@@ -16,8 +16,6 @@ using global::go.os;
 using io = io_package;
 using path;
 using ꓸꓸꓸstring = Span<@string>;
-using gccgoimporter = gccgoimporter_package;
-using static gccgoimporter_package;
 
 partial class gccgoimporter_package {
 
@@ -31,15 +29,13 @@ partial struct GccgoInstallation {
     public slice<@string> LibPaths;
 }
 
-} partial class gccgoimporterᴛGccgoInstallation {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string targetˢ => ref targetˢᵇ;
 private static readonly @string targetˢᵇ = "Target: "u8;
 
 // Ask the driver at the given path for information for this GccgoInstallation.
 // The given arguments are passed directly to the call of the driver.
-public static error /*err*/ InitFromDriver(this ref GccgoInstallation inst, @string gccgoPath, params ꓸꓸꓸstring argsʗp) {
+internal static error /*err*/ InitFromDriver⁔(/*this*/ ref GccgoInstallation inst, @string gccgoPath, params ꓸꓸꓸstring argsʗp) {
     error err = default;
     var args = argsʗp.sslice();
 
@@ -85,7 +81,7 @@ public static error /*err*/ InitFromDriver(this ref GccgoInstallation inst, @str
 }
 
 // Return the list of export search paths for this GccgoInstallation.
-public static slice<@string> /*paths*/ SearchPaths(this ref GccgoInstallation inst) {
+internal static slice<@string> /*paths*/ SearchPaths⁔(/*this*/ ref GccgoInstallation inst) {
     slice<@string> paths = default;
 
     foreach (var (_, lpath) in range(inst.LibPaths)) {
@@ -111,8 +107,8 @@ public static slice<@string> /*paths*/ SearchPaths(this ref GccgoInstallation in
 
 // Return an importer that searches incpaths followed by the gcc installation's
 // built-in search paths and the current directory.
-public static Func<map<@string, ж<types.Package>>, @string, @string, Func<@string, (io.ReadCloser, error)>, (ж<types.Package>, error)> GetImporter(this ref GccgoInstallation inst, slice<@string> incpaths, map<ж<types.Package>, InitData> initmap) {
-    return gccgoimporter.GetImporter(append(appendꓸꓸꓸ(incpaths, inst.SearchPaths()), (@string)"."), initmap);
+internal static Func<map<@string, ж<types.Package>>, @string, @string, Func<@string, (io.ReadCloser, error)>, (ж<types.Package>, error)> GetImporter⁔(/*this*/ ref GccgoInstallation inst, slice<@string> incpaths, map<ж<types.Package>, InitData> initmap) {
+    return GetImporter(append(appendꓸꓸꓸ(incpaths, inst.SearchPaths()), (@string)"."), initmap);
 }
 
-}
+} // end gccgoimporter_package

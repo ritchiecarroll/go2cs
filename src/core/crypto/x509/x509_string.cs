@@ -2,7 +2,6 @@
 namespace go.crypto;
 
 using strconv = strconv_package;
-using static x509_package;
 
 partial class x509_package {
 
@@ -40,9 +39,7 @@ private static readonly @string _KeyUsage_name_7ᵇ = "decipherOnly"u8;
 
 internal static array<uint8> _KeyUsage_index_0 = array<uint8>([0, 16, 33]);
 
-} partial class x509ᴛKeyUsage {
-
-public static @string String(this KeyUsage i) {
+internal static @string String⁔(/*this*/ KeyUsage i) {
     switch (ᐧ) {
     case {} when 1 <= i && i <= 2: {
         i -= 1;
@@ -73,9 +70,6 @@ public static @string String(this KeyUsage i) {
         return "KeyUsage("u8 + strconv.FormatInt((int64)i, 10) + ")"u8;
     }}
 }
-
-} partial class x509_package {
-
 internal static void _ᴛ3() {
     // An "invalid array index" compiler error signifies that the constant values have changed.
     // Re-run the stringer command to generate them again.
@@ -101,9 +95,7 @@ private static readonly @string _ExtKeyUsage_nameᵇ = "anyExtendedKeyUsageserve
 
 internal static array<uint8> _ExtKeyUsage_index = array<uint8>([0, 19, 29, 39, 50, 65, 79, 90, 99, 111, 122, 127, 132, 141, 153]);
 
-} partial class x509ᴛExtKeyUsage {
-
-public static @string String(this ExtKeyUsage i) {
+internal static @string String⁔(/*this*/ ExtKeyUsage i) {
     nint idx = (nint)i - 0;
     if (i < 0 || idx >= len(_ExtKeyUsage_index) - 1) {
         return "ExtKeyUsage("u8 + strconv.FormatInt((int64)i, 10) + ")"u8;
@@ -111,4 +103,4 @@ public static @string String(this ExtKeyUsage i) {
     return _ExtKeyUsage_name.slice(_ExtKeyUsage_index[idx], _ExtKeyUsage_index[idx + 1]);
 }
 
-}
+} // end x509_package

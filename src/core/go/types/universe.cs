@@ -74,14 +74,10 @@ internal static array<ж<Basic>> basicAliases = array<ж<Basic>>([
 ]);
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string anyˢ => ref anyˢᵇ;
-private static readonly @string anyˢᵇ = "any"u8;
 internal static ref readonly @string errorˢ => ref errorˢᵇ;
 private static readonly @string errorˢᵇ = "error"u8;
 internal static ref readonly @string errorˢ2 => ref errorˢ2ᵇ;
 private static readonly @string errorˢ2ᵇ = "Error"u8;
-internal static ref readonly @string comparableˢ => ref comparableˢᵇ;
-private static readonly @string comparableˢᵇ = "comparable"u8;
 
 internal static void defPredeclaredTypes() {
     foreach (var (_, t) in range(Typ)) {

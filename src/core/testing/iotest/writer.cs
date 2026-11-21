@@ -4,7 +4,6 @@
 namespace go.testing;
 
 using io = io_package;
-using static iotest_package;
 
 partial class iotest_package {
 
@@ -19,9 +18,7 @@ partial struct truncateWriter {
     internal int64 n;
 }
 
-} partial class iotestᴛtruncateWriter {
-
-internal static (nint n, error err) Write(this ref truncateWriter t, slice<byte> p) {
+internal static (nint n, error err) Write⁔(/*this*/ ref truncateWriter t, slice<byte> p) {
     nint n = default;
     error err = default;
 
@@ -41,4 +38,4 @@ internal static (nint n, error err) Write(this ref truncateWriter t, slice<byte>
     return (n, err);
 }
 
-}
+} // end iotest_package

@@ -10,10 +10,14 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+using ꓸꓸꓸClass = Span<bidi_package.Class>;
 // </ImportedTypeAliases>
 
 using go;
 using static go.vendor.golang.org.x.text.unicode.bidi_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -62,11 +66,11 @@ using static go.vendor.golang.org.x.text.unicode.bidi_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("vendor/golang.org/x/text/unicode/bidi/bidi.go", "bidi.cs", "ADeKAQALAoIAETIACQKClIKClIKCgoKClIKCgoKmgpSCpgACEPKCggACEPKCgqyyrLIAAhDSgoKCgoKmxoKUgpSmgoKUlIKCgoKUgqaCgoLIsoKmgpSCgpSCgqaUgqqigoKClIKCAA8esqiSqJLKABQkkqiSAAIS4qqizLKCgpSCgoK4gpSUrLKCgoKCgoKUpg==", "70-72:1")]
-[assembly: GoPositionMap("vendor/golang.org/x/text/unicode/bidi/bracket.go", "bracket.cs", "ADhwggAJDIKCAAMUAAgC3IKClIIAHkqiAAgU9paUlKaCgqbIgoKCgpSUgpSmAAd8ADcCpqSkAAMW8oKCgoKUgpSmqqKCgriopNyCppSClAAHEKaCgpSCgoKUpoKCgpS6koI=", "", "", "83=New/1/1/2")]
-[assembly: GoPositionMap("vendor/golang.org/x/text/unicode/bidi/core.go", "core.cs", "AD56soKCpgAZSPKCgpSClIKUgqYACBKCxpjC3IK4grgACRSmuLi4ptwAAiQADwKClIKmgpSCgoKCgoKCgoK4ggAIFtKmgoKCgoKCgsqmpKQAEh6CgpSCgoKCpoKmgqaCyJKCxpSUlIKmgpSCgoK4gpSmpoKC3JS0tLaCyoKUgv6CgqaCgpSClNqUlIKCggAIEIKCgoK2goIAEyK4woKCgriCgpSCgqaCgoKmgpaCgqaCAAsc1riCgoLK3IKCgoKClO6CggAQIoKCgoKCgoKC3KKUgqaCgpSCgoKmgqbKgoLKopSCgoKCgqaC3qaUoqaCltiClIKCpoKUgoK4gpTKpqb6goK4goLappSClIKUlIKUuJSmAAUQooKCvtKCgoKCgqa0qsKCgoKCpgAHFOKCgpSCgpSCgqaUuIKUqMKmgoKCuJSUooKClJSUgoKClKamvsKCgoLugpSCggAGIgAVGJTKgpSmgoKU7oKCgoKUpqYAAiQADwKUyqKUgoKClIKUlKyylILcgoKCgpSCuIKClIKCgqaCpsqqopSUqJKUlKiSgpSmgoKUgoKmpoKGlKaCgoKClJSClKaCgpSCxqamgoKUgpQ=", "", "", "499=typeForLevel/1/2/5,typeForLevel/2/2/6")]
-[assembly: GoPositionMap("vendor/golang.org/x/text/unicode/bidi/prop.go", "prop.cs", "ABEeAAMaAAsCgoKUqICYkJaSxgALGpKCggACKgASAoKUpKSClIKCgpSkgpSCgoKUgoKCgpSkgpSCgoKUgoKCgpSCgoKClKassoKUpKSClIKCgpSkgpSCgoKUgoKCgpSkgpSCgoKUgoKCgpSCgoKClKY=")]
-[assembly: GoPositionMap("vendor/golang.org/x/text/unicode/bidi/tables15.0.0.go", "tables15.0.0.cs", "AA4Y3rKClKSkgpSCgoKUpIKUgoKClIKCgoKUpIKUgoKClIKCgoKUgoKCgpSmqqKCgpSCgpSCgpSCgpSssoKUpKSClIKCgpSkgpSCgoKUgoKCgpSkgpSCgoKUgoKCgpSCgoKClKaqooKClIKClIKClIKClAAIDILIkpT8ALAN4ho=")]
+[assembly: GoPositionMap("vendor/golang.org/x/text/unicode/bidi/bidi.go", "bidi.cs", "ADaKAQALAoIADzIACQKClIKClIKCgoKClIKCgoKmgpSCpgACEPKCggACEPKCgqyyrLIAAhDSgoKCgoKmpoKUgpSmgoKUlIKCgoKUgqaCgoKosoKmgpSCgpSCgqaUgqqigoKClIKCAAsesqiSqJLKABAkkqiSAAIS4qqirLKCgpSCgoK4gpSUrLKCgoKCgoKUpg==", "70-72:1")]
+[assembly: GoPositionMap("vendor/golang.org/x/text/unicode/bidi/bracket.go", "bracket.cs", "ADVwgtyCggABFAAIAtyCgpSCABxKogAEFPaWlJSmgoKmyIKCgoKUlIKUpgAHfAA3AqakpAADFvKCgoKClIKUpqqigoK4qKTcgqaUgpQABxCmgoKUgoKClKaCgoKUupKC", "", "", "74=New/1/1/2")]
+[assembly: GoPositionMap("vendor/golang.org/x/text/unicode/bidi/core.go", "core.cs", "ADt6soKCpgAXSPKCgpSClIKUgqYACBKCppjC3IK4grgACRSmuLi4ptwAAiQADwKClIKmgpSCgoKCgoKCgoK4ggAIFtKmgoKCgoKCgsqmpKQADh6CgpSCgoKCpoKmgqaCqJKCxpSUlIKmgpSCgoK4gpSmpoKC3JS0tLaCyoKUgv6CgqaCgpSClNqUlIKCggAIEIKCgoK2goIADyKYwoKCgriCgpSCgqaCgoKmgpaCgqaCAAkc1riCgoLK3IKCgoKClO6CggAQIoKCgoKCgoKC3KKUgqaCgpSCgoKmgqbKgoLKopSCgoKCgqaC3qaUoqaCltiClIKCpoKUgoK4gpTKpqbagoK4goK6ppSClIKUlIKUuJSmAAUQooKCvtKCgoKCgqa0qsKCgoKCpgAFFOKCgpSCgpSCgqaUuIKUqMKmgoKCuJSUooKClJSUgoKClKamvsKCgoLugpSCggAGIgAVGJTKgpSmgoKU7oKCgoKUpqYAAiQADwKUqqKUgoKClIKUlKyylILcgoKCgpSCuIKClIKCgqaCpsqqopSUqJKUlKiSgpSmgoKUgoKmpoKGlKaCgoKClJSClKaCgpSCxqamgoKUgpQ=", "", "", "480=typeForLevel/1/2/5,typeForLevel/2/2/6")]
+[assembly: GoPositionMap("vendor/golang.org/x/text/unicode/bidi/prop.go", "prop.cs", "ABAeAAEaAAsCgoKUqICYkJaSpgALGpKCggACKgASAoKUpKSClIKCgpSkgpSCgoKUgoKCgpSkgpSCgoKUgoKCgpSCgoKClKassoKUpKSClIKCgpSkgpSCgoKUgoKCgpSkgpSCgoKUgoKCgpSCgoKClKY=")]
+[assembly: GoPositionMap("vendor/golang.org/x/text/unicode/bidi/tables15.0.0.go", "tables15.0.0.cs", "AAwYvrKClKSkgpSCgoKUpIKUgoKClIKCgoKUpIKUgoKClIKCgoKUgoKCgpSmqqKCgpSCgpSCgpSCgpSssoKUpKSClIKCgpSkgpSCgoKUgoKCgpSkgpSCgoKUgoKCgpSCgoKClKaqooKClIKClIKClIKClOyCqJKU3ACwDeIa")]
 // </GoSourcePositionMaps>
 
 namespace go.vendor.golang.org.x.text.unicode;
@@ -121,16 +125,109 @@ public static partial class bidi_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(bidi_package.Class)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class bidiᴛClass;
-[GoMethodHost(typeof(bidi_package.Ordering)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class bidiᴛOrdering;
-[GoMethodHost(typeof(bidi_package.Paragraph)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class bidiᴛParagraph;
-[GoMethodHost(typeof(bidi_package.Properties)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class bidiᴛProperties;
-[GoMethodHost(typeof(bidi_package.Run)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class bidiᴛRun;
-[GoMethodHost(typeof(bidi_package.bidiTrie)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class bidiᴛbidiTrie;
-[GoMethodHost(typeof(bidi_package.bracketPair)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class bidiᴛbracketPair;
-[GoMethodHost(typeof(bidi_package.bracketPairer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class bidiᴛbracketPairer;
-[GoMethodHost(typeof(bidi_package.bracketPairs)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class bidiᴛbracketPairs;
-[GoMethodHost(typeof(bidi_package.directionalStatusStack)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class bidiᴛdirectionalStatusStack;
-[GoMethodHost(typeof(bidi_package.isolatingRunSequence)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class bidiᴛisolatingRunSequence;
-[GoMethodHost(typeof(bidi_package.paragraph)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class bidiᴛparagraph;
+[GoMethodHost(typeof(bidi_package.Class)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class bidiᴛClass;
+[GoMethodHost(typeof(bidi_package.Ordering)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class bidiᴛOrdering;
+[GoMethodHost(typeof(bidi_package.Paragraph)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class bidiᴛParagraph;
+[GoMethodHost(typeof(bidi_package.Properties)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class bidiᴛProperties;
+[GoMethodHost(typeof(bidi_package.Run)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class bidiᴛRun;
+[GoMethodHost(typeof(bidi_package.bidiTrie)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class bidiᴛbidiTrie;
+[GoMethodHost(typeof(bidi_package.bracketPair)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class bidiᴛbracketPair;
+[GoMethodHost(typeof(bidi_package.bracketPairer)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class bidiᴛbracketPairer;
+[GoMethodHost(typeof(bidi_package.bracketPairs)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class bidiᴛbracketPairs;
+[GoMethodHost(typeof(bidi_package.directionalStatusStack)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class bidiᴛdirectionalStatusStack;
+[GoMethodHost(typeof(bidi_package.isolatingRunSequence)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class bidiᴛisolatingRunSequence;
+[GoMethodHost(typeof(bidi_package.paragraph)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class bidiᴛparagraph;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class bidiᴛClass {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool @in(this bidi_package.Class c, params ꓸꓸꓸClass setʗp) => bidi_package.in⁔(c, setʗp);
+}
+partial class bidiᴛOrdering {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bidi_package.Direction Direction(this ref bidi_package.Ordering o) => bidi_package.Direction⁔(ref o);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint NumRuns(this ref bidi_package.Ordering o) => bidi_package.NumRuns⁔(ref o);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bidi_package.Run Run(this ref bidi_package.Ordering o, nint i) => bidi_package.Run⁔(ref o, i);
+}
+partial class bidiᴛParagraph {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) prepareInput(this ref bidi_package.Paragraph p) => bidi_package.prepareInput⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint n, error err) SetBytes(this ref bidi_package.Paragraph p, slice<byte> b, params Span<Action<ж<bidi_package.options>>> optsʗp) => bidi_package.SetBytes⁔(ref p, b, optsʗp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint n, error err) SetString(this ref bidi_package.Paragraph p, @string s, params Span<Action<ж<bidi_package.options>>> optsʗp) => bidi_package.SetString⁔(ref p, s, optsʗp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool IsLeftToRight(this ref bidi_package.Paragraph p) => bidi_package.IsLeftToRight⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bidi_package.Direction Direction(this ref bidi_package.Paragraph p) => bidi_package.Direction⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bidi_package.Run RunAt(this ref bidi_package.Paragraph p, nint pos) => bidi_package.RunAt⁔(ref p, pos);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (bidi_package.Ordering, error) Order(this ж<bidi_package.Paragraph> Ꮡp) => bidi_package.Order⁔(Ꮡp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (bidi_package.Ordering, error) Line(this ref bidi_package.Paragraph p, nint start, nint end) => bidi_package.Line⁔(ref p, start, end);
+}
+partial class bidiᴛProperties {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bidi_package.Class Class(this bidi_package.Properties p) => bidi_package.Class⁔(p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool IsBracket(this bidi_package.Properties p) => bidi_package.IsBracket⁔(p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool IsOpeningBracket(this bidi_package.Properties p) => bidi_package.IsOpeningBracket⁔(p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static rune reverseBracket(this bidi_package.Properties p, rune r) => bidi_package.reverseBracket⁔(p, r);
+}
+partial class bidiᴛRun {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this ref bidi_package.Run r) => bidi_package.String⁔(ref r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> Bytes(this ref bidi_package.Run r) => bidi_package.Bytes⁔(ref r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bidi_package.Direction Direction(this ref bidi_package.Run r) => bidi_package.Direction⁔(ref r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint start, nint end) Pos(this ref bidi_package.Run r) => bidi_package.Pos⁔(ref r);
+}
+partial class bidiᴛbidiTrie {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (uint8 v, nint sz) lookup(this ref bidi_package.bidiTrie t, slice<byte> s) => bidi_package.lookup⁔(ref t, s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static uint8 lookupUnsafe(this ref bidi_package.bidiTrie t, slice<byte> s) => bidi_package.lookupUnsafe⁔(ref t, s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (uint8 v, nint sz) lookupString(this ref bidi_package.bidiTrie t, @string s) => bidi_package.lookupString⁔(ref t, s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static uint8 lookupStringUnsafe(this ref bidi_package.bidiTrie t, @string s) => bidi_package.lookupStringUnsafe⁔(ref t, s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static uint8 lookupValue(this ref bidi_package.bidiTrie t, uint32 n, byte b) => bidi_package.lookupValue⁔(ref t, n, b);
+}
+partial class bidiᴛbracketPair {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string String(this ref bidi_package.bracketPair b) => bidi_package.String⁔(ref b);
+}
+partial class bidiᴛbracketPairer {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool matchOpener(this ref bidi_package.bracketPairer p, slice<rune> pairValues, nint opener, nint closer) => bidi_package.matchOpener⁔(ref p, pairValues, opener, closer);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void locateBrackets(this ref bidi_package.bracketPairer p, slice<bidi_package.bracketType> pairTypes, slice<rune> pairValues) => bidi_package.locateBrackets⁔(ref p, pairTypes, pairValues);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bidi_package.Class getStrongTypeN0(this ref bidi_package.bracketPairer p, nint index) => bidi_package.getStrongTypeN0⁔(ref p, index);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bidi_package.Class classifyPairContent(this ref bidi_package.bracketPairer p, bidi_package.bracketPair loc, bidi_package.Class dirEmbed) => bidi_package.classifyPairContent⁔(ref p, loc, dirEmbed);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bidi_package.Class classBeforePair(this ref bidi_package.bracketPairer p, bidi_package.bracketPair loc) => bidi_package.classBeforePair⁔(ref p, loc);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void assignBracketType(this ref bidi_package.bracketPairer p, bidi_package.bracketPair loc, bidi_package.Class dirEmbed, slice<bidi_package.Class> initialTypes) => bidi_package.assignBracketType⁔(ref p, loc, dirEmbed, initialTypes);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void setBracketsToType(this ref bidi_package.bracketPairer p, bidi_package.bracketPair loc, bidi_package.Class dirPair, slice<bidi_package.Class> initialTypes) => bidi_package.setBracketsToType⁔(ref p, loc, dirPair, initialTypes);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void resolveBrackets(this ref bidi_package.bracketPairer p, bidi_package.Class dirEmbed, slice<bidi_package.Class> initialTypes) => bidi_package.resolveBrackets⁔(ref p, dirEmbed, initialTypes);
+}
+partial class bidiᴛbracketPairs {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint Len(this bidi_package.bracketPairs b) => bidi_package.Len⁔(b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void Swap(this bidi_package.bracketPairs b, nint i, nint j) => bidi_package.Swap⁔(b, i, j);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool Less(this bidi_package.bracketPairs b, nint i, nint j) => bidi_package.Less⁔(b, i, j);
+}
+partial class bidiᴛdirectionalStatusStack {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void empty(this ref bidi_package.directionalStatusStack s) => bidi_package.empty⁔(ref s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void pop(this ref bidi_package.directionalStatusStack s) => bidi_package.pop⁔(ref s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint depth(this ref bidi_package.directionalStatusStack s) => bidi_package.depth⁔(ref s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void push(this ref bidi_package.directionalStatusStack s, bidi_package.level level, bidi_package.Class overrideStatus, bool isolateStatus) => bidi_package.push⁔(ref s, level, overrideStatus, isolateStatus);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bidi_package.level lastEmbeddingLevel(this ref bidi_package.directionalStatusStack s) => bidi_package.lastEmbeddingLevel⁔(ref s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bidi_package.Class lastDirectionalOverrideStatus(this ref bidi_package.directionalStatusStack s) => bidi_package.lastDirectionalOverrideStatus⁔(ref s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool lastDirectionalIsolateStatus(this ref bidi_package.directionalStatusStack s) => bidi_package.lastDirectionalIsolateStatus⁔(ref s);
+}
+partial class bidiᴛisolatingRunSequence {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint Len(this ref bidi_package.isolatingRunSequence i) => bidi_package.Len⁔(ref i);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void resolveWeakTypes(this ref bidi_package.isolatingRunSequence s) => bidi_package.resolveWeakTypes⁔(ref s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void resolveNeutralTypes(this ref bidi_package.isolatingRunSequence s) => bidi_package.resolveNeutralTypes⁔(ref s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void resolveImplicitLevels(this ref bidi_package.isolatingRunSequence s) => bidi_package.resolveImplicitLevels⁔(ref s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void applyLevelsAndTypes(this ref bidi_package.isolatingRunSequence s) => bidi_package.applyLevelsAndTypes⁔(ref s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint findRunLimit(this ref bidi_package.isolatingRunSequence s, nint index, params ꓸꓸꓸClass validSetʗp) => bidi_package.findRunLimit⁔(ref s, index, validSetʗp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void assertOnly(this ref bidi_package.isolatingRunSequence s, params ꓸꓸꓸClass codesʗp) => bidi_package.assertOnly⁔(ref s, codesʗp);
+}
+partial class bidiᴛparagraph {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint Len(this ref bidi_package.paragraph p) => bidi_package.Len⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void run(this ж<bidi_package.paragraph> Ꮡp) => bidi_package.run⁔(Ꮡp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void determineMatchingIsolates(this ref bidi_package.paragraph p) => bidi_package.determineMatchingIsolates⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bidi_package.level determineParagraphEmbeddingLevel(this ref bidi_package.paragraph p, nint start, nint end) => bidi_package.determineParagraphEmbeddingLevel⁔(ref p, start, end);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void determineExplicitEmbeddingLevels(this ref bidi_package.paragraph p) => bidi_package.determineExplicitEmbeddingLevels⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<bidi_package.isolatingRunSequence> isolatingRunSequence(this ж<bidi_package.paragraph> Ꮡp, slice<nint> indexes) => bidi_package.isolatingRunSequence⁔(Ꮡp, indexes);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<slice<nint>> determineLevelRuns(this ref bidi_package.paragraph p) => bidi_package.determineLevelRuns⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<ж<bidi_package.isolatingRunSequence>> determineIsolatingRunSequences(this ж<bidi_package.paragraph> Ꮡp) => bidi_package.determineIsolatingRunSequences⁔(Ꮡp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void assignLevelsToCharactersRemovedByX9(this ref bidi_package.paragraph p) => bidi_package.assignLevelsToCharactersRemovedByX9⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<bidi_package.level> getLevels(this ref bidi_package.paragraph p, slice<nint> linebreaks) => bidi_package.getLevels⁔(ref p, linebreaks);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<nint> getReordering(this ref bidi_package.paragraph p, slice<nint> linebreaks) => bidi_package.getReordering⁔(ref p, linebreaks);
+}
+// </MethodForwarders>

@@ -2,7 +2,6 @@
 namespace go.debug;
 
 using strconv = strconv_package;
-using static dwarf_package;
 
 partial class dwarf_package {
 
@@ -260,13 +259,11 @@ private static readonly @string _Attr_nameᵇ = "SiblingLocationNameOrderingByte
     [140] = _Attr_name[1171..1183]
 }; }
 
-} partial class dwarfᴛAttr {
-
-public static @string String(this Attr i) {
+internal static @string String⁔(/*this*/ Attr i) {
     var (str, ok) = _Attr_map[i, ꟷ]; if (ok) {
         return str;
     }
     return "Attr("u8 + strconv.FormatInt((int64)i, 10) + ")"u8;
 }
 
-}
+} // end dwarf_package

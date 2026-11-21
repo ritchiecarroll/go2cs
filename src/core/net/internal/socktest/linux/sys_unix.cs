@@ -5,14 +5,11 @@
 namespace go.net.@internal;
 
 using syscall = syscall_package;
-using static socktest_package;
 
 partial class socktest_package {
 
-} partial class socktestᴛSwitch {
-
 // Socket wraps [syscall.Socket].
-public static (nint s, error err) Socket(this ж<Switch> Ꮡsw, nint family, nint sotype, nint proto) {
+internal static (nint s, error err) Socket⁔(/*this*/ ж<Switch> Ꮡsw, nint family, nint sotype, nint proto) {
     nint s = default;
     error err = default;
     GoFrame ᒐ = default;
@@ -54,7 +51,7 @@ public static (nint s, error err) Socket(this ж<Switch> Ꮡsw, nint family, nin
 }
 
 // Close wraps syscall.Close.
-public static error /*err*/ Close(this ж<Switch> Ꮡsw, nint s) {
+internal static error /*err*/ Close⁔(/*this*/ ж<Switch> Ꮡsw, nint s) {
     error err = default;
     GoFrame ᒐ = default;
     try {
@@ -93,7 +90,7 @@ public static error /*err*/ Close(this ж<Switch> Ꮡsw, nint s) {
 }
 
 // Connect wraps syscall.Connect.
-public static error /*err*/ Connect(this ж<Switch> Ꮡsw, nint s, syscall.Sockaddr sa) {
+internal static error /*err*/ Connect⁔(/*this*/ ж<Switch> Ꮡsw, nint s, syscall.Sockaddr sa) {
     error err = default;
     GoFrame ᒐ = default;
     try {
@@ -131,7 +128,7 @@ public static error /*err*/ Connect(this ж<Switch> Ꮡsw, nint s, syscall.Socka
 }
 
 // Listen wraps syscall.Listen.
-public static error /*err*/ Listen(this ж<Switch> Ꮡsw, nint s, nint backlog) {
+internal static error /*err*/ Listen⁔(/*this*/ ж<Switch> Ꮡsw, nint s, nint backlog) {
     error err = default;
     GoFrame ᒐ = default;
     try {
@@ -169,7 +166,7 @@ public static error /*err*/ Listen(this ж<Switch> Ꮡsw, nint s, nint backlog) 
 }
 
 // Accept wraps syscall.Accept.
-public static (nint ns, syscall.Sockaddr sa, error err) Accept(this ж<Switch> Ꮡsw, nint s) {
+internal static (nint ns, syscall.Sockaddr sa, error err) Accept⁔(/*this*/ ж<Switch> Ꮡsw, nint s) {
     nint ns = default;
     syscall.Sockaddr sa = default;
     error err = default;
@@ -213,7 +210,7 @@ public static (nint ns, syscall.Sockaddr sa, error err) Accept(this ж<Switch> �
 }
 
 // GetsockoptInt wraps syscall.GetsockoptInt.
-public static (nint soerr, error err) GetsockoptInt(this ж<Switch> Ꮡsw, nint s, nint level, nint opt) {
+internal static (nint soerr, error err) GetsockoptInt⁔(/*this*/ ж<Switch> Ꮡsw, nint s, nint level, nint opt) {
     nint soerr = default;
     error err = default;
     ref var sw = ref Ꮡsw.DerefOrNull();
@@ -247,4 +244,4 @@ public static (nint soerr, error err) GetsockoptInt(this ж<Switch> Ꮡsw, nint 
     return (soerr, default);
 }
 
-}
+} // end socktest_package

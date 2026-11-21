@@ -11,17 +11,14 @@ using time = time_package;
 using @internal;
 using fs = go.io.fs_package;
 using go.io;
-using static os_package;
 
 partial class os_package {
-
-} partial class osᴛFile {
 
 // Close closes the [File], rendering it unusable for I/O.
 // On files that support [File.SetDeadline], any pending I/O operations will
 // be canceled and return immediately with an [ErrClosed] error.
 // Close will return an error if it has already been called.
-public static error Close(this ж<File> Ꮡf) {
+internal static error Close⁔(/*this*/ ж<File> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     if (Ꮡf == nil) {
@@ -32,7 +29,7 @@ public static error Close(this ж<File> Ꮡf) {
 
 // read reads up to len(b) bytes from the File.
 // It returns the number of bytes read and an error, if any.
-internal static (nint n, error err) read(this ж<File> Ꮡf, slice<byte> b) {
+internal static (nint n, error err) read⁔(/*this*/ ж<File> Ꮡf, slice<byte> b) {
     nint n = default;
     error err = default;
 
@@ -44,7 +41,7 @@ internal static (nint n, error err) read(this ж<File> Ꮡf, slice<byte> b) {
 // pread reads len(b) bytes from the File starting at byte offset off.
 // It returns the number of bytes read and the error, if any.
 // EOF is signaled by a zero count with err set to nil.
-internal static (nint n, error err) pread(this ж<File> Ꮡf, slice<byte> b, int64 off) {
+internal static (nint n, error err) pread⁔(/*this*/ ж<File> Ꮡf, slice<byte> b, int64 off) {
     nint n = default;
     error err = default;
 
@@ -55,7 +52,7 @@ internal static (nint n, error err) pread(this ж<File> Ꮡf, slice<byte> b, int
 
 // write writes len(b) bytes to the File.
 // It returns the number of bytes written and an error, if any.
-internal static (nint n, error err) write(this ж<File> Ꮡf, slice<byte> b) {
+internal static (nint n, error err) write⁔(/*this*/ ж<File> Ꮡf, slice<byte> b) {
     nint n = default;
     error err = default;
 
@@ -66,7 +63,7 @@ internal static (nint n, error err) write(this ж<File> Ꮡf, slice<byte> b) {
 
 // pwrite writes len(b) bytes to the File starting at byte offset off.
 // It returns the number of bytes written and an error, if any.
-internal static (nint n, error err) pwrite(this ж<File> Ꮡf, slice<byte> b, int64 off) {
+internal static (nint n, error err) pwrite⁔(/*this*/ ж<File> Ꮡf, slice<byte> b, int64 off) {
     nint n = default;
     error err = default;
 
@@ -74,8 +71,6 @@ internal static (nint n, error err) pwrite(this ж<File> Ꮡf, slice<byte> b, in
     runtime.KeepAlive(Ꮡf.OrTypedNil());
     return (n, err);
 }
-
-} partial class os_package {
 
 // syscallMode returns the syscall-specific mode bits from Go's portable mode bits.
 internal static uint32 /*o*/ syscallMode(FileMode i) {
@@ -105,14 +100,12 @@ internal static error chmod(@string name, FileMode mode) {
     return default;
 }
 
-} partial class osᴛFile {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string chmodˢ => ref chmodˢᵇ;
 private static readonly @string chmodˢᵇ = "chmod"u8;
 
 // See docs in file.go:(*File).Chmod.
-internal static error chmod(this ж<File> Ꮡf, FileMode mode) {
+internal static error chmod⁔(/*this*/ ж<File> Ꮡf, FileMode mode) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     var err = Ꮡf.checkValid(chmodˢ); if (err != nil) {
@@ -123,8 +116,6 @@ internal static error chmod(this ж<File> Ꮡf, FileMode mode) {
     }
     return default;
 }
-
-} partial class os_package {
 
 // Chown changes the numeric uid and gid of the named file.
 // If the file is a symbolic link, it changes the uid and gid of the link's target.
@@ -155,8 +146,6 @@ public static error Lchown(@string name, nint uid, nint gid) {
     return default;
 }
 
-} partial class osᴛFile {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string chownˢ => ref chownˢᵇ;
 private static readonly @string chownˢᵇ = "chown"u8;
@@ -166,7 +155,7 @@ private static readonly @string chownˢᵇ = "chown"u8;
 //
 // On Windows, it always returns the [syscall.EWINDOWS] error, wrapped
 // in [*PathError].
-public static error Chown(this ж<File> Ꮡf, nint uid, nint gid) {
+internal static error Chown⁔(/*this*/ ж<File> Ꮡf, nint uid, nint gid) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     var err = Ꮡf.checkValid(chownˢ); if (err != nil) {
@@ -185,7 +174,7 @@ private static readonly @string truncateˢᵇ = "truncate"u8;
 // Truncate changes the size of the file.
 // It does not change the I/O offset.
 // If there is an error, it will be of type [*PathError].
-public static error Truncate(this ж<File> Ꮡf, int64 size) {
+internal static error Truncate⁔(/*this*/ ж<File> Ꮡf, int64 size) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     var err = Ꮡf.checkValid(truncateˢ); if (err != nil) {
@@ -204,7 +193,7 @@ private static readonly @string syncˢᵇ = "sync"u8;
 // Sync commits the current contents of the file to stable storage.
 // Typically, this means flushing the file system's in-memory copy
 // of recently written data to disk.
-public static error Sync(this ж<File> Ꮡf) {
+internal static error Sync⁔(/*this*/ ж<File> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     var err = Ꮡf.checkValid(syncˢ); if (err != nil) {
@@ -215,8 +204,6 @@ public static error Sync(this ж<File> Ꮡf) {
     }
     return default;
 }
-
-} partial class os_package {
 
 // Chtimes changes the access and modification times of the named
 // file, similar to the Unix utime() or utimes() functions.
@@ -247,16 +234,10 @@ internal static array<syscall.Timespec> chtimesUtimes(time.Time atime, time.Time
     return utimes.Clone();
 }
 
-} partial class osᴛFile {
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string chdirˢ => ref chdirˢᵇ;
-private static readonly @string chdirˢᵇ = "chdir"u8;
-
 // Chdir changes the current working directory to the file,
 // which must be a directory.
 // If there is an error, it will be of type [*PathError].
-public static error Chdir(this ж<File> Ꮡf) {
+internal static error Chdir⁔(/*this*/ ж<File> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     {
@@ -281,7 +262,7 @@ internal static ref readonly @string setDeadlineˢ => ref setDeadlineˢᵇ;
 private static readonly @string setDeadlineˢᵇ = "SetDeadline"u8;
 
 // setDeadline sets the read and write deadline.
-internal static error setDeadline(this ж<File> Ꮡf, time.Time t) {
+internal static error setDeadline⁔(/*this*/ ж<File> Ꮡf, time.Time t) {
     var err = Ꮡf.checkValid(setDeadlineˢ); if (err != nil) {
         return err;
     }
@@ -293,7 +274,7 @@ internal static ref readonly @string setReadDeadlineˢ => ref setReadDeadlineˢ�
 private static readonly @string setReadDeadlineˢᵇ = "SetReadDeadline"u8;
 
 // setReadDeadline sets the read deadline.
-internal static error setReadDeadline(this ж<File> Ꮡf, time.Time t) {
+internal static error setReadDeadline⁔(/*this*/ ж<File> Ꮡf, time.Time t) {
     var err = Ꮡf.checkValid(setReadDeadlineˢ); if (err != nil) {
         return err;
     }
@@ -305,7 +286,7 @@ internal static ref readonly @string setWriteDeadlineˢ => ref setWriteDeadline�
 private static readonly @string setWriteDeadlineˢᵇ = "SetWriteDeadline"u8;
 
 // setWriteDeadline sets the write deadline.
-internal static error setWriteDeadline(this ж<File> Ꮡf, time.Time t) {
+internal static error setWriteDeadline⁔(/*this*/ ж<File> Ꮡf, time.Time t) {
     var err = Ꮡf.checkValid(setWriteDeadlineˢ); if (err != nil) {
         return err;
     }
@@ -314,14 +295,12 @@ internal static error setWriteDeadline(this ж<File> Ꮡf, time.Time t) {
 
 // checkValid checks whether f is valid for use.
 // If not, it returns an appropriate error, perhaps incorporating the operation name op.
-internal static error checkValid(this ж<File> Ꮡf, @string op) {
+internal static error checkValid⁔(/*this*/ ж<File> Ꮡf, @string op) {
     if (Ꮡf == nil) {
         return ErrInvalid;
     }
     return default;
 }
-
-} partial class os_package {
 
 // ignoringEINTR makes a function call and repeats it if it returns an
 // EINTR error. This appears to be required even though we install all

@@ -14,6 +14,9 @@
 
 using go;
 using static go.@internal.abi_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -67,14 +70,14 @@ using static go.@internal.abi_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/abi/abi.go", "abi.cs", "AC9egoKClIKCgpSCgoKUAAIYAAkCgpSCgpQACxCSAAIS9II=")]
+[assembly: GoPositionMap("internal/abi/abi.go", "abi.cs", "ACxegoKClIKCgpSCgoKUAAIYAAkCgpSCgpQABxCSAAIS9II=")]
 [assembly: GoPositionMap("internal/abi/bounds.go", "bounds.cs", "ABluABgCgoKCgpSClJSClJSCgoKUlIKUlJTygoKCgoKCgoKCgpSClIKClIKUgpQ=")]
 [assembly: GoPositionMap("internal/abi/compiletype.go", "compiletype.cs", "AAce4JaAmJCWgJaA")]
 [assembly: GoPositionMap("internal/abi/escape.go", "escape.cs", "AAkmAAoCgt6SgpQAAiAADhwADgKC")]
 [assembly: GoPositionMap("internal/abi/funcpc.go", "funcpc.cs", "AAgsAA4S")]
-[assembly: GoPositionMap("internal/abi/map.go", "map.cs", "ADJqkpSSlJKUkg==")]
+[assembly: GoPositionMap("internal/abi/map.go", "map.cs", "AC9qkpSSlJKUkg==")]
 [assembly: GoPositionMap("internal/abi/switch.go", "switch.cs", "ACBAppSk")]
-[assembly: GoPositionMap("internal/abi/type.go", "type.cs", "AIsBngKSgpTGACNclIKogJaSpoKClAAeLqKClOaigpQABBTyABQyggBHRLKClJSkrKysrKysrAARlAGAlAALEIKCgpSmooKClMiAAB8+gqaCpoKmggAFMoIAERyCAClSouqiqJKokqiS6qKCgoKCgsySgpSCzLKCgoKCgpQACQqSgpSCqJKClIKCxoKClIKUgoKClIKCgpSCgpSCpoKCgoKCgoKm")]
+[assembly: GoPositionMap("internal/abi/type.go", "type.cs", "AIgBngKSgpSmACFclIKogJaSpoKClAAaLqKClOaigpQAAhTyABIyggA/RLKClJSkrKysrKysrAARlAGAlAAHEIKCgpSmooKClKiAABk+gqaCpoKmggAFMoIADRyCACVSouqiqJKokqiS6qKCgoKCgsySgpSCrLKCgoKCgpT6koKUgqiSgpSCgqaCgpSClIKCgpSCgoKUgoKUgqaCgoKCgoKCpg==")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;
@@ -154,14 +157,79 @@ public static partial class abi_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(abi_package.FuncType)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class abiᴛFuncType;
-[GoMethodHost(typeof(abi_package.IntArgRegBitmap)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class abiᴛIntArgRegBitmap;
-[GoMethodHost(typeof(abi_package.InterfaceType)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class abiᴛInterfaceType;
-[GoMethodHost(typeof(abi_package.Kind)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class abiᴛKind;
-[GoMethodHost(typeof(abi_package.MapType)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class abiᴛMapType;
-[GoMethodHost(typeof(abi_package.Name)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class abiᴛName;
-[GoMethodHost(typeof(abi_package.RegArgs)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class abiᴛRegArgs;
-[GoMethodHost(typeof(abi_package.StructField)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class abiᴛStructField;
-[GoMethodHost(typeof(abi_package.Type)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class abiᴛType;
-[GoMethodHost(typeof(abi_package.UncommonType)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class abiᴛUncommonType;
+[GoMethodHost(typeof(abi_package.FuncType)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class abiᴛFuncType;
+[GoMethodHost(typeof(abi_package.IntArgRegBitmap)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class abiᴛIntArgRegBitmap;
+[GoMethodHost(typeof(abi_package.InterfaceType)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class abiᴛInterfaceType;
+[GoMethodHost(typeof(abi_package.Kind)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class abiᴛKind;
+[GoMethodHost(typeof(abi_package.MapType)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class abiᴛMapType;
+[GoMethodHost(typeof(abi_package.Name)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class abiᴛName;
+[GoMethodHost(typeof(abi_package.RegArgs)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class abiᴛRegArgs;
+[GoMethodHost(typeof(abi_package.StructField)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class abiᴛStructField;
+[GoMethodHost(typeof(abi_package.Type)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class abiᴛType;
+[GoMethodHost(typeof(abi_package.UncommonType)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class abiᴛUncommonType;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class abiᴛFuncType {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<abi_package.Type> In(this ж<abi_package.FuncType> Ꮡt, nint i) => abi_package.In⁔(Ꮡt, i);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint NumIn(this ref abi_package.FuncType t) => abi_package.NumIn⁔(ref t);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint NumOut(this ref abi_package.FuncType t) => abi_package.NumOut⁔(ref t);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<abi_package.Type> Out(this ж<abi_package.FuncType> Ꮡt, nint i) => abi_package.Out⁔(Ꮡt, i);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool IsVariadic(this ref abi_package.FuncType t) => abi_package.IsVariadic⁔(ref t);
+}
+partial class abiᴛIntArgRegBitmap {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Set(this ref abi_package.IntArgRegBitmap b, nint i) => abi_package.Set⁔(ref b, i);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Get(this ж<abi_package.IntArgRegBitmap> Ꮡb, nint i) => abi_package.Get⁔(Ꮡb, i);
+}
+partial class abiᴛInterfaceType {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint NumMethod(this ref abi_package.InterfaceType t) => abi_package.NumMethod⁔(ref t);
+}
+partial class abiᴛKind {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this abi_package.Kind k) => abi_package.String⁔(k);
+}
+partial class abiᴛMapType {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool NeedKeyUpdate(this ref abi_package.MapType mt) => abi_package.NeedKeyUpdate⁔(ref mt);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool HashMightPanic(this ref abi_package.MapType mt) => abi_package.HashMightPanic⁔(ref mt);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool IndirectKey(this ref abi_package.MapType mt) => abi_package.IndirectKey⁔(ref mt);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool IndirectElem(this ref abi_package.MapType mt) => abi_package.IndirectElem⁔(ref mt);
+}
+partial class abiᴛName {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<byte> DataChecked(this abi_package.Name n, nint off, @string whySafe) => abi_package.DataChecked⁔(n, off, whySafe);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<byte> Data(this abi_package.Name n, nint off) => abi_package.Data⁔(n, off);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool IsExported(this abi_package.Name n) => abi_package.IsExported⁔(n);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool HasTag(this abi_package.Name n) => abi_package.HasTag⁔(n);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool IsEmbedded(this abi_package.Name n) => abi_package.IsEmbedded⁔(n);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint, nint) ReadVarint(this abi_package.Name n, nint off) => abi_package.ReadVarint⁔(n, off);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool IsBlank(this abi_package.Name n) => abi_package.IsBlank⁔(n);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Name(this abi_package.Name n) => abi_package.Name⁔(n);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Tag(this abi_package.Name n) => abi_package.Tag⁔(n);
+}
+partial class abiᴛRegArgs {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Dump(this ref abi_package.RegArgs r) => abi_package.Dump⁔(ref r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @unsafe.Pointer IntRegArgAddr(this ref abi_package.RegArgs r, nint reg, uintptr argSize) => abi_package.IntRegArgAddr⁔(ref r, reg, argSize);
+}
+partial class abiᴛStructField {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Embedded(this ref abi_package.StructField f) => abi_package.Embedded⁔(ref f);
+}
+partial class abiᴛType {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static abi_package.Kind Kind(this ref abi_package.Type t) => abi_package.Kind⁔(ref t);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool HasName(this ref abi_package.Type t) => abi_package.HasName⁔(ref t);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Pointers(this ref abi_package.Type t) => abi_package.Pointers⁔(ref t);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool IsDirectIface(this ref abi_package.Type t) => abi_package.IsDirectIface⁔(ref t);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> GcSlice(this ref abi_package.Type t, uintptr begin, uintptr end) => abi_package.GcSlice⁔(ref t, begin, end);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<abi_package.Type> Common(this ж<abi_package.Type> Ꮡt) => abi_package.Common⁔(Ꮡt);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<abi_package.UncommonType> Uncommon(this ж<abi_package.Type> Ꮡt) => abi_package.Uncommon⁔(Ꮡt);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Align(this ref abi_package.Type t) => abi_package.Align⁔(ref t);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint FieldAlign(this ref abi_package.Type t) => abi_package.FieldAlign⁔(ref t);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<abi_package.Method> ExportedMethods(this ж<abi_package.Type> Ꮡt) => abi_package.ExportedMethods⁔(Ꮡt);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint NumMethod(this ж<abi_package.Type> Ꮡt) => abi_package.NumMethod⁔(Ꮡt);
+}
+partial class abiᴛUncommonType {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static unsafe slice<abi_package.Method> Methods(this ж<abi_package.UncommonType> Ꮡt) => abi_package.Methods⁔(Ꮡt);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static unsafe slice<abi_package.Method> ExportedMethods(this ж<abi_package.UncommonType> Ꮡt) => abi_package.ExportedMethods⁔(Ꮡt);
+}
+// </MethodForwarders>

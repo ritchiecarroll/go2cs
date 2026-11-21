@@ -10,10 +10,16 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+using io = go.io_package;
+using tls = go.crypto.tls_package;
+using ꓸꓸꓸany = Span<any>;
 // </ImportedTypeAliases>
 
 using go;
 using static go.net.smtp_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -63,8 +69,8 @@ using static go.net.smtp_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("net/smtp/auth.go", "auth.cs", "AC1qAAgCpoIADAb8gpSClILmgpSUAAgWwgAIBoKmgoKCgoKU")]
-[assembly: GoPositionMap("net/smtp/smtp.go", "smtp.cs", "ADxqooKClIKqooKCgoKUgoLIkqiygoKCgqYABhDygpSClIKo4oKClIKCggAJCsKCggAICsKCgpSCgoKCgoKmgpSC6sKClIKClIKCgqzigoKU7sKClIKUgqzSgpSCgoKClIKCooKClMa0pIKUlIKClIKUgoKUAAgQ8oKUgpSCgoKUgqaC7LKClIIADxCCgoIACA7igoKUAA4yABYCgpSCgqaCgpSSgpSAgoKClIK2goKUgqaClIKCpoKClIKClIKClP7igpSClIKC6qKClILqooKUguiygoKClAAICJKClA==", "", "", "", "439:21")]
+[assembly: GoPositionMap("net/smtp/auth.go", "auth.cs", "ACxqAAgCpoIACgb8gpSClILmgpSUAAYWwuaCpoKCgoKClA==")]
+[assembly: GoPositionMap("net/smtp/smtp.go", "smtp.cs", "ADtqooKClIKqooKCgoKUgoKokqiygoKCgqYABhDygpSClIKo4oKClIKCggAJCsKCggAICsKCgpSCgoKCgoKmgpSC6sKClIKClIKCgqzigoKU7sKClIKUgqzSgpSCgoKClIKCooKClMa0pIKUlIKClIKUgoKUAAgQ8oKUgpSCgoKUgqaC7LKClIIACxCCgoLu4oKClAAIMgAWAoKUgoKmgoKUkoKUgIKCgpSCtoKClIKmgpSCgqaCgpSCgpSCgpTe4oKUgpSCguqigpSC6qKClILosoKCgpTokoKU", "", "", "", "424:21")]
 // </GoSourcePositionMaps>
 
 namespace go.net;
@@ -114,8 +120,46 @@ public static partial class smtp_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(smtp_package.Client)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class smtpᴛClient;
-[GoMethodHost(typeof(smtp_package.cramMD5Auth)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class smtpᴛcramMD5Auth;
-[GoMethodHost(typeof(smtp_package.dataCloser)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class smtpᴛdataCloser;
-[GoMethodHost(typeof(smtp_package.plainAuth)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class smtpᴛplainAuth;
+[GoMethodHost(typeof(smtp_package.Client)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class smtpᴛClient;
+[GoMethodHost(typeof(smtp_package.cramMD5Auth)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class smtpᴛcramMD5Auth;
+[GoMethodHost(typeof(smtp_package.dataCloser)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class smtpᴛdataCloser;
+[GoMethodHost(typeof(smtp_package.plainAuth)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class smtpᴛplainAuth;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class smtpᴛClient {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Close(this ref smtp_package.Client c) => smtp_package.Close⁔(ref c);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error hello(this ж<smtp_package.Client> Ꮡc) => smtp_package.hello⁔(Ꮡc);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Hello(this ж<smtp_package.Client> Ꮡc, @string localName) => smtp_package.Hello⁔(Ꮡc, localName);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint, @string, error) cmd(this ж<smtp_package.Client> Ꮡc, nint expectCode, @string format, params ꓸꓸꓸany argsʗp) => smtp_package.cmd⁔(Ꮡc, expectCode, format, argsʗp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error helo(this ж<smtp_package.Client> Ꮡc) => smtp_package.helo⁔(Ꮡc);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error ehlo(this ж<smtp_package.Client> Ꮡc) => smtp_package.ehlo⁔(Ꮡc);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error StartTLS(this ж<smtp_package.Client> Ꮡc, ж<tls.Config> Ꮡconfig) => smtp_package.StartTLS⁔(Ꮡc, Ꮡconfig);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (tls.ConnectionState state, bool ok) TLSConnectionState(this ref smtp_package.Client c) => smtp_package.TLSConnectionState⁔(ref c);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Verify(this ж<smtp_package.Client> Ꮡc, @string addr) => smtp_package.Verify⁔(Ꮡc, addr);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Auth(this ж<smtp_package.Client> Ꮡc, smtp_package.Auth a) => smtp_package.Auth⁔(Ꮡc, a);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Mail(this ж<smtp_package.Client> Ꮡc, @string from) => smtp_package.Mail⁔(Ꮡc, from);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Rcpt(this ж<smtp_package.Client> Ꮡc, @string to) => smtp_package.Rcpt⁔(Ꮡc, to);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (io.WriteCloser, error) Data(this ж<smtp_package.Client> Ꮡc) => smtp_package.Data⁔(Ꮡc);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (bool, @string) Extension(this ж<smtp_package.Client> Ꮡc, @string ext) => smtp_package.Extension⁔(Ꮡc, ext);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Reset(this ж<smtp_package.Client> Ꮡc) => smtp_package.Reset⁔(Ꮡc);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Noop(this ж<smtp_package.Client> Ꮡc) => smtp_package.Noop⁔(Ꮡc);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Quit(this ж<smtp_package.Client> Ꮡc) => smtp_package.Quit⁔(Ꮡc);
+}
+partial class smtpᴛcramMD5Auth {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (@string, slice<byte>, error) Start(this ref smtp_package.cramMD5Auth a, ж<smtp_package.ServerInfo> Ꮡserver) => smtp_package.Start⁔(ref a, Ꮡserver);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<byte>, error) Next(this ref smtp_package.cramMD5Auth a, slice<byte> fromServer, bool more) => smtp_package.Next⁔(ref a, fromServer, more);
+}
+partial class smtpᴛdataCloser {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint, error) Write(this smtp_package.dataCloser recvᴛ, slice<byte> p) => smtp_package.Write⁔(recvᴛ, p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error Close(this ref smtp_package.dataCloser d) => smtp_package.Close⁔(ref d);
+}
+partial class smtpᴛplainAuth {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (@string, slice<byte>, error) Start(this ref smtp_package.plainAuth a, ж<smtp_package.ServerInfo> Ꮡserver) => smtp_package.Start⁔(ref a, Ꮡserver);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<byte>, error) Next(this ref smtp_package.plainAuth a, slice<byte> fromServer, bool more) => smtp_package.Next⁔(ref a, fromServer, more);
+}
+// </MethodForwarders>

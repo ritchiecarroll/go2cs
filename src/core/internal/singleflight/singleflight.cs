@@ -8,7 +8,6 @@ namespace go.@internal;
 
 using sync = go.sync_package;
 using go;
-using static singleflight_package;
 
 partial class singleflight_package {
 
@@ -41,14 +40,12 @@ partial struct Result {
     public bool Shared;
 }
 
-} partial class singleflightᴛGroup {
-
 // Do executes and returns the results of the given function, making
 // sure that only one execution is in-flight for a given key at a
 // time. If a duplicate comes in, the duplicate caller waits for the
 // original to complete and receives the same results.
 // The return value shared indicates whether v was given to multiple callers.
-public static (any v, error err, bool shared) Do(this ж<Group> Ꮡg, @string key, Func<(any, error)> fn) {
+internal static (any v, error err, bool shared) Do⁔(/*this*/ ж<Group> Ꮡg, @string key, Func<(any, error)> fn) {
     ref var g = ref Ꮡg.DerefOrNull();
 
     g.mu.Lock();
@@ -72,7 +69,7 @@ public static (any v, error err, bool shared) Do(this ж<Group> Ꮡg, @string ke
 
 // DoChan is like Do but returns a channel that will receive the
 // results when they are ready.
-public static partial /*<-*/channel<Result> DoChan(this ж<Group> Ꮡg, @string key, Func<(any, error)> fn) {
+internal static partial /*<-*/channel<Result> DoChan⁔(/*this*/ ж<Group> Ꮡg, @string key, Func<(any, error)> fn) {
     ref var g = ref Ꮡg.DerefOrNull();
 
     var ch = new channel<Result>(1);
@@ -97,7 +94,7 @@ public static partial /*<-*/channel<Result> DoChan(this ж<Group> Ꮡg, @string 
 }
 
 // doCall handles the single call for a key.
-internal static void doCall(this ж<Group> Ꮡg, ж<call> Ꮡc, @string key, Func<(any, error)> fn) {
+internal static void doCall⁔(/*this*/ ж<Group> Ꮡg, ж<call> Ꮡc, @string key, Func<(any, error)> fn) {
     ref var g = ref Ꮡg.DerefOrNull();
     ref var c = ref Ꮡc.DerefOrNull();
 
@@ -119,7 +116,7 @@ internal static void doCall(this ж<Group> Ꮡg, ж<call> Ꮡc, @string key, Fun
 // will call the function rather than waiting for an earlier call to complete.
 // Returns whether the key was forgotten or unknown--that is, whether no
 // other goroutines are waiting for the result.
-public static bool ForgetUnshared(this ж<Group> Ꮡg, @string key) {
+internal static bool ForgetUnshared⁔(/*this*/ ж<Group> Ꮡg, @string key) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -141,4 +138,4 @@ public static bool ForgetUnshared(this ж<Group> Ꮡg, @string key) {
     finally { if (ᒐd1) Ꮡg.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
-}
+} // end singleflight_package

@@ -7,16 +7,13 @@ namespace go.go;
 using ast = global::go.go.ast_package;
 using token = global::go.go.token_package;
 using global::go.go;
-using static types_package;
 
 partial class types_package {
-
-} partial class typesᴛChecker {
 
 // isTerminating reports if s is a terminating statement.
 // If s is labeled, label is the label name; otherwise s
 // is "".
-internal static bool isTerminating(this ref Checker check, ast.Stmt s, @string label) {
+internal static bool isTerminating⁔(/*this*/ ref Checker check, ast.Stmt s, @string label) {
     switch (s.type()) {
     default: {
         var sΔ1 = s;
@@ -89,7 +86,7 @@ internal static bool isTerminating(this ref Checker check, ast.Stmt s, @string l
     return false;
 }
 
-internal static bool isTerminatingList(this ref Checker check, slice<ast.Stmt> list, @string label) {
+internal static bool isTerminatingList⁔(/*this*/ ref Checker check, slice<ast.Stmt> list, @string label) {
     // trailing empty statements are permitted - skip them
     for (nint i = len(list) - 1; i >= 0; i--) {
         var (_, ok) = list[i]._<ж<ast.EmptyStmt>>(ᐧ); if (!ok) {
@@ -99,7 +96,7 @@ internal static bool isTerminatingList(this ref Checker check, slice<ast.Stmt> l
     return false; // all statements are empty
 }
 
-internal static bool isTerminatingSwitch(this ref Checker check, ж<ast.BlockStmt> Ꮡbody, @string label) {
+internal static bool isTerminatingSwitch⁔(/*this*/ ref Checker check, ж<ast.BlockStmt> Ꮡbody, @string label) {
     ref var body = ref Ꮡbody.DerefOrNull();
 
     var hasDefault = false;
@@ -114,8 +111,6 @@ internal static bool isTerminatingSwitch(this ref Checker check, ж<ast.BlockStm
     }
     return hasDefault;
 }
-
-} partial class types_package {
 
 // TODO(gri) For nested breakable statements, the current implementation of hasBreak
 // will traverse the same subtree repeatedly, once for each label. Replace

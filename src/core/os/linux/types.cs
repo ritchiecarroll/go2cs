@@ -17,7 +17,6 @@ namespace go;
 using fs = go.io.fs_package;
 using syscall = syscall_package;
 using go.io;
-using static os_package;
 
 partial class os_package {
 
@@ -57,12 +56,8 @@ public static fs.FileMode ModeType => /* fs.ModeType */ 2401763328;
 
 public static fs.FileMode ModePerm => /* fs.ModePerm */ 511; // Unix permission bits, 0o777
 
-} partial class osᴛfileStat {
-
-internal static @string Name(this ref fileStat fs) { return fs.name; }
-internal static bool IsDir(this ref fileStat fs) { return fs.Mode().IsDir(); }
-
-} partial class os_package {
+internal static @string Name⁔(/*this*/ ref fileStat fs) { return fs.name; }
+internal static bool IsDir⁔(/*this*/ ref fileStat fs) { return fs.Mode().IsDir(); }
 
 // SameFile reports whether fi1 and fi2 describe the same file.
 // For example, on Unix this means that the device and inode fields

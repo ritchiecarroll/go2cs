@@ -10,10 +10,18 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+using io = go.io_package;
+using net = go.net_package;
+using reflect = go.reflect_package;
+using sync = go.sync_package;
+using Δhttp = go.net.http_package;
 // </ImportedTypeAliases>
 
 using go;
 using static go.net.rpc_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -72,9 +80,9 @@ using static go.net.rpc_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("net/rpc/client.go", "client.cs", "ABksgsYALFrigqaCgoKCgpSCgoKmgoKCgoKCgoKCgsbUooKCgoKCgpSCgoKClO6CgvyCgoKUtIKClMiCgoKCgoKUpoKClIKCggAICKIACAyCAAccAAkCgoKqoriSAAsUooKUgpSmgqaCpoLKoqqigoKUuIKClIKUggAHEpKCgpTKwoKCgpSCgt7CgoKCgoLcgqaCgqiSgg==")]
-[assembly: GoPositionMap("net/rpc/debug.go", "debug.cs", "ACxQABYogoK0goIADA6UkoKCgoKUhoKUhoKC", "76-87:1;82-84:1.1;88-90:2")]
-[assembly: GoPositionMap("net/rpc/server.go", "server.cs", "AJsBsAIALFySuJaSgrgABBwACwKqogAKDoKCgoKCgpSCgoKUgoKClKaUgqaCgpSUgqaClMqigoKCgpSCpoKClKaCgoKUpoKCgpSmgoKUpoKClKaCgpSUlNzkopSCgoKUgoKCgpSCxrKCgoLG0oKUgoKClJSCgoKUgqIADhSCpoLmooKmgpSUgqaClJSmgpSUggAEEuKC3NqigoKCooKClIKmgoKUlILIgqqigoKCgqaCgpSUgqaigoKClIKUgqaygoKCpqKCgoKUgpSCprKCgoKmAAgCgoKCpoK4goKUgqaClIKmlJS0pKb0goKCgoKUgsqUgoKClIKmgoKClIKCgpTewoKCgoKU2oCYogAUNOKqoqqirKAADwyygoKCgpSCgoKUgqyygsyy", "", "", "495=NewDecoder/1/1/2,NewEncoder/1/1/3")]
+[assembly: GoPositionMap("net/rpc/client.go", "client.cs", "ABYsgqYAKlrigqaCgoKCgpSCgoKmgoKCgoKCgoKCgsbUooKCgoKCgpSCgoKClO6CgvyCgoKUtIKClMiCgoKCgoKUpoKClIKCguiiAAgMggAFHAAJAoKCqqK4kgAJFKKClIKUpoKmgqaCqqKqooKClLiCgpSClIIABxKSgoKUqsKCgoKUgoLewoKCgoKC3IKmgoKokoI=")]
+[assembly: GoPositionMap("net/rpc/debug.go", "debug.cs", "ACtQABQogoKUgoIACA6UkoKCgoKUhoKUhoKC", "76-87:1;82-84:1.1;88-90:2")]
+[assembly: GoPositionMap("net/rpc/server.go", "server.cs", "AJoBsAIALFySuJaSgrgAAhwACwKqou6CgoKCgoKUgoKClIKCgpSmlIKmgoKUlIKmgpSqooKCgoKUgqaCgpSmgoKClKaCgoKUpoKClKaCgpSmgoKUlJTcxKKUgoKClIKCgoKUgqaygoKCptKClIKCgpSUgoKClIKiAAoUgqaC5qKCpoKUlIKmgpSUpoKUlIIAAhLigtzaooKCgqKCgpSCpoKClJSCyIKqooKCgoKmgoKUlIKmooKCgpSClIKmsoKCgqaigoKClIKUgqaygoKCpgAIAoKCgqaCuIKClIKmgpSCppSUtKSm9IKCgoKClILKlIKCgpSCpoKCgpSCgoKU3sKCgoKClLqAmKIAFDTiqqKqoqygAA0MsoKCgoKUgoKClIKssoKssg==", "", "", "474=NewDecoder/1/1/2,NewEncoder/1/1/3")]
 // </GoSourcePositionMaps>
 
 namespace go.net;
@@ -139,15 +147,84 @@ public static partial class rpc_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(rpc_package.Call)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class rpcᴛCall;
-[GoMethodHost(typeof(rpc_package.Client)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class rpcᴛClient;
-[GoMethodHost(typeof(rpc_package.Server)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class rpcᴛServer;
-[GoMethodHost(typeof(rpc_package.ServerError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class rpcᴛServerError;
-[GoMethodHost(typeof(rpc_package.debugHTTP)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class rpcᴛdebugHTTP;
-[GoMethodHost(typeof(rpc_package.gobClientCodec)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class rpcᴛgobClientCodec;
-[GoMethodHost(typeof(rpc_package.gobServerCodec)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class rpcᴛgobServerCodec;
-[GoMethodHost(typeof(rpc_package.methodArray)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class rpcᴛmethodArray;
-[GoMethodHost(typeof(rpc_package.methodType)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class rpcᴛmethodType;
-[GoMethodHost(typeof(rpc_package.service)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class rpcᴛservice;
-[GoMethodHost(typeof(rpc_package.serviceArray)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class rpcᴛserviceArray;
+[GoMethodHost(typeof(rpc_package.Call)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class rpcᴛCall;
+[GoMethodHost(typeof(rpc_package.Client)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class rpcᴛClient;
+[GoMethodHost(typeof(rpc_package.Server)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class rpcᴛServer;
+[GoMethodHost(typeof(rpc_package.ServerError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class rpcᴛServerError;
+[GoMethodHost(typeof(rpc_package.debugHTTP)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class rpcᴛdebugHTTP;
+[GoMethodHost(typeof(rpc_package.gobClientCodec)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class rpcᴛgobClientCodec;
+[GoMethodHost(typeof(rpc_package.gobServerCodec)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class rpcᴛgobServerCodec;
+[GoMethodHost(typeof(rpc_package.methodArray)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class rpcᴛmethodArray;
+[GoMethodHost(typeof(rpc_package.methodType)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class rpcᴛmethodType;
+[GoMethodHost(typeof(rpc_package.service)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class rpcᴛservice;
+[GoMethodHost(typeof(rpc_package.serviceArray)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class rpcᴛserviceArray;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class rpcᴛCall {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void done(this ж<rpc_package.Call> Ꮡcall) => rpc_package.done⁔(Ꮡcall);
+}
+partial class rpcᴛClient {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void send(this ж<rpc_package.Client> Ꮡclient, ж<rpc_package.Call> Ꮡcall) => rpc_package.send⁔(Ꮡclient, Ꮡcall);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void input(this ж<rpc_package.Client> Ꮡclient) => rpc_package.input⁔(Ꮡclient);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Close(this ж<rpc_package.Client> Ꮡclient) => rpc_package.Close⁔(Ꮡclient);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<rpc_package.Call> Go(this ж<rpc_package.Client> Ꮡclient, @string serviceMethod, any args, any reply, channel<ж<rpc_package.Call>> done) => rpc_package.Go⁔(Ꮡclient, serviceMethod, args, reply, done);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Call(this ж<rpc_package.Client> Ꮡclient, @string serviceMethod, any args, any reply) => rpc_package.Call⁔(Ꮡclient, serviceMethod, args, reply);
+}
+partial class rpcᴛServer {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Register(this ж<rpc_package.Server> Ꮡserver, any rcvr) => rpc_package.Register⁔(Ꮡserver, rcvr);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error RegisterName(this ж<rpc_package.Server> Ꮡserver, @string name, any rcvr) => rpc_package.RegisterName⁔(Ꮡserver, name, rcvr);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error register(this ж<rpc_package.Server> Ꮡserver, any rcvr, @string name, bool useName) => rpc_package.register⁔(Ꮡserver, rcvr, name, useName);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void sendResponse(this ж<rpc_package.Server> Ꮡserver, ж<sync.Mutex> Ꮡsending, ж<rpc_package.Request> Ꮡreq, any reply, rpc_package.ServerCodec codec, @string errmsg) => rpc_package.sendResponse⁔(Ꮡserver, Ꮡsending, Ꮡreq, reply, codec, errmsg);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void ServeConn(this ж<rpc_package.Server> Ꮡserver, io.ReadWriteCloser conn) => rpc_package.ServeConn⁔(Ꮡserver, conn);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void ServeCodec(this ж<rpc_package.Server> Ꮡserver, rpc_package.ServerCodec codec) => rpc_package.ServeCodec⁔(Ꮡserver, codec);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error ServeRequest(this ж<rpc_package.Server> Ꮡserver, rpc_package.ServerCodec codec) => rpc_package.ServeRequest⁔(Ꮡserver, codec);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<rpc_package.Request> getRequest(this ж<rpc_package.Server> Ꮡserver) => rpc_package.getRequest⁔(Ꮡserver);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void freeRequest(this ж<rpc_package.Server> Ꮡserver, ж<rpc_package.Request> Ꮡreq) => rpc_package.freeRequest⁔(Ꮡserver, Ꮡreq);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<rpc_package.Response> getResponse(this ж<rpc_package.Server> Ꮡserver) => rpc_package.getResponse⁔(Ꮡserver);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void freeResponse(this ж<rpc_package.Server> Ꮡserver, ж<rpc_package.Response> Ꮡresp) => rpc_package.freeResponse⁔(Ꮡserver, Ꮡresp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (ж<rpc_package.service> service, ж<rpc_package.methodType> mtype, ж<rpc_package.Request> req, reflect.Value argv, reflect.Value replyv, bool keepReading, error err) readRequest(this ж<rpc_package.Server> Ꮡserver, rpc_package.ServerCodec codec) => rpc_package.readRequest⁔(Ꮡserver, codec);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (ж<rpc_package.service> svc, ж<rpc_package.methodType> mtype, ж<rpc_package.Request> req, bool keepReading, error err) readRequestHeader(this ж<rpc_package.Server> Ꮡserver, rpc_package.ServerCodec codec) => rpc_package.readRequestHeader⁔(Ꮡserver, codec);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Accept(this ж<rpc_package.Server> Ꮡserver, net.Listener lis) => rpc_package.Accept⁔(Ꮡserver, lis);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void ServeHTTP(this ж<rpc_package.Server> Ꮡserver, Δhttp.ResponseWriter w, ж<Δhttp.Request> Ꮡreq) => rpc_package.ServeHTTP⁔(Ꮡserver, w, Ꮡreq);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void HandleHTTP(this ж<rpc_package.Server> Ꮡserver, @string rpcPath, @string debugPath) => rpc_package.HandleHTTP⁔(Ꮡserver, rpcPath, debugPath);
+}
+partial class rpcᴛServerError {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this rpc_package.ServerError e) => rpc_package.Error⁔(e);
+}
+partial class rpcᴛdebugHTTP {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void ServeHTTP(this rpc_package.debugHTTP server, Δhttp.ResponseWriter w, ж<Δhttp.Request> Ꮡreq) => rpc_package.ServeHTTP⁔(server, w, Ꮡreq);
+}
+partial class rpcᴛgobClientCodec {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error /*err*/ WriteRequest(this ref rpc_package.gobClientCodec c, ж<rpc_package.Request> Ꮡr, any body) => rpc_package.WriteRequest⁔(ref c, Ꮡr, body);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error ReadResponseHeader(this ref rpc_package.gobClientCodec c, ж<rpc_package.Response> Ꮡr) => rpc_package.ReadResponseHeader⁔(ref c, Ꮡr);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error ReadResponseBody(this ref rpc_package.gobClientCodec c, any body) => rpc_package.ReadResponseBody⁔(ref c, body);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error Close(this ref rpc_package.gobClientCodec c) => rpc_package.Close⁔(ref c);
+}
+partial class rpcᴛgobServerCodec {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error ReadRequestHeader(this ref rpc_package.gobServerCodec c, ж<rpc_package.Request> Ꮡr) => rpc_package.ReadRequestHeader⁔(ref c, Ꮡr);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error ReadRequestBody(this ref rpc_package.gobServerCodec c, any body) => rpc_package.ReadRequestBody⁔(ref c, body);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error /*err*/ WriteResponse(this ref rpc_package.gobServerCodec c, ж<rpc_package.Response> Ꮡr, any body) => rpc_package.WriteResponse⁔(ref c, Ꮡr, body);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error Close(this ref rpc_package.gobServerCodec c) => rpc_package.Close⁔(ref c);
+}
+partial class rpcᴛmethodArray {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint Len(this rpc_package.methodArray m) => rpc_package.Len⁔(m);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool Less(this rpc_package.methodArray m, nint i, nint j) => rpc_package.Less⁔(m, i, j);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void Swap(this rpc_package.methodArray m, nint i, nint j) => rpc_package.Swap⁔(m, i, j);
+}
+partial class rpcᴛmethodType {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nuint /*n*/ NumCalls(this ж<rpc_package.methodType> Ꮡm) => rpc_package.NumCalls⁔(Ꮡm);
+}
+partial class rpcᴛservice {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void call(this ж<rpc_package.service> Ꮡs, ж<rpc_package.Server> Ꮡserver, ж<sync.Mutex> Ꮡsending, ж<sync.WaitGroup> Ꮡwg, ж<rpc_package.methodType> Ꮡmtype, ж<rpc_package.Request> Ꮡreq, reflect.Value argv, reflect.Value replyv, rpc_package.ServerCodec codec) => rpc_package.call⁔(Ꮡs, Ꮡserver, Ꮡsending, Ꮡwg, Ꮡmtype, Ꮡreq, argv, replyv, codec);
+}
+partial class rpcᴛserviceArray {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint Len(this rpc_package.serviceArray s) => rpc_package.Len⁔(s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool Less(this rpc_package.serviceArray s, nint i, nint j) => rpc_package.Less⁔(s, i, j);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void Swap(this rpc_package.serviceArray s, nint i, nint j) => rpc_package.Swap⁔(s, i, j);
+}
+// </MethodForwarders>

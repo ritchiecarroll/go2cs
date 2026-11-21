@@ -14,6 +14,9 @@
 
 using go;
 using static go.vendor.golang.org.x.net.dns.dnsmessage_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -75,8 +78,8 @@ using static go.vendor.golang.org.x.net.dns.dnsmessage_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("vendor/golang.org/x/net/dns/dnsmessage/message.go", "message.cs", "ADt4ABUqkoKUqJKClAAQIgAJEpKClKiSgpQACQ6SAA8gAAoUkoKUqJKClMaCgu6CgoKUgpSmooKUgoKCgpTaooKCgoiCpoKCAAYQpoKmlIKCgoKUgpQACAaCgpTeuJSCgoKCgoKCgoKCgoKCgoKCgoKCAB1CkgAUIrKCgoKUgpSClIKUgpSClIKUqJIAH1QAEySClKSkpJSokoKCgoKCpoKCgoKUgpSClIKUgpSClKaCABcoggARKJKClIKCgoKUgoKClIKUACA+koKUgoKClIKmgoKUgpSCgoKClKaCgoKigpSCgoKUgqaCgqaClIKCgpSCgoKCgqaCgoKClIKCgpSClIKCgpSCqJKClIKCgpSCgpSCgpSCgqj+goKCgpSClLqSgpSCgpSClIKUgoKokoKCgoLMkqiSqOyCgpSCgoKClIKUAAMQwqiSgoKCgsySqJKo7IKClIKCgoKUgpQAAxDCqJKCgoKCzJKokqjsgoKUgoKCgpSClAADEMKokoKCgoIABBLCgpSCgpSCgoKuwoKUgoKUgoKCrsKClIKClIKCgq7CgpSCgpSCgoKuwoKUgoKUgoKCrsKClIKClIKCgq7CgpSCgpSCgoKuwoKUgoKUgoKCrsKClIKClIKCgq7CgpSCgpSCgoKuwoKUgoKUgoKCyJKCgoKUgpSClIKUgpSokqrYgpSClIKUgqaClIKCgpSCAAkUlIKCgqaCgoKmgoKCpoKCgriokoSCgqKmgoKCoqaCgoKipoKCgqKmAB5WAAoCgpSCgoKCggAEHAALAqaCgpSClKiSgpSCqJKClIKokoKUgqiSgpSCpqKCgpSCtIK0grSCpIKUgqjCgpSClIKClIKUgqaCgpSClKjSgpSCgoKUgoKUgpSClIKo0oKUgoKClIKClIKUgpSCqNKClIKCgpSCgpSClIKUgqjSgpSCgoKUgoKUgpSClIKo0oKUgoKClIKClIKUgpSCqMKClIKCgpSCgpSClIKUgqjSgpSCgoKUgoKUgpSClIKo0oKUgoKClIKClIKUgpSCqNKClIKCgpSCgpSClIKUgqjCgpSCgoKUgoKUgpSClIKowoKUgoKClIKClIKUgpSCqJKClJSCABw8kgACFvKCgpSCgoKCgqaCgoKClIKUgpSClIKUAAIS4oKCuIKUAA0esoKCgoKClKiSrLKClMaCgoKUgpSClIKUgoKUgpSokqaCgpSmgoKUqJKmgoKmgqiSpoKCpoKokgAHEoKClIKmgoKUqJKCgpSClKaCgpSCgoKUqJKmgoKClIIACxqSgoKUgqiSgoKUzNKokgACFPKUgriCuIKmppS4griCppSCpoLcgqbKgoKmlLioxMqWtpSCgoKUgoKUlJSCgsqCgriCgrSClIKCgqaClMbGgpSClIKClMa4lIKCgpSCgpSUpoKC/KbG2AALFpKCgpSCqJIAGgyiqpSCkoK0gpKCtIKSgrSCkoK0gpKCtIKSgrSCgoK0gpKCtIKSgrSCkoK0gqKCtIKCgrSCgoKkgpQACRCCqJKoksaCgoKUAAoSgqiSgoKCgpSoksqCgoKUgoKUAAkQgqiSqJLGgoKClAAJEIKokqiSxoKCgpQAEiSCqJKCgoKUgoKUgoKCgqiSAAQUgoKCgpSCgpSCgpSCgpSCgpSCgpSCgpQACRCCqJKCgoKCgqbokoKClIKClMaCgoKCgoKmgpSClAAMFoKokoKCgoKCgpSoks6CgoKUgoKUgoKUgoKUAAkQgqiSqJLIgoKClAAJEIKokqqSxoKCgpQAFSqSyoKmgoKCgoKU6JKCgpSCopTGgoKCgoKCgpSCgoKUgoKUgpQAChKCqJKoksqCuIKU", "", "", "397=printUint16/1/1/1,printBool/1/7/2,GoString/1/2/3,printBool/2/7/4,printBool/3/7/5,printBool/4/7/6,printBool/5/7/7,printBool/6/7/8,printBool/7/7/9,GoString/2/2/10;526=GoString/1/2/1,GoString/2/2/2;1780=GoString/1/3/1,GoString/2/3/2,GoString/3/3/3,printUint32/1/1/4,printUint16/1/1/5;2296=GoString/1/3/1,GoString/2/3/2,GoString/3/3/3;2494=printUint16/1/1/1,GoString/1/1/2;2613=GoString/1/2/1,GoString/2/2/2,printUint32/1/5/3,printUint32/2/5/4,printUint32/3/5/5,printUint32/4/5/6,printUint32/5/5/7;2741=printUint16/1/3/1,printUint16/2/3/2,printUint16/3/3/3,GoString/1/1/4;2784=printByteSlice/1/1/1;2810=printByteSlice/1/1/1;2849=printUint16/1/1/1,printByteSlice/1/1/2;2932=GoString/1/1/1,printByteSlice/1/1/2")]
-[assembly: GoPositionMap("vendor/golang.org/x/net/dns/dnsmessage/svcb.go", "svcb.cs", "ABMkgqiSiIKCgqaCAA0UgqiSyJKCgpSCpqqigoKClKaCgqaqooKCgpSCpgAMFJIAEywADhySgpSokoKUxoKCyoKClIKCgpSClIKClMaUgoKUgoKmgsqCgoKCgpKClKaUgpSClIKClIK4poKCgoKSgpSCgpSClIKUgoKmyJKClIKClIKCgq7CrsKCgpTI0oKUgoKUgoKUgpSClIKowoKowoI=", "", "", "26=printUint16/1/1/1,GoString/1/1/2;118=GoString/1/1/1,printByteSlice/1/1/2")]
+[assembly: GoPositionMap("vendor/golang.org/x/net/dns/dnsmessage/message.go", "message.cs", "ADl4ABMqkoKUqJKClAAOIgAHEpKClKiSgpTekgANIAAIFJKClKiSgpSmgoLugoKClIKUpqKClIKCgoKU2qKCgoKIgqaCggAGEKaCppSCgoKClIKUAAgGgoKU3riUgoKCgoKCgoKCgoKCgoKCgoKCggAbQpIAECKygoKClIKUgpSClIKUgpSClKiSAB1UABEkgpSkpKSUqJKCgoKCgqaCgoKClIKUgpSClIKUgpSmggATKIIADSiSgpSCgoKClIKCgpSClAAcPpKClIKCgpSCpoKClIKUgoKCgpSmgoKCooKUgoKClIKmgoKmgpSCgoKUgoKCgoKmgoKCgpSCgoKUgpSCgoKUgqiSgpSCgoKUgoKUgoKUgoKo/oKCgoKUgpS6koKUgoKUgpSClIKCqJKCgoKCzJKokqjsgoKUgoKCgpSClAADEMKokoKCgoLMkqiSqOyCgpSCgoKClIKUAAMQwqiSgoKCgsySqJKo7IKClIKCgoKUgpQAAxDCqJKCgoKCAAQSwoKUgoKUgoKCrsKClIKClIKCgq7CgpSCgpSCgoKuwoKUgoKUgoKCrsKClIKClIKCgq7CgpSCgpSCgoKuwoKUgoKUgoKCrsKClIKClIKCgq7CgpSCgpSCgoKuwoKUgoKUgoKCrsKClIKClIKCgqiSgoKClIKUgpSClIKUqJKq2IKUgpSClIKmgpSCgoKUggAJFJSCgoKmgoKCpoKCgqaCgoK4qJKEgoKipoKCgqKmgoKCoqaCgoKipgAcVgAKAoKUgoKCgoIAAhwACwKmgoKUgpSokoKUgqiSgpSCqJKClIKokoKUgqaigoKUgrSCtIK0gqSClIKowoKUgpSCgpSClIKmgoKUgpSo0oKUgoKClIKClIKUgpSCqNKClIKCgpSCgpSClIKUgqjSgpSCgoKUgoKUgpSClIKo0oKUgoKClIKClIKUgpSCqNKClIKCgpSCgpSClIKUgqjCgpSCgoKUgoKUgpSClIKo0oKUgoKClIKClIKUgpSCqNKClIKCgpSCgpSClIKUgqjSgpSCgoKUgoKUgpSClIKowoKUgoKClIKClIKUgpSCqMKClIKCgpSCgpSClIKUgqiSgpSUggAYPJIAAhbygoKUgoKCgoKmgoKCgpSClIKUgpSClAACEuKCgriClAAJHrKCgoKCgpSokqyygpSmgoKClIKUgpSClIKClIKUqJKmgoKUpoKClKiSpoKCpoKokqaCgqaCqJIABxKCgpSCpoKClKiSgoKUgpSmgoKUgoKClKiSpoKCgpSCAAsakoKClIKokoKClKzSqJIAAhTylIK4griCpqaUuIK4gqaUgqaC3IKmyoKCppS4qMTKlraUgoKClIKClJSUgoLKgoK4goK0gpSCgoKmgpTGxoKUgpSCgpSmuJSCgoKUgoKUlKaCgvymxtgACRaSgoKUgqiSABgMoqqUgpKCtIKSgrSCkoK0gpKCtIKSgrSCkoK0goKCtIKSgrSCkoK0gpKCtIKigrSCgoK0goKCpIKUAAcQgqiSqJKmgoKClAAIEoKokoKCgoKUqJKqgoKClIKClAAHEIKokqiSpoKCgpQABxCCqJKokqaCgoKUABAkgqiSgoKClIKClIKCgoKokgACFIKCgoKUgoKUgoKUgoKUgoKUgoKUgoKUAAcQgqiSgoKCgoKm6JKCgpSCgpSmgoKCgoKCpoKUgpQAChaCqJKCgoKCgoKUqJKugoKClIKClIKClIKClAAHEIKokqiSqIKCgpQABxCCqJKqkqaCgoKUABMqkqqCpoKCgoKClOiSgoKUgqKUpoKCgoKCgoKUgoKClIKClIKUAAgSgqiSqJKqgriClA==", "", "", "373=printUint16/1/1/1,printBool/1/7/2,GoString/1/2/3,printBool/2/7/4,printBool/3/7/5,printBool/4/7/6,printBool/5/7/7,printBool/6/7/8,printBool/7/7/9,GoString/2/2/10;494=GoString/1/2/1,GoString/2/2/2;1730=GoString/1/3/1,GoString/2/3/2,GoString/3/3/3,printUint32/1/1/4,printUint16/1/1/5;2234=GoString/1/3/1,GoString/2/3/2,GoString/3/3/3;2424=printUint16/1/1/1,GoString/1/1/2;2531=GoString/1/2/1,GoString/2/2/2,printUint32/1/5/3,printUint32/2/5/4,printUint32/3/5/5,printUint32/4/5/6,printUint32/5/5/7;2651=printUint16/1/3/1,printUint16/2/3/2,printUint16/3/3/3,GoString/1/1/4;2690=printByteSlice/1/1/1;2712=printByteSlice/1/1/1;2747=printUint16/1/1/1,printByteSlice/1/1/2;2824=GoString/1/1/1,printByteSlice/1/1/2")]
+[assembly: GoPositionMap("vendor/golang.org/x/net/dns/dnsmessage/svcb.go", "svcb.cs", "ABAkgqiSiIKCgqaCAAkUgqiSqJKCgpSCpqqigoKClKaCgqaqooKCgpSCpgAIFJIAESwADBySgpSokoKUpoKCyoKClIKCgpSClIKClKaUgoKUgoKmgsqCgoKCgpKClKaUgpSClIKClIK4poKCgoKSgpSCgpSClIKUgoKmqJKClIKClIKCgq7CrsKCgpSo0oKUgoKUgoKUgpSClIKowoKowoI=", "", "", "23=printUint16/1/1/1,GoString/1/1/2;105=GoString/1/1/1,printByteSlice/1/1/2")]
 // </GoSourcePositionMaps>
 
 namespace go.vendor.golang.org.x.net.dns;
@@ -144,34 +147,241 @@ public static partial class dnsmessage_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(dnsmessage_package.AAAAResource)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dnsmessageᴛAAAAResource;
-[GoMethodHost(typeof(dnsmessage_package.AResource)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dnsmessageᴛAResource;
-[GoMethodHost(typeof(dnsmessage_package.Builder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dnsmessageᴛBuilder;
-[GoMethodHost(typeof(dnsmessage_package.CNAMEResource)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dnsmessageᴛCNAMEResource;
-[GoMethodHost(typeof(dnsmessage_package.Class)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dnsmessageᴛClass;
-[GoMethodHost(typeof(dnsmessage_package.HTTPSResource)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dnsmessageᴛHTTPSResource;
-[GoMethodHost(typeof(dnsmessage_package.Header)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dnsmessageᴛHeader;
-[GoMethodHost(typeof(dnsmessage_package.MXResource)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dnsmessageᴛMXResource;
-[GoMethodHost(typeof(dnsmessage_package.Message)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dnsmessageᴛMessage;
-[GoMethodHost(typeof(dnsmessage_package.NSResource)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dnsmessageᴛNSResource;
-[GoMethodHost(typeof(dnsmessage_package.Name)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dnsmessageᴛName;
-[GoMethodHost(typeof(dnsmessage_package.OPTResource)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dnsmessageᴛOPTResource;
-[GoMethodHost(typeof(dnsmessage_package.OpCode)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dnsmessageᴛOpCode;
-[GoMethodHost(typeof(dnsmessage_package.Option)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dnsmessageᴛOption;
-[GoMethodHost(typeof(dnsmessage_package.PTRResource)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dnsmessageᴛPTRResource;
-[GoMethodHost(typeof(dnsmessage_package.Parser)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dnsmessageᴛParser;
-[GoMethodHost(typeof(dnsmessage_package.Question)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dnsmessageᴛQuestion;
-[GoMethodHost(typeof(dnsmessage_package.RCode)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dnsmessageᴛRCode;
-[GoMethodHost(typeof(dnsmessage_package.Resource)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dnsmessageᴛResource;
-[GoMethodHost(typeof(dnsmessage_package.ResourceHeader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dnsmessageᴛResourceHeader;
-[GoMethodHost(typeof(dnsmessage_package.SOAResource)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dnsmessageᴛSOAResource;
-[GoMethodHost(typeof(dnsmessage_package.SRVResource)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dnsmessageᴛSRVResource;
-[GoMethodHost(typeof(dnsmessage_package.SVCBResource)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dnsmessageᴛSVCBResource;
-[GoMethodHost(typeof(dnsmessage_package.SVCParam)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dnsmessageᴛSVCParam;
-[GoMethodHost(typeof(dnsmessage_package.SVCParamKey)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dnsmessageᴛSVCParamKey;
-[GoMethodHost(typeof(dnsmessage_package.TXTResource)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dnsmessageᴛTXTResource;
-[GoMethodHost(typeof(dnsmessage_package.Type)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dnsmessageᴛType;
-[GoMethodHost(typeof(dnsmessage_package.UnknownResource)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dnsmessageᴛUnknownResource;
-[GoMethodHost(typeof(dnsmessage_package.header)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dnsmessageᴛheader;
-[GoMethodHost(typeof(dnsmessage_package.nestedError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dnsmessageᴛnestedError;
+[GoMethodHost(typeof(dnsmessage_package.AAAAResource)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class dnsmessageᴛAAAAResource;
+[GoMethodHost(typeof(dnsmessage_package.AResource)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class dnsmessageᴛAResource;
+[GoMethodHost(typeof(dnsmessage_package.Builder)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class dnsmessageᴛBuilder;
+[GoMethodHost(typeof(dnsmessage_package.CNAMEResource)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class dnsmessageᴛCNAMEResource;
+[GoMethodHost(typeof(dnsmessage_package.Class)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class dnsmessageᴛClass;
+[GoMethodHost(typeof(dnsmessage_package.HTTPSResource)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class dnsmessageᴛHTTPSResource;
+[GoMethodHost(typeof(dnsmessage_package.Header)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class dnsmessageᴛHeader;
+[GoMethodHost(typeof(dnsmessage_package.MXResource)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class dnsmessageᴛMXResource;
+[GoMethodHost(typeof(dnsmessage_package.Message)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class dnsmessageᴛMessage;
+[GoMethodHost(typeof(dnsmessage_package.NSResource)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class dnsmessageᴛNSResource;
+[GoMethodHost(typeof(dnsmessage_package.Name)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class dnsmessageᴛName;
+[GoMethodHost(typeof(dnsmessage_package.OPTResource)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class dnsmessageᴛOPTResource;
+[GoMethodHost(typeof(dnsmessage_package.OpCode)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class dnsmessageᴛOpCode;
+[GoMethodHost(typeof(dnsmessage_package.Option)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class dnsmessageᴛOption;
+[GoMethodHost(typeof(dnsmessage_package.PTRResource)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class dnsmessageᴛPTRResource;
+[GoMethodHost(typeof(dnsmessage_package.Parser)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class dnsmessageᴛParser;
+[GoMethodHost(typeof(dnsmessage_package.Question)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class dnsmessageᴛQuestion;
+[GoMethodHost(typeof(dnsmessage_package.RCode)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class dnsmessageᴛRCode;
+[GoMethodHost(typeof(dnsmessage_package.Resource)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class dnsmessageᴛResource;
+[GoMethodHost(typeof(dnsmessage_package.ResourceHeader)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class dnsmessageᴛResourceHeader;
+[GoMethodHost(typeof(dnsmessage_package.SOAResource)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class dnsmessageᴛSOAResource;
+[GoMethodHost(typeof(dnsmessage_package.SRVResource)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class dnsmessageᴛSRVResource;
+[GoMethodHost(typeof(dnsmessage_package.SVCBResource)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class dnsmessageᴛSVCBResource;
+[GoMethodHost(typeof(dnsmessage_package.SVCParam)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class dnsmessageᴛSVCParam;
+[GoMethodHost(typeof(dnsmessage_package.SVCParamKey)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class dnsmessageᴛSVCParamKey;
+[GoMethodHost(typeof(dnsmessage_package.TXTResource)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class dnsmessageᴛTXTResource;
+[GoMethodHost(typeof(dnsmessage_package.Type)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class dnsmessageᴛType;
+[GoMethodHost(typeof(dnsmessage_package.UnknownResource)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class dnsmessageᴛUnknownResource;
+[GoMethodHost(typeof(dnsmessage_package.header)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class dnsmessageᴛheader;
+[GoMethodHost(typeof(dnsmessage_package.nestedError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class dnsmessageᴛnestedError;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class dnsmessageᴛAAAAResource {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static dnsmessage_package.Type realType(this ref dnsmessage_package.AAAAResource r) => dnsmessage_package.realType⁔(ref r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string GoString(this ref dnsmessage_package.AAAAResource r) => dnsmessage_package.GoString⁔(ref r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<byte>, error) pack(this ref dnsmessage_package.AAAAResource r, slice<byte> msg, map<@string, uint16> compression, nint compressionOff) => dnsmessage_package.pack⁔(ref r, msg, compression, compressionOff);
+}
+partial class dnsmessageᴛAResource {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static dnsmessage_package.Type realType(this ref dnsmessage_package.AResource r) => dnsmessage_package.realType⁔(ref r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<byte>, error) pack(this ref dnsmessage_package.AResource r, slice<byte> msg, map<@string, uint16> compression, nint compressionOff) => dnsmessage_package.pack⁔(ref r, msg, compression, compressionOff);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string GoString(this ref dnsmessage_package.AResource r) => dnsmessage_package.GoString⁔(ref r);
+}
+partial class dnsmessageᴛBuilder {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void EnableCompression(this ref dnsmessage_package.Builder b) => dnsmessage_package.EnableCompression⁔(ref b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error startCheck(this ref dnsmessage_package.Builder b, dnsmessage_package.section s) => dnsmessage_package.startCheck⁔(ref b, s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error StartQuestions(this ref dnsmessage_package.Builder b) => dnsmessage_package.StartQuestions⁔(ref b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error StartAnswers(this ref dnsmessage_package.Builder b) => dnsmessage_package.StartAnswers⁔(ref b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error StartAuthorities(this ref dnsmessage_package.Builder b) => dnsmessage_package.StartAuthorities⁔(ref b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error StartAdditionals(this ref dnsmessage_package.Builder b) => dnsmessage_package.StartAdditionals⁔(ref b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error incrementSectionCount(this ж<dnsmessage_package.Builder> Ꮡb) => dnsmessage_package.incrementSectionCount⁔(Ꮡb);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Question(this ж<dnsmessage_package.Builder> Ꮡb, dnsmessage_package.Question q) => dnsmessage_package.Question⁔(Ꮡb, q);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error checkResourceSection(this ref dnsmessage_package.Builder b) => dnsmessage_package.checkResourceSection⁔(ref b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error CNAMEResource(this ж<dnsmessage_package.Builder> Ꮡb, dnsmessage_package.ResourceHeader h, dnsmessage_package.CNAMEResource r) => dnsmessage_package.CNAMEResource⁔(Ꮡb, h, r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error MXResource(this ж<dnsmessage_package.Builder> Ꮡb, dnsmessage_package.ResourceHeader h, dnsmessage_package.MXResource r) => dnsmessage_package.MXResource⁔(Ꮡb, h, r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error NSResource(this ж<dnsmessage_package.Builder> Ꮡb, dnsmessage_package.ResourceHeader h, dnsmessage_package.NSResource r) => dnsmessage_package.NSResource⁔(Ꮡb, h, r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error PTRResource(this ж<dnsmessage_package.Builder> Ꮡb, dnsmessage_package.ResourceHeader h, dnsmessage_package.PTRResource r) => dnsmessage_package.PTRResource⁔(Ꮡb, h, r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error SOAResource(this ж<dnsmessage_package.Builder> Ꮡb, dnsmessage_package.ResourceHeader h, dnsmessage_package.SOAResource r) => dnsmessage_package.SOAResource⁔(Ꮡb, h, r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error TXTResource(this ж<dnsmessage_package.Builder> Ꮡb, dnsmessage_package.ResourceHeader h, dnsmessage_package.TXTResource r) => dnsmessage_package.TXTResource⁔(Ꮡb, h, r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error SRVResource(this ж<dnsmessage_package.Builder> Ꮡb, dnsmessage_package.ResourceHeader h, dnsmessage_package.SRVResource r) => dnsmessage_package.SRVResource⁔(Ꮡb, h, r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error AResource(this ж<dnsmessage_package.Builder> Ꮡb, dnsmessage_package.ResourceHeader h, dnsmessage_package.AResource r) => dnsmessage_package.AResource⁔(Ꮡb, h, r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error AAAAResource(this ж<dnsmessage_package.Builder> Ꮡb, dnsmessage_package.ResourceHeader h, dnsmessage_package.AAAAResource r) => dnsmessage_package.AAAAResource⁔(Ꮡb, h, r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error OPTResource(this ж<dnsmessage_package.Builder> Ꮡb, dnsmessage_package.ResourceHeader h, dnsmessage_package.OPTResource r) => dnsmessage_package.OPTResource⁔(Ꮡb, h, r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error UnknownResource(this ж<dnsmessage_package.Builder> Ꮡb, dnsmessage_package.ResourceHeader h, dnsmessage_package.UnknownResource r) => dnsmessage_package.UnknownResource⁔(Ꮡb, h, r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<byte>, error) Finish(this ref dnsmessage_package.Builder b) => dnsmessage_package.Finish⁔(ref b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error genericSVCBResource(this ж<dnsmessage_package.Builder> Ꮡb, dnsmessage_package.ResourceHeader h, dnsmessage_package.SVCBResource r) => dnsmessage_package.genericSVCBResource⁔(Ꮡb, h, r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error SVCBResource(this ж<dnsmessage_package.Builder> Ꮡb, dnsmessage_package.ResourceHeader h, dnsmessage_package.SVCBResource r) => dnsmessage_package.SVCBResource⁔(Ꮡb, h, r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error HTTPSResource(this ж<dnsmessage_package.Builder> Ꮡb, dnsmessage_package.ResourceHeader h, dnsmessage_package.HTTPSResource r) => dnsmessage_package.HTTPSResource⁔(Ꮡb, h, r);
+}
+partial class dnsmessageᴛCNAMEResource {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static dnsmessage_package.Type realType(this ref dnsmessage_package.CNAMEResource r) => dnsmessage_package.realType⁔(ref r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<byte>, error) pack(this ref dnsmessage_package.CNAMEResource r, slice<byte> msg, map<@string, uint16> compression, nint compressionOff) => dnsmessage_package.pack⁔(ref r, msg, compression, compressionOff);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string GoString(this ref dnsmessage_package.CNAMEResource r) => dnsmessage_package.GoString⁔(ref r);
+}
+partial class dnsmessageᴛClass {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this dnsmessage_package.Class c) => dnsmessage_package.String⁔(c);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string GoString(this dnsmessage_package.Class c) => dnsmessage_package.GoString⁔(c);
+}
+partial class dnsmessageᴛHTTPSResource {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static dnsmessage_package.Type realType(this ref dnsmessage_package.HTTPSResource r) => dnsmessage_package.realType⁔(ref r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string GoString(this ref dnsmessage_package.HTTPSResource r) => dnsmessage_package.GoString⁔(ref r);
+}
+partial class dnsmessageᴛHeader {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (uint16 id, uint16 bits) pack(this ref dnsmessage_package.Header m) => dnsmessage_package.pack⁔(ref m);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string GoString(this ref dnsmessage_package.Header m) => dnsmessage_package.GoString⁔(ref m);
+}
+partial class dnsmessageᴛMXResource {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static dnsmessage_package.Type realType(this ref dnsmessage_package.MXResource r) => dnsmessage_package.realType⁔(ref r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<byte>, error) pack(this ref dnsmessage_package.MXResource r, slice<byte> msg, map<@string, uint16> compression, nint compressionOff) => dnsmessage_package.pack⁔(ref r, msg, compression, compressionOff);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string GoString(this ref dnsmessage_package.MXResource r) => dnsmessage_package.GoString⁔(ref r);
+}
+partial class dnsmessageᴛMessage {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Unpack(this ref dnsmessage_package.Message m, slice<byte> msg) => dnsmessage_package.Unpack⁔(ref m, msg);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<byte>, error) Pack(this ref dnsmessage_package.Message m) => dnsmessage_package.Pack⁔(ref m);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<byte>, error) AppendPack(this ref dnsmessage_package.Message m, slice<byte> b) => dnsmessage_package.AppendPack⁔(ref m, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string GoString(this ref dnsmessage_package.Message m) => dnsmessage_package.GoString⁔(ref m);
+}
+partial class dnsmessageᴛNSResource {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static dnsmessage_package.Type realType(this ref dnsmessage_package.NSResource r) => dnsmessage_package.realType⁔(ref r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<byte>, error) pack(this ref dnsmessage_package.NSResource r, slice<byte> msg, map<@string, uint16> compression, nint compressionOff) => dnsmessage_package.pack⁔(ref r, msg, compression, compressionOff);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string GoString(this ref dnsmessage_package.NSResource r) => dnsmessage_package.GoString⁔(ref r);
+}
+partial class dnsmessageᴛName {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this dnsmessage_package.Name n) => dnsmessage_package.String⁔(n);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string GoString(this ref dnsmessage_package.Name n) => dnsmessage_package.GoString⁔(ref n);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<byte>, error) pack(this ref dnsmessage_package.Name n, slice<byte> msg, map<@string, uint16> compression, nint compressionOff) => dnsmessage_package.pack⁔(ref n, msg, compression, compressionOff);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint, error) unpack(this ref dnsmessage_package.Name n, slice<byte> msg, nint off) => dnsmessage_package.unpack⁔(ref n, msg, off);
+}
+partial class dnsmessageᴛOPTResource {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static dnsmessage_package.Type realType(this ref dnsmessage_package.OPTResource r) => dnsmessage_package.realType⁔(ref r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<byte>, error) pack(this ref dnsmessage_package.OPTResource r, slice<byte> msg, map<@string, uint16> compression, nint compressionOff) => dnsmessage_package.pack⁔(ref r, msg, compression, compressionOff);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string GoString(this ref dnsmessage_package.OPTResource r) => dnsmessage_package.GoString⁔(ref r);
+}
+partial class dnsmessageᴛOpCode {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string GoString(this dnsmessage_package.OpCode o) => dnsmessage_package.GoString⁔(o);
+}
+partial class dnsmessageᴛOption {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string GoString(this ref dnsmessage_package.Option o) => dnsmessage_package.GoString⁔(ref o);
+}
+partial class dnsmessageᴛPTRResource {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static dnsmessage_package.Type realType(this ref dnsmessage_package.PTRResource r) => dnsmessage_package.realType⁔(ref r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<byte>, error) pack(this ref dnsmessage_package.PTRResource r, slice<byte> msg, map<@string, uint16> compression, nint compressionOff) => dnsmessage_package.pack⁔(ref r, msg, compression, compressionOff);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string GoString(this ref dnsmessage_package.PTRResource r) => dnsmessage_package.GoString⁔(ref r);
+}
+partial class dnsmessageᴛParser {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (dnsmessage_package.Header, error) Start(this ref dnsmessage_package.Parser p, slice<byte> msg) => dnsmessage_package.Start⁔(ref p, msg);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error checkAdvance(this ref dnsmessage_package.Parser p, dnsmessage_package.section sec) => dnsmessage_package.checkAdvance⁔(ref p, sec);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (dnsmessage_package.Resource, error) resource(this ref dnsmessage_package.Parser p, dnsmessage_package.section sec) => dnsmessage_package.resource⁔(ref p, sec);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (dnsmessage_package.ResourceHeader, error) resourceHeader(this ref dnsmessage_package.Parser p, dnsmessage_package.section sec) => dnsmessage_package.resourceHeader⁔(ref p, sec);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error skipResource(this ref dnsmessage_package.Parser p, dnsmessage_package.section sec) => dnsmessage_package.skipResource⁔(ref p, sec);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (dnsmessage_package.Question, error) Question(this ref dnsmessage_package.Parser p) => dnsmessage_package.Question⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<dnsmessage_package.Question>, error) AllQuestions(this ref dnsmessage_package.Parser p) => dnsmessage_package.AllQuestions⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error SkipQuestion(this ref dnsmessage_package.Parser p) => dnsmessage_package.SkipQuestion⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error SkipAllQuestions(this ref dnsmessage_package.Parser p) => dnsmessage_package.SkipAllQuestions⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (dnsmessage_package.ResourceHeader, error) AnswerHeader(this ref dnsmessage_package.Parser p) => dnsmessage_package.AnswerHeader⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (dnsmessage_package.Resource, error) Answer(this ref dnsmessage_package.Parser p) => dnsmessage_package.Answer⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<dnsmessage_package.Resource>, error) AllAnswers(this ref dnsmessage_package.Parser p) => dnsmessage_package.AllAnswers⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error SkipAnswer(this ref dnsmessage_package.Parser p) => dnsmessage_package.SkipAnswer⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error SkipAllAnswers(this ref dnsmessage_package.Parser p) => dnsmessage_package.SkipAllAnswers⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (dnsmessage_package.ResourceHeader, error) AuthorityHeader(this ref dnsmessage_package.Parser p) => dnsmessage_package.AuthorityHeader⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (dnsmessage_package.Resource, error) Authority(this ref dnsmessage_package.Parser p) => dnsmessage_package.Authority⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<dnsmessage_package.Resource>, error) AllAuthorities(this ref dnsmessage_package.Parser p) => dnsmessage_package.AllAuthorities⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error SkipAuthority(this ref dnsmessage_package.Parser p) => dnsmessage_package.SkipAuthority⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error SkipAllAuthorities(this ref dnsmessage_package.Parser p) => dnsmessage_package.SkipAllAuthorities⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (dnsmessage_package.ResourceHeader, error) AdditionalHeader(this ref dnsmessage_package.Parser p) => dnsmessage_package.AdditionalHeader⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (dnsmessage_package.Resource, error) Additional(this ref dnsmessage_package.Parser p) => dnsmessage_package.Additional⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<dnsmessage_package.Resource>, error) AllAdditionals(this ref dnsmessage_package.Parser p) => dnsmessage_package.AllAdditionals⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error SkipAdditional(this ref dnsmessage_package.Parser p) => dnsmessage_package.SkipAdditional⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error SkipAllAdditionals(this ref dnsmessage_package.Parser p) => dnsmessage_package.SkipAllAdditionals⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (dnsmessage_package.CNAMEResource, error) CNAMEResource(this ref dnsmessage_package.Parser p) => dnsmessage_package.CNAMEResource⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (dnsmessage_package.MXResource, error) MXResource(this ref dnsmessage_package.Parser p) => dnsmessage_package.MXResource⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (dnsmessage_package.NSResource, error) NSResource(this ref dnsmessage_package.Parser p) => dnsmessage_package.NSResource⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (dnsmessage_package.PTRResource, error) PTRResource(this ref dnsmessage_package.Parser p) => dnsmessage_package.PTRResource⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (dnsmessage_package.SOAResource, error) SOAResource(this ref dnsmessage_package.Parser p) => dnsmessage_package.SOAResource⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (dnsmessage_package.TXTResource, error) TXTResource(this ref dnsmessage_package.Parser p) => dnsmessage_package.TXTResource⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (dnsmessage_package.SRVResource, error) SRVResource(this ref dnsmessage_package.Parser p) => dnsmessage_package.SRVResource⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (dnsmessage_package.AResource, error) AResource(this ref dnsmessage_package.Parser p) => dnsmessage_package.AResource⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (dnsmessage_package.AAAAResource, error) AAAAResource(this ref dnsmessage_package.Parser p) => dnsmessage_package.AAAAResource⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (dnsmessage_package.OPTResource, error) OPTResource(this ref dnsmessage_package.Parser p) => dnsmessage_package.OPTResource⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (dnsmessage_package.UnknownResource, error) UnknownResource(this ref dnsmessage_package.Parser p) => dnsmessage_package.UnknownResource⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (dnsmessage_package.SVCBResource, error) genericSVCBResource(this ref dnsmessage_package.Parser p, dnsmessage_package.Type svcbType) => dnsmessage_package.genericSVCBResource⁔(ref p, svcbType);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (dnsmessage_package.SVCBResource, error) SVCBResource(this ref dnsmessage_package.Parser p) => dnsmessage_package.SVCBResource⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (dnsmessage_package.HTTPSResource, error) HTTPSResource(this ref dnsmessage_package.Parser p) => dnsmessage_package.HTTPSResource⁔(ref p);
+}
+partial class dnsmessageᴛQuestion {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<byte>, error) pack(this ref dnsmessage_package.Question q, slice<byte> msg, map<@string, uint16> compression, nint compressionOff) => dnsmessage_package.pack⁔(ref q, msg, compression, compressionOff);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string GoString(this ref dnsmessage_package.Question q) => dnsmessage_package.GoString⁔(ref q);
+}
+partial class dnsmessageᴛRCode {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this dnsmessage_package.RCode r) => dnsmessage_package.String⁔(r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string GoString(this dnsmessage_package.RCode r) => dnsmessage_package.GoString⁔(r);
+}
+partial class dnsmessageᴛResource {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string GoString(this ref dnsmessage_package.Resource r) => dnsmessage_package.GoString⁔(ref r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<byte>, error) pack(this ref dnsmessage_package.Resource r, slice<byte> msg, map<@string, uint16> compression, nint compressionOff) => dnsmessage_package.pack⁔(ref r, msg, compression, compressionOff);
+}
+partial class dnsmessageᴛResourceHeader {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string GoString(this ref dnsmessage_package.ResourceHeader h) => dnsmessage_package.GoString⁔(ref h);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<byte> msg, nint lenOff, error err) pack(this ref dnsmessage_package.ResourceHeader h, slice<byte> oldMsg, map<@string, uint16> compression, nint compressionOff) => dnsmessage_package.pack⁔(ref h, oldMsg, compression, compressionOff);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint, error) unpack(this ref dnsmessage_package.ResourceHeader h, slice<byte> msg, nint off) => dnsmessage_package.unpack⁔(ref h, msg, off);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error fixLen(this ref dnsmessage_package.ResourceHeader h, slice<byte> msg, nint lenOff, nint preLen) => dnsmessage_package.fixLen⁔(ref h, msg, lenOff, preLen);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error SetEDNS0(this ref dnsmessage_package.ResourceHeader h, nint udpPayloadLen, dnsmessage_package.RCode extRCode, bool dnssecOK) => dnsmessage_package.SetEDNS0⁔(ref h, udpPayloadLen, extRCode, dnssecOK);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool DNSSECAllowed(this ref dnsmessage_package.ResourceHeader h) => dnsmessage_package.DNSSECAllowed⁔(ref h);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static dnsmessage_package.RCode ExtendedRCode(this ref dnsmessage_package.ResourceHeader h, dnsmessage_package.RCode rcode) => dnsmessage_package.ExtendedRCode⁔(ref h, rcode);
+}
+partial class dnsmessageᴛSOAResource {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static dnsmessage_package.Type realType(this ref dnsmessage_package.SOAResource r) => dnsmessage_package.realType⁔(ref r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<byte>, error) pack(this ref dnsmessage_package.SOAResource r, slice<byte> msg, map<@string, uint16> compression, nint compressionOff) => dnsmessage_package.pack⁔(ref r, msg, compression, compressionOff);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string GoString(this ref dnsmessage_package.SOAResource r) => dnsmessage_package.GoString⁔(ref r);
+}
+partial class dnsmessageᴛSRVResource {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static dnsmessage_package.Type realType(this ref dnsmessage_package.SRVResource r) => dnsmessage_package.realType⁔(ref r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<byte>, error) pack(this ref dnsmessage_package.SRVResource r, slice<byte> msg, map<@string, uint16> compression, nint compressionOff) => dnsmessage_package.pack⁔(ref r, msg, compression, compressionOff);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string GoString(this ref dnsmessage_package.SRVResource r) => dnsmessage_package.GoString⁔(ref r);
+}
+partial class dnsmessageᴛSVCBResource {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static dnsmessage_package.Type realType(this ref dnsmessage_package.SVCBResource r) => dnsmessage_package.realType⁔(ref r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string GoString(this ref dnsmessage_package.SVCBResource r) => dnsmessage_package.GoString⁔(ref r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<byte> value, bool ok) GetParam(this ref dnsmessage_package.SVCBResource r, dnsmessage_package.SVCParamKey key) => dnsmessage_package.GetParam⁔(ref r, key);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void SetParam(this ref dnsmessage_package.SVCBResource r, dnsmessage_package.SVCParamKey key, slice<byte> value) => dnsmessage_package.SetParam⁔(ref r, key, value);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool DeleteParam(this ref dnsmessage_package.SVCBResource r, dnsmessage_package.SVCParamKey key) => dnsmessage_package.DeleteParam⁔(ref r, key);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<byte>, error) pack(this ref dnsmessage_package.SVCBResource r, slice<byte> msg, map<@string, uint16> _Δp2, nint _Δp3) => dnsmessage_package.pack⁔(ref r, msg, _Δp2, _Δp3);
+}
+partial class dnsmessageᴛSVCParam {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string GoString(this dnsmessage_package.SVCParam p) => dnsmessage_package.GoString⁔(p);
+}
+partial class dnsmessageᴛSVCParamKey {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this dnsmessage_package.SVCParamKey k) => dnsmessage_package.String⁔(k);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string GoString(this dnsmessage_package.SVCParamKey k) => dnsmessage_package.GoString⁔(k);
+}
+partial class dnsmessageᴛTXTResource {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static dnsmessage_package.Type realType(this ref dnsmessage_package.TXTResource r) => dnsmessage_package.realType⁔(ref r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<byte>, error) pack(this ref dnsmessage_package.TXTResource r, slice<byte> msg, map<@string, uint16> compression, nint compressionOff) => dnsmessage_package.pack⁔(ref r, msg, compression, compressionOff);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string GoString(this ref dnsmessage_package.TXTResource r) => dnsmessage_package.GoString⁔(ref r);
+}
+partial class dnsmessageᴛType {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this dnsmessage_package.Type t) => dnsmessage_package.String⁔(t);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string GoString(this dnsmessage_package.Type t) => dnsmessage_package.GoString⁔(t);
+}
+partial class dnsmessageᴛUnknownResource {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static dnsmessage_package.Type realType(this ref dnsmessage_package.UnknownResource r) => dnsmessage_package.realType⁔(ref r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<byte>, error) pack(this ref dnsmessage_package.UnknownResource r, slice<byte> msg, map<@string, uint16> compression, nint compressionOff) => dnsmessage_package.pack⁔(ref r, msg, compression, compressionOff);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string GoString(this ref dnsmessage_package.UnknownResource r) => dnsmessage_package.GoString⁔(ref r);
+}
+partial class dnsmessageᴛheader {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static uint16 count(this ref dnsmessage_package.header h, dnsmessage_package.section sec) => dnsmessage_package.count⁔(ref h, sec);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<byte> pack(this ref dnsmessage_package.header h, slice<byte> msg) => dnsmessage_package.pack⁔(ref h, msg);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint, error) unpack(this ref dnsmessage_package.header h, slice<byte> msg, nint off) => dnsmessage_package.unpack⁔(ref h, msg, off);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static dnsmessage_package.Header header(this ref dnsmessage_package.header h) => dnsmessage_package.header⁔(ref h);
+}
+partial class dnsmessageᴛnestedError {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string Error(this ref dnsmessage_package.nestedError e) => dnsmessage_package.Error⁔(ref e);
+}
+// </MethodForwarders>

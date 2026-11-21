@@ -25,7 +25,6 @@ using norm = go.vendor.golang.org.x.text.unicode.norm_package;
 using go.vendor.golang.org.x.text.secure;
 using go.vendor.golang.org.x.text.unicode;
 using unicode;
-using static idna_package;
 
 partial class idna_package {
 
@@ -233,13 +232,11 @@ public static ж<Profile> New(params Span<Action<ж<options>>> oʗp) {
     return p;
 }
 
-} partial class idnaᴛProfile {
-
 // ToASCII converts a domain or domain label to its ASCII form. For example,
 // ToASCII("bücher.example.com") is "xn--bcher-kva.example.com", and
 // ToASCII("golang") is "golang". If an error is encountered it will return
 // an error and a (partially) processed result.
-public static (@string, error) ToASCII(this ж<Profile> Ꮡp, @string s) {
+internal static (@string, error) ToASCII⁔(/*this*/ ж<Profile> Ꮡp, @string s) {
     return Ꮡp.process(s, true);
 }
 
@@ -247,7 +244,7 @@ public static (@string, error) ToASCII(this ж<Profile> Ꮡp, @string s) {
 // ToUnicode("xn--bcher-kva.example.com") is "bücher.example.com", and
 // ToUnicode("golang") is "golang". If an error is encountered it will return
 // an error and a (partially) processed result.
-public static (@string, error) ToUnicode(this ref Profile p, @string s) {
+internal static (@string, error) ToUnicode⁔(/*this*/ ref Profile p, @string s) {
     ref var pp = ref heap<Profile>(p, out var Ꮡpp);
     pp.transitional = false;
     return Ꮡpp.process(s, false);
@@ -261,7 +258,7 @@ private static readonly @string nonTransitionalˢᵇ = "NonTransitional"u8;
 
 // String reports a string with a description of the profile for debugging
 // purposes. The string format may change with different versions.
-public static @string String(this ref Profile p) {
+internal static @string String⁔(/*this*/ ref Profile p) {
     @string s = ""u8;
     if (p.transitional) {
         s = transitionalˢ;
@@ -282,8 +279,6 @@ public static @string String(this ref Profile p) {
     }
     return s;
 }
-
-} partial class idna_package {
 
 // Punycode is a Profile that does raw punycode processing with a minimum
 // of validation.
@@ -344,29 +339,21 @@ partial struct labelError {
     internal @string label, code_;
 }
 
-} partial class idnaᴛlabelError {
-
-internal static @string code(this labelError e) { return e.code_; }
-internal static @string Error(this labelError e) {
+internal static @string code⁔(/*this*/ labelError e) { return e.code_; }
+internal static @string Error⁔(/*this*/ labelError e) {
     return fmt.Sprintf("idna: invalid label %q"u8, e.label);
 }
 
-} partial class idna_package {
-
 partial struct runeError /*num:rune*/;
 
-} partial class idnaᴛruneError {
-
-internal static @string code(this runeError e) { return "P1"; }
-internal static @string Error(this runeError e) {
+internal static @string code⁔(/*this*/ runeError e) { return "P1"; }
+internal static @string Error⁔(/*this*/ runeError e) {
     return fmt.Sprintf("idna: disallowed rune %U"u8, e);
 }
 
-} partial class idnaᴛProfile {
-
 // process implements the algorithm described in section 4 of UTS #46,
 // see https://www.unicode.org/reports/tr46.
-internal static (@string, error) process(this ж<Profile> Ꮡp, @string s, bool toASCII) {
+internal static (@string, error) process⁔(/*this*/ ж<Profile> Ꮡp, @string s, bool toASCII) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     error err = default;
@@ -463,8 +450,6 @@ internal static (@string, error) process(this ж<Profile> Ꮡp, @string s, bool 
     return (s, err);
 }
 
-} partial class idna_package {
-
 internal static bool isASCII(@string s) {
     foreach (var (_, c) in range(slice<byte>(s))) {
         if (c >= 0x80) {
@@ -516,9 +501,7 @@ internal static (@string idem, bool bidi, error err) validateRegistration(ж<Pro
     return (s, bidi, default);
 }
 
-} partial class idnaᴛinfo {
-
-internal static bool isBidi(this info c, @string s) {
+internal static bool isBidi⁔(/*this*/ info c, @string s) {
     if (!c.isMapped()) {
         return (info)(c & (uint16)attributesMask) == rtl;
     }
@@ -531,8 +514,6 @@ internal static bool isBidi(this info c, @string s) {
     }}
     return false;
 }
-
-} partial class idna_package {
 
 internal static (@string vm, bool bidi, error err) validateAndMap(ж<Profile> Ꮡp, @string s) {
     bool bidi = default;
@@ -617,26 +598,24 @@ partial struct labelIter {
     internal nint i;
 }
 
-} partial class idnaᴛlabelIter {
-
-internal static void reset(this ref labelIter l) {
+internal static void reset⁔(/*this*/ ref labelIter l) {
     l.curStart = 0;
     l.curEnd = 0;
     l.i = 0;
 }
 
-internal static bool done(this ref labelIter l) {
+internal static bool done⁔(/*this*/ ref labelIter l) {
     return l.curStart >= len(l.orig);
 }
 
-internal static @string result(this ref labelIter l) {
+internal static @string result⁔(/*this*/ ref labelIter l) {
     if (l.Δslice != nil) {
         return strings.Join(l.Δslice, ".");
     }
     return l.orig;
 }
 
-internal static @string label(this ref labelIter l) {
+internal static @string label⁔(/*this*/ ref labelIter l) {
     if (l.Δslice != nil) {
         return l.Δslice[l.i];
     }
@@ -649,7 +628,7 @@ internal static @string label(this ref labelIter l) {
 }
 
 // next sets the value to the next label. It skips the last label if it is empty.
-internal static void next(this ref labelIter l) {
+internal static void next⁔(/*this*/ ref labelIter l) {
     l.i++;
     if (l.Δslice != nil) {
         if (l.i >= len(l.Δslice) || l.i == len(l.Δslice) - 1 && l.Δslice[l.i] == "") {
@@ -663,22 +642,18 @@ internal static void next(this ref labelIter l) {
     }
 }
 
-internal static void set(this ref labelIter l, @string s) {
+internal static void set⁔(/*this*/ ref labelIter l, @string s) {
     if (l.Δslice == nil) {
         l.Δslice = strings.Split(l.orig, ".");
     }
     l.Δslice[l.i] = s;
 }
 
-} partial class idna_package {
-
 // acePrefix is the ASCII Compatible Encoding prefix.
 internal static ref readonly @string acePrefix => ref acePrefixᵇ;
 private static readonly @string acePrefixᵇ = "xn--"u8;
 
-} partial class idnaᴛProfile {
-
-internal static category simplify(this ref Profile p, category cat) {
+internal static category simplify⁔(/*this*/ ref Profile p, category cat) {
     switch (cat) {
     case var ᴛ when ᴛ == disallowedSTD3Mapped: {
         if (p.useSTD3Rules) {
@@ -709,8 +684,6 @@ internal static category simplify(this ref Profile p, category cat) {
     }}
     return cat;
 }
-
-} partial class idna_package {
 
 internal static error validateFromPunycode(ж<Profile> Ꮡp, @string s) {
     ref var p = ref Ꮡp.DerefOrNull();
@@ -788,11 +761,9 @@ internal static joinState stateFAIL => 5;
         [joinVirama] = stateFAIL}.array(8)
 }.slice(), 8); }
 
-} partial class idnaᴛProfile {
-
 // validateLabel validates the criteria from Section 4.1. Item 1, 4, and 6 are
 // already implicitly satisfied by the overall implementation.
-internal static error /*err*/ validateLabel(this ref Profile p, @string s) {
+internal static error /*err*/ validateLabel⁔(/*this*/ ref Profile p, @string s) {
     if (s == ""u8) {
         if (p.verifyDNSLength) {
             return new labelErrorжerror(Ꮡ(new labelError(s, "A4")));
@@ -844,8 +815,6 @@ internal static error /*err*/ validateLabel(this ref Profile p, @string s) {
     }
     return default;
 }
-
-} partial class idna_package {
 
 internal static bool ascii(@string s) {
     for (nint i = 0; i < len(s); i++) {

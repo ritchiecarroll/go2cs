@@ -23,7 +23,6 @@ using io = io_package;
 using os = os_package;
 using @internal;
 using encoding;
-using static plan9obj_package;
 
 partial class plan9obj_package {
 
@@ -66,17 +65,13 @@ partial struct Section {
     internal ж<io.SectionReader> sr;
 }
 
-} partial class plan9objᴛSection {
-
 // Data reads and returns the contents of the Plan 9 a.out section.
-public static (slice<byte>, error) Data(this ref Section s) {
+internal static (slice<byte>, error) Data⁔(/*this*/ ref Section s) {
     return saferio.ReadDataAt(new io.SectionReaderжReaderAt(s.sr), (uint64)s.Size, 0);
 }
 
 // Open returns a new ReadSeeker reading the Plan 9 a.out section.
-public static io.ReadSeeker Open(this ref Section s) { return new io.SectionReaderжReadSeeker(io.NewSectionReader(new io.SectionReaderжReaderAt(s.sr), 0, 9223372036854775807L)); }
-
-} partial class plan9obj_package {
+internal static io.ReadSeeker Open⁔(/*this*/ ref Section s) { return new io.SectionReaderжReadSeeker(io.NewSectionReader(new io.SectionReaderжReaderAt(s.sr), 0, 9223372036854775807L)); }
 
 // A Symbol represents an entry in a Plan 9 a.out symbol table section.
 partial struct Sym {
@@ -97,9 +92,7 @@ partial struct formatError {
     internal any val;
 }
 
-} partial class plan9objᴛformatError {
-
-internal static @string Error(this ref formatError e) {
+internal static @string Error⁔(/*this*/ ref formatError e) {
     @string msg = e.msg;
     if (e.val != nil) {
         msg += fmt.Sprintf(" '%v'"u8, e.val);
@@ -107,8 +100,6 @@ internal static @string Error(this ref formatError e) {
     msg += fmt.Sprintf(" in record at byte %#x"u8, e.off);
     return msg;
 }
-
-} partial class plan9obj_package {
 
 // Open opens the named file using [os.Open] and prepares it for use as a Plan 9 a.out binary.
 public static (ж<File>, error) Open(@string name) {
@@ -125,12 +116,10 @@ public static (ж<File>, error) Open(@string name) {
     return (ff, default);
 }
 
-} partial class plan9objᴛFile {
-
 // Close closes the [File].
 // If the [File] was created using [NewFile] directly instead of [Open],
 // Close has no effect.
-public static error Close(this ref File f) {
+internal static error Close⁔(/*this*/ ref File f) {
     error err = default;
     if (f.closer != nil) {
         err = f.closer.Close();
@@ -138,8 +127,6 @@ public static error Close(this ref File f) {
     }
     return err;
 }
-
-} partial class plan9obj_package {
 
 internal static (uint32, error) parseMagic(slice<byte> magic) {
     var m = binary.BigEndian.Uint32(magic);
@@ -336,8 +323,6 @@ internal static (slice<Sym>, error) newTable(slice<byte> symtab, nint ptrsz) {
 // in the File.
 public static error ErrNoSymbols = errors.New("no symbol section");
 
-} partial class plan9objᴛFile {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string symsˢ => ref symsˢᵇ;
 private static readonly @string symsˢᵇ = "syms"u8;
@@ -345,7 +330,7 @@ internal static ref readonly @string cannotLoadSymbolSectionˢ => ref cannotLoad
 private static readonly @string cannotLoadSymbolSectionˢᵇ = "cannot load symbol section"u8;
 
 // Symbols returns the symbol table for f.
-public static (slice<Sym>, error) Symbols(this ref File f) {
+internal static (slice<Sym>, error) Symbols⁔(/*this*/ ref File f) {
     var symtabSection = f.Section(symsˢ);
     if (symtabSection == nil) {
         return (default, ErrNoSymbols);
@@ -361,7 +346,7 @@ public static (slice<Sym>, error) Symbols(this ref File f) {
 
 // Section returns a section with the given name, or nil if no such
 // section exists.
-public static ж<Section> Section(this ref File f, @string name) {
+internal static ж<Section> Section⁔(/*this*/ ref File f, @string name) {
     foreach (var (_, s) in range(f.Sections)) {
         if (s.Name == name) {
             return s;
@@ -370,4 +355,4 @@ public static ж<Section> Section(this ref File f, @string name) {
     return default;
 }
 
-}
+} // end plan9obj_package

@@ -10,7 +10,6 @@ using @unsafe = unsafe_package;
 using @internal.runtime;
 using @internal.trace;
 using ꓸꓸꓸtraceArg = Span<runtime_package.traceArg>;
-using static runtime_package;
 
 partial class runtime_package {
 
@@ -31,8 +30,6 @@ partial struct traceWriter {
     /*embed*/ internal ж<traceBuf> traceBuf;
 }
 
-} partial class runtimeᴛtraceLocker {
-
 // writer returns a traceWriter that writes into the current M's stream.
 //
 // Once this is called, the caller must guard against stack growth until
@@ -44,7 +41,7 @@ partial struct traceWriter {
 // nosplit to allow for safe reentrant tracing from stack growth paths.
 //
 //go:nosplit
-internal static traceWriter writer(this traceLocker tl) {
+internal static traceWriter writer⁔(/*this*/ traceLocker tl) {
     if (debugTraceReentrancy) {
         // Checks that the invariants of this function are being upheld.
         var gp = getg();
@@ -55,8 +52,6 @@ internal static traceWriter writer(this traceLocker tl) {
     }
     return new traceWriter(traceLocker: tl, traceBuf: (~tl.mp).trace.buf[tl.gen % 2][tracev2.NoExperiment]);
 }
-
-} partial class runtime_package {
 
 // unsafeTraceWriter produces a traceWriter that doesn't lock the trace.
 //
@@ -71,15 +66,13 @@ internal static traceWriter unsafeTraceWriter(uintptr gen, ж<traceBuf> buf) {
     return new traceWriter(traceLocker: new traceLocker(gen: gen), traceBuf: buf);
 }
 
-} partial class runtimeᴛtraceWriter {
-
 // event writes out the bytes of an event into the event stream.
 //
 // nosplit because it's part of writing an event for an M, which must not
 // have any stack growth.
 //
 //go:nosplit
-internal static traceWriter @event(this traceWriter w, tracev2.EventType ev, params ꓸꓸꓸtraceArg argsʗp) {
+internal static traceWriter event⁔(/*this*/ traceWriter w, tracev2.EventType ev, params ꓸꓸꓸtraceArg argsʗp) {
     var args = argsʗp.sslice();
 
     // N.B. Everything in this call must be nosplit to maintain
@@ -111,7 +104,7 @@ internal static traceWriter @event(this traceWriter w, tracev2.EventType ev, par
 // have any stack growth.
 //
 //go:nosplit
-internal static void end(this traceWriter w) {
+internal static void end⁔(/*this*/ traceWriter w) {
     if (w.mp == nil) {
         // Tolerate a nil mp. It makes code that creates traceWriters directly
         // less error-prone.
@@ -136,7 +129,7 @@ internal static void end(this traceWriter w) {
 // have any stack growth.
 //
 //go:nosplit
-internal static (traceWriter, bool) ensure(this traceWriter w, nint maxSize) {
+internal static (traceWriter, bool) ensure⁔(/*this*/ traceWriter w, nint maxSize) {
     var refill = w.traceBuf == nil || !w.available(maxSize);
     if (refill) {
         w = w.refill();
@@ -150,7 +143,7 @@ internal static (traceWriter, bool) ensure(this traceWriter w, nint maxSize) {
 // have any stack growth.
 //
 //go:nosplit
-internal static traceWriter flush(this traceWriter w) {
+internal static traceWriter flush⁔(/*this*/ traceWriter w) {
     systemstack(() => {
         @lock(Ꮡtrace.of(traceᴛ1.Ꮡlock));
         if (w.traceBuf != nil) {
@@ -169,7 +162,7 @@ internal static ref readonly @string traceOutOfMemoryˢ => ref traceOutOfMemory�
 private static readonly @string traceOutOfMemoryˢᵇ = "trace: out of memory"u8;
 
 // refill puts w.traceBuf on the queue of full buffers and refresh's w's buffer.
-internal static traceWriter refill(this traceWriter w) {
+internal static traceWriter refill⁔(/*this*/ traceWriter w) {
     systemstack(() => {
         @lock(Ꮡtrace.of(traceᴛ1.Ꮡlock));
         if (w.traceBuf != nil) {
@@ -216,15 +209,11 @@ internal static traceWriter refill(this traceWriter w) {
     return w;
 }
 
-} partial class runtimeᴛtraceLocker {
-
 // expWriter returns a traceWriter that writes into the current M's stream for
 // the given experiment.
-internal static traceWriter expWriter(this traceLocker tl, tracev2.Experiment exp) {
+internal static traceWriter expWriter⁔(/*this*/ traceLocker tl, tracev2.Experiment exp) {
     return new traceWriter(traceLocker: tl, traceBuf: (~tl.mp).trace.buf[tl.gen % 2][exp], exp: exp);
 }
-
-} partial class runtime_package {
 
 // unsafeTraceExpWriter produces a traceWriter for experimental trace batches
 // that doesn't lock the trace. Data written to experimental batches need not
@@ -246,10 +235,8 @@ partial struct traceBufQueue {
     internal ж<traceBuf> head, tail;
 }
 
-} partial class runtimeᴛtraceBufQueue {
-
 // push queues buf into queue of buffers.
-internal static void push(this ref traceBufQueue q, ж<traceBuf> Ꮡbuf) {
+internal static void push⁔(/*this*/ ref traceBufQueue q, ж<traceBuf> Ꮡbuf) {
     ref var buf = ref Ꮡbuf.DerefOrNull();
 
     buf.link = default;
@@ -262,7 +249,7 @@ internal static void push(this ref traceBufQueue q, ж<traceBuf> Ꮡbuf) {
 }
 
 // pop dequeues from the queue of buffers.
-internal static ж<traceBuf> pop(this ref traceBufQueue q) {
+internal static ж<traceBuf> pop⁔(/*this*/ ref traceBufQueue q) {
     var buf = q.head;
     if (buf == nil) {
         return default;
@@ -275,11 +262,9 @@ internal static ж<traceBuf> pop(this ref traceBufQueue q) {
     return buf;
 }
 
-internal static bool empty(this ref traceBufQueue q) {
+internal static bool empty⁔(/*this*/ ref traceBufQueue q) {
     return q.head == nil;
 }
-
-} partial class runtime_package {
 
 // traceBufHeader is per-P tracing buffer.
 partial struct traceBufHeader {
@@ -298,15 +283,13 @@ partial struct traceBuf {
     internal array<byte> arr = new((uintptr)tracev2.MaxBatchSize - /* unsafe.Sizeof(traceBufHeader{}) */ (uintptr)32); // underlying buffer for traceBufHeader.buf
 }
 
-} partial class runtimeᴛtraceBuf {
-
 // byte appends v to buf.
 //
 // nosplit because it's part of writing an event for an M, which must not
 // have any stack growth.
 //
 //go:nosplit
-internal static void @byte(this ref traceBuf buf, byte v) {
+internal static void byte⁔(/*this*/ ref traceBuf buf, byte v) {
     buf.arr[buf.pos] = v;
     buf.pos++;
 }
@@ -317,7 +300,7 @@ internal static void @byte(this ref traceBuf buf, byte v) {
 // have any stack growth.
 //
 //go:nosplit
-internal static void varint(this ref traceBuf buf, uint64 v) {
+internal static void varint⁔(/*this*/ ref traceBuf buf, uint64 v) {
     nint pos = buf.pos;
     var arr = buf.arr.slice(pos, pos + (nint)traceBytesPerNumber);
     foreach (var i in range(len(arr))) {
@@ -340,7 +323,7 @@ internal static void varint(this ref traceBuf buf, uint64 v) {
 // have any stack growth.
 //
 //go:nosplit
-internal static nint varintReserve(this ref traceBuf buf) {
+internal static nint varintReserve⁔(/*this*/ ref traceBuf buf) {
     nint p = buf.pos;
     buf.pos += traceBytesPerNumber;
     return p;
@@ -352,7 +335,7 @@ internal static nint varintReserve(this ref traceBuf buf) {
 // have any stack growth.
 //
 //go:nosplit
-internal static void stringData(this ref traceBuf buf, @string s) {
+internal static void stringData⁔(/*this*/ ref traceBuf buf, @string s) {
     buf.pos += copy(buf.arr.slice(buf.pos), s);
 }
 
@@ -360,7 +343,7 @@ internal static void stringData(this ref traceBuf buf, @string s) {
 // have any stack growth.
 //
 //go:nosplit
-internal static bool available(this ref traceBuf buf, nint size) {
+internal static bool available⁔(/*this*/ ref traceBuf buf, nint size) {
     return len(buf.arr) - buf.pos >= size;
 }
 
@@ -377,7 +360,7 @@ private static readonly @string vCouldNotFitInˢᵇ = "v could not fit in traceB
 // have any stack growth.
 //
 //go:nosplit
-internal static void varintAt(this ref traceBuf buf, nint pos, uint64 v) {
+internal static void varintAt⁔(/*this*/ ref traceBuf buf, nint pos, uint64 v) {
     for (nint i = 0; i < traceBytesPerNumber; i++) {
         if (i < (nint)(traceBytesPerNumber - 1)) {
             buf.arr[pos] = (byte)(0x80 | (byte)v);
@@ -391,8 +374,6 @@ internal static void varintAt(this ref traceBuf buf, nint pos, uint64 v) {
         @throw(vCouldNotFitInˢ);
     }
 }
-
-} partial class runtime_package {
 
 // traceBufFlush flushes a trace buffer.
 //

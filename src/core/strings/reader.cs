@@ -7,7 +7,6 @@ using errors = errors_package;
 using io = io_package;
 using utf8 = go.unicode.utf8_package;
 using go.unicode;
-using static strings_package;
 
 partial class strings_package {
 
@@ -21,11 +20,9 @@ partial struct Reader {
     internal nint prevRune; // index of previous rune; or < 0
 }
 
-} partial class stringsᴛReader {
-
 // Len returns the number of bytes of the unread portion of the
 // string.
-public static nint Len(this ref Reader r) {
+internal static nint Len⁔(/*this*/ ref Reader r) {
     if (r.i >= (int64)len(r.s)) {
         return 0;
     }
@@ -36,10 +33,10 @@ public static nint Len(this ref Reader r) {
 // Size is the number of bytes available for reading via [Reader.ReadAt].
 // The returned value is always the same and is not affected by calls
 // to any other method.
-public static int64 Size(this ref Reader r) { return (int64)len(r.s); }
+internal static int64 Size⁔(/*this*/ ref Reader r) { return (int64)len(r.s); }
 
 // Read implements the [io.Reader] interface.
-public static (nint n, error err) Read(this ref Reader r, slice<byte> b) {
+internal static (nint n, error err) Read⁔(/*this*/ ref Reader r, slice<byte> b) {
     nint n = default;
     error err = default;
 
@@ -57,7 +54,7 @@ internal static ref readonly @string stringsReaderReadAtˢ => ref stringsReaderR
 private static readonly @string stringsReaderReadAtˢᵇ = "strings.Reader.ReadAt: negative offset"u8;
 
 // ReadAt implements the [io.ReaderAt] interface.
-public static (nint n, error err) ReadAt(this ref Reader r, slice<byte> b, int64 off) {
+internal static (nint n, error err) ReadAt⁔(/*this*/ ref Reader r, slice<byte> b, int64 off) {
     nint n = default;
     error err = default;
 
@@ -76,7 +73,7 @@ public static (nint n, error err) ReadAt(this ref Reader r, slice<byte> b, int64
 }
 
 // ReadByte implements the [io.ByteReader] interface.
-public static (byte, error) ReadByte(this ref Reader r) {
+internal static (byte, error) ReadByte⁔(/*this*/ ref Reader r) {
     r.prevRune = -1;
     if (r.i >= (int64)len(r.s)) {
         return (0, io.EOF);
@@ -91,7 +88,7 @@ internal static ref readonly @string stringsReaderUnreadByteˢ => ref stringsRea
 private static readonly @string stringsReaderUnreadByteˢᵇ = "strings.Reader.UnreadByte: at beginning of string"u8;
 
 // UnreadByte implements the [io.ByteScanner] interface.
-public static error UnreadByte(this ref Reader r) {
+internal static error UnreadByte⁔(/*this*/ ref Reader r) {
     if (r.i <= 0) {
         return errors.New(stringsReaderUnreadByteˢ);
     }
@@ -101,7 +98,7 @@ public static error UnreadByte(this ref Reader r) {
 }
 
 // ReadRune implements the [io.RuneReader] interface.
-public static (rune ch, nint size, error err) ReadRune(this ref Reader r) {
+internal static (rune ch, nint size, error err) ReadRune⁔(/*this*/ ref Reader r) {
     rune ch = default;
     nint size = default;
     error err = default;
@@ -123,7 +120,7 @@ internal static ref readonly @string stringsReaderUnreadRuneˢ2 => ref stringsRe
 private static readonly @string stringsReaderUnreadRuneˢ2ᵇ = "strings.Reader.UnreadRune: previous operation was not ReadRune"u8;
 
 // UnreadRune implements the [io.RuneScanner] interface.
-public static error UnreadRune(this ref Reader r) {
+internal static error UnreadRune⁔(/*this*/ ref Reader r) {
     if (r.i <= 0) {
         return errors.New(stringsReaderUnreadRuneˢ);
     }
@@ -142,7 +139,7 @@ internal static ref readonly @string stringsReaderSeekˢ => ref stringsReaderSee
 private static readonly @string stringsReaderSeekˢᵇ = "strings.Reader.Seek: negative position"u8;
 
 // Seek implements the [io.Seeker] interface.
-public static (int64, error) Seek(this ref Reader r, int64 offset, nint whence) {
+internal static (int64, error) Seek⁔(/*this*/ ref Reader r, int64 offset, nint whence) {
     r.prevRune = -1;
     int64 abs = default;
     switch (whence) {
@@ -169,7 +166,7 @@ public static (int64, error) Seek(this ref Reader r, int64 offset, nint whence) 
 }
 
 // WriteTo implements the [io.WriterTo] interface.
-public static (int64 n, error err) WriteTo(this ref Reader r, io.Writer w) {
+internal static (int64 n, error err) WriteTo⁔(/*this*/ ref Reader r, io.Writer w) {
     int64 n = default;
     error err = default;
 
@@ -191,9 +188,7 @@ public static (int64 n, error err) WriteTo(this ref Reader r, io.Writer w) {
 }
 
 // Reset resets the [Reader] to be reading from s.
-public static void Reset(this ref Reader r, @string s) { r = new Reader(s, 0, -1); }
-
-} partial class strings_package {
+internal static void Reset⁔(/*this*/ ref Reader r, @string s) { r = new Reader(s, 0, -1); }
 
 // NewReader returns a new [Reader] reading from s.
 // It is similar to [bytes.NewBufferString] but more efficient and non-writable.

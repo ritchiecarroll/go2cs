@@ -14,11 +14,8 @@ using errors = global::go.@internal.types.errors_package;
 using global::go.go;
 using iter = iter_package;
 using ꓸꓸꓸType = Span<types_package.Type>;
-using static types_package;
 
 partial class types_package {
-
-} partial class typesᴛChecker {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string argumentToDeleteˢ => ref argumentToDeleteˢᵇ;
@@ -46,7 +43,7 @@ private static readonly @string vTraceWithoutArgumentsˢᵇ = "%v: trace() witho
 // reports whether the call is valid, with *x holding the result;
 // but x.expr is not set. If the call is invalid, the result is
 // false, and *x is undefined.
-internal static bool /*_*/ Δbuiltin(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.CallExpr> Ꮡcall, builtinId id) {
+internal static bool /*_*/ Δbuiltin⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.CallExpr> Ꮡcall, builtinId id) {
     GoFrame ᒐ = default;
     try {
         ref var check = ref Ꮡcheck.DerefOrNull();
@@ -736,7 +733,7 @@ internal static bool /*_*/ Δbuiltin(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx
             // (no argument evaluated yet)
             var arg = argList[0];
             Ꮡcheck.exprOrType(Ꮡx, arg, false);
-            Ꮡcheck.exclude(Ꮡx, (nuint)((nuint)(1 << (int)(novalue)) | (nuint)(1 << (int)(types_package.Δbuiltin))));
+            Ꮡcheck.exclude(Ꮡx, (nuint)((nuint)(1 << (int)(novalue)) | (nuint)(1 << (int)(Δbuiltin))));
             switch (x.mode) {
             case var ᴛ2 when ᴛ2 == invalid: {
                 return default;
@@ -1095,8 +1092,6 @@ internal static bool /*_*/ Δbuiltin(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx
     finally { ᒐ.Run(); }
 }
 
-} partial class types_package {
-
 // sliceElem returns the slice element type for a slice operand x
 // or a type error if x is not a slice (or a type set of slices).
 internal static (Type, ж<typeError>) sliceElem(ж<operand> Ꮡx) {
@@ -1179,8 +1174,6 @@ internal static bool /*varSized*/ hasVarSize(Type t, map<ж<Named>, bool> seen) 
     ᒐdone: return varSized;
 }
 
-} partial class typesᴛChecker {
-
 // applyTypeFunc applies f to x. If x is a type parameter,
 // the result is a type parameter constrained by a new
 // interface bound. The type bounds for that interface
@@ -1188,7 +1181,7 @@ internal static bool /*varSized*/ hasVarSize(Type t, map<ж<Named>, bool> seen) 
 // of x. If any of these applications of f return nil,
 // applyTypeFunc returns nil.
 // If x is not a type parameter, the result is f(x).
-internal static Type applyTypeFunc(this ж<Checker> Ꮡcheck, Func<Type, Type> f, ж<operand> Ꮡx, builtinId id) {
+internal static Type applyTypeFunc⁔(/*this*/ ж<Checker> Ꮡcheck, Func<Type, Type> f, ж<operand> Ꮡx, builtinId id) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
 
@@ -1247,8 +1240,6 @@ internal static Type applyTypeFunc(this ж<Checker> Ꮡcheck, Func<Type, Type> f
 
     return f(x.typ);
 }
-
-} partial class types_package {
 
 // makeSig makes a signature for the given argument and result types.
 // Default types are used for untyped arguments, and res may be nil.

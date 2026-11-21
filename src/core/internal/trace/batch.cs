@@ -11,7 +11,6 @@ using tracev2 = go.@internal.trace.tracev2_package;
 using version = go.@internal.trace.version_package;
 using encoding;
 using go.@internal.trace;
-using static trace_package;
 
 partial class trace_package {
 
@@ -27,29 +26,25 @@ partial struct batch {
     internal tracev2.Experiment exp;
 }
 
-} partial class traceᴛbatch {
-
-internal static bool isStringsBatch(this ref batch b) {
+internal static bool isStringsBatch⁔(/*this*/ ref batch b) {
     return b.exp == tracev2.NoExperiment && len(b.data) > 0 && ((tracev2.EventType)b.data[0]) == tracev2.EvStrings;
 }
 
-internal static bool isStacksBatch(this ref batch b) {
+internal static bool isStacksBatch⁔(/*this*/ ref batch b) {
     return b.exp == tracev2.NoExperiment && len(b.data) > 0 && ((tracev2.EventType)b.data[0]) == tracev2.EvStacks;
 }
 
-internal static bool isCPUSamplesBatch(this ref batch b) {
+internal static bool isCPUSamplesBatch⁔(/*this*/ ref batch b) {
     return b.exp == tracev2.NoExperiment && len(b.data) > 0 && ((tracev2.EventType)b.data[0]) == tracev2.EvCPUSamples;
 }
 
-internal static bool isSyncBatch(this ref batch b, version.Version ver) {
+internal static bool isSyncBatch⁔(/*this*/ ref batch b, version.Version ver) {
     return (b.exp == tracev2.NoExperiment && len(b.data) > 0) && ((((tracev2.EventType)b.data[0]) == tracev2.EvFrequency && ver < version.Go125) || (((tracev2.EventType)b.data[0]) == tracev2.EvSync && ver >= version.Go125));
 }
 
-internal static bool isEndOfGeneration(this ref batch b) {
+internal static bool isEndOfGeneration⁔(/*this*/ ref batch b) {
     return b.exp == tracev2.NoExperiment && len(b.data) > 0 && ((tracev2.EventType)b.data[0]) == tracev2.EvEndOfGeneration;
 }
-
-} partial class trace_package {
 
 internal partial interface readBatch_r /*dyn*/ :
     io.Reader,

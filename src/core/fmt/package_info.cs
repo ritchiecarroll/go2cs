@@ -10,10 +10,14 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+using reflect = go.reflect_package;
 // </ImportedTypeAliases>
 
 using go;
 using static go.fmt_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -82,10 +86,10 @@ using static go.fmt_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("fmt/errors.go", "errors.cs", "AA4uAA8GgriosoKUgoKCgoKUtIKCtIKUgoKClIKmpIIACRCCpoIACxCCpoI=")]
-[assembly: GoPositionMap("fmt/format.go", "format.cs", "ADJsgoKCpqKCqJKClIKClIKCppSCpoKClKiSgoKUgpSCpoK6koKClIKUgqaCAAkKkoKUupLKgoKUgoLKpoKCgoKCgoKCpoKCgoKUgoKUgoKCpoKCgpSCgoKokoKCpqaUgpTugoKUgoKCgoKUgoKC7qaUgoKCgsaCgoLGgoKCxoKCgsakgoKCgriCpoKCgrSCgtiCgoK2goKCgqaCgoKCgoKCgsqCgoKokoKCgoKCuKiSgoKCgoKUgqaokoKokoKokoKUpoKmgoKUgqaClKaClKaCpoKUlIKClIKUpoKUppSUgrqSqJKssoKCgpSCgpS8xoKClIKqooKClIKClLzUgqaCgpS4griCgpSClIKCuIKClJSCzKKUgpSCpKSCtIKCgpS0gqaCuJSClJSCgpSmuIKCgoKUgqY=")]
-[assembly: GoPositionMap("fmt/print.go", "print.cs", "AFuiAQAIAoKCgoKmgIKkgIKCpIL8gqaCpoKmggAbPMqSgoKCgoLIAAoQgpSUgqaCgoKmlJSClKSkpKSUqqKCqqKCzgAIAoKCgoKqwqiygoKCgqrCgoKCggACEAAJAoKCgoKs0qrCgoKCgqzSgoKCggACFAALAoKCgoKs0qrCgoKCgqzSgoKCgqyygoKUqqKCqNKClIKClIKUxoKCgpSCgqaigoKCgpSCgrSCgrSkgqailLTMooKCgqiylIKUxrS0tLS0tLS0zMKUtLS0tM72lIKClIKCgrTIopSClMa0tLS0yKKUgoKCgpSCgoKUlJSCgoKUlMa0tLS0yKKClLSCppSCgoKCgpSUlIKU2LS0AAgI0riCgriUppSUgoKCgoKCgoKUtAAMBNKClJSCgoKmuICCgoKCyIKAgoKUguzclIKCgqaCgoLIAAoGooKUgpS0pMqUgqSCuJS0tLS0tLS0tLS0tLS0tLS0tNiCgoKm1qbe1IKCgqaClLSClJS02KSkpKSkpKSkgoKCgpSUlIKCgoKUpoKClIKUtoKUgoKCgpSmgoKCppSkgoKCgpSmtqaCgoKCyoKCpoK2goKCgpSCgoKUlJSCgoKUlNqCpIKCpqSk2tKCgoKUpIKCgsaCgoIACAyCgoKmAAIS9IK4goKCgpSmzLKClIKCgpSCpoKCgqaCgoKmooKCgoKCgoKCgpSClJS4poKCgoKUtLS0tNiClIK2gpSClIKCgqb6poKClILKgoKClJSCgsqCgoKUgoKClIKClIKUlIKCgsqCpoKCpoKUlKSkpIK2gpSCgqSCAAgOgoKCgoKUgpSCgqa4ooKClIKUgrzCgoKUlA==")]
-[assembly: GoPositionMap("fmt/scan.go", "scan.cs", "AD9+4qrCAAIUAAkC6rKCgoKUzvKq0q7yrgAIAoKCgqrigoKCrgAIAoKCggAkRLKmwoKCpoKCgoKUgpSmgoKUqsKCgoKUlKzSgoKUpoKCgoKmgqaCpuKCgpKUuIKUgoIACQoADBqCgpSCooKUgqaokgAPINKCgoKClIKClKrigoKCgpSCgpSCgpSClIKCgoKCgpSmgoKCpoLmgoKmgsbKwoKClJSCgoKCgoKCgsjEgoKmgpSCguyygoKClIKUgoKUgpSCggAEELKCpoKCgpSCgpSUxoKUgoKCpsqigoKUgoKUlIKUqJKCgpSmlIKUqqKokoKCpoLokoKCgqaUpKSClKSClJQAHB7CgoKClIK0grSCpOiSgoKCppSokoKCgoKClKyygpSUlIKkgqSCpPyigpSCgoKCgoKmgoKmgoKClIKCgpSqooKUgoKCgoKClIKUgoKClIKCgpSsspSCppSClIKCgoKmppS4lJSmrPSCgpSCpoKCgpSClMaCgoKmyMimgpSClJSClIKUlJSCgpTuwoKUgoKCgoIACArCgpSCgpS0tKTokoKCpoKCgpSUtoKCgoK4goKmgoKUpKTIkoKUpKSUAAgM4oKClIKCgpSCgoKU6JKCgoKClJSCgpQAEhqSgoKCAAkKsoKUgIKCgoKUlLaUtLS0tLS0tLS0tLS0tNiCgoLGgoKCxtjEgoKCgpSktLS0xoKClIKCgsaCgrS0AAgM0oKCgoKUxgAIBgAIAoKCgqaCgoKClIKCuAAPFgAKAoIABxCCgoKCgoKUlIKUgoKClIKmgoKmgpSCpoKUgqa4lIKmgoKUuIKCgpSUAAgKAAkCgpSCgoKCppSCppSWkoKCpoKUgpSCgpSCgqaCgpSUgoKUgpQ=", "248-256:1", "", "", "1351:21,1490:21", "307:21,308:13")]
+[assembly: GoPositionMap("fmt/errors.go", "errors.cs", "AA0uAA8GgriosoKUgoKCgoKUtIKCtIKUgoKClIKmpIIABxCCpoIABxCCpoI=")]
+[assembly: GoPositionMap("fmt/format.go", "format.cs", "AC9sgoKCpqKCqJKClIKClIKCppSCpoKClKiSgoKUgpSCpoK6koKClIKUgqaCAAkKkoKUupLKgoKUgoLKpoKCgoKCgoKCpoKCgoKUgoKUgoKCpoKCgpSCgoKokoKCpqaUgpTugoKUgoKCgoKUgoKC7qaUgoKCgsaCgoLGgoKCxoKCgsakgoKCgriCpoKCgrSCgtiCgoK2goKCgqaCgoKCgoKCgsqCgoKokoKCgoKCuKiSgoKCgoKUgqaokoKokoKokoKUpoKmgoKUgqaClKaClKaCpoKUlIKClIKUpoKUppSUgrqSqJKssoKCgpSCgpS8xoKClIKqooKClIKClLzUgqaCgpS4griCgpSClIKCuIKClJSCzKKUgpSCpKSCtIKCgpS0gqaCuJSClJSCgpSmuIKCgoKUgqY=")]
+[assembly: GoPositionMap("fmt/print.go", "print.cs", "AFqiAQAIAoKCgoKmgIKkgIKCpILcgqaCpoKmggAZPMqSgoKCgoKoAAoQgpSUgqaCgoKmlJSClKSkpKSUqqKCqqKCrgAIAoKCgoKqwqiygoKCgqrCgoKCggACEAAJAoKCgoKs0qrCgoKCgqzSgoKCggACFAALAoKCgoKs0qrCgoKCgqzSgoKCgqyygoKUqqKCqNKClIKClIKUpoKCgpSCgqaigoKCgpSCgrSCgrSkgqailLTMooKCgqiylIKUxrS0tLS0tLS0zMKUtLS0tM72lIKClIKCgrTIopSClMa0tLS0yKKUgoKCgpSCgoKUlJSCgoKUlMa0tLS0yKKClLSCppSCgoKCgpSUlIKU2LS0AAgI0riCgriUppSUgoKCgoKCgoKUtAAMBNKClJSCgoKmuICCgoKCyIKAgoKUguzclIKCgqaCgoLIAAoGooKUgpS0pMqUgqSCuJS0tLS0tLS0tLS0tLS0tLS0tNiCgoKm1qbe1IKCgqaClLSClJS02KSkpKSkpKSkgoKCgpSUlIKCgoKUpoKClIKUtoKUgoKCgpSmgoKCppSkgoKCgpSmtqaCgoKCyoKCpoK2goKCgpSCgoKUlJSCgoKUlNqCpIKCpqSkutKCgoKUpIKCgsaCgoIACAyCgoKmAAIS9IK4goKCgpSmrLKClIKCgpSCpoKCgqaCgoKmooKCgoKCgoKCgpSClJS4poKCgoKUtLS0tNiClIK2gpSClIKCgqb6poKClILKgoKClJSCgsqCgoKUgoKClIKClIKUlIKCgsqCpoKCpoKUlKSkpIK2gpSCgqSCAAgOgoKCgoKUgpSCgqa4ooKClIKUgrzCgoKUlA==")]
+[assembly: GoPositionMap("fmt/scan.go", "scan.cs", "AD5+4qrCAAIUAAkCyrKCgoKUrvKq0q7yrgAIAoKCgqrigoKCrgAIAoKCggAiRLKmwoKCpoKCgoKUgpSmgoKUqsKCgoKUlKzSgoKUpoKCgoKmgqaCpuKCgpKUuIKUgoL6AAwagoKUgqKClIKmqJIADSDSgoKCgpSCgpSq4oKCgoKUgoKUgoKUgpSCgoKCgoKUpoKCgqaC5oKCpoKmysKCgpSUgoKCgoKCgoKoxIKCpoKUgoLssoKCgpSClIKClIKUgoIABBCygqaCgoKUgoKUlKaClIKCgqaqooKClIKClJSClKiSgoKUppSClKqiqJKCgqaC6JKCgoKmlKSkgpSkgpSUABgewoKCgpSCtIK0gqTokoKCgqaUqJKCgoKCgpSssoKUlJSCpIKkgqT8ooKUgoKCgoKCpoKCpoKCgpSCgoKUqqKClIKCgoKCgpSClIKCgpSCgoKUrLKUgqaUgpSCgoKCpqaUuJSUpqz0goKUgqaCgoKUgpSmgoKCpqjIpoKUgpSUgpSClJSUgoKU7sKClIKCgoKCAAgKwoKUgoKUtLSk6JKCgqaCgoKUlLaCgoKCuIKCpoKClKSkqJKClKSklOzigoKUgoKClIKCgpTokoKCgoKUlIKClAAOGpKCgoIACQqygpSAgoKCgpSUtpS0tLS0tLS0tLS0tLS02IKCgsaCgoLG2MSCgoKClKS0tLTGgoKUgoKCxoKCtLTs0oKCgoKUxuYACAKCgoKmgoKCgpSCgrgADxYACgKCAAcQgoKCgoKClJSClIKCgpSCpoKCpoKUgqaClIKmuJSCpoKClLiCgoKUlAAICgAJAoKUgoKCgqaUgqaUlpKCgqaClIKUgoKUgoKmgoKUlIKClIKU", "248-256:1", "", "", "1312:21,1451:21", "300:21,301:13")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -147,12 +151,129 @@ public static partial class fmt_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(fmt_package.buffer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fmtᴛbuffer;
-[GoMethodHost(typeof(fmt_package.fmt)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fmtᴛfmt;
-[GoMethodHost(typeof(fmt_package.pp)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fmtᴛpp;
-[GoMethodHost(typeof(fmt_package.readRune)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fmtᴛreadRune;
-[GoMethodHost(typeof(fmt_package.ss)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fmtᴛss;
-[GoMethodHost(typeof(fmt_package.stringReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fmtᴛstringReader;
-[GoMethodHost(typeof(fmt_package.wrapError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fmtᴛwrapError;
-[GoMethodHost(typeof(fmt_package.wrapErrors)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fmtᴛwrapErrors;
+[GoMethodHost(typeof(fmt_package.buffer)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class fmtᴛbuffer;
+[GoMethodHost(typeof(fmt_package.fmt)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class fmtᴛfmt;
+[GoMethodHost(typeof(fmt_package.pp)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class fmtᴛpp;
+[GoMethodHost(typeof(fmt_package.readRune)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class fmtᴛreadRune;
+[GoMethodHost(typeof(fmt_package.ss)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class fmtᴛss;
+[GoMethodHost(typeof(fmt_package.stringReader)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class fmtᴛstringReader;
+[GoMethodHost(typeof(fmt_package.wrapError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class fmtᴛwrapError;
+[GoMethodHost(typeof(fmt_package.wrapErrors)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class fmtᴛwrapErrors;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class fmtᴛbuffer {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void write(this ref fmt_package.buffer b, slice<byte> p) => fmt_package.write⁔(ref b, p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void writeString(this ref fmt_package.buffer b, sstring s) => fmt_package.writeString⁔(ref b, s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void writeByte(this ref fmt_package.buffer b, byte c) => fmt_package.writeByte⁔(ref b, c);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void writeRune(this ref fmt_package.buffer b, rune r) => fmt_package.writeRune⁔(ref b, r);
+}
+partial class fmtᴛfmt {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void clearflags(this ref fmt_package.fmt f) => fmt_package.clearflags⁔(ref f);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void init(this ref fmt_package.fmt f, ж<fmt_package.buffer> Ꮡbuf) => fmt_package.init⁔(ref f, Ꮡbuf);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void writePadding(this ref fmt_package.fmt f, nint n) => fmt_package.writePadding⁔(ref f, n);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void pad(this ref fmt_package.fmt f, slice<byte> b) => fmt_package.pad⁔(ref f, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void padString(this ref fmt_package.fmt f, sstring s) => fmt_package.padString⁔(ref f, s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void fmtBoolean(this ref fmt_package.fmt f, bool v) => fmt_package.fmtBoolean⁔(ref f, v);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void fmtUnicode(this ref fmt_package.fmt f, uint64 u) => fmt_package.fmtUnicode⁔(ref f, u);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void fmtInteger(this ref fmt_package.fmt f, uint64 u, nint @base, bool isSigned, rune verb, sstring digits) => fmt_package.fmtInteger⁔(ref f, u, @base, isSigned, verb, digits);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string truncateString(this ref fmt_package.fmt f, @string s) => fmt_package.truncateString⁔(ref f, s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<byte> truncate(this ref fmt_package.fmt f, slice<byte> b) => fmt_package.truncate⁔(ref f, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void fmtS(this ref fmt_package.fmt f, @string s) => fmt_package.fmtS⁔(ref f, s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void fmtBs(this ref fmt_package.fmt f, slice<byte> b) => fmt_package.fmtBs⁔(ref f, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void fmtSbx(this ref fmt_package.fmt f, sstring s, slice<byte> b, sstring digits) => fmt_package.fmtSbx⁔(ref f, s, b, digits);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void fmtSx(this ref fmt_package.fmt f, sstring s, sstring digits) => fmt_package.fmtSx⁔(ref f, s, digits);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void fmtBx(this ref fmt_package.fmt f, slice<byte> b, sstring digits) => fmt_package.fmtBx⁔(ref f, b, digits);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void fmtQ(this ref fmt_package.fmt f, @string s) => fmt_package.fmtQ⁔(ref f, s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void fmtC(this ref fmt_package.fmt f, uint64 c) => fmt_package.fmtC⁔(ref f, c);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void fmtQc(this ref fmt_package.fmt f, uint64 c) => fmt_package.fmtQc⁔(ref f, c);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void fmtFloat(this ref fmt_package.fmt f, float64 v, nint size, rune verb, nint prec) => fmt_package.fmtFloat⁔(ref f, v, size, verb, prec);
+}
+partial class fmtᴛpp {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void free(this ж<fmt_package.pp> Ꮡp) => fmt_package.free⁔(Ꮡp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint wid, bool ok) Width(this ref fmt_package.pp p) => fmt_package.Width⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint prec, bool ok) Precision(this ref fmt_package.pp p) => fmt_package.Precision⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool Flag(this ref fmt_package.pp p, nint b) => fmt_package.Flag⁔(ref p, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint ret, error err) Write(this ref fmt_package.pp p, slice<byte> b) => fmt_package.Write⁔(ref p, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint ret, error err) WriteString(this ref fmt_package.pp p, @string s) => fmt_package.WriteString⁔(ref p, s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void unknownType(this ref fmt_package.pp p, reflect.Value v) => fmt_package.unknownType⁔(ref p, v);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void badVerb(this ж<fmt_package.pp> Ꮡp, rune verb) => fmt_package.badVerb⁔(Ꮡp, verb);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void fmtBool(this ж<fmt_package.pp> Ꮡp, bool v, rune verb) => fmt_package.fmtBool⁔(Ꮡp, v, verb);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void fmt0x64(this ref fmt_package.pp p, uint64 v, bool leading0x) => fmt_package.fmt0x64⁔(ref p, v, leading0x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void fmtInteger(this ж<fmt_package.pp> Ꮡp, uint64 v, bool isSigned, rune verb) => fmt_package.fmtInteger⁔(Ꮡp, v, isSigned, verb);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void fmtFloat(this ж<fmt_package.pp> Ꮡp, float64 v, nint size, rune verb) => fmt_package.fmtFloat⁔(Ꮡp, v, size, verb);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void fmtComplex(this ж<fmt_package.pp> Ꮡp, complex128 v, nint size, rune verb) => fmt_package.fmtComplex⁔(Ꮡp, v, size, verb);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void fmtString(this ж<fmt_package.pp> Ꮡp, @string v, rune verb) => fmt_package.fmtString⁔(Ꮡp, v, verb);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void fmtBytes(this ж<fmt_package.pp> Ꮡp, slice<byte> v, rune verb, sstring typeString) => fmt_package.fmtBytes⁔(Ꮡp, v, verb, typeString);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void fmtPointer(this ж<fmt_package.pp> Ꮡp, reflect.Value value, rune verb) => fmt_package.fmtPointer⁔(Ꮡp, value, verb);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void catchPanic(this ж<fmt_package.pp> Ꮡp, any arg, rune verb, @string method) => fmt_package.catchPanic⁔(Ꮡp, arg, verb, method);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool /*handled*/ handleMethods(this ж<fmt_package.pp> Ꮡp, rune verb) => fmt_package.handleMethods⁔(Ꮡp, verb);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void printArg(this ж<fmt_package.pp> Ꮡp, any arg, rune verb) => fmt_package.printArg⁔(Ꮡp, arg, verb);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void printValue(this ж<fmt_package.pp> Ꮡp, reflect.Value value, rune verb, nint depth) => fmt_package.printValue⁔(Ꮡp, value, verb, depth);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint newArgNum, nint newi, bool found) argNumber(this ref fmt_package.pp p, nint argNum, sstring format, nint i, nint numArgs) => fmt_package.argNumber⁔(ref p, argNum, format, i, numArgs);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void badArgNum(this ref fmt_package.pp p, rune verb) => fmt_package.badArgNum⁔(ref p, verb);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void missingArg(this ref fmt_package.pp p, rune verb) => fmt_package.missingArg⁔(ref p, verb);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void doPrintf(this ж<fmt_package.pp> Ꮡp, sstring format, slice<any> a) => fmt_package.doPrintf⁔(Ꮡp, format, a);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void doPrint(this ж<fmt_package.pp> Ꮡp, slice<any> a) => fmt_package.doPrint⁔(Ꮡp, a);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void doPrintln(this ж<fmt_package.pp> Ꮡp, slice<any> a) => fmt_package.doPrintln⁔(Ꮡp, a);
+}
+partial class fmtᴛreadRune {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (byte b, error err) readByte(this ref fmt_package.readRune r) => fmt_package.readByte⁔(ref r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (rune rr, nint size, error err) ReadRune(this ref fmt_package.readRune r) => fmt_package.ReadRune⁔(ref r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error UnreadRune(this ref fmt_package.readRune r) => fmt_package.UnreadRune⁔(ref r);
+}
+partial class fmtᴛss {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) Read(this ref fmt_package.ss s, slice<byte> buf) => fmt_package.Read⁔(ref s, buf);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (rune r, nint size, error err) ReadRune(this ref fmt_package.ss s) => fmt_package.ReadRune⁔(ref s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint wid, bool ok) Width(this ref fmt_package.ss s) => fmt_package.Width⁔(ref s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static rune /*r*/ getRune(this ref fmt_package.ss s) => fmt_package.getRune⁔(ref s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static rune /*r*/ mustReadRune(this ref fmt_package.ss s) => fmt_package.mustReadRune⁔(ref s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error UnreadRune(this ref fmt_package.ss s) => fmt_package.UnreadRune⁔(ref s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void error(this ref fmt_package.ss s, error err) => fmt_package.error⁔(ref s, err);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void errorString(this ref fmt_package.ss s, @string err) => fmt_package.errorString⁔(ref s, err);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<byte> tok, error err) Token(this ж<fmt_package.ss> Ꮡs, bool skipSpace, Func<rune, bool> f) => fmt_package.Token⁔(Ꮡs, skipSpace, f);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void free(this ж<fmt_package.ss> Ꮡs, fmt_package.ssave old) => fmt_package.free⁔(Ꮡs, old);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void SkipSpace(this ref fmt_package.ss s) => fmt_package.SkipSpace⁔(ref s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<byte> token(this ref fmt_package.ss s, bool skipSpace, Func<rune, bool> f) => fmt_package.token⁔(ref s, skipSpace, f);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool consume(this ref fmt_package.ss s, sstring ok, bool accept) => fmt_package.consume⁔(ref s, ok, accept);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool peek(this ref fmt_package.ss s, sstring ok) => fmt_package.peek⁔(ref s, ok);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void notEOF(this ref fmt_package.ss s) => fmt_package.notEOF⁔(ref s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool accept(this ref fmt_package.ss s, sstring ok) => fmt_package.accept⁔(ref s, ok);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool okVerb(this ref fmt_package.ss s, rune verb, sstring okVerbs, sstring typ) => fmt_package.okVerb⁔(ref s, verb, okVerbs, typ);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool scanBool(this ref fmt_package.ss s, rune verb) => fmt_package.scanBool⁔(ref s, verb);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint @base, @string digits) getBase(this ref fmt_package.ss s, rune verb) => fmt_package.getBase⁔(ref s, verb);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string scanNumber(this ref fmt_package.ss s, sstring digits, bool haveDigits) => fmt_package.scanNumber⁔(ref s, digits, haveDigits);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static int64 scanRune(this ref fmt_package.ss s, nint bitSize) => fmt_package.scanRune⁔(ref s, bitSize);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint @base, @string digits, bool zeroFound) scanBasePrefix(this ref fmt_package.ss s) => fmt_package.scanBasePrefix⁔(ref s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static int64 scanInt(this ref fmt_package.ss s, rune verb, nint bitSize) => fmt_package.scanInt⁔(ref s, verb, bitSize);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static uint64 scanUint(this ref fmt_package.ss s, rune verb, nint bitSize) => fmt_package.scanUint⁔(ref s, verb, bitSize);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string floatToken(this ref fmt_package.ss s) => fmt_package.floatToken⁔(ref s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (@string real, @string imag) complexTokens(this ref fmt_package.ss s) => fmt_package.complexTokens⁔(ref s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static float64 convertFloat(this ref fmt_package.ss s, @string str, nint n) => fmt_package.convertFloat⁔(ref s, str, n);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static complex128 scanComplex(this ref fmt_package.ss s, rune verb, nint n) => fmt_package.scanComplex⁔(ref s, verb, n);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string /*str*/ convertString(this ref fmt_package.ss s, rune verb) => fmt_package.convertString⁔(ref s, verb);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string quotedString(this ref fmt_package.ss s) => fmt_package.quotedString⁔(ref s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (byte b, bool ok) hexByte(this ref fmt_package.ss s) => fmt_package.hexByte⁔(ref s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string hexString(this ref fmt_package.ss s) => fmt_package.hexString⁔(ref s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void scanPercent(this ref fmt_package.ss s) => fmt_package.scanPercent⁔(ref s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void scanOne(this ж<fmt_package.ss> Ꮡs, rune verb, any arg) => fmt_package.scanOne⁔(Ꮡs, verb, arg);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint numProcessed, error err) doScan(this ж<fmt_package.ss> Ꮡs, slice<any> a) => fmt_package.doScan⁔(Ꮡs, a);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint /*i*/ advance(this ref fmt_package.ss s, sstring format) => fmt_package.advance⁔(ref s, format);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint numProcessed, error err) doScanf(this ж<fmt_package.ss> Ꮡs, sstring format, slice<any> a) => fmt_package.doScanf⁔(Ꮡs, format, a);
+}
+partial class fmtᴛstringReader {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) Read(this ref fmt_package.stringReader r, slice<byte> b) => fmt_package.Read⁔(ref r, b);
+}
+partial class fmtᴛwrapError {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string Error(this ref fmt_package.wrapError e) => fmt_package.Error⁔(ref e);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error Unwrap(this ref fmt_package.wrapError e) => fmt_package.Unwrap⁔(ref e);
+}
+partial class fmtᴛwrapErrors {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string Error(this ref fmt_package.wrapErrors e) => fmt_package.Error⁔(ref e);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<error> Unwrap(this ref fmt_package.wrapErrors e) => fmt_package.Unwrap⁔(ref e);
+}
+// </MethodForwarders>

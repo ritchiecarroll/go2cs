@@ -32,7 +32,6 @@ using fmt = fmt_package;
 using io = io_package;
 using net = net_package;
 using ꓸꓸꓸany = Span<any>;
-using static textproto_package;
 
 partial class textproto_package {
 
@@ -42,25 +41,17 @@ partial struct Error {
     public @string Msg;
 }
 
-} partial class textprotoᴛError {
-
-public static @string Error(this ref Error e) {
+internal static @string Error⁔(/*this*/ ref Error e) {
     return fmt.Sprintf("%03d %q"u8, e.Code, e.Msg);
 }
-
-} partial class textproto_package {
 
 // A ProtocolError describes a protocol violation such
 // as an invalid response or a hung-up connection.
 partial struct ProtocolError /*@string*/;
 
-} partial class textprotoᴛProtocolError {
-
-public static @string Error(this ProtocolError p) {
+internal static @string Error⁔(/*this*/ ProtocolError p) {
     return (@string)p;
 }
-
-} partial class textproto_package {
 
 // A Conn represents a textual network protocol connection.
 // It consists of a [Reader] and [Writer] to manage I/O
@@ -83,14 +74,10 @@ public static ж<Conn> NewConn(io.ReadWriteCloser conn) {
     ));
 }
 
-} partial class textprotoᴛConn {
-
 // Close closes the connection.
-public static error Close(this ref Conn c) {
+internal static error Close⁔(/*this*/ ref Conn c) {
     return c.conn.Close();
 }
-
-} partial class textproto_package {
 
 // Dial connects to the given address on the given network using [net.Dial]
 // and then returns a new [Conn] for the connection.
@@ -101,8 +88,6 @@ public static (ж<Conn>, error) Dial(@string network, @string addr) {
     }
     return (NewConn(new net_ConnᴠReadWriteCloser(c)), default);
 }
-
-} partial class textprotoᴛConn {
 
 // Cmd is a convenience method that sends a command after
 // waiting its turn in the pipeline. The command text is the
@@ -128,7 +113,7 @@ public static (ж<Conn>, error) Dial(@string network, @string addr) {
 //		return nil, err
 //	}
 //	return c.ReadCodeLine(250)
-public static (nuint id, error err) Cmd(this ж<Conn> Ꮡc, @string format, params ꓸꓸꓸany argsʗp) {
+internal static (nuint id, error err) Cmd⁔(/*this*/ ж<Conn> Ꮡc, @string format, params ꓸꓸꓸany argsʗp) {
     nuint id = default;
     error err = default;
     var args = argsʗp.sslice();
@@ -142,8 +127,6 @@ public static (nuint id, error err) Cmd(this ж<Conn> Ꮡc, @string format, para
     }
     return (id, default);
 }
-
-} partial class textproto_package {
 
 // TrimString returns s without leading and trailing ASCII space.
 public static @string TrimString(@string s) {

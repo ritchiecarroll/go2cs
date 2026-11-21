@@ -11,7 +11,6 @@ using version = go.@internal.trace.version_package;
 using encoding;
 using go;
 using go.@internal.trace;
-using static raw_package;
 
 partial class raw_package {
 
@@ -27,8 +26,6 @@ partial struct Event {
     public slice<byte> Data;
 }
 
-} partial class rawᴛEvent {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static ref readonly @string dataˢ => ref dataˢᵇ;
 private static readonly @string dataˢᵇ = "\n\tdata="u8;
@@ -37,7 +34,7 @@ private static readonly @string dataˢᵇ = "\n\tdata="u8;
 //
 // This format is the same format that is parsed by the TextReader
 // and emitted by the TextWriter.
-public static @string String(this ref Event e) {
+internal static @string String⁔(/*this*/ ref Event e) {
     var spec = e.Version.Specs()[e.Ev];
 
     ref var s = ref heap(new strings.Builder(), out var Ꮡs);
@@ -69,7 +66,7 @@ public static @string String(this ref Event e) {
 }
 
 // EncodedSize returns the canonical encoded size of an event.
-public static nint EncodedSize(this ref Event e) {
+internal static nint EncodedSize⁔(/*this*/ ref Event e) {
     nint size = 1;
     array<byte> buf = new(10); /* binary.MaxVarintLen64 */
     foreach (var (_, arg) in range(e.Args)) {
@@ -83,4 +80,4 @@ public static nint EncodedSize(this ref Event e) {
     return size;
 }
 
-}
+} // end raw_package
