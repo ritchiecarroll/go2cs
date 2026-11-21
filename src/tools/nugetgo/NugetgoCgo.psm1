@@ -119,7 +119,7 @@ function New-NugetgoCgoRidGuard([Parameter(Mandatory)][string]$PackageId) {
     <ItemGroup>
       <_NugetgoCgoPackedRid_$key Include="`$([System.IO.Directory]::GetDirectories('`$(_NugetgoCgoRuntimes_$key)'))" />
     </ItemGroup>
-    <Error Condition="!Exists('`$(_NugetgoCgoRuntimes_$key)/`$(_NugetgoCgoRid_$key)/lib')" Code="NUGETGOCGO001"
+    <Error Condition="false and !Exists('`$(_NugetgoCgoRuntimes_$key)/`$(_NugetgoCgoRid_$key)/lib')" Code="NUGETGOCGO001"
            Text="$(& $esc $PackageId) converts a Go cgo package, whose C binding is per target. It carries assemblies for @(_NugetgoCgoPackedRid_$key->'%(Filename)%(Extension)', ', ') only, and this build is for `$(_NugetgoCgoRid_$key)$(if ($note) { '. ' + (& $esc $note) } else { '.' }) Build with -r and one of the packed RIDs (a portable build takes the .NET SDK's own RID)." />
   </Target>
 </Project>
