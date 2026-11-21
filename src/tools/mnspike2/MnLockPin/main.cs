@@ -27,6 +27,9 @@ internal const nint shapeExit = 8;
 internal const nint shapeUnpin = 9;
 internal const nint shapeScenA = 10;
 internal const nint shapeScenB = 11;
+// The Gosched-park seat (P3's check (d)): a locked goroutine's runtime.Gosched is a yield park, delivered back to its
+// own carrier; checkPinned after every yield asserts it never stepped on another thread.
+internal const nint shapeGosched = 12;
 
 // echo answers round trips until it is sent a negative value. It is never locked, so it checks after every park that
 // it is not on a thread a locked goroutine holds.
@@ -164,6 +167,8 @@ internal static void locked(nint shape, nint rounds, channel<nint> done) {
                 hop();
             } else if (shape == shapeSleep) {
                 time.Sleep(time.Microsecond);
+            } else if (shape == shapeGosched) {
+                runtime.Gosched();
             }
 
             checkPinned(shape);
@@ -338,7 +343,8 @@ internal static void main() {
     goǃ(nest, roundsOf(2000), done);
     goǃ(exitLocked, done);
     goǃ(unpin, roundsOf(2000), done);
-    running += 6;
+    goǃ(locked, shapeGosched, roundsOf(2000), done);
+    running += 7;
 
     for (nint i = 0; i < running; i++) {
         ᐸꟷ(done);
