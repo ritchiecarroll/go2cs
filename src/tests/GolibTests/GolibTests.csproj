@@ -317,6 +317,11 @@
          arm calls into, so the arm does not depend on sync continuing to reference it. -->
     <ProjectReference Include="..\..\core\internal\sync\internal.sync.csproj" />
 
+    <!-- PollSemaphoreTests: internal/poll's runtime_Semacquire and runtime_Semrelease (the fdMutex's
+         sleeping semaphore), reached by reflection. Already reachable transitively (os/exec, os,
+         internal/poll); the explicit reference names the project the arms call into. -->
+    <ProjectReference Include="..\..\core\internal\poll\internal.poll.csproj" />
+
     <!-- The ready-seam guards (GoroutineReadyTests) drive sync.Cond, whose notify list is one of the
          park sites the waker readies (sync/runtime_impl.cs), through its converted public surface. -->
     <ProjectReference Include="..\..\core\sync\sync.csproj" />
