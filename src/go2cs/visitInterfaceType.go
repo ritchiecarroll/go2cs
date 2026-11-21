@@ -163,18 +163,42 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType
 		// always safe regardless of case. Falling through to a fresh mint when the check fails is
 		// always safe — it only forgoes a dedup opportunity, never breaks one.
 		//
+		// The struct twin's account of the THIRD disjunct, moved here verbatim from
+		// visitStructType.go on 2026-11-20 (it holds for both visitors):
 		// A THIRD disjunct used to also allow reuse whenever generatedTypeScope(existing) read
-		// "public" — the struct twin's comment (visitStructType.go) has the full account of why it
-		// was unsound (it cannot see localTypeAccess's override) and the measurement that showed
-		// removing it costs no currently-safe dedup anywhere in the corpus (i9's cross-tier census,
-		// 2026-09-01: 0 hits `-stdlib`-wide, 2 in reflect's own `-tests`, both false, 0 in the five
-		// reflect-importer canaries' `-tests`).
+		// "public" — trusting the CANDIDATE's own name-based accessibility guess as a stand-in for
+		// its real recorded accessibility. That guess cannot see localTypeAccess's override: a
+		// package-wide-registered function-local type is ALWAYS internal regardless of what its
+		// mangled name's capitalization suggests (localTypeAccess's own doc comment), so the guess
+		// reads "public" for any such type whose enclosing function happens to be exported —
+		// exactly reflect's `TestTypeFieldOutOfRangePanic_i` (all_test.go, function-local, always
+		// internal) reused by `Δtypeᴛ37`'s public field `A` (visiblefields_test.go): CS0052/50/51.
+		// 0d6549ae5 widened package-wide registration to call-boundary function-local lifts, which
+		// is what first let a name-mangling-inherits-the-enclosing-function registrant reach this
+		// check at all — the guess itself was always unsound here, just never exercised against
+		// one before. Removed rather than repaired: a truthful check needs the candidate's REAL
+		// recorded accessibility, which means seeing past this file's own visit (cross-file,
+		// concurrent, no barrier here the way deferredDynamicTypeName's marker path has), and the
+		// fallback is unconditionally safe regardless. Measured before removing it (i9's
+		// cross-tier census, 2026-09-01): 0 hits in the whole `-stdlib` corpus, 2 in reflect's own
+		// `-tests` (both false — guess public, actual internal), 0 in the five reflect-importer
+		// canaries' `-tests` — this removal costs no currently-safe dedup anywhere measured.
+		//
+		// The disjunct is now RESTORED on the truthful fact the removal said was missing:
+		// liftDeclaredPublic reads the access modifier the lift was actually DECLARED with
+		// (recordLiftDeclaredPublic, below), not a guess from its name. File visits within a
+		// package are sequential, so the record is complete for every earlier file. Without it, an
+		// exported field whose type repeats an exported signature's anonymous interface minted a
+		// second, identical lift (AnonLiftOnePerType guards it).
+		// (The pointer this paragraph replaced read: "the struct twin's comment (visitStructType.go)
+		// has the full account", with i9's census, 2026-09-01: 0 hits `-stdlib`-wide, 2 in reflect's
+		// own `-tests`, both false, 0 in the five reflect-importer canaries' `-tests`.)
 		// A lift that closes over type parameters is never reused or registered by signature: its
 		// signature text names `T`/`V`, which mean something different in every generic declaration.
 		if signatureType := v.getType(interfaceType, false); signatureType != nil && len(capturedTypeParams) == 0 {
 			signature := signatureType.String()
 			existing := lookupDynamicTypeName(signature)
-			admissible := existing != "" && (v.inFunction || !liftNameNeedsPublicType(name))
+			admissible := existing != "" && (v.inFunction || !liftNameNeedsPublicType(name) || liftDeclaredPublic(existing))
 
 			// The PRODUCTION-registry arm carries an accessibility question the same-pass arm above
 			// cannot have: its candidate may live in ANOTHER assembly, and this arm emits no
@@ -271,6 +295,7 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType
 
 		if t := v.getType(interfaceType, false); t != nil && len(capturedTypeParams) == 0 {
 			registerDynamicTypeName(t.String(), interfaceTypeName)
+			recordLiftDeclaredPublic(interfaceTypeName, access)
 		}
 	} else {
 		interfaceTypeName = name

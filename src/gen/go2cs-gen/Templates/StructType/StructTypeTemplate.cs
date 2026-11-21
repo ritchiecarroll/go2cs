@@ -496,36 +496,8 @@ internal class StructTypeTemplate : TemplateBase
             // (CS0102) and a duplicate Ꮡfn reference (CS0111).
             HashSet<string> declaredMemberNames = new(StructMembers.Select(m => GetSimpleName(m.memberName)));
 
-            // Go's AMBIGUITY rule is DEPTH-AWARE: a member name is promoted iff there is a
-            // UNIQUE occurrence at the SHALLOWEST embedding depth. Same-depth duplicates are
-            // ambiguous and drop (bufio's ReadWriter embeds *Reader AND *Writer, both carrying
-            // err/buf — CS0102/CS0111), but a shallower occurrence WINS over deeper ones —
-            // macho's FatArch embeds FatArchHeader (Cpu/SubCpu at depth 1) AND *File (whose
-            // flattened surface carries FileHeader's Cpu/SubCpu at depth 2): the depth-blind
-            // count dropped BOTH, orphaning the converter's bare `fa.Cpu` (CS1061 x4).
-            Dictionary<string, int> promotedFieldMinDepth = new(StringComparer.Ordinal);
-            Dictionary<string, int> promotedFieldMinDepthCount = new(StringComparer.Ordinal);
-
-            foreach ((string promotedStructType, _, _, _, _) in promotedStructs)
-            {
-                foreach ((_, string memberName, int depth) in getStructMembers(promotedStructType))
-                {
-                    string simpleName = GetSimpleName(memberName);
-
-                    if (!promotedFieldMinDepth.TryGetValue(simpleName, out int minDepth) || depth < minDepth)
-                    {
-                        promotedFieldMinDepth[simpleName] = depth;
-                        promotedFieldMinDepthCount[simpleName] = 1;
-                    }
-                    else if (depth == minDepth)
-                    {
-                        promotedFieldMinDepthCount[simpleName]++;
-                    }
-                }
-            }
-
-            bool promotes(string simpleName, int depth) =>
-                promotedFieldMinDepth[simpleName] == depth && promotedFieldMinDepthCount[simpleName] == 1;
+            // Go's depth-aware AMBIGUITY rule for promoted fields: see PromotesField.
+            bool promotes(string simpleName, int depth) => PromotesField(simpleName, depth);
 
             foreach ((string promotedStructType, string promotedMemberName, _, _, _) in promotedStructs)
             {
@@ -533,7 +505,7 @@ internal class StructTypeTemplate : TemplateBase
                 // promoted member TYPE (a generic embed's field carries `Point`, out of scope here).
                 Dictionary<string, string> typeArgMap = GetEmbedTypeArgumentMap(promotedStructType);
 
-                foreach ((string typeName, string memberName, int depth) in getStructMembers(promotedStructType))
+                foreach ((string typeName, string memberName, int depth) in GetPromotedStructMembers(promotedStructType))
                 {
                     // A blank `_` field (padding / embedded unexported marker) is never promoted or
                     // selectable in Go; emitting an accessor for it collides with the enclosing
@@ -586,7 +558,7 @@ internal class StructTypeTemplate : TemplateBase
             {
                 Dictionary<string, string> typeArgMap = GetEmbedTypeArgumentMap(promotedStructType);
 
-                foreach ((string typeName, string memberName, int depth) in getStructMembers(promotedStructType))
+                foreach ((string typeName, string memberName, int depth) in GetPromotedStructMembers(promotedStructType))
                 {
                     // Blank `_` field — unaddressable in Go, and its `Ꮡ_` would collide with the
                     // enclosing struct's own `Ꮡ_` (CS0111). Every uniquified spelling counts; see
@@ -644,177 +616,230 @@ internal class StructTypeTemplate : TemplateBase
             }
 
             return result.ToString();
+        }
+    }
 
-            IEnumerable<(string typeName, string memberName, int depth)> getStructMembers(string structTypeName)
+    // Go's AMBIGUITY rule for a PROMOTED FIELD, shared by the field accessors (PromotedStructDeclarations) and the
+    // one-hop descent of a promoted box-receiver method (PromotedStructReceivers), which names the outer type's
+    // promoted accessor reference and so may name it only where this rule emitted it.
+    // Go's AMBIGUITY rule is DEPTH-AWARE: a member name is promoted iff there is a
+    // UNIQUE occurrence at the SHALLOWEST embedding depth. Same-depth duplicates are
+    // ambiguous and drop (bufio's ReadWriter embeds *Reader AND *Writer, both carrying
+    // err/buf — CS0102/CS0111), but a shallower occurrence WINS over deeper ones —
+    // macho's FatArch embeds FatArchHeader (Cpu/SubCpu at depth 1) AND *File (whose
+    // flattened surface carries FileHeader's Cpu/SubCpu at depth 2): the depth-blind
+    // count dropped BOTH, orphaning the converter's bare `fa.Cpu` (CS1061 x4).
+    private Dictionary<string, (int minDepth, int count)>? m_promotedFieldDepths;
+
+    private bool PromotesField(string simpleName, int depth)
+    {
+        if (m_promotedFieldDepths is null)
+        {
+            m_promotedFieldDepths = new(StringComparer.Ordinal);
+
+            foreach ((string promotedStructType, _, _, _, _) in StructMembers.Where(item => item.isPromotedStruct))
             {
-                // Collect the embedded struct's members TRANSITIVELY: a member promoted into the
-                // enclosing struct may itself come from a NESTED embedded struct (Go promotes through
-                // every embedding level). e.g. stackWorkBuf embeds stackWorkBufHdr embeds workbufhdr,
-                // so stackWorkBuf.nobj must promote workbufhdr's nobj — but reading stackWorkBufHdr's
-                // DECLARED members alone misses it (nobj is a generated accessor on stackWorkBufHdr,
-                // not a declared field). The emitted accessor stays single-hop (`stackWorkBuf.nobj =>
-                // ref stackWorkBufHdr.nobj`), resolving through stackWorkBufHdr's own 1-level promotion.
-                // EVERY occurrence is collected, duplicates included: Go's promotion rule is
-                // DEPTH-AWARE and the caller applies it (promotes(): unique at the shallowest depth).
-                // A name-dedupe here would decide the question first, and decide it WRONG — "first
-                // (closest) declaration wins" is only half of Go's rule. It holds across DIFFERENT
-                // depths; at the SAME depth Go promotes from neither. Deduping silently turned an
-                // ambiguity into a win: reflect's `S0` embeds `D1` AND `D2`, both declaring `d`, so
-                // the second `d` was dropped here, the caller counted ONE occurrence, and `S1`
-                // promoted `d` through `S0` — emitting `instance.S0.d`, which does not exist (CS1061
-                // ×2), while `S0`'s own shell correctly emitted no `d` at all.
-                //
-                // Feeding the counter every occurrence does not re-open the case it was written for
-                // (macho's `FatArch`, Cpu at depth 1 and depth 2): minDepth 1 with count 1 still
-                // emits the depth-1 accessor and skips the depth-2 one.
-                List<(string typeName, string memberName, int depth)> collected = [];
-
-                collect(structTypeName, [], 1);
-
-                return collected;
-
-                // seenTypes is the current PATH, not the set of everything visited: it is COPIED at each
-                // recursion, so a type reached by two SIBLING branches is walked on BOTH. That is what the
-                // header above requires -- every occurrence collected, the caller applying Go's depth-aware
-                // rule -- and a shared set silently performed the dedupe the header forbids, one level up:
-                // `twice` embeds viaX and *viaY, both embedding `base`, so with one set `base.B` was collected
-                // ONCE and promotes() saw a unique member at min depth. `twice`'s own shell was right (the
-                // caller walks each direct embed with a fresh set) while a type EMBEDDING twice emitted
-                // `B => ref twice.B`, a hop that does not exist -- CS1061, the `deeper` row of the
-                // ReflectFieldMetadata guard, which is red before this line and green after. Go's clause is
-                // that an ambiguity at one depth INHIBITS every deeper match; it does not resolve into
-                // whichever branch reached the type first (increment E2c).
-                //
-                // The two METHOD walks below (countPromotedMethods, collectPromotedMethods) thread their set
-                // the same way and take the SAME fix. The measurement that says so is worth keeping, because it
-                // read the other way first: with a METHOD on `base`, the guard at the unfixed generator reported
-                // only the FIELD error, which reads as `the method half is fine` -- and is wrong. Fixing the
-                // field walk UNMASKED CS1929 on the same row (`deeper` forwarding to `twice.M`, which twice
-                // correctly promotes no more than it promotes B). Errors behind a blocker are invisible until
-                // the blocker moves, so a clean second half is only believable once the first half is fixed.
-                //
-                // Cost: one HashSet copy per embedded field per level. Embedding chains are shallow (the
-                // corpus census below found no shape where the two walks even differ), and correctness is not
-                // negotiable against it.
-                void collect(string typeName, HashSet<string> seenTypes, int depth)
+                foreach ((_, string memberName, int memberDepth) in GetPromotedStructMembers(promotedStructType))
                 {
-                    // Go forbids embedding cycles, but guard anyway so a malformed input can't loop. A cycle
-                    // repeats a type ON THE PATH, so a path-scoped set still catches it.
-                    if (!seenTypes.Add(typeName))
-                        return;
+                    string name = GetSimpleName(memberName);
 
-                    (StructDeclarationSyntax? structDecl, Compilation? compilation) = Context.GetStructDeclaration(typeName);
-
-                    if (structDecl is null)
-                    {
-                        // A CROSS-PACKAGE embedded type cannot be resolved by syntax in a real MSBuild
-                        // build: project references arrive as METADATA references, never CompilationReference,
-                        // so the referenced-compilations walk finds nothing — `type rtype struct { *abi.Type }`
-                        // (runtime type.go) promoted NO fields and every `t.TFlag`/`t.Str`/`t.Kind_` was
-                        // CS1061. Fall back to the semantic model: resolve the embedded type's symbol by
-                        // metadata name and enumerate its public instance fields (the Go-visible members of
-                        // a converted struct are plain public fields). Transitive promotion through a
-                        // metadata type's own embeds is not chased (none of the runtime's cross-package
-                        // embeds need it); the emitted single-hop accessor resolves through the embedded
-                        // type's own generated promotion when it exists.
-                        foreach ((string fieldTypeName, string fieldName) in getMetadataStructFields(typeName))
-                            collected.Add((fieldTypeName, fieldName, depth));
-
-                        return;
-                    }
-
-                    foreach ((string memberType, string memberName, _, bool isEmbedded, _) in structDecl.GetStructMembers(compilation!, true))
-                    {
-                        collected.Add((memberType, memberName, depth));
-
-                        // An embedded struct field contributes its own members transitively. The
-                        // converter emits every embed - value or POINTER - as a `partial ref`
-                        // PROPERTY (the marker the top level keys isPromotedStruct on), so recurse
-                        // on that flag; a NAMED field whose name merely equals its type's simple
-                        // name (`RCode RCode` in dnsmessage.Header) is a plain FIELD and must not
-                        // contribute nested promotions.
-                        if (isEmbedded)
-                            collect(memberType, [.. seenTypes], depth + 1);
-                    }
+                    if (!m_promotedFieldDepths.TryGetValue(name, out (int minDepth, int count) seen) || memberDepth < seen.minDepth)
+                        m_promotedFieldDepths[name] = (memberDepth, 1);
+                    else if (memberDepth == seen.minDepth)
+                        m_promotedFieldDepths[name] = (seen.minDepth, seen.count + 1);
                 }
+            }
+        }
 
-                IEnumerable<(string typeName, string fieldName)> getMetadataStructFields(string typeName)
-                {
-                    // Normalize the source-form type reference to a CLR metadata name: strip the ж<>
-                    // pointer wrapper, the `global::` prefix and `@` identifier escapes, root it in the
-                    // `go` namespace, and mark the final containing package class as a NESTED type —
-                    // `ж<@internal.abi_package.Type>` → `go.internal.abi_package+Type` (a converted
-                    // package is a static class inside the go namespace; its types are nested members).
-                    string metadataName = GeneratorExecutionContextExtensions.GetUnderlyingTypeName(typeName)
-                        .Replace("global::", "").Replace("@", "");
+        return m_promotedFieldDepths.TryGetValue(simpleName, out (int minDepth, int count) entry) && entry.minDepth == depth && entry.count == 1;
+    }
 
-                    if (!metadataName.StartsWith("go.", StringComparison.Ordinal))
-                        metadataName = $"go.{metadataName}";
+    // Whether PromotedStructDeclarations emits this struct's accessor reference `Ꮡ<memberName>` for a field promoted
+    // through the VALUE embed promotedMemberName at memberDepth: the same tests its accessor reference loop applies.
+    private bool EmitsPromotedFieldReference(string promotedStructType, string promotedMemberName, string memberName, int memberDepth)
+    {
+        string simpleName = GetSimpleName(memberName);
 
-                    int lastDot = metadataName.LastIndexOf('.');
+        if (IsGoBlankMemberName(simpleName) || StructMembers.Any(member => GetSimpleName(member.memberName) == simpleName))
+            return false;
 
-                    if (lastDot < 0)
-                        yield break;
+        if (!PromotesField(simpleName, memberDepth))
+            return false;
 
-                    INamedTypeSymbol? typeSymbol =
-                        Context.Compilation.GetTypeByMetadataName($"{metadataName[..lastDot]}+{metadataName[(lastDot + 1)..]}");
+        if (PointerEmbedInnerType(promotedStructType, promotedMemberName) is not null)
+            return false;
 
-                    if (typeSymbol is null)
-                        yield break;
+        return !(memberDepth == 1 && IsReadOnlyZeroSizeMemberOf(promotedStructType, memberName) || ReadOnlyZeroSizeMembers.Contains(promotedMemberName));
+    }
 
-                    // Membership is Go's own promotion rule projected through existing metadata
-                    // (see PromotesFromMetadata): public members always — a genuine cross-package
-                    // embed sees exactly what Go exports — and unexported ones exactly when the
-                    // embedding struct belongs to the SAME Go package, which the `-tests`
-                    // reference model splits across an assembly seam (net's resolvConfTest over
-                    // *resolverConfig: the internal initOnce/dnsConfig/lastChecked promoted
-                    // NOTHING under the old public-only filter, and every converter-emitted
-                    // promoted selection was a missing member). The friend grant
-                    // (InternalsVisibleTo) is what makes those members legal C# here, and
-                    // IsSymbolAccessibleWithin is what consults it.
-                    string? embedGoPackage = GetGoPackageName(typeSymbol.ContainingType);
+    private IEnumerable<(string typeName, string memberName, int depth)> GetPromotedStructMembers(string structTypeName)
+    {
+        // Collect the embedded struct's members TRANSITIVELY: a member promoted into the
+        // enclosing struct may itself come from a NESTED embedded struct (Go promotes through
+        // every embedding level). e.g. stackWorkBuf embeds stackWorkBufHdr embeds workbufhdr,
+        // so stackWorkBuf.nobj must promote workbufhdr's nobj — but reading stackWorkBufHdr's
+        // DECLARED members alone misses it (nobj is a generated accessor on stackWorkBufHdr,
+        // not a declared field). The emitted accessor stays single-hop (`stackWorkBuf.nobj =>
+        // ref stackWorkBufHdr.nobj`), resolving through stackWorkBufHdr's own 1-level promotion.
+        // EVERY occurrence is collected, duplicates included: Go's promotion rule is
+        // DEPTH-AWARE and the caller applies it (promotes(): unique at the shallowest depth).
+        // A name-dedupe here would decide the question first, and decide it WRONG — "first
+        // (closest) declaration wins" is only half of Go's rule. It holds across DIFFERENT
+        // depths; at the SAME depth Go promotes from neither. Deduping silently turned an
+        // ambiguity into a win: reflect's `S0` embeds `D1` AND `D2`, both declaring `d`, so
+        // the second `d` was dropped here, the caller counted ONE occurrence, and `S1`
+        // promoted `d` through `S0` — emitting `instance.S0.d`, which does not exist (CS1061
+        // ×2), while `S0`'s own shell correctly emitted no `d` at all.
+        //
+        // Feeding the counter every occurrence does not re-open the case it was written for
+        // (macho's `FatArch`, Cpu at depth 1 and depth 2): minDepth 1 with count 1 still
+        // emits the depth-1 accessor and skips the depth-2 one.
+        List<(string typeName, string memberName, int depth)> collected = [];
 
-                    // `fieldSymbol`, not `field`: this local function is nested inside the
-                    // `PromotedStructDeclarations` GET accessor, and C# 14 makes `field` a KEYWORD there
-                    // (the synthesized-backing-field feature). Under LangVersion 14 the declaration is
-                    // CS9273 and each use binds to the synthesized backing field instead of the loop
-                    // variable — CS1061 on `.DeclaredAccessibility`/`.IsStatic`/`.Name`/`.Type`, which
-                    // is what broke every build on the .NET 10 SDK (issue #34). The sibling
-                    // `property` loop below is unaffected; `field` is the only contextual keyword the
-                    // accessor scope introduces.
-                    foreach (IFieldSymbol fieldSymbol in typeSymbol.GetMembers().OfType<IFieldSymbol>())
-                    {
-                        if (fieldSymbol.IsStatic || fieldSymbol.IsImplicitlyDeclared || !PromotesFromMetadata(fieldSymbol, embedGoPackage))
-                            continue;
+        collect(structTypeName, [], 1);
 
-                        if (GetSimpleName(fieldSymbol.Name) == "_")
-                            continue;
+        return collected;
 
-                        // A SYMBOL's .Name never carries the `@` a C# keyword needs (unlike syntax
-                        // Identifier.Text, which GetStructMembers's source-based sibling reads) —
-                        // escape it before it reaches emitted C# (runtime's white-box AddrRange
-                        // promoting addrRange.base: CS1519/CS1001/CS1002 in the generated accessor).
-                        yield return (fieldSymbol.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat), EscapeCsKeyword(fieldSymbol.Name));
-                    }
+        // seenTypes is the current PATH, not the set of everything visited: it is COPIED at each
+        // recursion, so a type reached by two SIBLING branches is walked on BOTH. That is what the
+        // header above requires -- every occurrence collected, the caller applying Go's depth-aware
+        // rule -- and a shared set silently performed the dedupe the header forbids, one level up:
+        // `twice` embeds viaX and *viaY, both embedding `base`, so with one set `base.B` was collected
+        // ONCE and promotes() saw a unique member at min depth. `twice`'s own shell was right (the
+        // caller walks each direct embed with a fresh set) while a type EMBEDDING twice emitted
+        // `B => ref twice.B`, a hop that does not exist -- CS1061, the `deeper` row of the
+        // ReflectFieldMetadata guard, which is red before this line and green after. Go's clause is
+        // that an ambiguity at one depth INHIBITS every deeper match; it does not resolve into
+        // whichever branch reached the type first (increment E2c).
+        //
+        // The two METHOD walks below (countPromotedMethods, collectPromotedMethods) thread their set
+        // the same way and take the SAME fix. The measurement that says so is worth keeping, because it
+        // read the other way first: with a METHOD on `base`, the guard at the unfixed generator reported
+        // only the FIELD error, which reads as `the method half is fine` -- and is wrong. Fixing the
+        // field walk UNMASKED CS1929 on the same row (`deeper` forwarding to `twice.M`, which twice
+        // correctly promotes no more than it promotes B). Errors behind a blocker are invisible until
+        // the blocker moves, so a clean second half is only believable once the first half is fixed.
+        //
+        // Cost: one HashSet copy per embedded field per level. Embedding chains are shallow (the
+        // corpus census below found no shape where the two walks even differ), and correctness is not
+        // negotiable against it.
+        void collect(string typeName, HashSet<string> seenTypes, int depth)
+        {
+            // Go forbids embedding cycles, but guard anyway so a malformed input can't loop. A cycle
+            // repeats a type ON THE PATH, so a path-scoped set still catches it.
+            if (!seenTypes.Add(typeName))
+                return;
 
-                    // A REFERENCED assembly's generated wrapper exposes its embedded member and its
-                    // transitively-promoted fields as public REF-RETURNING PROPERTIES (the embed
-                    // accessor `public partial ref Type Type` and the promoted accessors) - the
-                    // fields-only enumeration missed them, so a struct embedding a cross-package
-                    // wrapper (reflect's structType over abi.StructType over abi.Type) promoted
-                    // NOTHING from the deeper levels (CS1061 x32 + CS0117 x13). Yield them too;
-                    // the standard single-hop `X => ref Embed.X` emission handles both shapes.
-                    foreach (IPropertySymbol property in typeSymbol.GetMembers().OfType<IPropertySymbol>())
-                    {
-                        if (property.IsStatic || !property.ReturnsByRef || !PromotesFromMetadata(property, embedGoPackage))
-                            continue;
+            (StructDeclarationSyntax? structDecl, Compilation? compilation) = Context.GetStructDeclaration(typeName);
 
-                        if (property.IsIndexer || GetSimpleName(property.Name) == "_")
-                            continue;
+            if (structDecl is null)
+            {
+                // A CROSS-PACKAGE embedded type cannot be resolved by syntax in a real MSBuild
+                // build: project references arrive as METADATA references, never CompilationReference,
+                // so the referenced-compilations walk finds nothing — `type rtype struct { *abi.Type }`
+                // (runtime type.go) promoted NO fields and every `t.TFlag`/`t.Str`/`t.Kind_` was
+                // CS1061. Fall back to the semantic model: resolve the embedded type's symbol by
+                // metadata name and enumerate its public instance fields (the Go-visible members of
+                // a converted struct are plain public fields). Transitive promotion through a
+                // metadata type's own embeds is not chased (none of the runtime's cross-package
+                // embeds need it); the emitted single-hop accessor resolves through the embedded
+                // type's own generated promotion when it exists.
+                foreach ((string fieldTypeName, string fieldName) in getMetadataStructFields(typeName))
+                    collected.Add((fieldTypeName, fieldName, depth));
 
-                        yield return (property.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat), EscapeCsKeyword(property.Name));
-                    }
-                }
+                return;
+            }
+
+            foreach ((string memberType, string memberName, _, bool isEmbedded, _) in structDecl.GetStructMembers(compilation!, true))
+            {
+                collected.Add((memberType, memberName, depth));
+
+                // An embedded struct field contributes its own members transitively. The
+                // converter emits every embed - value or POINTER - as a `partial ref`
+                // PROPERTY (the marker the top level keys isPromotedStruct on), so recurse
+                // on that flag; a NAMED field whose name merely equals its type's simple
+                // name (`RCode RCode` in dnsmessage.Header) is a plain FIELD and must not
+                // contribute nested promotions.
+                if (isEmbedded)
+                    collect(memberType, [.. seenTypes], depth + 1);
+            }
+        }
+
+        IEnumerable<(string typeName, string fieldName)> getMetadataStructFields(string typeName)
+        {
+            // Normalize the source-form type reference to a CLR metadata name: strip the ж<>
+            // pointer wrapper, the `global::` prefix and `@` identifier escapes, root it in the
+            // `go` namespace, and mark the final containing package class as a NESTED type —
+            // `ж<@internal.abi_package.Type>` → `go.internal.abi_package+Type` (a converted
+            // package is a static class inside the go namespace; its types are nested members).
+            string metadataName = GeneratorExecutionContextExtensions.GetUnderlyingTypeName(typeName)
+                .Replace("global::", "").Replace("@", "");
+
+            if (!metadataName.StartsWith("go.", StringComparison.Ordinal))
+                metadataName = $"go.{metadataName}";
+
+            int lastDot = metadataName.LastIndexOf('.');
+
+            if (lastDot < 0)
+                yield break;
+
+            INamedTypeSymbol? typeSymbol =
+                Context.Compilation.GetTypeByMetadataName($"{metadataName[..lastDot]}+{metadataName[(lastDot + 1)..]}");
+
+            if (typeSymbol is null)
+                yield break;
+
+            // Membership is Go's own promotion rule projected through existing metadata
+            // (see PromotesFromMetadata): public members always — a genuine cross-package
+            // embed sees exactly what Go exports — and unexported ones exactly when the
+            // embedding struct belongs to the SAME Go package, which the `-tests`
+            // reference model splits across an assembly seam (net's resolvConfTest over
+            // *resolverConfig: the internal initOnce/dnsConfig/lastChecked promoted
+            // NOTHING under the old public-only filter, and every converter-emitted
+            // promoted selection was a missing member). The friend grant
+            // (InternalsVisibleTo) is what makes those members legal C# here, and
+            // IsSymbolAccessibleWithin is what consults it.
+            string? embedGoPackage = GetGoPackageName(typeSymbol.ContainingType);
+
+            // `fieldSymbol`, not `field`: this local function is nested inside the
+            // `PromotedStructDeclarations` GET accessor, and C# 14 makes `field` a KEYWORD there
+            // (the synthesized-backing-field feature). Under LangVersion 14 the declaration is
+            // CS9273 and each use binds to the synthesized backing field instead of the loop
+            // variable — CS1061 on `.DeclaredAccessibility`/`.IsStatic`/`.Name`/`.Type`, which
+            // is what broke every build on the .NET 10 SDK (issue #34). The sibling
+            // `property` loop below is unaffected; `field` is the only contextual keyword the
+            // accessor scope introduces.
+            foreach (IFieldSymbol fieldSymbol in typeSymbol.GetMembers().OfType<IFieldSymbol>())
+            {
+                if (fieldSymbol.IsStatic || fieldSymbol.IsImplicitlyDeclared || !PromotesFromMetadata(fieldSymbol, embedGoPackage))
+                    continue;
+
+                if (GetSimpleName(fieldSymbol.Name) == "_")
+                    continue;
+
+                // A SYMBOL's .Name never carries the `@` a C# keyword needs (unlike syntax
+                // Identifier.Text, which GetStructMembers's source-based sibling reads) —
+                // escape it before it reaches emitted C# (runtime's white-box AddrRange
+                // promoting addrRange.base: CS1519/CS1001/CS1002 in the generated accessor).
+                yield return (fieldSymbol.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat), EscapeCsKeyword(fieldSymbol.Name));
+            }
+
+            // A REFERENCED assembly's generated wrapper exposes its embedded member and its
+            // transitively-promoted fields as public REF-RETURNING PROPERTIES (the embed
+            // accessor `public partial ref Type Type` and the promoted accessors) - the
+            // fields-only enumeration missed them, so a struct embedding a cross-package
+            // wrapper (reflect's structType over abi.StructType over abi.Type) promoted
+            // NOTHING from the deeper levels (CS1061 x32 + CS0117 x13). Yield them too;
+            // the standard single-hop `X => ref Embed.X` emission handles both shapes.
+            foreach (IPropertySymbol property in typeSymbol.GetMembers().OfType<IPropertySymbol>())
+            {
+                if (property.IsStatic || !property.ReturnsByRef || !PromotesFromMetadata(property, embedGoPackage))
+                    continue;
+
+                if (property.IsIndexer || GetSimpleName(property.Name) == "_")
+                    continue;
+
+                yield return (property.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat), EscapeCsKeyword(property.Name));
             }
         }
     }
@@ -960,7 +985,7 @@ internal class StructTypeTemplate : TemplateBase
                     promotedMethodDepths[occurrences.Key] = (minDepth, shallowest.count + atMinDepth);
             }
 
-            // seenTypes is the PATH, copied at each recursion -- see collect() in getStructMembers for the rule
+            // seenTypes is the PATH, copied at each recursion -- see collect() in GetPromotedStructMembers for the rule
             // and the measurement (increment E2c). A shared set counts a method reached through two SIBLING
             // embeds once, so Go's same-depth annihilation never fires and an enclosing type promotes what the
             // embed itself does not have.
@@ -1073,13 +1098,13 @@ internal class StructTypeTemplate : TemplateBase
             List<MethodInfo> crossMethods = [];
             HashSet<string> crossMethodNames = new(StringComparer.Ordinal);
 
-            collectPromotedMethods(promotedStructType, [], 1, IsPointerHop(promotedStructType), directEmbedIsValue);
+            collectPromotedMethods(promotedStructType, promotedMemberName, [], 1, IsPointerHop(promotedStructType), directEmbedIsValue);
 
             // PATH-scoped for the same reason as countPromotedMethods above (increment E2c).
             // pathHasPointer is carried down the same path and stamped on every method harvested
             // along it (MethodInfo.PathHasPointer): whether a POINTER embed lies between the
             // enclosing struct and the type declaring the method.
-            void collectPromotedMethods(string typeName, HashSet<string> seenTypes, int depth, bool pathHasPointer, bool pathIsPlainValue)
+            void collectPromotedMethods(string typeName, string viaField, HashSet<string> seenTypes, int depth, bool pathHasPointer, bool pathIsPlainValue)
             {
                 // Go forbids embedding cycles, but guard anyway.
                 if (!seenTypes.Add(typeName))
@@ -1129,7 +1154,7 @@ internal class StructTypeTemplate : TemplateBase
                     if (pathHasPointer || pathIsPlainValue)
                     {
                         foreach (MethodInfo m in metadataBoxMethods.Where(m => !m.IsCrossPackage))
-                            offerPromotedMethod(m with { IsBoxRecv = true, IsValueEmbedBoxRecv = pathIsPlainValue, PathHasPointer = pathHasPointer }, depth);
+                            offerPromotedMethod(m with { IsBoxRecv = true, IsValueEmbedBoxRecv = pathIsPlainValue, PathHasPointer = pathHasPointer, ViaField = viaField, PromotedDepth = depth }, depth);
                     }
 
                     return;
@@ -1171,7 +1196,7 @@ internal class StructTypeTemplate : TemplateBase
                 if (pathHasPointer || pathIsPlainValue)
                 {
                     foreach (MethodInfo m in decl.GetBoxReceiverExtensionMethods(comp!))
-                        offerPromotedMethod(m with { IsBoxRecv = true, IsValueEmbedBoxRecv = pathIsPlainValue, PathHasPointer = pathHasPointer }, depth);
+                        offerPromotedMethod(m with { IsBoxRecv = true, IsValueEmbedBoxRecv = pathIsPlainValue, PathHasPointer = pathHasPointer, ViaField = viaField, PromotedDepth = depth }, depth);
                 }
 
                 // Recurse into nested embedded struct fields. The converter emits every embed -
@@ -1181,10 +1206,10 @@ internal class StructTypeTemplate : TemplateBase
                 // (`RCode RCode` in dnsmessage.Header) is a plain FIELD, not an embed - recursing
                 // into it falsely promotes the field type's methods (Message got RCode's String()
                 // forwarded as `target.Header.String()`, but Header has no String - CS1929).
-                foreach ((string memberType, _, _, bool isEmbedded, _) in decl.GetStructMembers(comp!, true))
+                foreach ((string memberType, string memberName, _, bool isEmbedded, _) in decl.GetStructMembers(comp!, true))
                 {
                     if (isEmbedded)
-                        collectPromotedMethods(memberType, [.. seenTypes], depth + 1, pathHasPointer || IsPointerHop(memberType), pathIsPlainValue && IsPlainValueHop(memberType));
+                        collectPromotedMethods(memberType, memberName, [.. seenTypes], depth + 1, pathHasPointer || IsPointerHop(memberType), pathIsPlainValue && IsPlainValueHop(memberType));
                 }
             }
 
@@ -1361,7 +1386,18 @@ internal class StructTypeTemplate : TemplateBase
                 {
                     if (structTypeParamStart < 0)
                     {
-                        string embedBox = GetUnsanitizedIdentifier(promotedMemberName);
+                        // ONE view of the receiver. A method declared deeper than the direct embed was once
+                        // reached through the direct embed's own shim, which descends a level and recurses:
+                        // `Ꮡt.of(T.ᏑB).M()` → `Ꮡb.of(B.ᏑC).M()` → `Ꮡc.of(C.ᏑD).M()`, one view minted and kept per
+                        // level (TS perf item 1b: six per node in LeftHandSideExpressionBase.AsNode). This struct
+                        // already carries the promoted accessor reference for the field that holds the declaring
+                        // type (`T.ᏑD`, a ref to `instance.B.D`), and golib resolves that view's Go offset by the
+                        // field's NAME, so `Ꮡt.of(T.ᏑD).M()` is the same Go pointer in one step. Named only where
+                        // the accessor reference loop above emits it: unshadowed, unambiguous at its depth, and
+                        // not a zero-size shared slot.
+                        string embedBox = method.PromotedDepth > 1 && method.ViaField is { } deepField && EmitsPromotedFieldReference(promotedStructType, promotedMemberName, deepField, method.PromotedDepth - 1)
+                            ? GetUnsanitizedIdentifier(deepField)
+                            : GetUnsanitizedIdentifier(promotedMemberName);
                         string shimScope = GetScope(GetSimpleName(method.Name)) == "public" ? methodScope : "internal";
                         string shimReceiver = ReceiverName(method.Parameters);
 
@@ -2145,7 +2181,7 @@ internal class StructTypeTemplate : TemplateBase
     //   - A CROSS-PACKAGE embed, whose declaration syntax is unavailable in this compilation. The
     //     re-rooted form names the INNER type's own `Ꮡ<member>` accessor, which exists only for the
     //     members that type's own generator saw; a cross-package embed is enumerated from METADATA
-    //     instead (see getStructMembers), and metadata surfaces public fields the inner DECLARATION
+    //     instead (see GetPromotedStructMembers), and metadata surfaces public fields the inner DECLARATION
     //     never had — the reflect bridge's hand-added `abi.Type.sysType`/`arrayDims`, promoted into
     //     `runtime.rtype`, have no generated accessor to name (CS0117).
     private string? PointerEmbedInnerType(string promotedStructType, string memberName)

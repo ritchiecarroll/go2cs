@@ -34,16 +34,28 @@ import (
 // a host go2cs targets: x/sys/cpu's four arm64 ID-register reads, which it reads only on freebsd, keep
 // their stubs, and the conversion names each stub it leaves (GO2CS2012).
 
-// asmForwardBody is one row: the golib type and member that implement the function, and its signature.
+// SAME-PACKAGE SIBLINGS. Some assembly has its exact answer in Go in the same package, under another name, and is
+// unreachable through any tag: zeebo/xxh3's accum_stubs_arm64.go is gated on the architecture alone and sets
+// `hasNEON = true` as a constant, so on linux/arm64 and darwin/arm64 every hash of more than 240 bytes, and every
+// Hasher block, calls accumNEON or accumBlockNEON, whose stubs threw. xxh3's own accumScalar and accumBlockScalar
+// compute the same accumulators in Go with identical signatures (`ptr` is an alias of unsafe.Pointer), and
+// accum_stubs_other.go uses them on every other architecture. A sibling row forwards the stub to such a function.
+// The two signatures must be types.Identical; a row whose sibling is absent, or differs, refuses the package
+// (GO2CS2011) rather than forward a call the sibling does not answer.
+
+// asmForwardBody is one row: the golib type and member that implement the function, and its signature; or, for a
+// sibling row, the same-package Go function that answers it.
 type asmForwardBody struct {
 	signature string // the Go signature, types only: "func(uint32, uint32) (uint32, uint32, uint32, uint32)"
 	alias     string // the C# type holding the body
 	member    string // its member
+	sibling   string // a sibling row's same-package Go function; alias, member and signature stay empty
 }
 
-// asmForwardBodies is keyed by "<package path>.<function>". Only golang.org/x/sys/cpu as a module: the
-// standard library's vendored copy is converted std and reached by no banked row. It converts under the same
-// import path, so the forward is gated on the package being outside GOROOT (funcAsmBodyForward), not on the key.
+// asmForwardBodies is keyed by "<package path>.<function>", for modules outside the standard library only: the
+// standard library's vendored golang.org/x/sys/cpu is converted std and reached by no banked row. It converts under
+// the same import path, so the forward is gated on the package being outside GOROOT (funcAsmBodyForward), not on
+// the key.
 var asmForwardBodies = map[string]asmForwardBody{
 	"golang.org/x/sys/cpu.cpuid": {
 		signature: "func(uint32, uint32) (uint32, uint32, uint32, uint32)",
@@ -55,6 +67,8 @@ var asmForwardBodies = map[string]asmForwardBody{
 		alias:     "global::go.golib.GoCpu",
 		member:    "Xgetbv",
 	},
+	"github.com/zeebo/xxh3.accumNEON":      {sibling: "accumScalar"},
+	"github.com/zeebo/xxh3.accumBlockNEON": {sibling: "accumBlockScalar"},
 }
 
 // asmForwardSignatureOf spells a signature by its types alone, as asmForwardBodies' rows do.
@@ -101,7 +115,23 @@ func asmForwardRowOf(funcDecl *ast.FuncDecl, pkgPath string, info *types.Info) (
 		return row, true, false
 	}
 
+	if row.sibling != "" {
+		sibling, found := asmForwardSiblingOf(funcObj, row.sibling)
+		return row, true, found && types.Identical(funcObj.Type(), sibling.Type())
+	}
+
 	return row, true, asmForwardSignatureOf(funcObj.Type().(*types.Signature)) == row.signature
+}
+
+// asmForwardSiblingOf finds a sibling row's Go function in the package that declares funcObj.
+func asmForwardSiblingOf(funcObj *types.Func, name string) (*types.Func, bool) {
+	if funcObj.Pkg() == nil {
+		return nil, false
+	}
+
+	sibling, ok := funcObj.Pkg().Scope().Lookup(name).(*types.Func)
+
+	return sibling, ok
 }
 
 // funcAsmBodyForward recognizes a bodyless function asmForwardBodies lists with its row's signature, and
@@ -116,6 +146,11 @@ func (v *Visitor) funcAsmBodyForward(funcDecl *ast.FuncDecl) (alias string, targ
 
 	if !listed || !matches {
 		return "", "", false
+	}
+
+	// A sibling is a member of this package's own class, so the forwarder calls it unqualified (an empty alias).
+	if row.sibling != "" {
+		return "", getSanitizedFunctionName(row.sibling), true
 	}
 
 	return row.alias, row.member, true
@@ -175,9 +210,28 @@ func refuseAsmForwardSignatures(pkg *packages.Package) *asmForwardSignatureRefus
 			}
 
 			declared := "an unresolved signature"
+			funcObj, resolved := pkg.TypesInfo.Defs[funcDecl.Name].(*types.Func)
 
-			if funcObj, ok := pkg.TypesInfo.Defs[funcDecl.Name].(*types.Func); ok {
+			if resolved {
 				declared = asmForwardSignatureOf(funcObj.Type().(*types.Signature))
+			}
+
+			if row.sibling != "" {
+				answer := "which this package does not declare"
+
+				if resolved {
+					if sibling, found := asmForwardSiblingOf(funcObj, row.sibling); found {
+						answer = "which is " + asmForwardSignatureOf(sibling.Type().(*types.Signature))
+					}
+				}
+
+				refusal.sites = append(refusal.sites, asmForwardSignatureSite{
+					position: pkg.Fset.Position(funcDecl.Pos()),
+					text: fmt.Sprintf("%s.%s is assembly that go2cs forwards to its same-package sibling %s, %s; this declaration is %s",
+						pkg.PkgPath, funcDecl.Name.Name, row.sibling, answer, declared),
+				})
+
+				continue
 			}
 
 			refusal.sites = append(refusal.sites, asmForwardSignatureSite{

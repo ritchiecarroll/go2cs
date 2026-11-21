@@ -48,6 +48,17 @@ type DeepHash struct {
 	deep
 }
 
+// side declares a FIELD named inner, at the same depth below TwinHash as acc's embedded inner. Go
+// then selects neither as TwinHash's `inner`, so the promoted call keeps BOTH hops: a promoted call
+// otherwise takes one view through the outer type's accessor for the field holding the method's
+// receiver (`p.Ꮡdeep.of(deep.Ꮡinner)` in resetVia, TS perf item 1b), which leaves no second hop to qualify.
+type side struct{ inner int }
+
+type TwinHash struct {
+	acc
+	side
+}
+
 // Write declares NO local named `acc` — the hop qualifier must stay the bare `acc`.
 func (h *Hash) Write(p []byte) {
 	h.acc.Add(p)
@@ -90,6 +101,14 @@ func resetVia(p *DeepHash) [4]byte {
 	return acc
 }
 
+// twinVia shadows the SECOND-hop type name on a call the one-view rewrite declines: the chain keeps
+// `.of(TwinHash.Ꮡacc).of(<pkg>_package.acc.Ꮡinner)`, and main's bare twin of the call stays bare.
+func twinVia(t *TwinHash) [4]byte {
+	var acc [4]byte
+	t.Store(&acc)
+	return acc
+}
+
 func main() {
 	h := &Hash{}
 	h.Write([]byte("go2cs"))
@@ -104,4 +123,8 @@ func main() {
 	fmt.Println(d.Verify(out[:]))
 	fmt.Println(d.Verify([]byte{0, 0}))
 	fmt.Println(resetVia(d))
+
+	t := &TwinHash{}
+	t.Add([]byte("go"))
+	fmt.Println(twinVia(t), t.side.inner)
 }

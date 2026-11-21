@@ -812,8 +812,8 @@ internal static (slice<slice<ж<Certificate>>> chains, error err) buildChains(th
         if (sigChecks == nil) {
             sigChecks = @new<nint>();
         }
-        sigChecks.Value++;
-        if (sigChecks.Value > maxChainSignatureChecks) {
+        sigChecks.DerefOrNull()++;
+        if (sigChecks.DerefOrNull() > maxChainSignatureChecks) {
             err = errSignatureLimit;
             return;
         }

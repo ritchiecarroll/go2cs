@@ -238,6 +238,35 @@ public class HeadlineGuardTests
         AssertNames(Headline.BuildFileRefusals(Targets, planted, Headline.BuildFiles[Targets]), "<ItemGroup>");
     }
 
+    // bc0f7ecf11 (2026-11-14) pinned go2csPath in the performance tree's props; the guard (1e3f492cdb, 2026-10-31)
+    // reads the file statically, ignoring its Condition, and refused the pin, so the headline refused on master itself.
+    // The allowance is the repository expression exactly: the pin passes, any other value is refused by name and value.
+    [TestMethod]
+    public void TheRepositoryPinOfGo2csPathPasses()
+    {
+        const string Props = "tests/Performance/Directory.Build.props";
+        string props = File.ReadAllText(Path.Combine(s_srcRoot, Props));
+
+        StringAssert.Contains(props, "<go2csPath>" + Headline.RepositoryGo2csPath + "</go2csPath>", "the props still pin the repository");
+        IReadOnlyList<HeadlineRefusal> refused = Headline.BuildFileRefusals(Props, props, Headline.BuildFiles[Props]);
+        Assert.IsFalse(refused.Any(r => r.ToString().Contains("go2csPath", StringComparison.Ordinal)), string.Join(" | ", refused));
+    }
+
+    [TestMethod]
+    public void AnotherGo2csPathIsRefusedByNameAndValue()
+    {
+        const string Props = "tests/Performance/Directory.Build.props";
+        const string Elsewhere = "C:/go2cs-deployed/";
+        string props = File.ReadAllText(Path.Combine(s_srcRoot, Props));
+
+        string planted = props.Replace(Headline.RepositoryGo2csPath, Elsewhere);
+        Assert.AreNotEqual(props, planted, "the plant did not land");
+
+        IReadOnlyList<HeadlineRefusal> refused = Headline.BuildFileRefusals(Props, planted, Headline.BuildFiles[Props]);
+        AssertNames(refused, "go2csPath");
+        AssertNames(refused, Elsewhere);
+    }
+
     [TestMethod]
     public void ABuildFileOutsideTheListedChainIsRefused()
     {

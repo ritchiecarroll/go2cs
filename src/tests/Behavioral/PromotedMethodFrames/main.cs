@@ -68,12 +68,12 @@ internal static partial void direct(ж<outer> Ꮡo, pouter p) {
     ref var o = ref Ꮡo.DerefOrNull();
 
     fmt.Println("direct value:", o.Val());
-    fmt.Println("direct pointer:", Ꮡo.of(outer.Ꮡmid).of(mid.Ꮡinner).Ptr());
+    fmt.Println("direct pointer:", Ꮡo.of(outer.Ꮡinner).Ptr());
     fmt.Println("direct self:", o.Self());
     fmt.Println("pointer embed value:", p.Val());
     fmt.Println("pointer embed pointer:", p.Ptr());
     fmt.Println("direct value stack:", o.ValStack());
-    fmt.Println("direct pointer stack:", Ꮡo.of(outer.Ꮡmid).of(mid.Ꮡinner).PtrStack());
+    fmt.Println("direct pointer stack:", Ꮡo.of(outer.Ꮡinner).PtrStack());
 }
 
 internal static partial void viaIface(ж<outer> o) {

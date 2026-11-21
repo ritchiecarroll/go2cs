@@ -150,6 +150,7 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - [Array ASSIGNMENT copies the whole array (`.Clone()` on the RHS)](slices-and-arrays.md#array-assignment-copies-the-whole-array-clone-on-the-rhs)
   - [Array VALUE-COPY at every transfer site (range, composite, return, send, append) — DEEP for nested arrays](slices-and-arrays.md#array-value-copy-at-every-transfer-site-range-composite-return-send-append--deep-for-nested-arrays)
   - [A STRUCT carrying array fields copies through its generated `ΔClone()`](slices-and-arrays.md#a-struct-carrying-array-fields-copies-through-its-generated-δclone)
+  - [A struct read from native memory holds its arrays inline, and seeds make two packages agree](slices-and-arrays.md#a-struct-read-from-native-memory-holds-its-arrays-inline-and-seeds-make-two-packages-agree)
   - [Nil-vs-empty slice identity (`s == nil` is representation nilness, not emptiness)](slices-and-arrays.md#nil-vs-empty-slice-identity-s--nil-is-representation-nilness-not-emptiness)
   - [`append` grows a slice exactly as Go's `growslice` does](slices-and-arrays.md#append-grows-a-slice-exactly-as-gos-growslice-does)
   - [A non-escaping append can take Go's 32-byte stack buffer](slices-and-arrays.md#a-non-escaping-append-can-take-gos-32-byte-stack-buffer)
