@@ -344,7 +344,7 @@ change without rebuilding callers.
 
 **The `GoFrame` rule is reported from the source generator**, not from an analyzer: it still runs where
 analyzers are switched off, and it is not configurable. F# and Visual Basic get no guard, and the contract page
-says so.
+says so. A project that sets `RunAnalyzers` to false keeps the rule and loses only its analyzer net (2026-11-20, item 8): the uses the generator could not bind, because they bind only with another generator's output.
 
 **One sentence above is corrected.** "`AsyncLocal` state follows the goroutine" is published as .5 intent, not
 as a .4 contract sentence: its cost and a no-bleed test between goroutines that share a carrier are read first,

@@ -710,6 +710,7 @@ public class TwinBoxTests
         CSharpParseOptions options = new(LanguageVersion.CSharp13);
         string source = Header + string.Concat(shapes) + Footer;
         IEnumerable<MetadataReference> references = References();
+        byte[]? libraryImage = null;
 
         if (library is not null)
         {
@@ -727,7 +728,8 @@ public class TwinBoxTests
             using MemoryStream image = new();
             Microsoft.CodeAnalysis.Emit.EmitResult built = lib.Emit(image);
             Assert.IsTrue(built.Success, "library: " + Errors(built.Diagnostics.Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error).ToArray()));
-            references = references.Append(MetadataReference.CreateFromImage(image.ToArray())).ToArray();
+            libraryImage = image.ToArray();
+            references = references.Append(MetadataReference.CreateFromImage(libraryImage)).ToArray();
         }
 
         CSharpCompilation compilation = CSharpCompilation.Create("twinbox",
@@ -746,6 +748,8 @@ public class TwinBoxTests
             .RunGeneratorsAndUpdateCompilation(compilation, out Compilation output, out var generated);
 
         LastGeneratorDiagnostics = [.. generated];
+
+        global::go2cs.Tests.TwinStampTests.AssertStampsHold(output, libraryImage); // 7d: every stamp agrees with the compiler
 
         string twins = string.Join("\n", output.SyntaxTrees.Skip(compilation.SyntaxTrees.Length).Select(tree => tree.ToString()));
 

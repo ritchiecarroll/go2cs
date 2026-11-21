@@ -214,6 +214,19 @@ internal static class GeneratorDiagnostics
         defaultSeverity: DiagnosticSeverity.Warning,
         isEnabledByDefault: true);
 
+    // GO2CS0016, GoFrameRuleGenerator (M:N item 8; DATA-mn-spike-2.md 9.8 and 10.6): GoFrame is a plain struct, so the
+    // compiler no longer refuses a frame that escapes, and a copied frame runs its deferred calls twice or loses them.
+    // Reported from a SOURCE GENERATOR, so it runs where analyzers are switched off, and NotConfigurable, so no severity
+    // setting, NoWarn or pragma turns it off.
+    public static readonly DiagnosticDescriptor GoFrameEscapes = new(
+        id: "GO2CS0016",
+        title: "A GoFrame is copied, stored or captured",
+        messageFormat: "{0}: a GoFrame may only be a local initialised to default, a ref parameter or ref argument, or the receiver of its own members, since a copy runs the frame's deferred calls twice or loses them",
+        category: "go2cs-gen",
+        defaultSeverity: DiagnosticSeverity.Error,
+        isEnabledByDefault: true,
+        customTags: WellKnownDiagnosticTags.NotConfigurable);
+
     // GO2CS0017, TwinGenerator (M:N, 7a: DESIGN-mn-twin-set.md sections 8 and 12.1): in an assembly built with twins,
     // every public member of its converted code is twinned, forwarded, or excluded by E1. Any other member would ship
     // without a twin, and adding one later changes the surface, so the build stops and names it with the reason.

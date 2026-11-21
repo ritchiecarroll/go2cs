@@ -8125,7 +8125,7 @@ internal static void main() {
 Each part has one job:
 
 - `GoFrame ᒐ = default;` declares this call's list of deferred calls. golib's
-  [`GoFrame`](../src/core/golib/GoFrame.cs) is a small `ref struct` that lives on the stack. The glyph
+  [`GoFrame`](../src/core/golib/GoFrame.cs) is a small struct that lives on the stack (GO2CS0016 refuses a copy). The glyph
   `ᒐ` marks this frame and every name that belongs to it, such as `ᒐex`, `ᒐp` and the label `ᒐdone`
   ([Reading Converted Code](#reading-converted-code-names-and-glyphs)).
 - `defer(…, ref ᒐ)` adds one call to that list. `ᒐ` is passed by `ref`, so the call lands in this
@@ -11799,7 +11799,7 @@ puts the frame back into `runtime.Callers` and the crash report, printed `name(.
 It does so only when the statement's IL holds exactly one call and that call reaches exactly one `panic`. A fault
 the CLR raises itself inside an inlined function, such as an integer divide by zero or a nil dereference, keeps
 the frames the CLR reports.
-<!-- src/core/runtime/managed_impl.cs:5468 `private static (System.Reflection.MethodBase method, int ilOffset)[]? inlinedPanicFrames(System.Reflection.MethodBase faulting, int ilOffset)`;
+<!-- src/core/runtime/managed_impl.cs:5526 `private static (System.Reflection.MethodBase method, int ilOffset)[]? inlinedPanicFrames(System.Reflection.MethodBase faulting, int ilOffset)`;
      the printed form :2341 `trace.Append(name).Append(inlined ? "(...)\n" : "()\n");`. Guards: GolibTests
      PanicFramesInlinedPanicTests (src/tests/GolibTests/PanicFramesInlinedPanicTests.cs). The limit is recorded as a BOARD row
      (docs/phase4/BOARD-next-validation-candidates.md, the frame-hint seat's stated limit). -->

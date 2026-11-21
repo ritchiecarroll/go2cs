@@ -33,7 +33,7 @@ Each part does one of the three things Go's runtime does for free:
   path — normal return, panic, `runtime.Goexit`, or a mapped runtime fault. They run **after** the
   panic has been parked, which is exactly what lets a deferred call recover the panic raised by the
   body it was registered in;
-- the **frame** is the defer list. It is a `ref struct`, so it lives in the method's own stack frame,
+- the **frame** is the defer list. It is a struct local (GO2CS0016 refuses a copy), so it lives in the method's own stack frame,
   the JIT can enregister its four inline slots, and the machinery allocates **nothing**.
 
 `GoFrame.Run()` is the whole of the ordering contract: LIFO drain, the `HandledPanic` save/restore

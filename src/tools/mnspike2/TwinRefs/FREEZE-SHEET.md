@@ -259,3 +259,10 @@ to .6 (2026-11-20); every ".5" in the block above reads ".6", and the work conti
   that rule move together, in the stdlib-twins arm.
 
 Kit: C:\go2cs\scratch\mn2\proto\b1sheet (sheet-7b holds the first read; the second build ran over it; G-LAPTOP).
+
+## Landing requirement met: the generated origin table (dated block, 2026-11-21, H, M:N item 7d)
+
+The first landing requirement above (the twin origin and the await map as a generated table, not reflection) is the
+[GoTwinOf] stamp. The design, the readings and what is owed are in docs/phase4/DATA-mn-origin-table.md, on branch
+claude/h-mn-origin-table. Its ctor is frozen in PublicSurface.golib.txt [mn-frozen]. The Native AOT reading of A4's
+program is owed before landing.
