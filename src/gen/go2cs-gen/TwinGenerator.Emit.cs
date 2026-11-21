@@ -331,6 +331,18 @@ public sealed partial class TwinGenerator
             report.Append("// candidates=").Append(m_ordered.Count).Append(" twinned=").Append(twinned.Count)
                 .Append(" go-only=").Append(twinned.Count(candidate => candidate.GoOnly)).Append("\r\n");
             report.Append("// forwarders=").Append(m_ordered.Count(candidate => candidate.Forwarded)).Append("\r\n");
+
+            // Section 9: one row per member of the population, `// S file|line|name|class`.
+            if (m_populationAssembly)
+            {
+                foreach (Candidate candidate in m_ordered.Where(InPopulation))
+                {
+                    FileLinePositionSpan span = candidate.Syntax.SyntaxTree.GetLineSpan(candidate.Syntax.Identifier.Span);
+
+                    report.Append("// S ").Append(Path.GetFileName(span.Path)).Append('|').Append(span.StartLinePosition.Line + 1).Append('|')
+                        .Append(candidate.Syntax.Identifier.Text).Append('|').Append(Classify(candidate)).Append("\r\n");
+                }
+            }
             report.Append("// await-sites=").Append(m_awaitSites).Append(" go-twinned=").Append(m_goTwinned).Append(" go-literals=").Append(m_goLiterals)
                 .Append(" ref-unrederivable=").Append(m_unrederivable).Append(" ref-spills=").Append(m_spills)
                 .Append(" ref-blocked=").Append(m_refBlocked).Append(" go-plain=").Append(GoPlain).Append("\r\n");

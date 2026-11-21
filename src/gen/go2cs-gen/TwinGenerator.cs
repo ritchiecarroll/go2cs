@@ -146,6 +146,16 @@ public sealed partial class TwinGenerator : ISourceGenerator
                 unmark.Add(entry.Trim());
         }
 
+        // 7a's test seam for the guard (F9): GoTwinsGuardDrop names functions, ',' or ';' between, whose forwarders are
+        // dropped, so GO2CS0017 must name each one. Never a build anyone ships.
+        HashSet<string> guardDrop = new(StringComparer.Ordinal);
+
+        if (options.TryGetValue("build_property.GoTwinsGuardDrop", out string? dropped))
+        {
+            foreach (string entry in dropped.Split([',', ';'], StringSplitOptions.RemoveEmptyEntries))
+                guardDrop.Add(entry.Trim());
+        }
+
         // N2 (DESIGN-mn-box-twin.md 9.8): GoTwinsBoxRecv=false keeps every by-ref receiver refused, the cut's A/B control;
         // GoTwinsBoxForwarders=false keeps the interface forwarders to box twins sync, their own arm; GoTwinsBoxCopy=true
         // makes a box twin COPY its receiver -- wrong on purpose, the aliasing probe's negative control (SN-6), never a
@@ -162,7 +172,7 @@ public sealed partial class TwinGenerator : ISourceGenerator
 
         new Run(context, goSites, ifaceShape, ifaceAll)
         {
-            Self = self, Pairs = pairs, CallerRule = callerRule, IfaceUnmark = unmark, BoxRecv = boxRecv, BoxForwarders = boxForwarders, BoxCopy = boxCopy,
+            Self = self, Pairs = pairs, CallerRule = callerRule, IfaceUnmark = unmark, GuardDrop = guardDrop, BoxRecv = boxRecv, BoxForwarders = boxForwarders, BoxCopy = boxCopy,
             BoxParam = boxParam, BoxArgCopy = boxArgCopy
         }.Execute();
     }
@@ -177,6 +187,12 @@ public sealed partial class TwinGenerator : ISourceGenerator
         private readonly Dictionary<SyntaxTree, SemanticModel> m_models = [];
         private readonly List<(string path, int line, string id)> m_refuse = [];
         private Compilation m_augmented = null!;
+
+        // 7a: whether this assembly has a population at all (it is not hand-owned, R5).
+        private bool m_populationAssembly;
+
+        // 7a's guard seam (F9): the functions whose forwarders are dropped.
+        internal HashSet<string> GuardDrop { get; init; } = [];
 
         internal SemanticModel Model(SyntaxTree tree)
         {
@@ -242,10 +258,23 @@ public sealed partial class TwinGenerator : ISourceGenerator
                     candidate.Refusal = "ref-shared-member";
             }
 
-            bool population = !Common.IsHandOwnedAssembly(Context.Compilation);
+            m_populationAssembly = !Common.IsHandOwnedAssembly(Context.Compilation);
 
             foreach (Candidate candidate in m_ordered)
-                candidate.Forwarded = population && !candidate.Twinned && Forwardable(candidate);
+                candidate.Forwarded = m_populationAssembly && !candidate.Twinned && InPopulation(candidate) && !IsE1(candidate.Symbol) && NotForwardable(candidate) is null &&
+                    !GuardDrop.Contains(candidate.Symbol.Name);
+
+            // The guard (GO2CS0017, section 8): a member of the population that is neither twinned, forwarded nor E1.
+            if (m_populationAssembly)
+            {
+                foreach (Candidate candidate in m_ordered.Where(InPopulation))
+                {
+                    string verdict = Classify(candidate);
+
+                    if (verdict.StartsWith("GUARD:", StringComparison.Ordinal))
+                        Context.ReportDiagnostic(Diagnostic.Create(GeneratorDiagnostics.TwinSetGap, candidate.Syntax.Identifier.GetLocation(), candidate.Symbol.ToDisplayString(), verdict.Substring("GUARD:".Length)));
+                }
+            }
 
             foreach (Candidate candidate in m_ordered)
             {
@@ -445,7 +474,7 @@ public sealed partial class TwinGenerator : ISourceGenerator
                 symbol.Parameters.Any(parameter => parameter.Type.TypeKind is TypeKind.Pointer or TypeKind.FunctionPointer))
                 return "unsafe";
 
-            if (symbol.ReturnType.Name is "Task" or "ValueTask" or "GoTask")
+            if (IsTaskShaped(symbol.ReturnType))
                 return "async-shaped";
 
             if (method.DescendantNodes().OfType<YieldStatementSyntax>().Any())
@@ -481,30 +510,55 @@ public sealed partial class TwinGenerator : ISourceGenerator
             TwinVisible(twin) && !twin.GetAttributes().Any(attribute =>
                 attribute.AttributeClass is { Name: "GoParkForwarderAttribute", ContainingNamespace: { Name: "golib", ContainingNamespace.Name: "go" } });
 
-        // 7a (12.1): whether a candidate with no state-machine twin gets a forwarder. The population (R1) is every PUBLIC
-        // method, its every containing type public, declared in a converted file of an assembly that is not hand-owned
-        // (the caller checks that), outside E1 (a generic method or a method of a generic type). A forwarder is written
-        // only into a partial host, for a static method with a plain signature; the rest of the population is the guard's
-        // (F9) to name, and the shapes that 12.1 lowers (a box receiver, `...T`) join it row by row (F3, F4).
-        private bool Forwardable(Candidate candidate)
+        // 7a (12.1, R1): the population is every PUBLIC method, its every containing type public, declared in a converted
+        // file (Common's predicate) of an assembly that is not hand-owned (the caller checks that).
+        private static bool InPopulation(Candidate candidate)
         {
-            IMethodSymbol symbol = candidate.Symbol;
-
-            if (candidate.Refusal is "has-twin" or "host-not-partial" or "interface-member" or "explicit-impl" or "instance" or "ref-return")
+            if (!Common.IsConvertedSourceFile(candidate.Syntax.SyntaxTree))
                 return false;
 
-            if (!symbol.IsStatic || symbol.IsGenericMethod || !Common.IsConvertedSourceFile(candidate.Syntax.SyntaxTree))
-                return false;
-
-            for (ISymbol? member = symbol; member is not null and not INamespaceSymbol; member = member.ContainingType)
+            for (ISymbol? member = candidate.Symbol; member is not null and not INamespaceSymbol; member = member.ContainingType)
             {
-                if (member.DeclaredAccessibility != Accessibility.Public || member is INamedTypeSymbol { IsGenericType: true })
+                if (member.DeclaredAccessibility != Accessibility.Public)
                     return false;
             }
 
+            return true;
+        }
+
+        // E1, one named rule (12.1): a generic method, or a method of a generic type. Excluded at the freeze; the lift is
+        // owed and additive. (A member of a generic interface is the interface side's `generic-interface`.)
+        private static bool IsE1(IMethodSymbol symbol)
+        {
+            if (symbol.IsGenericMethod)
+                return true;
+
+            for (INamedTypeSymbol? type = symbol.ContainingType; type is not null; type = type.ContainingType)
+            {
+                if (type.IsGenericType)
+                    return true;
+            }
+
+            return false;
+        }
+
+        // Why a member of the population with no state-machine twin gets no forwarder, or null when it gets one. A
+        // forwarder is written only into a partial host, for a static method whose signature it can carry; any member
+        // left here is the guard's (F9) to name. `async-shaped` (a BCL or golib task result) is no forwarder's: a
+        // converted file never returns one, so the guard names it (section 8's control for keying it on a name).
+        private static string? NotForwardable(Candidate candidate)
+        {
+            IMethodSymbol symbol = candidate.Symbol;
+
+            if (candidate.Refusal is "has-twin" or "host-not-partial" or "interface-member" or "explicit-impl" or "instance" or "ref-return" or "async-shaped")
+                return candidate.Refusal;
+
+            if (!symbol.IsStatic)
+                return "instance";
+
             if (symbol.ReturnsByRef || symbol.ReturnsByRefReadonly || symbol.ReturnType.IsRefLikeType ||
                 symbol.ReturnType.TypeKind is TypeKind.Pointer or TypeKind.FunctionPointer)
-                return false;
+                return "result-shape";
 
             for (int i = 0; i < symbol.Parameters.Length; i++)
             {
@@ -514,11 +568,26 @@ public sealed partial class TwinGenerator : ISourceGenerator
                     continue;
 
                 if (parameter.RefKind != RefKind.None || parameter.Type.IsRefLikeType && !IsSString(parameter.Type))
-                    return false;
+                    return "parameter-shape";
             }
 
-            return true;
+            return null;
         }
+
+        // Section 9's row per member of the population: `twin | forwarder:<reason> | E1 | GUARD:<reason>`.
+        internal string Classify(Candidate candidate) =>
+            candidate.Twinned ? "twin" :
+            candidate.Forwarded ? "forwarder:" + (candidate.Refusal ?? "no-park") :
+            IsE1(candidate.Symbol) ? "E1" :
+            "GUARD:" + (NotForwardable(candidate) ?? (GuardDrop.Contains(candidate.Symbol.Name) ? "forwarder-dropped" : null) ?? candidate.Refusal ?? "unknown");
+
+        // Async-shaped keys on the SYMBOLS (12.1, F7): a Go type that happens to be named Task is none.
+        private static bool IsTaskShaped(ITypeSymbol type) =>
+            type.OriginalDefinition is INamedTypeSymbol
+            {
+                Name: "Task" or "ValueTask", ContainingNamespace:
+                { Name: "Tasks", ContainingNamespace: { Name: "Threading", ContainingNamespace: { Name: "System", ContainingNamespace.IsGlobalNamespace: true } } }
+            } or INamedTypeSymbol { Name: "GoTask", ContainingNamespace: { Name: "golib", ContainingNamespace: { Name: "go", ContainingNamespace.IsGlobalNamespace: true } } };
 
         // The plain lowerings a forwarder gives back their Go shape (section 4): a pointer receiver, `this ref T`, takes
         // its box (F3), and an sstring-pilot parameter its @string (F5), so the twin is the same whichever lowering the

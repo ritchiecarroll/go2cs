@@ -362,3 +362,12 @@ F2, F6; F3, F5; F4, F11; F7, F8; the guard (F9) and O2 (F10); P8; then the closu
   one element), and was restored byte-identical. Named limit: a call to a variadic interface member stays plain, as
   it did before the member had a slot (its arguments are in the expanded `params` form). GenTests 702 of 702, with
   no earlier row changed.
+- **Step 4, F7, F8 and F9:**
+  - F7: `async-shaped` keys on the BCL and golib task symbols, so a Go type named `Task` is forwarded or twinned.
+    It stays out of forwarders: a converted file never returns a BCL task, so the guard names one.
+  - F8: E1 is one rule (`IsE1`), and the report writes section 9's row per member of the population:
+    `// S file|line|name|twin`, `forwarder:<reason>`, `E1` or `GUARD:<reason>`.
+  - F9: GO2CS0017 (Error) reports every GUARD row, naming the member and the reason. Its seam, GoTwinsGuardDrop,
+    drops a forwarder, and the guard names that one member. Made to fail as section 8 asks: keyed on the name again,
+    `async-shaped` makes the guard name the two functions returning the Go type `Task`. Restored byte-identical.
+  - GenTests 707 of 707, with no earlier row changed. GO2CS0017 is registered in `docs/DiagnosticCodes.md`.

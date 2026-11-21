@@ -174,6 +174,85 @@ public class TwinSurfaceTests
         StringAssert.Contains(twins, "Addꞏtwin(nint first, global::go.slice<object> restʗp);", "the slot takes the Go shape, a slice");
     }
 
+    // F7: a Go type named Task, returned by a function that cannot park and by one that parks; a BCL Task beside them.
+    private const string GoTaskType = """
+            public partial struct Task { public nint v; }
+
+            public static Task mk(nint v) => new Task { v = v };
+
+            public static Task mkp() { ᐸꟷ(ch); return default; }
+
+            public static System.Threading.Tasks.Task real() => System.Threading.Tasks.Task.CompletedTask;
+
+        """;
+
+    [TestMethod]
+    public void F7_AGoTypeNamedTaskIsNotAsyncShaped()
+    {
+        (string twins, Diagnostic[] errors) = RunWith(null, null, GoTaskType);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        StringAssert.Contains(twins, "global::go.golib.GoTask<Task> mkꞏtwin(nint v) => new global::go.golib.GoTask<Task>(mk(v));", "forwarded");
+        StringAssert.Contains(twins, "async global::go.golib.GoTask<Task> mkpꞏtwin()", "twinned");
+        StringAssert.Contains(twins, "// refused async-shaped=1 ", "only the BCL Task is async-shaped");
+        StringAssert.Contains(twins, "|real|GUARD:async-shaped", "and a converted file never holds one: the guard names it");
+    }
+
+    // F8: a generic function (E1), beside the report row of each other class.
+    private const string Generic = """
+            public static T ident<T>(T v) => v;
+
+        """;
+
+    [TestMethod]
+    public void F8_AGenericFunctionIsE1ByName()
+    {
+        (string twins, Diagnostic[] errors) = RunWith(null, null, Generic, CannotPark, CallsAdd);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        Assert.AreEqual(0, Lines(twins, "identꞏtwin("), "no twin and no forwarder: E1 is excluded at the freeze");
+        StringAssert.Contains(twins, "|ident|E1\r", "named E1 in the report");
+        StringAssert.Contains(twins, "|add|forwarder:no-park\r", "a forwarder's row names why");
+        StringAssert.Contains(twins, "|useAdd|twin\r", "a twin's row");
+        Assert.AreEqual(0, Lines(twins, "|hidden|"), "an internal function is not in the population: no row");
+    }
+
+    private static Diagnostic[] Guard(string id) => LastGeneratorDiagnostics!.Where(diagnostic => diagnostic.Id == id).ToArray();
+
+    [TestMethod]
+    public void F9_TheGuardNamesAPopulationMemberWithNoTwinAndNoForwarder()
+    {
+        // The seam drops add's forwarder: the guard must name add, and nothing else.
+        (_, Diagnostic[] errors) = RunWith(null, new() { ["build_property.GoTwinsGuardDrop"] = "add" }, CannotPark, CallsAdd, Generic);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        Diagnostic[] guard = Guard("GO2CS0017");
+        Assert.AreEqual(1, guard.Length, string.Join("\n", guard.Select(diagnostic => diagnostic.ToString())));
+        Assert.AreEqual(DiagnosticSeverity.Error, guard[0].Severity);
+        StringAssert.Contains(guard[0].GetMessage(), "add(", "it names the member");
+        StringAssert.Contains(guard[0].GetMessage(), "forwarder-dropped", "and the reason");
+    }
+
+    [TestMethod]
+    public void F9_TheGuardIsSilentOnAWholeSet_TheControl()
+    {
+        (_, Diagnostic[] errors) = RunWith(null, null, CannotPark, CallsAdd, Generic, BodyRefused, PointerReceivers, SStringPilot, Variadic);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        Assert.AreEqual(0, Guard("GO2CS0017").Length, "every member is twinned, forwarded or E1");
+    }
+
+    [TestMethod]
+    public void F9_TheGuardNamesAnAsyncShapedResult()
+    {
+        (_, Diagnostic[] errors) = RunWith(null, null, GoTaskType);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        Diagnostic[] guard = Guard("GO2CS0017");
+        Assert.AreEqual(1, guard.Length, string.Join("\n", guard.Select(diagnostic => diagnostic.ToString())));
+        StringAssert.Contains(guard[0].GetMessage(), "real(", "the BCL Task, and not the Go type named Task");
+    }
+
     private static int Lines(string twins, string text) => twins.Split('\n').Count(line => line.Contains(text, StringComparison.Ordinal));
 
     [TestMethod]

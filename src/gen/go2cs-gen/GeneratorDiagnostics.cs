@@ -213,5 +213,26 @@ internal static class GeneratorDiagnostics
         category: "go2cs-gen",
         defaultSeverity: DiagnosticSeverity.Warning,
         isEnabledByDefault: true);
+
+    // GO2CS0017, TwinGenerator (M:N, 7a: DESIGN-mn-twin-set.md sections 8 and 12.1): in an assembly built with twins,
+    // every public member of its converted code is twinned, forwarded, or excluded by E1. Any other member would ship
+    // without a twin, and adding one later changes the surface, so the build stops and names it with the reason.
+    public static readonly DiagnosticDescriptor TwinSetGap = new(
+        id: "GO2CS0017",
+        title: "A public member of a package built with twins has no twin",
+        messageFormat: "'{0}' is public in a package built with twins but gets neither a twin nor a forwarder ({1})",
+        category: "go2cs-gen",
+        defaultSeverity: DiagnosticSeverity.Error,
+        isEnabledByDefault: true);
+
+    // GO2CS0018, TwinGenerator (M:N, 7a: DESIGN-mn-twin-set.md O2): a package built with twins ships the whole twin set,
+    // never a part of it. A switch that selects part of the set is refused in such a build.
+    public static readonly DiagnosticDescriptor PartialTwinSet = new(
+        id: "GO2CS0018",
+        title: "A partial twin set is selected in a package built with twins",
+        messageFormat: "'{0}' selects a partial twin set; a package built with twins ships the whole set",
+        category: "go2cs-gen",
+        defaultSeverity: DiagnosticSeverity.Error,
+        isEnabledByDefault: true);
 #pragma warning restore RS2008
 }

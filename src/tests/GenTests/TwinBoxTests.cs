@@ -734,7 +734,9 @@ public class TwinBoxTests
         // struct's field tokens, by rule) beside the twin generator, as a converted project builds: the twin generator
         // binds against its siblings' output, so the final compilation must carry it too.
         CSharpGeneratorDriver.Create([new RecvGenerator(), new FieldAccessGenerator(), new TypeGenerator(), new TwinGenerator()], parseOptions: options, optionsProvider: new BuildProperties(properties))
-            .RunGeneratorsAndUpdateCompilation(compilation, out Compilation output, out _);
+            .RunGeneratorsAndUpdateCompilation(compilation, out Compilation output, out var generated);
+
+        LastGeneratorDiagnostics = [.. generated];
 
         string twins = string.Join("\n", output.SyntaxTrees.Skip(compilation.SyntaxTrees.Length).Select(tree => tree.ToString()));
 
@@ -751,6 +753,9 @@ public class TwinBoxTests
 
     // The image RunWith last emitted on this thread, for a row that RUNS a twin (TwinSurfaceTests F4).
     [ThreadStatic] internal static byte[]? LastImage;
+
+    // The diagnostics the generators of RunWith's last run reported (the guard's rows, TwinSurfaceTests F9 and F10).
+    [ThreadStatic] internal static Diagnostic[]? LastGeneratorDiagnostics;
 
     internal static string Errors(Diagnostic[] errors) => string.Join("\n", errors.Select(error => error.ToString()));
 
