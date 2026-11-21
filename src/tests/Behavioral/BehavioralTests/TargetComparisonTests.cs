@@ -1495,6 +1495,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckMnBoxAlias() => CheckTarget("MnBoxAlias");
 
     [TestMethod]
+    public void CheckMnContended() => CheckTarget("MnContended");
+
+    [TestMethod]
     public void CheckMnAotGeneric() => CheckTarget("MnAotGeneric");
 
     [TestMethod]
