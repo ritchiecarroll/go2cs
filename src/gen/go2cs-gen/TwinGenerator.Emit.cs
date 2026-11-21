@@ -233,6 +233,7 @@ public sealed partial class TwinGenerator
 
             return indent + "[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]\r\n" +
                    indent + rewriter.Stamp(rewriter.Sites) + "\r\n" +
+                   indent + rewriter.KeepOrigin() + "\r\n" +
                    "#line " + (start.Line + 1) + " \"" + tree.FilePath + "\"\r\n" +
                    new string(' ', start.Character) + twin.ToFullString().TrimEnd() + "\r\n#line default\r\n" +
                    string.Concat(rewriter.CacheFields.Select(field => indent + field + "\r\n"));

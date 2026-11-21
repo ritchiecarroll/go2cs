@@ -103,10 +103,18 @@ public sealed partial class TwinGenerator
         // The [GoTwinOf] stamp of the function this twin is generated from, with the given await lines.
         public string Stamp(IReadOnlyList<int> sites) => m_method is IMethodSymbol origin ? StampFor(origin, sites) : "";
 
+        // A trimmed build keeps the methods the stamp names while it keeps the twin (G's condition 2 on 7d): the runtime
+        // reads the origin by reflection, and a trimmed-away origin would leave the frame without its Go name.
+        public string KeepOrigin() => m_method is IMethodSymbol origin
+            ? "[global::System.Diagnostics.CodeAnalysis.DynamicDependency(\"" + origin.Name + "\", typeof(" + HostText(origin.ContainingType) + "))]"
+            : "";
+
+        private static string HostText(INamedTypeSymbol host) =>
+            (host.IsGenericType ? host.ConstructUnboundGenericType() : host).ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+
         internal static string StampFor(IMethodSymbol origin, IReadOnlyList<int> sites)
         {
-            INamedTypeSymbol host = origin.ContainingType;
-            string hostText = (host.IsGenericType ? host.ConstructUnboundGenericType() : host).ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+            string hostText = HostText(origin.ContainingType);
 
             return "[global::go.golib.GoTwinOf(typeof(" + hostText + "), \"" + origin.Name + "\", new global::System.Type[] { " +
                    string.Join(", ", origin.Parameters.Select(parameter => StampType(parameter.Type))) + " }, new int[] { " +
