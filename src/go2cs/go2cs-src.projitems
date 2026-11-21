@@ -206,6 +206,7 @@
     <None Include="$(MSBuildThisFileDirectory)crashVerdict_test.go" />
     <None Include="$(MSBuildThisFileDirectory)crossAssemblyLiftDedup_test.go" />
     <None Include="$(MSBuildThisFileDirectory)crosspkgExportedBox_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)csBannedTypeAndAliasNames_test.go" />
     <None Include="$(MSBuildThisFileDirectory)csReservedTypeNames_test.go" />
     <None Include="$(MSBuildThisFileDirectory)csprojMetadata_test.go" />
     <None Include="$(MSBuildThisFileDirectory)csprojTemplate_test.go" />

@@ -1249,6 +1249,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckKeywordNamedTypes() => CheckTarget("KeywordNamedTypes");
 
     [TestMethod]
+    public void CheckKeywordPackageAliases() => CheckTarget("KeywordPackageAliases");
+
+    [TestMethod]
     public void CheckKeywordTrueFalseIdent() => CheckTarget("KeywordTrueFalseIdent");
 
     [TestMethod]
