@@ -1462,6 +1462,12 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckMnParkedCallers() => CheckTarget("MnParkedCallers");
 
     [TestMethod]
+    public void CheckMnParkedMultiLine() => CheckTarget("MnParkedMultiLine");
+
+    [TestMethod]
+    public void CheckMnParkedSameName() => CheckTarget("MnParkedSameName");
+
+    [TestMethod]
     public void CheckMnFuncPair() => CheckTarget("MnFuncPair");
 
     [TestMethod]

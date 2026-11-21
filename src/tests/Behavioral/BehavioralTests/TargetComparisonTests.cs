@@ -1465,6 +1465,12 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckMnParkedCallers() => CheckTarget("MnParkedCallers");
 
     [TestMethod]
+    public void CheckMnParkedMultiLine() => CheckTarget("MnParkedMultiLine");
+
+    [TestMethod]
+    public void CheckMnParkedSameName() => CheckTarget("MnParkedSameName");
+
+    [TestMethod]
     public void CheckMnFuncPair() => CheckTarget("MnFuncPair");
 
     [TestMethod]
