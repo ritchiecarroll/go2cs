@@ -244,6 +244,12 @@ func runModuleTests(moduleDir string, outRoot string, options Options, corpusRel
 		return err
 	}
 
+	// Before any conversion: a -module-disclosures root this run cannot apply is refused now, not after an hour of
+	// conversion, and never silently (moduleDisclosurePreflight).
+	if err := moduleDisclosurePreflight(options.testModuleDisclosures, moduleDir, options.testModuleVersion); err != nil {
+		return err
+	}
+
 	// A module-cache release with no go.mod: the go commands of this run read the cache's synthesized
 	// one, as goModFile already does in-process (and say so).
 	if _, err := installGoModOverlay(moduleDir, outRoot); err != nil {

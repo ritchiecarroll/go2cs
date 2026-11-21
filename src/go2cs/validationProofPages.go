@@ -402,6 +402,13 @@ func renderValidationProofPage(provenance proofPageProvenance, comparison testCo
 
 	if provenance.convertedPath != "" {
 		fmt.Fprintf(&page, "\nBoth sides were built with %s.\n", proofBuildTagsSentence(provenance.buildTags, comparison.Environment.OracleBuildTags))
+
+		// A module COPY read under a version -module-version claimed, not one a module-cache directory resolved
+		// (moduleVersionClaimed): said on the page, so the row cannot be banked unnoticed.
+		if claimed := comparison.Environment.ModuleVersionClaimed; claimed != "" {
+			fmt.Fprintf(&page, "\nThe module version `%s` was claimed by -module-version for a copy of the module, not resolved "+
+				"from a module-cache directory.\n", claimed)
+		}
 	}
 
 	if provenance.inputDigest != "" {
@@ -1201,7 +1208,7 @@ func thirdPartyDisclosureURL(outputPath string, manifest testManifest, options O
 
 	rel := strings.TrimPrefix(strings.TrimPrefix(manifest.PackageImportPath, manifest.ModulePath), "/")
 	pkgDir := filepath.Join(options.mainModuleDir, filepath.FromSlash(rel))
-	manifestDir, _ := resolveDisclosureManifestDir(outputPath, options.testModuleDisclosures, options.mainModulePath, options.mainModuleDir, pkgDir)
+	manifestDir, _, _ := resolveDisclosureManifestDir(outputPath, options.testModuleDisclosures, options.mainModulePath, options.mainModuleDir, options.testModuleVersion, pkgDir)
 
 	if filepath.Clean(manifestDir) == filepath.Clean(outputPath) {
 		return ""
