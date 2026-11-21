@@ -528,7 +528,7 @@ behavioral corpus has 0 besides the new extension. -->
 if (sigChecks == nil) {
     sigChecks = @new<nint>();
 }
-sigChecks.Value++;
+sigChecks.DerefOrNull()++;
 ```
 Outside a lambda the assignment is followed by `sigChecks = ref ᏑsigChecks.DerefOrNull();`; inside one that line is CS8175, so it is not emitted.
 The suppression is sound because no LEGITIMATE re-alias ever occurs inside a lambda: a lambda's OWN pointer parameter is passed as the box `ж<T>` (never deref-aliased), and a heap-boxed value local is written THROUGH its box (`Ꮡb.Value = …`, never box-repointed).
