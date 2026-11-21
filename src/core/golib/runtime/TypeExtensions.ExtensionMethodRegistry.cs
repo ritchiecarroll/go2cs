@@ -563,13 +563,21 @@ public static partial class TypeExtensions
     /// <summary>
     /// The key of a loaded receiver, read as <see cref="ExtensionHome"/> reads it (<see cref="ScopedReceiver"/>), or
     /// <c>null</c> when it has none and its host class must be read for every question: a type parameter, an array, a
-    /// pointer, a function pointer, and any type of the core library or of golib.
+    /// pointer, a function pointer, any type of the core library or of golib, and a type whose metadata token the
+    /// runtime cannot read.
     /// </summary>
     /// <remarks>
     /// A core-library receiver has no key because a question's keys cannot name it: <c>Nullable&lt;E&gt;</c> matches a
     /// question about <c>E</c> by assignability (<see cref="Type.IsAssignableFrom"/>), and <c>E</c> neither derives from
     /// it nor implements it. A golib receiver is left without one too, conservatively: its class is read for every
     /// question its homes admit, as before keys.
+    /// <para>
+    /// Native AOT reflection reads no metadata token (<see cref="MemberInfo.MetadataToken"/> throws), so there no
+    /// type has a key. That leaves no class unread: an assembly without raw metadata is read from its build-time
+    /// list (<see cref="ListedExtensionHostEntries"/>), which carries no keys, and a class with no key list is read
+    /// for every question (<see cref="ExtensionHost.ExtendsReceivers"/>). Until 2026-11-21 this read the token
+    /// unguarded, and every Native AOT program that reached a method-set question threw here.
+    /// </para>
     /// </remarks>
     internal static ReceiverKey? ReceiverKeyOf(Type receiver)
     {
@@ -579,6 +587,9 @@ public static partial class TypeExtensions
         Assembly assembly = element.Assembly;
 
         if (assembly == typeof(object).Assembly || assembly == typeof(TypeExtensions).Assembly)
+            return null;
+
+        if (!element.HasMetadataToken())
             return null;
 
         return new ReceiverKey(element.Module, element.MetadataToken);
