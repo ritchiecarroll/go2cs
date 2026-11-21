@@ -1,7 +1,6 @@
 namespace go;
 
 using fmt = fmt_package;
-using static main_package;
 
 partial class main_package {
 
@@ -30,8 +29,6 @@ partial struct EncBuffer /*coder*/;
 public partial struct tally /*num:nint*/;
 public partial struct weight /*num:nint*/;
 
-} partial class mainᴛCaseRange {
-
 public static tally Tally(this CaseRange cr) {
     cr = cr.ΔClone();
 
@@ -43,8 +40,6 @@ public static nint Weigh(this CaseRange cr, weight w) {
 
     return (nint)w * 2;
 }
-
-} partial class main_package {
 
 internal static void main() {
     CaseRange cr = new();

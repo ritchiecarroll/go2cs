@@ -1,7 +1,6 @@
 namespace go;
 
 using fmt = fmt_package;
-using static main_package;
 
 partial class main_package {
 
@@ -9,11 +8,7 @@ partial struct myErr {
     internal @string msg;
 }
 
-} partial class mainᴛmyErr {
-
 internal static @string Error(this ref myErr e) { return e.msg; }
-
-} partial class main_package {
 
 internal static error typedNilErr() {
     ж<myErr> p = default;

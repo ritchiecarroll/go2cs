@@ -85,4 +85,4 @@ internal static error Err(this ref bitReader br) {
     return br.err;
 }
 
-} // end bzip2ᴛbitReader
+}

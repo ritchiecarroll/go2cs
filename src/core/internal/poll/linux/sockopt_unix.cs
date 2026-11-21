@@ -28,4 +28,4 @@ public static error SetsockoptByte(this ж<FD> Ꮡfd, nint level, nint name, byt
     finally { if (ᒐd1) Ꮡfd.decref(); ᒐ.Run(); }
 }
 
-} // end pollᴛFD
+}

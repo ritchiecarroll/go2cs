@@ -373,11 +373,13 @@ func TestNativeFieldArrayViewEmitsTheDoorAndElementRef(t *testing.T) {
 		t.Errorf("sameElem: a same-element view must keep array<T>.AliasPointer, got:\n%s", body)
 	}
 
-	// CONTROL 3 — a promoted field keeps the raw route, spelled as the typed door; CONTROL 4 — so does a field
-	// of an element and of a call's result.
+	// CONTROL 3 — a promoted field takes no field view; CONTROL 4 — nor does a field of an element or of a call's
+	// result. Each is the kept conversion of door C (section 20), whose window is cut only over storage a box holds
+	// still: over these fields, which nothing pins, it answers the raw route's refusal by name
+	// (GolibTests KeptArrayDoorTests.AFieldNothingHoldsStillIsNoWindow).
 	for _, control := range []string{"promoted", "elementRoot", "callRoot"} {
-		if body := emittedFunctionBody(t, mainCs, control); strings.Contains(body, "@unsafe.ArrayPointer<") || !strings.Contains(body, "@unsafe.Pointer.To<array<byte>>(") || strings.Contains(body, ".ElementRef(") {
-			t.Errorf("%s: a field that is not reached by field selections off a variable must keep the raw route, got:\n%s", control, body)
+		if body := emittedFunctionBody(t, mainCs, control); strings.Contains(body, "@unsafe.ArrayPointer<") || !strings.Contains(body, "@unsafe.Pointer.ToArray<byte>(") || !strings.Contains(body, ", 2);") {
+			t.Errorf("%s: a field that is not reached by field selections off a variable must take door C, not the field view, got:\n%s", control, body)
 		}
 	}
 }

@@ -262,4 +262,4 @@ public static error Close(this ref Writer z) {
     return z.err;
 }
 
-} // end gzipᴛWriter
+}

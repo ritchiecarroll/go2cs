@@ -185,4 +185,4 @@ public static cryptoꓸPublicKey Public(this ref PrivateKey k) {
     return k.PublicKey().OrTypedNil();
 }
 
-} // end ecdhᴛPrivateKey
+}

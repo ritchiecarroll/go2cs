@@ -16,4 +16,4 @@ internal static void xorKeyStreamBlocks(this ref Cipher s, slice<byte> dst, slic
     s.xorKeyStreamBlocksGeneric(dst, src);
 }
 
-} // end chacha20ᴛCipher
+}

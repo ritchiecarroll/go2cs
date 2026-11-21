@@ -27,4 +27,4 @@ public static error SetsockoptIPMreqn(this ж<FD> Ꮡfd, nint level, nint name, 
     finally { if (ᒐd1) Ꮡfd.decref(); ᒐ.Run(); }
 }
 
-} // end pollᴛFD
+}

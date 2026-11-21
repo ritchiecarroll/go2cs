@@ -2,7 +2,6 @@ namespace go;
 
 using fmt = fmt_package;
 using runtime = runtime_package;
-using static main_package;
 
 partial class main_package {
 
@@ -11,13 +10,9 @@ partial struct node {
     internal ж<node> next;
 }
 
-} partial class mainᴛnode {
-
 internal static @string label(this ref node n) { return "node:"u8 + n.name; }
 
 internal static bool isNil(this ж<node> Ꮡn) { return Ꮡn == nil; }
-
-} partial class main_package {
 
 partial struct box {
     internal ж<node> p;

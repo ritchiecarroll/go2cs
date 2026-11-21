@@ -228,4 +228,4 @@ internal static void escape(this ref mdPrinter p, ж<bytes.Buffer> Ꮡout, @stri
     @out.WriteString(s.slice(start));
 }
 
-} // end commentᴛmdPrinter
+}

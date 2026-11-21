@@ -472,13 +472,13 @@ internal static (@unsafe.Pointer, @unsafe.Pointer, bool) getWithKeySmall(this re
 
         @unsafe.Pointer slotKey = g.key(Ꮡtyp, i);
         if (typ.IndirectKey()) {
-            slotKey = (@unsafe.Pointer.To<@unsafe.Pointer>(slotKey)).Value;
+            slotKey = @unsafe.Pointer.LoadWord((@unsafe.Pointer.To<@unsafe.Pointer>(slotKey)));
         }
 
         if (typ.Key.Equal(key, slotKey)) {
             @unsafe.Pointer slotElem = g.elem(Ꮡtyp, i);
             if (typ.IndirectElem()) {
-                slotElem = (@unsafe.Pointer.To<@unsafe.Pointer>(slotElem)).Value;
+                slotElem = @unsafe.Pointer.LoadWord((@unsafe.Pointer.To<@unsafe.Pointer>(slotElem)));
             }
             return (slotKey, slotElem, true);
         }
@@ -578,7 +578,7 @@ internal static @unsafe.Pointer putSlotSmall(this ref Map m, ж<abi.MapType> Ꮡ
 
         @unsafe.Pointer slotKeyΔ1 = g.key(Ꮡtyp, iΔ1);
         if (typ.IndirectKey()) {
-            slotKeyΔ1 = (@unsafe.Pointer.To<@unsafe.Pointer>(slotKeyΔ1)).Value;
+            slotKeyΔ1 = @unsafe.Pointer.LoadWord((@unsafe.Pointer.To<@unsafe.Pointer>(slotKeyΔ1)));
         }
         if (typ.Key.Equal(key, slotKeyΔ1)) {
             if (typ.NeedKeyUpdate()) {
@@ -587,7 +587,7 @@ internal static @unsafe.Pointer putSlotSmall(this ref Map m, ж<abi.MapType> Ꮡ
 
             @unsafe.Pointer slotElemΔ1 = g.elem(Ꮡtyp, iΔ1);
             if (typ.IndirectElem()) {
-                slotElemΔ1 = (@unsafe.Pointer.To<@unsafe.Pointer>(slotElemΔ1)).Value;
+                slotElemΔ1 = @unsafe.Pointer.LoadWord((@unsafe.Pointer.To<@unsafe.Pointer>(slotElemΔ1)));
             }
 
             return slotElemΔ1;
@@ -609,7 +609,7 @@ internal static @unsafe.Pointer putSlotSmall(this ref Map m, ж<abi.MapType> Ꮡ
     @unsafe.Pointer slotKey = g.key(Ꮡtyp, i);
     if (typ.IndirectKey()) {
         @unsafe.Pointer kmem = newobject(typ.Key);
-        (@unsafe.Pointer.To<@unsafe.Pointer>(slotKey)).Value = kmem;
+        @unsafe.Pointer.StoreWord(@unsafe.Pointer.To<@unsafe.Pointer>(slotKey), kmem);
         slotKey = kmem;
     }
     typedmemmove(typ.Key, slotKey, key);
@@ -617,7 +617,7 @@ internal static @unsafe.Pointer putSlotSmall(this ref Map m, ж<abi.MapType> Ꮡ
     @unsafe.Pointer slotElem = g.elem(Ꮡtyp, i);
     if (typ.IndirectElem()) {
         @unsafe.Pointer emem = newobject(typ.Elem);
-        (@unsafe.Pointer.To<@unsafe.Pointer>(slotElem)).Value = emem;
+        @unsafe.Pointer.StoreWord(@unsafe.Pointer.To<@unsafe.Pointer>(slotElem), emem);
         slotElem = emem;
     }
 
@@ -654,12 +654,12 @@ internal static void growToTable(this ref Map m, ж<abi.MapType> Ꮡtyp) {
 
         @unsafe.Pointer key = g.key(Ꮡtyp, i);
         if (typ.IndirectKey()) {
-            key = (@unsafe.Pointer.To<@unsafe.Pointer>(key)).Value;
+            key = @unsafe.Pointer.LoadWord((@unsafe.Pointer.To<@unsafe.Pointer>(key)));
         }
 
         @unsafe.Pointer elem = g.elem(Ꮡtyp, i);
         if (typ.IndirectElem()) {
-            elem = (@unsafe.Pointer.To<@unsafe.Pointer>(elem)).Value;
+            elem = @unsafe.Pointer.LoadWord((@unsafe.Pointer.To<@unsafe.Pointer>(elem)));
         }
 
         var hash = typ.Hasher(key, m.seed);
@@ -735,14 +735,14 @@ internal static void deleteSmall(this ref Map m, ж<abi.MapType> Ꮡtyp, uintptr
         @unsafe.Pointer slotKey = g.key(Ꮡtyp, i);
         @unsafe.Pointer origSlotKey = slotKey;
         if (typ.IndirectKey()) {
-            slotKey = (@unsafe.Pointer.To<@unsafe.Pointer>(slotKey)).Value;
+            slotKey = @unsafe.Pointer.LoadWord((@unsafe.Pointer.To<@unsafe.Pointer>(slotKey)));
         }
         if (typ.Key.Equal(key, slotKey)) {
             m.used--;
 
             if (typ.IndirectKey()) {
                 // Clearing the pointer is sufficient.
-                (@unsafe.Pointer.To<@unsafe.Pointer>(origSlotKey)).Value = default;
+                @unsafe.Pointer.StoreWord(@unsafe.Pointer.To<@unsafe.Pointer>(origSlotKey), default);
             } else if (typ.Key.Pointers()) {
                 // Only bother clearing if there are pointers.
                 typedmemclr(typ.Key, slotKey);
@@ -751,7 +751,7 @@ internal static void deleteSmall(this ref Map m, ж<abi.MapType> Ꮡtyp, uintptr
             @unsafe.Pointer slotElem = g.elem(Ꮡtyp, i);
             if (typ.IndirectElem()) {
                 // Clearing the pointer is sufficient.
-                (@unsafe.Pointer.To<@unsafe.Pointer>(slotElem)).Value = default;
+                @unsafe.Pointer.StoreWord(@unsafe.Pointer.To<@unsafe.Pointer>(slotElem), default);
             } else {
                 // Unlike keys, always clear the elem (even if
                 // it contains no pointers), as compound
@@ -915,7 +915,7 @@ internal static error mapKeyError2(ж<abi.Type> Ꮡt, @unsafe.Pointer p) {
         if (tΔ2.IsDirectIface()) {
             return mapKeyError2(tΔ2, @unsafe.Pointer.FromBox(pdata));
         } else {
-            return mapKeyError2(tΔ2, pdata.Value);
+            return mapKeyError2(tΔ2, @unsafe.Pointer.LoadWord(pdata));
         }
         break;
     }

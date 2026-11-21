@@ -315,4 +315,4 @@ public static Mask64 /*z*/ ShiftRight(this Mask64 x, uint8 c) {
     return z;
 }
 
-} // end genᴛMask64
+}

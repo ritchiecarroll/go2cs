@@ -203,4 +203,4 @@ internal static bool disjoint(this ref term x, ж<term> Ꮡy) {
     return !Identical(ux, uy);
 }
 
-} // end typesᴛterm
+}

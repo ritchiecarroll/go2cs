@@ -467,3 +467,31 @@ Not done for A1, and owed if it is taken up: the Native AOT half (M1), the fixtu
 residual, and every item under "Not verified by the review" above.
 
 — P5 (2026-11-14)
+
+## Amendment 2026-11-18 (P5): A1 cut, for release .5, with `error<T>`'s box lookup
+
+**Rulings (COORD, 2026-11-17 19:02Z and 2026-11-18 01:04Z):** A1 is the .5 seat, steps 1 to 4 as proposed.
+Step 1 at master + batch 311 (`f36b6b0d48`) named the reader the 11-14 work could not find: `runtime`'s per-type
+holders were read by A2's own lookup, `GetBoxExtensionMethod`, from `error<T>`'s static constructor for
+`runtime.TypeAssertionError`, one unkeyed read of 201 host classes in `wide`. COORD ruled it carried in this seat: it
+is the one box lookup M2 names as changing. `GetExtensionMethods(Type)` on a box stays whole-scan and unkeyed. The
+Native AOT half stays out (M1), with a BOARD row naming the go2cs-gen change.
+
+**A1 as cut** (`claude/p5-b3-a1-keys`, record `docs/phase4/DATA-startup-method-sets-a1.md`): golib only. The metadata
+walk reads each host class's receiver keys; `CollectGoMethodSetCandidates`, `ExtensionMethodsOf` (a non-box target)
+and `GetBoxExtensionMethod` (keyed by the pointee) read only the classes whose keys meet the question's.
+
+**What M3 became.** One function (`ScopedReceiver`) reads a receiver through a by-ref and every pointer box, a box
+subclass included, as the method-set rule does (`ResolveReceiverElement`); the home and the key both come from it.
+This changed the HOME as well as adding the key: since the receiver-scope cut the home read through `ж<T>` itself
+and no subclass, so a receiver typed `NativeBox<T>` was homed in golib and a question about `T` skipped its class.
+No converted assembly declares such a receiver, so no answer changed (the reachable guard read 0 differences before
+and after); the fixture shows it red under the old home. Two corrections to M3 as written: there is no public
+`FieldRefBox<T>`; the public box subclasses are `StandardBox<T>`, `SlottedStandardBox<T>`, `StaticBox<T>`,
+`NativeBox<T>` and `ElemRefBox<T>`, and each has a fixture. And a question's keys do not add `object` or
+`Nullable<>`: core-library and golib receivers carry no key, so their classes are read for every question their homes
+admit, which covers both. A receiver of another assembly is loaded and keyed (the walk already loads it to home it),
+not made `AnyReceiver`; only a class whose receiver is a type the assembly derives from something other than
+`object`, `ValueType` or `Enum` (a possible box subclass of its own) is left unkeyed.
+
+— P5 (2026-11-18)

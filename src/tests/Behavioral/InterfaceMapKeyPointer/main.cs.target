@@ -1,7 +1,6 @@
 namespace go;
 
 using fmt = fmt_package;
-using static main_package;
 
 partial class main_package {
 
@@ -13,13 +12,9 @@ partial struct Item {
     internal nint pos;
 }
 
-} partial class mainᴛItem {
-
 public static nint Pos(this ref Item i) {
     return i.pos;
 }
-
-} partial class main_package {
 
 internal static (@string, bool) lookup(map<Node, @string> seen, ж<Item> it) {
     var (value, ok) = seen[new ItemжNode(it), ꟷ];

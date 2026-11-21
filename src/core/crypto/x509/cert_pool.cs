@@ -333,4 +333,4 @@ public static void AddCertWithConstraint(this ref CertPool s, ж<Certificate> �
     s.addCertFunc(sha256.Sum224(cert.Raw), (@string)cert.RawSubject, () => (Ꮡcert, default), constraint);
 }
 
-} // end x509ᴛCertPool
+}

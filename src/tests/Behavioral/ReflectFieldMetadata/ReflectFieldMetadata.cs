@@ -4,7 +4,6 @@ using fmt = fmt_package;
 using reflect = reflect_package;
 using fieldlib = ReflectFieldMetadata.fieldlib_package;
 using ReflectFieldMetadata;
-using static main_package;
 
 partial class main_package {
 
@@ -23,12 +22,7 @@ partial struct holds {
 partial struct @base {
     public nint B;
 }
-
-} partial class mainᴛbase {
-
 internal static nint M(this @base b) { return b.B; }
-
-} partial class main_package {
 
 partial struct viaX {
     /*embed*/ internal @base @base;

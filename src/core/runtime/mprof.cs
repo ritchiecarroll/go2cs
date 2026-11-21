@@ -653,10 +653,10 @@ internal static void storeSlow(this ref mLockProfile prof) {
     var rate = (int64)atomic.Load64(Ꮡmutexprofilerate);
     saveBlockEventStack(cycles, rate, prof.stack.slice(0, nstk), mutexProfile);
     if (lost > 0) {
-        var lostStk = new uintptr[]{
+        var lostStk = array<uintptr>([
             logicalStackSentinel,
             abi.FuncPCABIInternal(_LostContendedRuntimeLock) + (uintptr)sys.PCQuantum
-        }.array();
+        ]);
         saveBlockEventStack(lost, rate, lostStk[..], mutexProfile);
     }
 

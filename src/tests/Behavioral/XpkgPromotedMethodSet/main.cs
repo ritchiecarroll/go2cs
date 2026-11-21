@@ -12,14 +12,11 @@ using testing = testing_package;
 using time = time_package;
 using inner = XpkgPromotedInnerLib_package;
 using mid = XpkgPromotedMidLib_package;
-using FieldOffsetAttribute = global::System.Runtime.InteropServices.FieldOffsetAttribute;
-using LayoutKind = global::System.Runtime.InteropServices.LayoutKind;
-using StructLayoutAttribute = global::System.Runtime.InteropServices.StructLayoutAttribute;
+using System.Runtime.InteropServices;
 using XpkgPromotedInnerLib = XpkgPromotedInnerLib_package;
 using XpkgPromotedMidLib = XpkgPromotedMidLib_package;
 using encoding;
 using ꓸꓸꓸany = Span<any>;
-using static main_package;
 
 partial class main_package {
 
@@ -38,11 +35,7 @@ partial struct Outer {
 partial struct loc {
 }
 
-} partial class mainᴛloc {
-
 internal static inner.Token Tok(this loc _) { return new inner.Token(N: 7); }
-
-} partial class main_package {
 
 [StructLayout(LayoutKind.Explicit, Size = 16)] partial struct Five {
     [FieldOffset(0)] /*embed*/ public XpkgPromotedMidLib_package.Mid Mid;
@@ -109,11 +102,7 @@ partial struct BufP {
 partial struct deepTok {
 }
 
-} partial class mainᴛdeepTok {
-
 internal static inner.Token Tok(this deepTok _) { return new inner.Token(N: 5); }
-
-} partial class main_package {
 
 partial struct localTok {
     /*embed*/ internal deepTok deepTok;

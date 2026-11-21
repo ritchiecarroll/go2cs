@@ -165,7 +165,7 @@ internal static float64 reducePi(float64 x) {
     // that is, 1/Pi = Sum mPi[i]*2^(-64*i).
     // 19 64-bit digits give 1216 bits of precision
     // to handle the largest possible float64 exponent.
-    array<uint64> mPi = new uint64[]{
+    array<uint64> mPi = array<uint64>([
         0x0000000000000000,
         0x517cc1b727220a94UL,
         0xfe13abe8fa9a6ee0UL,
@@ -186,7 +186,7 @@ internal static float64 reducePi(float64 x) {
         0x9e839cfbc5294975UL,
         0x35fdafd88fc6ae84UL,
         0x2b0198237e3db5d5UL
-    }.array();
+    ]);
     // Use the exponent to extract the 3 appropriate uint64 digits from mPi,
     // B ~ (z0, z1, z2), such that the product leading digit has the exponent -64.
     // Note, exp >= 50 since x >= reduceThreshold and exp < 971 for maximum float64.

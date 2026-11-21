@@ -4,28 +4,19 @@ using context = context_package;
 using fmt = fmt_package;
 using reflect = reflect_package;
 using time = time_package;
-using static main_package;
 
 partial class main_package {
 
 partial struct R {
 }
 
-} partial class mainᴛR {
-
 public static bool Equal(this R _, /*<-*/channel<bool> y) { return true; }
-
-} partial class main_package {
 
 partial struct S {
     internal nint n;
 }
 
-} partial class mainᴛS {
-
 public static void Feed(this ref S s, channel/*<-*/<nint> c) { s.n++; }
-
-} partial class main_package {
 
 partial interface Notifier {
     /*<-*/channel<EmptyStruct> Done();
@@ -33,11 +24,7 @@ partial interface Notifier {
 
 partial struct AssignD /*<-chan bool*/;
 
-} partial class mainᴛAssignD {
-
 public static bool Equal(this AssignD x, /*<-*/channel<bool> y) { return true; }
-
-} partial class main_package {
 
 internal static void recvLocal(/*<-*/channel<nint> c) { }
 internal static void bidiLocal(channel<nint> c) { }

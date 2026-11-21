@@ -47,10 +47,10 @@ using static go.main_package;
 
 // The go statements whose goroutine the converter proved cannot recurse, by the file, line and column of
 // their goǃ call: go2cs-gen starts each on golib's bounded stack reservation rather than the Go-scale default.
-[assembly: GoBoundedGoroutine("GoStmtReceiverBoxGroup.cs", 30, 58, 0)]
-[assembly: GoBoundedGoroutine("GoStmtReceiverBoxGroup.cs", 31, 61, 1)]
-[assembly: GoBoundedGoroutine("GoStmtReceiverBoxGroup.cs", 32, 63, 2)]
-[assembly: GoBoundedGoroutine("GoStmtReceiverBoxGroup.cs", 43, 72, 3)]
+[assembly: GoBoundedGoroutine("GoStmtReceiverBoxGroup.cs", 23, 58, 0)]
+[assembly: GoBoundedGoroutine("GoStmtReceiverBoxGroup.cs", 24, 61, 1)]
+[assembly: GoBoundedGoroutine("GoStmtReceiverBoxGroup.cs", 25, 63, 2)]
+[assembly: GoBoundedGoroutine("GoStmtReceiverBoxGroup.cs", 36, 72, 3)]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -60,7 +60,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("GoStmtReceiverBoxGroup.go", "GoStmtReceiverBoxGroup.cs", "AA0WAAsQgoKUgoKSoKCitIKCgoKCgoKCgoKCgg==")]
+[assembly: GoPositionMap("GoStmtReceiverBoxGroup.go", "GoStmtReceiverBoxGroup.cs", "AAoWAAcQgoKUgoKSoKCilIKCgoKCgoKCgoKCgg==")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -98,6 +98,4 @@ public static partial class main_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(main_package.inner)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛinner;
-[GoMethodHost(typeof(main_package.tracker)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛtracker;
 // </MethodHolders>

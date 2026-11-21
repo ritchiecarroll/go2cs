@@ -4,7 +4,6 @@ using fmt = fmt_package;
 using ꓸꓸꓸbyte = Span<byte>;
 using ꓸꓸꓸnint = Span<nint>;
 using ꓸꓸꓸstring = Span<@string>;
-using static main_package;
 
 partial class main_package {
 
@@ -24,11 +23,7 @@ internal static void bothUnnamed(nint _Δp0, params ꓸꓸꓸstring ʗp) { count
 
 internal static @string label(@string tag, params ꓸꓸꓸnint _ʗp) { return tag + "!"u8; }
 
-} partial class mainᴛnote {
-
 internal static nint tally(this note n, params ꓸꓸꓸbyte ʗp) { return n.x; }
-
-} partial class main_package {
 
 internal static nint total(params ꓸꓸꓸnint valsʗp) {
     var vals = valsʗp.sslice();

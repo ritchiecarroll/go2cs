@@ -39,4 +39,4 @@ public static Type Elem(this ref Chan c) { return c.elem; }
 public static Type Underlying(this ж<Chan> Ꮡc) { return new ChanжType(Ꮡc); }
 public static @string String(this ж<Chan> Ꮡc) { return TypeString(new ChanжType(Ꮡc), default); }
 
-} // end typesᴛChan
+}

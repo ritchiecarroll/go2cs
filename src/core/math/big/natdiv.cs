@@ -950,4 +950,4 @@ internal static void divRecursiveStep(this nat z, ж<stack> Ꮡstk, nat u, nat v
     finally { ᒐ.Run(); }
 }
 
-} // end bigᴛnat
+}

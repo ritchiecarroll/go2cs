@@ -18,13 +18,13 @@ internal static ref array<uint32> pkg => ref ((StaticBox<array<uint32>>)Ꮡpkg).
 internal static void main() {
     ref var a = ref heap(new array<uint32>(4), out var Ꮡa);
     @unsafe.Pointer p = @unsafe.Pointer.FromPinnedBox(Ꮡa);
-    a.Assign(new uint32[]{1, 2, 3, 4}.array());
+    a.Assign(array<uint32>([1, 2, 3, 4]));
     (@unsafe.Pointer.To<uint32>(p)).Value = 41;
     fmt.Println("local:", a[0]);
 
     ref var b = ref heap(new array<uint32>(4), out var Ꮡb);
     var n = (uintptr)Ꮡb;
-    b.Assign(new uint32[]{1, 2, 3, 4}.array());
+    b.Assign(array<uint32>([1, 2, 3, 4]));
     (@unsafe.Pointer.To<uint32>((@unsafe.Pointer)n)).Value = 42;
     fmt.Println("local by number:", b[0]);
 
@@ -44,31 +44,31 @@ internal static void main() {
     fmt.Println("named:", s[0]);
 
     var m = (uintptr)Ꮡpkg;
-    pkg.Assign(new uint32[]{5, 6, 7, 8}.array());
+    pkg.Assign(array<uint32>([5, 6, 7, 8]));
     (@unsafe.Pointer.To<uint32>((@unsafe.Pointer)m)).Value = 45;
     fmt.Println("package:", pkg[0]);
 
     ref var h = ref heap(new holder(), out var Ꮡh);
     @unsafe.Pointer f = @unsafe.Pointer.FromPinnedBox(Ꮡh.Ꮡarr);
-    h.arr.Assign(new uint32[]{1, 2, 3, 4}.array());
+    h.arr.Assign(array<uint32>([1, 2, 3, 4]));
     (@unsafe.Pointer.To<uint32>(f)).Value = 46;
     fmt.Println("field:", h.arr[0]);
 
     ref var d = ref heap(new array<uint32>(4), out var Ꮡd);
     @unsafe.Pointer t = @unsafe.Pointer.FromPinnedBox(Ꮡd);
-    d.Assign(new uint32[]{7, 7, 7, 7}.array());
+    d.Assign(array<uint32>([7, 7, 7, 7]));
     fmt.Println("read:", ~@unsafe.Pointer.To<uint32>(t));
 
     ref var e = ref heap(new array<uint32>(4), out var Ꮡe);
     @unsafe.Pointer u = @unsafe.Pointer.FromPinnedBox(Ꮡe);
-    e.Assign(new uint32[]{1, 2, 3, 4}.array());
+    e.Assign(array<uint32>([1, 2, 3, 4]));
     @unsafe.Pointer.ElementRef<uint32>(u, 0, 4) = 47;
     fmt.Println("array pointer:", e[0]);
 
     ref var g = ref heap(new array<uint32>(4), out var Ꮡg);
     @unsafe.Pointer v = @unsafe.Pointer.FromPinnedBox(Ꮡg);
     _ = (uintptr)v;
-    g.Assign(new uint32[]{1, 2, 3, 4}.array());
+    g.Assign(array<uint32>([1, 2, 3, 4]));
     @unsafe.Pointer.View<byte>(v, 0, 4, 16)[0] = 48;
     fmt.Println("byte view:", g[0]);
 

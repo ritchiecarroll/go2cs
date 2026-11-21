@@ -290,4 +290,4 @@ public static partial void Go(this ж<WaitGroup> Ꮡwg, Action f) {
     });
 }
 
-} // end syncᴛWaitGroup
+}

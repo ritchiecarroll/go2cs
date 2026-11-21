@@ -116,7 +116,7 @@ internal static @unsafe.Pointer pointer(this Value v) {
         throw panic("can't call pointer on a non-pointer Value");
     }
     if ((flag)(v.flag & flagIndir) != 0) {
-        return ~@unsafe.Pointer.To<@unsafe.Pointer>(v.ptr);
+        return @unsafe.Pointer.LoadWord(@unsafe.Pointer.To<@unsafe.Pointer>(v.ptr));
     }
     return v.ptr;
 }
@@ -152,7 +152,7 @@ internal static @unsafe.Pointer packEfaceData(Value v) {
     case {} when (flag)(v.flag & flagIndir) != 0: {
         // Value is indirect, but interface is direct. We need
         // to load the data at v.ptr into the interface data word.
-        return ~@unsafe.Pointer.To<@unsafe.Pointer>(v.ptr);
+        return @unsafe.Pointer.LoadWord(@unsafe.Pointer.To<@unsafe.Pointer>(v.ptr));
     }
     default: {
         // Value is direct, and so is the interface.
@@ -295,7 +295,7 @@ internal static slice<Value> call(this Value v, @string op, slice<Value> @in) {
         rcvr = v;
         (rcvrtype, t, fn) = methodReceiver(op, v, (nint)v.flag >> (int)(flagMethodShift));
     } else if ((flag)(v.flag & flagIndir) != 0) {
-        fn = ~@unsafe.Pointer.To<@unsafe.Pointer>(v.ptr);
+        fn = @unsafe.Pointer.LoadWord(@unsafe.Pointer.To<@unsafe.Pointer>(v.ptr));
     } else {
         fn = v.ptr;
     }
@@ -435,7 +435,7 @@ stepsLoop:
                 if ((flag)(vΔ1.flag & flagIndir) != 0) {
                     typedmemmove(targ.Ꮡt, addr, vΔ1.ptr);
                 } else {
-                    (@unsafe.Pointer.To<@unsafe.Pointer>(addr)).Value = vΔ1.ptr;
+                    @unsafe.Pointer.StoreWord(@unsafe.Pointer.To<@unsafe.Pointer>(addr), vΔ1.ptr);
                 }
                 // There's only one step for a stack-allocated value.
                 goto break_stepsLoop;
@@ -449,7 +449,7 @@ stepsLoop:
                         // Duplicate this pointer in the pointer area of the
                         // register space. Otherwise, there's the potential for
                         // this to be the last reference to v.ptr.
-                        regArgs.Ptrs[st.ireg] = ~@unsafe.Pointer.To<@unsafe.Pointer>(offset);
+                        regArgs.Ptrs[st.ireg] = @unsafe.Pointer.LoadWord(@unsafe.Pointer.To<@unsafe.Pointer>(offset));
                     }
                     intToReg(ᏑregArgs, st.ireg, st.size, offset);
                 } else {
@@ -574,7 +574,7 @@ break_stepsLoop:;
                 }
                 case var ᴛ when ᴛ == abiStepPointer: {
                     @unsafe.Pointer sΔ2 = add(s, st.offset, precomputedValueOffsetˢ);
-                    (@unsafe.Pointer.To<@unsafe.Pointer>(sΔ2)).Value = regArgs.Ptrs[st.ireg];
+                    @unsafe.Pointer.StoreWord((@unsafe.Pointer.To<@unsafe.Pointer>(sΔ2)), regArgs.Ptrs[st.ireg]);
                     break;
                 }
                 case var ᴛ when ᴛ == abiStepFloatReg: {
@@ -671,7 +671,7 @@ internal static void callReflect(ж<makeFuncImpl> Ꮡctxt, @unsafe.Pointer frame
                 }
                 v.flag |= (flag)(flagIndir);
             } else {
-                v.ptr = ~@unsafe.Pointer.To<@unsafe.Pointer>(add(ptr, st.stkOff, ptrˢ));
+                v.ptr = @unsafe.Pointer.LoadWord(@unsafe.Pointer.To<@unsafe.Pointer>(add(ptr, st.stkOff, ptrˢ)));
             }
         } else {
             if (!typ.IsDirectIface()) {
@@ -688,7 +688,7 @@ internal static void callReflect(ж<makeFuncImpl> Ꮡctxt, @unsafe.Pointer frame
                     }
                     case var ᴛ when ᴛ == abiStepPointer: {
                         @unsafe.Pointer s = add(v.ptr, stΔ1.offset, precomputedValueOffsetˢ);
-                        (@unsafe.Pointer.To<@unsafe.Pointer>(s)).Value = regs.Ptrs[stΔ1.ireg];
+                        @unsafe.Pointer.StoreWord((@unsafe.Pointer.To<@unsafe.Pointer>(s)), regs.Ptrs[stΔ1.ireg]);
                         break;
                     }
                     case var ᴛ when ᴛ == abiStepFloatReg: {
@@ -879,11 +879,11 @@ internal static void storeRcvr(Value v, @unsafe.Pointer p) {
     if (t.Kind() == abi.Interface) {
         // the interface data word becomes the receiver word
         var iface = @unsafe.Pointer.To<nonEmptyInterface>(v.ptr);
-        (@unsafe.Pointer.To<@unsafe.Pointer>(p)).Value = iface.word;
+        @unsafe.Pointer.StoreWord(@unsafe.Pointer.To<@unsafe.Pointer>(p), iface.word);
     } else if ((flag)(v.flag & flagIndir) != 0 && t.IsDirectIface()) {
-        (@unsafe.Pointer.To<@unsafe.Pointer>(p)).Value = (@unsafe.Pointer.To<@unsafe.Pointer>(v.ptr)).Value;
+        @unsafe.Pointer.StoreWord(@unsafe.Pointer.To<@unsafe.Pointer>(p), @unsafe.Pointer.LoadWord(@unsafe.Pointer.To<@unsafe.Pointer>(v.ptr)));
     } else {
-        (@unsafe.Pointer.To<@unsafe.Pointer>(p)).Value = v.ptr;
+        @unsafe.Pointer.StoreWord(@unsafe.Pointer.To<@unsafe.Pointer>(p), v.ptr);
     }
 }
 
@@ -1013,7 +1013,7 @@ internal static void callMethod(ж<methodValue> Ꮡctxt, @unsafe.Pointer frame, 
                     var matchᴛ2 = false;
                     if (exprᴛ2 == abiStepPointer) { matchᴛ2 = true;
                         // Do the pointer copy directly so we get a write barrier.
-                        methodRegs.Ptrs[mStepΔ1.ireg] = ~@unsafe.Pointer.To<@unsafe.Pointer>(from); // We need to make sure this ends up in Ints, too.
+                        methodRegs.Ptrs[mStepΔ1.ireg] = @unsafe.Pointer.LoadWord(@unsafe.Pointer.To<@unsafe.Pointer>(from)); // We need to make sure this ends up in Ints, too.
                         fallthrough = true;
                     }
                     if (fallthrough || !matchᴛ2 && exprᴛ2 == abiStepIntReg) { matchᴛ2 = true;
@@ -1037,7 +1037,7 @@ internal static void callMethod(ж<methodValue> Ꮡctxt, @unsafe.Pointer frame, 
                     switch (vStep.kind) {
                     case var ᴛ when ᴛ == abiStepPointer: {
                         // Do the pointer copy directly so we get a write barrier.
-                        (@unsafe.Pointer.To<@unsafe.Pointer>(to)).Value = valueRegs.Ptrs[vStep.ireg];
+                        @unsafe.Pointer.StoreWord(@unsafe.Pointer.To<@unsafe.Pointer>(to), valueRegs.Ptrs[vStep.ireg]);
                         break;
                     }
                     case var ᴛ when ᴛ == abiStepIntReg: {
@@ -1444,7 +1444,7 @@ internal static Value copyVal(ж<abi.Type> Ꮡtyp, flag fl, @unsafe.Pointer ptr)
         typedmemmove(Ꮡtyp, c, ptr);
         return new Value(Ꮡtyp, c.Value, (flag)(fl | flagIndir));
     }
-    return new Value(Ꮡtyp, ~@unsafe.Pointer.To<@unsafe.Pointer>(ptr), fl);
+    return new Value(Ꮡtyp, @unsafe.Pointer.LoadWord(@unsafe.Pointer.To<@unsafe.Pointer>(ptr)), fl);
 }
 
 } partial class reflectᴛValue {
@@ -1612,7 +1612,7 @@ public static void Send(this Value v, Value x) {
 public static void SetPointer(this Value v, @unsafe.Pointer x) {
     v.mustBeAssignable();
     v.mustBe(reflect.UnsafePointer);
-    (@unsafe.Pointer.To<@unsafe.Pointer>(v.ptr)).Value = x;
+    @unsafe.Pointer.StoreWord(@unsafe.Pointer.To<@unsafe.Pointer>(v.ptr), x);
 }
 
 // go2cs generated this placeholder — func SetString is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])

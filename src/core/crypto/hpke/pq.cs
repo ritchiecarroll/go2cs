@@ -669,4 +669,4 @@ internal static (slice<byte>, error) decap(this ref mlkemPrivateKey k, slice<byt
     return k.pq.Decapsulate(enc);
 }
 
-} // end hpkeᴛmlkemPrivateKey
+}

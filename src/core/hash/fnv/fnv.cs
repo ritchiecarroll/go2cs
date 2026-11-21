@@ -557,4 +557,4 @@ internal static (hash.Cloner, error) Clone(this ref sum128a d) {
     return (new sum128aжCloner(Ꮡr), default);
 }
 
-} // end fnvᴛsum128a
+}

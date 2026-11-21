@@ -278,4 +278,4 @@ internal static @string match(this textSig _, slice<byte> data, nint firstNonWS)
     return textPlainCharsetUtf8ˢ;
 }
 
-} // end httpᴛtextSig
+}

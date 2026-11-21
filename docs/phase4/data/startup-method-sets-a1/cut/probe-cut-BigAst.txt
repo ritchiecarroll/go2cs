@@ -1,0 +1,13 @@
+B3PROBE marks:
+B3PROBE   main-enter at 374 ms after process start; assemblies loaded 68; methods jitted 2930; jit time 2044 ms
+B3PROBE   exit at 1037 ms after process start; assemblies loaded 71; methods jitted 10428; jit time 2752 ms
+B3PROBE site	calls	inclusive ms	items
+B3PROBE CollectGoMethodSetCandidates	2	102.0	2
+B3PROBE HomedIn.methodsFound	2	97.2	4
+B3PROBE HomedIn.hostsPassed	2	95.9	2
+B3PROBE ExtensionHost.Methods(read)	1	5.0	2
+B3PROBE keys CollectGoMethodSetCandidates: 2 distinct
+B3PROBE   *go.main_package+Kind x1
+B3PROBE   go.main_package+Kind x1
+B3PROBE keys ExtensionHost.Methods(read): 1 distinct
+B3PROBE   go.mainᴛKind x1

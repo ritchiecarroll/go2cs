@@ -189,4 +189,4 @@ internal static pageCache allocToCache(this ref pageAlloc p) {
     return c;
 }
 
-} // end runtimeᴛpageAlloc
+}

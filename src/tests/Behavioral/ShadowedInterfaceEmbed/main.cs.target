@@ -25,24 +25,16 @@ partial struct baseHandler {
     internal nint level;
 }
 
-} partial class mainᴛbaseHandler {
-
 internal static bool Enabled(this baseHandler b, nint level) { return level >= b.level; }
 internal static @string Handle(this baseHandler b, @string msg) { return "base:"u8 + msg; }
 internal static @string WithName(this baseHandler b, @string name) { return "base-name:"u8 + name; }
-
-} partial class main_package {
 
 partial struct wrapper {
     /*embed*/ public Handler Handler;
     internal @string prefix;
 }
 
-} partial class mainᴛwrapper {
-
 internal static @string Handle(this wrapper w, @string msg) { return w.prefix + w.Handler.Handle(msg); }
-
-} partial class main_package {
 
 internal static void main() {
     var l = new Logger(name: "test");

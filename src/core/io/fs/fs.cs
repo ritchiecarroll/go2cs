@@ -293,4 +293,4 @@ public static bool Timeout(this ref PathError e) {
     return ok && t.Timeout();
 }
 
-} // end fsᴛPathError
+}
