@@ -271,15 +271,50 @@ func (v *Visitor) visitReturnStmt(returnStmt *ast.ReturnStmt) {
 		signature = v.currentFuncSignature
 	}
 
+	// A named result that owns array storage (valueAssignMethod) takes the in-place copy, as an `=`
+	// to it does: in Go the result IS its storage, so a slice, an element pointer or a window taken
+	// from it before the return still names it when a deferred call writes through it after the
+	// return stored its value. The swap `a = v` left every one of those on the old storage, and the
+	// deferred write missed the result. A single result takes `a.Assign(v)`; in a tuple the operand
+	// becomes a temporary in the deconstruction and its Assign follows the statement, left to right
+	// (the tuple path of visitAssignStmt).
+	singleInPlace := false
+	var inPlaceAssigns []string
+
 	if namedDeferAssign {
 		// A box-ref named result's assignment target reads through its box inside a function
 		// literal's conversion (see namedReturnAssignTargets).
 		assignTargets := v.namedReturnAssignTargets(signature)
+		inPlaceMethods := make([]string, len(assignTargets))
+
+		if signature != nil && signature.Results().Len() == len(assignTargets) {
+			for i := range assignTargets {
+				inPlaceMethods[i] = valueAssignMethod(signature.Results().At(i).Type())
+			}
+		}
 
 		if len(assignTargets) > 1 {
-			result.WriteString("(" + strings.Join(assignTargets, ", ") + ") = ")
+			lhs := make([]string, len(assignTargets))
+
+			for i, target := range assignTargets {
+				if inPlaceMethods[i] == "" {
+					lhs[i] = target
+					continue
+				}
+
+				temp := v.getTempVarName(strings.TrimPrefix(v.namedReturnNames[i], "@"))
+				lhs[i] = "var " + temp
+				inPlaceAssigns = append(inPlaceAssigns, fmt.Sprintf("%s.%s(%s);", target, inPlaceMethods[i], temp))
+			}
+
+			result.WriteString("(" + strings.Join(lhs, ", ") + ") = ")
 		} else if len(assignTargets) == 1 {
-			result.WriteString(assignTargets[0] + " = ")
+			if inPlaceMethods[0] != "" {
+				singleInPlace = true
+				result.WriteString(assignTargets[0] + "." + inPlaceMethods[0] + "(")
+			} else {
+				result.WriteString(assignTargets[0] + " = ")
+			}
 		}
 	} else if namedDefer && v.inGoFrame {
 		// The named-result frame form's exit (§4.4): the results live outside the try and are
@@ -539,7 +574,9 @@ func (v *Visitor) visitReturnStmt(returnStmt *ast.ReturnStmt) {
 				// struct copy aliases the shared backing either way (see
 				// exprReadsValueNeedingClone). Applied before any interface conversion below,
 				// so a boxed array result (`func f() any { return arr }`) boxes the clone.
-				if v.exprReadsValueNeedingClone(expr) {
+				//
+				// The single in-place result takes none: `a.Assign(v)` copies the elements into a's own storage.
+				if !singleInPlace && v.exprReadsValueNeedingClone(expr) {
 					resultExpr = appendValueClone(resultExpr, v.getExprType(expr))
 				}
 
@@ -714,7 +751,15 @@ func (v *Visitor) visitReturnStmt(returnStmt *ast.ReturnStmt) {
 		}
 	}
 
+	if singleInPlace {
+		result.WriteRune(')')
+	}
+
 	result.WriteRune(';')
+
+	for _, assign := range inPlaceAssigns {
+		result.WriteString(" " + assign)
+	}
 
 	// In namedReturnDeferMode a non-terminal explicit return assigned the named result params
 	// above; follow it with a bare `return;` to exit the void func() wrapper. A terminal return

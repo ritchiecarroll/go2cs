@@ -12,27 +12,6 @@ variable declared with a two-argument `//go:linkname`.
 [Limitations](Limitations.md#what-converts-but-doesnt-behave-exactly-like-go) describes the cases and the
 workarounds.
 
-## A deferred write through an earlier slice of a named array result is lost
-
-In a function with a `defer`, `return v` into a named result whose type is an array, or a struct holding one, gives
-the result new storage before the deferred calls run. A slice of the result (`s := a[:]`), a pointer to one of its
-elements (`&a[1]`) or an `unsafe` view of it, taken before the `return` and written by a deferred call, still refers
-to the old storage, so the write does not reach the value the function returns:
-
-```go
-func f() (a [8]uint64) {
-	s := a[:]
-	defer func() { s[0] = 7 }()
-	return [8]uint64{1, 2} // Go returns 7 2; the conversion returns 1 2
-}
-```
-
-**To avoid it**, assign the result and return bare: `a = [8]uint64{1, 2}` then `return`. An assignment statement
-copies into the result's existing storage, so the deferred write lands in the value returned.
-<!-- docs/phase4/DESIGN-array-pointer-doors.md 21 (P5, 2026-11-21): measured on a scratch probe converted at
-     claude/p5-doorc-assign-limit 901eb8fbf2, the example and its workaround as written, and a struct result's `h.x[:]` alike; the census of std (four
-     targets, test files included) reads 0 instances. Sized at about one lane-day and posted to COORD for scheduling. -->
-
 ## On Apple silicon, the standard library is the `amd64` build {#on-apple-silicon-runtimegoarch-reports-amd64}
 
 The packages ship for five platforms: `win-x64`, `linux-x64`, `linux-arm64`, `osx-x64` and `osx-arm64`. The converted standard library

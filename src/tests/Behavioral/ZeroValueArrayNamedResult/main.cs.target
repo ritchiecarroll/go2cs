@@ -57,7 +57,7 @@ internal static partial (array<byte> a4, error err) withDefer() {
             a4[0]++;
         }, ref ᒐ);
         a4[1] = 2;
-        (a4, err) = (a4.Clone(), default);
+        (var a4ᴛ1, err) = (a4.Clone(), default); a4.Assign(a4ᴛ1);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }

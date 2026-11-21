@@ -318,6 +318,137 @@ func aliasedResultIndex() (a aliasArr) {
 	return
 }
 
+// A RETURN into a named result under a defer stores into the result, and a deferred call then writes through a slice,
+// an element pointer or a window taken from the result before the return. In Go the result is its storage, so the
+// write lands in what the caller receives. Each prints the result's first two elements.
+func retSlice() (a [8]uint64) {
+	s := a[:]
+	defer func() { s[0] = 7 }()
+	return [8]uint64{1, 2}
+}
+
+func retElemPtr() (a [8]uint64) {
+	p := &a[1]
+	defer func() { *p = 9 }()
+	return [8]uint64{1, 2}
+}
+
+func retWindow() (a [8]uint64) {
+	f := (*[16]uint32)(unsafe.Pointer(&a))
+	defer func() { f[2] = 5 }()
+	return [8]uint64{1, 2}
+}
+
+func retStruct() (h holder) {
+	s := h.x[:]
+	defer func() { s[0] = 7 }()
+	return holder{n: 3, x: [8]uint64{1, 2}}
+}
+
+func retNamed() (a named) {
+	s := a[:]
+	defer func() { s[0] = 7 }()
+	return named{1, 2}
+}
+
+func retMulti() (a [8]uint64, err error) {
+	s := a[:]
+	defer func() { s[0] = 7 }()
+	return mk(), nil
+}
+
+func retSecond(early bool) (n int, a [8]uint64) {
+	s := a[:]
+	defer func() { s[0] = 7 }()
+	if early {
+		return 5, [8]uint64{3, 4}
+	}
+	return 6, [8]uint64{1, 2}
+}
+
+func retRecover() (a [8]uint64) {
+	s := a[:]
+	defer func() {
+		recover()
+		s[0] = 7
+	}()
+	return [8]uint64{1, 2}
+}
+
+func retFromVar() (a [8]uint64) {
+	v := [8]uint64{1, 2}
+	s := a[:]
+	defer func() { s[0] = 7; v[1] = 99 }()
+	return v
+}
+
+var retLit = func() (a [8]uint64) {
+	s := a[:]
+	defer func() { s[0] = 7 }()
+	return [8]uint64{1, 2}
+}
+
+func retLitCaptured() [8]uint64 {
+	f := func() (a [8]uint64) {
+		defer func() { a[0] += 10 }()
+		s := a[:]
+		defer func() { s[1] = 8 }()
+		return [8]uint64{1, 2}
+	}
+	return f()
+}
+
+var retLitIndex = func() (a [8]uint64) {
+	p := &a
+	defer func() { a[0] = 0xEEEE }()
+	p[1] = 505
+	return
+}
+
+var retLitAddr = func() (a [8]uint64) {
+	p := &a
+	defer func() { p[0] = 7 }()
+	return [8]uint64{1, 2}
+}
+
+func retForward() (a [8]uint64, err error) {
+	s := a[:]
+	defer func() { s[0] = 7 }()
+	return pair()
+}
+
+func returns() {
+	a := retSlice()
+	fmt.Println("ret slice  :", a[0], a[1])
+	a = retElemPtr()
+	fmt.Println("ret elemPtr:", a[0], a[1])
+	a = retWindow()
+	fmt.Println("ret window :", a[0], a[1])
+	h := retStruct()
+	fmt.Println("ret struct :", h.n, h.x[0], h.x[1])
+	b := retNamed()
+	fmt.Println("ret named  :", b[0], b[1])
+	a, err := retMulti()
+	fmt.Println("ret multi  :", a[0], a[1], err)
+	n1, a1 := retSecond(true)
+	n2, a2 := retSecond(false)
+	fmt.Println("ret second :", n1, a1[0], a1[1], n2, a2[0], a2[1])
+	a = retRecover()
+	fmt.Println("ret recover:", a[0], a[1])
+	a = retFromVar()
+	fmt.Println("ret fromVar:", a[0], a[1])
+	a = retLit()
+	fmt.Println("ret lit    :", a[0], a[1])
+	a = retLitCaptured()
+	fmt.Println("ret litCapt:", a[0], a[1])
+	a = retLitIndex()
+	fmt.Println("ret litIdx :", a[0], a[1], len(a))
+	a = retLitAddr()
+	fmt.Println("ret litAddr:", a[0], a[1])
+	a, err = retForward()
+	fmt.Println("ret forward:", a[0], a[1], err)
+}
+
 func main() {
 	variable()
 	literal()
@@ -352,4 +483,5 @@ func main() {
 	fmt.Println("res sidx:", h.x[0], h.x[1], len(h.x))
 	ra := aliasedResultIndex()
 	fmt.Println("res aidx:", ra[0], ra[1], len(ra))
+	returns()
 }
