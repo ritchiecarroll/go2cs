@@ -2554,3 +2554,19 @@ predicted 0 before the run (P-RD-7). The prediction missed the trace counts by o
 `goto ᒐdone` returns and not each function's terminal return. Event's arrays are copied into the result's storage now;
 nothing in either function takes an alias of the result, so the banked internal/trace row should read as before. It
 was not re-run in this seat; the union sweep reads it.
+
+### 22.4 Amendment 2026-11-21 (P5): P3's review, three guard rows and one clause
+
+P3 cleared the seat (2026-11-21 17:41Z) with two SHOULD rows and one NIT. COORD ruled one commit on the seat:
+- **Three guard rows** in ArrayViewWholeAssign, each compared to Go. None reds at this tip, so none needed a fix:
+  - `retCrossed`, `func f() (a, b [8]uint64)` ending `return b, a`: the temps take both operands before either result
+    is stored, so the results swap. Go and C# print `7 2 8 1`.
+  - `retPanicAfter`, `return [8]uint64{1, 2}, boom()` under a recovering defer: the panic comes before any result is
+    stored, so `a` stays zero and only the deferred write reaches it. Go and C# print `0 5 <nil>`.
+  - `retNamedTuple`, a `named` array result in a tuple fed an unnamed array: the temp takes the operand's type and
+    `a.Assign(aᴛ1)` compiles. Go and C# print `7 2 <nil>`.
+  The guard is now 47 lines, all equal to Go, and its golden is re-baselined by `UpdateTestTargets --only`.
+- **The internal/trace banked row** (SHOULD 2) is COORD's to name in the batch's gate list; it was not re-run here.
+- **NIT, `visitReturnStmt.go`.** The tuple form names its temps from `namedReturnNames` by target index, so the
+  in-place condition now also requires `len(v.namedReturnNames) == len(assignTargets)`. Where they differ, the return
+  keeps the plain assignment instead of indexing past the names.

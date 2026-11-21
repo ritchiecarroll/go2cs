@@ -417,6 +417,34 @@ func retForward() (a [8]uint64, err error) {
 	return pair()
 }
 
+// Two in-place results crossed: every operand is evaluated before any result is stored, so `return b, a` swaps them.
+func retCrossed() (a, b [8]uint64) {
+	sa, sb := a[:], b[:]
+	defer func() { sa[0] = 7; sb[0] = 8 }()
+	a[1], b[1] = 1, 2
+	return b, a
+}
+
+func boom() error { panic("boom") }
+
+// An operand that panics after the in-place operand: no result is stored, so `a` stays zero and only the deferred
+// write reaches it.
+func retPanicAfter() (a [8]uint64, err error) {
+	s := a[:]
+	defer func() {
+		recover()
+		s[1] = 5
+	}()
+	return [8]uint64{1, 2}, boom()
+}
+
+// A named array type result in a tuple, fed an unnamed array.
+func retNamedTuple() (a named, err error) {
+	s := a[:]
+	defer func() { s[0] = 7 }()
+	return [8]uint64{1, 2}, nil
+}
+
 func returns() {
 	a := retSlice()
 	fmt.Println("ret slice  :", a[0], a[1])
@@ -447,6 +475,12 @@ func returns() {
 	fmt.Println("ret litAddr:", a[0], a[1])
 	a, err = retForward()
 	fmt.Println("ret forward:", a[0], a[1], err)
+	c1, c2 := retCrossed()
+	fmt.Println("ret crossed:", c1[0], c1[1], c2[0], c2[1])
+	a, err = retPanicAfter()
+	fmt.Println("ret panicAf:", a[0], a[1], err)
+	b, err = retNamedTuple()
+	fmt.Println("ret namedTp:", b[0], b[1], err)
 }
 
 func main() {

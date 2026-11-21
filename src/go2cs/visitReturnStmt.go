@@ -287,7 +287,9 @@ func (v *Visitor) visitReturnStmt(returnStmt *ast.ReturnStmt) {
 		assignTargets := v.namedReturnAssignTargets(signature)
 		inPlaceMethods := make([]string, len(assignTargets))
 
-		if signature != nil && signature.Results().Len() == len(assignTargets) {
+		// The tuple form names its temps from namedReturnNames, indexed by target, so the in-place
+		// copy is taken only when the names line up with the targets too.
+		if signature != nil && signature.Results().Len() == len(assignTargets) && len(v.namedReturnNames) == len(assignTargets) {
 			for i := range assignTargets {
 				inPlaceMethods[i] = valueAssignMethod(signature.Results().At(i).Type())
 			}

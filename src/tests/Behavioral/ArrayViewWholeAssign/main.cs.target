@@ -607,6 +607,63 @@ internal static (array<uint64> a, error err) retForward() {
     return (a, err);
 }
 
+internal static (array<uint64> a, array<uint64> b) retCrossed() {
+    array<uint64> a = new(8);
+    array<uint64> b = new(8);
+    GoFrame ᒐ = default;
+    try {
+        var (sa, sb) = (a[..], b[..]);
+        var saʗ1 = sa;
+        var sbʗ1 = sb;
+        defer(() => {
+            saʗ1[0] = 7;
+            sbʗ1[0] = 8;
+        }, ref ᒐ);
+        (a[1], b[1]) = (1, 2);
+        (var aᴛ1, var bᴛ1) = (b.Clone(), a.Clone()); a.Assign(aᴛ1); b.Assign(bᴛ1);
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+    finally { ᒐ.Run(); }
+    return (a, b);
+}
+
+internal static error boom() { throw panic("boom"); }
+
+internal static (array<uint64> a, error err) retPanicAfter() {
+    array<uint64> a = new(8);
+    error err = default;
+    GoFrame ᒐ = default;
+    try {
+        var s = a[..];
+        var sʗ1 = s;
+        defer(() => {
+            recover();
+            sʗ1[1] = 5;
+        }, ref ᒐ);
+        (var aᴛ1, err) = (array<uint64>(8, [1, 2]), boom()); a.Assign(aᴛ1);
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+    finally { ᒐ.Run(); }
+    return (a, err);
+}
+
+internal static (named a, error err) retNamedTuple() {
+    named a = default;
+    error err = default;
+    GoFrame ᒐ = default;
+    try {
+        var s = a[..];
+        var sʗ1 = s;
+        defer(() => {
+            sʗ1[0] = 7;
+        }, ref ᒐ);
+        (var aᴛ1, err) = (array<uint64>(8, [1, 2]), default); a.Assign(aᴛ1);
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+    finally { ᒐ.Run(); }
+    return (a, err);
+}
+
 internal static void returns() {
     var a = retSlice();
     fmt.Println("ret slice  :", a[0], a[1]);
@@ -639,6 +696,14 @@ internal static void returns() {
     (var aᴛ2, err) = retForward();
     a.Assign(aᴛ2);
     fmt.Println("ret forward:", a[0], a[1], err);
+    var (c1, c2) = retCrossed();
+    fmt.Println("ret crossed:", c1[0], c1[1], c2[0], c2[1]);
+    (var aᴛ3, err) = retPanicAfter();
+    a.Assign(aᴛ3);
+    fmt.Println("ret panicAf:", a[0], a[1], err);
+    (var bᴛ1, err) = retNamedTuple();
+    b.Assign(bᴛ1);
+    fmt.Println("ret namedTp:", b[0], b[1], err);
 }
 
 internal static void main() {
