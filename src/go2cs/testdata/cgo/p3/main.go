@@ -36,6 +36,7 @@ struct go2cs_probe_entry
 
 struct go2cs_probe_entry *go2cs_probe_list(void);
 void go2cs_probe_list_release(struct go2cs_probe_entry *node);
+int go2cs_probe_next_family(struct go2cs_probe_entry *node);
 void *go2cs_probe_address(void);
 */
 import "C"
@@ -373,6 +374,27 @@ func main() {
 		mem := unsafe.Slice((*byte)(buf), 64)
 		r := (*C.struct_go2cs_probe_entry)(unsafe.Pointer(&mem[0]))
 		fmt.Println("s6slice", C.go2cs_probe_same(unsafe.Pointer(r)) == buf)
+	// Increment 3.2's stores into a pointer field of C memory (DESIGN-cgo-phase3-marshaling 18.9, D-4), each read back
+	// in C.
+	case "s6store":
+		// nil, then a pointer to C memory: C reads each back.
+		l := C.go2cs_probe_list()
+		defer C.go2cs_probe_list_release(l)
+		second := l.next
+		l.next = second.next
+		none := int(C.go2cs_probe_next_family(l))
+		l.next = second
+		fmt.Println("s6store", none, int(C.go2cs_probe_next_family(l)))
+	case "s6storego":
+		// A pointer to Go memory. Go stores it, and C reads it back; g's last use keeps it alive until then. go2cs
+		// refuses the store by name: C memory must not hold a Go pointer.
+		l := C.go2cs_probe_list()
+		defer C.go2cs_probe_list_release(l)
+		second := l.next
+		g := &C.struct_go2cs_probe_entry{family: 7}
+		l.next = g
+		fmt.Println("s6storego", int(C.go2cs_probe_next_family(l)), int(g.family))
+		l.next = second
 	case "caddtyped":
 		p := C.malloc(16)
 		defer C.free(p)

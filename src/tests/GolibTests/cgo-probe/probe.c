@@ -270,6 +270,13 @@ GO2CS_PROBE_EXPORT void go2cs_probe_list_release(struct go2cs_probe_entry *node)
     }
 }
 
+// The family of the node after node, read in C through node->next: -1 when there is none. Increment 3.2's store arms
+// (docs/phase4/DESIGN-cgo-phase3-marshaling.md 18.9, D-4) read back what Go stored into the field.
+GO2CS_PROBE_EXPORT int go2cs_probe_next_family(struct go2cs_probe_entry *node)
+{
+    return node->next ? node->next->family : -1;
+}
+
 // An address in C memory: family 2, port 8080, addr 0x7f000001. Released by go2cs_probe_release.
 GO2CS_PROBE_EXPORT void *go2cs_probe_address(void)
 {
