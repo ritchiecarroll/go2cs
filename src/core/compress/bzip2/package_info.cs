@@ -14,6 +14,9 @@
 
 using go;
 using static go.compress.bzip2_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -64,13 +67,15 @@ using static go.compress.bzip2_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("compress/bzip2/bit_reader.go", "bit_reader.cs", "ABYyooKClMzSgoKClIKClIKCABAigoKmgoKmgoKmgg==")]
-[assembly: GoPositionMap("compress/bzip2/bzip2.go", "bzip2.cs", "ABcmggAXNLKCggAQELKUgoKCuIKCpoKCpoKCgpSmwoKmgoKCgpSClKaCgoKUpu6CAAkUgoKCgoKUpoKCgpSCgoKmgpSUlIKmAAwGooKCgoK4goK4gpS4goLagoKUgoLcgpSCgoKClIKClIKCgpSClIKUggAgDsKCgoKCgoKUyoKCgoKCgoKCgtyUuIKCyoK4goKCgoKClJSClMqCgoKCgqaUgqaClIKCgoKUgpSClKaUgoK4goKUgpSCyoKmlIKCgoKUgpSCgqaClJSClIK4gpSmpoKUgoKCgpSmuAAIEoKClIKCpoLKgoKCgoKUAAQaAAoCgoKCpoKCgqYABhCCgoKCgoKUpryigoKU")]
-[assembly: GoPositionMap("compress/bzip2/huffman.go", "huffman.cs", "ACZO0pSClIKUgsrKlIKUpqaCgpSU7gAKEoKmuIKCgqaCgpTugpSCgoKUgoKmypiCggAVJvKmgoKCgriClAAMGoLcyqaClKaCgpSUgpSmgqaUgpSm", "106-111:1;135-137:2")]
-[assembly: GoPositionMap("compress/bzip2/move_to_front.go", "move_to_front.cs", "ABIkooKUqqKCpoKClMbqgoKCqJI=")]
+[assembly: GoPositionMap("compress/bzip2/bit_reader.go", "bit_reader.cs", "ABUyooKClKzSgoKClIKClIKCABAigoKmgoKmgoKmgg==")]
+[assembly: GoPositionMap("compress/bzip2/bzip2.go", "bzip2.cs", "ABQmggAVNLKCggAOELKUgoKCuIKCpoKCpoKCgpSmwoKmgoKCgpSClKaCgoKUpu6CAAkUgoKCgoKUpoKCgpSCgoKmgpSUlIKmAAwGooKCgoK4goK4gpS4goLagoKUgoLcgpSCgoKClIKClIKCgpSClIKUggAgDsKCgoKCgoKUyoKCgoKCgoKCgtyUuIKCyoK4goKCgoKClJSClMqCgoKCgqaUgqaClIKCgoKUgpSClKaUgoK4goKUgpSCyoKmlIKCgoKUgpSCgqaClJSClIK4gpSmpoKUgoKCgpSmuAAIEoKClIKCpoLKgoKCgoKUAAIaAAoCgoKCpoKCgqYABhCCgoKCgoKUpryigoKU")]
+[assembly: GoPositionMap("compress/bzip2/huffman.go", "huffman.cs", "ACNO0pSClIKUgsrKlIKUpqaCgpSUzgAKEoKmuIKCgqaCgpTugpSCgoKUgoKmypiCggAVJvKmgoKCgriClAAMGoLcyqaClKaCgpSUgpSmgqaUgpSm", "106-111:1;135-137:2")]
+[assembly: GoPositionMap("compress/bzip2/move_to_front.go", "move_to_front.cs", "ABAkooKUqqKCpoKClKbqgoKCqJI=")]
 // </GoSourcePositionMaps>
 
 namespace go.compress;
+
+using static go.compress.bzip2_package;
 
 [GoPackage("bzip2")]
 public static partial class bzip2_package
@@ -112,9 +117,39 @@ public static partial class bzip2_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(bzip2_package.StructuralError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class bzip2ᴛStructuralError;
-[GoMethodHost(typeof(bzip2_package.bitReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class bzip2ᴛbitReader;
-[GoMethodHost(typeof(bzip2_package.huffmanTree)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class bzip2ᴛhuffmanTree;
-[GoMethodHost(typeof(bzip2_package.moveToFrontDecoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class bzip2ᴛmoveToFrontDecoder;
-[GoMethodHost(typeof(bzip2_package.reader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class bzip2ᴛreader;
+[GoMethodHost(typeof(bzip2_package.StructuralError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class bzip2ᴛStructuralError;
+[GoMethodHost(typeof(bzip2_package.bitReader)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class bzip2ᴛbitReader;
+[GoMethodHost(typeof(bzip2_package.huffmanTree)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class bzip2ᴛhuffmanTree;
+[GoMethodHost(typeof(bzip2_package.moveToFrontDecoder)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class bzip2ᴛmoveToFrontDecoder;
+[GoMethodHost(typeof(bzip2_package.reader)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class bzip2ᴛreader;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class bzip2ᴛStructuralError {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this StructuralError s) => bzip2_package.Error⁔(s);
+}
+partial class bzip2ᴛbitReader {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static uint64 /*n*/ ReadBits64(this ref bitReader br, nuint bits) => bzip2_package.ReadBits64⁔(ref br, bits);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint /*n*/ ReadBits(this ref bitReader br, nuint bits) => bzip2_package.ReadBits⁔(ref br, bits);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool ReadBit(this ref bitReader br) => bzip2_package.ReadBit⁔(ref br);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error Err(this ref bitReader br) => bzip2_package.Err⁔(ref br);
+}
+partial class bzip2ᴛhuffmanTree {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static uint16 /*v*/ Decode(this ref huffmanTree t, ж<bitReader> Ꮡbr) => bzip2_package.Decode⁔(ref t, Ꮡbr);
+}
+partial class bzip2ᴛmoveToFrontDecoder {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static byte /*b*/ Decode(this moveToFrontDecoder m, nint n) => bzip2_package.Decode⁔(m, n);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static byte First(this moveToFrontDecoder m) => bzip2_package.First⁔(m);
+}
+partial class bzip2ᴛreader {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error setup(this ж<reader> Ꮡbz2, bool needMagic) => bzip2_package.setup⁔(Ꮡbz2, needMagic);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) Read(this ж<reader> Ꮡbz2, slice<byte> buf) => bzip2_package.Read⁔(Ꮡbz2, buf);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint readFromBlock(this ref reader bz2, slice<byte> buf) => bzip2_package.readFromBlock⁔(ref bz2, buf);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint, error) read(this ж<reader> Ꮡbz2, slice<byte> buf) => bzip2_package.read⁔(Ꮡbz2, buf);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error /*err*/ readBlock(this ж<reader> Ꮡbz2) => bzip2_package.readBlock⁔(Ꮡbz2);
+}
+// </MethodForwarders>

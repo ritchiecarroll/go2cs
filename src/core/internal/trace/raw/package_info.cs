@@ -10,10 +10,14 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+using version = go.@internal.trace.version_package;
 // </ImportedTypeAliases>
 
 using go;
 using static go.@internal.trace.raw_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -61,14 +65,17 @@ using static go.@internal.trace.raw_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/trace/raw/event.go", "event.cs", "ACNAwpSCgoKCgoKUgoKCgpSUgoKmgoKUqJKCgoKUgoKClA==")]
-[assembly: GoPositionMap("internal/trace/raw/reader.go", "reader.cs", "ABk0koKSgpTIkqiSgoKUgpSClIKCgoKUgoKUgoKUpoKCgoKmAAcQooKCgoKUlLaigoKUgoKCgpSU")]
-[assembly: GoPositionMap("internal/trace/raw/textreader.go", "textreader.cs", "ACA6koKCgpSCgpSCgpSCgpSCgpSCgoKCgqbIkqiSgoKUgoKClIKCgpSCgoKCgpSClIKClKaCgoKClIKUgoKmAAcQgoKCgpSUgoKClNiUooKCgoKUgpSClIKCprbSgoKClIKClIKClKaCgoKClIKCpoKUgoKCgqaClKaCgoKUgoKU")]
-[assembly: GoPositionMap("internal/trace/raw/textwriter.go", "textwriter.cs", "ABMqkoKClMikgriC")]
-[assembly: GoPositionMap("internal/trace/raw/writer.go", "writer.cs", "AB08koLIpIK4poKClIKCgsqCuIKCgriCgpQ=")]
+[assembly: GoPositionMap("internal/trace/raw/event.go", "event.cs", "ACBAwpSCgoKCgoKUgoKCgpSUgoKmgoKUqJKCgoKUgoKClA==")]
+[assembly: GoPositionMap("internal/trace/raw/reader.go", "reader.cs", "ABg0koKSgpSokqiSgoKUgpSClIKCgoKUgoKUgoKUpoKCgoKmAAcQooKCgoKUlLaigoKUgoKCgpSU")]
+[assembly: GoPositionMap("internal/trace/raw/textreader.go", "textreader.cs", "AB86koKCgpSCgpSCgpSCgpSCgpSCgoKCgqaokqiSgoKUgoKClIKCgpSCgoKCgpSClIKClKaCgoKClIKUgoKmAAcQgoKCgpSUgoKClLiUooKCgoKUgpSClIKCprbSgoKClIKClIKClKaCgoKClIKCpoKUgoKCgqaClKaCgoKUgoKU")]
+[assembly: GoPositionMap("internal/trace/raw/textwriter.go", "textwriter.cs", "ABIqkoKClKikgriC")]
+[assembly: GoPositionMap("internal/trace/raw/writer.go", "writer.cs", "ABw8koKopIK4poKClIKCgsqCuIKCgriCgpQ=")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.trace;
+
+using static go.@internal.trace.raw_package;
+using version = go.@internal.trace.version_package;
 
 [GoPackage("raw")]
 public static partial class raw_package
@@ -113,9 +120,37 @@ public static partial class raw_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(raw_package.Event)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class rawᴛEvent;
-[GoMethodHost(typeof(raw_package.Reader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class rawᴛReader;
-[GoMethodHost(typeof(raw_package.TextReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class rawᴛTextReader;
-[GoMethodHost(typeof(raw_package.TextWriter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class rawᴛTextWriter;
-[GoMethodHost(typeof(raw_package.Writer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class rawᴛWriter;
+[GoMethodHost(typeof(raw_package.Event)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class rawᴛEvent;
+[GoMethodHost(typeof(raw_package.Reader)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class rawᴛReader;
+[GoMethodHost(typeof(raw_package.TextReader)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class rawᴛTextReader;
+[GoMethodHost(typeof(raw_package.TextWriter)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class rawᴛTextWriter;
+[GoMethodHost(typeof(raw_package.Writer)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class rawᴛWriter;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class rawᴛEvent {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this ref Event e) => raw_package.String⁔(ref e);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint EncodedSize(this ref Event e) => raw_package.EncodedSize⁔(ref e);
+}
+partial class rawᴛReader {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static version.Version Version(this ref Reader r) => raw_package.Version⁔(ref r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (Event, error) ReadEvent(this ref Reader r) => raw_package.ReadEvent⁔(ref r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<uint64>, error) readArgs(this ref Reader r, nint n) => raw_package.readArgs⁔(ref r, n);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<byte>, error) readData(this ref Reader r) => raw_package.readData⁔(ref r);
+}
+partial class rawᴛTextReader {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static version.Version Version(this ref TextReader r) => raw_package.Version⁔(ref r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (Event, error) ReadEvent(this ref TextReader r) => raw_package.ReadEvent⁔(ref r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (@string, error) nextLine(this ref TextReader r) => raw_package.nextLine⁔(ref r);
+}
+partial class rawᴛTextWriter {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error WriteEvent(this ref TextWriter w, Event e) => raw_package.WriteEvent⁔(ref w, e);
+}
+partial class rawᴛWriter {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error WriteEvent(this ref Writer w, Event e) => raw_package.WriteEvent⁔(ref w, e);
+}
+// </MethodForwarders>

@@ -184,7 +184,6 @@ using tracev2 = @internal.trace.tracev2_package;
 using @unsafe = unsafe_package;
 using @internal.runtime;
 using @internal.trace;
-using static runtime_package;
 
 partial class runtime_package {
 
@@ -925,10 +924,8 @@ partial struct traceAdvancerState {
     internal channel<EmptyStruct> done;
 }
 
-} partial class runtimeᴛtraceAdvancerState {
-
 // start starts a new traceAdvancer.
-internal static partial void start(this ж<traceAdvancerState> Ꮡs) {
+internal static partial void start⁔(/*this*/ ж<traceAdvancerState> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     // Start a goroutine to periodically advance the trace generation.
@@ -947,14 +944,12 @@ internal static partial void start(this ж<traceAdvancerState> Ꮡs) {
 }
 
 // stop stops a traceAdvancer and blocks until it exits.
-internal static void stop(this ref traceAdvancerState s) {
+internal static void stop⁔(/*this*/ ref traceAdvancerState s) {
     s.timer.wake();
     ᐸꟷ(s.done);
     close(s.done);
     s.timer.close();
 }
-
-} partial class runtime_package {
 
 // traceAdvancePeriod is the approximate period between
 // new generations.
@@ -985,14 +980,12 @@ internal static ж<wakeableSleep> newWakeableSleep() {
     return s;
 }
 
-} partial class runtimeᴛwakeableSleep {
-
 // sleep sleeps for the provided duration in nanoseconds or until
 // another goroutine calls wake.
 //
 // Must not be called by more than one goroutine at a time and
 // must not be called concurrently with close.
-internal static void sleep(this ж<wakeableSleep> Ꮡs, int64 ns) {
+internal static void sleep⁔(/*this*/ ж<wakeableSleep> Ꮡs, int64 ns) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     s.timer.reset(nanotime() + ns, 0);
@@ -1012,7 +1005,7 @@ internal static void sleep(this ж<wakeableSleep> Ꮡs, int64 ns) {
 // wake awakens any goroutine sleeping on the timer.
 //
 // Safe for concurrent use with all other methods.
-internal static void wake(this ж<wakeableSleep> Ꮡs) {
+internal static void wake⁔(/*this*/ ж<wakeableSleep> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     // Grab the wakeup channel, which may be nil if we're
@@ -1049,7 +1042,7 @@ internal static void wake(this ж<wakeableSleep> Ꮡs) {
 //
 // It must only be called once no goroutine is sleeping on the
 // timer *and* nothing else will call wake concurrently.
-internal static void close(this ж<wakeableSleep> Ꮡs) {
+internal static void close⁔(/*this*/ ж<wakeableSleep> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     // Set wakeup to nil so that a late timer ends up being a no-op.
@@ -1061,7 +1054,7 @@ internal static void close(this ж<wakeableSleep> Ꮡs) {
     s.wakeup = default;
 
     // Close the channel.
-    builtin.close(wakeup);
+    close(wakeup);
 
     if (raceenabled) {
         racerelease(@unsafe.Pointer.FromPinnedBox(Ꮡs.Ꮡlock));
@@ -1070,4 +1063,4 @@ internal static void close(this ж<wakeableSleep> Ꮡs) {
     return;
 }
 
-}
+} // end runtime_package

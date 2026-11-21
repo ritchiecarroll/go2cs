@@ -23,7 +23,6 @@ using strings = strings_package;
 using time = time_package;
 using @internal;
 using go.io;
-using static tar_package;
 
 partial class tar_package {
 
@@ -44,8 +43,6 @@ internal static error errSparseTooLong = errors.New("archive/tar: sparse map too
 
 partial struct headerError /*[]@string*/;
 
-} partial class tarᴛheaderError {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string andˢ => ref andˢᵇ;
 private static readonly @string andˢᵇ = "; and "u8;
@@ -54,7 +51,7 @@ private static readonly @string andˢᵇ = "; and "u8;
 internal static ref readonly @string prefixᶜ => ref prefixᶜᵇ;
 private static readonly @string prefixᶜᵇ = "archive/tar: cannot encode header"u8;
 
-internal static @string Error(this headerError he) {
+internal static @string Error⁔(/*this*/ headerError he) {
     var ssᴷ = new stackAppend<@string>();
 
     @string prefix = prefixᶜ;
@@ -69,8 +66,6 @@ internal static @string Error(this headerError he) {
     }
     return fmt.Sprintf("%s: %v"u8, prefix, strings.Join(ss, andˢ));
 }
-
-} partial class tar_package {
 
 // Type flags for Header.Typeflag.
 // Type '0' indicates a regular file.
@@ -242,11 +237,7 @@ partial struct sparseEntry {
     public int64 Offset, Length;
 }
 
-} partial class tarᴛsparseEntry {
-
-internal static int64 endOffset(this sparseEntry s) { return s.Offset + s.Length; }
-
-} partial class tar_package {
+internal static int64 endOffset⁔(/*this*/ sparseEntry s) { return s.Offset + s.Length; }
 
 // A sparse file can be represented as either a sparseDatas or a sparseHoles.
 // As long as the total size is known, they are equivalent and one can be
@@ -368,8 +359,6 @@ partial interface fileState {
     int64 physicalRemaining();
 }
 
-} partial class tarᴛHeader {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string nameˢ => ref nameˢᵇ;
 private static readonly @string nameˢᵇ = "Name"u8;
@@ -412,7 +401,7 @@ private static readonly @string onlyPaxSupportsˢ2ᵇ = "only PAX supports PAXRe
 // As a by-product of checking the fields, this function returns paxHdrs, which
 // contain all fields that could not be directly encoded.
 // A value receiver ensures that this method does not mutate the source Header.
-internal static (Format format, map<@string, @string> paxHdrs, error err) allowedFormats(this Header h) {
+internal static (Format format, map<@string, @string> paxHdrs, error err) allowedFormats⁔(/*this*/ Header h) {
     Format format = default;
     map<@string, @string> paxHdrs = default;
     error err = default;
@@ -640,26 +629,22 @@ internal static (Format format, map<@string, @string> paxHdrs, error err) allowe
 }
 
 // FileInfo returns an fs.FileInfo for the Header.
-public static fs.FileInfo FileInfo(this ж<Header> Ꮡh) {
+internal static fs.FileInfo FileInfo⁔(/*this*/ ж<Header> Ꮡh) {
     return new headerFileInfo(Ꮡh);
 }
-
-} partial class tar_package {
 
 // headerFileInfo implements fs.FileInfo.
 partial struct headerFileInfo {
     internal ж<Header> h;
 }
 
-} partial class tarᴛheaderFileInfo {
-
-internal static int64 Size(this headerFileInfo fi) { return fi.h.Size; }
-internal static bool IsDir(this headerFileInfo fi) { return fi.Mode().IsDir(); }
-internal static time.Time ModTime(this headerFileInfo fi) { return fi.h.ModTime; }
-internal static any Sys(this headerFileInfo fi) { return fi.h.OrTypedNil(); }
+internal static int64 Size⁔(/*this*/ headerFileInfo fi) { return fi.h.Size; }
+internal static bool IsDir⁔(/*this*/ headerFileInfo fi) { return fi.Mode().IsDir(); }
+internal static time.Time ModTime⁔(/*this*/ headerFileInfo fi) { return fi.h.ModTime; }
+internal static any Sys⁔(/*this*/ headerFileInfo fi) { return fi.h.OrTypedNil(); }
 
 // Name returns the base name of the file.
-internal static @string Name(this headerFileInfo fi) {
+internal static @string Name⁔(/*this*/ headerFileInfo fi) {
     if (fi.IsDir()) {
         return path.Base(path.Clean(fi.h.Name));
     }
@@ -667,7 +652,7 @@ internal static @string Name(this headerFileInfo fi) {
 }
 
 // Mode returns the permission and mode bits for the headerFileInfo.
-internal static fs.FileMode /*mode*/ Mode(this headerFileInfo fi) {
+internal static fs.FileMode /*mode*/ Mode⁔(/*this*/ headerFileInfo fi) {
     fs.FileMode mode = default;
 
     // Set file permission bits.
@@ -739,11 +724,9 @@ internal static fs.FileMode /*mode*/ Mode(this headerFileInfo fi) {
     return mode;
 }
 
-internal static @string String(this headerFileInfo fi) {
+internal static @string String⁔(/*this*/ headerFileInfo fi) {
     return fs.FormatFileInfo(fi);
 }
-
-} partial class tar_package {
 
 // sysStat, if non-nil, populates h from system-dependent fields of fi.
 internal static Func<fs.FileInfo, ж<Header>, bool, error> sysStat;

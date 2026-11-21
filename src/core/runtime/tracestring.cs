@@ -7,7 +7,6 @@ namespace go;
 using tracev2 = @internal.trace.tracev2_package;
 using @internal.trace;
 using @unsafe = unsafe_package;
-using static runtime_package;
 
 partial class runtime_package {
 
@@ -25,10 +24,8 @@ partial struct traceStringTable {
     internal traceMap tab;
 }
 
-} partial class runtimeᴛtraceStringTable {
-
 // put adds a string to the table, emits it, and returns a unique ID for it.
-internal static uint64 put(this ж<traceStringTable> Ꮡt, uintptr gen, @string sʗp) {
+internal static uint64 put⁔(/*this*/ ж<traceStringTable> Ꮡt, uintptr gen, @string sʗp) {
     ref var s = ref heap(sʗp, out var Ꮡs);
 
     // Put the string in the table.
@@ -44,7 +41,7 @@ internal static uint64 put(this ж<traceStringTable> Ꮡt, uintptr gen, @string 
 }
 
 // emit emits a string and creates an ID for it, but doesn't add it to the table. Returns the ID.
-internal static uint64 emit(this ж<traceStringTable> Ꮡt, uintptr gen, @string s) {
+internal static uint64 emit⁔(/*this*/ ж<traceStringTable> Ꮡt, uintptr gen, @string s) {
     if (len(s) == 0) {
         return 0; // Empty strings are implicitly assigned ID 0 already.
     }
@@ -61,7 +58,7 @@ internal static uint64 emit(this ж<traceStringTable> Ꮡt, uintptr gen, @string
 // Must run on the systemstack because it acquires t.lock.
 //
 //go:systemstack
-internal static void writeString(this ж<traceStringTable> Ꮡt, uintptr gen, uint64 id, @string s) {
+internal static void writeString⁔(/*this*/ ж<traceStringTable> Ꮡt, uintptr gen, uint64 id, @string s) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     // Truncate the string if necessary.
@@ -95,7 +92,7 @@ internal static void writeString(this ж<traceStringTable> Ꮡt, uintptr gen, ui
 //
 // Must be called only once the caller is certain nothing else will be
 // added to this table.
-internal static void reset(this ж<traceStringTable> Ꮡt, uintptr gen) {
+internal static void reset⁔(/*this*/ ж<traceStringTable> Ꮡt, uintptr gen) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (t.buf != nil) {
@@ -111,4 +108,4 @@ internal static void reset(this ж<traceStringTable> Ꮡt, uintptr gen) {
     Ꮡt.Ꮡtab.reset();
 }
 
-}
+} // end runtime_package

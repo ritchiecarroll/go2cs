@@ -5,8 +5,6 @@
 // license that can be found in the LICENSE file.
 namespace go.go;
 
-using static types_package;
-
 partial class types_package {
 
 // A term describes elementary type sets:
@@ -20,9 +18,7 @@ public partial struct term {
     internal Type typ;
 }
 
-} partial class typesᴛterm {
-
-public static @string String(this ж<term> Ꮡx) {
+internal static @string String⁔(/*this*/ ж<term> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     switch (ᐧ) {
@@ -41,7 +37,7 @@ public static @string String(this ж<term> Ꮡx) {
 }
 
 // equal reports whether x and y represent the same type set.
-internal static bool equal(this ж<term> Ꮡx, ж<term> Ꮡy) {
+internal static bool equal⁔(/*this*/ ж<term> Ꮡx, ж<term> Ꮡy) {
     ref var x = ref Ꮡx.DerefOrNull();
     ref var y = ref Ꮡy.DerefOrNull();
 
@@ -59,7 +55,7 @@ internal static bool equal(this ж<term> Ꮡx, ж<term> Ꮡy) {
 }
 
 // union returns the union x ∪ y: zero, one, or two non-nil terms.
-internal static (ж<term>, ж<term>) union(this ж<term> Ꮡx, ж<term> Ꮡy) {
+internal static (ж<term>, ж<term>) union⁔(/*this*/ ж<term> Ꮡx, ж<term> Ꮡy) {
     ref var x = ref Ꮡx.DerefOrNull();
     ref var y = ref Ꮡy.DerefOrNull();
 
@@ -98,7 +94,7 @@ internal static (ж<term>, ж<term>) union(this ж<term> Ꮡx, ж<term> Ꮡy) {
 }
 
 // intersect returns the intersection x ∩ y.
-internal static ж<term> intersect(this ж<term> Ꮡx, ж<term> Ꮡy) {
+internal static ж<term> intersect⁔(/*this*/ ж<term> Ꮡx, ж<term> Ꮡy) {
     ref var x = ref Ꮡx.DerefOrNull();
     ref var y = ref Ꮡy.DerefOrNull();
 
@@ -131,7 +127,7 @@ internal static ж<term> intersect(this ж<term> Ꮡx, ж<term> Ꮡy) {
 }
 
 // includes reports whether t ∈ x.
-internal static bool includes(this ж<term> Ꮡx, Type t) {
+internal static bool includes⁔(/*this*/ ж<term> Ꮡx, Type t) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     // easy cases
@@ -152,7 +148,7 @@ internal static bool includes(this ж<term> Ꮡx, Type t) {
 }
 
 // subsetOf reports whether x ⊆ y.
-internal static bool subsetOf(this ж<term> Ꮡx, ж<term> Ꮡy) {
+internal static bool subsetOf⁔(/*this*/ ж<term> Ꮡx, ж<term> Ꮡy) {
     ref var x = ref Ꮡx.DerefOrNull();
     ref var y = ref Ꮡy.DerefOrNull();
 
@@ -186,7 +182,7 @@ internal static bool subsetOf(this ж<term> Ꮡx, ж<term> Ꮡy) {
 
 // disjoint reports whether x ∩ y == ∅.
 // x.typ and y.typ must not be nil.
-internal static bool disjoint(this ref term x, ж<term> Ꮡy) {
+internal static bool disjoint⁔(/*this*/ ref term x, ж<term> Ꮡy) {
     ref var y = ref Ꮡy.DerefOrNull();
 
     if (debug && (x.typ == nil || y.typ == nil)) {
@@ -203,4 +199,4 @@ internal static bool disjoint(this ref term x, ж<term> Ꮡy) {
     return !Identical(ux, uy);
 }
 
-}
+} // end types_package

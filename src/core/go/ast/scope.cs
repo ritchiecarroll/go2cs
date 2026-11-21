@@ -9,7 +9,6 @@ using token = global::go.go.token_package;
 using strings = strings_package;
 using global::go.go;
 using io = io_package;
-using static ast_package;
 
 partial class ast_package {
 
@@ -29,12 +28,10 @@ public static ж<Scope> NewScope(ж<Scope> outer) {
     return Ꮡ(new Scope(outer, new map<@string, ж<Object>>(n)));
 }
 
-} partial class astᴛScope {
-
 // Lookup returns the object with the given name if it is
 // found in scope s, otherwise it returns nil. Outer scopes
 // are ignored.
-public static ж<Object> Lookup(this ref Scope s, @string name) {
+internal static ж<Object> Lookup⁔(/*this*/ ref Scope s, @string name) {
     return s.Objects[name];
 }
 
@@ -42,7 +39,7 @@ public static ж<Object> Lookup(this ref Scope s, @string name) {
 // If the scope already contains an object alt with the same name,
 // Insert leaves the scope unchanged and returns alt. Otherwise
 // it inserts obj and returns nil.
-public static ж<Object> /*alt*/ Insert(this ref Scope s, ж<Object> Ꮡobj) {
+internal static ж<Object> /*alt*/ Insert⁔(/*this*/ ref Scope s, ж<Object> Ꮡobj) {
     ж<Object> alt = default;
     ref var obj = ref Ꮡobj.DerefOrNull();
 
@@ -53,7 +50,7 @@ public static ж<Object> /*alt*/ Insert(this ref Scope s, ж<Object> Ꮡobj) {
 }
 
 // Debugging support
-public static @string String(this ж<Scope> Ꮡs) {
+internal static @string String⁔(/*this*/ ж<Scope> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
@@ -67,8 +64,6 @@ public static @string String(this ж<Scope> Ꮡs) {
     fmt.Fprintf(new strings_BuilderжWriter(Ꮡbuf), "}\n"u8);
     return buf.String();
 }
-
-} partial class ast_package {
 
 // ----------------------------------------------------------------------------
 // Objects
@@ -107,12 +102,10 @@ public static ж<Object> NewObj(ObjKind kind, @string name) {
     return Ꮡ(new Object(Kind: kind, Name: name));
 }
 
-} partial class astᴛObject {
-
 // Pos computes the source position of the declaration of an object name.
 // The result may be an invalid position if it cannot be computed
 // (obj.Decl may be nil or not correct).
-public static token.Pos Pos(this ref Object obj) {
+internal static token.Pos Pos⁔(/*this*/ ref Object obj) {
     @string name = obj.Name;
     switch (obj.Decl.type()) {
     case ж<Field> d: {
@@ -170,8 +163,6 @@ public static token.Pos Pos(this ref Object obj) {
     return token.NoPos;
 }
 
-} partial class ast_package {
-
 // ObjKind describes what an [Object] represents.
 partial struct ObjKind /*num:nint*/;
 
@@ -194,8 +185,6 @@ public static ObjKind Lbl => 6;            // label
     [(int)Lbl] = "label"
 }.array(); }
 
-} partial class astᴛObjKind {
+internal static @string String⁔(/*this*/ ObjKind kind) { return objKindStrings[kind]; }
 
-public static @string String(this ObjKind kind) { return objKindStrings[kind]; }
-
-}
+} // end ast_package

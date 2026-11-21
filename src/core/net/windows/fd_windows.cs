@@ -13,7 +13,6 @@ using @unsafe = unsafe_package;
 using @internal;
 using @internal.syscall;
 using time = time_package;
-using static net_package;
 
 partial class net_package {
 
@@ -59,13 +58,11 @@ internal static (ж<netFD>, error) newFD(syscall.Handle sysfd, nint family, nint
     return (ret, default);
 }
 
-} partial class netᴛnetFD {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string wsaioctlˢ => ref wsaioctlˢᵇ;
 private static readonly @string wsaioctlˢᵇ = "wsaioctl"u8;
 
-internal static error init(this ж<netFD> Ꮡfd) {
+internal static error init⁔(/*this*/ ж<netFD> Ꮡfd) {
     ref var fd = ref Ꮡfd.DerefOrNull();
 
     {
@@ -110,7 +107,7 @@ internal static ref readonly @string setsockoptˢ => ref setsockoptˢᵇ;
 private static readonly @string setsockoptˢᵇ = "setsockopt"u8;
 
 // Always returns nil for connected peer address result.
-internal static (syscall.Sockaddr, error) connect(this ж<netFD> Ꮡfd, context.Context ctx, syscall.Sockaddr la, syscall.Sockaddr ra) {
+internal static (syscall.Sockaddr, error) connect⁔(/*this*/ ж<netFD> Ꮡfd, context.Context ctx, syscall.Sockaddr la, syscall.Sockaddr ra) {
     GoFrame ᒐ = default;
     try {
         ref var fd = ref Ꮡfd.DerefOrNull();
@@ -237,9 +234,7 @@ internal static (syscall.Sockaddr, error) connect(this ж<netFD> Ꮡfd, context.
     finally { ᒐ.Run(); }
 }
 
-} partial class netᴛconn {
-
-internal static (int64, error) writeBuffers(this ж<conn> Ꮡc, ж<Buffers> v) {
+internal static (int64, error) writeBuffers⁔(/*this*/ ж<conn> Ꮡc, ж<Buffers> v) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.ok()) {
@@ -252,19 +247,17 @@ internal static (int64, error) writeBuffers(this ж<conn> Ꮡc, ж<Buffers> v) {
     return (n, default);
 }
 
-} partial class netᴛnetFD {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string wsasendˢ => ref wsasendˢᵇ;
 private static readonly @string wsasendˢᵇ = "wsasend"u8;
 
-internal static (int64, error) writeBuffers(this ж<netFD> Ꮡfd, ж<Buffers> buf) {
+internal static (int64, error) writeBuffers⁔(/*this*/ ж<netFD> Ꮡfd, ж<Buffers> buf) {
     var (n, err) = Ꮡfd.Ꮡpfd.Writev(buf.of(Buffers.Ꮡm_value));
     runtime.KeepAlive(Ꮡfd.OrTypedNil());
     return (n, wrapSyscallError(wsasendˢ, err));
 }
 
-internal static (ж<netFD>, error) accept(this ж<netFD> Ꮡfd) {
+internal static (ж<netFD>, error) accept⁔(/*this*/ ж<netFD> Ꮡfd) {
     ref var fd = ref Ꮡfd.DerefOrNull();
 
     var (s, rawsa, rsan, errcall, err) = Ꮡfd.Ꮡpfd.Accept(() => sysSocket(Ꮡfd.Value.family, Ꮡfd.Value.sotype, 0));
@@ -301,16 +294,12 @@ internal static (ж<netFD>, error) accept(this ж<netFD> Ꮡfd) {
     return (netfd, default);
 }
 
-} partial class net_package {
-
 // Defined in os package.
 /*linkname*/ internal static partial ж<os.File> newWindowsFile(syscall.Handle h, @string name) {
     return os.net_newWindowsFile((uintptr)h, name);
 }
 
-} partial class netᴛnetFD {
-
-internal static (ж<os.File>, error) dup(this ж<netFD> Ꮡfd) {
+internal static (ж<os.File>, error) dup⁔(/*this*/ ж<netFD> Ꮡfd) {
     ref var fd = ref Ꮡfd.DerefOrNull();
 
     // Disassociate the IOCP from the socket,
@@ -336,4 +325,4 @@ internal static (ж<os.File>, error) dup(this ж<netFD> Ꮡfd) {
     return (newWindowsFile(h, fd.name()), default);
 }
 
-}
+} // end net_package

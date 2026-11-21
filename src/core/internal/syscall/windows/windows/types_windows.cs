@@ -10,7 +10,6 @@ using Δwindows = go.@internal.runtime.syscall.windows_package;
 using syscall = syscall_package;
 using @unsafe = unsafe_package;
 using go.@internal.runtime.syscall;
-using static windows_package;
 
 partial class windows_package {
 
@@ -109,10 +108,8 @@ partial struct OBJECT_ATTRIBUTES {
     public ж<SECURITY_QUALITY_OF_SERVICE> SecurityQoS;
 }
 
-} partial class windowsᴛOBJECT_ATTRIBUTES {
-
 // init sets o's RootDirectory, ObjectName, and Length.
-internal static error init(this ref OBJECT_ATTRIBUTES o, syscall.Handle root, @string name) {
+internal static error init⁔(/*this*/ ref OBJECT_ATTRIBUTES o, syscall.Handle root, @string name) {
     if (name == "."u8) {
         name = ""u8;
     }
@@ -127,8 +124,6 @@ internal static error init(this ref OBJECT_ATTRIBUTES o, syscall.Handle root, @s
     o.Length = (uint32)/* unsafe.Sizeof(*o) */ (uintptr)48;
     return default;
 }
-
-} partial class windows_package {
 
 // Values for the Attributes member of OBJECT_ATTRIBUTES.
 public static UntypedInt OBJ_INHERIT => 0x00000002;

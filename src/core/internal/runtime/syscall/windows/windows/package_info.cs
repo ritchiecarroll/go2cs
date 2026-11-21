@@ -14,6 +14,9 @@
 
 using go;
 using static go.@internal.runtime.syscall.windows_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -55,11 +58,13 @@ using static go.@internal.runtime.syscall.windows_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/runtime/syscall/windows/defs_windows_amd64.go", "defs_windows_amd64.cs", "AEaIAYKWgIKUgoKUgoKCggARHII=")]
+[assembly: GoPositionMap("internal/runtime/syscall/windows/defs_windows_amd64.go", "defs_windows_amd64.cs", "AEOIAYKWgIKUgoKUgoKCggANHII=")]
 [assembly: GoPositionMap("internal/runtime/syscall/windows/syscall_windows.go", "syscall_windows.cs", "ABxCxqzC")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.runtime.syscall;
+
+using static go.@internal.runtime.syscall.windows_package;
 
 [GoPackage("windows")]
 public static partial class windows_package
@@ -102,6 +107,26 @@ public static partial class windows_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(windows_package.Context)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class windowsᴛContext;
-[GoMethodHost(typeof(windows_package.DISPATCHER_CONTEXT)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class windowsᴛDISPATCHER_CONTEXT;
+[GoMethodHost(typeof(windows_package.Context)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class windowsᴛContext;
+[GoMethodHost(typeof(windows_package.DISPATCHER_CONTEXT)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class windowsᴛDISPATCHER_CONTEXT;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class windowsᴛContext {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static uintptr PC(this ref Context c) => windows_package.PC⁔(ref c);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static uintptr SP(this ref Context c) => windows_package.SP⁔(ref c);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static uintptr LR(this ref Context c) => windows_package.LR⁔(ref c);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void SetLR(this ref Context c, uintptr x) => windows_package.SetLR⁔(ref c, x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void SetPC(this ref Context c, uintptr x) => windows_package.SetPC⁔(ref c, x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void SetSP(this ref Context c, uintptr x) => windows_package.SetSP⁔(ref c, x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void SetFP(this ref Context c, uintptr x) => windows_package.SetFP⁔(ref c, x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void PushCall(this ref Context c, uintptr targetPC, uintptr resumePC) => windows_package.PushCall⁔(ref c, targetPC, resumePC);
+}
+partial class windowsᴛDISPATCHER_CONTEXT {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Context> Ctx(this ref DISPATCHER_CONTEXT c) => windows_package.Ctx⁔(ref c);
+}
+// </MethodForwarders>

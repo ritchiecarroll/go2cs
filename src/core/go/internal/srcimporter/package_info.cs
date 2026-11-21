@@ -10,10 +10,16 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+using ast = go.go.ast_package;
+using build = go.go.build_package;
+using types = go.go.types_package;
 // </ImportedTypeAliases>
 
 using go;
 using static go.go.@internal.srcimporter_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -63,10 +69,16 @@ using static go.go.@internal.srcimporter_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("go/internal/srcimporter/srcimporter.go", "srcimporter.cs", "ACZOAAgCAA4akgACEgALAoKmgpSCgriCuIKCgpTKlKaC2oK4goKUgoKokriC3IKmlIKCgpS4griCgpSUlKaC1rSCgoDGgpSCgoLSgoKCgpSCoqSmgoK4AA4G4oKClJSCgpSCgqS0toKCgoKCgoKUlIKCgpSCgoKm2ramgoKUpqKClMg=", "98-106:1;122-126:2;169-169:1;178-187:2", "", "48=SizesFor/1/1/3", "", "115:21,120:13")]
+[assembly: GoPositionMap("go/internal/srcimporter/srcimporter.go", "srcimporter.cs", "ACVOAAgCAAwakgACEgALAoKmgpSCgriCuIKCgpTKlKaC2oK4goKUgoKokriC3IKmlIKCgpS4griCgpSUlKaC1rSCgoDGgpSCgoLSgoKCgpSCoqSmgoK4AA4G4oKClJSCgpSCgqS0toKCgoKCgoKUlIKCgpSCgoKm2ramgoKUpqKClKg=", "98-106:1;122-126:2;169-169:1;178-187:2", "", "47=SizesFor/1/1/3", "", "112:21,117:13")]
 // </GoSourcePositionMaps>
 
 namespace go.go.@internal;
+
+using static global::go.go.@internal.srcimporter_package;
+using ast = global::go.go.ast_package;
+using build = global::go.go.build_package;
+using types = global::go.go.types_package;
+using ꓸꓸꓸstring = Span<@string>;
 
 [GoPackage("srcimporter")]
 public static partial class srcimporter_package
@@ -110,5 +122,21 @@ public static partial class srcimporter_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(srcimporter_package.Importer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class srcimporterᴛImporter;
+[GoMethodHost(typeof(srcimporter_package.Importer)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class srcimporterᴛImporter;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class srcimporterᴛImporter {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (ж<types.Package>, error) Import(this ж<Importer> Ꮡp, @string path) => srcimporter_package.Import⁔(Ꮡp, path);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (ж<types.Package>, error) ImportFrom(this ж<Importer> Ꮡp, @string path, @string srcDir, types.ImportMode mode) => srcimporter_package.ImportFrom⁔(Ꮡp, path, srcDir, mode);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<ж<ast.File>>, error) parseFiles(this ж<Importer> Ꮡp, @string dir, slice<@string> filenames) => srcimporter_package.parseFiles⁔(Ꮡp, dir, filenames);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (ж<ast.File>, error) cgo(this ж<Importer> Ꮡp, ж<build.Package> Ꮡbp) => srcimporter_package.cgo⁔(Ꮡp, Ꮡbp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (@string, error) absPath(this ref Importer p, @string path) => srcimporter_package.absPath⁔(ref p, path);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool isAbsPath(this ref Importer p, @string path) => srcimporter_package.isAbsPath⁔(ref p, path);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string joinPath(this ref Importer p, params ꓸꓸꓸstring elemʗp) => srcimporter_package.joinPath⁔(ref p, elemʗp);
+}
+// </MethodForwarders>

@@ -14,6 +14,9 @@
 
 using go;
 using static go.crypto.@internal.boring_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -55,10 +58,12 @@ using static go.crypto.@internal.boring_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("crypto/internal/boring/notboring.go", "notboring.cs", "ABIo2Kr42IKCgoKUgoKCgpSUgoIACAqClIKUgpSClIIACQyClIKUgpSClIKUgpSClIKUgoKUgpSClIL8goKCsrI=")]
+[assembly: GoPositionMap("crypto/internal/boring/notboring.go", "notboring.cs", "ABEo2KrYuIKCgoKUgoKCgpSUgoIACAqClIKUgpSClIIACQyClIKUgpSClIKUgpSClIKUgoKUgpSClIL8goKCgoI=")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal;
+
+using static go.crypto.@internal.boring_package;
 
 [GoPackage("boring")]
 public static partial class boring_package
@@ -100,7 +105,23 @@ public static partial class boring_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(boring_package.PrivateKeyECDH)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class boringᴛPrivateKeyECDH;
-[GoMethodHost(typeof(boring_package.PublicKeyECDH)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class boringᴛPublicKeyECDH;
-[GoMethodHost(typeof(boring_package.randReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class boringᴛrandReader;
+[GoMethodHost(typeof(boring_package.PrivateKeyECDH)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class boringᴛPrivateKeyECDH;
+[GoMethodHost(typeof(boring_package.PublicKeyECDH)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class boringᴛPublicKeyECDH;
+[GoMethodHost(typeof(boring_package.randReader)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class boringᴛrandReader;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class boringᴛPrivateKeyECDH {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (ж<PublicKeyECDH>, error) PublicKey(this ref PrivateKeyECDH _) => boring_package.PublicKey⁔(ref _);
+}
+partial class boringᴛPublicKeyECDH {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> Bytes(this ref PublicKeyECDH _) => boring_package.Bytes⁔(ref _);
+}
+partial class boringᴛrandReader {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint, error) Read(this randReader _, slice<byte> b) => boring_package.Read⁔(_, b);
+}
+// </MethodForwarders>

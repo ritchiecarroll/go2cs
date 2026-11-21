@@ -44,10 +44,6 @@ internal static (IP, error) interfaceToIPv4Addr(ж<Interface> ifi) {
     return (default, errNoSuchInterface);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string setsockoptˢ => ref setsockoptˢᵇ;
-private static readonly @string setsockoptˢᵇ = "setsockopt"u8;
-
 internal static error setReadBuffer(ж<netFD> fd, nint bytes) {
     var err = fd.Ꮡpfd.SetsockoptInt(syscall.SOL_SOCKET, syscall.SO_RCVBUF, bytes);
     runtime.KeepAlive(fd.OrTypedNil());

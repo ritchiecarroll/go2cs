@@ -14,6 +14,9 @@
 
 using go;
 using static go.crypto.@internal.fips140.ed25519_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -61,10 +64,12 @@ using static go.crypto.@internal.fips140.ed25519_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("crypto/internal/fips140/ed25519/cast.go", "cast.cs", "ABIegq7CgriCgpSmgoKmgraCgtyCAAkUgoKCgpSCgpQ=", "16-18:1")]
-[assembly: GoPositionMap("crypto/internal/fips140/ed25519/ed25519.go", "ed25519.cs", "ACNGgoKCgqaCgqaCggALEIKCyJKCpqKCgoKCgqaCgqaigoKClIKCpqKCgpSCgpSClKaCgqaigoKCppSCgpSCypSUpoKC5qKCpoKUggAQIKaCpoKCgqamgqaCgoKAgqSAgqSmpoKmgpSUgpSmooKCgoKUgoKCgoKCppSCgoKClIKCgoKCgoKmlIKUpoKmgoKCpoKCgoCCpICCpKaClIKClOaigqaCpoKCgoKUgoKCgoKCgqaCgriClIKU")]
+[assembly: GoPositionMap("crypto/internal/fips140/ed25519/ed25519.go", "ed25519.cs", "ACBGgoKCgqaCgqaCggAHEIKCqJKCpqKCgoKCgqaCgqaigoKClIKCpqKCgpSCgpSClKaCgqaigoKCppSCgpSCypSUpoKC5qKCpoKUggAQIKaCpoKCgqamgqaCgoKAgqSAgqSmpoKmgpSUgpSmooKCgoKUgoKCgoKCppSCgoKClIKCgoKCgoKmlIKUpoKmgoKCpoKCgoCCpICCpKaClIKClOaigqaCpoKCgoKUgoKCgoKCgqaCgriClIKU")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140;
+
+using static go.crypto.@internal.fips140.ed25519_package;
 
 [GoPackage("ed25519")]
 public static partial class ed25519_package
@@ -106,6 +111,21 @@ public static partial class ed25519_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(ed25519_package.PrivateKey)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ed25519ᴛPrivateKey;
-[GoMethodHost(typeof(ed25519_package.PublicKey)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ed25519ᴛPublicKey;
+[GoMethodHost(typeof(ed25519_package.PrivateKey)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class ed25519ᴛPrivateKey;
+[GoMethodHost(typeof(ed25519_package.PublicKey)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class ed25519ᴛPublicKey;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class ed25519ᴛPrivateKey {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> Bytes(this ref PrivateKey priv) => ed25519_package.Bytes⁔(ref priv);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> Seed(this ref PrivateKey priv) => ed25519_package.Seed⁔(ref priv);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> PublicKey(this ref PrivateKey priv) => ed25519_package.PublicKey⁔(ref priv);
+}
+partial class ed25519ᴛPublicKey {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> Bytes(this ref PublicKey pub) => ed25519_package.Bytes⁔(ref pub);
+}
+// </MethodForwarders>

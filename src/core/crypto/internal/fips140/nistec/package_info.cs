@@ -14,6 +14,9 @@
 
 using go;
 using static go.crypto.@internal.fips140.nistec_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -60,16 +63,18 @@ using static go.crypto.@internal.fips140.nistec_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("crypto/internal/fips140/nistec/p224.go", "p224.cs", "ABs4kgAIELKCgoKowoKCggAIDuKmuIKClIKClIKUgoKCuIKCuIKCyoKCgpSCgoKmAAkOgoKUqJKClIKClOaUgoKClMy2oqaigqaCgpSCgoKqpqLmooKmgpSstqKmooKmgoK4goKCqAAICIKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgpSCgoKo+IKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgpSCgoKo0oKCggALFKKClIKCgtqW2IKCgsqCgqaCgoKCpoKClIKCgpSCgqYAChKygoKCgoKClIKCgqbqwoKUAAcQgoKCgoKCgpSCgoKmyqKCgoKClII=", "114-116:1;393-406:1", "", "30=One/1/1/2;395=NewP224Point/4/15/1,NewP224Point/5/15/1,NewP224Point/6/15/1,NewP224Point/7/15/1,NewP224Point/8/15/2,NewP224Point/9/15/2,NewP224Point/10/15/2,NewP224Point/11/15/2,NewP224Point/12/15/3,NewP224Point/13/15/3,NewP224Point/14/15/3,NewP224Point/15/15/3")]
+[assembly: GoPositionMap("crypto/internal/fips140/nistec/p224.go", "p224.cs", "ABo4kgAGELKCgoKowoKCggAIDuKmuIKClIKClIKUgoKCuIKCuIKCyoKCgpSCgoKm/oKClKiSgpSCgpTmlIKCgpSstqKmooKmgoKUgoKCqqai5qKCpoKUrLaipqKCpoKCuIKCgqgACAiCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKUgoKCqPiCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKUgoKCqNKCgoIABxSigpSCgoK6ltiCgoLKgoKmgoKCgqaCgpSCgoKUgoKmAAYSsoKCgoKCgpSCgoKm6sKClAAHEIKCgoKCgoKUgoKCpqqigoKCgpSC", "114-116:1;393-406:1", "", "29=One/1/1/2;382=NewP224Point/4/15/1,NewP224Point/5/15/1,NewP224Point/6/15/1,NewP224Point/7/15/1,NewP224Point/8/15/2,NewP224Point/9/15/2,NewP224Point/10/15/2,NewP224Point/11/15/2,NewP224Point/12/15/3,NewP224Point/13/15/3,NewP224Point/14/15/3,NewP224Point/15/15/3")]
 [assembly: GoPositionMap("crypto/internal/fips140/nistec/p224_sqrt.go", "p224_sqrt.cs", "ABAgAAsWgoKCgsoABzoAFQKUgoKCgoKClIKCgoKUgoKClIKCgpSCgpSCgoKUgoKUpoKmAAcQpoKCgpSCgg==", "27-39:1", "", "122=One/1/1/1")]
-[assembly: GoPositionMap("crypto/internal/fips140/nistec/p256.go", "p256.cs", "ACFAkoKCyJKCgoKokoKCggAQFsKmuIKClIKClIKUgoKCuIKCuIKCyoKCgpSCgoKmAAkOgoKUqJKClIKClOaUgoKClMy2oqbGgqaCgpSCgoKqpqLmooKmgpSstqKmooKmgoK4goKCqMiCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKUgoKCqMiCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKUgoKCAAwSgoKCzgAICoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKClIKCgqiSgoKCAA4QsoKmgoKCyoKCgoKCgoKClKaCgoKCgoKqwoKClIKUAAsUooKUgoKCurKCgoKCpsaCgoKCgsyygoLKlKa4gpSCgpSCgoKClIK4gqaCgqaokoKCggAKFLKClIKCggARMoKCgoKCzPqCgsqUppSCgtyClIKUgriCpoKCgoKmyJKCgoLKogAQIoKCgoKCgoKCgoKCgoKCpoKClIKokoKC", "120-122:1")]
+[assembly: GoPositionMap("crypto/internal/fips140/nistec/p256.go", "p256.cs", "ACBAkoKCqJKCgoKokoKCggAMFsKmuIKClIKClIKUgoKCuIKCuIKCyoKCgpSCgoKm/oKClKiSgpSCgpTmlIKCgpSstqKmxoKmgoKUgoKCqqai5qKCpoKUrLaipqKCpoKCuIKCgqjIgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKClIKCgqjIgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKClIKCggAIEoKCgq4ACAqCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgpSCgoKokoKCggAGELKCpoKCgsqCgoKCgoKCgpSmgoKCgoKCqsKCgpSClAAHFKKClIKCgrqygoKCgqamgoKCgoKssoKCypSmuIKUgoKUgoKCgpSCuIKmgoKmqJKCgoIABhSygpSCgoIADzKCgoKCgqz6goLKlKaUgoLcgpSClIK4gqaCgoKCpqiSgoKCqqIAECKCgoKCgoKCgoKCgoKCgqaCgpSCqJKCgg==", "120-122:1")]
 [assembly: GoPositionMap("crypto/internal/fips140/nistec/p256_ordinv_noasm.go", "p256_ordinv_noasm.cs", "AA4Wgg==")]
 [assembly: GoPositionMap("crypto/internal/fips140/nistec/p256_table.go", "p256_table.cs", "AAoU")]
-[assembly: GoPositionMap("crypto/internal/fips140/nistec/p384.go", "p384.cs", "ABs4kgAIELKCgoKowoKCggAIDuKmuIKClIKClIKUgoKCuIKCuIKCyoKCgpSCgoKmAAkOgoKUqJKClIKClOaUgoKClMy2oqaigqaCgpSCgoKqpqLmooKmgpSstqKmooKmgoK4goKCqAAICIKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgpSCgoKo+IKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgpSCgoKo0oKCggALFKKClIKCgtqW2IKCgsqCgqaCgoKCpoKClIKCgpSCgqYAChKygoKCgoKClIKCgqbqwoKUAAcQgoKCgoKCgpSCgoKmyqKCgoKClIKoAAEwABcCgpSCgoKCgoKUgoKCgpSCgoKUgoKUgoKCgoKUgoKClIKCgpSCgpSCgpSCgpSCgg==", "114-116:1;393-406:1", "", "30=One/1/1/2;395=NewP384Point/4/15/1,NewP384Point/5/15/1,NewP384Point/6/15/1,NewP384Point/7/15/1,NewP384Point/8/15/2,NewP384Point/9/15/2,NewP384Point/10/15/2,NewP384Point/11/15/2,NewP384Point/12/15/3,NewP384Point/13/15/3,NewP384Point/14/15/3,NewP384Point/15/15/3")]
-[assembly: GoPositionMap("crypto/internal/fips140/nistec/p521.go", "p521.cs", "ABs4kgAIELKCgoKowoKCggAIDuKmuIKClIKClIKUgoKCuIKCuIKCyoKCgpSCgoKmAAkOgoKUqJKClIKClOaUgoKClMy2oqaigqaCgpSCgoKqpqLmooKmgpSstqKmooKmgoK4goKCqAAICIKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgpSCgoKo+IKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgpSCgoKo0oKCggALFKKClIKCgtqW2IKCgsqCgqaCgoKCpoKClIKCgpSCgqYAChKygoKCgoKClIKCgqbqwoKUAAcQgoKCgoKCgpSCgoKmyqKCgoKClIKoAAkSgoI=", "114-116:1;393-406:1", "", "30=One/1/1/2;395=NewP521Point/4/15/1,NewP521Point/5/15/1,NewP521Point/6/15/1,NewP521Point/7/15/1,NewP521Point/8/15/2,NewP521Point/9/15/2,NewP521Point/10/15/2,NewP521Point/11/15/2,NewP521Point/12/15/3,NewP521Point/13/15/3,NewP521Point/14/15/3,NewP521Point/15/15/3")]
+[assembly: GoPositionMap("crypto/internal/fips140/nistec/p384.go", "p384.cs", "ABo4kgAGELKCgoKowoKCggAIDuKmuIKClIKClIKUgoKCuIKCuIKCyoKCgpSCgoKm/oKClKiSgpSCgpTmlIKCgpSstqKmooKmgoKUgoKCqqai5qKCpoKUrLaipqKCpoKCuIKCgqgACAiCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKUgoKCqPiCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKUgoKCqNKCgoIABxSigpSCgoK6ltiCgoLKgoKmgoKCgqaCgpSCgoKUgoKmAAYSsoKCgoKCgpSCgoKmqsKClAAHEIKCgoKCgoKUgoKCpqqigoKCgpSCqAABMAAXAoKUgoKCgoKClIKCgoKUgoKClIKClIKCgoKClIKCgpSCgoKUgoKUgoKUgoKUgoI=", "114-116:1;393-406:1", "", "29=One/1/1/2;382=NewP384Point/4/15/1,NewP384Point/5/15/1,NewP384Point/6/15/1,NewP384Point/7/15/1,NewP384Point/8/15/2,NewP384Point/9/15/2,NewP384Point/10/15/2,NewP384Point/11/15/2,NewP384Point/12/15/3,NewP384Point/13/15/3,NewP384Point/14/15/3,NewP384Point/15/15/3")]
+[assembly: GoPositionMap("crypto/internal/fips140/nistec/p521.go", "p521.cs", "ABo4kgAGELKCgoKowoKCggAIDuKmuIKClIKClIKUgoKCuIKCuIKCyoKCgpSCgoKm/oKClKiSgpSCgpTmlIKCgpSstqKmooKmgoKUgoKCqqai5qKCpoKUrLaipqKCpoKCuIKCgqgACAiCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKUgoKCqPiCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKUgoKCqNKCgoIABxSigpSCgoK6ltiCgoLKgoKmgoKCgqaCgpSCgoKUgoKmAAYSsoKCgoKCgpSCgoKmqsKClAAHEIKCgoKCgoKUgoKCpqqigoKCgpSCqAAJEoKC", "114-116:1;393-406:1", "", "29=One/1/1/2;382=NewP521Point/4/15/1,NewP521Point/5/15/1,NewP521Point/6/15/1,NewP521Point/7/15/1,NewP521Point/8/15/2,NewP521Point/9/15/2,NewP521Point/10/15/2,NewP521Point/11/15/2,NewP521Point/12/15/3,NewP521Point/13/15/3,NewP521Point/14/15/3,NewP521Point/15/15/3")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140;
+
+using static go.crypto.@internal.fips140.nistec_package;
 
 [GoPackage("nistec")]
 public static partial class nistec_package
@@ -117,15 +122,116 @@ public static partial class nistec_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(nistec_package.P224Point)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class nistecᴛP224Point;
-[GoMethodHost(typeof(nistec_package.P256Point)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class nistecᴛP256Point;
-[GoMethodHost(typeof(nistec_package.P384Point)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class nistecᴛP384Point;
-[GoMethodHost(typeof(nistec_package.P521Point)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class nistecᴛP521Point;
-[GoMethodHost(typeof(nistec_package.p224Table)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class nistecᴛp224Table;
-[GoMethodHost(typeof(nistec_package.p256AffinePoint)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class nistecᴛp256AffinePoint;
-[GoMethodHost(typeof(nistec_package.p256AffineTable)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class nistecᴛp256AffineTable;
-[GoMethodHost(typeof(nistec_package.p256OrdElement)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class nistecᴛp256OrdElement;
-[GoMethodHost(typeof(nistec_package.p256Table)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class nistecᴛp256Table;
-[GoMethodHost(typeof(nistec_package.p384Table)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class nistecᴛp384Table;
-[GoMethodHost(typeof(nistec_package.p521Table)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class nistecᴛp521Table;
+[GoMethodHost(typeof(nistec_package.P224Point)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class nistecᴛP224Point;
+[GoMethodHost(typeof(nistec_package.P256Point)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class nistecᴛP256Point;
+[GoMethodHost(typeof(nistec_package.P384Point)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class nistecᴛP384Point;
+[GoMethodHost(typeof(nistec_package.P521Point)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class nistecᴛP521Point;
+[GoMethodHost(typeof(nistec_package.p224Table)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class nistecᴛp224Table;
+[GoMethodHost(typeof(nistec_package.p256AffinePoint)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class nistecᴛp256AffinePoint;
+[GoMethodHost(typeof(nistec_package.p256AffineTable)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class nistecᴛp256AffineTable;
+[GoMethodHost(typeof(nistec_package.p256OrdElement)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class nistecᴛp256OrdElement;
+[GoMethodHost(typeof(nistec_package.p256Table)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class nistecᴛp256Table;
+[GoMethodHost(typeof(nistec_package.p384Table)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class nistecᴛp384Table;
+[GoMethodHost(typeof(nistec_package.p521Table)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class nistecᴛp521Table;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class nistecᴛP224Point {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<P224Point> SetGenerator(this ж<P224Point> Ꮡp) => nistec_package.SetGenerator⁔(Ꮡp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<P224Point> Set(this ж<P224Point> Ꮡp, ж<P224Point> Ꮡq) => nistec_package.Set⁔(Ꮡp, Ꮡq);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (ж<P224Point>, error) SetBytes(this ж<P224Point> Ꮡp, slice<byte> b) => nistec_package.SetBytes⁔(Ꮡp, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> Bytes(this ref P224Point p) => nistec_package.Bytes⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<byte> bytes(this ref P224Point p, /*[57]*/ ж<array<byte>> Ꮡout) => nistec_package.bytes⁔(ref p, Ꮡout);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<byte>, error) BytesX(this ref P224Point p) => nistec_package.BytesX⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<byte>, error) bytesX(this ref P224Point p, /*[28]*/ ж<array<byte>> Ꮡout) => nistec_package.bytesX⁔(ref p, Ꮡout);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> BytesCompressed(this ref P224Point p) => nistec_package.BytesCompressed⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<byte> bytesCompressed(this ref P224Point p, /*[29]*/ ж<array<byte>> Ꮡout) => nistec_package.bytesCompressed⁔(ref p, Ꮡout);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<P224Point> Add(this ж<P224Point> Ꮡq, ж<P224Point> Ꮡp1, ж<P224Point> Ꮡp2) => nistec_package.Add⁔(Ꮡq, Ꮡp1, Ꮡp2);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<P224Point> Double(this ж<P224Point> Ꮡq, ж<P224Point> Ꮡp) => nistec_package.Double⁔(Ꮡq, Ꮡp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<P224Point> Select(this ж<P224Point> Ꮡq, ж<P224Point> Ꮡp1, ж<P224Point> Ꮡp2, nint cond) => nistec_package.Select⁔(Ꮡq, Ꮡp1, Ꮡp2, cond);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (ж<P224Point>, error) ScalarMult(this ж<P224Point> Ꮡp, ж<P224Point> Ꮡq, slice<byte> scalar) => nistec_package.ScalarMult⁔(Ꮡp, Ꮡq, scalar);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<array<p224Table>> generatorTable(this ref P224Point p) => nistec_package.generatorTable⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (ж<P224Point>, error) ScalarBaseMult(this ж<P224Point> Ꮡp, slice<byte> scalar) => nistec_package.ScalarBaseMult⁔(Ꮡp, scalar);
+}
+partial class nistecᴛP256Point {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<P256Point> SetGenerator(this ж<P256Point> Ꮡp) => nistec_package.SetGenerator⁔(Ꮡp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<P256Point> Set(this ж<P256Point> Ꮡp, ж<P256Point> Ꮡq) => nistec_package.Set⁔(Ꮡp, Ꮡq);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (ж<P256Point>, error) SetBytes(this ж<P256Point> Ꮡp, slice<byte> b) => nistec_package.SetBytes⁔(Ꮡp, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> Bytes(this ж<P256Point> Ꮡp) => nistec_package.Bytes⁔(Ꮡp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<byte> bytes(this ж<P256Point> Ꮡp, /*[65]*/ ж<array<byte>> Ꮡout) => nistec_package.bytes⁔(Ꮡp, Ꮡout);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<byte>, error) BytesX(this ж<P256Point> Ꮡp) => nistec_package.BytesX⁔(Ꮡp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<byte>, error) bytesX(this ж<P256Point> Ꮡp, /*[32]*/ ж<array<byte>> Ꮡout) => nistec_package.bytesX⁔(Ꮡp, Ꮡout);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> BytesCompressed(this ж<P256Point> Ꮡp) => nistec_package.BytesCompressed⁔(Ꮡp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<byte> bytesCompressed(this ж<P256Point> Ꮡp, /*[33]*/ ж<array<byte>> Ꮡout) => nistec_package.bytesCompressed⁔(Ꮡp, Ꮡout);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<P256Point> Add(this ж<P256Point> Ꮡq, ж<P256Point> Ꮡp1, ж<P256Point> Ꮡp2) => nistec_package.Add⁔(Ꮡq, Ꮡp1, Ꮡp2);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<P256Point> Double(this ж<P256Point> Ꮡq, ж<P256Point> Ꮡp) => nistec_package.Double⁔(Ꮡq, Ꮡp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<P256Point> AddAffine(this ж<P256Point> Ꮡq, ж<P256Point> Ꮡp1, ж<p256AffinePoint> Ꮡp2, nint infinity) => nistec_package.AddAffine⁔(Ꮡq, Ꮡp1, Ꮡp2, infinity);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<P256Point> Select(this ж<P256Point> Ꮡq, ж<P256Point> Ꮡp1, ж<P256Point> Ꮡp2, nint cond) => nistec_package.Select⁔(Ꮡq, Ꮡp1, Ꮡp2, cond);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (ж<P256Point>, error) ScalarMult(this ж<P256Point> Ꮡp, ж<P256Point> Ꮡq, slice<byte> scalar) => nistec_package.ScalarMult⁔(Ꮡp, Ꮡq, scalar);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<P256Point> Negate(this ж<P256Point> Ꮡp, nint cond) => nistec_package.Negate⁔(Ꮡp, cond);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (ж<P256Point>, error) ScalarBaseMult(this ж<P256Point> Ꮡp, slice<byte> scalar) => nistec_package.ScalarBaseMult⁔(Ꮡp, scalar);
+}
+partial class nistecᴛP384Point {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<P384Point> SetGenerator(this ж<P384Point> Ꮡp) => nistec_package.SetGenerator⁔(Ꮡp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<P384Point> Set(this ж<P384Point> Ꮡp, ж<P384Point> Ꮡq) => nistec_package.Set⁔(Ꮡp, Ꮡq);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (ж<P384Point>, error) SetBytes(this ж<P384Point> Ꮡp, slice<byte> b) => nistec_package.SetBytes⁔(Ꮡp, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> Bytes(this ref P384Point p) => nistec_package.Bytes⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<byte> bytes(this ref P384Point p, /*[97]*/ ж<array<byte>> Ꮡout) => nistec_package.bytes⁔(ref p, Ꮡout);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<byte>, error) BytesX(this ref P384Point p) => nistec_package.BytesX⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<byte>, error) bytesX(this ref P384Point p, /*[48]*/ ж<array<byte>> Ꮡout) => nistec_package.bytesX⁔(ref p, Ꮡout);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> BytesCompressed(this ref P384Point p) => nistec_package.BytesCompressed⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<byte> bytesCompressed(this ref P384Point p, /*[49]*/ ж<array<byte>> Ꮡout) => nistec_package.bytesCompressed⁔(ref p, Ꮡout);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<P384Point> Add(this ж<P384Point> Ꮡq, ж<P384Point> Ꮡp1, ж<P384Point> Ꮡp2) => nistec_package.Add⁔(Ꮡq, Ꮡp1, Ꮡp2);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<P384Point> Double(this ж<P384Point> Ꮡq, ж<P384Point> Ꮡp) => nistec_package.Double⁔(Ꮡq, Ꮡp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<P384Point> Select(this ж<P384Point> Ꮡq, ж<P384Point> Ꮡp1, ж<P384Point> Ꮡp2, nint cond) => nistec_package.Select⁔(Ꮡq, Ꮡp1, Ꮡp2, cond);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (ж<P384Point>, error) ScalarMult(this ж<P384Point> Ꮡp, ж<P384Point> Ꮡq, slice<byte> scalar) => nistec_package.ScalarMult⁔(Ꮡp, Ꮡq, scalar);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<array<p384Table>> generatorTable(this ref P384Point p) => nistec_package.generatorTable⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (ж<P384Point>, error) ScalarBaseMult(this ж<P384Point> Ꮡp, slice<byte> scalar) => nistec_package.ScalarBaseMult⁔(Ꮡp, scalar);
+}
+partial class nistecᴛP521Point {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<P521Point> SetGenerator(this ж<P521Point> Ꮡp) => nistec_package.SetGenerator⁔(Ꮡp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<P521Point> Set(this ж<P521Point> Ꮡp, ж<P521Point> Ꮡq) => nistec_package.Set⁔(Ꮡp, Ꮡq);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (ж<P521Point>, error) SetBytes(this ж<P521Point> Ꮡp, slice<byte> b) => nistec_package.SetBytes⁔(Ꮡp, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> Bytes(this ref P521Point p) => nistec_package.Bytes⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<byte> bytes(this ref P521Point p, /*[133]*/ ж<array<byte>> Ꮡout) => nistec_package.bytes⁔(ref p, Ꮡout);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<byte>, error) BytesX(this ref P521Point p) => nistec_package.BytesX⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<byte>, error) bytesX(this ref P521Point p, /*[66]*/ ж<array<byte>> Ꮡout) => nistec_package.bytesX⁔(ref p, Ꮡout);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> BytesCompressed(this ref P521Point p) => nistec_package.BytesCompressed⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<byte> bytesCompressed(this ref P521Point p, /*[67]*/ ж<array<byte>> Ꮡout) => nistec_package.bytesCompressed⁔(ref p, Ꮡout);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<P521Point> Add(this ж<P521Point> Ꮡq, ж<P521Point> Ꮡp1, ж<P521Point> Ꮡp2) => nistec_package.Add⁔(Ꮡq, Ꮡp1, Ꮡp2);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<P521Point> Double(this ж<P521Point> Ꮡq, ж<P521Point> Ꮡp) => nistec_package.Double⁔(Ꮡq, Ꮡp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<P521Point> Select(this ж<P521Point> Ꮡq, ж<P521Point> Ꮡp1, ж<P521Point> Ꮡp2, nint cond) => nistec_package.Select⁔(Ꮡq, Ꮡp1, Ꮡp2, cond);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (ж<P521Point>, error) ScalarMult(this ж<P521Point> Ꮡp, ж<P521Point> Ꮡq, slice<byte> scalar) => nistec_package.ScalarMult⁔(Ꮡp, Ꮡq, scalar);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<array<p521Table>> generatorTable(this ref P521Point p) => nistec_package.generatorTable⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (ж<P521Point>, error) ScalarBaseMult(this ж<P521Point> Ꮡp, slice<byte> scalar) => nistec_package.ScalarBaseMult⁔(Ꮡp, scalar);
+}
+partial class nistecᴛp224Table {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void Select(this ref p224Table table, ж<P224Point> Ꮡp, uint8 n) => nistec_package.Select⁔(ref table, Ꮡp, n);
+}
+partial class nistecᴛp256AffinePoint {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<P256Point> Projective(this ref p256AffinePoint p) => nistec_package.Projective⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<p256AffinePoint> Negate(this ж<p256AffinePoint> Ꮡp, nint cond) => nistec_package.Negate⁔(Ꮡp, cond);
+}
+partial class nistecᴛp256AffineTable {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void Select(this ref p256AffineTable table, ж<p256AffinePoint> Ꮡp, uint8 n) => nistec_package.Select⁔(ref table, Ꮡp, n);
+}
+partial class nistecᴛp256OrdElement {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (ж<p256OrdElement>, error) SetBytes(this ж<p256OrdElement> Ꮡs, slice<byte> x) => nistec_package.SetBytes⁔(Ꮡs, x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<byte> Bytes(this ref p256OrdElement s) => nistec_package.Bytes⁔(ref s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static uint64 Rsh(this ж<p256OrdElement> Ꮡs, nint n) => nistec_package.Rsh⁔(Ꮡs, n);
+}
+partial class nistecᴛp256Table {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void Select(this ref p256Table table, ж<P256Point> Ꮡp, uint8 n) => nistec_package.Select⁔(ref table, Ꮡp, n);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<p256Table> Compute(this ж<p256Table> Ꮡtable, ж<P256Point> Ꮡq) => nistec_package.Compute⁔(Ꮡtable, Ꮡq);
+}
+partial class nistecᴛp384Table {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void Select(this ref p384Table table, ж<P384Point> Ꮡp, uint8 n) => nistec_package.Select⁔(ref table, Ꮡp, n);
+}
+partial class nistecᴛp521Table {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void Select(this ref p521Table table, ж<P521Point> Ꮡp, uint8 n) => nistec_package.Select⁔(ref table, Ꮡp, n);
+}
+// </MethodForwarders>

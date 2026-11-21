@@ -6,7 +6,6 @@ namespace go.@internal.runtime.syscall;
 using goarch = go.@internal.goarch_package;
 using @unsafe = unsafe_package;
 using go.@internal;
-using static windows_package;
 
 partial class windows_package {
 
@@ -66,27 +65,23 @@ partial struct Context {
     public uint64 LastExceptionFromRip;
 }
 
-} partial class windowsᴛContext {
-
-public static uintptr PC(this ref Context c) { return (uintptr)c.Rip; }
-public static uintptr SP(this ref Context c) { return (uintptr)c.Rsp; }
+internal static uintptr PC⁔(/*this*/ ref Context c) { return (uintptr)c.Rip; }
+internal static uintptr SP⁔(/*this*/ ref Context c) { return (uintptr)c.Rsp; }
 
 // AMD64 does not have link register, so this returns 0.
-public static uintptr LR(this ref Context c) { return 0; }
-public static void SetLR(this ref Context c, uintptr x) { }
+internal static uintptr LR⁔(/*this*/ ref Context c) { return 0; }
+internal static void SetLR⁔(/*this*/ ref Context c, uintptr x) { }
 
-public static void SetPC(this ref Context c, uintptr x) { c.Rip = (uint64)x; }
-public static void SetSP(this ref Context c, uintptr x) { c.Rsp = (uint64)x; }
-public static void SetFP(this ref Context c, uintptr x) { c.Rbp = (uint64)x; }
+internal static void SetPC⁔(/*this*/ ref Context c, uintptr x) { c.Rip = (uint64)x; }
+internal static void SetSP⁔(/*this*/ ref Context c, uintptr x) { c.Rsp = (uint64)x; }
+internal static void SetFP⁔(/*this*/ ref Context c, uintptr x) { c.Rbp = (uint64)x; }
 
-public static void PushCall(this ref Context c, uintptr targetPC, uintptr resumePC) {
+internal static void PushCall⁔(/*this*/ ref Context c, uintptr targetPC, uintptr resumePC) {
     var sp = c.SP() - (uintptr)goarch.StackAlign;
     (@unsafe.Pointer.To<uintptr>((@unsafe.Pointer)sp)).Value = resumePC;
     c.SetSP(sp);
     c.SetPC(targetPC);
 }
-
-} partial class windows_package {
 
 partial struct DISPATCHER_CONTEXT {
     public uint64 ControlPc;
@@ -99,10 +94,8 @@ partial struct DISPATCHER_CONTEXT {
     public uintptr HandlerData;
 }
 
-} partial class windowsᴛDISPATCHER_CONTEXT {
-
-public static ж<Context> Ctx(this ref DISPATCHER_CONTEXT c) {
+internal static ж<Context> Ctx⁔(/*this*/ ref DISPATCHER_CONTEXT c) {
     return c.Context;
 }
 
-}
+} // end windows_package

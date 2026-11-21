@@ -18,7 +18,6 @@ using utf8 = go.unicode.utf8_package;
 /* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
 using go.encoding;
 using go.unicode;
-using static json_package;
 
 partial class json_package {
 
@@ -132,16 +131,12 @@ partial struct UnmarshalTypeError {
     public @string Field;     // the full path from root node to the field, include embedded struct
 }
 
-} partial class jsonᴛUnmarshalTypeError {
-
-public static @string Error(this ref UnmarshalTypeError e) {
+internal static @string Error⁔(/*this*/ ref UnmarshalTypeError e) {
     if (e.Struct != ""u8 || e.Field != ""u8) {
         return "json: cannot unmarshal "u8 + e.Value + " into Go struct field "u8 + e.Struct + "."u8 + e.Field + " of type "u8 + e.Type.String();
     }
     return "json: cannot unmarshal "u8 + e.Value + " into Go value of type "u8 + e.Type.String();
 }
-
-} partial class json_package {
 
 // An UnmarshalFieldError describes a JSON object key that
 // led to an unexported (and therefore unwritable) struct field.
@@ -153,13 +148,9 @@ partial struct UnmarshalFieldError {
     public reflect.StructField Field;
 }
 
-} partial class jsonᴛUnmarshalFieldError {
-
-public static @string Error(this ref UnmarshalFieldError e) {
+internal static @string Error⁔(/*this*/ ref UnmarshalFieldError e) {
     return "json: cannot unmarshal object key "u8 + strconv.Quote(e.Key) + " into unexported field "u8 + e.Field.Name + " of type "u8 + e.Type.String();
 }
-
-} partial class json_package {
 
 // An InvalidUnmarshalError describes an invalid argument passed to [Unmarshal].
 // (The argument to [Unmarshal] must be a non-nil pointer.)
@@ -167,13 +158,11 @@ partial struct InvalidUnmarshalError {
     public reflect.Type Type;
 }
 
-} partial class jsonᴛInvalidUnmarshalError {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string jsonUnmarshalNilˢ => ref jsonUnmarshalNilˢᵇ;
 private static readonly @string jsonUnmarshalNilˢᵇ = "json: Unmarshal(nil)"u8;
 
-public static @string Error(this ref InvalidUnmarshalError e) {
+internal static @string Error⁔(/*this*/ ref InvalidUnmarshalError e) {
     if (e.Type == nil) {
         return jsonUnmarshalNilˢ;
     }
@@ -184,9 +173,7 @@ public static @string Error(this ref InvalidUnmarshalError e) {
     return "json: Unmarshal(nil "u8 + e.Type.String() + ")"u8;
 }
 
-} partial class jsonᴛdecodeState {
-
-internal static error unmarshal(this ж<decodeState> Ꮡd, any v) {
+internal static error unmarshal⁔(/*this*/ ж<decodeState> Ꮡd, any v) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     var rv = reflect.ValueOf(v);
@@ -205,27 +192,21 @@ internal static error unmarshal(this ж<decodeState> Ꮡd, any v) {
     return d.savedError;
 }
 
-} partial class json_package {
-
 // A Number represents a JSON number literal.
 partial struct Number /*@string*/;
 
-} partial class jsonᴛNumber {
-
 // String returns the literal text of the number.
-public static @string String(this Number n) { return (@string)n; }
+internal static @string String⁔(/*this*/ Number n) { return (@string)n; }
 
 // Float64 returns the number as a float64.
-public static (float64, error) Float64(this Number n) {
+internal static (float64, error) Float64⁔(/*this*/ Number n) {
     return strconv.ParseFloat((@string)n, 64);
 }
 
 // Int64 returns the number as an int64.
-public static (int64, error) Int64(this Number n) {
+internal static (int64, error) Int64⁔(/*this*/ Number n) {
     return strconv.ParseInt((@string)n, 10, 64);
 }
-
-} partial class json_package {
 
 // An errorContext provides context for type errors during decoding.
 partial struct errorContext {
@@ -245,14 +226,10 @@ partial struct decodeState {
     internal bool disallowUnknownFields;
 }
 
-} partial class jsonᴛdecodeState {
-
 // readIndex returns the position of the last byte read.
-internal static nint readIndex(this ref decodeState d) {
+internal static nint readIndex⁔(/*this*/ ref decodeState d) {
     return d.off - 1;
 }
-
-} partial class json_package {
 
 // phasePanicMsg is used as a panic message when we end up with something that
 // shouldn't happen. It can indicate a bug in the JSON decoder, or that
@@ -260,9 +237,7 @@ internal static nint readIndex(this ref decodeState d) {
 internal static ref readonly @string phasePanicMsg => ref phasePanicMsgᵇ;
 private static readonly @string phasePanicMsgᵇ = "JSON decoder out of sync - data changing underfoot?"u8;
 
-} partial class jsonᴛdecodeState {
-
-internal static ж<decodeState> init(this ж<decodeState> Ꮡd, slice<byte> data) {
+internal static ж<decodeState> init⁔(/*this*/ ж<decodeState> Ꮡd, slice<byte> data) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     d.data = data;
@@ -278,14 +253,14 @@ internal static ж<decodeState> init(this ж<decodeState> Ꮡd, slice<byte> data
 
 // saveError saves the first err it is called with,
 // for reporting at the end of the unmarshal.
-internal static void saveError(this ref decodeState d, error err) {
+internal static void saveError⁔(/*this*/ ref decodeState d, error err) {
     if (d.savedError == nil) {
         d.savedError = d.addErrorContext(err);
     }
 }
 
 // addErrorContext returns a new error enhanced with information from d.errorContext
-internal static error addErrorContext(this ref decodeState d, error err) {
+internal static error addErrorContext⁔(/*this*/ ref decodeState d, error err) {
     var fieldStackᴷ = new stackAppend<@string>();
 
     if (d.errorContext != nil && (d.errorContext.Struct != nil || len(d.errorContext.FieldStack) > 0)) {
@@ -304,7 +279,7 @@ internal static error addErrorContext(this ref decodeState d, error err) {
 }
 
 // skip scans to the end of what was started.
-internal static void skip(this ж<decodeState> Ꮡd) {
+internal static void skip⁔(/*this*/ ж<decodeState> Ꮡd) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     var s = Ꮡd.Ꮡscan;
@@ -323,7 +298,7 @@ internal static void skip(this ж<decodeState> Ꮡd) {
 }
 
 // scanNext processes the byte at d.data[d.off].
-internal static void scanNext(this ж<decodeState> Ꮡd) {
+internal static void scanNext⁔(/*this*/ ж<decodeState> Ꮡd) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     if (d.off < len(d.data)) {
@@ -337,7 +312,7 @@ internal static void scanNext(this ж<decodeState> Ꮡd) {
 
 // scanWhile processes bytes in d.data[d.off:] until it
 // receives a scan code not equal to op.
-internal static void scanWhile(this ж<decodeState> Ꮡd, nint op) {
+internal static void scanWhile⁔(/*this*/ ж<decodeState> Ꮡd, nint op) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     var s = Ꮡd.Ꮡscan;
@@ -365,7 +340,7 @@ internal static void scanWhile(this ж<decodeState> Ꮡd, nint op) {
 // Only in the second step do we use decodeState to tokenize literals, so we
 // know there aren't any syntax errors. We can take advantage of that knowledge,
 // and scan a literal's bytes much more quickly.
-internal static void rescanLiteral(this ж<decodeState> Ꮡd) {
+internal static void rescanLiteral⁔(/*this*/ ж<decodeState> Ꮡd) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     var data = d.data;
@@ -424,7 +399,7 @@ Switch:
 // value consumes a JSON value from d.data[d.off-1:], decoding into v, and
 // reads the following byte ahead. If v is invalid, the value is discarded.
 // The first byte of the value has been read already.
-internal static error value(this ж<decodeState> Ꮡd, reflect.Value v) {
+internal static error value⁔(/*this*/ ж<decodeState> Ꮡd, reflect.Value v) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     switch (d.opcode) {
@@ -469,18 +444,14 @@ internal static error value(this ж<decodeState> Ꮡd, reflect.Value v) {
     return default;
 }
 
-} partial class json_package {
-
 partial struct unquotedValue {
 }
-
-} partial class jsonᴛdecodeState {
 
 // valueQuoted is like value but decodes a
 // quoted string literal or literal null into an interface value.
 // If it finds anything other than a quoted string literal or null,
 // valueQuoted returns unquotedValue{}.
-internal static any valueQuoted(this ж<decodeState> Ꮡd) {
+internal static any valueQuoted⁔(/*this*/ ж<decodeState> Ꮡd) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     switch (d.opcode) {
@@ -504,8 +475,6 @@ internal static any valueQuoted(this ж<decodeState> Ꮡd) {
     }}
     return new unquotedValue();
 }
-
-} partial class json_package {
 
 // indirect walks down v allocating pointers as needed,
 // until it gets to a non-pointer.
@@ -587,11 +556,9 @@ internal static (Unmarshaler, encoding.TextUnmarshaler, reflect.Value) indirect(
     return (default, default, v);
 }
 
-} partial class jsonᴛdecodeState {
-
 // array consumes an array from d.data[d.off-1:], decoding into v.
 // The first byte of the array ('[') has been read already.
-internal static error Δarray(this ж<decodeState> Ꮡd, reflect.Value v) {
+internal static error Δarray⁔(/*this*/ ж<decodeState> Ꮡd, reflect.Value v) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     // Check for unmarshaler.
@@ -690,16 +657,12 @@ internal static error Δarray(this ж<decodeState> Ꮡd, reflect.Value v) {
     return default;
 }
 
-} partial class json_package {
-
 internal static slice<byte> nullLiteral = slice<byte>("null"u8);
 internal static reflect.Type textUnmarshalerType = reflect.TypeFor<encoding.TextUnmarshaler>();
 
-} partial class jsonᴛdecodeState {
-
 // object consumes an object from d.data[d.off-1:], decoding into v.
 // The first byte ('{') of the object has been read already.
-internal static error @object(this ж<decodeState> Ꮡd, reflect.Value v) {
+internal static error object⁔(/*this*/ ж<decodeState> Ꮡd, reflect.Value v) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     // Check for unmarshaler.
@@ -957,7 +920,7 @@ internal static error @object(this ж<decodeState> Ꮡd, reflect.Value v) {
 
 // convertNumber converts the number literal s to a float64 or a Number
 // depending on the setting of d.useNumber.
-internal static (any, error) convertNumber(this ref decodeState d, @string s) {
+internal static (any, error) convertNumber⁔(/*this*/ ref decodeState d, @string s) {
     if (d.useNumber) {
         return ((Number)s, default);
     }
@@ -968,11 +931,7 @@ internal static (any, error) convertNumber(this ref decodeState d, @string s) {
     return (f, default);
 }
 
-} partial class json_package {
-
 internal static reflect.Type numberType = reflect.TypeFor<Number>();
-
-} partial class jsonᴛdecodeState {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string numberˢ => ref numberˢᵇ;
@@ -987,7 +946,7 @@ private static readonly @string boolˢᵇ = "bool"u8;
 // fromQuoted indicates whether this literal came from unwrapping a
 // string from the ",string" struct tag option. this is used only to
 // produce more helpful error messages.
-internal static error literalStore(this ref decodeState d, slice<byte> item, reflect.Value v, bool fromQuoted) {
+internal static error literalStore⁔(/*this*/ ref decodeState d, slice<byte> item, reflect.Value v, bool fromQuoted) {
     // Check for unmarshaler.
     if (len(item) == 0) {
         // Empty string given.
@@ -1194,7 +1153,7 @@ internal static error literalStore(this ref decodeState d, slice<byte> item, ref
 // but they avoid the weight of reflection in this common case.
 
 // valueInterface is like value but returns any.
-internal static any /*val*/ valueInterface(this ж<decodeState> Ꮡd) {
+internal static any /*val*/ valueInterface⁔(/*this*/ ж<decodeState> Ꮡd) {
     any val = default;
     ref var d = ref Ꮡd.DerefOrNull();
 
@@ -1221,7 +1180,7 @@ internal static any /*val*/ valueInterface(this ж<decodeState> Ꮡd) {
 }
 
 // arrayInterface is like array but returns []any.
-internal static slice<any> arrayInterface(this ж<decodeState> Ꮡd) {
+internal static slice<any> arrayInterface⁔(/*this*/ ж<decodeState> Ꮡd) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     slice<any> v = new slice<any>(0);
@@ -1249,7 +1208,7 @@ internal static slice<any> arrayInterface(this ж<decodeState> Ꮡd) {
 }
 
 // objectInterface is like object but returns map[string]any.
-internal static map<@string, any> objectInterface(this ж<decodeState> Ꮡd) {
+internal static map<@string, any> objectInterface⁔(/*this*/ ж<decodeState> Ꮡd) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     var m = new map<@string, any>();
@@ -1302,7 +1261,7 @@ internal static map<@string, any> objectInterface(this ж<decodeState> Ꮡd) {
 // literalInterface consumes and returns a literal from d.data[d.off-1:] and
 // it reads the following byte ahead. The first byte of the literal has been
 // read already (that's how the caller knows it's a literal).
-internal static any literalInterface(this ж<decodeState> Ꮡd) {
+internal static any literalInterface⁔(/*this*/ ж<decodeState> Ꮡd) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     // All bytes inside literal return scanContinue op code.
@@ -1337,8 +1296,6 @@ internal static any literalInterface(this ж<decodeState> Ꮡd) {
         return n;
     }}
 }
-
-} partial class json_package {
 
 // getu4 decodes \uXXXX from the beginning of s, returning the hex value,
 // or it returns -1.

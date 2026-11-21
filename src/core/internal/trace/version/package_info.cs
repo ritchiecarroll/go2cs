@@ -10,10 +10,14 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+using tracev2 = go.@internal.trace.tracev2_package;
 // </ImportedTypeAliases>
 
 using go;
 using static go.@internal.trace.version_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -55,10 +59,13 @@ using static go.@internal.trace.version_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/trace/version/version.go", "version.cs", "ABk4AA4ckgAICqKClIKClIKUpoKCAAgQooKCgpSClKiS", "", "", "26=Specs/1/4/7,Specs/2/4/8,Specs/3/4/9,Specs/4/4/10")]
+[assembly: GoPositionMap("internal/trace/version/version.go", "version.cs", "ABg4AAwckgAICqKClIKClIKUpoKCAAYQooKCgpSClKiS", "", "", "25=Specs/1/4/7,Specs/2/4/8,Specs/3/4/9,Specs/4/4/10")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.trace;
+
+using static go.@internal.trace.version_package;
+using tracev2 = go.@internal.trace.tracev2_package;
 
 [GoPackage("version")]
 public static partial class version_package
@@ -93,5 +100,17 @@ public static partial class version_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(version_package.Version)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class versionᴛVersion;
+[GoMethodHost(typeof(version_package.Version)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class versionᴛVersion;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class versionᴛVersion {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<tracev2.EventSpec> Specs(this Version v) => version_package.Specs⁔(v);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string EventName(this Version v, tracev2.EventType typ) => version_package.EventName⁔(v, typ);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Valid(this Version v) => version_package.Valid⁔(v);
+}
+// </MethodForwarders>

@@ -13,7 +13,6 @@ using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
 using @internal.runtime.pprof;
-using static runtime_package;
 
 partial class runtime_package {
 
@@ -110,13 +109,11 @@ partial struct unwinder {
     internal unwindFlags flags;
 }
 
-} partial class runtimeᴛunwinder {
-
 // init initializes u to start unwinding gp's stack and positions the
 // iterator on gp's innermost frame. gp must not be the current G.
 //
 // A single unwinder can be reused for multiple unwinds.
-internal static void init(this ж<unwinder> Ꮡu, ж<g> gp, unwindFlags flags) {
+internal static void init⁔(/*this*/ ж<unwinder> Ꮡu, ж<g> gp, unwindFlags flags) {
     // Implementation note: This starts the iterator on the first frame and we
     // provide a "valid" method. Alternatively, this could start in a "before
     // the first frame" state and "next" could return whether it was able to
@@ -132,7 +129,7 @@ private static readonly @string cannotTraceUserGoroutineˢᵇ = "cannot trace us
 internal static ref readonly @string unknownPcˢ => ref unknownPcˢᵇ;
 private static readonly @string unknownPcˢᵇ = "unknown pc"u8;
 
-internal static void initAt(this ж<unwinder> Ꮡu, uintptr pc0, uintptr sp0, uintptr lr0, ж<g> Ꮡgp, unwindFlags flags) {
+internal static void initAt⁔(/*this*/ ж<unwinder> Ꮡu, uintptr pc0, uintptr sp0, uintptr lr0, ж<g> Ꮡgp, unwindFlags flags) {
     ref var u = ref Ꮡu.DerefOrNull();
     ref var gp = ref Ꮡgp.DerefOrNull();
 
@@ -230,7 +227,7 @@ internal static void initAt(this ж<unwinder> Ꮡu, uintptr pc0, uintptr sp0, ui
     Ꮡu.resolveInternal(true, isSyscall);
 }
 
-internal static bool valid(this ref unwinder u) {
+internal static bool valid⁔(/*this*/ ref unwinder u) {
     return u.frame.pc != 0;
 }
 
@@ -259,7 +256,7 @@ private static readonly @string tracebackˢᵇ = "traceback"u8;
 // frame state to follow that stack jump.
 //
 // This is internal to unwinder.
-internal static void resolveInternal(this ж<unwinder> Ꮡu, bool innermost, bool isSyscall) {
+internal static void resolveInternal⁔(/*this*/ ж<unwinder> Ꮡu, bool innermost, bool isSyscall) {
     ref var u = ref Ꮡu.DerefOrNull();
 
     var frame = Ꮡu.Ꮡframe;
@@ -452,13 +449,9 @@ internal static void resolveInternal(this ж<unwinder> Ꮡu, bool innermost, boo
     }
 }
 
-} partial class runtime_package {
-
 internal static bool isInjectedCall(abi.FuncID id) {
     return id == abi.FuncID_sigpanic || id == abi.FuncID_asyncPreempt || id == abi.FuncID_debugCallV2;
 }
-
-} partial class runtimeᴛunwinder {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string unknownCallerPcˢ => ref unknownCallerPcˢᵇ;
@@ -466,7 +459,7 @@ private static readonly @string unknownCallerPcˢᵇ = "unknown caller pc"u8;
 internal static ref readonly @string tracebackStuckˢ => ref tracebackStuckˢᵇ;
 private static readonly @string tracebackStuckˢᵇ = "traceback stuck"u8;
 
-internal static void next(this ж<unwinder> Ꮡu) {
+internal static void next⁔(/*this*/ ж<unwinder> Ꮡu) {
     ref var u = ref Ꮡu.DerefOrNull();
 
     var frame = Ꮡu.Ꮡframe;
@@ -552,7 +545,7 @@ private static readonly @string tracebackDidNotUnwindˢᵇ = "traceback did not 
 // finishInternal is an unwinder-internal helper called after the stack has been
 // exhausted. It sets the unwinder to an invalid state and checks that it
 // successfully unwound the entire stack.
-internal static void finishInternal(this ref unwinder u) {
+internal static void finishInternal⁔(/*this*/ ref unwinder u) {
     u.frame.pc = 0;
 
     // Note that panic != nil is okay here: there can be leftover panics,
@@ -613,7 +606,7 @@ internal static void finishInternal(this ref unwinder u) {
 // frame.pc can be at function entry when the frame is initialized without
 // actually running code, like in runtime.mstart, in which case this returns
 // frame.pc because that's the best we can do.
-internal static uintptr symPC(this ref unwinder u) {
+internal static uintptr symPC⁔(/*this*/ ref unwinder u) {
     if ((unwindFlags)(u.flags & unwindTrap) == 0 && u.frame.pc > u.frame.fn.entry()) {
         // Regular call.
         return u.frame.pc - 1;
@@ -626,7 +619,7 @@ internal static uintptr symPC(this ref unwinder u) {
 // the registered cgo unwinder. It returns the number of PCs written to pcBuf.
 // If the current frame is not a cgo frame or if there's no registered cgo
 // unwinder, it returns 0.
-internal static nint cgoCallers(this ref unwinder u, slice<uintptr> pcBuf) {
+internal static nint cgoCallers⁔(/*this*/ ref unwinder u, slice<uintptr> pcBuf) {
     if (!cgoTracebackAvailable() || u.frame.fn.funcID != abi.FuncID_cgocallback || u.cgoCtxt < 0) {
         // We don't have a cgo unwinder (typical case), or we do but we're not
         // in a cgo frame or we're out of cgo context.
@@ -643,8 +636,6 @@ internal static nint cgoCallers(this ref unwinder u, slice<uintptr> pcBuf) {
     }
     return len(pcBuf);
 }
-
-} partial class runtime_package {
 
 // tracebackPCs populates pcBuf with the return addresses for each frame from u
 // and returns the number of PCs written to pcBuf. The returned PCs correspond

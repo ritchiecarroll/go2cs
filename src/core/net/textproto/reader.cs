@@ -13,7 +13,6 @@ using strconv = strconv_package;
 using strings = strings_package;
 using sync = sync_package;
 /* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
-using static textproto_package;
 
 partial class textproto_package {
 
@@ -38,17 +37,15 @@ public static ж<Reader> NewReader(ж<bufio.Reader> r) {
     return Ꮡ(new Reader(R: r));
 }
 
-} partial class textprotoᴛReader {
-
 // ReadLine reads a single line from r,
 // eliding the final \n or \r\n from the returned string.
-public static (@string, error) ReadLine(this ref Reader r) {
+internal static (@string, error) ReadLine⁔(/*this*/ ref Reader r) {
     var (line, err) = r.readLineSlice(-1);
     return ((@string)line, err);
 }
 
 // ReadLineBytes is like [Reader.ReadLine] but returns a []byte instead of a string.
-public static (slice<byte>, error) ReadLineBytes(this ref Reader r) {
+internal static (slice<byte>, error) ReadLineBytes⁔(/*this*/ ref Reader r) {
     var (line, err) = r.readLineSlice(-1);
     if (line != nil) {
         line = bytes.Clone(line);
@@ -59,7 +56,7 @@ public static (slice<byte>, error) ReadLineBytes(this ref Reader r) {
 // readLineSlice reads a single line from r,
 // up to lim bytes long (or unlimited if lim is less than 0),
 // eliding the final \r or \r\n from the returned string.
-internal static (slice<byte>, error) readLineSlice(this ref Reader r, int64 lim) {
+internal static (slice<byte>, error) readLineSlice⁔(/*this*/ ref Reader r, int64 lim) {
     r.closeDot();
     slice<byte> line = default;
     for (;;) {
@@ -100,12 +97,10 @@ internal static (slice<byte>, error) readLineSlice(this ref Reader r, int64 lim)
 // and the second will return "Line 2".
 //
 // Empty lines are never continued.
-public static (@string, error) ReadContinuedLine(this ref Reader r) {
+internal static (@string, error) ReadContinuedLine⁔(/*this*/ ref Reader r) {
     var (line, err) = r.readContinuedLineSlice(-1, noValidation);
     return ((@string)line, err);
 }
-
-} partial class textproto_package {
 
 // trim returns s with leading and trailing spaces and tabs removed.
 // It does not assume Unicode or UTF-8.
@@ -122,11 +117,9 @@ internal static slice<byte> trim(slice<byte> s) {
     return s.slice(0, n + 1);
 }
 
-} partial class textprotoᴛReader {
-
 // ReadContinuedLineBytes is like [Reader.ReadContinuedLine] but
 // returns a []byte instead of a string.
-public static (slice<byte>, error) ReadContinuedLineBytes(this ref Reader r) {
+internal static (slice<byte>, error) ReadContinuedLineBytes⁔(/*this*/ ref Reader r) {
     var (line, err) = r.readContinuedLineSlice(-1, noValidation);
     if (line != nil) {
         line = bytes.Clone(line);
@@ -139,7 +132,7 @@ public static (slice<byte>, error) ReadContinuedLineBytes(this ref Reader r) {
 // is run on the first read line, and if it returns an error then this
 // error is returned from readContinuedLineSlice.
 // It reads up to lim bytes of data (or unlimited if lim is less than 0).
-internal static (slice<byte>, error) readContinuedLineSlice(this ref Reader r, int64 lim, Func<slice<byte>, error> validateFirstLine) {
+internal static (slice<byte>, error) readContinuedLineSlice⁔(/*this*/ ref Reader r, int64 lim, Func<slice<byte>, error> validateFirstLine) {
     if (validateFirstLine == nil) {
         return (default, fmt.Errorf("missing validateFirstLine func"u8));
     }
@@ -193,7 +186,7 @@ internal static (slice<byte>, error) readContinuedLineSlice(this ref Reader r, i
 }
 
 // skipSpace skips R over all spaces and returns the number of bytes skipped.
-internal static nint skipSpace(this ref Reader r) {
+internal static nint skipSpace⁔(/*this*/ ref Reader r) {
     nint n = 0;
     for (;;) {
         var (c, err) = r.R.ReadByte();
@@ -210,7 +203,7 @@ internal static nint skipSpace(this ref Reader r) {
     return n;
 }
 
-internal static (nint code, bool continued, @string message, error err) readCodeLine(this ref Reader r, nint expectCode) {
+internal static (nint code, bool continued, @string message, error err) readCodeLine⁔(/*this*/ ref Reader r, nint expectCode) {
     nint code = default;
     bool continued = default;
     @string message = default;
@@ -222,8 +215,6 @@ internal static (nint code, bool continued, @string message, error err) readCode
     }
     return parseCodeLine(line, expectCode);
 }
-
-} partial class textproto_package {
 
 internal static (nint code, bool continued, @string message, error err) parseCodeLine(@string line, nint expectCode) {
     nint code = default;
@@ -248,8 +239,6 @@ internal static (nint code, bool continued, @string message, error err) parseCod
     return (code, continued, message, err);
 }
 
-} partial class textprotoᴛReader {
-
 // ReadCodeLine reads a response code line of the form
 //
 //	code message
@@ -267,7 +256,7 @@ internal static (nint code, bool continued, @string message, error err) parseCod
 // If the response is multi-line, ReadCodeLine returns an error.
 //
 // An expectCode <= 0 disables the check of the status code.
-public static (nint code, @string message, error err) ReadCodeLine(this ref Reader r, nint expectCode) {
+internal static (nint code, @string message, error err) ReadCodeLine⁔(/*this*/ ref Reader r, nint expectCode) {
     nint code = default;
     @string message = default;
     error err = default;
@@ -305,7 +294,7 @@ public static (nint code, @string message, error err) ReadCodeLine(this ref Read
 // the status is not in the range [310,319].
 //
 // An expectCode <= 0 disables the check of the status code.
-public static (nint code, @string message, error err) ReadResponse(this ref Reader r, nint expectCode) {
+internal static (nint code, @string message, error err) ReadResponse⁔(/*this*/ ref Reader r, nint expectCode) {
     ref var code = ref heap(new nint(), out var Ꮡcode);
     @string message = default;
     error err = default;
@@ -356,7 +345,7 @@ public static (nint code, @string message, error err) ReadResponse(this ref Read
 // rewrites the "\r\n" line endings into the simpler "\n",
 // removes leading dot escapes if present, and stops with error [io.EOF]
 // after consuming (and discarding) the end-of-sequence line.
-public static io.Reader DotReader(this ж<Reader> Ꮡr) {
+internal static io.Reader DotReader⁔(/*this*/ ж<Reader> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     r.closeDot();
@@ -364,17 +353,13 @@ public static io.Reader DotReader(this ж<Reader> Ꮡr) {
     return new dotReaderжReader(r.dot);
 }
 
-} partial class textproto_package {
-
 partial struct dotReader {
     internal ж<Reader> r;
     internal nint state;
 }
 
-} partial class textprotoᴛdotReader {
-
 // Read satisfies reads by decoding dot-encoded data read from d.r.
-internal static (nint n, error err) Read(this ж<dotReader> Ꮡd, slice<byte> b) {
+internal static (nint n, error err) Read⁔(/*this*/ ж<dotReader> Ꮡd, slice<byte> b) {
     nint n = default;
     error err = default;
     ref var d = ref Ꮡd.DerefOrNull();
@@ -468,11 +453,9 @@ internal static (nint n, error err) Read(this ж<dotReader> Ꮡd, slice<byte> b)
     return (n, err);
 }
 
-} partial class textprotoᴛReader {
-
 // closeDot drains the current DotReader if any,
 // making sure that it reads until the ending dot line.
-internal static void closeDot(this ref Reader r) {
+internal static void closeDot⁔(/*this*/ ref Reader r) {
     if (r.dot == nil) {
         return;
     }
@@ -487,7 +470,7 @@ internal static void closeDot(this ref Reader r) {
 // ReadDotBytes reads a dot-encoding and returns the decoded data.
 //
 // See the documentation for the [Reader.DotReader] method for details about dot-encoding.
-public static (slice<byte>, error) ReadDotBytes(this ж<Reader> Ꮡr) {
+internal static (slice<byte>, error) ReadDotBytes⁔(/*this*/ ж<Reader> Ꮡr) {
     return io.ReadAll(Ꮡr.DotReader());
 }
 
@@ -495,7 +478,7 @@ public static (slice<byte>, error) ReadDotBytes(this ж<Reader> Ꮡr) {
 // containing the decoded lines, with the final \r\n or \n elided from each.
 //
 // See the documentation for the [Reader.DotReader] method for details about dot-encoding.
-public static (slice<@string>, error) ReadDotLines(this ref Reader r) {
+internal static (slice<@string>, error) ReadDotLines⁔(/*this*/ ref Reader r) {
     var vᴷ = new stackAppend<@string>(moves: true);
 
     // We could use ReadDotBytes and then Split it,
@@ -526,11 +509,7 @@ public static (slice<@string>, error) ReadDotLines(this ref Reader r) {
     return (v, err);
 }
 
-} partial class textproto_package {
-
 internal static slice<byte> colon = slice<byte>(":"u8);
-
-} partial class textprotoᴛReader {
 
 // ReadMIMEHeader reads a MIME-style header from r.
 // The header is a sequence of possibly continued Key: Value lines
@@ -551,11 +530,9 @@ internal static slice<byte> colon = slice<byte>(":"u8);
 //		"My-Key": {"Value 1", "Value 2"},
 //		"Long-Key": {"Even Longer Value"},
 //	}
-public static (MIMEHeader, error) ReadMIMEHeader(this ж<Reader> Ꮡr) {
+internal static (MIMEHeader, error) ReadMIMEHeader⁔(/*this*/ ж<Reader> Ꮡr) {
     return readMIMEHeader(Ꮡr, math.MaxInt64, math.MaxInt64);
 }
-
-} partial class textproto_package {
 
 // readMIMEHeader is accessed from mime/multipart.
 //go:linkname readMIMEHeader
@@ -671,11 +648,9 @@ internal static error mustHaveFieldNameColon(slice<byte> line) {
 
 internal static slice<byte> nl = slice<byte>("\n"u8);
 
-} partial class textprotoᴛReader {
-
 // upcomingHeaderKeys returns an approximation of the number of keys
 // that will be in this header. If it gets confused, it returns 0.
-internal static nint /*n*/ upcomingHeaderKeys(this ref Reader r) {
+internal static nint /*n*/ upcomingHeaderKeys⁔(/*this*/ ref Reader r) {
     nint n = default;
 
     // Try to determine the 'hint' size.
@@ -700,8 +675,6 @@ internal static nint /*n*/ upcomingHeaderKeys(this ref Reader r) {
     }
     return n;
 }
-
-} partial class textproto_package {
 
 // CanonicalMIMEHeaderKey returns the canonical format of the
 // MIME header key s. The canonicalization converts the first

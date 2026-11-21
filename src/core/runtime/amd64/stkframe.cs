@@ -9,7 +9,6 @@ using sys = @internal.runtime.sys_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
-using static runtime_package;
 
 partial class runtime_package {
 
@@ -67,10 +66,8 @@ partial struct reflectMethodValue {
     internal uintptr argLen;     // just args
 }
 
-} partial class runtimeᴛstkframe {
-
 // argBytes returns the argument frame size for a call to frame.fn.
-internal static uintptr argBytes(this ref stkframe frame) {
+internal static uintptr argBytes⁔(/*this*/ ref stkframe frame) {
     if (frame.fn.args != abi.ArgsSizeUnknown) {
         return (uintptr)frame.fn.args;
     }
@@ -96,7 +93,7 @@ private static readonly @string reflectMismatchˢᵇ = "reflect mismatch"u8;
 //
 // hasReflectStackObj indicates that this frame also has a reflect
 // function stack object, which the caller must synthesize.
-internal static (bitvector argMap, bool hasReflectStackObj) argMapInternal(this ref stkframe frame) {
+internal static (bitvector argMap, bool hasReflectStackObj) argMapInternal⁔(/*this*/ ref stkframe frame) {
     bitvector argMap = default;
     bool hasReflectStackObj = default;
 
@@ -170,7 +167,7 @@ private static readonly @string badSymbolTableˢᵇ = "bad symbol table"u8;
 
 // getStackMap returns the locals and arguments live pointer maps, and
 // stack object list for frame.
-internal static (bitvector locals, bitvector args, slice<stackObjectRecord> objs) getStackMap(this ref stkframe frame, bool debug) {
+internal static (bitvector locals, bitvector args, slice<stackObjectRecord> objs) getStackMap⁔(/*this*/ ref stkframe frame, bool debug) {
     bitvector locals = default;
     bitvector args = default;
     slice<stackObjectRecord> objs = default;
@@ -280,8 +277,6 @@ internal static (bitvector locals, bitvector args, slice<stackObjectRecord> objs
 
     return (locals, args, objs);
 }
-
-} partial class runtime_package {
 
 internal static readonly ж<array<stackObjectRecord>> ᏑmethodValueCallFrameObjs = new StaticBox<array<stackObjectRecord>>(new array<stackObjectRecord>(1));
 internal static ref array<stackObjectRecord> methodValueCallFrameObjs => ref ((StaticBox<array<stackObjectRecord>>)ᏑmethodValueCallFrameObjs).ValueSlot; // initialized in stkobjinit

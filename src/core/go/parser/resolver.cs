@@ -10,7 +10,6 @@ using strings = strings_package;
 using global::go.go;
 using ꓸꓸꓸany = Span<any>;
 using ꓸꓸꓸжastꓸIdent = Span<ж<global::go.go.ast_package.Ident>>;
-using static parser_package;
 
 partial class parser_package {
 
@@ -87,15 +86,13 @@ partial struct resolver {
     internal slice<slice<ж<ast.Ident>>> targetStack; // stack of unresolved labels
 }
 
-} partial class parserᴛresolver {
-
-internal static void trace(this ref resolver r, @string format, params ꓸꓸꓸany argsʗp) {
+internal static void trace⁔(/*this*/ ref resolver r, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     fmt.Println(strings.Repeat(". ", r.depth) + r.sprintf(format, args.ꓸꓸꓸ));
 }
 
-internal static @string sprintf(this ref resolver r, @string format, params ꓸꓸꓸany argsʗp) {
+internal static @string sprintf⁔(/*this*/ ref resolver r, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     foreach (var (i, arg) in range(args)) {
@@ -112,7 +109,7 @@ internal static @string sprintf(this ref resolver r, @string format, params ꓸ�
 internal static ref readonly @string openingScopeVˢ => ref openingScopeVˢᵇ;
 private static readonly @string openingScopeVˢᵇ = "opening scope @%v"u8;
 
-internal static void openScope(this ref resolver r, token.Pos pos) {
+internal static void openScope⁔(/*this*/ ref resolver r, token.Pos pos) {
     r.depth++;
     if (r.depth > maxScopeDepth) {
         throw panic(new bailout(pos: pos, msg: "exceeded max scope depth during object resolution"));
@@ -127,7 +124,7 @@ internal static void openScope(this ref resolver r, token.Pos pos) {
 internal static ref readonly @string closingScopeˢ => ref closingScopeˢᵇ;
 private static readonly @string closingScopeˢᵇ = "closing scope"u8;
 
-internal static void closeScope(this ref resolver r) {
+internal static void closeScope⁔(/*this*/ ref resolver r) {
     r.depth--;
     if (debugResolve) {
         r.trace(closingScopeˢ);
@@ -135,12 +132,12 @@ internal static void closeScope(this ref resolver r) {
     r.topScope = r.topScope.Outer;
 }
 
-internal static void openLabelScope(this ref resolver r) {
+internal static void openLabelScope⁔(/*this*/ ref resolver r) {
     r.labelScope = ast.NewScope(r.labelScope);
     r.targetStack = append(r.targetStack, (slice<ж<ast.Ident>>)(default));
 }
 
-internal static void closeLabelScope(this ref resolver r) {
+internal static void closeLabelScope⁔(/*this*/ ref resolver r) {
     // resolve labels
     nint n = len(r.targetStack) - 1;
     var scope = r.labelScope;
@@ -159,7 +156,7 @@ internal static void closeLabelScope(this ref resolver r) {
 internal static ref readonly @string declaringSVˢ => ref declaringSVˢᵇ;
 private static readonly @string declaringSVˢᵇ = "declaring %s@%v"u8;
 
-internal static void declare(this ref resolver r, any decl, any data, ж<ast.Scope> Ꮡscope, ast.ObjKind kind, params ꓸꓸꓸжastꓸIdent identsʗp) {
+internal static void declare⁔(/*this*/ ref resolver r, any decl, any data, ж<ast.Scope> Ꮡscope, ast.ObjKind kind, params ꓸꓸꓸжastꓸIdent identsʗp) {
     var idents = identsʗp.sslice();
     ref var scope = ref Ꮡscope.DerefOrNull();
 
@@ -198,7 +195,7 @@ private static readonly @string identifierAlreadyˢᵇ = "identifier already dec
 internal static ref readonly @string noNewVariablesOnLeftSideˢ => ref noNewVariablesOnLeftSideˢᵇ;
 private static readonly @string noNewVariablesOnLeftSideˢᵇ = "no new variables on left side of :="u8;
 
-internal static void shortVarDecl(this ref resolver r, ж<ast.AssignStmt> Ꮡdecl) {
+internal static void shortVarDecl⁔(/*this*/ ref resolver r, ж<ast.AssignStmt> Ꮡdecl) {
     ref var decl = ref Ꮡdecl.DerefOrNull();
 
     // Go spec: A short variable declaration may redeclare variables
@@ -229,14 +226,10 @@ internal static void shortVarDecl(this ref resolver r, ж<ast.AssignStmt> Ꮡdec
     }
 }
 
-} partial class parser_package {
-
 // The unresolved object is a sentinel to mark identifiers that have been added
 // to the list of unresolved identifiers. The sentinel is only used for verifying
 // internal consistency.
 internal static ж<ast.Object> unresolved = @new<ast.Object>();
-
-} partial class parserᴛresolver {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string resolvedVSToVˢ => ref resolvedVSToVˢᵇ;
@@ -248,7 +241,7 @@ private static readonly @string objWithNoNameˢᵇ = "obj with no name"u8;
 // the object it denotes. If no object is found and collectUnresolved is
 // set, x is marked as unresolved and collected in the list of unresolved
 // identifiers.
-internal static void resolve(this ref resolver r, ж<ast.Ident> Ꮡident, bool collectUnresolved) {
+internal static void resolve⁔(/*this*/ ref resolver r, ж<ast.Ident> Ꮡident, bool collectUnresolved) {
     ref var ident = ref Ꮡident.DerefOrNull();
 
     if (ident.Obj != nil) {
@@ -283,13 +276,13 @@ internal static void resolve(this ref resolver r, ж<ast.Ident> Ꮡident, bool c
     }
 }
 
-internal static void walkExprs(this ж<resolver> Ꮡr, slice<ast.Expr> list) {
+internal static void walkExprs⁔(/*this*/ ж<resolver> Ꮡr, slice<ast.Expr> list) {
     foreach (var (_, node) in range(list)) {
         ast.Walk(new resolverжVisitor(Ꮡr), node);
     }
 }
 
-internal static void walkLHS(this ж<resolver> Ꮡr, slice<ast.Expr> list) {
+internal static void walkLHS⁔(/*this*/ ж<resolver> Ꮡr, slice<ast.Expr> list) {
     foreach (var (_, expr) in range(list)) {
         var exprΔ1 = ast.Unparen(expr);
         var (_, ok) = exprΔ1._<ж<ast.Ident>>(ᐧ); if (!ok && exprΔ1 != nil) {
@@ -298,7 +291,7 @@ internal static void walkLHS(this ж<resolver> Ꮡr, slice<ast.Expr> list) {
     }
 }
 
-internal static void walkStmts(this ж<resolver> Ꮡr, slice<ast.Stmt> list) {
+internal static void walkStmts⁔(/*this*/ ж<resolver> Ꮡr, slice<ast.Stmt> list) {
     foreach (var (_, stmt) in range(list)) {
         ast.Walk(new resolverжVisitor(Ꮡr), stmt);
     }
@@ -308,7 +301,7 @@ internal static void walkStmts(this ж<resolver> Ꮡr, slice<ast.Stmt> list) {
 internal static ref readonly @string nodeTVˢ => ref nodeTVˢᵇ;
 private static readonly @string nodeTVˢᵇ = "node %T@%v"u8;
 
-internal static ast.Visitor Visit(this ж<resolver> Ꮡr, ast.Node node) {
+internal static ast.Visitor Visit⁔(/*this*/ ж<resolver> Ꮡr, ast.Node node) {
     GoFrame ᒐ = default;
     try {
         ref var r = ref Ꮡr.DerefOrNull();
@@ -604,7 +597,7 @@ internal static ast.Visitor Visit(this ж<resolver> Ꮡr, ast.Node node) {
     finally { ᒐ.Run(); }
 }
 
-internal static void walkFuncType(this ж<resolver> Ꮡr, ж<ast.FuncType> Ꮡtyp) {
+internal static void walkFuncType⁔(/*this*/ ж<resolver> Ꮡr, ж<ast.FuncType> Ꮡtyp) {
     ref var r = ref Ꮡr.DerefOrNull();
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
@@ -615,7 +608,7 @@ internal static void walkFuncType(this ж<resolver> Ꮡr, ж<ast.FuncType> Ꮡty
     r.declareList(typ.Results, ast.Var);
 }
 
-internal static void resolveList(this ж<resolver> Ꮡr, ж<ast.FieldList> Ꮡlist) {
+internal static void resolveList⁔(/*this*/ ж<resolver> Ꮡr, ж<ast.FieldList> Ꮡlist) {
     ref var list = ref Ꮡlist.DerefOrNull();
 
     if (Ꮡlist == nil) {
@@ -628,7 +621,7 @@ internal static void resolveList(this ж<resolver> Ꮡr, ж<ast.FieldList> Ꮡli
     }
 }
 
-internal static void declareList(this ref resolver r, ж<ast.FieldList> Ꮡlist, ast.ObjKind kind) {
+internal static void declareList⁔(/*this*/ ref resolver r, ж<ast.FieldList> Ꮡlist, ast.ObjKind kind) {
     ref var list = ref Ꮡlist.DerefOrNull();
 
     if (Ꮡlist == nil) {
@@ -639,7 +632,7 @@ internal static void declareList(this ref resolver r, ж<ast.FieldList> Ꮡlist,
     }
 }
 
-internal static void walkRecv(this ж<resolver> Ꮡr, ж<ast.FieldList> Ꮡrecv) {
+internal static void walkRecv⁔(/*this*/ ж<resolver> Ꮡr, ж<ast.FieldList> Ꮡrecv) {
     ref var r = ref Ꮡr.DerefOrNull();
     ref var recv = ref Ꮡrecv.DerefOrNull();
     var resolveExprsᴷ = new stackAppend<ast.Expr>();
@@ -695,7 +688,7 @@ internal static void walkRecv(this ж<resolver> Ꮡr, ж<ast.FieldList> Ꮡrecv)
     }
 }
 
-internal static void walkFieldList(this ж<resolver> Ꮡr, ж<ast.FieldList> list, ast.ObjKind kind) {
+internal static void walkFieldList⁔(/*this*/ ж<resolver> Ꮡr, ж<ast.FieldList> list, ast.ObjKind kind) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     if (list == nil) {
@@ -708,14 +701,14 @@ internal static void walkFieldList(this ж<resolver> Ꮡr, ж<ast.FieldList> lis
 // walkTParams is like walkFieldList, but declares type parameters eagerly so
 // that they may be resolved in the constraint expressions held in the field
 // Type.
-internal static void walkTParams(this ж<resolver> Ꮡr, ж<ast.FieldList> list) {
+internal static void walkTParams⁔(/*this*/ ж<resolver> Ꮡr, ж<ast.FieldList> list) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     r.declareList(list, ast.Typ);
     Ꮡr.resolveList(list);
 }
 
-internal static void walkBody(this ж<resolver> Ꮡr, ж<ast.BlockStmt> Ꮡbody) {
+internal static void walkBody⁔(/*this*/ ж<resolver> Ꮡr, ж<ast.BlockStmt> Ꮡbody) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -733,4 +726,4 @@ internal static void walkBody(this ж<resolver> Ꮡr, ж<ast.BlockStmt> Ꮡbody)
     finally { if (ᒐd1) Ꮡr.DerefOrNull().closeLabelScope(); ᒐ.Run(); }
 }
 
-}
+} // end parser_package

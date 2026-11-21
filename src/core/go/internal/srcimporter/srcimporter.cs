@@ -24,7 +24,6 @@ using global::go.go;
 using global::go.os;
 using path;
 using ꓸꓸꓸstring = Span<@string>;
-using static srcimporter_package;
 
 partial class srcimporter_package {
 
@@ -58,10 +57,8 @@ public static ж<Importer> New(ж<build.Context> Ꮡctxt, ж<token.FileSet> fset
 internal static readonly ж<types.Package> Ꮡimporting = new StaticBox<types.Package>(default(types.Package));
 internal static ref types.Package importing => ref ((StaticBox<types.Package>)Ꮡimporting).ValueSlot;
 
-} partial class srcimporterᴛImporter {
-
 // Import(path) is a shortcut for ImportFrom(path, ".", 0).
-public static (ж<types.Package>, error) Import(this ж<Importer> Ꮡp, @string path) {
+internal static (ж<types.Package>, error) Import⁔(/*this*/ ж<Importer> Ꮡp, @string path) {
     return Ꮡp.ImportFrom(path, ".", 0); // use "." rather than "" (see issue #24441)
 }
 
@@ -71,7 +68,7 @@ public static (ж<types.Package>, error) Import(this ж<Importer> Ꮡp, @string 
 // maintained with the importer. The import mode must be zero but is otherwise ignored.
 // Packages that are not comprised entirely of pure Go files may fail to import because the
 // type checker may not be able to determine all exported entities (e.g. due to cgo dependencies).
-public static (ж<types.Package>, error) ImportFrom(this ж<Importer> Ꮡp, @string path, @string srcDir, types.ImportMode mode) {
+internal static (ж<types.Package>, error) ImportFrom⁔(/*this*/ ж<Importer> Ꮡp, @string path, @string srcDir, types.ImportMode mode) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -182,7 +179,7 @@ public static (ж<types.Package>, error) ImportFrom(this ж<Importer> Ꮡp, @str
     finally { ᒐ.Run(); }
 }
 
-internal static partial (slice<ж<ast.File>>, error) parseFiles(this ж<Importer> Ꮡp, @string dir, slice<@string> filenames) {
+internal static partial (slice<ж<ast.File>>, error) parseFiles⁔(/*this*/ ж<Importer> Ꮡp, @string dir, slice<@string> filenames) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     // use build.Context's OpenFile if there is one
@@ -243,7 +240,7 @@ private static readonly @string cgoCflagsˢᵇ = "CGO_CFLAGS"u8;
 internal static ref readonly @string cgoGotypesGoˢ => ref cgoGotypesGoˢᵇ;
 private static readonly @string cgoGotypesGoˢᵇ = "_cgo_gotypes.go"u8;
 
-internal static (ж<ast.File>, error) cgo(this ж<Importer> Ꮡp, ж<build.Package> Ꮡbp) {
+internal static (ж<ast.File>, error) cgo⁔(/*this*/ ж<Importer> Ꮡp, ж<build.Package> Ꮡbp) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -302,20 +299,20 @@ internal static (ж<ast.File>, error) cgo(this ж<Importer> Ꮡp, ж<build.Packa
 }
 
 // context-controlled file system operations
-internal static (@string, error) absPath(this ref Importer p, @string path) {
+internal static (@string, error) absPath⁔(/*this*/ ref Importer p, @string path) {
     // TODO(gri) This should be using p.ctxt.AbsPath which doesn't
     // exist but probably should. See also issue #14282.
     return filepath.Abs(path);
 }
 
-internal static bool isAbsPath(this ref Importer p, @string path) {
+internal static bool isAbsPath⁔(/*this*/ ref Importer p, @string path) {
     var f = p.ctxt.IsAbsPath; if (f != nil) {
         return f(path);
     }
     return filepath.IsAbs(path);
 }
 
-internal static @string joinPath(this ref Importer p, params ꓸꓸꓸstring elemʗp) {
+internal static @string joinPath⁔(/*this*/ ref Importer p, params ꓸꓸꓸstring elemʗp) {
     var elem = elemʗp.sslice();
 
     var f = p.ctxt.JoinPath; if (f != nil) {
@@ -323,8 +320,6 @@ internal static @string joinPath(this ref Importer p, params ꓸꓸꓸstring ele
     }
     return filepath.Join(elem.ꓸꓸꓸ);
 }
-
-} partial class srcimporter_package {
 
 //go:linkname setUsesCgo go/types.srcimporter_setUsesCgo
 /*linkname*/ internal static partial void setUsesCgo(ж<types.Config> conf) {

@@ -14,6 +14,9 @@
 
 using go;
 using static go.vendor.golang.org.x.sys.cpu_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -65,7 +68,7 @@ using static go.vendor.golang.org.x.sys.cpu_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("vendor/golang.org/x/sys/cpu/byteorder.go", "byteorder.cs", "ABcogoKmgoLIgoKmgoLMogACFAACEJQ=")]
+[assembly: GoPositionMap("vendor/golang.org/x/sys/cpu/byteorder.go", "byteorder.cs", "ABQogoKmgoKogoKmgoKsogACFAACEJQ=")]
 [assembly: GoPositionMap("vendor/golang.org/x/sys/cpu/cpu.go", "cpu.cs", "AIsC8gOCgoIAFSSCgoKCgoKClJSClIKCgpSkgpS0tIK2goKClKaCgoKCuMaCgqaCgqaCgqY=")]
 [assembly: GoPositionMap("vendor/golang.org/x/sys/cpu/cpu_gc_x86.go", "cpu_gc_x86.cs", "AAgWuA==")]
 [assembly: GoPositionMap("vendor/golang.org/x/sys/cpu/cpu_linux_noinit.go", "cpu_linux_noinit.cs", "AAgS")]
@@ -78,6 +81,8 @@ using static go.vendor.golang.org.x.sys.cpu_package;
 // </GoSourcePositionMaps>
 
 namespace go.vendor.golang.org.x.sys;
+
+using static go.vendor.golang.org.x.sys.cpu_package;
 
 [GoPackage("cpu", ImportPath = "vendor/golang.org/x/sys/cpu")]
 public static partial class cpu_package
@@ -125,6 +130,21 @@ public static partial class cpu_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(cpu_package.bigEndian)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class cpuᴛbigEndian;
-[GoMethodHost(typeof(cpu_package.littleEndian)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class cpuᴛlittleEndian;
+[GoMethodHost(typeof(cpu_package.bigEndian)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class cpuᴛbigEndian;
+[GoMethodHost(typeof(cpu_package.littleEndian)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class cpuᴛlittleEndian;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class cpuᴛbigEndian {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static uint32 Uint32(this bigEndian _Δp0, slice<byte> b) => cpu_package.Uint32⁔(_Δp0, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static uint64 Uint64(this bigEndian _Δp0, slice<byte> b) => cpu_package.Uint64⁔(_Δp0, b);
+}
+partial class cpuᴛlittleEndian {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static uint32 Uint32(this littleEndian _Δp0, slice<byte> b) => cpu_package.Uint32⁔(_Δp0, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static uint64 Uint64(this littleEndian _Δp0, slice<byte> b) => cpu_package.Uint64⁔(_Δp0, b);
+}
+// </MethodForwarders>

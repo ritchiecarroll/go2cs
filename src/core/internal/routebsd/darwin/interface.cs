@@ -4,8 +4,6 @@
 //go:build darwin || dragonfly || freebsd || netbsd || openbsd
 namespace go.@internal;
 
-using static routebsd_package;
-
 partial class routebsd_package {
 
 // An InterfaceMessage represents an interface message.
@@ -41,17 +39,9 @@ partial struct InterfaceMulticastAddrMessage {
     internal slice<byte> raw; // raw message
 }
 
-} partial class routebsdᴛInterfaceMessage {
-
 // Implement the Message interface.
-internal static void message(this InterfaceMessage _) { }
+internal static void message⁔(/*this*/ InterfaceMessage _) { }
+internal static void message⁔(/*this*/ InterfaceAddrMessage _) { }
+internal static void message⁔(/*this*/ InterfaceMulticastAddrMessage _) { }
 
-} partial class routebsdᴛInterfaceAddrMessage {
-
-internal static void message(this InterfaceAddrMessage _) { }
-
-} partial class routebsdᴛInterfaceMulticastAddrMessage {
-
-internal static void message(this InterfaceMulticastAddrMessage _) { }
-
-}
+} // end routebsd_package

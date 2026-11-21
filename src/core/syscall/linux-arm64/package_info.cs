@@ -14,6 +14,9 @@
 
 using go;
 using static go.syscall_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -84,16 +87,16 @@ using static go.syscall_package;
 [assembly: GoPositionMap("syscall/exec_linux.go", "exec_linux.cs", "AG7oAZLckoIAARoAEAaCgpSCuIKCpoKCpoKCpqKmABMqgJaAABA4ABEEAAMmACMilJSCgqaCgpSClJS4gtyCgoKClJS4goKCuIKClIKmgriCgpSC3IKCgqaClJSm7tyCgoLKgoKUooKUgoKUgoLKgoKCypSCgriCgoKUuKKC3KaCgoKmgoKilKKClIKmopSigpSCuIKCopSigpSCAAoWgsKC3IKigsqCgoKClIKCgqaCgpSCgrimlMKmxoKmwqaigoLcgqKCyoKCgtyCgoKCgu6CgoKUgpSCgoKUgoKUgsqCgoKUpoKClLiCggAHEIK4goKCyoKCgsoAChaiggAIDoKCgsr6hLKCuIKCgpSokoKCpoKCpoKmrsKCgoKmgoKUpoKCpqqigoKCuJSAgqSCgILIqJKCggAZEOKCgoKmuIKCyoKCgqaCpsruggAAJIKCgqKCpoKmAAUWAAsCgpSUlO6mgg==")]
 [assembly: GoPositionMap("syscall/forkpipe2.go", "forkpipe2.cs", "AAoaogAKHAAFFgALAoKUlIKCygAMGpSClLiCuKKowoKUgqaUlLQ=")]
 [assembly: GoPositionMap("syscall/lsf_linux.go", "lsf_linux.cs", "AAockqiSqJKmgoKUgoKCgoKCgpQABxKygoKUgoKCooKUgpSUooKU2JKCgoKokoI=")]
-[assembly: GoPositionMap("syscall/netlink_linux.go", "netlink_linux.cs", "AAwekqqiAAsUgoKCgoKCgoLGgoKCgoKCgqaCgrrCgoKUgoKClIKClIKClIKClJSCgoKCgoKClIKUgoKCgpSCgpSClILYAAsWooKCgoKUgoKUpoKCgoKUAAgY4oKUtLS0lIKCgoKUgoKUtoKCgpQ=")]
+[assembly: GoPositionMap("syscall/netlink_linux.go", "netlink_linux.cs", "AAsekqqiAAkUgoKCgoKCgoKmgoKCgoKCgqaCgrrCgoKUgoKClIKClIKClIKClJSCgoKCgoKClIKUgoKCgpSCgpSClILYAAsWooKCgoKUgoKUpoKCgoKUAAgY4oKUtLS0lIKCgoKUgoKUtoKCgpQ=")]
 [assembly: GoPositionMap("syscall/rlimit.go", "rlimit.cs", "AA88AA4CgoKCAAcQlIK4gqaU")]
 [assembly: GoPositionMap("syscall/rlimit_stub.go", "rlimit_stub.cs", "AAgU")]
 [assembly: GoPositionMap("syscall/sockcmsg_linux.go", "sockcmsg_linux.cs", "AAoc0oKCgoKCgqzSgpSClIKUgg==")]
-[assembly: GoPositionMap("syscall/sockcmsg_unix.go", "sockcmsg_unix.cs", "AA0ioqqixoIAChaigoKCgoKUgoKUpoKCgpSqwoKCgoKCgoKUqsKClIKUgoKClA==")]
+[assembly: GoPositionMap("syscall/sockcmsg_unix.go", "sockcmsg_unix.cs", "AAwioqqipoIACBaigoKCgoKUgoKUpoKCgpSqwoKCgoKCgoKUqsKClIKUgoKClA==")]
 [assembly: GoPositionMap("syscall/sockcmsg_unix_other.go", "sockcmsg_unix_other.cs", "AAockri26oLYgqaCyA==")]
-[assembly: GoPositionMap("syscall/syscall.go", "syscall.cs", "ACFK8oKClKyygpSCggACEMCasoKClAAJEJLIksiSyJLKkpaSmA==")]
-[assembly: GoPositionMap("syscall/syscall_linux.go", "syscall_linux.cs", "ABg8AAkGAAIsABQCrgAIAoKCgqzyAAwagoKs8oKCgqaCnLKmgqaCpoKmgoKUpoKCgqamgoKClNSsooIACRSCggAJFIKmgoKmgoKokoKCuKamgpSUlJSmgoKUgoKUpoKUuIKmrMaCgqaCgoKmlKqSpoKmgqaCqpKmgqqSgpSCgoKClKqSpoKmgqqSpoKqkqaCgpSqkoKUpoKClKamzrKCgoKmgsqCpqaygoKUgriCpoKCgpSCgpQAGG6UlJSUlIKClKaCgpSmgoKUpoKClMrSgoKClKaCAAw4ooKCgri4gpSCgriCpoKUpgAQGqKClIKCgoKCgoIADhaigoKCggAGigGCAAY8soKCAAgwgoKCggAEFIKCgoIABlaygoKCgoKClIKCgoKCgqaCgqaClIKCgpSClKiSrAAKDu6CgoKClIK4poKClIKCpqaCpoKm6oKCgoKClIKCgoKUuIKCgoKUgriCgoKClIKCgoKUpqaCpoLOgoKCgqaCgoKCpoKmsoKCgqaCpoKmlJSYkqaCpoKmgqaCgoKUqtaClIKClAACPAAbAoIAAkIAHyYAFAKClIKu8oKUgqwACAyigoKUgpTKooKClIKUyqKCgpSClMqigoKUgpTKooKClIKUyqKCgpSClMqigoKUgpTKooKClIKUABMq3IKmggACFPSqogACFAAJAoKClA==")]
-[assembly: GoPositionMap("syscall/syscall_linux_arm64.go", "syscall_linux_arm64.cs", "AA8qwgACKAAQAqaCpoIAG0ySpoKmooKmuKaigoKClIKUpqK4pqKCprjGlLSCxoLGgsaCqpKC", "", "", "93=TimevalToNsec/1/2/1,NsecToTimespec/1/2/1,TimevalToNsec/2/2/2,NsecToTimespec/2/2/2;131=TimevalToNsec/1/2/1,NsecToTimespec/1/2/1,TimevalToNsec/2/2/2,NsecToTimespec/2/2/2")]
-[assembly: GoPositionMap("syscall/syscall_unix.go", "syscall_unix.cs", "AB9EkoKUAAwY4oK4goK4poKCgoLm0oK4goKCgoK4gpSCABomgoKCgqamgpSkpKSUpoKmggAKGqKUpKSklAAIDpSCgoKCpsaygoKClIKmgpSClKaygpSCgoKmlIKUgpSClKaygoKClIKmgpSClKaygpSCgpSClIKUACNsooKCggAEHrKCkoKUgoKCgqaygpKClIKCgoKCptKCgoKUgoKCgqbSgoKClIKCgoKCpuKClIKUpqKCAAQeooKCgoKCpqaigoKCgoKmpqKCgpSmooKClAAEIqKmgqKmogAIHoKmgoKClKaCprKClIKmsoKCgoKUpoKClA==")]
+[assembly: GoPositionMap("syscall/syscall.go", "syscall.cs", "ACBK8oKClKyygpSCggACEMCasoKClAAHEJKokqiSqJKqkpaSmA==")]
+[assembly: GoPositionMap("syscall/syscall_linux.go", "syscall_linux.cs", "ABc8AAkGAAIsABQCrgAIAoKCgqzyAAwagoKs8oKCgqaCnLKmgqaCpoKmgoKUpoKCgqamgoKClNSsooIACRSCggAJFIKmgoKmgoKokoKCuKamgpSUlJSmgoKUgoKUpoKUuIKmrMaCgqaCgoKmlKqSpoKmgqaCqpKmgqqSgpSCgoKClKqSpoKmgqqSpoKqkqaCgpSqkoKUpoKClKamzrKCgoKmgsqCpqaygoKUgriCpoKCgpSCgpQAFm6UlJSUlIKClKaCgpSmgoKUpoKClKrSgoKClKaCAAY4ooKCgri4gpSCgriCpoKUpgAMGqKClIKCgoKCgoIAChaigoKCggAEigGCAAY8soKCAAgwgoKCggAEFIKCgoIABlaygoKCgoKClIKCgoKCgqaCgqaClIKCgpSClKiSrAAKDu6CgoKClIK4poKClIKCpqaCpoKm6oKCgoKClIKCgoKUuIKCgoKUgriCgoKClIKCgoKUpqaCpoLOgoKCgqaCgoKCpoKmsoKCgqaCpoKmlJSYkqaCpoKmgqaCgoKUqtaClIKClAACPAAbAoIAAkIAHyYAFAKClIKu8oKUgqwACAyigoKUgpTKooKClIKUyqKCgpSClMqigoKUgpTKooKClIKUyqKCgpSClMqigoKUgpTKooKClIKUABMq3IKmggACFPSqogACFAAJAoKClA==")]
+[assembly: GoPositionMap("syscall/syscall_linux_arm64.go", "syscall_linux_arm64.cs", "AA4qwgACKAAQAqaCpoIAG0ySpoKmooKmuKaigoKClIKUpqK4pqKCprimlJSCpoKmgqaCqpKC", "", "", "92=TimevalToNsec/1/2/1,NsecToTimespec/1/2/1,TimevalToNsec/2/2/2,NsecToTimespec/2/2/2;130=TimevalToNsec/1/2/1,NsecToTimespec/1/2/1,TimevalToNsec/2/2/2,NsecToTimespec/2/2/2")]
+[assembly: GoPositionMap("syscall/syscall_unix.go", "syscall_unix.cs", "AB5EkoKUAAoY4oK4goK4poKCgoLm0oK4goKCgoK4gpSCABYmgoKCgqamgpSkpKSUpoKmggAIGqKUpKSklO6UgoKCgqamsoKCgpSCpoKUgpSmsoKUgoKCppSClIKUgpSmsoKCgpSCpoKUgpSmsoKUgoKUgpSClAAjbKKCgoIABB6ygpKClIKCgoKmsoKSgpSCgoKCgqbSgoKClIKCgoKm0oKCgpSCgoKCgqbigpSClKaiggAEHqKCgoKCgqamooKCgoKCpqaigoKUpqKCgpQABCKipoKipqIACB6CpoKCgpSmgqaygpSCprKCgoKClKaCgpQ=")]
 [assembly: GoPositionMap("syscall/time_nofake.go", "time_nofake.cs", "AAoWlA==")]
 [assembly: GoPositionMap("syscall/timestruct.go", "timestruct.cs", "AAgUgJaSgoKCgpSogJaSgoKCgoKU")]
 [assembly: GoPositionMap("syscall/zerrors_linux_arm64.go", "zerrors_linux_arm64.cs", "ANoMwhkAhgGOAg==")]
@@ -101,6 +104,8 @@ using static go.syscall_package;
 // </GoSourcePositionMaps>
 
 namespace go;
+
+using static go.syscall_package;
 
 [GoPackage("syscall")]
 public static partial class syscall_package
@@ -225,20 +230,86 @@ public static partial class syscall_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(syscall_package.Cmsghdr)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syscallᴛCmsghdr;
-[GoMethodHost(typeof(syscall_package.Errno)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syscallᴛErrno;
-[GoMethodHost(typeof(syscall_package.Iovec)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syscallᴛIovec;
-[GoMethodHost(typeof(syscall_package.Msghdr)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syscallᴛMsghdr;
-[GoMethodHost(typeof(syscall_package.NetlinkRouteRequest)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syscallᴛNetlinkRouteRequest;
-[GoMethodHost(typeof(syscall_package.PtraceRegs)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syscallᴛPtraceRegs;
-[GoMethodHost(typeof(syscall_package.Signal)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syscallᴛSignal;
-[GoMethodHost(typeof(syscall_package.SockaddrInet4)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syscallᴛSockaddrInet4;
-[GoMethodHost(typeof(syscall_package.SockaddrInet6)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syscallᴛSockaddrInet6;
-[GoMethodHost(typeof(syscall_package.SockaddrLinklayer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syscallᴛSockaddrLinklayer;
-[GoMethodHost(typeof(syscall_package.SockaddrNetlink)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syscallᴛSockaddrNetlink;
-[GoMethodHost(typeof(syscall_package.SockaddrUnix)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syscallᴛSockaddrUnix;
-[GoMethodHost(typeof(syscall_package.Timespec)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syscallᴛTimespec;
-[GoMethodHost(typeof(syscall_package.Timeval)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syscallᴛTimeval;
-[GoMethodHost(typeof(syscall_package.WaitStatus)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syscallᴛWaitStatus;
-[GoMethodHost(typeof(syscall_package.mmapper)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syscallᴛmmapper;
+[GoMethodHost(typeof(syscall_package.Cmsghdr)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syscallᴛCmsghdr;
+[GoMethodHost(typeof(syscall_package.Errno)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syscallᴛErrno;
+[GoMethodHost(typeof(syscall_package.Iovec)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syscallᴛIovec;
+[GoMethodHost(typeof(syscall_package.Msghdr)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syscallᴛMsghdr;
+[GoMethodHost(typeof(syscall_package.NetlinkRouteRequest)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syscallᴛNetlinkRouteRequest;
+[GoMethodHost(typeof(syscall_package.PtraceRegs)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syscallᴛPtraceRegs;
+[GoMethodHost(typeof(syscall_package.Signal)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syscallᴛSignal;
+[GoMethodHost(typeof(syscall_package.SockaddrInet4)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syscallᴛSockaddrInet4;
+[GoMethodHost(typeof(syscall_package.SockaddrInet6)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syscallᴛSockaddrInet6;
+[GoMethodHost(typeof(syscall_package.SockaddrLinklayer)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syscallᴛSockaddrLinklayer;
+[GoMethodHost(typeof(syscall_package.SockaddrNetlink)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syscallᴛSockaddrNetlink;
+[GoMethodHost(typeof(syscall_package.SockaddrUnix)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syscallᴛSockaddrUnix;
+[GoMethodHost(typeof(syscall_package.Timespec)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syscallᴛTimespec;
+[GoMethodHost(typeof(syscall_package.Timeval)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syscallᴛTimeval;
+[GoMethodHost(typeof(syscall_package.WaitStatus)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syscallᴛWaitStatus;
+[GoMethodHost(typeof(syscall_package.mmapper)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syscallᴛmmapper;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class syscallᴛCmsghdr {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static unsafe_package.Pointer data(this ж<Cmsghdr> Ꮡh, uintptr offset) => syscall_package.data⁔(Ꮡh, offset);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void SetLen(this ref Cmsghdr cmsg, nint length) => syscall_package.SetLen⁔(ref cmsg, length);
+}
+partial class syscallᴛErrno {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this Errno e) => syscall_package.Error⁔(e);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Is(this Errno e, error target) => syscall_package.Is⁔(e, target);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Temporary(this Errno e) => syscall_package.Temporary⁔(e);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Timeout(this Errno e) => syscall_package.Timeout⁔(e);
+}
+partial class syscallᴛIovec {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void SetLen(this ref Iovec iov, nint length) => syscall_package.SetLen⁔(ref iov, length);
+}
+partial class syscallᴛMsghdr {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void SetControllen(this ref Msghdr msghdr, nint length) => syscall_package.SetControllen⁔(ref msghdr, length);
+}
+partial class syscallᴛNetlinkRouteRequest {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<byte> toWireFormat(this ref NetlinkRouteRequest rr) => syscall_package.toWireFormat⁔(ref rr);
+}
+partial class syscallᴛPtraceRegs {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static uint64 PC(this ref PtraceRegs r) => syscall_package.PC⁔(ref r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void SetPC(this ref PtraceRegs r, uint64 pc) => syscall_package.SetPC⁔(ref r, pc);
+}
+partial class syscallᴛSignal {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Signal(this Signal s) => syscall_package.Signal⁔(s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this Signal s) => syscall_package.String⁔(s);
+}
+partial class syscallᴛSockaddrLinklayer {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (unsafe_package.Pointer, _Socklen, error) sockaddr(this ж<SockaddrLinklayer> Ꮡsa) => syscall_package.sockaddr⁔(Ꮡsa);
+}
+partial class syscallᴛSockaddrNetlink {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (unsafe_package.Pointer, _Socklen, error) sockaddr(this ж<SockaddrNetlink> Ꮡsa) => syscall_package.sockaddr⁔(Ꮡsa);
+}
+partial class syscallᴛSockaddrUnix {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (unsafe_package.Pointer, _Socklen, error) sockaddr(this ж<SockaddrUnix> Ꮡsa) => syscall_package.sockaddr⁔(Ꮡsa);
+}
+partial class syscallᴛTimespec {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (int64 sec, int64 nsec) Unix(this ref Timespec ts) => syscall_package.Unix⁔(ref ts);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static int64 Nano(this ref Timespec ts) => syscall_package.Nano⁔(ref ts);
+}
+partial class syscallᴛTimeval {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (int64 sec, int64 nsec) Unix(this ref Timeval tv) => syscall_package.Unix⁔(ref tv);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static int64 Nano(this ref Timeval tv) => syscall_package.Nano⁔(ref tv);
+}
+partial class syscallᴛWaitStatus {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Exited(this WaitStatus w) => syscall_package.Exited⁔(w);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Signaled(this WaitStatus w) => syscall_package.Signaled⁔(w);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Stopped(this WaitStatus w) => syscall_package.Stopped⁔(w);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Continued(this WaitStatus w) => syscall_package.Continued⁔(w);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool CoreDump(this WaitStatus w) => syscall_package.CoreDump⁔(w);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint ExitStatus(this WaitStatus w) => syscall_package.ExitStatus⁔(w);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static Signal Signal(this WaitStatus w) => syscall_package.Signal⁔(w);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static Signal StopSignal(this WaitStatus w) => syscall_package.StopSignal⁔(w);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint TrapCause(this WaitStatus w) => syscall_package.TrapCause⁔(w);
+}
+partial class syscallᴛmmapper {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<byte> data, error err) Mmap(this ж<mmapper> Ꮡm, nint fd, int64 offset, nint length, nint prot, nint flags) => syscall_package.Mmap⁔(Ꮡm, fd, offset, length, prot, flags);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error /*err*/ Munmap(this ж<mmapper> Ꮡm, slice<byte> data) => syscall_package.Munmap⁔(Ꮡm, data);
+}
+// </MethodForwarders>

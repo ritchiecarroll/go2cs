@@ -11,15 +11,12 @@ using @unsafe = unsafe_package;
 using @internal;
 using @internal.syscall;
 using fs = go.io.fs_package;
-using static os_package;
 
 partial class os_package {
 
-} partial class osᴛFile {
-
 // Stat returns the [FileInfo] structure describing file.
 // If there is an error, it will be of type [*PathError].
-public static (FileInfo, error) Stat(this ж<File> Ꮡfile) {
+internal static (FileInfo, error) Stat⁔(/*this*/ ж<File> Ꮡfile) {
     ref var @file = ref Ꮡfile.DerefOrNull();
 
     if (Ꮡfile == nil) {
@@ -27,8 +24,6 @@ public static (FileInfo, error) Stat(this ж<File> Ꮡfile) {
     }
     return statHandle(@file.name, @file.pfd.Sysfd);
 }
-
-} partial class os_package {
 
 // stat implements both Stat and Lstat of a file.
 internal static (FileInfo, error) stat(@string funcname, @string name, bool followSurrogates) {

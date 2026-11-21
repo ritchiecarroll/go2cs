@@ -5,7 +5,6 @@ namespace go.debug;
 
 using io = io_package;
 using os = os_package;
-using static elf_package;
 
 partial class elf_package {
 
@@ -14,25 +13,21 @@ partial struct errorReader {
     /*embed*/ internal error error;
 }
 
-} partial class elfᴛerrorReader {
-
-internal static (nint n, error err) Read(this errorReader r, slice<byte> p) {
+internal static (nint n, error err) Read⁔(/*this*/ errorReader r, slice<byte> p) {
     return (0, r.error);
 }
 
-internal static (nint n, error err) ReadAt(this errorReader r, slice<byte> p, int64 off) {
+internal static (nint n, error err) ReadAt⁔(/*this*/ errorReader r, slice<byte> p, int64 off) {
     return (0, r.error);
 }
 
-internal static (int64, error) Seek(this errorReader r, int64 offset, nint whence) {
+internal static (int64, error) Seek⁔(/*this*/ errorReader r, int64 offset, nint whence) {
     return (0, r.error);
 }
 
-internal static error Close(this errorReader r) {
+internal static error Close⁔(/*this*/ errorReader r) {
     return r.error;
 }
-
-} partial class elf_package {
 
 // readSeekerFromReader converts an io.Reader into an io.ReadSeeker.
 // In general Seek may not be efficient, but it is optimized for
@@ -45,9 +40,7 @@ partial struct readSeekerFromReader {
     internal int64 offset;
 }
 
-} partial class elfᴛreadSeekerFromReader {
-
-internal static void start(this ref readSeekerFromReader r) {
+internal static void start⁔(/*this*/ ref readSeekerFromReader r) {
     var (x, err) = r.reset();
     if (err != nil) {
         r.r = new errorReader(err);
@@ -57,7 +50,7 @@ internal static void start(this ref readSeekerFromReader r) {
     r.offset = 0;
 }
 
-internal static (nint n, error err) Read(this ref readSeekerFromReader r, slice<byte> p) {
+internal static (nint n, error err) Read⁔(/*this*/ ref readSeekerFromReader r, slice<byte> p) {
     nint n = default;
     error err = default;
 
@@ -69,7 +62,7 @@ internal static (nint n, error err) Read(this ref readSeekerFromReader r, slice<
     return (n, err);
 }
 
-internal static (int64, error) Seek(this ref readSeekerFromReader r, int64 offset, nint whence) {
+internal static (int64, error) Seek⁔(/*this*/ ref readSeekerFromReader r, int64 offset, nint whence) {
     int64 newOffset = default;
     switch (whence) {
     case var ᴛ when ᴛ == io.SeekStart: {
@@ -125,4 +118,4 @@ internal static (int64, error) Seek(this ref readSeekerFromReader r, int64 offse
     return (r.offset, default);
 }
 
-}
+} // end elf_package

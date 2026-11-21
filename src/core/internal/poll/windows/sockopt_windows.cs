@@ -4,14 +4,11 @@
 namespace go.@internal;
 
 using Δsyscall = syscall_package;
-using static poll_package;
 
 partial class poll_package {
 
-} partial class pollᴛFD {
-
 // WSAIoctl wraps the WSAIoctl network call.
-public static error WSAIoctl(this ж<FD> Ꮡfd, uint32 iocc, ж<byte> inbuf, uint32 cbif, ж<byte> outbuf, uint32 cbob, ж<uint32> cbbr, ж<Δsyscall.Overlapped> overlapped, uintptr completionRoutine) {
+internal static error WSAIoctl⁔(/*this*/ ж<FD> Ꮡfd, uint32 iocc, ж<byte> inbuf, uint32 cbif, ж<byte> outbuf, uint32 cbob, ж<uint32> cbbr, ж<Δsyscall.Overlapped> overlapped, uintptr completionRoutine) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -27,4 +24,4 @@ public static error WSAIoctl(this ж<FD> Ꮡfd, uint32 iocc, ж<byte> inbuf, uin
     finally { if (ᒐd1) Ꮡfd.decref(); ᒐ.Run(); }
 }
 
-}
+} // end poll_package

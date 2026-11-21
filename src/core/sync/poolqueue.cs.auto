@@ -12,7 +12,6 @@ namespace go;
 using atomic = go.sync.atomic_package;
 using @unsafe = unsafe_package;
 using go.sync;
-using static sync_package;
 
 partial class sync_package {
 
@@ -68,9 +67,7 @@ internal static UntypedInt dequeueLimit => /* (1 << dequeueBits) / 4 */ 10737418
 // to represent nil.
 partial class dequeueNil /*ж<EmptyStruct>*/;
 
-} partial class syncᴛpoolDequeue {
-
-internal static (uint32 head, uint32 tail) unpack(this ref poolDequeue d, uint64 ptrs) {
+internal static (uint32 head, uint32 tail) unpack⁔(/*this*/ ref poolDequeue d, uint64 ptrs) {
     uint32 head = default;
     uint32 tail = default;
 
@@ -80,14 +77,14 @@ internal static (uint32 head, uint32 tail) unpack(this ref poolDequeue d, uint64
     return (head, tail);
 }
 
-internal static uint64 pack(this ref poolDequeue d, uint32 head, uint32 tail) {
+internal static uint64 pack⁔(/*this*/ ref poolDequeue d, uint32 head, uint32 tail) {
     const uint32 mask = /* 1<<dequeueBits - 1 */ 4294967295;
     return ((uint64)head << (int)(dequeueBits)) | (uint64)((uint32)(tail & mask));
 }
 
 // pushHead adds val at the head of the queue. It returns false if the
 // queue is full. It must only be called by a single producer.
-internal static bool pushHead(this ж<poolDequeue> Ꮡd, any val) {
+internal static bool pushHead⁔(/*this*/ ж<poolDequeue> Ꮡd, any val) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     var ptrs = Ꮡd.of(poolDequeue.ᏑheadTail).Load();
@@ -121,7 +118,7 @@ internal static bool pushHead(this ж<poolDequeue> Ꮡd, any val) {
 // popHead removes and returns the element at the head of the queue.
 // It returns false if the queue is empty. It must only be called by a
 // single producer.
-internal static (any, bool) popHead(this ж<poolDequeue> Ꮡd) {
+internal static (any, bool) popHead⁔(/*this*/ ж<poolDequeue> Ꮡd) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     ж<eface> slot = default;
@@ -158,7 +155,7 @@ internal static (any, bool) popHead(this ж<poolDequeue> Ꮡd) {
 // popTail removes and returns the element at the tail of the queue.
 // It returns false if the queue is empty. It may be called by any
 // number of consumers.
-internal static (any, bool) popTail(this ж<poolDequeue> Ꮡd) {
+internal static (any, bool) popTail⁔(/*this*/ ж<poolDequeue> Ꮡd) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     ж<eface> slot = default;
@@ -200,8 +197,6 @@ internal static (any, bool) popTail(this ж<poolDequeue> Ꮡd) {
     return (val, true);
 }
 
-} partial class sync_package {
-
 // poolChain is a dynamically-sized version of poolDequeue.
 //
 // This is implemented as a doubly-linked list queue of poolDequeues
@@ -233,9 +228,7 @@ partial struct poolChainElt {
     internal atomic.Pointer<poolChainElt> next, prev;
 }
 
-} partial class syncᴛpoolChain {
-
-internal static void pushHead(this ж<poolChain> Ꮡc, any val) {
+internal static void pushHead⁔(/*this*/ ж<poolChain> Ꮡc, any val) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     var d = c.head;
@@ -268,7 +261,7 @@ internal static void pushHead(this ж<poolChain> Ꮡc, any val) {
     d2.of(poolChainElt.ᏑpoolDequeue).pushHead(val);
 }
 
-internal static (any, bool) popHead(this ref poolChain c) {
+internal static (any, bool) popHead⁔(/*this*/ ref poolChain c) {
     var d = c.head;
     while (d != nil) {
         var (val, ok) = d.of(poolChainElt.ᏑpoolDequeue).popHead(); if (ok) {
@@ -281,7 +274,7 @@ internal static (any, bool) popHead(this ref poolChain c) {
     return (default, false);
 }
 
-internal static (any, bool) popTail(this ж<poolChain> Ꮡc) {
+internal static (any, bool) popTail⁔(/*this*/ ж<poolChain> Ꮡc) {
     var d = Ꮡc.of(poolChain.Ꮡtail).Load();
     if (d == nil) {
         return (default, false);
@@ -321,4 +314,4 @@ internal static (any, bool) popTail(this ж<poolChain> Ꮡc) {
     }
 }
 
-}
+} // end sync_package

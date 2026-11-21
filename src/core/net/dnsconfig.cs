@@ -8,7 +8,6 @@ using atomic = go.sync.atomic_package;
 using time = time_package;
 // blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
 using go.sync;
-using static net_package;
 
 partial class net_package {
 
@@ -46,13 +45,11 @@ partial struct dnsConfig {
     internal bool noReload;          // do not check for config file updates
 }
 
-} partial class netᴛdnsConfig {
-
 // serverOffset returns an offset that can be used to determine
 // indices of servers in c.servers when making queries.
 // When the rotate option is enabled, this offset increases.
 // Otherwise it is always 0.
-internal static uint32 serverOffset(this ж<dnsConfig> Ꮡc) {
+internal static uint32 serverOffset⁔(/*this*/ ж<dnsConfig> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (c.rotate) {
@@ -61,4 +58,4 @@ internal static uint32 serverOffset(this ж<dnsConfig> Ꮡc) {
     return 0;
 }
 
-}
+} // end net_package

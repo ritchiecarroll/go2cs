@@ -7,7 +7,6 @@ using context = context_package;
 using netip = net.netip_package;
 using syscall = syscall_package;
 using net;
-using static net_package;
 
 partial class net_package {
 
@@ -42,16 +41,10 @@ partial struct IPAddr {
     public @string Zone; // IPv6 scoped addressing zone
 }
 
-} partial class netᴛIPAddr {
-
 // Network returns the address's network name, "ip".
-public static @string Network(this ref IPAddr a) { return "ip"; }
+internal static @string Network⁔(/*this*/ ref IPAddr a) { return "ip"; }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string nilˢ => ref nilˢᵇ;
-private static readonly @string nilˢᵇ = "<nil>"u8;
-
-public static @string String(this ж<IPAddr> Ꮡa) {
+internal static @string String⁔(/*this*/ ж<IPAddr> Ꮡa) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (Ꮡa == nil) {
@@ -64,7 +57,7 @@ public static @string String(this ж<IPAddr> Ꮡa) {
     return ip;
 }
 
-internal static bool isWildcard(this ж<IPAddr> Ꮡa) {
+internal static bool isWildcard⁔(/*this*/ ж<IPAddr> Ꮡa) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (Ꮡa == nil || a.IP == nil) {
@@ -73,14 +66,12 @@ internal static bool isWildcard(this ж<IPAddr> Ꮡa) {
     return a.IP.IsUnspecified();
 }
 
-internal static Addr opAddr(this ж<IPAddr> Ꮡa) {
+internal static Addr opAddr⁔(/*this*/ ж<IPAddr> Ꮡa) {
     if (Ꮡa == nil) {
         return default;
     }
     return new IPAddrжAddr(Ꮡa);
 }
-
-} partial class net_package {
 
 // ResolveIPAddr returns an address of IP end point.
 //
@@ -123,11 +114,9 @@ partial struct IPConn {
     /*embed*/ internal conn conn;
 }
 
-} partial class netᴛIPConn {
-
 // SyscallConn returns a raw network connection.
 // This implements the [syscall.Conn] interface.
-public static (syscall.RawConn, error) SyscallConn(this ж<IPConn> Ꮡc) {
+internal static (syscall.RawConn, error) SyscallConn⁔(/*this*/ ж<IPConn> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.of(IPConn.Ꮡconn).ok()) {
@@ -137,7 +126,7 @@ public static (syscall.RawConn, error) SyscallConn(this ж<IPConn> Ꮡc) {
 }
 
 // ReadFromIP acts like ReadFrom but returns an IPAddr.
-public static (nint, ж<IPAddr>, error) ReadFromIP(this ж<IPConn> Ꮡc, slice<byte> b) {
+internal static (nint, ж<IPAddr>, error) ReadFromIP⁔(/*this*/ ж<IPConn> Ꮡc, slice<byte> b) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.of(IPConn.Ꮡconn).ok()) {
@@ -151,7 +140,7 @@ public static (nint, ж<IPAddr>, error) ReadFromIP(this ж<IPConn> Ꮡc, slice<b
 }
 
 // ReadFrom implements the [PacketConn] ReadFrom method.
-public static (nint, Addr, error) ReadFrom(this ж<IPConn> Ꮡc, slice<byte> b) {
+internal static (nint, Addr, error) ReadFrom⁔(/*this*/ ж<IPConn> Ꮡc, slice<byte> b) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.of(IPConn.Ꮡconn).ok()) {
@@ -174,7 +163,7 @@ public static (nint, Addr, error) ReadFrom(this ж<IPConn> Ꮡc, slice<byte> b) 
 //
 // The packages golang.org/x/net/ipv4 and golang.org/x/net/ipv6 can be
 // used to manipulate IP-level socket options in oob.
-public static (nint n, nint oobn, nint flags, ж<IPAddr> addr, error err) ReadMsgIP(this ж<IPConn> Ꮡc, slice<byte> b, slice<byte> oob) {
+internal static (nint n, nint oobn, nint flags, ж<IPAddr> addr, error err) ReadMsgIP⁔(/*this*/ ж<IPConn> Ꮡc, slice<byte> b, slice<byte> oob) {
     nint n = default;
     nint oobn = default;
     nint flags = default;
@@ -193,7 +182,7 @@ public static (nint n, nint oobn, nint flags, ж<IPAddr> addr, error err) ReadMs
 }
 
 // WriteToIP acts like [IPConn.WriteTo] but takes an [IPAddr].
-public static (nint, error) WriteToIP(this ж<IPConn> Ꮡc, slice<byte> b, ж<IPAddr> addr) {
+internal static (nint, error) WriteToIP⁔(/*this*/ ж<IPConn> Ꮡc, slice<byte> b, ж<IPAddr> addr) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.of(IPConn.Ꮡconn).ok()) {
@@ -207,7 +196,7 @@ public static (nint, error) WriteToIP(this ж<IPConn> Ꮡc, slice<byte> b, ж<IP
 }
 
 // WriteTo implements the [PacketConn] WriteTo method.
-public static (nint, error) WriteTo(this ж<IPConn> Ꮡc, slice<byte> b, Addr addr) {
+internal static (nint, error) WriteTo⁔(/*this*/ ж<IPConn> Ꮡc, slice<byte> b, Addr addr) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.of(IPConn.Ꮡconn).ok()) {
@@ -230,7 +219,7 @@ public static (nint, error) WriteTo(this ж<IPConn> Ꮡc, slice<byte> b, Addr ad
 //
 // The packages golang.org/x/net/ipv4 and golang.org/x/net/ipv6 can be
 // used to manipulate IP-level socket options in oob.
-public static (nint n, nint oobn, error err) WriteMsgIP(this ж<IPConn> Ꮡc, slice<byte> b, slice<byte> oob, ж<IPAddr> addr) {
+internal static (nint n, nint oobn, error err) WriteMsgIP⁔(/*this*/ ж<IPConn> Ꮡc, slice<byte> b, slice<byte> oob, ж<IPAddr> addr) {
     nint n = default;
     nint oobn = default;
     error err = default;
@@ -245,8 +234,6 @@ public static (nint n, nint oobn, error err) WriteMsgIP(this ж<IPConn> Ꮡc, sl
     }
     return (n, oobn, err);
 }
-
-} partial class net_package {
 
 internal static ж<IPConn> newIPConn(ж<netFD> fd) { return Ꮡ(new IPConn(new conn(fd))); }
 

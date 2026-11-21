@@ -11,10 +11,14 @@
 
 // <ImportedTypeAliases>
 using abi = go.@internal.abi_package;
+using iter = go.iter_package;
 // </ImportedTypeAliases>
 
 using go;
 using static go.reflect_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -79,18 +83,22 @@ using static go.reflect_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("reflect/abi.go", "abi.cs", "AFe4AYKClIKClIKCgqyygoKClJSu9IKCAA4egriCpoKClAACEgAJBIKSgoIABxCClIKClAAElgEACQKClIKUgpSCgoKU3JQAAhLigpSClILclK7CgtwAJEiCgoKCgoKCgoKCgoKCgsaigoKClLgACBKmuJaSgoKCgpSmpoKCgpSCgoKCyriCuJbsgoKCgpSCgu6CrNKs0qzSlLS0zrKUtLQ=")]
+[assembly: GoPositionMap("reflect/abi.go", "abi.cs", "AFS4AYKClIKClIKCgqyygoKClJSu9IKCAA4egriCpoKClAACEgAJBIKSgoIABxCClIKClAAElgEACQKClIKUgpSCgoKU3JQAAhLigpSClILclK7CgtwAIEiCgoKCgoKCgoKCgoKCgqaigoKClLgACBKmuJaSgoKCgpSmpoKCgpSCgoKCyriCuJbsgoKCgpSCgu6CrNKs0qzSlLS0zrKUtLQ=")]
 [assembly: GoPositionMap("reflect/badlinkname.go", "badlinkname.cs", "AAw6ABICAAIU9qampqampqampqampqampqampqampqampqampqam")]
 [assembly: GoPositionMap("reflect/float32reg_generic.go", "float32reg_generic.cs", "AAogwoKmgg==")]
-[assembly: GoPositionMap("reflect/iter.go", "iter.cs", "AAwWtoKUgqaClIIABxrygoKGppSkpKSkpKSkpKSkpIKUgoKCgtqCgoLagoKC2oKCgoLagoKCygACENKCgoamlIKUgoKCgtqCgoLagoKC2oKCgoLK", "14-28:1;40-45:1;41-43:1.1;74-81:2;83-89:3;91-97:4;99-106:5;108-114:6;126-131:1;127-129:1.1;138-145:2;147-153:3;155-161:4;163-170:5")]
+[assembly: GoPositionMap("reflect/iter.go", "iter.cs", "AAoWtoKUgqaClIIABRrygoKGppSkpKSkpKSkpKSkpIKUgoKCgtqCgoLagoKC2oKCgoLagoKCygACENKCgoamlIKUgoKCgtqCgoLagoKC2oKCgoLK", "14-28:1;40-45:1;41-43:1.1;74-81:2;83-89:3;91-97:4;99-106:5;108-114:6;126-131:1;127-129:1.1;138-145:2;147-153:3;155-161:4;163-170:5")]
 [assembly: GoPositionMap("reflect/makefunc.go", "makefunc.cs", "ABueAQAPJPKCuIKCppSmggANHJSmggACEAATLAALAu6Cgso=")]
-[assembly: GoPositionMap("reflect/map.go", "map.cs", "ABi2AQAIEoKUgqYACRSUAAkUgqYAB1jSgoKmgqzSgoKmAC32A9I=", "", "", "53=TypeFor/1/1/3,ArrayOf/1/1/7")]
-[assembly: GoPositionMap("reflect/type.go", "type.cs", "ANkCxgWCpoIAElCCxoKmgsaCpoKmggAZKoKClIKCgoKUpoKCpoIAGDSSyJKClMYAHUYACA4ACA4ACCAAEQiiqqKsssaipqKmosaCAAYWlKKClIKClKaUlJSCgoKUAAywAYIACCyCAAgWgqaCgoKUAAw+ooKUggAQdqKClKSUpqKClKSUpqKClIKClKaigpSCgpSmopSkpJTGooKUgoKUgoKUgsailKSklMaigpSCgpSCgpSCxqKClIKCgtyCgoKC3KKClIKCgtyigpSCgoIABzAAEgIADAaClKSklMjCgpSCgoKCgoKmgoKogJbSgpSCgoKCpgAVKpIAECTSggACEgAJCJSCgpSCgu6CgpSClIKmgoKClJSClIKUgoKClKbIsoKUgoKCgoKUgpS4goKCgpQACBKUAAQQAAgM4oKCgoKClJSUAAwWAA4SggABEAAMDpSCgoLcgoK4lIKClIKClIKCypSUlIKCgoKC3IKUgoKClIKUgoKUgoKCpoKmqvSCgoKCgpSCuIKUyqIABBSSAAYeAAgAAAUQooKCuIK4goKCgpSCqsKClILulJSCxoKosoKUAAYagoKUgqaCgpSmggAGuAEACAoAAhAACQSCyoKmgrimsoKmgqYACvoBAAkCAAIkABECgpSCuJKClIKUAAcQgoKClKYAI7gBooKCgoKClIKmAAkUAAbAAYKowoKCgoKUgoKUpoKCgoKClIKClJSClKrClKSkgqSCgoKmtsqylNqkgqSCgoKmtsqylKSCpIKCgqakvMKCgoKCgoKCABJ0kgACEuKCgqaCuKiSlIKClKSkgpSkgoKUpIKCgqa2qqKCgpQABLAFgqyygqamgoK4gsqs0pSUgoKCgqaClIKmAAbsAYKClIIAEmAADAKClIKUgoKCuKYACBKCpoKClJSmpsqCAAoUkriCpoI=", "964-970:1;974-980:1;987-993:1;1000-1006:1;1378-1378:1;2871-2873:1", "", "1620=TypeOf/1/2/3,TypeOf/2/2/7,ArrayOf/1/1/7;1900=IsExported/1/1/1,newName/1/1/1,common/1/1/2;1992=align/1/1/6")]
-[assembly: GoPositionMap("reflect/value.go", "value.cs", "AFWsAYKmgoKUzAAIDKyygpSClMiSAAUQooKUgqaCgoKClMi2AA80goKUAB7UAYLGAAUagpSCpqSClIKUgoKUAAQm0gACENIAGUiUgqqCgoKClKaCpoKCgoKClIKUgqaClIKUgqaCgqaCgqaUgoKCgoKClJSCgoKmgoKUlraWkoKCuKaUgoLcgri0pIKkpKSUuKKCuIKCgqaCgpSmxoKCuJSUlJTYgpSCtAAIDIKmlIK4grimgqaCgoKCpri4goKCpoKUgoC4gsrIpoKClIIACxiCgpSCtIK0grS0trgAEC4AFwLclIKUpoKCgoKClIKCgsqCgpSUpqaCgoKUgrSCtIK0tOyCgpSmuIKCgriCgoKCloKWggAQIoKCgqbKgqamxoKC7tiClIK0AAoQ3MoAAhQACwKCgoKClIKClIKClIKClIKCgpSCgpSCgpSuwoKUgoKClLyiAAwsABUCggAJFIKSuIKm2LaCpKSkuIKCpoKClAAMGoCClIKClKamgoK2tqSkpraAgoKCprS0tLa2uJSCgoKUtoKkpKTKpoKmygAKFoKUgoKUysqCpsrosoKCgpQABhqCgpSkpIKUpAAEJJKUpAAJ3AGygpSCgoKCgpSmlK7CgpSCgoKCgpSmlKyygoKUrsKClKiSlKQAByIABWKSlKQABTKSgpQADuQB1oKUAAh00gAGpgGigpSUgoKUgoKmgoKUlIKUgoKClJSCAAAQlJQABnaiAAQagqSCpKS2pIKUpMrCpoKClAAGPtKClIKUAAIYAAkCgpSClIKClAAEGqKClKSUqqKClKSUxoKClMqigpSCgpSqooKUgoKUAAiSAdKCggAEPLKCggAY6gKygoIADpYCgoK4AAIQ0oKCrsKCggAEGJKmgoKUpoKCpoKCyoKUgoKUgqaCgpSCqJKUpAAN2AHigoKUooKCAAUiAAsCkoKCggAiQoKCAAcW8gAGIJKClLS0ggAZoAIALawC9gAMhgGygpQAEIgB8oKmuIKCpriUgoKUgpSUuAAEJqKCgriUgsaCgrauwoKUppSCgqaUpqaCgqamAAMYAAgCgpSCpoKmgsqUtKSkpKSkpLaClIKUlIKCpraCgoKmpKTK0pSUpKTIlKSkyJSkpMiUyIKUpNqClKTKgriCyILagriGpoKClKaqooKClLS0tKSqooKClLSkqJKCgoKqooKClLSkpoKCgoKmgoKCgqaCgoKCAAIS4qiSqJKokqiSqJKokriUqJKokoKClKiSgoKUqJKokqiSqJKokoKClIKokoKClIKCgoKClKiSgoKClIKCgpSokoKCgpSUqJKCgoKUrMamAAIUAAkGpIKCpoKWpqYAAhgACgKCgqikooKCqKampAABOAAbBJrKyszc3NaklqaqsoIACRrCgg==", "2649-2655:1;2670-2677:1", "", "128=typ/1/1/1,packEfaceData/1/1/2;1004=add/1/2/1,add/2/2/2;2253=Kind/2/2/1,nameFor/2/2/1,elem/1/2/2,elem/2/2/2,haveIdenticalUnderlyingType/1/1/2")]
-[assembly: GoPositionMap("reflect/visiblefields.go", "visiblefields.cs", "AAkgAAkCgpSClNy4goKCgpSmlJQACx7SgpSCgoKCgoKCyoKClKampoKClIKClIKmlA==", "", "", "26=NumField/1/1/3")]
+[assembly: GoPositionMap("reflect/map.go", "map.cs", "ABO2AQAIEoKUgqYACRSUAAkUgqYAA1jSgoKmgqzSgoKmABv2A9I=", "", "", "48=TypeFor/1/1/3,ArrayOf/1/1/7")]
+[assembly: GoPositionMap("reflect/type.go", "type.cs", "ANUCxgWCpoIADlCCpoKmgqaCpoKmggAXKoKClIKCgoKUpoKCpoIAFjSSqJKClKYAHUYACA4ACA4ACCAAEQiiqqKssqaipqKmoqaCAAQWlKKClIKClKaUlJSCgoKUAAqwAYIABCyCAAQWgqaCgoKUAAo+ooKUggAQdqKClKSUpqKClKSUpqKClIKClKaigpSCgpSmopSkpJSmooKUgoKUgoKUgqailKSklKaigpSCgpSCgpSCpqKClIKCgtyCgoKC3KKClIKCgtyigpSCgoIABTAAEgIACgaClKSklKjCgpSCgoKCgoKmgoKogJbSgpSCgoKCpgARKpIADCTSggACEgAJCJSCgpSCgu6CgpSClIKmgoKClJSClIKUgoKClKaosoKUgoKCgoKUgpS4goKCgpQACBKUAAIQ7OKCgoKCgpSUlAAIFgAOEoIAARAADA6UgoKC3IKCuJSCgpSCgpSCgsqUlJSCgoKCgtyClIKCgpSClIKClIKCgqaCpqr0goKCgoKUgriClKqiAAQUkgAGHgAIAAADEKKCgriCuIKCgoKUgqrCgpSC7pSUgqaCqLKClAAEGoKClIKmgoKUpoIABLgBAAgKAAIQAAkEgsqCpoK4prKCpoKmAAr6AQAJAgACJAARAoKUgriSgpSClAAHEIKCgpSmACO4AaKCgoKCgpSCpgAJFAAGwAGCqMKCgoKClIKClKaCgoKCgpSCgpSUgpSqwpSkpIKkgoKCprbKspTapIKkgoKCprbKspSkgqSCgoKmpLzCgoKCgoKCggASdJIAAhLigoKmgriokpSCgpSkpIKUpIKClKSCgoKmtqqigoKUAASwBYKssoKmpoKCuILKrNKUlIKCgoKmgpSCpgAG7AGCgpSCABJgAAwCgpSClIKCgrimAAgSgqaCgpSUpqbKggAIFJK4gqaC", "964-970:1;974-980:1;987-993:1;1000-1006:1;1378-1378:1;2871-2873:1", "", "1540=TypeOf/1/2/3,TypeOf/2/2/7,ArrayOf/1/1/7;1820=IsExported/1/1/1,newName/1/1/1,common/1/1/2;1912=align/1/1/6")]
+[assembly: GoPositionMap("reflect/value.go", "value.cs", "AFGsAYKmgoKUrAAIDKyygpSClKiSAAUQooKUgqaCgoKClMi2AA00goKUABjUAYKmAAMagpSCpqSClIKUgoKUAAQm0gACENIAFUiUgqqCgoKClKaCpoKCgoKClIKUgqaClIKUgqaCgqaCgqaUgoKCgoKClJSCgoKmgoKUlraWkoKCuKaUgoLcgri0pIKkpKSUuKKCuIKCgqaCgpSmxoKCuJSUlJTYgpSCtAAIDIKmlIK4grimgqaCgoKCpri4goKCpoKUgoC4gsrIpoKClIIACxiCgpSCtIK0grS0trgACi4AFwLclIKUpoKCgoKClIKCgsqCgpSUpqaCgoKUgrSCtIK0tOyCgpSmuIKCgriCgoKCloKWggAQIoKCgqbKgqamxoKC7tiClIK0AAoQ3MoAAhQACwKCgoKClIKClIKClIKClIKCgpSCgpSCgpSuwoKUgoKClLyiAAwsABUCggAJFIKSuIKm2LaCpKSkuIKCpoKClAAMGoCClIKClKamgoK2tqSkpraAgoKCprS0tLa2uJSCgoKUtoKkpKTKpoKmygAKFoKUgoKUysqCpsrosoKCgpQABBqCgpSkpIKUpAAEJJKUpAAJ3AGygpSCgoKCgpSmlK7CgpSCgoKCgpSmlKyygoKUrsKClKiSlKQABSIAA2KSlKQABTKSgpQADOQB1oKUAAZ00gAEpgGigpSUgoKUgoKmgoKUlIKUgoKClJSCAAAQlJQABHaiAAQagqSCpKS2pIKUpKrCpoKClAAEPtKClIKUAAIYAAkCgpSClIKClAAEGqKClKSUqqKClKSUpoKClKqigpSCgpSqooKUgoKUAAiSAdKCggAEPLKCggAY6gKygoIADpYCgoK4AAIQ0oKCrsKCggAEGJKmgoKUpoKCpoKCyoKUgoKUgqaCgpSCqJKUpAAN2AHigoKUooKCAAUiAAsCkoKCggAgQoKCAAcW8gAEIJKClLS0ggAXoAIALawC9gAMhgGygpQADogB8oKmuIKCpriUgoKUgpSUuAAEJqKCgriUgsaCgrauwoKUppSCgqaUpqaCgqamAAMYAAgCgpSCpoKmgsqUtKSkpKSkpLaClIKUlIKCpraCgoKmpKSq0pSUpKTIlKSkyJSkpMiUyIKUpNqClKTKgriCyILagriGpoKClKaqooKClLS0tKSqooKClLSkqJKCgoKqooKClLSkpoKCgoKmgoKCgqaCgoKCAAIS4qiSqJKokqiSqJKokriUqJKokoKClKiSgoKUqJKokqiSqJKokoKClIKokoKClIKCgoKClKiSgoKClIKCgpSokoKCgpSUqJKCgoKUrMamAAIUAAkGpIKCpoKWpqYAAhgACgKCgqikooKCqKampAABOAAbBJrKyszc3NaklqaqsoIACRrCgg==", "2649-2655:1;2670-2677:1", "", "120=typ/1/1/1,packEfaceData/1/1/2;974=add/1/2/1,add/2/2/2;2191=Kind/2/2/1,nameFor/2/2/1,elem/1/2/2,elem/2/2/2,haveIdenticalUnderlyingType/1/1/2")]
+[assembly: GoPositionMap("reflect/visiblefields.go", "visiblefields.cs", "AAcgAAkCgpSClNy4goKCgpSmlJQACR7SgpSCgoKCgoKCyoKClKampoKClIKClIKmlA==", "", "", "24=NumField/1/1/3")]
 // </GoSourcePositionMaps>
 
 namespace go;
+
+using static go.reflect_package;
+using abi = go.@internal.abi_package;
+using iter = go.iter_package;
 
 [GoPackage("reflect")]
 public static partial class reflect_package
@@ -175,20 +183,158 @@ public static partial class reflect_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(reflect_package.ChanDir)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class reflectᴛChanDir;
-[GoMethodHost(typeof(reflect_package.Kind)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class reflectᴛKind;
-[GoMethodHost(typeof(reflect_package.MapIter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class reflectᴛMapIter;
-[GoMethodHost(typeof(reflect_package.Method)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class reflectᴛMethod;
-[GoMethodHost(typeof(reflect_package.StructField)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class reflectᴛStructField;
-[GoMethodHost(typeof(reflect_package.StructTag)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class reflectᴛStructTag;
-[GoMethodHost(typeof(reflect_package.Value)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class reflectᴛValue;
-[GoMethodHost(typeof(reflect_package.ValueError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class reflectᴛValueError;
-[GoMethodHost(typeof(reflect_package.abiDesc)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class reflectᴛabiDesc;
-[GoMethodHost(typeof(reflect_package.abiSeq)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class reflectᴛabiSeq;
-[GoMethodHost(typeof(reflect_package.bitVector)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class reflectᴛbitVector;
-[GoMethodHost(typeof(reflect_package.flag)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class reflectᴛflag;
-[GoMethodHost(typeof(reflect_package.interfaceType)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class reflectᴛinterfaceType;
-[GoMethodHost(typeof(reflect_package.rtype)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class reflectᴛrtype;
-[GoMethodHost(typeof(reflect_package.structType)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class reflectᴛstructType;
-[GoMethodHost(typeof(reflect_package.visibleFieldsWalker)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class reflectᴛvisibleFieldsWalker;
+[GoMethodHost(typeof(reflect_package.ChanDir)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class reflectᴛChanDir;
+[GoMethodHost(typeof(reflect_package.Kind)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class reflectᴛKind;
+[GoMethodHost(typeof(reflect_package.MapIter)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class reflectᴛMapIter;
+[GoMethodHost(typeof(reflect_package.Method)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class reflectᴛMethod;
+[GoMethodHost(typeof(reflect_package.StructField)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class reflectᴛStructField;
+[GoMethodHost(typeof(reflect_package.StructTag)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class reflectᴛStructTag;
+[GoMethodHost(typeof(reflect_package.Value)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class reflectᴛValue;
+[GoMethodHost(typeof(reflect_package.ValueError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class reflectᴛValueError;
+[GoMethodHost(typeof(reflect_package.abiDesc)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class reflectᴛabiDesc;
+[GoMethodHost(typeof(reflect_package.abiSeq)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class reflectᴛabiSeq;
+[GoMethodHost(typeof(reflect_package.bitVector)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class reflectᴛbitVector;
+[GoMethodHost(typeof(reflect_package.flag)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class reflectᴛflag;
+[GoMethodHost(typeof(reflect_package.interfaceType)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class reflectᴛinterfaceType;
+[GoMethodHost(typeof(reflect_package.rtype)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class reflectᴛrtype;
+[GoMethodHost(typeof(reflect_package.structType)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class reflectᴛstructType;
+[GoMethodHost(typeof(reflect_package.visibleFieldsWalker)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class reflectᴛvisibleFieldsWalker;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class reflectᴛChanDir {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this ChanDir d) => reflect_package.String⁔(d);
+}
+partial class reflectᴛKind {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this Kind k) => reflect_package.String⁔(k);
+}
+partial class reflectᴛMethod {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool IsExported(this Method m) => reflect_package.IsExported⁔(m);
+}
+partial class reflectᴛStructField {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool IsExported(this StructField f) => reflect_package.IsExported⁔(f);
+}
+partial class reflectᴛStructTag {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Get(this StructTag tag, @string key) => reflect_package.Get⁔(tag, key);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (@string value, bool ok) Lookup(this StructTag tag, @string key) => reflect_package.Lookup⁔(tag, key);
+}
+partial class reflectᴛValue {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static iter.Seq<Value> Seq(this Value v) => reflect_package.Seq⁔(v);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static iter.Seq2<Value, Value> Seq2(this Value v) => reflect_package.Seq2⁔(v);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<abi.Type> typ(this Value v) => reflect_package.typ⁔(v);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static unsafe_package.Pointer pointer(this Value v) => reflect_package.pointer⁔(v);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void panicNotBool(this Value v) => reflect_package.panicNotBool⁔(v);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<byte> bytesSlow(this Value v) => reflect_package.bytesSlow⁔(v);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool CanAddr(this Value v) => reflect_package.CanAddr⁔(v);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool CanSet(this Value v) => reflect_package.CanSet⁔(v);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<Value> call(this Value v, @string op, slice<Value> @in) => reflect_package.call⁔(v, op, @in);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint capNonSlice(this Value v) => reflect_package.capNonSlice⁔(v);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool CanComplex(this Value v) => reflect_package.CanComplex⁔(v);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static Value FieldByIndex(this Value v, slice<nint> index) => reflect_package.FieldByIndex⁔(v, index);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (Value, error) FieldByIndexErr(this Value v, slice<nint> index) => reflect_package.FieldByIndexErr⁔(v, index);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static Value FieldByName(this Value v, @string name) => reflect_package.FieldByName⁔(v, name);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static Value FieldByNameFunc(this Value v, Func<@string, bool> match) => reflect_package.FieldByNameFunc⁔(v, match);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool CanFloat(this Value v) => reflect_package.CanFloat⁔(v);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool CanInt(this Value v) => reflect_package.CanInt⁔(v);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool CanInterface(this Value v) => reflect_package.CanInterface⁔(v);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool IsValid(this Value v) => reflect_package.IsValid⁔(v);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static Kind Kind(this Value v) => reflect_package.Kind⁔(v);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint lenNonSlice(this Value v) => reflect_package.lenNonSlice⁔(v);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint NumMethod(this Value v) => reflect_package.NumMethod⁔(v);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static Value MethodByName(this Value v, @string name) => reflect_package.MethodByName⁔(v, name);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool OverflowComplex(this Value v, complex128 x) => reflect_package.OverflowComplex⁔(v, x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool OverflowFloat(this Value v, float64 x) => reflect_package.OverflowFloat⁔(v, x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool OverflowInt(this Value v, int64 x) => reflect_package.OverflowInt⁔(v, x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool OverflowUint(this Value v, uint64 x) => reflect_package.OverflowUint⁔(v, x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (Value x, bool ok) Recv(this Value v) => reflect_package.Recv⁔(v);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Send(this Value v, Value x) => reflect_package.Send⁔(v, x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void SetPointer(this Value v, unsafe_package.Pointer x) => reflect_package.SetPointer⁔(v, x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string stringNonString(this Value v) => reflect_package.stringNonString⁔(v);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (Value x, bool ok) TryRecv(this Value v) => reflect_package.TryRecv⁔(v);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool TrySend(this Value v, Value x) => reflect_package.TrySend⁔(v, x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static Type typeSlow(this Value v) => reflect_package.typeSlow⁔(v);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<abi.Type> abiType(this Value v) => reflect_package.abiType⁔(v);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<abi.Type> abiTypeSlow(this Value v) => reflect_package.abiTypeSlow⁔(v);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool CanUint(this Value v) => reflect_package.CanUint⁔(v);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static iter.Seq2<StructField, Value> Fields(this Value v) => reflect_package.Fields⁔(v);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static iter.Seq2<Method, Value> Methods(this Value v) => reflect_package.Methods⁔(v);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void grow(this Value v, nint n) => reflect_package.grow⁔(v, n);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static Value assignTo(this Value v, @string context, ж<abi.Type> Ꮡdst, unsafe_package.Pointer target) => reflect_package.assignTo⁔(v, context, Ꮡdst, target);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool CanConvert(this Value v, Type t) => reflect_package.CanConvert⁔(v, t);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Comparable(this Value v) => reflect_package.Comparable⁔(v);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Equal(this Value v, Value u) => reflect_package.Equal⁔(v, u);
+}
+partial class reflectᴛValueError {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this ref ValueError e) => reflect_package.Error⁔(ref e);
+}
+partial class reflectᴛabiDesc {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void dump(this ref abiDesc a) => reflect_package.dump⁔(ref a);
+}
+partial class reflectᴛabiSeq {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void dump(this ref abiSeq a) => reflect_package.dump⁔(ref a);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<abiStep> stepsForValue(this ref abiSeq a, nint i) => reflect_package.stepsForValue⁔(ref a, i);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<abiStep> addArg(this ref abiSeq a, ж<abi.Type> Ꮡt) => reflect_package.addArg⁔(ref a, Ꮡt);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (ж<abiStep>, bool) addRcvr(this ref abiSeq a, ж<abi.Type> Ꮡrcvr) => reflect_package.addRcvr⁔(ref a, Ꮡrcvr);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool assignIntN(this ref abiSeq a, uintptr offset, uintptr size, nint n, uint8 ptrMap) => reflect_package.assignIntN⁔(ref a, offset, size, n, ptrMap);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool assignFloatN(this ref abiSeq a, uintptr offset, uintptr size, nint n) => reflect_package.assignFloatN⁔(ref a, offset, size, n);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void stackAssign(this ref abiSeq a, uintptr size, uintptr alignment) => reflect_package.stackAssign⁔(ref a, size, alignment);
+}
+partial class reflectᴛbitVector {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void append(this ref bitVector bv, uint8 bit) => reflect_package.append⁔(ref bv, bit);
+}
+partial class reflectᴛflag {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void panicNotMap(this flag f) => reflect_package.panicNotMap⁔(f);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static Kind kind(this flag f) => reflect_package.kind⁔(f);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static flag ro(this flag f) => reflect_package.ro⁔(f);
+}
+partial class reflectᴛinterfaceType {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static abi.Name nameOff(this ж<interfaceType> Ꮡt, aNameOff off) => reflect_package.nameOff⁔(Ꮡt, off);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<abi.Type> typeOff(this ж<interfaceType> Ꮡt, aTypeOff off) => reflect_package.typeOff⁔(Ꮡt, off);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<abi.Type> common(this ж<interfaceType> Ꮡt) => reflect_package.common⁔(Ꮡt);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<abi.UncommonType> uncommon(this ж<interfaceType> Ꮡt) => reflect_package.uncommon⁔(Ꮡt);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static Method /*m*/ Method(this ж<interfaceType> Ꮡt, nint i) => reflect_package.Method⁔(Ꮡt, i);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint NumMethod(this ref interfaceType t) => reflect_package.NumMethod⁔(ref t);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (Method m, bool ok) MethodByName(this ж<interfaceType> Ꮡt, @string name) => reflect_package.MethodByName⁔(Ꮡt, name);
+}
+partial class reflectᴛrtype {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<abi.Type> common(this ж<rtype> Ꮡt) => reflect_package.common⁔(Ꮡt);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<abi.UncommonType> uncommon(this ж<rtype> Ꮡt) => reflect_package.uncommon⁔(Ꮡt);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static abi.Name nameOff(this ж<rtype> Ꮡt, aNameOff off) => reflect_package.nameOff⁔(Ꮡt, off);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<abi.Type> typeOff(this ж<rtype> Ꮡt, aTypeOff off) => reflect_package.typeOff⁔(Ꮡt, off);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static unsafe_package.Pointer textOff(this ж<rtype> Ꮡt, aTextOff off) => reflect_package.textOff⁔(Ꮡt, off);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static uintptr Size(this ref rtype t) => reflect_package.Size⁔(ref t);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint Bits(this ж<rtype> Ꮡt) => reflect_package.Bits⁔(Ꮡt);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint Align(this ref rtype t) => reflect_package.Align⁔(ref t);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint FieldAlign(this ref rtype t) => reflect_package.FieldAlign⁔(ref t);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static Kind Kind(this ref rtype t) => reflect_package.Kind⁔(ref t);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<abi.Method> exportedMethods(this ж<rtype> Ꮡt) => reflect_package.exportedMethods⁔(Ꮡt);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (StructField, bool) FieldByNameFunc(this ж<rtype> Ꮡt, Func<@string, bool> match) => reflect_package.FieldByNameFunc⁔(Ꮡt, match);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool OverflowComplex(this ж<rtype> Ꮡt, complex128 x) => reflect_package.OverflowComplex⁔(Ꮡt, x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool OverflowFloat(this ж<rtype> Ꮡt, float64 x) => reflect_package.OverflowFloat⁔(Ꮡt, x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool OverflowInt(this ж<rtype> Ꮡt, int64 x) => reflect_package.OverflowInt⁔(Ꮡt, x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool OverflowUint(this ж<rtype> Ꮡt, uint64 x) => reflect_package.OverflowUint⁔(Ꮡt, x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool CanSeq(this ж<rtype> Ꮡt) => reflect_package.CanSeq⁔(Ꮡt);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool CanSeq2(this ж<rtype> Ꮡt) => reflect_package.CanSeq2⁔(Ꮡt);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static iter.Seq<StructField> Fields(this ж<rtype> Ꮡt) => reflect_package.Fields⁔(Ꮡt);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static iter.Seq<Method> Methods(this ж<rtype> Ꮡt) => reflect_package.Methods⁔(Ꮡt);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static iter.Seq<Type> Ins(this ж<rtype> Ꮡt) => reflect_package.Ins⁔(Ꮡt);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static iter.Seq<Type> Outs(this ж<rtype> Ꮡt) => reflect_package.Outs⁔(Ꮡt);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<abi.Type> ptrTo(this ж<rtype> Ꮡt) => reflect_package.ptrTo⁔(Ꮡt);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool AssignableTo(this ж<rtype> Ꮡt, Type u) => reflect_package.AssignableTo⁔(Ꮡt, u);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool ConvertibleTo(this ж<rtype> Ꮡt, Type u) => reflect_package.ConvertibleTo⁔(Ꮡt, u);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool Comparable(this ref rtype t) => reflect_package.Comparable⁔(ref t);
+}
+partial class reflectᴛstructType {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static StructField /*f*/ Field(this ref structType t, nint i) => reflect_package.Field⁔(ref t, i);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static StructField /*f*/ FieldByIndex(this ж<structType> Ꮡt, slice<nint> index) => reflect_package.FieldByIndex⁔(Ꮡt, index);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (StructField result, bool ok) FieldByNameFunc(this ж<structType> Ꮡt, Func<@string, bool> match) => reflect_package.FieldByNameFunc⁔(Ꮡt, match);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (StructField f, bool present) FieldByName(this ж<structType> Ꮡt, @string name) => reflect_package.FieldByName⁔(Ꮡt, name);
+}
+partial class reflectᴛvisibleFieldsWalker {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void walk(this ref visibleFieldsWalker w, Type t) => reflect_package.walk⁔(ref w, t);
+}
+// </MethodForwarders>

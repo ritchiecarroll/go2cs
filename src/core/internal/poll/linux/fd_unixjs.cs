@@ -6,7 +6,6 @@ namespace go.@internal;
 
 using Δsyscall = syscall_package;
 using go;
-using static poll_package;
 
 partial class poll_package {
 
@@ -15,11 +14,9 @@ partial struct SysFile {
     internal ж<slice<Δsyscall.Iovec>> iovecs;
 }
 
-} partial class pollᴛSysFile {
+internal static void init⁔(/*this*/ ref SysFile s) { }
 
-internal static void init(this ref SysFile s) { }
-
-internal static error destroy(this ref SysFile s, nint fd) {
+internal static error destroy⁔(/*this*/ ref SysFile s, nint fd) {
     // We don't use ignoringEINTR here because POSIX does not define
     // whether the descriptor is closed if close returns EINTR.
     // If the descriptor is indeed closed, using a loop would race
@@ -27,8 +24,6 @@ internal static error destroy(this ref SysFile s, nint fd) {
     // (The Linux kernel guarantees that it is closed on an EINTR error.)
     return CloseFunc(fd);
 }
-
-} partial class poll_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string dupˢ => ref dupˢᵇ;
@@ -52,10 +47,8 @@ internal static (nint, @string, error) dupCloseOnExecOld(nint fd) {
     finally { ᒐ.Run(); }
 }
 
-} partial class pollᴛFD {
-
 // Fchdir wraps syscall.Fchdir.
-public static error Fchdir(this ж<FD> Ꮡfd) {
+internal static error Fchdir⁔(/*this*/ ж<FD> Ꮡfd) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -74,7 +67,7 @@ public static error Fchdir(this ж<FD> Ꮡfd) {
 // ReadDirent wraps syscall.ReadDirent.
 // We treat this like an ordinary system call rather than a call
 // that tries to fill the buffer.
-public static (nint, error) ReadDirent(this ж<FD> Ꮡfd, slice<byte> buf) {
+internal static (nint, error) ReadDirent⁔(/*this*/ ж<FD> Ꮡfd, slice<byte> buf) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -105,7 +98,7 @@ public static (nint, error) ReadDirent(this ж<FD> Ꮡfd, slice<byte> buf) {
 }
 
 // Seek wraps syscall.Seek.
-public static (int64, error) Seek(this ж<FD> Ꮡfd, int64 offset, nint whence) {
+internal static (int64, error) Seek⁔(/*this*/ ж<FD> Ꮡfd, int64 offset, nint whence) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -121,4 +114,4 @@ public static (int64, error) Seek(this ж<FD> Ꮡfd, int64 offset, nint whence) 
     finally { if (ᒐd1) Ꮡfd.decref(); ᒐ.Run(); }
 }
 
-}
+} // end poll_package

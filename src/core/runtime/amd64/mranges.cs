@@ -12,7 +12,6 @@ using atomic = @internal.runtime.atomic_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
-using static runtime_package;
 
 partial class runtime_package {
 
@@ -43,10 +42,8 @@ internal static addrRange makeAddrRange(uintptr @base, uintptr limit) {
     return r;
 }
 
-} partial class runtimeᴛaddrRange {
-
 // size returns the size of the range represented in bytes.
-internal static uintptr size(this addrRange a) {
+internal static uintptr size⁔(/*this*/ addrRange a) {
     if (!a.@base.lessThan(a.limit)) {
         return 0;
     }
@@ -56,7 +53,7 @@ internal static uintptr size(this addrRange a) {
 }
 
 // contains returns whether or not the range contains a given address.
-internal static bool contains(this addrRange a, uintptr addr) {
+internal static bool contains⁔(/*this*/ addrRange a, uintptr addr) {
     return a.@base.lessEqual(new offAddr(addr)) && (new offAddr(addr)).lessThan(a.limit);
 }
 
@@ -68,7 +65,7 @@ private static readonly @string badPruneˢᵇ = "bad prune"u8;
 // from, then returns the new range. subtract assumes that a and b
 // either don't overlap at all, only overlap on one side, or are equal.
 // If b is strictly contained in a, thus forcing a split, it will throw.
-internal static addrRange subtract(this addrRange a, addrRange b) {
+internal static addrRange subtract⁔(/*this*/ addrRange a, addrRange b) {
     if (b.@base.lessEqual(a.@base) && a.limit.lessEqual(b.limit)) {
         return new addrRange();
     } else if (a.@base.lessThan(b.@base) && b.limit.lessThan(a.limit)) {
@@ -84,7 +81,7 @@ internal static addrRange subtract(this addrRange a, addrRange b) {
 // takeFromFront takes len bytes from the front of the address range, aligning
 // the base to align first. On success, returns the aligned start of the region
 // taken and true.
-internal static (uintptr, bool) takeFromFront(this ref addrRange a, uintptr len, uint8 align) {
+internal static (uintptr, bool) takeFromFront⁔(/*this*/ ref addrRange a, uintptr len, uint8 align) {
     var @base = alignUp(a.@base.addr(), (uintptr)align) + len;
     if (@base > a.limit.addr()) {
         return (0, false);
@@ -96,7 +93,7 @@ internal static (uintptr, bool) takeFromFront(this ref addrRange a, uintptr len,
 // takeFromBack takes len bytes from the end of the address range, aligning
 // the limit to align after subtracting len. On success, returns the aligned
 // start of the region taken and true.
-internal static (uintptr, bool) takeFromBack(this ref addrRange a, uintptr len, uint8 align) {
+internal static (uintptr, bool) takeFromBack⁔(/*this*/ ref addrRange a, uintptr len, uint8 align) {
     var limit = alignDown(a.limit.addr() - len, (uintptr)align);
     if (a.@base.addr() > limit) {
         return (0, false);
@@ -107,7 +104,7 @@ internal static (uintptr, bool) takeFromBack(this ref addrRange a, uintptr len, 
 
 // removeGreaterEqual removes all addresses in a greater than or equal
 // to addr and returns the new range.
-internal static addrRange removeGreaterEqual(this addrRange a, uintptr addr) {
+internal static addrRange removeGreaterEqual⁔(/*this*/ addrRange a, uintptr addr) {
     if ((new offAddr(addr)).lessEqual(a.@base)) {
         return new addrRange();
     }
@@ -116,8 +113,6 @@ internal static addrRange removeGreaterEqual(this addrRange a, uintptr addr) {
     }
     return makeAddrRange(a.@base.addr(), addr);
 }
-
-} partial class runtime_package {
 
 // minOffAddr is the minimum address in the offset space, and
 // it corresponds to the virtual address arenaBaseOffset.
@@ -137,49 +132,45 @@ partial struct offAddr {
     internal uintptr a;
 }
 
-} partial class runtimeᴛoffAddr {
-
 // add adds a uintptr offset to the offAddr.
-internal static offAddr add(this offAddr l, uintptr bytes) {
+internal static offAddr add⁔(/*this*/ offAddr l, uintptr bytes) {
     return new offAddr(a: l.a + bytes);
 }
 
 // sub subtracts a uintptr offset from the offAddr.
-internal static offAddr sub(this offAddr l, uintptr bytes) {
+internal static offAddr sub⁔(/*this*/ offAddr l, uintptr bytes) {
     return new offAddr(a: l.a - bytes);
 }
 
 // diff returns the amount of bytes in between the
 // two offAddrs.
-internal static uintptr diff(this offAddr l1, offAddr l2) {
+internal static uintptr diff⁔(/*this*/ offAddr l1, offAddr l2) {
     return l1.a - l2.a;
 }
 
 // lessThan returns true if l1 is less than l2 in the offset
 // address space.
-internal static bool lessThan(this offAddr l1, offAddr l2) {
+internal static bool lessThan⁔(/*this*/ offAddr l1, offAddr l2) {
     return (l1.a - (uintptr)arenaBaseOffset) < (l2.a - (uintptr)arenaBaseOffset);
 }
 
 // lessEqual returns true if l1 is less than or equal to l2 in
 // the offset address space.
-internal static bool lessEqual(this offAddr l1, offAddr l2) {
+internal static bool lessEqual⁔(/*this*/ offAddr l1, offAddr l2) {
     return (l1.a - (uintptr)arenaBaseOffset) <= (l2.a - (uintptr)arenaBaseOffset);
 }
 
 // equal returns true if the two offAddr values are equal.
-internal static bool equal(this offAddr l1, offAddr l2) {
+internal static bool equal⁔(/*this*/ offAddr l1, offAddr l2) {
     // No need to compare in the offset space, it
     // means the same thing.
     return l1 == l2;
 }
 
 // addr returns the virtual address for this offset address.
-internal static uintptr addr(this offAddr l) {
+internal static uintptr addr⁔(/*this*/ offAddr l) {
     return l.a;
 }
-
-} partial class runtime_package {
 
 // atomicOffAddr is like offAddr, but operations on it are atomic.
 // It also contains operations to be able to store marked addresses
@@ -189,11 +180,9 @@ partial struct atomicOffAddr {
     internal atomic.Int64 a;
 }
 
-} partial class runtimeᴛatomicOffAddr {
-
 // Clear attempts to store minOffAddr in atomicOffAddr. It may fail
 // if a marked value is placed in the box in the meanwhile.
-internal static void Clear(this ж<atomicOffAddr> Ꮡb) {
+internal static void Clear⁔(/*this*/ ж<atomicOffAddr> Ꮡb) {
     for (;;) {
         var old = Ꮡb.Ꮡa.Load();
         if (old < 0) {
@@ -207,7 +196,7 @@ internal static void Clear(this ж<atomicOffAddr> Ꮡb) {
 
 // StoreMin stores addr if it's less than the current value in the
 // offset address space if the current value is not marked.
-internal static void StoreMin(this ж<atomicOffAddr> Ꮡb, uintptr addr) {
+internal static void StoreMin⁔(/*this*/ ж<atomicOffAddr> Ꮡb, uintptr addr) {
     var @new = (int64)(addr - (uintptr)arenaBaseOffset);
     for (;;) {
         var old = Ꮡb.Ꮡa.Load();
@@ -224,19 +213,19 @@ internal static void StoreMin(this ж<atomicOffAddr> Ꮡb, uintptr addr) {
 // replace it with newAddr. markedAddr must be a marked address
 // returned by Load. This function will not store newAddr if the
 // box no longer contains markedAddr.
-internal static void StoreUnmark(this ж<atomicOffAddr> Ꮡb, uintptr markedAddr, uintptr newAddr) {
+internal static void StoreUnmark⁔(/*this*/ ж<atomicOffAddr> Ꮡb, uintptr markedAddr, uintptr newAddr) {
     Ꮡb.Ꮡa.CompareAndSwap(-(int64)(markedAddr - (uintptr)arenaBaseOffset), (int64)(newAddr - (uintptr)arenaBaseOffset));
 }
 
 // StoreMarked stores addr but first converted to the offset address
 // space and then negated.
-internal static void StoreMarked(this ж<atomicOffAddr> Ꮡb, uintptr addr) {
+internal static void StoreMarked⁔(/*this*/ ж<atomicOffAddr> Ꮡb, uintptr addr) {
     Ꮡb.Ꮡa.Store(-(int64)(addr - (uintptr)arenaBaseOffset));
 }
 
 // Load returns the address in the box as a virtual address. It also
 // returns if the value was marked or not.
-internal static (uintptr, bool) Load(this ж<atomicOffAddr> Ꮡb) {
+internal static (uintptr, bool) Load⁔(/*this*/ ж<atomicOffAddr> Ꮡb) {
     var v = Ꮡb.Ꮡa.Load();
     var wasMarked = false;
     if (v < 0) {
@@ -245,8 +234,6 @@ internal static (uintptr, bool) Load(this ж<atomicOffAddr> Ꮡb) {
     }
     return ((uintptr)v + (uintptr)arenaBaseOffset, wasMarked);
 }
-
-} partial class runtime_package {
 
 // addrRanges is a data structure holding a collection of ranges of
 // address space.
@@ -268,13 +255,11 @@ partial struct addrRanges {
     internal ж<sysMemStat> sysStat;
 }
 
-} partial class runtimeᴛaddrRanges {
-
 // go2cs generated this placeholder — func init is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // findSucc returns the first index in a such that addr is
 // less than the base of the addrRange at that index.
-internal static nint findSucc(this ref addrRanges a, uintptr addr) {
+internal static nint findSucc⁔(/*this*/ ref addrRanges a, uintptr addr) {
     var @base = new offAddr(addr);
 
     // Narrow down the search space via a binary search
@@ -320,7 +305,7 @@ internal static nint findSucc(this ref addrRanges a, uintptr addr) {
 // then it returns addr. The second return value indicates whether
 // such an address exists for addr in a. That is, if addr is larger than
 // any address known to a, the second return value will be false.
-internal static (uintptr, bool) findAddrGreaterEqual(this ref addrRanges a, uintptr addr) {
+internal static (uintptr, bool) findAddrGreaterEqual⁔(/*this*/ ref addrRanges a, uintptr addr) {
     nint i = a.findSucc(addr);
     if (i == 0) {
         return (a.ranges[0].@base.addr(), true);
@@ -335,7 +320,7 @@ internal static (uintptr, bool) findAddrGreaterEqual(this ref addrRanges a, uint
 }
 
 // contains returns true if a covers the address addr.
-internal static bool contains(this ref addrRanges a, uintptr addr) {
+internal static bool contains⁔(/*this*/ ref addrRanges a, uintptr addr) {
     nint i = a.findSucc(addr);
     if (i == 0) {
         return false;
@@ -348,7 +333,7 @@ internal static bool contains(this ref addrRanges a, uintptr addr) {
 // removeLast removes and returns the highest-addressed contiguous range
 // of a, or the last nBytes of that range, whichever is smaller. If a is
 // empty, it returns an empty range.
-internal static addrRange removeLast(this ref addrRanges a, uintptr nBytes) {
+internal static addrRange removeLast⁔(/*this*/ ref addrRanges a, uintptr nBytes) {
     if (len(a.ranges) == 0) {
         return new addrRange();
     }
@@ -367,7 +352,7 @@ internal static addrRange removeLast(this ref addrRanges a, uintptr nBytes) {
 
 // removeGreaterEqual removes the ranges of a which are above addr, and additionally
 // splits any range containing addr.
-internal static void removeGreaterEqual(this ref addrRanges a, uintptr addr) {
+internal static void removeGreaterEqual⁔(/*this*/ ref addrRanges a, uintptr addr) {
     nint pivot = a.findSucc(addr);
     if (pivot == 0) {
         // addr is before all ranges in a.
@@ -397,4 +382,4 @@ internal static void removeGreaterEqual(this ref addrRanges a, uintptr addr) {
 
 // go2cs generated this placeholder — func cloneInto is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-}
+} // end runtime_package
