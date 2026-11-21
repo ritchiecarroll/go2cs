@@ -16,6 +16,7 @@ package main
 import (
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 )
@@ -380,7 +381,11 @@ func TestModuleDisclosureFlagsAreRefusedWhereTheyCannotTakeEffect(t *testing.T) 
 // claimed-version refusal both went silent.
 func TestModuleDisclosureRootWithGlobCharactersStillSeesOtherVersions(t *testing.T) {
 	moduleDir, pkgDir, outputDir, _ := moduleRootFixture(t)
-	root := filepath.Join(t.TempDir(), "Module[Disclosures]*")
+	name := "Module[Disclosures]*"
+	if runtime.GOOS == "windows" {
+		name = "Module[Disclosures]" // `*` is not a legal Windows file-name character; `[` alone still trips filepath.Glob
+	}
+	root := filepath.Join(t.TempDir(), name)
 	writeModuleRootManifest(t, filepath.Join(root, "github.com", "google", "go-cmp@v0.6.0", "cmp"), "TestDiff/Comparer/MapKeyPointer")
 
 	if _, note, err := resolveDisclosureManifestDir(outputDir, root, moduleRootTestModule, moduleDir, "", pkgDir); err != nil ||
