@@ -713,8 +713,17 @@ public class TwinBoxTests
 
         if (library is not null)
         {
-            CSharpCompilation lib = CSharpCompilation.Create("twinboxlib", [CSharpSyntaxTree.ParseText(library, options)], References(),
+            Compilation lib = CSharpCompilation.Create("twinboxlib", [CSharpSyntaxTree.ParseText(library, options, path: @"C:\twinboxlib\lib.cs")], References(),
                 new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, allowUnsafe: true));
+
+            // A library built WITH twins (LibraryTwins, set by the row): its generated twins, as a twin-built package ships them.
+            if (LibraryTwins)
+            {
+                CSharpGeneratorDriver.Create([new RecvGenerator(), new FieldAccessGenerator(), new TypeGenerator(), new TwinGenerator()], parseOptions: options,
+                        optionsProvider: new BuildProperties(new() { ["build_property.GoTwins"] = "true" }))
+                    .RunGeneratorsAndUpdateCompilation(lib, out lib, out _);
+            }
+
             using MemoryStream image = new();
             Microsoft.CodeAnalysis.Emit.EmitResult built = lib.Emit(image);
             Assert.IsTrue(built.Success, "library: " + Errors(built.Diagnostics.Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error).ToArray()));
@@ -753,6 +762,9 @@ public class TwinBoxTests
 
     // The image RunWith last emitted on this thread, for a row that RUNS a twin (TwinSurfaceTests F4).
     [ThreadStatic] internal static byte[]? LastImage;
+
+    // When set, RunWith builds its library with the twin generator on (TwinSurfaceTests, the refused-parker row).
+    [ThreadStatic] internal static bool LibraryTwins;
 
     // The diagnostics the generators of RunWith's last run reported (the guard's rows, TwinSurfaceTests F9 and F10).
     [ThreadStatic] internal static Diagnostic[]? LastGeneratorDiagnostics;

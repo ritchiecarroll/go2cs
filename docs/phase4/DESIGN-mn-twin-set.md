@@ -393,3 +393,14 @@ F2, F6; F3, F5; F4, F11; F7, F8; the guard (F9) and O2 (F10); P8; then the closu
     advice, not surface, so accept it; or (iii) mark only members that cannot park (the generator's park analysis),
     so a refused member that parks gets an unmarked forwarder that callers await. The surface then stays fixed when
     a refusal is lifted, at the cost of more caller state machines now.
+- **COORD's ruling on P8 (2026-11-21): (iii).** `[GoParkForwarder]` marks only members that CANNOT park, by the
+  generator's park analysis, a property of the Go code. A refused member that CAN park gets an UNMARKED forwarder,
+  which callers in other assemblies await, so lifting the refusal later changes nothing a caller bound. Built:
+  - P8 asserts full invariance, the mark included, on both flips.
+  - A new row builds a library WITH twins: its unsafe parking member gets an unmarked forwarder, and the caller in
+    the other assembly awaits it. A marked forwarder in the same library is not awaited.
+  - Made to fail: marking every forwarder again fails both rows. Restored byte-identical.
+  - The rows that pin "refused a twin" now also pin the mark: `AssertForwarderOnly(..., parks: true)` for locked,
+    stale and pcb.
+  - The report counts `forwarders=N marked=M unmarked=U`, and a row reads `forwarder-unmarked:<reason>`.
+  - GenTests 712 of 712.

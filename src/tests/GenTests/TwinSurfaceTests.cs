@@ -26,15 +26,20 @@ public class TwinSurfaceTests
     private const string Forwarder = "[global::go.golib.GoParkForwarder]";
 
     // For rows written before 7a that pin "refused a twin" or "parks nowhere" on a PUBLIC function: it has no state
-    // machine, and its one `ꞏtwin` member is a forwarder (R3), not an absence. No caller awaits it.
-    internal static void AssertForwarderOnly(string twins, string name, string message)
+    // machine, and its one `ꞏtwin` member is a forwarder (R3), not an absence. No caller in its assembly awaits it. The
+    // forwarder carries the mark exactly when the member cannot park (COORD's ruling on P8, (iii)).
+    internal static void AssertForwarderOnly(string twins, string name, string message, bool parks = false)
     {
         string[] lines = twins.Split('\n');
         int[] declared = Enumerable.Range(0, lines.Length).Where(index => lines[index].Contains(name + "ꞏtwin(", StringComparison.Ordinal)).ToArray();
 
         Assert.AreEqual(1, declared.Length, message + ": exactly one " + name + "ꞏtwin, its forwarder, and no await of it");
-        Assert.IsFalse(lines[declared[0]].Contains("async ", StringComparison.Ordinal), message + ": no state machine");
-        Assert.IsTrue(declared[0] > 0 && lines[declared[0] - 1].Contains(Forwarder, StringComparison.Ordinal), message + ": the member is a forwarder");
+        string line = lines[declared[0]];
+        Assert.IsFalse(line.Contains("async ", StringComparison.Ordinal), message + ": no state machine");
+        Assert.IsTrue(line.Contains("; return default; }", StringComparison.Ordinal) || line.Contains("=> new global::go.golib.GoTask<", StringComparison.Ordinal),
+            message + ": the member is a forwarder");
+        Assert.AreEqual(!parks, declared[0] > 0 && lines[declared[0] - 1].Contains(Forwarder, StringComparison.Ordinal),
+            message + (parks ? ": it parks, so its forwarder is unmarked" : ": it cannot park, so its forwarder is marked"));
     }
 
     // F1: public functions that cannot park, with and without a result; an internal one beside them (R6: no forwarder).
@@ -356,14 +361,56 @@ public class TwinSurfaceTests
         Assert.AreEqual(4, baseline.Length, Show(baseline));
         Assert.AreEqual(Show(baseline), Show(flipped), "(b) one receiver flipped from ref to ж: identical, attributes included");
 
-        // (a), as found (DESIGN-mn-twin-set.md 12.4, P8): the call surface is identical; the ONE difference is the
-        // forwarder mark of a pilot member that parks (sput). Under the pilot its body keeps the sstring parameter, so it
-        // is refused a state machine and forwarded; with @string it is twinned. Pinned exactly, so any other difference
-        // still fails, until COORD rules on the mark.
-        string Unmarked(string line) => line.Replace(", GoParkForwarderAttribute", "");
-        Assert.AreEqual(Show(baseline.Select(Unmarked).ToArray()), Show(noPilot.Select(Unmarked).ToArray()), "(a) the call surface");
-        CollectionAssert.AreEqual(new[] { "sputꞏtwin(go.string s, System.IntPtr n) -> go.golib.GoTask [EditorBrowsableAttribute]" },
-            noPilot.Except(baseline).ToArray(), "(a) the only difference: sput's twin is a state machine, not a forwarder");
+        // (a) under COORD's ruling (iii): sput parks, so its forwarder under the pilot is unmarked, as its state-machine
+        // twin with @string is. Identical, the mark included.
+        Assert.AreEqual(Show(baseline), Show(noPilot), "(a) the sstring pilot list emptied: identical, attributes included");
+    }
+
+    // COORD's ruling on P8 (iii): a library member refused a state machine that CAN park (the unsafe modifier, a park in
+    // its body) gets an UNMARKED forwarder; a member that cannot park gets a marked one.
+    private const string LibraryRefusedParker = """
+        using System;
+        using static go.builtin;
+
+        namespace go;
+
+        public static partial class lib_package
+        {
+            internal static channel<nint> lch;
+
+            public static unsafe nint upark(nint a) { ᐸꟷ(lch); return a; }
+
+            public static nint quick(nint a) => a;
+        }
+        """;
+
+    private const string CallsLibrary = """
+            public static nint useLib()
+            {
+                nint r = lib_package.upark(1) + lib_package.quick(2);
+                return r;
+            }
+
+        """;
+
+    [TestMethod]
+    public void P8_ARefusedMemberThatParksGetsAnUnmarkedForwarderThatCallersAwait()
+    {
+        LibraryTwins = true;
+
+        try
+        {
+            (string twins, Diagnostic[] errors) = RunWith(LibraryRefusedParker, null, CallsLibrary);
+
+            Assert.AreEqual(0, errors.Length, Errors(errors));
+            StringAssert.Contains(twins, "useLibꞏtwin()", "the caller parks through upark's unmarked forwarder: a twin");
+            StringAssert.Contains(twins, "uparkꞏtwin(1)", "and it awaits that forwarder");
+            Assert.IsFalse(twins.Contains("quickꞏtwin(", StringComparison.Ordinal), "a marked forwarder is never awaited");
+        }
+        finally
+        {
+            LibraryTwins = false;
+        }
     }
 
     private static int Lines(string twins, string text) => twins.Split('\n').Count(line => line.Contains(text, StringComparison.Ordinal));
@@ -378,7 +425,7 @@ public class TwinSurfaceTests
             "an expression body: the forwarder takes the box and calls through DerefOrNull");
         StringAssert.Contains(twins, "global::go.golib.GoTask psetꞏtwin(this global::go.ж<T> Ꮡt, nint v) { pset(ref Ꮡt.DerefOrNull(), v); return default; }",
             "a receiver that parks nowhere");
-        AssertForwarderOnly(twins, "pcb", "a copy-bound receiver is refused its box twin");
+        AssertForwarderOnly(twins, "pcb", "a copy-bound receiver is refused its box twin", parks: true);
         StringAssert.Contains(twins, "pcbꞏtwin(this global::go.ж<T> Ꮡt)", "its forwarder takes the box all the same");
         StringAssert.Contains(twins, "callPꞏtwin(", "the caller parks: a twin, which calls pcb plain");
     }

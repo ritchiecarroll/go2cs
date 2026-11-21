@@ -599,7 +599,7 @@ public sealed partial class TwinGenerator : ISourceGenerator
         // Section 9's row per member of the population: `twin | forwarder:<reason> | E1 | GUARD:<reason>`.
         internal string Classify(Candidate candidate) =>
             candidate.Twinned ? "twin" :
-            candidate.Forwarded ? "forwarder:" + (candidate.Refusal ?? "no-park") :
+            candidate.Forwarded ? (candidate.Parks ? "forwarder-unmarked:" : "forwarder:") + (candidate.Refusal ?? "no-park") :
             IsE1(candidate.Symbol) ? "E1" :
             "GUARD:" + (NotForwardable(candidate) ?? (GuardDrop.Contains(candidate.Symbol.Name) ? "forwarder-dropped" : null) ?? candidate.Refusal ?? "unknown");
 

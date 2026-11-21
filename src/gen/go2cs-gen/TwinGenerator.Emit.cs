@@ -283,8 +283,11 @@ public sealed partial class TwinGenerator
 
             string body = isVoid ? " { " + call + "; return default; }" : " => new global::go.golib.GoTask<" + returnType + ">(" + call + ");";
 
+            // COORD's ruling on P8 (iii): the mark says the member CANNOT park, by the park analysis, a property of the Go
+            // code. A refused member that parks gets an unmarked forwarder, which a caller in another assembly awaits, so
+            // lifting the refusal later changes nothing a caller bound.
             return indent + "[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]\r\n" +
-                   indent + "[global::go.golib.GoParkForwarder]\r\n" +
+                   (candidate.Parks ? "" : indent + "[global::go.golib.GoParkForwarder]\r\n") +
                    indent + declaration + body + "\r\n";
         }
 
@@ -330,7 +333,9 @@ public sealed partial class TwinGenerator
             report.Append("// go-propagation=").Append(goSites ? "on" : "off").Append("\r\n");
             report.Append("// candidates=").Append(m_ordered.Count).Append(" twinned=").Append(twinned.Count)
                 .Append(" go-only=").Append(twinned.Count(candidate => candidate.GoOnly)).Append("\r\n");
-            report.Append("// forwarders=").Append(m_ordered.Count(candidate => candidate.Forwarded)).Append("\r\n");
+            report.Append("// forwarders=").Append(m_ordered.Count(candidate => candidate.Forwarded))
+                .Append(" marked=").Append(m_ordered.Count(candidate => candidate is { Forwarded: true, Parks: false }))
+                .Append(" unmarked=").Append(m_ordered.Count(candidate => candidate is { Forwarded: true, Parks: true })).Append("\r\n");
 
             // Section 9: one row per member of the population, `// S file|line|name|class`.
             if (m_populationAssembly)
