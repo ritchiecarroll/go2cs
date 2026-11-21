@@ -28,11 +28,15 @@ internal struct objShellVal
     internal int N;
 }
 
+internal readonly struct objShellPanic;
+
 internal static class ErrorObjectShellTestExtensions
 {
     internal static @string Error(this objShellCode e) => "code(" + e.m_code + ")";
 
     internal static @string Error(this objShellVal v) => "val(" + v.N + ")";
+
+    internal static @string Error(this objShellPanic _) => throw panic("boom");
 }
 
 /// <summary>
@@ -124,5 +128,84 @@ public class ErrorObjectShellTests
         Assert.AreEqual("val(2)", shell.Error().ToString());
         Assert.AreEqual(error.As(box).Error().ToString(), shell.Error().ToString());
         Assert.AreEqual(Format(error.As(box), "T"), Format(shell, "T"));
+    }
+
+    // A Go panic raised inside Error() is a Go panic where the caller meets it: fmt's catchPanic and recover() match
+    // PanicException, never a reflection wrapper around it (builtin.AreEqual's DoNotWrapExceptions note).
+    [TestMethod]
+    public void APanicInsideErrorReachesTheCallerAsItself()
+    {
+        Assert.IsTrue(AdapterBinder.TryCreate(new objShellPanic(), typeof(error), out object? built));
+
+        error shell = (error)built;
+
+        Assert.AreSame(Spec.ObjectShell, shell.GetType());
+        Assert.AreEqual("boom", Thrown(() => shell.Error()).Message);
+
+        // The same panic through a pointer: the value-receiver method runs on the pointee, read through the box.
+        ж<objShellPanic> box = new StandardBox<objShellPanic>(new objShellPanic());
+
+        Assert.AreEqual("boom", Thrown(() => ObjectShell(box.GetType(), box).Error()).Message);
+    }
+
+    // A typed assertion out of the shell yields the Go value, as out of error<T>.
+    [TestMethod]
+    public void ATypedAssertionOutOfTheShellYieldsTheValue()
+    {
+        objShellCode value = new(9);
+
+        Assert.IsTrue(AdapterBinder.TryCreate(value, typeof(error), out object? built));
+
+        error shell = (error)built;
+
+        Assert.AreSame(Spec.ObjectShell, shell.GetType());
+        Assert.AreEqual(value, shell._<objShellCode>());
+        Assert.AreEqual(value, shell._(typeof(objShellCode)));
+        Assert.IsFalse(shell._<objShellVal>(out objShellVal _), "an assertion to another type fails");
+    }
+
+    // A nil *T whose Error has a pointer receiver dispatches: the method decides what a nil receiver means.
+    [TestMethod]
+    public void ANilBoxWithAPointerReceiverErrorDispatches()
+    {
+        ж<testNilAware> nilBox = go.ж<testNilAware>.NilBox;
+
+        error shell = ObjectShell(nilBox.GetType(), nilBox);
+
+        Assert.AreEqual("nil receiver", shell.Error().ToString());
+        Assert.AreEqual(error.As(nilBox).Error().ToString(), shell.Error().ToString());
+        Assert.AreEqual("<nil>", Format(shell, "v"), "%v of a nil box reads <nil>, as Go's fmt prints it");
+    }
+
+    // A nil *T whose Error has only a value receiver panics with Go's nil dereference when Error is called.
+    [TestMethod]
+    public void ANilBoxWithAValueReceiverErrorPanicsWithANilDereference()
+    {
+        ж<objShellVal> nilBox = go.ж<objShellVal>.NilBox;
+
+        error shell = ObjectShell(nilBox.GetType(), nilBox);
+
+        PanicException thrown = Thrown(() => shell.Error());
+
+        Assert.AreEqual(Thrown(() => error.As(nilBox).Error()).Message, thrown.Message);
+        StringAssert.Contains(thrown.Message, "nil pointer dereference");
+        Assert.AreEqual("<nil>", Format(shell, "v"));
+    }
+
+    // The exception Error() raised, which must be a Go panic and not a wrapper around one.
+    private static PanicException Thrown(Func<@string> call)
+    {
+        try
+        {
+            call();
+        }
+        catch (Exception ex)
+        {
+            Assert.IsInstanceOfType(ex, typeof(PanicException), $"Error() raised {ex.GetType().Name}, not a Go panic: {ex.Message}");
+            return (PanicException)ex;
+        }
+
+        Assert.Fail("Error() did not panic");
+        return null!;
     }
 }

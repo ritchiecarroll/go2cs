@@ -682,6 +682,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckEnvironBlockWalk() => CheckTarget("EnvironBlockWalk");
 
     [TestMethod]
+    public void CheckErrorMethodPanicFormat() => CheckTarget("ErrorMethodPanicFormat");
+
+    [TestMethod]
     public void CheckErrorfFormatting() => CheckTarget("ErrorfFormatting");
 
     [TestMethod]

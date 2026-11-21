@@ -540,8 +540,12 @@ namespace go;
     {
         // A value-receiver method reached through a pointer source runs on the CURRENT pointee: Go
         // copies the value at the call, so the deref has to happen per call, never once at binding.
+        // DoNotWrapExceptions: a NIL pointer's Value getter raises Go's nil-dereference panic, which
+        // must reach the caller as itself. Wrapped in a TargetInvocationException, recover() and fmt's
+        // catchPanic do not match it (builtin.AreEqual's operator invoke, the same rule). The invokers
+        // below need no flag: MethodInvoker does not wrap what the method throws.
         if (m_dereference[index] && m_pointee is not null)
-            target = m_pointee.GetValue(target)!;
+            target = m_pointee.GetValue(target, BindingFlags.DoNotWrapExceptions, null, null, null)!;
 
         MethodInvoker invoker = m_invokers[index]!;
 

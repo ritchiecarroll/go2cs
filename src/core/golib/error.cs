@@ -249,7 +249,10 @@ internal interface IErrorTarget
 /// <para>
 /// The <c>%v</c>/<c>%T</c> formatting overload is <see cref="error{T}"/>'s, answered from the held value:
 /// <c>T</c> names the dynamic type (<c>*T</c> for a box), and <c>v</c> renders the pointee for a box, as Go's
-/// <c>%v</c> of an error renders through the value's own method rather than as a pointer.
+/// <c>%v</c> of an error renders through the value's own method rather than as a pointer. Neither overload has a
+/// caller in the tree (read 2026-11-21: <c>error</c> does not inherit <see cref="IFormattable"/>, and nothing names
+/// the overload by reflection; fmt reaches <c>%v</c> and <c>%T</c> through the unwrapped value). It is kept so the two
+/// shells answer alike if one is added.
 /// </para>
 /// </remarks>
 [EditorBrowsable(EditorBrowsableState.Never)] internal sealed class errorObjectShell : error, IInterfaceAdapter
