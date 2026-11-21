@@ -348,14 +348,6 @@ func writePackageInfoFile(packageInfoFileName string, mergeExisting bool) {
 			lines.Add(fmt.Sprintf("using %s = %s.%s;", alias, RootNamespace, namespace))
 		}
 
-		// The file-local aliases the method forwarders name (a variadic parameter's `ꓸꓸꓸT`), declared as the
-		// bodies' files declare them; see forwarderAliasUsings.
-		forwarderUsings, _ := forwarderAliasUsings()
-
-		for alias, referent := range forwarderUsings {
-			lines.Add(fmt.Sprintf("using %s = %s;", alias, referent))
-		}
-
 		// Sort lines
 		sortedLines := lines.Keys()
 		sort.Strings(sortedLines)

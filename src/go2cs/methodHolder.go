@@ -1231,25 +1231,40 @@ func (v *Visitor) qualifyForwarderLocalTypes(text string, typeParamNames map[str
 	}
 
 	qualify := func(typeText string) string {
-		return packageQualifiedNameRegex.ReplaceAllStringFunc(typeText, func(match string) string {
+		var result strings.Builder
+		last := 0
+
+		for _, bounds := range packageQualifiedNameRegex.FindAllStringIndex(typeText, -1) {
+			match := typeText[bounds[0]:bounds[1]]
+			result.WriteString(typeText[last:bounds[0]])
+			last = bounds[1]
+
 			// unsafe.Pointer is spelled through each file's `using @unsafe = unsafe_package;`, which package_info.cs
 			// does not declare; the package class is the spelling an assembly attribute takes for the same reason.
 			if member, ok := strings.CutPrefix(match, "@unsafe."); ok {
-				return "unsafe_package." + member
+				result.WriteString("unsafe_package." + member)
+				continue
 			}
 
-			if strings.Contains(match, ".") || typeParamNames[match] {
-				return match
+			if !strings.Contains(match, ".") && !typeParamNames[match] {
+				// A name is the package's type only where its use is as generic as the type: runtime's `slice` and
+				// `Func` leave golib's `slice<T>` and System's `Func<…>` as written.
+				if typeName, ok := v.pkg.Scope().Lookup(strings.TrimPrefix(match, "@")).(*types.TypeName); ok && !typeName.IsAlias() {
+					named, _ := typeName.Type().(*types.Named)
+					generic := named != nil && named.TypeParams().Len() > 0
+
+					if generic == strings.HasPrefix(typeText[bounds[1]:], "<") {
+						match = v.packageScopeClassName(typeName) + "." + match
+					}
+				}
 			}
 
-			typeName, ok := v.pkg.Scope().Lookup(strings.TrimPrefix(match, "@")).(*types.TypeName)
+			result.WriteString(match)
+		}
 
-			if !ok || typeName.IsAlias() {
-				return match
-			}
+		result.WriteString(typeText[last:])
 
-			return v.packageScopeClassName(typeName) + "." + match
-		})
+		return result.String()
 	}
 
 	// A named element (`ref Buffer b`, a tuple's `Buffer b`) ends in its name, after the last space outside any
@@ -1331,6 +1346,78 @@ func (v *Visitor) forwarderFileAliases(line string) map[string]string {
 
 	return aliases
 }
+
+// forwarderAliasDirectives takes out of package_info.cs the alias directives an earlier write put after its namespace
+// declaration (insertForwarderAliasDirectives), and answers the ones this write declares: those a merging write found,
+// and those its forwarders name (forwarderAliasUsings). A name already bound to another referent is one more that
+// this write's forwarders spell through its referent.
+func forwarderAliasDirectives(packageInfoLines []string, mergeExisting bool) ([]string, []string, map[string]bool) {
+	usings, inline := forwarderAliasUsings()
+	declared := map[string]string{}
+	namespaceIndex := packageInfoNamespaceLine(packageInfoLines)
+
+	if namespaceIndex >= 0 {
+		end := namespaceIndex + 1
+
+		for end < len(packageInfoLines) && (forwarderAliasDirective.MatchString(packageInfoLines[end]) || strings.TrimSpace(packageInfoLines[end]) == "" && end+1 < len(packageInfoLines) && forwarderAliasDirective.MatchString(packageInfoLines[end+1])) {
+			if match := forwarderAliasDirective.FindStringSubmatch(packageInfoLines[end]); match != nil && mergeExisting {
+				declared[match[1]] = match[2]
+			}
+
+			end++
+		}
+
+		packageInfoLines = append(packageInfoLines[:namespaceIndex+1:namespaceIndex+1], packageInfoLines[end:]...)
+	}
+
+	for alias, referent := range usings {
+		if bound, ok := declared[alias]; ok && bound != referent {
+			inline[alias] = true
+			continue
+		}
+
+		declared[alias] = referent
+	}
+
+	lines := make([]string, 0, len(declared))
+
+	for alias, referent := range declared {
+		lines = append(lines, fmt.Sprintf("using %s = %s;", alias, referent))
+	}
+
+	sort.Strings(lines)
+
+	return packageInfoLines, lines, inline
+}
+
+// insertForwarderAliasDirectives writes the alias directives the forwarders read right after package_info.cs's
+// namespace declaration, as each converted file declares its own: there a referent resolves as in the body's file
+// (`Span<runtime_package.traceArg>` through the namespace and the project's global usings), which it does not among
+// the compilation unit's directives above the namespace.
+func insertForwarderAliasDirectives(packageInfoLines []string, aliasLines []string) []string {
+	namespaceIndex := packageInfoNamespaceLine(packageInfoLines)
+
+	if len(aliasLines) == 0 || namespaceIndex < 0 {
+		return packageInfoLines
+	}
+
+	inserted := append([]string{""}, aliasLines...)
+
+	return append(packageInfoLines[:namespaceIndex+1:namespaceIndex+1], append(inserted, packageInfoLines[namespaceIndex+1:]...)...)
+}
+
+// packageInfoNamespaceLine answers the index of package_info.cs's namespace declaration, or -1.
+func packageInfoNamespaceLine(packageInfoLines []string) int {
+	for i, line := range packageInfoLines {
+		if strings.HasPrefix(strings.TrimSpace(line), "namespace ") {
+			return i
+		}
+	}
+
+	return -1
+}
+
+var forwarderAliasDirective = regexp.MustCompile(`^using (` + EllipsisOperator + `[\p{L}\p{N}_]*) = (.+);$`)
 
 // forwarderAliasUsings answers the file-local aliases package_info.cs declares for the forwarders it writes (those
 // whose holder the unit declares), and the alias names two files bind to different referents: a forwarder spells
@@ -1537,6 +1624,8 @@ func methodForwarderProseLines() []string {
 // not write again. Only forwarders whose holder this unit declares are written (packageMethodHolders), so a
 // -tests variant's forwarders go where its holders go.
 func applyMethodForwarderSection(packageInfoLines []string, mergeExisting bool) []string {
+	// First, so the section's indices below are read from the lines this pass rebuilds.
+	packageInfoLines, aliasLines, inlineAliases := forwarderAliasDirectives(packageInfoLines, mergeExisting)
 	startLineIndex, endLineIndex := -1, -1
 
 	for i, line := range packageInfoLines {
@@ -1585,8 +1674,6 @@ func applyMethodForwarderSection(packageInfoLines []string, mergeExisting bool) 
 
 	sort.SliceStable(recorded, func(i, j int) bool { return recorded[i].key < recorded[j].key })
 
-	_, inlineAliases := forwarderAliasUsings()
-
 	for _, forwarder := range recorded {
 		if _, declared := packageMethodHolders[forwarder.holder]; !declared {
 			continue
@@ -1614,6 +1701,8 @@ func applyMethodForwarderSection(packageInfoLines []string, mergeExisting bool) 
 
 		packageInfoLines = append(packageInfoLines[:from:from], packageInfoLines[endLineIndex+1:]...)
 	}
+
+	packageInfoLines = insertForwarderAliasDirectives(packageInfoLines, aliasLines)
 
 	if len(byHolder) == 0 {
 		return packageInfoLines

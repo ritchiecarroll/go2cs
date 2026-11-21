@@ -1316,6 +1316,10 @@ func (b *Buffer) Add(xs ...any) int {
 func (b Buffer) Many(ts ...Type) int { return len(ts) + b.n }
 
 func (b *Buffer) At(p unsafe.Pointer) unsafe.Pointer { return unsafe.Add(p, b.n) }
+
+type slice struct{ lo, hi int }
+
+func (b Buffer) Span(data []byte) slice { return slice{hi: len(data) + b.n} }
 `
 
 // A forwarder stands at namespace scope in package_info.cs, where a bare name is looked up in the enclosing
@@ -1324,7 +1328,10 @@ func (b *Buffer) At(p unsafe.Pointer) unsafe.Pointer { return unsafe.Add(p, b.n)
 // types through the package class, as the holder's typeof does, while the body keeps the bare names its package class
 // resolves. A variadic parameter's `ꓸꓸꓸT` alias is a using of the body's file, so package_info.cs declares the ones
 // its forwarders name, and so is the `@unsafe` alias unsafe.Pointer is spelled through, so a forwarder names the
-// package class as an assembly attribute does (`unsafe_package.Pointer`).
+// package class as an assembly attribute does (`unsafe_package.Pointer`). A name is the package's type only where its
+// use is as generic as the type: a package's own `slice` (renamed `Δslice` beside golib's) leaves golib's
+// `slice<byte>` as written. The aliases stand
+// right after the namespace declaration, as in each converted file, where their referents resolve.
 func TestAForwarderNamesItsPackagesTypesAndVariadicAliasesForNamespaceScope(t *testing.T) {
 	emitted := convertMethodHolderFixture(t, map[string]string{"buf.go": forwarderNamespaceScopeSource})
 
@@ -1337,12 +1344,47 @@ func TestAForwarderNamesItsPackagesTypesAndVariadicAliasesForNamespaceScope(t *t
 		"public static buf_package.Buffer Grow(this buf_package.Buffer b, buf_package.Type t) => buf_package.Grow⁔(b, t);\n",
 		"public static nint Add(this ref buf_package.Buffer b, params ꓸꓸꓸany xsʗp) => buf_package.Add⁔(ref b, xsʗp);\n",
 		"public static nint Many(this buf_package.Buffer b, params ꓸꓸꓸType tsʗp) => buf_package.Many⁔(b, tsʗp);\n",
-		"\nusing ꓸꓸꓸany = Span<any>;\n",
-		"\nusing ꓸꓸꓸType = Span<buf_package.Type>;\n",
+		"namespace go.example.com.app;\n\nusing ꓸꓸꓸType = Span<buf_package.Type>;\nusing ꓸꓸꓸany = Span<any>;\n\n",
+		"public static Δslice Span(this buf_package.Buffer b, slice<byte> data) => buf_package.Span⁔(b, data);\n",
 		"public static unsafe_package.Pointer At(this ref buf_package.Buffer b, unsafe_package.Pointer p) => buf_package.At⁔(ref b, p);\n",
 	}, []string{
 		"(this Buffer b",
 		"(this ref Buffer b",
 		"@unsafe.",
+		"buf_package.slice<",
+	})
+}
+
+const handOwnedHolderSource = `package app
+
+type gptr uintptr
+
+func (g gptr) ptr() int { return int(g) }
+
+func (g gptr) set(v int) gptr { return gptr(v) }
+
+type kept struct{ n int }
+
+func (k kept) N() int { return k.n }
+
+func Use() int { return gptr(1).ptr() + kept{}.N() }
+`
+
+// A method whose C# a hand-owned file supplies (manualConversionFuncs) is emitted as a placeholder; its hand-written
+// extension method stands in the holder, `partial class appᴛgptr`, which only package_info.cs declares static. So the
+// holder is declared as for a converted method, even where every method of the type is hand-owned, and no forwarder
+// is written for a body that does not exist.
+func TestAHandOwnedMethodKeepsItsHoldersDeclaration(t *testing.T) {
+	displacedFixture(t, "example.com/app", "gptr.ptr", "gptr.set")
+
+	emitted := convertMethodHolderFixture(t, map[string]string{"app.go": handOwnedHolderSource})
+
+	requireEmitted(t, "package_info.cs", emitted["package_info.cs"], []string{
+		"[GoMethodHost(typeof(app_package.gptr)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class appᴛgptr;\n",
+		"[GoMethodHost(typeof(app_package.kept)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class appᴛkept;\n",
+		"internal static nint N(this app_package.kept k) => app_package.N⁔(k);\n",
+	}, []string{
+		"ptr⁔",
+		"set⁔",
 	})
 }

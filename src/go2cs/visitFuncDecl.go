@@ -559,6 +559,10 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 			panic(fmt.Sprintf("@visitFuncDecl - the sstring twin %s is refused: it is hand-owned (DESIGN-sstring-twin-pilot.md §3.1)", sstringTwinKey(fn)))
 		}
 
+		// The hand-written method stands in its holder as declared (`partial class <pkg>ᴛ<T>`), which only
+		// package_info.cs declares static; the holder is declared as for a converted method, with no forwarder.
+		v.suffixMethodHolder(funcDecl)
+
 		v.outputBuilder.WriteString(v.newline)
 		v.outputBuilder.WriteString(v.placeFuncDecl(funcDecl, v.manualSignatureLiftPrefix(funcDecl), ""))
 		v.writeDoc(nil, funcDecl.Pos())
