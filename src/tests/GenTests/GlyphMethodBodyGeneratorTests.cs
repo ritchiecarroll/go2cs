@@ -200,7 +200,7 @@ public class GlyphMethodBodyGeneratorTests
         using MemoryStream image = new();
         Assert.IsTrue(executed.Emit(image).Success, "the package emits an assembly");
 
-        MethodInfo probe = Assembly.Load(image.ToArray()).GetType("go.gtest_package", throwOnError: true)!.GetMethod("Probe")!;
+        System.Reflection.MethodInfo probe = Assembly.Load(image.ToArray()).GetType("go.gtest_package", throwOnError: true)!.GetMethod("Probe")!;
 
         // p.Sum() 3+4 and p.Scale(2) through the forwarders' twins; the set's unbound Sum 1+1 and its Scale through
         // *Vertex (6*5); X is 30; the set answers no body; the source's Swap returns 26, leaves 7, and is the forwarder.
