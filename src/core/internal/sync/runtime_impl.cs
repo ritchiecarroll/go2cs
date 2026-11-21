@@ -110,20 +110,18 @@ partial class sync_package
     // runtime/sema.go:93 pushes internal_sync_runtime_SemacquireMutex, whose body is
     // semacquire1(addr, lifo, semaBlockProfile|semaMutexProfile, skipframes, waitReasonSyncMutexLock).
     // RuntimeSemaphore is the managed semacquire1, and its own remarks name THIS package as its
-    // second caller. The park reason is Go's (a traceback reads [sync.Mutex.Lock]). Three arguments
-    // do not reach it, and each is named here so that nobody has to rediscover it:
-    //   lifo        Go queues a waiter that has ALREADY waited at the head of the queue, which bounds
-    //               a re-waiter's delay. RuntimeSemaphore's queue is FIFO only. That is a fairness
-    //               difference, not a correctness one: starvation mode, which is what actually bounds
-    //               waiting in Go (the 1 ms threshold, then direct handoff), still works, because
-    //               Semrelease's handoff below does reach the primitive. sync's RWMutex passes lifo
-    //               to the same primitive under the same limitation.
+    // second caller. The park reason is Go's (a traceback reads [sync.Mutex.Lock]).
+    //   lifo        reaches it. lockSlow passes queueLifo (waitStartTime != 0), so a waiter that has
+    //               already waited parks at the head of the queue, as in Go. That is the other half of
+    //               the conditional handoff in Semrelease: a starving Mutex's longest waiter that is
+    //               readied but loses the permit to a newcomer re-queues first and wins the next round.
+    // Two arguments do not reach it, and each is named here so that nobody has to rediscover it:
     //   skipframes  traceback trimming for profiles only.
     //   profile     semaBlockProfile|semaMutexProfile: mutex and block profile SAMPLES. That is the
     //               structural class already ruled for runtime's sample-1 and runtime/pprof's
     //               TestMutexBlockFullAggregation (no mutex-profile stack samples in the managed model).
     internal static partial void runtime_SemacquireMutex(ж<uint32> s, bool lifo, nint skipframes) =>
-        RuntimeSemaphore.Acquire(s, WaitReason.SyncMutexLock);
+        RuntimeSemaphore.Acquire(s, lifo, WaitReason.SyncMutexLock);
 
     // runtime/sema.go:118 pushes internal_sync_runtime_Semrelease, whose body is
     // semrelease1(addr, handoff, skipframes). handoff is Go's starvation-mode direct transfer and it
