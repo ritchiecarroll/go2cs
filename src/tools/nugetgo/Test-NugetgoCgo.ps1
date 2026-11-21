@@ -183,6 +183,13 @@ try {
         $assets = Join-Path $tdir 'App/obj/project.assets.json'
         $build = if (Test-Path $assets) { $j = Get-Content -Raw $assets | ConvertFrom-Json; @($j.targets.PSObject.Properties | ForEach-Object { $t = $_.Name; $_.Value.PSObject.Properties | Where-Object { $_.Name -like 'nugetgo.cgo.probe/*' } | ForEach-Object { "$t => build:[$(@($_.Value.build.PSObject.Properties.Name) -join ',')]" } }) } else { @('no assets') }
         $ran = @($tout | Where-Object { $_ -match '_NugetgoCgoRidGuard' }).Count
+        $objList = @(Get-ChildItem -Path (Join-Path $tdir 'App/obj') -ErrorAction SilentlyContinue | ForEach-Object { $_.Name }) -join ','
+        $libs = if (Test-Path $assets) { (@((Get-Content -Raw $assets | ConvertFrom-Json).libraries.PSObject.Properties.Name) -join ',') } else { '-' }
+        $tnames = if (Test-Path $assets) { (@((Get-Content -Raw $assets | ConvertFrom-Json).targets.PSObject.Properties.Name) -join ',') } else { '-' }
+        $libAssets = Join-Path $tdir 'Lib/obj/project.assets.json'
+        $liblibs = if (Test-Path $libAssets) { (@((Get-Content -Raw $libAssets | ConvertFrom-Json).libraries.PSObject.Properties.Name) -join ',') } else { '-' }
+        $restoreLines = @($tout | Where-Object { $_ -match 'Restor|NU1[0-9]{3}|warn' } | Select-Object -First 6) -join ' || '
+        Write-Host "DIAG2 $name tmp=$([System.IO.Path]::GetTempPath()) obj=[$objList] appLibraries=[$libs] appTargets=[$tnames] libLibraries=[$liblibs] restore=[$restoreLines]"
         Write-Host "DIAG $name exit=$texit imports=[$($gt -join ' || ')] assets=[$($build -join ' ; ')] guardLines=$ran"
         [pscustomobject]@{ Exit = $texit; Text = $tout; App = @($tout | Where-Object { $_ -match 'NUGETGOCGO001' -and $_ -match '[\\/]App\.csproj\]' }).Count; Lib = @($tout | Where-Object { $_ -match 'NUGETGOCGO001' -and $_ -match '[\\/]Lib\.csproj\]' }).Count }
     }
