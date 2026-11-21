@@ -180,3 +180,42 @@ the base sat high 3 times and the tip 6 times.
   re-baselined at 05cb5b3446: MnParkedSameName, MnAotGeneric, MnBoxAlias, MnIfaceTwin and MnMixedStorm.
 - MnParkedSameName now carries T.b and U.b in one class, which is the red's shape in converted code.
 - The gates at the merged tip are appended below.
+
+**The gates at the merged tip 86916f4b2a** (all unfiltered; red base 8bb34cc879, the local train-1 merge without 7d).
+7 of 8 predictions MET. (2) MISSED as worded and was posted on its own before the fix:
+- GolibTests read failed [TheConvertersListIsGolibsNamespace] at the tip (Release 3024/52/1 and Debug 2999/77/1 of 3077)
+  and at the red (Release 3022/52/1 of 3075).
+- The guard is GolibNamespaceNamesTests.cs:216. src/go2cs/golibNamespaceNames.go's golibBuiltinMembers lacked item 8's
+  four builtin twins (RunMainꞏtwin, goǃtwin, selectꞏtwin, ᐸꟷꞏtwin): a union defect between item 8 and train 1, since
+  the red has it too.
+- COORD ruled the fix onto item 8's branch, where it landed at 62fdbd3879.
+- MET:
+  - GenTests 724/724 at the tip, 720/720 at the red;
+  - go test ok=11;
+  - CNR NO REGRESSION over 1147 packages (+12 platform-exclusive);
+  - go2cs.slnx: 1386 dlls against the red's 1384, the warning-code list identical;
+  - go2cs-stdlib.slnx: 365 dlls;
+  - full repoguard rc 0.
+- The twins lane:
+  - MnParkedSameName and MnParkedMultiLine are RED at the red and 0 diff at the tip;
+  - MnMixedStorm times out (rc 124) at both;
+  - the other 8 Mn fixtures show 0 diff.
+
+**The merge of item 8's tip 5c2fe771f1**, at 6df3a83ad2. Item 8's tip carries:
+- master ccca03abea (the CI SDK pin);
+- the golibNamespaceNames re-render;
+- the four Q1 fixtures re-baselined under train 1.
+The merge was predicted, and MET, as 2 conflicts, both doc citations into managed_impl.cs.
+- 7d's side was kept, re-derived from the merged file: :5365, :5373 and :5382.
+- Against 86916f4b2a, 3 files move: the two workflow files, and golibNamespaceNames.go (+4 lines, a blob identical to
+  item 8's).
+- The four fixtures do not move: they were already byte-identical at 05cb5b3446.
+
+**The re-gate at 6df3a83ad2** (all unfiltered; predicted before the run, 5 of 5 MET):
+- GolibTests Release failed [] 3025/52 of 3077; Debug failed [] 3000/77 of 3077.
+- GenTests 724/724.
+- go test ok=11 FAIL=0, TestLicensing in it.
+- Full repoguard rc 0.
+- CNR NO REGRESSION over 1147 packages (+12 platform-exclusive), NOT MEASURED 0.
+
+The Native AOT reading in section 7 is still owed, on the AOT box.
