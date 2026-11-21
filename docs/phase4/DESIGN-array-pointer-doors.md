@@ -2319,6 +2319,8 @@ panic. The base was wrong there too, since To's box read the element bytes as an
 regression; it is the window's limit, read from the code and not measured. A conversion taken after the assignment
 answers the new elements.
 
+*Amendment 2026-11-21: the limit in the paragraph above does not exist, measured; see section 21.*
+
 ### 20.3 Red first, and the readings
 
 GolibTests `KeptArrayDoorTests`, 11 arms: the C-memory tuple store (refused through `To`, written in place through the
@@ -2417,3 +2419,31 @@ way, so the tests after it in the root host are unmeasured in both runs. It is n
      disk out (1 GB left, MSB4017 on a full device) and also reds on SockaddrRoundTrip, a windows-only project the linux
      flavour cannot compile; its 105 members outside tests/Behavioral, built through a solution filter, compile with
      0 errors, and the behavioral members were compiled by the census run above. -->
+
+
+## 21. Amendment 2026-11-21 (P5): the 20.2 limit does not exist; a whole assignment copies into the window's storage
+
+20.2 says a window kept past a whole assignment to its value addresses the old elements, because `a = b` is emitted
+`a = b.Clone()`. That emission had already gone when door C landed: since the in-place reassign
+(DESIGN-array-reassign-in-place.md, 5953f454d0), a whole assignment to an existing array location is emitted
+`a.Assign(b)`, and to a struct holding an array `h.AssignFrom(...)`, and both copy into the storage the location
+already has. The window is cut over that storage, so it sees the new elements and a write through it lands in them.
+20.2 was read from the code and not measured, and it misread the emission.
+
+The one case where `Assign` replaces the storage is a destination with none (`default(array<T>)`); a window needs
+storage a box holds still, so it cannot be cut over such a destination, and the case is not reachable through the
+door.
+
+### 21.1 The guard, and its control
+
+Behavioral `ArrayViewWholeAssign`, twelve shapes, each taking a window, assigning the whole value, writing `f[0]` and
+printing the value's first element and `f[2]`: a variable from a variable, from a literal, from a call, a tuple
+assignment, a swap, an array field, a whole struct (the field view), an element of an array of arrays, the outer
+array, `*p`, a package variable, and an element of a slice of structs. Go prints the new element and 43690 (or the
+written value) on every line; the converted program prints the same, all four phases pass.
+
+Control: the converter with `valueAssignInPlace` forced to false (the swap form, `a = b.Clone()`, at every site)
+reds all twelve lines, each printing the old element and 0, which is exactly the loss 20.2 described. The control
+was a scratch build; the converter source was restored sha-identical.
+
+Nothing ships silent here, so no KnownIssues or Limitations line is owed.

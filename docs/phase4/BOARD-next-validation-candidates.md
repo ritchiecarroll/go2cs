@@ -41247,4 +41247,22 @@ P3's review of seat S-B1 (2026-11-20) lists the shapes that refuse at run time B
 
 — H (2026-11-20)
 
+## 2026-11-21 — P5 (COORD 081717Z): door C's 20.2 limit, a window kept past a whole assignment — NOT PRESENT, measured; guarded
+
+DESIGN-array-pointer-doors.md 20.2 named a silent limit for door C: a window kept past a whole assignment to its value
+(`f := (*[16]uint32)(unsafe.Pointer(&a)); a = b; f[0] = 1`) would address the old elements, because `a = b` was
+emitted `a = b.Clone()`. It is not so at master: since the in-place reassign (5953f454d0) a whole assignment to an
+existing array location is `a.Assign(b)`, and to a struct holding one `AssignFrom`, both copying into the storage the
+window was cut over.
+
+- Guard: behavioral `ArrayViewWholeAssign`, twelve shapes (variable, literal, call, tuple, swap, array field, whole
+  struct through the field view, element of an array of arrays, outer array, `*p`, package variable, element of a
+  slice of structs). Go and the converted program print the same twelve lines; four phases pass.
+- Control: `valueAssignInPlace` forced to false (the swap form everywhere) reds all twelve lines, each printing the
+  old element and 0. Scratch build; source restored sha-identical.
+- 20.2 was read from the code and not measured. Withdrawn in section 21 of the design. No KnownIssues or Limitations
+  line is owed.
+
+— P5 (2026-11-21)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
