@@ -534,7 +534,7 @@ Outside a lambda the assignment is followed by `sigChecks = ref ᏑsigChecks.Der
 The suppression is sound because no LEGITIMATE re-alias ever occurs inside a lambda: a lambda's OWN pointer parameter is passed as the box `ж<T>` (never deref-aliased), and a heap-boxed value local is written THROUGH its box (`Ꮡb.Value = …`, never box-repointed).
 
 **A pointer parameter that a func literal assigns takes no entry alias at all.** Dropping the re-alias inside the lambda is not enough by itself: the enclosing body still reads the entry alias, which goes on naming the OLD target once the closure has repointed the box. That was a silent wrong read, and an endless loop where the body walks a structure until a callback moves it (`for len(n.kids) > 0 { n.each(func(k *node) bool { n = k; return true }) }` re-read the root forever). Go has one variable, shared by the body and every closure, so such a parameter keeps its box as that variable: `closureRepointedPointerParams` collects every pointer parameter (and direct-ж receiver) that an assignment or range assignment inside any func literal targets — a closure, a deferred literal or a go-statement literal alike — and the declaration emits it with no alias, in the same Go-named form as a parameter whose alias is dead. Every value read goes through the box in the body as well as in the literal:
-<!-- source: src/tests/Behavioral/PointerParamClosureRepoint/main.cs.target:26-37 -->
+<!-- source: src/tests/Behavioral/PointerParamClosureRepoint/main.cs.target:21-32 -->
 ```csharp
 internal static nint deepest(ж<node> n) {
     for (nint i = 0; i < 10; i++) {

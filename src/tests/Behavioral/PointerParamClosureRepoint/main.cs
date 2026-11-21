@@ -1,7 +1,6 @@
 namespace go;
 
 using fmt = fmt_package;
-using static main_package;
 
 partial class main_package {
 
@@ -9,8 +8,6 @@ partial struct node {
     internal nint val;
     internal slice<ж<node>> kids;
 }
-
-} partial class mainᴛnode {
 
 internal static bool each(this ref node n, Func<ж<node>, bool> f) {
     foreach (var (_, k) in range(n.kids)) {
@@ -20,8 +17,6 @@ internal static bool each(this ref node n, Func<ж<node>, bool> f) {
     }
     return false;
 }
-
-} partial class main_package {
 
 internal static nint deepest(ж<node> n) {
     for (nint i = 0; i < 10; i++) {
@@ -114,8 +109,6 @@ internal static nint rangeBody(ж<node> Ꮡn) {
     return nΔ1.val;
 }
 
-} partial class mainᴛnode {
-
 internal static nint lastKid(this ж<node> Ꮡn) {
     ref var nΔ1 = ref Ꮡn.DerefOrNull();
 
@@ -127,8 +120,6 @@ internal static nint lastKid(this ж<node> Ꮡn) {
     return nΔ1.val;
 }
 
-} partial class main_package {
-
 internal static nint mixed(ж<node> n) {
     n = n.DerefOrNull().kids[0];
     void step() {
@@ -138,8 +129,6 @@ internal static nint mixed(ж<node> n) {
     return n.DerefOrNull().val;
 }
 
-} partial class mainᴛnode {
-
 internal static nint last(this ж<node> Ꮡn) {
     Ꮡn.DerefOrNull().each((ж<node> k) => {
         Ꮡn = k;
@@ -147,8 +136,6 @@ internal static nint last(this ж<node> Ꮡn) {
     });
     return Ꮡn.DerefOrNull().val;
 }
-
-} partial class main_package {
 
 internal static bool errAfter(ж<error> e) {
     ref var other = ref heap<error>(out var Ꮡother);
@@ -168,8 +155,6 @@ internal static (nint, nint) sliceAfter(ж<slice<nint>> s) {
     return (len(s.DerefOrNull()), (s.DerefOrNull())[0]);
 }
 
-} partial class mainᴛnode {
-
 internal static nint count(this ж<node> Ꮡn) {
     if (Ꮡn == nil) {
         return 0;
@@ -181,8 +166,6 @@ internal static nint tag(this ref node n) {
     fmt.Println("tag runs before its deref");
     return n.val;
 }
-
-} partial class main_package {
 
 internal static nint nilCount(ж<node> n) {
     GoFrame ᒐ = default;
