@@ -1,7 +1,6 @@
 namespace go;
 
 using fmt = fmt_package;
-using static main_package;
 
 partial class main_package {
 
@@ -24,18 +23,14 @@ partial struct store {
     internal slice<uintptr> data;
 }
 
-} partial class mainᴛstore {
-
 internal static slice<uintptr> stk(this ref store s) { return s.data; }
-
-} partial class main_package {
 
 internal static partial void bump(ref uintptr p) { p = p + 7; }
 
 internal static partial void bumpInt(ref nint p) { p = p + 3; }
 
 internal static void main() {
-    var pp = Ꮡ(new pstate(wbBuf: new wbBuf(buf: new uintptr[]{10, 20, 30, 40}.array())));
+    var pp = Ꮡ(new pstate(wbBuf: new wbBuf(buf: array<uintptr>([10, 20, 30, 40]))));
     bump(ref (pp.ᏑwbBuf.at(wbBuf.Ꮡbuf, 0)).DerefOrNull());
     fmt.Println(pp.wbBuf.buf[0], pp.wbBuf.buf[1]);
 
@@ -47,7 +42,7 @@ internal static void main() {
     })();
     fmt.Println(got);
 
-    var cache = Ꮡ(new cacheT(entries: new array<nint>[]{new nint[]{1, 2, 3}.array(), new nint[]{4, 5, 6}.array()}.array()));
+    var cache = Ꮡ(new cacheT(entries: new array<nint>[]{array<nint>([1, 2, 3]), array<nint>([4, 5, 6])}.array()));
     bumpInt(ref (cache.at(cacheT.Ꮡentries, 1).at<nint>(2)).DerefOrNull());
     fmt.Println(cache.entries[1][2], cache.entries[0][0]);
 

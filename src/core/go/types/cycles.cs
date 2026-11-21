@@ -178,4 +178,4 @@ internal static bool finiteSize(this ж<Checker> Ꮡcheck, Type t) {
     finally { ᒐ.Run(); }
 }
 
-} // end typesᴛChecker
+}

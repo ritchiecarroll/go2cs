@@ -225,4 +225,4 @@ public static ж<Point> VarTimeDoubleScalarBaseMult(this ж<Point> Ꮡv, ж<Scal
     return Ꮡv;
 }
 
-} // end edwards25519ᴛPoint
+}

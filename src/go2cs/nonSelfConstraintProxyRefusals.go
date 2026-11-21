@@ -87,6 +87,11 @@ func refuseNonSelfConstraintProxies(pkg *packages.Package) *nonSelfProxyRefusal 
 			typeParam, typeArg := typeParams.At(i), instance.TypeArgs.At(i)
 			subject := fmt.Sprintf("%s[%s %s] instantiated with %s", ident.Name, typeParam.Obj().Name(), typeParam.Constraint(), typeArg)
 
+			// A shape-witness position takes no proxy, so nothing here applies (shapeWitness.go; GO2CS2013 names stage 1's limits).
+			if shapeWitnessed(object, i) {
+				continue
+			}
+
 			if refusesUnionPlusMethods(typeParam, typeArg) {
 				refuse(position, "%s: a constraint that mixes a type-term union with methods is neither erased nor carried by a constraint proxy, so a pointer type argument cannot satisfy it (DESIGN-constraint-proxy-nonself ruling 3a)", subject)
 				continue

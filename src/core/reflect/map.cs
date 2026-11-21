@@ -153,4 +153,4 @@ internal static partial void panicNotMap(this flag f) {
     f.mustBe(Map);
 }
 
-} // end reflectᴛflag
+}

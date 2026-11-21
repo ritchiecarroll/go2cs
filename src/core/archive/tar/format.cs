@@ -418,4 +418,4 @@ partial struct sparseElem /*[]byte*/;
 internal static slice<byte> offset(this sparseElem s) { return s[0..][..12]; }
 internal static slice<byte> length(this sparseElem s) { return s[12..][..12]; }
 
-} // end tarᴛsparseElem
+}

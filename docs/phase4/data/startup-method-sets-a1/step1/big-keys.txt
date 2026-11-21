@@ -1,0 +1,40 @@
+B3PROBE marks:
+B3PROBE   main-enter at 432 ms after process start; assemblies loaded 68; methods jitted 3008; jit time 2385 ms
+B3PROBE   exit at 1176 ms after process start; assemblies loaded 72; methods jitted 10411; jit time 3155 ms
+B3PROBE site	calls	inclusive ms	items
+B3PROBE StructurallyImplements	3	107.9	1
+B3PROBE CollectGoMethodSetCandidates	2	105.8	2
+B3PROBE Collect Kind	1	104.2	1
+B3PROBE HomedIn.by	2	100.7	2
+B3PROBE HomedIn.call#1 (read)	1	100.2	2
+B3PROBE GetExtensionMethodsHomedIn	2	99.2	4
+B3PROBE HomedIn.walk	2	91.5	1354
+B3PROBE LoadAssemblyExtensionHosts	72	87.3	677
+B3PROBE GoDeferredRegistrations.Run(Adapters)	1	17.4	15
+B3PROBE HomedIn.gc	2	6.9	0
+B3PROBE HomedIn.pass	2	6.7	4
+B3PROBE HomedIn.pass call#1	1	6.5	2
+B3PROBE ExtensionHost.Methods(read)	1	5.1	2
+B3PROBE AdapterBinder.BuildFactory	1	4.0	1
+B3PROBE Collect *Kind	1	1.5	1
+B3PROBE HomedIn.call#2 (read)	1	0.5	2
+B3PROBE HomedIn.pass call#2	1	0.3	2
+B3PROBE ExtensionHost.Type(resolve)	1	0.1	0
+B3PROBE keys HomedIn.gc: 2 distinct
+B3PROBE   call 1: gen0 0, gen1 0, gen2 0, allocated 8 KB, heap 7874 KB x1
+B3PROBE   call 2: gen0 0, gen1 0, gen2 0, allocated 0 KB, heap 7906 KB x1
+B3PROBE keys HomedIn.pass: 1 distinct
+B3PROBE   attempt 1, hosts 1 x2
+B3PROBE keys HomedIn.by: 1 distinct
+B3PROBE   keyed hosts=1 homes=3 via TypeExtensions.GetExtensionMethodsFor < TypeExtensions.CollectGoMethodSetCandidatesB3 < TypeExtensions.CollectGoMethodSetCandidates < <>c.<GetGoMethodSetCandidates>b__92_0 < ConcurrentDictionary`2.GetOrAdd < TypeExtensions.GetGoMethodSetCandidates x2
+B3PROBE keys CollectGoMethodSetCandidates: 2 distinct
+B3PROBE   *go.main_package+Kind x1
+B3PROBE   go.main_package+Kind x1
+B3PROBE keys AdapterBinder.BuildFactory: 1 distinct
+B3PROBE   go.main_package+Kind -> go.fmt_package+Stringer x1
+B3PROBE keys StructurallyImplements: 3 distinct
+B3PROBE   go.main_package+Kind -> go.error = False x1
+B3PROBE   go.main_package+Kind -> go.fmt_package+Formatter = False x1
+B3PROBE   go.main_package+Kind -> go.fmt_package+Stringer = True x1
+B3PROBE keys ExtensionHost.Methods(read): 1 distinct
+B3PROBE   go.mainᴛKind x1

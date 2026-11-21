@@ -118,8 +118,8 @@ internal static void rangeStmt(this ж<Checker> Ꮡcheck, stmtContext inner, ж<
         // (irregular assignment, cannot easily map to existing assignment checks)
 
         // lhs expressions and initialization value (rhs) types
-        var lhs = new ast.Expr[]{sKey, sValue}.array(); // sKey, sValue may be nil
-        var rhs = new Type[]{key, val}.array();         // key, val may be nil
+        var lhs = array<ast.Expr>([sKey, sValue]); // sKey, sValue may be nil
+        var rhs = array<Type>([key, val]);         // key, val may be nil
 
         var rangeOverInt = isInteger(x.typ);
 

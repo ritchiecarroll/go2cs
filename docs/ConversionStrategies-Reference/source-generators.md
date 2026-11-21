@@ -286,7 +286,7 @@ public static (rune r, nint size) DecodeRuneInString(sstring s) {
 a wrapper over golib's `channel<bool>`, which has no direction in its type. The comment after the name spells
 the type as Go does, arrow included, and the generator records the direction from it.
 
-<!-- source: src/tests/Behavioral/ReflectFuncChanDir/main.cs.target:34 -->
+<!-- source: src/tests/Behavioral/ReflectFuncChanDir/main.cs.target:25 -->
 ```csharp
 partial struct AssignD /*<-chan bool*/;
 ```

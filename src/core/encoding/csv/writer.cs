@@ -193,4 +193,4 @@ internal static bool fieldNeedsQuotes(this ref Writer w, @string field) {
     return unicode.IsSpace(r1);
 }
 
-} // end csvᴛWriter
+}

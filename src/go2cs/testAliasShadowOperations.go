@@ -18,6 +18,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/ritchiecarroll/hashset"
@@ -45,6 +46,17 @@ type siblingTestSignals struct {
 
 	// hasInternalTests reports whether any build-selected in-package `_test.go` file exists.
 	hasInternalTests bool
+
+	// scopeNames are the names the test half adds to the package scope or to a file scope of its own: its
+	// package-level declarations and its imports (see mainTestScopeNames).
+	scopeNames hashset.HashSet[string]
+
+	// dotImport reports a dot import in the test half, whose names a parse cannot list.
+	dotImport bool
+
+	// methodTypes are the receiver base types of the methods the test half declares, which a type's method list
+	// holds in a -tests variant and lacks in a plain conversion.
+	methodTypes hashset.HashSet[string]
 }
 
 // collectSiblingTestSignals scans the build-selected in-package `_test.go` files for the signals a
@@ -79,6 +91,9 @@ func collectSiblingTestSignals(packageDir, packageName string, options Options) 
 	addressed := hashset.HashSet[string]{}
 	methodValues := map[string]siblingMethodValue{}
 	publicized := hashset.HashSet[string]{}
+	scopeNames := hashset.HashSet[string]{}
+	methodTypes := hashset.HashSet[string]{}
+	dotImport := false
 	hasInternal := false
 
 	for _, entry := range entries {
@@ -101,12 +116,19 @@ func collectSiblingTestSignals(packageDir, packageName string, options Options) 
 
 		collectSiblingAddressedNames(file, addressed, methodValues)
 		collectSiblingPublicizedTypeNames(file, publicized)
+
+		if collectSiblingScopeNames(file, packageDir, buildContext, scopeNames, methodTypes) {
+			dotImport = true
+		}
 	}
 
 	signals := siblingTestSignals{
 		addressedGlobalNames: addressed.Keys(),
 		publicizedTypeNames:  publicized.Keys(),
 		hasInternalTests:     hasInternal,
+		scopeNames:           scopeNames,
+		dotImport:            dotImport,
+		methodTypes:          methodTypes,
 	}
 
 	methodValueKeys := make([]string, 0, len(methodValues))
@@ -139,6 +161,96 @@ func collectSiblingTestSignals(packageDir, packageName string, options Options) 
 // production package-scope name therefore denotes exactly that object, with no shadowing to
 // disambiguate. A qualified `pkg.T` is skipped: another package's type is never this package's to
 // publicize.
+// collectSiblingScopeNames adds to names what file declares at package level and the names of its imports, a
+// package import by the name its package clause gives, and to methodTypes the receiver base type of each method
+// file declares. It reports a dot import, whose names it cannot list.
+func collectSiblingScopeNames(file *ast.File, packageDir string, buildContext build.Context, names, methodTypes hashset.HashSet[string]) (dotImport bool) {
+	for _, spec := range file.Imports {
+		path, err := strconv.Unquote(spec.Path.Value)
+
+		if err != nil {
+			continue
+		}
+
+		switch {
+		case spec.Name == nil:
+			if imported, importErr := buildContext.Import(path, packageDir, 0); importErr == nil && imported.Name != "" {
+				names.Add(imported.Name)
+			} else {
+				names.Add(importPathPackageName(path))
+			}
+		case spec.Name.Name == ".":
+			dotImport = true
+		case spec.Name.Name != "_":
+			names.Add(spec.Name.Name)
+		}
+	}
+
+	for _, decl := range file.Decls {
+		switch decl := decl.(type) {
+		case *ast.FuncDecl:
+			if decl.Recv == nil && decl.Name.Name != "init" {
+				names.Add(decl.Name.Name)
+			} else if decl.Recv != nil && len(decl.Recv.List) == 1 {
+				if base := receiverBaseTypeName(decl.Recv.List[0].Type); base != "" {
+					methodTypes.Add(base)
+				}
+			}
+		case *ast.GenDecl:
+			for _, spec := range decl.Specs {
+				switch spec := spec.(type) {
+				case *ast.TypeSpec:
+					names.Add(spec.Name.Name)
+				case *ast.ValueSpec:
+					for _, name := range spec.Names {
+						names.Add(name.Name)
+					}
+				}
+			}
+		}
+	}
+
+	return dotImport
+}
+
+// receiverBaseTypeName is the type name a method's receiver expression declares the method on: `T` for `T`,
+// `*T`, `T[K]` and `*T[K, V]`.
+func receiverBaseTypeName(receiver ast.Expr) string {
+	for {
+		switch expr := receiver.(type) {
+		case *ast.ParenExpr:
+			receiver = expr.X
+		case *ast.StarExpr:
+			receiver = expr.X
+		case *ast.IndexExpr:
+			receiver = expr.X
+		case *ast.IndexListExpr:
+			receiver = expr.X
+		case *ast.Ident:
+			return expr.Name
+		default:
+			return ""
+		}
+	}
+}
+
+// importPathPackageName is the package name Go's convention gives an import path, its last element without a
+// major-version suffix (`math/rand/v2` is rand, `gopkg.in/yaml.v3` is yaml), for a package go/build cannot read.
+func importPathPackageName(path string) string {
+	name := path[strings.LastIndex(path, "/")+1:]
+
+	if major, ok := strings.CutPrefix(name, "v"); ok && major != "" && strings.Trim(major, "0123456789") == "" && strings.Contains(path, "/") {
+		trimmed := strings.TrimSuffix(path, "/"+name)
+		name = trimmed[strings.LastIndex(trimmed, "/")+1:]
+	}
+
+	if dot := strings.Index(name, ".v"); dot > 0 {
+		name = name[:dot]
+	}
+
+	return name
+}
+
 func collectSiblingPublicizedTypeNames(file *ast.File, names hashset.HashSet[string]) {
 	for _, decl := range file.Decls {
 		switch decl := decl.(type) {

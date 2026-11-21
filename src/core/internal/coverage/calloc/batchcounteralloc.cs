@@ -32,4 +32,4 @@ public static slice<uint32> AllocateCounters(this ref BatchCounterAlloc ca, nint
     return rv;
 }
 
-} // end callocᴛBatchCounterAlloc
+}

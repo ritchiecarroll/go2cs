@@ -1,7 +1,6 @@
 namespace go;
 
 using fmt = fmt_package;
-using static main_package;
 
 partial class main_package {
 
@@ -9,11 +8,7 @@ partial struct holder {
     internal Func<nint, nint> fn;
 }
 
-} partial class mainᴛholder {
-
 internal static void method(this holder h) { }
-
-} partial class main_package {
 
 partial struct row {
     internal any v;

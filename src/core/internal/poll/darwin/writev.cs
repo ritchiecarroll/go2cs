@@ -99,4 +99,4 @@ public static (int64, error) Writev(this ж<FD> Ꮡfd, ж<slice<slice<byte>>> �
     finally { if (ᒐd1) Ꮡfd.writeUnlock(); ᒐ.Run(); }
 }
 
-} // end pollᴛFD
+}

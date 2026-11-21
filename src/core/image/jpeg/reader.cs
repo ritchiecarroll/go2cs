@@ -80,7 +80,7 @@ internal static UntypedInt adobeTransformYCbCrK => 2;
 // unzig maps from the zig-zag ordering to the natural ordering. For example,
 // unzig[3] is the column and row of the fourth element in zig-zag order. The
 // value is 16, which means first column (16%8 == 0) and third row (16/8 == 2).
-[GoLazy] partial class lazyᴛunzig { internal static array<nint> unzig = new nint[]{
+[GoLazy] partial class lazyᴛunzig { internal static array<nint> unzig = array<nint>([
     0, 1, 8, 16, 9, 2, 3, 10,
     17, 24, 32, 25, 18, 11, 4, 5,
     12, 19, 26, 33, 40, 48, 41, 34,
@@ -89,7 +89,7 @@ internal static UntypedInt adobeTransformYCbCrK => 2;
     29, 22, 15, 23, 30, 37, 44, 51,
     58, 59, 52, 45, 38, 31, 39, 46,
     53, 60, 61, 54, 47, 55, 62, 63
-}.array(); }
+]); }
 
 // Deprecated: Reader is not used by the [image/jpeg] package and should
 // not be used by others. It is kept for compatibility.
@@ -816,12 +816,12 @@ internal static (image.Image, error) applyBlack(this ref decoder d) {
     var bounds = d.img3.Bounds();
     var img = image.NewCMYK(bounds);
 
-    var translations = new applyBlack_translations[]{
+    var translations = array<applyBlack_translations>([
         new(d.img3.Y, d.img3.YStride),
         new(d.img3.Cb, d.img3.CStride),
         new(d.img3.Cr, d.img3.CStride),
         new(d.blackPix, d.blackStride)
-    }.array();
+    ]);
     foreach (var (t, translation) in range(translations.ΔRangeSnapshot())) {
         var subsample = d.comp[t].h != d.comp[0].h || d.comp[t].v != d.comp[0].v;
         for ((nint iBase, nint y) = (0, bounds.Min.Y); y < bounds.Max.Y; (iBase, y) = (iBase + img.Stride, y + 1)) {

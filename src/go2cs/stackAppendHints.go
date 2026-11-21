@@ -699,7 +699,7 @@ func newStackAppendHarvestCommand(tests bool, target string, options Options) st
 	return stackAppendHarvestCommand{
 		goTool: goTool,
 		args:   args,
-		env:    []string{"GOOS=" + goos, "GOARCH=" + goarch, "GOTOOLCHAIN=local", "CGO_ENABLED=0", "GOFLAGS="},
+		env:    []string{"GOOS=" + goos, "GOARCH=" + goarch, "GOTOOLCHAIN=local", "CGO_ENABLED=0", "GOFLAGS=", "GOCACHE=" + probeCacheDirOrExit()},
 	}
 }
 
@@ -989,4 +989,96 @@ func (v *Visitor) writeStackAppendMove(stmt ast.Stmt) {
 		v.outputBuilder.WriteString(v.indent(v.indentLevel))
 		fmt.Fprintf(v.outputBuilder, "%s = move2heap(%s, %s);", name, v.stackAppendBufferName(buffer), name)
 	}
+}
+
+// probeCacheEnv overrides the default probe cache directory; -probe-cache (probeCacheFlag) overrides it in turn.
+const probeCacheEnv = "GO2CS_PROBE_CACHE"
+
+// probeCacheFlag is -probe-cache, set by main; empty when the flag was not passed.
+var probeCacheFlag string
+
+// probeCacheDir is the probe cache (resolveProbeCacheDir), or "off" when it cannot be resolved: go refuses "off"
+// outright, where an empty GOCACHE would mean the user's own cache. A run never reaches that fallback, because every
+// harvest command takes its GOCACHE from probeCacheDirOrExit.
+func probeCacheDir() string {
+	dir, err := resolveProbeCacheDir()
+
+	if err != nil {
+		return "off"
+	}
+
+	return dir
+}
+
+// resolveProbeCacheDir resolves the probe cache: -probe-cache, else GO2CS_PROBE_CACHE, else go2cs/probe-cache under the
+// user cache directory, else a per-user directory under the temporary directory (probeCacheTempFallback). The harvest
+// builds the standard library once per target under its own flags (-trimpath, CGO_ENABLED=0, four targets), which no
+// ordinary build shares, so those entries are kept out of the user's GOCACHE: they cost a cold run about 175 MB and
+// 17 s on a ten-package module and are reused by every later run of any module. Go trims this cache by its own rule
+// (entries unused for five days), and deleting the directory is always safe. Go refuses a relative GOCACHE, so the
+// result is absolute.
+func resolveProbeCacheDir() (string, error) {
+	dir := probeCacheFlag
+
+	if dir == "" {
+		dir = os.Getenv(probeCacheEnv)
+	}
+
+	if dir == "" {
+		base, err := os.UserCacheDir()
+
+		if err != nil {
+			return probeCacheTempFallback()
+		}
+
+		dir = filepath.Join(base, "go2cs", "probe-cache")
+	}
+
+	if absolute, err := filepath.Abs(dir); err == nil {
+		dir = absolute
+	}
+
+	return dir, nil
+}
+
+// probeCacheTempFallback is the probe cache when the user has no cache directory (HOME and XDG_CACHE_HOME unset):
+// go2cs-probe-cache-<uid> under the temporary directory, created 0700. The temporary directory is shared and, on
+// Linux, world-writable, so a fixed name there could be created first by another user and fed to this user's builds
+// as GOCACHE; the directory is used only when it is a real directory (not a link), owned by this user, and closed to
+// group and others. Anything else, and any system with no user id (Windows), is refused, naming -probe-cache.
+func probeCacheTempFallback() (string, error) {
+	uid := os.Getuid()
+
+	if uid < 0 {
+		return "", fmt.Errorf("no user cache directory for the escape probe's build cache; pass -probe-cache <dir> or set %s", probeCacheEnv)
+	}
+
+	dir := filepath.Join(os.TempDir(), fmt.Sprintf("go2cs-probe-cache-%d", uid))
+
+	if err := os.Mkdir(dir, 0o700); err != nil && !os.IsExist(err) {
+		return "", fmt.Errorf("cannot create the escape probe's build cache %s: %w; pass -probe-cache <dir> or set %s", dir, err, probeCacheEnv)
+	}
+
+	info, err := os.Lstat(dir)
+
+	if err != nil || !info.IsDir() || info.Mode().Perm()&0o077 != 0 || !probeCacheOwnerIs(info, uid) {
+		return "", fmt.Errorf("refusing %s as the escape probe's build cache: it must be a directory owned by this user with mode 0700; pass -probe-cache <dir> or set %s", dir, probeCacheEnv)
+	}
+
+	return dir, nil
+}
+
+// probeCacheDirOrExit is the GOCACHE of every harvest command, resolved when the command is built rather than at
+// start-up, so only a run that would probe can be refused: a mode that converts nothing (the ref-lowering census,
+// -test-action build, run or compare) never resolves the cache. The refusal ends the run before the first probe,
+// because a harvest whose go commands fail reports nothing, which would change the emission silently.
+func probeCacheDirOrExit() string {
+	dir, err := resolveProbeCacheDir()
+
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+
+	return dir
 }

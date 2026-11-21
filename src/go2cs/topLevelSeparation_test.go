@@ -79,7 +79,7 @@ var topLevelSeparationCases = []struct {
 	{"nint Y = 4", false, "Go writes the vars adjacent"},
 	{"Pb(this ref T t) { return t.b; }", false, "adjacent one-line methods stay adjacent"},
 	{"void C(this ref T t) {", true, "Go has a blank line before C"},
-	{"void F() { }", true, "C stands in T's holder and F in the package class: a class switch stands between two blank lines"},
+	{"void F() { }", false, "Go writes F under C's closing brace, and package main keeps both in its package class"},
 	{"nint G() {", true, "G is one line in Go but two statements in C#, so it keeps a blank line"},
 	{"void H(", true, "H is one line in Go but has a prelude in C#, so it keeps a blank line"},
 	{"nint K() { return 7; }", true, "K follows H, which keeps its blank line"},

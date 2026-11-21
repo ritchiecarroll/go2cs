@@ -102,7 +102,7 @@ func dropped(n int) string {
 }
 ```
 
-<!-- source: src/tests/Behavioral/InitStatementScope/main.cs.target:45-58 -->
+<!-- source: src/tests/Behavioral/InitStatementScope/main.cs.target:36-49 -->
 ```csharp
 internal static @string dropped(nint n) {
     nint m = next(n); if (m > 3) {
@@ -162,7 +162,7 @@ func classify(x any) string {
 }
 ```
 
-<!-- source: src/tests/Behavioral/InitStatementScope/main.cs.target:72-96 -->
+<!-- source: src/tests/Behavioral/InitStatementScope/main.cs.target:63-87 -->
 ```csharp
 internal static @string classify(any x) {
     if (x._<Shape>(out var s)) {
@@ -219,7 +219,7 @@ func chain(x any, m map[string]int, n int) string {
 }
 ```
 
-<!-- source: src/tests/Behavioral/InitStatementScope/main.cs.target:98-111 -->
+<!-- source: src/tests/Behavioral/InitStatementScope/main.cs.target:89-102 -->
 ```csharp
 internal static @string chain(any x, map<@string, nint> m, nint n) {
     if (x == nil) {
@@ -258,7 +258,7 @@ func rebinding() int {
 }
 ```
 
-<!-- source: src/tests/Behavioral/InitStatementScope/main.cs.target:113-120 -->
+<!-- source: src/tests/Behavioral/InitStatementScope/main.cs.target:104-111 -->
 ```csharp
 internal static nint rebinding() {
     {
@@ -274,7 +274,7 @@ The closure case: each pass of the backward `goto` loop captures its own `x` bec
 scope each time it is entered. Siblings declaring the same name keep their blocks too, rather than
 renaming one of them.
 
-<!-- source: src/tests/Behavioral/InitStatementScope/main.cs.target:122-156 -->
+<!-- source: src/tests/Behavioral/InitStatementScope/main.cs.target:113-147 -->
 ```csharp
 internal static slice<nint> captures() {
     var fnsᴷ = new stackAppend<Func<nint>>();
@@ -326,7 +326,7 @@ output matches Go for every shape and for the rebinding and closure cases.
 
 Go keeps types and methods in separate namespaces, so a package may legally declare both a type `foo` and a method `foo` on some receiver. In C# the type is a member of the package class and the method is a member of its receiver type's **method holder**, one static class per receiver type (`mainᴛbuilder` holds the methods of `builder`; see [Functions and Methods](../ConversionStrategies.md#functions-and-methods)). The two never share a class, so neither is renamed. A golib reserved word (`slice`, `array`, `channel`, `map`, …) takes its one reserved spelling, `Δslice`, on the type and on the method alike:
 
-<!-- source: src/tests/Behavioral/ReservedTypeMethodCollision/main.cs.target:8-10, 18-26 -->
+<!-- source: src/tests/Behavioral/ReservedTypeMethodCollision/main.cs.target:8-10, 14-22 -->
 ```csharp
 partial struct Δslice {
     internal nint lo, hi;
@@ -352,7 +352,7 @@ Inside the holder the method `Δslice` stands beside the type `Δslice`. C# read
 
 Everywhere else the plain spelling stands. A holder for `words` that declares `cap`, `bits` and `Sort`, and a holder for `gauge` beside it that declares none of them:
 
-<!-- source: src/tests/Behavioral/MethodHolderNames/others.cs.target:14, 20-23, 33-35 -->
+<!-- source: src/tests/Behavioral/MethodHolderNames/others.cs.target:14, 20-23, 33 -->
 ```csharp
 } partial class mainᴛwords {
 …
@@ -361,8 +361,6 @@ internal static nint bits(this words w) { return math.bits_package.Len64(w[0]); 
 
 internal static void Sort(this words w) { main.Sort(w); }
 …
-} partial class mainᴛgauge {
-
 internal static nint size(this gauge g, words w) { return cap(w) + bits.Len64((uint64)g.n); }
 ```
 (Guarded by the `MethodHolderNames` behavioral test, output-compared against `go run`, and by the `GO2CS0013` analyzer, which reports a name in a holder that binds another member than the package's ([Diagnostic Codes](../DiagnosticCodes.md)).)
@@ -377,7 +375,7 @@ One case *does* rename the field: when its name equals its **enclosing type's** 
 Go's `type Label struct{ Label string }` keeps its field under one marker, which the composite
 literal's key and each access then use:
 
-<!-- source: src/tests/Behavioral/FieldNameTypeMethodCollision/FieldNameTypeMethodCollision.cs.target:13, 15-16, 21-22, 24, 29 -->
+<!-- source: src/tests/Behavioral/FieldNameTypeMethodCollision/FieldNameTypeMethodCollision.cs.target:13, 15-16, 21-22, 24, 27 -->
 ```csharp
 } partial class mainᴛevent {
 …
@@ -421,7 +419,7 @@ A **collision-renamed owning type is qualified unconditionally**, not just when 
 
 The three receiver-shadow arms above (`.of()` receiver equals the type, its capture, its box) and the collision-rename arm are all **special cases of one general rule**: a box accessor's bare owning-type spelling `Type.Ꮡfield` binds to **any** same-named variable that C# has in scope, and C# scopes a local to its whole enclosing block regardless of where it is declared or whether it participates in this accessor at all. So `boxAccessorType` also qualifies whenever a variable of the type's name is declared **anywhere in the current function** — receiver, parameters, results, or a local at any nesting depth (func literals included), collected into `funcScopeVarNames` during variable analysis. The general case, unrelated to any type-vs-method collision, is vendored poly1305 under `-tags purego`: `mac_noasm.go` declares `type mac struct{ macGeneric }`, and `func (h *MAC) Sum(b []byte)` declares `var mac [TagSize]byte`, so reaching the promoted-embed method `h.mac.Sum(&mac)` bare would spell `Ꮡ(h.mac).of(mac.ᏑmacGeneric)`, in which `mac` binds to the `array<byte>` local (CS1061) — in `Sum`/`Verify`, which declare that local, and **not** in `Write`, which does not. Qualifying is always value-correct: Go guarantees the reference is unambiguous, and inside a scope that shadows the type the type is simply unreachable by that bare name, so every bare occurrence the emitter produces is meant as the type. Emitted forms (from the `LocalShadowsEmbedHopType` guard; a method whose receiver is a `ref` reaches the promoted method through the plain field path, `h.acc.inner.Store(Ꮡacc)`, and needs no accessor, so the accessor appears where the receiver is a pointer):
 
-<!-- source: src/tests/Behavioral/LocalShadowsEmbedHopType/LocalShadowsEmbedHopType.cs.target:81, 94 -->
+<!-- source: src/tests/Behavioral/LocalShadowsEmbedHopType/LocalShadowsEmbedHopType.cs.target:70, 83 -->
 ```csharp
     p.Ꮡdeep.of(deep.Ꮡacc).of(main_package.acc.Ꮡinner).Store(Ꮡacc);
     …
@@ -443,25 +441,29 @@ The same rule applies to an **escaping local** whose address is taken — `var p
 ### A generic type's holder is named by the type alone
 
 A method holder's name is the package's class name, the marker and the receiver type's identifier, and for a
-generic type that identifier carries no type parameters and no constraints. `Iterator[T text.Text]` and
-`Window[K comparable, T text.Text]`, both constrained by a type of a package whose import path has a slash,
-take the holders `mainᴛIterator` and `mainᴛWindow`, each declared once with its open generic type
-(`[GoMethodHost(typeof(main_package.Iterator<>))]`, `typeof(main_package.Window<,>)`):
+generic type that identifier carries no type parameters and no constraints. In a library package `iterators`,
+`Iterator[T text.Text]` and `Window[K comparable, T text.Text]`, both constrained by a type of a package whose
+import path has a slash, take the holders `iteratorsᴛIterator` and `iteratorsᴛWindow`, each declared once with
+its open generic type (`[GoMethodHost(typeof(iterators_package.Iterator<>))]`,
+`typeof(iterators_package.Window<,>)`):
 
-<!-- source: src/tests/Behavioral/GenericHolderForeignConstraint/main.cs.target:17-20, 51-54 -->
+<!-- source: src/tests/Behavioral/GenericHolderForeignConstraint/iterators/iterators.cs:16-19, 56-59 -->
 ```csharp
-} partial class mainᴛIterator {
+} partial class iteratorsᴛIterator {
 
 public static void SetText<T>(this ref Iterator<T> it, T data)
     where T : /* text.Text */ IByteSeq<T, byte>, new()
 …
-} partial class mainᴛWindow {
+} partial class iteratorsᴛWindow {
 
 public static nint Len<K, T>(this Window<K, T> w)
     where T : /* text.Text */ IByteSeq<T, byte>, new()
 ```
-(Guarded by the `GenericHolderForeignConstraint` behavioral test, output-compared against `go run`, and by the
-converter test `TestGenericHolderIsNamedByTheTypeWhateverItsConstraint`.)
+Package `main` writes a holder only when a method name clashes (see
+[Functions and Methods](../ConversionStrategies.md#functions-and-methods)); otherwise its generic types' methods
+stay in `main_package` and no holder is named at all.
+(Guarded by the `GenericHolderForeignConstraint` behavioral test, whose `iterators` sub-package holds these types,
+output-compared against `go run`, and by the converter test `TestGenericHolderIsNamedByTheTypeWhateverItsConstraint`.)
 <!-- Until 2026-11-19 the holder's name was cut from the type's generic ORIGIN as rendered through
      getCSharpTypeName, whose string form carries each type parameter with its constraint. For a constraint
      from a slash-path package the string path's last-slash strip ate the type's own name, so
@@ -927,6 +929,7 @@ Every non-function predeclared Go identifier, the golib public top-level type su
 - **User types named `builtin` or `sstring`** would shadow golib names the emitter references even when the Go source never spells them — the qualified `builtin.len(…)` calls (emitted when a package method shadows a built-in) would bind the nested user struct (CS1501), and the string([]byte) elision's `sstring` views would bind the user type (CS0030). Both names are in the `reserved` set: the user types decline to `Δbuiltin`/`Δsstring`.
 - **User types named `any`, `rune`, `nint`, or `nuint`** shadow spellings the *emitter itself* produces: `interface{}` renders `any` (`slice<any>` bound the user struct, CS0029), an untyped rune-constant default spells `rune` (`c := 'x'` emits `rune c = 'x';`, CS0030), and Go `int`/`uint` map to the C# native-int contextual keywords (`partial struct nint { internal nint d; }` is a CS0523 layout cycle, and `@` cannot fix a name-identity problem). These names must **never** enter the string-based `reserved` set — legitimate emissions re-enter the same sanitizers, so corpus-wide `slice<rune>(…)` would corrupt to `slice<Δrune>` and re-fed delegate compositions corrupt `Func<…, nint, nint>` to `Δnint`. Instead `performNameCollisionAnalysis` registers a package-level TYPE bearing one of these names (`emitterSpelledTypeNames`) in the package-scoped `nameCollisions` map: every ident with that name *in that package* is `Δ`-renamed — exactly mirroring Go's package-scoped shadowing — with zero effect on any other package (the behavioral regression check is byte-identical<!-- [CNR](../Glossary.md#cnr) -->).
 - **`required` and `scoped`** are C# 11 contextual keywords banned as *type* names (CS9029/CS9062, surfacing in both the converted declaration and the TypeGenerator's output). Both are in the `keywords` `@`-escape set like `file` (`partial struct @required` — the `@` escape is valid in every position and the generator carries it through). `record`, `partial`, and the other contextual keywords compile clean as type names on C# 13/net9 (verified empirically) and stay unescaped.
+- **`extension`** is a C# 14 contextual keyword banned as a type or alias name (CS9306), and is escaped only in those two positions. A Go package named `extension` reaches C# as an import alias, which is written `using @extension = …;` (the `@` is carried on the alias's type-position uses too, `@extension.Kind e = 1;`). A package that declares a type named `extension` renames that name package-wide to `Δextension`, the same rule as `closed` and `union`. A local or field named `extension` stays bare (`nint extension = 7;`): the name is legal there, and escaping it in every position would put `@` on ordinary std locals. The C# 15 names `closed`, `union` and `safe` get the same `@` at an import alias. Guarded by `TestCSBannedTypeAndAliasNamesAreEscaped` and the `KeywordPackageAliases` behavioral test.<!-- 2026-11-20, board (qq): goldmark's `using extension = …` failed CS9306. The first cut put `extension` in the keywords set and its footprint moved 6 std files on windows/amd64 (`@extension` on locals in crypto/tls, crypto/x509, image/gif and mime), so the escape was narrowed to the alias and type positions. -->
 - **A user type whose name is a spelling the converter maps to a builtin** (`type float struct{…}` in modernc.org/mathutil) is named by its go/types object, never by its spelling: a type-position identifier that resolves to a package-level or function-local `TypeName` (not the Universe) skips the basic-type spellings (`float` to `float64`, `int` to `nint`) and renders as declared, `new @float(n: n, fracBits: fracBits)`. Before this the composite literal emitted `new float64(n: n, …)` (CS1739). Guarded by the `DeclaredTypeNamedFloat` behavioral test.
 - **`__arglist`** is a real (undocumented) Roslyn keyword, so a Go local of that name is escaped: `nint @__arglist = 5;` (unescaped it fails to parse, CS1002).<!-- history: the keyword set once carried the typo __argslist, which covered nothing. -->
 

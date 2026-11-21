@@ -60,4 +60,4 @@ internal static uint64 Uint64(this binaryBigEndian _, slice<byte> b) {
     return byteorder.BEUint64(b);
 }
 
-} // end routebsdᴛbinaryBigEndian
+}

@@ -33,4 +33,4 @@ public static nint /*s*/ Sum(this ref Value v) {
 
 public static slice<nint> Head(this ref Value v) { return v.Value‿[..2]; }
 
-} // end arrvalᴛValue
+}

@@ -76,4 +76,4 @@ internal static bool verifyVersionf(this ж<Checker> Ꮡcheck, positioner at, go
     return true;
 }
 
-} // end typesᴛChecker
+}

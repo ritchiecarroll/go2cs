@@ -43,7 +43,7 @@ internal static void checkSetFileCompletionNotificationModes() {
     if (err != nil) {
         return;
     }
-    ref var protos = ref heap<array<int32>>(new int32[]{Δsyscall.IPPROTO_TCP, 0}.array(), out var Ꮡprotos);
+    ref var protos = ref heap<array<int32>>(array<int32>([Δsyscall.IPPROTO_TCP, 0]), out var Ꮡprotos);
     ref var buf = ref heap(new array<Δsyscall.WSAProtocolInfo>(32, () => new()), out var Ꮡbuf);
     ref var len = ref heap<uint32>((uint32)/* unsafe.Sizeof(buf) */ (uintptr)20096, out var Ꮡlen);
     (var n, err) = Δsyscall.WSAEnumProtocols(Ꮡprotos.at<int32>(0), Ꮡbuf.at<Δsyscall.WSAProtocolInfo>(0), Ꮡlen);

@@ -437,7 +437,7 @@ public class TestingRuntimeTests
     public void ParallelCapLimitsConcurrentParallelTests()
     {
         // F10 guard: -parallel caps simultaneously RUNNING parallel tests (Go semantics; the
-        // default is the processor count, matching go test's GOMAXPROCS default).
+        // default is runtime.GOMAXPROCS(0), as Go's flag reads it: ParallelDefaultIsGOMAXPROCS).
         int current = 0;
         int observedMax = 0;
 
@@ -463,6 +463,48 @@ public class TestingRuntimeTests
 
         Assert.AreEqual(0, TestHost.Run(registry, ["-parallel", "1", "-timeout", "30s"]));
         Assert.AreEqual(1, observedMax);
+    }
+
+    [TestMethod]
+    public void ParallelDefaultIsGOMAXPROCS()
+    {
+        // Go's -test.parallel defaults to runtime.GOMAXPROCS(0) when the flag is registered, so a GOMAXPROCS
+        // in the environment (or set before the run) caps the parallel tests; .NET's processor count does
+        // not. Four parallel tests under GOMAXPROCS 2 run at most two at a time. (A host with fewer than three
+        // processors cannot tell the two defaults apart here.)
+        nint previous = runtime_package.GOMAXPROCS(2);
+        int current = 0;
+        int observedMax = 0;
+
+        try
+        {
+            TestRegistry registry = new("runtime/paralleldefault", []);
+
+            for (int i = 1; i <= 4; i++)
+            {
+                registry.Add($"TestParallel{i}", pointer =>
+                {
+                    ref testing_package.T test = ref pointer.Value;
+                    test.Parallel();
+                    int now = Interlocked.Increment(ref current);
+                    int seenMax;
+                    do
+                    {
+                        seenMax = Volatile.Read(ref observedMax);
+                    }
+                    while (now > seenMax && Interlocked.CompareExchange(ref observedMax, now, seenMax) != seenMax);
+                    Thread.Sleep(200);
+                    Interlocked.Decrement(ref current);
+                }, "runtime_test.go", 1);
+            }
+
+            Assert.AreEqual(0, TestHost.Run(registry, ["-timeout", "30s"]));
+            Assert.AreEqual(2, observedMax, "parallel tests running at once under GOMAXPROCS 2 with no -parallel");
+        }
+        finally
+        {
+            runtime_package.GOMAXPROCS(previous);
+        }
     }
 
     [TestMethod]

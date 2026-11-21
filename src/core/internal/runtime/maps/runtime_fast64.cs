@@ -362,7 +362,7 @@ internal static @unsafe.Pointer putSlotSmallFastPtr(this ref Map m, ж<abi.MapTy
         var iΔ1 = match.first();
 
         @unsafe.Pointer slotKeyΔ1 = g.key(typ, iΔ1);
-        if (key == ~@unsafe.Pointer.To<@unsafe.Pointer>(slotKeyΔ1)) {
+        if (key == @unsafe.Pointer.LoadWord(@unsafe.Pointer.To<@unsafe.Pointer>(slotKeyΔ1))) {
             @unsafe.Pointer slotElemΔ1 = g.elem(typ, iΔ1);
             return slotElemΔ1;
         }
@@ -380,7 +380,7 @@ internal static @unsafe.Pointer putSlotSmallFastPtr(this ref Map m, ж<abi.MapTy
     var i = match.first();
 
     @unsafe.Pointer slotKey = g.key(typ, i);
-    (@unsafe.Pointer.To<@unsafe.Pointer>(slotKey)).Value = key;
+    @unsafe.Pointer.StoreWord(@unsafe.Pointer.To<@unsafe.Pointer>(slotKey), key);
 
     @unsafe.Pointer slotElem = g.elem(typ, i);
 
@@ -464,7 +464,7 @@ outer:
                 var iΔ1 = match.first();
 
                 @unsafe.Pointer slotKey = g.key(Ꮡtyp, iΔ1);
-                if (key == ~@unsafe.Pointer.To<@unsafe.Pointer>(slotKey)) {
+                if (key == @unsafe.Pointer.LoadWord(@unsafe.Pointer.To<@unsafe.Pointer>(slotKey))) {
                     slotElem = g.elem(Ꮡtyp, iΔ1);
 
                     t.checkInvariants(Ꮡtyp, Ꮡm);
@@ -503,7 +503,7 @@ outer:
             // If there is room left to grow, just insert the new entry.
             if (t.growthLeft > 0) {
                 @unsafe.Pointer slotKey = g.key(Ꮡtyp, i);
-                (@unsafe.Pointer.To<@unsafe.Pointer>(slotKey)).Value = key;
+                @unsafe.Pointer.StoreWord(@unsafe.Pointer.To<@unsafe.Pointer>(slotKey), key);
 
                 slotElem = g.elem(Ꮡtyp, i);
 

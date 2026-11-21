@@ -598,4 +598,4 @@ internal static (@string, error) decodeString(this ref Decoder d, undecodedStrin
     return (s, err);
 }
 
-} // end hpackᴛDecoder
+}

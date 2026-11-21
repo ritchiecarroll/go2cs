@@ -1,7 +1,6 @@
 namespace go;
 
 using fmt = fmt_package;
-using static main_package;
 
 partial class main_package {
 
@@ -9,13 +8,9 @@ partial struct @float {
     internal nint n, fracBits;
 }
 
-} partial class mainᴛfloat {
-
 internal static void normalize(this ref @float f) { f.fracBits++; }
 
 internal static @string String(this @float f) { return fmt.Sprintf("float(%d,%d)"u8, f.n, f.fracBits); }
-
-} partial class main_package {
 
 internal static @float newFloat(nint n, nint fracBits) {
     var f = new @float(n: n, fracBits: fracBits);

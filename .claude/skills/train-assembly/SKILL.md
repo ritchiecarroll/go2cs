@@ -473,10 +473,10 @@ description: Assemble, rehearse, gate or land a train. Seats and seating mechani
      dropped them silently — the subtraction class of step 4, one file over. -->
 - **THE GATE-RED LOOP OF RECORD FOR A CONVERTER SEAT ON A VERSION BRANCH** — a red in an EMITTED file of
   new-release code is a CONVERTER seat: mechanism at the tree, then a prediction (census, footprint by
-  class, build proof) BEFORE the two-seeded three-target diff, one signed commit off the version tip with
+  class, build proof) BEFORE the two-seeded diff on every flavour the corpus carries, one signed commit off the version tip with
   the footprint applied as hunks, push-then-announce, a second lane reviewing AT THE BYTES, and the
   applying lane building a closure-derived prediction before its rebuild. **Every first compile behind a
-  cured red is a finding of its own, and UNPREDICTED.** <!-- ⚠ 2026-09-15, the H5 tree: three reds cured
+  cured red is a finding of its own, and UNPREDICTED.** <!-- 2026-11-20 (board tt): "three-target diff" became "diff on every flavour the corpus carries" (today four, linux/arm64 the fourth; corpus-reconvert §2). ⚠ 2026-09-15, the H5 tree: three reds cured
      this way in one morning and two more found behind them. -->
 - **SEAT REVIEW OF RECORD: A SECOND LANE BUILDS THE SEAT'S CONVERTER, RE-EMITS THE AFFECTED PACKAGES FROM
   THE PIN AGAINST A BASELINE PINNED AT THE SEAT'S OWN PARENT, AND COMPARES THE SEAT'S APPLIED CORPUS DELTA

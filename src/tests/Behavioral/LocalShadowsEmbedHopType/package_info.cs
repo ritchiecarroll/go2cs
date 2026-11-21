@@ -54,7 +54,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("LocalShadowsEmbedHopType.go", "LocalShadowsEmbedHopType.cs", "AA0ugoK4ooKCggAXJoKogoKCgsqCgoKCgoKCuAAEFIKCgqaCgoKClIKCgoKCgoI=")]
+[assembly: GoPositionMap("LocalShadowsEmbedHopType.go", "LocalShadowsEmbedHopType.cs", "AAougoK4ooKCggATJoKogoKCgqqCgoKCgoKCuAACFIKCgqaCgoKClIKCgoKCgoI=")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -95,7 +95,4 @@ public static partial class main_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(main_package.DeepHash)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛDeepHash;
-[GoMethodHost(typeof(main_package.Hash)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛHash;
-[GoMethodHost(typeof(main_package.inner)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛinner;
 // </MethodHolders>

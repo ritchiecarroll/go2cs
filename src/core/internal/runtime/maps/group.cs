@@ -388,25 +388,25 @@ internal static void cloneGroup(ж<abi.MapType> Ꮡtyp, groupReference newGroup,
     if (typ.IndirectKey()) {
         // Deep copy keys if indirect.
         for (var i = (uintptr)0; i < abi.MapGroupSlots; i++) {
-            @unsafe.Pointer oldKey = ~@unsafe.Pointer.To<@unsafe.Pointer>(oldGroup.key(Ꮡtyp, i));
+            @unsafe.Pointer oldKey = @unsafe.Pointer.LoadWord(@unsafe.Pointer.To<@unsafe.Pointer>(oldGroup.key(Ꮡtyp, i)));
             if (oldKey == nil) {
                 continue;
             }
             @unsafe.Pointer newKey = newobject(typ.Key);
             typedmemmove(typ.Key, newKey, oldKey);
-            (@unsafe.Pointer.To<@unsafe.Pointer>(newGroup.key(Ꮡtyp, i))).Value = newKey;
+            @unsafe.Pointer.StoreWord(@unsafe.Pointer.To<@unsafe.Pointer>(newGroup.key(Ꮡtyp, i)), newKey);
         }
     }
     if (typ.IndirectElem()) {
         // Deep copy elems if indirect.
         for (var i = (uintptr)0; i < abi.MapGroupSlots; i++) {
-            @unsafe.Pointer oldElem = ~@unsafe.Pointer.To<@unsafe.Pointer>(oldGroup.elem(Ꮡtyp, i));
+            @unsafe.Pointer oldElem = @unsafe.Pointer.LoadWord(@unsafe.Pointer.To<@unsafe.Pointer>(oldGroup.elem(Ꮡtyp, i)));
             if (oldElem == nil) {
                 continue;
             }
             @unsafe.Pointer newElem = newobject(typ.Elem);
             typedmemmove(typ.Elem, newElem, oldElem);
-            (@unsafe.Pointer.To<@unsafe.Pointer>(newGroup.elem(Ꮡtyp, i))).Value = newElem;
+            @unsafe.Pointer.StoreWord(@unsafe.Pointer.To<@unsafe.Pointer>(newGroup.elem(Ꮡtyp, i)), newElem);
         }
     }
 }

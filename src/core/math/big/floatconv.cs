@@ -168,7 +168,7 @@ internal static (ж<Float> f, nint b, error err) scan(this ж<Float> Ꮡz, io.By
 //	for p, q := uint64(0), uint64(1); p < q; p, q = q, q*5 {
 //		fmt.Println(q)
 //	}
-[GoLazy] partial class lazyᴛpow5tab { internal static array<uint64> pow5tab = new uint64[]{
+[GoLazy] partial class lazyᴛpow5tab { internal static array<uint64> pow5tab = array<uint64>([
     1,
     5,
     25,
@@ -197,7 +197,7 @@ internal static (ж<Float> f, nint b, error err) scan(this ж<Float> Ꮡz, io.By
     298023223876953125UL,
     1490116119384765625UL,
     7450580596923828125UL
-}.array(); }
+]); }
 
 } partial class bigᴛFloat {
 
@@ -328,4 +328,4 @@ public static error Scan(this ж<Float> Ꮡz, fmt.ScanState s, rune ch) {
     return err;
 }
 
-} // end bigᴛFloat
+}

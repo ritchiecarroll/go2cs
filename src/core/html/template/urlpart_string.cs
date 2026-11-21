@@ -19,7 +19,7 @@ internal static void _ᴛ6() {
 internal static ref readonly @string _urlPart_name => ref _urlPart_nameᵇ;
 private static readonly @string _urlPart_nameᵇ = "urlPartNoneurlPartPreQueryurlPartQueryOrFragurlPartUnknown"u8;
 
-internal static array<uint8> _urlPart_index = new uint8[]{0, 11, 26, 44, 58}.array();
+internal static array<uint8> _urlPart_index = array<uint8>([0, 11, 26, 44, 58]);
 
 } partial class templateᴛurlPart {
 
@@ -30,4 +30,4 @@ internal static @string String(this urlPart i) {
     return _urlPart_name.slice(_urlPart_index[i], _urlPart_index[i + 1]);
 }
 
-} // end templateᴛurlPart
+}

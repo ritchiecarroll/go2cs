@@ -47,6 +47,11 @@ func (v *Visitor) convIndexListExpr(indexListExpr *ast.IndexListExpr) string {
 		indices = kept
 	}
 
+	// An explicit instantiation of a shape-witness FUNCTION names its witnesses (see convIndexExpr).
+	if witnessed := v.shapeWitnessExplicitTypeArgs(indexListExpr.X); witnessed != nil {
+		return fmt.Sprintf("%s<%s>", v.convExpr(indexListExpr.X, xContexts), strings.Join(witnessed, ", "))
+	}
+
 	// A PARTIAL Go instantiation of a generic FUNCTION completes from the resolved instance —
 	// C# has no partial instantiation (CS0305). See completedInstantiationTypeArgs.
 	if completed := v.completedInstantiationTypeArgs(indexListExpr.X, indices); completed != nil {

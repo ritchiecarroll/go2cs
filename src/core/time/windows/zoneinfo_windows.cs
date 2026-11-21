@@ -238,13 +238,13 @@ internal static void initLocalFromTZI(ж<syscall.Timezoneinformation> Ꮡi) {
 
 [GoLazy] partial class lazyᴛusPacific { internal static readonly ж<syscall.Timezoneinformation> ᏑusPacific = new StaticBox<syscall.Timezoneinformation>(new syscall.Timezoneinformation(
     Bias: 8 * 60,
-    StandardName: new uint16[]{
+    StandardName: array<uint16>(32, [
         'P', 'a', 'c', 'i', 'f', 'i', 'c', ' ', 'S', 't', 'a', 'n', 'd', 'a', 'r', 'd', ' ', 'T', 'i', 'm', 'e'
-    }.array(32),
+    ]),
     StandardDate: new syscall.Systemtime(Month: 11, Day: 1, Hour: 2),
-    DaylightName: new uint16[]{
+    DaylightName: array<uint16>(32, [
         'P', 'a', 'c', 'i', 'f', 'i', 'c', ' ', 'D', 'a', 'y', 'l', 'i', 'g', 'h', 't', ' ', 'T', 'i', 'm', 'e'
-    }.array(32),
+    ]),
     DaylightDate: new syscall.Systemtime(Month: 3, Day: 2, Hour: 2),
     DaylightBias: -60
 )); }
@@ -252,13 +252,13 @@ internal static ref syscall.Timezoneinformation usPacific => ref ((StaticBox<sys
 
 [GoLazy] partial class lazyᴛaus { internal static readonly ж<syscall.Timezoneinformation> Ꮡaus = new StaticBox<syscall.Timezoneinformation>(new syscall.Timezoneinformation(
     Bias: -10 * 60,
-    StandardName: new uint16[]{
+    StandardName: array<uint16>(32, [
         'A', 'U', 'S', ' ', 'E', 'a', 's', 't', 'e', 'r', 'n', ' ', 'S', 't', 'a', 'n', 'd', 'a', 'r', 'd', ' ', 'T', 'i', 'm', 'e'
-    }.array(32),
+    ]),
     StandardDate: new syscall.Systemtime(Month: 4, Day: 1, Hour: 3),
-    DaylightName: new uint16[]{
+    DaylightName: array<uint16>(32, [
         'A', 'U', 'S', ' ', 'E', 'a', 's', 't', 'e', 'r', 'n', ' ', 'D', 'a', 'y', 'l', 'i', 'g', 'h', 't', ' ', 'T', 'i', 'm', 'e'
-    }.array(32),
+    ]),
     DaylightDate: new syscall.Systemtime(Month: 10, Day: 1, Hour: 2),
     DaylightBias: -60
 )); }

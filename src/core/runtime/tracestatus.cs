@@ -242,4 +242,4 @@ internal static traceArg nextSeq(this ref traceSchedResourceState r, uintptr gen
     return (traceArg)r.seq[gen % 2];
 }
 
-} // end runtimeᴛtraceSchedResourceState
+}

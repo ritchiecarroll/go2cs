@@ -574,4 +574,4 @@ public static (@string, @string, CodeObj) PeekObj(this ж<PkgDecoder> Ꮡpr, Rel
 // Version reports the version of the bitstream.
 public static Version Version(this ref Decoder w) { return w.common.version; }
 
-} // end pkgbitsᴛDecoder
+}

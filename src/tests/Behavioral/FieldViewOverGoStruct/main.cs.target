@@ -117,7 +117,7 @@ internal static bool wholeCompare(ж<hdr> Ꮡh) {
     ref var h = ref Ꮡh.DerefOrNull();
 
     var p = @unsafe.ArrayPointer<byte>.Of(Ꮡh.Ꮡport, 2);
-    return @unsafe.ArrayPointer<byte>.Load(p) == new byte[]{(byte)h.port, (byte)(h.port >> 8)}.array();
+    return @unsafe.ArrayPointer<byte>.Load(p) == array<byte>([(byte)h.port, (byte)(h.port >> 8)]);
 }
 
 internal static nint sum2(/*[2]*/ array<byte> a) {
@@ -271,9 +271,9 @@ internal static void arms(@string root, ж<hdr> Ꮡh) {
     var (before, after) = wholeIsACopy(Ꮡh);
     fmt.Printf("%s whole load is a copy: %#x then %#x, port %#x\n"u8, root, before, after, h.port);
     fmt.Printf("%s whole load compared: %v, as an argument: %#x\n"u8, root, wholeCompare(Ꮡh), wholeArgument(Ꮡh));
-    wholeStoreDirect(Ꮡh, new byte[]{0xA1, 0xA2}.array());
+    wholeStoreDirect(Ꮡh, array<byte>([0xA1, 0xA2]));
     fmt.Printf("%s whole store: port %#x\n"u8, root, h.port);
-    wholeStoreLocal(Ꮡh, new byte[]{0xB1, 0xB2}.array());
+    wholeStoreLocal(Ꮡh, array<byte>([0xB1, 0xB2]));
     fmt.Printf("%s whole store through a local: port %#x, tail %#x\n"u8, root, h.port, h.tail);
     fmt.Printf("%s range by value: %#x, where written: %#x\n"u8, root, rangeValue(Ꮡh), rangeValueDirect(Ꮡh));
     fmt.Printf("%s range by value sees a store: %#x, port %#x\n"u8, root, rangeValueSeesAStore(Ꮡh), h.port);

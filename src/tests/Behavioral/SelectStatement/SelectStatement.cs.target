@@ -1,7 +1,6 @@
 namespace go;
 
 using fmt = fmt_package;
-using static main_package;
 
 partial class main_package {
 
@@ -45,8 +44,6 @@ internal static void sendOnly(channel/*<-*/<@string> s) {
     s.ᐸꟷ("output");
 }
 
-} partial class mainᴛIntSlice {
-
 public static Action<Func<nint, bool>> All(this IntSlice s) {
     var sʗ1 = s;
     return (Func<nint, bool> yield) => {
@@ -57,8 +54,6 @@ public static Action<Func<nint, bool>> All(this IntSlice s) {
         }
     };
 }
-
-} partial class main_package {
 
 internal static void generate(channel/*<-*/<nint> ch) {
     for (nint i = 2; ; i++) {

@@ -872,4 +872,4 @@ internal static void varList(this ж<cycleFinder> Ꮡw, slice<ж<Var>> list) {
     }
 }
 
-} // end typesᴛcycleFinder
+}

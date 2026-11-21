@@ -429,4 +429,4 @@ internal static bool match(this domainMatch m, @string host, @string port, net.I
     return false;
 }
 
-} // end httpproxyᴛdomainMatch
+}

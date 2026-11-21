@@ -161,4 +161,4 @@ public static bool /*reseedRequired*/ Generate(this ж<Counter> Ꮡc, slice<byte
     return false;
 }
 
-} // end drbgᴛCounter
+}

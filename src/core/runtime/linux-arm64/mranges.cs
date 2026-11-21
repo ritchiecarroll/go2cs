@@ -397,4 +397,4 @@ internal static void removeGreaterEqual(this ref addrRanges a, uintptr addr) {
 
 // go2cs generated this placeholder — func cloneInto is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-} // end runtimeᴛaddrRanges
+}

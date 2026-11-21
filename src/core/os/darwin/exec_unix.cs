@@ -171,4 +171,4 @@ internal static time.Duration systemTime(this ref ProcessState p) {
     return ((time.Duration)p.rusage.ᏑStime.Nano()) * time.Nanosecond;
 }
 
-} // end osᴛProcessState
+}

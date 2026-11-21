@@ -53,7 +53,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("DeferValueReceiverSnapshot.go", "DeferValueReceiverSnapshot.cs", "AA0UgoIACQjCgoKipKKSoqTCgqLEooKSoqTCgqKkgoKCgoKCgg==", "", "", "", "31:27,32:31,43:27,55:21,69:27,81:21")]
+[assembly: GoPositionMap("DeferValueReceiverSnapshot.go", "DeferValueReceiverSnapshot.cs", "AAoUgoLYwoKCoqSikqKkwoKipKKCkqKkwoKipIKCgoKCgoI=", "", "", "", "24:27,25:31,36:27,48:21,60:27,72:21")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -91,6 +91,4 @@ public static partial class main_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(main_package.path)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛpath;
-[GoMethodHost(typeof(main_package.state)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛstate;
 // </MethodHolders>

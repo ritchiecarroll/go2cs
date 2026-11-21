@@ -18,7 +18,7 @@ internal static void main() {
     Rows r = GoReflect.WithElemDims(new array<nint>[]{}.slice(), 3);
     fmt.Println("named empty:", reflect.TypeOf(u).Elem().Len(), reflect.TypeOf(r).Elem().Len());
 
-    var rows = GoReflect.WithElemDims(new array<nint>[]{new nint[]{1, 2, 3}.array()}.slice(), 3);
+    var rows = GoReflect.WithElemDims(new array<nint>[]{array<nint>([1, 2, 3])}.slice(), 3);
     Rows window = GoReflect.WithElemDims(rows[..0], 3);
     fmt.Println("named window:", reflect.TypeOf(window).Elem().Len());
     Rows full = rows;

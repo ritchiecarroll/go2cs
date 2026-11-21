@@ -90,4 +90,4 @@ public static template.HTML ToHTML(this ж<TimeHistogram> Ꮡh, Func<time.Durati
     return (template.HTML)w.String();
 }
 
-} // end traceviewerᴛTimeHistogram
+}

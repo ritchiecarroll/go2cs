@@ -52,7 +52,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("TypedNilInterface.go", "TypedNilInterface.cs", "AA0mAAkIABQEhIKCloKWgpaCgoKCloKegoKCgoKCgpaUxAADFIKCgpaCloKCgpaWgoKCgoKWgoKWgpSslIKYAAQQgqaCgqaYsoKCgpS4gg==", "149-156:1", "", "", "", "142:21,143:13")]
+[assembly: GoPositionMap("TypedNilInterface.go", "TypedNilInterface.cs", "AAom2AASBISCgpaCloKWgoKCgpaCnoKCgoKCgoKWlMQAAxSCgoKWgpaCgoKWloKCgoKCloKCloKUrJSCmAAEEIKmgoKmmLKCgoKUuII=", "149-156:1", "", "", "", "133:21,134:13")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -94,6 +94,4 @@ public static partial class main_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(main_package.AErr)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛAErr;
-[GoMethodHost(typeof(main_package.BErr)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛBErr;
 // </MethodHolders>

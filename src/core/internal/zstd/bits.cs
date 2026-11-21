@@ -146,4 +146,4 @@ internal static error makeError(this ref reverseBitReader rbr, @string msg) {
     return rbr.r.makeError((nint)rbr.off, msg);
 }
 
-} // end zstdᴛreverseBitReader
+}

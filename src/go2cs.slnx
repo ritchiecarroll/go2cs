@@ -298,6 +298,8 @@
     <Project Path="tests/Behavioral/AliasReceiverForms/AliasReceiverForms.csproj" />
     <Project Path="tests/Behavioral/AliasStructComposite/AliasStructComposite.csproj" />
     <Project Path="tests/Behavioral/AndNotAssignNarrow/AndNotAssignNarrow.csproj" />
+    <Project Path="tests/Behavioral/AnonIfaceEmbedCrossPackage/AnonIfaceEmbedCrossPackage.csproj" />
+    <Project Path="tests/Behavioral/AnonIfaceEmbedCrossPackage/embedlib/go.anonifaceembed.csproj" />
     <Project Path="tests/Behavioral/AnonIfaceMethodSetWidening/AnonIfaceMethodSetWidening.csproj" />
     <Project Path="tests/Behavioral/AnonIfaceParamCrossPackage/AnonIfaceParamCrossPackage.csproj" />
     <Project Path="tests/Behavioral/AnonIfaceParamCrossPackage/anonifacelib/go.anonifacedbg.csproj" />
@@ -356,6 +358,8 @@
     <Project Path="tests/Behavioral/OpenSliceUnnamedArray/OpenSliceUnnamedArray.csproj" />
     <Project Path="tests/Behavioral/PackageNameNotDirName/PackageNameNotDirName.csproj" />
     <Project Path="tests/Behavioral/PackageNameNotDirName/lib/PackageNameNotDirName.lib.csproj" />
+    <Project Path="tests/Behavioral/PromotedUnexportedEmbedChain/PromotedUnexportedEmbedChain.csproj" />
+    <Project Path="tests/Behavioral/PromotedUnexportedEmbedChain/ppembedlib/go.ppembedlib.csproj" />
     <Project Path="tests/Behavioral/ReceiverShadowsImport/ReceiverShadowsImport.csproj" />
     <Project Path="tests/Behavioral/BigUntypedConstComparison/BigUntypedConstComparison.csproj" />
     <Project Path="tests/Behavioral/BitwiseUntypedConst/BitwiseUntypedConst.csproj" />
@@ -373,6 +377,7 @@
     <Project Path="tests/Behavioral/ByteTableStringConst/ByteTableStringConst.csproj" />
     <Project Path="tests/Behavioral/ByteTableStringVar/ByteTableStringVar.csproj" />
     <Project Path="tests/Behavioral/ArrayCastDerefClone/ArrayCastDerefClone.csproj" />
+    <Project Path="tests/Behavioral/ArrayLiteralBuiltin/ArrayLiteralBuiltin.csproj" />
     <Project Path="tests/Behavioral/ArrayLiteralDeclaredLength/ArrayLiteralDeclaredLength.csproj" />
     <Project Path="tests/Behavioral/ArrayOfCrossPackageType/ArrayOfCrossPackageType.csproj" />
     <Project Path="tests/Behavioral/ArrayPassByValue/ArrayPassByValue.csproj" />
@@ -641,6 +646,7 @@
     <Project Path="tests/Behavioral/GenericNamedArrayType/GenericNamedArrayType.csproj" />
     <Project Path="tests/Behavioral/GenericNegation/GenericNegation.csproj" />
     <Project Path="tests/Behavioral/GenericHolderForeignConstraint/GenericHolderForeignConstraint.csproj" />
+    <Project Path="tests/Behavioral/GenericHolderForeignConstraint/iterators/GenericHolderForeignConstraint.iterators.csproj" />
     <Project Path="tests/Behavioral/GenericHolderForeignConstraint/text/GenericHolderForeignConstraint.text.csproj" />
     <Project Path="tests/Behavioral/GenericInstClosedIface/GenericInstClosedIface.csproj" />
     <Project Path="tests/Behavioral/GenericInstClosedIfaceConsumer/GenericInstClosedIfaceConsumer.csproj" />
@@ -755,6 +761,12 @@
     <Project Path="tests/Behavioral/KeyedLiteralNamedForeignStruct/guid/KeyedLiteralNamedForeignStruct.guid.csproj" />
     <Project Path="tests/Behavioral/KeyedLiteralNamedForeignStruct/win/KeyedLiteralNamedForeignStruct.win.csproj" />
     <Project Path="tests/Behavioral/KeywordNamedTypes/KeywordNamedTypes.csproj" />
+    <Project Path="tests/Behavioral/KeywordPackageAliases/KeywordPackageAliases.csproj" />
+    <Project Path="tests/Behavioral/KeywordPackageAliases/kwlib/extension/go.kwlib.extension.csproj" />
+    <Project Path="tests/Behavioral/KeywordPackageAliases/kwlib/extension/sub/go.kwlib.extension.sub.csproj" />
+    <Project Path="tests/Behavioral/KeywordPackageAliases/kwlib/file/go.kwlib.file.csproj" />
+    <Project Path="tests/Behavioral/KeywordPackageAliases/kwlib/required/go.kwlib.required.csproj" />
+    <Project Path="tests/Behavioral/KeywordPackageAliases/kwlib/scoped/go.kwlib.scoped.csproj" />
     <Project Path="tests/Behavioral/KeywordTrueFalseIdent/KeywordTrueFalseIdent.csproj" />
     <Project Path="tests/Behavioral/LambdaFunctions/LambdaFunctions.csproj" />
     <Project Path="tests/Behavioral/LambdaNilOnlyReturnInference/LambdaNilOnlyReturnInference.csproj" />
@@ -1208,6 +1220,7 @@
     <Project Path="tests/Behavioral/SharedEmbeddedInterfaceMember/SharedEmbeddedInterfaceMember.csproj" />
     <Project Path="tests/Behavioral/ShiftNegativeWideConst/ShiftNegativeWideConst.csproj" />
     <Project Path="tests/Behavioral/ShiftPrecedenceUnsigned/ShiftPrecedenceUnsigned.csproj" />
+    <Project Path="tests/Behavioral/ShapeWitnessSamePackage/ShapeWitnessSamePackage.csproj" />
     <Project Path="tests/Behavioral/ShellCacheMutation/ShellCacheMutation.csproj" />
     <Project Path="tests/Behavioral/ShellCacheNilFunc/ShellCacheNilFunc.csproj" />
     <Project Path="tests/Behavioral/ShellCacheReassertEquality/ShellCacheReassertEquality.csproj" />
@@ -1357,6 +1370,7 @@
     <Project Path="tests/Behavioral/UnsafePointerReceiverCopy/UnsafePointerReceiverCopy.csproj" />
     <Project Path="tests/Behavioral/UnsafePointerReinterpret/UnsafePointerReinterpret.csproj" />
     <Project Path="tests/Behavioral/UnsafePointerTypeAlias/UnsafePointerTypeAlias.csproj" />
+    <Project Path="tests/Behavioral/UnsafePointerWordNilSlot/UnsafePointerWordNilSlot.csproj" />
     <Project Path="tests/Behavioral/UnsafeStringEmpty/UnsafeStringEmpty.csproj" />
     <Project Path="tests/Behavioral/UnsafeSliceDataAliasing/UnsafeSliceDataAliasing.csproj" />
     <Project Path="tests/Behavioral/UnsignedIndexPastIntRange/UnsignedIndexPastIntRange.csproj" />

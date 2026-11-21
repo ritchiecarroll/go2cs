@@ -792,4 +792,4 @@ internal static void encode(this ж<Encoder> Ꮡenc, ж<encBuffer> b, reflect.Va
     finally { ᒐ.Run(); }
 }
 
-} // end gobᴛEncoder
+}
