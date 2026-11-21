@@ -75,7 +75,7 @@ public sealed class GoFrameRuleGenerator : IIncrementalGenerator
     /// A source file's key in the deferred lists and their hint names: its file name's letters and digits and an FNV-1a
     /// hash of its full path. The path itself is never written: with EmitCompilerGeneratedFiles the lists land on disk.
     /// </summary>
-    internal static string DeferredKey(string filePath)
+    public static string DeferredKey(string filePath)
     {
         uint hash = 2166136261;
 
