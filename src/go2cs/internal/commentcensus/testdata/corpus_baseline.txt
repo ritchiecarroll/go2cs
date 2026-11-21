@@ -22,7 +22,7 @@ misplaced:field-doc/anchor-differs	24
 misplaced:free-in-type/anchor-differs	23
 misplaced:free-stmt/anchor-differs	356
 misplaced:free-top-level/anchor-differs	36
-misplaced:in-composite-literal/anchor-differs	25
+misplaced:in-composite-literal/anchor-differs	26
 misplaced:in-composite-literal/trailing-to-own-line	4
 misplaced:in-expression/trailing-to-own-line	12
 misplaced:spec-doc-in-group/anchor-differs	1

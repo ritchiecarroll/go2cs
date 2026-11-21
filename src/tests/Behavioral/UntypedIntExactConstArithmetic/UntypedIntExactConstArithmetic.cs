@@ -12,7 +12,7 @@ partial struct word /*num:nuint*/;
 
 internal static UntypedInt wordMask => /* 1<<64 - 1 */ 18446744073709551615;
 
-internal static array<uint64> quotients = new uint64[]{/* maxUint64 / 5 */ 3689348814741910323UL, /* maxUint64 / 5 / 5 */ 737869762948382064UL, /* maxUint64/10 + 1 */ 1844674407370955162UL}.array();
+internal static array<uint64> quotients = array<uint64>([/* maxUint64 / 5 */ 3689348814741910323UL, /* maxUint64 / 5 / 5 */ 737869762948382064UL, /* maxUint64/10 + 1 */ 1844674407370955162UL]);
 
 internal static slice<word> words = [0, 1, unchecked((nuint)(/* wordMask / 4 */ 4611686018427387903UL)), unchecked((nuint)(/* wordMask / 2 */ 9223372036854775807UL)), wordMask - 1, wordMask];
 

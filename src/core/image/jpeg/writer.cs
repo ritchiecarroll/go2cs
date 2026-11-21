@@ -22,7 +22,7 @@ internal static int32 div(int32 a, int32 b) {
 }
 
 // bitCount counts the number of bits needed to hold an integer.
-[GoLazy] partial class lazyᴛbitCount { internal static array<byte> bitCount = new byte[]{
+[GoLazy] partial class lazyᴛbitCount { internal static array<byte> bitCount = array<byte>([
     0, 1, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4,
     5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
     6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
@@ -39,7 +39,7 @@ internal static int32 div(int32 a, int32 b) {
     8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
     8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
     8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8
-}.array(); }
+]); }
 
 partial struct quantIndex /*num:nint*/;
 
@@ -53,7 +53,7 @@ internal static quantIndex nQuantIndex => 2;
 // natural to zig-zag order.
 [GoLazy] partial class lazyᴛunscaledQuant { internal static array<array<byte>> unscaledQuant = new array<byte>[]{
     // Luminance.
-    new byte[]{
+    array<byte>([
         16, 11, 12, 14, 12, 10, 16, 14,
         13, 14, 18, 17, 16, 19, 24, 40,
         26, 24, 22, 22, 24, 49, 35, 37,
@@ -61,9 +61,9 @@ internal static quantIndex nQuantIndex => 2;
         56, 55, 64, 72, 92, 78, 64, 68,
         87, 69, 55, 56, 80, 109, 81, 87,
         95, 98, 103, 104, 103, 62, 77, 113,
-        121, 112, 100, 120, 92, 101, 103, 99}.array(),
+        121, 112, 100, 120, 92, 101, 103, 99]),
     // Chrominance.
-    new byte[]{
+    array<byte>([
         17, 18, 18, 24, 21, 24, 47, 26,
         26, 47, 99, 66, 56, 66, 99, 99,
         99, 99, 99, 99, 99, 99, 99, 99,
@@ -71,7 +71,7 @@ internal static quantIndex nQuantIndex => 2;
         99, 99, 99, 99, 99, 99, 99, 99,
         99, 99, 99, 99, 99, 99, 99, 99,
         99, 99, 99, 99, 99, 99, 99, 99,
-        99, 99, 99, 99, 99, 99, 99, 99}.array()
+        99, 99, 99, 99, 99, 99, 99, 99])
 }.array(); }
 
 partial struct huffIndex /*num:nint*/;
@@ -100,15 +100,15 @@ partial struct huffmanSpec {
 // The AC tables have 162 decoded values: bytes that pack a 4-bit Run and a
 // 4-bit Size. There are 16 valid Runs and 10 valid Sizes, plus two special R|S
 // cases: 0|0 (meaning EOB) and F|0 (meaning ZRL).
-[GoLazy] partial class lazyᴛtheHuffmanSpec { internal static array<huffmanSpec> theHuffmanSpec = new huffmanSpec[]{
+[GoLazy] partial class lazyᴛtheHuffmanSpec { internal static array<huffmanSpec> theHuffmanSpec = array<huffmanSpec>([
     // Luminance DC.
     new(
-        new byte[]{0, 1, 5, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0}.array(),
+        array<byte>([0, 1, 5, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0]),
         [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
     ),
     // Luminance AC.
     new(
-        new byte[]{0, 2, 1, 3, 3, 2, 4, 3, 5, 5, 4, 4, 0, 0, 1, 125}.array(),
+        array<byte>([0, 2, 1, 3, 3, 2, 4, 3, 5, 5, 4, 4, 0, 0, 1, 125]),
         [
             0x01, 0x02, 0x03, 0x00, 0x04, 0x11, 0x05, 0x12,
             0x21, 0x31, 0x41, 0x06, 0x13, 0x51, 0x61, 0x07,
@@ -135,12 +135,12 @@ partial struct huffmanSpec {
     ),
     // Chrominance DC.
     new(
-        new byte[]{0, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0}.array(),
+        array<byte>([0, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0]),
         [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
     ),
     // Chrominance AC.
     new(
-        new byte[]{0, 2, 1, 2, 4, 4, 3, 4, 7, 5, 4, 4, 0, 1, 2, 119}.array(),
+        array<byte>([0, 2, 1, 2, 4, 4, 3, 4, 7, 5, 4, 4, 0, 1, 2, 119]),
         [
             0x00, 0x01, 0x02, 0x03, 0x11, 0x04, 0x05, 0x21,
             0x31, 0x06, 0x12, 0x41, 0x51, 0x07, 0x61, 0x71,
@@ -165,7 +165,7 @@ partial struct huffmanSpec {
             0xf9, 0xfa
         ]
     )
-}.array(); }
+]); }
 
 // huffmanLUT is a compiled look-up table representation of a huffmanSpec.
 // Each value maps to a uint32 of which the 8 most significant bits hold the

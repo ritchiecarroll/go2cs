@@ -584,7 +584,7 @@ _ = assert[(div1e8m*5*5*5*5*5*5*5*5)%(1<<64)-1]  // a compile-time assert: the i
 ```
 <!-- source: src/tests/Behavioral/UntypedIntExactConstArithmetic/UntypedIntExactConstArithmetic.cs:15, 26 -->
 ```csharp
-internal static array<uint64> quotients = new uint64[]{/* maxUint64 / 5 */ 3689348814741910323UL, /* maxUint64 / 5 / 5 */ 737869762948382064UL, /* maxUint64/10 + 1 */ 1844674407370955162UL}.array();
+internal static array<uint64> quotients = array<uint64>([/* maxUint64 / 5 */ 3689348814741910323UL, /* maxUint64 / 5 / 5 */ 737869762948382064UL, /* maxUint64/10 + 1 */ 1844674407370955162UL]);
 …
 _ = assert[(nint)(/* (div1e8m*5*5*5*5*5*5*5*5)%(1<<64) - 1 */ 0L)];
 ```

@@ -166,6 +166,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckArrayCastDerefClone() => CheckTarget("ArrayCastDerefClone");
 
     [TestMethod]
+    public void CheckArrayLiteralBuiltin() => CheckTarget("ArrayLiteralBuiltin");
+
+    [TestMethod]
     public void CheckArrayLiteralDeclaredLength() => CheckTarget("ArrayLiteralDeclaredLength");
 
     [TestMethod]

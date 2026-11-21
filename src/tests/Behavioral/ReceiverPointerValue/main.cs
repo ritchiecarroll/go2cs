@@ -44,7 +44,7 @@ internal static slice<ж<ring>> chain(this ж<ring> Ꮡr, nint n) {
 }
 
 internal static array<ж<ring>> pair(this ж<ring> Ꮡr, ж<ring> other) {
-    return new ж<ring>[]{Ꮡr, other}.array();
+    return array<ж<ring>>([Ꮡr, other]);
 }
 
 } partial class main_package {

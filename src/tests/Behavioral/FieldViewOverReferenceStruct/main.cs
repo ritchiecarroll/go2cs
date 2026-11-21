@@ -26,7 +26,7 @@ partial struct record {
     internal uint16 tail;
 }
 
-internal static readonly ж<rawInet4> Ꮡglobal = new StaticBox<rawInet4>(new rawInet4(family: 2, port: 0x1234, addr: new byte[]{10, 0, 0, 1}.array()));
+internal static readonly ж<rawInet4> Ꮡglobal = new StaticBox<rawInet4>(new rawInet4(family: 2, port: 0x1234, addr: array<byte>([10, 0, 0, 1])));
 internal static ref rawInet4 global => ref ((StaticBox<rawInet4>)Ꮡglobal).ValueSlot;
 
 internal static void encodePort(ж<rawInet4> raw, nint port) {
@@ -197,7 +197,7 @@ internal static uint16 packageRoot() {
 
 internal static @string arrayFieldOfVariable() {
     ref var raw = ref heap(new rawInet4(), out var Ꮡraw);
-    raw.addr.Assign(new byte[]{0x7f, 0xff, 0, 1}.array());
+    raw.addr.Assign(array<byte>([0x7f, 0xff, 0, 1]));
     var p = @unsafe.ArrayPointer<int8>.Of(Ꮡraw.Ꮡaddr, 4);
     p.ElementRef(3) = (int8)(-2);
     var s = @unsafe.ArrayPointer<int8>.Of(Ꮡraw.Ꮡaddr, 4).slice();
@@ -221,7 +221,7 @@ internal static @string /*text*/ outOfRange(ж<rawInet4> raw, nint i) {
 }
 
 internal static void main() {
-    var raw = Ꮡ(new rawInet4(family: 2, port: 0x1234, addr: new byte[]{127, 0, 0, 1}.array()));
+    var raw = Ꮡ(new rawInet4(family: 2, port: 0x1234, addr: array<byte>([127, 0, 0, 1])));
 
     encodePort(raw, 8080);
     fmt.Printf("encode: port=%#04x decode=%d family=%d addr=%v\n"u8, raw.port, decodePort(raw), raw.family, raw.addr);
@@ -244,7 +244,7 @@ internal static void main() {
     raw.port = 0x1234;
     var v = wholeLoad(raw);
     fmt.Printf("whole load: %#02x %#02x port=%#04x\n"u8, v[0], v[1], raw.port);
-    wholeStore(raw, new byte[]{1, 2}.array());
+    wholeStore(raw, array<byte>([1, 2]));
     fmt.Printf("whole store: port=%#04x family=%d addr=%v rounds=%d\n"u8, raw.port, raw.family, raw.addr, countRounds(raw));
 
     (lo, hi, port) = storeCollectRead(raw, 0x41);
@@ -260,7 +260,7 @@ internal static void main() {
     encodePort(Ꮡ(structs, 1), 0x0102);
     fmt.Printf("element: %#04x %#04x\n"u8, structs[0].port, structs[1].port);
 
-    var sa = Ꮡ(new sockInet4(port: 8443, addr: new byte[]{192, 168, 0, 1}.array()));
+    var sa = Ꮡ(new sockInet4(port: 8443, addr: array<byte>([192, 168, 0, 1])));
     sa.sockaddr();
     fmt.Printf("two deep: raw.port=%#04x decode=%d raw.addr=%v\n"u8, sa.raw.port, anyToPort(sa), sa.raw.addr);
     fmt.Printf("two deep direct: %#02x raw.port=%#04x\n"u8, twoDeepDirect(sa), sa.raw.port);

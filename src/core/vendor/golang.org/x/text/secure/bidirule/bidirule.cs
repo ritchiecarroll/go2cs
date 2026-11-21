@@ -66,10 +66,10 @@ partial struct ruleTransition {
     // [2.1] The first character must be a character with Bidi property L, R, or
     // AL. If it has the R or AL property, it is an RTL label; if it has the L
     // property, it is an LTR label.
-    [ruleInitial] = new ruleTransition[]{
+    [ruleInitial] = array<ruleTransition>([
         new(ruleLTRFinal, (uint16)(1 << (int)(bidi.L))),
-        new(ruleRTLFinal, (uint16)(1 << (int)(bidi.R) | 1 << (int)(bidi.AL)))}.array(),
-    [ruleRTL] = new ruleTransition[]{
+        new(ruleRTLFinal, (uint16)(1 << (int)(bidi.R) | 1 << (int)(bidi.AL)))]),
+    [ruleRTL] = array<ruleTransition>([
         // [2.3] In an RTL label, the end of the label must be a character with
         // Bidi property R, AL, EN, or AN, followed by zero or more characters
         // with Bidi property NSM.
@@ -78,8 +78,8 @@ partial struct ruleTransition {
         // [2.2] In an RTL label, only characters with the Bidi properties R,
         // AL, AN, EN, ES, CS, ET, ON, BN, or NSM are allowed.
         // We exclude the entries from [2.3]
-        new(ruleRTL, (uint16)((UntypedInt)((UntypedInt)((UntypedInt)((UntypedInt)(1 << (int)(bidi.ES) | 1 << (int)(bidi.CS)) | 1 << (int)(bidi.ET)) | 1 << (int)(bidi.ON)) | 1 << (int)(bidi.BN)) | 1 << (int)(bidi.NSM)))}.array(),
-    [ruleRTLFinal] = new ruleTransition[]{
+        new(ruleRTL, (uint16)((UntypedInt)((UntypedInt)((UntypedInt)((UntypedInt)(1 << (int)(bidi.ES) | 1 << (int)(bidi.CS)) | 1 << (int)(bidi.ET)) | 1 << (int)(bidi.ON)) | 1 << (int)(bidi.BN)) | 1 << (int)(bidi.NSM)))]),
+    [ruleRTLFinal] = array<ruleTransition>([
         // [2.3] In an RTL label, the end of the label must be a character with
         // Bidi property R, AL, EN, or AN, followed by zero or more characters
         // with Bidi property NSM.
@@ -88,8 +88,8 @@ partial struct ruleTransition {
         // [2.2] In an RTL label, only characters with the Bidi properties R,
         // AL, AN, EN, ES, CS, ET, ON, BN, or NSM are allowed.
         // We exclude the entries from [2.3] and NSM.
-        new(ruleRTL, (uint16)((UntypedInt)((UntypedInt)((UntypedInt)(1 << (int)(bidi.ES) | 1 << (int)(bidi.CS)) | 1 << (int)(bidi.ET)) | 1 << (int)(bidi.ON)) | 1 << (int)(bidi.BN)))}.array(),
-    [ruleLTR] = new ruleTransition[]{
+        new(ruleRTL, (uint16)((UntypedInt)((UntypedInt)((UntypedInt)(1 << (int)(bidi.ES) | 1 << (int)(bidi.CS)) | 1 << (int)(bidi.ET)) | 1 << (int)(bidi.ON)) | 1 << (int)(bidi.BN)))]),
+    [ruleLTR] = array<ruleTransition>([
         // [2.6] In an LTR label, the end of the label must be a character with
         // Bidi property L or EN, followed by zero or more characters with Bidi
         // property NSM.
@@ -98,8 +98,8 @@ partial struct ruleTransition {
         // [2.5] In an LTR label, only characters with the Bidi properties L,
         // EN, ES, CS, ET, ON, BN, or NSM are allowed.
         // We exclude the entries from [2.6].
-        new(ruleLTR, (uint16)((UntypedInt)((UntypedInt)((UntypedInt)((UntypedInt)(1 << (int)(bidi.ES) | 1 << (int)(bidi.CS)) | 1 << (int)(bidi.ET)) | 1 << (int)(bidi.ON)) | 1 << (int)(bidi.BN)) | 1 << (int)(bidi.NSM)))}.array(),
-    [ruleLTRFinal] = new ruleTransition[]{
+        new(ruleLTR, (uint16)((UntypedInt)((UntypedInt)((UntypedInt)((UntypedInt)(1 << (int)(bidi.ES) | 1 << (int)(bidi.CS)) | 1 << (int)(bidi.ET)) | 1 << (int)(bidi.ON)) | 1 << (int)(bidi.BN)) | 1 << (int)(bidi.NSM)))]),
+    [ruleLTRFinal] = array<ruleTransition>([
         // [2.6] In an LTR label, the end of the label must be a character with
         // Bidi property L or EN, followed by zero or more characters with Bidi
         // property NSM.
@@ -108,10 +108,10 @@ partial struct ruleTransition {
         // [2.5] In an LTR label, only characters with the Bidi properties L,
         // EN, ES, CS, ET, ON, BN, or NSM are allowed.
         // We exclude the entries from [2.6].
-        new(ruleLTR, (uint16)((UntypedInt)((UntypedInt)((UntypedInt)(1 << (int)(bidi.ES) | 1 << (int)(bidi.CS)) | 1 << (int)(bidi.ET)) | 1 << (int)(bidi.ON)) | 1 << (int)(bidi.BN)))}.array(),
-    [ruleInvalid] = new ruleTransition[]{
+        new(ruleLTR, (uint16)((UntypedInt)((UntypedInt)((UntypedInt)(1 << (int)(bidi.ES) | 1 << (int)(bidi.CS)) | 1 << (int)(bidi.ET)) | 1 << (int)(bidi.ON)) | 1 << (int)(bidi.BN)))]),
+    [ruleInvalid] = array<ruleTransition>([
         new(ruleInvalid, 0),
-        new(ruleInvalid, 0)}.array()
+        new(ruleInvalid, 0)])
 }.array(); }
 
 // [2.4] In an RTL label, if an EN is present, no AN may be present, and

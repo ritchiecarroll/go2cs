@@ -143,10 +143,10 @@ internal static stdFunction _timeBeginPeriod;
 internal static stdFunction _timeEndPeriod;
 internal static stdFunction _ᴛ2ʗ;
 
-[GoLazy] partial class lazyᴛbcryptprimitivesdll { internal static array<uint16> bcryptprimitivesdll = new uint16[]{'b', 'c', 'r', 'y', 'p', 't', 'p', 'r', 'i', 'm', 'i', 't', 'i', 'v', 'e', 's', '.', 'd', 'l', 'l', 0}.array(); }
-internal static array<uint16> ntdlldll = new uint16[]{'n', 't', 'd', 'l', 'l', '.', 'd', 'l', 'l', 0}.array();
-internal static array<uint16> powrprofdll = new uint16[]{'p', 'o', 'w', 'r', 'p', 'r', 'o', 'f', '.', 'd', 'l', 'l', 0}.array();
-internal static array<uint16> winmmdll = new uint16[]{'w', 'i', 'n', 'm', 'm', '.', 'd', 'l', 'l', 0}.array();
+[GoLazy] partial class lazyᴛbcryptprimitivesdll { internal static array<uint16> bcryptprimitivesdll = array<uint16>(['b', 'c', 'r', 'y', 'p', 't', 'p', 'r', 'i', 'm', 'i', 't', 'i', 'v', 'e', 's', '.', 'd', 'l', 'l', 0]); }
+internal static array<uint16> ntdlldll = array<uint16>(['n', 't', 'd', 'l', 'l', '.', 'd', 'l', 'l', 0]);
+internal static array<uint16> powrprofdll = array<uint16>(['p', 'o', 'w', 'r', 'p', 'r', 'o', 'f', '.', 'd', 'l', 'l', 0]);
+internal static array<uint16> winmmdll = array<uint16>(['w', 'i', 'n', 'm', 'm', '.', 'd', 'l', 'l', 0]);
 
 // Function to be called by windows CreateThread
 // to start new os thread.
@@ -667,7 +667,7 @@ internal static int32 semasleep(int64 ns) {
                 ms = 1;
             }
             result = stdcall(_WaitForMultipleObjects, 2,
-                (uintptr)Ꮡ(new uintptr[]{(~(~getg()).m).waitsema, (~(~getg()).m).resumesema}.array()),
+                (uintptr)Ꮡ(array<uintptr>([(~(~getg()).m).waitsema, (~(~getg()).m).resumesema])),
                 0, (uintptr)ms);
             if (result != (uintptr)(_WAIT_OBJECT_0 + 1)) {
                 // Not a suspend/resume event

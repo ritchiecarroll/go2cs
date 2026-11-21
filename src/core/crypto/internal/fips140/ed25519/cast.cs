@@ -49,12 +49,12 @@ internal static error verifyWithoutSelfTest(ж<PublicKey> pub, slice<byte> messa
 internal static Action fipsSelfTest;
 internal static void initᴛfipsSelfTest() { fipsSelfTest = sync.OnceFunc(() => {
     fips140.CAST("Ed25519 sign and verify", () => {
-        ref var seed = ref heap<array<byte>>(new byte[]{
+        ref var seed = ref heap<array<byte>>(array<byte>([
             0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
             0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10,
             0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18,
             0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f, 0x20
-        }.array(), out var Ꮡseed);
+        ]), out var Ꮡseed);
         var msg = slice<byte>("CAST"u8);
         var want = slice<byte>([
             0xbd, 0xe7, 0xa5, 0xf3, 0x40, 0x73, 0xb9, 0x5a,
