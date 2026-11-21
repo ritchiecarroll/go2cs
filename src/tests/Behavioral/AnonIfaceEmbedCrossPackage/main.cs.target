@@ -4,19 +4,14 @@ using fmt = fmt_package;
 using lib = global::go.go.anonifaceembed_package;
 using anonifaceembed = global::go.go.anonifaceembed_package;
 using global::go.go;
-using static main_package;
 
 partial class main_package {
 
 partial struct mine {
 }
 
-} partial class mainᴛmine {
-
 internal static nint Apply(this mine _) { return 5; }
 internal static @string Name(this mine _) { return "mine"; }
-
-} partial class main_package {
 
 internal static nint useOption(lib.Option o) { return o.Apply(); }
 
@@ -26,11 +21,7 @@ partial struct local {
     internal nint n;
 }
 
-} partial class mainᴛlocal {
-
 internal static nint run(this local l) { return l.n + 1; }
-
-} partial class main_package {
 
 internal static void main() {
     fmt.Println(useOption(lib.With(3)));

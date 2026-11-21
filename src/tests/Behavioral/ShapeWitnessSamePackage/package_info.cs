@@ -64,7 +64,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "ABYsggAIEKKmooKClKiCqJAACxAACQyQtKKCgoKmppAAERQACwiggAAMCKCAxMKCAAgQggAJDLSCgoKCgpSCgpSClIKCgoKCgpSCgoKClIKClJSClIKClIKCgpiCgpSCggARJpSixqKCgoKClA==")]
+[assembly: GoPositionMap("main.go", "main.cs", "ABMsggAGEKKmooKClKiCqJAACRD8kJSigoKCpqaQAA0U+KCAAAgIoICkwoIABhCC3JSCgoKCgpSCgpSClIKCgoKCgpSCgoKClIKClJSClIKClIKCgpiCgpSCggAPJpSipqKCgoKClA==")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -137,13 +137,4 @@ public static partial class main_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(main_package.Array<,>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛArray;
-[GoMethodHost(typeof(main_package.Export)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛExport;
-[GoMethodHost(typeof(main_package.Index<,>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛIndex;
-[GoMethodHost(typeof(main_package.Ptr<>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛPtr;
-[GoMethodHost(typeof(main_package.SourceFile)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛSourceFile;
-[GoMethodHost(typeof(main_package.boxed)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛboxed;
-[GoMethodHost(typeof(main_package.memFile)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛmemFile;
-[GoMethodHost(typeof(main_package.memSrc)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛmemSrc;
-[GoMethodHost(typeof(main_package.u8)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛu8;
 // </MethodHolders>

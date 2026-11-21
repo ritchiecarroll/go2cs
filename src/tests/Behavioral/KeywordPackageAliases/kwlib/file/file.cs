@@ -12,4 +12,4 @@ partial struct Kind /*num:nint*/;
 
 public static Kind Double(this Kind k) { return k * 2; }
 
-} // end fileᴛKind
+}

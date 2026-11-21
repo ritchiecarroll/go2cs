@@ -5,7 +5,6 @@ using stdio = io_package;
 using strings = strings_package;
 using Δio = io_package;
 using ꓸꓸꓸstring = Span<@string>;
-using static main_package;
 
 partial class main_package {
 
@@ -18,12 +17,8 @@ partial struct SourceFile {
     internal @string name, text;
 }
 
-} partial class mainᴛSourceFile {
-
 public static @string FileName(this ref SourceFile f) { return f.name; }
 public static @string Text(this ref SourceFile f) { return f.text; }
-
-} partial class main_package {
 
 partial struct MappedSpan<T> {
     public T Script;
@@ -62,11 +57,7 @@ partial struct Export {
     internal @string name;
 }
 
-} partial class mainᴛExport {
-
 public static @string Name(this ref Export e) { return e.name; }
-
-} partial class main_package {
 
 partial struct Index<T, TΔNamed>
     where TΔNamed : struct, NamedΔshape<T>
@@ -77,8 +68,6 @@ partial struct Index<T, TΔNamed>
 internal static @string nameOf<T, TΔNamed>(T x)
     where TΔNamed : struct, NamedΔshape<T>
 { return TΔNamed.Name(x); }
-
-} partial class mainᴛIndex {
 
 public static slice<T> Find<T, TΔNamed>(this ref Index<T, TΔNamed> idx, @string name)
     where TΔNamed : struct, NamedΔshape<T>
@@ -96,8 +85,6 @@ public static void Add<T, TΔNamed>(this ref Index<T, TΔNamed> idx, T e)
     where TΔNamed : struct, NamedΔshape<T>
 { idx.entries = append(idx.entries, e); }
 
-} partial class main_package {
-
 partial struct registry {
     internal Index<ж<Export>, ExportжNamedΔshape> exports;
 }
@@ -110,19 +97,13 @@ partial struct u8 {
     internal byte v;
 }
 
-} partial class mainᴛu8 {
-
 internal static @string kind(this u8 _) { return "u8"; }
-
-} partial class main_package {
 
 partial struct Ptr<T>
     where T : Value
 {
     internal nint off;
 }
-
-} partial class mainᴛPtr {
 
 internal static @string kind<T>(this Ptr<T> _)
     where T : Value
@@ -131,15 +112,11 @@ internal static @string kind<T>(this Ptr<T> _)
     return "Ptr["u8 + x.kind() + "]"u8;
 }
 
-} partial class main_package {
-
 partial struct Array<T, TΔValue>
     where TΔValue : struct, ValueΔshape<T>
 {
     internal slice<T> vals;
 }
-
-} partial class mainᴛArray {
 
 internal static @string kind<T, TΔValue>(this Array<T, TΔValue> _)
     where TΔValue : struct, ValueΔshape<T>
@@ -147,8 +124,6 @@ internal static @string kind<T, TΔValue>(this Array<T, TΔValue> _)
     T x = GoZero<T>();
     return "Array["u8 + TΔValue.kind(x) + "]"u8;
 }
-
-} partial class main_package {
 
 public static Array<T, TΔValue> /*y*/ ConstArray<T, TΔValue>(slice<T> vals, @string name)
     where TΔValue : struct, ValueΔshape<T>
@@ -163,22 +138,14 @@ partial struct memFile {
     internal @string name;
 }
 
-} partial class mainᴛmemFile {
-
 internal static @string FileName(this memFile m) { return m.name; }
 internal static @string Text(this memFile m) { return "mem:"u8 + m.name; }
-
-} partial class main_package {
 
 partial struct boxed {
     internal nint n;
 }
 
-} partial class mainᴛboxed {
-
 internal static @string kind(this ref boxed _) { return "boxed"; }
-
-} partial class main_package {
 
 internal static void main() {
     var a = Ꮡ(new SourceFile("a.ts", "let x"));
@@ -248,8 +215,6 @@ partial struct memSrc {
     internal @string data;
 }
 
-} partial class mainᴛmemSrc {
-
 internal static stdio.Reader Open(this ref memSrc m) { return new strings_ReaderжReader(strings.NewReader(m.data)); }
 
 internal static @string Join(this ref memSrc m, @string sep, params ꓸꓸꓸstring partsʗp) {
@@ -257,8 +222,6 @@ internal static @string Join(this ref memSrc m, @string sep, params ꓸꓸꓸstr
 
     return m.data + ":"u8 + strings.Join(parts, sep);
 }
-
-} partial class main_package {
 
 public static (slice<T>, nint) Readers<T, TΔSource>(slice<T> srcs)
     where TΔSource : struct, SourceΔshape<T>

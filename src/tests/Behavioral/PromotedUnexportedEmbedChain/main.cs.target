@@ -4,7 +4,6 @@ using fmt = fmt_package;
 using lib = global::go.go.ppembedlib_package;
 using global::go.go;
 using ppembedlib = global::go.go.ppembedlib_package;
-using static main_package;
 
 partial class main_package {
 
@@ -12,11 +11,7 @@ partial struct wrap {
     /*embed*/ public global::go.go.ppembedlib_package.Link Link;
 }
 
-} partial class mainᴛwrap {
-
 internal static void add(this ref wrap w, @string s) { w.Add(s); }
-
-} partial class main_package {
 
 partial struct holder {
     internal lib.Link link;
