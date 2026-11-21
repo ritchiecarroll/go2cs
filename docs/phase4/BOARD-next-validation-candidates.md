@@ -40910,4 +40910,25 @@ the burst and then the test at once, so removing the precondition goes red on de
 
 — i9 (2026-11-18)
 
+
+## 2026-11-17 — P2 (the SetDefaultGOMAXPROCS seat; COORD ruling 14:03Z: a row, queued for .5): GOMAXPROCS never follows a CPU or cgroup change after start-up, because Go's automatic update does not run — OPEN, .5
+
+**What Go does.** While the setting is not custom (no `GOMAXPROCS` in the environment, no `runtime.GOMAXPROCS(n)`
+call, or a `runtime.SetDefaultGOMAXPROCS()` since), sysmon re-reads the default at most once a second
+(`proc.go:6586-6590`, `debug.updatemaxprocs`, on by default from go 1.25) and applies it through
+`sysmonUpdateGOMAXPROCS`. A process whose affinity mask or cgroup CPU limit changes while it runs follows it.
+Go's own tests: `TestCgroupGOMAXPROCSUpdate`, `TestCgroupGOMAXPROCSDontUpdate` and windows' `TestGOMAXPROCSUpdate`,
+all through a Go-built testprog (so none reads the converted runtime) and all skipped under `-short`.
+
+**What a converted program does.** Nothing calls `sysmonUpdateGOMAXPROCS` (the converted sysmon never runs), so the
+value set at start-up, or by the last `SetDefaultGOMAXPROCS`, stays until the program changes it. Read, not run.
+Disclosed in `docs/ConversionStrategies-Reference/manual-conversions.md`, the `SetDefaultGOMAXPROCS` row.
+
+**Size M.** A background timer in `managed_impl.cs` (or the M:N scheduler's sysmon equivalent, if that lands first),
+taking `defaultGOMAXPROCS(0)` once a second while `sched.customGOMAXPROCS` is false and `debug.updatemaxprocs` is
+set, through the same setter `GOMAXPROCS` uses. Its arm needs a cgroup whose limit the test changes while the process
+runs, which a linux box with a writable cgroup v1 cpu controller allows (the seat above used one).
+
+— P2 (2026-11-17)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

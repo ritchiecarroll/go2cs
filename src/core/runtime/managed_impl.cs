@@ -406,9 +406,42 @@ partial class runtime_package
     {
         nint previous = Volatile.Read(ref s_gomaxprocs);
 
-        if (n < 1 || n == previous)
+        if (n < 1)
             return previous;
 
+        // Go marks the setting custom before its equal-value return, so a program that sets GOMAXPROCS to
+        // the value it already has has still set it: SetDefaultGOMAXPROCS then resets it, and the default no
+        // longer follows the CPUs on its own.
+        sched.customGOMAXPROCS = true;
+
+        if (n == previous)
+            return previous;
+
+        setGOMAXPROCS(n, custom: true);
+
+        return previous;
+    }
+
+    // SetDefaultGOMAXPROCS updates the GOMAXPROCS setting to the runtime default, as described by
+    // GOMAXPROCS, ignoring the GOMAXPROCS environment variable. Go's body sets newprocs for the
+    // converted startTheWorldWithSema, which never runs here, so the setting did not move; this is Go's
+    // body over the managed setting.
+    public static void SetDefaultGOMAXPROCS()
+    {
+        nint procs = defaultGOMAXPROCS(0);
+
+        if (!sched.customGOMAXPROCS && procs == Volatile.Read(ref s_gomaxprocs))
+        {
+            // Nothing to do if we're already using automatic GOMAXPROCS and the limit is unchanged.
+            return;
+        }
+
+        setGOMAXPROCS(procs, custom: false);
+    }
+
+    // The setting's one writer, GOMAXPROCS and SetDefaultGOMAXPROCS alike.
+    private static void setGOMAXPROCS(nint n, bool custom)
+    {
         // Go changes the P count inside stopTheWorldGC(stwGOMAXPROCS); the pause is recorded the
         // same way (the stop-the-world contract, stopTheWorld below).
         worldStop stw = stopTheWorldGC(stwGOMAXPROCS);
@@ -428,10 +461,61 @@ partial class runtime_package
             gomaxprocs = (int32)n;
         }
 
-        startTheWorldGC(stw);
+        sched.customGOMAXPROCS = custom;
 
-        return previous;
+        startTheWorldGC(stw);
     }
+
+    // osinit's and schedinit's GOMAXPROCS steps, which the converted osinit and schedinit (never run here)
+    // would take: goenvs_impl.cs's module initializer calls this after parsedebugvars and gcinit, schedinit's
+    // order. NumCPU is getCPUCount(), the CPUs the operating system lets the process run on, read once as
+    // osinit reads it: not .NET's Environment.ProcessorCount, which also applies DOTNET_PROCESSOR_COUNT
+    // and a cgroup quota, neither of which Go's NumCPU reads. On linux, defaultGOMAXPROCSInit opens the
+    // process's CPU cgroup, so defaultGOMAXPROCS lowers the default to the cgroup's CPU limit as Go's does
+    // (debug.containermaxprocs, on by default); elsewhere it is empty.
+    internal static void startGOMAXPROCS()
+    {
+        numCPUStartup = getCPUCount();
+        defaultGOMAXPROCSInit();
+        initialGOMAXPROCS();
+    }
+
+    // schedinit's starting value, verbatim: the GOMAXPROCS environment variable when it parses as a
+    // positive number, which marks the setting custom, and Go's default for NumCPU otherwise.
+    private static void initialGOMAXPROCS()
+    {
+        int32 procs;
+        var (n, err) = @internal.strconv_package.ParseInt(gogetenv(gomaxprocsˢ), 10, 32);
+
+        if (err == nil && n > 0)
+        {
+            procs = (int32)n;
+            sched.customGOMAXPROCS = true;
+        }
+        else
+        {
+            procs = defaultGOMAXPROCS(numCPUStartup);
+            sched.customGOMAXPROCS = false;
+        }
+
+        lock (s_cpuStatsLock)
+        {
+            Volatile.Write(ref s_gomaxprocs, procs);
+            gomaxprocs = procs;
+        }
+    }
+
+    // TEST SEAM (goenvs_impl.cs's pattern): the starting value over a given environment, as a process started
+    // with it would compute it. The caller restores by passing back what GoStartEnvironment returned.
+    public static void GoStartGOMAXPROCS(string[] environment)
+    {
+        GoParseDebugVarsAtStart(environment);
+        initialGOMAXPROCS();
+    }
+
+    // TEST SEAM (malloc_impl.cs's pattern: GolibTests is outside the InternalsVisibleTo grant): the value
+    // Go's rule gives GOMAXPROCS when nothing set it, defaultGOMAXPROCS(0), which SetDefaultGOMAXPROCS restores.
+    public static nint GoDefaultGOMAXPROCSProbe() => defaultGOMAXPROCS(0);
 
     // THE /cpu/classes ACCOUNTING. Go writes work.cpuStats only at gcMarkTermination
     // (accumulateGCPauseTime, then accumulate, then sched.idleTime reset), which the managed host

@@ -1155,7 +1155,7 @@ borrow expressions; each word-size function is a single expression with no `Uint
 behavioral test, whose output matches Go over the edge cases and a 100,000-value sweep.
 <!-- src/core/math/bits/bits_impl.cs:147 `public static (uint64 hi, uint64 lo) Mul64(uint64 x, uint64 y)`,
      :117 `public static (uint64 sum, uint64 carryOut) Add64(uint64 x, uint64 y, uint64 carry)`,
-     :58-59 (`MEASURED (linux/amd64, min over seven`); src/go2cs/manualTypeOperations.go:2862 (`"math/bits": {`);
+     :58-59 (`MEASURED (linux/amd64, min over seven`); src/go2cs/manualTypeOperations.go:2871 (`"math/bits": {`);
      src/tests/Behavioral/MathBitsLeaves/main.go:37 (`for i := 0; i < 100000; i++ {`); commit d89ec81a23. -->
 
 ## A cross-package `//go:linkname` PULL emits a forwarder, not a throwing stub
@@ -3211,7 +3211,7 @@ Two places are deliberately **not** Go. Upstream `Stop` drains after releasing `
 
 ## The runtime's PROCESS-CONTROL surface: implement the CONTRACT, never the mechanism
 
-`runtime`'s public control API — `GC`, `GOMAXPROCS`, `Gosched`, `Stack`, `ReadMemStats`,
+`runtime`'s public control API — `GC`, `GOMAXPROCS`, `SetDefaultGOMAXPROCS`, `Gosched`, `Stack`, `ReadMemStats`,
 `LockOSThread`/`UnlockOSThread` — converts faithfully and **compiles**, then dies on its first call.
 Each body drives machinery that has no managed counterpart: `GC()` → `gcStart` → `acquirem` →
 `getg()`; `GOMAXPROCS(n)` → `stopTheWorldGC` → `semacquire` → `getg()`; `Gosched()` →
@@ -3224,7 +3224,7 @@ goroutine (a managed thread) that is an unhandled exception and
 The rule is the one sync's `Mutex`/`notifyList` established: **where a Go mechanism has no managed
 counterpart but its public contract does, reimplement the CONTRACT at the API boundary and never
 emulate the mechanism.** Synthesizing a plausible `g`/`m` so the converted scheduler can walk it buys
-nothing — the code underneath still wants a real run queue, a real heap and real stacks. The seven
+nothing — the code underneath still wants a real run queue, a real heap and real stacks. The eight
 declarations above are dropped from emission by the type-level registry
 (`manualConversionFuncs["runtime"]`) and answered in a hand-owned `runtime/managed_impl.cs`;
 everything below them stays auto-converted and simply becomes unreachable.
@@ -3232,7 +3232,8 @@ everything below them stays auto-converted and simply becomes unreachable.
 | Go API | Managed realization | Divergence |
 |---|---|---|
 | `Gosched()` | `Thread.Yield()` | none — same "offer the rest of the slice, then continue" contract |
-| `GOMAXPROCS(n)` | remembered value, defaults to `Environment.ProcessorCount`; `n < 1` queries | with the default threads, does **not** cap parallelism — the CLR schedules goroutine threads. The universal save/restore idiom `defer runtime.GOMAXPROCS(runtime.GOMAXPROCS(n))` is exactly right |
+| `GOMAXPROCS(n)` | remembered value; `n < 1` queries. It starts as Go's `schedinit` starts it: the `GOMAXPROCS` environment variable when it parses as a positive number (which marks the setting custom), and otherwise Go's default for `NumCPU`. `NumCPU` is `getCPUCount()`, the CPUs the operating system lets the process run on, read once at start-up as `osinit` reads it. Neither reads `DOTNET_PROCESSOR_COUNT` or .NET's `Environment.ProcessorCount`: a converted program answers as the Go program does on the same machine, and `GOMAXPROCS` is the cap it honours (.NET still sizes its own thread pool by `DOTNET_PROCESSOR_COUNT`) | with the default threads, does **not** cap parallelism — the CLR schedules goroutine threads. The universal save/restore idiom `defer runtime.GOMAXPROCS(runtime.GOMAXPROCS(n))` is exactly right |
+| `SetDefaultGOMAXPROCS()` | Go's body over the remembered value: it sets `defaultGOMAXPROCS(0)`, the CPUs the process may run on, which on linux is lowered to the cgroup's CPU limit (rounded up, at least 2; the cgroup is opened at start-up, after `parsedebugvars`, as `schedinit`'s `defaultGOMAXPROCSInit` does). `GOMAXPROCS(n)` marks the setting custom, as Go's does, and this clears the mark | Go's automatic update, which sysmon runs at most once a second while the setting is not custom, does not run, so the value follows a CPU or cgroup change only when the program calls this. The converted body set `newprocs` for a `startTheWorldWithSema` that never runs, so before 2026-11-17 the call changed nothing |
 | `GC()` | blocking compacting collect → `WaitForPendingFinalizers` → collect → **`GcPauseRecorder.Drain()`** | none observable; the second pass reclaims what finalizers released, which is the state a completed Go cycle leaves. The drain is what makes `NumGC` current on return |
 | `Stack(buf, all)` | a Go-shaped traceback rendered from the managed stack into `buf`; `all` enumerates every live goroutine | see *`runtime.Stack` renders a GO-shaped traceback* and *`runtime.Stack(all: true)`* below |
 | `ReadMemStats(m)` | `GC.GetTotalMemory`/`GetTotalAllocatedBytes` + one `GcPauseRecorder` snapshot | allocator-internal fields (`Mallocs`/`Frees`/`HeapObjects`/`BySize`) and `GCCPUFraction` stay **zero** rather than invented; the pause history, `LastGC`, `PauseTotalNs`, `NumGC`, `NumForcedGC` and `HeapReleased` are **real** (see below) |
@@ -3827,7 +3828,7 @@ levels. Anything the IL cannot prove keeps the frames the trace has, and an impl
 nil dereference) inside an inlinee is not covered, since a statement cannot say which instruction faulted. Nothing
 is emitted for this and nothing runs off the panic path. Guarded by GolibTests' `PanicFramesInlinedPanicTests`,
 including the controls where the IL names no single callee.
-<!-- src/core/runtime/managed_impl.cs:5112 (`INLINED PANIC SITES`), :5120 (`NEVER A GUESS. A frame is added only when the IL proves which one`);
+<!-- src/core/runtime/managed_impl.cs:5196 (`INLINED PANIC SITES`), :5204 (`NEVER A GUESS. A frame is added only when the IL proves which one`);
      src/tests/GolibTests/PanicFramesInlinedPanicTests.cs:14 (`AN EXPLICIT PANIC RAISED INSIDE A GO FUNCTION THE JIT INLINED`). -->
 
 ## `runtime.Stack(all: true)` enumerates every goroutine, and each one names the wait it is parked on
