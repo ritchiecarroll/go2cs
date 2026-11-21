@@ -338,22 +338,45 @@ internal interface IFirstFieldView
     // The box ж.of hands out for a field of a struct in NATIVE memory, null for any other root: the native window
     // above for an array field whose Go length is known, else a NativeBox at the field's Go address. So every hop
     // of a native chain is itself native and addresses Go's layout, never the CLR slot.
-    internal ж<T>? NativeFieldBox() =>
-        ((INativeRooted)this).NativeGoFieldAddress is var address and not 0
-            ? NativeArrayWindow() ?? new NativeBox<T>(address, retainedSource: NativeDerivation.Kept(m_source))
-            : null;
+    internal ж<T>? NativeFieldBox() => NativeFieldAt(m_source, m_token);
 
-    private ж<T>? NativeArrayWindow()
+    /// <summary>
+    /// The field <paramref name="token"/> names, of the struct a NATIVE root <paramref name="source"/> addresses: a native
+    /// box at the field's GO offset, or for an array field whose Go length is known, the native window over it. Null when
+    /// <paramref name="source"/> is not a native root or the field's Go layout cannot be known, so the caller keeps its
+    /// own route and nothing is viewed at a guess.
+    /// </summary>
+    /// <remarks>
+    /// The one door two callers share (P3, Change A): a field view's own <see cref="NativeFieldBox"/>, with its source
+    /// and token, and <c>ж&lt;T&gt;.of</c> on a <see cref="NativeBox{T}"/> root, with the root and the ORIGINAL accessor,
+    /// before the view cache is consulted at all (ж.Views.cs). <paramref name="token"/> must be the accessor the field's
+    /// name is read off (FieldNameOf), never a per-call wrapper. The derived box retains
+    /// <see cref="NativeDerivation.Kept"/> of the root, as every native hop does.
+    /// </remarks>
+    internal static ж<T>? NativeFieldAt(object source, Delegate token)
     {
-        if (NativeArrayField.Element is not { } element || ((INativeRooted)this).NativeGoFieldAddress is not (var address and not 0))
+        if (source is not INativeRooted { NativeRootAddress: var root and not 0 } || GoFieldOffsetOf(source, token) is not (var offset and >= 0))
             return null;
 
-        nint length = GoArrayLengthOf(m_source, m_token);
+        nuint address = root + (nuint)offset;
+
+        return NativeArrayWindowAt(source, token, address) ?? new NativeBox<T>(address, retainedSource: NativeDerivation.Kept(source));
+    }
+
+    private ж<T>? NativeArrayWindow() =>
+        ((INativeRooted)this).NativeGoFieldAddress is var address and not 0 ? NativeArrayWindowAt(m_source, m_token, address) : null;
+
+    private static ж<T>? NativeArrayWindowAt(object source, Delegate token, nuint address)
+    {
+        if (NativeArrayField.Element is not { } element)
+            return null;
+
+        nint length = GoArrayLengthOf(source, token);
 
         // The window is X's registered door (NativeArrayOpeners), compiled only for an [N]X field some compilation
         // declares, never a generic method closed by reflection (Native AOT has no code for one over a value type).
         // T is array<X>, so the window IS a ж<T>.
-        return length >= 0 ? (ж<T>)NativeArrayOpeners.OpenArray(element, address, length, NativeDerivation.Kept(m_source)) : null;
+        return length >= 0 ? (ж<T>)NativeArrayOpeners.OpenArray(element, address, length, NativeDerivation.Kept(source)) : null;
     }
 
     // X for an array field type T = array<X>, else null: a pure type query, decided once per T.
