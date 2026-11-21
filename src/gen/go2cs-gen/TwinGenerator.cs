@@ -510,7 +510,7 @@ public sealed partial class TwinGenerator : ISourceGenerator
             {
                 IParameterSymbol parameter = symbol.Parameters[i];
 
-                if (IsBoxedReceiver(symbol, i))
+                if (IsBoxedReceiver(symbol, i) || VariadicElement(parameter) is not null)
                     continue;
 
                 if (parameter.RefKind != RefKind.None || parameter.Type.IsRefLikeType && !IsSString(parameter.Type))
@@ -525,6 +525,12 @@ public sealed partial class TwinGenerator : ISourceGenerator
         // plain member got (P8).
         internal static bool IsBoxedReceiver(IMethodSymbol symbol, int index) =>
             index == 0 && symbol.IsExtensionMethod && symbol.Parameters[0].RefKind == RefKind.Ref;
+
+        // F4: Go's `...T`, as the converter lowers it (`params ꓸꓸꓸT`, a Span<T> alias): its element type, or null. The
+        // forwarder takes `slice<T>` and spreads it back with `.ꓸꓸꓸ` (11.6).
+        internal static ITypeSymbol? VariadicElement(IParameterSymbol parameter) =>
+            parameter is { IsParams: true, Type: INamedTypeSymbol { Name: "Span" or "ReadOnlySpan", TypeArguments: [{ } element], ContainingNamespace: { Name: "System", ContainingNamespace.IsGlobalNamespace: true } } }
+                ? element : null;
 
         internal static bool IsSString(ITypeSymbol type) =>
             type is INamedTypeSymbol { Name: "sstring", ContainingNamespace: { Name: "go", ContainingNamespace.IsGlobalNamespace: true } };
@@ -768,7 +774,9 @@ public sealed partial class TwinGenerator : ISourceGenerator
                 // An interface call is awaited only in its plain shape, a member read off an interface-typed value.
                 site.Interface = true;
                 site.IfaceTarget = method.OriginalDefinition;
-                site.IfaceCallable = !method.IsStatic &&
+                // 7a (F11): a call to a variadic member stays plain, as before it had a slot: its arguments are the
+                // expanded `params` form, not the slot's slice. Named limit; the slot exists, so the surface is complete.
+                site.IfaceCallable = !method.IsStatic && !method.Parameters.Any(parameter => VariadicElement(parameter) is not null) &&
                     node.Expression is MemberAccessExpressionSyntax { RawKind: (int)SyntaxKind.SimpleMemberAccessExpression, Name: IdentifierNameSyntax } access &&
                     model.GetTypeInfo(access.Expression).Type?.TypeKind == TypeKind.Interface;
             }

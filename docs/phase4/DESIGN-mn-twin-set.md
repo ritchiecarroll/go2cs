@@ -356,3 +356,9 @@ F2, F6; F3, F5; F4, F11; F7, F8; the guard (F9) and O2 (F10); P8; then the closu
   its box, `Mꞏtwin(this ж<T> Ꮡt, ...)`, and calls `M(ref Ꮡt.DerefOrNull(), ...)`. An sstring-pilot parameter takes
   `@string`, and the call binds the body member through the implicit view. Both rows went red before the code.
   GenTests 700 of 700, with no earlier row changed.
+- **Step 3, F4 and F11:** Go's `...T` (`params ꓸꓸꓸT`, a `Span<T>` alias) takes `slice<T>` in a forwarder and in
+  an interface slot. The plain call spreads it back, `xs.ꓸꓸꓸ`. Both rows RUN the emitted code: three elements in,
+  three arrive. Each was made to fail by dropping `.ꓸꓸꓸ`, which gave 2 where 4 was expected (the slice arrived as
+  one element), and was restored byte-identical. Named limit: a call to a variadic interface member stays plain, as
+  it did before the member had a slot (its arguments are in the expanded `params` form). GenTests 702 of 702, with
+  no earlier row changed.

@@ -91,7 +91,7 @@ public sealed partial class TwinGenerator
                 {
                     IMethodSymbol method = member.Symbol;
                     string result = Result(method), parameters = Parameters(method), arguments = Arguments(method), inner = indent + "    ";
-                    string call = Escaped(method.Name) + "(" + arguments + ")", twin = method.Name + Suffix + "(" + arguments + ")";
+                    string call = Escaped(method.Name) + "(" + PlainArguments(method) + ")", twin = method.Name + Suffix + "(" + arguments + ")";
 
                     if (IfaceHidden)
                     {

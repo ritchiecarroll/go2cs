@@ -135,10 +135,11 @@ public sealed partial class TwinGenerator
             if (symbol.ReturnsByRef || symbol.ReturnsByRefReadonly)
                 return "ref-return";
 
-            if (symbol.Parameters.Any(parameter => parameter.RefKind != RefKind.None || parameter.IsParams))
+            // F11 (7a): Go's `...T` (`params ꓸꓸꓸT`) gets a slot of the Go shape, `slice<T>` (Parameters, PlainArguments).
+            if (symbol.Parameters.Any(parameter => parameter.RefKind != RefKind.None || parameter.IsParams && VariadicElement(parameter) is null))
                 return "byref-param";
 
-            if (symbol.ReturnType.IsRefLikeType || symbol.Parameters.Any(parameter => parameter.Type.IsRefLikeType))
+            if (symbol.ReturnType.IsRefLikeType || symbol.Parameters.Any(parameter => parameter.Type.IsRefLikeType && VariadicElement(parameter) is null))
                 return "reflike";
 
             if (symbol.ReturnType.TypeKind is TypeKind.Pointer or TypeKind.FunctionPointer ||
@@ -246,10 +247,16 @@ public sealed partial class TwinGenerator
             method.ReturnsVoid ? Task : Task + "<" + method.ReturnType.ToDisplayString(s_full) + ">";
 
         private static string Parameters(IMethodSymbol method) =>
-            string.Join(", ", method.Parameters.Select(parameter => parameter.Type.ToDisplayString(s_full) + " " + Escaped(parameter.Name)));
+            string.Join(", ", method.Parameters.Select(parameter =>
+                (VariadicElement(parameter) is { } element ? "global::go.slice<" + element.ToDisplayString(s_full) + ">" : parameter.Type.ToDisplayString(s_full)) +
+                " " + Escaped(parameter.Name)));
 
         private static string Arguments(IMethodSymbol method) =>
             string.Join(", ", method.Parameters.Select(parameter => Escaped(parameter.Name)));
+
+        // The arguments of a slot's PLAIN fallback call: a variadic slice is spread back (`xs.ꓸꓸꓸ`), so every element arrives.
+        private static string PlainArguments(IMethodSymbol method) =>
+            string.Join(", ", method.Parameters.Select(parameter => Escaped(parameter.Name) + (VariadicElement(parameter) is not null ? ".ꓸꓸꓸ" : "")));
 
         // recv.M(a, b) becomes Iꞏtwin.Mꞏcall(recv, a, b) under the hidden shape.
         internal InvocationExpressionSyntax IfaceCall(IMethodSymbol member, InvocationExpressionSyntax visited)

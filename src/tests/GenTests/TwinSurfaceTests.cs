@@ -4,6 +4,8 @@
 // Use of this source code is governed by an MIT-style license
 // that can be found in the LICENSE file.
 
+extern alias golib;
+
 using System;
 using System.Linq;
 using Microsoft.CodeAnalysis;
@@ -120,6 +122,57 @@ public class TwinSurfaceTests
             public static void sw(this ref T t, sstring s) { t.x = 1; }
 
         """;
+
+    // F4: a variadic function, as the converter lowers `...any` (`params ꓸꓸꓸany aʗp`, ꓸꓸꓸany = Span<any>).
+    private const string Variadic = """
+            public static nint count(nint first, params Span<object> restʗp) => first + restʗp.Length;
+
+        """;
+
+    [TestMethod]
+    public void F4_AVariadicFunctionGetsASliceForwarderThatDeliversEveryElement()
+    {
+        (string twins, Diagnostic[] errors) = RunWith(null, null, Variadic);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+
+        // Run it: three elements in, three arrive. Without `.ꓸꓸꓸ` the slice binds as ONE params element, and 1 + 1 arrives.
+        System.Reflection.Assembly built = System.Reflection.Assembly.Load(LastImage!);
+        System.Reflection.MethodInfo forwarder = built.GetType("go.box_package", throwOnError: true)!.GetMethod("countꞏtwin")!;
+        object task = forwarder.Invoke(null, [(nint)1, new golib::go.slice<object>(new object[] { "a", "b", "c" })])!;
+        object awaiter = task.GetType().GetMethod("GetAwaiter")!.Invoke(task, null)!;
+
+        Assert.AreEqual((nint)4, (nint)awaiter.GetType().GetMethod("GetResult")!.Invoke(awaiter, null)!, "every element is delivered");
+
+        StringAssert.Contains(twins, "global::go.golib.GoTask<nint> countꞏtwin(nint first, global::go.slice<object> restʗp) => new global::go.golib.GoTask<nint>(count(first, restʗp.ꓸꓸꓸ));",
+            "the twin takes the Go shape, a slice, and spreads it");
+    }
+
+    // F11: a variadic interface member and a plain implementer (no twin of its own, so ꞏcall falls back to the plain call).
+    private const string VariadicIface = """
+            public partial interface IAdder { nint Add(nint first, params Span<object> restʗp); }
+
+            public partial class Adder : IAdder { public nint Add(nint first, params Span<object> restʗp) => first + restʗp.Length; }
+
+        """;
+
+    [TestMethod]
+    public void F11_AVariadicInterfaceMemberGetsASliceSlotWhoseCallDeliversEveryElement()
+    {
+        (string twins, Diagnostic[] errors) = RunWith(null, new() { ["build_property.GoTwinsIface"] = "hidden", ["build_property.GoTwinsIfaceAll"] = "true" }, VariadicIface);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+
+        // Run the fallback: three elements in, three arrive at the plain member.
+        System.Reflection.Assembly built = System.Reflection.Assembly.Load(LastImage!);
+        Type face = built.GetType("go.box_package+IAdderꞏtwin", throwOnError: true)!;
+        object adder = Activator.CreateInstance(built.GetType("go.box_package+Adder", throwOnError: true)!)!;
+        object task = face.GetMethod("Addꞏcall")!.Invoke(null, [adder, (nint)1, new golib::go.slice<object>(new object[] { "a", "b", "c" })])!;
+        object awaiter = task.GetType().GetMethod("GetAwaiter")!.Invoke(task, null)!;
+
+        Assert.AreEqual((nint)4, (nint)awaiter.GetType().GetMethod("GetResult")!.Invoke(awaiter, null)!, "every element is delivered");
+        StringAssert.Contains(twins, "Addꞏtwin(nint first, global::go.slice<object> restʗp);", "the slot takes the Go shape, a slice");
+    }
 
     private static int Lines(string twins, string text) => twins.Split('\n').Count(line => line.Contains(text, StringComparison.Ordinal));
 

@@ -258,6 +258,11 @@ public sealed partial class TwinGenerator
                     declared.Add("this global::go.ж<" + receiverType.WithoutTrivia().ToFullString() + "> " + box);
                     arguments.Add("ref " + box + ".DerefOrNull()");
                 }
+                else if (VariadicElement(candidate.Symbol.Parameters[i]) is { } element)
+                {
+                    declared.Add("global::go.slice<" + element.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) + "> " + parameter.Identifier.Text);
+                    arguments.Add(parameter.Identifier.Text + ".ꓸꓸꓸ");
+                }
                 else if (IsSString(type) && parameter.Type is not null)
                 {
                     declared.Add(parameter.WithType(SyntaxFactory.ParseTypeName("global::go.@string").WithTrailingTrivia(SyntaxFactory.Space)).WithoutTrivia().ToFullString());

@@ -742,10 +742,15 @@ public class TwinBoxTests
             File.WriteAllText(dump, twins);
 
         // EMIT, not GetDiagnostics: an async lowering error is reported only while the state machine is built.
-        Microsoft.CodeAnalysis.Emit.EmitResult emitted = output.Emit(Stream.Null);
+        using MemoryStream emittedImage = new();
+        Microsoft.CodeAnalysis.Emit.EmitResult emitted = output.Emit(emittedImage);
+        LastImage = emitted.Success ? emittedImage.ToArray() : null;
 
         return (twins, emitted.Diagnostics.Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error).ToArray());
     }
+
+    // The image RunWith last emitted on this thread, for a row that RUNS a twin (TwinSurfaceTests F4).
+    [ThreadStatic] internal static byte[]? LastImage;
 
     internal static string Errors(Diagnostic[] errors) => string.Join("\n", errors.Select(error => error.ToString()));
 
