@@ -187,7 +187,6 @@ var golibFriendNamespaceTypes = nameSet(
 	"IElementRun",
 	"IErrorTarget",
 	"IExactOrderToken",
-	"IFieldView",
 	"IFirstFieldView",
 	"IGoNilArrayPointer",
 	"IGoReflectBox",
