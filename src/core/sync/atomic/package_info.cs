@@ -14,6 +14,7 @@
 
 using go;
 using static go.sync.atomic_package;
+using System.ComponentModel;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -90,13 +91,13 @@ public static partial class atomic_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(atomic_package.Bool)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class atomicᴛBool;
-[GoMethodHost(typeof(atomic_package.Int32)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class atomicᴛInt32;
-[GoMethodHost(typeof(atomic_package.Int64)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class atomicᴛInt64;
-[GoMethodHost(typeof(atomic_package.Pointer<>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class atomicᴛPointer;
-[GoMethodHost(typeof(atomic_package.Uint32)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class atomicᴛUint32;
-[GoMethodHost(typeof(atomic_package.Uint64)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class atomicᴛUint64;
-[GoMethodHost(typeof(atomic_package.Uintptr)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class atomicᴛUintptr;
-[GoMethodHost(typeof(atomic_package.Value)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class atomicᴛValue;
-[GoMethodHost(typeof(atomic_package.noCopy)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class atomicᴛnoCopy;
+[GoMethodHost(typeof(atomic_package.Bool)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class atomicᴛBool;
+[GoMethodHost(typeof(atomic_package.Int32)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class atomicᴛInt32;
+[GoMethodHost(typeof(atomic_package.Int64)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class atomicᴛInt64;
+[GoMethodHost(typeof(atomic_package.Pointer<>)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class atomicᴛPointer;
+[GoMethodHost(typeof(atomic_package.Uint32)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class atomicᴛUint32;
+[GoMethodHost(typeof(atomic_package.Uint64)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class atomicᴛUint64;
+[GoMethodHost(typeof(atomic_package.Uintptr)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class atomicᴛUintptr;
+[GoMethodHost(typeof(atomic_package.Value)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class atomicᴛValue;
+[GoMethodHost(typeof(atomic_package.noCopy)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class atomicᴛnoCopy;
 // </MethodHolders>

@@ -56,10 +56,12 @@ using static go.runtime.metrics_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("runtime/metrics/description.go", "description.cs", "ADVuAO8ClgemgoKUgoKCggAHFKiS")]
-[assembly: GoPositionMap("runtime/metrics/value.go", "value.cs", "ACNKkqyygpSssoKUrLKClA==")]
+[assembly: GoPositionMap("runtime/metrics/value.go", "value.cs", "ACBKkqyygpSssoKUrLKClA==")]
 // </GoSourcePositionMaps>
 
 namespace go.runtime;
+
+using static go.runtime.metrics_package;
 
 [GoPackage("metrics")]
 public static partial class metrics_package
@@ -99,3 +101,16 @@ public static partial class metrics_package
 // <MethodHolders>
 [GoMethodHost(typeof(metrics_package.Value)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class metricsᴛValue;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class metricsᴛValue {
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ValueKind Kind(this Value v) => metrics_package.Kind⁔(v);
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static uint64 Uint64(this Value v) => metrics_package.Uint64⁔(v);
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static float64 Float64(this Value v) => metrics_package.Float64⁔(v);
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Float64Histogram> Float64Histogram(this Value v) => metrics_package.Float64Histogram⁔(v);
+}
+// </MethodForwarders>

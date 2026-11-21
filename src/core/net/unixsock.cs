@@ -8,7 +8,6 @@ using os = os_package;
 using Δsync = sync_package;
 using syscall = syscall_package;
 using time = time_package;
-using static net_package;
 
 partial class net_package {
 
@@ -23,19 +22,13 @@ partial struct UnixAddr {
     public @string Net;
 }
 
-} partial class netᴛUnixAddr {
-
 // Network returns the address's network name, "unix", "unixgram" or
 // "unixpacket".
-public static @string Network(this ref UnixAddr a) {
+internal static @string Network⁔(/*this*/ ref UnixAddr a) {
     return a.Net;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string nilˢ => ref nilˢᵇ;
-private static readonly @string nilˢᵇ = "<nil>"u8;
-
-public static @string String(this ж<UnixAddr> Ꮡa) {
+internal static @string String⁔(/*this*/ ж<UnixAddr> Ꮡa) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (Ꮡa == nil) {
@@ -44,20 +37,18 @@ public static @string String(this ж<UnixAddr> Ꮡa) {
     return a.Name;
 }
 
-internal static bool isWildcard(this ж<UnixAddr> Ꮡa) {
+internal static bool isWildcard⁔(/*this*/ ж<UnixAddr> Ꮡa) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     return Ꮡa == nil || a.Name == ""u8;
 }
 
-internal static Addr opAddr(this ж<UnixAddr> Ꮡa) {
+internal static Addr opAddr⁔(/*this*/ ж<UnixAddr> Ꮡa) {
     if (Ꮡa == nil) {
         return default;
     }
     return new UnixAddrжAddr(Ꮡa);
 }
-
-} partial class net_package {
 
 // ResolveUnixAddr returns an address of Unix domain socket end point.
 //
@@ -81,11 +72,9 @@ partial struct UnixConn {
     /*embed*/ internal conn conn;
 }
 
-} partial class netᴛUnixConn {
-
 // SyscallConn returns a raw network connection.
 // This implements the [syscall.Conn] interface.
-public static (syscall.RawConn, error) SyscallConn(this ж<UnixConn> Ꮡc) {
+internal static (syscall.RawConn, error) SyscallConn⁔(/*this*/ ж<UnixConn> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.of(UnixConn.Ꮡconn).ok()) {
@@ -96,7 +85,7 @@ public static (syscall.RawConn, error) SyscallConn(this ж<UnixConn> Ꮡc) {
 
 // CloseRead shuts down the reading side of the Unix domain connection.
 // Most callers should just use [UnixConn.Close].
-public static error CloseRead(this ж<UnixConn> Ꮡc) {
+internal static error CloseRead⁔(/*this*/ ж<UnixConn> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.of(UnixConn.Ꮡconn).ok()) {
@@ -110,7 +99,7 @@ public static error CloseRead(this ж<UnixConn> Ꮡc) {
 
 // CloseWrite shuts down the writing side of the Unix domain connection.
 // Most callers should just use [UnixConn.Close].
-public static error CloseWrite(this ж<UnixConn> Ꮡc) {
+internal static error CloseWrite⁔(/*this*/ ж<UnixConn> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.of(UnixConn.Ꮡconn).ok()) {
@@ -123,7 +112,7 @@ public static error CloseWrite(this ж<UnixConn> Ꮡc) {
 }
 
 // ReadFromUnix acts like [UnixConn.ReadFrom] but returns a [UnixAddr].
-public static (nint, ж<UnixAddr>, error) ReadFromUnix(this ж<UnixConn> Ꮡc, slice<byte> b) {
+internal static (nint, ж<UnixAddr>, error) ReadFromUnix⁔(/*this*/ ж<UnixConn> Ꮡc, slice<byte> b) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.of(UnixConn.Ꮡconn).ok()) {
@@ -137,7 +126,7 @@ public static (nint, ж<UnixAddr>, error) ReadFromUnix(this ж<UnixConn> Ꮡc, s
 }
 
 // ReadFrom implements the [PacketConn].ReadFrom method.
-public static (nint, Addr, error) ReadFrom(this ж<UnixConn> Ꮡc, slice<byte> b) {
+internal static (nint, Addr, error) ReadFrom⁔(/*this*/ ж<UnixConn> Ꮡc, slice<byte> b) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.of(UnixConn.Ꮡconn).ok()) {
@@ -160,7 +149,7 @@ public static (nint, Addr, error) ReadFrom(this ж<UnixConn> Ꮡc, slice<byte> b
 //
 // Note that if len(b) == 0 and len(oob) > 0, this function will still
 // read (and discard) 1 byte from the connection.
-public static (nint n, nint oobn, nint flags, ж<UnixAddr> addr, error err) ReadMsgUnix(this ж<UnixConn> Ꮡc, slice<byte> b, slice<byte> oob) {
+internal static (nint n, nint oobn, nint flags, ж<UnixAddr> addr, error err) ReadMsgUnix⁔(/*this*/ ж<UnixConn> Ꮡc, slice<byte> b, slice<byte> oob) {
     nint n = default;
     nint oobn = default;
     nint flags = default;
@@ -179,7 +168,7 @@ public static (nint n, nint oobn, nint flags, ж<UnixAddr> addr, error err) Read
 }
 
 // WriteToUnix acts like [UnixConn.WriteTo] but takes a [UnixAddr].
-public static (nint, error) WriteToUnix(this ж<UnixConn> Ꮡc, slice<byte> b, ж<UnixAddr> addr) {
+internal static (nint, error) WriteToUnix⁔(/*this*/ ж<UnixConn> Ꮡc, slice<byte> b, ж<UnixAddr> addr) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.of(UnixConn.Ꮡconn).ok()) {
@@ -193,7 +182,7 @@ public static (nint, error) WriteToUnix(this ж<UnixConn> Ꮡc, slice<byte> b, �
 }
 
 // WriteTo implements the [PacketConn].WriteTo method.
-public static (nint, error) WriteTo(this ж<UnixConn> Ꮡc, slice<byte> b, Addr addr) {
+internal static (nint, error) WriteTo⁔(/*this*/ ж<UnixConn> Ꮡc, slice<byte> b, Addr addr) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.of(UnixConn.Ꮡconn).ok()) {
@@ -216,7 +205,7 @@ public static (nint, error) WriteTo(this ж<UnixConn> Ꮡc, slice<byte> b, Addr 
 //
 // Note that if len(b) == 0 and len(oob) > 0, this function will still
 // write 1 byte to the connection.
-public static (nint n, nint oobn, error err) WriteMsgUnix(this ж<UnixConn> Ꮡc, slice<byte> b, slice<byte> oob, ж<UnixAddr> addr) {
+internal static (nint n, nint oobn, error err) WriteMsgUnix⁔(/*this*/ ж<UnixConn> Ꮡc, slice<byte> b, slice<byte> oob, ж<UnixAddr> addr) {
     nint n = default;
     nint oobn = default;
     error err = default;
@@ -231,8 +220,6 @@ public static (nint n, nint oobn, error err) WriteMsgUnix(this ж<UnixConn> Ꮡc
     }
     return (n, oobn, err);
 }
-
-} partial class net_package {
 
 internal static ж<UnixConn> newUnixConn(ж<netFD> fd) { return Ꮡ(new UnixConn(new conn(fd))); }
 
@@ -277,9 +264,7 @@ partial struct UnixListener {
     internal Δsync.Once unlinkOnce;
 }
 
-} partial class netᴛUnixListener {
-
-internal static bool ok(this ж<UnixListener> Ꮡln) {
+internal static bool ok⁔(/*this*/ ж<UnixListener> Ꮡln) {
     ref var ln = ref Ꮡln.DerefOrNull();
 
     return Ꮡln != nil && ln.fd != nil;
@@ -290,7 +275,7 @@ internal static bool ok(this ж<UnixListener> Ꮡln) {
 //
 // The returned [syscall.RawConn] only supports calling Control. Read and
 // Write return an error.
-public static (syscall.RawConn, error) SyscallConn(this ж<UnixListener> Ꮡl) {
+internal static (syscall.RawConn, error) SyscallConn⁔(/*this*/ ж<UnixListener> Ꮡl) {
     ref var l = ref Ꮡl.DerefOrNull();
 
     if (!Ꮡl.ok()) {
@@ -301,7 +286,7 @@ public static (syscall.RawConn, error) SyscallConn(this ж<UnixListener> Ꮡl) {
 
 // AcceptUnix accepts the next incoming call and returns the new
 // connection.
-public static (ж<UnixConn>, error) AcceptUnix(this ж<UnixListener> Ꮡl) {
+internal static (ж<UnixConn>, error) AcceptUnix⁔(/*this*/ ж<UnixListener> Ꮡl) {
     ref var l = ref Ꮡl.DerefOrNull();
 
     if (!Ꮡl.ok()) {
@@ -316,7 +301,7 @@ public static (ж<UnixConn>, error) AcceptUnix(this ж<UnixListener> Ꮡl) {
 
 // Accept implements the Accept method in the [Listener] interface.
 // Returned connections will be of type [*UnixConn].
-public static (Conn, error) Accept(this ж<UnixListener> Ꮡl) {
+internal static (Conn, error) Accept⁔(/*this*/ ж<UnixListener> Ꮡl) {
     ref var l = ref Ꮡl.DerefOrNull();
 
     if (!Ꮡl.ok()) {
@@ -331,7 +316,7 @@ public static (Conn, error) Accept(this ж<UnixListener> Ꮡl) {
 
 // Close stops listening on the Unix address. Already accepted
 // connections are not closed.
-public static error Close(this ж<UnixListener> Ꮡl) {
+internal static error Close⁔(/*this*/ ж<UnixListener> Ꮡl) {
     ref var l = ref Ꮡl.DerefOrNull();
 
     if (!Ꮡl.ok()) {
@@ -346,11 +331,11 @@ public static error Close(this ж<UnixListener> Ꮡl) {
 // Addr returns the listener's network address.
 // The [Addr] returned is shared by all invocations of Addr, so
 // do not modify it.
-public static Addr Addr(this ref UnixListener l) { return l.fd.laddr; }
+internal static Addr Addr⁔(/*this*/ ref UnixListener l) { return l.fd.laddr; }
 
 // SetDeadline sets the deadline associated with the listener.
 // A zero time value disables the deadline.
-public static error SetDeadline(this ж<UnixListener> Ꮡl, time.Time t) {
+internal static error SetDeadline⁔(/*this*/ ж<UnixListener> Ꮡl, time.Time t) {
     ref var l = ref Ꮡl.DerefOrNull();
 
     if (!Ꮡl.ok()) {
@@ -369,7 +354,7 @@ public static error SetDeadline(this ж<UnixListener> Ꮡl, time.Time t) {
 //
 // On Windows, the returned os.File's file descriptor is not
 // usable on other processes.
-public static (ж<os.File> f, error err) File(this ж<UnixListener> Ꮡl) {
+internal static (ж<os.File> f, error err) File⁔(/*this*/ ж<UnixListener> Ꮡl) {
     ж<os.File> f = default;
     error err = default;
     ref var l = ref Ꮡl.DerefOrNull();
@@ -383,8 +368,6 @@ public static (ж<os.File> f, error err) File(this ж<UnixListener> Ꮡl) {
     }
     return (f, err);
 }
-
-} partial class net_package {
 
 // ListenUnix acts like [Listen] for Unix networks.
 //

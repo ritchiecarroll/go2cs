@@ -9,7 +9,7 @@ using chacha8rand = @internal.chacha8rand_package;
 using goarch = @internal.goarch_package;
 using Δmath = @internal.runtime.math_package;
 using @unsafe = unsafe_package;
-/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for go:linkname
+/* import _ "unsafe" (nothing to initialize) */ // for go:linkname
 using @internal;
 using @internal.runtime;
 

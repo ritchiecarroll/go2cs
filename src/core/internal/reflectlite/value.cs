@@ -9,7 +9,6 @@ using unsafeheader = go.@internal.unsafeheader_package;
 using Δruntime = runtime_package;
 using @unsafe = unsafe_package;
 using go.@internal;
-using static reflectlite_package;
 
 partial class reflectlite_package {
 
@@ -75,22 +74,18 @@ internal static flag flagMethod => /* 1 << 9 */ 512;
 internal static UntypedInt flagMethodShift => 10;
 internal static flag flagRO => /* flagStickyRO | flagEmbedRO */ 96;
 
-} partial class reflectliteᴛflag {
-
-internal static Kind kind(this flag f) {
+internal static Kind kind⁔(/*this*/ flag f) {
     return (Kind)(uint8)((flag)(f & flagKindMask));
 }
 
-internal static flag ro(this flag f) {
+internal static flag ro⁔(/*this*/ flag f) {
     if ((flag)(f & flagRO) != 0) {
         return flagStickyRO;
     }
     return 0;
 }
 
-} partial class reflectliteᴛValue {
-
-internal static ж<abi.Type> typ(this Value v) {
+internal static ж<abi.Type> typ⁔(/*this*/ Value v) {
     // Types are either static (for compiler-created types) or
     // heap-allocated but always reachable (for reflection-created
     // types, held in the central map). So there is no need to
@@ -101,7 +96,7 @@ internal static ж<abi.Type> typ(this Value v) {
 
 // pointer returns the underlying pointer represented by v.
 // v.Kind() must be Pointer, Map, Chan, Func, or UnsafePointer
-internal static @unsafe.Pointer pointer(this Value v) {
+internal static @unsafe.Pointer pointer⁔(/*this*/ Value v) {
     if (v.typ().Size() != goarch.PtrSize || !v.typ().Pointers()) {
         throw panic("can't call pointer on a non-pointer Value");
     }
@@ -110,8 +105,6 @@ internal static @unsafe.Pointer pointer(this Value v) {
     }
     return v.ptr;
 }
-
-} partial class reflectlite_package {
 
 // packEface converts v to the empty interface.
 internal static any packEface(Value v) {
@@ -163,24 +156,18 @@ partial struct ValueError {
     public Kind Kind;
 }
 
-} partial class reflectliteᴛValueError {
-
-public static @string Error(this ref ValueError e) {
+internal static @string Error⁔(/*this*/ ref ValueError e) {
     if (e.Kind == 0) {
         return "reflect: call of "u8 + e.Method + " on zero Value"u8;
     }
     return "reflect: call of "u8 + e.Method + " on "u8 + e.Kind.String() + " Value"u8;
 }
 
-} partial class reflectlite_package {
-
 // go2cs generated this placeholder — func methodName is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
-
-} partial class reflectliteᴛflag {
 
 // mustBeExported panics if f records that the value was obtained using
 // an unexported field.
-internal static partial void mustBeExported(this flag f) {
+internal static partial void mustBeExported⁔(/*this*/ flag f) {
     if (f == 0) {
         throw panic(Ꮡ(new ValueError(methodName(), 0)));
     }
@@ -192,7 +179,7 @@ internal static partial void mustBeExported(this flag f) {
 // mustBeAssignable panics if f records that the value is not assignable,
 // which is to say that either it was obtained using an unexported field
 // or it is not addressable.
-internal static partial void mustBeAssignable(this flag f) {
+internal static partial void mustBeAssignable⁔(/*this*/ flag f) {
     if (f == 0) {
         throw panic(Ꮡ(new ValueError(methodName(), abi.Invalid)));
     }
@@ -205,24 +192,18 @@ internal static partial void mustBeAssignable(this flag f) {
     }
 }
 
-} partial class reflectliteᴛValue {
-
 // CanSet reports whether the value of v can be changed.
 // A Value can be changed only if it is addressable and was not
 // obtained by the use of unexported struct fields.
 // If CanSet returns false, calling Set or any type-specific
 // setter (e.g., SetBool, SetInt) will panic.
-public static bool CanSet(this Value v) {
+internal static bool CanSet⁔(/*this*/ Value v) {
     return (flag)(v.flag & ((flag)(flagAddr | flagRO))) == flagAddr;
 }
 
 // go2cs generated this placeholder — func Elem is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-} partial class reflectlite_package {
-
 // go2cs generated this placeholder — func valueInterface is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
-
-} partial class reflectliteᴛValue {
 
 // go2cs generated this placeholder — func IsNil is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
@@ -231,17 +212,15 @@ public static bool CanSet(this Value v) {
 // If IsValid returns false, all other methods except String panic.
 // Most functions and methods never return an invalid Value.
 // If one does, its documentation states the conditions explicitly.
-public static bool IsValid(this Value v) {
+internal static bool IsValid⁔(/*this*/ Value v) {
     return v.flag != 0;
 }
 
 // Kind returns v's Kind.
 // If v is the zero Value (IsValid returns false), Kind returns Invalid.
-public static Kind Kind(this Value v) {
+internal static Kind Kind⁔(/*this*/ Value v) {
     return v.kind();
 }
-
-} partial class reflectlite_package {
 
 // implemented in runtime:
 
@@ -251,12 +230,10 @@ internal static partial nint chanlen(@unsafe.Pointer _);
 //go:noescape
 internal static partial nint maplen(@unsafe.Pointer _);
 
-} partial class reflectliteᴛValue {
-
 // go2cs generated this placeholder — func Len is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // NumMethod returns the number of exported methods in the value's method set.
-internal static nint numMethod(this Value v) {
+internal static nint numMethod⁔(/*this*/ Value v) {
     if (v.typ() == nil) {
         throw panic(Ꮡ(new ValueError("reflectlite.Value.NumMethod", abi.Invalid)));
     }
@@ -266,7 +243,7 @@ internal static nint numMethod(this Value v) {
 // go2cs generated this placeholder — func Set is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // Type returns v's type.
-public static Type Type(this Value v) {
+internal static Type Type⁔(/*this*/ Value v) {
     var f = v.flag;
     if (f == 0) {
         throw panic(Ꮡ(new ValueError("reflectlite.Value.Type", abi.Invalid)));
@@ -274,8 +251,6 @@ public static Type Type(this Value v) {
     // Method values not supported.
     return toRType(v.typ());
 }
-
-} partial class reflectlite_package {
 
 /*
  * constructors
@@ -287,12 +262,10 @@ internal static partial @unsafe.Pointer unsafe_New(ж<abi.Type> _);
 
 // go2cs generated this placeholder — func ValueOf is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-} partial class reflectliteᴛValue {
-
 // assignTo returns a value v that can be assigned directly to typ.
 // It panics if v is not assignable to typ.
 // For a conversion to an interface type, target is a suggested scratch space to use.
-internal static Value assignTo(this Value v, @string context, ж<abi.Type> Ꮡdst, @unsafe.Pointer target) {
+internal static Value assignTo⁔(/*this*/ Value v, @string context, ж<abi.Type> Ꮡdst, @unsafe.Pointer target) {
     ref var dst = ref Ꮡdst.DerefOrNull();
 
     // if v.flag&flagMethod != 0 {
@@ -329,8 +302,6 @@ internal static Value assignTo(this Value v, @string context, ж<abi.Type> Ꮡds
     // Failed.
     throw panic(context + ": value of type " + toRType(v.typ()).String() + " is not assignable to type " + toRType(Ꮡdst).String());
 }
-
-} partial class reflectlite_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string iLenˢ => ref iLenˢᵇ;

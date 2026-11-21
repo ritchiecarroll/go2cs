@@ -5,8 +5,6 @@ namespace go;
 
 using iter = iter_package;
 using abi = @internal.abi_package;
-using reflect = reflect_package;
-using static reflect_package;
 
 partial class reflect_package {
 
@@ -31,8 +29,6 @@ internal static iter.Seq<Value> rangeNum<T, N>(N num, Type t)
     };
 }
 
-} partial class reflectᴛValue {
-
 // Seq returns an iter.Seq[Value] that loops over the elements of v.
 // If v's kind is Func, it must be a function that has no results and
 // that takes a single argument of type func(T) bool for some type T.
@@ -40,7 +36,7 @@ internal static iter.Seq<Value> rangeNum<T, N>(N num, Type t)
 // Otherwise v's kind must be Int, Int8, Int16, Int32, Int64,
 // Uint, Uint8, Uint16, Uint32, Uint64, Uintptr,
 // Array, Chan, Map, Slice, or String.
-public static iter.Seq<Value> Seq(this Value v) {
+internal static iter.Seq<Value> Seq⁔(/*this*/ Value v) {
     if (canRangeFunc(v.abiType())) {
         return (Func<Value, bool> yield) => {
             var rf = MakeFunc(v.Type().In(0), (slice<Value> @in) => slice<Value>([ValueOf(yield(@in[0]))]));
@@ -48,7 +44,7 @@ public static iter.Seq<Value> Seq(this Value v) {
         };
     }
     switch (v.kind()) {
-    case var ᴛ when ᴛ == reflect.Int: {
+    case var ᴛ when ᴛ == Int: {
         return rangeNum<nint, int64>(v.Int(), v.Type());
     }
     case var ᴛ when ᴛ == Int8: {
@@ -63,7 +59,7 @@ public static iter.Seq<Value> Seq(this Value v) {
     case var ᴛ when ᴛ == Int64: {
         return rangeNum<int64, int64>(v.Int(), v.Type());
     }
-    case var ᴛ when ᴛ == reflect.Uint: {
+    case var ᴛ when ᴛ == Uint: {
         return rangeNum<nuint, uint64>(v.Uint(), v.Type());
     }
     case var ᴛ when ᴛ == Uint8: {
@@ -81,7 +77,7 @@ public static iter.Seq<Value> Seq(this Value v) {
     case var ᴛ when ᴛ == Uintptr: {
         return rangeNum<uintptr, uint64>(v.Uint(), v.Type());
     }
-    case var ᴛ when ᴛ == reflect.Pointer: {
+    case var ᴛ when ᴛ == Pointer: {
         if (v.Elem().kind() != Array) {
             break;
         }
@@ -94,7 +90,7 @@ public static iter.Seq<Value> Seq(this Value v) {
             }
         };
     }
-    case var ᴛ when ᴛ == Array || ᴛ == reflect.Slice: {
+    case var ᴛ when ᴛ == Array || ᴛ == Slice: {
         return (Func<Value, bool> yield) => {
             foreach (var i in range(v.Len())) {
                 if (!yield(ValueOf(i))) {
@@ -103,7 +99,7 @@ public static iter.Seq<Value> Seq(this Value v) {
             }
         };
     }
-    case var ᴛ when ᴛ == reflect.String: {
+    case var ᴛ when ᴛ == String: {
         return (Func<Value, bool> yield) => {
             foreach (var (i, _) in v.String()) {
                 if (!yield(ValueOf(i))) {
@@ -139,7 +135,7 @@ public static iter.Seq<Value> Seq(this Value v) {
 // that takes a single argument of type func(K, V) bool for some type K, V.
 // If v's kind is Pointer, the pointer element type must have kind Array.
 // Otherwise v's kind must be Array, Map, Slice, or String.
-public static iter.Seq2<Value, Value> Seq2(this Value v) {
+internal static iter.Seq2<Value, Value> Seq2⁔(/*this*/ Value v) {
     if (canRangeFunc2(v.abiType())) {
         return (Func<Value, Value, bool> yield) => {
             var rf = MakeFunc(v.Type().In(0), (slice<Value> @in) => slice<Value>([ValueOf(yield(@in[0], @in[1]))]));
@@ -147,7 +143,7 @@ public static iter.Seq2<Value, Value> Seq2(this Value v) {
         };
     }
     switch (v.Kind()) {
-    case var ᴛ when ᴛ == reflect.Pointer: {
+    case var ᴛ when ᴛ == Pointer: {
         if (v.Elem().kind() != Array) {
             break;
         }
@@ -160,7 +156,7 @@ public static iter.Seq2<Value, Value> Seq2(this Value v) {
             }
         };
     }
-    case var ᴛ when ᴛ == Array || ᴛ == reflect.Slice: {
+    case var ᴛ when ᴛ == Array || ᴛ == Slice: {
         return (Func<Value, Value, bool> yield) => {
             foreach (var i in range(v.Len())) {
                 if (!yield(ValueOf(i), v.Index(i))) {
@@ -169,7 +165,7 @@ public static iter.Seq2<Value, Value> Seq2(this Value v) {
             }
         };
     }
-    case var ᴛ when ᴛ == reflect.String: {
+    case var ᴛ when ᴛ == String: {
         return (Func<Value, Value, bool> yield) => {
             foreach (var (i, vΔ2) in v.String()) {
                 if (!yield(ValueOf(i), ValueOf(vΔ2))) {
@@ -191,4 +187,4 @@ public static iter.Seq2<Value, Value> Seq2(this Value v) {
     throw panic("reflect: " + v.Type().String() + " cannot produce iter.Seq2[Value, Value]");
 }
 
-}
+} // end reflect_package

@@ -13,8 +13,6 @@ using time = time_package;
 partial class net_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string getsockoptˢ => ref getsockoptˢᵇ;
-private static readonly @string getsockoptˢᵇ = "getsockopt"u8;
 internal static ref readonly @string getsocknameˢ => ref getsocknameˢᵇ;
 private static readonly @string getsocknameˢᵇ = "getsockname"u8;
 

@@ -19,7 +19,6 @@ using fs = io.fs_package;
 using go;
 using go.@internal.runtime;
 using path;
-using static cgrouptest_package;
 
 partial class cgrouptest_package {
 
@@ -28,9 +27,7 @@ partial struct CgroupV2 {
     internal @string path;
 }
 
-} partial class cgrouptestᴛCgroupV2 {
-
-public static @string Path(this ref CgroupV2 c) {
+internal static @string Path⁔(/*this*/ ref CgroupV2 c) {
     return c.path;
 }
 
@@ -39,7 +36,7 @@ internal static ref readonly @string cpuMaxˢ => ref cpuMaxˢᵇ;
 private static readonly @string cpuMaxˢᵇ = "cpu.max"u8;
 
 // Path to cpu.max.
-public static @string CPUMaxPath(this ref CgroupV2 c) {
+internal static @string CPUMaxPath⁔(/*this*/ ref CgroupV2 c) {
     return filepath.Join(c.path, cpuMaxˢ);
 }
 
@@ -48,7 +45,7 @@ internal static ref readonly @string maxˢ => ref maxˢᵇ;
 private static readonly @string maxˢᵇ = "max"u8;
 
 // Set cpu.max. Pass -1 for quota to disable the limit.
-public static error SetCPUMax(this ref CgroupV2 c, int64 quota, int64 period) {
+internal static error SetCPUMax⁔(/*this*/ ref CgroupV2 c, int64 quota, int64 period) {
     @string q = maxˢ;
     if (quota >= 0) {
         q = strconv.FormatInt(quota, 10);
@@ -56,8 +53,6 @@ public static error SetCPUMax(this ref CgroupV2 c, int64 quota, int64 period) {
     @string buf = fmt.Sprintf("%s %d"u8, q, period);
     return os.WriteFile(c.CPUMaxPath(), slice<byte>(buf), 0);
 }
-
-} partial class cgrouptest_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string cgroupSubtreeControlˢ => ref cgroupSubtreeControlˢᵇ;

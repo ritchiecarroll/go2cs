@@ -13,7 +13,6 @@ using math = math_package;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140;
 using go.crypto.@internal.fips140deps;
-using static gcm_package;
 
 partial class gcm_package {
 
@@ -97,17 +96,15 @@ partial struct GCMWithCounterNonce {
     internal uint64 next;
 }
 
-} partial class gcmᴛGCMWithCounterNonce {
+internal static nint NonceSize⁔(/*this*/ ref GCMWithCounterNonce g) { return gcmStandardNonceSize; }
 
-public static nint NonceSize(this ref GCMWithCounterNonce g) { return gcmStandardNonceSize; }
-
-public static nint Overhead(this ref GCMWithCounterNonce g) { return gcmTagSize; }
+internal static nint Overhead⁔(/*this*/ ref GCMWithCounterNonce g) { return gcmTagSize; }
 
 // Seal implements the [cipher.AEAD] interface, checking that the nonce prefix
 // is stable and that the counter is strictly increasing.
 //
 // It is not safe for concurrent use.
-public static slice<byte> Seal(this ж<GCMWithCounterNonce> Ꮡg, slice<byte> dst, slice<byte> nonce, slice<byte> plaintext, slice<byte> data) {
+internal static slice<byte> Seal⁔(/*this*/ ж<GCMWithCounterNonce> Ꮡg, slice<byte> dst, slice<byte> nonce, slice<byte> plaintext, slice<byte> data) {
     ref var g = ref Ꮡg.DerefOrNull();
 
     if (len(nonce) != gcmStandardNonceSize) {
@@ -146,12 +143,10 @@ public static slice<byte> Seal(this ж<GCMWithCounterNonce> Ꮡg, slice<byte> ds
     return Ꮡg.Ꮡg.sealAfterIndicator(dst, nonce, plaintext, data);
 }
 
-public static (slice<byte>, error) Open(this ж<GCMWithCounterNonce> Ꮡg, slice<byte> dst, slice<byte> nonce, slice<byte> ciphertext, slice<byte> data) {
+internal static (slice<byte>, error) Open⁔(/*this*/ ж<GCMWithCounterNonce> Ꮡg, slice<byte> dst, slice<byte> nonce, slice<byte> ciphertext, slice<byte> data) {
     fips140.RecordApproved();
     return Ꮡg.Ꮡg.Open(dst, nonce, ciphertext, data);
 }
-
-} partial class gcm_package {
 
 // NewGCMWithXORCounterNonce returns a new AEAD that works like GCM, but
 // enforces the construction of deterministic nonces. The nonce must be 96 bits,
@@ -226,8 +221,6 @@ partial struct GCMWithXORCounterNonce {
     internal uint64 next;
 }
 
-} partial class gcmᴛGCMWithXORCounterNonce {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static ref readonly @string cryptoCipherIncorrectˢ => ref cryptoCipherIncorrectˢᵇ;
 private static readonly @string cryptoCipherIncorrectˢᵇ = "crypto/cipher: incorrect nonce length given to SetNoncePrefixAndMask"u8;
@@ -243,7 +236,7 @@ private static readonly @string cryptoCipherˢᵇ = "crypto/cipher: SetNoncePref
 // Note that Seal expects the nonce to be already XOR'd with the mask. The mask
 // is provided here only to allow Seal to enforce that the counter is strictly
 // increasing.
-public static error SetNoncePrefixAndMask(this ref GCMWithXORCounterNonce g, slice<byte> nonce) {
+internal static error SetNoncePrefixAndMask⁔(/*this*/ ref GCMWithXORCounterNonce g, slice<byte> nonce) {
     if (len(nonce) != gcmStandardNonceSize) {
         return errors.New(cryptoCipherIncorrectˢ);
     }
@@ -256,15 +249,15 @@ public static error SetNoncePrefixAndMask(this ref GCMWithXORCounterNonce g, sli
     return default;
 }
 
-public static nint NonceSize(this ref GCMWithXORCounterNonce g) { return gcmStandardNonceSize; }
+internal static nint NonceSize⁔(/*this*/ ref GCMWithXORCounterNonce g) { return gcmStandardNonceSize; }
 
-public static nint Overhead(this ref GCMWithXORCounterNonce g) { return gcmTagSize; }
+internal static nint Overhead⁔(/*this*/ ref GCMWithXORCounterNonce g) { return gcmTagSize; }
 
 // Seal implements the [cipher.AEAD] interface, checking that the nonce prefix
 // is stable and that the counter is strictly increasing.
 //
 // It is not safe for concurrent use.
-public static slice<byte> Seal(this ж<GCMWithXORCounterNonce> Ꮡg, slice<byte> dst, slice<byte> nonce, slice<byte> plaintext, slice<byte> data) {
+internal static slice<byte> Seal⁔(/*this*/ ж<GCMWithXORCounterNonce> Ꮡg, slice<byte> dst, slice<byte> nonce, slice<byte> plaintext, slice<byte> data) {
     ref var g = ref Ꮡg.DerefOrNull();
 
     if (len(nonce) != gcmStandardNonceSize) {
@@ -300,9 +293,9 @@ public static slice<byte> Seal(this ж<GCMWithXORCounterNonce> Ꮡg, slice<byte>
     return Ꮡg.Ꮡg.sealAfterIndicator(dst, nonce, plaintext, data);
 }
 
-public static (slice<byte>, error) Open(this ж<GCMWithXORCounterNonce> Ꮡg, slice<byte> dst, slice<byte> nonce, slice<byte> ciphertext, slice<byte> data) {
+internal static (slice<byte>, error) Open⁔(/*this*/ ж<GCMWithXORCounterNonce> Ꮡg, slice<byte> dst, slice<byte> nonce, slice<byte> ciphertext, slice<byte> data) {
     fips140.RecordApproved();
     return Ꮡg.Ꮡg.Open(dst, nonce, ciphertext, data);
 }
 
-}
+} // end gcm_package

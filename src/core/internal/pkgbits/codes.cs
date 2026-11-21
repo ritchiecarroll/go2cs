@@ -3,8 +3,6 @@
 // license that can be found in the LICENSE file.
 namespace go.@internal;
 
-using static pkgbits_package;
-
 partial class pkgbits_package {
 
 // A Code is an enum value that can be encoded into bitstreams.
@@ -21,12 +19,8 @@ partial interface Code {
 // A CodeVal distinguishes among go/constant.Value encodings.
 partial struct CodeVal /*num:nint*/;
 
-} partial class pkgbitsᴛCodeVal {
-
-public static SyncMarker Marker(this CodeVal c) { return SyncVal; }
-public static nint Value(this CodeVal c) { return (nint)c; }
-
-} partial class pkgbits_package {
+internal static SyncMarker Marker⁔(/*this*/ CodeVal c) { return SyncVal; }
+internal static nint Value⁔(/*this*/ CodeVal c) { return (nint)c; }
 
 // Note: These values are public and cannot be changed without
 // updating the go/types importers.
@@ -40,12 +34,8 @@ public static CodeVal ValBigFloat => 5;
 // A CodeType distinguishes among go/types.Type encodings.
 partial struct CodeType /*num:nint*/;
 
-} partial class pkgbitsᴛCodeType {
-
-public static SyncMarker Marker(this CodeType c) { return SyncType; }
-public static nint Value(this CodeType c) { return (nint)c; }
-
-} partial class pkgbits_package {
+internal static SyncMarker Marker⁔(/*this*/ CodeType c) { return SyncType; }
+internal static nint Value⁔(/*this*/ CodeType c) { return (nint)c; }
 
 // Note: These values are public and cannot be changed without
 // updating the go/types importers.
@@ -65,12 +55,8 @@ public static CodeType TypeTypeParam => 11;
 // A CodeObj distinguishes among go/types.Object encodings.
 partial struct CodeObj /*num:nint*/;
 
-} partial class pkgbitsᴛCodeObj {
-
-public static SyncMarker Marker(this CodeObj c) { return SyncCodeObj; }
-public static nint Value(this CodeObj c) { return (nint)c; }
-
-} partial class pkgbits_package {
+internal static SyncMarker Marker⁔(/*this*/ CodeObj c) { return SyncCodeObj; }
+internal static nint Value⁔(/*this*/ CodeObj c) { return (nint)c; }
 
 // Note: These values are public and cannot be changed without
 // updating the go/types importers.

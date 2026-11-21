@@ -14,6 +14,9 @@
 
 using go;
 using static go.crypto.des_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -62,12 +65,14 @@ using static go.crypto.des_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("crypto/des/block.go", "block.cs", "AAwYgoKClIKUgoKmgriCpoKqopSCmoKagpqCmgAJFLKCgpSmgoKCgoK4goKmlAAFELSCgqaCggAMGoKCAAsYgoIADBqCAAoWqsaClIKClIKClIKClIKCgqrCgoKUgoKClMiSpoKmgqaUlN6y")]
-[assembly: GoPositionMap("crypto/des/cipher.go", "cipher.cs", "ABsqggANEpKCpoKmgoLGlIKClIKUgpSmgoKUgpSClAANEpKCpoKmgoKCgsaUgoKUgpSCpoKClIKUgpSClIKmgpSCpoKClIKUgqaCgpSClIKUgpSCpoKUgg==")]
+[assembly: GoPositionMap("crypto/des/block.go", "block.cs", "AAsYgoKClIKUgoKmgriCpoKqopSCmoKagpqCmgAJFLKCgpSmgoKCgoK4goKmlAAFELSCgqaCggAMGoKCAAsYgoIADBqCAAoWqsaClIKClIKClIKClIKCgqrCgoKUgoKClKiSpoKmgqaUlL6y")]
+[assembly: GoPositionMap("crypto/des/cipher.go", "cipher.cs", "ABcqggALEpKCpoKmgoKmlIKClIKUgpSmgoKUgpSClAALEpKCpoKmgoKCgqaUgoKUgpSCpoKClIKUgpSClIKmgpSCpoKClIKUgqaCgpSClIKUgpSCpoKUgg==")]
 [assembly: GoPositionMap("crypto/des/const.go", "const.cs", "AA8cAAwaAAwaAAkUAAgSAAsYAAoWADN4")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;
+
+using static go.crypto.des_package;
 
 [GoPackage("des")]
 public static partial class des_package
@@ -106,7 +111,28 @@ public static partial class des_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(des_package.KeySizeError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class desᴛKeySizeError;
-[GoMethodHost(typeof(des_package.desCipher)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class desᴛdesCipher;
-[GoMethodHost(typeof(des_package.tripleDESCipher)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class desᴛtripleDESCipher;
+[GoMethodHost(typeof(des_package.KeySizeError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class desᴛKeySizeError;
+[GoMethodHost(typeof(des_package.desCipher)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class desᴛdesCipher;
+[GoMethodHost(typeof(des_package.tripleDESCipher)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class desᴛtripleDESCipher;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class desᴛKeySizeError {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this KeySizeError k) => des_package.Error⁔(k);
+}
+partial class desᴛdesCipher {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void generateSubkeys(this ref desCipher c, slice<byte> keyBytes) => des_package.generateSubkeys⁔(ref c, keyBytes);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint BlockSize(this ref desCipher c) => des_package.BlockSize⁔(ref c);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void Encrypt(this ref desCipher c, slice<byte> dst, slice<byte> src) => des_package.Encrypt⁔(ref c, dst, src);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void Decrypt(this ref desCipher c, slice<byte> dst, slice<byte> src) => des_package.Decrypt⁔(ref c, dst, src);
+}
+partial class desᴛtripleDESCipher {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint BlockSize(this ref tripleDESCipher c) => des_package.BlockSize⁔(ref c);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void Encrypt(this ref tripleDESCipher c, slice<byte> dst, slice<byte> src) => des_package.Encrypt⁔(ref c, dst, src);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void Decrypt(this ref tripleDESCipher c, slice<byte> dst, slice<byte> src) => des_package.Decrypt⁔(ref c, dst, src);
+}
+// </MethodForwarders>

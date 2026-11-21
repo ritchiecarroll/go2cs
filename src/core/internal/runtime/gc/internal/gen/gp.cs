@@ -3,8 +3,6 @@
 // license that can be found in the LICENSE file.
 namespace go.@internal.runtime.gc.@internal;
 
-using static gen_package;
-
 partial class gen_package {
 
 partial struct Uint64 {
@@ -20,16 +18,14 @@ public static Uint64 /*y*/ ConstUint64(uint64 c, @string name) {
     return y;
 }
 
-} partial class genᴛUint64 {
-
-internal static ж<kind> kind(this Uint64 _) {
+internal static ж<kind> kind⁔(/*this*/ Uint64 _) {
     return kindUint64;
 }
 
-internal static Uint64 wrap(this Uint64 _, ж<op> x) {
+internal static Uint64 wrap⁔(/*this*/ Uint64 _, ж<op> x) {
     Uint64 y = new(nil);
     y.valGP.valAny.initOp(x);
     return y;
 }
 
-}
+} // end gen_package

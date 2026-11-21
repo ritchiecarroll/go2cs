@@ -5,7 +5,6 @@ namespace go.math.big.@internal;
 
 using fmt = fmt_package;
 using strings = strings_package;
-using static asmgen_package;
 
 partial class asmgen_package {
 
@@ -134,15 +133,11 @@ partial struct Arch {
     internal map<Option, Action<ж<Asm>, @string>> options;
 }
 
-} partial class asmgenᴛArch {
-
 // HasShiftWide reports whether the Arch has working LshWide/RshWide instructions.
 // If not, calling them will panic.
-public static bool HasShiftWide(this ref Arch a) {
+internal static bool HasShiftWide⁔(/*this*/ ref Arch a) {
     return a.lshd != ""u8;
 }
-
-} partial class asmgen_package {
 
 // A Hint is a hint about what a register will be used for,
 // so that an appropriate one can be selected.
@@ -163,21 +158,17 @@ partial struct Reg {
     internal @string name;
 }
 
-} partial class asmgenᴛReg {
-
 // IsImm reports whether r is an immediate value.
-public static bool IsImm(this Reg r) { return strings.HasPrefix(r.name, "$"); }
+internal static bool IsImm⁔(/*this*/ Reg r) { return strings.HasPrefix(r.name, "$"); }
 
 // IsMem reports whether r is a memory value.
-public static bool IsMem(this Reg r) { return strings.HasSuffix(r.name, ")"); }
+internal static bool IsMem⁔(/*this*/ Reg r) { return strings.HasSuffix(r.name, ")"); }
 
 // String returns the assembly syntax for r.
-public static @string String(this Reg r) { return r.name; }
+internal static @string String⁔(/*this*/ Reg r) { return r.name; }
 
 // Valid reports whether is valid, meaning r is not the zero value of Reg (a register with no name).
-public static bool Valid(this Reg r) { return r.name != ""u8; }
-
-} partial class asmgen_package {
+internal static bool Valid⁔(/*this*/ Reg r) { return r.name != ""u8; }
 
 // A RegPtr is like a Reg but expected to hold a pointer.
 // The separate Go type helps keeps pointers and scalars separate and avoid mistakes;
@@ -186,18 +177,14 @@ partial struct RegPtr {
     internal @string name;
 }
 
-} partial class asmgenᴛRegPtr {
-
 // String returns the assembly syntax for r.
-public static @string String(this RegPtr r) { return r.name; }
+internal static @string String⁔(/*this*/ RegPtr r) { return r.name; }
 
 // Valid reports whether is valid, meaning r is not the zero value of RegPtr (a register with no name).
-public static bool Valid(this RegPtr r) { return r.name != ""u8; }
+internal static bool Valid⁔(/*this*/ RegPtr r) { return r.name != ""u8; }
 
 // mem returns a memory reference to off bytes from the pointer r.
-internal static Reg mem(this ж<RegPtr> Ꮡr, nint off) { return new Reg(fmt.Sprintf("%d(%s)"u8, off, Ꮡr.OrTypedNil())); }
-
-} partial class asmgen_package {
+internal static Reg mem⁔(/*this*/ ж<RegPtr> Ꮡr, nint off) { return new Reg(fmt.Sprintf("%d(%s)"u8, off, Ꮡr.OrTypedNil())); }
 
 // A Carry is a flag field explaining how an instruction sets and uses the carry flags.
 // Different operations expect different sets of bits.

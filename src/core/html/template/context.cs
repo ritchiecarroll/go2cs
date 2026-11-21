@@ -7,7 +7,6 @@ using fmt = fmt_package;
 using slices = slices_package;
 using parse = text.template.parse_package;
 using text.template;
-using static template_package;
 
 partial class template_package {
 
@@ -34,9 +33,7 @@ partial struct context {
     internal ж<Error> err;
 }
 
-} partial class templateᴛcontext {
-
-internal static @string String(this context c) {
+internal static @string String⁔(/*this*/ context c) {
     error err = default;
     if (c.err != nil) {
         err = new Errorжerror(c.err);
@@ -45,13 +42,13 @@ internal static @string String(this context c) {
 }
 
 // eq reports whether two contexts are equal.
-internal static bool eq(this context c, context d) {
+internal static bool eq⁔(/*this*/ context c, context d) {
     return c.state == d.state && c.delim == d.delim && c.urlPart == d.urlPart && c.jsCtx == d.jsCtx && slices.Equal<slice<nint>, nint>(c.jsBraceDepth, d.jsBraceDepth) && c.attr == d.attr && c.element == d.element && c.err == d.err;
 }
 
 // mangle produces an identifier that includes a suffix that distinguishes it
 // from template names mangled with different contexts.
-internal static @string mangle(this context c, @string templateName) {
+internal static @string mangle⁔(/*this*/ context c, @string templateName) {
     // The mangled name for the default context is the input templateName.
     if (c.state == stateText) {
         return templateName;
@@ -79,13 +76,11 @@ internal static @string mangle(this context c, @string templateName) {
 }
 
 // clone returns a copy of c with the same field values.
-internal static context clone(this context c) {
+internal static context clone⁔(/*this*/ context c) {
     var clone = c;
     clone.jsBraceDepth = slices.Clone<slice<nint>, nint>(c.jsBraceDepth);
     return clone;
 }
-
-} partial class template_package {
 
 // state describes a high-level HTML parser state.
 //

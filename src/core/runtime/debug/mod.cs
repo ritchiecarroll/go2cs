@@ -8,7 +8,6 @@ using runtime = runtime_package;
 using strconv = strconv_package;
 using strings = strings_package;
 using io = io_package;
-using static debug_package;
 
 partial class debug_package {
 
@@ -101,8 +100,6 @@ internal static bool quoteValue(@string value) {
     return strings.ContainsAny(value, " \t\r\n\"`");
 }
 
-} partial class debugᴛBuildInfo {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static ref readonly @string modˢ => ref modˢᵇ;
 private static readonly @string modˢᵇ = "mod"u8;
@@ -110,7 +107,7 @@ private static ref readonly @string depˢ => ref depˢᵇ;
 private static readonly @string depˢᵇ = "dep"u8;
 
 // String returns a string representation of a [BuildInfo].
-public static @string String(this ref BuildInfo bi) {
+internal static @string String⁔(/*this*/ ref BuildInfo bi) {
     var buf = @new<strings.Builder>();
     if (bi.GoVersion != ""u8) {
         fmt.Fprintf(new strings_BuilderжWriter(buf), "go\t%s\n"u8, bi.GoVersion);
@@ -155,8 +152,6 @@ public static @string String(this ref BuildInfo bi) {
 
     return buf.String();
 }
-
-} partial class debug_package {
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 private static ref readonly @string pathLineᶜ => ref pathLineᶜᵇ;

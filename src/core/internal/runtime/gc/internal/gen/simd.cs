@@ -3,8 +3,6 @@
 // license that can be found in the LICENSE file.
 namespace go.@internal.runtime.gc.@internal;
 
-using static gen_package;
-
 partial class gen_package {
 
 partial struct Uint8x64 {
@@ -21,26 +19,24 @@ public static Uint8x64 /*y*/ ConstUint8x64(/*[64]*/ array<uint8> c, @string name
     return y;
 }
 
-} partial class genᴛUint8x64 {
-
-internal static ж<kind> kind(this Uint8x64 _) {
+internal static ж<kind> kind⁔(/*this*/ Uint8x64 _) {
     return kindUint8x64;
 }
 
-internal static Uint8x64 wrap(this Uint8x64 _, ж<op> x) {
+internal static Uint8x64 wrap⁔(/*this*/ Uint8x64 _, ж<op> x) {
     Uint8x64 y = new(nil);
     y.valAny.initOp(x);
     return y;
 }
 
-public static Uint64x8 /*z*/ ToUint64x8(this Uint8x64 x) {
+internal static Uint64x8 /*z*/ ToUint64x8⁔(/*this*/ Uint8x64 x) {
     Uint64x8 z = new(nil);
 
     z.op = x.op;
     return z;
 }
 
-public static Uint8x64 /*y*/ Shuffle(this Uint8x64 x, Uint8x64 shuf) {
+internal static Uint8x64 /*y*/ Shuffle⁔(/*this*/ Uint8x64 x, Uint8x64 shuf) {
     Uint8x64 y = new(nil);
 
     if (shuf.op.Δop == "const"u8) {
@@ -62,7 +58,7 @@ public static Uint8x64 /*y*/ Shuffle(this Uint8x64 x, Uint8x64 shuf) {
     return y;
 }
 
-public static Uint8x64 /*y*/ ShuffleZeroed(this Uint8x64 x, Uint8x64 shuf, Mask64 mask) {
+internal static Uint8x64 /*y*/ ShuffleZeroed⁔(/*this*/ Uint8x64 x, Uint8x64 shuf, Mask64 mask) {
     Uint8x64 y = new(nil);
 
     var args = slice<ж<op>>([x.op, shuf.op, mask.op]);
@@ -70,7 +66,7 @@ public static Uint8x64 /*y*/ ShuffleZeroed(this Uint8x64 x, Uint8x64 shuf, Mask6
     return y;
 }
 
-public static Uint8x64 /*y*/ ShuffleMasked(this Uint8x64 x, Uint8x64 shuf, Mask64 mask) {
+internal static Uint8x64 /*y*/ ShuffleMasked⁔(/*this*/ Uint8x64 x, Uint8x64 shuf, Mask64 mask) {
     Uint8x64 y = new(nil);
 
     var args = slice<ж<op>>([x.op, shuf.op, mask.op]);
@@ -81,7 +77,7 @@ public static Uint8x64 /*y*/ ShuffleMasked(this Uint8x64 x, Uint8x64 shuf, Mask6
 // TODO: The two-argument shuffle is a little weird. You almost want the
 // receiver to be the shuffle and the two arguments to be the two inputs, but
 // that's almost certainly *not* what you want for the single input shuffle.
-public static Uint8x64 /*z*/ Shuffle2(this Uint8x64 x, Uint8x64 y, Uint8x64 shuf) {
+internal static Uint8x64 /*z*/ Shuffle2⁔(/*this*/ Uint8x64 x, Uint8x64 y, Uint8x64 shuf) {
     Uint8x64 z = new(nil);
 
     // Confusingly, the inputs are in the opposite order from what you'd expect.
@@ -90,7 +86,7 @@ public static Uint8x64 /*z*/ Shuffle2(this Uint8x64 x, Uint8x64 y, Uint8x64 shuf
     return z;
 }
 
-public static Uint8x64 /*z*/ Shuffle2Zeroed(this Uint8x64 x, Uint8x64 y, Uint8x64 shuf, Mask64 mask) {
+internal static Uint8x64 /*z*/ Shuffle2Zeroed⁔(/*this*/ Uint8x64 x, Uint8x64 y, Uint8x64 shuf, Mask64 mask) {
     Uint8x64 z = new(nil);
 
     // Confusingly, the inputs are in the opposite order from what you'd expect.
@@ -99,7 +95,7 @@ public static Uint8x64 /*z*/ Shuffle2Zeroed(this Uint8x64 x, Uint8x64 y, Uint8x6
     return z;
 }
 
-public static Uint8x64 /*z*/ Shuffle2Masked(this Uint8x64 x, Uint8x64 y, Uint8x64 shuf, Mask64 mask) {
+internal static Uint8x64 /*z*/ Shuffle2Masked⁔(/*this*/ Uint8x64 x, Uint8x64 y, Uint8x64 shuf, Mask64 mask) {
     Uint8x64 z = new(nil);
 
     // Confusingly, the inputs are in the opposite order from what you'd expect.
@@ -107,8 +103,6 @@ public static Uint8x64 /*z*/ Shuffle2Masked(this Uint8x64 x, Uint8x64 y, Uint8x6
     z.valAny.initOp(Ꮡ(new op(Δop: "VPERMI2B.mask", kind: z.kind(), args: args)));
     return z;
 }
-
-} partial class gen_package {
 
 partial struct Uint64x8 {
     /*embed*/ internal valAny valAny;
@@ -132,33 +126,31 @@ public static Uint64x8 /*z*/ BroadcastUint64x8Zeroed(Uint64 src, Mask8 mask) {
     return z;
 }
 
-} partial class genᴛUint64x8 {
-
-public static Uint64x8 /*z*/ BroadcastMasked(this Uint64x8 x, Uint64 src, Mask8 mask) {
+internal static Uint64x8 /*z*/ BroadcastMasked⁔(/*this*/ Uint64x8 x, Uint64 src, Mask8 mask) {
     Uint64x8 z = new(nil);
 
     z.valAny.initOp(Ꮡ(new op(Δop: "VPBROADCASTQ.mask", kind: z.kind(), args: [src.op, mask.op, x.op])));
     return z;
 }
 
-internal static ж<kind> kind(this Uint64x8 _) {
+internal static ж<kind> kind⁔(/*this*/ Uint64x8 _) {
     return kindUint64x8;
 }
 
-internal static Uint64x8 wrap(this Uint64x8 _, ж<op> x) {
+internal static Uint64x8 wrap⁔(/*this*/ Uint64x8 _, ж<op> x) {
     Uint64x8 y = new(nil);
     y.valAny.initOp(x);
     return y;
 }
 
-public static Uint64x8 /*z*/ Or(this Uint64x8 x, Uint64x8 y) {
+internal static Uint64x8 /*z*/ Or⁔(/*this*/ Uint64x8 x, Uint64x8 y) {
     Uint64x8 z = new(nil);
 
     z.valAny.initOp(Ꮡ(new op(Δop: "VPORQ", kind: z.kind(), args: [y.op, x.op])));
     return z;
 }
 
-public static Uint64x8 /*z*/ Sub(this Uint64x8 x, Uint64x8 y) {
+internal static Uint64x8 /*z*/ Sub⁔(/*this*/ Uint64x8 x, Uint64x8 y) {
     Uint64x8 z = new(nil);
 
     // Arguments are backwards
@@ -166,14 +158,14 @@ public static Uint64x8 /*z*/ Sub(this Uint64x8 x, Uint64x8 y) {
     return z;
 }
 
-public static Uint8x64 /*z*/ ToUint8x64(this Uint64x8 x) {
+internal static Uint8x64 /*z*/ ToUint8x64⁔(/*this*/ Uint64x8 x) {
     Uint8x64 z = new(nil);
 
     z.op = x.op;
     return z;
 }
 
-public static Uint8x64 /*z*/ GF2P8Affine(this Uint64x8 x, Uint8x64 y) {
+internal static Uint8x64 /*z*/ GF2P8Affine⁔(/*this*/ Uint64x8 x, Uint8x64 y) {
     Uint8x64 z = new(nil);
 
     // matrix, vector
@@ -181,22 +173,20 @@ public static Uint8x64 /*z*/ GF2P8Affine(this Uint64x8 x, Uint8x64 y) {
     return z;
 }
 
-public static Mask64 /*z*/ ShuffleBits(this Uint64x8 x, Uint8x64 y) {
+internal static Mask64 /*z*/ ShuffleBits⁔(/*this*/ Uint64x8 x, Uint8x64 y) {
     Mask64 z = new(nil);
 
     z.valAny.initOp(Ꮡ(new op(Δop: "VPSHUFBITQMB", kind: z.kind(), args: [y.op, x.op])));
     return z;
 }
 
-public static Mask64 /*z*/ ShuffleBitsMasked(this Uint64x8 x, Uint8x64 y, Mask64 mask) {
+internal static Mask64 /*z*/ ShuffleBitsMasked⁔(/*this*/ Uint64x8 x, Uint8x64 y, Mask64 mask) {
     Mask64 z = new(nil);
 
     // This is always zeroing if the mask is provided.
     z.valAny.initOp(Ꮡ(new op(Δop: "VPSHUFBITQMB", kind: z.kind(), args: [y.op, x.op, mask.op])));
     return z;
 }
-
-} partial class gen_package {
 
 partial struct Mask8 {
     /*embed*/ internal valAny valAny;
@@ -213,33 +203,31 @@ public static Mask8 /*y*/ ConstMask8(uint8 c) {
     return y;
 }
 
-} partial class genᴛMask8 {
-
-internal static ж<kind> kind(this Mask8 _) {
+internal static ж<kind> kind⁔(/*this*/ Mask8 _) {
     return kindMask8;
 }
 
-internal static Mask8 wrap(this Mask8 _, ж<op> x) {
+internal static Mask8 wrap⁔(/*this*/ Mask8 _, ж<op> x) {
     Mask8 y = new(nil);
     y.valAny.initOp(x);
     return y;
 }
 
-public static Uint64 /*z*/ ToUint8(this Mask8 x) {
+internal static Uint64 /*z*/ ToUint8⁔(/*this*/ Mask8 x) {
     Uint64 z = new(nil);
 
     z.valGP.valAny.initOp(Ꮡ(new op(Δop: "KMOVB", kind: z.kind(), args: [x.op])));
     return z;
 }
 
-public static Mask8 /*z*/ Or(this Mask8 x, Mask8 y) {
+internal static Mask8 /*z*/ Or⁔(/*this*/ Mask8 x, Mask8 y) {
     Mask8 z = new(nil);
 
     z.valAny.initOp(Ꮡ(new op(Δop: "KORQ", kind: z.kind(), args: [y.op, x.op])));
     return z;
 }
 
-public static Mask8 /*z*/ ShiftLeft(this Mask8 x, uint8 c) {
+internal static Mask8 /*z*/ ShiftLeft⁔(/*this*/ Mask8 x, uint8 c) {
     Mask8 z = new(nil);
 
     if (c == 0) {
@@ -249,8 +237,6 @@ public static Mask8 /*z*/ ShiftLeft(this Mask8 x, uint8 c) {
     }
     return z;
 }
-
-} partial class gen_package {
 
 partial struct Mask64 {
     /*embed*/ internal valAny valAny;
@@ -267,33 +253,31 @@ public static Mask64 /*y*/ ConstMask64(uint64 c) {
     return y;
 }
 
-} partial class genᴛMask64 {
-
-internal static ж<kind> kind(this Mask64 _) {
+internal static ж<kind> kind⁔(/*this*/ Mask64 _) {
     return kindMask64;
 }
 
-internal static Mask64 wrap(this Mask64 _, ж<op> x) {
+internal static Mask64 wrap⁔(/*this*/ Mask64 _, ж<op> x) {
     Mask64 y = new(nil);
     y.valAny.initOp(x);
     return y;
 }
 
-public static Uint64 /*z*/ ToUint64(this Mask64 x) {
+internal static Uint64 /*z*/ ToUint64⁔(/*this*/ Mask64 x) {
     Uint64 z = new(nil);
 
     z.valGP.valAny.initOp(Ꮡ(new op(Δop: "KMOVQ", kind: z.kind(), args: [x.op])));
     return z;
 }
 
-public static Mask64 /*z*/ Or(this Mask64 x, Mask64 y) {
+internal static Mask64 /*z*/ Or⁔(/*this*/ Mask64 x, Mask64 y) {
     Mask64 z = new(nil);
 
     z.valAny.initOp(Ꮡ(new op(Δop: "KORQ", kind: z.kind(), args: [y.op, x.op])));
     return z;
 }
 
-public static Mask64 /*z*/ ShiftLeft(this Mask64 x, uint8 c) {
+internal static Mask64 /*z*/ ShiftLeft⁔(/*this*/ Mask64 x, uint8 c) {
     Mask64 z = new(nil);
 
     if (c == 0) {
@@ -304,7 +288,7 @@ public static Mask64 /*z*/ ShiftLeft(this Mask64 x, uint8 c) {
     return z;
 }
 
-public static Mask64 /*z*/ ShiftRight(this Mask64 x, uint8 c) {
+internal static Mask64 /*z*/ ShiftRight⁔(/*this*/ Mask64 x, uint8 c) {
     Mask64 z = new(nil);
 
     if (c == 0) {
@@ -315,4 +299,4 @@ public static Mask64 /*z*/ ShiftRight(this Mask64 x, uint8 c) {
     return z;
 }
 
-}
+} // end gen_package

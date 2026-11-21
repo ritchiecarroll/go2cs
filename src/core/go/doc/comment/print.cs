@@ -7,7 +7,6 @@ using bytes = bytes_package;
 using fmt = fmt_package;
 using strings = strings_package;
 using io = io_package;
-using static comment_package;
 
 partial class comment_package {
 
@@ -50,16 +49,14 @@ partial struct Printer {
     public nint TextWidth;
 }
 
-} partial class commentᴛPrinter {
-
-internal static nint headingLevel(this ref Printer p) {
+internal static nint headingLevel⁔(/*this*/ ref Printer p) {
     if (p.HeadingLevel <= 0) {
         return 3;
     }
     return p.HeadingLevel;
 }
 
-internal static @string headingID(this ref Printer p, ж<Heading> Ꮡh) {
+internal static @string headingID⁔(/*this*/ ref Printer p, ж<Heading> Ꮡh) {
     ref var h = ref Ꮡh.DerefOrNull();
 
     if (p.HeadingID == nil) {
@@ -68,7 +65,7 @@ internal static @string headingID(this ref Printer p, ж<Heading> Ꮡh) {
     return p.HeadingID(Ꮡh);
 }
 
-internal static @string docLinkURL(this ref Printer p, ж<DocLink> Ꮡlink) {
+internal static @string docLinkURL⁔(/*this*/ ref Printer p, ж<DocLink> Ꮡlink) {
     ref var link = ref Ꮡlink.DerefOrNull();
 
     if (p.DocLinkURL != nil) {
@@ -76,8 +73,6 @@ internal static @string docLinkURL(this ref Printer p, ж<DocLink> Ꮡlink) {
     }
     return link.DefaultURL(p.DocLinkBaseURL);
 }
-
-} partial class commentᴛDocLink {
 
 // DefaultURL constructs and returns the documentation URL for l,
 // using baseURL as a prefix for links to other packages.
@@ -97,7 +92,7 @@ internal static @string docLinkURL(this ref Printer p, ж<DocLink> Ꮡlink) {
 //	"/pkg"  → "/pkg/math#Sqrt"
 //	"/"     → "/math/#Sqrt"
 //	""      → "/math#Sqrt"
-public static @string DefaultURL(this ref DocLink l, @string baseURL) {
+internal static @string DefaultURL⁔(/*this*/ ref DocLink l, @string baseURL) {
     if (l.ImportPath != ""u8) {
         @string slash = ""u8;
         if (strings.HasSuffix(baseURL, "/")) {
@@ -122,8 +117,6 @@ public static @string DefaultURL(this ref DocLink l, @string baseURL) {
     return "#"u8 + l.Name;
 }
 
-} partial class commentᴛHeading {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string hdrˢ => ref hdrˢᵇ;
 private static readonly @string hdrˢᵇ = "hdr-"u8;
@@ -135,7 +128,7 @@ private static readonly @string hdrˢᵇ = "hdr-"u8;
 // and then adding the prefix “hdr-”.
 // For example, if the heading text is “Go Doc Comments”,
 // the default ID is “hdr-Go_Doc_Comments”.
-public static @string DefaultID(this ref Heading h) {
+internal static @string DefaultID⁔(/*this*/ ref Heading h) {
     // Note: The “hdr-” prefix is important to avoid DOM clobbering attacks.
     // See https://pkg.go.dev/github.com/google/safehtml#Identifier.
     ref var @out = ref heap(new strings.Builder(), out var Ꮡout);
@@ -157,17 +150,13 @@ public static @string DefaultID(this ref Heading h) {
     return @out.String();
 }
 
-} partial class comment_package {
-
 partial struct commentPrinter {
     /*embed*/ public ж<Printer> Printer;
 }
 
-} partial class commentᴛPrinter {
-
 // Comment returns the standard Go formatting of the [Doc],
 // without any comment markers.
-public static slice<byte> Comment(this ж<Printer> Ꮡp, ж<Doc> Ꮡd) {
+internal static slice<byte> Comment⁔(/*this*/ ж<Printer> Ꮡp, ж<Doc> Ꮡd) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     var cp = Ꮡ(new commentPrinter(Printer: Ꮡp));
@@ -205,8 +194,6 @@ public static slice<byte> Comment(this ж<Printer> Ꮡp, ж<Doc> Ꮡd) {
     return @out.Bytes();
 }
 
-} partial class comment_package {
-
 // blankBefore reports whether the block x requires a blank line before it.
 // All blocks do, except for Lists that return false from x.BlankBefore().
 internal static bool blankBefore(Block x) {
@@ -216,14 +203,12 @@ internal static bool blankBefore(Block x) {
     return true;
 }
 
-} partial class commentᴛcommentPrinter {
-
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static ref readonly @string fourSpaceᶜ1 => ref fourSpaceᶜ1ᵇ;
 private static readonly @string fourSpaceᶜ1ᵇ = "    "u8;
 
 // block prints the block x to out.
-internal static void block(this ref commentPrinter p, ж<bytes.Buffer> Ꮡout, Block x) {
+internal static void block⁔(/*this*/ ref commentPrinter p, ж<bytes.Buffer> Ꮡout, Block x) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     switch (x.type()) {
@@ -283,7 +268,7 @@ internal static void block(this ref commentPrinter p, ж<bytes.Buffer> Ꮡout, B
 }
 
 // text prints the text sequence x to out.
-internal static void text(this ref commentPrinter p, ж<bytes.Buffer> Ꮡout, @string indent, slice<Text> x) {
+internal static void text⁔(/*this*/ ref commentPrinter p, ж<bytes.Buffer> Ꮡout, @string indent, slice<Text> x) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     foreach (var (_, t) in range(x)) {
@@ -317,7 +302,7 @@ internal static void text(this ref commentPrinter p, ж<bytes.Buffer> Ꮡout, @s
 
 // indent prints s to out, indenting with the indent string
 // after each newline in s.
-internal static void indent(this ref commentPrinter p, ж<bytes.Buffer> Ꮡout, @string indent, @string s) {
+internal static void indent⁔(/*this*/ ref commentPrinter p, ж<bytes.Buffer> Ꮡout, @string indent, @string s) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     while (s != ""u8) {
@@ -331,4 +316,4 @@ internal static void indent(this ref commentPrinter p, ж<bytes.Buffer> Ꮡout, 
     }
 }
 
-}
+} // end comment_package

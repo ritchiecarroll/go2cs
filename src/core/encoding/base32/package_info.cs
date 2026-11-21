@@ -14,6 +14,9 @@
 
 using go;
 using static go.encoding.base32_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -63,10 +66,12 @@ using static go.encoding.base32_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("encoding/base32/base32.go", "base32.cs", "ACN68oKmgoKClLiUtKSUuLgAAxIACQKUtKSCAAIaAAoCgsqUkoKmgpSCgoKCgoKClIK4goK4gpSCgoKkgoKkgoKCpIKCuIKCgs6igoKCqJKCggAPGLKCuIKCgoKUgoKClIKClLiCgoKClIKClIK4goKCqrSCgoKClAAEENLKooKUAAgSss4ACASUgpSEkpSEgpSmgpSCgpSUlIKUptyClJSCgpTKlIKCpIKCpIKCpIKCpIKUlAACEgAJAoKCgq7UgoKUlIKCrLKCgoIADxyygoKCpoLKgpTGxIKCgoKUpoK4goKUgqiSgoKClIKmgoKClIKokoKUlJSCgoKClJSCgqaCpsqmAAgSooKCgpSClMaCgoKCgoKmlMiSyqLGgoKU")]
+[assembly: GoPositionMap("encoding/base32/base32.go", "base32.cs", "ACJ68oKmgoKClLiUtKSUuLgAARIACQKUtKSCAAIaAAoCgsqUkoKmgpSCgoKCgoKClIK4goK4gpSCgoKkgoKkgoKCpIKCuIKCgs6igoKCqJKCggALGLKCuIKCgoKUgoKClIKClLiCgoKClIKClIK4goKCqrSCgoKClAACENKqooKUAAQSsq4ACASUgpSEkpSEgpSmgpSCgpSUlIKUptyClJSCgpTKlIKCpIKCpIKCpIKCpIKUlAACEgAJAoKCgq7UgoKUlIKCrLKCgoIADRyygoKCpoLKgpSmxIKCgoKUpoK4goKUgqiSgoKClIKmgoKClIKokoKUlJSCgoKClJSCgqaCpsqmAAYSooKCgpSClKaCgoKCgoKmlKiSqqKmgoKU")]
 // </GoSourcePositionMaps>
 
 namespace go.encoding;
+
+using static go.encoding.base32_package;
 
 [GoPackage("base32")]
 public static partial class base32_package
@@ -105,9 +110,41 @@ public static partial class base32_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(base32_package.CorruptInputError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class base32ᴛCorruptInputError;
-[GoMethodHost(typeof(base32_package.Encoding)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class base32ᴛEncoding;
-[GoMethodHost(typeof(base32_package.decoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class base32ᴛdecoder;
-[GoMethodHost(typeof(base32_package.encoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class base32ᴛencoder;
-[GoMethodHost(typeof(base32_package.newlineFilteringReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class base32ᴛnewlineFilteringReader;
+[GoMethodHost(typeof(base32_package.CorruptInputError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class base32ᴛCorruptInputError;
+[GoMethodHost(typeof(base32_package.Encoding)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class base32ᴛEncoding;
+[GoMethodHost(typeof(base32_package.decoder)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class base32ᴛdecoder;
+[GoMethodHost(typeof(base32_package.encoder)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class base32ᴛencoder;
+[GoMethodHost(typeof(base32_package.newlineFilteringReader)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class base32ᴛnewlineFilteringReader;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class base32ᴛCorruptInputError {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this CorruptInputError e) => base32_package.Error⁔(e);
+}
+partial class base32ᴛEncoding {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Encoding> WithPadding(this Encoding encʗp, rune padding) => base32_package.WithPadding⁔(encʗp, padding);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Encode(this ref Encoding enc, slice<byte> dst, slice<byte> src) => base32_package.Encode⁔(ref enc, dst, src);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> AppendEncode(this ref Encoding enc, slice<byte> dst, slice<byte> src) => base32_package.AppendEncode⁔(ref enc, dst, src);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string EncodeToString(this ref Encoding enc, slice<byte> src) => base32_package.EncodeToString⁔(ref enc, src);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint EncodedLen(this ref Encoding enc, nint n) => base32_package.EncodedLen⁔(ref enc, n);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, bool end, error err) decode(this ref Encoding enc, slice<byte> dst, slice<byte> src) => base32_package.decode⁔(ref enc, dst, src);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint n, error err) Decode(this ref Encoding enc, slice<byte> dst, slice<byte> src) => base32_package.Decode⁔(ref enc, dst, src);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<byte>, error) AppendDecode(this ref Encoding enc, slice<byte> dst, slice<byte> src) => base32_package.AppendDecode⁔(ref enc, dst, src);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<byte>, error) DecodeString(this ref Encoding enc, @string s) => base32_package.DecodeString⁔(ref enc, s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint DecodedLen(this ref Encoding enc, nint n) => base32_package.DecodedLen⁔(ref enc, n);
+}
+partial class base32ᴛdecoder {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) Read(this ref decoder d, slice<byte> p) => base32_package.Read⁔(ref d, p);
+}
+partial class base32ᴛencoder {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) Write(this ref encoder e, slice<byte> p) => base32_package.Write⁔(ref e, p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error Close(this ref encoder e) => base32_package.Close⁔(ref e);
+}
+partial class base32ᴛnewlineFilteringReader {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint, error) Read(this ref newlineFilteringReader r, slice<byte> p) => base32_package.Read⁔(ref r, p);
+}
+// </MethodForwarders>

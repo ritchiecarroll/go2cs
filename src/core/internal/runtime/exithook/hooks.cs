@@ -14,9 +14,8 @@
 namespace go.@internal.runtime;
 
 using atomic = go.@internal.runtime.atomic_package;
-/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
+/* import _ "unsafe" (nothing to initialize) */ // for linkname
 using go.@internal.runtime;
-using static exithook_package;
 
 partial class exithook_package {
 
@@ -98,8 +97,6 @@ public static void Run(nint code) {
 
 partial struct exitError /*@string*/;
 
-} partial class exithookᴛexitError {
+internal static @string Error⁔(/*this*/ exitError e) { return (@string)e; }
 
-internal static @string Error(this exitError e) { return (@string)e; }
-
-}
+} // end exithook_package

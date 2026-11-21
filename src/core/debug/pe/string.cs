@@ -10,7 +10,6 @@ using saferio = @internal.saferio_package;
 using io = io_package;
 using @internal;
 using encoding;
-using static pe_package;
 
 partial class pe_package {
 
@@ -55,12 +54,10 @@ internal static (StringTable, error) readStringTable(ref FileHeader fh, io.ReadS
     return ((StringTable)buf, default);
 }
 
-} partial class peᴛStringTable {
-
 // TODO(brainman): decide if start parameter should be int instead of uint32
 
 // String extracts string from COFF string table st at offset start.
-public static (@string, error) String(this StringTable st, uint32 start) {
+internal static (@string, error) String⁔(/*this*/ StringTable st, uint32 start) {
     // start includes 4 bytes of string table length
     if (start < 4) {
         return ("", fmt.Errorf("offset %d is before the start of string table"u8, start));
@@ -72,4 +69,4 @@ public static (@string, error) String(this StringTable st, uint32 start) {
     return (cstring(st.slice((nint)(start))), default);
 }
 
-}
+} // end pe_package

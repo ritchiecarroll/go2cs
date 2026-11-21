@@ -14,6 +14,9 @@
 
 using go;
 using static go.crypto.@internal.fips140.edwards25519.field_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -55,12 +58,14 @@ using static go.crypto.@internal.fips140.edwards25519.field_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("crypto/internal/fips140/edwards25519/field/fe.go", "fe.cs", "AClMtrKCxraygqiy7oKCgoK4lIKCgoKCgoKUlKjSgoKCgoKo9oKCgoKCqJKstgALBIKCgoKCgpSCgpSUgoKUlIKClJSCgpSUgoKUlIKClJSCgpSUgoKCgpSowoIABhYACgKCuIKUgpSClIKmgpSolqKmooIACBKCgoKUgoKClKiygsiAttKCgoKCgoKosoKCgoKCgoKCgoKCgoKCgqiSqLKokoKokoKowoKCgoKCgoKCgqbIwoKCgsiStIKCgoKCgoKCgpSCgoKUgoKClIKCgpSCgoKUgoKClIKCgpSCgoLYAAQQ0qaCgoKUlIKCgpSUlII=")]
+[assembly: GoPositionMap("crypto/internal/fips140/edwards25519/field/fe.go", "fe.cs", "AChMlrKCppaygqiy7oKCgoK4lIKCgoKCgoKUlKjSgoKCgoKo9oKCgoKCqJKstgALBIKCgoKCgpSCgpSUgoKUlIKClJSCgpSUgoKUlIKClJSCgpSUgoKCgpSowoIABhYACgKCuIKUgpSClIKmgpSolqKmooIACBKCgoKUgoKClKiygqiAltKCgoKCgoKosoKCgoKCgoKCgoKCgoKCgqiSqLKokoKokoKowoKCgoKCgoKCgqaowoKCgqiStIKCgoKCgoKCgpSCgoKUgoKClIKCgpSCgoKUgoKClIKCgpSCgoK4AAIQ0qaCgoKUlIKCgpSUlII=")]
 [assembly: GoPositionMap("crypto/internal/fips140/edwards25519/field/fe_amd64_noasm.go", "fe_amd64_noasm.cs", "AAgSlA==")]
-[assembly: GoPositionMap("crypto/internal/fips140/edwards25519/field/fe_generic.go", "fe_generic.cs", "ABEgkoKokoKCgqikqJKCgoKokoKCgqiSpoKCgoKClIKCgoIAIkaCgoKCpoKCgoKmgoKCgqaCgoKCpoKCgoIAHDqCgoKClIKCgoLcgoKCgqaCgoKCggAYMoKCpoKCpoKCpoKCpoKClIKCgoKUgoKCgpSCgoKCyuaCgoKCgpQ=")]
+[assembly: GoPositionMap("crypto/internal/fips140/edwards25519/field/fe_generic.go", "fe_generic.cs", "ABAgkoKokoKCgqikqJKCgoKokoKCgqiSpoKCgoKClIKCgoIAIkaCgoKCpoKCgoKmgoKCgqaCgoKCpoKCgoIAHDqCgoKClIKCgoLcgoKCgqaCgoKCggAYMoKCpoKCpoKCpoKCpoKClIKCgoKUgoKCgpSCgoKCquaCgoKCgpQ=")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140.edwards25519;
+
+using static go.crypto.@internal.fips140.edwards25519.field_package;
 
 [GoPackage("field")]
 public static partial class field_package
@@ -97,5 +102,36 @@ public static partial class field_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(field_package.Element)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fieldᴛElement;
+[GoMethodHost(typeof(field_package.Element)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class fieldᴛElement;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class fieldᴛElement {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Element> Zero(this ж<Element> Ꮡv) => field_package.Zero⁔(Ꮡv);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Element> One(this ж<Element> Ꮡv) => field_package.One⁔(Ꮡv);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<Element> reduce(this ж<Element> Ꮡv) => field_package.reduce⁔(Ꮡv);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Element> Add(this ж<Element> Ꮡv, ж<Element> Ꮡa, ж<Element> Ꮡb) => field_package.Add⁔(Ꮡv, Ꮡa, Ꮡb);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Element> Subtract(this ж<Element> Ꮡv, ж<Element> Ꮡa, ж<Element> Ꮡb) => field_package.Subtract⁔(Ꮡv, Ꮡa, Ꮡb);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Element> Negate(this ж<Element> Ꮡv, ж<Element> Ꮡa) => field_package.Negate⁔(Ꮡv, Ꮡa);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Element> Invert(this ж<Element> Ꮡv, ж<Element> Ꮡz) => field_package.Invert⁔(Ꮡv, Ꮡz);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Element> Set(this ж<Element> Ꮡv, ж<Element> Ꮡa) => field_package.Set⁔(Ꮡv, Ꮡa);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (ж<Element>, error) SetBytes(this ж<Element> Ꮡv, slice<byte> x) => field_package.SetBytes⁔(Ꮡv, x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> Bytes(this ref Element v) => field_package.Bytes⁔(ref v);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<byte> bytes(this ref Element v, /*[32]*/ ж<array<byte>> Ꮡout) => field_package.bytes⁔(ref v, Ꮡout);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Equal(this ref Element v, ж<Element> Ꮡu) => field_package.Equal⁔(ref v, Ꮡu);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Element> Select(this ж<Element> Ꮡv, ж<Element> Ꮡa, ж<Element> Ꮡb, nint cond) => field_package.Select⁔(Ꮡv, Ꮡa, Ꮡb, cond);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Swap(this ref Element v, ж<Element> Ꮡu, nint cond) => field_package.Swap⁔(ref v, Ꮡu, cond);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint IsNegative(this ref Element v) => field_package.IsNegative⁔(ref v);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Element> Absolute(this ж<Element> Ꮡv, ж<Element> Ꮡu) => field_package.Absolute⁔(Ꮡv, Ꮡu);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Element> Multiply(this ж<Element> Ꮡv, ж<Element> Ꮡx, ж<Element> Ꮡy) => field_package.Multiply⁔(Ꮡv, Ꮡx, Ꮡy);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Element> Square(this ж<Element> Ꮡv, ж<Element> Ꮡx) => field_package.Square⁔(Ꮡv, Ꮡx);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Element> Mult32(this ж<Element> Ꮡv, ж<Element> Ꮡx, uint32 y) => field_package.Mult32⁔(Ꮡv, Ꮡx, y);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Element> Pow22523(this ж<Element> Ꮡv, ж<Element> Ꮡx) => field_package.Pow22523⁔(Ꮡv, Ꮡx);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (ж<Element> R, nint wasSquare) SqrtRatio(this ж<Element> Ꮡr, ж<Element> Ꮡu, ж<Element> Ꮡv) => field_package.SqrtRatio⁔(Ꮡr, Ꮡu, Ꮡv);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<Element> carryPropagate(this ж<Element> Ꮡv) => field_package.carryPropagate⁔(Ꮡv);
+}
+// </MethodForwarders>

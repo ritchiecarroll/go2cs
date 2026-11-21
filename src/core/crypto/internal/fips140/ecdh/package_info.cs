@@ -14,6 +14,9 @@
 
 using go;
 using static go.crypto.@internal.fips140.ecdh_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -64,10 +67,12 @@ using static go.crypto.@internal.fips140.ecdh_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("crypto/internal/fips140/ecdh/cast.go", "cast.cs", "ABAelILcAAoW3IKCgoKUgpQ=")]
-[assembly: GoPositionMap("crypto/internal/fips140/ecdh/ecdh.go", "ecdh.cs", "ACE8gqaCAAsQggAiOILu7oLu7oLuAAgSgu4AEBjSgriCgoCC2riCpoKCAAsYkoKClIKUpvjCyoKmgqamgrimgubUgu6CpqaigoIACAaigpSC7oLKgoK4gsqokoKClKqigtyClIKCqJKCgrg=", "175-184:1")]
+[assembly: GoPositionMap("crypto/internal/fips140/ecdh/ecdh.go", "ecdh.cs", "AB48gqaCAAcQggAgOILu7oLu7oLuAAgSgu4AEBjSgriCgoCC2riCpoKCAAsYkoKClIKUpvjCyoKmgqamgrimgubUgu6CpqaigoIACAaigpSC7oLKgoK4gsqokoKClKqigtyClIKCqJKCgrg=", "175-184:1")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140;
+
+using static go.crypto.@internal.fips140.ecdh_package;
 
 [GoPackage("ecdh")]
 public static partial class ecdh_package
@@ -112,6 +117,20 @@ public static partial class ecdh_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(ecdh_package.PrivateKey)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ecdhᴛPrivateKey;
-[GoMethodHost(typeof(ecdh_package.PublicKey)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ecdhᴛPublicKey;
+[GoMethodHost(typeof(ecdh_package.PrivateKey)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class ecdhᴛPrivateKey;
+[GoMethodHost(typeof(ecdh_package.PublicKey)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class ecdhᴛPublicKey;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class ecdhᴛPrivateKey {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> Bytes(this ref PrivateKey priv) => ecdh_package.Bytes⁔(ref priv);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<PublicKey> PublicKey(this ж<PrivateKey> Ꮡpriv) => ecdh_package.PublicKey⁔(Ꮡpriv);
+}
+partial class ecdhᴛPublicKey {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> Bytes(this ref PublicKey pub) => ecdh_package.Bytes⁔(ref pub);
+}
+// </MethodForwarders>

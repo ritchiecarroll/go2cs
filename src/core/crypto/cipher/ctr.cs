@@ -16,7 +16,6 @@ using subtle = go.crypto.subtle_package;
 using go.crypto;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140;
-using static cipher_package;
 
 partial class cipher_package {
 
@@ -70,15 +69,11 @@ partial struct aesCtrWrapper {
     internal ж<aes.CTR> c;
 }
 
-} partial class cipherᴛaesCtrWrapper {
-
-internal static void XORKeyStream(this aesCtrWrapper x, slice<byte> dst, slice<byte> src) {
+internal static void XORKeyStream⁔(/*this*/ aesCtrWrapper x, slice<byte> dst, slice<byte> src) {
     x.c.XORKeyStream(dst, src);
 }
 
-} partial class cipherᴛctr {
-
-internal static void refill(this ref ctr x) {
+internal static void refill⁔(/*this*/ ref ctr x) {
     nint remain = len(x.@out) - x.outUsed;
     copy(x.@out, x.@out.slice(x.outUsed));
     x.@out = x.@out.slice(0, cap(x.@out));
@@ -99,7 +94,7 @@ internal static void refill(this ref ctr x) {
     x.outUsed = 0;
 }
 
-internal static void XORKeyStream(this ref ctr x, slice<byte> dst, slice<byte> src) {
+internal static void XORKeyStream⁔(/*this*/ ref ctr x, slice<byte> dst, slice<byte> src) {
     if (len(dst) < len(src)) {
         throw panic("crypto/cipher: output smaller than input");
     }
@@ -120,4 +115,4 @@ internal static void XORKeyStream(this ref ctr x, slice<byte> dst, slice<byte> s
     }
 }
 
-}
+} // end cipher_package

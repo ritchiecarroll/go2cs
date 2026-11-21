@@ -14,6 +14,9 @@
 
 using go;
 using static go.encoding.hex_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -60,10 +63,12 @@ using static go.encoding.hex_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("encoding/hex/hex.go", "hex.cs", "ABVOkJzCgoKCgpSqooKCgtzqgsqQAAES8pKCgpSCgoKUgpSClKaClJSssoKCgqiSgoIAAhLigoKqooKmuJSCgoIACxqSxqKCgoKmgoKCgpQACxiixrSCkoKCgoSClNyClIKCgqaClMyyAAsYgoKUAAgGsoLcgqaCgoKCgoKCgoKmgoKClIKCpoKClIKClIKCgoKCgoKCgpSmprSClIKClIKCgoKCgoKCgoKClIKClJSCgoI=")]
+[assembly: GoPositionMap("encoding/hex/hex.go", "hex.cs", "ABROkJzCgoKCgpSqooKCgtzKgqqQAAES8pKCgpSCgoKUgpSClKaClJSssoKCgqiSgoIAAhLigoKqooKmuJSCgoIACxqSpqKCgoKmgoKCgpQACRiiprSCkoKCgoSClNyClIKCgqaClKyyAAsYgoKU5rKC3IKmgoKCgoKCgoKCpoKCgpSCgqaCgpSCgpSCgoKCgoKCgoKUpqa0gpSCgpSCgoKCgoKCgoKCgpSCgpSUgoKC")]
 // </GoSourcePositionMaps>
 
 namespace go.encoding;
+
+using static go.encoding.hex_package;
 
 [GoPackage("hex")]
 public static partial class hex_package
@@ -103,8 +108,28 @@ public static partial class hex_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(hex_package.InvalidByteError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class hexᴛInvalidByteError;
-[GoMethodHost(typeof(hex_package.decoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class hexᴛdecoder;
-[GoMethodHost(typeof(hex_package.dumper)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class hexᴛdumper;
-[GoMethodHost(typeof(hex_package.encoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class hexᴛencoder;
+[GoMethodHost(typeof(hex_package.InvalidByteError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class hexᴛInvalidByteError;
+[GoMethodHost(typeof(hex_package.decoder)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class hexᴛdecoder;
+[GoMethodHost(typeof(hex_package.dumper)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class hexᴛdumper;
+[GoMethodHost(typeof(hex_package.encoder)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class hexᴛencoder;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class hexᴛInvalidByteError {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this InvalidByteError e) => hex_package.Error⁔(e);
+}
+partial class hexᴛdecoder {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) Read(this ref decoder d, slice<byte> p) => hex_package.Read⁔(ref d, p);
+}
+partial class hexᴛdumper {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) Write(this ref dumper h, slice<byte> data) => hex_package.Write⁔(ref h, data);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error /*err*/ Close(this ref dumper h) => hex_package.Close⁔(ref h);
+}
+partial class hexᴛencoder {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) Write(this ref encoder e, slice<byte> p) => hex_package.Write⁔(ref e, p);
+}
+// </MethodForwarders>

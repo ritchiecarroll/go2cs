@@ -7,10 +7,8 @@ using context = context_package;
 using os = os_package;
 using slices = slices_package;
 using sync = sync_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
+using System.Runtime.CompilerServices;
 using ꓸꓸꓸosꓸSignal = Span<os_package.Signal>;
-using static signal_package;
 
 partial class signal_package {
 
@@ -39,21 +37,17 @@ partial struct handler {
     internal array<uint32> mask = new((numSig + 31) / 32);
 }
 
-} partial class signalᴛhandler {
-
-internal static bool want(this ref handler h, nint sig) {
+internal static bool want⁔(/*this*/ ref handler h, nint sig) {
     return ((h.mask[sig / 32].Rsh((nuint)(sig & 31))) & 1) != 0;
 }
 
-internal static void set(this ref handler h, nint sig) {
+internal static void set⁔(/*this*/ ref handler h, nint sig) {
     h.mask[sig / 32] |= (uint32)(((uint32)1).Lsh((nuint)(sig & 31)));
 }
 
-internal static void clear(this ref handler h, nint sig) {
+internal static void clear⁔(/*this*/ ref handler h, nint sig) {
     h.mask[sig / 32] &= unchecked((uint32)~(uint32)(((uint32)1).Lsh((nuint)(sig & 31))));
 }
-
-} partial class signal_package {
 
 // Stop relaying the signals, sigs, to any channels previously registered to
 // receive them and either reset the signal handlers to their original values
@@ -355,22 +349,16 @@ partial struct signalCtx {
     internal channel<os.Signal> ch;
 }
 
-} partial class signalᴛsignalCtx {
-
-internal static void stop(this ref signalCtx c) {
+internal static void stop⁔(/*this*/ ref signalCtx c) {
     c.cancel(default);
     Stop(c.ch.AsSendOnly());
 }
-
-} partial class signal_package {
 
 partial interface stringer {
     @string String();
 }
 
-} partial class signalᴛsignalCtx {
-
-internal static @string String(this ref signalCtx c) {
+internal static @string String⁔(/*this*/ ref signalCtx c) {
     var bufᴷ = new stackAppend<byte>();
 
     slice<byte> buf = default;
@@ -393,21 +381,17 @@ internal static @string String(this ref signalCtx c) {
     return (@string)buf;
 }
 
-} partial class signal_package {
-
 partial struct signalError /*@string*/;
 
-} partial class signalᴛsignalError {
-
-internal static @string Error(this signalError s) {
+internal static @string Error⁔(/*this*/ signalError s) {
     return (@string)s;
 }
 
-internal static bool Is(this signalError s, error target) {
+internal static bool Is⁔(/*this*/ signalError s, error target) {
     if (AreEqual(target, context.Canceled)) {
         return true;
     }
     return false;
 }
 
-}
+} // end signal_package

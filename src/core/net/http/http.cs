@@ -12,7 +12,6 @@ using utf8 = go.unicode.utf8_package;
 using httpguts = vendor.golang.org.x.net.http.httpguts_package;
 using go.unicode;
 using vendor.golang.org.x.net.http;
-using static http_package;
 
 partial class http_package {
 
@@ -35,27 +34,25 @@ internal static UntypedInt protoHTTP1 => /* 1 << iota */ 1;
 internal static UntypedInt protoHTTP2 => 2;
 internal static UntypedInt protoUnencryptedHTTP2 => 4;
 
-} partial class httpᴛProtocols {
-
 // HTTP1 reports whether p includes HTTP/1.
-public static bool HTTP1(this Protocols p) { return (uint8)(p.bits & (uint8)protoHTTP1) != 0; }
+internal static bool HTTP1⁔(/*this*/ Protocols p) { return (uint8)(p.bits & (uint8)protoHTTP1) != 0; }
 
 // SetHTTP1 adds or removes HTTP/1 from p.
-public static void SetHTTP1(this ref Protocols p, bool ok) { p.setBit(protoHTTP1, ok); }
+internal static void SetHTTP1⁔(/*this*/ ref Protocols p, bool ok) { p.setBit(protoHTTP1, ok); }
 
 // HTTP2 reports whether p includes HTTP/2.
-public static bool HTTP2(this Protocols p) { return (uint8)(p.bits & (uint8)protoHTTP2) != 0; }
+internal static bool HTTP2⁔(/*this*/ Protocols p) { return (uint8)(p.bits & (uint8)protoHTTP2) != 0; }
 
 // SetHTTP2 adds or removes HTTP/2 from p.
-public static void SetHTTP2(this ref Protocols p, bool ok) { p.setBit(protoHTTP2, ok); }
+internal static void SetHTTP2⁔(/*this*/ ref Protocols p, bool ok) { p.setBit(protoHTTP2, ok); }
 
 // UnencryptedHTTP2 reports whether p includes unencrypted HTTP/2.
-public static bool UnencryptedHTTP2(this Protocols p) { return (uint8)(p.bits & (uint8)protoUnencryptedHTTP2) != 0; }
+internal static bool UnencryptedHTTP2⁔(/*this*/ Protocols p) { return (uint8)(p.bits & (uint8)protoUnencryptedHTTP2) != 0; }
 
 // SetUnencryptedHTTP2 adds or removes unencrypted HTTP/2 from p.
-public static void SetUnencryptedHTTP2(this ref Protocols p, bool ok) { p.setBit(protoUnencryptedHTTP2, ok); }
+internal static void SetUnencryptedHTTP2⁔(/*this*/ ref Protocols p, bool ok) { p.setBit(protoUnencryptedHTTP2, ok); }
 
-internal static void setBit(this ref Protocols p, uint8 bit, bool ok) {
+internal static void setBit⁔(/*this*/ ref Protocols p, uint8 bit, bool ok) {
     if (ok) {
         p.bits |= (uint8)(bit);
     } else {
@@ -63,7 +60,7 @@ internal static void setBit(this ref Protocols p, uint8 bit, bool ok) {
     }
 }
 
-public static @string String(this Protocols p) {
+internal static @string String⁔(/*this*/ Protocols p) {
     var sᴷ = new stackAppend<@string>();
 
     slice<@string> s = default;
@@ -78,8 +75,6 @@ public static @string String(this Protocols p) {
     }
     return "{"u8 + strings.Join(s, ",") + "}"u8;
 }
-
-} partial class http_package {
 
 // incomparable is a zero-width, non-comparable type. Adding it to a struct
 // makes that struct also non-comparable, and generally doesn't add
@@ -108,11 +103,7 @@ public partial struct contextKey {
     internal @string name;
 }
 
-} partial class httpᴛcontextKey {
-
-public static @string String(this ref contextKey k) { return "net/http context value "u8 + k.name; }
-
-} partial class http_package {
+internal static @string String⁔(/*this*/ ref contextKey k) { return "net/http context value "u8 + k.name; }
 
 // Given a string of the form "host", "host:port", or "[ipv6::address]:port",
 // return true if the string includes a port.
@@ -186,13 +177,9 @@ public static ref noBody NoBody => ref ((StaticBox<noBody>)ᏑNoBody).ValueSlot;
 public partial struct noBody {
 }
 
-} partial class httpᴛnoBody {
-
-public static (nint, error) Read(this noBody _Δp0, slice<byte> _Δp1) { return (0, io.EOF); }
-public static error Close(this noBody _) { return default; }
-public static (int64, error) WriteTo(this noBody _Δp0, io.Writer _Δp1) { return (0, default); }
-
-} partial class http_package {
+internal static (nint, error) Read⁔(/*this*/ noBody _Δp0, slice<byte> _Δp1) { return (0, io.EOF); }
+internal static error Close⁔(/*this*/ noBody _) { return default; }
+internal static (int64, error) WriteTo⁔(/*this*/ noBody _Δp0, io.Writer _Δp1) { return (0, default); }
 
 // verify that an io.Copy from NoBody won't require a buffer:
 internal static io.WriterTo _ᴛ7ʗ = NoBody;

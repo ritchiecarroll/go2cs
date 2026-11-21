@@ -4,7 +4,6 @@
 namespace go.math.rand;
 
 using math = math_package;
-using static rand_package;
 
 partial class rand_package {
 
@@ -24,8 +23,6 @@ internal static uint32 absInt32(int32 i) {
     return (uint32)i;
 }
 
-} partial class randᴛRand {
-
 // NormFloat64 returns a normally distributed float64 in
 // the range -math.MaxFloat64 through +math.MaxFloat64 inclusive,
 // with standard normal distribution (mean = 0, stddev = 1).
@@ -33,7 +30,7 @@ internal static uint32 absInt32(int32 i) {
 // adjust the output using:
 //
 //	sample = NormFloat64() * desiredStdDev + desiredMean
-public static float64 NormFloat64(this ref Rand r) {
+internal static float64 NormFloat64⁔(/*this*/ ref Rand r) {
     for (;;) {
         var u = r.Uint64();
         var j = (int32)u; // Possibly negative
@@ -63,8 +60,6 @@ public static float64 NormFloat64(this ref Rand r) {
         }
     }
 }
-
-} partial class rand_package {
 
 [GoLazy] partial class lazyᴛkn { internal static array<uint32> kn = array<uint32>([
     0x76ad2212, 0x0, 0x600f1b53, 0x6ce447a6, 0x725b46a2,

@@ -4,7 +4,6 @@
 namespace go.net;
 
 using math = math_package;
-using static http_package;
 
 partial class http_package {
 
@@ -30,9 +29,7 @@ partial struct routingIndexKey {
     internal @string s; // literal, or empty for wildcard
 }
 
-} partial class httpᴛroutingIndex {
-
-internal static void addPattern(this ref routingIndex idx, ж<pattern> Ꮡpat) {
+internal static void addPattern⁔(/*this*/ ref routingIndex idx, ж<pattern> Ꮡpat) {
     ref var pat = ref Ꮡpat.DerefOrNull();
 
     if (pat.lastSegment().multi) {
@@ -60,7 +57,7 @@ internal static void addPattern(this ref routingIndex idx, ж<pattern> Ꮡpat) {
 // For instance, an implementation that returns all registered patterns is correct.
 // We use this fact throughout, simplifying the implementation by returning more
 // patterns that we might need to.
-internal static error /*err*/ possiblyConflictingPatterns(this ref routingIndex idx, ж<pattern> Ꮡpat, Func<ж<pattern>, error> f) {
+internal static error /*err*/ possiblyConflictingPatterns⁔(/*this*/ ref routingIndex idx, ж<pattern> Ꮡpat, Func<ж<pattern>, error> f) {
     error err = default;
     ref var pat = ref Ꮡpat.DerefOrNull();
 
@@ -133,4 +130,4 @@ internal static error /*err*/ possiblyConflictingPatterns(this ref routingIndex 
     return err;
 }
 
-}
+} // end http_package
