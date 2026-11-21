@@ -428,7 +428,11 @@ public sealed partial class TwinGenerator : ISourceGenerator
             // A bodyless `extern` member is a candidate too (P3's read of 4afbe98217): it can never be twinned (IsNative
             // refuses it), but a PUBLIC one in a converted file is in the population and gets a forwarder (R3).
             // Before this it was never seen, so it had no twin, no forwarder and no guard row. Any other bodyless
-            // method (an abstract or partial declaration) still is not a candidate.
+            // method (an abstract or partial declaration) still is not a candidate. A bodyless `partial` declaration
+            // in a converted file is a Go function whose body is hand-written (its implementing part in an `_impl.cs`
+            // companion: assembly, linkname or runtime-provided). That is R5, the hand-owned population, which moves
+            // with row 7 (DESIGN-mn-twin-set.md 12.1 and 12.6, P3's finding 6: 127 distinct public functions in 15
+            // packages, sync/atomic and internal/runtime/atomic the bulk).
             if (method.Body is null && method.ExpressionBody is null && !method.Modifiers.Any(SyntaxKind.ExternKeyword) || method.Parent is not TypeDeclarationSyntax ||
                 method.Modifiers.Any(SyntaxKind.AsyncKeyword) || method.Identifier.Text.EndsWith(Suffix, StringComparison.Ordinal))
                 return;

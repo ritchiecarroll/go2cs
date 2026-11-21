@@ -479,3 +479,14 @@ S4 (6fa1b16a21, the shipping rule, under `GO2CS_MN=1`): GREEN. Build 429 s, GO2C
   emission is.
 - **4 (NIT), owed to row 7:** Lockꞏtwin adds one frame above Lock in a mutex or block profile taken from a twin.
 - **5 (NIT):** the peak-carriers line above, with the cost beside it.
+- **6 (SHOULD-FIX, record only), public bodyless `partial` declarations: R5.** Such a declaration in a converted
+  file is a Go function whose body is hand-written: its implementing part sits in an `_impl.cs` companion. The
+  declaration is not a candidate, and the implementing part is outside the population, so neither gets a twin, a
+  forwarder or a GO2CS0017 row. These are R5's (12.1: the hand-owned population moves with row 7, named, not
+  dropped). The census is generator-side: Common.IsConvertedSourceFile, type accessibility read across all parts,
+  hand-owned and test files excluded. It counts 166 public declarations, 127 distinct Go functions (one per name and
+  arity across the OS folders, none generic) in 15 packages: internal/runtime/atomic 42, sync/atomic 39,
+  internal/bytealg 8, internal/syscall/unix 8, syscall 8, internal/runtime/sys 6, and 9 more. Identical on proto-b1
+  and on the item 13 merge. Controls: P3's three examples found (syscall Getpagesize and Exit, runtime/debug
+  WriteHeapDump); an internal one (syscall runtime_BeforeFork) not counted. Most never park (atomics), so row 7
+  gives them marked forwarders. The reason sits beside AddCandidate's "still is not a candidate".
