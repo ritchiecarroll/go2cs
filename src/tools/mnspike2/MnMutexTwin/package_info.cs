@@ -43,7 +43,8 @@ using static go.main_package;
 
 // The go statements whose goroutine the converter proved cannot recurse, by the file, line and column of
 // their goǃ call: go2cs-gen starts each on golib's bounded stack reservation rather than the Go-scale default.
-[assembly: GoBoundedGoroutine("main.cs", 14, 5, 0)]
+[assembly: GoBoundedGoroutine("main.cs", 17, 5, 0)]
+[assembly: GoBoundedGoroutine("main.cs", 53, 5, 2)]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -53,7 +54,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("MnMutexTwin@/main.go", "main.cs", "AAocgoKQkpSApIKCgpSCgoI=", "16-16:1;19-19:2")]
+[assembly: GoPositionMap("MnMutexTwin@/main.go", "main.cs", "AA0mgoKQkpSApIKCgpSCgoKUgoKCsqKClJSCkoKUgJKC", "21-21:1;24-24:2;39-45:3;40-43:3.1;47-50:4;51-51:5")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -79,5 +80,6 @@ public static partial class main_package
     // <ImportInitializers>
     [GoInit] internal static void initᴛᴛimportꓸfmt() => builtin.initPackage(typeof(fmt_package));
     [GoInit] internal static void initᴛᴛimportꓸsync() => builtin.initPackage(typeof(sync_package));
+    [GoInit] internal static void initᴛᴛimportꓸtime() => builtin.initPackage(typeof(time_package));
     // </ImportInitializers>
 }

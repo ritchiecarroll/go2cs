@@ -551,6 +551,26 @@ public class TwinSurfaceTests
         StringAssert.Contains(twins, "// refused native=1", "the refusal is still counted");
     }
 
+    // P3's read of 4afbe98217, finding 1: a public `static extern` member of a converted file. It has no body, so it
+    // was never a candidate: no twin, no forwarder and no guard row (outside the set, silently). Admitted as a
+    // candidate it is refused `native`, and its forwarder must not copy `extern` (CS0179: an extern with a body).
+    private const string ExternMember = """
+            [System.Runtime.InteropServices.DllImport("kernel32")]
+            public static extern int GetCurrentProcessId();
+
+        """;
+
+    [TestMethod]
+    public void F2_APublicExternMemberGetsAForwarderWithoutExtern()
+    {
+        (string twins, Diagnostic[] errors) = RunWith(null, null, ExternMember);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        StringAssert.Contains(twins, "public static global::go.golib.GoTask<int> GetCurrentProcessIdꞏtwin() => new global::go.golib.GoTask<int>(GetCurrentProcessId());",
+            "a forwarder, without `extern`");
+        StringAssert.Contains(twins, "|GetCurrentProcessId|forwarder:native", "in the population, as a native refusal's forwarder");
+    }
+
     [TestMethod]
     public void F6_ACallerCallsAForwardedFunctionPlain()
     {

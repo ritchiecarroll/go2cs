@@ -244,7 +244,9 @@ public sealed partial class TwinGenerator
             MethodDeclarationSyntax method = candidate.Syntax;
             bool isVoid = method.ReturnType is PredefinedTypeSyntax predefined && predefined.Keyword.IsKind(SyntaxKind.VoidKeyword);
             string returnType = method.ReturnType.WithoutTrivia().ToFullString();
-            string modifiers = string.Join(" ", method.Modifiers.Where(modifier => !modifier.IsKind(SyntaxKind.PartialKeyword)).Select(modifier => modifier.Text));
+            // `extern` and `partial` belong to the plain member: a forwarder has a body (CS0179 with `extern`).
+            string modifiers = string.Join(" ", method.Modifiers.Where(modifier => !modifier.IsKind(SyntaxKind.PartialKeyword) && !modifier.IsKind(SyntaxKind.ExternKeyword))
+                .Select(modifier => modifier.Text));
             List<string> declared = [], arguments = [];
 
             for (int i = 0; i < method.ParameterList.Parameters.Count; i++)

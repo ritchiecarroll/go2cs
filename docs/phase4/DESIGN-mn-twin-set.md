@@ -454,3 +454,28 @@ S4 (6fa1b16a21, the shipping rule, under `GO2CS_MN=1`): GREEN. Build 429 s, GO2C
   `RunMainꞏtwin` (precondition OK). Three runs, each rc 0, EQUAL to Go, with a READING line: 2.0, 2.3 and 2.0 s;
   steps=74, parks=36 and thread-blocks=0 every run; peak carriers 22-24; injections 7-13. go.*.dll 84,274,176
   (S3 less 1,024: the smaller Lockꞏtwin).
+  What raised the peak carriers to 22-24 for eight goroutines: each run had 13-15 steps over the monitor's 10 ms
+  preemption line (the longest 216-242 ms: first use of cold code, JIT), and the monitor injected a carrier beside
+  each such step (7-13 per run), so peak = P (12) + the injections; retakes 0, thread-blocks 0. The cost beside the
+  figure: peak OS threads 38-40 for the eight goroutines (the L-min cost FREEZE-SHEET.md asks to state with every
+  thread figure: an opted-in program also holds its carrier on a contended Lock and on time.Sleep).
+
+### 12.6 P3's read of 4afbe98217 (dated block, 2026-11-21): CLEAR, no MUST-FIX; four findings done
+
+- **1 (SHOULD-FIX), a public `static extern` member.** P3's reading: ForwarderText kept `extern`, so its forwarder
+  would hit CS0179. Measured, the state was one step worse: a bodyless member was never a candidate, so a public
+  extern in a converted file had no twin, no forwarder and no guard row (outside the set, silently; the corpus holds
+  none today, by census). Now a bodyless `extern` member is a candidate (refused `native`, never twinned), and the
+  forwarder drops `extern` beside `partial`. Row F2_APublicExternMemberGetsAForwarderWithoutExtern, red twice
+  before green: no forwarder at all; then, admitted, P3's CS0179; then green. GenTests 716 of 716.
+- **2 (SHOULD-FIX), the red row's precondition.** MnMutexTwin is red on the broken tree only when SYNC is twinned.
+  The kit asserts sync's twin report shows twinned > 0 (twinned=4), made to fail once by dropping `sync` from
+  GoTwinsFor ("PRECONDITION FAIL: sync is not twinned ... the row cannot be red").
+- **3 (NIT), a contended Lock through the twin.** None of the kit's rows ran one, so MnMutexTwin's last section is
+  CONTENDED: a goroutine parks inside `once2.Do`, holding the Once's mutex; main's `once2.Do` waits on it through
+  sync's twinned slow path (main's twin awaits `Ꮡonce2.Doꞏtwin`; `doSlowꞏtwin` awaits `Lockꞏtwin`, read in the
+  emission). Under GO2CS_MN=1: Go's 4 lines, "never" never printed. The `thread-blocks` reading counts only a
+  block with no carrier to hand off (a block on a carrier is a handoff), so it is not this arm's witness; the
+  emission is.
+- **4 (NIT), owed to row 7:** Lockꞏtwin adds one frame above Lock in a mutex or block profile taken from a twin.
+- **5 (NIT):** the peak-carriers line above, with the cost beside it.

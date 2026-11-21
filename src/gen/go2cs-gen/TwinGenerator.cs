@@ -425,7 +425,11 @@ public sealed partial class TwinGenerator : ISourceGenerator
 
         private void AddCandidate(MethodDeclarationSyntax method)
         {
-            if (method.Body is null && method.ExpressionBody is null || method.Parent is not TypeDeclarationSyntax ||
+            // A bodyless `extern` member is a candidate too (P3's read of 4afbe98217): it can never be twinned (IsNative
+            // refuses it), but a PUBLIC one in a converted file is in the population and gets a forwarder (R3).
+            // Before this it was never seen, so it had no twin, no forwarder and no guard row. Any other bodyless
+            // method (an abstract or partial declaration) still is not a candidate.
+            if (method.Body is null && method.ExpressionBody is null && !method.Modifiers.Any(SyntaxKind.ExternKeyword) || method.Parent is not TypeDeclarationSyntax ||
                 method.Modifiers.Any(SyntaxKind.AsyncKeyword) || method.Identifier.Text.EndsWith(Suffix, StringComparison.Ordinal))
                 return;
 
