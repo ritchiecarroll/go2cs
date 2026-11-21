@@ -3336,6 +3336,7 @@ public static partial class builtin
     /// <typeparam name="T">Desired type for <paramref name="target"/>.</typeparam>
     /// <param name="target">Source value to type assert.</param>
     /// <returns><paramref name="target"/> value cast as <typeparamref name="T"/>, if successful.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] // so AssertHit sees the call site's exact T
     public static T _<[DynamicallyAccessedMembers(
         DynamicallyAccessedMemberTypes.PublicMethods |
         DynamicallyAccessedMemberTypes.PublicConstructors |
@@ -3357,9 +3358,11 @@ public static partial class builtin
     }
 
     // The head of every `x.(T)`: a HIT it can prove cheaply, or false to send the assertion to TryTypeAssert's
-    // body. Inlined, it is specialized for the call site's T. TryTypeAssert<T> runs as ONE shared body for every
-    // reference T (every pointer and every interface), where each `is T`, typeof(T) and per-T static is a runtime
-    // lookup, so a pointer assert cost ~14 ns where Go's is one compare (~1 ns). Here T is exact.
+    // body. Inlined, it is specialized for the call site's T, which holds because the four _<T> entry points that call
+    // it inline too: inside a shared _<T> body its `is T` was the runtime lookup it avoids (11.84 to 3.91 ns a hit,
+    // tiering off). TryTypeAssert<T> runs as ONE shared body for every reference T (every pointer and every interface),
+    // where each `is T`, typeof(T) and per-T static is a runtime lookup, so a pointer assert cost ~14 ns where Go's is
+    // one compare (~1 ns). Here T is exact.
     //
     // It answers only what the body would answer, and only where that is cheap to prove:
     //  - a concrete T other than object: `target is T`. No adapter is ever a concrete Go type, so this is the body's
@@ -3440,17 +3443,21 @@ public static partial class builtin
             return false;
         }
 
-        Type typeOfT = typeof(T);
-
-        switch (target)
+        // The per-T facts are fields (AssertFacts<T>), so no Type is materialised here: typeof(T) in a shared generic
+        // body is a run-time handle lookup and conversion, paid by every assert that reaches this body (AssertHit misses).
+        if (AssertFacts<T>.IsGoString && target is string str)
         {
-            case string str when typeOfT == typeof(@string):
-                value = (T)(object)new @string(str);
-                return true;
-            case T typedTarget:
-                value = typedTarget;
-                return true;
+            value = (T)(object)new @string(str);
+            return true;
         }
+
+        if (target is T typedTarget)
+        {
+            value = typedTarget;
+            return true;
+        }
+
+        Type typeOfT = AssertFacts<T>.Type;
 
         // A value adapter over a null func that is not itself a T stands for its typed nil func too
         // (GoReflect.NilFuncOf): asserted to its own func type or to ANOTHER interface, the carried
@@ -3611,7 +3618,9 @@ public static partial class builtin
                     // Create a new instance of the asserted type — held BOXED for the copy:
                     // FieldInfo.SetValue on an unboxed struct mutates a fresh transient box per
                     // call and the writes vanish (the copy came back all zeros).
-                    object newInstance = Activator.CreateInstance(typeOfT)!;
+                    // typeof(T), not typeOfT: the trim analyzer follows T's member annotations from typeof(T), and not
+                    // through AssertFacts<T>.Type, a field.
+                    object newInstance = Activator.CreateInstance(typeof(T))!;
 
                     // Copy the values of the fields from the target to the new instance. The
                     // lookup must span NONPUBLIC fields: an unexported Go field emits `internal`,
@@ -3623,7 +3632,7 @@ public static partial class builtin
                     const BindingFlags CopyFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
 
                     foreach (string field in typeOfTFieldNames)
-                        typeOfT.GetField(field, CopyFlags)!.SetValue(newInstance, targetType.GetField(field, CopyFlags)!.GetValue(target));
+                        typeof(T).GetField(field, CopyFlags)!.SetValue(newInstance, targetType.GetField(field, CopyFlags)!.GetValue(target));
                 #pragma warning restore IL2075
 
                     value = (T)newInstance;
@@ -3668,6 +3677,8 @@ public static partial class builtin
     // reasoning) as Cache<TInterface> below.
     private static class AssertFacts<T>
     {
+        internal static readonly Type Type = typeof(T);
+        internal static readonly bool IsGoString = typeof(T) == typeof(@string);
         internal static readonly bool IsInterface = typeof(T).IsInterface;
         internal static readonly bool IsValueType = typeof(T).IsValueType;
         internal static readonly bool IsDynamic = typeof(T).IsDynamicType();
@@ -3775,6 +3786,7 @@ public static partial class builtin
     /// <param name="target">Source value to type assert.</param>
     /// <param name="_">Overload discriminator for different return type, <see cref="ꟷ"/>.</param>
     /// <returns>Tuple of <paramref name="target"/> value cast as <typeparamref name="T"/> and success boolean.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] // so AssertHit sees the call site's exact T
     public static (T?, bool) _<[DynamicallyAccessedMembers(
         DynamicallyAccessedMemberTypes.PublicMethods |
         DynamicallyAccessedMemberTypes.PublicConstructors |
@@ -3795,6 +3807,7 @@ public static partial class builtin
     /// <param name="target">Source value to type assert.</param>
     /// <param name="value">Value cast as <typeparamref name="T"/>, if successful; otherwise <c>default</c>.</param>
     /// <returns><c>true</c> if type assertion was successful; otherwise, <c>false</c>.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] // so AssertHit sees the call site's exact T
     public static bool _<[DynamicallyAccessedMembers(
         DynamicallyAccessedMemberTypes.PublicMethods |
         DynamicallyAccessedMemberTypes.PublicConstructors |
@@ -4260,6 +4273,14 @@ public static partial class builtin
 
             if (leftNil || rightNil)
                 return leftNil && rightNil;
+
+            // Two non-nil pointers: the pointer type's own identity rule answers, the one its `==` uses -- ж<T>'s
+            // per-kind Equals, or a named pointer's Equals over its box. The object overload below answered the same
+            // for a same-kind pair after six adapter probes, two GetType calls and a dictionary read, about 90 ns a
+            // compare on the hit path of slices.Contains over []*T (TypeScript's AppendIfUnique). It also matched
+            // the two operands by box CLASS, so two kinds naming one address (a native element box and a NativeBox,
+            // or two zerobase pointers) were unequal through generic == while equal through ж's ==; Go has one ==.
+            return EqualityComparer<T>.Default.Equals(left!, right!);
         }
 
         return default(T) is null ?
@@ -4652,6 +4673,7 @@ public static partial class builtin
     /// Go prints "io.Reader is *os.File, not *bytes.Buffer". A generated overload on each interface, and golib's own for
     /// <c>error</c>, supply the source here, leaving the call site as <c>x._&lt;T&gt;()</c>.
     /// </remarks>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] // so AssertHit sees the call site's exact T
     public static T _<TSource, [DynamicallyAccessedMembers(
         DynamicallyAccessedMemberTypes.PublicMethods |
         DynamicallyAccessedMemberTypes.PublicConstructors |

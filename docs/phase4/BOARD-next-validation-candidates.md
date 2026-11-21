@@ -41246,6 +41246,46 @@ P3's review of seat S-B1 (2026-11-20) lists the shapes that refuse at run time B
 **Owner.** Unassigned; for COORD to route.
 
 — H (2026-11-20)
+## 2026-11-21 — P2 (TS items 4 and 6): generic pointer ==, the type-assert body and its entry points
+
+From P3's TypeScript type-check profile (items 4 and 6 of its .5 list). Measured with a converted Go probe
+(`PerfEqAssert`, kept in P2's kit, not in the tree): `slices.Contains` over 64 pointers for generic `==`, and
+comma-ok asserts on an `any`. P2's linux-x64 box, Release, net10, floor over rounds 2-8 of each process, shown as
+floor/ceiling over five processes, ns per compare or assert. Native Go on the same box: 0.5 per compare, 0.2-0.5
+per pointer assert, 2.1-2.4 per interface assert.
+
+**Item 4, generic `==` over a pointer type argument.** `AreEqual<T>` for a pointer `T`, after its nil leg, entered
+the interface-value overload `AreEqual(object, object)`: six adapter probes, two `GetType` calls, the
+comparable-type dictionary, the `IGoEquatable` cast and call. Two non-nil pointers now answer through the pointer
+type's own identity rule (`EqualityComparer<T>.Default`: `ж<T>`'s per-kind `Equals`, or a named pointer's `Equals`
+over its box). Box compare 93.66 to 25.20 with tiering off, 14.23 to 3.08 by default; a field view 97.66 to 27.35
+and 73.94 to 4.91. A measure-only arm returning `ReferenceEquals` reads 6.7 off and 1.9 by default, the loop and
+the call; the rest of the tiering-off figure is the existing `PointerNilIdentity` nil leg and the comparer's
+dispatch in shared generic code, which PGO removes.
+**A behavior fix rode with it.** The object overload matched the operands by box CLASS, so two kinds naming one
+address (an element box and a heap box over the zerobase, a native element box and a `NativeBox`) were unequal
+through generic `==` and equal through `ж`'s `==`. `GenericEqualityAgreesWithPointerEqualityAcrossBoxKinds` pins
+the agreement; it fails with item 4's line removed.
+
+**Item 6, `TryTypeAssert<T>`'s per-T facts.** The shared body read `typeof(T)` before its first arm; the string arm
+now reads `AssertFacts<T>.IsGoString` and the cold arms `AssertFacts<T>.Type`. A pointer miss 27.92 to 23.60 off,
+no measurable move by default. A pointer HIT never reaches this body: every emitted assert calls `AssertHit<T>`
+first. My prediction for the hit was derived from the body without reading its callers, and missed.
+
+**The entry points (commit 3).** `AssertHit<T>` is AggressiveInlining and assumed it was specialized for the call
+site's `T`, but the four `_<T>` entry points that call it are themselves shared generic bodies for every reference
+`T` and carried no inlining hint, so its `is T` was the runtime lookup it was written to avoid. With
+AggressiveInlining on the four: pointer hit 11.84 to 3.91 off and 8.61 to 2.81 by default; an interface assert on a
+value 49.04 to 27.32 and 39.66 to 24.88; on a pointer 32.05 to 26.90 and 28.51 to 23.16. Code: IL unchanged at
+every call site; jitted native code (tiering off, same program) fmt +4.3%, the probe's main +24.5%, the whole
+process +0.06% (the two shared bodies are no longer jitted); about 300-430 bytes of x64 per hot assert site.
+ReadyToRun images do not change (crossgen2 does not inline across version bubbles, and golib is outside every
+converted package's bubble), so only tier-1 code grows.
+
+**Not measured here:** the type-check share. P3's rows predicted -1.5% to -2.5% (item 4) and -0.5% to -1% (item 6)
+from a biased sampler; the checkdemo re-time and the checker's jitted growth are R's.
+
+— P2 (2026-11-21)
 
 ## 2026-11-21 — P1 (F3; COORD 2026-11-20 08:55Z: a board row and a runbook line): the converter's escape harvest fills the Go build cache, about 120 MB per package on a large module — the separation from `GOCACHE` is P4's probe-cache seat (board item hh), landed in train 1; the cost stays an environment fact; runbook trap 13 for the module procedure
 
