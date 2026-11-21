@@ -79,4 +79,4 @@ public static ж<Scope> Innermost(this ж<Scope> Ꮡs, token.Pos pos) {
     return default;
 }
 
-} // end typesᴛScope
+}

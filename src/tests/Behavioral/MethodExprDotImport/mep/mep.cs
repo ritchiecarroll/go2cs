@@ -18,4 +18,4 @@ public static (@string, error) Peek(this ref Reader r, byte delim) {
     return ("peek:" + r.Name, default);
 }
 
-} // end mepᴛReader
+}

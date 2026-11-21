@@ -137,7 +137,9 @@ func TestWarnRefusesADisallowedCodeAtTheCommandLine(t *testing.T) {
 }
 
 // TestNonSelfProxyRefusalIsItsOwnCode: C35's non-self refusals report GO2CS2005, never GO2CS2002, so -warn GO2CS2002
-// cannot downgrade them (their downgraded sites are not loud).
+// cannot downgrade them (their downgraded sites are not loud). The site is ruling 2's zero-value call, a shape the narrow
+// shape witness does not select (O is only a plain parameter and result): its map[string]O and []O siblings take the
+// witness now (shapeWitness.go), so they no longer reach GO2CS2005 at all.
 func TestNonSelfProxyRefusalIsItsOwnCode(t *testing.T) {
 	dir := writeWarnFixture(t, `package main
 
@@ -147,9 +149,16 @@ type impl struct{ n int }
 
 func (p *impl) Parse(s string) bool { p.n++; return s != "" }
 
-func many[O parser](p O, all map[string]O) O { p.Parse("m"); return p }
+func zeroCall[O parser](p O, ok bool) O {
+	var zero O
+	if !ok {
+		zero.Parse("z")
+	}
+	p.Parse("p")
+	return p
+}
 
-func main() { _ = many(&impl{}, nil) }
+func main() { _ = zeroCall(&impl{}, true) }
 `)
 
 	for _, args := range [][]string{nil, {"-warn", diagnosticProxyRefused}} {

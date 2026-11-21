@@ -158,7 +158,7 @@ literal's default `"…"u8` span would fail against the channel's `in object` se
 In converted code both sends then read the literal's hoisted pre-boxed field (see above), never a bare
 `"text"u8`:
 
-<!-- source: src/tests/Behavioral/AnyStringLitChanSend/main.cs.target:54-55, 60, 66-67 -->
+<!-- source: src/tests/Behavioral/AnyStringLitChanSend/main.cs.target:45-46, 51, 57-58 -->
 ```csharp
 private static readonly object textˢ = (@string)"text"u8;
 private static readonly object selˢ = (@string)"sel"u8;
@@ -414,7 +414,7 @@ marking (`markEmptyInterfaceElems`, shared by both renderers), so the two spelli
 
 <!-- source: src/tests/Behavioral/ElidedAnyCompositeElems/ElidedAnyCompositeElems.cs.target:9 -->
 ```csharp
-    var a = GoReflect.WithElemDims(new array<any>[]{new any[]{(nint)1, (nint)2}.array(), new any[]{(@string)"a", (@string)"b"}.array()}.slice(), 2);
+    var a = GoReflect.WithElemDims(new array<any>[]{array<any>([(nint)1, (nint)2]), array<any>([(@string)"a", (@string)"b"])}.slice(), 2);
 ```
 
 A pointer, func or `unsafe.Pointer` element takes its box the same way. An elided literal of any other element type,

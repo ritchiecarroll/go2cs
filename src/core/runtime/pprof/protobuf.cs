@@ -149,4 +149,4 @@ internal static void endMessage(this ref protobuf b, nint tag, msgOffset start) 
     b.nest--;
 }
 
-} // end pprofᴛprotobuf
+}

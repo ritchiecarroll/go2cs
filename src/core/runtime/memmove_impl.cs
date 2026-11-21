@@ -88,6 +88,7 @@ partial class runtime_package
             for (int i = 0; i < count; i++)
                 dstArray![dstIndex + i] = staged[i];
 
+            GoPointerWords.CopyEntries(to!.RetainedSource, dst, from!.RetainedSource, src, n.Value);
             return;
         }
 
@@ -98,6 +99,10 @@ partial class runtime_package
                 Buffer.MemoryCopy((void*)src, (void*)dst, n.Value, n.Value);
             }
 
+            // THE COPY DOOR for unsafe.Pointer words (docs/phase4/DESIGN-cgo-phase3-marshaling.md 18.5 finding 4, seat
+            // S-B1): a copied word of Go memory takes the source slot's entry, so the destination reads the same referent and
+            // the source keeps its own. Both arms take it, after the bytes moved. No table anywhere: one flag read.
+            GoPointerWords.CopyEntries(to!.RetainedSource, dst, from!.RetainedSource, src, n.Value);
             return;
         }
 
@@ -176,6 +181,7 @@ partial class runtime_package
             for (int i = 0; i < count; i++)
                 array![index + i] = zero;
 
+            GoPointerWords.ClearEntries(ptr!.RetainedSource, address, n.Value);
             return;
         }
 
@@ -186,6 +192,9 @@ partial class runtime_package
                 new Span<byte>((void*)address, checked((int)n.Value)).Clear();
             }
 
+            // THE CLEAR DOOR (18.5 finding 5): a cleared word of Go memory drops its entries, or a deleted indirect map key
+            // would stay referenced for the storage's life. typedmemclr and its reflect and maps wrappers reach it.
+            GoPointerWords.ClearEntries(ptr!.RetainedSource, address, n.Value);
             return;
         }
 

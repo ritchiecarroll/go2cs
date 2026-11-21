@@ -2,14 +2,11 @@ namespace go;
 
 using fmt = fmt_package;
 using reflect = reflect_package;
-using static main_package;
 
 partial class main_package {
 
 partial struct filler {
 }
-
-} partial class mainᴛfiller {
 
 internal static void FillPtr(this filler _, nint i, /*[3]*/ ж<array<nint>> Ꮡreply) {
     ref var reply = ref Ꮡreply.DerefOrNull();
@@ -27,8 +24,6 @@ internal static nint SumArray(this filler _, /*[4]*/ array<nint> @in) {
     }
     return total;
 }
-
-} partial class main_package {
 
 partial struct wrap {
     public array<byte> Buf = new(8);

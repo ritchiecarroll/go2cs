@@ -54,9 +54,9 @@ using static go.main_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("avars.go", "avars.cs", "AAkO")]
-[assembly: GoPositionMap("bvars.go", "bvars.cs", "AAsaAAoIgoQ=")]
+[assembly: GoPositionMap("bvars.go", "bvars.cs", "AAoaAAgIgoQ=")]
 [assembly: GoPositionMap("main.go", "main.cs", "AAYYgrKCprKCpoI=")]
-[assembly: GoPositionMap("yvars.go", "yvars.cs", "AAsSAAoIgoQ=")]
+[assembly: GoPositionMap("yvars.go", "yvars.cs", "AAoSAAgIgoQ=")]
 [assembly: GoPositionMap("zvars.go", "zvars.cs", "AAkS")]
 // </GoSourcePositionMaps>
 
@@ -101,6 +101,4 @@ public static partial class main_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(main_package.Bee)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛBee;
-[GoMethodHost(typeof(main_package.Why)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛWhy;
 // </MethodHolders>

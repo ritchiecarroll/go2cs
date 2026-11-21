@@ -29,4 +29,4 @@ public static void Append(this ref Buffer b, @string s) {
     b.N += len(s);
 }
 
-} // end innerᴛBuffer
+}

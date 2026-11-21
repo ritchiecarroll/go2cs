@@ -542,3 +542,79 @@ func TestLayoutUniverseIsTheConvertersUniverse(t *testing.T) {
 		t.Errorf("src/go2cs/platformLattice.go declares platformUniverse {%s} and layoutUniverse is {%s}; they change together", declared[1], want)
 	}
 }
+
+// unsafeDoorBlanks reads one Go file and one C# rendering of it, written to a temporary folder, and returns the
+// body's blank-line classes.
+func unsafeDoorBlanks(t *testing.T, goSrc, csSrc string) map[string]int {
+	t.Helper()
+
+	dir := t.TempDir()
+	goFile, csFile := dir+"/p.go", dir+"/p.cs"
+
+	if err := os.WriteFile(goFile, []byte(goSrc), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := os.WriteFile(csFile, []byte(csSrc), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	r := NewResults()
+
+	if err := r.AnalyzeFiles(goFile, csFile, "p/p"); err != nil {
+		t.Fatal(err)
+	}
+
+	// Vacuity: the four functions are read, or no class could move.
+	if n := r.r.body["functions"]; n != 4 {
+		t.Fatalf("%d function bodies read, want 4", n)
+	}
+
+	got := map[string]int{}
+
+	for k, n := range r.Counts() {
+		if strings.HasPrefix(k, "body:") {
+			got[k] = n
+		}
+	}
+
+	return got
+}
+
+// The converter writes Go's pointer arithmetic through the unsafe doors: `unsafe.Pointer(uintptr(p) + n)` is
+// `@unsafe.Add(p, n)`, and `uintptr(unsafe.Pointer(&r))` is `(uintptr)Ꮡr`. Neither C# line spells `Pointer` or
+// `uintptr`, so a Go line holding `unsafe.Pointer(` does not require `Pointer` on its C# line, nor `uintptr` when it
+// also holds `uintptr(`. `door` has a Go blank line before such a return: it maps, and `bad`, which drops it, reports
+// it missing. `gc` opens with such a line after the prelude's heap box: the blank line between them is the prelude's
+// separator. `plain` is the control: its line holds `uintptr(` without `unsafe.Pointer(`, so `uintptr` is still
+// required, and its blank line stays unmapped against a translation that does not spell it (its C# blank line then
+// reads unexplained). `twin` is runtime/sema.go's dequeue: a blank line sits between two `if` lines that differ only
+// in their operator, so without their conversions both hold the same identifiers. The blank belongs to the second,
+// and the first one's translation must not take it: `good` keeps the blank and reads clean, `bad` drops it and
+// reports it there.
+func TestUnsafeDoorLinesAnchorWithoutTheirConversions(t *testing.T) {
+	const goSrc = "package p\n\nimport \"unsafe\"\n\n" +
+		"func door(data unsafe.Pointer, off uintptr) unsafe.Pointer {\n\tn := off * 2\n\n\treturn unsafe.Pointer(uintptr(data) + n)\n}\n\n" +
+		"func gc(r int) uintptr {\n\tptr := uintptr(unsafe.Pointer(&r))\n\treturn ptr\n}\n\n" +
+		"func plain(n int) uintptr {\n\tm := n * 2\n\n\tx := uintptr(m) + 1\n\treturn x\n}\n\n" +
+		"func twin(addr *uint32, s *uint32) int {\n\tfor ; s != nil; s = nil {\n\t\tif uintptr(unsafe.Pointer(addr)) == uintptr(unsafe.Pointer(s)) {\n\t\t\treturn 0\n\t\t}\n\n" +
+		"\t\tif uintptr(unsafe.Pointer(addr)) < uintptr(unsafe.Pointer(s)) {\n\t\t\treturn 1\n\t\t}\n\t}\n\treturn 2\n}\n"
+
+	render := func(doorBlank, twinBlank string) string {
+		return "namespace go;\n\nusing @unsafe = unsafe_package;\n\npartial class p_package {\n\n" +
+			"public static @unsafe.Pointer door(@unsafe.Pointer data, uintptr off) {\n    var n = off * 2;\n" + doorBlank +
+			"    return @unsafe.Add(data, n);\n}\n\n" +
+			"public static uintptr gc(nint rʗp) {\n    ref var r = ref heap(rʗp, out var Ꮡr);\n\n    var ptr = (uintptr)Ꮡr;\n    return ptr;\n}\n\n" +
+			"public static uintptr plain(nint n) {\n    var m = n * 2;\n\n    var x = m + 1;\n    return x;\n}\n\n" +
+			"public static nint twin(ж<uint32> addr, ж<uint32> s) {\n    for (; s != nil; s = nil) {\n        if ((uintptr)addr == (uintptr)s) {\n            return 0;\n        }\n" + twinBlank +
+			"        if ((uintptr)addr < (uintptr)s) {\n            return 1;\n        }\n    }\n    return 2;\n}\n\n} // end p_package\n"
+	}
+
+	if got, want := unsafeDoorBlanks(t, goSrc, render("\n", "\n")), map[string]int{"body:go-blank-unmapped": 1, "body:extra:unexplained": 1}; !maps.Equal(got, want) {
+		t.Errorf("good: %v, want %v", got, want)
+	}
+
+	if got, want := unsafeDoorBlanks(t, goSrc, render("", "")), map[string]int{"body:go-blank-cs-none": 2, "body:go-blank-unmapped": 1, "body:extra:unexplained": 1}; !maps.Equal(got, want) {
+		t.Errorf("bad: %v, want %v", got, want)
+	}
+}

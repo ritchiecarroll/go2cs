@@ -66,6 +66,10 @@
     For a module with no Go tests: the directory of its hosted behavior rows (<rid>.md, one per shipped RID), run
     against this module's rehearsal package. Required for its release pack; refused for a module with Go tests, whose
     proof is the test comparison.
+.PARAMETER ApiCompatSuppressions
+    A same-floor deliberate break: the CompatibilitySuppressions.xml file passed to the pack, which lists each member
+    the revision removes from its previous revision's surface (an announced break). A previous revision built below
+    the break floor needs none: the pack reports it and does not compare it.
 .PARAMETER ConversionReadme
     The conversion repository's root README as it will be committed at nuget-<PV>, a local file, checked by the pack
     in place of the module table's ConversionReadme (the README at the repository's last tag).
@@ -87,6 +91,7 @@ param(
     [string]$Feed = 'https://api.nuget.org/v3/index.json',
     [string]$ConversionReadme,
     [string]$BehaviorProofDir,
+    [string]$ApiCompatSuppressions,
     [string]$ModulesFile = (Join-Path $PSScriptRoot 'nugetgo-modules.psd1')
 )
 
@@ -104,6 +109,8 @@ $goWant = "go$($Matches[1]).$($Matches[2]).$($Matches[3])"
 
 if ($PackageReadme -and -not (Test-Path -LiteralPath $PackageReadme -PathType Leaf)) { Refuse "-PackageReadme $PackageReadme is not a file" }
 if ($PackageReadme) { $PackageReadme = (Resolve-Path -LiteralPath $PackageReadme).Path }
+if ($ApiCompatSuppressions -and -not (Test-Path -LiteralPath $ApiCompatSuppressions -PathType Leaf)) { Refuse "-ApiCompatSuppressions $ApiCompatSuppressions is not a file" }
+if ($ApiCompatSuppressions) { $ApiCompatSuppressions = (Resolve-Path -LiteralPath $ApiCompatSuppressions).Path }
 $table = Import-PowerShellDataFile -LiteralPath $ModulesFile
 if (-not $table.ContainsKey($Module)) { Refuse "$Module is not in $ModulesFile ($($table.Keys -join ', '))" }
 $row = $table[$Module]
@@ -317,6 +324,7 @@ try {
         # pwsh -File binds a repeated parameter as an error: each list goes once, comma-joined, and the pack splits it.
         if ($excluded) { $packArgs += @('-ExcludePackage', ($excluded -join ',')) }
         if ($ThirdPartyPackage) { $packArgs += @('-ThirdPartyPackage', ($ThirdPartyPackage -join ',')) }
+        if ($ApiCompatSuppressions) { $packArgs += @('-ApiCompatSuppressions', $ApiCompatSuppressions) }
         $packArgs += if ($pack -eq 'int1') { @('-RehearsalSuffix', 'int.1') } else { @('-Release') }
         $start = Get-Date
         $p = Start-Process -FilePath $pwsh -ArgumentList (Join-Argv $packArgs) -NoNewWindow -PassThru -Wait `

@@ -56,10 +56,13 @@ partial class atomic_package
     // `new @unsafe.Pointer(n)` marks the zero address nil, so a nil pointer round-trips exactly.
     // The managed arm is unchanged.
 
+    // W3 (docs/phase4/DESIGN-cgo-phase3-marshaling.md 18.3-18.7, seat S-B1): over a native slot the word doors decide.
+    // A word of Go memory publishes the referent's PROJECTED number with an entry that keeps it (golib GoPointerWords);
+    // a word of C memory is a number, and a Go pointer stored there is refused by name.
     public static partial @unsafe.Pointer /*old*/ SwapPointer(ж<@unsafe.Pointer> addr, @unsafe.Pointer @new)
     {
         if (addr.IsNative)
-            return new @unsafe.Pointer((uintptr)addr.ExchangePointerWord(((uintptr)@new).Value));
+            return @unsafe.Pointer.SwapWord(addr, @new);
 
         return Interlocked.Exchange(ref addr.Value, @new);
     }
@@ -94,7 +97,7 @@ partial class atomic_package
         // Native arm: the slot holds the pointer's VALUE, so the CAS compares NUMBERS — which is
         // Go's own comparison for unsafe.Pointer, and the same one Pointer.Equals already answers.
         if (addr.IsNative)
-            return addr.CompareExchangePointerWord(((uintptr)old).Value, ((uintptr)@new).Value);
+            return @unsafe.Pointer.CompareAndSwapWord(addr, old, @new);
 
         // Managed arm: Go compares the POINTERS, and a pointer is its address, so two Pointer objects over one
         // address are one pointer. Interlocked compares REFERENCES, so this reads the slot, compares addresses, and
@@ -269,7 +272,7 @@ partial class atomic_package
     {
         // Native arm: see the banner above SwapPointer.
         if (addr.IsNative)
-            return new @unsafe.Pointer((uintptr)addr.ReadPointerWord());
+            return @unsafe.Pointer.LoadWord(addr);
 
         return Volatile.Read(ref addr.Value);
     }
@@ -304,7 +307,7 @@ partial class atomic_package
         // Native arm: see the banner above SwapPointer.
         if (addr.IsNative)
         {
-            addr.ExchangePointerWord(((uintptr)val).Value);
+            @unsafe.Pointer.StoreWord(addr, val);
             return;
         }
 

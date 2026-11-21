@@ -246,6 +246,19 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
+      # global.json's latestMajor takes the highest SDK installed, and an image carrying a newer major beside the one
+      # setup-dotnet installed would build this job with it, silently. The job holds to the channel it asked for.
+      - name: The .NET SDK is the requested channel
+        shell: pwsh
+        env:
+          DOTNET_CHANNEL: '10.0.x'
+        run: |
+          $got = "$(dotnet --version)".Trim()
+          $want = $env:DOTNET_CHANNEL
+          $ok = if ($want.EndsWith('.x')) { $got.StartsWith($want.Substring(0, $want.Length - 1)) } else { $got -ceq $want }
+          if (-not $ok) { Write-Host "::error::dotnet --version is $got, not the requested channel ${want}: global.json's latestMajor takes the highest SDK installed"; exit 1 }
+          Write-Host "dotnet --version $got is channel $want"
+
       # The smoke's packages carry a prerelease version of the release the converter reports, so they can never be
       # mistaken for, or collide with, the signed ones on nuget.org.
       - name: Pack the go2cs dotnet tool, unsigned, for the smoke
@@ -366,6 +379,19 @@ jobs:
       - uses: actions/setup-dotnet@v5
         with:
           dotnet-version: '10.0.x'
+
+      # global.json's latestMajor takes the highest SDK installed, and an image carrying a newer major beside the one
+      # setup-dotnet installed would build this job with it, silently. The job holds to the channel it asked for.
+      - name: The .NET SDK is the requested channel
+        shell: pwsh
+        env:
+          DOTNET_CHANNEL: '10.0.x'
+        run: |
+          $got = "$(dotnet --version)".Trim()
+          $want = $env:DOTNET_CHANNEL
+          $ok = if ($want.EndsWith('.x')) { $got.StartsWith($want.Substring(0, $want.Length - 1)) } else { $got -ceq $want }
+          if (-not $ok) { Write-Host "::error::dotnet --version is $got, not the requested channel ${want}: global.json's latestMajor takes the highest SDK installed"; exit 1 }
+          Write-Host "dotnet --version $got is channel $want"
 
       # The reference conversion is made with this Go on PATH; the smoke then hides it.
       - uses: actions/setup-go@v6

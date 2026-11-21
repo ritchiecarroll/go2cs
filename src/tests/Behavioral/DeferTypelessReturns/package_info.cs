@@ -49,7 +49,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("DeferTypelessReturns.go", "DeferTypelessReturns.cs", "ABIcuqKCgoKm2oKCqqKCypqigoKU1qKIgpKCgoKCgoKCgoKCgqIACAqCgg==", "", "", "", "26:21,57:21,70:21,73:21")]
+[assembly: GoPositionMap("DeferTypelessReturns.go", "DeferTypelessReturns.cs", "ABAcmqKCgoKm2oKCqqKCypqigoKU1qKIgpKCgoKCgoKCgoKCgqIACAqCgg==", "", "", "", "22:21,53:21,66:21,69:21")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -88,6 +88,5 @@ public static partial class main_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(main_package.handle)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛhandle;
 [GoMethodHost(typeof(main_package.res)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛres;
 // </MethodHolders>

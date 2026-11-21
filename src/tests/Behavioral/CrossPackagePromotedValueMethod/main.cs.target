@@ -2,7 +2,6 @@ namespace go;
 
 using fmt = fmt_package;
 using time = time_package;
-using static main_package;
 
 partial class main_package {
 
@@ -26,11 +25,7 @@ partial struct localBase {
     internal nint n;
 }
 
-} partial class mainᴛlocalBase {
-
 internal static nint Twice(this localBase b) { return b.n * 2; }
-
-} partial class main_package {
 
 partial struct Wrap {
     /*embed*/ internal localBase localBase;

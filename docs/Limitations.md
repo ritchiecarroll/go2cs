@@ -198,7 +198,7 @@ standard library, and runs on Windows, Linux or macOS. **A longer evening:** lot
   until the function returns, so "drop the reference, call `runtime.GC()`, expect the finalizer" can
   wait forever. `GOGC` and `GOMEMLIMIT` are read and reported, by `debug.SetGCPercent` for example, but
   .NET's collector does not follow them.
-  <!-- src/core/runtime/managed_impl.cs:1315 `internal static void gcinitController() => ᏑgcController.init(readGOGC(), readGOMEMLIMIT());`;
+  <!-- src/core/runtime/managed_impl.cs:1510 `internal static void gcinitController() => ᏑgcController.init(readGOGC(), readGOMEMLIMIT());`;
        nothing in src/core/runtime or src/core/golib sets a GCSettings value or a GC heap limit from them. -->
 * **Runtime introspection is thinner than Go's.** A dump of all goroutines lists each one and what it waits on,
   with frames for the calling goroutine only. `pprof.StartCPUProfile` gives a profile with no samples (profile with
@@ -258,7 +258,7 @@ program that uses the converted package needs only the C library.
 architecture, and the converted package refuses to call C anywhere else. It builds against a go2cs clone
 (`dotnet build -p:go2csPath=<go2cs>/src/`), not against the `go.*` packages
 ([Roadmap](Roadmap.md#cgo)). The standard library itself is converted with `CGO_ENABLED=0`.
-<!-- src/go2cs/main.go:305 (`Not combinable with -stdlib, -tests or -recurse`); src/go2cs/csproj-template.xml:135 (`<ProjectReference Include="$(go2csPath)gen/go2cs-gen/go2cs-gen.csproj"`) and src/go2cs/csproj-template.xml:187 (`<ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />`). COORD's ruling O2, 2026-11-14 (cgo 3.1's release-path seat). -->
+<!-- src/go2cs/main.go:306 (`Not combinable with -stdlib, -tests or -recurse`); src/go2cs/csproj-template.xml:135 (`<ProjectReference Include="$(go2csPath)gen/go2cs-gen/go2cs-gen.csproj"`) and src/go2cs/csproj-template.xml:187 (`<ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />`). COORD's ruling O2, 2026-11-14 (cgo 3.1's release-path seat). -->
 
 **What is refused, by name, with the phase that will cover it:**
 - a pointer into Go memory handed to C as a `void *`, or to `C.GoBytes`, `C.GoString` or `C.GoStringN`
@@ -404,7 +404,7 @@ The [validated modules](ValidatedModules.md) page lists the modules validated so
   every later result says it ran after the abandoned test.
   <!-- docs/CommandLine.md, the -test-deadline row (default 15m; 0 turns it off). A converted test's argv has the
        shape go test gives a test binary:
-       src/core/testing/TestOptions.cs:243-245 `keeps argv exactly the shape…gives a…test binary`. pflag's suite
+       src/core/testing/TestOptions.cs:245-247 `keeps argv exactly the shape…gives a…test binary`. pflag's suite
        reads identical to its published proof at 9dcf0bafe1 (docs/phase4/DATA-p2-nugetgo-trial-2026-10-24.md §3). -->
 * **Converter bugs that surface as C# compile errors**, usually in corners of the type system. In your
   own code, reshape the Go. In a dependency, point a `replace` at a patched copy, or fix the generated
@@ -436,7 +436,7 @@ A package's own Go `Test` functions were converted, run, and compared with `go t
 verdict, by full test name. That's a real bar, and narrower than the word sounds:
 
 * **Tests only.** Examples, benchmarks and fuzz targets never run. No race detector either.
-  <!-- src/go2cs/testConversion.go:4227 `entry.Kind, entry.Status, entry.Reason = "fuzz", "unsupported", "fuzz execution is deferred to Phase 4D"`;
+  <!-- src/go2cs/testConversion.go:4242 `entry.Kind, entry.Status, entry.Reason = "fuzz", "unsupported", "fuzz execution is deferred to Phase 4D"`;
        Example- and Benchmark-only test files are left out of the compile set, :844
        `// Phase-4D file exclusion (option-a ruling): drop Example/Benchmark-only test files from the`. -->
 * **Matched is not passed.** A test that skips on both sides counts as a match and measures nothing.

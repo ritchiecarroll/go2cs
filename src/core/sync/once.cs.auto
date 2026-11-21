@@ -97,4 +97,4 @@ internal static void doSlow(this ж<Once> Ꮡo, Action f) {
     finally { ᒐ.Run(); }
 }
 
-} // end syncᴛOnce
+}

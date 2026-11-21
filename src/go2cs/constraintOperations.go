@@ -1017,6 +1017,12 @@ func (v *Visitor) renderedTypeArgs(funIdent *ast.Ident, typeArgs *types.TypeList
 		names = append(names, v.getCSharpTypeName(typeArgs.At(i)))
 	}
 
+	// THE SHAPE WITNESS'S SUPPLY: a selected function's canonical witness for each selected position, directly after
+	// the declared arguments, where its declaration put the witness parameters (shapeWitness.go).
+	if funcObj, isFunc := v.info.ObjectOf(funIdent).(*types.Func); isFunc {
+		names = append(names, v.shapeWitnessInstanceArgs(funcObj.Origin(), typeArgs, false)...)
+	}
+
 	// THE COMPANION'S SUPPLY. A callee that threads gains one argument per name-reading parameter,
 	// appended in declared order after every real argument — the DESCRIPTOR CARRIER when the Go type
 	// argument is a defined-over-interface type the emission erased to a `using` alias, and the
@@ -1245,6 +1251,10 @@ func (v *Visitor) getGenericDefinition(srcType types.Type) (string, string) {
 	// declaration being emitted — the renderer's identity set wouldn't cover it).
 	eraseAllowed := named == nil && signature == v.currentFuncSignature && typeParams == signature.TypeParams()
 
+	// A NARROW SHAPE-WITNESS declaration (shapeWitness.go): a selected type parameter keeps NO clause -- it is the box or
+	// the value itself, which cannot implement the constraint nominally -- and a carrier gains its witness parameters.
+	witness := v.shapeWitnessDeclOfList(named, signature, typeParams)
+
 	for i := range typeParams.Len() {
 		typeParam := typeParams.At(i)
 		typeParamNames[i] = typeParam.Obj().Name()
@@ -1254,6 +1264,10 @@ func (v *Visitor) getGenericDefinition(srcType types.Type) (string, string) {
 		// must too. Scoped to that set so no other type parameter's spelling moves.
 		if csReservedTypeNames.Contains(typeParamNames[i]) {
 			typeParamNames[i] = getSanitizedIdentifier(typeParamNames[i])
+		}
+
+		if witness != nil && witness.tps[i] != nil {
+			continue
 		}
 
 		// A single non-tilde pointer term (`[P *T]`) has a singleton type set — P is
@@ -1552,6 +1566,22 @@ func (v *Visitor) getGenericDefinition(srcType types.Type) (string, string) {
 		}
 	}
 
+	// WITNESS PARAMETERS ride directly after the declared ones, in declared order, each `where TI : struct, IΔshape<T>`.
+	if witness != nil && witness.carrier {
+		for i := range typeParams.Len() {
+			if witness.tps[i] == nil {
+				continue
+			}
+
+			witnessName := v.shapeWitnessParamName(typeParams.At(i))
+			constraintNamed := types.Unalias(typeParams.At(i).Constraint()).(*types.Named)
+			v.recordShapeWitnessInterface(constraintNamed)
+			emittedNames = append(emittedNames, witnessName)
+			constraintNames = append(constraintNames, fmt.Sprintf("%s%s    where %s : struct, %s", v.newline, v.indent(v.indentLevel), witnessName,
+				v.shapeWitnessInterfaceRef(constraintNamed, typeParamNames[i])))
+		}
+	}
+
 	// DESCRIPTOR COMPANIONS ride at the END of the list, after every declared parameter, so a call
 	// site appends its extra arguments without disturbing the positions Go itself wrote — and so an
 	// EXPLICIT partial instantiation (completedInstantiationTypeArgs) still counts the declared
@@ -1790,6 +1820,11 @@ func (v *Visitor) constraintProxyArg(named *types.Named, i int) (string, bool) {
 	typeParams := origin.TypeParams()
 
 	if typeParams == nil || i >= typeParams.Len() || named.TypeArgs() == nil || i >= named.TypeArgs().Len() {
+		return "", false
+	}
+
+	// A shape-witness position binds the type argument itself (shapeWitness.go).
+	if shapeWitnessed(origin.Obj(), i) {
 		return "", false
 	}
 
@@ -2146,7 +2181,7 @@ func (v *Visitor) namedHasConstraintProxy(named *types.Named) bool {
 // assertion or a conversion). Gated to the proxy case, as the composite-literal re-render is, so nothing else changes.
 func (v *Visitor) proxiedTypeInstantiation(instantiation ast.Expr) (string, bool) {
 	if tv, ok := v.info.Types[instantiation]; ok && tv.IsType() {
-		if named, ok := types.Unalias(tv.Type).(*types.Named); ok && v.namedHasConstraintProxy(named) {
+		if named, ok := types.Unalias(tv.Type).(*types.Named); ok && v.namedRendersResolved(named) {
 			return convertToCSTypeName(v.getAliasQualifiedTypeName(named, false)), true
 		}
 	}
@@ -2183,6 +2218,11 @@ func (v *Visitor) constraintProxySigArg(funIdent *ast.Ident, typeArgs *types.Typ
 	typeParams := v.signatureTypeParams(funIdent)
 
 	if typeParams == nil || i >= typeParams.Len() || typeArgs == nil || i >= typeArgs.Len() {
+		return "", false
+	}
+
+	// A shape-witness position binds the type argument itself (shapeWitness.go).
+	if shapeWitnessed(v.info.ObjectOf(funIdent), i) {
 		return "", false
 	}
 
@@ -2509,6 +2549,10 @@ func (v *Visitor) funcResultProjectionArgChecked(funIdent *ast.Ident, typeArgs *
 // test somewhere else: this seat's first cut asked exactly that question of the projected form and
 // refused a valid row, because Go has no return covariance.
 func (v *Visitor) funcResultProjection(funIdent *ast.Ident, typeArgs *types.TypeList, k int) (types.Type, types.Type, bool) {
+	if shapeWitnessed(v.info.ObjectOf(funIdent), k) {
+		return nil, nil, false
+	}
+
 	arg, constraint, _, ok := v.funcResultProjectionChecked(funIdent, typeArgs, k)
 
 	return arg, constraint, ok

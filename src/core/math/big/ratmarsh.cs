@@ -106,4 +106,4 @@ public static error UnmarshalText(this ж<Rat> Ꮡz, slice<byte> text) {
     return default;
 }
 
-} // end bigᴛRat
+}

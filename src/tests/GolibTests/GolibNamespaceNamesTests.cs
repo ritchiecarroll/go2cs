@@ -68,6 +68,25 @@ public class GolibNamespaceNamesTests
             .Distinct()
             .Order(StringComparer.Ordinal)];
 
+        // The members of class builtin a converted file reads bare, through the global `using static go.builtin`: its
+        // public static fields, properties, events and methods, and its public nested types. An extension method is
+        // left out, since a simple name never binds one; a name that is also a plain member is kept by that member.
+        Type builtinClass = golib.GetType("go.builtin", throwOnError: true)!;
+        const BindingFlags builtinFlags = BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly;
+
+        string[] builtinMembers = [.. builtinClass.GetMembers(builtinFlags)
+            .Where(member => member switch
+            {
+                MethodInfo method => !method.IsSpecialName && !method.IsDefined(typeof(ExtensionAttribute), false),
+                FieldInfo or PropertyInfo or EventInfo => true,
+                _ => false
+            })
+            .Select(member => member.Name)
+            .Concat(builtinClass.GetNestedTypes(BindingFlags.Public).Select(NameOf))
+            .Where(name => name.IndexOfAny(['<', '>', '$', '.']) < 0)
+            .Distinct()
+            .Order(StringComparer.Ordinal)];
+
         string[] friends = [.. golib.GetCustomAttributes<InternalsVisibleToAttribute>()
             .Select(grant => grant.AssemblyName.Split(',')[0].Trim())
             .Distinct()
@@ -147,6 +166,20 @@ public class GolibNamespaceNamesTests
             """);
 
         AppendNames(file, children);
+
+        file.Append(
+            """
+            )
+
+            // golibBuiltinMembers holds the members of class builtin that a converted file reads bare through the global
+            // `using static go.builtin`: public static fields, properties, events and methods other than extension
+            // methods, and public nested types. A method of package main named like one stays in a holder, since in the
+            // package class it would hide the member from every file of the package (methodHolder.go).
+            var golibBuiltinMembers = nameSet(
+
+            """);
+
+        AppendNames(file, builtinMembers);
         file.Append(")\n");
 
         return file.ToString().Replace("\r\n", "\n");
@@ -185,7 +218,7 @@ public class GolibNamespaceNamesTests
                     $"({string.Join(" ", was.Except(now).Take(8).Select(line => line.Trim()))}). The rendered file is {written}; copy it over the committed one.");
     }
 
-    // The render reads what the converter's three questions need; each is pinned on one name golib is certain to
+    // The render reads what the converter's questions need; each is pinned on one name golib is certain to
     // keep, so a render that loses a list fails here and not as a missing qualification in converted code.
     [TestMethod]
     public void TheRenderNamesWhatGolibDeclares()
@@ -205,6 +238,8 @@ public class GolibNamespaceNamesTests
         Assert.IsFalse(section("golibNamespaceTypes").Contains("\t\"slice\",\n", StringComparison.Ordinal), "and so is on no list of plain types");
         StringAssert.Contains(section("golibChildNamespaces"), "\t\"golib\",\n", "namespace go.golib");
         StringAssert.Contains(section("golibFriendAssemblies"), "\t\"go.runtime\",\n", "golib grants package runtime's assembly its internals");
+        StringAssert.Contains(section("golibBuiltinMembers"), "\t\"len\",\n", "builtin.len, read bare through the global using static");
+        Assert.IsFalse(section("golibBuiltinMembers").Contains("\t\"ReferenceEquals\",\n", StringComparison.Ordinal), "object's statics are not builtin's own members");
         Assert.IsFalse(rendered.Contains('<'), "no compiler-generated type is named");
     }
 }

@@ -69,6 +69,9 @@ func first[T any](a [2]T) T { return a[0] }
 
 func noted(a /*[9]*/ [4]byte, b /*[10]*/ int) int { return len(a) + b }
 
+// put, a package-level name, keeps holder's method put in its method holder in package main.
+const put = 3
+
 func (h *holder) put(v [3]int) {}
 
 func main() {

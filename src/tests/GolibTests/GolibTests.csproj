@@ -239,6 +239,9 @@
     <!-- runtime's managed Windows usleep (and its GoUsleep seam) live in runtime's windows/ folder. -->
     <Compile Remove="RuntimeUsleepWindowsTests.cs" />
 
+    <!-- runtime's managed Windows getCPUCount lives in runtime's windows/ folder (os_windows_impl.cs). -->
+    <Compile Remove="RuntimeNumCPUWindowsTests.cs" />
+
     <!-- runtime's managed Windows sysAllocOS/sysFreeOS (and their seams) live in runtime's windows/ folder. -->
     <Compile Remove="RuntimeSysAllocWindowsTests.cs" />
 

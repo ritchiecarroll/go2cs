@@ -328,4 +328,4 @@ internal static void init(this ref Writer w, io.Writer dst, Order order, nint li
     w.savedCode = invalidCode;
 }
 
-} // end lzwᴛWriter
+}

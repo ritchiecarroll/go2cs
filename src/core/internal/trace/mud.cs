@@ -222,4 +222,4 @@ internal static (float64, bool) invCumulativeSum(this ref mud d, float64 y) {
     return (prevX, false);
 }
 
-} // end traceᴛmud
+}

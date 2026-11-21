@@ -373,4 +373,4 @@ internal static (slice<fs.DirEntry>, error) ReadDir(this ref mapDir d, nint coun
     return (list, default);
 }
 
-} // end fstestᴛmapDir
+}

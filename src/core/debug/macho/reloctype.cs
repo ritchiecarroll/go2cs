@@ -79,4 +79,4 @@ public static RelocTypeARM64 ARM64_RELOC_ADDEND => 10;
 
 public static @string GoString(this RelocTypeARM64 r) { return "macho."u8 + r.String(); }
 
-} // end machoᴛRelocTypeARM64
+}

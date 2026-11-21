@@ -153,4 +153,4 @@ public static @string Get(this ref Reader str, uint32 idx) {
     return str.strs[idx];
 }
 
-} // end stringtabᴛReader
+}

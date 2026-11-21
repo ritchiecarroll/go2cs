@@ -2,7 +2,6 @@ namespace go;
 
 using fmt = fmt_package;
 using reflect = reflect_package;
-using static main_package;
 
 partial class main_package {
 
@@ -17,12 +16,8 @@ partial struct UnixAddr {
     public @string Net;
 }
 
-} partial class mainᴛUnixAddr {
-
 public static @string Network(this ref UnixAddr a) { return a.Net; }
 public static @string String(this ref UnixAddr a) { return a.Name; }
-
-} partial class main_package {
 
 internal partial struct main_type /*dyn*/ {
     internal Addr got, want;
@@ -35,11 +30,11 @@ internal partial struct main_named /*dyn*/ {
 internal static void main() {
     var ta = Ꮡ(new UnixAddr(Name: "/tmp/sock", Net: "unix"));
 
-    array<main_type> connAddrs = new main_type[]{
+    array<main_type> connAddrs = array<main_type>([
         new(new UnixAddrжAddr(ta), new UnixAddrжAddr(ta)),
         new(new UnixAddrжAddr(Ꮡ(new UnixAddr(Name: "/tmp/sock", Net: "unix"))), new UnixAddrжAddr(Ꮡ(new UnixAddr(Name: "/tmp/sock", Net: "unix")))),
         new(new UnixAddrжAddr(ta), new UnixAddrжAddr(Ꮡ(new UnixAddr(Name: "/tmp/sock", Net: "unix"))))
-    }.array();
+    ]);
 
     foreach (var (i, ca) in range(connAddrs.ΔRangeSnapshot())) {
         fmt.Printf("%d got  T=%T v=%#v\n"u8, i, ca.got, ca.got);

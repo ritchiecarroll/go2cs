@@ -5,13 +5,11 @@ using @unsafe = unsafe_package;
 partial class main_package {
 
 internal static partial @unsafe.Pointer indirectKey(@unsafe.Pointer k) {
-    return (@unsafe.Pointer.To<@unsafe.Pointer>(k)).Value;
+    return @unsafe.Pointer.LoadWord((@unsafe.Pointer.To<@unsafe.Pointer>(k)));
 }
 
-internal static partial void store(ж<@unsafe.Pointer> Ꮡdst, @unsafe.Pointer val) {
-    ref var dst = ref Ꮡdst.DerefOrNull();
-
-    dst = val;
+internal static partial void store(ж<@unsafe.Pointer> dst, @unsafe.Pointer val) {
+    @unsafe.Pointer.StoreWord(dst, val);
 }
 
 internal static partial void writeBarrier(@unsafe.Pointer ptr, @unsafe.Pointer val) {

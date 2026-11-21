@@ -120,4 +120,4 @@ internal static void XORKeyStream(this ref ctr x, slice<byte> dst, slice<byte> s
     }
 }
 
-} // end cipherᴛctr
+}

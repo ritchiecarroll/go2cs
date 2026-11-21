@@ -326,17 +326,15 @@ func (v *Visitor) visitImportSpec(importSpec *ast.ImportSpec, doc *ast.CommentGr
 			v.dotImportTargets[v.currentImportPath] = importPath
 			v.packageImports.WriteString(fmt.Sprintf("using static %s;", importPath))
 		} else if alias == "_" {
-			// A BLANK import (`import _ "unsafe"`) is side-effects-only: Go forbids referencing
-			// the package through it, so the alias is never legitimately used — but emitting
-			// `using _ = <ns>;` HIJACKS C#'s `_` DISCARD for the whole file: any deconstruction
-			// discard (`(w, _) = w.ensure(…)`, runtime tracetime.go) then binds the namespace
-			// alias instead (CS0118 + CS0029). Record the import as a comment only; the package's
-			// exported aliases still load (loadImportedTypeAliases above) and a genuine type
-			// reference gets its canonical `using` from visitFile's collectTypePackages machinery.
+			// A BLANK import (`import _ "unsafe"`) emits no `using`: `using _ = <ns>;` would take over
+			// C#'s `_` discard for the whole file (CS0118 + CS0029 at runtime tracetime.go's
+			// `(w, _) = w.ensure(…)`). The Go line is echoed as a comment instead, with a tail that
+			// says what happens to the package's init (blankImportNote; the full reasoning is in
+			// docs/ConversionStrategies-Reference/package-conversion.md).
 			//
 			// A Go trailing comment on the spec (`_ "unsafe" // for linkname`) follows this note on the same line.
 			// The note is then a block comment, so Go's comment stays its own `//` comment, not text inside the note.
-			note := fmt.Sprintf("blank import: %s (side effects only; no using emitted — a `using _` alias hijacks C# discards)", importPath)
+			note := blankImportNote(importSpec.Path.Value, v.currentImportPath, isPackageUnderTest)
 
 			if importSpec.Comment != nil && v.options.includeComments {
 				v.packageImports.WriteString("/* " + note + " */")
@@ -391,6 +389,24 @@ func (v *Visitor) visitImportSpec(importSpec *ast.ImportSpec, doc *ast.CommentGr
 
 	v.writeCommentString(v.packageImports, importSpec.Comment, importSpec.End())
 	v.packageImports.WriteString(v.newline)
+}
+
+// blankImportNote is the comment a blank import converts to: the Go import line, then what happens to the
+// imported package's init. The tail follows writeImportInit's own conditions, so it says "forced" exactly
+// when an ImportInitializers hook is emitted for the import.
+func blankImportNote(quotedPath, importPath string, isPackageUnderTest bool) string {
+	var tail string
+
+	switch {
+	case isPackageUnderTest:
+		tail = "compiled into this assembly; no hook"
+	case noInitPseudoPackages.Contains(importPath) || !packageInitializesTransitively(importPath):
+		tail = "nothing to initialize"
+	default:
+		tail = "init forced in ImportInitializers"
+	}
+
+	return fmt.Sprintf("import _ %s (%s)", quotedPath, tail)
 }
 
 // noInitPseudoPackages are the Go pseudo-packages the language gives no initialization at all:

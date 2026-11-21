@@ -135,7 +135,7 @@ internal static ж<array<uintptr>> get1(this ref wbBuf b) {
     if (b.next + (uintptr)goarch.PtrSize > b.end) {
         wbBufFlush();
     }
-    var p = @unsafe.Pointer.To<array<uintptr>>((@unsafe.Pointer)b.next);
+    var p = @unsafe.Pointer.ToArray<uintptr>((@unsafe.Pointer)b.next, 1);
     b.next += goarch.PtrSize;
     return p;
 }
@@ -146,7 +146,7 @@ internal static ж<array<uintptr>> get2(this ref wbBuf b) {
     if (b.next + (uintptr)(2 * goarch.PtrSize) > b.end) {
         wbBufFlush();
     }
-    var p = @unsafe.Pointer.To<array<uintptr>>((@unsafe.Pointer)b.next);
+    var p = @unsafe.Pointer.ToArray<uintptr>((@unsafe.Pointer)b.next, 2);
     b.next += 2 * goarch.PtrSize;
     return p;
 }

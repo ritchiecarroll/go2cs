@@ -339,4 +339,4 @@ internal static (nint n, error err) Read(this ref decoder d, slice<byte> p) {
     }
 }
 
-} // end ascii85ᴛdecoder
+}

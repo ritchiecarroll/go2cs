@@ -1,7 +1,6 @@
 namespace go;
 
 using fmt = fmt_package;
-using static main_package;
 
 partial class main_package {
 
@@ -9,19 +8,13 @@ partial struct path {
     internal @string name;
 }
 
-} partial class mainᴛpath {
-
 internal static void Pop(this path p, nint k) { fmt.Println("pop", p.name, k); }
 internal static void Done(this path p) { fmt.Println("done", p.name); }
 internal static void Pair(this path p, nint a, @string b) { fmt.Println("pair", p.name, a, b); }
 
-} partial class main_package {
-
 partial struct state {
     internal path cur;
 }
-
-} partial class mainᴛstate {
 
 internal static void fieldOfPointer(this ж<state> Ꮡs, nint k) {
     GoFrame ᒐ = default;
@@ -58,8 +51,6 @@ internal static void nullary(this ж<state> Ꮡs) {
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
-
-} partial class main_package {
 
 internal static void local(nint k) {
     GoFrame ᒐ = default;

@@ -121,4 +121,4 @@ internal static nint next(this ref stringFinder f, @string text) {
     return -1;
 }
 
-} // end stringsᴛstringFinder
+}

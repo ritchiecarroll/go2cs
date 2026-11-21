@@ -1,15 +1,12 @@
 namespace go;
 
 using fmt = fmt_package;
-using static main_package;
 
 partial class main_package {
 
 partial struct UUID /*[16]byte*/;
 
 partial struct UUIDs /*[]UUID*/;
-
-} partial class mainᴛUUIDs {
 
 public static slice<@string> Strings(this UUIDs us) {
     var @out = new slice<@string>(len(us));
@@ -21,11 +18,7 @@ public static slice<@string> Strings(this UUIDs us) {
     return @out;
 }
 
-} partial class main_package {
-
 partial struct Rows /*[]array<nint>*/;
-
-} partial class mainᴛRows {
 
 public static nint Sum(this Rows r) {
     nint total = 0;
@@ -39,8 +32,6 @@ public static nint Sum(this Rows r) {
     return total;
 }
 
-} partial class main_package {
-
 internal static void main() {
     var (a, b) = (new UUID(new byte[]{0xab, 0x01}.array(16)), new UUID(new byte[]{0xcd, 0x02}.array(16)));
 
@@ -53,7 +44,7 @@ internal static void main() {
     fmt.Println(len(made), cap(made), made.Strings());
     fmt.Println(us[1..].Strings());
 
-    var rows = new Rows(GoReflect.WithElemDims(new array<nint>[]{new nint[]{1, 2, 3}.array(), new nint[]{4, 5, 6}.array()}.slice(), 3));
+    var rows = new Rows(GoReflect.WithElemDims(new array<nint>[]{array<nint>([1, 2, 3]), array<nint>([4, 5, 6])}.slice(), 3));
     fmt.Println(rows.Sum(), new Rows(GoReflect.WithElemDims(new slice<array<nint>>(1, () => new(3)), 3)).Sum());
 
     fmt.Println(len(new UUIDs(GoReflect.WithElemDims(new UUID[]{}.slice(), 16))), len(new UUIDs(0)), new UUIDs(GoReflect.WithElemDims(new UUID[]{}.slice(), 16)).Strings(), new Rows(GoReflect.WithElemDims(new array<nint>[]{}.slice(), 3)).Sum(), len(new Rows(GoReflect.WithElemDims(new slice<array<nint>>(0, () => new(3), 2), 3))));

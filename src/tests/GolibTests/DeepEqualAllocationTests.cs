@@ -117,7 +117,7 @@ public class DeepEqualAllocationTests
         string name = typeof(E).Name;
         Assert.AreEqual(Unsafe.SizeOf<array<byte>>(), Unsafe.SizeOf<array<E>>(), $"array<{name}> size");
 
-        array<E> window = array<E>.Alias(new slice<E>(backing).slice(2), 2);
+        array<E> window = go.array<E>.Alias(new slice<E>(backing).slice(2), 2);
         Assert.AreEqual((nint)2, window.Length, $"array<{name}> window length");
         Assert.AreEqual((nint)2, Unsafe.As<array<E>, array<byte>>(ref window).Length, $"array<{name}> length read as array<byte>");
         Assert.IsTrue(ReferenceEquals(backing, Unsafe.As<array<E>, array<byte>>(ref window).m_array), $"array<{name}> backing read as array<byte>");

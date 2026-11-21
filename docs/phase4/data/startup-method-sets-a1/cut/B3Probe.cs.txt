@@ -1,0 +1,75 @@
+// MEASUREMENT ONLY (B3 design, never committed): counters and inclusive times of the start-up reflection path,
+// printed to stderr at process exit when GO2CS_B3_PROBE is set.
+using System;
+using System.Collections.Concurrent;
+using System.Diagnostics;
+using System.Linq;
+using System.Threading;
+
+namespace go.golib;
+
+public static class B3Probe
+{
+    public static readonly bool On = Environment.GetEnvironmentVariable("GO2CS_B3_PROBE") is { Length: > 0 };
+    public static readonly bool Detail = Environment.GetEnvironmentVariable("GO2CS_B3_PROBE") == "2";
+    private static readonly ConcurrentDictionary<string, (long count, long ticks, long items)> s_sites = new();
+    private static readonly ConcurrentDictionary<string, int> s_keys = new();
+    private static readonly ConcurrentQueue<string> s_marks = new();
+    private static int s_hooked;
+
+    public static long Enter() => On ? Stopwatch.GetTimestamp() : 0;
+
+    public static void Leave(string site, long t0, long items = 0, string? key = null)
+    {
+        if (!On)
+            return;
+
+        long ticks = Stopwatch.GetTimestamp() - t0;
+        s_sites.AddOrUpdate(site, (1, ticks, items), (_, old) => (old.count + 1, old.ticks + ticks, old.items + items));
+
+        if (key is not null)
+            s_keys.AddOrUpdate(site + "\t" + key, 1, static (_, n) => n + 1);
+
+        Hook();
+    }
+
+    public static void Mark(string name)
+    {
+        if (!On)
+            return;
+
+        s_marks.Enqueue($"{name} at {(DateTime.Now - Process.GetCurrentProcess().StartTime).TotalMilliseconds:F0} ms after process start; assemblies loaded {AppDomain.CurrentDomain.GetAssemblies().Length}; methods jitted {System.Runtime.JitInfo.GetCompiledMethodCount()}; jit time {System.Runtime.JitInfo.GetCompilationTime().TotalMilliseconds:F0} ms");
+        Hook();
+    }
+
+    private static void Hook()
+    {
+        if (Interlocked.CompareExchange(ref s_hooked, 1, 0) == 0)
+            AppDomain.CurrentDomain.ProcessExit += static (_, _) => Dump();
+    }
+
+    public static void Dump()
+    {
+        Mark("exit");
+        Console.Error.WriteLine("B3PROBE marks:");
+
+        foreach (string mark in s_marks)
+            Console.Error.WriteLine("B3PROBE   " + mark);
+
+        Console.Error.WriteLine("B3PROBE site\tcalls\tinclusive ms\titems");
+
+        foreach (var pair in s_sites.OrderByDescending(static p => p.Value.ticks))
+            Console.Error.WriteLine($"B3PROBE {pair.Key}\t{pair.Value.count}\t{pair.Value.ticks * 1000.0 / Stopwatch.Frequency:F1}\t{pair.Value.items}");
+
+        foreach (IGrouping<string, System.Collections.Generic.KeyValuePair<string, int>> site in s_keys.GroupBy(static p => p.Key.Split('\t')[0]))
+        {
+            Console.Error.WriteLine($"B3PROBE keys {site.Key}: {site.Count()} distinct");
+
+            if (Detail)
+            {
+                foreach (var key in site.OrderBy(static p => p.Key))
+                    Console.Error.WriteLine($"B3PROBE   {key.Key.Split('\t')[1]} x{key.Value}");
+            }
+        }
+    }
+}

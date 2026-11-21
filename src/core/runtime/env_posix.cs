@@ -74,7 +74,7 @@ internal static void setenv_c(@string k, @string v) {
     if (_cgo_setenv == nil) {
         return;
     }
-    ref var arg = ref heap<array<@unsafe.Pointer>>(new @unsafe.Pointer[]{cstring(k), cstring(v)}.array(), out var Ꮡarg);
+    ref var arg = ref heap<array<@unsafe.Pointer>>(array<@unsafe.Pointer>([cstring(k), cstring(v)]), out var Ꮡarg);
     asmcgocall(_cgo_setenv, @unsafe.Pointer.FromPinnedBox(Ꮡarg));
 }
 
@@ -83,7 +83,7 @@ internal static void unsetenv_c(@string k) {
     if (_cgo_unsetenv == nil) {
         return;
     }
-    ref var arg = ref heap<array<@unsafe.Pointer>>(new @unsafe.Pointer[]{cstring(k)}.array(), out var Ꮡarg);
+    ref var arg = ref heap<array<@unsafe.Pointer>>(array<@unsafe.Pointer>([cstring(k)]), out var Ꮡarg);
     asmcgocall(_cgo_unsetenv, @unsafe.Pointer.FromPinnedBox(Ꮡarg));
 }
 

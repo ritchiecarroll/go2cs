@@ -134,7 +134,8 @@ param(
     [string[]]$VList,
     # The binary-compatibility guard (src/tools/pushnuget/GoApiCompat.psm1): the packed module is compared, asset by
     # asset, with its previous published revision of the same module version, read from this flat container. A break
-    # refuses the pack unless this suppression file lists it (an announced break).
+    # refuses the pack unless this suppression file lists it (an announced break). A previous revision built below the
+    # break floor of the go.lib this pack restored is reported and not compared (W-ng-apicompat, COORD 2026-11-19).
     [string]$ApiCompatSuppressions,
     [string]$ApiCompatFlatContainer = 'https://api.nuget.org/v3-flatcontainer/',
     [string]$Authors = 'go2cs conversion',
@@ -815,11 +816,18 @@ foreach ($r in $requires) {
 # The binary-compatibility guard: B4's edge between third-party packages is a bare minimum version, so a consumer who
 # takes this revision gets it under every module built against the one before. It must keep that revision's surface,
 # except for a break -ApiCompatSuppressions lists. A module version's first revision has no baseline and is reported.
+# So is a previous revision built below the break floor of the go.lib this pack restored: GO2CS3002 refuses it to every
+# consumer of that go.lib, so its surface binds nobody (W-ng-apicompat, COORD 2026-11-19: the 1.26.11.1 wave, whose
+# method holders moved every method of every module built on 1.26.10.3). At or above the floor it is compared.
 Import-Module (Join-Path $PSScriptRoot '../pushnuget/GoApiCompat.psm1') -Force
 $toolRoot = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../../..'))
 $apiCompatVersion = Initialize-GoApiCompatTool -RepoRoot $toolRoot
+$goLibTargets = Join-Path $isolated "go.lib/$($ClosureVersion.ToLowerInvariant())/buildTransitive/go.lib.targets"
+if (-not (Test-Path -LiteralPath $goLibTargets -PathType Leaf)) { Refuse "no go.lib.targets in the restored go.lib $ClosureVersion ($goLibTargets): the break floor the guard reads is unknown" }
+$breakFloor = Get-GoBreakFloor ([System.IO.File]::ReadAllText($goLibTargets))
+if (-not $breakFloor) { Refuse "the restored go.lib $ClosureVersion states no <GoBreakFloor>: the guard cannot tell which baseline binds" }
 $packedIdentity = [pscustomobject]@{ Id = "$($md.id)"; Version = "$($md.version)" }
-$apiCompat = Invoke-GoApiCompatGuard -Packages @(Get-Item -LiteralPath $nupkg) -RepoRoot $toolRoot -WorkDir (Join-Path $Scratch 'apicompat') `
+$apiCompat = Invoke-GoApiCompatGuard -Packages @(Get-Item -LiteralPath $nupkg) -RepoRoot $toolRoot -WorkDir (Join-Path $Scratch 'apicompat') -BreakFloor $breakFloor `
     -FlatContainer $ApiCompatFlatContainer -Identity { param($path) $packedIdentity }.GetNewClosure() `
     -SuppressionFor { param($packageId) $ApiCompatSuppressions }.GetNewClosure()
 if ($apiCompat.Failures.Count -gt 0 -or $apiCompat.Compared -ne $apiCompat.Expected) {
@@ -827,5 +835,6 @@ if ($apiCompat.Failures.Count -gt 0 -or $apiCompat.Compared -ne $apiCompat.Expec
     Refuse "the module's public surface is not its previous revision's (apicompat $apiCompatVersion, $($apiCompat.Compared) of $($apiCompat.Expected) asset(s) compared) -- $($apiCompat.Failures -join '; ')"
 }
 if ($apiCompat.NoBaseline.Count) { Write-Host "    binary compatibility: no published revision of $($md.id) $GoVersion before this one (reported, not gated)" }
+elseif ($apiCompat.BelowFloor.Count) { foreach ($line in $apiCompat.BelowFloor) { Write-Host "    binary compatibility: $line" } }
 else { Write-Host "    binary compatibility: CLEAN -- $($apiCompat.Compared) asset(s) compared with the previous revision by apicompat $apiCompatVersion" }
 Write-Host "==> packed $nupkg (global packages folder unchanged: $($gpfAfter.Count) go.*/nugetgo.* pairs)"

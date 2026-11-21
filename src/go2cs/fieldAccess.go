@@ -962,7 +962,7 @@ func (v *Visitor) recordFieldAccessType(pointee types.Type) {
 	// A generic struct is listed by its open definition, `typeof(pair<>)`: go2cs-gen reads the definition anyway, and
 	// an instantiation's arguments may be type parameters no record can name.
 	if named, ok := types.Unalias(pointee).(*types.Named); ok && named.TypeArgs().Len() > 0 {
-		typeName = openGenericTypeName(typeName, named.TypeArgs().Len())
+		typeName = openGenericTypeName(typeName, named.TypeArgs().Len()+shapeWitnessArity(named.Origin().Obj()))
 	}
 
 	packageLock.Lock()

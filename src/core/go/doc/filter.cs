@@ -118,4 +118,4 @@ public static void Filter(this ref Package p, Func<@string, bool> f) {
     p.Doc = ""u8; // don't show top-level package doc
 }
 
-} // end docᴛPackage
+}

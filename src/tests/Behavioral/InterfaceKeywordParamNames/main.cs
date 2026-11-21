@@ -1,7 +1,6 @@
 namespace go;
 
 using fmt = fmt_package;
-using static main_package;
 
 partial class main_package {
 
@@ -14,8 +13,6 @@ partial struct cell {
     internal any value;
     internal @string tag;
 }
-
-} partial class mainᴛcell {
 
 internal static bool CompareAndSwap(this ref cell c, any key, any old, any @new) {
     if (!AreEqual(c.value, old)) {
@@ -30,13 +27,9 @@ internal static @string Guard(this ref cell c, @string @lock, @string @base, nin
     return fmt.Sprintf("%s|%s|%d|%s"u8, @lock, @base, @event, c.tag);
 }
 
-} partial class main_package {
-
 partial struct frozen {
     internal @string label;
 }
-
-} partial class mainᴛfrozen {
 
 internal static bool CompareAndSwap(this frozen f, any key, any old, any @new) {
     return AreEqual(old, @new);
@@ -45,8 +38,6 @@ internal static bool CompareAndSwap(this frozen f, any key, any old, any @new) {
 internal static @string Guard(this frozen f, @string @lock, @string @base, nint @event) {
     return fmt.Sprintf("%s~%s~%d~%s"u8, @lock, @base, @event, f.label);
 }
-
-} partial class main_package {
 
 internal static void exercise(swapper s) {
     fmt.Println(s.CompareAndSwap("k", (nint)2, (nint)3));
