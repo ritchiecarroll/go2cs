@@ -32,4 +32,4 @@ internal static slice<byte> appendMapping(this info c, slice<byte> b, @string s)
     return b;
 }
 
-} // end idnaᴛinfo
+}

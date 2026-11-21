@@ -87,7 +87,7 @@ partial class math_package {
 //              lgamma(-integer) = +-inf
 //
 //
-internal static array<float64> _lgamA = new float64[]{
+internal static array<float64> _lgamA = array<float64>([
     7.72156649015328655494e-02D, // 0x3FB3C467E37DB0C8
     3.22467033424113591611e-01D, // 0x3FD4A34CC4A60FAD
     6.73523010531292681824e-02D, // 0x3FB13E001A5562A7
@@ -100,8 +100,8 @@ internal static array<float64> _lgamA = new float64[]{
     1.08011567247583939954e-04D, // 0x3F1C5088987DFB07
     2.52144565451257326939e-05D, // 0x3EFA7074428CFA52
     4.48640949618915160150e-05D  // 0x3F07858E90A45837
-}.array();
-internal static array<float64> _lgamR = new float64[]{
+]);
+internal static array<float64> _lgamR = array<float64>([
     1.0D,                        // placeholder
     1.39200533467621045958e+00D, // 0x3FF645A762C4AB74
     7.21935547567138069525e-01D, // 0x3FE71A1893D3DCDC
@@ -109,8 +109,8 @@ internal static array<float64> _lgamR = new float64[]{
     1.86459191715652901344e-02D, // 0x3F9317EA742ED475
     7.77942496381893596434e-04D, // 0x3F497DDACA41A95B
     7.32668430744625636189e-06D  // 0x3EDEBAF7A5B38140
-}.array();
-internal static array<float64> _lgamS = new float64[]{
+]);
+internal static array<float64> _lgamS = array<float64>([
     -7.72156649015328655494e-02D, // 0xBFB3C467E37DB0C8
     2.14982415960608852501e-01D,  // 0x3FCB848B36E20878
     3.25778796408930981787e-01D,  // 0x3FD4D98F4F139F59
@@ -118,8 +118,8 @@ internal static array<float64> _lgamS = new float64[]{
     2.66422703033638609560e-02D,  // 0x3F9B481C7E939961
     1.84028451407337715652e-03D,  // 0x3F5E26B67368F239
     3.19475326584100867617e-05D   // 0x3F00BFECDD17E945
-}.array();
-[GoLazy] partial class lazyᴛ_lgamT { internal static array<float64> _lgamT = new float64[]{
+]);
+[GoLazy] partial class lazyᴛ_lgamT { internal static array<float64> _lgamT = array<float64>([
     4.83836122723810047042e-01D,  // 0x3FDEF72BC8EE38A2
     -1.47587722994593911752e-01D, // 0xBFC2E4278DC6C509
     6.46249402391333854778e-02D,  // 0x3FB08B4294D5419B
@@ -135,24 +135,24 @@ internal static array<float64> _lgamS = new float64[]{
     3.15632070903625950361e-04D,  // 0x3F34AF6D6C0EBBF7
     -3.12754168375120860518e-04D, // 0xBF347F24ECC38C38
     3.35529192635519073543e-04D   // 0x3F35FD3EE8C2D3F4
-}.array(); }
-internal static array<float64> _lgamU = new float64[]{
+]); }
+internal static array<float64> _lgamU = array<float64>([
     -7.72156649015328655494e-02D, // 0xBFB3C467E37DB0C8
     6.32827064025093366517e-01D,  // 0x3FE4401E8B005DFF
     1.45492250137234768737e+00D,  // 0x3FF7475CD119BD6F
     9.77717527963372745603e-01D,  // 0x3FEF497644EA8450
     2.28963728064692451092e-01D,  // 0x3FCD4EAEF6010924
     1.33810918536787660377e-02D   // 0x3F8B678BBF2BAB09
-}.array();
-internal static array<float64> _lgamV = new float64[]{
+]);
+internal static array<float64> _lgamV = array<float64>([
     1.0D,
     2.45597793713041134822e+00D, // 0x4003A5D7C2BD619C
     2.12848976379893395361e+00D, // 0x40010725A42B18F5
     7.69285150456672783825e-01D, // 0x3FE89DFBE45050AF
     1.04222645593369134254e-01D, // 0x3FBAAE55D6537C88
     3.21709242282423911810e-03D  // 0x3F6A5ABB57D0CF61
-}.array();
-internal static array<float64> _lgamW = new float64[]{
+]);
+internal static array<float64> _lgamW = array<float64>([
     4.18938533204672725052e-01D,  // 0x3FDACFE390C97D69
     8.33333333333329678849e-02D,  // 0x3FB555555555553B
     -2.77777777728775536470e-03D, // 0xBF66C16C16B02E5C
@@ -160,7 +160,7 @@ internal static array<float64> _lgamW = new float64[]{
     -5.95187557450339963135e-04D, // 0xBF4380CB8C0FE741
     8.36339918996282139126e-04D,  // 0x3F4B67BA4CDAD5D1
     -1.63092934096575273989e-03D  // 0xBF5AB89D0B9E43E4
-}.array();
+]);
 
 // Lgamma returns the natural logarithm and sign (-1 or +1) of [Gamma](x).
 //

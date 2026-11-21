@@ -48,11 +48,7 @@ partial struct badge {
     internal @string name;
 }
 
-} partial class mainᴛbadge {
-
 internal static @string Label(this badge b) { return "badge:"u8 + b.name; }
-
-} partial class main_package {
 
 partial interface namedLabel :
     CrossPkgLib.Labeled
@@ -65,12 +61,8 @@ partial struct emblem {
     internal nint rank;
 }
 
-} partial class mainᴛemblem {
-
 internal static @string Label(this emblem e) { return e.name; }
 internal static nint Rank(this emblem e) { return e.rank; }
-
-} partial class main_package {
 
 partial interface stamped :
     CrossPkgLib.Labeled
@@ -86,22 +78,14 @@ partial struct seal {
     internal @string name;
 }
 
-} partial class mainᴛseal {
-
 internal static @string Label(this seal s) { return s.name; }
 internal static @string Stamp(this seal s) { return "ok:"u8 + s.name; }
-
-} partial class main_package {
 
 partial struct dial {
     internal @string n;
 }
 
-} partial class mainᴛdial {
-
 internal static @string Label(this ref dial d) { return "dial:"u8 + d.n; }
-
-} partial class main_package {
 
 partial interface certificate :
     CrossPkgLib.Rated,
@@ -115,14 +99,10 @@ partial struct cert {
     internal nint id;
 }
 
-} partial class mainᴛcert {
-
 internal static @string Label(this cert c) { return "cert"; }
 internal static @string Seal(this cert c) { return "wax"; }
 internal static nint Rating(this cert c) { return 9; }
 internal static nint Serial(this cert c) { return c.id; }
-
-} partial class main_package {
 
 partial struct holder<T> {
     /*embed*/ public ж<CrossPkgLib_package.Cache<T>> Cache;
@@ -133,11 +113,7 @@ partial struct relay {
     internal @string tag;
 }
 
-} partial class mainᴛrelay {
-
 internal static @string Report(this ref relay r) { return "relay:"u8 + r.tag; }
-
-} partial class main_package {
 
 internal static (ж<relay>, error) makeRelay() { return (Ꮡ(new relay(tag: "live")), default); }
 
@@ -415,8 +391,6 @@ partial struct tallies {
     internal nint pts;
 }
 
-} partial class mainᴛtallies {
-
 internal static nint Score(this ref tallies t) { return t.pts; }
 
-} // end mainᴛtallies
+} // end main_package

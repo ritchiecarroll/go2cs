@@ -1,13 +1,10 @@
 namespace go;
 
 using fmt = fmt_package;
-using static main_package;
 
 partial class main_package {
 
 partial struct grid /*[4]nint*/;
-
-} partial class mainᴛgrid {
 
 internal static nint firstTwo(this ref grid b) {
     nint total = 0;
@@ -16,8 +13,6 @@ internal static nint firstTwo(this ref grid b) {
     }
     return total;
 }
-
-} partial class main_package {
 
 internal static nint sumParam(ж<grid> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
@@ -30,7 +25,7 @@ internal static nint sumParam(ж<grid> Ꮡp) {
 }
 
 internal static void main() {
-    ref var arr = ref heap<array<nint>>(new nint[]{10, 20, 30, 40, 50}.array(), out var Ꮡarr);
+    ref var arr = ref heap<array<nint>>(array<nint>([10, 20, 30, 40, 50]), out var Ꮡarr);
     var p = Ꮡarr;
 
     var full = p.slice();
@@ -68,7 +63,7 @@ internal static void rangeIndexOnly() {
     }
     fmt.Println("nil *grid ranges", count);
 
-    var p = Ꮡ(new @string[]{"a", "b"}.array());
+    var p = Ꮡ(array<@string>(["a", "b"]));
     foreach (var i in range(p, 2)) {
         p.Value[i] += "!"u8;
     }
@@ -79,12 +74,10 @@ internal static void rangeIndexOnly() {
     fmt.Println("receiver ranges", g);
 }
 
-} partial class mainᴛgrid {
-
 internal static void fill(this ref grid b) {
     foreach (var i in range(4)) {
         b.Value[i] = i * 10;
     }
 }
 
-} // end mainᴛgrid
+} // end main_package

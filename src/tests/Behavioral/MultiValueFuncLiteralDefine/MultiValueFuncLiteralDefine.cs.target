@@ -1,7 +1,6 @@
 namespace go;
 
 using fmt = fmt_package;
-using static main_package;
 
 partial class main_package {
 
@@ -9,12 +8,8 @@ partial struct box {
     internal nint n;
 }
 
-} partial class mainᴛbox {
-
 internal static nint get(this box b) { return b.n; }
 internal static void bump(this ref box b, nint d) { b.n += d; }
-
-} partial class main_package {
 
 internal static nint @double(nint v) { return v * 2; }
 internal static nint triple(nint v) { return v * 3; }

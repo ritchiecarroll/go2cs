@@ -403,7 +403,7 @@ internal static error makeMatchBaselineFSE(this ref Reader r, nint off, slice<fs
 // predefinedLiteralTable is the predefined table to use for literal lengths.
 // Generated from table in RFC 3.1.1.3.2.2.1.
 // Checked by TestPredefinedTables.
-[GoLazy] partial class lazyᴛpredefinedLiteralTable { internal static array<fseBaselineEntry> predefinedLiteralTable = new fseBaselineEntry[]{
+[GoLazy] partial class lazyᴛpredefinedLiteralTable { internal static array<fseBaselineEntry> predefinedLiteralTable = array<fseBaselineEntry>([
     new(0, 0, 4, 0), new(0, 0, 4, 16), new(1, 0, 5, 32),
     new(3, 0, 5, 0), new(4, 0, 5, 0), new(6, 0, 5, 0),
     new(7, 0, 5, 0), new(9, 0, 5, 0), new(10, 0, 5, 0),
@@ -426,12 +426,12 @@ internal static error makeMatchBaselineFSE(this ref Reader r, nint off, slice<fs
     new(28, 2, 5, 32), new(40, 3, 5, 32), new(48, 4, 5, 32),
     new(65536, 16, 6, 0), new(32768, 15, 6, 0), new(16384, 14, 6, 0),
     new(8192, 13, 6, 0)
-}.array(); }
+]); }
 
 // predefinedOffsetTable is the predefined table to use for offsets.
 // Generated from table in RFC 3.1.1.3.2.2.3.
 // Checked by TestPredefinedTables.
-[GoLazy] partial class lazyᴛpredefinedOffsetTable { internal static array<fseBaselineEntry> predefinedOffsetTable = new fseBaselineEntry[]{
+[GoLazy] partial class lazyᴛpredefinedOffsetTable { internal static array<fseBaselineEntry> predefinedOffsetTable = array<fseBaselineEntry>([
     new(1, 0, 5, 0), new(61, 6, 4, 0), new(509, 9, 5, 0),
     new(32765, 15, 5, 0), new(2097149, 21, 5, 0), new(5, 3, 5, 0),
     new(125, 7, 4, 0), new(4093, 12, 5, 0), new(262141, 18, 5, 0),
@@ -443,12 +443,12 @@ internal static error makeMatchBaselineFSE(this ref Reader r, nint off, slice<fs
     new(61, 6, 4, 16), new(1021, 10, 5, 0), new(65533, 16, 5, 0),
     new(268435453, 28, 5, 0), new(134217725, 27, 5, 0), new(67108861, 26, 5, 0),
     new(33554429, 25, 5, 0), new(16777213, 24, 5, 0)
-}.array(); }
+]); }
 
 // predefinedMatchTable is the predefined table to use for match lengths.
 // Generated from table in RFC 3.1.1.3.2.2.2.
 // Checked by TestPredefinedTables.
-[GoLazy] partial class lazyᴛpredefinedMatchTable { internal static array<fseBaselineEntry> predefinedMatchTable = new fseBaselineEntry[]{
+[GoLazy] partial class lazyᴛpredefinedMatchTable { internal static array<fseBaselineEntry> predefinedMatchTable = array<fseBaselineEntry>([
     new(3, 0, 6, 0), new(4, 0, 4, 0), new(5, 0, 5, 32),
     new(6, 0, 5, 0), new(8, 0, 5, 0), new(9, 0, 5, 0),
     new(11, 0, 5, 0), new(13, 0, 6, 0), new(16, 0, 6, 0),
@@ -471,6 +471,6 @@ internal static error makeMatchBaselineFSE(this ref Reader r, nint off, slice<fs
     new(65539, 16, 6, 0), new(32771, 15, 6, 0), new(16387, 14, 6, 0),
     new(8195, 13, 6, 0), new(4099, 12, 6, 0), new(2051, 11, 6, 0),
     new(1027, 10, 6, 0)
-}.array(); }
+]); }
 
 } // end zstd_package

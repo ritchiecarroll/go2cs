@@ -87,12 +87,6 @@ public class ChanDirSigGeneratorTests
     private static string PackageClassPart(string[] generated) =>
         generated.Single(source => source.Contains("partial class main_package") && !source.Contains("partial interface"));
 
-    // A method's entries are written on its receiver type's method holder, the class that declares the method.
-    private static string HolderPart(string holder) => HolderPart(holder, s_generated.Value);
-
-    private static string HolderPart(string holder, string[] generated) =>
-        generated.Single(source => source.Contains($"partial class {holder}\r\n") || source.Contains($"partial class {holder}\n"));
-
     [TestMethod]
     public void ARecvParameterIsReadBeforeTheType()
     {
@@ -132,9 +126,11 @@ public class ChanDirSigGeneratorTests
     [TestMethod]
     public void AnExtensionMethodIsKeyedWithItsReceiver()
     {
+        // A method's entries are written on the class that declares the method: here package main's package class,
+        // where a program's methods stand beside its functions.
         string part = PackageClassPart();
-        StringAssert.Contains(HolderPart("mainᴛR"), Entry("Equal", ["typeof(global::go.main_package.R)", "typeof(global::go.channel<bool>)"], [Unstamped, Recv], [Unstamped]));
-        StringAssert.Contains(HolderPart("mainᴛAssignD"), Entry("Equal", ["typeof(global::go.main_package.AssignD)", "typeof(global::go.channel<bool>)"], [Unstamped, Recv], [Unstamped]));
+        StringAssert.Contains(part, Entry("Equal", ["typeof(global::go.main_package.R)", "typeof(global::go.channel<bool>)"], [Unstamped, Recv], [Unstamped]));
+        StringAssert.Contains(part, Entry("Equal", ["typeof(global::go.main_package.AssignD)", "typeof(global::go.channel<bool>)"], [Unstamped, Recv], [Unstamped]));
         StringAssert.Contains(part, Entry("mixed", ["typeof(nint)", "typeof(global::go.channel<nint>)"], [Unstamped, Send], [Recv]));
         StringAssert.Contains(part, Entry("two", [], [], [Recv, Unstamped]));
     }
@@ -142,7 +138,7 @@ public class ChanDirSigGeneratorTests
     [TestMethod]
     public void AGoRecvMethodIsAlsoKeyedOnItsBoxedReceiverOverload()
     {
-        string part = HolderPart("mainᴛS");
+        string part = PackageClassPart();
         StringAssert.Contains(part, Entry("Feed", ["typeof(global::go.main_package.S)", "typeof(global::go.channel<nint>)"], [Unstamped, Send], []));
         StringAssert.Contains(part, Entry("Feed", ["typeof(global::go.ж<global::go.main_package.S>)", "typeof(global::go.channel<nint>)"], [Unstamped, Send], []));
     }
@@ -152,7 +148,7 @@ public class ChanDirSigGeneratorTests
     [TestMethod]
     public void AnUnmarkedRefReceiverIsAlsoKeyedOnItsBoxedReceiverOverload()
     {
-        string part = HolderPart("mainᴛS", s_generatedUnmarked.Value);
+        string part = PackageClassPart(s_generatedUnmarked.Value);
         StringAssert.Contains(part, Entry("Feed", ["typeof(global::go.main_package.S)", "typeof(global::go.channel<nint>)"], [Unstamped, Send], []));
         StringAssert.Contains(part, Entry("Feed", ["typeof(global::go.ж<global::go.main_package.S>)", "typeof(global::go.channel<nint>)"], [Unstamped, Send], []));
     }

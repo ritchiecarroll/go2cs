@@ -31,4 +31,4 @@ partial struct Doubler {
 
 public static int32 Visit(this Doubler d, int32 n) { return n * d.By; }
 
-} // end libᴛDoubler
+}

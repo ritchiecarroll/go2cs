@@ -280,4 +280,4 @@ internal static nint index(this ref ipv6ZoneCache zc, @string name) {
     return index;
 }
 
-} // end netᴛipv6ZoneCache
+}

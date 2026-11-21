@@ -23,6 +23,13 @@ func (v *Visitor) visitTypeSpec(typeSpec *ast.TypeSpec, doc *ast.CommentGroup) {
 	name := v.getIdentName(typeSpec.Name)
 	identType := v.getIdentType(typeSpec.Name)
 
+	// A generic type's own witness parameters are in scope while its declaration emits (shapeWitness.go).
+	if named, ok := identType.(*types.Named); ok && named.TypeParams() != nil && shapeWitnessDeclFor(named.Obj()) != nil {
+		savedOwner := v.shapeWitnessTypeOwner
+		v.shapeWitnessTypeOwner = named
+		defer func() { v.shapeWitnessTypeOwner = savedOwner }()
+	}
+
 	// A defined type whose name COLLIDES with a method name (go/ast's `type Filter func(string)
 	// bool` vs `(CommentMap).Filter`) is Δ-prefixed at every USE (convIdent →
 	// getSanitizedIdentifier), but getIdentName returns the raw name — so the DECLARATION

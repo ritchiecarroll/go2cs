@@ -1,7 +1,6 @@
 namespace go;
 
 using fmt = fmt_package;
-using static main_package;
 
 partial class main_package {
 
@@ -65,11 +64,7 @@ partial struct box {
     internal @string name;
 }
 
-} partial class mainᴛbox {
-
 internal static void say(this ref box b, @string msg) { results.ᐸꟷ(b.name + " says "u8 + msg); }
-
-} partial class main_package {
 
 internal static void @catch(@string tag) {
     GoFrame ᒐ = default;

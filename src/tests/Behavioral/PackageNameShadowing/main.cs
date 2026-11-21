@@ -2,7 +2,7 @@ namespace go;
 
 using fmt = fmt_package;
 using Δtime = time_package;
-// blank import: go.time.tzdata_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
+// import _ "time/tzdata" (init forced in ImportInitializers)
 
 partial class main_package {
 

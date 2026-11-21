@@ -66,4 +66,4 @@ public static error Close(this StreamWriter w) {
     return default;
 }
 
-} // end cipherᴛStreamWriter
+}

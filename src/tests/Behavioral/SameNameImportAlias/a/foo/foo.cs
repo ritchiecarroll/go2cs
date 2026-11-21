@@ -19,4 +19,4 @@ partial struct S {
 
 public static Kind Kind(this S _) { return 1; }
 
-} // end fooᴛS
+}

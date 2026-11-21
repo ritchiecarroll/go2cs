@@ -143,4 +143,4 @@ public static slice<byte> Bytes(this ref PublicKeyECDH _) { throw panic("boringc
 
 public static (ж<PublicKeyECDH>, error) PublicKey(this ref PrivateKeyECDH _) { throw panic("boringcrypto: not available"); }
 
-} // end boringᴛPrivateKeyECDH
+}

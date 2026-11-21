@@ -235,4 +235,4 @@ public static (slice<byte>, error) GetPackagePayload(this ref CoverageMetaFileRe
     return (payload, default);
 }
 
-} // end decodemetaᴛCoverageMetaFileReader
+}

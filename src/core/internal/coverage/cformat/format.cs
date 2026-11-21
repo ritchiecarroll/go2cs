@@ -412,4 +412,4 @@ public static error EmitFuncs(this ж<Formatter> Ꮡfm, io.Writer w) {
     finally { ᒐ.Run(); }
 }
 
-} // end cformatᴛFormatter
+}

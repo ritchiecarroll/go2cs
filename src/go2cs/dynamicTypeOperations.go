@@ -278,8 +278,10 @@ func lookupProductionDynamicTypeName(signature string) string {
 // K() string })` from another package found no lift of its own and emitted the raw Go text
 // (catalogue C1, EXPERIMENT-ts-readiness-2026-11-07.md).
 func (v *Visitor) importedDynamicInterfaceName(iface *types.Interface) string {
+	// An interface made only of embedded interfaces names no package of its own (goldmark's html.WithWriter
+	// returns `interface{ renderer.Option; Option }`), so the imports' published lifts are searched instead.
 	if iface.NumExplicitMethods() == 0 {
-		return ""
+		return v.importedInterfaceLift(iface)
 	}
 
 	pkg := iface.ExplicitMethod(0).Pkg()
@@ -312,14 +314,61 @@ func (v *Visitor) importedDynamicInterfaceName(iface *types.Interface) string {
 // `type LC_ID = TLC_ID` ahead of `type TLC_ID = struct{...}` in one file, the struct libc's tagLC_ID -- deferred to
 // a marker the post-barrier pass could not resolve, since a reused lift is another package's and never enters
 // this package's registry: raw Go text (sqlite-cs W2). "" when t is not such a struct.
+//
+// An anonymous INTERFACE another package lifted takes that lift the same way (importedInterfaceLift): a value
+// whose static type is one -- the result of goldmark's html.WithWriter, `interface{ renderer.Option; Option }`,
+// passed on as a renderer.Option -- named its type through the marker, which only this package's registry
+// answers, and the run refused the raw Go text (board ii).
 func (v *Visitor) forwardImportedStructLift(t types.Type) string {
-	st, ok := t.(*types.Struct)
+	switch typ := t.(type) {
+	case *types.Struct:
+		return v.importedStructLift(typ)
+	case *types.Interface:
+		return v.importedInterfaceLift(typ)
+	}
 
-	if !ok {
+	return ""
+}
+
+// importedInterfaceLift returns the qualified C# name of the public lift that a package this one imports
+// directly published for an anonymous interface with iface's signature, or "". When two imports publish one,
+// the lexically smallest import path wins, as for importedStructLift; an interface with an explicit method has
+// a declaring package, and importedDynamicInterfaceName asks that package first.
+//
+// The signature is the match key, so the lookup is made only where the signature identifies the type: go/types
+// prints an unexported method and a type parameter by bare name, so `interface{ run() }` in this package and the
+// same spelling in an import are two Go types with one signature (as are two generic functions' `interface{ M() T }`).
+// Such an interface is never matched here and keeps its own package's lift. With exported method names and
+// path-qualified named types, equal signatures are identical interfaces.
+func (v *Visitor) importedInterfaceLift(iface *types.Interface) string {
+	if iface == nil || iface.Empty() || v.pkg == nil || !interfaceSignatureIdentifiesIt(iface) {
 		return ""
 	}
 
-	return v.importedStructLift(st)
+	imports := slices.Clone(v.pkg.Imports())
+	slices.SortFunc(imports, func(a, b *types.Package) int { return strings.Compare(a.Path(), b.Path()) })
+	signature := iface.String()
+
+	for _, pkg := range imports {
+		meta, ok := importPackageDirs[pkg.Path()]
+
+		if !ok {
+			continue
+		}
+
+		key := filepath.Clean(meta.Dir)
+
+		packageLock.Lock()
+		name := importedDynamicTypeNames[key][signature]
+		public := name != "" && importedPublicLiftNames[key][name]
+		packageLock.Unlock()
+
+		if public {
+			return convertToCSTypeName(getSanitizedImport(packageClassPath(pkg.Path(), pkg.Name())+PackageSuffix) + "." + name)
+		}
+	}
+
+	return ""
 }
 
 // importedStructLift returns the qualified C# name of an anonymous struct that a package this one
@@ -767,10 +816,12 @@ func resolveDynamicTypeMarkers(outputFileNames []string) {
 				// next pass of the rewrite loop), and this keeps the evidence in the file where a
 				// human or a grep will find it. Substituting only this occurrence, so a second
 				// corrupted marker gets its own report rather than being collapsed into this one.
-				showWarning("Undecodable dynamic-type marker payload \"%s\" in \"%s\"", payload, fileName)
-				// Same gate class as the unresolved case below: the payload replacing the marker is
-				// not valid C# either, so the file is just as certainly unbuildable.
+				// Same gate class as the unresolved case below: the payload replacing the marker is not valid C#
+				// either, so the file is just as certainly unbuildable. A corrupt payload is a converter defect,
+				// not an unlifted type, so it refuses at once (GO2CS2014; P3's review of the godebug seat,
+				// 2026-11-19) rather than waiting for unresolvedDynamicTypeError at the end of the run.
 				recordUnresolvedDynamicType("«undecodable marker payload: "+payload+"»", fileName, line)
+				refuseMarkerPass(fmt.Sprintf("%s:%d", fileName, line), fmt.Sprintf("a dynamic-type marker's payload %q does not decode", payload))
 				return payload, false
 			}
 
@@ -858,4 +909,21 @@ func resolvedDynamicTypeText(text string) (result string, unresolved []string) {
 	resolved.WriteString(text)
 
 	return resolved.String(), unresolved
+}
+
+// interfaceSignatureIdentifiesIt reports whether iface's printed signature names one Go type wherever it is read:
+// a method set (no type terms) whose every method, embedded ones included, is exported and whose signature mentions
+// no type parameter anywhere (mentionsTypeParam; typeContainsTypeParams does not look inside a signature).
+func interfaceSignatureIdentifiesIt(iface *types.Interface) bool {
+	if !iface.IsMethodSet() {
+		return false
+	}
+
+	for i := range iface.NumMethods() {
+		if method := iface.Method(i); !method.Exported() || mentionsTypeParam(method.Type(), map[types.Type]bool{}) {
+			return false
+		}
+	}
+
+	return true
 }

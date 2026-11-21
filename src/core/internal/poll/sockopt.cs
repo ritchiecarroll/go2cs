@@ -80,4 +80,4 @@ public static (nint, error) GetsockoptInt(this ж<FD> Ꮡfd, nint level, nint na
     finally { if (ᒐd1) Ꮡfd.decref(); ᒐ.Run(); }
 }
 
-} // end pollᴛFD
+}

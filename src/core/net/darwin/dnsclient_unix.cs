@@ -1020,4 +1020,4 @@ internal static (slice<@string>, error) goLookupPTR(this ж<Resolver> Ꮡr, cont
     return (ptrs, default);
 }
 
-} // end netᴛResolver
+}

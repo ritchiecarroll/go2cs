@@ -193,3 +193,58 @@ func TestResolveGo2CSPathUnusableRootWarns(t *testing.T) {
 		t.Error("-recurse=nuget consumed the once-per-run warning latch")
 	}
 }
+
+// TestResolveGo2CSPathNuGetNamesAFoundRoot pins the one-time notice -recurse=nuget gives when its runtime root holds a
+// core tree: the run reads no standard-library metadata from it (publishedStdLibRecord), and such a root is often an
+// old deploy-core staging whose stale package_info.cs once won silently (2026-11-20). i9's stale root had core/reflect
+// but no core/golib/golib.csproj, so the notice keys on core/, not on isGo2CSRoot. Once per run, and only for nuget.
+func TestResolveGo2CSPathNuGetNamesAFoundRoot(t *testing.T) {
+	for _, shape := range []struct {
+		name string
+		make func(t *testing.T) string
+	}{
+		{"a go2cs root", func(t *testing.T) string { return makeGo2CSRoot(t, t.TempDir()) }},
+		{"a stale deploy with core but no golib", func(t *testing.T) string {
+			dir := t.TempDir()
+
+			if err := os.MkdirAll(filepath.Join(dir, "core", "reflect"), 0o755); err != nil {
+				t.Fatalf("mkdir: %v", err)
+			}
+
+			return dir
+		}},
+	} {
+		t.Run(shape.name, func(t *testing.T) {
+			root := shape.make(t)
+
+			pinRootWarning(t)
+
+			nuget := Options{go2csPath: root, recurse: true, nugetRefs: true}
+
+			stderr := captureConverterStderr(t, func() {
+				resolveGo2CSPath(&nuget, "", false)
+			})
+
+			if !strings.Contains(stderr, "-recurse=nuget found go2cs standard-library sources") || !strings.Contains(stderr, filepath.Join(root, "core")) {
+				t.Errorf("-recurse=nuget with a core tree under its root must name it once, got:\n%s", stderr)
+			}
+
+			if nuget.go2csPath != root {
+				t.Errorf("the notice must not move the root: got %q, want %q", nuget.go2csPath, root)
+			}
+
+			if repeat := captureConverterStderr(t, func() { resolveGo2CSPath(&nuget, "", false) }); repeat != "" {
+				t.Errorf("the notice repeated within one run:\n%s", repeat)
+			}
+		})
+	}
+
+	// A source-referencing recurse against a go2cs root is the normal case and stays silent.
+	pinRootWarning(t)
+
+	local := Options{go2csPath: makeGo2CSRoot(t, t.TempDir()), recurse: true}
+
+	if quiet := captureConverterStderr(t, func() { resolveGo2CSPath(&local, "", false) }); quiet != "" {
+		t.Errorf("a local-refs recurse against a go2cs root must not warn, got:\n%s", quiet)
+	}
+}

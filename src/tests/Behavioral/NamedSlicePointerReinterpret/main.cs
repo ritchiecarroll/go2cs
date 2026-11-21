@@ -1,7 +1,6 @@
 namespace go;
 
 using fmt = fmt_package;
-using static main_package;
 
 partial class main_package {
 
@@ -18,8 +17,6 @@ partial struct handler {
     internal nint groups;
 }
 
-} partial class mainᴛhandler {
-
 internal static void preformat(this ж<handler> Ꮡh, @string s) {
     ref var h = ref Ꮡh.DerefOrNull();
 
@@ -27,8 +24,6 @@ internal static void preformat(this ж<handler> Ꮡh, @string s) {
     buf.ValueSlot = append(buf.ValueSlot, s.ꓸꓸꓸ);
     h.groups++;
 }
-
-} partial class main_package {
 
 internal static void main() {
     ref var b = ref heap<slice<byte>>(new slice<byte>(0, 8), out var Ꮡb);

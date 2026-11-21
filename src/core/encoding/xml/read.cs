@@ -884,4 +884,4 @@ public static error Skip(this ref Decoder d) {
     }
 }
 
-} // end xmlᴛDecoder
+}

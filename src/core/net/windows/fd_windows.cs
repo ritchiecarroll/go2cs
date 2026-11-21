@@ -336,4 +336,4 @@ internal static (ж<os.File>, error) dup(this ж<netFD> Ꮡfd) {
     return (newWindowsFile(h, fd.name()), default);
 }
 
-} // end netᴛnetFD
+}

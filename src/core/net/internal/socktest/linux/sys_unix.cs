@@ -247,4 +247,4 @@ public static (nint soerr, error err) GetsockoptInt(this ж<Switch> Ꮡsw, nint 
     return (soerr, default);
 }
 
-} // end socktestᴛSwitch
+}

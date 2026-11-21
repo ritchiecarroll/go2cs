@@ -23,4 +23,4 @@ internal static (bool, error) blockUntilWaitable(this ref Process p) {
     return (false, default);
 }
 
-} // end osᴛProcess
+}

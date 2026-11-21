@@ -109,4 +109,4 @@ public static bool Verify(this ref MAC h, slice<byte> expected) {
     return subtle.ConstantTimeCompare(expected, mac[..]) == 1;
 }
 
-} // end poly1305ᴛMAC
+}

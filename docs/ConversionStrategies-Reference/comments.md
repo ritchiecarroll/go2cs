@@ -61,7 +61,7 @@ the two groups is dropped and leaves no extra blank behind:
 	fmt.Println(r.h(21)) // 42
 ```
 
-<!-- source: src/tests/Behavioral/FirstClassFunctions/FirstClassFunctions.cs.target:112-122 -->
+<!-- source: src/tests/Behavioral/FirstClassFunctions/FirstClassFunctions.cs.target:111-121 -->
 ```csharp
     var converted = (Func<score, (score, bool)>)(stay);
     var (result, turnIsOver) = converted(new score(player: 3, opponent: 5, thisTurn: 7));
@@ -131,7 +131,7 @@ func ratioString(vals ...int) string {
 	}
 ```
 
-<!-- source: src/tests/Behavioral/FirstClassFunctions/FirstClassFunctions.cs.target:80-86 -->
+<!-- source: src/tests/Behavioral/FirstClassFunctions/FirstClassFunctions.cs.target:79-85 -->
 ```csharp
 internal static @string ratioString(params ꓸꓸꓸnint valsʗp) {
     var vals = valsʗp.sslice();
@@ -289,12 +289,10 @@ func (embeddedImpl) Close() error { return nil }
 func (embeddedImpl) Flush() error { return nil }
 ```
 
-<!-- source: src/tests/Behavioral/AnonymousInterfaces/AnonymousInterfaces.cs.target:79-85 -->
+<!-- source: src/tests/Behavioral/AnonymousInterfaces/AnonymousInterfaces.cs.target:78-82 -->
 ```csharp
 partial struct embeddedImpl {
 }
-
-} partial class mainᴛembeddedImpl {
 
 internal static error Close(this embeddedImpl _) { return default; }
 internal static error Flush(this embeddedImpl _) { return default; }
@@ -324,7 +322,7 @@ even when that statement is the converter's own, such as `{ v = v.Clone(); }` fo
 func byName(a, b *item) bool { return a.name < b.name }
 ```
 
-<!-- source: src/tests/Behavioral/NamedFuncTypeStructuralField/main.cs.target:44-49 -->
+<!-- source: src/tests/Behavioral/NamedFuncTypeStructuralField/main.cs.target:35-40 -->
 ```csharp
 internal static bool byName(ж<item> Ꮡa, ж<item> Ꮡb) {
     ref var a = ref Ꮡa.DerefOrNull();

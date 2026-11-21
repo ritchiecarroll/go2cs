@@ -102,7 +102,7 @@ internal static void main() {
     fmt.Println("6 slice write +4:", b);
     fmt.Println("6 slice read +2:", ~@unsafe.Pointer.To<uint16>(@unsafe.Add(@unsafe.Pointer.FromPinnedBox(Ꮡ(b, 0)), 2)));
 
-    ref var h = ref heap<holder>(new holder(n: 7, arr: new uint32[]{10, 20, 30, 40}.array()), out var Ꮡh);
+    ref var h = ref heap<holder>(new holder(n: 7, arr: array<uint32>([10, 20, 30, 40])), out var Ꮡh);
     (@unsafe.Pointer.To<uint32>(@unsafe.Add(@unsafe.Pointer.FromPinnedBox(Ꮡh.at(holder.Ꮡarr, 0)), 8))).Value = 33;
     fmt.Println("7 array field write +8:", h.arr);
     fmt.Println("7 array field read via struct +12:", ~@unsafe.Pointer.To<uint32>(@unsafe.Add(@unsafe.Pointer.FromPinnedBox(Ꮡh), 12)));

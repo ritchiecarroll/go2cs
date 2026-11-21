@@ -16,8 +16,8 @@ namespace GolibTests;
 /// <para>
 /// NOT a map, a channel, a string, a slice or an array value: golib's forms of those are VALUE types that hold a
 /// reference, so the floor's test (the pointee is not a value type) does not reach them. They stay the census's B2a value
-/// kinds, counted and not refused. ONE EXEMPTION, by COORD's ruling: <c>unsafe.Pointer</c> over MANAGED Go storage (a box
-/// that retains its source or carries a pin), the shape the converted runtime emits for <c>(*unsafe.Pointer)(p)</c>.
+/// kinds, counted and not refused. NO EXEMPTION since seat S-B1 (W4): <c>unsafe.Pointer</c> over MANAGED Go storage is read and
+/// written through the word doors (<c>unsafe.Pointer.LoadWord</c> / <c>StoreWord</c>), never through <c>Value</c>.
 /// </para>
 /// <para>
 /// Native memory holds Go's words and never a managed reference, yet <c>Value</c> reads a <c>T</c> at the address with
@@ -138,14 +138,13 @@ public unsafe class NativeBoxReferenceFloorTests
         }
     }
 
-    // CONTROL, the exemption: unsafe.Pointer over MANAGED Go storage is not refused. `(*unsafe.Pointer)(p)` over a Go word
-    // is a shape the converted runtime itself emits (map.go's indirect key, atomic_pointer.go's atomicwb), and the
-    // behavioral program UnsafePointerReinterpret runs it with its output compared. The mint here is the converter's own:
-    // a pointer to a Go uintptr, reinterpreted as a pointer to an unsafe.Pointer. The word stays 0 throughout, so no
-    // managed reference is ever stored where the collector cannot see it. That hazard is real for a nonzero word and is
-    // named on the BOARD, with its cure (an unsafe.Pointer read and written as the word it is) in the section 18.2 design.
+    // W4 (seat S-B1, design 18.3-18.7): the exemption is DELETED. unsafe.Pointer over MANAGED Go storage was exempt while
+    // the converter emitted `*p` as `p.Value`; the exempt read and write stored a CLR reference in a word the collector
+    // does not scan. The converter now emits the word doors (unsafe.Pointer.LoadWord / StoreWord), which read and write
+    // the word as the number it is, so `.Value` over such a box is refused by name like every other reference. The mint is
+    // the converter's own: a pointer to a Go uintptr, reinterpreted as a pointer to an unsafe.Pointer.
     [TestMethod]
-    public void AnUnsafePointerOverManagedGoStorageIsNotRefused()
+    public void AnUnsafePointerOverManagedGoStorageIsRefusedAndTheWordDoorsReadAndWriteIt()
     {
         ж<uintptr> backing = new StandardBox<uintptr>(0);
         @unsafe.Pointer p = @unsafe.Pointer.FromBox(backing);
@@ -154,9 +153,12 @@ public unsafe class NativeBoxReferenceFloorTests
         Assert.IsInstanceOfType(slot, typeof(NativeBox<@unsafe.Pointer>), "the premise: the reinterpret is a native box over the Go word");
         Assert.IsNotNull(((NativeBox<@unsafe.Pointer>)slot).RetainedSource, "the premise: it retains the Go storage it was derived from");
 
-        Assert.IsNull(slot.Value, "a zero word reads as a nil unsafe.Pointer");
-        slot.Value = null!;
-        Assert.AreEqual((uintptr)0, backing.Value, "and a nil write stores a zero word");
+        AssertRefusedByName<@unsafe.Pointer>(Refused(() => _ = slot.Value));
+        AssertRefusedByName<@unsafe.Pointer>(Refused(() => slot.Value = null!));
+
+        Assert.IsTrue(@unsafe.Pointer.LoadWord(slot) == nil, "the word door reads a zero word as a nil unsafe.Pointer");
+        @unsafe.Pointer.StoreWord(slot, @unsafe.Pointer.Nil);
+        Assert.AreEqual((uintptr)0, backing.Value, "and a nil store writes a zero word");
 
         GC.KeepAlive(p);
     }

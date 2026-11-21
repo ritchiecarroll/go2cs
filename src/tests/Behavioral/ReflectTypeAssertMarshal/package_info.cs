@@ -49,7 +49,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("ReflectTypeAssertMarshal.go", "ReflectTypeAssertMarshal.cs", "AA8kggAYIrSCgpSClIKClIKUgpSigpSCgpSClII=")]
+[assembly: GoPositionMap("ReflectTypeAssertMarshal.go", "ReflectTypeAssertMarshal.cs", "AAwkggAUIpSCgpSClIKClIKUgpSigpSCgpSClII=")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -93,6 +93,4 @@ public static partial class main_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(main_package.celsius)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛcelsius;
-[GoMethodHost(typeof(main_package.thing)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛthing;
 // </MethodHolders>

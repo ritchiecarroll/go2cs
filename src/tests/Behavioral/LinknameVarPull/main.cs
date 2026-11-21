@@ -1,8 +1,8 @@
 namespace go;
 
 using fmt = fmt_package;
-// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
-// blank import: LinknameVarPullLib_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
+// import _ "unsafe" (nothing to initialize)
+// import _ "LinknameVarPullLib" (nothing to initialize)
 
 partial class main_package {
 

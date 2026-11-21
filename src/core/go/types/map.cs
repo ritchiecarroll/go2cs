@@ -30,4 +30,4 @@ public static Type Elem(this ref Map m) { return m.elem; }
 public static Type Underlying(this ж<Map> Ꮡt) { return new MapжType(Ꮡt); }
 public static @string String(this ж<Map> Ꮡt) { return TypeString(new MapжType(Ꮡt), default); }
 
-} // end typesᴛMap
+}

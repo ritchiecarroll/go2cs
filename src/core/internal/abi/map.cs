@@ -65,4 +65,4 @@ public static bool IndirectElem(this ref MapType mt) {
     return (mt.Flags & (uint32)MapIndirectElem) != 0;
 }
 
-} // end abiᴛMapType
+}

@@ -1,7 +1,6 @@
 namespace go;
 
 using fmt = fmt_package;
-using static main_package;
 
 partial class main_package {
 
@@ -10,11 +9,7 @@ partial struct inner {
     internal nint p;
 }
 
-} partial class mainᴛinner {
-
 internal static @string describe(this inner i) { return fmt.Sprintf("n=%d p=%d"u8, i.n, i.p); }
-
-} partial class main_package {
 
 partial struct mid {
     /*embed*/ internal inner inner;

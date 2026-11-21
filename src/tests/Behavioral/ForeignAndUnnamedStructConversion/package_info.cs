@@ -80,8 +80,8 @@ using static go.main_package;
 
 // The go statements whose goroutine the converter proved cannot recurse, by the file, line and column of
 // their goǃ call: go2cs-gen starts each on golib's bounded stack reservation rather than the Go-scale default.
-[assembly: GoBoundedGoroutine("main.cs", 323, 5, 0)]
-[assembly: GoBoundedGoroutine("main.cs", 495, 5, 1)]
+[assembly: GoBoundedGoroutine("main.cs", 314, 5, 0)]
+[assembly: GoBoundedGoroutine("main.cs", 482, 5, 1)]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -91,7 +91,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "ABJOABEglJSClIKCgoKClIKUgpSClJSCgoKCgoKClIKCgoKC6ICAgKKAgICilgAJDICAooCAooKCgpSCgoKUgoKCkoCAooCAooCAooCAooCAooCAooKCgpSCgoKoggAICoKSgICigICigoKClIKCgpSCgoKSgICigICigICigICigICigoKUgoKClIKCgqiCmILogrSigoKUpoCAgKKCgoKUgoKClIKCgoKUgpKAgKKygJLUgoKQkpSCgpKkgICigICigoKUgoKUgoKClKKCgpSCgviUgoKCgoKUgoKCgoKCgpSUgoKCgoKClJSCgoKCgoKUlIKCtJSCgoKCqIKUooKClMa0gICAooKCgpSCgoKUgoKCgpSCkoCAorKAktSCgpCSlIKCkqSAgKKAgKKCgpSCgpSCgoKUooKClIKC+JSCgoKCgpSCgoKCgoKClJSCgoKCgoKUlIKCgoKCgpSUgoK0lIKCgoKogpSklIKUpKaCgoKUgoKCgoKCgoKClIKCgoKCgoKClKaCgoKClIKCgoKCgoKClIKCgoKCgoKClIKCgoKCgoKUgoKCgoKCgoLqgoKC5oKCguaCgoKCguaCgoKCguaigoKC5oKClKKm5oKCgpSCpuaCgoKUgqbmgoKC5oKCguaCgoKUlLaUtuaigqaCpoKCgqaigqYACQiCgoKCgoKCgoKmgoKCgg==", "230-230:1;235-235:1;240-240:1;357-357:1;362-362:1;367-367:1", "", "", "", "311:32,312:13,483:28,484:13")]
+[assembly: GoPositionMap("main.go", "main.cs", "AA9OAA8glJSClIKCgoKClIKUgpSClJSCgoKCgoKClIKCgoKC6ICAgKKAgICilgAJDICAooCAooKCgpSCgoKUgoKCkoCAooCAooCAooCAooCAooCAooKCgpSCgoKoggAICoKSgICigICigoKClIKCgpSCgoKSgICigICigICigICigICigoKUgoKClIKCgqiCmILIgpSigoKUpoCAgKKCgoKUgoKClIKCgoKUgpKAgKKygJLUgoKQkpSCgpKkgICigICigoKUgoKUgoKClKKCgpSCgviUgoKCgoKUgoKCgoKCgpSUgoKCgoKClJSCgoKCgoKUlIKCtJSCgoKCqIKUooKClKaUgICAooKCgpSCgoKUgoKCgpSCkoCAorKAktSCgpCSlIKCkqSAgKKAgKKCgpSCgpSCgoKUooKClIKC+JSCgoKCgpSCgoKCgoKClJSCgoKCgoKUlIKCgoKCgpSUgoK0lIKCgoKogpSklIKUpKaCgoKUgoKCgoKCgoKClIKCgoKCgoKClKaCgoKClIKCgoKCgoKClIKCgoKCgoKClIKCgoKCgoKUgoKCgoKCgoLqgoKC5oKCguaCgoKCguaCgoKCguaigoKC5oKClKKm5oKCgpSCpuaCgoKUgqbmgoKC5oKCguaCgoKUlLaUtuaigqaCpoKCgqaigqYACQiCgoKCgoKCgoKmgoKCgg==", "230-230:1;235-235:1;240-240:1;357-357:1;362-362:1;367-367:1", "", "", "", "302:32,303:13,470:28,471:13")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -151,6 +151,4 @@ public static partial class main_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(main_package.hertz)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛhertz;
-[GoMethodHost(typeof(main_package.taker)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛtaker;
 // </MethodHolders>

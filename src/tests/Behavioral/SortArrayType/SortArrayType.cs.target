@@ -82,11 +82,7 @@ partial struct PeopleByAge /*[]Person*/;
 
 partial struct Roster /*[]Person*/;
 
-} partial class mainᴛRoster {
-
 internal static nint headcount(this Roster r) { return len(r); }
-
-} partial class main_package {
 
 partial struct levelToken /*num:uint32*/;
 
@@ -98,7 +94,7 @@ internal static void sort(this PeopleByAge p) {
     sort_package.Sort(p);
 }
 
-} partial class mainᴛPeopleByShoeSize {
+} partial class main_package {
 
 public static nint Len(this PeopleByShoeSize p) {
     return len(p);

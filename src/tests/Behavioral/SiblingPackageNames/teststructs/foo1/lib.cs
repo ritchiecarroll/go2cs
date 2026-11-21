@@ -18,4 +18,4 @@ public static nint Sum(this Pair p) {
     return p.Left + p.Right;
 }
 
-} // end fooᴛPair
+}

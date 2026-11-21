@@ -193,4 +193,4 @@ internal static void skipSpace(this ref directiveScanner s) {
     s.skip(len(s.str) - len(trim));
 }
 
-} // end astᴛdirectiveScanner
+}

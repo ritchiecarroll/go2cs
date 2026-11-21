@@ -640,4 +640,4 @@ internal static error findRST(this ref decoder d, uint8 expectedRST) {
     }
 }
 
-} // end jpegᴛdecoder
+}

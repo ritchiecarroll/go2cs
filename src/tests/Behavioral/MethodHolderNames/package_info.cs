@@ -58,8 +58,8 @@ using static go.main_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("forms.go", "forms.cs", "ABgolpaigpSUgoKUgpSClIKUgpSUlMS2lMaUgoI=")]
-[assembly: GoPositionMap("main.go", "main.cs", "ABActAAJCJSCgqaUgoKmgpSkpoKmqIKUtKYACgyUugAKEOSCgoKCgoKCgoKUgpSUgpaCgqKUgoI=", "", "103=main.Box.Scale")]
-[assembly: GoPositionMap("others.go", "others.cs", "AA8cgoKUgpaUAAkKtJSUgoKUgoKU")]
+[assembly: GoPositionMap("main.go", "main.cs", "ABAclPiUgoKmlIKCpoKUpKaCpqiClLSmAAoMlLoAChDkgoKCgoKCgoKClIKUlIKWgoKilIKC", "", "103=main.Box.Scale")]
+[assembly: GoPositionMap("others.go", "others.cs", "AA8cgoKUgpaU+pSUlIKClIKClA==")]
 [assembly: GoPositionMap("shadow.go", "shadow.cs", "AA4SgoKolrSCgg==")]
 // </GoSourcePositionMaps>
 
@@ -110,10 +110,8 @@ public static partial class main_package
 // <MethodHolders>
 [GoMethodHost(typeof(main_package.Box)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛBox;
 [GoMethodHost(typeof(main_package.Chest)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛChest;
-[GoMethodHost(typeof(main_package.Kind)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛKind;
 [GoMethodHost(typeof(main_package.Pair<>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛPair;
 [GoMethodHost(typeof(main_package.Shelf)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛShelf;
-[GoMethodHost(typeof(main_package.gauge)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛgauge;
 [GoMethodHost(typeof(main_package.meter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛmeter;
 [GoMethodHost(typeof(main_package.words)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛwords;
 // </MethodHolders>

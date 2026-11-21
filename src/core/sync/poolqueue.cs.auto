@@ -321,4 +321,4 @@ internal static (any, bool) popTail(this ж<poolChain> Ꮡc) {
     }
 }
 
-} // end syncᴛpoolChain
+}

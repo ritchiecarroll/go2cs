@@ -155,4 +155,4 @@ public static void StoreArg(this ref Func f, Reg src, @string name) {
     a.Mov(src, mem);
 }
 
-} // end asmgenᴛFunc
+}

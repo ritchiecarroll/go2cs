@@ -41,6 +41,7 @@ var warnRefusedCodes = map[string]string{
 	diagnosticFileDropped:                 "a dropped file is not loud: an init function, a method or an interface record can vanish with no compile error",
 	diagnosticInlineArrayMixedPair:        "its downgraded site is silent: one side's inline bytes would be read as the other's array<T> references",
 	diagnosticAsmForwardSignatureRefused:  "a whole-package refusal, so there is no per-site code to produce",
+	diagnosticShapeWitnessRefused:         "its downgraded sites have no witness to name, so they would not compile",
 }
 
 // parseWarnCodes reads -warn's comma-separated list. An unknown code, or a known code that is not allowed, is an

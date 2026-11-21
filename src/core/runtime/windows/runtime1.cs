@@ -324,13 +324,13 @@ internal static void check() {
         @throw(cas6ˢ);
     }
 
-    m.Assign(new byte[]{1, 1, 1, 1}.array());
+    m.Assign(array<byte>([1, 1, 1, 1]));
     atomic.Or8(Ꮡm.at<byte>(1), 0xf0);
     if (m[0] != 1 || m[1] != 0xf1 || m[2] != 1 || m[3] != 1) {
         @throw(atomicor8ˢ);
     }
 
-    m.Assign(new byte[]{0xff, 0xff, 0xff, 0xff}.array());
+    m.Assign(array<byte>([0xff, 0xff, 0xff, 0xff]));
     atomic.And8(Ꮡm.at<byte>(1), 0x1);
     if (m[0] != 0xff || m[1] != 0x1 || m[2] != 0xff || m[3] != 0xff) {
         @throw(atomicand8ˢ);

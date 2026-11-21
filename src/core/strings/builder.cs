@@ -130,4 +130,4 @@ public static (nint, error) WriteString(this ж<Builder> Ꮡb, @string s) {
     return (len(s), default);
 }
 
-} // end stringsᴛBuilder
+}

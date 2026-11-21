@@ -292,4 +292,4 @@ internal static (ж<UnixConn>, error) listenUnixgram(this ж<sysListener> Ꮡsl,
     return (newUnixConn(fd), default);
 }
 
-} // end netᴛsysListener
+}

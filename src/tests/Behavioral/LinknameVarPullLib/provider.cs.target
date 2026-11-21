@@ -1,6 +1,6 @@
 namespace go;
 
-// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
+// import _ "unsafe" (nothing to initialize)
 
 partial class LinknameVarPullLib_package {
 

@@ -181,4 +181,4 @@ internal static slice<byte> line(this ref lineReader r) {
     return r.scratch.slice(0, r.newline);
 }
 
-} // end cgroupᴛlineReader
+}

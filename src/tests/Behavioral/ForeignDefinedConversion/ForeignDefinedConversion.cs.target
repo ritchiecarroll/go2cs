@@ -4,17 +4,12 @@ using fmt = fmt_package;
 using time = time_package;
 using levellib = ForeignDefinedConversion.levellib_package;
 using ForeignDefinedConversion;
-using static main_package;
 
 partial class main_package {
 
 partial struct Level /*global::go.ForeignDefinedConversion.levellib_package.Level*/;
 
-} partial class mainᴛLevel {
-
 public static @string String(this Level l) { return fmt.Sprintf("Level(%d)"u8, (uint32)((levellib.Level)l)); }
-
-} partial class main_package {
 
 partial struct Dur /*global::go.time_package.Duration*/;
 

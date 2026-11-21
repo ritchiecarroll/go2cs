@@ -29,7 +29,7 @@ partial struct outer {
 }
 
 internal static lib.Emb fresh() {
-    return new lib.Emb(Inner: new lib.Inner(V: new nint[]{1, 2}.array()), N: 1);
+    return new lib.Emb(Inner: new lib.Inner(V: array<nint>([1, 2])), N: 1);
 }
 
 internal static nint bump(emb e) {

@@ -111,4 +111,4 @@ internal static void reset(this ж<traceStringTable> Ꮡt, uintptr gen) {
     Ꮡt.Ꮡtab.reset();
 }
 
-} // end runtimeᴛtraceStringTable
+}

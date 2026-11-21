@@ -182,41 +182,7 @@ func (v *Visitor) isNativeFieldArrayViewLocal(x ast.Expr) bool {
 // nativeFieldArrayViewBinds reports whether obj's declaration in the current function binds it to the
 // native field-view shape — `p := (*[N]T)(unsafe.Pointer(&x.f))` or `var p = …`.
 func (v *Visitor) nativeFieldArrayViewBinds(obj types.Object) bool {
-	binds := false
-	isView := v.isNativeFieldArrayViewConversion
-
-	ast.Inspect(v.currentFuncDecl.Body, func(n ast.Node) bool {
-		if binds {
-			return false
-		}
-
-		switch node := n.(type) {
-		case *ast.AssignStmt:
-			if node.Tok != token.DEFINE || len(node.Lhs) != len(node.Rhs) {
-				return true
-			}
-
-			for i, lhs := range node.Lhs {
-				if ident, ok := lhs.(*ast.Ident); ok && v.info.Defs[ident] == obj && isView(node.Rhs[i]) {
-					binds = true
-				}
-			}
-		case *ast.ValueSpec:
-			if len(node.Names) != len(node.Values) {
-				return true
-			}
-
-			for i, name := range node.Names {
-				if v.info.Defs[name] == obj && isView(node.Values[i]) {
-					binds = true
-				}
-			}
-		}
-
-		return true
-	})
-
-	return binds
+	return v.localBoundBy(obj, v.isNativeFieldArrayViewConversion)
 }
 
 // THE WHOLE ARRAY THROUGH THE VIEW (docs/phase4/DESIGN-array-pointer-doors.md, section 18, part C)
