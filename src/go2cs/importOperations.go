@@ -34,7 +34,10 @@ type PackageInfo struct {
 	// dependency has no package_info.cs on disk to read its exported aliases and GoImplement
 	// records from, so those come from the converter's embedded record of the tree those packages
 	// are built from (stdlibMetadata.go). The flag is what makes that substitution SOUND: the
-	// record describes src/core, which under this mode is exactly what is referenced.
+	// record describes src/core, which under this mode is exactly what is referenced. That identity
+	// holds for a RELEASE-built converter (the published tool, or one built at the release commit),
+	// whose record is the tree push-nuget packed; a converter built at a later commit records a newer
+	// src/core than the published go.* packages its floating GoStdLibVersion default restores.
 	// It is deliberately NOT set for a $(go2csPath) source deployment, whose staged tree may be
 	// the baseline core stub instead.
 	PublishedStdLib bool
@@ -927,6 +930,40 @@ func loadImportedTypeAliases(info PackageInfo, options Options) {
 		return
 	}
 
+	// A PUBLISHED standard-library dependency (-recurse=nuget: the assembly referenced is the go.<pkg> package built
+	// from src/core) is described by the metadata recorded in the converter itself, captured from that same tree, and by
+	// nothing on disk: see publishedStdLibRecord for why a package_info.cs under the runtime root must not be read. With
+	// the record, a NuGet-referencing conversion resolves foreign aliases and foreign GoImplement records exactly as a
+	// source-referencing one does. Without it the converter cannot see that the dependency's OWN assembly already
+	// implements an interface on one of its types, and re-declares the pair locally in this package — go2cs-gen then
+	// emits a second, duplicate adapter class (syscall.Errno → error, consumed by golang.org/x/sys/windows:
+	// CS0102/CS0111/CS8646).
+	if info.PublishedStdLib {
+		key := "stdlib:" + info.PackageName + "@" + options.targetPlatform
+
+		packageLock.Lock()
+
+		if _, ok := parsedPackageInfoFiles[key]; ok {
+			packageLock.Unlock()
+			return
+		}
+
+		parsedPackageInfoFiles.Add(key)
+		packageLock.Unlock()
+
+		if lines, ok := publishedStdLibRecord(info, options); ok {
+			if results, parseErr := parseExportedTypeAliasLines(lines); parseErr == nil {
+				applyExportedTypeAliases(results, info)
+				loadPackageImplementLines(lines, info.RootPackageName, info.ImportPath)
+				loadImportedDynamicTypeLiftLines(lines, info.SourceDir)
+				return
+			}
+		}
+
+		applyExportedTypeAliases(foreignDerivedTypeAliases(importedPackageSources[filepath.Clean(info.SourceDir)]), info)
+		return
+	}
+
 	// Layout L3 routes a package's platform-varying artifacts into per-GOOS folders, and
 	// `package_info.cs` is one of them (design §4.3) — so ask for the copy that describes the
 	// platform THIS conversion is emitting for. Flat wins when the dependency's metadata is shared,
@@ -948,26 +985,6 @@ func loadImportedTypeAliases(info PackageInfo, options Options) {
 	// The dependency has not been converted into this output root, so there is no package_info.cs
 	// carrying its exported type aliases.
 	if _, err := os.Stat(packageInfoFile); os.IsNotExist(err) {
-		// A PUBLISHED standard-library dependency (-recurse=nuget: the assembly referenced is the
-		// go.<pkg> package built from src/core) has no converted source anywhere on
-		// disk, and never will — but the metadata that source would have carried is recorded in
-		// the converter itself, captured from that same tree. Read it, so a NuGet-referencing
-		// conversion resolves foreign aliases and foreign GoImplement records exactly as a
-		// source-referencing one does. Without it the converter cannot see that the dependency's
-		// OWN assembly already implements an interface on one of its types, and re-declares the
-		// pair locally in this package — go2cs-gen then emits a second, duplicate adapter class
-		// (syscall.Errno → error, consumed by golang.org/x/sys/windows: CS0102/CS0111/CS8646).
-		if info.PublishedStdLib {
-			if lines, ok := stdLibExportedMetadata(info.PackageName, options.targetPlatform); ok {
-				if results, parseErr := parseExportedTypeAliasLines(lines); parseErr == nil {
-					applyExportedTypeAliases(results, info)
-					loadPackageImplementLines(lines, info.RootPackageName, info.ImportPath)
-					loadImportedDynamicTypeLiftLines(lines, info.SourceDir)
-					return
-				}
-			}
-		}
-
 		// Most exported aliases are still knowable — they are a function of the dependency's OWN
 		// declarations — so derive and apply those, giving a single-package conversion the same
 		// foreign spelling a whole-stdlib run produces: its re-exported type aliases (`os.FileMode`
@@ -991,6 +1008,25 @@ func loadImportedTypeAliases(info PackageInfo, options Options) {
 	} else {
 		showWarning("Failed to parse exported type aliases from package info file \"%s\": %s", packageInfoFile, err)
 	}
+}
+
+// publishedStdLibRecord returns the converter's embedded record of a PUBLISHED standard-library dependency's
+// package_info.cs, and false for any other dependency or a package the record does not carry. It is the ONE source both
+// readers consult (loadImportedTypeAliases and importPackageInfoLines), and they consult it BEFORE any file on disk.
+//
+// Why the order matters. The record and the go.<pkg> assemblies -recurse=nuget references are one commit's output, so
+// the record is the only description the emitted references must agree with. A package_info.cs under the runtime root
+// (-go2cspath, GO2CSPATH, else ~/go2cs) describes whatever tree was deployed there, possibly long ago: a box with a
+// 2026-07-11 deploy-core staging emitted `reflect_package.ΔKind` and `reflect.ΔInt` from it, names the 1.26.11.1
+// assemblies no longer declare (OQ2 dropped those renames), and libc's windows files failed CS0426 ×10 against the
+// published packages. Reading the file first made the output a function of an ambient directory, silently and rc 0,
+// while a clean machine converted correctly (sqlite-cs, i9 2026-11-20 07:37Z).
+func publishedStdLibRecord(info PackageInfo, options Options) ([]string, bool) {
+	if !info.PublishedStdLib {
+		return nil, false
+	}
+
+	return stdLibExportedMetadata(info.PackageName, options.targetPlatform)
 }
 
 // applyExportedTypeAliases records one imported package's exported type aliases — parsed from its
