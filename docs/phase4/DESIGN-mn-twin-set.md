@@ -266,3 +266,63 @@ slot holds likewise, and its `ꞏcall` fallback passes `.ꓸꓸꓸ` the same way
 - Sections 2 and 4 say `params Span<T>`. After wall E the plain lowering is `params variadic<T>`, still ref-like.
   The generator's variadic test keys on the parameter being `params` with a ref-like type, not on `Span<T>` by
   name: the same symbols-not-names rule COORD ruled for `async-shaped`.
+
+## 12. 7a as cut: scope, shapes and predictions, before any code (dated block, 2026-11-21)
+
+Row 2 of the ruled .6 plan: the surface build behind sections 3-6 and 11. It changes which PUBLIC members of an
+opted-in assembly get a twin, and in what shape. It changes nothing for an assembly built without twins.
+
+### 12.1 Scope
+
+- **The population (R1, as built):** every public method declared in a CONVERTED file (the generator's existing
+  predicate: not a `*_impl.cs` companion, not `[module: GoManualConversion]`, not a metadata file, not generated
+  output) of an assembly that is not `[GoHandOwnedPackage]`, outside E1. Hand-owned members (R5) are NOT in 7a's
+  guard: they need a per-package list of the Go declarations they stand for, and only the stdlib has them in number,
+  so they move with row 7 (the stdlib-twins arm). Named, not dropped.
+- **Shapes, as section 4:** a pointer receiver's twin takes `this ж<T>`; an sstring-pilot function's twin hangs on its
+  `@string` member; `...T` becomes `slice<T>`, and a forwarder passes `args.ꓸꓸꓸ` (11.6).
+- **Forwarders (R3):** every member of the population that the generator does not twin as a state machine (it cannot
+  park, a body refusal, or the plain lowering refused) gets `[GoParkForwarder] Mꞏtwin(<canonical>)`. Its body calls
+  the plain member and returns a completed task (`default`, or `new GoTask<R>(...)`). `GoParkForwarderAttribute`
+  is new in golib and goes into `[mn-frozen]`. A caller's twin binds the PLAIN member when the callee's twin
+  carries the mark, so a forwarder is never awaited.
+- **Interfaces (R7):** the hidden twin interface gets a slot for every member in the population, variadic members
+  included (canonical `slice<T>`); the `ꞏcall` fallback passes `.ꓸꓸꓸ`.
+- **async-shaped** keys on the symbols (`System.Threading.Tasks.Task`, `ValueTask`, `go.golib.GoTask`), not the name.
+- **E1:** one named rule: a generic method, a method of a generic type, or a member of a generic interface.
+- **The guard, GO2CS0017 (Error):** a member of the population with no twin, no forwarder, and no E1 exclusion.
+  **GO2CS0018 (Error), O2:** a partial-set switch (`GoTwinsIface`, `GoTwinsIfaceAll`, `GoTwinsGo`, `GoTwinsRefuse`)
+  set in a build with twins on. The prototype's own arms set `GoTwinsArm=true`, which this refusal admits. That
+  property is an arm marker, and the docs never mention it.
+
+### 12.2 GenTests rows, each red first
+
+| row | red before the code | green after |
+|---|---|---|
+| F1 a public function that cannot park | no `ꞏtwin` member | a `[GoParkForwarder]` twin returning a completed task |
+| F2 a public method refused by its body (`unsafe` modifier, `native`) | absent | a forwarder |
+| F3 a pointer receiver whose box twin is refused | absent | a forwarder taking `this ж<T>`, calling through `DerefOrNull` |
+| F4 a variadic `...any` function | refused `reflike` | a forwarder taking `slice<object>` and delivering EVERY element (dropping `.ꓸꓸꓸ` makes it fail: one element arrives) |
+| F5 an sstring-pilot pair | refused on the `sstring` member | one twin, on the `@string` member |
+| F6 a caller of F1 | (n/a before) | calls the plain member, no await |
+| F7 a Go type named `Task` | refused `async-shaped` | twinned or forwarded |
+| F8 a generic function | refused under several names | refused as E1, by name |
+| F9 the guard | (no guard) | a population member with its forwarder suppressed (a test seam) fails GO2CS0017, naming it |
+| F10 O2 | (no refusal) | GoTwinsIface set with twins on fails GO2CS0018; with GoTwinsArm=true it builds |
+| F11 a variadic interface member | no slot | a `slice<T>` slot; `ꞏcall` delivers every element |
+| P8 invariance (11.4) | (no check) | the sstring list emptied, and one receiver flipped from ref to ж: the twin members' metadata is identical |
+
+### 12.3 Predictions on the programs and the closure
+
+| # | prediction | stop line |
+|---|---|---|
+| Q1 | the 20 twin builds of the 7b kit stay green; each twin run prints its plain output | any difference |
+| Q2 | MnHttpClosure, arm B's rule: GO2CS0017 reports 0 in converted files | any (section 9's P1) |
+| Q3 | forwarders are 60-75% of the population on the closure (section 9's P3) | none: a reading |
+| Q4 | the closure's go.*.dll bytes: a further +2% to +5% over arm B (P4) | over +10%: a ruling |
+| Q5 | the build wall: within 1.2x of arm B (P5) | over 1.5x: a ruling |
+| Q6 | P7: `instance`, `interface-member`, `explicit-impl`, `ref-return` on converted public members: 0 | any |
+| Q7 | GenTests: every row of 12.2 green, with the 693 already there unchanged | any red that was green |
+
+Size: 3.5-5.5 lane-days, as section 7 priced it. Order: `GoParkForwarderAttribute` and its `[mn-frozen]` lines; F1,
+F2, F6; F3, F5; F4, F11; F7, F8; the guard (F9) and O2 (F10); P8; then the closure arms.
