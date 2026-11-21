@@ -1297,9 +1297,19 @@ func insertForwarderAliasDirectives(packageInfoLines []string, aliasLines []stri
 
 	inserted := []string{""}
 
+	// A copy is rooted at global:: where a `go.go` namespace (a go/* package's) shadows the root, as a converted
+	// file's own `using static` is: inside the namespace declaration `go.` would find `go.go` first.
+	rooted := func(referent string) string {
+		if strings.HasPrefix(referent, RootNamespace+".") {
+			return globalQualifyRooted(referent)
+		}
+
+		return referent
+	}
+
 	for _, line := range packageInfoLines[:namespaceIndex] {
-		if strings.HasPrefix(line, "using static ") {
-			inserted = append(inserted, line)
+		if target, ok := strings.CutPrefix(line, "using static "); ok {
+			inserted = append(inserted, "using static "+rooted(strings.TrimSuffix(target, ";"))+";")
 		}
 	}
 
@@ -1308,7 +1318,8 @@ func insertForwarderAliasDirectives(packageInfoLines []string, aliasLines []stri
 	// alias the declaration itself carries, as each converted file's does.
 	for _, line := range packageInfoLines[:namespaceIndex] {
 		if forwarderImportAlias.MatchString(line) {
-			inserted = append(inserted, line)
+			alias, referent, _ := strings.Cut(strings.TrimSuffix(strings.TrimPrefix(line, "using "), ";"), " = ")
+			inserted = append(inserted, "using "+alias+" = "+rooted(referent)+";")
 		}
 	}
 

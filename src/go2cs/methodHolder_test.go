@@ -1392,3 +1392,37 @@ func TestAHandOwnedMethodKeepsItsHoldersDeclaration(t *testing.T) {
 		"set⁔",
 	})
 }
+
+// Under a `go.go` namespace (a go/* package), a `go.`-rooted directive inside the namespace declaration finds `go.go`
+// first, so the namespace-level copies of package_info.cs's compilation-unit directives are rooted at global::, as a
+// converted file's `using static` is (globalQualifyRooted).
+func TestForwarderDirectivesUnderAShadowedRootTakeGlobal(t *testing.T) {
+	savedNamespace := packageNamespace
+	t.Cleanup(func() { packageNamespace = savedNamespace })
+
+	lines := []string{
+		"using iter = go.iter_package;",
+		"using go;",
+		"using static go.go.token_package;",
+		"",
+		"namespace go.go;",
+		"",
+		"[GoPackage(\"token\")]",
+	}
+
+	for _, test := range []struct {
+		namespace string
+		want      []string
+	}{
+		{"go.go", []string{"using static global::go.go.token_package;", "using iter = global::go.iter_package;", "using ꓸꓸꓸжFile = Span<ж<token_package.File>>;"}},
+		{"go.example", []string{"using static go.go.token_package;", "using iter = go.iter_package;", "using ꓸꓸꓸжFile = Span<ж<token_package.File>>;"}},
+	} {
+		packageNamespace = test.namespace
+		got := insertForwarderAliasDirectives(append([]string(nil), lines...), []string{"using ꓸꓸꓸжFile = Span<ж<token_package.File>>;"}, true)
+		want := append(append(append([]string(nil), lines[:5]...), ""), append(test.want, lines[5:]...)...)
+
+		if strings.Join(got, "\n") != strings.Join(want, "\n") {
+			t.Errorf("under namespace %s the directive block is\n%s\nwant\n%s", test.namespace, strings.Join(got, "\n"), strings.Join(want, "\n"))
+		}
+	}
+}
