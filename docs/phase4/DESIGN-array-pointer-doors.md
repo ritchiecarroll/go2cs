@@ -2245,3 +2245,175 @@ and an array field of a struct variable.
   field ends the process (19.7). 0 emitted sites in the standard library. Ruled for .5 (COORD 13:44Z); disclosed
   with its workaround in `docs/Limitations.md`; BOARD row of this date, with its size.
 - Nothing here ran on windows or darwin before the hosted runs.
+
+## 20. Amendment 2026-11-20 (P5): door C's unnamed form, kept in a local (decision D5, taken)
+
+Section 8 left door C's unnamed form out of the first cut (D5) because "the form works over Go memory today ... and
+sqlite has one such site". That site is wall C of the sqlite-cs run: modernc.org/sqlite's page cache binding
+(`pagecache_trampolines.go`) writes two words into memory it took from `libc.Xcalloc`:
+
+    f := (*[2]uintptr)(unsafe.Pointer(stub))
+    f[0], f[1] = uintptr(page.Buf()), uintptr(page.Extra())
+
+SQLite's own code then reads the same 16 bytes as a `sqlite3_pcache_page`. Go relies on three things: the stores land
+in place in that memory, a raw read of the address sees them, and no managed copy of the array is made. The emission
+before this cut was `@unsafe.Pointer.To<array<uintptr>>(...)` with `f.Value[0]` and `f.Value[1]`. `array<E>` carries
+no N, so over an address no Go value owns the number conversion can build no window, and arm 5 refuses by name
+(`DESIGN-native-array-view.md` 1.1 is why it must). Nine of sqlite's own tests stop there (3 in the pcache tests, 6 at
+the root).
+
+### 20.1 The change
+
+**Converter** (`keptArrayDoor.go`). A conversion `(*[N]E)(unsafe.Pointer(x))` whose value is kept (bound, passed or
+returned), of an UNNAMED array whose element holds no reference in go2cs's model, is emitted
+
+    (*[N]E)(p)        ->   @unsafe.Pointer.ToArray<E>(p, N)
+    f[i], (*f)[i]     ->   f.ElementRef(i)      f a local bound once by the door, never re-pointed, address never taken
+
+It declines, keeping `To<array<E>>(p)`, wherever another route already renders the conversion
+(`arrayPointerConversionKeepsItsRoute`: identity, a managed source, an alias source, the field view of section 18),
+on a span view, on a `FromRef` operand (4.6) and on an element that holds a reference. A named array is not taken
+(4.5's sibling box kind; 0 sites in the population of 20.3). `len(f)` stays the constant N, as for every array pointer.
+An index through any other pointer to such a box (a parameter, a field, a re-pointed local) still reads `.Value[i]` and
+refuses by name: loud, not wrong.
+
+**golib.** `@unsafe.Pointer.ToArray<E>(p, n)` is `To<array<E>>(p)` with a length. It runs the same preamble (nil, and a
+pointer whose source is itself the array pointer) and then `ж<array<E>>.FromNumber`'s own arm order, through a new
+overload that takes the length and an opener; the old two-argument form forwards with none, so every other caller is
+unchanged. The opener replaces exactly two answers, the two where `To` had no N:
+
+| Arm | `To<array<E>>(p)` | `ToArray<E>(p, N)` |
+|:--|:--|:--|
+| 5: a number no Go value owns (C memory) | refused by name | an N-element native window over the address |
+| 5: an address derived from a Go value that the registry does not know | refused by name | a window only if the value holds its storage still and all N elements lie inside it; otherwise refused as by `To` |
+| 2b: a pinned real address of another pointee | a `NativeBox<array<E>>` whose `Value` reads element bytes as an array header | a window only over bytes that box holds still, all N elements inside them; otherwise `To`'s box |
+
+Every other arm answers what `To` answers: nil, the same-type alias (the source box itself), the order token and a
+tagged token (no window: a token names no user memory), token arithmetic (arm 3, refused by the same text), and an
+element that holds a reference (the opener is null, so it is `To` exactly). The window is
+`builtin.NativeArrayPointer<E>` (`NativeArrayBox<E>.Over`), whose `Value` refuses by name and whose `ElementRef` is
+bounds-checked against N with Go's index panic. A window over Go storage is cut by the view doors' own rule (V2,
+section 4.2): only over bytes a box holds still, anchored on that box (`IHeldStorage`; for an address derived from a Go
+value, `NativeDerivation.HeldSource`), so the value stays alive and stays where the window says it is. `slice(...)` and
+`at<E>(i)` over the box take the native view first; every form through `.Value` refuses by name, as it did at arm 5.
+
+The opener is a cached static lambda per element type (`KeptArrayOpener<E>.Open`), so a conversion allocates no
+delegate. The window is bounded by N, as Go's is: it is not checked against the size of the memory behind the
+address, which Go does not check either.
+
+### 20.2 What it costs the refusal's safety
+
+Arm 5 is unchanged for every caller that does not pass N; only the door turns "an unknown address" from a refusal into
+a window. An address derived from a Go value stays loud unless the value holds its storage still (20.3 shows why). The
+one population that moves from loud to silent is a managed address that carries nothing and that the registry does not
+know, a `FromRef` number that escaped its statement through a variable: the provenance design's stated bound, which
+`unsafe.Slice` already accepts (4.6). Still held: no `array<E>` is ever made from bytes, an element holding a reference
+is refused as before, an index is bounded by N, and the number 0 is nil. Lifetime is Go's: C memory freed under a live
+window is a use after free on both sides.
+
+One bound moves from loud to silent with it. The held-storage test runs once, at the conversion, so a window kept past a
+whole assignment to its value still addresses the value's old elements: with `var a [8]uint64`,
+`f := (*[16]uint32)(unsafe.Pointer(&a)); a = b; f[0] = 1` writes into the elements `a` had before the assignment
+(`a = b` is emitted `a = b.Clone()`, the case `ж.cs` names where the pin is checked), and the write is lost without a
+panic. The base was wrong there too, since To's box read the element bytes as an array header, so this is no
+regression; it is the window's limit, read from the code and not measured. A conversion taken after the assignment
+answers the new elements.
+
+### 20.3 Red first, and the readings
+
+GolibTests `KeptArrayDoorTests`, 11 arms: the C-memory tuple store (refused through `To`, written in place through the
+door and read back raw); index N is Go's bounds panic with nothing written; nil; the same-type alias; arm 2b; an
+interior address of a heap struct whose source is dropped, the window keeping it alive across a collection (made to fail
+with the root forced null); token arithmetic refused by the same text as `To`; the order token answering `To`'s box
+kind and its refusal; an element that holds a reference answering `To`'s refusal exactly; a field nothing holds still
+answering `To`'s refusal; and a window past the end of a Go value answering `To`'s answer.
+
+The door's two guards (the order-token test and the tagged-token test) were each removed in turn and both together,
+and the door was moved ahead of arm 3:
+
+| Variant | Result |
+|:--|:--|
+| order-token guard removed | 9 of 9 green |
+| tagged-token guard removed | 9 of 9 green |
+| both removed | the order-token arm red |
+| door ahead of arm 3, guards removed | the token-arithmetic arm and the order-token arm red |
+
+So the two guards are redundant with each other (either alone holds the order-token arm), and the arm order is what
+keeps token arithmetic refused. Restored sha-identical. The full GolibTests suite (linux, 3075 tests at the V2 commit)
+is green at Debug and Release.
+
+**A window over storage nothing holds still: found by the scope probe, fixed before the push.** The first cut opened its
+window at arm 5 for any address the registry did not know. Every array-pointer fixture of the converter suite, converted
+by the base and the cut converters, moved three shapes beyond the sqlite site: a conversion ranged for its index alone, a
+conversion stored into a field or element, and `(*[2]byte)(unsafe.Pointer(&e.Port))` through a promoted field, an
+element or a call result (the shapes 19.8 leaves). Built and run, the third wrote through its window after a collection
+and the write was lost: the field belongs to a struct that holds a reference, nothing can pin it, and the window
+addressed where the struct had been. The base refused it by name at the conversion. The opener now applies V2, and the
+same program answers the base's refusal; the ranged form and a held field view print what native Go prints. Made to
+fail: with the held-extent test removed, the two new arms go red and the other nine stay green; restored sha-identical.
+
+**Corpus footprint**, two seeded `-stdlib` roots (windows/amd64, linux/amd64, darwin/amd64, linux/arm64): 12 files, all
+under `runtime/`, 36 lines out and 36 in: 22 conversions respelled and 18 index sites to `ElementRef`. No `.csproj`, no
+`package_info.cs`, no `GoPositionMap` line. The prediction named 23 conversions; `runtime/symtabinl.cs:73` is not
+respelled, because `inlinedCall` carries `_ [3]byte`, an `array<byte>` field, so its element holds a reference and the
+door declines it. The decline is correct and the prediction's census was wrong. Every one of the 22 sites is in runtime
+code that is converted but not run (`DESIGN-native-array-view.md` 1.5): signal handling, vdso and auxv setup, the
+write-barrier buffer, inline unwinding, and `alg`'s complex-number equality. The behavioral sources emit no door: all 31
+behavioral packages whose Go source holds a `(*[N]T)(...)` conversion convert byte-identically with and without the cut.
+
+<!-- P5, 2026-11-20. Rulings: COORD 085021Z (the amended design; P3 MUST 1-2, SHOULD 3-5 taken), 092645Z (P3 CLEAR on the
+     design; SHOULD 4 owed in full before the merge: the census over the behavioral suite and the banked rows that load the
+     runtime, prediction first). Tree base 91024cab0c (batch 320). Commits: f609052c37 (the door, converter and golib, 9
+     arms; the liveness arm made to fail with the root forced null in ж.cs and restored sha-identical), b6b0816469 (the
+     census instrument: per-process file, start block, samples), f075e0e3e9 (the regen of the 12 runtime files),
+     12347fb964 (the V2 rule in the opener, two arms, the converter test expectations and the moved citations; the
+     scope probe's 12 fixture modules, 3 changed, read in full). Footprint:
+     base converter 1143 s, cut 914 s, GOMEMLIMIT=9GiB, one at a time (the first attempt was OOM-killed at 12.6 GB beside a
+     GolibTests build). Per-file index sites: signal_amd64 (linux-amd64, darwin) 4 each, signal_darwin_amd64 3,
+     signal_unix (linux, darwin) 1 each, alg 1, traceback (amd64, linux-arm64) 2 each. vdso_linux and mgc assign to an
+     existing variable or field, so their index sites keep .Value[i]. Excluded by name: the zsyscall argv and malloc l2
+     lines and plugin.cs:96 (a pointer or unsafe.Pointer element), sync/pool.cs.auto:100, mfinal.cs:329 (a whole-file
+     hand-own whose .cs.auto already holds StoreArray). The committed bytes of the 12 files equal the pre-change emission
+     (CR-stripped compare), so the regen carries no foreign drift. GolibTests linux: Debug 2997 passed / 76 skipped / 0
+     failed, Release 3022 / 51 / 0, of 3073; the 6 toolchain tests that skip without go on PATH pass with it at both. -->
+
+### 20.4 SHOULD 4: the census, and the sqlite reading
+
+**Prediction, posted before any run:** zero arrivals at the door's native arm from the behavioral suite and from the
+`runtime`, `reflect`, `sync` and `os` hosts, and arrivals with arm 5 above zero and arm 2b at zero from the sqlite root
+and pcache hosts, whose nine divergences (six root, three pcache) were predicted to pass. The prediction also said a
+process that never arrives writes no file. That was wrong about the instrument, not about the door: the census's start
+block writes a `total=0` file for every golib process that has the variable set, so the reading is the sum of the
+totals, and the file count is the number of processes the census saw.
+
+| Population (linux/amd64, `CGO_ENABLED=0`) | Result | Processes | Arrivals |
+|---|---|---:|---:|
+| Behavioral suite, all four phases, 12 slices | 1009 of 1009 measurable pass (Output: 983 compared, 26 not compared) | 993 | 0 |
+| `runtime` -tests | PASS 11094 | 18 | 0 |
+| `reflect` -tests | PASS 445 | 1 | 0 |
+| `sync` -tests | PASS 48 | 10 | 0 |
+| `os` -tests | 3831 + 2 (the banked 3840 + 2 is the hosted runner's reading; 3831 + 2 is the other hosts', as the roster names) | 16 | 0 |
+| sqlite module (positive control) | root's six and pcache's three divergences pass; pcache validates 19 of 19 | 9 | 1281 (pcache 1280, root 1), all arm 5 |
+
+No banked row arrived, so there is no number to read for a mapped address. Every sampled sqlite number lies in the
+`0x7f..` range where libc's allocator maps its blocks; the hosts had exited, so they were not read against
+`/proc/<pid>/maps`.
+
+The sqlite root host still dies in flight on `TestSEHTruncatedShm` (an access violation in `Xmemcpy` under
+`walIndexTryHdr`, which reads a shared-memory file the test has truncated). The run before the cut died there in the same
+way, so the tests after it in the root host are unmeasured in both runs. It is not this seat's wall.
+
+<!-- P5, 2026-11-20, at 12347fb964 (CNR rc 0: 1122 behavioral packages byte-identical, 12 platform-exclusive skipped;
+     converter go test rc 0; GolibTests linux Debug 3005 passed / 70 skipped / 0 failed, Release 3030 / 45 / 0, of 3075).
+     Behavioral: run-behavioral.ps1 --slice i/12 --phase all, bin/obj purged between slices, census
+     GO2CS_KEPT_ARRAY_CENSUS_FILE=<dir>/k-{pid}.txt; 993 files, every one total=0. CNR transpiles 1134 packages; the runner
+     enumerates 1021 projects (1009 measurable, 12 platform-exclusive), so 113 packages CNR reads are not runner
+     projects. -tests: run-validated-sweep.ps1 -Filter PKG -Exact, one row at a time, core bin/obj purged before each; the sweep's test-side emission drift and untracked
+     test files restored and removed afterwards, `git status --porcelain | grep '^ D'` empty. The os row's 9-verdict
+     shortfall is the host: ValidatedTestPackages.md's 2026-11-10 note records 3831 + 2 on the non-hosted hosts against
+     3840 + 2 on the hosted linux-x64 runner. sqlite: the C1 union tree (ea2aa14497) with the cut merged locally
+     (de3a62fad8, no file touched by both sides), converter rebuilt, `-tests -recurse -test-action all` over the module,
+     3547 s; the run before the cut is the same union without it. go2cs.slnx (linux, Debug): the whole solution ran the
+     disk out (1 GB left, MSB4017 on a full device) and also reds on SockaddrRoundTrip, a windows-only project the linux
+     flavour cannot compile; its 105 members outside tests/Behavioral, built through a solution filter, compile with
+     0 errors, and the behavioral members were compiled by the census run above. -->

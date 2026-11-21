@@ -832,9 +832,9 @@ internal static ж<g> fatalsignal(uint32 sig, ж<sigctxt> Ꮡc, ж<g> Ꮡgp, ref
             n = physPageSize - pc % physPageSize;
         }
         print((@string)"instruction bytes:");
-        var b = @unsafe.Pointer.To<array<byte>>((@unsafe.Pointer)pc);
+        var b = @unsafe.Pointer.ToArray<byte>((@unsafe.Pointer)pc, 16);
         for (var i = (uintptr)0; i < n; i++) {
-            print((@string)" ", (hex)(uint64)b.Value[i]);
+            print((@string)" ", (hex)(uint64)b.ElementRef(i));
         }
         println();
     }

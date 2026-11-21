@@ -258,7 +258,7 @@ internal static void sysargs(int32 argc, ж<ж<byte>> argv) {
     n++;
 
     // now argv+n is auxv
-    var auxvp = @unsafe.Pointer.To<array<uintptr>>(add(@unsafe.Pointer.FromPinnedBox(argv), (uintptr)n * (uintptr)goarch.PtrSize));
+    var auxvp = @unsafe.Pointer.ToArray<uintptr>(add(@unsafe.Pointer.FromPinnedBox(argv), (uintptr)n * (uintptr)goarch.PtrSize), 268435456);
 
     nint pairsΔ1 = sysauxv(auxvp.slice()); if (pairsΔ1 != 0) {
         auxv = auxvp.slice(0, pairsΔ1 * 2, pairsΔ1 * 2);

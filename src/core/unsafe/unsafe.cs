@@ -890,6 +890,82 @@ public class Pointer : StandardBox<uintptr>, IUnsafePointer {
         GC.KeepAlive(p);
     }
 
+    // ---- Go's `(*[N]E)(p)` kept, passed or returned, E an unnamed array's element: door C, the unnamed form ----
+    //
+    // docs/phase4/DESIGN-array-pointer-doors.md, section 20 (decision D5, taken for the unnamed form only). The
+    // conversion bound to a local, passed or returned was the pointer conversion `To<array<E>>(p)`, which has no N:
+    // array<E> does not carry it, so over an address no Go value owns the conversion can build no window and refuses
+    // by name (ж<T>.FromNumber; DESIGN-native-array-view.md 1.1 is why it must). The converter hands N here from the
+    // type, so that case has an answer.
+    //
+    // This is To<array<E>>(p) with a length, and nothing else decides: the same preamble (nil, and a pointer whose
+    // source is itself the array pointer), then the number conversion's own arm order (ж<T>.FromNumber's length
+    // variant). Its arms answer as they do for To: the same-type alias, the order token through the interior-alias
+    // step, the reinterpret, and token arithmetic, which still refuses by name. Only what stood at arm 5 changes: a
+    // number no Go value owns (C memory), and a pinned real address of another pointee, open a native array pointer
+    // of N elements (builtin.NativeArrayPointer). Its Value refuses by name as before; its elements are read and
+    // written in place through ElementRef, which the converter emits for an index through a local bound by this door,
+    // and `*p = v` stores through it (array<T>.Assign).
+    //
+    // A window over Go storage is cut by the view doors' own rule (V2, ArrayView above): only over bytes a box holds
+    // still, anchored on that box, and only when all N elements lie inside them. Where nothing holds the storage still
+    // (an address derived from a field of a struct that holds a reference, which cannot be pinned) or the window would
+    // pass its end, the opener declines and the conversion answers what To answers: arm 5's refusal by name, or the
+    // fall-through box. A window over storage the collector may move would read and write whatever lies at the old
+    // address once it moves (measured 2026-11-20: a write through such a window after a collection was lost).
+    //
+    // An E that holds a reference passes no opener, so it answers exactly what To<array<E>>(p) answers; the converter
+    // keeps such an E, a named array and a FromRef operand off this door.
+    [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+    public static ж<array<E>> ToArray<E>(Pointer? p, long length)
+    {
+        if (p is null || p.IsNull)
+            return ж<array<E>>.FromNumber(default, carried: null);
+
+        if (p.m_retainedSource is ж<array<E>> itself && NamesAManagedSourceByAddress(p, out _))
+            return itself;
+
+        return ж<array<E>>.FromNumber(BaseOf(p), p.m_retainedSource, (nint)length, KeptArrayOpener<E>.Open);
+    }
+
+    // The window door for E, or null for an E that holds a reference (whose window is not this door's to open).
+    private static class KeptArrayOpener<E>
+    {
+        internal static readonly global::System.Func<nuint, nint, object?, object?, ж<array<E>>?>? Open =
+            RuntimeHelpers.IsReferenceOrContainsReferences<E>() ? null : static (address, length, resolved, carried) => OpenWindow(address, length, resolved, carried);
+
+        // `resolved` is the live Go box the number names, or null; `carried` is what the pointer carried.
+        private static ж<array<E>>? OpenWindow(nuint address, nint length, object? resolved, object? carried)
+        {
+            nuint bytes = (nuint)length * (nuint)Unsafe.SizeOf<E>();
+
+            if (resolved is not null)
+            {
+                // Arm 2b. A resolved box that names native memory (an element or field over a native window) holds
+                // nothing here: the address is native memory, and the window keeps what the pointer carried.
+                if (NativeDerivation.KeptResolved(resolved, aliasesAnOrderToken: false) is not { } holder)
+                    return builtin.NativeArrayPointer<E>(address, length, NativeDerivation.Kept(carried));
+
+                // A Go value of another type: a window only over the bytes it holds still from this address.
+                return holder is IHeldStorage storage && storage.HeldBytesFrom(address) is var room and not 0 && room >= bytes
+                    ? builtin.NativeArrayPointer<E>(address, length, holder)
+                    : null;
+            }
+
+            object? kept = NativeDerivation.Kept(carried);
+
+            // C memory, or a number that carries nothing: nothing here knows where it ends, as in Go.
+            if (NativeDerivation.HeldSource(kept) is not { } origin)
+                return builtin.NativeArrayPointer<E>(address, length, kept);
+
+            // An address derived from a Go value (an offset into it, a field of it) that the registry does not know:
+            // a window only when the value holds its storage still and all N elements lie inside it.
+            return origin.TryHeldExtent(out nuint start, out nuint end) && address >= start && address <= end && end - address >= bytes
+                ? builtin.NativeArrayPointer<E>(address, length, kept)
+                : null;
+        }
+    }
+
     // ---- Go's `(*[N]E)(unsafe.Pointer(&p.f))`, f not an E, over a root that is not native: the FIELD VIEW ----
     //
     // docs/phase4/DESIGN-array-pointer-doors.md, section 18. ArrayPointer<E>.Of answers this where golib's native
