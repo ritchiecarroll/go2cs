@@ -243,6 +243,11 @@ jobs:
           fi
 
       - uses: actions/setup-dotnet@v5
+        env:
+          # The job's own install directory, first on PATH with DOTNET_ROOT on it, so the job's dotnet sees only the
+          # SDK installed here: the runner image carries newer majors beside its own install, and global.json's
+          # latestMajor would take them. The checkout is not touched. The step after this one proves the pin.
+          DOTNET_INSTALL_DIR: ${{ runner.temp }}/dotnet
         with:
           dotnet-version: '10.0.x'
 
@@ -258,6 +263,18 @@ jobs:
           $ok = if ($want.EndsWith('.x')) { $got.StartsWith($want.Substring(0, $want.Length - 1)) } else { $got -ceq $want }
           if (-not $ok) { Write-Host "::error::dotnet --version is $got, not the requested channel ${want}: global.json's latestMajor takes the highest SDK installed"; exit 1 }
           Write-Host "dotnet --version $got is channel $want"
+
+      # The SDK pin works outside the checkout. The tool built next must stamp the record commit unmodified, as the
+      # binaries above do, so a pin that ever wrote into the checkout (a job-local global.json) is refused here.
+      - name: The SDK pin left the checkout clean
+        run: |
+          set -euo pipefail
+          dirty="$(git status --porcelain)"
+          if [ -n "$dirty" ]; then
+            echo "::error::the checkout is not clean after the SDK pin:"
+            printf '%s\n' "$dirty"
+            exit 1
+          fi
 
       # The smoke's packages carry a prerelease version of the release the converter reports, so they can never be
       # mistaken for, or collide with, the signed ones on nuget.org.
@@ -377,6 +394,11 @@ jobs:
             src/go2cs
 
       - uses: actions/setup-dotnet@v5
+        env:
+          # The job's own install directory, first on PATH with DOTNET_ROOT on it, so the job's dotnet sees only the
+          # SDK installed here: the runner image carries newer majors beside its own install, and global.json's
+          # latestMajor would take them. The checkout is not touched. The step after this one proves the pin.
+          DOTNET_INSTALL_DIR: ${{ runner.temp }}/dotnet
         with:
           dotnet-version: '10.0.x'
 
