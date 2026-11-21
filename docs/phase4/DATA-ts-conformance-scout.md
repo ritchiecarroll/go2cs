@@ -247,3 +247,55 @@ cause; the semaphore table (4.9) and the long-tail case (4.8) are not. Which cod
 - Any run through the `-tests` pipeline, and any run at current master.
 - The 8 OOM files at 4 workers alone.
 - Windows and darwin.
+
+## 8. Amendment, 2026-11-21 (after `a68adf08de`): the owner and the root cause
+
+Same instruments and labels as above. COORD gave P5 the root-cause seat (2026-11-21 012155Z).
+
+### 8.1 Fill and reachability (the existing count=4 dumps)
+- Fill = element boxes / total length of the slab arrays they point into: 84.4% at repetition 1, 83.8% at
+  repetition 3. Flat, so the growth is new slabs (capacity 552 k → 799 k), not more boxes on old ones. P5's
+  prediction (55-75%, rising) MISSED.
+- Split by reachability from the harness `sourceFileCache`, the `emitContextPool` static and the
+  dependent-handle roots: about all of the repetition 1 → 3 growth sits in slabs not reachable from
+  `sourceFileCache` (prediction ≥ 70%: MET). Symbols do not grow; syntax nodes do, type nodes most
+  (`KeywordTypeNode` +64%, `TypeReferenceNode` +53%).
+
+### 8.2 Owner by dominator tree (clean dumps after repetitions 1 and 2, both under the node cap)
+`-test.count=3`, 6.76 M and 9.28 M nodes, heap 476 → 641 MB. Exclusive retention (dominator subtree) of the items
+that grow:
+
+| owner | rep 1 | rep 2 |
+|:--|:--|:--|
+| static `sync.Pool` `emitContextPool` | 80.9 MB | 199.1 MB |
+| an `EmitContext` box held from a running goroutine | 45.9 MB | 90.3 MB |
+| `semaTable` (4.9) | 17.3 MB | 33.6 MB |
+| harness `sourceFileCache`, extension-method reflection scan, others | flat | flat |
+
+Each pooled `printer.EmitContext` dominates 24-59 MB, all through its `printer.NodeFactory`. The factory
+references only its arenas' current slabs (49 references), yet dominates, for example, 70 `Identifier[]`, 44
+`NodeList[]` and 27 `TypeReferenceNode[]` slabs with their element boxes and field views. TS's `core.Arena` keeps
+filling a partly used slab across uses, and `EmitContext.Reset` keeps the factory, so the current slab holds the
+latest emit's nodes and the tail of the one before; those nodes point into older slabs that hold an earlier
+emit's tail, and so on through every emit the pooled factory did.
+
+### 8.3 Pool cleanup at every .NET GC (scratch startup hook)
+The same hook as 4.10, firing after every GC of any generation: 720 cleanups in 752 collections (33 gen 2).
+`-test.count=6`: rc 0, 244 s, 0 fails, same verdicts; TestLocal 61.2 / 39.6 / 34.9 / 34.3 / 34.8 / 36.3 s.
+
+| repetitions finished | 1 | 2 | 3 | 4 | 5 |
+|:--|:--|:--|:--|:--|:--|
+| gen-2 survivors, per-GC cleanup | 382-436 MB | 371-504 MB | 409-531 MB | 481-534 MB | 442-594 MB |
+| gen-2 survivors, no cleanup (4.12) | 455 MB | 637 MB | 785 MB | 927 MB | 1,103 MB |
+
+About +20 MB per repetition on the gen-2 medians, of which the semaphore table is about 16 MB. Peak RSS 1.62 GB at
+the end of repetition 6. Prediction (≤ 30 MB per repetition after repetition 2): MET; falsifier (≥ 75 MB) did not
+fire.
+
+### 8.4 Root cause
+The converted `sync.Pool` ages its caches only in the converted runtime's GC cycle (`runtime.GC()` or the 2-minute
+periodic tick), where Go runs `clearpools` at the start of every GC cycle (the native run did 12,782 collections
+in 188 s). A pooled object that keeps references is therefore never dropped while it stays in use, and TS's pooled
+emit contexts keep every node graph they built. Gen-2 cadence is not enough (4.10): a busy pooled object survives
+each cleanup through the victim cache. Per-GC cadence is. The element boxes and field views are retained only
+because their slabs are; this is not a `ж.Views` or `ElemRefBox` policy defect. The fix is routed by COORD.
