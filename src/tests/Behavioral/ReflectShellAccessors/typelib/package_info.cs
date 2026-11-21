@@ -14,6 +14,9 @@
 
 using go;
 using static go.ReflectShellAccessors.typelib_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -49,10 +52,12 @@ using static go.ReflectShellAccessors.typelib_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("lib.go", "lib.cs", "AAoS/Pz8AAkQAAkQtpaWlg==")]
+[assembly: GoPositionMap("lib.go", "lib.cs", "AAYSvLy8AAUQAAUQlpaWlg==")]
 // </GoSourcePositionMaps>
 
 namespace go.ReflectShellAccessors;
+
+using static go.ReflectShellAccessors.typelib_package;
 
 [GoPackage("typelib")]
 public static partial class typelib_package
@@ -89,10 +94,35 @@ public static partial class typelib_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(typelib_package.Box)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class typelibᴛBox;
-[GoMethodHost(typeof(typelib_package.Count)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class typelibᴛCount;
-[GoMethodHost(typeof(typelib_package.Dict)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class typelibᴛDict;
-[GoMethodHost(typeof(typelib_package.Label)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class typelibᴛLabel;
-[GoMethodHost(typeof(typelib_package.List)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class typelibᴛList;
-[GoMethodHost(typeof(typelib_package.Mark)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class typelibᴛMark;
+[GoMethodHost(typeof(typelib_package.Box)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class typelibᴛBox;
+[GoMethodHost(typeof(typelib_package.Count)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class typelibᴛCount;
+[GoMethodHost(typeof(typelib_package.Dict)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class typelibᴛDict;
+[GoMethodHost(typeof(typelib_package.Label)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class typelibᴛLabel;
+[GoMethodHost(typeof(typelib_package.List)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class typelibᴛList;
+[GoMethodHost(typeof(typelib_package.Mark)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class typelibᴛMark;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class typelibᴛBox {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Name(this ref Box b) => typelib_package.Name⁔(ref b);
+}
+partial class typelibᴛCount {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Name(this Count c) => typelib_package.Name⁔(c);
+}
+partial class typelibᴛDict {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Name(this Dict d) => typelib_package.Name⁔(d);
+}
+partial class typelibᴛLabel {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Name(this Label l) => typelib_package.Name⁔(l);
+}
+partial class typelibᴛList {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Name(this List l) => typelib_package.Name⁔(l);
+}
+partial class typelibᴛMark {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Name(this Mark m) => typelib_package.Name⁔(m);
+}
+// </MethodForwarders>

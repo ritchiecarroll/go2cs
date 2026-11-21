@@ -14,6 +14,9 @@
 
 using go;
 using static go.NamedBytesConstConversion.lib_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -49,10 +52,12 @@ using static go.NamedBytesConstConversion.lib_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("lib.go", "lib.cs", "AAsStNj4goKU")]
+[assembly: GoPositionMap("lib.go", "lib.cs", "AAgSlLi4goKU")]
 // </GoSourcePositionMaps>
 
 namespace go.NamedBytesConstConversion;
+
+using static go.NamedBytesConstConversion.lib_package;
 
 [GoPackage("lib")]
 public static partial class lib_package
@@ -86,7 +91,23 @@ public static partial class lib_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(lib_package.Handler)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class libᴛHandler;
-[GoMethodHost(typeof(lib_package.Name)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class libᴛName;
-[GoMethodHost(typeof(lib_package.Value)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class libᴛValue;
+[GoMethodHost(typeof(lib_package.Handler)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class libᴛHandler;
+[GoMethodHost(typeof(lib_package.Name)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class libᴛName;
+[GoMethodHost(typeof(lib_package.Value)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class libᴛValue;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class libᴛHandler {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Run(this Handler h, nint x) => lib_package.Run⁔(h, x);
+}
+partial class libᴛName {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Len(this Name n) => lib_package.Len⁔(n);
+}
+partial class libᴛValue {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool IsNull(this Value v) => lib_package.IsNull⁔(v);
+}
+// </MethodForwarders>

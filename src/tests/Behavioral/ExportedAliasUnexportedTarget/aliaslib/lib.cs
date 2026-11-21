@@ -4,7 +4,6 @@ global using CompareType = go.ExportedAliasUnexportedTarget.aliaslib_package.com
 namespace go.ExportedAliasUnexportedTarget;
 
 using sync = sync_package;
-using static aliaslib_package;
 
 partial class aliaslib_package {
 
@@ -13,9 +12,7 @@ public partial struct mutexWrap {
     internal bool disabled;
 }
 
-} partial class aliaslibᴛmutexWrap {
-
-public static void Lock(this ж<mutexWrap> Ꮡmw) {
+internal static void Lock⁔(/*this*/ ж<mutexWrap> Ꮡmw) {
     ref var mw = ref Ꮡmw.DerefOrNull();
 
     if (!mw.disabled) {
@@ -23,7 +20,7 @@ public static void Lock(this ж<mutexWrap> Ꮡmw) {
     }
 }
 
-public static void Unlock(this ж<mutexWrap> Ꮡmw) {
+internal static void Unlock⁔(/*this*/ ж<mutexWrap> Ꮡmw) {
     ref var mw = ref Ꮡmw.DerefOrNull();
 
     if (!mw.disabled) {
@@ -31,11 +28,9 @@ public static void Unlock(this ж<mutexWrap> Ꮡmw) {
     }
 }
 
-public static void Disable(this ref mutexWrap mw) {
+internal static void Disable⁔(/*this*/ ref mutexWrap mw) {
     mw.disabled = true;
 }
-
-} partial class aliaslib_package {
 
 public partial struct compareResult /*num:nint*/;
 

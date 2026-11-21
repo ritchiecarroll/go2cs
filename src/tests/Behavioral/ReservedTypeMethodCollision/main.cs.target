@@ -1,7 +1,6 @@
 namespace go;
 
 using fmt = fmt_package;
-using static main_package;
 
 partial class main_package {
 
@@ -15,13 +14,9 @@ partial struct builder {
     internal nint @base;
 }
 
-} partial class mainᴛbuilder {
-
-internal static Δslice Δslice(this ref builder b, nint n) {
+internal static Δslice Δslice⁔(/*this*/ ref builder b, nint n) {
     return new Δslice(lo: b.@base, hi: b.@base + n);
 }
-
-} partial class main_package {
 
 internal static void main() {
     var b = Ꮡ(new builder(@base: 10));
@@ -41,9 +36,7 @@ partial struct Sieve {
     internal slice<nint> vals;
 }
 
-} partial class mainᴛSieve {
-
-public static nint Filter(this Sieve sv, Func<nint, bool> f) {
+internal static nint Filter⁔(/*this*/ Sieve sv, Func<nint, bool> f) {
     nint count = 0;
     foreach (var (_, v) in range(sv.vals)) {
         if (f(v)) {
@@ -53,4 +46,4 @@ public static nint Filter(this Sieve sv, Func<nint, bool> f) {
     return count;
 }
 
-}
+} // end main_package

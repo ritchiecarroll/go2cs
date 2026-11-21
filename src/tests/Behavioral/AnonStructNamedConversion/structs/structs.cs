@@ -1,15 +1,11 @@
 namespace go.AnonStructNamedConversion;
 
-using static structs_package;
-
 partial class structs_package {
 
 partial struct AssignB {
     public nint A;
 }
 
-} partial class structsᴛAssignB {
+internal static nint Sum⁔(/*this*/ AssignB x) { return x.A * 10; }
 
-public static nint Sum(this AssignB x) { return x.A * 10; }
-
-}
+} // end structs_package

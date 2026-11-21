@@ -14,6 +14,9 @@
 
 using go;
 using static go.main_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -53,10 +56,12 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("GoCallVariations.go", "GoCallVariations.cs", "AAgQgoKClIKklJSUgoKUgpSUgoKUgoKUAAgKgoLOgoKmgoK4goKCrIKCgoKClJC2goKC", "23-25:1;59-61:1;75-79:1;80-80:2", "", "", "10:15,11:15,12:15,16:15,20:15,88:15")]
+[assembly: GoPositionMap("GoCallVariations.go", "GoCallVariations.cs", "AAcQgoKClIKklJSUgoKUgpSUgoKUgoKU6oKCroKCpoKCuIKCgqyCgoKCgpSQtoKCgg==", "23-25:1;59-61:1;75-79:1;80-80:2", "", "", "9:15,10:15,11:15,15:15,19:15,83:15")]
 // </GoSourcePositionMaps>
 
 namespace go;
+
+using static go.main_package;
 
 [GoPackage("main")]
 // Cannot test matching console output, go routine output order is non-deterministic
@@ -91,5 +96,15 @@ public static partial class main_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(main_package.accum)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛaccum;
+[GoMethodHost(typeof(main_package.accum)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class mainᴛaccum;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class mainᴛaccum {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint add(this ref accum a, nint n) => main_package.add⁔(ref a, n);
+}
+// </MethodForwarders>

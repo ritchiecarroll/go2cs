@@ -14,6 +14,9 @@
 
 using go;
 using static go.RenamedTypeAliasReexport.lib_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -50,10 +53,12 @@ using static go.RenamedTypeAliasReexport.lib_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("lib.go", "lib.cs", "ABEUoMS0lAALDLQACQ4=")]
+[assembly: GoPositionMap("lib.go", "lib.cs", "AA0UoKSUlPyU/g==")]
 // </GoSourcePositionMaps>
 
 namespace go.RenamedTypeAliasReexport;
+
+using static go.RenamedTypeAliasReexport.lib_package;
 
 [GoPackage("lib")]
 public static partial class lib_package
@@ -90,8 +95,28 @@ public static partial class lib_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(lib_package.Encoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class libᴛEncoder;
-[GoMethodHost(typeof(lib_package.Reader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class libᴛReader;
-[GoMethodHost(typeof(lib_package.Tok)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class libᴛTok;
-[GoMethodHost(typeof(lib_package.export)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class libᴛexport;
+[GoMethodHost(typeof(lib_package.Encoder)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class libᴛEncoder;
+[GoMethodHost(typeof(lib_package.Reader)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class libᴛReader;
+[GoMethodHost(typeof(lib_package.Tok)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class libᴛTok;
+[GoMethodHost(typeof(lib_package.export)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class libᴛexport;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class libᴛEncoder {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint N(this ref Encoder e) => lib_package.N⁔(ref e);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Bump(this ref Encoder e) => lib_package.Bump⁔(ref e);
+}
+partial class libᴛReader {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static Token Token(this Reader _) => lib_package.Token⁔(_);
+}
+partial class libᴛTok {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static Kind Kind(this Tok t) => lib_package.Kind⁔(t);
+}
+partial class libᴛexport {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint Encoder(this export _, ж<Encoder> Ꮡe) => lib_package.Encoder⁔(_, Ꮡe);
+}
+// </MethodForwarders>

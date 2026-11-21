@@ -1,7 +1,5 @@
 namespace go;
 
-using static PromotedEmbedLib_package;
-
 partial class PromotedEmbedLib_package {
 
 partial struct Reading {
@@ -12,19 +10,15 @@ partial struct common {
     internal nint sum;
 }
 
-} partial class PromotedEmbedLibᴛcommon {
-
-internal static void Add(this ж<common> Ꮡc, nint n) {
+internal static void Add⁔(/*this*/ ж<common> Ꮡc, nint n) {
     var p = Ꮡc.Ꮡsum;
     p.Value += n;
 }
 
-internal static Reading Report(this ж<common> Ꮡc) {
+internal static Reading Report⁔(/*this*/ ж<common> Ꮡc) {
     var p = Ꮡc.Ꮡsum;
     return new Reading(Sum: p.Value);
 }
-
-} partial class PromotedEmbedLib_package {
 
 partial struct Counter {
     /*embed*/ internal common common;

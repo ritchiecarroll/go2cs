@@ -1,7 +1,6 @@
 namespace go;
 
 using fmt = fmt_package;
-using static main_package;
 
 partial class main_package {
 
@@ -88,11 +87,9 @@ partial struct res {
     internal nint id;
 }
 
-} partial class mainᴛres {
-
-internal static error close(this res h) {
+internal static error close⁔(/*this*/ res h) {
     fmt.Println("closed", h.id);
     return default;
 }
 
-}
+} // end main_package

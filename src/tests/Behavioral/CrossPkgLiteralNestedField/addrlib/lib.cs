@@ -1,7 +1,5 @@
 namespace go.CrossPkgLiteralNestedField;
 
-using static addrlib_package;
-
 partial class addrlib_package {
 
 public static UntypedInt PathMax => 12;
@@ -16,13 +14,11 @@ partial struct Addr {
     internal rawAddr raw;
 }
 
-} partial class addrlibᴛAddr {
-
-public static nint Capacity(this ref Addr a) {
+internal static nint Capacity⁔(/*this*/ ref Addr a) {
     return len(a.raw.Path);
 }
 
-public static (nint, bool) Encode(this ref Addr a) {
+internal static (nint, bool) Encode⁔(/*this*/ ref Addr a) {
     nint n = len(a.Name);
     if (n > len(a.raw.Path)) {
         return (0, false);
@@ -34,11 +30,9 @@ public static (nint, bool) Encode(this ref Addr a) {
     return (2 + n + 1, true);
 }
 
-public static int8 PathByte(this ref Addr a, nint i) {
+internal static int8 PathByte⁔(/*this*/ ref Addr a, nint i) {
     return a.raw.Path[i];
 }
-
-} partial class addrlib_package {
 
 partial struct slots {
     public array<int32> Cells = new(4);
@@ -49,15 +43,13 @@ partial struct Embedder {
     /*embed*/ internal slots slots;
 }
 
-} partial class addrlibᴛEmbedder {
-
-public static nint Slots(this ref Embedder e) {
+internal static nint Slots⁔(/*this*/ ref Embedder e) {
     return len(e.Cells);
 }
 
-public static int32 Put(this ref Embedder e, nint i, int32 v) {
+internal static int32 Put⁔(/*this*/ ref Embedder e, nint i, int32 v) {
     e.Cells[i] = v;
     return e.Cells[i];
 }
 
-}
+} // end addrlib_package

@@ -8,8 +8,6 @@ global using visitor = go.ForwardAliasChainRecord.lib_package.Tvisitorᴛ1;
 
 namespace go.ForwardAliasChainRecord;
 
-using static lib_package;
-
 partial class lib_package {
 
 public partial struct Tsqlite3_vtab_cursorᴛ1 /*dyn*/ {
@@ -27,8 +25,6 @@ partial struct Doubler {
     public int32 By;
 }
 
-} partial class libᴛDoubler {
+internal static int32 Visit⁔(/*this*/ Doubler d, int32 n) { return n * d.By; }
 
-public static int32 Visit(this Doubler d, int32 n) { return n * d.By; }
-
-}
+} // end lib_package

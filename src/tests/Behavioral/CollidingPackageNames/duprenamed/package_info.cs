@@ -14,6 +14,9 @@
 
 using go;
 using static go.collidea.dup_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -49,10 +52,12 @@ using static go.collidea.dup_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("lib.go", "lib.cs", "AAsW/gAHFg==")]
+[assembly: GoPositionMap("lib.go", "lib.cs", "AAcW3gAFFg==")]
 // </GoSourcePositionMaps>
 
 namespace go.collidea;
+
+using static go.collidea.dup_package;
 
 [GoPackage("dup")]
 public static partial class dup_package
@@ -86,6 +91,19 @@ public static partial class dup_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(dup_package.Box<>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dupᴛBox;
-[GoMethodHost(typeof(dup_package.Widget)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dupᴛWidget;
+[GoMethodHost(typeof(dup_package.Box<>)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class dupᴛBox;
+[GoMethodHost(typeof(dup_package.Widget)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class dupᴛWidget;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class dupᴛBox {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static T Get<T>(this Box<T> b) => dup_package.Get⁔<T>(b);
+}
+partial class dupᴛWidget {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Marker(this Widget _) => dup_package.Marker⁔(_);
+}
+// </MethodForwarders>

@@ -1,43 +1,33 @@
 namespace go;
 
-using static ForeignPtrEmbedIfaceLib_package;
-
 partial class ForeignPtrEmbedIfaceLib_package {
 
 partial struct Meter {
     internal nint total;
 }
 
-} partial class ForeignPtrEmbedIfaceLibᴛMeter {
-
-public static nint Add(this ж<Meter> Ꮡm, nint delta) {
+internal static nint Add⁔(/*this*/ ж<Meter> Ꮡm, nint delta) {
     var p = Ꮡm.Ꮡtotal;
     p.Value += delta;
     return p.Value;
 }
 
-public static nint Total(this ж<Meter> Ꮡm) {
+internal static nint Total⁔(/*this*/ ж<Meter> Ꮡm) {
     var p = Ꮡm.Ꮡtotal;
     return p.Value;
 }
-
-} partial class ForeignPtrEmbedIfaceLib_package {
 
 partial struct Gauge {
     internal nint value;
 }
 
-} partial class ForeignPtrEmbedIfaceLibᴛGauge {
-
-public static void Set(this ref Gauge g, nint v) {
+internal static void Set⁔(/*this*/ ref Gauge g, nint v) {
     g.value = v;
 }
 
-public static nint Get(this ref Gauge g) {
+internal static nint Get⁔(/*this*/ ref Gauge g) {
     return g.value;
 }
-
-} partial class ForeignPtrEmbedIfaceLib_package {
 
 partial struct Pair {
     /*embed*/ public ж<Meter> Meter;
