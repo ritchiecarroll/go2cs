@@ -57,7 +57,7 @@ public class PublicSurfaceTests
             current.Add(line);
         }
 
-        foreach (string section in new[] { "tier1", "go-tier2", "builtin", "tier1-members" })
+        foreach (string section in new[] { "tier1", "go-tier2", "builtin", "tier1-members", "mn-frozen" })
         {
             if (!sections.ContainsKey(section))
                 throw new InvalidDataException($"{BaselineFile} has no [{section}] section");
@@ -271,6 +271,69 @@ public class PublicSurfaceTests
             violations.Add($"[tier1-members] {line}: a new tier-1 member; add the line once it is meant to be a promise, or hide it");
 
         return violations;
+    }
+
+    // [mn-frozen]: the lines golib has today for each type the section names.
+    private static HashSet<string> FrozenLines(IEnumerable<string> typeNames)
+    {
+        HashSet<string> lines = new(StringComparer.Ordinal);
+
+        foreach (string name in typeNames)
+        {
+            if (typeof(builtin).Assembly.GetType(name) is not { } type)
+                continue;
+
+            foreach (ConstructorInfo constructor in type.GetConstructors())
+                lines.Add($"{name} :: ctor ({string.Join(", ", constructor.GetParameters().Select(parameter => parameter.ParameterType.FullName))})");
+
+            if (type.GetCustomAttribute<AttributeUsageAttribute>(inherit: false) is { } usage)
+                lines.Add($"{name} :: usage {usage.ValidOn}, AllowMultiple={usage.AllowMultiple}, Inherited={usage.Inherited}");
+        }
+
+        return lines;
+    }
+
+    private static List<string> FrozenViolations(HashSet<string> baseline)
+    {
+        HashSet<string> types = [.. baseline.Select(line => line[..line.IndexOf(" :: ", StringComparison.Ordinal)])];
+        HashSet<string> actual = FrozenLines(types);
+        List<string> violations = [];
+
+        foreach (string line in baseline.Where(line => !actual.Contains(line)).Order(StringComparer.Ordinal))
+            violations.Add($"[mn-frozen] {line}: removed or changed; generated code in every converted assembly names it");
+
+        foreach (string line in actual.Where(line => !baseline.Contains(line)).Order(StringComparer.Ordinal))
+            violations.Add($"[mn-frozen] {line}: not in the frozen baseline");
+
+        return violations;
+    }
+
+    // M:N item 7d: the stamp generated code names holds its shape (G's condition 1).
+    [TestMethod]
+    public void TheFrozenMnSurfaceMatchesItsBaseline()
+    {
+        HashSet<string> baseline = ReadBaseline()["mn-frozen"];
+        List<string> violations = FrozenViolations(baseline);
+
+        Assert.AreEqual(0, violations.Count, string.Join("\n", violations));
+        Assert.IsTrue(baseline.Count >= 2, "the [mn-frozen] section names the [GoTwinOf] ctor and usage");
+    }
+
+    // Its negative control: a line that moves is named, both ways.
+    [TestMethod]
+    public void AFrozenMnLineThatMovesIsNamed()
+    {
+        HashSet<string> baseline = ReadBaseline()["mn-frozen"];
+        const string Ctor = "go.golib.GoTwinOfAttribute :: ctor (System.Type, System.String, System.Type[], System.Int32[])";
+
+        Assert.IsTrue(baseline.Remove(Ctor));
+        baseline.Add("go.golib.GoTwinOfAttribute :: ctor (System.Type, System.String)");
+
+        CollectionAssert.AreEquivalent(new[]
+        {
+            "[mn-frozen] go.golib.GoTwinOfAttribute :: ctor (System.Type, System.String): removed or changed; generated code in every converted assembly names it",
+            $"[mn-frozen] {Ctor}: not in the frozen baseline"
+        }, FrozenViolations(baseline));
     }
 
     [TestMethod]

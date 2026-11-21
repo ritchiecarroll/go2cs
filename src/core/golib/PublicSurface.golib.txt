@@ -21,6 +21,15 @@
 #
 # A [go-tier2] addition, and any change to [tier1] or [tier1-members] outside the deprecation path, needs a COORD
 # ruling, cited in a comment line beside it.
+#
+# [mn-frozen] The M:N members generated code names in every converted assembly, which hold across a break floor:
+# "<type> :: ctor (<parameter types>)" for each public constructor and "<type> :: usage <targets>, AllowMultiple=<b>,
+# Inherited=<b>" for an attribute. A line that moves, or a constructor added, reads red by the line.
+
+[mn-frozen]
+# G's ruling on M:N item 7d (2026-11-20): the [GoTwinOf] stamp, docs/phase4/DATA-mn-origin-table.md
+go.golib.GoTwinOfAttribute :: ctor (System.Type, System.String, System.Type[], System.Int32[])
+go.golib.GoTwinOfAttribute :: usage Method, AllowMultiple=False, Inherited=False
 
 [tier1]
 go.array`1
