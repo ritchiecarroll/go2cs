@@ -359,6 +359,10 @@
     <None Include="$(MSBuildThisFileDirectory)inlineArrayFaces.go" />
     <None Include="$(MSBuildThisFileDirectory)inlineArrayFaces_test.go" />
     <None Include="$(MSBuildThisFileDirectory)inlineArrayForeignSlice_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)inlineArrayImporterSeed.go" />
+    <None Include="$(MSBuildThisFileDirectory)inlineArrayImporterSeed_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)inlineArrayLiftChain.go" />
+    <None Include="$(MSBuildThisFileDirectory)inlineArrayLiftChain_test.go" />
     <None Include="$(MSBuildThisFileDirectory)inlineArrayOverCap_test.go" />
     <None Include="$(MSBuildThisFileDirectory)inlineArraySeed_test.go" />
     <None Include="$(MSBuildThisFileDirectory)inlineArrayStamp.go" />
