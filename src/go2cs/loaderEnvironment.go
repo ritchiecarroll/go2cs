@@ -57,11 +57,13 @@ func cgoOnLoad(options Options, env []string) bool {
 	return enabled == "1"
 }
 
-// checkCgoFlag refuses a -cgo the converter cannot honour. -cgo makes ONE load cgo-on, the single-package driver's
-// own (processConversion), so it is refused beside -stdlib (the standard library converts at CGO_ENABLED=0 by
-// ruling), and beside -tests and -recurse, whose loads it does not reach and would otherwise leave silently cgo-off.
+// checkCgoFlag refuses a -cgo the converter cannot honour. -cgo makes the conversion's loads cgo-on: the
+// single-package driver's own (processConversion), and under -recurse the module driver's closure load and each
+// package's own (a cgo package against the go.* packages, INC 1). It is refused beside -stdlib (the standard library
+// converts at CGO_ENABLED=0 by ruling), and beside -tests, whose loads it does not reach and would otherwise leave
+// silently cgo-off.
 // An explicit CGO_ENABLED other than 1 asks for the opposite load and is refused too; an empty one is Go's "unset".
-func checkCgoFlag(cgo, stdlib, tests, recurse bool) error {
+func checkCgoFlag(cgo, stdlib, tests bool) error {
 	if !cgo {
 		return nil
 	}
@@ -71,8 +73,6 @@ func checkCgoFlag(cgo, stdlib, tests, recurse bool) error {
 		return fmt.Errorf("-cgo cannot be combined with -stdlib: the standard library converts at CGO_ENABLED=0 by ruling")
 	case tests:
 		return fmt.Errorf("-cgo cannot be combined with -tests: the test drivers' loads stay at CGO_ENABLED=0")
-	case recurse:
-		return fmt.Errorf("-cgo cannot be combined with -recurse: the module driver's loads stay at CGO_ENABLED=0")
 	}
 
 	if value, set := os.LookupEnv("CGO_ENABLED"); set && value != "" && value != "1" {

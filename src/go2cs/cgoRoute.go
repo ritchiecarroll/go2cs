@@ -26,6 +26,7 @@ import (
 	"slices"
 	"sort"
 	"strings"
+	"sync"
 
 	"golang.org/x/tools/go/ast/astutil"
 	"golang.org/x/tools/go/packages"
@@ -823,6 +824,24 @@ func cgoCalledFunction(node ast.Node, declarations map[types.Object]cgoDeclarati
 // nil when the package holds no cmd/cgo output (cmd/cgo did not run), so the caller's own refusal stands, and refuses,
 // exiting before anything is written, when any C use is outside Phase 2's set.
 func planCgoRoute(pkg *packages.Package, options Options, load cgoLoad) *cgoRoute {
+	// C++ sources need a C++ compiler (CXX) for ANOTHER target, which INC 2 does not take: R3, by name (P3's INC 2 shape
+	// read, SHOULD 5). go/packages lists them among a package's OtherFiles. At the host's own target they convert as they
+	// did before INC 2 (measured at 6bdf33a157; P3's 2a CLEAR, SHOULD 4), so the refusal reads the host first.
+	host, hostErr := cgoGoEnv(load, "GOHOSTOS", "GOHOSTARCH")
+	crossTarget := hostErr != nil || host[0]+"/"+host[1] != options.targetPlatform
+
+	for _, file := range pkg.OtherFiles {
+		if !crossTarget {
+			break
+		}
+
+		switch strings.ToLower(filepath.Ext(file)) {
+		case ".cc", ".cpp", ".cxx", ".c++":
+			reportDiagnostic(file, diagnosticCgoRefused, fmt.Sprintf("cgo: R3: package %s has C++ source %s, which needs a C++ compiler (CXX) for %s; INC 2 takes a C compiler only", pkg.PkgPath, filepath.Base(file), options.targetPlatform))
+			log.Fatalf("Refusing to convert: cgo: R3: package %s has C++ sources, which need a C++ compiler (CXX); INC 2 takes a C compiler only\n", pkg.PkgPath)
+		}
+	}
+
 	sources, typesFile, imports, refusals := cgoTreeRoles(pkg)
 
 	if typesFile == nil && len(refusals) == 0 {
@@ -1068,10 +1087,15 @@ func planCgoRoute(pkg *packages.Package, options Options, load cgoLoad) *cgoRout
 		}
 	}
 
+	// The C compiler's target triple, which cgoHostTarget checked against the requested target, is recorded in the
+	// bindings' header beside its --version line (P3's INC 2 shape read, MUST 1).
+	var triple string
+
 	if cgoCaptureOverride != nil {
 		captured, toolchain, err = cgoCaptureOverride(symbols)
 	} else {
 		var undefined []cgoUseRefusal
+		triple, _ = cgoCompilerTriple(load, options.targetPlatform)
 		captured, toolchain, undefined, err = cgoCapture(load, goos, goarch, flags, symbols, symbolUses)
 
 		if len(undefined) > 0 {
@@ -1125,7 +1149,7 @@ func planCgoRoute(pkg *packages.Package, options Options, load cgoLoad) *cgoRout
 	route := &cgoRoute{
 		typesFile: reduced,
 		folder:    goos + "-" + goarch,
-		header:    cgoBindingsHeader(pkg, sources, reduced, options.targetPlatform, toolchain),
+		header:    cgoBindingsHeader(pkg, sources, reduced, options.targetPlatform, toolchain, triple),
 		members:   cgoPseudoPackageText(pkg.Name, members),
 	}
 
@@ -1214,7 +1238,7 @@ func refuseCgoRoute(pkg *packages.Package, refusals []cgoUseRefusal) {
 // first --version line, never its path, and a sha256 over the package's import "C" sources and the C type and
 // constant declarations cmd/cgo gave them, each normalised, so that two bindings files are told apart by provenance and
 // the same package converted anywhere hashes the same. No path, link flag or host library version reaches the hash.
-func cgoBindingsHeader(pkg *packages.Package, sources []syntaxSourceFile, reduced *ast.File, targetPlatform, toolchain string) string {
+func cgoBindingsHeader(pkg *packages.Package, sources []syntaxSourceFile, reduced *ast.File, targetPlatform, toolchain, triple string) string {
 	hash := sha256.New()
 	var names []string
 	paths := map[string]string{}
@@ -1259,6 +1283,10 @@ func cgoBindingsHeader(pkg *packages.Package, sources []syntaxSourceFile, reduce
 	header.WriteString("// sources (docs/phase4/DESIGN-cgo-phase2-pinvoke.md §4.1, §11.20). DO NOT EDIT: convert the package again with -cgo.\n")
 	fmt.Fprintf(&header, "// target: %s\n", targetPlatform)
 	fmt.Fprintf(&header, "// C toolchain: %s\n", cgoToolchainLine(toolchain))
+
+	if triple != "" {
+		fmt.Fprintf(&header, "// C target triple: %s\n", cgoToolchainLine(triple))
+	}
 	fmt.Fprintf(&header, "// sha256: %s (the import \"C\" sources and the C declarations cmd/cgo gave them)\n\n", hex.EncodeToString(hash.Sum(nil)))
 
 	return header.String()
@@ -1446,22 +1474,148 @@ func cgoGoEnv(load cgoLoad, keys ...string) ([]string, error) {
 	return values, nil
 }
 
-// cgoHostTarget refuses a -cgo conversion for any target but the host's own (§11.20, S3): cmd/cgo lays out C types with
-// the host's C compiler, so bindings for another target need that target's toolchain, which is Phase 2 later. The host
-// is what go env reads in the load's own environment (GOHOSTOS/GOHOSTARCH), never go2cs's own runtime.GOOS, and the
-// refusal names both sides.
+// cgoHostTarget refuses a -cgo conversion whose C compiler does not compile for the requested target (§11.20, S3; cgo
+// against go.* INC 2a, R3, as amended by P3's shape read, MUST 1). cmd/cgo lays out C types, and the library capture
+// links its probe, with the C compiler `go env CC` reads in the load's environment, which also honours a `go env -w CC`.
+// A compiler that is merely SET proves nothing: the host's gcc named for a windows target sizes C.long at 8 bytes where
+// windows has 4, under windows' Register string, and nothing links at conversion time to notice. So the compiler is
+// ASKED what it targets (-dumpmachine), and an operating system or architecture other than the requested one is refused
+// by name, naming the target, the host (GOHOSTOS/GOHOSTARCH, never go2cs's own runtime.GOOS) and the triple. The host's
+// own default compiler passes for the host's own target, as before; another target needs that target's compiler, such
+// as the pinned zig (`zig cc -target <triple>`, .github/cgo-toolchain.ps1). An explicit sysroot is refused too: narrow
+// v1 links what the pinned compiler carries.
 func cgoHostTarget(load cgoLoad, target string) error {
-	host, err := cgoGoEnv(load, "GOHOSTOS", "GOHOSTARCH")
+	values, err := cgoGoEnv(load, "GOHOSTOS", "GOHOSTARCH", "CGO_CFLAGS", "CGO_CPPFLAGS", "CGO_LDFLAGS")
 
 	if err != nil {
 		return err
 	}
 
-	if hostTarget := host[0] + "/" + host[1]; hostTarget != target {
-		return fmt.Errorf("cgo: -cgo converts for the host's own target only: this conversion asks for %s, and go env in its load reads the host as %s (GOHOSTOS/GOHOSTARCH); converting cgo for another target is Phase 2 later", target, hostTarget)
+	hostTarget := values[0] + "/" + values[1]
+
+	for i, name := range []string{"CGO_CFLAGS", "CGO_CPPFLAGS", "CGO_LDFLAGS"} {
+		if strings.Contains(values[2+i], "sysroot") {
+			return fmt.Errorf("cgo: R3: this -cgo conversion for %s sets a sysroot in %s (%q); INC 2 takes no sysroot: narrow v1 links what the target's pinned C compiler carries", target, name, values[2+i])
+		}
+
+		// A target-changing flag here reaches cmd/cgo's compile but not the -dumpmachine probe, which runs CC alone.
+		// A -target in CC itself is what the probe answers for (the pinned zig, `zig cc -target <triple>`).
+		if name != "CGO_LDFLAGS" && (strings.Contains(values[2+i], "--target") || strings.Contains(values[2+i], "-target ") || strings.HasSuffix(values[2+i], "-target")) {
+			return fmt.Errorf("cgo: R3: this -cgo conversion for %s sets a target flag in %s (%q), which the C compiler's -dumpmachine cannot answer for: name the target in CC itself (for example the pinned zig: CC=\"zig cc -target <triple>\")", target, name, values[2+i])
+		}
+	}
+
+	triple, err := cgoCompilerTriple(load, target)
+
+	if err != nil {
+		return fmt.Errorf("cgo: R3: this -cgo conversion asks for %s (the host is %s), and the C compiler go env CC names in its load did not answer -dumpmachine: %w", target, hostTarget, err)
+	}
+
+	goos, goarch, abi := cgoTripleTarget(triple)
+
+	if goos+"/"+goarch != target {
+		return fmt.Errorf("cgo: R3: this -cgo conversion asks for %s, and the C compiler go env CC names in its load targets %q (-dumpmachine; the host is %s): name a C compiler for %s in CC (for example the pinned zig: CC=\"zig cc -target <triple>\")", target, triple, hostTarget, target)
+	}
+
+	// The ABI narrow v1 binds against: glibc on linux, the gnu or mingw C runtime on windows (P3's 2a CLEAR, SHOULD 1).
+	if abi == "musl" || abi == "android" || abi == "msvc" {
+		return fmt.Errorf("cgo: R3: this -cgo conversion for %s has a C compiler for the %s ABI (-dumpmachine %q); narrow v1 takes gnu on linux and gnu or mingw on windows", target, abi, triple)
 	}
 
 	return nil
+}
+
+var (
+	cgoCompilerTripleMutex sync.Mutex
+	cgoCompilerTriples     = map[string]string{} // keyed by the CC value and the target: one probe per run, not per package
+)
+
+// cgoCompilerTriple is what the load's C compiler (go env CC, split as cmd/go splits it) answers to -dumpmachine, asked
+// once per run for each CC value and target (P3's 2a CLEAR, SHOULD 3).
+func cgoCompilerTriple(load cgoLoad, target string) (string, error) {
+	values, err := cgoGoEnv(load, "CC")
+
+	if err != nil {
+		return "", err
+	}
+
+	key := values[0] + "\x00" + target
+
+	cgoCompilerTripleMutex.Lock()
+	defer cgoCompilerTripleMutex.Unlock()
+
+	if triple, cached := cgoCompilerTriples[key]; cached {
+		return triple, nil
+	}
+
+	command, err := splitCgoCommand(values[0])
+
+	if err != nil {
+		return "", err
+	}
+
+	cmd := exec.Command(command[0], append(append([]string{}, command[1:]...), "-dumpmachine")...)
+	cmd.Env = load.env
+	cmd.Dir = load.dir
+	out, err := cmd.Output()
+
+	if err != nil {
+		return "", err
+	}
+
+	triple := strings.TrimSpace(strings.ReplaceAll(string(out), "\r\n", "\n"))
+
+	if triple == "" {
+		return "", fmt.Errorf("-dumpmachine printed nothing")
+	}
+
+	cgoCompilerTriples[key] = triple
+
+	return triple, nil
+}
+
+// cgoTripleTarget reads a compiler's target triple (x86_64-linux-gnu, aarch64-apple-darwin24.0.0, x86_64-w64-mingw32,
+// x86_64-unknown-windows-gnu) as Go's GOOS and GOARCH, and its ABI part (gnu, mingw, musl, android, msvc); a part it does
+// not know reads as the empty string, which matches no target.
+func cgoTripleTarget(triple string) (goos, goarch, abi string) {
+	parts := strings.Split(strings.ToLower(triple), "-")
+
+	switch parts[0] {
+	case "x86_64", "amd64":
+		goarch = "amd64"
+	case "aarch64", "arm64":
+		goarch = "arm64"
+	case "i386", "i486", "i586", "i686":
+		goarch = "386"
+	}
+
+	for _, part := range parts[1:] {
+		switch {
+		case part == "linux":
+			goos = "linux"
+		case part == "windows", strings.HasPrefix(part, "mingw"):
+			goos = "windows"
+		case strings.HasPrefix(part, "darwin"), strings.HasPrefix(part, "macos"):
+			goos = "darwin"
+		case strings.HasPrefix(part, "freebsd"):
+			goos = "freebsd"
+		}
+
+		switch {
+		case strings.HasPrefix(part, "musl"):
+			abi = "musl"
+		case strings.HasPrefix(part, "android"):
+			abi, goos = "android", "android"
+		case part == "msvc":
+			abi = "msvc"
+		case strings.HasPrefix(part, "gnu"):
+			abi = "gnu"
+		case strings.HasPrefix(part, "mingw"):
+			abi = "mingw"
+		}
+	}
+
+	return goos, goarch, abi
 }
 
 // cgoCapture answers each symbol's library through the C compiler the load used (go env CC, split as cmd/go splits it),
