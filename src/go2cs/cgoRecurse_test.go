@@ -422,6 +422,33 @@ func TestARecurseCgoConversionForAnotherTargetWithoutANamedCCIsRefused(t *testin
 	}
 }
 
+// R3b (P3's INC 2 shape read, MUST 1): a C compiler that is NAMED but compiles for the host does not make bindings for
+// another target. cmd/cgo would size C types with it (C.long is 8 bytes on linux, 4 on windows) under the other target's
+// Register string, and nothing links at conversion time to notice. The route asks the compiler what it targets
+// (-dumpmachine) and refuses an OS or architecture other than the requested one, by name. LOCAL: the host's own CC.
+func TestARecurseCgoConversionForAnotherTargetWithTheHostsCCIsRefused(t *testing.T) {
+	requireHostCC(t)
+	target := cgoRecurseOtherTarget()
+	out, err := exec.Command("go", "env", "CC").Output()
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	combined, _, err := convertCgoRecurseEnv(t, map[string]string{"cptr/cptr.go": cgoRecurseCptr, "main.go": cgoRecurseMain},
+		[]string{"CC=" + strings.TrimSpace(string(out))}, "-recurse=nuget", "-cgo=true", "-platforms", target)
+
+	if err == nil {
+		t.Fatalf("a -cgo conversion for %s with the host's C compiler named as CC converted:\n%s", target, combined)
+	}
+
+	for _, want := range []string{"R3", target, "-dumpmachine"} {
+		if !strings.Contains(combined, want) {
+			t.Errorf("the refusal does not name %q:\n%s", want, combined)
+		}
+	}
+}
+
 // X1, the cross-target conversion with a named C compiler. HOSTED: GO2CS_CGO_CROSS_TARGET names the target and
 // GO2CS_CGO_CROSS_CC its compiler (the converter-cgo stage's pinned zig, `zig cc -target <triple>`); without both the row
 // is NOT MEASURED.
@@ -454,4 +481,40 @@ func TestARecurseCgoConversionForAnotherTargetWithANamedCCBindsThatTarget(t *tes
 	}
 
 	t.Logf("READING %s via %q: %d bytes of cptr C#", target, cc, len(cs))
+}
+
+// R3's two other texts (P3's INC 2 shape read, SHOULD 5): an explicit sysroot and C++ sources are refused by name in
+// INC 2. Both LOCAL, at the host's own target.
+func TestARecurseCgoConversionWithASysrootIsRefused(t *testing.T) {
+	requireHostCC(t)
+
+	combined, _, err := convertCgoRecurseEnv(t, map[string]string{"cptr/cptr.go": cgoRecurseCptr, "main.go": cgoRecurseMain},
+		[]string{"CGO_CFLAGS=--sysroot=/nonexistent-sysroot"}, "-recurse=nuget", "-cgo=true")
+
+	if err == nil {
+		t.Fatalf("a -cgo conversion with a sysroot converted:\n%s", combined)
+	}
+
+	for _, want := range []string{"R3", "sysroot", "CGO_CFLAGS"} {
+		if !strings.Contains(combined, want) {
+			t.Errorf("the refusal does not name %q:\n%s", want, combined)
+		}
+	}
+}
+
+func TestARecurseCgoConversionWithCppSourcesIsRefused(t *testing.T) {
+	requireHostCC(t)
+
+	combined, _, err := convertCgoRecurse(t, map[string]string{"cptr/cptr.go": cgoRecurseCptr, "cptr/helper.cc": "int go2cs_helper() { return 1; }\n",
+		"main.go": cgoRecurseMain}, "-recurse=nuget", "-cgo=true")
+
+	if err == nil {
+		t.Fatalf("a -cgo conversion of a package with C++ sources converted:\n%s", combined)
+	}
+
+	for _, want := range []string{"R3", "C++", "CXX", "helper.cc"} {
+		if !strings.Contains(combined, want) {
+			t.Errorf("the refusal does not name %q:\n%s", want, combined)
+		}
+	}
 }
