@@ -14,6 +14,9 @@
 
 using go;
 using static go.net.http.internal_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -58,10 +61,12 @@ using static go.net.http.internal_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("net/http/internal/chunked.go", "chunked.cs", "ABQqAAEQ4oKClAARGISSgoKUgoKCgpSCggAQIoKCgpSCuIKCgoKU5qKCgriUgoKCpoKUlJSCppSClIKUgoKUgoKCgqaCgoKmAAoO4oKmgoKClAAHEIKCgpSUgpSmgoKUpoKmAAES8rgAAhwACwIAChj2gqaClIKUgoKUgpSClKaCggAVGLKClKKUtLS0lIKUgpQ=")]
+[assembly: GoPositionMap("net/http/internal/chunked.go", "chunked.cs", "ABMqAAEQ4oKClAAPGISSgoKUgoKCgpSCggAQIoKCgpSCuIKCgoKU5qKCgriUgoKCpoKUlJSCppSClIKUgoKUgoKCgqaCgoKmAAgO4oKmgoKClAAHEIKCgpSUgpSmgoKUpoKmAAES8rgAAhwACwIACBj2gqaClIKUgoKUgpSClKaCggATGLKClKKUtLS0lIKUgpQ=")]
 // </GoSourcePositionMaps>
 
 namespace go.net.http;
+
+using static go.net.http.internal_package;
 
 [GoPackage("internal")]
 public static partial class internal_package
@@ -100,6 +105,22 @@ public static partial class internal_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(internal_package.chunkedReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class internalᴛchunkedReader;
-[GoMethodHost(typeof(internal_package.chunkedWriter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class internalᴛchunkedWriter;
+[GoMethodHost(typeof(internal_package.chunkedReader)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class internalᴛchunkedReader;
+[GoMethodHost(typeof(internal_package.chunkedWriter)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class internalᴛchunkedWriter;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class internalᴛchunkedReader {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void beginChunk(this ref chunkedReader cr) => internal_package.beginChunk⁔(ref cr);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool chunkHeaderAvailable(this ref chunkedReader cr) => internal_package.chunkHeaderAvailable⁔(ref cr);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) Read(this ref chunkedReader cr, slice<uint8> b) => internal_package.Read⁔(ref cr, b);
+}
+partial class internalᴛchunkedWriter {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) Write(this ref chunkedWriter cw, slice<byte> data) => internal_package.Write⁔(ref cw, data);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error Close(this ref chunkedWriter cw) => internal_package.Close⁔(ref cw);
+}
+// </MethodForwarders>

@@ -10,21 +10,17 @@
 // object name.
 namespace go.go;
 
-using static types_package;
-
 partial class types_package {
 
 // An objset is a set of objects identified by their unique id.
 // The zero value for objset is a ready-to-use empty objset.
 partial struct objset /*map[@string, Object]*/; // initialized lazily
 
-} partial class typesᴛobjset {
-
 // insert attempts to insert an object obj into objset s.
 // If s already contains an alternative object alt with
 // the same name, insert leaves s unchanged and returns alt.
 // Otherwise it inserts obj and returns nil.
-internal static Object insert(this ref objset s, Object obj) {
+internal static Object insert⁔(/*this*/ ref objset s, Object obj) {
     @string id = obj.Id();
     var alt = (s)[id]; if (alt != nil) {
         return alt;
@@ -36,4 +32,4 @@ internal static Object insert(this ref objset s, Object obj) {
     return default;
 }
 
-}
+} // end types_package

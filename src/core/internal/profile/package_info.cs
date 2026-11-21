@@ -10,10 +10,15 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+using io = go.io_package;
+using regexp = go.regexp_package;
 // </ImportedTypeAliases>
 
 using go;
 using static go.@internal.profile_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -82,16 +87,20 @@ using static go.@internal.profile_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/profile/encode.go", "encode.cs", "AA4agqzigpSCgqaCgoKClIKCgoIABhCCgpSCgoKCAAYQgoK4goKmgoKClKaClKaCgoKmgpSCgqaCgriCgpSClIKUgpSClIKCgoKCgpTGuIKCgriCgoK4goKCuIKCgriCgoK4goKUgpQACxiCgoIACxrSlIKCgoKmgoKCgoKmgoKCgoKCgoKUpqaCgqaCgoKikoKCgpSmgpSClIKClKaClICCtoCCgqSigoKmgoKCxoKmgoLGAAkQgqaCgoKUgtgABxCCgoLYgqaCgoLGAAsUgqaCgoKCgoKCgoKCxgAPHIKmgoKCgoLY3IKCgtiCpoKCxgAJEIKmgoKCgoLGAA0cgoKCgpSmgoKUgoKUgg==", "", "", "44=addString/1/2/2,addString/2/2/3;59=addString/1/1/2")]
-[assembly: GoPositionMap("internal/profile/filter.go", "filter.cs", "AA8e4oKCgoKCgqaCytKCgoKClIK4goKClIK4")]
-[assembly: GoPositionMap("internal/profile/graph.go", "graph.cs", "AECKAaKClKqigpSqoqrSgoKCgpSClKaCggANFpKokoKClIKmpgAICqQAFy6ygoK4gqamgqaCpoKCggAJDIKCgqamgqaCgoKCggAUKKKClMjCgoKCgpKCgpSClIKClAAIEoKClIKCgoKCgoKmgoKCpoKCpoKmlLimlIKCgpSClIKUlAAGEqKUpKQAChKCgpS4goKU3tKCgoKCgpSCgpSUxoKCgpSmsoKCpoKUxoKClMqCyMKCgpTGlIKClILaspSUgqaCgqSClIKUlMyygoKmgqiSgoKUAAgKgqaCgqaCgoKmgpSmgsaCgpQ=")]
-[assembly: GoPositionMap("internal/profile/merge.go", "merge.cs", "AA4q8oKUgoKmAAcQlIKClMqmgoLKgqa4zNSCpoKCgriCgoK4goKClKaCxoKCgqYAFi6i7oKUgoKClIKCgoKCgoLKgoKClJSCgoLIwoKCpoKClJSCgpSUABAaooKmgoKmgu6CuIKCgpSCgoLIkriUgpSCgoKUlIIADBKigqaCuIKCgoKUAAsYpoKCgsqmtIKCgsqUtAAIDAALEIK4pqKClIKUgoKClO6CgoLIkgAOHqKCgriigoKCgoKUgoKUgoKCpoK4AA0cgszSgqaCpoKCpsqi", "", "", "207=Join/1/3/1,Join/2/3/2,Join/3/3/3;378=mapFunction/1/1/1")]
-[assembly: GoPositionMap("internal/profile/profile.go", "profile.cs", "AHL4AaKCgqaCgoKUgoKUpoKCpoKUpoKUgoKmgoCCtoCCtsjSgoKCkoLe1IKClIKC3IKCgpSClJSCgoKUgpSUgoKClIKUgoKCpoKCgsqssoKCgoK4goKCgpSC3IKCgpSCgqaCyurEgoKUgoKUgqaCgoKUgoKCgpSCgpSCgoKCgpSUgoKClLiCgoKClIKUgoKCyoKmlLiCgoKClIKUgpSClAAHEK7igqamgqaUgoKUgoKUgoKmgoKCuIKs0oKmgqaCgriqooKCpqqigoKmxrKClMiygpSCgIKkgIK2AAsWtJKCuIKClIKCpqiSqJKClIKClKiSgpSCgoKCpoKUgoKCuA==", "", "", "", "182:21")]
+[assembly: GoPositionMap("internal/profile/encode.go", "encode.cs", "AAsagqzigpSCgqaCgoKClIKCgoIABhCCgpSCgoKCAAYQgoK4goKmgoKClKaClKaCgoKmgpSCgqaCgriCgpSClIKUgpSClIKCgoKCgpSmuIKCgriCgoK4goKCuIKCgriCgoK4goKUgpQACxiCgoIACRrSlIKCgoKmgoKCgoKmgoKCgoKCgoKUpqaCgqaCgoKikoKCgpSmgpSClIKClKaClICCtoCCgqSigoKmgoKCpoKmgoKmAAcQgqaCgoKUgrgABxCCgoK4gqaCgoKmAAkUgqaCgoKCgoKCgoKCpgANHIKmgoKCgoK43IKCgriCpoKCpgAHEIKmgoKCgoKmAA0cgoKCgpSmgoKUgoKUgg==", "", "", "41=addString/1/2/2,addString/2/2/3;56=addString/1/1/2")]
+[assembly: GoPositionMap("internal/profile/filter.go", "filter.cs", "AAse4oKCgoKCgqaCqtKCgoKClIK4goKClIK4")]
+[assembly: GoPositionMap("internal/profile/graph.go", "graph.cs", "AD2KAaKClKqigpSqoqrSgoKCgpSClKaCggAJFpKokoKClIKmpgAICqQAEy6ygoK4gqamgqaCpoKCgtyCgoKmpoKmgoKCgoIAECiigpSowoKCgoKSgoKUgpSCgpQACBKCgpSCgoKCgoKCpoKCgqaCgqaCppS4ppSCgoKUgpSClJQABhKilKSkAAgSgoKUuIKClL7SgoKCgoKUgoKUlKaCgoKUprKCgqaClKaCgpTKgqjCgoKUppSCgpSCurKUlIKmgoKkgpSClJSssoKCpoKokoKClMqCpoKCpoKCgqaClKaCpoKClA==")]
+[assembly: GoPositionMap("internal/profile/merge.go", "merge.cs", "AA0q8oKUgoKmAAcQlIKClMqmgoLKgqa4rNSCpoKCgriCgoK4goKClKaCpoKCgqYAFC6i7oKUgoKClIKCgoKCgoLKgoKClJSCgoKowoKCpoKClJSCgpSUAAwaooKmgoKmgu6CuIKCgpSCgoKokriUgpSCgoKUlIIACBKigqaCuIKCgoKUAAsYpoKCgqqmtIKCgsqUtAAIDAAHEIK4pqKClIKUgoKClO6CgoKokgAMHqKCgriigoKCgoKUgoKUgoKCpoK4AA0cgqzSgqaCpoKCpqqi", "", "", "198=Join/1/3/1,Join/2/3/2,Join/3/3/3;353=mapFunction/1/1/1")]
+[assembly: GoPositionMap("internal/profile/profile.go", "profile.cs", "AHH4AaKCgqaCgoKUgoKUpoKCpoKUpoKUgoKmgoCCtoCCtqjSgoKCkoLe1IKClIKC3IKCgpSClJSCgoKUgpSUgoKClIKUgoKCpoKCgsqssoKCgoK4goKCgpSC3IKCgpSCgqaCyurEgoKUgoKUgqaCgoKUgoKCgpSCgpSCgoKCgpSUgoKClLiCgoKClIKUgoKCyoKmlLiCgoKClIKUgpSClAAHEK7igqamgqaUgoKUgoKUgoKmgoKCuIKs0oKmgqaCgriqooKCpqqigoKmprKClKiygpSCgIKkgIK2AAcWtJKCuIKClIKCpqiSqJKClIKClKiSgpSCgoKCpoKUgoKCuA==", "", "", "", "179:21")]
 [assembly: GoPositionMap("internal/profile/proto.go", "proto.cs", "ACpagoKCpoKCgpSmgoKmlIKmgpSCgpSCgoKCgoKUgriCgpSmgoKmgoKUpoKUgoKUgoKCgoKClIK4goKmgoK4goKUuIKClKaigoKCgoKCgqaCgqaCpoKmooKCgqbmgoKCgoKUgoIACgqCgoKUgoKCgpSCgsaClIK0goKClIKUgrSClIK0puaCgpSmooCCpIKChJKCgpSClIKmpqKClIKmopSClIKCgpSClJSUgoCCpIKmooKUgqailIKUgoKClIKUlJSCgIKkgqaCgpSCpqKCgpSCpqKClIKUlA==")]
-[assembly: GoPositionMap("internal/profile/prune.go", "prune.cs", "AA4isoKUgoKCgpSClIKC3JSmlJTcuIKCgoKClIKUgoKUgoIABRCikpSCgpSCgqaU")]
+[assembly: GoPositionMap("internal/profile/prune.go", "prune.cs", "AAsisoKUgoKCgpSClIKC3JSmlJTcuIKCgoKClIKUgoKUgoIABRCikpSCgpSCgqaU")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;
+
+using static go.@internal.profile_package;
+using io = go.io_package;
+using regexp = go.regexp_package;
 
 [GoPackage("profile")]
 public static partial class profile_package
@@ -162,22 +171,133 @@ public static partial class profile_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(profile_package.Edge)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class profileᴛEdge;
-[GoMethodHost(typeof(profile_package.EdgeMap)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class profileᴛEdgeMap;
-[GoMethodHost(typeof(profile_package.Function)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class profileᴛFunction;
-[GoMethodHost(typeof(profile_package.Graph)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class profileᴛGraph;
-[GoMethodHost(typeof(profile_package.Label)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class profileᴛLabel;
-[GoMethodHost(typeof(profile_package.Line)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class profileᴛLine;
-[GoMethodHost(typeof(profile_package.Location)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class profileᴛLocation;
-[GoMethodHost(typeof(profile_package.Mapping)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class profileᴛMapping;
-[GoMethodHost(typeof(profile_package.Node)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class profileᴛNode;
-[GoMethodHost(typeof(profile_package.NodeInfo)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class profileᴛNodeInfo;
-[GoMethodHost(typeof(profile_package.NodeMap)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class profileᴛNodeMap;
-[GoMethodHost(typeof(profile_package.Nodes)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class profileᴛNodes;
-[GoMethodHost(typeof(profile_package.Profile)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class profileᴛProfile;
-[GoMethodHost(typeof(profile_package.Sample)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class profileᴛSample;
-[GoMethodHost(typeof(profile_package.ValueType)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class profileᴛValueType;
-[GoMethodHost(typeof(profile_package.edgeList)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class profileᴛedgeList;
-[GoMethodHost(typeof(profile_package.locationMap)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class profileᴛlocationMap;
-[GoMethodHost(typeof(profile_package.profileMerger)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class profileᴛprofileMerger;
+[GoMethodHost(typeof(profile_package.Edge)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class profileᴛEdge;
+[GoMethodHost(typeof(profile_package.EdgeMap)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class profileᴛEdgeMap;
+[GoMethodHost(typeof(profile_package.Function)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class profileᴛFunction;
+[GoMethodHost(typeof(profile_package.Graph)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class profileᴛGraph;
+[GoMethodHost(typeof(profile_package.Label)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class profileᴛLabel;
+[GoMethodHost(typeof(profile_package.Line)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class profileᴛLine;
+[GoMethodHost(typeof(profile_package.Location)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class profileᴛLocation;
+[GoMethodHost(typeof(profile_package.Mapping)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class profileᴛMapping;
+[GoMethodHost(typeof(profile_package.Node)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class profileᴛNode;
+[GoMethodHost(typeof(profile_package.NodeInfo)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class profileᴛNodeInfo;
+[GoMethodHost(typeof(profile_package.NodeMap)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class profileᴛNodeMap;
+[GoMethodHost(typeof(profile_package.Nodes)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class profileᴛNodes;
+[GoMethodHost(typeof(profile_package.Profile)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class profileᴛProfile;
+[GoMethodHost(typeof(profile_package.Sample)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class profileᴛSample;
+[GoMethodHost(typeof(profile_package.ValueType)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class profileᴛValueType;
+[GoMethodHost(typeof(profile_package.edgeList)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class profileᴛedgeList;
+[GoMethodHost(typeof(profile_package.locationMap)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class profileᴛlocationMap;
+[GoMethodHost(typeof(profile_package.profileMerger)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class profileᴛprofileMerger;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class profileᴛEdge {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static int64 WeightValue(this ref Edge e) => profile_package.WeightValue⁔(ref e);
+}
+partial class profileᴛEdgeMap {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Edge> FindTo(this EdgeMap em, ж<Node> Ꮡn) => profile_package.FindTo⁔(em, Ꮡn);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Add(this ref EdgeMap em, ж<Edge> Ꮡe) => profile_package.Add⁔(ref em, Ꮡe);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Delete(this ref EdgeMap em, ж<Edge> Ꮡe) => profile_package.Delete⁔(ref em, Ꮡe);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<ж<Edge>> Sort(this EdgeMap em) => profile_package.Sort⁔(em);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static int64 Sum(this EdgeMap em) => profile_package.Sum⁔(em);
+}
+partial class profileᴛFunction {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<Func<ж<buffer>, message, error>> decoder(this ref Function p) => profile_package.decoder⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void encode(this ref Function p, ж<buffer> Ꮡb) => profile_package.encode⁔(ref p, Ꮡb);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static functionKey key(this ref Function f) => profile_package.key⁔(ref f);
+}
+partial class profileᴛGraph {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this ref Graph g) => profile_package.String⁔(ref g);
+}
+partial class profileᴛLabel {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<Func<ж<buffer>, message, error>> decoder(this Label p) => profile_package.decoder⁔(p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void encode(this Label p, ж<buffer> Ꮡb) => profile_package.encode⁔(p, Ꮡb);
+}
+partial class profileᴛLine {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<Func<ж<buffer>, message, error>> decoder(this ref Line p) => profile_package.decoder⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void encode(this ref Line p, ж<buffer> Ꮡb) => profile_package.encode⁔(ref p, Ꮡb);
+}
+partial class profileᴛLocation {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<Func<ж<buffer>, message, error>> decoder(this ref Location p) => profile_package.decoder⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void encode(this ref Location p, ж<buffer> Ꮡb) => profile_package.encode⁔(ref p, Ꮡb);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static locationKey key(this ref Location l) => profile_package.key⁔(ref l);
+}
+partial class profileᴛMapping {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<Func<ж<buffer>, message, error>> decoder(this ref Mapping p) => profile_package.decoder⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void encode(this ref Mapping p, ж<buffer> Ꮡb) => profile_package.encode⁔(ref p, Ꮡb);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static mappingKey key(this ref Mapping m) => profile_package.key⁔(ref m);
+}
+partial class profileᴛNode {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static int64 FlatValue(this ref Node n) => profile_package.FlatValue⁔(ref n);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static int64 CumValue(this ref Node n) => profile_package.CumValue⁔(ref n);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void AddToEdge(this ж<Node> Ꮡn, ж<Node> Ꮡto, int64 v, bool residual, bool inline) => profile_package.AddToEdge⁔(Ꮡn, Ꮡto, v, residual, inline);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void AddToEdgeDiv(this ж<Node> Ꮡn, ж<Node> Ꮡto, int64 dv, int64 v, bool residual, bool inline) => profile_package.AddToEdgeDiv⁔(Ꮡn, Ꮡto, dv, v, residual, inline);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void addSample(this ref Node n, int64 dw, int64 w, bool flat) => profile_package.addSample⁔(ref n, dw, w, flat);
+}
+partial class profileᴛNodeInfo {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string PrintableName(this ref NodeInfo i) => profile_package.PrintableName⁔(ref i);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<@string> NameComponents(this ref NodeInfo i) => profile_package.NameComponents⁔(ref i);
+}
+partial class profileᴛNodeMap {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Node> FindOrInsertNode(this NodeMap nm, NodeInfo info, NodeSet kept) => profile_package.FindOrInsertNode⁔(nm, info, kept);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static Nodes nodes(this NodeMap nm) => profile_package.nodes⁔(nm);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<Node> findOrInsertLine(this NodeMap nm, ж<Location> Ꮡl, Line li, ж<Options> Ꮡo) => profile_package.findOrInsertLine⁔(nm, Ꮡl, li, Ꮡo);
+}
+partial class profileᴛNodes {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (int64 flat, int64 cum) Sum(this Nodes ns) => profile_package.Sum⁔(ns);
+}
+partial class profileᴛProfile {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<Func<ж<buffer>, message, error>> decoder(this ref Profile p) => profile_package.decoder⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void preEncode(this ref Profile p) => profile_package.preEncode⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void encode(this ref Profile p, ж<buffer> Ꮡb) => profile_package.encode⁔(ref p, Ꮡb);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error postDecode(this ж<Profile> Ꮡp) => profile_package.postDecode⁔(Ꮡp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (bool fm, bool im) FilterSamplesByTag(this ref Profile p, Func<@string, @string, int64, bool> focus, Func<@string, @string, int64, bool> ignore) => profile_package.FilterSamplesByTag⁔(ref p, focus, ignore);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Normalize(this ref Profile p, ж<Profile> Ꮡpb) => profile_package.Normalize⁔(ref p, Ꮡpb);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error compatible(this ref Profile p, ж<Profile> Ꮡpb) => profile_package.compatible⁔(ref p, Ꮡpb);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Write(this ж<Profile> Ꮡp, io.Writer w) => profile_package.Write⁔(Ꮡp, w);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error CheckValid(this ref Profile p) => profile_package.CheckValid⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Aggregate(this ref Profile p, bool inlineFrame, bool function, bool filename, bool linenumber, bool address) => profile_package.Aggregate⁔(ref p, inlineFrame, function, filename, linenumber, address);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this ref Profile p) => profile_package.String⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Merge(this ref Profile p, ж<Profile> Ꮡpb, float64 r) => profile_package.Merge⁔(ref p, Ꮡpb, r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Compatible(this ref Profile p, ж<Profile> Ꮡpb) => profile_package.Compatible⁔(ref p, Ꮡpb);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool HasFunctions(this ref Profile p) => profile_package.HasFunctions⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool HasFileLines(this ref Profile p) => profile_package.HasFileLines⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Profile> Copy(this ж<Profile> Ꮡp) => profile_package.Copy⁔(Ꮡp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Demangle(this ref Profile p, Func<slice<@string>, (map<@string, @string>, error)> d) => profile_package.Demangle⁔(ref p, d);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Empty(this ref Profile p) => profile_package.Empty⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Scale(this ref Profile p, float64 ratio) => profile_package.Scale⁔(ref p, ratio);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error ScaleN(this ref Profile p, slice<float64> ratios) => profile_package.ScaleN⁔(ref p, ratios);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Prune(this ref Profile p, ж<regexp.Regexp> ᏑdropRx, ж<regexp.Regexp> ᏑkeepRx) => profile_package.Prune⁔(ref p, ᏑdropRx, ᏑkeepRx);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error RemoveUninteresting(this ref Profile p) => profile_package.RemoveUninteresting⁔(ref p);
+}
+partial class profileᴛSample {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<Func<ж<buffer>, message, error>> decoder(this ref Sample p) => profile_package.decoder⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void encode(this ref Sample p, ж<buffer> Ꮡb) => profile_package.encode⁔(ref p, Ꮡb);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static sampleKey key(this ref Sample sample) => profile_package.key⁔(ref sample);
+}
+partial class profileᴛValueType {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<Func<ж<buffer>, message, error>> decoder(this ref ValueType p) => profile_package.decoder⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void encode(this ref ValueType p, ж<buffer> Ꮡb) => profile_package.encode⁔(ref p, Ꮡb);
+}
+partial class profileᴛedgeList {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint Len(this edgeList el) => profile_package.Len⁔(el);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool Less(this edgeList el, nint i, nint j) => profile_package.Less⁔(el, i, j);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void Swap(this edgeList el, nint i, nint j) => profile_package.Swap⁔(el, i, j);
+}
+partial class profileᴛlocationMap {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void add(this ref locationMap l, uint64 id, Nodes n) => profile_package.add⁔(ref l, id, n);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static Nodes get(this locationMap l, uint64 id) => profile_package.get⁔(l, id);
+}
+partial class profileᴛprofileMerger {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<Sample> mapSample(this ref profileMerger pm, ж<Sample> Ꮡsrc) => profile_package.mapSample⁔(ref pm, Ꮡsrc);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<Location> mapLocation(this ref profileMerger pm, ж<Location> Ꮡsrc) => profile_package.mapLocation⁔(ref pm, Ꮡsrc);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static mapInfo mapMapping(this ref profileMerger pm, ж<Mapping> Ꮡsrc) => profile_package.mapMapping⁔(ref pm, Ꮡsrc);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static Line mapLine(this ref profileMerger pm, Line src) => profile_package.mapLine⁔(ref pm, src);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<Function> mapFunction(this ref profileMerger pm, ж<Function> Ꮡsrc) => profile_package.mapFunction⁔(ref pm, Ꮡsrc);
+}
+// </MethodForwarders>

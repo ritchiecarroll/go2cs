@@ -14,6 +14,9 @@
 
 using go;
 using static go.container.ring_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -59,10 +62,12 @@ using static go.container.ring_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("container/ring/ring.go", "ring.cs", "ABckooKCqLKClKiygpSqwoKUlILGgrbIkoKUgoKCgpSCggAEJAASAoKCpoKCgpSssoKUqqKCgoKCpqrCgoKC")]
+[assembly: GoPositionMap("container/ring/ring.go", "ring.cs", "ABMkooKCqLKClKiygpSqwoKUlILGgraokoKUgoKCgpSCggACJAASAoKCpoKCgpSssoKUqqKCgoKCpqrCgoKC")]
 // </GoSourcePositionMaps>
 
 namespace go.container;
+
+using static go.container.ring_package;
 
 [GoPackage("ring")]
 public static partial class ring_package
@@ -94,5 +99,22 @@ public static partial class ring_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(ring_package.Ring)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ringᴛRing;
+[GoMethodHost(typeof(ring_package.Ring)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class ringᴛRing;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class ringᴛRing {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<Ring> init(this ж<Ring> Ꮡr) => ring_package.init⁔(Ꮡr);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Ring> Next(this ж<Ring> Ꮡr) => ring_package.Next⁔(Ꮡr);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Ring> Prev(this ж<Ring> Ꮡr) => ring_package.Prev⁔(Ꮡr);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Ring> Move(this ж<Ring> Ꮡr, nint n) => ring_package.Move⁔(Ꮡr, n);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Ring> Link(this ж<Ring> Ꮡr, ж<Ring> Ꮡs) => ring_package.Link⁔(Ꮡr, Ꮡs);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Ring> Unlink(this ж<Ring> Ꮡr, nint n) => ring_package.Unlink⁔(Ꮡr, n);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Len(this ж<Ring> Ꮡr) => ring_package.Len⁔(Ꮡr);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Do(this ж<Ring> Ꮡr, Action<any> f) => ring_package.Do⁔(Ꮡr, f);
+}
+// </MethodForwarders>

@@ -26,8 +26,6 @@ using time = time_package;
 using global::go.@internal;
 using global::go.os;
 using runtime;
-using testdeps = testdeps_package;
-using static testdeps_package;
 
 partial class testdeps_package {
 
@@ -43,9 +41,7 @@ partial struct TestDeps {
 internal static @string matchPat;
 internal static ж<regexp.Regexp> matchRe;
 
-} partial class testdepsᴛTestDeps {
-
-public static (bool result, error err) MatchString(this TestDeps _, @string pat, @string str) {
+internal static (bool result, error err) MatchString⁔(/*this*/ TestDeps _, @string pat, @string str) {
     bool result = default;
     error err = default;
 
@@ -59,42 +55,32 @@ public static (bool result, error err) MatchString(this TestDeps _, @string pat,
     return (matchRe.MatchString(str), default);
 }
 
-public static error StartCPUProfile(this TestDeps _, io.Writer w) {
+internal static error StartCPUProfile⁔(/*this*/ TestDeps _, io.Writer w) {
     return pprof.StartCPUProfile(w);
 }
 
-public static void StopCPUProfile(this TestDeps _) {
+internal static void StopCPUProfile⁔(/*this*/ TestDeps _) {
     pprof.StopCPUProfile();
 }
 
-public static error WriteProfileTo(this TestDeps _, @string name, io.Writer w, nint debug) {
+internal static error WriteProfileTo⁔(/*this*/ TestDeps _, @string name, io.Writer w, nint debug) {
     return pprof.Lookup(name).WriteTo(w, debug);
 }
-
-} partial class testdeps_package {
 
 // ImportPath is the import path of the testing binary, set by the generated main function.
 public static readonly ж<@string> ᏑImportPath = new StaticBox<@string>(default(@string));
 public static ref @string ImportPath => ref ((StaticBox<@string>)ᏑImportPath).ValueSlot;
 
-} partial class testdepsᴛTestDeps {
-
-public static @string ImportPath(this TestDeps _) {
-    return testdeps.ImportPath;
+internal static @string ImportPath⁔(/*this*/ TestDeps _) {
+    return ImportPath;
 }
-
-} partial class testdeps_package {
 
 public static readonly ж<@string> ᏑModulePath = new StaticBox<@string>(default(@string));
 public static ref @string ModulePath => ref ((StaticBox<@string>)ᏑModulePath).ValueSlot;
 
-} partial class testdepsᴛTestDeps {
-
-public static @string ModulePath(this TestDeps _) {
-    return testdeps.ModulePath;
+internal static @string ModulePath⁔(/*this*/ TestDeps _) {
+    return ModulePath;
 }
-
-} partial class testdeps_package {
 
 // testLog implements testlog.Interface, logging actions by package os.
 partial struct testLog {
@@ -103,13 +89,11 @@ partial struct testLog {
     internal bool set;
 }
 
-} partial class testdepsᴛtestLog {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static ref readonly @string getenvˢ => ref getenvˢᵇ;
 private static readonly @string getenvˢᵇ = "getenv"u8;
 
-internal static void Getenv(this ж<testLog> Ꮡl, @string key) {
+internal static void Getenv⁔(/*this*/ ж<testLog> Ꮡl, @string key) {
     Ꮡl.add(getenvˢ, key);
 }
 
@@ -117,7 +101,7 @@ internal static void Getenv(this ж<testLog> Ꮡl, @string key) {
 private static ref readonly @string openˢ => ref openˢᵇ;
 private static readonly @string openˢᵇ = "open"u8;
 
-internal static void Open(this ж<testLog> Ꮡl, @string name) {
+internal static void Open⁔(/*this*/ ж<testLog> Ꮡl, @string name) {
     Ꮡl.add(openˢ, name);
 }
 
@@ -125,7 +109,7 @@ internal static void Open(this ж<testLog> Ꮡl, @string name) {
 private static ref readonly @string statˢ => ref statˢᵇ;
 private static readonly @string statˢᵇ = "stat"u8;
 
-internal static void Stat(this ж<testLog> Ꮡl, @string name) {
+internal static void Stat⁔(/*this*/ ж<testLog> Ꮡl, @string name) {
     Ꮡl.add(statˢ, name);
 }
 
@@ -133,12 +117,12 @@ internal static void Stat(this ж<testLog> Ꮡl, @string name) {
 private static ref readonly @string chdirˢ => ref chdirˢᵇ;
 private static readonly @string chdirˢᵇ = "chdir"u8;
 
-internal static void Chdir(this ж<testLog> Ꮡl, @string name) {
+internal static void Chdir⁔(/*this*/ ж<testLog> Ꮡl, @string name) {
     Ꮡl.add(chdirˢ, name);
 }
 
 // add adds the (op, name) pair to the test log.
-internal static void add(this ж<testLog> Ꮡl, @string op, @string name) {
+internal static void add⁔(/*this*/ ж<testLog> Ꮡl, @string op, @string name) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -162,18 +146,14 @@ internal static void add(this ж<testLog> Ꮡl, @string op, @string name) {
     finally { if (ᒐd1) Ꮡl.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
-} partial class testdeps_package {
-
 internal static readonly ж<testLog> Ꮡlog = new StaticBox<testLog>(default(testLog));
 internal static ref testLog log => ref ((StaticBox<testLog>)Ꮡlog).ValueSlot;
-
-} partial class testdepsᴛTestDeps {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static ref readonly @string testLogˢ => ref testLogˢᵇ;
 private static readonly @string testLogˢᵇ = "# test log\n"u8;
 
-public static void StartTestLog(this TestDeps _, io.Writer w) {
+internal static void StartTestLog⁔(/*this*/ TestDeps _, io.Writer w) {
     Ꮡlog.Ꮡmu.Lock();
     log.w = bufio.NewWriter(w);
     if (!log.set) {
@@ -188,7 +168,7 @@ public static void StartTestLog(this TestDeps _, io.Writer w) {
     Ꮡlog.Ꮡmu.Unlock();
 }
 
-public static error StopTestLog(this TestDeps _) {
+internal static error StopTestLog⁔(/*this*/ TestDeps _) {
     GoFrame ᒐ = default;
     try {
         Ꮡlog.Ꮡmu.Lock();
@@ -202,11 +182,11 @@ public static error StopTestLog(this TestDeps _) {
 }
 
 // SetPanicOnExit0 tells the os package whether to panic on os.Exit(0).
-public static void SetPanicOnExit0(this TestDeps _, bool v) {
+internal static void SetPanicOnExit0⁔(/*this*/ TestDeps _, bool v) {
     testlog.SetPanicOnExit0(v);
 }
 
-public static error /*err*/ CoordinateFuzzing(this TestDeps _, time.Duration timeout, int64 limit, time.Duration minimizeTimeout, int64 minimizeLimit, nint parallel, slice<fuzzꓸCorpusEntry> seed, slice<reflect.Type> types, @string corpusDir, @string cacheDir) {
+internal static error /*err*/ CoordinateFuzzing⁔(/*this*/ TestDeps _, time.Duration timeout, int64 limit, time.Duration minimizeTimeout, int64 minimizeLimit, nint parallel, slice<fuzzꓸCorpusEntry> seed, slice<reflect.Type> types, @string corpusDir, @string cacheDir) {
     error err = default;
     GoFrame ᒐ = default;
     try {
@@ -237,7 +217,7 @@ public static error /*err*/ CoordinateFuzzing(this TestDeps _, time.Duration tim
     ᒐdone: return err;
 }
 
-public static error RunFuzzWorker(this TestDeps _, Func<fuzzꓸCorpusEntry, error> fn) {
+internal static error RunFuzzWorker⁔(/*this*/ TestDeps _, Func<fuzzꓸCorpusEntry, error> fn) {
     GoFrame ᒐ = default;
     try {
         // Worker processes may or may not receive a signal when the user presses ^C
@@ -259,23 +239,21 @@ public static error RunFuzzWorker(this TestDeps _, Func<fuzzꓸCorpusEntry, erro
     finally { ᒐ.Run(); }
 }
 
-public static (slice<fuzzꓸCorpusEntry>, error) ReadCorpus(this TestDeps _, @string dir, slice<reflect.Type> types) {
+internal static (slice<fuzzꓸCorpusEntry>, error) ReadCorpus⁔(/*this*/ TestDeps _, @string dir, slice<reflect.Type> types) {
     return fuzz.ReadCorpus(dir, types);
 }
 
-public static error CheckCorpus(this TestDeps _, slice<any> vals, slice<reflect.Type> types) {
+internal static error CheckCorpus⁔(/*this*/ TestDeps _, slice<any> vals, slice<reflect.Type> types) {
     return fuzz.CheckCorpus(vals, types);
 }
 
-public static void ResetCoverage(this TestDeps _) {
+internal static void ResetCoverage⁔(/*this*/ TestDeps _) {
     fuzz.ResetCoverage();
 }
 
-public static void SnapshotCoverage(this TestDeps _) {
+internal static void SnapshotCoverage⁔(/*this*/ TestDeps _) {
     fuzz.SnapshotCoverage();
 }
-
-} partial class testdeps_package {
 
 public static readonly ж<@string> ᏑCoverMode = new StaticBox<@string>(default(@string));
 public static ref @string CoverMode => ref ((StaticBox<@string>)ᏑCoverMode).ValueSlot;
@@ -295,9 +273,7 @@ public static ref Func<@string, @string, @string, @string, io.Writer, slice<@str
 public static readonly ж<Action<bool>> ᏑCoverMarkProfileEmittedFunc = new StaticBox<Action<bool>>(default(Action<bool>));
 public static ref Action<bool> CoverMarkProfileEmittedFunc => ref ((StaticBox<Action<bool>>)ᏑCoverMarkProfileEmittedFunc).ValueSlot;
 
-} partial class testdepsᴛTestDeps {
-
-public static (@string mode, Func<@string, @string, (@string, error)> tearDown, Func<float64> snapcov) InitRuntimeCoverage(this TestDeps _) {
+internal static (@string mode, Func<@string, @string, (@string, error)> tearDown, Func<float64> snapcov) InitRuntimeCoverage⁔(/*this*/ TestDeps _) {
     @string mode = default;
     Func<@string, @string, (@string, error)> tearDown = default;
     Func<float64> snapcov = default;
@@ -307,8 +283,6 @@ public static (@string mode, Func<@string, @string, (@string, error)> tearDown, 
     }
     return (CoverMode, coverTearDown, CoverSnapshotFunc);
 }
-
-} partial class testdeps_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static ref readonly @string gocoverdirˢ => ref gocoverdirˢᵇ;

@@ -10,10 +10,14 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+using dwarf = go.debug.dwarf_package;
 // </ImportedTypeAliases>
 
 using go;
 using static go.@internal.xcoff_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -83,11 +87,14 @@ using static go.@internal.xcoff_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/xcoff/ar.go", "ar.cs", "AEyYAaKCgpSCgoKUgsyygoKClMiShpaSgqaCpLSkpoKClIKmgoKmlKaCgrjKgqaCgqaClIKClKaCgpSCgpSUgoKCgrqSgpSCpoKUgpSCgrrMsoKCpg==", "104-106:1")]
-[assembly: GoPositionMap("internal/xcoff/file.go", "file.cs", "AFqyAZKCgpSCgoKUgsyygoKClK7CgoKmqqKCgqbKooKUqJKClKiShJKAgqSCpoKmgIKkgoKCgoKUgoCCpIKCgoK0goCCpIKCgoK2griCgIKmkoCCpIKCgpS4gIKkgoKUgoKCgpSCgIKkgoKCgoKCtIKAgqSCgoKCgoKkgoKUgoKotoCCpIKCgpKClIKAgqSCgoKCgoKClIKCgtiCgIKkgoKCgoKCgraCpoKmgpSClKbcgpSCgIKktIKAgqTagoKmgoKUgoCCpIKCtIKAgqSCgqSCgoKAguyCgpSClIKClIKAgqSCgpSCgIKkgoKClIKUgsiCgIKkgoKCgoKUgsi4AAsKgsiSgoKClMiSgoKCgoKCgoKUpqamiLKCgoKCgoKUuIKq1ICCpIKCgpSCgIKkgoK0goCCpIKCyICCpIKAgraUgoKCgoKCgoKCgoKCgpSUpq7CgoKmgpSCgoKClIKClIKCgrSCgpSCgoLIgpSCgriCgriClIKCgoKClIKClIKUgoKUgoKCprSCgpSClIKClKSCgoKUpqyygoKUgg==")]
+[assembly: GoPositionMap("internal/xcoff/ar.go", "ar.cs", "AEuYAaKCgpSCgoKUgqyygoKClKiShpaSgqaCpLSkpoKClIKmgoKmlKaCgrjKgqaCgqaClIKClKaCgpSCgpSUgoKCgrqSgpSCpoKUgpSCgrqssoKCpg==", "104-106:1")]
+[assembly: GoPositionMap("internal/xcoff/file.go", "file.cs", "AFmyAZKCgpSCgoKUgqyygoKClK7CgoKmqqKCgqaqooKUqJKClKiShJKAgqSCpoKmgIKkgoKCgoKUgoCCpIKCgoK0goCCpIKCgoK2griCgIKmkoCCpIKCgpS4gIKkgoKUgoKCgpSCgIKkgoKCgoKCtIKAgqSCgoKCgoKkgoKUgoKotoCCpIKCgpKClIKAgqSCgoKCgoKClIKCgtiCgIKkgoKCgoKCgraCpoKmgpSClKbcgpSCgIKktIKAgqTagoKmgoKUgoCCpIKCtIKAgqSCgqSCgoKAguyCgpSClIKClIKAgqSCgpSCgIKkgoKClIKUgsiCgIKkgoKCgoKUgsi4AAkKgqiSgoKClKiSgoKCgoKCgoKUpqamiLKCgoKCgoKUuIKq1ICCpIKCgpSCgIKkgoK0goCCpIKCyICCpIKAgraUgoKCgoKCgoKCgoKCgpSUpq7CgoKmgpSCgoKClIKClIKCgrSCgpSCgoLIgpSCgriCgriClIKCgoKClIKClIKUgoKUgoKCprSCgpSClIKClKSCgoKUpqyygoKUgg==")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;
+
+using static go.@internal.xcoff_package;
+using dwarf = go.debug.dwarf_package;
 
 [GoPackage("xcoff")]
 public static partial class xcoff_package
@@ -161,8 +168,35 @@ public static partial class xcoff_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(xcoff_package.Archive)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class xcoffᴛArchive;
-[GoMethodHost(typeof(xcoff_package.File)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class xcoffᴛFile;
-[GoMethodHost(typeof(xcoff_package.Section)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class xcoffᴛSection;
-[GoMethodHost(typeof(xcoff_package.nobitsSectionReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class xcoffᴛnobitsSectionReader;
+[GoMethodHost(typeof(xcoff_package.Archive)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class xcoffᴛArchive;
+[GoMethodHost(typeof(xcoff_package.File)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class xcoffᴛFile;
+[GoMethodHost(typeof(xcoff_package.Section)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class xcoffᴛSection;
+[GoMethodHost(typeof(xcoff_package.nobitsSectionReader)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class xcoffᴛnobitsSectionReader;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class xcoffᴛArchive {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Close(this ref Archive a) => xcoff_package.Close⁔(ref a);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (ж<File>, error) GetFile(this ref Archive arch, @string name) => xcoff_package.GetFile⁔(ref arch, name);
+}
+partial class xcoffᴛFile {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Close(this ref File f) => xcoff_package.Close⁔(ref f);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Section> Section(this ref File f, @string name) => xcoff_package.Section⁔(ref f, name);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Section> SectionByType(this ref File f, uint32 typ) => xcoff_package.SectionByType⁔(ref f, typ);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> CSect(this ref File f, @string name) => xcoff_package.CSect⁔(ref f, name);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (ж<dwarf.Data>, error) DWARF(this ref File f) => xcoff_package.DWARF⁔(ref f);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<@string>, error) readImportIDs(this ref File f, ж<Section> Ꮡs) => xcoff_package.readImportIDs⁔(ref f, Ꮡs);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<ImportedSymbol>, error) ImportedSymbols(this ref File f) => xcoff_package.ImportedSymbols⁔(ref f);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<@string>, error) ImportedLibraries(this ref File f) => xcoff_package.ImportedLibraries⁔(ref f);
+}
+partial class xcoffᴛSection {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<byte>, error) Data(this ref Section s) => xcoff_package.Data⁔(ref s);
+}
+partial class xcoffᴛnobitsSectionReader {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) ReadAt(this ref nobitsSectionReader _, slice<byte> p, int64 off) => xcoff_package.ReadAt⁔(ref _, p, off);
+}
+// </MethodForwarders>

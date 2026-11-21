@@ -5,7 +5,6 @@ namespace go.@internal.coverage;
 
 using fmt = fmt_package;
 using io = io_package;
-using static slicewriter_package;
 
 partial class slicewriter_package {
 
@@ -19,9 +18,7 @@ partial struct WriteSeeker {
     internal int64 off;
 }
 
-} partial class slicewriterᴛWriteSeeker {
-
-public static (nint n, error err) Write(this ref WriteSeeker sws, slice<byte> p) {
+internal static (nint n, error err) Write⁔(/*this*/ ref WriteSeeker sws, slice<byte> p) {
     nint amt = len(p);
     var towrite = sws.payload.slice((nint)(sws.off));
     if (len(towrite) < amt) {
@@ -37,7 +34,7 @@ public static (nint n, error err) Write(this ref WriteSeeker sws, slice<byte> p)
 // its internally maintained slice. Note that it is not possible to
 // expand the size of the slice using SEEK_SET; trying to seek outside
 // the slice will result in an error.
-public static (int64, error) Seek(this ref WriteSeeker sws, int64 offset, nint whence) {
+internal static (int64, error) Seek⁔(/*this*/ ref WriteSeeker sws, int64 offset, nint whence) {
     switch (whence) {
     case var ᴛ when ᴛ == io.SeekStart: {
         if (sws.off != offset && (offset < 0 || offset > (int64)len(sws.payload))) {
@@ -68,11 +65,11 @@ public static (int64, error) Seek(this ref WriteSeeker sws, int64 offset, nint w
 
 // BytesWritten returns the underlying byte slice for the WriteSeeker,
 // containing the data written to it via Write/Seek calls.
-public static slice<byte> BytesWritten(this ref WriteSeeker sws) {
+internal static slice<byte> BytesWritten⁔(/*this*/ ref WriteSeeker sws) {
     return sws.payload;
 }
 
-public static (nint n, error err) Read(this ref WriteSeeker sws, slice<byte> p) {
+internal static (nint n, error err) Read⁔(/*this*/ ref WriteSeeker sws, slice<byte> p) {
     nint amt = len(p);
     var toread = sws.payload.slice((nint)(sws.off));
     if (len(toread) < amt) {
@@ -83,4 +80,4 @@ public static (nint n, error err) Read(this ref WriteSeeker sws, slice<byte> p) 
     return (amt, default);
 }
 
-}
+} // end slicewriter_package

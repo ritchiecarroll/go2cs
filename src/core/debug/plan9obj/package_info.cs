@@ -10,10 +10,14 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+using io = go.io_package;
 // </ImportedTypeAliases>
 
 using go;
 using static go.debug.plan9obj_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -66,10 +70,13 @@ using static go.debug.plan9obj_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("debug/plan9obj/file.go", "file.cs", "AEaIAZKogAAYKoKCgpSCyJKCgpSCgoKUgsyygoKClMaCgpSU+qKEkoKUgoKmgoKmAAkSgoKUgoKmAAcWlJSCgsqCgoKmpoKCgoKUgqaCgpSCpoKUgoKWkoKCgoKmlIKCgoLIgpSCgpSUqqKCgoKUgqaCgpKCgoKCgpS0goKCgpSClLaUpJSCpsoACQaSgoKmgoKmqqKCgqY=", "267-270:1;277-304:2")]
+[assembly: GoPositionMap("debug/plan9obj/file.go", "file.cs", "AEOIAZKogAAUKoKCgpSCqJKCgpSCgoKUgqyygoKClKaCgpSU+qKEkoKUgoKmgoKmAAkSgoKUgoKmAAcWlJSCgsqCgoKmpoKCgoKUgqaCgpSCpoKUgoKWkoKCgoKmlIKCgoLIgpSCgpSUqqKCgoKUgqaCgpKCgoKCgpS0goKCgpSClLaUpJSCpsr2koKCpoKCpqqigoKm", "267-270:1;277-304:2")]
 // </GoSourcePositionMaps>
 
 namespace go.debug;
+
+using static go.debug.plan9obj_package;
+using io = go.io_package;
 
 [GoPackage("plan9obj")]
 public static partial class plan9obj_package
@@ -115,7 +122,26 @@ public static partial class plan9obj_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(plan9obj_package.File)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class plan9objᴛFile;
-[GoMethodHost(typeof(plan9obj_package.Section)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class plan9objᴛSection;
-[GoMethodHost(typeof(plan9obj_package.formatError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class plan9objᴛformatError;
+[GoMethodHost(typeof(plan9obj_package.File)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class plan9objᴛFile;
+[GoMethodHost(typeof(plan9obj_package.Section)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class plan9objᴛSection;
+[GoMethodHost(typeof(plan9obj_package.formatError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class plan9objᴛformatError;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class plan9objᴛFile {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Close(this ref File f) => plan9obj_package.Close⁔(ref f);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<Sym>, error) Symbols(this ref File f) => plan9obj_package.Symbols⁔(ref f);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Section> Section(this ref File f, @string name) => plan9obj_package.Section⁔(ref f, name);
+}
+partial class plan9objᴛSection {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<byte>, error) Data(this ref Section s) => plan9obj_package.Data⁔(ref s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static io.ReadSeeker Open(this ref Section s) => plan9obj_package.Open⁔(ref s);
+}
+partial class plan9objᴛformatError {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string Error(this ref formatError e) => plan9obj_package.Error⁔(ref e);
+}
+// </MethodForwarders>

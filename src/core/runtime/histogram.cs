@@ -7,7 +7,6 @@ using atomic = @internal.runtime.atomic_package;
 using sys = @internal.runtime.sys_package;
 using @unsafe = unsafe_package;
 using @internal.runtime;
-using static runtime_package;
 
 partial class runtime_package {
 
@@ -93,15 +92,13 @@ partial struct timeHistogram {
     internal atomic.Uint64 overflow;
 }
 
-} partial class runtimeᴛtimeHistogram {
-
 // record adds the given duration to the distribution.
 //
 // Disallow preemptions and stack growths because this function
 // may run in sensitive locations.
 //
 //go:nosplit
-internal static void record(this ж<timeHistogram> Ꮡh, int64 duration) {
+internal static void record⁔(/*this*/ ж<timeHistogram> Ꮡh, int64 duration) {
     ref var h = ref Ꮡh.DerefOrNull();
 
     // If the duration is negative, capture that in underflow.
@@ -137,7 +134,7 @@ internal static void record(this ж<timeHistogram> Ꮡh, int64 duration) {
 }
 
 // write dumps the histogram to the passed metricValue as a float64 histogram.
-internal static void write(this ж<timeHistogram> Ꮡh, ж<metricValue> Ꮡout) {
+internal static void write⁔(/*this*/ ж<timeHistogram> Ꮡh, ж<metricValue> Ꮡout) {
     ref var h = ref Ꮡh.DerefOrNull();
     ref var @out = ref Ꮡout.DerefOrNull();
 
@@ -151,8 +148,6 @@ internal static void write(this ж<timeHistogram> Ꮡh, ж<metricValue> Ꮡout) 
     }
     hist.counts[len(hist.counts) - 1] = Ꮡh.Ꮡoverflow.Load();
 }
-
-} partial class runtime_package {
 
 internal static UntypedInt fInf => 0x7FF0000000000000;
 internal static UntypedInt fNegInf => 0xFFF0000000000000;

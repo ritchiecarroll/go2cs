@@ -8,7 +8,6 @@ using strings = strings_package;
 using unicode = unicode_package;
 using utf8 = global::go.unicode.utf8_package;
 using global::go.unicode;
-using static comment_package;
 
 partial class comment_package {
 
@@ -38,11 +37,7 @@ partial struct Heading {
     public slice<Text> Text; // the heading text
 }
 
-} partial class commentᴛHeading {
-
-internal static void block(this ref Heading _) { }
-
-} partial class comment_package {
+internal static void block⁔(/*this*/ ref Heading _) { }
 
 // A List is a numbered or bullet list.
 // Lists are always non-empty: len(Items) > 0.
@@ -69,9 +64,7 @@ partial struct List {
     public bool ForceBlankBetween;
 }
 
-} partial class commentᴛList {
-
-internal static void block(this ref List _) { }
+internal static void block⁔(/*this*/ ref List _) { }
 
 // BlankBefore reports whether a reformatting of the comment
 // should include a blank line before the list.
@@ -80,7 +73,7 @@ internal static void block(this ref List _) { }
 // (meaning at least one item has multiple paragraphs)
 // then the list itself must be preceded by a blank line.
 // A preceding blank line can be forced by setting [List].ForceBlankBefore.
-public static bool BlankBefore(this ref List l) {
+internal static bool BlankBefore⁔(/*this*/ ref List l) {
     return l.ForceBlankBefore || l.BlankBetween();
 }
 
@@ -90,7 +83,7 @@ public static bool BlankBefore(this ref List l) {
 // (meaning at least one item has multiple paragraphs)
 // then list items must themselves be separated by blank lines.
 // Blank line separators can be forced by setting [List].ForceBlankBetween.
-public static bool BlankBetween(this ref List l) {
+internal static bool BlankBetween⁔(/*this*/ ref List l) {
     if (l.ForceBlankBetween) {
         return true;
     }
@@ -105,8 +98,6 @@ public static bool BlankBetween(this ref List l) {
     }
     return false;
 }
-
-} partial class comment_package {
 
 // A ListItem is a single item in a numbered or bullet list.
 partial struct ListItem {
@@ -124,11 +115,7 @@ partial struct Paragraph {
     public slice<Text> Text;
 }
 
-} partial class commentᴛParagraph {
-
-internal static void block(this ref Paragraph _) { }
-
-} partial class comment_package {
+internal static void block⁔(/*this*/ ref Paragraph _) { }
 
 // A Code is a preformatted code block.
 partial struct Code {
@@ -138,11 +125,7 @@ partial struct Code {
     public @string Text;
 }
 
-} partial class commentᴛCode {
-
-internal static void block(this ref Code _) { }
-
-} partial class comment_package {
+internal static void block⁔(/*this*/ ref Code _) { }
 
 // A Text is text-level content in a doc comment,
 // one of [Plain], [Italic], [*Link], or [*DocLink].
@@ -153,20 +136,12 @@ partial interface Text {
 // A Plain is a string rendered as plain text (not italicized).
 partial struct Plain /*@string*/;
 
-} partial class commentᴛPlain {
-
-internal static void text(this Plain _) { }
-
-} partial class comment_package {
+internal static void text⁔(/*this*/ Plain _) { }
 
 // An Italic is a string rendered as italicized text.
 partial struct Italic /*@string*/;
 
-} partial class commentᴛItalic {
-
-internal static void text(this Italic _) { }
-
-} partial class comment_package {
+internal static void text⁔(/*this*/ Italic _) { }
 
 // A Link is a link to a specific URL.
 partial struct Link {
@@ -175,11 +150,7 @@ partial struct Link {
     public @string URL;      // target URL of link
 }
 
-} partial class commentᴛLink {
-
-internal static void text(this ref Link _) { }
-
-} partial class comment_package {
+internal static void text⁔(/*this*/ ref Link _) { }
 
 // A DocLink is a link to documentation for a Go package or symbol.
 partial struct DocLink {
@@ -197,11 +168,7 @@ partial struct DocLink {
     public @string Name;       // const, func, type, var, or method name
 }
 
-} partial class commentᴛDocLink {
-
-internal static void text(this ref DocLink _) { }
-
-} partial class comment_package {
+internal static void text⁔(/*this*/ ref DocLink _) { }
 
 // A Parser is a doc comment parser.
 // The fields in the struct can be filled in before calling [Parser.Parse]
@@ -258,8 +225,6 @@ partial struct parseDoc {
     internal Func<@string, @string, bool> lookupSym;
 }
 
-} partial class commentᴛparseDoc {
-
 // lookupPkg is called to look up the pkg in [pkg], [pkg.Name], and [pkg.Name.Recv].
 // If pkg has a slash, it is assumed to be the full import path and is returned with ok = true.
 //
@@ -271,7 +236,7 @@ partial struct parseDoc {
 // like "math" are full import paths but don't contain slashes. We let d.LookupPackage have
 // the first chance to resolve it, in case there's a different package imported as math,
 // and otherwise we refer to a built-in list of single-element standard library package names.
-internal static (@string importPath, bool ok) lookupPkg(this ref parseDoc d, @string pkg) {
+internal static (@string importPath, bool ok) lookupPkg⁔(/*this*/ ref parseDoc d, @string pkg) {
     if (strings.Contains(pkg, "/")) { // assume a full import path
         if (validImportPath(pkg)) {
             return (pkg, true);
@@ -286,8 +251,6 @@ internal static (@string importPath, bool ok) lookupPkg(this ref parseDoc d, @st
     }
     return DefaultLookupPackage(pkg);
 }
-
-} partial class comment_package {
 
 internal static bool isStdPkg(@string path) {
     var (_, ok) = slices.BinarySearch(stdPkgs, path);
@@ -309,11 +272,9 @@ public static (@string importPath, bool ok) DefaultLookupPackage(@string name) {
     return ("", false);
 }
 
-} partial class commentᴛParser {
-
 // Parse parses the doc comment text and returns the *[Doc] form.
 // Comment markers (/* // and */) in the text must have already been removed.
-public static ж<Doc> Parse(this ж<Parser> Ꮡp, @string text) {
+internal static ж<Doc> Parse⁔(/*this*/ ж<Parser> Ꮡp, @string text) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     var lines = unindent(strings.Split(text, "\n"));
@@ -384,8 +345,6 @@ public static ж<Doc> Parse(this ж<Parser> Ꮡp, @string text) {
 
     return d.Doc;
 }
-
-} partial class comment_package {
 
 // A span represents a single span of comment lines (lines[start:end])
 // of an identified kind (code, heading, paragraph, and so on).
@@ -671,29 +630,23 @@ internal static bool isOldHeading(@string line, slice<@string> all, nint off) {
     return true;
 }
 
-} partial class commentᴛparseDoc {
-
 // oldHeading returns the *Heading for the given old-style section heading line.
-internal static Block oldHeading(this ref parseDoc d, @string line) {
+internal static Block oldHeading⁔(/*this*/ ref parseDoc d, @string line) {
     return new HeadingжBlock(Ꮡ(new Heading(Text: slice<Text>([((Plain)strings.TrimSpace(line))]))));
 }
-
-} partial class comment_package {
 
 // isHeading reports whether line is a new-style section heading.
 internal static bool isHeading(@string line) {
     return len(line) >= 2 && line[0] == '#' && (line[1] == ' ' || line[1] == '\t') && strings.TrimSpace(line) != "#"u8;
 }
 
-} partial class commentᴛparseDoc {
-
 // heading returns the *Heading for the given new-style section heading line.
-internal static Block heading(this ref parseDoc d, @string line) {
+internal static Block heading⁔(/*this*/ ref parseDoc d, @string line) {
     return new HeadingжBlock(Ꮡ(new Heading(Text: slice<Text>([((Plain)strings.TrimSpace(line[1..]))]))));
 }
 
 // code returns a code block built from the lines.
-internal static ж<Code> code(this ref parseDoc d, slice<@string> lines) {
+internal static ж<Code> code⁔(/*this*/ ref parseDoc d, slice<@string> lines) {
     var bodyᴷ = new stackAppend<@string>();
 
     var body = unindent(lines);
@@ -703,7 +656,7 @@ internal static ж<Code> code(this ref parseDoc d, slice<@string> lines) {
 
 // paragraph returns a paragraph block built from the lines.
 // If the lines are link definitions, paragraph adds them to d and returns nil.
-internal static Block paragraph(this ref parseDoc d, slice<@string> lines) {
+internal static Block paragraph⁔(/*this*/ ref parseDoc d, slice<@string> lines) {
     var defsᴷ = new stackAppend<ж<LinkDef>>(moves: true);
 
     // Is this a block of known links? Handle.
@@ -726,8 +679,6 @@ internal static Block paragraph(this ref parseDoc d, slice<@string> lines) {
 NoDefs:
     return new ParagraphжBlock(Ꮡ(new Paragraph(Text: slice<Text>([((Plain)strings.Join(lines, "\n"))]))));
 }
-
-} partial class comment_package {
 
 // parseLink parses a single link definition line:
 //
@@ -757,11 +708,9 @@ internal static (ж<LinkDef>, bool) parseLink(@string line) {
     return (Ꮡ(new LinkDef(Text: text, URL: url)), true);
 }
 
-} partial class commentᴛparseDoc {
-
 // list returns a list built from the indented lines,
 // using forceBlankBefore as the value of the List's ForceBlankBefore field.
-internal static ж<List> list(this ж<parseDoc> Ꮡd, slice<@string> lines, bool forceBlankBefore) {
+internal static ж<List> list⁔(/*this*/ ж<parseDoc> Ꮡd, slice<@string> lines, bool forceBlankBefore) {
     var textᴷ = new stackAppend<@string>();
 
     var (num, _, _) = listMarker(lines[0]);
@@ -800,8 +749,6 @@ internal static ж<List> list(this ж<parseDoc> Ꮡd, slice<@string> lines, bool
     flush();
     return list;
 }
-
-} partial class comment_package {
 
 // listMarker parses the line as beginning with a list marker.
 // If it can do that, it returns the numeric marker ("" for a bullet list),
@@ -847,8 +794,6 @@ internal static bool isList(@string line) {
     return ok;
 }
 
-} partial class commentᴛparseDoc {
-
 // parseLinkedText parses text that is allowed to contain explicit links,
 // such as [math.Sin] or [Go home page], into a slice of Text items.
 //
@@ -859,7 +804,7 @@ internal static bool isList(@string line) {
 // must be both preceded and followed by punctuation, spaces, tabs,
 // or the start or end of a line. An example problem would be treating
 // map[ast.Expr]TypeAndValue as containing a link.
-internal static slice<Text> parseLinkedText(this ж<parseDoc> Ꮡd, @string text) {
+internal static slice<Text> parseLinkedText⁔(/*this*/ ж<parseDoc> Ꮡd, @string text) {
     ref var d = ref Ꮡd.DerefOrNull();
     var bufᴷ = new stackAppend<byte>();
 
@@ -920,7 +865,7 @@ internal static slice<Text> parseLinkedText(this ж<parseDoc> Ꮡd, @string text
 // The before and after strings are the text before the [ and after the ]
 // on the same line. Doc links must be preceded and followed by
 // punctuation, spaces, tabs, or the start or end of a line.
-internal static (ж<DocLink> link, bool ok) docLink(this ref parseDoc d, @string text, @string before, @string after) {
+internal static (ж<DocLink> link, bool ok) docLink⁔(/*this*/ ref parseDoc d, @string text, @string before, @string after) {
     ж<DocLink> link = default;
     bool ok = default;
 
@@ -961,8 +906,6 @@ internal static (ж<DocLink> link, bool ok) docLink(this ref parseDoc d, @string
     return (link, true);
 }
 
-} partial class comment_package {
-
 // If text is of the form before.Name, where Name is a capitalized Go identifier,
 // then splitDocName returns before, name, true.
 // Otherwise it returns text, "", false.
@@ -981,15 +924,13 @@ internal static (@string before, @string name, bool foundDot) splitDocName(@stri
     return (before, name, true);
 }
 
-} partial class commentᴛparseDoc {
-
 // parseText parses s as text and returns the result of appending
 // those parsed Text elements to out.
 // parseText does not handle explicit links like [math.Sin] or [Go home page]:
 // those are handled by parseLinkedText.
 // If autoLink is true, then parseText recognizes URLs and words from d.Words
 // and converts those to links as appropriate.
-internal static slice<Text> parseText(this ref parseDoc d, slice<Text> @out, @string s, bool autoLink) {
+internal static slice<Text> parseText⁔(/*this*/ ref parseDoc d, slice<Text> @out, @string s, bool autoLink) {
     ref var w = ref heap(new strings.Builder(), out var Ꮡw);
     nint wrote = 0;
     void writeUntil(nint i) {
@@ -1073,8 +1014,6 @@ internal static slice<Text> parseText(this ref parseDoc d, slice<Text> @out, @st
     flush(len(s));
     return @out;
 }
-
-} partial class comment_package {
 
 // autoURL checks whether s begins with a URL that should be hyperlinked.
 // If so, it returns the URL, which is a prefix of s, and ok == true.

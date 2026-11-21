@@ -10,10 +10,8 @@ using fmt = fmt_package;
 using token = global::go.go.token_package;
 using slices = slices_package;
 using strings = strings_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
+using System.Runtime.CompilerServices;
 using global::go.go;
-using static types_package;
 
 partial class types_package {
 
@@ -23,8 +21,6 @@ partial class types_package {
 // inference will attempt to infer the missing type arguments.
 // Available with go1.21.
 internal const bool enableReverseTypeInference = true; // disable for debugging
-
-} partial class typesᴛChecker {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string inferSSSˢ => ref inferSSSˢᵇ;
@@ -39,7 +35,7 @@ private static readonly @string inferSSSˢᵇ = "== infer : %s%s ➞ %s"u8;
 // If successful, infer returns the complete list of given and inferred type arguments, one for each
 // type parameter. Otherwise the result is nil. Errors are reported through the err parameter.
 // Note: infer may fail (return nil) due to invalid args operands without reporting additional errors.
-internal static slice<Type> /*inferred*/ infer(this ж<Checker> Ꮡcheck, positioner posn, slice<ж<TypeParam>> tparams, slice<Type> targs, ж<Tuple> Ꮡparams, slice<ж<operand>> args, bool reverse, ж<error_> Ꮡerr) {
+internal static slice<Type> /*inferred*/ infer⁔(/*this*/ ж<Checker> Ꮡcheck, positioner posn, slice<ж<TypeParam>> tparams, slice<Type> targs, ж<Tuple> Ꮡparams, slice<ж<operand>> args, bool reverse, ж<error_> Ꮡerr) {
     slice<Type> inferred = default;
     GoFrame ᒐ = default;
     try {
@@ -495,7 +491,7 @@ internal static slice<Type> /*inferred*/ infer(this ж<Checker> Ꮡcheck, positi
 // If typ is a generic function, type parameters held with typ are not changed and
 // must be updated separately if desired.
 // The positions is only used for debug traces.
-internal static (slice<ж<TypeParam>>, Type) renameTParams(this ж<Checker> Ꮡcheck, token.Pos pos, slice<ж<TypeParam>> tparams, Type typ) {
+internal static (slice<ж<TypeParam>>, Type) renameTParams⁔(/*this*/ ж<Checker> Ꮡcheck, token.Pos pos, slice<ж<TypeParam>> tparams, Type typ) {
     ref var check = ref Ꮡcheck.DerefOrNull();
 
     // For the purpose of type inference we must differentiate type parameters
@@ -543,8 +539,6 @@ internal static (slice<ж<TypeParam>>, Type) renameTParams(this ж<Checker> Ꮡc
 
     return (tparams2, Ꮡcheck.subst(pos, typ, renameMap, nil, check.context()));
 }
-
-} partial class types_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string andˢ => ref andˢᵇ;
@@ -595,9 +589,7 @@ partial struct tpWalker {
     internal map<Type, bool> seen;
 }
 
-} partial class typesᴛtpWalker {
-
-internal static bool /*res*/ isParameterized(this ж<tpWalker> Ꮡw, Type typ) {
+internal static bool /*res*/ isParameterized⁔(/*this*/ ж<tpWalker> Ꮡw, Type typ) {
     bool res = default;
     GoFrame ᒐ = default;
     try {
@@ -689,7 +681,7 @@ internal static bool /*res*/ isParameterized(this ж<tpWalker> Ꮡw, Type typ) {
     ᒐdone: return res;
 }
 
-internal static bool varList(this ж<tpWalker> Ꮡw, slice<ж<Var>> list) {
+internal static bool varList⁔(/*this*/ ж<tpWalker> Ꮡw, slice<ж<Var>> list) {
     foreach (var (_, v) in range(list)) {
         if (Ꮡw.isParameterized(v.typ)) {
             return true;
@@ -697,8 +689,6 @@ internal static bool varList(this ж<tpWalker> Ꮡw, slice<ж<Var>> list) {
     }
     return false;
 }
-
-} partial class types_package {
 
 // If the type parameter has a single specific type S, coreTerm returns (S, true).
 // Otherwise, if tpar has a core type T, it returns a term corresponding to that
@@ -759,9 +749,7 @@ partial struct cycleFinder {
     internal map<Type, bool> seen;
 }
 
-} partial class typesᴛcycleFinder {
-
-internal static void typ(this ж<cycleFinder> Ꮡw, Type typ) {
+internal static void typ⁔(/*this*/ ж<cycleFinder> Ꮡw, Type typ) {
     GoFrame ᒐ = default;
     try {
         ref var w = ref Ꮡw.DerefOrNull();
@@ -866,10 +854,10 @@ internal static void typ(this ж<cycleFinder> Ꮡw, Type typ) {
     finally { ᒐ.Run(); }
 }
 
-internal static void varList(this ж<cycleFinder> Ꮡw, slice<ж<Var>> list) {
+internal static void varList⁔(/*this*/ ж<cycleFinder> Ꮡw, slice<ж<Var>> list) {
     foreach (var (_, v) in range(list)) {
         Ꮡw.typ(v.typ);
     }
 }
 
-}
+} // end types_package

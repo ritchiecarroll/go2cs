@@ -12,7 +12,6 @@ using filepath = go.path.filepath_package;
 using go.io;
 using go.path;
 using ꓸꓸꓸstring = Span<@string>;
-using static template_package;
 
 partial class template_package {
 
@@ -45,8 +44,6 @@ public static (ж<Template>, error) ParseFiles(params ꓸꓸꓸstring filenames�
     return parseFiles(nil, readFileOS, filenames.ꓸꓸꓸ);
 }
 
-} partial class templateᴛTemplate {
-
 // ParseFiles parses the named files and associates the resulting templates with
 // t. If an error occurs, parsing stops and the returned template is nil;
 // otherwise it is t. There must be at least one file.
@@ -58,15 +55,13 @@ public static (ж<Template>, error) ParseFiles(params ꓸꓸꓸstring filenames�
 //
 // When parsing multiple files with the same name in different directories,
 // the last one mentioned will be the one that results.
-public static (ж<Template>, error) ParseFiles(this ж<Template> Ꮡt, params ꓸꓸꓸstring filenamesʗp) {
+internal static (ж<Template>, error) ParseFiles⁔(/*this*/ ж<Template> Ꮡt, params ꓸꓸꓸstring filenamesʗp) {
     var filenames = filenamesʗp.sslice();
     ref var t = ref Ꮡt.DerefOrNull();
 
     t.init();
     return parseFiles(Ꮡt, readFileOS, filenames.ꓸꓸꓸ);
 }
-
-} partial class template_package {
 
 // parseFiles is the helper for the method and function. If the argument
 // template is nil, it is created from the first file.
@@ -120,8 +115,6 @@ public static (ж<Template>, error) ParseGlob(@string pattern) {
     return parseGlob(nil, pattern);
 }
 
-} partial class templateᴛTemplate {
-
 // ParseGlob parses the template definitions in the files identified by the
 // pattern and associates the resulting templates with t. The files are matched
 // according to the semantics of [filepath.Match], and the pattern must match at
@@ -130,14 +123,12 @@ public static (ж<Template>, error) ParseGlob(@string pattern) {
 //
 // When parsing multiple files with the same name in different directories,
 // the last one mentioned will be the one that results.
-public static (ж<Template>, error) ParseGlob(this ж<Template> Ꮡt, @string pattern) {
+internal static (ж<Template>, error) ParseGlob⁔(/*this*/ ж<Template> Ꮡt, @string pattern) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     t.init();
     return parseGlob(Ꮡt, pattern);
 }
-
-} partial class template_package {
 
 // parseGlob is the implementation of the function and method ParseGlob.
 internal static (ж<Template>, error) parseGlob(ж<Template> t, @string pattern) {
@@ -161,21 +152,17 @@ public static (ж<Template>, error) ParseFS(fs.FS fsys, params ꓸꓸꓸstring p
     return parseFS(nil, fsys, patterns);
 }
 
-} partial class templateᴛTemplate {
-
 // ParseFS is like [Template.ParseFiles] or [Template.ParseGlob] but reads from the file system fsys
 // instead of the host operating system's file system.
 // It accepts a list of glob patterns (see [path.Match]).
 // (Note that most file names serve as glob patterns matching only themselves.)
-public static (ж<Template>, error) ParseFS(this ж<Template> Ꮡt, fs.FS fsys, params ꓸꓸꓸstring patternsʗp) {
+internal static (ж<Template>, error) ParseFS⁔(/*this*/ ж<Template> Ꮡt, fs.FS fsys, params ꓸꓸꓸstring patternsʗp) {
     var patterns = patternsʗp.slice();
     ref var t = ref Ꮡt.DerefOrNull();
 
     t.init();
     return parseFS(Ꮡt, fsys, patterns);
 }
-
-} partial class template_package {
 
 internal static (ж<Template>, error) parseFS(ж<Template> t, fs.FS fsys, slice<@string> patterns) {
     slice<@string> filenames = default;

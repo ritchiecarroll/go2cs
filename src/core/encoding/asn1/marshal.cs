@@ -13,7 +13,6 @@ using time = time_package;
 using utf8 = unicode.utf8_package;
 using go.math;
 using unicode;
-using static asn1_package;
 
 partial class asn1_package {
 
@@ -30,55 +29,41 @@ partial interface encoder {
 
 partial struct byteEncoder /*num:byte*/;
 
-} partial class asn1ᴛbyteEncoder {
-
-internal static nint Len(this byteEncoder c) {
+internal static nint Len⁔(/*this*/ byteEncoder c) {
     return 1;
 }
 
-internal static void Encode(this byteEncoder c, slice<byte> dst) {
+internal static void Encode⁔(/*this*/ byteEncoder c, slice<byte> dst) {
     dst[0] = (byte)c;
 }
 
-} partial class asn1_package {
-
 partial struct bytesEncoder /*[]byte*/;
 
-} partial class asn1ᴛbytesEncoder {
-
-internal static nint Len(this bytesEncoder b) {
+internal static nint Len⁔(/*this*/ bytesEncoder b) {
     return len(b);
 }
 
-internal static void Encode(this bytesEncoder b, slice<byte> dst) {
+internal static void Encode⁔(/*this*/ bytesEncoder b, slice<byte> dst) {
     if (copy(dst, b) != len(b)) {
         throw panic("internal error");
     }
 }
 
-} partial class asn1_package {
-
 partial struct stringEncoder /*@string*/;
 
-} partial class asn1ᴛstringEncoder {
-
-internal static nint Len(this stringEncoder s) {
+internal static nint Len⁔(/*this*/ stringEncoder s) {
     return len(s);
 }
 
-internal static void Encode(this stringEncoder s, slice<byte> dst) {
+internal static void Encode⁔(/*this*/ stringEncoder s, slice<byte> dst) {
     if (copy(dst, s) != len(s)) {
         throw panic("internal error");
     }
 }
 
-} partial class asn1_package {
-
 partial struct multiEncoder /*[]encoder*/;
 
-} partial class asn1ᴛmultiEncoder {
-
-internal static nint Len(this multiEncoder m) {
+internal static nint Len⁔(/*this*/ multiEncoder m) {
     nint size = default;
     foreach (var (_, e) in range<encoder>(m)) {
         size += e.Len();
@@ -86,7 +71,7 @@ internal static nint Len(this multiEncoder m) {
     return size;
 }
 
-internal static void Encode(this multiEncoder m, slice<byte> dst) {
+internal static void Encode⁔(/*this*/ multiEncoder m, slice<byte> dst) {
     nint off = default;
     foreach (var (_, e) in range<encoder>(m)) {
         e.Encode(dst.slice(off));
@@ -94,13 +79,9 @@ internal static void Encode(this multiEncoder m, slice<byte> dst) {
     }
 }
 
-} partial class asn1_package {
-
 partial struct setEncoder /*[]encoder*/;
 
-} partial class asn1ᴛsetEncoder {
-
-internal static nint Len(this setEncoder s) {
+internal static nint Len⁔(/*this*/ setEncoder s) {
     nint size = default;
     foreach (var (_, e) in range<encoder>(s)) {
         size += e.Len();
@@ -108,7 +89,7 @@ internal static nint Len(this setEncoder s) {
     return size;
 }
 
-internal static void Encode(this setEncoder s, slice<byte> dst) {
+internal static void Encode⁔(/*this*/ setEncoder s, slice<byte> dst) {
     // Per X690 Section 11.6: The encodings of the component values of a
     // set-of value shall appear in ascending order, the encodings being
     // compared as octet strings with the shorter components being padded
@@ -138,8 +119,6 @@ internal static void Encode(this setEncoder s, slice<byte> dst) {
     }
 }
 
-} partial class asn1_package {
-
 partial struct taggedEncoder {
     // scratch contains temporary space for encoding the tag and length of
     // an element in order to avoid extra allocations.
@@ -148,24 +127,18 @@ partial struct taggedEncoder {
     internal encoder body;
 }
 
-} partial class asn1ᴛtaggedEncoder {
-
-internal static nint Len(this ref taggedEncoder t) {
+internal static nint Len⁔(/*this*/ ref taggedEncoder t) {
     return t.tag.Len() + t.body.Len();
 }
 
-internal static void Encode(this ref taggedEncoder t, slice<byte> dst) {
+internal static void Encode⁔(/*this*/ ref taggedEncoder t, slice<byte> dst) {
     t.tag.Encode(dst);
     t.body.Encode(dst.slice(t.tag.Len()));
 }
 
-} partial class asn1_package {
-
 partial struct int64Encoder /*num:int64*/;
 
-} partial class asn1ᴛint64Encoder {
-
-internal static nint Len(this int64Encoder i) {
+internal static nint Len⁔(/*this*/ int64Encoder i) {
     nint n = 1;
 
     while (i > 127) {
@@ -181,15 +154,13 @@ internal static nint Len(this int64Encoder i) {
     return n;
 }
 
-internal static void Encode(this int64Encoder i, slice<byte> dst) {
+internal static void Encode⁔(/*this*/ int64Encoder i, slice<byte> dst) {
     nint n = i.Len();
 
     for (nint j = 0; j < n; j++) {
         dst[j] = (byte)(i >> (nuint)((n - 1 - j) * 8));
     }
 }
-
-} partial class asn1_package {
 
 internal static nint base128IntLength(int64 n) {
     if (n == 0) {
@@ -304,26 +275,20 @@ internal static slice<byte> appendTagAndLength(slice<byte> dst, tagAndLength t) 
 
 partial struct bitStringEncoder /*BitString*/;
 
-} partial class asn1ᴛbitStringEncoder {
-
-internal static nint Len(this bitStringEncoder b) {
+internal static nint Len⁔(/*this*/ bitStringEncoder b) {
     return len(b.Bytes) + 1;
 }
 
-internal static void Encode(this bitStringEncoder b, slice<byte> dst) {
+internal static void Encode⁔(/*this*/ bitStringEncoder b, slice<byte> dst) {
     dst[0] = (byte)((8 - b.BitLength % 8) % 8);
     if (copy(dst[1..], b.Bytes) != len(b.Bytes)) {
         throw panic("internal error");
     }
 }
 
-} partial class asn1_package {
-
 partial struct oidEncoder /*[]nint*/;
 
-} partial class asn1ᴛoidEncoder {
-
-internal static nint Len(this oidEncoder oid) {
+internal static nint Len⁔(/*this*/ oidEncoder oid) {
     nint l = base128IntLength((int64)(oid[0] * 40 + oid[1]));
     for (nint i = 2; i < len(oid); i++) {
         l += base128IntLength((int64)oid[i]);
@@ -331,14 +296,12 @@ internal static nint Len(this oidEncoder oid) {
     return l;
 }
 
-internal static void Encode(this oidEncoder oid, slice<byte> dst) {
+internal static void Encode⁔(/*this*/ oidEncoder oid, slice<byte> dst) {
     dst = appendBase128Int(dst[..0], (int64)(oid[0] * 40 + oid[1]));
     for (nint i = 2; i < len(oid); i++) {
         dst = appendBase128Int(dst, (int64)oid[i]);
     }
 }
-
-} partial class asn1_package {
 
 internal static (encoder e, error err) makeObjectIdentifier(slice<nint> oid) {
     if (len(oid) < 2 || oid[0] > 2 || (oid[0] < 2 && oid[1] >= 40)) {

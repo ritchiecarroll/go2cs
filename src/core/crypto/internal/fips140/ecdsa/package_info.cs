@@ -14,6 +14,9 @@
 
 using go;
 using static go.crypto.@internal.fips140.ecdsa_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -69,12 +72,14 @@ using static go.crypto.@internal.fips140.ecdsa_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("crypto/internal/fips140/ecdsa/cast.go", "cast.cs", "ABIglAAWLoIADxiigoKCgoKUyIKCgri4ggAMGoKCgpSClIKUyIKCgoIADBqCgoKUgpSClA==", "55-63:1")]
-[assembly: GoPositionMap("crypto/internal/fips140/ecdsa/ecdsa.go", "ecdsa.cs", "AB44gqaCAAsQggAlPqKCgoKUgqakgriCpu6kgsqCptykgriCpgAHEKSCuIKmAA8a8oKCgoKUgpSCgpSClILqAAkIgpSCgpSo0oKUhoKm7oIAAhIACAKCgoIACximgpQABxCCgqaCABImAAoCgpSC7oKCAAgSlAACEAALAoKUgoKCqsKCggAIBsaCgpSCuIKUgoKUgoLcgqaClIKClIKCpoKmqNKClIKCgpTcqgAICoKCgqaCggADEtKClIKCgoKmAAYUAAwCgpSCggAKBsaCgqaCgpSClIKClIKmgqaCpoKCpoKCpoKCpoKCpoKU", "204-206:1;337-340:1", "", "251=Bytes/1/2/3,Bytes/2/2/5")]
+[assembly: GoPositionMap("crypto/internal/fips140/ecdsa/ecdsa.go", "ecdsa.cs", "ABs4gqaCAAcQggAjPqKCgoKUgqakgriCpu6kgsqCptykgriCpgAHEKSCuIKmAA8a8oKCgoKUgpSCgpSClILqAAkIgpSCgpSo0oKUhoKm7oIAAhIACAKCgoIACximgpQABxCCgqaCABImAAoCgpSC7oKCAAgSlAACEAALAoKUgoKCqsKCggAIBsaCgpSCuIKUgoKUgoLcgqaClIKClIKCpoKmqNKClIKCgpTcqgAICoKCgqaCggADEtKClIKCgoKmAAYUAAwCgpSCggAKBsaCgqaCgpSClIKClIKmgqaCpoKCpoKCpoKCpoKCpoKU", "204-206:1;337-340:1", "", "242=Bytes/1/2/3,Bytes/2/2/5")]
 [assembly: GoPositionMap("crypto/internal/fips140/ecdsa/ecdsa_noasm.go", "ecdsa_noasm.cs", "AAgSoqai")]
-[assembly: GoPositionMap("crypto/internal/fips140/ecdsa/hmacdrbg.go", "hmacdrbg.cs", "ACZOAAoO/LSUqqamuIKCgoKClLSCgoKCtpSCgpSCgoKCgpS0goKCgraUgoKUgoIAAhDypqKCgtqklIKmgqaCpoKCggAIEoKCgpSCgpQ=", "57-59:1")]
+[assembly: GoPositionMap("crypto/internal/fips140/ecdsa/hmacdrbg.go", "hmacdrbg.cs", "ACNO7ty0lKqmpriCgoKCgpS0goKCgraUgoKUgoKCgoKUtIKCgoK2lIKClIKCAAIQ8qaigoK6pJSCpoKmgqaCgoIACBKCgoKUgoKU", "57-59:1")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140;
+
+using static go.crypto.@internal.fips140.ecdsa_package;
 
 [GoPackage("ecdsa")]
 public static partial class ecdsa_package
@@ -127,9 +132,32 @@ public static partial class ecdsa_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(ecdsa_package.PrivateKey)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ecdsaᴛPrivateKey;
-[GoMethodHost(typeof(ecdsa_package.PublicKey)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ecdsaᴛPublicKey;
-[GoMethodHost(typeof(ecdsa_package.blockAlignedPersonalizationString)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ecdsaᴛblockAlignedPersonalizationString;
-[GoMethodHost(typeof(ecdsa_package.hmacDRBG)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ecdsaᴛhmacDRBG;
-[GoMethodHost(typeof(ecdsa_package.plainPersonalizationString)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ecdsaᴛplainPersonalizationString;
+[GoMethodHost(typeof(ecdsa_package.PrivateKey)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class ecdsaᴛPrivateKey;
+[GoMethodHost(typeof(ecdsa_package.PublicKey)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class ecdsaᴛPublicKey;
+[GoMethodHost(typeof(ecdsa_package.blockAlignedPersonalizationString)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class ecdsaᴛblockAlignedPersonalizationString;
+[GoMethodHost(typeof(ecdsa_package.hmacDRBG)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class ecdsaᴛhmacDRBG;
+[GoMethodHost(typeof(ecdsa_package.plainPersonalizationString)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class ecdsaᴛplainPersonalizationString;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class ecdsaᴛPrivateKey {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> Bytes(this ref PrivateKey priv) => ecdsa_package.Bytes⁔(ref priv);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<PublicKey> PublicKey(this ж<PrivateKey> Ꮡpriv) => ecdsa_package.PublicKey⁔(Ꮡpriv);
+}
+partial class ecdsaᴛPublicKey {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> Bytes(this ref PublicKey pub) => ecdsa_package.Bytes⁔(ref pub);
+}
+partial class ecdsaᴛblockAlignedPersonalizationString {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void isPersonalizationString(this blockAlignedPersonalizationString _) => ecdsa_package.isPersonalizationString⁔(_);
+}
+partial class ecdsaᴛhmacDRBG {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Generate(this ref hmacDRBG d, slice<byte> @out) => ecdsa_package.Generate⁔(ref d, @out);
+}
+partial class ecdsaᴛplainPersonalizationString {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void isPersonalizationString(this plainPersonalizationString _) => ecdsa_package.isPersonalizationString⁔(_);
+}
+// </MethodForwarders>

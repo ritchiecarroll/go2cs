@@ -4,16 +4,12 @@
 //go:build unix || (js && wasm) || wasip1
 namespace go.net.@internal;
 
-using static socktest_package;
-
 partial class socktest_package {
 
 // Sockets maps a socket descriptor to the status of socket.
 partial struct Sockets /*map[nint, Status]*/;
 
-} partial class socktestᴛSwitch {
-
-internal static ж<Status> sockso(this ж<Switch> Ꮡsw, nint s) {
+internal static ж<Status> sockso⁔(/*this*/ ж<Switch> Ꮡsw, nint s) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -34,7 +30,7 @@ internal static ж<Status> sockso(this ж<Switch> Ꮡsw, nint s) {
 
 // addLocked returns a new Status without locking.
 // sw.smu must be held before call.
-internal static ж<Status> addLocked(this ж<Switch> Ꮡsw, nint s, nint family, nint sotype, nint proto) {
+internal static ж<Status> addLocked⁔(/*this*/ ж<Switch> Ꮡsw, nint s, nint family, nint sotype, nint proto) {
     ref var sw = ref Ꮡsw.DerefOrNull();
 
     Ꮡsw.Ꮡonce.Do(Ꮡsw.init);
@@ -43,4 +39,4 @@ internal static ж<Status> addLocked(this ж<Switch> Ꮡsw, nint s, nint family,
     return Ꮡso;
 }
 
-}
+} // end socktest_package

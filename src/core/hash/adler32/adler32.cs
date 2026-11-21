@@ -17,8 +17,6 @@ using errors = errors_package;
 using hash = hash_package;
 using byteorder = @internal.byteorder_package;
 using @internal;
-using adler32 = adler32_package;
-using static adler32_package;
 
 partial class adler32_package {
 
@@ -36,11 +34,7 @@ public static UntypedInt Size => 4;
 // The low 16 bits are s1, the high 16 bits are s2.
 partial struct digest /*num:uint32*/;
 
-} partial class adler32ᴛdigest {
-
-internal static void Reset(this ref digest d) { d = 1; }
-
-} partial class adler32_package {
+internal static void Reset⁔(/*this*/ ref digest d) { d = 1; }
 
 // New returns a new hash.Hash32 computing the Adler-32 checksum. Its
 // Sum method will lay the value out in big-endian byte order. The
@@ -53,27 +47,21 @@ public static hash.Hash32 New() {
     return new digestжHash32(d);
 }
 
-} partial class adler32ᴛdigest {
+internal static nint Size⁔(/*this*/ ref digest d) { return Size; }
 
-internal static nint Size(this ref digest d) { return adler32.Size; }
-
-internal static nint BlockSize(this ref digest d) { return 4; }
-
-} partial class adler32_package {
+internal static nint BlockSize⁔(/*this*/ ref digest d) { return 4; }
 
 internal static ref readonly @string magic => ref magicᵇ;
 private static readonly @string magicᵇ = "adl\x01"u8;
 internal const nint marshaledSize = /* len(magic) + 4 */ 8;
 
-} partial class adler32ᴛdigest {
-
-internal static (slice<byte>, error) AppendBinary(this ref digest d, slice<byte> b) {
+internal static (slice<byte>, error) AppendBinary⁔(/*this*/ ref digest d, slice<byte> b) {
     b = append(b, magic.ꓸꓸꓸ);
     b = byteorder.BEAppendUint32(b, (uint32)(d));
     return (b, default);
 }
 
-internal static (slice<byte>, error) MarshalBinary(this ref digest d) {
+internal static (slice<byte>, error) MarshalBinary⁔(/*this*/ ref digest d) {
     return d.AppendBinary(new slice<byte>(0, marshaledSize));
 }
 
@@ -83,7 +71,7 @@ private static readonly @string hashAdler32InvalidHashˢᵇ = "hash/adler32: inv
 internal static ref readonly @string hashAdler32InvalidHashˢ2 => ref hashAdler32InvalidHashˢ2ᵇ;
 private static readonly @string hashAdler32InvalidHashˢ2ᵇ = "hash/adler32: invalid hash state size"u8;
 
-internal static error UnmarshalBinary(this ref digest d, slice<byte> b) {
+internal static error UnmarshalBinary⁔(/*this*/ ref digest d, slice<byte> b) {
     if (len(b) < len(magic) || ((sstring)(b[..(int)(len(magic))])) != magic) {
         return errors.New(hashAdler32InvalidHashˢ);
     }
@@ -94,12 +82,10 @@ internal static error UnmarshalBinary(this ref digest d, slice<byte> b) {
     return default;
 }
 
-internal static (hash.Cloner, error) Clone(this ref digest d) {
+internal static (hash.Cloner, error) Clone⁔(/*this*/ ref digest d) {
     ref var r = ref heap<digest>(d, out var Ꮡr);
     return (new digestжCloner(Ꮡr), default);
 }
-
-} partial class adler32_package {
 
 // Add p to the running checksum d.
 internal static digest update(digest d, slice<byte> p) {
@@ -131,21 +117,17 @@ internal static digest update(digest d, slice<byte> p) {
     return (digest)(s2 << 16 | s1);
 }
 
-} partial class adler32ᴛdigest {
-
-internal static (nint nn, error err) Write(this ref digest d, slice<byte> p) {
+internal static (nint nn, error err) Write⁔(/*this*/ ref digest d, slice<byte> p) {
     d = update(d, p);
     return (len(p), default);
 }
 
-internal static uint32 Sum32(this ref digest d) { return (uint32)(d); }
+internal static uint32 Sum32⁔(/*this*/ ref digest d) { return (uint32)(d); }
 
-internal static slice<byte> Sum(this ref digest d, slice<byte> @in) {
+internal static slice<byte> Sum⁔(/*this*/ ref digest d, slice<byte> @in) {
     var s = (uint32)(d);
     return append(@in, (byte)(s >> 24), (byte)(s >> 16), (byte)(s >> 8), (byte)s);
 }
-
-} partial class adler32_package {
 
 // Checksum returns the Adler-32 checksum of data.
 public static uint32 Checksum(slice<byte> data) { return (uint32)update(1, data); }

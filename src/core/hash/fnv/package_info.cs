@@ -10,10 +10,14 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+using hash = go.hash_package;
 // </ImportedTypeAliases>
 
 using go;
 using static go.hash.fnv_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -67,10 +71,13 @@ using static go.hash.fnv_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("hash/fnv/fnv.go", "fnv.cs", "AC1YopKqopKqopKqopKqooKCgqqigoKCxrKysrKAgMKAgMSysrK0goKCgpSCxoKCgoKUgsaCgoKClILGgoKCgpSCxoKUgpSCgpTGgoKUgpSClMaysrKysrSysrKysrSCgsaCgsaCgsaCgsaCgsaCggAWHoKCgqaCxoKCgqaCxoKCgqaCxoKCgqaCxoKCgoKmgsaCgoKCpoIACgaCgpSClIIACgaCgpSClIIACgaCgpSClIIACgaCgpSClIIACgaCgpSClIKCAAoGgoKUgpSCgsaCgsaCgsaCgsaCgsaCgsaCgg==")]
+[assembly: GoPositionMap("hash/fnv/fnv.go", "fnv.cs", "ACxYopKqopKqopKqopKqooKCgqqigoKCpoKCgpKAgKKAgKSCgoKUgoKCgpSCpoKCgoKUgqaCgoKClIKmgoKCgpSCpoKUgpSCgpSmgoKUgpSClKaCgoKCgpSCgoKCgpSCgqaCgqaCgqaCgqaCgqaCggASHoKCgqaCpoKCgqaCpoKCgqaCpoKCgqaCpoKCgoKmgqaCgoKCpoIACAaCgpSClIKmgoKUgpSCpoKClIKUgqaCgpSClIKmgoKUgpSCgqaCgpSClIKCpoKCpoKCpoKCpoKCpoKCpoKC")]
 // </GoSourcePositionMaps>
 
 namespace go.hash;
+
+using static go.hash.fnv_package;
+using hash = go.hash_package;
 
 [GoPackage("fnv")]
 public static partial class fnv_package
@@ -110,10 +117,87 @@ public static partial class fnv_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(fnv_package.sum128)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fnvᴛsum128;
-[GoMethodHost(typeof(fnv_package.sum128a)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fnvᴛsum128a;
-[GoMethodHost(typeof(fnv_package.sum32)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fnvᴛsum32;
-[GoMethodHost(typeof(fnv_package.sum32a)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fnvᴛsum32a;
-[GoMethodHost(typeof(fnv_package.sum64)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fnvᴛsum64;
-[GoMethodHost(typeof(fnv_package.sum64a)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fnvᴛsum64a;
+[GoMethodHost(typeof(fnv_package.sum128)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class fnvᴛsum128;
+[GoMethodHost(typeof(fnv_package.sum128a)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class fnvᴛsum128a;
+[GoMethodHost(typeof(fnv_package.sum32)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class fnvᴛsum32;
+[GoMethodHost(typeof(fnv_package.sum32a)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class fnvᴛsum32a;
+[GoMethodHost(typeof(fnv_package.sum64)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class fnvᴛsum64;
+[GoMethodHost(typeof(fnv_package.sum64a)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class fnvᴛsum64a;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class fnvᴛsum128 {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void Reset(this ref sum128 s) => fnv_package.Reset⁔(ref s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint, error) Write(this ref sum128 s, slice<byte> data) => fnv_package.Write⁔(ref s, data);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint Size(this ref sum128 s) => fnv_package.Size⁔(ref s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint BlockSize(this ref sum128 s) => fnv_package.BlockSize⁔(ref s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<byte> Sum(this ref sum128 s, slice<byte> @in) => fnv_package.Sum⁔(ref s, @in);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<byte>, error) AppendBinary(this ref sum128 s, slice<byte> b) => fnv_package.AppendBinary⁔(ref s, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<byte>, error) MarshalBinary(this ref sum128 s) => fnv_package.MarshalBinary⁔(ref s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error UnmarshalBinary(this ref sum128 s, slice<byte> b) => fnv_package.UnmarshalBinary⁔(ref s, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (hash.Cloner, error) Clone(this ref sum128 d) => fnv_package.Clone⁔(ref d);
+}
+partial class fnvᴛsum128a {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void Reset(this ref sum128a s) => fnv_package.Reset⁔(ref s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint, error) Write(this ref sum128a s, slice<byte> data) => fnv_package.Write⁔(ref s, data);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint Size(this ref sum128a s) => fnv_package.Size⁔(ref s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint BlockSize(this ref sum128a s) => fnv_package.BlockSize⁔(ref s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<byte> Sum(this ref sum128a s, slice<byte> @in) => fnv_package.Sum⁔(ref s, @in);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<byte>, error) AppendBinary(this ref sum128a s, slice<byte> b) => fnv_package.AppendBinary⁔(ref s, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<byte>, error) MarshalBinary(this ref sum128a s) => fnv_package.MarshalBinary⁔(ref s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error UnmarshalBinary(this ref sum128a s, slice<byte> b) => fnv_package.UnmarshalBinary⁔(ref s, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (hash.Cloner, error) Clone(this ref sum128a d) => fnv_package.Clone⁔(ref d);
+}
+partial class fnvᴛsum32 {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void Reset(this ref sum32 s) => fnv_package.Reset⁔(ref s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static uint32 Sum32(this ref sum32 s) => fnv_package.Sum32⁔(ref s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint, error) Write(this ref sum32 s, slice<byte> data) => fnv_package.Write⁔(ref s, data);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint Size(this ref sum32 s) => fnv_package.Size⁔(ref s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint BlockSize(this ref sum32 s) => fnv_package.BlockSize⁔(ref s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<byte> Sum(this ref sum32 s, slice<byte> @in) => fnv_package.Sum⁔(ref s, @in);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<byte>, error) AppendBinary(this ref sum32 s, slice<byte> b) => fnv_package.AppendBinary⁔(ref s, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<byte>, error) MarshalBinary(this ref sum32 s) => fnv_package.MarshalBinary⁔(ref s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error UnmarshalBinary(this ref sum32 s, slice<byte> b) => fnv_package.UnmarshalBinary⁔(ref s, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (hash.Cloner, error) Clone(this ref sum32 d) => fnv_package.Clone⁔(ref d);
+}
+partial class fnvᴛsum32a {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void Reset(this ref sum32a s) => fnv_package.Reset⁔(ref s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static uint32 Sum32(this ref sum32a s) => fnv_package.Sum32⁔(ref s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint, error) Write(this ref sum32a s, slice<byte> data) => fnv_package.Write⁔(ref s, data);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint Size(this ref sum32a s) => fnv_package.Size⁔(ref s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint BlockSize(this ref sum32a s) => fnv_package.BlockSize⁔(ref s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<byte> Sum(this ref sum32a s, slice<byte> @in) => fnv_package.Sum⁔(ref s, @in);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<byte>, error) AppendBinary(this ref sum32a s, slice<byte> b) => fnv_package.AppendBinary⁔(ref s, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<byte>, error) MarshalBinary(this ref sum32a s) => fnv_package.MarshalBinary⁔(ref s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error UnmarshalBinary(this ref sum32a s, slice<byte> b) => fnv_package.UnmarshalBinary⁔(ref s, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (hash.Cloner, error) Clone(this ref sum32a d) => fnv_package.Clone⁔(ref d);
+}
+partial class fnvᴛsum64 {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void Reset(this ref sum64 s) => fnv_package.Reset⁔(ref s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static uint64 Sum64(this ref sum64 s) => fnv_package.Sum64⁔(ref s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint, error) Write(this ref sum64 s, slice<byte> data) => fnv_package.Write⁔(ref s, data);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint Size(this ref sum64 s) => fnv_package.Size⁔(ref s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint BlockSize(this ref sum64 s) => fnv_package.BlockSize⁔(ref s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<byte> Sum(this ref sum64 s, slice<byte> @in) => fnv_package.Sum⁔(ref s, @in);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<byte>, error) AppendBinary(this ref sum64 s, slice<byte> b) => fnv_package.AppendBinary⁔(ref s, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<byte>, error) MarshalBinary(this ref sum64 s) => fnv_package.MarshalBinary⁔(ref s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error UnmarshalBinary(this ref sum64 s, slice<byte> b) => fnv_package.UnmarshalBinary⁔(ref s, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (hash.Cloner, error) Clone(this ref sum64 d) => fnv_package.Clone⁔(ref d);
+}
+partial class fnvᴛsum64a {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void Reset(this ref sum64a s) => fnv_package.Reset⁔(ref s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static uint64 Sum64(this ref sum64a s) => fnv_package.Sum64⁔(ref s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint, error) Write(this ref sum64a s, slice<byte> data) => fnv_package.Write⁔(ref s, data);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint Size(this ref sum64a s) => fnv_package.Size⁔(ref s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint BlockSize(this ref sum64a s) => fnv_package.BlockSize⁔(ref s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<byte> Sum(this ref sum64a s, slice<byte> @in) => fnv_package.Sum⁔(ref s, @in);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<byte>, error) AppendBinary(this ref sum64a s, slice<byte> b) => fnv_package.AppendBinary⁔(ref s, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<byte>, error) MarshalBinary(this ref sum64a s) => fnv_package.MarshalBinary⁔(ref s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error UnmarshalBinary(this ref sum64a s, slice<byte> b) => fnv_package.UnmarshalBinary⁔(ref s, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (hash.Cloner, error) Clone(this ref sum64a d) => fnv_package.Clone⁔(ref d);
+}
+// </MethodForwarders>

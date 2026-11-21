@@ -15,8 +15,6 @@ using unicode = unicode_package;
 using utf8 = global::go.unicode.utf8_package;
 using global::go.unicode;
 using iter = iter_package;
-using constraint = constraint_package;
-using static constraint_package;
 
 partial class constraint_package {
 
@@ -44,19 +42,15 @@ partial struct TagExpr {
     public @string Tag; // for example, “linux” or “cgo”
 }
 
-} partial class constraintᴛTagExpr {
+internal static void isExpr⁔(/*this*/ ref TagExpr x) { }
 
-internal static void isExpr(this ref TagExpr x) { }
-
-public static bool Eval(this ref TagExpr x, Func<@string, bool> ok) {
+internal static bool Eval⁔(/*this*/ ref TagExpr x, Func<@string, bool> ok) {
     return ok(x.Tag);
 }
 
-public static @string String(this ref TagExpr x) {
+internal static @string String⁔(/*this*/ ref TagExpr x) {
     return x.Tag;
 }
-
-} partial class constraint_package {
 
 internal static Expr tag(@string tag) { return new TagExprжExpr(Ꮡ(new TagExpr(tag))); }
 
@@ -65,15 +59,13 @@ partial struct NotExpr {
     public Expr X;
 }
 
-} partial class constraintᴛNotExpr {
+internal static void isExpr⁔(/*this*/ ref NotExpr x) { }
 
-internal static void isExpr(this ref NotExpr x) { }
-
-public static bool Eval(this ref NotExpr x, Func<@string, bool> ok) {
+internal static bool Eval⁔(/*this*/ ref NotExpr x, Func<@string, bool> ok) {
     return !x.X.Eval(ok);
 }
 
-public static @string String(this ref NotExpr x) {
+internal static @string String⁔(/*this*/ ref NotExpr x) {
     @string s = x.X.String();
     switch (x.X.type()) {
     case ж<AndExpr> _:
@@ -84,8 +76,6 @@ public static @string String(this ref NotExpr x) {
     return "!"u8 + s;
 }
 
-} partial class constraint_package {
-
 internal static Expr not(Expr x) { return new NotExprжExpr(Ꮡ(new NotExpr(x))); }
 
 // An AndExpr represents the expression X && Y.
@@ -93,22 +83,18 @@ partial struct AndExpr {
     public Expr X, Y;
 }
 
-} partial class constraintᴛAndExpr {
+internal static void isExpr⁔(/*this*/ ref AndExpr x) { }
 
-internal static void isExpr(this ref AndExpr x) { }
-
-public static bool Eval(this ref AndExpr x, Func<@string, bool> ok) {
+internal static bool Eval⁔(/*this*/ ref AndExpr x, Func<@string, bool> ok) {
     // Note: Eval both, to make sure ok func observes all tags.
     var xok = x.X.Eval(ok);
     var yok = x.Y.Eval(ok);
     return xok && yok;
 }
 
-public static @string String(this ref AndExpr x) {
+internal static @string String⁔(/*this*/ ref AndExpr x) {
     return andArg(x.X) + " && "u8 + andArg(x.Y);
 }
-
-} partial class constraint_package {
 
 internal static @string andArg(Expr x) {
     @string s = x.String();
@@ -127,22 +113,18 @@ partial struct OrExpr {
     public Expr X, Y;
 }
 
-} partial class constraintᴛOrExpr {
+internal static void isExpr⁔(/*this*/ ref OrExpr x) { }
 
-internal static void isExpr(this ref OrExpr x) { }
-
-public static bool Eval(this ref OrExpr x, Func<@string, bool> ok) {
+internal static bool Eval⁔(/*this*/ ref OrExpr x, Func<@string, bool> ok) {
     // Note: Eval both, to make sure ok func observes all tags.
     var xok = x.X.Eval(ok);
     var yok = x.Y.Eval(ok);
     return xok || yok;
 }
 
-public static @string String(this ref OrExpr x) {
+internal static @string String⁔(/*this*/ ref OrExpr x) {
     return orArg(x.X) + " || "u8 + orArg(x.Y);
 }
-
-} partial class constraint_package {
 
 internal static @string orArg(Expr x) {
     @string s = x.String();
@@ -162,13 +144,9 @@ partial struct SyntaxError {
     public @string Err; // description of error
 }
 
-} partial class constraintᴛSyntaxError {
-
-public static @string Error(this ref SyntaxError e) {
+internal static @string Error⁔(/*this*/ ref SyntaxError e) {
     return e.Err;
 }
-
-} partial class constraint_package {
 
 internal static error errNotConstraint = errors.New("not a build constraint");
 
@@ -267,17 +245,15 @@ internal static (Expr x, error err) parseExpr(@string text) {
     return (x, err);
 }
 
-} partial class constraintᴛexprParser {
-
 // or parses a sequence of || expressions.
 // On entry, the next input token has not yet been lexed.
 // On exit, the next input token has been lexed and is in p.tok.
-internal static Expr or(this ж<exprParser> Ꮡp) {
+internal static Expr or⁔(/*this*/ ж<exprParser> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     var x = Ꮡp.and();
     while (p.tok == "||"u8) {
-        x = constraint.or(x, Ꮡp.and());
+        x = or(x, Ꮡp.and());
     }
     return x;
 }
@@ -285,12 +261,12 @@ internal static Expr or(this ж<exprParser> Ꮡp) {
 // and parses a sequence of && expressions.
 // On entry, the next input token has not yet been lexed.
 // On exit, the next input token has been lexed and is in p.tok.
-internal static Expr and(this ж<exprParser> Ꮡp) {
+internal static Expr and⁔(/*this*/ ж<exprParser> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     var x = Ꮡp.not();
     while (p.tok == "&&"u8) {
-        x = constraint.and(x, Ꮡp.not());
+        x = and(x, Ꮡp.not());
     }
     return x;
 }
@@ -298,7 +274,7 @@ internal static Expr and(this ж<exprParser> Ꮡp) {
 // not parses a ! expression.
 // On entry, the next input token has not yet been lexed.
 // On exit, the next input token has been lexed and is in p.tok.
-internal static Expr not(this ж<exprParser> Ꮡp) {
+internal static Expr not⁔(/*this*/ ж<exprParser> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     p.size++;
@@ -311,7 +287,7 @@ internal static Expr not(this ж<exprParser> Ꮡp) {
         if (p.tok == "!"u8) {
             throw panic(Ꮡ(new SyntaxError(Offset: p.pos, Err: "double negation not allowed")));
         }
-        return constraint.not(Ꮡp.atom());
+        return not(Ꮡp.atom());
     }
     return Ꮡp.atom();
 }
@@ -323,7 +299,7 @@ private static readonly @string missingCloseParenˢᵇ = "missing close paren"u8
 // atom parses a tag or a parenthesized expression.
 // On entry, the next input token HAS been lexed.
 // On exit, the next input token has been lexed and is in p.tok.
-internal static Expr atom(this ж<exprParser> Ꮡp) {
+internal static Expr atom⁔(/*this*/ ж<exprParser> Ꮡp) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -367,7 +343,7 @@ internal static Expr atom(this ж<exprParser> Ꮡp) {
 // and p.pos records the byte offset of the start of the token in the input stream.
 // If lex reaches the end of the input, p.tok is set to the empty string.
 // For any other syntax error, lex panics with a SyntaxError.
-internal static void lex(this ref exprParser p) {
+internal static void lex⁔(/*this*/ ref exprParser p) {
     p.isTag = false;
     while (p.i < len(p.s) && (p.s[p.i] == ' ' || p.s[p.i] == '\t')) {
         p.i++;
@@ -411,8 +387,6 @@ internal static void lex(this ref exprParser p) {
     p.tok = p.s.slice(p.pos, p.i);
     p.isTag = true;
 }
-
-} partial class constraint_package {
 
 // IsPlusBuild reports whether the line of text is a “// +build” constraint.
 // It only checks the prefix of the text, not that the expression itself parses.

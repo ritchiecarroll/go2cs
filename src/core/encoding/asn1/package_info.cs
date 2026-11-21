@@ -14,6 +14,9 @@
 
 using go;
 using static go.encoding.asn1_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -71,12 +74,14 @@ using static go.encoding.asn1_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("encoding/asn1/asn1.go", "asn1.cs", "ADBYAAoOvNKCgtyUtLS2rsKClIKUgpSq0oKClJSClIKCuIKCqqKClIKClIKUppiigpSClIKClIKCgpSCAA4eooKUgoKqooKCpoKCgoKmyMKCgpSChoKUgoLctgAJEJKmgoKUgoKClKbM4oKCytyCgpSCgpSCpoKCgoKUlIIADB7igoKmgoKUgqaCgpSCgoKUgpSmgqrClIKCgoKUgqaCgqaUpurSgpSCpoKmrsKCgqaokgACEPKCgoKmggALIrIACzDygoKCpoKuAA0UgpSU7sKClO4ADhKCuIKmgoK4hpSCpgATLAAKAqaCgpSCgoKCuIKCgqaCgqaCgpSCgpSmgoKClIKCgoKUgoKmgpSCgpSCuIKCuKzigoKCyoKCgoKClMrGtoKClIKClIKUgoKCgpSCgoKCgoKCpqiCgoKCgoKCmqLs4oKYgpSCpoKClLiCgoKClIKClIKCgpS0tLS0tLS0tLS0tLT6goKUgpSmgoKUgoKClIKClIKUgoKCpoKClIK4goKUlLiCgoLugoKUpIIACBKCgoKUgriCpoKClIKCgqaCgoKmgoKCuJaCgpSUlIKClIKmlIKkgqSCpIKClIKkgoKUgqSCpIKClIKUpIKClIKkgoKClJSCgpSUtpSCgoK4hIKmgoKCgpSCgtykgoKCgpSCgpSCpIKUtLS0tPy0tqSClJSCqqKUpqzSgpSCgpSClAACngEATAIADhKCgqaClMrCgoKUgoKU", "", "", "1080=Field/1/1/1")]
+[assembly: GoPositionMap("encoding/asn1/asn1.go", "asn1.cs", "AC1Y7pzSgoLclLS0tq7CgpSClIKUqtKCgpSUgpSCgriCgqqigpSCgpSClKaYooKUgpSCgpSCgoKUggAMHqKClIKCqqKCgqaCgoKCpqjCgoKUgoaClIKC3LYABxCSpoKClIKCgpSmrOKCgsrcgoKUgoKUgqaCgoKClJSCAAwe4oKCpoKClIKmgoKUgoKClIKUpoKqwpSCgoKClIKmgoKmlKbq0oKUgqaCpq7CgoKmqJIAAhDygoKCpoIACyKyAAsw8oKCgqaCrgANFIKUlO7CgpTuAA4SgriCpoKCuIaUgqYAEywACgKmgoKUgoKCgriCgoKmgoKmgoKUgoKUpoKCgpSCgoKClIKCpoKUgoKUgriCgris4oKCgsqCgoKCgpTKxraCgpSCgpSClIKCgoKUgoKCgoKCgqaogoKCgoKCgpqi7OKCmIKUgqaCgpS4goKCgpSCgpSCgoKUtLS0tLS0tLS0tLS0+oKClIKUpoKClIKCgpSCgpSClIKCgqaCgpSCuIKClJS4goKC7oKClKSCAAgSgoKClIK4gqaCgpSCgoKmgoKCpoKCgriWgoKUlJSCgpSCppSCpIKkgqSCgpSCpIKClIKkgqSCgpSClKSCgpSCpIKCgpSUgoKUlLaUgoKCuISCpoKCgoKUgoLcpIKCgoKUgoKUgqSClLS0tLT8tLakgpSUgqqilKas0oKUgoKUgpQAAp4BAEwCAAwSgoKmgpSqwoKClIKClA==", "", "", "1063=Field/1/1/1")]
 [assembly: GoPositionMap("encoding/asn1/common.go", "common.cs", "AFe8AQAIAoKCgpS0goLGtLS0tLS0goKCxoKCgsa0goLGgoLGtuqilKSkpKSklJSkpKSClIKUpJQ=")]
-[assembly: GoPositionMap("encoding/asn1/marshal.go", "marshal.cs", "ACJCgqaCAAgKgqaCggAJDIKmgoIACQyCgoKUpoKCgoIACQyCgoKUpgAIEoKCggAIEpSCgoIADxiCpoKCAAgKgpSCgqaCgqamgpSC2IKCpoKCpqaClIKCgoKmpqaigqbKgoKCgpSClIKUlIKmlLiClIKmpqKCgoKUpoKCgpSCgoKUgqaCgoKUpuqCpoKCggAJDIKCgpSmgoKC2IKCpqaC7oK4poKCgrimgoKCuKaCpoKmgu6CgqailIKCpqailIKCpqaClJS0tKamgoKCppSmgpSClJSCgpSUlKS0toKCpoKUpoKCgpSmopSkgoKUpIKkgqSCpoCkgpSkpJSCgriUgoLKgoKCyqampKSkgoKCgrjGgoKmlKSkpJSCgoK4gpTGlKSkpNjmooKmgqaCpoKClILugoK4goKCppSClKaCgqaCpoKmlLiCgoKUgrjGgoLIgoKUAAcQgqaUgoKmlIKCgoKClKaClJSU7rimlAACHgAMAqqigoKUgoI=", "", "", "790=Len/1/1/3")]
+[assembly: GoPositionMap("encoding/asn1/marshal.go", "marshal.cs", "AB9CgqaCyoKmgoLcgqaCgtyCgoKUpoKCgoLcgoKClKYACBKCgoIACBKUgoKCAAsYgqaCgsqClIKCpoKCpqaClIK4goKmgoKmpoKUgoKCgqampqKCpsqCgoKClIKUgpSUgqaUuIKUgqamooKCgpSmgoKClIKCgpSCpoKCgpSmyoKmgoKC3IKCgpSmgoKCuIKCpqaC7oK4poKCgrimgoKCuKaCpoKmgu6CgqailIKCpqailIKCpqaClJS0tKamgoKCppSmgpSClJSCgpSUlKS0toKCpoKUpoKCgpSmopSkgoKUpIKkgqSCpoCkgpSkpJSCgriUgoLKgoKCyqampKSkgoKCgrjGgoKmlKSkpJSCgoK4gpTGlKSkpNjmooKmgqaCpoKClILugoK4goKCppSClKaCgqaCpoKmlLiCgoKUgrjGgoLIgoKUAAcQgqaUgoKmlIKCgoKClKaClJSU7rimlAACHgAMAqqigoKUgoI=", "", "", "753=Len/1/1/3")]
 // </GoSourcePositionMaps>
 
 namespace go.encoding;
+
+using static go.encoding.asn1_package;
 
 [GoPackage("asn1")]
 public static partial class asn1_package
@@ -143,18 +148,78 @@ public static partial class asn1_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(asn1_package.BitString)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class asn1ᴛBitString;
-[GoMethodHost(typeof(asn1_package.ObjectIdentifier)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class asn1ᴛObjectIdentifier;
-[GoMethodHost(typeof(asn1_package.StructuralError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class asn1ᴛStructuralError;
-[GoMethodHost(typeof(asn1_package.SyntaxError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class asn1ᴛSyntaxError;
-[GoMethodHost(typeof(asn1_package.bitStringEncoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class asn1ᴛbitStringEncoder;
-[GoMethodHost(typeof(asn1_package.byteEncoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class asn1ᴛbyteEncoder;
-[GoMethodHost(typeof(asn1_package.bytesEncoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class asn1ᴛbytesEncoder;
-[GoMethodHost(typeof(asn1_package.int64Encoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class asn1ᴛint64Encoder;
-[GoMethodHost(typeof(asn1_package.invalidUnmarshalError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class asn1ᴛinvalidUnmarshalError;
-[GoMethodHost(typeof(asn1_package.multiEncoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class asn1ᴛmultiEncoder;
-[GoMethodHost(typeof(asn1_package.oidEncoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class asn1ᴛoidEncoder;
-[GoMethodHost(typeof(asn1_package.setEncoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class asn1ᴛsetEncoder;
-[GoMethodHost(typeof(asn1_package.stringEncoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class asn1ᴛstringEncoder;
-[GoMethodHost(typeof(asn1_package.taggedEncoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class asn1ᴛtaggedEncoder;
+[GoMethodHost(typeof(asn1_package.BitString)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class asn1ᴛBitString;
+[GoMethodHost(typeof(asn1_package.ObjectIdentifier)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class asn1ᴛObjectIdentifier;
+[GoMethodHost(typeof(asn1_package.StructuralError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class asn1ᴛStructuralError;
+[GoMethodHost(typeof(asn1_package.SyntaxError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class asn1ᴛSyntaxError;
+[GoMethodHost(typeof(asn1_package.bitStringEncoder)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class asn1ᴛbitStringEncoder;
+[GoMethodHost(typeof(asn1_package.byteEncoder)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class asn1ᴛbyteEncoder;
+[GoMethodHost(typeof(asn1_package.bytesEncoder)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class asn1ᴛbytesEncoder;
+[GoMethodHost(typeof(asn1_package.int64Encoder)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class asn1ᴛint64Encoder;
+[GoMethodHost(typeof(asn1_package.invalidUnmarshalError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class asn1ᴛinvalidUnmarshalError;
+[GoMethodHost(typeof(asn1_package.multiEncoder)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class asn1ᴛmultiEncoder;
+[GoMethodHost(typeof(asn1_package.oidEncoder)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class asn1ᴛoidEncoder;
+[GoMethodHost(typeof(asn1_package.setEncoder)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class asn1ᴛsetEncoder;
+[GoMethodHost(typeof(asn1_package.stringEncoder)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class asn1ᴛstringEncoder;
+[GoMethodHost(typeof(asn1_package.taggedEncoder)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class asn1ᴛtaggedEncoder;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class asn1ᴛBitString {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint At(this BitString b, nint i) => asn1_package.At⁔(b, i);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> RightAlign(this BitString b) => asn1_package.RightAlign⁔(b);
+}
+partial class asn1ᴛObjectIdentifier {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Equal(this ObjectIdentifier oi, ObjectIdentifier other) => asn1_package.Equal⁔(oi, other);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this ObjectIdentifier oi) => asn1_package.String⁔(oi);
+}
+partial class asn1ᴛStructuralError {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this StructuralError e) => asn1_package.Error⁔(e);
+}
+partial class asn1ᴛSyntaxError {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this SyntaxError e) => asn1_package.Error⁔(e);
+}
+partial class asn1ᴛbitStringEncoder {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint Len(this bitStringEncoder b) => asn1_package.Len⁔(b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void Encode(this bitStringEncoder b, slice<byte> dst) => asn1_package.Encode⁔(b, dst);
+}
+partial class asn1ᴛbyteEncoder {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint Len(this byteEncoder c) => asn1_package.Len⁔(c);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void Encode(this byteEncoder c, slice<byte> dst) => asn1_package.Encode⁔(c, dst);
+}
+partial class asn1ᴛbytesEncoder {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint Len(this bytesEncoder b) => asn1_package.Len⁔(b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void Encode(this bytesEncoder b, slice<byte> dst) => asn1_package.Encode⁔(b, dst);
+}
+partial class asn1ᴛint64Encoder {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint Len(this int64Encoder i) => asn1_package.Len⁔(i);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void Encode(this int64Encoder i, slice<byte> dst) => asn1_package.Encode⁔(i, dst);
+}
+partial class asn1ᴛinvalidUnmarshalError {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string Error(this ref invalidUnmarshalError e) => asn1_package.Error⁔(ref e);
+}
+partial class asn1ᴛmultiEncoder {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint Len(this multiEncoder m) => asn1_package.Len⁔(m);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void Encode(this multiEncoder m, slice<byte> dst) => asn1_package.Encode⁔(m, dst);
+}
+partial class asn1ᴛoidEncoder {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint Len(this oidEncoder oid) => asn1_package.Len⁔(oid);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void Encode(this oidEncoder oid, slice<byte> dst) => asn1_package.Encode⁔(oid, dst);
+}
+partial class asn1ᴛsetEncoder {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint Len(this setEncoder s) => asn1_package.Len⁔(s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void Encode(this setEncoder s, slice<byte> dst) => asn1_package.Encode⁔(s, dst);
+}
+partial class asn1ᴛstringEncoder {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint Len(this stringEncoder s) => asn1_package.Len⁔(s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void Encode(this stringEncoder s, slice<byte> dst) => asn1_package.Encode⁔(s, dst);
+}
+partial class asn1ᴛtaggedEncoder {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint Len(this ref taggedEncoder t) => asn1_package.Len⁔(ref t);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void Encode(this ref taggedEncoder t, slice<byte> dst) => asn1_package.Encode⁔(ref t, dst);
+}
+// </MethodForwarders>

@@ -10,10 +10,15 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+using http = go.net.http_package;
+using io = go.io_package;
 // </ImportedTypeAliases>
 
 using go;
 using static go.net.http.cgi_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -69,12 +74,17 @@ using static go.net.http.cgi_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("net/http/cgi/cgi_main.go", "cgi_main.cs", "ABsmgqSClAAKCqKCgqaCgqaCgoKmgoKClIKmlIKClKaUgqaCgqaC6oKClAAWCJKUlKS0grSCpIKCgpSCgoKUgoKUgoKCpoKCgqaCpg==", "105-134:1")]
-[assembly: GoPositionMap("net/http/cgi/child.go", "child.cs", "ABg4woKClIKUpoKCgoKmABwKooKCgqaCgqaCgIK2goKUlIKCgpSmgriCgpSCuIKUgoKC3ICCtpSCgpSUgoKUuIKCgpTKgpSuwoKClIKUgpTKgoKClAANGIKmgqaCgpSClKaClIKUgu7CgpSCgoKUgoI=", "", "", "190=NewWriter/1/1/3")]
-[assembly: GoPositionMap("net/http/cgi/host.go", "host.cs", "AChIlIKkpKSkpKSUAB0+goKUAAQUAAoCgoKCgoKCgriCpgAPBtKCgoKmgpSCgpSCpgANHIKmpoKUpoKmooKUlIKClKaClIKmgoKUlIKCuIKCuIKmlJKCgpSUgqaCgqbugpSCgoKmgoKClIKUkqSCgoKCgoKCgoKClIKUgoKClIKClIKCgoKUgoKUgpSCgpSCgoKClLS2goKCpoKCgpSCuIKCgqaC3IKCuJSCgu60pKKClLiigoKCggAKFgAKFsaClKTapg==", "221-224:1", "", "168=RequestURI/1/1/7;262=stderr/1/1/5", "287:21,289:21")]
+[assembly: GoPositionMap("net/http/cgi/cgi_main.go", "cgi_main.cs", "ABomgqSClAAKCqKCgqaCgqaCgoKmgoKClIKmlIKClKaUgqaCgqaCyoKClAAUCJKUlKS0grSCpIKCgpSCgoKUgoKUgoKCpoKCgqaCpg==", "105-134:1")]
+[assembly: GoPositionMap("net/http/cgi/child.go", "child.cs", "ABc4woKClIKUpoKCgoKmABwKooKCgqaCgqaCgIK2goKUlIKCgpSmgriCgpSCuIKUgoKC3ICCtpSCgpSUgoKUuIKCgpTKgpSuwoKClIKUgpTKgoKClAALGIKmgqaCgpSClKaClIKUgq7CgpSCgoKUgoI=", "", "", "189=NewWriter/1/1/3")]
+[assembly: GoPositionMap("net/http/cgi/host.go", "host.cs", "ACdIlIKkpKSkpKSUABs+goKUAAIUAAoCgoKCgoKCgriCpgALBtKCgoKmgpSCgpSCpgANHIKmpoKUpoKmooKUlIKClKaClIKmgoKUlIKCuIKCuIKmlJKCgpSUgqaCgqbugpSCgoKmgoKClIKUkqSCgoKCgoKCgoKClIKUgoKClIKClIKCgoKUgoKUgpSCgpSCgoKClLS2goKCpoKCgpSCuIKCgqaC3IKCuJSCgu60pKKClLiigoKCggAKFgAKFqaClKTapg==", "221-224:1", "", "159=RequestURI/1/1/7;253=stderr/1/1/5", "278:21,280:21")]
 // </GoSourcePositionMaps>
 
 namespace go.net.http;
+
+using static go.net.http.cgi_package;
+using http = go.net.http_package;
+using io = go.io_package;
+using ꓸꓸꓸany = Span<any>;
 
 [GoPackage("cgi")]
 public static partial class cgi_package
@@ -130,7 +140,30 @@ public static partial class cgi_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(cgi_package.Handler)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class cgiᴛHandler;
-[GoMethodHost(typeof(cgi_package.neverEnding)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class cgiᴛneverEnding;
-[GoMethodHost(typeof(cgi_package.response)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class cgiᴛresponse;
+[GoMethodHost(typeof(cgi_package.Handler)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class cgiᴛHandler;
+[GoMethodHost(typeof(cgi_package.neverEnding)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class cgiᴛneverEnding;
+[GoMethodHost(typeof(cgi_package.response)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class cgiᴛresponse;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class cgiᴛHandler {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static io.Writer stderr(this ref Handler h) => cgi_package.stderr⁔(ref h);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void ServeHTTP(this ж<Handler> Ꮡh, http.ResponseWriter rw, ж<http.Request> Ꮡreq) => cgi_package.ServeHTTP⁔(Ꮡh, rw, Ꮡreq);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void printf(this ref Handler h, @string format, params ꓸꓸꓸany vʗp) => cgi_package.printf⁔(ref h, format, vʗp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void handleInternalRedirect(this ref Handler h, http.ResponseWriter rw, ж<http.Request> Ꮡreq, @string path) => cgi_package.handleInternalRedirect⁔(ref h, rw, Ꮡreq, path);
+}
+partial class cgiᴛneverEnding {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) Read(this neverEnding b, slice<byte> p) => cgi_package.Read⁔(b, p);
+}
+partial class cgiᴛresponse {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void Flush(this ref response r) => cgi_package.Flush⁔(ref r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static http.Header Header(this ref response r) => cgi_package.Header⁔(ref r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) Write(this ref response r, slice<byte> p) => cgi_package.Write⁔(ref r, p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void WriteHeader(this ref response r, nint code) => cgi_package.WriteHeader⁔(ref r, code);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void writeCGIHeader(this ref response r, slice<byte> p) => cgi_package.writeCGIHeader⁔(ref r, p);
+}
+// </MethodForwarders>

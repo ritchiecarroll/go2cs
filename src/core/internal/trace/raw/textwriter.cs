@@ -7,7 +7,6 @@ using fmt = fmt_package;
 using io = io_package;
 using version = go.@internal.trace.version_package;
 using go.@internal.trace;
-using static raw_package;
 
 partial class raw_package {
 
@@ -26,10 +25,8 @@ public static (ж<TextWriter>, error) NewTextWriter(io.Writer w, version.Version
     return (Ꮡ(new TextWriter(w: w, v: v)), default);
 }
 
-} partial class rawᴛTextWriter {
-
 // WriteEvent writes a single event to the stream.
-public static error WriteEvent(this ref TextWriter w, Event e) {
+internal static error WriteEvent⁔(/*this*/ ref TextWriter w, Event e) {
     // Check version.
     if (e.Version != w.v) {
         return fmt.Errorf("mismatched version between writer (go 1.%d) and event (go 1.%d)"u8, w.v, e.Version);
@@ -40,4 +37,4 @@ public static error WriteEvent(this ref TextWriter w, Event e) {
     return err;
 }
 
-}
+} // end raw_package

@@ -14,6 +14,9 @@
 
 using go;
 using static go.@internal.coverage.slicereader_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -55,10 +58,12 @@ using static go.@internal.coverage.slicereader_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/coverage/slicereader/slicereader.go", "slicereader.cs", "ABcwgrjGgoKCgpSCgqaClIKUgqSCgpSCpIKClIKmpoKmgoKCpoKCgoKmgoKCgqailIKCgoKClJSmgoKCgpTGgoKU")]
+[assembly: GoPositionMap("internal/coverage/slicereader/slicereader.go", "slicereader.cs", "ABYwgrimgoKCgpSCgqaClIKUgqSCgpSCpIKClIKmpoKmgoKCpoKCgoKmgoKCgqailIKCgoKClJSmgoKCgpSmgoKU")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.coverage;
+
+using static go.@internal.coverage.slicereader_package;
 
 [GoPackage("slicereader")]
 public static partial class slicereader_package
@@ -93,5 +98,22 @@ public static partial class slicereader_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(slicereader_package.Reader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class slicereaderᴛReader;
+[GoMethodHost(typeof(slicereader_package.Reader)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class slicereaderᴛReader;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class slicereaderᴛReader {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint, error) Read(this ref Reader r, slice<byte> b) => slicereader_package.Read⁔(ref r, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (int64 ret, error err) Seek(this ref Reader r, int64 offset, nint whence) => slicereader_package.Seek⁔(ref r, offset, whence);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static int64 Offset(this ref Reader r) => slicereader_package.Offset⁔(ref r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static uint8 ReadUint8(this ref Reader r) => slicereader_package.ReadUint8⁔(ref r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static uint32 ReadUint32(this ref Reader r) => slicereader_package.ReadUint32⁔(ref r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static uint64 ReadUint64(this ref Reader r) => slicereader_package.ReadUint64⁔(ref r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static uint64 /*value*/ ReadULEB128(this ref Reader r) => slicereader_package.ReadULEB128⁔(ref r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string ReadString(this ref Reader r, int64 len) => slicereader_package.ReadString⁔(ref r, len);
+}
+// </MethodForwarders>

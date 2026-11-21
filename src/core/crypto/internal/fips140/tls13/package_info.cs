@@ -10,10 +10,14 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+using hash = go.hash_package;
 // </ImportedTypeAliases>
 
 using go;
 using static go.crypto.@internal.fips140.tls13_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -57,10 +61,13 @@ using static go.crypto.@internal.fips140.tls13_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("crypto/internal/fips140/tls13/cast.go", "cast.cs", "ABAegoK43IKCgoKCgpQ=", "16-36:1")]
-[assembly: GoPositionMap("crypto/internal/fips140/tls13/tls13.go", "tls13.cs", "ABEoAAkCAAgSlIKCgoKCgoKmooKUpqKClAAaKKL8gqqiAA8QgoIABxCiqqIADxCCggAHEKKqoqqiAAsUogAHEKIACwyCgoKCxqI=", "76-76:1", "", "94=extract/1/1/1;127=extract/1/1/1;162=extract/1/1/1;200=deriveSecret/1/1/1;211=deriveSecret/1/1/1")]
+[assembly: GoPositionMap("crypto/internal/fips140/tls13/tls13.go", "tls13.cs", "ABAoAAkCAAgSlIKCgoKCgoKmooKUpqKClAAaKKLcgqqiAAsQgoIABRCiqqIABxCCggAFEKKqoqqiAAcUogAFEKIACQyCgoKCpqI=", "76-76:1", "", "93=extract/1/1/1;120=extract/1/1/1;145=extract/1/1/1;177=deriveSecret/1/1/1;186=deriveSecret/1/1/1")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140;
+
+using static go.crypto.@internal.fips140.tls13_package;
+using hash = go.hash_package;
 
 [GoPackage("tls13")]
 public static partial class tls13_package
@@ -102,8 +109,35 @@ public static partial class tls13_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(tls13_package.EarlySecret)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class tls13ᴛEarlySecret;
-[GoMethodHost(typeof(tls13_package.ExporterMasterSecret)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class tls13ᴛExporterMasterSecret;
-[GoMethodHost(typeof(tls13_package.HandshakeSecret)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class tls13ᴛHandshakeSecret;
-[GoMethodHost(typeof(tls13_package.MasterSecret)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class tls13ᴛMasterSecret;
+[GoMethodHost(typeof(tls13_package.EarlySecret)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class tls13ᴛEarlySecret;
+[GoMethodHost(typeof(tls13_package.ExporterMasterSecret)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class tls13ᴛExporterMasterSecret;
+[GoMethodHost(typeof(tls13_package.HandshakeSecret)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class tls13ᴛHandshakeSecret;
+[GoMethodHost(typeof(tls13_package.MasterSecret)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class tls13ᴛMasterSecret;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class tls13ᴛEarlySecret {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> ResumptionBinderKey(this ref EarlySecret s) => tls13_package.ResumptionBinderKey⁔(ref s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> ClientEarlyTrafficSecret(this ref EarlySecret s, hash.Hash transcript) => tls13_package.ClientEarlyTrafficSecret⁔(ref s, transcript);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<HandshakeSecret> HandshakeSecret(this ref EarlySecret s, slice<byte> sharedSecret) => tls13_package.HandshakeSecret⁔(ref s, sharedSecret);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<ExporterMasterSecret> EarlyExporterMasterSecret(this ref EarlySecret s, hash.Hash transcript) => tls13_package.EarlyExporterMasterSecret⁔(ref s, transcript);
+}
+partial class tls13ᴛExporterMasterSecret {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> Exporter(this ref ExporterMasterSecret s, @string label, slice<byte> context, nint length) => tls13_package.Exporter⁔(ref s, label, context, length);
+}
+partial class tls13ᴛHandshakeSecret {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> ClientHandshakeTrafficSecret(this ref HandshakeSecret s, hash.Hash transcript) => tls13_package.ClientHandshakeTrafficSecret⁔(ref s, transcript);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> ServerHandshakeTrafficSecret(this ref HandshakeSecret s, hash.Hash transcript) => tls13_package.ServerHandshakeTrafficSecret⁔(ref s, transcript);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<MasterSecret> MasterSecret(this ref HandshakeSecret s) => tls13_package.MasterSecret⁔(ref s);
+}
+partial class tls13ᴛMasterSecret {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> ClientApplicationTrafficSecret(this ref MasterSecret s, hash.Hash transcript) => tls13_package.ClientApplicationTrafficSecret⁔(ref s, transcript);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> ServerApplicationTrafficSecret(this ref MasterSecret s, hash.Hash transcript) => tls13_package.ServerApplicationTrafficSecret⁔(ref s, transcript);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> ResumptionMasterSecret(this ref MasterSecret s, hash.Hash transcript) => tls13_package.ResumptionMasterSecret⁔(ref s, transcript);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<ExporterMasterSecret> ExporterMasterSecret(this ref MasterSecret s, hash.Hash transcript) => tls13_package.ExporterMasterSecret⁔(ref s, transcript);
+}
+// </MethodForwarders>

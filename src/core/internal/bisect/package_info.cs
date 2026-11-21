@@ -14,6 +14,9 @@
 
 using go;
 using static go.@internal.bisect_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -61,10 +64,12 @@ using static go.@internal.bisect_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/bisect/bisect.go", "bisect.cs", "ALwBggMACAKCppSmgoKCgriCgoKCgtyCgoKCgriUgriCgoKClIKClIKCgpSkpIKUpIKkgpSCpIKUpJSUgoKClIKUgpSCgpSUgoKCpgAWMsKosoKUqLKClKiSgoKCpqqigpSqwoKCgpSmyJKCgoKCgoKokoKCgoKClIKCgoKClILMsoKUqsKCgpSCppSCpoKCgoKCgpSCgriCgqaUgpS4AAoWooKCgoKqopSClIKCgoKCgoKCgoKCpoKCgqyy6JKCgoKCgpSCAAYQAAkEgoKCgpSCyoKClIK4gpSClIKCpLS0yIKmgoKkpAAIEIKCgoKUgqrCgoL+tLS0tLS0tLS0tILGgsaCxoLGgsaCxoLGgsaCyAAMEgAJFoKCgqaCgoKUpoKCgoKUpoKCgoKUABMqwoKClIKCgq7CgoKCyoKClII=")]
+[assembly: GoPositionMap("internal/bisect/bisect.go", "bisect.cs", "ALsBggMACAKCppSmgoKCgriCgoKCgtyCgoKCgriUgriCgoKClIKClIKCgpSkpIKUpIKkgpSCpIKUpJSUgoKClIKUgpSCgpSUgoKCpgAUMsKosoKUqLKClKiSgoKCpqqigpSqwoKCgpSmqJKCgoKCgoKokoKCgoKClIKCgoKClIKssoKUqsKCgpSCppSCpoKCgoKCgpSCgriCgqaUgpS4AAgWooKCgoKqopSClIKCgoKCgoKCgoKCpoKCgqyy6JKCgoKCgpSCAAYQAAkEgoKCgpSCyoKClIK4gpSClIKCpLS0yIKmgoKkpAAIEIKCgoKUgqrCgoL+tLS0tLS0tLS0tILGgsaCxoLGgsaCxoLGgsaCyAAKEgAHFoKCgqaCgoKUpoKCgoKUpoKCgoKUABEqwoKClIKCgq7CgoKCyoKClII=")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;
+
+using static go.@internal.bisect_package;
 
 [GoPackage("bisect")]
 public static partial class bisect_package
@@ -103,7 +108,31 @@ public static partial class bisect_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(bisect_package.Matcher)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class bisectᴛMatcher;
-[GoMethodHost(typeof(bisect_package.dedup)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class bisectᴛdedup;
-[GoMethodHost(typeof(bisect_package.parseError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class bisectᴛparseError;
+[GoMethodHost(typeof(bisect_package.Matcher)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class bisectᴛMatcher;
+[GoMethodHost(typeof(bisect_package.dedup)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class bisectᴛdedup;
+[GoMethodHost(typeof(bisect_package.parseError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class bisectᴛparseError;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class bisectᴛMatcher {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool MarkerOnly(this ref Matcher m) => bisect_package.MarkerOnly⁔(ref m);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool ShouldEnable(this ж<Matcher> Ꮡm, uint64 id) => bisect_package.ShouldEnable⁔(Ꮡm, id);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool ShouldPrint(this ж<Matcher> Ꮡm, uint64 id) => bisect_package.ShouldPrint⁔(Ꮡm, id);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool matchResult(this ref Matcher m, uint64 id) => bisect_package.matchResult⁔(ref m, id);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool FileLine(this ж<Matcher> Ꮡm, Writer w, @string @file, nint line) => bisect_package.FileLine⁔(Ꮡm, w, @file, line);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool fileLine(this ж<Matcher> Ꮡm, Writer w, @string @file, nint line) => bisect_package.fileLine⁔(Ꮡm, w, @file, line);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Stack(this ж<Matcher> Ꮡm, Writer w) => bisect_package.Stack⁔(Ꮡm, w);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool stack(this ж<Matcher> Ꮡm, Writer w) => bisect_package.stack⁔(Ꮡm, w);
+}
+partial class bisectᴛdedup {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool seen(this ж<dedup> Ꮡd, uint64 h) => bisect_package.seen⁔(Ꮡd, h);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool seenLossy(this ref dedup d, uint64 h) => bisect_package.seenLossy⁔(ref d, h);
+}
+partial class bisectᴛparseError {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string Error(this ref parseError e) => bisect_package.Error⁔(ref e);
+}
+// </MethodForwarders>

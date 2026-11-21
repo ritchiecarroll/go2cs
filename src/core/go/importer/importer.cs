@@ -22,7 +22,6 @@ using io = io_package;
 using runtime = runtime_package;
 using global::go.go;
 using global::go.go.@internal;
-using static importer_package;
 
 partial class importer_package {
 
@@ -112,20 +111,16 @@ partial struct gcimports {
     internal Func<@string, (io.ReadCloser, error)> lookup;
 }
 
-} partial class importerᴛgcimports {
-
-internal static (ж<types.Package>, error) Import(this ref gcimports m, @string path) {
+internal static (ж<types.Package>, error) Import⁔(/*this*/ ref gcimports m, @string path) {
     return m.ImportFrom(path, ""u8, /* no vendoring */ 0);
 }
 
-internal static (ж<types.Package>, error) ImportFrom(this ref gcimports m, @string path, @string srcDir, types.ImportMode mode) {
+internal static (ж<types.Package>, error) ImportFrom⁔(/*this*/ ref gcimports m, @string path, @string srcDir, types.ImportMode mode) {
     if (mode != 0) {
         throw panic("mode must be 0");
     }
     return gcimporter.Import(m.fset, m.packages, path, srcDir, m.lookup);
 }
-
-} partial class importer_package {
 
 // gccgo importer
 partial struct gccgoimports {
@@ -134,17 +129,15 @@ partial struct gccgoimports {
     internal Func<@string, (io.ReadCloser, error)> lookup;
 }
 
-} partial class importerᴛgccgoimports {
-
-internal static (ж<types.Package>, error) Import(this ref gccgoimports m, @string path) {
+internal static (ж<types.Package>, error) Import⁔(/*this*/ ref gccgoimports m, @string path) {
     return m.ImportFrom(path, ""u8, /* no vendoring */ 0);
 }
 
-internal static (ж<types.Package>, error) ImportFrom(this ref gccgoimports m, @string path, @string srcDir, types.ImportMode mode) {
+internal static (ж<types.Package>, error) ImportFrom⁔(/*this*/ ref gccgoimports m, @string path, @string srcDir, types.ImportMode mode) {
     if (mode != 0) {
         throw panic("mode must be 0");
     }
     return m.importer(m.packages, path, srcDir, m.lookup);
 }
 
-}
+} // end importer_package

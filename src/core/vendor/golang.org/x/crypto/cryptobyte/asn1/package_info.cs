@@ -14,6 +14,9 @@
 
 using go;
 using static go.vendor.golang.org.x.crypto.cryptobyte.asn1_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -55,10 +58,12 @@ using static go.vendor.golang.org.x.crypto.cryptobyte.asn1_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("vendor/golang.org/x/crypto/cryptobyte/asn1/asn1.go", "asn1.cs", "ABkugJaA")]
+[assembly: GoPositionMap("vendor/golang.org/x/crypto/cryptobyte/asn1/asn1.go", "asn1.cs", "ABUugJaA")]
 // </GoSourcePositionMaps>
 
 namespace go.vendor.golang.org.x.crypto.cryptobyte;
+
+using static go.vendor.golang.org.x.crypto.cryptobyte.asn1_package;
 
 [GoPackage("asn1", ImportPath = "vendor/golang.org/x/crypto/cryptobyte/asn1")]
 public static partial class asn1_package
@@ -90,5 +95,16 @@ public static partial class asn1_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(asn1_package.Tag)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class asn1ᴛTag;
+[GoMethodHost(typeof(asn1_package.Tag)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class asn1ᴛTag;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class asn1ᴛTag {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static Tag Constructed(this Tag t) => asn1_package.Constructed⁔(t);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static Tag ContextSpecific(this Tag t) => asn1_package.ContextSpecific⁔(t);
+}
+// </MethodForwarders>
