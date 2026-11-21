@@ -19,11 +19,14 @@ namespace GolibTests;
 /// waiters have left, so the word's owner can be collected.
 /// </summary>
 /// <remarks>
-/// Until 2026-11-21 poll kept a private table whose bucket held the count, so no bucket could ever be removed: every
-/// fdMutex word that once blocked kept its bucket, and the key (the pointer box over the word) kept the word's owner,
-/// an os.File or a netFD, alive for the life of the process. The arms call poll's own entry points (internal, so by
-/// reflection) and look in every semaphore table there is (also by reflection), so they hold whichever primitive
-/// serves poll. RuntimeSemaphoreBucketTests holds the same properties for the shared primitive itself.
+/// The word these primitives serve is FD.csema: FD.destroy releases it and FD.Close acquires it (fdMutex's rsema and
+/// wsema never reach them; fd_mutex_impl.cs waits on inline gates). Until 2026-11-21 poll kept a private table whose
+/// bucket held the count, and both calls fetched the bucket, so no bucket could ever be removed: every FD that was
+/// ever closed kept its bucket, and the key (the pointer box over csema) kept the FD, and its os.File or netFD, alive
+/// for the life of the process. The arms call poll's own entry points (internal, so by reflection) and look in every
+/// semaphore table there is (also by reflection), so they hold whichever primitive serves poll; the shared table must
+/// be found, so a renamed field cannot make them read nothing. RuntimeSemaphoreBucketTests holds the same properties
+/// for the shared primitive itself.
 /// </remarks>
 [TestClass]
 public class PollSemaphoreTests
@@ -32,6 +35,23 @@ public class PollSemaphoreTests
 
     private static readonly Action<ж<uint32>> Semacquire = PollEntry("runtime_Semacquire");
     private static readonly Action<ж<uint32>> Semrelease = PollEntry("runtime_Semrelease");
+
+    // The common production order: destroy releases csema before Close acquires it, so neither call waits. Nothing
+    // is kept for the word and its owner is collected. The acquire runs on a thread with a deadline, so a lost permit
+    // fails by name instead of hanging the suite.
+    [TestMethod]
+    public void ReleaseThenAcquireKeepsNothingAndTheOwnerIsCollected()
+    {
+        WeakReference owner = ReleaseThenAcquireInAFreshOwner();
+
+        for (int i = 0; i < 3 && owner.IsAlive; i++)
+        {
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+        }
+
+        Assert.IsFalse(owner.IsAlive, "internal/poll's semaphore kept the owner of a word released then acquired");
+    }
 
     [TestMethod]
     public void APollWordThatBlockedOnceKeepsNoBucket()
@@ -119,6 +139,20 @@ public class PollSemaphoreTests
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
+    private static WeakReference ReleaseThenAcquireInAFreshOwner()
+    {
+        heap<uint32>(out var word);
+        Semrelease(word);
+
+        Thread acquirer = new(() => Semacquire(word)) { IsBackground = true };
+        acquirer.Start();
+        Assert.IsTrue(acquirer.Join(TimeSpan.FromSeconds(30)), "the acquire after a release parked: the permit was lost");
+        Assert.IsFalse(KeptAnywhere(word), "a release then an acquire, neither waiting, left a bucket behind");
+
+        return new WeakReference(word);
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
     private static WeakReference BlockOnceInAFreshOwner()
     {
         heap<uint32>(out var word);
@@ -146,10 +180,14 @@ public class PollSemaphoreTests
         Assert.IsTrue(waiter.Join(TimeSpan.FromSeconds(30)), "the waiter was not woken");
     }
 
-    // Whether any semaphore table holds a bucket for the word: the shared primitive's, and poll's own if it has one.
+    // Whether any semaphore table holds a bucket for the word: the shared primitive's, which must be found, and
+    // poll's own if it still has one (absent once poll forwards).
     private static bool KeptAnywhere(ж<uint32> word)
     {
-        if (Table(typeof(RuntimeSemaphore)) is { } shared && shared.Contains(word))
+        IDictionary? shared = Table(typeof(RuntimeSemaphore));
+        Assert.IsNotNull(shared, "RuntimeSemaphore's semaTable was not found: these arms would read nothing");
+
+        if (shared.Contains(word))
             return true;
 
         return Table(typeof(poll_package)) is { } own && own.Contains(word);
