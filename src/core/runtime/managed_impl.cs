@@ -5777,6 +5777,44 @@ partial class runtime_package
                 (receiver.IsGenericType && referent.IsGenericType && receiver.GetGenericTypeDefinition() == referent.GetGenericTypeDefinition());
 
             if (sameReceiver)
+                return glyphBodyOf(candidate) ?? candidate;
+        }
+
+        return null;
+    }
+
+    // SCRATCH PROTOTYPE (the global ᴍ cost test): the Go-named `this ref T` method a twin forwards to is itself a
+    // [StackTraceHidden] forwarder to the body `<name>ᴍ(ref T, …)` in the package class; the body is the Go method.
+    private static System.Reflection.MethodBase? glyphBodyOf(System.Reflection.MethodInfo forwarder)
+    {
+        if (!forwarder.IsDefined(typeof(System.Diagnostics.StackTraceHiddenAttribute), inherit: false) || forwarder.DeclaringType is not { } holder)
+            return null;
+
+        Type? package = GoMethodHostAttribute.PackageClassOf(holder);
+
+        if (package is null || package == holder)
+            return null;
+
+        Type[] parameterTypes = Array.ConvertAll(forwarder.GetParameters(), parameter => parameter.ParameterType);
+        const System.Reflection.BindingFlags anyStatic = System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.DeclaredOnly;
+
+        foreach (System.Reflection.MethodInfo candidate in package.GetMethods(anyStatic))
+        {
+            if (candidate.Name != forwarder.Name + GlyphMethodSuffix)
+                continue;
+
+            System.Reflection.ParameterInfo[] parameters = candidate.GetParameters();
+
+            if (parameters.Length != parameterTypes.Length)
+                continue;
+
+            bool same = true;
+
+            for (int i = 0; i < parameters.Length && same; i++)
+                same = parameters[i].ParameterType == parameterTypes[i] ||
+                       (parameters[i].ParameterType.IsGenericParameter && parameterTypes[i].IsGenericParameter);
+
+            if (same)
                 return candidate;
         }
 
