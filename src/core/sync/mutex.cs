@@ -513,30 +513,21 @@ internal static readonly System.Runtime.CompilerServices.ConditionalWeakTable<Se
 // TryLock tries to lock m and reports whether it succeeded.
 [GoRecv] public static bool TryLock(this ref Mutex m) => Interlocked.CompareExchange(ref m.state, 1, 0) == 0;
 
-// M:N SPIKE: the hidden twin of Lock, which a twin awaits. An async method cannot take a ref receiver, so
-// the twin is this synchronous wrapper: it resolves the gate and takes the free lock, and only the wait
-// is async. A contended Lock parks on a GoParkSlot that the gate's own queue wakes (SemaphoreSlim
-// completes an awaited wait on the ThreadPool, which is one hop per contended Lock). The profiling arms
-// of Lock are not twinned here.
+// M:N SPIKE: the hidden twin of Lock, which a twin awaits. It takes the lock through Lock itself: the CAS fast
+// path, and on contention Lock's own slow path, which holds the carrier while it waits (Goroutine.Park counts
+// the block), and the profiling arms with it. That is the cost FREEZE-SHEET.md states for L-min: an opted-in
+// program holds its carrier on a contended sync.Mutex.Lock, as on any plain call.
+//
+// 7a (DESIGN-mn-twin-set.md 12.4, 2026-11-21): the twin this replaces ran the protocol before W9a, when the
+// gate was SemaphoreSlim(1,1) and was itself the lock. W9a moved the lock into m.state and made the gate a
+// zero-permit WaitQueue, so on a FREE mutex the old twin's Wait(0) failed and it parked forever without
+// writing m.state: MnHttpClosure hung under GO2CS_MN=1 (main parked on SyncMutexLock; red row MnMutexTwin). A
+// twin that parks instead of blocking needs the box receiver (state is written after the await) and the
+// generator's own-shape rule with it: the stdlib-twins arm (row 7), as FREEZE-SHEET.md lists it.
 [GoRecv, System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
 internal static global::go.golib.GoTask Lockꞏtwin(this ref Mutex m) {
-    SemaphoreSlim gate = gateOf(ref m);
-    if (gate.Wait(0)) {
-        return default;
-    }
-    return lockTwinSlow(gate);
-}
-
-private static async global::go.golib.GoTask lockTwinSlow(SemaphoreSlim gate) {
-    System.Threading.Tasks.Task acquired = gate.WaitAsync();
-    if (acquired.IsCompleted) {
-        return;
-    }
-    global::go.golib.GoParkSlot slot = new();
-    Goroutine.ParkScope scope = Goroutine.ParkTwin(WaitReason.SyncMutexLock);
-    acquired.GetAwaiter().UnsafeOnCompleted(slot.Wake);
-    await slot;
-    scope.Dispose();
+    m.Lock();
+    return default;
 }
 
 // Unlock unlocks m.
