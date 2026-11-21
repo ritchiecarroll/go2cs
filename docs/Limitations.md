@@ -256,8 +256,9 @@ pointer, or a `void *` that is nil or points at C memory. `C.CString`, `C.CBytes
 `C.GoBytes`, `C.malloc`, `C.free` and `defer C.f(…)` convert, with the package's C types and constants. A
 program that uses the converted package needs only the C library.
 
-**One machine.** A `-cgo` conversion is for the machine's own operating system and architecture, and the converted
-package refuses to call C anywhere else. A single-package conversion builds against a go2cs clone
+**One target.** A `-cgo` conversion is for one operating system and architecture: the machine's own, or another one
+named with `-platforms` when `CC` names that target's C compiler (for example `zig cc -target <triple>`). The converted
+package refuses to call C on any other. A single-package conversion builds against a go2cs clone
 (`dotnet build -p:go2csPath=<go2cs>/src/`). Under `-recurse -cgo` a module's cgo packages convert with the module.
 Packing a cgo package against the `go.*` packages for every platform is still to come ([Roadmap](Roadmap.md#cgo)).
 The standard library itself is converted with `CGO_ENABLED=0`, and a module converted with `-recurse -cgo` uses it as

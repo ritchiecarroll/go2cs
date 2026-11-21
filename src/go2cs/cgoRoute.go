@@ -1446,10 +1446,12 @@ func cgoGoEnv(load cgoLoad, keys ...string) ([]string, error) {
 	return values, nil
 }
 
-// cgoHostTarget refuses a -cgo conversion for any target but the host's own (§11.20, S3): cmd/cgo lays out C types with
-// the host's C compiler, so bindings for another target need that target's toolchain, which is Phase 2 later. The host
-// is what go env reads in the load's own environment (GOHOSTOS/GOHOSTARCH), never go2cs's own runtime.GOOS, and the
-// refusal names both sides.
+// cgoHostTarget refuses a -cgo conversion for a target other than the host's own unless the environment names that
+// target's C compiler (§11.20, S3; cgo against go.* INC 2a, R3). cmd/cgo lays out C types, and the library capture links
+// its probe, with the C compiler `go env CC` reads in the load's environment; a default CC compiles for the host, so
+// bindings for another target need that target's compiler named explicitly: CC set, such as the pinned zig
+// (`zig cc -target <triple>`, .github/cgo-toolchain.ps1). The host is what go env reads in the load's own environment
+// (GOHOSTOS/GOHOSTARCH), never go2cs's own runtime.GOOS, and the refusal names both sides and the missing CC.
 func cgoHostTarget(load cgoLoad, target string) error {
 	host, err := cgoGoEnv(load, "GOHOSTOS", "GOHOSTARCH")
 
@@ -1457,8 +1459,8 @@ func cgoHostTarget(load cgoLoad, target string) error {
 		return err
 	}
 
-	if hostTarget := host[0] + "/" + host[1]; hostTarget != target {
-		return fmt.Errorf("cgo: -cgo converts for the host's own target only: this conversion asks for %s, and go env in its load reads the host as %s (GOHOSTOS/GOHOSTARCH); converting cgo for another target is Phase 2 later", target, hostTarget)
+	if hostTarget := host[0] + "/" + host[1]; hostTarget != target && cgoNamedCC(load.env) == "" {
+		return fmt.Errorf("cgo: R3: this -cgo conversion asks for %s, and go env in its load reads the host as %s (GOHOSTOS/GOHOSTARCH); a C compiler for %s must be named explicitly, and CC is not set (for example the pinned zig: CC=\"zig cc -target <triple>\")", target, hostTarget, target)
 	}
 
 	return nil
@@ -1641,4 +1643,18 @@ func cgoImportedByCmdCgo(symbols []string, imports map[string]bool, usedAt map[s
 	}
 
 	return refusals
+}
+
+// cgoNamedCC is the C compiler the environment names explicitly: the last CC= setting, if it is not empty. An unset or
+// empty CC leaves cmd/cgo its default, which compiles for the host.
+func cgoNamedCC(env []string) string {
+	named := ""
+
+	for _, entry := range env {
+		if value, found := strings.CutPrefix(entry, "CC="); found {
+			named = value
+		}
+	}
+
+	return named
 }

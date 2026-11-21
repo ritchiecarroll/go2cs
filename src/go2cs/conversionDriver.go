@@ -220,7 +220,8 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 	// a GOPATH input and every one of them loaded its subtree, while on a box with an ordinary GOROOT
 	// install the branch never fired at all. The same command emitted a different corpus on the two
 	// boxes, and neither run said so. (C2 mailbox 1257a20bad; COORD ruling 3d0c7cd5d.)
-	// -cgo converts for the host's own target only (cgoRoute.go): refused before the load, naming both sides.
+	// -cgo converts for the host's own target, or for another when CC names its C compiler (cgoRoute.go, R3): a target
+	// without one is refused before the load, naming both sides.
 	if options.parseCgoTargets && !cgoOfflineTrees {
 		if err := cgoHostTarget(cgoLoad{env: cfg.Env, dir: cfg.Dir}, options.targetPlatform); err != nil {
 			reportDiagnostic("-", diagnosticCgoRefused, err.Error())
