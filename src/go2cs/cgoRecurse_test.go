@@ -224,3 +224,104 @@ func TestARecurseCgoModuleReadsAsGo(t *testing.T) {
 		t.Fatalf("go2cs differs from go:\n   go: %s\ngo2cs: %s", want, got)
 	}
 }
+
+// R5 and R5c: the go.* packages are the standard library converted cgo-OFF (the corpus ruling), so a converted package
+// that imports a std package Go builds from DIFFERENT files with cgo on would not do what the cgo build does. The set
+// is derived per target from `go list std` both ways, never a hand list: today net, os/user and plugin on linux, plugin
+// on darwin, and runtime/cgo everywhere. Refused by name (GO2CS2001), the package skipped.
+const cgoRecurseNetUser = `package netuser
+
+import "net"
+
+// Port resolves a literal address, so no lookup leaves the host.
+func Port() int {
+	addr, err := net.ResolveTCPAddr("tcp", "127.0.0.1:8080")
+
+	if err != nil {
+		return -1
+	}
+
+	return addr.Port
+}
+`
+
+const cgoRecurseHandleUser = `package handleuser
+
+import "runtime/cgo"
+
+// Round stores v and reads it back through a cgo.Handle.
+func Round(v int) int {
+	h := cgo.NewHandle(v)
+	defer h.Delete()
+	return h.Value().(int)
+}
+`
+
+func TestARecurseCgoConversionRefusesAnImportOfNetOnLinux(t *testing.T) {
+	requireHostCC(t)
+
+	if runtime.GOOS != "linux" {
+		t.Skipf("net is built from the same files cgo-on and cgo-off on %s; the row is linux's: NOT MEASURED", runtime.GOOS)
+	}
+
+	combined, _, _ := convertCgoRecurse(t, map[string]string{"cptr/cptr.go": cgoRecurseCptr, "netuser/netuser.go": cgoRecurseNetUser, "main.go": cgoRecurseMain},
+		"-recurse=nuget", "-cgo=true")
+
+	for _, want := range []string{"GO2CS2001", "example.com/cgorecurse/netuser", `"net"`} {
+		if !strings.Contains(combined, want) {
+			t.Errorf("the refusal does not name %q:\n%s", want, combined)
+		}
+	}
+}
+
+func TestARecurseCgoConversionRefusesAnImportOfRuntimeCgo(t *testing.T) {
+	requireHostCC(t)
+
+	combined, _, _ := convertCgoRecurse(t, map[string]string{"cptr/cptr.go": cgoRecurseCptr, "handleuser/handleuser.go": cgoRecurseHandleUser, "main.go": cgoRecurseMain},
+		"-recurse=nuget", "-cgo=true")
+
+	for _, want := range []string{"GO2CS2001", "example.com/cgorecurse/handleuser", `"runtime/cgo"`} {
+		if !strings.Contains(combined, want) {
+			t.Errorf("the refusal does not name %q:\n%s", want, combined)
+		}
+	}
+}
+
+// R6, an ASSERTION in this shape: every non-std package loads cgo-on, so a file pair split by the cgo build tag with no
+// import "C" converts its cgo-on file, as Go's cgo build does; no package is converted cgo-off beside a cgo-on one.
+const cgoRecursePairOn = `//go:build cgo
+
+package pair
+
+// Mode names the build that selected this file.
+func Mode() string { return "built with cgo on" }
+`
+
+const cgoRecursePairOff = `//go:build !cgo
+
+package pair
+
+// Mode names the build that selected this file.
+func Mode() string { return "built with cgo off" }
+`
+
+func TestARecurseCgoConversionConvertsATagSplitPairsCgoOnFile(t *testing.T) {
+	requireHostCC(t)
+
+	combined, output, err := convertCgoRecurse(t, map[string]string{"cptr/cptr.go": cgoRecurseCptr, "pair/pair_cgo.go": cgoRecursePairOn,
+		"pair/pair_nocgo.go": cgoRecursePairOff, "main.go": cgoRecurseMain}, "-recurse=nuget", "-cgo=true")
+
+	if err != nil {
+		t.Fatalf("the conversion failed: %v\n%s", err, combined)
+	}
+
+	sources := strings.Builder{}
+
+	for _, text := range cgoRecurseWritten(t, output, "pair", ".cs") {
+		sources.WriteString(text)
+	}
+
+	if cs := sources.String(); !strings.Contains(cs, "built with cgo on") || strings.Contains(cs, "built with cgo off") {
+		t.Errorf("pair does not convert exactly its cgo-on file:\n%s", cs)
+	}
+}
