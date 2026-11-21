@@ -5,7 +5,6 @@ using os = os_package;
 using strconv = strconv_package;
 using Δsync = sync_package;
 using time = time_package;
-using static main_package;
 
 partial class main_package {
 
@@ -18,8 +17,6 @@ partial struct storm {
     internal Δsync.WaitGroup arrived;
     internal Δsync.WaitGroup done;
 }
-
-} partial class mainᴛstorm {
 
 internal static void worker(this ж<storm> Ꮡs, nint id) {
     GoFrame ᒐ = default;
@@ -54,8 +51,6 @@ internal static void worker(this ж<storm> Ꮡs, nint id) {
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
-
-} partial class main_package {
 
 internal static nint envInt(@string name, nint fallback) {
     var (v, err) = strconv.Atoi(os.Getenv(name)); if (err == nil && v > 0) {

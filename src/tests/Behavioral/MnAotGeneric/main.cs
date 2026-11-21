@@ -4,7 +4,6 @@ using errors = errors_package;
 using fmt = fmt_package;
 using runtime = runtime_package;
 using strings = strings_package;
-using static main_package;
 
 partial class main_package {
 
@@ -77,12 +76,12 @@ internal static point retPoint(nint n) {
 internal static big retBig(nint n) {
     nint v = park(n);
     var w = (int64)v;
-    return new big(a: w, b: w * 2, c: w * 3, d: w * 4, s: fmt.Sprint("s", v), f: (float64)v + 0.5D, p: new point(v, v), arr: new int32[]{(int32)v, 2, 3, 4}.array());
+    return new big(a: w, b: w * 2, c: w * 3, d: w * 4, s: fmt.Sprint("s", v), f: (float64)v + 0.5D, p: new point(v, v), arr: array<int32>([(int32)v, 2, 3, 4]));
 }
 
 internal static array<nint> retArr(nint n) {
     nint v = park(n);
-    return new nint[]{v, v + 1, v + 2}.array();
+    return array<nint>([v, v + 1, v + 2]);
 }
 
 internal static (nint, error) retPair(nint n) {
@@ -136,15 +135,13 @@ internal static T total<T>(slice<T> xs, nint n)
 internal static array<T> twice<T>(T v, nint n) {
     var a = hold(v, n);
     var b = hold(v, n + 1);
-    return new T[]{a, b}.array();
+    return array<T>([a, b]);
 }
 
 partial struct box<T> {
     internal T v;
     internal nint n;
 }
-
-} partial class mainᴛbox {
 
 internal static T val<T>(this box<T> b, nint n) {
     park(n);
@@ -159,8 +156,6 @@ internal static T swap<T>(this ref box<T> b, T v, nint n) {
     return old;
 }
 
-} partial class main_package {
-
 partial interface holder<T> {
     T val(nint n);
 }
@@ -168,7 +163,7 @@ partial interface holder<T> {
 internal static partial @string closureArm(big b) {
     b = b.ΔClone();
 
-    ref var arr = ref heap<array<nint>>(new nint[]{7, 8, 9}.array(), out var Ꮡarr);
+    ref var arr = ref heap<array<nint>>(array<nint>([7, 8, 9]), out var Ꮡarr);
     ref var g = ref heap<point>(hold(new point(5, 6), 1), out var Ꮡg);
     var @out = new channel<big>(0);
     var pts = new channel<point>(1);
@@ -283,13 +278,13 @@ internal static partial void main() {
     var pp = Ꮡ(new point(3, 4));
     var g4 = hold(pp, 4);
     var g5 = hold(bg, 5);
-    var g6 = hold(new nint[]{5, 6}.array(), 6);
+    var g6 = hold(array<nint>([5, 6]), 6);
     var g7 = hold<error>(errOdd, 7);
     fmt.Println("generic", g1, g2, g3, g4.Value, g4 == pp, g5, g6, g7);
 
     var (k1, v1) = both((@string)"k", 1.5D, 1);
     var (k2, v2) = both(new point(1, 1), bg, 2);
-    var (k3, v3) = both<nint, array<@string>>(7, new @string[]{"a", "b"}.array(), 3);
+    var (k3, v3) = both<nint, array<@string>>(7, array<@string>(["a", "b"]), 3);
     fmt.Println("both", k1, v1, k2, v2, k3, v3);
 
     nint s1 = total(slice<nint>([1, 2, 3]), 1);

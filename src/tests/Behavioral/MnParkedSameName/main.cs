@@ -5,7 +5,6 @@ using runtime = runtime_package;
 using strings = strings_package;
 using time = time_package;
 using Δio = io_package;
-using static main_package;
 
 partial class main_package {
 
@@ -50,15 +49,11 @@ partial struct U {
     internal nint y;
 }
 
-} partial class mainᴛT {
-
 internal static partial nint b(this ref T t, channel<nint> c) {
     nint v = wait("T after", c);
     t.x = v;
     return v;
 }
-
-} partial class mainᴛU {
 
 internal static nint b(this ref U u, channel<nint> c) {
     u.y = 1;
@@ -66,8 +61,6 @@ internal static nint b(this ref U u, channel<nint> c) {
     u.y += v;
     return u.y;
 }
-
-} partial class main_package {
 
 internal static partial void runT(channel<nint> c, channel<nint> d) {
     var t = Ꮡ(new T());
