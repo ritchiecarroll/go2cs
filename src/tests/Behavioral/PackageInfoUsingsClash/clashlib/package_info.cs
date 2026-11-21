@@ -10,6 +10,7 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+using fmt = go.fmt_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -36,6 +37,7 @@ using static go.PackageInfoUsingsClash.clashlib_package;
 // this way is what keeps startup free of reflection.
 
 // <InterfaceImplementations>
+[assembly: GoImplement<StackTrace, fmt_package.Stringer>]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
@@ -49,7 +51,7 @@ using static go.PackageInfoUsingsClash.clashlib_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("lib.go", "lib.cs", "AAoclLqUlg==")]
+[assembly: GoPositionMap("lib.go", "lib.cs", "AAsilLqUlpY=")]
 // </GoSourcePositionMaps>
 
 namespace go.PackageInfoUsingsClash;
@@ -75,6 +77,7 @@ public static partial class clashlib_package
     // item of the project guarantees.
 
     // <ImportInitializers>
+    [GoInit] internal static void initᴛᴛimportꓸfmt() => builtin.initPackage(typeof(fmt_package));
     [GoInit] internal static void initᴛᴛimportꓸstrings() => builtin.initPackage(typeof(strings_package));
     // </ImportInitializers>
 }
@@ -102,5 +105,6 @@ partial class clashlibᴛMethodImpl {
 partial class clashlibᴛStackTrace {
     [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this clashlib_package.StackTrace s) => clashlib_package.String⁔(s);
     [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Push(this ref clashlib_package.StackTrace s, @string frame) => clashlib_package.Push⁔(ref s, frame);
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static fmt.Stringer Describe(this clashlib_package.StackTrace s) => clashlib_package.Describe⁔(s);
 }
 // </MethodForwarders>

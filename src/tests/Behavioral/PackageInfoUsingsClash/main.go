@@ -28,5 +28,6 @@ func main() {
 	trace.Push("main")
 	trace.Push("caller")
 	fmt.Println(trace.String(), len(trace))
+	fmt.Println(trace.Describe().String())
 	fmt.Println(trace)
 }

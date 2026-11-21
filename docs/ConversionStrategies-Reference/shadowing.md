@@ -514,7 +514,7 @@ under both of its names); an external test package's file also counts the names 
 class it reads through `using static` as well. A merging write (`-tests`) respells every holder and forwarder line in
 whichever direction the decision takes, so a file is never left with both spellings.
 
-<!-- source: src/tests/Behavioral/PackageInfoUsingsClash/clashlib/package_info.cs:88-91 -->
+<!-- source: src/tests/Behavioral/PackageInfoUsingsClash/clashlib/package_info.cs:91-94 -->
 ```csharp
 // <MethodHolders>
 [GoMethodHost(typeof(clashlib_package.MethodImpl)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class clashlibᴛMethodImpl;
@@ -522,7 +522,7 @@ whichever direction the decision takes, so a file is never left with both spelli
 // </MethodHolders>
 ```
 
-<!-- source: src/tests/Behavioral/PackageInfoUsingsClash/clashlib/package_info.cs:97-101 -->
+<!-- source: src/tests/Behavioral/PackageInfoUsingsClash/clashlib/package_info.cs:100-104 -->
 ```csharp
 // <MethodForwarders>
 partial class clashlibᴛMethodImpl {
@@ -533,7 +533,8 @@ partial class clashlibᴛMethodImpl {
 
 The library above declares `MethodImpl` and `StackTrace`, so its file keeps `global::`; a package with no such name
 takes the usings. (Guarded by the `PackageInfoUsingsClash` behavioral test, whose `clashlib` sub-package declares
-both types with value and pointer methods and is called from `main`, output-compared against `go run`, and by the
+both types with value and pointer methods, converts `StackTrace` to `fmt.Stringer` (an interface record naming it
+bare), and is called from `main`, output-compared against `go run`, and by the
 converter tests `TestAPackageDeclaringASystemTypeNameKeepsTheGlobalSpelling`,
 `TestSystemUsingClashesCountTheAttributeArgumentsEnumsAsAnyMember` and
 `TestMergingWriteRespellsSystemAttributesInBothDirections`.)
