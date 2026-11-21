@@ -365,6 +365,26 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt, target LabeledStmtCon
 		valExpr = v.convExpr(rangeStmt.Value, nil)
 	}
 
+	// A range ASSIGNMENT into a pointer parameter repoints it (`for _, n = range n.kids`), so it
+	// writes the box and re-aliases the value var, as visitAssignStmt does for `n = …`.
+	var rangeReAliases []string
+
+	if rangeStmt.Tok == token.ASSIGN {
+		var reAlias string
+
+		if rangeStmt.Key != nil {
+			if keyExpr, reAlias = v.rangeAssignPointerTarget(rangeStmt.Key, keyExpr); reAlias != "" {
+				rangeReAliases = append(rangeReAliases, reAlias)
+			}
+		}
+
+		if rangeStmt.Value != nil {
+			if valExpr, reAlias = v.rangeAssignPointerTarget(rangeStmt.Value, valExpr); reAlias != "" {
+				rangeReAliases = append(rangeReAliases, reAlias)
+			}
+		}
+	}
+
 	if valExpr == "" && !(isChan || isInt || yieldFunc == 0 || yieldFunc == 1) {
 		valExpr = "_"
 	}
@@ -1075,6 +1095,17 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt, target LabeledStmtCon
 	// Range variables are per-iteration natively (foreach), so no copy-backs — but the entry
 	// keeps an unlabeled `continue` in the body bound to the innermost loop's copy-backs (an
 	// enclosing transformed for loop's must not leak through; see forClausePerIterVars).
+	// The re-alias follows the assignments the arm above wrote into the body's prefix.
+	if len(rangeReAliases) > 0 {
+		reAliasLine := v.newline + v.indent(v.indentLevel+1) + strings.Join(rangeReAliases, " ")
+
+		if strings.HasSuffix(context.innerPrefix, v.newline) {
+			context.innerPrefix = strings.TrimSuffix(context.innerPrefix, v.newline) + reAliasLine + v.newline
+		} else {
+			context.innerPrefix += reAliasLine
+		}
+	}
+
 	v.loopCopyBackStack = append(v.loopCopyBackStack, nil)
 	v.continueTargetStack = append(v.continueTargetStack, continueTarget)
 	v.visitBlockStmt(rangeStmt.Body, context)
@@ -1136,4 +1167,48 @@ func (v *Visitor) rangeAssignVar(goExpr ast.Expr, rendered, temp, cloneSuffix st
 	}
 
 	return fmt.Sprintf("%s%s%s = %s%s;", v.newline, v.indent(v.indentLevel+1), rendered, temp, cloneSuffix)
+}
+
+// rangeAssignPointerTarget renders a range ASSIGNMENT target that is a deref-aliased pointer
+// parameter or direct-ж receiver as its box (`Ꮡn`), so the iteration repoints the pointer rather
+// than writing a `ж<T>` into the value alias (CS0029). It returns the re-alias statement that keeps
+// the alias current (`n = ref Ꮡn.DerefOrNull();`), or "" where no alias exists to re-alias: inside
+// a func literal, which reads the parameter through its box, and for a parameter a func literal
+// repoints (see closureRepointedPointerParams). Any other target is returned as rendered.
+func (v *Visitor) rangeAssignPointerTarget(expr ast.Expr, rendered string) (string, string) {
+	ident, ok := ast.Unparen(expr).(*ast.Ident)
+
+	if !ok || ident.Name == "_" {
+		return rendered, ""
+	}
+
+	obj := v.info.Uses[ident]
+
+	if obj == nil || v.paramIsRefLoweredObj(obj) {
+		return rendered, ""
+	}
+
+	isBoxedParam := false
+
+	if v.exprIsCurrentDirectBoxReceiver(ident) {
+		isBoxedParam = true
+	} else if v.currentFuncSignature == nil || v.currentFuncSignature.Recv() != obj {
+		if _, isRealPointer := v.paramPointerType(obj.Type()); isRealPointer && v.identIsParameter(ident) {
+			isBoxedParam = true
+		}
+	}
+
+	if !isBoxedParam {
+		return rendered, ""
+	}
+
+	// The box is named exactly as visitFuncDecl declares it, from the Go name; the value alias may
+	// carry a collision rename (`nΔ1`) that the box does not.
+	box := AddressPrefix + obj.Name()
+
+	if (v.lambdaCapture != nil && v.lambdaCapture.conversionInLambda) || v.paramReadsThroughBox(obj) {
+		return box, ""
+	}
+
+	return box, fmt.Sprintf("%s = ref %s.%s;", rendered, box, NilDeferringDerefAccessor)
 }
