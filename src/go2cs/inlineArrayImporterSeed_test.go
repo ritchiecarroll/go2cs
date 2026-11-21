@@ -199,3 +199,84 @@ func TestImporterSeedPrePassReadsAStdStamp(t *testing.T) {
 			"but the pre-pass admitted it and main demanded no seed:\n%s", info)
 	}
 }
+
+// P3 review 2.2 (COORD 2026-11-20 11:42Z): the seed derivation is a fixed point capped at importerSeedMaxPasses. When the
+// cap ends the loop while a pass is still adding seeds, the seeds are not the fixed point, and the demands the next pass
+// would have made are dropped. That must be said by name, not used silently. The fixture takes two passes: main admits S,
+// so pass 1 seeds q with its identical Tq; q then admits Tq, so pass 2 seeds r with its identical Tr.
+const seedChainR = `package r
+
+type Tr = struct {
+	A int32
+	B [2]int32
+}
+`
+
+const seedChainQ = `package q
+
+import "example.com/app/r"
+
+type Tq = struct {
+	A int32
+	B [2]int32
+}
+
+var Keep r.Tr
+`
+
+const seedChainMain = `package main
+
+import (
+	"fmt"
+	"unsafe"
+
+	"example.com/app/q"
+)
+
+type S = struct {
+	A int32
+	B [2]int32
+}
+
+func main() {
+	var raw [2]uint64
+	s := (*S)(unsafe.Pointer(&raw))
+	s.B[1] = 4
+	fmt.Println(s.B[1], q.Keep.A)
+}
+`
+
+func seedChainFiles() map[string]string {
+	return map[string]string{"r/r.go": seedChainR, "q/q.go": seedChainQ, "main.go": seedChainMain}
+}
+
+func TestImporterSeedCapWarnsWhenSeedsArePending(t *testing.T) {
+	saved := importerSeedMaxPasses
+	t.Cleanup(func() { importerSeedMaxPasses = saved })
+	importerSeedMaxPasses = 1
+
+	var out string
+	stderr := captureStderr(t, func() { out = convertInlineModuleWith(t, "app", seedChainFiles(), "") })
+
+	if !strings.Contains(stderr, "importer-seed derivation stopped") || !strings.Contains(stderr, "example.com/app/q#Tq") {
+		t.Errorf("the seed loop stopped at its cap with seeds still being added, and said nothing by name; stderr:\n%s", stderr)
+	}
+
+	if info := readGenerated(t, filepath.Join(out, "r", "package_info.cs")); strings.Contains(info, `GoInlineArraySeed("Tr")`) {
+		t.Errorf("PRECONDITION: r is seeded although the cap of 1 pass leaves pass 2's demand unmade:\n%s", info)
+	}
+}
+
+// The control: at the default cap the same chain reaches its fixed point (r is seeded in pass 2) with no warning.
+func TestImporterSeedFixedPointNeedsNoWarning(t *testing.T) {
+	var out string
+	stderr := captureStderr(t, func() { out = convertInlineModuleWith(t, "app", seedChainFiles(), "") })
+
+	if strings.Contains(stderr, "importer-seed derivation stopped") {
+		t.Errorf("a derivation that reached its fixed point warns:\n%s", stderr)
+	}
+
+	if info := readGenerated(t, filepath.Join(out, "r", "package_info.cs")); !strings.Contains(info, `GoInlineArraySeed("Tr")`) {
+		t.Errorf("PRECONDITION: the chain does not take two passes (r is not seeded):\n%s", info)
+	}
+}

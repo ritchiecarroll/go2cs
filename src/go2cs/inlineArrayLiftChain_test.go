@@ -9,7 +9,11 @@
 package main
 
 import (
+	"encoding/hex"
+	"fmt"
+	"go/types"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 )
@@ -237,4 +241,52 @@ func readGeneratedPackage(t *testing.T, dir string) string {
 	}
 
 	return all.String()
+}
+
+// P3 review 2.1 (COORD 2026-11-20 11:42Z): a lift's owner can be a NuGet-substituted package (-recurse=nuget), which has
+// no converted output in the root: its records travel in the package's self-description. loadImportLiftRecords read the
+// owner's package_info.cs from disk, so for such an owner it found no file, the chained reuse was lost, and the importer
+// declared a second lift -- the defect the chain exists to fix. It reads through importPackageInfoLines now, the one
+// reader that knows the three sources (the substitution's metadata, the file, a published std package's record).
+func TestLiftRecordsOfANuGetSubstitutedOwnerLoad(t *testing.T) {
+	isolateConverterPathGlobals(t)
+
+	savedSubstitutions, savedDirs := nugetSubstitutions, importPackageDirs
+	savedNames, savedPublic, savedRead := importedDynamicTypeNames, importedPublicLiftNames, liftRecordsRead
+	t.Cleanup(func() {
+		nugetSubstitutions, importPackageDirs = savedSubstitutions, savedDirs
+		importedDynamicTypeNames, importedPublicLiftNames, liftRecordsRead = savedNames, savedPublic, savedRead
+	})
+
+	ownerDir := t.TempDir()
+	writeModuleFile(t, filepath.Join(ownerDir, "go.mod"), "module example.test/r\n\ngo 1.23\n")
+
+	signature := "struct{Sec int64; Pad [2]int32}"
+	records := []string{
+		"// <ExportedTypeAliases>",
+		fmt.Sprintf("[assembly: GoDynamicTypeLift(%q, %q)]", hex.EncodeToString([]byte(signature)), "Tvᴛ1"),
+		"// </ExportedTypeAliases>",
+		"    public partial struct Tvᴛ1 {}",
+	}
+
+	owner := substitution("example.test/r", "v1.0.0", "r")
+	owner.description.Sections = map[string][]string{"example.test.r": records}
+	nugetSubstitutions = map[string]*nugetSubstitution{"example.test/r": owner}
+
+	meta := importedPackageMeta{Dir: ownerDir, Name: "r"}
+	importPackageDirs = map[string]importedPackageMeta{"example.test/r": meta}
+	importedDynamicTypeNames, importedPublicLiftNames, liftRecordsRead = map[string]map[string]string{}, map[string]map[string]bool{}, map[string]bool{}
+
+	v := &Visitor{options: Options{recurse: true, nugetRefs: true, go2csPath: t.TempDir(), mainModulePath: "example.test/app",
+		targetPlatform: runtime.GOOS + "/" + runtime.GOARCH}}
+
+	if !v.loadImportLiftRecords(types.NewPackage("example.test/r", "r"), meta) {
+		t.Fatalf("the lift records of a NuGet-substituted owner did not load; a chained reuse through it is lost")
+	}
+
+	key := filepath.Clean(ownerDir)
+
+	if got := importedDynamicTypeNames[key][signature]; got != "Tvᴛ1" || !importedPublicLiftNames[key]["Tvᴛ1"] {
+		t.Errorf("the owner's public lift is not recorded: name %q, public %t", got, importedPublicLiftNames[key]["Tvᴛ1"])
+	}
 }

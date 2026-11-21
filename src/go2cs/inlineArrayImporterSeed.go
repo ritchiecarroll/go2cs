@@ -40,8 +40,9 @@ import (
 // item 3, scope a, a separate .5 row).
 
 // importerSeedMaxPasses bounds the fixed point; each pass that changes anything adds at least one seed, and the
-// closure's alias count bounds those, so this is a guard against a defect, not a limit a real closure reaches.
-const importerSeedMaxPasses = 16
+// closure's alias count bounds those, so this is a guard against a defect, not a limit a real closure reaches. A
+// variable only so an arm can lower it.
+var importerSeedMaxPasses = 16
 
 // importerInlineArraySeeds derives the importer seeds for the convert-set queue (dependency order) from the closure's
 // syntax and types: import path -> the alias names to seed, sorted. A package the closure did not load with syntax (a
