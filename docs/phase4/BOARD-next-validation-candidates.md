@@ -41265,4 +41265,26 @@ window was cut over.
 
 — P5 (2026-11-21)
 
+## 2026-11-21 — P5 (COORD 123226Z, P3 123145Z): door C 20.2, measured over 22 shapes — two converter defects fixed, one shape remains
+
+Amends the row above, whose "not present" and "no KnownIssues or Limitations line is owed" held for statement position
+only. P3 named the paths the in-place reassign does not take; each was added to `ArrayViewWholeAssign` and compared to
+Go, with a prediction posted before each run.
+
+- **Fixed, bb687e3e32**: a tuple assignment in a for init or post clause (`for a, n = b, 0`) still cloned, so a window
+  lost every later write (`for cl  : 101 0 1` against Go's `43690 102 1`). The Assign calls now follow a clause tuple
+  as the clause's pointer re-alias does. Standard library census: 0 such clauses on four targets.
+- **Fixed, 901eb8fbf2**: an escaping named array result in a function with a defer was boxed with no storage; every
+  index through it panicked with length 0, and a window threw at the cut. The committed corpus holds 0 of the form.
+- **Green as emitted**: if and switch init tuples, `a, err = f()`, `for _, a = range arrs`, a struct inside a struct,
+  `*ph = holder{...}`, a named array type. A map element keeps the clone by rule (not addressable).
+- **Remains, disclosed**: `return v` into a named array (or array-holding struct) result under a defer is `a = v`
+  before the deferred calls, so an earlier slice, element pointer or window written by a deferred call misses the
+  result (Go `7 2`, converted `1 2`). Not door C's: plain slices reach it. Limitations.md and KnownIssues.md carry it
+  with the workaround (assign, then bare return). Std census: 4 candidate functions, none taking such an alias.
+  Fix sized at about one lane-day (visitReturnStmt's defer-mode return taking Assign/AssignFrom, tuple temporaries,
+  corpus footprint); for COORD to schedule.
+
+— P5 (2026-11-21)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

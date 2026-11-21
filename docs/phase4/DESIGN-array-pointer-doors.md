@@ -2319,7 +2319,7 @@ panic. The base was wrong there too, since To's box read the element bytes as an
 regression; it is the window's limit, read from the code and not measured. A conversion taken after the assignment
 answers the new elements.
 
-*Amendment 2026-11-21: the limit in the paragraph above does not exist, measured; see section 21.*
+*Amendment 2026-11-21: measured, the limit above holds for none of 22 whole-assignment shapes once two converter defects found by the measurement are fixed; one shape remains (a return into a named result under a defer); see section 21.*
 
 ### 20.3 Red first, and the readings
 
@@ -2421,29 +2421,66 @@ way, so the tests after it in the root host are unmeasured in both runs. It is n
      0 errors, and the behavioral members were compiled by the census run above. -->
 
 
-## 21. Amendment 2026-11-21 (P5): the 20.2 limit does not exist; a whole assignment copies into the window's storage
+## 21. Amendment 2026-11-21 (P5): a whole assignment copies into the window's storage; one shape remains
 
 20.2 says a window kept past a whole assignment to its value addresses the old elements, because `a = b` is emitted
-`a = b.Clone()`. That emission had already gone when door C landed: since the in-place reassign
-(DESIGN-array-reassign-in-place.md, 5953f454d0), a whole assignment to an existing array location is emitted
-`a.Assign(b)`, and to a struct holding an array `h.AssignFrom(...)`, and both copy into the storage the location
-already has. The window is cut over that storage, so it sees the new elements and a write through it lands in them.
-20.2 was read from the code and not measured, and it misread the emission.
+`a = b.Clone()`. For a whole assignment in statement position that emission had already gone when door C landed: since
+the in-place reassign (DESIGN-array-reassign-in-place.md on claude/r-reassign-census, landed as 5953f454d0), a whole
+assignment to an existing array location is emitted `a.Assign(b)`, and to a struct holding an array `h.AssignFrom(...)`,
+and both copy into the storage the location already has. The window is cut over that storage, so it sees the new
+elements and a write through it lands in them. 20.2 was read from the code and not measured, and it misread that
+emission.
 
-The one case where `Assign` replaces the storage is a destination with none (`default(array<T>)`); a window needs
-storage a box holds still, so it cannot be cut over such a destination, and the case is not reachable through the
-door.
+It was right for the paths the in-place reassign did not reach. Measured (21.1), two converter defects and one
+remaining shape:
 
-### 21.1 The guard, and its control
+- **A tuple assignment in a for clause** (`for a, n = b, 0; ...`, and the same in the post clause) still emitted
+  `(a, n) = (b.Clone(), 0)`: the tuple's in-place copy needed statement position (visitAssignStmt.go, "a for-loop
+  clause has neither"). Fixed in this seat (bb687e3e32): in the init clause the `Assign` calls follow as a C# expression
+  list, `for ((var aᴛ1, n) = (b.Clone(), 0), a.Assign(aᴛ1); ...)`, with a non-identifier target captured before the
+  loop; in the post clause, where C# allows no declaration, the temporary is declared in the hoist buffer, which lowers
+  the post to the end of the body behind the existing continue label. The standard library holds no such clause (21.2).
+- **An escaping named array result in a function with a defer** was boxed as `heap<array<T>>(out ...)`, which is
+  `default(array<T>)`: no storage. That is the "destination with none" this section first called unreachable through
+  the door. It is reachable: a window cut over the result threw at the cut, and, door or not, every index through the
+  result panicked with length 0. Fixed in this seat (901eb8fbf2): the result gets `heap(new array<T>(N), out ...)`, as a
+  local does. The committed corpus holds no instance of the bare form.
+- **What remains: `return v` into a named result, in a function with a defer**, is emitted `a = v` before the deferred
+  calls run, so it replaces the result's storage. A window, a slice (`s := a[:]`) or an element pointer (`&a[1]`) taken
+  earlier and written by a deferred call misses the returned value: Go returns `7 2` where the conversion returns `1 2`.
+  This is not door C's; it reaches plain slices too, and it is the in-place reassign's missing return path. Recorded in
+  Limitations.md ("A few quiet ones") and KnownIssues.md, with the workaround (assign the result, `a = v`, then a bare
+  `return`, which takes `a.Assign(v)`; measured green). The standard library has no instance (21.2). Fixing it means
+  the defer-mode return in visitReturnStmt taking `Assign`/`AssignFrom`, with tuple temporaries for a multi-result
+  return; sized at about one lane-day with its corpus footprint, so it is posted for scheduling rather than cut here.
 
-Behavioral `ArrayViewWholeAssign`, twelve shapes, each taking a window, assigning the whole value, writing `f[0]` and
-printing the value's first element and `f[2]`: a variable from a variable, from a literal, from a call, a tuple
-assignment, a swap, an array field, a whole struct (the field view), an element of an array of arrays, the outer
-array, `*p`, a package variable, and an element of a slice of structs. Go prints the new element and 43690 (or the
-written value) on every line; the converted program prints the same, all four phases pass.
+A map element (`m[k] = b`) keeps the clone by rule: a Go map value is not addressable, so no window can be cut over
+it.
 
-Control: the converter with `valueAssignInPlace` forced to false (the swap form, `a = b.Clone()`, at every site)
-reds all twelve lines, each printing the old element and 0, which is exactly the loss 20.2 described. The control
-was a scratch build; the converter source was restored sha-identical.
+### 21.1 The guard, and its controls
 
-Nothing ships silent here, so no KnownIssues or Limitations line is owed.
+Behavioral `ArrayViewWholeAssign`, 23 lines, each taking a window (or, for the last, an element through the result's
+address), assigning the whole value and printing the value's first element and the window's element 2, compared to Go:
+a variable from a variable, from a literal, from a call, a tuple, a swap, an array field, a whole struct (the field
+view), an element of an array of arrays, the outer array, `*p`, a package variable, an element of a slice of structs;
+the for init, for post and for-clause field tuples; if-init and switch-init tuples; a multi-value right side
+(`a, err = f()`); a range that assigns (`for _, a = range arrs`); a struct inside a struct; `*ph = holder{...}`; a named
+array type; and an index through an escaping named result in a function with a defer. All four phases pass.
+
+Controls, each a scratch build, the converter source restored sha-identical:
+
+- In-place assignment off. The edit: the first statement of `valueAssignInPlace` (arrayCloneOperations.go) made
+  `if true { return false }`. The twelve statement-position lines red, each printing the old element and 0, which is
+  exactly the loss 20.2 described (run on the first twelve, before the other shapes existed).
+- The converter before bb687e3e32: the three for-clause lines red (`for cl  : 101 0 1`, `for post: 171 0 2`,
+  `for fld : 181 0 1`), the other seven new lines green, as predicted before the run.
+- The converter before 901eb8fbf2: the named-result line panics, `index out of range [1] with length 0`.
+
+### 21.2 The standard library census
+
+A go/packages pass over `std` with test files, at windows/amd64, linux/amd64, darwin/amd64 and linux/arm64: a for
+clause whose tuple assigns an array or a struct holding one, 0 (positive control: the guard reads 3 of 3); a function
+with a defer, a named result of such a type and an explicit return, 4 (net goLookupIPCNAMEOrder, internal/trace
+MakeEvent and ReadEvent, log/slog Value.Resolve), none taking the address, a slice or an element address of the result
+(positive control: the probes read 3 of 3). The predicate does not see an alias taken through a field of a struct
+result or through a pointer-receiver method call; the four were read and take neither.
