@@ -99,7 +99,7 @@ const (
 	// module's README carries (docs/ConvertingAModule.md). It needs no input, so every README has it.
 	// Its link is go2cs.net's root, so push-nuget.ps1's retarget patterns, anchored on
 	// 'go2cs.net/validation/', never match it.
-	go2csBadge = "[![converted by go2cs](https://go2cs.net/images/go2cs-badge.svg)](https://go2cs.net)"
+	go2csBadge = "[![converted by go2cs](https://cdn.jsdelivr.net/gh/ritchiecarroll/go2cs@master/docs/images/go2cs-badge.svg)](https://go2cs.net)"
 
 	// shieldsBadgeHost renders both badges; the path form is `/badge/<label>-<message>-<color>`.
 	shieldsBadgeHost = "https://img.shields.io"
