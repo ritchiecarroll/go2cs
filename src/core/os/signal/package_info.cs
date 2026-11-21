@@ -14,6 +14,9 @@
 
 using go;
 using static go.os.signal_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -65,11 +68,13 @@ using static go.os.signal_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("os/signal/signal.go", "signal.cs", "ACtKgqaCpoLM0oKUgpSCgoKCgsqmgoKmgsas4qiSggAKOAAUAoKmgpSCgoKUgqaSgpSCgoK4goK4uIKCpoLGqtKsspSCgoKUlIKCgoIADyCUlJSUgoKCuKrUooKCpoKUgpQACxCCggALDAACKAAVAoLKgoKCkrT6AAsWgoIACg6ipoKCgoKCgoKCppSCAAgKgqaCgpQ=", "56-70:1;139-158:1;150-154:1.1;291-297:1")]
+[assembly: GoPositionMap("os/signal/signal.go", "signal.cs", "ACdKgqaCpoKs0oKUgpSCgoKCgsqmgoKmgsas4qiSggAKOAAUAoKmgpSCgoKUgqaSgpSCgoK4goK4uIKCpoLGqtKsspSCgoKUlIKCgoIADyCUlJSUgoKCuKrUooKCpoKUgpQACxCCggALDAACKAAVAoLKgoKCkrT6AAkWgoLuoqaCgoKCgoKCgqaUgsqCpoKClA==", "56-70:1;139-158:1;150-154:1.1;291-297:1")]
 [assembly: GoPositionMap("os/signal/signal_unix.go", "signal_unix.cs", "AAsesqKiorSCgriCzoKUgoKUtLiCpoKmgqaC")]
 // </GoSourcePositionMaps>
 
 namespace go.os;
+
+using static go.os.signal_package;
 
 [GoPackage("signal")]
 public static partial class signal_package
@@ -111,7 +116,27 @@ public static partial class signal_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(signal_package.handler)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class signalᴛhandler;
-[GoMethodHost(typeof(signal_package.signalCtx)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class signalᴛsignalCtx;
-[GoMethodHost(typeof(signal_package.signalError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class signalᴛsignalError;
+[GoMethodHost(typeof(signal_package.handler)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class signalᴛhandler;
+[GoMethodHost(typeof(signal_package.signalCtx)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class signalᴛsignalCtx;
+[GoMethodHost(typeof(signal_package.signalError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class signalᴛsignalError;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class signalᴛhandler {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool want(this ref handler h, nint sig) => signal_package.want⁔(ref h, sig);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void set(this ref handler h, nint sig) => signal_package.set⁔(ref h, sig);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void clear(this ref handler h, nint sig) => signal_package.clear⁔(ref h, sig);
+}
+partial class signalᴛsignalCtx {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void stop(this ref signalCtx c) => signal_package.stop⁔(ref c);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string String(this ref signalCtx c) => signal_package.String⁔(ref c);
+}
+partial class signalᴛsignalError {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string Error(this signalError s) => signal_package.Error⁔(s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool Is(this signalError s, error target) => signal_package.Is⁔(s, target);
+}
+// </MethodForwarders>

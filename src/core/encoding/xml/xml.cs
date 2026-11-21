@@ -24,7 +24,6 @@ using strings = strings_package;
 using unicode = unicode_package;
 using utf8 = go.unicode.utf8_package;
 using go.unicode;
-using static xml_package;
 
 partial class xml_package {
 
@@ -34,13 +33,9 @@ partial struct SyntaxError {
     public nint Line;
 }
 
-} partial class xmlᴛSyntaxError {
-
-public static @string Error(this ref SyntaxError e) {
+internal static @string Error⁔(/*this*/ ref SyntaxError e) {
     return "XML syntax error on line "u8 + strconv.Itoa(e.Line) + ": "u8 + e.Msg;
 }
-
-} partial class xml_package {
 
 // A Name represents an XML name (Local) annotated
 // with a name space identifier (Space).
@@ -63,10 +58,8 @@ partial struct StartElement {
     public slice<Attr> Attr;
 }
 
-} partial class xmlᴛStartElement {
-
 // Copy creates a new copy of StartElement.
-public static StartElement Copy(this StartElement e) {
+internal static StartElement Copy⁔(/*this*/ StartElement e) {
     var attrs = new slice<Attr>(len(e.Attr));
     copy(attrs, e.Attr);
     e.Attr = attrs;
@@ -74,11 +67,9 @@ public static StartElement Copy(this StartElement e) {
 }
 
 // End returns the corresponding XML end element.
-public static EndElement End(this StartElement e) {
+internal static EndElement End⁔(/*this*/ StartElement e) {
     return new EndElement(e.Name);
 }
-
-} partial class xml_package {
 
 // An EndElement represents an XML end element.
 partial struct EndElement {
@@ -90,23 +81,15 @@ partial struct EndElement {
 // the characters they represent.
 partial struct CharData /*[]byte*/;
 
-} partial class xmlᴛCharData {
-
 // Copy creates a new copy of CharData.
-public static CharData Copy(this CharData c) { return (CharData)bytes.Clone(c); }
-
-} partial class xml_package {
+internal static CharData Copy⁔(/*this*/ CharData c) { return (CharData)bytes.Clone(c); }
 
 // A Comment represents an XML comment of the form <!--comment-->.
 // The bytes do not include the <!-- and --> comment markers.
 partial struct Comment /*[]byte*/;
 
-} partial class xmlᴛComment {
-
 // Copy creates a new copy of Comment.
-public static Comment Copy(this Comment c) { return (Comment)bytes.Clone(c); }
-
-} partial class xml_package {
+internal static Comment Copy⁔(/*this*/ Comment c) { return (Comment)bytes.Clone(c); }
 
 // A ProcInst represents an XML processing instruction of the form <?target inst?>
 partial struct ProcInst {
@@ -114,26 +97,18 @@ partial struct ProcInst {
     public slice<byte> Inst;
 }
 
-} partial class xmlᴛProcInst {
-
 // Copy creates a new copy of ProcInst.
-public static ProcInst Copy(this ProcInst p) {
+internal static ProcInst Copy⁔(/*this*/ ProcInst p) {
     p.Inst = bytes.Clone(p.Inst);
     return p;
 }
-
-} partial class xml_package {
 
 // A Directive represents an XML directive of the form <!text>.
 // The bytes do not include the <! and > markers.
 partial struct Directive /*[]byte*/;
 
-} partial class xmlᴛDirective {
-
 // Copy creates a new copy of Directive.
-public static Directive Copy(this Directive d) { return (Directive)bytes.Clone(d); }
-
-} partial class xml_package {
+internal static Directive Copy⁔(/*this*/ Directive d) { return (Directive)bytes.Clone(d); }
 
 // CopyToken returns a copy of a Token.
 public static Token CopyToken(Token t) {
@@ -271,8 +246,6 @@ public static ж<Decoder> NewTokenDecoder(TokenReader t) {
     return d;
 }
 
-} partial class xmlᴛDecoder {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string unexpectedEofˢ => ref unexpectedEofˢᵇ;
 private static readonly @string unexpectedEofˢᵇ = "unexpected EOF"u8;
@@ -303,7 +276,7 @@ private static readonly @string unexpectedEofˢᵇ = "unexpected EOF"u8;
 // set to the URL identifying its name space when known.
 // If Token encounters an unrecognized name space prefix,
 // it uses the prefix as the Space rather than report an error.
-public static (Token, error) Token(this ref Decoder d) {
+internal static (Token, error) Token⁔(/*this*/ ref Decoder d) {
     Token t = default;
     error err = default;
     if (d.stk != nil && d.stk.kind == stkEOF) {
@@ -369,8 +342,6 @@ public static (Token, error) Token(this ref Decoder d) {
     return (t, err);
 }
 
-} partial class xml_package {
-
 internal static ref readonly @string xmlURL => ref xmlURLᵇ;
 private static readonly @string xmlURLᵇ = "http://www.w3.org/XML/1998/namespace"u8;
 internal static ref readonly @string xmlnsPrefix => ref xmlnsPrefixᵇ;
@@ -378,12 +349,10 @@ private static readonly @string xmlnsPrefixᵇ = "xmlns"u8;
 internal static ref readonly @string xmlPrefix => ref xmlPrefixᵇ;
 private static readonly @string xmlPrefixᵇ = "xml"u8;
 
-} partial class xmlᴛDecoder {
-
 // Apply name space translation to name n.
 // The default name space (for Space=="")
 // applies only to element names, not to attribute names.
-internal static void translate(this ref Decoder d, ж<Name> Ꮡn, bool isElementName) {
+internal static void translate⁔(/*this*/ ref Decoder d, ж<Name> Ꮡn, bool isElementName) {
     ref var n = ref Ꮡn.DerefOrNull();
 
     switch (ᐧ) {
@@ -407,7 +376,7 @@ internal static void translate(this ref Decoder d, ж<Name> Ꮡn, bool isElement
     }
 }
 
-internal static void switchToReader(this ref Decoder d, io.Reader r) {
+internal static void switchToReader⁔(/*this*/ ref Decoder d, io.Reader r) {
     // Get efficient byte at a time reader.
     // Assume that if reader has its own
     // ReadByte, it's efficient enough.
@@ -418,8 +387,6 @@ internal static void switchToReader(this ref Decoder d, io.Reader r) {
         d.r = new bufio_ReaderжByteReader(bufio.NewReader(r));
     }
 }
-
-} partial class xml_package {
 
 // Parsing state - stack holds old name space translations
 // and the current set of open elements. The translations to pop when
@@ -436,9 +403,7 @@ internal static UntypedInt stkStart => iota;
 internal static UntypedInt stkNs => 1;
 internal static UntypedInt stkEOF => 2;
 
-} partial class xmlᴛDecoder {
-
-internal static ж<stack> push(this ref Decoder d, nint kind) {
+internal static ж<stack> push⁔(/*this*/ ref Decoder d, nint kind) {
     var s = d.free;
     if (s != nil) {
         d.free = s.next;
@@ -454,7 +419,7 @@ internal static ж<stack> push(this ref Decoder d, nint kind) {
     return s;
 }
 
-internal static ж<stack> pop(this ref Decoder d) {
+internal static ж<stack> pop⁔(/*this*/ ref Decoder d) {
     var s = d.stk;
     if (s != nil) {
         if (s.kind == stkStart) {
@@ -470,7 +435,7 @@ internal static ж<stack> pop(this ref Decoder d) {
 // Record that after the current element is finished
 // (that element is already pushed on the stack)
 // Token should return EOF until popEOF is called.
-internal static void pushEOF(this ref Decoder d) {
+internal static void pushEOF⁔(/*this*/ ref Decoder d) {
     // Walk down stack to find Start.
     // It might not be the top, because there might be stkNs
     // entries above it.
@@ -496,7 +461,7 @@ internal static void pushEOF(this ref Decoder d) {
 
 // Undo a pushEOF.
 // The element must have been finished, so the EOF should be at the top of the stack.
-internal static bool popEOF(this ref Decoder d) {
+internal static bool popEOF⁔(/*this*/ ref Decoder d) {
     if (d.stk == nil || d.stk.kind != stkEOF) {
         return false;
     }
@@ -505,14 +470,14 @@ internal static bool popEOF(this ref Decoder d) {
 }
 
 // Record that we are starting an element with the given name.
-internal static void pushElement(this ref Decoder d, Name name) {
+internal static void pushElement⁔(/*this*/ ref Decoder d, Name name) {
     var s = d.push(stkStart);
     s.name = name;
 }
 
 // Record that we are changing the value of ns[local].
 // The old value is url, ok.
-internal static void pushNs(this ref Decoder d, @string local, @string url, bool ok) {
+internal static void pushNs⁔(/*this*/ ref Decoder d, @string local, @string url, bool ok) {
     var s = d.push(stkNs);
     s.name.Local = local;
     s.name.Space = url;
@@ -520,7 +485,7 @@ internal static void pushNs(this ref Decoder d, @string local, @string url, bool
 }
 
 // Creates a SyntaxError with the current line number.
-internal static error syntaxError(this ref Decoder d, @string msg) {
+internal static error syntaxError⁔(/*this*/ ref Decoder d, @string msg) {
     return new SyntaxErrorжerror(Ꮡ(new SyntaxError(Msg: msg, Line: d.line)));
 }
 
@@ -530,7 +495,7 @@ internal static error syntaxError(this ref Decoder d, @string msg) {
 // After popping the element, apply any undo records from
 // the stack to restore the name translations that existed
 // before we saw this element.
-internal static bool popElement(this ref Decoder d, ж<EndElement> Ꮡt) {
+internal static bool popElement⁔(/*this*/ ref Decoder d, ж<EndElement> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     var s = d.pop();
@@ -577,7 +542,7 @@ internal static bool popElement(this ref Decoder d, ж<EndElement> Ꮡt) {
 
 // If the top element on the stack is autoclosing and
 // t is not the end tag, invent the end tag.
-internal static (Token, bool) autoClose(this ref Decoder d, Token t) {
+internal static (Token, bool) autoClose⁔(/*this*/ ref Decoder d, Token t) {
     if (d.stk == nil || d.stk.kind != stkStart) {
         return (default, false);
     }
@@ -594,16 +559,12 @@ internal static (Token, bool) autoClose(this ref Decoder d, Token t) {
     return (default, false);
 }
 
-} partial class xml_package {
-
 internal static error errRawToken = errors.New("xml: cannot use RawToken from UnmarshalXML method");
-
-} partial class xmlᴛDecoder {
 
 // RawToken is like [Decoder.Token] but does not verify that
 // start and end elements match and does not translate
 // name space prefixes to their corresponding URLs.
-public static (Token, error) RawToken(this ref Decoder d) {
+internal static (Token, error) RawToken⁔(/*this*/ ref Decoder d) {
     if (d.inUnmarshalXML) {
         return (default, errRawToken);
     }
@@ -636,7 +597,7 @@ private static readonly @string expectedAttributeNameInˢᵇ = "expected attribu
 internal static ref readonly @string attributeNameWithoutInˢ => ref attributeNameWithoutInˢᵇ;
 private static readonly @string attributeNameWithoutInˢᵇ = "attribute name without = in element"u8;
 
-internal static (Token, error) rawToken(this ref Decoder d) {
+internal static (Token, error) rawToken⁔(/*this*/ ref Decoder d) {
     if (d.t != nil) {
         return d.t.Token();
     }
@@ -947,7 +908,7 @@ HandleB:
 internal static ref readonly @string unquotedOrMissingˢ => ref unquotedOrMissingˢᵇ;
 private static readonly @string unquotedOrMissingˢᵇ = "unquoted or missing attribute value in element"u8;
 
-internal static slice<byte> attrval(this ref Decoder d) {
+internal static slice<byte> attrval⁔(/*this*/ ref Decoder d) {
     var (b, ok) = d.mustgetc();
     if (!ok) {
         return default;
@@ -981,7 +942,7 @@ internal static slice<byte> attrval(this ref Decoder d) {
 }
 
 // Skip spaces if any
-internal static void space(this ref Decoder d) {
+internal static void space⁔(/*this*/ ref Decoder d) {
     for (;;) {
         var (b, ok) = d.getc();
         if (!ok) {
@@ -1002,7 +963,7 @@ internal static void space(this ref Decoder d) {
 // If there is no byte to read, return ok==false
 // and leave the error in d.err.
 // Maintain line number.
-internal static (byte b, bool ok) getc(this ref Decoder d) {
+internal static (byte b, bool ok) getc⁔(/*this*/ ref Decoder d) {
     byte b = default;
 
     if (d.err != nil) {
@@ -1031,20 +992,20 @@ internal static (byte b, bool ok) getc(this ref Decoder d) {
 // InputOffset returns the input stream byte offset of the current decoder position.
 // The offset gives the location of the end of the most recently returned token
 // and the beginning of the next token.
-public static int64 InputOffset(this ref Decoder d) {
+internal static int64 InputOffset⁔(/*this*/ ref Decoder d) {
     return d.offset;
 }
 
 // InputPos returns the line of the current decoder position and the 1 based
 // input position of the line. The position gives the location of the end of the
 // most recently returned token.
-public static (nint line, nint column) InputPos(this ref Decoder d) {
+internal static (nint line, nint column) InputPos⁔(/*this*/ ref Decoder d) {
     return (d.line, (nint)(d.offset - d.linestart) + 1);
 }
 
 // Return saved offset.
 // If we did ungetc (nextByte >= 0), have to back up one.
-internal static nint savedOffset(this ref Decoder d) {
+internal static nint savedOffset⁔(/*this*/ ref Decoder d) {
     nint n = d.saved.Len();
     if (d.nextByte >= 0) {
         n--;
@@ -1056,7 +1017,7 @@ internal static nint savedOffset(this ref Decoder d) {
 // If there is no byte to read,
 // set d.err to SyntaxError("unexpected EOF")
 // and return ok==false
-internal static (byte b, bool ok) mustgetc(this ref Decoder d) {
+internal static (byte b, bool ok) mustgetc⁔(/*this*/ ref Decoder d) {
     byte b = default;
     bool ok = default;
 
@@ -1069,15 +1030,13 @@ internal static (byte b, bool ok) mustgetc(this ref Decoder d) {
 }
 
 // Unread a single byte.
-internal static void ungetc(this ref Decoder d, byte b) {
+internal static void ungetc⁔(/*this*/ ref Decoder d, byte b) {
     if (b == '\n') {
         d.line--;
     }
     d.nextByte = (nint)b;
     d.offset--;
 }
-
-} partial class xml_package {
 
 internal static map<@string, rune> entity = new map<@string, rune>{
     ["lt"] = '<',
@@ -1086,8 +1045,6 @@ internal static map<@string, rune> entity = new map<@string, rune>{
     ["apos"] = '\'',
     ["quot"] = '"'
 };
-
-} partial class xmlᴛDecoder {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string unexpectedEofInCdataˢ => ref unexpectedEofInCdataˢᵇ;
@@ -1103,7 +1060,7 @@ private static readonly @string invalidUtf8ˢᵇ = "invalid UTF-8"u8;
 // If quote >= 0, we are in a quoted string and need to find the matching quote.
 // If cdata == true, we are in a <![CDATA[ section and need to find ]]>.
 // On failure return nil and leave the error in d.err.
-internal static slice<byte> text(this ref Decoder d, nint quote, bool cdata) {
+internal static slice<byte> text⁔(/*this*/ ref Decoder d, nint quote, bool cdata) {
     byte b0 = default;
     byte b1 = default;
     nint trunc = default;
@@ -1269,8 +1226,6 @@ break_Input:;
     return data;
 }
 
-} partial class xml_package {
-
 // Decide whether the given rune is in the XML Character Range, per
 // the Char production of https://www.xml.com/axml/testaxml.htm,
 // Section 2.2 Characters.
@@ -1278,11 +1233,9 @@ internal static bool /*inrange*/ isInCharacterRange(rune r) {
     return r == 0x09 || r == 0x0A || r == 0x0D || r >= 0x20 && r <= 0xD7FF || r >= 0xE000 && r <= 0xFFFD || r >= 0x10000 && r <= 0x10FFFF;
 }
 
-} partial class xmlᴛDecoder {
-
 // Get name space name: name with a : stuck in the middle.
 // The part before the : is the name space identifier.
-internal static (Name name, bool ok) nsname(this ref Decoder d) {
+internal static (Name name, bool ok) nsname⁔(/*this*/ ref Decoder d) {
     Name name = default;
     bool ok = default;
 
@@ -1304,7 +1257,7 @@ internal static (Name name, bool ok) nsname(this ref Decoder d) {
 // Get name: /first(first|second)*/
 // Do not set d.err if the name is missing (unless unexpected EOF is received):
 // let the caller provide better context.
-internal static (@string s, bool ok) name(this ref Decoder d) {
+internal static (@string s, bool ok) name⁔(/*this*/ ref Decoder d) {
     d.buf.Reset();
     if (!d.readName()) {
         return ("", false);
@@ -1322,7 +1275,7 @@ internal static (@string s, bool ok) name(this ref Decoder d) {
 // Read a name and append its bytes to d.buf.
 // The name is delimited by any single-byte character not valid in names.
 // All multi-byte characters are accepted; the caller must check their validity.
-internal static bool /*ok*/ readName(this ref Decoder d) {
+internal static bool /*ok*/ readName⁔(/*this*/ ref Decoder d) {
     bool ok = default;
 
     byte b = default;
@@ -1347,8 +1300,6 @@ internal static bool /*ok*/ readName(this ref Decoder d) {
     }
     return true;
 }
-
-} partial class xml_package {
 
 internal static bool isNameByte(byte c) {
     return 'A' <= c && c <= 'Z' || 'a' <= c && c <= 'z' || '0' <= c && c <= '9' || c == '_' || c == ':' || c == '.' || c == '-';
@@ -2097,11 +2048,9 @@ internal static error escapeText(io.Writer w, slice<byte> s, bool escapeNewline)
     return err;
 }
 
-} partial class xmlᴛprinter {
-
 // EscapeString writes to p the properly escaped XML equivalent
 // of the plain text data s.
-internal static void EscapeString(this ref printer p, @string s) {
+internal static void EscapeString⁔(/*this*/ ref printer p, @string s) {
     slice<byte> esc = default;
     nint last = 0;
     for (nint i = 0; i < len(s); ) {
@@ -2154,8 +2103,6 @@ internal static void EscapeString(this ref printer p, @string s) {
     }
     p.WriteString(s.slice(last));
 }
-
-} partial class xml_package {
 
 // Escape is like [EscapeText] but omits the error return value.
 // It is provided for backwards compatibility with Go 1.0.

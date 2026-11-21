@@ -10,6 +10,8 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+using asn1 = go.encoding.asn1_package;
+using time = go.time_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -55,10 +57,14 @@ using static go.crypto.x509.pkix_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("crypto/x509/pkix/pkix.go", "pkix.cs", "ABw0AA0cwoKCgoKUgoKmgoKCgoKCpqaClIKUlLa2toKUuLgAMmjSgoKmgoKCgqaCgpS0tLS0tLS0tAAJEIKCgoKCgoKCvsKCpoKCgqYAAh4ADgKCgoKCgoKCgpSClIKmqsKmgoKCgqbapoLKooKCpgAPHpI=")]
+[assembly: GoPositionMap("crypto/x509/pkix/pkix.go", "pkix.cs", "ABs0AAscwoKCgoKUgoKmgoKCgoKCpqaClIKUlLa2toKUuLgALmjSgoKmgoKCgqaCgpS0tLS0tLS0tAAHEIKCgoKCgoKCnsKCpoKCgqYAAh4ADgKCgoKCgoKCgpSClIKmqsKmgoKCgqbapoKqooKCpgANHpI=")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.x509;
+
+using static go.crypto.x509.pkix_package;
+using asn1 = go.encoding.asn1_package;
+using time = go.time_package;
 
 [GoPackage("pkix")]
 public static partial class pkix_package
@@ -108,3 +114,22 @@ public static partial class pkix_package
 [GoMethodHost(typeof(pkix_package.Name)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class pkixᴛName;
 [GoMethodHost(typeof(pkix_package.RDNSequence)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class pkixᴛRDNSequence;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class pkixᴛCertificateList {
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool HasExpired(this ref CertificateList certList, time.Time now) => pkix_package.HasExpired⁔(ref certList, now);
+}
+partial class pkixᴛName {
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void FillFromRDNSequence(this ref Name n, ж<RDNSequence> Ꮡrdns) => pkix_package.FillFromRDNSequence⁔(ref n, Ꮡrdns);
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static RDNSequence appendRDNs(this Name n, RDNSequence @in, slice<@string> values, asn1.ObjectIdentifier oid) => pkix_package.appendRDNs⁔(n, @in, values, oid);
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static RDNSequence /*ret*/ ToRDNSequence(this Name n) => pkix_package.ToRDNSequence⁔(n);
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this Name n) => pkix_package.String⁔(n);
+}
+partial class pkixᴛRDNSequence {
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this RDNSequence r) => pkix_package.String⁔(r);
+}
+// </MethodForwarders>

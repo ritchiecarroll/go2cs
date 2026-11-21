@@ -11,7 +11,6 @@ using bits = math.bits_package;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140deps;
 using math;
-using static sha3_package;
 
 partial class sha3_package {
 
@@ -62,22 +61,20 @@ internal static ж<SHAKE> newCShake(ж<SHAKE> Ꮡc, slice<byte> N, slice<byte> S
     return Ꮡc;
 }
 
-} partial class sha3ᴛSHAKE {
-
-public static nint BlockSize(this ref SHAKE s) { return s.d.BlockSize(); }
-public static nint Size(this ref SHAKE s) { return s.d.Size(); }
+internal static nint BlockSize⁔(/*this*/ ref SHAKE s) { return s.d.BlockSize(); }
+internal static nint Size⁔(/*this*/ ref SHAKE s) { return s.d.Size(); }
 
 // Sum appends a portion of output to b and returns the resulting slice. The
 // output length is selected to provide full-strength generic security: 32 bytes
 // for SHAKE128 and 64 bytes for SHAKE256. It does not change the underlying
 // state. It panics if any output has already been read.
-public static slice<byte> Sum(this ref SHAKE s, slice<byte> @in) { return s.d.Sum(@in); }
+internal static slice<byte> Sum⁔(/*this*/ ref SHAKE s, slice<byte> @in) { return s.d.Sum(@in); }
 
 // Write absorbs more data into the hash's state.
 // It panics if any output has already been read.
-public static (nint n, error err) Write(this ж<SHAKE> Ꮡs, slice<byte> p) { return Ꮡs.Ꮡd.Write(p); }
+internal static (nint n, error err) Write⁔(/*this*/ ж<SHAKE> Ꮡs, slice<byte> p) { return Ꮡs.Ꮡd.Write(p); }
 
-public static (nint n, error err) Read(this ж<SHAKE> Ꮡs, slice<byte> @out) {
+internal static (nint n, error err) Read⁔(/*this*/ ж<SHAKE> Ꮡs, slice<byte> @out) {
     fips140.RecordApproved();
     // Note that read is not exposed on Digest since SHA-3 does not offer
     // variable output length. It is only used internally by Sum.
@@ -85,7 +82,7 @@ public static (nint n, error err) Read(this ж<SHAKE> Ꮡs, slice<byte> @out) {
 }
 
 // Reset resets the hash to initial state.
-public static void Reset(this ж<SHAKE> Ꮡs) {
+internal static void Reset⁔(/*this*/ ж<SHAKE> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     s.d.Reset();
@@ -95,16 +92,16 @@ public static void Reset(this ж<SHAKE> Ꮡs) {
 }
 
 // Clone returns a copy of the SHAKE context in its current state.
-public static ж<SHAKE> Clone(this ref SHAKE s) {
+internal static ж<SHAKE> Clone⁔(/*this*/ ref SHAKE s) {
     ref var ret = ref heap<SHAKE>(s.ΔClone(), out var Ꮡret);
     return Ꮡret;
 }
 
-public static (slice<byte>, error) MarshalBinary(this ref SHAKE s) {
+internal static (slice<byte>, error) MarshalBinary⁔(/*this*/ ref SHAKE s) {
     return s.AppendBinary(new slice<byte>(0, marshaledSize + len(s.initBlock)));
 }
 
-public static (slice<byte>, error) AppendBinary(this ref SHAKE s, slice<byte> b) {
+internal static (slice<byte>, error) AppendBinary⁔(/*this*/ ref SHAKE s, slice<byte> b) {
     (b, var err) = s.d.AppendBinary(b);
     if (err != nil) {
         return (default, err);
@@ -113,11 +110,7 @@ public static (slice<byte>, error) AppendBinary(this ref SHAKE s, slice<byte> b)
     return (b, default);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string sha3InvalidHashStateˢ => ref sha3InvalidHashStateˢᵇ;
-private static readonly @string sha3InvalidHashStateˢᵇ = "sha3: invalid hash state"u8;
-
-public static error UnmarshalBinary(this ref SHAKE s, slice<byte> b) {
+internal static error UnmarshalBinary⁔(/*this*/ ref SHAKE s, slice<byte> b) {
     if (len(b) < marshaledSize) {
         return errors.New(sha3InvalidHashStateˢ);
     }
@@ -127,8 +120,6 @@ public static error UnmarshalBinary(this ref SHAKE s, slice<byte> b) {
     s.initBlock = bytes.Clone(b[(int)(marshaledSize)..]);
     return default;
 }
-
-} partial class sha3_package {
 
 // NewShake128 creates a new SHAKE128 XOF.
 public static ж<SHAKE> NewShake128() {

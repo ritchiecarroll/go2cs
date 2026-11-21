@@ -5,7 +5,6 @@ namespace go.@internal.runtime;
 
 using bytealg = go.@internal.bytealg_package;
 using go.@internal;
-using static cgroup_package;
 
 partial class cgroup_package {
 
@@ -13,13 +12,9 @@ partial class cgroup_package {
 // which cannot be imported from a runtime package.
 partial struct stringError /*@string*/;
 
-} partial class cgroupᴛstringError {
-
-internal static @string Error(this stringError e) {
+internal static @string Error⁔(/*this*/ stringError e) {
     return (@string)e;
 }
-
-} partial class cgroup_package {
 
 // All errors are explicit converted to type error in global initialization to
 // ensure that the linker allocates a static interface value. This is necessary
@@ -68,8 +63,6 @@ internal static ж<lineReader> newLineReader(nint fd, slice<byte> scratch, Func<
     ));
 }
 
-} partial class cgroupᴛlineReader {
-
 // next advances to the next line.
 //
 // May return errIncompleteLine if the scratch buffer is too small to hold the
@@ -82,7 +75,7 @@ internal static ж<lineReader> newLineReader(nint fd, slice<byte> scratch, Func<
 // the line.
 //
 // Returns errEOF when there are no more lines.
-internal static error next(this ref lineReader r) {
+internal static error next⁔(/*this*/ ref lineReader r) {
     // Three cases:
     //
     // 1. First call, no data read.
@@ -172,7 +165,7 @@ internal static error next(this ref lineReader r) {
 // Preconditions: [r.next] is called prior to the first call to line.
 //
 // Postconditions: The caller must not keep a reference to the returned slice.
-internal static slice<byte> line(this ref lineReader r) {
+internal static slice<byte> line⁔(/*this*/ ref lineReader r) {
     if (r.newline < 0) {
         // Incomplete line
         return r.scratch.slice(0, r.n);
@@ -181,4 +174,4 @@ internal static slice<byte> line(this ref lineReader r) {
     return r.scratch.slice(0, r.newline);
 }
 
-}
+} // end cgroup_package

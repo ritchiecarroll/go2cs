@@ -4,24 +4,20 @@
 //go:build (!amd64 && !arm64 && !s390x) || purego
 namespace go.crypto.@internal.fips140;
 
-using static sha3_package;
-
 partial class sha3_package {
 
 internal static void keccakF1600(/*[200]*/ ж<array<byte>> a) {
     keccakF1600Generic(a);
 }
 
-} partial class sha3ᴛDigest {
-
-internal static (nint n, error err) write(this ж<Digest> Ꮡd, slice<byte> p) {
+internal static (nint n, error err) write⁔(/*this*/ ж<Digest> Ꮡd, slice<byte> p) {
     return Ꮡd.writeGeneric(p);
 }
-internal static (nint n, error err) read(this ж<Digest> Ꮡd, slice<byte> @out) {
+internal static (nint n, error err) read⁔(/*this*/ ж<Digest> Ꮡd, slice<byte> @out) {
     return Ꮡd.readGeneric(@out);
 }
-internal static slice<byte> sum(this ref Digest d, slice<byte> b) {
+internal static slice<byte> sum⁔(/*this*/ ref Digest d, slice<byte> b) {
     return d.sumGeneric(b);
 }
 
-}
+} // end sha3_package

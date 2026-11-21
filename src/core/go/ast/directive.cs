@@ -11,7 +11,6 @@ using unicode = unicode_package;
 using utf8 = global::go.unicode.utf8_package;
 using global::go.go;
 using global::go.unicode;
-using static ast_package;
 
 partial class ast_package {
 
@@ -95,12 +94,8 @@ internal static bool isalnum(byte b) {
     return 'a' <= b && b <= 'z' || '0' <= b && b <= '9';
 }
 
-} partial class astᴛDirective {
-
-public static token.Pos Pos(this ref Directive d) { return d.Slash; }
-public static token.Pos End(this ref Directive d) { return (token.Pos)((nint)d.ArgsPos + len(d.Args)); }
-
-} partial class ast_package {
+internal static token.Pos Pos⁔(/*this*/ ref Directive d) { return d.Slash; }
+internal static token.Pos End⁔(/*this*/ ref Directive d) { return (token.Pos)((nint)d.ArgsPos + len(d.Args)); }
 
 // A DirectiveArg is an argument to a directive comment.
 partial struct DirectiveArg {
@@ -111,15 +106,13 @@ partial struct DirectiveArg {
     public token.Pos Pos;
 }
 
-} partial class astᴛDirective {
-
 // ParseArgs parses a [Directive]'s arguments using the standard convention,
 // which is a sequence of tokens, where each token may be a bare word, or a
 // double quoted Go string, or a back quoted raw Go string. Each token must be
 // separated by one or more Unicode spaces.
 //
 // If the arguments do not conform to this syntax, it returns an error.
-public static (slice<DirectiveArg>, error) ParseArgs(this ref Directive d) {
+internal static (slice<DirectiveArg>, error) ParseArgs⁔(/*this*/ ref Directive d) {
     var listᴷ = new stackAppend<DirectiveArg>(moves: true);
 
     var args = new directiveScanner(d.Args, d.ArgsPos);
@@ -158,8 +151,6 @@ public static (slice<DirectiveArg>, error) ParseArgs(this ref Directive d) {
     return (list, default);
 }
 
-} partial class ast_package {
-
 // directiveScanner is a helper for parsing directive comments while maintaining
 // position information.
 partial struct directiveScanner {
@@ -167,20 +158,18 @@ partial struct directiveScanner {
     internal token.Pos pos;
 }
 
-} partial class astᴛdirectiveScanner {
-
-internal static void skip(this ref directiveScanner s, nint n) {
+internal static void skip⁔(/*this*/ ref directiveScanner s, nint n) {
     s.pos += ((token.Pos)n);
     s.str = s.str.slice(n);
 }
 
-internal static @string take(this ref directiveScanner s, nint n) {
+internal static @string take⁔(/*this*/ ref directiveScanner s, nint n) {
     @string res = s.str.slice(0, n);
     s.skip(n);
     return res;
 }
 
-internal static @string takeNonSpace(this ref directiveScanner s) {
+internal static @string takeNonSpace⁔(/*this*/ ref directiveScanner s) {
     nint i = strings.IndexFunc(s.str, unicode.IsSpace);
     if (i == -1) {
         i = len(s.str);
@@ -188,9 +177,9 @@ internal static @string takeNonSpace(this ref directiveScanner s) {
     return s.take(i);
 }
 
-internal static void skipSpace(this ref directiveScanner s) {
+internal static void skipSpace⁔(/*this*/ ref directiveScanner s) {
     @string trim = strings.TrimLeftFunc(s.str, unicode.IsSpace);
     s.skip(len(s.str) - len(trim));
 }
 
-}
+} // end ast_package

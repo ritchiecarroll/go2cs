@@ -12,7 +12,6 @@ using sys = @internal.runtime.sys_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
-using static runtime_package;
 
 partial class runtime_package {
 
@@ -52,19 +51,15 @@ internal static UntypedInt drainCheckThreshold => 100000;
 // must also evenly divide pagesPerArena.
 internal static UntypedInt pagesPerSpanRoot => /* min(512, pagesPerArena) */ 512;
 
-} partial class runtimeᴛg {
-
 // internalBlocked returns true if the goroutine is blocked due to an
 // internal (non-leaking) waitReason, e.g. waiting for the netpoller or garbage collector.
 // Such goroutines are never leak detection candidates according to the GC.
 //
 //go:nosplit
-internal static bool internalBlocked(this ref g gp) {
+internal static bool internalBlocked⁔(/*this*/ ref g gp) {
     var reason = gp.waitreason;
     return reason < waitReasonChanReceiveNilChan || waitReasonSyncWaitGroupWait < reason;
 }
-
-} partial class runtime_package {
 
 // allGsSnapshotSortedForGC takes a snapshot of allgs and returns a sorted
 // array of Gs. The array is sorted by the G's status, with running Gs

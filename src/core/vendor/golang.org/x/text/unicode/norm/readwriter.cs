@@ -4,7 +4,6 @@
 namespace go.vendor.golang.org.x.text.unicode;
 
 using io = io_package;
-using static norm_package;
 
 partial class norm_package {
 
@@ -14,12 +13,10 @@ partial struct normWriter {
     internal slice<byte> buf;
 }
 
-} partial class normᴛnormWriter {
-
 // Write implements the standard write interface.  If the last characters are
 // not at a normalization boundary, the bytes will be buffered for the next
 // write. The remaining bytes will be written on close.
-internal static (nint n, error err) Write(this ж<normWriter> Ꮡw, slice<byte> data) {
+internal static (nint n, error err) Write⁔(/*this*/ ж<normWriter> Ꮡw, slice<byte> data) {
     nint n = default;
     error err = default;
     ref var w = ref Ꮡw.DerefOrNull();
@@ -57,7 +54,7 @@ internal static (nint n, error err) Write(this ж<normWriter> Ꮡw, slice<byte> 
 }
 
 // Close forces data that remains in the buffer to be written.
-internal static error Close(this ref normWriter w) {
+internal static error Close⁔(/*this*/ ref normWriter w) {
     if (len(w.buf) > 0) {
         var (_, err) = w.w.Write(w.buf);
         if (err != nil) {
@@ -67,19 +64,15 @@ internal static error Close(this ref normWriter w) {
     return default;
 }
 
-} partial class normᴛForm {
-
 // Writer returns a new writer that implements Write(b)
 // by writing f(b) to w. The returned writer may use an
 // internal buffer to maintain state across Write calls.
 // Calling its Close method writes any buffered data to w.
-public static io.WriteCloser Writer(this Form f, io.Writer w) {
+internal static io.WriteCloser Writer⁔(/*this*/ Form f, io.Writer w) {
     var wr = Ꮡ(new normWriter(rb: new reorderBuffer(), w: w));
     wr.Ꮡrb.init(f, default);
     return new normWriterжWriteCloser(wr);
 }
-
-} partial class norm_package {
 
 partial struct normReader {
     internal reorderBuffer rb;
@@ -91,10 +84,8 @@ partial struct normReader {
     internal error err;
 }
 
-} partial class normᴛnormReader {
-
 // Read implements the standard read interface.
-internal static (nint, error) Read(this ж<normReader> Ꮡr, slice<byte> p) {
+internal static (nint, error) Read⁔(/*this*/ ж<normReader> Ꮡr, slice<byte> p) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     for (;;) {
@@ -130,11 +121,9 @@ internal static (nint, error) Read(this ж<normReader> Ꮡr, slice<byte> p) {
     }
 }
 
-} partial class normᴛForm {
-
 // Reader returns a new reader that implements Read
 // by reading data from r and returning f(data).
-public static io.Reader Reader(this Form f, io.Reader r) {
+internal static io.Reader Reader⁔(/*this*/ Form f, io.Reader r) {
     const nint chunk = 4000;
     var buf = new slice<byte>(chunk);
     var rr = Ꮡ(new normReader(rb: new reorderBuffer(), r: r, inbuf: buf));
@@ -142,4 +131,4 @@ public static io.Reader Reader(this Form f, io.Reader r) {
     return new normReaderжReader(rr);
 }
 
-}
+} // end norm_package

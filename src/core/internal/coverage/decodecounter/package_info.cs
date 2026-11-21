@@ -14,6 +14,9 @@
 
 using go;
 using static go.@internal.coverage.decodecounter_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -59,10 +62,12 @@ using static go.@internal.coverage.decodecounter_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/coverage/decodecounter/decodecounterfile.go", "decodecounterfile.cs", "AClOgtyAgqSClIKUgriAgraCgIK2gIKkpqKCxqKCgIKkgIKkgpSClKrUgIKkgoLKgIKkgIK2gIKUgoKCgsimgoKCgpSClIKCggAKBqKCgoKUgpSCkoKClJSCgoKCgpSCgpSClJSCgoKUgoKCpoKUgpQAAhLirsKuwgAOGJKu4oKUgpSCgIK2gIKkqqIACBQACAKClIKCgoKCgoKCgpSCgoKUlJSCgoKCgpSClKaCgoKUgpS4AAIQ0oKCgoKCgoKUgriUgriCgpSCgpSClIKCgoKUlA==", "157-163:1;281-297:1;300-309:2;311-320:3")]
+[assembly: GoPositionMap("internal/coverage/decodecounter/decodecounterfile.go", "decodecounterfile.cs", "AChOgtyAgqSClIKUgriAgraCgIK2gIKkpqKCpqKCgIKkgIKkgpSClKrUgIKkgoLKgIKkgIK2gIKUgoKCgsimgoKCgpSClIKCggAKBqKCgoKUgpSCkoKClJSCgoKCgpSCgpSClJSCgoKUgoKCpoKUgpQAAhLirsKuwgAKGJKu4oKUgpSCgIK2gIKkqqIABBQACAKClIKCgoKCgoKCgpSCgoKUlJSCgoKCgpSClKaCgoKUgpS4AAIQ0oKCgoKCgoKUgriUgriCgpSCgpSClIKCgoKUlA==", "157-163:1;281-297:1;300-309:2;311-320:3")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.coverage;
+
+using static go.@internal.coverage.decodecounter_package;
 
 [GoPackage("decodecounter")]
 public static partial class decodecounter_package
@@ -103,5 +108,25 @@ public static partial class decodecounter_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(decodecounter_package.CounterDataReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class decodecounterᴛCounterDataReader;
+[GoMethodHost(typeof(decodecounter_package.CounterDataReader)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class decodecounterᴛCounterDataReader;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class decodecounterᴛCounterDataReader {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error readFooter(this ж<CounterDataReader> Ꮡcdr) => decodecounter_package.readFooter⁔(Ꮡcdr);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error readSegmentPreamble(this ж<CounterDataReader> Ꮡcdr) => decodecounter_package.readSegmentPreamble⁔(Ꮡcdr);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error readStringTable(this ref CounterDataReader cdr) => decodecounter_package.readStringTable⁔(ref cdr);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error readArgs(this ж<CounterDataReader> Ꮡcdr) => decodecounter_package.readArgs⁔(Ꮡcdr);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<@string> OsArgs(this ref CounterDataReader cdr) => decodecounter_package.OsArgs⁔(ref cdr);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Goos(this ref CounterDataReader cdr) => decodecounter_package.Goos⁔(ref cdr);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Goarch(this ref CounterDataReader cdr) => decodecounter_package.Goarch⁔(ref cdr);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static uint32 NumSegments(this ref CounterDataReader cdr) => decodecounter_package.NumSegments⁔(ref cdr);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (bool, error) BeginNextSegment(this ж<CounterDataReader> Ꮡcdr) => decodecounter_package.BeginNextSegment⁔(Ꮡcdr);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static uint32 NumFunctionsInSegment(this ref CounterDataReader cdr) => decodecounter_package.NumFunctionsInSegment⁔(ref cdr);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (bool, error) NextFunc(this ж<CounterDataReader> Ꮡcdr, ж<FuncPayload> Ꮡp) => decodecounter_package.NextFunc⁔(Ꮡcdr, Ꮡp);
+}
+// </MethodForwarders>

@@ -10,10 +10,14 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+using crypto = go.crypto_package;
 // </ImportedTypeAliases>
 
 using go;
 using static go.crypto.mlkem_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -59,10 +63,13 @@ using static go.crypto.mlkem_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("crypto/mlkem/mlkem.go", "mlkem.cs", "ACxeooKCpqqigoKmzLKuwqqirsLGAAcUooKCpsiSAAIU8gAKFqKCgqaqooKCpsyyrsKqoq7CxgAHFKKCgqbIkgACFPI=")]
+[assembly: GoPositionMap("crypto/mlkem/mlkem.go", "mlkem.cs", "ACteooKCpqqigoKmrLKuwqqirsKmAAcUooKCpqiSAAIU8gAIFqKCgqaqooKCpqyyrsKqoq7CpgAHFKKCgqaokgACFPI=")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;
+
+using static go.crypto.mlkem_package;
+using crypto = go.crypto_package;
 
 [GoPackage("mlkem")]
 public static partial class mlkem_package
@@ -99,8 +106,35 @@ public static partial class mlkem_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(mlkem_package.DecapsulationKey1024)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mlkemᴛDecapsulationKey1024;
-[GoMethodHost(typeof(mlkem_package.DecapsulationKey768)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mlkemᴛDecapsulationKey768;
-[GoMethodHost(typeof(mlkem_package.EncapsulationKey1024)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mlkemᴛEncapsulationKey1024;
-[GoMethodHost(typeof(mlkem_package.EncapsulationKey768)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mlkemᴛEncapsulationKey768;
+[GoMethodHost(typeof(mlkem_package.DecapsulationKey1024)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class mlkemᴛDecapsulationKey1024;
+[GoMethodHost(typeof(mlkem_package.DecapsulationKey768)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class mlkemᴛDecapsulationKey768;
+[GoMethodHost(typeof(mlkem_package.EncapsulationKey1024)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class mlkemᴛEncapsulationKey1024;
+[GoMethodHost(typeof(mlkem_package.EncapsulationKey768)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class mlkemᴛEncapsulationKey768;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class mlkemᴛDecapsulationKey1024 {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> Bytes(this ref DecapsulationKey1024 dk) => mlkem_package.Bytes⁔(ref dk);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<byte> sharedKey, error err) Decapsulate(this ref DecapsulationKey1024 dk, slice<byte> ciphertext) => mlkem_package.Decapsulate⁔(ref dk, ciphertext);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<EncapsulationKey1024> EncapsulationKey(this ref DecapsulationKey1024 dk) => mlkem_package.EncapsulationKey⁔(ref dk);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static crypto.Encapsulator Encapsulator(this ref DecapsulationKey1024 dk) => mlkem_package.Encapsulator⁔(ref dk);
+}
+partial class mlkemᴛDecapsulationKey768 {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> Bytes(this ref DecapsulationKey768 dk) => mlkem_package.Bytes⁔(ref dk);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<byte> sharedKey, error err) Decapsulate(this ref DecapsulationKey768 dk, slice<byte> ciphertext) => mlkem_package.Decapsulate⁔(ref dk, ciphertext);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<EncapsulationKey768> EncapsulationKey(this ref DecapsulationKey768 dk) => mlkem_package.EncapsulationKey⁔(ref dk);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static crypto.Encapsulator Encapsulator(this ref DecapsulationKey768 dk) => mlkem_package.Encapsulator⁔(ref dk);
+}
+partial class mlkemᴛEncapsulationKey1024 {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> Bytes(this ref EncapsulationKey1024 ek) => mlkem_package.Bytes⁔(ref ek);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<byte> sharedKey, slice<byte> ciphertext) Encapsulate(this ref EncapsulationKey1024 ek) => mlkem_package.Encapsulate⁔(ref ek);
+}
+partial class mlkemᴛEncapsulationKey768 {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> Bytes(this ref EncapsulationKey768 ek) => mlkem_package.Bytes⁔(ref ek);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<byte> sharedKey, slice<byte> ciphertext) Encapsulate(this ref EncapsulationKey768 ek) => mlkem_package.Encapsulate⁔(ref ek);
+}
+// </MethodForwarders>

@@ -5,7 +5,6 @@ namespace go.testing;
 
 using io = io_package;
 using log = log_package;
-using static iotest_package;
 
 partial class iotest_package {
 
@@ -14,9 +13,7 @@ partial struct writeLogger {
     internal io.Writer w;
 }
 
-} partial class iotestᴛwriteLogger {
-
-internal static (nint n, error err) Write(this ref writeLogger l, slice<byte> p) {
+internal static (nint n, error err) Write⁔(/*this*/ ref writeLogger l, slice<byte> p) {
     nint n = default;
     error err = default;
 
@@ -28,8 +25,6 @@ internal static (nint n, error err) Write(this ref writeLogger l, slice<byte> p)
     }
     return (n, err);
 }
-
-} partial class iotest_package {
 
 // NewWriteLogger returns a writer that behaves like w except
 // that it logs (using [log.Printf]) each write to standard error,
@@ -43,9 +38,7 @@ partial struct readLogger {
     internal io.Reader r;
 }
 
-} partial class iotestᴛreadLogger {
-
-internal static (nint n, error err) Read(this ref readLogger l, slice<byte> p) {
+internal static (nint n, error err) Read⁔(/*this*/ ref readLogger l, slice<byte> p) {
     nint n = default;
     error err = default;
 
@@ -57,8 +50,6 @@ internal static (nint n, error err) Read(this ref readLogger l, slice<byte> p) {
     }
     return (n, err);
 }
-
-} partial class iotest_package {
 
 // NewReadLogger returns a reader that behaves like r except
 // that it logs (using [log.Printf]) each read to standard error,

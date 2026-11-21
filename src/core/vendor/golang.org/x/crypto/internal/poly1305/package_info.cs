@@ -14,6 +14,9 @@
 
 using go;
 using static go.vendor.golang.org.x.crypto.@internal.poly1305_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -59,11 +62,13 @@ using static go.vendor.golang.org.x.crypto.@internal.poly1305_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("vendor/golang.org/x/crypto/internal/poly1305/poly1305.go", "poly1305.cs", "ABw40oKCqLKCggACGAAJAoKCABAigJzigpSqooKCgqqigoKC")]
-[assembly: GoPositionMap("vendor/golang.org/x/crypto/internal/poly1305/sum_generic.go", "sum_generic.cs", "AA8+AA8CgoKmgoKCABYwwoKCgoKClIKClICCgqSClKyygoKUAAoYsoKCggAIEoKCpoKCgoKUpoKCggACFPKClIIACBKCgoKUlIKClIKClAAYMoKCgoKC7oKUgqaCgoKUgoKCABAigriCgpSUgoLuAAUSgAAGGNLugoKmggAHEIKUgg==")]
+[assembly: GoPositionMap("vendor/golang.org/x/crypto/internal/poly1305/poly1305.go", "poly1305.cs", "ABs40oKCqLKCggACGAAJAoKCAA4igJzigpSqooKCgqqigoKC")]
+[assembly: GoPositionMap("vendor/golang.org/x/crypto/internal/poly1305/sum_generic.go", "sum_generic.cs", "AA4+AA8CgoKmgoKCABQwwoKCgoKClIKClICCgqSClKyygoKUAAgYsoKCggAIEoKCpoKCgoKUpoKCggACFPKClIIACBKCgoKUlIKClIKClAAYMoKCgoKC7oKUgqaCgoKUgoKCABAigriCgpSUgoLuAAUSgAAGGNLugoKmggAHEIKUgg==")]
 // </GoSourcePositionMaps>
 
 namespace go.vendor.golang.org.x.crypto.@internal;
+
+using static go.vendor.golang.org.x.crypto.@internal.poly1305_package;
 
 [GoPackage("poly1305", ImportPath = "vendor/golang.org/x/crypto/internal/poly1305")]
 public static partial class poly1305_package
@@ -102,6 +107,23 @@ public static partial class poly1305_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(poly1305_package.MAC)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class poly1305ᴛMAC;
-[GoMethodHost(typeof(poly1305_package.macGeneric)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class poly1305ᴛmacGeneric;
+[GoMethodHost(typeof(poly1305_package.MAC)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class poly1305ᴛMAC;
+[GoMethodHost(typeof(poly1305_package.macGeneric)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class poly1305ᴛmacGeneric;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class poly1305ᴛMAC {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Size(this ref MAC h) => poly1305_package.Size⁔(ref h);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint n, error err) Write(this ж<MAC> Ꮡh, slice<byte> p) => poly1305_package.Write⁔(Ꮡh, p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> Sum(this ref MAC h, slice<byte> b) => poly1305_package.Sum⁔(ref h, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Verify(this ref MAC h, slice<byte> expected) => poly1305_package.Verify⁔(ref h, expected);
+}
+partial class poly1305ᴛmacGeneric {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint, error) Write(this ж<macGeneric> Ꮡh, slice<byte> p) => poly1305_package.Write⁔(Ꮡh, p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void Sum(this ref macGeneric h, /*[16]*/ ж<array<byte>> Ꮡout) => poly1305_package.Sum⁔(ref h, Ꮡout);
+}
+// </MethodForwarders>

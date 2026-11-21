@@ -10,10 +10,15 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+using http = go.net.http_package;
+using pprof = go.runtime.pprof_package;
 // </ImportedTypeAliases>
 
 using go;
 using static go.net.http.pprof_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -68,10 +73,14 @@ using static go.net.http.pprof_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("net/http/pprof/pprof.go", "pprof.cs", "AGPAAYKCgpSCgoKCAAwMsoKCpqIACgyigoKUggAJCIKCgoKCAAoMsoKCgqa4goKUlJSC7LKCgoKmuIKClJSUgqzSgpjqlIKClKaCgoKUgoKCgtyCgpS4qqIAGgqCgoKCgpSCgpSCgpSCgpSClAAOBsKCgoKmgoKmlIKCgpSCgoKmgqS0goKUlNiCgoKUgpSUgoKCpoKUgoKixIKCgpSCgoKUgqYACRQADBqCggAQHuKCgoK4gpSCggAIEoLumIIALAiCggABKIKCpo6ClJqC", "424-426:1", "", "197=Sprintf/1/1/1;227=Sprintf/1/1/1;506=Name/1/3/1,Name/2/3/2,Name/3/3/3,Count/1/1/4", "384:21")]
+[assembly: GoPositionMap("net/http/pprof/pprof.go", "pprof.cs", "AGLAAYKCgpSCgoKCAAwMsoKCpqIACgyigoKUggAJCIKCgoKCAAoMsoKCgqa4goKUlJSC7LKCgoKmuIKClJSUgqzSgpjqlIKClKaCgoKUgoKCgtyCgpS4qqIACgqCgoKCgpSCgpSCgpSCgpSClAAOBsKCgoKmgoKmlIKCgpSCgoKmgqS0goKUlNiCgoKUgpSUgoKCpoKUgoKipIKCgpSCgoKUgqYACRQADBqCggAQHuKCgoK4gpSCggAIEoLumIIALAiCggABKIKCpo6ClJqC", "424-426:1", "", "196=Sprintf/1/1/1;226=Sprintf/1/1/1;487=Name/1/3/1,Name/2/3/2,Name/3/3/3,Count/1/1/4", "367:21")]
 // </GoSourcePositionMaps>
 
 namespace go.net.http;
+
+using static go.net.http.pprof_package;
+using http = go.net.http_package;
+using pprof = go.runtime.pprof_package;
 
 [GoPackage("pprof")]
 public static partial class pprof_package
@@ -123,5 +132,16 @@ public static partial class pprof_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(pprof_package.handler)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class pprofᴛhandler;
+[GoMethodHost(typeof(pprof_package.handler)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class pprofᴛhandler;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class pprofᴛhandler {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void ServeHTTP(this handler name, http.ResponseWriter w, ж<http.Request> Ꮡr) => pprof_package.ServeHTTP⁔(name, w, Ꮡr);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void serveDeltaProfile(this handler name, http.ResponseWriter w, ж<http.Request> Ꮡr, ж<pprof.Profile> Ꮡp, @string secStr) => pprof_package.serveDeltaProfile⁔(name, w, Ꮡr, Ꮡp, secStr);
+}
+// </MethodForwarders>

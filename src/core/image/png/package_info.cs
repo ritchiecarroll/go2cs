@@ -10,10 +10,16 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+using color = go.image.color_package;
+using image = go.image_package;
+using io = go.io_package;
 // </ImportedTypeAliases>
 
 using go;
 using static go.image.png_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -76,11 +82,16 @@ using static go.image.png_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("image/png/paeth.go", "paeth.cs", "AAoUlO6oAAgQgoKCgoKCgoKClKqi0oKCgoKCgoKCgpSClJSCgoI=")]
-[assembly: GoPositionMap("image/png/reader.go", "reader.cs", "ADJkgqaCABU0ADBiAAoOABEEgoKUgpSCgpSClIKUlIKCgpSCgoKmgqaCgpSUtNaUtNaUtNaUtLS0tNaUtLS0xoKUggAIBoKCgpSCgpSClIKClNyUAAgKlAAIBoKUgpSCgpSUgpS0tKS2gpSCgpSUgraClIKClJSClIKCyJQACBgACQKClJSCuIKUgoKUgpSClIKCgujSgoKUkoKCgoKUlIKClIKCgpSC3IKCgpSUgpSCpgAJCJKCggAHFJKClIK4gqaUgoKClILGgoK0goKClILGgoK0goK0goKClILGgoK0goKClILGgoKkgpSmgoKmgpSUgoKClLiCgtiCxoL8gpSCxrS4lIKCgoKCgoKClIK4goKCguqCgoKCgoKCgpSCuIKCgoLqgoKCgoKCgoKUgriCgoKC6oKCgoKCgpSmgsaCgsaCooKCgoKCgoKUgoKCgoKUlKKCgoKCgoKUxoKCgoKClILYgoKCgoKUgtiCgoKCgpSC2IKCgriCtIK0goKCgoKClKaCgtiCgoLGgoKCgoKCgoKCgpSmgoKCgtiCgoKCgtqmqJKCzpSCgrSCgrSCgrSCgrSCgrSCgrSCgoKCysaCgrSCgqSSgoKCgoLKsoKCgpTmgoKUprSAgqSCgqakgpSCpIKUgqSCgpSCgpSClIKkgoLclIKClKSClIKUgpaSgoKClIKU5oKClIKU5oKCgpSClMqiuICCgpSkgoKClKaqoriAgoKUtoKCgpSmgoKmgsqClLS0tLS0tLS0pO6C", "", "", "1168=NewIEEE/1/1/2;1194=NewIEEE/1/1/2", "458:21")]
-[assembly: GoPositionMap("image/png/writer.go", "writer.cs", "AEeQAZKClIKCgoKCuKiSgpTGgoKUgoKClIKCgoKCgoKClIKClIKClOaCgoKUlIK0grSCtIK0grSCtIK0grSCtIKkgoKCAAgGgoKClIKCgoKCgoKUlIKCAAcU4oKClMrqgoKCgoKCpoKCgpSCpoKCgpSCgoKCpoKCuIKCgoKmgoK4goKClIKCgoKmgoK4goKClIKCgoKmgqbG0oKCgpSClJSUlJS0tLS0tLS0tLQACBCCgoKClJSUgoKUgpSUgoKClJSClIKClIKCguqCkoKCgpSCgoKCgoKCpoKCgoKC2IKClIKCgtqUgoKCgoKCgoKCgqaCgoKUyIKCgoKCgoKCgoKCgoKCggABFAAIAoKCgoLKgoKCgoKC2IKCgoLYgoKCgoKCgoLYgoKCgoKCgoKCggAIEIKmgriCuJTYsoKUgpSUgoKUyqKUpKSkpAAJCLiigsgACAiCgqaCgoKWgpSCpoKClJSClIKCgoKCgpSmlLS0gpTGgpTagoKClIKC")]
+[assembly: GoPositionMap("image/png/reader.go", "reader.cs", "ADFkgqaCABU0AC5i7gAPBIKClIKUgoKUgpSClJSCgoKUgoKCpoKmgoKUlLTWlLTWlLTWlLS0tLTWlLS0tMaClIIACAaCgoKUgoKUgpSCgpTclAAICpQACAaClIKUgoKUlIKUtLSktoKUgoKUlIK2gpSCgpSUgpSCgsiUAAgYAAkCgpSUgriClIKClIKUgpSCgoLo0oKClJKCgoKClJSCgpSCgoKUgtyCgoKUlIKUgqYACQiSgoIABxSSgpSCuIKmlIKCgpSCxoKCtIKCgpSCxoKCtIKCtIKCgpSCxoKCtIKCgpSCxoKCpIKUpoKCpoKUlIKCgpS4goLYgsaC/IKUgsa0uJSCgoKCgoKCgpSCuIKCgoLqgoKCgoKCgoKUgriCgoKC6oKCgoKCgoKClIK4goKCguqCgoKCgoKUpoLGgoLGgqKCgoKCgoKClIKCgoKClJSigoKCgoKClMaCgoKCgpSC2IKCgoKClILYgoKCgoKUgtiCgoK4grSCtIKCgoKCgpSmgoLYgoKCxoKCgoKCgoKCgoKUpoKCgoLYgoKCgoLapqiSgs6UgoK0goK0goK0goK0goK0goK0goKCgsrGgoK0goKkkoKCgoKCyrKCgoKU5oKClKa0gIKkgoKmpIKUgqSClIKkgoKUgoKUgpSCpIKC3JSCgpSkgpSClIKWkoKCgpSClOaCgpSClOaCgoKUgpSqoriAgoKUpIKCgpSmqqK4gIKClLaCgoKUpoKCpoLKgpS0tLS0tLS0tKTugg==", "", "", "1157=NewIEEE/1/1/2;1183=NewIEEE/1/1/2", "449:21")]
+[assembly: GoPositionMap("image/png/writer.go", "writer.cs", "AEaQAZKClIKCgoKCuKiSgpSmgoKUgoKClIKCgoKCgoKClIKClIKClOaCgoKUlIK0grSCtIK0grSCtIK0grSCtIKkgoKCAAgGgoKClIKCgoKCgoKUlIKCAAcU4oKClKrqgoKCgoKCpoKCgpSCpoKCgpSCgoKCpoKCuIKCgoKmgoK4goKClIKCgoKmgoK4goKClIKCgoKmgqam0oKCgpSClJSUlJS0tLS0tLS0tLQACBCCgoKClJSUgoKUgpSUgoKClJSClIKClIKCguqCkoKCgpSCgoKCgoKCpoKCgoKC2IKClIKCgtqUgoKCgoKCgoKCgqaCgoKUyIKCgoKCgoKCgoKCgoKCggABFAAIAoKCgoLKgoKCgoKC2IKCgoLYgoKCgoKCgoLYgoKCgoKCgoKCggAIEIKmgriCuJTYsoKUgpSUgoKUqqKUpKSkpPiYooKoAAgIgoKmgoKCloKUgqaCgpSUgpSCgoKCgoKUppS0tIKUxoKU2oKCgpSCgg==")]
 // </GoSourcePositionMaps>
 
 namespace go.image;
+
+using static go.image.png_package;
+using color = go.image.color_package;
+using image = go.image_package;
+using io = go.io_package;
 
 [GoPackage("png")]
 public static partial class png_package
@@ -131,9 +142,48 @@ public static partial class png_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(png_package.Encoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class pngᴛEncoder;
-[GoMethodHost(typeof(png_package.FormatError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class pngᴛFormatError;
-[GoMethodHost(typeof(png_package.UnsupportedError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class pngᴛUnsupportedError;
-[GoMethodHost(typeof(png_package.decoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class pngᴛdecoder;
-[GoMethodHost(typeof(png_package.encoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class pngᴛencoder;
+[GoMethodHost(typeof(png_package.Encoder)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class pngᴛEncoder;
+[GoMethodHost(typeof(png_package.FormatError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class pngᴛFormatError;
+[GoMethodHost(typeof(png_package.UnsupportedError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class pngᴛUnsupportedError;
+[GoMethodHost(typeof(png_package.decoder)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class pngᴛdecoder;
+[GoMethodHost(typeof(png_package.encoder)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class pngᴛencoder;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class pngᴛEncoder {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Encode(this ж<Encoder> Ꮡenc, io.Writer w, image.Image m) => png_package.Encode⁔(Ꮡenc, w, m);
+}
+partial class pngᴛFormatError {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this FormatError e) => png_package.Error⁔(e);
+}
+partial class pngᴛUnsupportedError {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this UnsupportedError e) => png_package.Error⁔(e);
+}
+partial class pngᴛdecoder {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error parseIHDR(this ref decoder d, uint32 length) => png_package.parseIHDR⁔(ref d, length);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error parsePLTE(this ref decoder d, uint32 length) => png_package.parsePLTE⁔(ref d, length);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error parsetRNS(this ref decoder d, uint32 length) => png_package.parsetRNS⁔(ref d, length);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint, error) Read(this ref decoder d, slice<byte> p) => png_package.Read⁔(ref d, p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (image.Image, error) decode(this ж<decoder> Ꮡd) => png_package.decode⁔(Ꮡd);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (image.Image, error) readImagePass(this ref decoder d, io.Reader r, nint pass, bool allocateOnly) => png_package.readImagePass⁔(ref d, r, pass, allocateOnly);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void mergePassInto(this ref decoder d, image.Image dst, image.Image src, nint pass) => png_package.mergePassInto⁔(ref d, dst, src, pass);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error /*err*/ parseIDAT(this ж<decoder> Ꮡd, uint32 length) => png_package.parseIDAT⁔(Ꮡd, length);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error parseIEND(this ref decoder d, uint32 length) => png_package.parseIEND⁔(ref d, length);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error parseChunk(this ж<decoder> Ꮡd, bool configOnly) => png_package.parseChunk⁔(Ꮡd, configOnly);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error verifyChecksum(this ref decoder d) => png_package.verifyChecksum⁔(ref d);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error checkHeader(this ref decoder d) => png_package.checkHeader⁔(ref d);
+}
+partial class pngᴛencoder {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void writeChunk(this ref encoder e, slice<byte> b, @string name) => png_package.writeChunk⁔(ref e, b, name);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void writeIHDR(this ref encoder e) => png_package.writeIHDR⁔(ref e);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void writePLTEAndTRNS(this ref encoder e, color.Palette p) => png_package.writePLTEAndTRNS⁔(ref e, p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint, error) Write(this ref encoder e, slice<byte> b) => png_package.Write⁔(ref e, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error writeImage(this ж<encoder> Ꮡe, io.Writer w, image.Image m, nint cb, nint level) => png_package.writeImage⁔(Ꮡe, w, m, cb, level);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void writeIDATs(this ж<encoder> Ꮡe) => png_package.writeIDATs⁔(Ꮡe);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void writeIEND(this ref encoder e) => png_package.writeIEND⁔(ref e);
+}
+// </MethodForwarders>

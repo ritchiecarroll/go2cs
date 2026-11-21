@@ -12,7 +12,6 @@ using errors = errors_package;
 using strconv = strconv_package;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140;
-using static ed25519_package;
 
 partial class ed25519_package {
 
@@ -31,40 +30,32 @@ partial struct PrivateKey {
     internal array<byte> prefix = new(sha512Size / 2);
 }
 
-} partial class ed25519ᴛPrivateKey {
-
-public static slice<byte> Bytes(this ref PrivateKey priv) {
+internal static slice<byte> Bytes⁔(/*this*/ ref PrivateKey priv) {
     var k = new slice<byte>(0, privateKeySize);
     k = appendꓸꓸꓸ(k, priv.seed[..]);
     k = appendꓸꓸꓸ(k, priv.pub[..]);
     return k;
 }
 
-public static slice<byte> Seed(this ref PrivateKey priv) {
+internal static slice<byte> Seed⁔(/*this*/ ref PrivateKey priv) {
     var seed = priv.seed.Clone();
     return seed[..];
 }
 
-public static slice<byte> PublicKey(this ref PrivateKey priv) {
+internal static slice<byte> PublicKey⁔(/*this*/ ref PrivateKey priv) {
     var pub = priv.pub.Clone();
     return pub[..];
 }
-
-} partial class ed25519_package {
 
 partial struct PublicKey {
     internal Δedwards25519.Point a;
     internal array<byte> aBytes = new(32);
 }
 
-} partial class ed25519ᴛPublicKey {
-
-public static slice<byte> Bytes(this ref PublicKey pub) {
+internal static slice<byte> Bytes⁔(/*this*/ ref PublicKey pub) {
     var a = pub.aBytes.Clone();
     return a[..];
 }
-
-} partial class ed25519_package {
 
 // GenerateKey generates a new Ed25519 private key pair.
 public static (ж<PrivateKey>, error) GenerateKey() {

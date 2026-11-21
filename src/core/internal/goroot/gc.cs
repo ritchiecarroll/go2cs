@@ -14,7 +14,6 @@ using go;
 using go.os;
 using io;
 using path;
-using static goroot_package;
 
 partial class goroot_package {
 
@@ -59,8 +58,6 @@ partial struct gccgoDirs {
 internal static readonly ж<gccgoDirs> ᏑgccgoSearch = new StaticBox<gccgoDirs>(default(gccgoDirs));
 internal static ref gccgoDirs gccgoSearch => ref ((StaticBox<gccgoDirs>)ᏑgccgoSearch).ValueSlot;
 
-} partial class gorootᴛgccgoDirs {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static ref readonly @string gccgoˢ => ref gccgoˢᵇ;
 private static readonly @string gccgoˢᵇ = "GCCGO"u8;
@@ -78,7 +75,7 @@ private static ref readonly @string prefixᶜ => ref prefixᶜᵇ;
 private static readonly @string prefixᶜᵇ = "libraries: ="u8;
 
 // init finds the gccgo search directories. If this fails it leaves dirs == nil.
-internal static void init(this ref gccgoDirs gd) {
+internal static void init⁔(/*this*/ ref gccgoDirs gd) {
     var lastDirsᴷ = new stackAppend<@string>();
 
     @string gccgo = os.Getenv(gccgoˢ);
@@ -140,7 +137,7 @@ internal static void init(this ref gccgoDirs gd) {
 }
 
 // isStandard reports whether path is a standard library for gccgo.
-internal static bool isStandard(this ж<gccgoDirs> Ꮡgd, @string path) {
+internal static bool isStandard⁔(/*this*/ ж<gccgoDirs> Ꮡgd, @string path) {
     ref var gd = ref Ꮡgd.DerefOrNull();
 
     // Quick check: if the first path component has a '.', it's not
@@ -176,4 +173,4 @@ internal static bool isStandard(this ж<gccgoDirs> Ꮡgd, @string path) {
     return false;
 }
 
-}
+} // end goroot_package

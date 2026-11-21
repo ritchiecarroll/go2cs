@@ -4,8 +4,6 @@
 // Multiplication.
 namespace go.math;
 
-using static big_package;
-
 partial class big_package {
 
 // Operands that are shorter than karatsubaThreshold are multiplied using
@@ -14,11 +12,9 @@ partial class big_package {
 internal static readonly ж<nint> ᏑkaratsubaThreshold = new StaticBox<nint>(40);
 internal static ref nint karatsubaThreshold => ref ((StaticBox<nint>)ᏑkaratsubaThreshold).ValueSlot; // see calibrate_test.go
 
-} partial class bigᴛnat {
-
 // mul sets z = x*y, using stk for temporary storage.
 // The caller may pass stk == nil to request that mul obtain and release one itself.
-internal static nat mul(this nat z, ж<stack> Ꮡstk, nat x, nat y) {
+internal static nat mul⁔(/*this*/ nat z, ж<stack> Ꮡstk, nat x, nat y) {
     GoFrame ᒐ = default;
     try {
         ref var stk = ref Ꮡstk.DerefOrNull();
@@ -76,8 +72,6 @@ internal static nat mul(this nat z, ж<stack> Ꮡstk, nat x, nat y) {
     finally { ᒐ.Run(); }
 }
 
-} partial class big_package {
-
 // Operands that are shorter than basicSqrThreshold are squared using
 // "grade school" multiplication; for operands longer than karatsubaSqrThreshold
 // we use the Karatsuba algorithm optimized for x == y.
@@ -86,11 +80,9 @@ internal static ref nint basicSqrThreshold => ref ((StaticBox<nint>)ᏑbasicSqrT
 internal static readonly ж<nint> ᏑkaratsubaSqrThreshold = new StaticBox<nint>(80);
 internal static ref nint karatsubaSqrThreshold => ref ((StaticBox<nint>)ᏑkaratsubaSqrThreshold).ValueSlot; // see calibrate_test.go
 
-} partial class bigᴛnat {
-
 // sqr sets z = x*x, using stk for temporary storage.
 // The caller may pass stk == nil to request that sqr obtain and release one itself.
-internal static nat sqr(this nat z, ж<stack> Ꮡstk, nat x) {
+internal static nat sqr⁔(/*this*/ nat z, ж<stack> Ꮡstk, nat x) {
     GoFrame ᒐ = default;
     try {
         ref var stk = ref Ꮡstk.DerefOrNull();
@@ -134,8 +126,6 @@ internal static nat sqr(this nat z, ж<stack> Ꮡstk, nat x) {
     finally { ᒐ.Run(); }
 }
 
-} partial class big_package {
-
 // basicSqr sets z = x*x and is asymptotically faster than basicMul
 // by about a factor of 2, but slower for small arguments due to overhead.
 // Requirements: len(x) > 0, len(z) == 2*len(x)
@@ -169,10 +159,8 @@ internal static void basicSqr(ж<stack> Ꮡstk, nat z, nat x) {
     finally { ᒐ.Run(); }
 }
 
-} partial class bigᴛnat {
-
 // mulAddWW returns z = x*y + r.
-internal static nat mulAddWW(this nat z, nat x, Word y, Word r) {
+internal static nat mulAddWW⁔(/*this*/ nat z, nat x, Word y, Word r) {
     nint m = len(x);
     if (m == 0 || y == 0) {
         return z.setWord(r); // result is r
@@ -184,8 +172,6 @@ internal static nat mulAddWW(this nat z, nat x, Word y, Word r) {
 
     return z.norm();
 }
-
-} partial class big_package {
 
 // basicMul multiplies x and y and leaves the result in z.
 // The (non-normalized) result is placed in z[0 : len(x) + len(y)].

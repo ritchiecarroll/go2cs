@@ -10,10 +10,14 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+using types = go.go.types_package;
 // </ImportedTypeAliases>
 
 using go;
 using static go.go.importer_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -57,10 +61,13 @@ using static go.go.importer_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("go/importer/importer.go", "importer.cs", "ACReABEClO6CgpTugqa4AAIS4gACFgAIAgALFoKmgoKUAA0WgqaCgpQ=", "", "", "68=GetImporter/1/1/2")]
+[assembly: GoPositionMap("go/importer/importer.go", "importer.cs", "ACNeABEClO6CgpTugqa4AAIS4gACFgAIAgAJFoKmgoKUAAkWgqaCgpQ=", "", "", "67=GetImporter/1/1/2")]
 // </GoSourcePositionMaps>
 
 namespace go.go;
+
+using static global::go.go.importer_package;
+using types = global::go.go.types_package;
 
 [GoPackage("importer")]
 public static partial class importer_package
@@ -101,6 +108,21 @@ public static partial class importer_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(importer_package.gccgoimports)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class importerᴛgccgoimports;
-[GoMethodHost(typeof(importer_package.gcimports)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class importerᴛgcimports;
+[GoMethodHost(typeof(importer_package.gccgoimports)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class importerᴛgccgoimports;
+[GoMethodHost(typeof(importer_package.gcimports)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class importerᴛgcimports;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class importerᴛgccgoimports {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (ж<types.Package>, error) Import(this ref gccgoimports m, @string path) => importer_package.Import⁔(ref m, path);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (ж<types.Package>, error) ImportFrom(this ref gccgoimports m, @string path, @string srcDir, types.ImportMode mode) => importer_package.ImportFrom⁔(ref m, path, srcDir, mode);
+}
+partial class importerᴛgcimports {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (ж<types.Package>, error) Import(this ref gcimports m, @string path) => importer_package.Import⁔(ref m, path);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (ж<types.Package>, error) ImportFrom(this ref gcimports m, @string path, @string srcDir, types.ImportMode mode) => importer_package.ImportFrom⁔(ref m, path, srcDir, mode);
+}
+// </MethodForwarders>

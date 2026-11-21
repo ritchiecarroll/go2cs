@@ -18,7 +18,6 @@ using strings = strings_package;
 using encoding;
 using go.crypto;
 using hash = hash_package;
-using static x509_package;
 
 partial class x509_package {
 
@@ -77,12 +76,10 @@ partial struct rfc1423Algo {
 ]); }
 internal static ref slice<rfc1423Algo> rfc1423Algos => ref ((StaticBox<slice<rfc1423Algo>>)Ꮡrfc1423Algos).ValueSlot;
 
-} partial class x509ᴛrfc1423Algo {
-
 // deriveKey uses a key derivation function to stretch the password into a key
 // with the number of bits our cipher requires. This algorithm was derived from
 // the OpenSSL source.
-internal static slice<byte> deriveKey(this rfc1423Algo c, slice<byte> password, slice<byte> salt) {
+internal static slice<byte> deriveKey⁔(/*this*/ rfc1423Algo c, slice<byte> password, slice<byte> salt) {
     var hash = md5.New();
     var @out = new slice<byte>(c.keySize);
     slice<byte> digest = default;
@@ -97,8 +94,6 @@ internal static slice<byte> deriveKey(this rfc1423Algo c, slice<byte> password, 
     }
     return @out;
 }
-
-} partial class x509_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string dekInfoˢ => ref dekInfoˢᵇ;

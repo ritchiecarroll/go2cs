@@ -12,7 +12,6 @@ using errors = errors_package;
 using hash = hash_package;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140deps;
-using static sha256_package;
 
 partial class sha256_package {
 
@@ -63,13 +62,11 @@ internal static ref readonly @string magic256 => ref magic256ᵇ;
 private static readonly @string magic256ᵇ = "sha\x03"u8;
 internal const nint marshaledSize = /* len(magic256) + 8*4 + chunk + 8 */ 108;
 
-} partial class sha256ᴛDigest {
-
-public static (slice<byte>, error) MarshalBinary(this ref Digest d) {
+internal static (slice<byte>, error) MarshalBinary⁔(/*this*/ ref Digest d) {
     return d.AppendBinary(new slice<byte>(0, marshaledSize));
 }
 
-public static (slice<byte>, error) AppendBinary(this ref Digest d, slice<byte> b) {
+internal static (slice<byte>, error) AppendBinary⁔(/*this*/ ref Digest d, slice<byte> b) {
     if (d.is224) {
         b = append(b, magic224.ꓸꓸꓸ);
     } else {
@@ -95,7 +92,7 @@ private static readonly @string cryptoSha256InvalidHashˢᵇ = "crypto/sha256: i
 private static ref readonly @string cryptoSha256InvalidHashˢ2 => ref cryptoSha256InvalidHashˢ2ᵇ;
 private static readonly @string cryptoSha256InvalidHashˢ2ᵇ = "crypto/sha256: invalid hash state size"u8;
 
-public static error UnmarshalBinary(this ref Digest d, slice<byte> b) {
+internal static error UnmarshalBinary⁔(/*this*/ ref Digest d, slice<byte> b) {
     if (len(b) < len(magic224) || (d.is224 && ((sstring)(b[..(int)(len(magic224))])) != magic224) || (!d.is224 && ((sstring)(b[..(int)(len(magic256))])) != magic256)) {
         return errors.New(cryptoSha256InvalidHashˢ);
     }
@@ -117,8 +114,6 @@ public static error UnmarshalBinary(this ref Digest d, slice<byte> b) {
     return default;
 }
 
-} partial class sha256_package {
-
 internal static (slice<byte>, uint64) consumeUint64(slice<byte> b) {
     return (b[8..], byteorder.BEUint64(b));
 }
@@ -127,14 +122,12 @@ internal static (slice<byte>, uint32) consumeUint32(slice<byte> b) {
     return (b[4..], byteorder.BEUint32(b));
 }
 
-} partial class sha256ᴛDigest {
-
-public static (hash.Cloner, error) Clone(this ref Digest d) {
+internal static (hash.Cloner, error) Clone⁔(/*this*/ ref Digest d) {
     ref var r = ref heap<Digest>(d.ΔClone(), out var Ꮡr);
     return (new DigestжCloner(Ꮡr), default);
 }
 
-public static void Reset(this ref Digest d) {
+internal static void Reset⁔(/*this*/ ref Digest d) {
     if (!d.is224) {
         d.h[0] = init0;
         d.h[1] = init1;
@@ -158,8 +151,6 @@ public static void Reset(this ref Digest d) {
     d.len = 0;
 }
 
-} partial class sha256_package {
-
 // New returns a new Digest computing the SHA-256 hash.
 public static ж<Digest> New() {
     var d = @new<Digest>();
@@ -175,18 +166,16 @@ public static ж<Digest> New224() {
     return d;
 }
 
-} partial class sha256ᴛDigest {
-
-public static nint Size(this ref Digest d) {
+internal static nint Size⁔(/*this*/ ref Digest d) {
     if (!d.is224) {
         return size;
     }
     return size224;
 }
 
-public static nint BlockSize(this ref Digest d) { return blockSize; }
+internal static nint BlockSize⁔(/*this*/ ref Digest d) { return blockSize; }
 
-public static (nint nn, error err) Write(this ж<Digest> Ꮡd, slice<byte> p) {
+internal static (nint nn, error err) Write⁔(/*this*/ ж<Digest> Ꮡd, slice<byte> p) {
     nint nn = default;
     error err = default;
     ref var d = ref Ꮡd.DerefOrNull();
@@ -218,7 +207,7 @@ public static (nint nn, error err) Write(this ж<Digest> Ꮡd, slice<byte> p) {
     return (nn, err);
 }
 
-public static slice<byte> Sum(this ref Digest d, slice<byte> @in) {
+internal static slice<byte> Sum⁔(/*this*/ ref Digest d, slice<byte> @in) {
     fips140.RecordApproved();
     // Make a copy of d so that caller can keep writing and summing.
     ref var d0 = ref heap<Digest>(d.ΔClone(), out var Ꮡd0);
@@ -229,7 +218,7 @@ public static slice<byte> Sum(this ref Digest d, slice<byte> @in) {
     return appendꓸꓸꓸ(@in, hash[..]);
 }
 
-internal static array<byte> checkSum(this ж<Digest> Ꮡd) {
+internal static array<byte> checkSum⁔(/*this*/ ж<Digest> Ꮡd) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     var len = d.len;
@@ -269,4 +258,4 @@ internal static array<byte> checkSum(this ж<Digest> Ꮡd) {
     return digest.Clone();
 }
 
-}
+} // end sha256_package

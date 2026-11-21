@@ -3,8 +3,6 @@
 // license that can be found in the LICENSE file.
 namespace go.@internal;
 
-using static fuzz_package;
-
 partial class fuzz_package {
 
 // queue holds a growable sequence of inputs for fuzzing and minimization.
@@ -23,13 +21,11 @@ partial struct queue {
     internal nint head, len;
 }
 
-} partial class fuzzᴛqueue {
-
-internal static nint cap(this ref queue q) {
+internal static nint cap⁔(/*this*/ ref queue q) {
     return len(q.elems);
 }
 
-internal static void grow(this ref queue q) {
+internal static void grow⁔(/*this*/ ref queue q) {
     nint oldCap = q.cap();
     nint newCap = oldCap * 2;
     if (newCap == 0) {
@@ -44,7 +40,7 @@ internal static void grow(this ref queue q) {
     q.head = 0;
 }
 
-internal static void enqueue(this ref queue q, any e) {
+internal static void enqueue⁔(/*this*/ ref queue q, any e) {
     if (q.len + 1 > q.cap()) {
         q.grow();
     }
@@ -53,7 +49,7 @@ internal static void enqueue(this ref queue q, any e) {
     q.len++;
 }
 
-internal static (any, bool) dequeue(this ref queue q) {
+internal static (any, bool) dequeue⁔(/*this*/ ref queue q) {
     if (q.len == 0) {
         return (default, false);
     }
@@ -64,15 +60,15 @@ internal static (any, bool) dequeue(this ref queue q) {
     return (e, true);
 }
 
-internal static (any, bool) peek(this ref queue q) {
+internal static (any, bool) peek⁔(/*this*/ ref queue q) {
     if (q.len == 0) {
         return (default, false);
     }
     return (q.elems[q.head], true);
 }
 
-internal static void clear(this ref queue q) {
+internal static void clear⁔(/*this*/ ref queue q) {
     q = new queue();
 }
 
-}
+} // end fuzz_package

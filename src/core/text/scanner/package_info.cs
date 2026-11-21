@@ -10,10 +10,14 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+using io = go.io_package;
 // </ImportedTypeAliases>
 
 using go;
 using static go.text.scanner_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -59,10 +63,14 @@ using static go.text.scanner_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("text/scanner/scanner.go", "scanner.cs", "ACdIgNSCgoKUgpQAKVgAChiSgpQAP5YB0riCgqaCgoKCuKamgoKCgpQACA7ipJSmgoK4gtyCgoKCgoKClIKUlILcuIKUgpSCgoKC3IKCpqa0goK2AAISAAgCgoKCgpSs0pSCgqamooKCgoKUgoKUpqKmgoKUprSCgpTGgoIAAxAACgKCgoKCgoKCgpSCpoKCgpSCpgAKBqKCgoKWkoKCgoKClIK0grSCtIK2goKCgsqCgoKUgqaCuIKUtKSCgoKUgoKClIKmgqaCgoK4AA4GgpSkpKS6koKCpoKCgoLKgoKClILGtIKUtoKmpoKUpJQACAaCgoKUgpSmgoKmtLS0tLSk5qKCgoKClIKUlJSmgoKCgoKU+IKC+JSUgoKUuIKCgoKUgoKCgqYAAhDypoKUhJLYgriClILKgriClIKClMaClMaUtIKClLSCgpS0goLGgoKCgoKUgsaCgpS06pSCruKCgqaCxoLGgqSqwpSmlLiUyoKC")]
+[assembly: GoPositionMap("text/scanner/scanner.go", "scanner.cs", "ACRIgNSCgoKUgpQAJ1gAChiSgpQAPZYB0riCgqaCgoKCuKamgoKCgpQACA7ipJSmgoK4gtyCgoKCgoKClIKUlILcuIKUgpSCgoKC3IKCpqa0goK2AAISAAgCgoKCgpSs0pSCgqamooKCgoKUgoKUpqKmgoKUprSCgpSmgoIAARAACgKCgoKCgoKCgpSCpoKCgpSCpgAKBqKCgoKWkoKCgoKClIK0grSCtIK2goKCgsqCgoKUgqaCuIKUtKSCgoKUgoKClIKmgqaCgoK4AAwGgpSkpKS6koKCpoKCgoLKgoKClILGtIKUtoKmpoKUpJTmgoKClIKUpoKCprS0tLS0pOaigoKCgpSClJSUpoKCgoKClPiCgviUlIKClLiCgoKClIKCgoKmAAIQ8qaClISS2IK4gpSCyoK4gpSCgpTGgpTGlLSCgpS0goKUtIKCxoKCgoKClILGgoKUtOqUgq7igoKmgsaCxoKkqsKUppS4lMqCgg==")]
 // </GoSourcePositionMaps>
 
 namespace go.text;
+
+using static go.text.scanner_package;
+using io = go.io_package;
+using ꓸꓸꓸany = Span<any>;
 
 [GoPackage("scanner")]
 public static partial class scanner_package
@@ -101,6 +109,38 @@ public static partial class scanner_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(scanner_package.Position)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class scannerᴛPosition;
-[GoMethodHost(typeof(scanner_package.Scanner)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class scannerᴛScanner;
+[GoMethodHost(typeof(scanner_package.Position)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class scannerᴛPosition;
+[GoMethodHost(typeof(scanner_package.Scanner)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class scannerᴛScanner;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class scannerᴛPosition {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool IsValid(this ref Position pos) => scanner_package.IsValid⁔(ref pos);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this Position pos) => scanner_package.String⁔(pos);
+}
+partial class scannerᴛScanner {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Scanner> Init(this ж<Scanner> Ꮡs, io.Reader src) => scanner_package.Init⁔(Ꮡs, src);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static rune next(this ж<Scanner> Ꮡs) => scanner_package.next⁔(Ꮡs);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static rune Next(this ж<Scanner> Ꮡs) => scanner_package.Next⁔(Ꮡs);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static rune Peek(this ж<Scanner> Ꮡs) => scanner_package.Peek⁔(Ꮡs);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void error(this ж<Scanner> Ꮡs, @string msg) => scanner_package.error⁔(Ꮡs, msg);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void errorf(this ж<Scanner> Ꮡs, @string format, params ꓸꓸꓸany argsʗp) => scanner_package.errorf⁔(Ꮡs, format, argsʗp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool isIdentRune(this ref Scanner s, rune ch, nint i) => scanner_package.isIdentRune⁔(ref s, ch, i);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static rune scanIdentifier(this ж<Scanner> Ꮡs) => scanner_package.scanIdentifier⁔(Ꮡs);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (rune ch, nint digsep) digits(this ж<Scanner> Ꮡs, rune ch0, nint @base, ж<rune> Ꮡinvalid) => scanner_package.digits⁔(Ꮡs, ch0, @base, Ꮡinvalid);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (rune, rune) scanNumber(this ж<Scanner> Ꮡs, rune ch, bool seenDot) => scanner_package.scanNumber⁔(Ꮡs, ch, seenDot);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static rune scanDigits(this ж<Scanner> Ꮡs, rune ch, nint @base, nint n) => scanner_package.scanDigits⁔(Ꮡs, ch, @base, n);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static rune scanEscape(this ж<Scanner> Ꮡs, rune quote) => scanner_package.scanEscape⁔(Ꮡs, quote);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint /*n*/ scanString(this ж<Scanner> Ꮡs, rune quote) => scanner_package.scanString⁔(Ꮡs, quote);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void scanRawString(this ж<Scanner> Ꮡs) => scanner_package.scanRawString⁔(Ꮡs);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void scanChar(this ж<Scanner> Ꮡs) => scanner_package.scanChar⁔(Ꮡs);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static rune scanComment(this ж<Scanner> Ꮡs, rune ch) => scanner_package.scanComment⁔(Ꮡs, ch);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static rune Scan(this ж<Scanner> Ꮡs) => scanner_package.Scan⁔(Ꮡs);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static Position /*pos*/ Pos(this ref Scanner s) => scanner_package.Pos⁔(ref s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string TokenText(this ж<Scanner> Ꮡs) => scanner_package.TokenText⁔(Ꮡs);
+}
+// </MethodForwarders>

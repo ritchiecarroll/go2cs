@@ -14,6 +14,9 @@
 
 using go;
 using static go.go.constant_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -67,11 +70,13 @@ using static go.go.constant_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("go/constant/kind_string.go", "kind_string.cs", "AAgOhqKCgoKCgtq0goKU")]
-[assembly: GoPositionMap("go/constant/value.go", "value.cs", "AHbOAbKysrKysrL0sraSgoK4goKClJQAAhDygoKCgpSClMiSgoKUAAQS4oKCgoKUgoKUgpSCgpTGsrK2kqaCyoKCppSuwriCpoKm2oK0grbGtLKysrK0goKClMa0gsaysrKysrKytIKClIKCgoKCgpSigpSmgoKClKamlLSClILKpoKClKaCgpTKlIK4lAAGEsKqooKUgqrCgpSCrrCWgJaSgpTcgJaSgpSssoKUgpQAAhDSgqaUgIKkgILYgILYgIKC6oCCguqAgti2AAIWAAgClKS0zKKUpLTOspSkpLTOspSkpLTKkpSCpIKkpIKktAAEEtKUgqSCpKSCpLQABB4ACwKUpKSkpKS0AAMeAAsClLSkpKSktL6ylIKClKSktM6ylJSklKSkpKSktAAMIKKClLTEtoKUgqKCgoK4gqaqopSCgoKCgoKCgoK4goKmgqauwrSkpIKCxsSkrLK0pKSCgsbEpKyylNSkzKLkpLTMopTkpLQABBLStKaC/oKCgIL+goKmgoKAgsiCgoCC6oLIqqKUpIKUxKSCtqqi1KSUrsKCqJKCrsKU5MiUpIKUpKSkpIKCyIKUpLTE2oKUppSkyIKmgriktKSkpKSkAAMQwrS0pKrYlJTGlKTGlKSkxtTsAAIYAAkClJSmgpSkyIKCgpSClLSClLSClLSktLS0tLS0pKaCgoKUtLS0pLS0tLS0tKSmgoKClLS0tLSkpoKCgpS0tLS0pKaCgoKSpoLGgsaCgoKCgsaCgoKCgoKCgoKCtKSmgsiCpoKCgpqylKaClJSCpMiClIKUpMimgpSkpKSkpJSuwpSUpoKUpMiClKSkpKSkyKampoKCgpSkyIKClKSkpKSkyA==")]
+[assembly: GoPositionMap("go/constant/kind_string.go", "kind_string.cs", "/oaigoKCgoLalIKClA==")]
+[assembly: GoPositionMap("go/constant/value.go", "value.cs", "AHLOAYKCgoKCgoLUgpaSgoK4goKClJQAAhDygoKCgpSClKiSgoKUAAIS4oKCgoKUgoKUgpSCgpSmgoKWkqaCyoKCppSuwriCpoKm2oK0gramlIKCgoKUgoKClKaUgqaCgoKCgoKClIKClIKCgoKCgpSigpSmgoKClKamlLSClILKpoKClKaCgpTKlIK4lAAGEsKqooKUgqrCgpSCrrCWgJaSgpTcgJaSgpSssoKUgpQAAhDSgqaUgIKkgILYgILYgIKC6oCCguqAgti2AAIWAAgClKS0zKKUpLTOspSkpLTOspSkpLTKkpSCpIKkpIKktAAEEtKUgqSCpKSCpLQABB4ACwKUpKSkpKS0AAMeAAsClLSkpKSktL6ylIKClKSktM6ylJSklKSkpKSktAAMIKKClLTEtoKUgqKCgoK4gqaqopSCgoKCgoKCgoK4goKmgqauwrSkpIKCxsSkrLK0pKSCgsbEpKyylNSkzKLkpLTMopTkpLQABBLStKaC/oKCgIL+goKmgoKAgsiCgoCC6oLIqqKUpIKUxKSCtqqi1KSUrsKCqJKCrsKU5MiUpIKUpKSkpIKCyIKUpLTE2oKUppSkyIKmgriktKSkpKSkAAMQwrS0pKrYlJTGlKTGlKSkxtTsAAIYAAkClJSmgpSkyIKCgpSClLSClLSClLSktLS0tLS0pKaCgoKUtLS0pLS0tLS0tKSmgoKClLS0tLSkpoKCgpS0tLS0pKaCgoKSpoLGgsaCgoKCgsaCgoKCgoKCgoKCtKSmgsiCpoKCgpqylKaClJSCpMiClIKUpMimgpSkpKSkpJSuwpSUpoKUpMiClKSkpKSkyKampoKCgpSkyIKClKSkpKSkyA==")]
 // </GoSourcePositionMaps>
 
 namespace go.go;
+
+using static global::go.go.constant_package;
 
 [GoPackage("constant")]
 public static partial class constant_package
@@ -121,13 +126,73 @@ public static partial class constant_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(constant_package.Kind)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class constantᴛKind;
-[GoMethodHost(typeof(constant_package.boolVal)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class constantᴛboolVal;
-[GoMethodHost(typeof(constant_package.complexVal)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class constantᴛcomplexVal;
-[GoMethodHost(typeof(constant_package.floatVal)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class constantᴛfloatVal;
-[GoMethodHost(typeof(constant_package.int64Val)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class constantᴛint64Val;
-[GoMethodHost(typeof(constant_package.intVal)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class constantᴛintVal;
-[GoMethodHost(typeof(constant_package.ratVal)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class constantᴛratVal;
-[GoMethodHost(typeof(constant_package.stringVal)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class constantᴛstringVal;
-[GoMethodHost(typeof(constant_package.unknownVal)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class constantᴛunknownVal;
+[GoMethodHost(typeof(constant_package.Kind)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class constantᴛKind;
+[GoMethodHost(typeof(constant_package.boolVal)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class constantᴛboolVal;
+[GoMethodHost(typeof(constant_package.complexVal)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class constantᴛcomplexVal;
+[GoMethodHost(typeof(constant_package.floatVal)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class constantᴛfloatVal;
+[GoMethodHost(typeof(constant_package.int64Val)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class constantᴛint64Val;
+[GoMethodHost(typeof(constant_package.intVal)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class constantᴛintVal;
+[GoMethodHost(typeof(constant_package.ratVal)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class constantᴛratVal;
+[GoMethodHost(typeof(constant_package.stringVal)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class constantᴛstringVal;
+[GoMethodHost(typeof(constant_package.unknownVal)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class constantᴛunknownVal;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class constantᴛKind {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this Kind i) => constant_package.String⁔(i);
+}
+partial class constantᴛboolVal {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static Kind Kind(this boolVal _) => constant_package.Kind⁔(_);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string String(this boolVal x) => constant_package.String⁔(x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string ExactString(this boolVal x) => constant_package.ExactString⁔(x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void implementsValue(this boolVal _) => constant_package.implementsValue⁔(_);
+}
+partial class constantᴛcomplexVal {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static Kind Kind(this complexVal _) => constant_package.Kind⁔(_);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string String(this complexVal x) => constant_package.String⁔(x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string ExactString(this complexVal x) => constant_package.ExactString⁔(x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void implementsValue(this complexVal _) => constant_package.implementsValue⁔(_);
+}
+partial class constantᴛfloatVal {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static Kind Kind(this floatVal _) => constant_package.Kind⁔(_);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string String(this floatVal x) => constant_package.String⁔(x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string ExactString(this floatVal x) => constant_package.ExactString⁔(x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void implementsValue(this floatVal _) => constant_package.implementsValue⁔(_);
+}
+partial class constantᴛint64Val {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static Kind Kind(this int64Val _) => constant_package.Kind⁔(_);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string String(this int64Val x) => constant_package.String⁔(x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string ExactString(this int64Val x) => constant_package.ExactString⁔(x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void implementsValue(this int64Val _) => constant_package.implementsValue⁔(_);
+}
+partial class constantᴛintVal {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static Kind Kind(this intVal _) => constant_package.Kind⁔(_);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string String(this intVal x) => constant_package.String⁔(x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string ExactString(this intVal x) => constant_package.ExactString⁔(x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void implementsValue(this intVal _) => constant_package.implementsValue⁔(_);
+}
+partial class constantᴛratVal {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static Kind Kind(this ratVal _) => constant_package.Kind⁔(_);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string String(this ratVal x) => constant_package.String⁔(x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string ExactString(this ratVal x) => constant_package.ExactString⁔(x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void implementsValue(this ratVal _) => constant_package.implementsValue⁔(_);
+}
+partial class constantᴛstringVal {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static Kind Kind(this ref stringVal _) => constant_package.Kind⁔(ref _);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string String(this ж<stringVal> Ꮡx) => constant_package.String⁔(Ꮡx);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string @string(this ж<stringVal> Ꮡx) => constant_package.string⁔(Ꮡx);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<@string> appendReverse(this ж<stringVal> Ꮡx, slice<@string> list) => constant_package.appendReverse⁔(Ꮡx, list);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string ExactString(this ж<stringVal> Ꮡx) => constant_package.ExactString⁔(Ꮡx);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void implementsValue(this ref stringVal _) => constant_package.implementsValue⁔(ref _);
+}
+partial class constantᴛunknownVal {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static Kind Kind(this unknownVal _) => constant_package.Kind⁔(_);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string String(this unknownVal _) => constant_package.String⁔(_);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string ExactString(this unknownVal x) => constant_package.ExactString⁔(x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void implementsValue(this unknownVal _) => constant_package.implementsValue⁔(_);
+}
+// </MethodForwarders>

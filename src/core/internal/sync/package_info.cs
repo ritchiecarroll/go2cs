@@ -14,6 +14,9 @@
 
 using go;
 using static go.@internal.sync_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -61,11 +64,13 @@ using static go.@internal.sync_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/sync/mutex.go", "mutex.cs", "ADx65IKClKas0oKC3IKmgpTmooKCgoKCpriElIKCgpSUgpSC3IKUpoKUlIKCpoKClIKCgsqClILclIKUgpS4gr7SgoK4gqb4ooKUgoLugqaCgoKUAAcQ", "", "", "121=CompareAndSwapInt32/1/1/1")]
+[assembly: GoPositionMap("internal/sync/mutex.go", "mutex.cs", "ADl65IKClKas0oKC3IKmgpTmooKCgoKCpriElIKCgpSUgpSC3IKUpoKUlIKCpoKClIKCgsqClILclIKUgpS4gr7SgoK4gqb4ooKUgoLugqaCgoKUAAcQ", "", "", "118=CompareAndSwapInt32/1/1/1")]
 [assembly: GoPositionMap("internal/sync/runtime.go", "runtime.cs", "AAkqAA0WAAoM2sampg==")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;
+
+using static go.@internal.sync_package;
 
 [GoPackage("sync")]
 public static partial class sync_package
@@ -100,6 +105,20 @@ public static partial class sync_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(sync_package.HashTrieMap<,>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syncᴛHashTrieMap;
-[GoMethodHost(typeof(sync_package.Mutex)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syncᴛMutex;
+[GoMethodHost(typeof(sync_package.HashTrieMap<,>)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syncᴛHashTrieMap;
+[GoMethodHost(typeof(sync_package.Mutex)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syncᴛMutex;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class syncᴛMutex {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Lock(this ж<Mutex> Ꮡm) => sync_package.Lock⁔(Ꮡm);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool TryLock(this ж<Mutex> Ꮡm) => sync_package.TryLock⁔(Ꮡm);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void lockSlow(this ж<Mutex> Ꮡm) => sync_package.lockSlow⁔(Ꮡm);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Unlock(this ж<Mutex> Ꮡm) => sync_package.Unlock⁔(Ꮡm);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void unlockSlow(this ж<Mutex> Ꮡm, int32 @new) => sync_package.unlockSlow⁔(Ꮡm, @new);
+}
+// </MethodForwarders>

@@ -15,7 +15,6 @@ using sys = @internal.runtime.sys_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
-using static runtime_package;
 
 partial class runtime_package {
 
@@ -95,8 +94,6 @@ public static void SetCPUProfileRate(nint hz) {
     unlock(Ꮡcpuprof.Ꮡlock);
 }
 
-} partial class runtimeᴛcpuProfile {
-
 // add adds the stack trace to the profile.
 // It is called from signal handlers and other limited environments
 // and cannot allocate memory or acquire locks that might be
@@ -104,7 +101,7 @@ public static void SetCPUProfileRate(nint hz) {
 // of stack.
 //
 //go:nowritebarrierrec
-internal static void add(this ref cpuProfile p, ж<@unsafe.Pointer> tagPtr, slice<uintptr> stk) {
+internal static void add⁔(/*this*/ ref cpuProfile p, ж<@unsafe.Pointer> tagPtr, slice<uintptr> stk) {
     // Simple cas-lock to coordinate with setcpuprofilerate.
     while (!Ꮡprof.of(profᴛ1.ᏑsignalLock).CompareAndSwap(0, 1)) {
         // TODO: Is it safe to osyield here? https://go.dev/issue/52672
@@ -136,7 +133,7 @@ internal static void add(this ref cpuProfile p, ж<@unsafe.Pointer> tagPtr, slic
 //
 //go:nosplit
 //go:nowritebarrierrec
-internal static void addNonGo(this ref cpuProfile p, slice<uintptr> stk) {
+internal static void addNonGo⁔(/*this*/ ref cpuProfile p, slice<uintptr> stk) {
     // Simple cas-lock to coordinate with SetCPUProfileRate.
     // (Other calls to add or addNonGo should be blocked out
     // by the fact that only one SIGPROF can be handled by the
@@ -165,7 +162,7 @@ internal static void addNonGo(this ref cpuProfile p, slice<uintptr> stk) {
 // addExtra is called either from a signal handler on a Go thread
 // or from an ordinary goroutine; either way it can use stack
 // and has a g. The world may be stopped, though.
-internal static void addExtra(this ref cpuProfile p) {
+internal static void addExtra⁔(/*this*/ ref cpuProfile p) {
     // Copy accumulated non-Go profile events.
     var hdr = array<uint64>([1]);
     for (nint i = 0; i < p.numExtra; ) {
@@ -195,8 +192,6 @@ internal static void addExtra(this ref cpuProfile p) {
         p.lostAtomic = 0;
     }
 }
-
-} partial class runtime_package {
 
 // CPUProfile panics.
 // It formerly provided raw access to chunks of

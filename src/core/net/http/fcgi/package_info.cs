@@ -10,10 +10,15 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+using http = go.net.http_package;
+using io = go.io_package;
 // </ImportedTypeAliases>
 
 using go;
 using static go.net.http.fcgi_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -69,11 +74,15 @@ using static go.net.http.fcgi_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("net/http/fcgi/child.go", "child.cs", "ACZKgsqCyJKCgoKCgpSCgoKUgoKUgoKCggAPHKIACA6CpoKClIKUAAwGgoKUgoKUgoKUggADEMKClIKCgpSCgqaCgpSmgoIAChSCAAgOwoKCgoKAgqSAggAKCpS4uPSygpSmlKamgoKUgoKUgoLIgoKUgqSCgoKmpJSUppSCgqakgoK2pIKCgpSUlKSCgoLcooKCgqbGsoKClIKUgoKCgqaCggAIEoKUgriCgqYABhTygoKCgpSUgpSCgoKUggAHEvKC6rSalILclKY=", "", "", "92=newWriter/1/1/3;181=newConn/1/1/1", "195:21,409:25")]
-[assembly: GoPositionMap("net/http/fcgi/fcgi.go", "fcgi.cs", "AE2eAYKClIKCAAoOgoKCgoIADx6CyOKCgoKClAASELKClIKUgoKUpoLI4oKCgoKClIKUgpSC1oKCgoKmgoKCgoKCgIKkgIKkgIK2gsaCgpSSgoKUgoKUpoKClKaCgoKClIIACxSCgoKUxoKCggAMFoKCgoKClIKUgpSmlA==")]
+[assembly: GoPositionMap("net/http/fcgi/child.go", "child.cs", "ACVKgsqCqJKCgoKCgpSCgoKUgoKUgoKCggANHKLugqaCgpSClAAMBoKClIKClIKClIIAAxDCgpSCgoKUgoKmgoKUpoKCAAgUgu7CgoKCgoCCpICCAAgKlLi41LKClKaUpqaCgpSCgpSCgsiCgpSCpIKCgqaklJSmlIKCpqSCgrakgoKClJSUpIKCgryigoKCpqaygoKUgpSCgoKCpoKCAAgSgpSCuIKCpgAEFPKCgoKClJSClIKCgpSCAAcS8oLqtJqUgtyUpg==", "", "", "87=newWriter/1/1/3;172=newConn/1/1/1", "184:21,388:25")]
+[assembly: GoPositionMap("net/http/fcgi/fcgi.go", "fcgi.cs", "AEqeAYKClIKC7oKCgoKCAA0egqjigoKCgpQADhCygpSClIKClKaCqOKCgoKCgpSClIKUgtaCgoKCpoKCgoKCgoCCpICCpICCtoKmgoKUkoKClIKClKaCgpSmgoKCgpSCAAkUgoKClKaCgoIAChaCgoKCgpSClIKUppQ=")]
 // </GoSourcePositionMaps>
 
 namespace go.net.http;
+
+using static go.net.http.fcgi_package;
+using http = go.net.http_package;
+using io = go.io_package;
 
 [GoPackage("fcgi")]
 public static partial class fcgi_package
@@ -129,13 +138,60 @@ public static partial class fcgi_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(fcgi_package.beginRequest)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fcgiᴛbeginRequest;
-[GoMethodHost(typeof(fcgi_package.bufWriter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fcgiᴛbufWriter;
-[GoMethodHost(typeof(fcgi_package.child)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fcgiᴛchild;
-[GoMethodHost(typeof(fcgi_package.conn)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fcgiᴛconn;
-[GoMethodHost(typeof(fcgi_package.header)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fcgiᴛheader;
-[GoMethodHost(typeof(fcgi_package.record)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fcgiᴛrecord;
-[GoMethodHost(typeof(fcgi_package.request)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fcgiᴛrequest;
-[GoMethodHost(typeof(fcgi_package.response)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fcgiᴛresponse;
-[GoMethodHost(typeof(fcgi_package.streamWriter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fcgiᴛstreamWriter;
+[GoMethodHost(typeof(fcgi_package.beginRequest)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class fcgiᴛbeginRequest;
+[GoMethodHost(typeof(fcgi_package.bufWriter)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class fcgiᴛbufWriter;
+[GoMethodHost(typeof(fcgi_package.child)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class fcgiᴛchild;
+[GoMethodHost(typeof(fcgi_package.conn)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class fcgiᴛconn;
+[GoMethodHost(typeof(fcgi_package.header)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class fcgiᴛheader;
+[GoMethodHost(typeof(fcgi_package.record)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class fcgiᴛrecord;
+[GoMethodHost(typeof(fcgi_package.request)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class fcgiᴛrequest;
+[GoMethodHost(typeof(fcgi_package.response)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class fcgiᴛresponse;
+[GoMethodHost(typeof(fcgi_package.streamWriter)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class fcgiᴛstreamWriter;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class fcgiᴛbeginRequest {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error read(this ref beginRequest br, slice<byte> content) => fcgi_package.read⁔(ref br, content);
+}
+partial class fcgiᴛbufWriter {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error Close(this ref bufWriter w) => fcgi_package.Close⁔(ref w);
+}
+partial class fcgiᴛchild {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void serve(this ж<child> Ꮡc) => fcgi_package.serve⁔(Ꮡc);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error handleRecord(this ж<child> Ꮡc, ж<record> Ꮡrec) => fcgi_package.handleRecord⁔(Ꮡc, Ꮡrec);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void serveRequest(this ж<child> Ꮡc, ж<request> Ꮡreq, io.ReadCloser body) => fcgi_package.serveRequest⁔(Ꮡc, Ꮡreq, body);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void cleanUp(this ref child c) => fcgi_package.cleanUp⁔(ref c);
+}
+partial class fcgiᴛconn {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error Close(this ж<conn> Ꮡc) => fcgi_package.Close⁔(Ꮡc);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error writeRecord(this ж<conn> Ꮡc, recType recType, uint16 reqId, slice<byte> b) => fcgi_package.writeRecord⁔(Ꮡc, recType, reqId, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error writeEndRequest(this ж<conn> Ꮡc, uint16 reqId, nint appStatus, uint8 protocolStatus) => fcgi_package.writeEndRequest⁔(Ꮡc, reqId, appStatus, protocolStatus);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error writePairs(this ж<conn> Ꮡc, recType recType, uint16 reqId, map<@string, @string> pairs) => fcgi_package.writePairs⁔(Ꮡc, recType, reqId, pairs);
+}
+partial class fcgiᴛheader {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void init(this ref header h, recType recType, uint16 reqId, nint contentLength) => fcgi_package.init⁔(ref h, recType, reqId, contentLength);
+}
+partial class fcgiᴛrecord {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error /*err*/ read(this ж<record> Ꮡrec, io.Reader r) => fcgi_package.read⁔(Ꮡrec, r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<byte> content(this ref record r) => fcgi_package.content⁔(ref r);
+}
+partial class fcgiᴛrequest {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void parseParams(this ref request r) => fcgi_package.parseParams⁔(ref r);
+}
+partial class fcgiᴛresponse {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static http.Header Header(this ref response r) => fcgi_package.Header⁔(ref r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) Write(this ref response r, slice<byte> p) => fcgi_package.Write⁔(ref r, p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void WriteHeader(this ref response r, nint code) => fcgi_package.WriteHeader⁔(ref r, code);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void writeCGIHeader(this ref response r, slice<byte> p) => fcgi_package.writeCGIHeader⁔(ref r, p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void Flush(this ref response r) => fcgi_package.Flush⁔(ref r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error Close(this ref response r) => fcgi_package.Close⁔(ref r);
+}
+partial class fcgiᴛstreamWriter {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint, error) Write(this ref streamWriter w, slice<byte> p) => fcgi_package.Write⁔(ref w, p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error Close(this ref streamWriter w) => fcgi_package.Close⁔(ref w);
+}
+// </MethodForwarders>

@@ -5,7 +5,6 @@ namespace go.@internal.runtime.gc.@internal;
 
 using sync = go.sync_package;
 using go;
-using static gen_package;
 
 partial class gen_package {
 
@@ -43,11 +42,7 @@ partial struct @void {
 
 internal static ж<kind> voidKind = Ꮡ(new kind(typ: "void", reg: regClassNone));
 
-} partial class genᴛvoid {
-
-internal static ж<kind> kind(this @void _) { return voidKind; }
-
-} partial class gen_package {
+internal static ж<kind> kind⁔(/*this*/ @void _) { return voidKind; }
 
 partial struct Ptr<T>
     where T : Value
@@ -61,9 +56,7 @@ internal static Word _ᴛ1ʗ = new Ptr<@void>();
 internal static readonly ж<sync.Map> ᏑptrKinds = new StaticBox<sync.Map>(new sync.Map());
 internal static ref sync.Map ptrKinds => ref ((StaticBox<sync.Map>)ᏑptrKinds).ValueSlot; // *kind -> *kind
 
-} partial class genᴛPtr {
-
-internal static ж<kind> kind<T>(this Ptr<T> _Δp0)
+internal static ж<kind> kind⁔<T>(/*this*/ Ptr<T> _Δp0)
     where T : Value
 {
     T x = GoZero<T>();
@@ -76,7 +69,7 @@ internal static ж<kind> kind<T>(this Ptr<T> _Δp0)
     return pk._<ж<kind>>();
 }
 
-internal static Ptr<T> wrap<T>(this Ptr<T> _, ж<op> x)
+internal static Ptr<T> wrap⁔<T>(/*this*/ Ptr<T> _, ж<op> x)
     where T : Value
 {
     Ptr<T> y = new(nil);
@@ -84,7 +77,7 @@ internal static Ptr<T> wrap<T>(this Ptr<T> _, ж<op> x)
     return y;
 }
 
-public static Ptr<T> /*y*/ AddConst<T>(this Ptr<T> x, nint off)
+internal static Ptr<T> /*y*/ AddConst⁔<T>(/*this*/ Ptr<T> x, nint off)
     where T : Value
 {
     Ptr<T> y = new(nil);
@@ -97,8 +90,6 @@ public static Ptr<T> /*y*/ AddConst<T>(this Ptr<T> x, nint off)
     y.valGP.valAny.initOp(Ꮡ(new op(Δop: "addConst", kind: y.kind(), args: slice<ж<op>>([@base, imm(off)]))));
     return y;
 }
-
-} partial class gen_package {
 
 public static T Deref<W, T>(Ptr<W> ptr)
     where W : wrap<T>
@@ -132,9 +123,7 @@ public static Array<T> /*y*/ ConstArray<T>(slice<T> vals, @string name)
     return y;
 }
 
-} partial class genᴛArray {
-
-internal static ж<kind> kind<T>(this Array<T> _)
+internal static ж<kind> kind⁔<T>(/*this*/ Array<T> _)
     where T : Value
 {
     // TODO: Cache this like Ptr.kind.
@@ -142,25 +131,17 @@ internal static ж<kind> kind<T>(this Array<T> _)
     return Ꮡ(new kind(typ: "Array["u8 + x.kind().typ + "]"u8, reg: regClassNone));
 }
 
-} partial class gen_package {
-
 partial struct valGP {
     /*embed*/ internal valAny valAny;
 }
 
-} partial class genᴛvalGP {
-
-internal static void isWord(this valGP _) { }
-
-} partial class gen_package {
+internal static void isWord⁔(/*this*/ valGP _) { }
 
 partial struct valAny {
     /*embed*/ internal ж<op> op;
 }
 
-} partial class genᴛvalAny {
-
-internal static void initOp(this ref valAny v, ж<op> Ꮡx) {
+internal static void initOp⁔(/*this*/ ref valAny v, ж<op> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     if (v.op != nil) {
@@ -180,8 +161,8 @@ internal static void initOp(this ref valAny v, ж<op> Ꮡx) {
     }
 }
 
-internal static ж<op> getOp(this valAny v) {
+internal static ж<op> getOp⁔(/*this*/ valAny v) {
     return v.op;
 }
 
-}
+} // end gen_package

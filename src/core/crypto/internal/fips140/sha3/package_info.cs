@@ -14,6 +14,9 @@
 
 using go;
 using static go.crypto.@internal.fips140.sha3_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -63,12 +66,14 @@ using static go.crypto.@internal.fips140.sha3_package;
 [assembly: GoPositionMap("crypto/internal/fips140/sha3/cast.go", "cast.cs", "AAwagoK43IKCgpQ=", "14-31:1")]
 [assembly: GoPositionMap("crypto/internal/fips140/sha3/hashes.go", "hashes.cs", "AAcQkqiSqJKokgAPKKKqog==")]
 [assembly: GoPositionMap("crypto/internal/fips140/sha3/keccakf.go", "keccakf.cs", "AA8e")]
-[assembly: GoPositionMap("crypto/internal/fips140/sha3/sha3.go", "sha3.cs", "ADZwgJaAlqSCgqaCgqiygqoACAq4lIKogILCgqaUgoKCpoK4qOSCpqaUgqaCgqaqooKUlKaCgsqCgoIAERiCpoKUtLS0tLaCgoIACgaCgqaCggANDKaCgoKmgpSSgpSCgpSU")]
-[assembly: GoPositionMap("crypto/internal/fips140/sha3/sha3_noasm.go", "sha3_noasm.cs", "AAoSgsaClIKUgg==")]
-[assembly: GoPositionMap("crypto/internal/fips140/sha3/shake.go", "shake.cs", "ABs0goKCgoKCuJSCgqaCgoKCpqKCgoKCgoKCxoKcsJiQlIKmqLKCgrqSgqaCpoKCgpSC5oKClIKUgsiSqJIAAhDkgqaigoKUAAIQ5IKmooKClA==")]
+[assembly: GoPositionMap("crypto/internal/fips140/sha3/sha3.go", "sha3.cs", "ADNwgJaAlqSCgqaCgqiygqoACAq4lIKogILCgqaUgoKCpoK4qOSCpqaUgqaCgqaqooKUlKaCgsqCgoIADRiCpoKUtLS0tLaCgoIACgaCgqaCggANDKaCgoKmgpSSgpSCgpSU")]
+[assembly: GoPositionMap("crypto/internal/fips140/sha3/sha3_noasm.go", "sha3_noasm.cs", "AAgSgqaClIKUgg==")]
+[assembly: GoPositionMap("crypto/internal/fips140/sha3/shake.go", "shake.cs", "ABo0goKCgoKCuJSCgqaCgoKCpqKCgoKCgoKCpoKcsJiQlIKmqLKCgrqSgqaCpoKCgpSCpoKClIKUgqiSqJIAAhDkgqaigoKUAAIQ5IKmooKClA==")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140;
+
+using static go.crypto.@internal.fips140.sha3_package;
 
 [GoPackage("sha3")]
 public static partial class sha3_package
@@ -108,6 +113,44 @@ public static partial class sha3_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(sha3_package.Digest)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class sha3ᴛDigest;
-[GoMethodHost(typeof(sha3_package.SHAKE)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class sha3ᴛSHAKE;
+[GoMethodHost(typeof(sha3_package.Digest)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class sha3ᴛDigest;
+[GoMethodHost(typeof(sha3_package.SHAKE)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class sha3ᴛSHAKE;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class sha3ᴛDigest {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint BlockSize(this ref Digest d) => sha3_package.BlockSize⁔(ref d);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Size(this ref Digest d) => sha3_package.Size⁔(ref d);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Reset(this ref Digest d) => sha3_package.Reset⁔(ref d);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Digest> Clone(this ref Digest d) => sha3_package.Clone⁔(ref d);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void permute(this ж<Digest> Ꮡd) => sha3_package.permute⁔(Ꮡd);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void padAndPermute(this ж<Digest> Ꮡd) => sha3_package.padAndPermute⁔(Ꮡd);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint n, error err) Write(this ж<Digest> Ꮡd, slice<byte> p) => sha3_package.Write⁔(Ꮡd, p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) writeGeneric(this ж<Digest> Ꮡd, slice<byte> p) => sha3_package.writeGeneric⁔(Ꮡd, p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) readGeneric(this ж<Digest> Ꮡd, slice<byte> @out) => sha3_package.readGeneric⁔(Ꮡd, @out);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> Sum(this ref Digest d, slice<byte> b) => sha3_package.Sum⁔(ref d, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<byte> sumGeneric(this ref Digest d, slice<byte> b) => sha3_package.sumGeneric⁔(ref d, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<byte>, error) MarshalBinary(this ref Digest d) => sha3_package.MarshalBinary⁔(ref d);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<byte>, error) AppendBinary(this ref Digest d, slice<byte> b) => sha3_package.AppendBinary⁔(ref d, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error UnmarshalBinary(this ref Digest d, slice<byte> b) => sha3_package.UnmarshalBinary⁔(ref d, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) write(this ж<Digest> Ꮡd, slice<byte> p) => sha3_package.write⁔(Ꮡd, p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) read(this ж<Digest> Ꮡd, slice<byte> @out) => sha3_package.read⁔(Ꮡd, @out);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<byte> sum(this ref Digest d, slice<byte> b) => sha3_package.sum⁔(ref d, b);
+}
+partial class sha3ᴛSHAKE {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint BlockSize(this ref SHAKE s) => sha3_package.BlockSize⁔(ref s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Size(this ref SHAKE s) => sha3_package.Size⁔(ref s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> Sum(this ref SHAKE s, slice<byte> @in) => sha3_package.Sum⁔(ref s, @in);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint n, error err) Write(this ж<SHAKE> Ꮡs, slice<byte> p) => sha3_package.Write⁔(Ꮡs, p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint n, error err) Read(this ж<SHAKE> Ꮡs, slice<byte> @out) => sha3_package.Read⁔(Ꮡs, @out);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Reset(this ж<SHAKE> Ꮡs) => sha3_package.Reset⁔(Ꮡs);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<SHAKE> Clone(this ref SHAKE s) => sha3_package.Clone⁔(ref s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<byte>, error) MarshalBinary(this ref SHAKE s) => sha3_package.MarshalBinary⁔(ref s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<byte>, error) AppendBinary(this ref SHAKE s, slice<byte> b) => sha3_package.AppendBinary⁔(ref s, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error UnmarshalBinary(this ref SHAKE s, slice<byte> b) => sha3_package.UnmarshalBinary⁔(ref s, b);
+}
+// </MethodForwarders>

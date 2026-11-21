@@ -14,6 +14,9 @@
 
 using go;
 using static go.sort_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -64,14 +67,16 @@ using static go.sort_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("sort/search.go", "search.cs", "AAp0ADMGkoKUgpS4AAI2AB0IkoKUgpS4AAIS4r7CvsLYgLaAtoA=", "124-124:1;132-132:1;140-140:1")]
+[assembly: GoPositionMap("sort/search.go", "search.cs", "AAh0ADMGkoKUgpS4AAI2AB0IkoKUgpS4AAIS4r7CvsK4gJaAloA=", "124-124:1;132-132:1;140-140:1")]
 [assembly: GoPositionMap("sort/slice.go", "slice.cs", "AAwwAAwCgoKCggACGAAJAoKCAAIQ0oKCgoKm")]
-[assembly: GoPositionMap("sort/sort.go", "sort.cs", "ACtk4oKClIIADRyCgoKCxoKCABIkksiSrsKCgoKmAAkQgoKWgAAJDAABENCCtpLIgAAICoKCloC+wJywmqCaoJywmqAAAUgAIgI=")]
+[assembly: GoPositionMap("sort/sort.go", "sort.cs", "AClk4oKClIIACxyCgoKCpoKCABAkkqiSrsKCgoKmAAcQgoKWgNwAARDQgpaSqIDKgoKWgJ7AnLCaoJqgnLCaoAABSAAiAg==")]
 [assembly: GoPositionMap("sort/zsortfunc.go", "zsortfunc.cs", "AAgUkoKCzqKCgoKClIKUgpSCuIKCgqaCuIKCAAMU4pSqgpSCgriCgriCgqaCgriCuIKC3IKCgqaClJKCgoKClIKCAAQSwoKkgpSClIKClIKClIKClIKUgpSCgpSCqqKCpIKClIKUgpSCgpSokpiCgoKmgqaCpqaCgoKUuIKCgpS4qqKCgoKUgoKClAAEFNKqlM6ClIKCpqaUpKS6koKClKiSgoKCqJKmgoKCgoKCuIKCuIKCkoKCgpSUgoKCgoKUgpQAAy4AFgi4goKCgoKUuIKU3LiCgoKCgpS4gpSmgoKSgoKUgpSUgoKClLiCgpSClIIAAxDCgpSCgoKUgrg=")]
 [assembly: GoPositionMap("sort/zsortinterface.go", "zsortinterface.cs", "AAgUkoKCzqKCgoKClIKUgpSCuIKCgqaCuIKCAAMU4pSqgpSCgriCgriCgqaCgriCuIKC3IKCgqaClJKCgoKClIKCAAQSwoKkgpSClIKClIKClIKClIKUgpSCgpSCqqKCpIKClIKUgpSCgpSokpiCgoKmgqaCpqaCgoKUuIKCgpS4qqKCgoKUgoKClAAEFNKqlM6ClIKCpqaUpKS6koKClKiSgoKCqJKmgoKCgoKCuIKCuIKCkoKCgpSUgoKCgoKUgpQAAy4AFgi4goKCgoKUuIKU3LiCgoKCgpS4gpSmgoKSgoKUgpSUgoKClLiCgpSClIIAAxDCgpSCgoKUgrg=")]
 // </GoSourcePositionMaps>
 
 namespace go;
+
+using static go.sort_package;
 
 [GoPackage("sort")]
 public static partial class sort_package
@@ -113,9 +118,43 @@ public static partial class sort_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(sort_package.Float64Slice)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class sortᴛFloat64Slice;
-[GoMethodHost(typeof(sort_package.IntSlice)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class sortᴛIntSlice;
-[GoMethodHost(typeof(sort_package.StringSlice)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class sortᴛStringSlice;
-[GoMethodHost(typeof(sort_package.reverse)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class sortᴛreverse;
-[GoMethodHost(typeof(sort_package.xorshift)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class sortᴛxorshift;
+[GoMethodHost(typeof(sort_package.Float64Slice)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class sortᴛFloat64Slice;
+[GoMethodHost(typeof(sort_package.IntSlice)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class sortᴛIntSlice;
+[GoMethodHost(typeof(sort_package.StringSlice)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class sortᴛStringSlice;
+[GoMethodHost(typeof(sort_package.reverse)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class sortᴛreverse;
+[GoMethodHost(typeof(sort_package.xorshift)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class sortᴛxorshift;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class sortᴛFloat64Slice {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Search(this Float64Slice p, float64 x) => sort_package.Search⁔(p, x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Len(this Float64Slice x) => sort_package.Len⁔(x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Less(this Float64Slice x, nint i, nint j) => sort_package.Less⁔(x, i, j);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Swap(this Float64Slice x, nint i, nint j) => sort_package.Swap⁔(x, i, j);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Sort(this Float64Slice x) => sort_package.Sort⁔(x);
+}
+partial class sortᴛIntSlice {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Search(this IntSlice p, nint x) => sort_package.Search⁔(p, x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Len(this IntSlice x) => sort_package.Len⁔(x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Less(this IntSlice x, nint i, nint j) => sort_package.Less⁔(x, i, j);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Swap(this IntSlice x, nint i, nint j) => sort_package.Swap⁔(x, i, j);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Sort(this IntSlice x) => sort_package.Sort⁔(x);
+}
+partial class sortᴛStringSlice {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Search(this StringSlice p, @string x) => sort_package.Search⁔(p, x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Len(this StringSlice x) => sort_package.Len⁔(x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Less(this StringSlice x, nint i, nint j) => sort_package.Less⁔(x, i, j);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Swap(this StringSlice x, nint i, nint j) => sort_package.Swap⁔(x, i, j);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Sort(this StringSlice x) => sort_package.Sort⁔(x);
+}
+partial class sortᴛreverse {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool Less(this reverse r, nint i, nint j) => sort_package.Less⁔(r, i, j);
+}
+partial class sortᴛxorshift {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static uint64 Next(this ref xorshift r) => sort_package.Next⁔(ref r);
+}
+// </MethodForwarders>

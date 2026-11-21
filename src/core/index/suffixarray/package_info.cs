@@ -10,10 +10,15 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+using io = go.io_package;
+using regexp = go.regexp_package;
 // </ImportedTypeAliases>
 
 using go;
 using static go.index.suffixarray_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -61,10 +66,14 @@ using static go.index.suffixarray_package;
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("index/suffixarray/sais.go", "sais.cs", "AHmAArKClAACFgAIAoK4gpSCggACEOKCgpTugqaCgoKCgoKCAAgSlJSCpgACFgAIAoKUgqaCgoKUqqKCgoKCgoIAAxDCgoKCgoKCAAMyABUClIKCABo2goKCgoKCpoKCgoIADh6ClAACHAAMBIIAGDKCgoIACBKCgoKUgoKUlJSClNyCgoKmgoKClIIAAyAADQSCABUsgpSCgoKUlIKUgoLugoKCgqaCgoKUggADMAAUAgASJriCgoKCgoKCuIKCgpSCgqaCggAEHgAKAoKCgpSCgpSUlJSCgoKCgqaUgoKCgoKUAAIcAAsCgoKCgoIABBLCAChSgoKUlIKClNyCAAIWAAgCgqaCgoKCgoKmgsqCggADEMKC3IKCgoKUgoKClKaCgoKCggAEFvSCAAsYgoKCuIKCgpSCgpQACxiCgoKCuIKCgpSCuJSClIKUgoKmuIIACBKCgoKCuIKCgpSC")]
 [assembly: GoPositionMap("index/suffixarray/sais2.go", "sais2.cs", "AAgSgoKUpoKCuIKUgoIAAhDigoKU7oKmgoKCgoKCggAIEpSUgqamgoK4gpSCggACEOKCgpTugqaCgoKCgoKCAAgSlJSCpqaCgriClIKCAAIQ4oKClO6CpoKCgoKCgoIACBKUlIKmpoKClIKmgoKClKaCgpSCpoKClKaCgpSCpoKClKaCgoKCgoKCuIKCgoKCuIKCgoKCuIKCgoKCgoK4goKCgoK4goKCgoK4gpSCggAaNoKCgoKCgqaCgoKCAA4egpSmgpSCABo2goKCgoKCpoKCgoIADh6ClKaClIIAGjaCgoKCgoKmgoKCggAOHoKUppSCABgygoKCAAgSgoKClIKClJSUgpTcgoKCpoKCgpSCuJQAGDKCgoIACBKCgoKUgoKUlJSClNyCgoKmgoKClIK4lAAYMoKCggAIEoKCgpSCgpSUlIKU3IKCgqaCgoKUgriUggAVLIKUgoKClJSClIKC7oKCgoKmgoKClIK4lAAVLIKUgoKClJSClIKC7oKCgoKmgoKClIK4lAAVLIKUgoKClJSClIKC7oKCgoKmgoKClIK4ggASJriCgoKCgoKCuIKCgpSCgqaCgsqCABUsgoKCgoKCuIKCgpSUgsqCABUsgoKCgoKCuIKCgpSUgsqCgoKClIKClJSUlIKCgoKCppSCgoKCgpSmgoKCgpSCgpSUlJSCgoKCgqaUgoKCgoKUpoKCgoKUgoKUlJSUgoKCgoKmlIKCgoKClKaCgoKCgoLKggAoUoKClJSCgpTcgqaCgqaCgoKCgoKmgsqCgriCgqaCgoKCgoKmgsqCgriCgqaCgoKCgoKmgsqCgriCgtyCgoKClIKCgpSmgoKCgoLKgtyCgoKClIKCgpSmgoKCgoLKgtyCgoKClIKCgpSmgoKCgoLKlIIACxiCgoK4goKClIKClAALGIKCgoK4goKClIK4lAALGIKCgriCgoKUgoKUAAsYgoKCgriCgoKUgriUAAsYgoKCuIKCgpSCgpQACxiCgoKCuIKCgpSCuJSClIKUgoKmuIIACBKCgoKCuIKCgpSCuJSUgpSCgqa4ggAIEoKCgoK4goKClIK4lJSClIKCpriCAAgSgoKCgriCgoKUgg==")]
-[assembly: GoPositionMap("index/suffixarray/suffixarray.go", "suffixarray.cs", "ADNggqaCgpSmgoKUuIKClMqigoKClIKUqJKCgqiSgoKq5IKCgrimgqaY1JKCgpSUlKaCuIKCgqbspKaCgpSClKamgoKCgpS4griCuIKCgoKUlKikpoCCyICCyIKCgoKUlKqipoKq5qSSAAIQ8oKCgoKmgoKCgqaCygACEgAMBoKmgsrukoKClIKCgoKCgoKmgoKCgoKCpoKmpoKU7qaSgoKUgoKCgoKUlIKCgoKmpqaClA==", "246-246:1;248-248:2")]
+[assembly: GoPositionMap("index/suffixarray/suffixarray.go", "suffixarray.cs", "ADBggqaCgpSmgoKUuIKClKqigoKClIKUqJKCgqiSgoKq5IKCgrimgqaY1JKCgpSUlKaCuIKCgqbMpKaCgpSClKamgoKCgpS4griCuIKCgoKUlKikpoCCyICCyIKCgoKUlKqipoKq5qSSAAIQ8oKCgoKmgoKCgqaCygACEgAMBoKmgsrukoKClIKCgoKCgoKmgoKCgoKCpoKmpoKU7qaSgoKUgoKCgoKUlIKCgoKmpqaClA==", "246-246:1;248-248:2")]
 // </GoSourcePositionMaps>
 
 namespace go.index;
+
+using static go.index.suffixarray_package;
+using io = go.io_package;
+using regexp = go.regexp_package;
 
 [GoPackage("suffixarray")]
 public static partial class suffixarray_package
@@ -105,6 +114,28 @@ public static partial class suffixarray_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(suffixarray_package.Index)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class suffixarrayᴛIndex;
-[GoMethodHost(typeof(suffixarray_package.ints)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class suffixarrayᴛints;
+[GoMethodHost(typeof(suffixarray_package.Index)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class suffixarrayᴛIndex;
+[GoMethodHost(typeof(suffixarray_package.ints)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class suffixarrayᴛints;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class suffixarrayᴛIndex {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Read(this ref Index x, io.Reader r) => suffixarray_package.Read⁔(ref x, r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Write(this ref Index x, io.Writer w) => suffixarray_package.Write⁔(ref x, w);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> Bytes(this ref Index x) => suffixarray_package.Bytes⁔(ref x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<byte> at(this ref Index x, nint i) => suffixarray_package.at⁔(ref x, i);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ints lookupAll(this ж<Index> Ꮡx, slice<byte> s) => suffixarray_package.lookupAll⁔(Ꮡx, s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<nint> /*result*/ Lookup(this ж<Index> Ꮡx, slice<byte> s, nint n) => suffixarray_package.Lookup⁔(Ꮡx, s, n);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<slice<nint>> /*result*/ FindAllIndex(this ж<Index> Ꮡx, ж<regexp.Regexp> Ꮡr, nint n) => suffixarray_package.FindAllIndex⁔(Ꮡx, Ꮡr, n);
+}
+partial class suffixarrayᴛints {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint len(this ref ints a) => suffixarray_package.len⁔(ref a);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static int64 get(this ref ints a, nint i) => suffixarray_package.get⁔(ref a, i);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void set(this ref ints a, nint i, int64 v) => suffixarray_package.set⁔(ref a, i, v);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ints Δslice(this ref ints a, nint i, nint j) => suffixarray_package.Δslice⁔(ref a, i, j);
+}
+// </MethodForwarders>

@@ -7,7 +7,6 @@ using binary = encoding.binary_package;
 using bits = math.bits_package;
 using encoding;
 using math;
-using static zstd_package;
 
 partial class zstd_package {
 
@@ -25,11 +24,9 @@ partial struct xxhash64 {
     internal nint cnt;                  // number of bytes in buffer
 }
 
-} partial class zstdᴛxxhash64 {
-
 // reset discards the current state and prepares to compute a new hash.
 // We assume a seed of 0 since that is what zstd uses.
-internal static void reset(this ref xxhash64 xh) {
+internal static void reset⁔(/*this*/ ref xxhash64 xh) {
     xh.len = 0;
 
     // Separate addition for awkward constant overflow.
@@ -48,7 +45,7 @@ internal static void reset(this ref xxhash64 xh) {
 }
 
 // update adds a buffer to the has.
-internal static void update(this ref xxhash64 xh, slice<byte> b) {
+internal static void update⁔(/*this*/ ref xxhash64 xh, slice<byte> b) {
     xh.len += (uint64)len(b);
 
     if (xh.cnt + len(b) < len(xh.buf)) {
@@ -82,7 +79,7 @@ internal static void update(this ref xxhash64 xh, slice<byte> b) {
 }
 
 // digest returns the final hash value.
-internal static uint64 digest(this ref xxhash64 xh) {
+internal static uint64 digest⁔(/*this*/ ref xxhash64 xh) {
     uint64 h64 = default;
     if (xh.len < 32) {
         h64 = xh.v[2] + (uint64)xxhPrime64c5;
@@ -129,7 +126,7 @@ internal static uint64 digest(this ref xxhash64 xh) {
 }
 
 // round updates a value.
-internal static uint64 round(this ref xxhash64 xh, uint64 v, uint64 n) {
+internal static uint64 round⁔(/*this*/ ref xxhash64 xh, uint64 v, uint64 n) {
     v += n * (uint64)xxhPrime64c2;
     v = bits.RotateLeft64(v, 31);
     v *= xxhPrime64c1;
@@ -137,11 +134,11 @@ internal static uint64 round(this ref xxhash64 xh, uint64 v, uint64 n) {
 }
 
 // mergeRound updates a value in the final round.
-internal static uint64 mergeRound(this ref xxhash64 xh, uint64 v, uint64 n) {
+internal static uint64 mergeRound⁔(/*this*/ ref xxhash64 xh, uint64 v, uint64 n) {
     n = xh.round(0, n);
     v ^= (uint64)(n);
     v = v * (uint64)xxhPrime64c1 + (uint64)xxhPrime64c4;
     return v;
 }
 
-}
+} // end zstd_package
