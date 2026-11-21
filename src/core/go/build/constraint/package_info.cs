@@ -76,13 +76,7 @@ using static go.go.build.constraint_package;
 namespace go.go.build;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using errors = errors_package;
-using strings = strings_package;
-using unicode = unicode_package;
-using utf8 = global::go.unicode.utf8_package;
 using global::go.unicode;
-using iter = iter_package;
-using constraint = constraint_package;
 using static constraint_package;
 // </GlyphForwarderUsings>
 

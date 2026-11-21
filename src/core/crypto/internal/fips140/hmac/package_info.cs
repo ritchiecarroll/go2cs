@@ -69,11 +69,6 @@ using static go.crypto.@internal.fips140.hmac_package;
 namespace go.crypto.@internal.fips140;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using fips140 = go.crypto.@internal.fips140_package;
-using sha256 = go.crypto.@internal.fips140.sha256_package;
-using sha3 = go.crypto.@internal.fips140.sha3_package;
-using sha512 = go.crypto.@internal.fips140.sha512_package;
-using errors = errors_package;
 using hash = hash_package;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140;

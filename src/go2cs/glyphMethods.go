@@ -29,6 +29,7 @@ import (
 	"strings"
 	"sync"
 	"unicode"
+	"unicode/utf8"
 )
 
 // GlyphMethodSuffix ends a method body's name in the package class.
@@ -294,9 +295,31 @@ func applyGlyphForwarderSection(lines []string) []string {
 		return lines
 	}
 
+	// Only the aliases a forwarder names come along: a using directive applies to the whole file, and an alias the
+	// forwarders never read can hide a namespace package_info.cs itself names (`using hash = go.hash_package;`
+	// against an import initializer's `typeof(hash.fnv_package)`). An alias the forwarders DO read that
+	// package_info.cs also names as a qualifier is reported, not silently written.
+	forwarders := strings.Join(glyphUnit.blocks, "\n")
+	own := strings.Join(lines, "\n")
+	usings := make([]string, 0, len(glyphUnit.usings))
+
+	for _, using := range glyphUnit.usings {
+		if match := glyphUsingAlias.FindStringSubmatch(using); match != nil {
+			if !glyphNamesIdentifier(forwarders, match[1]) {
+				continue
+			}
+
+			if glyphNamesIdentifier(own, match[1]) {
+				fmt.Fprintf(os.Stderr, "glyph: forwarder alias %q is also a name in package_info.cs\n", match[1])
+			}
+		}
+
+		usings = append(usings, using)
+	}
+
 	for i, line := range lines {
 		if strings.HasPrefix(strings.TrimSpace(line), "namespace ") && strings.HasSuffix(strings.TrimSpace(line), ";") {
-			section := append([]string{"", "// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)"}, glyphUnit.usings...)
+			section := append([]string{"", "// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)"}, usings...)
 			section = append(section, "// </GlyphForwarderUsings>")
 			lines = append(lines[:i+1], append(section, lines[i+1:]...)...)
 			break
@@ -314,6 +337,30 @@ func applyGlyphForwarderSection(lines []string) []string {
 	}
 
 	return append(lines, "// </GlyphForwarders>")
+}
+
+// glyphNamesIdentifier answers whether name occurs in text as a whole identifier that is not a member access.
+func glyphNamesIdentifier(text, name string) bool {
+	isIdent := func(r rune) bool { return r == '_' || r == '@' || unicode.IsLetter(r) || unicode.IsDigit(r) }
+
+	for from := 0; ; {
+		at := strings.Index(text[from:], name)
+
+		if at < 0 {
+			return false
+		}
+
+		at += from
+		end := at + len(name)
+		before, _ := utf8.DecodeLastRuneInString(text[:at])
+		after, _ := utf8.DecodeRuneInString(text[end:])
+
+		if (at == 0 || !isIdent(before) && before != '.') && (end == len(text) || !isIdent(after)) {
+			return true
+		}
+
+		from = end
+	}
 }
 
 func glyphStripSection(lines []string, name string) []string {
@@ -851,21 +898,35 @@ func glyphBindMethodExpressions(lines []string, packageClass string, transformed
 	group := regexp.MustCompile(`\(` + regexp.QuoteMeta(packageClass) + `\.([\p{L}_@][\p{L}\p{N}_]*)\)`)
 	wrapperCall := regexp.MustCompile(`=> ` + regexp.QuoteMeta(packageClass) + `\.([\p{L}_@][\p{L}\p{N}_]*)\(`)
 
-	rename := func(pattern *regexp.Regexp, line string, prefix, suffix string) string {
-		return pattern.ReplaceAllStringFunc(line, func(match string) string {
-			name := pattern.FindStringSubmatch(match)[1]
+	rename := func(pattern *regexp.Regexp, line string, prefix, suffix string, castOnly bool) string {
+		var out strings.Builder
+		last := 0
+
+		for _, at := range pattern.FindAllStringSubmatchIndex(line, -1) {
+			name := line[at[2]:at[3]]
 			holder, ok := transformed[name]
 
-			if !ok {
-				return match
+			// A method expression is always `((Func<…>)(pkg.name))` (convSelectorExpr's MethodExpr arm): a group
+			// under any other cast is an ordinary member that shares the method's name, e.g. go/types' constant
+			// `builtin` beside its method `(*Checker).builtin`.
+			if !ok || castOnly && !glyphUnderDelegateCast(line, at[0]) {
+				continue
 			}
+
+			out.WriteString(line[last:at[0]])
 
 			if holder != "" {
-				return prefix + holder + "." + name + suffix
+				out.WriteString(prefix + holder + "." + name + suffix)
+			} else {
+				out.WriteString(prefix + packageClass + "." + name + GlyphMethodSuffix + suffix)
 			}
 
-			return prefix + packageClass + "." + name + GlyphMethodSuffix + suffix
-		})
+			last = at[1]
+		}
+
+		out.WriteString(line[last:])
+
+		return out.String()
 	}
 
 	for i, line := range lines {
@@ -873,14 +934,41 @@ func glyphBindMethodExpressions(lines []string, packageClass string, transformed
 			continue
 		}
 
-		line = rename(group, line, "(", ")")
+		line = rename(group, line, "(", ")", true)
 
 		if strings.Contains(line, "[GoWrapper(") {
-			line = rename(wrapperCall, line, "=> ", "(")
+			line = rename(wrapperCall, line, "=> ", "(", false)
 		}
 
 		lines[i] = line
 	}
+}
+
+// glyphUnderDelegateCast answers whether the group opening at `at` is the operand of a cast to a delegate type,
+// `(Func<…>)` or `(Action…)`, itself inside the method expression's outer paren pair.
+func glyphUnderDelegateCast(line string, at int) bool {
+	if at == 0 || line[at-1] != ')' {
+		return false
+	}
+
+	depth := 0
+
+	for i := at - 1; i >= 0; i-- {
+		switch line[i] {
+		case ')':
+			depth++
+		case '(':
+			depth--
+
+			if depth == 0 {
+				cast := line[i+1 : at-1]
+
+				return i > 0 && line[i-1] == '(' && (strings.HasPrefix(cast, "Func<") || cast == "Action" || strings.HasPrefix(cast, "Action<"))
+			}
+		}
+	}
+
+	return false
 }
 
 // glyphHolderClassName answers the holder class a forwarder goes into: the type's declared holder, or for a type whose

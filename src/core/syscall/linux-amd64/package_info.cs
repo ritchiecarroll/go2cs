@@ -103,24 +103,11 @@ using static go.syscall_package;
 namespace go;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using Δsync = sync_package;
 using @unsafe = unsafe_package;
 using static syscall_package;
-using ꓸꓸꓸnint = Span<nint>;
-using bytealg = @internal.bytealg_package;
 using @internal;
-using linux = @internal.runtime.syscall.linux_package;
-using strconv = @internal.strconv_package;
-using runtime = runtime_package;
-using slices = slices_package;
 using @internal.runtime.syscall;
 using go.sync;
-using ꓸꓸꓸuintptr = Span<uintptr>;
-using errorspkg = errors_package;
-using asan = @internal.asan_package;
-using msan = @internal.msan_package;
-using oserror = @internal.oserror_package;
-using race = @internal.race_package;
 // </GlyphForwarderUsings>
 
 [GoPackage("syscall")]

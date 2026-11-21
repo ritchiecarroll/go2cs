@@ -72,13 +72,6 @@ using static go.os.signal_package;
 namespace go.os;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using context = context_package;
-using os = os_package;
-using slices = slices_package;
-using sync = sync_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
-using ꓸꓸꓸosꓸSignal = Span<os_package.Signal>;
 using static signal_package;
 // </GlyphForwarderUsings>
 

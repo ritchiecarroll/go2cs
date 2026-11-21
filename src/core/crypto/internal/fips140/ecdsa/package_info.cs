@@ -77,19 +77,9 @@ using static go.crypto.@internal.fips140.ecdsa_package;
 namespace go.crypto.@internal.fips140;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using bytes = bytes_package;
-using fips140 = go.crypto.@internal.fips140_package;
-using bigmod = go.crypto.@internal.fips140.bigmod_package;
-using drbg = go.crypto.@internal.fips140.drbg_package;
-using Δnistec = go.crypto.@internal.fips140.nistec_package;
-using errors = errors_package;
-using hash = hash_package;
-using io = io_package;
-using sync = sync_package;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140;
 using static ecdsa_package;
-using hmac = go.crypto.@internal.fips140.hmac_package;
 // </GlyphForwarderUsings>
 
 [GoPackage("ecdsa")]

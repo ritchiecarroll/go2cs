@@ -72,19 +72,12 @@ using static go.go.@internal.gcimporter_package;
 namespace go.go.@internal;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using fmt = fmt_package;
 using token = global::go.go.token_package;
 using pkgbits = global::go.@internal.pkgbits_package;
-using sync = sync_package;
 using global::go.@internal;
 using global::go.go;
-using ꓸꓸꓸany = Span<any>;
 using static gcimporter_package;
 using types = global::go.go.types_package;
-using godebug = global::go.@internal.godebug_package;
-using slices = slices_package;
-using strings = strings_package;
-using constant = global::go.go.constant_package;
 // </GlyphForwarderUsings>
 
 [GoPackage("gcimporter")]

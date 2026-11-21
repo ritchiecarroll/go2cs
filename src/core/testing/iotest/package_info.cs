@@ -72,12 +72,7 @@ using static go.testing.iotest_package;
 namespace go.testing;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using io = io_package;
-using log = log_package;
 using static iotest_package;
-using bytes = bytes_package;
-using errors = errors_package;
-using fmt = fmt_package;
 // </GlyphForwarderUsings>
 
 [GoPackage("iotest")]

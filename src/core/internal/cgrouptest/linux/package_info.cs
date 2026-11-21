@@ -61,16 +61,6 @@ using static go.@internal.cgrouptest_package;
 namespace go.@internal;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using fmt = fmt_package;
-using cgroup = go.@internal.runtime.cgroup_package;
-using os = os_package;
-using filepath = path.filepath_package;
-using slices = slices_package;
-using strconv = go.strconv_package;
-using strings = strings_package;
-using Δsyscall = syscall_package;
-using testing = testing_package;
-using fs = io.fs_package;
 using go;
 using go.@internal.runtime;
 using path;

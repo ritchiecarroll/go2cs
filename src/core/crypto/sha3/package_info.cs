@@ -68,8 +68,6 @@ using static go.crypto.sha3_package;
 namespace go.crypto;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using crypto = crypto_package;
-using sha3 = go.crypto.@internal.fips140.sha3_package;
 using hash = hash_package;
 using go.crypto.@internal.fips140;
 using static sha3_package;

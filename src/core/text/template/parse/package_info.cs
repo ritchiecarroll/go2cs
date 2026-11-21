@@ -97,16 +97,10 @@ using static go.text.template.parse_package;
 namespace go.text.template;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using fmt = fmt_package;
 using strings = strings_package;
-using unicode = unicode_package;
-using utf8 = go.unicode.utf8_package;
 using go.unicode;
 using ꓸꓸꓸany = Span<any>;
 using static parse_package;
-using strconv = strconv_package;
-using bytes = bytes_package;
-using runtime = runtime_package;
 // </GlyphForwarderUsings>
 
 [GoPackage("parse")]

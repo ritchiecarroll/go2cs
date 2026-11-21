@@ -83,31 +83,14 @@ using static go.runtime.pprof_package;
 namespace go.runtime;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using context = context_package;
-using fmt = fmt_package;
-using label = @internal.runtime.pprof.label_package;
-using slices = slices_package;
 using strings = strings_package;
 using @internal.runtime.pprof;
-using ꓸꓸꓸstring = Span<@string>;
 using static pprof_package;
 using @unsafe = unsafe_package;
-using bufio = bufio_package;
-using cmp = cmp_package;
-using abi = @internal.abi_package;
-using goexperiment = @internal.goexperiment_package;
-using profilerecord = @internal.profilerecord_package;
 using io = io_package;
 using runtime = runtime_package;
-using sort = sort_package;
-using sync = sync_package;
-using tabwriter = text.tabwriter_package;
-using time = time_package;
 using @internal;
 using text;
-using bytes = bytes_package;
-using gzip = compress.gzip_package;
-using strconv = strconv_package;
 using compress;
 // </GlyphForwarderUsings>
 

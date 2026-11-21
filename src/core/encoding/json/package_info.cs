@@ -90,25 +90,10 @@ using static go.encoding.json_package;
 namespace go.encoding;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using encoding = encoding_package;
-using base64 = go.encoding.base64_package;
-using fmt = fmt_package;
 using reflect = reflect_package;
-using strconv = strconv_package;
-using strings = strings_package;
-using unicode = unicode_package;
-using utf16 = go.unicode.utf16_package;
-using utf8 = go.unicode.utf8_package;
 using go.encoding;
 using go.unicode;
 using static json_package;
-using bytes = bytes_package;
-using cmp = cmp_package;
-using math = math_package;
-using slices = slices_package;
-using sync = sync_package;
-using @unsafe = unsafe_package;
-using errors = errors_package;
 using io = io_package;
 // </GlyphForwarderUsings>
 

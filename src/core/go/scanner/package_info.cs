@@ -71,18 +71,9 @@ using static go.go.scanner_package;
 namespace go.go;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using fmt = fmt_package;
 using token = global::go.go.token_package;
-using io = io_package;
-using sort = sort_package;
 using global::go.go;
 using static scanner_package;
-using bytes = bytes_package;
-using scannerhooks = global::go.go.@internal.scannerhooks_package;
-using filepath = path.filepath_package;
-using strconv = strconv_package;
-using unicode = unicode_package;
-using utf8 = global::go.unicode.utf8_package;
 using global::go.go.@internal;
 using global::go.unicode;
 using path;

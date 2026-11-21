@@ -81,13 +81,9 @@ using static go.sync_package;
 namespace go;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using atomic = go.sync.atomic_package;
-using @unsafe = unsafe_package;
 using go.sync;
 using static sync_package;
-using isync = @internal.sync_package;
 using @internal;
-using Δsync = @internal.sync_package;
 // </GlyphForwarderUsings>
 
 [GoPackage("sync")]

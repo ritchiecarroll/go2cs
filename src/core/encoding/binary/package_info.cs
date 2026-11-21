@@ -68,12 +68,7 @@ using static go.encoding.binary_package;
 namespace go.encoding;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using errors = errors_package;
-using io = io_package;
-using math = math_package;
 using reflect = reflect_package;
-using slices = slices_package;
-using sync = sync_package;
 using static binary_package;
 // </GlyphForwarderUsings>
 

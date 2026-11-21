@@ -96,26 +96,13 @@ using static go.archive.tar_package;
 namespace go.archive;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using errors = errors_package;
-using fmt = fmt_package;
-using godebug = @internal.godebug_package;
 using fs = go.io.fs_package;
-using maps = maps_package;
-using math = math_package;
-using path = path_package;
-using reflect = reflect_package;
-using strconv = strconv_package;
-using strings = strings_package;
 using time = time_package;
 using @internal;
 using go.io;
 using static tar_package;
-using bytes = bytes_package;
 using io = io_package;
-using filepath = go.path.filepath_package;
 using go.path;
-using slices = slices_package;
-using iter = iter_package;
 // </GlyphForwarderUsings>
 
 [GoPackage("tar")]

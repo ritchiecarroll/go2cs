@@ -71,7 +71,6 @@ using static go.unicode_package;
 namespace go;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using unicode = unicode_package;
 using static unicode_package;
 // </GlyphForwarderUsings>
 

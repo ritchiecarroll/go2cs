@@ -108,28 +108,14 @@ using static go.database.sql_package;
 namespace go.database;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using bytes = bytes_package;
 using driver = go.database.sql.driver_package;
-using errors = errors_package;
-using fmt = fmt_package;
 using reflect = reflect_package;
-using strconv = strconv_package;
 using time = time_package;
-using unicode = unicode_package;
-using utf8 = go.unicode.utf8_package;
 using go.database.sql;
 using go.unicode;
 using static sql_package;
 using context = context_package;
-using io = io_package;
-using maps = maps_package;
-using rand = math.rand.rand_package;
-using runtime = runtime_package;
-using slices = slices_package;
-using sync = sync_package;
-using atomic = go.sync.atomic_package;
 using go.sync;
-using iter = iter_package;
 using math.rand;
 using ꓸꓸꓸany = Span<any>;
 // </GlyphForwarderUsings>

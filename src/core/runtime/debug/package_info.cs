@@ -71,11 +71,6 @@ using static go.runtime.debug_package;
 namespace go.runtime;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using fmt = fmt_package;
-using runtime = runtime_package;
-using strconv = strconv_package;
-using strings = strings_package;
-using io = io_package;
 using static debug_package;
 // </GlyphForwarderUsings>
 

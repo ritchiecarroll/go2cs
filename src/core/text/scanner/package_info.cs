@@ -65,12 +65,7 @@ using static go.text.scanner_package;
 namespace go.text;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using bytes = bytes_package;
-using fmt = fmt_package;
 using io = io_package;
-using os = os_package;
-using unicode = unicode_package;
-using utf8 = go.unicode.utf8_package;
 using go.unicode;
 using ꓸꓸꓸany = Span<any>;
 using static scanner_package;

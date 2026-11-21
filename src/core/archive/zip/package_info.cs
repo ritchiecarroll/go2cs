@@ -96,32 +96,16 @@ using static go.archive.zip_package;
 namespace go.archive;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using bufio = bufio_package;
-using binary = encoding.binary_package;
-using errors = errors_package;
-using fmt = fmt_package;
-using hash = hash_package;
-using crc32 = go.hash.crc32_package;
-using godebug = @internal.godebug_package;
 using io = io_package;
 using fs = go.io.fs_package;
-using os = os_package;
-using path = path_package;
-using filepath = go.path.filepath_package;
-using slices = slices_package;
-using strings = strings_package;
-using sync = sync_package;
 using time = time_package;
 using @internal;
 using encoding;
 using go.hash;
 using go.io;
 using go.path;
-using zip = zip_package;
 using static zip_package;
-using flate = compress.flate_package;
 using compress;
-using utf8 = unicode.utf8_package;
 using unicode;
 // </GlyphForwarderUsings>
 

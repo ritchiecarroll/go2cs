@@ -63,10 +63,6 @@ using static go.crypto.aes_package;
 namespace go.crypto;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using cipher = go.crypto.cipher_package;
-using boring = go.crypto.@internal.boring_package;
-using aes = go.crypto.@internal.fips140.aes_package;
-using strconv = strconv_package;
 using go.crypto;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140;

@@ -69,9 +69,6 @@ using static go.encoding.base32_package;
 namespace go.encoding;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using io = io_package;
-using slices = slices_package;
-using strconv = strconv_package;
 using static base32_package;
 // </GlyphForwarderUsings>
 

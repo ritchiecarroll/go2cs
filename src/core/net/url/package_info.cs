@@ -71,15 +71,6 @@ using static go.net.url_package;
 namespace go.net;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using bytes = bytes_package;
-using errors = errors_package;
-using fmt = fmt_package;
-using godebug = @internal.godebug_package;
-using netip = go.net.netip_package;
-using path = path_package;
-using slices = slices_package;
-using strconv = strconv_package;
-using strings = strings_package;
 using @internal;
 using go.net;
 using ꓸꓸꓸstring = Span<@string>;

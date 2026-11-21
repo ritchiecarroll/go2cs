@@ -82,19 +82,9 @@ using static go.time_package;
 namespace go;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using errors = errors_package;
-using stringslite = @internal.stringslite_package;
 using @internal;
-using time = time_package;
 using static time_package;
-using godebug = @internal.godebug_package;
-using @unsafe = unsafe_package;
-using bits = math.bits_package;
 using math;
-using Δsync = sync_package;
-using syscall = syscall_package;
-using bytealg = @internal.bytealg_package;
-using runtime = runtime_package;
 // </GlyphForwarderUsings>
 
 [GoPackage("time")]

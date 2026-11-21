@@ -72,18 +72,10 @@ using static go.go.token_package;
 namespace go.go;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using cmp = cmp_package;
-using fmt = fmt_package;
-using slices = slices_package;
-using strconv = strconv_package;
-using sync = sync_package;
-using atomic = global::go.sync.atomic_package;
 using global::go.sync;
 using iter = iter_package;
 using ꓸꓸꓸжFile = Span<ж<token_package.File>>;
 using static token_package;
-using unicode = unicode_package;
-using utf8 = global::go.unicode.utf8_package;
 using global::go.unicode;
 // </GlyphForwarderUsings>
 

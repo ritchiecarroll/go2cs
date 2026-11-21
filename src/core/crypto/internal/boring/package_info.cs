@@ -61,10 +61,6 @@ using static go.crypto.@internal.boring_package;
 namespace go.crypto.@internal;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using crypto = crypto_package;
-using cipher = go.crypto.cipher_package;
-using sig = go.crypto.@internal.boring.sig_package;
-using hash = hash_package;
 using go.crypto;
 using go.crypto.@internal.boring;
 using static boring_package;

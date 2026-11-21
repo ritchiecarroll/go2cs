@@ -76,23 +76,11 @@ using static go.net.http.fcgi_package;
 namespace go.net.http;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using context = context_package;
-using errors = errors_package;
-using fmt = fmt_package;
 using io = io_package;
-using net = net_package;
 using http = go.net.http_package;
-using cgi = go.net.http.cgi_package;
-using os = os_package;
-using strings = strings_package;
-using time = time_package;
 using go.net;
 using go.net.http;
 using static fcgi_package;
-using bufio = bufio_package;
-using bytes = bytes_package;
-using binary = encoding.binary_package;
-using sync = sync_package;
 using encoding;
 // </GlyphForwarderUsings>
 

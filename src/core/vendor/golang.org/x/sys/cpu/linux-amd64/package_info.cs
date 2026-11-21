@@ -80,7 +80,6 @@ using static go.vendor.golang.org.x.sys.cpu_package;
 namespace go.vendor.golang.org.x.sys;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using runtime = runtime_package;
 using static cpu_package;
 // </GlyphForwarderUsings>
 

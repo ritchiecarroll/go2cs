@@ -122,25 +122,14 @@ using static go.go.printer_package;
 namespace go.go;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using constraint = global::go.go.build.constraint_package;
-using slices = slices_package;
-using tabwriter = text.tabwriter_package;
 using global::go.go.build;
 using text;
 using static printer_package;
 using ast = global::go.go.ast_package;
 using token = global::go.go.token_package;
-using math = math_package;
-using strconv = strconv_package;
-using strings = strings_package;
-using unicode = unicode_package;
-using utf8 = global::go.unicode.utf8_package;
 using global::go.go;
 using global::go.unicode;
 using io = io_package;
-using fmt = fmt_package;
-using os = os_package;
-using sync = sync_package;
 using ꓸꓸꓸany = Span<any>;
 // </GlyphForwarderUsings>
 

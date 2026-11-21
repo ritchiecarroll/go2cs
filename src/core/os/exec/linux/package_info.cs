@@ -82,26 +82,13 @@ using static go.os.exec_package;
 namespace go.os;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using bytes = bytes_package;
-using context = context_package;
-using errors = errors_package;
-using godebug = @internal.godebug_package;
-using execenv = @internal.syscall.execenv_package;
 using io = io_package;
 using os = os_package;
-using filepath = path.filepath_package;
-using runtime = runtime_package;
-using strconv = strconv_package;
-using strings = strings_package;
-using atomic = sync.atomic_package;
-using syscall = syscall_package;
 using time = time_package;
 using @internal;
 using @internal.syscall;
-using fs = go.io.fs_package;
 using path;
 using sync;
-using ꓸꓸꓸstring = Span<@string>;
 using static exec_package;
 // </GlyphForwarderUsings>
 

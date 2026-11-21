@@ -72,12 +72,7 @@ using static go.debug.plan9obj_package;
 namespace go.debug;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using binary = encoding.binary_package;
-using errors = errors_package;
-using fmt = fmt_package;
-using saferio = @internal.saferio_package;
 using io = io_package;
-using os = os_package;
 using @internal;
 using encoding;
 using static plan9obj_package;

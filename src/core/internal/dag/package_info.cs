@@ -68,11 +68,6 @@ namespace go.@internal;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
 using static dag_package;
-using cmp = cmp_package;
-using fmt = fmt_package;
-using slices = slices_package;
-using strings = strings_package;
-using ꓸꓸꓸany = Span<any>;
 // </GlyphForwarderUsings>
 
 [GoPackage("dag")]

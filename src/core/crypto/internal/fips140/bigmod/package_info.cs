@@ -67,9 +67,6 @@ using static go.crypto.@internal.fips140.bigmod_package;
 namespace go.crypto.@internal.fips140;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using byteorder = go.crypto.@internal.fips140deps.byteorder_package;
-using errors = errors_package;
-using bits = math.bits_package;
 using go.crypto.@internal.fips140deps;
 using math;
 using static bigmod_package;

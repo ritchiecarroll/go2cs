@@ -76,14 +76,10 @@ using static go.@internal.zstd_package;
 namespace go.@internal;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using bits = math.bits_package;
 using math;
 using static zstd_package;
 using io = io_package;
-using binary = encoding.binary_package;
 using encoding;
-using errors = errors_package;
-using fmt = fmt_package;
 // </GlyphForwarderUsings>
 
 [GoPackage("zstd")]

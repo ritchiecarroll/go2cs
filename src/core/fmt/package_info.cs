@@ -91,22 +91,10 @@ using static go.fmt_package;
 namespace go;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using errors = errors_package;
-using stringslite = @internal.stringslite_package;
-using slices = slices_package;
 using @internal;
-using ꓸꓸꓸany = Span<any>;
 using static fmt_package;
-using strconv = strconv_package;
-using utf8 = unicode.utf8_package;
 using unicode;
-using fmtsort = @internal.fmtsort_package;
-using Δio = io_package;
-using os = os_package;
 using reflect = reflect_package;
-using Δsync = sync_package;
-using @unsafe = unsafe_package;
-using Δmath = math_package;
 // </GlyphForwarderUsings>
 
 [GoPackage("fmt")]

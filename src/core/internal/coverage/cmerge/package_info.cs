@@ -61,11 +61,8 @@ using static go.@internal.coverage.cmerge_package;
 namespace go.@internal.coverage;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using fmt = fmt_package;
 using coverage = go.@internal.coverage_package;
-using math = math_package;
 using go.@internal;
-using cmerge = cmerge_package;
 using static cmerge_package;
 // </GlyphForwarderUsings>
 

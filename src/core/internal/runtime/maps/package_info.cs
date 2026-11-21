@@ -81,14 +81,10 @@ namespace go.@internal.runtime;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
 using abi = go.@internal.abi_package;
-using goarch = go.@internal.goarch_package;
-using sys = go.@internal.runtime.sys_package;
 using @unsafe = unsafe_package;
 using go.@internal;
 using go.@internal.runtime;
 using static maps_package;
-using math = go.@internal.runtime.math_package;
-using race = go.@internal.race_package;
 // </GlyphForwarderUsings>
 
 [GoPackage("maps")]

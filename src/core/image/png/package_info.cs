@@ -83,11 +83,6 @@ using static go.image.png_package;
 namespace go.image;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using zlib = compress.zlib_package;
-using binary = encoding.binary_package;
-using fmt = fmt_package;
-using hash = hash_package;
-using crc32 = go.hash.crc32_package;
 using image = image_package;
 using color = go.image.color_package;
 using io = io_package;
@@ -96,8 +91,6 @@ using encoding;
 using go.hash;
 using go.image;
 using static png_package;
-using bufio = bufio_package;
-using strconv = strconv_package;
 // </GlyphForwarderUsings>
 
 [GoPackage("png")]

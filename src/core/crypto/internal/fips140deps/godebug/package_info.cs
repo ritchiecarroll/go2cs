@@ -61,7 +61,6 @@ using static go.crypto.@internal.fips140deps.godebug_package;
 namespace go.crypto.@internal.fips140deps;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using godebug = go.@internal.godebug_package;
 using go.@internal;
 using static godebug_package;
 // </GlyphForwarderUsings>

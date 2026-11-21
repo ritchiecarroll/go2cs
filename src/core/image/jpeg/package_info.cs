@@ -81,12 +81,8 @@ namespace go.image;
 using io = io_package;
 using static jpeg_package;
 using image = image_package;
-using color = go.image.color_package;
-using imageutil = go.image.@internal.imageutil_package;
 using go.image;
 using go.image.@internal;
-using bufio = bufio_package;
-using errors = errors_package;
 // </GlyphForwarderUsings>
 
 [GoPackage("jpeg")]

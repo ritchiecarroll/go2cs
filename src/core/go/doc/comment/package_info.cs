@@ -92,16 +92,9 @@ namespace go.go.doc;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
 using bytes = bytes_package;
-using fmt = fmt_package;
-using strconv = strconv_package;
-using io = io_package;
 using static comment_package;
 using strings = strings_package;
-using slices = slices_package;
-using unicode = unicode_package;
-using utf8 = global::go.unicode.utf8_package;
 using global::go.unicode;
-using sort = sort_package;
 // </GlyphForwarderUsings>
 
 [GoPackage("comment")]

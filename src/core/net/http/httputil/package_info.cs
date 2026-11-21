@@ -97,32 +97,17 @@ namespace go.net.http;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
 using bufio = bufio_package;
-using bytes = bytes_package;
-using errors = errors_package;
-using fmt = fmt_package;
 using io = io_package;
 using net = net_package;
 using http = go.net.http_package;
 using url = go.net.url_package;
-using strings = strings_package;
 using time = time_package;
 using go.net;
 using static httputil_package;
-using textproto = go.net.textproto_package;
-using sync = sync_package;
-using context = context_package;
-using godebug = go.@internal.godebug_package;
-using log = log_package;
-using mime = mime_package;
-using httptrace = go.net.http.httptrace_package;
-using ascii = go.net.http.@internal.ascii_package;
-using atomic = go.sync.atomic_package;
-using httpguts = vendor.golang.org.x.net.http.httpguts_package;
 using go.@internal;
 using go.net.http;
 using go.net.http.@internal;
 using go.sync;
-using iter = iter_package;
 using vendor.golang.org.x.net.http;
 using ꓸꓸꓸany = Span<any>;
 // </GlyphForwarderUsings>

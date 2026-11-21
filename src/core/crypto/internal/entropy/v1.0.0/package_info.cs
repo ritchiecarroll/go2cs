@@ -62,10 +62,6 @@ using static go.crypto.@internal.entropy.v1_0_0.entropy_package;
 namespace go.crypto.@internal.entropy.v1_0_0;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using time = go.crypto.@internal.fips140deps.time_package;
-using errors = errors_package;
-using atomic = sync.atomic_package;
-using @unsafe = unsafe_package;
 using go.crypto.@internal.fips140deps;
 using sync;
 using static entropy_package;

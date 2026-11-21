@@ -67,8 +67,6 @@ namespace go;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
 using hash = hash_package;
-using io = io_package;
-using strconv = strconv_package;
 using static crypto_package;
 // </GlyphForwarderUsings>
 

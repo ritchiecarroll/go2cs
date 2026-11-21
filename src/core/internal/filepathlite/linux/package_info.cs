@@ -63,10 +63,6 @@ using static go.@internal.filepathlite_package;
 namespace go.@internal;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using errors = errors_package;
-using stringslite = go.@internal.stringslite_package;
-using fs = io.fs_package;
-using slices = slices_package;
 using go.@internal;
 using io;
 using ꓸꓸꓸbyte = Span<byte>;

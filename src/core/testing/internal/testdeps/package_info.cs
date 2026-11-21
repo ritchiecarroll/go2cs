@@ -67,23 +67,12 @@ using static go.testing.@internal.testdeps_package;
 namespace go.testing.@internal;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using bufio = bufio_package;
-using context = context_package;
-using fuzz = global::go.@internal.fuzz_package;
-using testlog = global::go.@internal.testlog_package;
 using io = io_package;
-using os = os_package;
-using signal = global::go.os.signal_package;
 using reflect = reflect_package;
-using regexp = regexp_package;
-using pprof = runtime.pprof_package;
-using strings = strings_package;
-using sync = sync_package;
 using time = time_package;
 using global::go.@internal;
 using global::go.os;
 using runtime;
-using testdeps = testdeps_package;
 using static testdeps_package;
 // </GlyphForwarderUsings>
 

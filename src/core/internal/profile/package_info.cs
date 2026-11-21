@@ -94,17 +94,9 @@ using static go.@internal.profile_package;
 namespace go.@internal;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using errors = errors_package;
-using fmt = fmt_package;
-using sort = sort_package;
 using static profile_package;
-using strings = strings_package;
-using strconv = go.strconv_package;
 using go;
-using bytes = bytes_package;
-using gzip = compress.gzip_package;
 using io = io_package;
-using time = time_package;
 using compress;
 using regexp = regexp_package;
 // </GlyphForwarderUsings>

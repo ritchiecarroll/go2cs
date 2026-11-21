@@ -65,10 +65,7 @@ using static go.@internal.lazyregexp_package;
 namespace go.@internal;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using os = os_package;
 using regexp = regexp_package;
-using strings = strings_package;
-using sync = go.sync_package;
 using go;
 using static lazyregexp_package;
 // </GlyphForwarderUsings>

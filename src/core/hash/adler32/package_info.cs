@@ -63,11 +63,8 @@ using static go.hash.adler32_package;
 namespace go.hash;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using errors = errors_package;
 using hash = hash_package;
-using byteorder = @internal.byteorder_package;
 using @internal;
-using adler32 = adler32_package;
 using static adler32_package;
 // </GlyphForwarderUsings>
 

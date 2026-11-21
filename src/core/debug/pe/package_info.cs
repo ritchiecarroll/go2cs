@@ -77,23 +77,13 @@ using static go.debug.pe_package;
 namespace go.debug;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using bytes = bytes_package;
-using zlib = compress.zlib_package;
 using dwarf = go.debug.dwarf_package;
-using binary = encoding.binary_package;
-using errors = errors_package;
-using fmt = fmt_package;
 using io = io_package;
-using os = os_package;
-using strings = strings_package;
 using compress;
 using encoding;
 using go.debug;
 using static pe_package;
-using saferio = @internal.saferio_package;
-using strconv = strconv_package;
 using @internal;
-using @unsafe = unsafe_package;
 // </GlyphForwarderUsings>
 
 [GoPackage("pe")]

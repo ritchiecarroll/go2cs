@@ -64,11 +64,6 @@ using static go.net.http.internal_package;
 namespace go.net.http;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using bufio = bufio_package;
-using bytes = bytes_package;
-using errors = errors_package;
-using fmt = fmt_package;
-using io = io_package;
 using static internal_package;
 // </GlyphForwarderUsings>
 

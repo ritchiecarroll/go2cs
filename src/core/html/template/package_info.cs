@@ -101,27 +101,14 @@ using static go.html.template_package;
 namespace go.html;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using strconv = strconv_package;
 using static template_package;
-using fmt = fmt_package;
-using slices = slices_package;
 using parse = text.template.parse_package;
 using text.template;
-using ꓸꓸꓸany = Span<any>;
-using bytes = bytes_package;
-using html = html_package;
-using godebug = @internal.godebug_package;
 using io = io_package;
-using maps = maps_package;
-using regexp = regexp_package;
 using template = text.template_package;
 using @internal;
 using text;
 using fs = go.io.fs_package;
-using os = os_package;
-using path = path_package;
-using filepath = go.path.filepath_package;
-using sync = sync_package;
 using go.io;
 using go.path;
 using ꓸꓸꓸstring = Span<@string>;

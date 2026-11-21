@@ -64,11 +64,6 @@ using static go.vendor.golang.org.x.crypto.chacha20_package;
 namespace go.vendor.golang.org.x.crypto;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using cipher = go.crypto.cipher_package;
-using binary = encoding.binary_package;
-using errors = errors_package;
-using bits = math.bits_package;
-using alias = go.vendor.golang.org.x.crypto.@internal.alias_package;
 using encoding;
 using go.crypto;
 using go.vendor.golang.org.x.crypto.@internal;

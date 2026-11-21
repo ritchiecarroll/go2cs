@@ -66,11 +66,6 @@ using static go.encoding.hex_package;
 namespace go.encoding;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using errors = errors_package;
-using fmt = fmt_package;
-using io = io_package;
-using slices = slices_package;
-using strings = strings_package;
 using static hex_package;
 // </GlyphForwarderUsings>
 

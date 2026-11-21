@@ -80,21 +80,13 @@ using static go.net.rpc_package;
 namespace go.net;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using bufio = bufio_package;
-using gob = encoding.gob_package;
-using errors = errors_package;
 using io = io_package;
-using log = log_package;
 using net = net_package;
 using Δhttp = global::go.net.http_package;
 using sync = sync_package;
 using encoding;
 using global::go.net;
 using static rpc_package;
-using fmt = fmt_package;
-using template = html.template_package;
-using slices = slices_package;
-using strings = strings_package;
 using html;
 // </GlyphForwarderUsings>
 

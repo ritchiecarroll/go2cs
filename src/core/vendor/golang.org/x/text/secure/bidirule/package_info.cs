@@ -62,10 +62,6 @@ using static go.vendor.golang.org.x.text.secure.bidirule_package;
 namespace go.vendor.golang.org.x.text.secure;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using errors = errors_package;
-using utf8 = go.unicode.utf8_package;
-using transform = go.vendor.golang.org.x.text.transform_package;
-using bidi = go.vendor.golang.org.x.text.unicode.bidi_package;
 using go.unicode;
 using go.vendor.golang.org.x.text;
 using go.vendor.golang.org.x.text.unicode;

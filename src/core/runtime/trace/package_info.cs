@@ -73,18 +73,10 @@ using static go.runtime.trace_package;
 namespace go.runtime;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using context = context_package;
-using fmt = fmt_package;
-using atomic = go.sync.atomic_package;
 using go.sync;
-using ꓸꓸꓸany = Span<any>;
 using static trace_package;
 using io = io_package;
-using sync = sync_package;
 using time = time_package;
-using slices = slices_package;
-using tracev2 = @internal.trace.tracev2_package;
-using runtime = runtime_package;
 using @internal.trace;
 // </GlyphForwarderUsings>
 

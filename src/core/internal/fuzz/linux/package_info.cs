@@ -101,24 +101,9 @@ using static go.@internal.fuzz_package;
 namespace go.@internal;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using bytes = bytes_package;
 using context = context_package;
-using sha256 = crypto.sha256_package;
-using errors = errors_package;
-using fmt = fmt_package;
-using godebug = global::go.@internal.godebug_package;
-using io = io_package;
-using bits = global::go.math.bits_package;
-using os = os_package;
-using filepath = path.filepath_package;
-using reflect = reflect_package;
-using Δruntime = runtime_package;
-using strings = strings_package;
 using time = time_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using crypto;
-using fs = global::go.io.fs_package;
 using global::go.@internal;
 using global::go.io;
 using global::go.math;
@@ -126,22 +111,11 @@ using path;
 using ꓸꓸꓸCorpusEntry = Span<CorpusEntry>;
 using ꓸꓸꓸany = Span<any>;
 using static fuzz_package;
-using @unsafe = unsafe_package;
 using binary = encoding.binary_package;
-using math = math_package;
 using encoding;
-using strconv = global::go.strconv_package;
-using atomic = global::go.sync.atomic_package;
-using FieldOffsetAttribute = global::System.Runtime.InteropServices.FieldOffsetAttribute;
-using LayoutKind = global::System.Runtime.InteropServices.LayoutKind;
-using StructLayoutAttribute = global::System.Runtime.InteropServices.StructLayoutAttribute;
 using global::go;
 using global::go.sync;
-using exec = global::go.os.exec_package;
-using Δsyscall = syscall_package;
 using global::go.os;
-using json = encoding.json_package;
-using sync = global::go.sync_package;
 // </GlyphForwarderUsings>
 
 [GoPackage("fuzz")]

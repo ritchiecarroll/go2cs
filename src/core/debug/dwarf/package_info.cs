@@ -123,17 +123,11 @@ using static go.debug.dwarf_package;
 namespace go.debug;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using strconv = strconv_package;
 using static dwarf_package;
 using bytes = bytes_package;
 using binary = encoding.binary_package;
 using encoding;
-using errors = errors_package;
-using fmt = fmt_package;
-using io = io_package;
 using path = path_package;
-using strings = strings_package;
-using sort = sort_package;
 // </GlyphForwarderUsings>
 
 [GoPackage("dwarf")]

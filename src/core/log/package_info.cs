@@ -65,16 +65,7 @@ using static go.log_package;
 namespace go;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using fmt = fmt_package;
 using Δio = io_package;
-using Δinternal = log.internal_package;
-using os = os_package;
-using runtime = runtime_package;
-using Δsync = sync_package;
-using atomic = go.sync.atomic_package;
-using time = time_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.sync;
 using log;
 using ꓸꓸꓸany = Span<any>;

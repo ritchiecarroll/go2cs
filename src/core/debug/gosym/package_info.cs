@@ -73,17 +73,9 @@ using static go.debug.gosym_package;
 namespace go.debug;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using bytes = bytes_package;
-using binary = encoding.binary_package;
-using abi = @internal.abi_package;
-using sort = sort_package;
-using sync = sync_package;
 using @internal;
 using encoding;
 using static gosym_package;
-using fmt = fmt_package;
-using strconv = strconv_package;
-using strings = strings_package;
 // </GlyphForwarderUsings>
 
 [GoPackage("gosym")]

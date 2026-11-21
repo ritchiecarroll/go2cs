@@ -61,8 +61,6 @@ using static go.@internal.coverage.slicewriter_package;
 namespace go.@internal.coverage;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using fmt = fmt_package;
-using io = io_package;
 using static slicewriter_package;
 // </GlyphForwarderUsings>
 

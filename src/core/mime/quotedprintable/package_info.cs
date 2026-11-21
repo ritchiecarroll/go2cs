@@ -62,10 +62,6 @@ using static go.mime.quotedprintable_package;
 namespace go.mime;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using bufio = bufio_package;
-using bytes = bytes_package;
-using fmt = fmt_package;
-using io = io_package;
 using static quotedprintable_package;
 // </GlyphForwarderUsings>
 

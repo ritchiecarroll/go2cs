@@ -72,8 +72,6 @@ using static go.crypto.@internal.fips140.nistec.fiat_package;
 namespace go.crypto.@internal.fips140.nistec;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using subtle = go.crypto.@internal.fips140.subtle_package;
-using errors = errors_package;
 using go.crypto.@internal.fips140;
 using static fiat_package;
 // </GlyphForwarderUsings>

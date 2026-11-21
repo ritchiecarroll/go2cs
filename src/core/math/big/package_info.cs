@@ -99,21 +99,13 @@ using static go.math.big_package;
 namespace go.math;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using strconv = strconv_package;
 using static big_package;
 using fmt = fmt_package;
-using math = math_package;
-using bits = go.math.bits_package;
 using go.math;
 using io = io_package;
-using strings = strings_package;
-using errors = errors_package;
-using byteorder = @internal.byteorder_package;
 using @internal;
 using bytes = bytes_package;
 using rand = go.math.rand_package;
-using slices = slices_package;
-using sync = sync_package;
 // </GlyphForwarderUsings>
 
 [GoPackage("big")]

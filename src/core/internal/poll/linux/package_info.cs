@@ -91,20 +91,13 @@ using static go.@internal.poll_package;
 namespace go.@internal;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using errors = errors_package;
 using static poll_package;
 using Δsyscall = syscall_package;
-using atomic = go.sync.atomic_package;
 using go.sync;
-using sync = go.sync_package;
 using time = time_package;
 using go;
-using io = io_package;
-using strconv = go.@internal.strconv_package;
-using unix = go.@internal.syscall.unix_package;
 using go.@internal;
 using go.@internal.syscall;
-using Δruntime = runtime_package;
 // </GlyphForwarderUsings>
 
 [GoPackage("poll")]

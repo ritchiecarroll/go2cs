@@ -82,28 +82,17 @@ using static go.text.template_package;
 namespace go.text;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using errors = errors_package;
-using fmt = fmt_package;
-using fmtsort = @internal.fmtsort_package;
 using io = io_package;
 using reflect = reflect_package;
-using runtime = runtime_package;
-using strings = strings_package;
 using parse = go.text.template.parse_package;
 using @internal;
 using go.text.template;
-using iter = iter_package;
 using ꓸꓸꓸany = Span<any>;
 using static template_package;
 using fs = go.io.fs_package;
-using os = os_package;
-using path = path_package;
-using filepath = go.path.filepath_package;
 using go.io;
 using go.path;
 using ꓸꓸꓸstring = Span<@string>;
-using maps = maps_package;
-using sync = sync_package;
 // </GlyphForwarderUsings>
 
 [GoPackage("template")]

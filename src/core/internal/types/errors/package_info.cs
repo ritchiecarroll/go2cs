@@ -61,7 +61,6 @@ using static go.@internal.types.errors_package;
 namespace go.@internal.types;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using strconv = go.strconv_package;
 using go;
 using static errors_package;
 // </GlyphForwarderUsings>

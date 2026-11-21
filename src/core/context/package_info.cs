@@ -81,14 +81,8 @@ using static go.context_package;
 namespace go;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using errors = errors_package;
-using reflectlite = @internal.reflectlite_package;
-using Δsync = sync_package;
-using atomic = go.sync.atomic_package;
 using time = time_package;
 using @internal;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.sync;
 using static context_package;
 // </GlyphForwarderUsings>

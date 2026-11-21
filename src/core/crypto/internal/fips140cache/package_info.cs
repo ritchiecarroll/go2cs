@@ -65,8 +65,6 @@ using static go.crypto.@internal.fips140cache_package;
 namespace go.crypto.@internal;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using runtime = runtime_package;
-using sync = sync_package;
 using weak = weak_package;
 using static fips140cache_package;
 // </GlyphForwarderUsings>

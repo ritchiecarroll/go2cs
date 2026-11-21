@@ -106,22 +106,12 @@ using static go.go.doc_package;
 namespace go.go;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using fmt = fmt_package;
 using ast = global::go.go.ast_package;
 using comment = global::go.go.doc.comment_package;
 using token = global::go.go.token_package;
-using strings = strings_package;
 using global::go.go;
 using global::go.go.doc;
-using ꓸꓸꓸany = Span<any>;
 using static doc_package;
-using cmp = cmp_package;
-using lazyregexp = global::go.@internal.lazyregexp_package;
-using path = path_package;
-using slices = slices_package;
-using strconv = strconv_package;
-using unicode = unicode_package;
-using utf8 = global::go.unicode.utf8_package;
 using global::go.@internal;
 using global::go.unicode;
 // </GlyphForwarderUsings>

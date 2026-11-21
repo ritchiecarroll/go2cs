@@ -69,19 +69,11 @@ using static go.vendor.golang.org.x.net.http.httpproxy_package;
 namespace go.vendor.golang.org.x.net.http;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using errors = errors_package;
-using fmt = fmt_package;
 using net = net_package;
-using netip = go.net.netip_package;
 using url = go.net.url_package;
-using os = os_package;
-using strings = strings_package;
-using utf8 = unicode.utf8_package;
-using idna = go.vendor.golang.org.x.net.idna_package;
 using go.net;
 using go.vendor.golang.org.x.net;
 using unicode;
-using ꓸꓸꓸstring = Span<@string>;
 using static httpproxy_package;
 // </GlyphForwarderUsings>
 

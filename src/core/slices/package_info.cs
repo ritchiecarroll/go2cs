@@ -65,8 +65,6 @@ using static go.slices_package;
 namespace go;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using cmp = cmp_package;
-using bits = math.bits_package;
 using math;
 using static slices_package;
 // </GlyphForwarderUsings>

@@ -65,12 +65,6 @@ using static go.@internal.goroot_package;
 namespace go.@internal;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using os = os_package;
-using exec = go.os.exec_package;
-using filepath = path.filepath_package;
-using strings = strings_package;
-using sync = go.sync_package;
-using fs = io.fs_package;
 using go;
 using go.os;
 using io;

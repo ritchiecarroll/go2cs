@@ -62,9 +62,6 @@ using static go.@internal.testpty_package;
 namespace go.@internal;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using errors = errors_package;
-using fmt = fmt_package;
-using os = os_package;
 using static testpty_package;
 // </GlyphForwarderUsings>
 

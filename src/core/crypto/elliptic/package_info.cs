@@ -81,8 +81,6 @@ using static go.crypto.elliptic_package;
 namespace go.crypto;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using nistec = go.crypto.@internal.fips140.nistec_package;
-using errors = errors_package;
 using big = math.big_package;
 using go.crypto.@internal.fips140;
 using math;

@@ -67,16 +67,8 @@ using static go.encoding.csv_package;
 namespace go.encoding;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using bufio = bufio_package;
-using bytes = bytes_package;
-using errors = errors_package;
-using fmt = fmt_package;
-using io = io_package;
-using unicode = unicode_package;
-using utf8 = go.unicode.utf8_package;
 using go.unicode;
 using static csv_package;
-using strings = strings_package;
 // </GlyphForwarderUsings>
 
 [GoPackage("csv")]

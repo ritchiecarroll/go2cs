@@ -67,9 +67,6 @@ using static go.@internal.chacha8rand_package;
 namespace go.@internal;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using byteorder = go.@internal.byteorder_package;
-using cpu = go.@internal.cpu_package;
-using @unsafe = unsafe_package;
 using go.@internal;
 using static chacha8rand_package;
 // </GlyphForwarderUsings>

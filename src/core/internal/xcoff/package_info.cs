@@ -90,18 +90,10 @@ using static go.@internal.xcoff_package;
 namespace go.@internal;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using binary = encoding.binary_package;
-using fmt = fmt_package;
-using io = io_package;
-using os = os_package;
-using strconv = go.strconv_package;
-using strings = strings_package;
 using encoding;
 using go;
 using static xcoff_package;
 using dwarf = debug.dwarf_package;
-using errors = errors_package;
-using saferio = go.@internal.saferio_package;
 using debug;
 using go.@internal;
 // </GlyphForwarderUsings>

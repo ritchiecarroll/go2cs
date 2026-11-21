@@ -61,8 +61,6 @@ using static go.@internal.synctest_package;
 namespace go.@internal;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using abi = go.@internal.abi_package;
-using @unsafe = unsafe_package;
 using go.@internal;
 using static synctest_package;
 // </GlyphForwarderUsings>

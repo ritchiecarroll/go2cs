@@ -66,19 +66,10 @@ using static go.@internal.coverage.cformat_package;
 namespace go.@internal.coverage;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using cmp = cmp_package;
-using fmt = fmt_package;
 using coverage = go.@internal.coverage_package;
-using cmerge = go.@internal.coverage.cmerge_package;
 using io = io_package;
-using maps = maps_package;
-using slices = slices_package;
-using sort = sort_package;
-using strings = strings_package;
-using tabwriter = text.tabwriter_package;
 using go.@internal;
 using go.@internal.coverage;
-using iter = iter_package;
 using text;
 using static cformat_package;
 // </GlyphForwarderUsings>

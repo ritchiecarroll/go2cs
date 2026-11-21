@@ -73,16 +73,10 @@ using static go.net.rpc.jsonrpc_package;
 namespace go.net.rpc;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using json = encoding.json_package;
-using fmt = fmt_package;
-using io = io_package;
-using net = net_package;
 using rpc = global::go.net.rpc_package;
-using sync = sync_package;
 using encoding;
 using global::go.net;
 using static jsonrpc_package;
-using errors = errors_package;
 // </GlyphForwarderUsings>
 
 [GoPackage("jsonrpc")]

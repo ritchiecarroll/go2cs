@@ -62,10 +62,6 @@ using static go.crypto.rc4_package;
 namespace go.crypto;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using alias = go.crypto.@internal.fips140.alias_package;
-using fips140only = go.crypto.@internal.fips140only_package;
-using errors = errors_package;
-using strconv = strconv_package;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140;
 using static rc4_package;

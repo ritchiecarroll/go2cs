@@ -66,7 +66,6 @@ namespace go.crypto;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
 using crypto = crypto_package;
-using mlkem = go.crypto.@internal.fips140.mlkem_package;
 using go.crypto.@internal.fips140;
 using static mlkem_package;
 // </GlyphForwarderUsings>

@@ -76,14 +76,9 @@ using static go.math.rand_package;
 namespace go.math;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using math = math_package;
 using static rand_package;
-using godebug = @internal.godebug_package;
-using sync = sync_package;
-using atomic = go.sync.atomic_package;
 using @internal;
 using go.sync;
-using rand = rand_package;
 // </GlyphForwarderUsings>
 
 [GoPackage("rand")]

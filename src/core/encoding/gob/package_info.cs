@@ -98,27 +98,13 @@ using static go.encoding.gob_package;
 namespace go.encoding;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using encoding = encoding_package;
-using errors = errors_package;
-using saferio = @internal.saferio_package;
 using io = io_package;
-using math = math_package;
-using bits = go.math.bits_package;
 using reflect = reflect_package;
 using @internal;
 using go.math;
 using static gob_package;
-using bufio = bufio_package;
-using sync = sync_package;
-using binary = go.encoding.binary_package;
 using go.encoding;
 using go.sync;
-using fmt = fmt_package;
-using maps = maps_package;
-using os = os_package;
-using atomic = go.sync.atomic_package;
-using unicode = unicode_package;
-using utf8 = go.unicode.utf8_package;
 using go.unicode;
 // </GlyphForwarderUsings>
 

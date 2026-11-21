@@ -81,31 +81,11 @@ using static go.go.build_package;
 namespace go.go;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using bytes = bytes_package;
-using errors = errors_package;
-using fmt = fmt_package;
 using ast = global::go.go.ast_package;
 using constraint = global::go.go.build.constraint_package;
-using Δdoc = global::go.go.doc_package;
 using token = global::go.go.token_package;
-using buildcfg = global::go.@internal.buildcfg_package;
-using godebug = global::go.@internal.godebug_package;
-using goroot = global::go.@internal.goroot_package;
-using goversion = global::go.@internal.goversion_package;
-using platform = global::go.@internal.platform_package;
-using syslist = global::go.@internal.syslist_package;
 using io = io_package;
 using fs = global::go.io.fs_package;
-using os = os_package;
-using exec = global::go.os.exec_package;
-using pathpkg = path_package;
-using filepath = global::go.path.filepath_package;
-using runtime = runtime_package;
-using slices = slices_package;
-using strconv = strconv_package;
-using strings = strings_package;
-using unicode = unicode_package;
-using utf8 = global::go.unicode.utf8_package;
 using global::go.@internal;
 using global::go.go;
 using global::go.go.build;
@@ -113,13 +93,8 @@ using global::go.io;
 using global::go.os;
 using global::go.path;
 using global::go.unicode;
-using iter = iter_package;
 using ꓸꓸꓸstring = Span<@string>;
-using Δbuild = build_package;
 using static build_package;
-using bufio = bufio_package;
-using parser = global::go.go.parser_package;
-using scanner = global::go.go.scanner_package;
 // </GlyphForwarderUsings>
 
 [GoPackage("build")]

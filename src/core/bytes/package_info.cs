@@ -64,14 +64,9 @@ using static go.bytes_package;
 namespace go;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using errors = errors_package;
 using io = io_package;
-using utf8 = go.unicode.utf8_package;
 using go.unicode;
 using static bytes_package;
-using bytealg = @internal.bytealg_package;
-using bits = math.bits_package;
-using Δunicode = unicode_package;
 using @internal;
 using math;
 // </GlyphForwarderUsings>

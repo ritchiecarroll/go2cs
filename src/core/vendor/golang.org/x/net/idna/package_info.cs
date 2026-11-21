@@ -74,12 +74,6 @@ using static go.vendor.golang.org.x.net.idna_package;
 namespace go.vendor.golang.org.x.net;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using fmt = fmt_package;
-using strings = strings_package;
-using utf8 = unicode.utf8_package;
-using bidirule = go.vendor.golang.org.x.text.secure.bidirule_package;
-using bidi = go.vendor.golang.org.x.text.unicode.bidi_package;
-using norm = go.vendor.golang.org.x.text.unicode.norm_package;
 using go.vendor.golang.org.x.text.secure;
 using go.vendor.golang.org.x.text.unicode;
 using unicode;

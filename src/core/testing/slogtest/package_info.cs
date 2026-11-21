@@ -61,13 +61,7 @@ namespace go.testing;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
 using context = context_package;
-using errors = errors_package;
-using fmt = fmt_package;
 using slog = log.slog_package;
-using reflect = reflect_package;
-using runtime = runtime_package;
-using testing = testing_package;
-using time = time_package;
 using log;
 using static slogtest_package;
 // </GlyphForwarderUsings>

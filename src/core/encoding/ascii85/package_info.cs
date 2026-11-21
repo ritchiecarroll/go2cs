@@ -64,8 +64,6 @@ using static go.encoding.ascii85_package;
 namespace go.encoding;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using io = io_package;
-using strconv = strconv_package;
 using static ascii85_package;
 // </GlyphForwarderUsings>
 

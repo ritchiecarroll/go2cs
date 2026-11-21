@@ -71,27 +71,12 @@ using static go.@internal.coverage.cfile_package;
 namespace go.@internal.coverage;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using fmt = fmt_package;
-using fnv = hash.fnv_package;
-using coverage = go.@internal.coverage_package;
-using encodecounter = go.@internal.coverage.encodecounter_package;
-using encodemeta = go.@internal.coverage.encodemeta_package;
-using rtcov = go.@internal.coverage.rtcov_package;
 using io = io_package;
-using os = os_package;
-using filepath = path.filepath_package;
-using runtime = runtime_package;
-using strconv = go.strconv_package;
-using atomic = sync.atomic_package;
-using time = time_package;
-using @unsafe = unsafe_package;
-using fs = go.io.fs_package;
 using go;
 using go.@internal;
 using go.@internal.coverage;
 using go.io;
 using hash;
-using hash = hash_package;
 using path;
 using sync;
 using static cfile_package;

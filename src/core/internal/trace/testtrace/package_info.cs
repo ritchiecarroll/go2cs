@@ -78,23 +78,11 @@ using static go.@internal.trace.testtrace_package;
 namespace go.@internal.trace;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using bufio = bufio_package;
-using bytes = bytes_package;
-using fmt = fmt_package;
-using regexp = regexp_package;
-using strconv = go.strconv_package;
-using strings = strings_package;
 using go;
-using io = io_package;
 using static testtrace_package;
-using errors = errors_package;
 using trace = go.@internal.trace_package;
-using version = go.@internal.trace.version_package;
-using slices = slices_package;
 using go.@internal;
 using go.@internal.trace;
-using iter = iter_package;
-using time = time_package;
 using ꓸꓸꓸany = Span<any>;
 // </GlyphForwarderUsings>
 

@@ -62,15 +62,8 @@ using static go.testing.cryptotest_package;
 namespace go.testing;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using cryptorand = crypto.rand_package;
-using byteorder = @internal.byteorder_package;
-using io = io_package;
-using mathrand = math.rand.rand_package;
-using sync = sync_package;
-using testing = testing_package;
 using @internal;
 using math.rand;
-using rand = math.rand.rand_package;
 using static cryptotest_package;
 // </GlyphForwarderUsings>
 

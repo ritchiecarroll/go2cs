@@ -63,18 +63,11 @@ using static go.compress.gzip_package;
 namespace go.compress;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using bufio = bufio_package;
-using flate = go.compress.flate_package;
-using binary = encoding.binary_package;
-using errors = errors_package;
-using crc32 = hash.crc32_package;
 using io = io_package;
-using time = time_package;
 using encoding;
 using go.compress;
 using hash;
 using static gzip_package;
-using fmt = fmt_package;
 // </GlyphForwarderUsings>
 
 [GoPackage("gzip")]

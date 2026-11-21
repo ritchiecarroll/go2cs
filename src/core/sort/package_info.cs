@@ -75,10 +75,7 @@ namespace go;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
 using static sort_package;
-using bits = math.bits_package;
-using slices = slices_package;
 using math;
-using sort = sort_package;
 // </GlyphForwarderUsings>
 
 [GoPackage("sort")]

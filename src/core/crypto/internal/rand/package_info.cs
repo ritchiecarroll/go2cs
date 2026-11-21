@@ -64,11 +64,6 @@ using static go.crypto.@internal.rand_package;
 namespace go.crypto.@internal;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using Δboring = go.crypto.@internal.boring_package;
-using drbg = go.crypto.@internal.fips140.drbg_package;
-using randutil = go.crypto.@internal.randutil_package;
-using godebug = go.@internal.godebug_package;
-using io = io_package;
 using go.@internal;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140;

@@ -216,35 +216,20 @@ namespace go;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
 using netip = net.netip_package;
-using slices = slices_package;
 using net;
 using static net_package;
-using errors = errors_package;
-using bytealg = @internal.bytealg_package;
-using godebug = @internal.godebug_package;
-using stringslite = @internal.stringslite_package;
-using fs = go.io.fs_package;
 using os = os_package;
-using runtime = runtime_package;
-using Δsync = sync_package;
 using @internal;
 using go.io;
 using context = context_package;
-using nettrace = @internal.nettrace_package;
 using syscall = syscall_package;
 using time = time_package;
-using cmp = cmp_package;
-using strconv = @internal.strconv_package;
 using dnsmessage = vendor.golang.org.x.net.dns.dnsmessage_package;
 using vendor.golang.org.x.net.dns;
 using Δio = io_package;
-using atomic = go.sync.atomic_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.sync;
 using poll = @internal.poll_package;
 using singleflight = @internal.singleflight_package;
-using unix = @internal.syscall.unix_package;
 using @internal.syscall;
 // </GlyphForwarderUsings>
 

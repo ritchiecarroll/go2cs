@@ -69,10 +69,6 @@ using static go.encoding.base64_package;
 namespace go.encoding;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using byteorder = @internal.byteorder_package;
-using io = io_package;
-using slices = slices_package;
-using strconv = strconv_package;
 using @internal;
 using static base64_package;
 // </GlyphForwarderUsings>

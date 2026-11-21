@@ -71,8 +71,6 @@ using static go.net.@internal.socktest_package;
 namespace go.net.@internal;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using fmt = fmt_package;
-using sync = sync_package;
 using static socktest_package;
 using syscall = syscall_package;
 // </GlyphForwarderUsings>

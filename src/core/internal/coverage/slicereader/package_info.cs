@@ -61,10 +61,6 @@ using static go.@internal.coverage.slicereader_package;
 namespace go.@internal.coverage;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using binary = encoding.binary_package;
-using fmt = fmt_package;
-using io = io_package;
-using @unsafe = unsafe_package;
 using encoding;
 using static slicereader_package;
 // </GlyphForwarderUsings>

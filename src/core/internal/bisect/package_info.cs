@@ -67,12 +67,8 @@ using static go.@internal.bisect_package;
 namespace go.@internal;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using Δruntime = runtime_package;
-using sync = go.sync_package;
-using atomic = go.sync.atomic_package;
 using go;
 using go.sync;
-using ꓸꓸꓸany = Span<any>;
 using static bisect_package;
 // </GlyphForwarderUsings>
 

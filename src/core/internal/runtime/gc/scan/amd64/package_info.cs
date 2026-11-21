@@ -67,10 +67,6 @@ using static go.@internal.runtime.gc.scan_package;
 namespace go.@internal.runtime.gc;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using goarch = go.@internal.goarch_package;
-using gc = go.@internal.runtime.gc_package;
-using sys = go.@internal.runtime.sys_package;
-using @unsafe = unsafe_package;
 using go.@internal;
 using go.@internal.runtime;
 using static scan_package;

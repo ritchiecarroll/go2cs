@@ -65,11 +65,8 @@ namespace go.log.slog.@internal;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
 using context = context_package;
-using fmt = fmt_package;
-using io = io_package;
 using slog = go.log.slog_package;
 using buffer = go.log.slog.@internal.buffer_package;
-using strconv = strconv_package;
 using time = time_package;
 using go.log;
 using go.log.slog.@internal;

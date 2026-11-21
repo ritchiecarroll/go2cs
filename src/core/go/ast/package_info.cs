@@ -229,23 +229,11 @@ namespace go.go;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
 using token = global::go.go.token_package;
-using strings = strings_package;
 using global::go.go;
-using iter = iter_package;
 using static ast_package;
-using bytes = bytes_package;
-using cmp = cmp_package;
-using fmt = fmt_package;
-using slices = slices_package;
-using io = io_package;
-using strconv = strconv_package;
-using unicode = unicode_package;
-using utf8 = global::go.unicode.utf8_package;
 using global::go.unicode;
-using os = os_package;
 using reflect = reflect_package;
 using ꓸꓸꓸany = Span<any>;
-using scanner = global::go.go.scanner_package;
 // </GlyphForwarderUsings>
 
 [GoPackage("ast")]

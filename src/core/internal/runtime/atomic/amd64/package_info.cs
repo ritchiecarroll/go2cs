@@ -80,10 +80,6 @@ namespace go.@internal.runtime;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
 using @unsafe = unsafe_package;
-using FieldOffsetAttribute = global::System.Runtime.InteropServices.FieldOffsetAttribute;
-using LayoutKind = global::System.Runtime.InteropServices.LayoutKind;
-using StructLayoutAttribute = global::System.Runtime.InteropServices.StructLayoutAttribute;
-using atomic = atomic_package;
 using static atomic_package;
 // </GlyphForwarderUsings>
 

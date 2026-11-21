@@ -79,18 +79,13 @@ using static go.vendor.golang.org.x.text.unicode.norm_package;
 namespace go.vendor.golang.org.x.text.unicode;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using utf8 = go.unicode.utf8_package;
 using go.unicode;
 using static norm_package;
-using binary = encoding.binary_package;
 using encoding;
-using fmt = fmt_package;
 using transform = go.vendor.golang.org.x.text.transform_package;
 using go.vendor.golang.org.x.text;
 using ꓸꓸꓸbyte = Span<byte>;
-using norm = norm_package;
 using io = io_package;
-using sync = sync_package;
 // </GlyphForwarderUsings>
 
 [GoPackage("norm", ImportPath = "vendor/golang.org/x/text/unicode/norm")]

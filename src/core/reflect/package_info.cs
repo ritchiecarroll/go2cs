@@ -94,23 +94,12 @@ namespace go;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
 using abi = @internal.abi_package;
-using goarch = @internal.goarch_package;
 using @unsafe = unsafe_package;
 using @internal;
 using static reflect_package;
 using iter = iter_package;
-using reflect = reflect_package;
-using race = @internal.race_package;
-using maps = @internal.runtime.maps_package;
-using sys = @internal.runtime.sys_package;
 using @internal.runtime;
-using runtime = runtime_package;
-using strconv = strconv_package;
-using Δsync = sync_package;
-using Δunicode = unicode_package;
-using utf8 = go.unicode.utf8_package;
 using go.unicode;
-using ꓸꓸꓸbyte = Span<byte>;
 // </GlyphForwarderUsings>
 
 [GoPackage("reflect")]

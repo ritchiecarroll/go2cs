@@ -77,9 +77,6 @@ using abi = go.@internal.abi_package;
 using @unsafe = unsafe_package;
 using go.@internal;
 using static reflectlite_package;
-using goarch = go.@internal.goarch_package;
-using unsafeheader = go.@internal.unsafeheader_package;
-using Δruntime = runtime_package;
 // </GlyphForwarderUsings>
 
 [GoPackage("reflectlite")]

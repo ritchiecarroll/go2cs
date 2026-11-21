@@ -68,16 +68,8 @@ namespace go.crypto;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
 using crypto = crypto_package;
-using ed25519 = go.crypto.@internal.fips140.ed25519_package;
-using fips140cache = go.crypto.@internal.fips140cache_package;
-using fips140only = go.crypto.@internal.fips140only_package;
 using rand = go.crypto.@internal.rand_package;
-using cryptorand = go.crypto.rand_package;
-using subtle = go.crypto.subtle_package;
-using errors = errors_package;
-using godebug = go.@internal.godebug_package;
 using io = io_package;
-using strconv = strconv_package;
 using go.@internal;
 using go.crypto;
 using go.crypto.@internal;

@@ -83,17 +83,10 @@ namespace go;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
 using syntax = regexp.syntax_package;
-using Δsync = sync_package;
 using io = io_package;
 using regexp;
 using static regexp_package;
-using slices = slices_package;
-using strings = strings_package;
-using Δunicode = unicode_package;
-using utf8 = go.unicode.utf8_package;
 using go.unicode;
-using bytes = bytes_package;
-using strconv = strconv_package;
 // </GlyphForwarderUsings>
 
 [GoPackage("regexp")]

@@ -63,7 +63,7 @@ public static (cipher.AEAD, error) NewX(slice<byte> key) {
     copy(c.key[..], hKey);
 
     // The first 4 bytes of the final nonce are unused counter space.
-    var cNonce = new slice<byte>(chacha20poly1305ᴛxchacha20poly1305.NonceSize);
+    var cNonce = new slice<byte>(chacha20poly1305_package.NonceSize);
     copy(cNonce[4..12], nonce[16..24]);
 
     return c.seal(dst, cNonce[..], plaintext, additionalData);
@@ -85,7 +85,7 @@ public static (cipher.AEAD, error) NewX(slice<byte> key) {
     copy(c.key[..], hKey);
 
     // The first 4 bytes of the final nonce are unused counter space.
-    var cNonce = new slice<byte>(chacha20poly1305ᴛxchacha20poly1305.NonceSize);
+    var cNonce = new slice<byte>(chacha20poly1305_package.NonceSize);
     copy(cNonce[4..12], nonce[16..24]);
 
     return c.open(dst, cNonce[..], ciphertext, additionalData);

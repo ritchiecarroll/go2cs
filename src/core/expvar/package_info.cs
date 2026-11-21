@@ -74,18 +74,6 @@ using static go.expvar_package;
 namespace go;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using json = encoding.json_package;
-using godebug = @internal.godebug_package;
-using Δlog = log_package;
-using Δmath = math_package;
-using http = net.http_package;
-using os = os_package;
-using runtime = runtime_package;
-using slices = slices_package;
-using strconv = strconv_package;
-using Δsync = sync_package;
-using atomic = go.sync.atomic_package;
-using utf8 = unicode.utf8_package;
 using @internal;
 using encoding;
 using go.sync;

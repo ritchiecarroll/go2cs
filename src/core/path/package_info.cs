@@ -62,9 +62,7 @@ using static go.path_package;
 namespace go;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using bytealg = @internal.bytealg_package;
 using @internal;
-using ꓸꓸꓸstring = Span<@string>;
 using static path_package;
 // </GlyphForwarderUsings>
 

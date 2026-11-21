@@ -88,18 +88,9 @@ using static go.math.big.@internal.asmgen_package;
 namespace go.math.big.@internal;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using fmt = fmt_package;
-using strings = strings_package;
 using static asmgen_package;
-using bytes = bytes_package;
-using cmp = cmp_package;
-using bits = go.math.bits_package;
-using slices = slices_package;
 using go.math;
-using io = io_package;
 using ꓸꓸꓸany = Span<any>;
-using asmgen = asmgen_package;
-using iter = iter_package;
 using ꓸꓸꓸnint = Span<nint>;
 // </GlyphForwarderUsings>
 

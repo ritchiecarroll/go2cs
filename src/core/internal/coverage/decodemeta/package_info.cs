@@ -70,21 +70,12 @@ using static go.@internal.coverage.decodemeta_package;
 namespace go.@internal.coverage;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using binary = encoding.binary_package;
-using fmt = fmt_package;
 using coverage = go.@internal.coverage_package;
-using slicereader = go.@internal.coverage.slicereader_package;
-using stringtab = go.@internal.coverage.stringtab_package;
-using io = io_package;
-using os = os_package;
 using encoding;
 using go.@internal;
 using go.@internal.coverage;
 using static decodemeta_package;
-using bufio = bufio_package;
-using fnv = hash.fnv_package;
 using hash;
-using hash = hash_package;
 // </GlyphForwarderUsings>
 
 [GoPackage("decodemeta")]

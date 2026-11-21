@@ -81,18 +81,9 @@ using static go.io.fs_package;
 namespace go.io;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using oserror = @internal.oserror_package;
-using time = time_package;
-using utf8 = unicode.utf8_package;
 using @internal;
-using io = io_package;
 using unicode;
 using static fs_package;
-using errors = errors_package;
-using bytealg = @internal.bytealg_package;
-using slices = slices_package;
-using path = path_package;
-using fs = fs_package;
 // </GlyphForwarderUsings>
 
 [GoPackage("fs")]

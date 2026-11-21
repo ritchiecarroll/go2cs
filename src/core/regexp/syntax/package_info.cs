@@ -77,16 +77,8 @@ using static go.regexp.syntax_package;
 namespace go.regexp;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using unicode = unicode_package;
 using static syntax_package;
-using strconv = strconv_package;
-using sort = sort_package;
-using strings = strings_package;
-using sync = sync_package;
-using utf8 = go.unicode.utf8_package;
 using go.unicode;
-using ꓸꓸꓸstring = Span<@string>;
-using slices = slices_package;
 // </GlyphForwarderUsings>
 
 [GoPackage("syntax")]

@@ -75,17 +75,10 @@ using static go.crypto.@internal.fips140.edwards25519_package;
 namespace go.crypto.@internal.fips140;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using field = go.crypto.@internal.fips140.edwards25519.field_package;
-using errors = errors_package;
 using go.crypto.@internal.fips140.edwards25519;
-using ꓸꓸꓸжPoint = Span<ж<edwards25519_package.Point>>;
 using static edwards25519_package;
-using byteorder = go.crypto.@internal.fips140deps.byteorder_package;
-using bits = math.bits_package;
 using go.crypto.@internal.fips140deps;
 using math;
-using sync = sync_package;
-using constanttime = go.crypto.@internal.constanttime_package;
 using go.crypto.@internal;
 // </GlyphForwarderUsings>
 

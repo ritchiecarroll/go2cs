@@ -64,15 +64,8 @@ namespace go.hash;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
 using hash = hash_package;
-using abi = @internal.abi_package;
 using @internal;
 using static maphash_package;
-using rand = crypto.rand_package;
-using errors = errors_package;
-using byteorder = @internal.byteorder_package;
-using math = math_package;
-using bits = go.math.bits_package;
-using reflect = reflect_package;
 using crypto;
 using go.math;
 // </GlyphForwarderUsings>

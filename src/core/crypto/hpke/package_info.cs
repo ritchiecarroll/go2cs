@@ -87,29 +87,11 @@ namespace go.crypto;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
 using cipher = go.crypto.cipher_package;
-using errors = errors_package;
-using fmt = fmt_package;
-using chacha20poly1305 = vendor.golang.org.x.crypto.chacha20poly1305_package;
 using go.crypto;
 using vendor.golang.org.x.crypto;
 using static hpke_package;
-using byteorder = go.@internal.byteorder_package;
 using go.@internal;
-using hkdf = go.crypto.hkdf_package;
-using sha256 = go.crypto.sha256_package;
-using sha3 = go.crypto.sha3_package;
-using sha512 = go.crypto.sha512_package;
-using hash = hash_package;
-using ecdh = go.crypto.ecdh_package;
-using rand = go.crypto.@internal.rand_package;
-using slices = slices_package;
 using go.crypto.@internal;
-using io = io_package;
-using bytes = bytes_package;
-using crypto = crypto_package;
-using fips140 = go.crypto.fips140_package;
-using drbg = go.crypto.@internal.fips140.drbg_package;
-using mlkem = go.crypto.mlkem_package;
 using go.crypto.@internal.fips140;
 // </GlyphForwarderUsings>
 

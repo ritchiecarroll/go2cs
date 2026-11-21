@@ -74,20 +74,10 @@ using static go.go.constant_package;
 namespace go.go;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using strconv = strconv_package;
 using static constant_package;
-using fmt = fmt_package;
-using token = global::go.go.token_package;
-using math = math_package;
-using big = global::go.math.big_package;
-using bits = global::go.math.bits_package;
-using strings = strings_package;
-using sync = sync_package;
-using utf8 = unicode.utf8_package;
 using global::go.go;
 using global::go.math;
 using unicode;
-using constant = constant_package;
 // </GlyphForwarderUsings>
 
 [GoPackage("constant")]

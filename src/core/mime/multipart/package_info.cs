@@ -87,24 +87,12 @@ using static go.mime.multipart_package;
 namespace go.mime;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using bytes = bytes_package;
-using errors = errors_package;
-using godebug = @internal.godebug_package;
 using io = io_package;
-using math = math_package;
 using textproto = net.textproto_package;
-using os = os_package;
-using strconv = strconv_package;
 using @internal;
 using net;
 using static multipart_package;
-using rand = crypto.rand_package;
-using fmt = fmt_package;
-using maps = maps_package;
-using slices = slices_package;
-using strings = strings_package;
 using crypto;
-using iter = iter_package;
 // </GlyphForwarderUsings>
 
 [GoPackage("multipart")]

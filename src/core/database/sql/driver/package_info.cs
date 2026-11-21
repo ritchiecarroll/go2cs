@@ -74,13 +74,7 @@ using static go.database.sql.driver_package;
 namespace go.database.sql;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using context = context_package;
-using errors = errors_package;
-using reflect = reflect_package;
 using static driver_package;
-using fmt = fmt_package;
-using strconv = strconv_package;
-using time = time_package;
 // </GlyphForwarderUsings>
 
 [GoPackage("driver")]

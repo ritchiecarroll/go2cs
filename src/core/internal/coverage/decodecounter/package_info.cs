@@ -65,15 +65,6 @@ using static go.@internal.coverage.decodecounter_package;
 namespace go.@internal.coverage;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using binary = encoding.binary_package;
-using fmt = fmt_package;
-using coverage = go.@internal.coverage_package;
-using slicereader = go.@internal.coverage.slicereader_package;
-using stringtab = go.@internal.coverage.stringtab_package;
-using io = io_package;
-using os = os_package;
-using strconv = go.strconv_package;
-using @unsafe = unsafe_package;
 using encoding;
 using go;
 using go.@internal;

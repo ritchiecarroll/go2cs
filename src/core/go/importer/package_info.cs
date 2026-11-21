@@ -63,14 +63,7 @@ using static go.go.importer_package;
 namespace go.go;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using Δbuild = global::go.go.build_package;
-using gccgoimporter = global::go.go.@internal.gccgoimporter_package;
-using gcimporter = global::go.go.@internal.gcimporter_package;
-using srcimporter = global::go.go.@internal.srcimporter_package;
-using token = global::go.go.token_package;
 using types = global::go.go.types_package;
-using io = io_package;
-using runtime = runtime_package;
 using global::go.go;
 using global::go.go.@internal;
 using static importer_package;

@@ -83,17 +83,10 @@ using static go.compress.flate_package;
 namespace go.compress;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using errors = errors_package;
-using fmt = fmt_package;
 using io = io_package;
-using math = math_package;
 using static flate_package;
-using bits = go.math.bits_package;
 using sort = sort_package;
 using go.math;
-using bufio = bufio_package;
-using strconv = strconv_package;
-using sync = sync_package;
 // </GlyphForwarderUsings>
 
 [GoPackage("flate")]

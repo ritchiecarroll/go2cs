@@ -73,11 +73,7 @@ using static go.compress.bzip2_package;
 namespace go.compress;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using bufio = bufio_package;
-using io = io_package;
 using static bzip2_package;
-using cmp = cmp_package;
-using slices = slices_package;
 // </GlyphForwarderUsings>
 
 [GoPackage("bzip2")]

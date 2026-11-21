@@ -68,22 +68,13 @@ using static go.@internal.trace.@internal.testgen_package;
 namespace go.@internal.trace.@internal;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using bytes = bytes_package;
-using binary = encoding.binary_package;
-using fmt = fmt_package;
-using os = os_package;
-using regexp = regexp_package;
-using strings = strings_package;
 using time = time_package;
 using trace = go.@internal.trace_package;
 using raw = go.@internal.trace.raw_package;
 using tracev2 = go.@internal.trace.tracev2_package;
-using version = go.@internal.trace.version_package;
-using txtar = go.@internal.txtar_package;
 using encoding;
 using go.@internal;
 using go.@internal.trace;
-using io = io_package;
 using ꓸꓸꓸany = Span<any>;
 using ꓸꓸꓸuint64 = Span<uint64>;
 using static testgen_package;

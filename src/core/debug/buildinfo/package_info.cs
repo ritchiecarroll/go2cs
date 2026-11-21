@@ -92,20 +92,7 @@ using static go.debug.buildinfo_package;
 namespace go.debug;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using bytes = bytes_package;
-using elf = go.debug.elf_package;
-using macho = go.debug.macho_package;
-using pe = go.debug.pe_package;
-using plan9obj = go.debug.plan9obj_package;
-using binary = encoding.binary_package;
-using errors = errors_package;
-using fmt = fmt_package;
-using saferio = @internal.saferio_package;
-using xcoff = @internal.xcoff_package;
 using io = io_package;
-using fs = go.io.fs_package;
-using os = os_package;
-using debug = runtime.debug_package;
 using @internal;
 using encoding;
 using go.debug;

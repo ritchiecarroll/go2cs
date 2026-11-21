@@ -75,9 +75,7 @@ using static go.os.user_package;
 namespace go.os;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using sync = sync_package;
 using static user_package;
-using strconv = strconv_package;
 // </GlyphForwarderUsings>
 
 [GoPackage("user")]

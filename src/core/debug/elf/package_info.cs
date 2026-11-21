@@ -84,21 +84,9 @@ using static go.debug.elf_package;
 namespace go.debug;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using strconv = strconv_package;
 using static elf_package;
-using bytes = bytes_package;
-using zlib = compress.zlib_package;
 using dwarf = go.debug.dwarf_package;
-using binary = encoding.binary_package;
-using errors = errors_package;
-using fmt = fmt_package;
-using saferio = @internal.saferio_package;
-using zstd = @internal.zstd_package;
 using io = io_package;
-using math = math_package;
-using os = os_package;
-using strings = strings_package;
-using @unsafe = unsafe_package;
 using @internal;
 using compress;
 using encoding;

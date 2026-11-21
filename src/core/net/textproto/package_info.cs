@@ -80,16 +80,7 @@ namespace go.net;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
 using static textproto_package;
-using sync = sync_package;
-using bufio = bufio_package;
-using bytes = bytes_package;
-using errors = errors_package;
-using fmt = fmt_package;
 using io = io_package;
-using math = math_package;
-using strconv = strconv_package;
-using strings = strings_package;
-using net = net_package;
 using ꓸꓸꓸany = Span<any>;
 // </GlyphForwarderUsings>
 

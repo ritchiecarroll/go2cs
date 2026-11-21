@@ -70,22 +70,12 @@ using static go.net.smtp_package;
 namespace go.net;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using hmac = crypto.hmac_package;
-using md5 = crypto.md5_package;
-using errors = errors_package;
-using fmt = fmt_package;
 using crypto;
-using hash = hash_package;
 using static smtp_package;
 using tls = crypto.tls_package;
-using base64 = encoding.base64_package;
 using io = io_package;
-using net = net_package;
-using textproto = go.net.textproto_package;
-using strings = strings_package;
 using encoding;
 using go.net;
-using time = time_package;
 using ꓸꓸꓸany = Span<any>;
 // </GlyphForwarderUsings>
 

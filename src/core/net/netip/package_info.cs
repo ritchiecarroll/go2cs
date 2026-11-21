@@ -69,16 +69,8 @@ using static go.net.netip_package;
 namespace go.net;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using cmp = cmp_package;
-using errors = errors_package;
-using bytealg = @internal.bytealg_package;
-using byteorder = @internal.byteorder_package;
-using math = math_package;
-using strconv = strconv_package;
-using unique = unique_package;
 using @internal;
 using static netip_package;
-using bits = go.math.bits_package;
 using go.math;
 // </GlyphForwarderUsings>
 

@@ -78,22 +78,13 @@ using static go.testing.fstest_package;
 namespace go.testing;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using io = io_package;
 using fs = go.io.fs_package;
 using path = path_package;
-using slices = slices_package;
-using strings = strings_package;
 using time = time_package;
 using go.io;
 using static fstest_package;
-using errors = errors_package;
-using fmt = fmt_package;
-using maps = maps_package;
-using iotest = go.testing.iotest_package;
 using go.testing;
-using iter = iter_package;
 using ꓸꓸꓸany = Span<any>;
-using ꓸꓸꓸstring = Span<@string>;
 // </GlyphForwarderUsings>
 
 [GoPackage("fstest")]

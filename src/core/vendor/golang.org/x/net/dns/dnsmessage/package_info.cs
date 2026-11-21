@@ -82,10 +82,7 @@ using static go.vendor.golang.org.x.net.dns.dnsmessage_package;
 namespace go.vendor.golang.org.x.net.dns;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using errors = errors_package;
-using dnsmessage = dnsmessage_package;
 using static dnsmessage_package;
-using slices = slices_package;
 // </GlyphForwarderUsings>
 
 [GoPackage("dnsmessage", ImportPath = "vendor/golang.org/x/net/dns/dnsmessage")]

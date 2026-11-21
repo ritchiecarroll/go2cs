@@ -74,15 +74,7 @@ namespace go;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
 using encoding = encoding_package;
-using errors = errors_package;
-using fmt = fmt_package;
 using Δio = io_package;
-using os = os_package;
-using reflect = reflect_package;
-using runtime = runtime_package;
-using slices = slices_package;
-using strconv = strconv_package;
-using strings = strings_package;
 using time = time_package;
 using ꓸꓸꓸany = Span<any>;
 using static flag_package;

@@ -69,9 +69,6 @@ using static go.crypto.@internal.fips140.sha256_package;
 namespace go.crypto.@internal.fips140;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using fips140 = go.crypto.@internal.fips140_package;
-using byteorder = go.crypto.@internal.fips140deps.byteorder_package;
-using errors = errors_package;
 using hash = hash_package;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140deps;

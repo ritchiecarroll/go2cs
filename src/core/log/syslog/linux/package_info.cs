@@ -69,15 +69,6 @@ using static go.log.syslog_package;
 namespace go.log;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using errors = errors_package;
-using fmt = fmt_package;
-using log = log_package;
-using net = net_package;
-using os = os_package;
-using strings = strings_package;
-using sync = sync_package;
-using time = time_package;
-using io = io_package;
 using static syslog_package;
 // </GlyphForwarderUsings>
 

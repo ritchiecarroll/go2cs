@@ -93,33 +93,13 @@ using ꓸꓸꓸAttr = Span<slog_package.Attr>;
 using ꓸꓸꓸany = Span<any>;
 using static slog_package;
 using context = context_package;
-using fmt = fmt_package;
-using io = io_package;
 using buffer = go.log.slog.@internal.buffer_package;
-using reflect = reflect_package;
-using slices = slices_package;
-using strconv = strconv_package;
-using sync = sync_package;
 using go.log.slog.@internal;
-using bytes = bytes_package;
-using json = go.encoding.json_package;
-using errors = errors_package;
-using utf8 = go.unicode.utf8_package;
 using go.encoding;
 using go.unicode;
-using strings = strings_package;
-using atomic = go.sync.atomic_package;
 using go.sync;
 using log = log_package;
-using loginternal = go.log.internal_package;
-using @internal = go.log.slog.internal_package;
-using runtime = runtime_package;
 using go.log.slog;
-using ꓸꓸꓸHandler = Span<slog_package.Handler>;
-using encoding = encoding_package;
-using unicode = unicode_package;
-using math = math_package;
-using @unsafe = unsafe_package;
 // </GlyphForwarderUsings>
 
 [GoPackage("slog")]

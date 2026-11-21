@@ -87,24 +87,13 @@ namespace go.@internal;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
 using static pkgbits_package;
-using binary = encoding.binary_package;
-using errors = errors_package;
-using fmt = fmt_package;
 using constant = global::go.go.constant_package;
-using token = global::go.go.token_package;
 using io = io_package;
 using big = math.big_package;
-using os = os_package;
-using Δruntime = runtime_package;
-using strings = strings_package;
 using encoding;
 using global::go.go;
 using math;
-using bytes = bytes_package;
-using sha256 = crypto.sha256_package;
 using crypto;
-using hash = hash_package;
-using strconv = global::go.strconv_package;
 using global::go;
 // </GlyphForwarderUsings>
 

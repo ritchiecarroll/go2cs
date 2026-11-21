@@ -84,24 +84,12 @@ using static go.@internal.runtime.gc.@internal.gen_package;
 namespace go.@internal.runtime.gc.@internal;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using heap = container.heap_package;
-using binary = encoding.binary_package;
-using fmt = fmt_package;
-using maphash = hash.maphash_package;
 using io = io_package;
-using log = log_package;
-using os = os_package;
-using reflect = reflect_package;
-using strings = strings_package;
 using container;
 using encoding;
 using hash;
-using ꓸꓸꓸValue = Span<gen_package.Value>;
-using ꓸꓸꓸany = Span<any>;
 using static gen_package;
-using bits = math.bits_package;
 using math;
-using sync = go.sync_package;
 using go;
 // </GlyphForwarderUsings>
 

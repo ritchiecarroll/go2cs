@@ -68,15 +68,12 @@ namespace go.vendor.golang.org.x.crypto;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
 using encoding_asn1 = encoding.asn1_package;
-using fmt = fmt_package;
 using big = math.big_package;
-using reflect = reflect_package;
 using time = time_package;
 using asn1 = go.vendor.golang.org.x.crypto.cryptobyte.asn1_package;
 using go.vendor.golang.org.x.crypto.cryptobyte;
 using math;
 using static cryptobyte_package;
-using errors = errors_package;
 using ꓸꓸꓸbyte = Span<byte>;
 // </GlyphForwarderUsings>
 

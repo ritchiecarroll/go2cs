@@ -144,32 +144,15 @@ using static go.os_package;
 namespace go;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using bytealg = @internal.bytealg_package;
-using filepathlite = @internal.filepathlite_package;
 using Δio = io_package;
 using fs = go.io.fs_package;
-using slices = slices_package;
 using @internal;
 using go.io;
 using static os_package;
-using byteorder = @internal.byteorder_package;
-using goarch = @internal.goarch_package;
-using runtime = runtime_package;
-using Δsync = sync_package;
 using syscall = syscall_package;
-using @unsafe = unsafe_package;
 using go.sync;
-using poll = @internal.poll_package;
-using errors = errors_package;
-using testlog = @internal.testlog_package;
-using atomic = go.sync.atomic_package;
 using time = time_package;
-using strconv = @internal.strconv_package;
-using execenv = @internal.syscall.execenv_package;
 using @internal.syscall;
-using os = os_package;
-using unix = @internal.syscall.unix_package;
-using stringslite = @internal.stringslite_package;
 // </GlyphForwarderUsings>
 
 [GoPackage("os")]

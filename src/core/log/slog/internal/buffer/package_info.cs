@@ -61,7 +61,6 @@ using static go.log.slog.@internal.buffer_package;
 namespace go.log.slog.@internal;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using sync = sync_package;
 using static buffer_package;
 // </GlyphForwarderUsings>
 

@@ -68,14 +68,7 @@ using static go.mime_package;
 namespace go;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using bytes = bytes_package;
-using base64 = encoding.base64_package;
-using errors = errors_package;
-using fmt = fmt_package;
-using Δio = io_package;
 using strings = strings_package;
-using Δunicode = unicode_package;
-using utf8 = go.unicode.utf8_package;
 using encoding;
 using go.unicode;
 using static mime_package;

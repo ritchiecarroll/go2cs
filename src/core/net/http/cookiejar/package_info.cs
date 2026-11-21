@@ -66,17 +66,8 @@ using static go.net.http.cookiejar_package;
 namespace go.net.http;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using cmp = cmp_package;
-using errors = errors_package;
-using fmt = fmt_package;
-using net = net_package;
 using http = go.net.http_package;
-using ascii = go.net.http.@internal.ascii_package;
-using netip = go.net.netip_package;
 using url = go.net.url_package;
-using slices = slices_package;
-using strings = strings_package;
-using sync = sync_package;
 using time = time_package;
 using go.net;
 using go.net.http.@internal;

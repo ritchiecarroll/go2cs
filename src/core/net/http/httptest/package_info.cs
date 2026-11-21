@@ -77,28 +77,12 @@ using static go.net.http.httptest_package;
 namespace go.net.http;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using bytes = bytes_package;
-using fmt = fmt_package;
-using io = io_package;
 using http = go.net.http_package;
-using textproto = go.net.textproto_package;
-using strconv = strconv_package;
-using strings = strings_package;
-using httpguts = vendor.golang.org.x.net.http.httpguts_package;
 using go.net;
-using iter = iter_package;
 using vendor.golang.org.x.net.http;
 using static httptest_package;
-using context = context_package;
-using tls = crypto.tls_package;
 using x509 = crypto.x509_package;
-using flag = flag_package;
-using log = log_package;
 using net = net_package;
-using testcert = go.net.http.@internal.testcert_package;
-using os = os_package;
-using sync = sync_package;
-using time = time_package;
 using crypto;
 using go.net.http.@internal;
 // </GlyphForwarderUsings>

@@ -70,10 +70,6 @@ using static go.crypto.@internal.fips140.rsa_package;
 namespace go.crypto.@internal.fips140;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using bytes = bytes_package;
-using fips140 = go.crypto.@internal.fips140_package;
-using bigmod = go.crypto.@internal.fips140.bigmod_package;
-using errors = errors_package;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140;
 using static rsa_package;

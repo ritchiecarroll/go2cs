@@ -80,12 +80,8 @@ using static go.@internal.trace.traceviewer_package;
 namespace go.@internal.trace;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using json = encoding.json_package;
-using fmt = fmt_package;
 using trace = go.@internal.trace_package;
 using format = go.@internal.trace.traceviewer.format_package;
-using io = io_package;
-using strconv = go.strconv_package;
 using time = time_package;
 using encoding;
 using go;
@@ -93,16 +89,9 @@ using go.@internal;
 using go.@internal.trace.traceviewer;
 using static traceviewer_package;
 using template = html.template_package;
-using math = math_package;
-using strings = strings_package;
 using html;
-using embed = embed_package;
 using http = net.http_package;
-using fs = go.io.fs_package;
 using net;
-using log = log_package;
-using sync = go.sync_package;
-using iter = iter_package;
 // </GlyphForwarderUsings>
 
 [GoPackage("traceviewer")]

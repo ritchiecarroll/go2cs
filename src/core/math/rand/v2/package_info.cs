@@ -76,13 +76,8 @@ using static go.math.rand.rand_package;
 namespace go.math.rand;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using errors = errors_package;
-using byteorder = @internal.byteorder_package;
-using chacha8rand = @internal.chacha8rand_package;
 using @internal;
 using static rand_package;
-using math = math_package;
-using bits = go.math.bits_package;
 using go.math;
 // </GlyphForwarderUsings>
 

@@ -64,14 +64,9 @@ using static go.hash.crc32_package;
 namespace go.hash;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using errors = errors_package;
 using hash = hash_package;
-using byteorder = @internal.byteorder_package;
-using sync = sync_package;
-using atomic = go.sync.atomic_package;
 using @internal;
 using go.sync;
-using crc32 = crc32_package;
 using static crc32_package;
 // </GlyphForwarderUsings>
 

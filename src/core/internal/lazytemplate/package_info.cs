@@ -66,9 +66,6 @@ namespace go.@internal;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
 using io = io_package;
-using os = os_package;
-using strings = strings_package;
-using sync = go.sync_package;
 using template = text.template_package;
 using go;
 using text;

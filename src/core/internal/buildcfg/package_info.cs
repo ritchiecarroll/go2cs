@@ -66,18 +66,9 @@ using static go.@internal.buildcfg_package;
 namespace go.@internal;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using fmt = fmt_package;
-using os = os_package;
-using filepath = path.filepath_package;
-using strconv = go.strconv_package;
-using strings = strings_package;
 using go;
-using io = io_package;
-using iter = iter_package;
 using path;
 using static buildcfg_package;
-using reflect = reflect_package;
-using goexperiment = go.@internal.goexperiment_package;
 using go.@internal;
 // </GlyphForwarderUsings>
 

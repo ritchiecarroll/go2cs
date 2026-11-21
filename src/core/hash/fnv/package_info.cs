@@ -73,10 +73,7 @@ using static go.hash.fnv_package;
 namespace go.hash;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using errors = errors_package;
 using hash = hash_package;
-using byteorder = @internal.byteorder_package;
-using bits = math.bits_package;
 using @internal;
 using math;
 using static fnv_package;

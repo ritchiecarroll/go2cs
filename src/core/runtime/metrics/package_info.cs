@@ -62,8 +62,6 @@ using static go.runtime.metrics_package;
 namespace go.runtime;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using math = math_package;
-using @unsafe = unsafe_package;
 using static metrics_package;
 // </GlyphForwarderUsings>
 

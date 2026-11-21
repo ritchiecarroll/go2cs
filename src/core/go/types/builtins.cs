@@ -736,7 +736,7 @@ private static readonly @string vTraceWithoutArgumentsˢᵇᴍChecker = "%v: tra
             // (no argument evaluated yet)
             var arg = argList[0];
             Ꮡcheck.exprOrType(Ꮡx, arg, false);
-            Ꮡcheck.exclude(Ꮡx, (nuint)((nuint)(1 << (int)(novalue)) | (nuint)(1 << (int)(types_package.Δbuiltinᴍ))));
+            Ꮡcheck.exclude(Ꮡx, (nuint)((nuint)(1 << (int)(novalue)) | (nuint)(1 << (int)(types_package.Δbuiltin))));
             switch (x.mode) {
             case var ᴛ2 when ᴛ2 == invalid: {
                 return default;

@@ -67,14 +67,8 @@ using static go.index.suffixarray_package;
 namespace go.index;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using bytes = bytes_package;
-using binary = encoding.binary_package;
-using errors = errors_package;
 using io = io_package;
-using math = math_package;
 using regexp = regexp_package;
-using slices = slices_package;
-using sort = sort_package;
 using encoding;
 using static suffixarray_package;
 // </GlyphForwarderUsings>

@@ -61,8 +61,6 @@ using static go.@internal.trace.version_package;
 namespace go.@internal.trace;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using fmt = fmt_package;
-using io = io_package;
 using tracev2 = go.@internal.trace.tracev2_package;
 using go.@internal.trace;
 using static version_package;

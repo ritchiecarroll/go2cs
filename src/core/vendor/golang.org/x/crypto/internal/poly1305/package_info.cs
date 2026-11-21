@@ -66,11 +66,8 @@ using static go.vendor.golang.org.x.crypto.@internal.poly1305_package;
 namespace go.vendor.golang.org.x.crypto.@internal;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using subtle = go.crypto.subtle_package;
 using go.crypto;
 using static poly1305_package;
-using binary = encoding.binary_package;
-using bits = math.bits_package;
 using encoding;
 using math;
 // </GlyphForwarderUsings>

@@ -69,18 +69,9 @@ using static go.go.@internal.srcimporter_package;
 namespace go.go.@internal;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using fmt = fmt_package;
 using ast = global::go.go.ast_package;
 using build = global::go.go.build_package;
-using parser = global::go.go.parser_package;
-using token = global::go.go.token_package;
 using types = global::go.go.types_package;
-using io = io_package;
-using os = os_package;
-using exec = global::go.os.exec_package;
-using filepath = path.filepath_package;
-using strings = strings_package;
-using sync = sync_package;
 using global::go.go;
 using global::go.os;
 using path;

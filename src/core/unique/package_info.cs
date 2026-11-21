@@ -73,12 +73,6 @@ using static go.unique_package;
 namespace go;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using abi = @internal.abi_package;
-using goarch = @internal.goarch_package;
-using runtime = runtime_package;
-using Δsync = sync_package;
-using atomic = go.sync.atomic_package;
-using @unsafe = unsafe_package;
 using weak = weak_package;
 using @internal;
 using go.sync;

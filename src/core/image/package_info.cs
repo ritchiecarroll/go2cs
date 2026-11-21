@@ -97,8 +97,6 @@ namespace go;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
 using color = image.color_package;
-using bits = math.bits_package;
-using strconv = strconv_package;
 using image;
 using math;
 using static image_package;

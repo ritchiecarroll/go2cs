@@ -75,11 +75,7 @@ using static go.vendor.golang.org.x.net.http2.hpack_package;
 namespace go.vendor.golang.org.x.net.http2;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using io = io_package;
 using static hpack_package;
-using bytes = bytes_package;
-using errors = errors_package;
-using fmt = fmt_package;
 // </GlyphForwarderUsings>
 
 [GoPackage("hpack", ImportPath = "vendor/golang.org/x/net/http2/hpack")]

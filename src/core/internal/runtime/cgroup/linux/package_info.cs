@@ -65,10 +65,8 @@ using static go.@internal.runtime.cgroup_package;
 namespace go.@internal.runtime;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using linux = go.@internal.runtime.syscall.linux_package;
 using go.@internal.runtime.syscall;
 using static cgroup_package;
-using bytealg = go.@internal.bytealg_package;
 using go.@internal;
 // </GlyphForwarderUsings>
 

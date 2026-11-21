@@ -79,24 +79,10 @@ using static go.encoding.asn1_package;
 namespace go.encoding;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using errors = errors_package;
-using fmt = fmt_package;
-using saferio = @internal.saferio_package;
-using math = math_package;
-using big = go.math.big_package;
-using reflect = reflect_package;
-using runtime = runtime_package;
-using slices = slices_package;
-using strconv = strconv_package;
-using strings = strings_package;
-using time = time_package;
-using utf16 = unicode.utf16_package;
-using utf8 = unicode.utf8_package;
 using @internal;
 using go.math;
 using unicode;
 using static asn1_package;
-using bytes = bytes_package;
 // </GlyphForwarderUsings>
 
 [GoPackage("asn1")]

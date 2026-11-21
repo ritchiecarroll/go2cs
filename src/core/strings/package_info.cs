@@ -81,20 +81,10 @@ using static go.strings_package;
 namespace go;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using abi = @internal.abi_package;
-using bytealg = @internal.bytealg_package;
-using utf8 = go.unicode.utf8_package;
-using @unsafe = unsafe_package;
 using @internal;
 using go.unicode;
 using static strings_package;
-using errors = errors_package;
 using io = io_package;
-using Δsync = sync_package;
-using ꓸꓸꓸstring = Span<@string>;
-using stringslite = @internal.stringslite_package;
-using bits = math.bits_package;
-using Δunicode = unicode_package;
 using math;
 // </GlyphForwarderUsings>
 

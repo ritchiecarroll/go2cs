@@ -74,8 +74,6 @@ namespace go.image;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
 using image = image_package;
-using color = go.image.color_package;
-using imageutil = go.image.@internal.imageutil_package;
 using go.image;
 using go.image.@internal;
 using static draw_package;

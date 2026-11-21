@@ -67,12 +67,6 @@ using static go.encoding.pem_package;
 namespace go.encoding;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using bytes = bytes_package;
-using base64 = go.encoding.base64_package;
-using errors = errors_package;
-using io = io_package;
-using slices = slices_package;
-using strings = strings_package;
 using go.encoding;
 using static pem_package;
 // </GlyphForwarderUsings>

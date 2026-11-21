@@ -68,9 +68,6 @@ using static go.@internal.sync_package;
 namespace go.@internal;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using race = go.@internal.race_package;
-using atomic = sync.atomic_package;
-using @unsafe = unsafe_package;
 using go.@internal;
 using sync;
 using static sync_package;

@@ -72,15 +72,9 @@ using static go.vendor.golang.org.x.text.unicode.bidi_package;
 namespace go.vendor.golang.org.x.text.unicode;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using bytes = bytes_package;
 using static bidi_package;
-using list = container.list_package;
-using fmt = fmt_package;
-using sort = sort_package;
 using container;
-using log = log_package;
 using ꓸꓸꓸClass = Span<bidi_package.Class>;
-using utf8 = go.unicode.utf8_package;
 using go.unicode;
 // </GlyphForwarderUsings>
 

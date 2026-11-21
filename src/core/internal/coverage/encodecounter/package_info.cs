@@ -67,21 +67,10 @@ using static go.@internal.coverage.encodecounter_package;
 namespace go.@internal.coverage;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using bufio = bufio_package;
-using binary = encoding.binary_package;
-using fmt = fmt_package;
-using coverage = go.@internal.coverage_package;
 using slicewriter = go.@internal.coverage.slicewriter_package;
-using stringtab = go.@internal.coverage.stringtab_package;
-using uleb128 = go.@internal.coverage.uleb128_package;
-using io = io_package;
-using maps = maps_package;
-using os = os_package;
-using slices = slices_package;
 using encoding;
 using go.@internal;
 using go.@internal.coverage;
-using iter = iter_package;
 using static encodecounter_package;
 // </GlyphForwarderUsings>
 

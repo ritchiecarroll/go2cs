@@ -70,12 +70,7 @@ using static go.vendor.golang.org.x.text.transform_package;
 namespace go.vendor.golang.org.x.text;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using bytes = bytes_package;
-using errors = errors_package;
-using io = io_package;
-using utf8 = unicode.utf8_package;
 using unicode;
-using ꓸꓸꓸTransformer = Span<transform_package.Transformer>;
 using static transform_package;
 // </GlyphForwarderUsings>
 

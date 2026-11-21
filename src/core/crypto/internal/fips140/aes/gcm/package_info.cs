@@ -76,17 +76,9 @@ using static go.crypto.@internal.fips140.aes.gcm_package;
 namespace go.crypto.@internal.fips140.aes;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using fips140 = go.crypto.@internal.fips140_package;
-using aes = go.crypto.@internal.fips140.aes_package;
-using subtle = go.crypto.@internal.fips140.subtle_package;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140;
 using static gcm_package;
-using alias = go.crypto.@internal.fips140.alias_package;
-using errors = errors_package;
-using drbg = go.crypto.@internal.fips140.drbg_package;
-using byteorder = go.crypto.@internal.fips140deps.byteorder_package;
-using math = math_package;
 using go.crypto.@internal.fips140deps;
 // </GlyphForwarderUsings>
 

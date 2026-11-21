@@ -113,13 +113,8 @@ using static go.go.parser_package;
 namespace go.go;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using fmt = fmt_package;
 using ast = global::go.go.ast_package;
-using constraint = global::go.go.build.constraint_package;
-using scannerhooks = global::go.go.@internal.scannerhooks_package;
-using scanner = global::go.go.scanner_package;
 using token = global::go.go.token_package;
-using strings = strings_package;
 using global::go.go;
 using global::go.go.@internal;
 using global::go.go.build;

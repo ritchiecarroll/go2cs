@@ -72,17 +72,9 @@ using static go.crypto.@internal.fips140.nistec_package;
 namespace go.crypto.@internal.fips140;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using constanttime = go.crypto.@internal.constanttime_package;
-using fiat = go.crypto.@internal.fips140.nistec.fiat_package;
-using errors = errors_package;
-using sync = sync_package;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140.nistec;
 using static nistec_package;
-using byteorder = go.crypto.@internal.fips140deps.byteorder_package;
-using cpu = go.crypto.@internal.fips140deps.cpu_package;
-using bits = math.bits_package;
-using @unsafe = unsafe_package;
 using go.crypto.@internal.fips140deps;
 using math;
 // </GlyphForwarderUsings>

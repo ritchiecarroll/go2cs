@@ -61,9 +61,7 @@ using static go.text.tabwriter_package;
 namespace go.text;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using fmt = fmt_package;
 using io = io_package;
-using utf8 = unicode.utf8_package;
 using unicode;
 using static tabwriter_package;
 // </GlyphForwarderUsings>

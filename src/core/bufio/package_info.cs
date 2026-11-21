@@ -67,11 +67,7 @@ using static go.bufio_package;
 namespace go;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using bytes = bytes_package;
-using errors = errors_package;
 using io = io_package;
-using strings = strings_package;
-using utf8 = unicode.utf8_package;
 using unicode;
 using static bufio_package;
 // </GlyphForwarderUsings>

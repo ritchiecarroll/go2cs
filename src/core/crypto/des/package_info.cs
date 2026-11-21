@@ -70,19 +70,11 @@ using static go.crypto.des_package;
 namespace go.crypto;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using byteorder = go.@internal.byteorder_package;
-using sync = sync_package;
 using go.@internal;
 using static des_package;
-using cipher = go.crypto.cipher_package;
-using alias = go.crypto.@internal.fips140.alias_package;
-using fips140only = go.crypto.@internal.fips140only_package;
-using errors = errors_package;
-using strconv = strconv_package;
 using go.crypto;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140;
-using des = des_package;
 // </GlyphForwarderUsings>
 
 [GoPackage("des")]

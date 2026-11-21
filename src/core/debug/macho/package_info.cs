@@ -97,21 +97,13 @@ using static go.debug.macho_package;
 namespace go.debug;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using binary = encoding.binary_package;
-using fmt = fmt_package;
-using saferio = @internal.saferio_package;
 using io = io_package;
-using os = os_package;
 using @internal;
 using encoding;
 using static macho_package;
-using bytes = bytes_package;
-using zlib = compress.zlib_package;
 using dwarf = go.debug.dwarf_package;
-using strings = strings_package;
 using compress;
 using go.debug;
-using strconv = strconv_package;
 // </GlyphForwarderUsings>
 
 [GoPackage("macho")]

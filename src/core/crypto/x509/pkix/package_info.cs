@@ -62,9 +62,6 @@ namespace go.crypto.x509;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
 using asn1 = encoding.asn1_package;
-using hex = encoding.hex_package;
-using fmt = fmt_package;
-using big = math.big_package;
 using time = time_package;
 using encoding;
 using math;

@@ -61,7 +61,6 @@ using static go.@internal.runtime.exithook_package;
 namespace go.@internal.runtime;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using atomic = go.@internal.runtime.atomic_package;
 using go.@internal.runtime;
 using static exithook_package;
 // </GlyphForwarderUsings>

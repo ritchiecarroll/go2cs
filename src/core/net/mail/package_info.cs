@@ -68,18 +68,7 @@ using static go.net.mail_package;
 namespace go.net;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using bufio = bufio_package;
-using errors = errors_package;
-using fmt = fmt_package;
-using io = io_package;
-using log = log_package;
-using mime = mime_package;
-using net = net_package;
-using textproto = go.net.textproto_package;
-using strings = strings_package;
-using sync = sync_package;
 using time = time_package;
-using utf8 = unicode.utf8_package;
 using go.net;
 using unicode;
 using ꓸꓸꓸany = Span<any>;

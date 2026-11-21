@@ -75,10 +75,6 @@ using static go.embed_package;
 namespace go;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using errors = errors_package;
-using bytealg = @internal.bytealg_package;
-using stringslite = @internal.stringslite_package;
-using Δio = io_package;
 using fs = go.io.fs_package;
 using time = time_package;
 using @internal;

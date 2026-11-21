@@ -74,8 +74,6 @@ namespace go;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
 using static errors_package;
-using @unsafe = unsafe_package;
-using ꓸꓸꓸerror = Span<error>;
 // </GlyphForwarderUsings>
 
 [GoPackage("errors")]

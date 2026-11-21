@@ -109,33 +109,17 @@ using static go.@internal.trace_package;
 namespace go.@internal;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using fmt = fmt_package;
-using math = math_package;
-using strings = strings_package;
 using tracev2 = go.@internal.trace.tracev2_package;
 using version = go.@internal.trace.version_package;
 using go.@internal.trace;
-using io = io_package;
 using static trace_package;
-using bytes = bytes_package;
-using binary = encoding.binary_package;
 using encoding;
-using cmp = cmp_package;
-using errors = errors_package;
 using iter = iter_package;
-using regexp = regexp_package;
-using slices = slices_package;
-using strconv = go.strconv_package;
 using time = time_package;
 using go;
-using heap = container.heap_package;
-using sort = sort_package;
 using container;
-using ꓸꓸꓸuint64 = Span<uint64>;
-using bufio = bufio_package;
 using tracev1 = go.@internal.trace.@internal.tracev1_package;
 using go.@internal.trace.@internal;
-using @unsafe = unsafe_package;
 // </GlyphForwarderUsings>
 
 [GoPackage("trace")]

@@ -64,13 +64,7 @@ using static go.testing.quick_package;
 namespace go.testing;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using flag = flag_package;
-using fmt = fmt_package;
-using math = math_package;
 using rand = go.math.rand_package;
-using reflect = reflect_package;
-using strings = strings_package;
-using time = time_package;
 using go.math;
 using static quick_package;
 // </GlyphForwarderUsings>

@@ -101,11 +101,7 @@ using static go.io_package;
 namespace go;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using errors = errors_package;
-using Δsync = sync_package;
 using static io_package;
-using ꓸꓸꓸReader = Span<io_package.Reader>;
-using ꓸꓸꓸWriter = Span<io_package.Writer>;
 // </GlyphForwarderUsings>
 
 [GoPackage("io")]

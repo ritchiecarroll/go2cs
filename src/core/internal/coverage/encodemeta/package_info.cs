@@ -68,23 +68,13 @@ using static go.@internal.coverage.encodemeta_package;
 namespace go.@internal.coverage;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using bytes = bytes_package;
-using binary = encoding.binary_package;
-using fmt = fmt_package;
-using hash = hash_package;
-using fnv = go.hash.fnv_package;
 using coverage = go.@internal.coverage_package;
-using stringtab = go.@internal.coverage.stringtab_package;
-using uleb128 = go.@internal.coverage.uleb128_package;
 using io = io_package;
-using os = os_package;
 using encoding;
 using go.@internal;
 using go.@internal.coverage;
 using go.hash;
 using static encodemeta_package;
-using bufio = bufio_package;
-using @unsafe = unsafe_package;
 // </GlyphForwarderUsings>
 
 [GoPackage("encodemeta")]

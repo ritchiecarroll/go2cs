@@ -77,26 +77,12 @@ namespace go.crypto;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
 using crypto = crypto_package;
-using boring = go.crypto.@internal.boring_package;
-using rsa = go.crypto.@internal.fips140.rsa_package;
-using fips140hash = go.crypto.@internal.fips140hash_package;
-using fips140only = go.crypto.@internal.fips140only_package;
 using rand = go.crypto.@internal.rand_package;
-using errors = errors_package;
-using hash = hash_package;
 using io = io_package;
-using big = go.math.big_package;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140;
 using go.math;
 using static rsa_package;
-using bbig = go.crypto.@internal.boring.bbig_package;
-using bigmod = go.crypto.@internal.fips140.bigmod_package;
-using cryptorand = go.crypto.rand_package;
-using subtle = go.crypto.subtle_package;
-using fmt = fmt_package;
-using godebug = go.@internal.godebug_package;
-using math = math_package;
 using go.@internal;
 using go.crypto;
 using go.crypto.@internal.boring;

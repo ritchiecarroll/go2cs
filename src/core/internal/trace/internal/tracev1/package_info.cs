@@ -70,17 +70,7 @@ using static go.@internal.trace.@internal.tracev1_package;
 namespace go.@internal.trace.@internal;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using errors = errors_package;
 using static tracev1_package;
-using bytes = bytes_package;
-using cmp = cmp_package;
-using binary = encoding.binary_package;
-using fmt = fmt_package;
-using version = go.@internal.trace.version_package;
-using io = io_package;
-using math = math_package;
-using slices = slices_package;
-using sort = sort_package;
 using encoding;
 using go.@internal.trace;
 // </GlyphForwarderUsings>

@@ -73,21 +73,12 @@ using static go.image.gif_package;
 namespace go.image;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using bufio = bufio_package;
-using lzw = compress.lzw_package;
-using errors = errors_package;
-using fmt = fmt_package;
 using image = image_package;
 using Δcolor = go.image.color_package;
 using io = io_package;
 using compress;
 using go.image;
 using static gif_package;
-using bytes = bytes_package;
-using palette = go.image.color.palette_package;
-using draw = go.image.draw_package;
-using byteorder = go.@internal.byteorder_package;
-using bits = math.bits_package;
 using go.@internal;
 using go.image.color;
 using math;

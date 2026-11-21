@@ -65,7 +65,6 @@ using static go.@internal.singleflight_package;
 namespace go.@internal;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using sync = go.sync_package;
 using go;
 using static singleflight_package;
 // </GlyphForwarderUsings>

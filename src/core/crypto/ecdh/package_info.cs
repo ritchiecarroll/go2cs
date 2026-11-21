@@ -73,21 +73,12 @@ using static go.crypto.ecdh_package;
 namespace go.crypto;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using crypto = crypto_package;
-using boring = go.crypto.@internal.boring_package;
 using ecdh = go.crypto.@internal.fips140.ecdh_package;
-using subtle = go.crypto.subtle_package;
-using errors = errors_package;
 using io = io_package;
 using go.crypto;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140;
 using static ecdh_package;
-using bytes = bytes_package;
-using fips140only = go.crypto.@internal.fips140only_package;
-using rand = go.crypto.@internal.rand_package;
-using nistec = go.crypto.@internal.fips140.nistec_package;
-using field = go.crypto.@internal.fips140.edwards25519.field_package;
 using go.crypto.@internal.fips140.edwards25519;
 // </GlyphForwarderUsings>
 

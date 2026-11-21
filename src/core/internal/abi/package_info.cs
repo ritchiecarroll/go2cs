@@ -80,7 +80,6 @@ using static go.@internal.abi_package;
 namespace go.@internal;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using goarch = go.@internal.goarch_package;
 using @unsafe = unsafe_package;
 using go.@internal;
 using static abi_package;

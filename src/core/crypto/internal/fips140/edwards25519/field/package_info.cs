@@ -63,10 +63,6 @@ using static go.crypto.@internal.fips140.edwards25519.field_package;
 namespace go.crypto.@internal.fips140.edwards25519;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using subtle = go.crypto.@internal.fips140.subtle_package;
-using byteorder = go.crypto.@internal.fips140deps.byteorder_package;
-using errors = errors_package;
-using bits = math.bits_package;
 using go.crypto.@internal.fips140;
 using go.crypto.@internal.fips140deps;
 using math;

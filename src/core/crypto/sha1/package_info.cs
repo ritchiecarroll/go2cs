@@ -65,15 +65,9 @@ using static go.crypto.sha1_package;
 namespace go.crypto;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using crypto = crypto_package;
-using boring = go.crypto.@internal.boring_package;
-using fips140only = go.crypto.@internal.fips140only_package;
-using errors = errors_package;
 using hash = hash_package;
-using byteorder = go.@internal.byteorder_package;
 using go.@internal;
 using go.crypto.@internal;
-using sha1 = sha1_package;
 using static sha1_package;
 // </GlyphForwarderUsings>
 

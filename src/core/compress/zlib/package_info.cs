@@ -65,18 +65,11 @@ using static go.compress.zlib_package;
 namespace go.compress;
 
 // <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
-using bufio = bufio_package;
-using flate = go.compress.flate_package;
-using binary = encoding.binary_package;
-using errors = errors_package;
-using hash = hash_package;
-using adler32 = go.hash.adler32_package;
 using io = io_package;
 using encoding;
 using go.compress;
 using go.hash;
 using static zlib_package;
-using fmt = fmt_package;
 // </GlyphForwarderUsings>
 
 [GoPackage("zlib")]
