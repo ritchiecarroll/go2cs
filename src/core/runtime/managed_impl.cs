@@ -541,8 +541,119 @@ partial class runtime_package
     // assembly. The symbol that linkname names, sync_runtime_registerPoolCleanup (mgc.cs), is
     // `internal` under the exported-ness rule, and a cross-assembly forwarder cannot reach an internal
     // target — the same constraint blockUntilEmptyFinalizerQueue documents in mfinal.cs. So sync calls
-    // this shim, which hands the cleanup to the converted registration unchanged.
-    public static void registerPoolCleanup(Action cleanup) => sync_runtime_registerPoolCleanup(cleanup);
+    // this shim, which hands the cleanup to the converted registration unchanged, and then arms the
+    // per-collection cadence below, so the cleanup ages sync.Pool at every collection as Go's does.
+    public static void registerPoolCleanup(Action cleanup)
+    {
+        sync_runtime_registerPoolCleanup(cleanup);
+        PoolCleanupCadence.Arm();
+    }
+
+    // PER-COLLECTION POOL AGING. Go's gcStart runs clearpools() at the start of EVERY cycle, automatic
+    // ones included, so a pooled object nobody takes back is dropped after two cycles. gcCycleLocked
+    // below runs the cleanup only for runtime.GC() and the periodic tick, and a busy program reaches
+    // neither: every CLR gen2 collection resets the tick's clock (noteGCEnd), so its pools never aged.
+    // TypeScript's converted compiler suite measured the cost: pooled emit contexts kept every node
+    // graph they had built, about 150 MB per pass over its 454 test configurations, without bound.
+    //
+    // The mechanism is golib.BoringCaches' sentinel pattern with one change. An unrooted finalizable
+    // object is finalized by the first collection that condemns its generation, and its finalizer runs
+    // the cleanup on the CLR finalizer thread. BoringCaches re-registers ONE sentinel, which survives
+    // into gen2 and so fires once per gen2 collection; that cadence was measured and refuted here (14
+    // gen2 cleanups in a 189 s TypeScript run left the growth unchanged, because a busy pool's items
+    // ride its victim cache from one gen2 to the next). So each firing allocates a FRESH sentinel,
+    // which starts in gen0 and is condemned by the next collection of any generation: one firing per
+    // CLR collection, under workstation (concurrent or not) and server GC alike, because every CLR
+    // collection collects gen0 and the CLR keeps one finalizer thread in every mode. A background gen2
+    // that runs while ephemeral collections come and go fires for the ephemeral ones, which is the
+    // same count CollectionCount(0) reports. A firing that lands while the finalizer thread is busy
+    // folds into the next one; Pool only promises that an item MAY vanish, never when.
+    //
+    // Three rules keep this Go's clearpools and nothing more:
+    //   - GOGC=off with no memory limit means Go runs NO automatic cycle, so no aging happens except
+    //     runtime.GC()'s (sync's TestPool disables the collector to control exactly that). The test
+    //     reads the same pacer state gcTrigger.test() reads.
+    //   - It never waits for s_gcCycleLock. runtime.GC() holds that lock across its finalizer drain,
+    //     so a waiting finalizer thread would deadlock it; a cycle in progress runs the cleanup
+    //     itself, so a busy lock means the collection is already served. This is what makes one
+    //     runtime.GC() one aging: it runs the cleanup once and then collects twice, and the sentinels
+    //     those two collections condemn are finalized by its own drains (WaitForPendingFinalizers,
+    //     then GcPauseRecorder.Drain), under the lock, so they skip. Without it the victim cache Go
+    //     keeps for one cycle is gone after one call (GolibTests' OneRuntimeGCIsOneAging).
+    //   - A collection gcCycleLocked already served is skipped (s_servedThrough, BoringCaches'
+    //     s_clearedThrough pattern keyed on CollectionCount(0)), so a firing for one of its
+    //     collections that lands after the lock is released does not age the pools again. Today
+    //     the drains above leave no such firing, so this is the second of two guards and removing it
+    //     alone reds no test; it keeps the rule true if the cycle's drains are ever reordered.
+    //
+    // Cost per collection: one small allocation and, when the collector is on, one poolCleanup, which
+    // takes sync's allPoolsMu and walks the pools that held a shard array in the last two cycles
+    // (oldPools then allPools): O(pools used in two cycles), with no per-item work, since aging swaps
+    // whole shard arrays.
+    private static class PoolCleanupCadence
+    {
+        private static int s_armed;
+        private static long s_servedThrough;
+
+        internal static void Arm()
+        {
+            if (Interlocked.Exchange(ref s_armed, 1) != 0)
+                return;
+
+            Interlocked.Exchange(ref s_servedThrough, System.GC.CollectionCount(0));
+            _ = new Sentinel();
+        }
+
+        // gcCycleLocked's own cleanup has served every collection up to now.
+        internal static void NoteServed() => Interlocked.Exchange(ref s_servedThrough, System.GC.CollectionCount(0));
+
+        private static void AgeForCollection()
+        {
+            // gcTrigger.test()'s condition for an automatic cycle: GOGC=off with no memory limit runs none.
+            if (ᏑgcController.of(gcControllerState.ᏑgcPercent).Load() < 0 &&
+                ᏑgcController.of(gcControllerState.ᏑmemoryLimit).Load() == long.MaxValue)
+                return;
+
+            if (!Monitor.TryEnter(s_gcCycleLock))
+                return;
+
+            try
+            {
+                long count = System.GC.CollectionCount(0);
+
+                if (count <= Interlocked.Read(ref s_servedThrough))
+                    return;
+
+                Interlocked.Exchange(ref s_servedThrough, count);
+
+                if (poolcleanup != default!)
+                    poolcleanup();
+            }
+            finally
+            {
+                Monitor.Exit(s_gcCycleLock);
+            }
+        }
+
+        private sealed class Sentinel
+        {
+            ~Sentinel()
+            {
+                // A finalizer that throws ends the process, and the cleanup is the pool's code, so a
+                // failure costs one aging rather than the program.
+                try
+                {
+                    AgeForCollection();
+                }
+                catch
+                {
+                }
+
+                if (!Environment.HasShutdownStarted)
+                    _ = new Sentinel();
+            }
+        }
+    }
 
     // godebugRegisterMetric is where internal/godebug's //go:linkname registerMetric crosses into
     // this assembly (the registerPoolCleanup pattern above). The symbol that linkname names,
@@ -746,6 +857,9 @@ partial class runtime_package
         // Go's gcStart runs clearpools() at the START of every cycle, and that is what ages
         // sync.Pool's victim cache — without it a Pool never releases what it cached. Both of
         // clearpools' cache arms are wired here (Go 1.25 removed the third, unique's; see below).
+        // This is the aging for runtime.GC() and the periodic tick; every other collection ages the
+        // pools through PoolCleanupCadence (beside registerPoolCleanup above), which skips the
+        // collections this cycle makes.
         if (poolcleanup != default!)
             poolcleanup();
 
@@ -804,6 +918,11 @@ partial class runtime_package
         GoFinalizerQueue.WaitForIdle(GoFinalizerQueue.DrainBudgetMs);
 
         System.GC.Collect(System.GC.MaxGeneration, GCCollectionMode.Forced, blocking: true, compacting: true);
+
+        // The cleanup at the head of this cycle served both collections above, so the per-collection
+        // cadence must not age the pools again for them (PoolCleanupCadence; one runtime.GC() is one
+        // aging, as in Go).
+        PoolCleanupCadence.NoteServed();
 
         // The heap profile's cycle for this collection, in Go's order: mark termination's
         // mProf_NextCycle and mProf_Flush, the sweep's frees, then the mProf_PostSweep that Go's GC()
