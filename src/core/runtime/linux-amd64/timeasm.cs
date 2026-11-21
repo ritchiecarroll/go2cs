@@ -5,7 +5,7 @@
 //go:build !faketime && (windows || (linux && amd64))
 namespace go;
 
-// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
+// import _ "unsafe" (nothing to initialize)
 
 partial class runtime_package {
 

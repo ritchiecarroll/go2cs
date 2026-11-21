@@ -6,7 +6,7 @@
 // Section 7.2 and allowed by SP 800-135 Revision 1.
 namespace go.crypto.@internal.fips140;
 
-// blank import: go.crypto.@internal.fips140.check_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
+// import _ "crypto/internal/fips140/check" (init forced in ImportInitializers)
 using hash = hash_package;
 
 partial class ssh_package {

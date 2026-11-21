@@ -8,7 +8,7 @@ using drbg = go.crypto.@internal.fips140.drbg_package;
 using randutil = go.crypto.@internal.randutil_package;
 using godebug = go.@internal.godebug_package;
 using io = io_package;
-// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
+// import _ "unsafe" (nothing to initialize)
 using go.@internal;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140;

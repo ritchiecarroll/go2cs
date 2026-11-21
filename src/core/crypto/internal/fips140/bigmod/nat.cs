@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 namespace go.crypto.@internal.fips140;
 
-// blank import: go.crypto.@internal.fips140.check_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
+// import _ "crypto/internal/fips140/check" (init forced in ImportInitializers)
 using byteorder = go.crypto.@internal.fips140deps.byteorder_package;
 using errors = errors_package;
 using bits = math.bits_package;

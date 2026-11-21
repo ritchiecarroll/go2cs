@@ -25,7 +25,7 @@ using slices = slices_package;
 using strings = strings_package;
 using sync = sync_package;
 using time = time_package;
-/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
+/* import _ "unsafe" (nothing to initialize) */ // for linkname
 using container;
 using go.@internal;
 using go.crypto;

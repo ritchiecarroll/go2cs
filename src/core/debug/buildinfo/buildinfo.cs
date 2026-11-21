@@ -30,7 +30,7 @@ using io = io_package;
 using fs = go.io.fs_package;
 using os = os_package;
 using debug = runtime.debug_package;
-/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
+/* import _ "unsafe" (nothing to initialize) */ // for linkname
 using @internal;
 using encoding;
 using go.debug;

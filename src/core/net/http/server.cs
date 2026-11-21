@@ -27,7 +27,7 @@ using strings = strings_package;
 using sync = sync_package;
 using atomic = go.sync.atomic_package;
 using time = time_package;
-/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
+/* import _ "unsafe" (nothing to initialize) */ // for linkname
 using httpguts = vendor.golang.org.x.net.http.httpguts_package;
 using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
 using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;

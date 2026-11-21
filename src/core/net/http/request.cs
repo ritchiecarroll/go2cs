@@ -23,7 +23,7 @@ using urlpkg = go.net.url_package;
 using strconv = strconv_package;
 using strings = strings_package;
 using sync = sync_package;
-/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
+/* import _ "unsafe" (nothing to initialize) */ // for linkname
 using httpguts = vendor.golang.org.x.net.http.httpguts_package;
 using idna = vendor.golang.org.x.net.idna_package;
 using crypto;

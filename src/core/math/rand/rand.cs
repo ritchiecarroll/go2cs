@@ -20,7 +20,7 @@ namespace go.math;
 using godebug = @internal.godebug_package;
 using sync = sync_package;
 using atomic = go.sync.atomic_package;
-/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for go:linkname
+/* import _ "unsafe" (nothing to initialize) */ // for go:linkname
 using @internal;
 using go.sync;
 using rand = rand_package;

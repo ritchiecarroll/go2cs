@@ -12,7 +12,7 @@ using math = math_package;
 using strconv = strconv_package;
 using strings = strings_package;
 using sync = sync_package;
-/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
+/* import _ "unsafe" (nothing to initialize) */ // for linkname
 using static textproto_package;
 
 partial class textproto_package {
