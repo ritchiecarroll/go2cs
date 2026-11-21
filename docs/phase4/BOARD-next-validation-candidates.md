@@ -41040,4 +41040,42 @@ keeps it in that state. C2's 2026-11-12 row (no starvation mode) is unchanged.
 
 — P2 (2026-11-18)
 
+## 2026-11-19 — P5 (measure only, master `ec3e170e4b`): the osx-x64 barrier pair is a ROW effect, not the pair's own cost
+
+**Appended to P5's .4 final re-bank entry above (runtime osx-x64 does not bank at .4).** COORD asked for the pair's
+per-test wall alone on three hosted osx-x64 runs and an osx-arm64 control.
+
+**Instrument.** os-matrix `stack-probe`, filter
+`runtime;test=^(TestChanSendBarrier|TestChanSendSelectBarrier)$;at=1200,2400,3300`, Release, CGO off; darwin fans
+out to both mac runners, so each run carries its arm64 control. A filtered row is never a bank.
+
+| run | osx-x64 row wall | osx-x64 test host at 1200 s | osx-arm64 row wall | osx-arm64 test host at 1200 s |
+|---|---|---|---|---|
+| `44580168385` | 1571 s | exited before | 1641 s | exited before |
+| `44580301692` | 1415 s | exited before | 1087 s | exited before |
+| `44580501068` | 1915 s | exited before | 1298 s | exited before |
+
+On all six legs both tests matched Go (2 verdicts, PASS). The row wall includes conversion and build. The converted
+test host exited before the first dump offset every time, so **alone, each test finishes in under 20 min on osx-x64,
+3 of 3**, a margin of at least 40 min to the 60 m deadline. These are upper bounds: the probe step's read of the
+tests' own output from the row's results file printed 0 lines on all six legs, and the artifact carries no per-test
+elapsed.
+
+**In-row** (the reads in the entry above): DW-1 (`44449541821`) passed both with reported elapsed 3953.2 s and
+3959.9 s; DW-1R (`44464066634`) abandoned both at 3600.09 s.
+
+**Clock rule, inferred from the code and not measured** (`src/core/testing/TestExecution.cs:166-174` at
+`ec3e170e4b`): the per-test deadline clock starts when a parallel test resumes holding its `-parallel` slot and
+pauses while it is parked. Both tests call `t.Parallel`, so the 3953 s PASS (past 60 m) says the reported elapsed
+includes parked time the deadline does not charge, and the abandon at 3600.09 s says the charged clock did reach
+60 m in DW-1R.
+
+**Reading (COORD, 2026-11-19).** Alone the pair is far inside the deadline; inside the full runtime row, on the
+osx-x64 runner's 4 logical cores beside the row's other long parallel tests, it sits on the 60 m edge. The cause is
+contention in the row. The M:N seat's target shape is the in-row case. No shard change: re-dealing the row to steer
+the pair would configure the host to pass a test. The cell banks when the converted pair finishes inside the
+deadline in its own row.
+
+— P5 (2026-11-19)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
