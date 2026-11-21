@@ -31,7 +31,7 @@ public sealed class GoParkSlot
 {
     private static readonly object s_woken = new();
 
-    // null (not woken, not parked), s_woken, or the parked continuation (an Action).
+    // null (not woken, not parked), s_woken, or the parked continuation: an Action, or the parked twin's box (row 6).
     private object? m_state;
     private Goroutine? m_goroutine;
 
@@ -41,12 +41,12 @@ public sealed class GoParkSlot
     /// <summary>Makes the goroutine parked here runnable, now or as soon as its park is committed.</summary>
     public void Wake()
     {
-        if (Interlocked.Exchange(ref m_state, s_woken) is Action continuation)
+        if (Interlocked.Exchange(ref m_state, s_woken) is { } continuation && !ReferenceEquals(continuation, s_woken))
             GoScheduler.Ready(m_goroutine!, continuation);
     }
 
     // Called by the carrier once the goroutine is unmounted.
-    internal void Commit(Goroutine goroutine, Action continuation)
+    internal void Commit(Goroutine goroutine, object continuation)
     {
         m_goroutine = goroutine;
 
@@ -65,6 +65,9 @@ public readonly struct GoParkAwaiter : ICriticalNotifyCompletion
     private readonly GoParkSlot m_slot;
 
     internal GoParkAwaiter(GoParkSlot slot) => m_slot = slot;
+
+    // The slot, for a twin's builder to park on it with the twin's box instead of a delegate (row 6).
+    internal GoParkSlot Slot => m_slot;
 
     /// <summary>Whether the slot was woken before the await: the twin then runs on without parking.</summary>
     public bool IsCompleted => m_slot.IsWoken;
@@ -147,10 +150,12 @@ public static class GoScheduler
         return ms * (Stopwatch.Frequency / 1000);
     }
 
-    private readonly struct Item(Goroutine goroutine, Action step)
+    // A step is an Action, or the box of a twin that parked (row 6 of the .5 plan): a park carries the box itself,
+    // so a leaf park allocates no delegate. RunStep resumes a box as GoTaskCore.ResumeAsStep would.
+    private readonly struct Item(Goroutine goroutine, object step)
     {
         internal readonly Goroutine Goroutine = goroutine;
-        internal readonly Action Step = step;
+        internal readonly object Step = step;
     }
 
     private static readonly ConcurrentQueue<Item> s_runq = new();
@@ -356,7 +361,7 @@ public static class GoScheduler
     }
 
     /// <summary>Queues one step of <paramref name="goroutine"/>.</summary>
-    internal static void Ready(Goroutine goroutine, Action step)
+    internal static void Ready(Goroutine goroutine, object step)
     {
         if (Volatile.Read(ref s_started) == 0)
             Start();
@@ -391,7 +396,7 @@ public static class GoScheduler
     // DESIGN-mn-pin.md 14.2 (COORD's arm (c)): the locked waker's hand-off, kept out of Ready's hot path as a cold static
     // helper, so the lock-taking call cannot change how Ready is compiled for the unlocked path.
     [MethodImpl(MethodImplOptions.NoInlining)]
-    private static bool HandToIdle(Goroutine goroutine, Action step)
+    private static bool HandToIdle(Goroutine goroutine, object step)
     {
         if (ClaimIdle(goroutine.m_lastCarrier as Carrier) is not { } target)
             return false;
@@ -406,7 +411,7 @@ public static class GoScheduler
         return true;
     }
 
-    private static void Enqueue(Goroutine goroutine, Action step)
+    private static void Enqueue(Goroutine goroutine, object step)
     {
         s_runq.Enqueue(new Item(goroutine, step));
 
@@ -479,7 +484,7 @@ public static class GoScheduler
     }
 
     // Records the park of the goroutine mounted on this carrier. The carrier commits it after the unmount.
-    internal static void ParkPending(GoParkSlot slot, Action continuation)
+    internal static void ParkPending(GoParkSlot slot, object continuation)
     {
         Carrier? carrier = t_carrier;
 
@@ -768,7 +773,7 @@ public static class GoScheduler
     {
         internal Goroutine? Mounted;
         internal GoParkSlot? PendingSlot;
-        internal Action? PendingContinuation;
+        internal object? PendingContinuation;
         internal long RunningSince;
         internal long PauseAtStart;
         internal volatile bool Injected;
@@ -822,7 +827,7 @@ public static class GoScheduler
                 Interlocked.Decrement(ref s_pinnedBlocked);
             }
         }
-        private Action? m_pinnedStep;
+        private object? m_pinnedStep;
         private SemaphoreSlim? m_pinWake;
         private bool m_retiring;
 
@@ -856,7 +861,7 @@ public static class GoScheduler
             }
         }
 
-        internal void Deliver(Action step)
+        internal void Deliver(object step)
         {
             Volatile.Write(ref m_pinnedStep, step);
             m_pinWake!.Release();
@@ -1048,7 +1053,17 @@ public static class GoScheduler
             if (s_contextSwap && goroutine.m_context is { } context)
                 ExecutionContext.Restore(context);
 
-            item.Step();
+            // A parked twin's box resumes as its ResumeAction would: the step is noted for the stack walk, then the box
+            // runs. Any other step is an Action (a goroutine's first step, a foreign awaiter's continuation).
+            if (item.Step is GoTaskCore box)
+            {
+                NoteStep(box);
+                box.Resume();
+            }
+            else
+            {
+                ((Action)item.Step)();
+            }
 
             // Each twin that ended in the step left its awaiting caller here: run the callers one after
             // another, each from this frame, until one parks or the goroutine's root ends.
@@ -1090,7 +1105,7 @@ public static class GoScheduler
             // Only now may a waker make the goroutine runnable: it is on no carrier.
             if (PendingSlot is { } slot)
             {
-                Action continuation = PendingContinuation!;
+                object continuation = PendingContinuation!;
                 PendingSlot = null;
                 PendingContinuation = null;
                 Interlocked.Increment(ref s_parks);
