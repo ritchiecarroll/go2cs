@@ -28,7 +28,8 @@
 
 [mn-frozen]
 # G's ruling on M:N item 7d (2026-11-20): the [GoTwinOf] stamp, docs/phase4/DATA-mn-origin-table.md
-go.golib.GoTwinOfAttribute :: ctor (System.Type, System.String, System.Type[], System.Int32[])
+# G 2026-11-21: a second int[], the call ordinals, before it shipped (one array, one meaning)
+go.golib.GoTwinOfAttribute :: ctor (System.Type, System.String, System.Type[], System.Int32[], System.Int32[])
 go.golib.GoTwinOfAttribute :: usage Method, AllowMultiple=False, Inherited=False
 
 [tier1]

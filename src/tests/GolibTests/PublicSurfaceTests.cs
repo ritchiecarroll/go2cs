@@ -324,7 +324,7 @@ public class PublicSurfaceTests
     public void AFrozenMnLineThatMovesIsNamed()
     {
         HashSet<string> baseline = ReadBaseline()["mn-frozen"];
-        const string Ctor = "go.golib.GoTwinOfAttribute :: ctor (System.Type, System.String, System.Type[], System.Int32[])";
+        const string Ctor = "go.golib.GoTwinOfAttribute :: ctor (System.Type, System.String, System.Type[], System.Int32[], System.Int32[])";
 
         Assert.IsTrue(baseline.Remove(Ctor));
         baseline.Add("go.golib.GoTwinOfAttribute :: ctor (System.Type, System.String)");

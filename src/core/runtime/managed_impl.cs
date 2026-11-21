@@ -3910,6 +3910,11 @@ partial class runtime_package
         // [GoTwinOf] stamp), not by an IL offset; 0 for every other frame.
         public int StampedCsLine;
 
+        // With it: the awaited call's place among its statement's same-name calls ((ordinal << 16) | total) and the Go
+        // name it is recorded under, read from the twin it awaits; 0 and null where not known.
+        public int StampedCall;
+        public string? StampedCallee;
+
         // The frame is suspended in the call AT ILOffset itself, read at capture from the callee (see
         // suspendedAtReportedCall), so the line is that call's rather than returnSiteILOffset's answer.
         public bool SuspendedAtReportedCall;
@@ -3949,6 +3954,14 @@ partial class runtime_package
                     // call's own line inside a multi-line statement (goCallLineDelta) needs IL, so it is the statement's.
                     (string? csFile, _) = methodSourcePosition(Method);
                     (File, Line) = goSourcePosition(Method, csFile, StampedCsLine);
+
+                    // A call on a later line of its statement: Go's line for it, from the position map's per-call table.
+                    if (StampedCall != 0 && StampedCallee is { } callee && goSourcePath(csFile) is { Length: > 0 } csPath &&
+                        goPositionMapRecord(Method, csPath) is { } record && record.HasCallsAt(StampedCsLine) &&
+                        record.CallLineDelta(StampedCsLine, callee, StampedCall >> 16, StampedCall & 0xFFFF) is { } delta)
+                    {
+                        Line += delta;
+                    }
                 }
                 else
                 {
@@ -4168,9 +4181,9 @@ partial class runtime_package
         // its awaiting callers are suspended state machines, reached through the parent link, and each is a
         // frame at the call it awaits. Nothing is resumed on a goroutine that never parked, and on a thread
         // that is not a carrier, so the walk above is the whole answer there.
-        for (GoTaskCore? caller = GoScheduler.ResumedTwin?.Parent; caller is not null; caller = caller.Parent)
+        for (GoTaskCore? callee = GoScheduler.ResumedTwin, caller = callee?.Parent; caller is not null; callee = caller, caller = caller.Parent)
         {
-            if (parkedTwinFrame(caller) is not uintptr parked)
+            if (parkedTwinFrame(caller, callee) is not uintptr parked)
                 continue;
 
             if (remainingSkip > 0)
@@ -6929,7 +6942,7 @@ partial class runtime_package
     // from its [GoTwinOf] stamp at the machine's state (twinStamp). The pc is interned per machine and state, so the same
     // twin met parked at the same await is one pc. A twin whose stamp or state cannot be read is a frame with its name
     // and its first line; nothing here throws.
-    private static uintptr? parkedTwinFrame(GoTaskCore twin)
+    private static uintptr? parkedTwinFrame(GoTaskCore twin, GoTaskCore? callee)
     {
         if (twin.MachineSnapshot is not { } machine)
             return null;
@@ -6941,17 +6954,23 @@ partial class runtime_package
         if (stamp.MoveNext is null || !isGoSourceFrame(stamp.MoveNext))
             return null;
 
-        int csLine = stamp.AwaitLine(machine);
+        (int state, int csLine, int call) = stamp.Await(machine);
 
-        // The key's offset is no IL offset (the stamp carries a line): -2 - line keeps it apart from every real offset
-        // and from -1 (unknown).
-        CallSiteKey key = new(stamp.MoveNext.MethodHandle, -2 - csLine, false, true, false, null);
+        // The awaited call is named by the callee it awaits (that twin's origin), as the plain method's IL named it, so
+        // the position map's per-call table gives a later-line call its own Go line.
+        string? calleeName = callee?.MachineSnapshot is { } calleeMachine && twinStamp(calleeMachine.GetType()).Origin is { } calleeOrigin
+            ? goCalleeName(calleeOrigin)
+            : null;
+
+        // The key's offset is no IL offset (the stamp carries a line): -2 - state keeps each await apart, and apart from
+        // every real offset and from -1 (unknown).
+        CallSiteKey key = new(stamp.MoveNext.MethodHandle, -2 - state, false, true, false, null);
 
         lock (s_callerTableLock)
         {
             if (!s_callSiteTokens.TryGetValue(key, out nuint token))
             {
-                s_callerRecords.Add(new CallerFrameRecord { Method = stamp.MoveNext, ILOffset = -1, ReturnAddress = true, StampedCsLine = csLine });
+                s_callerRecords.Add(new CallerFrameRecord { Method = stamp.MoveNext, ILOffset = -1, ReturnAddress = true, StampedCsLine = csLine, StampedCall = call, StampedCallee = calleeName });
                 token = callerSpanStart(s_callerRecords.Count - 1) + ((nuint)1 << (CallerSpanShift - 1));
                 s_callSiteTokens[key] = token;
             }
@@ -6983,6 +7002,7 @@ partial class runtime_package
         public readonly System.Reflection.MethodBase? Origin;
 
         private readonly int[] m_sites = [];
+        private readonly int[] m_calls = [];
         private readonly System.Reflection.FieldInfo? m_state;
 
         [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2070",
@@ -7009,6 +7029,7 @@ partial class runtime_package
                     if (System.Reflection.CustomAttributeExtensions.GetCustomAttribute<GoTwinOfAttribute>(kickoff) is { } stamp)
                     {
                         m_sites = stamp.AwaitSites;
+                        m_calls = stamp.CallOrdinals;
                         Origin = resolve(stamp, declared);
                     }
 
@@ -7021,16 +7042,20 @@ partial class runtime_package
             }
         }
 
-        // The converted file's line of the call the suspended `machine` awaits, or 0 where it is not known.
-        public int AwaitLine(object machine)
+        // The suspended `machine`'s state, the converted file's line of the call it awaits there (0 where not known),
+        // and that call's ordinal among its statement's same-name calls ((ordinal << 16) | total; 0 where not known).
+        public (int State, int Line, int Call) Await(object machine)
         {
             try
             {
-                return m_state?.GetValue(machine) is int state && (uint)state < (uint)m_sites.Length ? m_sites[state] : 0;
+                if (m_state?.GetValue(machine) is not int state || (uint)state >= (uint)m_sites.Length)
+                    return (-1, 0, 0);
+
+                return (state, m_sites[state], (uint)state < (uint)m_calls.Length ? m_calls[state] : 0);
             }
             catch (Exception)
             {
-                return 0;
+                return (-1, 0, 0);
             }
         }
 

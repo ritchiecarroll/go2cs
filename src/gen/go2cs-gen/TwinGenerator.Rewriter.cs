@@ -49,9 +49,16 @@ public sealed partial class TwinGenerator
 
         public IReadOnlyList<int> Sites => m_sites;
 
+        // Beside each line: the awaited call's place among its statement's calls of the same name ((ordinal << 16) | total).
+        private List<int> m_calls = [];
+
+        public IReadOnlyList<int> Calls => m_calls;
+
         // The line the compiler's sequence point for this await starts on: its statement's, or the clause of a
         // for statement or the expression body it sits in. A parked frame's line is read from it, as from the PDB before.
-        private static int SequenceLine(SyntaxNode node)
+        private static int SequenceLine(SyntaxNode node) => SequenceNode(node).GetLocation().GetLineSpan().StartLinePosition.Line + 1;
+
+        private static SyntaxNode SequenceNode(SyntaxNode node)
         {
             SyntaxNode at = node;
 
@@ -72,7 +79,8 @@ public sealed partial class TwinGenerator
 
                 if (current.Parent is DoStatementSyntax doLoop && current == doLoop.Condition)
                 {
-                    return doLoop.WhileKeyword.GetLocation().GetLineSpan().StartLinePosition.Line + 1;
+                    at = current;
+                    break;
                 }
 
                 // A case guard (`case X when cond:`, or a switch expression arm's `when`) is a sequence point of its own.
@@ -95,30 +103,74 @@ public sealed partial class TwinGenerator
                 }
             }
 
-            return at.GetLocation().GetLineSpan().StartLinePosition.Line + 1;
+            return at;
         }
 
-        private void NoteSite(SyntaxNode original) => m_sites.Add(SequenceLine(original));
+        // The awaited call's place among the calls of its name in the sequence point's span, in evaluation order (a call's
+        // arguments are evaluated before it): what the runtime counted in the plain method's IL, now counted here.
+        private int CallOrdinal(SyntaxNode original)
+        {
+            if (original is not InvocationExpressionSyntax call || m_model.GetSymbolInfo(call).Symbol is not IMethodSymbol target)
+                return 0;
+
+            string name = target.Name.TrimStart('Δ');
+            int ordinal = 0, total = 0;
+
+            foreach (InvocationExpressionSyntax other in PostOrder(SequenceNode(original)))
+            {
+                if (m_model.GetSymbolInfo(other).Symbol is not IMethodSymbol callee || callee.Name.TrimStart('Δ') != name)
+                    continue;
+
+                total++;
+
+                if (other == call)
+                    ordinal = total;
+            }
+
+            return ordinal == 0 ? 0 : (ordinal << 16) | total;
+        }
+
+        private static IEnumerable<InvocationExpressionSyntax> PostOrder(SyntaxNode node)
+        {
+            foreach (SyntaxNode child in node.ChildNodes())
+            {
+                // A lambda's body runs later, not as part of this statement.
+                if (child is LambdaExpressionSyntax or AnonymousMethodExpressionSyntax or LocalFunctionStatementSyntax)
+                    continue;
+
+                foreach (InvocationExpressionSyntax inner in PostOrder(child))
+                    yield return inner;
+            }
+
+            if (node is InvocationExpressionSyntax invocation)
+                yield return invocation;
+        }
+
+        private void NoteSite(SyntaxNode original)
+        {
+            m_sites.Add(SequenceLine(original));
+            m_calls.Add(CallOrdinal(original));
+        }
 
         // The [GoTwinOf] stamp of the function this twin is generated from, with the given await lines.
-        public string Stamp(IReadOnlyList<int> sites) => m_method is IMethodSymbol origin ? StampFor(origin, sites) : "";
+        public string Stamp() => m_method is IMethodSymbol origin ? StampFor(origin, m_sites, m_calls) : "";
 
         // A trimmed build keeps the methods the stamp names while it keeps the twin (G's condition 2 on 7d): the runtime
         // reads the origin by reflection, and a trimmed-away origin would leave the frame without its Go name.
         public string KeepOrigin() => m_method is IMethodSymbol origin
-            ? "[global::System.Diagnostics.CodeAnalysis.DynamicDependency(\"" + origin.Name + "\", typeof(" + HostText(origin.ContainingType) + "))]"
+            ? "[global::System.Diagnostics.CodeAnalysis.DynamicDependency(\"" + origin.Name + (origin.Arity > 0 ? "``" + origin.Arity : "") + "\", typeof(" + HostText(origin.ContainingType) + "))]"
             : "";
 
         private static string HostText(INamedTypeSymbol host) =>
             (host.IsGenericType ? host.ConstructUnboundGenericType() : host).ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
 
-        internal static string StampFor(IMethodSymbol origin, IReadOnlyList<int> sites)
+        internal static string StampFor(IMethodSymbol origin, IReadOnlyList<int> sites, IReadOnlyList<int> calls)
         {
             string hostText = HostText(origin.ContainingType);
 
             return "[global::go.golib.GoTwinOf(typeof(" + hostText + "), \"" + origin.Name + "\", new global::System.Type[] { " +
                    string.Join(", ", origin.Parameters.Select(parameter => StampType(parameter.Type))) + " }, new int[] { " +
-                   string.Join(", ", sites) + " })]";
+                   string.Join(", ", sites) + " }, new int[] { " + string.Join(", ", calls) + " })]";
         }
 
         // A parameter's type as the stamp writes it: null where it is or holds a type parameter (an attribute cannot name
@@ -141,12 +193,12 @@ public sealed partial class TwinGenerator
         };
 
         // An async literal's twin, stamped with its own await lines (and the enclosing function as its origin).
-        private ExpressionSyntax StampLiteral(ExpressionSyntax twin, IReadOnlyList<int> sites)
+        private ExpressionSyntax StampLiteral(ExpressionSyntax twin, IReadOnlyList<int> sites, IReadOnlyList<int> calls)
         {
             if (m_method is not IMethodSymbol origin)
                 return twin;
 
-            AttributeListSyntax stamp = ParseAttributeList(StampFor(origin, sites)).WithTrailingTrivia(Space);
+            AttributeListSyntax stamp = ParseAttributeList(StampFor(origin, sites, calls)).WithTrailingTrivia(Space);
 
             return twin switch
             {
@@ -584,22 +636,24 @@ public sealed partial class TwinGenerator
 
             List<List<string>> scopes = m_scopes;
             int awaits = m_awaits;
-            List<int> sites = m_sites;
+            List<int> sites = m_sites, calls = m_calls;
             m_scopes = [];
             m_sites = [];
+            m_calls = [];
 
             CSharpSyntaxNode body = (CSharpSyntaxNode)Visit(lambda.Body)!;
-            List<int> literalSites = m_sites;
+            List<int> literalSites = m_sites, literalCalls = m_calls;
 
             m_scopes = scopes;
             m_awaits = awaits;
             m_sites = sites;
+            m_calls = calls;
 
             LinePosition start = lambda.SyntaxTree.GetLineSpan(lambda.Span).StartLinePosition;
             string directive = "\r\n#line " + (start.Line + 1) + " \"" + lambda.SyntaxTree.FilePath + "\"\r\n" + new string(' ', start.Character);
 
             ExpressionSyntax twin = StampLiteral(lambda.WithBody(body).WithoutTrivia()
-                    .WithModifiers(lambda.Modifiers.Add(Token(SyntaxKind.AsyncKeyword).WithTrailingTrivia(Space))), literalSites)
+                    .WithModifiers(lambda.Modifiers.Add(Token(SyntaxKind.AsyncKeyword).WithTrailingTrivia(Space))), literalSites, literalCalls)
                 .WithLeadingTrivia(ParseLeadingTrivia(directive));
 
             GoTwinned++;
@@ -793,20 +847,22 @@ public sealed partial class TwinGenerator
             List<List<string>> scopes = m_scopes;
             int awaits = m_awaits, pairAwaits = m_pairAwaits, totalAwaits = Awaits, temps = m_temps, tests = m_run.PairTests;
             List<string> hoisted = [.. HoistedPairs];
-            List<int> sites = m_sites;
+            List<int> sites = m_sites, calls = m_calls;
             m_scopes = [];
             m_awaits = 0;
             m_pairAwaits = 0;
             m_sites = [];
+            m_calls = [];
 
             CSharpSyntaxNode body = (CSharpSyntaxNode)Visit(node.Body)!;
             bool parks = m_awaits - m_pairAwaits > 0;
-            List<int> literalSites = m_sites;
+            List<int> literalSites = m_sites, literalCalls = m_calls;
 
             m_scopes = scopes;
             m_awaits = awaits;
             m_pairAwaits = pairAwaits;
             m_sites = sites;
+            m_calls = calls;
 
             if (!parks)
             {
@@ -829,7 +885,7 @@ public sealed partial class TwinGenerator
             string directive = "\r\n#line " + (start.Line + 1) + " \"" + node.SyntaxTree.FilePath + "\"\r\n" + new string(' ', start.Character);
 
             ExpressionSyntax twin = StampLiteral(node.WithBody(body).WithoutTrivia()
-                    .WithModifiers(node.Modifiers.Add(Token(SyntaxKind.AsyncKeyword).WithTrailingTrivia(Space))), literalSites)
+                    .WithModifiers(node.Modifiers.Add(Token(SyntaxKind.AsyncKeyword).WithTrailingTrivia(Space))), literalSites, literalCalls)
                 .WithLeadingTrivia(ParseLeadingTrivia(directive));
 
             // C3 (COORD's approval, 2026-11-15): a literal with an EXPLICIT return type (`(uint32, error) () => {…}`)
