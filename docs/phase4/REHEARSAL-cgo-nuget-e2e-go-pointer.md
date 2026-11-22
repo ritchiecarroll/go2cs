@@ -117,3 +117,32 @@ re-converts, re-packs and re-runs go-pointer's sample. Its check covers the samp
 `GoPositionMap` identity `github.com/mattn/go-pointer@<version>/pointer.go`. That keeps two things exercised on real
 third-party code: the go.mod-less module-cache copy route, and a module path whose last element (`go-pointer`)
 differs from its package name (`pointer`).
+
+## Amended 2026-11-22: the re-read after the review folds (1b79e39b38)
+
+The review folds (a0ef45c755, 3dc05f72e1, 6f5c561a22, 1b79e39b38) change golib and the nugetgo tools, both of them J1
+inputs, so the reused feed no longer applies. The re-read ran on a newly built J1 (run 45033824268 at 1b79e39b38, no
+`;feedrun=`; every job success):
+- J1: 362 go.* packages at 1.26.11.2-ci.45033824268.
+- J2: nugetgo.github.com.mattn.go-pointer.0.0.1-ci.45033824268.nupkg (sha256 9ae61e64…127a, 17 entries).
+  - Runtimes win-x64, linux-x64, osx-x64 and linux-arm64.
+  - No entry names the copy or the overlay. The pack's read-back, now also checking the converter's temp-directory
+    markers, refused nothing.
+  - -RecurseRoot identity: `github.com/mattn/go-pointer@v0.0.1/pointer.go`.
+  - R-c PASS, with the same refusal as before: the go.mod-less preflight.
+
+| RID | J3: converted output = go run | Isolation | Red |
+|---|---|---|---|
+| win-x64 | PASS | PASS | R-a PASS: "converted for linux/amd64, and this process runs as windows/amd64 ... (docs/Limitations.md#cgo)" |
+| linux-x64 | PASS | PASS | |
+| osx-x64 | PASS | PASS | |
+| linux-arm64 | PASS | PASS | |
+| osx-arm64 | out by name | | R-b PASS: NUGETGOCGO001 at build |
+
+The only change in what the run printed is R-a's message: it now ends with the docs pointer that 3dc05f72e1 added.
+
+Two runs at the same tip cover the rest of the folds:
+- golib-tests on darwin (run 45033826493), filtered to the cgo classes: 75 passed, 0 failed and 2 skipped, on both
+  osx-arm64 and osx-x64. The two skipped tests are host-gated: one is Windows-only and one is Linux-only.
+- converter-cgo on linux (run 45033828490): `ok go2cs`, with 110 tests passed, 0 failed and 14 skipped, plus 75
+  pack-suite readings ok. It includes the reworded refusal anchors.
