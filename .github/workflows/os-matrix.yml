@@ -260,6 +260,7 @@ jobs:
       sweep-timeout: ${{ steps.derive.outputs.sweep-timeout }}
       probe-at: ${{ steps.derive.outputs.probe-at }}
       jit-disasm: ${{ steps.derive.outputs.jit-disasm }}
+      mn: ${{ steps.derive.outputs.mn }}
       cgo-cc: ${{ steps.derive.outputs.cgo-cc }}
       cgo-cc-sha: ${{ steps.derive.outputs.cgo-cc-sha }}
     steps:
@@ -325,8 +326,8 @@ jobs:
           # go as CC (the cgo toolchain scout, H, 2026-11-10); sha=HEX replaces the pin's sha256, and exists so a wrong
           # hash can be shown to refuse before anything runs. An unknown or repeated key, an empty value, or any option on
           # any other stage FAILS the plan by name rather than being ignored.
-          $probeTest = ''; $probeAt = ''; $jitDisasm = ''; $dnsServers = ''; $cgoCc = ''; $cgoCcSha = ''; $dumpProof = ''; $sweepTimeout = ''
-          $optionKeys = @(switch ($stage) { 'golib-tests' { 'jit' } 'stack-probe' { 'test', 'at' } 'sweep-shard' { 'dns', 'dumpproof', 'timeout' } { $_ -in 'converter-cgo', 'cgo-e2e' } { 'cc', 'sha' } })
+          $probeTest = ''; $probeAt = ''; $jitDisasm = ''; $dnsServers = ''; $cgoCc = ''; $cgoCcSha = ''; $dumpProof = ''; $sweepTimeout = ''; $mnMode = '0'
+          $optionKeys = @(switch ($stage) { 'behavioral-smoke' { 'mn' } 'golib-tests' { 'jit' } 'stack-probe' { 'test', 'at' } 'sweep-shard' { 'dns', 'dumpproof', 'timeout' } { $_ -in 'converter-cgo', 'cgo-e2e' } { 'cc', 'sha' } })
           if ($optionKeys.Count) {
               $parts = @($filter -split ';')
               $filter = $parts[0].Trim()
@@ -340,6 +341,13 @@ jobs:
                   $seen[$key] = $value
               }
               $jitDisasm = "$($seen['jit'])"
+              # behavioral-smoke ;mn=1 runs the filtered programs in M:N mode (BehavioralRunner --mn: GO2CS_MN=1 and
+              # generated twins for every selected project); blank or 0 is default mode (release review TC-3/TC-4).
+              if ($seen.ContainsKey('mn')) {
+                  if ($seen['mn'] -notin '0', '1') { throw "behavioral-smoke filter option mn= is 0 (default mode) or 1 (M:N mode); got '$($seen['mn'])'." }
+                  $mnMode = $seen['mn']
+              }
+              if ($stage -eq 'behavioral-smoke') { Write-Host "behavioral-smoke: $(if ($mnMode -eq '1') { 'M:N mode (BehavioralRunner --mn)' } else { 'default mode' })" }
               if ($stage -eq 'stack-probe') {
                   if (-not $filter -or $filter.Contains(',')) { throw "stack-probe takes exactly ONE roster row before its options in filter; got '$filter'." }
                   $probeTest = "$($seen['test'])"
@@ -377,7 +385,7 @@ jobs:
                   if ($cgoCc) { Write-Host "converter-cgo: CC is the pinned $cgoCc$(if ($cgoCcSha) { ", its sha256 REPLACED by $cgoCcSha" })" }
               }
           }
-          elseif ($filter -match '(^|;)\s*(jit|test|at|dns|dumpproof|timeout|cc|sha)\s*=') { throw "filter options (;key=value) apply to stages golib-tests, stack-probe, sweep-shard, converter-cgo and cgo-e2e only; got stage '$stage' and filter '$filter'." }
+          elseif ($filter -match '(^|;)\s*(mn|jit|test|at|dns|dumpproof|timeout|cc|sha)\s*=') { throw "filter options (;key=value) apply to stages behavioral-smoke, golib-tests, stack-probe, sweep-shard, converter-cgo and cgo-e2e only; got stage '$stage' and filter '$filter'." }
 
           # The behavioral stages' per-program run budget. A schedule has no inputs and keeps 120, as
           # does a blank dispatch. A value that is not a whole number of seconds in 1..1800 FAILS the
@@ -690,6 +698,7 @@ jobs:
           Add-Content -Path $env:GITHUB_OUTPUT -Value "probe-test=$probeTest" -Encoding utf8
           Add-Content -Path $env:GITHUB_OUTPUT -Value "probe-at=$probeAt" -Encoding utf8
           Add-Content -Path $env:GITHUB_OUTPUT -Value "jit-disasm=$jitDisasm" -Encoding utf8
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "mn=$mnMode" -Encoding utf8
           Add-Content -Path $env:GITHUB_OUTPUT -Value "dns-servers=$dnsServers" -Encoding utf8
           Add-Content -Path $env:GITHUB_OUTPUT -Value "dump-proof=$dumpProof" -Encoding utf8
           Add-Content -Path $env:GITHUB_OUTPUT -Value "sweep-timeout=$(if ($sweepTimeout) { $sweepTimeout } else { '45m' })" -Encoding utf8
@@ -1917,11 +1926,9 @@ jobs:
         shell: pwsh
         env:
           SMOKE_FILTER: ${{ needs.plan.outputs.filter }}
-          # M:N: every program the smoke runs is on the scheduler (GO2CS_MN), and each project the filter selects is
-          # built with generated twins. The step sets GoTwinsFor itself, below, to the EXACT project list: MSBuild
-          # matches GoTwinsFor by whole project name (src/Directory.Build.targets), and a substring filter passed
-          # straight through twinned nothing once it selected more than one project.
-          GO2CS_MN: '1'
+          # The run's mode is the runner's: ;mn=1 passes BehavioralRunner --mn (GO2CS_MN=1 and generated twins for every
+          # selected project, by exact name), and blank or ;mn=0 is default mode (release review TC-3/TC-4).
+          SMOKE_MN: ${{ needs.plan.outputs.mn }}
           # BehavioralRunner's OWN budgets, in seconds: no timeout the caller sets can influence
           # them, so a generous job budget alone would be worthless if the runner killed its child
           # first. Sized for a cold 4-core hosted runner, where the shared core closure is built
@@ -1948,23 +1955,19 @@ jobs:
 
           Write-Host "==> behavioral smoke: filter '$filter', GoTargetOS=$($env:GoTargetOS)"
 
-          # GoTwinsFor is the exact ';'-separated list of the projects the runner's --filter (a case-insensitive
-          # substring) selects, with each sub-library project beside them (`<Project>.<lib>.csproj`, whose methods the
-          # program calls). A filter that selects no project refuses by name: it would twin nothing and read nothing.
-          $twinNames = @(Get-ChildItem -Directory 'src/tests/Behavioral' |
-              Where-Object { $_.Name.IndexOf($filter, [StringComparison]::OrdinalIgnoreCase) -ge 0 -and
-                  (Test-Path (Join-Path $_.FullName "$($_.Name).csproj")) } |
-              ForEach-Object { Get-ChildItem -Path $_.FullName -Filter '*.csproj' -Recurse -File } |
-              Where-Object { $_.Extension -eq '.csproj' } |
-              ForEach-Object BaseName | Sort-Object -Unique)
-
-          if ($twinNames.Count -eq 0) {
-              Write-Host "::error::behavioral-smoke filter '$filter' selects no behavioral project, so GoTwinsFor would twin nothing; name a project or a substring of one"
+          # The runner's --filter is a case-insensitive substring, or a|b|c alternatives. A filter that selects no project
+          # refuses by name: it would run nothing and read nothing.
+          $parts = @($filter -split '\|' | Where-Object { $_ })
+          $selected = @(Get-ChildItem -Directory 'src/tests/Behavioral' | Where-Object {
+              $name = $_.Name
+              (Test-Path (Join-Path $_.FullName "$name.csproj")) -and @($parts | Where-Object { $name.IndexOf($_, [StringComparison]::OrdinalIgnoreCase) -ge 0 }).Count -gt 0
+          })
+          if ($selected.Count -eq 0) {
+              Write-Host "::error::behavioral-smoke filter '$filter' selects no behavioral project; name a project or a substring of one"
               exit 1
           }
-
-          $env:GoTwinsFor = $twinNames -join ';'
-          Write-Host "==> GoTwinsFor ($($twinNames.Count)): $env:GoTwinsFor"
+          $mnArgs = @(if ($env:SMOKE_MN -eq '1') { '--mn' })
+          Write-Host "==> $($selected.Count) project(s), $(if ($mnArgs) { 'M:N mode (--mn)' } else { 'default mode' })"
 
           # Build the converter explicitly. A hosted runner has no go2cs binary at all, and every
           # harness rebuild predicate keys on a converter *.go being NEWER than the binary -- which
@@ -1993,7 +1996,7 @@ jobs:
           # disk-exhaustion failure can still be recognized rather than guessed at.
           $log = Join-Path $art "behavioral-smoke-$goos-$rid.log"
 
-          & ./src/tests/Behavioral/run-behavioral.ps1 -IgnoreDiskPreflight --filter $filter *>&1 |
+          & ./src/tests/Behavioral/run-behavioral.ps1 -IgnoreDiskPreflight --filter $filter @mnArgs *>&1 |
               Tee-Object -FilePath $log
 
           $runExit = $LASTEXITCODE
@@ -2028,7 +2031,7 @@ jobs:
       # scheduler prints its own reading.
       # -------------------------------------------------------------------------------------
       - name: M:N spike — direct runs of the twinned storm
-        if: always() && needs.plan.outputs.stage == 'behavioral-smoke' && needs.plan.outputs.filter == 'MnMixedStorm'
+        if: always() && needs.plan.outputs.stage == 'behavioral-smoke' && needs.plan.outputs.filter == 'MnMixedStorm' && needs.plan.outputs.mn == '1'
         timeout-minutes: 30
         shell: bash
         run: |
