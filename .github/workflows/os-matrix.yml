@@ -1843,7 +1843,7 @@ jobs:
           ls "$dir/glyphlib/Generated/go2cs-gen/go2cs.TwinGenerator/" 2>/dev/null | sed 's/^/DIRECT lib generated: /'
           if [ -n "$dll" ]; then
             echo "---- C# GO2CS_MN=1"; GO2CS_MN=1 dotnet "$dll" 2>&1 | tr -d '\r' | sed 's/^/MN| /'; echo "rc=${PIPESTATUS[0]}"
-            echo "---- C# thread path"; env -u GO2CS_MN dotnet "$dll" 2>&1 | tr -d '\r' | sed 's/^/TP| /'; echo "rc=${PIPESTATUS[0]}"
+            echo "---- C# thread path, traced"; GO2CS_TRACE_LITERAL_RECEIVER=1 env -u GO2CS_MN dotnet "$dll" 2>&1 | tr -d '\r' | sed 's/^/TP| /'; echo "rc=${PIPESTATUS[0]}"
           fi
           echo "---- go run"; (cd "$dir" && go run . 2>&1) | tr -d '\r' | sed 's/^/GO| /'
 

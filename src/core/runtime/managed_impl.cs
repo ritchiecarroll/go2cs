@@ -2940,6 +2940,17 @@ partial class runtime_package
 
         (string? file, int line) = methodSourcePosition(literal, ilOffset < 0 ? 0 : ilOffset);
 
+        // SCRATCH TRACE (claude/c1-scratch-glyph-twins only, never merges).
+        if (Environment.GetEnvironmentVariable("GO2CS_TRACE_LITERAL_RECEIVER") == "1")
+        {
+            Console.Error.WriteLine($"TRACE literal {literal.DeclaringType?.Name}.{literal.Name} token={literal.MetadataToken:X} ilOffset={ilOffset} at {System.IO.Path.GetFileName(file)}:{line}");
+            foreach ((System.Reflection.MethodInfo candidate, string? receiver) in candidates)
+            {
+                (string? cf, int cl) = methodSourcePosition(candidate, 0);
+                Console.Error.WriteLine($"TRACE   candidate {candidate.Name} receiver={receiver ?? "-"} token={candidate.MetadataToken:X} at {System.IO.Path.GetFileName(cf)}:{cl}");
+            }
+        }
+
         if (file is null || line <= 0)
             return null;
 
