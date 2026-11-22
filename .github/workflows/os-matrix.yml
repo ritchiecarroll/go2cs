@@ -135,6 +135,8 @@ on:
 
 permissions:
   contents: read
+  # cgo-nuget-e2e's feedrun= option downloads a NAMED prior run's J1 feed artifact (download-artifact run-id).
+  actions: read
 
 # Different flavors and different stages may run at once; two dispatches of the SAME pair queue
 # rather than cancel, because a half-measured census is worth nothing and a killed sweep leaves
@@ -192,6 +194,8 @@ jobs:
       jit-disasm: ${{ steps.derive.outputs.jit-disasm }}
       cgo-cc: ${{ steps.derive.outputs.cgo-cc }}
       cgo-cc-sha: ${{ steps.derive.outputs.cgo-cc-sha }}
+      # cgo-nuget-e2e: the prior run whose J1 feed is reused, or empty (J1 packs).
+      feed-run: ${{ steps.derive.outputs.feed-run }}
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -214,6 +218,7 @@ jobs:
           INPUT_NUGETGO_FEED: ${{ inputs.nugetgo_feed }}
           INPUT_NUGETGO_FEED_SHA256: ${{ inputs.nugetgo_feed_sha256 }}
           INPUT_ARCH: ${{ inputs.arch }}
+          GH_TOKEN: ${{ github.token }}
           EVENT_NAME: ${{ github.event_name }}
         run: |
           $ErrorActionPreference = 'Stop'
@@ -253,8 +258,8 @@ jobs:
           # go as CC (the cgo toolchain scout, H, 2026-11-10); sha=HEX replaces the pin's sha256, and exists so a wrong
           # hash can be shown to refuse before anything runs. An unknown or repeated key, an empty value, or any option on
           # any other stage FAILS the plan by name rather than being ignored.
-          $probeTest = ''; $probeAt = ''; $jitDisasm = ''; $dnsServers = ''; $cgoCc = ''; $cgoCcSha = ''; $dumpProof = ''; $sweepTimeout = ''
-          $optionKeys = @(switch ($stage) { 'golib-tests' { 'jit' } 'stack-probe' { 'test', 'at' } 'sweep-shard' { 'dns', 'dumpproof', 'timeout' } { $_ -in 'converter-cgo', 'cgo-e2e' } { 'cc', 'sha' } })
+          $probeTest = ''; $probeAt = ''; $jitDisasm = ''; $dnsServers = ''; $cgoCc = ''; $cgoCcSha = ''; $dumpProof = ''; $sweepTimeout = ''; $feedRun = ''
+          $optionKeys = @(switch ($stage) { 'golib-tests' { 'jit' } 'stack-probe' { 'test', 'at' } 'sweep-shard' { 'dns', 'dumpproof', 'timeout' } { $_ -in 'converter-cgo', 'cgo-e2e' } { 'cc', 'sha' } 'cgo-nuget-e2e' { 'feedrun' } })
           if ($optionKeys.Count) {
               $parts = @($filter -split ';')
               $filter = $parts[0].Trim()
@@ -304,8 +309,44 @@ jobs:
                   if ($cgoCc -eq 'llvm-mingw' -and $goos -ne 'windows') { throw "llvm-mingw's compilers target windows only, so cc=llvm-mingw applies to goos windows only; got goos '$goos'." }
                   if ($cgoCc) { Write-Host "converter-cgo: CC is the pinned $cgoCc$(if ($cgoCcSha) { ", its sha256 REPLACED by $cgoCcSha" })" }
               }
+              # cgo-nuget-e2e: ;feedrun=RUN reuses that run's J1 feed instead of packing (COORD, 2026-11-22), but ONLY when
+              # what J1 packs is provably the same at both commits: the git tree of every entry under src/ (core, gen, tools,
+              # and the scripts and props at its root) except src/go2cs, src/tests and src/archived, plus global.json,
+              # .github/pack-flavour-guard.ps1 and the text of the pack job itself. The converter is not a packed input:
+              # push-nuget.ps1 packs the committed src/core and src/gen, and only runs src/go2cs's go test preflights, which
+              # decide whether J1 passes, not what it packs. On any difference the reuse is refused by name and J1 runs. A
+              # reused feed is never a release reading: INC 4's final reading runs J1 fresh.
+              if ($stage -eq 'cgo-nuget-e2e' -and $seen.ContainsKey('feedrun')) {
+                  if ($filter) { throw "cgo-nuget-e2e takes no filter before its option; got '$filter'." }
+                  $wanted = $seen['feedrun']
+                  if ($wanted -notmatch '^[0-9]+$') { throw "cgo-nuget-e2e filter option feedrun= is a run id; got '$wanted'." }
+                  $prior = gh api "repos/$($env:GITHUB_REPOSITORY)/actions/runs/$wanted" | ConvertFrom-Json
+                  if (-not $prior.head_sha) { throw "cgo-nuget-e2e feedrun=${wanted}: no such run in this repository." }
+                  $artifact = "cgo-nuget-e2e-go-feed-ci.$wanted"
+                  $held = @((gh api "repos/$($env:GITHUB_REPOSITORY)/actions/runs/$wanted/artifacts" | ConvertFrom-Json).artifacts | Where-Object { $_.name -eq $artifact -and -not $_.expired })
+                  if (-not $held.Count) { throw "cgo-nuget-e2e feedrun=${wanted}: run $wanted holds no unexpired $artifact." }
+                  & git fetch --no-tags --depth=1 origin $prior.head_sha 2>&1 | Out-Null
+                  if ($LASTEXITCODE -ne 0) { throw "cgo-nuget-e2e feedrun=${wanted}: its commit $($prior.head_sha) cannot be fetched." }
+                  function Get-PackInputs([string]$sha) {
+                      $rows = @(& git ls-tree $sha -- src/ | Where-Object { ($_ -split "`t")[1] -notin 'src/go2cs', 'src/tests', 'src/archived' })
+                      $rows += @(& git ls-tree $sha -- global.json .github/pack-flavour-guard.ps1)
+                      $yaml = (& git show "${sha}:.github/workflows/os-matrix.yml") -join "`n"
+                      $job = [regex]::Match($yaml, '(?ms)^  pack:\n.*?(?=^  [a-z][a-z0-9-]*:\n)').Value
+                      $hash = [Convert]::ToHexString([Security.Cryptography.SHA256]::HashData([Text.Encoding]::UTF8.GetBytes($job))).ToLowerInvariant()
+                      $rows + @("job`t.github/workflows/os-matrix.yml#pack $hash")
+                  }
+                  $here = @(Get-PackInputs $env:GITHUB_SHA); $there = @(Get-PackInputs $prior.head_sha)
+                  $differ = @(Compare-Object $here $there | ForEach-Object { ($_.InputObject -split "`t")[-1] -replace ' .*$', '' } | Sort-Object -Unique)
+                  if ($differ.Count) {
+                      Write-Host "::warning::cgo-nuget-e2e feedrun=$wanted REFUSED: run $wanted packed at $($prior.head_sha), and what J1 packs differs here: $($differ -join ', '). J1 runs."
+                  }
+                  else {
+                      $feedRun = $wanted
+                      Write-Host "cgo-nuget-e2e: J1's feed REUSED from run $wanted (packed at $($prior.head_sha)): its $($here.Count) pack inputs are identical here. Not a release reading."
+                  }
+              }
           }
-          elseif ($filter -match '(^|;)\s*(jit|test|at|dns|dumpproof|timeout|cc|sha)\s*=') { throw "filter options (;key=value) apply to stages golib-tests, stack-probe, sweep-shard, converter-cgo and cgo-e2e only; got stage '$stage' and filter '$filter'." }
+          elseif ($filter -match '(^|;)\s*(jit|test|at|dns|dumpproof|timeout|cc|sha|feedrun)\s*=') { throw "filter options (;key=value) apply to stages golib-tests, stack-probe, sweep-shard, converter-cgo and cgo-e2e only; got stage '$stage' and filter '$filter'." }
 
           # The behavioral stages' per-program run budget. A schedule has no inputs and keeps 120, as
           # does a blank dispatch. A value that is not a whole number of seconds in 1..1800 FAILS the
@@ -625,6 +666,7 @@ jobs:
           Add-Content -Path $env:GITHUB_OUTPUT -Value "sweep-timeout=$(if ($sweepTimeout) { $sweepTimeout } else { '45m' })" -Encoding utf8
           Add-Content -Path $env:GITHUB_OUTPUT -Value "cgo-cc=$cgoCc" -Encoding utf8
           Add-Content -Path $env:GITHUB_OUTPUT -Value "cgo-cc-sha=$cgoCcSha" -Encoding utf8
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "feed-run=$feedRun" -Encoding utf8
 
   # ---------------------------------------------------------------------------------------------
   # pack — release-smoke only: the release's own pack, as a rehearsal, on a hosted Windows runner.
@@ -642,7 +684,7 @@ jobs:
     #   release-smoke, no published_version -> pack    release-smoke, published_version -> no pack (nuget.org)
     #   aot-smoke                           -> pack    every other stage                -> no pack
     # cgo-nuget-e2e's J1 is this job unchanged (D4): the stage only renames the artifacts with the run's rehearsal suffix.
-    if: (needs.plan.outputs.stage == 'release-smoke' || needs.plan.outputs.stage == 'aot-smoke' || needs.plan.outputs.stage == 'cgo-nuget-e2e') && needs.plan.outputs.published-version == ''
+    if: (needs.plan.outputs.stage == 'release-smoke' || needs.plan.outputs.stage == 'aot-smoke' || needs.plan.outputs.stage == 'cgo-nuget-e2e') && needs.plan.outputs.published-version == '' && needs.plan.outputs.feed-run == ''
     runs-on: windows-latest
     # PROVISIONAL: three Release build+pack passes of the whole stdlib solution on a 4-core runner
     # (the i7 measures ~17 min per pass); never yet run on a hosted runner.
@@ -833,7 +875,7 @@ jobs:
   # ---------------------------------------------------------------------------------------------
   cgo-nuget-pack:
     needs: [plan, pack]
-    if: needs.plan.outputs.stage == 'cgo-nuget-e2e' && needs.pack.result == 'success'
+    if: ${{ !cancelled() && needs.plan.outputs.stage == 'cgo-nuget-e2e' && (needs.pack.result == 'success' || (needs.pack.result == 'skipped' && needs.plan.outputs.feed-run != '')) }}
     name: cgo-nuget-e2e J2 (linux / go-pointer -Cgo pack)
     runs-on: ubuntu-latest
     # The pack converts four flavors with zig and builds each against the go.* closure from cold. PROVISIONAL until the
@@ -871,12 +913,21 @@ jobs:
       - name: J2 -- download J1's go.* feed
         uses: actions/download-artifact@v5
         with:
-          name: cgo-nuget-e2e-go-feed-ci.${{ github.run_id }}
+          # feedrun= names a prior run whose J1 inputs the plan proved identical; otherwise this run's own J1.
+          name: cgo-nuget-e2e-go-feed-ci.${{ needs.plan.outputs.feed-run || github.run_id }}
+          run-id: ${{ needs.plan.outputs.feed-run || github.run_id }}
+          github-token: ${{ github.token }}
           path: go-feed
 
       - name: J2 -- R-c, then the -Cgo pack against the local closure
         shell: pwsh
+        env:
+          FEED_RUN: ${{ needs.plan.outputs.feed-run }}
         run: |
+          if ($env:FEED_RUN) {
+              $line = "J1's go.* feed REUSED from run $($env:FEED_RUN): the plan proved its pack inputs identical at both commits. Not a release reading."
+              Write-Host $line; Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value "> $line`n"
+          }
           $zig = & ./.github/cgo-toolchain.ps1 -Cc zig -Rid linux-x64 -Label 'cgo-nuget-e2e J2 zig'
           & ./.github/cgo-nuget-pack.ps1 -Feed (Join-Path $PWD 'go-feed') -Zig $zig.Exe -Suffix "ci.${{ github.run_id }}" -OutDir (Join-Path $PWD 'artifacts/cgo-nuget-pack')
           exit $LASTEXITCODE
@@ -2861,7 +2912,10 @@ jobs:
         if: needs.plan.outputs.stage == 'cgo-nuget-e2e'
         uses: actions/download-artifact@v5
         with:
-          name: cgo-nuget-e2e-go-feed-ci.${{ github.run_id }}
+          # feedrun= names a prior run whose J1 inputs the plan proved identical; otherwise this run's own J1.
+          name: cgo-nuget-e2e-go-feed-ci.${{ needs.plan.outputs.feed-run || github.run_id }}
+          run-id: ${{ needs.plan.outputs.feed-run || github.run_id }}
+          github-token: ${{ github.token }}
           path: go-feed
 
       - name: cgo-nuget-e2e J3 -- download J2's package
@@ -2878,7 +2932,12 @@ jobs:
           # The row names its host by the matrix label beside ImageOS and ImageVersion, as the nugetgo-behavior step's does;
           # without it Invoke-NugetgoBehaviorRow.ps1 refuses "not a hosted runner" (run 45001845693, every J3 leg).
           NUGETGO_RUNNER: ${{ matrix.runner }}
+          FEED_RUN: ${{ needs.plan.outputs.feed-run }}
         run: |
+          if ($env:FEED_RUN) {
+              $line = "J1's go.* feed REUSED from run $($env:FEED_RUN): the plan proved its pack inputs identical at both commits. Not a release reading."
+              Write-Host $line; Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value "> $line`n"
+          }
           # The sample is not a corpus project; the leg-wide GoTargetOS binding must not reach its build.
           Remove-Item Env:GoTargetOS -ErrorAction SilentlyContinue
           $cc = if ($IsWindows) { 'llvm-mingw' } else { 'zig' }

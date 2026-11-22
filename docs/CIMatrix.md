@@ -306,6 +306,13 @@ The legs provision the OS's default pinned C toolchain (`.github/cgo-toolchain.p
 because `go run` and the sample's conversion both load go-pointer with cgo on. The built program needs none.
 Every artifact is named with the run's suffix, and no feed outside the run's artifacts is written.
 
+`-f filter=';feedrun=<run id>'` reuses that run's J1 feed instead of packing again, which saves the hour and more
+that J1 takes. The plan allows it only when what J1 packs is the same at both commits: the git tree of every entry
+under `src/` except `src/go2cs`, `src/tests` and `src/archived`, plus `global.json`,
+`.github/pack-flavour-guard.ps1` and the `pack` job's own text. On any difference it names the paths in a warning
+and runs J1. J2's and J3's summaries state the reuse. A reused feed is never a release reading, and INC 4's final
+reading runs J1 fresh.
+
 ```
 gh workflow run os-matrix.yml -f stage=cgo-nuget-e2e -f goos=linux
 ```
