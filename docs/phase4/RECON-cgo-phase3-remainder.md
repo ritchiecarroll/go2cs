@@ -4,6 +4,9 @@
 > `ccca03abea` and against go1.26.11's sources. H reviews it for cgo fit and P3 reviews it as a design. It feeds H's
 > .6 cgo plan; the plan, not this record, decides what is built. Amended by dated blocks, never rewritten.
 >
+> **Amended 2026-11-22 (section 7).** P3's design read is folded in there: 3.3-D's pin owner, 3.3-C(b) and Q4,
+> A3's red reading, the order of R3 and Go's walk, the layout predicate, the runtime floor and the sizes.
+>
 > **Labels.** 3.3 and 3.4 are COORD's labels from the brief. In
 > [`DESIGN-cgo-phase3-marshaling.md`](DESIGN-cgo-phase3-marshaling.md) the same numbers name other things: its 3.3 was
 > the realloc view (section 5), which section 18 records as closed by the view doors, and its 3.4 is `net` and the
@@ -325,3 +328,182 @@ No site in this population slices C memory as a C struct type with pointer field
 - The reasoning in 3.3-A, that Go's walk is already faithful, rests on `pinner_impl.cs` and runtime's banked Pinner
   tests (`TestPinnerCgoCheck*`). It has not been run against a `-cgo` program.
 - Sizes are estimates from comparable seats (door C, the view doors, S-B1's footprint), not measurements.
+
+## 7. Amendment, 2026-11-22: P3's design read folded (three MUSTs, two SHOULDs, one NIT)
+
+P3 read this record at `baf94a1c4e` and returned APPROVE WITH CHANGES (mailbox, P3 to COORD, 2026-11-21 17:23Z). This
+block folds every point in. The sections above stand as written; where this block corrects one, it names the lines.
+Every golib site below is READ at master `1f8d62ddb3`, and its line numbers are that tree's. P3's answers to the
+questions: Q1 agreed (3.5 and 3.6), Q2 keep deviation 8(b) for the first seat, Q3 keep the number refused.
+
+### 7.1 MUST 1: who owns the long-lived pin (corrects 3.3-D, lines 118-122)
+
+**What the record got wrong.** Line 120 says `EnsureStableAddress` "moves the value into pinned storage once", and
+lines 118-119 say the pin is released at the last `Unpin`. Neither is the tree:
+- `EnsureStableAddress` (`ж.cs:774-781`) pins IN PLACE: `m_pin = PinnedBuffer.PinOnly(storage)`, when
+  `PinnableStorage` is not null. Nothing moves.
+- `m_pin` (`ж.cs:117`) is never cleared. The pin lasts for the box's life and is released by the `PinnedBuffer`
+  finalizer once the box is unreachable (`ж.cs:829-830`). Nothing releases it at `Unpin`.
+- It is a pin on the BOX that took the address. For a standard box that box is the referent, and the Pinner holds
+  it, so the pin does last while the Pinner holds it (the reason `pinner_impl.cs`'s header gives for taking no CLR
+  pin). For a field reference or an element reference it is not: the Pinner holds the referent, which is the source
+  allocation or the canonical backing (`pinner_impl.cs:138-139`, `goReferentOfBox`), and the pin sits on a per-access
+  view box that nothing holds. When that view box is collected, its finalizer releases the pin while the Pinner still
+  holds the allocation.
+- `PinOnly` returns null when the CLR refuses the pin (`runtime/PinnedBuffer.cs:138-148`; `GCHandle` pins only a
+  blittable object). A field reference's storage is its root's (`ж.FieldRefBox.cs:434-435`), so a reference-free field
+  of a reference-bearing root reads `PointerStorage.Unpinnable` (`ж.FieldRefBox.cs:468-470`; the element reference has
+  the same arm, `ж.ElemRefBox.cs:394-396`). For that shape no pin can be taken that outlives the call.
+
+**The design, restated.**
+- **The pin record owns the pin.** `PinRecord` (`pinner_impl.cs:292`, a class keyed by the referent, moving to
+  golib's `GoPinTable` under 3.3-B) gains one field, `PinnedBuffer? Hold`.
+- The first time the cgo wrapper hands C a pointer whose referent the table reports pinned, it sets
+  `Hold = PinnedBuffer.PinOnly(view.PinnableStorage)` under the table's lock, if `Hold` is still null. Every view into
+  the same allocation reaches the same storage object, so one hold covers all of them, and the address handed to C
+  stays the same on every call.
+- `GoPinTable.Unpin` disposes `Hold` (`PinnedBuffer.Dispose`, `runtime/PinnedBuffer.cs:82`) where the count reaches
+  zero (`pinner_impl.cs:321`). That is the last `Unpin` across every Pinner that pinned the referent, which is Go's
+  rule: the object stays pinned while any Pinner pins it.
+- The leak finalizer reaches the same line through `unpinManaged`, so a leaked Pinner releases its holds as well.
+- A standard box keeps its box-life pin from the address-take as well. That pin outlives `Unpin` until the box is
+  collected. It costs a pinned slot for longer than Go would pin it and changes no value, and it is that way at
+  master already.
+- Runtime's own suite never crosses a pinned referent, so `Hold` stays null there and Pin and Unpin cost what they
+  cost today.
+
+**A new refusal, R6.** A Pinner-pinned pointee whose storage reads `PointerStorage.Unpinnable`, or for which `PinOnly`
+returns null, gets:
+`cgo: the <T> pointer handed to C.<f> is Go memory a runtime.Pinner holds, inside an allocation that holds managed
+references, which go2cs cannot hold still past the call, so it refuses the call`.
+Without a Pinner the same pointee is class (a) and crosses under the call-scoped `fixed`, which pins any object as a
+pinned local (P3 agrees). Go allows the Pinner case (G4), so R6 is a place where Go proceeds and go2cs refuses, and it
+is added to the disclosure list with R2.
+
+**A new arm, A3b, the twin of A3 on that shape.** `s` holds a string and a reference-free `hdr`. `p.Pin(&s.hdr)`,
+then `C.keep(&s.hdr)`, compacting collections forced, then `C.writeKept(42)`. Target: R6's text, asserted at
+`C.keep`. At 1b's tip the field reference crosses by the mirror and C keeps a stack address, so the red reading runs in
+a child process, as 7.3 says for A3.
+
+### 7.2 MUST 2: IMAGE exists in golib (corrects 3.3-C(b), lines 105-110, the size table, and Q4)
+
+**What the record got wrong.** 3.3-C(b) says IMAGE needs "Go-offset accessors on a Go struct ... a go2cs-gen change,
+so it is stop line S-G". That was not read at the tree. golib already builds a Go-layout image of a converted Go struct
+at run time, with no generator change:
+- `NativeStructMarshal` (`NativeStructMarshal.cs`): `classify` (`:410`) decides a struct type's shape (scalars,
+  fixed arrays of scalars and nested structs of the same are marshallable; a pointer, string, slice, map, channel,
+  func, interface or `unsafe.Pointer` is refused by name), `MarshalledSizeOf` (`:397`) gives Go's size, `encode`
+  (`:543`) writes the image at Go's offsets and `decode` (`:618`) reads it back into the box. This is the linux
+  keystone's marshal and the darwin libc funnel's (`CallLibc`, `:125`). It is keyed by `Type` at run time.
+- `NativeStructMarshal.ImagePlan<S>` (`GoImage.cs:189`): the same image for a struct type known at compile time,
+  with no boxing per call. `GoImage<S>` uses it for `copy` over a reference-bearing struct's bytes.
+- `NativeBox<T>.FieldRef` (`ж.NativeBox.cs:272-284`) already reads a Go struct's scalar field at its Go offset over
+  native memory.
+
+**What is actually missing.**
+1. **Finding the source value.** `net` hands C `(*C.struct_sockaddr)(unsafe.Pointer(&sa))`. `sa`'s array field makes
+   its box reference-bearing, so `unsafe.Pointer(&sa)` is its order token. `GoCgoArgs.StructPointer` refuses a
+   native box minted from managed storage, naming the reinterpret view and the order token among its forms
+   (`runtime/GoCgoArgs.cs:51-53`, through `IsGenuinelyNative`, `:302-303`). Which box kind the reinterpret reaches
+   the wrapper as is NOT READ by a run; A7 reads it. The source is reachable: the native box
+   carries `RetainedSource` (`ж.NativeBox.cs:321`) or `AliasesAnOrderToken` (`:298`), and an order token resolves
+   through `ManagedPointerTokens.Resolve`, as the keystone resolves it. The new arm takes the source box, not the
+   reinterpreted one.
+2. **The image's size is the source's.** `RawSockaddrInet6` is 28 bytes (`SizeofSockaddrInet6 = 0x1c`, go1.26.11
+   `syscall/ztypes_linux_amd64.go:310`, READ) and `struct sockaddr` declares 16. C reads `salen` bytes, so the image
+   is built at the SOURCE's Go type and size (`MarshalledSizeOf(sourceType)`), never at `T`'s, and is decoded back
+   into the source box after the call.
+3. **A door from golib's cgo class into the marshal.** `classify`, `encode` and `decode` are private. The arm needs
+   one internal member that encodes a box into a caller's buffer and decodes it back. Both classes are in golib, so
+   this is a golib member, under route #7's consumer gates, not a generator change.
+
+**Restated (b).** For a pointee with no Go pointer whose CLR layout is not Go's (the predicate is 7.5), the wrapper
+reuses the keystone's plan: resolve the source box, size and encode its image at the source's Go layout, hand C the
+image's address, decode back after the call. Both sockaddr shapes are within `classify`'s accepted set by their
+declarations (`uint16`, `uint32` and fixed byte arrays; go1.26.11 `syscall/ztypes_linux_amd64.go:155-168`, READ).
+Whether `classify` returns marshallable for them at the tree is NOT READ by a run; A7 measures it. Whether the
+`Type`-keyed path is clean under Native AOT for the `release-smoke-cgo` legs is NOT READ either; A7's AOT leg answers
+it.
+
+**Re-sized.** 3.3-C(b) goes from 2 lane-days to **0.75** (the source resolution, the internal door, the size rule and
+A7). **Q4 is withdrawn**: there is no stop line S-G for this increment. 3.4-A goes from 0.75 to **0.5**, because the
+read side exists and the remaining question is the one 1a's item 2 already asks (whether `unsafe.Pointer(&sa.Port)`
+over a native receiver yields base plus the Go offset); it is mostly its arm.
+
+### 7.3 MUST 3: A3's red reading is host-unsafe too (corrects lines 173-178)
+
+At 1b's tip a whole struct crosses by the mirror, so `C.keep` stores the mirror's stack address and `C.writeKept(42)`
+writes through a dead stack slot of the test host. The red run can corrupt the host, not only its control. So:
+- A3 and A3b run their red readings in a child process, the handling wall D gave a host-fatal test.
+- Each red is read as "42 not observed, or the child crashed". Neither is asserted.
+- Only the green reading, after 3.3-D, runs in-process, and asserts 42.
+- The other arms do not keep an address past the call (A1, A2 and A8 write or compare within it; A9 is refused at
+  1b's tip), so they stay in-process.
+
+### 7.4 SHOULD 4: the order of R3 and Go's walk (adds to 3.3-A, lines 82-86)
+
+`pinner_impl.cs:58-61` states two divergences of the managed walk: a string literal's bytes are a heap `byte[]`, and
+a boxed scalar inside an interface is a heap copy, so both read "unpinned Go pointer" where Go reads "not a Go
+pointer". Routed as written, a struct with a literal string field handed to C would panic with Go's R1 where Go
+proceeds. The CLR cannot hand a string or interface field to C under any `cgocheck` level, so the outcome is a refusal
+either way; the text must be R3's.
+
+**The order, stated.** The wrapper classifies first. A pointee whose type holds a string or interface word at level 1
+is refused with R3 before the walk runs. The walk runs for pointer words only.
+
+**The residue, disclosed.** A string field whose bytes are heap memory Go would reject with R1 now reads R3: both are
+refusals, and only the text differs. It goes into Limitations with one arm, **A12**: a struct with a literal string
+field and one with a heap-built string field, each handed to C, each asserting R3's text.
+
+### 7.5 SHOULD 5: the layout predicate, by name (adds to 3.3-C, lines 100 and 105)
+
+"CLR layout is Go's" is the predicate `NativeBox<T>.FieldRef` already uses (`ж.NativeBox.cs:291`):
+`RuntimeHelpers.IsReferenceOrContainsReferences<T>()` false and `GoReflect.ClrLayoutMismatch(typeof(T))` null. The
+three results split on it and on the keystone's shape:
+- **(a) PIN**: the predicate holds.
+- **(b) IMAGE**: the predicate fails and `NativeStructMarshal`'s shape is marshallable.
+- **(c) REFUSE**: the shape names a pointer field, or the type holds a string or interface word (R3, 7.4), or Go's
+  walk panics (R1).
+
+3.4 uses the same test, so a struct reaches the same class on both increments. GolibTests carries one arm per result,
+each with a near-miss control one field away: (a) `{a, b uint32}` against (b) `{a uint32; b [4]byte}`; (b) against
+(c) `{a uint32; b *uint32}`; (a) against a reference-free struct whose CLR layout is not Go's, if `ClrLayoutMismatch`
+names one at the tree (NOT READ which types it names).
+
+### 7.6 NIT 6: the runtime floor for C2's seat (adds to 3.3-A, line 77)
+
+The public door already exists. `pinner_impl.cs:831` is `public static void GoCgoCheckPointer(any ptr, any arg)`, a
+GolibTests seam over the same body. It is in the published `nuget-1.26.11.1` (READ: `git show
+nuget-1.26.11.1:src/core/runtime/pinner_impl.cs`). Two choices for C2's seat:
+- **Recommended:** the converter emits a call to `GoCgoCheckPointer`. A .5-built cgo package then runs against
+  go.runtime 1.26.11.1 or later, and the runtime floor does not move. The seam becomes production API, and its
+  comment says so.
+- A new `[EditorBrowsable(Never)]` forwarder, as line 77 proposed: a .5-built cgo package then needs go.runtime .5
+  or later, and C2's seat states that floor.
+
+### 7.7 The size, re-totalled (supersedes the table at lines 206-216 and 4.5's total)
+
+| Part | Lane-days |
+|:--|--:|
+| 3.3-A: the converter lowering of four forms, the call to the existing seam, the cgo goldens and closure-form test | 1.5 |
+| 3.3-B: the pin table into golib | 0.5 |
+| 3.3-C(a): PIN for a whole value | 1 |
+| 3.3-C(b): IMAGE over the keystone's marshal | 0.75 |
+| 3.3-D: the pin record's hold, R6 and A3b | 1.75 |
+| 3.3-E: a pinned store into C memory | 1.5 |
+| 3.3-F: `GODEBUG` | 0.25 |
+| Red arms (A3 and A3b in a child process, A12), GolibTests, and the hosted reading | 1.5 |
+| **Total** | **8.75** |
+
+- A first seat without 3.3-E (P3's Q2 answer) is about **7.25**. IMAGE is now cheap enough to ride the first seat,
+  and `net`'s sockaddr shape needs it.
+- 3.4: 3.4-A 0.5, 3.4-B 1.5, 3.4-C 0.25, arms and the hosted reading 0.5. **About 2.75.**
+- The corpus footprint prediction is unchanged: 0 files on four targets.
+
+### 7.8 What this block does not show
+
+- No arm has been run and nothing has been built. Every claim marked READ is a reading of source at `1f8d62ddb3` or of
+  go1.26.11's sources.
+- `classify`'s acceptance of the sockaddr shapes, the AOT cleanliness of the `Type`-keyed marshal, and which types
+  `ClrLayoutMismatch` names are NOT READ by a run, as marked above.
+- H's review of this record is still owed, and H's plan, not this record, decides what is built.
