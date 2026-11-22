@@ -53,7 +53,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "AA0kgoKUpoKUgqCSgpSCpoKgkoKUgqayhJKU", "29-29:1;38-38:2", "46=MnGlyphMethodFrames/glyphlib.Box.Pass")]
+[assembly: GoPositionMap("main.go", "main.cs", "AA8ygoKUpoKUgqCSgpSCpoKgkoKUgqayhJKUlII=", "36-36:1;45-45:2", "53=MnGlyphMethodFrames/glyphlib.Box.Pass;62=MnGlyphMethodFrames/glyphlib.Box.Pass")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -81,5 +81,7 @@ public static partial class main_package
     // <ImportInitializers>
     [GoInit] internal static void initᴛᴛimportꓸMnGlyphMethodFramesꓸglyphlib() => builtin.initPackage(typeof(MnGlyphMethodFrames.glyphlib_package));
     [GoInit] internal static void initᴛᴛimportꓸfmt() => builtin.initPackage(typeof(fmt_package));
+    [GoInit] internal static void initᴛᴛimportꓸreflect() => builtin.initPackage(typeof(reflect_package));
+    [GoInit] internal static void initᴛᴛimportꓸruntime() => builtin.initPackage(typeof(runtime_package));
     // </ImportInitializers>
 }

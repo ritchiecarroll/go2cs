@@ -187,6 +187,8 @@
     <ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />
 
     <ProjectReference Include="$(go2csPath)core/fmt/fmt.csproj" />
+    <ProjectReference Include="$(go2csPath)core/reflect/reflect.csproj" />
+    <ProjectReference Include="$(go2csPath)core/runtime/runtime.csproj" />
     <ProjectReference Include="glyphlib/MnGlyphMethodFrames.glyphlib.csproj" />
   </ItemGroup>
 

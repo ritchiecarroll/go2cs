@@ -1,6 +1,8 @@
 namespace go;
 
 using fmt = fmt_package;
+using reflect = reflect_package;
+using runtime = runtime_package;
 using glyphlib = MnGlyphMethodFrames.glyphlib_package;
 using MnGlyphMethodFrames;
 
@@ -57,6 +59,10 @@ internal static partial void main() {
     fmt.Println(expr(b.Value, 2));
 
     fmt.Println(b.Pass(3));
+
+    fmt.Println("method expression:", runtime.FuncForPC(reflect.ValueOf(((Func<glyphlib.Box, nint, @string>)(global::go.MnGlyphMethodFrames.glyphlibᴛBox.Pass))).Pointer()).Name());
+    var recvʗ2 = ~b;
+    fmt.Println("method value:", runtime.FuncForPC(reflect.ValueOf((nint p1) => recvʗ2.Pass(p1)).Pointer()).Name());
 }
 
 } // end main_package
