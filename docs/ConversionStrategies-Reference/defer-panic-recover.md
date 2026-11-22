@@ -1226,7 +1226,7 @@ A result list that is entirely **unnamed** (`func f() (int, error)`) or entirely
 
 A named result that **owns array storage** — an array, or a struct holding one (`valueAssignMethod`) — is assigned **in place** by an explicit `return`, as an `=` to it is: in Go the result IS its storage, so a slice, an element pointer or a window taken from it before the `return` still names it when a deferred call writes through it afterwards. The swap `a = v` left every one of those on the old storage and the deferred write missed the result (Go `7 2`, converted `1 2`). A single result emits `a.Assign(v)` / `h.AssignFrom(v)` with no clone; in a tuple each such operand becomes a temporary in the deconstruction and its copy follows the statement, as in `internal/trace`'s `Reader.ReadEvent` (Go `return Event{}, io.EOF`):
 
-<!-- source: src/core/internal/trace/reader.cs:102 -->
+<!-- source: src/core/internal/trace/reader.cs:99 -->
 ```csharp
             (var eᴛ1, err) = (new Event(), io.EOF); e.AssignFrom(eᴛ1); goto ᒐdone;
 ```
