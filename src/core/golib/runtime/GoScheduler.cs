@@ -307,8 +307,8 @@ public static class GoScheduler
         return int.TryParse(text, out int procs) && procs > 0 ? procs : Environment.ProcessorCount;
     }
 
-    /// <summary>Whether the calling thread is a carrier with a goroutine mounted.</summary>
-    internal static bool OnCarrier => t_carrier is { Mounted: not null };
+    /// <summary>Whether the calling thread is a carrier with a goroutine mounted: where a twin may park.</summary>
+    public static bool OnCarrier => t_carrier is { Mounted: not null };
 
     // M:N PROTOTYPE (A1). GO2CS_MN_CONTEXT=0 (a reading) turns the context rule off: a goroutine's
     // ExecutionContext is then not carried from step to step, and a carrier starts under its starter's.

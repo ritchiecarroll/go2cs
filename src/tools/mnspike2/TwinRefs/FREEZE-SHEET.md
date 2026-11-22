@@ -266,3 +266,12 @@ The first landing requirement above (the twin origin and the await map as a gene
 [GoTwinOf] stamp. The design, the readings and what is owed are in docs/phase4/DATA-mn-origin-table.md, on branch
 claude/h-mn-origin-table. Its ctor is frozen in PublicSurface.golib.txt [mn-frozen]. The Native AOT reading of A4's
 program is owed before landing.
+
+### Amendment (dated block, 2026-11-22, G): the hand-written stdlib twins ship public from .5
+
+Superseding the 7b block above for these two members (COORD's freeze ruling, docs/phase4/inbox/G/20261122T114603Z-COORD.md;
+row 7 pieces 2+3, docs/phase4/DESIGN-mn-stdlib-twins.md section 6): go.sync's `Lockꞏtwin` is now
+`public static GoTask Lockꞏtwin(this ж<Mutex> Ꮡm)` and PARKS (the canonical receiver this sheet listed as owed), and
+go.time's `Sleepꞏtwin` is public. Both are frozen surface of go.sync and go.time, guarded by GolibTests'
+StdlibTwinSurfaceTests. The L-min cost stated above no longer applies to these two calls; it still applies to every other
+plain stdlib call. Still owed with piece 5: a twin-built sync must skip the generator's box forwarder beside this twin.
