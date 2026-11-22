@@ -1,5 +1,5 @@
 //******************************************************************************************************
-//  GoTask.cs - M:N PROTOTYPE (A1). Prototype code: nothing from this branch lands on master as it is.
+//  GoTask.cs - M:N scheduler, experimental and opt-in (GoTwins=true to build, GO2CS_MN=1 to run); inert otherwise.
 //
 //  The task a hidden async twin returns, with its builders and its awaiters: the shape every twin's
 //  state machine binds to. A twin awaits only another twin's GoTask or a GoParkSlot, so a continuation
@@ -306,7 +306,7 @@ internal class GoTaskCore
         Resume();
     }
 
-    // M:N PROTOTYPE (A2). A copy of the twin's state machine as it stands, for a stack walk to read which
+    // M:N (A2). A copy of the twin's state machine as it stands, for a stack walk to read which
     // await a suspended caller sits at (runtime.Callers). Null for a twin that never suspended. A cold path:
     // a struct state machine is boxed by the read.
     internal virtual object? MachineSnapshot => null;

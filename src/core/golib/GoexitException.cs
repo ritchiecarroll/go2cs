@@ -78,6 +78,6 @@ namespace go;
 
     internal static void ResetThread() => t_started = false;
 
-    // M:N SPIKE: exchanges this thread's mark with a goroutine's saved one (Goroutine.Mount / Unmount).
+    // M:N: exchanges this thread's mark with a goroutine's saved one (Goroutine.Mount / Unmount).
     internal static void SwapMounted(ref bool saved) => (saved, t_started) = (t_started, saved);
 }

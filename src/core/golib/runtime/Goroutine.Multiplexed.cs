@@ -1,5 +1,5 @@
 //******************************************************************************************************
-//  Goroutine.Multiplexed.cs - M:N SPIKE (R5b, B1). Spike code: it stays on the spike branch and never lands.
+//  Goroutine.Multiplexed.cs - M:N scheduler, experimental and opt-in (GoTwins=true to build, GO2CS_MN=1 to run); inert otherwise.
 //
 //  The goroutine half of the spike's scheduler (GoScheduler.cs): a goroutine started with a hidden async
 //  twin is not bound to a thread. A carrier MOUNTS it for one step (from its start, or from a wake, to its
@@ -80,10 +80,10 @@ public sealed partial class Goroutine
         GoScheduler.Ready(goroutine, start.Run);
     }
 
-    // M:N PROTOTYPE (A1). The ExecutionContext of a multiplexed goroutine while no carrier has it mounted.
+    // M:N (A1). The ExecutionContext of a multiplexed goroutine while no carrier has it mounted.
     internal ExecutionContext? m_context;
 
-    // M:N PROTOTYPE (A4). The carrier that ran this goroutine's last step, and whether a step ever ran on another:
+    // M:N (A4). The carrier that ran this goroutine's last step, and whether a step ever ran on another:
     // read only by the scheduler's reading.
     internal object? m_lastCarrier;
     internal bool m_migrated;
