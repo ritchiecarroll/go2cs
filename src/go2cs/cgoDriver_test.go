@@ -339,8 +339,8 @@ func requireCgoPhase1UsesRefused(t *testing.T, stderr string) {
 	t.Helper()
 
 	lines := cgoRefusalLines(stderr)
-	requireCgoUseRefused(t, lines, "C.twice", "§11.6")
-	requireCgoUseRefused(t, lines, "C.NEXT", "Phase 4")
+	requireCgoUseRefused(t, lines, "C.twice", "used as a value")
+	requireCgoUseRefused(t, lines, "C.NEXT", "does not compile C yet")
 
 	for _, name := range []string{"C.CString", "C.GoString", "C.free"} {
 		for _, line := range lines {

@@ -41599,4 +41599,22 @@ fixture above, Go's output against the converted program's.
 
 — i9 (2026-11-22)
 
+### 2026-11-22 — C2: the `-tests -recurse` go.mod overlay is refused beneath GOMODCACHE (OPEN, likely cure named)
+
+`installGoModOverlay` (`src/go2cs/goModFile.go`) serves a module-cache release that ships no go.mod to a `-tests
+-recurse` run. It writes a `go build -overlay` file that maps `<release>/go.mod` to the cache's synthesized
+`cache/download/<escaped path>/@v/<version>.mod`, and appends `-overlay=` to GOFLAGS. At Go 1.26.11 only `go mod
+download` accepts that overlay. `go list` (C2, INC 4 increment 1) and `go build` (P3's read of the increment) both
+refuse it: "overlay contains a replacement for .../go.mod. Files beneath GOMODCACHE must not be replaced". So the
+overlay has most likely never served a release converted from inside the module cache. Not measured: whether any
+banked `-tests` row has gone through it.
+
+**Likely cure, not seated:** the route plain `-recurse` now takes (INC 4 increment 1). `ConvertModule` converts a
+COPY (`copyModuleCacheRelease`) that carries the synthesized go.mod, keeps the `<escaped path>@<version>` leaf,
+runs with GOWORK=off, and maps every source path and diagnostic back to the cache path. The `-tests` driver would
+also need its `go test` runs pointed at the copy. Ruled out of INC 4's seat (COORD, option (a)): INC 4 neither
+changes nor depends on the `-tests` path.
+
+— C2 (2026-11-22)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

@@ -430,7 +430,7 @@ func _Cfunc_handle(p0 uintptr) (r1 _Ctype_int) { return }
 
 	want := map[string]string{
 		"free":    "C.free's parameter 1 is not a scalar",
-		"scale":   "C.scale's parameter 1 is not a scalar (a C struct is increment 3b2",
+		"scale":   "C.scale's parameter 1 is not a scalar",
 		"CString": "C.CString is one of cmd/cgo's own helpers",
 		"handle":  "C.handle's parameter 1 is of basic kind uintptr",
 	}

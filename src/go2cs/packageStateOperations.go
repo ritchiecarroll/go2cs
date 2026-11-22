@@ -227,6 +227,21 @@ func newFileEntry(file *ast.File, filePath string, manualConversion bool) FileEn
 	}
 }
 
+// entrySourcePath is the Go source a file entry's positions belong to, which its position map names (goSourceIdentity). A
+// tree cmd/cgo rewrote (outputBase, the cgo route) was parsed from its build-cache intermediate, whose //line directive
+// names the import "C" source: the file Go itself reports for that tree's frames, as cgoSourceFiles reads it. Recording
+// the intermediate instead put a hashed build-cache path on every packed cgo assembly (cgo against go.* INC 4, 1c).
+// Every other entry is its own source.
+func entrySourcePath(fset *token.FileSet, entry FileEntry) string {
+	if entry.outputBase != "" && entry.file != nil {
+		if named := fset.PositionFor(entry.file.Package, true).Filename; named != "" {
+			return filepath.Clean(named)
+		}
+	}
+
+	return entry.filePath
+}
+
 // newFileVisitor constructs the per-file Visitor with every eagerly-required field initialized.
 // Fields absent here (e.g. tightenedConsts, untypedConstContexts) are deliberately lazy — their
 // operations nil-check before first write.
@@ -261,7 +276,8 @@ func newFileVisitor(fset *token.FileSet, packageTypes *types.Package, info *type
 		blocks:                    Stack[*strings.Builder]{},
 		manualConversion:          fileEntry.manualConversion,
 		handOwnedTypeNames:        fileEntry.handOwnedTypeNames,
-		sourceFilePath:            fileEntry.filePath,
+		sourceFilePath:            entrySourcePath(fset, fileEntry),
+		cgoBindings:               fileEntry.cgoBindings,
 		identEscapesHeap:          fileEntry.identEscapesHeap,
 		sstringEligible:           fileEntry.sstringEligible,
 		ssliceEligible:            fileEntry.ssliceEligible,

@@ -73,6 +73,72 @@ Check 'a portable pdb it cannot read is refused, naming System.Reflection.Metada
 
 Check 'an empty or blank root is ignored' (@(Find-NugetgoHostPaths -Bytes (Utf8 'anything') -Roots @('', '  ')).Count -eq 0) 'a blank root matched'
 
+Write-Host 'GoPositionMap identities (cgo against go.* INC 4, increment 1c)'
+# goSourceIdentity's forms ship; an absolute path or a Go build-cache file does not. The -cgo route recorded the latter for
+# every tree cmd/cgo rewrote, and the host-path scan above never saw it: the build cache is not a root it is given.
+$identityCases = @(
+    @('GOROOT-relative', 'fmt/print.go', $null),
+    @('a module-cache release', 'github.com/mattn/go-pointer@v0.0.1/pointer.go', $null),
+    @('a main module, -trimpath', 'example.com/m@/cptr/cptr.go', $null),
+    @('a bare name, converted beside its source', 'main.go', $null),
+    @('a Go build-cache file (the -cgo route at ff59c592bf)', '/home/runner/.cache/go-build/f6/f66f9457d7df8bc95f420327a7808b9cfe23b8cd2eb2bb8c912ff69ff153796c-d', 'a Go build-cache path'),
+    @('a Windows build-cache file', 'C:\Users\x\AppData\Local\go-build\cd\cdd39fe5259474ea8e564c35d4b4b66e06389fa7528b017f87f95d75a946a2df-d', 'a Go build-cache path'),
+    @('an untrimmed unix source path', '/src/app/cptr/cptr.go', 'an absolute path'),
+    @('an untrimmed Windows source path', 'C:/src/app/cptr.go', 'an absolute path'),
+    @('a UNC source path', '\\server\share\x.go', 'an absolute path')
+)
+foreach ($c in $identityCases) {
+    $why = Test-NugetgoPositionMapIdentity $c[1]
+    if ($null -eq $c[2]) { Check "identity: $($c[0]) ships" ($null -eq $why) "refused: $why" }
+    else { Check "identity: $($c[0]) is refused" ($why -and $why.StartsWith($c[2]) -and $why.Contains($c[1])) "reason [$why]" }
+}
+$source = "[assembly: GoPositionMap(`"fmt/print.go`", `"print.cs`", `"`")]`n[assembly: GoPositionMap(`"/tmp/gocache/f6/f66f9457d7df8bc95f420327a7808b9cfe23b8cd2eb2bb8c912ff69ff153796c-d`", `"pointer.cs`", `"`")]`n"
+$hits = @(Find-NugetgoPositionMapIdentityHits -Text $source)
+Check 'a package_info.cs: the build-cache record is named, the GOROOT one is not' ($hits.Count -eq 1 -and $hits[0].Contains('f66f9457')) "hits [$($hits -join '; ')]"
+# An assembly's records are read from its metadata. Two shapes: the attribute declared in another assembly (go.lib, a
+# MemberReference -- every converted package) and in the assembly itself (a MethodDefinition).
+if ((Get-Command dotnet -ErrorAction SilentlyContinue) -and ('System.Reflection.PortableExecutable.PEReader' -as [type])) {
+    $work = Join-Path ([System.IO.Path]::GetTempPath()) ("nugetgo-posmap-$PID-" + [DateTime]::UtcNow.Ticks)
+    $savedNp = $env:NUGET_PACKAGES
+    $env:NUGET_PACKAGES = Join-Path $work 'gpf'
+    try {
+        $attribute = 'namespace go { [System.AttributeUsage(System.AttributeTargets.Assembly, AllowMultiple = true)] public sealed class GoPositionMapAttribute : System.Attribute { public GoPositionMapAttribute(string goFile, string csFile, string table) { } } }'
+        $records = '[assembly: go.GoPositionMap("github.com/x/y@v1.0.0/y.go", "y.cs", "")] [assembly: go.GoPositionMap("/home/runner/.cache/go-build/ab/abababababababababababababababababababababababababababababababab-d", "z.cs", "")]'
+        function New-PositionMapProbe([string]$name, [string]$source, [string]$reference) {
+            $dir = Join-Path $work $name
+            New-Item -ItemType Directory -Force $dir | Out-Null
+            $ref = if ($reference) { "<ItemGroup><ProjectReference Include=`"$reference`" /></ItemGroup>" } else { '' }
+            Set-Content -LiteralPath (Join-Path $dir "$name.csproj") -Value "<Project Sdk=`"Microsoft.NET.Sdk`"><PropertyGroup><TargetFramework>net10.0</TargetFramework><Deterministic>true</Deterministic></PropertyGroup>$ref</Project>"
+            Set-Content -LiteralPath (Join-Path $dir "$name.cs") -Value $source
+            $log = & dotnet build (Join-Path $dir "$name.csproj") -c Release --nologo -v q 2>&1
+            if ($LASTEXITCODE -ne 0) { throw "the $name probe did not build: $($log -join ' | ')" }
+            Join-Path $dir "bin/Release/net10.0/$name.dll"
+        }
+        $golib = New-PositionMapProbe 'PosMapAttr' $attribute ''
+        $referenced = New-PositionMapProbe 'PosMapRef' $records (Join-Path $work 'PosMapAttr/PosMapAttr.csproj')
+        $declared = New-PositionMapProbe 'PosMapOwn' "$records`n$attribute" ''
+        foreach ($probe in @(@('the attribute from another assembly', $referenced), @('the attribute declared in the assembly', $declared))) {
+            $bytes = [System.IO.File]::ReadAllBytes($probe[1])
+            $identities = @(Get-NugetgoAssemblyPositionMapIdentities $bytes)
+            Check "assembly ($($probe[0])): both records read" ($identities.Count -eq 2 -and $identities[0] -eq 'github.com/x/y@v1.0.0/y.go') "read [$($identities -join '; ')]"
+            $hits = @(Find-NugetgoPositionMapIdentityHits -Bytes $bytes)
+            Check "assembly ($($probe[0])): the build-cache record is refused by name" ($hits.Count -eq 1 -and $hits[0].Contains('go-build/ab/abab')) "hits [$($hits -join '; ')]"
+        }
+        Check 'an assembly with no records reads none' (@(Get-NugetgoAssemblyPositionMapIdentities ([System.IO.File]::ReadAllBytes($golib))).Count -eq 0) 'records read from PosMapAttr'
+        Check 'bytes that are no assembly read none' (@(Get-NugetgoAssemblyPositionMapIdentities (Utf8 'not a PE image')).Count -eq 0) 'records read from text'
+    }
+    finally {
+        $env:NUGET_PACKAGES = $savedNp
+        if ($work.StartsWith([System.IO.Path]::GetTempPath())) { Remove-Item -Recurse -Force -LiteralPath $work -ErrorAction SilentlyContinue }
+    }
+}
+else { Write-Host '  skip  the assembly arms: NOT MEASURED (no dotnet, or no System.Reflection.Metadata in this PowerShell)' }
+
+Write-Host 'the converter''s temp markers (COORD''s INC 4 review, fold 5)'
+Check 'a go2cs-modcopy-* copy path in UTF-8 is found' ((@(Find-NugetgoTempMarkers (Utf8 '/tmp/go2cs-modcopy-123456/github.com/x/y.go')) -join ',') -eq 'go2cs-modcopy-') 'not found'
+Check 'a go2cs-gomod-overlay file in UTF-16LE at an odd offset is found' ((@(Find-NugetgoTempMarkers (Join-Bytes @([byte[]]@(0x01), (Utf16 'C:\\Temp\\go2cs-gomod-overlay.json')))) -join ',') -eq 'go2cs-gomod-overlay') 'not found'
+Check 'a Go string /tmp is no marker' (@(Find-NugetgoTempMarkers (Utf8 'os.TempDir falls back to /tmp')).Count -eq 0) 'a marker was found in /tmp'
+
 Write-Host 'the pack uses it'
 $pack = [System.IO.File]::ReadAllText((Join-Path $PSScriptRoot 'nugetgo-pack.ps1'))
 Check 'nugetgo-pack.ps1 builds with ContinuousIntegrationBuild and a PathMap over the recurse root' (
@@ -80,6 +146,9 @@ Check 'nugetgo-pack.ps1 builds with ContinuousIntegrationBuild and a PathMap ove
 Check 'nugetgo-pack.ps1 scans every packed entry and each packed assembly''s pdb' (
     $pack.Contains('Find-NugetgoHostPaths') -and $pack.Contains('Entries') -and $pack.Contains('.pdb')) 'no host-path scan of the package'
 Check 'a refused package is removed from the output' ($pack.Contains('Remove-Item -LiteralPath $nupkg')) 'the refused nupkg stays in -OutDir'
+Check 'nugetgo-pack.ps1 scans every packed entry for the temp markers' ($pack.Contains('Find-NugetgoTempMarkers -Bytes')) 'the pack does not scan for them'
+Check 'nugetgo-pack.ps1 checks every package_info.cs before it builds, and every packed assembly after' (
+    $pack.Contains('Find-NugetgoPositionMapIdentityHits -Text') -and $pack.Contains('Find-NugetgoPositionMapIdentityHits -Bytes')) 'no GoPositionMap identity guard'
 
 Write-Host "ran $ran, failed $failed"
 exit $failed

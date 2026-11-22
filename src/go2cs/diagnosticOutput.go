@@ -209,6 +209,8 @@ func canonicalDiagnostic(position, code, text string) string {
 // canonicalDiagnosticAs is canonicalDiagnostic with the severity named: "error", or "warning" for a refusal -warn
 // downgraded (warnOption.go). The two lines differ in that one word only, so a matcher reads both.
 func canonicalDiagnosticAs(severity, position, code, text string) string {
+	// A go.mod-less module-cache release converts from a copy (copyModuleCacheRelease); a user reads the release's own path.
+	position, text = remapCopiedPaths(position), remapCopiedPaths(text)
 	origin := "go2cs"
 
 	if position != "" && position != "-" {

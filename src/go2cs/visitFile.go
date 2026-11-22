@@ -448,6 +448,13 @@ func (v *Visitor) writeProvenance(file *ast.File) {
 		v.outputBuilder.WriteString(v.newline)
 	}
 
-	v.outputBuilder.WriteString(sourceProvenance(v.fset.PositionFor(file.Package, false).Filename, v.options, v.newline))
+	// The entry's source (entrySourcePath): for a tree cmd/cgo rewrote, its import "C" source, never the hashed build-cache
+	// intermediate the parser was handed. cmd/cgo's types file has no Go source and no root to name: it is named as cmd/cgo
+	// names it.
+	if v.cgoBindings && v.options.provenance {
+		v.outputBuilder.WriteString(provenanceNotice("_cgo_gotypes.go", "", v.newline))
+	} else {
+		v.outputBuilder.WriteString(sourceProvenance(v.sourceFilePath, v.options, v.newline))
+	}
 	v.outputBuilder.WriteString(v.newline)
 }

@@ -547,6 +547,8 @@ type Visitor struct {
 	// the position map can record the source identity Go itself would have baked for the same build
 	// (goSourceIdentity). Mirrors the file entry, which the driver does not hand back to the writer.
 	sourceFilePath string
+	// cgoBindings mirrors the file entry's: this tree is cmd/cgo's types file, which no Go source of the package wrote.
+	cgoBindings bool
 	// namedReturnDeferMode is set when the current function has named return values AND uses
 	// defer/recover. Such a function is emitted as a block body that declares the named returns
 	// *outside* the `func((defer, recover) => …)` wrapper (so deferred code, including recover,

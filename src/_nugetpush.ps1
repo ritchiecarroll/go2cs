@@ -92,21 +92,25 @@ function Test-GoNuGetCgoPackage([string]$Path) {
     $false
 }
 
-# Does the package's go2cs/source-metadata.txt record A6 ("# a6: ", written by nugetgo-pack.ps1 -Cgo over a go.lib that
-# declares GoCgoRunTimeTargetCheck)?
-function Test-GoNuGetCgoA6Note([string]$Path) {
+# Does the package's go2cs/source-metadata.txt carry a "# <key>: " note line (nugetgo-pack.ps1 writes them with gensourcemeta
+# -note)?
+function Test-GoNuGetSelfDescriptionNote([string]$Path, [string]$Key) {
     $zip = [System.IO.Compression.ZipFile]::OpenRead($Path)
 
     try {
         $entry = $zip.GetEntry('go2cs/source-metadata.txt')
         if (-not $entry) { return $false }
         $reader = New-Object System.IO.StreamReader($entry.Open())
-        try { return ("`n" + $reader.ReadToEnd()).Contains("`n# a6: ") } finally { $reader.Dispose() }
+        try { return ("`n" + $reader.ReadToEnd()).Contains("`n# ${Key}: ") } finally { $reader.Dispose() }
     }
     finally {
         $zip.Dispose()
     }
 }
+
+# Does the package's go2cs/source-metadata.txt record A6 ("# a6: ", written by nugetgo-pack.ps1 -Cgo over a go.lib that
+# declares GoCgoRunTimeTargetCheck)?
+function Test-GoNuGetCgoA6Note([string]$Path) { Test-GoNuGetSelfDescriptionNote $Path 'a6' }
 
 # NuGet's normalized version, the form the flat container keys a version by: build metadata dropped, numeric parts
 # without leading zeros, at least three of them, a fourth part of 0 dropped, and lower case. 1.26.10.0 is 1.26.10.
@@ -227,6 +231,12 @@ function Invoke-GoNuGetPush {
     # (a), condition 3). The whole set is refused before the first push, so a refusal never leaves a half-pushed release.
     # A -Cgo pack is pushed only when its self-description records that its go.lib floor carries the run-time target check
     # (A6; COORD's push-lift ruling (a)): nugetgo-pack.ps1 -Cgo writes "# a6: " only over a go.lib that declares it.
+    # A package packed against a LOCAL go.* closure (nugetgo-pack.ps1 -LocalClosure, a rehearsal from the tree; cgo against
+    # go.* INC 4, COORD's ruling (1)) records "# local-closure: " and is never pushed: its go.* dependencies are not a
+    # published release.
+    $localPacks = @($Packages | Where-Object { Test-GoNuGetSelfDescriptionNote $_.FullName 'local-closure' } | ForEach-Object { $_.Name })
+    if ($localPacks.Count) { throw "REFUSED: $($localPacks -join ', ') $(if ($localPacks.Count -eq 1) { 'was' } else { 'were' }) packed against a local go.* closure (its go2cs/source-metadata.txt records `"# local-closure: `"), a rehearsal never pushed; nothing was pushed" }
+
     $cgoPacks = @($Packages | Where-Object { (Test-GoNuGetCgoPackage $_.FullName) -and -not (Test-GoNuGetCgoA6Note $_.FullName) } | ForEach-Object { $_.Name })
     if ($cgoPacks.Count) { throw "REFUSED: $($cgoPacks -join ', ') $(if ($cgoPacks.Count -eq 1) { 'is a -Cgo pack' } else { 'are -Cgo packs' }) (its build/<id>.targets carries NUGETGOCGO001, or its lib/ holds reference assemblies beside runtimes/) whose go2cs/source-metadata.txt does not record the run-time target check (A6: no `"# a6: `" line), so its go.lib floor may not refuse its bindings at load; nothing was pushed" }
 
