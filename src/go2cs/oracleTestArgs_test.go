@@ -14,6 +14,7 @@ package main
 
 import (
 	"encoding/json"
+	"path/filepath"
 	"slices"
 	"strings"
 	"testing"
@@ -289,7 +290,8 @@ func TestOracleVetOffIsDisclosedOnThePageAndInModuleMD(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	summary := readGenerated(t, filepath.Join(moduleDir, "MODULE.md"))
+	// Written with CRLF line ends (writeStableDocFile), read here as lines.
+	summary := strings.ReplaceAll(readGenerated(t, filepath.Join(moduleDir, "MODULE.md")), "\r", "")
 
 	if !strings.Contains(summary, "\n## Go's tests ran without vet\n") || !strings.Contains(summary, "- `example.test/m/p`: "+finding+"\n") {
 		t.Fatalf("MODULE.md does not name the package's -vet=off oracle and its finding:\n%s", summary)

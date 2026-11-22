@@ -704,6 +704,17 @@ func renderValidationProofPage(provenance proofPageProvenance, comparison testCo
 		}
 	}
 
+	if len(comparison.OracleVetOff) > 0 {
+		page.WriteString("\n## Go's tests ran without vet\n\n")
+		page.WriteString("Go's own `go test` of this package fails at the vet checks it runs before any test, not at a test, so\n")
+		page.WriteString("the `go test` baseline ran with `-vet=off` (`-test-oracle-vet-off`), and the converted side is compared\n")
+		page.WriteString("with it test by test. What vet reports, by analyzer:\n\n")
+
+		for _, finding := range comparison.OracleVetOff {
+			fmt.Fprintf(&page, "- %s\n", finding)
+		}
+	}
+
 	if len(comparison.Gated) > 0 {
 		page.WriteString("\n## Gated by a host capability\n\n")
 		page.WriteString("A gate names a declaration the converted test host *provably cannot run at all* — not an\n")
@@ -1272,6 +1283,10 @@ func writeThirdPartyModuleSummaryWith(moduleDir string, modulePath string, unval
 	// rehearsal, 2026-10-09, gap 7).
 	excludedByPackage := map[string][]string{}
 
+	// The packages whose go test baseline ran without vet (-test-oracle-vet-off), with what vet reported: a module
+	// pack ships MODULE.md, so the disclosure travels with it.
+	vetOffByPackage := map[string][]string{}
+
 	// The build-tags sentence of every page: one value when the module was read in one run (the usual
 	// case), more when packages were re-read under different tags, none for pages written before pages
 	// stated their tags.
@@ -1303,6 +1318,10 @@ func writeThirdPartyModuleSummaryWith(moduleDir string, modulePath string, unval
 
 		if excluded := proofExcludedDeclarations(string(data)); len(excluded) > 0 {
 			excludedByPackage[importPath] = excluded
+		}
+
+		if findings := proofOracleVetOff(string(data)); len(findings) > 0 {
+			vetOffByPackage[importPath] = findings
 		}
 
 		if match := proofBuildTagsPattern.FindStringSubmatch(strings.ReplaceAll(string(data), "\r", "")); match != nil {
@@ -1395,6 +1414,18 @@ func writeThirdPartyModuleSummaryWith(moduleDir string, modulePath string, unval
 		}
 	}
 
+	if len(vetOffByPackage) > 0 {
+		page.WriteString("\n## Go's tests ran without vet\n\n")
+		fmt.Fprintf(&page, "%d package(s) were compared with a `go test` baseline run with `-vet=off`, because Go's own `go test`\n", len(vetOffByPackage))
+		page.WriteString("fails at its vet checks rather than at a test. What vet reports, by package and analyzer:\n\n")
+
+		for _, row := range rows {
+			for _, finding := range vetOffByPackage[row.importPath] {
+				fmt.Fprintf(&page, "- `%s`: %s\n", row.importPath, finding)
+			}
+		}
+	}
+
 	_, err = writeStableDocFile(filepath.Join(moduleDir, thirdPartyModuleSummaryName), page.String())
 
 	return err
@@ -1449,6 +1480,28 @@ func proofExcludedDeclarations(page string) []string {
 	}
 
 	return excluded
+}
+
+// proofOracleVetOff reads a proof page's "Go's tests ran without vet" findings back, in the page's (sorted) order.
+func proofOracleVetOff(page string) []string {
+	_, section, found := strings.Cut(strings.ReplaceAll(page, "\r", ""), "\n## Go's tests ran without vet\n")
+	if !found {
+		return nil
+	}
+
+	var findings []string
+
+	for _, line := range strings.Split(section, "\n") {
+		if strings.HasPrefix(line, "## ") {
+			break
+		}
+
+		if entry, ok := strings.CutPrefix(line, "- "); ok {
+			findings = append(findings, entry)
+		}
+	}
+
+	return findings
 }
 
 // proofTitlePattern reads a proof page's import path back from its title line.
