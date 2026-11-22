@@ -213,3 +213,93 @@ func TestOracleBuildTagsRecordKeepsAnEmptyOracleSet(t *testing.T) {
 		t.Fatalf("the record %s lost the empty oracle tag set; the page must read %q:\n%s", data, want, page)
 	}
 }
+
+// -test-oracle-vet-off (COORD's ruling on go-difflib v1.0.0, 2026-11-22): when Go's OWN `go test` fails at vet, not
+// at a test, the oracle may run with -vet=off. Never a default; the comparison is still test by test, against the
+// -vet=off run; and the vet findings are disclosed mechanically, by analyzer, on the proof page and in MODULE.md.
+func TestOracleTestArgsTurnVetOffOnlyWhenAsked(t *testing.T) {
+	options := Options{testTimeout: 2 * time.Minute}
+
+	if args := oracleTestArgs(options, "", ""); slices.ContainsFunc(args, func(arg string) bool { return strings.HasPrefix(arg, "-vet") }) {
+		t.Fatalf("the default oracle sets vet: %v", args)
+	}
+
+	options.testOracleVetOff = true
+
+	if args := oracleTestArgs(options, "", ""); !slices.Contains(args, "-vet=off") {
+		t.Fatalf("-test-oracle-vet-off does not reach the oracle: %v", args)
+	}
+}
+
+// The findings come from `go vet -json` over go test's own vet subset, run where the oracle runs, under its tags:
+// each as "<analyzer>: <file>:<line>:<col>: <message>", the file named relative to the package, never by a machine
+// path. A package go test's vet passes has none, and the caller refuses the option for it.
+func TestOracleVetFindingsNameTheAnalyzerAndTheSite(t *testing.T) {
+	dir := t.TempDir()
+	writeModuleFile(t, filepath.Join(dir, "go.mod"), "module example.test/vetted\n\ngo 1.23\n")
+	writeModuleFile(t, filepath.Join(dir, "one.go"), "package vetted\n\nfunc One() int { return 1 }\n")
+	writeModuleFile(t, filepath.Join(dir, "one_test.go"),
+		"package vetted\n\nimport \"fmt\"\n\nfunc ExampleTwo() {\n\tfmt.Println(One())\n\t// Output: 1\n}\n")
+
+	t.Setenv("GOWORK", "off")
+	t.Setenv("GOFLAGS", "")
+
+	findings, err := oracleVetFindings(dir, Options{}, "example.test/vetted")
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	want := []string{"tests: one_test.go:5:1: ExampleTwo refers to unknown identifier: Two"}
+
+	if !slices.Equal(findings, want) {
+		t.Fatalf("findings:\n  want %q\n  got  %q", want, findings)
+	}
+
+	// The same package with the example fixed passes go test's vet: no findings.
+	writeModuleFile(t, filepath.Join(dir, "one_test.go"),
+		"package vetted\n\nimport \"fmt\"\n\nfunc ExampleOne() {\n\tfmt.Println(One())\n\t// Output: 1\n}\n")
+
+	if findings, err := oracleVetFindings(dir, Options{}, "example.test/vetted"); err != nil || len(findings) != 0 {
+		t.Fatalf("a package vet passes: want no findings, got %q (%v)", findings, err)
+	}
+}
+
+// The disclosure round-trips: the proof page states each finding, and MODULE.md, which a module pack ships, names
+// them by package.
+func TestOracleVetOffIsDisclosedOnThePageAndInModuleMD(t *testing.T) {
+	finding := "tests: difflib_test.go:105:1: ExampleGetUnifiedDiffCode refers to unknown identifier: GetUnifiedDiffCode"
+	comparison := testComparison{Package: "example.test/m/p", Status: "matched", Matched: true,
+		Go: map[string]string{"TestA": "pass"}, CSharp: map[string]string{"TestA": "pass"}, OracleVetOff: []string{finding}}
+	page := renderValidationProofPage(proofPageProvenance{importPath: "example.test/m/p", goVersion: "1.26.11", platform: "linux/amd64",
+		date: "2026-11-22", convertedPath: "src/example.test/m/p"}, comparison, nil, nil)
+
+	if !strings.Contains(page, "\n## Go's tests ran without vet\n") || !strings.Contains(page, "- "+finding+"\n") {
+		t.Fatalf("the proof page does not disclose the oracle's -vet=off with its finding:\n%s", page)
+	}
+
+	if got := proofOracleVetOff(page); !slices.Equal(got, []string{finding}) {
+		t.Fatalf("read back: want [%s], got %q", finding, got)
+	}
+
+	moduleDir := filepath.Join(t.TempDir(), "example.test", "m")
+	writeModuleFile(t, filepath.Join(moduleDir, "p", "p.md"), page)
+
+	if err := writeThirdPartyModuleSummary(moduleDir, "example.test/m"); err != nil {
+		t.Fatal(err)
+	}
+
+	summary := readGenerated(t, filepath.Join(moduleDir, "MODULE.md"))
+
+	if !strings.Contains(summary, "\n## Go's tests ran without vet\n") || !strings.Contains(summary, "- `example.test/m/p`: "+finding+"\n") {
+		t.Fatalf("MODULE.md does not name the package's -vet=off oracle and its finding:\n%s", summary)
+	}
+
+	// A page without the option renders no such section, so every existing page is unchanged.
+	comparison.OracleVetOff = nil
+
+	if page := renderValidationProofPage(proofPageProvenance{importPath: "example.test/m/p", goVersion: "1.26.11", platform: "linux/amd64",
+		date: "2026-11-22", convertedPath: "src/example.test/m/p"}, comparison, nil, nil); strings.Contains(page, "without vet") {
+		t.Fatalf("a page without the option mentions vet:\n%s", page)
+	}
+}
