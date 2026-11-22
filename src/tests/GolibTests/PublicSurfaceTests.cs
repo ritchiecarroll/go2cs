@@ -277,7 +277,7 @@ public class PublicSurfaceTests
         return lines;
     }
 
-    // ---- [mn-frozen]: the M:N surface frozen for L-min (src/tools/mnspike2/TwinRefs/FREEZE-SHEET.md, block 7b) -------
+    // ---- [mn-frozen]: the M:N surface frozen for L-min (docs/phase4/FREEZE-mn-surface.md, block 7b) -------
     //
     // Every public or protected member of the six task types, of GoFuncPair, and of the two attributes generated code
     // places or names (GoParkForwarder; GoTwinOf, M:N item 7d's stamp, folded in at train 3), hidden or not, and the

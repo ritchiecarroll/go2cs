@@ -2,7 +2,7 @@ namespace go;
 
 using time = time_package;
 
-// M:N SPIKE (R5b, B2). Spike code: it stays on the spike branch and never lands.
+// M:N scheduler, experimental and opt-in (GoTwins=true to build, GO2CS_MN=1 to run); inert otherwise.
 // What a C# consumer writes against a Go interface, by hand and with no knowledge of twins: a class that
 // implements the interface, and a class that only has the method (duck-typed at the assertion). This file must
 // compile unchanged with twins off, under the hidden shape and under the default-bodied shape.

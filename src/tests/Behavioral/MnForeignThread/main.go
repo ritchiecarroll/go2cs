@@ -1,4 +1,4 @@
-// S2 arm 3 of the M:N spike's owed list (docs/phase4/DATA-mn-spike-2.md 9.5): callbacks on foreign threads. A
+// S2 arm 3 of the M:N scheduler's owed list (docs/phase4/DATA-mn-spike-2.md 9.5): callbacks on foreign threads. A
 // foreign thread is one the scheduler did not make: a C# caller's own thread (the record's M3) or a thread that
 // calls into Go from C. It has no carrier, no P and no goroutine identity (the native-call seam's gap M7).
 //

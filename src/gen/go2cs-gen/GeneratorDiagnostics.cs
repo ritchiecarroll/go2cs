@@ -190,7 +190,7 @@ internal static class GeneratorDiagnostics
         defaultSeverity: DiagnosticSeverity.Error,
         isEnabledByDefault: true);
 
-    // GO2CS0014, TwinGenerator (M:N PROTOTYPE, N3's must-fix 3, DESIGN-mn-func-values.md 10.4): under the propagating
+    // GO2CS0014, TwinGenerator (M:N, experimental: N3's must-fix 3, DESIGN-mn-func-values.md 10.4): under the propagating
     // caller rule a function that calls through a func value is twinned, so its call can await a pair's twin. A function
     // the generator REFUSES a twin (a by-ref or ref-like parameter, unsafe, an iterator, ...) keeps calling the plain
     // delegate, so a func value that can park blocks its carrier there. Reported once per function, not per call.
@@ -202,7 +202,7 @@ internal static class GeneratorDiagnostics
         defaultSeverity: DiagnosticSeverity.Warning,
         isEnabledByDefault: true);
 
-    // GO2CS0015, TwinGenerator (M:N PROTOTYPE, the LOUD fallback: COORD's A3 ruling 2026-11-12; severity by the owner,
+    // GO2CS0015, TwinGenerator (M:N, experimental: the LOUD fallback: COORD's A3 ruling 2026-11-12; severity by the owner,
     // FREEZE-SHEET.md 2026-11-13): a go statement the generator does not launch as a twin, where its goroutine could
     // park, keeps its plain launch on a thread. A WARNING by default; WarningsAsErrors (or an .editorconfig severity) on
     // this code is the opt-in that makes it an error. Reported once per go statement, naming the reason.
@@ -239,11 +239,11 @@ internal static class GeneratorDiagnostics
         isEnabledByDefault: true);
 
     // GO2CS0018, TwinGenerator (M:N, 7a: DESIGN-mn-twin-set.md O2): a package built with twins ships the whole twin set,
-    // never a part of it. A switch that selects part of the set is refused in such a build.
+    // built one way. A switch that selects part of the set, or a measurement arm's control, is refused in such a build.
     public static readonly DiagnosticDescriptor PartialTwinSet = new(
         id: "GO2CS0018",
         title: "A partial twin set is selected in a package built with twins",
-        messageFormat: "'{0}' selects a partial twin set; a package built with twins ships the whole set",
+        messageFormat: "'{0}' changes the twin set; a package built with twins ships the whole set, built one way. Remove '{0}', or set GoTwinsArm=true for a measurement build that does not ship.",
         category: "go2cs-gen",
         defaultSeverity: DiagnosticSeverity.Error,
         isEnabledByDefault: true);

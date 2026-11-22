@@ -54,6 +54,7 @@ TheMintCounterMoves  # NOT MEASURED: the Q44 census is off. Set GO2CS_Q44_CENSUS
 TheSeamsCostOverARealKernelTransitionIsMeasured  # opt-in: set GO2CS_NATIVE_SEAM_PROBE to a file the READING lines are appended to
 TheServiceThreadIsIdleUnderAFarFutureTimer  # reads a thread's CPU time by its OS thread id, which this platform's ProcessThread does not carry
 TheStackSlotShapeIsHarmlessToANonVariadicCallee  # drives glibc's strtol; linux-only
+ThisLinuxProcessReadsAsGlibc  # not linux
 TwentyDisjointRangesGrowTheSetPastItsInitialSixteenSlots  # the memory primitives are the linux flavour's
 TwoRetirementsAtOnceFreeTheBlockOnce  # the overlapped records bind a socket to the CLR's completion port, a windows facility
 UnalignedInputSliceMatchesTheOsImplementation  # OS SHA-3 unavailable.

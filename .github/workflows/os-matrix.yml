@@ -2053,7 +2053,7 @@ jobs:
           exit $runExit
 
       # -------------------------------------------------------------------------------------
-      # M:N spike (this branch never lands). After the smoke has built MnMixedStorm with generated twins, run the
+      # M:N (experimental, opt-in). After the smoke has built MnMixedStorm with generated twins, run the
       # program directly: Go's build for the reference output, then the C# build on the thread path (the sampler's
       # control) and on the scheduler at three sizes. A sampler outside the process counts its OS threads, and the
       # scheduler prints its own reading. Then MnGoschedFair's chain check, which joins the direct runs' failures that FAIL the step: the
@@ -2061,7 +2061,7 @@ jobs:
       # script asserts the chain formed (run-next steps >= 100 x Gosched yields) and reads CHAIN-FAIL by name when a
       # later change makes the row vacuous (P3's SHOULD 1 on the Gosched-park seat).
       # -------------------------------------------------------------------------------------
-      - name: M:N spike — direct runs of the twinned storm
+      - name: M:N — direct runs of the twinned storm
         if: always() && needs.plan.outputs.stage == 'behavioral-smoke' && needs.plan.outputs.filter == 'MnMixedStorm' && needs.plan.outputs.mn == '1'
         timeout-minutes: 30
         shell: bash
@@ -2134,7 +2134,9 @@ jobs:
             one cs-twins $n 1 dotnet "$dll"
           done
           unset GO2CS_MN MN_STORM_N MN_STORM_HOLD_MS GO2CS_MN_READING
-          bash src/tools/mnspike2/MnGoschedFair/chain-check.sh || failures+=("MnGoschedFair chain check (rc $?)")
+          chain=0
+          bash src/tools/mnspike2/MnGoschedFair/chain-check.sh || chain=$?
+          if [ "$chain" -ne 0 ]; then failures+=("MnGoschedFair chain-check exited $chain"); fi
           if [ ${#failures[@]} -gt 0 ]; then
             for f in "${failures[@]}"; do echo "::error::M:N direct run: $f"; done
             exit 1

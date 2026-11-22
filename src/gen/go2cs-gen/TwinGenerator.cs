@@ -17,7 +17,7 @@ using Microsoft.CodeAnalysis.Diagnostics;
 namespace go2cs;
 
 /// <summary>
-/// M:N SPIKE (R5b, B2). Spike code: it stays on the spike branch and never lands.
+/// M:N scheduler, experimental and opt-in (GoTwins=true to build, GO2CS_MN=1 to run); inert otherwise.
 /// Writes a hidden async twin beside each converted function that can park: the function's own text, with each call
 /// that has a twin awaited. It runs only for a project built with <c>GoTwins=true</c>.
 /// </summary>
@@ -109,6 +109,16 @@ public sealed partial class TwinGenerator : ISourceGenerator
     public void Execute(GeneratorExecutionContext context) =>
         Execute(context, typeof(TwinGenerator));
 
+    // Every build property that changes what the twin generator writes, other than GoTwins itself. Outside a prototype
+    // arm (GoTwinsArm=true) each one is refused by name (GO2CS0018); none may reach a package that ships. The guard's
+    // test seam (GoTwinsGuardDrop) is here too, and a twin-refuse.txt additional file is refused the same way.
+    internal static readonly string[] ArmSwitches =
+    [
+        "GoTwinsIface", "GoTwinsIfaceAll", "GoTwinsIfaceUnmark", "GoTwinsGo", "GoTwinsPairs", "GoTwinsCallerRule",
+        "GoTwinsForwarders", "GoTwinsGuardWarn", "GoTwinsGuardDrop",
+        "GoTwinsBoxRecv", "GoTwinsBoxForwarders", "GoTwinsBoxCopy", "GoTwinsBoxParam", "GoTwinsBoxArgCopy"
+    ];
+
     // GoTwinsSiblings=last (B4) hands the work to ZTwinGenerator, which the compiler runs after every sibling.
     internal static void Execute(GeneratorExecutionContext context, Type self)
     {
@@ -122,16 +132,19 @@ public sealed partial class TwinGenerator : ISourceGenerator
 
         bool goSites = !(options.TryGetValue("build_property.GoTwinsGo", out string? go) && string.Equals(go, "false", StringComparison.OrdinalIgnoreCase));
 
-        // O2 (7a, DESIGN-mn-twin-set.md 12.1 and section 10): a package built with twins carries the WHOLE set, so a
-        // switch that selects part of it is refused (GO2CS0018), naming it. A prototype arm sets GoTwinsArm=true, which
-        // admits the switches and keeps their old defaults. A property MSBuild makes visible arrives empty when unset.
+        // O2 (7a, DESIGN-mn-twin-set.md 12.1 and section 10): a package built with twins carries the WHOLE set, built one
+        // way, so every switch that changes what is generated is refused (GO2CS0018), naming it: the ones that select part
+        // of the set, and the measurement arms' A/B controls, two of which (GoTwinsBoxCopy, GoTwinsBoxArgCopy) are wrong on
+        // purpose. A prototype arm sets GoTwinsArm=true, which admits the switches and keeps their old defaults.
+        // GoTwinsSiblings and GoTwinsTiming are not refused: the first picks how the generator reads its siblings' output,
+        // not what it twins; the second only adds a stopwatch to the report. A property MSBuild makes visible arrives
+        // empty when unset.
         bool arm = options.TryGetValue("build_property.GoTwinsArm", out string? armed) && string.Equals(armed, "true", StringComparison.OrdinalIgnoreCase);
         bool Set(string name) => options.TryGetValue("build_property." + name, out string? value) && !string.IsNullOrWhiteSpace(value);
 
         if (!arm)
         {
-            // The 7a arm switches and the guard's seam are refused the same way: none may reach a package that ships.
-            foreach (string name in new[] { "GoTwinsIface", "GoTwinsIfaceAll", "GoTwinsGo", "GoTwinsForwarders", "GoTwinsGuardWarn", "GoTwinsGuardDrop" })
+            foreach (string name in ArmSwitches)
             {
                 if (Set(name))
                     context.ReportDiagnostic(Diagnostic.Create(GeneratorDiagnostics.PartialTwinSet, Location.None, name));
@@ -457,11 +470,11 @@ public sealed partial class TwinGenerator : ISourceGenerator
             m_ordered.Add(candidate);
         }
 
-        // M:N PROTOTYPE (A1): the never-twinned rule for native wrappers (the cgo design's M4). A method that is extern, that
+        // M:N (A1): the never-twinned rule for native wrappers (the cgo design's M4). A method that is extern, that
         // carries DllImport or LibraryImport, or whose body pins with `fixed`, is synchronous: a `fixed` scope cannot span a
         // park. A twin that calls one calls the plain method, and blocks its carrier for the length of the call.
         //
-        // M:N PROTOTYPE (A2): the closed list. A method is refused as "native" when any one of these holds, and for no
+        // M:N (A2): the closed list. A method is refused as "native" when any one of these holds, and for no
         // other reason:
         //   1. it is extern;
         //   2. it carries DllImport or LibraryImport;

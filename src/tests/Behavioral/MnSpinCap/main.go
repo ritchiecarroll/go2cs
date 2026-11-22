@@ -1,4 +1,4 @@
-// S2 arm 1 of the M:N spike's owed list (docs/phase4/DATA-mn-spike-2.md 9.5): Gosched and spin loops at
+// S2 arm 1 of the M:N scheduler's owed list (docs/phase4/DATA-mn-spike-2.md 9.5): Gosched and spin loops at
 // the P cap. More goroutines spin on runtime.Gosched than there are Ps, and two goroutines are parked: a
 // waker asleep on a timer, and a sleeper blocked on a channel the waker sends on. Only the sleeper stops
 // the spinners, so the program ends only if both parked goroutines get a P while every P is held by a
