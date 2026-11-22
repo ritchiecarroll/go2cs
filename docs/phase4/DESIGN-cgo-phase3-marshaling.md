@@ -2731,3 +2731,15 @@ at the same site.
   `entryNext`'s parameter does not ref-lower, and its body is `e.Ꮡnext`, a native box at the field's Go offset.
 - **The mint census:** `ж.CgoFields.cs|CgoPointerFieldRead` is re-keyed to `ж.CgoFields.cs|ReadWord`, count 1, the
   core both seats read.
+- **The battery at `68220bfa6f`: three misses, each posted on its own before its fix.**
+  - golib's namespace guard (TheConvertersListIsGolibsNamespace) caught the new internal `CgoPointerWords` in
+    namespace `go`. The core moved to its own file, src/core/golib/CgoPointerWords.cs, in namespace `go.golib`, so the
+    converter's list is unchanged. The mint row follows it, to `CgoPointerWords.cs|ReadWord`.
+  - The projitems guard caught the two new converter files, and they are now registered.
+  - The globals-isolation guard caught the off-route test's leaked `currentPackageOutsideGoroot`. That test now isolates
+    the converter's path globals, as the other module-converting tests do.
+  - The filtered reads (`-run TestCgoPointerDoor`, `-run Cgo`) could not see any of the three. Only the unfiltered gate
+    could.
+- **A NIT from the review of 1a's fold:** an `IsCMemoryAlone` value with no native identity now gets its own named
+  refusal in WriteWord, instead of the Go-pointer text. No row constructs it: a zero native box is nil, and
+  `slice.OverNativeMemory` refuses a nil base. The comment at the arm says so.

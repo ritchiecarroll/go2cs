@@ -139,6 +139,8 @@ func TestCgoPointerDoorTakesTheLoadAndTheStoreOfAPointerToACPointer(t *testing.T
 // Control (b), 1a's D-3b near miss for the door: a package that does not import "C" and declares a type spelled like
 // cmd/cgo's keeps `.val` for a **U dereference. The route, not the name, admits the door.
 func TestCgoPointerDoorIsNotTakenOffTheCgoRoute(t *testing.T) {
+	isolateConverterPathGlobals(t)
+
 	root := t.TempDir()
 	appDir := filepath.Join(root, "app")
 
