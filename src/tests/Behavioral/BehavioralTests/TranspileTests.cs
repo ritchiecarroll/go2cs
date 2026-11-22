@@ -1723,6 +1723,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckNamedSliceGoClone() => CheckTarget("NamedSliceGoClone");
 
     [TestMethod]
+    public void CheckNamedSliceMethodShadow() => CheckTarget("NamedSliceMethodShadow");
+
+    [TestMethod]
     public void CheckNamedSliceNilVsEmpty() => CheckTarget("NamedSliceNilVsEmpty");
 
     [TestMethod]
