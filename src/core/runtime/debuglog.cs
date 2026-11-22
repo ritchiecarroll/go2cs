@@ -30,6 +30,7 @@ using sys = @internal.runtime.sys_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
+using static runtime_package;
 
 partial class runtime_package {
 
@@ -96,15 +97,19 @@ internal static ref ж<dloggerImpl> allDloggers => ref ((StaticBox<ж<dloggerImp
 partial struct dloggerFake {
 }
 
+} partial class runtimeᴛdloggerFake {
+
 //go:nosplit
-internal static void end⁔(/*this*/ dloggerFake l) { }
+internal static void end(this dloggerFake l) { }
+
+} partial class runtimeᴛdloggerImpl {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string recordTooLargeˢ => ref recordTooLargeˢᵇ;
 private static readonly @string recordTooLargeˢᵇ = "record too large"u8;
 
 //go:nosplit
-internal static void end⁔(/*this*/ ж<dloggerImpl> Ꮡl) {
+internal static void end(this ж<dloggerImpl> Ꮡl) {
     ref var l = ref Ꮡl.DerefOrNull();
 
     // Fill in framing header.
@@ -125,6 +130,8 @@ internal static void end⁔(/*this*/ ж<dloggerImpl> Ꮡl) {
     Ꮡl.Ꮡowned.Store(0);
 }
 
+} partial class runtime_package {
+
 internal static UntypedInt debugLogUnknown => /* 1 + iota */ 1;
 internal static UntypedInt debugLogBoolTrue => 2;
 internal static UntypedInt debugLogBoolFalse => 3;
@@ -140,11 +147,15 @@ internal static UntypedInt debugLogOverflow => 11;
 internal static UntypedInt debugLogPC => 12;
 internal static UntypedInt debugLogTraceback => 13;
 
-//go:nosplit
-internal static dloggerFake b⁔(/*this*/ dloggerFake l, bool x) { return l; }
+} partial class runtimeᴛdloggerFake {
 
 //go:nosplit
-internal static ж<dloggerImpl> b⁔(/*this*/ ж<dloggerImpl> Ꮡl, bool x) {
+internal static dloggerFake b(this dloggerFake l, bool x) { return l; }
+
+} partial class runtimeᴛdloggerImpl {
+
+//go:nosplit
+internal static ж<dloggerImpl> b(this ж<dloggerImpl> Ꮡl, bool x) {
     ref var l = ref Ꮡl.DerefOrNull();
 
     if (x) {
@@ -155,43 +166,63 @@ internal static ж<dloggerImpl> b⁔(/*this*/ ж<dloggerImpl> Ꮡl, bool x) {
     return Ꮡl;
 }
 
-//go:nosplit
-internal static dloggerFake i⁔(/*this*/ dloggerFake l, nint x) { return l; }
+} partial class runtimeᴛdloggerFake {
 
 //go:nosplit
-internal static ж<dloggerImpl> i⁔(/*this*/ ж<dloggerImpl> Ꮡl, nint x) {
+internal static dloggerFake i(this dloggerFake l, nint x) { return l; }
+
+} partial class runtimeᴛdloggerImpl {
+
+//go:nosplit
+internal static ж<dloggerImpl> i(this ж<dloggerImpl> Ꮡl, nint x) {
     return Ꮡl.i64((int64)x);
 }
 
-//go:nosplit
-internal static dloggerFake i8⁔(/*this*/ dloggerFake l, int8 x) { return l; }
+} partial class runtimeᴛdloggerFake {
 
 //go:nosplit
-internal static ж<dloggerImpl> i8⁔(/*this*/ ж<dloggerImpl> Ꮡl, int8 x) {
+internal static dloggerFake i8(this dloggerFake l, int8 x) { return l; }
+
+} partial class runtimeᴛdloggerImpl {
+
+//go:nosplit
+internal static ж<dloggerImpl> i8(this ж<dloggerImpl> Ꮡl, int8 x) {
     return Ꮡl.i64((int64)x);
 }
 
-//go:nosplit
-internal static dloggerFake i16⁔(/*this*/ dloggerFake l, int16 x) { return l; }
+} partial class runtimeᴛdloggerFake {
 
 //go:nosplit
-internal static ж<dloggerImpl> i16⁔(/*this*/ ж<dloggerImpl> Ꮡl, int16 x) {
+internal static dloggerFake i16(this dloggerFake l, int16 x) { return l; }
+
+} partial class runtimeᴛdloggerImpl {
+
+//go:nosplit
+internal static ж<dloggerImpl> i16(this ж<dloggerImpl> Ꮡl, int16 x) {
     return Ꮡl.i64((int64)x);
 }
 
-//go:nosplit
-internal static dloggerFake i32⁔(/*this*/ dloggerFake l, int32 x) { return l; }
+} partial class runtimeᴛdloggerFake {
 
 //go:nosplit
-internal static ж<dloggerImpl> i32⁔(/*this*/ ж<dloggerImpl> Ꮡl, int32 x) {
+internal static dloggerFake i32(this dloggerFake l, int32 x) { return l; }
+
+} partial class runtimeᴛdloggerImpl {
+
+//go:nosplit
+internal static ж<dloggerImpl> i32(this ж<dloggerImpl> Ꮡl, int32 x) {
     return Ꮡl.i64((int64)x);
 }
 
-//go:nosplit
-internal static dloggerFake i64⁔(/*this*/ dloggerFake l, int64 x) { return l; }
+} partial class runtimeᴛdloggerFake {
 
 //go:nosplit
-internal static ж<dloggerImpl> i64⁔(/*this*/ ж<dloggerImpl> Ꮡl, int64 x) {
+internal static dloggerFake i64(this dloggerFake l, int64 x) { return l; }
+
+} partial class runtimeᴛdloggerImpl {
+
+//go:nosplit
+internal static ж<dloggerImpl> i64(this ж<dloggerImpl> Ꮡl, int64 x) {
     ref var l = ref Ꮡl.DerefOrNull();
 
     l.w.@byte(debugLogInt);
@@ -199,51 +230,75 @@ internal static ж<dloggerImpl> i64⁔(/*this*/ ж<dloggerImpl> Ꮡl, int64 x) {
     return Ꮡl;
 }
 
-//go:nosplit
-internal static dloggerFake u⁔(/*this*/ dloggerFake l, nuint x) { return l; }
+} partial class runtimeᴛdloggerFake {
 
 //go:nosplit
-internal static ж<dloggerImpl> u⁔(/*this*/ ж<dloggerImpl> Ꮡl, nuint x) {
+internal static dloggerFake u(this dloggerFake l, nuint x) { return l; }
+
+} partial class runtimeᴛdloggerImpl {
+
+//go:nosplit
+internal static ж<dloggerImpl> u(this ж<dloggerImpl> Ꮡl, nuint x) {
     return Ꮡl.u64((uint64)x);
 }
 
-//go:nosplit
-internal static dloggerFake uptr⁔(/*this*/ dloggerFake l, uintptr x) { return l; }
+} partial class runtimeᴛdloggerFake {
 
 //go:nosplit
-internal static ж<dloggerImpl> uptr⁔(/*this*/ ж<dloggerImpl> Ꮡl, uintptr x) {
+internal static dloggerFake uptr(this dloggerFake l, uintptr x) { return l; }
+
+} partial class runtimeᴛdloggerImpl {
+
+//go:nosplit
+internal static ж<dloggerImpl> uptr(this ж<dloggerImpl> Ꮡl, uintptr x) {
     return Ꮡl.u64((uint64)x);
 }
 
-//go:nosplit
-internal static dloggerFake u8⁔(/*this*/ dloggerFake l, uint8 x) { return l; }
+} partial class runtimeᴛdloggerFake {
 
 //go:nosplit
-internal static ж<dloggerImpl> u8⁔(/*this*/ ж<dloggerImpl> Ꮡl, uint8 x) {
+internal static dloggerFake u8(this dloggerFake l, uint8 x) { return l; }
+
+} partial class runtimeᴛdloggerImpl {
+
+//go:nosplit
+internal static ж<dloggerImpl> u8(this ж<dloggerImpl> Ꮡl, uint8 x) {
     return Ꮡl.u64((uint64)x);
 }
 
-//go:nosplit
-internal static dloggerFake u16⁔(/*this*/ dloggerFake l, uint16 x) { return l; }
+} partial class runtimeᴛdloggerFake {
 
 //go:nosplit
-internal static ж<dloggerImpl> u16⁔(/*this*/ ж<dloggerImpl> Ꮡl, uint16 x) {
+internal static dloggerFake u16(this dloggerFake l, uint16 x) { return l; }
+
+} partial class runtimeᴛdloggerImpl {
+
+//go:nosplit
+internal static ж<dloggerImpl> u16(this ж<dloggerImpl> Ꮡl, uint16 x) {
     return Ꮡl.u64((uint64)x);
 }
 
-//go:nosplit
-internal static dloggerFake u32⁔(/*this*/ dloggerFake l, uint32 x) { return l; }
+} partial class runtimeᴛdloggerFake {
 
 //go:nosplit
-internal static ж<dloggerImpl> u32⁔(/*this*/ ж<dloggerImpl> Ꮡl, uint32 x) {
+internal static dloggerFake u32(this dloggerFake l, uint32 x) { return l; }
+
+} partial class runtimeᴛdloggerImpl {
+
+//go:nosplit
+internal static ж<dloggerImpl> u32(this ж<dloggerImpl> Ꮡl, uint32 x) {
     return Ꮡl.u64((uint64)x);
 }
 
-//go:nosplit
-internal static dloggerFake u64⁔(/*this*/ dloggerFake l, uint64 x) { return l; }
+} partial class runtimeᴛdloggerFake {
 
 //go:nosplit
-internal static ж<dloggerImpl> u64⁔(/*this*/ ж<dloggerImpl> Ꮡl, uint64 x) {
+internal static dloggerFake u64(this dloggerFake l, uint64 x) { return l; }
+
+} partial class runtimeᴛdloggerImpl {
+
+//go:nosplit
+internal static ж<dloggerImpl> u64(this ж<dloggerImpl> Ꮡl, uint64 x) {
     ref var l = ref Ꮡl.DerefOrNull();
 
     l.w.@byte(debugLogUint);
@@ -251,11 +306,15 @@ internal static ж<dloggerImpl> u64⁔(/*this*/ ж<dloggerImpl> Ꮡl, uint64 x) 
     return Ꮡl;
 }
 
-//go:nosplit
-internal static dloggerFake hex⁔(/*this*/ dloggerFake l, uint64 x) { return l; }
+} partial class runtimeᴛdloggerFake {
 
 //go:nosplit
-internal static ж<dloggerImpl> hex⁔(/*this*/ ж<dloggerImpl> Ꮡl, uint64 x) {
+internal static dloggerFake hex(this dloggerFake l, uint64 x) { return l; }
+
+} partial class runtimeᴛdloggerImpl {
+
+//go:nosplit
+internal static ж<dloggerImpl> hex(this ж<dloggerImpl> Ꮡl, uint64 x) {
     ref var l = ref Ꮡl.DerefOrNull();
 
     l.w.@byte(debugLogHex);
@@ -263,15 +322,19 @@ internal static ж<dloggerImpl> hex⁔(/*this*/ ж<dloggerImpl> Ꮡl, uint64 x) 
     return Ꮡl;
 }
 
+} partial class runtimeᴛdloggerFake {
+
 //go:nosplit
-internal static dloggerFake p⁔(/*this*/ dloggerFake l, any x) { return l; }
+internal static dloggerFake p(this dloggerFake l, any x) { return l; }
+
+} partial class runtimeᴛdloggerImpl {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string notAPointerTypeˢ => ref notAPointerTypeˢᵇ;
 private static readonly @string notAPointerTypeˢᵇ = "not a pointer type"u8;
 
 //go:nosplit
-internal static ж<dloggerImpl> p⁔(/*this*/ ж<dloggerImpl> Ꮡl, any xʗp) {
+internal static ж<dloggerImpl> p(this ж<dloggerImpl> Ꮡl, any xʗp) {
     ref var l = ref Ꮡl.DerefOrNull();
     ref var x = ref heap(xʗp, out var Ꮡx);
 
@@ -293,16 +356,24 @@ internal static ж<dloggerImpl> p⁔(/*this*/ ж<dloggerImpl> Ꮡl, any xʗp) {
     return Ꮡl;
 }
 
+} partial class runtimeᴛdloggerFake {
+
 //go:nosplit
-internal static dloggerFake s⁔(/*this*/ dloggerFake l, @string x) { return l; }
+internal static dloggerFake s(this dloggerFake l, @string x) { return l; }
+
+} partial class runtimeᴛdloggerImpl {
 
 // go2cs generated this placeholder — func s is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-//go:nosplit
-internal static dloggerFake hexdump⁔(/*this*/ dloggerFake l, @unsafe.Pointer p, uintptr bytes) { return l; }
+} partial class runtimeᴛdloggerFake {
 
 //go:nosplit
-internal static ж<dloggerImpl> hexdump⁔(/*this*/ ж<dloggerImpl> Ꮡl, @unsafe.Pointer p, uintptr bytes) {
+internal static dloggerFake hexdump(this dloggerFake l, @unsafe.Pointer p, uintptr bytes) { return l; }
+
+} partial class runtimeᴛdloggerImpl {
+
+//go:nosplit
+internal static ж<dloggerImpl> hexdump(this ж<dloggerImpl> Ꮡl, @unsafe.Pointer p, uintptr bytes) {
     ref var l = ref Ꮡl.DerefOrNull();
 
     ref var b = ref heap<slice<byte>>(out var Ꮡb);
@@ -326,11 +397,15 @@ internal static ж<dloggerImpl> hexdump⁔(/*this*/ ж<dloggerImpl> Ꮡl, @unsaf
     return Ꮡl;
 }
 
-//go:nosplit
-internal static dloggerFake pc⁔(/*this*/ dloggerFake l, uintptr x) { return l; }
+} partial class runtimeᴛdloggerFake {
 
 //go:nosplit
-internal static ж<dloggerImpl> pc⁔(/*this*/ ж<dloggerImpl> Ꮡl, uintptr x) {
+internal static dloggerFake pc(this dloggerFake l, uintptr x) { return l; }
+
+} partial class runtimeᴛdloggerImpl {
+
+//go:nosplit
+internal static ж<dloggerImpl> pc(this ж<dloggerImpl> Ꮡl, uintptr x) {
     ref var l = ref Ꮡl.DerefOrNull();
 
     l.w.@byte(debugLogPC);
@@ -338,11 +413,15 @@ internal static ж<dloggerImpl> pc⁔(/*this*/ ж<dloggerImpl> Ꮡl, uintptr x) 
     return Ꮡl;
 }
 
-//go:nosplit
-internal static dloggerFake traceback⁔(/*this*/ dloggerFake l, slice<uintptr> x) { return l; }
+} partial class runtimeᴛdloggerFake {
 
 //go:nosplit
-internal static ж<dloggerImpl> traceback⁔(/*this*/ ж<dloggerImpl> Ꮡl, slice<uintptr> x) {
+internal static dloggerFake traceback(this dloggerFake l, slice<uintptr> x) { return l; }
+
+} partial class runtimeᴛdloggerImpl {
+
+//go:nosplit
+internal static ж<dloggerImpl> traceback(this ж<dloggerImpl> Ꮡl, slice<uintptr> x) {
     ref var l = ref Ꮡl.DerefOrNull();
 
     l.w.@byte(debugLogTraceback);
@@ -352,6 +431,8 @@ internal static ж<dloggerImpl> traceback⁔(/*this*/ ж<dloggerImpl> Ꮡl, slic
     }
     return Ꮡl;
 }
+
+} partial class runtime_package {
 
 // A debugLogWriter is a ring buffer of binary debug log records.
 //
@@ -394,12 +475,14 @@ internal static UntypedInt debugLogHeaderSize => 2;
 // debugLogSyncSize is the number of bytes in a sync record.
 internal static UntypedInt debugLogSyncSize => /* debugLogHeaderSize + 2*8 */ 18;
 
+} partial class runtimeᴛdebugLogWriter {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string recordWrappedAroundˢ => ref recordWrappedAroundˢᵇ;
 private static readonly @string recordWrappedAroundˢᵇ = "record wrapped around"u8;
 
 //go:nosplit
-internal static void ensure⁔(/*this*/ ref debugLogWriter l, uint64 n) {
+internal static void ensure(this ref debugLogWriter l, uint64 n) {
     while (l.write + n >= l.r.begin + (uint64)len(l.data.b)) {
         // Consume record at begin.
         if (l.r.skip() == ~(uint64)0) {
@@ -415,14 +498,14 @@ internal static void ensure⁔(/*this*/ ref debugLogWriter l, uint64 n) {
 }
 
 //go:nosplit
-internal static bool writeFrameAt⁔(/*this*/ ref debugLogWriter l, uint64 pos, uint64 size) {
+internal static bool writeFrameAt(this ref debugLogWriter l, uint64 pos, uint64 size) {
     l.data.b[pos % (uint64)len(l.data.b)] = (uint8)size;
     l.data.b[(pos + 1) % (uint64)len(l.data.b)] = (uint8)(size >> 8);
     return size <= 0xFFFF;
 }
 
 //go:nosplit
-internal static void writeSync⁔(/*this*/ ref debugLogWriter l, uint64 tick, uint64 nano) {
+internal static void writeSync(this ref debugLogWriter l, uint64 tick, uint64 nano) {
     (l.tick, l.nano) = (tick, nano);
     l.ensure(debugLogHeaderSize);
     l.writeFrameAt(l.write, 0);
@@ -433,14 +516,14 @@ internal static void writeSync⁔(/*this*/ ref debugLogWriter l, uint64 tick, ui
 }
 
 //go:nosplit
-internal static void writeUint64LE⁔(/*this*/ ref debugLogWriter l, uint64 x) {
+internal static void writeUint64LE(this ref debugLogWriter l, uint64 x) {
     array<byte> b = new(8);
     byteorder.LEPutUint64(b[..], x);
     l.bytes(b[..]);
 }
 
 //go:nosplit
-internal static void byte⁔(/*this*/ ref debugLogWriter l, byte x) {
+internal static void @byte(this ref debugLogWriter l, byte x) {
     l.ensure(1);
     var pos = l.write;
     l.write++;
@@ -448,7 +531,7 @@ internal static void byte⁔(/*this*/ ref debugLogWriter l, byte x) {
 }
 
 //go:nosplit
-internal static void bytes⁔(/*this*/ ref debugLogWriter l, slice<byte> x) {
+internal static void bytes(this ref debugLogWriter l, slice<byte> x) {
     l.ensure((uint64)len(x));
     var pos = l.write;
     l.write += (uint64)len(x);
@@ -460,7 +543,7 @@ internal static void bytes⁔(/*this*/ ref debugLogWriter l, slice<byte> x) {
 }
 
 //go:nosplit
-internal static void varint⁔(/*this*/ ref debugLogWriter l, int64 x) {
+internal static void varint(this ref debugLogWriter l, int64 x) {
     uint64 u = default;
     if (x < 0) {
         u = (~(uint64)x << 1) | 1; // complement i, bit 0 is 1
@@ -471,7 +554,7 @@ internal static void varint⁔(/*this*/ ref debugLogWriter l, int64 x) {
 }
 
 //go:nosplit
-internal static void uvarint⁔(/*this*/ ref debugLogWriter l, uint64 u) {
+internal static void uvarint(this ref debugLogWriter l, uint64 u) {
     nint i = 0;
     while (u >= 0x80) {
         l.buf[i] = (byte)((byte)u | 0x80);
@@ -483,6 +566,8 @@ internal static void uvarint⁔(/*this*/ ref debugLogWriter l, uint64 u) {
     l.bytes(l.buf.slice(0, i));
 }
 
+} partial class runtime_package {
+
 partial struct debugLogReader {
     internal ж<debugLogBuf> data;
     // begin and end are the positions in the log of the beginning
@@ -492,8 +577,10 @@ partial struct debugLogReader {
     internal uint64 tick, nano;
 }
 
+} partial class runtimeᴛdebugLogReader {
+
 //go:nosplit
-internal static uint64 skip⁔(/*this*/ ref debugLogReader r) {
+internal static uint64 skip(this ref debugLogReader r) {
     // Read size at pos.
     if (r.begin + (uint64)debugLogHeaderSize > r.end) {
         return ~(uint64)0;
@@ -513,12 +600,12 @@ internal static uint64 skip⁔(/*this*/ ref debugLogReader r) {
 }
 
 //go:nosplit
-internal static uint16 readUint16LEAt⁔(/*this*/ ref debugLogReader r, uint64 pos) {
+internal static uint16 readUint16LEAt(this ref debugLogReader r, uint64 pos) {
     return (uint16)((uint16)r.data.b[pos % (uint64)len(r.data.b)] | (uint16)((uint16)r.data.b[(pos + 1) % (uint64)len(r.data.b)] << 8));
 }
 
 //go:nosplit
-internal static uint64 readUint64LEAt⁔(/*this*/ ref debugLogReader r, uint64 pos) {
+internal static uint64 readUint64LEAt(this ref debugLogReader r, uint64 pos) {
     array<byte> b = new(8);
     foreach (var i in range(len(b))) {
         b[i] = r.data.b[pos % (uint64)len(r.data.b)];
@@ -527,7 +614,7 @@ internal static uint64 readUint64LEAt⁔(/*this*/ ref debugLogReader r, uint64 p
     return byteorder.LEUint64(b[..]);
 }
 
-internal static uint64 /*tick*/ peek⁔(/*this*/ ref debugLogReader r) {
+internal static uint64 /*tick*/ peek(this ref debugLogReader r) {
     // Consume any sync records.
     var size = (uint64)0;
     while (size == 0) {
@@ -567,7 +654,7 @@ internal static uint64 /*tick*/ peek⁔(/*this*/ ref debugLogReader r) {
     return r.tick + u;
 }
 
-internal static (uint64 end, uint64 tick, uint64 nano, nint p) header⁔(/*this*/ ref debugLogReader r) {
+internal static (uint64 end, uint64 tick, uint64 nano, nint p) header(this ref debugLogReader r) {
     uint64 end = default;
     uint64 tick = default;
     uint64 nano = default;
@@ -587,7 +674,7 @@ internal static (uint64 end, uint64 tick, uint64 nano, nint p) header⁔(/*this*
     return (end, tick, nano, p);
 }
 
-internal static uint64 uvarint⁔(/*this*/ ref debugLogReader r) {
+internal static uint64 uvarint(this ref debugLogReader r) {
     uint64 u = default;
     for (nuint i = (nuint)0; ; i += 7) {
         var b = r.data.b[r.begin % (uint64)len(r.data.b)];
@@ -600,7 +687,7 @@ internal static uint64 uvarint⁔(/*this*/ ref debugLogReader r) {
     return u;
 }
 
-internal static int64 varint⁔(/*this*/ ref debugLogReader r) {
+internal static int64 varint(this ref debugLogReader r) {
     var u = r.uvarint();
     int64 v = default;
     if ((u & 1) == 0) {
@@ -612,6 +699,8 @@ internal static int64 varint⁔(/*this*/ ref debugLogReader r) {
 }
 
 // go2cs generated this placeholder — func printVal is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
+
+} partial class runtime_package {
 
 // printDebugLog prints the debug log.
 internal static void printDebugLog() {

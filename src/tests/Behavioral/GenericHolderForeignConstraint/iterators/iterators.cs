@@ -2,6 +2,7 @@ namespace go.GenericHolderForeignConstraint;
 
 using text = go.GenericHolderForeignConstraint.text_package;
 using go.GenericHolderForeignConstraint;
+using static iterators_package;
 
 partial class iterators_package {
 
@@ -12,14 +13,16 @@ partial struct Iterator<T>
     internal nint pos;
 }
 
-internal static void SetText⁔<T>(/*this*/ ref Iterator<T> it, T data)
+} partial class iteratorsᴛIterator {
+
+public static void SetText<T>(this ref Iterator<T> it, T data)
     where T : /* text.Text */ IByteSeq<T, byte>, new()
 {
     it.data = data;
     it.pos = 0;
 }
 
-internal static bool Next⁔<T>(/*this*/ ref Iterator<T> it)
+public static bool Next<T>(this ref Iterator<T> it)
     where T : /* text.Text */ IByteSeq<T, byte>, new()
 {
     if (it.pos >= len(it.data)) {
@@ -31,9 +34,11 @@ internal static bool Next⁔<T>(/*this*/ ref Iterator<T> it)
     return true;
 }
 
-internal static nint Pos⁔<T>(/*this*/ Iterator<T> it)
+public static nint Pos<T>(this Iterator<T> it)
     where T : /* text.Text */ IByteSeq<T, byte>, new()
 { return it.pos; }
+
+} partial class iterators_package {
 
 partial struct Window<K, T>
     where T : /* text.Text */ IByteSeq<T, byte>, new()
@@ -48,12 +53,14 @@ public static Window<K, T> NewWindow<K, T>(K key, T data)
     return new Window<K, T>(key: key, data: data);
 }
 
-internal static nint Len⁔<K, T>(/*this*/ Window<K, T> w)
+} partial class iteratorsᴛWindow {
+
+public static nint Len<K, T>(this Window<K, T> w)
     where T : /* text.Text */ IByteSeq<T, byte>, new()
 { return len(w.data); }
 
-internal static K Key⁔<K, T>(/*this*/ ref Window<K, T> w)
+public static K Key<K, T>(this ref Window<K, T> w)
     where T : /* text.Text */ IByteSeq<T, byte>, new()
 { return w.key; }
 
-} // end iterators_package
+}

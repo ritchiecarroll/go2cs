@@ -15,6 +15,7 @@ using runtime = runtime_package;
 using Δsync = sync_package;
 using @unsafe = unsafe_package;
 using @internal;
+using static syscall_package;
 
 partial class syscall_package {
 
@@ -44,7 +45,9 @@ partial struct mmapper {
     internal Func<uintptr, uintptr, error> munmap;
 }
 
-internal static (slice<byte> data, error err) Mmap⁔(/*this*/ ж<mmapper> Ꮡm, nint fd, int64 offset, nint length, nint prot, nint flags) {
+} partial class syscallᴛmmapper {
+
+internal static (slice<byte> data, error err) Mmap(this ж<mmapper> Ꮡm, nint fd, int64 offset, nint length, nint prot, nint flags) {
     slice<byte> data = default;
     error err = default;
     GoFrame ᒐ = default;
@@ -76,7 +79,7 @@ internal static (slice<byte> data, error err) Mmap⁔(/*this*/ ж<mmapper> Ꮡm,
     ᒐdone: return (data, err);
 }
 
-internal static error /*err*/ Munmap⁔(/*this*/ ж<mmapper> Ꮡm, slice<byte> data) {
+internal static error /*err*/ Munmap(this ж<mmapper> Ꮡm, slice<byte> data) {
     error err = default;
     GoFrame ᒐ = default;
     try {
@@ -107,6 +110,8 @@ internal static error /*err*/ Munmap⁔(/*this*/ ж<mmapper> Ꮡm, slice<byte> d
     ᒐdone: return err;
 }
 
+} partial class syscall_package {
+
 // An Errno is an unsigned number describing an error condition.
 // It implements the error interface. The zero Errno is by convention
 // a non-error, so code to convert from Errno to error should use:
@@ -123,7 +128,9 @@ internal static error /*err*/ Munmap⁔(/*this*/ ж<mmapper> Ꮡm, slice<byte> d
 //	if errors.Is(err, fs.ErrNotExist) ...
 partial struct Errno /*num:uintptr*/;
 
-internal static @string Error⁔(/*this*/ Errno e) {
+} partial class syscallᴛErrno {
+
+public static @string Error(this Errno e) {
     if (0 <= (nint)e && (nint)e < len(errors)) {
         @string s = errors[e];
         if (s != ""u8) {
@@ -133,7 +140,7 @@ internal static @string Error⁔(/*this*/ Errno e) {
     return "errno "u8 + strconv.Itoa((nint)e);
 }
 
-internal static bool Is⁔(/*this*/ Errno e, error target) {
+public static bool Is(this Errno e, error target) {
     switch (target) {
     case var ᴛ when AreEqual(ᴛ, oserror.ErrPermission): {
         return e == EACCES || e == EPERM;
@@ -150,13 +157,15 @@ internal static bool Is⁔(/*this*/ Errno e, error target) {
     return false;
 }
 
-internal static bool Temporary⁔(/*this*/ Errno e) {
+public static bool Temporary(this Errno e) {
     return e == EINTR || e == EMFILE || e == ENFILE || e.Timeout();
 }
 
-internal static bool Timeout⁔(/*this*/ Errno e) {
+public static bool Timeout(this Errno e) {
     return e == EAGAIN || e == EWOULDBLOCK || e == ETIMEDOUT;
 }
+
+} partial class syscall_package {
 
 // Do the interface allocations only once for common
 // Errno values.
@@ -187,9 +196,11 @@ internal static error errnoErr(Errno e) {
 // It implements the [os.Signal] interface.
 partial struct Signal /*num:nint*/;
 
-internal static void Signal⁔(/*this*/ Signal s) { }
+} partial class syscallᴛSignal {
 
-internal static @string String⁔(/*this*/ Signal s) {
+public static void Signal(this Signal s) { }
+
+public static @string String(this Signal s) {
     if (0 <= s && (nint)s < len(signals)) {
         @string str = signals[s];
         if (str != ""u8) {
@@ -198,6 +209,8 @@ internal static @string String⁔(/*this*/ Signal s) {
     }
     return "signal "u8 + strconv.Itoa((nint)s);
 }
+
+} partial class syscall_package {
 
 public static (nint n, error err) Read(nint fd, slice<byte> p) {
     nint n = default;

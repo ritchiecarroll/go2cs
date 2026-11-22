@@ -4,10 +4,13 @@
 namespace go;
 
 using @unsafe = unsafe_package;
+using static syscall_package;
 
 partial class syscall_package {
 
-internal static RoutingMessage toRoutingMessage⁔(/*this*/ ж<anyMessage> Ꮡany, slice<byte> b) {
+} partial class syscallᴛanyMessage {
+
+internal static RoutingMessage toRoutingMessage(this ж<anyMessage> Ꮡany, slice<byte> b) {
     ref var any = ref Ꮡany.DerefOrNull();
 
     switch (any.Type) {
@@ -30,6 +33,8 @@ internal static RoutingMessage toRoutingMessage⁔(/*this*/ ж<anyMessage> Ꮡan
     return default;
 }
 
+} partial class syscall_package {
+
 // InterfaceMulticastAddrMessage represents a routing message
 // containing network interface address entries.
 //
@@ -39,7 +44,9 @@ partial struct InterfaceMulticastAddrMessage {
     public slice<byte> Data;
 }
 
-internal static (slice<Sockaddr>, error) sockaddr⁔(/*this*/ ref InterfaceMulticastAddrMessage m) {
+} partial class syscallᴛInterfaceMulticastAddrMessage {
+
+internal static (slice<Sockaddr>, error) sockaddr(this ref InterfaceMulticastAddrMessage m) {
     array<Sockaddr> sas = new(8); /* RTAX_MAX */
     var b = m.Data[..];
     for (nuint i = (nuint)0; i < RTAX_MAX && len(b) >= minRoutingSockaddrLen; i++) {
@@ -79,4 +86,4 @@ internal static (slice<Sockaddr>, error) sockaddr⁔(/*this*/ ref InterfaceMulti
     return (sas[..], default);
 }
 
-} // end syscall_package
+}

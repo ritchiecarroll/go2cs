@@ -9,6 +9,7 @@ using errors = errors_package;
 using bits = math.bits_package;
 using go.crypto.@internal.fips140deps;
 using math;
+using static bigmod_package;
 
 partial class bigmod_package {
 
@@ -72,8 +73,10 @@ public static ж<Nat> NewNat() {
     return Ꮡ(new Nat(limbs));
 }
 
+} partial class bigmodᴛNat {
+
 // expand expands x to n limbs, leaving its value unchanged.
-internal static ж<Nat> expand⁔(/*this*/ ж<Nat> Ꮡx, nint n) {
+internal static ж<Nat> expand(this ж<Nat> Ꮡx, nint n) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     if (len(x.limbs) > n) {
@@ -92,7 +95,7 @@ internal static ж<Nat> expand⁔(/*this*/ ж<Nat> Ꮡx, nint n) {
 }
 
 // reset returns a zero nat of n limbs, reusing x's storage if n <= cap(x.limbs).
-internal static ж<Nat> reset⁔(/*this*/ ж<Nat> Ꮡx, nint n) {
+internal static ж<Nat> reset(this ж<Nat> Ꮡx, nint n) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     if (cap(x.limbs) < n) {
@@ -110,7 +113,7 @@ internal static ж<Nat> reset⁔(/*this*/ ж<Nat> Ꮡx, nint n) {
 //
 // The announced length of x is set based on the actual bit size of the input,
 // ignoring leading zeroes.
-internal static ж<Nat> resetToBytes⁔(/*this*/ ж<Nat> Ꮡx, slice<byte> b) {
+internal static ж<Nat> resetToBytes(this ж<Nat> Ꮡx, slice<byte> b) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     Ꮡx.reset((len(b) + (nint)_S - 1) / (nint)_S);
@@ -121,7 +124,7 @@ internal static ж<Nat> resetToBytes⁔(/*this*/ ж<Nat> Ꮡx, slice<byte> b) {
 }
 
 // trim reduces the size of x to match its value.
-internal static ж<Nat> trim⁔(/*this*/ ж<Nat> Ꮡx) {
+internal static ж<Nat> trim(this ж<Nat> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     // Trim most significant (trailing in little-endian) zero limbs.
@@ -136,7 +139,7 @@ internal static ж<Nat> trim⁔(/*this*/ ж<Nat> Ꮡx) {
 }
 
 // set assigns x = y, optionally resizing x to the appropriate size.
-internal static ж<Nat> set⁔(/*this*/ ж<Nat> Ꮡx, ж<Nat> Ꮡy) {
+internal static ж<Nat> set(this ж<Nat> Ꮡx, ж<Nat> Ꮡy) {
     ref var x = ref Ꮡx.DerefOrNull();
     ref var y = ref Ꮡy.DerefOrNull();
 
@@ -148,7 +151,7 @@ internal static ж<Nat> set⁔(/*this*/ ж<Nat> Ꮡx, ж<Nat> Ꮡy) {
 // Bits returns x as a little-endian slice of uint. The length of the slice
 // matches the announced length of x. The result and x share the same underlying
 // array.
-internal static slice<nuint> Bits⁔(/*this*/ ref Nat x) {
+public static slice<nuint> Bits(this ref Nat x) {
     return x.limbs;
 }
 
@@ -156,7 +159,7 @@ internal static slice<nuint> Bits⁔(/*this*/ ref Nat x) {
 // slice will match the size of m.
 //
 // x must have the same size as m and it must be less than or equal to m.
-internal static slice<byte> Bytes⁔(/*this*/ ref Nat x, ж<Modulus> Ꮡm) {
+public static slice<byte> Bytes(this ref Nat x, ж<Modulus> Ꮡm) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     nint i = m.Size();
@@ -189,7 +192,7 @@ private static readonly @string inputOverflowsTheModulusˢᵇ = "input overflows
 // The output will be resized to the size of m and overwritten.
 //
 //go:norace
-internal static (ж<Nat>, error) SetBytes⁔(/*this*/ ж<Nat> Ꮡx, slice<byte> b, ж<Modulus> Ꮡm) {
+public static (ж<Nat>, error) SetBytes(this ж<Nat> Ꮡx, slice<byte> b, ж<Modulus> Ꮡm) {
     ref var x = ref Ꮡx.DerefOrNull();
     ref var m = ref Ꮡm.DerefOrNull();
 
@@ -212,7 +215,7 @@ private static readonly @string inputOverflowsTheModulusˢ2ᵇ = "input overflow
 // reduces overflowing values up to 2^⌈log2(m)⌉ - 1.
 //
 // The output will be resized to the size of m and overwritten.
-internal static (ж<Nat>, error) SetOverflowingBytes⁔(/*this*/ ж<Nat> Ꮡx, slice<byte> b, ж<Modulus> Ꮡm) {
+public static (ж<Nat>, error) SetOverflowingBytes(this ж<Nat> Ꮡx, slice<byte> b, ж<Modulus> Ꮡm) {
     ref var x = ref Ꮡx.DerefOrNull();
     ref var m = ref Ꮡm.DerefOrNull();
 
@@ -230,6 +233,8 @@ internal static (ж<Nat>, error) SetOverflowingBytes⁔(/*this*/ ж<Nat> Ꮡx, s
     return (Ꮡx, default);
 }
 
+} partial class bigmod_package {
+
 // bigEndianUint returns the contents of buf interpreted as a
 // big-endian encoded uint value.
 internal static nuint bigEndianUint(slice<byte> buf) {
@@ -239,7 +244,9 @@ internal static nuint bigEndianUint(slice<byte> buf) {
     return (nuint)byteorder.BEUint32(buf);
 }
 
-internal static error setBytes⁔(/*this*/ ref Nat x, slice<byte> b) {
+} partial class bigmodᴛNat {
+
+internal static error setBytes(this ref Nat x, slice<byte> b) {
     nint i = len(b);
     nint k = 0;
     while (k < len(x.limbs) && i >= _S) {
@@ -260,7 +267,7 @@ internal static error setBytes⁔(/*this*/ ref Nat x, slice<byte> b) {
 // SetUint assigns x = y.
 //
 // The output will be resized to a single limb and overwritten.
-internal static ж<Nat> SetUint⁔(/*this*/ ж<Nat> Ꮡx, nuint y) {
+public static ж<Nat> SetUint(this ж<Nat> Ꮡx, nuint y) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     Ꮡx.reset(1);
@@ -273,7 +280,7 @@ internal static ж<Nat> SetUint⁔(/*this*/ ж<Nat> Ꮡx, nuint y) {
 // Both operands must have the same announced length.
 //
 //go:norace
-internal static choice Equal⁔(/*this*/ ref Nat x, ж<Nat> Ꮡy) {
+public static choice Equal(this ref Nat x, ж<Nat> Ꮡy) {
     ref var y = ref Ꮡy.DerefOrNull();
 
     // Eliminate bounds checks in the loop.
@@ -291,7 +298,7 @@ internal static choice Equal⁔(/*this*/ ref Nat x, ж<Nat> Ꮡy) {
 // IsZero returns 1 if x == 0, and 0 otherwise.
 //
 //go:norace
-internal static choice IsZero⁔(/*this*/ ref Nat x) {
+public static choice IsZero(this ref Nat x) {
     // Eliminate bounds checks in the loop.
     nint size = len(x.limbs);
     var xLimbs = x.limbs.slice(0, size);
@@ -306,7 +313,7 @@ internal static choice IsZero⁔(/*this*/ ref Nat x) {
 // IsOne returns 1 if x == 1, and 0 otherwise.
 //
 //go:norace
-internal static choice IsOne⁔(/*this*/ ref Nat x) {
+public static choice IsOne(this ref Nat x) {
     // Eliminate bounds checks in the loop.
     nint size = len(x.limbs);
     var xLimbs = x.limbs.slice(0, size);
@@ -328,7 +335,7 @@ internal static choice IsOne⁔(/*this*/ ref Nat x) {
 // modulo m.
 //
 //go:norace
-internal static choice IsMinusOne⁔(/*this*/ ref Nat x, ж<Modulus> Ꮡm) {
+public static choice IsMinusOne(this ref Nat x, ж<Modulus> Ꮡm) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     var minusOne = m.Nat();
@@ -337,7 +344,7 @@ internal static choice IsMinusOne⁔(/*this*/ ref Nat x, ж<Modulus> Ꮡm) {
 }
 
 // IsOdd returns 1 if x is odd, and 0 otherwise.
-internal static choice IsOdd⁔(/*this*/ ref Nat x) {
+public static choice IsOdd(this ref Nat x) {
     if (len(x.limbs) == 0) {
         return no;
     }
@@ -345,7 +352,7 @@ internal static choice IsOdd⁔(/*this*/ ref Nat x) {
 }
 
 // TrailingZeroBitsVarTime returns the number of trailing zero bits in x.
-internal static nuint TrailingZeroBitsVarTime⁔(/*this*/ ref Nat x) {
+public static nuint TrailingZeroBitsVarTime(this ref Nat x) {
     nuint t = default;
     var limbs = x.limbs;
     foreach (var (_, l) in range(limbs)) {
@@ -364,7 +371,7 @@ internal static nuint TrailingZeroBitsVarTime⁔(/*this*/ ref Nat x) {
 // Both operands must have the same announced length.
 //
 //go:norace
-internal static choice cmpGeq⁔(/*this*/ ref Nat x, ж<Nat> Ꮡy) {
+internal static choice cmpGeq(this ref Nat x, ж<Nat> Ꮡy) {
     ref var y = ref Ꮡy.DerefOrNull();
 
     // Eliminate bounds checks in the loop.
@@ -386,7 +393,7 @@ internal static choice cmpGeq⁔(/*this*/ ref Nat x, ж<Nat> Ꮡy) {
 // Both operands must have the same announced length.
 //
 //go:norace
-internal static ж<Nat> assign⁔(/*this*/ ж<Nat> Ꮡx, choice on, ж<Nat> Ꮡy) {
+internal static ж<Nat> assign(this ж<Nat> Ꮡx, choice on, ж<Nat> Ꮡy) {
     ref var x = ref Ꮡx.DerefOrNull();
     ref var y = ref Ꮡy.DerefOrNull();
 
@@ -407,7 +414,7 @@ internal static ж<Nat> assign⁔(/*this*/ ж<Nat> Ꮡx, choice on, ж<Nat> Ꮡy
 // Both operands must have the same announced length.
 //
 //go:norace
-internal static nuint /*c*/ add⁔(/*this*/ ref Nat x, ж<Nat> Ꮡy) {
+internal static nuint /*c*/ add(this ref Nat x, ж<Nat> Ꮡy) {
     nuint c = default;
     ref var y = ref Ꮡy.DerefOrNull();
 
@@ -427,7 +434,7 @@ internal static nuint /*c*/ add⁔(/*this*/ ref Nat x, ж<Nat> Ꮡy) {
 // Both operands must have the same announced length.
 //
 //go:norace
-internal static nuint /*c*/ sub⁔(/*this*/ ref Nat x, ж<Nat> Ꮡy) {
+internal static nuint /*c*/ sub(this ref Nat x, ж<Nat> Ꮡy) {
     nuint c = default;
     ref var y = ref Ꮡy.DerefOrNull();
 
@@ -447,7 +454,7 @@ internal static nuint /*c*/ sub⁔(/*this*/ ref Nat x, ж<Nat> Ꮡy) {
 // The announced length of x is unchanged.
 //
 //go:norace
-internal static ж<Nat> ShiftRightVarTime⁔(/*this*/ ж<Nat> Ꮡx, nuint n) {
+public static ж<Nat> ShiftRightVarTime(this ж<Nat> Ꮡx, nuint n) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     // Eliminate bounds checks in the loop.
@@ -481,7 +488,7 @@ internal static ж<Nat> ShiftRightVarTime⁔(/*this*/ ж<Nat> Ꮡx, nuint n) {
 //
 // The actual size of x (but nothing more) leaks through timing side-channels.
 // Note that this is ordinarily secret, as opposed to the announced size of x.
-internal static nint BitLenVarTime⁔(/*this*/ ref Nat x) {
+public static nint BitLenVarTime(this ref Nat x) {
     // Eliminate bounds checks in the loop.
     nint size = len(x.limbs);
     var xLimbs = x.limbs.slice(0, size);
@@ -493,6 +500,8 @@ internal static nint BitLenVarTime⁔(/*this*/ ref Nat x) {
     }
     return 0;
 }
+
+} partial class bigmod_package {
 
 // bitLen is a version of bits.Len that only leaks the bit length of n, but not
 // its value. bits.Len and bits.LeadingZeros use a lookup table for the
@@ -633,18 +642,20 @@ internal static (ж<Modulus>, error) newModulus(ж<Nat> n) {
     return (m, default);
 }
 
+} partial class bigmodᴛModulus {
+
 // Size returns the size of m in bytes.
-internal static nint Size⁔(/*this*/ ref Modulus m) {
+public static nint Size(this ref Modulus m) {
     return (m.BitLen() + 7) / 8;
 }
 
 // BitLen returns the size of m in bits.
-internal static nint BitLen⁔(/*this*/ ref Modulus m) {
+public static nint BitLen(this ref Modulus m) {
     return m.nat.BitLenVarTime();
 }
 
 // Nat returns m as a Nat.
-internal static ж<Nat> Nat⁔(/*this*/ ref Modulus m) {
+public static ж<Nat> Nat(this ref Modulus m) {
     // Make a copy so that the caller can't modify m.nat or alias it with
     // another Nat in a modulus operation.
     var n = NewNat();
@@ -652,12 +663,14 @@ internal static ж<Nat> Nat⁔(/*this*/ ref Modulus m) {
     return n;
 }
 
+} partial class bigmodᴛNat {
+
 // shiftIn calculates x = x << _W + y mod m.
 //
 // This assumes that x is already reduced mod m.
 //
 //go:norace
-internal static ж<Nat> shiftIn⁔(/*this*/ ж<Nat> Ꮡx, nuint y, ж<Modulus> Ꮡm) {
+internal static ж<Nat> shiftIn(this ж<Nat> Ꮡx, nuint y, ж<Modulus> Ꮡm) {
     ref var x = ref Ꮡx.DerefOrNull();
     ref var m = ref Ꮡm.DerefOrNull();
 
@@ -701,7 +714,7 @@ internal static ж<Nat> shiftIn⁔(/*this*/ ж<Nat> Ꮡx, nuint y, ж<Modulus> �
 // The output will be resized to the size of m and overwritten.
 //
 //go:norace
-internal static ж<Nat> Mod⁔(/*this*/ ж<Nat> Ꮡout, ж<Nat> Ꮡx, ж<Modulus> Ꮡm) {
+public static ж<Nat> Mod(this ж<Nat> Ꮡout, ж<Nat> Ꮡx, ж<Modulus> Ꮡm) {
     ref var @out = ref Ꮡout.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
     ref var m = ref Ꮡm.DerefOrNull();
@@ -734,7 +747,7 @@ internal static ж<Nat> Mod⁔(/*this*/ ж<Nat> Ꮡout, ж<Nat> Ꮡx, ж<Modulus
 // ExpandFor ensures x has the right size to work with operations modulo m.
 //
 // The announced size of x must be smaller than or equal to that of m.
-internal static ж<Nat> ExpandFor⁔(/*this*/ ж<Nat> Ꮡx, ж<Modulus> Ꮡm) {
+public static ж<Nat> ExpandFor(this ж<Nat> Ꮡx, ж<Modulus> Ꮡm) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     return Ꮡx.expand(len(m.nat.limbs));
@@ -743,7 +756,7 @@ internal static ж<Nat> ExpandFor⁔(/*this*/ ж<Nat> Ꮡx, ж<Modulus> Ꮡm) {
 // resetFor ensures out has the right size to work with operations modulo m.
 //
 // out is zeroed and may start at any size.
-internal static ж<Nat> resetFor⁔(/*this*/ ж<Nat> Ꮡout, ж<Modulus> Ꮡm) {
+internal static ж<Nat> resetFor(this ж<Nat> Ꮡout, ж<Modulus> Ꮡm) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     return Ꮡout.reset(len(m.nat.limbs));
@@ -760,7 +773,7 @@ internal static ж<Nat> resetFor⁔(/*this*/ ж<Nat> Ꮡout, ж<Modulus> Ꮡm) {
 // x and m operands must have the same announced length.
 //
 //go:norace
-internal static void maybeSubtractModulus⁔(/*this*/ ж<Nat> Ꮡx, choice always, ж<Modulus> Ꮡm) {
+internal static void maybeSubtractModulus(this ж<Nat> Ꮡx, choice always, ж<Modulus> Ꮡm) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     var t = NewNat().set(Ꮡx);
@@ -777,7 +790,7 @@ internal static void maybeSubtractModulus⁔(/*this*/ ж<Nat> Ꮡx, choice alway
 // must already be reduced modulo m.
 //
 //go:norace
-internal static ж<Nat> Sub⁔(/*this*/ ж<Nat> Ꮡx, ж<Nat> y, ж<Modulus> Ꮡm) {
+public static ж<Nat> Sub(this ж<Nat> Ꮡx, ж<Nat> y, ж<Modulus> Ꮡm) {
     ref var x = ref Ꮡx.DerefOrNull();
     ref var m = ref Ꮡm.DerefOrNull();
 
@@ -792,7 +805,7 @@ internal static ж<Nat> Sub⁔(/*this*/ ж<Nat> Ꮡx, ж<Nat> y, ж<Modulus> Ꮡ
 // SubOne computes x = x - 1 mod m.
 //
 // The length of x must be the same as the modulus.
-internal static ж<Nat> SubOne⁔(/*this*/ ж<Nat> Ꮡx, ж<Modulus> m) {
+public static ж<Nat> SubOne(this ж<Nat> Ꮡx, ж<Modulus> m) {
     var one = NewNat().ExpandFor(m);
     one.limbs[0] = 1;
     // Sub asks for x to be reduced modulo m, while SubOne doesn't, but when
@@ -806,7 +819,7 @@ internal static ж<Nat> SubOne⁔(/*this*/ ж<Nat> Ꮡx, ж<Modulus> m) {
 // must already be reduced modulo m.
 //
 //go:norace
-internal static ж<Nat> Add⁔(/*this*/ ж<Nat> Ꮡx, ж<Nat> y, ж<Modulus> m) {
+public static ж<Nat> Add(this ж<Nat> Ꮡx, ж<Nat> y, ж<Modulus> m) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     nuint overflow = x.add(y);
@@ -821,7 +834,7 @@ internal static ж<Nat> Add⁔(/*this*/ ж<Nat> Ꮡx, ж<Nat> y, ж<Modulus> m) 
 // numbers in this representation.
 //
 // This assumes that x is already reduced mod m.
-internal static ж<Nat> montgomeryRepresentation⁔(/*this*/ ж<Nat> Ꮡx, ж<Modulus> Ꮡm) {
+internal static ж<Nat> montgomeryRepresentation(this ж<Nat> Ꮡx, ж<Modulus> Ꮡm) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     // A Montgomery multiplication (which computes a * b / R) by R * R works out
@@ -833,7 +846,7 @@ internal static ж<Nat> montgomeryRepresentation⁔(/*this*/ ж<Nat> Ꮡx, ж<Mo
 // n = len(m.nat.limbs).
 //
 // This assumes that x is already reduced mod m.
-internal static ж<Nat> montgomeryReduction⁔(/*this*/ ж<Nat> Ꮡx, ж<Modulus> m) {
+internal static ж<Nat> montgomeryReduction(this ж<Nat> Ꮡx, ж<Modulus> m) {
     // By Montgomery multiplying with 1 not in Montgomery representation, we
     // convert out back from Montgomery representation, because it works out to
     // dividing by R.
@@ -849,7 +862,7 @@ internal static ж<Nat> montgomeryReduction⁔(/*this*/ ж<Nat> Ꮡx, ж<Modulus
 // x will be resized to the size of m and overwritten.
 //
 //go:norace
-internal static ж<Nat> montgomeryMul⁔(/*this*/ ж<Nat> Ꮡx, ж<Nat> Ꮡa, ж<Nat> Ꮡb, ж<Modulus> Ꮡm) {
+internal static ж<Nat> montgomeryMul(this ж<Nat> Ꮡx, ж<Nat> Ꮡa, ж<Nat> Ꮡb, ж<Modulus> Ꮡm) {
     ref var a = ref Ꮡa.DerefOrNull();
     ref var b = ref Ꮡb.DerefOrNull();
     ref var m = ref Ꮡm.DerefOrNull();
@@ -975,6 +988,8 @@ internal static ж<Nat> montgomeryMul⁔(/*this*/ ж<Nat> Ꮡx, ж<Nat> Ꮡa, ж
     return Ꮡx;
 }
 
+} partial class bigmod_package {
+
 // addMulVVW multiplies the multi-word value x by the single-word value y,
 // adding the result to the multi-word value z and returning the final carry.
 // It can be thought of as one row of a pen-and-paper column multiplication.
@@ -998,13 +1013,15 @@ internal static nuint /*carry*/ addMulVVW(slice<nuint> z, slice<nuint> x, nuint 
     return carry;
 }
 
+} partial class bigmodᴛNat {
+
 // Mul calculates x = x * y mod m.
 //
 // The length of both operands must be the same as the modulus. Both operands
 // must already be reduced modulo m.
 //
 //go:norace
-internal static ж<Nat> Mul⁔(/*this*/ ж<Nat> Ꮡx, ж<Nat> Ꮡy, ж<Modulus> Ꮡm) {
+public static ж<Nat> Mul(this ж<Nat> Ꮡx, ж<Nat> Ꮡy, ж<Modulus> Ꮡm) {
     ref var x = ref Ꮡx.DerefOrNull();
     ref var y = ref Ꮡy.DerefOrNull();
     ref var m = ref Ꮡm.DerefOrNull();
@@ -1073,7 +1090,7 @@ internal static ж<Nat> Mul⁔(/*this*/ ж<Nat> Ꮡx, ж<Nat> Ꮡy, ж<Modulus> 
 // m must be odd, or Exp will panic.
 //
 //go:norace
-internal static ж<Nat> Exp⁔(/*this*/ ж<Nat> Ꮡout, ж<Nat> x, slice<byte> e, ж<Modulus> Ꮡm) {
+public static ж<Nat> Exp(this ж<Nat> Ꮡout, ж<Nat> x, slice<byte> e, ж<Modulus> Ꮡm) {
     ref var @out = ref Ꮡout.DerefOrNull();
     ref var m = ref Ꮡm.DerefOrNull();
 
@@ -1131,7 +1148,7 @@ internal static ж<Nat> Exp⁔(/*this*/ ж<Nat> Ꮡout, ж<Nat> x, slice<byte> e
 // be reduced modulo m. This leaks the exponent through timing side-channels.
 //
 // m must be odd, or ExpShortVarTime will panic.
-internal static ж<Nat> ExpShortVarTime⁔(/*this*/ ж<Nat> Ꮡout, ж<Nat> x, nuint e, ж<Modulus> Ꮡm) {
+public static ж<Nat> ExpShortVarTime(this ж<Nat> Ꮡout, ж<Nat> x, nuint e, ж<Modulus> Ꮡm) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     if (!m.odd) {
@@ -1159,7 +1176,7 @@ internal static ж<Nat> ExpShortVarTime⁔(/*this*/ ж<Nat> Ꮡout, ж<Nat> x, n
 // output will be resized to the size of m and overwritten.
 //
 //go:norace
-internal static (ж<Nat>, bool) InverseVarTime⁔(/*this*/ ж<Nat> Ꮡx, ж<Nat> a, ж<Modulus> Ꮡm) {
+public static (ж<Nat>, bool) InverseVarTime(this ж<Nat> Ꮡx, ж<Nat> a, ж<Modulus> Ꮡm) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     var (u, A, err) = extendedGCD(a, m.nat);
@@ -1176,13 +1193,15 @@ internal static (ж<Nat>, bool) InverseVarTime⁔(/*this*/ ж<Nat> Ꮡx, ж<Nat>
 // both are non-zero. If GCDVarTime returns an error, x is not modified.
 //
 // The output will be resized to the size of the larger of a and b.
-internal static (ж<Nat>, error) GCDVarTime⁔(/*this*/ ж<Nat> Ꮡx, ж<Nat> a, ж<Nat> b) {
+public static (ж<Nat>, error) GCDVarTime(this ж<Nat> Ꮡx, ж<Nat> a, ж<Nat> b) {
     var (u, _, err) = extendedGCD(a, b);
     if (err != nil) {
         return (default, err);
     }
     return (Ꮡx.set(u), default);
 }
+
+} partial class bigmod_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string extendedGCDAOrMIsZeroˢ => ref extendedGCDAOrMIsZeroˢᵇ;
@@ -1318,12 +1337,14 @@ internal static void rshift1(ref Nat a, nuint carry) {
     }
 }
 
+} partial class bigmodᴛNat {
+
 // DivShortVarTime calculates x = x / y and returns the remainder.
 //
 // It panics if y is zero.
 //
 //go:norace
-internal static nuint DivShortVarTime⁔(/*this*/ ref Nat x, nuint y) {
+public static nuint DivShortVarTime(this ref Nat x, nuint y) {
     if (y == 0) {
         throw panic("bigmod: division by zero");
     }
@@ -1335,4 +1356,4 @@ internal static nuint DivShortVarTime⁔(/*this*/ ref Nat x, nuint y) {
     return r;
 }
 
-} // end bigmod_package
+}

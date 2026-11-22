@@ -8,6 +8,7 @@ using token = global::go.go.token_package;
 using io = io_package;
 using sort = sort_package;
 using global::go.go;
+using static scanner_package;
 
 partial class scanner_package {
 
@@ -20,8 +21,10 @@ partial struct Error {
     public @string Msg;
 }
 
+} partial class scannerᴛError {
+
 // Error implements the error interface.
-internal static @string Error⁔(/*this*/ Error e) {
+public static @string Error(this Error e) {
     if (e.Pos.Filename != ""u8 || e.Pos.IsValid()) {
         // don't print "<unknown position>"
         // TODO(gri) reconsider the semantics of Position.IsValid
@@ -30,23 +33,27 @@ internal static @string Error⁔(/*this*/ Error e) {
     return e.Msg;
 }
 
+} partial class scanner_package {
+
 // ErrorList is a list of *Errors.
 // The zero value for an ErrorList is an empty ErrorList ready to use.
 partial struct ErrorList /*[]ж<Error>*/;
 
+} partial class scannerᴛErrorList {
+
 // Add adds an [Error] with given position and error message to an [ErrorList].
-internal static void Add⁔(/*this*/ ref ErrorList p, token.Position pos, @string msg) {
+public static void Add(this ref ErrorList p, token.Position pos, @string msg) {
     p = append(p, Ꮡ(new Error(pos, msg)));
 }
 
 // Reset resets an [ErrorList] to no errors.
-internal static void Reset⁔(/*this*/ ref ErrorList p) { p = (p)[0..0]; }
+public static void Reset(this ref ErrorList p) { p = (p)[0..0]; }
 
 // [ErrorList] implements the sort Interface.
-internal static nint Len⁔(/*this*/ ErrorList p) { return len(p); }
-internal static void Swap⁔(/*this*/ ErrorList p, nint i, nint j) { (p[i], p[j]) = (p[j], p[i]); }
+public static nint Len(this ErrorList p) { return len(p); }
+public static void Swap(this ErrorList p, nint i, nint j) { (p[i], p[j]) = (p[j], p[i]); }
 
-internal static bool Less⁔(/*this*/ ErrorList p, nint i, nint j) {
+public static bool Less(this ErrorList p, nint i, nint j) {
     var e = p[i].ᏑPos;
     var f = p[j].ᏑPos;
     // Note that it is not sufficient to simply compare file offsets because
@@ -67,12 +74,12 @@ internal static bool Less⁔(/*this*/ ErrorList p, nint i, nint j) {
 // Sort sorts an [ErrorList]. *[Error] entries are sorted by position,
 // other errors are sorted by error message, and before any *[Error]
 // entry.
-internal static void Sort⁔(/*this*/ ErrorList p) {
+public static void Sort(this ErrorList p) {
     sort.Sort(p);
 }
 
 // RemoveMultiples sorts an [ErrorList] and removes all but the first error per line.
-internal static void RemoveMultiples⁔(/*this*/ ж<ErrorList> Ꮡp) {
+public static void RemoveMultiples(this ж<ErrorList> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     sort.Sort(new ErrorListжInterface(Ꮡp));
@@ -93,7 +100,7 @@ internal static ref readonly @string noErrorsˢ => ref noErrorsˢᵇ;
 private static readonly @string noErrorsˢᵇ = "no errors"u8;
 
 // An [ErrorList] implements the error interface.
-internal static @string Error⁔(/*this*/ ErrorList p) {
+public static @string Error(this ErrorList p) {
     switch (len(p)) {
     case 0: {
         return noErrorsˢ;
@@ -106,12 +113,14 @@ internal static @string Error⁔(/*this*/ ErrorList p) {
 
 // Err returns an error equivalent to this error list.
 // If the list is empty, Err returns nil.
-internal static error Err⁔(/*this*/ ErrorList p) {
+public static error Err(this ErrorList p) {
     if (len(p) == 0) {
         return default;
     }
     return p;
 }
+
+} partial class scanner_package {
 
 // PrintError is a utility function that prints a list of errors to w,
 // one error per line, if the err parameter is an [ErrorList]. Otherwise

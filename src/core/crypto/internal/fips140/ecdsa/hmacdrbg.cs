@@ -9,6 +9,7 @@ using hmac = go.crypto.@internal.fips140.hmac_package;
 using hash = hash_package;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140;
+using static ecdsa_package;
 
 partial class ecdsa_package {
 
@@ -33,14 +34,22 @@ internal static UntypedInt maxRequestSize => /* (1 << 19) / 8 */ 65536;
 // plainPersonalizationString is used by HMAC_DRBG as-is.
 partial struct plainPersonalizationString /*[]byte*/;
 
-internal static void isPersonalizationString⁔(/*this*/ plainPersonalizationString _) { }
+} partial class ecdsaᴛplainPersonalizationString {
+
+internal static void isPersonalizationString(this plainPersonalizationString _) { }
+
+} partial class ecdsa_package {
 
 // Each entry in blockAlignedPersonalizationString is written to the HMAC at a
 // block boundary, as specified in draft-irtf-cfrg-det-sigs-with-noise-04,
 // Section 4.
 partial struct blockAlignedPersonalizationString /*[]slice<byte>*/;
 
-internal static void isPersonalizationString⁔(/*this*/ blockAlignedPersonalizationString _) { }
+} partial class ecdsaᴛblockAlignedPersonalizationString {
+
+internal static void isPersonalizationString(this blockAlignedPersonalizationString _) { }
+
+} partial class ecdsa_package {
 
 partial interface personalizationString {
     void isPersonalizationString();
@@ -140,8 +149,10 @@ internal static void pad000(ж<hmac.HMAC> Ꮡh, nint writtenSoFar) {
     }
 }
 
+} partial class ecdsaᴛhmacDRBG {
+
 // Generate produces at most maxRequestSize bytes of random data in out.
-internal static void Generate⁔(/*this*/ ref hmacDRBG d, slice<byte> @out) {
+public static void Generate(this ref hmacDRBG d, slice<byte> @out) {
     // HMAC_DRBG_Generate_algorithm, per Section 10.1.2.5.
     fips140.RecordApproved();
 
@@ -181,4 +192,4 @@ internal static void Generate⁔(/*this*/ ref hmacDRBG d, slice<byte> @out) {
     d.reseedCounter++;
 }
 
-} // end ecdsa_package
+}

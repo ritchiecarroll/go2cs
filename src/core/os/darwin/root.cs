@@ -13,6 +13,7 @@ using slices = slices_package;
 using time = time_package;
 using @internal;
 using go.io;
+using static os_package;
 
 partial class os_package {
 
@@ -89,28 +90,30 @@ public static (ж<Root>, error) OpenRoot(@string name) {
     return openRootNolog(name);
 }
 
+} partial class osᴛRoot {
+
 // Name returns the name of the directory presented to OpenRoot.
 //
 // It is safe to call Name after [Close].
-internal static @string Name⁔(/*this*/ ref Root r) {
+public static @string Name(this ref Root r) {
     return r.root.Name();
 }
 
 // Close closes the Root.
 // After Close is called, methods on Root return errors.
-internal static error Close⁔(/*this*/ ref Root r) {
+public static error Close(this ref Root r) {
     return r.root.Close();
 }
 
 // Open opens the named file in the root for reading.
 // See [Open] for more details.
-internal static (ж<File>, error) Open⁔(/*this*/ ж<Root> Ꮡr, @string name) {
+public static (ж<File>, error) Open(this ж<Root> Ꮡr, @string name) {
     return Ꮡr.OpenFile(name, O_RDONLY, 0);
 }
 
 // Create creates or truncates the named file in the root.
 // See [Create] for more details.
-internal static (ж<File>, error) Create⁔(/*this*/ ж<Root> Ꮡr, @string name) {
+public static (ж<File>, error) Create(this ж<Root> Ꮡr, @string name) {
     return Ꮡr.OpenFile(name, (nint)((nint)(nint)(O_RDWR | O_CREATE) | O_TRUNC), 438);
 }
 
@@ -123,7 +126,7 @@ private static readonly @string unsupportedFileModeˢᵇ = "unsupported file mod
 //
 // If perm contains bits other than the nine least-significant bits (0o777),
 // OpenFile returns an error.
-internal static (ж<File>, error) OpenFile⁔(/*this*/ ж<Root> Ꮡr, @string name, nint flag, FileMode perm) {
+public static (ж<File>, error) OpenFile(this ж<Root> Ꮡr, @string name, nint flag, FileMode perm) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     if ((FileMode)(perm & 511) != perm) {
@@ -140,7 +143,7 @@ internal static (ж<File>, error) OpenFile⁔(/*this*/ ж<Root> Ꮡr, @string na
 
 // OpenRoot opens the named directory in the root.
 // If there is an error, it will be of type [*PathError].
-internal static (ж<Root>, error) OpenRoot⁔(/*this*/ ж<Root> Ꮡr, @string name) {
+public static (ж<Root>, error) OpenRoot(this ж<Root> Ꮡr, @string name) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     r.logOpen(name);
@@ -149,7 +152,7 @@ internal static (ж<Root>, error) OpenRoot⁔(/*this*/ ж<Root> Ꮡr, @string na
 
 // Chmod changes the mode of the named file in the root to mode.
 // See [Chmod] for more details.
-internal static error Chmod⁔(/*this*/ ж<Root> Ꮡr, @string name, FileMode mode) {
+public static error Chmod(this ж<Root> Ꮡr, @string name, FileMode mode) {
     return rootChmod(ref (Ꮡr).DerefOrNull(), name, mode);
 }
 
@@ -159,7 +162,7 @@ internal static error Chmod⁔(/*this*/ ж<Root> Ꮡr, @string name, FileMode mo
 //
 // If perm contains bits other than the nine least-significant bits (0o777),
 // Mkdir returns an error.
-internal static error Mkdir⁔(/*this*/ ж<Root> Ꮡr, @string name, FileMode perm) {
+public static error Mkdir(this ж<Root> Ꮡr, @string name, FileMode perm) {
     if ((FileMode)(perm & 511) != perm) {
         return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "mkdirat", Path: name, Err: errors.New(unsupportedFileModeˢ))));
     }
@@ -171,7 +174,7 @@ internal static error Mkdir⁔(/*this*/ ж<Root> Ꮡr, @string name, FileMode pe
 //
 // If perm contains bits other than the nine least-significant bits (0o777),
 // MkdirAll returns an error.
-internal static error MkdirAll⁔(/*this*/ ж<Root> Ꮡr, @string name, FileMode perm) {
+public static error MkdirAll(this ж<Root> Ꮡr, @string name, FileMode perm) {
     if ((FileMode)(perm & 511) != perm) {
         return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "mkdirat", Path: name, Err: errors.New(unsupportedFileModeˢ))));
     }
@@ -180,37 +183,37 @@ internal static error MkdirAll⁔(/*this*/ ж<Root> Ꮡr, @string name, FileMode
 
 // Chown changes the numeric uid and gid of the named file in the root.
 // See [Chown] for more details.
-internal static error Chown⁔(/*this*/ ж<Root> Ꮡr, @string name, nint uid, nint gid) {
+public static error Chown(this ж<Root> Ꮡr, @string name, nint uid, nint gid) {
     return rootChown(ref (Ꮡr).DerefOrNull(), name, uid, gid);
 }
 
 // Lchown changes the numeric uid and gid of the named file in the root.
 // See [Lchown] for more details.
-internal static error Lchown⁔(/*this*/ ж<Root> Ꮡr, @string name, nint uid, nint gid) {
+public static error Lchown(this ж<Root> Ꮡr, @string name, nint uid, nint gid) {
     return rootLchown(ref (Ꮡr).DerefOrNull(), name, uid, gid);
 }
 
 // Chtimes changes the access and modification times of the named file in the root.
 // See [Chtimes] for more details.
-internal static error Chtimes⁔(/*this*/ ж<Root> Ꮡr, @string name, time.Time atime, time.Time mtime) {
+public static error Chtimes(this ж<Root> Ꮡr, @string name, time.Time atime, time.Time mtime) {
     return rootChtimes(ref (Ꮡr).DerefOrNull(), name, atime, mtime);
 }
 
 // Remove removes the named file or (empty) directory in the root.
 // See [Remove] for more details.
-internal static error Remove⁔(/*this*/ ж<Root> Ꮡr, @string name) {
+public static error Remove(this ж<Root> Ꮡr, @string name) {
     return rootRemove(ref (Ꮡr).DerefOrNull(), name);
 }
 
 // RemoveAll removes the named file or directory and any children that it contains.
 // See [RemoveAll] for more details.
-internal static error RemoveAll⁔(/*this*/ ж<Root> Ꮡr, @string name) {
+public static error RemoveAll(this ж<Root> Ꮡr, @string name) {
     return rootRemoveAll(ref (Ꮡr).DerefOrNull(), name);
 }
 
 // Stat returns a [FileInfo] describing the named file in the root.
 // See [Stat] for more details.
-internal static (FileInfo, error) Stat⁔(/*this*/ ж<Root> Ꮡr, @string name) {
+public static (FileInfo, error) Stat(this ж<Root> Ꮡr, @string name) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     r.logStat(name);
@@ -221,7 +224,7 @@ internal static (FileInfo, error) Stat⁔(/*this*/ ж<Root> Ꮡr, @string name) 
 // If the file is a symbolic link, the returned FileInfo
 // describes the symbolic link.
 // See [Lstat] for more details.
-internal static (FileInfo, error) Lstat⁔(/*this*/ ж<Root> Ꮡr, @string name) {
+public static (FileInfo, error) Lstat(this ж<Root> Ꮡr, @string name) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     r.logStat(name);
@@ -230,14 +233,14 @@ internal static (FileInfo, error) Lstat⁔(/*this*/ ж<Root> Ꮡr, @string name)
 
 // Readlink returns the destination of the named symbolic link in the root.
 // See [Readlink] for more details.
-internal static (@string, error) Readlink⁔(/*this*/ ж<Root> Ꮡr, @string name) {
+public static (@string, error) Readlink(this ж<Root> Ꮡr, @string name) {
     return rootReadlink(ref (Ꮡr).DerefOrNull(), name);
 }
 
 // Rename renames (moves) oldname to newname.
 // Both paths are relative to the root.
 // See [Rename] for more details.
-internal static error Rename⁔(/*this*/ ж<Root> Ꮡr, @string oldname, @string newname) {
+public static error Rename(this ж<Root> Ꮡr, @string oldname, @string newname) {
     return rootRename(Ꮡr, oldname, newname);
 }
 
@@ -249,7 +252,7 @@ internal static error Rename⁔(/*this*/ ж<Root> Ꮡr, @string oldname, @string
 // This behavior may differ from that of [Link] on some platforms.
 //
 // When GOOS=js, Link returns an error if oldname is a symbolic link.
-internal static error Link⁔(/*this*/ ж<Root> Ꮡr, @string oldname, @string newname) {
+public static error Link(this ж<Root> Ꮡr, @string oldname, @string newname) {
     return rootLink(Ꮡr, oldname, newname);
 }
 
@@ -261,13 +264,13 @@ internal static error Link⁔(/*this*/ ж<Root> Ꮡr, @string oldname, @string n
 //
 // On Windows, a directory link is created if oldname references
 // a directory within the root. Otherwise a file link is created.
-internal static error Symlink⁔(/*this*/ ж<Root> Ꮡr, @string oldname, @string newname) {
+public static error Symlink(this ж<Root> Ꮡr, @string oldname, @string newname) {
     return rootSymlink(ref (Ꮡr).DerefOrNull(), oldname, newname);
 }
 
 // ReadFile reads the named file in the root and returns its contents.
 // See [ReadFile] for more details.
-internal static (slice<byte>, error) ReadFile⁔(/*this*/ ж<Root> Ꮡr, @string name) {
+public static (slice<byte>, error) ReadFile(this ж<Root> Ꮡr, @string name) {
     GoFrame ᒐ = default;
     try {
         var (f, err) = Ꮡr.Open(name);
@@ -284,7 +287,7 @@ internal static (slice<byte>, error) ReadFile⁔(/*this*/ ж<Root> Ꮡr, @string
 
 // WriteFile writes data to the named file in the root, creating it if necessary.
 // See [WriteFile] for more details.
-internal static error WriteFile⁔(/*this*/ ж<Root> Ꮡr, @string name, slice<byte> data, FileMode perm) {
+public static error WriteFile(this ж<Root> Ꮡr, @string name, slice<byte> data, FileMode perm) {
     var (f, err) = Ꮡr.OpenFile(name, (nint)((nint)(nint)(O_WRONLY | O_CREATE) | O_TRUNC), perm);
     if (err != nil) {
         return err;
@@ -296,7 +299,7 @@ internal static error WriteFile⁔(/*this*/ ж<Root> Ꮡr, @string name, slice<b
     return err;
 }
 
-internal static void logOpen⁔(/*this*/ ref Root r, @string name) {
+internal static void logOpen(this ref Root r, @string name) {
     var log = testlog.Logger(); if (log != nil) {
         // This won't be right if r's name has changed since it was opened,
         // but it's the best we can do.
@@ -304,13 +307,15 @@ internal static void logOpen⁔(/*this*/ ref Root r, @string name) {
     }
 }
 
-internal static void logStat⁔(/*this*/ ref Root r, @string name) {
+internal static void logStat(this ref Root r, @string name) {
     var log = testlog.Logger(); if (log != nil) {
         // This won't be right if r's name has changed since it was opened,
         // but it's the best we can do.
         log.Stat(joinPath(r.Name(), name));
     }
 }
+
+} partial class os_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string emptyPathˢ => ref emptyPathˢᵇ;
@@ -383,17 +388,23 @@ internal static (slice<@string>, bool endsInSlash, error err) splitPathInRoot(@s
     return (parts, endsInSlash, default);
 }
 
+} partial class osᴛRoot {
+
 // FS returns a file system (an fs.FS) for the tree of files in the root.
 //
 // The result implements [io/fs.StatFS], [io/fs.ReadFileFS],
 // [io/fs.ReadDirFS], and [io/fs.ReadLinkFS].
-internal static fs.FS FS⁔(/*this*/ ж<Root> Ꮡr) {
+public static fs.FS FS(this ж<Root> Ꮡr) {
     return new rootFSжFS(Ꮡr.Reinterpret<Root, rootFS>());
 }
 
+} partial class os_package {
+
 partial struct rootFS /*Root*/;
 
-internal static (fs.File, error) Open⁔(/*this*/ ж<rootFS> Ꮡrfs, @string name) {
+} partial class osᴛrootFS {
+
+internal static (fs.File, error) Open(this ж<rootFS> Ꮡrfs, @string name) {
     var r = Ꮡrfs.Reinterpret<rootFS, Root>();
     if (!isValidRootFSPath(name)) {
         return (default, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "open", Path: name, Err: ErrInvalid))));
@@ -405,7 +416,7 @@ internal static (fs.File, error) Open⁔(/*this*/ ж<rootFS> Ꮡrfs, @string nam
     return (new FileжFile(f), default);
 }
 
-internal static (slice<DirEntry>, error) ReadDir⁔(/*this*/ ж<rootFS> Ꮡrfs, @string name) {
+internal static (slice<DirEntry>, error) ReadDir(this ж<rootFS> Ꮡrfs, @string name) {
     GoFrame ᒐ = default;
     try {
         var r = Ꮡrfs.Reinterpret<rootFS, Root>();
@@ -433,7 +444,7 @@ internal static (slice<DirEntry>, error) ReadDir⁔(/*this*/ ж<rootFS> Ꮡrfs, 
     finally { ᒐ.Run(); }
 }
 
-internal static (slice<byte>, error) ReadFile⁔(/*this*/ ж<rootFS> Ꮡrfs, @string name) {
+internal static (slice<byte>, error) ReadFile(this ж<rootFS> Ꮡrfs, @string name) {
     GoFrame ᒐ = default;
     try {
         var r = Ꮡrfs.Reinterpret<rootFS, Root>();
@@ -452,7 +463,7 @@ internal static (slice<byte>, error) ReadFile⁔(/*this*/ ж<rootFS> Ꮡrfs, @st
     finally { ᒐ.Run(); }
 }
 
-internal static (@string, error) ReadLink⁔(/*this*/ ж<rootFS> Ꮡrfs, @string name) {
+internal static (@string, error) ReadLink(this ж<rootFS> Ꮡrfs, @string name) {
     var r = Ꮡrfs.Reinterpret<rootFS, Root>();
     if (!isValidRootFSPath(name)) {
         return ("", new fs.PathErrorжerror(Ꮡ(new PathError(Op: "readlink", Path: name, Err: ErrInvalid))));
@@ -460,7 +471,7 @@ internal static (@string, error) ReadLink⁔(/*this*/ ж<rootFS> Ꮡrfs, @string
     return r.Readlink(name);
 }
 
-internal static (FileInfo, error) Stat⁔(/*this*/ ж<rootFS> Ꮡrfs, @string name) {
+internal static (FileInfo, error) Stat(this ж<rootFS> Ꮡrfs, @string name) {
     var r = Ꮡrfs.Reinterpret<rootFS, Root>();
     if (!isValidRootFSPath(name)) {
         return (default, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "stat", Path: name, Err: ErrInvalid))));
@@ -468,13 +479,15 @@ internal static (FileInfo, error) Stat⁔(/*this*/ ж<rootFS> Ꮡrfs, @string na
     return r.Stat(name);
 }
 
-internal static (FileInfo, error) Lstat⁔(/*this*/ ж<rootFS> Ꮡrfs, @string name) {
+internal static (FileInfo, error) Lstat(this ж<rootFS> Ꮡrfs, @string name) {
     var r = Ꮡrfs.Reinterpret<rootFS, Root>();
     if (!isValidRootFSPath(name)) {
         return (default, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "lstat", Path: name, Err: ErrInvalid))));
     }
     return r.Lstat(name);
 }
+
+} partial class os_package {
 
 // isValidRootFSPath reports whether name is a valid filename to pass a Root.FS method.
 internal static bool isValidRootFSPath(@string name) {

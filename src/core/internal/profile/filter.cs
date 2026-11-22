@@ -4,15 +4,19 @@
 // Implements methods to filter samples from profiles.
 namespace go.@internal;
 
+using static profile_package;
+
 partial class profile_package {
 
 // TagMatch selects tags for filtering
 // type TagMatch is a methodless func type — rendered inline as its base delegate
 
+} partial class profileᴛProfile {
+
 // FilterSamplesByTag removes all samples from the profile, except
 // those that match focus and do not match the ignore regular
 // expression.
-internal static (bool fm, bool im) FilterSamplesByTag⁔(/*this*/ ref Profile p, Func<@string, @string, int64, bool> focus, Func<@string, @string, int64, bool> ignore) {
+public static (bool fm, bool im) FilterSamplesByTag(this ref Profile p, Func<@string, @string, int64, bool> focus, Func<@string, @string, int64, bool> ignore) {
     bool fm = default;
     bool im = default;
 
@@ -28,6 +32,8 @@ internal static (bool fm, bool im) FilterSamplesByTag⁔(/*this*/ ref Profile p,
     p.Sample = samples;
     return (fm, im);
 }
+
+} partial class profile_package {
 
 // focusedSample checks a sample against focus and ignore regexps.
 // Returns whether the focus/ignore regexps match any tags.

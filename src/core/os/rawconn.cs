@@ -6,6 +6,7 @@ namespace go;
 
 using runtime = runtime_package;
 using @internal;
+using static os_package;
 
 partial class os_package {
 
@@ -14,11 +15,13 @@ partial struct rawConn {
     internal ж<File> @file;
 }
 
+} partial class osᴛrawConn {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string syscallConnControlˢ => ref syscallConnControlˢᵇ;
 private static readonly @string syscallConnControlˢᵇ = "SyscallConn.Control"u8;
 
-internal static error Control⁔(/*this*/ ref rawConn c, Action<uintptr> f) {
+internal static error Control(this ref rawConn c, Action<uintptr> f) {
     var errΔ1 = c.@file.checkValid(syscallConnControlˢ); if (errΔ1 != nil) {
         return errΔ1;
     }
@@ -31,7 +34,7 @@ internal static error Control⁔(/*this*/ ref rawConn c, Action<uintptr> f) {
 internal static ref readonly @string syscallConnReadˢ => ref syscallConnReadˢᵇ;
 private static readonly @string syscallConnReadˢᵇ = "SyscallConn.Read"u8;
 
-internal static error Read⁔(/*this*/ ref rawConn c, Func<uintptr, bool> f) {
+internal static error Read(this ref rawConn c, Func<uintptr, bool> f) {
     var errΔ1 = c.@file.checkValid(syscallConnReadˢ); if (errΔ1 != nil) {
         return errΔ1;
     }
@@ -44,7 +47,7 @@ internal static error Read⁔(/*this*/ ref rawConn c, Func<uintptr, bool> f) {
 internal static ref readonly @string syscallConnWriteˢ => ref syscallConnWriteˢᵇ;
 private static readonly @string syscallConnWriteˢᵇ = "SyscallConn.Write"u8;
 
-internal static error Write⁔(/*this*/ ref rawConn c, Func<uintptr, bool> f) {
+internal static error Write(this ref rawConn c, Func<uintptr, bool> f) {
     var errΔ1 = c.@file.checkValid(syscallConnWriteˢ); if (errΔ1 != nil) {
         return errΔ1;
     }
@@ -52,6 +55,8 @@ internal static error Write⁔(/*this*/ ref rawConn c, Func<uintptr, bool> f) {
     runtime.KeepAlive(c.@file.OrTypedNil());
     return err;
 }
+
+} partial class os_package {
 
 internal static (ж<rawConn>, error) newRawConn(ж<File> @file) {
     return (Ꮡ(new rawConn(@file: @file)), default);

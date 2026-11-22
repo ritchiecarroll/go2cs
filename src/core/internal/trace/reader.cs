@@ -14,6 +14,7 @@ using tracev2 = go.@internal.trace.tracev2_package;
 using version = go.@internal.trace.version_package;
 using go.@internal.trace;
 using go.@internal.trace.@internal;
+using static trace_package;
 
 partial class trace_package {
 
@@ -84,10 +85,12 @@ public static (ж<Reader>, error) NewReader(io.Reader r) {
     }}
 }
 
+} partial class traceᴛReader {
+
 // ReadEvent reads a single event from the stream.
 //
 // If the stream has been exhausted, it returns an invalid event and io.EOF.
-internal static (Event e, error err) ReadEvent⁔(/*this*/ ж<Reader> Ꮡr) {
+public static (Event e, error err) ReadEvent(this ж<Reader> Ꮡr) {
     Event e = new();
     error err = default;
     GoFrame ᒐ = default;
@@ -96,7 +99,7 @@ internal static (Event e, error err) ReadEvent⁔(/*this*/ ж<Reader> Ꮡr) {
 
         // Return only io.EOF if we're done.
         if (r.done) {
-            (e, err) = (new Event(), io.EOF); goto ᒐdone;
+            (var eᴛ1, err) = (new Event(), io.EOF); e.AssignFrom(eᴛ1); goto ᒐdone;
         }
 
         // Handle v1 execution traces.
@@ -106,7 +109,7 @@ internal static (Event e, error err) ReadEvent⁔(/*this*/ ж<Reader> Ꮡr) {
                 var (evΔ1, okΔ1) = r.v1Events.Ꮡevents.Peek();
                 if (okΔ1) {
                     r.syncs++;
-                    (e, err) = (syncEvent(r.v1Events.evt, (Time)(int64)(evΔ1.Ts - 1), r.syncs), default); goto ᒐdone;
+                    (var eᴛ2, err) = (syncEvent(r.v1Events.evt, (Time)(int64)(evΔ1.Ts - 1), r.syncs), default); e.AssignFrom(eᴛ2); goto ᒐdone;
                 }
             }
             var (evΔ2, errΔ1) = r.v1Events.next();
@@ -114,11 +117,11 @@ internal static (Event e, error err) ReadEvent⁔(/*this*/ ж<Reader> Ꮡr) {
                 // Always emit a sync event at the end.
                 r.done = true;
                 r.syncs++;
-                (e, err) = (syncEvent(nil, r.v1Events.lastTs + 1, r.syncs), default); goto ᒐdone;
+                (var eᴛ3, err) = (syncEvent(nil, r.v1Events.lastTs + 1, r.syncs), default); e.AssignFrom(eᴛ3); goto ᒐdone;
             } else if (errΔ1 != nil) {
-                (e, err) = (new Event(), errΔ1); goto ᒐdone;
+                (var eᴛ4, err) = (new Event(), errΔ1); e.AssignFrom(eᴛ4); goto ᒐdone;
             }
-            (e, err) = (evΔ2.ΔClone(), default); goto ᒐdone;
+            (var eᴛ5, err) = (evΔ2.ΔClone(), default); e.AssignFrom(eᴛ5); goto ᒐdone;
         }
 
         // Trace v2 parsing algorithm.
@@ -153,16 +156,16 @@ internal static (Event e, error err) ReadEvent⁔(/*this*/ ж<Reader> Ꮡr) {
 
         // Consume any events in the ordering first.
         var (evΔ3, okΔ2) = r.order.Next(); if (okΔ2) {
-            (e, err) = (evΔ3.ΔClone(), default); goto ᒐdone;
+            (var eᴛ6, err) = (evΔ3.ΔClone(), default); e.AssignFrom(eᴛ6); goto ᒐdone;
         }
 
         // Check if we need to refresh the generation.
         if (len(r.frontier) == 0 && len(r.cpuSamples) == 0) {
             if (r.version < version.Go126) {
-                (e, err) = r.nextGenWithSpill(); goto ᒐdone;
+                (var eᴛ7, err) = r.nextGenWithSpill(); e.AssignFrom(eᴛ7); goto ᒐdone;
             }
             if (r.readGenErr != nil) {
-                (e, err) = (new Event(), r.readGenErr); goto ᒐdone;
+                (var eᴛ8, err) = (new Event(), r.readGenErr); e.AssignFrom(eᴛ8); goto ᒐdone;
             }
             var (gen, errΔ2) = readGeneration(r.r, r.version);
             if (errΔ2 != nil) {
@@ -172,9 +175,9 @@ internal static (Event e, error err) ReadEvent⁔(/*this*/ ж<Reader> Ꮡr) {
                 r.readGenErr = errΔ2;
                 r.gen = default;
                 r.syncs++;
-                (e, err) = (syncEvent(nil, r.lastTs, r.syncs), default); goto ᒐdone;
+                (var eᴛ9, err) = (syncEvent(nil, r.lastTs, r.syncs), default); e.AssignFrom(eᴛ9); goto ᒐdone;
             }
-            (e, err) = r.installGen(gen); goto ᒐdone;
+            (var eᴛ10, err) = r.installGen(gen); e.AssignFrom(eᴛ10); goto ᒐdone;
         }
         (bool, error) tryAdvance(nint i) {
             var bc = Ꮡr.Value.frontier[i];
@@ -202,17 +205,17 @@ internal static (Event e, error err) ReadEvent⁔(/*this*/ ж<Reader> Ꮡr) {
             if (len(r.frontier) == 0 || r.cpuSamples[0].time < r.frontier[0].ev.time) {
                 var eΔ1 = r.cpuSamples[0].asEvent(r.gen.evTable);
                 r.cpuSamples = r.cpuSamples[1..];
-                (e, err) = (eΔ1.ΔClone(), default); goto ᒐdone;
+                (var eᴛ11, err) = (eΔ1.ΔClone(), default); e.AssignFrom(eᴛ11); goto ᒐdone;
             }
         }
         // Try to advance the head of the frontier, which should have the minimum timestamp.
         // This should be by far the most common case
         if (len(r.frontier) == 0) {
-            (e, err) = (new Event(), fmt.Errorf("broken trace: frontier is empty:\n[gen=%d]\n\n%s\n%s\n"u8, r.gen.gen, dumpFrontier(r.frontier), dumpOrdering(ref nonnil(ref r).order))); goto ᒐdone;
+            (var eᴛ12, err) = (new Event(), fmt.Errorf("broken trace: frontier is empty:\n[gen=%d]\n\n%s\n%s\n"u8, r.gen.gen, dumpFrontier(r.frontier), dumpOrdering(ref nonnil(ref r).order))); e.AssignFrom(eᴛ12); goto ᒐdone;
         }
         {
             var (okΔ5, errΔ5) = tryAdvance(0); if (errΔ5 != nil) {
-                (e, err) = (new Event(), errΔ5); goto ᒐdone;
+                (var eᴛ13, err) = (new Event(), errΔ5); e.AssignFrom(eᴛ13); goto ᒐdone;
             } else if (!okΔ5) {
                 // Try to advance the rest of the frontier, in timestamp order.
                 //
@@ -223,14 +226,14 @@ internal static (Event e, error err) ReadEvent⁔(/*this*/ ж<Reader> Ꮡr) {
                 var success = false;
                 for (nint i = 1; i < len(r.frontier); i++) {
                     (okΔ5, errΔ5) = tryAdvance(i); if (errΔ5 != nil) {
-                        (e, err) = (new Event(), errΔ5); goto ᒐdone;
+                        (var eᴛ14, err) = (new Event(), errΔ5); e.AssignFrom(eᴛ14); goto ᒐdone;
                     } else if (okΔ5) {
                         success = true;
                         break;
                     }
                 }
                 if (!success) {
-                    (e, err) = (new Event(), fmt.Errorf("broken trace: failed to advance: frontier:\n[gen=%d]\n\n%s\n%s\n"u8, r.gen.gen, dumpFrontier(r.frontier), dumpOrdering(ref nonnil(ref r).order))); goto ᒐdone;
+                    (var eᴛ15, err) = (new Event(), fmt.Errorf("broken trace: failed to advance: frontier:\n[gen=%d]\n\n%s\n%s\n"u8, r.gen.gen, dumpFrontier(r.frontier), dumpOrdering(ref nonnil(ref r).order))); e.AssignFrom(eᴛ15); goto ᒐdone;
                 }
             }
         }
@@ -240,7 +243,7 @@ internal static (Event e, error err) ReadEvent⁔(/*this*/ ж<Reader> Ꮡr) {
         if (!ok) {
             throw panic("invariant violation: advance successful, but queue is empty");
         }
-        (e, err) = (ev.ΔClone(), default);
+        (var eᴛ16, err) = (ev.ΔClone(), default); e.AssignFrom(eᴛ16);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -253,7 +256,7 @@ private static readonly @string internalErrorˢ4ᵇ = "internal error: nextGenWi
 
 // nextGenWithSpill reads the generation and calls nextGen while
 // also handling any spilled batches.
-internal static (Event, error) nextGenWithSpill⁔(/*this*/ ref Reader r) {
+internal static (Event, error) nextGenWithSpill(this ref Reader r) {
     if (r.version >= version.Go126) {
         return (new Event(), errors.New(internalErrorˢ4));
     }
@@ -290,7 +293,7 @@ internal static (Event, error) nextGenWithSpill⁔(/*this*/ ref Reader r) {
 
 // installGen installs the new generation into the Reader and returns
 // a Sync event for the new generation.
-internal static (Event, error) installGen⁔(/*this*/ ref Reader r, ж<generation> Ꮡgen) {
+internal static (Event, error) installGen(this ref Reader r, ж<generation> Ꮡgen) {
     ref var gen = ref Ꮡgen.DerefOrNull();
 
     if (Ꮡgen == nil) {
@@ -327,6 +330,8 @@ internal static (Event, error) installGen⁔(/*this*/ ref Reader r, ж<generatio
     // Always emit a sync event at the beginning of the generation.
     return (syncEvent(r.gen.evTable, r.gen.freq.mul(r.gen.minTs), r.syncs), default);
 }
+
+} partial class trace_package {
 
 internal static @string dumpFrontier(slice<ж<batchCursor>> frontier) {
     ref var sb = ref heap(new strings.Builder(), out var Ꮡsb);

@@ -8,6 +8,7 @@ using aes = go.crypto.@internal.fips140.aes_package;
 using subtle = go.crypto.@internal.fips140.subtle_package;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140;
+using static gcm_package;
 
 partial class gcm_package {
 
@@ -30,7 +31,9 @@ public static ж<CMAC> NewCMAC(ж<aes.Block> Ꮡb) {
     return c;
 }
 
-internal static void deriveSubkeys⁔(/*this*/ ж<CMAC> Ꮡc) {
+} partial class gcmᴛCMAC {
+
+internal static void deriveSubkeys(this ж<CMAC> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     aes.EncryptBlockInternal(Ꮡc.Ꮡb, c.k1[..], c.k1[..]);
@@ -42,7 +45,7 @@ internal static void deriveSubkeys⁔(/*this*/ ж<CMAC> Ꮡc) {
     c.k2[len(c.k2) - 1] ^= (byte)(msb * 0b10000111);
 }
 
-internal static array<byte> MAC⁔(/*this*/ ж<CMAC> Ꮡc, slice<byte> m) {
+public static array<byte> MAC(this ж<CMAC> Ꮡc, slice<byte> m) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     fips140.RecordApproved();
@@ -73,6 +76,8 @@ internal static array<byte> MAC⁔(/*this*/ ж<CMAC> Ꮡc, slice<byte> m) {
     }
     return x.Clone();
 }
+
+} partial class gcm_package {
 
 // shiftLeft sets x to x << 1, and returns MSB₁(x).
 internal static byte shiftLeft(/*[16]*/ ж<array<byte>> Ꮡx) {

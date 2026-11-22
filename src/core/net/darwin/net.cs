@@ -106,6 +106,7 @@ using syscall = syscall_package;
 using time = time_package;
 /* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
 using @internal;
+using static net_package;
 
 partial class net_package {
 
@@ -180,7 +181,9 @@ partial struct conn {
     internal ж<netFD> fd;
 }
 
-internal static bool ok⁔(/*this*/ ж<conn> Ꮡc) {
+} partial class netᴛconn {
+
+internal static bool ok(this ж<conn> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     return Ꮡc != nil && c.fd != nil;
@@ -189,7 +192,7 @@ internal static bool ok⁔(/*this*/ ж<conn> Ꮡc) {
 // Implementation of the Conn interface.
 
 // Read implements the Conn Read method.
-internal static (nint, error) Read⁔(/*this*/ ж<conn> Ꮡc, slice<byte> b) {
+internal static (nint, error) Read(this ж<conn> Ꮡc, slice<byte> b) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.ok()) {
@@ -203,7 +206,7 @@ internal static (nint, error) Read⁔(/*this*/ ж<conn> Ꮡc, slice<byte> b) {
 }
 
 // Write implements the Conn Write method.
-internal static (nint, error) Write⁔(/*this*/ ж<conn> Ꮡc, slice<byte> b) {
+internal static (nint, error) Write(this ж<conn> Ꮡc, slice<byte> b) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.ok()) {
@@ -217,7 +220,7 @@ internal static (nint, error) Write⁔(/*this*/ ж<conn> Ꮡc, slice<byte> b) {
 }
 
 // Close closes the connection.
-internal static error Close⁔(/*this*/ ж<conn> Ꮡc) {
+internal static error Close(this ж<conn> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.ok()) {
@@ -233,7 +236,7 @@ internal static error Close⁔(/*this*/ ж<conn> Ꮡc) {
 // LocalAddr returns the local network address.
 // The Addr returned is shared by all invocations of LocalAddr, so
 // do not modify it.
-internal static Addr LocalAddr⁔(/*this*/ ж<conn> Ꮡc) {
+internal static Addr LocalAddr(this ж<conn> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.ok()) {
@@ -245,7 +248,7 @@ internal static Addr LocalAddr⁔(/*this*/ ж<conn> Ꮡc) {
 // RemoteAddr returns the remote network address.
 // The Addr returned is shared by all invocations of RemoteAddr, so
 // do not modify it.
-internal static Addr RemoteAddr⁔(/*this*/ ж<conn> Ꮡc) {
+internal static Addr RemoteAddr(this ж<conn> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.ok()) {
@@ -255,7 +258,7 @@ internal static Addr RemoteAddr⁔(/*this*/ ж<conn> Ꮡc) {
 }
 
 // SetDeadline implements the Conn SetDeadline method.
-internal static error SetDeadline⁔(/*this*/ ж<conn> Ꮡc, time.Time t) {
+internal static error SetDeadline(this ж<conn> Ꮡc, time.Time t) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.ok()) {
@@ -268,7 +271,7 @@ internal static error SetDeadline⁔(/*this*/ ж<conn> Ꮡc, time.Time t) {
 }
 
 // SetReadDeadline implements the Conn SetReadDeadline method.
-internal static error SetReadDeadline⁔(/*this*/ ж<conn> Ꮡc, time.Time t) {
+internal static error SetReadDeadline(this ж<conn> Ꮡc, time.Time t) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.ok()) {
@@ -281,7 +284,7 @@ internal static error SetReadDeadline⁔(/*this*/ ж<conn> Ꮡc, time.Time t) {
 }
 
 // SetWriteDeadline implements the Conn SetWriteDeadline method.
-internal static error SetWriteDeadline⁔(/*this*/ ж<conn> Ꮡc, time.Time t) {
+internal static error SetWriteDeadline(this ж<conn> Ꮡc, time.Time t) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.ok()) {
@@ -295,7 +298,7 @@ internal static error SetWriteDeadline⁔(/*this*/ ж<conn> Ꮡc, time.Time t) {
 
 // SetReadBuffer sets the size of the operating system's
 // receive buffer associated with the connection.
-internal static error SetReadBuffer⁔(/*this*/ ж<conn> Ꮡc, nint bytes) {
+internal static error SetReadBuffer(this ж<conn> Ꮡc, nint bytes) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.ok()) {
@@ -309,7 +312,7 @@ internal static error SetReadBuffer⁔(/*this*/ ж<conn> Ꮡc, nint bytes) {
 
 // SetWriteBuffer sets the size of the operating system's
 // transmit buffer associated with the connection.
-internal static error SetWriteBuffer⁔(/*this*/ ж<conn> Ꮡc, nint bytes) {
+internal static error SetWriteBuffer(this ж<conn> Ꮡc, nint bytes) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.ok()) {
@@ -331,7 +334,7 @@ internal static error SetWriteBuffer⁔(/*this*/ ж<conn> Ꮡc, nint bytes) {
 //
 // On Windows, the returned os.File's file descriptor is not usable
 // on other processes.
-internal static (ж<os.File> f, error err) File⁔(/*this*/ ref conn c) {
+internal static (ж<os.File> f, error err) File(this ref conn c) {
     ж<os.File> f = default;
     error err = default;
 
@@ -341,6 +344,8 @@ internal static (ж<os.File> f, error err) File⁔(/*this*/ ref conn c) {
     }
     return (f, err);
 }
+
+} partial class net_package {
 
 // PacketConn is a generic packet-oriented network connection.
 //
@@ -471,13 +476,17 @@ public static error ErrWriteToConnected = errors.New("use of WriteTo with pre-co
 partial struct canceledError {
 }
 
+} partial class netᴛcanceledError {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string operationWasCanceledˢ => ref operationWasCanceledˢᵇ;
 private static readonly @string operationWasCanceledˢᵇ = "operation was canceled"u8;
 
-internal static @string Error⁔(/*this*/ canceledError _) { return operationWasCanceledˢ; }
+internal static @string Error(this canceledError _) { return operationWasCanceledˢ; }
 
-internal static bool Is⁔(/*this*/ canceledError _, error err) { return AreEqual(err, context.Canceled); }
+internal static bool Is(this canceledError _, error err) { return AreEqual(err, context.Canceled); }
+
+} partial class net_package {
 
 // mapErr maps from the context errors to the historical internal net
 // error values.
@@ -520,9 +529,15 @@ partial struct OpError {
     public error Err;
 }
 
-internal static error Unwrap⁔(/*this*/ ref OpError e) { return e.Err; }
+} partial class netᴛOpError {
 
-internal static @string Error⁔(/*this*/ ж<OpError> Ꮡe) {
+public static error Unwrap(this ref OpError e) { return e.Err; }
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string nilˢ => ref nilˢᵇ;
+private static readonly @string nilˢᵇ = "<nil>"u8;
+
+public static @string Error(this ж<OpError> Ꮡe) {
     ref var e = ref Ꮡe.DerefOrNull();
 
     if (Ꮡe == nil) {
@@ -547,6 +562,8 @@ internal static @string Error⁔(/*this*/ ж<OpError> Ꮡe) {
     return s;
 }
 
+} partial class net_package {
+
 // aLongTimeAgo is a non-zero time, far in the past, used for
 // immediate cancellation of dials.
 internal static time.Time aLongTimeAgo = time.Unix(1, 0);
@@ -560,7 +577,9 @@ partial interface timeout {
     bool Timeout();
 }
 
-internal static bool Timeout⁔(/*this*/ ref OpError e) {
+} partial class netᴛOpError {
+
+public static bool Timeout(this ref OpError e) {
     var (ne, okΔ1) = e.Err._<ж<os.SyscallError>>(ᐧ); if (okΔ1) {
         var (tΔ1, okΔ2) = ne.Err._<timeout>(ᐧ);
         return okΔ2 && tΔ1.Timeout();
@@ -569,11 +588,15 @@ internal static bool Timeout⁔(/*this*/ ref OpError e) {
     return ok && t.Timeout();
 }
 
+} partial class net_package {
+
 partial interface temporary {
     bool Temporary();
 }
 
-internal static bool Temporary⁔(/*this*/ ref OpError e) {
+} partial class netᴛOpError {
+
+public static bool Temporary(this ref OpError e) {
     // Treat ECONNRESET and ECONNABORTED as temporary errors when
     // they come from calling accept. See issue 6163.
     if (e.Op == "accept"u8 && isConnError(e.Err)) {
@@ -588,6 +611,8 @@ internal static bool Temporary⁔(/*this*/ ref OpError e) {
     return ok && t.Temporary();
 }
 
+} partial class net_package {
+
 // A ParseError is the error type of literal network address parsers.
 partial struct ParseError {
     // Type is the type of string that was expected, such as
@@ -597,17 +622,27 @@ partial struct ParseError {
     public @string Text;
 }
 
-internal static @string Error⁔(/*this*/ ref ParseError e) { return "invalid "u8 + e.Type + ": "u8 + e.Text; }
+} partial class netᴛParseError {
 
-internal static bool Timeout⁔(/*this*/ ref ParseError e) { return false; }
-internal static bool Temporary⁔(/*this*/ ref ParseError e) { return false; }
+public static @string Error(this ref ParseError e) { return "invalid "u8 + e.Type + ": "u8 + e.Text; }
+
+public static bool Timeout(this ref ParseError e) { return false; }
+public static bool Temporary(this ref ParseError e) { return false; }
+
+} partial class net_package {
 
 partial struct AddrError {
     public @string Err;
     public @string Addr;
 }
 
-internal static @string Error⁔(/*this*/ ж<AddrError> Ꮡe) {
+} partial class netᴛAddrError {
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string nilˢ => ref nilˢᵇ;
+private static readonly @string nilˢᵇ = "<nil>"u8;
+
+public static @string Error(this ж<AddrError> Ꮡe) {
     ref var e = ref Ꮡe.DerefOrNull();
 
     if (Ꮡe == nil) {
@@ -620,20 +655,30 @@ internal static @string Error⁔(/*this*/ ж<AddrError> Ꮡe) {
     return s;
 }
 
-internal static bool Timeout⁔(/*this*/ ref AddrError e) { return false; }
-internal static bool Temporary⁔(/*this*/ ref AddrError e) { return false; }
+public static bool Timeout(this ref AddrError e) { return false; }
+public static bool Temporary(this ref AddrError e) { return false; }
+
+} partial class net_package {
 
 partial struct UnknownNetworkError /*@string*/;
 
-internal static @string Error⁔(/*this*/ UnknownNetworkError e) { return "unknown network "u8 + ((@string)e); }
-internal static bool Timeout⁔(/*this*/ UnknownNetworkError e) { return false; }
-internal static bool Temporary⁔(/*this*/ UnknownNetworkError e) { return false; }
+} partial class netᴛUnknownNetworkError {
+
+public static @string Error(this UnknownNetworkError e) { return "unknown network "u8 + ((@string)e); }
+public static bool Timeout(this UnknownNetworkError e) { return false; }
+public static bool Temporary(this UnknownNetworkError e) { return false; }
+
+} partial class net_package {
 
 partial struct InvalidAddrError /*@string*/;
 
-internal static @string Error⁔(/*this*/ InvalidAddrError e) { return (@string)e; }
-internal static bool Timeout⁔(/*this*/ InvalidAddrError e) { return false; }
-internal static bool Temporary⁔(/*this*/ InvalidAddrError e) { return false; }
+} partial class netᴛInvalidAddrError {
+
+public static @string Error(this InvalidAddrError e) { return (@string)e; }
+public static bool Timeout(this InvalidAddrError e) { return false; }
+public static bool Temporary(this InvalidAddrError e) { return false; }
+
+} partial class net_package {
 
 // errTimeout exists to return the historical "i/o timeout" string
 // for context.DeadlineExceeded. See mapErr.
@@ -651,17 +696,21 @@ internal static error errTimeout = new timeoutErrorжerror(Ꮡ(new timeoutError(
 partial struct timeoutError {
 }
 
+} partial class netᴛtimeoutError {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string iOTimeoutˢ => ref iOTimeoutˢᵇ;
 private static readonly @string iOTimeoutˢᵇ = "i/o timeout"u8;
 
-internal static @string Error⁔(/*this*/ ref timeoutError e) { return iOTimeoutˢ; }
-internal static bool Timeout⁔(/*this*/ ref timeoutError e) { return true; }
-internal static bool Temporary⁔(/*this*/ ref timeoutError e) { return true; }
+internal static @string Error(this ref timeoutError e) { return iOTimeoutˢ; }
+internal static bool Timeout(this ref timeoutError e) { return true; }
+internal static bool Temporary(this ref timeoutError e) { return true; }
 
-internal static bool Is⁔(/*this*/ ref timeoutError e, error err) {
+internal static bool Is(this ref timeoutError e, error err) {
     return AreEqual(err, context.DeadlineExceeded);
 }
+
+} partial class net_package {
 
 // DNSConfigError represents an error reading the machine's DNS configuration.
 // (No longer used; kept for compatibility.)
@@ -669,10 +718,14 @@ partial struct DNSConfigError {
     public error Err;
 }
 
-internal static error Unwrap⁔(/*this*/ ref DNSConfigError e) { return e.Err; }
-internal static @string Error⁔(/*this*/ ref DNSConfigError e) { return "error reading DNS config: "u8 + e.Err.Error(); }
-internal static bool Timeout⁔(/*this*/ ref DNSConfigError e) { return false; }
-internal static bool Temporary⁔(/*this*/ ref DNSConfigError e) { return false; }
+} partial class netᴛDNSConfigError {
+
+public static error Unwrap(this ref DNSConfigError e) { return e.Err; }
+public static @string Error(this ref DNSConfigError e) { return "error reading DNS config: "u8 + e.Err.Error(); }
+public static bool Timeout(this ref DNSConfigError e) { return false; }
+public static bool Temporary(this ref DNSConfigError e) { return false; }
+
+} partial class net_package {
 
 // Various errors contained in DNSError.
 internal static ж<notFoundError> errNoSuchHost = Ꮡ(new notFoundError("no such host"));
@@ -684,7 +737,11 @@ partial struct notFoundError {
     internal @string s;
 }
 
-internal static @string Error⁔(/*this*/ ref notFoundError e) { return e.s; }
+} partial class netᴛnotFoundError {
+
+internal static @string Error(this ref notFoundError e) { return e.s; }
+
+} partial class net_package {
 
 // temporaryError is an error type that implements the [Error] interface.
 // It returns true from the Temporary method.
@@ -692,9 +749,13 @@ partial struct temporaryError {
     internal @string s;
 }
 
-internal static @string Error⁔(/*this*/ ref temporaryError e) { return e.s; }
-internal static bool Temporary⁔(/*this*/ ref temporaryError e) { return true; }
-internal static bool Timeout⁔(/*this*/ ref temporaryError e) { return false; }
+} partial class netᴛtemporaryError {
+
+internal static @string Error(this ref temporaryError e) { return e.s; }
+internal static bool Temporary(this ref temporaryError e) { return true; }
+internal static bool Timeout(this ref temporaryError e) { return false; }
+
+} partial class net_package {
 
 // DNSError represents a DNS lookup error.
 partial struct DNSError {
@@ -741,10 +802,16 @@ internal static ж<DNSError> newDNSError(error err, @string name, @string server
     ));
 }
 
-// Unwrap returns e.UnwrapErr.
-internal static error Unwrap⁔(/*this*/ ref DNSError e) { return e.UnwrapErr; }
+} partial class netᴛDNSError {
 
-internal static @string Error⁔(/*this*/ ж<DNSError> Ꮡe) {
+// Unwrap returns e.UnwrapErr.
+public static error Unwrap(this ref DNSError e) { return e.UnwrapErr; }
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string nilˢ => ref nilˢᵇ;
+private static readonly @string nilˢᵇ = "<nil>"u8;
+
+public static @string Error(this ж<DNSError> Ꮡe) {
     ref var e = ref Ꮡe.DerefOrNull();
 
     if (Ꮡe == nil) {
@@ -761,12 +828,14 @@ internal static @string Error⁔(/*this*/ ж<DNSError> Ꮡe) {
 // Timeout reports whether the DNS lookup is known to have timed out.
 // This is not always known; a DNS lookup may fail due to a timeout
 // and return a [DNSError] for which Timeout returns false.
-internal static bool Timeout⁔(/*this*/ ref DNSError e) { return e.IsTimeout; }
+public static bool Timeout(this ref DNSError e) { return e.IsTimeout; }
 
 // Temporary reports whether the DNS error is known to be temporary.
 // This is not always known; a DNS lookup may fail due to a temporary
 // error and return a [DNSError] for which Temporary returns false.
-internal static bool Temporary⁔(/*this*/ ref DNSError e) { return e.IsTimeout || e.IsTemporary; }
+public static bool Temporary(this ref DNSError e) { return e.IsTimeout || e.IsTemporary; }
+
+} partial class net_package {
 
 // errClosed exists just so that the docs for ErrClosed don't mention
 // the internal package poll.
@@ -784,11 +853,15 @@ public static error ErrClosed = errClosed;
 partial struct noReadFrom {
 }
 
+} partial class netᴛnoReadFrom {
+
 // ReadFrom hides another ReadFrom method.
 // It should never be called.
-internal static (int64, error) ReadFrom⁔(/*this*/ noReadFrom _Δp0, Δio.Reader _Δp1) {
+internal static (int64, error) ReadFrom(this noReadFrom _Δp0, Δio.Reader _Δp1) {
     throw panic("can't happen");
 }
+
+} partial class net_package {
 
 // tcpConnWithoutReadFrom implements all the methods of *TCPConn other
 // than ReadFrom. This is used to permit ReadFrom to call io.Copy
@@ -810,11 +883,15 @@ internal static (int64 n, error err) genericReadFrom(ж<TCPConn> c, Δio.Reader 
 partial struct noWriteTo {
 }
 
+} partial class netᴛnoWriteTo {
+
 // WriteTo hides another WriteTo method.
 // It should never be called.
-internal static (int64, error) WriteTo⁔(/*this*/ noWriteTo _Δp0, Δio.Writer _Δp1) {
+internal static (int64, error) WriteTo(this noWriteTo _Δp0, Δio.Writer _Δp1) {
     throw panic("can't happen");
 }
+
+} partial class net_package {
 
 // tcpConnWithoutWriteTo implements all the methods of *TCPConn other
 // than WriteTo. This is used to permit WriteTo to call io.Copy
@@ -878,13 +955,15 @@ partial struct Buffers /*[]slice<byte>*/;
 internal static Δio.WriterTo _ᴛ2ʗ = new BuffersжWriterTo(((ж<Buffers>)nil));
 internal static Δio.Reader _ᴛ3ʗ = new BuffersжReader(((ж<Buffers>)nil));
 
+} partial class netᴛBuffers {
+
 // WriteTo writes contents of the buffers to w.
 //
 // WriteTo implements [io.WriterTo] for [Buffers].
 //
 // WriteTo modifies the slice v as well as v[i] for 0 <= i < len(v),
 // but does not modify v[i][j] for any i, j.
-internal static (int64 n, error err) WriteTo⁔(/*this*/ ж<Buffers> Ꮡv, Δio.Writer w) {
+public static (int64 n, error err) WriteTo(this ж<Buffers> Ꮡv, Δio.Writer w) {
     int64 n = default;
     ref var v = ref Ꮡv.DerefOrNull();
 
@@ -909,7 +988,7 @@ internal static (int64 n, error err) WriteTo⁔(/*this*/ ж<Buffers> Ꮡv, Δio.
 //
 // Read modifies the slice v as well as v[i] for 0 <= i < len(v),
 // but does not modify v[i][j] for any i, j.
-internal static (nint n, error err) Read⁔(/*this*/ ref Buffers v, slice<byte> p) {
+public static (nint n, error err) Read(this ref Buffers v, slice<byte> p) {
     nint n = default;
     error err = default;
 
@@ -925,7 +1004,7 @@ internal static (nint n, error err) Read⁔(/*this*/ ref Buffers v, slice<byte> 
     return (n, err);
 }
 
-internal static void consume⁔(/*this*/ ref Buffers v, int64 n) {
+internal static void consume(this ref Buffers v, int64 n) {
     while (len(v) > 0) {
         var ln0 = (int64)len((v)[0]);
         if (ln0 > n) {
@@ -938,4 +1017,4 @@ internal static void consume⁔(/*this*/ ref Buffers v, int64 n) {
     }
 }
 
-} // end net_package
+}

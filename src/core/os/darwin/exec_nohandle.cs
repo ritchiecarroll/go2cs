@@ -4,10 +4,14 @@
 //go:build !linux && !windows
 namespace go;
 
+using static os_package;
+
 partial class os_package {
 
-internal static void closeHandle⁔(/*this*/ ref processHandle ph) {
+} partial class osᴛprocessHandle {
+
+internal static void closeHandle(this ref processHandle ph) {
     throw panic("internal error: unexpected call to closeHandle");
 }
 
-} // end os_package
+}

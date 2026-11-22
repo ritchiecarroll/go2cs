@@ -7,10 +7,13 @@ namespace go;
 using runtime = runtime_package;
 using syscall = syscall_package;
 using @internal;
+using static net_package;
 
 partial class net_package {
 
-internal static (int64, error) writeBuffers⁔(/*this*/ ж<conn> Ꮡc, ж<Buffers> v) {
+} partial class netᴛconn {
+
+internal static (int64, error) writeBuffers(this ж<conn> Ꮡc, ж<Buffers> v) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.ok()) {
@@ -23,11 +26,13 @@ internal static (int64, error) writeBuffers⁔(/*this*/ ж<conn> Ꮡc, ж<Buffer
     return (n, default);
 }
 
+} partial class netᴛnetFD {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string writevˢ => ref writevˢᵇ;
 private static readonly @string writevˢᵇ = "writev"u8;
 
-internal static (int64 n, error err) writeBuffers⁔(/*this*/ ж<netFD> Ꮡfd, ж<Buffers> v) {
+internal static (int64 n, error err) writeBuffers(this ж<netFD> Ꮡfd, ж<Buffers> v) {
     int64 n = default;
     error err = default;
 
@@ -36,4 +41,4 @@ internal static (int64 n, error err) writeBuffers⁔(/*this*/ ж<netFD> Ꮡfd, �
     return (n, wrapSyscallError(writevˢ, err));
 }
 
-} // end net_package
+}

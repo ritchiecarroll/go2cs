@@ -14,6 +14,7 @@ namespace go;
 using bytealg = @internal.bytealg_package;
 using @internal;
 using ꓸꓸꓸstring = Span<@string>;
+using static path_package;
 
 partial class path_package {
 
@@ -27,14 +28,16 @@ partial struct lazybuf {
     internal nint w;
 }
 
-internal static byte index⁔(/*this*/ ref lazybuf b, nint i) {
+} partial class pathᴛlazybuf {
+
+internal static byte index(this ref lazybuf b, nint i) {
     if (b.buf != nil) {
         return b.buf[i];
     }
     return b.s[i];
 }
 
-internal static void append⁔(/*this*/ ref lazybuf b, byte c) {
+internal static void append(this ref lazybuf b, byte c) {
     if (b.buf == nil) {
         if (b.w < len(b.s) && b.s[b.w] == c) {
             b.w++;
@@ -47,12 +50,14 @@ internal static void append⁔(/*this*/ ref lazybuf b, byte c) {
     b.w++;
 }
 
-internal static @string string⁔(/*this*/ ref lazybuf b) {
+internal static @string @string(this ref lazybuf b) {
     if (b.buf == nil) {
         return b.s.slice(0, b.w);
     }
     return (@string)(b.buf.slice(0, b.w));
 }
+
+} partial class path_package {
 
 // Clean returns the shortest path name equivalent to path
 // by purely lexical processing. It applies the following rules

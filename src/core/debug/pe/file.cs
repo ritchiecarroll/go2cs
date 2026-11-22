@@ -27,6 +27,7 @@ using strings = strings_package;
 using compress;
 using encoding;
 using go.debug;
+using static pe_package;
 
 partial class pe_package {
 
@@ -56,10 +57,12 @@ public static (ж<File>, error) Open(@string name) {
     return (ff, default);
 }
 
+} partial class peᴛFile {
+
 // Close closes the [File].
 // If the [File] was created using [NewFile] directly instead of [Open],
 // Close has no effect.
-internal static error Close⁔(/*this*/ ref File f) {
+public static error Close(this ref File f) {
     error err = default;
     if (f.closer != nil) {
         err = f.closer.Close();
@@ -67,6 +70,8 @@ internal static error Close⁔(/*this*/ ref File f) {
     }
     return err;
 }
+
+} partial class pe_package {
 
 // TODO(brainman): add Load function, as a replacement for NewFile, that does not call removeAuxSymbols (for performance)
 
@@ -180,13 +185,17 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
 partial struct nobitsSectionReader {
 }
 
+} partial class peᴛnobitsSectionReader {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string unexpectedReadFromˢ => ref unexpectedReadFromˢᵇ;
 private static readonly @string unexpectedReadFromˢᵇ = "unexpected read from section with uninitialized data"u8;
 
-internal static (nint n, error err) ReadAt⁔(/*this*/ ref nobitsSectionReader _, slice<byte> p, int64 off) {
+internal static (nint n, error err) ReadAt(this ref nobitsSectionReader _, slice<byte> p, int64 off) {
     return (0, errors.New(unexpectedReadFromˢ));
 }
+
+} partial class pe_package {
 
 // getString extracts a string from symbol string table.
 internal static (@string, bool) getString(slice<byte> section, nint start) {
@@ -202,9 +211,11 @@ internal static (@string, bool) getString(slice<byte> section, nint start) {
     return ("", false);
 }
 
+} partial class peᴛFile {
+
 // Section returns the first section with the given name, or nil if no such
 // section exists.
-internal static ж<Section> Section⁔(/*this*/ ref File f, @string name) {
+public static ж<Section> Section(this ref File f, @string name) {
     foreach (var (_, s) in range(f.Sections)) {
         if (s.Name == name) {
             return s;
@@ -229,7 +240,7 @@ private static readonly @string rangesˢᵇ = "ranges"u8;
 internal static ref readonly @string strˢ => ref strˢᵇ;
 private static readonly @string strˢᵇ = "str"u8;
 
-internal static (ж<dwarf.Data>, error) DWARF⁔(/*this*/ ref File f) {
+public static (ж<dwarf.Data>, error) DWARF(this ref File f) {
     @string dwarfSuffix(ж<Section> s) {
         switch (ᐧ) {
         case {} when strings.HasPrefix(s.Name, debugˢ): {
@@ -326,6 +337,8 @@ internal static (ж<dwarf.Data>, error) DWARF⁔(/*this*/ ref File f) {
     return (d, default);
 }
 
+} partial class pe_package {
+
 // TODO(brainman): document ImportDirectory once we decide what to do with it.
 partial struct ImportDirectory {
     public uint32 OriginalFirstThunk;
@@ -335,6 +348,8 @@ partial struct ImportDirectory {
     public uint32 FirstThunk;
     internal @string dll;
 }
+
+} partial class peᴛFile {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string optionalHeaderDataˢ => ref optionalHeaderDataˢᵇ;
@@ -350,7 +365,7 @@ private static readonly @string thunkParsingNeedsAtLeastˢ2ᵇ = "thunk parsing 
 // referred to by the binary f that are expected to be
 // satisfied by other libraries at dynamic load time.
 // It does not return weak symbols.
-internal static (slice<@string>, error) ImportedSymbols⁔(/*this*/ ref File f) {
+public static (slice<@string>, error) ImportedSymbols(this ref File f) {
     if (f.OptionalHeader == nil) {
         return (default, default);
     }
@@ -488,24 +503,30 @@ internal static (slice<@string>, error) ImportedSymbols⁔(/*this*/ ref File f) 
 // ImportedLibraries returns the names of all libraries
 // referred to by the binary f that are expected to be
 // linked with the binary at dynamic link time.
-internal static (slice<@string>, error) ImportedLibraries⁔(/*this*/ ref File f) {
+public static (slice<@string>, error) ImportedLibraries(this ref File f) {
     // TODO
     // cgo -dynimport don't use this for windows PE, so just return.
     return (default, default);
 }
+
+} partial class pe_package {
 
 // FormatError is unused.
 // The type is retained for compatibility.
 partial struct FormatError {
 }
 
+} partial class peᴛFormatError {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string unknownErrorˢ => ref unknownErrorˢᵇ;
 private static readonly @string unknownErrorˢᵇ = "unknown error"u8;
 
-internal static @string Error⁔(/*this*/ ref FormatError e) {
+public static @string Error(this ref FormatError e) {
     return unknownErrorˢ;
 }
+
+} partial class pe_package {
 
 // readOptionalHeader accepts an io.ReadSeeker pointing to optional header in the PE file
 // and its size as seen in the file header.

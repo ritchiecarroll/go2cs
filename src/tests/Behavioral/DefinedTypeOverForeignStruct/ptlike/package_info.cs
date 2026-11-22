@@ -14,9 +14,6 @@
 
 using go;
 using static go.DefinedTypeOverForeignStruct.ptlike_package;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -52,12 +49,10 @@ using System.Runtime.CompilerServices;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("lib.go", "lib.cs", "AAocgqaCAAcSog==")]
+[assembly: GoPositionMap("lib.go", "lib.cs", "AA0cgqaCAAkSog==")]
 // </GoSourcePositionMaps>
 
 namespace go.DefinedTypeOverForeignStruct;
-
-using static go.DefinedTypeOverForeignStruct.ptlike_package;
 
 [GoPackage("ptlike")]
 public static partial class ptlike_package
@@ -90,16 +85,5 @@ public static partial class ptlike_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(ptlike_package.Inner)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class ptlikeᴛInner;
+[GoMethodHost(typeof(ptlike_package.Inner)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ptlikeᴛInner;
 // </MethodHolders>
-
-// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
-// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
-// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
-// the body's frame as the Go method.
-// <MethodForwarders>
-partial class ptlikeᴛInner {
-    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Len(this Inner i) => ptlike_package.Len⁔(i);
-    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Push(this ref Inner i, nint v) => ptlike_package.Push⁔(ref i, v);
-}
-// </MethodForwarders>

@@ -7,6 +7,7 @@ using fips140 = go.crypto.@internal.fips140_package;
 using aes = go.crypto.@internal.fips140.aes_package;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140;
+using static gcm_package;
 
 partial class gcm_package {
 
@@ -29,8 +30,10 @@ public static ж<CounterKDF> NewCounterKDF(ж<aes.Block> b) {
     return Ꮡ(new CounterKDF(mac: NewCMAC(b).Value.ΔClone()));
 }
 
+} partial class gcmᴛCounterKDF {
+
 // DeriveKey derives a key from the given label and context.
-internal static array<byte> DeriveKey⁔(/*this*/ ж<CounterKDF> Ꮡkdf, byte label, /*[12]*/ array<byte> context) {
+public static array<byte> DeriveKey(this ж<CounterKDF> Ꮡkdf, byte label, /*[12]*/ array<byte> context) {
     context = context.Clone();
 
     fips140.RecordApproved();
@@ -51,4 +54,4 @@ internal static array<byte> DeriveKey⁔(/*this*/ ж<CounterKDF> Ꮡkdf, byte la
     return output.Clone();
 }
 
-} // end gcm_package
+}

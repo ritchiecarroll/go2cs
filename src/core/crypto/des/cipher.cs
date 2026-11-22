@@ -13,6 +13,8 @@ using go.@internal;
 using go.crypto;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140;
+using des = des_package;
+using static des_package;
 
 partial class des_package {
 
@@ -21,9 +23,13 @@ public static UntypedInt BlockSize => 8;
 
 partial struct KeySizeError /*num:nint*/;
 
-internal static @string Error⁔(/*this*/ KeySizeError k) {
+} partial class desᴛKeySizeError {
+
+public static @string Error(this KeySizeError k) {
     return "crypto/des: invalid key size "u8 + strconv.Itoa((nint)k);
 }
+
+} partial class des_package {
 
 // desCipher is an instance of DES encryption.
 partial struct desCipher {
@@ -49,33 +55,37 @@ public static (cipher.Block, error) NewCipher(slice<byte> key) {
     return (new desCipherжBlock(c), default);
 }
 
-internal static nint BlockSize⁔(/*this*/ ref desCipher c) { return BlockSize; }
+} partial class desᴛdesCipher {
 
-internal static void Encrypt⁔(/*this*/ ref desCipher c, slice<byte> dst, slice<byte> src) {
-    if (len(src) < BlockSize) {
+internal static nint BlockSize(this ref desCipher c) { return des.BlockSize; }
+
+internal static void Encrypt(this ref desCipher c, slice<byte> dst, slice<byte> src) {
+    if (len(src) < des.BlockSize) {
         throw panic("crypto/des: input not full block");
     }
-    if (len(dst) < BlockSize) {
+    if (len(dst) < des.BlockSize) {
         throw panic("crypto/des: output not full block");
     }
-    if (alias.InexactOverlap(dst[..(int)(BlockSize)], src[..(int)(BlockSize)])) {
+    if (alias.InexactOverlap(dst[..(int)(des.BlockSize)], src[..(int)(des.BlockSize)])) {
         throw panic("crypto/des: invalid buffer overlap");
     }
     cryptBlock(c.subkeys[..], dst, src, false);
 }
 
-internal static void Decrypt⁔(/*this*/ ref desCipher c, slice<byte> dst, slice<byte> src) {
-    if (len(src) < BlockSize) {
+internal static void Decrypt(this ref desCipher c, slice<byte> dst, slice<byte> src) {
+    if (len(src) < des.BlockSize) {
         throw panic("crypto/des: input not full block");
     }
-    if (len(dst) < BlockSize) {
+    if (len(dst) < des.BlockSize) {
         throw panic("crypto/des: output not full block");
     }
-    if (alias.InexactOverlap(dst[..(int)(BlockSize)], src[..(int)(BlockSize)])) {
+    if (alias.InexactOverlap(dst[..(int)(des.BlockSize)], src[..(int)(des.BlockSize)])) {
         throw panic("crypto/des: invalid buffer overlap");
     }
     cryptBlock(c.subkeys[..], dst, src, true);
 }
+
+} partial class des_package {
 
 // A tripleDESCipher is an instance of TripleDES encryption.
 partial struct tripleDESCipher {
@@ -103,16 +113,18 @@ public static (cipher.Block, error) NewTripleDESCipher(slice<byte> key) {
     return (new tripleDESCipherжBlock(c), default);
 }
 
-internal static nint BlockSize⁔(/*this*/ ref tripleDESCipher c) { return BlockSize; }
+} partial class desᴛtripleDESCipher {
 
-internal static void Encrypt⁔(/*this*/ ref tripleDESCipher c, slice<byte> dst, slice<byte> src) {
-    if (len(src) < BlockSize) {
+internal static nint BlockSize(this ref tripleDESCipher c) { return des.BlockSize; }
+
+internal static void Encrypt(this ref tripleDESCipher c, slice<byte> dst, slice<byte> src) {
+    if (len(src) < des.BlockSize) {
         throw panic("crypto/des: input not full block");
     }
-    if (len(dst) < BlockSize) {
+    if (len(dst) < des.BlockSize) {
         throw panic("crypto/des: output not full block");
     }
-    if (alias.InexactOverlap(dst[..(int)(BlockSize)], src[..(int)(BlockSize)])) {
+    if (alias.InexactOverlap(dst[..(int)(des.BlockSize)], src[..(int)(des.BlockSize)])) {
         throw panic("crypto/des: invalid buffer overlap");
     }
 
@@ -140,14 +152,14 @@ internal static void Encrypt⁔(/*this*/ ref tripleDESCipher c, slice<byte> dst,
     byteorder.BEPutUint64(dst, permuteFinalBlock(preOutput));
 }
 
-internal static void Decrypt⁔(/*this*/ ref tripleDESCipher c, slice<byte> dst, slice<byte> src) {
-    if (len(src) < BlockSize) {
+internal static void Decrypt(this ref tripleDESCipher c, slice<byte> dst, slice<byte> src) {
+    if (len(src) < des.BlockSize) {
         throw panic("crypto/des: input not full block");
     }
-    if (len(dst) < BlockSize) {
+    if (len(dst) < des.BlockSize) {
         throw panic("crypto/des: output not full block");
     }
-    if (alias.InexactOverlap(dst[..(int)(BlockSize)], src[..(int)(BlockSize)])) {
+    if (alias.InexactOverlap(dst[..(int)(des.BlockSize)], src[..(int)(des.BlockSize)])) {
         throw panic("crypto/des: invalid buffer overlap");
     }
 
@@ -175,4 +187,4 @@ internal static void Decrypt⁔(/*this*/ ref tripleDESCipher c, slice<byte> dst,
     byteorder.BEPutUint64(dst, permuteFinalBlock(preOutput));
 }
 
-} // end des_package
+}

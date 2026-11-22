@@ -1,5 +1,7 @@
 namespace go.DefinedForeignStructConvert;
 
+using static rec_package;
+
 partial class rec_package {
 
 partial struct Hidden {
@@ -14,6 +16,8 @@ partial struct Open {
 
 public static Hidden NewHidden(nint n, @string s) { return new Hidden(N: n, s: s); }
 
-internal static @string S⁔(/*this*/ Hidden h) { return h.s; }
+} partial class recᴛHidden {
 
-} // end rec_package
+public static @string S(this Hidden h) { return h.s; }
+
+}

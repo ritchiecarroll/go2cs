@@ -4,6 +4,7 @@ using fmt = fmt_package;
 using static DotImportRenamedType.renamedlib_package;
 using DotImportRenamedType;
 using renamedlib = DotImportRenamedType.renamedlib_package;
+using static main_package;
 
 partial class main_package {
 
@@ -11,9 +12,13 @@ partial struct Local {
     public @string Tag;
 }
 
-internal static @string Local⁔(/*this*/ Local l) {
+} partial class mainᴛLocal {
+
+public static @string Local(this Local l) {
     return "L:"u8 + l.Tag;
 }
+
+} partial class main_package {
 
 internal static void main() {
     var m = new Marker(Name: "alpha", Size: 3);

@@ -11,6 +11,8 @@ using token = global::go.go.token_package;
 using static global::go.@internal.types.errors_package;
 using errors = global::go.@internal.types.errors_package;
 using global::go.go;
+using types = types_package;
+using static types_package;
 
 partial class types_package {
 
@@ -69,7 +71,9 @@ internal static opPredicates unaryOpPredicates;
     });
 }
 
-internal static bool op⁔(/*this*/ ж<Checker> Ꮡcheck, opPredicates m, ж<operand> Ꮡx, token.Token op) {
+} partial class typesᴛChecker {
+
+internal static bool op(this ж<Checker> Ꮡcheck, opPredicates m, ж<operand> Ꮡx, token.Token op) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     var pred = m[op]; if (pred != nil) {
@@ -83,6 +87,8 @@ internal static bool op⁔(/*this*/ ж<Checker> Ꮡcheck, opPredicates m, ж<ope
     }
     return true;
 }
+
+} partial class types_package {
 
 // opPos returns the position of the operator if x is an operation;
 // otherwise it returns the start position of x.
@@ -132,6 +138,8 @@ internal static array<@string> op2str1 = new golib.SparseArray<@string>{
     [20] = "shift"
 }.array(21); }
 
+} partial class typesᴛChecker {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string cannotUseOutsideOfˢ => ref cannotUseOutsideOfˢᵇ;
 private static readonly @string cannotUseOutsideOfˢᵇ = "cannot use ~ outside of interface or type constraint"u8;
@@ -139,7 +147,7 @@ internal static ref readonly @string cannotUseOutsideOfˢ2 => ref cannotUseOutsi
 private static readonly @string cannotUseOutsideOfˢ2ᵇ = "cannot use ~ outside of interface or type constraint (use ^ for bitwise complement)"u8;
 
 // The unary expression e may be nil. It's passed in for better error messages only.
-internal static void unary⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.UnaryExpr> Ꮡe) {
+internal static void unary(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.UnaryExpr> Ꮡe) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
     ref var e = ref Ꮡe.DerefOrNull();
@@ -212,7 +220,7 @@ internal static void unary⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operand> Ꮡx, �
 // chanElem returns the channel element type of x for a receive from x (recv == true)
 // or send to x (recv == false) operation. If the operation is not valid, chanElem
 // reports an error and returns nil.
-internal static Type chanElem⁔(/*this*/ ж<Checker> Ꮡcheck, positioner pos, ж<operand> Ꮡx, bool recv) {
+internal static Type chanElem(this ж<Checker> Ꮡcheck, positioner pos, ж<operand> Ꮡx, bool recv) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     var (u, err) = commonUnder(x.typ, (Type t, Type uΔ1) => {
@@ -255,6 +263,8 @@ internal static Type chanElem⁔(/*this*/ ж<Checker> Ꮡcheck, positioner pos, 
     return default;
 }
 
+} partial class types_package {
+
 internal static bool isShift(token.Token op) {
     return op == token.SHL || op == token.SHR;
 }
@@ -267,6 +277,8 @@ internal static bool isComparison(token.Token op) {
     }}
     return false;
 }
+
+} partial class typesᴛChecker {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string vFoundOldTypeSSNewSˢ => ref vFoundOldTypeSSNewSˢᵇ;
@@ -281,7 +293,7 @@ private static readonly @string vFoundOldTypeSSNewSˢᵇ = "%v: found old type(%
 // Also, if x is a constant, it must be representable as a value of typ,
 // and if x is the (formerly untyped) lhs operand of a non-constant
 // shift, it must be an integer value.
-internal static void updateExprType⁔(/*this*/ ж<Checker> Ꮡcheck, ast.Expr x, Type typ, bool final) {
+internal static void updateExprType(this ж<Checker> Ꮡcheck, ast.Expr x, Type typ, bool final) {
     ref var check = ref Ꮡcheck.DerefOrNull();
 
     var (old, found) = check.untyped[x, ꟷ];
@@ -408,7 +420,7 @@ internal static void updateExprType⁔(/*this*/ ж<Checker> Ꮡcheck, ast.Expr x
 }
 
 // updateExprVal updates the value of x to val.
-internal static void updateExprVal⁔(/*this*/ ref Checker check, ast.Expr x, constant.Value val) {
+internal static void updateExprVal(this ref Checker check, ast.Expr x, constant.Value val) {
     var (info, ok) = check.untyped[x, ꟷ]; if (ok) {
         info.val = val;
         check.untyped[x] = info;
@@ -421,7 +433,7 @@ internal static void updateExprVal⁔(/*this*/ ref Checker check, ast.Expr x, co
 //
 // If x is a constant operand, the returned constant.Value will be the
 // representation of x in this context.
-internal static (Type, constant.Value, errors.Code) implicitTypeAndValue⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operand> Ꮡx, Type target) {
+internal static (Type, constant.Value, errors.Code) implicitTypeAndValue(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, Type target) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     if (x.mode == invalid || isTyped(x.typ) || !isValid(target)) {
@@ -536,7 +548,7 @@ internal static (Type, constant.Value, errors.Code) implicitTypeAndValue⁔(/*th
 }
 
 // If switchCase is true, the operator op is ignored.
-internal static void comparison⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<operand> Ꮡy, token.Token op, bool switchCase) {
+internal static void comparison(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<operand> Ꮡy, token.Token op, bool switchCase) {
     ref var x = ref Ꮡx.DerefOrNull();
     ref var y = ref Ꮡy.DerefOrNull();
 
@@ -673,7 +685,7 @@ Error:
 
 // incomparableCause returns a more specific cause why typ is not comparable.
 // If there is no more specific cause, the result is "".
-internal static @string incomparableCause⁔(/*this*/ ж<Checker> Ꮡcheck, Type typ) {
+internal static @string incomparableCause(this ж<Checker> Ꮡcheck, Type typ) {
     switch (typ.Underlying().type()) {
     case ж<Slice> _:
     case ж<Signature> _:
@@ -685,7 +697,7 @@ internal static @string incomparableCause⁔(/*this*/ ж<Checker> Ꮡcheck, Type
 }
 
 // If e != nil, it must be the shift expression; it may be nil for non-constant shifts.
-internal static void shift⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<operand> Ꮡy, ast.Expr e, token.Token op) {
+internal static void shift(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<operand> Ꮡy, ast.Expr e, token.Token op) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
     ref var y = ref Ꮡy.DerefOrNull();
@@ -832,6 +844,8 @@ internal static void shift⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operand> Ꮡx, �
     x.mode = value;
 }
 
+} partial class types_package {
+
 internal static opPredicates binaryOpPredicates;
 
 [GoInit] internal static void initΔ1() {
@@ -853,9 +867,11 @@ internal static opPredicates binaryOpPredicates;
     });
 }
 
+} partial class typesᴛChecker {
+
 // If e != nil, it must be the binary expression; it may be nil for non-constant expressions
 // (when invoked for an assignment operation where the binary expression is implicit).
-internal static void binary⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ast.Expr e, ast.Expr lhs, ast.Expr rhs, token.Token op, token.Pos opPos) {
+internal static void binary(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ast.Expr e, ast.Expr lhs, ast.Expr rhs, token.Token op, token.Pos opPos) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     ref var y = ref heap(new operand(), out var Ꮡy);
@@ -953,7 +969,7 @@ internal static void binary⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operand> Ꮡx, 
 
 // matchTypes attempts to convert any untyped types x and y such that they match.
 // If an error occurs, x.mode is set to invalid.
-internal static void matchTypes⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<operand> Ꮡy) {
+internal static void matchTypes(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<operand> Ꮡy) {
     ref var x = ref Ꮡx.DerefOrNull();
     ref var y = ref Ꮡy.DerefOrNull();
 
@@ -1018,6 +1034,8 @@ internal static void matchTypes⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operand> �
     }
 }
 
+} partial class types_package {
+
 // exprKind describes the kind of an expression; the kind
 // determines if an expression is valid in 'statement context'.
 partial struct exprKind /*num:nint*/;
@@ -1044,6 +1062,8 @@ internal static ж<target> newTarget(Type typ, @string desc) {
     return default;
 }
 
+} partial class typesᴛChecker {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string exprSˢ => ref exprSˢᵇ;
 private static readonly @string exprSˢᵇ = "-- expr %s"u8;
@@ -1055,7 +1075,7 @@ private static readonly @string exprSˢᵇ = "-- expr %s"u8;
 // If hint != nil, it is the type of a composite literal element.
 // If allowGeneric is set, the operand type may be an uninstantiated
 // parameterized type or function value.
-internal static exprKind rawExpr⁔(/*this*/ ж<Checker> Ꮡcheck, ж<target> T, ж<operand> x, ast.Expr e, Type hint, bool allowGeneric) {
+internal static exprKind rawExpr(this ж<Checker> Ꮡcheck, ж<target> T, ж<operand> x, ast.Expr e, Type hint, bool allowGeneric) {
     GoFrame ᒐ = default;
     try {
         ref var check = ref Ꮡcheck.DerefOrNull();
@@ -1099,7 +1119,7 @@ private static readonly @string functionˢᵇ = "function"u8;
 // If x is a generic type, or a generic function whose type arguments cannot be inferred
 // from a non-nil target T, nonGeneric reports an error and invalidates x.mode and x.typ.
 // Otherwise it leaves x alone.
-internal static void nonGeneric⁔(/*this*/ ж<Checker> Ꮡcheck, ж<target> T, ж<operand> Ꮡx) {
+internal static void nonGeneric(this ж<Checker> Ꮡcheck, ж<target> T, ж<operand> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     if (x.mode == invalid || x.mode == novalue) {
@@ -1135,7 +1155,7 @@ internal static void nonGeneric⁔(/*this*/ ж<Checker> Ꮡcheck, ж<target> T, 
 // If x has a pending type (i.e. its declaring object is on the object path), pendingType
 // reports an error and invalidates x.mode and x.typ.
 // Otherwise it leaves x alone.
-internal static void pendingType⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operand> Ꮡx) {
+internal static void pendingType(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     if (x.mode == invalid || x.mode == novalue) {
@@ -1158,7 +1178,7 @@ private static readonly @string noKeyValueExpectedˢᵇ = "no key:value expected
 // exprInternal contains the core of type checking of expressions.
 // Must only be called by rawExpr.
 // (See rawExpr for an explanation of the parameters.)
-internal static exprKind exprInternal⁔(/*this*/ ж<Checker> Ꮡcheck, ж<target> ᏑT, ж<operand> Ꮡx, ast.Expr e, Type hint) {
+internal static exprKind exprInternal(this ж<Checker> Ꮡcheck, ж<target> ᏑT, ж<operand> Ꮡx, ast.Expr e, Type hint) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var T = ref ᏑT.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
@@ -1359,6 +1379,8 @@ Error:
     return statement; // avoid follow-up errors
 }
 
+} partial class types_package {
+
 // keyVal maps a complex, float, integer, string or boolean constant value
 // to the corresponding complex128, float64, int64, uint64, string, or bool
 // Go value if possible; otherwise it returns x.
@@ -1410,8 +1432,10 @@ internal static any keyVal(constant.Value x) {
     return x;
 }
 
+} partial class typesᴛChecker {
+
 // typeAssertion checks x.(T). The type of x must be an interface.
-internal static void typeAssertion⁔(/*this*/ ж<Checker> Ꮡcheck, ast.Expr e, ж<operand> Ꮡx, Type T, bool typeSwitch) {
+internal static void typeAssertion(this ж<Checker> Ꮡcheck, ast.Expr e, ж<operand> Ꮡx, Type T, bool typeSwitch) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     ref var cause = ref heap(new @string(), out var Ꮡcause);
@@ -1432,16 +1456,16 @@ internal static void typeAssertion⁔(/*this*/ ж<Checker> Ꮡcheck, ast.Expr e,
 // a function call, T is used to infer the type arguments for e.
 // The result must be a single value.
 // If an error occurred, x.mode is set to invalid.
-internal static void expr⁔(/*this*/ ж<Checker> Ꮡcheck, ж<target> T, ж<operand> x, ast.Expr e) {
+internal static void expr(this ж<Checker> Ꮡcheck, ж<target> T, ж<operand> x, ast.Expr e) {
     Ꮡcheck.rawExpr(T, x, e, default, false);
-    Ꮡcheck.exclude(x, (nuint)((nuint)(UntypedInt)(1 << (int)(novalue) | 1 << (int)(Δbuiltin)) | (nuint)(1 << (int)(typexpr))));
+    Ꮡcheck.exclude(x, (nuint)((nuint)(UntypedInt)(1 << (int)(novalue) | 1 << (int)(types.Δbuiltin)) | (nuint)(1 << (int)(typexpr))));
     Ꮡcheck.singleValue(x);
 }
 
 // genericExpr is like expr but the result may also be generic.
-internal static void genericExpr⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operand> x, ast.Expr e) {
+internal static void genericExpr(this ж<Checker> Ꮡcheck, ж<operand> x, ast.Expr e) {
     Ꮡcheck.rawExpr(nil, x, e, default, true);
-    Ꮡcheck.exclude(x, (nuint)((nuint)(UntypedInt)(1 << (int)(novalue) | 1 << (int)(Δbuiltin)) | (nuint)(1 << (int)(typexpr))));
+    Ꮡcheck.exclude(x, (nuint)((nuint)(UntypedInt)(1 << (int)(novalue) | 1 << (int)(types.Δbuiltin)) | (nuint)(1 << (int)(typexpr))));
     Ꮡcheck.singleValue(x);
 }
 
@@ -1450,13 +1474,13 @@ internal static void genericExpr⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operand> x
 // expression, the result is a two-element list containing the value
 // of e, and an untyped bool value or an error value, respectively.
 // If an error occurred, list[0] is not valid.
-internal static (slice<ж<operand>> list, bool commaOk) multiExpr⁔(/*this*/ ж<Checker> Ꮡcheck, ast.Expr e, bool allowCommaOk) {
+internal static (slice<ж<operand>> list, bool commaOk) multiExpr(this ж<Checker> Ꮡcheck, ast.Expr e, bool allowCommaOk) {
     slice<ж<operand>> list = default;
     bool commaOk = default;
 
     ref var x = ref heap(new operand(), out var Ꮡx);
     Ꮡcheck.rawExpr(nil, Ꮡx, e, default, false);
-    Ꮡcheck.exclude(Ꮡx, (nuint)((nuint)(UntypedInt)(1 << (int)(novalue) | 1 << (int)(Δbuiltin)) | (nuint)(1 << (int)(typexpr))));
+    Ꮡcheck.exclude(Ꮡx, (nuint)((nuint)(UntypedInt)(1 << (int)(novalue) | 1 << (int)(types.Δbuiltin)) | (nuint)(1 << (int)(typexpr))));
 
     var (t, ok) = x.typ._<ж<Tuple>>(ᐧ); if (ok && x.mode != invalid) {
         // multiple values
@@ -1484,10 +1508,10 @@ internal static (slice<ж<operand>> list, bool commaOk) multiExpr⁔(/*this*/ ж
 // exprWithHint typechecks expression e and initializes x with the expression value;
 // hint is the type of a composite literal element.
 // If an error occurred, x.mode is set to invalid.
-internal static void exprWithHint⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operand> x, ast.Expr e, Type hint) {
+internal static void exprWithHint(this ж<Checker> Ꮡcheck, ж<operand> x, ast.Expr e, Type hint) {
     assert(hint != nil);
     Ꮡcheck.rawExpr(nil, x, e, hint, false);
-    Ꮡcheck.exclude(x, (nuint)((nuint)(UntypedInt)(1 << (int)(novalue) | 1 << (int)(Δbuiltin)) | (nuint)(1 << (int)(typexpr))));
+    Ꮡcheck.exclude(x, (nuint)((nuint)(UntypedInt)(1 << (int)(novalue) | 1 << (int)(types.Δbuiltin)) | (nuint)(1 << (int)(typexpr))));
     Ꮡcheck.singleValue(x);
 }
 
@@ -1495,7 +1519,7 @@ internal static void exprWithHint⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operand> 
 // If allowGeneric is set, the operand type may be an uninstantiated parameterized type or function
 // value.
 // If an error occurred, x.mode is set to invalid.
-internal static void exprOrType⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operand> x, ast.Expr e, bool allowGeneric) {
+internal static void exprOrType(this ж<Checker> Ꮡcheck, ж<operand> x, ast.Expr e, bool allowGeneric) {
     Ꮡcheck.rawExpr(nil, x, e, default, allowGeneric);
     Ꮡcheck.exclude(x, (nuint)1 << (int)(novalue));
     Ꮡcheck.singleValue(x);
@@ -1513,7 +1537,7 @@ private static readonly @string sIsNotAnExpressionˢᵇ = "%s is not an expressi
 
 // exclude reports an error if x.mode is in modeset and sets x.mode to invalid.
 // The modeset may contain any of 1<<novalue, 1<<builtin, 1<<typexpr.
-internal static void exclude⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operand> Ꮡx, nuint modeset) {
+internal static void exclude(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, nuint modeset) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     if ((modeset & (((nuint)1).Lsh((uint64)(x.mode)))) != 0) {
@@ -1529,7 +1553,7 @@ internal static void exclude⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operand> Ꮡx,
             code = TooManyValues;
             break;
         }
-        case var ᴛ when ᴛ == Δbuiltin: {
+        case var ᴛ when ᴛ == types.Δbuiltin: {
             msg = sMustBeCalledˢ;
             code = UncalledBuiltin;
             break;
@@ -1549,7 +1573,7 @@ internal static void exclude⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operand> Ꮡx,
 }
 
 // singleValue reports an error if x describes a tuple and sets x.mode to invalid.
-internal static void singleValue⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operand> Ꮡx) {
+internal static void singleValue(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     if (x.mode == value) {
@@ -1562,4 +1586,4 @@ internal static void singleValue⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operand> �
     }
 }
 
-} // end types_package
+}

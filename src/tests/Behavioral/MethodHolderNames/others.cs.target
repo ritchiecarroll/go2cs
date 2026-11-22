@@ -4,21 +4,27 @@ using fmt = fmt_package;
 using bits = math.bits_package;
 using sort = sort_package;
 using math;
+using main = main_package;
+using static main_package;
 
 partial class main_package {
 
 partial struct words /*[]uint64*/;
 
-internal static nint Len⁔(/*this*/ words w) { return len(w); }
-internal static bool Less⁔(/*this*/ words w, nint i, nint j) { return w[i] < w[j]; }
-internal static void Swap⁔(/*this*/ words w, nint i, nint j) { (w[i], w[j]) = (w[j], w[i]); }
+} partial class mainᴛwords {
 
-internal static nint cap⁔(/*this*/ words w) { return cap(w) + 1; }
-internal static nint bits⁔(/*this*/ words w) { return bits.Len64(w[0]); }
+internal static nint Len(this words w) { return len(w); }
+internal static bool Less(this words w, nint i, nint j) { return w[i] < w[j]; }
+internal static void Swap(this words w, nint i, nint j) { (w[i], w[j]) = (w[j], w[i]); }
 
-internal static void Sort⁔(/*this*/ words w) { Sort(w); }
+internal static nint cap(this words w) { return builtin.cap(w) + 1; }
+internal static nint bits(this words w) { return math.bits_package.Len64(w[0]); }
 
-internal static nint Run⁔(/*this*/ words w) { return len(w); }
+internal static void Sort(this words w) { main.Sort(w); }
+
+internal static nint Run(this words w) { return len(w); }
+
+} partial class main_package {
 
 partial struct gauge {
     internal nint n;

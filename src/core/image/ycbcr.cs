@@ -5,6 +5,7 @@ namespace go;
 
 using color = image.color_package;
 using image;
+using static image_package;
 
 partial class image_package {
 
@@ -17,6 +18,8 @@ public static YCbCrSubsampleRatio YCbCrSubsampleRatio420 => 2;
 public static YCbCrSubsampleRatio YCbCrSubsampleRatio440 => 3;
 public static YCbCrSubsampleRatio YCbCrSubsampleRatio411 => 4;
 public static YCbCrSubsampleRatio YCbCrSubsampleRatio410 => 5;
+
+} partial class imageᴛYCbCrSubsampleRatio {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string yCbCrSubsampleRatio444ˢ => ref yCbCrSubsampleRatio444ˢᵇ;
@@ -32,7 +35,7 @@ private static readonly @string yCbCrSubsampleRatio411ˢᵇ = "YCbCrSubsampleRat
 internal static ref readonly @string yCbCrSubsampleRatio410ˢ => ref yCbCrSubsampleRatio410ˢᵇ;
 private static readonly @string yCbCrSubsampleRatio410ˢᵇ = "YCbCrSubsampleRatio410"u8;
 
-internal static @string String⁔(/*this*/ YCbCrSubsampleRatio s) {
+public static @string String(this YCbCrSubsampleRatio s) {
     switch (s) {
     case var ᴛ when ᴛ == YCbCrSubsampleRatio444: {
         return yCbCrSubsampleRatio444ˢ;
@@ -54,6 +57,8 @@ internal static @string String⁔(/*this*/ YCbCrSubsampleRatio s) {
     }}
     return "YCbCrSubsampleRatioUnknown";
 }
+
+} partial class image_package {
 
 // YCbCr is an in-memory image of Y'CbCr colors. There is one Y sample per
 // pixel, but each Cb and Cr sample can span one or more pixels.
@@ -77,24 +82,26 @@ partial struct YCbCr {
     public Rectangle Rect;
 }
 
-internal static color.Model ColorModel⁔(/*this*/ ref YCbCr p) {
+} partial class imageᴛYCbCr {
+
+public static color.Model ColorModel(this ref YCbCr p) {
     return color.YCbCrModel;
 }
 
-internal static Rectangle Bounds⁔(/*this*/ ref YCbCr p) {
+public static Rectangle Bounds(this ref YCbCr p) {
     return p.Rect;
 }
 
-internal static color.Color At⁔(/*this*/ ref YCbCr p, nint x, nint y) {
+public static color.Color At(this ref YCbCr p, nint x, nint y) {
     return p.YCbCrAt(x, y);
 }
 
-internal static color.RGBA64 RGBA64At⁔(/*this*/ ref YCbCr p, nint x, nint y) {
+public static color.RGBA64 RGBA64At(this ref YCbCr p, nint x, nint y) {
     var (r, g, b, a) = p.YCbCrAt(x, y).RGBA();
     return new color.RGBA64((uint16)r, (uint16)g, (uint16)b, (uint16)a);
 }
 
-internal static color.YCbCr YCbCrAt⁔(/*this*/ ref YCbCr p, nint x, nint y) {
+public static color.YCbCr YCbCrAt(this ref YCbCr p, nint x, nint y) {
     if (!(new Point(x, y).In(p.Rect))) {
         return new color.YCbCr();
     }
@@ -109,13 +116,13 @@ internal static color.YCbCr YCbCrAt⁔(/*this*/ ref YCbCr p, nint x, nint y) {
 
 // YOffset returns the index of the first element of Y that corresponds to
 // the pixel at (x, y).
-internal static nint YOffset⁔(/*this*/ ref YCbCr p, nint x, nint y) {
+public static nint YOffset(this ref YCbCr p, nint x, nint y) {
     return (y - p.Rect.Min.Y) * p.YStride + (x - p.Rect.Min.X);
 }
 
 // COffset returns the index of the first element of Cb or Cr that corresponds
 // to the pixel at (x, y).
-internal static nint COffset⁔(/*this*/ ref YCbCr p, nint x, nint y) {
+public static nint COffset(this ref YCbCr p, nint x, nint y) {
     switch (p.SubsampleRatio) {
     case var ᴛ when ᴛ == YCbCrSubsampleRatio422: {
         return (y - p.Rect.Min.Y) * p.CStride + (x / 2 - p.Rect.Min.X / 2);
@@ -138,7 +145,7 @@ internal static nint COffset⁔(/*this*/ ref YCbCr p, nint x, nint y) {
 
 // SubImage returns an image representing the portion of the image p visible
 // through r. The returned value shares pixels with the original image.
-internal static Image SubImage⁔(/*this*/ ref YCbCr p, Rectangle r) {
+public static Image SubImage(this ref YCbCr p, Rectangle r) {
     r = r.Intersect(p.Rect);
     // If r1 and r2 are Rectangles, r1.Intersect(r2) is not guaranteed to be inside
     // either r1 or r2 if the intersection is empty. Without explicitly checking for
@@ -161,9 +168,11 @@ internal static Image SubImage⁔(/*this*/ ref YCbCr p, Rectangle r) {
     )));
 }
 
-internal static bool Opaque⁔(/*this*/ ref YCbCr p) {
+public static bool Opaque(this ref YCbCr p) {
     return true;
 }
+
+} partial class image_package {
 
 internal static (nint w, nint h, nint cw, nint ch) yCbCrSize(Rectangle r, YCbCrSubsampleRatio subsampleRatio) {
     nint w = default;
@@ -246,20 +255,22 @@ partial struct NYCbCrA {
     public nint AStride;
 }
 
-internal static color.Model ColorModel⁔(/*this*/ ref NYCbCrA p) {
+} partial class imageᴛNYCbCrA {
+
+public static color.Model ColorModel(this ref NYCbCrA p) {
     return color.NYCbCrAModel;
 }
 
-internal static color.Color At⁔(/*this*/ ref NYCbCrA p, nint x, nint y) {
+public static color.Color At(this ref NYCbCrA p, nint x, nint y) {
     return p.NYCbCrAAt(x, y);
 }
 
-internal static color.RGBA64 RGBA64At⁔(/*this*/ ref NYCbCrA p, nint x, nint y) {
+public static color.RGBA64 RGBA64At(this ref NYCbCrA p, nint x, nint y) {
     var (r, g, b, a) = p.NYCbCrAAt(x, y).RGBA();
     return new color.RGBA64((uint16)r, (uint16)g, (uint16)b, (uint16)a);
 }
 
-internal static color.NYCbCrA NYCbCrAAt⁔(/*this*/ ref NYCbCrA p, nint x, nint y) {
+public static color.NYCbCrA NYCbCrAAt(this ref NYCbCrA p, nint x, nint y) {
     if (!(new Point(X: x, Y: y).In(p.Rect))) {
         return new color.NYCbCrA();
     }
@@ -278,13 +289,13 @@ internal static color.NYCbCrA NYCbCrAAt⁔(/*this*/ ref NYCbCrA p, nint x, nint 
 
 // AOffset returns the index of the first element of A that corresponds to the
 // pixel at (x, y).
-internal static nint AOffset⁔(/*this*/ ref NYCbCrA p, nint x, nint y) {
+public static nint AOffset(this ref NYCbCrA p, nint x, nint y) {
     return (y - p.Rect.Min.Y) * p.AStride + (x - p.Rect.Min.X);
 }
 
 // SubImage returns an image representing the portion of the image p visible
 // through r. The returned value shares pixels with the original image.
-internal static Image SubImage⁔(/*this*/ ref NYCbCrA p, Rectangle r) {
+public static Image SubImage(this ref NYCbCrA p, Rectangle r) {
     r = r.Intersect(p.Rect);
     // If r1 and r2 are Rectangles, r1.Intersect(r2) is not guaranteed to be inside
     // either r1 or r2 if the intersection is empty. Without explicitly checking for
@@ -315,7 +326,7 @@ internal static Image SubImage⁔(/*this*/ ref NYCbCrA p, Rectangle r) {
 }
 
 // Opaque scans the entire image and reports whether it is fully opaque.
-internal static bool Opaque⁔(/*this*/ ref NYCbCrA p) {
+public static bool Opaque(this ref NYCbCrA p) {
     if (p.Rect.Empty()) {
         return true;
     }
@@ -332,6 +343,8 @@ internal static bool Opaque⁔(/*this*/ ref NYCbCrA p) {
     }
     return true;
 }
+
+} partial class image_package {
 
 // NewNYCbCrA returns a new [NYCbCrA] image with the given bounds and subsample
 // ratio.

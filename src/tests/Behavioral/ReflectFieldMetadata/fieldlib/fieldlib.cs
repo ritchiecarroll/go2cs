@@ -1,5 +1,7 @@
 namespace go.ReflectFieldMetadata;
 
+using static fieldlib_package;
+
 partial class fieldlib_package {
 
 partial struct Outer {
@@ -7,6 +9,8 @@ partial struct Outer {
     internal nint unexported;
 }
 
-internal static nint Sum⁔(/*this*/ Outer o) { return o.Exported + o.unexported; }
+} partial class fieldlibᴛOuter {
 
-} // end fieldlib_package
+public static nint Sum(this Outer o) { return o.Exported + o.unexported; }
+
+}

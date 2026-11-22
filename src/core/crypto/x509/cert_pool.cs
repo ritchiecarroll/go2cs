@@ -9,6 +9,7 @@ using pem = encoding.pem_package;
 using sync = sync_package;
 using encoding;
 using go.crypto;
+using static x509_package;
 
 partial class x509_package {
 
@@ -65,33 +66,35 @@ public static ж<CertPool> NewCertPool() {
     ));
 }
 
+} partial class x509ᴛCertPool {
+
 // len returns the number of certs in the set.
 // A nil set is a valid empty set.
-internal static nint len⁔(/*this*/ ж<CertPool> Ꮡs) {
+internal static nint len(this ж<CertPool> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     if (Ꮡs == nil) {
         return 0;
     }
-    return len(s.lazyCerts);
+    return builtin.len(s.lazyCerts);
 }
 
 // cert returns cert index n in s.
-internal static (ж<Certificate>, Func<slice<ж<Certificate>>, error>, error) cert⁔(/*this*/ ref CertPool s, nint n) {
+internal static (ж<Certificate>, Func<slice<ж<Certificate>>, error>, error) cert(this ref CertPool s, nint n) {
     var (cert, err) = s.lazyCerts[n].getCert();
     return (cert, s.lazyCerts[n].constraint, err);
 }
 
 // Clone returns a copy of s.
-internal static ж<CertPool> Clone⁔(/*this*/ ref CertPool s) {
+public static ж<CertPool> Clone(this ref CertPool s) {
     var p = Ꮡ(new CertPool(
-        byName: new map<@string, slice<nint>>(len(s.byName)),
-        lazyCerts: new slice<lazyCert>(len(s.lazyCerts)),
-        haveSum: new map<sum224, bool>(len(s.haveSum)),
+        byName: new map<@string, slice<nint>>(builtin.len(s.byName)),
+        lazyCerts: new slice<lazyCert>(builtin.len(s.lazyCerts)),
+        haveSum: new map<sum224, bool>(builtin.len(s.haveSum)),
         systemPool: s.systemPool
     ));
     foreach (var (k, v) in s.byName) {
-        var indexes = new slice<nint>(len(v));
+        var indexes = new slice<nint>(builtin.len(v));
         copy(indexes, v);
         p.byName[k] = indexes;
     }
@@ -103,6 +106,8 @@ internal static ж<CertPool> Clone⁔(/*this*/ ref CertPool s) {
     copy(p.lazyCerts, s.lazyCerts);
     return p;
 }
+
+} partial class x509_package {
 
 // SystemCertPool returns a copy of the system cert pool.
 //
@@ -128,9 +133,11 @@ partial struct potentialParent {
     internal Func<slice<ж<Certificate>>, error> constraint;
 }
 
+} partial class x509ᴛCertPool {
+
 // findPotentialParents returns the certificates in s which might have signed
 // cert.
-internal static slice<potentialParent> findPotentialParents⁔(/*this*/ ж<CertPool> Ꮡs, ж<Certificate> Ꮡcert) {
+internal static slice<potentialParent> findPotentialParents(this ж<CertPool> Ꮡs, ж<Certificate> Ꮡcert) {
     ref var s = ref Ꮡs.DerefOrNull();
     ref var cert = ref Ꮡcert.DerefOrNull();
     var matchingKeyIDᴷ = new stackAppend<potentialParent>();
@@ -161,7 +168,7 @@ internal static slice<potentialParent> findPotentialParents⁔(/*this*/ ж<CertP
             matchingKeyID = append(matchingKeyIDᴷ, matchingKeyID, new potentialParent(candidate, constraint));
             break;
         }
-        case {} when (len(candidate.SubjectKeyId) == 0 && len(cert.AuthorityKeyId) > 0) || (len(candidate.SubjectKeyId) > 0 && len(cert.AuthorityKeyId) == 0): {
+        case {} when (builtin.len(candidate.SubjectKeyId) == 0 && builtin.len(cert.AuthorityKeyId) > 0) || (builtin.len(candidate.SubjectKeyId) > 0 && builtin.len(cert.AuthorityKeyId) == 0): {
             oneKeyID = append(oneKeyIDᴷ, oneKeyID, new potentialParent(candidate, constraint));
             break;
         }
@@ -171,7 +178,7 @@ internal static slice<potentialParent> findPotentialParents⁔(/*this*/ ж<CertP
         }}
     }
 
-    nint found = len(matchingKeyID) + len(oneKeyID) + len(mismatchKeyID);
+    nint found = builtin.len(matchingKeyID) + builtin.len(oneKeyID) + builtin.len(mismatchKeyID);
     if (found == 0) {
         return default;
     }
@@ -182,7 +189,7 @@ internal static slice<potentialParent> findPotentialParents⁔(/*this*/ ж<CertP
     return candidates;
 }
 
-internal static bool contains⁔(/*this*/ ж<CertPool> Ꮡs, ж<Certificate> Ꮡcert) {
+internal static bool contains(this ж<CertPool> Ꮡs, ж<Certificate> Ꮡcert) {
     ref var s = ref Ꮡs.DerefOrNull();
     ref var cert = ref Ꮡcert.DerefOrNull();
 
@@ -193,7 +200,7 @@ internal static bool contains⁔(/*this*/ ж<CertPool> Ꮡs, ж<Certificate> Ꮡ
 }
 
 // AddCert adds a certificate to a pool.
-internal static void AddCert⁔(/*this*/ ref CertPool s, ж<Certificate> Ꮡcert) {
+public static void AddCert(this ref CertPool s, ж<Certificate> Ꮡcert) {
     ref var cert = ref Ꮡcert.DerefOrNull();
 
     if (Ꮡcert == nil) {
@@ -207,7 +214,7 @@ internal static void AddCert⁔(/*this*/ ref CertPool s, ж<Certificate> Ꮡcert
 //
 // The rawSubject is Certificate.RawSubject and must be non-empty.
 // The getCert func may be called 0 or more times.
-internal static void addCertFunc⁔(/*this*/ ref CertPool s, sum224 rawSum224, @string rawSubject, Func<(ж<Certificate>, error)> getCert, Func<slice<ж<Certificate>>, error> constraint) {
+internal static void addCertFunc(this ref CertPool s, sum224 rawSum224, @string rawSubject, Func<(ж<Certificate>, error)> getCert, Func<slice<ж<Certificate>>, error> constraint) {
     rawSum224 = rawSum224.Clone();
 
     if (getCert == nil) {
@@ -225,13 +232,17 @@ internal static void addCertFunc⁔(/*this*/ ref CertPool s, sum224 rawSum224, @
         getCert: getCert,
         constraint: constraint
     ));
-    s.byName[rawSubject] = append(s.byName[rawSubject], len(s.lazyCerts) - 1);
+    s.byName[rawSubject] = append(s.byName[rawSubject], builtin.len(s.lazyCerts) - 1);
 }
+
+} partial class x509_package {
 
 internal partial struct AppendCertsFromPEM_lazyCert /*dyn*/ {
     /*embed*/ public sync_package.Once Once;
     internal ж<Certificate> v;
 }
+
+} partial class x509ᴛCertPool {
 
 // AppendCertsFromPEM attempts to parse a series of PEM encoded certificates.
 // It appends any certificates found to s and reports whether any certificates
@@ -239,16 +250,16 @@ internal partial struct AppendCertsFromPEM_lazyCert /*dyn*/ {
 //
 // On many Linux systems, /etc/ssl/cert.pem will contain the system wide set
 // of root CAs in a format suitable for this function.
-internal static bool /*ok*/ AppendCertsFromPEM⁔(/*this*/ ref CertPool s, slice<byte> pemCerts) {
+public static bool /*ok*/ AppendCertsFromPEM(this ref CertPool s, slice<byte> pemCerts) {
     bool ok = default;
 
-    while (len(pemCerts) > 0) {
+    while (builtin.len(pemCerts) > 0) {
         ж<pem.Block> block = default;
         (block, pemCerts) = pem.Decode(pemCerts);
         if (block == nil) {
             break;
         }
-        if (block.Type != "CERTIFICATE"u8 || len(block.Headers) != 0) {
+        if (block.Type != "CERTIFICATE"u8 || builtin.len(block.Headers) != 0) {
             continue;
         }
 
@@ -277,7 +288,7 @@ internal static bool /*ok*/ AppendCertsFromPEM⁔(/*this*/ ref CertPool s, slice
 //
 // Deprecated: if s was returned by [SystemCertPool], Subjects
 // will not include the system roots.
-internal static slice<slice<byte>> Subjects⁔(/*this*/ ж<CertPool> Ꮡs) {
+public static slice<slice<byte>> Subjects(this ж<CertPool> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     var res = new slice<slice<byte>>(Ꮡs.len());
@@ -288,14 +299,14 @@ internal static slice<slice<byte>> Subjects⁔(/*this*/ ж<CertPool> Ꮡs) {
 }
 
 // Equal reports whether s and other are equal.
-internal static bool Equal⁔(/*this*/ ж<CertPool> Ꮡs, ж<CertPool> Ꮡother) {
+public static bool Equal(this ж<CertPool> Ꮡs, ж<CertPool> Ꮡother) {
     ref var s = ref Ꮡs.DerefOrNull();
     ref var other = ref Ꮡother.DerefOrNull();
 
     if (Ꮡs == nil || Ꮡother == nil) {
         return Ꮡs == Ꮡother;
     }
-    if (s.systemPool != other.systemPool || len(s.haveSum) != len(other.haveSum)) {
+    if (s.systemPool != other.systemPool || builtin.len(s.haveSum) != builtin.len(other.haveSum)) {
         return false;
     }
     foreach (var (kᴛ1, _) in s.haveSum) {
@@ -313,7 +324,7 @@ internal static bool Equal⁔(/*this*/ ж<CertPool> Ꮡs, ж<CertPool> Ꮡother)
 // it will additionally pass the whole chain to constraint to determine its
 // validity. If constraint returns a non-nil error, the chain will be discarded.
 // constraint may be called concurrently from multiple goroutines.
-internal static void AddCertWithConstraint⁔(/*this*/ ref CertPool s, ж<Certificate> Ꮡcert, Func<slice<ж<Certificate>>, error> constraint) {
+public static void AddCertWithConstraint(this ref CertPool s, ж<Certificate> Ꮡcert, Func<slice<ж<Certificate>>, error> constraint) {
     ref var cert = ref Ꮡcert.DerefOrNull();
 
     if (Ꮡcert == nil) {
@@ -322,4 +333,4 @@ internal static void AddCertWithConstraint⁔(/*this*/ ref CertPool s, ж<Certif
     s.addCertFunc(sha256.Sum224(cert.Raw), (@string)cert.RawSubject, () => (Ꮡcert, default), constraint);
 }
 
-} // end x509_package
+}

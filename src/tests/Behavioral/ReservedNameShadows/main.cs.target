@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -57,7 +58,11 @@ partial struct box {
     internal slice<nint> items;
 }
 
-internal static nint len⁔(/*this*/ ref box b) { return len(b.items) + 1; }
+} partial class mainᴛbox {
+
+internal static nint len(this ref box b) { return builtin.len(b.items) + 1; }
+
+} partial class main_package {
 
 internal static nint freeLen() {
     var s = slice<nint>([1, 2, 3]);

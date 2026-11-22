@@ -20,6 +20,7 @@ using go;
 using io = io_package;
 using iter = iter_package;
 using path;
+using static buildcfg_package;
 
 partial class buildcfg_package {
 
@@ -173,7 +174,9 @@ partial struct GoarmFeatures {
     public bool SoftFloat;
 }
 
-internal static @string String⁔(/*this*/ GoarmFeatures g) {
+} partial class buildcfgᴛGoarmFeatures {
+
+public static @string String(this GoarmFeatures g) {
     @string armStr = strconv.Itoa(g.Version);
     if (g.SoftFloat) {
         armStr += ",softfloat"u8;
@@ -182,6 +185,8 @@ internal static @string String⁔(/*this*/ GoarmFeatures g) {
     }
     return armStr;
 }
+
+} partial class buildcfg_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string goarmˢ => ref goarmˢᵇ;
@@ -256,7 +261,9 @@ partial struct Goarm64Features {
     public bool Crypto;
 }
 
-internal static @string String⁔(/*this*/ Goarm64Features g) {
+} partial class buildcfgᴛGoarm64Features {
+
+public static @string String(this Goarm64Features g) {
     @string arm64Str = g.Version;
     if (g.LSE) {
         arm64Str += ",lse"u8;
@@ -266,6 +273,8 @@ internal static @string String⁔(/*this*/ Goarm64Features g) {
     }
     return arm64Str;
 }
+
+} partial class buildcfg_package {
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static ref readonly @string lseOptᶜ => ref lseOptᶜᵇ;
@@ -333,9 +342,11 @@ internal static Goarm64Features /*g*/ goarm64() {
     return g;
 }
 
+} partial class buildcfgᴛGoarm64Features {
+
 // Returns true if g supports giving ARM64 ISA
 // Note that this function doesn't accept / test suffixes (like ",lse" or ",crypto")
-internal static bool Supports⁔(/*this*/ Goarm64Features g, @string s) {
+public static bool Supports(this Goarm64Features g, @string s) {
     // We only accept "v{8-9}.{0-9}. Everything else is malformed.
     if (len(s) != 4) {
         return false;
@@ -361,6 +372,8 @@ internal static bool Supports⁔(/*this*/ Goarm64Features g, @string s) {
         return false;
     }
 }
+
+} partial class buildcfg_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string gomipsˢ => ref gomipsˢᵇ;
@@ -436,13 +449,17 @@ internal static nint goriscv64() {
 public partial struct gowasmFeatures {
 }
 
+} partial class buildcfgᴛgowasmFeatures {
+
 // Legacy features, now always enabled
 //SatConv bool
 //SignExt bool
-internal static @string String⁔(/*this*/ gowasmFeatures f) {
+public static @string String(this gowasmFeatures f) {
     slice<@string> flags = default;
     return strings.Join(flags, ",");
 }
+
+} partial class buildcfg_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string gowasmˢ => ref gowasmˢᵇ;

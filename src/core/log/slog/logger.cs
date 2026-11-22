@@ -16,6 +16,7 @@ using go.sync;
 using io = io_package;
 using ꓸꓸꓸAttr = Span<slog_package.Attr>;
 using ꓸꓸꓸany = Span<any>;
+using static slog_package;
 
 partial class slog_package {
 
@@ -92,7 +93,9 @@ partial struct handlerWriter {
     internal bool capturePC;
 }
 
-internal static partial (nint, error) Write⁔(/*this*/ ref handlerWriter w, slice<byte> buf) {
+} partial class slogᴛhandlerWriter {
+
+internal static partial (nint, error) Write(this ref handlerWriter w, slice<byte> buf) {
     Level level = w.level.Level();
     if (!w.h.Enabled(context.Background(), level)) {
         return (0, default);
@@ -112,6 +115,8 @@ internal static partial (nint, error) Write⁔(/*this*/ ref handlerWriter w, sli
     return (origLen, w.h.Handle(context.Background(), r));
 }
 
+} partial class slog_package {
+
 // A Logger records structured information about each call to its
 // Log, Debug, Info, Warn, and Error methods.
 // For each call, it creates a [Record] and passes it to a [Handler].
@@ -122,18 +127,20 @@ partial struct Logger {
     internal Handler handler; // for structured logging
 }
 
-internal static ж<Logger> clone⁔(/*this*/ ref Logger l) {
+} partial class slogᴛLogger {
+
+internal static ж<Logger> clone(this ref Logger l) {
     ref var c = ref heap<Logger>(l, out var Ꮡc);
     return Ꮡc;
 }
 
 // Handler returns l's Handler.
-internal static Handler Handler⁔(/*this*/ ref Logger l) { return l.handler; }
+public static Handler Handler(this ref Logger l) { return l.handler; }
 
 // With returns a Logger that includes the given attributes
 // in each output operation. Arguments are converted to
 // attributes as if by [Logger.Log].
-internal static ж<Logger> With⁔(/*this*/ ж<Logger> Ꮡl, params ꓸꓸꓸany argsʗp) {
+public static ж<Logger> With(this ж<Logger> Ꮡl, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();
     ref var l = ref Ꮡl.DerefOrNull();
 
@@ -151,7 +158,7 @@ internal static ж<Logger> With⁔(/*this*/ ж<Logger> Ꮡl, params ꓸꓸꓸany
 // method of the Logger's Handler.)
 //
 // If name is empty, WithGroup returns the receiver.
-internal static ж<Logger> WithGroup⁔(/*this*/ ж<Logger> Ꮡl, @string name) {
+public static ж<Logger> WithGroup(this ж<Logger> Ꮡl, @string name) {
     ref var l = ref Ꮡl.DerefOrNull();
 
     if (name == ""u8) {
@@ -161,6 +168,8 @@ internal static ж<Logger> WithGroup⁔(/*this*/ ж<Logger> Ꮡl, @string name) 
     c.handler = l.handler.WithGroup(name);
     return c;
 }
+
+} partial class slog_package {
 
 // New creates a new Logger with the given non-nil Handler.
 public static ж<Logger> New(Handler h) {
@@ -177,13 +186,17 @@ public static ж<Logger> With(params ꓸꓸꓸany argsʗp) {
     return Default().With(args.ꓸꓸꓸ);
 }
 
+} partial class slogᴛLogger {
+
 // Enabled reports whether l emits log records at the given context and level.
-internal static bool Enabled⁔(/*this*/ ref Logger l, context.Context ctx, Level level) {
+public static bool Enabled(this ref Logger l, context.Context ctx, Level level) {
     if (ctx == nil) {
         ctx = context.Background();
     }
     return l.Handler().Enabled(ctx, level);
 }
+
+} partial class slog_package {
 
 // NewLogLogger returns a new [log.Logger] such that each call to its Output method
 // dispatches a Record to the specified handler. The logger acts as a bridge from
@@ -191,6 +204,8 @@ internal static bool Enabled⁔(/*this*/ ref Logger l, context.Context ctx, Leve
 public static ж<log.Logger> NewLogLogger(Handler h, Level level) {
     return log.New(new handlerWriterжWriter(Ꮡ(new handlerWriter(h, level, true))), ""u8, 0);
 }
+
+} partial class slogᴛLogger {
 
 // Log emits a log record with the current time and the given level and message.
 // The Record's Attrs consist of the Logger's attributes followed by
@@ -202,70 +217,70 @@ public static ж<log.Logger> NewLogLogger(Handler h, Level level) {
 //     the following argument is treated as the value and the two are combined
 //     into an Attr.
 //   - Otherwise, the argument is treated as a value with key "!BADKEY".
-internal static partial void Log⁔(/*this*/ ref Logger l, context.Context ctx, Level level, @string msg, params ꓸꓸꓸany argsʗp) {
+public static partial void Log(this ref Logger l, context.Context ctx, Level level, @string msg, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     l.log(ctx, level, msg, args.ꓸꓸꓸ);
 }
 
 // LogAttrs is a more efficient version of [Logger.Log] that accepts only Attrs.
-internal static partial void LogAttrs⁔(/*this*/ ref Logger l, context.Context ctx, Level level, @string msg, params ꓸꓸꓸAttr attrsʗp) {
+public static partial void LogAttrs(this ref Logger l, context.Context ctx, Level level, @string msg, params ꓸꓸꓸAttr attrsʗp) {
     var attrs = attrsʗp.sslice();
 
     l.logAttrs(ctx, level, msg, attrs.ꓸꓸꓸ);
 }
 
 // Debug logs at [LevelDebug].
-internal static partial void Debug⁔(/*this*/ ref Logger l, @string msg, params ꓸꓸꓸany argsʗp) {
+public static partial void Debug(this ref Logger l, @string msg, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     l.log(context.Background(), LevelDebug, msg, args.ꓸꓸꓸ);
 }
 
 // DebugContext logs at [LevelDebug] with the given context.
-internal static partial void DebugContext⁔(/*this*/ ref Logger l, context.Context ctx, @string msg, params ꓸꓸꓸany argsʗp) {
+public static partial void DebugContext(this ref Logger l, context.Context ctx, @string msg, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     l.log(ctx, LevelDebug, msg, args.ꓸꓸꓸ);
 }
 
 // Info logs at [LevelInfo].
-internal static partial void Info⁔(/*this*/ ref Logger l, @string msg, params ꓸꓸꓸany argsʗp) {
+public static partial void Info(this ref Logger l, @string msg, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     l.log(context.Background(), LevelInfo, msg, args.ꓸꓸꓸ);
 }
 
 // InfoContext logs at [LevelInfo] with the given context.
-internal static partial void InfoContext⁔(/*this*/ ref Logger l, context.Context ctx, @string msg, params ꓸꓸꓸany argsʗp) {
+public static partial void InfoContext(this ref Logger l, context.Context ctx, @string msg, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     l.log(ctx, LevelInfo, msg, args.ꓸꓸꓸ);
 }
 
 // Warn logs at [LevelWarn].
-internal static partial void Warn⁔(/*this*/ ref Logger l, @string msg, params ꓸꓸꓸany argsʗp) {
+public static partial void Warn(this ref Logger l, @string msg, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     l.log(context.Background(), LevelWarn, msg, args.ꓸꓸꓸ);
 }
 
 // WarnContext logs at [LevelWarn] with the given context.
-internal static partial void WarnContext⁔(/*this*/ ref Logger l, context.Context ctx, @string msg, params ꓸꓸꓸany argsʗp) {
+public static partial void WarnContext(this ref Logger l, context.Context ctx, @string msg, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     l.log(ctx, LevelWarn, msg, args.ꓸꓸꓸ);
 }
 
 // Error logs at [LevelError].
-internal static partial void Error⁔(/*this*/ ref Logger l, @string msg, params ꓸꓸꓸany argsʗp) {
+public static partial void Error(this ref Logger l, @string msg, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     l.log(context.Background(), LevelError, msg, args.ꓸꓸꓸ);
 }
 
 // ErrorContext logs at [LevelError] with the given context.
-internal static partial void ErrorContext⁔(/*this*/ ref Logger l, context.Context ctx, @string msg, params ꓸꓸꓸany argsʗp) {
+public static partial void ErrorContext(this ref Logger l, context.Context ctx, @string msg, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     l.log(ctx, LevelError, msg, args.ꓸꓸꓸ);
@@ -274,7 +289,7 @@ internal static partial void ErrorContext⁔(/*this*/ ref Logger l, context.Cont
 // log is the low-level logging method for methods that take ...any.
 // It must always be called directly by an exported logging method
 // or function, because it uses a fixed call depth to obtain the pc.
-internal static partial void log⁔(/*this*/ ref Logger l, context.Context ctx, Level level, @string msg, params ꓸꓸꓸany argsʗp) {
+internal static partial void log(this ref Logger l, context.Context ctx, Level level, @string msg, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     if (ctx == nil) {
@@ -296,7 +311,7 @@ internal static partial void log⁔(/*this*/ ref Logger l, context.Context ctx, 
 }
 
 // logAttrs is like [Logger.log], but for methods that take ...Attr.
-internal static partial void logAttrs⁔(/*this*/ ref Logger l, context.Context ctx, Level level, @string msg, params ꓸꓸꓸAttr attrsʗp) {
+internal static partial void logAttrs(this ref Logger l, context.Context ctx, Level level, @string msg, params ꓸꓸꓸAttr attrsʗp) {
     var attrs = attrsʗp.sslice();
 
     if (ctx == nil) {
@@ -316,6 +331,8 @@ internal static partial void logAttrs⁔(/*this*/ ref Logger l, context.Context 
     r.AddAttrs(attrs.ꓸꓸꓸ);
     _ = l.Handler().Handle(ctx, r);
 }
+
+} partial class slog_package {
 
 // Debug calls [Logger.Debug] on the default logger.
 public static partial void Debug(@string msg, params ꓸꓸꓸany argsʗp) {

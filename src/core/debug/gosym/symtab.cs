@@ -13,6 +13,7 @@ using fmt = fmt_package;
 using strconv = strconv_package;
 using strings = strings_package;
 using encoding;
+using static gosym_package;
 
 partial class gosym_package {
 
@@ -31,15 +32,17 @@ partial struct Sym {
     internal version goVersion;
 }
 
+} partial class gosymᴛSym {
+
 // Static reports whether this symbol is static (not visible outside its file).
-internal static bool Static⁔(/*this*/ ref Sym s) { return s.Type >= 'a'; }
+public static bool Static(this ref Sym s) { return s.Type >= 'a'; }
 
 // nameWithoutInst returns s.Name if s.Name has no brackets (does not reference an
 // instantiated type, function, or method). If s.Name contains brackets, then it
 // returns s.Name with all the contents between (and including) the outermost left
 // and right bracket removed. This is useful to ignore any extra slashes or dots
 // inside the brackets from the string searches below, where needed.
-internal static @string nameWithoutInst⁔(/*this*/ ref Sym s) {
+internal static @string nameWithoutInst(this ref Sym s) {
     nint start = strings.Index(s.Name, "[");
     if (start < 0) {
         return s.Name;
@@ -60,7 +63,7 @@ private static readonly @string typeˢ2ᵇ = "type."u8;
 
 // PackageName returns the package part of the symbol name,
 // or the empty string if there is none.
-internal static @string PackageName⁔(/*this*/ ref Sym s) {
+public static @string PackageName(this ref Sym s) {
     @string name = s.nameWithoutInst();
 
     // Since go1.20, a prefix of "type:" and "go:" is a compiler-generated symbol,
@@ -90,7 +93,7 @@ internal static @string PackageName⁔(/*this*/ ref Sym s) {
 // ReceiverName returns the receiver type name of this symbol,
 // or the empty string if there is none.  A receiver name is only detected in
 // the case that s.Name is fully-specified with a package name.
-internal static @string ReceiverName⁔(/*this*/ ref Sym s) {
+public static @string ReceiverName(this ref Sym s) {
     @string name = s.nameWithoutInst();
     // If we find a slash in name, it should precede any bracketed expression
     // that was removed, so pathend will apply correctly to name and s.Name.
@@ -115,7 +118,7 @@ internal static @string ReceiverName⁔(/*this*/ ref Sym s) {
 }
 
 // BaseName returns the symbol name without the package or receiver name.
-internal static @string BaseName⁔(/*this*/ ref Sym s) {
+public static @string BaseName(this ref Sym s) {
     @string name = s.nameWithoutInst();
     nint i = strings.LastIndex(name, "."); if (i != -1) {
         if (s.Name != name) {
@@ -132,6 +135,8 @@ internal static @string BaseName⁔(/*this*/ ref Sym s) {
     }
     return s.Name;
 }
+
+} partial class gosym_package {
 
 // A Func collects information about a single function.
 partial struct Func {
@@ -565,9 +570,11 @@ break_countloop:;
     return (Ꮡt, default);
 }
 
+} partial class gosymᴛTable {
+
 // PCToFunc returns the function containing the program counter pc,
 // or nil if there is no such function.
-internal static ж<Func> PCToFunc⁔(/*this*/ ref Table t, uint64 pc) {
+public static ж<Func> PCToFunc(this ref Table t, uint64 pc) {
     var funcs = t.Funcs;
     while (len(funcs) > 0) {
         nint m = len(funcs) / 2;
@@ -590,7 +597,7 @@ internal static ж<Func> PCToFunc⁔(/*this*/ ref Table t, uint64 pc) {
 
 // PCToLine looks up line number information for a program counter.
 // If there is no information, it returns fn == nil.
-internal static (@string @file, nint line, ж<Func> fn) PCToLine⁔(/*this*/ ref Table t, uint64 pc) {
+public static (@string @file, nint line, ж<Func> fn) PCToLine(this ref Table t, uint64 pc) {
     @string @file = default;
     nint line = default;
     ж<Func> fn = default;
@@ -610,7 +617,7 @@ internal static (@string @file, nint line, ж<Func> fn) PCToLine⁔(/*this*/ ref
 // LineToPC looks up the first program counter on the given line in
 // the named file. It returns [UnknownFileError] or [UnknownLineError] if
 // there is an error looking up this line.
-internal static (uint64 pc, ж<Func> fn, error err) LineToPC⁔(/*this*/ ref Table t, @string @file, nint line) {
+public static (uint64 pc, ж<Func> fn, error err) LineToPC(this ref Table t, @string @file, nint line) {
     uint64 pc = default;
     ж<Func> fn = default;
     error err = default;
@@ -644,7 +651,7 @@ internal static (uint64 pc, ж<Func> fn, error err) LineToPC⁔(/*this*/ ref Tab
 
 // LookupSym returns the text, data, or bss symbol with the given name,
 // or nil if no such symbol is found.
-internal static ж<Sym> LookupSym⁔(/*this*/ ref Table t, @string name) {
+public static ж<Sym> LookupSym(this ref Table t, @string name) {
     // TODO(austin) Maybe make a map
     foreach (var i in range(len(t.Syms))) {
         var s = Ꮡ(t.Syms, i);
@@ -661,7 +668,7 @@ internal static ж<Sym> LookupSym⁔(/*this*/ ref Table t, @string name) {
 
 // LookupFunc returns the text, data, or bss symbol with the given name,
 // or nil if no such symbol is found.
-internal static ж<Func> LookupFunc⁔(/*this*/ ref Table t, @string name) {
+public static ж<Func> LookupFunc(this ref Table t, @string name) {
     foreach (var i in range(len(t.Funcs))) {
         var f = Ꮡ(t.Funcs, i);
         if (f.Sym.Name == name) {
@@ -672,7 +679,7 @@ internal static ж<Func> LookupFunc⁔(/*this*/ ref Table t, @string name) {
 }
 
 // SymByAddr returns the text, data, or bss symbol starting at the given address.
-internal static ж<Sym> SymByAddr⁔(/*this*/ ref Table t, uint64 addr) {
+public static ж<Sym> SymByAddr(this ref Table t, uint64 addr) {
     foreach (var i in range(len(t.Syms))) {
         var s = Ꮡ(t.Syms, i);
         switch (s.Type) {
@@ -686,9 +693,7 @@ internal static ж<Sym> SymByAddr⁔(/*this*/ ref Table t, uint64 addr) {
     return default;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string malformedSymbolTableˢ => ref malformedSymbolTableˢᵇ;
-private static readonly @string malformedSymbolTableˢᵇ = "<malformed symbol table>"u8;
+} partial class gosym_package {
 
 internal partial struct lineFromAline_stackEnt /*dyn*/ {
     internal @string path;
@@ -696,6 +701,12 @@ internal partial struct lineFromAline_stackEnt /*dyn*/ {
     internal nint offset;
     internal ж<lineFromAline_stackEnt> prev;
 }
+
+} partial class gosymᴛObj {
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string malformedSymbolTableˢ => ref malformedSymbolTableˢᵇ;
+private static readonly @string malformedSymbolTableˢᵇ = "<malformed symbol table>"u8;
 
 /*
  * Object files
@@ -706,7 +717,7 @@ internal partial struct lineFromAline_stackEnt /*dyn*/ {
 // we never quite found all the corner cases.
 //
 // Go 1.2 and later use a simpler format, documented at golang.org/s/go12symtab.
-internal static (@string, nint) lineFromAline⁔(/*this*/ ref Obj o, nint aline) {
+internal static (@string, nint) lineFromAline(this ref Obj o, nint aline) {
     var noPath = Ꮡ(new lineFromAline_stackEnt("", 0, 0, nil));
     var tos = noPath;
 
@@ -747,7 +758,7 @@ break_pathloop:;
     return (tos.path, aline - tos.start - tos.offset + 1);
 }
 
-internal static (nint, error) alineFromLine⁔(/*this*/ ref Obj o, @string path, nint line) {
+internal static (nint, error) alineFromLine(this ref Obj o, @string path, nint line) {
     if (line < 1) {
         return (0, new UnknownLineErrorжerror(Ꮡ(new UnknownLineError(path, line))));
     }
@@ -793,6 +804,8 @@ break_pathloop:;
     return (0, ((UnknownFileError)path));
 }
 
+} partial class gosym_package {
+
 /*
  * Errors
  */
@@ -801,7 +814,11 @@ break_pathloop:;
 // the symbol table.
 partial struct UnknownFileError /*@string*/;
 
-internal static @string Error⁔(/*this*/ UnknownFileError e) { return "unknown file: "u8 + ((@string)e); }
+} partial class gosymᴛUnknownFileError {
+
+public static @string Error(this UnknownFileError e) { return "unknown file: "u8 + ((@string)e); }
+
+} partial class gosym_package {
 
 // UnknownLineError represents a failure to map a line to a program
 // counter, either because the line is beyond the bounds of the file
@@ -811,9 +828,13 @@ partial struct UnknownLineError {
     public nint Line;
 }
 
-internal static @string Error⁔(/*this*/ ref UnknownLineError e) {
+} partial class gosymᴛUnknownLineError {
+
+public static @string Error(this ref UnknownLineError e) {
     return "no code at "u8 + e.File + ":"u8 + strconv.Itoa(e.Line);
 }
+
+} partial class gosym_package {
 
 // DecodingError represents an error during the decoding of
 // the symbol table.
@@ -823,7 +844,9 @@ partial struct DecodingError {
     internal any val;
 }
 
-internal static @string Error⁔(/*this*/ ref DecodingError e) {
+} partial class gosymᴛDecodingError {
+
+public static @string Error(this ref DecodingError e) {
     @string msg = e.msg;
     if (e.val != nil) {
         msg += fmt.Sprintf(" '%v'"u8, e.val);
@@ -832,4 +855,4 @@ internal static @string Error⁔(/*this*/ ref DecodingError e) {
     return msg;
 }
 
-} // end gosym_package
+}

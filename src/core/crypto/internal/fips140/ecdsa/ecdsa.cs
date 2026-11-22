@@ -14,6 +14,7 @@ using io = io_package;
 using sync = sync_package;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140;
+using static ecdsa_package;
 
 partial class ecdsa_package {
 
@@ -25,22 +26,30 @@ partial struct PrivateKey {
     internal slice<byte> d; // bigmod.(*Nat).Bytes output (same length as the curve order)
 }
 
-internal static slice<byte> Bytes⁔(/*this*/ ref PrivateKey priv) {
+} partial class ecdsaᴛPrivateKey {
+
+public static slice<byte> Bytes(this ref PrivateKey priv) {
     return priv.d;
 }
 
-internal static ж<PublicKey> PublicKey⁔(/*this*/ ж<PrivateKey> Ꮡpriv) {
+public static ж<PublicKey> PublicKey(this ж<PrivateKey> Ꮡpriv) {
     return Ꮡpriv.Ꮡpub;
 }
+
+} partial class ecdsa_package {
 
 partial struct PublicKey {
     internal curveID curve;
     internal slice<byte> q; // uncompressed nistec Point.Bytes output
 }
 
-internal static slice<byte> Bytes⁔(/*this*/ ref PublicKey pub) {
+} partial class ecdsaᴛPublicKey {
+
+public static slice<byte> Bytes(this ref PublicKey pub) {
     return pub.q;
 }
+
+} partial class ecdsa_package {
 
 partial struct curveID /*@string*/;
 

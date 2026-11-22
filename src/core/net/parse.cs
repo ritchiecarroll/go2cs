@@ -12,6 +12,7 @@ using time = time_package;
 using @internal;
 using fs = go.io.fs_package;
 using go.io;
+using static net_package;
 
 partial class net_package {
 
@@ -21,9 +22,11 @@ partial struct @file {
     internal bool atEOF;
 }
 
-internal static void close⁔(/*this*/ ref @file f) { f.ΔΔfile.Close(); }
+} partial class netᴛfile {
 
-internal static (@string s, bool ok) getLineFromData⁔(/*this*/ ref @file f) {
+internal static void close(this ref @file f) { f.ΔΔfile.Close(); }
+
+internal static (@string s, bool ok) getLineFromData(this ref @file f) {
     @string s = default;
     bool ok = default;
 
@@ -50,7 +53,7 @@ internal static (@string s, bool ok) getLineFromData⁔(/*this*/ ref @file f) {
     return (s, ok);
 }
 
-internal static (@string s, bool ok) readLine⁔(/*this*/ ref @file f) {
+internal static (@string s, bool ok) readLine(this ref @file f) {
     @string s = default;
     bool ok = default;
 
@@ -71,7 +74,7 @@ internal static (@string s, bool ok) readLine⁔(/*this*/ ref @file f) {
     return (s, ok);
 }
 
-internal static (time.Time mtime, int64 size, error err) stat⁔(/*this*/ ref @file f) {
+internal static (time.Time mtime, int64 size, error err) stat(this ref @file f) {
     error err = default;
 
     (var st, err) = f.ΔΔfile.Stat();
@@ -80,6 +83,8 @@ internal static (time.Time mtime, int64 size, error err) stat⁔(/*this*/ ref @f
     }
     return (st.ModTime(), st.Size(), default);
 }
+
+} partial class net_package {
 
 internal static (ж<@file>, error) open(@string name) {
     var (fd, err) = os.Open(name);

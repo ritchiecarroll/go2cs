@@ -127,7 +127,7 @@ internal static (ж<Root>, error) newRoot(syscall.Handle fd, @string name) {
         name: name
     ))
     ));
-    runtime.SetFinalizer(r.root.OrTypedNil(), ((Func<ж<root>, error>)(os_package.Close⁔)));
+    runtime.SetFinalizer(r.root.OrTypedNil(), ((Func<ж<root>, error>)(osᴛroot.Close)));
     return (r, default);
 }
 

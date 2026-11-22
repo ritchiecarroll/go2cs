@@ -7,6 +7,7 @@ using fmt = fmt_package;
 using slices = slices_package;
 using strings = strings_package;
 using iter = iter_package;
+using static asmgen_package;
 
 partial class asmgen_package {
 
@@ -23,12 +24,14 @@ partial struct Func {
     internal map<@string, nint> args; // offsets of args, results on stack
 }
 
+} partial class asmgenᴛAsm {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string funcˢ => ref funcˢᵇ;
 private static readonly @string funcˢᵇ = "func "u8;
 
 // Func starts a new function in the assembly output.
-internal static ж<Func> Func⁔(/*this*/ ж<Asm> Ꮡa, @string decl) {
+public static ж<Func> Func(this ж<Asm> Ꮡa, @string decl) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     var (d, ok) = strings.CutPrefix(decl, funcˢ);
@@ -106,14 +109,16 @@ internal static ж<Func> Func⁔(/*this*/ ж<Asm> Ꮡa, @string decl) {
     return f;
 }
 
+} partial class asmgenᴛFunc {
+
 // Arg allocates a new register, copies the named argument (or result) into it,
 // and returns that register.
-internal static Reg Arg⁔(/*this*/ ref Func f, @string name) {
+public static Reg Arg(this ref Func f, @string name) {
     return f.ArgHint(name, HintNone);
 }
 
 // ArgHint is like Arg but uses a register allocation hint.
-internal static Reg ArgHint⁔(/*this*/ ref Func f, @string name, Hint hint) {
+public static Reg ArgHint(this ref Func f, @string name, Hint hint) {
     var (off, ok) = f.args[name, ꟷ];
     if (!ok) {
         f.Asm.Fatalf("unknown argument %s", name);
@@ -128,12 +133,12 @@ internal static Reg ArgHint⁔(/*this*/ ref Func f, @string name, Hint hint) {
 }
 
 // ArgPtr is like Arg but returns a RegPtr.
-internal static RegPtr ArgPtr⁔(/*this*/ ref Func f, @string name) {
+public static RegPtr ArgPtr(this ref Func f, @string name) {
     return (RegPtr)f.Arg(name);
 }
 
 // StoreArg stores src into the named argument (or result).
-internal static void StoreArg⁔(/*this*/ ref Func f, Reg src, @string name) {
+public static void StoreArg(this ref Func f, Reg src, @string name) {
     var (off, ok) = f.args[name, ꟷ];
     if (!ok) {
         f.Asm.Fatalf("unknown argument %s", name);
@@ -150,4 +155,4 @@ internal static void StoreArg⁔(/*this*/ ref Func f, Reg src, @string name) {
     a.Mov(src, mem);
 }
 
-} // end asmgen_package
+}

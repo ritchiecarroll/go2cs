@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -49,10 +50,14 @@ partial struct @file {
     internal int64 fd;
 }
 
-internal static int64 bump⁔(/*this*/ ref @file f) {
+} partial class mainᴛfile {
+
+internal static int64 bump(this ref @file f) {
     f.fd += 2;
     return f.fd;
 }
+
+} partial class main_package {
 
 partial struct mixed {
     public nint Pub;

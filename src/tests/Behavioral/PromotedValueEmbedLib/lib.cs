@@ -1,14 +1,20 @@
 namespace go;
 
+using static PromotedValueEmbedLib_package;
+
 partial class PromotedValueEmbedLib_package {
 
 partial struct common {
     internal @string label;
 }
 
-internal static @string Name⁔(/*this*/ ref common c) {
+} partial class PromotedValueEmbedLibᴛcommon {
+
+internal static @string Name(this ref common c) {
     return c.label;
 }
+
+} partial class PromotedValueEmbedLib_package {
 
 partial struct Widget {
     /*embed*/ internal common common;
@@ -22,9 +28,13 @@ partial struct Gadget {
     internal @string tag;
 }
 
-internal static @string Name⁔(/*this*/ ref Gadget g) {
+} partial class PromotedValueEmbedLibᴛGadget {
+
+public static @string Name(this ref Gadget g) {
     return g.tag;
 }
+
+} partial class PromotedValueEmbedLib_package {
 
 public static ж<Gadget> NewGadget(@string tag) {
     return Ꮡ(new Gadget(tag: tag));
@@ -35,17 +45,21 @@ partial struct Meta {
     internal bool ok;
 }
 
-internal static @string Text⁔(/*this*/ Meta m) { return m.text; }
+} partial class PromotedValueEmbedLibᴛMeta {
 
-internal static bool Ok⁔(/*this*/ Meta m) { return m.ok; }
+public static @string Text(this Meta m) { return m.text; }
 
-internal static (@string, bool) Both⁔(/*this*/ Meta m) { return (m.text, m.ok); }
+public static bool Ok(this Meta m) { return m.ok; }
 
-internal static (ж<Meta>, @string) Self⁔(/*this*/ ж<Meta> Ꮡm) {
+public static (@string, bool) Both(this Meta m) { return (m.text, m.ok); }
+
+public static (ж<Meta>, @string) Self(this ж<Meta> Ꮡm) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     return (Ꮡm, m.text);
 }
+
+} partial class PromotedValueEmbedLib_package {
 
 partial struct Badge {
     /*embed*/ public Meta Meta;

@@ -2,6 +2,8 @@ global using Alias = go.SameNameImportAlias.a.foo_package.Inner;
 
 namespace go.SameNameImportAlias.a;
 
+using static foo_package;
+
 partial class foo_package {
 
 partial struct Inner {
@@ -13,6 +15,8 @@ partial struct Kind /*num:nint*/;
 partial struct S {
 }
 
-internal static Kind Kind⁔(/*this*/ S _) { return 1; }
+} partial class fooᴛS {
 
-} // end foo_package
+public static Kind Kind(this S _) { return 1; }
+
+}

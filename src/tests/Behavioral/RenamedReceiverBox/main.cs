@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -11,7 +12,11 @@ partial struct p {
 partial struct tagger {
 }
 
-internal static void p⁔(/*this*/ tagger _) { }
+} partial class mainᴛtagger {
+
+internal static void p(this tagger _) { }
+
+} partial class main_package {
 
 partial struct counter {
     internal nint n;

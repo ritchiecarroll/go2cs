@@ -7,14 +7,17 @@ namespace go.go;
 
 using token = global::go.go.token_package;
 using global::go.go;
+using static types_package;
 
 partial class types_package {
+
+} partial class typesᴛChecker {
 
 // validType verifies that the given type does not "expand" indefinitely
 // producing a cycle in the type graph.
 // (Cycles involving alias types, as in "type A = [10]A" are detected
 // earlier, via the objDecl cycle detection mechanism.)
-internal static void validType⁔(/*this*/ ж<Checker> Ꮡcheck, ж<Named> typ) {
+internal static void validType(this ж<Checker> Ꮡcheck, ж<Named> typ) {
     Ꮡcheck.validType0(nopos, new NamedжType(typ), default, default);
 }
 
@@ -32,7 +35,7 @@ private static readonly @string validTypeSNestVPathVˢᵇ = "validType(%s) nest 
 // of) F in S, leading to the nest S->F. If a type appears in its own nest
 // (say S->F->S) we have an invalid recursive type. The path list is the full
 // path of named types in a cycle, it is only needed for error reporting.
-internal static bool validType0⁔(/*this*/ ж<Checker> Ꮡcheck, token.Pos pos, Type typ, slice<ж<Named>> nest, slice<ж<Named>> path) {
+internal static bool validType0(this ж<Checker> Ꮡcheck, token.Pos pos, Type typ, slice<ж<Named>> nest, slice<ж<Named>> path) {
     GoFrame ᒐ = default;
     try {
         ref var check = ref Ꮡcheck.DerefOrNull();
@@ -205,6 +208,8 @@ internal static bool validType0⁔(/*this*/ ж<Checker> Ꮡcheck, token.Pos pos,
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
+
+} partial class types_package {
 
 // makeObjList returns the list of type name objects for the given
 // list of named types.

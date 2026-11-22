@@ -7,11 +7,14 @@ using windows = @internal.syscall.windows_package;
 using syscall = syscall_package;
 using @internal.syscall;
 using time = time_package;
+using static net_package;
 
 partial class net_package {
 
+} partial class netᴛTCPConn {
+
 // SetKeepAliveConfig configures keep-alive messages sent by the operating system.
-internal static error SetKeepAliveConfig⁔(/*this*/ ж<TCPConn> Ꮡc, KeepAliveConfig config) {
+public static error SetKeepAliveConfig(this ж<TCPConn> Ꮡc, KeepAliveConfig config) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.of(TCPConn.Ꮡconn).ok()) {
@@ -46,4 +49,4 @@ internal static error SetKeepAliveConfig⁔(/*this*/ ж<TCPConn> Ꮡc, KeepAlive
     return default;
 }
 
-} // end net_package
+}

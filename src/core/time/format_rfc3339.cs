@@ -4,8 +4,11 @@
 namespace go;
 
 using errors = errors_package;
+using static time_package;
 
 partial class time_package {
+
+} partial class timeᴛTime {
 
 // RFC 3339 is the most commonly used format.
 //
@@ -15,7 +18,7 @@ partial class time_package {
 // with the second most popular format only being used 8% of the time.
 // The overwhelming use of RFC 3339 compared to all other formats justifies
 // the addition of logic to optimize formatting and parsing.
-internal static slice<byte> appendFormatRFC3339⁔(/*this*/ Time t, slice<byte> b, bool nanos) {
+internal static slice<byte> appendFormatRFC3339(this Time t, slice<byte> b, bool nanos) {
     var (_, offset, abs) = t.locabs();
 
     // Format date.
@@ -65,7 +68,7 @@ private static readonly @string yearOutsideOfRange09999ˢᵇ = "year outside of 
 internal static ref readonly @string timezoneHourOutsideOfˢ => ref timezoneHourOutsideOfˢᵇ;
 private static readonly @string timezoneHourOutsideOfˢᵇ = "timezone hour outside of range [0,23]"u8;
 
-internal static (slice<byte>, error) appendStrictRFC3339⁔(/*this*/ Time t, slice<byte> b) {
+internal static (slice<byte>, error) appendStrictRFC3339(this Time t, slice<byte> b) {
     nint n0 = len(b);
     b = t.appendFormatRFC3339(b, true);
 
@@ -86,6 +89,8 @@ internal static (slice<byte>, error) appendStrictRFC3339⁔(/*this*/ Time t, sli
     }}
     return (b, default);
 }
+
+} partial class time_package {
 
 internal static (Time, bool) parseRFC3339<bytes>(bytes s, ж<Location> local)
     where bytes : /* []byte | string */ IByteSeq<bytes, byte>, new()

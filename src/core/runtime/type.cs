@@ -24,6 +24,7 @@ using atomic = @internal.runtime.atomic_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
+using static runtime_package;
 
 partial class runtime_package {
 
@@ -37,13 +38,15 @@ partial struct rtype {
     /*embed*/ public ж<@internal.abi_package.Type> Type; // embedding is okay here (unlike reflect) because none of this is public
 }
 
+} partial class runtimeᴛrtype {
+
 // go2cs generated this placeholder — func string is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-internal static ж<uncommontype> uncommon⁔(/*this*/ rtype t) {
+internal static ж<uncommontype> uncommon(this rtype t) {
     return t.Type.Uncommon();
 }
 
-internal static @string name⁔(/*this*/ rtype t) {
+internal static @string name(this rtype t) {
     if ((abi.TFlag)(t.TFlag & abi.TFlagNamed) == 0) {
         return ""u8;
     }
@@ -69,7 +72,7 @@ internal static @string name⁔(/*this*/ rtype t) {
 // available. This is not the same as the reflect package's PkgPath
 // method, in that it returns the package path for struct and interface
 // types, not just named types.
-internal static @string pkgpath⁔(/*this*/ rtype t) {
+internal static @string pkgpath(this rtype t) {
     var u = t.uncommon(); if (u != nil) {
         return t.nameOff(u.PkgPath).Name();
     }
@@ -84,6 +87,8 @@ internal static @string pkgpath⁔(/*this*/ rtype t) {
     }}
     return ""u8;
 }
+
+} partial class runtime_package {
 
 // getGCMask returns the pointer/nonpointer bitmask for type t.
 //
@@ -164,9 +169,11 @@ partial struct bitCursor {
     internal uintptr n;   // cursor points to bit n of region
 }
 
+} partial class runtimeᴛbitCursor {
+
 // Write to b cnt bits starting at bit 0 of data.
 // Requires cnt>0.
-internal static void write⁔(/*this*/ bitCursor b, ж<byte> Ꮡdata, uintptr cnt) {
+internal static void write(this bitCursor b, ж<byte> Ꮡdata, uintptr cnt) {
     ref var data = ref Ꮡdata.DerefOrNull();
 
     // Starting byte for writing.
@@ -205,9 +212,11 @@ internal static void write⁔(/*this*/ bitCursor b, ж<byte> Ꮡdata, uintptr cn
     p.Value |= (byte)((byte)buf);
 }
 
-internal static bitCursor offset⁔(/*this*/ bitCursor b, uintptr cnt) {
+internal static bitCursor offset(this bitCursor b, uintptr cnt) {
     return new bitCursor(ptr: b.ptr, n: b.n + cnt);
 }
+
+} partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string pointerlessTypeˢ => ref pointerlessTypeˢᵇ;
@@ -358,9 +367,13 @@ internal static name resolveNameOff(@unsafe.Pointer ptrInModule, nameOff off) {
     return new name(Bytes: @unsafe.Pointer.To<byte>(res));
 }
 
-internal static name nameOff⁔(/*this*/ rtype t, nameOff off) {
+} partial class runtimeᴛrtype {
+
+internal static name nameOff(this rtype t, nameOff off) {
     return resolveNameOff(@unsafe.Pointer.FromPinnedBox(t.Type), off);
 }
+
+} partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string runtimeTypeOffsetBaseˢ => ref runtimeTypeOffsetBaseˢᵇ;
@@ -406,7 +419,9 @@ internal static ж<_type> resolveTypeOff(@unsafe.Pointer ptrInModule, typeOff of
     return @unsafe.Pointer.To<_type>((@unsafe.Pointer)res);
 }
 
-internal static ж<_type> typeOff⁔(/*this*/ rtype t, typeOff off) {
+} partial class runtimeᴛrtype {
+
+internal static ж<_type> typeOff(this rtype t, typeOff off) {
     return resolveTypeOff(@unsafe.Pointer.FromPinnedBox(t.Type), off);
 }
 
@@ -414,7 +429,7 @@ internal static ж<_type> typeOff⁔(/*this*/ rtype t, typeOff off) {
 internal static ref readonly @string runtimeTextOffsetBaseˢ => ref runtimeTextOffsetBaseˢᵇ;
 private static readonly @string runtimeTextOffsetBaseˢᵇ = "runtime: text offset base pointer out of range"u8;
 
-internal static @unsafe.Pointer textOff⁔(/*this*/ rtype t, textOff off) {
+internal static @unsafe.Pointer textOff(this rtype t, textOff off) {
     if (off == -1) {
         // -1 is the sentinel value for unreachable code.
         // See cmd/link/internal/ld/data.go:relocsym.
@@ -444,6 +459,8 @@ internal static @unsafe.Pointer textOff⁔(/*this*/ rtype t, textOff off) {
     var res = md.textAddr((uint32)off);
     return (@unsafe.Pointer)res;
 }
+
+} partial class runtime_package {
 
 internal static @string pkgPath(name n) {
     if (n.Bytes == nil || (byte)(n.Data(0).Value & ((byte)(1 << 2))) == 0) {

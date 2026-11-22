@@ -7,6 +7,8 @@ using errors = errors_package;
 using stringslite = @internal.stringslite_package;
 /* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
 using @internal;
+using time = time_package;
+using static time_package;
 
 partial class time_package {
 
@@ -563,6 +565,8 @@ internal static slice<byte> appendNano(slice<byte> b, nint nanosec, nint std) {
     return b;
 }
 
+} partial class timeᴛTime {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string mstˢ => ref mstˢᵇ;
 private static readonly @string mstˢᵇ = "2006-01-02 15:04:05.999999999 -0700 MST"u8;
@@ -578,7 +582,7 @@ private static readonly @string mstˢᵇ = "2006-01-02 15:04:05.999999999 -0700 
 // The returned string is meant for debugging; for a stable serialized
 // representation, use t.MarshalText, t.MarshalBinary, or t.Format
 // with an explicit format string.
-internal static @string String⁔(/*this*/ Time t) {
+public static @string String(this Time t) {
     var bufᴷ = new stackAppend<byte>();
 
     @string s = t.Format(mstˢ);
@@ -613,7 +617,7 @@ internal static @string String⁔(/*this*/ Time t) {
 
 // GoString implements [fmt.GoStringer] and formats t to be printed in Go source
 // code.
-internal static @string GoString⁔(/*this*/ Time t) {
+public static @string GoString(this Time t) {
     var bufᴷ = new stackAppend<byte>();
 
     var abs = t.absSec();
@@ -644,11 +648,11 @@ internal static @string GoString⁔(/*this*/ Time t) {
     buf = append(buf, ((@string)", ").ꓸꓸꓸ);
     var loc = t.Location();
     switch (loc) {
-    case var ᴛ when ᴛ == UTC || ᴛ == default: {
+    case var ᴛ when ᴛ == time.UTC || ᴛ == default: {
         buf = append(buf, ((@string)"time.UTC").ꓸꓸꓸ);
         break;
     }
-    case var ᴛ when ᴛ == Local: {
+    case var ᴛ when ᴛ == time.Local: {
         buf = append(buf, ((@string)"time.Local").ꓸꓸꓸ);
         break;
     }
@@ -683,7 +687,7 @@ internal static @string GoString⁔(/*this*/ Time t) {
 //
 // The executable example for [Time.Format] demonstrates the working
 // of the layout string in detail and is a good reference.
-internal static @string Format⁔(/*this*/ Time t, @string layout) {
+public static @string Format(this Time t, @string layout) {
     UntypedInt bufSize = 64;
     slice<byte> b = default;
     nint max = len(layout) + 10;
@@ -699,7 +703,7 @@ internal static @string Format⁔(/*this*/ Time t, @string layout) {
 
 // AppendFormat is like [Time.Format] but appends the textual
 // representation to b and returns the extended buffer.
-internal static slice<byte> AppendFormat⁔(/*this*/ Time t, slice<byte> b, @string layout) {
+public static slice<byte> AppendFormat(this Time t, slice<byte> b, @string layout) {
     // Optimize for RFC3339 as it accounts for over half of all representations.
     switch (ᐧ) {
     case {} when layout == RFC3339: {
@@ -713,7 +717,7 @@ internal static slice<byte> AppendFormat⁔(/*this*/ Time t, slice<byte> b, @str
     }}
 }
 
-internal static slice<byte> appendFormat⁔(/*this*/ Time t, slice<byte> b, @string layout) {
+internal static slice<byte> appendFormat(this Time t, slice<byte> b, @string layout) {
     var (name, offset, abs) = t.locabs();
     var days = abs.days();
 
@@ -930,6 +934,8 @@ internal static slice<byte> appendFormat⁔(/*this*/ Time t, slice<byte> b, @str
     return b;
 }
 
+} partial class time_package {
+
 internal static error errBad = errors.New("bad value for field"); // placeholder not passed to user
 
 // ParseError describes a problem parsing a time string.
@@ -994,13 +1000,17 @@ internal static @string quote(@string s) {
     return (@string)buf;
 }
 
+} partial class timeᴛParseError {
+
 // Error returns the string representation of a ParseError.
-internal static @string Error⁔(/*this*/ ref ParseError e) {
+public static @string Error(this ref ParseError e) {
     if (e.Message == ""u8) {
         return "parsing time "u8 + quote(e.Value) + " as "u8 + quote(e.Layout) + ": cannot parse "u8 + quote(e.ValueElem) + " as "u8 + quote(e.LayoutElem);
     }
     return "parsing time "u8 + quote(e.Value) + e.Message;
 }
+
+} partial class time_package {
 
 // isDigit reports whether s[i] is in range and is a decimal digit.
 internal static bool isDigit<bytes>(bytes s, nint i)
@@ -1808,9 +1818,13 @@ partial struct parseDurationError {
     internal @string value;
 }
 
-internal static @string Error⁔(/*this*/ ref parseDurationError e) {
+} partial class timeᴛparseDurationError {
+
+internal static @string Error(this ref parseDurationError e) {
     return "time: "u8 + e.message + " "u8 + quote(e.value);
 }
+
+} partial class time_package {
 
 [GoLazy] partial class lazyᴛunitMap { internal static map<@string, uint64> unitMap = new map<@string, uint64>{
     ["ns"] = (uint64)Nanosecond,

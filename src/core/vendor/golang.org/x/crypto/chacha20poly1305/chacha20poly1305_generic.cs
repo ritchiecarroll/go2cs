@@ -10,6 +10,7 @@ using poly1305 = go.vendor.golang.org.x.crypto.@internal.poly1305_package;
 using encoding;
 using go.vendor.golang.org.x.crypto;
 using go.vendor.golang.org.x.crypto.@internal;
+using static chacha20poly1305_package;
 
 partial class chacha20poly1305_package {
 
@@ -28,7 +29,9 @@ internal static void writeUint64(ж<poly1305.MAC> p, nint n) {
     p.Write(buf[..]);
 }
 
-internal static slice<byte> sealGeneric⁔(/*this*/ ref chacha20poly1305 c, slice<byte> dst, slice<byte> nonce, slice<byte> plaintext, slice<byte> additionalData) {
+} partial class chacha20poly1305ᴛchacha20poly1305 {
+
+internal static slice<byte> sealGeneric(this ref chacha20poly1305 c, slice<byte> dst, slice<byte> nonce, slice<byte> plaintext, slice<byte> additionalData) {
     var (ret, @out) = sliceForAppend(dst, len(plaintext) + (nint)poly1305.TagSize);
     var (ciphertext, tag) = (@out.slice(0, len(plaintext)), @out.slice(len(plaintext)));
     if (alias.InexactOverlap(@out, plaintext)) {
@@ -54,7 +57,7 @@ internal static slice<byte> sealGeneric⁔(/*this*/ ref chacha20poly1305 c, slic
     return ret;
 }
 
-internal static (slice<byte>, error) openGeneric⁔(/*this*/ ref chacha20poly1305 c, slice<byte> dst, slice<byte> nonce, slice<byte> ciphertext, slice<byte> additionalData) {
+internal static (slice<byte>, error) openGeneric(this ref chacha20poly1305 c, slice<byte> dst, slice<byte> nonce, slice<byte> ciphertext, slice<byte> additionalData) {
     var tag = ciphertext.slice(len(ciphertext) - 16);
     ciphertext = ciphertext.slice(0, len(ciphertext) - 16);
 
@@ -87,4 +90,4 @@ internal static (slice<byte>, error) openGeneric⁔(/*this*/ ref chacha20poly130
     return (ret, default);
 }
 
-} // end chacha20poly1305_package
+}

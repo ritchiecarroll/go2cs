@@ -10,6 +10,7 @@ using token = global::go.go.token_package;
 using strconv = strconv_package;
 using global::go.go;
 using ꓸꓸꓸany = Span<any>;
+using static ast_package;
 
 partial class ast_package {
 
@@ -18,17 +19,19 @@ partial struct pkgBuilder {
     internal scanner.ErrorList errors;
 }
 
-internal static void error⁔(/*this*/ ref pkgBuilder p, token.Pos pos, @string msg) {
+} partial class astᴛpkgBuilder {
+
+internal static void error(this ref pkgBuilder p, token.Pos pos, @string msg) {
     p.errors.Add(p.fset.Position(pos), msg);
 }
 
-internal static void errorf⁔(/*this*/ ref pkgBuilder p, token.Pos pos, @string format, params ꓸꓸꓸany argsʗp) {
+internal static void errorf(this ref pkgBuilder p, token.Pos pos, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     p.error(pos, fmt.Sprintf(format, args.ꓸꓸꓸ));
 }
 
-internal static void declare⁔(/*this*/ ref pkgBuilder p, ж<Scope> Ꮡscope, ж<Scope> ᏑaltScope, ж<Object> Ꮡobj) {
+internal static void declare(this ref pkgBuilder p, ж<Scope> Ꮡscope, ж<Scope> ᏑaltScope, ж<Object> Ꮡobj) {
     ref var scope = ref Ꮡscope.DerefOrNull();
     ref var altScope = ref ᏑaltScope.DerefOrNull();
     ref var obj = ref Ꮡobj.DerefOrNull();
@@ -46,6 +49,8 @@ internal static void declare⁔(/*this*/ ref pkgBuilder p, ж<Scope> Ꮡscope, �
         p.error(obj.Pos(), fmt.Sprintf("%s redeclared in this block%s"u8, obj.Name, prevDecl));
     }
 }
+
+} partial class ast_package {
 
 internal static bool resolve(ж<Scope> Ꮡscope, ref Ident ident) {
     ref var scope = ref Ꮡscope.DerefOrNull();

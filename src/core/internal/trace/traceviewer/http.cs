@@ -12,6 +12,7 @@ using fs = go.io.fs_package;
 using html;
 using io = io_package;
 using net;
+using static traceviewer_package;
 
 partial class traceviewer_package {
 
@@ -268,12 +269,16 @@ private static readonly ViewType ViewProcᵇ = "proc"u8;
 public static ref readonly ViewType ViewThread => ref ViewThreadᵇ;
 private static readonly ViewType ViewThreadᵇ = "thread"u8;
 
-internal static @string URL⁔(/*this*/ View v, nint rangeIdx) {
+} partial class traceviewerᴛView {
+
+public static @string URL(this View v, nint rangeIdx) {
     if (rangeIdx < 0) {
         return fmt.Sprintf("/trace?view=%s"u8, v.Type);
     }
     return v.Ranges[rangeIdx].URL(v.Type);
 }
+
+} partial class traceviewer_package {
 
 partial struct Range {
     public @string Name;
@@ -283,9 +288,13 @@ partial struct Range {
     public int64 EndTime;
 }
 
-internal static @string URL⁔(/*this*/ Range r, ViewType viewType) {
+} partial class traceviewerᴛRange {
+
+public static @string URL(this Range r, ViewType viewType) {
     return fmt.Sprintf("/trace?view=%s&start=%d&end=%d"u8, viewType, r.Start, r.End);
 }
+
+} partial class traceviewer_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static ref readonly @string paramsˢ => ref paramsˢᵇ;

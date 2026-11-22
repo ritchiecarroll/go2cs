@@ -6,6 +6,7 @@
 namespace go.go;
 
 using ꓸꓸꓸжVar = Span<ж<types_package.Var>>;
+using static types_package;
 
 partial class types_package {
 
@@ -26,8 +27,10 @@ public static ж<Tuple> NewTuple(params ꓸꓸꓸжVar xʗp) {
     return default;
 }
 
+} partial class typesᴛTuple {
+
 // Len returns the number variables of tuple t.
-internal static nint Len⁔(/*this*/ ж<Tuple> Ꮡt) {
+public static nint Len(this ж<Tuple> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (Ꮡt != nil) {
@@ -37,9 +40,9 @@ internal static nint Len⁔(/*this*/ ж<Tuple> Ꮡt) {
 }
 
 // At returns the i'th variable of tuple t.
-internal static ж<Var> At⁔(/*this*/ ref Tuple t, nint i) { return t.vars[i]; }
+public static ж<Var> At(this ref Tuple t, nint i) { return t.vars[i]; }
 
-internal static Type Underlying⁔(/*this*/ ж<Tuple> Ꮡt) { return new TupleжType(Ꮡt); }
-internal static @string String⁔(/*this*/ ж<Tuple> Ꮡt) { return TypeString(new TupleжType(Ꮡt), default); }
+public static Type Underlying(this ж<Tuple> Ꮡt) { return new TupleжType(Ꮡt); }
+public static @string String(this ж<Tuple> Ꮡt) { return TypeString(new TupleжType(Ꮡt), default); }
 
-} // end types_package
+}

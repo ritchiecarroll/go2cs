@@ -1,5 +1,7 @@
 namespace go;
 
+using static ShadowedImportConstLib_package;
+
 partial class ShadowedImportConstLib_package {
 
 partial struct Span /*num:int64*/;
@@ -10,6 +12,8 @@ partial struct Meter {
     public nint Level;
 }
 
-internal static nint Peak⁔(/*this*/ Meter m) { return m.Level + 1; }
+} partial class ShadowedImportConstLibᴛMeter {
 
-} // end ShadowedImportConstLib_package
+public static nint Peak(this Meter m) { return m.Level + 1; }
+
+}

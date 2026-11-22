@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -11,7 +12,11 @@ partial struct p {
 partial struct tagger {
 }
 
-internal static void p⁔(/*this*/ tagger _) { }
+} partial class mainᴛtagger {
+
+internal static void p(this tagger _) { }
+
+} partial class main_package {
 
 partial struct box {
     internal nint n;
@@ -37,7 +42,11 @@ internal static void bump(ж<nint> Ꮡnp) {
 internal static readonly ж<box> Ꮡcounter = new StaticBox<box>(default(box));
 internal static ref box counter => ref ((StaticBox<box>)Ꮡcounter).ValueSlot;
 
-internal static nint counter⁔(/*this*/ tagger _) { return 1; }
+} partial class mainᴛtagger {
+
+internal static nint counter(this tagger _) { return 1; }
+
+} partial class main_package {
 
 internal static nint usesTypeP() {
     p pv = default;

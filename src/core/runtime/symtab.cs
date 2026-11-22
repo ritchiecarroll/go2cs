@@ -10,6 +10,7 @@ using sys = @internal.runtime.sys_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
+using static runtime_package;
 
 partial class runtime_package {
 
@@ -76,7 +77,11 @@ public static ж<Frames> CallersFrames(slice<uintptr> callers) {
     return f;
 }
 
+} partial class runtimeᴛFrames {
+
 // go2cs generated this placeholder — func Next is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
+
+} partial class runtime_package {
 
 // runtime_FrameStartLine returns the start line of the function in a Frame.
 //
@@ -223,15 +228,19 @@ partial struct Func {
     internal EmptyStruct opaque; // unexported field to disallow conversions
 }
 
-internal static ж<_func> raw⁔(/*this*/ ж<Func> Ꮡf) {
+} partial class runtimeᴛFunc {
+
+internal static ж<_func> raw(this ж<Func> Ꮡf) {
     return Ꮡf.Reinterpret<Func, _func>();
 }
 
-internal static funcInfo funcInfo⁔(/*this*/ ж<Func> Ꮡf) {
+internal static funcInfo funcInfo(this ж<Func> Ꮡf) {
     return Ꮡf.raw().funcInfo();
 }
 
-internal static funcInfo funcInfo⁔(/*this*/ ж<_func> Ꮡf) {
+} partial class runtimeᴛ_func {
+
+internal static funcInfo funcInfo(this ж<_func> Ꮡf) {
     // Find the module containing fn. fn is located in the pclntable.
     // The unsafe.Pointer to uintptr conversions and arithmetic
     // are safe because we are working with module addresses.
@@ -249,6 +258,8 @@ internal static funcInfo funcInfo⁔(/*this*/ ж<_func> Ꮡf) {
     }
     return new funcInfo(Ꮡf, mod);
 }
+
+} partial class runtime_package {
 
 // pcHeader holds data used by the pclntab lookups.
 partial struct pcHeader {
@@ -554,6 +565,8 @@ internal static void moduledataverify1(ж<moduledata> Ꮡdatap) {
     }
 }
 
+} partial class runtimeᴛmoduledata {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string runtimeTextOffsetOutOfˢ => ref runtimeTextOffsetOutOfˢᵇ;
 private static readonly @string runtimeTextOffsetOutOfˢᵇ = "runtime: text offset out of range"u8;
@@ -576,7 +589,7 @@ private static readonly @string runtimeTextOffsetOutOfˢᵇ = "runtime: text off
 // It is nosplit because it is part of the findfunc implementation.
 //
 //go:nosplit
-internal static uintptr textAddr⁔(/*this*/ ref moduledata md, uint32 off32) {
+internal static uintptr textAddr(this ref moduledata md, uint32 off32) {
     var off = (uintptr)off32;
     var res = md.text + off;
     if (len(md.textsectmap) > 1) {
@@ -610,7 +623,7 @@ private static readonly @string unexpectedMultipleTextˢᵇ = "unexpected multip
 // It is nosplit because it is part of the findfunc implementation.
 //
 //go:nosplit
-internal static (uint32, bool) textOff⁔(/*this*/ ref moduledata md, uintptr pc) {
+internal static (uint32, bool) textOff(this ref moduledata md, uintptr pc) {
     var off = pc - md.text;
     if (GOARCH == "wasm"u8) {
         // On Wasm, the func table contains the function index, whereas
@@ -642,12 +655,14 @@ internal static (uint32, bool) textOff⁔(/*this*/ ref moduledata md, uintptr pc
 }
 
 // funcName returns the string at nameOff in the function name table.
-internal static @string funcName⁔(/*this*/ ref moduledata md, int32 nameOff) {
+internal static @string funcName(this ref moduledata md, int32 nameOff) {
     if (nameOff == 0) {
         return ""u8;
     }
     return gostringnocopy(Ꮡ(md.funcnametab, nameOff));
 }
+
+} partial class runtime_package {
 
 // Despite being an exported symbol,
 // FuncForPC is linknamed by widely used packages.
@@ -662,6 +677,8 @@ internal static @string funcName⁔(/*this*/ ref moduledata md, int32 nameOff) {
 //go:linkname FuncForPC
 // go2cs generated this placeholder — func FuncForPC is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
+} partial class runtimeᴛFunc {
+
 // go2cs generated this placeholder — func Name is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // go2cs generated this placeholder — func Entry is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
@@ -670,7 +687,7 @@ internal static @string funcName⁔(/*this*/ ref moduledata md, int32 nameOff) {
 
 // startLine returns the starting line number of the function. i.e., the line
 // number of the func keyword.
-internal static int32 startLine⁔(/*this*/ ж<Func> Ꮡf) {
+internal static int32 startLine(this ж<Func> Ꮡf) {
     var fn = Ꮡf.raw();
     if (fn.isInlined()) { // inlined version
         var fi = fn.Reinterpret<_func, funcinl>();
@@ -678,6 +695,8 @@ internal static int32 startLine⁔(/*this*/ ж<Func> Ꮡf) {
     }
     return fn.funcInfo().startLine;
 }
+
+} partial class runtime_package {
 
 // findmoduledatap looks up the moduledata for a PC.
 //
@@ -699,18 +718,24 @@ partial struct funcInfo {
     internal ж<moduledata> datap;
 }
 
-internal static bool valid⁔(/*this*/ funcInfo f) {
+} partial class runtimeᴛfuncInfo {
+
+internal static bool valid(this funcInfo f) {
     return f._func != nil;
 }
 
-internal static ж<Func> _Func⁔(/*this*/ funcInfo f) {
+internal static ж<Func> _Func(this funcInfo f) {
     return f._func.Reinterpret<_func, Func>();
 }
 
+} partial class runtimeᴛ_func {
+
 // isInlined reports whether f should be re-interpreted as a *funcinl.
-internal static bool isInlined⁔(/*this*/ ref _func f) {
+internal static bool isInlined(this ref _func f) {
     return f.entryOff == ~(uint32)0; // see comment for funcinl.ones
 }
+
+} partial class runtimeᴛfuncInfo {
 
 // entry returns the entry PC for f.
 //
@@ -721,9 +746,11 @@ internal static bool isInlined⁔(/*this*/ ref _func f) {
 //
 // Do not remove or change the type signature.
 // See go.dev/issue/67401.
-internal static uintptr entry⁔(/*this*/ funcInfo f) {
+internal static uintptr entry(this funcInfo f) {
     return f.datap.textAddr(f.entryOff);
 }
+
+} partial class runtime_package {
 
 //go:linkname badFuncInfoEntry runtime.funcInfo.entry
 internal static partial uintptr badFuncInfoEntry(funcInfo _);
@@ -786,12 +813,16 @@ partial struct srcFunc {
     internal abi.FuncID funcID;
 }
 
-internal static srcFunc srcFunc⁔(/*this*/ funcInfo f) {
+} partial class runtimeᴛfuncInfo {
+
+internal static srcFunc srcFunc(this funcInfo f) {
     if (!f.valid()) {
         return new srcFunc();
     }
     return new srcFunc(f.datap, f.nameOff, f.startLine, f.funcID);
 }
+
+} partial class runtimeᴛsrcFunc {
 
 // name should be an internal detail,
 // but widely used packages access it using linkname.
@@ -800,12 +831,14 @@ internal static srcFunc srcFunc⁔(/*this*/ funcInfo f) {
 //
 // Do not remove or change the type signature.
 // See go.dev/issue/67401.
-internal static @string name⁔(/*this*/ srcFunc s) {
+internal static @string name(this srcFunc s) {
     if (s.datap == nil) {
         return ""u8;
     }
     return s.datap.funcName(s.nameOff);
 }
+
+} partial class runtime_package {
 
 //go:linkname badSrcFuncName runtime.srcFunc.name
 internal static partial @string badSrcFuncName(srcFunc _);

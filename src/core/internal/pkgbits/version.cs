@@ -3,6 +3,8 @@
 // license that can be found in the LICENSE file.
 namespace go.@internal;
 
+using static pkgbits_package;
+
 partial class pkgbits_package {
 
 // Version indicates a version of a unified IR bitstream.
@@ -76,9 +78,11 @@ internal static array<Version> removed = new golib.SparseArray<Version>{
     [(int)DerivedInfoNeeded] = V2
 }.array(5);
 
+} partial class pkgbitsᴛVersion {
+
 // Has reports whether field f is present in a bitstream at version v.
-internal static bool Has⁔(/*this*/ Version v, Field f) {
+public static bool Has(this Version v, Field f) {
     return introduced[f] <= v && (v < removed[f] || removed[f] == V0);
 }
 
-} // end pkgbits_package
+}

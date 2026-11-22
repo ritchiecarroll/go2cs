@@ -9,6 +9,7 @@ using fmt = fmt_package;
 using io = io_package;
 using strconv = strconv_package;
 using strings = strings_package;
+using static big_package;
 
 partial class big_package {
 
@@ -20,6 +21,8 @@ internal static readonly ж<Rat> ᏑratZero = new StaticBox<Rat>(default(Rat));
 internal static ref Rat ratZero => ref ((StaticBox<Rat>)ᏑratZero).ValueSlot;
 internal static fmt.Scanner _ᴛ6ʗ = new RatжScanner(ᏑratZero); // *Rat must implement fmt.Scanner
 
+} partial class bigᴛRat {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string efgEFGvˢ => ref efgEFGvˢᵇ;
 private static readonly @string efgEFGvˢᵇ = "efgEFGv"u8;
@@ -30,7 +33,7 @@ private static readonly @string ratScanInvalidSyntaxˢᵇ = "Rat.Scan: invalid s
 
 // Scan is a support routine for fmt.Scanner. It accepts the formats
 // 'e', 'E', 'f', 'F', 'g', 'G', and 'v'. All formats are equivalent.
-internal static error Scan⁔(/*this*/ ж<Rat> Ꮡz, fmt.ScanState s, rune ch) {
+public static error Scan(this ж<Rat> Ꮡz, fmt.ScanState s, rune ch) {
     var (tok, err) = s.Token(true, ratTok);
     if (err != nil) {
         return err;
@@ -62,7 +65,7 @@ internal static error Scan⁔(/*this*/ ж<Rat> Ꮡz, fmt.ScanState s, rune ch) {
 // is too large, the operation may fail.
 // The entire string, not just a prefix, must be valid for success. If the
 // operation failed, the value of z is undefined but the returned value is nil.
-internal static (ж<Rat>, bool) SetString⁔(/*this*/ ж<Rat> Ꮡz, @string s) {
+public static (ж<Rat>, bool) SetString(this ж<Rat> Ꮡz, @string s) {
     GoFrame ᒐ = default;
     try {
         ref var z = ref Ꮡz.DerefOrNull();
@@ -229,6 +232,8 @@ internal static (ж<Rat>, bool) SetString⁔(/*this*/ ж<Rat> Ꮡz, @string s) {
     finally { ᒐ.Run(); }
 }
 
+} partial class big_package {
+
 // scanExponent scans the longest possible prefix of r representing a base 10
 // (“e”, “E”) or a base 2 (“p”, “P”) exponent, if any. It returns the
 // exponent, the exponent base (10 or 2), or a read or syntax error, if any.
@@ -331,15 +336,17 @@ internal static (int64 exp, nint @base, error err) scanExponent(io.ByteScanner r
     return (exp, @base, err);
 }
 
+} partial class bigᴛRat {
+
 // String returns a string representation of x in the form "a/b" (even if b == 1).
-internal static @string String⁔(/*this*/ ж<Rat> Ꮡx) {
+public static @string String(this ж<Rat> Ꮡx) {
     return (@string)Ꮡx.marshal(default);
 }
 
 // marshal implements [Rat.String] returning a slice of bytes.
 // It appends the string representation of x in the form "a/b" (even if b == 1) to buf,
 // and returns the extended buffer.
-internal static slice<byte> marshal⁔(/*this*/ ж<Rat> Ꮡx, slice<byte> buf) {
+internal static slice<byte> marshal(this ж<Rat> Ꮡx, slice<byte> buf) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     buf = Ꮡx.Ꮡa.Append(buf, 10);
@@ -354,7 +361,7 @@ internal static slice<byte> marshal⁔(/*this*/ ж<Rat> Ꮡx, slice<byte> buf) {
 
 // RatString returns a string representation of x in the form "a/b" if b != 1,
 // and in the form "a" if b == 1.
-internal static @string RatString⁔(/*this*/ ж<Rat> Ꮡx) {
+public static @string RatString(this ж<Rat> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     if (x.IsInt()) {
@@ -366,7 +373,7 @@ internal static @string RatString⁔(/*this*/ ж<Rat> Ꮡx) {
 // FloatString returns a string representation of x in decimal form with prec
 // digits of precision after the radix point. The last digit is rounded to
 // nearest, with halves rounded away from zero.
-internal static @string FloatString⁔(/*this*/ ж<Rat> Ꮡx, nint prec) {
+public static @string FloatString(this ж<Rat> Ꮡx, nint prec) {
     GoFrame ᒐ = default;
     try {
         ref var x = ref Ꮡx.DerefOrNull();
@@ -446,7 +453,7 @@ internal static @string FloatString⁔(/*this*/ ж<Rat> Ꮡx, nint prec) {
 //	1/3    0    false    0       (0.333... rounded)
 //	1/4    2    true     0.25
 //	1/6    1    false    0.2     (0.166... rounded)
-internal static (nint n, bool exact) FloatPrec⁔(/*this*/ ж<Rat> Ꮡx) {
+public static (nint n, bool exact) FloatPrec(this ж<Rat> Ꮡx) {
     nint n = default;
     bool exact = default;
     GoFrame ᒐ = default;
@@ -523,4 +530,4 @@ internal static (nint n, bool exact) FloatPrec⁔(/*this*/ ж<Rat> Ꮡx) {
     return (n, exact);
 }
 
-} // end big_package
+}

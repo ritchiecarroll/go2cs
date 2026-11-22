@@ -8,6 +8,7 @@ using context = context_package;
 using netip = net.netip_package;
 using syscall = syscall_package;
 using net;
+using static net_package;
 
 partial class net_package {
 
@@ -22,7 +23,9 @@ internal static Addr sockaddrToUDP(syscall.Sockaddr sa) {
     return default;
 }
 
-internal static nint family⁔(/*this*/ ж<UDPAddr> Ꮡa) {
+} partial class netᴛUDPAddr {
+
+internal static nint family(this ж<UDPAddr> Ꮡa) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (Ꮡa == nil || len(a.IP) <= IPv4len) {
@@ -34,7 +37,7 @@ internal static nint family⁔(/*this*/ ж<UDPAddr> Ꮡa) {
     return syscall.AF_INET6;
 }
 
-internal static (syscall.Sockaddr, error) sockaddr⁔(/*this*/ ж<UDPAddr> Ꮡa, nint family) {
+internal static (syscall.Sockaddr, error) sockaddr(this ж<UDPAddr> Ꮡa, nint family) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (Ꮡa == nil) {
@@ -43,11 +46,13 @@ internal static (syscall.Sockaddr, error) sockaddr⁔(/*this*/ ж<UDPAddr> Ꮡa,
     return ipToSockaddr(family, a.IP, a.Port, a.Zone);
 }
 
-internal static sockaddr toLocal⁔(/*this*/ ref UDPAddr a, @string net) {
+internal static sockaddr toLocal(this ref UDPAddr a, @string net) {
     return new UDPAddrжsockaddr(Ꮡ(new UDPAddr(loopbackIP(net), a.Port, a.Zone)));
 }
 
-internal static (nint, ж<UDPAddr>, error) readFrom⁔(/*this*/ ref UDPConn c, slice<byte> b, ж<UDPAddr> Ꮡaddr) {
+} partial class netᴛUDPConn {
+
+internal static (nint, ж<UDPAddr>, error) readFrom(this ref UDPConn c, slice<byte> b, ж<UDPAddr> Ꮡaddr) {
     ref var addr = ref Ꮡaddr.DerefOrNull();
 
     nint n = default;
@@ -78,7 +83,7 @@ internal static (nint, ж<UDPAddr>, error) readFrom⁔(/*this*/ ref UDPConn c, s
     return (n, Ꮡaddr, err);
 }
 
-internal static (nint n, netip.AddrPort addr, error err) readFromAddrPort⁔(/*this*/ ref UDPConn c, slice<byte> b) {
+internal static (nint n, netip.AddrPort addr, error err) readFromAddrPort(this ref UDPConn c, slice<byte> b) {
     nint n = default;
     netip.AddrPort addr = default;
     error err = default;
@@ -110,7 +115,7 @@ internal static (nint n, netip.AddrPort addr, error err) readFromAddrPort⁔(/*t
     return (n, addr, err);
 }
 
-internal static (nint n, nint oobn, nint flags, netip.AddrPort addr, error err) readMsg⁔(/*this*/ ref UDPConn c, slice<byte> b, slice<byte> oob) {
+internal static (nint n, nint oobn, nint flags, netip.AddrPort addr, error err) readMsg(this ref UDPConn c, slice<byte> b, slice<byte> oob) {
     nint n = default;
     nint oobn = default;
     nint flags = default;
@@ -135,7 +140,7 @@ internal static (nint n, nint oobn, nint flags, netip.AddrPort addr, error err) 
     return (n, oobn, flags, addr, err);
 }
 
-internal static (nint, error) writeTo⁔(/*this*/ ref UDPConn c, slice<byte> b, ж<UDPAddr> Ꮡaddr) {
+internal static (nint, error) writeTo(this ref UDPConn c, slice<byte> b, ж<UDPAddr> Ꮡaddr) {
     ref var addr = ref Ꮡaddr.DerefOrNull();
 
     if (c.fd.isConnected) {
@@ -167,7 +172,7 @@ internal static (nint, error) writeTo⁔(/*this*/ ref UDPConn c, slice<byte> b, 
     }}
 }
 
-internal static (nint, error) writeToAddrPort⁔(/*this*/ ref UDPConn c, slice<byte> b, netip.AddrPort addr) {
+internal static (nint, error) writeToAddrPort(this ref UDPConn c, slice<byte> b, netip.AddrPort addr) {
     if (c.fd.isConnected) {
         return (0, ErrWriteToConnected);
     }
@@ -197,7 +202,7 @@ internal static (nint, error) writeToAddrPort⁔(/*this*/ ref UDPConn c, slice<b
     }}
 }
 
-internal static (nint n, nint oobn, error err) writeMsg⁔(/*this*/ ref UDPConn c, slice<byte> b, slice<byte> oob, ж<UDPAddr> addr) {
+internal static (nint n, nint oobn, error err) writeMsg(this ref UDPConn c, slice<byte> b, slice<byte> oob, ж<UDPAddr> addr) {
     error err = default;
 
     if (c.fd.isConnected && addr != nil) {
@@ -213,7 +218,7 @@ internal static (nint n, nint oobn, error err) writeMsg⁔(/*this*/ ref UDPConn 
     return c.fd.writeMsg(b, oob, sa);
 }
 
-internal static (nint n, nint oobn, error err) writeMsgAddrPort⁔(/*this*/ ref UDPConn c, slice<byte> b, slice<byte> oob, netip.AddrPort addr) {
+internal static (nint n, nint oobn, error err) writeMsgAddrPort(this ref UDPConn c, slice<byte> b, slice<byte> oob, netip.AddrPort addr) {
     if (c.fd.isConnected && addr.IsValid()) {
         return (0, 0, ErrWriteToConnected);
     }
@@ -251,7 +256,9 @@ internal static (nint n, nint oobn, error err) writeMsgAddrPort⁔(/*this*/ ref 
     }}
 }
 
-internal static (ж<UDPConn>, error) dialUDP⁔(/*this*/ ж<sysDialer> Ꮡsd, context.Context ctx, ж<UDPAddr> laddr, ж<UDPAddr> raddr) {
+} partial class netᴛsysDialer {
+
+internal static (ж<UDPConn>, error) dialUDP(this ж<sysDialer> Ꮡsd, context.Context ctx, ж<UDPAddr> laddr, ж<UDPAddr> raddr) {
     ref var sd = ref Ꮡsd.DerefOrNull();
 
     var ctrlCtxFn = sd.Dialer.ControlContext;
@@ -265,7 +272,9 @@ internal static (ж<UDPConn>, error) dialUDP⁔(/*this*/ ж<sysDialer> Ꮡsd, co
     return (newUDPConn(fd), default);
 }
 
-internal static (ж<UDPConn>, error) listenUDP⁔(/*this*/ ж<sysListener> Ꮡsl, context.Context ctx, ж<UDPAddr> laddr) {
+} partial class netᴛsysListener {
+
+internal static (ж<UDPConn>, error) listenUDP(this ж<sysListener> Ꮡsl, context.Context ctx, ж<UDPAddr> laddr) {
     ref var sl = ref Ꮡsl.DerefOrNull();
 
     Func<context.Context, @string, @string, syscall.RawConn, error> ctrlCtxFn = default;
@@ -279,7 +288,7 @@ internal static (ж<UDPConn>, error) listenUDP⁔(/*this*/ ж<sysListener> Ꮡsl
     return (newUDPConn(fd), default);
 }
 
-internal static (ж<UDPConn>, error) listenMulticastUDP⁔(/*this*/ ж<sysListener> Ꮡsl, context.Context ctx, ж<Interface> ifi, ж<UDPAddr> Ꮡgaddr) {
+internal static (ж<UDPConn>, error) listenMulticastUDP(this ж<sysListener> Ꮡsl, context.Context ctx, ж<Interface> ifi, ж<UDPAddr> Ꮡgaddr) {
     ref var sl = ref Ꮡsl.DerefOrNull();
     ref var gaddr = ref Ꮡgaddr.DerefOrNull();
 
@@ -305,6 +314,8 @@ internal static (ж<UDPConn>, error) listenMulticastUDP⁔(/*this*/ ж<sysListen
     }
     return (c, default);
 }
+
+} partial class net_package {
 
 internal static error listenIPv4MulticastUDP(ref UDPConn c, ж<Interface> ifi, IP ip) {
     if (ifi != nil) {

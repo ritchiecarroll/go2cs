@@ -8,6 +8,7 @@ using bits = math.bits_package;
 using strconv = strconv_package;
 using image;
 using math;
+using static image_package;
 
 partial class image_package {
 
@@ -16,39 +17,41 @@ partial struct Point {
     public nint X, Y;
 }
 
+} partial class imageᴛPoint {
+
 // String returns a string representation of p like "(3,4)".
-internal static @string String⁔(/*this*/ Point p) {
+public static @string String(this Point p) {
     return "("u8 + strconv.Itoa(p.X) + ","u8 + strconv.Itoa(p.Y) + ")"u8;
 }
 
 // Add returns the vector p+q.
-internal static Point Add⁔(/*this*/ Point p, Point q) {
+public static Point Add(this Point p, Point q) {
     return new Point(p.X + q.X, p.Y + q.Y);
 }
 
 // Sub returns the vector p-q.
-internal static Point Sub⁔(/*this*/ Point p, Point q) {
+public static Point Sub(this Point p, Point q) {
     return new Point(p.X - q.X, p.Y - q.Y);
 }
 
 // Mul returns the vector p*k.
-internal static Point Mul⁔(/*this*/ Point p, nint k) {
+public static Point Mul(this Point p, nint k) {
     return new Point(p.X * k, p.Y * k);
 }
 
 // Div returns the vector p/k.
-internal static Point Div⁔(/*this*/ Point p, nint k) {
+public static Point Div(this Point p, nint k) {
     return new Point(quo(p.X, k), quo(p.Y, k));
 }
 
 // In reports whether p is in r.
-internal static bool In⁔(/*this*/ Point p, Rectangle r) {
+public static bool In(this Point p, Rectangle r) {
     return r.Min.X <= p.X && p.X < r.Max.X && r.Min.Y <= p.Y && p.Y < r.Max.Y;
 }
 
 // Mod returns the point q in r such that p.X-q.X is a multiple of r's width
 // and p.Y-q.Y is a multiple of r's height.
-internal static Point Mod⁔(/*this*/ Point p, Rectangle r) {
+public static Point Mod(this Point p, Rectangle r) {
     nint w = r.Dx();
     nint h = r.Dy();
     p = p.Sub(r.Min);
@@ -64,9 +67,11 @@ internal static Point Mod⁔(/*this*/ Point p, Rectangle r) {
 }
 
 // Eq reports whether p and q are equal.
-internal static bool Eq⁔(/*this*/ Point p, Point q) {
+public static bool Eq(this Point p, Point q) {
     return p == q;
 }
+
+} partial class image_package {
 
 // ZP is the zero [Point].
 //
@@ -91,23 +96,25 @@ partial struct Rectangle {
     public Point Min, Max;
 }
 
+} partial class imageᴛRectangle {
+
 // String returns a string representation of r like "(3,4)-(6,5)".
-internal static @string String⁔(/*this*/ Rectangle r) {
+public static @string String(this Rectangle r) {
     return r.Min.String() + "-"u8 + r.Max.String();
 }
 
 // Dx returns r's width.
-internal static nint Dx⁔(/*this*/ Rectangle r) {
+public static nint Dx(this Rectangle r) {
     return r.Max.X - r.Min.X;
 }
 
 // Dy returns r's height.
-internal static nint Dy⁔(/*this*/ Rectangle r) {
+public static nint Dy(this Rectangle r) {
     return r.Max.Y - r.Min.Y;
 }
 
 // Size returns r's width and height.
-internal static Point Size⁔(/*this*/ Rectangle r) {
+public static Point Size(this Rectangle r) {
     return new Point(
         r.Max.X - r.Min.X,
         r.Max.Y - r.Min.Y
@@ -115,7 +122,7 @@ internal static Point Size⁔(/*this*/ Rectangle r) {
 }
 
 // Add returns the rectangle r translated by p.
-internal static Rectangle Add⁔(/*this*/ Rectangle r, Point p) {
+public static Rectangle Add(this Rectangle r, Point p) {
     return new Rectangle(
         new Point(r.Min.X + p.X, r.Min.Y + p.Y),
         new Point(r.Max.X + p.X, r.Max.Y + p.Y)
@@ -123,7 +130,7 @@ internal static Rectangle Add⁔(/*this*/ Rectangle r, Point p) {
 }
 
 // Sub returns the rectangle r translated by -p.
-internal static Rectangle Sub⁔(/*this*/ Rectangle r, Point p) {
+public static Rectangle Sub(this Rectangle r, Point p) {
     return new Rectangle(
         new Point(r.Min.X - p.X, r.Min.Y - p.Y),
         new Point(r.Max.X - p.X, r.Max.Y - p.Y)
@@ -133,7 +140,7 @@ internal static Rectangle Sub⁔(/*this*/ Rectangle r, Point p) {
 // Inset returns the rectangle r inset by n, which may be negative. If either
 // of r's dimensions is less than 2*n then an empty rectangle near the center
 // of r will be returned.
-internal static Rectangle Inset⁔(/*this*/ Rectangle r, nint n) {
+public static Rectangle Inset(this Rectangle r, nint n) {
     if (r.Dx() < 2 * n) {
         r.Min.X = (r.Min.X + r.Max.X) / 2;
         r.Max.X = r.Min.X;
@@ -153,7 +160,7 @@ internal static Rectangle Inset⁔(/*this*/ Rectangle r, nint n) {
 
 // Intersect returns the largest rectangle contained by both r and s. If the
 // two rectangles do not overlap then the zero rectangle will be returned.
-internal static Rectangle Intersect⁔(/*this*/ Rectangle r, Rectangle s) {
+public static Rectangle Intersect(this Rectangle r, Rectangle s) {
     if (r.Min.X < s.Min.X) {
         r.Min.X = s.Min.X;
     }
@@ -177,7 +184,7 @@ internal static Rectangle Intersect⁔(/*this*/ Rectangle r, Rectangle s) {
 }
 
 // Union returns the smallest rectangle that contains both r and s.
-internal static Rectangle Union⁔(/*this*/ Rectangle r, Rectangle s) {
+public static Rectangle Union(this Rectangle r, Rectangle s) {
     if (r.Empty()) {
         return s;
     }
@@ -200,23 +207,23 @@ internal static Rectangle Union⁔(/*this*/ Rectangle r, Rectangle s) {
 }
 
 // Empty reports whether the rectangle contains no points.
-internal static bool Empty⁔(/*this*/ Rectangle r) {
+public static bool Empty(this Rectangle r) {
     return r.Min.X >= r.Max.X || r.Min.Y >= r.Max.Y;
 }
 
 // Eq reports whether r and s contain the same set of points. All empty
 // rectangles are considered equal.
-internal static bool Eq⁔(/*this*/ Rectangle r, Rectangle s) {
+public static bool Eq(this Rectangle r, Rectangle s) {
     return r == s || r.Empty() && s.Empty();
 }
 
 // Overlaps reports whether r and s have a non-empty intersection.
-internal static bool Overlaps⁔(/*this*/ Rectangle r, Rectangle s) {
+public static bool Overlaps(this Rectangle r, Rectangle s) {
     return !r.Empty() && !s.Empty() && r.Min.X < s.Max.X && s.Min.X < r.Max.X && r.Min.Y < s.Max.Y && s.Min.Y < r.Max.Y;
 }
 
 // In reports whether every point in r is in s.
-internal static bool In⁔(/*this*/ Rectangle r, Rectangle s) {
+public static bool In(this Rectangle r, Rectangle s) {
     if (r.Empty()) {
         return true;
     }
@@ -227,7 +234,7 @@ internal static bool In⁔(/*this*/ Rectangle r, Rectangle s) {
 
 // Canon returns the canonical version of r. The returned rectangle has minimum
 // and maximum coordinates swapped if necessary so that it is well-formed.
-internal static Rectangle Canon⁔(/*this*/ Rectangle r) {
+public static Rectangle Canon(this Rectangle r) {
     if (r.Max.X < r.Min.X) {
         (r.Min.X, r.Max.X) = (r.Max.X, r.Min.X);
     }
@@ -238,7 +245,7 @@ internal static Rectangle Canon⁔(/*this*/ Rectangle r) {
 }
 
 // At implements the [Image] interface.
-internal static color.Color At⁔(/*this*/ Rectangle r, nint x, nint y) {
+public static color.Color At(this Rectangle r, nint x, nint y) {
     if ((new Point(x, y)).In(r)) {
         return color.Opaque;
     }
@@ -246,7 +253,7 @@ internal static color.Color At⁔(/*this*/ Rectangle r, nint x, nint y) {
 }
 
 // RGBA64At implements the [RGBA64Image] interface.
-internal static color.RGBA64 RGBA64At⁔(/*this*/ Rectangle r, nint x, nint y) {
+public static color.RGBA64 RGBA64At(this Rectangle r, nint x, nint y) {
     if ((new Point(x, y)).In(r)) {
         return new color.RGBA64(0xffff, 0xffff, 0xffff, 0xffff);
     }
@@ -254,14 +261,16 @@ internal static color.RGBA64 RGBA64At⁔(/*this*/ Rectangle r, nint x, nint y) {
 }
 
 // Bounds implements the [Image] interface.
-internal static Rectangle Bounds⁔(/*this*/ Rectangle r) {
+public static Rectangle Bounds(this Rectangle r) {
     return r;
 }
 
 // ColorModel implements the [Image] interface.
-internal static color.Model ColorModel⁔(/*this*/ Rectangle r) {
+public static color.Model ColorModel(this Rectangle r) {
     return color.Alpha16Model;
 }
+
+} partial class image_package {
 
 // ZR is the zero [Rectangle].
 //

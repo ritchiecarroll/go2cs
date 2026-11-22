@@ -13,6 +13,7 @@ using Δhttp = global::go.net.http_package;
 using sync = sync_package;
 using encoding;
 using global::go.net;
+using static rpc_package;
 
 partial class rpc_package {
 
@@ -20,9 +21,13 @@ partial class rpc_package {
 // the remote side of the RPC connection.
 partial struct ServerError /*@string*/;
 
-internal static @string Error⁔(/*this*/ ServerError e) {
+} partial class rpcᴛServerError {
+
+public static @string Error(this ServerError e) {
     return (@string)e;
 }
+
+} partial class rpc_package {
 
 public static error ErrShutdown = errors.New("connection is shut down");
 
@@ -67,7 +72,9 @@ partial interface ClientCodec :
     error ReadResponseBody(any _);
 }
 
-internal static void send⁔(/*this*/ ж<Client> Ꮡclient, ж<Call> Ꮡcall) {
+} partial class rpcᴛClient {
+
+internal static void send(this ж<Client> Ꮡclient, ж<Call> Ꮡcall) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -112,7 +119,7 @@ internal static void send⁔(/*this*/ ж<Client> Ꮡclient, ж<Call> Ꮡcall) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object rpcClientProtocolErrorˢ = (@string)"rpc: client protocol error:"u8;
 
-internal static void input⁔(/*this*/ ж<Client> Ꮡclient) {
+internal static void input(this ж<Client> Ꮡclient) {
     ref var client = ref Ꮡclient.DerefOrNull();
 
     error err = default;
@@ -186,10 +193,12 @@ internal static void input⁔(/*this*/ ж<Client> Ꮡclient) {
     }
 }
 
+} partial class rpcᴛCall {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object rpcDiscardingCallReplyˢ = (@string)"rpc: discarding Call reply due to insufficient Done chan capacity"u8;
 
-internal static void done⁔(/*this*/ ж<Call> Ꮡcall) {
+internal static void done(this ж<Call> Ꮡcall) {
     ref var call = ref Ꮡcall.DerefOrNull();
 
     var selᴛ1 = call.Done.ᐸꟷ(Ꮡcall, ꓸꓸꓸ);
@@ -207,6 +216,8 @@ internal static void done⁔(/*this*/ ж<Call> Ꮡcall) {
         break;
     }}
 }
+
+} partial class rpc_package {
 
 // NewClient returns a new [Client] to handle requests to the
 // set of services at the other end of the connection.
@@ -242,7 +253,9 @@ partial struct gobClientCodec {
     internal ж<bufio.Writer> encBuf;
 }
 
-internal static error /*err*/ WriteRequest⁔(/*this*/ ref gobClientCodec c, ж<Request> r, any body) {
+} partial class rpcᴛgobClientCodec {
+
+internal static error /*err*/ WriteRequest(this ref gobClientCodec c, ж<Request> r, any body) {
     error err = default;
 
     err = c.enc.Encode(r.OrTypedNil()); if (err != nil) {
@@ -254,17 +267,19 @@ internal static error /*err*/ WriteRequest⁔(/*this*/ ref gobClientCodec c, ж<
     return c.encBuf.Flush();
 }
 
-internal static error ReadResponseHeader⁔(/*this*/ ref gobClientCodec c, ж<Response> r) {
+internal static error ReadResponseHeader(this ref gobClientCodec c, ж<Response> r) {
     return c.dec.Decode(r.OrTypedNil());
 }
 
-internal static error ReadResponseBody⁔(/*this*/ ref gobClientCodec c, any body) {
+internal static error ReadResponseBody(this ref gobClientCodec c, any body) {
     return c.dec.Decode(body);
 }
 
-internal static error Close⁔(/*this*/ ref gobClientCodec c) {
+internal static error Close(this ref gobClientCodec c) {
     return c.rwc.Close();
 }
+
+} partial class rpc_package {
 
 // DialHTTP connects to an HTTP RPC server at the specified network address
 // listening on the default HTTP RPC path.
@@ -308,9 +323,11 @@ public static (ж<Client>, error) Dial(@string network, @string address) {
     return (NewClient(new net_ConnᴠReadWriteCloser(conn)), default);
 }
 
+} partial class rpcᴛClient {
+
 // Close calls the underlying codec's Close method. If the connection is already
 // shutting down, [ErrShutdown] is returned.
-internal static error Close⁔(/*this*/ ж<Client> Ꮡclient) {
+public static error Close(this ж<Client> Ꮡclient) {
     ref var client = ref Ꮡclient.DerefOrNull();
 
     client.mutex.Lock();
@@ -330,7 +347,7 @@ internal static readonly object rpcDoneChannelIsˢ = (@string)"rpc: done channel
 // the invocation. The done channel will signal when the call is complete by returning
 // the same Call object. If done is nil, Go will allocate a new channel.
 // If non-nil, done must be buffered or Go will deliberately crash.
-internal static ж<Call> Go⁔(/*this*/ ж<Client> Ꮡclient, @string serviceMethod, any args, any reply, channel<ж<Call>> done) {
+public static ж<Call> Go(this ж<Client> Ꮡclient, @string serviceMethod, any args, any reply, channel<ж<Call>> done) {
     var call = @new<Call>();
     call.ServiceMethod = serviceMethod;
     call.Args = args;
@@ -352,9 +369,9 @@ internal static ж<Call> Go⁔(/*this*/ ж<Client> Ꮡclient, @string serviceMet
 }
 
 // Call invokes the named function, waits for it to complete, and returns its error status.
-internal static error Call⁔(/*this*/ ж<Client> Ꮡclient, @string serviceMethod, any args, any reply) {
+public static error Call(this ж<Client> Ꮡclient, @string serviceMethod, any args, any reply) {
     var call = ᐸꟷ(Ꮡclient.Go(serviceMethod, args, reply, new channel<ж<Call>>(1)).Done);
     return call.Error;
 }
 
-} // end rpc_package
+}

@@ -11,6 +11,7 @@ using time = time_package;
 using @internal;
 using fs = go.io.fs_package;
 using go.io;
+using static net_package;
 
 partial class net_package {
 
@@ -38,19 +39,21 @@ internal static ж<nssConf> getSystemNSS() {
     return conf;
 }
 
+} partial class netᴛnsswitchConfig {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string etcNsswitchConfˢ => ref etcNsswitchConfˢᵇ;
 private static readonly @string etcNsswitchConfˢᵇ = "/etc/nsswitch.conf"u8;
 
 // init initializes conf and is only called via conf.initOnce.
-internal static void init⁔(/*this*/ ref nsswitchConfig conf) {
+internal static void init(this ref nsswitchConfig conf) {
     conf.nssConf = parseNSSConfFile(etcNsswitchConfˢ);
     conf.lastChecked = time.Now();
     conf.ch = new channel<EmptyStruct>(1);
 }
 
 // tryUpdate tries to update conf.
-internal static void tryUpdate⁔(/*this*/ ж<nsswitchConfig> Ꮡconf) {
+internal static void tryUpdate(this ж<nsswitchConfig> Ꮡconf) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -87,11 +90,11 @@ internal static void tryUpdate⁔(/*this*/ ж<nsswitchConfig> Ꮡconf) {
     finally { if (ᒐd1) Ꮡconf.DerefOrNull().releaseSema(); ᒐ.Run(); }
 }
 
-internal static void acquireSema⁔(/*this*/ ref nsswitchConfig conf) {
+internal static void acquireSema(this ref nsswitchConfig conf) {
     conf.ch.ᐸꟷ(new EmptyStruct());
 }
 
-internal static bool tryAcquireSema⁔(/*this*/ ref nsswitchConfig conf) {
+internal static bool tryAcquireSema(this ref nsswitchConfig conf) {
     var selᴛ19 = conf.ch.ᐸꟷ(new EmptyStruct(), ꓸꓸꓸ);
     switch (trySelect(selᴛ19)) {
     case 0: {
@@ -102,9 +105,11 @@ internal static bool tryAcquireSema⁔(/*this*/ ref nsswitchConfig conf) {
     }}
 }
 
-internal static void releaseSema⁔(/*this*/ ref nsswitchConfig conf) {
+internal static void releaseSema(this ref nsswitchConfig conf) {
     ᐸꟷ(conf.ch);
 }
+
+} partial class net_package {
 
 // nssConf represents the state of the machine's /etc/nsswitch.conf file.
 partial struct nssConf {
@@ -118,9 +123,11 @@ partial struct nssSource {
     internal slice<nssCriterion> criteria;
 }
 
+} partial class netᴛnssSource {
+
 // standardCriteria reports all specified criteria have the default
 // status actions.
-internal static bool standardCriteria⁔(/*this*/ nssSource s) {
+internal static bool standardCriteria(this nssSource s) {
     foreach (var (i, crit) in range(s.criteria)) {
         if (!crit.standardStatusAction(i == len(s.criteria) - 1)) {
             return false;
@@ -129,6 +136,8 @@ internal static bool standardCriteria⁔(/*this*/ nssSource s) {
     return true;
 }
 
+} partial class net_package {
+
 // nssCriterion is the parsed structure of one of the criteria in brackets
 // after an NSS source name.
 partial struct nssCriterion {
@@ -136,6 +145,8 @@ partial struct nssCriterion {
     internal @string status; // e.g. "success", "unavail" (lowercase)
     internal @string action; // e.g. "return", "continue" (lowercase)
 }
+
+} partial class netᴛnssCriterion {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string returnˢ => ref returnˢᵇ;
@@ -146,7 +157,7 @@ private static readonly @string continueˢᵇ = "continue"u8;
 // standardStatusAction reports whether c is equivalent to not
 // specifying the criterion at all. last is whether this criteria is the
 // last in the list.
-internal static bool standardStatusAction⁔(/*this*/ nssCriterion c, bool last) {
+internal static bool standardStatusAction(this nssCriterion c, bool last) {
     if (c.negate) {
         return false;
     }
@@ -170,6 +181,8 @@ internal static bool standardStatusAction⁔(/*this*/ nssCriterion c, bool last)
     }
     return c.action == def;
 }
+
+} partial class net_package {
 
 internal static ж<nssConf> parseNSSConfFile(@string @file) {
     GoFrame ᒐ = default;

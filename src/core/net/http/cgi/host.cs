@@ -34,6 +34,7 @@ using go.path;
 using url = go.net.url_package;
 using vendor.golang.org.x.net.http;
 using ꓸꓸꓸany = Span<any>;
+using static cgi_package;
 
 partial class cgi_package {
 
@@ -88,12 +89,16 @@ partial struct Handler {
     public http.Handler PathLocationHandler;
 }
 
-internal static io.Writer stderr⁔(/*this*/ ref Handler h) {
+} partial class cgiᴛHandler {
+
+internal static io.Writer stderr(this ref Handler h) {
     if (h.Stderr != nil) {
         return h.Stderr;
     }
     return new os.FileжWriter(os.Stderr);
 }
+
+} partial class cgi_package {
 
 // removeLeadingDuplicates remove leading duplicate in environments.
 // It's possible to override environment like following.
@@ -125,7 +130,11 @@ internal static slice<@string> /*ret*/ removeLeadingDuplicates(slice<@string> en
     return ret;
 }
 
+} partial class cgiᴛHandler {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string contentTypeˢ2 => ref contentTypeˢ2ᵇ;
+private static readonly @string contentTypeˢ2ᵇ = "Content-Type"u8;
 internal static ref readonly @string pathˢ => ref pathˢᵇ;
 private static readonly @string pathˢᵇ = "PATH"u8;
 internal static ref readonly @string binUsrBinUsrUcbUsrBsdUsrˢ => ref binUsrBinUsrUcbUsrBsdUsrˢᵇ;
@@ -133,7 +142,7 @@ private static readonly @string binUsrBinUsrUcbUsrBsdUsrˢᵇ = "/bin:/usr/bin:/
 internal static ref readonly @string locationˢ => ref locationˢᵇ;
 private static readonly @string locationˢᵇ = "Location"u8;
 
-internal static void ServeHTTP⁔(/*this*/ ж<Handler> Ꮡh, http.ResponseWriter rw, ж<http.Request> Ꮡreq) {
+public static void ServeHTTP(this ж<Handler> Ꮡh, http.ResponseWriter rw, ж<http.Request> Ꮡreq) {
     GoFrame ᒐ = default;
     try {
         ref var h = ref Ꮡh.DerefOrNull();
@@ -387,7 +396,7 @@ internal static void ServeHTTP⁔(/*this*/ ж<Handler> Ꮡh, http.ResponseWriter
     finally { ᒐ.Run(); }
 }
 
-internal static void printf⁔(/*this*/ ref Handler h, @string format, params ꓸꓸꓸany vʗp) {
+internal static void printf(this ref Handler h, @string format, params ꓸꓸꓸany vʗp) {
     var v = vʗp.sslice();
 
     if (h.Logger != nil) {
@@ -397,7 +406,7 @@ internal static void printf⁔(/*this*/ ref Handler h, @string format, params �
     }
 }
 
-internal static void handleInternalRedirect⁔(/*this*/ ref Handler h, http.ResponseWriter rw, ж<http.Request> Ꮡreq, @string path) {
+internal static void handleInternalRedirect(this ref Handler h, http.ResponseWriter rw, ж<http.Request> Ꮡreq, @string path) {
     ref var req = ref Ꮡreq.DerefOrNull();
 
     var (url, err) = req.URL.Parse(path);
@@ -428,6 +437,8 @@ internal static void handleInternalRedirect⁔(/*this*/ ref Handler h, http.Resp
     ));
     h.PathLocationHandler.ServeHTTP(rw, newReq);
 }
+
+} partial class cgi_package {
 
 internal static rune upperCaseAndUnderscore(rune r) {
     switch (ᐧ) {

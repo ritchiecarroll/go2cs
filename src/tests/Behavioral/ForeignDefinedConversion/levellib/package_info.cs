@@ -14,9 +14,6 @@
 
 using go;
 using static go.ForeignDefinedConversion.levellib_package;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -52,12 +49,10 @@ using System.Runtime.CompilerServices;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("levellib.go", "levellib.cs", "AAYQ")]
+[assembly: GoPositionMap("levellib.go", "levellib.cs", "AAoQ")]
 // </GoSourcePositionMaps>
 
 namespace go.ForeignDefinedConversion;
-
-using static go.ForeignDefinedConversion.levellib_package;
 
 [GoPackage("levellib")]
 public static partial class levellib_package
@@ -89,15 +84,5 @@ public static partial class levellib_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(levellib_package.Level)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class levellibᴛLevel;
+[GoMethodHost(typeof(levellib_package.Level)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class levellibᴛLevel;
 // </MethodHolders>
-
-// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
-// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
-// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
-// the body's frame as the Go method.
-// <MethodForwarders>
-partial class levellibᴛLevel {
-    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static uint32 Double(this Level l) => levellib_package.Double⁔(l);
-}
-// </MethodForwarders>

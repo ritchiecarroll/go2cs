@@ -2,12 +2,17 @@ namespace go;
 
 using fmt = fmt_package;
 using strings = strings_package;
+using static main_package;
 
 partial class main_package {
 
 partial struct Env /*map[@string, @string]*/;
 
-internal static void Set⁔(/*this*/ Env e, @string k, @string v) { e[strings.ToLower(k)] = v; }
+} partial class mainᴛEnv {
+
+public static void Set(this Env e, @string k, @string v) { e[strings.ToLower(k)] = v; }
+
+} partial class main_package {
 
 partial struct Bag /*map[@string, nint]*/;
 
@@ -34,7 +39,11 @@ public static bool ContainsKey(this Cache c, @string k) { return k == "always"u8
 
 partial struct PEnv /*map[@string, @string]*/;
 
-internal static void Set⁔(/*this*/ ref PEnv p, @string k, @string v) { (p)[strings.ToUpper(k)] = v; }
+} partial class mainᴛPEnv {
+
+public static void Set(this ref PEnv p, @string k, @string v) { (p)[strings.ToUpper(k)] = v; }
+
+} partial class main_package {
 
 partial struct Uniq<T> /*map[T, EmptyStruct]*/;
 
@@ -57,7 +66,11 @@ partial struct Set /*map[@string, nint]*/;
 
 partial struct Hdr /*map[@string, slice<@string>]*/;
 
-internal static void Set⁔(/*this*/ Hdr h, @string k, @string v) { h[strings.ToUpper(k)] = [v]; }
+} partial class mainᴛHdr {
+
+public static void Set(this Hdr h, @string k, @string v) { h[strings.ToUpper(k)] = [v]; }
+
+} partial class main_package {
 
 internal partial struct main_named /*dyn*/ {
     internal map<@string, Env> m;

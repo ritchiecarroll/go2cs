@@ -5,6 +5,7 @@ namespace go;
 
 using color = image.color_package;
 using image;
+using static image_package;
 
 partial class image_package {
 
@@ -23,32 +24,36 @@ partial struct Uniform {
     public color.Color C;
 }
 
-internal static (uint32 r, uint32 g, uint32 b, uint32 a) RGBA⁔(/*this*/ ref Uniform c) {
+} partial class imageᴛUniform {
+
+public static (uint32 r, uint32 g, uint32 b, uint32 a) RGBA(this ref Uniform c) {
     return c.C.RGBA();
 }
 
-internal static color.Model ColorModel⁔(/*this*/ ж<Uniform> Ꮡc) {
+public static color.Model ColorModel(this ж<Uniform> Ꮡc) {
     return new UniformжModel(Ꮡc);
 }
 
-internal static color.Color Convert⁔(/*this*/ ref Uniform c, color.Color _) {
+public static color.Color Convert(this ref Uniform c, color.Color _) {
     return c.C;
 }
 
-internal static Rectangle Bounds⁔(/*this*/ ref Uniform c) { return new Rectangle(new Point(-1000000000, -1000000000), new Point(1000000000, 1000000000)); }
+public static Rectangle Bounds(this ref Uniform c) { return new Rectangle(new Point(-1000000000, -1000000000), new Point(1000000000, 1000000000)); }
 
-internal static color.Color At⁔(/*this*/ ref Uniform c, nint x, nint y) { return c.C; }
+public static color.Color At(this ref Uniform c, nint x, nint y) { return c.C; }
 
-internal static color.RGBA64 RGBA64At⁔(/*this*/ ref Uniform c, nint x, nint y) {
+public static color.RGBA64 RGBA64At(this ref Uniform c, nint x, nint y) {
     var (r, g, b, a) = c.C.RGBA();
     return new color.RGBA64((uint16)r, (uint16)g, (uint16)b, (uint16)a);
 }
 
 // Opaque scans the entire image and reports whether it is fully opaque.
-internal static bool Opaque⁔(/*this*/ ref Uniform c) {
+public static bool Opaque(this ref Uniform c) {
     var (_, _, _, a) = c.C.RGBA();
     return a == 0xffff;
 }
+
+} partial class image_package {
 
 // NewUniform returns a new [Uniform] image of the given color.
 public static ж<Uniform> NewUniform(color.Color c) {

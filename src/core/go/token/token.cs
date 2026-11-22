@@ -10,6 +10,7 @@ using strconv = strconv_package;
 using unicode = unicode_package;
 using utf8 = global::go.unicode.utf8_package;
 using global::go.unicode;
+using static token_package;
 
 partial class token_package {
 
@@ -232,12 +233,14 @@ internal static Token additional_end => 89;
     [(int)TILDE] = "~"
 }.array(89); }
 
+} partial class tokenᴛToken {
+
 // String returns the string corresponding to the token tok.
 // For operators, delimiters, and keywords the string is the actual
 // token character sequence (e.g., for the token [ADD], the string is
 // "+"). For all other tokens the string corresponds to the token
 // constant name (e.g. for the token [IDENT], the string is "IDENT").
-internal static @string String⁔(/*this*/ Token tok) {
+public static @string String(this Token tok) {
     @string s = ""u8;
     if (0 <= tok && tok < ((Token)len(tokens))) {
         s = tokens[tok];
@@ -248,6 +251,8 @@ internal static @string String⁔(/*this*/ Token tok) {
     return s;
 }
 
+} partial class token_package {
+
 // A set of constants for precedence-based expression parsing.
 // Non-operators have lowest precedence, followed by operators
 // starting with precedence 1 up to unary operators. The highest
@@ -257,10 +262,12 @@ public static UntypedInt LowestPrec => 0; // non-operators
 public static UntypedInt UnaryPrec => 6;
 public static UntypedInt HighestPrec => 7;
 
+} partial class tokenᴛToken {
+
 // Precedence returns the operator precedence of the binary
 // operator op. If op is not a binary operator, the result
 // is LowestPrecedence.
-internal static nint Precedence⁔(/*this*/ Token op) {
+public static nint Precedence(this Token op) {
     switch (op) {
     case var ᴛ when ᴛ == LOR: {
         return 1;
@@ -280,6 +287,8 @@ internal static nint Precedence⁔(/*this*/ Token op) {
     return LowestPrec;
 }
 
+} partial class token_package {
+
 internal static map<@string, Token> keywords;
 
 [GoInit] internal static void init() {
@@ -297,21 +306,25 @@ public static Token Lookup(@string ident) {
     return IDENT;
 }
 
+} partial class tokenᴛToken {
+
 // Predicates
 
 // IsLiteral returns true for tokens corresponding to identifiers
 // and basic type literals; it returns false otherwise.
-internal static bool IsLiteral⁔(/*this*/ Token tok) { return literal_beg < tok && tok < literal_end; }
+public static bool IsLiteral(this Token tok) { return literal_beg < tok && tok < literal_end; }
 
 // IsOperator returns true for tokens corresponding to operators and
 // delimiters; it returns false otherwise.
-internal static bool IsOperator⁔(/*this*/ Token tok) {
+public static bool IsOperator(this Token tok) {
     return (operator_beg < tok && tok < operator_end) || tok == TILDE;
 }
 
 // IsKeyword returns true for tokens corresponding to keywords;
 // it returns false otherwise.
-internal static bool IsKeyword⁔(/*this*/ Token tok) { return keyword_beg < tok && tok < keyword_end; }
+public static bool IsKeyword(this Token tok) { return keyword_beg < tok && tok < keyword_end; }
+
+} partial class token_package {
 
 // IsExported reports whether name starts with an upper-case letter.
 public static bool IsExported(@string name) {

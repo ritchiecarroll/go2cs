@@ -46,6 +46,7 @@ using fmt = fmt_package;
 using slices = slices_package;
 using strings = strings_package;
 using ꓸꓸꓸany = Span<any>;
+using static dag_package;
 
 partial class dag_package {
 
@@ -59,7 +60,9 @@ internal static ж<Graph> newGraph() {
     return Ꮡ(new Graph(byLabel: new map<@string, nint>{}, edges: new map<@string, map<@string, bool>>{}));
 }
 
-internal static bool addNode⁔(/*this*/ ref Graph g, @string label) {
+} partial class dagᴛGraph {
+
+internal static bool addNode(this ref Graph g, @string label) {
     var (_, ok) = g.byLabel[label, ꟷ]; if (ok) {
         return false;
     }
@@ -69,19 +72,19 @@ internal static bool addNode⁔(/*this*/ ref Graph g, @string label) {
     return true;
 }
 
-internal static void AddEdge⁔(/*this*/ ref Graph g, @string from, @string to) {
+public static void AddEdge(this ref Graph g, @string from, @string to) {
     g.edges[from].Set(to, true);
 }
 
-internal static void DelEdge⁔(/*this*/ ref Graph g, @string from, @string to) {
+public static void DelEdge(this ref Graph g, @string from, @string to) {
     delete(g.edges[from], to);
 }
 
-internal static bool HasEdge⁔(/*this*/ ref Graph g, @string from, @string to) {
+public static bool HasEdge(this ref Graph g, @string from, @string to) {
     return g.edges[from] != nil && g.edges[from][to];
 }
 
-internal static slice<@string> Edges⁔(/*this*/ ж<Graph> Ꮡg, @string from) {
+public static slice<@string> Edges(this ж<Graph> Ꮡg, @string from) {
     ref var g = ref Ꮡg.DerefOrNull();
 
     var edges = new slice<@string>(0, 16);
@@ -91,6 +94,8 @@ internal static slice<@string> Edges⁔(/*this*/ ж<Graph> Ꮡg, @string from) {
     slices.SortFunc(edges, (@string a, @string b) => cmp.Compare(Ꮡg.Value.byLabel[a], Ꮡg.Value.byLabel[b]));
     return edges;
 }
+
+} partial class dag_package {
 
 // Parse parses the DAG language and returns the transitive closure of
 // the described graph. In the returned graph, there is an edge from "b"
@@ -189,9 +194,13 @@ partial struct rule {
 
 partial struct syntaxError /*@string*/;
 
-internal static @string Error⁔(/*this*/ syntaxError e) {
+} partial class dagᴛsyntaxError {
+
+internal static @string Error(this syntaxError e) {
     return (@string)e;
 }
+
+} partial class dag_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string unexpectedEofˢ => ref unexpectedEofˢᵇ;
@@ -260,8 +269,10 @@ partial struct rulesParser {
     internal @string text;
 }
 
+} partial class dagᴛrulesParser {
+
 // syntaxError reports a parsing error.
-internal static void syntaxError⁔(/*this*/ ref rulesParser p, @string msg) {
+internal static void syntaxError(this ref rulesParser p, @string msg) {
     throw panic(((syntaxError)fmt.Sprintf("parsing graph: line %d: syntax error: %s near %s"u8, p.lineno, msg, p.lastWord)));
 }
 
@@ -270,7 +281,7 @@ internal static ref readonly @string badListSyntaxˢ => ref badListSyntaxˢᵇ;
 private static readonly @string badListSyntaxˢᵇ = "bad list syntax"u8;
 
 // nextList parses and returns a comma-separated list of names.
-internal static (slice<@string> list, @string token) nextList⁔(/*this*/ ref rulesParser p) {
+internal static (slice<@string> list, @string token) nextList(this ref rulesParser p) {
     slice<@string> list = default;
 
     for (;;) {
@@ -300,7 +311,7 @@ private static readonly @string unexpectedTokenˢᵇ = "unexpected token !"u8;
 
 // nextToken returns the next token in the deps rules,
 // one of ";" "," "<" "!<" or a name.
-internal static @string nextToken⁔(/*this*/ ref rulesParser p) {
+internal static @string nextToken(this ref rulesParser p) {
     for (;;) {
         if (p.text == ""u8) {
             return ""u8;
@@ -348,4 +359,4 @@ internal static @string nextToken⁔(/*this*/ ref rulesParser p) {
     }
 }
 
-} // end dag_package
+}

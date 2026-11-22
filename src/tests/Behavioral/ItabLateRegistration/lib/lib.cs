@@ -1,6 +1,7 @@
 namespace go.ItabLateRegistration;
 
 using fmt = fmt_package;
+using static lib_package;
 
 partial class lib_package {
 
@@ -16,23 +17,35 @@ partial struct Circle {
     public nint R;
 }
 
-internal static @string Name⁔(/*this*/ Circle c) { return fmt.Sprintf("circle(%d)"u8, c.R); }
+} partial class libᴛCircle {
 
-internal static nint Size⁔(/*this*/ Circle c) { return c.R * 2; }
+public static @string Name(this Circle c) { return fmt.Sprintf("circle(%d)"u8, c.R); }
+
+public static nint Size(this Circle c) { return c.R * 2; }
+
+} partial class lib_package {
 
 partial struct Square {
     public nint S;
 }
 
-internal static @string Name⁔(/*this*/ Square s) { return fmt.Sprintf("square(%d)"u8, s.S); }
+} partial class libᴛSquare {
 
-internal static nint Size⁔(/*this*/ Square s) { return s.S * 4; }
+public static @string Name(this Square s) { return fmt.Sprintf("square(%d)"u8, s.S); }
+
+public static nint Size(this Square s) { return s.S * 4; }
+
+} partial class lib_package {
 
 partial struct Blank {
     public nint N;
 }
 
-internal static @string Tag⁔(/*this*/ Blank b) { return "blank"; }
+} partial class libᴛBlank {
+
+public static @string Tag(this Blank b) { return "blank"; }
+
+} partial class lib_package {
 
 public static (@string, bool) TryName(any v) {
     var (n, ok) = v._<Named>(ᐧ);

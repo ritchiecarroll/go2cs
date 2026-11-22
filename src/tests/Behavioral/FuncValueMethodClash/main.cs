@@ -3,13 +3,18 @@ namespace go;
 using fmt = fmt_package;
 using reflect = reflect_package;
 using time = time_package;
+using static main_package;
 
 partial class main_package {
 
 partial struct T {
 }
 
-internal static @string Run⁔(/*this*/ T _) { return "method"; }
+} partial class mainᴛT {
+
+public static @string Run(this T _) { return "method"; }
+
+} partial class main_package {
 
 public static @string Run() { return "func"; }
 

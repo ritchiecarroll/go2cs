@@ -60,6 +60,7 @@ using utf8 = go.unicode.utf8_package;
 using @unsafe = unsafe_package;
 using go.encoding;
 using go.unicode;
+using static json_package;
 
 partial class json_package {
 
@@ -250,9 +251,13 @@ partial struct UnsupportedTypeError {
     public reflect.Type Type;
 }
 
-internal static @string Error⁔(/*this*/ ref UnsupportedTypeError e) {
+} partial class jsonᴛUnsupportedTypeError {
+
+public static @string Error(this ref UnsupportedTypeError e) {
     return "json: unsupported type: "u8 + e.Type.String();
 }
+
+} partial class json_package {
 
 // An UnsupportedValueError is returned by [Marshal] when attempting
 // to encode an unsupported value.
@@ -261,9 +266,13 @@ partial struct UnsupportedValueError {
     public @string Str;
 }
 
-internal static @string Error⁔(/*this*/ ref UnsupportedValueError e) {
+} partial class jsonᴛUnsupportedValueError {
+
+public static @string Error(this ref UnsupportedValueError e) {
     return "json: unsupported value: "u8 + e.Str;
 }
+
+} partial class json_package {
 
 // Before Go 1.2, an InvalidUTF8Error was returned by [Marshal] when
 // attempting to encode a string value with invalid UTF-8 sequences.
@@ -275,9 +284,13 @@ partial struct InvalidUTF8Error {
     public @string S; // the whole string value that caused the error
 }
 
-internal static @string Error⁔(/*this*/ ref InvalidUTF8Error e) {
+} partial class jsonᴛInvalidUTF8Error {
+
+public static @string Error(this ref InvalidUTF8Error e) {
     return "json: invalid UTF-8 in string: "u8 + strconv.Quote(e.S);
 }
+
+} partial class json_package {
 
 // A MarshalerError represents an error from calling a
 // [Marshaler.MarshalJSON] or [encoding.TextMarshaler.MarshalText] method.
@@ -287,11 +300,13 @@ partial struct MarshalerError {
     internal @string sourceFunc;
 }
 
+} partial class jsonᴛMarshalerError {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string marshalJSONˢ => ref marshalJSONˢᵇ;
 private static readonly @string marshalJSONˢᵇ = "MarshalJSON"u8;
 
-internal static @string Error⁔(/*this*/ ref MarshalerError e) {
+public static @string Error(this ref MarshalerError e) {
     @string srcFunc = e.sourceFunc;
     if (srcFunc == ""u8) {
         srcFunc = marshalJSONˢ;
@@ -300,7 +315,9 @@ internal static @string Error⁔(/*this*/ ref MarshalerError e) {
 }
 
 // Unwrap returns the underlying error.
-internal static error Unwrap⁔(/*this*/ ref MarshalerError e) { return e.Err; }
+public static error Unwrap(this ref MarshalerError e) { return e.Err; }
+
+} partial class json_package {
 
 internal static ref readonly @string hex => ref hexᵇ;
 private static readonly @string hexᵇ = "0123456789abcdef"u8;
@@ -342,7 +359,9 @@ partial struct jsonError {
     /*embed*/ internal error error;
 }
 
-internal static error /*err*/ marshal⁔(/*this*/ ж<encodeState> Ꮡe, any v, encOpts opts) {
+} partial class jsonᴛencodeState {
+
+internal static error /*err*/ marshal(this ж<encodeState> Ꮡe, any v, encOpts opts) {
     error err = default;
     GoFrame ᒐ = default;
     try {
@@ -365,9 +384,11 @@ internal static error /*err*/ marshal⁔(/*this*/ ж<encodeState> Ꮡe, any v, e
 }
 
 // error aborts the encoding by panicking with err wrapped in jsonError.
-internal static void error⁔(/*this*/ ref encodeState e, error err) {
+internal static void error(this ref encodeState e, error err) {
     throw panic(new jsonError(err));
 }
+
+} partial class json_package {
 
 internal static bool isEmptyValue(reflect.Value v) {
     switch (v.Kind()) {
@@ -380,9 +401,13 @@ internal static bool isEmptyValue(reflect.Value v) {
     return false;
 }
 
-internal static void reflectValue⁔(/*this*/ ж<encodeState> Ꮡe, reflect.Value v, encOpts opts) {
+} partial class jsonᴛencodeState {
+
+internal static void reflectValue(this ж<encodeState> Ꮡe, reflect.Value v, encOpts opts) {
     valueEncoder(v)(Ꮡe, v, opts);
 }
+
+} partial class json_package {
 
 partial struct encOpts {
     // quoted causes primitive fields to be encoded inside JSON strings.
@@ -492,6 +517,10 @@ internal static Action<ж<encodeState>, reflect.Value, encOpts> newTypeEncoder(r
         return unsupportedTypeEncoder;
     }}
 }
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string nullˢ => ref nullˢᵇ;
+private static readonly @string nullˢᵇ = "null"u8;
 
 internal static void invalidValueEncoder(ж<encodeState> e, reflect.Value v, encOpts _) {
     e.of(encodeState.ᏑBuffer).WriteString(nullˢ);
@@ -603,7 +632,9 @@ internal static void uintEncoder(ж<encodeState> e, reflect.Value v, encOpts opt
 
 partial struct floatEncoder /*num:nint*/; // number of bits
 
-internal static void encode⁔(/*this*/ floatEncoder bits, ж<encodeState> Ꮡe, reflect.Value v, encOpts opts) {
+} partial class jsonᴛfloatEncoder {
+
+internal static void encode(this floatEncoder bits, ж<encodeState> Ꮡe, reflect.Value v, encOpts opts) {
     ref var e = ref Ꮡe.DerefOrNull();
 
     var f = v.Float();
@@ -638,6 +669,8 @@ internal static void encode⁔(/*this*/ floatEncoder bits, ж<encodeState> Ꮡe,
     b = mayAppendQuote(b, opts.quoted);
     Ꮡe.of(encodeState.ᏑBuffer).Write(b);
 }
+
+} partial class json_package {
 
 internal static Action<ж<encodeState>, reflect.Value, encOpts> float32Encoder = (ж<encodeState> p1, reflect.Value p2, encOpts p3) => (((floatEncoder)32)).encode(p1, p2, p3);
 internal static Action<ж<encodeState>, reflect.Value, encOpts> float64Encoder = (ж<encodeState> p1, reflect.Value p2, encOpts p3) => (((floatEncoder)64)).encode(p1, p2, p3);
@@ -755,7 +788,9 @@ partial struct structFields {
     internal map<@string, ж<field>> byFoldedName;
 }
 
-internal static void encode⁔(/*this*/ structEncoder se, ж<encodeState> e, reflect.Value v, encOpts opts) {
+} partial class jsonᴛstructEncoder {
+
+internal static void encode(this structEncoder se, ж<encodeState> e, reflect.Value v, encOpts opts) {
     var next = (byte)'{';
 FieldLoop:
     foreach (var i in range(len(se.fields.list))) {
@@ -795,6 +830,8 @@ break_FieldLoop:;
     }
 }
 
+} partial class json_package {
+
 internal static Action<ж<encodeState>, reflect.Value, encOpts> newStructEncoder(reflect.Type t) {
     var se = new structEncoder(fields: cachedTypeFields(t));
     var seʗ1 = se;
@@ -805,7 +842,13 @@ partial struct mapEncoder {
     internal Action<ж<encodeState>, reflect.Value, encOpts> elemEnc;
 }
 
-internal static void encode⁔(/*this*/ mapEncoder me, ж<encodeState> Ꮡe, reflect.Value v, encOpts opts) {
+} partial class jsonᴛmapEncoder {
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string nullˢ => ref nullˢᵇ;
+private static readonly @string nullˢᵇ = "null"u8;
+
+internal static void encode(this mapEncoder me, ж<encodeState> Ꮡe, reflect.Value v, encOpts opts) {
     GoFrame ᒐ = default;
     try {
         ref var e = ref Ꮡe.DerefOrNull();
@@ -855,6 +898,8 @@ internal static void encode⁔(/*this*/ mapEncoder me, ж<encodeState> Ꮡe, ref
     finally { ᒐ.Run(); }
 }
 
+} partial class json_package {
+
 internal static Action<ж<encodeState>, reflect.Value, encOpts> newMapEncoder(reflect.Type t) {
     switch (t.Key().Kind()) {
     case var ᴛ when ᴛ == reflect.String || ᴛ == reflect.Int || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64 || ᴛ == reflect.Uint || ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32 || ᴛ == reflect.Uint64 || ᴛ == reflect.Uintptr: {
@@ -897,7 +942,13 @@ internal partial struct encode_ptr /*dyn*/ {
     internal nint len;
 }
 
-internal static void encode⁔(/*this*/ sliceEncoder se, ж<encodeState> Ꮡe, reflect.Value v, encOpts opts) {
+} partial class jsonᴛsliceEncoder {
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string nullˢ => ref nullˢᵇ;
+private static readonly @string nullˢᵇ = "null"u8;
+
+internal static void encode(this sliceEncoder se, ж<encodeState> Ꮡe, reflect.Value v, encOpts opts) {
     GoFrame ᒐ = default;
     try {
         ref var e = ref Ꮡe.DerefOrNull();
@@ -927,6 +978,8 @@ internal static void encode⁔(/*this*/ sliceEncoder se, ж<encodeState> Ꮡe, r
     finally { ᒐ.Run(); }
 }
 
+} partial class json_package {
+
 internal static Action<ж<encodeState>, reflect.Value, encOpts> newSliceEncoder(reflect.Type t) {
     // Byte slices get special treatment; arrays don't.
     if (t.Elem().Kind() == reflect.Uint8) {
@@ -944,7 +997,9 @@ partial struct arrayEncoder {
     internal Action<ж<encodeState>, reflect.Value, encOpts> elemEnc;
 }
 
-internal static void encode⁔(/*this*/ arrayEncoder ae, ж<encodeState> e, reflect.Value v, encOpts opts) {
+} partial class jsonᴛarrayEncoder {
+
+internal static void encode(this arrayEncoder ae, ж<encodeState> e, reflect.Value v, encOpts opts) {
     e.of(encodeState.ᏑBuffer).WriteByte((byte)'[');
     nint n = v.Len();
     for (nint i = 0; i < n; i++) {
@@ -956,6 +1011,8 @@ internal static void encode⁔(/*this*/ arrayEncoder ae, ж<encodeState> e, refl
     e.of(encodeState.ᏑBuffer).WriteByte((byte)']');
 }
 
+} partial class json_package {
+
 internal static Action<ж<encodeState>, reflect.Value, encOpts> newArrayEncoder(reflect.Type t) {
     var enc = new arrayEncoder(typeEncoder(t.Elem()));
     var encʗ1 = enc;
@@ -966,7 +1023,13 @@ partial struct ptrEncoder {
     internal Action<ж<encodeState>, reflect.Value, encOpts> elemEnc;
 }
 
-internal static void encode⁔(/*this*/ ptrEncoder pe, ж<encodeState> Ꮡe, reflect.Value v, encOpts opts) {
+} partial class jsonᴛptrEncoder {
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string nullˢ => ref nullˢᵇ;
+private static readonly @string nullˢᵇ = "null"u8;
+
+internal static void encode(this ptrEncoder pe, ж<encodeState> Ꮡe, reflect.Value v, encOpts opts) {
     GoFrame ᒐ = default;
     try {
         ref var e = ref Ꮡe.DerefOrNull();
@@ -994,6 +1057,8 @@ internal static void encode⁔(/*this*/ ptrEncoder pe, ж<encodeState> Ꮡe, ref
     finally { ᒐ.Run(); }
 }
 
+} partial class json_package {
+
 internal static Action<ж<encodeState>, reflect.Value, encOpts> newPtrEncoder(reflect.Type t) {
     var enc = new ptrEncoder(typeEncoder(t.Elem()));
     var encʗ1 = enc;
@@ -1004,13 +1069,17 @@ partial struct condAddrEncoder {
     internal Action<ж<encodeState>, reflect.Value, encOpts> canAddrEnc, elseEnc;
 }
 
-internal static void encode⁔(/*this*/ condAddrEncoder ce, ж<encodeState> e, reflect.Value v, encOpts opts) {
+} partial class jsonᴛcondAddrEncoder {
+
+internal static void encode(this condAddrEncoder ce, ж<encodeState> e, reflect.Value v, encOpts opts) {
     if (v.CanAddr()) {
         ce.canAddrEnc(e, v, opts);
     } else {
         ce.elseEnc(e, v, opts);
     }
 }
+
+} partial class json_package {
 
 // newCondAddrEncoder returns an encoder that checks whether its value
 // CanAddr and delegates to canAddrEnc if so, else to elseEnc.

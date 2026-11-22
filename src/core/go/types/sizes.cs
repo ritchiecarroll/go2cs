@@ -6,7 +6,9 @@
 // This file implements Sizes.
 namespace go.go;
 
-using System.Runtime.CompilerServices;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
+using static types_package;
 
 partial class types_package {
 
@@ -49,7 +51,9 @@ partial struct StdSizes {
     public int64 MaxAlign; // maximum alignment in bytes - must be >= 1
 }
 
-internal static int64 /*result*/ Alignof⁔(/*this*/ ж<StdSizes> Ꮡs, Type T) {
+} partial class typesᴛStdSizes {
+
+public static int64 /*result*/ Alignof(this ж<StdSizes> Ꮡs, Type T) {
     int64 result = default;
     GoFrame ᒐ = default;
     try {
@@ -133,6 +137,8 @@ internal static int64 /*result*/ Alignof⁔(/*this*/ ж<StdSizes> Ꮡs, Type T) 
     ᒐdone: return result;
 }
 
+} partial class types_package {
+
 internal static bool _IsSyncAtomicAlign64(Type T) {
     var named = asNamed(T);
     if (named == nil) {
@@ -142,7 +148,9 @@ internal static bool _IsSyncAtomicAlign64(Type T) {
     return obj.of(TypeName.Ꮡobject).Name() == "align64"u8 && obj.of(TypeName.Ꮡobject).Pkg() != nil && (obj.of(TypeName.Ꮡobject).Pkg().Path() == "sync/atomic"u8 || obj.of(TypeName.Ꮡobject).Pkg().Path() == "internal/runtime/atomic"u8);
 }
 
-internal static slice<int64> Offsetsof⁔(/*this*/ ж<StdSizes> Ꮡs, slice<ж<Var>> fields) {
+} partial class typesᴛStdSizes {
+
+public static slice<int64> Offsetsof(this ж<StdSizes> Ꮡs, slice<ж<Var>> fields) {
     var offsets = new slice<int64>(len(fields));
     int64 offs = default;
     foreach (var (i, f) in range(fields)) {
@@ -164,6 +172,8 @@ internal static slice<int64> Offsetsof⁔(/*this*/ ж<StdSizes> Ꮡs, slice<ж<V
     return offsets;
 }
 
+} partial class types_package {
+
 [GoLazy] partial class lazyᴛbasicSizes { internal static array<byte> basicSizes = new golib.SparseArray<byte>{
     [(int)Bool] = 1,
     [(int)Int8] = 1,
@@ -180,7 +190,9 @@ internal static slice<int64> Offsetsof⁔(/*this*/ ж<StdSizes> Ꮡs, slice<ж<V
     [(int)Complex128] = 16
 }.array(17); }
 
-internal static int64 Sizeof⁔(/*this*/ ж<StdSizes> Ꮡs, Type T) {
+} partial class typesᴛStdSizes {
+
+public static int64 Sizeof(this ж<StdSizes> Ꮡs, Type T) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     var switchᴛ14 = T.Underlying();
@@ -257,6 +269,8 @@ internal static int64 Sizeof⁔(/*this*/ ж<StdSizes> Ꮡs, Type T) {
     return s.WordSize; // catch-all
 }
 
+} partial class types_package {
+
 // common architecture word sizes and alignments
 [GoLazy] partial class lazyᴛgcArchSizes { internal static map<@string, ж<gcSizes>> gcArchSizes = new map<@string, ж<gcSizes>>{
     ["386"] = Ꮡ(new gcSizes(4, 4)),
@@ -310,7 +324,9 @@ public static Sizes SizesFor(@string compiler, @string arch) {
 internal static Sizes stdSizes;
 internal static void initᴛstdSizes() { stdSizes = SizesFor("gc", "amd64"); }
 
-internal static int64 alignof⁔(/*this*/ ref Config conf, Type T) {
+} partial class typesᴛConfig {
+
+internal static int64 alignof(this ref Config conf, Type T) {
     var f = stdSizes.Alignof;
     if (conf.Sizes != nil) {
         f = conf.Sizes.Alignof;
@@ -321,7 +337,7 @@ internal static int64 alignof⁔(/*this*/ ref Config conf, Type T) {
     throw panic("implementation of alignof returned an alignment < 1");
 }
 
-internal static slice<int64> offsetsof⁔(/*this*/ ref Config conf, ж<Struct> ᏑT) {
+internal static slice<int64> offsetsof(this ref Config conf, ж<Struct> ᏑT) {
     ref var T = ref ᏑT.DerefOrNull();
 
     slice<int64> offsets = default;
@@ -345,7 +361,7 @@ internal static slice<int64> offsetsof⁔(/*this*/ ref Config conf, ж<Struct> �
 // must be structs (rather than pointers to structs).
 // If the offset is too large (because T is too large),
 // the result is negative.
-internal static int64 offsetof⁔(/*this*/ ref Config conf, Type T, slice<nint> index) {
+internal static int64 offsetof(this ref Config conf, Type T, slice<nint> index) {
     int64 offs = default;
     foreach (var (_, i) in range(index)) {
         var s = T.Underlying()._<ж<Struct>>();
@@ -364,13 +380,15 @@ internal static int64 offsetof⁔(/*this*/ ref Config conf, Type T, slice<nint> 
 
 // sizeof returns the size of T.
 // If T is too large, the result is negative.
-internal static int64 sizeof⁔(/*this*/ ref Config conf, Type T) {
+internal static int64 @sizeof(this ref Config conf, Type T) {
     var f = stdSizes.Sizeof;
     if (conf.Sizes != nil) {
         f = conf.Sizes.Sizeof;
     }
     return f(T);
 }
+
+} partial class types_package {
 
 // align returns the smallest y >= x such that y % a == 0.
 // a must be within 1 and 8 and it must be a power of 2.

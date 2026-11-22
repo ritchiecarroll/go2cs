@@ -9,6 +9,7 @@ using Δsync = sync_package;
 using time = time_package;
 // blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
 using @internal;
+using static net_package;
 
 partial class net_package {
 
@@ -51,7 +52,9 @@ internal static slice<@string> flagNames = [
     "running"
 ];
 
-internal static @string String⁔(/*this*/ Flags f) {
+} partial class netᴛFlags {
+
+public static @string String(this Flags f) {
     @string s = ""u8;
     foreach (var (i, name) in range(flagNames)) {
         if ((Flags)(f & ((Flags)((nuint)1 << (int)((nuint)i)))) != 0) {
@@ -67,9 +70,11 @@ internal static @string String⁔(/*this*/ Flags f) {
     return s;
 }
 
+} partial class netᴛInterface {
+
 // Addrs returns a list of unicast interface addresses for a specific
 // interface.
-internal static (slice<Addr>, error) Addrs⁔(/*this*/ ж<Interface> Ꮡifi) {
+public static (slice<Addr>, error) Addrs(this ж<Interface> Ꮡifi) {
     if (Ꮡifi == nil) {
         return (default, new OpErrorжerror(Ꮡ(new OpError(Op: "route", Net: "ip+net", Source: default, Addr: default, Err: errInvalidInterface))));
     }
@@ -82,7 +87,7 @@ internal static (slice<Addr>, error) Addrs⁔(/*this*/ ж<Interface> Ꮡifi) {
 
 // MulticastAddrs returns a list of multicast, joined group addresses
 // for a specific interface.
-internal static (slice<Addr>, error) MulticastAddrs⁔(/*this*/ ж<Interface> Ꮡifi) {
+public static (slice<Addr>, error) MulticastAddrs(this ж<Interface> Ꮡifi) {
     if (Ꮡifi == nil) {
         return (default, new OpErrorжerror(Ꮡ(new OpError(Op: "route", Net: "ip+net", Source: default, Addr: default, Err: errInvalidInterface))));
     }
@@ -92,6 +97,8 @@ internal static (slice<Addr>, error) MulticastAddrs⁔(/*this*/ ж<Interface> �
     }
     return (ifat, err);
 }
+
+} partial class net_package {
 
 // Interfaces returns a list of the system's network interfaces.
 public static (slice<Interface>, error) Interfaces() {
@@ -192,10 +199,12 @@ internal static readonly ж<ipv6ZoneCache> ᏑzoneCache = new StaticBox<ipv6Zone
 ));
 internal static ref ipv6ZoneCache zoneCache => ref ((StaticBox<ipv6ZoneCache>)ᏑzoneCache).ValueSlot;
 
+} partial class netᴛipv6ZoneCache {
+
 // update refreshes the network interface information if the cache was last
 // updated more than 1 minute ago, or if force is set. It reports whether the
 // cache was updated.
-internal static bool /*updated*/ update⁔(/*this*/ ж<ipv6ZoneCache> Ꮡzc, slice<Interface> ift, bool force) {
+internal static bool /*updated*/ update(this ж<ipv6ZoneCache> Ꮡzc, slice<Interface> ift, bool force) {
     bool updated = default;
     GoFrame ᒐ = default;
     try {
@@ -231,7 +240,7 @@ internal static bool /*updated*/ update⁔(/*this*/ ж<ipv6ZoneCache> Ꮡzc, sli
     ᒐdone: return updated;
 }
 
-internal static @string name⁔(/*this*/ ref ipv6ZoneCache zc, nint index) {
+internal static @string name(this ref ipv6ZoneCache zc, nint index) {
     if (index == 0) {
         return ""u8;
     }
@@ -251,7 +260,7 @@ internal static @string name⁔(/*this*/ ref ipv6ZoneCache zc, nint index) {
     return name;
 }
 
-internal static nint index⁔(/*this*/ ref ipv6ZoneCache zc, @string name) {
+internal static nint index(this ref ipv6ZoneCache zc, @string name) {
     if (name == ""u8) {
         return 0;
     }
@@ -271,4 +280,4 @@ internal static nint index⁔(/*this*/ ref ipv6ZoneCache zc, @string name) {
     return index;
 }
 
-} // end net_package
+}

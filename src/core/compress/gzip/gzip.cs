@@ -12,6 +12,7 @@ using time = time_package;
 using encoding;
 using go.compress;
 using hash;
+using static gzip_package;
 
 partial class gzip_package {
 
@@ -66,7 +67,9 @@ public static (ж<Writer>, error) NewWriterLevel(io.Writer w, nint level) {
     return (z, default);
 }
 
-internal static void init⁔(/*this*/ ref Writer z, io.Writer w, nint level) {
+} partial class gzipᴛWriter {
+
+internal static void init(this ref Writer z, io.Writer w, nint level) {
     var compressor = z.compressor;
     if (compressor != nil) {
         compressor.Reset(w);
@@ -85,7 +88,7 @@ internal static void init⁔(/*this*/ ref Writer z, io.Writer w, nint level) {
 // result of its original state from [NewWriter] or [NewWriterLevel], but
 // writing to w instead. This permits reusing a [Writer] rather than
 // allocating a new one.
-internal static void Reset⁔(/*this*/ ref Writer z, io.Writer w) {
+public static void Reset(this ref Writer z, io.Writer w) {
     z.init(w, z.level);
 }
 
@@ -94,7 +97,7 @@ internal static ref readonly @string gzipWriteExtraDataIsTooˢ => ref gzipWriteE
 private static readonly @string gzipWriteExtraDataIsTooˢᵇ = "gzip.Write: Extra data is too large"u8;
 
 // writeBytes writes a length-prefixed byte slice to z.w.
-internal static error writeBytes⁔(/*this*/ ref Writer z, slice<byte> b) {
+internal static error writeBytes(this ref Writer z, slice<byte> b) {
     if (len(b) > 0xffff) {
         return errors.New(gzipWriteExtraDataIsTooˢ);
     }
@@ -113,7 +116,7 @@ private static readonly @string gzipWriteNonLatin1Headerˢᵇ = "gzip.Write: non
 
 // writeString writes a UTF-8 string s in GZIP's format to z.w.
 // GZIP (RFC 1952) specifies that strings are NUL-terminated ISO 8859-1 (Latin-1).
-internal static error /*err*/ writeString⁔(/*this*/ ref Writer z, @string s) {
+internal static error /*err*/ writeString(this ref Writer z, @string s) {
     error err = default;
 
     // GZIP stores Latin-1 strings; error if non-Latin-1; convert if non-ASCII.
@@ -146,7 +149,7 @@ internal static error /*err*/ writeString⁔(/*this*/ ref Writer z, @string s) {
 
 // Write writes a compressed form of p to the underlying [io.Writer]. The
 // compressed bytes are not necessarily flushed until the [Writer] is closed.
-internal static (nint, error) Write⁔(/*this*/ ref Writer z, slice<byte> p) {
+public static (nint, error) Write(this ref Writer z, slice<byte> p) {
     if (z.err != nil) {
         return (0, z.err);
     }
@@ -215,7 +218,7 @@ internal static (nint, error) Write⁔(/*this*/ ref Writer z, slice<byte> p) {
 // writer returns an error, Flush returns that error.
 //
 // In the terminology of the zlib library, Flush is equivalent to Z_SYNC_FLUSH.
-internal static error Flush⁔(/*this*/ ref Writer z) {
+public static error Flush(this ref Writer z) {
     if (z.err != nil) {
         return z.err;
     }
@@ -235,7 +238,7 @@ internal static error Flush⁔(/*this*/ ref Writer z) {
 // Close closes the [Writer] by flushing any unwritten data to the underlying
 // [io.Writer] and writing the GZIP footer.
 // It does not close the underlying [io.Writer].
-internal static error Close⁔(/*this*/ ref Writer z) {
+public static error Close(this ref Writer z) {
     if (z.err != nil) {
         return z.err;
     }
@@ -259,4 +262,4 @@ internal static error Close⁔(/*this*/ ref Writer z) {
     return z.err;
 }
 
-} // end gzip_package
+}

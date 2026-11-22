@@ -16,6 +16,7 @@ using testing = testing_package;
 using @internal;
 using math.rand;
 using rand = math.rand.rand_package;
+using static cryptotest_package;
 
 partial class cryptotest_package {
 
@@ -74,7 +75,9 @@ partial struct lockedReader {
     internal ж<mathrand.ChaCha8> r;
 }
 
-internal static (nint n, error err) Read⁔(/*this*/ ж<lockedReader> Ꮡlr, slice<byte> b) {
+} partial class cryptotestᴛlockedReader {
+
+internal static (nint n, error err) Read(this ж<lockedReader> Ꮡlr, slice<byte> b) {
     nint n = default;
     error err = default;
     GoFrame ᒐ = default;
@@ -90,4 +93,4 @@ internal static (nint n, error err) Read⁔(/*this*/ ж<lockedReader> Ꮡlr, sli
     return (n, err);
 }
 
-} // end cryptotest_package
+}

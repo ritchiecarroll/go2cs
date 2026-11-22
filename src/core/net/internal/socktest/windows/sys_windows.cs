@@ -6,11 +6,14 @@ namespace go.net.@internal;
 using windows = go.@internal.syscall.windows_package;
 using syscall = syscall_package;
 using go.@internal.syscall;
+using static socktest_package;
 
 partial class socktest_package {
 
+} partial class socktestᴛSwitch {
+
 // WSASocket wraps [syscall.WSASocket].
-internal static (syscall.Handle s, error err) WSASocket⁔(/*this*/ ж<Switch> Ꮡsw, int32 family, int32 sotype, int32 proto, ж<syscall.WSAProtocolInfo> protinfo, uint32 group, uint32 flags) {
+public static (syscall.Handle s, error err) WSASocket(this ж<Switch> Ꮡsw, int32 family, int32 sotype, int32 proto, ж<syscall.WSAProtocolInfo> protinfo, uint32 group, uint32 flags) {
     syscall.Handle s = default;
     error err = default;
     GoFrame ᒐ = default;
@@ -52,7 +55,7 @@ internal static (syscall.Handle s, error err) WSASocket⁔(/*this*/ ж<Switch> �
 }
 
 // Closesocket wraps [syscall.Closesocket].
-internal static error /*err*/ Closesocket⁔(/*this*/ ж<Switch> Ꮡsw, syscall.Handle s) {
+public static error /*err*/ Closesocket(this ж<Switch> Ꮡsw, syscall.Handle s) {
     error err = default;
     GoFrame ᒐ = default;
     try {
@@ -91,7 +94,7 @@ internal static error /*err*/ Closesocket⁔(/*this*/ ж<Switch> Ꮡsw, syscall.
 }
 
 // Connect wraps [syscall.Connect].
-internal static error /*err*/ Connect⁔(/*this*/ ж<Switch> Ꮡsw, syscall.Handle s, syscall.Sockaddr sa) {
+public static error /*err*/ Connect(this ж<Switch> Ꮡsw, syscall.Handle s, syscall.Sockaddr sa) {
     error err = default;
     GoFrame ᒐ = default;
     try {
@@ -129,7 +132,7 @@ internal static error /*err*/ Connect⁔(/*this*/ ж<Switch> Ꮡsw, syscall.Hand
 }
 
 // ConnectEx wraps [syscall.ConnectEx].
-internal static error /*err*/ ConnectEx⁔(/*this*/ ж<Switch> Ꮡsw, syscall.Handle s, syscall.Sockaddr sa, ж<byte> b, uint32 n, ж<uint32> nwr, ж<syscall.Overlapped> o) {
+public static error /*err*/ ConnectEx(this ж<Switch> Ꮡsw, syscall.Handle s, syscall.Sockaddr sa, ж<byte> b, uint32 n, ж<uint32> nwr, ж<syscall.Overlapped> o) {
     error err = default;
     GoFrame ᒐ = default;
     try {
@@ -167,7 +170,7 @@ internal static error /*err*/ ConnectEx⁔(/*this*/ ж<Switch> Ꮡsw, syscall.Ha
 }
 
 // Listen wraps [syscall.Listen].
-internal static error /*err*/ Listen⁔(/*this*/ ж<Switch> Ꮡsw, syscall.Handle s, nint backlog) {
+public static error /*err*/ Listen(this ж<Switch> Ꮡsw, syscall.Handle s, nint backlog) {
     error err = default;
     GoFrame ᒐ = default;
     try {
@@ -205,7 +208,7 @@ internal static error /*err*/ Listen⁔(/*this*/ ж<Switch> Ꮡsw, syscall.Handl
 }
 
 // AcceptEx wraps [syscall.AcceptEx].
-internal static error AcceptEx⁔(/*this*/ ж<Switch> Ꮡsw, syscall.Handle ls, syscall.Handle @as, ж<byte> b, uint32 rxdatalen, uint32 laddrlen, uint32 raddrlen, ж<uint32> rcvd, ж<syscall.Overlapped> overlapped) {
+public static error AcceptEx(this ж<Switch> Ꮡsw, syscall.Handle ls, syscall.Handle @as, ж<byte> b, uint32 rxdatalen, uint32 laddrlen, uint32 raddrlen, ж<uint32> rcvd, ж<syscall.Overlapped> overlapped) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -242,4 +245,4 @@ internal static error AcceptEx⁔(/*this*/ ж<Switch> Ꮡsw, syscall.Handle ls, 
     finally { if (ᒐd1) Ꮡsw.Ꮡsmu.Unlock(); ᒐ.Run(); }
 }
 
-} // end socktest_package
+}

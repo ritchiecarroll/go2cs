@@ -14,6 +14,7 @@ using io = io_package;
 using slices = slices_package;
 using strings = strings_package;
 using go.encoding;
+using static pem_package;
 
 partial class pem_package {
 
@@ -210,7 +211,9 @@ partial struct lineBreaker {
 
 internal static slice<byte> nl = [(byte)'\n'];
 
-internal static (nint n, error err) Write⁔(/*this*/ ref lineBreaker l, slice<byte> b) {
+} partial class pemᴛlineBreaker {
+
+internal static (nint n, error err) Write(this ref lineBreaker l, slice<byte> b) {
     nint n = default;
     error err = default;
 
@@ -240,7 +243,7 @@ internal static (nint n, error err) Write⁔(/*this*/ ref lineBreaker l, slice<b
     return l.Write(b.slice(excess));
 }
 
-internal static error /*err*/ Close⁔(/*this*/ ref lineBreaker l) {
+internal static error /*err*/ Close(this ref lineBreaker l) {
     error err = default;
 
     if (l.used > 0) {
@@ -253,6 +256,8 @@ internal static error /*err*/ Close⁔(/*this*/ ref lineBreaker l) {
 
     return err;
 }
+
+} partial class pem_package {
 
 internal static error writeHeader(io.Writer @out, @string k, @string v) {
     var (_, err) = @out.Write(slice<byte>(k + ": " + v + "\n"));

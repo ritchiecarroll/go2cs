@@ -5,6 +5,8 @@
 // Package color implements a basic color library.
 namespace go.image;
 
+using static color_package;
+
 partial class color_package {
 
 // Color can convert itself to alpha-premultiplied 16-bits per channel RGBA.
@@ -29,7 +31,9 @@ partial struct RGBA {
     public uint8 R, G, B, A;
 }
 
-internal static (uint32 r, uint32 g, uint32 b, uint32 a) RGBA⁔(/*this*/ RGBA c) {
+} partial class colorᴛRGBA {
+
+public static (uint32 r, uint32 g, uint32 b, uint32 a) RGBA(this RGBA c) {
     uint32 r = default;
     uint32 g = default;
     uint32 b = default;
@@ -46,6 +50,8 @@ internal static (uint32 r, uint32 g, uint32 b, uint32 a) RGBA⁔(/*this*/ RGBA c
     return (r, g, b, a);
 }
 
+} partial class color_package {
+
 // RGBA64 represents a 64-bit alpha-premultiplied color, having 16 bits for
 // each of red, green, blue and alpha.
 //
@@ -55,16 +61,22 @@ partial struct RGBA64 {
     public uint16 R, G, B, A;
 }
 
-internal static (uint32 r, uint32 g, uint32 b, uint32 a) RGBA⁔(/*this*/ RGBA64 c) {
+} partial class colorᴛRGBA64 {
+
+public static (uint32 r, uint32 g, uint32 b, uint32 a) RGBA(this RGBA64 c) {
     return ((uint32)c.R, (uint32)c.G, (uint32)c.B, (uint32)c.A);
 }
+
+} partial class color_package {
 
 // NRGBA represents a non-alpha-premultiplied 32-bit color.
 partial struct NRGBA {
     public uint8 R, G, B, A;
 }
 
-internal static (uint32 r, uint32 g, uint32 b, uint32 a) RGBA⁔(/*this*/ NRGBA c) {
+} partial class colorᴛNRGBA {
+
+public static (uint32 r, uint32 g, uint32 b, uint32 a) RGBA(this NRGBA c) {
     uint32 r = default;
     uint32 g = default;
     uint32 b = default;
@@ -87,13 +99,17 @@ internal static (uint32 r, uint32 g, uint32 b, uint32 a) RGBA⁔(/*this*/ NRGBA 
     return (r, g, b, a);
 }
 
+} partial class color_package {
+
 // NRGBA64 represents a non-alpha-premultiplied 64-bit color,
 // having 16 bits for each of red, green, blue and alpha.
 partial struct NRGBA64 {
     public uint16 R, G, B, A;
 }
 
-internal static (uint32 r, uint32 g, uint32 b, uint32 a) RGBA⁔(/*this*/ NRGBA64 c) {
+} partial class colorᴛNRGBA64 {
+
+public static (uint32 r, uint32 g, uint32 b, uint32 a) RGBA(this NRGBA64 c) {
     uint32 r = default;
     uint32 g = default;
     uint32 b = default;
@@ -112,12 +128,16 @@ internal static (uint32 r, uint32 g, uint32 b, uint32 a) RGBA⁔(/*this*/ NRGBA6
     return (r, g, b, a);
 }
 
+} partial class color_package {
+
 // Alpha represents an 8-bit alpha color.
 partial struct Alpha {
     public uint8 A;
 }
 
-internal static (uint32 r, uint32 g, uint32 b, uint32 a) RGBA⁔(/*this*/ Alpha c) {
+} partial class colorᴛAlpha {
+
+public static (uint32 r, uint32 g, uint32 b, uint32 a) RGBA(this Alpha c) {
     uint32 a = default;
 
     a = (uint32)c.A;
@@ -125,38 +145,52 @@ internal static (uint32 r, uint32 g, uint32 b, uint32 a) RGBA⁔(/*this*/ Alpha 
     return (a, a, a, a);
 }
 
+} partial class color_package {
+
 // Alpha16 represents a 16-bit alpha color.
 partial struct Alpha16 {
     public uint16 A;
 }
 
-internal static (uint32 r, uint32 g, uint32 b, uint32 a) RGBA⁔(/*this*/ Alpha16 c) {
+} partial class colorᴛAlpha16 {
+
+public static (uint32 r, uint32 g, uint32 b, uint32 a) RGBA(this Alpha16 c) {
     uint32 a = default;
 
     a = (uint32)c.A;
     return (a, a, a, a);
 }
 
+} partial class color_package {
+
 // Gray represents an 8-bit grayscale color.
 partial struct Gray {
     public uint8 Y;
 }
 
-internal static (uint32 r, uint32 g, uint32 b, uint32 a) RGBA⁔(/*this*/ Gray c) {
+} partial class colorᴛGray {
+
+public static (uint32 r, uint32 g, uint32 b, uint32 a) RGBA(this Gray c) {
     var y = (uint32)c.Y;
     y |= (uint32)((y << 8));
     return (y, y, y, 0xffff);
 }
+
+} partial class color_package {
 
 // Gray16 represents a 16-bit grayscale color.
 partial struct Gray16 {
     public uint16 Y;
 }
 
-internal static (uint32 r, uint32 g, uint32 b, uint32 a) RGBA⁔(/*this*/ Gray16 c) {
+} partial class colorᴛGray16 {
+
+public static (uint32 r, uint32 g, uint32 b, uint32 a) RGBA(this Gray16 c) {
     var y = (uint32)c.Y;
     return (y, y, y, 0xffff);
 }
+
+} partial class color_package {
 
 // Model can convert any [Color] to one from its own color model. The conversion
 // may be lossy.
@@ -178,9 +212,13 @@ partial struct modelFunc {
     internal Func<Color, Color> f;
 }
 
-internal static Color Convert⁔(/*this*/ ref modelFunc m, Color c) {
+} partial class colorᴛmodelFunc {
+
+internal static Color Convert(this ref modelFunc m, Color c) {
     return m.f(c);
 }
+
+} partial class color_package {
 
 // Models for the standard color types.
 public static Model RGBAModel = ModelFunc(rgbaModel);
@@ -298,8 +336,10 @@ internal static Color gray16Model(Color c) {
 // Palette is a palette of colors.
 partial struct Palette /*[]Color*/;
 
+} partial class colorᴛPalette {
+
 // Convert returns the palette color closest to c in Euclidean R,G,B space.
-internal static Color Convert⁔(/*this*/ Palette p, Color c) {
+public static Color Convert(this Palette p, Color c) {
     if (len(p) == 0) {
         return default;
     }
@@ -308,7 +348,7 @@ internal static Color Convert⁔(/*this*/ Palette p, Color c) {
 
 // Index returns the index of the palette color closest to c in Euclidean
 // R,G,B,A space.
-internal static nint Index⁔(/*this*/ Palette p, Color c) {
+public static nint Index(this Palette p, Color c) {
     // A batch version of this computation is in image/draw/draw.go.
 
     var (cr, cg, cb, ca) = c.RGBA();
@@ -326,6 +366,8 @@ internal static nint Index⁔(/*this*/ Palette p, Color c) {
     }
     return ret;
 }
+
+} partial class color_package {
 
 // sqDiff returns the squared-difference of x and y, shifted by 2 so that
 // adding four of those won't overflow a uint32.

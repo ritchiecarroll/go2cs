@@ -2,6 +2,7 @@ namespace go.CollisionRenamedGlobalReceiver;
 
 using atomic = sync.atomic_package;
 using sync;
+using static lib_package;
 
 partial class lib_package {
 
@@ -12,7 +13,11 @@ partial struct T {
     public int32 ID;
 }
 
-internal static int32 Tid⁔(/*this*/ ref T t) { return t.ID; }
+} partial class libᴛT {
+
+public static int32 Tid(this ref T t) { return t.ID; }
+
+} partial class lib_package {
 
 public static int32 Next() { return ᏑTid.Add(1); }
 

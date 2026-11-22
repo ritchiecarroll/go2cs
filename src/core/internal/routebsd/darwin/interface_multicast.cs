@@ -4,9 +4,13 @@
 //go:build darwin || dragonfly || freebsd
 namespace go.@internal;
 
+using static routebsd_package;
+
 partial class routebsd_package {
 
-internal static (Message, error) parseInterfaceMulticastAddrMessage⁔(/*this*/ ref wireFormat w, slice<byte> b) {
+} partial class routebsdᴛwireFormat {
+
+internal static (Message, error) parseInterfaceMulticastAddrMessage(this ref wireFormat w, slice<byte> b) {
     if (len(b) < w.bodyOff) {
         return (default, errMessageTooShort);
     }
@@ -29,4 +33,4 @@ internal static (Message, error) parseInterfaceMulticastAddrMessage⁔(/*this*/ 
     return (new InterfaceMulticastAddrMessageжMessage(m), default);
 }
 
-} // end routebsd_package
+}

@@ -8,6 +8,7 @@ using log = log_package;
 using bits = math.bits_package;
 using strings = strings_package;
 using math;
+using static gen_package;
 
 partial class gen_package {
 
@@ -29,7 +30,9 @@ partial struct locReg {
     internal nint reg;
 }
 
-internal static @string LocString⁔(/*this*/ locReg l) {
+} partial class genᴛlocReg {
+
+internal static @string LocString(this locReg l) {
     switch (l.cls) {
     case var ᴛ when ᴛ == regClassFixed: {
         return fixedRegs[l.reg];
@@ -46,13 +49,15 @@ internal static @string LocString⁔(/*this*/ locReg l) {
     throw panic("bad register class");
 }
 
-internal static (loc, error) Deref⁔(/*this*/ locReg l, nint off) {
+internal static (loc, error) Deref(this locReg l, nint off) {
     return (new locMem(l, off, ""), default);
 }
 
-internal static (locReg, bool) Reg⁔(/*this*/ locReg l) {
+internal static (locReg, bool) Reg(this locReg l) {
     return (l, true);
 }
+
+} partial class gen_package {
 
 partial struct locMem {
     internal locReg @base;
@@ -60,7 +65,9 @@ partial struct locMem {
     internal @string name;
 }
 
-internal static @string LocString⁔(/*this*/ locMem l) {
+} partial class genᴛlocMem {
+
+internal static @string LocString(this locMem l) {
     if (l.@base.cls == regClassFixed && l.@base.reg == regSB && l.off == 0) {
         return l.name + "(SB)"u8;
     }
@@ -73,16 +80,18 @@ internal static @string LocString⁔(/*this*/ locMem l) {
     return "("u8 + l.@base.LocString() + ")"u8;
 }
 
-internal static (loc, error) Deref⁔(/*this*/ locMem l, nint off) {
+internal static (loc, error) Deref(this locMem l, nint off) {
     return (default, fmt.Errorf("cannot dereference already memory address %s"u8, l.LocString()));
 }
 
-internal static (locReg, bool) Reg⁔(/*this*/ locMem l) {
+internal static (locReg, bool) Reg(this locMem l) {
     if (l.@base.cls == regClassFixed) {
         return (new locReg(), false);
     }
     return (l.@base, true);
 }
+
+} partial class gen_package {
 
 partial interface loc {
     @string LocString();          // Return the assembly syntax for this location
@@ -110,7 +119,9 @@ partial struct regSet {
     internal array<uint32> inUse = new(numRegClasses);
 }
 
-internal static void used⁔(/*this*/ ref regSet s, ж<op> Ꮡo, loc l) {
+} partial class genᴛregSet {
+
+internal static void used(this ref regSet s, ж<op> Ꮡo, loc l) {
     ref var o = ref Ꮡo.DerefOrNull();
 
     if (l == nil) {
@@ -129,7 +140,7 @@ internal static void used⁔(/*this*/ ref regSet s, ж<op> Ꮡo, loc l) {
     s.inUse[reg.cls] |= (uint32)(((uint32)1).Lsh((int64)(reg.reg)));
 }
 
-internal static void free⁔(/*this*/ ref regSet s, loc l) {
+internal static void free(this ref regSet s, loc l) {
     if (l == nil) {
         return;
     }
@@ -146,7 +157,9 @@ internal static void free⁔(/*this*/ ref regSet s, loc l) {
     s.inUse[reg.cls] &= unchecked((uint32)~(uint32)(((uint32)1).Lsh((int64)(reg.reg))));
 }
 
-internal static map<ж<op>, loc> assignLocs⁔(/*this*/ ж<Func> Ꮡfn) {
+} partial class genᴛFunc {
+
+internal static map<ж<op>, loc> assignLocs(this ж<Func> Ꮡfn) {
     ref var fn = ref Ꮡfn.DerefOrNull();
 
     // Remove static indicator on name, if any. We'll add it back.
@@ -365,4 +378,4 @@ internal static map<ж<op>, loc> assignLocs⁔(/*this*/ ж<Func> Ꮡfn) {
     return locs;
 }
 
-} // end gen_package
+}

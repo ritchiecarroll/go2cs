@@ -12,6 +12,7 @@ using textproto = go.net.textproto_package;
 using sync = sync_package;
 using go.net;
 using time = time_package;
+using static httputil_package;
 
 partial class httputil_package {
 
@@ -58,11 +59,13 @@ public static ж<ServerConn> NewServerConn(net.Conn c, ж<bufio.Reader> Ꮡr) {
     return Ꮡ(new ServerConn(c: c, r: Ꮡr, pipereq: new map<ж<http.Request>, nuint>()));
 }
 
+} partial class httputilᴛServerConn {
+
 // Hijack detaches the [ServerConn] and returns the underlying connection as well
 // as the read-side bufio which may have some left over data. Hijack may be
 // called before Read has signaled the end of the keep-alive logic. The user
 // should not call Hijack while [ServerConn.Read] or [ServerConn.Write] is in progress.
-internal static (net.Conn, ж<bufio.Reader>) Hijack⁔(/*this*/ ж<ServerConn> Ꮡsc) {
+public static (net.Conn, ж<bufio.Reader>) Hijack(this ж<ServerConn> Ꮡsc) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -81,7 +84,7 @@ internal static (net.Conn, ж<bufio.Reader>) Hijack⁔(/*this*/ ж<ServerConn> �
 }
 
 // Close calls [ServerConn.Hijack] and then also closes the underlying connection.
-internal static error Close⁔(/*this*/ ж<ServerConn> Ꮡsc) {
+public static error Close(this ж<ServerConn> Ꮡsc) {
     var (c, _) = Ꮡsc.Hijack();
     if (c != nil) {
         return c.Close();
@@ -93,7 +96,7 @@ internal static error Close⁔(/*this*/ ж<ServerConn> Ꮡsc) {
 // it is gracefully determined that there are no more requests (e.g. after the
 // first request on an HTTP/1.0 connection, or after a Connection:close on a
 // HTTP/1.1 connection).
-internal static (ж<http.Request>, error) Read⁔(/*this*/ ж<ServerConn> Ꮡsc) {
+public static (ж<http.Request>, error) Read(this ж<ServerConn> Ꮡsc) {
     GoFrame ᒐ = default;
     try {
         ref var sc = ref Ꮡsc.DerefOrNull();
@@ -178,7 +181,7 @@ internal static (ж<http.Request>, error) Read⁔(/*this*/ ж<ServerConn> Ꮡsc)
 
 // Pending returns the number of unanswered requests
 // that have been received on the connection.
-internal static nint Pending⁔(/*this*/ ж<ServerConn> Ꮡsc) {
+public static nint Pending(this ж<ServerConn> Ꮡsc) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -199,7 +202,7 @@ private static readonly @string persistServerPipeCountˢᵇ = "persist server pi
 // Write writes resp in response to req. To close the connection gracefully, set the
 // Response.Close field to true. Write should be considered operational until
 // it returns an error, regardless of any errors returned on the [ServerConn.Read] side.
-internal static error Write⁔(/*this*/ ж<ServerConn> Ꮡsc, ж<http.Request> req, ж<http.Response> Ꮡresp) {
+public static error Write(this ж<ServerConn> Ꮡsc, ж<http.Request> req, ж<http.Response> Ꮡresp) {
     GoFrame ᒐ = default;
     try {
         ref var sc = ref Ꮡsc.DerefOrNull();
@@ -256,6 +259,8 @@ internal static error Write⁔(/*this*/ ж<ServerConn> Ꮡsc, ж<http.Request> r
     finally { ᒐ.Run(); }
 }
 
+} partial class httputil_package {
+
 // ClientConn is an artifact of Go's early HTTP implementation.
 // It is low-level, old, and unused by Go's current HTTP stack.
 // We should have deleted it before Go 1.
@@ -303,11 +308,13 @@ public static ж<ClientConn> NewProxyClientConn(net.Conn c, ж<bufio.Reader> r) 
     return cc;
 }
 
+} partial class httputilᴛClientConn {
+
 // Hijack detaches the [ClientConn] and returns the underlying connection as well
 // as the read-side bufio which may have some left over data. Hijack may be
 // called before the user or Read have signaled the end of the keep-alive
 // logic. The user should not call Hijack while [ClientConn.Read] or ClientConn.Write is in progress.
-internal static (net.Conn c, ж<bufio.Reader> r) Hijack⁔(/*this*/ ж<ClientConn> Ꮡcc) {
+public static (net.Conn c, ж<bufio.Reader> r) Hijack(this ж<ClientConn> Ꮡcc) {
     net.Conn c = default;
     ж<bufio.Reader> r = default;
     GoFrame ᒐ = default;
@@ -327,7 +334,7 @@ internal static (net.Conn c, ж<bufio.Reader> r) Hijack⁔(/*this*/ ж<ClientCon
 }
 
 // Close calls [ClientConn.Hijack] and then also closes the underlying connection.
-internal static error Close⁔(/*this*/ ж<ClientConn> Ꮡcc) {
+public static error Close(this ж<ClientConn> Ꮡcc) {
     var (c, _) = Ꮡcc.Hijack();
     if (c != nil) {
         return c.Close();
@@ -340,7 +347,7 @@ internal static error Close⁔(/*this*/ ж<ClientConn> Ꮡcc) {
 // keep-alive connection is logically closed after this request and the opposing
 // server is informed. An ErrUnexpectedEOF indicates the remote closed the
 // underlying TCP connection, which is usually considered as graceful close.
-internal static error Write⁔(/*this*/ ж<ClientConn> Ꮡcc, ж<http.Request> Ꮡreq) {
+public static error Write(this ж<ClientConn> Ꮡcc, ж<http.Request> Ꮡreq) {
     GoFrame ᒐ = default;
     try {
         ref var cc = ref Ꮡcc.DerefOrNull();
@@ -402,7 +409,7 @@ internal static error Write⁔(/*this*/ ж<ClientConn> Ꮡcc, ж<http.Request> �
 
 // Pending returns the number of unanswered requests
 // that have been sent on the connection.
-internal static nint Pending⁔(/*this*/ ж<ClientConn> Ꮡcc) {
+public static nint Pending(this ж<ClientConn> Ꮡcc) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -420,7 +427,7 @@ internal static nint Pending⁔(/*this*/ ж<ClientConn> Ꮡcc) {
 // returned together with an [ErrPersistEOF], which means that the remote
 // requested that this be the last request serviced. Read can be called
 // concurrently with [ClientConn.Write], but not with another Read.
-internal static (ж<http.Response> resp, error err) Read⁔(/*this*/ ж<ClientConn> Ꮡcc, ж<http.Request> req) {
+public static (ж<http.Response> resp, error err) Read(this ж<ClientConn> Ꮡcc, ж<http.Request> req) {
     ж<http.Response> resp = default;
     error err = default;
     GoFrame ᒐ = default;
@@ -491,7 +498,7 @@ internal static (ж<http.Response> resp, error err) Read⁔(/*this*/ ж<ClientCo
 }
 
 // Do is convenience method that writes a request and reads a response.
-internal static (ж<http.Response>, error) Do⁔(/*this*/ ж<ClientConn> Ꮡcc, ж<http.Request> req) {
+public static (ж<http.Response>, error) Do(this ж<ClientConn> Ꮡcc, ж<http.Request> req) {
     var err = Ꮡcc.Write(req);
     if (err != nil) {
         return (default, err);
@@ -499,4 +506,4 @@ internal static (ж<http.Response>, error) Do⁔(/*this*/ ж<ClientConn> Ꮡcc, 
     return Ꮡcc.Read(req);
 }
 
-} // end httputil_package
+}

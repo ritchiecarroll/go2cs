@@ -9,10 +9,13 @@ using strconv = global::go.strconv_package;
 using strings = strings_package;
 using atomic = global::go.sync.atomic_package;
 using time = time_package;
-using System.Runtime.InteropServices;
+using FieldOffsetAttribute = global::System.Runtime.InteropServices.FieldOffsetAttribute;
+using LayoutKind = global::System.Runtime.InteropServices.LayoutKind;
+using StructLayoutAttribute = global::System.Runtime.InteropServices.StructLayoutAttribute;
 using global::go;
 using global::go.math;
 using global::go.sync;
+using static fuzz_package;
 
 partial class fuzz_package {
 
@@ -80,12 +83,14 @@ internal static ж<pcgRand> newPcgRand() {
     return r;
 }
 
-internal static void step⁔(/*this*/ ref pcgRand r) {
+} partial class fuzzᴛpcgRand {
+
+internal static void step(this ref pcgRand r) {
     r.state *= multiplier;
     r.state += r.inc;
 }
 
-internal static void save⁔(/*this*/ ref pcgRand r, ж<uint64> ᏑrandState, ж<uint64> ᏑrandInc) {
+internal static void save(this ref pcgRand r, ж<uint64> ᏑrandState, ж<uint64> ᏑrandInc) {
     ref var randState = ref ᏑrandState.DerefOrNull();
     ref var randInc = ref ᏑrandInc.DerefOrNull();
 
@@ -93,13 +98,13 @@ internal static void save⁔(/*this*/ ref pcgRand r, ж<uint64> ᏑrandState, ж
     randInc = r.inc;
 }
 
-internal static void restore⁔(/*this*/ ref pcgRand r, uint64 randState, uint64 randInc) {
+internal static void restore(this ref pcgRand r, uint64 randState, uint64 randInc) {
     r.state = randState;
     r.inc = randInc;
 }
 
 // uint32 returns a pseudo-random uint32.
-internal static uint32 uint32⁔(/*this*/ ref pcgRand r) {
+internal static uint32 uint32(this ref pcgRand r) {
     var x = r.state;
     r.step();
     return bits.RotateLeft32((uint32)(((x >> 18) ^ x) >> 27), -(nint)(x >> 59));
@@ -107,7 +112,7 @@ internal static uint32 uint32⁔(/*this*/ ref pcgRand r) {
 
 // intn returns a pseudo-random number in [0, n).
 // n must fit in a uint32.
-internal static nint intn⁔(/*this*/ ref pcgRand r, nint n) {
+internal static nint intn(this ref pcgRand r, nint n) {
     if ((nint)(uint32)n != n) {
         throw panic("large Intn");
     }
@@ -119,7 +124,7 @@ internal static nint intn⁔(/*this*/ ref pcgRand r, nint n) {
 // For implementation details, see:
 // https://lemire.me/blog/2016/06/27/a-fast-alternative-to-the-modulo-reduction
 // https://lemire.me/blog/2016/06/30/fast-random-shuffling
-internal static uint32 uint32n⁔(/*this*/ ref pcgRand r, uint32 n) {
+internal static uint32 uint32n(this ref pcgRand r, uint32 n) {
     var v = r.uint32();
     var prod = (uint64)v * (uint64)n;
     var low = (uint32)prod;
@@ -135,9 +140,11 @@ internal static uint32 uint32n⁔(/*this*/ ref pcgRand r, uint32 n) {
 }
 
 // bool generates a random bool.
-internal static bool bool⁔(/*this*/ ref pcgRand r) {
+internal static bool @bool(this ref pcgRand r) {
     return (r.uint32() & 1) == 0;
 }
+
+} partial class fuzz_package {
 
 // noCopy may be embedded into structs which must not be copied
 // after the first use.
@@ -147,8 +154,10 @@ internal static bool bool⁔(/*this*/ ref pcgRand r) {
 partial struct noCopy {
 }
 
-// Lock is a no-op used by -copylocks checker from `go vet`.
-internal static void Lock⁔(/*this*/ ref noCopy _) { }
-internal static void Unlock⁔(/*this*/ ref noCopy _) { }
+} partial class fuzzᴛnoCopy {
 
-} // end fuzz_package
+// Lock is a no-op used by -copylocks checker from `go vet`.
+internal static void Lock(this ref noCopy _) { }
+internal static void Unlock(this ref noCopy _) { }
+
+}

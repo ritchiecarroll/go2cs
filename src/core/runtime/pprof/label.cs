@@ -10,6 +10,7 @@ using slices = slices_package;
 using strings = strings_package;
 using @internal.runtime.pprof;
 using ꓸꓸꓸstring = Span<@string>;
+using static pprof_package;
 
 partial class pprof_package {
 
@@ -37,9 +38,11 @@ partial struct labelMap {
     /*embed*/ public @internal.runtime.pprof.label_package.Set Set;
 }
 
+} partial class pprofᴛlabelMap {
+
 // String satisfies Stringer and returns key, value pairs in a consistent
 // order.
-internal static @string String⁔(/*this*/ ж<labelMap> Ꮡl) {
+internal static @string String(this ж<labelMap> Ꮡl) {
     ref var l = ref Ꮡl.DerefOrNull();
     var keyValsᴷ = new stackAppend<@string>();
 
@@ -55,6 +58,8 @@ internal static @string String⁔(/*this*/ ж<labelMap> Ꮡl) {
     slices.Sort<slice<@string>, @string>(keyVals);
     return "{"u8 + strings.Join(keyVals, ", ") + "}"u8;
 }
+
+} partial class pprof_package {
 
 // WithLabels returns a new [context.Context] with the given labels added.
 // A label overwrites a prior label with the same key.

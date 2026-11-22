@@ -7,8 +7,11 @@ namespace go.go;
 
 using token = global::go.go.token_package;
 using global::go.go;
+using static types_package;
 
 partial class types_package {
+
+} partial class typesᴛScope {
 
 // LookupParent follows the parent chain of scopes starting with s until
 // it finds a scope where Lookup(name) returns a non-nil object, and then
@@ -22,7 +25,7 @@ partial class types_package {
 // object was inserted into the scope and already had a parent at that
 // time (see Insert). This can only happen for dot-imported objects
 // whose parent is the scope of the package that exported them.
-internal static (ж<Scope>, Object) LookupParent⁔(/*this*/ ж<Scope> Ꮡs, @string name, token.Pos pos) {
+public static (ж<Scope>, Object) LookupParent(this ж<Scope> Ꮡs, @string name, token.Pos pos) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     for (; Ꮡs != nil; Ꮡs = s.parent, s = ref Ꮡs.DerefOrNull()) {
@@ -37,13 +40,13 @@ internal static (ж<Scope>, Object) LookupParent⁔(/*this*/ ж<Scope> Ꮡs, @st
 // The results are guaranteed to be valid only if the type-checked
 // AST has complete position information. The extent is undefined
 // for Universe and package scopes.
-internal static token.Pos Pos⁔(/*this*/ ref Scope s) { return s.pos; }
-internal static token.Pos End⁔(/*this*/ ref Scope s) { return s.end; }
+public static token.Pos Pos(this ref Scope s) { return s.pos; }
+public static token.Pos End(this ref Scope s) { return s.end; }
 
 // Contains reports whether pos is within the scope's extent.
 // The result is guaranteed to be valid only if the type-checked
 // AST has complete position information.
-internal static bool Contains⁔(/*this*/ ref Scope s, token.Pos pos) {
+public static bool Contains(this ref Scope s, token.Pos pos) {
     return cmpPos(s.pos, pos) <= 0 && cmpPos(pos, s.end) < 0;
 }
 
@@ -52,7 +55,7 @@ internal static bool Contains⁔(/*this*/ ref Scope s, token.Pos pos) {
 // The result is also nil for the Universe scope.
 // The result is guaranteed to be valid only if the type-checked
 // AST has complete position information.
-internal static ж<Scope> Innermost⁔(/*this*/ ж<Scope> Ꮡs, token.Pos pos) {
+public static ж<Scope> Innermost(this ж<Scope> Ꮡs, token.Pos pos) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     // Package scopes do not have extents since they may be
@@ -76,4 +79,4 @@ internal static ж<Scope> Innermost⁔(/*this*/ ж<Scope> Ꮡs, token.Pos pos) {
     return default;
 }
 
-} // end types_package
+}

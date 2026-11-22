@@ -3,6 +3,8 @@ global using Crate = go.main_package.Box;
 namespace go;
 
 using fmt = fmt_package;
+using main = main_package;
+using static main_package;
 
 partial class main_package {
 
@@ -20,21 +22,23 @@ partial struct Box {
     internal nint n;
 }
 
-internal static nint Limit⁔(/*this*/ Box b) { return b.n + (nint)Limit; }
+} partial class mainᴛBox {
 
-internal static nint Count⁔(/*this*/ ref Box b) {
-    Count++;
-    return b.n + Count;
+public static nint Limit(this Box b) { return b.n + (nint)main.Limit; }
+
+public static nint Count(this ref Box b) {
+    main.Count++;
+    return b.n + main.Count;
 }
 
-internal static Kind Kind⁔(/*this*/ Box b) { return (Kind)b.n; }
+public static Kind Kind(this Box b) { return (Kind)b.n; }
 
-internal static nint Scale⁔(/*this*/ Box b) {
-    var f = Scale;
-    return Scale(b.n) + f(1);
+public static nint Scale(this Box b) {
+    var f = main.Scale;
+    return main.Scale(b.n) + f(1);
 }
 
-internal static @string Describe⁔(/*this*/ Box b, any v) {
+public static @string Describe(this Box b, any v) {
     switch (v.type()) {
     case Kind k: {
         return "a Kind: "u8 + k.String();
@@ -50,9 +54,9 @@ internal static @string Describe⁔(/*this*/ Box b, any v) {
     return fmt.Sprint("other: ", v, " zero ", (Kind)0);
 }
 
-internal static @string Class⁔(/*this*/ Box b, any v) {
+public static @string Class(this Box b, any v) {
     switch (v.type()) {
-    case Kind: {
+    case Kind _: {
         return "kind";
     }
     case Box _:
@@ -63,22 +67,34 @@ internal static @string Class⁔(/*this*/ Box b, any v) {
     return "neither";
 }
 
+} partial class main_package {
+
 partial struct Pair<T> {
     internal T a, b;
 }
 
-internal static nint Scale⁔<T>(/*this*/ Pair<T> p) { return Scale(2) + (nint)Limit; }
+} partial class mainᴛPair {
 
-internal static nint Limit⁔<T>(/*this*/ ref Pair<T> p) { return Limit * 2; }
+public static nint Scale<T>(this Pair<T> p) { return main.Scale(2) + (nint)main.Limit; }
 
-internal static nint Total⁔(/*this*/ Crate c) { return c.Limit() + (nint)Limit + Scale(c.n); }
+public static nint Limit<T>(this ref Pair<T> p) { return main.Limit * 2; }
+
+} partial class mainᴛBox {
+
+public static nint Total(this Crate c) { return c.Limit() + (nint)main.Limit + main.Scale(c.n); }
+
+} partial class main_package {
 
 partial struct Shelf {
     /*embed*/ public Box Box;
     internal nint extra;
 }
 
-internal static nint Limit⁔(/*this*/ Shelf s) { return s.Box.Limit() + s.extra + (nint)Limit; }
+} partial class mainᴛShelf {
+
+public static nint Limit(this Shelf s) { return s.Box.Limit() + s.extra + (nint)main.Limit; }
+
+} partial class main_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object textˢ = (@string)"text"u8;
@@ -102,7 +118,7 @@ internal static void main() {
     var s = new Shelf(Box: new Box(n: 3), extra: 100);
     fmt.Println("embedded", s.Limit(), s.Scale(), s.Kind(), s.Box.Count());
 
-    var limit = ((Func<Box, nint>)(main_package.Limit⁔));
+    var limit = ((Func<Box, nint>)(mainᴛBox.Limit));
     var count = ((Func<ж<Box>, nint>)(mainᴛBox.Count));
     
     var bʗ1 = b;

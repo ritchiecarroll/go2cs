@@ -8,6 +8,7 @@ namespace go.encoding;
 using io = io_package;
 using slices = slices_package;
 using strconv = strconv_package;
+using static base32_package;
 
 partial class base32_package {
 
@@ -74,6 +75,8 @@ public static ж<Encoding> StdEncoding = NewEncoding("ABCDEFGHIJKLMNOPQRSTUVWXYZ
 // It is typically used in DNS.
 public static ж<Encoding> HexEncoding = NewEncoding("0123456789ABCDEFGHIJKLMNOPQRSTUV");
 
+} partial class base32ᴛEncoding {
+
 // WithPadding creates a new encoding identical to enc except
 // with a specified padding character, or NoPadding to disable padding.
 // The padding character must not be '\r' or '\n',
@@ -81,7 +84,7 @@ public static ж<Encoding> HexEncoding = NewEncoding("0123456789ABCDEFGHIJKLMNOP
 // must not be negative, and must be a rune equal or below '\xff'.
 // Padding characters above '\x7f' are encoded as their exact byte value
 // rather than using the UTF-8 representation of the codepoint.
-internal static ж<Encoding> WithPadding⁔(/*this*/ Encoding encʗp, rune padding) {
+public static ж<Encoding> WithPadding(this Encoding encʗp, rune padding) {
     ref var enc = ref heap(encʗp.ΔClone(), out var Ꮡenc);
 
     switch (ᐧ) {
@@ -107,7 +110,7 @@ internal static ж<Encoding> WithPadding⁔(/*this*/ Encoding encʗp, rune paddi
 // The encoding pads the output to a multiple of 8 bytes,
 // so Encode is not appropriate for use on individual blocks
 // of a large data stream. Use [NewEncoder] instead.
-internal static void Encode⁔(/*this*/ ref Encoding enc, slice<byte> dst, slice<byte> src) {
+public static void Encode(this ref Encoding enc, slice<byte> dst, slice<byte> src) {
     if (len(src) == 0) {
         return;
     }
@@ -181,7 +184,7 @@ internal static void Encode⁔(/*this*/ ref Encoding enc, slice<byte> dst, slice
 
 // AppendEncode appends the base32 encoded src to dst
 // and returns the extended buffer.
-internal static slice<byte> AppendEncode⁔(/*this*/ ref Encoding enc, slice<byte> dst, slice<byte> src) {
+public static slice<byte> AppendEncode(this ref Encoding enc, slice<byte> dst, slice<byte> src) {
     nint n = enc.EncodedLen(len(src));
     dst = slices.Grow<slice<byte>, byte>(dst, n);
     enc.Encode(dst.slice(len(dst)).slice(0, n), src);
@@ -189,11 +192,13 @@ internal static slice<byte> AppendEncode⁔(/*this*/ ref Encoding enc, slice<byt
 }
 
 // EncodeToString returns the base32 encoding of src.
-internal static @string EncodeToString⁔(/*this*/ ref Encoding enc, slice<byte> src) {
+public static @string EncodeToString(this ref Encoding enc, slice<byte> src) {
     var buf = new slice<byte>(enc.EncodedLen(len(src)));
     enc.Encode(buf, src);
     return (@string)buf;
 }
+
+} partial class base32_package {
 
 partial struct encoder {
     internal error err;
@@ -204,7 +209,9 @@ partial struct encoder {
     internal array<byte> @out = new(1024); // output buffer
 }
 
-internal static (nint n, error err) Write⁔(/*this*/ ref encoder e, slice<byte> p) {
+} partial class base32ᴛencoder {
+
+internal static (nint n, error err) Write(this ref encoder e, slice<byte> p) {
     nint n = default;
     error err = default;
 
@@ -255,7 +262,7 @@ internal static (nint n, error err) Write⁔(/*this*/ ref encoder e, slice<byte>
 
 // Close flushes any pending output from the encoder.
 // It is an error to call Write after calling Close.
-internal static error Close⁔(/*this*/ ref encoder e) {
+internal static error Close(this ref encoder e) {
     // If there's anything left in the buffer, flush it out
     if (e.err == nil && e.nbuf > 0) {
         e.enc.Encode(e.@out[0..], e.buf.slice(0, e.nbuf));
@@ -266,6 +273,8 @@ internal static error Close⁔(/*this*/ ref encoder e) {
     return e.err;
 }
 
+} partial class base32_package {
+
 // NewEncoder returns a new base32 stream encoder. Data written to
 // the returned writer will be encoded using enc and then written to w.
 // Base32 encodings operate in 5-byte blocks; when finished
@@ -275,29 +284,37 @@ public static io.WriteCloser NewEncoder(ж<Encoding> enc, io.Writer w) {
     return new encoderжWriteCloser(Ꮡ(new encoder(enc: enc, w: w)));
 }
 
+} partial class base32ᴛEncoding {
+
 // EncodedLen returns the length in bytes of the base32 encoding
 // of an input buffer of length n.
-internal static nint EncodedLen⁔(/*this*/ ref Encoding enc, nint n) {
+public static nint EncodedLen(this ref Encoding enc, nint n) {
     if (enc.padChar == NoPadding) {
         return n / 5 * 8 + (n % 5 * 8 + 4) / 5;
     }
     return (n + 4) / 5 * 8;
 }
 
+} partial class base32_package {
+
 partial struct CorruptInputError /*num:int64*/;
+
+} partial class base32ᴛCorruptInputError {
 
 /*
  * Decoder
  */
-internal static @string Error⁔(/*this*/ CorruptInputError e) {
+public static @string Error(this CorruptInputError e) {
     return "illegal base32 data at input byte "u8 + strconv.FormatInt((int64)e, 10);
 }
+
+} partial class base32ᴛEncoding {
 
 // decode is like Decode but returns an additional 'end' value, which
 // indicates if end-of-message padding was encountered and thus any
 // additional data is an error. This method assumes that src has been
 // stripped of all supported whitespace ('\r' and '\n').
-internal static (nint n, bool end, error err) decode⁔(/*this*/ ref Encoding enc, slice<byte> dst, slice<byte> src) {
+internal static (nint n, bool end, error err) decode(this ref Encoding enc, slice<byte> dst, slice<byte> src) {
     nint n = default;
     bool end = default;
 
@@ -392,7 +409,7 @@ internal static (nint n, bool end, error err) decode⁔(/*this*/ ref Encoding en
 // the decoded data. If src contains invalid base32 data, it will return the
 // number of bytes successfully written and [CorruptInputError].
 // Newline characters (\r and \n) are ignored.
-internal static (nint n, error err) Decode⁔(/*this*/ ref Encoding enc, slice<byte> dst, slice<byte> src) {
+public static (nint n, error err) Decode(this ref Encoding enc, slice<byte> dst, slice<byte> src) {
     nint n = default;
     error err = default;
 
@@ -406,7 +423,7 @@ internal static (nint n, error err) Decode⁔(/*this*/ ref Encoding enc, slice<b
 // and returns the extended buffer.
 // If the input is malformed, it returns the partially decoded src and an error.
 // New line characters (\r and \n) are ignored.
-internal static (slice<byte>, error) AppendDecode⁔(/*this*/ ref Encoding enc, slice<byte> dst, slice<byte> src) {
+public static (slice<byte>, error) AppendDecode(this ref Encoding enc, slice<byte> dst, slice<byte> src) {
     // Compute the output size without padding to avoid over allocating.
     nint n = len(src);
     while (n > 0 && (rune)src[n - 1] == enc.padChar) {
@@ -422,12 +439,14 @@ internal static (slice<byte>, error) AppendDecode⁔(/*this*/ ref Encoding enc, 
 // DecodeString returns the bytes represented by the base32 string s.
 // If the input is malformed, it returns the partially decoded data and
 // [CorruptInputError]. New line characters (\r and \n) are ignored.
-internal static (slice<byte>, error) DecodeString⁔(/*this*/ ref Encoding enc, @string s) {
+public static (slice<byte>, error) DecodeString(this ref Encoding enc, @string s) {
     var buf = slice<byte>(s);
     nint l = stripNewlines(buf, buf);
     var (n, _, err) = enc.decode(buf, buf.slice(0, l));
     return (buf.slice(0, n), err);
 }
+
+} partial class base32_package {
 
 partial struct decoder {
     internal error err;
@@ -462,7 +481,9 @@ internal static (nint n, error err) readEncodedData(io.Reader r, slice<byte> buf
     return (n, err);
 }
 
-internal static (nint n, error err) Read⁔(/*this*/ ref decoder d, slice<byte> p) {
+} partial class base32ᴛdecoder {
+
+internal static (nint n, error err) Read(this ref decoder d, slice<byte> p) {
     nint n = default;
     error err = default;
 
@@ -546,6 +567,8 @@ internal static (nint n, error err) Read⁔(/*this*/ ref decoder d, slice<byte> 
     return (n, d.err);
 }
 
+} partial class base32_package {
+
 partial struct newlineFilteringReader {
     internal io.Reader wrapped;
 }
@@ -564,7 +587,9 @@ internal static nint stripNewlines(slice<byte> dst, slice<byte> src) {
     return offset;
 }
 
-internal static (nint, error) Read⁔(/*this*/ ref newlineFilteringReader r, slice<byte> p) {
+} partial class base32ᴛnewlineFilteringReader {
+
+internal static (nint, error) Read(this ref newlineFilteringReader r, slice<byte> p) {
     var (n, err) = r.wrapped.Read(p);
     while (n > 0) {
         var s = p.slice(0, n);
@@ -578,16 +603,22 @@ internal static (nint, error) Read⁔(/*this*/ ref newlineFilteringReader r, sli
     return (n, err);
 }
 
+} partial class base32_package {
+
 // NewDecoder constructs a new base32 stream decoder.
 public static io.Reader NewDecoder(ж<Encoding> enc, io.Reader r) {
     return new decoderжReader(Ꮡ(new decoder(enc: enc, r: new newlineFilteringReaderжReader(Ꮡ(new newlineFilteringReader(r))))));
 }
 
+} partial class base32ᴛEncoding {
+
 // DecodedLen returns the maximum length in bytes of the decoded data
 // corresponding to n bytes of base32-encoded data.
-internal static nint DecodedLen⁔(/*this*/ ref Encoding enc, nint n) {
+public static nint DecodedLen(this ref Encoding enc, nint n) {
     return decodedLen(n, enc.padChar);
 }
+
+} partial class base32_package {
 
 internal static nint decodedLen(nint n, rune padChar) {
     if (padChar == NoPadding) {

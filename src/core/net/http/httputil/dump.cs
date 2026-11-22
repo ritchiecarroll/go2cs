@@ -14,6 +14,7 @@ using url = go.net.url_package;
 using strings = strings_package;
 using time = time_package;
 using go.net;
+using static httputil_package;
 
 partial class httputil_package {
 
@@ -45,21 +46,29 @@ partial struct dumpConn {
     /*embed*/ public io_package.Reader Reader;
 }
 
-internal static error Close⁔(/*this*/ ref dumpConn c) { return default; }
-internal static net.Addr LocalAddr⁔(/*this*/ ref dumpConn c) { return default; }
-internal static net.Addr RemoteAddr⁔(/*this*/ ref dumpConn c) { return default; }
-internal static error SetDeadline⁔(/*this*/ ref dumpConn c, time.Time t) { return default; }
-internal static error SetReadDeadline⁔(/*this*/ ref dumpConn c, time.Time t) { return default; }
-internal static error SetWriteDeadline⁔(/*this*/ ref dumpConn c, time.Time t) { return default; }
+} partial class httputilᴛdumpConn {
+
+internal static error Close(this ref dumpConn c) { return default; }
+internal static net.Addr LocalAddr(this ref dumpConn c) { return default; }
+internal static net.Addr RemoteAddr(this ref dumpConn c) { return default; }
+internal static error SetDeadline(this ref dumpConn c, time.Time t) { return default; }
+internal static error SetReadDeadline(this ref dumpConn c, time.Time t) { return default; }
+internal static error SetWriteDeadline(this ref dumpConn c, time.Time t) { return default; }
+
+} partial class httputil_package {
 
 partial struct neverEnding /*num:byte*/;
 
-internal static (nint n, error err) Read⁔(/*this*/ neverEnding b, slice<byte> p) {
+} partial class httputilᴛneverEnding {
+
+internal static (nint n, error err) Read(this neverEnding b, slice<byte> p) {
     foreach (var i in range(len(p))) {
         p[i] = (byte)b;
     }
     return (len(p), default);
 }
+
+} partial class httputil_package {
 
 // outgoingLength is a copy of the unexported
 // (*http.Request).outgoingLength method.
@@ -200,7 +209,9 @@ partial struct delegateReader {
     internal io.Reader r; // nil until received from c
 }
 
-internal static (nint, error) Read⁔(/*this*/ ref delegateReader r, slice<byte> p) {
+} partial class httputilᴛdelegateReader {
+
+internal static (nint, error) Read(this ref delegateReader r, slice<byte> p) {
     if (r.r == nil) {
         bool ok = default;
         (r.r, ok) = ᐸꟷ(r.c, ꟷ); if (!ok) {
@@ -209,6 +220,8 @@ internal static (nint, error) Read⁔(/*this*/ ref delegateReader r, slice<byte>
     }
     return r.r.Read(p);
 }
+
+} partial class httputil_package {
 
 // Return value if nonempty, def otherwise.
 internal static @string valueOrDefault(@string value, @string def) {
@@ -331,8 +344,12 @@ internal static error errNoBody = errors.New("sentinel error value");
 partial struct failureToReadBody {
 }
 
-internal static (nint, error) Read⁔(/*this*/ failureToReadBody _Δp0, slice<byte> _Δp1) { return (0, errNoBody); }
-internal static error Close⁔(/*this*/ failureToReadBody _) { return default; }
+} partial class httputilᴛfailureToReadBody {
+
+internal static (nint, error) Read(this failureToReadBody _Δp0, slice<byte> _Δp1) { return (0, errNoBody); }
+internal static error Close(this failureToReadBody _) { return default; }
+
+} partial class httputil_package {
 
 // emptyBody is an instance of empty reader.
 internal static io.ReadCloser emptyBody = io.NopCloser(new strings_ReaderжReader(strings.NewReader("")));

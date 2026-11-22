@@ -6,6 +6,9 @@
 // Unicode code points.
 namespace go;
 
+using unicode = unicode_package;
+using static unicode_package;
+
 partial class unicode_package {
 
 public static UntypedInt MaxRune => /* '\U0010FFFF' */ 1114111;   // Maximum valid Unicode code point.
@@ -296,32 +299,36 @@ public static rune ToTitle(rune r) {
     return To(TitleCase, r);
 }
 
+} partial class unicodeᴛSpecialCase {
+
 // ToUpper maps the rune to upper case giving priority to the special mapping.
-internal static rune ToUpper⁔(/*this*/ SpecialCase special, rune r) {
+public static rune ToUpper(this SpecialCase special, rune r) {
     var (r1, hadMapping) = to(UpperCase, r, (slice<CaseRange>)special);
     if (r1 == r && !hadMapping) {
-        r1 = ToUpper(r);
+        r1 = unicode.ToUpper(r);
     }
     return r1;
 }
 
 // ToTitle maps the rune to title case giving priority to the special mapping.
-internal static rune ToTitle⁔(/*this*/ SpecialCase special, rune r) {
+public static rune ToTitle(this SpecialCase special, rune r) {
     var (r1, hadMapping) = to(TitleCase, r, (slice<CaseRange>)special);
     if (r1 == r && !hadMapping) {
-        r1 = ToTitle(r);
+        r1 = unicode.ToTitle(r);
     }
     return r1;
 }
 
 // ToLower maps the rune to lower case giving priority to the special mapping.
-internal static rune ToLower⁔(/*this*/ SpecialCase special, rune r) {
+public static rune ToLower(this SpecialCase special, rune r) {
     var (r1, hadMapping) = to(LowerCase, r, (slice<CaseRange>)special);
     if (r1 == r && !hadMapping) {
-        r1 = ToLower(r);
+        r1 = unicode.ToLower(r);
     }
     return r1;
 }
+
+} partial class unicode_package {
 
 // caseOrbit is defined in tables.go as []foldPair. Right now all the
 // entries fit in uint16, so use uint16. If that changes, compilation

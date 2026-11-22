@@ -1,11 +1,17 @@
 namespace go.collidea;
 
+using static dup_package;
+
 partial class dup_package {
 
 partial struct Widget {
 }
 
-internal static @string Marker⁔(/*this*/ Widget _) { return "widget-marker"; }
+} partial class dupᴛWidget {
+
+public static @string Marker(this Widget _) { return "widget-marker"; }
+
+} partial class dup_package {
 
 partial struct Marker {
     public @string Value;
@@ -17,6 +23,8 @@ partial struct Box<T> {
     public T V;
 }
 
-internal static T Get⁔<T>(/*this*/ Box<T> b) { return b.V; }
+} partial class dupᴛBox {
 
-} // end dup_package
+public static T Get<T>(this Box<T> b) { return b.V; }
+
+}

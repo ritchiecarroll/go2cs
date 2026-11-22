@@ -3,6 +3,7 @@
 namespace go.vendor.golang.org.x.text.unicode;
 
 using sync = sync_package;
+using static norm_package;
 
 partial class norm_package {
 
@@ -2772,10 +2773,12 @@ internal static UntypedInt maxDecomp => 0x8000;
     0x00, 0x01
 ]); }
 
+} partial class normᴛnfcTrie {
+
 // lookup returns the trie value for the first UTF-8 encoding in s and
 // the width in bytes of this encoding. The size will be 0 if s does not
 // hold enough bytes to complete the encoding. len(s) must be greater than 0.
-internal static (uint16 v, nint sz) lookup⁔(/*this*/ ref nfcTrie t, slice<byte> s) {
+internal static (uint16 v, nint sz) lookup(this ref nfcTrie t, slice<byte> s) {
     var c0 = s[0];
     switch (ᐧ) {
     case {} when c0 is < 0x80: { // is ASCII
@@ -2841,7 +2844,7 @@ internal static (uint16 v, nint sz) lookup⁔(/*this*/ ref nfcTrie t, slice<byte
 
 // lookupUnsafe returns the trie value for the first UTF-8 encoding in s.
 // s must start with a full and valid UTF-8 encoded rune.
-internal static uint16 lookupUnsafe⁔(/*this*/ ref nfcTrie t, slice<byte> s) {
+internal static uint16 lookupUnsafe(this ref nfcTrie t, slice<byte> s) {
     var c0 = s[0];
     if (c0 < 0x80) { // is ASCII
         return nfcValues[c0];
@@ -2864,7 +2867,7 @@ internal static uint16 lookupUnsafe⁔(/*this*/ ref nfcTrie t, slice<byte> s) {
 // lookupString returns the trie value for the first UTF-8 encoding in s and
 // the width in bytes of this encoding. The size will be 0 if s does not
 // hold enough bytes to complete the encoding. len(s) must be greater than 0.
-internal static (uint16 v, nint sz) lookupString⁔(/*this*/ ref nfcTrie t, @string s) {
+internal static (uint16 v, nint sz) lookupString(this ref nfcTrie t, @string s) {
     var c0 = s[0];
     switch (ᐧ) {
     case {} when c0 is < 0x80: { // is ASCII
@@ -2930,7 +2933,7 @@ internal static (uint16 v, nint sz) lookupString⁔(/*this*/ ref nfcTrie t, @str
 
 // lookupStringUnsafe returns the trie value for the first UTF-8 encoding in s.
 // s must start with a full and valid UTF-8 encoded rune.
-internal static uint16 lookupStringUnsafe⁔(/*this*/ ref nfcTrie t, @string s) {
+internal static uint16 lookupStringUnsafe(this ref nfcTrie t, @string s) {
     var c0 = s[0];
     if (c0 < 0x80) { // is ASCII
         return nfcValues[c0];
@@ -2950,6 +2953,8 @@ internal static uint16 lookupStringUnsafe⁔(/*this*/ ref nfcTrie t, @string s) 
     return 0;
 }
 
+} partial class norm_package {
+
 // nfcTrie. Total size: 10798 bytes (10.54 KiB). Checksum: b5981cc85e3bd14.
 partial struct nfcTrie {
 }
@@ -2958,8 +2963,10 @@ internal static ж<nfcTrie> newNfcTrie(nint i) {
     return Ꮡ(new nfcTrie());
 }
 
+} partial class normᴛnfcTrie {
+
 // lookupValue determines the type of block n and looks up the value for b.
-internal static uint16 lookupValue⁔(/*this*/ ref nfcTrie t, uint32 n, byte b) {
+internal static uint16 lookupValue(this ref nfcTrie t, uint32 n, byte b) {
     switch (ᐧ) {
     case {} when n is < 46: {
         return (uint16)nfcValues[(n << 6) + (uint32)b];
@@ -2969,6 +2976,8 @@ internal static uint16 lookupValue⁔(/*this*/ ref nfcTrie t, uint32 n, byte b) 
         return (uint16)nfcSparse.lookup(n, b);
     }}
 }
+
+} partial class norm_package {
 
 // nfcValues: 48 blocks, 3072 entries, 6144 bytes
 // The third block is the zero block.
@@ -4497,10 +4506,12 @@ internal static uint16 lookupValue⁔(/*this*/ ref nfcTrie t, uint32 n, byte b) 
     new(value: 0x8100, lo: 0x93, hi: 0x93)
 ]); }
 
+} partial class normᴛnfkcTrie {
+
 // lookup returns the trie value for the first UTF-8 encoding in s and
 // the width in bytes of this encoding. The size will be 0 if s does not
 // hold enough bytes to complete the encoding. len(s) must be greater than 0.
-internal static (uint16 v, nint sz) lookup⁔(/*this*/ ref nfkcTrie t, slice<byte> s) {
+internal static (uint16 v, nint sz) lookup(this ref nfkcTrie t, slice<byte> s) {
     var c0 = s[0];
     switch (ᐧ) {
     case {} when c0 is < 0x80: { // is ASCII
@@ -4566,7 +4577,7 @@ internal static (uint16 v, nint sz) lookup⁔(/*this*/ ref nfkcTrie t, slice<byt
 
 // lookupUnsafe returns the trie value for the first UTF-8 encoding in s.
 // s must start with a full and valid UTF-8 encoded rune.
-internal static uint16 lookupUnsafe⁔(/*this*/ ref nfkcTrie t, slice<byte> s) {
+internal static uint16 lookupUnsafe(this ref nfkcTrie t, slice<byte> s) {
     var c0 = s[0];
     if (c0 < 0x80) { // is ASCII
         return nfkcValues[c0];
@@ -4589,7 +4600,7 @@ internal static uint16 lookupUnsafe⁔(/*this*/ ref nfkcTrie t, slice<byte> s) {
 // lookupString returns the trie value for the first UTF-8 encoding in s and
 // the width in bytes of this encoding. The size will be 0 if s does not
 // hold enough bytes to complete the encoding. len(s) must be greater than 0.
-internal static (uint16 v, nint sz) lookupString⁔(/*this*/ ref nfkcTrie t, @string s) {
+internal static (uint16 v, nint sz) lookupString(this ref nfkcTrie t, @string s) {
     var c0 = s[0];
     switch (ᐧ) {
     case {} when c0 is < 0x80: { // is ASCII
@@ -4655,7 +4666,7 @@ internal static (uint16 v, nint sz) lookupString⁔(/*this*/ ref nfkcTrie t, @st
 
 // lookupStringUnsafe returns the trie value for the first UTF-8 encoding in s.
 // s must start with a full and valid UTF-8 encoded rune.
-internal static uint16 lookupStringUnsafe⁔(/*this*/ ref nfkcTrie t, @string s) {
+internal static uint16 lookupStringUnsafe(this ref nfkcTrie t, @string s) {
     var c0 = s[0];
     if (c0 < 0x80) { // is ASCII
         return nfkcValues[c0];
@@ -4675,6 +4686,8 @@ internal static uint16 lookupStringUnsafe⁔(/*this*/ ref nfkcTrie t, @string s)
     return 0;
 }
 
+} partial class norm_package {
+
 // nfkcTrie. Total size: 19260 bytes (18.81 KiB). Checksum: 1a0bbc4c8c24da49.
 partial struct nfkcTrie {
 }
@@ -4683,8 +4696,10 @@ internal static ж<nfkcTrie> newNfkcTrie(nint i) {
     return Ꮡ(new nfkcTrie());
 }
 
+} partial class normᴛnfkcTrie {
+
 // lookupValue determines the type of block n and looks up the value for b.
-internal static uint16 lookupValue⁔(/*this*/ ref nfkcTrie t, uint32 n, byte b) {
+internal static uint16 lookupValue(this ref nfkcTrie t, uint32 n, byte b) {
     switch (ᐧ) {
     case {} when n is < 95: {
         return (uint16)nfkcValues[(n << 6) + (uint32)b];
@@ -4694,6 +4709,8 @@ internal static uint16 lookupValue⁔(/*this*/ ref nfkcTrie t, uint32 n, byte b)
         return (uint16)nfkcSparse.lookup(n, b);
     }}
 }
+
+} partial class norm_package {
 
 // nfkcValues: 97 blocks, 6208 entries, 12416 bytes
 // The third block is the zero block.

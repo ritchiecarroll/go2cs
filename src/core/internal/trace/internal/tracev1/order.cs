@@ -4,6 +4,7 @@
 namespace go.@internal.trace.@internal;
 
 using errors = errors_package;
+using static tracev1_package;
 
 partial class tracev1_package {
 
@@ -139,11 +140,13 @@ internal static error transition(map<uint64, gState> gs, uint64 g, gState init, 
 
 partial struct orderEventList /*[]orderEvent*/;
 
-internal static bool Less⁔(/*this*/ ref orderEventList l, nint i, nint j) {
+} partial class tracev1ᴛorderEventList {
+
+internal static bool Less(this ref orderEventList l, nint i, nint j) {
     return (l)[i].ev.Ts < (l)[j].ev.Ts;
 }
 
-internal static void Push⁔(/*this*/ ж<orderEventList> Ꮡh, orderEvent x) {
+internal static void Push(this ж<orderEventList> Ꮡh, orderEvent x) {
     x = x.ΔClone();
     ref var h = ref Ꮡh.DerefOrNull();
 
@@ -151,7 +154,7 @@ internal static void Push⁔(/*this*/ ж<orderEventList> Ꮡh, orderEvent x) {
     heapUp(Ꮡh, len(h) - 1);
 }
 
-internal static orderEvent Pop⁔(/*this*/ ж<orderEventList> Ꮡh) {
+internal static orderEvent Pop(this ж<orderEventList> Ꮡh) {
     ref var h = ref Ꮡh.DerefOrNull();
 
     nint n = len(h) - 1;
@@ -165,6 +168,8 @@ internal static orderEvent Pop⁔(/*this*/ ж<orderEventList> Ꮡh) {
     h = (h).slice(0, len(h) - 1);
     return x.ΔClone();
 }
+
+} partial class tracev1_package {
 
 internal static void heapUp(ж<orderEventList> Ꮡh, nint j) {
     ref var h = ref Ꮡh.DerefOrNull();

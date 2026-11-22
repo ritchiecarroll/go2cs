@@ -5,6 +5,7 @@ namespace go.@internal;
 
 using fmt = fmt_package;
 using @unsafe = unsafe_package;
+using static trace_package;
 
 partial class trace_package {
 
@@ -22,20 +23,22 @@ public static ValueKind ValueBad => /* iota */ 0;
 public static ValueKind ValueUint64 => 1;
 public static ValueKind ValueString => 2;
 
+} partial class traceᴛValue {
+
 // Kind returns the ValueKind of the value.
 //
 // It represents the underlying structure of the value.
 //
 // New ValueKinds may be added in the future. Users of this type must be robust
 // to that possibility.
-internal static ValueKind Kind⁔(/*this*/ Value v) {
+public static ValueKind Kind(this Value v) {
     return v.kind;
 }
 
 // Uint64 returns the uint64 value for a ValueUint64.
 //
 // Panics if this Value's Kind is not ValueUint64.
-internal static uint64 Uint64⁔(/*this*/ Value v) {
+public static uint64 Uint64(this Value v) {
     if (v.kind != ValueUint64) {
         throw panic("Uint64 called on Value of a different Kind");
     }
@@ -48,7 +51,7 @@ private static readonly @string valueBadˢᵇ = "Value{Bad}"u8;
 
 // String returns the string value for a ValueString, and otherwise
 // a string representation of the value for other kinds of values.
-internal static @string String⁔(/*this*/ Value v) {
+public static @string String(this Value v) {
     if (v.kind == ValueString) {
         return @unsafe.String(@unsafe.Pointer.To<byte>(v.pointer), (nint)v.scalar);
     }
@@ -58,6 +61,8 @@ internal static @string String⁔(/*this*/ Value v) {
     }}
     return valueBadˢ;
 }
+
+} partial class trace_package {
 
 // Uint64Value creates a value of kind ValueUint64.
 public static Value Uint64Value(uint64 x) {

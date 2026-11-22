@@ -11,6 +11,7 @@ using errors = errors_package;
 using fmt = fmt_package;
 using io = io_package;
 using encoding;
+using static zstd_package;
 
 partial class zstd_package {
 
@@ -75,9 +76,11 @@ public static ж<Reader> NewReader(io.Reader input) {
     return r;
 }
 
+} partial class zstdᴛReader {
+
 // Reset discards the current state and starts reading a new stream from r.
 // This permits reusing a Reader rather than allocating a new one.
-internal static void Reset⁔(/*this*/ ref Reader r, io.Reader input) {
+public static void Reset(this ref Reader r, io.Reader input) {
     r.r = input;
 
     // Several fields are preserved to avoid allocation.
@@ -106,7 +109,7 @@ internal static void Reset⁔(/*this*/ ref Reader r, io.Reader input) {
 }
 
 // Read implements [io.Reader].
-internal static (nint, error) Read⁔(/*this*/ ж<Reader> Ꮡr, slice<byte> p) {
+public static (nint, error) Read(this ж<Reader> Ꮡr, slice<byte> p) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     var err = Ꮡr.refillIfNeeded(); if (err != nil) {
@@ -118,7 +121,7 @@ internal static (nint, error) Read⁔(/*this*/ ж<Reader> Ꮡr, slice<byte> p) {
 }
 
 // ReadByte implements [io.ByteReader].
-internal static (byte, error) ReadByte⁔(/*this*/ ж<Reader> Ꮡr) {
+public static (byte, error) ReadByte(this ж<Reader> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     var err = Ꮡr.refillIfNeeded(); if (err != nil) {
@@ -130,7 +133,7 @@ internal static (byte, error) ReadByte⁔(/*this*/ ж<Reader> Ꮡr) {
 }
 
 // refillIfNeeded reads the next block if necessary.
-internal static error refillIfNeeded⁔(/*this*/ ж<Reader> Ꮡr) {
+internal static error refillIfNeeded(this ж<Reader> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     while (r.off >= len(r.buffer)) {
@@ -143,7 +146,7 @@ internal static error refillIfNeeded⁔(/*this*/ ж<Reader> Ꮡr) {
 }
 
 // refill reads and decompresses the next block.
-internal static error refill⁔(/*this*/ ж<Reader> Ꮡr) {
+internal static error refill(this ж<Reader> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     if (!r.sawFrameHeader) {
@@ -165,7 +168,7 @@ internal static ref readonly @string dictionariesAreNotˢ => ref dictionariesAre
 private static readonly @string dictionariesAreNotˢᵇ = "dictionaries are not supported"u8;
 
 // readFrameHeader reads the frame header and prepares to read a block.
-internal static error readFrameHeader⁔(/*this*/ ref Reader r) {
+internal static error readFrameHeader(this ref Reader r) {
 retry:
     nint relativeOffset = 0;
 
@@ -336,7 +339,7 @@ retry:
 }
 
 // skipFrame skips a skippable frame. RFC 3.1.2.
-internal static error skipFrame⁔(/*this*/ ref Reader r) {
+internal static error skipFrame(this ref Reader r) {
     nint relativeOffset = 0;
 
     var (_, errΔ1) = io.ReadFull(r.r, r.scratch[..4]); if (errΔ1 != nil) {
@@ -397,7 +400,7 @@ internal static ref readonly @string notEnoughUncompressedˢ => ref notEnoughUnc
 private static readonly @string notEnoughUncompressedˢᵇ = "not enough uncompressed bytes for frame"u8;
 
 // readBlock reads the next block from a frame.
-internal static error readBlock⁔(/*this*/ ж<Reader> Ꮡr) {
+internal static error readBlock(this ж<Reader> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     nint relativeOffset = 0;
@@ -505,7 +508,7 @@ internal static error readBlock⁔(/*this*/ ж<Reader> Ꮡr) {
 
 // setBufferSize sets the decompressed buffer size.
 // When this is called the buffer is empty.
-internal static void setBufferSize⁔(/*this*/ ref Reader r, nint size) {
+internal static void setBufferSize(this ref Reader r, nint size) {
     if (cap(r.buffer) < size) {
         nint need = size - cap(r.buffer);
         r.buffer = appendꓸꓸꓸ(r.buffer.slice(0, cap(r.buffer)), makeꓸꓸꓸ<byte>(need));
@@ -513,40 +516,46 @@ internal static void setBufferSize⁔(/*this*/ ref Reader r, nint size) {
     r.buffer = r.buffer.slice(0, size);
 }
 
+} partial class zstd_package {
+
 // zstdError is an error while decompressing.
 partial struct zstdError {
     internal int64 offset;
     internal error err;
 }
 
-internal static @string Error⁔(/*this*/ ref zstdError ze) {
+} partial class zstdᴛzstdError {
+
+internal static @string Error(this ref zstdError ze) {
     return fmt.Sprintf("zstd decompression error at %d: %v"u8, ze.offset, ze.err);
 }
 
-internal static error Unwrap⁔(/*this*/ ref zstdError ze) {
+internal static error Unwrap(this ref zstdError ze) {
     return ze.err;
 }
 
-internal static error makeEOFError⁔(/*this*/ ref Reader r, nint off) {
+} partial class zstdᴛReader {
+
+internal static error makeEOFError(this ref Reader r, nint off) {
     return r.wrapError(off, io.ErrUnexpectedEOF);
 }
 
-internal static error wrapNonEOFError⁔(/*this*/ ref Reader r, nint off, error err) {
+internal static error wrapNonEOFError(this ref Reader r, nint off, error err) {
     if (AreEqual(err, io.EOF)) {
         err = io.ErrUnexpectedEOF;
     }
     return r.wrapError(off, err);
 }
 
-internal static error makeError⁔(/*this*/ ref Reader r, nint off, @string msg) {
+internal static error makeError(this ref Reader r, nint off, @string msg) {
     return r.wrapError(off, errors.New(msg));
 }
 
-internal static error wrapError⁔(/*this*/ ref Reader r, nint off, error err) {
+internal static error wrapError(this ref Reader r, nint off, error err) {
     if (AreEqual(err, io.EOF)) {
         return err;
     }
     return new zstdErrorжerror(Ꮡ(new zstdError(r.blockOffset + (int64)off, err)));
 }
 
-} // end zstd_package
+}

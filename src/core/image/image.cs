@@ -41,6 +41,7 @@ namespace go;
 
 using color = image.color_package;
 using image;
+using static image_package;
 
 partial class image_package {
 
@@ -114,15 +115,17 @@ partial struct RGBA {
     public Rectangle Rect;
 }
 
-internal static color.Model ColorModel⁔(/*this*/ ref RGBA p) { return color.RGBAModel; }
+} partial class imageᴛRGBA {
 
-internal static Rectangle Bounds⁔(/*this*/ ref RGBA p) { return p.Rect; }
+public static color.Model ColorModel(this ref RGBA p) { return color.RGBAModel; }
 
-internal static color.Color At⁔(/*this*/ ref RGBA p, nint x, nint y) {
+public static Rectangle Bounds(this ref RGBA p) { return p.Rect; }
+
+public static color.Color At(this ref RGBA p, nint x, nint y) {
     return p.RGBAAt(x, y);
 }
 
-internal static color.RGBA64 RGBA64At⁔(/*this*/ ref RGBA p, nint x, nint y) {
+public static color.RGBA64 RGBA64At(this ref RGBA p, nint x, nint y) {
     if (!(new Point(x, y).In(p.Rect))) {
         return new color.RGBA64();
     }
@@ -140,7 +143,7 @@ internal static color.RGBA64 RGBA64At⁔(/*this*/ ref RGBA p, nint x, nint y) {
     );
 }
 
-internal static color.RGBA RGBAAt⁔(/*this*/ ref RGBA p, nint x, nint y) {
+public static color.RGBA RGBAAt(this ref RGBA p, nint x, nint y) {
     if (!(new Point(x, y).In(p.Rect))) {
         return new color.RGBA();
     }
@@ -151,11 +154,11 @@ internal static color.RGBA RGBAAt⁔(/*this*/ ref RGBA p, nint x, nint y) {
 
 // PixOffset returns the index of the first element of Pix that corresponds to
 // the pixel at (x, y).
-internal static nint PixOffset⁔(/*this*/ ref RGBA p, nint x, nint y) {
+public static nint PixOffset(this ref RGBA p, nint x, nint y) {
     return (y - p.Rect.Min.Y) * p.Stride + (x - p.Rect.Min.X) * 4;
 }
 
-internal static void Set⁔(/*this*/ ref RGBA p, nint x, nint y, color.Color c) {
+public static void Set(this ref RGBA p, nint x, nint y, color.Color c) {
     if (!(new Point(x, y).In(p.Rect))) {
         return;
     }
@@ -168,7 +171,7 @@ internal static void Set⁔(/*this*/ ref RGBA p, nint x, nint y, color.Color c) 
     s[3] = c1.A;
 }
 
-internal static void SetRGBA64⁔(/*this*/ ref RGBA p, nint x, nint y, color.RGBA64 c) {
+public static void SetRGBA64(this ref RGBA p, nint x, nint y, color.RGBA64 c) {
     if (!(new Point(x, y).In(p.Rect))) {
         return;
     }
@@ -180,7 +183,7 @@ internal static void SetRGBA64⁔(/*this*/ ref RGBA p, nint x, nint y, color.RGB
     s[3] = (uint8)(c.A >> 8);
 }
 
-internal static void SetRGBA⁔(/*this*/ ref RGBA p, nint x, nint y, color.RGBA c) {
+public static void SetRGBA(this ref RGBA p, nint x, nint y, color.RGBA c) {
     if (!(new Point(x, y).In(p.Rect))) {
         return;
     }
@@ -194,7 +197,7 @@ internal static void SetRGBA⁔(/*this*/ ref RGBA p, nint x, nint y, color.RGBA 
 
 // SubImage returns an image representing the portion of the image p visible
 // through r. The returned value shares pixels with the original image.
-internal static Image SubImage⁔(/*this*/ ref RGBA p, Rectangle r) {
+public static Image SubImage(this ref RGBA p, Rectangle r) {
     r = r.Intersect(p.Rect);
     // If r1 and r2 are Rectangles, r1.Intersect(r2) is not guaranteed to be inside
     // either r1 or r2 if the intersection is empty. Without explicitly checking for
@@ -211,7 +214,7 @@ internal static Image SubImage⁔(/*this*/ ref RGBA p, Rectangle r) {
 }
 
 // Opaque scans the entire image and reports whether it is fully opaque.
-internal static bool Opaque⁔(/*this*/ ref RGBA p) {
+public static bool Opaque(this ref RGBA p) {
     if (p.Rect.Empty()) {
         return true;
     }
@@ -228,6 +231,8 @@ internal static bool Opaque⁔(/*this*/ ref RGBA p) {
     }
     return true;
 }
+
+} partial class image_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string rgbaˢ => ref rgbaˢᵇ;
@@ -253,15 +258,17 @@ partial struct RGBA64 {
     public Rectangle Rect;
 }
 
-internal static color.Model ColorModel⁔(/*this*/ ref RGBA64 p) { return color.RGBA64Model; }
+} partial class imageᴛRGBA64 {
 
-internal static Rectangle Bounds⁔(/*this*/ ref RGBA64 p) { return p.Rect; }
+public static color.Model ColorModel(this ref RGBA64 p) { return color.RGBA64Model; }
 
-internal static color.Color At⁔(/*this*/ ref RGBA64 p, nint x, nint y) {
+public static Rectangle Bounds(this ref RGBA64 p) { return p.Rect; }
+
+public static color.Color At(this ref RGBA64 p, nint x, nint y) {
     return p.RGBA64At(x, y);
 }
 
-internal static color.RGBA64 RGBA64At⁔(/*this*/ ref RGBA64 p, nint x, nint y) {
+public static color.RGBA64 RGBA64At(this ref RGBA64 p, nint x, nint y) {
     if (!(new Point(x, y).In(p.Rect))) {
         return new color.RGBA64();
     }
@@ -277,11 +284,11 @@ internal static color.RGBA64 RGBA64At⁔(/*this*/ ref RGBA64 p, nint x, nint y) 
 
 // PixOffset returns the index of the first element of Pix that corresponds to
 // the pixel at (x, y).
-internal static nint PixOffset⁔(/*this*/ ref RGBA64 p, nint x, nint y) {
+public static nint PixOffset(this ref RGBA64 p, nint x, nint y) {
     return (y - p.Rect.Min.Y) * p.Stride + (x - p.Rect.Min.X) * 8;
 }
 
-internal static void Set⁔(/*this*/ ref RGBA64 p, nint x, nint y, color.Color c) {
+public static void Set(this ref RGBA64 p, nint x, nint y, color.Color c) {
     if (!(new Point(x, y).In(p.Rect))) {
         return;
     }
@@ -298,7 +305,7 @@ internal static void Set⁔(/*this*/ ref RGBA64 p, nint x, nint y, color.Color c
     s[7] = (uint8)c1.A;
 }
 
-internal static void SetRGBA64⁔(/*this*/ ref RGBA64 p, nint x, nint y, color.RGBA64 c) {
+public static void SetRGBA64(this ref RGBA64 p, nint x, nint y, color.RGBA64 c) {
     if (!(new Point(x, y).In(p.Rect))) {
         return;
     }
@@ -316,7 +323,7 @@ internal static void SetRGBA64⁔(/*this*/ ref RGBA64 p, nint x, nint y, color.R
 
 // SubImage returns an image representing the portion of the image p visible
 // through r. The returned value shares pixels with the original image.
-internal static Image SubImage⁔(/*this*/ ref RGBA64 p, Rectangle r) {
+public static Image SubImage(this ref RGBA64 p, Rectangle r) {
     r = r.Intersect(p.Rect);
     // If r1 and r2 are Rectangles, r1.Intersect(r2) is not guaranteed to be inside
     // either r1 or r2 if the intersection is empty. Without explicitly checking for
@@ -333,7 +340,7 @@ internal static Image SubImage⁔(/*this*/ ref RGBA64 p, Rectangle r) {
 }
 
 // Opaque scans the entire image and reports whether it is fully opaque.
-internal static bool Opaque⁔(/*this*/ ref RGBA64 p) {
+public static bool Opaque(this ref RGBA64 p) {
     if (p.Rect.Empty()) {
         return true;
     }
@@ -350,6 +357,8 @@ internal static bool Opaque⁔(/*this*/ ref RGBA64 p) {
     }
     return true;
 }
+
+} partial class image_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string rgba64ˢ => ref rgba64ˢᵇ;
@@ -375,20 +384,22 @@ partial struct NRGBA {
     public Rectangle Rect;
 }
 
-internal static color.Model ColorModel⁔(/*this*/ ref NRGBA p) { return color.NRGBAModel; }
+} partial class imageᴛNRGBA {
 
-internal static Rectangle Bounds⁔(/*this*/ ref NRGBA p) { return p.Rect; }
+public static color.Model ColorModel(this ref NRGBA p) { return color.NRGBAModel; }
 
-internal static color.Color At⁔(/*this*/ ref NRGBA p, nint x, nint y) {
+public static Rectangle Bounds(this ref NRGBA p) { return p.Rect; }
+
+public static color.Color At(this ref NRGBA p, nint x, nint y) {
     return p.NRGBAAt(x, y);
 }
 
-internal static color.RGBA64 RGBA64At⁔(/*this*/ ref NRGBA p, nint x, nint y) {
+public static color.RGBA64 RGBA64At(this ref NRGBA p, nint x, nint y) {
     var (r, g, b, a) = p.NRGBAAt(x, y).RGBA();
     return new color.RGBA64((uint16)r, (uint16)g, (uint16)b, (uint16)a);
 }
 
-internal static color.NRGBA NRGBAAt⁔(/*this*/ ref NRGBA p, nint x, nint y) {
+public static color.NRGBA NRGBAAt(this ref NRGBA p, nint x, nint y) {
     if (!(new Point(x, y).In(p.Rect))) {
         return new color.NRGBA();
     }
@@ -399,11 +410,11 @@ internal static color.NRGBA NRGBAAt⁔(/*this*/ ref NRGBA p, nint x, nint y) {
 
 // PixOffset returns the index of the first element of Pix that corresponds to
 // the pixel at (x, y).
-internal static nint PixOffset⁔(/*this*/ ref NRGBA p, nint x, nint y) {
+public static nint PixOffset(this ref NRGBA p, nint x, nint y) {
     return (y - p.Rect.Min.Y) * p.Stride + (x - p.Rect.Min.X) * 4;
 }
 
-internal static void Set⁔(/*this*/ ref NRGBA p, nint x, nint y, color.Color c) {
+public static void Set(this ref NRGBA p, nint x, nint y, color.Color c) {
     if (!(new Point(x, y).In(p.Rect))) {
         return;
     }
@@ -416,7 +427,7 @@ internal static void Set⁔(/*this*/ ref NRGBA p, nint x, nint y, color.Color c)
     s[3] = c1.A;
 }
 
-internal static void SetRGBA64⁔(/*this*/ ref NRGBA p, nint x, nint y, color.RGBA64 c) {
+public static void SetRGBA64(this ref NRGBA p, nint x, nint y, color.RGBA64 c) {
     if (!(new Point(x, y).In(p.Rect))) {
         return;
     }
@@ -434,7 +445,7 @@ internal static void SetRGBA64⁔(/*this*/ ref NRGBA p, nint x, nint y, color.RG
     s[3] = (uint8)(a >> 8);
 }
 
-internal static void SetNRGBA⁔(/*this*/ ref NRGBA p, nint x, nint y, color.NRGBA c) {
+public static void SetNRGBA(this ref NRGBA p, nint x, nint y, color.NRGBA c) {
     if (!(new Point(x, y).In(p.Rect))) {
         return;
     }
@@ -448,7 +459,7 @@ internal static void SetNRGBA⁔(/*this*/ ref NRGBA p, nint x, nint y, color.NRG
 
 // SubImage returns an image representing the portion of the image p visible
 // through r. The returned value shares pixels with the original image.
-internal static Image SubImage⁔(/*this*/ ref NRGBA p, Rectangle r) {
+public static Image SubImage(this ref NRGBA p, Rectangle r) {
     r = r.Intersect(p.Rect);
     // If r1 and r2 are Rectangles, r1.Intersect(r2) is not guaranteed to be inside
     // either r1 or r2 if the intersection is empty. Without explicitly checking for
@@ -465,7 +476,7 @@ internal static Image SubImage⁔(/*this*/ ref NRGBA p, Rectangle r) {
 }
 
 // Opaque scans the entire image and reports whether it is fully opaque.
-internal static bool Opaque⁔(/*this*/ ref NRGBA p) {
+public static bool Opaque(this ref NRGBA p) {
     if (p.Rect.Empty()) {
         return true;
     }
@@ -482,6 +493,8 @@ internal static bool Opaque⁔(/*this*/ ref NRGBA p) {
     }
     return true;
 }
+
+} partial class image_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string nrgbaˢ => ref nrgbaˢᵇ;
@@ -507,20 +520,22 @@ partial struct NRGBA64 {
     public Rectangle Rect;
 }
 
-internal static color.Model ColorModel⁔(/*this*/ ref NRGBA64 p) { return color.NRGBA64Model; }
+} partial class imageᴛNRGBA64 {
 
-internal static Rectangle Bounds⁔(/*this*/ ref NRGBA64 p) { return p.Rect; }
+public static color.Model ColorModel(this ref NRGBA64 p) { return color.NRGBA64Model; }
 
-internal static color.Color At⁔(/*this*/ ref NRGBA64 p, nint x, nint y) {
+public static Rectangle Bounds(this ref NRGBA64 p) { return p.Rect; }
+
+public static color.Color At(this ref NRGBA64 p, nint x, nint y) {
     return p.NRGBA64At(x, y);
 }
 
-internal static color.RGBA64 RGBA64At⁔(/*this*/ ref NRGBA64 p, nint x, nint y) {
+public static color.RGBA64 RGBA64At(this ref NRGBA64 p, nint x, nint y) {
     var (r, g, b, a) = p.NRGBA64At(x, y).RGBA();
     return new color.RGBA64((uint16)r, (uint16)g, (uint16)b, (uint16)a);
 }
 
-internal static color.NRGBA64 NRGBA64At⁔(/*this*/ ref NRGBA64 p, nint x, nint y) {
+public static color.NRGBA64 NRGBA64At(this ref NRGBA64 p, nint x, nint y) {
     if (!(new Point(x, y).In(p.Rect))) {
         return new color.NRGBA64();
     }
@@ -536,11 +551,11 @@ internal static color.NRGBA64 NRGBA64At⁔(/*this*/ ref NRGBA64 p, nint x, nint 
 
 // PixOffset returns the index of the first element of Pix that corresponds to
 // the pixel at (x, y).
-internal static nint PixOffset⁔(/*this*/ ref NRGBA64 p, nint x, nint y) {
+public static nint PixOffset(this ref NRGBA64 p, nint x, nint y) {
     return (y - p.Rect.Min.Y) * p.Stride + (x - p.Rect.Min.X) * 8;
 }
 
-internal static void Set⁔(/*this*/ ref NRGBA64 p, nint x, nint y, color.Color c) {
+public static void Set(this ref NRGBA64 p, nint x, nint y, color.Color c) {
     if (!(new Point(x, y).In(p.Rect))) {
         return;
     }
@@ -557,7 +572,7 @@ internal static void Set⁔(/*this*/ ref NRGBA64 p, nint x, nint y, color.Color 
     s[7] = (uint8)c1.A;
 }
 
-internal static void SetRGBA64⁔(/*this*/ ref NRGBA64 p, nint x, nint y, color.RGBA64 c) {
+public static void SetRGBA64(this ref NRGBA64 p, nint x, nint y, color.RGBA64 c) {
     if (!(new Point(x, y).In(p.Rect))) {
         return;
     }
@@ -579,7 +594,7 @@ internal static void SetRGBA64⁔(/*this*/ ref NRGBA64 p, nint x, nint y, color.
     s[7] = (uint8)a;
 }
 
-internal static void SetNRGBA64⁔(/*this*/ ref NRGBA64 p, nint x, nint y, color.NRGBA64 c) {
+public static void SetNRGBA64(this ref NRGBA64 p, nint x, nint y, color.NRGBA64 c) {
     if (!(new Point(x, y).In(p.Rect))) {
         return;
     }
@@ -597,7 +612,7 @@ internal static void SetNRGBA64⁔(/*this*/ ref NRGBA64 p, nint x, nint y, color
 
 // SubImage returns an image representing the portion of the image p visible
 // through r. The returned value shares pixels with the original image.
-internal static Image SubImage⁔(/*this*/ ref NRGBA64 p, Rectangle r) {
+public static Image SubImage(this ref NRGBA64 p, Rectangle r) {
     r = r.Intersect(p.Rect);
     // If r1 and r2 are Rectangles, r1.Intersect(r2) is not guaranteed to be inside
     // either r1 or r2 if the intersection is empty. Without explicitly checking for
@@ -614,7 +629,7 @@ internal static Image SubImage⁔(/*this*/ ref NRGBA64 p, Rectangle r) {
 }
 
 // Opaque scans the entire image and reports whether it is fully opaque.
-internal static bool Opaque⁔(/*this*/ ref NRGBA64 p) {
+public static bool Opaque(this ref NRGBA64 p) {
     if (p.Rect.Empty()) {
         return true;
     }
@@ -631,6 +646,8 @@ internal static bool Opaque⁔(/*this*/ ref NRGBA64 p) {
     }
     return true;
 }
+
+} partial class image_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string nrgba64ˢ => ref nrgba64ˢᵇ;
@@ -656,21 +673,23 @@ partial struct Alpha {
     public Rectangle Rect;
 }
 
-internal static color.Model ColorModel⁔(/*this*/ ref Alpha p) { return color.AlphaModel; }
+} partial class imageᴛAlpha {
 
-internal static Rectangle Bounds⁔(/*this*/ ref Alpha p) { return p.Rect; }
+public static color.Model ColorModel(this ref Alpha p) { return color.AlphaModel; }
 
-internal static color.Color At⁔(/*this*/ ref Alpha p, nint x, nint y) {
+public static Rectangle Bounds(this ref Alpha p) { return p.Rect; }
+
+public static color.Color At(this ref Alpha p, nint x, nint y) {
     return p.AlphaAt(x, y);
 }
 
-internal static color.RGBA64 RGBA64At⁔(/*this*/ ref Alpha p, nint x, nint y) {
+public static color.RGBA64 RGBA64At(this ref Alpha p, nint x, nint y) {
     var a = (uint16)p.AlphaAt(x, y).A;
     a |= (uint16)((uint16)(a << 8));
     return new color.RGBA64(a, a, a, a);
 }
 
-internal static color.Alpha AlphaAt⁔(/*this*/ ref Alpha p, nint x, nint y) {
+public static color.Alpha AlphaAt(this ref Alpha p, nint x, nint y) {
     if (!(new Point(x, y).In(p.Rect))) {
         return new color.Alpha();
     }
@@ -680,11 +699,11 @@ internal static color.Alpha AlphaAt⁔(/*this*/ ref Alpha p, nint x, nint y) {
 
 // PixOffset returns the index of the first element of Pix that corresponds to
 // the pixel at (x, y).
-internal static nint PixOffset⁔(/*this*/ ref Alpha p, nint x, nint y) {
+public static nint PixOffset(this ref Alpha p, nint x, nint y) {
     return (y - p.Rect.Min.Y) * p.Stride + (x - p.Rect.Min.X) * 1;
 }
 
-internal static void Set⁔(/*this*/ ref Alpha p, nint x, nint y, color.Color c) {
+public static void Set(this ref Alpha p, nint x, nint y, color.Color c) {
     if (!(new Point(x, y).In(p.Rect))) {
         return;
     }
@@ -692,7 +711,7 @@ internal static void Set⁔(/*this*/ ref Alpha p, nint x, nint y, color.Color c)
     p.Pix[i] = color.AlphaModel.Convert(c)._<color.Color, color.Alpha>().A;
 }
 
-internal static void SetRGBA64⁔(/*this*/ ref Alpha p, nint x, nint y, color.RGBA64 c) {
+public static void SetRGBA64(this ref Alpha p, nint x, nint y, color.RGBA64 c) {
     if (!(new Point(x, y).In(p.Rect))) {
         return;
     }
@@ -700,7 +719,7 @@ internal static void SetRGBA64⁔(/*this*/ ref Alpha p, nint x, nint y, color.RG
     p.Pix[i] = (uint8)(c.A >> 8);
 }
 
-internal static void SetAlpha⁔(/*this*/ ref Alpha p, nint x, nint y, color.Alpha c) {
+public static void SetAlpha(this ref Alpha p, nint x, nint y, color.Alpha c) {
     if (!(new Point(x, y).In(p.Rect))) {
         return;
     }
@@ -710,7 +729,7 @@ internal static void SetAlpha⁔(/*this*/ ref Alpha p, nint x, nint y, color.Alp
 
 // SubImage returns an image representing the portion of the image p visible
 // through r. The returned value shares pixels with the original image.
-internal static Image SubImage⁔(/*this*/ ref Alpha p, Rectangle r) {
+public static Image SubImage(this ref Alpha p, Rectangle r) {
     r = r.Intersect(p.Rect);
     // If r1 and r2 are Rectangles, r1.Intersect(r2) is not guaranteed to be inside
     // either r1 or r2 if the intersection is empty. Without explicitly checking for
@@ -727,7 +746,7 @@ internal static Image SubImage⁔(/*this*/ ref Alpha p, Rectangle r) {
 }
 
 // Opaque scans the entire image and reports whether it is fully opaque.
-internal static bool Opaque⁔(/*this*/ ref Alpha p) {
+public static bool Opaque(this ref Alpha p) {
     if (p.Rect.Empty()) {
         return true;
     }
@@ -744,6 +763,8 @@ internal static bool Opaque⁔(/*this*/ ref Alpha p) {
     }
     return true;
 }
+
+} partial class image_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string alphaˢ => ref alphaˢᵇ;
@@ -769,20 +790,22 @@ partial struct Alpha16 {
     public Rectangle Rect;
 }
 
-internal static color.Model ColorModel⁔(/*this*/ ref Alpha16 p) { return color.Alpha16Model; }
+} partial class imageᴛAlpha16 {
 
-internal static Rectangle Bounds⁔(/*this*/ ref Alpha16 p) { return p.Rect; }
+public static color.Model ColorModel(this ref Alpha16 p) { return color.Alpha16Model; }
 
-internal static color.Color At⁔(/*this*/ ref Alpha16 p, nint x, nint y) {
+public static Rectangle Bounds(this ref Alpha16 p) { return p.Rect; }
+
+public static color.Color At(this ref Alpha16 p, nint x, nint y) {
     return p.Alpha16At(x, y);
 }
 
-internal static color.RGBA64 RGBA64At⁔(/*this*/ ref Alpha16 p, nint x, nint y) {
+public static color.RGBA64 RGBA64At(this ref Alpha16 p, nint x, nint y) {
     var a = p.Alpha16At(x, y).A;
     return new color.RGBA64(a, a, a, a);
 }
 
-internal static color.Alpha16 Alpha16At⁔(/*this*/ ref Alpha16 p, nint x, nint y) {
+public static color.Alpha16 Alpha16At(this ref Alpha16 p, nint x, nint y) {
     if (!(new Point(x, y).In(p.Rect))) {
         return new color.Alpha16();
     }
@@ -792,11 +815,11 @@ internal static color.Alpha16 Alpha16At⁔(/*this*/ ref Alpha16 p, nint x, nint 
 
 // PixOffset returns the index of the first element of Pix that corresponds to
 // the pixel at (x, y).
-internal static nint PixOffset⁔(/*this*/ ref Alpha16 p, nint x, nint y) {
+public static nint PixOffset(this ref Alpha16 p, nint x, nint y) {
     return (y - p.Rect.Min.Y) * p.Stride + (x - p.Rect.Min.X) * 2;
 }
 
-internal static void Set⁔(/*this*/ ref Alpha16 p, nint x, nint y, color.Color c) {
+public static void Set(this ref Alpha16 p, nint x, nint y, color.Color c) {
     if (!(new Point(x, y).In(p.Rect))) {
         return;
     }
@@ -806,7 +829,7 @@ internal static void Set⁔(/*this*/ ref Alpha16 p, nint x, nint y, color.Color 
     p.Pix[i + 1] = (uint8)c1.A;
 }
 
-internal static void SetRGBA64⁔(/*this*/ ref Alpha16 p, nint x, nint y, color.RGBA64 c) {
+public static void SetRGBA64(this ref Alpha16 p, nint x, nint y, color.RGBA64 c) {
     if (!(new Point(x, y).In(p.Rect))) {
         return;
     }
@@ -815,7 +838,7 @@ internal static void SetRGBA64⁔(/*this*/ ref Alpha16 p, nint x, nint y, color.
     p.Pix[i + 1] = (uint8)c.A;
 }
 
-internal static void SetAlpha16⁔(/*this*/ ref Alpha16 p, nint x, nint y, color.Alpha16 c) {
+public static void SetAlpha16(this ref Alpha16 p, nint x, nint y, color.Alpha16 c) {
     if (!(new Point(x, y).In(p.Rect))) {
         return;
     }
@@ -826,7 +849,7 @@ internal static void SetAlpha16⁔(/*this*/ ref Alpha16 p, nint x, nint y, color
 
 // SubImage returns an image representing the portion of the image p visible
 // through r. The returned value shares pixels with the original image.
-internal static Image SubImage⁔(/*this*/ ref Alpha16 p, Rectangle r) {
+public static Image SubImage(this ref Alpha16 p, Rectangle r) {
     r = r.Intersect(p.Rect);
     // If r1 and r2 are Rectangles, r1.Intersect(r2) is not guaranteed to be inside
     // either r1 or r2 if the intersection is empty. Without explicitly checking for
@@ -843,7 +866,7 @@ internal static Image SubImage⁔(/*this*/ ref Alpha16 p, Rectangle r) {
 }
 
 // Opaque scans the entire image and reports whether it is fully opaque.
-internal static bool Opaque⁔(/*this*/ ref Alpha16 p) {
+public static bool Opaque(this ref Alpha16 p) {
     if (p.Rect.Empty()) {
         return true;
     }
@@ -860,6 +883,8 @@ internal static bool Opaque⁔(/*this*/ ref Alpha16 p) {
     }
     return true;
 }
+
+} partial class image_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string alpha16ˢ => ref alpha16ˢᵇ;
@@ -885,21 +910,23 @@ partial struct Gray {
     public Rectangle Rect;
 }
 
-internal static color.Model ColorModel⁔(/*this*/ ref Gray p) { return color.GrayModel; }
+} partial class imageᴛGray {
 
-internal static Rectangle Bounds⁔(/*this*/ ref Gray p) { return p.Rect; }
+public static color.Model ColorModel(this ref Gray p) { return color.GrayModel; }
 
-internal static color.Color At⁔(/*this*/ ref Gray p, nint x, nint y) {
+public static Rectangle Bounds(this ref Gray p) { return p.Rect; }
+
+public static color.Color At(this ref Gray p, nint x, nint y) {
     return p.GrayAt(x, y);
 }
 
-internal static color.RGBA64 RGBA64At⁔(/*this*/ ref Gray p, nint x, nint y) {
+public static color.RGBA64 RGBA64At(this ref Gray p, nint x, nint y) {
     var gray = (uint16)p.GrayAt(x, y).Y;
     gray |= (uint16)((uint16)(gray << 8));
     return new color.RGBA64(gray, gray, gray, 0xffff);
 }
 
-internal static color.Gray GrayAt⁔(/*this*/ ref Gray p, nint x, nint y) {
+public static color.Gray GrayAt(this ref Gray p, nint x, nint y) {
     if (!(new Point(x, y).In(p.Rect))) {
         return new color.Gray();
     }
@@ -909,11 +936,11 @@ internal static color.Gray GrayAt⁔(/*this*/ ref Gray p, nint x, nint y) {
 
 // PixOffset returns the index of the first element of Pix that corresponds to
 // the pixel at (x, y).
-internal static nint PixOffset⁔(/*this*/ ref Gray p, nint x, nint y) {
+public static nint PixOffset(this ref Gray p, nint x, nint y) {
     return (y - p.Rect.Min.Y) * p.Stride + (x - p.Rect.Min.X) * 1;
 }
 
-internal static void Set⁔(/*this*/ ref Gray p, nint x, nint y, color.Color c) {
+public static void Set(this ref Gray p, nint x, nint y, color.Color c) {
     if (!(new Point(x, y).In(p.Rect))) {
         return;
     }
@@ -921,7 +948,7 @@ internal static void Set⁔(/*this*/ ref Gray p, nint x, nint y, color.Color c) 
     p.Pix[i] = color.GrayModel.Convert(c)._<color.Color, color.Gray>().Y;
 }
 
-internal static void SetRGBA64⁔(/*this*/ ref Gray p, nint x, nint y, color.RGBA64 c) {
+public static void SetRGBA64(this ref Gray p, nint x, nint y, color.RGBA64 c) {
     if (!(new Point(x, y).In(p.Rect))) {
         return;
     }
@@ -931,7 +958,7 @@ internal static void SetRGBA64⁔(/*this*/ ref Gray p, nint x, nint y, color.RGB
     p.Pix[i] = (uint8)gray;
 }
 
-internal static void SetGray⁔(/*this*/ ref Gray p, nint x, nint y, color.Gray c) {
+public static void SetGray(this ref Gray p, nint x, nint y, color.Gray c) {
     if (!(new Point(x, y).In(p.Rect))) {
         return;
     }
@@ -941,7 +968,7 @@ internal static void SetGray⁔(/*this*/ ref Gray p, nint x, nint y, color.Gray 
 
 // SubImage returns an image representing the portion of the image p visible
 // through r. The returned value shares pixels with the original image.
-internal static Image SubImage⁔(/*this*/ ref Gray p, Rectangle r) {
+public static Image SubImage(this ref Gray p, Rectangle r) {
     r = r.Intersect(p.Rect);
     // If r1 and r2 are Rectangles, r1.Intersect(r2) is not guaranteed to be inside
     // either r1 or r2 if the intersection is empty. Without explicitly checking for
@@ -958,9 +985,11 @@ internal static Image SubImage⁔(/*this*/ ref Gray p, Rectangle r) {
 }
 
 // Opaque scans the entire image and reports whether it is fully opaque.
-internal static bool Opaque⁔(/*this*/ ref Gray p) {
+public static bool Opaque(this ref Gray p) {
     return true;
 }
+
+} partial class image_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string grayˢ => ref grayˢᵇ;
@@ -986,20 +1015,22 @@ partial struct Gray16 {
     public Rectangle Rect;
 }
 
-internal static color.Model ColorModel⁔(/*this*/ ref Gray16 p) { return color.Gray16Model; }
+} partial class imageᴛGray16 {
 
-internal static Rectangle Bounds⁔(/*this*/ ref Gray16 p) { return p.Rect; }
+public static color.Model ColorModel(this ref Gray16 p) { return color.Gray16Model; }
 
-internal static color.Color At⁔(/*this*/ ref Gray16 p, nint x, nint y) {
+public static Rectangle Bounds(this ref Gray16 p) { return p.Rect; }
+
+public static color.Color At(this ref Gray16 p, nint x, nint y) {
     return p.Gray16At(x, y);
 }
 
-internal static color.RGBA64 RGBA64At⁔(/*this*/ ref Gray16 p, nint x, nint y) {
+public static color.RGBA64 RGBA64At(this ref Gray16 p, nint x, nint y) {
     var gray = p.Gray16At(x, y).Y;
     return new color.RGBA64(gray, gray, gray, 0xffff);
 }
 
-internal static color.Gray16 Gray16At⁔(/*this*/ ref Gray16 p, nint x, nint y) {
+public static color.Gray16 Gray16At(this ref Gray16 p, nint x, nint y) {
     if (!(new Point(x, y).In(p.Rect))) {
         return new color.Gray16();
     }
@@ -1009,11 +1040,11 @@ internal static color.Gray16 Gray16At⁔(/*this*/ ref Gray16 p, nint x, nint y) 
 
 // PixOffset returns the index of the first element of Pix that corresponds to
 // the pixel at (x, y).
-internal static nint PixOffset⁔(/*this*/ ref Gray16 p, nint x, nint y) {
+public static nint PixOffset(this ref Gray16 p, nint x, nint y) {
     return (y - p.Rect.Min.Y) * p.Stride + (x - p.Rect.Min.X) * 2;
 }
 
-internal static void Set⁔(/*this*/ ref Gray16 p, nint x, nint y, color.Color c) {
+public static void Set(this ref Gray16 p, nint x, nint y, color.Color c) {
     if (!(new Point(x, y).In(p.Rect))) {
         return;
     }
@@ -1023,7 +1054,7 @@ internal static void Set⁔(/*this*/ ref Gray16 p, nint x, nint y, color.Color c
     p.Pix[i + 1] = (uint8)c1.Y;
 }
 
-internal static void SetRGBA64⁔(/*this*/ ref Gray16 p, nint x, nint y, color.RGBA64 c) {
+public static void SetRGBA64(this ref Gray16 p, nint x, nint y, color.RGBA64 c) {
     if (!(new Point(x, y).In(p.Rect))) {
         return;
     }
@@ -1034,7 +1065,7 @@ internal static void SetRGBA64⁔(/*this*/ ref Gray16 p, nint x, nint y, color.R
     p.Pix[i + 1] = (uint8)gray;
 }
 
-internal static void SetGray16⁔(/*this*/ ref Gray16 p, nint x, nint y, color.Gray16 c) {
+public static void SetGray16(this ref Gray16 p, nint x, nint y, color.Gray16 c) {
     if (!(new Point(x, y).In(p.Rect))) {
         return;
     }
@@ -1045,7 +1076,7 @@ internal static void SetGray16⁔(/*this*/ ref Gray16 p, nint x, nint y, color.G
 
 // SubImage returns an image representing the portion of the image p visible
 // through r. The returned value shares pixels with the original image.
-internal static Image SubImage⁔(/*this*/ ref Gray16 p, Rectangle r) {
+public static Image SubImage(this ref Gray16 p, Rectangle r) {
     r = r.Intersect(p.Rect);
     // If r1 and r2 are Rectangles, r1.Intersect(r2) is not guaranteed to be inside
     // either r1 or r2 if the intersection is empty. Without explicitly checking for
@@ -1062,9 +1093,11 @@ internal static Image SubImage⁔(/*this*/ ref Gray16 p, Rectangle r) {
 }
 
 // Opaque scans the entire image and reports whether it is fully opaque.
-internal static bool Opaque⁔(/*this*/ ref Gray16 p) {
+public static bool Opaque(this ref Gray16 p) {
     return true;
 }
+
+} partial class image_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string gray16ˢ => ref gray16ˢᵇ;
@@ -1090,20 +1123,22 @@ partial struct CMYK {
     public Rectangle Rect;
 }
 
-internal static color.Model ColorModel⁔(/*this*/ ref CMYK p) { return color.CMYKModel; }
+} partial class imageᴛCMYK {
 
-internal static Rectangle Bounds⁔(/*this*/ ref CMYK p) { return p.Rect; }
+public static color.Model ColorModel(this ref CMYK p) { return color.CMYKModel; }
 
-internal static color.Color At⁔(/*this*/ ref CMYK p, nint x, nint y) {
+public static Rectangle Bounds(this ref CMYK p) { return p.Rect; }
+
+public static color.Color At(this ref CMYK p, nint x, nint y) {
     return p.CMYKAt(x, y);
 }
 
-internal static color.RGBA64 RGBA64At⁔(/*this*/ ref CMYK p, nint x, nint y) {
+public static color.RGBA64 RGBA64At(this ref CMYK p, nint x, nint y) {
     var (r, g, b, a) = p.CMYKAt(x, y).RGBA();
     return new color.RGBA64((uint16)r, (uint16)g, (uint16)b, (uint16)a);
 }
 
-internal static color.CMYK CMYKAt⁔(/*this*/ ref CMYK p, nint x, nint y) {
+public static color.CMYK CMYKAt(this ref CMYK p, nint x, nint y) {
     if (!(new Point(x, y).In(p.Rect))) {
         return new color.CMYK();
     }
@@ -1114,11 +1149,11 @@ internal static color.CMYK CMYKAt⁔(/*this*/ ref CMYK p, nint x, nint y) {
 
 // PixOffset returns the index of the first element of Pix that corresponds to
 // the pixel at (x, y).
-internal static nint PixOffset⁔(/*this*/ ref CMYK p, nint x, nint y) {
+public static nint PixOffset(this ref CMYK p, nint x, nint y) {
     return (y - p.Rect.Min.Y) * p.Stride + (x - p.Rect.Min.X) * 4;
 }
 
-internal static void Set⁔(/*this*/ ref CMYK p, nint x, nint y, color.Color c) {
+public static void Set(this ref CMYK p, nint x, nint y, color.Color c) {
     if (!(new Point(x, y).In(p.Rect))) {
         return;
     }
@@ -1131,7 +1166,7 @@ internal static void Set⁔(/*this*/ ref CMYK p, nint x, nint y, color.Color c) 
     s[3] = c1.K;
 }
 
-internal static void SetRGBA64⁔(/*this*/ ref CMYK p, nint x, nint y, color.RGBA64 c) {
+public static void SetRGBA64(this ref CMYK p, nint x, nint y, color.RGBA64 c) {
     if (!(new Point(x, y).In(p.Rect))) {
         return;
     }
@@ -1144,7 +1179,7 @@ internal static void SetRGBA64⁔(/*this*/ ref CMYK p, nint x, nint y, color.RGB
     s[3] = kk;
 }
 
-internal static void SetCMYK⁔(/*this*/ ref CMYK p, nint x, nint y, color.CMYK c) {
+public static void SetCMYK(this ref CMYK p, nint x, nint y, color.CMYK c) {
     if (!(new Point(x, y).In(p.Rect))) {
         return;
     }
@@ -1158,7 +1193,7 @@ internal static void SetCMYK⁔(/*this*/ ref CMYK p, nint x, nint y, color.CMYK 
 
 // SubImage returns an image representing the portion of the image p visible
 // through r. The returned value shares pixels with the original image.
-internal static Image SubImage⁔(/*this*/ ref CMYK p, Rectangle r) {
+public static Image SubImage(this ref CMYK p, Rectangle r) {
     r = r.Intersect(p.Rect);
     // If r1 and r2 are Rectangles, r1.Intersect(r2) is not guaranteed to be inside
     // either r1 or r2 if the intersection is empty. Without explicitly checking for
@@ -1175,9 +1210,11 @@ internal static Image SubImage⁔(/*this*/ ref CMYK p, Rectangle r) {
 }
 
 // Opaque scans the entire image and reports whether it is fully opaque.
-internal static bool Opaque⁔(/*this*/ ref CMYK p) {
+public static bool Opaque(this ref CMYK p) {
     return true;
 }
+
+} partial class image_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string cmykˢ => ref cmykˢᵇ;
@@ -1205,11 +1242,13 @@ partial struct Paletted {
     public color.Palette Palette;
 }
 
-internal static color.Model ColorModel⁔(/*this*/ ref Paletted p) { return p.Palette; }
+} partial class imageᴛPaletted {
 
-internal static Rectangle Bounds⁔(/*this*/ ref Paletted p) { return p.Rect; }
+public static color.Model ColorModel(this ref Paletted p) { return p.Palette; }
 
-internal static color.Color At⁔(/*this*/ ref Paletted p, nint x, nint y) {
+public static Rectangle Bounds(this ref Paletted p) { return p.Rect; }
+
+public static color.Color At(this ref Paletted p, nint x, nint y) {
     if (len(p.Palette) == 0) {
         return default;
     }
@@ -1220,7 +1259,7 @@ internal static color.Color At⁔(/*this*/ ref Paletted p, nint x, nint y) {
     return p.Palette[p.Pix[i]];
 }
 
-internal static color.RGBA64 RGBA64At⁔(/*this*/ ref Paletted p, nint x, nint y) {
+public static color.RGBA64 RGBA64At(this ref Paletted p, nint x, nint y) {
     if (len(p.Palette) == 0) {
         return new color.RGBA64();
     }
@@ -1242,11 +1281,11 @@ internal static color.RGBA64 RGBA64At⁔(/*this*/ ref Paletted p, nint x, nint y
 
 // PixOffset returns the index of the first element of Pix that corresponds to
 // the pixel at (x, y).
-internal static nint PixOffset⁔(/*this*/ ref Paletted p, nint x, nint y) {
+public static nint PixOffset(this ref Paletted p, nint x, nint y) {
     return (y - p.Rect.Min.Y) * p.Stride + (x - p.Rect.Min.X) * 1;
 }
 
-internal static void Set⁔(/*this*/ ref Paletted p, nint x, nint y, color.Color c) {
+public static void Set(this ref Paletted p, nint x, nint y, color.Color c) {
     if (!(new Point(x, y).In(p.Rect))) {
         return;
     }
@@ -1254,7 +1293,7 @@ internal static void Set⁔(/*this*/ ref Paletted p, nint x, nint y, color.Color
     p.Pix[i] = (uint8)p.Palette.Index(c);
 }
 
-internal static void SetRGBA64⁔(/*this*/ ref Paletted p, nint x, nint y, color.RGBA64 c) {
+public static void SetRGBA64(this ref Paletted p, nint x, nint y, color.RGBA64 c) {
     if (!(new Point(x, y).In(p.Rect))) {
         return;
     }
@@ -1262,7 +1301,7 @@ internal static void SetRGBA64⁔(/*this*/ ref Paletted p, nint x, nint y, color
     p.Pix[i] = (uint8)p.Palette.Index(c);
 }
 
-internal static uint8 ColorIndexAt⁔(/*this*/ ref Paletted p, nint x, nint y) {
+public static uint8 ColorIndexAt(this ref Paletted p, nint x, nint y) {
     if (!(new Point(x, y).In(p.Rect))) {
         return 0;
     }
@@ -1270,7 +1309,7 @@ internal static uint8 ColorIndexAt⁔(/*this*/ ref Paletted p, nint x, nint y) {
     return p.Pix[i];
 }
 
-internal static void SetColorIndex⁔(/*this*/ ref Paletted p, nint x, nint y, uint8 index) {
+public static void SetColorIndex(this ref Paletted p, nint x, nint y, uint8 index) {
     if (!(new Point(x, y).In(p.Rect))) {
         return;
     }
@@ -1280,7 +1319,7 @@ internal static void SetColorIndex⁔(/*this*/ ref Paletted p, nint x, nint y, u
 
 // SubImage returns an image representing the portion of the image p visible
 // through r. The returned value shares pixels with the original image.
-internal static Image SubImage⁔(/*this*/ ref Paletted p, Rectangle r) {
+public static Image SubImage(this ref Paletted p, Rectangle r) {
     r = r.Intersect(p.Rect);
     // If r1 and r2 are Rectangles, r1.Intersect(r2) is not guaranteed to be inside
     // either r1 or r2 if the intersection is empty. Without explicitly checking for
@@ -1300,7 +1339,7 @@ internal static Image SubImage⁔(/*this*/ ref Paletted p, Rectangle r) {
 }
 
 // Opaque scans the entire image and reports whether it is fully opaque.
-internal static bool Opaque⁔(/*this*/ ref Paletted p) {
+public static bool Opaque(this ref Paletted p) {
     array<bool> present = new(256);
     nint i0 = 0;
     nint i1 = p.Rect.Dx();
@@ -1322,6 +1361,8 @@ internal static bool Opaque⁔(/*this*/ ref Paletted p) {
     }
     return true;
 }
+
+} partial class image_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string palettedˢ => ref palettedˢᵇ;

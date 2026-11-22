@@ -2,6 +2,7 @@
 namespace go.math;
 
 using strconv = strconv_package;
+using static big_package;
 
 partial class big_package {
 
@@ -19,7 +20,9 @@ private static readonly @string _Accuracy_nameᵇ = "BelowExactAbove"u8;
 
 internal static array<uint8> _Accuracy_index = array<uint8>([0, 5, 10, 15]);
 
-internal static @string String⁔(/*this*/ Accuracy i) {
+} partial class bigᴛAccuracy {
+
+public static @string String(this Accuracy i) {
     i -= (Accuracy)(-1);
     if (i < 0 || i >= ((Accuracy)(int8)(len(_Accuracy_index) - 1))) {
         return "Accuracy("u8 + strconv.FormatInt((int64)(i + -1), 10) + ")"u8;
@@ -27,4 +30,4 @@ internal static @string String⁔(/*this*/ Accuracy i) {
     return _Accuracy_name.slice(_Accuracy_index[i], _Accuracy_index[i + 1]);
 }
 
-} // end big_package
+}

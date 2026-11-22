@@ -14,6 +14,7 @@ using encoding;
 using go;
 using go.@internal;
 using go.@internal.trace.traceviewer;
+using static traceviewer_package;
 
 partial class traceviewer_package {
 
@@ -246,10 +247,14 @@ partial struct countingWriter {
     internal nint size;
 }
 
-internal static (nint, error) Write⁔(/*this*/ ref countingWriter cw, slice<byte> data) {
+} partial class traceviewerᴛcountingWriter {
+
+internal static (nint, error) Write(this ref countingWriter cw, slice<byte> data) {
     cw.size += len(data);
     return (len(data), default);
 }
+
+} partial class traceviewer_package {
 
 internal static nint stackFrameEncodedSize(nuint id, format.Frame f) {
     // We want to know the marginal size of traceviewer.Data.Frames for
@@ -353,43 +358,45 @@ partial struct task {
     internal nint sortIndex;
 }
 
-internal static void Gomaxprocs⁔(/*this*/ ref Emitter e, uint64 v) {
+} partial class traceviewerᴛEmitter {
+
+public static void Gomaxprocs(this ref Emitter e, uint64 v) {
     if (v > e.gomaxprocs) {
         e.gomaxprocs = v;
     }
 }
 
-internal static void Resource⁔(/*this*/ ref Emitter e, uint64 id, @string name) {
+public static void Resource(this ref Emitter e, uint64 id, @string name) {
     if (e.filter != nil && !e.filter(id)) {
         return;
     }
     e.resources[id] = name;
 }
 
-internal static void SetResourceType⁔(/*this*/ ref Emitter e, @string name) {
+public static void SetResourceType(this ref Emitter e, @string name) {
     e.resourceType = name;
 }
 
-internal static void SetResourceFilter⁔(/*this*/ ref Emitter e, Func<uint64, bool> filter) {
+public static void SetResourceFilter(this ref Emitter e, Func<uint64, bool> filter) {
     e.filter = filter;
 }
 
-internal static void Task⁔(/*this*/ ref Emitter e, uint64 id, @string name, nint sortIndex) {
+public static void Task(this ref Emitter e, uint64 id, @string name, nint sortIndex) {
     e.tasks[id] = new task(name, sortIndex);
 }
 
-internal static void Slice⁔(/*this*/ ref Emitter e, SliceEvent s) {
+public static void Slice(this ref Emitter e, SliceEvent s) {
     if (e.filter != nil && !e.filter(s.Resource)) {
         return;
     }
     e.Δslice(s, format.ProcsSection, ""u8);
 }
 
-internal static void TaskSlice⁔(/*this*/ ref Emitter e, SliceEvent s) {
+public static void TaskSlice(this ref Emitter e, SliceEvent s) {
     e.Δslice(s, format.TasksSection, pickTaskColor(s.Resource));
 }
 
-internal static void Δslice⁔(/*this*/ ref Emitter e, SliceEvent s, uint64 sectionID, @string cname) {
+internal static void Δslice(this ref Emitter e, SliceEvent s, uint64 sectionID, @string cname) {
     if (!e.tsWithinRange(s.Ts) && !e.tsWithinRange(s.Ts + s.Dur)) {
         return;
     }
@@ -407,6 +414,8 @@ internal static void Δslice⁔(/*this*/ ref Emitter e, SliceEvent s, uint64 sec
     )));
 }
 
+} partial class traceviewer_package {
+
 partial struct SliceEvent {
     public @string Name;
     public time.Duration Ts;
@@ -417,7 +426,9 @@ partial struct SliceEvent {
     public any Arg;
 }
 
-internal static void AsyncSlice⁔(/*this*/ ref Emitter e, AsyncSliceEvent s) {
+} partial class traceviewerᴛEmitter {
+
+public static void AsyncSlice(this ref Emitter e, AsyncSliceEvent s) {
     if (!e.tsWithinRange(s.Ts) && !e.tsWithinRange(s.Ts + s.Dur)) {
         return;
     }
@@ -454,6 +465,8 @@ internal static void AsyncSlice⁔(/*this*/ ref Emitter e, AsyncSliceEvent s) {
     )));
 }
 
+} partial class traceviewer_package {
+
 partial struct AsyncSliceEvent {
     /*embed*/ public SliceEvent SliceEvent;
     public @string Category;
@@ -461,7 +474,9 @@ partial struct AsyncSliceEvent {
     public uint64 TaskColorIndex; // Take on the same color as the task with this ID.
 }
 
-internal static void Instant⁔(/*this*/ ref Emitter e, InstantEvent i) {
+} partial class traceviewerᴛEmitter {
+
+public static void Instant(this ref Emitter e, InstantEvent i) {
     if (!e.tsWithinRange(i.Ts)) {
         return;
     }
@@ -483,6 +498,8 @@ internal static void Instant⁔(/*this*/ ref Emitter e, InstantEvent i) {
     )));
 }
 
+} partial class traceviewer_package {
+
 partial struct InstantEvent {
     public time.Duration Ts;
     public @string Name;
@@ -492,18 +509,20 @@ partial struct InstantEvent {
     public any Arg;
 }
 
-internal static void Arrow⁔(/*this*/ ref Emitter e, ArrowEvent a) {
+} partial class traceviewerᴛEmitter {
+
+public static void Arrow(this ref Emitter e, ArrowEvent a) {
     if (e.filter != nil && (!e.filter(a.FromResource) || !e.filter(a.ToResource))) {
         return;
     }
     e.arrow(a, format.ProcsSection);
 }
 
-internal static void TaskArrow⁔(/*this*/ ref Emitter e, ArrowEvent a) {
+public static void TaskArrow(this ref Emitter e, ArrowEvent a) {
     e.arrow(a, format.TasksSection);
 }
 
-internal static void arrow⁔(/*this*/ ref Emitter e, ArrowEvent a, uint64 sectionID) {
+internal static void arrow(this ref Emitter e, ArrowEvent a, uint64 sectionID) {
     if (!e.tsWithinRange(a.Start) || !e.tsWithinRange(a.End)) {
         return;
     }
@@ -527,6 +546,8 @@ internal static void arrow⁔(/*this*/ ref Emitter e, ArrowEvent a, uint64 secti
     )));
 }
 
+} partial class traceviewer_package {
+
 partial struct ArrowEvent {
     public @string Name;
     public time.Duration Start;
@@ -536,20 +557,22 @@ partial struct ArrowEvent {
     public uint64 ToResource;
 }
 
-internal static void Event⁔(/*this*/ ref Emitter e, ж<format.Event> ev) {
+} partial class traceviewerᴛEmitter {
+
+public static void Event(this ref Emitter e, ж<format.Event> ev) {
     e.c.ConsumeViewerEvent(ev, true);
 }
 
-internal static void HeapAlloc⁔(/*this*/ ref Emitter e, time.Duration ts, uint64 v) {
+public static void HeapAlloc(this ref Emitter e, time.Duration ts, uint64 v) {
     e.heapStats.heapAlloc = v;
     e.emitHeapCounters(ts);
 }
 
-internal static void Focus⁔(/*this*/ ref Emitter e, uint64 id) {
+public static void Focus(this ref Emitter e, uint64 id) {
     e.focusResource = id;
 }
 
-internal static void GoroutineTransition⁔(/*this*/ ref Emitter e, time.Duration ts, GState from, GState to) {
+public static void GoroutineTransition(this ref Emitter e, time.Duration ts, GState from, GState to) {
     e.gstates[from]--;
     e.gstates[to]++;
     if (e.prevGstates == e.gstates) {
@@ -571,7 +594,7 @@ internal static void GoroutineTransition⁔(/*this*/ ref Emitter e, time.Duratio
     e.prevGstates.Assign(e.gstates);
 }
 
-internal static void IncThreadStateCount⁔(/*this*/ ref Emitter e, time.Duration ts, ThreadState state, int64 delta) {
+public static void IncThreadStateCount(this ref Emitter e, time.Duration ts, ThreadState state, int64 delta) {
     e.threadStats[state] += delta;
     if (e.prevThreadStats == e.threadStats) {
         return;
@@ -592,7 +615,7 @@ internal static void IncThreadStateCount⁔(/*this*/ ref Emitter e, time.Duratio
     e.prevThreadStats.Assign(e.threadStats);
 }
 
-internal static void HeapGoal⁔(/*this*/ ref Emitter e, time.Duration ts, uint64 v) {
+public static void HeapGoal(this ref Emitter e, time.Duration ts, uint64 v) {
     // This cutoff at 1 PiB is a Workaround for https://github.com/golang/go/issues/63864.
     //
     // TODO(mknyszek): Remove this once the problem has been fixed.
@@ -604,7 +627,7 @@ internal static void HeapGoal⁔(/*this*/ ref Emitter e, time.Duration ts, uint6
     e.emitHeapCounters(ts);
 }
 
-internal static void emitHeapCounters⁔(/*this*/ ref Emitter e, time.Duration ts) {
+internal static void emitHeapCounters(this ref Emitter e, time.Duration ts) {
     if (e.prevHeapStats == e.heapStats) {
         return;
     }
@@ -625,7 +648,7 @@ internal static void emitHeapCounters⁔(/*this*/ ref Emitter e, time.Duration t
 }
 
 // Err returns an error if the emitter is in an invalid state.
-internal static error Err⁔(/*this*/ ref Emitter e) {
+public static error Err(this ref Emitter e) {
     if (e.gstates[GRunnable] < 0 || e.gstates[GRunning] < 0 || e.threadStats[ThreadStateInSyscall] < 0 || e.threadStats[ThreadStateInSyscallRuntime] < 0) {
         return fmt.Errorf(
             "runnable=%d running=%d insyscall=%d insyscallRuntime=%d"u8,
@@ -637,13 +660,13 @@ internal static error Err⁔(/*this*/ ref Emitter e) {
     return default;
 }
 
-internal static bool tsWithinRange⁔(/*this*/ ref Emitter e, time.Duration ts) {
+internal static bool tsWithinRange(this ref Emitter e, time.Duration ts) {
     return e.rangeStart <= ts && ts <= e.rangeEnd;
 }
 
 // OptionalEvent emits ev if it's within the time range of the consumer, i.e.
 // the selected trace split range.
-internal static void OptionalEvent⁔(/*this*/ ref Emitter e, ж<format.Event> ev) {
+public static void OptionalEvent(this ref Emitter e, ж<format.Event> ev) {
     e.c.ConsumeViewerEvent(ev, false);
 }
 
@@ -659,7 +682,7 @@ private static readonly @string timersˢᵇ = "Timers"u8;
 private static ref readonly @string syscallsˢ => ref syscallsˢᵇ;
 private static readonly @string syscallsˢᵇ = "Syscalls"u8;
 
-internal static void Flush⁔(/*this*/ ref Emitter e) {
+public static void Flush(this ref Emitter e) {
     e.processMeta(format.StatsSection, statsˢ, 0);
 
     if (len(e.tasks) != 0) {
@@ -688,7 +711,7 @@ internal static void Flush⁔(/*this*/ ref Emitter e) {
     e.c.Flush();
 }
 
-internal static void threadMeta⁔(/*this*/ ref Emitter e, uint64 sectionID, uint64 tid, @string name, nint priority) {
+internal static void threadMeta(this ref Emitter e, uint64 sectionID, uint64 tid, @string name, nint priority) {
     e.Event(Ꮡ(new format.Event(
         Name: "thread_name",
         Phase: "M",
@@ -705,7 +728,7 @@ internal static void threadMeta⁔(/*this*/ ref Emitter e, uint64 sectionID, uin
     )));
 }
 
-internal static void processMeta⁔(/*this*/ ref Emitter e, uint64 sectionID, @string name, nint priority) {
+internal static void processMeta(this ref Emitter e, uint64 sectionID, @string name, nint priority) {
     e.Event(Ꮡ(new format.Event(
         Name: "process_name",
         Phase: "M",
@@ -722,12 +745,12 @@ internal static void processMeta⁔(/*this*/ ref Emitter e, uint64 sectionID, @s
 
 // Stack emits the given frames and returns a unique id for the stack. No
 // pointers to the given data are being retained beyond the call to Stack.
-internal static nint Stack⁔(/*this*/ ref Emitter e, slice<trace.StackFrame> stk) {
+public static nint Stack(this ref Emitter e, slice<trace.StackFrame> stk) {
     return e.buildBranch(e.frameTree, stk);
 }
 
 // buildBranch builds one branch in the prefix tree rooted at ctx.frameTree.
-internal static nint buildBranch⁔(/*this*/ ref Emitter e, frameNode parent, slice<trace.StackFrame> stk) {
+internal static nint buildBranch(this ref Emitter e, frameNode parent, slice<trace.StackFrame> stk) {
     if (len(stk) == 0) {
         return parent.id;
     }
@@ -745,6 +768,8 @@ internal static nint buildBranch⁔(/*this*/ ref Emitter e, frameNode parent, sl
     }
     return e.buildBranch(node, stk);
 }
+
+} partial class traceviewer_package {
 
 partial struct heapStats {
     internal uint64 heapAlloc;

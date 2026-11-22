@@ -11,6 +11,8 @@
 //	}
 namespace go.container;
 
+using static list_package;
+
 partial class list_package {
 
 // Element is an element of a linked list.
@@ -27,8 +29,10 @@ partial struct Element {
     public any Value;
 }
 
+} partial class listᴛElement {
+
 // Next returns the next list element or nil.
-internal static ж<Element> Next⁔(/*this*/ ref Element e) {
+public static ж<Element> Next(this ref Element e) {
     var p = e.next; if (e.list != nil && p != e.list.Ꮡroot) {
         return p;
     }
@@ -36,12 +40,14 @@ internal static ж<Element> Next⁔(/*this*/ ref Element e) {
 }
 
 // Prev returns the previous list element or nil.
-internal static ж<Element> Prev⁔(/*this*/ ref Element e) {
+public static ж<Element> Prev(this ref Element e) {
     var p = e.prev; if (e.list != nil && p != e.list.Ꮡroot) {
         return p;
     }
     return default;
 }
+
+} partial class list_package {
 
 // List represents a doubly linked list.
 // The zero value for List is an empty list ready to use.
@@ -50,8 +56,10 @@ partial struct List {
     internal nint len;     // current list length excluding (this) sentinel element
 }
 
+} partial class listᴛList {
+
 // Init initializes or clears list l.
-internal static ж<List> Init⁔(/*this*/ ж<List> Ꮡl) {
+public static ж<List> Init(this ж<List> Ꮡl) {
     ref var l = ref Ꮡl.DerefOrNull();
 
     l.root.next = Ꮡl.Ꮡroot;
@@ -60,15 +68,19 @@ internal static ж<List> Init⁔(/*this*/ ж<List> Ꮡl) {
     return Ꮡl;
 }
 
+} partial class list_package {
+
 // New returns an initialized list.
 public static ж<List> New() { return @new<List>().Init(); }
 
+} partial class listᴛList {
+
 // Len returns the number of elements of list l.
 // The complexity is O(1).
-internal static nint Len⁔(/*this*/ ref List l) { return l.len; }
+public static nint Len(this ref List l) { return l.len; }
 
 // Front returns the first element of list l or nil if the list is empty.
-internal static ж<Element> Front⁔(/*this*/ ref List l) {
+public static ж<Element> Front(this ref List l) {
     if (l.len == 0) {
         return default;
     }
@@ -76,7 +88,7 @@ internal static ж<Element> Front⁔(/*this*/ ref List l) {
 }
 
 // Back returns the last element of list l or nil if the list is empty.
-internal static ж<Element> Back⁔(/*this*/ ref List l) {
+public static ж<Element> Back(this ref List l) {
     if (l.len == 0) {
         return default;
     }
@@ -84,7 +96,7 @@ internal static ж<Element> Back⁔(/*this*/ ref List l) {
 }
 
 // lazyInit lazily initializes a zero List value.
-internal static void lazyInit⁔(/*this*/ ж<List> Ꮡl) {
+internal static void lazyInit(this ж<List> Ꮡl) {
     ref var l = ref Ꮡl.DerefOrNull();
 
     if (l.root.next == nil) {
@@ -93,7 +105,7 @@ internal static void lazyInit⁔(/*this*/ ж<List> Ꮡl) {
 }
 
 // insert inserts e after at, increments l.len, and returns e.
-internal static ж<Element> insert⁔(/*this*/ ж<List> Ꮡl, ж<Element> Ꮡe, ж<Element> Ꮡat) {
+internal static ж<Element> insert(this ж<List> Ꮡl, ж<Element> Ꮡe, ж<Element> Ꮡat) {
     ref var l = ref Ꮡl.DerefOrNull();
     ref var e = ref Ꮡe.DerefOrNull();
     ref var at = ref Ꮡat.DerefOrNull();
@@ -108,12 +120,12 @@ internal static ж<Element> insert⁔(/*this*/ ж<List> Ꮡl, ж<Element> Ꮡe, 
 }
 
 // insertValue is a convenience wrapper for insert(&Element{Value: v}, at).
-internal static ж<Element> insertValue⁔(/*this*/ ж<List> Ꮡl, any v, ж<Element> at) {
+internal static ж<Element> insertValue(this ж<List> Ꮡl, any v, ж<Element> at) {
     return Ꮡl.insert(Ꮡ(new Element(Value: v)), at);
 }
 
 // remove removes e from its list, decrements l.len
-internal static void remove⁔(/*this*/ ref List l, ж<Element> Ꮡe) {
+internal static void remove(this ref List l, ж<Element> Ꮡe) {
     ref var e = ref Ꮡe.DerefOrNull();
 
     e.prev.next = e.next;
@@ -125,7 +137,7 @@ internal static void remove⁔(/*this*/ ref List l, ж<Element> Ꮡe) {
 }
 
 // move moves e to next to at.
-internal static void move⁔(/*this*/ ref List l, ж<Element> Ꮡe, ж<Element> Ꮡat) {
+internal static void move(this ref List l, ж<Element> Ꮡe, ж<Element> Ꮡat) {
     ref var e = ref Ꮡe.DerefOrNull();
     ref var at = ref Ꮡat.DerefOrNull();
 
@@ -144,7 +156,7 @@ internal static void move⁔(/*this*/ ref List l, ж<Element> Ꮡe, ж<Element> 
 // Remove removes e from l if e is an element of list l.
 // It returns the element value e.Value.
 // The element must not be nil.
-internal static any Remove⁔(/*this*/ ж<List> Ꮡl, ж<Element> Ꮡe) {
+public static any Remove(this ж<List> Ꮡl, ж<Element> Ꮡe) {
     ref var l = ref Ꮡl.DerefOrNull();
     ref var e = ref Ꮡe.DerefOrNull();
 
@@ -157,13 +169,13 @@ internal static any Remove⁔(/*this*/ ж<List> Ꮡl, ж<Element> Ꮡe) {
 }
 
 // PushFront inserts a new element e with value v at the front of list l and returns e.
-internal static ж<Element> PushFront⁔(/*this*/ ж<List> Ꮡl, any v) {
+public static ж<Element> PushFront(this ж<List> Ꮡl, any v) {
     Ꮡl.lazyInit();
     return Ꮡl.insertValue(v, Ꮡl.Ꮡroot);
 }
 
 // PushBack inserts a new element e with value v at the back of list l and returns e.
-internal static ж<Element> PushBack⁔(/*this*/ ж<List> Ꮡl, any v) {
+public static ж<Element> PushBack(this ж<List> Ꮡl, any v) {
     ref var l = ref Ꮡl.DerefOrNull();
 
     Ꮡl.lazyInit();
@@ -173,7 +185,7 @@ internal static ж<Element> PushBack⁔(/*this*/ ж<List> Ꮡl, any v) {
 // InsertBefore inserts a new element e with value v immediately before mark and returns e.
 // If mark is not an element of l, the list is not modified.
 // The mark must not be nil.
-internal static ж<Element> InsertBefore⁔(/*this*/ ж<List> Ꮡl, any v, ж<Element> Ꮡmark) {
+public static ж<Element> InsertBefore(this ж<List> Ꮡl, any v, ж<Element> Ꮡmark) {
     ref var mark = ref Ꮡmark.DerefOrNull();
 
     if (mark.list != Ꮡl) {
@@ -186,7 +198,7 @@ internal static ж<Element> InsertBefore⁔(/*this*/ ж<List> Ꮡl, any v, ж<El
 // InsertAfter inserts a new element e with value v immediately after mark and returns e.
 // If mark is not an element of l, the list is not modified.
 // The mark must not be nil.
-internal static ж<Element> InsertAfter⁔(/*this*/ ж<List> Ꮡl, any v, ж<Element> Ꮡmark) {
+public static ж<Element> InsertAfter(this ж<List> Ꮡl, any v, ж<Element> Ꮡmark) {
     ref var mark = ref Ꮡmark.DerefOrNull();
 
     if (mark.list != Ꮡl) {
@@ -199,7 +211,7 @@ internal static ж<Element> InsertAfter⁔(/*this*/ ж<List> Ꮡl, any v, ж<Ele
 // MoveToFront moves element e to the front of list l.
 // If e is not an element of l, the list is not modified.
 // The element must not be nil.
-internal static void MoveToFront⁔(/*this*/ ж<List> Ꮡl, ж<Element> Ꮡe) {
+public static void MoveToFront(this ж<List> Ꮡl, ж<Element> Ꮡe) {
     ref var l = ref Ꮡl.DerefOrNull();
     ref var e = ref Ꮡe.DerefOrNull();
 
@@ -213,7 +225,7 @@ internal static void MoveToFront⁔(/*this*/ ж<List> Ꮡl, ж<Element> Ꮡe) {
 // MoveToBack moves element e to the back of list l.
 // If e is not an element of l, the list is not modified.
 // The element must not be nil.
-internal static void MoveToBack⁔(/*this*/ ж<List> Ꮡl, ж<Element> Ꮡe) {
+public static void MoveToBack(this ж<List> Ꮡl, ж<Element> Ꮡe) {
     ref var l = ref Ꮡl.DerefOrNull();
     ref var e = ref Ꮡe.DerefOrNull();
 
@@ -227,7 +239,7 @@ internal static void MoveToBack⁔(/*this*/ ж<List> Ꮡl, ж<Element> Ꮡe) {
 // MoveBefore moves element e to its new position before mark.
 // If e or mark is not an element of l, or e == mark, the list is not modified.
 // The element and mark must not be nil.
-internal static void MoveBefore⁔(/*this*/ ж<List> Ꮡl, ж<Element> Ꮡe, ж<Element> Ꮡmark) {
+public static void MoveBefore(this ж<List> Ꮡl, ж<Element> Ꮡe, ж<Element> Ꮡmark) {
     ref var l = ref Ꮡl.DerefOrNull();
     ref var e = ref Ꮡe.DerefOrNull();
     ref var mark = ref Ꮡmark.DerefOrNull();
@@ -241,7 +253,7 @@ internal static void MoveBefore⁔(/*this*/ ж<List> Ꮡl, ж<Element> Ꮡe, ж<
 // MoveAfter moves element e to its new position after mark.
 // If e or mark is not an element of l, or e == mark, the list is not modified.
 // The element and mark must not be nil.
-internal static void MoveAfter⁔(/*this*/ ж<List> Ꮡl, ж<Element> Ꮡe, ж<Element> Ꮡmark) {
+public static void MoveAfter(this ж<List> Ꮡl, ж<Element> Ꮡe, ж<Element> Ꮡmark) {
     ref var l = ref Ꮡl.DerefOrNull();
     ref var e = ref Ꮡe.DerefOrNull();
     ref var mark = ref Ꮡmark.DerefOrNull();
@@ -254,7 +266,7 @@ internal static void MoveAfter⁔(/*this*/ ж<List> Ꮡl, ж<Element> Ꮡe, ж<E
 
 // PushBackList inserts a copy of another list at the back of list l.
 // The lists l and other may be the same. They must not be nil.
-internal static void PushBackList⁔(/*this*/ ж<List> Ꮡl, ж<List> Ꮡother) {
+public static void PushBackList(this ж<List> Ꮡl, ж<List> Ꮡother) {
     ref var l = ref Ꮡl.DerefOrNull();
     ref var other = ref Ꮡother.DerefOrNull();
 
@@ -266,7 +278,7 @@ internal static void PushBackList⁔(/*this*/ ж<List> Ꮡl, ж<List> Ꮡother) 
 
 // PushFrontList inserts a copy of another list at the front of list l.
 // The lists l and other may be the same. They must not be nil.
-internal static void PushFrontList⁔(/*this*/ ж<List> Ꮡl, ж<List> Ꮡother) {
+public static void PushFrontList(this ж<List> Ꮡl, ж<List> Ꮡother) {
     ref var other = ref Ꮡother.DerefOrNull();
 
     Ꮡl.lazyInit();
@@ -275,4 +287,4 @@ internal static void PushFrontList⁔(/*this*/ ж<List> Ꮡl, ж<List> Ꮡother)
     }
 }
 
-} // end list_package
+}

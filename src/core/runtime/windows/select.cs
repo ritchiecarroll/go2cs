@@ -9,6 +9,7 @@ using sys = @internal.runtime.sys_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
+using static runtime_package;
 
 partial class runtime_package {
 
@@ -561,9 +562,13 @@ sclose:
     throw panic(((plainError)(@string)sendOnClosedChannelˢ));
 }
 
-internal static uintptr sortkey⁔(/*this*/ ж<hchan> Ꮡc) {
+} partial class runtimeᴛhchan {
+
+internal static uintptr sortkey(this ж<hchan> Ꮡc) {
     return (uintptr)Ꮡc;
 }
+
+} partial class runtime_package {
 
 // A runtimeSelect is a single case passed to rselect.
 // This must match ../reflect/value.go:/runtimeSelect
@@ -647,7 +652,9 @@ internal static (nint, bool) reflect_rselect(slice<runtimeSelect> cases) {
     return (chosen, recvOK);
 }
 
-internal static void dequeueSudoG⁔(/*this*/ ref waitq q, ж<sudog> Ꮡsgp) {
+} partial class runtimeᴛwaitq {
+
+internal static void dequeueSudoG(this ref waitq q, ж<sudog> Ꮡsgp) {
     ref var sgp = ref Ꮡsgp.DerefOrNull();
 
     var x = sgp.prev;
@@ -683,4 +690,4 @@ internal static void dequeueSudoG⁔(/*this*/ ref waitq q, ж<sudog> Ꮡsgp) {
     }
 }
 
-} // end runtime_package
+}

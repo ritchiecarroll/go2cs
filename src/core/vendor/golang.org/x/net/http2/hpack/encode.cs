@@ -4,6 +4,7 @@
 namespace go.vendor.golang.org.x.net.http2;
 
 using io = io_package;
+using static hpack_package;
 
 partial class hpack_package {
 
@@ -41,10 +42,12 @@ public static ж<Encoder> NewEncoder(io.Writer w) {
     return e;
 }
 
+} partial class hpackᴛEncoder {
+
 // WriteField encodes f into a single Write to e's underlying Writer.
 // This function may also produce bytes for "Header Table Size Update"
 // if necessary. If produced, it is done before encoding f.
-internal static error WriteField⁔(/*this*/ ж<Encoder> Ꮡe, HeaderField f) {
+public static error WriteField(this ж<Encoder> Ꮡe, HeaderField f) {
     ref var e = ref Ꮡe.DerefOrNull();
 
     e.buf = e.buf[..0];
@@ -87,7 +90,7 @@ internal static error WriteField⁔(/*this*/ ж<Encoder> Ꮡe, HeaderField f) {
 // match, i is the matched index and nameValueMatch becomes true. If
 // only name matches, i points to that index and nameValueMatch
 // becomes false.
-internal static (uint64 i, bool nameValueMatch) searchTable⁔(/*this*/ ж<Encoder> Ꮡe, HeaderField f) {
+internal static (uint64 i, bool nameValueMatch) searchTable(this ж<Encoder> Ꮡe, HeaderField f) {
     uint64 i = default;
     bool nameValueMatch = default;
 
@@ -107,7 +110,7 @@ internal static (uint64 i, bool nameValueMatch) searchTable⁔(/*this*/ ж<Encod
 // SetMaxDynamicTableSize changes the dynamic header table size to v.
 // The actual size is bounded by the value passed to
 // SetMaxDynamicTableSizeLimit.
-internal static void SetMaxDynamicTableSize⁔(/*this*/ ref Encoder e, uint32 v) {
+public static void SetMaxDynamicTableSize(this ref Encoder e, uint32 v) {
     if (v > e.maxSizeLimit) {
         v = e.maxSizeLimit;
     }
@@ -119,7 +122,7 @@ internal static void SetMaxDynamicTableSize⁔(/*this*/ ref Encoder e, uint32 v)
 }
 
 // MaxDynamicTableSize returns the current dynamic header table size.
-internal static uint32 /*v*/ MaxDynamicTableSize⁔(/*this*/ ref Encoder e) {
+public static uint32 /*v*/ MaxDynamicTableSize(this ref Encoder e) {
     return e.dynTab.maxSize;
 }
 
@@ -130,7 +133,7 @@ internal static uint32 /*v*/ MaxDynamicTableSize⁔(/*this*/ ref Encoder e) {
 // dynamic header table size is strictly greater than v, "Header Table
 // Size Update" will be done in the next WriteField call and the
 // maximum dynamic header table size is truncated to v.
-internal static void SetMaxDynamicTableSizeLimit⁔(/*this*/ ref Encoder e, uint32 v) {
+public static void SetMaxDynamicTableSizeLimit(this ref Encoder e, uint32 v) {
     e.maxSizeLimit = v;
     if (e.dynTab.maxSize > v) {
         e.tableSizeUpdate = true;
@@ -139,9 +142,11 @@ internal static void SetMaxDynamicTableSizeLimit⁔(/*this*/ ref Encoder e, uint
 }
 
 // shouldIndex reports whether f should be indexed.
-internal static bool shouldIndex⁔(/*this*/ ref Encoder e, HeaderField f) {
+internal static bool shouldIndex(this ref Encoder e, HeaderField f) {
     return !f.Sensitive && f.Size() <= e.dynTab.maxSize;
 }
+
+} partial class hpack_package {
 
 // appendIndexed appends index i, as encoded in "Indexed Header Field"
 // representation, to dst and returns the extended buffer.

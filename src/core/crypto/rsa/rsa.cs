@@ -63,6 +63,7 @@ using go.crypto.@internal.boring;
 using go.crypto.@internal.fips140;
 using go.math;
 using hash = hash_package;
+using static rsa_package;
 
 partial class rsa_package {
 
@@ -77,23 +78,27 @@ partial struct PublicKey {
     public nint E;       // public exponent
 }
 
+} partial class rsaᴛPublicKey {
+
 // Any methods implemented on PublicKey might need to also be implemented on
 // PrivateKey, as the latter embeds the former and will expose its methods.
 
 // Size returns the modulus size in bytes. Raw signatures and ciphertexts
 // for or by this public key will have the same size.
-internal static nint Size⁔(/*this*/ ref PublicKey pub) {
+public static nint Size(this ref PublicKey pub) {
     return (pub.N.BitLen() + 7) / 8;
 }
 
 // Equal reports whether pub and x have the same value.
-internal static bool Equal⁔(/*this*/ ref PublicKey pub, cryptoꓸPublicKey x) {
+public static bool Equal(this ref PublicKey pub, cryptoꓸPublicKey x) {
     var (xx, ok) = x._<ж<PublicKey>>(ᐧ);
     if (!ok) {
         return false;
     }
     return bigIntEqual(pub.N, xx.N) && pub.E == xx.E;
 }
+
+} partial class rsa_package {
 
 // OAEPOptions allows passing options to OAEP encryption and decryption
 // through the [PrivateKey.Decrypt] and [EncryptOAEPWithOptions] functions.
@@ -122,14 +127,16 @@ partial struct PrivateKey {
     public PrecomputedValues Precomputed;
 }
 
+} partial class rsaᴛPrivateKey {
+
 // Public returns the public key corresponding to priv.
-internal static cryptoꓸPublicKey Public⁔(/*this*/ ж<PrivateKey> Ꮡpriv) {
+public static cryptoꓸPublicKey Public(this ж<PrivateKey> Ꮡpriv) {
     return Ꮡpriv.ᏑPublicKey;
 }
 
 // Equal reports whether priv and x have equivalent values. It ignores
 // Precomputed values.
-internal static bool Equal⁔(/*this*/ ref PrivateKey priv, cryptoꓸPrivateKey x) {
+public static bool Equal(this ref PrivateKey priv, cryptoꓸPrivateKey x) {
     var (xx, ok) = x._<ж<PrivateKey>>(ᐧ);
     if (!ok) {
         return false;
@@ -148,6 +155,8 @@ internal static bool Equal⁔(/*this*/ ref PrivateKey priv, cryptoꓸPrivateKey 
     return true;
 }
 
+} partial class rsa_package {
+
 // bigIntEqual reports whether a and b are equal leaking only their bit length
 // through timing side-channels.
 internal static bool bigIntEqual(ж<big.Int> Ꮡa, ж<big.Int> Ꮡb) {
@@ -157,6 +166,8 @@ internal static bool bigIntEqual(ж<big.Int> Ꮡa, ж<big.Int> Ꮡb) {
     return subtle.ConstantTimeCompare(a.Bytes(), b.Bytes()) == 1;
 }
 
+} partial class rsaᴛPrivateKey {
+
 // Sign signs digest with priv, reading randomness from rand. If opts is a
 // *[PSSOptions] then the PSS algorithm will be used, otherwise PKCS #1 v1.5 will
 // be used. digest must be the result of hashing the input message using
@@ -165,7 +176,7 @@ internal static bool bigIntEqual(ж<big.Int> Ꮡa, ж<big.Int> Ꮡb) {
 // This method implements [crypto.Signer], which is an interface to support keys
 // where the private part is kept in, for example, a hardware module. Common
 // uses should use the Sign* functions in this package directly.
-internal static (slice<byte>, error) Sign⁔(/*this*/ ж<PrivateKey> Ꮡpriv, io.Reader rand, slice<byte> digest, crypto.SignerOpts opts) {
+public static (slice<byte>, error) Sign(this ж<PrivateKey> Ꮡpriv, io.Reader rand, slice<byte> digest, crypto.SignerOpts opts) {
     var (pssOpts, ok) = opts._<ж<PSSOptions>>(ᐧ); if (ok) {
         return SignPSS(rand, Ꮡpriv, pssOpts.Hash, digest, pssOpts);
     }
@@ -180,7 +191,7 @@ private static readonly @string cryptoRsaInvalidOptionsˢᵇ = "crypto/rsa: inva
 // Decrypt decrypts ciphertext with priv. If opts is nil or of type
 // *[PKCS1v15DecryptOptions] then PKCS #1 v1.5 decryption is performed. Otherwise
 // opts must have type *[OAEPOptions] and OAEP decryption is done.
-internal static (slice<byte> plaintext, error err) Decrypt⁔(/*this*/ ж<PrivateKey> Ꮡpriv, io.Reader rand, slice<byte> ciphertext, cryptoꓸDecrypterOpts opts) {
+public static (slice<byte> plaintext, error err) Decrypt(this ж<PrivateKey> Ꮡpriv, io.Reader rand, slice<byte> ciphertext, cryptoꓸDecrypterOpts opts) {
     slice<byte> plaintext = default;
 
     if (opts == nil) {
@@ -217,6 +228,8 @@ internal static (slice<byte> plaintext, error err) Decrypt⁔(/*this*/ ж<Privat
     }}
 }
 
+} partial class rsa_package {
+
 partial struct PrecomputedValues {
     public ж<big.Int> Dp, Dq; // D mod (P-1) (or mod Q-1)
     public ж<big.Int> Qinv;   // Q^-1 mod P
@@ -240,6 +253,8 @@ partial struct CRTValue {
     public ж<big.Int> R;     // product of primes prior to this (inc p and q).
 }
 
+} partial class rsaᴛPrivateKey {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string cryptoRsaMissingPrimesˢ => ref cryptoRsaMissingPrimesˢᵇ;
 private static readonly @string cryptoRsaMissingPrimesˢᵇ = "crypto/rsa: missing primes"u8;
@@ -250,7 +265,7 @@ private static readonly @string cryptoRsaPrecomputedˢᵇ = "crypto/rsa: precomp
 // It returns nil if the key is valid, or else an error describing a problem.
 //
 // It runs faster on valid keys if run after [PrivateKey.Precompute].
-internal static error Validate⁔(/*this*/ ref PrivateKey priv) {
+public static error Validate(this ref PrivateKey priv) {
     // We can operate on keys based on d alone, but they can't be encoded with
     // [crypto/x509.MarshalPKCS1PrivateKey], which unfortunately doesn't return
     // an error, so we need to reject them here.
@@ -269,7 +284,7 @@ internal static error Validate⁔(/*this*/ ref PrivateKey priv) {
     return err;
 }
 
-internal static bool precomputedIsConsistent⁔(/*this*/ ref PrivateKey priv) {
+internal static bool precomputedIsConsistent(this ref PrivateKey priv) {
     if (priv.Precomputed.fips == nil) {
         return false;
     }
@@ -282,6 +297,8 @@ internal static bool precomputedIsConsistent⁔(/*this*/ ref PrivateKey priv) {
     }
     return bigIntEqualToBytes(priv.Primes[0], P) && bigIntEqualToBytes(priv.Primes[1], Q) && bigIntEqualToBytes(priv.Precomputed.Dp, dP) && bigIntEqualToBytes(priv.Precomputed.Dq, dQ) && bigIntEqualToBytes(priv.Precomputed.Qinv, qInv);
 }
+
+} partial class rsa_package {
 
 // bigIntEqual reports whether a and b are equal, ignoring leading zero bytes in
 // b, and leaking only their bit length through timing side-channels.
@@ -579,9 +596,11 @@ public static error ErrDecryption = errors.New("crypto/rsa: decryption error");
 // It is deliberately vague to avoid adaptive attacks.
 public static error ErrVerification = errors.New("crypto/rsa: verification error");
 
+} partial class rsaᴛPrivateKey {
+
 // Precompute performs some calculations that speed up private key operations
 // in the future. It is safe to run on non-validated private keys.
-internal static void Precompute⁔(/*this*/ ref PrivateKey priv) {
+public static void Precompute(this ref PrivateKey priv) {
     if (priv.precomputedIsConsistent()) {
         return;
     }
@@ -597,6 +616,8 @@ internal static void Precompute⁔(/*this*/ ref PrivateKey priv) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string cryptoRsaMissingPublicˢ => ref cryptoRsaMissingPublicˢᵇ;
+private static readonly @string cryptoRsaMissingPublicˢᵇ = "crypto/rsa: missing public modulus"u8;
 internal static ref readonly @string cryptoRsaMissingPrivateˢ => ref cryptoRsaMissingPrivateˢᵇ;
 private static readonly @string cryptoRsaMissingPrivateˢᵇ = "crypto/rsa: missing private exponent"u8;
 internal static ref readonly @string cryptoRsaPrimePIsNilˢ => ref cryptoRsaPrimePIsNilˢᵇ;
@@ -604,7 +625,7 @@ private static readonly @string cryptoRsaPrimePIsNilˢᵇ = "crypto/rsa: prime P
 internal static ref readonly @string cryptoRsaPrimeQIsNilˢ => ref cryptoRsaPrimeQIsNilˢᵇ;
 private static readonly @string cryptoRsaPrimeQIsNilˢᵇ = "crypto/rsa: prime Q is nil"u8;
 
-internal static (PrecomputedValues, error) precompute⁔(/*this*/ ref PrivateKey priv) {
+internal static (PrecomputedValues, error) precompute(this ref PrivateKey priv) {
     PrecomputedValues precomputed = default;
 
     if (priv.N == nil) {
@@ -660,7 +681,7 @@ private static readonly @string cryptoRsaPrimeFactorIs1ˢᵇ = "crypto/rsa: prim
 internal static ref readonly @string cryptoRsaPrimeFactorsAreˢ => ref cryptoRsaPrimeFactorsAreˢᵇ;
 private static readonly @string cryptoRsaPrimeFactorsAreˢᵇ = "crypto/rsa: prime factors are not relatively prime"u8;
 
-internal static (PrecomputedValues, error) precomputeLegacy⁔(/*this*/ ref PrivateKey priv) {
+internal static (PrecomputedValues, error) precomputeLegacy(this ref PrivateKey priv) {
     PrecomputedValues precomputed = default;
 
     var (k, err) = rsa.NewPrivateKeyWithoutCRT(priv.N.Bytes(), priv.E, priv.D.Bytes());
@@ -714,6 +735,8 @@ internal static (PrecomputedValues, error) precomputeLegacy⁔(/*this*/ ref Priv
 
     return (precomputed, default);
 }
+
+} partial class rsa_package {
 
 internal static (ж<rsa.PublicKey>, error) fipsPublicKey(ref PublicKey pub) {
     var (N, err) = bigmod.NewModulus(pub.N.Bytes());

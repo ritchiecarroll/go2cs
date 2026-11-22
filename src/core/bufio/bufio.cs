@@ -13,6 +13,7 @@ using io = io_package;
 using strings = strings_package;
 using utf8 = unicode.utf8_package;
 using unicode;
+using static bufio_package;
 
 partial class bufio_package {
 
@@ -60,15 +61,17 @@ public static ж<Reader> NewReader(io.Reader rd) {
     return NewReaderSize(rd, defaultBufSize);
 }
 
+} partial class bufioᴛReader {
+
 // Size returns the size of the underlying buffer in bytes.
-internal static nint Size⁔(/*this*/ ref Reader b) { return len(b.buf); }
+public static nint Size(this ref Reader b) { return len(b.buf); }
 
 // Reset discards any buffered data, resets all state, and switches
 // the buffered reader to read from r.
 // Calling Reset on the zero value of [Reader] initializes the internal buffer
 // to the default size.
 // Calling b.Reset(b) (that is, resetting a [Reader] to itself) does nothing.
-internal static void Reset⁔(/*this*/ ж<Reader> Ꮡb, io.Reader r) {
+public static void Reset(this ж<Reader> Ꮡb, io.Reader r) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     // If a Reader r is passed to NewReader, NewReader will return r.
@@ -83,7 +86,7 @@ internal static void Reset⁔(/*this*/ ж<Reader> Ꮡb, io.Reader r) {
     b.reset(b.buf, r);
 }
 
-internal static void reset⁔(/*this*/ ref Reader b, slice<byte> buf, io.Reader r) {
+internal static void reset(this ref Reader b, slice<byte> buf, io.Reader r) {
     b = new Reader(
         buf: buf,
         rd: r,
@@ -92,10 +95,14 @@ internal static void reset⁔(/*this*/ ref Reader b, slice<byte> buf, io.Reader 
     );
 }
 
+} partial class bufio_package {
+
 internal static error errNegativeRead = errors.New("bufio: reader returned negative count from Read");
 
+} partial class bufioᴛReader {
+
 // fill reads a new chunk into the buffer.
-internal static void fill⁔(/*this*/ ref Reader b) {
+internal static void fill(this ref Reader b) {
     // Slide existing data to beginning.
     if (b.r > 0) {
         copy(b.buf, b.buf.slice(b.r, b.w));
@@ -125,7 +132,7 @@ internal static void fill⁔(/*this*/ ref Reader b) {
     b.err = io.ErrNoProgress;
 }
 
-internal static error readErr⁔(/*this*/ ref Reader b) {
+internal static error readErr(this ref Reader b) {
     var err = b.err;
     b.err = default;
     return err;
@@ -139,7 +146,7 @@ internal static error readErr⁔(/*this*/ ref Reader b) {
 //
 // Calling Peek prevents a [Reader.UnreadByte] or [Reader.UnreadRune] call from succeeding
 // until the next read operation.
-internal static (slice<byte>, error) Peek⁔(/*this*/ ref Reader b, nint n) {
+public static (slice<byte>, error) Peek(this ref Reader b, nint n) {
     if (n < 0) {
         return (default, ErrNegativeCount);
     }
@@ -173,7 +180,7 @@ internal static (slice<byte>, error) Peek⁔(/*this*/ ref Reader b, nint n) {
 // If Discard skips fewer than n bytes, it also returns an error.
 // If 0 <= n <= b.Buffered(), Discard is guaranteed to succeed without
 // reading from the underlying io.Reader.
-internal static (nint discarded, error err) Discard⁔(/*this*/ ref Reader b, nint n) {
+public static (nint discarded, error err) Discard(this ref Reader b, nint n) {
     nint discarded = default;
     error err = default;
 
@@ -215,7 +222,7 @@ internal static (nint discarded, error err) Discard⁔(/*this*/ ref Reader b, ni
 // To read exactly len(p) bytes, use io.ReadFull(b, p).
 // If the underlying [Reader] can return a non-zero count with io.EOF,
 // then this Read method can do so as well; see the [io.Reader] docs.
-internal static (nint n, error err) Read⁔(/*this*/ ref Reader b, slice<byte> p) {
+public static (nint n, error err) Read(this ref Reader b, slice<byte> p) {
     nint n = default;
 
     n = len(p);
@@ -268,7 +275,7 @@ internal static (nint n, error err) Read⁔(/*this*/ ref Reader b, slice<byte> p
 
 // ReadByte reads and returns a single byte.
 // If no byte is available, returns an error.
-internal static (byte, error) ReadByte⁔(/*this*/ ref Reader b) {
+public static (byte, error) ReadByte(this ref Reader b) {
     b.lastRuneSize = -1;
     while (b.r == b.w) {
         if (b.err != nil) {
@@ -287,7 +294,7 @@ internal static (byte, error) ReadByte⁔(/*this*/ ref Reader b) {
 // UnreadByte returns an error if the most recent method called on the
 // [Reader] was not a read operation. Notably, [Reader.Peek], [Reader.Discard], and [Reader.WriteTo] are not
 // considered read operations.
-internal static error UnreadByte⁔(/*this*/ ref Reader b) {
+public static error UnreadByte(this ref Reader b) {
     if (b.lastByte < 0 || b.r == 0 && b.w > 0) {
         return ErrInvalidUnreadByte;
     }
@@ -307,7 +314,7 @@ internal static error UnreadByte⁔(/*this*/ ref Reader b) {
 // ReadRune reads a single UTF-8 encoded Unicode character and returns the
 // rune and its size in bytes. If the encoded rune is invalid, it consumes one byte
 // and returns unicode.ReplacementChar (U+FFFD) with a size of 1.
-internal static (rune r, nint size, error err) ReadRune⁔(/*this*/ ref Reader b) {
+public static (rune r, nint size, error err) ReadRune(this ref Reader b) {
     rune r = default;
     nint size = default;
 
@@ -329,7 +336,7 @@ internal static (rune r, nint size, error err) ReadRune⁔(/*this*/ ref Reader b
 // the [Reader] was not a [Reader.ReadRune], [Reader.UnreadRune] returns an error. (In this
 // regard it is stricter than [Reader.UnreadByte], which will unread the last byte
 // from any read operation.)
-internal static error UnreadRune⁔(/*this*/ ref Reader b) {
+public static error UnreadRune(this ref Reader b) {
     if (b.lastRuneSize < 0 || b.r < b.lastRuneSize) {
         return ErrInvalidUnreadRune;
     }
@@ -340,7 +347,7 @@ internal static error UnreadRune⁔(/*this*/ ref Reader b) {
 }
 
 // Buffered returns the number of bytes that can be read from the current buffer.
-internal static nint Buffered⁔(/*this*/ ref Reader b) { return b.w - b.r; }
+public static nint Buffered(this ref Reader b) { return b.w - b.r; }
 
 // ReadSlice reads until the first occurrence of delim in the input,
 // returning a slice pointing at the bytes in the buffer.
@@ -352,7 +359,7 @@ internal static nint Buffered⁔(/*this*/ ref Reader b) { return b.w - b.r; }
 // by the next I/O operation, most clients should use
 // [Reader.ReadBytes] or ReadString instead.
 // ReadSlice returns err != nil if and only if line does not end in delim.
-internal static (slice<byte> line, error err) ReadSlice⁔(/*this*/ ref Reader b, byte delim) {
+public static (slice<byte> line, error err) ReadSlice(this ref Reader b, byte delim) {
     slice<byte> line = default;
     error err = default;
 
@@ -414,7 +421,7 @@ internal static (slice<byte> line, error err) ReadSlice⁔(/*this*/ ref Reader b
 // Calling [Reader.UnreadByte] after ReadLine will always unread the last byte read
 // (possibly a character belonging to the line end) even if that byte is not
 // part of the line returned by ReadLine.
-internal static (slice<byte> line, bool isPrefix, error err) ReadLine⁔(/*this*/ ref Reader b) {
+public static (slice<byte> line, bool isPrefix, error err) ReadLine(this ref Reader b) {
     slice<byte> line = default;
     bool isPrefix = default;
     error err = default;
@@ -460,7 +467,7 @@ internal static (slice<byte> line, bool isPrefix, error err) ReadLine⁔(/*this*
 // `bytes.Join(append(fullBuffers, finalFragment), nil)`, which has a
 // length of `totalLen`. The result is structured in this way to allow callers
 // to minimize allocations and copies.
-internal static (slice<slice<byte>> fullBuffers, slice<byte> finalFragment, nint totalLen, error err) collectFragments⁔(/*this*/ ref Reader b, byte delim) {
+internal static (slice<slice<byte>> fullBuffers, slice<byte> finalFragment, nint totalLen, error err) collectFragments(this ref Reader b, byte delim) {
     slice<slice<byte>> fullBuffers = default;
     nint totalLen = default;
     error err = default;
@@ -497,7 +504,7 @@ internal static (slice<slice<byte>> fullBuffers, slice<byte> finalFragment, nint
 // ReadBytes returns err != nil if and only if the returned data does not end in
 // delim.
 // For simple uses, a Scanner may be more convenient.
-internal static (slice<byte>, error) ReadBytes⁔(/*this*/ ref Reader b, byte delim) {
+public static (slice<byte>, error) ReadBytes(this ref Reader b, byte delim) {
     var (full, frag, n, err) = b.collectFragments(delim);
     // Allocate new buffer to hold the full pieces and the fragment.
     var buf = new slice<byte>(n);
@@ -517,7 +524,7 @@ internal static (slice<byte>, error) ReadBytes⁔(/*this*/ ref Reader b, byte de
 // ReadString returns err != nil if and only if the returned data does not end in
 // delim.
 // For simple uses, a Scanner may be more convenient.
-internal static (@string, error) ReadString⁔(/*this*/ ref Reader b, byte delim) {
+public static (@string, error) ReadString(this ref Reader b, byte delim) {
     var (full, frag, n, err) = b.collectFragments(delim);
     // Allocate new buffer to hold the full pieces and the fragment.
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
@@ -534,7 +541,7 @@ internal static (@string, error) ReadString⁔(/*this*/ ref Reader b, byte delim
 // This may make multiple calls to the [Reader.Read] method of the underlying [Reader].
 // If the underlying reader supports the [Reader.WriteTo] method,
 // this calls the underlying [Reader.WriteTo] without buffering.
-internal static (int64 n, error err) WriteTo⁔(/*this*/ ref Reader b, io.Writer w) {
+public static (int64 n, error err) WriteTo(this ref Reader b, io.Writer w) {
     int64 n = default;
     error err = default;
 
@@ -581,10 +588,14 @@ internal static (int64 n, error err) WriteTo⁔(/*this*/ ref Reader b, io.Writer
     return (n, b.readErr());
 }
 
+} partial class bufio_package {
+
 internal static error errNegativeWrite = errors.New("bufio: writer returned negative count from Write");
 
+} partial class bufioᴛReader {
+
 // writeBuf writes the [Reader]'s buffer to the writer.
-internal static (int64, error) writeBuf⁔(/*this*/ ref Reader b, io.Writer w) {
+internal static (int64, error) writeBuf(this ref Reader b, io.Writer w) {
     var (n, err) = w.Write(b.buf.slice(b.r, b.w));
     if (n < 0) {
         throw panic(errNegativeWrite);
@@ -592,6 +603,8 @@ internal static (int64, error) writeBuf⁔(/*this*/ ref Reader b, io.Writer w) {
     b.r += n;
     return ((int64)n, err);
 }
+
+} partial class bufio_package {
 
 // buffered output
 
@@ -633,15 +646,17 @@ public static ж<Writer> NewWriter(io.Writer w) {
     return NewWriterSize(w, defaultBufSize);
 }
 
+} partial class bufioᴛWriter {
+
 // Size returns the size of the underlying buffer in bytes.
-internal static nint Size⁔(/*this*/ ref Writer b) { return len(b.buf); }
+public static nint Size(this ref Writer b) { return len(b.buf); }
 
 // Reset discards any unflushed buffered data, clears any error, and
 // resets b to write its output to w.
 // Calling Reset on the zero value of [Writer] initializes the internal buffer
 // to the default size.
 // Calling w.Reset(w) (that is, resetting a [Writer] to itself) does nothing.
-internal static void Reset⁔(/*this*/ ж<Writer> Ꮡb, io.Writer w) {
+public static void Reset(this ж<Writer> Ꮡb, io.Writer w) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     // If a Writer w is passed to NewWriter, NewWriter will return w.
@@ -659,7 +674,7 @@ internal static void Reset⁔(/*this*/ ж<Writer> Ꮡb, io.Writer w) {
 }
 
 // Flush writes any buffered data to the underlying [io.Writer].
-internal static error Flush⁔(/*this*/ ref Writer b) {
+public static error Flush(this ref Writer b) {
     if (b.err != nil) {
         return b.err;
     }
@@ -683,24 +698,24 @@ internal static error Flush⁔(/*this*/ ref Writer b) {
 }
 
 // Available returns how many bytes are unused in the buffer.
-internal static nint Available⁔(/*this*/ ref Writer b) { return len(b.buf) - b.n; }
+public static nint Available(this ref Writer b) { return len(b.buf) - b.n; }
 
 // AvailableBuffer returns an empty buffer with b.Available() capacity.
 // This buffer is intended to be appended to and
 // passed to an immediately succeeding [Writer.Write] call.
 // The buffer is only valid until the next write operation on b.
-internal static slice<byte> AvailableBuffer⁔(/*this*/ ref Writer b) {
+public static slice<byte> AvailableBuffer(this ref Writer b) {
     return b.buf.slice(b.n)[..0];
 }
 
 // Buffered returns the number of bytes that have been written into the current buffer.
-internal static nint Buffered⁔(/*this*/ ref Writer b) { return b.n; }
+public static nint Buffered(this ref Writer b) { return b.n; }
 
 // Write writes the contents of p into the buffer.
 // It returns the number of bytes written.
 // If nn < len(p), it also returns an error explaining
 // why the write is short.
-internal static (nint nn, error err) Write⁔(/*this*/ ref Writer b, slice<byte> p) {
+public static (nint nn, error err) Write(this ref Writer b, slice<byte> p) {
     nint nn = default;
 
     while (len(p) > b.Available() && b.err == nil) {
@@ -727,7 +742,7 @@ internal static (nint nn, error err) Write⁔(/*this*/ ref Writer b, slice<byte>
 }
 
 // WriteByte writes a single byte.
-internal static error WriteByte⁔(/*this*/ ref Writer b, byte c) {
+public static error WriteByte(this ref Writer b, byte c) {
     if (b.err != nil) {
         return b.err;
     }
@@ -741,7 +756,7 @@ internal static error WriteByte⁔(/*this*/ ref Writer b, byte c) {
 
 // WriteRune writes a single Unicode code point, returning
 // the number of bytes written and any error.
-internal static (nint size, error err) WriteRune⁔(/*this*/ ref Writer b, rune r) {
+public static (nint size, error err) WriteRune(this ref Writer b, rune r) {
     nint size = default;
     error err = default;
 
@@ -776,7 +791,7 @@ internal static (nint size, error err) WriteRune⁔(/*this*/ ref Writer b, rune 
 // It returns the number of bytes written.
 // If the count is less than len(s), it also returns an error explaining
 // why the write is short.
-internal static (nint, error) WriteString⁔(/*this*/ ref Writer b, @string s) {
+public static (nint, error) WriteString(this ref Writer b, @string s) {
     io.StringWriter sw = default;
     var tryStringWriter = true;
 
@@ -813,7 +828,7 @@ internal static (nint, error) WriteString⁔(/*this*/ ref Writer b, @string s) {
 // supports the ReadFrom method, this calls the underlying ReadFrom.
 // If there is buffered data and an underlying ReadFrom, this fills
 // the buffer and writes it before calling ReadFrom.
-internal static (int64 n, error err) ReadFrom⁔(/*this*/ ref Writer b, io.Reader r) {
+public static (int64 n, error err) ReadFrom(this ref Writer b, io.Reader r) {
     int64 n = default;
     error err = default;
 
@@ -861,6 +876,8 @@ internal static (int64 n, error err) ReadFrom⁔(/*this*/ ref Writer b, io.Reade
     }
     return (n, err);
 }
+
+} partial class bufio_package {
 
 // buffered input and output
 

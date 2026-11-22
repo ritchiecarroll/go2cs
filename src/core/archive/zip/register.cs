@@ -8,6 +8,7 @@ using errors = errors_package;
 using io = io_package;
 using sync = sync_package;
 using compress;
+using static zip_package;
 
 partial class zip_package {
 
@@ -43,11 +44,13 @@ partial struct pooledFlateWriter {
     internal ж<flate.Writer> fw;
 }
 
+} partial class zipᴛpooledFlateWriter {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string writeAfterCloseˢ => ref writeAfterCloseˢᵇ;
 private static readonly @string writeAfterCloseˢᵇ = "Write after Close"u8;
 
-internal static (nint n, error err) Write⁔(/*this*/ ж<pooledFlateWriter> Ꮡw, slice<byte> p) {
+internal static (nint n, error err) Write(this ж<pooledFlateWriter> Ꮡw, slice<byte> p) {
     nint n = default;
     error err = default;
     GoFrame ᒐ = default;
@@ -66,7 +69,7 @@ internal static (nint n, error err) Write⁔(/*this*/ ж<pooledFlateWriter> Ꮡw
     ᒐdone: return (n, err);
 }
 
-internal static error Close⁔(/*this*/ ж<pooledFlateWriter> Ꮡw) {
+internal static error Close(this ж<pooledFlateWriter> Ꮡw) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -86,6 +89,8 @@ internal static error Close⁔(/*this*/ ж<pooledFlateWriter> Ꮡw) {
     finally { if (ᒐd1) Ꮡw.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
+} partial class zip_package {
+
 internal static readonly ж<sync.Pool> ᏑflateReaderPool = new StaticBox<sync.Pool>(default(sync.Pool));
 internal static ref sync.Pool flateReaderPool => ref ((StaticBox<sync.Pool>)ᏑflateReaderPool).ValueSlot;
 
@@ -104,11 +109,13 @@ partial struct pooledFlateReader {
     internal io.ReadCloser fr;
 }
 
+} partial class zipᴛpooledFlateReader {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string readAfterCloseˢ => ref readAfterCloseˢᵇ;
 private static readonly @string readAfterCloseˢᵇ = "Read after Close"u8;
 
-internal static (nint n, error err) Read⁔(/*this*/ ж<pooledFlateReader> Ꮡr, slice<byte> p) {
+internal static (nint n, error err) Read(this ж<pooledFlateReader> Ꮡr, slice<byte> p) {
     nint n = default;
     error err = default;
     GoFrame ᒐ = default;
@@ -127,7 +134,7 @@ internal static (nint n, error err) Read⁔(/*this*/ ж<pooledFlateReader> Ꮡr,
     ᒐdone: return (n, err);
 }
 
-internal static error Close⁔(/*this*/ ж<pooledFlateReader> Ꮡr) {
+internal static error Close(this ж<pooledFlateReader> Ꮡr) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -146,6 +153,8 @@ internal static error Close⁔(/*this*/ ж<pooledFlateReader> Ꮡr) {
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡr.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
+
+} partial class zip_package {
 
 internal static readonly ж<sync.Map> Ꮡcompressors = new StaticBox<sync.Map>(default(sync.Map));
 internal static ref sync.Map compressors => ref ((StaticBox<sync.Map>)Ꮡcompressors).ValueSlot;     // map[uint16]Compressor

@@ -5,6 +5,7 @@
 namespace go.net;
 
 /* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
+using static http_package;
 
 partial class http_package {
 
@@ -19,6 +20,8 @@ partial class http_package {
 //go:linkname badRoundTrip net/http.(*Transport).RoundTrip
 internal static partial (ж<Response>, error) badRoundTrip(ж<Transport> _Δp0, ж<Request> _Δp1);
 
+} partial class httpᴛTransport {
+
 // RoundTrip implements the [RoundTripper] interface.
 //
 // For higher-level HTTP client support (such as handling of cookies
@@ -26,11 +29,11 @@ internal static partial (ж<Response>, error) badRoundTrip(ж<Transport> _Δp0, 
 //
 // Like the RoundTripper interface, the error types returned
 // by RoundTrip are unspecified.
-internal static (ж<Response>, error) RoundTrip⁔(/*this*/ ж<Transport> Ꮡt, ж<Request> req) {
+public static (ж<Response>, error) RoundTrip(this ж<Transport> Ꮡt, ж<Request> req) {
     if (Ꮡt == nil) {
         throw panic("transport is nil");
     }
     return Ꮡt.roundTrip(req);
 }
 
-} // end http_package
+}

@@ -6,6 +6,7 @@ namespace go.@internal;
 using goarch = go.@internal.goarch_package;
 using @unsafe = unsafe_package;
 using go.@internal;
+using static abi_package;
 
 partial class abi_package {
 
@@ -42,7 +43,9 @@ partial struct RegArgs {
     public IntArgRegBitmap ReturnIsPtr;
 }
 
-internal static void Dump⁔(/*this*/ ref RegArgs r) {
+} partial class abiᴛRegArgs {
+
+public static void Dump(this ref RegArgs r) {
     print((@string)"Ints:");
     foreach (var (_, x) in range(r.Ints.ΔRangeSnapshot())) {
         print((@string)" ", x);
@@ -69,7 +72,7 @@ internal static void Dump⁔(/*this*/ ref RegArgs r) {
 // architectures, since sub-word-sized arguments in big endian architectures
 // need to be "aligned" to the upper edge of the register to be interpreted
 // by the CPU correctly.
-internal static @unsafe.Pointer IntRegArgAddr⁔(/*this*/ ref RegArgs r, nint reg, uintptr argSize) {
+public static @unsafe.Pointer IntRegArgAddr(this ref RegArgs r, nint reg, uintptr argSize) {
     if (argSize > goarch.PtrSize || argSize == 0 || (uintptr)(argSize & (argSize - 1)) != 0) {
         throw panic("invalid argSize");
     }
@@ -80,13 +83,17 @@ internal static @unsafe.Pointer IntRegArgAddr⁔(/*this*/ ref RegArgs r, nint re
     return @unsafe.Add(@unsafe.Pointer.FromBox(Ꮡ(r.Ints, reg)), offset);
 }
 
+} partial class abi_package {
+
 // IntArgRegBitmap is a bitmap large enough to hold one bit per
 // integer argument/return register.
 /* [(IntArgRegs + 7) / 8]uint8 */
 partial struct IntArgRegBitmap /*[2]uint8*/;
 
+} partial class abiᴛIntArgRegBitmap {
+
 // Set sets the i'th bit of the bitmap to 1.
-internal static void Set⁔(/*this*/ ref IntArgRegBitmap b, nint i) {
+public static void Set(this ref IntArgRegBitmap b, nint i) {
     b.Value[i / 8] |= (uint8)(((uint8)1).Lsh((int64)(i % 8)));
 }
 
@@ -96,10 +103,10 @@ internal static void Set⁔(/*this*/ ref IntArgRegBitmap b, nint i) {
 // on the reflectcall return path.
 //
 //go:nosplit
-internal static bool Get⁔(/*this*/ ж<IntArgRegBitmap> Ꮡb, nint i) {
+public static bool Get(this ж<IntArgRegBitmap> Ꮡb, nint i) {
     // Compute p=&b[i/8], but without a bounds check. We don't have the stack for it.
     var p = @unsafe.Pointer.To<byte>(@unsafe.Add(@unsafe.Pointer.FromPinnedBox(Ꮡb), (uintptr)(i / 8)));
     return (byte)(p.Value & (((uint8)1).Lsh((int64)(i % 8)))) != 0;
 }
 
-} // end abi_package
+}

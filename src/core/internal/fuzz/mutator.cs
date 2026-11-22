@@ -8,6 +8,7 @@ using fmt = fmt_package;
 using math = math_package;
 using @unsafe = unsafe_package;
 using encoding;
+using static fuzz_package;
 
 partial class fuzz_package {
 
@@ -20,11 +21,13 @@ internal static ж<mutator> newMutator() {
     return Ꮡ(new mutator(r: new pcgRandжmutatorRand(newPcgRand())));
 }
 
-internal static nint rand⁔(/*this*/ ref mutator m, nint n) {
+} partial class fuzzᴛmutator {
+
+internal static nint rand(this ref mutator m, nint n) {
     return m.r.intn(n);
 }
 
-internal static binary.ByteOrder randByteOrder⁔(/*this*/ ref mutator m) {
+internal static binary.ByteOrder randByteOrder(this ref mutator m) {
     if (m.r.@bool()) {
         return binary.LittleEndian;
     }
@@ -33,7 +36,7 @@ internal static binary.ByteOrder randByteOrder⁔(/*this*/ ref mutator m) {
 
 // chooseLen chooses length of range mutation in range [1,n]. It gives
 // preference to shorter ranges.
-internal static nint chooseLen⁔(/*this*/ ref mutator m, nint n) {
+internal static nint chooseLen(this ref mutator m, nint n) {
     nint x = m.rand(100);
     switch (ᐧ) {
     case {} when x is < 90: {
@@ -48,7 +51,7 @@ internal static nint chooseLen⁔(/*this*/ ref mutator m, nint n) {
 }
 
 // mutate performs several mutations on the provided values.
-internal static void mutate⁔(/*this*/ ж<mutator> Ꮡm, slice<any> vals, nint maxBytes) {
+internal static void mutate(this ж<mutator> Ꮡm, slice<any> vals, nint maxBytes) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     // TODO(katiehockman): pull some of these functions into helper methods and
@@ -153,7 +156,7 @@ internal static void mutate⁔(/*this*/ ж<mutator> Ꮡm, slice<any> vals, nint 
     }}
 }
 
-internal static int64 mutateInt⁔(/*this*/ ref mutator m, int64 v, int64 maxValue) {
+internal static int64 mutateInt(this ref mutator m, int64 v, int64 maxValue) {
     int64 max = default;
     for (;;) {
         max = 100;
@@ -185,7 +188,7 @@ internal static int64 mutateInt⁔(/*this*/ ref mutator m, int64 v, int64 maxVal
     }
 }
 
-internal static uint64 mutateUInt⁔(/*this*/ ref mutator m, uint64 v, uint64 maxValue) {
+internal static uint64 mutateUInt(this ref mutator m, uint64 v, uint64 maxValue) {
     uint64 max = default;
     for (;;) {
         max = 100;
@@ -218,7 +221,7 @@ internal static uint64 mutateUInt⁔(/*this*/ ref mutator m, uint64 v, uint64 ma
     }
 }
 
-internal static float64 mutateFloat⁔(/*this*/ ref mutator m, float64 v, float64 maxValue) {
+internal static float64 mutateFloat(this ref mutator m, float64 v, float64 maxValue) {
     float64 max = default;
     for (;;) {
         switch (m.rand(4)) {
@@ -273,6 +276,8 @@ internal static float64 mutateFloat⁔(/*this*/ ref mutator m, float64 v, float6
     }
 }
 
+} partial class fuzz_package {
+
 // type byteSliceMutator is a methodless func type — rendered inline as its base delegate
 
 [GoLazy] partial class lazyᴛbyteSliceMutators { internal static slice<Func<ж<mutator>, slice<byte>, slice<byte>>> byteSliceMutators = [
@@ -296,7 +301,9 @@ internal static float64 mutateFloat⁔(/*this*/ ref mutator m, float64 v, float6
     byteSliceSwapBytes
 ]; }
 
-internal static void mutateBytes⁔(/*this*/ ж<mutator> Ꮡm, ж<slice<byte>> ᏑptrB) {
+} partial class fuzzᴛmutator {
+
+internal static void mutateBytes(this ж<mutator> Ꮡm, ж<slice<byte>> ᏑptrB) {
     GoFrame ᒐ = default;
     try {
         ref var m = ref Ꮡm.DerefOrNull();
@@ -321,6 +328,8 @@ internal static void mutateBytes⁔(/*this*/ ж<mutator> Ꮡm, ж<slice<byte>> �
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
+
+} partial class fuzz_package {
 
 internal static slice<int8> interesting8 = [(int8)(-128), (int8)(-1), 0, 1, 16, 32, 64, 100, 127];
 internal static slice<int16> interesting16 = [(int16)(-32768), (int16)(-129), 128, 255, 256, 512, 1000, 1024, 4096, 32767];

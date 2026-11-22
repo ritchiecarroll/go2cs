@@ -16,6 +16,7 @@ using encoding;
 using go.hash;
 using go.image;
 using hash = hash_package;
+using static png_package;
 
 partial class png_package {
 
@@ -93,7 +94,9 @@ internal static nint abs8(uint8 d) {
     return 256 - (nint)d;
 }
 
-internal static void writeChunk⁔(/*this*/ ref encoder e, slice<byte> b, @string name) {
+} partial class pngᴛencoder {
+
+internal static void writeChunk(this ref encoder e, slice<byte> b, @string name) {
     if (e.err != nil) {
         return;
     }
@@ -127,7 +130,7 @@ internal static void writeChunk⁔(/*this*/ ref encoder e, slice<byte> b, @strin
 internal static ref readonly @string ihdrˢ => ref ihdrˢᵇ;
 private static readonly @string ihdrˢᵇ = "IHDR"u8;
 
-internal static void writeIHDR⁔(/*this*/ ref encoder e) {
+internal static void writeIHDR(this ref encoder e) {
     var b = e.m.Bounds();
     binary.BigEndian.PutUint32(e.tmp[0..4], (uint32)b.Dx());
     binary.BigEndian.PutUint32(e.tmp[4..8], (uint32)b.Dy());
@@ -195,7 +198,7 @@ private static readonly @string plteˢᵇ = "PLTE"u8;
 internal static ref readonly @string tRNSˢ => ref tRNSˢᵇ;
 private static readonly @string tRNSˢᵇ = "tRNS"u8;
 
-internal static void writePLTEAndTRNS⁔(/*this*/ ref encoder e, color.Palette p) {
+internal static void writePLTEAndTRNS(this ref encoder e, color.Palette p) {
     if (len(p) < 1 || len(p) > 256) {
         e.err = ((FormatError)("bad palette length: "u8 + strconv.Itoa(len(p))));
         return;
@@ -227,13 +230,15 @@ private static readonly @string idatˢᵇ = "IDAT"u8;
 //
 // This method should only be called from writeIDATs (via writeImage).
 // No other code should treat an encoder as an io.Writer.
-internal static (nint, error) Write⁔(/*this*/ ref encoder e, slice<byte> b) {
+public static (nint, error) Write(this ref encoder e, slice<byte> b) {
     e.writeChunk(b, idatˢ);
     if (e.err != nil) {
         return (0, e.err);
     }
     return (len(b), default);
 }
+
+} partial class png_package {
 
 // Chooses the filter to use for encoding the current row, and applies it.
 // The return value is the index of the filter and also of the row in cr that has had it applied.
@@ -328,7 +333,9 @@ internal static nint filter(ref array<slice<byte>> cr, slice<byte> pr, nint bpp)
     return filter;
 }
 
-internal static error writeImage⁔(/*this*/ ж<encoder> Ꮡe, io.Writer w, image.Image m, nint cb, nint level) {
+} partial class pngᴛencoder {
+
+internal static error writeImage(this ж<encoder> Ꮡe, io.Writer w, image.Image m, nint cb, nint level) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -618,7 +625,7 @@ internal static error writeImage⁔(/*this*/ ж<encoder> Ꮡe, io.Writer w, imag
 }
 
 // Write the actual image data to one or more IDAT chunks.
-internal static void writeIDATs⁔(/*this*/ ж<encoder> Ꮡe) {
+internal static void writeIDATs(this ж<encoder> Ꮡe) {
     ref var e = ref Ꮡe.DerefOrNull();
 
     if (e.err != nil) {
@@ -635,6 +642,8 @@ internal static void writeIDATs⁔(/*this*/ ж<encoder> Ꮡe) {
     }
     e.err = e.bw.Flush();
 }
+
+} partial class png_package {
 
 // This function is required because we want the zero value of
 // Encoder.CompressionLevel to map to zlib.DefaultCompression.
@@ -657,11 +666,15 @@ internal static nint levelToZlib(CompressionLevel l) {
     }}
 }
 
+} partial class pngᴛencoder {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string iendˢ => ref iendˢᵇ;
 private static readonly @string iendˢᵇ = "IEND"u8;
 
-internal static void writeIEND⁔(/*this*/ ref encoder e) { e.writeChunk(default, iendˢ); }
+internal static void writeIEND(this ref encoder e) { e.writeChunk(default, iendˢ); }
+
+} partial class png_package {
 
 // Encode writes the Image m to w in PNG format. Any Image may be
 // encoded, but images that are not [image.NRGBA] might be encoded lossily.
@@ -670,8 +683,10 @@ public static error Encode(io.Writer w, image.Image m) {
     return Ꮡe.Encode(w, m);
 }
 
+} partial class pngᴛEncoder {
+
 // Encode writes the Image m to w in PNG format.
-internal static error Encode⁔(/*this*/ ж<Encoder> Ꮡenc, io.Writer w, image.Image m) {
+public static error Encode(this ж<Encoder> Ꮡenc, io.Writer w, image.Image m) {
     GoFrame ᒐ = default;
     try {
         ref var enc = ref Ꮡenc.DerefOrNull();
@@ -756,4 +771,4 @@ internal static error Encode⁔(/*this*/ ж<Encoder> Ꮡenc, io.Writer w, image.
     finally { ᒐ.Run(); }
 }
 
-} // end png_package
+}

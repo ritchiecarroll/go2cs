@@ -13,6 +13,7 @@ using hash = hash_package;
 using byteorder = go.@internal.byteorder_package;
 using go.@internal;
 using go.crypto;
+using static hpke_package;
 
 partial class hpke_package {
 
@@ -72,15 +73,17 @@ internal static ж<hkdfKDF> hkdfSHA256 = Ꮡ(new hkdfKDF(hash: sha256.New, id: 0
 internal static ж<hkdfKDF> hkdfSHA384 = Ꮡ(new hkdfKDF(hash: sha512.New384, id: 0x0002, nH: sha512.Size384));
 internal static ж<hkdfKDF> hkdfSHA512 = Ꮡ(new hkdfKDF(hash: sha512.New, id: 0x0003, nH: sha512.Size));
 
-internal static uint16 ID⁔(/*this*/ ref hkdfKDF kdf) {
+} partial class hpkeᴛhkdfKDF {
+
+internal static uint16 ID(this ref hkdfKDF kdf) {
     return kdf.id;
 }
 
-internal static nint size⁔(/*this*/ ref hkdfKDF kdf) {
+internal static nint size(this ref hkdfKDF kdf) {
     return kdf.nH;
 }
 
-internal static bool oneStage⁔(/*this*/ ref hkdfKDF kdf) {
+internal static bool oneStage(this ref hkdfKDF kdf) {
     return false;
 }
 
@@ -88,11 +91,11 @@ internal static bool oneStage⁔(/*this*/ ref hkdfKDF kdf) {
 internal static ref readonly @string hpkeInternalErrorˢ => ref hpkeInternalErrorˢᵇ;
 private static readonly @string hpkeInternalErrorˢᵇ = "hpke: internal error: labeledDerive called on two-stage KDF"u8;
 
-internal static (slice<byte>, error) labeledDerive⁔(/*this*/ ref hkdfKDF kdf, slice<byte> _Δp1, slice<byte> _Δp2, @string _Δp3, slice<byte> _Δp4, uint16 _Δp5) {
+internal static (slice<byte>, error) labeledDerive(this ref hkdfKDF kdf, slice<byte> _Δp1, slice<byte> _Δp2, @string _Δp3, slice<byte> _Δp4, uint16 _Δp5) {
     return (default, errors.New(hpkeInternalErrorˢ));
 }
 
-internal static (slice<byte>, error) labeledExtract⁔(/*this*/ ref hkdfKDF kdf, slice<byte> suiteID, slice<byte> salt, @string label, slice<byte> inputKey) {
+internal static (slice<byte>, error) labeledExtract(this ref hkdfKDF kdf, slice<byte> suiteID, slice<byte> salt, @string label, slice<byte> inputKey) {
     var labeledIKM = new slice<byte>(0, 7 + len(suiteID) + len(label) + len(inputKey));
     labeledIKM = appendꓸꓸꓸ(labeledIKM, slice<byte>("HPKE-v1"u8));
     labeledIKM = appendꓸꓸꓸ(labeledIKM, suiteID);
@@ -101,7 +104,7 @@ internal static (slice<byte>, error) labeledExtract⁔(/*this*/ ref hkdfKDF kdf,
     return hkdf.Extract(kdf.hash, labeledIKM, salt);
 }
 
-internal static (slice<byte>, error) labeledExpand⁔(/*this*/ ref hkdfKDF kdf, slice<byte> suiteID, slice<byte> randomKey, @string label, slice<byte> info, uint16 length) {
+internal static (slice<byte>, error) labeledExpand(this ref hkdfKDF kdf, slice<byte> suiteID, slice<byte> randomKey, @string label, slice<byte> info, uint16 length) {
     var labeledInfo = new slice<byte>(0, 2 + 7 + len(suiteID) + len(label) + len(info));
     labeledInfo = byteorder.BEAppendUint16(labeledInfo, length);
     labeledInfo = appendꓸꓸꓸ(labeledInfo, slice<byte>("HPKE-v1"u8));
@@ -110,6 +113,8 @@ internal static (slice<byte>, error) labeledExpand⁔(/*this*/ ref hkdfKDF kdf, 
     labeledInfo = appendꓸꓸꓸ(labeledInfo, info);
     return hkdf.Expand(kdf.hash, randomKey, (@string)labeledInfo, (nint)length);
 }
+
+} partial class hpke_package {
 
 // SHAKE128 returns a SHAKE128 KDF implementation.
 public static KDF SHAKE128() {
@@ -130,19 +135,21 @@ partial struct shakeKDF {
 internal static ж<shakeKDF> shake128KDF = Ꮡ(new shakeKDF(hash: sha3.NewSHAKE128, id: 0x0010, nH: 32));
 internal static ж<shakeKDF> shake256KDF = Ꮡ(new shakeKDF(hash: sha3.NewSHAKE256, id: 0x0011, nH: 64));
 
-internal static uint16 ID⁔(/*this*/ ref shakeKDF kdf) {
+} partial class hpkeᴛshakeKDF {
+
+internal static uint16 ID(this ref shakeKDF kdf) {
     return kdf.id;
 }
 
-internal static nint size⁔(/*this*/ ref shakeKDF kdf) {
+internal static nint size(this ref shakeKDF kdf) {
     return kdf.nH;
 }
 
-internal static bool oneStage⁔(/*this*/ ref shakeKDF kdf) {
+internal static bool oneStage(this ref shakeKDF kdf) {
     return true;
 }
 
-internal static (slice<byte>, error) labeledDerive⁔(/*this*/ ref shakeKDF kdf, slice<byte> suiteID, slice<byte> inputKey, @string label, slice<byte> context, uint16 length) {
+internal static (slice<byte>, error) labeledDerive(this ref shakeKDF kdf, slice<byte> suiteID, slice<byte> inputKey, @string label, slice<byte> context, uint16 length) {
     var H = kdf.hash();
     H.Write(inputKey);
     H.Write(slice<byte>("HPKE-v1"u8));
@@ -160,7 +167,7 @@ internal static (slice<byte>, error) labeledDerive⁔(/*this*/ ref shakeKDF kdf,
 internal static ref readonly @string hpkeInternalErrorˢ2 => ref hpkeInternalErrorˢ2ᵇ;
 private static readonly @string hpkeInternalErrorˢ2ᵇ = "hpke: internal error: labeledExtract called on one-stage KDF"u8;
 
-internal static (slice<byte>, error) labeledExtract⁔(/*this*/ ref shakeKDF kdf, slice<byte> _Δp1, slice<byte> _Δp2, @string _Δp3, slice<byte> _Δp4) {
+internal static (slice<byte>, error) labeledExtract(this ref shakeKDF kdf, slice<byte> _Δp1, slice<byte> _Δp2, @string _Δp3, slice<byte> _Δp4) {
     return (default, errors.New(hpkeInternalErrorˢ2));
 }
 
@@ -168,8 +175,8 @@ internal static (slice<byte>, error) labeledExtract⁔(/*this*/ ref shakeKDF kdf
 internal static ref readonly @string hpkeInternalErrorˢ3 => ref hpkeInternalErrorˢ3ᵇ;
 private static readonly @string hpkeInternalErrorˢ3ᵇ = "hpke: internal error: labeledExpand called on one-stage KDF"u8;
 
-internal static (slice<byte>, error) labeledExpand⁔(/*this*/ ref shakeKDF kdf, slice<byte> _Δp1, slice<byte> _Δp2, @string _Δp3, slice<byte> _Δp4, uint16 _Δp5) {
+internal static (slice<byte>, error) labeledExpand(this ref shakeKDF kdf, slice<byte> _Δp1, slice<byte> _Δp2, @string _Δp3, slice<byte> _Δp4, uint16 _Δp5) {
     return (default, errors.New(hpkeInternalErrorˢ3));
 }
 
-} // end hpke_package
+}

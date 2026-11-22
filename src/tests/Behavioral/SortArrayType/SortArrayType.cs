@@ -2,6 +2,7 @@ namespace go;
 
 using fmt = fmt_package;
 using sort = sort_package;
+using static main_package;
 
 partial class main_package {
 
@@ -87,9 +88,13 @@ partial struct levelToken /*num:uint32*/;
 
 internal static UntypedInt markerConst => 256;
 
-internal static void sort⁔(/*this*/ PeopleByAge p) {
-    sort.Sort(p);
+} partial class mainᴛPeopleByAge {
+
+internal static void sort(this PeopleByAge p) {
+    sort_package.Sort(p);
 }
+
+} partial class main_package {
 
 public static nint Len(this PeopleByShoeSize p) {
     return len(p);
@@ -106,17 +111,21 @@ public static bool /*a*/ Less(this PeopleByShoeSize p, nint i, nint j) {
     return a;
 }
 
-internal static nint Len⁔(/*this*/ PeopleByAge p) {
+} partial class mainᴛPeopleByAge {
+
+public static nint Len(this PeopleByAge p) {
     return len(p);
 }
 
-internal static void Swap⁔(/*this*/ PeopleByAge p, nint i, nint j) {
+public static void Swap(this PeopleByAge p, nint i, nint j) {
     (p[i], p[j]) = (p[j], p[i]);
 }
 
-internal static bool Less⁔(/*this*/ PeopleByAge p, nint i, nint j) {
+public static bool Less(this PeopleByAge p, nint i, nint j) {
     return (p[i].Age < p[j].Age);
 }
+
+} partial class main_package {
 
 public static (nint E2, @string p) Testing() {
     nint E2 = default;

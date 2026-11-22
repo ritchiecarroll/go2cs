@@ -8,6 +8,7 @@ using errors = errors_package;
 using big = math.big_package;
 using go.crypto.@internal.fips140;
 using math;
+using static elliptic_package;
 
 partial class elliptic_package {
 
@@ -106,13 +107,15 @@ partial interface nistPoint<T> {
     (T, error) ScalarBaseMult(slice<byte> _);
 }
 
-internal static ж<CurveParams> Params⁔<Point>(/*this*/ ref nistCurve<Point> curve)
+} partial class ellipticᴛnistCurve {
+
+internal static ж<CurveParams> Params<Point>(this ref nistCurve<Point> curve)
     where Point : nistPoint<Point>
 {
     return curve.@params;
 }
 
-internal static bool IsOnCurve⁔<Point>(/*this*/ ref nistCurve<Point> curve, ж<big.Int> Ꮡx, ж<big.Int> Ꮡy)
+internal static bool IsOnCurve<Point>(this ref nistCurve<Point> curve, ж<big.Int> Ꮡx, ж<big.Int> Ꮡy)
     where Point : nistPoint<Point>
 {
     ref var x = ref Ꮡx.DerefOrNull();
@@ -133,7 +136,7 @@ private static readonly @string negativeCoordinateˢᵇ = "negative coordinate"u
 internal static ref readonly @string overflowingCoordinateˢ => ref overflowingCoordinateˢᵇ;
 private static readonly @string overflowingCoordinateˢᵇ = "overflowing coordinate"u8;
 
-internal static (Point p, error err) pointFromAffine⁔<Point>(/*this*/ ref nistCurve<Point> curve, ж<big.Int> Ꮡx, ж<big.Int> Ꮡy)
+internal static (Point p, error err) pointFromAffine<Point>(this ref nistCurve<Point> curve, ж<big.Int> Ꮡx, ж<big.Int> Ꮡy)
     where Point : nistPoint<Point>
 {
     Point p = GoZero<Point>();
@@ -161,7 +164,7 @@ internal static (Point p, error err) pointFromAffine⁔<Point>(/*this*/ ref nist
     return curve.newPoint().SetBytes(buf);
 }
 
-internal static (ж<big.Int> x, ж<big.Int> y) pointToAffine⁔<Point>(/*this*/ ref nistCurve<Point> curve, Point p)
+internal static (ж<big.Int> x, ж<big.Int> y) pointToAffine<Point>(this ref nistCurve<Point> curve, Point p)
     where Point : nistPoint<Point>
 {
     ж<big.Int> x = default;
@@ -179,7 +182,7 @@ internal static (ж<big.Int> x, ж<big.Int> y) pointToAffine⁔<Point>(/*this*/ 
     return (x, y);
 }
 
-internal static (ж<big.Int>, ж<big.Int>) Add⁔<Point>(/*this*/ ref nistCurve<Point> curve, ж<big.Int> x1, ж<big.Int> y1, ж<big.Int> x2, ж<big.Int> y2)
+internal static (ж<big.Int>, ж<big.Int>) Add<Point>(this ref nistCurve<Point> curve, ж<big.Int> x1, ж<big.Int> y1, ж<big.Int> x2, ж<big.Int> y2)
     where Point : nistPoint<Point>
 {
     var (p1, err) = curve.pointFromAffine(x1, y1);
@@ -193,7 +196,7 @@ internal static (ж<big.Int>, ж<big.Int>) Add⁔<Point>(/*this*/ ref nistCurve<
     return curve.pointToAffine(p1.Add(p1, p2));
 }
 
-internal static (ж<big.Int>, ж<big.Int>) Double⁔<Point>(/*this*/ ref nistCurve<Point> curve, ж<big.Int> x1, ж<big.Int> y1)
+internal static (ж<big.Int>, ж<big.Int>) Double<Point>(this ref nistCurve<Point> curve, ж<big.Int> x1, ж<big.Int> y1)
     where Point : nistPoint<Point>
 {
     var (p, err) = curve.pointFromAffine(x1, y1);
@@ -205,7 +208,7 @@ internal static (ж<big.Int>, ж<big.Int>) Double⁔<Point>(/*this*/ ref nistCur
 
 // normalizeScalar brings the scalar within the byte size of the order of the
 // curve, as expected by the nistec scalar multiplication functions.
-internal static slice<byte> normalizeScalar⁔<Point>(/*this*/ ref nistCurve<Point> curve, slice<byte> scalar)
+internal static slice<byte> normalizeScalar<Point>(this ref nistCurve<Point> curve, slice<byte> scalar)
     where Point : nistPoint<Point>
 {
     nint byteSize = (curve.@params.N.BitLen() + 7) / 8;
@@ -220,7 +223,7 @@ internal static slice<byte> normalizeScalar⁔<Point>(/*this*/ ref nistCurve<Poi
     return s.FillBytes(@out);
 }
 
-internal static (ж<big.Int>, ж<big.Int>) ScalarMult⁔<Point>(/*this*/ ref nistCurve<Point> curve, ж<big.Int> Bx, ж<big.Int> By, slice<byte> scalar)
+internal static (ж<big.Int>, ж<big.Int>) ScalarMult<Point>(this ref nistCurve<Point> curve, ж<big.Int> Bx, ж<big.Int> By, slice<byte> scalar)
     where Point : nistPoint<Point>
 {
     var (p, err) = curve.pointFromAffine(Bx, By);
@@ -235,7 +238,7 @@ internal static (ж<big.Int>, ж<big.Int>) ScalarMult⁔<Point>(/*this*/ ref nis
     return curve.pointToAffine(p);
 }
 
-internal static (ж<big.Int>, ж<big.Int>) ScalarBaseMult⁔<Point>(/*this*/ ref nistCurve<Point> curve, slice<byte> scalar)
+internal static (ж<big.Int>, ж<big.Int>) ScalarBaseMult<Point>(this ref nistCurve<Point> curve, slice<byte> scalar)
     where Point : nistPoint<Point>
 {
     scalar = curve.normalizeScalar(scalar);
@@ -246,7 +249,7 @@ internal static (ж<big.Int>, ж<big.Int>) ScalarBaseMult⁔<Point>(/*this*/ ref
     return curve.pointToAffine(p);
 }
 
-internal static (ж<big.Int> x, ж<big.Int> y) Unmarshal⁔<Point>(/*this*/ ref nistCurve<Point> curve, slice<byte> data)
+internal static (ж<big.Int> x, ж<big.Int> y) Unmarshal<Point>(this ref nistCurve<Point> curve, slice<byte> data)
     where Point : nistPoint<Point>
 {
     ж<big.Int> x = default;
@@ -269,7 +272,7 @@ internal static (ж<big.Int> x, ж<big.Int> y) Unmarshal⁔<Point>(/*this*/ ref 
     return (x, y);
 }
 
-internal static (ж<big.Int> x, ж<big.Int> y) UnmarshalCompressed⁔<Point>(/*this*/ ref nistCurve<Point> curve, slice<byte> data)
+internal static (ж<big.Int> x, ж<big.Int> y) UnmarshalCompressed<Point>(this ref nistCurve<Point> curve, slice<byte> data)
     where Point : nistPoint<Point>
 {
     if (len(data) == 0 || (data[0] != 2 && data[0] != 3)) {
@@ -281,6 +284,8 @@ internal static (ж<big.Int> x, ж<big.Int> y) UnmarshalCompressed⁔<Point>(/*t
     }
     return curve.pointToAffine(p);
 }
+
+} partial class elliptic_package {
 
 internal static ж<big.Int> bigFromDecimal(@string s) {
     var (b, ok) = @new<big.Int>().SetString(s, 10);

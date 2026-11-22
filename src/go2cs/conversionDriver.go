@@ -220,7 +220,8 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 	// a GOPATH input and every one of them loaded its subtree, while on a box with an ordinary GOROOT
 	// install the branch never fired at all. The same command emitted a different corpus on the two
 	// boxes, and neither run said so. (C2 mailbox 1257a20bad; COORD ruling 3d0c7cd5d.)
-	// -cgo converts for the host's own target only (cgoRoute.go): refused before the load, naming both sides.
+	// -cgo converts for the host's own target, or for another when CC names its C compiler (cgoRoute.go, R3): a target
+	// without one is refused before the load, naming both sides.
 	if options.parseCgoTargets && !cgoOfflineTrees {
 		if err := cgoHostTarget(cgoLoad{env: cfg.Env, dir: cfg.Dir}, options.targetPlatform); err != nil {
 			reportDiagnostic("-", diagnosticCgoRefused, err.Error())
@@ -322,7 +323,12 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		var route *cgoRoute
 
 		if options.parseCgoTargets {
-			route = planCgoRoute(pkg, options, cgoLoad{env: cfg.Env, dir: cfg.Dir})
+			var routeErr error
+
+			// A route refusal goes through refusePackage: fatal for a single package, skipped and named under -recurse.
+			if route, routeErr = planCgoRoute(pkg, options, cgoLoad{env: cfg.Env, dir: cfg.Dir}); routeErr != nil {
+				return refusePackage(options, diagnosticCgoRefused, routeErr)
+			}
 		}
 
 		var err error
@@ -353,6 +359,20 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 
 			// Fatal for a single package; under -recurse the package is skipped and the run goes on (recurseRefusal.go).
 			return refusePackage(options, diagnosticCgoRefused, err)
+		}
+
+		// Under -recurse -cgo, a package importing a std package Go builds from different files with cgo on is refused:
+		// the go.* packages are the standard library converted cgo-off (R5, cgoRecurseStd.go).
+		if options.parseCgoTargets && options.recurse {
+			divergent, err := cgoDivergentStdPackages(cgoLoad{env: cfg.Env, dir: cfg.Dir}, options.targetPlatform)
+
+			if err == nil {
+				err = refuseCgoDivergentStdImports(pkg, divergent)
+			}
+
+			if err != nil {
+				return refusePackage(options, diagnosticCgoRefused, err)
+			}
 		}
 
 		// The narrow shape witness (shapeWitness.go): select its declarations into package state FIRST, so every proxy

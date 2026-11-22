@@ -1,16 +1,24 @@
 namespace go.DefinedOverNamedComposite;
 
+using static fslike_package;
+
 partial class fslike_package {
 
 partial struct MapFS /*map[@string, nint]*/;
 
-internal static nint Get⁔(/*this*/ MapFS m, @string k) { return m[k]; }
+} partial class fslikeᴛMapFS {
 
-internal static nint Size⁔(/*this*/ MapFS m) { return len(m); }
+public static nint Get(this MapFS m, @string k) { return m[k]; }
+
+public static nint Size(this MapFS m) { return len(m); }
+
+} partial class fslike_package {
 
 partial struct List /*[]nint*/;
 
-internal static nint Sum⁔(/*this*/ List l) {
+} partial class fslikeᴛList {
+
+public static nint Sum(this List l) {
     nint t = 0;
     foreach (var (_, v) in range<nint>(l)) {
         t += v;
@@ -18,12 +26,16 @@ internal static nint Sum⁔(/*this*/ List l) {
     return t;
 }
 
+} partial class fslike_package {
+
 partial struct Buf /*[2]nint*/;
 
-internal static nint First⁔(/*this*/ Buf b) {
+} partial class fslikeᴛBuf {
+
+public static nint First(this Buf b) {
     b = b.Clone();
 
     return b[0];
 }
 
-} // end fslike_package
+}

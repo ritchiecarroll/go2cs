@@ -8,6 +8,7 @@ using byteorder = @internal.byteorder_package;
 using bits = go.math.bits_package;
 using @internal;
 using go.math;
+using static rand_package;
 
 partial class rand_package {
 
@@ -26,14 +27,16 @@ public static ж<PCG> NewPCG(uint64 seed1, uint64 seed2) {
     return Ꮡ(new PCG(seed1, seed2));
 }
 
+} partial class randᴛPCG {
+
 // Seed resets the PCG to behave the same way as NewPCG(seed1, seed2).
-internal static void Seed⁔(/*this*/ ref PCG p, uint64 seed1, uint64 seed2) {
+public static void Seed(this ref PCG p, uint64 seed1, uint64 seed2) {
     p.hi = seed1;
     p.lo = seed2;
 }
 
 // AppendBinary implements the [encoding.BinaryAppender] interface.
-internal static (slice<byte>, error) AppendBinary⁔(/*this*/ ref PCG p, slice<byte> b) {
+public static (slice<byte>, error) AppendBinary(this ref PCG p, slice<byte> b) {
     b = append(b, ((@string)"pcg:").ꓸꓸꓸ);
     b = byteorder.BEAppendUint64(b, p.hi);
     b = byteorder.BEAppendUint64(b, p.lo);
@@ -41,14 +44,18 @@ internal static (slice<byte>, error) AppendBinary⁔(/*this*/ ref PCG p, slice<b
 }
 
 // MarshalBinary implements the [encoding.BinaryMarshaler] interface.
-internal static (slice<byte>, error) MarshalBinary⁔(/*this*/ ref PCG p) {
+public static (slice<byte>, error) MarshalBinary(this ref PCG p) {
     return p.AppendBinary(new slice<byte>(0, 20));
 }
 
+} partial class rand_package {
+
 internal static error errUnmarshalPCG = errors.New("invalid PCG encoding");
 
+} partial class randᴛPCG {
+
 // UnmarshalBinary implements the [encoding.BinaryUnmarshaler] interface.
-internal static error UnmarshalBinary⁔(/*this*/ ref PCG p, slice<byte> data) {
+public static error UnmarshalBinary(this ref PCG p, slice<byte> data) {
     if (len(data) != 20 || ((sstring)(data[..4])) != "pcg:"u8) {
         return errUnmarshalPCG;
     }
@@ -57,7 +64,7 @@ internal static error UnmarshalBinary⁔(/*this*/ ref PCG p, slice<byte> data) {
     return default;
 }
 
-internal static (uint64 hi, uint64 lo) next⁔(/*this*/ ref PCG p) {
+internal static (uint64 hi, uint64 lo) next(this ref PCG p) {
     uint64 hi = default;
     uint64 lo = default;
 
@@ -85,7 +92,7 @@ internal static (uint64 hi, uint64 lo) next⁔(/*this*/ ref PCG p) {
 }
 
 // Uint64 return a uniformly-distributed random uint64 value.
-internal static uint64 Uint64⁔(/*this*/ ref PCG p) {
+public static uint64 Uint64(this ref PCG p) {
     var (hi, lo) = p.next();
 
     // XSL-RR would be
@@ -107,4 +114,4 @@ internal static uint64 Uint64⁔(/*this*/ ref PCG p) {
     return hi;
 }
 
-} // end rand_package
+}

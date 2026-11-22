@@ -137,6 +137,7 @@ using fs = go.io.fs_package;
 using time = time_package;
 using @internal;
 using go.io;
+using static embed_package;
 
 partial class embed_package {
 
@@ -216,40 +217,46 @@ partial struct @file {
 internal static fs.FileInfo _ᴛ3ʗ = new fileжFileInfo(((ж<@file>)nil));
 internal static fs.DirEntry _ᴛ4ʗ = new fileжDirEntry(((ж<@file>)nil));
 
-internal static @string Name⁔(/*this*/ ref @file f) {
+} partial class embedᴛfile {
+
+internal static @string Name(this ref @file f) {
     var (_, elem, _) = split(f.name);
     return elem;
 }
 
-internal static int64 Size⁔(/*this*/ ref @file f) { return (int64)len(f.data); }
-internal static time.Time ModTime⁔(/*this*/ ref @file f) { return new time.Time(); }
+internal static int64 Size(this ref @file f) { return (int64)len(f.data); }
+internal static time.Time ModTime(this ref @file f) { return new time.Time(); }
 
-internal static bool IsDir⁔(/*this*/ ref @file f) {
+internal static bool IsDir(this ref @file f) {
     var (_, _, isDir) = split(f.name);
     return isDir;
 }
 
-internal static any Sys⁔(/*this*/ ref @file f) { return default; }
-internal static fs.FileMode Type⁔(/*this*/ ref @file f) { return f.Mode().Type(); }
-internal static (fs.FileInfo, error) Info⁔(/*this*/ ж<@file> Ꮡf) { return (new fileжFileInfo(Ꮡf), default); }
+internal static any Sys(this ref @file f) { return default; }
+internal static fs.FileMode Type(this ref @file f) { return f.Mode().Type(); }
+internal static (fs.FileInfo, error) Info(this ж<@file> Ꮡf) { return (new fileжFileInfo(Ꮡf), default); }
 
-internal static fs.FileMode Mode⁔(/*this*/ ref @file f) {
+internal static fs.FileMode Mode(this ref @file f) {
     if (f.IsDir()) {
         return (fs.FileMode)(fs.ModeDir | 365);
     }
     return 292;
 }
 
-internal static @string String⁔(/*this*/ ж<@file> Ꮡf) {
+internal static @string String(this ж<@file> Ꮡf) {
     return fs.FormatFileInfo(new fileжFileInfo(Ꮡf));
 }
+
+} partial class embed_package {
 
 // dotFile is a file for the root directory,
 // which is omitted from the files list in a FS.
 internal static ж<@file> dotFile = Ꮡ(new @file(name: "./"));
 
+} partial class embedᴛFS {
+
 // lookup returns the named file, or nil if it is not present.
-internal static ж<@file> lookup⁔(/*this*/ FS f, @string name) {
+internal static ж<@file> lookup(this FS f, @string name) {
     if (!fs.ValidPath(name)) {
         // The compiler should never emit a file with an invalid name,
         // so this check is not strictly necessary (if name is invalid,
@@ -279,7 +286,7 @@ internal static ж<@file> lookup⁔(/*this*/ FS f, @string name) {
 }
 
 // readDir returns the list of files corresponding to the directory dir.
-internal static slice<@file> readDir⁔(/*this*/ FS f, @string dir) {
+internal static slice<@file> readDir(this FS f, @string dir) {
     if (f.files == nil) {
         return default;
     }
@@ -302,7 +309,7 @@ internal static slice<@file> readDir⁔(/*this*/ FS f, @string dir) {
 // Open opens the named file for reading and returns it as an [fs.File].
 //
 // The returned file implements [io.Seeker] and [io.ReaderAt] when the file is not a directory.
-internal static (fs.File, error) Open⁔(/*this*/ FS f, @string name) {
+public static (fs.File, error) Open(this FS f, @string name) {
     var @file = f.lookup(name);
     if (@file == nil) {
         return (default, new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "open", Path: name, Err: fs.ErrNotExist))));
@@ -318,7 +325,7 @@ private static ref readonly @string notADirectoryˢ => ref notADirectoryˢᵇ;
 private static readonly @string notADirectoryˢᵇ = "not a directory"u8;
 
 // ReadDir reads and returns the entire named directory.
-internal static (slice<fs.DirEntry>, error) ReadDir⁔(/*this*/ FS f, @string name) {
+public static (slice<fs.DirEntry>, error) ReadDir(this FS f, @string name) {
     var (@file, err) = f.Open(name);
     if (err != nil) {
         return (default, err);
@@ -339,7 +346,7 @@ private static ref readonly @string isADirectoryˢ => ref isADirectoryˢᵇ;
 private static readonly @string isADirectoryˢᵇ = "is a directory"u8;
 
 // ReadFile reads and returns the content of the named file.
-internal static (slice<byte>, error) ReadFile⁔(/*this*/ FS f, @string name) {
+public static (slice<byte>, error) ReadFile(this FS f, @string name) {
     var (@file, err) = f.Open(name);
     if (err != nil) {
         return (default, err);
@@ -351,6 +358,8 @@ internal static (slice<byte>, error) ReadFile⁔(/*this*/ FS f, @string name) {
     return (slice<byte>(ofile.f.data), default);
 }
 
+} partial class embed_package {
+
 // An openFile is a regular file open for reading.
 partial struct openFile {
     internal ж<@file> f;   // the file itself
@@ -360,10 +369,12 @@ partial struct openFile {
 internal static Δio.Seeker _ᴛ5ʗ = new openFileжSeeker(((ж<openFile>)nil));
 internal static Δio.ReaderAt _ᴛ6ʗ = new openFileжReaderAt(((ж<openFile>)nil));
 
-internal static error Close⁔(/*this*/ ref openFile f) { return default; }
-internal static (fs.FileInfo, error) Stat⁔(/*this*/ ref openFile f) { return (new fileжFileInfo(f.f), default); }
+} partial class embedᴛopenFile {
 
-internal static (nint, error) Read⁔(/*this*/ ref openFile f, slice<byte> b) {
+internal static error Close(this ref openFile f) { return default; }
+internal static (fs.FileInfo, error) Stat(this ref openFile f) { return (new fileжFileInfo(f.f), default); }
+
+internal static (nint, error) Read(this ref openFile f, slice<byte> b) {
     if (f.offset >= (int64)len(f.f.data)) {
         return (0, Δio.EOF);
     }
@@ -375,7 +386,7 @@ internal static (nint, error) Read⁔(/*this*/ ref openFile f, slice<byte> b) {
     return (n, default);
 }
 
-internal static (int64, error) Seek⁔(/*this*/ ref openFile f, int64 offset, nint whence) {
+internal static (int64, error) Seek(this ref openFile f, int64 offset, nint whence) {
     switch (whence) {
     case 0: {
         // offset += 0
@@ -396,7 +407,7 @@ internal static (int64, error) Seek⁔(/*this*/ ref openFile f, int64 offset, ni
     return (offset, default);
 }
 
-internal static (nint, error) ReadAt⁔(/*this*/ ref openFile f, slice<byte> b, int64 offset) {
+internal static (nint, error) ReadAt(this ref openFile f, slice<byte> b, int64 offset) {
     if (offset < 0 || offset > (int64)len(f.f.data)) {
         return (0, new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "read", Path: f.f.name, Err: fs.ErrInvalid))));
     }
@@ -407,6 +418,8 @@ internal static (nint, error) ReadAt⁔(/*this*/ ref openFile f, slice<byte> b, 
     return (n, default);
 }
 
+} partial class embed_package {
+
 // An openDir is a directory open for reading.
 partial struct openDir {
     internal ж<@file> f;         // the directory file itself
@@ -414,14 +427,20 @@ partial struct openDir {
     internal nint offset;        // the read offset, an index into the files slice
 }
 
-internal static error Close⁔(/*this*/ ref openDir d) { return default; }
-internal static (fs.FileInfo, error) Stat⁔(/*this*/ ref openDir d) { return (new fileжFileInfo(d.f), default); }
+} partial class embedᴛopenDir {
 
-internal static (nint, error) Read⁔(/*this*/ ref openDir d, slice<byte> _) {
+internal static error Close(this ref openDir d) { return default; }
+internal static (fs.FileInfo, error) Stat(this ref openDir d) { return (new fileжFileInfo(d.f), default); }
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+private static ref readonly @string isADirectoryˢ => ref isADirectoryˢᵇ;
+private static readonly @string isADirectoryˢᵇ = "is a directory"u8;
+
+internal static (nint, error) Read(this ref openDir d, slice<byte> _) {
     return (0, new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "read", Path: d.f.name, Err: errors.New(isADirectoryˢ)))));
 }
 
-internal static (slice<fs.DirEntry>, error) ReadDir⁔(/*this*/ ref openDir d, nint count) {
+internal static (slice<fs.DirEntry>, error) ReadDir(this ref openDir d, nint count) {
     nint n = len(d.files) - d.offset;
     if (n == 0) {
         if (count <= 0) {
@@ -439,6 +458,8 @@ internal static (slice<fs.DirEntry>, error) ReadDir⁔(/*this*/ ref openDir d, n
     d.offset += n;
     return (list, default);
 }
+
+} partial class embed_package {
 
 // sortSearch is like sort.Search, avoiding an import.
 internal static nint sortSearch(nint n, Func<nint, bool> f) {

@@ -1,5 +1,7 @@
 namespace go.AnonLiftOnePerType;
 
+using static lib_package;
+
 partial class lib_package {
 
 partial interface Option {
@@ -14,8 +16,12 @@ partial struct both {
     internal nint n;
 }
 
-internal static nint A⁔(/*this*/ ref both b) { return b.n; }
-internal static nint B⁔(/*this*/ ref both b) { return b.n * 2; }
+} partial class libᴛboth {
+
+internal static nint A(this ref both b) { return b.n; }
+internal static nint B(this ref both b) { return b.n * 2; }
+
+} partial class lib_package {
 
 public partial interface With_R0 /*dyn*/ :
     Option,

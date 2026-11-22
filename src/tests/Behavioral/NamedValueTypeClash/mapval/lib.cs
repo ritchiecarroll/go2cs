@@ -1,13 +1,17 @@
 namespace go.NamedValueTypeClash;
 
+using static mapval_package;
+
 partial class mapval_package {
 
 partial struct Value /*map[@string, nint]*/;
 
-internal static nint Count⁔(/*this*/ Value v) { return len(v); }
+} partial class mapvalᴛValue {
 
-internal static nint Get⁔(/*this*/ Value v, @string k) { return v[k]; }
+public static nint Count(this Value v) { return len(v); }
 
-internal static void Put⁔(/*this*/ ref Value v, @string k, nint x) { (v)[k] = x; }
+public static nint Get(this Value v, @string k) { return v[k]; }
 
-} // end mapval_package
+public static void Put(this ref Value v, @string k, nint x) { (v)[k] = x; }
+
+}

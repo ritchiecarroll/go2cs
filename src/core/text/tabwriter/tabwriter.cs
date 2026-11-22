@@ -15,6 +15,7 @@ using fmt = fmt_package;
 using io = io_package;
 using utf8 = unicode.utf8_package;
 using unicode;
+using static tabwriter_package;
 
 partial class tabwriter_package {
 
@@ -105,10 +106,12 @@ partial struct Writer {
     internal slice<nint> widths;       // list of column widths in runes - re-used during formatting
 }
 
+} partial class tabwriterᴛWriter {
+
 // addLine adds a new line.
 // flushed is a hint indicating whether the underlying writer was just flushed.
 // If so, the previous line is not likely to be a good indicator of the new line's cells.
-internal static void addLine⁔(/*this*/ ref Writer b, bool flushed) {
+internal static void addLine(this ref Writer b, bool flushed) {
     // Grow slice instead of appending,
     // as that gives us an opportunity
     // to re-use an existing []cell.
@@ -117,7 +120,7 @@ internal static void addLine⁔(/*this*/ ref Writer b, bool flushed) {
             b.lines = b.lines.slice(0, n);
             b.lines[n - 1] = b.lines[n - 1][..0];
         } else {
-            b.lines = append(b.lines, (slice<cell>)(default));
+            b.lines = builtin.append(b.lines, (slice<cell>)(default));
         }
     }
 
@@ -135,7 +138,7 @@ internal static void addLine⁔(/*this*/ ref Writer b, bool flushed) {
 }
 
 // Reset the current state.
-internal static void reset⁔(/*this*/ ref Writer b) {
+internal static void reset(this ref Writer b) {
     b.buf = b.buf[..0];
     b.pos = 0;
     b.cell = new cell();
@@ -144,6 +147,8 @@ internal static void reset⁔(/*this*/ ref Writer b) {
     b.widths = b.widths[0..0];
     b.addLine(true);
 }
+
+} partial class tabwriter_package {
 
 // Internal representation (current state):
 //
@@ -193,6 +198,8 @@ public const nuint TabIndent = 16;
 // Discarded columns appear as zero-width columns ("||").
 public const nuint Debug = 32;
 
+} partial class tabwriterᴛWriter {
+
 // A [Writer] must be initialized with a call to Init. The first parameter (output)
 // specifies the filter output. The remaining parameters control the formatting:
 //
@@ -206,7 +213,7 @@ public const nuint Debug = 32;
 //			(for correct-looking results, tabwidth must correspond
 //			to the tab width in the viewer displaying the result)
 //	flags		formatting control
-internal static ж<Writer> Init⁔(/*this*/ ж<Writer> Ꮡb, io.Writer output, nint minwidth, nint tabwidth, nint padding, byte padchar, nuint flags) {
+public static ж<Writer> Init(this ж<Writer> Ꮡb, io.Writer output, nint minwidth, nint tabwidth, nint padding, byte padchar, nuint flags) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     if (minwidth < 0 || tabwidth < 0 || padding < 0) {
@@ -231,7 +238,7 @@ internal static ж<Writer> Init⁔(/*this*/ ж<Writer> Ꮡb, io.Writer output, n
 }
 
 // debugging support (keep code around)
-internal static void dump⁔(/*this*/ ref Writer b) {
+internal static void dump(this ref Writer b) {
     nint pos = 0;
     foreach (var (i, line) in range(b.lines)) {
         print((@string)"(", i, (@string)") ");
@@ -244,13 +251,17 @@ internal static void dump⁔(/*this*/ ref Writer b) {
     print((@string)"\n");
 }
 
+} partial class tabwriter_package {
+
 // local error wrapper so we can distinguish errors we want to return
 // as errors from genuine panics (which we don't want to return as errors)
 partial struct osError {
     internal error err;
 }
 
-internal static void write0⁔(/*this*/ ref Writer b, slice<byte> buf) {
+} partial class tabwriterᴛWriter {
+
+internal static void write0(this ref Writer b, slice<byte> buf) {
     var (n, err) = b.output.Write(buf);
     if (n != len(buf) && err == nil) {
         err = io.ErrShortWrite;
@@ -260,7 +271,7 @@ internal static void write0⁔(/*this*/ ref Writer b, slice<byte> buf) {
     }
 }
 
-internal static void writeN⁔(/*this*/ ref Writer b, slice<byte> src, nint n) {
+internal static void writeN(this ref Writer b, slice<byte> src, nint n) {
     while (n > len(src)) {
         b.write0(src);
         n -= len(src);
@@ -268,10 +279,14 @@ internal static void writeN⁔(/*this*/ ref Writer b, slice<byte> src, nint n) {
     b.write0(src.slice(0, n));
 }
 
+} partial class tabwriter_package {
+
 internal static slice<byte> newline = [(byte)'\n'];
 internal static slice<byte> tabs = slice<byte>("\t\t\t\t\t\t\t\t"u8);
 
-internal static void writePadding⁔(/*this*/ ref Writer b, nint textw, nint cellw, bool useTabs) {
+} partial class tabwriterᴛWriter {
+
+internal static void writePadding(this ref Writer b, nint textw, nint cellw, bool useTabs) {
     if (b.padbytes[0] == '\t' || useTabs) {
         // padding is done with tabs
         if (b.tabwidth == 0) {
@@ -291,9 +306,13 @@ internal static void writePadding⁔(/*this*/ ref Writer b, nint textw, nint cel
     b.writeN(b.padbytes[0..], cellw - textw);
 }
 
+} partial class tabwriter_package {
+
 internal static slice<byte> vbar = [(byte)'|'];
 
-internal static nint /*pos*/ writeLines⁔(/*this*/ ref Writer b, nint pos0, nint line0, nint line1) {
+} partial class tabwriterᴛWriter {
+
+internal static nint /*pos*/ writeLines(this ref Writer b, nint pos0, nint line0, nint line1) {
     nint pos = default;
 
     pos = pos0;
@@ -350,7 +369,7 @@ internal static nint /*pos*/ writeLines⁔(/*this*/ ref Writer b, nint pos0, nin
 // is the buffer position corresponding to the beginning of line0.
 // Returns the buffer position corresponding to the beginning of
 // line1 and an error, if any.
-internal static nint /*pos*/ format⁔(/*this*/ ref Writer b, nint pos0, nint line0, nint line1) {
+internal static nint /*pos*/ format(this ref Writer b, nint pos0, nint line0, nint line1) {
     nint pos = default;
 
     pos = pos0;
@@ -400,7 +419,7 @@ internal static nint /*pos*/ format⁔(/*this*/ ref Writer b, nint pos0, nint li
 
         // format and print all columns to the right of this column
         // (we know the widths of this column and all columns to the left)
-        b.widths = append(b.widths, width); // push width
+        b.widths = builtin.append(b.widths, width); // push width
         pos = b.format(pos, line0, @this);
         b.widths = b.widths.slice(0, len(b.widths) - 1); // pop width
         line0 = @this;
@@ -411,16 +430,18 @@ internal static nint /*pos*/ format⁔(/*this*/ ref Writer b, nint pos0, nint li
 }
 
 // Append text to current cell.
-internal static void append⁔(/*this*/ ref Writer b, slice<byte> text) {
-    b.buf = appendꓸꓸꓸ(b.buf, text);
+internal static void append(this ref Writer b, slice<byte> text) {
+    b.buf = builtin.appendꓸꓸꓸ(b.buf, text);
     b.cell.size += len(text);
 }
 
 // Update the cell width.
-internal static void updateWidth⁔(/*this*/ ref Writer b) {
+internal static void updateWidth(this ref Writer b) {
     b.cell.width += utf8.RuneCount(b.buf.slice(b.pos));
     b.pos = len(b.buf);
 }
+
+} partial class tabwriter_package {
 
 // To escape a text segment, bracket it with Escape characters.
 // For instance, the tab in this string "Ignore this tab: \xff\t\xff"
@@ -430,8 +451,10 @@ internal static void updateWidth⁔(/*this*/ ref Writer b) {
 // The value 0xff was chosen because it cannot appear in a valid UTF-8 sequence.
 public static UntypedInt Escape => /* '\xff' */ 255;
 
+} partial class tabwriterᴛWriter {
+
 // Start escaped mode.
-internal static void startEscape⁔(/*this*/ ref Writer b, byte ch) {
+internal static void startEscape(this ref Writer b, byte ch) {
     switch (ch) {
     case var ᴛ when ᴛ == Escape: {
         b.endChar = Escape;
@@ -451,7 +474,7 @@ internal static void startEscape⁔(/*this*/ ref Writer b, byte ch) {
 // is assumed to be zero for formatting purposes; if it was an HTML entity,
 // its width is assumed to be one. In all other cases, the width is the
 // unicode width of the text.
-internal static void endEscape⁔(/*this*/ ref Writer b) {
+internal static void endEscape(this ref Writer b) {
     switch (b.endChar) {
     case var ᴛ when ᴛ == Escape: {
         b.updateWidth();
@@ -473,15 +496,15 @@ internal static void endEscape⁔(/*this*/ ref Writer b) {
 
 // Terminate the current cell by adding it to the list of cells of the
 // current line. Returns the number of cells in that line.
-internal static nint terminateCell⁔(/*this*/ ref Writer b, bool htab) {
+internal static nint terminateCell(this ref Writer b, bool htab) {
     b.cell.htab = htab;
     var line = Ꮡ(b.lines, len(b.lines) - 1);
-    line.ValueSlot = append(line.ValueSlot, b.cell);
+    line.ValueSlot = builtin.append(line.ValueSlot, b.cell);
     b.cell = new cell();
     return len(line.ValueSlot);
 }
 
-internal static void handlePanic⁔(/*this*/ ж<Writer> Ꮡb, ж<error> Ꮡerr, @string op) {
+internal static void handlePanic(this ж<Writer> Ꮡb, ж<error> Ꮡerr, @string op) {
     GoFrame ᒐ = default;
     try {
         var calledByDefer = GoFrame.TakeDeferredCall(); // Go: is this call the deferred one?
@@ -508,7 +531,7 @@ internal static void handlePanic⁔(/*this*/ ж<Writer> Ꮡb, ж<error> Ꮡerr, 
 // that any data buffered in the [Writer] is written to output. Any
 // incomplete escape sequence at the end is considered
 // complete for formatting purposes.
-internal static error Flush⁔(/*this*/ ж<Writer> Ꮡb) {
+public static error Flush(this ж<Writer> Ꮡb) {
     return Ꮡb.flush();
 }
 
@@ -518,7 +541,7 @@ private static readonly @string flushˢᵇ = "Flush"u8;
 
 // flush is the internal version of Flush, with a named return value which we
 // don't want to expose.
-internal static error /*err*/ flush⁔(/*this*/ ж<Writer> Ꮡb) {
+internal static error /*err*/ flush(this ж<Writer> Ꮡb) {
     heap<error>(out var Ꮡerr);
     GoFrame ᒐ = default;
     try {
@@ -537,7 +560,7 @@ internal static error /*err*/ flush⁔(/*this*/ ж<Writer> Ꮡb) {
 // flushNoDefers is like flush, but without a deferred handlePanic call. This
 // can be called from other methods which already have their own deferred
 // handlePanic calls, such as Write, and avoid the extra defer work.
-internal static void flushNoDefers⁔(/*this*/ ref Writer b) {
+internal static void flushNoDefers(this ref Writer b) {
     // add current cell if not empty
     if (b.cell.size > 0) {
         if (b.endChar != 0) {
@@ -552,7 +575,11 @@ internal static void flushNoDefers⁔(/*this*/ ref Writer b) {
     b.reset();
 }
 
+} partial class tabwriter_package {
+
 internal static slice<byte> hbar = slice<byte>("---\n"u8);
+
+} partial class tabwriterᴛWriter {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static ref readonly @string writeˢ => ref writeˢᵇ;
@@ -561,7 +588,7 @@ private static readonly @string writeˢᵇ = "Write"u8;
 // Write writes buf to the writer b.
 // The only errors returned are ones encountered
 // while writing to the underlying output stream.
-internal static (nint n, error err) Write⁔(/*this*/ ж<Writer> Ꮡb, slice<byte> buf) {
+public static (nint n, error err) Write(this ж<Writer> Ꮡb, slice<byte> buf) {
     nint n = default;
     heap<error>(out var Ꮡerr);
     GoFrame ᒐ = default;
@@ -646,6 +673,8 @@ internal static (nint n, error err) Write⁔(/*this*/ ж<Writer> Ꮡb, slice<byt
     finally { ᒐ.Run(); }
     return (n, Ꮡerr.ValueSlot);
 }
+
+} partial class tabwriter_package {
 
 // NewWriter allocates and initializes a new [Writer].
 // The parameters are the same as for the Init function.

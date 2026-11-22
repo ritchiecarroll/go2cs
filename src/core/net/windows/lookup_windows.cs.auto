@@ -17,6 +17,7 @@ using syscall = syscall_package;
 using time = time_package;
 using @unsafe = unsafe_package;
 using @internal.syscall;
+using static net_package;
 
 partial class net_package {
 
@@ -95,7 +96,9 @@ internal static partial (nint, error) lookupProtocol(context.Context ctx, @strin
     return default;
 }
 
-internal static (slice<@string>, error) lookupHost⁔(/*this*/ ж<Resolver> Ꮡr, context.Context ctx, @string name) {
+} partial class netᴛResolver {
+
+internal static (slice<@string>, error) lookupHost(this ж<Resolver> Ꮡr, context.Context ctx, @string name) {
     var (ips, err) = Ꮡr.lookupIP(ctx, "ip"u8, name);
     if (err != nil) {
         return (default, err);
@@ -110,12 +113,16 @@ internal static (slice<@string>, error) lookupHost⁔(/*this*/ ж<Resolver> Ꮡr
     return (addrs, default);
 }
 
+} partial class net_package {
+
 [GoLocalName("ret")] internal partial struct lookupIP_ret /*dyn*/ {
     internal slice<IPAddr> addrs;
     internal error err;
 }
 
-internal static partial (slice<IPAddr>, error) lookupIP⁔(/*this*/ ж<Resolver> Ꮡr, context.Context ctx, @string network, @string name) {
+} partial class netᴛResolver {
+
+internal static partial (slice<IPAddr>, error) lookupIP(this ж<Resolver> Ꮡr, context.Context ctx, @string network, @string name) {
     var (order, conf) = systemConf().hostLookupOrder(Ꮡr, name); if (order != hostLookupCgo) {
         return Ꮡr.goLookupIP(ctx, network, name, order, conf);
     }
@@ -221,7 +228,7 @@ internal static partial (slice<IPAddr>, error) lookupIP⁔(/*this*/ ж<Resolver>
     return default;
 }
 
-internal static (nint, error) lookupPort⁔(/*this*/ ж<Resolver> Ꮡr, context.Context ctx, @string network, @string service) {
+internal static (nint, error) lookupPort(this ж<Resolver> Ꮡr, context.Context ctx, @string network, @string service) {
     GoFrame ᒐ = default;
     try {
         if (systemConf().mustUseGoResolver(Ꮡr)) {
@@ -306,7 +313,7 @@ internal static (nint, error) lookupPort⁔(/*this*/ ж<Resolver> Ꮡr, context.
     finally { ᒐ.Run(); }
 }
 
-internal static (@string, error) lookupCNAME⁔(/*this*/ ж<Resolver> Ꮡr, context.Context ctx, @string name) {
+internal static (@string, error) lookupCNAME(this ж<Resolver> Ꮡr, context.Context ctx, @string name) {
     GoFrame ᒐ = default;
     try {
         var (order, conf) = systemConf().hostLookupOrder(Ꮡr, name); if (order != hostLookupCgo) {
@@ -343,7 +350,7 @@ internal static (@string, error) lookupCNAME⁔(/*this*/ ж<Resolver> Ꮡr, cont
     finally { ᒐ.Run(); }
 }
 
-internal static (@string, slice<ж<SRV>>, error) lookupSRV⁔(/*this*/ ж<Resolver> Ꮡr, context.Context ctx, @string service, @string proto, @string name) {
+internal static (@string, slice<ж<SRV>>, error) lookupSRV(this ж<Resolver> Ꮡr, context.Context ctx, @string service, @string proto, @string name) {
     GoFrame ᒐ = default;
     try {
         if (systemConf().mustUseGoResolver(Ꮡr)) {
@@ -379,7 +386,7 @@ internal static (@string, slice<ж<SRV>>, error) lookupSRV⁔(/*this*/ ж<Resolv
     finally { ᒐ.Run(); }
 }
 
-internal static (slice<ж<MX>>, error) lookupMX⁔(/*this*/ ж<Resolver> Ꮡr, context.Context ctx, @string name) {
+internal static (slice<ж<MX>>, error) lookupMX(this ж<Resolver> Ꮡr, context.Context ctx, @string name) {
     GoFrame ᒐ = default;
     try {
         if (systemConf().mustUseGoResolver(Ꮡr)) {
@@ -409,7 +416,7 @@ internal static (slice<ж<MX>>, error) lookupMX⁔(/*this*/ ж<Resolver> Ꮡr, c
     finally { ᒐ.Run(); }
 }
 
-internal static (slice<ж<NS>>, error) lookupNS⁔(/*this*/ ж<Resolver> Ꮡr, context.Context ctx, @string name) {
+internal static (slice<ж<NS>>, error) lookupNS(this ж<Resolver> Ꮡr, context.Context ctx, @string name) {
     GoFrame ᒐ = default;
     try {
         if (systemConf().mustUseGoResolver(Ꮡr)) {
@@ -438,7 +445,7 @@ internal static (slice<ж<NS>>, error) lookupNS⁔(/*this*/ ж<Resolver> Ꮡr, c
     finally { ᒐ.Run(); }
 }
 
-internal static (slice<@string>, error) lookupTXT⁔(/*this*/ ж<Resolver> Ꮡr, context.Context ctx, @string name) {
+internal static (slice<@string>, error) lookupTXT(this ж<Resolver> Ꮡr, context.Context ctx, @string name) {
     GoFrame ᒐ = default;
     try {
         if (systemConf().mustUseGoResolver(Ꮡr)) {
@@ -471,7 +478,7 @@ internal static (slice<@string>, error) lookupTXT⁔(/*this*/ ж<Resolver> Ꮡr,
     finally { ᒐ.Run(); }
 }
 
-internal static (slice<@string>, error) lookupAddr⁔(/*this*/ ж<Resolver> Ꮡr, context.Context ctx, @string addr) {
+internal static (slice<@string>, error) lookupAddr(this ж<Resolver> Ꮡr, context.Context ctx, @string addr) {
     GoFrame ᒐ = default;
     try {
         var (order, conf) = systemConf().addrLookupOrder(Ꮡr, addr); if (order != hostLookupCgo) {
@@ -504,6 +511,8 @@ internal static (slice<@string>, error) lookupAddr⁔(/*this*/ ж<Resolver> Ꮡr
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
+
+} partial class net_package {
 
 internal static UntypedInt dnsSectionMask => 0x0003;
 

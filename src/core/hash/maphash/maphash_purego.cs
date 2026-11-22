@@ -13,6 +13,7 @@ using reflect = reflect_package;
 using @internal;
 using crypto;
 using go.math;
+using static maphash_package;
 
 partial class maphash_package {
 
@@ -193,7 +194,9 @@ internal static void appendT(ж<Hash> Ꮡh, reflect.Value v) {
     throw panic(errors.New("maphash: hash of unhashable type "u8 + v.Type().String()));
 }
 
-internal static void float64⁔(/*this*/ ref Hash h, float64 f) {
+} partial class maphashᴛHash {
+
+internal static void float64(this ref Hash h, float64 f) {
     if (f == 0D) {
         h.WriteByte(0);
         return;
@@ -207,6 +210,8 @@ internal static void float64⁔(/*this*/ ref Hash h, float64 f) {
     byteorder.LEPutUint64(buf[..], math.Float64bits(f));
     h.Write(buf[..]);
 }
+
+} partial class maphash_package {
 
 internal static byte btoi(bool b) {
     if (b) {

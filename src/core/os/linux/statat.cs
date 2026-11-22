@@ -6,10 +6,13 @@ namespace go;
 
 using testlog = @internal.testlog_package;
 using @internal;
+using static os_package;
 
 partial class os_package {
 
-internal static (FileInfo, error) lstatat⁔(/*this*/ ж<File> Ꮡf, @string name) {
+} partial class osᴛFile {
+
+internal static (FileInfo, error) lstatat(this ж<File> Ꮡf, @string name) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     if (stathook != nil) {
@@ -24,4 +27,4 @@ internal static (FileInfo, error) lstatat⁔(/*this*/ ж<File> Ꮡf, @string nam
     return Ꮡf.lstatatNolog(name);
 }
 
-} // end os_package
+}

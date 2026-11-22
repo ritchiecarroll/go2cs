@@ -13,6 +13,7 @@ using errors = errors_package;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140;
 using go.crypto.@internal.fips140deps;
+using static mldsa_package;
 
 partial class mldsa_package {
 
@@ -65,22 +66,26 @@ partial struct PrivateKey {
     internal array<byte> k = new(32);
 }
 
-internal static bool Equal⁔(/*this*/ ref PrivateKey priv, ж<PrivateKey> Ꮡx) {
+} partial class mldsaᴛPrivateKey {
+
+public static bool Equal(this ref PrivateKey priv, ж<PrivateKey> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     return priv.pub.p == x.pub.p && subtle.ConstantTimeCompare(priv.seed[..], x.seed[..]) == 1;
 }
 
-internal static slice<byte> Bytes⁔(/*this*/ ref PrivateKey priv) {
+public static slice<byte> Bytes(this ref PrivateKey priv) {
     var seed = priv.seed.Clone();
     return seed[..];
 }
 
-internal static ж<PublicKey> PublicKey⁔(/*this*/ ж<PrivateKey> Ꮡpriv) {
+public static ж<PublicKey> PublicKey(this ж<PrivateKey> Ꮡpriv) {
     // Note that this is likely to keep the entire PrivateKey reachable for
     // the lifetime of the PublicKey, which may be undesirable.
     return Ꮡpriv.Ꮡpub;
 }
+
+} partial class mldsa_package {
 
 partial struct PublicKey {
     internal array<byte> raw = new(maxPubKeySize);
@@ -90,14 +95,16 @@ partial struct PublicKey {
     internal array<byte> tr = new(64);         // public key hash
 }
 
-internal static bool Equal⁔(/*this*/ ref PublicKey pub, ж<PublicKey> Ꮡx) {
+} partial class mldsaᴛPublicKey {
+
+public static bool Equal(this ref PublicKey pub, ж<PublicKey> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     nint size = pubKeySize(pub.p);
     return pub.p == x.p && subtle.ConstantTimeCompare(pub.raw.slice(0, size), x.raw.slice(0, size)) == 1;
 }
 
-internal static slice<byte> Bytes⁔(/*this*/ ref PublicKey pub) {
+public static slice<byte> Bytes(this ref PublicKey pub) {
     nint size = pubKeySize(pub.p);
     return bytes.Clone(pub.raw.slice(0, size));
 }
@@ -110,7 +117,7 @@ private static readonly @string mlDsa65ˢᵇ = "ML-DSA-65"u8;
 internal static ref readonly @string mlDsa87ˢ => ref mlDsa87ˢᵇ;
 private static readonly @string mlDsa87ˢᵇ = "ML-DSA-87"u8;
 
-internal static @string Parameters⁔(/*this*/ ref PublicKey pub) {
+public static @string Parameters(this ref PublicKey pub) {
     switch (pub.p) {
     case var ᴛ when ᴛ == params44: {
         return mlDsa44ˢ;
@@ -126,6 +133,8 @@ internal static @string Parameters⁔(/*this*/ ref PublicKey pub) {
         break;
     }}
 }
+
+} partial class mldsa_package {
 
 public static ж<PrivateKey> GenerateKey44() {
     fipsSelfTest();

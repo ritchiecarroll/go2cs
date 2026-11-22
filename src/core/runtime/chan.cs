@@ -21,7 +21,9 @@ using sys = @internal.runtime.sys_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
-using System.Runtime.CompilerServices;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
+using static runtime_package;
 
 partial class runtime_package {
 
@@ -946,7 +948,9 @@ internal static void reflect_chanclose(ж<hchan> c) {
     closechan(c);
 }
 
-internal static void enqueue⁔(/*this*/ ref waitq q, ж<sudog> Ꮡsgp) {
+} partial class runtimeᴛwaitq {
+
+internal static void enqueue(this ref waitq q, ж<sudog> Ꮡsgp) {
     ref var sgp = ref Ꮡsgp.DerefOrNull();
 
     sgp.next = default;
@@ -962,7 +966,7 @@ internal static void enqueue⁔(/*this*/ ref waitq q, ж<sudog> Ꮡsgp) {
     q.last = Ꮡsgp;
 }
 
-internal static ж<sudog> dequeue⁔(/*this*/ ref waitq q) {
+internal static ж<sudog> dequeue(this ref waitq q) {
     for (;;) {
         var sgp = q.first;
         if (sgp == nil) {
@@ -997,7 +1001,9 @@ internal static ж<sudog> dequeue⁔(/*this*/ ref waitq q) {
     }
 }
 
-internal static @unsafe.Pointer raceaddr⁔(/*this*/ ж<hchan> Ꮡc) {
+} partial class runtimeᴛhchan {
+
+internal static @unsafe.Pointer raceaddr(this ж<hchan> Ꮡc) {
     // Treat read-like and write-like operations on the channel to
     // happen at this address. Avoid using the address of qcount
     // or dataqsiz, because the len() and cap() builtins read
@@ -1005,6 +1011,8 @@ internal static @unsafe.Pointer raceaddr⁔(/*this*/ ж<hchan> Ꮡc) {
     // operations like close().
     return @unsafe.Pointer.FromBox(Ꮡc.Ꮡbuf);
 }
+
+} partial class runtime_package {
 
 internal static void racesync(ж<hchan> c, ref sudog sg) {
     racerelease(chanbuf(c, 0));

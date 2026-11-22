@@ -18,6 +18,7 @@ using strings = strings_package;
 using sync = sync_package;
 using go.@internal;
 using go.net;
+using static http_package;
 
 partial class http_package {
 
@@ -47,8 +48,10 @@ partial struct muxEntry {
     internal @string pattern;
 }
 
+} partial class httpᴛserveMux121 {
+
 // Formerly ServeMux.Handle.
-internal static void handle⁔(/*this*/ ж<serveMux121> Ꮡmux, @string pattern, Handler handler) {
+internal static void handle(this ж<serveMux121> Ꮡmux, @string pattern, Handler handler) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -84,6 +87,8 @@ internal static void handle⁔(/*this*/ ж<serveMux121> Ꮡmux, @string pattern,
     finally { if (ᒐd1) Ꮡmux.Ꮡmu.Unlock(); ᒐ.Run(); }
 }
 
+} partial class http_package {
+
 internal static slice<muxEntry> appendSorted(slice<muxEntry> es, muxEntry e) {
     nint n = len(es);
     var eʗ1 = e;
@@ -98,8 +103,10 @@ internal static slice<muxEntry> appendSorted(slice<muxEntry> es, muxEntry e) {
     return es;
 }
 
+} partial class httpᴛserveMux121 {
+
 // Formerly ServeMux.HandleFunc.
-internal static void handleFunc⁔(/*this*/ ж<serveMux121> Ꮡmux, @string pattern, Action<ResponseWriter, ж<Request>> handler) {
+internal static void handleFunc(this ж<serveMux121> Ꮡmux, @string pattern, Action<ResponseWriter, ж<Request>> handler) {
     if (handler == nil) {
         throw panic("http: nil handler");
     }
@@ -107,7 +114,7 @@ internal static void handleFunc⁔(/*this*/ ж<serveMux121> Ꮡmux, @string patt
 }
 
 // Formerly ServeMux.Handler.
-internal static (Handler h, @string pattern) findHandler⁔(/*this*/ ж<serveMux121> Ꮡmux, ж<Request> Ꮡr) {
+internal static (Handler h, @string pattern) findHandler(this ж<serveMux121> Ꮡmux, ж<Request> Ꮡr) {
     @string pattern = default;
     ref var r = ref Ꮡr.DerefOrNull();
 
@@ -147,7 +154,7 @@ internal static (Handler h, @string pattern) findHandler⁔(/*this*/ ж<serveMux
 
 // handler is the main implementation of findHandler.
 // The path is known to be in canonical form, except for CONNECT methods.
-internal static (Handler h, @string pattern) handler⁔(/*this*/ ж<serveMux121> Ꮡmux, @string host, @string path) {
+internal static (Handler h, @string pattern) handler(this ж<serveMux121> Ꮡmux, @string host, @string path) {
     Handler h = default;
     @string pattern = default;
     GoFrame ᒐ = default;
@@ -175,7 +182,7 @@ internal static (Handler h, @string pattern) handler⁔(/*this*/ ж<serveMux121>
 
 // Find a handler on a handler map given a path string.
 // Most-specific (longest) pattern wins.
-internal static (Handler h, @string pattern) match⁔(/*this*/ ref serveMux121 mux, @string path) {
+internal static (Handler h, @string pattern) match(this ref serveMux121 mux, @string path) {
     // Check for exact match first.
     var (v, ok) = mux.m[path, ꟷ];
     if (ok) {
@@ -196,7 +203,7 @@ internal static (Handler h, @string pattern) match⁔(/*this*/ ref serveMux121 m
 // This occurs when a handler for path + "/" was already registered, but
 // not for path itself. If the path needs appending to, it creates a new
 // URL, setting the path to u.Path + "/" and returning true to indicate so.
-internal static (ж<url.URL>, bool) redirectToPathSlash⁔(/*this*/ ж<serveMux121> Ꮡmux, @string host, @string path, ж<url.URL> Ꮡu) {
+internal static (ж<url.URL>, bool) redirectToPathSlash(this ж<serveMux121> Ꮡmux, @string host, @string path, ж<url.URL> Ꮡu) {
     ref var mux = ref Ꮡmux.DerefOrNull();
     ref var u = ref Ꮡu.DerefOrNull();
 
@@ -214,7 +221,7 @@ internal static (ж<url.URL>, bool) redirectToPathSlash⁔(/*this*/ ж<serveMux1
 // shouldRedirectRLocked reports whether the given path and host should be redirected to
 // path+"/". This should happen if a handler is registered for path+"/" but
 // not path -- see comments at ServeMux.
-internal static bool shouldRedirectRLocked⁔(/*this*/ ref serveMux121 mux, @string host, @string path) {
+internal static bool shouldRedirectRLocked(this ref serveMux121 mux, @string host, @string path) {
     var p = slice<@string>([path, host + path]);
 
     foreach (var (_, c) in range(p)) {
@@ -236,4 +243,4 @@ internal static bool shouldRedirectRLocked⁔(/*this*/ ref serveMux121 mux, @str
     return false;
 }
 
-} // end http_package
+}

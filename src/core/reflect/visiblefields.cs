@@ -3,6 +3,8 @@
 // license that can be found in the LICENSE file.
 namespace go;
 
+using static reflect_package;
+
 partial class reflect_package {
 
 // VisibleFields returns all the visible fields in t, which must be a
@@ -54,12 +56,14 @@ partial struct visibleFieldsWalker {
     internal slice<nint> index;
 }
 
+} partial class reflectᴛvisibleFieldsWalker {
+
 // walk walks all the fields in the struct type t, visiting
 // fields in index preorder and appending them to w.fields
 // (this maintains the required ordering).
 // Fields that have been overridden have their
 // Name field cleared.
-internal static void walk⁔(/*this*/ ref visibleFieldsWalker w, Type t) {
+internal static void walk(this ref visibleFieldsWalker w, Type t) {
     if (w.visiting[t]) {
         return;
     }
@@ -105,4 +109,4 @@ internal static void walk⁔(/*this*/ ref visibleFieldsWalker w, Type t) {
     delete(w.visiting, t);
 }
 
-} // end reflect_package
+}

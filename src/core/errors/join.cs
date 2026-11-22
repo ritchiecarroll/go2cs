@@ -5,6 +5,7 @@ namespace go;
 
 using @unsafe = unsafe_package;
 using ꓸꓸꓸerror = Span<error>;
+using static errors_package;
 
 partial class errors_package {
 
@@ -44,7 +45,9 @@ partial struct joinError {
     internal slice<error> errs;
 }
 
-internal static @string Error⁔(/*this*/ ref joinError e) {
+} partial class errorsᴛjoinError {
+
+internal static @string Error(this ref joinError e) {
     // Since Join returns nil if every value in errs is nil,
     // e.errs cannot be empty.
     if (len(e.errs) == 1) {
@@ -60,8 +63,8 @@ internal static @string Error⁔(/*this*/ ref joinError e) {
     return @unsafe.String(Ꮡ(b, 0), len(b));
 }
 
-internal static slice<error> Unwrap⁔(/*this*/ ref joinError e) {
+internal static slice<error> Unwrap(this ref joinError e) {
     return e.errs;
 }
 
-} // end errors_package
+}

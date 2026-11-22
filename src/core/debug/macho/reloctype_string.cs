@@ -2,6 +2,7 @@
 namespace go.debug;
 
 using strconv = strconv_package;
+using static macho_package;
 
 partial class macho_package {
 
@@ -22,12 +23,17 @@ private static readonly @string _RelocTypeGeneric_nameᵇ = "GENERIC_RELOC_VANIL
 
 internal static array<uint8> _RelocTypeGeneric_index = array<uint8>([0, 21, 39, 61, 84, 112, 129]);
 
-internal static @string String⁔(/*this*/ RelocTypeGeneric i) {
+} partial class machoᴛRelocTypeGeneric {
+
+public static @string String(this RelocTypeGeneric i) {
     if (i < 0 || i >= ((RelocTypeGeneric)(len(_RelocTypeGeneric_index) - 1))) {
         return "RelocTypeGeneric("u8 + strconv.FormatInt((int64)i, 10) + ")"u8;
     }
     return _RelocTypeGeneric_name.slice(_RelocTypeGeneric_index[i], _RelocTypeGeneric_index[i + 1]);
 }
+
+} partial class macho_package {
+
 internal static void _ᴛ2() {
     // An "invalid array index" compiler error signifies that the constant values have changed.
     // Re-run the stringer command to generate them again.
@@ -49,12 +55,17 @@ private static readonly @string _RelocTypeX86_64_nameᵇ = "X86_64_RELOC_UNSIGNE
 
 internal static array<uint8> _RelocTypeX86_64_index = array<uint8>([0, 21, 40, 59, 80, 96, 119, 140, 161, 182, 198]);
 
-internal static @string String⁔(/*this*/ RelocTypeX86_64 i) {
+} partial class machoᴛRelocTypeX86_64 {
+
+public static @string String(this RelocTypeX86_64 i) {
     if (i < 0 || i >= ((RelocTypeX86_64)(len(_RelocTypeX86_64_index) - 1))) {
         return "RelocTypeX86_64("u8 + strconv.FormatInt((int64)i, 10) + ")"u8;
     }
     return _RelocTypeX86_64_name.slice(_RelocTypeX86_64_index[i], _RelocTypeX86_64_index[i + 1]);
 }
+
+} partial class macho_package {
+
 internal static void _ᴛ3() {
     // An "invalid array index" compiler error signifies that the constant values have changed.
     // Re-run the stringer command to generate them again.
@@ -76,12 +87,17 @@ private static readonly @string _RelocTypeARM_nameᵇ = "ARM_RELOC_VANILLAARM_RE
 
 internal static array<uint8> _RelocTypeARM_index = array<uint8>([0, 17, 31, 49, 73, 92, 106, 126, 148, 162, 185]);
 
-internal static @string String⁔(/*this*/ RelocTypeARM i) {
+} partial class machoᴛRelocTypeARM {
+
+public static @string String(this RelocTypeARM i) {
     if (i < 0 || i >= ((RelocTypeARM)(len(_RelocTypeARM_index) - 1))) {
         return "RelocTypeARM("u8 + strconv.FormatInt((int64)i, 10) + ")"u8;
     }
     return _RelocTypeARM_name.slice(_RelocTypeARM_index[i], _RelocTypeARM_index[i + 1]);
 }
+
+} partial class macho_package {
+
 internal static void _ᴛ4() {
     // An "invalid array index" compiler error signifies that the constant values have changed.
     // Re-run the stringer command to generate them again.
@@ -104,11 +120,13 @@ private static readonly @string _RelocTypeARM64_nameᵇ = "ARM64_RELOC_UNSIGNEDA
 
 internal static array<uint16> _RelocTypeARM64_index = array<uint16>([0, 20, 42, 62, 80, 101, 128, 158, 184, 212, 243, 261]);
 
-internal static @string String⁔(/*this*/ RelocTypeARM64 i) {
+} partial class machoᴛRelocTypeARM64 {
+
+public static @string String(this RelocTypeARM64 i) {
     if (i < 0 || i >= ((RelocTypeARM64)(len(_RelocTypeARM64_index) - 1))) {
         return "RelocTypeARM64("u8 + strconv.FormatInt((int64)i, 10) + ")"u8;
     }
     return _RelocTypeARM64_name.slice(_RelocTypeARM64_index[i], _RelocTypeARM64_index[i + 1]);
 }
 
-} // end macho_package
+}

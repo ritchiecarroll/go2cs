@@ -12,6 +12,7 @@ using syscall = syscall_package;
 using time = time_package;
 using @internal;
 using net;
+using static net_package;
 
 partial class net_package {
 
@@ -49,7 +50,9 @@ internal static mptcpStatusDial mptcpUseDefaultDial => /* iota */ 0;
 internal static mptcpStatusDial mptcpEnabledDial => 1;
 internal static mptcpStatusDial mptcpDisabledDial => 2;
 
-internal static bool get⁔(/*this*/ ref mptcpStatusDial m) {
+} partial class netᴛmptcpStatusDial {
+
+internal static bool get(this ref mptcpStatusDial m) {
     switch (m) {
     case var ᴛ when ᴛ == mptcpEnabledDial: {
         return true;
@@ -68,13 +71,15 @@ internal static bool get⁔(/*this*/ ref mptcpStatusDial m) {
     return defaultMPTCPEnabledDial;
 }
 
-internal static void set⁔(/*this*/ ref mptcpStatusDial m, bool use) {
+internal static void set(this ref mptcpStatusDial m, bool use) {
     if (use) {
         m = mptcpEnabledDial;
     } else {
         m = mptcpDisabledDial;
     }
 }
+
+} partial class net_package {
 
 // mptcpStatusListen is a tristate for Multipath TCP on servers,
 // see go.dev/issue/56539
@@ -85,7 +90,9 @@ internal static mptcpStatusListen mptcpUseDefaultListen => /* iota */ 0;
 internal static mptcpStatusListen mptcpEnabledListen => 1;
 internal static mptcpStatusListen mptcpDisabledListen => 2;
 
-internal static bool get⁔(/*this*/ ref mptcpStatusListen m) {
+} partial class netᴛmptcpStatusListen {
+
+internal static bool get(this ref mptcpStatusListen m) {
     switch (m) {
     case var ᴛ when ᴛ == mptcpEnabledListen: {
         return true;
@@ -105,13 +112,15 @@ internal static bool get⁔(/*this*/ ref mptcpStatusListen m) {
     return defaultMPTCPEnabledListen;
 }
 
-internal static void set⁔(/*this*/ ref mptcpStatusListen m, bool use) {
+internal static void set(this ref mptcpStatusListen m, bool use) {
     if (use) {
         m = mptcpEnabledListen;
     } else {
         m = mptcpDisabledListen;
     }
 }
+
+} partial class net_package {
 
 // A Dialer contains options for connecting to an address.
 //
@@ -216,7 +225,11 @@ partial struct Dialer {
     internal mptcpStatusDial mptcpStatus;
 }
 
-internal static bool dualStack⁔(/*this*/ ref Dialer d) { return d.FallbackDelay >= 0; }
+} partial class netᴛDialer {
+
+internal static bool dualStack(this ref Dialer d) { return d.FallbackDelay >= 0; }
+
+} partial class net_package {
 
 internal static time.Time minNonzeroTime(time.Time a, time.Time b) {
     if (a.IsZero()) {
@@ -228,13 +241,15 @@ internal static time.Time minNonzeroTime(time.Time a, time.Time b) {
     return b;
 }
 
+} partial class netᴛDialer {
+
 // deadline returns the earliest of:
 //   - now+Timeout
 //   - d.Deadline
 //   - the context's deadline
 //
 // Or zero, if none of Timeout, Deadline, or context's deadline is set.
-internal static time.Time /*earliest*/ deadline⁔(/*this*/ ref Dialer d, context.Context ctx, time.Time now) {
+internal static time.Time /*earliest*/ deadline(this ref Dialer d, context.Context ctx, time.Time now) {
     time.Time earliest = default;
 
     if (d.Timeout != 0) { // including negative, for historical reasons
@@ -246,12 +261,14 @@ internal static time.Time /*earliest*/ deadline⁔(/*this*/ ref Dialer d, contex
     return minNonzeroTime(earliest, d.Deadline);
 }
 
-internal static ж<Resolver> resolver⁔(/*this*/ ref Dialer d) {
+internal static ж<Resolver> resolver(this ref Dialer d) {
     if (d.Resolver != nil) {
         return d.Resolver;
     }
     return DefaultResolver;
 }
+
+} partial class net_package {
 
 // partialDeadline returns the deadline to use for a single address,
 // when multiple addresses are pending.
@@ -277,13 +294,17 @@ internal static (time.Time, error) partialDeadline(time.Time now, time.Time dead
     return (now.Add(timeout), default);
 }
 
-internal static time.Duration fallbackDelay⁔(/*this*/ ref Dialer d) {
+} partial class netᴛDialer {
+
+internal static time.Duration fallbackDelay(this ref Dialer d) {
     if (d.FallbackDelay > 0) {
         return d.FallbackDelay;
     } else {
         return 300 * time.Millisecond;
     }
 }
+
+} partial class net_package {
 
 internal static (@string afnet, nint proto, error err) parseNetwork(context.Context ctx, @string network, bool needsProto) {
     @string afnet = default;
@@ -328,10 +349,12 @@ internal static (@string afnet, nint proto, error err) parseNetwork(context.Cont
     return ("", 0, ((UnknownNetworkError)network));
 }
 
+} partial class netᴛResolver {
+
 // resolveAddrList resolves addr using hint and returns a list of
 // addresses. The result contains at least one address when error is
 // nil.
-internal static (addrList, error) resolveAddrList⁔(/*this*/ ж<Resolver> Ꮡr, context.Context ctx, @string op, @string network, @string addr, Addr hint) {
+internal static (addrList, error) resolveAddrList(this ж<Resolver> Ꮡr, context.Context ctx, @string op, @string network, @string addr, Addr hint) {
     var (afnet, _, err) = parseNetwork(ctx, network, true);
     if (err != nil) {
         return (default, err);
@@ -408,11 +431,13 @@ internal static (addrList, error) resolveAddrList⁔(/*this*/ ж<Resolver> Ꮡr,
     return (naddrs, default);
 }
 
+} partial class netᴛDialer {
+
 // MultipathTCP reports whether MPTCP will be used.
 //
 // This method doesn't check if MPTCP is supported by the operating
 // system or not.
-internal static bool MultipathTCP⁔(/*this*/ ref Dialer d) {
+public static bool MultipathTCP(this ref Dialer d) {
     return d.mptcpStatus.get();
 }
 
@@ -422,9 +447,11 @@ internal static bool MultipathTCP⁔(/*this*/ ref Dialer d) {
 //
 // If MPTCP is not available on the host or not supported by the server,
 // the Dial methods will fall back to TCP.
-internal static void SetMultipathTCP⁔(/*this*/ ref Dialer d, bool use) {
+public static void SetMultipathTCP(this ref Dialer d, bool use) {
     d.mptcpStatus.set(use);
 }
+
+} partial class net_package {
 
 // Dial connects to the address on the named network.
 //
@@ -501,6 +528,8 @@ partial struct sysDialer {
     internal Func<context.Context, @string, ж<TCPAddr>, ж<TCPAddr>, (ж<TCPConn>, error)> testHookDialTCP;
 }
 
+} partial class netᴛDialer {
+
 // Dial connects to the address on the named network.
 //
 // See func Dial for a description of the network and address
@@ -508,7 +537,7 @@ partial struct sysDialer {
 //
 // Dial uses [context.Background] internally; to specify the context, use
 // [Dialer.DialContext].
-internal static (Conn, error) Dial⁔(/*this*/ ж<Dialer> Ꮡd, @string network, @string address) {
+public static (Conn, error) Dial(this ж<Dialer> Ꮡd, @string network, @string address) {
     return Ꮡd.DialContext(context.Background(), network, address);
 }
 
@@ -534,7 +563,7 @@ private static readonly @string dialˢᵇ = "dial"u8;
 //
 // See func [Dial] for a description of the network and address
 // parameters.
-internal static (Conn, error) DialContext⁔(/*this*/ ж<Dialer> Ꮡd, context.Context ctx, @string network, @string address) {
+public static (Conn, error) DialContext(this ж<Dialer> Ꮡd, context.Context ctx, @string network, @string address) {
     GoFrame ᒐ = default;
     try {
         ref var d = ref Ꮡd.DerefOrNull();
@@ -577,7 +606,7 @@ internal static (Conn, error) DialContext⁔(/*this*/ ж<Dialer> Ꮡd, context.C
     finally { ᒐ.Run(); }
 }
 
-internal static partial (context.Context, Action) dialCtx⁔(/*this*/ ref Dialer d, context.Context ctx) {
+internal static partial (context.Context, Action) dialCtx(this ref Dialer d, context.Context ctx) {
     if (ctx == nil) {
         throw panic("nil context");
     }
@@ -633,7 +662,7 @@ internal static partial (context.Context, Action) dialCtx⁔(/*this*/ ref Dialer
 // connection.
 //
 // The network must be a TCP network name; see func Dial for details.
-internal static (ж<TCPConn>, error) DialTCP⁔(/*this*/ ж<Dialer> Ꮡd, context.Context ctx, @string network, netip.AddrPort laddr, netip.AddrPort raddr) {
+public static (ж<TCPConn>, error) DialTCP(this ж<Dialer> Ꮡd, context.Context ctx, @string network, netip.AddrPort laddr, netip.AddrPort raddr) {
     GoFrame ᒐ = default;
     try {
         ref var d = ref Ꮡd.DerefOrNull();
@@ -663,7 +692,7 @@ internal static (ж<TCPConn>, error) DialTCP⁔(/*this*/ ж<Dialer> Ꮡd, contex
 // connection.
 //
 // The network must be a UDP network name; see func Dial for details.
-internal static (ж<UDPConn>, error) DialUDP⁔(/*this*/ ж<Dialer> Ꮡd, context.Context ctx, @string network, netip.AddrPort laddr, netip.AddrPort raddr) {
+public static (ж<UDPConn>, error) DialUDP(this ж<Dialer> Ꮡd, context.Context ctx, @string network, netip.AddrPort laddr, netip.AddrPort raddr) {
     GoFrame ᒐ = default;
     try {
         ref var d = ref Ꮡd.DerefOrNull();
@@ -693,7 +722,7 @@ internal static (ж<UDPConn>, error) DialUDP⁔(/*this*/ ж<Dialer> Ꮡd, contex
 // connection.
 //
 // The network must be an IP network name; see func Dial for details.
-internal static (ж<IPConn>, error) DialIP⁔(/*this*/ ж<Dialer> Ꮡd, context.Context ctx, @string network, netip.Addr laddr, netip.Addr raddr) {
+public static (ж<IPConn>, error) DialIP(this ж<Dialer> Ꮡd, context.Context ctx, @string network, netip.Addr laddr, netip.Addr raddr) {
     GoFrame ᒐ = default;
     try {
         ref var d = ref Ꮡd.DerefOrNull();
@@ -723,7 +752,7 @@ internal static (ж<IPConn>, error) DialIP⁔(/*this*/ ж<Dialer> Ꮡd, context.
 // connection.
 //
 // The network must be a Unix network name; see func Dial for details.
-internal static (ж<UnixConn>, error) DialUnix⁔(/*this*/ ж<Dialer> Ꮡd, context.Context ctx, @string network, ж<UnixAddr> laddr, ж<UnixAddr> raddr) {
+public static (ж<UnixConn>, error) DialUnix(this ж<Dialer> Ꮡd, context.Context ctx, @string network, ж<UnixAddr> laddr, ж<UnixAddr> raddr) {
     GoFrame ᒐ = default;
     try {
         ref var d = ref Ꮡd.DerefOrNull();
@@ -737,6 +766,8 @@ internal static (ж<UnixConn>, error) DialUnix⁔(/*this*/ ж<Dialer> Ꮡd, cont
     finally { ᒐ.Run(); }
 }
 
+} partial class net_package {
+
 internal partial struct dialParallel_dialResult /*dyn*/ {
     /*embed*/ public Conn Conn;
     /*embed*/ internal error error;
@@ -744,11 +775,13 @@ internal partial struct dialParallel_dialResult /*dyn*/ {
     internal bool done;
 }
 
+} partial class netᴛsysDialer {
+
 // dialParallel races two copies of dialSerial, giving the first a
 // head start. It returns the first established connection and
 // closes the others. Otherwise it returns an error from the first
 // primary address.
-internal static partial (Conn, error) dialParallel⁔(/*this*/ ж<sysDialer> Ꮡsd, context.Context ctx, addrList primaries, addrList fallbacks) {
+internal static partial (Conn, error) dialParallel(this ж<sysDialer> Ꮡsd, context.Context ctx, addrList primaries, addrList fallbacks) {
     GoFrame ᒐ = default;
     try {
         if (len(fallbacks) == 0) {
@@ -839,7 +872,7 @@ internal static partial (Conn, error) dialParallel⁔(/*this*/ ж<sysDialer> Ꮡ
 
 // dialSerial connects to a list of addresses in sequence, returning
 // either the first successful connection, or the first error.
-internal static (Conn, error) dialSerial⁔(/*this*/ ж<sysDialer> Ꮡsd, context.Context ctx, addrList ras) {
+internal static (Conn, error) dialSerial(this ж<sysDialer> Ꮡsd, context.Context ctx, addrList ras) {
     GoFrame ᒐ = default;
     try {
         ref var sd = ref Ꮡsd.DerefOrNull();
@@ -896,7 +929,7 @@ internal static (Conn, error) dialSerial⁔(/*this*/ ж<sysDialer> Ꮡsd, contex
 
 // dialSingle attempts to establish and returns a single connection to
 // the destination address.
-internal static (Conn c, error err) dialSingle⁔(/*this*/ ж<sysDialer> Ꮡsd, context.Context ctx, Addr ra) {
+internal static (Conn c, error err) dialSingle(this ж<sysDialer> Ꮡsd, context.Context ctx, Addr ra) {
     Conn c = default;
     error err = default;
     GoFrame ᒐ = default;
@@ -961,6 +994,8 @@ internal static (Conn c, error err) dialSingle⁔(/*this*/ ж<sysDialer> Ꮡsd, 
     ᒐdone: return (c, err);
 }
 
+} partial class net_package {
+
 // ListenConfig contains options for listening to an address.
 partial struct ListenConfig {
     // If Control is not nil, it is called after creating the network
@@ -996,11 +1031,13 @@ partial struct ListenConfig {
     internal mptcpStatusListen mptcpStatus;
 }
 
+} partial class netᴛListenConfig {
+
 // MultipathTCP reports whether MPTCP will be used.
 //
 // This method doesn't check if MPTCP is supported by the operating
 // system or not.
-internal static bool MultipathTCP⁔(/*this*/ ref ListenConfig lc) {
+public static bool MultipathTCP(this ref ListenConfig lc) {
     return lc.mptcpStatus.get();
 }
 
@@ -1010,7 +1047,7 @@ internal static bool MultipathTCP⁔(/*this*/ ref ListenConfig lc) {
 //
 // If MPTCP is not available on the host or not supported by the client,
 // the Listen method will fall back to TCP.
-internal static void SetMultipathTCP⁔(/*this*/ ref ListenConfig lc, bool use) {
+public static void SetMultipathTCP(this ref ListenConfig lc, bool use) {
     lc.mptcpStatus.set(use);
 }
 
@@ -1025,7 +1062,7 @@ private static readonly @string listenˢᵇ = "listen"u8;
 //
 // The ctx argument is used while resolving the address on which to listen;
 // it does not affect the returned Listener.
-internal static (Listener, error) Listen⁔(/*this*/ ref ListenConfig lc, context.Context ctx, @string network, @string address) {
+public static (Listener, error) Listen(this ref ListenConfig lc, context.Context ctx, @string network, @string address) {
     var (addrs, err) = DefaultResolver.resolveAddrList(ctx, listenˢ, network, address, default);
     if (err != nil) {
         return (default, new OpErrorжerror(Ꮡ(new OpError(Op: "listen", Net: network, Source: default, Addr: default, Err: err))));
@@ -1070,7 +1107,7 @@ internal static (Listener, error) Listen⁔(/*this*/ ref ListenConfig lc, contex
 //
 // The ctx argument is used while resolving the address on which to listen;
 // it does not affect the returned PacketConn.
-internal static (PacketConn, error) ListenPacket⁔(/*this*/ ref ListenConfig lc, context.Context ctx, @string network, @string address) {
+public static (PacketConn, error) ListenPacket(this ref ListenConfig lc, context.Context ctx, @string network, @string address) {
     var (addrs, err) = DefaultResolver.resolveAddrList(ctx, listenˢ, network, address, default);
     if (err != nil) {
         return (default, new OpErrorжerror(Ꮡ(new OpError(Op: "listen", Net: network, Source: default, Addr: default, Err: err))));
@@ -1107,6 +1144,8 @@ internal static (PacketConn, error) ListenPacket⁔(/*this*/ ref ListenConfig lc
     }
     return (c, default);
 }
+
+} partial class net_package {
 
 // sysListener contains a Listen's parameters and configuration.
 partial struct sysListener {

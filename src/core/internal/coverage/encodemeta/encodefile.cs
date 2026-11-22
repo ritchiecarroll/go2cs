@@ -17,6 +17,7 @@ using go.@internal;
 using go.@internal.coverage;
 using go.hash;
 using hash = hash_package;
+using static encodemeta_package;
 
 partial class encodemeta_package {
 
@@ -42,7 +43,9 @@ public static ж<CoverageMetaFileWriter> NewCoverageMetaFileWriter(@string mfnam
     return r;
 }
 
-internal static error Write⁔(/*this*/ ж<CoverageMetaFileWriter> Ꮡm, /*[16]*/ array<byte> finalHash, slice<slice<byte>> blobs, coverage.CounterMode mode, coverage.CounterGranularity granularity) {
+} partial class encodemetaᴛCoverageMetaFileWriter {
+
+public static error Write(this ж<CoverageMetaFileWriter> Ꮡm, /*[16]*/ array<byte> finalHash, slice<slice<byte>> blobs, coverage.CounterMode mode, coverage.CounterGranularity granularity) {
     finalHash = finalHash.Clone();
     ref var m = ref Ꮡm.DerefOrNull();
 
@@ -139,4 +142,4 @@ internal static error Write⁔(/*this*/ ж<CoverageMetaFileWriter> Ꮡm, /*[16]*
     return default;
 }
 
-} // end encodemeta_package
+}

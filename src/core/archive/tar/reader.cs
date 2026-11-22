@@ -11,6 +11,7 @@ using strings = strings_package;
 using time = time_package;
 using @internal;
 using go.path;
+using static tar_package;
 
 partial class tar_package {
 
@@ -40,6 +41,8 @@ public static ж<Reader> NewReader(io.Reader r) {
     return Ꮡ(new Reader(r: r, curr: new regFileReaderжfileReader(Ꮡ(new regFileReader(r, 0)))));
 }
 
+} partial class tarᴛReader {
+
 // Next advances to the next entry in the tar archive.
 // The Header.Size determines how many bytes can be read for the next file.
 // Any remaining data in the current file is automatically discarded.
@@ -51,7 +54,7 @@ public static ж<Reader> NewReader(io.Reader r) {
 // A future version of Go may introduce this behavior by default.
 // Programs that want to accept non-local names can ignore
 // the [ErrInsecurePath] error and use the returned header.
-internal static (ж<Header>, error) Next⁔(/*this*/ ж<Reader> Ꮡtr) {
+public static (ж<Header>, error) Next(this ж<Reader> Ꮡtr) {
     ref var tr = ref Ꮡtr.DerefOrNull();
 
     if (tr.err != nil) {
@@ -68,7 +71,7 @@ internal static (ж<Header>, error) Next⁔(/*this*/ ж<Reader> Ꮡtr) {
     return (hdr, err);
 }
 
-internal static (ж<Header>, error) next⁔(/*this*/ ж<Reader> Ꮡtr) {
+internal static (ж<Header>, error) next(this ж<Reader> Ꮡtr) {
     ref var tr = ref Ꮡtr.DerefOrNull();
 
     map<@string, @string> paxHdrs = default;
@@ -191,7 +194,7 @@ internal static (ж<Header>, error) next⁔(/*this*/ ж<Reader> Ꮡtr) {
 // handleRegularFile sets up the current file reader and padding such that it
 // can only read the following logical data section. It will properly handle
 // special headers that contain no data section.
-internal static error handleRegularFile⁔(/*this*/ ref Reader tr, ж<Header> Ꮡhdr) {
+internal static error handleRegularFile(this ref Reader tr, ж<Header> Ꮡhdr) {
     ref var hdr = ref Ꮡhdr.DerefOrNull();
 
     ref var nb = ref heap<int64>(hdr.Size, out var Ꮡnb);
@@ -209,7 +212,7 @@ internal static error handleRegularFile⁔(/*this*/ ref Reader tr, ж<Header> �
 
 // handleSparseFile checks if the current file is a sparse format of any type
 // and sets the curr reader appropriately.
-internal static error handleSparseFile⁔(/*this*/ ref Reader tr, ж<Header> Ꮡhdr, ж<block> rawHdr) {
+internal static error handleSparseFile(this ref Reader tr, ж<Header> Ꮡhdr, ж<block> rawHdr) {
     ref var hdr = ref Ꮡhdr.DerefOrNull();
 
     sparseDatas spd = default;
@@ -236,7 +239,7 @@ internal static error handleSparseFile⁔(/*this*/ ref Reader tr, ж<Header> Ꮡ
 // If they are found, then this function reads the sparse map and returns it.
 // This assumes that 0.0 headers have already been converted to 0.1 headers
 // by the PAX header parsing logic.
-internal static (sparseDatas, error) readGNUSparsePAXHeaders⁔(/*this*/ ref Reader tr, ж<Header> Ꮡhdr) {
+internal static (sparseDatas, error) readGNUSparsePAXHeaders(this ref Reader tr, ж<Header> Ꮡhdr) {
     ref var hdr = ref Ꮡhdr.DerefOrNull();
 
     // Identify the version of GNU headers.
@@ -286,6 +289,8 @@ internal static (sparseDatas, error) readGNUSparsePAXHeaders⁔(/*this*/ ref Rea
     }
     return readGNUSparseMap0x1(hdr.PAXRecords);
 }
+
+} partial class tar_package {
 
 // mergePAX merges paxHdrs into hdr for all relevant fields of Header.
 internal static error /*err*/ mergePAX(ref Header hdr, map<@string, @string> paxHdrs) {
@@ -400,6 +405,8 @@ internal static (map<@string, @string>, error) parsePAX(io.Reader r) {
     return (paxHdrs, default);
 }
 
+} partial class tarᴛReader {
+
 // readHeader reads the next block header and assumes that the underlying reader
 // is already aligned to a block boundary. It returns the raw block of the
 // header in case further processing is required.
@@ -408,7 +415,7 @@ internal static (map<@string, @string>, error) parsePAX(io.Reader r) {
 //   - Exactly 0 bytes are read and EOF is hit.
 //   - Exactly 1 block of zeros is read and EOF is hit.
 //   - At least 2 blocks of zeros are read.
-internal static (ж<Header>, ж<block>, error) readHeader⁔(/*this*/ ж<Reader> Ꮡtr) {
+internal static (ж<Header>, ж<block>, error) readHeader(this ж<Reader> Ꮡtr) {
     ref var tr = ref Ꮡtr.DerefOrNull();
 
     // Two blocks of zero bytes marks the end of the archive.
@@ -542,7 +549,7 @@ internal static (ж<Header>, ж<block>, error) readHeader⁔(/*this*/ ж<Reader>
 // The Header.Size does not reflect the size of any extended headers used.
 // Thus, this function will read from the raw io.Reader to fetch extra headers.
 // This method mutates blk in the process.
-internal static (sparseDatas, error) readOldGNUSparseMap⁔(/*this*/ ref Reader tr, ж<Header> Ꮡhdr, ж<block> Ꮡblk) {
+internal static (sparseDatas, error) readOldGNUSparseMap(this ref Reader tr, ж<Header> Ꮡhdr, ж<block> Ꮡblk) {
     ref var hdr = ref Ꮡhdr.DerefOrNull();
     ref var blk = ref Ꮡblk.DerefOrNull();
 
@@ -593,6 +600,8 @@ internal static (sparseDatas, error) readOldGNUSparseMap⁔(/*this*/ ref Reader 
     }
     return (default, errSparseTooLong);
 }
+
+} partial class tar_package {
 
 // readGNUSparseMap1x0 reads the sparse map as stored in GNU's PAX sparse format
 // version 1.0. The format of the sparse map consists of a series of
@@ -716,6 +725,8 @@ internal static (sparseDatas, error) appendSparseEntry(sparseDatas spd, sparseEn
     return (append(spd, ent), default);
 }
 
+} partial class tarᴛReader {
+
 // Read reads from the current file in the tar archive.
 // It returns (0, io.EOF) when it reaches the end of that file,
 // until [Next] is called to advance to the next file.
@@ -726,7 +737,7 @@ internal static (sparseDatas, error) appendSparseEntry(sparseDatas spd, sparseEn
 // Calling Read on special types like [TypeLink], [TypeSymlink], [TypeChar],
 // [TypeBlock], [TypeDir], and [TypeFifo] returns (0, [io.EOF]) regardless of what
 // the [Header.Size] claims.
-internal static (nint, error) Read⁔(/*this*/ ref Reader tr, slice<byte> b) {
+public static (nint, error) Read(this ref Reader tr, slice<byte> b) {
     if (tr.err != nil) {
         return (0, tr.err);
     }
@@ -747,7 +758,7 @@ internal static (nint, error) Read⁔(/*this*/ ref Reader tr, slice<byte> b) {
 //
 // TODO(dsnet): Re-export this when adding sparse file support.
 // See https://golang.org/issue/22735
-internal static (int64, error) writeTo⁔(/*this*/ ref Reader tr, io.Writer w) {
+internal static (int64, error) writeTo(this ref Reader tr, io.Writer w) {
     if (tr.err != nil) {
         return (0, tr.err);
     }
@@ -758,13 +769,17 @@ internal static (int64, error) writeTo⁔(/*this*/ ref Reader tr, io.Writer w) {
     return (n, err);
 }
 
+} partial class tar_package {
+
 // regFileReader is a fileReader for reading data from a regular file entry.
 partial struct regFileReader {
     internal io.Reader r; // Underlying Reader
     internal int64 nb;    // Number of remaining bytes to read
 }
 
-internal static (nint n, error err) Read⁔(/*this*/ ref regFileReader fr, slice<byte> b) {
+} partial class tarᴛregFileReader {
+
+internal static (nint n, error err) Read(this ref regFileReader fr, slice<byte> b) {
     nint n = default;
     error err = default;
 
@@ -787,23 +802,29 @@ internal static (nint n, error err) Read⁔(/*this*/ ref regFileReader fr, slice
     }}
 }
 
+} partial class tar_package {
+
 internal partial struct WriteTo_src /*dyn*/ {
     /*embed*/ public io_package.Reader Reader;
 }
 
-internal static (int64, error) WriteTo⁔(/*this*/ ж<regFileReader> Ꮡfr, io.Writer w) {
+} partial class tarᴛregFileReader {
+
+internal static (int64, error) WriteTo(this ж<regFileReader> Ꮡfr, io.Writer w) {
     return io.Copy(w, new WriteTo_src(new regFileReaderжReader(Ꮡfr)));
 }
 
 // logicalRemaining implements fileState.logicalRemaining.
-internal static int64 logicalRemaining⁔(/*this*/ regFileReader fr) {
+internal static int64 logicalRemaining(this regFileReader fr) {
     return fr.nb;
 }
 
 // physicalRemaining implements fileState.physicalRemaining.
-internal static int64 physicalRemaining⁔(/*this*/ regFileReader fr) {
+internal static int64 physicalRemaining(this regFileReader fr) {
     return fr.nb;
 }
+
+} partial class tar_package {
 
 // sparseFileReader is a fileReader for reading data from a sparse file entry.
 partial struct sparseFileReader {
@@ -812,7 +833,9 @@ partial struct sparseFileReader {
     internal int64 pos;      // Current position in sparse file
 }
 
-internal static (nint n, error err) Read⁔(/*this*/ ж<sparseFileReader> Ꮡsr, slice<byte> b) {
+} partial class tarᴛsparseFileReader {
+
+internal static (nint n, error err) Read(this ж<sparseFileReader> Ꮡsr, slice<byte> b) {
     nint n = default;
     error err = default;
     ref var sr = ref Ꮡsr.DerefOrNull();
@@ -860,7 +883,7 @@ internal static (nint n, error err) Read⁔(/*this*/ ж<sparseFileReader> Ꮡsr,
     }}
 }
 
-internal static (int64 n, error err) WriteTo⁔(/*this*/ ж<sparseFileReader> Ꮡsr, io.Writer w) {
+internal static (int64 n, error err) WriteTo(this ж<sparseFileReader> Ꮡsr, io.Writer w) {
     int64 n = default;
     error err = default;
     ref var sr = ref Ꮡsr.DerefOrNull();
@@ -920,20 +943,26 @@ internal static (int64 n, error err) WriteTo⁔(/*this*/ ж<sparseFileReader> �
     }}
 }
 
-internal static int64 logicalRemaining⁔(/*this*/ sparseFileReader sr) {
+internal static int64 logicalRemaining(this sparseFileReader sr) {
     return sr.sp[len(sr.sp) - 1].endOffset() - sr.pos;
 }
-internal static int64 physicalRemaining⁔(/*this*/ sparseFileReader sr) {
+internal static int64 physicalRemaining(this sparseFileReader sr) {
     return sr.fr.physicalRemaining();
 }
+
+} partial class tar_package {
 
 partial struct zeroReader {
 }
 
-internal static (nint, error) Read⁔(/*this*/ zeroReader _, slice<byte> b) {
+} partial class tarᴛzeroReader {
+
+internal static (nint, error) Read(this zeroReader _, slice<byte> b) {
     clear(b);
     return (len(b), default);
 }
+
+} partial class tar_package {
 
 // mustReadFull is like io.ReadFull except it returns
 // io.ErrUnexpectedEOF when io.EOF is hit before len(b) bytes are read.

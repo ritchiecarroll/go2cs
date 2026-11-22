@@ -6,10 +6,13 @@ namespace go.@internal;
 
 using Δruntime = runtime_package;
 using syscall = syscall_package;
+using static routebsd_package;
 
 partial class routebsd_package {
 
-internal static (Message, error) parseInterfaceMessage⁔(/*this*/ ref wireFormat w, slice<byte> b) {
+} partial class routebsdᴛwireFormat {
+
+internal static (Message, error) parseInterfaceMessage(this ref wireFormat w, slice<byte> b) {
     if (len(b) < w.bodyOff) {
         return (default, errMessageTooShort);
     }
@@ -50,7 +53,7 @@ internal static (Message, error) parseInterfaceMessage⁔(/*this*/ ref wireForma
     return (new InterfaceMessageжMessage(m), default);
 }
 
-internal static (Message, error) parseInterfaceAddrMessage⁔(/*this*/ ref wireFormat w, slice<byte> b) {
+internal static (Message, error) parseInterfaceAddrMessage(this ref wireFormat w, slice<byte> b) {
     if (len(b) < w.bodyOff) {
         return (default, errMessageTooShort);
     }
@@ -77,4 +80,4 @@ internal static (Message, error) parseInterfaceAddrMessage⁔(/*this*/ ref wireF
     return (new InterfaceAddrMessageжMessage(m), default);
 }
 
-} // end routebsd_package
+}

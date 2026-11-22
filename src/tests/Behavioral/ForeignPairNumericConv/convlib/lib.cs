@@ -1,5 +1,7 @@
 namespace go.ForeignPairNumericConv;
 
+using static convlib_package;
+
 partial class convlib_package {
 
 partial struct Handle /*num:uintptr*/;
@@ -8,8 +10,12 @@ partial struct Token /*num:uintptr*/;
 
 public static Token NewToken(uintptr v) { return (Token)v; }
 
-internal static @string String⁔(/*this*/ Handle h) { return "handle"; }
+} partial class convlibᴛHandle {
 
-internal static uintptr Raw⁔(/*this*/ Token t) { return (uintptr)t; }
+public static @string String(this Handle h) { return "handle"; }
 
-} // end convlib_package
+} partial class convlibᴛToken {
+
+public static uintptr Raw(this Token t) { return (uintptr)t; }
+
+}

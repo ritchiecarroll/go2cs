@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -12,7 +13,9 @@ partial struct tracker {
     internal map<ж<conn>, @string> m;
 }
 
-internal static @string status⁔(/*this*/ ж<conn> Ꮡc, ж<tracker> Ꮡt) {
+} partial class mainᴛconn {
+
+internal static @string status(this ж<conn> Ꮡc, ж<tracker> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     var (s, ok) = t.m[Ꮡc, ꟷ]; if (ok) {
@@ -21,19 +24,19 @@ internal static @string status⁔(/*this*/ ж<conn> Ꮡc, ж<tracker> Ꮡt) {
     return "unknown";
 }
 
-internal static void rename⁔(/*this*/ ж<conn> Ꮡc, ж<tracker> Ꮡt, @string s) {
+internal static void rename(this ж<conn> Ꮡc, ж<tracker> Ꮡt, @string s) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     t.m[Ꮡc] = s;
 }
 
-internal static @string label⁔(/*this*/ ж<conn> Ꮡc, ж<tracker> Ꮡt) {
+internal static @string label(this ж<conn> Ꮡc, ж<tracker> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     return t.m[Ꮡc];
 }
 
-internal static void close⁔(/*this*/ ж<conn> Ꮡc, ж<tracker> Ꮡt) {
+internal static void close(this ж<conn> Ꮡc, ж<tracker> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         ref var c = ref Ꮡc.DerefOrNull();
@@ -47,6 +50,8 @@ internal static void close⁔(/*this*/ ж<conn> Ꮡc, ж<tracker> Ꮡt) {
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
+
+} partial class main_package {
 
 internal static void main() {
     var a = Ꮡ(new conn(id: 1));

@@ -38,6 +38,8 @@ using global::go.path;
 using global::go.unicode;
 using iter = iter_package;
 using ꓸꓸꓸstring = Span<@string>;
+using Δbuild = build_package;
+using static build_package;
 
 partial class build_package {
 
@@ -112,8 +114,10 @@ partial struct Context {
     public Func<@string, (io.ReadCloser, error)> OpenFile;
 }
 
+} partial class buildᴛContext {
+
 // joinPath calls ctxt.JoinPath (if not nil) or else filepath.Join.
-internal static @string joinPath⁔(/*this*/ ref Context ctxt, params ꓸꓸꓸstring elemʗp) {
+internal static @string joinPath(this ref Context ctxt, params ꓸꓸꓸstring elemʗp) {
     var elem = elemʗp.sslice();
 
     var f = ctxt.JoinPath; if (f != nil) {
@@ -123,7 +127,7 @@ internal static @string joinPath⁔(/*this*/ ref Context ctxt, params ꓸꓸꓸs
 }
 
 // splitPathList calls ctxt.SplitPathList (if not nil) or else filepath.SplitList.
-internal static slice<@string> splitPathList⁔(/*this*/ ref Context ctxt, @string s) {
+internal static slice<@string> splitPathList(this ref Context ctxt, @string s) {
     var f = ctxt.SplitPathList; if (f != nil) {
         return f(s);
     }
@@ -131,7 +135,7 @@ internal static slice<@string> splitPathList⁔(/*this*/ ref Context ctxt, @stri
 }
 
 // isAbsPath calls ctxt.IsAbsPath (if not nil) or else filepath.IsAbs.
-internal static bool isAbsPath⁔(/*this*/ ref Context ctxt, @string path) {
+internal static bool isAbsPath(this ref Context ctxt, @string path) {
     var f = ctxt.IsAbsPath; if (f != nil) {
         return f(path);
     }
@@ -139,7 +143,7 @@ internal static bool isAbsPath⁔(/*this*/ ref Context ctxt, @string path) {
 }
 
 // isDir calls ctxt.IsDir (if not nil) or else uses os.Stat.
-internal static bool isDir⁔(/*this*/ ref Context ctxt, @string path) {
+internal static bool isDir(this ref Context ctxt, @string path) {
     var f = ctxt.IsDir; if (f != nil) {
         return f(path);
     }
@@ -149,7 +153,7 @@ internal static bool isDir⁔(/*this*/ ref Context ctxt, @string path) {
 
 // hasSubdir calls ctxt.HasSubdir (if not nil) or else uses
 // the local file system to answer the question.
-internal static (@string rel, bool ok) hasSubdir⁔(/*this*/ ref Context ctxt, @string root, @string dir) {
+internal static (@string rel, bool ok) hasSubdir(this ref Context ctxt, @string root, @string dir) {
     @string rel = default;
     bool ok = default;
 
@@ -158,7 +162,7 @@ internal static (@string rel, bool ok) hasSubdir⁔(/*this*/ ref Context ctxt, @
     }
 
     // Try using paths we received.
-    (rel, ok) = hasSubdir(root, dir); if (ok) {
+    (rel, ok) = Δbuild.hasSubdir(root, dir); if (ok) {
         return (rel, ok);
     }
 
@@ -168,14 +172,16 @@ internal static (@string rel, bool ok) hasSubdir⁔(/*this*/ ref Context ctxt, @
     var (rootSym, _) = filepath.EvalSymlinks(root);
     var (dirSym, _) = filepath.EvalSymlinks(dir);
 
-    (rel, ok) = hasSubdir(rootSym, dir); if (ok) {
+    (rel, ok) = Δbuild.hasSubdir(rootSym, dir); if (ok) {
         return (rel, ok);
     }
-    (rel, ok) = hasSubdir(root, dirSym); if (ok) {
+    (rel, ok) = Δbuild.hasSubdir(root, dirSym); if (ok) {
         return (rel, ok);
     }
-    return hasSubdir(rootSym, dirSym);
+    return Δbuild.hasSubdir(rootSym, dirSym);
 }
+
+} partial class build_package {
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static ref readonly @string sepᶜ => ref sepᶜᵇ;
@@ -196,8 +202,10 @@ internal static (@string rel, bool ok) hasSubdir(@string root, @string dir) {
     return (filepath.ToSlash(after), true);
 }
 
+} partial class buildᴛContext {
+
 // readDir calls ctxt.ReadDir (if not nil) or else os.ReadDir.
-internal static (slice<fs.DirEntry>, error) readDir⁔(/*this*/ ref Context ctxt, @string path) {
+internal static (slice<fs.DirEntry>, error) readDir(this ref Context ctxt, @string path) {
     // TODO: add a fs.DirEntry version of Context.ReadDir
     var f = ctxt.ReadDir; if (f != nil) {
         var (fis, err) = f(path);
@@ -214,7 +222,7 @@ internal static (slice<fs.DirEntry>, error) readDir⁔(/*this*/ ref Context ctxt
 }
 
 // openFile calls ctxt.OpenFile (if not nil) or else os.Open.
-internal static (io.ReadCloser, error) openFile⁔(/*this*/ ref Context ctxt, @string path) {
+internal static (io.ReadCloser, error) openFile(this ref Context ctxt, @string path) {
     var fn = ctxt.OpenFile; if (fn != nil) {
         return fn(path);
     }
@@ -229,7 +237,7 @@ internal static (io.ReadCloser, error) openFile⁔(/*this*/ ref Context ctxt, @s
 // isFile determines whether path is a file by trying to open it.
 // It reuses openFile instead of adding another function to the
 // list in Context.
-internal static bool isFile⁔(/*this*/ ref Context ctxt, @string path) {
+internal static bool isFile(this ref Context ctxt, @string path) {
     var (f, err) = ctxt.openFile(path);
     if (err != nil) {
         return false;
@@ -239,7 +247,7 @@ internal static bool isFile⁔(/*this*/ ref Context ctxt, @string path) {
 }
 
 // gopath returns the list of Go path directories.
-internal static slice<@string> gopath⁔(/*this*/ ref Context ctxt) {
+internal static slice<@string> gopath(this ref Context ctxt) {
     var allᴷ = new stackAppend<@string>(moves: true);
 
     slice<@string> all = default;
@@ -279,7 +287,7 @@ private static readonly @string srcˢᵇ = "src"u8;
 // SrcDirs returns a list of package source root directories.
 // It draws from the current Go root and Go path but omits directories
 // that do not exist.
-internal static slice<@string> SrcDirs⁔(/*this*/ ref Context ctxt) {
+public static slice<@string> SrcDirs(this ref Context ctxt) {
     slice<@string> all = default;
     if (ctxt.GOROOT != ""u8 && ctxt.Compiler != "gccgo"u8) {
         @string dir = ctxt.joinPath(ctxt.GOROOT, srcˢ);
@@ -295,6 +303,8 @@ internal static slice<@string> SrcDirs⁔(/*this*/ ref Context ctxt) {
     }
     return all;
 }
+
+} partial class build_package {
 
 // Default is the default Context for builds.
 // It uses the GOARCH, GOOS, GOROOT, and GOPATH environment variables
@@ -537,18 +547,24 @@ partial struct Directive {
     public token.Position Pos; // position of comment
 }
 
+} partial class buildᴛPackage {
+
 // IsCommand reports whether the package is considered a
 // command to be installed (not just a library).
 // Packages named "main" are treated as commands.
-internal static bool IsCommand⁔(/*this*/ ref Package p) {
+public static bool IsCommand(this ref Package p) {
     return p.Name == "main"u8;
 }
 
+} partial class buildᴛContext {
+
 // ImportDir is like [Import] but processes the Go package found in
 // the named directory.
-internal static (ж<Package>, error) ImportDir⁔(/*this*/ ж<Context> Ꮡctxt, @string dir, ImportMode mode) {
+public static (ж<Package>, error) ImportDir(this ж<Context> Ꮡctxt, @string dir, ImportMode mode) {
     return Ꮡctxt.Import(".", dir, mode);
 }
+
+} partial class build_package {
 
 // NoGoError is the error used by [Import] to describe a directory
 // containing no buildable Go source files. (It may still contain
@@ -557,9 +573,13 @@ partial struct NoGoError {
     public @string Dir;
 }
 
-internal static @string Error⁔(/*this*/ ref NoGoError e) {
+} partial class buildᴛNoGoError {
+
+public static @string Error(this ref NoGoError e) {
     return "no buildable Go source files in "u8 + e.Dir;
 }
+
+} partial class build_package {
 
 // MultiplePackageError describes a directory containing
 // multiple buildable Go source files for multiple packages.
@@ -569,10 +589,14 @@ partial struct MultiplePackageError {
     public slice<@string> Files;    // corresponding files: Files[i] declares package Packages[i]
 }
 
-internal static @string Error⁔(/*this*/ ref MultiplePackageError e) {
+} partial class buildᴛMultiplePackageError {
+
+public static @string Error(this ref MultiplePackageError e) {
     // Error string limited to two entries for compatibility.
     return fmt.Sprintf("found packages %s (%s) and %s (%s) in %s"u8, e.Packages[0], e.Files[0], e.Packages[1], e.Files[1], e.Dir);
 }
+
+} partial class build_package {
 
 internal static @string nameExt(@string name) {
     nint i = strings.LastIndex(name, ".");
@@ -583,6 +607,14 @@ internal static @string nameExt(@string name) {
 }
 
 internal static ж<godebug.Setting> installgoroot = godebug.New("installgoroot");
+
+internal partial struct Import_tried /*dyn*/ {
+    internal slice<@string> vendor;
+    internal @string goroot;
+    internal slice<@string> gopath;
+}
+
+} partial class buildᴛContext {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string testdataˢ => ref testdataˢᵇ;
@@ -612,12 +644,6 @@ private static readonly @string testˢᵇ = "_test"u8;
 internal static ref readonly @string cgoˢ => ref cgoˢᵇ;
 private static readonly @string cgoˢᵇ = "cgo"u8;
 
-internal partial struct Import_tried /*dyn*/ {
-    internal slice<@string> vendor;
-    internal @string goroot;
-    internal slice<@string> gopath;
-}
-
 // Import returns details about the Go package named by the import path,
 // interpreting local import paths relative to the srcDir directory.
 // If the path is a local import path naming a package that can be imported
@@ -633,7 +659,7 @@ internal partial struct Import_tried /*dyn*/ {
 //
 // If an error occurs, Import returns a non-nil error and a non-nil
 // *[Package] containing partial information.
-internal static (ж<Package>, error) Import⁔(/*this*/ ж<Context> Ꮡctxt, @string path, @string srcDir, ImportMode mode) {
+public static (ж<Package>, error) Import(this ж<Context> Ꮡctxt, @string path, @string srcDir, ImportMode mode) {
     ref var ctxt = ref Ꮡctxt.DerefOrNull();
     var pathsᴷ = new stackAppend<@string>();
     var Sfilesᴷ = new stackAppend<@string>();
@@ -1170,6 +1196,8 @@ Found:
     return (p, pkgerr);
 }
 
+} partial class build_package {
+
 internal static ж<slice<@string>> fileListForExt(ж<Package> p, @string ext) {
     switch (ᐧ) {
     case {} when ext == ".c"u8: {
@@ -1220,6 +1248,8 @@ internal static slice<@string> uniq(slice<@string> list) {
 
 internal static error errNoModules = errors.New("not using modules");
 
+} partial class buildᴛContext {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string go111moduleˢ => ref go111moduleˢᵇ;
 private static readonly @string go111moduleˢᵇ = "GO111MODULE"u8;
@@ -1240,7 +1270,7 @@ private static readonly @string fDirImportPathRootGorootˢᵇ = "-f={{.Dir}}\n{{
 // about the requested package and all dependencies and then only reports about the requested package.
 // Then we reinvoke it for every dependency. But this is still better than not working at all.
 // See golang.org/issue/26504.
-internal static error importGo⁔(/*this*/ ref Context ctxt, ж<Package> Ꮡp, @string path, @string srcDir, ImportMode mode) {
+internal static error importGo(this ref Context ctxt, ж<Package> Ꮡp, @string path, @string srcDir, ImportMode mode) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     // To invoke the go command,
@@ -1388,6 +1418,8 @@ internal static error importGo⁔(/*this*/ ref Context ctxt, ж<Package> Ꮡp, @
     return default;
 }
 
+} partial class build_package {
+
 // hasGoFiles reports whether dir contains any files with names ending in .go.
 // For a vendor check we must exclude directories that contain no .go files.
 // Otherwise it is not possible to vendor just a/b/c and still import the
@@ -1519,18 +1551,22 @@ internal static (slice<byte> word, slice<byte> rest) parseWord(slice<byte> data)
     return (word, rest);
 }
 
+} partial class buildᴛContext {
+
 // MatchFile reports whether the file with the given name in the given directory
 // matches the context and would be included in a [Package] created by [ImportDir]
 // of that directory.
 //
 // MatchFile considers the name of the file and may use ctxt.OpenFile to
 // read some or all of the file's content.
-internal static (bool match, error err) MatchFile⁔(/*this*/ ж<Context> Ꮡctxt, @string dir, @string name) {
+public static (bool match, error err) MatchFile(this ж<Context> Ꮡctxt, @string dir, @string name) {
     error err = default;
 
     (var info, err) = Ꮡctxt.matchFile(dir, name, default, nil, nil);
     return (info != nil, err);
 }
+
+} partial class build_package {
 
 internal static readonly ж<Package> ᏑdummyPkg = new StaticBox<Package>(default(Package));
 internal static ref Package dummyPkg => ref ((StaticBox<Package>)ᏑdummyPkg).ValueSlot;
@@ -1558,6 +1594,8 @@ partial struct fileEmbed {
     internal token.Position pos;
 }
 
+} partial class buildᴛContext {
+
 // matchFile determines whether the file with the given name in the given directory
 // should be included in the package being constructed.
 // If the file should be included, matchFile returns a non-nil *fileInfo (and a nil error).
@@ -1570,7 +1608,7 @@ partial struct fileEmbed {
 //
 // If allTags is non-nil, matchFile records any encountered build tag
 // by setting allTags[tag] = true.
-internal static (ж<fileInfo>, error) matchFile⁔(/*this*/ ж<Context> Ꮡctxt, @string dir, @string name, map<@string, bool> allTags, ж<bool> ᏑbinaryOnly, ж<token.FileSet> fset) {
+internal static (ж<fileInfo>, error) matchFile(this ж<Context> Ꮡctxt, @string dir, @string name, map<@string, bool> allTags, ж<bool> ᏑbinaryOnly, ж<token.FileSet> fset) {
     ref var ctxt = ref Ꮡctxt.DerefOrNull();
     ref var binaryOnly = ref ᏑbinaryOnly.DerefOrNull();
 
@@ -1634,6 +1672,8 @@ internal static (ж<fileInfo>, error) matchFile⁔(/*this*/ ж<Context> Ꮡctxt,
     return (info, default);
 }
 
+} partial class build_package {
+
 internal static (slice<@string>, map<@string, slice<token.Position>>) cleanDecls(map<@string, slice<token.Position>> m) {
     var all = new slice<@string>(0, len(m));
     foreach (var (path, _) in m) {
@@ -1673,6 +1713,8 @@ internal static bool isGoBuildComment(slice<byte> line) {
 // for more about the design of binary-only packages.
 internal static slice<byte> binaryOnlyComment = slice<byte>("//go:binary-only-package"u8);
 
+} partial class buildᴛContext {
+
 // shouldBuild reports whether it is okay to use this file,
 // The rule is that in the file's leading run of // comments
 // and blank lines, which must be followed by a blank line
@@ -1690,7 +1732,7 @@ internal static slice<byte> binaryOnlyComment = slice<byte>("//go:binary-only-pa
 //
 // shouldBuild reports whether the file should be built
 // and whether a //go:binary-only-package comment was found.
-internal static (bool shouldBuild, bool binaryOnly, error err) shouldBuild⁔(/*this*/ ж<Context> Ꮡctxt, slice<byte> content, map<@string, bool> allTags) {
+internal static (bool shouldBuild, bool binaryOnly, error err) shouldBuild(this ж<Context> Ꮡctxt, slice<byte> content, map<@string, bool> allTags) {
     bool shouldBuild = default;
     error err = default;
 
@@ -1742,6 +1784,8 @@ internal static (bool shouldBuild, bool binaryOnly, error err) shouldBuild⁔(/*
 
     return (shouldBuild, sawBinaryOnly, default);
 }
+
+} partial class build_package {
 
 // parseFileHeader should be an internal detail,
 // but widely used packages access it using linkname.
@@ -1828,10 +1872,12 @@ break_Lines:;
     return (content.slice(0, end), goBuild, sawBinaryOnly, default);
 }
 
+} partial class buildᴛContext {
+
 // saveCgo saves the information from the #cgo lines in the import "C" comment.
 // These lines set CFLAGS, CPPFLAGS, CXXFLAGS and LDFLAGS and pkg-config directives
 // that affect the way cgo's C code is built.
-internal static error saveCgo⁔(/*this*/ ж<Context> Ꮡctxt, @string filename, ж<Package> Ꮡdi, ж<ast.CommentGroup> cg) {
+internal static error saveCgo(this ж<Context> Ꮡctxt, @string filename, ж<Package> Ꮡdi, ж<ast.CommentGroup> cg) {
     ref var ctxt = ref Ꮡctxt.DerefOrNull();
     ref var di = ref Ꮡdi.DerefOrNull();
 
@@ -1932,6 +1978,8 @@ internal static error saveCgo⁔(/*this*/ ж<Context> Ꮡctxt, @string filename,
     return default;
 }
 
+} partial class build_package {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string srcdirˢ => ref srcdirˢᵇ;
 private static readonly @string srcdirˢᵇ = "${SRCDIR}"u8;
@@ -1957,6 +2005,8 @@ internal static (@string, bool) expandSrcDir(@string str, @string srcdir) {
     return (res, ok && res != ""u8);
 }
 
+} partial class buildᴛContext {
+
 // makePathsAbsolute looks for compiler options that take paths and
 // makes them absolute. We do this because through the 1.8 release we
 // ran the compiler in the package directory, so any relative -I or -L
@@ -1968,7 +2018,7 @@ internal static (@string, bool) expandSrcDir(@string str, @string srcdir) {
 // Using filepath.IsAbs and filepath.Join here means the results will be
 // different on different systems, but that's OK: -I and -L options are
 // inherently system-dependent.
-internal static void makePathsAbsolute⁔(/*this*/ ref Context ctxt, slice<@string> args, @string srcDir) {
+internal static void makePathsAbsolute(this ref Context ctxt, slice<@string> args, @string srcDir) {
     var nextPath = false;
     foreach (var (i, arg) in range(args)) {
         if (nextPath) {
@@ -1987,6 +2037,8 @@ internal static void makePathsAbsolute⁔(/*this*/ ref Context ctxt, slice<@stri
         }
     }
 }
+
+} partial class build_package {
 
 // NOTE: $ is not safe for the shell, but it is allowed here because of linker options like -Wl,$ORIGIN.
 // We never pass these arguments to a shell (just to programs we construct argv for), so this should be okay.
@@ -2087,12 +2139,14 @@ internal static (slice<@string> r, error err) splitQuoted(@string s) {
     return (args, err);
 }
 
+} partial class buildᴛContext {
+
 // matchAuto interprets text as either a +build or //go:build expression (whichever works),
 // reporting whether the expression matches the build context.
 //
 // matchAuto is only used for testing of tag evaluation
 // and in #cgo lines, which accept either syntax.
-internal static bool matchAuto⁔(/*this*/ ж<Context> Ꮡctxt, @string text, map<@string, bool> allTags) {
+internal static bool matchAuto(this ж<Context> Ꮡctxt, @string text, map<@string, bool> allTags) {
     if (strings.ContainsAny(text, "&|()")) {
         text = "//go:build "u8 + text;
     } else {
@@ -2105,7 +2159,7 @@ internal static bool matchAuto⁔(/*this*/ ж<Context> Ꮡctxt, @string text, ma
     return Ꮡctxt.eval(x, allTags);
 }
 
-internal static bool eval⁔(/*this*/ ж<Context> Ꮡctxt, constraint.Expr x, map<@string, bool> allTags) {
+internal static bool eval(this ж<Context> Ꮡctxt, constraint.Expr x, map<@string, bool> allTags) {
     var allTagsʗ1 = allTags;
     return x.Eval((@string tag) => Ꮡctxt.Value.matchTag(tag, allTagsʗ1));
 }
@@ -2128,7 +2182,7 @@ private static readonly @string goexperimentBoringcryptoˢᵇ = "goexperiment.bo
 //	tag (if tag is listed in ctxt.BuildTags, ctxt.ToolTags, or ctxt.ReleaseTags)
 //
 // It records all consulted tags in allTags.
-internal static bool matchTag⁔(/*this*/ ref Context ctxt, @string name, map<@string, bool> allTags) {
+internal static bool matchTag(this ref Context ctxt, @string name, map<@string, bool> allTags) {
     if (allTags != nil) {
         allTags[name] = true;
     }
@@ -2175,7 +2229,7 @@ internal static bool matchTag⁔(/*this*/ ref Context ctxt, @string name, map<@s
 // if GOOS=android, then files with GOOS=linux are also matched.
 // if GOOS=illumos, then files with GOOS=solaris are also matched.
 // if GOOS=ios, then files with GOOS=darwin are also matched.
-internal static bool goodOSArchFile⁔(/*this*/ ref Context ctxt, @string name, map<@string, bool> allTags) {
+internal static bool goodOSArchFile(this ref Context ctxt, @string name, map<@string, bool> allTags) {
     (name, _, _) = strings.Cut(name, ".");
 
     // Before Go 1.4, a file called "linux.go" would be equivalent to having a
@@ -2208,6 +2262,8 @@ internal static bool goodOSArchFile⁔(/*this*/ ref Context ctxt, @string name, 
     }
     return true;
 }
+
+} partial class build_package {
 
 // ToolDir is the directory containing build tools.
 public static readonly ж<@string> ᏑToolDir = new StaticBox<@string>(getToolDir());

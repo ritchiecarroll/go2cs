@@ -82,7 +82,7 @@ namespace go;
     {
         ArgumentNullException.ThrowIfNull(target);
 
-        return Of(target.Method);
+        return Of(golib.GoFuncPair.Underlying(target).Method);
     }
 
     /// <summary>

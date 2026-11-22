@@ -27,6 +27,8 @@ using encoding;
 using go.net;
 using go.net.http.@internal;
 using go.sync;
+using Δhttp = http_package;
+using static http_package;
 
 partial class http_package {
 
@@ -172,8 +174,10 @@ internal static @string refererForURL(ж<url.URL> ᏑlastReq, ref url.URL newReq
     return referer;
 }
 
+} partial class httpᴛClient {
+
 // didTimeout is non-nil only if err != nil.
-internal static (ж<Response> resp, Func<bool> didTimeout, error err) send⁔(/*this*/ ref Client c, ж<Request> Ꮡreq, time.Time deadline) {
+internal static (ж<Response> resp, Func<bool> didTimeout, error err) send(this ref Client c, ж<Request> Ꮡreq, time.Time deadline) {
     ж<Response> resp = default;
     Func<bool> didTimeout = default;
     error err = default;
@@ -189,7 +193,7 @@ internal static (ж<Response> resp, Func<bool> didTimeout, error err) send⁔(/*
             req.AddCookie(cookie);
         }
     }
-    (resp, didTimeout, err) = send(Ꮡreq, c.transport(), deadline);
+    (resp, didTimeout, err) = Δhttp.send(Ꮡreq, c.transport(), deadline);
     if (err != nil) {
         return (default, didTimeout, err);
     }
@@ -201,19 +205,21 @@ internal static (ж<Response> resp, Func<bool> didTimeout, error err) send⁔(/*
     return (resp, default, default);
 }
 
-internal static time.Time deadline⁔(/*this*/ ref Client c) {
+internal static time.Time deadline(this ref Client c) {
     if (c.Timeout > 0) {
         return time.Now().Add(c.Timeout);
     }
     return new time.Time();
 }
 
-internal static RoundTripper transport⁔(/*this*/ ref Client c) {
+internal static RoundTripper transport(this ref Client c) {
     if (c.Transport != nil) {
         return c.Transport;
     }
     return DefaultTransport;
 }
+
+} partial class http_package {
 
 // ErrSchemeMismatch is returned when a server returns an HTTP response to an HTTPS client.
 public static error ErrSchemeMismatch = errors.New("http: server gave HTTP response to HTTPS client");
@@ -505,6 +511,8 @@ public static (ж<Response> resp, error err) Get(@string url) {
     return DefaultClient.Get(url);
 }
 
+} partial class httpᴛClient {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string getˢ => ref getˢᵇ;
 private static readonly @string getˢᵇ = "GET"u8;
@@ -532,7 +540,7 @@ private static readonly @string getˢᵇ = "GET"u8;
 //
 // To make a request with a specified context.Context, use [NewRequestWithContext]
 // and Client.Do.
-internal static (ж<Response> resp, error err) Get⁔(/*this*/ ж<Client> Ꮡc, @string url) {
+public static (ж<Response> resp, error err) Get(this ж<Client> Ꮡc, @string url) {
     error err = default;
 
     (var req, err) = NewRequest(getˢ, url, default);
@@ -542,6 +550,8 @@ internal static (ж<Response> resp, error err) Get⁔(/*this*/ ж<Client> Ꮡc, 
     return Ꮡc.Do(req);
 }
 
+} partial class http_package {
+
 internal static bool alwaysFalse() { return false; }
 
 // ErrUseLastResponse can be returned by Client.CheckRedirect hooks to
@@ -550,15 +560,23 @@ internal static bool alwaysFalse() { return false; }
 // unclosed.
 public static error ErrUseLastResponse = errors.New("net/http: use last response");
 
+} partial class httpᴛClient {
+
 // checkRedirect calls either the user's configured CheckRedirect
 // function, or the default.
-internal static error checkRedirect⁔(/*this*/ ref Client c, ж<Request> req, slice<ж<Request>> via) {
+internal static error checkRedirect(this ref Client c, ж<Request> req, slice<ж<Request>> via) {
     var fn = c.CheckRedirect;
     if (fn == nil) {
         fn = defaultCheckRedirect;
     }
     return fn(req, via);
 }
+
+} partial class http_package {
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string getˢ => ref getˢᵇ;
+private static readonly @string getˢᵇ = "GET"u8;
 
 // redirectBehavior describes what should happen when the
 // client encounters a 3xx status code from the server.
@@ -616,6 +634,8 @@ internal static @string urlErrorOp(@string method) {
     return method;
 }
 
+} partial class httpᴛClient {
+
 // Do sends an HTTP request and returns an HTTP response, following
 // policy (such as redirects, cookies, auth) as configured on the
 // client.
@@ -653,19 +673,25 @@ internal static @string urlErrorOp(@string method) {
 //
 // Any returned error will be of type [*url.Error]. The url.Error
 // value's Timeout method will report true if the request timed out.
-internal static (ж<Response>, error) Do⁔(/*this*/ ж<Client> Ꮡc, ж<Request> req) {
+public static (ж<Response>, error) Do(this ж<Client> Ꮡc, ж<Request> req) {
     return Ꮡc.@do(req);
 }
 
+} partial class http_package {
+
 internal static Action<ж<Response>, error> testHookClientDoResult;
 
+} partial class httpᴛClient {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string httpNilRequestUrlˢ => ref httpNilRequestUrlˢᵇ;
+private static readonly @string httpNilRequestUrlˢᵇ = "http: nil Request.URL"u8;
 internal static ref readonly @string locationˢ => ref locationˢᵇ;
 private static readonly @string locationˢᵇ = "Location"u8;
 internal static ref readonly @string refererˢ => ref refererˢᵇ;
 private static readonly @string refererˢᵇ = "Referer"u8;
 
-internal static (ж<Response> retres, error reterr) do⁔(/*this*/ ж<Client> Ꮡc, ж<Request> Ꮡreq) {
+internal static (ж<Response> retres, error reterr) @do(this ж<Client> Ꮡc, ж<Request> Ꮡreq) {
     ж<Response> retres = default;
     error reterr = default;
     GoFrame ᒐ = default;
@@ -844,7 +870,7 @@ private static readonly @string cookieˢᵇ = "Cookie"u8;
 // makeHeadersCopier makes a function that copies headers from the
 // initial Request, ireq. For every redirect, this function must be called
 // so that it can copy headers into the upcoming Request.
-internal static Action<ж<Request>, bool, bool> makeHeadersCopier⁔(/*this*/ ж<Client> Ꮡc, ж<Request> Ꮡireq) {
+internal static Action<ж<Request>, bool, bool> makeHeadersCopier(this ж<Client> Ꮡc, ж<Request> Ꮡireq) {
     ref var c = ref Ꮡc.DerefOrNull();
     ref var ireq = ref Ꮡireq.DerefOrNull();
 
@@ -921,6 +947,8 @@ internal static Action<ж<Request>, bool, bool> makeHeadersCopier⁔(/*this*/ ж
     };
 }
 
+} partial class http_package {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string stoppedAfter10Redirectsˢ => ref stoppedAfter10Redirectsˢᵇ;
 private static readonly @string stoppedAfter10Redirectsˢᵇ = "stopped after 10 redirects"u8;
@@ -952,6 +980,8 @@ public static (ж<Response> resp, error err) Post(@string url, @string contentTy
     return DefaultClient.Post(url, contentType, body);
 }
 
+} partial class httpᴛClient {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string postˢ => ref postˢᵇ;
 private static readonly @string postˢᵇ = "POST"u8;
@@ -972,7 +1002,7 @@ private static readonly @string contentTypeˢᵇ = "Content-Type"u8;
 //
 // See the [Client.Do] method documentation for details on how redirects
 // are handled.
-internal static (ж<Response> resp, error err) Post⁔(/*this*/ ж<Client> Ꮡc, @string url, @string contentType, io.Reader body) {
+public static (ж<Response> resp, error err) Post(this ж<Client> Ꮡc, @string url, @string contentType, io.Reader body) {
     error err = default;
 
     (var req, err) = NewRequest(postˢ, url, body);
@@ -982,6 +1012,8 @@ internal static (ж<Response> resp, error err) Post⁔(/*this*/ ж<Client> Ꮡc,
     req.Header.Set(contentTypeˢ, contentType);
     return Ꮡc.Do(req);
 }
+
+} partial class http_package {
 
 // PostForm issues a POST to the specified URL, with data's keys and
 // values URL-encoded as the request body.
@@ -1003,6 +1035,8 @@ public static (ж<Response> resp, error err) PostForm(@string urlΔ1, url.Values
     return DefaultClient.PostForm(urlΔ1, data);
 }
 
+} partial class httpᴛClient {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string applicationXWwwFormˢ => ref applicationXWwwFormˢᵇ;
 private static readonly @string applicationXWwwFormˢᵇ = "application/x-www-form-urlencoded"u8;
@@ -1021,9 +1055,11 @@ private static readonly @string applicationXWwwFormˢᵇ = "application/x-www-fo
 //
 // To make a request with a specified context.Context, use [NewRequestWithContext]
 // and Client.Do.
-internal static (ж<Response> resp, error err) PostForm⁔(/*this*/ ж<Client> Ꮡc, @string urlΔ1, url.Values data) {
+public static (ж<Response> resp, error err) PostForm(this ж<Client> Ꮡc, @string urlΔ1, url.Values data) {
     return Ꮡc.Post(urlΔ1, applicationXWwwFormˢ, new strings_ReaderжReader(strings.NewReader(data.Encode())));
 }
+
+} partial class http_package {
 
 // Head issues a HEAD to the specified URL. If the response is one of
 // the following redirect codes, Head follows the redirect, up to a
@@ -1043,6 +1079,8 @@ public static (ж<Response> resp, error err) Head(@string url) {
     return DefaultClient.Head(url);
 }
 
+} partial class httpᴛClient {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string headˢ => ref headˢᵇ;
 private static readonly @string headˢᵇ = "HEAD"u8;
@@ -1059,7 +1097,7 @@ private static readonly @string headˢᵇ = "HEAD"u8;
 //
 // To make a request with a specified [context.Context], use [NewRequestWithContext]
 // and [Client.Do].
-internal static (ж<Response> resp, error err) Head⁔(/*this*/ ж<Client> Ꮡc, @string url) {
+public static (ж<Response> resp, error err) Head(this ж<Client> Ꮡc, @string url) {
     error err = default;
 
     (var req, err) = NewRequest(headˢ, url, default);
@@ -1069,9 +1107,13 @@ internal static (ж<Response> resp, error err) Head⁔(/*this*/ ж<Client> Ꮡc,
     return Ꮡc.Do(req);
 }
 
+} partial class http_package {
+
 internal partial interface CloseIdleConnections_closeIdler /*dyn*/ {
     void CloseIdleConnections();
 }
+
+} partial class httpᴛClient {
 
 // CloseIdleConnections closes any connections on its [Transport] which
 // were previously connected from previous requests but are now
@@ -1080,11 +1122,13 @@ internal partial interface CloseIdleConnections_closeIdler /*dyn*/ {
 //
 // If [Client.Transport] does not have a [Client.CloseIdleConnections] method
 // then this method does nothing.
-internal static void CloseIdleConnections⁔(/*this*/ ref Client c) {
+public static void CloseIdleConnections(this ref Client c) {
     var (tr, ok) = c.transport()._<CloseIdleConnections_closeIdler>(ᐧ); if (ok) {
         tr.CloseIdleConnections();
     }
 }
+
+} partial class http_package {
 
 // cancelTimerBody is an io.ReadCloser that wraps rc with two features:
 //  1. On Read error or close, the stop func is called.
@@ -1096,7 +1140,9 @@ partial struct cancelTimerBody {
     internal Func<bool> reqDidTimeout;
 }
 
-internal static (nint n, error err) Read⁔(/*this*/ ref cancelTimerBody b, slice<byte> p) {
+} partial class httpᴛcancelTimerBody {
+
+internal static (nint n, error err) Read(this ref cancelTimerBody b, slice<byte> p) {
     nint n = default;
     error err = default;
 
@@ -1113,11 +1159,13 @@ internal static (nint n, error err) Read⁔(/*this*/ ref cancelTimerBody b, slic
     return (n, err);
 }
 
-internal static error Close⁔(/*this*/ ref cancelTimerBody b) {
+internal static error Close(this ref cancelTimerBody b) {
     var err = b.rc.Close();
     b.stop();
     return err;
 }
+
+} partial class http_package {
 
 internal static bool shouldCopyHeaderOnRedirect(ж<url.URL> initial, ж<url.URL> dest) {
     // Permit sending auth/cookie headers from "foo.com"

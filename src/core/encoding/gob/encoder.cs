@@ -7,6 +7,7 @@ using errors = errors_package;
 using io = io_package;
 using reflect = reflect_package;
 using sync = sync_package;
+using static gob_package;
 
 partial class gob_package {
 
@@ -38,22 +39,24 @@ public static ж<Encoder> NewEncoder(io.Writer w) {
     return enc;
 }
 
+} partial class gobᴛEncoder {
+
 // writer returns the innermost writer the encoder is using.
-internal static io.Writer writer⁔(/*this*/ ref Encoder enc) {
+internal static io.Writer writer(this ref Encoder enc) {
     return enc.w[len(enc.w) - 1];
 }
 
 // pushWriter adds a writer to the encoder.
-internal static void pushWriter⁔(/*this*/ ref Encoder enc, io.Writer w) {
+internal static void pushWriter(this ref Encoder enc, io.Writer w) {
     enc.w = append(enc.w, w);
 }
 
 // popWriter pops the innermost writer.
-internal static void popWriter⁔(/*this*/ ref Encoder enc) {
+internal static void popWriter(this ref Encoder enc) {
     enc.w = enc.w.slice(0, len(enc.w) - 1);
 }
 
-internal static void setError⁔(/*this*/ ref Encoder enc, error err) {
+internal static void setError(this ref Encoder enc, error err) {
     if (enc.err == nil) { // remember the first.
         enc.err = err;
     }
@@ -64,7 +67,7 @@ internal static ref readonly @string gobEncoderMessageTooBigˢ => ref gobEncoder
 private static readonly @string gobEncoderMessageTooBigˢᵇ = "gob: encoder: message too big"u8;
 
 // writeMessage sends the data item preceded by an unsigned count of its length.
-internal static void writeMessage⁔(/*this*/ ref Encoder enc, io.Writer w, ж<encBuffer> Ꮡb) {
+internal static void writeMessage(this ref Encoder enc, io.Writer w, ж<encBuffer> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     // Space has been reserved for the length at the head of the message.
@@ -95,7 +98,7 @@ internal static void writeMessage⁔(/*this*/ ref Encoder enc, io.Writer w, ж<e
 
 // sendActualType sends the requested type, without further investigation, unless
 // it's been sent before.
-internal static bool /*sent*/ sendActualType⁔(/*this*/ ж<Encoder> Ꮡenc, io.Writer w, ж<encoderState> Ꮡstate, ж<userTypeInfo> Ꮡut, reflect.Type actual) {
+internal static bool /*sent*/ sendActualType(this ж<Encoder> Ꮡenc, io.Writer w, ж<encoderState> Ꮡstate, ж<userTypeInfo> Ꮡut, reflect.Type actual) {
     bool sent = default;
     ref var enc = ref Ꮡenc.DerefOrNull();
     ref var state = ref Ꮡstate.DerefOrNull();
@@ -148,7 +151,7 @@ internal static bool /*sent*/ sendActualType⁔(/*this*/ ж<Encoder> Ꮡenc, io.
 }
 
 // sendType sends the type info to the other side, if necessary.
-internal static bool /*sent*/ sendType⁔(/*this*/ ж<Encoder> Ꮡenc, io.Writer w, ж<encoderState> state, reflect.Type origt) {
+internal static bool /*sent*/ sendType(this ж<Encoder> Ꮡenc, io.Writer w, ж<encoderState> state, reflect.Type origt) {
     bool sent = default;
 
     var ut = userType(origt);
@@ -200,14 +203,14 @@ internal static bool /*sent*/ sendType⁔(/*this*/ ж<Encoder> Ꮡenc, io.Writer
 // Encode transmits the data item represented by the empty interface value,
 // guaranteeing that all necessary type information has been transmitted first.
 // Passing a nil pointer to Encoder will panic, as they cannot be transmitted by gob.
-internal static error Encode⁔(/*this*/ ж<Encoder> Ꮡenc, any e) {
+public static error Encode(this ж<Encoder> Ꮡenc, any e) {
     return Ꮡenc.EncodeValue(reflect.ValueOf(e));
 }
 
 // sendTypeDescriptor makes sure the remote side knows about this type.
 // It will send a descriptor if this is the first time the type has been
 // sent.
-internal static void sendTypeDescriptor⁔(/*this*/ ж<Encoder> Ꮡenc, io.Writer w, ж<encoderState> state, ж<userTypeInfo> Ꮡut) {
+internal static void sendTypeDescriptor(this ж<Encoder> Ꮡenc, io.Writer w, ж<encoderState> state, ж<userTypeInfo> Ꮡut) {
     ref var enc = ref Ꮡenc.DerefOrNull();
     ref var ut = ref Ꮡut.DerefOrNull();
 
@@ -238,7 +241,7 @@ internal static void sendTypeDescriptor⁔(/*this*/ ж<Encoder> Ꮡenc, io.Write
 }
 
 // sendTypeId sends the id, which must have already been defined.
-internal static void sendTypeId⁔(/*this*/ ref Encoder enc, ж<encoderState> Ꮡstate, ж<userTypeInfo> Ꮡut) {
+internal static void sendTypeId(this ref Encoder enc, ж<encoderState> Ꮡstate, ж<userTypeInfo> Ꮡut) {
     ref var state = ref Ꮡstate.DerefOrNull();
     ref var ut = ref Ꮡut.DerefOrNull();
 
@@ -253,7 +256,7 @@ private static readonly @string gobCannotEncodeNilValueˢᵇ = "gob: cannot enco
 // EncodeValue transmits the data item represented by the reflection value,
 // guaranteeing that all necessary type information has been transmitted first.
 // Passing a nil pointer to EncodeValue will panic, as they cannot be transmitted by gob.
-internal static error EncodeValue⁔(/*this*/ ж<Encoder> Ꮡenc, reflect.Value value) {
+public static error EncodeValue(this ж<Encoder> Ꮡenc, reflect.Value value) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -303,4 +306,4 @@ internal static error EncodeValue⁔(/*this*/ ж<Encoder> Ꮡenc, reflect.Value 
     finally { if (ᒐd1) Ꮡenc.DerefOrNull().mutex.Unlock(); ᒐ.Run(); }
 }
 
-} // end gob_package
+}

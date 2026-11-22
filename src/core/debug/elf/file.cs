@@ -32,6 +32,7 @@ using @internal;
 using compress;
 using encoding;
 using go.debug;
+using static elf_package;
 
 partial class elf_package {
 
@@ -102,16 +103,20 @@ partial struct Section {
     internal int64 compressionOffset;
 }
 
+} partial class elfᴛSection {
+
 // Data reads and returns the contents of the ELF section.
 // Even if the section is stored compressed in the ELF file,
 // Data returns uncompressed data.
 //
 // For an [SHT_NOBITS] section, Data always returns a non-nil error.
-internal static (slice<byte>, error) Data⁔(/*this*/ ж<Section> Ꮡs) {
+public static (slice<byte>, error) Data(this ж<Section> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     return saferio.ReadData(new io_ReadSeekerᴠReader(Ꮡs.Open()), s.Size);
 }
+
+} partial class elfᴛFile {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string sectionHasInvalidStringˢ => ref sectionHasInvalidStringˢᵇ;
@@ -119,12 +124,14 @@ private static readonly @string sectionHasInvalidStringˢᵇ = "section has inva
 
 // stringTable reads and returns the string table given by the
 // specified link value.
-internal static (slice<byte>, error) stringTable⁔(/*this*/ ref File f, uint32 link) {
+internal static (slice<byte>, error) stringTable(this ref File f, uint32 link) {
     if (link <= 0 || link >= (uint32)len(f.Sections)) {
         return (default, errors.New(sectionHasInvalidStringˢ));
     }
     return f.Sections[link].Data();
 }
+
+} partial class elfᴛSection {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string zdebugˢ => ref zdebugˢᵇ;
@@ -136,7 +143,7 @@ private static readonly @string zdebugˢᵇ = ".zdebug"u8;
 //
 // For an [SHT_NOBITS] section, all calls to the opened reader
 // will return a non-nil error.
-internal static io.ReadSeeker Open⁔(/*this*/ ж<Section> Ꮡs) {
+public static io.ReadSeeker Open(this ж<Section> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     if (s.Type == SHT_NOBITS) {
@@ -189,6 +196,8 @@ internal static io.ReadSeeker Open⁔(/*this*/ ж<Section> Ꮡs) {
     )));
 }
 
+} partial class elf_package {
+
 // A ProgHeader represents a single ELF program header.
 partial struct ProgHeader {
     public ProgType Type;
@@ -214,8 +223,12 @@ partial struct Prog {
     internal ж<io.SectionReader> sr;
 }
 
+} partial class elfᴛProg {
+
 // Open returns a new ReadSeeker reading the ELF program body.
-internal static io.ReadSeeker Open⁔(/*this*/ ref Prog p) { return new io.SectionReaderжReadSeeker(io.NewSectionReader(new io.SectionReaderжReaderAt(p.sr), 0, 9223372036854775807L)); }
+public static io.ReadSeeker Open(this ref Prog p) { return new io.SectionReaderжReadSeeker(io.NewSectionReader(new io.SectionReaderжReaderAt(p.sr), 0, 9223372036854775807L)); }
+
+} partial class elf_package {
 
 // A Symbol represents an entry in an ELF symbol table section.
 partial struct Symbol {
@@ -244,7 +257,9 @@ partial struct FormatError {
     internal any val;
 }
 
-internal static @string Error⁔(/*this*/ ref FormatError e) {
+} partial class elfᴛFormatError {
+
+public static @string Error(this ref FormatError e) {
     @string msg = e.msg;
     if (e.val != nil) {
         msg += fmt.Sprintf(" '%v' "u8, e.val);
@@ -252,6 +267,8 @@ internal static @string Error⁔(/*this*/ ref FormatError e) {
     msg += fmt.Sprintf("in record at byte %#x"u8, e.off);
     return msg;
 }
+
+} partial class elf_package {
 
 // Open opens the named file using [os.Open] and prepares it for use as an ELF binary.
 public static (ж<File>, error) Open(@string name) {
@@ -268,10 +285,12 @@ public static (ж<File>, error) Open(@string name) {
     return (ff, default);
 }
 
+} partial class elfᴛFile {
+
 // Close closes the [File].
 // If the [File] was created using [NewFile] directly instead of [Open],
 // Close has no effect.
-internal static error Close⁔(/*this*/ ref File f) {
+public static error Close(this ref File f) {
     error err = default;
     if (f.closer != nil) {
         err = f.closer.Close();
@@ -282,7 +301,7 @@ internal static error Close⁔(/*this*/ ref File f) {
 
 // SectionByType returns the first section in f with the
 // given type, or nil if there is no such section.
-internal static ж<Section> SectionByType⁔(/*this*/ ref File f, SectionType typ) {
+public static ж<Section> SectionByType(this ref File f, SectionType typ) {
     foreach (var (_, s) in range(f.Sections)) {
         if (s.Type == typ) {
             return s;
@@ -290,6 +309,8 @@ internal static ж<Section> SectionByType⁔(/*this*/ ref File f, SectionType ty
     }
     return default;
 }
+
+} partial class elf_package {
 
 // NewFile creates a new [File] for accessing an ELF binary in an underlying reader.
 // The ELF binary is expected to start at position 0 in the ReaderAt.
@@ -657,13 +678,15 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
     return (f, default);
 }
 
+} partial class elfᴛFile {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string notImplementedˢ => ref notImplementedˢᵇ;
 private static readonly @string notImplementedˢᵇ = "not implemented"u8;
 
 // getSymbols returns a slice of Symbols from parsing the symbol table
 // with the given type, along with the associated string table.
-internal static (slice<Symbol>, slice<byte>, error) getSymbols⁔(/*this*/ ref File f, SectionType typ) {
+internal static (slice<Symbol>, slice<byte>, error) getSymbols(this ref File f, SectionType typ) {
     switch (f.Class) {
     case var ᴛ when ᴛ == ELFCLASS64: {
         return f.getSymbols64(typ);
@@ -675,15 +698,19 @@ internal static (slice<Symbol>, slice<byte>, error) getSymbols⁔(/*this*/ ref F
     return (default, default, errors.New(notImplementedˢ));
 }
 
+} partial class elf_package {
+
 // ErrNoSymbols is returned by [File.Symbols] and [File.DynamicSymbols]
 // if there is no such section in the File.
 public static error ErrNoSymbols = errors.New("no symbol section");
+
+} partial class elfᴛFile {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string lengthOfSymbolSectionIsˢ => ref lengthOfSymbolSectionIsˢᵇ;
 private static readonly @string lengthOfSymbolSectionIsˢᵇ = "length of symbol section is not a multiple of SymSize"u8;
 
-internal static (slice<Symbol>, slice<byte>, error) getSymbols32⁔(/*this*/ ref File f, SectionType typ) {
+internal static (slice<Symbol>, slice<byte>, error) getSymbols32(this ref File f, SectionType typ) {
     var symtabSection = f.SectionByType(typ);
     if (symtabSection == nil) {
         return (default, default, ErrNoSymbols);
@@ -737,7 +764,7 @@ internal static (slice<Symbol>, slice<byte>, error) getSymbols32⁔(/*this*/ ref
 internal static ref readonly @string lengthOfSymbolSectionIsˢ2 => ref lengthOfSymbolSectionIsˢ2ᵇ;
 private static readonly @string lengthOfSymbolSectionIsˢ2ᵇ = "length of symbol section is not a multiple of Sym64Size"u8;
 
-internal static (slice<Symbol>, slice<byte>, error) getSymbols64⁔(/*this*/ ref File f, SectionType typ) {
+internal static (slice<Symbol>, slice<byte>, error) getSymbols64(this ref File f, SectionType typ) {
     var symtabSection = f.SectionByType(typ);
     if (symtabSection == nil) {
         return (default, default, ErrNoSymbols);
@@ -787,6 +814,8 @@ internal static (slice<Symbol>, slice<byte>, error) getSymbols64⁔(/*this*/ ref
     return (symbols, strdata, default);
 }
 
+} partial class elf_package {
+
 // getString extracts a string from an ELF string table.
 internal static (@string, bool) getString(slice<byte> section, nint start) {
     if (start < 0 || start >= len(section)) {
@@ -801,9 +830,11 @@ internal static (@string, bool) getString(slice<byte> section, nint start) {
     return ("", false);
 }
 
+} partial class elfᴛFile {
+
 // Section returns a section with the given name, or nil if no such
 // section exists.
-internal static ж<Section> Section⁔(/*this*/ ref File f, @string name) {
+public static ж<Section> Section(this ref File f, @string name) {
     foreach (var (_, s) in range(f.Sections)) {
         if (s.Name == name) {
             return s;
@@ -818,7 +849,7 @@ private static readonly @string applyRelocationsNotˢᵇ = "applyRelocations: no
 
 // applyRelocations applies relocations to dst. rels is a relocations section
 // in REL or RELA format.
-internal static error applyRelocations⁔(/*this*/ ref File f, slice<byte> dst, slice<byte> rels) {
+internal static error applyRelocations(this ref File f, slice<byte> dst, slice<byte> rels) {
     switch (ᐧ) {
     case {} when f.Class == ELFCLASS64 && f.Machine == EM_X86_64: {
         return f.applyRelocationsAMD64(dst, rels);
@@ -861,6 +892,8 @@ internal static error applyRelocations⁔(/*this*/ ref File f, slice<byte> dst, 
     }}
 }
 
+} partial class elf_package {
+
 // canApplyRelocation reports whether we should try to apply a
 // relocation to a DWARF data section, given a pointer to the symbol
 // targeted by the relocation.
@@ -871,11 +904,13 @@ internal static bool canApplyRelocation(ref Symbol sym) {
     return sym.Section != SHN_UNDEF && sym.Section < SHN_LORESERVE;
 }
 
+} partial class elfᴛFile {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string lengthOfRelocationˢ => ref lengthOfRelocationˢᵇ;
 private static readonly @string lengthOfRelocationˢᵇ = "length of relocation section is not a multiple of 24"u8;
 
-internal static error applyRelocationsAMD64⁔(/*this*/ ref File f, slice<byte> dst, slice<byte> rels) {
+internal static error applyRelocationsAMD64(this ref File f, slice<byte> dst, slice<byte> rels) {
     // 24 is the size of Rela64.
     if (len(rels) % 24 != 0) {
         return errors.New(lengthOfRelocationˢ);
@@ -924,7 +959,7 @@ internal static error applyRelocationsAMD64⁔(/*this*/ ref File f, slice<byte> 
 internal static ref readonly @string lengthOfRelocationˢ2 => ref lengthOfRelocationˢ2ᵇ;
 private static readonly @string lengthOfRelocationˢ2ᵇ = "length of relocation section is not a multiple of 8"u8;
 
-internal static error applyRelocations386⁔(/*this*/ ref File f, slice<byte> dst, slice<byte> rels) {
+internal static error applyRelocations386(this ref File f, slice<byte> dst, slice<byte> rels) {
     // 8 is the size of Rel32.
     if (len(rels) % 8 != 0) {
         return errors.New(lengthOfRelocationˢ2);
@@ -956,7 +991,7 @@ internal static error applyRelocations386⁔(/*this*/ ref File f, slice<byte> ds
     return default;
 }
 
-internal static error applyRelocationsARM⁔(/*this*/ ref File f, slice<byte> dst, slice<byte> rels) {
+internal static error applyRelocationsARM(this ref File f, slice<byte> dst, slice<byte> rels) {
     // 8 is the size of Rel32.
     if (len(rels) % 8 != 0) {
         return errors.New(lengthOfRelocationˢ2);
@@ -990,7 +1025,7 @@ internal static error applyRelocationsARM⁔(/*this*/ ref File f, slice<byte> ds
     return default;
 }
 
-internal static error applyRelocationsARM64⁔(/*this*/ ref File f, slice<byte> dst, slice<byte> rels) {
+internal static error applyRelocationsARM64(this ref File f, slice<byte> dst, slice<byte> rels) {
     // 24 is the size of Rela64.
     if (len(rels) % 24 != 0) {
         return errors.New(lengthOfRelocationˢ);
@@ -1039,7 +1074,7 @@ internal static error applyRelocationsARM64⁔(/*this*/ ref File f, slice<byte> 
 internal static ref readonly @string lengthOfRelocationˢ3 => ref lengthOfRelocationˢ3ᵇ;
 private static readonly @string lengthOfRelocationˢ3ᵇ = "length of relocation section is not a multiple of 12"u8;
 
-internal static error applyRelocationsPPC⁔(/*this*/ ref File f, slice<byte> dst, slice<byte> rels) {
+internal static error applyRelocationsPPC(this ref File f, slice<byte> dst, slice<byte> rels) {
     // 12 is the size of Rela32.
     if (len(rels) % 12 != 0) {
         return errors.New(lengthOfRelocationˢ3);
@@ -1076,7 +1111,7 @@ internal static error applyRelocationsPPC⁔(/*this*/ ref File f, slice<byte> ds
     return default;
 }
 
-internal static error applyRelocationsPPC64⁔(/*this*/ ref File f, slice<byte> dst, slice<byte> rels) {
+internal static error applyRelocationsPPC64(this ref File f, slice<byte> dst, slice<byte> rels) {
     // 24 is the size of Rela64.
     if (len(rels) % 24 != 0) {
         return errors.New(lengthOfRelocationˢ);
@@ -1117,7 +1152,7 @@ internal static error applyRelocationsPPC64⁔(/*this*/ ref File f, slice<byte> 
     return default;
 }
 
-internal static error applyRelocationsMIPS⁔(/*this*/ ref File f, slice<byte> dst, slice<byte> rels) {
+internal static error applyRelocationsMIPS(this ref File f, slice<byte> dst, slice<byte> rels) {
     // 8 is the size of Rel32.
     if (len(rels) % 8 != 0) {
         return errors.New(lengthOfRelocationˢ2);
@@ -1151,7 +1186,7 @@ internal static error applyRelocationsMIPS⁔(/*this*/ ref File f, slice<byte> d
     return default;
 }
 
-internal static error applyRelocationsMIPS64⁔(/*this*/ ref File f, slice<byte> dst, slice<byte> rels) {
+internal static error applyRelocationsMIPS64(this ref File f, slice<byte> dst, slice<byte> rels) {
     // 24 is the size of Rela64.
     if (len(rels) % 24 != 0) {
         return errors.New(lengthOfRelocationˢ);
@@ -1199,7 +1234,7 @@ internal static error applyRelocationsMIPS64⁔(/*this*/ ref File f, slice<byte>
     return default;
 }
 
-internal static error applyRelocationsLOONG64⁔(/*this*/ ref File f, slice<byte> dst, slice<byte> rels) {
+internal static error applyRelocationsLOONG64(this ref File f, slice<byte> dst, slice<byte> rels) {
     // 24 is the size of Rela64.
     if (len(rels) % 24 != 0) {
         return errors.New(lengthOfRelocationˢ);
@@ -1242,7 +1277,7 @@ internal static error applyRelocationsLOONG64⁔(/*this*/ ref File f, slice<byte
     return default;
 }
 
-internal static error applyRelocationsRISCV64⁔(/*this*/ ref File f, slice<byte> dst, slice<byte> rels) {
+internal static error applyRelocationsRISCV64(this ref File f, slice<byte> dst, slice<byte> rels) {
     // 24 is the size of Rela64.
     if (len(rels) % 24 != 0) {
         return errors.New(lengthOfRelocationˢ);
@@ -1283,7 +1318,7 @@ internal static error applyRelocationsRISCV64⁔(/*this*/ ref File f, slice<byte
     return default;
 }
 
-internal static error applyRelocationss390x⁔(/*this*/ ref File f, slice<byte> dst, slice<byte> rels) {
+internal static error applyRelocationss390x(this ref File f, slice<byte> dst, slice<byte> rels) {
     // 24 is the size of Rela64.
     if (len(rels) % 24 != 0) {
         return errors.New(lengthOfRelocationˢ);
@@ -1324,7 +1359,7 @@ internal static error applyRelocationss390x⁔(/*this*/ ref File f, slice<byte> 
     return default;
 }
 
-internal static error applyRelocationsSPARC64⁔(/*this*/ ref File f, slice<byte> dst, slice<byte> rels) {
+internal static error applyRelocationsSPARC64(this ref File f, slice<byte> dst, slice<byte> rels) {
     // 24 is the size of Rela64.
     if (len(rels) % 24 != 0) {
         return errors.New(lengthOfRelocationˢ);
@@ -1381,7 +1416,7 @@ private static readonly @string rangesˢᵇ = "ranges"u8;
 internal static ref readonly @string strˢ => ref strˢᵇ;
 private static readonly @string strˢᵇ = "str"u8;
 
-internal static (ж<dwarf.Data>, error) DWARF⁔(/*this*/ ж<File> Ꮡf) {
+public static (ж<dwarf.Data>, error) DWARF(this ж<File> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     @string dwarfSuffix(ж<Section> s) {
@@ -1489,7 +1524,7 @@ internal static (ж<dwarf.Data>, error) DWARF⁔(/*this*/ ж<File> Ꮡf) {
 // For compatibility with Go 1.0, Symbols omits the null symbol at index 0.
 // After retrieving the symbols as symtab, an externally supplied index x
 // corresponds to symtab[x-1], not symtab[x].
-internal static (slice<Symbol>, error) Symbols⁔(/*this*/ ref File f) {
+public static (slice<Symbol>, error) Symbols(this ref File f) {
     var (sym, _, err) = f.getSymbols(SHT_SYMTAB);
     return (sym, err);
 }
@@ -1503,7 +1538,7 @@ internal static (slice<Symbol>, error) Symbols⁔(/*this*/ ref File f) {
 // For compatibility with [File.Symbols], [File.DynamicSymbols] omits the null symbol at index 0.
 // After retrieving the symbols as symtab, an externally supplied index x
 // corresponds to symtab[x-1], not symtab[x].
-internal static (slice<Symbol>, error) DynamicSymbols⁔(/*this*/ ref File f) {
+public static (slice<Symbol>, error) DynamicSymbols(this ref File f) {
     var (sym, str, err) = f.getSymbols(SHT_DYNSYM);
     if (err != nil) {
         return (default, err);
@@ -1520,17 +1555,21 @@ internal static (slice<Symbol>, error) DynamicSymbols⁔(/*this*/ ref File f) {
     return (sym, default);
 }
 
+} partial class elf_package {
+
 partial struct ImportedSymbol {
     public @string Name;
     public @string Version;
     public @string Library;
 }
 
+} partial class elfᴛFile {
+
 // ImportedSymbols returns the names of all symbols
 // referred to by the binary f that are expected to be
 // satisfied by other libraries at dynamic load time.
 // It does not return weak symbols.
-internal static (slice<ImportedSymbol>, error) ImportedSymbols⁔(/*this*/ ref File f) {
+public static (slice<ImportedSymbol>, error) ImportedSymbols(this ref File f) {
     var (sym, str, err) = f.getSymbols(SHT_DYNSYM);
     if (err != nil) {
         return (default, err);
@@ -1549,12 +1588,16 @@ internal static (slice<ImportedSymbol>, error) ImportedSymbols⁔(/*this*/ ref F
     return (all, default);
 }
 
+} partial class elf_package {
+
 // VersionIndex is the type of a [Symbol] version index.
 partial struct VersionIndex /*num:uint16*/;
 
+} partial class elfᴛVersionIndex {
+
 // IsHidden reports whether the symbol is hidden within the version.
 // This means that the symbol can only be seen by specifying the exact version.
-internal static bool IsHidden⁔(/*this*/ VersionIndex vi) {
+public static bool IsHidden(this VersionIndex vi) {
     return (VersionIndex)(vi & 0x8000) != 0;
 }
 
@@ -1571,9 +1614,11 @@ internal static bool IsHidden⁔(/*this*/ VersionIndex vi) {
 // In general, a defined symbol will have an index referring
 // to DynamicVersions, and an undefined symbol will have an index
 // referring to some version in DynamicVersionNeeds.
-internal static uint16 Index⁔(/*this*/ VersionIndex vi) {
+public static uint16 Index(this VersionIndex vi) {
     return (uint16)((VersionIndex)(vi & 0x7fff));
 }
+
+} partial class elf_package {
 
 // DynamicVersion is a version defined by a dynamic object.
 // This describes entries in the ELF SHT_GNU_verdef section.
@@ -1603,8 +1648,10 @@ partial struct DynamicVersionDep {
     public @string Dep;  // Name of required version.
 }
 
+} partial class elfᴛFile {
+
 // dynamicVersions returns version information for a dynamic object.
-internal static error dynamicVersions⁔(/*this*/ ref File f, slice<byte> str) {
+internal static error dynamicVersions(this ref File f, slice<byte> str) {
     if (f.dynVers != nil) {
         // Already initialized.
         return default;
@@ -1681,7 +1728,7 @@ internal static ref readonly @string dynamicVersionsMissingˢ => ref dynamicVers
 private static readonly @string dynamicVersionsMissingˢᵇ = "DynamicVersions: missing version table"u8;
 
 // DynamicVersions returns version information for a dynamic object.
-internal static (slice<DynamicVersion>, error) DynamicVersions⁔(/*this*/ ref File f) {
+public static (slice<DynamicVersion>, error) DynamicVersions(this ref File f) {
     if (f.dynVers == nil) {
         var (_, str, err) = f.getSymbols(SHT_DYNSYM);
         if (err != nil) {
@@ -1700,7 +1747,7 @@ internal static (slice<DynamicVersion>, error) DynamicVersions⁔(/*this*/ ref F
 }
 
 // dynamicVersionNeeds returns version dependencies for a dynamic object.
-internal static error dynamicVersionNeeds⁔(/*this*/ ref File f, slice<byte> str) {
+internal static error dynamicVersionNeeds(this ref File f, slice<byte> str) {
     if (f.dynVerNeeds != nil) {
         // Already initialized.
         return default;
@@ -1774,7 +1821,7 @@ internal static ref readonly @string dynamicVersionNeedsˢ => ref dynamicVersion
 private static readonly @string dynamicVersionNeedsˢᵇ = "DynamicVersionNeeds: missing version table"u8;
 
 // DynamicVersionNeeds returns version dependencies for a dynamic object.
-internal static (slice<DynamicVersionNeed>, error) DynamicVersionNeeds⁔(/*this*/ ref File f) {
+public static (slice<DynamicVersionNeed>, error) DynamicVersionNeeds(this ref File f) {
     if (f.dynVerNeeds == nil) {
         var (_, str, err) = f.getSymbols(SHT_DYNSYM);
         if (err != nil) {
@@ -1795,7 +1842,7 @@ internal static (slice<DynamicVersionNeed>, error) DynamicVersionNeeds⁔(/*this
 // gnuVersionInit parses the GNU version tables
 // for use by calls to gnuVersion.
 // It reports whether any version tables were found.
-internal static (bool, error) gnuVersionInit⁔(/*this*/ ref File f, slice<byte> str) {
+internal static (bool, error) gnuVersionInit(this ref File f, slice<byte> str) {
     // Versym parallels symbol table, indexing into verneed.
     var vs = f.SectionByType(SHT_GNU_VERSYM);
     if (vs == nil) {
@@ -1819,7 +1866,7 @@ internal static (bool, error) gnuVersionInit⁔(/*this*/ ref File f, slice<byte>
 
 // gnuVersion adds Library and Version information to sym,
 // which came from offset i of the symbol table.
-internal static (bool hasVersion, VersionIndex versionIndex, @string version, @string library) gnuVersion⁔(/*this*/ ref File f, nint i) {
+internal static (bool hasVersion, VersionIndex versionIndex, @string version, @string library) gnuVersion(this ref File f, nint i) {
     // Each entry is two bytes; skip undef entry at beginning.
     i = (i + 1) * 2;
     if (i >= len(f.gnuVersym)) {
@@ -1856,7 +1903,7 @@ internal static (bool hasVersion, VersionIndex versionIndex, @string version, @s
 // ImportedLibraries returns the names of all libraries
 // referred to by the binary f that are expected to be
 // linked with the binary at dynamic link time.
-internal static (slice<@string>, error) ImportedLibraries⁔(/*this*/ ref File f) {
+public static (slice<@string>, error) ImportedLibraries(this ref File f) {
     return f.DynString(DT_NEEDED);
 }
 
@@ -1869,7 +1916,7 @@ private static readonly @string lengthOfDynamicSectionIsˢᵇ = "length of dynam
 //
 // The tag must be one that takes string values: [DT_NEEDED], [DT_SONAME], [DT_RPATH], or
 // [DT_RUNPATH].
-internal static (slice<@string>, error) DynString⁔(/*this*/ ref File f, DynTag tag) {
+public static (slice<@string>, error) DynString(this ref File f, DynTag tag) {
     var allᴷ = new stackAppend<@string>(moves: true);
 
     switch (tag) {
@@ -1931,7 +1978,7 @@ internal static (slice<@string>, error) DynString⁔(/*this*/ ref File f, DynTag
 
 // DynValue returns the values listed for the given tag in the file's dynamic
 // section.
-internal static (slice<uint64>, error) DynValue⁔(/*this*/ ref File f, DynTag tag) {
+public static (slice<uint64>, error) DynValue(this ref File f, DynTag tag) {
     var valsᴷ = new stackAppend<uint64>(moves: true);
 
     var ds = f.SectionByType(SHT_DYNAMIC);
@@ -1977,16 +2024,22 @@ internal static (slice<uint64>, error) DynValue⁔(/*this*/ ref File f, DynTag t
     return (vals, default);
 }
 
+} partial class elf_package {
+
 partial struct nobitsSectionReader {
 }
+
+} partial class elfᴛnobitsSectionReader {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string unexpectedReadFromShtˢ => ref unexpectedReadFromShtˢᵇ;
 private static readonly @string unexpectedReadFromShtˢᵇ = "unexpected read from SHT_NOBITS section"u8;
 
-internal static (nint n, error err) ReadAt⁔(/*this*/ ref nobitsSectionReader _, slice<byte> p, int64 off) {
+internal static (nint n, error err) ReadAt(this ref nobitsSectionReader _, slice<byte> p, int64 off) {
     return (0, errors.New(unexpectedReadFromShtˢ));
 }
+
+} partial class elf_package {
 
 // putUint writes a relocation to slice
 // at offset start of length length (4 or 8 bytes),

@@ -3,6 +3,8 @@
 // license that can be found in the LICENSE file.
 namespace go.image;
 
+using static color_package;
+
 partial class color_package {
 
 // RGBToYCbCr converts an RGB triple to a Y'CbCr triple.
@@ -169,7 +171,9 @@ partial struct YCbCr {
     public uint8 Y, Cb, Cr;
 }
 
-internal static (uint32, uint32, uint32, uint32) RGBA⁔(/*this*/ YCbCr c) {
+} partial class colorᴛYCbCr {
+
+public static (uint32, uint32, uint32, uint32) RGBA(this YCbCr c) {
     // This code is a copy of the YCbCrToRGB function above, except that it
     // returns values in the range [0, 0xffff] instead of [0, 0xff]. There is a
     // subtle difference between doing this and having YCbCr satisfy the Color
@@ -226,6 +230,8 @@ internal static (uint32, uint32, uint32, uint32) RGBA⁔(/*this*/ YCbCr c) {
     return ((uint32)r, (uint32)g, (uint32)b, 0xffff);
 }
 
+} partial class color_package {
+
 // YCbCrModel is the [Model] for Y'CbCr colors.
 public static Model YCbCrModel = ModelFunc(yCbCrModel);
 
@@ -245,7 +251,9 @@ partial struct NYCbCrA {
     public uint8 A;
 }
 
-internal static (uint32, uint32, uint32, uint32) RGBA⁔(/*this*/ NYCbCrA c) {
+} partial class colorᴛNYCbCrA {
+
+public static (uint32, uint32, uint32, uint32) RGBA(this NYCbCrA c) {
     // The first part of this method is the same as YCbCr.RGBA.
     var yy1 = (int32)c.Y * 0x10101;
     var cb1 = (int32)c.Cb - 128;
@@ -287,6 +295,8 @@ internal static (uint32, uint32, uint32, uint32) RGBA⁔(/*this*/ NYCbCrA c) {
     var a = (uint32)c.A * 0x101;
     return ((uint32)r * a / 0xffff, (uint32)g * a / 0xffff, (uint32)b * a / 0xffff, a);
 }
+
+} partial class color_package {
 
 // NYCbCrAModel is the [Model] for non-alpha-premultiplied Y'CbCr-with-alpha
 // colors.
@@ -351,7 +361,9 @@ partial struct CMYK {
     public uint8 C, M, Y, K;
 }
 
-internal static (uint32, uint32, uint32, uint32) RGBA⁔(/*this*/ CMYK c) {
+} partial class colorᴛCMYK {
+
+public static (uint32, uint32, uint32, uint32) RGBA(this CMYK c) {
     // This code is a copy of the CMYKToRGB function above, except that it
     // returns values in the range [0, 0xffff] instead of [0, 0xff].
 
@@ -361,6 +373,8 @@ internal static (uint32, uint32, uint32, uint32) RGBA⁔(/*this*/ CMYK c) {
     var b = (0xffff - (uint32)c.Y * 0x101) * w / 0xffff;
     return (r, g, b, 0xffff);
 }
+
+} partial class color_package {
 
 // CMYKModel is the [Model] for CMYK colors.
 public static Model CMYKModel = ModelFunc(cmykModel);

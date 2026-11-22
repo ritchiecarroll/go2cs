@@ -15,6 +15,7 @@ using subtle = go.crypto.subtle_package;
 using go.crypto;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140;
+using static cipher_package;
 
 partial class cipher_package {
 
@@ -73,9 +74,11 @@ internal static BlockMode newCBCGenericEncrypter(Block b, slice<byte> iv) {
     return new cbcEncrypterжBlockMode(newCBC(b, iv).Reinterpret<cbc, cbcEncrypter>());
 }
 
-internal static nint BlockSize⁔(/*this*/ ref cbcEncrypter x) { return x.blockSize; }
+} partial class cipherᴛcbcEncrypter {
 
-internal static void CryptBlocks⁔(/*this*/ ref cbcEncrypter x, slice<byte> dst, slice<byte> src) {
+internal static nint BlockSize(this ref cbcEncrypter x) { return x.blockSize; }
+
+internal static void CryptBlocks(this ref cbcEncrypter x, slice<byte> dst, slice<byte> src) {
     if (len(src) % x.blockSize != 0) {
         throw panic("crypto/cipher: input not full blocks");
     }
@@ -106,12 +109,14 @@ internal static void CryptBlocks⁔(/*this*/ ref cbcEncrypter x, slice<byte> dst
     copy(x.iv, iv);
 }
 
-internal static void SetIV⁔(/*this*/ ref cbcEncrypter x, slice<byte> iv) {
+internal static void SetIV(this ref cbcEncrypter x, slice<byte> iv) {
     if (len(iv) != len(x.iv)) {
         throw panic("cipher: incorrect length IV");
     }
     copy(x.iv, iv);
 }
+
+} partial class cipher_package {
 
 partial struct cbcDecrypter /*cbc*/;
 
@@ -152,9 +157,11 @@ internal static BlockMode newCBCGenericDecrypter(Block b, slice<byte> iv) {
     return new cbcDecrypterжBlockMode(newCBC(b, iv).Reinterpret<cbc, cbcDecrypter>());
 }
 
-internal static nint BlockSize⁔(/*this*/ ref cbcDecrypter x) { return x.blockSize; }
+} partial class cipherᴛcbcDecrypter {
 
-internal static void CryptBlocks⁔(/*this*/ ref cbcDecrypter x, slice<byte> dst, slice<byte> src) {
+internal static nint BlockSize(this ref cbcDecrypter x) { return x.blockSize; }
+
+internal static void CryptBlocks(this ref cbcDecrypter x, slice<byte> dst, slice<byte> src) {
     if (len(src) % x.blockSize != 0) {
         throw panic("crypto/cipher: input not full blocks");
     }
@@ -198,11 +205,11 @@ internal static void CryptBlocks⁔(/*this*/ ref cbcDecrypter x, slice<byte> dst
     (x.iv, x.tmp) = (x.tmp, x.iv);
 }
 
-internal static void SetIV⁔(/*this*/ ref cbcDecrypter x, slice<byte> iv) {
+internal static void SetIV(this ref cbcDecrypter x, slice<byte> iv) {
     if (len(iv) != len(x.iv)) {
         throw panic("cipher: incorrect length IV");
     }
     copy(x.iv, iv);
 }
 
-} // end cipher_package
+}

@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -8,7 +9,11 @@ partial struct Logger {
     internal @string name;
 }
 
-internal static @string Handler⁔(/*this*/ Logger l) { return "logger:"u8 + l.name; }
+} partial class mainᴛLogger {
+
+public static @string Handler(this Logger l) { return "logger:"u8 + l.name; }
+
+} partial class main_package {
 
 partial interface Handler {
     bool Enabled(nint level);

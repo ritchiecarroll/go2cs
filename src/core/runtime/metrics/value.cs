@@ -5,6 +5,7 @@ namespace go.runtime;
 
 using math = math_package;
 using @unsafe = unsafe_package;
+using static metrics_package;
 
 partial class metrics_package {
 
@@ -30,15 +31,17 @@ partial struct Value {
     internal @unsafe.Pointer pointer; // contains non-scalar values.
 }
 
+} partial class metricsᴛValue {
+
 // Kind returns the tag representing the kind of value this is.
-internal static ValueKind Kind⁔(/*this*/ Value v) {
+public static ValueKind Kind(this Value v) {
     return v.kind;
 }
 
 // Uint64 returns the internal uint64 value for the metric.
 //
 // If v.Kind() != KindUint64, this method panics.
-internal static uint64 Uint64⁔(/*this*/ Value v) {
+public static uint64 Uint64(this Value v) {
     if (v.kind != KindUint64) {
         throw panic("called Uint64 on non-uint64 metric value");
     }
@@ -48,7 +51,7 @@ internal static uint64 Uint64⁔(/*this*/ Value v) {
 // Float64 returns the internal float64 value for the metric.
 //
 // If v.Kind() != KindFloat64, this method panics.
-internal static float64 Float64⁔(/*this*/ Value v) {
+public static float64 Float64(this Value v) {
     if (v.kind != KindFloat64) {
         throw panic("called Float64 on non-float64 metric value");
     }
@@ -58,11 +61,11 @@ internal static float64 Float64⁔(/*this*/ Value v) {
 // Float64Histogram returns the internal *Float64Histogram value for the metric.
 //
 // If v.Kind() != KindFloat64Histogram, this method panics.
-internal static ж<Float64Histogram> Float64Histogram⁔(/*this*/ Value v) {
+public static ж<Float64Histogram> Float64Histogram(this Value v) {
     if (v.kind != KindFloat64Histogram) {
         throw panic("called Float64Histogram on non-Float64Histogram metric value");
     }
     return @unsafe.Pointer.To<Float64Histogram>(v.pointer);
 }
 
-} // end metrics_package
+}

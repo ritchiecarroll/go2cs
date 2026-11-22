@@ -18,6 +18,7 @@ namespace go.encoding;
 using bytes = bytes_package;
 using errors = errors_package;
 using io = io_package;
+using static json_package;
 
 partial class json_package {
 
@@ -42,21 +43,23 @@ public static ж<Decoder> NewDecoder(io.Reader r) {
     return Ꮡ(new Decoder(r: r));
 }
 
+} partial class jsonᴛDecoder {
+
 // UseNumber causes the Decoder to unmarshal a number into an
 // interface value as a [Number] instead of as a float64.
-internal static void UseNumber⁔(/*this*/ ref Decoder dec) { dec.d.useNumber = true; }
+public static void UseNumber(this ref Decoder dec) { dec.d.useNumber = true; }
 
 // DisallowUnknownFields causes the Decoder to return an error when the destination
 // is a struct and the input contains object keys which do not match any
 // non-ignored, exported fields in the destination.
-internal static void DisallowUnknownFields⁔(/*this*/ ref Decoder dec) { dec.d.disallowUnknownFields = true; }
+public static void DisallowUnknownFields(this ref Decoder dec) { dec.d.disallowUnknownFields = true; }
 
 // Decode reads the next JSON-encoded value from its
 // input and stores it in the value pointed to by v.
 //
 // See the documentation for [Unmarshal] for details about
 // the conversion of JSON into a Go value.
-internal static error Decode⁔(/*this*/ ж<Decoder> Ꮡdec, any v) {
+public static error Decode(this ж<Decoder> Ꮡdec, any v) {
     ref var dec = ref Ꮡdec.DerefOrNull();
 
     if (dec.err != nil) {
@@ -92,13 +95,13 @@ internal static error Decode⁔(/*this*/ ж<Decoder> Ꮡdec, any v) {
 
 // Buffered returns a reader of the data remaining in the Decoder's
 // buffer. The reader is valid until the next call to [Decoder.Decode].
-internal static io.Reader Buffered⁔(/*this*/ ref Decoder dec) {
+public static io.Reader Buffered(this ref Decoder dec) {
     return new bytes_ReaderжReader(bytes.NewReader(dec.buf.slice(dec.scanp)));
 }
 
 // readValue reads a JSON value into dec.buf.
 // It returns the length of the encoding.
-internal static (nint, error) readValue⁔(/*this*/ ж<Decoder> Ꮡdec) {
+internal static (nint, error) readValue(this ж<Decoder> Ꮡdec) {
     ref var dec = ref Ꮡdec.DerefOrNull();
 
     dec.scan.reset();
@@ -163,7 +166,7 @@ break_Input:;
     return (scanp - dec.scanp, default);
 }
 
-internal static error refill⁔(/*this*/ ref Decoder dec) {
+internal static error refill(this ref Decoder dec) {
     // Make room to read more into the buffer.
     // First slide down data already consumed.
     if (dec.scanp > 0) {
@@ -187,6 +190,8 @@ internal static error refill⁔(/*this*/ ref Decoder dec) {
 
     return err;
 }
+
+} partial class json_package {
 
 internal static bool nonSpace(slice<byte> b) {
     foreach (var (_, c) in range(b)) {
@@ -212,13 +217,15 @@ public static ж<Encoder> NewEncoder(io.Writer w) {
     return Ꮡ(new Encoder(w: w, escapeHTML: true));
 }
 
+} partial class jsonᴛEncoder {
+
 // Encode writes the JSON encoding of v to the stream,
 // with insignificant space characters elided,
 // followed by a newline character.
 //
 // See the documentation for [Marshal] for details about the
 // conversion of Go values to JSON.
-internal static error Encode⁔(/*this*/ ж<Encoder> Ꮡenc, any v) {
+public static error Encode(this ж<Encoder> Ꮡenc, any v) {
     GoFrame ᒐ = default;
     try {
         ref var enc = ref Ꮡenc.DerefOrNull();
@@ -263,7 +270,7 @@ internal static error Encode⁔(/*this*/ ж<Encoder> Ꮡenc, any v) {
 // SetIndent instructs the encoder to format each subsequent encoded
 // value as if indented by the package-level function Indent(dst, src, prefix, indent).
 // Calling SetIndent("", "") disables indentation.
-internal static void SetIndent⁔(/*this*/ ref Encoder enc, @string prefix, @string indent) {
+public static void SetIndent(this ref Encoder enc, @string prefix, @string indent) {
     enc.indentPrefix = prefix;
     enc.indentValue = indent;
 }
@@ -275,17 +282,21 @@ internal static void SetIndent⁔(/*this*/ ref Encoder enc, @string prefix, @str
 //
 // In non-HTML settings where the escaping interferes with the readability
 // of the output, SetEscapeHTML(false) disables this behavior.
-internal static void SetEscapeHTML⁔(/*this*/ ref Encoder enc, bool on) {
+public static void SetEscapeHTML(this ref Encoder enc, bool on) {
     enc.escapeHTML = on;
 }
+
+} partial class json_package {
 
 // RawMessage is a raw encoded JSON value.
 // It implements [Marshaler] and [Unmarshaler] and can
 // be used to delay JSON decoding or precompute a JSON encoding.
 partial struct RawMessage /*[]byte*/;
 
+} partial class jsonᴛRawMessage {
+
 // MarshalJSON returns m as the JSON encoding of m.
-internal static (slice<byte>, error) MarshalJSON⁔(/*this*/ RawMessage m) {
+public static (slice<byte>, error) MarshalJSON(this RawMessage m) {
     if (m == nil) {
         return (slice<byte>("null"u8), default);
     }
@@ -297,7 +308,7 @@ internal static ref readonly @string jsonRawMessageˢ => ref jsonRawMessageˢᵇ
 private static readonly @string jsonRawMessageˢᵇ = "json.RawMessage: UnmarshalJSON on nil pointer"u8;
 
 // UnmarshalJSON sets *m to a copy of data.
-internal static error UnmarshalJSON⁔(/*this*/ ж<RawMessage> Ꮡm, slice<byte> data) {
+public static error UnmarshalJSON(this ж<RawMessage> Ꮡm, slice<byte> data) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     if (Ꮡm == nil) {
@@ -306,6 +317,8 @@ internal static error UnmarshalJSON⁔(/*this*/ ж<RawMessage> Ꮡm, slice<byte>
     m = appendꓸꓸꓸ((m)[0..0], data);
     return default;
 }
+
+} partial class json_package {
 
 internal static Marshaler _ᴛ1ʗ = new RawMessageжMarshaler(((ж<RawMessage>)nil));
 internal static Unmarshaler _ᴛ2ʗ = new RawMessageжUnmarshaler(((ж<RawMessage>)nil));
@@ -320,8 +333,10 @@ internal static UntypedInt tokenObjectColon => 6;
 internal static UntypedInt tokenObjectValue => 7;
 internal static UntypedInt tokenObjectComma => 8;
 
+} partial class jsonᴛDecoder {
+
 // advance tokenstate from a separator state to a value state
-internal static error tokenPrepareForDecode⁔(/*this*/ ref Decoder dec) {
+internal static error tokenPrepareForDecode(this ref Decoder dec) {
     // Note: Not calling peek before switch, to avoid
     // putting peek into the standard Decode path.
     // peek is only called when using the Token API.
@@ -353,7 +368,7 @@ internal static error tokenPrepareForDecode⁔(/*this*/ ref Decoder dec) {
     return default;
 }
 
-internal static bool tokenValueAllowed⁔(/*this*/ ref Decoder dec) {
+internal static bool tokenValueAllowed(this ref Decoder dec) {
     switch (dec.tokenState) {
     case var ᴛ when ᴛ == tokenTopValue || ᴛ == tokenArrayStart || ᴛ == tokenArrayValue || ᴛ == tokenObjectValue: {
         return true;
@@ -361,7 +376,7 @@ internal static bool tokenValueAllowed⁔(/*this*/ ref Decoder dec) {
     return false;
 }
 
-internal static void tokenValueEnd⁔(/*this*/ ref Decoder dec) {
+internal static void tokenValueEnd(this ref Decoder dec) {
     switch (dec.tokenState) {
     case var ᴛ when ᴛ == tokenArrayStart || ᴛ == tokenArrayValue: {
         dec.tokenState = tokenArrayComma;
@@ -373,12 +388,18 @@ internal static void tokenValueEnd⁔(/*this*/ ref Decoder dec) {
     }}
 }
 
+} partial class json_package {
+
 // A Delim is a JSON array or object delimiter, one of [ ] { or }.
 partial struct Delim /*num:rune*/;
 
-internal static @string String⁔(/*this*/ Delim d) {
+} partial class jsonᴛDelim {
+
+public static @string String(this Delim d) {
     return (@string)(rune)d;
 }
+
+} partial class jsonᴛDecoder {
 
 // Token returns the next JSON token in the input stream.
 // At the end of the input stream, Token returns nil, [io.EOF].
@@ -391,7 +412,7 @@ internal static @string String⁔(/*this*/ Delim d) {
 // number, and null—along with delimiters [ ] { } of type [Delim]
 // to mark the start and end of arrays and objects.
 // Commas and colons are elided.
-internal static (Token, error) Token⁔(/*this*/ ж<Decoder> Ꮡdec) {
+public static (Token, error) Token(this ж<Decoder> Ꮡdec) {
     ref var dec = ref Ꮡdec.DerefOrNull();
 
     for (;;) {
@@ -499,7 +520,7 @@ private static readonly @string afterObjectKeyˢ2ᵇ = " after object key"u8;
 internal static ref readonly @string afterObjectKeyValuePairˢ2 => ref afterObjectKeyValuePairˢ2ᵇ;
 private static readonly @string afterObjectKeyValuePairˢ2ᵇ = " after object key:value pair"u8;
 
-internal static (Token, error) tokenError⁔(/*this*/ ref Decoder dec, byte c) {
+internal static (Token, error) tokenError(this ref Decoder dec, byte c) {
     @string context = default;
     switch (dec.tokenState) {
     case var ᴛ when ᴛ == tokenTopValue: {
@@ -531,12 +552,12 @@ internal static (Token, error) tokenError⁔(/*this*/ ref Decoder dec, byte c) {
 
 // More reports whether there is another element in the
 // current array or object being parsed.
-internal static bool More⁔(/*this*/ ref Decoder dec) {
+public static bool More(this ref Decoder dec) {
     var (c, err) = dec.peek();
     return err == nil && c != ']' && c != '}';
 }
 
-internal static (byte, error) peek⁔(/*this*/ ref Decoder dec) {
+internal static (byte, error) peek(this ref Decoder dec) {
     error err = default;
     for (;;) {
         for (nint i = dec.scanp; i < len(dec.buf); i++) {
@@ -558,8 +579,8 @@ internal static (byte, error) peek⁔(/*this*/ ref Decoder dec) {
 // InputOffset returns the input stream byte offset of the current decoder position.
 // The offset gives the location of the end of the most recently returned token
 // and the beginning of the next token.
-internal static int64 InputOffset⁔(/*this*/ ref Decoder dec) {
+public static int64 InputOffset(this ref Decoder dec) {
     return dec.scanned + (int64)dec.scanp;
 }
 
-} // end json_package
+}

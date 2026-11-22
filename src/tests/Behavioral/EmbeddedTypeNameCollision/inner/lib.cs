@@ -1,6 +1,7 @@
 namespace go.EmbeddedTypeNameCollision;
 
 using fmt = fmt_package;
+using static inner_package;
 
 partial class inner_package {
 
@@ -13,17 +14,19 @@ public static Buffer NewBuffer(@string data, nint n) {
     return new Buffer(Data: data, N: n);
 }
 
-internal static @string Describe⁔(/*this*/ Buffer b) {
+} partial class innerᴛBuffer {
+
+public static @string Describe(this Buffer b) {
     return fmt.Sprintf("inner.Buffer(%s,%d)"u8, b.Data, b.N);
 }
 
-internal static void Bump⁔(/*this*/ ref Buffer b) {
+public static void Bump(this ref Buffer b) {
     b.N++;
 }
 
-internal static void Append⁔(/*this*/ ref Buffer b, @string s) {
+public static void Append(this ref Buffer b, @string s) {
     b.Data += s;
     b.N += len(s);
 }
 
-} // end inner_package
+}

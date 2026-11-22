@@ -31,6 +31,7 @@ using go.sync;
 using iter = iter_package;
 using vendor.golang.org.x.net.http;
 using ꓸꓸꓸany = Span<any>;
+using static httputil_package;
 
 partial class httputil_package {
 
@@ -46,6 +47,8 @@ partial struct ProxyRequest {
     public ж<http.Request> Out;
 }
 
+} partial class httputilᴛProxyRequest {
+
 // SetURL routes the outbound request to the scheme, host, and base path
 // provided in target. If the target's path is "/base" and the incoming
 // request was for "/dir", the target request will be for "/base/dir".
@@ -60,7 +63,7 @@ partial struct ProxyRequest {
 //		r.SetURL(url)
 //		r.Out.Host = r.In.Host
 //	}
-internal static void SetURL⁔(/*this*/ ref ProxyRequest r, ж<url.URL> target) {
+public static void SetURL(this ref ProxyRequest r, ж<url.URL> target) {
     rewriteRequestURL(ref (r.Out).DerefOrNull(), target);
     r.Out.Host = ""u8;
 }
@@ -72,6 +75,8 @@ internal static ref readonly @string xForwardedHostˢ => ref xForwardedHostˢᵇ
 private static readonly @string xForwardedHostˢᵇ = "X-Forwarded-Host"u8;
 internal static ref readonly @string xForwardedProtoˢ => ref xForwardedProtoˢᵇ;
 private static readonly @string xForwardedProtoˢᵇ = "X-Forwarded-Proto"u8;
+internal static ref readonly @string httpˢ => ref httpˢᵇ;
+private static readonly @string httpˢᵇ = "http"u8;
 internal static ref readonly @string httpsˢ2 => ref httpsˢ2ᵇ;
 private static readonly @string httpsˢ2ᵇ = "https"u8;
 
@@ -94,7 +99,7 @@ private static readonly @string httpsˢ2ᵇ = "https"u8;
 //		r.Out.Header["X-Forwarded-For"] = r.In.Header["X-Forwarded-For"]
 //		r.SetXForwarded()
 //	}
-internal static void SetXForwarded⁔(/*this*/ ref ProxyRequest r) {
+public static void SetXForwarded(this ref ProxyRequest r) {
     var (clientIP, _, err) = net.SplitHostPort(r.In.RemoteAddr);
     if (err == nil) {
         var prior = r.Out.Header[xForwardedForˢ];
@@ -112,6 +117,8 @@ internal static void SetXForwarded⁔(/*this*/ ref ProxyRequest r) {
         r.Out.Header.Set(xForwardedProtoˢ, httpsˢ2);
     }
 }
+
+} partial class httputil_package {
 
 // ReverseProxy is an HTTP Handler that takes an incoming request and
 // sends it to another server, proxying the response back to the
@@ -389,12 +396,14 @@ internal static slice<@string> hopHeaders = [
     "Upgrade"
 ];
 
-internal static void defaultErrorHandler⁔(/*this*/ ref ReverseProxy p, http.ResponseWriter rw, ж<http.Request> req, error err) {
+} partial class httputilᴛReverseProxy {
+
+internal static void defaultErrorHandler(this ref ReverseProxy p, http.ResponseWriter rw, ж<http.Request> req, error err) {
     p.logf("http: proxy error: %v", err);
     rw.WriteHeader(http.StatusBadGateway);
 }
 
-internal static Action<http.ResponseWriter, ж<http.Request>, error> getErrorHandler⁔(/*this*/ ж<ReverseProxy> Ꮡp) {
+internal static Action<http.ResponseWriter, ж<http.Request>, error> getErrorHandler(this ж<ReverseProxy> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     if (p.ErrorHandler != nil) {
@@ -405,7 +414,7 @@ internal static Action<http.ResponseWriter, ж<http.Request>, error> getErrorHan
 
 // modifyResponse conditionally runs the optional ModifyResponse hook
 // and reports whether the request should proceed.
-internal static bool modifyResponse⁔(/*this*/ ж<ReverseProxy> Ꮡp, http.ResponseWriter rw, ж<http.Response> Ꮡres, ж<http.Request> req) {
+internal static bool modifyResponse(this ж<ReverseProxy> Ꮡp, http.ResponseWriter rw, ж<http.Response> Ꮡres, ж<http.Request> req) {
     ref var p = ref Ꮡp.DerefOrNull();
     ref var res = ref Ꮡres.DerefOrNull();
 
@@ -431,6 +440,12 @@ internal static ref readonly @string upgradeˢ => ref upgradeˢᵇ;
 private static readonly @string upgradeˢᵇ = "Upgrade"u8;
 internal static ref readonly @string forwardedˢ => ref forwardedˢᵇ;
 private static readonly @string forwardedˢᵇ = "Forwarded"u8;
+internal static ref readonly @string xForwardedForˢ => ref xForwardedForˢᵇ;
+private static readonly @string xForwardedForˢᵇ = "X-Forwarded-For"u8;
+internal static ref readonly @string xForwardedHostˢ => ref xForwardedHostˢᵇ;
+private static readonly @string xForwardedHostˢᵇ = "X-Forwarded-Host"u8;
+internal static ref readonly @string xForwardedProtoˢ => ref xForwardedProtoˢᵇ;
+private static readonly @string xForwardedProtoˢᵇ = "X-Forwarded-Proto"u8;
 internal static ref readonly @string clientSentUnsupportedˢ => ref clientSentUnsupportedˢᵇ;
 private static readonly @string clientSentUnsupportedˢᵇ = "client sent unsupported CONNECT request"u8;
 internal static ref readonly @string userAgentˢ => ref userAgentˢᵇ;
@@ -438,7 +453,7 @@ private static readonly @string userAgentˢᵇ = "User-Agent"u8;
 internal static ref readonly @string trailerˢ => ref trailerˢᵇ;
 private static readonly @string trailerˢᵇ = "Trailer"u8;
 
-internal static partial void ServeHTTP⁔(/*this*/ ж<ReverseProxy> Ꮡp, http.ResponseWriter rw, ж<http.Request> Ꮡreq) {
+public static partial void ServeHTTP(this ж<ReverseProxy> Ꮡp, http.ResponseWriter rw, ж<http.Request> Ꮡreq) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -712,6 +727,8 @@ internal static partial void ServeHTTP⁔(/*this*/ ж<ReverseProxy> Ꮡp, http.R
     finally { ᒐ.Run(); }
 }
 
+} partial class httputil_package {
+
 internal static bool inOurTests; // whether we're in our own tests
 
 // shouldPanicOnCopyError reports whether the reverse proxy should
@@ -736,6 +753,10 @@ internal static bool shouldPanicOnCopyError(ж<http.Request> Ꮡreq) {
     return false;
 }
 
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string connectionˢ => ref connectionˢᵇ;
+private static readonly @string connectionˢᵇ = "Connection"u8;
+
 // removeHopByHopHeaders removes hop-by-hop headers.
 internal static void removeHopByHopHeaders(http.Header h) {
     // RFC 7230, section 6.1: Remove headers listed in the "Connection" header.
@@ -755,13 +776,15 @@ internal static void removeHopByHopHeaders(http.Header h) {
     }
 }
 
+} partial class httputilᴛReverseProxy {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string contentTypeˢ => ref contentTypeˢᵇ;
 private static readonly @string contentTypeˢᵇ = "Content-Type"u8;
 
 // flushInterval returns the p.FlushInterval value, conditionally
 // overriding its value for a specific request/response.
-internal static time.Duration flushInterval⁔(/*this*/ ref ReverseProxy p, ж<http.Response> Ꮡres) {
+internal static time.Duration flushInterval(this ref ReverseProxy p, ж<http.Response> Ꮡres) {
     ref var res = ref Ꮡres.DerefOrNull();
 
     @string resCT = res.Header.Get(contentTypeˢ);
@@ -780,7 +803,7 @@ internal static time.Duration flushInterval⁔(/*this*/ ref ReverseProxy p, ж<h
     return p.FlushInterval;
 }
 
-internal static error copyResponse⁔(/*this*/ ж<ReverseProxy> Ꮡp, http.ResponseWriter dst, io.Reader src, time.Duration flushInterval) {
+internal static error copyResponse(this ж<ReverseProxy> Ꮡp, http.ResponseWriter dst, io.Reader src, time.Duration flushInterval) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -817,7 +840,7 @@ internal static error copyResponse⁔(/*this*/ ж<ReverseProxy> Ꮡp, http.Respo
 
 // copyBuffer returns any write errors or non-EOF read errors, and the amount
 // of bytes written.
-internal static (int64, error) copyBuffer⁔(/*this*/ ref ReverseProxy p, io.Writer dst, io.Reader src, slice<byte> buf) {
+internal static (int64, error) copyBuffer(this ref ReverseProxy p, io.Writer dst, io.Reader src, slice<byte> buf) {
     if (len(buf) == 0) {
         buf = new slice<byte>(32 * 1024);
     }
@@ -848,7 +871,7 @@ internal static (int64, error) copyBuffer⁔(/*this*/ ref ReverseProxy p, io.Wri
     }
 }
 
-internal static void logf⁔(/*this*/ ref ReverseProxy p, @string format, params ꓸꓸꓸany argsʗp) {
+internal static void logf(this ref ReverseProxy p, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     if (p.ErrorLog != nil) {
@@ -857,6 +880,8 @@ internal static void logf⁔(/*this*/ ref ReverseProxy p, @string format, params
         log.Printf(format, args.ꓸꓸꓸ);
     }
 }
+
+} partial class httputil_package {
 
 partial struct maxLatencyWriter {
     internal io.Writer dst;
@@ -867,7 +892,9 @@ partial struct maxLatencyWriter {
     internal bool flushPending;
 }
 
-internal static (nint n, error err) Write⁔(/*this*/ ж<maxLatencyWriter> Ꮡm, slice<byte> p) {
+} partial class httputilᴛmaxLatencyWriter {
+
+internal static (nint n, error err) Write(this ж<maxLatencyWriter> Ꮡm, slice<byte> p) {
     nint n = default;
     error err = default;
     GoFrame ᒐ = default;
@@ -896,7 +923,7 @@ internal static (nint n, error err) Write⁔(/*this*/ ж<maxLatencyWriter> Ꮡm,
     ᒐdone: return (n, err);
 }
 
-internal static void delayedFlush⁔(/*this*/ ж<maxLatencyWriter> Ꮡm) {
+internal static void delayedFlush(this ж<maxLatencyWriter> Ꮡm) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -914,7 +941,7 @@ internal static void delayedFlush⁔(/*this*/ ж<maxLatencyWriter> Ꮡm) {
     finally { if (ᒐd1) Ꮡm.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
-internal static void stop⁔(/*this*/ ж<maxLatencyWriter> Ꮡm) {
+internal static void stop(this ж<maxLatencyWriter> Ꮡm) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -931,6 +958,12 @@ internal static void stop⁔(/*this*/ ж<maxLatencyWriter> Ꮡm) {
     finally { if (ᒐd1) Ꮡm.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
+} partial class httputil_package {
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string upgradeˢ => ref upgradeˢᵇ;
+private static readonly @string upgradeˢᵇ = "Upgrade"u8;
+
 internal static @string upgradeType(http.Header h) {
     if (!httpguts.HeaderValuesContainsToken(h[connectionˢ], upgradeˢ)) {
         return ""u8;
@@ -938,7 +971,9 @@ internal static @string upgradeType(http.Header h) {
     return h.Get(upgradeˢ);
 }
 
-internal static partial void handleUpgradeResponse⁔(/*this*/ ж<ReverseProxy> Ꮡp, http.ResponseWriter rw, ж<http.Request> Ꮡreq, ж<http.Response> Ꮡres) {
+} partial class httputilᴛReverseProxy {
+
+internal static partial void handleUpgradeResponse(this ж<ReverseProxy> Ꮡp, http.ResponseWriter rw, ж<http.Request> Ꮡreq, ж<http.Response> Ꮡres) {
     GoFrame ᒐ = default;
     try {
         ref var req = ref Ꮡreq.DerefOrNull();
@@ -1024,6 +1059,8 @@ internal static partial void handleUpgradeResponse⁔(/*this*/ ж<ReverseProxy> 
     finally { ᒐ.Run(); }
 }
 
+} partial class httputil_package {
+
 internal static error errCopyDone = errors.New("hijacked connection copy complete");
 
 // switchProtocolCopier exists so goroutines proxying data back and
@@ -1036,7 +1073,9 @@ internal partial interface copyFromBackend_type /*dyn*/ {
     error CloseWrite();
 }
 
-internal static void copyFromBackend⁔(/*this*/ switchProtocolCopier c, channel/*<-*/<error> errc) {
+} partial class httputilᴛswitchProtocolCopier {
+
+internal static void copyFromBackend(this switchProtocolCopier c, channel/*<-*/<error> errc) {
     var (_, err) = io.Copy(c.user, c.backend); if (err != nil) {
         errc.ᐸꟷ(err);
         return;
@@ -1051,7 +1090,7 @@ internal static void copyFromBackend⁔(/*this*/ switchProtocolCopier c, channel
     errc.ᐸꟷ(errCopyDone);
 }
 
-internal static void copyToBackend⁔(/*this*/ switchProtocolCopier c, channel/*<-*/<error> errc) {
+internal static void copyToBackend(this switchProtocolCopier c, channel/*<-*/<error> errc) {
     var (_, err) = io.Copy(c.backend, c.user); if (err != nil) {
         errc.ᐸꟷ(err);
         return;
@@ -1065,6 +1104,8 @@ internal static void copyToBackend⁔(/*this*/ switchProtocolCopier c, channel/*
 
     errc.ᐸꟷ(errCopyDone);
 }
+
+} partial class httputil_package {
 
 internal static ж<godebug.Setting> urlmaxqueryparams = godebug.New("urlmaxqueryparams");
 
@@ -1123,7 +1164,9 @@ partial struct noopCloseReader {
     internal atomic.Bool closed;
 }
 
-internal static error Close⁔(/*this*/ ж<noopCloseReader> Ꮡncr) {
+} partial class httputilᴛnoopCloseReader {
+
+internal static error Close(this ж<noopCloseReader> Ꮡncr) {
     Ꮡncr.Ꮡclosed.Store(true);
     return default;
 }
@@ -1132,7 +1175,7 @@ internal static error Close⁔(/*this*/ ж<noopCloseReader> Ꮡncr) {
 internal static ref readonly @string reverseProxyDoesAnˢ => ref reverseProxyDoesAnˢᵇ;
 private static readonly @string reverseProxyDoesAnˢᵇ = "ReverseProxy does an invalid Read on closed Body"u8;
 
-internal static (nint, error) Read⁔(/*this*/ ж<noopCloseReader> Ꮡncr, slice<byte> p) {
+internal static (nint, error) Read(this ж<noopCloseReader> Ꮡncr, slice<byte> p) {
     ref var ncr = ref Ꮡncr.DerefOrNull();
 
     if (Ꮡncr.Ꮡclosed.Load()) {
@@ -1141,4 +1184,4 @@ internal static (nint, error) Read⁔(/*this*/ ж<noopCloseReader> Ꮡncr, slice
     return ncr.readCloser.Read(p);
 }
 
-} // end httputil_package
+}

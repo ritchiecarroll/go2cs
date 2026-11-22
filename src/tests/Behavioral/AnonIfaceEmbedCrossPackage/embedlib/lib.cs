@@ -1,5 +1,7 @@
 namespace go.go;
 
+using static anonifaceembed_package;
+
 partial class anonifaceembed_package {
 
 partial interface Option {
@@ -14,9 +16,13 @@ partial struct both {
     internal nint n;
 }
 
-internal static nint Apply⁔(/*this*/ ref both b) { return b.n; }
-internal static @string Name⁔(/*this*/ ref both b) { return "both"; }
-internal static nint Extra⁔(/*this*/ ref both b) { return b.n * 10; }
+} partial class anonifaceembedᴛboth {
+
+internal static nint Apply(this ref both b) { return b.n; }
+internal static @string Name(this ref both b) { return "both"; }
+internal static nint Extra(this ref both b) { return b.n * 10; }
+
+} partial class anonifaceembed_package {
 
 public partial interface With_R0 /*dyn*/ :
     Option,
@@ -46,7 +52,11 @@ partial struct runner {
     internal nint n;
 }
 
-internal static nint run⁔(/*this*/ runner r) { return r.n; }
+} partial class anonifaceembedᴛrunner {
+
+internal static nint run(this runner r) { return r.n; }
+
+} partial class anonifaceembed_package {
 
 public partial interface Runner_R0 /*dyn*/ {
     nint run();

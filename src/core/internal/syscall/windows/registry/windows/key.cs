@@ -25,6 +25,7 @@ namespace go.@internal.syscall.windows;
 
 using runtime = runtime_package;
 using syscall = syscall_package;
+using static registry_package;
 
 partial class registry_package {
 
@@ -60,10 +61,14 @@ public static Key LOCAL_MACHINE => /* Key(syscall.HKEY_LOCAL_MACHINE) */ uncheck
 public static Key USERS => /* Key(syscall.HKEY_USERS) */ unchecked((Key)(syscall.Handle)2147483651);
 public static Key CURRENT_CONFIG => /* Key(syscall.HKEY_CURRENT_CONFIG) */ unchecked((Key)(syscall.Handle)2147483653);
 
+} partial class registryᴛKey {
+
 // Close closes open key k.
-internal static error Close⁔(/*this*/ Key k) {
+public static error Close(this Key k) {
     return syscall.RegCloseKey((syscall.Handle)k);
 }
+
+} partial class registry_package {
 
 // OpenKey opens a new key with path name relative to key k.
 // It accepts any open key, including CURRENT_USER and others,
@@ -83,8 +88,10 @@ public static (Key, error) OpenKey(Key k, @string path, uint32 access) {
     return ((Key)subkey, default);
 }
 
+} partial class registryᴛKey {
+
 // ReadSubKeyNames returns the names of subkeys of key k.
-internal static (slice<@string>, error) ReadSubKeyNames⁔(/*this*/ Key k) {
+public static (slice<@string>, error) ReadSubKeyNames(this Key k) {
     GoFrame ᒐ = default;
     try {
         // RegEnumKeyEx must be called repeatedly and to completion.
@@ -125,6 +132,8 @@ break_loopItems:;
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
+
+} partial class registry_package {
 
 // CreateKey creates a key named path under open key k.
 // CreateKey returns the new key and a boolean flag that reports
@@ -167,8 +176,10 @@ partial struct KeyInfo {
     internal syscall.Filetime lastWriteTime;
 }
 
+} partial class registryᴛKey {
+
 // Stat retrieves information about the open key k.
-internal static (ж<KeyInfo>, error) Stat⁔(/*this*/ Key k) {
+public static (ж<KeyInfo>, error) Stat(this Key k) {
     ref var ki = ref heap(new KeyInfo(), out var Ꮡki);
     var err = syscall.RegQueryInfoKey((syscall.Handle)k, nil, nil, nil,
         Ꮡki.ᏑSubKeyCount, Ꮡki.ᏑMaxSubKeyLen, nil, Ꮡki.ᏑValueCount,
@@ -179,4 +190,4 @@ internal static (ж<KeyInfo>, error) Stat⁔(/*this*/ Key k) {
     return (Ꮡki, default);
 }
 
-} // end registry_package
+}

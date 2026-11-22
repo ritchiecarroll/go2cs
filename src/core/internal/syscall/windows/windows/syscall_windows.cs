@@ -7,6 +7,7 @@ using sync = go.sync_package;
 using syscall = syscall_package;
 using @unsafe = unsafe_package;
 using go;
+using static windows_package;
 
 partial class windows_package {
 
@@ -455,15 +456,23 @@ public static UntypedInt PIPE_READMODE_MESSAGE => 0x00000002;
 // other native functions.
 partial struct NTStatus /*num:uint32*/;
 
-internal static syscall.Errno Errno⁔(/*this*/ NTStatus s) {
+} partial class windowsᴛNTStatus {
+
+public static syscall.Errno Errno(this NTStatus s) {
     return rtlNtStatusToDosErrorNoTeb(s);
 }
 
+} partial class windows_package {
+
 internal static uint32 langID(uint16 pri, uint16 sub) { return (uint32)sub << 10 | (uint32)pri; }
 
-internal static @string Error⁔(/*this*/ NTStatus s) {
+} partial class windowsᴛNTStatus {
+
+public static @string Error(this NTStatus s) {
     return s.Errno().Error();
 }
+
+} partial class windows_package {
 
 // x/sys/windows/mkerrors.bash can generate a complete list of NTStatus codes.
 //

@@ -25,6 +25,7 @@ using fs = go.io.fs_package;
 using path = path_package;
 using time = time_package;
 using go.io;
+using static zip_package;
 
 partial class zip_package {
 
@@ -144,39 +145,47 @@ partial struct FileHeader {
     public uint32 ExternalAttrs; // Meaning depends on CreatorVersion
 }
 
+} partial class zipᴛFileHeader {
+
 // FileInfo returns an fs.FileInfo for the [FileHeader].
-internal static fs.FileInfo FileInfo⁔(/*this*/ ж<FileHeader> Ꮡh) {
+public static fs.FileInfo FileInfo(this ж<FileHeader> Ꮡh) {
     return new headerFileInfo(Ꮡh);
 }
+
+} partial class zip_package {
 
 // headerFileInfo implements [fs.FileInfo].
 partial struct headerFileInfo {
     internal ж<FileHeader> fh;
 }
 
-internal static @string Name⁔(/*this*/ headerFileInfo fi) { return path.Base(fi.fh.Name); }
-internal static int64 Size⁔(/*this*/ headerFileInfo fi) {
+} partial class zipᴛheaderFileInfo {
+
+internal static @string Name(this headerFileInfo fi) { return path.Base(fi.fh.Name); }
+internal static int64 Size(this headerFileInfo fi) {
     if (fi.fh.UncompressedSize64 > 0) {
         return (int64)fi.fh.UncompressedSize64;
     }
     return (int64)fi.fh.UncompressedSize;
 }
-internal static bool IsDir⁔(/*this*/ headerFileInfo fi) { return fi.Mode().IsDir(); }
-internal static time.Time ModTime⁔(/*this*/ headerFileInfo fi) {
+internal static bool IsDir(this headerFileInfo fi) { return fi.Mode().IsDir(); }
+internal static time.Time ModTime(this headerFileInfo fi) {
     if (fi.fh.Modified.IsZero()) {
         return fi.fh.ModTime();
     }
     return fi.fh.Modified.UTC();
 }
-internal static fs.FileMode Mode⁔(/*this*/ headerFileInfo fi) { return fi.fh.Mode(); }
-internal static fs.FileMode Type⁔(/*this*/ headerFileInfo fi) { return fi.fh.Mode().Type(); }
-internal static any Sys⁔(/*this*/ headerFileInfo fi) { return fi.fh.OrTypedNil(); }
+internal static fs.FileMode Mode(this headerFileInfo fi) { return fi.fh.Mode(); }
+internal static fs.FileMode Type(this headerFileInfo fi) { return fi.fh.Mode().Type(); }
+internal static any Sys(this headerFileInfo fi) { return fi.fh.OrTypedNil(); }
 
-internal static (fs.FileInfo, error) Info⁔(/*this*/ headerFileInfo fi) { return (fi, default); }
+internal static (fs.FileInfo, error) Info(this headerFileInfo fi) { return (fi, default); }
 
-internal static @string String⁔(/*this*/ headerFileInfo fi) {
+internal static @string String(this headerFileInfo fi) {
     return fs.FormatFileInfo(fi);
 }
+
+} partial class zip_package {
 
 // FileInfoHeader creates a partially-populated [FileHeader] from an
 // fs.FileInfo.
@@ -256,11 +265,13 @@ internal static (uint16 fDate, uint16 fTime) timeToMsDosTime(time.Time t) {
     return (fDate, fTime);
 }
 
+} partial class zipᴛFileHeader {
+
 // ModTime returns the modification time in UTC using the legacy
 // [ModifiedDate] and [ModifiedTime] fields.
 //
 // Deprecated: Use [Modified] instead.
-internal static time.Time ModTime⁔(/*this*/ ref FileHeader h) {
+public static time.Time ModTime(this ref FileHeader h) {
     return msDosTimeToTime(h.ModifiedDate, h.ModifiedTime);
 }
 
@@ -268,11 +279,13 @@ internal static time.Time ModTime⁔(/*this*/ ref FileHeader h) {
 // to the given time in UTC.
 //
 // Deprecated: Use [Modified] instead.
-internal static void SetModTime⁔(/*this*/ ref FileHeader h, time.Time t) {
+public static void SetModTime(this ref FileHeader h, time.Time t) {
     t = t.UTC(); // Convert to UTC for compatibility
     h.Modified = t;
     (h.ModifiedDate, h.ModifiedTime) = timeToMsDosTime(t);
 }
+
+} partial class zip_package {
 
 // Unix constants. The specification doesn't mention them,
 // but these seem to be the values agreed on by tools.
@@ -291,8 +304,10 @@ internal static UntypedInt s_ISVTX => 0x200;
 internal static UntypedInt msdosDir => 0x10;
 internal static UntypedInt msdosReadOnly => 0x01;
 
+} partial class zipᴛFileHeader {
+
 // Mode returns the permission and mode bits for the [FileHeader].
-internal static fs.FileMode /*mode*/ Mode⁔(/*this*/ ref FileHeader h) {
+public static fs.FileMode /*mode*/ Mode(this ref FileHeader h) {
     fs.FileMode mode = default;
 
     switch ((h.CreatorVersion >> 8)) {
@@ -311,7 +326,7 @@ internal static fs.FileMode /*mode*/ Mode⁔(/*this*/ ref FileHeader h) {
 }
 
 // SetMode changes the permission and mode bits for the [FileHeader].
-internal static void SetMode⁔(/*this*/ ref FileHeader h, fs.FileMode mode) {
+public static void SetMode(this ref FileHeader h, fs.FileMode mode) {
     h.CreatorVersion = (uint16)((uint16)(h.CreatorVersion & 0xff) | (uint16)(creatorUnix << 8));
     h.ExternalAttrs = fileModeToUnixMode(mode) << 16;
 
@@ -325,13 +340,15 @@ internal static void SetMode⁔(/*this*/ ref FileHeader h, fs.FileMode mode) {
 }
 
 // isZip64 reports whether the file size exceeds the 32 bit limit
-internal static bool isZip64⁔(/*this*/ ref FileHeader h) {
+internal static bool isZip64(this ref FileHeader h) {
     return h.CompressedSize64 >= uint32max || h.UncompressedSize64 >= uint32max;
 }
 
-internal static bool hasDataDescriptor⁔(/*this*/ ref FileHeader h) {
+internal static bool hasDataDescriptor(this ref FileHeader h) {
     return (uint16)(h.Flags & 0x8) != 0;
 }
+
+} partial class zip_package {
 
 internal static fs.FileMode /*mode*/ msdosModeToFileMode(uint32 m) {
     fs.FileMode mode = default;

@@ -4,6 +4,7 @@
 namespace go.math;
 
 using math = math_package;
+using static rand_package;
 
 partial class rand_package {
 
@@ -16,6 +17,8 @@ partial class rand_package {
  */
 internal static UntypedFloat re => 7.69711747013104972;
 
+} partial class randᴛRand {
+
 // ExpFloat64 returns an exponentially distributed float64 in the range
 // (0, +[math.MaxFloat64]] with an exponential distribution whose rate parameter
 // (lambda) is 1 and whose mean is 1/lambda (1).
@@ -23,7 +26,7 @@ internal static UntypedFloat re => 7.69711747013104972;
 // callers can adjust the output using:
 //
 //	sample = ExpFloat64() / desiredRateParameter
-internal static float64 ExpFloat64⁔(/*this*/ ref Rand r) {
+public static float64 ExpFloat64(this ref Rand r) {
     for (;;) {
         var j = r.Uint32();
         var i = j & 0xFF;
@@ -39,6 +42,8 @@ internal static float64 ExpFloat64⁔(/*this*/ ref Rand r) {
         }
     }
 }
+
+} partial class rand_package {
 
 [GoLazy] partial class lazyᴛke { internal static array<uint32> ke = array<uint32>([
     0xe290a139U, 0x0, 0x9beadebcU, 0xc377ac71U, 0xd4ddb990U,

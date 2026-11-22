@@ -12,6 +12,7 @@ using syscall = syscall_package;
 using time = time_package;
 using @internal;
 using net;
+using static net_package;
 
 partial class net_package {
 
@@ -25,12 +26,14 @@ partial struct TCPAddr {
     public @string Zone; // IPv6 scoped addressing zone
 }
 
+} partial class netᴛTCPAddr {
+
 // AddrPort returns the [TCPAddr] a as a [netip.AddrPort].
 //
 // If a.Port does not fit in a uint16, it's silently truncated.
 //
 // If a is nil, a zero value is returned.
-internal static netip.AddrPort AddrPort⁔(/*this*/ ж<TCPAddr> Ꮡa) {
+public static netip.AddrPort AddrPort(this ж<TCPAddr> Ꮡa) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (Ꮡa == nil) {
@@ -41,10 +44,18 @@ internal static netip.AddrPort AddrPort⁔(/*this*/ ж<TCPAddr> Ꮡa) {
     return netip.AddrPortFrom(na, (uint16)a.Port);
 }
 
-// Network returns the address's network name, "tcp".
-internal static @string Network⁔(/*this*/ ref TCPAddr a) { return tcpˢ; }
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string tcpˢ => ref tcpˢᵇ;
+private static readonly @string tcpˢᵇ = "tcp"u8;
 
-internal static @string String⁔(/*this*/ ж<TCPAddr> Ꮡa) {
+// Network returns the address's network name, "tcp".
+public static @string Network(this ref TCPAddr a) { return tcpˢ; }
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string nilˢ => ref nilˢᵇ;
+private static readonly @string nilˢᵇ = "<nil>"u8;
+
+public static @string String(this ж<TCPAddr> Ꮡa) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (Ꮡa == nil) {
@@ -57,7 +68,7 @@ internal static @string String⁔(/*this*/ ж<TCPAddr> Ꮡa) {
     return JoinHostPort(ip, strconv.Itoa(a.Port));
 }
 
-internal static bool isWildcard⁔(/*this*/ ж<TCPAddr> Ꮡa) {
+internal static bool isWildcard(this ж<TCPAddr> Ꮡa) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (Ꮡa == nil || a.IP == nil) {
@@ -66,12 +77,14 @@ internal static bool isWildcard⁔(/*this*/ ж<TCPAddr> Ꮡa) {
     return a.IP.IsUnspecified();
 }
 
-internal static Addr opAddr⁔(/*this*/ ж<TCPAddr> Ꮡa) {
+internal static Addr opAddr(this ж<TCPAddr> Ꮡa) {
     if (Ꮡa == nil) {
         return default;
     }
     return new TCPAddrжAddr(Ꮡa);
 }
+
+} partial class net_package {
 
 // ResolveTCPAddr returns an address of TCP end point.
 //
@@ -156,9 +169,11 @@ partial struct KeepAliveConfig {
     public nint Count;
 }
 
+} partial class netᴛTCPConn {
+
 // SyscallConn returns a raw network connection.
 // This implements the [syscall.Conn] interface.
-internal static (syscall.RawConn, error) SyscallConn⁔(/*this*/ ж<TCPConn> Ꮡc) {
+public static (syscall.RawConn, error) SyscallConn(this ж<TCPConn> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.of(TCPConn.Ꮡconn).ok()) {
@@ -168,7 +183,7 @@ internal static (syscall.RawConn, error) SyscallConn⁔(/*this*/ ж<TCPConn> Ꮡ
 }
 
 // ReadFrom implements the [io.ReaderFrom] ReadFrom method.
-internal static (int64, error) ReadFrom⁔(/*this*/ ж<TCPConn> Ꮡc, Δio.Reader r) {
+public static (int64, error) ReadFrom(this ж<TCPConn> Ꮡc, Δio.Reader r) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.of(TCPConn.Ꮡconn).ok()) {
@@ -182,7 +197,7 @@ internal static (int64, error) ReadFrom⁔(/*this*/ ж<TCPConn> Ꮡc, Δio.Reade
 }
 
 // WriteTo implements the io.WriterTo WriteTo method.
-internal static (int64, error) WriteTo⁔(/*this*/ ж<TCPConn> Ꮡc, Δio.Writer w) {
+public static (int64, error) WriteTo(this ж<TCPConn> Ꮡc, Δio.Writer w) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.of(TCPConn.Ꮡconn).ok()) {
@@ -197,7 +212,7 @@ internal static (int64, error) WriteTo⁔(/*this*/ ж<TCPConn> Ꮡc, Δio.Writer
 
 // CloseRead shuts down the reading side of the TCP connection.
 // Most callers should just use Close.
-internal static error CloseRead⁔(/*this*/ ж<TCPConn> Ꮡc) {
+public static error CloseRead(this ж<TCPConn> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.of(TCPConn.Ꮡconn).ok()) {
@@ -211,7 +226,7 @@ internal static error CloseRead⁔(/*this*/ ж<TCPConn> Ꮡc) {
 
 // CloseWrite shuts down the writing side of the TCP connection.
 // Most callers should just use Close.
-internal static error CloseWrite⁔(/*this*/ ж<TCPConn> Ꮡc) {
+public static error CloseWrite(this ж<TCPConn> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.of(TCPConn.Ꮡconn).ok()) {
@@ -237,7 +252,7 @@ internal static error CloseWrite⁔(/*this*/ ж<TCPConn> Ꮡc) {
 // until all data has been sent or discarded.
 // On some operating systems after sec seconds have elapsed any remaining
 // unsent data may be discarded.
-internal static error SetLinger⁔(/*this*/ ж<TCPConn> Ꮡc, nint sec) {
+public static error SetLinger(this ж<TCPConn> Ꮡc, nint sec) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.of(TCPConn.Ꮡconn).ok()) {
@@ -251,7 +266,7 @@ internal static error SetLinger⁔(/*this*/ ж<TCPConn> Ꮡc, nint sec) {
 
 // SetKeepAlive sets whether the operating system should send
 // keep-alive messages on the connection.
-internal static error SetKeepAlive⁔(/*this*/ ж<TCPConn> Ꮡc, bool keepalive) {
+public static error SetKeepAlive(this ж<TCPConn> Ꮡc, bool keepalive) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.of(TCPConn.Ꮡconn).ok()) {
@@ -268,7 +283,7 @@ internal static error SetKeepAlive⁔(/*this*/ ж<TCPConn> Ꮡc, bool keepalive)
 //
 // Note that calling this method on Windows prior to Windows 10 version 1709
 // will reset the KeepAliveInterval to the default system value, which is normally 1 second.
-internal static error SetKeepAlivePeriod⁔(/*this*/ ж<TCPConn> Ꮡc, time.Duration d) {
+public static error SetKeepAlivePeriod(this ж<TCPConn> Ꮡc, time.Duration d) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.of(TCPConn.Ꮡconn).ok()) {
@@ -284,7 +299,7 @@ internal static error SetKeepAlivePeriod⁔(/*this*/ ж<TCPConn> Ꮡc, time.Dura
 // packet transmission in hopes of sending fewer packets (Nagle's
 // algorithm).  The default is true (no delay), meaning that data is
 // sent as soon as possible after a Write.
-internal static error SetNoDelay⁔(/*this*/ ж<TCPConn> Ꮡc, bool noDelay) {
+public static error SetNoDelay(this ж<TCPConn> Ꮡc, bool noDelay) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.of(TCPConn.Ꮡconn).ok()) {
@@ -305,7 +320,7 @@ internal static error SetNoDelay⁔(/*this*/ ж<TCPConn> Ꮡc, bool noDelay) {
 //
 // On Linux, more conditions are verified on kernels >= v5.16, improving
 // the results.
-internal static (bool, error) MultipathTCP⁔(/*this*/ ж<TCPConn> Ꮡc) {
+public static (bool, error) MultipathTCP(this ж<TCPConn> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.of(TCPConn.Ꮡconn).ok()) {
@@ -313,6 +328,8 @@ internal static (bool, error) MultipathTCP⁔(/*this*/ ж<TCPConn> Ꮡc) {
     }
     return (isUsingMultipathTCP(c.fd), default);
 }
+
+} partial class net_package {
 
 internal static ж<TCPConn> newTCPConn(ж<netFD> fd, time.Duration keepAliveIdle, KeepAliveConfig keepAliveCfg, Action<ж<netFD>> preKeepAliveHook, Action<KeepAliveConfig> keepAliveHook) {
     setNoDelay(fd, true);
@@ -383,12 +400,14 @@ partial struct TCPListener {
     internal ListenConfig lc;
 }
 
+} partial class netᴛTCPListener {
+
 // SyscallConn returns a raw network connection.
 // This implements the [syscall.Conn] interface.
 //
 // The returned RawConn only supports calling Control. Read and
 // Write return an error.
-internal static (syscall.RawConn, error) SyscallConn⁔(/*this*/ ж<TCPListener> Ꮡl) {
+public static (syscall.RawConn, error) SyscallConn(this ж<TCPListener> Ꮡl) {
     ref var l = ref Ꮡl.DerefOrNull();
 
     if (!Ꮡl.ok()) {
@@ -399,7 +418,7 @@ internal static (syscall.RawConn, error) SyscallConn⁔(/*this*/ ж<TCPListener>
 
 // AcceptTCP accepts the next incoming call and returns the new
 // connection.
-internal static (ж<TCPConn>, error) AcceptTCP⁔(/*this*/ ж<TCPListener> Ꮡl) {
+public static (ж<TCPConn>, error) AcceptTCP(this ж<TCPListener> Ꮡl) {
     ref var l = ref Ꮡl.DerefOrNull();
 
     if (!Ꮡl.ok()) {
@@ -414,7 +433,7 @@ internal static (ж<TCPConn>, error) AcceptTCP⁔(/*this*/ ж<TCPListener> Ꮡl)
 
 // Accept implements the Accept method in the [Listener] interface; it
 // waits for the next call and returns a generic [Conn].
-internal static (Conn, error) Accept⁔(/*this*/ ж<TCPListener> Ꮡl) {
+public static (Conn, error) Accept(this ж<TCPListener> Ꮡl) {
     ref var l = ref Ꮡl.DerefOrNull();
 
     if (!Ꮡl.ok()) {
@@ -429,7 +448,7 @@ internal static (Conn, error) Accept⁔(/*this*/ ж<TCPListener> Ꮡl) {
 
 // Close stops listening on the TCP address.
 // Already Accepted connections are not closed.
-internal static error Close⁔(/*this*/ ж<TCPListener> Ꮡl) {
+public static error Close(this ж<TCPListener> Ꮡl) {
     ref var l = ref Ꮡl.DerefOrNull();
 
     if (!Ꮡl.ok()) {
@@ -444,11 +463,11 @@ internal static error Close⁔(/*this*/ ж<TCPListener> Ꮡl) {
 // Addr returns the listener's network address, a [*TCPAddr].
 // The Addr returned is shared by all invocations of Addr, so
 // do not modify it.
-internal static Addr Addr⁔(/*this*/ ref TCPListener l) { return l.fd.laddr; }
+public static Addr Addr(this ref TCPListener l) { return l.fd.laddr; }
 
 // SetDeadline sets the deadline associated with the listener.
 // A zero time value disables the deadline.
-internal static error SetDeadline⁔(/*this*/ ж<TCPListener> Ꮡl, time.Time t) {
+public static error SetDeadline(this ж<TCPListener> Ꮡl, time.Time t) {
     ref var l = ref Ꮡl.DerefOrNull();
 
     if (!Ꮡl.ok()) {
@@ -467,7 +486,7 @@ internal static error SetDeadline⁔(/*this*/ ж<TCPListener> Ꮡl, time.Time t)
 //
 // On Windows, the returned os.File's file descriptor is not
 // usable on other processes.
-internal static (ж<os.File> f, error err) File⁔(/*this*/ ж<TCPListener> Ꮡl) {
+public static (ж<os.File> f, error err) File(this ж<TCPListener> Ꮡl) {
     ж<os.File> f = default;
     error err = default;
     ref var l = ref Ꮡl.DerefOrNull();
@@ -481,6 +500,8 @@ internal static (ж<os.File> f, error err) File⁔(/*this*/ ж<TCPListener> Ꮡl
     }
     return (f, err);
 }
+
+} partial class net_package {
 
 // ListenTCP acts like [Listen] for TCP networks.
 //

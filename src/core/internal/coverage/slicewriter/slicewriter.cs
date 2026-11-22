@@ -5,6 +5,7 @@ namespace go.@internal.coverage;
 
 using fmt = fmt_package;
 using io = io_package;
+using static slicewriter_package;
 
 partial class slicewriter_package {
 
@@ -18,7 +19,9 @@ partial struct WriteSeeker {
     internal int64 off;
 }
 
-internal static (nint n, error err) Write⁔(/*this*/ ref WriteSeeker sws, slice<byte> p) {
+} partial class slicewriterᴛWriteSeeker {
+
+public static (nint n, error err) Write(this ref WriteSeeker sws, slice<byte> p) {
     nint amt = len(p);
     var towrite = sws.payload.slice((nint)(sws.off));
     if (len(towrite) < amt) {
@@ -34,7 +37,7 @@ internal static (nint n, error err) Write⁔(/*this*/ ref WriteSeeker sws, slice
 // its internally maintained slice. Note that it is not possible to
 // expand the size of the slice using SEEK_SET; trying to seek outside
 // the slice will result in an error.
-internal static (int64, error) Seek⁔(/*this*/ ref WriteSeeker sws, int64 offset, nint whence) {
+public static (int64, error) Seek(this ref WriteSeeker sws, int64 offset, nint whence) {
     switch (whence) {
     case var ᴛ when ᴛ == io.SeekStart: {
         if (sws.off != offset && (offset < 0 || offset > (int64)len(sws.payload))) {
@@ -65,11 +68,11 @@ internal static (int64, error) Seek⁔(/*this*/ ref WriteSeeker sws, int64 offse
 
 // BytesWritten returns the underlying byte slice for the WriteSeeker,
 // containing the data written to it via Write/Seek calls.
-internal static slice<byte> BytesWritten⁔(/*this*/ ref WriteSeeker sws) {
+public static slice<byte> BytesWritten(this ref WriteSeeker sws) {
     return sws.payload;
 }
 
-internal static (nint n, error err) Read⁔(/*this*/ ref WriteSeeker sws, slice<byte> p) {
+public static (nint n, error err) Read(this ref WriteSeeker sws, slice<byte> p) {
     nint amt = len(p);
     var toread = sws.payload.slice((nint)(sws.off));
     if (len(toread) < amt) {
@@ -80,4 +83,4 @@ internal static (nint n, error err) Read⁔(/*this*/ ref WriteSeeker sws, slice<
     return (amt, default);
 }
 
-} // end slicewriter_package
+}

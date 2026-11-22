@@ -11,6 +11,7 @@ using @unsafe = unsafe_package;
 using fs = global::go.io.fs_package;
 using global::go.io;
 using global::go.os;
+using static fuzz_package;
 
 partial class fuzz_package {
 
@@ -71,9 +72,11 @@ internal static (ж<sharedMem> mem, error err) sharedMemMapFile(ж<os.File> f, n
     ᒐdone: return (mem, Ꮡerr.ValueSlot);
 }
 
+} partial class fuzzᴛsharedMem {
+
 // Close unmaps the shared memory and closes the temporary file. If this
 // sharedMem was created with sharedMemTempFile, Close also removes the file.
-internal static error Close⁔(/*this*/ ref sharedMem m) {
+internal static error Close(this ref sharedMem m) {
     var errsᴷ = new stackAppend<error>();
 
     // Attempt all operations, even if we get an error for an earlier operation.
@@ -94,6 +97,8 @@ internal static error Close⁔(/*this*/ ref sharedMem m) {
     }
     return default;
 }
+
+} partial class fuzz_package {
 
 // setWorkerComm configures communication channels on the cmd that will
 // run a worker process.

@@ -10,10 +10,13 @@ using sys = go.@internal.runtime.sys_package;
 using @unsafe = unsafe_package;
 using go.@internal;
 using go.@internal.runtime;
+using static maps_package;
 
 partial class maps_package {
 
-internal static @unsafe.Pointer getWithoutKeySmallFastStr⁔(/*this*/ ref Map m, ж<abi.MapType> Ꮡtyp, @string keyʗp) {
+} partial class mapsᴛMap {
+
+internal static @unsafe.Pointer getWithoutKeySmallFastStr(this ref Map m, ж<abi.MapType> Ꮡtyp, @string keyʗp) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
     ref var key = ref heap(keyʗp, out var Ꮡkey);
 
@@ -73,6 +76,8 @@ dohash:
     }
     return default;
 }
+
+} partial class maps_package {
 
 // Returns true if a and b might be equal.
 // Returns false if a and b are definitely not equal.
@@ -234,7 +239,9 @@ internal static (@unsafe.Pointer, bool) runtime_mapaccess2_faststr(ж<abi.MapTyp
     }
 }
 
-internal static @unsafe.Pointer putSlotSmallFastStr⁔(/*this*/ ref Map m, ж<abi.MapType> typ, uintptr hash, @string key) {
+} partial class mapsᴛMap {
+
+internal static @unsafe.Pointer putSlotSmallFastStr(this ref Map m, ж<abi.MapType> typ, uintptr hash, @string key) {
     var g = new groupReference(
         data: m.dirPtr
     );
@@ -275,6 +282,8 @@ internal static @unsafe.Pointer putSlotSmallFastStr⁔(/*this*/ ref Map m, ж<ab
 
     return slotElem;
 }
+
+} partial class maps_package {
 
 //go:linkname runtime_mapassign_faststr runtime.mapassign_faststr
 internal static @unsafe.Pointer runtime_mapassign_faststr(ж<abi.MapType> Ꮡtyp, ж<Map> Ꮡm, @string key) {

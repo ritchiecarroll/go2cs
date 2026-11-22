@@ -5,6 +5,7 @@ namespace go;
 
 using fmt = fmt_package;
 using CrossPkgLib = CrossPkgLib_package;
+using static main_package;
 
 partial class main_package {
 
@@ -371,7 +372,11 @@ partial interface Meter {
     nint Bump();
 }
 
-internal static @string Meter⁔(/*this*/ tagged t) { return "tagged-meter"; }
+} partial class mainᴛtagged {
+
+internal static @string Meter(this tagged t) { return "tagged-meter"; }
+
+} partial class main_package {
 
 partial struct counter {
     /*embed*/ public ж<CrossPkgLib_package.Meter> Meter;

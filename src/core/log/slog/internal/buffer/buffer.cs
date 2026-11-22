@@ -6,6 +6,7 @@
 namespace go.log.slog.@internal;
 
 using sync = sync_package;
+using static buffer_package;
 
 partial class buffer_package {
 
@@ -28,7 +29,9 @@ public static ж<Buffer> New() {
     return ᏑbufPool.Get()._<ж<Buffer>>();
 }
 
-internal static void Free⁔(/*this*/ ж<Buffer> Ꮡb) {
+} partial class bufferᴛBuffer {
+
+public static void Free(this ж<Buffer> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     // To reduce peak allocation, return only smaller buffers to the pool.
@@ -39,35 +42,35 @@ internal static void Free⁔(/*this*/ ж<Buffer> Ꮡb) {
     }
 }
 
-internal static void Reset⁔(/*this*/ ref Buffer b) {
+public static void Reset(this ref Buffer b) {
     b.SetLen(0);
 }
 
-internal static (nint, error) Write⁔(/*this*/ ref Buffer b, slice<byte> p) {
+public static (nint, error) Write(this ref Buffer b, slice<byte> p) {
     b = appendꓸꓸꓸ(b, p);
     return (len(p), default);
 }
 
-internal static (nint, error) WriteString⁔(/*this*/ ref Buffer b, @string s) {
+public static (nint, error) WriteString(this ref Buffer b, @string s) {
     b = append(b, s.ꓸꓸꓸ);
     return (len(s), default);
 }
 
-internal static error WriteByte⁔(/*this*/ ref Buffer b, byte c) {
+public static error WriteByte(this ref Buffer b, byte c) {
     b = append(b, c);
     return default;
 }
 
-internal static @string String⁔(/*this*/ ref Buffer b) {
+public static @string String(this ref Buffer b) {
     return (@string)(slice<byte>)b;
 }
 
-internal static nint Len⁔(/*this*/ ref Buffer b) {
+public static nint Len(this ref Buffer b) {
     return len(b);
 }
 
-internal static void SetLen⁔(/*this*/ ref Buffer b, nint n) {
+public static void SetLen(this ref Buffer b, nint n) {
     b = (b).slice(0, n);
 }
 
-} // end buffer_package
+}

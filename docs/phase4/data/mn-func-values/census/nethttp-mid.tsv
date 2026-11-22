@@ -1,0 +1,31 @@
+covered	plain	net/http.http2splitHeaderBlock	<goroot>\src\net\http\h2_bundle.go:11067:15	twin:(*net/http.http2writePushPromise).writeFrame | twin:(*net/http.http2writeResHeaders).writeFrame
+uncovered	twin	(*net/http.http2Framer).logWrite	<goroot>\src\net\http\h2_bundle.go:2016:22	plain:net/http.http2NewFramer
+uncovered	twin	(*net/http.http2Framer).logWrite	<goroot>\src\net\http\h2_bundle.go:2019:21	plain:net/http.http2NewFramer
+uncovered	twin	(*net/http.http2Framer).ReadFrameForHeader	<goroot>\src\net\http\h2_bundle.go:2158:41	package-init:net/http.init
+uncovered	twin	(*net/http.http2Framer).ReadFrameForHeader	<goroot>\src\net\http\h2_bundle.go:2167:22	plain:net/http.http2NewFramer
+partial	plain	(*net/http.http2SettingsFrame).ForeachSetting	<goroot>\src\net\http\h2_bundle.go:2480:15	plain:(*net/http.http2clientConnReadLoop).processSettingsNoWrite | twin:(*net/http.http2Server).serveConn | twin:(*net/http.http2serverConn).processSettings | twin:net/http.http2summarizeFrame
+uncovered	twin(closure)	(*net/http.http2Framer).readMetaFrame$1	<goroot>\src\net\http\h2_bundle.go:3228:23	plain:net/http.http2NewFramer
+covered	twin(closure)	net/http.http2ConfigureServer$3	<goroot>\src\net\http\h2_bundle.go:4383:15	twin:net/http.http2ConfigureServer
+covered	twin(closure)	net/http.http2ConfigureServer$4	<goroot>\src\net\http\h2_bundle.go:4399:15	twin:net/http.http2ConfigureServer
+covered	twin	(*net/http.http2serverConn).serve	<goroot>\src\net\http\h2_bundle.go:5065:16	twin:(*net/http.http2serverConn).readFrames
+covered	twin	(*net/http.http2serverConn).startFrameWrite	<goroot>\src\net\http\h2_bundle.go:5377:47	twin:(*net/http.http2serverConn).startPush
+partial	twin	(*net/http.http2serverConn).runHandler	<goroot>\src\net\http\h2_bundle.go:6506:9	plain:net/http.http2new400Handler | twin:(*net/http.http2serverConn).processHeaders
+covered	plain	net/http.http2foreachHeaderElement	<goroot>\src\net\http\h2_bundle.go:7342:5	twin:(*net/http.http2responseWriterState).writeChunk
+covered	plain	net/http.http2foreachHeaderElement	<goroot>\src\net\http\h2_bundle.go:7347:6	twin:(*net/http.http2responseWriterState).writeChunk
+covered	twin(closure)	net/http.http2configureTransports$2	<goroot>\src\net\http\h2_bundle.go:7660:19	twin:net/http.http2configureTransports
+covered	twin(closure)	net/http.http2configureTransports$3	<goroot>\src\net\http\h2_bundle.go:7669:19	twin:net/http.http2configureTransports
+covered	twin(closure)	(*net/http.http2ClientConn).roundTrip$2	<goroot>\src\net\http\h2_bundle.go:8776:22	twin:(*net/http.http2ClientConn).roundTrip
+covered	twin	(*net/http.http2ClientConn).roundTrip	<goroot>\src\net\http\h2_bundle.go:8819:13	twin:(*net/http.http2ClientConn).roundTrip
+covered	twin(closure)	net/http/internal/httpcommon.EncodeHeaders$3	<goroot>\src\net\http\internal\httpcommon\httpcommon.go:405:10	twin:(*net/http.http2clientStream).encodeAndWriteHeaders
+uncovered	twin	(*net/http.Request).write	<goroot>\src\net\http\request.go:747:22	plain:(*net/http.persistConn).waitForContinue
+covered	plain(closure)	(*net/http.routingIndex).possiblyConflictingPatterns$1	<goroot>\src\net\http\routing_index.go:69:11	twin:(*net/http.ServeMux).registerErr
+uncovered	plain	net/http.foreachHeaderElement	<goroot>\src\net\http\server.go:1556:5	plain:net/http.fixTrailer
+uncovered	plain(closure)	net/http.foreachHeaderElement$1	<goroot>\src\net\http\server.go:1561:6	plain:net/http.fixTrailer
+covered	twin	(*net/http.conn).serve	<goroot>\src\net\http\server.go:1970:7	twin:net/http.http2ConfigureServer
+covered	twin	(*net/http.conn).maybeServeUnencryptedHTTP2	<goroot>\src\net\http\server.go:2197:4	twin:net/http.http2ConfigureServer
+uncovered	plain	(net/http.HandlerFunc).ServeHTTP	<goroot>\src\net\http\server.go:2306:3	plain:(*net/http.ServeMux).findHandler | plain:net/http.NotFoundHandler
+covered	twin	(*net/http.socksDialer).connect	<goroot>\src\net\http\socks_bundle.go:85:29	twin:(*net/http.Transport).dialConn
+uncovered	twin	(*net/http.Transport).dial	<goroot>\src\net\http\transport.go:1307:26	plain:net/http.defaultTransportDialContext
+uncovered	twin	(*net/http.Transport).dialConn	<goroot>\src\net\http\transport.go:1890:52	package-init:net/http.init
+covered	twin	(*net/http.bodyEOFSignal).Close	<goroot>\src\net\http\transport.go:3100:25	twin:(*net/http.persistConn).readLoop
+covered	plain	(*net/http.bodyEOFSignal).condfn	<goroot>\src\net\http\transport.go:3111:13	twin:(*net/http.persistConn).readLoop

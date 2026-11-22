@@ -9,6 +9,7 @@ namespace go.crypto.@internal.fips140.nistec;
 using subtle = go.crypto.@internal.fips140.subtle_package;
 using errors = errors_package;
 using go.crypto.@internal.fips140;
+using static fiat_package;
 
 partial class fiat_package {
 
@@ -23,8 +24,10 @@ partial struct P521Element {
 
 internal static UntypedInt p521ElementLen => 66;
 
+} partial class fiatᴛP521Element {
+
 // One sets e = 1, and returns e.
-internal static ж<P521Element> One⁔(/*this*/ ж<P521Element> Ꮡe) {
+public static ж<P521Element> One(this ж<P521Element> Ꮡe) {
     ref var e = ref Ꮡe.DerefOrNull();
 
     p521SetOne(ref nonnil(ref e).x);
@@ -32,21 +35,21 @@ internal static ж<P521Element> One⁔(/*this*/ ж<P521Element> Ꮡe) {
 }
 
 // Equal returns 1 if e == t, and zero otherwise.
-internal static nint Equal⁔(/*this*/ ж<P521Element> Ꮡe, ж<P521Element> t) {
+public static nint Equal(this ж<P521Element> Ꮡe, ж<P521Element> t) {
     var eBytes = Ꮡe.Bytes();
     var tBytes = t.Bytes();
     return subtle.ConstantTimeCompare(eBytes, tBytes);
 }
 
 // IsZero returns 1 if e == 0, and zero otherwise.
-internal static nint IsZero⁔(/*this*/ ж<P521Element> Ꮡe) {
+public static nint IsZero(this ж<P521Element> Ꮡe) {
     var zero = new slice<byte>(p521ElementLen);
     var eBytes = Ꮡe.Bytes();
     return subtle.ConstantTimeCompare(eBytes, zero);
 }
 
 // Set sets e = t, and returns e.
-internal static ж<P521Element> Set⁔(/*this*/ ж<P521Element> Ꮡe, ж<P521Element> Ꮡt) {
+public static ж<P521Element> Set(this ж<P521Element> Ꮡe, ж<P521Element> Ꮡt) {
     ref var e = ref Ꮡe.DerefOrNull();
     ref var t = ref Ꮡt.DerefOrNull();
 
@@ -55,14 +58,14 @@ internal static ж<P521Element> Set⁔(/*this*/ ж<P521Element> Ꮡe, ж<P521Ele
 }
 
 // Bytes returns the 66-byte big-endian encoding of e.
-internal static slice<byte> Bytes⁔(/*this*/ ж<P521Element> Ꮡe) {
+public static slice<byte> Bytes(this ж<P521Element> Ꮡe) {
     // This function is outlined to make the allocations inline in the caller
     // rather than happen on the heap.
     ref var @out = ref heap(new array<byte>(66), out var Ꮡout);
     return Ꮡe.bytes(Ꮡout);
 }
 
-internal static slice<byte> bytes⁔(/*this*/ ж<P521Element> Ꮡe, /*[66]*/ ж<array<byte>> Ꮡout) {
+internal static slice<byte> bytes(this ж<P521Element> Ꮡe, /*[66]*/ ж<array<byte>> Ꮡout) {
     ref var e = ref Ꮡe.DerefOrNull();
     ref var @out = ref Ꮡout.DerefOrNull();
 
@@ -81,7 +84,7 @@ private static readonly @string invalidP521Elementˢᵇ = "invalid P521Element e
 // SetBytes sets e = v, where v is a big-endian 66-byte encoding, and returns e.
 // If v is not 66 bytes or it encodes a value higher than 2^521 - 1,
 // SetBytes returns nil and an error, and e is unchanged.
-internal static (ж<P521Element>, error) SetBytes⁔(/*this*/ ж<P521Element> Ꮡe, slice<byte> v) {
+public static (ж<P521Element>, error) SetBytes(this ж<P521Element> Ꮡe, slice<byte> v) {
     ref var e = ref Ꮡe.DerefOrNull();
 
     if (len(v) != p521ElementLen) {
@@ -107,7 +110,7 @@ internal static (ж<P521Element>, error) SetBytes⁔(/*this*/ ж<P521Element> �
 }
 
 // Add sets e = t1 + t2, and returns e.
-internal static ж<P521Element> Add⁔(/*this*/ ж<P521Element> Ꮡe, ж<P521Element> Ꮡt1, ж<P521Element> Ꮡt2) {
+public static ж<P521Element> Add(this ж<P521Element> Ꮡe, ж<P521Element> Ꮡt1, ж<P521Element> Ꮡt2) {
     ref var e = ref Ꮡe.DerefOrNull();
     ref var t1 = ref Ꮡt1.DerefOrNull();
     ref var t2 = ref Ꮡt2.DerefOrNull();
@@ -117,7 +120,7 @@ internal static ж<P521Element> Add⁔(/*this*/ ж<P521Element> Ꮡe, ж<P521Ele
 }
 
 // Sub sets e = t1 - t2, and returns e.
-internal static ж<P521Element> Sub⁔(/*this*/ ж<P521Element> Ꮡe, ж<P521Element> Ꮡt1, ж<P521Element> Ꮡt2) {
+public static ж<P521Element> Sub(this ж<P521Element> Ꮡe, ж<P521Element> Ꮡt1, ж<P521Element> Ꮡt2) {
     ref var e = ref Ꮡe.DerefOrNull();
     ref var t1 = ref Ꮡt1.DerefOrNull();
     ref var t2 = ref Ꮡt2.DerefOrNull();
@@ -127,7 +130,7 @@ internal static ж<P521Element> Sub⁔(/*this*/ ж<P521Element> Ꮡe, ж<P521Ele
 }
 
 // Mul sets e = t1 * t2, and returns e.
-internal static ж<P521Element> Mul⁔(/*this*/ ж<P521Element> Ꮡe, ж<P521Element> Ꮡt1, ж<P521Element> Ꮡt2) {
+public static ж<P521Element> Mul(this ж<P521Element> Ꮡe, ж<P521Element> Ꮡt1, ж<P521Element> Ꮡt2) {
     ref var e = ref Ꮡe.DerefOrNull();
     ref var t1 = ref Ꮡt1.DerefOrNull();
     ref var t2 = ref Ꮡt2.DerefOrNull();
@@ -137,7 +140,7 @@ internal static ж<P521Element> Mul⁔(/*this*/ ж<P521Element> Ꮡe, ж<P521Ele
 }
 
 // Square sets e = t * t, and returns e.
-internal static ж<P521Element> Square⁔(/*this*/ ж<P521Element> Ꮡe, ж<P521Element> Ꮡt) {
+public static ж<P521Element> Square(this ж<P521Element> Ꮡe, ж<P521Element> Ꮡt) {
     ref var e = ref Ꮡe.DerefOrNull();
     ref var t = ref Ꮡt.DerefOrNull();
 
@@ -146,7 +149,7 @@ internal static ж<P521Element> Square⁔(/*this*/ ж<P521Element> Ꮡe, ж<P521
 }
 
 // Select sets v to a if cond == 1, and to b if cond == 0.
-internal static ж<P521Element> Select⁔(/*this*/ ж<P521Element> Ꮡv, ж<P521Element> Ꮡa, ж<P521Element> Ꮡb, nint cond) {
+public static ж<P521Element> Select(this ж<P521Element> Ꮡv, ж<P521Element> Ꮡa, ж<P521Element> Ꮡb, nint cond) {
     ref var v = ref Ꮡv.DerefOrNull();
     ref var a = ref Ꮡa.DerefOrNull();
     ref var b = ref Ꮡb.DerefOrNull();
@@ -160,6 +163,8 @@ internal static ж<P521Element> Select⁔(/*this*/ ж<P521Element> Ꮡv, ж<P521
         ref ᴛ4, ref ᴛ5);
     return Ꮡv;
 }
+
+} partial class fiat_package {
 
 internal static void p521InvertEndianness(slice<byte> v) {
     for (nint i = 0; i < len(v) / 2; i++) {

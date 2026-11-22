@@ -182,6 +182,7 @@ using atomic = go.sync.atomic_package;
 using go;
 using go.sync;
 using ꓸꓸꓸany = Span<any>;
+using static bisect_package;
 
 partial class bisect_package {
 
@@ -330,16 +331,18 @@ partial struct cond {
     internal bool result;
 }
 
+} partial class bisectᴛMatcher {
+
 // MarkerOnly reports whether it is okay to print only the marker for
 // a given change, omitting the identifying information.
 // MarkerOnly returns true when bisect is using the printed reports
 // only for an intermediate search step, not for showing to users.
-internal static bool MarkerOnly⁔(/*this*/ ref Matcher m) {
+public static bool MarkerOnly(this ref Matcher m) {
     return !m.verbose;
 }
 
 // ShouldEnable reports whether the change with the given id should be enabled.
-internal static bool ShouldEnable⁔(/*this*/ ж<Matcher> Ꮡm, uint64 id) {
+public static bool ShouldEnable(this ж<Matcher> Ꮡm, uint64 id) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     if (Ꮡm == nil) {
@@ -349,7 +352,7 @@ internal static bool ShouldEnable⁔(/*this*/ ж<Matcher> Ꮡm, uint64 id) {
 }
 
 // ShouldPrint reports whether to print identifying information about the change with the given id.
-internal static bool ShouldPrint⁔(/*this*/ ж<Matcher> Ꮡm, uint64 id) {
+public static bool ShouldPrint(this ж<Matcher> Ꮡm, uint64 id) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     if (Ꮡm == nil || m.quiet) {
@@ -359,7 +362,7 @@ internal static bool ShouldPrint⁔(/*this*/ ж<Matcher> Ꮡm, uint64 id) {
 }
 
 // matchResult returns the result from the first condition that matches id.
-internal static bool matchResult⁔(/*this*/ ref Matcher m, uint64 id) {
+internal static bool matchResult(this ref Matcher m, uint64 id) {
     for (nint i = len(m.list) - 1; i >= 0; i--) {
         var c = Ꮡ(m.list, i);
         if ((id & c.mask) == c.bits) {
@@ -371,7 +374,7 @@ internal static bool matchResult⁔(/*this*/ ref Matcher m, uint64 id) {
 
 // FileLine reports whether the change identified by file and line should be enabled.
 // If the change should be printed, FileLine prints a one-line report to w.
-internal static bool FileLine⁔(/*this*/ ж<Matcher> Ꮡm, Writer w, @string @file, nint line) {
+public static bool FileLine(this ж<Matcher> Ꮡm, Writer w, @string @file, nint line) {
     if (Ꮡm == nil) {
         return true;
     }
@@ -380,7 +383,7 @@ internal static bool FileLine⁔(/*this*/ ж<Matcher> Ꮡm, Writer w, @string @f
 
 // fileLine does the real work for FileLine.
 // This lets FileLine's body handle m == nil and potentially be inlined.
-internal static bool fileLine⁔(/*this*/ ж<Matcher> Ꮡm, Writer w, @string @file, nint line) {
+internal static bool fileLine(this ж<Matcher> Ꮡm, Writer w, @string @file, nint line) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     var h = Hash(@file, line);
@@ -393,6 +396,8 @@ internal static bool fileLine⁔(/*this*/ ж<Matcher> Ꮡm, Writer w, @string @f
     }
     return Ꮡm.ShouldEnable(h);
 }
+
+} partial class bisect_package {
 
 // printFileLine prints a non-marker-only report for file:line to w.
 internal static error printFileLine(Writer w, uint64 h, @string @file, nint line) {
@@ -425,10 +430,12 @@ internal static slice<byte> appendFileLine(slice<byte> dst, @string @file, nint 
     return dst;
 }
 
+} partial class bisectᴛMatcher {
+
 // MatchStack assigns the current call stack a change ID.
 // If the stack should be printed, MatchStack prints it.
 // Then MatchStack reports whether a change at the current call stack should be enabled.
-internal static partial bool Stack⁔(/*this*/ ж<Matcher> Ꮡm, Writer w) {
+public static partial bool Stack(this ж<Matcher> Ꮡm, Writer w) {
     if (Ꮡm == nil) {
         return true;
     }
@@ -437,7 +444,7 @@ internal static partial bool Stack⁔(/*this*/ ж<Matcher> Ꮡm, Writer w) {
 
 // stack does the real work for Stack.
 // This lets stack's body handle m == nil and potentially be inlined.
-internal static partial bool stack⁔(/*this*/ ж<Matcher> Ꮡm, Writer w) {
+internal static partial bool stack(this ж<Matcher> Ꮡm, Writer w) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     UntypedInt maxStack = 16;
@@ -484,6 +491,8 @@ internal static partial bool stack⁔(/*this*/ ж<Matcher> Ꮡm, Writer w) {
     }
     return Ꮡm.ShouldEnable(h);
 }
+
+} partial class bisect_package {
 
 // Writer is the same interface as io.Writer.
 // It is duplicated here to avoid importing io.
@@ -763,7 +772,11 @@ partial struct parseError {
     internal @string text;
 }
 
-internal static @string Error⁔(/*this*/ ref parseError e) { return e.text; }
+} partial class bisectᴛparseError {
+
+internal static @string Error(this ref parseError e) { return e.text; }
+
+} partial class bisect_package {
 
 // FNV-1a implementation. See Go's hash/fnv/fnv.go.
 // Copied here for simplicity (can handle integers more directly)
@@ -818,9 +831,11 @@ partial struct dedup {
     internal map<uint64, bool> m;
 }
 
+} partial class bisectᴛdedup {
+
 // seen records that h has now been seen and reports whether it was seen before.
 // When seen returns false, the caller is expected to print a report for h.
-internal static bool seen⁔(/*this*/ ж<dedup> Ꮡd, uint64 h) {
+internal static bool seen(this ж<dedup> Ꮡd, uint64 h) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     d.mu.Lock();
@@ -837,7 +852,7 @@ internal static bool seen⁔(/*this*/ ж<dedup> Ꮡd, uint64 h) {
 // Each cache entry is N-way set-associative: h can appear in any of the slots.
 // If h does not appear in any of them, then it is inserted into a random slot,
 // overwriting whatever was there before.
-internal static bool seenLossy⁔(/*this*/ ref dedup d, uint64 h) {
+internal static bool seenLossy(this ref dedup d, uint64 h) {
     var cache = Ꮡ(d.recent, (nuint)h % (nuint)len(d.recent));
     for (nint i = 0; i < 4; i++) {
         if (atomic.LoadUint64(cache.at<uint64>(i)) == h) {
@@ -854,4 +869,4 @@ internal static bool seenLossy⁔(/*this*/ ref dedup d, uint64 h) {
     return false;
 }
 
-} // end bisect_package
+}

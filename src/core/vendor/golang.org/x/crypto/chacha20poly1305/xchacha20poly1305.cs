@@ -8,6 +8,7 @@ using errors = errors_package;
 using chacha20 = go.vendor.golang.org.x.crypto.chacha20_package;
 using go.crypto;
 using go.vendor.golang.org.x.crypto;
+using static chacha20poly1305_package;
 
 partial class chacha20poly1305_package {
 
@@ -33,15 +34,17 @@ public static (cipher.AEAD, error) NewX(slice<byte> key) {
     return (new xchacha20poly1305жAEAD(ret), default);
 }
 
-internal static nint NonceSize⁔(/*this*/ ref xchacha20poly1305 _) {
+} partial class chacha20poly1305ᴛxchacha20poly1305 {
+
+internal static nint NonceSize(this ref xchacha20poly1305 _) {
     return NonceSizeX;
 }
 
-internal static nint Overhead⁔(/*this*/ ref xchacha20poly1305 _) {
-    return Overhead;
+internal static nint Overhead(this ref xchacha20poly1305 _) {
+    return chacha20poly1305_package.Overhead;
 }
 
-internal static slice<byte> Seal⁔(/*this*/ ref xchacha20poly1305 x, slice<byte> dst, slice<byte> nonce, slice<byte> plaintext, slice<byte> additionalData) {
+internal static slice<byte> Seal(this ref xchacha20poly1305 x, slice<byte> dst, slice<byte> nonce, slice<byte> plaintext, slice<byte> additionalData) {
     if (len(nonce) != NonceSizeX) {
         throw panic("chacha20poly1305: bad nonce length passed to Seal");
     }
@@ -60,13 +63,13 @@ internal static slice<byte> Seal⁔(/*this*/ ref xchacha20poly1305 x, slice<byte
     copy(c.key[..], hKey);
 
     // The first 4 bytes of the final nonce are unused counter space.
-    var cNonce = new slice<byte>(NonceSize);
+    var cNonce = new slice<byte>(chacha20poly1305_package.NonceSize);
     copy(cNonce[4..12], nonce[16..24]);
 
     return c.seal(dst, cNonce[..], plaintext, additionalData);
 }
 
-internal static (slice<byte>, error) Open⁔(/*this*/ ref xchacha20poly1305 x, slice<byte> dst, slice<byte> nonce, slice<byte> ciphertext, slice<byte> additionalData) {
+internal static (slice<byte>, error) Open(this ref xchacha20poly1305 x, slice<byte> dst, slice<byte> nonce, slice<byte> ciphertext, slice<byte> additionalData) {
     if (len(nonce) != NonceSizeX) {
         throw panic("chacha20poly1305: bad nonce length passed to Open");
     }
@@ -82,10 +85,10 @@ internal static (slice<byte>, error) Open⁔(/*this*/ ref xchacha20poly1305 x, s
     copy(c.key[..], hKey);
 
     // The first 4 bytes of the final nonce are unused counter space.
-    var cNonce = new slice<byte>(NonceSize);
+    var cNonce = new slice<byte>(chacha20poly1305_package.NonceSize);
     copy(cNonce[4..12], nonce[16..24]);
 
     return c.open(dst, cNonce[..], ciphertext, additionalData);
 }
 
-} // end chacha20poly1305_package
+}

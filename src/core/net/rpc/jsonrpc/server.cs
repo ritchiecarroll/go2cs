@@ -10,6 +10,7 @@ using rpc = global::go.net.rpc_package;
 using sync = sync_package;
 using encoding;
 using global::go.net;
+using static jsonrpc_package;
 
 partial class jsonrpc_package {
 
@@ -48,11 +49,15 @@ partial struct serverRequest {
     public ж<json.RawMessage> Id; /*`json:"id"`*/
 }
 
-internal static void reset⁔(/*this*/ ref serverRequest r) {
+} partial class jsonrpcᴛserverRequest {
+
+internal static void reset(this ref serverRequest r) {
     r.Method = ""u8;
     r.Params = default;
     r.Id = default;
 }
+
+} partial class jsonrpc_package {
 
 partial struct serverResponse {
     public ж<json.RawMessage> Id; /*`json:"id"`*/
@@ -60,7 +65,9 @@ partial struct serverResponse {
     public any Error; /*`json:"error"`*/
 }
 
-internal static error ReadRequestHeader⁔(/*this*/ ж<serverCodec> Ꮡc, ж<rpc.Request> Ꮡr) {
+} partial class jsonrpcᴛserverCodec {
+
+internal static error ReadRequestHeader(this ж<serverCodec> Ꮡc, ж<rpc.Request> Ꮡr) {
     ref var c = ref Ꮡc.DerefOrNull();
     ref var r = ref Ꮡr.DerefOrNull();
 
@@ -83,7 +90,7 @@ internal static error ReadRequestHeader⁔(/*this*/ ж<serverCodec> Ꮡc, ж<rpc
     return default;
 }
 
-internal static error ReadRequestBody⁔(/*this*/ ref serverCodec c, any x) {
+internal static error ReadRequestBody(this ref serverCodec c, any x) {
     if (x == nil) {
         return default;
     }
@@ -99,14 +106,18 @@ internal static error ReadRequestBody⁔(/*this*/ ref serverCodec c, any x) {
     return json.Unmarshal(c.req.Params.ValueSlot, Ꮡparams);
 }
 
+} partial class jsonrpc_package {
+
 internal static readonly ж<json.RawMessage> Ꮡnull = new StaticBox<json.RawMessage>(((json.RawMessage)slice<byte>("null"u8)));
 internal static ref json.RawMessage @null => ref ((StaticBox<json.RawMessage>)Ꮡnull).ValueSlot;
+
+} partial class jsonrpcᴛserverCodec {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string invalidSequenceNumberInˢ => ref invalidSequenceNumberInˢᵇ;
 private static readonly @string invalidSequenceNumberInˢᵇ = "invalid sequence number in response"u8;
 
-internal static error WriteResponse⁔(/*this*/ ж<serverCodec> Ꮡc, ж<rpc.Response> Ꮡr, any x) {
+internal static error WriteResponse(this ж<serverCodec> Ꮡc, ж<rpc.Response> Ꮡr, any x) {
     ref var c = ref Ꮡc.DerefOrNull();
     ref var r = ref Ꮡr.DerefOrNull();
 
@@ -132,9 +143,11 @@ internal static error WriteResponse⁔(/*this*/ ж<serverCodec> Ꮡc, ж<rpc.Res
     return c.enc.Encode(resp);
 }
 
-internal static error Close⁔(/*this*/ ref serverCodec c) {
+internal static error Close(this ref serverCodec c) {
     return c.c.Close();
 }
+
+} partial class jsonrpc_package {
 
 // ServeConn runs the JSON-RPC server on a single connection.
 // ServeConn blocks, serving the connection until the client hangs up.

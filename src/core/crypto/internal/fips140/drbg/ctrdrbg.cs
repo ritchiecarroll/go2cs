@@ -12,6 +12,7 @@ using go.crypto.@internal;
 using go.crypto.@internal.fips140;
 using go.crypto.@internal.fips140deps;
 using math;
+using static drbg_package;
 
 partial class drbg_package {
 
@@ -66,7 +67,9 @@ public static ж<Counter> NewCounter(/*[48]*/ ж<array<byte>> entropy) {
     return c;
 }
 
-internal static void update⁔(/*this*/ ж<Counter> Ꮡc, /*[48]*/ ж<array<byte>> Ꮡseed) {
+} partial class drbgᴛCounter {
+
+internal static void update(this ж<Counter> Ꮡc, /*[48]*/ ж<array<byte>> Ꮡseed) {
     ref var c = ref Ꮡc.DerefOrNull();
     ref var seed = ref Ꮡseed.DerefOrNull();
 
@@ -87,6 +90,8 @@ internal static void update⁔(/*this*/ ж<Counter> Ꮡc, /*[48]*/ ж<array<byte
     c.c.AssignFrom(aes.NewCTR(cipher, V).Value);
 }
 
+} partial class drbg_package {
+
 internal static void increment(/*[16]*/ ж<array<byte>> Ꮡv) {
     ref var v = ref Ꮡv.DerefOrNull();
 
@@ -98,7 +103,9 @@ internal static void increment(/*[16]*/ ж<array<byte>> Ꮡv) {
     byteorder.BEPutUint64(v[8..], lo);
 }
 
-internal static void Reseed⁔(/*this*/ ж<Counter> Ꮡc, /*[48]*/ ж<array<byte>> Ꮡentropy, /*[48]*/ ж<array<byte>> ᏑadditionalInput) {
+} partial class drbgᴛCounter {
+
+public static void Reseed(this ж<Counter> Ꮡc, /*[48]*/ ж<array<byte>> Ꮡentropy, /*[48]*/ ж<array<byte>> ᏑadditionalInput) {
     ref var c = ref Ꮡc.DerefOrNull();
     ref var entropy = ref Ꮡentropy.DerefOrNull();
     ref var additionalInput = ref ᏑadditionalInput.DerefOrNull();
@@ -113,7 +120,7 @@ internal static void Reseed⁔(/*this*/ ж<Counter> Ꮡc, /*[48]*/ ж<array<byte
 }
 
 // Generate produces at most maxRequestSize bytes of random data in out.
-internal static bool /*reseedRequired*/ Generate⁔(/*this*/ ж<Counter> Ꮡc, slice<byte> @out, /*[48]*/ ж<array<byte>> ᏑadditionalInput) {
+public static bool /*reseedRequired*/ Generate(this ж<Counter> Ꮡc, slice<byte> @out, /*[48]*/ ж<array<byte>> ᏑadditionalInput) {
     ref var c = ref Ꮡc.DerefOrNull();
     ref var additionalInput = ref ᏑadditionalInput.DerefOrNull();
 
@@ -154,4 +161,4 @@ internal static bool /*reseedRequired*/ Generate⁔(/*this*/ ж<Counter> Ꮡc, s
     return false;
 }
 
-} // end drbg_package
+}

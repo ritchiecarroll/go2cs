@@ -13,6 +13,7 @@ using color = go.image.color_package;
 using imageutil = go.image.@internal.imageutil_package;
 using go.image;
 using go.image.@internal;
+using static draw_package;
 
 partial class draw_package {
 
@@ -52,11 +53,15 @@ public static Op Over => /* iota */ 0;
 // Src specifies ``src in mask''.
 public static Op Src => 1;
 
+} partial class drawᴛOp {
+
 // Draw implements the [Drawer] interface by calling the Draw function with this
 // [Op].
-internal static void Draw⁔(/*this*/ Op op, Image dst, image.Rectangle r, image.Image src, image.Point sp) {
+public static void Draw(this Op op, Image dst, image.Rectangle r, image.Image src, image.Point sp) {
     DrawMask(dst, r, src, sp, default, new image.Point(), op);
 }
+
+} partial class draw_package {
 
 // Drawer contains the [Draw] method.
 partial interface Drawer {
@@ -72,7 +77,9 @@ public static Drawer FloydSteinberg = new floydSteinberg();
 partial struct floydSteinberg {
 }
 
-internal static void Draw⁔(/*this*/ floydSteinberg _, Image dst, image.Rectangle rʗp, image.Image src, image.Point sp) {
+} partial class drawᴛfloydSteinberg {
+
+internal static void Draw(this floydSteinberg _, Image dst, image.Rectangle rʗp, image.Image src, image.Point sp) {
     ref var r = ref heap(rʗp, out var Ꮡr);
 
     clip(dst, Ꮡr, src, ref sp, default, nil);
@@ -81,6 +88,8 @@ internal static void Draw⁔(/*this*/ floydSteinberg _, Image dst, image.Rectang
     }
     drawPaletted(dst, r, src, sp, true);
 }
+
+} partial class draw_package {
 
 // clip clips r against each image's bounds (after translating into the
 // destination image's coordinate space) and shifts the points sp and mp by

@@ -20,6 +20,7 @@ using sys = @internal.runtime.sys_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
+using static runtime_package;
 
 partial class runtime_package {
 
@@ -58,9 +59,11 @@ partial struct traceMapNode {
     internal slice<byte> data;
 }
 
+} partial class runtimeᴛtraceMap {
+
 // stealID steals an ID from the table, ensuring that it will not
 // appear in the table anymore.
-internal static uint64 stealID⁔(/*this*/ ж<traceMap> Ꮡtab) {
+internal static uint64 stealID(this ж<traceMap> Ꮡtab) {
     return Ꮡtab.Ꮡseq.Add(1);
 }
 
@@ -70,7 +73,7 @@ internal static uint64 stealID⁔(/*this*/ ж<traceMap> Ꮡtab) {
 //
 // Returns a unique ID for the data and whether this is the first time
 // the data has been added to the map.
-internal static (uint64, bool) put⁔(/*this*/ ж<traceMap> Ꮡtab, @unsafe.Pointer data, uintptr size) {
+internal static (uint64, bool) put(this ж<traceMap> Ꮡtab, @unsafe.Pointer data, uintptr size) {
     if (size == 0) {
         return (0, false);
     }
@@ -124,10 +127,10 @@ internal static (uint64, bool) put⁔(/*this*/ ж<traceMap> Ꮡtab, @unsafe.Poin
 //
 // The caller must ensure that there are no put operations executing concurrently
 // with this function.
-internal static void reset⁔(/*this*/ ж<traceMap> Ꮡtab) {
+internal static void reset(this ж<traceMap> Ꮡtab) {
     Ꮡtab.Ꮡroot.Store(nil);
     Ꮡtab.Ꮡseq.Store(0);
     Ꮡtab.Ꮡmem.drop();
 }
 
-} // end runtime_package
+}

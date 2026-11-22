@@ -3336,7 +3336,6 @@ public static partial class builtin
     /// <typeparam name="T">Desired type for <paramref name="target"/>.</typeparam>
     /// <param name="target">Source value to type assert.</param>
     /// <returns><paramref name="target"/> value cast as <typeparamref name="T"/>, if successful.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] // so AssertHit sees the call site's exact T
     public static T _<[DynamicallyAccessedMembers(
         DynamicallyAccessedMemberTypes.PublicMethods |
         DynamicallyAccessedMemberTypes.PublicConstructors |
@@ -3358,11 +3357,12 @@ public static partial class builtin
     }
 
     // The head of every `x.(T)`: a HIT it can prove cheaply, or false to send the assertion to TryTypeAssert's
-    // body. Inlined, it is specialized for the call site's T, which holds because the four _<T> entry points that call
-    // it inline too: inside a shared _<T> body its `is T` was the runtime lookup it avoids (11.84 to 3.91 ns a hit,
-    // tiering off). TryTypeAssert<T> runs as ONE shared body for every reference T (every pointer and every interface),
-    // where each `is T`, typeof(T) and per-T static is a runtime lookup, so a pointer assert cost ~14 ns where Go's is
-    // one compare (~1 ns). Here T is exact.
+    // body. It inlines into the four _<T> entry points, which do NOT inline into their callers: for a reference T
+    // (every pointer and every interface) an entry point runs as ONE shared body, where `is T`, typeof(T) and each
+    // per-T static is a runtime lookup, so the hit still pays that lookup. Inlining the entry points made T exact at the
+    // call site (11.84 to 3.91 ns a hit, tiering off, a micro-benchmark) but pasted their bodies into every asserting
+    // caller, and the whole program lost: TypeScript's checkdemo +12 s, +17% (R's train 2 split, 2026-11-21; COORD
+    // ruled the attributes out). Keeping the micro gain needs a whole-program arm (BOARD, P2 TS items 4 and 6 block).
     //
     // It answers only what the body would answer, and only where that is cheap to prove:
     //  - a concrete T other than object: `target is T`. No adapter is ever a concrete Go type, so this is the body's
@@ -3786,7 +3786,6 @@ public static partial class builtin
     /// <param name="target">Source value to type assert.</param>
     /// <param name="_">Overload discriminator for different return type, <see cref="ꟷ"/>.</param>
     /// <returns>Tuple of <paramref name="target"/> value cast as <typeparamref name="T"/> and success boolean.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] // so AssertHit sees the call site's exact T
     public static (T?, bool) _<[DynamicallyAccessedMembers(
         DynamicallyAccessedMemberTypes.PublicMethods |
         DynamicallyAccessedMemberTypes.PublicConstructors |
@@ -3807,7 +3806,6 @@ public static partial class builtin
     /// <param name="target">Source value to type assert.</param>
     /// <param name="value">Value cast as <typeparamref name="T"/>, if successful; otherwise <c>default</c>.</param>
     /// <returns><c>true</c> if type assertion was successful; otherwise, <c>false</c>.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] // so AssertHit sees the call site's exact T
     public static bool _<[DynamicallyAccessedMembers(
         DynamicallyAccessedMemberTypes.PublicMethods |
         DynamicallyAccessedMemberTypes.PublicConstructors |
@@ -4673,7 +4671,6 @@ public static partial class builtin
     /// Go prints "io.Reader is *os.File, not *bytes.Buffer". A generated overload on each interface, and golib's own for
     /// <c>error</c>, supply the source here, leaving the call site as <c>x._&lt;T&gt;()</c>.
     /// </remarks>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] // so AssertHit sees the call site's exact T
     public static T _<TSource, [DynamicallyAccessedMembers(
         DynamicallyAccessedMemberTypes.PublicMethods |
         DynamicallyAccessedMemberTypes.PublicConstructors |

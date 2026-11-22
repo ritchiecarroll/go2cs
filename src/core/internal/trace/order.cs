@@ -11,6 +11,7 @@ using version = go.@internal.trace.version_package;
 using go.@internal.trace;
 using io = io_package;
 using ꓸꓸꓸuint64 = Span<uint64>;
+using static trace_package;
 
 partial class trace_package {
 
@@ -33,6 +34,8 @@ partial struct ordering {
     internal queue<Event> queue;
 }
 
+} partial class traceᴛordering {
+
 // Advance checks if it's valid to proceed with ev which came from thread m.
 //
 // It assumes the gen value passed to it is monotonically increasing across calls.
@@ -45,7 +48,7 @@ partial struct ordering {
 // If this returns true, Next is guaranteed to return a complete event. However,
 // multiple events may be added to the ordering, so the caller should (but is not
 // required to) continue to call Next until it is exhausted.
-internal static (bool, error) Advance⁔(/*this*/ ж<ordering> Ꮡo, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen) {
+internal static (bool, error) Advance(this ж<ordering> Ꮡo, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen) {
     ref var o = ref Ꮡo.DerefOrNull();
     ref var ev = ref Ꮡev.DerefOrNull();
 
@@ -93,9 +96,11 @@ internal static (bool, error) Advance⁔(/*this*/ ж<ordering> Ꮡo, ж<baseEven
     return (ok, err);
 }
 
-internal static @string evName⁔(/*this*/ ref ordering o, tracev2.EventType typ) {
+internal static @string evName(this ref ordering o, tracev2.EventType typ) {
     return o.traceVer.EventName(typ);
 }
+
+} partial class trace_package {
 
 // type orderingHandleFunc is a methodless func type — rendered inline as its base delegate
 
@@ -173,7 +178,9 @@ internal static void initᴛorderingDispatch() { orderingDispatch = new golib.Sp
     [tracev2.EvGoroutineStackFree] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceAllocFree))
 }.array(256); }
 
-internal static (schedCtx, bool, error) advanceProcStatus⁔(/*this*/ ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
+} partial class traceᴛordering {
+
+internal static (schedCtx, bool, error) advanceProcStatus(this ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
     ref var ev = ref Ꮡev.DerefOrNull();
 
     ref var pid = ref heap<ProcID>((ProcID)(int64)ev.args[0], out var Ꮡpid);
@@ -239,7 +246,7 @@ internal static (schedCtx, bool, error) advanceProcStatus⁔(/*this*/ ref orderi
     return (newCtx, true, default);
 }
 
-internal static (schedCtx, bool, error) advanceProcStart⁔(/*this*/ ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
+internal static (schedCtx, bool, error) advanceProcStart(this ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
     ref var ev = ref Ꮡev.DerefOrNull();
 
     var pid = (ProcID)(int64)ev.args[0];
@@ -272,7 +279,7 @@ internal static (schedCtx, bool, error) advanceProcStart⁔(/*this*/ ref orderin
     return (newCtx, true, default);
 }
 
-internal static (schedCtx, bool, error) advanceProcStop⁔(/*this*/ ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
+internal static (schedCtx, bool, error) advanceProcStop(this ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
     ref var ev = ref Ꮡev.DerefOrNull();
 
     // We must be able to advance this P.
@@ -302,7 +309,7 @@ internal static (schedCtx, bool, error) advanceProcStop⁔(/*this*/ ref ordering
     return (newCtx, true, default);
 }
 
-internal static (schedCtx, bool, error) advanceProcSteal⁔(/*this*/ ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
+internal static (schedCtx, bool, error) advanceProcSteal(this ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
     ref var ev = ref Ꮡev.DerefOrNull();
 
     var pid = (ProcID)(int64)ev.args[0];
@@ -375,7 +382,7 @@ internal static (schedCtx, bool, error) advanceProcSteal⁔(/*this*/ ref orderin
     return (newCtx, true, default);
 }
 
-internal static (schedCtx, bool, error) advanceGoStatus⁔(/*this*/ ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
+internal static (schedCtx, bool, error) advanceGoStatus(this ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
     ref var ev = ref Ꮡev.DerefOrNull();
 
     ref var gid = ref heap<GoID>((GoID)(int64)ev.args[0], out var Ꮡgid);
@@ -457,7 +464,7 @@ internal static (schedCtx, bool, error) advanceGoStatus⁔(/*this*/ ref ordering
     return (newCtx, true, default);
 }
 
-internal static (schedCtx, bool, error) advanceGoCreate⁔(/*this*/ ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
+internal static (schedCtx, bool, error) advanceGoCreate(this ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
     ref var ev = ref Ꮡev.DerefOrNull();
 
     // Goroutines must be created on a running P, but may or may not be created
@@ -484,7 +491,7 @@ internal static (schedCtx, bool, error) advanceGoCreate⁔(/*this*/ ref ordering
     return (curCtx, true, default);
 }
 
-internal static (schedCtx, bool, error) advanceGoStopExec⁔(/*this*/ ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
+internal static (schedCtx, bool, error) advanceGoStopExec(this ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
     ref var ev = ref Ꮡev.DerefOrNull();
 
     // These are goroutine events that all require an active running
@@ -526,7 +533,7 @@ internal static (schedCtx, bool, error) advanceGoStopExec⁔(/*this*/ ref orderi
     return (newCtx, true, default);
 }
 
-internal static (schedCtx, bool, error) advanceGoStart⁔(/*this*/ ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
+internal static (schedCtx, bool, error) advanceGoStart(this ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
     ref var ev = ref Ꮡev.DerefOrNull();
 
     var gid = (GoID)(int64)ev.args[0];
@@ -551,7 +558,7 @@ internal static (schedCtx, bool, error) advanceGoStart⁔(/*this*/ ref ordering 
     return (newCtx, true, default);
 }
 
-internal static (schedCtx, bool, error) advanceGoUnblock⁔(/*this*/ ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
+internal static (schedCtx, bool, error) advanceGoUnblock(this ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
     ref var ev = ref Ꮡev.DerefOrNull();
 
     // N.B. These both reference the goroutine to unblock, not the current goroutine.
@@ -572,7 +579,7 @@ internal static (schedCtx, bool, error) advanceGoUnblock⁔(/*this*/ ref orderin
     return (curCtx, true, default);
 }
 
-internal static (schedCtx, bool, error) advanceGoSwitch⁔(/*this*/ ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
+internal static (schedCtx, bool, error) advanceGoSwitch(this ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
     ref var ev = ref Ꮡev.DerefOrNull();
 
     // GoSwitch and GoSwitchDestroy represent a trio of events:
@@ -639,7 +646,7 @@ internal static (schedCtx, bool, error) advanceGoSwitch⁔(/*this*/ ref ordering
     return (newCtx, true, default);
 }
 
-internal static (schedCtx, bool, error) advanceGoSyscallBegin⁔(/*this*/ ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
+internal static (schedCtx, bool, error) advanceGoSyscallBegin(this ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
     ref var ev = ref Ꮡev.DerefOrNull();
 
     // Entering a syscall requires an active running goroutine with a
@@ -681,7 +688,7 @@ internal static (schedCtx, bool, error) advanceGoSyscallBegin⁔(/*this*/ ref or
     return (curCtx, true, default);
 }
 
-internal static (schedCtx, bool, error) advanceGoSyscallEnd⁔(/*this*/ ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
+internal static (schedCtx, bool, error) advanceGoSyscallEnd(this ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
     ref var ev = ref Ꮡev.DerefOrNull();
 
     // This event is always advance-able because it happens on the same
@@ -712,7 +719,7 @@ internal static (schedCtx, bool, error) advanceGoSyscallEnd⁔(/*this*/ ref orde
     return (curCtx, true, default);
 }
 
-internal static (schedCtx, bool, error) advanceGoSyscallEndBlocked⁔(/*this*/ ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
+internal static (schedCtx, bool, error) advanceGoSyscallEndBlocked(this ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
     ref var ev = ref Ꮡev.DerefOrNull();
 
     // This event becomes advanceable when its P is not in a syscall state
@@ -753,7 +760,7 @@ internal static (schedCtx, bool, error) advanceGoSyscallEndBlocked⁔(/*this*/ r
     return (newCtx, true, default);
 }
 
-internal static (schedCtx, bool, error) advanceGoCreateSyscall⁔(/*this*/ ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
+internal static (schedCtx, bool, error) advanceGoCreateSyscall(this ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
     ref var ev = ref Ꮡev.DerefOrNull();
 
     // This event indicates that a goroutine is effectively
@@ -775,7 +782,7 @@ internal static (schedCtx, bool, error) advanceGoCreateSyscall⁔(/*this*/ ref o
     return (newCtx, true, default);
 }
 
-internal static (schedCtx, bool, error) advanceGoDestroySyscall⁔(/*this*/ ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
+internal static (schedCtx, bool, error) advanceGoDestroySyscall(this ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
     ref var ev = ref Ꮡev.DerefOrNull();
 
     // This event indicates that a goroutine created for a
@@ -832,7 +839,7 @@ internal static (schedCtx, bool, error) advanceGoDestroySyscall⁔(/*this*/ ref 
     return (newCtx, true, default);
 }
 
-internal static (schedCtx, bool, error) advanceUserTaskBegin⁔(/*this*/ ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> Ꮡevt, ThreadID m, uint64 gen, schedCtx curCtx) {
+internal static (schedCtx, bool, error) advanceUserTaskBegin(this ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> Ꮡevt, ThreadID m, uint64 gen, schedCtx curCtx) {
     ref var ev = ref Ꮡev.DerefOrNull();
     ref var evt = ref Ꮡevt.DerefOrNull();
 
@@ -873,7 +880,7 @@ internal static (schedCtx, bool, error) advanceUserTaskBegin⁔(/*this*/ ref ord
     return (curCtx, true, default);
 }
 
-internal static (schedCtx, bool, error) advanceUserTaskEnd⁔(/*this*/ ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> Ꮡevt, ThreadID m, uint64 gen, schedCtx curCtx) {
+internal static (schedCtx, bool, error) advanceUserTaskEnd(this ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> Ꮡevt, ThreadID m, uint64 gen, schedCtx curCtx) {
     ref var ev = ref Ꮡev.DerefOrNull();
     ref var evt = ref Ꮡevt.DerefOrNull();
 
@@ -897,7 +904,7 @@ internal static (schedCtx, bool, error) advanceUserTaskEnd⁔(/*this*/ ref order
     return (curCtx, true, default);
 }
 
-internal static (schedCtx, bool, error) advanceUserRegionBegin⁔(/*this*/ ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> Ꮡevt, ThreadID m, uint64 gen, schedCtx curCtx) {
+internal static (schedCtx, bool, error) advanceUserRegionBegin(this ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> Ꮡevt, ThreadID m, uint64 gen, schedCtx curCtx) {
     ref var ev = ref Ꮡev.DerefOrNull();
     ref var evt = ref Ꮡevt.DerefOrNull();
 
@@ -925,7 +932,7 @@ internal static (schedCtx, bool, error) advanceUserRegionBegin⁔(/*this*/ ref o
     return (curCtx, true, default);
 }
 
-internal static (schedCtx, bool, error) advanceUserRegionEnd⁔(/*this*/ ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> Ꮡevt, ThreadID m, uint64 gen, schedCtx curCtx) {
+internal static (schedCtx, bool, error) advanceUserRegionEnd(this ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> Ꮡevt, ThreadID m, uint64 gen, schedCtx curCtx) {
     ref var ev = ref Ꮡev.DerefOrNull();
     ref var evt = ref Ꮡevt.DerefOrNull();
 
@@ -960,7 +967,7 @@ internal static (schedCtx, bool, error) advanceUserRegionEnd⁔(/*this*/ ref ord
 // partial order edge between start and end here, otherwise we're
 // relying entirely on timestamps to make sure we don't advance a
 // GCEnd for a _different_ GC cycle if timestamps are wildly broken.
-internal static (schedCtx, bool, error) advanceGCActive⁔(/*this*/ ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
+internal static (schedCtx, bool, error) advanceGCActive(this ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
     ref var ev = ref Ꮡev.DerefOrNull();
 
     var seq = ev.args[0];
@@ -988,7 +995,7 @@ internal static (schedCtx, bool, error) advanceGCActive⁔(/*this*/ ref ordering
     return (curCtx, true, default);
 }
 
-internal static (schedCtx, bool, error) advanceGCBegin⁔(/*this*/ ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
+internal static (schedCtx, bool, error) advanceGCBegin(this ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
     ref var ev = ref Ꮡev.DerefOrNull();
 
     var seq = ev.args[0];
@@ -1014,7 +1021,7 @@ internal static (schedCtx, bool, error) advanceGCBegin⁔(/*this*/ ref ordering 
     return (curCtx, true, default);
 }
 
-internal static (schedCtx, bool, error) advanceGCEnd⁔(/*this*/ ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
+internal static (schedCtx, bool, error) advanceGCEnd(this ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
     ref var ev = ref Ꮡev.DerefOrNull();
 
     var seq = ev.args[0];
@@ -1037,7 +1044,7 @@ internal static (schedCtx, bool, error) advanceGCEnd⁔(/*this*/ ref ordering o,
     return (curCtx, true, default);
 }
 
-internal static (schedCtx, bool, error) advanceAnnotation⁔(/*this*/ ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
+internal static (schedCtx, bool, error) advanceAnnotation(this ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
     ref var ev = ref Ꮡev.DerefOrNull();
 
     // Handle simple instantaneous events that require a G.
@@ -1048,7 +1055,7 @@ internal static (schedCtx, bool, error) advanceAnnotation⁔(/*this*/ ref orderi
     return (curCtx, true, default);
 }
 
-internal static (schedCtx, bool, error) advanceHeapMetric⁔(/*this*/ ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
+internal static (schedCtx, bool, error) advanceHeapMetric(this ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
     ref var ev = ref Ꮡev.DerefOrNull();
 
     // Handle allocation metrics, which don't require a G.
@@ -1059,7 +1066,7 @@ internal static (schedCtx, bool, error) advanceHeapMetric⁔(/*this*/ ref orderi
     return (curCtx, true, default);
 }
 
-internal static (schedCtx, bool, error) advanceGCSweepBegin⁔(/*this*/ ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
+internal static (schedCtx, bool, error) advanceGCSweepBegin(this ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
     ref var ev = ref Ꮡev.DerefOrNull();
 
     // Handle sweep, which is bound to a P and doesn't require a G.
@@ -1077,7 +1084,7 @@ internal static (schedCtx, bool, error) advanceGCSweepBegin⁔(/*this*/ ref orde
     return (curCtx, true, default);
 }
 
-internal static (schedCtx, bool, error) advanceGCSweepActive⁔(/*this*/ ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
+internal static (schedCtx, bool, error) advanceGCSweepActive(this ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
     ref var ev = ref Ꮡev.DerefOrNull();
 
     var pid = (ProcID)(int64)ev.args[0];
@@ -1096,7 +1103,7 @@ internal static (schedCtx, bool, error) advanceGCSweepActive⁔(/*this*/ ref ord
     return (curCtx, true, default);
 }
 
-internal static (schedCtx, bool, error) advanceGCSweepEnd⁔(/*this*/ ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
+internal static (schedCtx, bool, error) advanceGCSweepEnd(this ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
     ref var ev = ref Ꮡev.DerefOrNull();
 
     var errΔ1 = validateCtx(curCtx, new schedReqs(M: mustHave, P: mustHave, G: mayHave)); if (errΔ1 != nil) {
@@ -1110,7 +1117,7 @@ internal static (schedCtx, bool, error) advanceGCSweepEnd⁔(/*this*/ ref orderi
     return (curCtx, true, default);
 }
 
-internal static (schedCtx, bool, error) advanceGoRangeBegin⁔(/*this*/ ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
+internal static (schedCtx, bool, error) advanceGoRangeBegin(this ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
     ref var ev = ref Ꮡev.DerefOrNull();
 
     // Handle special goroutine-bound event ranges.
@@ -1136,7 +1143,7 @@ internal static (schedCtx, bool, error) advanceGoRangeBegin⁔(/*this*/ ref orde
     return (curCtx, true, default);
 }
 
-internal static (schedCtx, bool, error) advanceGoRangeActive⁔(/*this*/ ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
+internal static (schedCtx, bool, error) advanceGoRangeActive(this ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
     ref var ev = ref Ꮡev.DerefOrNull();
 
     var gid = (GoID)(int64)ev.args[0];
@@ -1154,7 +1161,7 @@ internal static (schedCtx, bool, error) advanceGoRangeActive⁔(/*this*/ ref ord
     return (curCtx, true, default);
 }
 
-internal static (schedCtx, bool, error) advanceGoRangeEnd⁔(/*this*/ ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
+internal static (schedCtx, bool, error) advanceGoRangeEnd(this ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
     ref var ev = ref Ꮡev.DerefOrNull();
 
     var errΔ1 = validateCtx(curCtx, userGoReqs); if (errΔ1 != nil) {
@@ -1177,7 +1184,7 @@ internal static (schedCtx, bool, error) advanceGoRangeEnd⁔(/*this*/ ref orderi
     return (curCtx, true, default);
 }
 
-internal static (schedCtx, bool, error) advanceAllocFree⁔(/*this*/ ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
+internal static (schedCtx, bool, error) advanceAllocFree(this ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
     ref var ev = ref Ꮡev.DerefOrNull();
 
     // Handle simple instantaneous events that may or may not have a P.
@@ -1189,9 +1196,11 @@ internal static (schedCtx, bool, error) advanceAllocFree⁔(/*this*/ ref orderin
 }
 
 // Next returns the next event in the ordering.
-internal static (Event, bool) Next⁔(/*this*/ ref ordering o) {
+internal static (Event, bool) Next(this ref ordering o) {
     return o.queue.pop();
 }
+
+} partial class trace_package {
 
 // schedCtx represents the scheduling resources associated with an event.
 partial struct schedCtx {
@@ -1235,6 +1244,8 @@ internal static gcState gcUndetermined => /* iota */ 0;
 internal static gcState gcNotRunning => 1;
 internal static gcState gcRunning => 2;
 
+} partial class traceᴛgcState {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string undeterminedˢ => ref undeterminedˢᵇ;
 private static readonly @string undeterminedˢᵇ = "Undetermined"u8;
@@ -1246,7 +1257,7 @@ internal static ref readonly @string badˢ => ref badˢᵇ;
 private static readonly @string badˢᵇ = "Bad"u8;
 
 // String returns a human-readable string for the GC state.
-internal static @string String⁔(/*this*/ gcState s) {
+internal static @string String(this gcState s) {
     switch (s) {
     case var ᴛ when ᴛ == gcUndetermined: {
         return undeterminedˢ;
@@ -1259,6 +1270,8 @@ internal static @string String⁔(/*this*/ gcState s) {
     }}
     return badˢ;
 }
+
+} partial class trace_package {
 
 // userRegion represents a unique user region when attached to some gState.
 partial struct userRegion {
@@ -1298,14 +1311,16 @@ partial struct gState {
     /*embed*/ internal rangeState rangeState;
 }
 
+} partial class traceᴛgState {
+
 // beginRegion starts a user region on the goroutine.
-internal static error beginRegion⁔(/*this*/ ref gState s, userRegion r) {
+internal static error beginRegion(this ref gState s, userRegion r) {
     s.regions = append(s.regions, r);
     return default;
 }
 
 // endRegion ends a user region on the goroutine.
-internal static error endRegion⁔(/*this*/ ref gState s, userRegion r) {
+internal static error endRegion(this ref gState s, userRegion r) {
     if (len(s.regions) == 0) {
         // We do not know about regions that began before tracing started.
         return default;
@@ -1316,6 +1331,8 @@ internal static error endRegion⁔(/*this*/ ref gState s, userRegion r) {
     s.regions = s.regions.slice(0, len(s.regions) - 1);
     return default;
 }
+
+} partial class trace_package {
 
 // pState is the state of a proc at a point in the trace.
 partial struct pState {
@@ -1338,10 +1355,12 @@ partial struct rangeState {
     internal slice<rangeType> inFlight;
 }
 
+} partial class traceᴛrangeState {
+
 // beginRange begins a special range in time on the goroutine.
 //
 // Returns an error if the range is already in progress.
-internal static error beginRange⁔(/*this*/ ref rangeState s, rangeType typ) {
+internal static error beginRange(this ref rangeState s, rangeType typ) {
     if (s.hasRange(typ)) {
         return fmt.Errorf("discovered event already in-flight for when starting event %v"u8, tracev2.Specs()[typ.typ].Name);
     }
@@ -1351,7 +1370,7 @@ internal static error beginRange⁔(/*this*/ ref rangeState s, rangeType typ) {
 
 // activeRange marks special range in time on the goroutine as active in the
 // initial generation, or confirms that it is indeed active in later generations.
-internal static error activeRange⁔(/*this*/ ref rangeState s, rangeType typ, bool isInitialGen) {
+internal static error activeRange(this ref rangeState s, rangeType typ, bool isInitialGen) {
     if (isInitialGen) {
         if (s.hasRange(typ)) {
             return fmt.Errorf("found named active range already in first gen: %v"u8, typ);
@@ -1364,14 +1383,14 @@ internal static error activeRange⁔(/*this*/ ref rangeState s, rangeType typ, b
 }
 
 // hasRange returns true if a special time range on the goroutine as in progress.
-internal static bool hasRange⁔(/*this*/ ref rangeState s, rangeType typ) {
+internal static bool hasRange(this ref rangeState s, rangeType typ) {
     return slices.Contains(s.inFlight, typ);
 }
 
 // endRange ends a special range in time on the goroutine.
 //
 // This must line up with the start event type  of the range the goroutine is currently in.
-internal static (stringID, error) endRange⁔(/*this*/ ref rangeState s, tracev2.EventType typ) {
+internal static (stringID, error) endRange(this ref rangeState s, tracev2.EventType typ) {
     var st = tracev2.Specs()[typ].StartEv;
     nint idx = -1;
     foreach (var (i, r) in range(s.inFlight)) {
@@ -1390,6 +1409,8 @@ internal static (stringID, error) endRange⁔(/*this*/ ref rangeState s, tracev2
     return (desc, default);
 }
 
+} partial class trace_package {
+
 // seqCounter represents a global sequence counter for a resource.
 partial struct seqCounter {
     internal uint64 gen; // The generation for the local sequence counter seq.
@@ -1401,15 +1422,19 @@ internal static seqCounter makeSeq(uint64 gen, uint64 seq) {
     return new seqCounter(gen: gen, seq: seq);
 }
 
+} partial class traceᴛseqCounter {
+
 // succeeds returns true if a is the immediate successor of b.
-internal static bool succeeds⁔(/*this*/ seqCounter a, seqCounter b) {
+internal static bool succeeds(this seqCounter a, seqCounter b) {
     return a.gen == b.gen && a.seq == b.seq + 1;
 }
 
 // String returns a debug string representation of the seqCounter.
-internal static @string String⁔(/*this*/ seqCounter c) {
+internal static @string String(this seqCounter c) {
     return fmt.Sprintf("%d (gen=%d)"u8, c.seq, c.gen);
 }
+
+} partial class trace_package {
 
 internal static @string dumpOrdering(ref ordering order) {
     ref var sb = ref heap(new strings.Builder(), out var Ꮡsb);
@@ -1443,8 +1468,10 @@ partial struct queue<T> {
     internal slice<T> buf;
 }
 
+} partial class traceᴛqueue {
+
 // push adds a new event to the back of the queue.
-internal static void push⁔<T>(/*this*/ ref queue<T> q, T value) {
+internal static void push<T>(this ref queue<T> q, T value) {
     if (q.end - q.start == len(q.buf)) {
         q.grow();
     }
@@ -1453,7 +1480,7 @@ internal static void push⁔<T>(/*this*/ ref queue<T> q, T value) {
 }
 
 // grow increases the size of the queue.
-internal static void grow⁔<T>(/*this*/ ref queue<T> q) {
+internal static void grow<T>(this ref queue<T> q) {
     if (len(q.buf) == 0) {
         q.buf = new slice<T>(2);
         return;
@@ -1474,7 +1501,7 @@ internal static void grow⁔<T>(/*this*/ ref queue<T> q) {
 
 // pop removes an event from the front of the queue. If the
 // queue is empty, it returns an EventBad event.
-internal static (T, bool) pop⁔<T>(/*this*/ ref queue<T> q) {
+internal static (T, bool) pop<T>(this ref queue<T> q) {
     if (q.end - q.start == 0) {
         return (@new<T>().ValueSlot, false);
     }
@@ -1484,6 +1511,8 @@ internal static (T, bool) pop⁔<T>(/*this*/ ref queue<T> q) {
     q.start++;
     return (value, true);
 }
+
+} partial class trace_package {
 
 // makeEvent creates an Event from the provided information.
 //

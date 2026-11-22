@@ -16,6 +16,7 @@ using big = go.math.big_package;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140;
 using go.math;
+using static rsa_package;
 
 partial class rsa_package {
 
@@ -41,12 +42,14 @@ partial struct PSSOptions {
     public crypto.Hash Hash;
 }
 
+} partial class rsaᴛPSSOptions {
+
 // HashFunc returns opts.Hash so that [PSSOptions] implements [crypto.SignerOpts].
-internal static crypto.Hash HashFunc⁔(/*this*/ ref PSSOptions opts) {
+public static crypto.Hash HashFunc(this ref PSSOptions opts) {
     return opts.Hash;
 }
 
-internal static nint saltLength⁔(/*this*/ ж<PSSOptions> Ꮡopts) {
+internal static nint saltLength(this ж<PSSOptions> Ꮡopts) {
     ref var opts = ref Ꮡopts.DerefOrNull();
 
     if (Ꮡopts == nil) {
@@ -54,6 +57,8 @@ internal static nint saltLength⁔(/*this*/ ж<PSSOptions> Ꮡopts) {
     }
     return opts.SaltLength;
 }
+
+} partial class rsa_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string cryptoRsaUseOfHashˢ => ref cryptoRsaUseOfHashˢᵇ;

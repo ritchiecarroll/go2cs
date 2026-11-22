@@ -14,6 +14,7 @@ using strconv = @internal.strconv_package;
 using Δsync = sync_package;
 using @unsafe = unsafe_package;
 using @internal;
+using static syscall_package;
 
 partial class syscall_package {
 
@@ -144,7 +145,9 @@ public static (uint32 n, error err) FormatMessage(uint32 flags, uint32 msgsrc, u
 internal static readonly ж<Δsync.Map> ᏑerrnoErrorCache = new StaticBox<Δsync.Map>(default(Δsync.Map));
 internal static ref Δsync.Map errnoErrorCache => ref ((StaticBox<Δsync.Map>)ᏑerrnoErrorCache).ValueSlot;
 
-internal static @string Error⁔(/*this*/ Errno e) {
+} partial class syscallᴛErrno {
+
+public static @string Error(this Errno e) {
     // deal with special go errors
     nint idx = (nint)(e - (Errno)APPLICATION_ERROR);
     if (0 <= idx && idx < len(errors)) {
@@ -168,7 +171,7 @@ internal static @string Error⁔(/*this*/ Errno e) {
     return result;
 }
 
-internal static @string error⁔(/*this*/ Errno e) {
+internal static @string error(this Errno e) {
     // ask windows for the remaining errors
     uint32 flags = (uint32)((UntypedInt)(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ARGUMENT_ARRAY) | (uint32)FORMAT_MESSAGE_IGNORE_INSERTS);
     var b = new slice<uint16>(300);
@@ -185,12 +188,16 @@ internal static @string error⁔(/*this*/ Errno e) {
     return UTF16ToString(b.slice(0, (nint)(n)));
 }
 
+} partial class syscall_package {
+
 internal static Errno _ERROR_NOT_ENOUGH_MEMORY => /* Errno(8) */ 8;
 internal static Errno _ERROR_NOT_SUPPORTED => /* Errno(50) */ 50;
 internal static Errno _ERROR_BAD_NETPATH => /* Errno(53) */ 53;
 internal static Errno _ERROR_CALL_NOT_IMPLEMENTED => /* Errno(120) */ 120;
 
-internal static bool Is⁔(/*this*/ Errno e, error target) {
+} partial class syscallᴛErrno {
+
+public static bool Is(this Errno e, error target) {
     switch (target) {
     case var ᴛ when AreEqual(ᴛ, oserror.ErrPermission): {
         return e == ERROR_ACCESS_DENIED || e == EACCES || e == EPERM;
@@ -207,13 +214,15 @@ internal static bool Is⁔(/*this*/ Errno e, error target) {
     return false;
 }
 
-internal static bool Temporary⁔(/*this*/ Errno e) {
+public static bool Temporary(this Errno e) {
     return e == EINTR || e == EMFILE || e.Timeout();
 }
 
-internal static bool Timeout⁔(/*this*/ Errno e) {
+public static bool Timeout(this Errno e) {
     return e == EAGAIN || e == EWOULDBLOCK || e == ETIMEDOUT;
 }
+
+} partial class syscall_package {
 
 // Implemented in runtime/syscall_windows.go.
 internal static partial uintptr compileCallback(any fn, bool cleanstack);
@@ -912,7 +921,11 @@ partial struct SockaddrInet4 {
     internal RawSockaddrInet4 raw;
 }
 
+} partial class syscallᴛSockaddrInet4 {
+
 // go2cs generated this placeholder — func sockaddr is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
+
+} partial class syscall_package {
 
 partial struct SockaddrInet6 {
     public nint Port;
@@ -921,7 +934,11 @@ partial struct SockaddrInet6 {
     internal RawSockaddrInet6 raw;
 }
 
+} partial class syscallᴛSockaddrInet6 {
+
 // go2cs generated this placeholder — func sockaddr is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
+
+} partial class syscall_package {
 
 partial struct RawSockaddrUnix {
     public uint16 Family;
@@ -933,7 +950,9 @@ partial struct SockaddrUnix {
     internal RawSockaddrUnix raw;
 }
 
-internal static (@unsafe.Pointer, int32, error) sockaddr⁔(/*this*/ ж<SockaddrUnix> Ꮡsa) {
+} partial class syscallᴛSockaddrUnix {
+
+internal static (@unsafe.Pointer, int32, error) sockaddr(this ж<SockaddrUnix> Ꮡsa) {
     ref var sa = ref Ꮡsa.DerefOrNull();
 
     @string name = sa.Name;
@@ -969,7 +988,11 @@ internal static (@unsafe.Pointer, int32, error) sockaddr⁔(/*this*/ ж<Sockaddr
     return (@unsafe.Pointer.FromPinnedBox(Ꮡsa.Ꮡraw), sl, default);
 }
 
+} partial class syscallᴛRawSockaddrAny {
+
 // go2cs generated this placeholder — func Sockaddr is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
+
+} partial class syscall_package {
 
 public static (Handle fd, error err) Socket(nint domain, nint typ, nint proto) {
     if (domain == AF_INET6 && SocketDisableIPv6) {
@@ -1107,23 +1130,27 @@ partial struct WaitStatus {
     public uint32 ExitCode;
 }
 
-internal static bool Exited⁔(/*this*/ WaitStatus w) { return true; }
+} partial class syscallᴛWaitStatus {
 
-internal static nint ExitStatus⁔(/*this*/ WaitStatus w) { return (nint)w.ExitCode; }
+public static bool Exited(this WaitStatus w) { return true; }
 
-internal static Signal Signal⁔(/*this*/ WaitStatus w) { return -1; }
+public static nint ExitStatus(this WaitStatus w) { return (nint)w.ExitCode; }
 
-internal static bool CoreDump⁔(/*this*/ WaitStatus w) { return false; }
+public static Signal Signal(this WaitStatus w) { return -1; }
 
-internal static bool Stopped⁔(/*this*/ WaitStatus w) { return false; }
+public static bool CoreDump(this WaitStatus w) { return false; }
 
-internal static bool Continued⁔(/*this*/ WaitStatus w) { return false; }
+public static bool Stopped(this WaitStatus w) { return false; }
 
-internal static Signal StopSignal⁔(/*this*/ WaitStatus w) { return -1; }
+public static bool Continued(this WaitStatus w) { return false; }
 
-internal static bool Signaled⁔(/*this*/ WaitStatus w) { return false; }
+public static Signal StopSignal(this WaitStatus w) { return -1; }
 
-internal static nint TrapCause⁔(/*this*/ WaitStatus w) { return -1; }
+public static bool Signaled(this WaitStatus w) { return false; }
+
+public static nint TrapCause(this WaitStatus w) { return -1; }
+
+} partial class syscall_package {
 
 // Timespec is an invented structure on Windows, but here for
 // consistency with the syscall package for other operating systems.
@@ -1322,9 +1349,11 @@ public static (slice<nint> gids, error err) Getgroups() { return (default, EWIND
 
 partial struct Signal /*num:nint*/;
 
-internal static void Signal⁔(/*this*/ Signal s) { }
+} partial class syscallᴛSignal {
 
-internal static @string String⁔(/*this*/ Signal s) {
+public static void Signal(this Signal s) { }
+
+public static @string String(this Signal s) {
     if (0 <= s && (nint)s < len(signals)) {
         @string str = signals[s];
         if (str != ""u8) {
@@ -1333,6 +1362,8 @@ internal static @string String⁔(/*this*/ Signal s) {
     }
     return "signal "u8 + strconv.Itoa((nint)s);
 }
+
+} partial class syscall_package {
 
 public static error LoadCreateSymbolicLink() {
     return procCreateSymbolicLinkW.Find();
@@ -1475,14 +1506,16 @@ internal static (ж<procThreadAttributeListContainer>, error) newProcThreadAttri
     return (al, err);
 }
 
+} partial class syscallᴛprocThreadAttributeListContainer {
+
 // Update modifies the ProcThreadAttributeList using UpdateProcThreadAttribute.
-internal static error update⁔(/*this*/ ref procThreadAttributeListContainer al, uintptr attribute, @unsafe.Pointer value, uintptr size) {
+internal static error update(this ref procThreadAttributeListContainer al, uintptr attribute, @unsafe.Pointer value, uintptr size) {
     al.pointers = append(al.pointers, value);
     return updateProcThreadAttribute(al.data, 0, attribute, value, size, nil, nil);
 }
 
 // Delete frees ProcThreadAttributeList's resources.
-internal static void delete⁔(/*this*/ ref procThreadAttributeListContainer al) {
+internal static void delete(this ref procThreadAttributeListContainer al) {
     deleteProcThreadAttributeList(al.data);
     LocalFree((Handle)(uintptr)al.data);
     al.data = default;
@@ -1490,9 +1523,11 @@ internal static void delete⁔(/*this*/ ref procThreadAttributeListContainer al)
 }
 
 // List returns the actual ProcThreadAttributeList to be passed to StartupInfoEx.
-internal static ж<_PROC_THREAD_ATTRIBUTE_LIST> list⁔(/*this*/ ref procThreadAttributeListContainer al) {
+internal static ж<_PROC_THREAD_ATTRIBUTE_LIST> list(this ref procThreadAttributeListContainer al) {
     return al.data;
 }
+
+} partial class syscall_package {
 
 // RegEnumKeyEx enumerates the subkeys of an open registry key.
 // Each call retrieves information about one subkey. name is

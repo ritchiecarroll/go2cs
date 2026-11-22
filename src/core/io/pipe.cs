@@ -7,6 +7,7 @@ namespace go;
 
 using errors = errors_package;
 using Δsync = sync_package;
+using static io_package;
 
 partial class io_package {
 
@@ -16,7 +17,9 @@ partial struct onceError {
     internal error err;
 }
 
-internal static void Store⁔(/*this*/ ж<onceError> Ꮡa, error err) {
+} partial class ioᴛonceError {
+
+internal static void Store(this ж<onceError> Ꮡa, error err) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -32,7 +35,7 @@ internal static void Store⁔(/*this*/ ж<onceError> Ꮡa, error err) {
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { if (ᒐd1) Ꮡa.of(onceError.ᏑMutex).Unlock(); ᒐ.Run(); }
 }
-internal static error Load⁔(/*this*/ ж<onceError> Ꮡa) {
+internal static error Load(this ж<onceError> Ꮡa) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -45,6 +48,8 @@ internal static error Load⁔(/*this*/ ж<onceError> Ꮡa) {
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡa.of(onceError.ᏑMutex).Unlock(); ᒐ.Run(); }
 }
+
+} partial class io_package {
 
 // ErrClosedPipe is the error used for read or write operations on a closed pipe.
 public static error ErrClosedPipe = errors.New("io: read/write on closed pipe");
@@ -60,7 +65,9 @@ partial struct pipe {
     internal onceError werr;
 }
 
-internal static (nint n, error err) read⁔(/*this*/ ж<pipe> Ꮡp, slice<byte> b) {
+} partial class ioᴛpipe {
+
+internal static (nint n, error err) read(this ж<pipe> Ꮡp, slice<byte> b) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     var selᴛ1 = p.done;
@@ -86,7 +93,7 @@ internal static (nint n, error err) read⁔(/*this*/ ж<pipe> Ꮡp, slice<byte> 
     return default;
 }
 
-internal static error closeRead⁔(/*this*/ ж<pipe> Ꮡp, error err) {
+internal static error closeRead(this ж<pipe> Ꮡp, error err) {
     if (err == nil) {
         err = ErrClosedPipe;
     }
@@ -97,7 +104,7 @@ internal static error closeRead⁔(/*this*/ ж<pipe> Ꮡp, error err) {
     return default;
 }
 
-internal static (nint n, error err) write⁔(/*this*/ ж<pipe> Ꮡp, slice<byte> b) {
+internal static (nint n, error err) write(this ж<pipe> Ꮡp, slice<byte> b) {
     nint n = default;
     error err = default;
     GoFrame ᒐ = default;
@@ -136,7 +143,7 @@ internal static (nint n, error err) write⁔(/*this*/ ж<pipe> Ꮡp, slice<byte>
     ᒐdone: return (n, err);
 }
 
-internal static error closeWrite⁔(/*this*/ ж<pipe> Ꮡp, error err) {
+internal static error closeWrite(this ж<pipe> Ꮡp, error err) {
     if (err == nil) {
         err = EOF;
     }
@@ -148,7 +155,7 @@ internal static error closeWrite⁔(/*this*/ ж<pipe> Ꮡp, error err) {
 }
 
 // readCloseError is considered internal to the pipe type.
-internal static error readCloseError⁔(/*this*/ ж<pipe> Ꮡp) {
+internal static error readCloseError(this ж<pipe> Ꮡp) {
     var rerr = Ꮡp.Ꮡrerr.Load();
     var werr = Ꮡp.Ꮡwerr.Load(); if (rerr == nil && werr != nil) {
         return werr;
@@ -157,7 +164,7 @@ internal static error readCloseError⁔(/*this*/ ж<pipe> Ꮡp) {
 }
 
 // writeCloseError is considered internal to the pipe type.
-internal static error writeCloseError⁔(/*this*/ ж<pipe> Ꮡp) {
+internal static error writeCloseError(this ж<pipe> Ꮡp) {
     var werr = Ꮡp.Ꮡwerr.Load();
     var rerr = Ꮡp.Ꮡrerr.Load(); if (werr == nil && rerr != nil) {
         return rerr;
@@ -165,23 +172,27 @@ internal static error writeCloseError⁔(/*this*/ ж<pipe> Ꮡp) {
     return ErrClosedPipe;
 }
 
+} partial class io_package {
+
 // A PipeReader is the read half of a pipe.
 partial struct PipeReader {
     /*embed*/ internal pipe pipe;
 }
+
+} partial class ioᴛPipeReader {
 
 // Read implements the standard Read interface:
 // it reads data from the pipe, blocking until a writer
 // arrives or the write end is closed.
 // If the write end is closed with an error, that error is
 // returned as err; otherwise err is EOF.
-internal static (nint n, error err) Read⁔(/*this*/ ж<PipeReader> Ꮡr, slice<byte> data) {
+public static (nint n, error err) Read(this ж<PipeReader> Ꮡr, slice<byte> data) {
     return Ꮡr.Ꮡpipe.read(data);
 }
 
 // Close closes the reader; subsequent writes to the
 // write half of the pipe will return the error [ErrClosedPipe].
-internal static error Close⁔(/*this*/ ж<PipeReader> Ꮡr) {
+public static error Close(this ж<PipeReader> Ꮡr) {
     return Ꮡr.CloseWithError(default);
 }
 
@@ -190,27 +201,31 @@ internal static error Close⁔(/*this*/ ж<PipeReader> Ꮡr) {
 //
 // CloseWithError never overwrites the previous error if it exists
 // and always returns nil.
-internal static error CloseWithError⁔(/*this*/ ж<PipeReader> Ꮡr, error err) {
+public static error CloseWithError(this ж<PipeReader> Ꮡr, error err) {
     return Ꮡr.Ꮡpipe.closeRead(err);
 }
+
+} partial class io_package {
 
 // A PipeWriter is the write half of a pipe.
 partial struct PipeWriter {
     internal PipeReader r;
 }
 
+} partial class ioᴛPipeWriter {
+
 // Write implements the standard Write interface:
 // it writes data to the pipe, blocking until one or more readers
 // have consumed all the data or the read end is closed.
 // If the read end is closed with an error, that err is
 // returned as err; otherwise err is [ErrClosedPipe].
-internal static (nint n, error err) Write⁔(/*this*/ ж<PipeWriter> Ꮡw, slice<byte> data) {
+public static (nint n, error err) Write(this ж<PipeWriter> Ꮡw, slice<byte> data) {
     return Ꮡw.Ꮡr.Ꮡpipe.write(data);
 }
 
 // Close closes the writer; subsequent reads from the
 // read half of the pipe will return no bytes and EOF.
-internal static error Close⁔(/*this*/ ж<PipeWriter> Ꮡw) {
+public static error Close(this ж<PipeWriter> Ꮡw) {
     return Ꮡw.CloseWithError(default);
 }
 
@@ -220,9 +235,11 @@ internal static error Close⁔(/*this*/ ж<PipeWriter> Ꮡw) {
 //
 // CloseWithError never overwrites the previous error if it exists
 // and always returns nil.
-internal static error CloseWithError⁔(/*this*/ ж<PipeWriter> Ꮡw, error err) {
+public static error CloseWithError(this ж<PipeWriter> Ꮡw, error err) {
     return Ꮡw.Ꮡr.Ꮡpipe.closeWrite(err);
 }
+
+} partial class io_package {
 
 // Pipe creates a synchronous in-memory pipe.
 // It can be used to connect code expecting an [io.Reader]

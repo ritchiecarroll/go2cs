@@ -5,6 +5,7 @@ namespace go.crypto;
 
 using big = math.big_package;
 using math;
+using static elliptic_package;
 
 partial class elliptic_package {
 
@@ -23,7 +24,9 @@ partial struct CurveParams {
     public @string Name;      // the canonical name of the curve
 }
 
-internal static ж<CurveParams> Params⁔(/*this*/ ж<CurveParams> Ꮡcurve) {
+} partial class ellipticᴛCurveParams {
+
+public static ж<CurveParams> Params(this ж<CurveParams> Ꮡcurve) {
     return Ꮡcurve;
 }
 
@@ -35,7 +38,7 @@ internal static ж<CurveParams> Params⁔(/*this*/ ж<CurveParams> Ꮡcurve) {
 // reverse the transform than to operate in affine coordinates.
 
 // polynomial returns x³ - 3x + b.
-internal static ж<big.Int> polynomial⁔(/*this*/ ref CurveParams curve, ж<big.Int> x) {
+internal static ж<big.Int> polynomial(this ref CurveParams curve, ж<big.Int> x) {
     var x3 = @new<big.Int>().Mul(x, x);
     x3.Mul(x3, x);
 
@@ -55,7 +58,7 @@ internal static ж<big.Int> polynomial⁔(/*this*/ ref CurveParams curve, ж<big
 // provide any security property. For ECDH, use the [crypto/ecdh] package.
 // For ECDSA, use the [crypto/ecdsa] package with a [Curve] value returned directly
 // from [P224], [P256], [P384], or [P521].
-internal static bool IsOnCurve⁔(/*this*/ ж<CurveParams> Ꮡcurve, ж<big.Int> Ꮡx, ж<big.Int> Ꮡy) {
+public static bool IsOnCurve(this ж<CurveParams> Ꮡcurve, ж<big.Int> Ꮡx, ж<big.Int> Ꮡy) {
     ref var curve = ref Ꮡcurve.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
     ref var y = ref Ꮡy.DerefOrNull();
@@ -77,6 +80,8 @@ internal static bool IsOnCurve⁔(/*this*/ ж<CurveParams> Ꮡcurve, ж<big.Int>
     return curve.polynomial(Ꮡx).Cmp(y2) == 0;
 }
 
+} partial class elliptic_package {
+
 // zForAffine returns a Jacobian Z value for the affine point (x, y). If x and
 // y are zero, it assumes that they represent the point at infinity because (0,
 // 0) is not on the any of the curves handled here.
@@ -91,9 +96,11 @@ internal static ж<big.Int> zForAffine(ж<big.Int> Ꮡx, ж<big.Int> Ꮡy) {
     return z;
 }
 
+} partial class ellipticᴛCurveParams {
+
 // affineFromJacobian reverses the Jacobian transform. See the comment at the
 // top of the file. If the point is ∞ it returns 0, 0.
-internal static (ж<big.Int> xOut, ж<big.Int> yOut) affineFromJacobian⁔(/*this*/ ref CurveParams curve, ж<big.Int> x, ж<big.Int> y, ж<big.Int> Ꮡz) {
+internal static (ж<big.Int> xOut, ж<big.Int> yOut) affineFromJacobian(this ref CurveParams curve, ж<big.Int> x, ж<big.Int> y, ж<big.Int> Ꮡz) {
     ж<big.Int> xOut = default;
     ж<big.Int> yOut = default;
     ref var z = ref Ꮡz.DerefOrNull();
@@ -119,7 +126,7 @@ internal static (ж<big.Int> xOut, ж<big.Int> yOut) affineFromJacobian⁔(/*thi
 // provide any security property. For ECDH, use the [crypto/ecdh] package.
 // For ECDSA, use the [crypto/ecdsa] package with a [Curve] value returned directly
 // from [P224], [P256], [P384], or [P521].
-internal static (ж<big.Int>, ж<big.Int>) Add⁔(/*this*/ ж<CurveParams> Ꮡcurve, ж<big.Int> x1, ж<big.Int> y1, ж<big.Int> x2, ж<big.Int> y2) {
+public static (ж<big.Int>, ж<big.Int>) Add(this ж<CurveParams> Ꮡcurve, ж<big.Int> x1, ж<big.Int> y1, ж<big.Int> x2, ж<big.Int> y2) {
     ref var curve = ref Ꮡcurve.DerefOrNull();
 
     // If there is a dedicated constant-time implementation for this curve operation,
@@ -138,7 +145,7 @@ internal static (ж<big.Int>, ж<big.Int>) Add⁔(/*this*/ ж<CurveParams> Ꮡcu
 
 // addJacobian takes two points in Jacobian coordinates, (x1, y1, z1) and
 // (x2, y2, z2) and returns their sum, also in Jacobian form.
-internal static (ж<big.Int>, ж<big.Int>, ж<big.Int>) addJacobian⁔(/*this*/ ref CurveParams curve, ж<big.Int> x1, ж<big.Int> y1, ж<big.Int> Ꮡz1, ж<big.Int> x2, ж<big.Int> y2, ж<big.Int> Ꮡz2) {
+internal static (ж<big.Int>, ж<big.Int>, ж<big.Int>) addJacobian(this ref CurveParams curve, ж<big.Int> x1, ж<big.Int> y1, ж<big.Int> Ꮡz1, ж<big.Int> x2, ж<big.Int> y2, ж<big.Int> Ꮡz2) {
     ref var z1 = ref Ꮡz1.DerefOrNull();
     ref var z2 = ref Ꮡz2.DerefOrNull();
 
@@ -223,7 +230,7 @@ internal static (ж<big.Int>, ж<big.Int>, ж<big.Int>) addJacobian⁔(/*this*/ 
 // provide any security property. For ECDH, use the [crypto/ecdh] package.
 // For ECDSA, use the [crypto/ecdsa] package with a [Curve] value returned directly
 // from [P224], [P256], [P384], or [P521].
-internal static (ж<big.Int>, ж<big.Int>) Double⁔(/*this*/ ж<CurveParams> Ꮡcurve, ж<big.Int> x1, ж<big.Int> y1) {
+public static (ж<big.Int>, ж<big.Int>) Double(this ж<CurveParams> Ꮡcurve, ж<big.Int> x1, ж<big.Int> y1) {
     ref var curve = ref Ꮡcurve.DerefOrNull();
 
     // If there is a dedicated constant-time implementation for this curve operation,
@@ -240,7 +247,7 @@ internal static (ж<big.Int>, ж<big.Int>) Double⁔(/*this*/ ж<CurveParams> �
 
 // doubleJacobian takes a point in Jacobian coordinates, (x, y, z), and
 // returns its double, also in Jacobian form.
-internal static (ж<big.Int>, ж<big.Int>, ж<big.Int>) doubleJacobian⁔(/*this*/ ref CurveParams curve, ж<big.Int> x, ж<big.Int> y, ж<big.Int> z) {
+internal static (ж<big.Int>, ж<big.Int>, ж<big.Int>) doubleJacobian(this ref CurveParams curve, ж<big.Int> x, ж<big.Int> y, ж<big.Int> z) {
     // See https://hyperelliptic.org/EFD/g1p/auto-shortw-jacobian-3.html#doubling-dbl-2001-b
     var delta = @new<big.Int>().Mul(z, z);
     delta.Mod(delta, curve.P);
@@ -305,7 +312,7 @@ internal static (ж<big.Int>, ж<big.Int>, ж<big.Int>) doubleJacobian⁔(/*this
 // provide any security property. For ECDH, use the [crypto/ecdh] package.
 // For ECDSA, use the [crypto/ecdsa] package with a [Curve] value returned directly
 // from [P224], [P256], [P384], or [P521].
-internal static (ж<big.Int>, ж<big.Int>) ScalarMult⁔(/*this*/ ж<CurveParams> Ꮡcurve, ж<big.Int> Bx, ж<big.Int> By, slice<byte> k) {
+public static (ж<big.Int>, ж<big.Int>) ScalarMult(this ж<CurveParams> Ꮡcurve, ж<big.Int> Bx, ж<big.Int> By, slice<byte> k) {
     ref var curve = ref Ꮡcurve.DerefOrNull();
 
     // If there is a dedicated constant-time implementation for this curve operation,
@@ -339,7 +346,7 @@ internal static (ж<big.Int>, ж<big.Int>) ScalarMult⁔(/*this*/ ж<CurveParams
 // provide any security property. For ECDH, use the [crypto/ecdh] package.
 // For ECDSA, use the [crypto/ecdsa] package with a [Curve] value returned directly
 // from [P224], [P256], [P384], or [P521].
-internal static (ж<big.Int>, ж<big.Int>) ScalarBaseMult⁔(/*this*/ ж<CurveParams> Ꮡcurve, slice<byte> k) {
+public static (ж<big.Int>, ж<big.Int>) ScalarBaseMult(this ж<CurveParams> Ꮡcurve, slice<byte> k) {
     ref var curve = ref Ꮡcurve.DerefOrNull();
 
     // If there is a dedicated constant-time implementation for this curve operation,
@@ -350,6 +357,8 @@ internal static (ж<big.Int>, ж<big.Int>) ScalarBaseMult⁔(/*this*/ ж<CurvePa
 
     return Ꮡcurve.ScalarMult(curve.Gx, curve.Gy, k);
 }
+
+} partial class elliptic_package {
 
 internal static (Curve, bool) matchesSpecificCurve(ж<CurveParams> @params) {
     foreach (var (_, c) in range(slice<Curve>([new nistCurveжCurve<P224PointжnistPoint>(p224), new nistCurveжCurve<P256PointжnistPoint>(p256), new nistCurveжCurve<P384PointжnistPoint>(p384), new nistCurveжCurve<P521PointжnistPoint>(p521)]))) {

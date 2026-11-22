@@ -15,6 +15,7 @@ using errors = errors_package;
 using hash = hash_package;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140;
+using static hmac_package;
 
 partial class hmac_package {
 
@@ -44,7 +45,9 @@ partial struct HMAC {
     internal nint keyLen;
 }
 
-internal static slice<byte> Sum⁔(/*this*/ ref HMAC h, slice<byte> @in) {
+} partial class hmacᴛHMAC {
+
+public static slice<byte> Sum(this ref HMAC h, slice<byte> @in) {
     // Per FIPS 140-3 IG C.M, key lengths below 112 bits are only allowed for
     // legacy use (i.e. verification only) and we don't support that. However,
     // HKDF-Extract uses the HMAC key for the salt, which is allowed to be shorter.
@@ -77,14 +80,14 @@ internal static slice<byte> Sum⁔(/*this*/ ref HMAC h, slice<byte> @in) {
     return h.outer.Sum(@in.slice(0, origLen));
 }
 
-internal static (nint n, error err) Write⁔(/*this*/ ref HMAC h, slice<byte> p) {
+public static (nint n, error err) Write(this ref HMAC h, slice<byte> p) {
     return h.inner.Write(p);
 }
 
-internal static nint Size⁔(/*this*/ ref HMAC h) { return h.outer.Size(); }
-internal static nint BlockSize⁔(/*this*/ ref HMAC h) { return h.inner.BlockSize(); }
+public static nint Size(this ref HMAC h) { return h.outer.Size(); }
+public static nint BlockSize(this ref HMAC h) { return h.inner.BlockSize(); }
 
-internal static void Reset⁔(/*this*/ ref HMAC h) {
+public static void Reset(this ref HMAC h) {
     if (h.marshaled) {
         var errΔ1 = h.inner._<marshalable>().UnmarshalBinary(h.ipad); if (errΔ1 != nil) {
             throw panic(errΔ1);
@@ -135,24 +138,30 @@ internal static void Reset⁔(/*this*/ ref HMAC h) {
     h.marshaled = true;
 }
 
+} partial class hmac_package {
+
 partial struct errCloneUnsupported {
 }
+
+} partial class hmacᴛerrCloneUnsupported {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static ref readonly @string cryptoHmacHashDoesNotˢ => ref cryptoHmacHashDoesNotˢᵇ;
 private static readonly @string cryptoHmacHashDoesNotˢᵇ = "crypto/hmac: hash does not support hash.Cloner"u8;
 
-internal static @string Error⁔(/*this*/ errCloneUnsupported e) {
+internal static @string Error(this errCloneUnsupported e) {
     return cryptoHmacHashDoesNotˢ;
 }
 
-internal static error Unwrap⁔(/*this*/ errCloneUnsupported e) {
+internal static error Unwrap(this errCloneUnsupported e) {
     return errors.ErrUnsupported;
 }
 
+} partial class hmacᴛHMAC {
+
 // Clone implements [hash.Cloner] if the underlying hash does.
 // Otherwise, it returns an error wrapping [errors.ErrUnsupported].
-internal static (hash.Cloner, error) Clone⁔(/*this*/ ref HMAC h) {
+public static (hash.Cloner, error) Clone(this ref HMAC h) {
     ref var r = ref heap<HMAC>(h, out var Ꮡr);
     var (ic, ok) = h.inner._<hash.Cloner>(ᐧ);
     if (!ok) {
@@ -173,6 +182,8 @@ internal static (hash.Cloner, error) Clone⁔(/*this*/ ref HMAC h) {
     }
     return (new HMACжCloner(Ꮡr), default);
 }
+
+} partial class hmac_package {
 
 // New returns a new HMAC hash using the given [hash.Hash] type and key.
 public static ж<HMAC> New<H>(Func<H> h, slice<byte> key)

@@ -19,6 +19,7 @@ using go.@internal;
 using go.image;
 using go.image.color;
 using math;
+using static gif_package;
 
 partial class gif_package {
 
@@ -65,15 +66,17 @@ partial struct blockWriter {
     internal ж<encoder> e;
 }
 
-internal static void setup⁔(/*this*/ blockWriter b) {
+} partial class gifᴛblockWriter {
+
+internal static void setup(this blockWriter b) {
     b.e.buf[0] = 0;
 }
 
-internal static error Flush⁔(/*this*/ blockWriter b) {
+internal static error Flush(this blockWriter b) {
     return b.e.err;
 }
 
-internal static error WriteByte⁔(/*this*/ blockWriter b, byte c) {
+internal static error WriteByte(this blockWriter b, byte c) {
     if (b.e.err != nil) {
         return b.e.err;
     }
@@ -93,7 +96,7 @@ internal static error WriteByte⁔(/*this*/ blockWriter b, byte c) {
 
 // blockWriter must be an io.Writer for lzw.NewWriter, but this is never
 // actually called.
-internal static (nint, error) Write⁔(/*this*/ blockWriter b, slice<byte> data) {
+internal static (nint, error) Write(this blockWriter b, slice<byte> data) {
     foreach (var (i, c) in range(data)) {
         var err = b.WriteByte(c); if (err != nil) {
             return (i, err);
@@ -102,7 +105,7 @@ internal static (nint, error) Write⁔(/*this*/ blockWriter b, slice<byte> data)
     return (len(data), default);
 }
 
-internal static void close⁔(/*this*/ blockWriter b) {
+internal static void close(this blockWriter b) {
     // Write the block terminator (0x00), either by itself, or along with a
     // pending sub-block.
     if (b.e.buf[0] == 0) {
@@ -115,21 +118,23 @@ internal static void close⁔(/*this*/ blockWriter b) {
     b.e.flush();
 }
 
-internal static void flush⁔(/*this*/ ref encoder e) {
+} partial class gifᴛencoder {
+
+internal static void flush(this ref encoder e) {
     if (e.err != nil) {
         return;
     }
     e.err = e.w.Flush();
 }
 
-internal static void write⁔(/*this*/ ref encoder e, slice<byte> p) {
+internal static void write(this ref encoder e, slice<byte> p) {
     if (e.err != nil) {
         return;
     }
     (_, e.err) = e.w.Write(p);
 }
 
-internal static void writeByte⁔(/*this*/ ref encoder e, byte b) {
+internal static void writeByte(this ref encoder e, byte b) {
     if (e.err != nil) {
         return;
     }
@@ -142,7 +147,7 @@ private static readonly @string gif89aˢᵇ = "GIF89a"u8;
 internal static ref readonly @string netscape20ˢ => ref netscape20ˢᵇ;
 private static readonly @string netscape20ˢᵇ = "NETSCAPE2.0"u8;
 
-internal static void writeHeader⁔(/*this*/ ref encoder e) {
+internal static void writeHeader(this ref encoder e) {
     if (e.err != nil) {
         return;
     }
@@ -197,6 +202,8 @@ internal static void writeHeader⁔(/*this*/ ref encoder e) {
     }
 }
 
+} partial class gif_package {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string gifCannotEncodeColorˢ => ref gifCannotEncodeColorˢᵇ;
 private static readonly @string gifCannotEncodeColorˢᵇ = "gif: cannot encode color table with more than 256 entries"u8;
@@ -234,7 +241,9 @@ internal static (nint, error) encodeColorTable(slice<byte> dst, Δcolor.Palette 
     return (3 * n, default);
 }
 
-internal static bool colorTablesMatch⁔(/*this*/ ref encoder e, nint localLen, nint transparentIndex) {
+} partial class gifᴛencoder {
+
+internal static bool colorTablesMatch(this ref encoder e, nint localLen, nint transparentIndex) {
     nint localSize = 3 * localLen;
     if (transparentIndex >= 0) {
         nint trOff = 3 * transparentIndex;
@@ -250,8 +259,10 @@ internal static ref readonly @string gifImageBlockIsTooLargeˢ => ref gifImageBl
 private static readonly @string gifImageBlockIsTooLargeˢᵇ = "gif: image block is too large to encode"u8;
 internal static ref readonly @string gifImageBlockIsOutOfˢ => ref gifImageBlockIsOutOfˢᵇ;
 private static readonly @string gifImageBlockIsOutOfˢᵇ = "gif: image block is out of bounds"u8;
+internal static ref readonly @string gifCannotEncodeColorˢ2 => ref gifCannotEncodeColorˢ2ᵇ;
+private static readonly @string gifCannotEncodeColorˢ2ᵇ = "gif: cannot encode color table with nil entries"u8;
 
-internal static void writeImageBlock⁔(/*this*/ ж<encoder> Ꮡe, ж<image.Paletted> Ꮡpm, nint delay, byte disposal) {
+internal static void writeImageBlock(this ж<encoder> Ꮡe, ж<image.Paletted> Ꮡpm, nint delay, byte disposal) {
     ref var e = ref Ꮡe.DerefOrNull();
     ref var pm = ref Ꮡpm.DerefOrNull();
 
@@ -367,6 +378,8 @@ internal static void writeImageBlock⁔(/*this*/ ж<encoder> Ꮡe, ж<image.Pale
     lzww.Close(); // flush to bw
     bw.close();   // flush to e.w
 }
+
+} partial class gif_package {
 
 // Options are the encoding parameters.
 partial struct Options {

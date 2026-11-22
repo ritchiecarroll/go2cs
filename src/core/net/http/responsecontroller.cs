@@ -7,6 +7,7 @@ using bufio = bufio_package;
 using fmt = fmt_package;
 using net = net_package;
 using time = time_package;
+using static http_package;
 
 partial class http_package {
 
@@ -46,8 +47,10 @@ internal partial interface Flush_type /*dyn*/ {
     error FlushError();
 }
 
+} partial class httpᴛResponseController {
+
 // Flush flushes buffered data to the client.
-internal static error Flush⁔(/*this*/ ref ResponseController c) {
+public static error Flush(this ref ResponseController c) {
     var rw = c.rw;
     for (;;) {
         switch (rw.type()) {
@@ -71,7 +74,7 @@ internal static error Flush⁔(/*this*/ ref ResponseController c) {
 
 // Hijack lets the caller take over the connection.
 // See the [Hijacker] interface for details.
-internal static (net.Conn, ж<bufio.ReadWriter>, error) Hijack⁔(/*this*/ ref ResponseController c) {
+public static (net.Conn, ж<bufio.ReadWriter>, error) Hijack(this ref ResponseController c) {
     var rw = c.rw;
     for (;;) {
         switch (rw.type()) {
@@ -89,16 +92,20 @@ internal static (net.Conn, ж<bufio.ReadWriter>, error) Hijack⁔(/*this*/ ref R
     }
 }
 
+} partial class http_package {
+
 internal partial interface SetReadDeadline_type /*dyn*/ {
     error SetReadDeadline(time.Time _);
 }
+
+} partial class httpᴛResponseController {
 
 // SetReadDeadline sets the deadline for reading the entire request, including the body.
 // Reads from the request body after the deadline has been exceeded will return an error.
 // A zero value means no deadline.
 //
 // Setting the read deadline after it has been exceeded will not extend it.
-internal static error SetReadDeadline⁔(/*this*/ ref ResponseController c, time.Time deadline) {
+public static error SetReadDeadline(this ref ResponseController c, time.Time deadline) {
     var rw = c.rw;
     for (;;) {
         switch (rw.type()) {
@@ -116,9 +123,13 @@ internal static error SetReadDeadline⁔(/*this*/ ref ResponseController c, time
     }
 }
 
+} partial class http_package {
+
 internal partial interface SetWriteDeadline_type /*dyn*/ {
     error SetWriteDeadline(time.Time _);
 }
+
+} partial class httpᴛResponseController {
 
 // SetWriteDeadline sets the deadline for writing the response.
 // Writes to the response body after the deadline has been exceeded will not block,
@@ -126,7 +137,7 @@ internal partial interface SetWriteDeadline_type /*dyn*/ {
 // A zero value means no deadline.
 //
 // Setting the write deadline after it has been exceeded will not extend it.
-internal static error SetWriteDeadline⁔(/*this*/ ref ResponseController c, time.Time deadline) {
+public static error SetWriteDeadline(this ref ResponseController c, time.Time deadline) {
     var rw = c.rw;
     for (;;) {
         switch (rw.type()) {
@@ -144,9 +155,13 @@ internal static error SetWriteDeadline⁔(/*this*/ ref ResponseController c, tim
     }
 }
 
+} partial class http_package {
+
 internal partial interface EnableFullDuplex_type /*dyn*/ {
     error EnableFullDuplex();
 }
+
+} partial class httpᴛResponseController {
 
 // EnableFullDuplex indicates that the request handler will interleave reads from [Request.Body]
 // with writes to the [ResponseWriter].
@@ -158,7 +173,7 @@ internal partial interface EnableFullDuplex_type /*dyn*/ {
 // from the request while concurrently writing the response.
 //
 // For HTTP/2 requests, the Go HTTP server always permits concurrent reads and responses.
-internal static error EnableFullDuplex⁔(/*this*/ ref ResponseController c) {
+public static error EnableFullDuplex(this ref ResponseController c) {
     var rw = c.rw;
     for (;;) {
         switch (rw.type()) {
@@ -175,6 +190,8 @@ internal static error EnableFullDuplex⁔(/*this*/ ref ResponseController c) {
         }}
     }
 }
+
+} partial class http_package {
 
 // errNotSupported returns an error that Is ErrNotSupported,
 // but is not == to it.

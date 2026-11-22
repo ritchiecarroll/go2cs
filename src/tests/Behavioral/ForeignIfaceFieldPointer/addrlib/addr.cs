@@ -1,5 +1,7 @@
 namespace go.ForeignIfaceFieldPointer;
 
+using static addrlib_package;
+
 partial class addrlib_package {
 
 partial interface Addr {
@@ -12,7 +14,9 @@ partial struct UnixAddr {
     public @string Net;
 }
 
-internal static @string Network⁔(/*this*/ ref UnixAddr a) { return a.Net; }
-internal static @string String⁔(/*this*/ ref UnixAddr a) { return a.Name; }
+} partial class addrlibᴛUnixAddr {
 
-} // end addrlib_package
+public static @string Network(this ref UnixAddr a) { return a.Net; }
+public static @string String(this ref UnixAddr a) { return a.Name; }
+
+}

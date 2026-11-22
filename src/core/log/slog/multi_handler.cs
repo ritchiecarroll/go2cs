@@ -6,6 +6,7 @@ namespace go.log;
 using context = context_package;
 using errors = errors_package;
 using ꓸꓸꓸHandler = Span<slog_package.Handler>;
+using static slog_package;
 
 partial class slog_package {
 
@@ -25,7 +26,9 @@ partial struct MultiHandler {
     internal slice<Handler> multi;
 }
 
-internal static bool Enabled⁔(/*this*/ ref MultiHandler h, context.Context ctx, Level l) {
+} partial class slogᴛMultiHandler {
+
+public static bool Enabled(this ref MultiHandler h, context.Context ctx, Level l) {
     foreach (var i in range(len(h.multi))) {
         if (h.multi[i].Enabled(ctx, l)) {
             return true;
@@ -34,7 +37,7 @@ internal static bool Enabled⁔(/*this*/ ref MultiHandler h, context.Context ctx
     return false;
 }
 
-internal static error Handle⁔(/*this*/ ref MultiHandler h, context.Context ctx, Record r) {
+public static error Handle(this ref MultiHandler h, context.Context ctx, Record r) {
     r = r.ΔClone();
     var errsᴷ = new stackAppend<error>();
 
@@ -49,7 +52,7 @@ internal static error Handle⁔(/*this*/ ref MultiHandler h, context.Context ctx
     return errors.Join(errs.ꓸꓸꓸ);
 }
 
-internal static Handler WithAttrs⁔(/*this*/ ref MultiHandler h, slice<Attr> attrs) {
+public static Handler WithAttrs(this ref MultiHandler h, slice<Attr> attrs) {
     var handlers = new slice<Handler>(0, len(h.multi));
     foreach (var i in range(len(h.multi))) {
         handlers = append(handlers, h.multi[i].WithAttrs(attrs));
@@ -57,7 +60,7 @@ internal static Handler WithAttrs⁔(/*this*/ ref MultiHandler h, slice<Attr> at
     return new MultiHandlerжHandler(Ꮡ(new MultiHandler(multi: handlers)));
 }
 
-internal static Handler WithGroup⁔(/*this*/ ref MultiHandler h, @string name) {
+public static Handler WithGroup(this ref MultiHandler h, @string name) {
     var handlers = new slice<Handler>(0, len(h.multi));
     foreach (var i in range(len(h.multi))) {
         handlers = append(handlers, h.multi[i].WithGroup(name));
@@ -65,4 +68,4 @@ internal static Handler WithGroup⁔(/*this*/ ref MultiHandler h, @string name) 
     return new MultiHandlerжHandler(Ꮡ(new MultiHandler(multi: handlers)));
 }
 
-} // end slog_package
+}

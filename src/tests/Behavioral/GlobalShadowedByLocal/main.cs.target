@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -14,7 +15,11 @@ partial struct acquirer {
     internal nint n;
 }
 
-internal static nint trace⁔(/*this*/ acquirer _) { return 1; }
+} partial class mainᴛacquirer {
+
+internal static nint trace(this acquirer _) { return 1; }
+
+} partial class main_package {
 
 internal static partial nint collisionGlobalShadow() {
     nint a = main_package.trace.addr;

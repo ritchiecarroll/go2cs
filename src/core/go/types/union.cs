@@ -9,6 +9,7 @@ using static global::go.@internal.types.errors_package;
 using constant = global::go.go.constant_package;
 using errors = global::go.@internal.types.errors_package;
 using global::go.go;
+using static types_package;
 
 partial class types_package {
 
@@ -29,11 +30,15 @@ public static ж<Union> NewUnion(slice<ж<Term>> terms) {
     return Ꮡ(new Union(terms));
 }
 
-internal static nint Len⁔(/*this*/ ref Union u) { return len(u.terms); }
-internal static ж<Term> Term⁔(/*this*/ ref Union u, nint i) { return u.terms[i]; }
+} partial class typesᴛUnion {
 
-internal static Type Underlying⁔(/*this*/ ж<Union> Ꮡu) { return new UnionжType(Ꮡu); }
-internal static @string String⁔(/*this*/ ж<Union> Ꮡu) { return TypeString(new UnionжType(Ꮡu), default); }
+public static nint Len(this ref Union u) { return len(u.terms); }
+public static ж<Term> Term(this ref Union u, nint i) { return u.terms[i]; }
+
+public static Type Underlying(this ж<Union> Ꮡu) { return new UnionжType(Ꮡu); }
+public static @string String(this ж<Union> Ꮡu) { return TypeString(new UnionжType(Ꮡu), default); }
+
+} partial class types_package {
 
 // A Term represents a term in a [Union].
 partial struct Term /*term*/;
@@ -41,9 +46,13 @@ partial struct Term /*term*/;
 // NewTerm returns a new union term.
 public static ж<Term> NewTerm(bool tilde, Type typ) { return Ꮡ(new Term(new term(tilde, typ))); }
 
-internal static bool Tilde⁔(/*this*/ ref Term t) { return t.tilde; }
-internal static Type Type⁔(/*this*/ ref Term t) { return t.typ; }
-internal static @string String⁔(/*this*/ ж<Term> Ꮡt) { return (Ꮡt.Reinterpret<Term, term>()).String(); }
+} partial class typesᴛTerm {
+
+public static bool Tilde(this ref Term t) { return t.tilde; }
+public static Type Type(this ref Term t) { return t.typ; }
+public static @string String(this ж<Term> Ꮡt) { return (Ꮡt.Reinterpret<Term, term>()).String(); }
+
+} partial class types_package {
 
 // ----------------------------------------------------------------------------
 // Implementation

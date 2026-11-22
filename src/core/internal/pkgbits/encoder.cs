@@ -16,6 +16,7 @@ using encoding;
 using global::go.go;
 using hash = hash_package;
 using math;
+using static pkgbits_package;
 
 partial class pkgbits_package {
 
@@ -35,8 +36,12 @@ partial struct PkgEncoder {
     internal nint syncFrames;
 }
 
+} partial class pkgbitsᴛPkgEncoder {
+
 // SyncMarkers reports whether pw uses sync markers.
-internal static bool SyncMarkers⁔(/*this*/ ref PkgEncoder pw) { return pw.syncFrames >= 0; }
+public static bool SyncMarkers(this ref PkgEncoder pw) { return pw.syncFrames >= 0; }
+
+} partial class pkgbits_package {
 
 // NewPkgEncoder returns an initialized PkgEncoder.
 //
@@ -53,9 +58,11 @@ public static PkgEncoder NewPkgEncoder(Version version, nint syncFrames) {
     );
 }
 
+} partial class pkgbitsᴛPkgEncoder {
+
 // DumpTo writes the package's encoded data to out0 and returns the
 // package fingerprint.
-internal static array<byte> /*fingerprint*/ DumpTo⁔(/*this*/ ж<PkgEncoder> Ꮡpw, io.Writer out0) {
+public static array<byte> /*fingerprint*/ DumpTo(this ж<PkgEncoder> Ꮡpw, io.Writer out0) {
     array<byte> fingerprint = new(8);
     ref var pw = ref Ꮡpw.DerefOrNull();
 
@@ -114,7 +121,7 @@ internal static array<byte> /*fingerprint*/ DumpTo⁔(/*this*/ ж<PkgEncoder> �
 
 // StringIdx adds a string value to the strings section, if not
 // already present, and returns its index.
-internal static RelElemIdx StringIdx⁔(/*this*/ ref PkgEncoder pw, @string s) {
+public static RelElemIdx StringIdx(this ref PkgEncoder pw, @string s) {
     var (idxΔ1, ok) = pw.stringsIdx[s, ꟷ]; if (ok) {
         assert(pw.elems[SectionString][idxΔ1] == s);
         return idxΔ1;
@@ -129,7 +136,7 @@ internal static RelElemIdx StringIdx⁔(/*this*/ ref PkgEncoder pw, @string s) {
 // NewEncoder returns an Encoder for a new element within the given
 // section, and encodes the given SyncMarker as the start of the
 // element bitstream.
-internal static ж<Encoder> NewEncoder⁔(/*this*/ ж<PkgEncoder> Ꮡpw, SectionKind k, SyncMarker marker) {
+public static ж<Encoder> NewEncoder(this ж<PkgEncoder> Ꮡpw, SectionKind k, SyncMarker marker) {
     var e = Ꮡpw.NewEncoderRaw(k);
     e.Sync(marker);
     return e;
@@ -139,7 +146,7 @@ internal static ж<Encoder> NewEncoder⁔(/*this*/ ж<PkgEncoder> Ꮡpw, Section
 // section.
 //
 // Most callers should use NewEncoder instead.
-internal static ж<Encoder> NewEncoderRaw⁔(/*this*/ ж<PkgEncoder> Ꮡpw, SectionKind k) {
+public static ж<Encoder> NewEncoderRaw(this ж<PkgEncoder> Ꮡpw, SectionKind k) {
     ref var pw = ref Ꮡpw.DerefOrNull();
 
     ref var idx = ref heap<RelElemIdx>((RelElemIdx)(int32)len(pw.elems[k]), out var Ꮡidx);
@@ -151,6 +158,8 @@ internal static ж<Encoder> NewEncoderRaw⁔(/*this*/ ж<PkgEncoder> Ꮡpw, Sect
         Idx: idx
     ));
 }
+
+} partial class pkgbits_package {
 
 // An Encoder provides methods for encoding an individual element's
 // bitstream data.
@@ -164,8 +173,10 @@ partial struct Encoder {
     public RelElemIdx Idx; // index within relocation section
 }
 
+} partial class pkgbitsᴛEncoder {
+
 // Flush finalizes the element's bitstream and returns its [RelElemIdx].
-internal static RelElemIdx Flush⁔(/*this*/ ж<Encoder> Ꮡw) {
+public static RelElemIdx Flush(this ж<Encoder> Ꮡw) {
     ref var w = ref Ꮡw.DerefOrNull();
 
     ref var sb = ref heap(new strings.Builder(), out var Ꮡsb);
@@ -196,20 +207,20 @@ internal static RelElemIdx Flush⁔(/*this*/ ж<Encoder> Ꮡw) {
     return w.Idx;
 }
 
-internal static void checkErr⁔(/*this*/ ref Encoder w, error err) {
+internal static void checkErr(this ref Encoder w, error err) {
     if (err != nil) {
         panicf("unexpected encoding error: %v", err);
     }
 }
 
-internal static void rawUvarint⁔(/*this*/ ref Encoder w, uint64 x) {
+internal static void rawUvarint(this ref Encoder w, uint64 x) {
     array<byte> buf = new(10); /* binary.MaxVarintLen64 */
     nint n = binary.PutUvarint(buf[..], x);
     var (_, err) = w.Data.Write(buf.slice(0, n));
     w.checkErr(err);
 }
 
-internal static void rawVarint⁔(/*this*/ ref Encoder w, int64 x) {
+internal static void rawVarint(this ref Encoder w, int64 x) {
     // Zig-zag encode.
     var ux = (uint64)x << 1;
     if (x < 0) {
@@ -219,7 +230,7 @@ internal static void rawVarint⁔(/*this*/ ref Encoder w, int64 x) {
     w.rawUvarint(ux);
 }
 
-internal static nint rawReloc⁔(/*this*/ ref Encoder w, SectionKind k, RelElemIdx idx) {
+internal static nint rawReloc(this ref Encoder w, SectionKind k, RelElemIdx idx) {
     var e = new RefTableEntry(k, idx);
     if (w.RelocMap != nil) {
         var (iΔ1, ok) = w.RelocMap[e, ꟷ]; if (ok) {
@@ -235,7 +246,7 @@ internal static nint rawReloc⁔(/*this*/ ref Encoder w, SectionKind k, RelElemI
     return i;
 }
 
-internal static partial void Sync⁔(/*this*/ ref Encoder w, SyncMarker m) {
+public static partial void Sync(this ref Encoder w, SyncMarker m) {
     if (!w.p.SyncMarkers()) {
         return;
     }
@@ -273,7 +284,7 @@ internal static partial void Sync⁔(/*this*/ ref Encoder w, SyncMarker m) {
 //	}
 //
 // For multi-alternative encodings, use Code instead.
-internal static bool Bool⁔(/*this*/ ref Encoder w, bool b) {
+public static bool Bool(this ref Encoder w, bool b) {
     w.Sync(SyncBool);
     byte x = default;
     if (b) {
@@ -285,28 +296,28 @@ internal static bool Bool⁔(/*this*/ ref Encoder w, bool b) {
 }
 
 // Int64 encodes and writes an int64 value into the element bitstream.
-internal static void Int64⁔(/*this*/ ref Encoder w, int64 x) {
+public static void Int64(this ref Encoder w, int64 x) {
     w.Sync(SyncInt64);
     w.rawVarint(x);
 }
 
 // Uint64 encodes and writes a uint64 value into the element bitstream.
-internal static void Uint64⁔(/*this*/ ref Encoder w, uint64 x) {
+public static void Uint64(this ref Encoder w, uint64 x) {
     w.Sync(SyncUint64);
     w.rawUvarint(x);
 }
 
 // Len encodes and writes a non-negative int value into the element bitstream.
-internal static void Len⁔(/*this*/ ref Encoder w, nint x) {
+public static void Len(this ref Encoder w, nint x) {
     assert(x >= 0);
     w.Uint64((uint64)x);
 }
 
 // Int encodes and writes an int value into the element bitstream.
-internal static void Int⁔(/*this*/ ref Encoder w, nint x) { w.Int64((int64)x); }
+public static void Int(this ref Encoder w, nint x) { w.Int64((int64)x); }
 
 // Uint encodes and writes a uint value into the element bitstream.
-internal static void Uint⁔(/*this*/ ref Encoder w, nuint x) { w.Uint64((uint64)x); }
+public static void Uint(this ref Encoder w, nuint x) { w.Uint64((uint64)x); }
 
 // Reloc encodes and writes a relocation for the given (section,
 // index) pair into the element bitstream.
@@ -314,13 +325,13 @@ internal static void Uint⁔(/*this*/ ref Encoder w, nuint x) { w.Uint64((uint64
 // Note: Only the index is formally written into the element
 // bitstream, so bitstream decoders must know from context which
 // section an encoded relocation refers to.
-internal static void Reloc⁔(/*this*/ ref Encoder w, SectionKind k, RelElemIdx idx) {
+public static void Reloc(this ref Encoder w, SectionKind k, RelElemIdx idx) {
     w.Sync(SyncUseReloc);
     w.Len(w.rawReloc(k, idx));
 }
 
 // Code encodes and writes a Code value into the element bitstream.
-internal static void Code⁔(/*this*/ ref Encoder w, Code c) {
+public static void Code(this ref Encoder w, Code c) {
     w.Sync(c.Marker());
     w.Len(c.Value());
 }
@@ -331,20 +342,20 @@ internal static void Code⁔(/*this*/ ref Encoder w, Code c) {
 // Internally, strings are deduplicated by adding them to the strings
 // section (if not already present), and then writing a relocation
 // into the element bitstream.
-internal static void String⁔(/*this*/ ref Encoder w, @string s) {
+public static void String(this ref Encoder w, @string s) {
     w.StringRef(w.p.StringIdx(s));
 }
 
 // StringRef writes a reference to the given index, which must be a
 // previously encoded string value.
-internal static void StringRef⁔(/*this*/ ref Encoder w, RelElemIdx idx) {
+public static void StringRef(this ref Encoder w, RelElemIdx idx) {
     w.Sync(SyncString);
     w.Reloc(SectionString, idx);
 }
 
 // Strings encodes and writes a variable-length slice of strings into
 // the element bitstream.
-internal static void Strings⁔(/*this*/ ref Encoder w, slice<@string> ss) {
+public static void Strings(this ref Encoder w, slice<@string> ss) {
     w.Len(len(ss));
     foreach (var (_, s) in range(ss)) {
         w.String(s);
@@ -353,7 +364,7 @@ internal static void Strings⁔(/*this*/ ref Encoder w, slice<@string> ss) {
 
 // Value encodes and writes a constant.Value into the element
 // bitstream.
-internal static void Value⁔(/*this*/ ref Encoder w, constant.Value val) {
+public static void Value(this ref Encoder w, constant.Value val) {
     w.Sync(SyncValue);
     if (w.Bool(val.Kind() == constant.Complex)) {
         w.scalar(constant.Real(val));
@@ -363,7 +374,7 @@ internal static void Value⁔(/*this*/ ref Encoder w, constant.Value val) {
     }
 }
 
-internal static void scalar⁔(/*this*/ ref Encoder w, constant.Value val) {
+internal static void scalar(this ref Encoder w, constant.Value val) {
     var switchᴛ1 = constant.Val(val);
     switch (switchᴛ1.type()) {
     default: {
@@ -404,7 +415,7 @@ internal static void scalar⁔(/*this*/ ref Encoder w, constant.Value val) {
     }}
 }
 
-internal static void bigInt⁔(/*this*/ ref Encoder w, ж<big.Int> Ꮡv) {
+internal static void bigInt(this ref Encoder w, ж<big.Int> Ꮡv) {
     ref var v = ref Ꮡv.DerefOrNull();
 
     var b = v.Bytes();
@@ -412,12 +423,12 @@ internal static void bigInt⁔(/*this*/ ref Encoder w, ж<big.Int> Ꮡv) {
     w.Bool(v.Sign() < 0);
 }
 
-internal static void bigFloat⁔(/*this*/ ref Encoder w, ж<big.Float> v) {
+internal static void bigFloat(this ref Encoder w, ж<big.Float> v) {
     var b = v.Append(default, (byte)'p', -1);
     w.String((@string)b); // TODO: More efficient encoding.
 }
 
 // Version reports the version of the bitstream.
-internal static Version Version⁔(/*this*/ ref Encoder w) { return w.p.version; }
+public static Version Version(this ref Encoder w) { return w.p.version; }
 
-} // end pkgbits_package
+}

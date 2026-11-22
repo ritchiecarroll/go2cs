@@ -7,17 +7,20 @@ using utf8 = go.unicode.utf8_package;
 using transform = go.vendor.golang.org.x.text.transform_package;
 using go.unicode;
 using go.vendor.golang.org.x.text;
+using static norm_package;
 
 partial class norm_package {
 
+} partial class normᴛForm {
+
 // Reset implements the Reset method of the transform.Transformer interface.
-internal static void Reset⁔(/*this*/ Form _) { }
+public static void Reset(this Form _) { }
 
 // Transform implements the Transform method of the transform.Transformer
 // interface. It may need to write segments of up to MaxSegmentSize at once.
 // Users should either catch ErrShortDst and allow dst to grow or have dst be at
 // least of size MaxTransformChunkSize to be guaranteed of progress.
-internal static (nint nDst, nint nSrc, error err) Transform⁔(/*this*/ Form f, slice<byte> dst, slice<byte> src, bool atEOF) {
+public static (nint nDst, nint nSrc, error err) Transform(this Form f, slice<byte> dst, slice<byte> src, bool atEOF) {
     nint nDst = default;
     nint nSrc = default;
     error err = default;
@@ -26,7 +29,7 @@ internal static (nint nDst, nint nSrc, error err) Transform⁔(/*this*/ Form f, 
     var b = src;
     var eof = atEOF;
     nint ns = len(dst); if (ns < len(b)) {
-        err = transform.ErrShortDst;
+        err = go.vendor.golang.org.x.text.transform_package.ErrShortDst;
         eof = false;
         b = b.slice(0, ns);
     }
@@ -38,10 +41,12 @@ internal static (nint nDst, nint nSrc, error err) Transform⁔(/*this*/ Form f, 
     }
 
     if (err == nil && n < len(src) && !atEOF) {
-        err = transform.ErrShortSrc;
+        err = go.vendor.golang.org.x.text.transform_package.ErrShortSrc;
     }
     return (n, n, err);
 }
+
+} partial class norm_package {
 
 internal static bool flushTransform(ж<reorderBuffer> Ꮡrb) {
     ref var rb = ref Ꮡrb.DerefOrNull();
@@ -56,9 +61,11 @@ internal static bool flushTransform(ж<reorderBuffer> Ꮡrb) {
 
 internal static slice<error> errs = [default, transform.ErrShortDst, transform.ErrShortSrc];
 
+} partial class normᴛForm {
+
 // transform implements the transform.Transformer interface. It is only called
 // when quickSpan does not pass for a given string.
-internal static (nint nDst, nint nSrc, error err) transform⁔(/*this*/ Form f, slice<byte> dst, slice<byte> src, bool atEOF) {
+internal static (nint nDst, nint nSrc, error err) transform(this Form f, slice<byte> dst, slice<byte> src, bool atEOF) {
     nint nDst = default;
     nint nSrc = default;
     error err = default;
@@ -80,7 +87,7 @@ internal static (nint nDst, nint nSrc, error err) transform⁔(/*this*/ Form f, 
         end = rb.nsrc;
         var eof = atEOF;
         nint nΔ1 = nSrc + len(dst) - nDst; if (nΔ1 < end) {
-            err = transform.ErrShortDst;
+            err = go.vendor.golang.org.x.text.transform_package.ErrShortDst;
             end = nΔ1;
             eof = false;
         }
@@ -90,11 +97,11 @@ internal static (nint nDst, nint nSrc, error err) transform⁔(/*this*/ Form f, 
         nDst += n;
         if (ok) {
             if (err == nil && n < rb.nsrc && !atEOF) {
-                err = transform.ErrShortSrc;
+                err = go.vendor.golang.org.x.text.transform_package.ErrShortSrc;
             }
             return (nDst, nSrc, err);
         }
     }
 }
 
-} // end norm_package
+}

@@ -13,6 +13,7 @@ using bits = go.math.bits_package;
 using strconv = strconv_package;
 using sync = sync_package;
 using go.math;
+using static flate_package;
 
 partial class flate_package {
 
@@ -33,14 +34,22 @@ internal static ref huffmanDecoder fixedHuffmanDecoder => ref ((StaticBox<huffma
 // A CorruptInputError reports the presence of corrupt input at a given offset.
 partial struct CorruptInputError /*num:int64*/;
 
-internal static @string Error⁔(/*this*/ CorruptInputError e) {
+} partial class flateᴛCorruptInputError {
+
+public static @string Error(this CorruptInputError e) {
     return "flate: corrupt input before offset "u8 + strconv.FormatInt((int64)e, 10);
 }
+
+} partial class flate_package {
 
 // An InternalError reports an error in the flate code itself.
 partial struct InternalError /*@string*/;
 
-internal static @string Error⁔(/*this*/ InternalError e) { return "flate: internal error: "u8 + ((@string)e); }
+} partial class flateᴛInternalError {
+
+public static @string Error(this InternalError e) { return "flate: internal error: "u8 + ((@string)e); }
+
+} partial class flate_package {
 
 // A ReadError reports an error encountered while reading input.
 //
@@ -50,9 +59,13 @@ partial struct ReadError {
     public error Err;    // error returned by underlying Read
 }
 
-internal static @string Error⁔(/*this*/ ref ReadError e) {
+} partial class flateᴛReadError {
+
+public static @string Error(this ref ReadError e) {
     return "flate: read error at offset "u8 + strconv.FormatInt(e.Offset, 10) + ": "u8 + e.Err.Error();
 }
+
+} partial class flate_package {
 
 // A WriteError reports an error encountered while writing output.
 //
@@ -62,9 +75,13 @@ partial struct WriteError {
     public error Err;    // error returned by underlying Write
 }
 
-internal static @string Error⁔(/*this*/ ref WriteError e) {
+} partial class flateᴛWriteError {
+
+public static @string Error(this ref WriteError e) {
     return "flate: write error at offset "u8 + strconv.FormatInt(e.Offset, 10) + ": "u8 + e.Err.Error();
 }
+
+} partial class flate_package {
 
 // Resetter resets a ReadCloser returned by [NewReader] or [NewReaderDict]
 // to switch to a new underlying [Reader]. This permits reusing a ReadCloser
@@ -105,12 +122,14 @@ partial struct huffmanDecoder {
     internal uint32 linkMask;                              // mask the width of the link table
 }
 
+} partial class flateᴛhuffmanDecoder {
+
 // Initialize Huffman decoding tables from array of code lengths.
 // Following this function, h is guaranteed to be initialized into a complete
 // tree (i.e., neither over-subscribed nor under-subscribed). The exception is a
 // degenerate case where the tree has only a single symbol with length 1. Empty
 // trees are permitted.
-internal static bool init⁔(/*this*/ ref huffmanDecoder h, slice<nint> lengths) {
+internal static bool init(this ref huffmanDecoder h, slice<nint> lengths) {
     // Sanity enables additional runtime tests during Huffman
     // table construction. It's intended to be used during
     // development to supplement the currently ad-hoc unit tests.
@@ -253,6 +272,8 @@ internal static bool init⁔(/*this*/ ref huffmanDecoder h, slice<nint> lengths)
     return true;
 }
 
+} partial class flate_package {
+
 // The actual read interface needed by [NewReader].
 // If the passed in [io.Reader] does not also have ReadByte,
 // the [NewReader] will introduce its own buffering.
@@ -292,7 +313,9 @@ partial struct decompressor {
     internal nint copyDist;
 }
 
-internal static void nextBlock⁔(/*this*/ ж<decompressor> Ꮡf) {
+} partial class flateᴛdecompressor {
+
+internal static void nextBlock(this ж<decompressor> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     while (f.nb < 1 + 2) {
@@ -334,7 +357,7 @@ internal static void nextBlock⁔(/*this*/ ж<decompressor> Ꮡf) {
     }}
 }
 
-internal static (nint, error) Read⁔(/*this*/ ж<decompressor> Ꮡf, slice<byte> b) {
+internal static (nint, error) Read(this ж<decompressor> Ꮡf, slice<byte> b) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     for (;;) {
@@ -356,22 +379,26 @@ internal static (nint, error) Read⁔(/*this*/ ж<decompressor> Ꮡf, slice<byte
     }
 }
 
-internal static error Close⁔(/*this*/ ref decompressor f) {
+internal static error Close(this ref decompressor f) {
     if (AreEqual(f.err, io.EOF)) {
         return default;
     }
     return f.err;
 }
 
+} partial class flate_package {
+
 // RFC 1951 section 3.2.7.
 // Compression with dynamic Huffman codes
 [GoLazy] partial class lazyᴛcodeOrder { internal static array<nint> codeOrder = array<nint>([16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15]); }
+
+} partial class flateᴛdecompressor {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string unexpectedLengthCodeˢ => ref unexpectedLengthCodeˢᵇ;
 private static readonly @string unexpectedLengthCodeˢᵇ = "unexpected length code"u8;
 
-internal static error readHuffman⁔(/*this*/ ж<decompressor> Ꮡf) {
+internal static error readHuffman(this ж<decompressor> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     // HLIT[5], HDIST[5], HCLEN[4].
@@ -491,7 +518,7 @@ internal static error readHuffman⁔(/*this*/ ж<decompressor> Ꮡf) {
 // hl and hd are the Huffman states for the lit/length values
 // and the distance values, respectively. If hd == nil, using the
 // fixed distance encoding associated with fixed Huffman blocks.
-internal static void huffmanBlock⁔(/*this*/ ref decompressor f) {
+internal static void huffmanBlock(this ref decompressor f) {
     const nint stateInit = iota; // Zero value must be stateInit
     const nint stateDict = 1;
 
@@ -657,7 +684,7 @@ copyHistory:
 }
 
 // Copy a single uncompressed data block from input to output.
-internal static void dataBlock⁔(/*this*/ ref decompressor f) {
+internal static void dataBlock(this ref decompressor f) {
     // Uncompressed.
     // Discard current half-byte.
     f.nb = 0;
@@ -689,7 +716,7 @@ internal static void dataBlock⁔(/*this*/ ref decompressor f) {
 
 // copyData copies f.copyLen bytes from the underlying reader into f.hist.
 // It pauses for reads when f.hist is full.
-internal static void copyData⁔(/*this*/ ref decompressor f) {
+internal static void copyData(this ref decompressor f) {
     var buf = f.dict.writeSlice();
     if (len(buf) > f.copyLen) {
         buf = buf.slice(0, f.copyLen);
@@ -712,15 +739,17 @@ internal static void copyData⁔(/*this*/ ref decompressor f) {
     f.finishBlock();
 }
 
-internal static void finishBlock⁔(/*this*/ ref decompressor f) {
+internal static void finishBlock(this ref decompressor f) {
     if (f.final) {
         if (f.dict.availRead() > 0) {
             f.toRead = f.dict.readFlush();
         }
         f.err = io.EOF;
     }
-    f.step = ((Action<ж<decompressor>>)(flate_package.nextBlock⁔));
+    f.step = ((Action<ж<decompressor>>)(flateᴛdecompressor.nextBlock));
 }
+
+} partial class flate_package {
 
 // noEOF returns err, unless err == io.EOF, in which case it returns io.ErrUnexpectedEOF.
 internal static error noEOF(error e) {
@@ -730,7 +759,9 @@ internal static error noEOF(error e) {
     return e;
 }
 
-internal static error moreBits⁔(/*this*/ ref decompressor f) {
+} partial class flateᴛdecompressor {
+
+internal static error moreBits(this ref decompressor f) {
     var (c, err) = f.r.ReadByte();
     if (err != nil) {
         return noEOF(err);
@@ -742,7 +773,7 @@ internal static error moreBits⁔(/*this*/ ref decompressor f) {
 }
 
 // Read the next Huffman-encoded symbol from f according to h.
-internal static (nint, error) huffSym⁔(/*this*/ ref decompressor f, ж<huffmanDecoder> Ꮡh) {
+internal static (nint, error) huffSym(this ref decompressor f, ж<huffmanDecoder> Ꮡh) {
     ref var h = ref Ꮡh.DerefOrNull();
 
     // Since a huffmanDecoder can be empty or be composed of a degenerate tree
@@ -787,7 +818,7 @@ internal static (nint, error) huffSym⁔(/*this*/ ref decompressor f, ж<huffman
     }
 }
 
-internal static void makeReader⁔(/*this*/ ref decompressor f, io.Reader r) {
+internal static void makeReader(this ref decompressor f, io.Reader r) {
     var (rr, ok) = r._<Reader>(ᐧ); if (ok) {
         f.rBuf = default;
         f.r = rr;
@@ -802,6 +833,8 @@ internal static void makeReader⁔(/*this*/ ref decompressor f, io.Reader r) {
     }
     f.r = new bufio_ReaderжReader(f.rBuf);
 }
+
+} partial class flate_package {
 
 internal static void fixedHuffmanDecoderInit() {
     ᏑfixedOnce.Do(() => {
@@ -823,18 +856,22 @@ internal static void fixedHuffmanDecoderInit() {
     });
 }
 
-internal static error Reset⁔(/*this*/ ref decompressor f, io.Reader r, slice<byte> dict) {
+} partial class flateᴛdecompressor {
+
+internal static error Reset(this ref decompressor f, io.Reader r, slice<byte> dict) {
     f.AssignFrom(new decompressor(
         rBuf: f.rBuf,
         bits: f.bits,
         codebits: f.codebits,
         dict: f.dict,
-        step: ((Action<ж<decompressor>>)(flate_package.nextBlock⁔))
+        step: ((Action<ж<decompressor>>)(flateᴛdecompressor.nextBlock))
     ));
     f.makeReader(r);
     f.dict.init(maxMatchOffset, dict);
     return default;
 }
+
+} partial class flate_package {
 
 // NewReader returns a new ReadCloser that can be used
 // to read the uncompressed version of r.
@@ -851,7 +888,7 @@ public static io.ReadCloser NewReader(io.Reader r) {
     f.makeReader(r);
     f.bits = Ꮡ(new array<nint>(316));
     f.codebits = Ꮡ(new array<nint>(19));
-    f.step = ((Action<ж<decompressor>>)(flate_package.nextBlock⁔));
+    f.step = ((Action<ж<decompressor>>)(flateᴛdecompressor.nextBlock));
     f.dict.init(maxMatchOffset, default);
     return new decompressorжReadCloser(Ꮡf);
 }
@@ -870,7 +907,7 @@ public static io.ReadCloser NewReaderDict(io.Reader r, slice<byte> dict) {
     f.makeReader(r);
     f.bits = Ꮡ(new array<nint>(316));
     f.codebits = Ꮡ(new array<nint>(19));
-    f.step = ((Action<ж<decompressor>>)(flate_package.nextBlock⁔));
+    f.step = ((Action<ж<decompressor>>)(flateᴛdecompressor.nextBlock));
     f.dict.init(maxMatchOffset, dict);
     return new decompressorжReadCloser(Ꮡf);
 }

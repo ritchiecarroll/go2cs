@@ -5,6 +5,8 @@
 // license that can be found in the LICENSE file.
 namespace go.go;
 
+using static types_package;
+
 partial class types_package {
 
 // A Chan represents a channel type.
@@ -26,13 +28,15 @@ public static ж<Chan> NewChan(ChanDir dir, Type elem) {
     return Ꮡ(new Chan(dir: dir, elem: elem));
 }
 
+} partial class typesᴛChan {
+
 // Dir returns the direction of channel c.
-internal static ChanDir Dir⁔(/*this*/ ref Chan c) { return c.dir; }
+public static ChanDir Dir(this ref Chan c) { return c.dir; }
 
 // Elem returns the element type of channel c.
-internal static Type Elem⁔(/*this*/ ref Chan c) { return c.elem; }
+public static Type Elem(this ref Chan c) { return c.elem; }
 
-internal static Type Underlying⁔(/*this*/ ж<Chan> Ꮡc) { return new ChanжType(Ꮡc); }
-internal static @string String⁔(/*this*/ ж<Chan> Ꮡc) { return TypeString(new ChanжType(Ꮡc), default); }
+public static Type Underlying(this ж<Chan> Ꮡc) { return new ChanжType(Ꮡc); }
+public static @string String(this ж<Chan> Ꮡc) { return TypeString(new ChanжType(Ꮡc), default); }
 
-} // end types_package
+}

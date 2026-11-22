@@ -3,6 +3,8 @@ global using Alias2 = go.go.instlib_package.Pair<go.@string>;
 
 namespace go.go;
 
+using static instlib_package;
+
 partial class instlib_package {
 
 partial struct Pair<T> {
@@ -10,7 +12,11 @@ partial struct Pair<T> {
     public nint B;
 }
 
-internal static T First⁔<T>(/*this*/ Pair<T> p) { return p.A; }
+} partial class instlibᴛPair {
+
+public static T First<T>(this Pair<T> p) { return p.A; }
+
+} partial class instlib_package {
 
 partial struct Q /*Pair<nint>*/;
 

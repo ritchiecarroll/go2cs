@@ -12,12 +12,13 @@ using strconv = strconv_package;
 using strings = strings_package;
 using global::go.go;
 using ꓸꓸꓸany = Span<any>;
+using types = types_package;
+using static types_package;
 
 partial class types_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string nilˢ => ref nilˢᵇ;
-private static readonly @string nilˢᵇ = "<nil>"u8;
+internal static readonly object nilˢ = (@string)"<nil>"u8;
 
 internal static @string sprintf(ж<token.FileSet> fset, Func<ж<Package>, @string> qf, bool tpSubscripts, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
@@ -116,8 +117,10 @@ internal static @string sprintf(ж<token.FileSet> fset, Func<ж<Package>, @strin
     return fmt.Sprintf(format, args.ꓸꓸꓸ);
 }
 
+} partial class typesᴛChecker {
+
 // check may be nil.
-internal static @string sprintf⁔(/*this*/ ж<Checker> Ꮡcheck, @string format, params ꓸꓸꓸany argsʗp) {
+internal static @string sprintf(this ж<Checker> Ꮡcheck, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
     ref var check = ref Ꮡcheck.DerefOrNull();
 
@@ -127,10 +130,10 @@ internal static @string sprintf⁔(/*this*/ ж<Checker> Ꮡcheck, @string format
         fset = check.fset;
         qf = (ж<Package> p1) => Ꮡcheck.qualifier(p1);
     }
-    return sprintf(fset, qf, false, format, args.ꓸꓸꓸ);
+    return types.sprintf(fset, qf, false, format, args.ꓸꓸꓸ);
 }
 
-internal static void trace⁔(/*this*/ ж<Checker> Ꮡcheck, token.Pos pos, @string format, params ꓸꓸꓸany argsʗp) {
+internal static void trace(this ж<Checker> Ꮡcheck, token.Pos pos, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
     ref var check = ref Ꮡcheck.DerefOrNull();
 
@@ -144,8 +147,10 @@ internal static void trace⁔(/*this*/ ж<Checker> Ꮡcheck, token.Pos pos, @str
         pos1,
         pad,
         strings.Repeat(".  ", check.indent),
-        sprintf(check.fset, new Func<ж<Package>, @string>(Ꮡcheck.qualifier), true, format, args.ꓸꓸꓸ));
+        types.sprintf(check.fset, new Func<ж<Package>, @string>(Ꮡcheck.qualifier), true, format, args.ꓸꓸꓸ));
 }
+
+} partial class types_package {
 
 // ndigits returns the number of decimal digits in x.
 // For x < 10, the result is always 1.
@@ -163,15 +168,17 @@ internal static nint ndigits(nint x) {
     }}
 }
 
+} partial class typesᴛChecker {
+
 // dump is only needed for debugging
-internal static void dump⁔(/*this*/ ж<Checker> Ꮡcheck, @string format, params ꓸꓸꓸany argsʗp) {
+internal static void dump(this ж<Checker> Ꮡcheck, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
     ref var check = ref Ꮡcheck.DerefOrNull();
 
-    fmt.Println(sprintf(check.fset, new Func<ж<Package>, @string>(Ꮡcheck.qualifier), true, format, args.ꓸꓸꓸ));
+    fmt.Println(types.sprintf(check.fset, new Func<ж<Package>, @string>(Ꮡcheck.qualifier), true, format, args.ꓸꓸꓸ));
 }
 
-internal static @string qualifier⁔(/*this*/ ref Checker check, ж<Package> Ꮡpkg) {
+internal static @string qualifier(this ref Checker check, ж<Package> Ꮡpkg) {
     ref var pkg = ref Ꮡpkg.DerefOrNull();
 
     // Qualify the package unless it's the package being type-checked.
@@ -192,7 +199,7 @@ internal static @string qualifier⁔(/*this*/ ref Checker check, ж<Package> Ꮡ
 
 // markImports recursively walks pkg and its imports, to record unique import
 // paths in pkgPathMap.
-internal static void markImports⁔(/*this*/ ref Checker check, ж<Package> Ꮡpkg) {
+internal static void markImports(this ref Checker check, ж<Package> Ꮡpkg) {
     ref var pkg = ref Ꮡpkg.DerefOrNull();
 
     if (check.seenPkgMap[Ꮡpkg]) {
@@ -211,6 +218,8 @@ internal static void markImports⁔(/*this*/ ref Checker check, ж<Package> Ꮡp
         check.markImports(imp);
     }
 }
+
+} partial class types_package {
 
 // stripAnnotations removes internal (type) annotations from s.
 internal static @string stripAnnotations(@string s) {

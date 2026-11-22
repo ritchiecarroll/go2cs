@@ -10,6 +10,7 @@ using sync = sync_package;
 using atomic = go.sync.atomic_package;
 using go.net;
 using go.sync;
+using static http_package;
 
 partial class http_package {
 
@@ -46,6 +47,8 @@ public static ж<CrossOriginProtection> NewCrossOriginProtection() {
     return Ꮡ(new CrossOriginProtection());
 }
 
+} partial class httpᴛCrossOriginProtection {
+
 // AddTrustedOrigin allows all requests with an [Origin] header
 // which exactly matches the given value.
 //
@@ -55,7 +58,7 @@ public static ж<CrossOriginProtection> NewCrossOriginProtection() {
 // or request handling, and applies to future requests.
 //
 // [Origin]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Origin
-internal static error AddTrustedOrigin⁔(/*this*/ ж<CrossOriginProtection> Ꮡc, @string origin) {
+public static error AddTrustedOrigin(this ж<CrossOriginProtection> Ꮡc, @string origin) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -86,12 +89,20 @@ internal static error AddTrustedOrigin⁔(/*this*/ ж<CrossOriginProtection> Ꮡ
     finally { if (ᒐd1) Ꮡc.ᏑtrustedMu.Unlock(); ᒐ.Run(); }
 }
 
+} partial class http_package {
+
 partial struct noopHandler {
 }
 
-internal static void ServeHTTP⁔(/*this*/ noopHandler _Δp0, ResponseWriter _Δp1, ж<Request> _Δp2) { }
+} partial class httpᴛnoopHandler {
+
+internal static void ServeHTTP(this noopHandler _Δp0, ResponseWriter _Δp1, ж<Request> _Δp2) { }
+
+} partial class http_package {
 
 internal static Handler sentinelHandler = new noopHandlerжHandler(Ꮡ(new noopHandler()));
+
+} partial class httpᴛCrossOriginProtection {
 
 // AddInsecureBypassPattern permits all requests that match the given pattern.
 //
@@ -106,7 +117,7 @@ internal static Handler sentinelHandler = new noopHandlerжHandler(Ꮡ(new noopH
 //
 // AddInsecureBypassPattern can be called concurrently with other methods or
 // request handling, and applies to future requests.
-internal static void AddInsecureBypassPattern⁔(/*this*/ ж<CrossOriginProtection> Ꮡc, @string pattern) {
+public static void AddInsecureBypassPattern(this ж<CrossOriginProtection> Ꮡc, @string pattern) {
     ж<ServeMux> bypass = default;
 
     // Lazily initialize c.bypass
@@ -131,7 +142,7 @@ internal static void AddInsecureBypassPattern⁔(/*this*/ ж<CrossOriginProtecti
 // or request handling, and applies to future requests.
 //
 // Check does not call the error handler.
-internal static void SetDenyHandler⁔(/*this*/ ж<CrossOriginProtection> Ꮡc, Handler hʗp) {
+public static void SetDenyHandler(this ж<CrossOriginProtection> Ꮡc, Handler hʗp) {
     ref var h = ref heap(hʗp, out var Ꮡh);
 
     if (h == nil) {
@@ -149,7 +160,7 @@ private static readonly @string originˢᵇ = "Origin"u8;
 
 // Check applies cross-origin checks to a request.
 // It returns an error if the request should be rejected.
-internal static error Check⁔(/*this*/ ж<CrossOriginProtection> Ꮡc, ж<Request> Ꮡreq) {
+public static error Check(this ж<CrossOriginProtection> Ꮡc, ж<Request> Ꮡreq) {
     ref var req = ref Ꮡreq.DerefOrNull();
 
     var exprᴛ1 = req.Method;
@@ -199,12 +210,16 @@ internal static error Check⁔(/*this*/ ж<CrossOriginProtection> Ꮡc, ж<Reque
     return errCrossOriginRequestFromOldBrowser;
 }
 
+} partial class http_package {
+
 internal static error errCrossOriginRequest = errors.New("cross-origin request detected from Sec-Fetch-Site header");
 internal static error errCrossOriginRequestFromOldBrowser = errors.New("cross-origin request detected, and/or browser is out of date: "u8 + "Sec-Fetch-Site is missing, and Origin does not match Host"u8);
 
+} partial class httpᴛCrossOriginProtection {
+
 // isRequestExempt checks the bypasses which require taking a lock, and should
 // be deferred until the last moment.
-internal static bool isRequestExempt⁔(/*this*/ ж<CrossOriginProtection> Ꮡc, ж<Request> Ꮡreq) {
+internal static bool isRequestExempt(this ж<CrossOriginProtection> Ꮡc, ж<Request> Ꮡreq) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -234,7 +249,7 @@ internal static bool isRequestExempt⁔(/*this*/ ж<CrossOriginProtection> Ꮡc,
 // If a request fails cross-origin checks, the request is rejected
 // with a 403 Forbidden status or handled with the handler passed
 // to [CrossOriginProtection.SetDenyHandler].
-internal static Handler Handler⁔(/*this*/ ж<CrossOriginProtection> Ꮡc, Handler h) {
+public static Handler Handler(this ж<CrossOriginProtection> Ꮡc, Handler h) {
     return new HandlerFuncᴠHandler(new HandlerFunc((ResponseWriter w, ж<Request> r) => {
         var err = Ꮡc.Check(r); if (err != nil) {
             var deny = Ꮡc.Ꮡdeny.Load(); if (deny != nil) {
@@ -248,4 +263,4 @@ internal static Handler Handler⁔(/*this*/ ж<CrossOriginProtection> Ꮡc, Hand
     }));
 }
 
-} // end http_package
+}

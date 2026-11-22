@@ -19,6 +19,7 @@ namespace go;
 using sys = @internal.runtime.sys_package;
 using @unsafe = unsafe_package;
 using @internal.runtime;
+using static runtime_package;
 
 partial class runtime_package {
 
@@ -137,7 +138,9 @@ internal static void xRegRestore(ж<g> Ꮡgp) {
     gp.xRegs.state = default;
 }
 
-internal static void free⁔(/*this*/ ref xRegPerP xRegs) {
+} partial class runtimeᴛxRegPerP {
+
+internal static void free(this ref xRegPerP xRegs) {
     if (xRegs.cache != nil) {
         @lock(ᏑxRegAlloc.of(xRegAllocᴛ1.Ꮡlock));
         ᏑxRegAlloc.of(xRegAllocᴛ1.Ꮡalloc).free(@unsafe.Pointer.FromPinnedBox(xRegs.cache));
@@ -146,4 +149,4 @@ internal static void free⁔(/*this*/ ref xRegPerP xRegs) {
     }
 }
 
-} // end runtime_package
+}

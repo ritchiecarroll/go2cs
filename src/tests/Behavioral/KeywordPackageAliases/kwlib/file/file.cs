@@ -1,11 +1,15 @@
 namespace go.go.kwlib;
 
+using static file_package;
+
 partial class file_package {
 
 public static @string Name() { return "file"; }
 
 partial struct Kind /*num:nint*/;
 
-internal static Kind Double⁔(/*this*/ Kind k) { return k * 2; }
+} partial class fileᴛKind {
 
-} // end file_package
+public static Kind Double(this Kind k) { return k * 2; }
+
+}

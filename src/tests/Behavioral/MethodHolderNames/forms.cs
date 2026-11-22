@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -19,11 +20,13 @@ partial struct Chest {
     internal slice<Tag> tags;
 }
 
-internal static Tag Tag⁔(/*this*/ ref Chest c) { return c.tag; }
+} partial class mainᴛChest {
 
-internal static ж<nint> Seal⁔(/*this*/ ж<Chest> Ꮡc) { return Ꮡc.Ꮡtag.Ꮡinner.Ꮡn; }
+public static Tag Tag(this ref Chest c) { return c.tag; }
 
-internal static @string Forms⁔(/*this*/ ж<Chest> Ꮡc, any v) {
+public static ж<nint> Seal(this ж<Chest> Ꮡc) { return Ꮡc.Ꮡtag.Ꮡinner.Ꮡn; }
+
+public static @string Forms(this ж<Chest> Ꮡc, any v) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     var lit = new Tag(id: 1, Value: 2);
@@ -38,7 +41,7 @@ internal static @string Forms⁔(/*this*/ ж<Chest> Ꮡc, any v) {
     var fresh = @new<Tag>();
     fresh.Value.Value = 9;
 
-    var valueAddr = ptr.of(Tag.ᏑValue);
+    var valueAddr = ptr.of(main_package.Tag.ᏑValue);
     valueAddr.Value += 4;
 
     var idAddr = Ꮡc.Ꮡtag.Ꮡid;
@@ -50,7 +53,7 @@ internal static @string Forms⁔(/*this*/ ж<Chest> Ꮡc, any v) {
     @string kind = "other";
 
     switch (v.type()) {
-    case Tag: {
+    case Tag _: {
         kind = "tag";
         break;
     }
@@ -64,6 +67,8 @@ internal static @string Forms⁔(/*this*/ ж<Chest> Ꮡc, any v) {
 
     return fmt.Sprint(lit.id, (~ptr).Value, zero.id, count, (~fresh).Value, c.tag.id, isTag, isPtr, kind, Ꮡc.Seal().Value);
 }
+
+} partial class main_package {
 
 internal static T pick<T>(slice<T> s, nint i) { return s[i]; }
 

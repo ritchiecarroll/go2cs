@@ -4,6 +4,7 @@
 namespace go.crypto;
 
 using io = io_package;
+using static cipher_package;
 
 partial class cipher_package {
 
@@ -17,7 +18,9 @@ partial struct StreamReader {
     public io.Reader R;
 }
 
-internal static (nint n, error err) Read⁔(/*this*/ StreamReader r, slice<byte> dst) {
+} partial class cipherᴛStreamReader {
+
+public static (nint n, error err) Read(this StreamReader r, slice<byte> dst) {
     nint n = default;
     error err = default;
 
@@ -25,6 +28,8 @@ internal static (nint n, error err) Read⁔(/*this*/ StreamReader r, slice<byte>
     r.S.XORKeyStream(dst.slice(0, n), dst.slice(0, n));
     return (n, err);
 }
+
+} partial class cipher_package {
 
 // StreamWriter wraps a [Stream] into an io.Writer. It calls XORKeyStream
 // to process each slice of data which passes through. If any [StreamWriter.Write]
@@ -37,7 +42,9 @@ partial struct StreamWriter {
     public error Err; // unused
 }
 
-internal static (nint n, error err) Write⁔(/*this*/ StreamWriter w, slice<byte> src) {
+} partial class cipherᴛStreamWriter {
+
+public static (nint n, error err) Write(this StreamWriter w, slice<byte> src) {
     nint n = default;
     error err = default;
 
@@ -52,11 +59,11 @@ internal static (nint n, error err) Write⁔(/*this*/ StreamWriter w, slice<byte
 
 // Close closes the underlying Writer and returns its Close return value, if the Writer
 // is also an io.Closer. Otherwise it returns nil.
-internal static error Close⁔(/*this*/ StreamWriter w) {
+public static error Close(this StreamWriter w) {
     var (c, ok) = w.W._<io.Closer>(ᐧ); if (ok) {
         return c.Close();
     }
     return default;
 }
 
-} // end cipher_package
+}

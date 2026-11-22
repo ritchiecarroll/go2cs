@@ -39,6 +39,7 @@ using encoding;
 using go.sync;
 using net;
 using unicode;
+using static expvar_package;
 
 partial class expvar_package {
 
@@ -60,45 +61,51 @@ partial struct Int {
     internal atomic.Int64 i;
 }
 
-internal static int64 Value⁔(/*this*/ ж<Int> Ꮡv) {
+} partial class expvarᴛInt {
+
+public static int64 Value(this ж<Int> Ꮡv) {
     return Ꮡv.Ꮡi.Load();
 }
 
-internal static @string String⁔(/*this*/ ж<Int> Ꮡv) {
+public static @string String(this ж<Int> Ꮡv) {
     return (@string)Ꮡv.appendJSON(default);
 }
 
-internal static slice<byte> appendJSON⁔(/*this*/ ж<Int> Ꮡv, slice<byte> b) {
+internal static slice<byte> appendJSON(this ж<Int> Ꮡv, slice<byte> b) {
     return strconv.AppendInt(b, Ꮡv.Ꮡi.Load(), 10);
 }
 
-internal static void Add⁔(/*this*/ ж<Int> Ꮡv, int64 delta) {
+public static void Add(this ж<Int> Ꮡv, int64 delta) {
     Ꮡv.Ꮡi.Add(delta);
 }
 
-internal static void Set⁔(/*this*/ ж<Int> Ꮡv, int64 value) {
+public static void Set(this ж<Int> Ꮡv, int64 value) {
     Ꮡv.Ꮡi.Store(value);
 }
+
+} partial class expvar_package {
 
 // Float is a 64-bit float variable that satisfies the [Var] interface.
 partial struct Float {
     internal atomic.Uint64 f;
 }
 
-internal static float64 Value⁔(/*this*/ ж<Float> Ꮡv) {
+} partial class expvarᴛFloat {
+
+public static float64 Value(this ж<Float> Ꮡv) {
     return Δmath.Float64frombits(Ꮡv.Ꮡf.Load());
 }
 
-internal static @string String⁔(/*this*/ ж<Float> Ꮡv) {
+public static @string String(this ж<Float> Ꮡv) {
     return (@string)Ꮡv.appendJSON(default);
 }
 
-internal static slice<byte> appendJSON⁔(/*this*/ ж<Float> Ꮡv, slice<byte> b) {
+internal static slice<byte> appendJSON(this ж<Float> Ꮡv, slice<byte> b) {
     return strconv.AppendFloat(b, Δmath.Float64frombits(Ꮡv.Ꮡf.Load()), (byte)'g', -1, 64);
 }
 
 // Add adds delta to v.
-internal static void Add⁔(/*this*/ ж<Float> Ꮡv, float64 delta) {
+public static void Add(this ж<Float> Ꮡv, float64 delta) {
     for (;;) {
         var cur = Ꮡv.Ꮡf.Load();
         var curVal = Δmath.Float64frombits(cur);
@@ -111,9 +118,11 @@ internal static void Add⁔(/*this*/ ж<Float> Ꮡv, float64 delta) {
 }
 
 // Set sets v to value.
-internal static void Set⁔(/*this*/ ж<Float> Ꮡv, float64 value) {
+public static void Set(this ж<Float> Ꮡv, float64 value) {
     Ꮡv.Ꮡf.Store(Δmath.Float64bits(value));
 }
+
+} partial class expvar_package {
 
 // Map is a string-to-Var map variable that satisfies the [Var] interface.
 partial struct Map {
@@ -128,15 +137,17 @@ partial struct KeyValue {
     public Var Value;
 }
 
-internal static @string String⁔(/*this*/ ж<Map> Ꮡv) {
+} partial class expvarᴛMap {
+
+public static @string String(this ж<Map> Ꮡv) {
     return (@string)Ꮡv.appendJSON(default);
 }
 
-internal static slice<byte> appendJSON⁔(/*this*/ ж<Map> Ꮡv, slice<byte> b) {
+internal static slice<byte> appendJSON(this ж<Map> Ꮡv, slice<byte> b) {
     return Ꮡv.appendJSONMayExpand(b, false);
 }
 
-internal static slice<byte> appendJSONMayExpand⁔(/*this*/ ж<Map> Ꮡv, slice<byte> b, bool expand) {
+internal static slice<byte> appendJSONMayExpand(this ж<Map> Ꮡv, slice<byte> b, bool expand) {
     var afterCommaDelim = (byte)' ';
     var mayAppendNewline = (slice<byte> bΔ1) => bΔ1;
     if (expand) {
@@ -176,7 +187,7 @@ internal static slice<byte> appendJSONMayExpand⁔(/*this*/ ж<Map> Ꮡv, slice<
 }
 
 // Init removes all keys from the map.
-internal static ж<Map> Init⁔(/*this*/ ж<Map> Ꮡv) {
+public static ж<Map> Init(this ж<Map> Ꮡv) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -193,7 +204,7 @@ internal static ж<Map> Init⁔(/*this*/ ж<Map> Ꮡv) {
 }
 
 // addKey updates the sorted list of keys in v.keys.
-internal static void addKey⁔(/*this*/ ж<Map> Ꮡv, @string key) {
+internal static void addKey(this ж<Map> Ꮡv, @string key) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -212,13 +223,13 @@ internal static void addKey⁔(/*this*/ ж<Map> Ꮡv, @string key) {
     finally { if (ᒐd1) Ꮡv.ᏑkeysMu.Unlock(); ᒐ.Run(); }
 }
 
-internal static Var Get⁔(/*this*/ ж<Map> Ꮡv, @string key) {
+public static Var Get(this ж<Map> Ꮡv, @string key) {
     var (i, _) = Ꮡv.Ꮡm.Load(key);
     var (av, _) = i._<Var>(ᐧ);
     return av;
 }
 
-internal static void Set⁔(/*this*/ ж<Map> Ꮡv, @string key, Var av) {
+public static void Set(this ж<Map> Ꮡv, @string key, Var av) {
     // Before we store the value, check to see whether the key is new. Try a Load
     // before LoadOrStore: LoadOrStore causes the key interface to escape even on
     // the Load path.
@@ -233,7 +244,7 @@ internal static void Set⁔(/*this*/ ж<Map> Ꮡv, @string key, Var av) {
 }
 
 // Add adds delta to the *[Int] value stored under the given map key.
-internal static void Add⁔(/*this*/ ж<Map> Ꮡv, @string key, int64 delta) {
+public static void Add(this ж<Map> Ꮡv, @string key, int64 delta) {
     var (i, ok) = Ꮡv.Ꮡm.Load(key);
     if (!ok) {
         bool dup = default;
@@ -250,7 +261,7 @@ internal static void Add⁔(/*this*/ ж<Map> Ꮡv, @string key, int64 delta) {
 }
 
 // AddFloat adds delta to the *[Float] value stored under the given map key.
-internal static void AddFloat⁔(/*this*/ ж<Map> Ꮡv, @string key, float64 delta) {
+public static void AddFloat(this ж<Map> Ꮡv, @string key, float64 delta) {
     var (i, ok) = Ꮡv.Ꮡm.Load(key);
     if (!ok) {
         bool dup = default;
@@ -267,7 +278,7 @@ internal static void AddFloat⁔(/*this*/ ж<Map> Ꮡv, @string key, float64 del
 }
 
 // Delete deletes the given key from the map.
-internal static void Delete⁔(/*this*/ ж<Map> Ꮡv, @string key) {
+public static void Delete(this ж<Map> Ꮡv, @string key) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -288,7 +299,7 @@ internal static void Delete⁔(/*this*/ ж<Map> Ꮡv, @string key) {
 // Do calls f for each entry in the map.
 // The map is locked during the iteration,
 // but existing entries may be concurrently updated.
-internal static void Do⁔(/*this*/ ж<Map> Ꮡv, Action<KeyValue> f) {
+public static void Do(this ж<Map> Ꮡv, Action<KeyValue> f) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -306,42 +317,52 @@ internal static void Do⁔(/*this*/ ж<Map> Ꮡv, Action<KeyValue> f) {
     finally { if (ᒐd1) Ꮡv.ᏑkeysMu.RUnlock(); ᒐ.Run(); }
 }
 
+} partial class expvar_package {
+
 // String is a string variable, and satisfies the [Var] interface.
 partial struct String {
     internal atomic.Value s; // string
 }
 
-internal static @string Value⁔(/*this*/ ж<String> Ꮡv) {
+} partial class expvarᴛString {
+
+public static @string Value(this ж<String> Ꮡv) {
     var (p, _) = Ꮡv.Ꮡs.Load()._<@string>(ᐧ);
     return p;
 }
 
 // String implements the [Var] interface. To get the unquoted string
 // use [String.Value].
-internal static @string String⁔(/*this*/ ж<String> Ꮡv) {
+public static @string String(this ж<String> Ꮡv) {
     return (@string)Ꮡv.appendJSON(default);
 }
 
-internal static slice<byte> appendJSON⁔(/*this*/ ж<String> Ꮡv, slice<byte> b) {
+internal static slice<byte> appendJSON(this ж<String> Ꮡv, slice<byte> b) {
     return appendJSONQuote(b, Ꮡv.Value());
 }
 
-internal static void Set⁔(/*this*/ ж<String> Ꮡv, @string value) {
+public static void Set(this ж<String> Ꮡv, @string value) {
     Ꮡv.Ꮡs.Store(value);
 }
+
+} partial class expvar_package {
 
 // Func implements [Var] by calling the function
 // and formatting the returned value using JSON.
 public delegate any Func();
 
-internal static any Value⁔(/*this*/ Func f) {
+} partial class expvarᴛFunc {
+
+public static any Value(this Func f) {
     return f();
 }
 
-internal static @string String⁔(/*this*/ Func f) {
+public static @string String(this Func f) {
     var (v, _) = json.Marshal(f());
     return (@string)v;
 }
+
+} partial class expvar_package {
 
 // All published variables.
 internal static readonly ж<Map> Ꮡvars = new StaticBox<Map>(default(Map));

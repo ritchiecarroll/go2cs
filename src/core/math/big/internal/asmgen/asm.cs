@@ -12,6 +12,8 @@ using strings = strings_package;
 using go.math;
 using io = io_package;
 using ꓸꓸꓸany = Span<any>;
+using asmgen = asmgen_package;
+using static asmgen_package;
 
 partial class asmgen_package {
 
@@ -59,6 +61,8 @@ internal static @string asmHeader = """
 
 """u8.Raw();
 
+} partial class asmgenᴛAsm {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string textˢ => ref textˢᵇ;
 private static readonly @string textˢᵇ = "\nTEXT"u8;
@@ -66,7 +70,7 @@ private static readonly @string textˢᵇ = "\nTEXT"u8;
 // Fatalf reports a fatal error by panicking.
 // Panicking is appropriate because there is a bug in the generator,
 // and panicking will show the exact source lines leading to that bug.
-internal static void Fatalf⁔(/*this*/ ж<Asm> Ꮡa, @string format, params ꓸꓸꓸany argsʗp) {
+public static void Fatalf(this ж<Asm> Ꮡa, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
     ref var a = ref Ꮡa.DerefOrNull();
 
@@ -77,7 +81,7 @@ internal static void Fatalf⁔(/*this*/ ж<Asm> Ꮡa, @string format, params ꓸ
 }
 
 // hint returns the register name for the given hint.
-internal static @string hint⁔(/*this*/ ж<Asm> Ꮡa, Hint h) {
+internal static @string hint(this ж<Asm> Ꮡa, Hint h) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (h == HintCarry && a.Arch.regCarry != ""u8) {
@@ -94,7 +98,7 @@ internal static @string hint⁔(/*this*/ ж<Asm> Ꮡa, Hint h) {
 
 // ZR returns the zero register (the specific register guaranteed to hold the integer 0),
 // or else the zero Reg (Reg{}, which has r.Valid() == false).
-internal static Reg ZR⁔(/*this*/ ref Asm a) {
+public static Reg ZR(this ref Asm a) {
     return new Reg(a.Arch.reg0);
 }
 
@@ -107,22 +111,22 @@ internal static Reg ZR⁔(/*this*/ ref Asm a) {
 // a live value. In general it is the architecture implementation's responsibility
 // not to suggest the use of any such pseudo-instructions in situations
 // where they would cause problems.
-internal static Reg tmp⁔(/*this*/ ref Asm a) {
+internal static Reg tmp(this ref Asm a) {
     return new Reg(a.Arch.regTmp);
 }
 
 // Carry returns the carry register, or else the zero Reg.
-internal static Reg Carry⁔(/*this*/ ref Asm a) {
+public static Reg Carry(this ref Asm a) {
     return new Reg(a.Arch.regCarry);
 }
 
 // AltCarry returns the secondary carry register, or else the zero Reg.
-internal static Reg AltCarry⁔(/*this*/ ref Asm a) {
+public static Reg AltCarry(this ref Asm a) {
     return new Reg(a.Arch.regAltCarry);
 }
 
 // Imm returns a Reg representing an immediate (constant) value.
-internal static Reg Imm⁔(/*this*/ ref Asm a, nint x) {
+public static Reg Imm(this ref Asm a, nint x) {
     if (x == 0 && a.Arch.reg0 != ""u8) {
         return new Reg(a.Arch.reg0);
     }
@@ -130,12 +134,12 @@ internal static Reg Imm⁔(/*this*/ ref Asm a, nint x) {
 }
 
 // IsZero reports whether r is a zero immediate or the zero register.
-internal static bool IsZero⁔(/*this*/ ref Asm a, Reg r) {
+public static bool IsZero(this ref Asm a, Reg r) {
     return r.name == "$0"u8 || a.Arch.reg0 != ""u8 && r.name == a.Arch.reg0;
 }
 
 // Reg allocates a new register.
-internal static Reg Reg⁔(/*this*/ ж<Asm> Ꮡa) {
+public static Reg Reg(this ж<Asm> Ꮡa) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     nint i = bits.TrailingZeros64(a.regavail);
@@ -147,7 +151,7 @@ internal static Reg Reg⁔(/*this*/ ж<Asm> Ꮡa) {
 }
 
 // RegHint allocates a new register, with a hint as to its purpose.
-internal static Reg RegHint⁔(/*this*/ ж<Asm> Ꮡa, Hint hint) {
+public static Reg RegHint(this ж<Asm> Ꮡa, Hint hint) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     @string name = Ꮡa.hint(hint); if (name != ""u8) {
@@ -166,7 +170,7 @@ internal static Reg RegHint⁔(/*this*/ ж<Asm> Ꮡa, Hint hint) {
 
 // Free frees a previously allocated register.
 // If r is not a register (if it's an immediate or a memory reference), Free is a no-op.
-internal static void Free⁔(/*this*/ ж<Asm> Ꮡa, Reg r) {
+public static void Free(this ж<Asm> Ꮡa, Reg r) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     nint i = slices.Index(a.Arch.regs, r.name);
@@ -184,7 +188,7 @@ internal static void Free⁔(/*this*/ ж<Asm> Ꮡa, Reg r) {
 // If r is not free for allocation, Unfree panics.
 // A Free paired with Unfree can release a register for use temporarily
 // but then reclaim it, such as at the end of a loop body when it must be restored.
-internal static void Unfree⁔(/*this*/ ж<Asm> Ꮡa, Reg r) {
+public static void Unfree(this ж<Asm> Ꮡa, Reg r) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     nint i = slices.Index(a.Arch.regs, r.name);
@@ -197,31 +201,35 @@ internal static void Unfree⁔(/*this*/ ж<Asm> Ꮡa, Reg r) {
     a.regavail &= unchecked((uint64)~(uint64)(((uint64)1).Lsh((int64)(i))));
 }
 
+} partial class asmgen_package {
+
 // A RegsUsed is a snapshot of which registers are allocated.
 partial struct RegsUsed {
     internal uint64 avail;
 }
 
+} partial class asmgenᴛAsm {
+
 // RegsUsed returns a snapshot of which registers are currently allocated,
 // which can be passed to a future call to [Asm.SetRegsUsed].
-internal static RegsUsed RegsUsed⁔(/*this*/ ref Asm a) {
+public static RegsUsed RegsUsed(this ref Asm a) {
     return new RegsUsed(a.regavail);
 }
 
 // SetRegsUsed sets which registers are currently allocated.
 // The argument should have been returned from a previous
 // call to [Asm.RegsUsed].
-internal static void SetRegsUsed⁔(/*this*/ ref Asm a, RegsUsed used) {
+public static void SetRegsUsed(this ref Asm a, RegsUsed used) {
     a.regavail = used.avail;
 }
 
 // FreeAll frees all known registers.
-internal static void FreeAll⁔(/*this*/ ref Asm a) {
+public static void FreeAll(this ref Asm a) {
     a.regavail = ((uint64)1).Lsh((int64)(len(a.Arch.regs))) - 1;
 }
 
 // Printf emits to the assembly output.
-internal static void Printf⁔(/*this*/ ж<Asm> Ꮡa, @string format, params ꓸꓸꓸany argsʗp) {
+public static void Printf(this ж<Asm> Ꮡa, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
     ref var a = ref Ꮡa.DerefOrNull();
 
@@ -233,14 +241,14 @@ internal static void Printf⁔(/*this*/ ж<Asm> Ꮡa, @string format, params ꓸ
 }
 
 // Comment emits a line comment to the assembly output.
-internal static void Comment⁔(/*this*/ ж<Asm> Ꮡa, @string format, params ꓸꓸꓸany argsʗp) {
+public static void Comment(this ж<Asm> Ꮡa, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     fmt.Fprintf(new bytes_BufferжWriter(Ꮡa.Ꮡout), "\t// %s\n"u8, fmt.Sprintf(format, args.ꓸꓸꓸ));
 }
 
 // EOL appends an end-of-line comment to the previous line.
-internal static void EOL⁔(/*this*/ ж<Asm> Ꮡa, @string format, params ꓸꓸꓸany argsʗp) {
+public static void EOL(this ж<Asm> Ꮡa, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
     ref var a = ref Ꮡa.DerefOrNull();
 
@@ -253,7 +261,7 @@ internal static void EOL⁔(/*this*/ ж<Asm> Ꮡa, @string format, params ꓸꓸ
 
 // JmpEnable emits a test for the optional CPU feature that jumps to label if the feature is present.
 // If JmpEnable returns false, the feature is not available on this architecture and no code was emitted.
-internal static bool JmpEnable⁔(/*this*/ ж<Asm> Ꮡa, Option option, @string label) {
+public static bool JmpEnable(this ж<Asm> Ꮡa, Option option, @string label) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     var jmpEnable = a.Arch.options[option];
@@ -266,20 +274,20 @@ internal static bool JmpEnable⁔(/*this*/ ж<Asm> Ꮡa, Option option, @string 
 
 // Enabled reports whether the optional CPU feature is considered
 // to be enabled at this point in the assembly output.
-internal static bool Enabled⁔(/*this*/ ref Asm a, Option option) {
+public static bool Enabled(this ref Asm a, Option option) {
     return a.enabled[option];
 }
 
 // SetOption changes whether the optional CPU feature should be
 // considered to be enabled.
-internal static void SetOption⁔(/*this*/ ref Asm a, Option option, bool on) {
+public static void SetOption(this ref Asm a, Option option, bool on) {
     a.enabled[option] = on;
 }
 
 // op3 emits a 3-operand instruction op src1, src2, dst,
 // taking care to handle 2-operand machines and also
 // to simplify the printout when src2==dst.
-internal static void op3⁔(/*this*/ ж<Asm> Ꮡa, @string op, Reg src1, Reg src2, Reg dst) {
+internal static void op3(this ж<Asm> Ꮡa, @string op, Reg src1, Reg src2, Reg dst) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (op == ""u8) {
@@ -302,7 +310,7 @@ internal static void op3⁔(/*this*/ ж<Asm> Ꮡa, @string op, Reg src1, Reg src
 }
 
 // Mov emits dst = src.
-internal static void Mov⁔(/*this*/ ж<Asm> Ꮡa, Reg src, Reg dst) {
+public static void Mov(this ж<Asm> Ꮡa, Reg src, Reg dst) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (src != dst) {
@@ -312,7 +320,7 @@ internal static void Mov⁔(/*this*/ ж<Asm> Ꮡa, Reg src, Reg dst) {
 
 // AddWords emits dst = src1*WordBytes + src2.
 // It does not set or use the carry flag.
-internal static void AddWords⁔(/*this*/ ж<Asm> Ꮡa, Reg src1, RegPtr src2, RegPtr dst) {
+public static void AddWords(this ж<Asm> Ꮡa, Reg src1, RegPtr src2, RegPtr dst) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (a.Arch.addWords == ""u8) {
@@ -329,7 +337,7 @@ internal static void AddWords⁔(/*this*/ ж<Asm> Ꮡa, Reg src1, RegPtr src2, R
 
 // And emits dst = src1 & src2
 // It may modify the carry flag.
-internal static void And⁔(/*this*/ ж<Asm> Ꮡa, Reg src1, Reg src2, Reg dst) {
+public static void And(this ж<Asm> Ꮡa, Reg src1, Reg src2, Reg dst) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     Ꮡa.op3(a.Arch.and, src1, src2, dst);
@@ -337,7 +345,7 @@ internal static void And⁔(/*this*/ ж<Asm> Ꮡa, Reg src1, Reg src2, Reg dst) 
 
 // Or emits dst = src1 | src2
 // It may modify the carry flag.
-internal static void Or⁔(/*this*/ ж<Asm> Ꮡa, Reg src1, Reg src2, Reg dst) {
+public static void Or(this ж<Asm> Ꮡa, Reg src1, Reg src2, Reg dst) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     Ꮡa.op3(a.Arch.or, src1, src2, dst);
@@ -345,7 +353,7 @@ internal static void Or⁔(/*this*/ ж<Asm> Ꮡa, Reg src1, Reg src2, Reg dst) {
 
 // Xor emits dst = src1 ^ src2
 // It may modify the carry flag.
-internal static void Xor⁔(/*this*/ ж<Asm> Ꮡa, Reg src1, Reg src2, Reg dst) {
+public static void Xor(this ж<Asm> Ꮡa, Reg src1, Reg src2, Reg dst) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     Ꮡa.op3(a.Arch.xor, src1, src2, dst);
@@ -353,7 +361,7 @@ internal static void Xor⁔(/*this*/ ж<Asm> Ꮡa, Reg src1, Reg src2, Reg dst) 
 
 // Neg emits dst = -src.
 // It may modify the carry flag.
-internal static void Neg⁔(/*this*/ ж<Asm> Ꮡa, Reg src, Reg dst) {
+public static void Neg(this ж<Asm> Ꮡa, Reg src, Reg dst) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (a.Arch.neg == ""u8) {
@@ -375,13 +383,13 @@ internal static void Neg⁔(/*this*/ ж<Asm> Ꮡa, Reg src, Reg dst) {
 }
 
 // HasRegShift reports whether the architecture can use shift expressions as operands.
-internal static bool HasRegShift⁔(/*this*/ ref Asm a) {
+public static bool HasRegShift(this ref Asm a) {
     return a.Arch.regShift;
 }
 
 // LshReg returns a shift-expression operand src<<shift.
 // If a.HasRegShift() == false, LshReg panics.
-internal static Reg LshReg⁔(/*this*/ ж<Asm> Ꮡa, Reg shift, Reg src) {
+public static Reg LshReg(this ж<Asm> Ꮡa, Reg shift, Reg src) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (!a.HasRegShift()) {
@@ -392,7 +400,7 @@ internal static Reg LshReg⁔(/*this*/ ж<Asm> Ꮡa, Reg shift, Reg src) {
 
 // Lsh emits dst = src << shift.
 // It may modify the carry flag.
-internal static void Lsh⁔(/*this*/ ж<Asm> Ꮡa, Reg shift, Reg src, Reg dst) {
+public static void Lsh(this ж<Asm> Ꮡa, Reg shift, Reg src, Reg dst) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     @string need = Ꮡa.hint(HintShiftCount); if (need != ""u8 && shift.name != need && !shift.IsImm()) {
@@ -407,7 +415,7 @@ internal static void Lsh⁔(/*this*/ ж<Asm> Ꮡa, Reg shift, Reg src, Reg dst) 
 
 // LshWide emits dst = src << shift with low bits shifted from adj.
 // It may modify the carry flag.
-internal static void LshWide⁔(/*this*/ ж<Asm> Ꮡa, Reg shift, Reg adj, Reg src, Reg dst) {
+public static void LshWide(this ж<Asm> Ꮡa, Reg shift, Reg adj, Reg src, Reg dst) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (a.Arch.lshd == ""u8) {
@@ -421,7 +429,7 @@ internal static void LshWide⁔(/*this*/ ж<Asm> Ꮡa, Reg shift, Reg adj, Reg s
 
 // RshReg returns a shift-expression operand src>>shift.
 // If a.HasRegShift() == false, RshReg panics.
-internal static Reg RshReg⁔(/*this*/ ж<Asm> Ꮡa, Reg shift, Reg src) {
+public static Reg RshReg(this ж<Asm> Ꮡa, Reg shift, Reg src) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (!a.HasRegShift()) {
@@ -432,7 +440,7 @@ internal static Reg RshReg⁔(/*this*/ ж<Asm> Ꮡa, Reg shift, Reg src) {
 
 // Rsh emits dst = src >> shift.
 // It may modify the carry flag.
-internal static void Rsh⁔(/*this*/ ж<Asm> Ꮡa, Reg shift, Reg src, Reg dst) {
+public static void Rsh(this ж<Asm> Ꮡa, Reg shift, Reg src, Reg dst) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     @string need = Ꮡa.hint(HintShiftCount); if (need != ""u8 && shift.name != need && !shift.IsImm()) {
@@ -447,7 +455,7 @@ internal static void Rsh⁔(/*this*/ ж<Asm> Ꮡa, Reg shift, Reg src, Reg dst) 
 
 // RshWide emits dst = src >> shift with high bits shifted from adj.
 // It may modify the carry flag.
-internal static void RshWide⁔(/*this*/ ж<Asm> Ꮡa, Reg shift, Reg adj, Reg src, Reg dst) {
+public static void RshWide(this ж<Asm> Ꮡa, Reg shift, Reg adj, Reg src, Reg dst) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (a.Arch.lshd == ""u8) {
@@ -460,7 +468,7 @@ internal static void RshWide⁔(/*this*/ ж<Asm> Ꮡa, Reg shift, Reg adj, Reg s
 }
 
 // SLTU emits dst = src2 < src1 (0 or 1), using an unsigned comparison.
-internal static void SLTU⁔(/*this*/ ж<Asm> Ꮡa, Reg src1, Reg src2, Reg dst) {
+public static void SLTU(this ж<Asm> Ꮡa, Reg src1, Reg src2, Reg dst) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     switch (ᐧ) {
@@ -495,7 +503,7 @@ internal static ref readonly @string adcsSSSCrSˢ => ref adcsSSSCrSˢᵇ;
 private static readonly @string adcsSSSCrSˢᵇ = "ADCS %s, %s, %s (cr=%s)"u8;
 
 // Add emits dst = src1+src2, with the specified carry behavior.
-internal static void Add⁔(/*this*/ ж<Asm> Ꮡa, Reg src1, Reg src2, Reg dst, Carry carry) {
+public static void Add(this ж<Asm> Ꮡa, Reg src1, Reg src2, Reg dst, Carry carry) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     switch (ᐧ) {
@@ -547,12 +555,12 @@ internal static void Add⁔(/*this*/ ж<Asm> Ꮡa, Reg src1, Reg src2, Reg dst, 
         // we comment the “higher-level” operation, with ... marking
         // continued instructions implementing the operation.
         var cr = a.Carry();
-        if ((Carry)(carry & AltCarry) != 0) {
+        if ((Carry)(carry & asmgen.AltCarry) != 0) {
             cr = a.AltCarry();
             if (!cr.Valid()) {
                 Ꮡa.Fatalf("alt carry not supported");
             }
-            carry &= unchecked((Carry)~(Carry)(AltCarry));
+            carry &= unchecked((Carry)~(Carry)(asmgen.AltCarry));
         }
         var tmp = a.tmp();
         if (!tmp.Valid()) {
@@ -671,7 +679,7 @@ internal static ref readonly @string sbcsSSSˢ => ref sbcsSSSˢᵇ;
 private static readonly @string sbcsSSSˢᵇ = "SBCS %s, %s, %s"u8;
 
 // Sub emits dst = src2-src1, with the specified carry behavior.
-internal static void Sub⁔(/*this*/ ж<Asm> Ꮡa, Reg src1, Reg src2, Reg dst, Carry carry) {
+public static void Sub(this ж<Asm> Ꮡa, Reg src1, Reg src2, Reg dst, Carry carry) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     switch (ᐧ) {
@@ -722,7 +730,7 @@ internal static void Sub⁔(/*this*/ ж<Asm> Ꮡa, Reg src1, Reg src2, Reg dst, 
         // Be careful! Subtract and add have different overflow behaviors,
         // so the details here are NOT the same as in Add above.
         var cr = a.Carry();
-        if ((Carry)(carry & AltCarry) != 0) {
+        if ((Carry)(carry & asmgen.AltCarry) != 0) {
             Ꮡa.Fatalf("alt carry not supported");
         }
         var tmp = a.tmp();
@@ -809,7 +817,7 @@ private static readonly @string clearCarryˢᵇ = "clear carry"u8;
 // ClearCarry clears the carry flag.
 // The ‘which’ parameter must be AddCarry or SubCarry to specify how the flag will be used.
 // (On some systems, the sub carry's actual processor bit is inverted from its usual value.)
-internal static void ClearCarry⁔(/*this*/ ж<Asm> Ꮡa, Carry which) {
+public static void ClearCarry(this ж<Asm> Ꮡa, Carry which) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     var dst = new Reg(a.Arch.regs[0]); // not actually modified
@@ -819,11 +827,11 @@ internal static void ClearCarry⁔(/*this*/ ж<Asm> Ꮡa, Carry which) {
         break;
     }
     case var ᴛ when ᴛ == AddCarry: {
-        Ꮡa.Add(a.Imm(0), dst, dst, (Carry)(SetCarry | (Carry)(which & AltCarry)));
+        Ꮡa.Add(a.Imm(0), dst, dst, (Carry)(SetCarry | (Carry)(which & asmgen.AltCarry)));
         break;
     }
     case var ᴛ when ᴛ == SubCarry: {
-        Ꮡa.Sub(a.Imm(0), dst, dst, (Carry)(SetCarry | (Carry)(which & AltCarry)));
+        Ꮡa.Sub(a.Imm(0), dst, dst, (Carry)(SetCarry | (Carry)(which & asmgen.AltCarry)));
         break;
     }}
     Ꮡa.EOL(clearCarryˢ);
@@ -836,7 +844,7 @@ private static readonly @string saveCarryˢᵇ = "save carry"u8;
 // SaveCarry saves the carry flag into dst.
 // The meaning of the bits in dst is architecture-dependent.
 // The carry flag is left in an undefined state.
-internal static void SaveCarry⁔(/*this*/ ж<Asm> Ꮡa, Reg dst) {
+public static void SaveCarry(this ж<Asm> Ꮡa, Reg dst) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     // Note: As implemented here, the carry flag is actually left unmodified,
@@ -859,7 +867,7 @@ private static readonly @string restoreCarryˢᵇ = "restore carry"u8;
 
 // RestoreCarry restores the carry flag from src.
 // src is left in an undefined state.
-internal static void RestoreCarry⁔(/*this*/ ж<Asm> Ꮡa, Reg src) {
+public static void RestoreCarry(this ж<Asm> Ꮡa, Reg src) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     var cr = a.Carry(); if (cr.Valid()) {
@@ -887,7 +895,7 @@ private static readonly @string convertSubCarryˢᵇ = "convert sub carry"u8;
 
 // ConvertCarry converts the carry flag in dst from the internal format to a 0 or 1.
 // The carry flag is left in an undefined state.
-internal static void ConvertCarry⁔(/*this*/ ж<Asm> Ꮡa, Carry which, Reg dst) {
+public static void ConvertCarry(this ж<Asm> Ꮡa, Carry which, Reg dst) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (a.Carry().Valid()) { // already 0 or 1
@@ -916,7 +924,7 @@ private static readonly @string saveConvertAddCarryˢᵇ = "save & convert add c
 
 // SaveConvertCarry saves and converts the carry flag into dst: 0 unset, 1 set.
 // The carry flag is left in an undefined state.
-internal static void SaveConvertCarry⁔(/*this*/ ж<Asm> Ꮡa, Carry which, Reg dst) {
+public static void SaveConvertCarry(this ж<Asm> Ꮡa, Carry which, Reg dst) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     switch (which) {
@@ -943,7 +951,7 @@ internal static void SaveConvertCarry⁔(/*this*/ ж<Asm> Ꮡa, Carry which, Reg
 // MulWide emits dstlo = src1 * src2 and dsthi = (src1 * src2) >> WordBits.
 // The carry flag is left in an undefined state.
 // If dstlo or dsthi is the zero Reg, then those outputs are discarded.
-internal static void MulWide⁔(/*this*/ ж<Asm> Ꮡa, Reg src1, Reg src2, Reg dstlo, Reg dsthi) {
+public static void MulWide(this ж<Asm> Ꮡa, Reg src1, Reg src2, Reg dstlo, Reg dsthi) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     switch (ᐧ) {
@@ -976,14 +984,14 @@ internal static void MulWide⁔(/*this*/ ж<Asm> Ꮡa, Reg src1, Reg src2, Reg d
 }
 
 // Jmp jumps to the label.
-internal static void Jmp⁔(/*this*/ ж<Asm> Ꮡa, @string label) {
+public static void Jmp(this ж<Asm> Ꮡa, @string label) {
     // Note: Some systems prefer the spelling B or BR, but all accept JMP.
     Ꮡa.Printf("\tJMP %s\n", label);
 }
 
 // JmpZero jumps to the label if src is zero.
 // It may modify the carry flag unless a.Arch.CarrySafeLoop is true.
-internal static void JmpZero⁔(/*this*/ ж<Asm> Ꮡa, Reg src, @string label) {
+public static void JmpZero(this ж<Asm> Ꮡa, Reg src, @string label) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     Ꮡa.Printf("\t"u8 + a.Arch.jmpZero + "\n"u8, src, label);
@@ -991,20 +999,20 @@ internal static void JmpZero⁔(/*this*/ ж<Asm> Ꮡa, Reg src, @string label) {
 
 // JmpNonZero jumps to the label if src is non-zero.
 // It may modify the carry flag unless a.Arch,CarrySafeLoop is true.
-internal static void JmpNonZero⁔(/*this*/ ж<Asm> Ꮡa, Reg src, @string label) {
+public static void JmpNonZero(this ж<Asm> Ꮡa, Reg src, @string label) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     Ꮡa.Printf("\t"u8 + a.Arch.jmpNonZero + "\n"u8, src, label);
 }
 
 // Label emits a label with the given name.
-internal static void Label⁔(/*this*/ ж<Asm> Ꮡa, @string name) {
+public static void Label(this ж<Asm> Ꮡa, @string name) {
     Ꮡa.Printf("%s:\n", name);
 }
 
 // Ret returns.
-internal static void Ret⁔(/*this*/ ж<Asm> Ꮡa) {
+public static void Ret(this ж<Asm> Ꮡa) {
     Ꮡa.Printf("\tRET\n");
 }
 
-} // end asmgen_package
+}

@@ -8,6 +8,7 @@ using io = io_package;
 using sync = sync_package;
 using time = time_package;
 /* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // added for go linkname usage
+using static trace_package;
 
 partial class trace_package {
 
@@ -56,11 +57,13 @@ public static ж<FlightRecorder> NewFlightRecorder(FlightRecorderConfig cfg) {
     return fr;
 }
 
+} partial class traceᴛFlightRecorder {
+
 // Start activates the flight recorder and begins recording trace data.
 // Only one call to trace.Start may be active at any given time.
 // In addition, currently only one flight recorder may be active in the program.
 // Returns an error if the flight recorder cannot be started or is already started.
-internal static error Start⁔(/*this*/ ж<FlightRecorder> Ꮡfr) {
+public static error Start(this ж<FlightRecorder> Ꮡfr) {
     ref var fr = ref Ꮡfr.DerefOrNull();
 
     if (fr.enabled) {
@@ -82,7 +85,7 @@ internal static error Start⁔(/*this*/ ж<FlightRecorder> Ꮡfr) {
 }
 
 // Stop ends recording of trace data. It blocks until any concurrent WriteTo calls complete.
-internal static void Stop⁔(/*this*/ ref FlightRecorder fr) {
+public static void Stop(this ref FlightRecorder fr) {
     if (!fr.enabled) {
         return;
     }
@@ -97,7 +100,7 @@ internal static void Stop⁔(/*this*/ ref FlightRecorder fr) {
 // Enabled returns true if the flight recorder is active.
 // Specifically, it will return true if Start did not return an error, and Stop has not yet been called.
 // It is safe to call from multiple goroutines simultaneously.
-internal static bool Enabled⁔(/*this*/ ref FlightRecorder fr) { return fr.enabled; }
+public static bool Enabled(this ref FlightRecorder fr) { return fr.enabled; }
 
 // WriteTo snapshots the moving window tracked by the flight recorder.
 // The snapshot is expected to contain data that is up-to-date as of when WriteTo is called,
@@ -105,7 +108,7 @@ internal static bool Enabled⁔(/*this*/ ref FlightRecorder fr) { return fr.enab
 // Only one goroutine may execute WriteTo at a time.
 // An error is returned upon failure to write to w, if another WriteTo call is already in-progress,
 // or if the flight recorder is inactive.
-internal static (int64 n, error err) WriteTo⁔(/*this*/ ж<FlightRecorder> Ꮡfr, io.Writer w) {
+public static (int64 n, error err) WriteTo(this ж<FlightRecorder> Ꮡfr, io.Writer w) {
     int64 n = default;
     error err = default;
     GoFrame ᒐ = default;
@@ -159,6 +162,8 @@ internal static (int64 n, error err) WriteTo⁔(/*this*/ ж<FlightRecorder> Ꮡf
     finally { ᒐ.Run(); }
     ᒐdone: return (n, err);
 }
+
+} partial class trace_package {
 
 partial struct FlightRecorderConfig {
     // MinAge is a lower bound on the age of an event in the flight recorder's window.

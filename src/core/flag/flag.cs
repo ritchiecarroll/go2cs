@@ -94,6 +94,7 @@ using strconv = strconv_package;
 using strings = strings_package;
 using time = time_package;
 using ꓸꓸꓸany = Span<any>;
+using static flag_package;
 
 partial class flag_package {
 
@@ -133,7 +134,9 @@ internal static ж<boolValue> newBoolValue(bool val, ж<bool> Ꮡp) {
     return Ꮡp.Reinterpret<bool, boolValue>();
 }
 
-internal static error Set⁔(/*this*/ ref boolValue b, @string s) {
+} partial class flagᴛboolValue {
+
+internal static error Set(this ref boolValue b, @string s) {
     var (v, err) = strconv.ParseBool(s);
     if (err != nil) {
         err = errParse;
@@ -142,11 +145,13 @@ internal static error Set⁔(/*this*/ ref boolValue b, @string s) {
     return err;
 }
 
-internal static any Get⁔(/*this*/ ref boolValue b) { return (bool)(b); }
+internal static any Get(this ref boolValue b) { return (bool)(b); }
 
-internal static @string String⁔(/*this*/ ref boolValue b) { return strconv.FormatBool((bool)(b)); }
+internal static @string String(this ref boolValue b) { return strconv.FormatBool((bool)(b)); }
 
-internal static bool IsBoolFlag⁔(/*this*/ ref boolValue b) { return true; }
+internal static bool IsBoolFlag(this ref boolValue b) { return true; }
+
+} partial class flag_package {
 
 // optional interface to indicate boolean flags that can be
 // supplied without "=value" text
@@ -166,7 +171,9 @@ internal static ж<intValue> newIntValue(nint val, ж<nint> Ꮡp) {
     return Ꮡp.Reinterpret<nint, intValue>();
 }
 
-internal static error Set⁔(/*this*/ ref intValue i, @string s) {
+} partial class flagᴛintValue {
+
+internal static error Set(this ref intValue i, @string s) {
     var (v, err) = strconv.ParseInt(s, 0, strconv.IntSize);
     if (err != nil) {
         err = numError(err);
@@ -175,9 +182,11 @@ internal static error Set⁔(/*this*/ ref intValue i, @string s) {
     return err;
 }
 
-internal static any Get⁔(/*this*/ ref intValue i) { return (nint)(i); }
+internal static any Get(this ref intValue i) { return (nint)(i); }
 
-internal static @string String⁔(/*this*/ ref intValue i) { return strconv.Itoa((nint)(i)); }
+internal static @string String(this ref intValue i) { return strconv.Itoa((nint)(i)); }
+
+} partial class flag_package {
 
 // -- int64 Value
 partial struct int64Value /*num:int64*/;
@@ -189,7 +198,9 @@ internal static ж<int64Value> newInt64Value(int64 val, ж<int64> Ꮡp) {
     return Ꮡp.Reinterpret<int64, int64Value>();
 }
 
-internal static error Set⁔(/*this*/ ref int64Value i, @string s) {
+} partial class flagᴛint64Value {
+
+internal static error Set(this ref int64Value i, @string s) {
     var (v, err) = strconv.ParseInt(s, 0, 64);
     if (err != nil) {
         err = numError(err);
@@ -198,9 +209,11 @@ internal static error Set⁔(/*this*/ ref int64Value i, @string s) {
     return err;
 }
 
-internal static any Get⁔(/*this*/ ref int64Value i) { return (int64)(i); }
+internal static any Get(this ref int64Value i) { return (int64)(i); }
 
-internal static @string String⁔(/*this*/ ref int64Value i) { return strconv.FormatInt((int64)(i), 10); }
+internal static @string String(this ref int64Value i) { return strconv.FormatInt((int64)(i), 10); }
+
+} partial class flag_package {
 
 // -- uint Value
 partial struct uintValue /*num:nuint*/;
@@ -212,7 +225,9 @@ internal static ж<uintValue> newUintValue(nuint val, ж<nuint> Ꮡp) {
     return Ꮡp.Reinterpret<nuint, uintValue>();
 }
 
-internal static error Set⁔(/*this*/ ref uintValue i, @string s) {
+} partial class flagᴛuintValue {
+
+internal static error Set(this ref uintValue i, @string s) {
     var (v, err) = strconv.ParseUint(s, 0, strconv.IntSize);
     if (err != nil) {
         err = numError(err);
@@ -221,9 +236,11 @@ internal static error Set⁔(/*this*/ ref uintValue i, @string s) {
     return err;
 }
 
-internal static any Get⁔(/*this*/ ref uintValue i) { return (nuint)(i); }
+internal static any Get(this ref uintValue i) { return (nuint)(i); }
 
-internal static @string String⁔(/*this*/ ref uintValue i) { return strconv.FormatUint((uint64)(i), 10); }
+internal static @string String(this ref uintValue i) { return strconv.FormatUint((uint64)(i), 10); }
+
+} partial class flag_package {
 
 // -- uint64 Value
 partial struct uint64Value /*num:uint64*/;
@@ -235,7 +252,9 @@ internal static ж<uint64Value> newUint64Value(uint64 val, ж<uint64> Ꮡp) {
     return Ꮡp.Reinterpret<uint64, uint64Value>();
 }
 
-internal static error Set⁔(/*this*/ ref uint64Value i, @string s) {
+} partial class flagᴛuint64Value {
+
+internal static error Set(this ref uint64Value i, @string s) {
     var (v, err) = strconv.ParseUint(s, 0, 64);
     if (err != nil) {
         err = numError(err);
@@ -244,9 +263,11 @@ internal static error Set⁔(/*this*/ ref uint64Value i, @string s) {
     return err;
 }
 
-internal static any Get⁔(/*this*/ ref uint64Value i) { return (uint64)(i); }
+internal static any Get(this ref uint64Value i) { return (uint64)(i); }
 
-internal static @string String⁔(/*this*/ ref uint64Value i) { return strconv.FormatUint((uint64)(i), 10); }
+internal static @string String(this ref uint64Value i) { return strconv.FormatUint((uint64)(i), 10); }
+
+} partial class flag_package {
 
 // -- string Value
 partial struct stringValue /*@string*/;
@@ -258,14 +279,18 @@ internal static ж<stringValue> newStringValue(@string val, ж<@string> Ꮡp) {
     return Ꮡp.Reinterpret<@string, stringValue>();
 }
 
-internal static error Set⁔(/*this*/ ref stringValue s, @string val) {
+} partial class flagᴛstringValue {
+
+internal static error Set(this ref stringValue s, @string val) {
     s = (stringValue)val;
     return default;
 }
 
-internal static any Get⁔(/*this*/ ref stringValue s) { return (@string)(s); }
+internal static any Get(this ref stringValue s) { return (@string)(s); }
 
-internal static @string String⁔(/*this*/ ref stringValue s) { return (@string)(s); }
+internal static @string String(this ref stringValue s) { return (@string)(s); }
+
+} partial class flag_package {
 
 // -- float64 Value
 partial struct float64Value /*num:float64*/;
@@ -277,7 +302,9 @@ internal static ж<float64Value> newFloat64Value(float64 val, ж<float64> Ꮡp) 
     return Ꮡp.Reinterpret<float64, float64Value>();
 }
 
-internal static error Set⁔(/*this*/ ref float64Value f, @string s) {
+} partial class flagᴛfloat64Value {
+
+internal static error Set(this ref float64Value f, @string s) {
     var (v, err) = strconv.ParseFloat(s, 64);
     if (err != nil) {
         err = numError(err);
@@ -286,9 +313,11 @@ internal static error Set⁔(/*this*/ ref float64Value f, @string s) {
     return err;
 }
 
-internal static any Get⁔(/*this*/ ref float64Value f) { return (float64)(f); }
+internal static any Get(this ref float64Value f) { return (float64)(f); }
 
-internal static @string String⁔(/*this*/ ref float64Value f) { return strconv.FormatFloat((float64)(f), (byte)'g', -1, 64); }
+internal static @string String(this ref float64Value f) { return strconv.FormatFloat((float64)(f), (byte)'g', -1, 64); }
+
+} partial class flag_package {
 
 // -- time.Duration Value
 partial struct durationValue /*global::go.time_package.Duration*/;
@@ -300,7 +329,9 @@ internal static ж<durationValue> newDurationValue(time.Duration val, ж<time.Du
     return Ꮡp.Reinterpret<time.Duration, durationValue>();
 }
 
-internal static error Set⁔(/*this*/ ref durationValue d, @string s) {
+} partial class flagᴛdurationValue {
+
+internal static error Set(this ref durationValue d, @string s) {
     var (v, err) = time.ParseDuration(s);
     if (err != nil) {
         err = errParse;
@@ -309,9 +340,11 @@ internal static error Set⁔(/*this*/ ref durationValue d, @string s) {
     return err;
 }
 
-internal static any Get⁔(/*this*/ ref durationValue d) { return (time.Duration)d; }
+internal static any Get(this ref durationValue d) { return (time.Duration)d; }
 
-internal static @string String⁔(/*this*/ ж<durationValue> Ꮡd) { return (Ꮡd.Reinterpret<durationValue, time.Duration>()).Value.String(); }
+internal static @string String(this ж<durationValue> Ꮡd) { return (Ꮡd.Reinterpret<durationValue, time.Duration>()).Value.String(); }
+
+} partial class flag_package {
 
 // -- encoding.TextUnmarshaler Value
 partial struct textValue {
@@ -334,15 +367,17 @@ internal static textValue newTextValue(encoding.TextMarshaler val, encoding.Text
     return new textValue(p);
 }
 
-internal static error Set⁔(/*this*/ textValue v, @string s) {
+} partial class flagᴛtextValue {
+
+internal static error Set(this textValue v, @string s) {
     return v.p.UnmarshalText(slice<byte>(s));
 }
 
-internal static any Get⁔(/*this*/ textValue v) {
+internal static any Get(this textValue v) {
     return v.p;
 }
 
-internal static @string String⁔(/*this*/ textValue v) {
+internal static @string String(this textValue v) {
     var (m, ok) = v.p._<encoding.TextMarshaler>(ᐧ); if (ok) {
         var (b, err) = m.MarshalText(); if (err == nil) {
             return (@string)b;
@@ -351,21 +386,31 @@ internal static @string String⁔(/*this*/ textValue v) {
     return ""u8;
 }
 
+} partial class flag_package {
+
 // -- func Value
 internal delegate error funcValue(@string _);
 
-internal static partial error Set⁔(/*this*/ funcValue f, @string s) { return f(s); }
+} partial class flagᴛfuncValue {
 
-internal static @string String⁔(/*this*/ funcValue f) { return ""u8; }
+internal static partial error Set(this funcValue f, @string s) { return f(s); }
+
+internal static @string String(this funcValue f) { return ""u8; }
+
+} partial class flag_package {
 
 // -- boolFunc Value
 internal delegate error boolFuncValue(@string _);
 
-internal static partial error Set⁔(/*this*/ boolFuncValue f, @string s) { return f(s); }
+} partial class flagᴛboolFuncValue {
 
-internal static @string String⁔(/*this*/ boolFuncValue f) { return ""u8; }
+internal static partial error Set(this boolFuncValue f, @string s) { return f(s); }
 
-internal static bool IsBoolFlag⁔(/*this*/ boolFuncValue f) { return true; }
+internal static @string String(this boolFuncValue f) { return ""u8; }
+
+internal static bool IsBoolFlag(this boolFuncValue f) { return true; }
+
+} partial class flag_package {
 
 // Value is the interface to the dynamic value stored in a flag.
 // (The default value is represented as a string.)
@@ -443,9 +488,11 @@ internal static slice<ж<Flag>> sortFlags(map<@string, ж<Flag>> flags) {
     return result;
 }
 
+} partial class flagᴛFlagSet {
+
 // Output returns the destination for usage and error messages. [os.Stderr] is returned if
 // output was not set or was set to nil.
-internal static Δio.Writer Output⁔(/*this*/ ref FlagSet f) {
+public static Δio.Writer Output(this ref FlagSet f) {
     if (f.output == nil) {
         return new os.FileжWriter(os.Stderr);
     }
@@ -453,28 +500,30 @@ internal static Δio.Writer Output⁔(/*this*/ ref FlagSet f) {
 }
 
 // Name returns the name of the flag set.
-internal static @string Name⁔(/*this*/ ref FlagSet f) {
+public static @string Name(this ref FlagSet f) {
     return f.name;
 }
 
 // ErrorHandling returns the error handling behavior of the flag set.
-internal static ErrorHandling ErrorHandling⁔(/*this*/ ref FlagSet f) {
+public static ErrorHandling ErrorHandling(this ref FlagSet f) {
     return f.errorHandling;
 }
 
 // SetOutput sets the destination for usage and error messages.
 // If output is nil, [os.Stderr] is used.
-internal static void SetOutput⁔(/*this*/ ref FlagSet f, Δio.Writer output) {
+public static void SetOutput(this ref FlagSet f, Δio.Writer output) {
     f.output = output;
 }
 
 // VisitAll visits the flags in lexicographical order, calling fn for each.
 // It visits all flags, even those not set.
-internal static void VisitAll⁔(/*this*/ ref FlagSet f, Action<ж<Flag>> fn) {
+public static void VisitAll(this ref FlagSet f, Action<ж<Flag>> fn) {
     foreach (var (_, flag) in range(sortFlags(f.formal))) {
         fn(flag);
     }
 }
+
+} partial class flag_package {
 
 // VisitAll visits the command-line flags in lexicographical order, calling
 // fn for each. It visits all flags, even those not set.
@@ -482,13 +531,17 @@ public static void VisitAll(Action<ж<Flag>> fn) {
     CommandLine.VisitAll(fn);
 }
 
+} partial class flagᴛFlagSet {
+
 // Visit visits the flags in lexicographical order, calling fn for each.
 // It visits only those flags that have been set.
-internal static void Visit⁔(/*this*/ ref FlagSet f, Action<ж<Flag>> fn) {
+public static void Visit(this ref FlagSet f, Action<ж<Flag>> fn) {
     foreach (var (_, flag) in range(sortFlags(f.actual))) {
         fn(flag);
     }
 }
+
+} partial class flag_package {
 
 // Visit visits the command-line flags in lexicographical order, calling fn
 // for each. It visits only those flags that have been set.
@@ -496,10 +549,14 @@ public static void Visit(Action<ж<Flag>> fn) {
     CommandLine.Visit(fn);
 }
 
+} partial class flagᴛFlagSet {
+
 // Lookup returns the [Flag] structure of the named flag, returning nil if none exists.
-internal static ж<Flag> Lookup⁔(/*this*/ ref FlagSet f, @string name) {
+public static ж<Flag> Lookup(this ref FlagSet f, @string name) {
     return f.formal[name];
 }
+
+} partial class flag_package {
 
 // Lookup returns the [Flag] structure of the named command-line flag,
 // returning nil if none exists.
@@ -507,11 +564,13 @@ public static ж<Flag> Lookup(@string name) {
     return CommandLine.formal[name];
 }
 
+} partial class flagᴛFlagSet {
+
 // Set sets the value of the named flag.
-internal static partial error Set⁔(/*this*/ ref FlagSet f, @string name, @string value) {
+public static partial error Set(this ref FlagSet f, @string name, @string value) {
     return f.set(name, value);
 }
-internal static partial error set⁔(/*this*/ ref FlagSet f, @string name, @string value) {
+internal static partial error set(this ref FlagSet f, @string name, @string value) {
     var (flag, ok) = f.formal[name, ꟷ];
     if (!ok) {
         // Remember that a flag that isn't defined is being set.
@@ -544,6 +603,8 @@ internal static partial error set⁔(/*this*/ ref FlagSet f, @string name, @stri
     f.actual[name] = flag;
     return default;
 }
+
+} partial class flag_package {
 
 // Set sets the value of the named command-line flag.
 public static partial error Set(@string name, @string value) {
@@ -661,10 +722,12 @@ public static (@string name, @string usage) UnquoteUsage(ж<Flag> Ꮡflag) {
     return (name, usage);
 }
 
+} partial class flagᴛFlagSet {
+
 // PrintDefaults prints, to standard error unless configured otherwise, the
 // default values of all defined command-line flags in the set. See the
 // documentation for the global function PrintDefaults for more information.
-internal static void PrintDefaults⁔(/*this*/ ж<FlagSet> Ꮡf) {
+public static void PrintDefaults(this ж<FlagSet> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     ref var isZeroValueErrs = ref heap<slice<error>>(out var ᏑisZeroValueErrs);
@@ -712,6 +775,8 @@ internal static void PrintDefaults⁔(/*this*/ ж<FlagSet> Ꮡf) {
     }
 }
 
+} partial class flag_package {
+
 // PrintDefaults prints, to standard error unless configured otherwise,
 // a usage message showing the default settings of all defined
 // command-line flags.
@@ -742,8 +807,10 @@ public static void PrintDefaults() {
     CommandLine.PrintDefaults();
 }
 
+} partial class flagᴛFlagSet {
+
 // defaultUsage is the default function to print a usage message.
-internal static void defaultUsage⁔(/*this*/ ж<FlagSet> Ꮡf) {
+internal static void defaultUsage(this ж<FlagSet> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     if (f.name == ""u8) {
@@ -753,6 +820,8 @@ internal static void defaultUsage⁔(/*this*/ ж<FlagSet> Ꮡf) {
     }
     Ꮡf.PrintDefaults();
 }
+
+} partial class flag_package {
 
 // NOTE: Usage is not just defaultUsage(CommandLine)
 // because it serves (via godoc flag Usage) as the example
@@ -773,21 +842,29 @@ internal static void defaultUsage⁔(/*this*/ ж<FlagSet> Ꮡf) {
 }); }
 public static ref Action Usage => ref ((StaticBox<Action>)ᏑUsage).ValueSlot;
 
+} partial class flagᴛFlagSet {
+
 // NFlag returns the number of flags that have been set.
-internal static nint NFlag⁔(/*this*/ ref FlagSet f) { return len(f.actual); }
+public static nint NFlag(this ref FlagSet f) { return len(f.actual); }
+
+} partial class flag_package {
 
 // NFlag returns the number of command-line flags that have been set.
 public static nint NFlag() { return len(CommandLine.actual); }
 
+} partial class flagᴛFlagSet {
+
 // Arg returns the i'th argument. Arg(0) is the first remaining argument
 // after flags have been processed. Arg returns an empty string if the
 // requested element does not exist.
-internal static @string Arg⁔(/*this*/ ref FlagSet f, nint i) {
+public static @string Arg(this ref FlagSet f, nint i) {
     if (i < 0 || i >= len(f.args)) {
         return ""u8;
     }
     return f.args[i];
 }
+
+} partial class flag_package {
 
 // Arg returns the i'th command-line argument. Arg(0) is the first remaining argument
 // after flags have been processed. Arg returns an empty string if the
@@ -796,23 +873,35 @@ public static @string Arg(nint i) {
     return CommandLine.Arg(i);
 }
 
+} partial class flagᴛFlagSet {
+
 // NArg is the number of arguments remaining after flags have been processed.
-internal static nint NArg⁔(/*this*/ ref FlagSet f) { return len(f.args); }
+public static nint NArg(this ref FlagSet f) { return len(f.args); }
+
+} partial class flag_package {
 
 // NArg is the number of arguments remaining after flags have been processed.
 public static nint NArg() { return len(CommandLine.args); }
 
+} partial class flagᴛFlagSet {
+
 // Args returns the non-flag arguments.
-internal static slice<@string> Args⁔(/*this*/ ref FlagSet f) { return f.args; }
+public static slice<@string> Args(this ref FlagSet f) { return f.args; }
+
+} partial class flag_package {
 
 // Args returns the non-flag command-line arguments.
 public static slice<@string> Args() { return CommandLine.args; }
 
+} partial class flagᴛFlagSet {
+
 // BoolVar defines a bool flag with specified name, default value, and usage string.
 // The argument p points to a bool variable in which to store the value of the flag.
-internal static void BoolVar⁔(/*this*/ ref FlagSet f, ж<bool> p, @string name, bool value, @string usage) {
+public static void BoolVar(this ref FlagSet f, ж<bool> p, @string name, bool value, @string usage) {
     f.Var(new boolValueжValue(newBoolValue(value, p)), name, usage);
 }
+
+} partial class flag_package {
 
 // BoolVar defines a bool flag with specified name, default value, and usage string.
 // The argument p points to a bool variable in which to store the value of the flag.
@@ -820,13 +909,17 @@ public static void BoolVar(ж<bool> p, @string name, bool value, @string usage) 
     CommandLine.Var(new boolValueжValue(newBoolValue(value, p)), name, usage);
 }
 
+} partial class flagᴛFlagSet {
+
 // Bool defines a bool flag with specified name, default value, and usage string.
 // The return value is the address of a bool variable that stores the value of the flag.
-internal static ж<bool> Bool⁔(/*this*/ ref FlagSet f, @string name, bool value, @string usage) {
+public static ж<bool> Bool(this ref FlagSet f, @string name, bool value, @string usage) {
     var p = @new<bool>();
     f.BoolVar(p, name, value, usage);
     return p;
 }
+
+} partial class flag_package {
 
 // Bool defines a bool flag with specified name, default value, and usage string.
 // The return value is the address of a bool variable that stores the value of the flag.
@@ -834,11 +927,15 @@ public static ж<bool> Bool(@string name, bool value, @string usage) {
     return CommandLine.Bool(name, value, usage);
 }
 
+} partial class flagᴛFlagSet {
+
 // IntVar defines an int flag with specified name, default value, and usage string.
 // The argument p points to an int variable in which to store the value of the flag.
-internal static void IntVar⁔(/*this*/ ref FlagSet f, ж<nint> p, @string name, nint value, @string usage) {
+public static void IntVar(this ref FlagSet f, ж<nint> p, @string name, nint value, @string usage) {
     f.Var(new intValueжValue(newIntValue(value, p)), name, usage);
 }
+
+} partial class flag_package {
 
 // IntVar defines an int flag with specified name, default value, and usage string.
 // The argument p points to an int variable in which to store the value of the flag.
@@ -846,13 +943,17 @@ public static void IntVar(ж<nint> p, @string name, nint value, @string usage) {
     CommandLine.Var(new intValueжValue(newIntValue(value, p)), name, usage);
 }
 
+} partial class flagᴛFlagSet {
+
 // Int defines an int flag with specified name, default value, and usage string.
 // The return value is the address of an int variable that stores the value of the flag.
-internal static ж<nint> Int⁔(/*this*/ ref FlagSet f, @string name, nint value, @string usage) {
+public static ж<nint> Int(this ref FlagSet f, @string name, nint value, @string usage) {
     var p = @new<nint>();
     f.IntVar(p, name, value, usage);
     return p;
 }
+
+} partial class flag_package {
 
 // Int defines an int flag with specified name, default value, and usage string.
 // The return value is the address of an int variable that stores the value of the flag.
@@ -860,11 +961,15 @@ public static ж<nint> Int(@string name, nint value, @string usage) {
     return CommandLine.Int(name, value, usage);
 }
 
+} partial class flagᴛFlagSet {
+
 // Int64Var defines an int64 flag with specified name, default value, and usage string.
 // The argument p points to an int64 variable in which to store the value of the flag.
-internal static void Int64Var⁔(/*this*/ ref FlagSet f, ж<int64> p, @string name, int64 value, @string usage) {
+public static void Int64Var(this ref FlagSet f, ж<int64> p, @string name, int64 value, @string usage) {
     f.Var(new int64ValueжValue(newInt64Value(value, p)), name, usage);
 }
+
+} partial class flag_package {
 
 // Int64Var defines an int64 flag with specified name, default value, and usage string.
 // The argument p points to an int64 variable in which to store the value of the flag.
@@ -872,13 +977,17 @@ public static void Int64Var(ж<int64> p, @string name, int64 value, @string usag
     CommandLine.Var(new int64ValueжValue(newInt64Value(value, p)), name, usage);
 }
 
+} partial class flagᴛFlagSet {
+
 // Int64 defines an int64 flag with specified name, default value, and usage string.
 // The return value is the address of an int64 variable that stores the value of the flag.
-internal static ж<int64> Int64⁔(/*this*/ ref FlagSet f, @string name, int64 value, @string usage) {
+public static ж<int64> Int64(this ref FlagSet f, @string name, int64 value, @string usage) {
     var p = @new<int64>();
     f.Int64Var(p, name, value, usage);
     return p;
 }
+
+} partial class flag_package {
 
 // Int64 defines an int64 flag with specified name, default value, and usage string.
 // The return value is the address of an int64 variable that stores the value of the flag.
@@ -886,11 +995,15 @@ public static ж<int64> Int64(@string name, int64 value, @string usage) {
     return CommandLine.Int64(name, value, usage);
 }
 
+} partial class flagᴛFlagSet {
+
 // UintVar defines a uint flag with specified name, default value, and usage string.
 // The argument p points to a uint variable in which to store the value of the flag.
-internal static void UintVar⁔(/*this*/ ref FlagSet f, ж<nuint> p, @string name, nuint value, @string usage) {
+public static void UintVar(this ref FlagSet f, ж<nuint> p, @string name, nuint value, @string usage) {
     f.Var(new uintValueжValue(newUintValue(value, p)), name, usage);
 }
+
+} partial class flag_package {
 
 // UintVar defines a uint flag with specified name, default value, and usage string.
 // The argument p points to a uint variable in which to store the value of the flag.
@@ -898,13 +1011,17 @@ public static void UintVar(ж<nuint> p, @string name, nuint value, @string usage
     CommandLine.Var(new uintValueжValue(newUintValue(value, p)), name, usage);
 }
 
+} partial class flagᴛFlagSet {
+
 // Uint defines a uint flag with specified name, default value, and usage string.
 // The return value is the address of a uint variable that stores the value of the flag.
-internal static ж<nuint> Uint⁔(/*this*/ ref FlagSet f, @string name, nuint value, @string usage) {
+public static ж<nuint> Uint(this ref FlagSet f, @string name, nuint value, @string usage) {
     var p = @new<nuint>();
     f.UintVar(p, name, value, usage);
     return p;
 }
+
+} partial class flag_package {
 
 // Uint defines a uint flag with specified name, default value, and usage string.
 // The return value is the address of a uint variable that stores the value of the flag.
@@ -912,11 +1029,15 @@ public static ж<nuint> Uint(@string name, nuint value, @string usage) {
     return CommandLine.Uint(name, value, usage);
 }
 
+} partial class flagᴛFlagSet {
+
 // Uint64Var defines a uint64 flag with specified name, default value, and usage string.
 // The argument p points to a uint64 variable in which to store the value of the flag.
-internal static void Uint64Var⁔(/*this*/ ref FlagSet f, ж<uint64> p, @string name, uint64 value, @string usage) {
+public static void Uint64Var(this ref FlagSet f, ж<uint64> p, @string name, uint64 value, @string usage) {
     f.Var(new uint64ValueжValue(newUint64Value(value, p)), name, usage);
 }
+
+} partial class flag_package {
 
 // Uint64Var defines a uint64 flag with specified name, default value, and usage string.
 // The argument p points to a uint64 variable in which to store the value of the flag.
@@ -924,13 +1045,17 @@ public static void Uint64Var(ж<uint64> p, @string name, uint64 value, @string u
     CommandLine.Var(new uint64ValueжValue(newUint64Value(value, p)), name, usage);
 }
 
+} partial class flagᴛFlagSet {
+
 // Uint64 defines a uint64 flag with specified name, default value, and usage string.
 // The return value is the address of a uint64 variable that stores the value of the flag.
-internal static ж<uint64> Uint64⁔(/*this*/ ref FlagSet f, @string name, uint64 value, @string usage) {
+public static ж<uint64> Uint64(this ref FlagSet f, @string name, uint64 value, @string usage) {
     var p = @new<uint64>();
     f.Uint64Var(p, name, value, usage);
     return p;
 }
+
+} partial class flag_package {
 
 // Uint64 defines a uint64 flag with specified name, default value, and usage string.
 // The return value is the address of a uint64 variable that stores the value of the flag.
@@ -938,11 +1063,15 @@ public static ж<uint64> Uint64(@string name, uint64 value, @string usage) {
     return CommandLine.Uint64(name, value, usage);
 }
 
+} partial class flagᴛFlagSet {
+
 // StringVar defines a string flag with specified name, default value, and usage string.
 // The argument p points to a string variable in which to store the value of the flag.
-internal static void StringVar⁔(/*this*/ ref FlagSet f, ж<@string> p, @string name, @string value, @string usage) {
+public static void StringVar(this ref FlagSet f, ж<@string> p, @string name, @string value, @string usage) {
     f.Var(new stringValueжValue(newStringValue(value, p)), name, usage);
 }
+
+} partial class flag_package {
 
 // StringVar defines a string flag with specified name, default value, and usage string.
 // The argument p points to a string variable in which to store the value of the flag.
@@ -950,13 +1079,17 @@ public static void StringVar(ж<@string> p, @string name, @string value, @string
     CommandLine.Var(new stringValueжValue(newStringValue(value, p)), name, usage);
 }
 
+} partial class flagᴛFlagSet {
+
 // String defines a string flag with specified name, default value, and usage string.
 // The return value is the address of a string variable that stores the value of the flag.
-internal static ж<@string> String⁔(/*this*/ ref FlagSet f, @string name, @string value, @string usage) {
+public static ж<@string> String(this ref FlagSet f, @string name, @string value, @string usage) {
     var p = @new<@string>();
     f.StringVar(p, name, value, usage);
     return p;
 }
+
+} partial class flag_package {
 
 // String defines a string flag with specified name, default value, and usage string.
 // The return value is the address of a string variable that stores the value of the flag.
@@ -964,11 +1097,15 @@ public static ж<@string> String(@string name, @string value, @string usage) {
     return CommandLine.String(name, value, usage);
 }
 
+} partial class flagᴛFlagSet {
+
 // Float64Var defines a float64 flag with specified name, default value, and usage string.
 // The argument p points to a float64 variable in which to store the value of the flag.
-internal static void Float64Var⁔(/*this*/ ref FlagSet f, ж<float64> p, @string name, float64 value, @string usage) {
+public static void Float64Var(this ref FlagSet f, ж<float64> p, @string name, float64 value, @string usage) {
     f.Var(new float64ValueжValue(newFloat64Value(value, p)), name, usage);
 }
+
+} partial class flag_package {
 
 // Float64Var defines a float64 flag with specified name, default value, and usage string.
 // The argument p points to a float64 variable in which to store the value of the flag.
@@ -976,13 +1113,17 @@ public static void Float64Var(ж<float64> p, @string name, float64 value, @strin
     CommandLine.Var(new float64ValueжValue(newFloat64Value(value, p)), name, usage);
 }
 
+} partial class flagᴛFlagSet {
+
 // Float64 defines a float64 flag with specified name, default value, and usage string.
 // The return value is the address of a float64 variable that stores the value of the flag.
-internal static ж<float64> Float64⁔(/*this*/ ref FlagSet f, @string name, float64 value, @string usage) {
+public static ж<float64> Float64(this ref FlagSet f, @string name, float64 value, @string usage) {
     var p = @new<float64>();
     f.Float64Var(p, name, value, usage);
     return p;
 }
+
+} partial class flag_package {
 
 // Float64 defines a float64 flag with specified name, default value, and usage string.
 // The return value is the address of a float64 variable that stores the value of the flag.
@@ -990,12 +1131,16 @@ public static ж<float64> Float64(@string name, float64 value, @string usage) {
     return CommandLine.Float64(name, value, usage);
 }
 
+} partial class flagᴛFlagSet {
+
 // DurationVar defines a time.Duration flag with specified name, default value, and usage string.
 // The argument p points to a time.Duration variable in which to store the value of the flag.
 // The flag accepts a value acceptable to time.ParseDuration.
-internal static void DurationVar⁔(/*this*/ ref FlagSet f, ж<time.Duration> p, @string name, time.Duration value, @string usage) {
+public static void DurationVar(this ref FlagSet f, ж<time.Duration> p, @string name, time.Duration value, @string usage) {
     f.Var(new durationValueжValue(newDurationValue(value, p)), name, usage);
 }
+
+} partial class flag_package {
 
 // DurationVar defines a time.Duration flag with specified name, default value, and usage string.
 // The argument p points to a time.Duration variable in which to store the value of the flag.
@@ -1004,14 +1149,18 @@ public static void DurationVar(ж<time.Duration> p, @string name, time.Duration 
     CommandLine.Var(new durationValueжValue(newDurationValue(value, p)), name, usage);
 }
 
+} partial class flagᴛFlagSet {
+
 // Duration defines a time.Duration flag with specified name, default value, and usage string.
 // The return value is the address of a time.Duration variable that stores the value of the flag.
 // The flag accepts a value acceptable to time.ParseDuration.
-internal static ж<time.Duration> Duration⁔(/*this*/ ref FlagSet f, @string name, time.Duration value, @string usage) {
+public static ж<time.Duration> Duration(this ref FlagSet f, @string name, time.Duration value, @string usage) {
     var p = @new<time.Duration>();
     f.DurationVar(p, name, value, usage);
     return p;
 }
+
+} partial class flag_package {
 
 // Duration defines a time.Duration flag with specified name, default value, and usage string.
 // The return value is the address of a time.Duration variable that stores the value of the flag.
@@ -1020,14 +1169,18 @@ public static ж<time.Duration> Duration(@string name, time.Duration value, @str
     return CommandLine.Duration(name, value, usage);
 }
 
+} partial class flagᴛFlagSet {
+
 // TextVar defines a flag with a specified name, default value, and usage string.
 // The argument p must be a pointer to a variable that will hold the value
 // of the flag, and p must implement encoding.TextUnmarshaler.
 // If the flag is used, the flag value will be passed to p's UnmarshalText method.
 // The type of the default value must be the same as the type of p.
-internal static void TextVar⁔(/*this*/ ref FlagSet f, encoding.TextUnmarshaler p, @string name, encoding.TextMarshaler value, @string usage) {
+public static void TextVar(this ref FlagSet f, encoding.TextUnmarshaler p, @string name, encoding.TextMarshaler value, @string usage) {
     f.Var(newTextValue(value, p), name, usage);
 }
+
+} partial class flag_package {
 
 // TextVar defines a flag with a specified name, default value, and usage string.
 // The argument p must be a pointer to a variable that will hold the value
@@ -1038,12 +1191,16 @@ public static void TextVar(encoding.TextUnmarshaler p, @string name, encoding.Te
     CommandLine.Var(newTextValue(value, p), name, usage);
 }
 
+} partial class flagᴛFlagSet {
+
 // Func defines a flag with the specified name and usage string.
 // Each time the flag is seen, fn is called with the value of the flag.
 // If fn returns a non-nil error, it will be treated as a flag value parsing error.
-internal static void Func⁔(/*this*/ ref FlagSet f, @string name, @string usage, Func<@string, error> fn) {
+public static void Func(this ref FlagSet f, @string name, @string usage, Func<@string, error> fn) {
     f.Var(new funcValueᴠValue(NilSafeDelegateConversion<funcValue, Func<@string, error>>(fn)), name, usage);
 }
+
+} partial class flag_package {
 
 // Func defines a flag with the specified name and usage string.
 // Each time the flag is seen, fn is called with the value of the flag.
@@ -1052,12 +1209,16 @@ public static void Func(@string name, @string usage, Func<@string, error> fn) {
     CommandLine.Func(name, usage, fn);
 }
 
+} partial class flagᴛFlagSet {
+
 // BoolFunc defines a flag with the specified name and usage string without requiring values.
 // Each time the flag is seen, fn is called with the value of the flag.
 // If fn returns a non-nil error, it will be treated as a flag value parsing error.
-internal static void BoolFunc⁔(/*this*/ ref FlagSet f, @string name, @string usage, Func<@string, error> fn) {
+public static void BoolFunc(this ref FlagSet f, @string name, @string usage, Func<@string, error> fn) {
     f.Var(new boolFuncValueᴠValue(NilSafeDelegateConversion<boolFuncValue, Func<@string, error>>(fn)), name, usage);
 }
+
+} partial class flag_package {
 
 // BoolFunc defines a flag with the specified name and usage string without requiring values.
 // Each time the flag is seen, fn is called with the value of the flag.
@@ -1066,13 +1227,15 @@ public static void BoolFunc(@string name, @string usage, Func<@string, error> fn
     CommandLine.BoolFunc(name, usage, fn);
 }
 
+} partial class flagᴛFlagSet {
+
 // Var defines a flag with the specified name and usage string. The type and
 // value of the flag are represented by the first argument, of type [Value], which
 // typically holds a user-defined implementation of [Value]. For instance, the
 // caller could create a flag that turns a comma-separated string into a slice
 // of strings by giving the slice the methods of [Value]; in particular, [Set] would
 // decompose the comma-separated string into the slice.
-internal static void Var⁔(/*this*/ ref FlagSet f, Value value, @string name, @string usage) {
+public static void Var(this ref FlagSet f, Value value, @string name, @string usage) {
     // Flag must not begin "-" or contain "=".
     if (strings.HasPrefix(name, "-")) {
         throw panic(f.sprintf("flag %q begins with -", name));
@@ -1101,6 +1264,8 @@ internal static void Var⁔(/*this*/ ref FlagSet f, Value value, @string name, @
     f.formal[name] = flag;
 }
 
+} partial class flag_package {
+
 // Var defines a flag with the specified name and usage string. The type and
 // value of the flag are represented by the first argument, of type [Value], which
 // typically holds a user-defined implementation of [Value]. For instance, the
@@ -1111,8 +1276,10 @@ public static void Var(Value value, @string name, @string usage) {
     CommandLine.Var(value, name, usage);
 }
 
+} partial class flagᴛFlagSet {
+
 // sprintf formats the message, prints it to output, and returns it.
-internal static @string sprintf⁔(/*this*/ ref FlagSet f, @string format, params ꓸꓸꓸany aʗp) {
+internal static @string sprintf(this ref FlagSet f, @string format, params ꓸꓸꓸany aʗp) {
     var a = aʗp.sslice();
 
     @string msg = fmt.Sprintf(format, a.ꓸꓸꓸ);
@@ -1122,7 +1289,7 @@ internal static @string sprintf⁔(/*this*/ ref FlagSet f, @string format, param
 
 // failf prints to standard error a formatted error and usage message and
 // returns the error.
-internal static error failf⁔(/*this*/ ж<FlagSet> Ꮡf, @string format, params ꓸꓸꓸany aʗp) {
+internal static error failf(this ж<FlagSet> Ꮡf, @string format, params ꓸꓸꓸany aʗp) {
     var a = aʗp.sslice();
     ref var f = ref Ꮡf.DerefOrNull();
 
@@ -1133,7 +1300,7 @@ internal static error failf⁔(/*this*/ ж<FlagSet> Ꮡf, @string format, params
 
 // usage calls the Usage method for the flag set if one is specified,
 // or the appropriate default usage function otherwise.
-internal static void usage⁔(/*this*/ ж<FlagSet> Ꮡf) {
+internal static void usage(this ж<FlagSet> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     if (f.Usage == nil) {
@@ -1148,7 +1315,7 @@ internal static ref readonly @string trueˢ => ref trueˢᵇ;
 private static readonly @string trueˢᵇ = "true"u8;
 
 // parseOne parses one flag. It reports whether a flag was seen.
-internal static (bool, error) parseOne⁔(/*this*/ ж<FlagSet> Ꮡf) {
+internal static (bool, error) parseOne(this ж<FlagSet> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     if (len(f.args) == 0) {
@@ -1228,7 +1395,7 @@ internal static (bool, error) parseOne⁔(/*this*/ ж<FlagSet> Ꮡf) {
 // include the command name. Must be called after all flags in the [FlagSet]
 // are defined and before flags are accessed by the program.
 // The return value will be [ErrHelp] if -help or -h were set but not defined.
-internal static error Parse⁔(/*this*/ ж<FlagSet> Ꮡf, slice<@string> arguments) {
+public static error Parse(this ж<FlagSet> Ꮡf, slice<@string> arguments) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     f.parsed = true;
@@ -1261,9 +1428,11 @@ internal static error Parse⁔(/*this*/ ж<FlagSet> Ꮡf, slice<@string> argumen
 }
 
 // Parsed reports whether f.Parse has been called.
-internal static bool Parsed⁔(/*this*/ ref FlagSet f) {
+public static bool Parsed(this ref FlagSet f) {
     return f.parsed;
 }
+
+} partial class flag_package {
 
 // Parse parses the command-line flags from [os.Args][1:]. Must be called
 // after all flags are defined and before flags are accessed by the program.
@@ -1314,12 +1483,14 @@ public static ж<FlagSet> NewFlagSet(@string name, ErrorHandling errorHandling) 
     return f;
 }
 
+} partial class flagᴛFlagSet {
+
 // Init sets the name and error handling property for a flag set.
 // By default, the zero [FlagSet] uses an empty name and the
 // [ContinueOnError] error handling policy.
-internal static void Init⁔(/*this*/ ref FlagSet f, @string name, ErrorHandling errorHandling) {
+public static void Init(this ref FlagSet f, @string name, ErrorHandling errorHandling) {
     f.name = name;
     f.errorHandling = errorHandling;
 }
 
-} // end flag_package
+}

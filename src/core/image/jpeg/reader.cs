@@ -13,18 +13,27 @@ using imageutil = go.image.@internal.imageutil_package;
 using io = io_package;
 using go.image;
 using go.image.@internal;
+using static jpeg_package;
 
 partial class jpeg_package {
 
 // A FormatError reports that the input is not a valid JPEG.
 partial struct FormatError /*@string*/;
 
-internal static @string Error⁔(/*this*/ FormatError e) { return "invalid JPEG format: "u8 + ((@string)e); }
+} partial class jpegᴛFormatError {
+
+public static @string Error(this FormatError e) { return "invalid JPEG format: "u8 + ((@string)e); }
+
+} partial class jpeg_package {
 
 // An UnsupportedError reports that the input uses a valid but unimplemented JPEG feature.
 partial struct UnsupportedError /*@string*/;
 
-internal static @string Error⁔(/*this*/ UnsupportedError e) { return "unsupported JPEG feature: "u8 + ((@string)e); }
+} partial class jpegᴛUnsupportedError {
+
+public static @string Error(this UnsupportedError e) { return "unsupported JPEG feature: "u8 + ((@string)e); }
+
+} partial class jpeg_package {
 
 internal static UnsupportedError errUnsupportedSubsamplingRatio = ((UnsupportedError)(@string)"luma/chroma subsampling ratio");
 
@@ -141,9 +150,11 @@ partial struct decoder {
     internal array<byte> tmp = new(2 * blockSize);
 }
 
+} partial class jpegᴛdecoder {
+
 // fill fills up the d.bytes.buf buffer from the underlying io.Reader. It
 // should only be called when there are no unread bytes in d.bytes.
-internal static error fill⁔(/*this*/ ref decoder d) {
+internal static error fill(this ref decoder d) {
     if (d.bytes.i != d.bytes.j) {
         throw panic("jpeg: fill called when unread bytes exist");
     }
@@ -171,7 +182,7 @@ internal static error fill⁔(/*this*/ ref decoder d) {
 // requires at least 8 bits for look-up, which means that Huffman decoding can
 // sometimes overshoot and read one or two too many bytes. Two-byte overshoot
 // can happen when expecting to read a 0xff 0x00 byte-stuffed byte.
-internal static void unreadByteStuffedByte⁔(/*this*/ ref decoder d) {
+internal static void unreadByteStuffedByte(this ref decoder d) {
     d.bytes.i -= d.bytes.nUnreadable;
     d.bytes.nUnreadable = 0;
     if (d.bits.n >= 8) {
@@ -183,7 +194,7 @@ internal static void unreadByteStuffedByte⁔(/*this*/ ref decoder d) {
 
 // readByte returns the next byte, whether buffered or not buffered. It does
 // not care about byte stuffing.
-internal static (byte x, error err) readByte⁔(/*this*/ ref decoder d) {
+internal static (byte x, error err) readByte(this ref decoder d) {
     byte x = default;
     error err = default;
 
@@ -198,12 +209,16 @@ internal static (byte x, error err) readByte⁔(/*this*/ ref decoder d) {
     return (x, default);
 }
 
+} partial class jpeg_package {
+
 // errMissingFF00 means that readByteStuffedByte encountered an 0xff byte (a
 // marker byte) that wasn't the expected byte-stuffed sequence 0xff, 0x00.
 internal static FormatError errMissingFF00 = ((FormatError)(@string)"missing 0xff00 sequence");
 
+} partial class jpegᴛdecoder {
+
 // readByteStuffedByte is like readByte but is for byte-stuffed Huffman data.
-internal static (byte x, error err) readByteStuffedByte⁔(/*this*/ ref decoder d) {
+internal static (byte x, error err) readByteStuffedByte(this ref decoder d) {
     byte x = default;
     error err = default;
 
@@ -247,7 +262,7 @@ internal static (byte x, error err) readByteStuffedByte⁔(/*this*/ ref decoder 
 
 // readFull reads exactly len(p) bytes into p. It does not care about byte
 // stuffing.
-internal static error readFull⁔(/*this*/ ref decoder d, slice<byte> p) {
+internal static error readFull(this ref decoder d, slice<byte> p) {
     // Unread the overshot bytes, if any.
     if (d.bytes.nUnreadable != 0) {
         if (d.bits.n >= 8) {
@@ -271,7 +286,7 @@ internal static error readFull⁔(/*this*/ ref decoder d, slice<byte> p) {
 }
 
 // ignore ignores the next n bytes.
-internal static error ignore⁔(/*this*/ ref decoder d, nint n) {
+internal static error ignore(this ref decoder d, nint n) {
     // Unread the overshot bytes, if any.
     if (d.bytes.nUnreadable != 0) {
         if (d.bits.n >= 8) {
@@ -314,7 +329,7 @@ internal static ref readonly @string lumaChromaSubsamplingˢ => ref lumaChromaSu
 private static readonly @string lumaChromaSubsamplingˢᵇ = "luma/chroma subsampling ratio"u8;
 
 // Specified in section B.2.2.
-internal static error processSOF⁔(/*this*/ ref decoder d, nint n) {
+internal static error processSOF(this ref decoder d, nint n) {
     if (d.nComp != 0) {
         return ((FormatError)(@string)multipleSofMarkersˢ);
     }
@@ -464,7 +479,7 @@ internal static ref readonly @string dqtHasWrongLengthˢ => ref dqtHasWrongLengt
 private static readonly @string dqtHasWrongLengthˢᵇ = "DQT has wrong length"u8;
 
 // Specified in section B.2.4.1.
-internal static error processDQT⁔(/*this*/ ref decoder d, nint n) {
+internal static error processDQT(this ref decoder d, nint n) {
 loop:
     while (n > 0) {
         n--;
@@ -520,7 +535,7 @@ internal static ref readonly @string driHasWrongLengthˢ => ref driHasWrongLengt
 private static readonly @string driHasWrongLengthˢᵇ = "DRI has wrong length"u8;
 
 // Specified in section B.2.4.4.
-internal static error processDRI⁔(/*this*/ ref decoder d, nint n) {
+internal static error processDRI(this ref decoder d, nint n) {
     if (n != 2) {
         return ((FormatError)(@string)driHasWrongLengthˢ);
     }
@@ -531,7 +546,7 @@ internal static error processDRI⁔(/*this*/ ref decoder d, nint n) {
     return default;
 }
 
-internal static error processApp0Marker⁔(/*this*/ ref decoder d, nint n) {
+internal static error processApp0Marker(this ref decoder d, nint n) {
     if (n < 5) {
         return d.ignore(n);
     }
@@ -548,7 +563,7 @@ internal static error processApp0Marker⁔(/*this*/ ref decoder d, nint n) {
     return default;
 }
 
-internal static error processApp14Marker⁔(/*this*/ ref decoder d, nint n) {
+internal static error processApp14Marker(this ref decoder d, nint n) {
     if (n < 12) {
         return d.ignore(n);
     }
@@ -579,7 +594,7 @@ internal static ref readonly @string missingSosMarkerˢ => ref missingSosMarker�
 private static readonly @string missingSosMarkerˢᵇ = "missing SOS marker"u8;
 
 // decode reads a JPEG image from r and returns it as an image.Image.
-internal static (image.Image, error) decode⁔(/*this*/ ref decoder d, io.Reader r, bool configOnly) {
+internal static (image.Image, error) decode(this ref decoder d, io.Reader r, bool configOnly) {
     d.r = r;
 
     // Check for the Start Of Image marker.
@@ -744,14 +759,18 @@ internal static (image.Image, error) decode⁔(/*this*/ ref decoder d, io.Reader
     return (default, ((FormatError)(@string)missingSosMarkerˢ));
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string unknownColorModel4ˢ => ref unknownColorModel4ˢᵇ;
-private static readonly @string unknownColorModel4ˢᵇ = "unknown color model: 4-component JPEG doesn't have Adobe APP14 metadata"u8;
+} partial class jpeg_package {
 
 internal partial struct applyBlack_translations /*dyn*/ {
     internal slice<byte> src;
     internal nint stride;
 }
+
+} partial class jpegᴛdecoder {
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string unknownColorModel4ˢ => ref unknownColorModel4ˢᵇ;
+private static readonly @string unknownColorModel4ˢᵇ = "unknown color model: 4-component JPEG doesn't have Adobe APP14 metadata"u8;
 
 // applyBlack combines d.img3 and d.blackPix into a CMYK image. The formula
 // used depends on whether the JPEG image is stored as CMYK or YCbCrK,
@@ -760,7 +779,7 @@ internal partial struct applyBlack_translations /*dyn*/ {
 // Adobe CMYK JPEG images are inverted, where 255 means no ink instead of full
 // ink, so we apply "v = 255 - v" at various points. Note that a double
 // inversion is a no-op, so inversions might be implicit in the code below.
-internal static (image.Image, error) applyBlack⁔(/*this*/ ref decoder d) {
+internal static (image.Image, error) applyBlack(this ref decoder d) {
     if (!d.adobeTransformValid) {
         return (default, ((UnsupportedError)(@string)unknownColorModel4ˢ));
     }
@@ -822,7 +841,7 @@ internal static (image.Image, error) applyBlack⁔(/*this*/ ref decoder d) {
     return (new image.CMYKжImage(img), default);
 }
 
-internal static bool isRGB⁔(/*this*/ ref decoder d) {
+internal static bool isRGB(this ref decoder d) {
     if (d.jfif) {
         return false;
     }
@@ -834,7 +853,7 @@ internal static bool isRGB⁔(/*this*/ ref decoder d) {
     return d.comp[0].c == 'R' && d.comp[1].c == 'G' && d.comp[2].c == 'B';
 }
 
-internal static (image.Image, error) convertToRGB⁔(/*this*/ ref decoder d) {
+internal static (image.Image, error) convertToRGB(this ref decoder d) {
     nint cScale = quo(d.comp[0].h, d.comp[1].h);
     var bounds = d.img3.Bounds();
     var img = image.NewRGBA(bounds);
@@ -851,6 +870,8 @@ internal static (image.Image, error) convertToRGB⁔(/*this*/ ref decoder d) {
     }
     return (new image.RGBAжImage(img), default);
 }
+
+} partial class jpeg_package {
 
 // Decode reads a JPEG image from r and returns it as an [image.Image].
 public static (image.Image, error) Decode(io.Reader r) {

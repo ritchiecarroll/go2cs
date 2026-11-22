@@ -13,6 +13,7 @@ using io = io_package;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140;
 using nistec = go.crypto.@internal.fips140.nistec_package;
+using static ecdh_package;
 
 partial class ecdh_package {
 
@@ -24,7 +25,9 @@ partial struct nistCurve {
     internal Func<ж<ecdh.PrivateKey>, ж<ecdh.PublicKey>, (slice<byte> sharedSecret, error err)> sharedSecret;
 }
 
-internal static @string String⁔(/*this*/ ref nistCurve c) {
+} partial class ecdhᴛnistCurve {
+
+internal static @string String(this ref nistCurve c) {
     return c.name;
 }
 
@@ -32,7 +35,7 @@ internal static @string String⁔(/*this*/ ref nistCurve c) {
 private static ref readonly @string cryptoEcdhOnlyCryptoRandˢ => ref cryptoEcdhOnlyCryptoRandˢᵇ;
 private static readonly @string cryptoEcdhOnlyCryptoRandˢᵇ = "crypto/ecdh: only crypto/rand.Reader is allowed in FIPS 140-only mode"u8;
 
-internal static (ж<PrivateKey>, error) GenerateKey⁔(/*this*/ ж<nistCurve> Ꮡc, io.Reader r) {
+internal static (ж<PrivateKey>, error) GenerateKey(this ж<nistCurve> Ꮡc, io.Reader r) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (boring.Enabled && rand.IsDefaultReader(r)) {
@@ -93,7 +96,7 @@ internal static (ж<PrivateKey>, error) GenerateKey⁔(/*this*/ ж<nistCurve> �
 private static ref readonly @string cryptoEcdhInvalidPrivateˢ => ref cryptoEcdhInvalidPrivateˢᵇ;
 private static readonly @string cryptoEcdhInvalidPrivateˢᵇ = "crypto/ecdh: invalid private key"u8;
 
-internal static (ж<PrivateKey>, error) NewPrivateKey⁔(/*this*/ ж<nistCurve> Ꮡc, slice<byte> key) {
+internal static (ж<PrivateKey>, error) NewPrivateKey(this ж<nistCurve> Ꮡc, slice<byte> key) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (boring.Enabled) {
@@ -135,7 +138,7 @@ internal static (ж<PrivateKey>, error) NewPrivateKey⁔(/*this*/ ж<nistCurve> 
 private static ref readonly @string cryptoEcdhInvalidPublicˢ => ref cryptoEcdhInvalidPublicˢᵇ;
 private static readonly @string cryptoEcdhInvalidPublicˢᵇ = "crypto/ecdh: invalid public key"u8;
 
-internal static (ж<PublicKey>, error) NewPublicKey⁔(/*this*/ ж<nistCurve> Ꮡc, slice<byte> key) {
+internal static (ж<PublicKey>, error) NewPublicKey(this ж<nistCurve> Ꮡc, slice<byte> key) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     // Reject the point at infinity and compressed encodings.
@@ -163,7 +166,7 @@ internal static (ж<PublicKey>, error) NewPublicKey⁔(/*this*/ ж<nistCurve> �
     return (k, default);
 }
 
-internal static (slice<byte>, error) ecdh⁔(/*this*/ ref nistCurve c, ж<PrivateKey> Ꮡlocal, ж<PublicKey> Ꮡremote) {
+internal static (slice<byte>, error) ecdh(this ref nistCurve c, ж<PrivateKey> Ꮡlocal, ж<PublicKey> Ꮡremote) {
     ref var local = ref Ꮡlocal.DerefOrNull();
     ref var remote = ref Ꮡremote.DerefOrNull();
 
@@ -179,6 +182,8 @@ internal static (slice<byte>, error) ecdh⁔(/*this*/ ref nistCurve c, ж<Privat
     }
     return c.sharedSecret(local.fips, remote.fips);
 }
+
+} partial class ecdh_package {
 
 // P256 returns a [Curve] which implements NIST P-256 (FIPS 186-3, section D.2.3),
 // also known as secp256r1 or prime256v1.

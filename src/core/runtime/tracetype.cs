@@ -12,6 +12,7 @@ using @internal;
 using @internal.runtime;
 using @internal.trace;
 using atomic = @internal.runtime.atomic_package;
+using static runtime_package;
 
 partial class runtime_package {
 
@@ -21,11 +22,13 @@ partial struct traceTypeTable {
     internal traceMap tab;
 }
 
+} partial class runtimeᴛtraceTypeTable {
+
 // put returns a unique id for the type typ and caches it in the table,
 // if it's seeing it for the first time.
 //
 // N.B. typ must be kept alive forever for this to work correctly.
-internal static uint64 put⁔(/*this*/ ж<traceTypeTable> Ꮡt, ж<abi.Type> Ꮡtyp) {
+internal static uint64 put(this ж<traceTypeTable> Ꮡt, ж<abi.Type> Ꮡtyp) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
     if (Ꮡtyp == nil) {
@@ -40,7 +43,7 @@ internal static uint64 put⁔(/*this*/ ж<traceTypeTable> Ꮡt, ж<abi.Type> Ꮡ
 // dump writes all previously cached types to trace buffers and
 // releases all memory and resets state. It must only be called once the caller
 // can guarantee that there are no more writers to the table.
-internal static void dump⁔(/*this*/ ж<traceTypeTable> Ꮡt, uintptr gen) {
+internal static void dump(this ж<traceTypeTable> Ꮡt, uintptr gen) {
     var w = unsafeTraceExpWriter(gen, nil, tracev2.AllocFree);
     var root = @unsafe.Pointer.To<traceMapNode>(Ꮡt.Ꮡtab.Ꮡroot.Load()); if (root != nil) {
         w = dumpTypesRec(root, w);
@@ -48,6 +51,8 @@ internal static void dump⁔(/*this*/ ж<traceTypeTable> Ꮡt, uintptr gen) {
     w.flush().end();
     Ꮡt.Ꮡtab.reset();
 }
+
+} partial class runtime_package {
 
 internal static traceWriter dumpTypesRec(ж<traceMapNode> Ꮡnode, traceWriter w) {
     ref var node = ref Ꮡnode.DerefOrNull();

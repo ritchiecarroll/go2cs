@@ -6,6 +6,7 @@ namespace go;
 using io = io_package;
 using Δsync = sync_package;
 using ꓸꓸꓸstring = Span<@string>;
+using static strings_package;
 
 partial class strings_package {
 
@@ -38,12 +39,14 @@ public static ж<Replacer> NewReplacer(params ꓸꓸꓸstring oldnewʗp) {
     return Ꮡ(new Replacer(oldnew: appendꓸꓸꓸ(slice<@string>(default), oldnew)));
 }
 
-internal static void buildOnce⁔(/*this*/ ref Replacer r) {
+} partial class stringsᴛReplacer {
+
+internal static void buildOnce(this ref Replacer r) {
     r.r = r.build();
     r.oldnew = default;
 }
 
-internal static replacer build⁔(/*this*/ ref Replacer b) {
+internal static replacer build(this ref Replacer b) {
     var oldnew = b.oldnew;
     if (len(oldnew) == 2 && len(oldnew[0]) > 1) {
         return new singleStringReplacerжreplacer(makeSingleStringReplacer(oldnew[0], oldnew[1]));
@@ -93,7 +96,7 @@ internal static replacer build⁔(/*this*/ ref Replacer b) {
 }
 
 // Replace returns a copy of s with all replacements performed.
-internal static @string Replace⁔(/*this*/ ж<Replacer> Ꮡr, @string s) {
+public static @string Replace(this ж<Replacer> Ꮡr, @string s) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     Ꮡr.Ꮡonce.Do(Ꮡr.buildOnce);
@@ -101,12 +104,14 @@ internal static @string Replace⁔(/*this*/ ж<Replacer> Ꮡr, @string s) {
 }
 
 // WriteString writes s to w with all replacements performed.
-internal static (nint n, error err) WriteString⁔(/*this*/ ж<Replacer> Ꮡr, io.Writer w, @string s) {
+public static (nint n, error err) WriteString(this ж<Replacer> Ꮡr, io.Writer w, @string s) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     Ꮡr.Ꮡonce.Do(Ꮡr.buildOnce);
     return r.r.WriteString(w, s);
 }
+
+} partial class strings_package {
 
 // trieNode is a node in a lookup trie for prioritized key/value pairs. Keys
 // and values may be empty. For example, the trie containing keys "ax", "ay",
@@ -158,7 +163,9 @@ partial struct trieNode {
     internal slice<ж<trieNode>> table;
 }
 
-internal static void add⁔(/*this*/ ref trieNode t, @string key, @string val, nint priority, ж<genericReplacer> Ꮡr) {
+} partial class stringsᴛtrieNode {
+
+internal static void add(this ref trieNode t, @string key, @string val, nint priority, ж<genericReplacer> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     if (key == ""u8) {
@@ -223,7 +230,9 @@ internal static void add⁔(/*this*/ ref trieNode t, @string key, @string val, n
     }
 }
 
-internal static (@string val, nint keylen, bool found) lookup⁔(/*this*/ ж<genericReplacer> Ꮡr, @string s, bool ignoreRoot) {
+} partial class stringsᴛgenericReplacer {
+
+internal static (@string val, nint keylen, bool found) lookup(this ж<genericReplacer> Ꮡr, @string s, bool ignoreRoot) {
     @string val = default;
     nint keylen = default;
     bool found = default;
@@ -263,6 +272,8 @@ internal static (@string val, nint keylen, bool found) lookup⁔(/*this*/ ж<gen
     }
     return (val, keylen, found);
 }
+
+} partial class strings_package {
 
 // genericReplacer is the fully generic algorithm.
 // It's used as a fallback when nothing faster can be used.
@@ -309,25 +320,33 @@ internal static ж<genericReplacer> makeGenericReplacer(slice<@string> oldnew) {
 
 partial struct appendSliceWriter /*[]byte*/;
 
+} partial class stringsᴛappendSliceWriter {
+
 // Write writes to the buffer to satisfy [io.Writer].
-internal static (nint, error) Write⁔(/*this*/ ref appendSliceWriter w, slice<byte> p) {
+internal static (nint, error) Write(this ref appendSliceWriter w, slice<byte> p) {
     w = appendꓸꓸꓸ(w, p);
     return (len(p), default);
 }
 
 // WriteString writes to the buffer without string->[]byte->string allocations.
-internal static (nint, error) WriteString⁔(/*this*/ ref appendSliceWriter w, @string s) {
+internal static (nint, error) WriteString(this ref appendSliceWriter w, @string s) {
     w = append(w, s.ꓸꓸꓸ);
     return (len(s), default);
 }
+
+} partial class strings_package {
 
 partial struct stringWriter {
     internal io.Writer w;
 }
 
-internal static (nint, error) WriteString⁔(/*this*/ stringWriter w, @string s) {
+} partial class stringsᴛstringWriter {
+
+internal static (nint, error) WriteString(this stringWriter w, @string s) {
     return w.w.Write(slice<byte>(s));
 }
+
+} partial class strings_package {
 
 internal static io.StringWriter getStringWriter(io.Writer w) {
     var (sw, ok) = w._<io.StringWriter>(ᐧ);
@@ -337,13 +356,15 @@ internal static io.StringWriter getStringWriter(io.Writer w) {
     return sw;
 }
 
-internal static @string Replace⁔(/*this*/ ж<genericReplacer> Ꮡr, @string s) {
+} partial class stringsᴛgenericReplacer {
+
+internal static @string Replace(this ж<genericReplacer> Ꮡr, @string s) {
     ref var buf = ref heap<appendSliceWriter>(new appendSliceWriter(0, len(s)), out var Ꮡbuf);
     Ꮡr.WriteString(new appendSliceWriterжWriter(Ꮡbuf), s);
     return (@string)(slice<byte>)buf;
 }
 
-internal static (nint n, error err) WriteString⁔(/*this*/ ж<genericReplacer> Ꮡr, io.Writer w, @string s) {
+internal static (nint n, error err) WriteString(this ж<genericReplacer> Ꮡr, io.Writer w, @string s) {
     nint n = default;
     error err = default;
     ref var r = ref Ꮡr.DerefOrNull();
@@ -389,6 +410,8 @@ internal static (nint n, error err) WriteString⁔(/*this*/ ж<genericReplacer> 
     return (n, err);
 }
 
+} partial class strings_package {
+
 // singleStringReplacer is the implementation that's used when there is only
 // one string to replace (and that string has more than one byte).
 partial struct singleStringReplacer {
@@ -401,7 +424,9 @@ internal static ж<singleStringReplacer> makeSingleStringReplacer(@string patter
     return Ꮡ(new singleStringReplacer(finder: makeStringFinder(pattern), value: value));
 }
 
-internal static @string Replace⁔(/*this*/ ref singleStringReplacer r, @string s) {
+} partial class stringsᴛsingleStringReplacer {
+
+internal static @string Replace(this ref singleStringReplacer r, @string s) {
     ref var buf = ref heap(new Builder(), out var Ꮡbuf);
     nint i = 0;
     var matched = false;
@@ -423,7 +448,7 @@ internal static @string Replace⁔(/*this*/ ref singleStringReplacer r, @string 
     return buf.String();
 }
 
-internal static (nint n, error err) WriteString⁔(/*this*/ ref singleStringReplacer r, io.Writer w, @string s) {
+internal static (nint n, error err) WriteString(this ref singleStringReplacer r, io.Writer w, @string s) {
     nint n = default;
     error err = default;
 
@@ -452,12 +477,16 @@ internal static (nint n, error err) WriteString⁔(/*this*/ ref singleStringRepl
     return (n, err);
 }
 
+} partial class strings_package {
+
 // byteReplacer is the implementation that's used when all the "old"
 // and "new" values are single ASCII bytes.
 // The array contains replacement bytes indexed by old byte.
 partial struct byteReplacer /*[256]byte*/;
 
-internal static @string Replace⁔(/*this*/ ref byteReplacer r, @string s) {
+} partial class stringsᴛbyteReplacer {
+
+internal static @string Replace(this ref byteReplacer r, @string s) {
     slice<byte> buf = default; // lazily allocated
     for (nint i = 0; i < len(s); i++) {
         var b = s[i];
@@ -474,7 +503,7 @@ internal static @string Replace⁔(/*this*/ ref byteReplacer r, @string s) {
     return (@string)buf;
 }
 
-internal static (nint n, error err) WriteString⁔(/*this*/ ref byteReplacer r, io.Writer w, @string s) {
+internal static (nint n, error err) WriteString(this ref byteReplacer r, io.Writer w, @string s) {
     nint n = default;
 
     var sw = getStringWriter(w);
@@ -508,6 +537,8 @@ internal static (nint n, error err) WriteString⁔(/*this*/ ref byteReplacer r, 
     return (n, default);
 }
 
+} partial class strings_package {
+
 // byteStringReplacer is the implementation that's used when all the
 // "old" values are single ASCII bytes but the "new" values vary in size.
 partial struct byteStringReplacer {
@@ -529,7 +560,9 @@ partial struct byteStringReplacer {
 // TODO(tocarip) revisit once we have register-based abi/mid-stack inlining.
 internal static UntypedInt countCutOff => 8;
 
-internal static @string Replace⁔(/*this*/ ref byteStringReplacer r, @string s) {
+} partial class stringsᴛbyteStringReplacer {
+
+internal static @string Replace(this ref byteStringReplacer r, @string s) {
     nint newSize = len(s);
     var anyChanges = false;
     // Is it faster to use Count?
@@ -568,7 +601,7 @@ internal static @string Replace⁔(/*this*/ ref byteStringReplacer r, @string s)
     return (@string)buf;
 }
 
-internal static (nint n, error err) WriteString⁔(/*this*/ ref byteStringReplacer r, io.Writer w, @string s) {
+internal static (nint n, error err) WriteString(this ref byteStringReplacer r, io.Writer w, @string s) {
     nint n = default;
     error err = default;
 
@@ -601,4 +634,4 @@ internal static (nint n, error err) WriteString⁔(/*this*/ ref byteStringReplac
     return (n, err);
 }
 
-} // end strings_package
+}

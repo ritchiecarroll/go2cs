@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -78,6 +79,8 @@ internal static (T, bool) take<T>(this ref pool<T> p) {
 partial struct keeper {
 }
 
-internal static @string pool⁔(/*this*/ keeper k) { return "kept"; }
+} partial class mainᴛkeeper {
 
-} // end main_package
+internal static @string pool(this keeper k) { return "kept"; }
+
+}

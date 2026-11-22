@@ -14,6 +14,7 @@ using errors = global::go.@internal.types.errors_package;
 using global::go.go;
 using iter = iter_package;
 using path;
+using static types_package;
 
 partial class types_package {
 
@@ -128,32 +129,36 @@ public static ж<Signature> NewSignatureType(ж<Var> recv, slice<ж<TypeParam>> 
     return sig;
 }
 
+} partial class typesᴛSignature {
+
 // Recv returns the receiver of signature s (if a method), or nil if a
 // function. It is ignored when comparing signatures for identity.
 //
 // For an abstract method, Recv returns the enclosing interface either
 // as a *[Named] or an *[Interface]. Due to embedding, an interface may
 // contain methods whose receiver type is a different interface.
-internal static ж<Var> Recv⁔(/*this*/ ref Signature s) { return s.recv; }
+public static ж<Var> Recv(this ref Signature s) { return s.recv; }
 
 // TypeParams returns the type parameters of signature s, or nil.
-internal static ж<TypeParamList> TypeParams⁔(/*this*/ ref Signature s) { return s.tparams; }
+public static ж<TypeParamList> TypeParams(this ref Signature s) { return s.tparams; }
 
 // RecvTypeParams returns the receiver type parameters of signature s, or nil.
-internal static ж<TypeParamList> RecvTypeParams⁔(/*this*/ ref Signature s) { return s.rparams; }
+public static ж<TypeParamList> RecvTypeParams(this ref Signature s) { return s.rparams; }
 
 // Params returns the parameters of signature s, or nil.
 // See [NewSignatureType] for details of variadic functions.
-internal static ж<Tuple> Params⁔(/*this*/ ref Signature s) { return s.@params; }
+public static ж<Tuple> Params(this ref Signature s) { return s.@params; }
 
 // Results returns the results of signature s, or nil.
-internal static ж<Tuple> Results⁔(/*this*/ ref Signature s) { return s.results; }
+public static ж<Tuple> Results(this ref Signature s) { return s.results; }
 
 // Variadic reports whether the signature s is variadic.
-internal static bool Variadic⁔(/*this*/ ref Signature s) { return s.variadic; }
+public static bool Variadic(this ref Signature s) { return s.variadic; }
 
-internal static Type Underlying⁔(/*this*/ ж<Signature> Ꮡs) { return new SignatureжType(Ꮡs); }
-internal static @string String⁔(/*this*/ ж<Signature> Ꮡs) { return TypeString(new SignatureжType(Ꮡs), default); }
+public static Type Underlying(this ж<Signature> Ꮡs) { return new SignatureжType(Ꮡs); }
+public static @string String(this ж<Signature> Ꮡs) { return TypeString(new SignatureжType(Ꮡs), default); }
+
+} partial class typesᴛChecker {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string methodHasMultipleˢ => ref methodHasMultipleˢᵇ;
@@ -163,7 +168,7 @@ private static readonly @string methodHasMultipleˢᵇ = "method has multiple re
 // Implementation
 
 // funcType type-checks a function or method type.
-internal static void funcType⁔(/*this*/ ж<Checker> Ꮡcheck, ж<Signature> Ꮡsig, ж<ast.FieldList> ᏑrecvPar, ж<ast.FuncType> Ꮡftyp) {
+internal static void funcType(this ж<Checker> Ꮡcheck, ж<Signature> Ꮡsig, ж<ast.FieldList> ᏑrecvPar, ж<ast.FuncType> Ꮡftyp) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -225,10 +230,14 @@ internal static void funcType⁔(/*this*/ ж<Checker> Ꮡcheck, ж<Signature> �
     finally { if (ᒐd1) Ꮡcheck.DerefOrNull().closeScope(); ᒐ.Run(); }
 }
 
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string typeParameterˢ => ref typeParameterˢᵇ;
+private static readonly @string typeParameterˢᵇ = "type parameter"u8;
+
 // collectRecv extracts the method receiver and its type parameters (if any) from rparam.
 // It declares the type parameters (but not the receiver) in the current scope, and
 // returns the receiver variable and its type parameter list (if any).
-internal static (ж<Var>, ж<TypeParamList>) collectRecv⁔(/*this*/ ж<Checker> Ꮡcheck, ж<ast.Field> Ꮡrparam, token.Pos scopePos) {
+internal static (ж<Var>, ж<TypeParamList>) collectRecv(this ж<Checker> Ꮡcheck, ж<ast.Field> Ꮡrparam, token.Pos scopePos) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var rparam = ref Ꮡrparam.DerefOrNull();
 
@@ -387,6 +396,8 @@ internal static (ж<Var>, ж<TypeParamList>) collectRecv⁔(/*this*/ ж<Checker>
     return (recv, recvTParamsList);
 }
 
+} partial class types_package {
+
 internal static Type unpointer(Type t) {
     for (;;) {
         var (p, _) = t._<ж<Pointer>>(ᐧ);
@@ -396,6 +407,8 @@ internal static Type unpointer(Type t) {
         t = p.@base;
     }
 }
+
+} partial class typesᴛChecker {
 
 // recordParenthesizedRecvTypes records parenthesized intermediate receiver type
 // expressions that all map to the same type, by recursively unpacking expr and
@@ -407,7 +420,7 @@ internal static Type unpointer(Type t) {
 //	 *(T[P])         *T[P]
 //	  (T[P])          T[P]
 //	   T[P]           T[P]
-internal static void recordParenthesizedRecvTypes⁔(/*this*/ ref Checker check, ast.Expr expr, Type typ) {
+internal static void recordParenthesizedRecvTypes(this ref Checker check, ast.Expr expr, Type typ) {
     for (;;) {
         check.recordTypeAndValue(expr, typexpr, typ, default);
         switch (expr.type()) {
@@ -443,7 +456,7 @@ private static readonly @string listContainsBothNamedAndˢᵇ = "list contains b
 // variables of list and returns the list of names and corresponding
 // variables, and whether the (parameter) list is variadic.
 // Anonymous parameters are recorded with nil names.
-internal static (slice<ж<ast.Ident>> names, slice<ж<Var>> @params, bool variadic) collectParams⁔(/*this*/ ж<Checker> Ꮡcheck, VarKind kind, ж<ast.FieldList> Ꮡlist) {
+internal static (slice<ж<ast.Ident>> names, slice<ж<Var>> @params, bool variadic) collectParams(this ж<Checker> Ꮡcheck, VarKind kind, ж<ast.FieldList> Ꮡlist) {
     slice<ж<ast.Ident>> names = default;
     slice<ж<Var>> @params = default;
     bool variadic = default;
@@ -511,7 +524,7 @@ internal static (slice<ж<ast.Ident>> names, slice<ж<Var>> @params, bool variad
 }
 
 // declareParams declares each named parameter in the current scope.
-internal static void declareParams⁔(/*this*/ ж<Checker> Ꮡcheck, slice<ж<ast.Ident>> names, slice<ж<Var>> @params, token.Pos scopePos) {
+internal static void declareParams(this ж<Checker> Ꮡcheck, slice<ж<ast.Ident>> names, slice<ж<Var>> @params, token.Pos scopePos) {
     ref var check = ref Ꮡcheck.DerefOrNull();
 
     foreach (var (i, name) in range(names)) {
@@ -529,7 +542,7 @@ private static readonly @string pointerOrInterfaceTypeˢᵇ = "pointer or interf
 
 // validRecv verifies that the receiver satisfies its respective spec requirements
 // and reports an error otherwise.
-internal static void validRecv⁔(/*this*/ ж<Checker> Ꮡcheck, positioner pos, ж<Var> Ꮡrecv) {
+internal static void validRecv(this ж<Checker> Ꮡcheck, positioner pos, ж<Var> Ꮡrecv) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var recv = ref Ꮡrecv.DerefOrNull();
 
@@ -585,6 +598,8 @@ internal static void validRecv⁔(/*this*/ ж<Checker> Ꮡcheck, positioner pos,
         break;
     }}
 }
+
+} partial class types_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string ctypeˢ => ref ctypeˢᵇ;

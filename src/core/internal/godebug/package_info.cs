@@ -14,7 +14,6 @@
 
 using go;
 using static go.@internal.godebug_package;
-using System.ComponentModel;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -98,6 +97,6 @@ public static partial class godebug_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(godebug_package.Setting)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class godebugᴛSetting;
-[GoMethodHost(typeof(godebug_package.runtimeStderr)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class godebugᴛruntimeStderr;
+[GoMethodHost(typeof(godebug_package.Setting)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class godebugᴛSetting;
+[GoMethodHost(typeof(godebug_package.runtimeStderr)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class godebugᴛruntimeStderr;
 // </MethodHolders>

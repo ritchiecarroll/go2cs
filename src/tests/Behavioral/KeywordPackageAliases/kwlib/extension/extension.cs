@@ -1,12 +1,18 @@
 namespace go.go.kwlib;
 
+using static extension_package;
+
 partial class extension_package {
 
 public static @string Name() { return "extension"; }
 
 partial struct Kind /*num:nint*/;
 
-internal static Kind Double⁔(/*this*/ Kind k) { return k * 2; }
+} partial class extensionᴛKind {
+
+public static Kind Double(this Kind k) { return k * 2; }
+
+} partial class extension_package {
 
 partial struct Δextension {
     internal nint n;

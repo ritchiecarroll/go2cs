@@ -3,6 +3,7 @@ namespace go;
 using fmt = fmt_package;
 using shapes = FuncMethodSameNameCollision.shapes_package;
 using FuncMethodSameNameCollision;
+using static main_package;
 
 partial class main_package {
 
@@ -10,7 +11,11 @@ partial struct Node {
     public nint Depth;
 }
 
-internal static bool Deep⁔(/*this*/ ref Node n) { return n.Depth > 2; }
+} partial class mainᴛNode {
+
+public static bool Deep(this ref Node n) { return n.Depth > 2; }
+
+} partial class main_package {
 
 public static bool Deep(ж<Node> Ꮡn) {
     ref var n = ref Ꮡn.DerefOrNull();

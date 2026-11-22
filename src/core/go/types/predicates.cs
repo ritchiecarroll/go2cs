@@ -9,6 +9,7 @@ namespace go.go;
 using slices = slices_package;
 using unicode = unicode_package;
 using token = global::go.go.token_package;
+using static types_package;
 
 partial class types_package {
 
@@ -262,11 +263,15 @@ partial struct ifacePair {
     internal ж<ifacePair> prev;
 }
 
-internal static bool identical⁔(/*this*/ ref ifacePair p, ж<ifacePair> Ꮡq) {
+} partial class typesᴛifacePair {
+
+internal static bool identical(this ref ifacePair p, ж<ifacePair> Ꮡq) {
     ref var q = ref Ꮡq.DerefOrNull();
 
     return p.x == q.x && p.y == q.y || p.x == q.y && p.y == q.x;
 }
+
+} partial class types_package {
 
 // A comparer is used to compare types.
 partial struct comparer {
@@ -274,8 +279,10 @@ partial struct comparer {
     internal bool ignoreInvalids; // if set, identical treats an invalid type as identical to any type
 }
 
+} partial class typesᴛcomparer {
+
 // For changes to this code the corresponding changes should be made to unifier.nify.
-internal static bool identical⁔(/*this*/ ref comparer c, Type x, Type y, ж<ifacePair> Ꮡp) {
+internal static bool identical(this ref comparer c, Type x, Type y, ж<ifacePair> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
     var targsᴷ = new stackAppend<Type>();
 
@@ -538,6 +545,8 @@ internal static bool identical⁔(/*this*/ ref comparer c, Type x, Type y, ж<if
 
     return false;
 }
+
+} partial class types_package {
 
 // identicalOrigin reports whether x and y originated in the same declaration.
 internal static bool identicalOrigin(ж<Named> x, ж<Named> y) {

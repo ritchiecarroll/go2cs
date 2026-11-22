@@ -5,6 +5,7 @@ namespace go.vendor.golang.org.x.text.unicode;
 
 using binary = encoding.binary_package;
 using encoding;
+using static norm_package;
 
 partial class norm_package {
 
@@ -79,6 +80,8 @@ partial struct formInfo {
     nextMain: nextDecomposed))
 ]; }
 
+} partial class normᴛProperties {
+
 // We do not distinguish between boundaries for NFC, NFD, etc. to avoid
 // unexpected behavior for the user.  For example, in NFD, there is a boundary
 // after 'a'.  However, 'a' might combine with modifiers, so from the application's
@@ -87,7 +90,7 @@ partial struct formInfo {
 
 // BoundaryBefore returns true if this rune starts a new segment and
 // cannot combine with any rune on the left.
-internal static bool BoundaryBefore⁔(/*this*/ Properties p) {
+public static bool BoundaryBefore(this Properties p) {
     if (p.ccc == 0 && !p.combinesBackward()) {
         return true;
     }
@@ -99,10 +102,12 @@ internal static bool BoundaryBefore⁔(/*this*/ Properties p) {
 
 // BoundaryAfter returns true if runes cannot combine with or otherwise
 // interact with this or previous runes.
-internal static bool BoundaryAfter⁔(/*this*/ Properties p) {
+public static bool BoundaryAfter(this Properties p) {
     // TODO: loosen these conditions.
     return p.isInert();
 }
+
+} partial class norm_package {
 
 // We pack quick check data in 4 bits:
 //
@@ -115,32 +120,34 @@ internal static bool BoundaryAfter⁔(/*this*/ Properties p) {
 // influenced by normalization.
 partial struct qcInfo /*num:uint8*/;
 
-internal static bool isYesC⁔(/*this*/ Properties p) { return (qcInfo)(p.flags & 0x10) == 0; }
-internal static bool isYesD⁔(/*this*/ Properties p) { return (qcInfo)(p.flags & 0x4) == 0; }
+} partial class normᴛProperties {
 
-internal static bool combinesForward⁔(/*this*/ Properties p) { return (qcInfo)(p.flags & 0x20) != 0; }
-internal static bool combinesBackward⁔(/*this*/ Properties p) { return (qcInfo)(p.flags & 0x8) != 0; } // == isMaybe
-internal static bool hasDecomposition⁔(/*this*/ Properties p) { return (qcInfo)(p.flags & 0x4) != 0; } // == isNoD
+internal static bool isYesC(this Properties p) { return (qcInfo)(p.flags & 0x10) == 0; }
+internal static bool isYesD(this Properties p) { return (qcInfo)(p.flags & 0x4) == 0; }
 
-internal static bool isInert⁔(/*this*/ Properties p) {
+internal static bool combinesForward(this Properties p) { return (qcInfo)(p.flags & 0x20) != 0; }
+internal static bool combinesBackward(this Properties p) { return (qcInfo)(p.flags & 0x8) != 0; } // == isMaybe
+internal static bool hasDecomposition(this Properties p) { return (qcInfo)(p.flags & 0x4) != 0; } // == isNoD
+
+internal static bool isInert(this Properties p) {
     return (qcInfo)(p.flags & (uint8)qcInfoMask) == 0 && p.ccc == 0;
 }
 
-internal static bool multiSegment⁔(/*this*/ Properties p) {
+internal static bool multiSegment(this Properties p) {
     return p.index >= firstMulti && p.index < endMulti;
 }
 
-internal static uint8 nLeadingNonStarters⁔(/*this*/ Properties p) {
+internal static uint8 nLeadingNonStarters(this Properties p) {
     return p.nLead;
 }
 
-internal static uint8 nTrailingNonStarters⁔(/*this*/ Properties p) {
+internal static uint8 nTrailingNonStarters(this Properties p) {
     return (uint8)((qcInfo)(p.flags & 0x03));
 }
 
 // Decomposition returns the decomposition for the underlying rune
 // or nil if there is none.
-internal static slice<byte> Decomposition⁔(/*this*/ Properties p) {
+public static slice<byte> Decomposition(this Properties p) {
     // TODO: create the decomposition for Hangul?
     if (p.index == 0) {
         return default;
@@ -152,12 +159,12 @@ internal static slice<byte> Decomposition⁔(/*this*/ Properties p) {
 }
 
 // Size returns the length of UTF-8 encoding of the rune.
-internal static nint Size⁔(/*this*/ Properties p) {
+public static nint Size(this Properties p) {
     return (nint)p.size;
 }
 
 // CCC returns the canonical combining class of the underlying rune.
-internal static uint8 CCC⁔(/*this*/ Properties p) {
+public static uint8 CCC(this Properties p) {
     if (p.index >= firstCCCZeroExcept) {
         return 0;
     }
@@ -166,15 +173,17 @@ internal static uint8 CCC⁔(/*this*/ Properties p) {
 
 // LeadCCC returns the CCC of the first rune in the decomposition.
 // If there is no decomposition, LeadCCC equals CCC.
-internal static uint8 LeadCCC⁔(/*this*/ Properties p) {
+public static uint8 LeadCCC(this Properties p) {
     return ccc[p.ccc];
 }
 
 // TrailCCC returns the CCC of the last rune in the decomposition.
 // If there is no decomposition, TrailCCC equals CCC.
-internal static uint8 TrailCCC⁔(/*this*/ Properties p) {
+public static uint8 TrailCCC(this Properties p) {
     return ccc[p.tccc];
 }
+
+} partial class norm_package {
 
 internal static void buildRecompMap() {
     recompMap = new map<uint32, rune>(len(recompMapPacked) / 8);
@@ -216,8 +225,10 @@ internal static Properties lookupInfoNFKC(input b, nint i) {
     return compInfo(v, sz);
 }
 
+} partial class normᴛForm {
+
 // Properties returns properties for the first rune in s.
-internal static Properties Properties⁔(/*this*/ Form f, slice<byte> s) {
+public static Properties Properties(this Form f, slice<byte> s) {
     if (f == NFC || f == NFD) {
         var (ᴛ1, ᴛ2) = nfcData.lookup(s);
         return compInfo(ᴛ1, ᴛ2);
@@ -227,7 +238,7 @@ internal static Properties Properties⁔(/*this*/ Form f, slice<byte> s) {
 }
 
 // PropertiesString returns properties for the first rune in s.
-internal static Properties PropertiesString⁔(/*this*/ Form f, @string s) {
+public static Properties PropertiesString(this Form f, @string s) {
     if (f == NFC || f == NFD) {
         var (ᴛ5, ᴛ6) = nfcData.lookupString(s);
         return compInfo(ᴛ5, ᴛ6);
@@ -235,6 +246,8 @@ internal static Properties PropertiesString⁔(/*this*/ Form f, @string s) {
     var (ᴛ7, ᴛ8) = nfkcData.lookupString(s);
     return compInfo(ᴛ7, ᴛ8);
 }
+
+} partial class norm_package {
 
 // compInfo converts the information contained in v and sz
 // to a Properties.  See the comment at the top of the file

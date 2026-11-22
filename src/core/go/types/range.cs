@@ -12,8 +12,11 @@ using static global::go.@internal.types.errors_package;
 using errors = global::go.@internal.types.errors_package;
 using global::go.go;
 using token = global::go.go.token_package;
+using static types_package;
 
 partial class types_package {
+
+} partial class typesᴛChecker {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string rangeˢ => ref rangeˢᵇ;
@@ -31,7 +34,7 @@ private static readonly @string noNewVariablesOnLeftSideˢᵇ = "no new variable
 // variables are assigned to only (=) or whether there is a short variable
 // declaration (:=). If the latter and there are no variables, an error is
 // reported at noNewVarPos.
-internal static void rangeStmt⁔(/*this*/ ж<Checker> Ꮡcheck, stmtContext inner, ж<ast.RangeStmt> ᏑrangeStmt, positioner noNewVarPos, ast.Expr sKey, ast.Expr sValue, ast.Expr sExtra, ast.Expr rangeVar, bool isDef) {
+internal static void rangeStmt(this ж<Checker> Ꮡcheck, stmtContext inner, ж<ast.RangeStmt> ᏑrangeStmt, positioner noNewVarPos, ast.Expr sKey, ast.Expr sValue, ast.Expr sExtra, ast.Expr rangeVar, bool isDef) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -223,6 +226,8 @@ internal static void rangeStmt⁔(/*this*/ ж<Checker> Ꮡcheck, stmtContext inn
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { if (ᒐd1) Ꮡcheck.DerefOrNull().closeScope(); ᒐ.Run(); }
 }
+
+} partial class types_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string requiresGo122OrLaterˢ => ref requiresGo122OrLaterˢᵇ;

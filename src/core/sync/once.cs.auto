@@ -10,8 +10,11 @@
 namespace go;
 
 using atomic = go.sync.atomic_package;
-using System.Runtime.InteropServices;
+using FieldOffsetAttribute = global::System.Runtime.InteropServices.FieldOffsetAttribute;
+using LayoutKind = global::System.Runtime.InteropServices.LayoutKind;
+using StructLayoutAttribute = global::System.Runtime.InteropServices.StructLayoutAttribute;
 using go.sync;
+using static sync_package;
 
 partial class sync_package {
 
@@ -35,6 +38,8 @@ partial class sync_package {
     [FieldOffset(4)] internal Mutex m;
 }
 
+} partial class syncᴛOnce {
+
 // Do calls the function f if and only if Do is being called for the
 // first time for this instance of [Once]. In other words, given
 //
@@ -55,7 +60,7 @@ partial class sync_package {
 //
 // If f panics, Do considers it to have returned; future calls of Do return
 // without calling f.
-internal static void Do⁔(/*this*/ ж<Once> Ꮡo, Action f) {
+public static void Do(this ж<Once> Ꮡo, Action f) {
     // Note: Here is an incorrect implementation of Do:
     //
     //	if o.done.CompareAndSwap(false, true) {
@@ -76,7 +81,7 @@ internal static void Do⁔(/*this*/ ж<Once> Ꮡo, Action f) {
     }
 }
 
-internal static void doSlow⁔(/*this*/ ж<Once> Ꮡo, Action f) {
+internal static void doSlow(this ж<Once> Ꮡo, Action f) {
     GoFrame ᒐ = default;
     try {
         ref var o = ref Ꮡo.DerefOrNull();
@@ -92,4 +97,4 @@ internal static void doSlow⁔(/*this*/ ж<Once> Ꮡo, Action f) {
     finally { ᒐ.Run(); }
 }
 
-} // end sync_package
+}

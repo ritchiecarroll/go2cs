@@ -9,6 +9,7 @@ using netip = net.netip_package;
 using syscall = syscall_package;
 using @internal;
 using net;
+using static net_package;
 
 partial class net_package {
 
@@ -24,12 +25,14 @@ partial struct UDPAddr {
     public @string Zone; // IPv6 scoped addressing zone
 }
 
+} partial class netᴛUDPAddr {
+
 // AddrPort returns the [UDPAddr] a as a [netip.AddrPort].
 //
 // If a.Port does not fit in a uint16, it's silently truncated.
 //
 // If a is nil, a zero value is returned.
-internal static netip.AddrPort AddrPort⁔(/*this*/ ж<UDPAddr> Ꮡa) {
+public static netip.AddrPort AddrPort(this ж<UDPAddr> Ꮡa) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (Ꮡa == nil) {
@@ -40,10 +43,18 @@ internal static netip.AddrPort AddrPort⁔(/*this*/ ж<UDPAddr> Ꮡa) {
     return netip.AddrPortFrom(na, (uint16)a.Port);
 }
 
-// Network returns the address's network name, "udp".
-internal static @string Network⁔(/*this*/ ref UDPAddr a) { return udpˢ; }
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string udpˢ => ref udpˢᵇ;
+private static readonly @string udpˢᵇ = "udp"u8;
 
-internal static @string String⁔(/*this*/ ж<UDPAddr> Ꮡa) {
+// Network returns the address's network name, "udp".
+public static @string Network(this ref UDPAddr a) { return udpˢ; }
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string nilˢ => ref nilˢᵇ;
+private static readonly @string nilˢᵇ = "<nil>"u8;
+
+public static @string String(this ж<UDPAddr> Ꮡa) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (Ꮡa == nil) {
@@ -56,7 +67,7 @@ internal static @string String⁔(/*this*/ ж<UDPAddr> Ꮡa) {
     return JoinHostPort(ip, strconv.Itoa(a.Port));
 }
 
-internal static bool isWildcard⁔(/*this*/ ж<UDPAddr> Ꮡa) {
+internal static bool isWildcard(this ж<UDPAddr> Ꮡa) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (Ꮡa == nil || a.IP == nil) {
@@ -65,12 +76,14 @@ internal static bool isWildcard⁔(/*this*/ ж<UDPAddr> Ꮡa) {
     return a.IP.IsUnspecified();
 }
 
-internal static Addr opAddr⁔(/*this*/ ж<UDPAddr> Ꮡa) {
+internal static Addr opAddr(this ж<UDPAddr> Ꮡa) {
     if (Ꮡa == nil) {
         return default;
     }
     return new UDPAddrжAddr(Ꮡa);
 }
+
+} partial class net_package {
 
 // ResolveUDPAddr returns an address of UDP end point.
 //
@@ -122,7 +135,15 @@ partial struct addrPortUDPAddr {
     /*embed*/ public net.netip_package.AddrPort AddrPort;
 }
 
-internal static @string Network⁔(/*this*/ addrPortUDPAddr _) { return udpˢ; }
+} partial class netᴛaddrPortUDPAddr {
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string udpˢ => ref udpˢᵇ;
+private static readonly @string udpˢᵇ = "udp"u8;
+
+internal static @string Network(this addrPortUDPAddr _) { return udpˢ; }
+
+} partial class net_package {
 
 // UDPConn is the implementation of the [Conn] and [PacketConn] interfaces
 // for UDP network connections.
@@ -130,9 +151,11 @@ partial struct UDPConn {
     /*embed*/ internal conn conn;
 }
 
+} partial class netᴛUDPConn {
+
 // SyscallConn returns a raw network connection.
 // This implements the [syscall.Conn] interface.
-internal static (syscall.RawConn, error) SyscallConn⁔(/*this*/ ж<UDPConn> Ꮡc) {
+public static (syscall.RawConn, error) SyscallConn(this ж<UDPConn> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.of(UDPConn.Ꮡconn).ok()) {
@@ -142,7 +165,7 @@ internal static (syscall.RawConn, error) SyscallConn⁔(/*this*/ ж<UDPConn> Ꮡ
 }
 
 // ReadFromUDP acts like [UDPConn.ReadFrom] but returns a UDPAddr.
-internal static (nint n, ж<UDPAddr> addr, error err) ReadFromUDP⁔(/*this*/ ж<UDPConn> Ꮡc, slice<byte> b) {
+public static (nint n, ж<UDPAddr> addr, error err) ReadFromUDP(this ж<UDPConn> Ꮡc, slice<byte> b) {
     // This function is designed to allow the caller to control the lifetime
     // of the returned *UDPAddr and thereby prevent an allocation.
     // See https://blog.filippo.io/efficient-go-apis-with-the-inliner/.
@@ -151,7 +174,7 @@ internal static (nint n, ж<UDPAddr> addr, error err) ReadFromUDP⁔(/*this*/ ж
 }
 
 // readFromUDP implements ReadFromUDP.
-internal static (nint, ж<UDPAddr>, error) readFromUDP⁔(/*this*/ ж<UDPConn> Ꮡc, slice<byte> b, ж<UDPAddr> Ꮡaddr) {
+internal static (nint, ж<UDPAddr>, error) readFromUDP(this ж<UDPConn> Ꮡc, slice<byte> b, ж<UDPAddr> Ꮡaddr) {
     ref var c = ref Ꮡc.DerefOrNull();
     ref var addr = ref Ꮡaddr.DerefOrNull();
 
@@ -166,7 +189,7 @@ internal static (nint, ж<UDPAddr>, error) readFromUDP⁔(/*this*/ ж<UDPConn> �
 }
 
 // ReadFrom implements the [PacketConn] ReadFrom method.
-internal static (nint, Addr, error) ReadFrom⁔(/*this*/ ж<UDPConn> Ꮡc, slice<byte> b) {
+public static (nint, Addr, error) ReadFrom(this ж<UDPConn> Ꮡc, slice<byte> b) {
     var (n, addr, err) = Ꮡc.readFromUDP(b, Ꮡ(new UDPAddr()));
     if (addr == nil) {
         // Return Addr(nil), not Addr(*UDPConn(nil)).
@@ -180,7 +203,7 @@ internal static (nint, Addr, error) ReadFrom⁔(/*this*/ ж<UDPConn> Ꮡc, slice
 // If c is bound to an unspecified address, the returned
 // netip.AddrPort's address might be an IPv4-mapped IPv6 address.
 // Use [netip.Addr.Unmap] to get the address without the IPv6 prefix.
-internal static (nint n, netip.AddrPort addr, error err) ReadFromUDPAddrPort⁔(/*this*/ ж<UDPConn> Ꮡc, slice<byte> b) {
+public static (nint n, netip.AddrPort addr, error err) ReadFromUDPAddrPort(this ж<UDPConn> Ꮡc, slice<byte> b) {
     nint n = default;
     netip.AddrPort addr = default;
     error err = default;
@@ -203,7 +226,7 @@ internal static (nint n, netip.AddrPort addr, error err) ReadFromUDPAddrPort⁔(
 //
 // The packages [golang.org/x/net/ipv4] and [golang.org/x/net/ipv6] can be
 // used to manipulate IP-level socket options in oob.
-internal static (nint n, nint oobn, nint flags, ж<UDPAddr> addr, error err) ReadMsgUDP⁔(/*this*/ ж<UDPConn> Ꮡc, slice<byte> b, slice<byte> oob) {
+public static (nint n, nint oobn, nint flags, ж<UDPAddr> addr, error err) ReadMsgUDP(this ж<UDPConn> Ꮡc, slice<byte> b, slice<byte> oob) {
     nint n = default;
     nint oobn = default;
     nint flags = default;
@@ -219,7 +242,7 @@ internal static (nint n, nint oobn, nint flags, ж<UDPAddr> addr, error err) Rea
 }
 
 // ReadMsgUDPAddrPort is like [UDPConn.ReadMsgUDP] but returns an [netip.AddrPort] instead of a [UDPAddr].
-internal static (nint n, nint oobn, nint flags, netip.AddrPort addr, error err) ReadMsgUDPAddrPort⁔(/*this*/ ж<UDPConn> Ꮡc, slice<byte> b, slice<byte> oob) {
+public static (nint n, nint oobn, nint flags, netip.AddrPort addr, error err) ReadMsgUDPAddrPort(this ж<UDPConn> Ꮡc, slice<byte> b, slice<byte> oob) {
     nint n = default;
     nint oobn = default;
     nint flags = default;
@@ -238,7 +261,7 @@ internal static (nint n, nint oobn, nint flags, netip.AddrPort addr, error err) 
 }
 
 // WriteToUDP acts like [UDPConn.WriteTo] but takes a [UDPAddr].
-internal static (nint, error) WriteToUDP⁔(/*this*/ ж<UDPConn> Ꮡc, slice<byte> b, ж<UDPAddr> addr) {
+public static (nint, error) WriteToUDP(this ж<UDPConn> Ꮡc, slice<byte> b, ж<UDPAddr> addr) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.of(UDPConn.Ꮡconn).ok()) {
@@ -252,7 +275,7 @@ internal static (nint, error) WriteToUDP⁔(/*this*/ ж<UDPConn> Ꮡc, slice<byt
 }
 
 // WriteToUDPAddrPort acts like [UDPConn.WriteTo] but takes a [netip.AddrPort].
-internal static (nint, error) WriteToUDPAddrPort⁔(/*this*/ ж<UDPConn> Ꮡc, slice<byte> b, netip.AddrPort addr) {
+public static (nint, error) WriteToUDPAddrPort(this ж<UDPConn> Ꮡc, slice<byte> b, netip.AddrPort addr) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.of(UDPConn.Ꮡconn).ok()) {
@@ -266,7 +289,7 @@ internal static (nint, error) WriteToUDPAddrPort⁔(/*this*/ ж<UDPConn> Ꮡc, s
 }
 
 // WriteTo implements the [PacketConn] WriteTo method.
-internal static (nint, error) WriteTo⁔(/*this*/ ж<UDPConn> Ꮡc, slice<byte> b, Addr addr) {
+public static (nint, error) WriteTo(this ж<UDPConn> Ꮡc, slice<byte> b, Addr addr) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.of(UDPConn.Ꮡconn).ok()) {
@@ -291,7 +314,7 @@ internal static (nint, error) WriteTo⁔(/*this*/ ж<UDPConn> Ꮡc, slice<byte> 
 //
 // The packages [golang.org/x/net/ipv4] and [golang.org/x/net/ipv6] can be
 // used to manipulate IP-level socket options in oob.
-internal static (nint n, nint oobn, error err) WriteMsgUDP⁔(/*this*/ ж<UDPConn> Ꮡc, slice<byte> b, slice<byte> oob, ж<UDPAddr> addr) {
+public static (nint n, nint oobn, error err) WriteMsgUDP(this ж<UDPConn> Ꮡc, slice<byte> b, slice<byte> oob, ж<UDPAddr> addr) {
     nint n = default;
     nint oobn = default;
     error err = default;
@@ -308,7 +331,7 @@ internal static (nint n, nint oobn, error err) WriteMsgUDP⁔(/*this*/ ж<UDPCon
 }
 
 // WriteMsgUDPAddrPort is like [UDPConn.WriteMsgUDP] but takes a [netip.AddrPort] instead of a [UDPAddr].
-internal static (nint n, nint oobn, error err) WriteMsgUDPAddrPort⁔(/*this*/ ж<UDPConn> Ꮡc, slice<byte> b, slice<byte> oob, netip.AddrPort addr) {
+public static (nint n, nint oobn, error err) WriteMsgUDPAddrPort(this ж<UDPConn> Ꮡc, slice<byte> b, slice<byte> oob, netip.AddrPort addr) {
     nint n = default;
     nint oobn = default;
     error err = default;
@@ -323,6 +346,8 @@ internal static (nint n, nint oobn, error err) WriteMsgUDPAddrPort⁔(/*this*/ �
     }
     return (n, oobn, err);
 }
+
+} partial class net_package {
 
 internal static ж<UDPConn> newUDPConn(ж<netFD> fd) { return Ꮡ(new UDPConn(new conn(fd))); }
 

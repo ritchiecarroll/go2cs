@@ -2,6 +2,8 @@
 //go:build go1.21
 namespace go.vendor.golang.org.x.text.unicode;
 
+using static bidi_package;
+
 partial class bidi_package {
 
 // UnicodeVersion is the Unicode version from which the tables in this package are derived.
@@ -14,10 +16,12 @@ internal static slice<int32> xorMasks = [ // 8 elements
     0, 1, 6, 7, 3, 15, 29, 63
 ]; // Size: 56 bytes
 
+} partial class bidiᴛbidiTrie {
+
 // lookup returns the trie value for the first UTF-8 encoding in s and
 // the width in bytes of this encoding. The size will be 0 if s does not
 // hold enough bytes to complete the encoding. len(s) must be greater than 0.
-internal static (uint8 v, nint sz) lookup⁔(/*this*/ ref bidiTrie t, slice<byte> s) {
+internal static (uint8 v, nint sz) lookup(this ref bidiTrie t, slice<byte> s) {
     var c0 = s[0];
     switch (ᐧ) {
     case {} when c0 is < 0x80: { // is ASCII
@@ -83,7 +87,7 @@ internal static (uint8 v, nint sz) lookup⁔(/*this*/ ref bidiTrie t, slice<byte
 
 // lookupUnsafe returns the trie value for the first UTF-8 encoding in s.
 // s must start with a full and valid UTF-8 encoded rune.
-internal static uint8 lookupUnsafe⁔(/*this*/ ref bidiTrie t, slice<byte> s) {
+internal static uint8 lookupUnsafe(this ref bidiTrie t, slice<byte> s) {
     var c0 = s[0];
     if (c0 < 0x80) { // is ASCII
         return bidiValues[c0];
@@ -106,7 +110,7 @@ internal static uint8 lookupUnsafe⁔(/*this*/ ref bidiTrie t, slice<byte> s) {
 // lookupString returns the trie value for the first UTF-8 encoding in s and
 // the width in bytes of this encoding. The size will be 0 if s does not
 // hold enough bytes to complete the encoding. len(s) must be greater than 0.
-internal static (uint8 v, nint sz) lookupString⁔(/*this*/ ref bidiTrie t, @string s) {
+internal static (uint8 v, nint sz) lookupString(this ref bidiTrie t, @string s) {
     var c0 = s[0];
     switch (ᐧ) {
     case {} when c0 is < 0x80: { // is ASCII
@@ -172,7 +176,7 @@ internal static (uint8 v, nint sz) lookupString⁔(/*this*/ ref bidiTrie t, @str
 
 // lookupStringUnsafe returns the trie value for the first UTF-8 encoding in s.
 // s must start with a full and valid UTF-8 encoded rune.
-internal static uint8 lookupStringUnsafe⁔(/*this*/ ref bidiTrie t, @string s) {
+internal static uint8 lookupStringUnsafe(this ref bidiTrie t, @string s) {
     var c0 = s[0];
     if (c0 < 0x80) { // is ASCII
         return bidiValues[c0];
@@ -192,6 +196,8 @@ internal static uint8 lookupStringUnsafe⁔(/*this*/ ref bidiTrie t, @string s) 
     return 0;
 }
 
+} partial class bidi_package {
+
 // bidiTrie. Total size: 19904 bytes (19.44 KiB). Checksum: b1f201ed2debb6c8.
 partial struct bidiTrie {
 }
@@ -200,13 +206,17 @@ internal static ж<bidiTrie> newBidiTrie(nint i) {
     return Ꮡ(new bidiTrie());
 }
 
+} partial class bidiᴛbidiTrie {
+
 // lookupValue determines the type of block n and looks up the value for b.
-internal static uint8 lookupValue⁔(/*this*/ ref bidiTrie t, uint32 n, byte b) {
+internal static uint8 lookupValue(this ref bidiTrie t, uint32 n, byte b) {
     switch (ᐧ) {
     default: {
         return (uint8)bidiValues[(n << 6) + (uint32)b];
     }}
 }
+
+} partial class bidi_package {
 
 // bidiValues: 259 blocks, 16576 entries, 16576 bytes
 // The third block is the zero block.

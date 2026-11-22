@@ -11,15 +11,19 @@ using static global::go.@internal.types.errors_package;
 using slices = slices_package;
 using errors = global::go.@internal.types.errors_package;
 using global::go.go;
+using types = types_package;
+using static types_package;
 
 partial class types_package {
+
+} partial class typesᴛChecker {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string missingReturnˢ => ref missingReturnˢᵇ;
 private static readonly @string missingReturnˢᵇ = "missing return"u8;
 
 // decl may be nil
-internal static void funcBody⁔(/*this*/ ж<Checker> Ꮡcheck, ж<declInfo> decl, @string name, ж<Signature> Ꮡsig, ж<ast.BlockStmt> Ꮡbody, constant.Value iota) {
+internal static void funcBody(this ж<Checker> Ꮡcheck, ж<declInfo> decl, @string name, ж<Signature> Ꮡsig, ж<ast.BlockStmt> Ꮡbody, constant.Value iota) {
     GoFrame ᒐ = default;
     try {
         ref var check = ref Ꮡcheck.DerefOrNull();
@@ -67,7 +71,7 @@ internal static void funcBody⁔(/*this*/ ж<Checker> Ꮡcheck, ж<declInfo> dec
     finally { ᒐ.Run(); }
 }
 
-internal static void usage⁔(/*this*/ ж<Checker> Ꮡcheck, ж<Scope> Ꮡscope) {
+internal static void usage(this ж<Checker> Ꮡcheck, ж<Scope> Ꮡscope) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var scope = ref Ꮡscope.DerefOrNull();
     var unusedᴷ = new stackAppend<ж<Var>>();
@@ -96,6 +100,8 @@ internal static void usage⁔(/*this*/ ж<Checker> Ꮡcheck, ж<Scope> Ꮡscope)
     }
 }
 
+} partial class types_package {
+
 // stmtContext is a bitset describing which
 // control-flow statements are permissible,
 // and provides additional context information
@@ -111,11 +117,15 @@ internal static stmtContext fallthroughOk => 4;
 internal static stmtContext finalSwitchCase => 8;
 internal static stmtContext inTypeSwitch => 16;
 
-internal static void simpleStmt⁔(/*this*/ ж<Checker> Ꮡcheck, ast.Stmt s) {
+} partial class typesᴛChecker {
+
+internal static void simpleStmt(this ж<Checker> Ꮡcheck, ast.Stmt s) {
     if (s != nil) {
         Ꮡcheck.stmt(0, s);
     }
 }
+
+} partial class types_package {
 
 internal static slice<ast.Stmt> trimTrailingEmptyStmts(slice<ast.Stmt> list) {
     for (nint i = len(list); i > 0; i--) {
@@ -126,7 +136,9 @@ internal static slice<ast.Stmt> trimTrailingEmptyStmts(slice<ast.Stmt> list) {
     return default;
 }
 
-internal static void stmtList⁔(/*this*/ ж<Checker> Ꮡcheck, stmtContext ctxt, slice<ast.Stmt> list) {
+} partial class typesᴛChecker {
+
+internal static void stmtList(this ж<Checker> Ꮡcheck, stmtContext ctxt, slice<ast.Stmt> list) {
     var ok = (stmtContext)(ctxt & fallthroughOk) != 0;
     stmtContext inner = (stmtContext)(ctxt & ~fallthroughOk);
     list = trimTrailingEmptyStmts(list); // trailing empty statements are "invisible" to fallthrough analysis
@@ -143,7 +155,7 @@ internal static void stmtList⁔(/*this*/ ж<Checker> Ꮡcheck, stmtContext ctxt
 internal static ref readonly @string caseCommunicationClauseˢ => ref caseCommunicationClauseˢᵇ;
 private static readonly @string caseCommunicationClauseˢᵇ = "case/communication clause expected"u8;
 
-internal static void multipleDefaults⁔(/*this*/ ж<Checker> Ꮡcheck, slice<ast.Stmt> list) {
+internal static void multipleDefaults(this ж<Checker> Ꮡcheck, slice<ast.Stmt> list) {
     ref var check = ref Ꮡcheck.DerefOrNull();
 
     ast.Stmt first = default;
@@ -177,15 +189,17 @@ internal static void multipleDefaults⁔(/*this*/ ж<Checker> Ꮡcheck, slice<as
     }
 }
 
-internal static void openScope⁔(/*this*/ ref Checker check, ast.Node node, @string comment) {
+internal static void openScope(this ref Checker check, ast.Node node, @string comment) {
     var scope = NewScope(check.scope, node.Pos(), node.End(), comment);
     check.recordScope(node, scope);
     check.scope = scope;
 }
 
-internal static void closeScope⁔(/*this*/ ref Checker check) {
+internal static void closeScope(this ref Checker check) {
     check.scope = check.scope.Parent();
 }
+
+} partial class types_package {
 
 internal static token.Token assignOp(token.Token op) {
     // token_test.go verifies the token ordering this function relies on
@@ -195,18 +209,20 @@ internal static token.Token assignOp(token.Token op) {
     return token.ILLEGAL;
 }
 
+} partial class typesᴛChecker {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string requiresFunctionCallNotˢ => ref requiresFunctionCallNotˢᵇ;
 private static readonly @string requiresFunctionCallNotˢᵇ = "requires function call, not conversion"u8;
 internal static ref readonly @string discardsResultOfˢ => ref discardsResultOfˢᵇ;
 private static readonly @string discardsResultOfˢᵇ = "discards result of"u8;
 
-internal static void suspendedCall⁔(/*this*/ ж<Checker> Ꮡcheck, @string keyword, ж<ast.CallExpr> call) {
+internal static void suspendedCall(this ж<Checker> Ꮡcheck, @string keyword, ж<ast.CallExpr> call) {
     ref var x = ref heap(new operand(), out var Ꮡx);
     @string msg = default;
     errors.Code code = default;
     switch (Ꮡcheck.rawExpr(nil, Ꮡx, new ast.CallExprжExpr(call), default, false)) {
-    case var ᴛ when ᴛ == conversion: {
+    case var ᴛ when ᴛ == types.conversion: {
         msg = requiresFunctionCallNotˢ;
         code = InvalidDefer;
         if (keyword == "go"u8) {
@@ -228,6 +244,8 @@ internal static void suspendedCall⁔(/*this*/ ж<Checker> Ꮡcheck, @string key
     }}
     Ꮡcheck.errorf(new operandжpositioner(Ꮡx), code, "%s %s %s", keyword, msg, Ꮡx);
 }
+
+} partial class types_package {
 
 // goVal returns the Go value for val, or nil.
 internal static any goVal(constant.Value val) {
@@ -280,7 +298,9 @@ partial struct valueType {
     internal Type typ;
 }
 
-internal static void caseValues⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operand> Ꮡx, slice<ast.Expr> values, valueMap seen) {
+} partial class typesᴛChecker {
+
+internal static void caseValues(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, slice<ast.Expr> values, valueMap seen) {
     ref var x = ref Ꮡx.DerefOrNull();
 
 L:
@@ -324,7 +344,7 @@ break_L:;
 }
 
 // isNil reports whether the expression e denotes the predeclared value nil.
-internal static bool isNil⁔(/*this*/ ref Checker check, ast.Expr e) {
+internal static bool isNil(this ref Checker check, ast.Expr e) {
     // The only way to express the nil value is by literally writing nil (possibly in parentheses).
     var (name, _) = ast.Unparen(e)._<ж<ast.Ident>>(ᐧ); if (name != nil) {
         var (_, ok) = check.environment.lookup(name.Name)._<ж<Nil>>(ᐧ);
@@ -332,6 +352,10 @@ internal static bool isNil⁔(/*this*/ ref Checker check, ast.Expr e) {
     }
     return false;
 }
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string nilˢ2 => ref nilˢ2ᵇ;
+private static readonly @string nilˢ2ᵇ = "nil"u8;
 
 // caseTypes typechecks the type expressions of a type case, checks for duplicate types
 // using the seen map, and verifies that each type is valid with respect to the type of
@@ -354,7 +378,7 @@ internal static bool isNil⁔(/*this*/ ref Checker check, ast.Expr e) {
 // If there is exactly one type expression, T is the type of that expression. If there
 // are multiple type expressions, or if predeclared nil is among the types, the result
 // is the type of x. If x is invalid (nil), the result is the invalid type.
-internal static Type caseTypes⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operand> Ꮡx, slice<ast.Expr> types, map<Type, ast.Expr> seen) {
+internal static Type caseTypes(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, slice<ast.Expr> types, map<Type, ast.Expr> seen) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
 
@@ -409,9 +433,13 @@ break_L:;
     return T;
 }
 
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string nilˢ => ref nilˢᵇ;
+private static readonly @string nilˢᵇ = "<nil>"u8;
+
 // TODO(gri) Once we are certain that typeHash is correct in all situations, use this version of caseTypes instead.
 // (Currently it may be possible that different types have identical names and import paths due to ImporterFrom.)
-internal static Type caseTypes_currently_unused⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<Interface> xtyp, slice<ast.Expr> types, map<@string, ast.Expr> seen) {
+internal static Type caseTypes_currently_unused(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<Interface> xtyp, slice<ast.Expr> types, map<@string, ast.Expr> seen) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
 
@@ -522,7 +550,7 @@ internal static ref readonly @string invalidStatementˢ => ref invalidStatement�
 private static readonly @string invalidStatementˢᵇ = "invalid statement"u8;
 
 // stmt typechecks statement s.
-internal static void stmt⁔(/*this*/ ж<Checker> Ꮡcheck, stmtContext ctxt, ast.Stmt s) {
+internal static void stmt(this ж<Checker> Ꮡcheck, stmtContext ctxt, ast.Stmt s) {
     GoFrame ᒐ = default;
     try {
         ref var check = ref Ꮡcheck.DerefOrNull();
@@ -578,7 +606,7 @@ internal static void stmt⁔(/*this*/ ж<Checker> Ꮡcheck, stmtContext ctxt, as
                 code = UnusedExpr;
                 break;
             }
-            case var ᴛ when ᴛ == Δbuiltin: {
+            case var ᴛ when ᴛ == types.Δbuiltin: {
                 msg = mustBeCalledˢ;
                 code = UncalledBuiltin;
                 break;
@@ -1049,4 +1077,4 @@ internal static void stmt⁔(/*this*/ ж<Checker> Ꮡcheck, stmtContext ctxt, as
     finally { ᒐ.Run(); }
 }
 
-} // end types_package
+}

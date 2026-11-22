@@ -26,6 +26,7 @@ using go.crypto.@internal;
 using go.crypto.@internal.fips140.aes;
 using vendor.golang.org.x.crypto;
 using Δx509 = go.crypto.x509_package;
+using static tls_package;
 
 partial class tls_package {
 
@@ -463,19 +464,23 @@ partial struct prefixNonceAEAD {
     internal cipher.AEAD aead;
 }
 
-internal static nint NonceSize⁔(/*this*/ ref prefixNonceAEAD f) { return aeadNonceLength - noncePrefixLength; }
-internal static nint Overhead⁔(/*this*/ ref prefixNonceAEAD f) { return f.aead.Overhead(); }
-internal static nint explicitNonceLen⁔(/*this*/ ref prefixNonceAEAD f) { return f.NonceSize(); }
+} partial class tlsᴛprefixNonceAEAD {
 
-internal static slice<byte> Seal⁔(/*this*/ ref prefixNonceAEAD f, slice<byte> @out, slice<byte> nonce, slice<byte> plaintext, slice<byte> additionalData) {
+internal static nint NonceSize(this ref prefixNonceAEAD f) { return aeadNonceLength - noncePrefixLength; }
+internal static nint Overhead(this ref prefixNonceAEAD f) { return f.aead.Overhead(); }
+internal static nint explicitNonceLen(this ref prefixNonceAEAD f) { return f.NonceSize(); }
+
+internal static slice<byte> Seal(this ref prefixNonceAEAD f, slice<byte> @out, slice<byte> nonce, slice<byte> plaintext, slice<byte> additionalData) {
     copy(f.nonce[4..], nonce);
     return f.aead.Seal(@out, f.nonce[..], plaintext, additionalData);
 }
 
-internal static (slice<byte>, error) Open⁔(/*this*/ ref prefixNonceAEAD f, slice<byte> @out, slice<byte> nonce, slice<byte> ciphertext, slice<byte> additionalData) {
+internal static (slice<byte>, error) Open(this ref prefixNonceAEAD f, slice<byte> @out, slice<byte> nonce, slice<byte> ciphertext, slice<byte> additionalData) {
     copy(f.nonce[4..], nonce);
     return f.aead.Open(@out, f.nonce[..], ciphertext, additionalData);
 }
+
+} partial class tls_package {
 
 // xorNonceAEAD wraps an AEAD by XORing in a fixed pattern to the nonce
 // before each call.
@@ -484,11 +489,13 @@ partial struct xorNonceAEAD {
     internal cipher.AEAD aead;
 }
 
-internal static nint NonceSize⁔(/*this*/ ref xorNonceAEAD f) { return 8; } // 64-bit sequence number
-internal static nint Overhead⁔(/*this*/ ref xorNonceAEAD f) { return f.aead.Overhead(); }
-internal static nint explicitNonceLen⁔(/*this*/ ref xorNonceAEAD f) { return 0; }
+} partial class tlsᴛxorNonceAEAD {
 
-internal static slice<byte> Seal⁔(/*this*/ ref xorNonceAEAD f, slice<byte> @out, slice<byte> nonce, slice<byte> plaintext, slice<byte> additionalData) {
+internal static nint NonceSize(this ref xorNonceAEAD f) { return 8; } // 64-bit sequence number
+internal static nint Overhead(this ref xorNonceAEAD f) { return f.aead.Overhead(); }
+internal static nint explicitNonceLen(this ref xorNonceAEAD f) { return 0; }
+
+internal static slice<byte> Seal(this ref xorNonceAEAD f, slice<byte> @out, slice<byte> nonce, slice<byte> plaintext, slice<byte> additionalData) {
     foreach (var (i, b) in range(nonce)) {
         f.nonceMask[4 + i] ^= (byte)(b);
     }
@@ -500,7 +507,7 @@ internal static slice<byte> Seal⁔(/*this*/ ref xorNonceAEAD f, slice<byte> @ou
     return result;
 }
 
-internal static (slice<byte>, error) Open⁔(/*this*/ ref xorNonceAEAD f, slice<byte> @out, slice<byte> nonce, slice<byte> ciphertext, slice<byte> additionalData) {
+internal static (slice<byte>, error) Open(this ref xorNonceAEAD f, slice<byte> @out, slice<byte> nonce, slice<byte> ciphertext, slice<byte> additionalData) {
     foreach (var (i, b) in range(nonce)) {
         f.nonceMask[4 + i] ^= (byte)(b);
     }
@@ -511,6 +518,8 @@ internal static (slice<byte>, error) Open⁔(/*this*/ ref xorNonceAEAD f, slice<
 
     return (result, err);
 }
+
+} partial class tls_package {
 
 internal static aead aeadAESGCM(slice<byte> key, slice<byte> noncePrefix) {
     if (len(noncePrefix) != noncePrefixLength) {
@@ -598,11 +607,15 @@ partial struct cthWrapper {
     internal constantTimeHash h;
 }
 
-internal static nint Size⁔(/*this*/ ref cthWrapper c) { return c.h.Size(); }
-internal static nint BlockSize⁔(/*this*/ ref cthWrapper c) { return c.h.BlockSize(); }
-internal static void Reset⁔(/*this*/ ref cthWrapper c) { c.h.Reset(); }
-internal static (nint, error) Write⁔(/*this*/ ref cthWrapper c, slice<byte> p) { return c.h.Write(p); }
-internal static slice<byte> Sum⁔(/*this*/ ref cthWrapper c, slice<byte> b) { return c.h.ConstantTimeSum(b); }
+} partial class tlsᴛcthWrapper {
+
+internal static nint Size(this ref cthWrapper c) { return c.h.Size(); }
+internal static nint BlockSize(this ref cthWrapper c) { return c.h.BlockSize(); }
+internal static void Reset(this ref cthWrapper c) { c.h.Reset(); }
+internal static (nint, error) Write(this ref cthWrapper c, slice<byte> p) { return c.h.Write(p); }
+internal static slice<byte> Sum(this ref cthWrapper c, slice<byte> b) { return c.h.ConstantTimeSum(b); }
+
+} partial class tls_package {
 
 internal static Func<hash.Hash> newConstantTimeHash(Func<hash.Hash> h) {
     boring.Unreachable();

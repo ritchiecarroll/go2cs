@@ -16,6 +16,7 @@ using strings = strings_package;
 using encoding;
 using global::go.go;
 using math;
+using static pkgbits_package;
 
 partial class pkgbits_package {
 
@@ -53,13 +54,17 @@ partial struct PkgDecoder {
     internal slice<RefTableEntry> scratchRelocEnt;
 }
 
+} partial class pkgbitsᴛPkgDecoder {
+
 // PkgPath returns the package path for the package
 //
 // TODO(mdempsky): Remove; unneeded since CL 391014.
-internal static @string PkgPath⁔(/*this*/ ref PkgDecoder pr) { return pr.pkgPath; }
+public static @string PkgPath(this ref PkgDecoder pr) { return pr.pkgPath; }
 
 // SyncMarkers reports whether pr uses sync markers.
-internal static bool SyncMarkers⁔(/*this*/ ref PkgDecoder pr) { return pr.sync; }
+public static bool SyncMarkers(this ref PkgDecoder pr) { return pr.sync; }
+
+} partial class pkgbits_package {
 
 // NewPkgDecoder returns a PkgDecoder initialized to read the Unified
 // IR export data from input. pkgPath is the package path for the
@@ -104,8 +109,10 @@ public static PkgDecoder NewPkgDecoder(@string pkgPath, @string input) {
     return pr.ΔClone();
 }
 
+} partial class pkgbitsᴛPkgDecoder {
+
 // NumElems returns the number of elements in section k.
-internal static nint NumElems⁔(/*this*/ ref PkgDecoder pr, SectionKind k) {
+public static nint NumElems(this ref PkgDecoder pr, SectionKind k) {
     nint count = (nint)pr.elemEndsEnds[k];
     if (k > 0) {
         count -= (nint)pr.elemEndsEnds[k - 1];
@@ -114,12 +121,12 @@ internal static nint NumElems⁔(/*this*/ ref PkgDecoder pr, SectionKind k) {
 }
 
 // TotalElems returns the total number of elements across all sections.
-internal static nint TotalElems⁔(/*this*/ ref PkgDecoder pr) {
+public static nint TotalElems(this ref PkgDecoder pr) {
     return len(pr.elemEnds);
 }
 
 // Fingerprint returns the package fingerprint.
-internal static array<byte> Fingerprint⁔(/*this*/ ref PkgDecoder pr) {
+public static array<byte> Fingerprint(this ref PkgDecoder pr) {
     array<byte> fp = new(8);
     copy(fp[..], pr.elemData.slice(len(pr.elemData) - 8));
     return fp.Clone();
@@ -127,7 +134,7 @@ internal static array<byte> Fingerprint⁔(/*this*/ ref PkgDecoder pr) {
 
 // AbsIdx returns the absolute index for the given (section, index)
 // pair.
-internal static nint AbsIdx⁔(/*this*/ ref PkgDecoder pr, SectionKind k, RelElemIdx idx) {
+public static nint AbsIdx(this ref PkgDecoder pr, SectionKind k, RelElemIdx idx) {
     nint absIdx = (nint)idx;
     if (k > 0) {
         absIdx += (nint)pr.elemEndsEnds[k - 1];
@@ -140,7 +147,7 @@ internal static nint AbsIdx⁔(/*this*/ ref PkgDecoder pr, SectionKind k, RelEle
 
 // DataIdx returns the raw element bitstream for the given (section,
 // index) pair.
-internal static @string DataIdx⁔(/*this*/ ref PkgDecoder pr, SectionKind k, RelElemIdx idx) {
+public static @string DataIdx(this ref PkgDecoder pr, SectionKind k, RelElemIdx idx) {
     nint absIdx = pr.AbsIdx(k, idx);
 
     uint32 start = default;
@@ -153,13 +160,13 @@ internal static @string DataIdx⁔(/*this*/ ref PkgDecoder pr, SectionKind k, Re
 }
 
 // StringIdx returns the string value for the given string index.
-internal static @string StringIdx⁔(/*this*/ ref PkgDecoder pr, RelElemIdx idx) {
+public static @string StringIdx(this ref PkgDecoder pr, RelElemIdx idx) {
     return pr.DataIdx(SectionString, idx);
 }
 
 // NewDecoder returns a Decoder for the given (section, index) pair,
 // and decodes the given SyncMarker from the element bitstream.
-internal static Decoder NewDecoder⁔(/*this*/ ж<PkgDecoder> Ꮡpr, SectionKind k, RelElemIdx idx, SyncMarker marker) {
+public static Decoder NewDecoder(this ж<PkgDecoder> Ꮡpr, SectionKind k, RelElemIdx idx, SyncMarker marker) {
     ref var r = ref heap<Decoder>(Ꮡpr.NewDecoderRaw(k, idx), out var Ꮡr);
     Ꮡr.Sync(marker);
     return r;
@@ -169,13 +176,13 @@ internal static Decoder NewDecoder⁔(/*this*/ ж<PkgDecoder> Ꮡpr, SectionKind
 // and decodes the given SyncMarker from the element bitstream.
 // If possible the Decoder should be RetireDecoder'd when it is no longer
 // needed, this will avoid heap allocations.
-internal static Decoder TempDecoder⁔(/*this*/ ж<PkgDecoder> Ꮡpr, SectionKind k, RelElemIdx idx, SyncMarker marker) {
+public static Decoder TempDecoder(this ж<PkgDecoder> Ꮡpr, SectionKind k, RelElemIdx idx, SyncMarker marker) {
     ref var r = ref heap<Decoder>(Ꮡpr.TempDecoderRaw(k, idx), out var Ꮡr);
     Ꮡr.Sync(marker);
     return r;
 }
 
-internal static void RetireDecoder⁔(/*this*/ ref PkgDecoder pr, ж<Decoder> Ꮡd) {
+public static void RetireDecoder(this ref PkgDecoder pr, ж<Decoder> Ꮡd) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     pr.scratchRelocEnt = d.Relocs;
@@ -185,7 +192,7 @@ internal static void RetireDecoder⁔(/*this*/ ref PkgDecoder pr, ж<Decoder> �
 // NewDecoderRaw returns a Decoder for the given (section, index) pair.
 //
 // Most callers should use NewDecoder instead.
-internal static Decoder NewDecoderRaw⁔(/*this*/ ж<PkgDecoder> Ꮡpr, SectionKind k, RelElemIdx idx) {
+public static Decoder NewDecoderRaw(this ж<PkgDecoder> Ꮡpr, SectionKind k, RelElemIdx idx) {
     ref var pr = ref Ꮡpr.DerefOrNull();
 
     ref var r = ref heap<Decoder>(new Decoder(
@@ -205,7 +212,7 @@ internal static Decoder NewDecoderRaw⁔(/*this*/ ж<PkgDecoder> Ꮡpr, SectionK
     return r;
 }
 
-internal static Decoder TempDecoderRaw⁔(/*this*/ ж<PkgDecoder> Ꮡpr, SectionKind k, RelElemIdx idx) {
+public static Decoder TempDecoderRaw(this ж<PkgDecoder> Ꮡpr, SectionKind k, RelElemIdx idx) {
     ref var pr = ref Ꮡpr.DerefOrNull();
 
     ref var r = ref heap<Decoder>(new Decoder(
@@ -231,6 +238,8 @@ internal static Decoder TempDecoderRaw⁔(/*this*/ ж<PkgDecoder> Ꮡpr, Section
     return r;
 }
 
+} partial class pkgbits_package {
+
 // A Decoder provides methods for decoding an individual element's
 // bitstream data.
 partial struct Decoder {
@@ -241,19 +250,23 @@ partial struct Decoder {
     public RelElemIdx Idx;
 }
 
-internal static void checkErr⁔(/*this*/ ref Decoder r, error err) {
+} partial class pkgbitsᴛDecoder {
+
+internal static void checkErr(this ref Decoder r, error err) {
     if (err != nil) {
         panicf("unexpected decoding error: %w", err);
     }
 }
 
-internal static uint64 rawUvarint⁔(/*this*/ ж<Decoder> Ꮡr) {
+internal static uint64 rawUvarint(this ж<Decoder> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     var (x, err) = readUvarint(Ꮡr.ᏑData);
     r.checkErr(err);
     return x;
 }
+
+} partial class pkgbits_package {
 
 // readUvarint is a type-specialized copy of encoding/binary.ReadUvarint.
 // This avoids the interface conversion and thus has better escape properties,
@@ -285,7 +298,9 @@ internal static (uint64, error) readUvarint(ж<strings.Reader> Ꮡr) {
 
 internal static error overflow = errors.New("pkgbits: readUvarint overflows a 64-bit integer");
 
-internal static int64 rawVarint⁔(/*this*/ ж<Decoder> Ꮡr) {
+} partial class pkgbitsᴛDecoder {
+
+internal static int64 rawVarint(this ж<Decoder> Ꮡr) {
     var ux = Ꮡr.rawUvarint();
 
     // Zig-zag decode.
@@ -296,7 +311,7 @@ internal static int64 rawVarint⁔(/*this*/ ж<Decoder> Ꮡr) {
     return x;
 }
 
-internal static RelElemIdx rawReloc⁔(/*this*/ ref Decoder r, SectionKind k, nint idx) {
+internal static RelElemIdx rawReloc(this ref Decoder r, SectionKind k, nint idx) {
     var e = r.Relocs[idx];
     assert(e.Kind == k);
     return e.Idx;
@@ -306,7 +321,7 @@ internal static RelElemIdx rawReloc⁔(/*this*/ ref Decoder r, SectionKind k, ni
 // that it matches the expected marker.
 //
 // If EnableSync is false, then Sync is a no-op.
-internal static partial void Sync⁔(/*this*/ ж<Decoder> Ꮡr, SyncMarker mWant) {
+public static partial void Sync(this ж<Decoder> Ꮡr, SyncMarker mWant) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     if (!r.common.sync) {
@@ -364,7 +379,7 @@ internal static partial void Sync⁔(/*this*/ ж<Decoder> Ꮡr, SyncMarker mWant
 }
 
 // Bool decodes and returns a bool value from the element bitstream.
-internal static bool Bool⁔(/*this*/ ж<Decoder> Ꮡr) {
+public static bool Bool(this ж<Decoder> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     Ꮡr.Sync(SyncBool);
@@ -375,19 +390,19 @@ internal static bool Bool⁔(/*this*/ ж<Decoder> Ꮡr) {
 }
 
 // Int64 decodes and returns an int64 value from the element bitstream.
-internal static int64 Int64⁔(/*this*/ ж<Decoder> Ꮡr) {
+public static int64 Int64(this ж<Decoder> Ꮡr) {
     Ꮡr.Sync(SyncInt64);
     return Ꮡr.rawVarint();
 }
 
 // Uint64 decodes and returns a uint64 value from the element bitstream.
-internal static uint64 Uint64⁔(/*this*/ ж<Decoder> Ꮡr) {
+public static uint64 Uint64(this ж<Decoder> Ꮡr) {
     Ꮡr.Sync(SyncUint64);
     return Ꮡr.rawUvarint();
 }
 
 // Len decodes and returns a non-negative int value from the element bitstream.
-internal static nint Len⁔(/*this*/ ж<Decoder> Ꮡr) {
+public static nint Len(this ж<Decoder> Ꮡr) {
     var x = Ꮡr.Uint64();
     nint v = (nint)x;
     assert((uint64)v == x);
@@ -395,7 +410,7 @@ internal static nint Len⁔(/*this*/ ж<Decoder> Ꮡr) {
 }
 
 // Int decodes and returns an int value from the element bitstream.
-internal static nint Int⁔(/*this*/ ж<Decoder> Ꮡr) {
+public static nint Int(this ж<Decoder> Ꮡr) {
     var x = Ꮡr.Int64();
     nint v = (nint)x;
     assert((int64)v == x);
@@ -403,7 +418,7 @@ internal static nint Int⁔(/*this*/ ж<Decoder> Ꮡr) {
 }
 
 // Uint decodes and returns a uint value from the element bitstream.
-internal static nuint Uint⁔(/*this*/ ж<Decoder> Ꮡr) {
+public static nuint Uint(this ж<Decoder> Ꮡr) {
     var x = Ꮡr.Uint64();
     nuint v = (nuint)x;
     assert((uint64)v == x);
@@ -417,14 +432,14 @@ internal static nuint Uint⁔(/*this*/ ж<Decoder> Ꮡr) {
 // TODO(mdempsky): Ideally this method would have signature "Code[T
 // Code] T" instead, but we don't allow generic methods and the
 // compiler can't depend on generics yet anyway.
-internal static nint Code⁔(/*this*/ ж<Decoder> Ꮡr, SyncMarker mark) {
+public static nint Code(this ж<Decoder> Ꮡr, SyncMarker mark) {
     Ꮡr.Sync(mark);
     return Ꮡr.Len();
 }
 
 // Reloc decodes a relocation of expected section k from the element
 // bitstream and returns an index to the referenced element.
-internal static RelElemIdx Reloc⁔(/*this*/ ж<Decoder> Ꮡr, SectionKind k) {
+public static RelElemIdx Reloc(this ж<Decoder> Ꮡr, SectionKind k) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     Ꮡr.Sync(SyncUseReloc);
@@ -433,7 +448,7 @@ internal static RelElemIdx Reloc⁔(/*this*/ ж<Decoder> Ꮡr, SectionKind k) {
 
 // String decodes and returns a string value from the element
 // bitstream.
-internal static @string String⁔(/*this*/ ж<Decoder> Ꮡr) {
+public static @string String(this ж<Decoder> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     Ꮡr.Sync(SyncString);
@@ -442,7 +457,7 @@ internal static @string String⁔(/*this*/ ж<Decoder> Ꮡr) {
 
 // Strings decodes and returns a variable-length slice of strings from
 // the element bitstream.
-internal static slice<@string> Strings⁔(/*this*/ ж<Decoder> Ꮡr) {
+public static slice<@string> Strings(this ж<Decoder> Ꮡr) {
     var res = new slice<@string>(Ꮡr.Len());
     foreach (var i in range(len(res))) {
         res[i] = Ꮡr.String();
@@ -452,7 +467,7 @@ internal static slice<@string> Strings⁔(/*this*/ ж<Decoder> Ꮡr) {
 
 // Value decodes and returns a constant.Value from the element
 // bitstream.
-internal static constant.Value Value⁔(/*this*/ ж<Decoder> Ꮡr) {
+public static constant.Value Value(this ж<Decoder> Ꮡr) {
     Ꮡr.Sync(SyncValue);
     var isComplex = Ꮡr.Bool();
     var val = Ꮡr.scalar();
@@ -462,7 +477,7 @@ internal static constant.Value Value⁔(/*this*/ ж<Decoder> Ꮡr) {
     return val;
 }
 
-internal static constant.Value scalar⁔(/*this*/ ж<Decoder> Ꮡr) {
+internal static constant.Value scalar(this ж<Decoder> Ꮡr) {
     CodeVal tag = (CodeVal)Ꮡr.Code(SyncVal);
     switch (tag) {
     default: {
@@ -491,7 +506,7 @@ internal static constant.Value scalar⁔(/*this*/ ж<Decoder> Ꮡr) {
     }}
 }
 
-internal static ж<big.Int> bigInt⁔(/*this*/ ж<Decoder> Ꮡr) {
+internal static ж<big.Int> bigInt(this ж<Decoder> Ꮡr) {
     var v = @new<big.Int>().SetBytes(slice<byte>(Ꮡr.String()));
     if (Ꮡr.Bool()) {
         v.Neg(v);
@@ -499,11 +514,13 @@ internal static ж<big.Int> bigInt⁔(/*this*/ ж<Decoder> Ꮡr) {
     return v;
 }
 
-internal static ж<big.Float> bigFloat⁔(/*this*/ ж<Decoder> Ꮡr) {
+internal static ж<big.Float> bigFloat(this ж<Decoder> Ꮡr) {
     var v = @new<big.Float>().SetPrec(512);
     assert(v.UnmarshalText(slice<byte>(Ꮡr.String())) == nil);
     return v;
 }
+
+} partial class pkgbitsᴛPkgDecoder {
 
 // @@@ Helpers
 // TODO(mdempsky): These should probably be removed. I think they're a
@@ -511,7 +528,7 @@ internal static ж<big.Float> bigFloat⁔(/*this*/ ж<Decoder> Ꮡr) {
 
 // PeekPkgPath returns the package path for the specified package
 // index.
-internal static @string PeekPkgPath⁔(/*this*/ ж<PkgDecoder> Ꮡpr, RelElemIdx idx) {
+public static @string PeekPkgPath(this ж<PkgDecoder> Ꮡpr, RelElemIdx idx) {
     ref var pr = ref Ꮡpr.DerefOrNull();
 
     @string path = default;
@@ -528,7 +545,7 @@ internal static @string PeekPkgPath⁔(/*this*/ ж<PkgDecoder> Ꮡpr, RelElemIdx
 
 // PeekObj returns the package path, object name, and CodeObj for the
 // specified object index.
-internal static (@string, @string, CodeObj) PeekObj⁔(/*this*/ ж<PkgDecoder> Ꮡpr, RelElemIdx idx) {
+public static (@string, @string, CodeObj) PeekObj(this ж<PkgDecoder> Ꮡpr, RelElemIdx idx) {
     ref var pr = ref Ꮡpr.DerefOrNull();
 
     RelElemIdx ridx = default;
@@ -552,7 +569,9 @@ internal static (@string, @string, CodeObj) PeekObj⁔(/*this*/ ж<PkgDecoder> �
     return (path, name, tag);
 }
 
-// Version reports the version of the bitstream.
-internal static Version Version⁔(/*this*/ ref Decoder w) { return w.common.version; }
+} partial class pkgbitsᴛDecoder {
 
-} // end pkgbits_package
+// Version reports the version of the bitstream.
+public static Version Version(this ref Decoder w) { return w.common.version; }
+
+}
