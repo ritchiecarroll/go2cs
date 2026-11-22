@@ -1745,6 +1745,16 @@ jobs:
 
           Write-Host "==> behavioral smoke: filter '$filter', GoTargetOS=$($env:GoTargetOS)"
 
+          # Scratch ref only (claude/c1-scratch-mn-platform-t3b, never merges): GoTwinsFor is an EXACT
+          # ';'-separated project list (src/Directory.Build.targets:65) while --filter is a case-insensitive
+          # substring, so a filter such as 'Mn' twinned nothing. Name every project the filter runs.
+          $twinNames = @(Get-ChildItem -Directory 'src/tests/Behavioral' |
+              Where-Object { $_.Name.IndexOf($filter, [StringComparison]::OrdinalIgnoreCase) -ge 0 -and
+                  (Test-Path (Join-Path $_.FullName "$($_.Name).csproj")) } |
+              ForEach-Object Name | Sort-Object)
+          $env:GoTwinsFor = $twinNames -join ';'
+          Write-Host "==> GoTwinsFor ($($twinNames.Count)): $env:GoTwinsFor"
+
           # Build the converter explicitly. A hosted runner has no go2cs binary at all, and every
           # harness rebuild predicate keys on a converter *.go being NEWER than the binary -- which
           # a toolchain change never touches (FALSE-GREEN route #4). Building it here first also
