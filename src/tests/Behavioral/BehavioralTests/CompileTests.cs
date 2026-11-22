@@ -1471,7 +1471,16 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckMixedUntypedConstArithmetic() => CheckTarget("MixedUntypedConstArithmetic");
 
     [TestMethod]
+    public void CheckMnAotGeneric() => CheckTarget("MnAotGeneric");
+
+    [TestMethod]
     public void CheckMnBlockedIO() => CheckTarget("MnBlockedIO");
+
+    [TestMethod]
+    public void CheckMnBoxAlias() => CheckTarget("MnBoxAlias");
+
+    [TestMethod]
+    public void CheckMnContended() => CheckTarget("MnContended");
 
     [TestMethod]
     public void CheckMnDeepUnwind() => CheckTarget("MnDeepUnwind");
@@ -1480,7 +1489,19 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckMnForeignThread() => CheckTarget("MnForeignThread");
 
     [TestMethod]
+    public void CheckMnFuncPair() => CheckTarget("MnFuncPair");
+
+    [TestMethod]
     public void CheckMnGenericContended() => CheckTarget("MnGenericContended");
+
+    [TestMethod]
+    public void CheckMnIfaceTwin() => CheckTarget("MnIfaceTwin");
+
+    [TestMethod]
+    public void CheckMnMainExit() => CheckTarget("MnMainExit");
+
+    [TestMethod]
+    public void CheckMnMixedStorm() => CheckTarget("MnMixedStorm");
 
     [TestMethod]
     public void CheckMnParkedCallers() => CheckTarget("MnParkedCallers");
@@ -1491,26 +1512,6 @@ public class B2_CompileTests : BehavioralTestBase
     [TestMethod]
     public void CheckMnParkedSameName() => CheckTarget("MnParkedSameName");
 
-    [TestMethod]
-    public void CheckMnFuncPair() => CheckTarget("MnFuncPair");
-
-    [TestMethod]
-    public void CheckMnBoxAlias() => CheckTarget("MnBoxAlias");
-
-    [TestMethod]
-    public void CheckMnContended() => CheckTarget("MnContended");
-
-    [TestMethod]
-    public void CheckMnAotGeneric() => CheckTarget("MnAotGeneric");
-
-    [TestMethod]
-    public void CheckMnIfaceTwin() => CheckTarget("MnIfaceTwin");
-
-    [TestMethod]
-    public void CheckMnMainExit() => CheckTarget("MnMainExit");
-
-    [TestMethod]
-    public void CheckMnMixedStorm() => CheckTarget("MnMixedStorm");
 
     [TestMethod]
     public void CheckMultiFileInitOrder() => CheckTarget("MultiFileInitOrder");
