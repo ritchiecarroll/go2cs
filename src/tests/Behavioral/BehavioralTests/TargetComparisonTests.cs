@@ -1515,6 +1515,8 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     [TestMethod]
     public void CheckMnParkedSameName() => CheckTarget("MnParkedSameName");
 
+    [TestMethod]
+    public void CheckMnSpinCap() => CheckTarget("MnSpinCap");
 
     [TestMethod]
     public void CheckMultiFileInitOrder() => CheckTarget("MultiFileInitOrder");

@@ -1468,6 +1468,8 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     [TestMethod]
     public void CheckMnParkedSameName() => CheckTarget("MnParkedSameName");
 
+    [TestMethod]
+    public void CheckMnSpinCap() => CheckTarget("MnSpinCap");
 
     [TestMethod]
     public void CheckMultiFileInitOrder() => CheckTarget("MultiFileInitOrder");

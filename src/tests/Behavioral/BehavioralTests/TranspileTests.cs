@@ -1512,6 +1512,8 @@ public class A1_TranspileTests : BehavioralTestBase
     [TestMethod]
     public void CheckMnParkedSameName() => CheckTarget("MnParkedSameName");
 
+    [TestMethod]
+    public void CheckMnSpinCap() => CheckTarget("MnSpinCap");
 
     [TestMethod]
     public void CheckMultiFileInitOrder() => CheckTarget("MultiFileInitOrder");
