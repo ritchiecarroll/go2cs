@@ -152,14 +152,15 @@ target, so the package is always RID-specific, and differs from the layout above
   project reference, fails a consumer build with `NUGETGOCGO001` when the build's RID has no `runtimes/<rid>/lib/`
   folder in the package. That RID is `-r`'s, or the .NET SDK's own for a portable build, so a portable build on an
   osx-arm64 host is refused even when it will run elsewhere: build with `-r` and a packed RID. The guard reads the set
-  from the package's folders, so osx-arm64 joins by being packed, with no change to the guard. One deployment neither
-  check refuses yet: a portable build made on a packed host and run on linux-musl takes `runtimes/linux-x64` by .NET's
-  RID fallback, whose C binding is glibc's. The run-time RID check (A6) is what will refuse it.
+  from the package's folders, so osx-arm64 joins by being packed, with no change to the guard. A portable build made
+  on a packed host and run on linux-musl takes `runtimes/linux-x64` by .NET's RID fallback, whose C binding is glibc's.
+  There the package's `go.lib` refuses those bindings at load, before any C call: its run-time target check.
 
 The read-back also checks R7: each RID's assembly has exactly the public surface of `lib/`'s reference assembly
-(ApiCompat, strict mode). **No `-Cgo` pack is pushed** until the run-time RID check (A6) lands: `src/_nugetpush.ps1`
-refuses a package whose `build/<id>.targets` carries `NUGETGOCGO001`, or whose `lib/` holds a reference assembly
-beside `runtimes/`, before it pushes anything. `-Cgo` runs under
+(ApiCompat, strict mode). **A `-Cgo` pack is pushed only when the `go.lib` it was packed against carries the run-time
+target check**, which its `go2cs/source-metadata.txt` records (`a6:`). Before it pushes anything, `src/_nugetpush.ps1`
+refuses a `-Cgo` package without that record: one whose `build/<id>.targets` carries `NUGETGOCGO001`, or whose `lib/`
+holds a reference assembly beside `runtimes/`. `-Cgo` runs under
 PowerShell 7 only.
 
 **A local closure** (`-LocalClosure <folder>`; COORD's ruling (1) for the cgo item's hosted proof, 2026-11-22). Before a
@@ -169,8 +170,8 @@ refused with `-Release`.
 - Every `go.*` package restores from that folder alone, through package source mapping.
 - The published-closure check is replaced by one that each restored `go.*` package is `-ClosureVersion` and
   byte-equal to the folder's nupkg (SHA-512).
-- `go2cs/source-metadata.txt` records `local-closure:`. `src/_nugetpush.ps1` refuses any package that carries it, so
-  a local-closure pack is never pushed.
+- `go2cs/source-metadata.txt` records `local-closure:`. `src/_nugetpush.ps1` refuses any package that carries it, and
+  so does `Assert-NugetgoPushable.ps1` before a hand push, so a local-closure pack is never pushed.
 
 Every pack also refuses a `GoPositionMap` record whose Go file is an absolute path or a Go build-cache file, and names
 the record. It checks each `package_info.cs` before it builds, and each packed assembly after the pack. A packed
@@ -254,8 +255,13 @@ The rehearsal runs on the test gallery, or from a local folder feed (*From a loc
 1. **Owner:** push the REHEARSAL package, unsigned, to the test gallery with that gallery's own API key. The
    release candidate never goes there.
    ```
+   pwsh -NoProfile -File src/tools/nugetgo/Assert-NugetgoPushable.ps1 <out-rehearsal>/<ID>.<PV>-int.1.nupkg
    dotnet nuget push <out-rehearsal>/<ID>.<PV>-int.1.nupkg --source https://apiint.nugettest.org/v3/index.json
    ```
+   `Assert-NugetgoPushable.ps1` refuses, by name, a package packed against a local `go.*` closure and a `-Cgo` pack
+   whose `go.lib` floor lacks the run-time target check: the refusals `src/_nugetpush.ps1` makes on the `go.*` push,
+   which a hand push never passes through. `Test-SheetPaste.ps1` refuses a sheet whose push has no such line before it
+   in the same block.
 2. **Lane:** wait until int's flat container lists `PV-int.1`.
 3. **Lane:** convert the module's sample program (named in the instance plan). The registry has no row yet, so a
    local mappings file carries the row, and the feed flag points selection at the test gallery:
@@ -335,8 +341,9 @@ COORD rules sections 1-3 green before this step. The owner works this step from 
 1. **Sign** the release candidate with the certificate registered to B1's account, as `release-nuget.ps1` Phase 2
    does: `dotnet nuget sign` with the card. nuget.org rejects an unsigned package from that account.
 2. **Verify:** `dotnet nuget verify --all <ID>.<PV>.nupkg`.
-3. **Push:** `dotnet nuget push <ID>.<PV>.nupkg --source https://api.nuget.org/v3/index.json`. A published version
-   can be unlisted but never deleted.
+3. **Push:** `pwsh -NoProfile -File src/tools/nugetgo/Assert-NugetgoPushable.ps1 <ID>.<PV>.nupkg`, then
+   `dotnet nuget push <ID>.<PV>.nupkg --source https://api.nuget.org/v3/index.json`. A published version can be
+   unlisted but never deleted.
 4. **Lane:** wait until the flat container and the registration list `PV`. The registry's checks read both.
 5. **COORD, BEFORE step 1:** push the conversion source to the conversion repository, and mint the signed tag
    `nuget-<PV>` on that commit (the stdlib release's order: the tag exists before the package is signed). The owner

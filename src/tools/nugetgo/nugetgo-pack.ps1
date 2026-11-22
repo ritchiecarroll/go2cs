@@ -94,8 +94,9 @@
     flavor's REFERENCE assemblies, never an implementation another RID could fall back to; build/<id>.targets fails a
     consumer build for a RID the package does not carry with NUGETGOCGO001, reading the set from the package's own
     runtimes/ folders. VALIDATION.md and the self-description state both. The read-back adds R7: each RID's assembly has
-    exactly the public surface of lib/'s reference assembly (ApiCompat, strict). No -Cgo pack is pushed to any feed
-    until the run-time RID check (A6) lands: src/_nugetpush.ps1 refuses one.
+    exactly the public surface of lib/'s reference assembly (ApiCompat, strict). A -Cgo pack is pushed only when the
+    go.lib it was packed against carries the run-time target check, which its self-description records ("a6: ");
+    src/_nugetpush.ps1 refuses any other.
 
     LocalClosure (-LocalClosure <folder>; cgo against go.* INC 4, COORD's ruling (1), 2026-11-22): a -Cgo REHEARSAL packed
     against go.* packages built from the tree, in a local folder feed, before any published go.lib carries A6. It is
@@ -780,6 +781,7 @@ try {
         $stream = $entry.Open(); $buffer = New-Object System.IO.MemoryStream
         try { $stream.CopyTo($buffer) } finally { $stream.Dispose() }
         foreach ($root in @(Find-NugetgoHostPaths -Bytes $buffer.ToArray() -Roots $hostRoots)) { $hostPathHits.Add("$($entry.FullName) names $root") }
+        foreach ($marker in @(Find-NugetgoTempMarkers -Bytes $buffer.ToArray())) { $hostPathHits.Add("$($entry.FullName) names the converter's temp $marker") }
         if ($entry.FullName -like '*.dll') {
             foreach ($why in @(Find-NugetgoPositionMapIdentityHits -Bytes $buffer.ToArray())) { $identityHits += "$($entry.FullName) records $why" }
         }

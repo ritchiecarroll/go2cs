@@ -134,6 +134,11 @@ if ((Get-Command dotnet -ErrorAction SilentlyContinue) -and ('System.Reflection.
 }
 else { Write-Host '  skip  the assembly arms: NOT MEASURED (no dotnet, or no System.Reflection.Metadata in this PowerShell)' }
 
+Write-Host 'the converter''s temp markers (COORD''s INC 4 review, fold 5)'
+Check 'a go2cs-modcopy-* copy path in UTF-8 is found' ((@(Find-NugetgoTempMarkers (Utf8 '/tmp/go2cs-modcopy-123456/github.com/x/y.go')) -join ',') -eq 'go2cs-modcopy-') 'not found'
+Check 'a go2cs-gomod-overlay file in UTF-16LE at an odd offset is found' ((@(Find-NugetgoTempMarkers (Join-Bytes @([byte[]]@(0x01), (Utf16 'C:\\Temp\\go2cs-gomod-overlay.json')))) -join ',') -eq 'go2cs-gomod-overlay') 'not found'
+Check 'a Go string /tmp is no marker' (@(Find-NugetgoTempMarkers (Utf8 'os.TempDir falls back to /tmp')).Count -eq 0) 'a marker was found in /tmp'
+
 Write-Host 'the pack uses it'
 $pack = [System.IO.File]::ReadAllText((Join-Path $PSScriptRoot 'nugetgo-pack.ps1'))
 Check 'nugetgo-pack.ps1 builds with ContinuousIntegrationBuild and a PathMap over the recurse root' (
@@ -141,6 +146,7 @@ Check 'nugetgo-pack.ps1 builds with ContinuousIntegrationBuild and a PathMap ove
 Check 'nugetgo-pack.ps1 scans every packed entry and each packed assembly''s pdb' (
     $pack.Contains('Find-NugetgoHostPaths') -and $pack.Contains('Entries') -and $pack.Contains('.pdb')) 'no host-path scan of the package'
 Check 'a refused package is removed from the output' ($pack.Contains('Remove-Item -LiteralPath $nupkg')) 'the refused nupkg stays in -OutDir'
+Check 'nugetgo-pack.ps1 scans every packed entry for the temp markers' ($pack.Contains('Find-NugetgoTempMarkers -Bytes')) 'the pack does not scan for them'
 Check 'nugetgo-pack.ps1 checks every package_info.cs before it builds, and every packed assembly after' (
     $pack.Contains('Find-NugetgoPositionMapIdentityHits -Text') -and $pack.Contains('Find-NugetgoPositionMapIdentityHits -Bytes')) 'no GoPositionMap identity guard'
 

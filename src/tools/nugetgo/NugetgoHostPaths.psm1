@@ -86,6 +86,25 @@ function Find-NugetgoHostPaths([byte[]]$Bytes, [string[]]$Roots) {
     return $found.ToArray()
 }
 
+# ---- the converter's own temp markers (COORD's INC 4 review, fold 5) -----------------------------------------------------
+# A go.mod-less module-cache release converts from a copy under the temp directory (go2cs-modcopy-*), and the -tests driver
+# writes a go.mod overlay (go2cs-gomod-overlay*). Neither may reach a packed byte. They are found as plain text, in UTF-8
+# and in UTF-16LE at both alignments: the root scan above needs a path boundary after a root, and a marker is followed by
+# the temp name's random digits. The temp directory itself is no root, since a Go string such as "/tmp" is legitimate
+# packed content.
+$script:TempMarkers = @('go2cs-modcopy-', 'go2cs-gomod-overlay')
+
+<#
+.SYNOPSIS
+    Returns each converter temp marker that -Bytes names; empty when none.
+#>
+function Find-NugetgoTempMarkers([byte[]]$Bytes) {
+    if ($null -eq $Bytes -or $Bytes.Length -eq 0) { return @() }
+    $views = @($script:latin1.GetString($Bytes), [System.Text.Encoding]::Unicode.GetString($Bytes),
+        $(if ($Bytes.Length -gt 1) { [System.Text.Encoding]::Unicode.GetString($Bytes, 1, $Bytes.Length - 1) } else { '' }))
+    @($script:TempMarkers | Where-Object { $marker = $_; @($views | Where-Object { $_.Contains($marker) }).Count })
+}
+
 # ---- GoPositionMap identities (cgo against go.* INC 4, increment 1c; COORD's ruling 2026-11-22) -------------------------
 # A GoPositionMap record's first argument names the Go file a frame was converted from, in one of goSourceIdentity's forms:
 # GOROOT-relative (`fmt/print.go`), `<module>@<version>/<path>`, `<module>@/<path>` (the -trimpath forms) or a bare
@@ -174,4 +193,4 @@ function Find-NugetgoPositionMapIdentityHits([string]$Text, [byte[]]$Bytes) {
     @($identities | ForEach-Object { Test-NugetgoPositionMapIdentity $_ } | Where-Object { $_ })
 }
 
-Export-ModuleMember -Function Find-NugetgoHostPaths, Test-NugetgoPositionMapIdentity, Get-NugetgoSourcePositionMapIdentities, Get-NugetgoAssemblyPositionMapIdentities, Find-NugetgoPositionMapIdentityHits
+Export-ModuleMember -Function Find-NugetgoHostPaths, Find-NugetgoTempMarkers, Test-NugetgoPositionMapIdentity, Get-NugetgoSourcePositionMapIdentities, Get-NugetgoAssemblyPositionMapIdentities, Find-NugetgoPositionMapIdentityHits

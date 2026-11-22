@@ -81,12 +81,19 @@ finally { [System.IO.File]::WriteAllText($stamp, $stamped); Pop-Location }
 Reading "converter: this tree's, stamped as the closure's release $closureVersion for this job only (it was $($stamped.Trim()))"
 
 # ---- the planted stale go.lib ------------------------------------------------------------------------------------------
-$global = if ($env:NUGET_PACKAGES) { $env:NUGET_PACKAGES } else { Join-Path ([Environment]::GetFolderPath('UserProfile')) '.nuget/packages' }
-$planted = Join-Path $global "go.lib/$($closureVersion.ToLowerInvariant())"
-New-Item -ItemType Directory -Force -Path (Join-Path $planted 'lib/net10.0') | Out-Null
-[System.IO.File]::WriteAllText((Join-Path $planted 'lib/net10.0/go.lib.dll'), 'a planted stale go.lib: not an assembly')
-[System.IO.File]::WriteAllText((Join-Path $planted "go.lib.$($closureVersion.ToLowerInvariant()).nupkg.sha512"), 'planted')
-Reading "planted: a stale go.lib $closureVersion in the user's global packages folder"
+# Only on a hosted runner, whose cache is thrown away with it, and only for a prerelease closure version, which no
+# published go.lib carries: a broken go.lib must never reach a fleet box's own cache (COORD's INC 4 review, fold 6).
+if ($env:GITHUB_ACTIONS -eq 'true' -and $closureVersion.Contains('-')) {
+    $global = if ($env:NUGET_PACKAGES) { $env:NUGET_PACKAGES } else { Join-Path ([Environment]::GetFolderPath('UserProfile')) '.nuget/packages' }
+    $planted = Join-Path $global "go.lib/$($closureVersion.ToLowerInvariant())"
+    New-Item -ItemType Directory -Force -Path (Join-Path $planted 'lib/net10.0') | Out-Null
+    [System.IO.File]::WriteAllText((Join-Path $planted 'lib/net10.0/go.lib.dll'), 'a planted stale go.lib: not an assembly')
+    [System.IO.File]::WriteAllText((Join-Path $planted "go.lib.$($closureVersion.ToLowerInvariant()).nupkg.sha512"), 'planted')
+    Reading "planted: a stale go.lib $closureVersion in the user's global packages folder"
+}
+else {
+    Reading "planted: nothing (not a hosted runner, or $closureVersion is no prerelease); the restored go.lib is still checked against J1's bytes"
+}
 
 function Invoke-Row([string]$label, [string]$feed) {
     $work = Join-Path $OutDir "work-$label"
