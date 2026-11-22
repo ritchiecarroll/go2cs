@@ -112,10 +112,16 @@ public abstract partial class ж<T>
         if (GoPointerWords.NamesGoMemory(word))
             throw RuntimeErrorPanic.RuntimeRaised(kind == GoPointerWords.SlotKind.CMemory ? CgoFieldLoadFromCText : CgoFieldLoadOverGoText);
 
+        // A fresh box per read. Go's == on two reads compares the address (NativeBox's Equals reads the native identity),
+        // so l.next == l.next holds, but the two reads are not one CLR object: a ReferenceEquals site would tell them
+        // apart. The `**C.T` load (seat 1c) mints the same way.
         return new NativeBox<U>(word);
     }
 
     // The store over a native receiver: 0 for nil, the address of a pointer to C memory alone, and a Go pointer refused.
+    // C memory alone is whatever box names it (GoPointerWords.IsCMemoryAlone): a native box over C memory, or an element
+    // of a native-backed slice that keeps no anchor (ж.ElemRefBox.cs, 3.1's C2). Its address is the box's native
+    // identity.
     private unsafe void CgoPointerFieldWrite<U>(FieldRefFunc<T, ж<U>> fieldRefFunc, ж<U> value)
     {
         NativeBox<ж<U>> slot = CgoPointerFieldSlot(fieldRefFunc, out GoPointerWords.SlotKind kind);
@@ -123,8 +129,8 @@ public abstract partial class ж<T>
 
         if (value is null || value.IsNilPointer)
             word = 0;
-        else if (value is NativeBox<U> native && GoPointerWords.IsCMemoryAlone(native))
-            word = native.NativeAddress;
+        else if (GoPointerWords.IsCMemoryAlone(value) && value.NativeIdentity is var address and not 0)
+            word = address;
         else
             throw RuntimeErrorPanic.RuntimeRaised(kind == GoPointerWords.SlotKind.CMemory ? CgoFieldStoreIntoCText : CgoFieldStoreOverGoText);
 
