@@ -15,8 +15,8 @@
 # Budget (hosted runner minutes, measured 2026-11-22 where stated):
 #   per push or PR:  golib-tests 12 (linux) + 17 (windows), gen-tests 1 + 2, go-test about 15 + 25 (PROVISIONAL,
 #                    not yet measured hosted), plus 6 one-minute plan jobs: about 78 runner minutes, about 30 wall.
-#   per night:       behavioral-full 47 (linux, measured) + about 70 (windows, PROVISIONAL), plus 2 plan jobs:
-#                    about 120 runner minutes.
+#   per night:       behavioral-full 47 (linux) + 72 (windows), measured; the 81-project M:N subset about 6 per leg,
+#                    measured on linux; plus the plan jobs: about 135 runner minutes.
 # The repository is public, so these minutes are not billed; the numbers are stated so a regression in cost is seen.
 #
 # Guide: docs/CIMatrix.md.
