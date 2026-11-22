@@ -9,6 +9,8 @@
 package main
 
 import (
+	"errors"
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -467,6 +469,35 @@ func TestPlainRecurseConvertsAModuleCacheReleaseWithNoGoMod(t *testing.T) {
 		}
 	})
 
+	// COORD's INC 4 review, NIT: the copy's work directory is its real path, so a TMPDIR reached through a symlink (macOS's
+	// /var is /private/var) maps back too. The go.mod line names the copy by its resolved path.
+	t.Run("a TMPDIR reached through a symlink converts and names the resolved copy", func(t *testing.T) {
+		real := t.TempDir()
+		link := filepath.Join(t.TempDir(), "link")
+
+		if err := os.Symlink(real, link); err != nil {
+			t.Skipf("no symlink here: %v", err)
+		}
+
+		combined, output, err := runWith(cache, "", moduleDir, "TMPDIR="+link, "TMP="+link, "TEMP="+link)
+
+		if err != nil || emitted(t, output)[oldRoot+"old.cs"] == "" {
+			t.Fatalf("the conversion under a symlinked TMPDIR failed (%v):\n%s", err, lastLines(combined, 12))
+		}
+
+		var copyLine string
+
+		for _, line := range strings.Split(combined, "\n") {
+			if strings.HasPrefix(line, "go.mod: ") {
+				copyLine = line
+			}
+		}
+
+		if !strings.Contains(copyLine, filepath.Join(real, "go2cs-modcopy-")) {
+			t.Errorf("the copy is not named by its resolved path under %s: %s", real, copyLine)
+		}
+	})
+
 	refused := func(t *testing.T, dir string) {
 		t.Helper()
 		combined, _, err := run(dir)
@@ -475,6 +506,23 @@ func TestPlainRecurseConvertsAModuleCacheReleaseWithNoGoMod(t *testing.T) {
 			t.Fatalf("not refused by name (%v):\n%s", err, lastLines(combined, 12))
 		}
 	}
+
+	// COORD's INC 4 review, fold 1: the refusal covers only a directory NO go.mod covers. A package directory inside a
+	// module, with the go.mod above it, converts under -recurse as it did before INC 4 (master found the parent go.mod).
+	t.Run("a package directory inside a module still converts", func(t *testing.T) {
+		module := t.TempDir()
+		writeModuleFile(t, filepath.Join(module, "go.mod"), "module example.com/inside\n\ngo 1.24\n")
+		writeModuleFile(t, filepath.Join(module, "sub", "sub.go"), "package sub\n\n// One is one.\nfunc One() int { return 1 }\n")
+		combined, output, err := run(filepath.Join(module, "sub"))
+
+		if err != nil || strings.Contains(combined, "-recurse needs a module") {
+			t.Fatalf("a package directory inside a module was refused (%v):\n%s", err, lastLines(combined, 12))
+		}
+
+		if !strings.Contains(strings.Join(mapKeys(emitted(t, output)), "\n"), "sub.cs") {
+			t.Fatalf("the package inside the module emitted no sub.cs:\n%s", lastLines(combined, 12))
+		}
+	})
 
 	t.Run("a near-miss copy outside the cache is refused by name", func(t *testing.T) {
 		copyDir := filepath.Join(t.TempDir(), "example.com", "!old@v0.9.1")
@@ -554,5 +602,17 @@ func TestACopyRunMapsEverySourceOrRefusesByName(t *testing.T) {
 	if got := remapCopiedPaths(message); strings.Contains(got, "go2cs-modcopy-") ||
 		!strings.Contains(got, filepath.ToSlash(filepath.Join(release, "old.go"))) {
 		t.Errorf("both spellings of the copy are remapped: %s", got)
+	}
+
+	// COORD's INC 4 review, NIT: an error ConvertModule returns after the copy names the release, and keeps its chain.
+	sentinel := errors.New("sentinel")
+	wrapped := fmt.Errorf("preflight failed in %s: %w", copyRoot, sentinel)
+
+	if got := remapCopiedError(wrapped); strings.Contains(got.Error(), "go2cs-modcopy-") || !strings.Contains(got.Error(), release) || !errors.Is(got, sentinel) {
+		t.Errorf("a returned error is remapped with its chain kept: %v (errors.Is %t)", got, errors.Is(got, sentinel))
+	}
+
+	if remapCopiedError(nil) != nil || remapCopiedError(sentinel) != sentinel {
+		t.Error("nil stays nil, and an error naming no copy is returned as it is")
 	}
 }

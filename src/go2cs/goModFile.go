@@ -99,6 +99,12 @@ func copyModuleCacheRelease(dir, synthesized string) (string, string, error) {
 		return "", "", err
 	}
 
+	// The temp root's real path: go reports a source under it resolved (macOS's /var is /private/var; C1 met it on the
+	// hosted Macs), and every map from the copy back to the release compares that spelling (COORD's INC 4 review, NIT).
+	if real, realErr := filepath.EvalSymlinks(work); realErr == nil {
+		work = real
+	}
+
 	copyDir := filepath.Join(work, filepath.Base(dir))
 
 	err = filepath.WalkDir(dir, func(path string, entry os.DirEntry, walkErr error) error {
@@ -159,6 +165,28 @@ func remapCopiedPaths(s string) string {
 	// gone when the user reads it (P3's delta read, NIT 2).
 	return strings.ReplaceAll(s, filepath.ToSlash(copiedModuleRoot), filepath.ToSlash(originalModuleRoot))
 }
+
+// remapCopiedError is err with the copy's path written as the release's (remapCopiedPaths), its chain kept for errors.As
+// and errors.Is; err itself when its text names no copy.
+func remapCopiedError(err error) error {
+	if err == nil {
+		return nil
+	}
+
+	if text := remapCopiedPaths(err.Error()); text != err.Error() {
+		return remappedCopyError{text: text, err: err}
+	}
+
+	return err
+}
+
+type remappedCopyError struct {
+	text string
+	err  error
+}
+
+func (e remappedCopyError) Error() string { return e.text }
+func (e remappedCopyError) Unwrap() error { return e.err }
 
 // originalSourcePath is the release's own path for a source under the copy, else path unchanged: the same map, for the
 // Go file identity a package records (goSourceIdentity), which reads the module and its VERSION from the cache path

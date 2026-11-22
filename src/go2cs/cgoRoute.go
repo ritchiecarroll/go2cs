@@ -1294,6 +1294,15 @@ func cgoBindingsHeader(pkg *packages.Package, sources []syntaxSourceFile, reduce
 	return header.String()
 }
 
+// digestHeader is the bindings header GoInputDigest reads for a cgo package, or "" for a package with no cgo route.
+func (route *cgoRoute) digestHeader() string {
+	if route == nil {
+		return ""
+	}
+
+	return route.header
+}
+
 // bindingsText completes the bindings file from its converted declarations: the header first, the assembly's
 // search-path attribute ahead of the namespace (an assembly attribute must precede it, CS1730), and the bindings last.
 func (route *cgoRoute) bindingsText(converted string) string {

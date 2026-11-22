@@ -54,8 +54,11 @@ func recordsInputDigest(projectFileName string, options Options) bool {
 // parser was handed: that file's //line directives name the source by ABSOLUTE path, and its name is a hash of the
 // build, so the digest differed per directory, and per run for a go.mod-less release converted from a fresh copy
 // (cgo-nuget-e2e's first J2, run 44995089337: the pack's own linux flavor did not reproduce -RecurseRoot). cmd/cgo's
-// types file is left out: it is generated from those sources under the options the digest records (cgo=true).
-func moduleInputDigest(projectFileName string, fset *token.FileSet, files []FileEntry, outputPath string, options Options) string {
+// types file is not read either; in its place the digest takes the bindings file's header (cgoBindingsHeader): the
+// target, the C toolchain's version line and target triple, and the sha256 of the import "C" sources and the C
+// declarations cmd/cgo gave them -- no path. So a new zig pin or a changed C layout moves the digest (COORD's INC 4
+// review, fold 3), where leaving the types file out with nothing in its place would not.
+func moduleInputDigest(projectFileName string, fset *token.FileSet, files []FileEntry, outputPath, cgoHeader string, options Options) string {
 	if !recordsInputDigest(projectFileName, options) {
 		return ""
 	}
@@ -70,7 +73,7 @@ func moduleInputDigest(projectFileName string, fset *token.FileSet, files []File
 		sources = append(sources, entrySourcePath(fset, entry))
 	}
 
-	digest, err := packageInputDigest(sources, outputPath, options, converterRevision())
+	digest, err := packageInputDigest(sources, outputPath, cgoHeader, options, converterRevision())
 
 	if err != nil {
 		showWarning("%s records no %s: %v", projectFileName, inputDigestProperty, err)
@@ -82,7 +85,7 @@ func moduleInputDigest(projectFileName string, fset *token.FileSet, files []File
 
 // packageInputDigest is the digest of the production inputs, as sha256-<64 hex>. sourceFiles are the package's parsed
 // production Go files; outputPath is the package's output directory, where its hand-owned companions live.
-func packageInputDigest(sourceFiles []string, outputPath string, options Options, revision string) (string, error) {
+func packageInputDigest(sourceFiles []string, outputPath, cgoHeader string, options Options, revision string) (string, error) {
 	if len(sourceFiles) == 0 {
 		return "", nil
 	}
@@ -144,6 +147,12 @@ func packageInputDigest(sourceFiles []string, outputPath string, options Options
 
 		fmt.Fprintf(hash, "%s\x00%d\x00", name, len(data))
 		hash.Write(data)
+	}
+
+	// A cgo package's bindings header (moduleInputDigest), after every file and only when there is one, so every other
+	// package's digest is unchanged.
+	if cgoHeader != "" {
+		fmt.Fprintf(hash, "cgo-bindings\x00%d\x00%s", len(cgoHeader), cgoHeader)
 	}
 
 	fmt.Fprintf(hash, "\x00%s\x00uco=%t;var=%t;indent=%d;cgo=%t\x00%s\x00%s", options.targetPlatform,

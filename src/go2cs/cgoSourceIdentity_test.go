@@ -13,6 +13,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"regexp"
+	"runtime"
 	"strings"
 	"testing"
 )
@@ -154,11 +155,11 @@ func TestACgoRewrittenTreeRecordsItsImportCSource(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		digest := func(t *testing.T, cache, dir string) string {
+		digest := func(t *testing.T, cache, dir string, extraEnv ...string) string {
 			t.Helper()
 			output := t.TempDir()
 			cmd := exec.Command(driverBinary(t), "-recurse=nuget", "-cgo=true", "-go2cspath", treeSrc, dir, output)
-			cmd.Env = append(os.Environ(), "GOMODCACHE="+cache, "GOWORK=off", "GOFLAGS=", "CGO_ENABLED=", "GOPROXY=off", "GOTOOLCHAIN=local", "TMPDIR="+t.TempDir())
+			cmd.Env = append(append(os.Environ(), "GOMODCACHE="+cache, "GOWORK=off", "GOFLAGS=", "CGO_ENABLED=", "GOPROXY=off", "GOTOOLCHAIN=local", "TMPDIR="+t.TempDir()), extraEnv...)
 			out, err := cmd.CombinedOutput()
 
 			if err != nil {
@@ -198,6 +199,27 @@ func TestACgoRewrittenTreeRecordsItsImportCSource(t *testing.T) {
 
 		if first != twinDigest {
 			t.Errorf("the go.mod-less release records %s, its go.mod twin %s", first, twinDigest)
+		}
+
+		// COORD's INC 4 review, fold 3: the bindings file's header stands in for cmd/cgo's types file, so the C
+		// toolchain moves the digest. A CC that compiles as this host's does but reports another --version line.
+		if runtime.GOOS != "windows" {
+			cc, err := exec.Command("go", "env", "CC").Output()
+
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			wrapper := filepath.Join(t.TempDir(), "cc-other-version")
+			script := "#!/bin/sh\nif [ \"$1\" = \"--version\" ]; then echo 'another-cc 9.9.9'; exit 0; fi\nexec " + strings.TrimSpace(string(cc)) + " \"$@\"\n"
+
+			if err := os.WriteFile(wrapper, []byte(script), 0o755); err != nil {
+				t.Fatal(err)
+			}
+
+			if other := digest(t, cache, release, "CC="+wrapper); other == first {
+				t.Errorf("a C toolchain with another --version line records the same digest %s", first)
+			}
 		}
 	})
 
