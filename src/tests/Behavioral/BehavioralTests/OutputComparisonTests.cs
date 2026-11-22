@@ -1268,6 +1268,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckLiteralFloatConstFold() => CheckTarget("LiteralFloatConstFold");
 
     [TestMethod]
+    public void CheckLiteralFrameNames() => CheckTarget("LiteralFrameNames");
+
+    [TestMethod]
     public void CheckLocalFunctionEmission() => CheckTarget("LocalFunctionEmission");
 
     [TestMethod]
