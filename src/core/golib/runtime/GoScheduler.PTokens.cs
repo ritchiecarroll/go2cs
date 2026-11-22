@@ -19,7 +19,7 @@ namespace go.golib;
 /// s_p was a SemaphoreSlim, and every wait and every release went through its one monitor. The train-4 storm capture
 /// read 19,228 threads back from a blocking call queued on it, 7,201 of them spinning on that monitor. Here no lock is
 /// shared: the free tokens are one int taken by compare-and-swap; a waiter first SPINS on that count (the spin tier,
-/// capped), then sleeps on its OWN event in a lock-free FIFO queue, so a release hands a token to a spinner hot or wakes
+/// uncapped), then sleeps on its OWN event in a lock-free FIFO queue, so a release hands a token to a spinner hot or wakes
 /// exactly one sleeper, and no thread spins on another's lock.
 /// </para>
 /// <para>
@@ -52,20 +52,17 @@ internal sealed class PTokens
     }
 
     private readonly ConcurrentQueue<Waiter> m_waiters = new();
-    private readonly int m_spinCap;
     private int m_free;
     private int m_waiting;   // nodes still Waiting (counted before they queue)
     private int m_spinning;  // waiters in the spin tier
 
-    internal PTokens(int count)
-    {
-        m_free = count;
-
-        // Go keeps at most GOMAXPROCS/2 Ms spinning. Uncapped, overlapping spinners kept m_spinning above zero and so
-        // left every release to the spinners while FIFO sleepers waited, and thousands of them compared-and-swapped one
-        // line. The cap follows the P count the scheduler starts with.
-        m_spinCap = Math.Max(1, count / 2);
-    }
+    // The spin tier has NO cap (COORD's ruling on R6, docs/phase4/DESIGN-mn-convoy.md section 8). Go keeps at most
+    // GOMAXPROCS/2 Ms spinning, and a cap of max(1, P/2) was folded in to bound the spinners and to keep releases from
+    // being left to spinners while sleepers wait. Measured, it cost the P=2 hand-back its gain (p99 2,437 us against 335
+    // uncapped), and a floor of max(2, P/2) still read 2,027 against 125; the guard's one justification, starvation,
+    // did not appear: uncapped, the oldest sleeper's wait at P=12 read 2.6 ms (median of the per-run max), the same as
+    // the capped arm's, with 4-9 sleepers per run against 91-631.
+    internal PTokens(int count) => m_free = count;
 
     /// <summary>
     /// The free tokens now (the monitor's injection count and SetProcs read it). It can dip by one while a hand-off holds
@@ -120,32 +117,29 @@ internal sealed class PTokens
             return false;
 
         // THE SPIN TIER (design (A)): a waiter first spins on the free count, counted in m_spinning, so a release that
-        // sees a spinner frees its token to the count and a spinner takes it hot, with no kernel wake. Over the cap, an
-        // arrival goes straight to the queue (never counted, so a release never leaves a token for it).
-        if (TryEnterSpin())
+        // sees a spinner frees its token to the count and a spinner takes it hot, with no kernel wake.
+        Interlocked.Increment(ref m_spinning);
+        bool taken = false;
+
+        // SpinOnce may Sleep(0), where an interrupt lands: the spinner is uncounted on every way out.
+        try
         {
-            bool taken = false;
+            SpinWait spin = default;
 
-            // SpinOnce may Sleep(0), where an interrupt lands: the spinner is uncounted on every way out.
-            try
+            for (int step = 0; step < SpinSteps && !taken; step++)
             {
-                SpinWait spin = default;
-
-                for (int step = 0; step < SpinSteps && !taken; step++)
-                {
-                    InSpinForTest?.Invoke();
-                    spin.SpinOnce(sleep1Threshold: -1);
-                    taken = TryTake();
-                }
+                InSpinForTest?.Invoke();
+                spin.SpinOnce(sleep1Threshold: -1);
+                taken = TryTake();
             }
-            finally
-            {
-                LeaveSpin();
-            }
-
-            if (taken)
-                return true;
         }
+        finally
+        {
+            LeaveSpin();
+        }
+
+        if (taken)
+            return true;
 
         BeforeCountForTest?.Invoke();
 
@@ -240,21 +234,6 @@ internal sealed class PTokens
             return;
 
         HandToSleepers();
-    }
-
-    // Counts a spinner while fewer than the cap are counted.
-    private bool TryEnterSpin()
-    {
-        while (true)
-        {
-            int spinning = Volatile.Read(ref m_spinning);
-
-            if (spinning >= m_spinCap)
-                return false;
-
-            if (Interlocked.CompareExchange(ref m_spinning, spinning + 1, spinning) == spinning)
-                return true;
-        }
     }
 
     // A spinner stops counting itself. The LAST one to leave hands any token still free to the queue: releases that left

@@ -190,3 +190,18 @@ Predictions:
 - R6c: no starvation outlier: lifted's per-run oldest-sleeper wait has a median within 2x of the floor's and no run over
   100 ms. Outlier here means a lifted run over 3x the floor's median or over 100 ms.
 If R6a holds, the decision is the floor whatever R6c reads; R6c is then the record of what the guard costs at P=12.
+
+**R6 reading** (one session at c02a3c1318, 10 runs per block; floor = max(2, P/2), lifted = no cap):
+
+| block | floor | lifted |
+|---|---|---|
+| P=2 MnHandBack p50 / p99 / wall medians | 2.9 us / 2,027 us / 354 ms | 1.7 us / 125 us / 233 ms |
+| P=2 MnBlockReturn median | 973 ms (0 over 5 s) | 995 ms (0 over 5 s) |
+| P=12 MnBlockReturn median | 1,021 ms | 991 ms |
+| starvation, P=12 MnHandBack: oldest sleeper's wait, median of per-run max (range) | 2,590 us (2,392-3,251) | 2,602 us (2,347-2,931) |
+| sleepers per run, same block | 91-631 | 4-9 |
+
+Scored: R6a **missed** (the floor's P=2 p99 is 16x lifted's and its wall 52% over; two spinners do not suffice).
+R6b **met** (MnBlockReturn within 3% at both P). R6c **met**: no starvation outlier; lifted's oldest-sleeper wait
+matches the capped arm's (both about 2.6 ms, no run over 3.3 ms), and lifting the cap cut the sleepers per run from
+hundreds to under ten. Decision by COORD's rule: R6a failed and lifted shows no outlier, so **the cap is lifted**.
