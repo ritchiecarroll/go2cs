@@ -57,6 +57,14 @@ public class TwinMethodSetTests
         Assert.IsTrue(typeof(ж<twinms_package.Mu>).StructurallyImplements(typeof(twinms_package.Locker)), "*Mu implements Locker");
         Assert.IsFalse(typeof(twinms_package.Mu).StructurallyImplements(typeof(twinms_package.Locker)), "Mu does not: Lock is a pointer method");
     }
+
+    [TestMethod]
+    public void PercentTOfALiftedInterfaceNeverPrintsATwin()
+    {
+        // P3's SHOULD on the twin seat: goInterfaceTypeString read GetMethods() itself, so under GoTwinsIface=default an
+        // anonymous interface's `%T` printed `Lockꞏtwin() golib.GoTask` beside Go's one method.
+        Assert.AreEqual("interface { Lock() }", GoReflect.GoTypeName(typeof(twinms_package.LiftedLocker)));
+    }
 }
 
 public static class twinms_package
@@ -64,6 +72,15 @@ public static class twinms_package
     public struct Mu { public nint state; }
 
     public interface Locker
+    {
+        void Lock();
+
+        GoTask Lockꞏtwin() { Lock(); return default; }
+    }
+
+    // An anonymous interface the converter lifted (`interface{ Lock() }`), in the same opt-in twin shape.
+    [GoType("dyn")]
+    public interface LiftedLocker
     {
         void Lock();
 
