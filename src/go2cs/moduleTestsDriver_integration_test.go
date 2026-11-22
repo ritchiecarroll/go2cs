@@ -452,4 +452,42 @@ func TestTestsRecurseConvertsAModuleCacheReleaseWithNoGoMod(t *testing.T) {
 	if copies, _ := filepath.Glob(filepath.Join(tmp, "go2cs-modcopy-*")); len(copies) != 0 {
 		t.Errorf("the run left its copy behind: %v", copies)
 	}
+
+	// The copy is gone when the user reads anything the run wrote, so nothing names it (COORD's ruling on the design):
+	// not a file of the output root -- the converted .cs files' GoPositionMap and provenance strings included, where
+	// INC 4's leak was found -- and not a line of the run's output, except the one line that announces the copy.
+	const copyMarker = "go2cs-modcopy-"
+
+	for _, line := range strings.Split(output, "\n") {
+		if strings.Contains(line, copyMarker) && !strings.Contains(line, "converting a copy carrying the module cache's") {
+			t.Errorf("a line of the run's output names the copy: %s", line)
+		}
+	}
+
+	identities := 0
+
+	_ = filepath.WalkDir(outRoot, func(path string, entry os.DirEntry, walkErr error) error {
+		if walkErr != nil || entry.IsDir() {
+			return walkErr
+		}
+
+		data, readErr := os.ReadFile(path)
+
+		if readErr != nil {
+			return readErr
+		}
+
+		if strings.Contains(string(data), copyMarker) {
+			t.Errorf("%s names the copy", path)
+		}
+
+		// The release's own Go file identities: the source's, and the test file's in the test project.
+		identities += strings.Count(string(data), `"example.com/Old@v0.9.1/`)
+
+		return nil
+	})
+
+	if identities == 0 {
+		t.Errorf("no emitted file records a Go source identity under example.com/Old@v0.9.1/\n%s", lastLines(output, 12))
+	}
 }

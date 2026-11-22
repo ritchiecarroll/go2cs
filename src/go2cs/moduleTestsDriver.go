@@ -239,7 +239,7 @@ func (m *ModuleConverter) mainModulePackagesWithTests() []*Package {
 
 // runModuleTests is the -tests -recurse driver. moduleDir and outRoot are absolute; options carries
 // the -tests settings (action, config, timeout) and a resolved go2csPath.
-func runModuleTests(moduleDir string, outRoot string, options Options, corpusRelease string) error {
+func runModuleTests(moduleDir string, outRoot string, options Options, corpusRelease string) (result error) {
 	if err := checkOutputRootOutsideModule(moduleDir, outRoot); err != nil {
 		return err
 	}
@@ -250,10 +250,21 @@ func runModuleTests(moduleDir string, outRoot string, options Options, corpusRel
 		return err
 	}
 
-	// A module-cache release with no go.mod: the go commands of this run read the cache's synthesized
-	// one, as goModFile already does in-process (and say so).
-	if _, err := installGoModOverlay(moduleDir, outRoot); err != nil {
-		return err
+	// A module-cache release with no go.mod (github.com/pmezard/go-difflib v1.0.0, github.com/davecgh/go-spew v1.1.1)
+	// converts AND tests from the copy plain -recurse converts it from: both phases run in it, so phase B's go test
+	// runs read the go.mod phase A's load read. The go.mod overlay this used to install failed every such run: go list
+	// refuses an overlay beneath GOMODCACHE, and the overlay could only ever name a file there.
+	if synthesized := moduleCacheGoMod(moduleDir); synthesized != "" {
+		copyDir, leave, err := enterModuleCacheReleaseCopy(moduleDir, synthesized)
+
+		if err != nil {
+			return err
+		}
+
+		defer leave()
+		defer func() { result = remapCopiedError(result) }()
+
+		moduleDir = copyDir
 	}
 
 	if err := checkModuleGoLine(moduleDir, corpusRelease); err != nil {

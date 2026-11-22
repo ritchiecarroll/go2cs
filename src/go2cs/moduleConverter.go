@@ -82,7 +82,9 @@ func NewModuleConverter(options Options) *ModuleConverter {
 // packages in dependency order (least dependencies first). The standard library is not converted —
 // its imports emit $(go2csPath)core references to a pre-converted stdlib (staged by deploy-core).
 func (m *ModuleConverter) ConvertModule(moduleDir string) (result error) {
-	fmt.Printf("Recursively converting module at %s\n", moduleDir)
+	// Under -tests -recurse the directory is already the copy of a go.mod-less release, and the copy is gone when the
+	// user reads this: name the release (remapCopiedPaths is the identity otherwise).
+	fmt.Printf("Recursively converting module at %s\n", remapCopiedPaths(moduleDir))
 
 	// Announce the effective build tags, as -stdlib does: a bare -recurse run reports the module default
 	// (safe,purego,noasm) and that it is the default; an explicit -tags reports exactly what was passed.
@@ -101,9 +103,10 @@ func (m *ModuleConverter) ConvertModule(moduleDir string) (result error) {
 	// 0a. A module-cache release that ships no go.mod (github.com/mattn/go-pointer v0.0.1, the cgo against go.* INC 4
 	//     proof; a `+incompatible` release with no requires: the synthesized go.mod names the module and nothing else)
 	//     converts from a COPY carrying the go.mod the cache synthesized for it,
-	//     the one go itself reads (cache/download/<escaped path>/@v/<version>.mod; read, never written). Not the -tests
-	//     driver's go.mod overlay: go list refuses one beneath GOMODCACHE ("Files beneath GOMODCACHE must not be
-	//     replaced"), where go mod download accepts it. The copy keeps the <escaped path>@<version> leaf and lives in a
+	//     the one go itself reads (cache/download/<escaped path>/@v/<version>.mod; read, never written). Not a go.mod
+	//     overlay: go list refuses one beneath GOMODCACHE ("Files beneath GOMODCACHE must not be replaced"), where go
+	//     mod download accepts it (enterModuleCacheReleaseCopy). Under -tests -recurse the driver has entered the copy
+	//     already, so the directory here is the copy, outside the cache with a go.mod, and is not copied again. The copy keeps the <escaped path>@<version> leaf and lives in a
 	//     work directory removed at exit, never in the output root nugetgo-pack reads. A directory inside a module (a
 	//     package below its go.mod) converts as it always did: go finds the go.mod above it. Only a directory that NO
 	//     go.mod covers -- none in it or above it, and no synthesized one in the cache -- is refused, by name here rather
@@ -115,36 +118,18 @@ func (m *ModuleConverter) ConvertModule(moduleDir string) (result error) {
 	}
 
 	if synthesized := moduleCacheGoMod(m.options.mainModuleDir); synthesized != "" {
-		copyDir, work, err := copyModuleCacheRelease(m.options.mainModuleDir, synthesized)
+		copyDir, leave, err := enterModuleCacheReleaseCopy(m.options.mainModuleDir, synthesized)
 
 		if err != nil {
 			return err
 		}
 
-		defer func() { _ = os.RemoveAll(work) }()
-
-		fmt.Printf("go.mod: the module at %s ships none; converting a copy carrying the module cache's %s, as go reads it (%s, removed at exit)\n",
-			m.options.mainModuleDir, synthesized, copyDir)
-		copiedModuleRoot, originalModuleRoot = copyDir, m.options.mainModuleDir
-		defer func() { copiedModuleRoot, originalModuleRoot = "", "" }()
+		defer leave()
 
 		// An error returned from here on names the release, not the copy, which is gone when the user reads it (COORD's
-		// INC 4 review, NIT). It runs before the roots are cleared above, and keeps the error's chain (errors.As).
+		// INC 4 review, NIT). It runs before leave clears the roots, and keeps the error's chain (errors.As).
 		defer func() { result = remapCopiedError(result) }()
 
-		// The copy sits outside the cache, so go loads it as a main module, where a user's GOWORK would apply
-		// ("directory ... does not contain modules listed in go.work"). A load from inside the cache turns it off
-		// (conversionDriver.go); so does the copy, for every go command of the run (P3's read, SHOULD 3).
-		savedGowork, hadGowork := os.LookupEnv("GOWORK")
-		_ = os.Setenv("GOWORK", "off")
-
-		defer func() {
-			if hadGowork {
-				_ = os.Setenv("GOWORK", savedGowork)
-			} else {
-				_ = os.Unsetenv("GOWORK")
-			}
-		}()
 		moduleDir, m.options.mainModuleDir = copyDir, copyDir
 	}
 

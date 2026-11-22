@@ -81,89 +81,9 @@ func TestModuleCacheGoModIsTheModulesGoMod(t *testing.T) {
 	}
 }
 
-// The driver hands the go commands the same answer through GOFLAGS -overlay, says so, and writes
-// nothing into the cache.
-func TestInstallGoModOverlayForAModuleWithoutGoMod(t *testing.T) {
-	_, moduleDir := moduleCacheFixture(t)
-	outRoot := t.TempDir()
-	t.Setenv("GOFLAGS", "-mod=mod")
-
-	overlay, err := installGoModOverlay(moduleDir, outRoot)
-
-	if err != nil || overlay == "" {
-		t.Fatalf("want an overlay, got %q (%v)", overlay, err)
-	}
-
-	if got, want := os.Getenv("GOFLAGS"), "-mod=mod -overlay="+overlay; got != want {
-		t.Fatalf("GOFLAGS: want %q, got %q", want, got)
-	}
-
-	data, err := os.ReadFile(overlay)
-
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	synthesized, _ := goModFile(moduleDir)
-
-	if want := `{"Replace":{` + quoteJSON(filepath.Join(moduleDir, "go.mod")) + `:` + quoteJSON(synthesized) + `}}`; string(data) != want {
-		t.Fatalf("overlay: want %s, got %s", want, data)
-	}
-
-	if _, err := os.Stat(filepath.Join(moduleDir, "go.mod")); !os.IsNotExist(err) {
-		t.Fatal("a go.mod was written into the module cache")
-	}
-
-	// A module that ships its own go.mod gets no overlay and GOFLAGS is left as it is.
-	t.Setenv("GOFLAGS", "")
-	own := t.TempDir()
-	writeModuleFile(t, filepath.Join(own, "go.mod"), "module example.com/own\n")
-
-	if overlay, err := installGoModOverlay(own, outRoot); err != nil || overlay != "" || os.Getenv("GOFLAGS") != "" {
-		t.Fatalf("a module with its own go.mod: want no overlay, got %q (%v), GOFLAGS %q", overlay, err, os.Getenv("GOFLAGS"))
-	}
-
-	// An existing -overlay is never replaced.
-	t.Setenv("GOFLAGS", "-overlay=elsewhere.json")
-
-	if _, err := installGoModOverlay(moduleDir, outRoot); err == nil {
-		t.Fatal("an existing GOFLAGS -overlay was replaced")
-	}
-}
-
-// The dependency preflight keeps the run's GOFLAGS (and so the go.mod overlay): it used to replace
-// GOFLAGS with -mod=readonly, `go mod download` then saw no module, and pkg/errors v0.9.1 was refused
-// before converting anything ("go: no modules specified"). Runs the real go command.
-func TestGoModDownloadPreflightKeepsTheGoModOverlay(t *testing.T) {
-	_, moduleDir := moduleCacheFixture(t)
-	t.Setenv("GOFLAGS", "")
-
-	if _, err := installGoModOverlay(moduleDir, t.TempDir()); err != nil {
-		t.Fatal(err)
-	}
-
-	if err := goModDownloadPreflight(moduleDir); err != nil {
-		t.Fatalf("the preflight must see the module through the overlay: %v", err)
-	}
-}
-
-func quoteJSON(s string) string {
-	out := []byte{'"'}
-
-	for _, r := range s {
-		if r == '\\' || r == '"' {
-			out = append(out, '\\')
-		}
-
-		out = append(out, string(r)...)
-	}
-
-	return string(append(out, '"'))
-}
-
 // PLAIN -recurse over a module-cache release with no go.mod (cgo against go.* INC 4: github.com/mattn/go-pointer
 // v0.0.1 is one, and nugetgo-pack converts each flavor with -recurse=nuget from its cache directory). Only the -tests
-// -recurse driver handled one, through a go.mod overlay that go list and go build both refuse beneath GOMODCACHE, so
+// -recurse driver tried one, through a go.mod overlay that go list and go build both refuse beneath GOMODCACHE, so
 // plain -recurse failed its dependency preflight: "go: no modules specified". It now converts a COPY carrying the
 // cache's synthesized go.mod. Driven through the real binary against offline fabricated caches, each run under a
 // private TMPDIR, with COORD's conditions and P3's reads as arms.

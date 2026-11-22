@@ -9,7 +9,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -258,54 +257,40 @@ func sweepStaleModuleCopies(dir string, maxAge time.Duration) {
 	}
 }
 
-// installGoModOverlay hands the go commands of a -tests -recurse run the same answer goModFile gives
-// in-process: for a module-cache module with no go.mod it writes a `go build -overlay` file mapping
-// <moduleDir>/go.mod to the cache's synthesized go.mod, and appends -overlay=<file> to GOFLAGS so the
-// loader's `go list`, and every `go test` the run starts, read it. It says so on stdout. A module with
-// its own go.mod is untouched (returns ""), as is every other conversion: this runs only from the
-// -tests -recurse driver. (Plain -recurse converts a copy instead: copyModuleCacheRelease.)
-func installGoModOverlay(moduleDir string, outRoot string) (string, error) {
-	synthesized := moduleCacheGoMod(moduleDir)
-
-	if synthesized == "" {
-		return "", nil
-	}
-
-	goflags := os.Getenv("GOFLAGS")
-
-	if strings.Contains(goflags, "-overlay") {
-		return "", fmt.Errorf("the module at %s ships no go.mod, and GOFLAGS already carries an -overlay (%q): "+
-			"refusing to replace it", moduleDir, goflags)
-	}
-
-	overlayPath := filepath.Join(outRoot, "go2cs-gomod-overlay.json")
-
-	// GOFLAGS splits on white space, so the overlay file's path must not carry any.
-	if strings.ContainsAny(overlayPath, " \t") {
-		return "", fmt.Errorf("the module at %s ships no go.mod, and its overlay file %s would have to reach `go` through "+
-			"GOFLAGS, which cannot carry a path with white space: choose an output root without spaces", moduleDir, overlayPath)
-	}
-
-	data, err := json.Marshal(map[string]map[string]string{"Replace": {filepath.Join(moduleDir, "go.mod"): synthesized}})
+// enterModuleCacheReleaseCopy sets a go.mod-less module-cache release at dir up to convert, and test, from a COPY
+// carrying the go.mod the cache synthesized for it (copyModuleCacheRelease), the one go itself reads. Not a go.mod
+// overlay: go list and go build refuse any overlay beneath GOMODCACHE ("Files beneath GOMODCACHE must not be
+// replaced"), and only go mod download accepts one. While inside, every diagnostic and Go source identity names the
+// release, not the copy (copiedModuleRoot), and GOWORK is off for every go command: the copy sits outside the cache, so
+// go loads it as a main module, where a user's GOWORK would apply ("directory ... does not contain modules listed in
+// go.work"; a load from inside the cache turns it off, conversionDriver.go). leave restores GOWORK, clears the roots and
+// removes the copy. A caller that returns an error from inside defers remapCopiedError AFTER leave, so it runs first.
+// Plain -recurse enters it in ConvertModule; -tests -recurse in runModuleTests, around both of its phases, so its go
+// test runs see the same copy its conversion read.
+func enterModuleCacheReleaseCopy(dir, synthesized string) (copyDir string, leave func(), err error) {
+	copyDir, work, err := copyModuleCacheRelease(dir, synthesized)
 
 	if err != nil {
-		return "", err
+		return "", nil, err
 	}
 
-	if err := os.MkdirAll(outRoot, 0o755); err != nil {
-		return "", err
+	fmt.Printf("go.mod: the module at %s ships none; converting a copy carrying the module cache's %s, as go reads it (%s, removed at exit)\n",
+		dir, synthesized, copyDir)
+
+	copiedModuleRoot, originalModuleRoot = copyDir, dir
+	savedGowork, hadGowork := os.LookupEnv("GOWORK")
+	_ = os.Setenv("GOWORK", "off")
+
+	leave = func() {
+		if hadGowork {
+			_ = os.Setenv("GOWORK", savedGowork)
+		} else {
+			_ = os.Unsetenv("GOWORK")
+		}
+
+		copiedModuleRoot, originalModuleRoot = "", ""
+		_ = os.RemoveAll(work)
 	}
 
-	if err := os.WriteFile(overlayPath, data, 0o644); err != nil {
-		return "", fmt.Errorf("writing the go.mod overlay: %w", err)
-	}
-
-	if err := os.Setenv("GOFLAGS", strings.TrimSpace(goflags+" -overlay="+overlayPath)); err != nil {
-		return "", err
-	}
-
-	fmt.Printf("go.mod: the module at %s ships none; using the module cache's %s, as go does (overlay %s)\n",
-		moduleDir, synthesized, overlayPath)
-
-	return overlayPath, nil
+	return copyDir, leave, nil
 }
