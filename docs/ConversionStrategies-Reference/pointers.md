@@ -1547,7 +1547,7 @@ Census at go1.26.11, the corpus toolchain's GOROOT, all 7714 .go files under src
 pin, gave the same counts): a w4 store with more than one target, 0; an atomic store or swap through
 `(*unsafe.Pointer)(unsafe.Pointer(&x))`, 4, all over pointer fields, none over a func variable (syscall/dll_windows.go:290
 and :349, and the same two in cmd's vendored x/sys/windows); a single-target w4 store, 2 (runtime/cgocall.go:465,
-runtime/debugcall.go:266), which are the 4 emitted sites. -->
+runtime/debugcall.go:266), which are the 4 emitted sites. Their regen: docs/phase4/DATA-tc13-regen-2026-11-22.md. -->
 
 **The shapes that keep today's pointer reinterpret, deliberately:**
 - a recovery from a pointer or from memory (runtime's mcleanup and panic);
