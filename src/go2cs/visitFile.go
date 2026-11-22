@@ -176,6 +176,7 @@ func (v *Visitor) visitFile(file *ast.File) {
 	v.emittedClassName = packageClassName
 	v.fileClassName, v.openClassName, v.fileHasMethodHolder = packageClassName, packageClassName, false
 	v.astFile, v.fileUsesSelfAlias, v.fileSelfAliasDecided, v.fileSelfAliasIsBlocked = file, false, false, false
+	v.fileDotImportAdapters = nil
 	v.fileSelectorSels = nil
 
 	v.writeOutput(UsingsMarker)

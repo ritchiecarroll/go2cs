@@ -295,7 +295,10 @@ type Visitor struct {
 	fileUsesSelfAlias      bool
 	fileSelfAliasDecided   bool
 	fileSelfAliasIsBlocked bool
-	fileSelectorSels       map[*ast.Ident]bool // selectorSelIdents: the selected names of the file's selector expressions
+	// fileDotImportAdapters holds, once read for the file being converted (dotImportAdapterNames), the adapter class
+	// names the packages it dot-imports compose from their own pointer GoImplement records.
+	fileDotImportAdapters map[string]bool
+	fileSelectorSels      map[*ast.Ident]bool // selectorSelIdents: the selected names of the file's selector expressions
 	// currentHolderNamed is the receiver type of the method being emitted, whose holder its body stands
 	// in, and nil in a function; currentHolderInTestFile says which half of a -tests unit declares it.
 	currentHolderNamed      *types.Named
