@@ -174,3 +174,25 @@ The prediction above and its correction stand unedited. A "MISS" is stated again
 - Golden lines **1,616** against 1,605: MISS, +11. Of the 12 Go lines holding two literals, the converter emits 11 as
   two C# lines (the inverse of the corpus miss above). Every rebaselined file equals the seat emission byte for byte with
   CRs stripped.
+
+## Prediction, 2026-11-22: the collection fallback (`361c0cac97`), before its measurement
+
+The hosted battery at `e122bcfbb0` found a defect this record never predicted. A C# collection expression whose first
+bracket token opens a literal's `[GoFunc(…)]` list is read by Roslyn as an attributed lambda: `internal/profile`'s
+decoder tables failed to compile on every leg (CS1001 ×259), as did seven behavioral projects. `361c0cac97` writes such
+a collection in the converter's own `new T[]{…}.slice()` / `.array(N)` form. The rule is the first bracket token, so it
+also rewrites collections that compiled only because a `new` stopped Roslyn's guess first.
+
+Predicted from the committed tree with the converter's predicate (each collection moves its opening and closing
+lines; one written on a single line moves that line):
+
+- **Corpus, every flavour alike** (all three files are flat): `internal/profile/encode.cs` 8 collections on 16 lines,
+  `net/http/h2_bundle.cs` 1 on 2, `testing/slogtest/slogtest.cs` 1 on 2. 3 files, 20 lines. No line added or removed, 0
+  `package_info.cs`, 0 `.csproj`. Committed `_test.cs` sources are not `-stdlib` emission and are not counted.
+- **Behavioral:** 14 projects' `main.cs` and their goldens, 31 lines (DeepEqual, FuncFieldUnexportedType,
+  FuncLitArgCapture, FuncLitEmptyInterfaceTarget, FuncTypeVerbs, MethodValueReceiverSnapshot ×2, NilFuncInterfaceReads,
+  NilFuncTypeSwitch, PackageVarFuncLitTypeLift, PkgLevelFuncLitLocals, RangeExprFuncLitCapture ×2, SliceBoundsRecover,
+  StatementTableFuncNames, TypeSwitchCollapsedFuncCase), plus the nested `LazyPackageVars/tables/tables.cs` by 2. 0
+  `package_info.cs`, 0 `.csproj`.
+- **Falsifiers:** any other file, a line-count change, any `package_info.cs`, or a collection left as a collection
+  expression whose first bracket opens a literal's attributes.
