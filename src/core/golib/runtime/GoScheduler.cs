@@ -1,5 +1,5 @@
 //******************************************************************************************************
-//  GoScheduler.cs - M:N SPIKE (R5b, B1). Spike code: it stays on the spike branch and never lands.
+//  GoScheduler.cs - M:N scheduler, experimental and opt-in (GoTwins=true + GO2CS_MN=1); inert otherwise.
 //
 //  A goroutine started with a hidden async twin (Goroutine.StartTwin) runs here, multiplexed over a
 //  small set of carrier threads, when GO2CS_MN=1. With the switch off nothing in this file runs.
@@ -100,7 +100,8 @@ public static class GoScheduler
 
     private static readonly bool s_reading = Environment.GetEnvironmentVariable("GO2CS_MN_READING") == "1";
 
-    private static readonly int s_procs = ReadProcs();
+    // The P count: how many goroutine steps run at once. It follows GOMAXPROCS (SetProcs, below).
+    private static int s_procs = ReadProcs();
 
     // A carrier runs inline continuations of any depth the twin chain reaches, so it gets a goroutine-sized
     // stack rather than the prototype's 256 KB.
@@ -301,16 +302,82 @@ public static class GoScheduler
 
     [ThreadStatic] private static Carrier? t_carrier;
 
-    private static int ReadProcs()
+    // The count until the runtime hands its GOMAXPROCS over (SetProcs), which it does at start, before main. GO2CS_MN_PROCS,
+    // a measurement knob until it retires after .5, pins the count: the setting is then not followed.
+    // ReadProcs runs in s_procs' initializer, ahead of every field declared below it, so it reads the variable itself.
+    private static int ReadProcs() => PinnedProcs() is > 0 and int pin ? pin : Environment.ProcessorCount;
+
+    private static int PinnedProcs() => int.TryParse(Environment.GetEnvironmentVariable("GO2CS_MN_PROCS"), out int pin) ? pin : 0;
+
+    private static readonly bool s_procsPinned = PinnedProcs() > 0;
+    private static readonly object s_procsLock = new();
+
+    /// <summary>The P count: how many goroutine steps the scheduler runs at once.</summary>
+    internal static int Procs => Volatile.Read(ref s_procs);
+
+    /// <summary>
+    /// The P count follows GOMAXPROCS, as Go's procresize does (COORD's ruling for .5, C1/20261122T141803Z): runtime's one
+    /// writer of the setting hands every new value here, the GOMAXPROCS variable at start and runtime.GOMAXPROCS(n) live.
+    /// With the scheduler off the count is only kept, so a later start uses it. A P added is a token released and, once
+    /// started, a shared carrier; a P removed takes a token out of circulation, now if one is free and otherwise once a
+    /// running step releases one, and the monitor retires the carrier it leaves idle.
+    /// </summary>
+    internal static void SetProcs(int procs)
     {
-        string? text = Environment.GetEnvironmentVariable("GO2CS_MN_PROCS");
-        return int.TryParse(text, out int procs) && procs > 0 ? procs : Environment.ProcessorCount;
+        if (procs < 1 || s_procsPinned)
+            return;
+
+        lock (s_procsLock)
+        {
+            int previous = s_procs;
+
+            if (procs == previous)
+                return;
+
+            Volatile.Write(ref s_procs, procs);
+
+            if (procs > previous)
+            {
+                s_p.Release(procs - previous);
+            }
+            else
+            {
+                int owed = previous - procs;
+
+                while (owed > 0 && s_p.Wait(0))
+                    owed--;
+
+                // Tokens held by running steps leave as those steps release them. The wait is a plain one, beside the
+                // carriers': SemaphoreSlim serves a pending async wait only once no plain waiter wants the token, so
+                // under load an async wait would never take one and the P would never leave.
+                if (owed > 0)
+                {
+                    Thread retire = new(() =>
+                    {
+                        for (int i = 0; i < owed; i++)
+                            s_p.Wait();
+                    })
+                    { IsBackground = true, Name = "go-procresize" };
+
+                    retire.Start();
+                }
+            }
+        }
+
+        if (Volatile.Read(ref s_started) != 0)
+        {
+            lock (s_carriersLock)
+                RefillShared();
+        }
     }
+
+    /// <summary>The P tokens free now: the P count less the steps running, when no P is waiting to be removed.</summary>
+    internal static int FreePs => s_p.CurrentCount;
 
     /// <summary>Whether the calling thread is a carrier with a goroutine mounted: where a twin may park.</summary>
     public static bool OnCarrier => t_carrier is { Mounted: not null };
 
-    // M:N PROTOTYPE (A1). GO2CS_MN_CONTEXT=0 (a reading) turns the context rule off: a goroutine's
+    // M:N (A1). GO2CS_MN_CONTEXT=0 (a reading) turns the context rule off: a goroutine's
     // ExecutionContext is then not carried from step to step, and a carrier starts under its starter's.
     private static readonly bool s_contextSwap = Environment.GetEnvironmentVariable("GO2CS_MN_CONTEXT") != "0";
 
@@ -322,7 +389,7 @@ public static class GoScheduler
     private static long s_offCarrierResumes;
     private static long s_nestedResumes;
 
-    // A twin's step is starting from a delegate: a wake, or an awaiter that is not a twin's.
+    // A twin's step is starting from its ResumeAction (a foreign awaiter) or from a parked box (RunStep).
     internal static void NoteStep(GoTaskCore twin)
     {
         if (t_carrier is { Mounted: not null } carrier)
@@ -331,7 +398,7 @@ public static class GoScheduler
             Interlocked.Increment(ref s_offCarrierResumes);
     }
 
-    // M:N PROTOTYPE (A2). The twin the calling carrier's step resumed, or null: no goroutine is mounted, or
+    // M:N (A2). The twin the calling carrier's step resumed, or null: no goroutine is mounted, or
     // the step is a goroutine's first, whose calls are all frames on this thread. The resumed twin is the
     // lowest frame of the goroutine that the thread holds; its callers are the suspended twins up its
     // parent link (GoTaskCore.Parent), which a stack walk reads after the thread's own frames.
@@ -1067,7 +1134,7 @@ public static class GoScheduler
             Mounted = goroutine;
             Interlocked.Increment(ref s_steps);
 
-            // M:N PROTOTYPE (A4). The reading's proof that goroutines moved: a step on a carrier other than the
+            // M:N (A4). The reading's proof that goroutines moved: a step on a carrier other than the
             // one that ran the goroutine's last step is a migration.
             if (goroutine.m_lastCarrier is { } last && !ReferenceEquals(last, this))
             {

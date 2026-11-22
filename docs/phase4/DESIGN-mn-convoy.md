@@ -108,3 +108,40 @@ aborted runs wrote 43 GB there, filling C: mid-gate (the Q1 kit's 22 builds fail
 allowed WSL changes for this work: a many-thread Linux run now proves dump suppression first (core_pattern set to a
 file for the run, `ulimit -c 0`, DOTNET_DbgEnableMiniDump=0, DOTNET_EnableCrashReport=0, one deliberate abort that
 leaves no file). WSL refused sparse mode for its disk as unsafe, so it was not forced.
+
+## 8. The review folds (COORD's PTokens review, 2026-11-22)
+
+The review seated (A) with folds, all in PTokens:
+
+- **API for GOMAXPROCS** (C1's SetProcs, merged here): `Wait(0)` only tries the free count (no spin, no queue);
+  `Wait(timeout)` withdraws its node by compare-and-swap on timeout; a failed withdraw means the node was granted, so
+  it returns true; `Release(n)` runs the spinner check and the hand-off like `Release()`, never a bare addition.
+- **arm64 ordering**: a full fence between each interlocked write and the read of the other side's variable that
+  follows it (Release, LeaveSpin, the sleeper's count-and-enqueue before its retry, the hand-off loop).
+- **Backoff**: the hand-off backs off (SpinWait) when it finds a sleeper counted but the queue empty.
+- **Spin cap**: at most max(1, P/2) spinners, as Go keeps at most GOMAXPROCS/2 Ms spinning; an arrival over the cap
+  queues at once and is never counted, so no release leaves a token for it.
+- **Bounded queue**: `m_waiting` counts the live (Waiting) nodes and is decremented by whoever moves a node out of
+  Waiting; the event is created only when a waiter sleeps; each arrival reaps the withdrawn nodes at the queue's head.
+- **Interrupt**: a sleeper interrupted in its wait withdraws (or, granted already, gives the token back) and rethrows;
+  the spin tier uncounts its spinner on every way out.
+- **Rows**, each red with its fix removed: withdraw against grant (the double-token give-back), `Release(n)` wakes
+  min(n, sleepers), `Wait(0)` never spins or queues, a timed-out wait leaves nothing behind, a grant racing a
+  timeout is reported as a taken token, timed waits under stress conserve tokens, an interrupted wait leaves nothing
+  behind. The stress row alone stayed GREEN with the failed-withdraw fix removed (the race is too narrow to hit), so
+  the timeout race got its own seamed row, red without that fix. Gates: the 11 rows green 3 of 3; each of the eight
+  fixes removed in turn reds its row(s), the file restored byte-identical; GolibTests Release 3113/53/0, Debug
+  3088/78/0.
+
+Re-score predictions R1-R4, written before the run (windows, base = SemaphoreSlim and F = the folded PTokens, one
+session, GO2CS_MN=1, 10 runs per arm per row; MnBlockReturn n=20,000):
+
+| # | prediction | reading | score |
+|---|---|---|---|
+| R1 (A1) | P=12: F's MnBlockReturn median within 10% of the base's, 0 over 5 s | | |
+| R2 (A2) | P=12: F's MnHandBack p50 median under 60 us, p99 median at or under 700 us, wall median at or under 250 ms | | |
+| R3 (AP1) | P=2: F's MnHandBack p50 and wall medians at or under the base's, p99 median at or under 1,000 us | | |
+| R4 (AP2) | P=2: F's MnBlockReturn median under 2,000 ms, 0 over 5 s (the base convoys: every run over 5 s) | | |
+
+The cap is the fold most likely to move a reading: at P=2 it admits one spinner where (A) admitted any number, so a
+hand-back that a second spinner took hot may now wake a sleeper. R3's p99 bar is wider than A2's for that reason.
