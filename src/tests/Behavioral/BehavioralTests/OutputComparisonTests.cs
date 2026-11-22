@@ -566,6 +566,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckDefinedTypeOverPkgType() => CheckTarget("DefinedTypeOverPkgType");
 
     [TestMethod]
+    public void CheckDeltaNameEdgeCases() => CheckTarget("DeltaNameEdgeCases");
+
+    [TestMethod]
     public void CheckDerefPointerToField() => CheckTarget("DerefPointerToField");
 
     [TestMethod]

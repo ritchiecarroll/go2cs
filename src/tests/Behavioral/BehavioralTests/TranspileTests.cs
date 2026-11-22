@@ -589,6 +589,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckDefinedTypeOverPkgType() => CheckTarget("DefinedTypeOverPkgType");
 
     [TestMethod]
+    public void CheckDeltaNameEdgeCases() => CheckTarget("DeltaNameEdgeCases");
+
+    [TestMethod]
     public void CheckDerefPointerToField() => CheckTarget("DerefPointerToField");
 
     [TestMethod]

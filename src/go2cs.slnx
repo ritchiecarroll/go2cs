@@ -521,6 +521,7 @@
     <Project Path="tests/Behavioral/DefinedTypeOverInstantiation/instlib/go.instlib.csproj" />
     <Project Path="tests/Behavioral/DefinedTypeOverInterface/DefinedTypeOverInterface.csproj" />
     <Project Path="tests/Behavioral/DefinedTypeOverPkgType/DefinedTypeOverPkgType.csproj" />
+    <Project Path="tests/Behavioral/DeltaNameEdgeCases/DeltaNameEdgeCases.csproj" />
     <Project Path="tests/Behavioral/DerefPointerToField/DerefPointerToField.csproj" />
     <Project Path="tests/Behavioral/DerivedInterfaceStructuralProbe/DerivedInterfaceStructuralProbe.csproj" />
     <Project Path="tests/Behavioral/DirectBoxReceiverPassedWhole/DirectBoxReceiverPassedWhole.csproj" />

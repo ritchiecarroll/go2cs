@@ -41,6 +41,17 @@ func performNameCollisionAnalysis(pkg *packages.Package) {
 	// cmd/cgo's C type and constant names are renamed package-wide into the C pseudo-package (cgoPseudoPackage.go).
 	collectCgoPseudoPackageNames(pkg.Types)
 
+	for name := range packageNameCollisions(pkg) {
+		nameCollisions[name] = true
+	}
+}
+
+// packageNameCollisions answers the names performNameCollisionAnalysis renames package-wide, reading pkg alone. The
+// marker-glyph refusal reads it too, before any file is written (refuseMarkerGlyphIdentifiers), so the two can
+// never disagree on which Δ names go2cs generates.
+func packageNameCollisions(pkg *packages.Package) map[string]bool {
+	collisions := make(map[string]bool)
+
 	// Track names of various declarations
 	namedElementNames := make(map[string]bool)
 
@@ -98,7 +109,7 @@ func performNameCollisionAnalysis(pkg *packages.Package) {
 	// every OTHER package (see the comment on that set).
 	for name, isType := range namedElementNames {
 		if isType && emitterSpelledTypeNames[name] {
-			nameCollisions[name] = true
+			collisions[name] = true
 		}
 	}
 
@@ -106,7 +117,7 @@ func performNameCollisionAnalysis(pkg *packages.Package) {
 	// `union`; preview `safe`) breaks as a type name and at member start, where C# 15 reads it as a
 	// keyword: Δ-rename it package-wide the same way (see csReservedTypeNames for the positions).
 	for name := range csReservedTypeNameDecls {
-		nameCollisions[name] = true
+		collisions[name] = true
 	}
 
 	// A package-level type, constant or variable named like a METHOD of the package is no collision: a
@@ -115,6 +126,8 @@ func performNameCollisionAnalysis(pkg *packages.Package) {
 	// class, and the element took the rename here. For the same reason no method hides a Go built-in or
 	// an import's alias anywhere but in its own holder: the two package-wide name sets that qualified
 	// those references are gone, and each reference asks its holder (holderDeclares).
+
+	return collisions
 }
 
 // heapIntrinsicIdent is the Go identifier that shadows golib's heap-boxing intrinsic. Unlike the
