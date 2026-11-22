@@ -220,7 +220,9 @@ func markerGlyphReason(name string, obj types.Object, sets *deltaNameSets) strin
 		return reason
 	}
 
-	if what, isMember := deltaMintedMemberNames[name]; isMember {
+	// ΔT is the type parameter of a converted Go interface, so it collides only with a type parameter declared on a generic
+	// interface; a function's or a struct's type parameter ΔT lives in another scope and converts.
+	if what, isMember := deltaMintedMemberNames[name]; isMember && (name != TypeT || !isTypeParam(obj) || sets.interfaceTypeParams[name]) {
 		return "is the name go2cs generates for " + what
 	}
 
@@ -296,7 +298,10 @@ func deltaMintedShapeOf(name string, sets *deltaNameSets) string {
 	}
 
 	// A shape-witnessed type parameter T constrained by C is written TΔC inside its declaration, where it shadows a
-	// package-level name of that spelling.
+	// package-level name of that spelling. C is the constraint's ORIGIN name (shapeWitnessBaseName), so a constraint
+	// reached through an alias is matched by its origin, not by the alias: a user name spelled with the alias misses
+	// here, and the collision it would make is a duplicate type-parameter name in C#, a compile error (CS0692), not a
+	// silent wrong binding.
 	if match := deltaWitnessParamPattern.FindStringSubmatch(name); match != nil && sets.typeParams[match[1]] {
 		if sets.typeNames[match[2]] || sets.importedTypeNames[match[2]] {
 			return fmt.Sprintf("is the witness type parameter go2cs generates for a type parameter %s constrained by %s", match[1], match[2])
@@ -309,11 +314,12 @@ func deltaMintedShapeOf(name string, sets *deltaNameSets) string {
 // deltaNameSets is what the Δ rules read from a package: every Δ name go2cs generates from it (minted, to what it is
 // generated for), and the declared names, type names, type parameters and imported type names the shape rules match.
 type deltaNameSets struct {
-	minted            map[string]string
-	names             map[string]bool
-	typeNames         map[string]bool
-	typeParams        map[string]bool
-	importedTypeNames map[string]bool
+	minted              map[string]string
+	names               map[string]bool
+	typeNames           map[string]bool
+	typeParams          map[string]bool
+	interfaceTypeParams map[string]bool
+	importedTypeNames   map[string]bool
 }
 
 // deltaMintedNames answers the Δ names go2cs generates from what pkg declares, in ANY scope, through the converter's
@@ -324,11 +330,12 @@ type deltaNameSets struct {
 // shape rules too.
 func deltaMintedNames(pkg *packages.Package, declared map[*ast.Ident]types.Object, clauses map[*ast.Ident]bool) *deltaNameSets {
 	sets := &deltaNameSets{
-		minted:            map[string]string{},
-		names:             map[string]bool{},
-		typeNames:         map[string]bool{},
-		typeParams:        map[string]bool{},
-		importedTypeNames: map[string]bool{},
+		minted:              map[string]string{},
+		names:               map[string]bool{},
+		typeNames:           map[string]bool{},
+		typeParams:          map[string]bool{},
+		importedTypeNames:   map[string]bool{},
+		interfaceTypeParams: map[string]bool{},
 	}
 
 	for name := range packageNameCollisions(pkg) {
@@ -355,6 +362,23 @@ func deltaMintedNames(pkg *packages.Package, declared map[*ast.Ident]types.Objec
 
 	for alias := range aliases {
 		sets.minted[ShadowVarMarker+alias] = fmt.Sprintf("the name go2cs gives the import or package alias %s when it renames it", alias)
+	}
+
+	// The type parameters of generic INTERFACES, which share a scope with the converted interface's own ΔT.
+	for _, file := range pkg.Syntax {
+		ast.Inspect(file, func(node ast.Node) bool {
+			if spec, ok := node.(*ast.TypeSpec); ok && spec.TypeParams != nil {
+				if _, isInterface := spec.Type.(*ast.InterfaceType); isInterface {
+					for _, field := range spec.TypeParams.List {
+						for _, name := range field.Names {
+							sets.interfaceTypeParams[name.Name] = true
+						}
+					}
+				}
+			}
+
+			return true
+		})
 	}
 
 	for _, imported := range pkg.Imports {
@@ -500,6 +524,18 @@ func refuseMarkerGlyphTestFiles(inputPath string, options Options) *markerGlyphR
 	}
 
 	return refusal
+}
+
+func isTypeParam(obj types.Object) bool {
+	typeName, ok := obj.(*types.TypeName)
+
+	if !ok {
+		return false
+	}
+
+	_, isParam := typeName.Type().(*types.TypeParam)
+
+	return isParam
 }
 
 func hasNonASCII(name string) bool {

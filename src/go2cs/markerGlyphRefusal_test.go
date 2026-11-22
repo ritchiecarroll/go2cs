@@ -292,6 +292,9 @@ type SΔScript struct{}
 // A bare Δ field projects to an empty name.
 type P2 struct{ Δ int }
 
+// A generic interface's type parameter ΔT shares a scope with the converted interface's own ΔT.
+type Box[ΔT any] interface{ Get() ΔT }
+
 // Main is renamed ΔMain; ΔCopy is a fixed generated member; TΔshape is T's shape witness.
 func Main()  {}
 func ΔMain() {}
@@ -344,6 +347,9 @@ func Δf() {}
 type Q2 struct{}
 
 func (Q2) Δ() {}
+
+// A function's type parameter ΔT is in no converted interface's scope.
+func twice[ΔT any](v ΔT) [2]ΔT { return [2]ΔT{v, v} }
 
 func h(Δv int) int { return Δv }
 
@@ -399,6 +405,7 @@ func TestMarkerGlyphIdentifiersAreRefused(t *testing.T) {
 		"Δstrings":      "is the name go2cs gives the import or package alias strings when it renames it",
 		"Δm":            "is the name go2cs gives the import or package alias m when it renames it",
 		"SΔScript":      "is the witness type parameter go2cs generates for a type parameter S constrained by Script",
+		"ΔT":            "is the name go2cs generates for the interface type parameter",
 		"Δ":             `is a struct field whose name starts with Δ: golib drops a leading Δ when it projects a converted field's Go name, so reflect, encoding/json and fmt would name it "" where Go names it "Δ"`,
 	}
 

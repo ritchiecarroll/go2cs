@@ -27,6 +27,7 @@ using static go.main_package;
 // when referenced.
 
 // <ExportedTypeAliases>
+[assembly: GoDynamicTypeLift("696e746572666163657bce94282920737472696e677d", "bareDeltaMethod_type")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -37,6 +38,7 @@ using static go.main_package;
 
 // <InterfaceImplementations>
 [assembly: GoImplement<count, Texter>]
+[assembly: GoImplement<label, fmt_package.Stringer>]
 [assembly: GoImplement<word, Texter>]
 // </InterfaceImplementations>
 
@@ -55,7 +57,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "ABAsgpSCpqiCqIKCgqqUgoKCgqiCgoKCgoKCgpSUqIKUpKSktLqCAAoSuNiQlIKCgoKCgoKClIKCgg==")]
+[assembly: GoPositionMap("main.go", "main.cs", "ABIwgpSCpqiCqIKCgqqUgoKCgqiCgoKCgoKCgpSUqIKUpKSktLqCAAoSuNiQ6oKCAAgGgoKCgoIADxqUgoKo3JSQlIKCgoKCgoKClIKCgoKCgoKCgg==")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -71,10 +73,14 @@ public static partial class main_package
     // via declarations below.
 
     // <TypeAccessibility>
+    internal partial interface bareDeltaMethod_type {}
     internal partial struct count {}
+    internal partial struct label {}
     internal partial struct pair<T> {}
     internal partial struct word {}
     public partial interface Texter {}
+    public partial struct Q {}
+    public partial struct R {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import
@@ -85,6 +91,7 @@ public static partial class main_package
 
     // <ImportInitializers>
     [GoInit] internal static void initᴛᴛimportꓸfmt() => builtin.initPackage(typeof(fmt_package));
+    [GoInit] internal static void initᴛᴛimportꓸreflect() => builtin.initPackage(typeof(reflect_package));
     [GoInit] internal static void initᴛᴛimportꓸruntime() => builtin.initPackage(typeof(runtime_package));
     [GoInit] internal static void initᴛᴛimportꓸstrings() => builtin.initPackage(typeof(strings_package));
     [GoInit] internal static void initᴛᴛimportꓸunicode() => builtin.initPackage(typeof(unicode_package));
@@ -103,3 +110,13 @@ public static partial class main_package
     public readonly struct TexterΔshapeOf<T> : TexterΔshape<T> where T : Texter { public static @string Text(T self) => self.Text(); }
     // </ShapeWitnesses>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(main_package.Q)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛQ;
+// </MethodHolders>
