@@ -247,5 +247,20 @@ internal static class GeneratorDiagnostics
         category: "go2cs-gen",
         defaultSeverity: DiagnosticSeverity.Error,
         isEnabledByDefault: true);
+
+    // GO2CS0020, TwinGenerator (the func-value seat: COORD's ruling of 2026-11-21, docs/phase4/inbox/G/
+    // 20261121T233319Z-COORD.md and its approval): in a package built with twins, a call through a func value whose
+    // shape the pair test cannot reach (a call's result, a conditional access, a parenthesized or converted value, a
+    // signature with no twin delegate type, else the expression's syntax kind) runs the
+    // plain delegate, so a stored function that parks holds its carrier there, with nothing else to say so. A WARNING
+    // by default, as GO2CS0014 and GO2CS0015; WarningsAsErrors makes it an error. Reported once per function, naming the
+    // first such shape and how many calls there are.
+    public static readonly DiagnosticDescriptor UncoveredFuncValueCall = new(
+        id: "GO2CS0020",
+        title: "A call through a func value cannot be tested for a twin",
+        messageFormat: "'{0}' calls a func value the twin generator cannot test for a pair ({1}; {2} such call(s)): if the stored function parks, the call holds its carrier",
+        category: "go2cs-gen",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true);
 #pragma warning restore RS2008
 }
