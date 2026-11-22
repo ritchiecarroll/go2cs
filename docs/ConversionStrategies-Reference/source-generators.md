@@ -204,15 +204,22 @@ stays the code a person reads; the attributes live where nobody has to.
 ### What each one carries, and why a Go reader does not need it
 
 **A pointer receiver is `this ref T`.** Go's `func (b *Reader)` becomes an extension method whose receiver is
-passed by reference, and a value receiver `func (d Duration)` becomes `this Duration d`. The `ref` is the whole
-fact: it is what lets the method change the caller's value, as Go's pointer receiver does. From it the
-generator writes the overload that takes a pointer (`ж<Reader>`), and the runtime decides which methods belong
-to `Reader` and which to `*Reader`. A Go reader sees a receiver and whether it is a pointer, which is what the
-Go line showed.
+passed by reference, and a value receiver `func (d Duration)` becomes `this Duration d`. In a library the
+method's body is `Read⁔`, in the package class, with the receiver as its first parameter (`/*this*/ ref Reader b`),
+and the extension method is its one-line forwarder in `package_info.cs`
+([Functions and Methods](../ConversionStrategies.md#functions-and-methods)). The `ref` is the whole
+fact: it is what lets the method change the caller's value, as Go's pointer receiver does. From the forwarder's
+`this ref` the generator writes the overload that takes a pointer (`ж<Reader>`), and the runtime decides which
+methods belong to `Reader` and which to `*Reader`. A Go reader sees a receiver and whether it is a pointer, which
+is what the Go line showed.
 
-<!-- source: src/core/bufio/bufio.cs:225 -->
+<!-- source: src/core/bufio/bufio.cs:218 -->
 ```csharp
-public static (nint n, error err) Read(this ref Reader b, slice<byte> p) {
+internal static (nint n, error err) Read⁔(/*this*/ ref Reader b, slice<byte> p) {
+```
+<!-- source: src/core/bufio/package_info.cs:132 -->
+```csharp
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint n, error err) Read(this ref Reader b, slice<byte> p) => bufio_package.Read⁔(ref b, p);
 ```
 
 **A Go type needs no mark.** Every struct and interface the converter declares inside a package class is a Go

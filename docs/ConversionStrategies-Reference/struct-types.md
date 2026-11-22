@@ -961,7 +961,7 @@ declared public, read from the access modifier recorded at its declaration (`lif
 so an exported function's anonymous result and the exported fields that repeat its type share one
 lift, across the package's files. Guarded by `AnonLiftOnePerType`:
 
-<!-- source: src/tests/Behavioral/AnonLiftOnePerType/lib/a.cs:43-45, 50-52 -->
+<!-- source: src/tests/Behavioral/AnonLiftOnePerType/lib/a.cs:37-39, 44-46 -->
 ```csharp
 public partial struct Pair_R0 /*dyn*/ {
     public nint X, Y;

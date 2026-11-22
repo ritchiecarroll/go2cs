@@ -23,7 +23,7 @@ These do not change. A change to any of them is a break, and takes the [deprecat
   - An exported package variable is a static field, or a `ref` property when Go code takes its address (`os.Args`).
     <!-- 2026-11-15 (P4, docs audit Q4): was "is a `ref` property"; only an address-taken variable is one
          (src/core/os/linux/proc.cs `ref slice<@string> Args`), while io.EOF and strconv.ErrSyntax are plain
-         `public static` fields (src/core/io/io.cs:43#4fa719, src/core/strconv/number.cs:279#175db4). -->
+         `public static` fields (src/core/io/io.cs:42#4fa719, src/core/strconv/number.cs:278#175db4). -->
   - Slices, maps, channels, arrays and pointers are golib's `slice<T>`, `map<K, V>`, `channel<T>`, `array<T>` and
     `ж<T>`.
 - **golib's consumer API.** The types a C# program uses directly: `@string`, `slice<T>`, `map<K, V>`, `channel<T>`,

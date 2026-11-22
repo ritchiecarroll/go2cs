@@ -19,7 +19,7 @@ converter writes it; and the Go line is the one both are converted from. The mar
 
 ## A pointer receiver is just `this ref`
 
-`strings.Builder.Len` has a pointer receiver. The C# receiver is `this ref Builder b`, and that `ref` is the whole fact; the attribute form repeats it on every pointer-receiver method of the standard library.
+`strings.Builder.Len` has a pointer receiver. The C# receiver is `ref Builder b` on the method's body and `this ref Builder b` on its forwarder, and that `ref` is the whole fact; the attribute form repeats it on every pointer-receiver method of the standard library.
 
 Go, `strings/builder.go`:
 
@@ -36,14 +36,21 @@ Before, `src/core/strings/builder.cs`:
 [GoRecv] public static nint Len(this ref Builder b) {
 ```
 
-After, the same file:
+After, the same file holds the method's body, `Len⁔`, beside its type, with the receiver as its first parameter:
 
-<!-- source: src/core/strings/builder.cs:56 -->
+<!-- source: src/core/strings/builder.cs:53 -->
 ```csharp
-public static nint Len(this ref Builder b) { return len(b.buf); }
+internal static nint Len⁔(/*this*/ ref Builder b) { return len(b.buf); }
 ```
 
-From the `this ref` receiver a source generator writes the overload that takes a pointer, as it does from the attribute.
+The Go-named method is a one-line forwarder to that body, in `src/core/strings/package_info.cs`:
+
+<!-- source: src/core/strings/package_info.cs:165 -->
+```csharp
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Len(this ref Builder b) => strings_package.Len⁔(ref b);
+```
+
+From the forwarder's `this ref` receiver a source generator writes the overload that takes a pointer, as it does from the attribute.
 
 ## A Go type needs no mark
 
@@ -242,9 +249,9 @@ internal static nint format(this Duration d, [GoArrayDims(32)] ж<array<byte>> �
 
 After, the same file:
 
-<!-- source: src/core/time/time.cs:1016 -->
+<!-- source: src/core/time/time.cs:974 -->
 ```csharp
-internal static nint format(this Duration d, /*[32]*/ ж<array<byte>> Ꮡbuf) {
+internal static nint format⁔(/*this*/ Duration d, /*[32]*/ ж<array<byte>> Ꮡbuf) {
 ```
 
 `ж<array<byte>>` is a pointer to the array, and `/*[32]*/` is the `[32]` of Go's `*[32]byte`.

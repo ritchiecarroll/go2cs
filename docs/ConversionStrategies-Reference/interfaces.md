@@ -60,20 +60,26 @@ bool global::go.main_package.ΔHandler.Enabled(nint level) => m_box.Value.Handle
 
 An overridden member is untouched (it forwards to the struct's own method, `this.Handle(…)` / `m_box.Value.Handle(…)`), and a non-renamed interface's simple name has no marker to strip, so every other promotion emits byte-identical code. (Guarded by `ShadowedInterfaceEmbed` — a `Handler` interface Δ-renamed by a `Logger.Handler()` method collision, value-embedded in a `wrapper` struct that overrides one of its three methods, cast to the interface by BOTH value and pointer, promoted and overridden members runtime-verified vs Go.)<!-- cleared testing/slogtest's 6 errors at the time -->
 
-**A converter-emitted promoted forwarder is one of its struct's methods: it takes the METHOD's spelling and stands in the struct's method holder.** When a struct satisfies an interface only through its pointer, the converter writes a forwarder for each method the embedded interface field still promotes into the VALUE method set (`// Go method set entry for the promoted 'Connector.Driver()'`). The forwarder's name and the member it calls come from the method spelling (`getSanitizedFunctionName`), which is how the interface declares the member and how every call site reads it. A package-level struct's forwarders are written into the struct's method holder, beside the methods Go declares on it ([Type-vs-Method Name Collisions](shadowing.md#type-vs-method-name-collisions)), and go2cs-gen writes their pointer-receiver overloads there too. A package's types and its methods are then members of different classes, so a type and a method of one name keep both names:
+**A converter-emitted promoted forwarder is one of its struct's methods: it takes the METHOD's spelling and the form of the methods Go declares on the struct.** When a struct satisfies an interface only through its pointer, the converter writes a forwarder for each method the embedded interface field still promotes into the VALUE method set (`// Go method set entry for the promoted 'Connector.Driver()'`). The forwarder's name and the member it calls come from the method spelling (`getSanitizedFunctionName`), which is how the interface declares the member and how every call site reads it. When the struct has a method holder, the promoted method takes the `⁔` form like the struct's other methods ([Type-vs-Method Name Collisions](shadowing.md#type-vs-method-name-collisions)): its body is `Driver⁔`, in the package class beside the struct, and its Go-named forwarder stands in the struct's holder in `package_info.cs`, where go2cs-gen writes the pointer-receiver overloads too. The body's suffix keeps it apart from the type `Driver` in the package class, and the Go-named method is a member of another class, so a type and a method of one name keep both names:
 
-<!-- source: src/tests/Behavioral/PromotedForwarderTypeNameCollision/main.cs.target:39-43 -->
+<!-- source: src/tests/Behavioral/PromotedForwarderTypeNameCollision/main.cs.target:34-36 -->
 ```csharp
-} partial class mainᴛcounting {
-
 // Go method set entry for the promoted 'Connector.Driver()' - provided ONLY by the embedded
 // interface field in *counting's method set; see the pointer-only satisfaction record.
-internal static Driver Driver(this counting recvᴛ) => recvᴛ.Connector.Driver();
+internal static Driver Driver⁔(/*this*/ counting recvᴛ) => recvᴛ.Connector.Driver();
 ```
 
-<!-- source: src/tests/Behavioral/PromotedForwarderTypeNameCollision/main.cs.target:71 -->
+<!-- source: src/tests/Behavioral/PromotedForwarderTypeNameCollision/package_info.cs:131-134 -->
 ```csharp
-internal static driver.Driver Driver(this fcounting recvᴛ) => recvᴛ.Connector.Driver();
+partial class mainᴛcounting {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static Driver Driver(this counting recvᴛ) => main_package.Driver⁔(recvᴛ);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string Name(this ref counting c) => main_package.Name⁔(ref c);
+}
+```
+
+<!-- source: src/tests/Behavioral/PromotedForwarderTypeNameCollision/main.cs.target:56 -->
+```csharp
+internal static driver.Driver Driver⁔(/*this*/ fcounting recvᴛ) => recvᴛ.Connector.Driver();
 ```
 
 Each earlier placement failed. When a type and a method of one name renamed the TYPE (`ΔDriver`), a forwarder named after the type was `ΔDriver(…) => recvᴛ.Connector.ΔDriver()`: CS0102 beside the nested type in the same package, and CS1929 against a foreign interface's `Driver()` (modernc.org/sqlite's tests, through `database/sql/driver.Connector`). Once the method-holder rule kept the type's name, a forwarder still written in the package class stood beside the type `Driver` there: CS0102 in `main.cs` and in go2cs-gen's two overloads (batch 311). A function-local struct keeps its forwarders beside it, in the package class: Go declares no method on a local type, so it has no holder. (Guarded by `PromotedForwarderTypeNameCollision` — `Driver` is a type and a `Connector` method, `*counting` overrides `Name`, and the promoted `Driver` is reached through the interface, directly, as a method value and through reflect's method sets, all compared with Go; its second arm is the TS probe's `t3` repro, `fcounting` embedding the foreign `driver.Connector` and overriding `Connect` through its pointer — and by the converter test `TestPromotedForwarderTakesTheSuffixFormInItsStructsHolder`, which pins the suffix form a holder's method takes: the body `Driver⁔(/*this*/ counting recvᴛ)` in the package class and the Go-named forwarder in the holder, in package_info.cs.)

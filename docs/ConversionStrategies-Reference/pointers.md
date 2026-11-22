@@ -905,9 +905,9 @@ answers Go's size for the derivable shapes.
 ```go
 func (u *UnsafePointer) Load() unsafe.Pointer { return Loadp(unsafe.Pointer(&u.value)) }
 ```
-<!-- source: src/core/internal/runtime/atomic/types.cs:505-507 -->
+<!-- source: src/core/internal/runtime/atomic/types.cs:467-469 -->
 ```csharp
-public static @unsafe.Pointer Load(this ж<UnsafePointer> Ꮡu) {
+internal static @unsafe.Pointer Load⁔(/*this*/ ж<UnsafePointer> Ꮡu) {
     return Loadp(@unsafe.Pointer.FromBox(Ꮡu.Ꮡvalue));
 }
 ```
@@ -1248,9 +1248,9 @@ func (p *nih) add(bytes uintptr) *nih {
 	return (*nih)(unsafe.Pointer(uintptr(unsafe.Pointer(p)) + bytes))
 }
 ```
-<!-- source: src/tests/Behavioral/FuncVsMethodOverload/main.cs.target:19-24 -->
+<!-- source: src/tests/Behavioral/FuncVsMethodOverload/main.cs.target:16-21 -->
 ```csharp
-internal static ж<nih> add(this ж<nih> Ꮡp, uintptr bytes) {
+internal static ж<nih> add⁔(/*this*/ ж<nih> Ꮡp, uintptr bytes) {
     if (bytes == 0) {
         return Ꮡp;
     }
@@ -1924,7 +1924,7 @@ long-standing arms; this is the remaining value-rooted case.) Guarded by
 
 ## Field address of a collision-renamed heap-boxed local uses the raw box name
 A heap box always keeps the RAW Go identifier (`ref var Δslice = ref heap<T>(out var <box>slice)`), so taking the address of a FIELD of a collision-renamed boxed local routes through `boxBaseName` -- the raw-name box, never the Δ-renamed alias (CS0103; reflect `SliceOf`'s `&slice.Type`). This matches the whole-value `&p` form and the renamed receiver/parameter boxes:
-<!-- source: src/tests/Behavioral/CollisionRenamedLocalBox/main.cs.target:60, 63 -->
+<!-- source: src/tests/Behavioral/CollisionRenamedLocalBox/main.cs.target:51, 54 -->
 ```csharp
     ref var p = ref heap<box>(new box(n: 0), out var Ꮡp);
 …

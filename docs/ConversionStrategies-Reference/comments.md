@@ -154,10 +154,10 @@ func (r *Reader) Read(b []byte) (n int, err error) {
 	}
 ```
 
-<!-- source: src/core/strings/reader.cs:41-48 -->
+<!-- source: src/core/strings/reader.cs:38-45 -->
 ```csharp
 // Read implements the [io.Reader] interface.
-public static (nint n, error err) Read(this ref Reader r, slice<byte> b) {
+internal static (nint n, error err) Read⁔(/*this*/ ref Reader r, slice<byte> b) {
     nint n = default;
     error err = default;
 
