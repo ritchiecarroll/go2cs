@@ -177,11 +177,11 @@ func refuseMarkerGlyphIdentifiers(pkg *packages.Package) *markerGlyphRefusal {
 
 	sort.Slice(idents, func(i, j int) bool { return idents[i].Pos() < idents[j].Pos() })
 
-	minted, names, typeNames := deltaMintedNames(pkg, declared, clauses)
+	sets := deltaMintedNames(pkg, declared, clauses)
 	var refusal *markerGlyphRefusal
 
 	for _, ident := range idents {
-		reason := markerGlyphReason(ident.Name, declared[ident], minted, names, typeNames)
+		reason := markerGlyphReason(ident.Name, declared[ident], sets)
 
 		if reason == "" {
 			continue
@@ -201,7 +201,7 @@ func refuseMarkerGlyphIdentifiers(pkg *packages.Package) *markerGlyphRefusal {
 }
 
 // markerGlyphReason says why name, declaring obj, is refused, or "" when it is not.
-func markerGlyphReason(name string, obj types.Object, minted map[string]string, names, typeNames map[string]bool) string {
+func markerGlyphReason(name string, obj types.Object, sets *deltaNameSets) string {
 	for _, r := range name {
 		if string(r) == ShadowVarMarker {
 			continue
@@ -224,19 +224,23 @@ func markerGlyphReason(name string, obj types.Object, minted map[string]string, 
 		return "is the name go2cs generates for " + what
 	}
 
-	if what, isMinted := minted[name]; isMinted {
+	if what, isMinted := sets.minted[name]; isMinted {
 		return "is " + what
 	}
 
-	if base, isWitness := strings.CutSuffix(name, ShapeWitnessSuffix); isWitness && typeNames[base] {
+	if base, isWitness := strings.CutSuffix(name, ShapeWitnessSuffix); isWitness && sets.typeNames[base] {
 		return fmt.Sprintf("is the name of the shape witness go2cs generates for this package's type %s", base)
 	}
 
-	return deltaMintedShapeOf(name, names)
+	return deltaMintedShapeOf(name, sets)
 }
 
 // deltaProjectionReason refuses a Δ-led struct field, method or named type: golib drops one leading Δ when it projects
 // a converted member's Go name, reading it as the collision marker go2cs added, so the name Go reports would differ.
+// A bare Δ is refused as a field or a type, whose projections strip it to an empty name (GoReflect.FieldAccess.cs and
+// GoReflect.TypeNaming.cs strip unconditionally), and converts as a method, whose projections leave it alone
+// (TypeExtensions.GoMethodSets.cs: ProjectGoMethodName and GoMethodNameMatches strip only a longer name, and
+// UnexportedMethodPackageMatches reads the empty remainder as exported, which is Go's answer for an upper-case Δ).
 func deltaProjectionReason(name string, obj types.Object) string {
 	if !strings.HasPrefix(name, ShadowVarMarker) {
 		return ""
@@ -270,11 +274,12 @@ var (
 	deltaParamPattern          = regexp.MustCompile(`^_?Δp\d+$`)    // ΔpN, _ΔpN (constraintOperations.go, convCompositeLit.go, visitFuncDecl.go)
 	deltaLiteralParamPattern   = regexp.MustCompile(`^(.+)Δp$`)     // xΔp (getConstraintProxyLitParamName)
 	deltaInlineLambdaParamPatt = regexp.MustCompile(`^Δe\d+$`)      // Δe0 (inlineArrayEmission.go)
+	deltaWitnessParamPattern   = regexp.MustCompile(`^(.+?)Δ(.+)$`) // TΔScript (shapeWitnessParamName)
 )
 
-// deltaMintedShapeOf says which generated local or parameter shape name has, or "" when none.
-func deltaMintedShapeOf(name string, names map[string]bool) string {
-	if match := deltaShadowRenamePattern.FindStringSubmatch(name); match != nil && names[match[1]] {
+// deltaMintedShapeOf says which generated local, parameter or type-parameter shape name has, or "" when none.
+func deltaMintedShapeOf(name string, sets *deltaNameSets) string {
+	if match := deltaShadowRenamePattern.FindStringSubmatch(name); match != nil && sets.names[match[1]] {
 		return fmt.Sprintf("is the name go2cs gives a shadowed or repeated %s", match[1])
 	}
 
@@ -282,7 +287,7 @@ func deltaMintedShapeOf(name string, names map[string]bool) string {
 		return "is a parameter name go2cs generates (ΔpN)"
 	}
 
-	if match := deltaLiteralParamPattern.FindStringSubmatch(name); match != nil && names[match[1]] {
+	if match := deltaLiteralParamPattern.FindStringSubmatch(name); match != nil && sets.names[match[1]] {
 		return fmt.Sprintf("is the incoming parameter name go2cs generates for a function literal's %s", match[1])
 	}
 
@@ -290,21 +295,80 @@ func deltaMintedShapeOf(name string, names map[string]bool) string {
 		return "is a lambda parameter name go2cs generates (ΔeN)"
 	}
 
+	// A shape-witnessed type parameter T constrained by C is written TΔC inside its declaration, where it shadows a
+	// package-level name of that spelling.
+	if match := deltaWitnessParamPattern.FindStringSubmatch(name); match != nil && sets.typeParams[match[1]] {
+		if sets.typeNames[match[2]] || sets.importedTypeNames[match[2]] {
+			return fmt.Sprintf("is the witness type parameter go2cs generates for a type parameter %s constrained by %s", match[1], match[2])
+		}
+	}
+
 	return ""
 }
 
-// deltaMintedNames maps each Δ name go2cs generates from a name pkg declares, in ANY scope, to what it generates it
-// for, through the converter's own renaming functions: a package-wide collision rename (packageNameCollisions,
-// getCollisionAvoidanceIdentifier), a reserved or `_package` name (getCoreSanitizedIdentifier), `Main`
-// (getSanitizedFunctionName), and a type switch's bound temporary. It also answers every declared name, and every
-// declared type name, for the shape rules.
-func deltaMintedNames(pkg *packages.Package, declared map[*ast.Ident]types.Object, clauses map[*ast.Ident]bool) (minted map[string]string, names, typeNames map[string]bool) {
-	minted = map[string]string{}
-	names = map[string]bool{}
-	typeNames = map[string]bool{}
+// deltaNameSets is what the Δ rules read from a package: every Δ name go2cs generates from it (minted, to what it is
+// generated for), and the declared names, type names, type parameters and imported type names the shape rules match.
+type deltaNameSets struct {
+	minted            map[string]string
+	names             map[string]bool
+	typeNames         map[string]bool
+	typeParams        map[string]bool
+	importedTypeNames map[string]bool
+}
+
+// deltaMintedNames answers the Δ names go2cs generates from what pkg declares, in ANY scope, through the converter's
+// own renaming functions: a package-wide collision rename (packageNameCollisions, getCollisionAvoidanceIdentifier), a
+// reserved or `_package` name (getCoreSanitizedIdentifier), `Main` (getSanitizedFunctionName), a type switch's bound
+// temporary, and the Δ rename of an import's alias or of the package's own name (importAliasOperations.go,
+// methodHolder.go). Each declared name is recorded in its Go and its sanitized spelling, so a renamed base matches the
+// shape rules too.
+func deltaMintedNames(pkg *packages.Package, declared map[*ast.Ident]types.Object, clauses map[*ast.Ident]bool) *deltaNameSets {
+	sets := &deltaNameSets{
+		minted:            map[string]string{},
+		names:             map[string]bool{},
+		typeNames:         map[string]bool{},
+		typeParams:        map[string]bool{},
+		importedTypeNames: map[string]bool{},
+	}
 
 	for name := range packageNameCollisions(pkg) {
-		minted[getCollisionAvoidanceIdentifier(name)] = fmt.Sprintf("the name go2cs gives this package's %s when it renames it", name)
+		sets.minted[getCollisionAvoidanceIdentifier(name)] = fmt.Sprintf("the name go2cs gives this package's %s when it renames it", name)
+	}
+
+	// An import's alias, and the package's own name, take Δ when they collide (using Δ<name> = …).
+	aliases := map[string]bool{pkg.Name: true}
+
+	for _, file := range pkg.Syntax {
+		for _, spec := range file.Imports {
+			path := strings.Trim(spec.Path.Value, `"`)
+
+			switch {
+			case spec.Name != nil && spec.Name.Name != "_" && spec.Name.Name != ".":
+				aliases[spec.Name.Name] = true
+			case spec.Name == nil:
+				if imported := pkg.Imports[path]; imported != nil {
+					aliases[imported.Name] = true
+				}
+			}
+		}
+	}
+
+	for alias := range aliases {
+		sets.minted[ShadowVarMarker+alias] = fmt.Sprintf("the name go2cs gives the import or package alias %s when it renames it", alias)
+	}
+
+	for _, imported := range pkg.Imports {
+		if imported.Types == nil {
+			continue
+		}
+
+		scope := imported.Types.Scope()
+
+		for _, name := range scope.Names() {
+			if typeName, isType := scope.Lookup(name).(*types.TypeName); isType && typeName.Exported() {
+				sets.importedTypeNames[name] = true
+			}
+		}
 	}
 
 	for ident, obj := range declared {
@@ -314,30 +378,35 @@ func deltaMintedNames(pkg *packages.Package, declared map[*ast.Ident]types.Objec
 			continue
 		}
 
-		names[name] = true
+		renamed := getCoreSanitizedIdentifier(name)
+		sets.names[name] = true
+		sets.names[renamed] = true
 
-		if renamed := getCoreSanitizedIdentifier(name); renamed != name && strings.HasPrefix(renamed, ShadowVarMarker) {
-			minted[renamed] = fmt.Sprintf("the name go2cs gives this package's %s when it renames it", name)
+		if renamed != name && strings.HasPrefix(renamed, ShadowVarMarker) {
+			sets.minted[renamed] = fmt.Sprintf("the name go2cs gives this package's %s when it renames it", name)
 		}
 
 		switch declaredObj := obj.(type) {
 		case nil:
 			// A type switch's symbolic binding: the converter binds its value through a temporary named Δ<binding>.
-			minted[ShadowVarMarker+name] = fmt.Sprintf("the temporary go2cs generates for the type switch binding %s", name)
+			sets.minted[ShadowVarMarker+name] = fmt.Sprintf("the temporary go2cs generates for the type switch binding %s", name)
 		case *types.Func:
 			if signature, ok := declaredObj.Type().(*types.Signature); ok && signature.Recv() == nil {
 				if renamed := getSanitizedFunctionName(name); renamed != name && strings.HasPrefix(renamed, ShadowVarMarker) {
-					minted[renamed] = fmt.Sprintf("the name go2cs gives this package's %s when it renames it", name)
+					sets.minted[renamed] = fmt.Sprintf("the name go2cs gives this package's %s when it renames it", name)
 				}
 			}
 		case *types.TypeName:
-			if _, isTypeParam := declaredObj.Type().(*types.TypeParam); !isTypeParam {
-				typeNames[name] = true
+			if _, isTypeParam := declaredObj.Type().(*types.TypeParam); isTypeParam {
+				sets.typeParams[name] = true
+				sets.typeParams[renamed] = true
+			} else {
+				sets.typeNames[name] = true
 			}
 		}
 	}
 
-	return minted, names, typeNames
+	return sets
 }
 
 // refuseMarkerGlyphTestFiles refuses a -tests conversion BEFORE its production half is written when one of the

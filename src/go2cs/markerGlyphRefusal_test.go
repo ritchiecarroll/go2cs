@@ -239,6 +239,8 @@ func TestDeltaMintedMemberNamesAreEveryFixedDeltaLiteral(t *testing.T) {
 
 const markerGlyphFixture = `package m
 
+import "strings"
+
 var Ꮡx int
 
 func fᴛ() {}
@@ -264,6 +266,31 @@ func f() string {
 	_ = slice
 	return Δslice
 }
+
+// A shadowed local array is renamed ΔarrayΔ1: its base is array's SANITIZED spelling, which the package never declares.
+var ΔarrayΔ1 int
+
+func arr() int {
+	array := 1
+	{
+		array := 2
+		_ = array
+	}
+	return array
+}
+
+// An import alias, and the package's own name, are renamed Δ<name> when they collide.
+var Δstrings, Δm = strings.ToUpper("x"), 0
+
+// A shape-witnessed type parameter S constrained by Script is written SΔScript inside run.
+type Script interface{ Text() string }
+
+func run[S Script](v S) string { return v.Text() }
+
+type SΔScript struct{}
+
+// A bare Δ field projects to an empty name.
+type P2 struct{ Δ int }
 
 // Main is renamed ΔMain; ΔCopy is a fixed generated member; TΔshape is T's shape witness.
 func Main()  {}
@@ -312,6 +339,11 @@ var µ, π int
 const ΔK = 1
 
 func Δf() {}
+
+// A bare Δ method is left alone by golib's method projections.
+type Q2 struct{}
+
+func (Q2) Δ() {}
 
 func h(Δv int) int { return Δv }
 
@@ -363,6 +395,11 @@ func TestMarkerGlyphIdentifiersAreRefused(t *testing.T) {
 		"ΔBar":          `is a method whose name starts with Δ`,
 		"ΔMatrix":       `is a type whose name starts with Δ: golib drops a leading Δ when it names a converted type, so reflect and fmt's %T would print "Matrix" where Go prints "ΔMatrix"`,
 		"xΔ1":           "is the name go2cs gives a shadowed or repeated x",
+		"ΔarrayΔ1":      "is the name go2cs gives a shadowed or repeated Δarray",
+		"Δstrings":      "is the name go2cs gives the import or package alias strings when it renames it",
+		"Δm":            "is the name go2cs gives the import or package alias m when it renames it",
+		"SΔScript":      "is the witness type parameter go2cs generates for a type parameter S constrained by Script",
+		"Δ":             `is a struct field whose name starts with Δ: golib drops a leading Δ when it projects a converted field's Go name, so reflect, encoding/json and fmt would name it "" where Go names it "Δ"`,
 	}
 
 	// The package variable Δt is refused for the type switch's temporary, the field Δt for its projection: two sites,

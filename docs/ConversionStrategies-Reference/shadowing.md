@@ -975,8 +975,14 @@ read it as theirs:
   - `ΔMain` beside a func `Main`;
   - a fixed generated member, such as `ΔCopy` or `ΔAssign`;
   - the shape witness of one of its types, `TΔshape`;
-  - a generated local or parameter shape: `xΔ1` (a shadowed or repeated `x`), the temporary `Δt` a type switch binds
-    `t` through, `ΔpN`, `xΔp` and `ΔeN`.
+  - a generated local or parameter shape: `xΔ1` (a shadowed or repeated `x`, read against the base's sanitized spelling
+    too, so a renamed local `array` gives `ΔarrayΔ1`), the temporary `Δt` a type switch binds `t` through, `ΔpN`, `xΔp`
+    and `ΔeN`;
+  - the `Δ` rename of an import's alias or of the package's own name (`using Δstrings = …`);
+  - a shape-witnessed type parameter, `SΔScript` for a type parameter `S` constrained by `Script`.
+
+A bare `Δ` is refused as a field or a type, whose projections strip it to an empty name, and converts as a method, whose
+projections leave it alone.
 
 `Δt` beside a plain local `t`, `Δx`, a bare `Δ`, a parameter `Δv`, and `Δ`-led package variables, constants and functions
 convert unchanged.
