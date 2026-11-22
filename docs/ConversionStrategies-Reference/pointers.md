@@ -1543,10 +1543,11 @@ over the resolved method) was ruled out for now: both sites are dormant (debugge
 Phase 5), no user Go code can build that shape, and the binding is unread under Native AOT. So the two sites refuse
 by name instead of calling nil. Red first: the behavioral row and the golib rows were predicted before their
 red runs; the converter's TestFuncWordShapes row was run red with no prediction written first, and its asserts were the claim.
-Census at go1.24.13, all 7117 .go files under src: a w4 store with more than one target, 0; an atomic store or swap
-through `(*unsafe.Pointer)(unsafe.Pointer(&x))`, 4, all over pointer fields, none over a func variable
-(syscall/dll_windows.go:201 and :260, and the same two lines in cmd's vendored x/sys/windows); a single-target w4 store, 2
-(runtime/cgocall.go:445, runtime/debugcall.go:266), which are the 4 emitted sites. -->
+Census at go1.26.11, the corpus toolchain's GOROOT, all 7714 .go files under src (a first read at go1.24.13, the wrong
+pin, gave the same counts): a w4 store with more than one target, 0; an atomic store or swap through
+`(*unsafe.Pointer)(unsafe.Pointer(&x))`, 4, all over pointer fields, none over a func variable (syscall/dll_windows.go:290
+and :349, and the same two in cmd's vendored x/sys/windows); a single-target w4 store, 2 (runtime/cgocall.go:465,
+runtime/debugcall.go:266), which are the 4 emitted sites. -->
 
 **The shapes that keep today's pointer reinterpret, deliberately:**
 - a recovery from a pointer or from memory (runtime's mcleanup and panic);
