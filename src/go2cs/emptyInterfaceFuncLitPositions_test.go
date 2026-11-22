@@ -114,7 +114,7 @@ func main() {
 		`return [GoFunc("retConst.func1")] int64 () => 1;`,             // return through interface{}
 		`any declared = [GoFunc("main.func1")] int64 () => 2;`,         // declared variable
 		`(Hook)([GoFunc("main.func2")] int64 () => 3)`,                 // conversion
-		`slice<any>([[GoFunc("main.func3")] int64 () => 4])`,           // unkeyed composite element
+		`new any[]{[GoFunc("main.func3")] int64 () => 4}.slice()`,      // unkeyed composite element (funcLitCollection_test.go)
 		`new holder([GoFunc("main.func4")] int64 () => 5)`,             // positional struct field
 		`ꟷ([GoFunc("main.func5")] int64 () => 6)`,                      // channel send
 		`any first = [GoFunc("main.func6")] int64 () => 7;`,            // multi-name var
