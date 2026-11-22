@@ -1541,7 +1541,8 @@ one `*unsafe.Pointer` store whose failure was SILENT. The corpus held 4 such sto
 abi.FuncPCABIInternal, which golib's synthetic-PC registry answers. Binding a func to a PC (Delegate.CreateDelegate
 over the resolved method) was ruled out for now: both sites are dormant (debugger call injection; cgo callbacks are
 Phase 5), no user Go code can build that shape, and the binding is unread under Native AOT. So the two sites refuse
-by name instead of calling nil. -->
+by name instead of calling nil. Red first: the behavioral row and the golib rows were predicted before their
+red runs; the converter's TestFuncWordShapes row was run red with no prediction written first, and its asserts were the claim. -->
 
 **The shapes that keep today's pointer reinterpret, deliberately:**
 - a recovery from a pointer or from memory (runtime's mcleanup and panic);
