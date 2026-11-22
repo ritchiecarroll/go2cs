@@ -1507,6 +1507,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckMnGlyphMethodFrames() => CheckTarget("MnGlyphMethodFrames");
 
     [TestMethod]
+    public void CheckGlyphLibraryFrameNames() => CheckTarget("GlyphLibraryFrameNames");
+
+    [TestMethod]
     public void CheckMultiFileInitOrder() => CheckTarget("MultiFileInitOrder");
 
     [TestMethod]
