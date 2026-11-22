@@ -131,3 +131,46 @@ Added falsifiers: a deferred-closure column that moves by anything other than th
 of `, GoFunc("<name>")` where a NoInlining list was already there); a moved site that is a first-statement site rather
 than a `{` site on a header line; and a thunk site (the seventh argument) or a bounded-go site that moves at all. The
 thunk and bounded-go sentinels sit ahead of any literal on their lines, so neither should move.
+
+## Scoring, 2026-11-22: the two-seeded regen
+
+Measured per flavour: the base converter (`be4a4eae9c`) against the seat converter (`0b44b1e4f1`), each a
+single-target `-stdlib -comments` emission into its own root seeded from this tree, one run at a time, every run exit 0.
+The prediction above and its correction stand unedited. A "MISS" is stated against the row as worded.
+
+| Flavour | Literal lines in `.cs` | `.cs` files | Packages | with NoInlining | `.cs.auto` lines / files | `package_info.cs` | `.csproj` |
+|---|---|---|---|---|---|---|---|
+| windows/amd64 | **1,659** (MISS, −3) | 385 | 153 | 17 | 22 / 7 | 52 | 0 |
+| linux/amd64 | **1,663** (MISS, −5) | 399 | 154 | 17 | 18 / 6 | 53 | 0 |
+| darwin/amd64 | **1,653** (MISS, −5) | 387 | 153 | 17 | 17 / 5 | 52 | 0 |
+| linux/arm64 | **1,662** (MISS, −5) | 398 | 153 | 17 | 18 / 6 | 53 | 0 |
+
+- **Literals: met on every flavour.** `GoFunc(` added in `.cs` equals the predicted literal count exactly (1,662, 1,668,
+  1,658, 1,667) and in `.cs.auto` the predicted 22, 18, 17, 18. No moved line lacks the attribute.
+- **Literal lines: missed on every flavour**, by the same mechanism. The prediction reasoned that literals on distinct Go
+  lines land on distinct C# lines. The converter joins some onto one C# line: `crypto/ecdsa` `privateKeyToFIPS` and
+  `crypto/ed25519` `PrivateKey.Sign` and `sign` (two literal arguments of one `privateKeyCache.Get` call, every flavour),
+  and on the three non-windows flavours `os` `root_unix.go` `chmodat` and `chownat` (a literal and the literal nested in
+  it). Each such line gains two attributes; nothing else moved.
+- **`package_info.cs`: met** as corrected before the measurement (52, 53, 52, 53), and by mechanism: the deferred-closure
+  argument moved in 94, 93, 93, 93 records and the per-call argument in 4, 5, 5, 5; no position table or literal-span
+  table moved.
+- **Packages** read 154, 155, 154, 153 by C# folder; mapped back to Go import paths (an `amd64/` key folder is not a
+  package, `internal/syscall/windows` is one) the sets equal the census's on every flavour.
+- **The merged corpus: MISS, not predicted.** The record said no line is added or removed and no `.csproj` is touched.
+  Two files moved instead. Go numbers package-level var-initializer literals on one counter over the PLATFORM'S file set,
+  so the same literal has a different name per GOOS. Read from `go tool objdump` of each GOOS's `internal/poll` under
+  `-gcflags=-l`: `fd.go:83` is `init.func1` on windows and darwin and `init.func2` on linux; `sendfile.go:7` is
+  `init.func7`, `init.func3` and `init.func2`. Both files were flat (shared); they now differ by GOOS, and the
+  four-target merge (run filtered to `internal/poll`) moves each into `windows/`, `linux/` and `darwin/`. The project
+  already compiles `$(GoTargetOS)/*.cs`, so its `.csproj` did not change. Across the four flavours every other path two or
+  more flavours move carries identical line pairs. The limit stated with the prediction measured test-binary renumbering
+  and never asked the cross-platform question.
+- **Applied:** 560 files by line pairs (2,188 lines) plus the `internal/poll` split; marker gate 0 of 225.
+
+**Behavioral** (1,178 packages, same host, base and seat):
+
+- 1,625 attributes added: met. 323 goldens, 5 nested `.cs` by 8 lines, 138 `package_info.cs`, 0 `.csproj`: met.
+- Golden lines **1,616** against 1,605: MISS, +11. Of the 12 Go lines holding two literals, the converter emits 11 as
+  two C# lines (the inverse of the corpus miss above). Every rebaselined file equals the seat emission byte for byte with
+  CRs stripped.
