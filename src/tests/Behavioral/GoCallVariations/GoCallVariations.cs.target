@@ -21,7 +21,7 @@ internal static partial void main() {
     printSquare(5);
 
     nint count = 1;
-    goǃ(() => {
+    goǃ([GoFunc("main.func1")] () => {
         fmt.Println("Go count (closure):", count);
     });
     count = 10;
@@ -55,7 +55,7 @@ internal static void bindAdd(ж<accum> a) {
 }
 
 public static Action<@string> GetPrintLn() {
-    return (@string src) => {
+    return [GoFunc("GetPrintLn.func1")] (@string src) => {
         fmt.Println(src);
     };
 }
@@ -68,13 +68,13 @@ internal static nint add(nint x, nint y) {
 
 internal static partial void runPair(channel<EmptyStruct> done) {
     @string tag = "pair";
-    void handler(channel<EmptyStruct> ch, Action fn) {
+    [GoFunc("runPair.func1")] void handler(channel<EmptyStruct> ch, Action fn) {
         fn();
         fmt.Println("handled:", tag);
         ch.ᐸꟷ(new EmptyStruct());
     }
     var handlerʗ1 = handler;
-    goǃ(handlerʗ1, done, () => {
+    goǃ(handlerʗ1, done, [GoFunc("runPair.func2")] () => {
         fmt.Println("inner fn ran");
     });
 }

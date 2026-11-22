@@ -33,7 +33,7 @@ internal static void bumpTwice(this ж<counter> Ꮡp) {
 internal static nint addInClosure(ж<counter> Ꮡp, nint d) {
     ref var p = ref Ꮡp.DerefOrNull();
 
-    void apply() {
+    [GoFunc("addInClosure.func1")] void apply() {
         Ꮡp.Value.n += d;
         addInt(ref (Ꮡp.Ꮡn).DerefOrNull(), d);
     }

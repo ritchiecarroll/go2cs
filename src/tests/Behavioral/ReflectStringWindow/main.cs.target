@@ -59,17 +59,17 @@ internal static void main() {
     var plainʗ2 = plain;
 
         var rfʗ1 = rf;
-    fmt.Println("panics:", probe(() => {
+    fmt.Println("panics:", probe([GoFunc("main.func1")] () => {
         sʗ1.Index(99);
-    }), probe(() => {
+    }), probe([GoFunc("main.func2")] () => {
         plainʗ1.Slice(4, 2);
     }),
-        probe(() => {
+        probe([GoFunc("main.func3")] () => {
             reflect.ValueOf((nint)42).Index(0);
-        }), probe(() => {
+        }), probe([GoFunc("main.func4")] () => {
         plainʗ2.Slice3(0, 1, 2);
     }),
-        probe(() => {
+        probe([GoFunc("main.func5")] () => {
             rfʗ1.Slice3(0, 2, 99);
         }));
 }
@@ -78,7 +78,7 @@ internal static @string /*msg*/ probe(Action f) {
     @string msg = default;
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("probe.func1")] () => {
             var r = recover(); if (r != nil) {
                 msg = fmt.Sprint(r);
             }

@@ -19,7 +19,7 @@ partial struct Box {
 internal static @string Name⁔(/*this*/ ref Box b) { return "box"; }
 
 public static Step NewStep() {
-    return (nint x) => x + 1;
+    return [GoFunc("NewStep.func1")] (nint x) => x + 1;
 }
 
 } // end typelib_package

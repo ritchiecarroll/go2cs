@@ -72,13 +72,13 @@ public static Func<ж<Node>> Next(this ж<Node> Ꮡn) {
         return default;
     }
 
-    return () => Ꮡn.Value.next;
+    return [GoFunc("(*Node).Next.func1")] () => Ꮡn.Value.next;
 }
 
 public static array<ж<Node>> Triple(this ж<Node> Ꮡn) { return array<ж<Node>>([Ꮡn, Ꮡn, Ꮡn]); }
 
 public static iter.Seq<ж<Node>> Path(this ж<Node> Ꮡn) {
-    return (Func<ж<Node>, bool> yield) => {
+    return [GoFunc("(*Node).Path.func1")] (Func<ж<Node>, bool> yield) => {
         for (var p = Ꮡn; p != nil; p = p.next) {
             if (!yield(p)) {
                 return;
@@ -131,7 +131,7 @@ internal static void main() {
     fmt.Println(Count(root));
     fmt.Println(Labels(root));
 
-    Rename(root, Leaf (Leaf l) => {
+    Rename(root, [GoFunc("main.func1")] Leaf (Leaf l) => {
         l.name += "!"u8;
         return l;
     });

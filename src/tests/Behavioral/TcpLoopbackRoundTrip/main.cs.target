@@ -47,7 +47,7 @@ internal static partial void roundTrip(@string label, @string network, @string a
 
         var acceptsʗ1 = accepts;
         var listenerʗ2 = listener;
-        goǃ(() => {
+        goǃ([GoFunc("roundTrip.func1")] () => {
             var (conn, errΔ1) = listenerʗ2.Accept();
             acceptsʗ1.ᐸꟷ(new roundTrip_accepted(conn, errΔ1));
         });
@@ -76,7 +76,7 @@ internal static partial void roundTrip(@string label, @string network, @string a
         var echoed = new channel<nint>(1);
         var echoedʗ1 = echoed;
         var serverʗ2 = server;
-        goǃ(() => {
+        goǃ([GoFunc("roundTrip.func2")] () => {
             var buf = new slice<byte>(payloadSize);
             var (n, errΔ2) = Δio.ReadFull(new net_ConnᴠReader(serverʗ2), buf);
             if (errΔ2 != nil) {
@@ -127,7 +127,7 @@ internal static partial void closeBreaksBlockedRead() {
         var accepts = new channel<Δnet.Conn>(1);
         var acceptsʗ1 = accepts;
         var listenerʗ2 = listener;
-        goǃ(() => {
+        goǃ([GoFunc("closeBreaksBlockedRead.func1")] () => {
             var (conn, errΔ1) = listenerʗ2.Accept();
             if (errΔ1 != nil) {
                 acceptsʗ1.ᐸꟷ(default);
@@ -152,7 +152,7 @@ internal static partial void closeBreaksBlockedRead() {
         var done = new channel<error>(1);
         var clientʗ1 = client;
         var doneʗ1 = done;
-        goǃ(() => {
+        goǃ([GoFunc("closeBreaksBlockedRead.func2")] () => {
             var buf = new slice<byte>(16);
             var (_, errΔ2) = clientʗ1.Read(buf);
             doneʗ1.ᐸꟷ(errΔ2);
@@ -191,7 +191,7 @@ internal static partial void closeBreaksBlockedWrite() {
         var accepts = new channel<Δnet.Conn>(1);
         var acceptsʗ1 = accepts;
         var listenerʗ2 = listener;
-        goǃ(() => {
+        goǃ([GoFunc("closeBreaksBlockedWrite.func1")] () => {
             var (conn, errΔ1) = listenerʗ2.Accept();
             if (errΔ1 != nil) {
                 acceptsʗ1.ᐸꟷ(default);
@@ -216,7 +216,7 @@ internal static partial void closeBreaksBlockedWrite() {
         var done = new channel<error>(1);
         var clientʗ1 = client;
         var doneʗ1 = done;
-        goǃ(() => {
+        goǃ([GoFunc("closeBreaksBlockedWrite.func2")] () => {
             var buf = new slice<byte>(64 * 1024);
             for (;;) {
                 var (_, errΔ2) = clientʗ1.Write(buf); if (errΔ2 != nil) {

@@ -26,7 +26,7 @@ internal static void main() {
 
     var c = new Counts(new map<@string, nint>{});
     var cʗ1 = c;
-    Counts get() => cʗ1;
+    [GoFunc("main.func1")] Counts get() => cʗ1;
 
     get()["hits"] = 3;
     get()["hits"] = get()["hits"] + 1;

@@ -13,7 +13,7 @@ partial struct gauge {
 }
 
 internal static partial @string Name⁔(/*this*/ ж<counter> Ꮡc) {
-    @string f() {
+    [GoFunc("(*counter).Name.func1")] @string f() {
         Ꮡc.Value.n++;
         return here();
     }
@@ -21,7 +21,7 @@ internal static partial @string Name⁔(/*this*/ ж<counter> Ꮡc) {
 }
 
 internal static partial @string Name⁔(/*this*/ gauge g) {
-    @string f() {
+    [GoFunc("gauge.Name.func1")] @string f() {
         g.v++;
         return here();
     }

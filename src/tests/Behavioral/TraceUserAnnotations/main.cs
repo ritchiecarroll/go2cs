@@ -15,7 +15,7 @@ internal static void annotate(@string label) {
         var taskʗ1 = task;
         defer(taskʗ1.End, ref ᒐ);
 
-        trace.WithRegion(ctx, "prepare", () => {
+        trace.WithRegion(ctx, "prepare", [GoFunc("annotate.func1")] () => {
             fmt.Println(label, "inside WithRegion");
         });
 
@@ -25,7 +25,7 @@ internal static void annotate(@string label) {
         region.End();
 
         var (subctx, subtask) = trace.NewTask(ctx, "inner");
-        trace.WithRegion(subctx, "nested", () => {
+        trace.WithRegion(subctx, "nested", [GoFunc("annotate.func2")] () => {
             fmt.Println(label, "inside nested region");
         });
         subtask.End();

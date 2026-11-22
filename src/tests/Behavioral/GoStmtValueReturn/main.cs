@@ -39,7 +39,7 @@ internal static partial void main() {
     fmt.Println("nib:", ᐸꟷ(gch));
 
     var outʗ1 = @out;
-    goǃ(() => {
+    goǃ([GoFunc("main.func1")] () => {
         outʗ1.ᐸꟷ(1);
     });
     fmt.Println("lit:", ᐸꟷ(@out));
@@ -47,12 +47,12 @@ internal static partial void main() {
     goǃ(emit, @out);
     fmt.Println("emit:", ᐸꟷ(@out));
 
-    goǃ((channel<nint> o) => {
+    goǃ([GoFunc("main.func2")] (channel<nint> o) => {
         error retErr = default;
         GoFrame ᒐ = default;
         try {
             var oʗ1 = o;
-            defer(() => {
+            defer([GoFunc("main.func2.1")] () => {
                 oʗ1.ᐸꟷ(11);
             }, ref ᒐ);
             retErr = default; goto ᒐdone;
@@ -63,7 +63,7 @@ internal static partial void main() {
     }, @out);
     fmt.Println("litval:", ᐸꟷ(@out));
 
-    goǃ(error (channel<nint> o, nint n) => {
+    goǃ([GoFunc("main.func3")] error (channel<nint> o, nint n) => {
         o.ᐸꟷ(n * 2);
         if (n < 0) {
             return fmt.Errorf("negative %d"u8, n);

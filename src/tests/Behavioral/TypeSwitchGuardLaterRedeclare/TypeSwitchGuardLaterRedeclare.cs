@@ -25,7 +25,7 @@ internal static @string kind(error err, any expected) {
 partial struct Result /*@string*/;
 
 internal static Func<Result> errorType(error err, any expected) {
-    return () => {
+    return [GoFunc("errorType.func1")] () => {
         switch (expected.type()) {
         case {} ΔexpectedTypeΔ1 when ΔexpectedTypeΔ1._<Func<error, bool>>(out var expectedTypeΔ1): {
             return (Result)fmt.Sprint("func:", expectedTypeΔ1(err));
@@ -75,13 +75,13 @@ internal static @string describe(any v, bool nested) {
 
 internal static void main() {
     var e = errors.New("x");
-    fmt.Println(kind(e, bool (error _) => true));
+    fmt.Println(kind(e, [GoFunc("main.func1")] bool (error _) => true));
     fmt.Println(kind(e, reflect.TypeOf((nint)1)));
     fmt.Println(kind(e, default));
     fmt.Println(kind(e, new EmptyStruct()));
 
     var eʗ1 = e;
-    fmt.Println(errorType(e, bool (error err) => AreEqual(err, eʗ1))());
+    fmt.Println(errorType(e, [GoFunc("main.func2")] bool (error err) => AreEqual(err, eʗ1))());
     fmt.Println(errorType(e, reflect.TypeOf(""))());
     fmt.Println(errorType(e, 2.5D)());
 

@@ -128,7 +128,7 @@ internal static void main() {
     convertMapToOptions<compilerOptionsParserжoptionParserᴾ>(default, slice<@string>(["discarded"]), original);
     fmt.Println("discarded:", original.seen[len(original.seen) - 1]);
 
-    each(original, slice<@string>(["x", "y"]), (ж<compilerOptionsParser> o, @string k) => {
+    each(original, slice<@string>(["x", "y"]), [GoFunc("main.func1")] (ж<compilerOptionsParser> o, @string k) => {
         o.seen = append(o.seen, "cb-"u8 + k);
     });
     fmt.Println("callback:", original.seen.slice(len(original.seen) - 2));

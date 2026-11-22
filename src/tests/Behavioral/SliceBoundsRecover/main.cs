@@ -19,7 +19,7 @@ internal partial interface try_type /*dyn*/ {
 internal static void @try(@string name, Action f) {
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("try.func1")] () => {
             var r = recover();
             var (_, isErr) = r._<try_type>(ᐧ);
             fmt.Printf("%-24s %v | runtime.Error=%v\n"u8, name, r, isErr);
@@ -117,121 +117,121 @@ internal static void main() {
 
         var sʗ16 = s;
     var cases = slice<main_cases>([
-        new("slice [:hi>cap]", () => {
+        new("slice [:hi>cap]", [GoFunc("main.func1")] () => {
             sink = sʗ1.slice(0, hi11);
         }),
-        new("slice [:len<hi<=cap]", () => {
+        new("slice [:len<hi<=cap]", [GoFunc("main.func2")] () => {
             sink = len(sʗ2.slice(0, hi5));
         }),
-        new("slice [:-1]", () => {
+        new("slice [:-1]", [GoFunc("main.func3")] () => {
             sink = sʗ3.slice(0, neg);
         }),
-        new("slice [-1:]", () => {
+        new("slice [-1:]", [GoFunc("main.func4")] () => {
             sink = sʗ4.slice(neg);
         }),
-        new("slice [-1:2]", () => {
+        new("slice [-1:2]", [GoFunc("main.func5")] () => {
             sink = sʗ5.slice(neg, hi2);
         }),
-        new("slice [4:2]", () => {
+        new("slice [4:2]", [GoFunc("main.func6")] () => {
             sink = sʗ6.slice(lo4, hi2);
         }),
-        new("slice [4:]", () => {
+        new("slice [4:]", [GoFunc("main.func7")] () => {
             sink = sʗ7.slice(lo4);
         }),
-        new("slice [:big]", () => {
+        new("slice [:big]", [GoFunc("main.func8")] () => {
             sink = sʗ8.slice(0, big);
         }),
-        new("slice [big:]", () => {
+        new("slice [big:]", [GoFunc("main.func9")] () => {
             sink = sʗ9.slice(big);
         }),
-        new("slice [:i64]", () => {
+        new("slice [:i64]", [GoFunc("main.func10")] () => {
             sink = sʗ10.slice(0, (nint)(i64));
         }),
-        new("slice [:u64]", () => {
+        new("slice [:u64]", [GoFunc("main.func11")] () => {
             sink = sʗ11.slice(0, (nint)(u64));
         }),
-        new("slice [:u32]", () => {
+        new("slice [:u32]", [GoFunc("main.func12")] () => {
             sink = sʗ12.slice(0, (nint)(u32));
         }),
-        new("named [:-1]", () => {
+        new("named [:-1]", [GoFunc("main.func13")] () => {
             sink = nʗ1.slice(0, neg);
         }),
-        new("named [4:2]", () => {
+        new("named [4:2]", [GoFunc("main.func14")] () => {
             sink = nʗ2.slice(lo4, hi2);
         }),
-        new("array [:5]", () => {
+        new("array [:5]", [GoFunc("main.func15")] () => {
             sink = Ꮡa.Value.slice(0, hi5);
         }),
-        new("array [:-1]", () => {
+        new("array [:-1]", [GoFunc("main.func16")] () => {
             sink = Ꮡa.Value.slice(0, neg);
         }),
-        new("array [4:2]", () => {
+        new("array [4:2]", [GoFunc("main.func17")] () => {
             sink = Ꮡa.Value.slice(lo4, hi2);
         }),
-        new("array [4:]", () => {
+        new("array [4:]", [GoFunc("main.func18")] () => {
             sink = Ꮡa.Value.slice(lo4);
         }),
-        new("ptrarray [:5]", () => {
+        new("ptrarray [:5]", [GoFunc("main.func19")] () => {
             sink = pʗ1.slice(0, hi5);
         }),
-        new("namedarr [:5]", () => {
+        new("namedarr [:5]", [GoFunc("main.func20")] () => {
             sink = naʗ1.slice(0, hi5);
         }),
-        new("string [:5]", () => {
+        new("string [:5]", [GoFunc("main.func21")] () => {
             sink = str.slice(0, hi5);
         }),
-        new("string [:-1]", () => {
+        new("string [:-1]", [GoFunc("main.func22")] () => {
             sink = str.slice(0, neg);
         }),
-        new("string [-1:]", () => {
+        new("string [-1:]", [GoFunc("main.func23")] () => {
             sink = str.slice(neg);
         }),
-        new("string [4:2]", () => {
+        new("string [4:2]", [GoFunc("main.func24")] () => {
             sink = str.slice(lo4, hi2);
         }),
-        new("string [4:]", () => {
+        new("string [4:]", [GoFunc("main.func25")] () => {
             sink = str.slice(lo4);
         }),
-        new("string [:big]", () => {
+        new("string [:big]", [GoFunc("main.func26")] () => {
             sink = str.slice(0, big);
         }),
-        new("namedstr [:5]", () => {
+        new("namedstr [:5]", [GoFunc("main.func27")] () => {
             sink = ns.slice(0, hi5);
         }),
-        new("strlit [:5]", () => {
+        new("strlit [:5]", [GoFunc("main.func28")] () => {
             @string t = "abc"u8.slice(0, hi5);
             sink = t;
         }),
-        new("strlit [-1:]", () => {
+        new("strlit [-1:]", [GoFunc("main.func29")] () => {
             @string t = "abc"u8.slice(neg);
             sink = t;
         }),
-        new("slice3 [-1:2:5]", () => {
+        new("slice3 [-1:2:5]", [GoFunc("main.func30")] () => {
             var t = sʗ13.slice(neg, two, five);
             sink = t;
             fmt.Println("len", len(t), "cap", cap(t));
         }),
-        new("slice3 [0:-1:5]", () => {
+        new("slice3 [0:-1:5]", [GoFunc("main.func31")] () => {
             var t = sʗ14.slice(0, neg, five);
             sink = t;
             fmt.Println("len", len(t), "cap", cap(t));
         }),
-        new("slice3 [0:2:-1]", () => {
+        new("slice3 [0:2:-1]", [GoFunc("main.func32")] () => {
             var t = sʗ15.slice(0, two, neg);
             sink = t;
             fmt.Println("len", len(t), "cap", cap(t));
         }),
-        new("array3 [-1:2:5]", () => {
+        new("array3 [-1:2:5]", [GoFunc("main.func33")] () => {
             var t = a6ʗ1.slice(neg, two, five);
             sink = t;
             fmt.Println("len", len(t), "cap", cap(t));
         }),
-        new("array3 [0:2:-1]", () => {
+        new("array3 [0:2:-1]", [GoFunc("main.func34")] () => {
             var t = a6ʗ2.slice(0, two, neg);
             sink = t;
             fmt.Println("len", len(t), "cap", cap(t));
         }),
-        new("slice3 [:2:5] in range", () => {
+        new("slice3 [:2:5] in range", [GoFunc("main.func35")] () => {
             var t = sʗ16.slice(0, two, five);
             sink = t;
             fmt.Println("len", len(t), "cap", cap(t));

@@ -41,10 +41,10 @@ internal static void main() {
     Ꮡb.write("world");
     fmt.Println(b.String());
 
-    func(() => {
+    func([GoFunc("main.func1")] () => {
         GoFrame ᒐ = default;
         try {
-            defer(() => {
+            defer([GoFunc("main.func1.1")] () => {
                 var r = recover(); if (r != nil) {
                     fmt.Println("caught:", r);
                 }

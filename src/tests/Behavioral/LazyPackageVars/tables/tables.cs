@@ -36,9 +36,9 @@ public static ref array<ж<Entry>> Roots => ref ((StaticBox<array<ж<Entry>>>)�
 internal static nint second = record("second");
 
 [GoLazy] partial class lazyᴛRules { public static readonly ж<array<Rule>> ᏑRules = new StaticBox<array<Rule>>(array<Rule>([
-    new("double", (nint n) => n * 2),
-    new("square", (nint n) => n * n),
-    new("negate", (nint n) => -n)
+    new("double", [GoFunc("init.func1")] (nint n) => n * 2),
+    new("square", [GoFunc("init.func2")] (nint n) => n * n),
+    new("negate", [GoFunc("init.func3")] (nint n) => -n)
 ])); }
 public static ref array<Rule> Rules => ref ((StaticBox<array<Rule>>)ᏑRules).ValueSlot;
 

@@ -44,7 +44,7 @@ internal static nint deferInShadowedPackage() {
     GoFrame ᒐ = default;
     try {
         ref var f = ref heap<ΔGoFrame>(new ΔGoFrame(k: 1), out var Ꮡf);
-        defer(() => {
+        defer([GoFunc("deferInShadowedPackage.func1")] () => {
             Ꮡf.Value.k++;
         }, ref ᒐ);
         return f.k;

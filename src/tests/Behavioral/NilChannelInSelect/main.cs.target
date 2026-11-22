@@ -30,7 +30,7 @@ internal static partial void main() {
 
     var u = new channel<nint>(0);
     var uʗ1 = u;
-    goǃ(() => {
+    goǃ([GoFunc("main.func1")] () => {
         uʗ1.ᐸꟷ(7);
     });
     var nilChᴛ3 = nilCh;

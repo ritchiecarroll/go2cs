@@ -117,14 +117,14 @@ internal static partial void main() {
             break;
         }}
 
-        lib.Pitch convert(other.Pitch v) => libꓸPitch(v);
+        [GoFunc("main.func1")] lib.Pitch convert(other.Pitch v) => libꓸPitch(v);
         fmt.Println("literal:", convert(o).Hz, convert(new other.Pitch(Hz: 3)).Double());
 
         var c = new channel<lib.Pitch>(2);
         c.ᐸꟷ(libꓸPitch(o));
 
         var cʗ1 = c;
-        goǃ((lib.Pitch v) => {
+        goǃ([GoFunc("main.func2")] (lib.Pitch v) => {
             cʗ1.ᐸꟷ(v);
         }, libꓸPitch(new other.Pitch(Hz: 12)));
 

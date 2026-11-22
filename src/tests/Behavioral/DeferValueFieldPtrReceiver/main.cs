@@ -36,7 +36,7 @@ internal static void main() {
 
     var x = Ꮡ(new builder());
     var xʗ1 = x;
-    func(() => {
+    func([GoFunc("main.func1")] () => {
         GoFrame ᒐ = default;
         try {
             var xʗ2 = xʗ1;

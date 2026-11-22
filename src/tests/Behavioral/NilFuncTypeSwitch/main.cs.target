@@ -87,13 +87,13 @@ internal static any concrete(@string kind) {
         return (typelib.NewStep()).OrTypedNilFunc();
     }
     case {} when kind == "livelocale"u8: {
-        return new localStepE((nint x) => x + 2);
+        return new localStepE([GoFunc("concrete.func1")] (nint x) => x + 2);
     }
     case {} when kind == "livebare"u8: {
-        return nint (nint x) => x + 3;
+        return [GoFunc("concrete.func2")] nint (nint x) => x + 3;
     }
     case {} when kind == "livehook"u8: {
-        return new Func<@string, nint>((@string s) => len(s));
+        return new Func<@string, nint>([GoFunc("concrete.func3")] (@string s) => len(s));
     }
     case {} when kind == "nilptr"u8: {
         return (ж<typelib.Box>)nil;
@@ -126,7 +126,7 @@ internal static namer @static(@string kind) {
         break;
     }
     case {} when kind == "livelocale"u8: {
-        n = new localStepEᴠnamer(new localStepE((nint x) => x + 2));
+        n = new localStepEᴠnamer(new localStepE([GoFunc("static.func1")] (nint x) => x + 2));
         break;
     }
     case {} when kind == "nilptr"u8: {
@@ -149,7 +149,7 @@ internal static error asError(@string kind) {
         break;
     }
     case {} when kind == "livelocale"u8: {
-        e = new localStepEᴠerror(new localStepE((nint x) => x + 2));
+        e = new localStepEᴠerror(new localStepE([GoFunc("asError.func1")] (nint x) => x + 2));
         break;
     }}
 
@@ -343,18 +343,18 @@ internal static @string merged(any a) {
     new("mixed", mixed),
     new("escape", escape),
     new("merged", merged),
-    new("reswitch", (any a) => {
+    new("reswitch", [GoFunc("init.func1")] (any a) => {
         any b = a._<namer>();
         return which(b);
     }),
-    new("ifacesw", (any a) => which(reflect.ValueOf(a).Interface()))
+    new("ifacesw", [GoFunc("init.func2")] (any a) => which(reflect.ValueOf(a).Interface()))
 ]; }
 
 internal static void runOne(@string arm, @string kind, probe p) {
     GoFrame ᒐ = default;
     try {
         var pʗ1 = p;
-        defer(() => {
+        defer([GoFunc("runOne.func1")] () => {
             var r = recover(); if (r != nil) {
                 fmt.Println(arm, kind, pʗ1.name, "= PANIC", r);
             }

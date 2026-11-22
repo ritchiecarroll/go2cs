@@ -40,7 +40,7 @@ internal static partial void contendedMutex(nint workers) {
         Ꮡwg.Add(1);
         var sinkʗ1 = sink;
         var startʗ1 = start;
-        goǃ((nint wΔ1) => {
+        goǃ([GoFunc("contendedMutex.func1")] (nint wΔ1) => {
             GoFrame ᒐ = default;
             try {
                 defer(Ꮡwg.Done, ref ᒐ);
@@ -76,7 +76,7 @@ internal static partial void contendedChannel(nint pairs) {
         Ꮡwg.Add(1);
         var chʗ1 = ch;
         var startʗ1 = start;
-        goǃ((nint sΔ1) => {
+        goǃ([GoFunc("contendedChannel.func1")] (nint sΔ1) => {
             GoFrame ᒐ = default;
             try {
                 defer(Ꮡwg.Done, ref ᒐ);
@@ -96,7 +96,7 @@ internal static partial void contendedChannel(nint pairs) {
         var chʗ2 = ch;
         var startʗ2 = start;
         var sumsʗ1 = sums;
-        goǃ((nint rΔ1) => {
+        goǃ([GoFunc("contendedChannel.func2")] (nint rΔ1) => {
             GoFrame ᒐ = default;
             try {
                 defer(Ꮡrg.Done, ref ᒐ);
@@ -132,7 +132,7 @@ internal static partial void readySelect(nint selectors) {
         Ꮡwg.Add(1);
         var gotʗ1 = got;
         var startʗ1 = start;
-        goǃ((nint gΔ1) => {
+        goǃ([GoFunc("readySelect.func1")] (nint gΔ1) => {
             GoFrame ᒐ = default;
             try {
                 defer(Ꮡwg.Done, ref ᒐ);

@@ -115,7 +115,7 @@ internal static void withLit(this ж<box> Ꮡx) {
         x.a.touch();
         ᒐd1 = true;
 
-        void f() {
+        [GoFunc("(*box).withLit.func1")] void f() {
             GoFrame ᒐ = default;
             try {
                 var r = recoverChecked(); if (r != nil) {
@@ -213,10 +213,10 @@ internal static void main() {
     x.two();
 
     var xʗ1 = x;
-    func(() => {
+    func([GoFunc("main.func1")] () => {
         GoFrame ᒐ = default;
         try {
-            defer(() => {
+            defer([GoFunc("main.func1.1")] () => {
                 var r = recover(); if (r != nil) {
                     fmt.Println("recovered", r);
                 }

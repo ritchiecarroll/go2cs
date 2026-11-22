@@ -10,7 +10,7 @@ internal static void tryWrite(map<@string, nint> m) {
     GoFrame ᒐ = default;
     try {
         writePanicked = false;
-        defer(() => {
+        defer([GoFunc("tryWrite.func1")] () => {
             var r = recover(); if (r != nil) {
                 writePanicked = true;
             }

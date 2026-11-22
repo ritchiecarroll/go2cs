@@ -31,7 +31,7 @@ internal static partial void main() {
         var lnʗ1 = ln;
         defer(() => lnʗ1.Close(), ref ᒐ);
         var lnʗ2 = ln;
-        goǃ(() => {
+        goǃ([GoFunc("main.func1")] () => {
             var (cΔ1, e) = lnʗ2.Accept(); if (e == nil) {
                 cΔ1.Close();
             }

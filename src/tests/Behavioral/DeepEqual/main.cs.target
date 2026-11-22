@@ -148,19 +148,19 @@ internal static void main() {
 
     var h1 = new hooks(name: "a");
     var h2 = new hooks(name: "a");
-    var h3 = new hooks(name: "a", step: () => {
+    var h3 = new hooks(name: "a", step: [GoFunc("main.func1")] () => {
     });
     fmt.Println(reflect.DeepEqual(h1, h2));
     fmt.Println(reflect.DeepEqual(h1, h3));
     fmt.Println(reflect.DeepEqual(h3, h3));
     fmt.Println(reflect.DeepEqual(new hooks(name: "a"), new hooks(name: "b")));
     fmt.Println(reflect.DeepEqual(slice<Action>([default, default]), slice<Action>([default, default])));
-    fmt.Println(reflect.DeepEqual(slice<Action>([default]), slice<Action>([() => {
+    fmt.Println(reflect.DeepEqual(slice<Action>([default]), slice<Action>([[GoFunc("main.func2")] () => {
     }])));
     fmt.Println(reflect.DeepEqual(new map<@string, Action>{["k"] = default}, new map<@string, Action>{["k"] = default}));
     Action nilFn = default;
     fmt.Println(reflect.DeepEqual((nilFn).OrTypedNilFunc(), (nilFn).OrTypedNilFunc()));
-    fmt.Println(reflect.DeepEqual((nilFn).OrTypedNilFunc(), () => {
+    fmt.Println(reflect.DeepEqual((nilFn).OrTypedNilFunc(), [GoFunc("main.func3")] () => {
     }));
 
     var g1 = Ꮡ(new guarded(n: 1, name: "a"));
@@ -176,7 +176,7 @@ internal static void main() {
     fmt.Println(reflect.DeepEqual(slice<ж<guarded>>([g1]), slice<ж<guarded>>([g2])));
     fmt.Println(reflect.DeepEqual(new map<@string, ж<guarded>>{["k"] = g1}, new map<@string, ж<guarded>>{["k"] = g2}));
     var g3 = Ꮡ(new guarded(n: 1, name: "a"));
-    g3.Ꮡonce.Do(() => {
+    g3.Ꮡonce.Do([GoFunc("main.func4")] () => {
     });
     fmt.Println(reflect.DeepEqual(g3.OrTypedNil(), g2.OrTypedNil()));
 

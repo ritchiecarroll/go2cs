@@ -23,7 +23,7 @@ public static nint Area(this Square s) { return s.S * s.S; }
 internal static Shape pick(nint kind) {
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("pick.func1")] () => {
             _ = recover();
         }, ref ᒐ);
         if (kind == 0) {
@@ -38,7 +38,7 @@ internal static Shape pick(nint kind) {
 internal static (Shape, bool) classify(nint kind) {
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("classify.func1")] () => {
             _ = recover();
         }, ref ᒐ);
         if (kind == 0) {

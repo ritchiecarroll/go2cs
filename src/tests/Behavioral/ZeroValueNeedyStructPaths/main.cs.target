@@ -29,7 +29,7 @@ internal static T zeroNew<T>() {
 internal static T zeroCaptured<T>() {
     T z = GoZero<T>();
     var zʗ1 = z;
-    T get() => zʗ1;
+    [GoFunc("zeroCaptured[...].func1")] T get() => zʗ1;
     return get();
 }
 
@@ -42,7 +42,7 @@ internal static T zeroAddressed<T>() {
 internal static void arm(@string name, Action f) {
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("arm.func1")] () => {
             var r = recover(); if (r != nil) {
                 fmt.Println(name, "PANIC", r);
             }
@@ -54,58 +54,58 @@ internal static void arm(@string name, Action f) {
 }
 
 internal static void main() {
-    arm("map missing key:", () => {
+    arm("map missing key:", [GoFunc("main.func1")] () => {
         var m = new map<@string, counts>{};
         var (v, ok) = m["x", ꟷ];
         fmt.Println("map missing key:", len(v.vals), v.vals[3], ok);
     });
-    arm("generic var:", () => {
+    arm("generic var:", [GoFunc("main.func2")] () => {
         var z = zeroVar<counts>();
         fmt.Println("generic var:", len(z.vals), z.vals[3]);
     });
-    arm("generic named result:", () => {
+    arm("generic named result:", [GoFunc("main.func3")] () => {
         var z = zeroNamed<counts>();
         fmt.Println("generic named result:", len(z.vals), z.vals[3]);
     });
-    arm("generic new:", () => {
+    arm("generic new:", [GoFunc("main.func4")] () => {
         var z = zeroNew<counts>();
         fmt.Println("generic new:", len(z.vals), z.vals[3]);
     });
-    arm("generic captured var:", () => {
+    arm("generic captured var:", [GoFunc("main.func5")] () => {
         var z = zeroCaptured<counts>();
         fmt.Println("generic captured var:", len(z.vals), z.vals[3]);
     });
-    arm("generic addressed var:", () => {
+    arm("generic addressed var:", [GoFunc("main.func6")] () => {
         var z = zeroAddressed<counts>();
         fmt.Println("generic addressed var:", len(z.vals), z.vals[3]);
     });
-    arm("closed channel:", () => {
+    arm("closed channel:", [GoFunc("main.func7")] () => {
         var ch = new channel<counts>(0);
         close(ch);
         var (v, ok) = ᐸꟷ(ch, ꟷ);
         fmt.Println("closed channel:", len(v.vals), v.vals[3], ok);
     });
-    arm("parked receive:", [MethodImpl(MethodImplOptions.NoInlining)] () => {
+    arm("parked receive:", [MethodImpl(MethodImplOptions.NoInlining), GoFunc("main.func8")] () => {
         var ch = new channel<counts>(0);
         var chʗ1 = ch;
-        goǃ(() => {
+        goǃ([GoFunc("main.func8.1")] () => {
             time.Sleep(100 * time.Millisecond);
             close(chʗ1);
         });
         var (v, ok) = ᐸꟷ(ch, ꟷ);
         fmt.Println("parked receive:", len(v.vals), v.vals[3], ok);
     });
-    arm("parked bare receive:", [MethodImpl(MethodImplOptions.NoInlining)] () => {
+    arm("parked bare receive:", [MethodImpl(MethodImplOptions.NoInlining), GoFunc("main.func9")] () => {
         var ch = new channel<counts>(0);
         var chʗ2 = ch;
-        goǃ(() => {
+        goǃ([GoFunc("main.func9.1")] () => {
             time.Sleep(100 * time.Millisecond);
             close(chʗ2);
         });
         var v = ᐸꟷ(ch);
         fmt.Println("parked bare receive:", len(v.vals), v.vals[3]);
     });
-    arm("failed assertion:", () => {
+    arm("failed assertion:", [GoFunc("main.func10")] () => {
         any x = (nint)7;
         var (v, ok) = x._<counts>(ᐧ);
         fmt.Println("failed assertion:", len(v.vals), v.vals[3], ok);

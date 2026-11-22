@@ -46,7 +46,7 @@ partial struct comparer {
 internal static void main() {
     var items = slice<item>([new("delta", 4), new("alpha", 1), new("charlie", 3), new("bravo", 2)]);
 
-    new By((ж<item> a, ж<item> b) => a.rank < b.rank).Sort(items);
+    new By([GoFunc("main.func1")] (ж<item> a, ж<item> b) => a.rank < b.rank).Sort(items);
 
     foreach (var (_, it) in range(items)) {
         fmt.Println(it.name, it.rank);

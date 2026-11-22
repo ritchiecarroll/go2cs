@@ -65,7 +65,7 @@ internal static partial nint channelWork(nint pairs, nint rounds) {
 
     for (nint p = 0; p < pairs; p++) {
         var resultsʗ1 = results;
-        goǃ([MethodImpl(MethodImplOptions.NoInlining)] () => {
+        goǃ([MethodImpl(MethodImplOptions.NoInlining), GoFunc("channelWork.func1")] () => {
             var ping = new channel<nint>(0);
             var pong = new channel<nint>(0);
 

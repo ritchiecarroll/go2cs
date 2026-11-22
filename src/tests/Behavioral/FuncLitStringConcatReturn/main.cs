@@ -8,7 +8,7 @@ partial class main_package {
 private static readonly object abcˢ = (@string)"abc"u8;
 
 internal static void main() {
-    @string pick(any v) {
+    [GoFunc("main.func1")] @string pick(any v) {
         switch (v.type()) {
         case @string t: {
             return "string:"u8 + t;
@@ -26,7 +26,7 @@ internal static void main() {
     fmt.Println(pick((nint)42));
     fmt.Println(pick(true));
 
-    @string wrap(@string s, bool quote) {
+    [GoFunc("main.func2")] @string wrap(@string s, bool quote) {
         if (quote) {
             return "q:"u8 + s;
         }
@@ -36,7 +36,7 @@ internal static void main() {
     fmt.Println(wrap("x", true));
     fmt.Println(wrap("y", false));
 
-    @string tag(@string s) {
+    [GoFunc("main.func3")] @string tag(@string s) {
         if (len(s) == 0) {
             return "tag:"u8 + "empty"u8;
         }
@@ -46,7 +46,7 @@ internal static void main() {
     fmt.Println(tag("z"));
     fmt.Println(tag(""));
 
-    @string bang(@string s) {
+    [GoFunc("main.func4")] @string bang(@string s) {
         if (len(s) > 1) {
             return s + "!"u8;
         }
@@ -56,7 +56,7 @@ internal static void main() {
     fmt.Println(bang("hi"));
     fmt.Println(bang("h"));
 
-    Func<@string, bool, @string> pad = (@string s, bool wide) => {
+    Func<@string, bool, @string> pad = [GoFunc("main.func5")] (@string s, bool wide) => {
         if (wide) {
             return "  "u8 + s;
         }
@@ -66,7 +66,7 @@ internal static void main() {
     fmt.Println(pad("v", true));
     fmt.Println(pad("v", false));
 
-    (nint dur, slice<byte> cov, @string errMsg) fuzzish(nint entry) {
+    [GoFunc("main.func6")] (nint dur, slice<byte> cov, @string errMsg) fuzzish(nint entry) {
         if (entry < 0) {
             @string msg = fmt.Sprintf("bad entry %d"u8, entry);
             return (entry, default, msg);
@@ -84,7 +84,7 @@ internal static void main() {
     var (d3, c3, e3) = fuzzish(2);
     fmt.Println(d3, c3, e3 != ""u8, e3);
 
-    (@string, error) sget(bool ok) {
+    [GoFunc("main.func7")] (@string, error) sget(bool ok) {
         if (!ok) {
             return ("", fmt.Errorf("no string"u8));
         }
@@ -96,7 +96,7 @@ internal static void main() {
     var (s2, err2) = sget(true);
     fmt.Println(s2, err2 == nil);
 
-    error quiet(nint n) {
+    [GoFunc("main.func8")] error quiet(nint n) {
         if (n > 0) {
             return default;
         }
@@ -105,10 +105,10 @@ internal static void main() {
 
     fmt.Println(quiet(1) == nil, quiet(0) == nil);
 
-    Func<nint, error> hush = (nint n) => default;
+    Func<nint, error> hush = [GoFunc("main.func9")] (nint n) => default;
     fmt.Println(hush(3) == nil);
 
-    error mixed(nint n) {
+    [GoFunc("main.func10")] error mixed(nint n) {
         if (n < 0) {
             return fmt.Errorf("neg %d"u8, n);
         }

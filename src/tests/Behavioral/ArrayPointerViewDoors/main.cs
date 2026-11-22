@@ -185,7 +185,7 @@ internal static void goMemory() {
 internal static void bounds() {
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("bounds.func1")] () => {
             fmt.Println("past the array's length :", recover());
         }, ref ᒐ);
 

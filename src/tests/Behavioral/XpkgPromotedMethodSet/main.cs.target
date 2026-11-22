@@ -153,7 +153,7 @@ internal static void report(@string label, any v) {
 internal static void probe(@string label, Func<@string> f) {
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("probe.func1")] () => {
             var r = recover(); if (r != nil) {
                 fmt.Printf("%s: PANIC %v\n"u8, label, r);
             }
@@ -205,8 +205,8 @@ internal static void main() {
     report("OuterFS", new OuterFS());
     report("TT", new TT());
 
-    probe("S5 dispatch Tok", () => fmt.Sprint(((any)new OuterS5())._<main_type>().Tok().N));
-    probe("TT value has Error", () => {
+    probe("S5 dispatch Tok", [GoFunc("main.func1")] () => fmt.Sprint(((any)new OuterS5())._<main_type>().Tok().N));
+    probe("TT value has Error", [GoFunc("main.func2")] () => {
         var (_, okΔ1) = ((any)new TT())._<main_typeᴛ1>(ᐧ);
         return fmt.Sprint(okΔ1);
     });
@@ -245,9 +245,9 @@ internal static void main() {
     fmt.Println("Broken value is sync.Locker:", ok);
     fmt.Println("Name var:", Name);
 
-    probe("Where direct call", () => fmt.Sprint(new Direct().Inner.Where()));
-    probe("Where via assert Direct", () => fmt.Sprint(((any)new Direct())._<main_typeᴛ2>().Where()));
-    probe("Where via assert Outer", () => fmt.Sprint(((any)new Outer())._<main_typeᴛ2>().Where()));
+    probe("Where direct call", [GoFunc("main.func3")] () => fmt.Sprint(new Direct().Inner.Where()));
+    probe("Where via assert Direct", [GoFunc("main.func4")] () => fmt.Sprint(((any)new Direct())._<main_typeᴛ2>().Where()));
+    probe("Where via assert Outer", [GoFunc("main.func5")] () => fmt.Sprint(((any)new Outer())._<main_typeᴛ2>().Where()));
 
     var d = Ꮡ(new Direct());
     ((any)d.OrTypedNil())._<main_typeᴛ3>().Set(4);
@@ -257,12 +257,12 @@ internal static void main() {
     ((any)pd)._<main_typeᴛ3>().Set(6);
     fmt.Println("PtrDirect after Set through the value:", pd.X);
 
-    probe("SameP value methods", () => methods(reflect.TypeOf(mid.NewSameP())));
-    probe("SameP ptr methods", () => methods(reflect.TypeOf(Ꮡ(new mid.SameP()))));
-    probe("SameV value methods", () => methods(reflect.TypeOf(new mid.SameV())));
-    probe("SameV ptr methods", () => methods(reflect.TypeOf(Ꮡ(new mid.SameV()))));
-    probe("SameP value Method(0) call", () => fmt.Sprint(reflect.ValueOf(mid.NewSameP()).Method(0).Call(default)[0].Int()));
-    probe("SameP value assert+call Ping", () => {
+    probe("SameP value methods", [GoFunc("main.func6")] () => methods(reflect.TypeOf(mid.NewSameP())));
+    probe("SameP ptr methods", [GoFunc("main.func7")] () => methods(reflect.TypeOf(Ꮡ(new mid.SameP()))));
+    probe("SameV value methods", [GoFunc("main.func8")] () => methods(reflect.TypeOf(new mid.SameV())));
+    probe("SameV ptr methods", [GoFunc("main.func9")] () => methods(reflect.TypeOf(Ꮡ(new mid.SameV()))));
+    probe("SameP value Method(0) call", [GoFunc("main.func10")] () => fmt.Sprint(reflect.ValueOf(mid.NewSameP()).Method(0).Call(default)[0].Int()));
+    probe("SameP value assert+call Ping", [GoFunc("main.func11")] () => {
         var (p, okΔ4) = ((any)mid.NewSameP())._<main_typeᴛ4>(ᐧ);
 
         if (!okΔ4) {
@@ -271,12 +271,12 @@ internal static void main() {
 
         return fmt.Sprint(p.Ping());
     });
-    probe("SameV value assert Ping", () => {
+    probe("SameV value assert Ping", [GoFunc("main.func12")] () => {
         var (_, okΔ5) = ((any)new mid.SameV())._<main_typeᴛ4>(ᐧ);
 
         return fmt.Sprint(okΔ5);
     });
-    probe("*SameV assert+call Ping", () => {
+    probe("*SameV assert+call Ping", [GoFunc("main.func13")] () => {
         var (p, okΔ6) = ((any)(Ꮡ(new mid.SameV())))._<main_typeᴛ4>(ᐧ);
 
         if (!okΔ6) {

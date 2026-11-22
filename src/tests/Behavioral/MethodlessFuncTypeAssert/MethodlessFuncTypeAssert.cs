@@ -14,7 +14,7 @@ internal static Func<nint, nint> lookup(any i) {
 }
 
 internal static void main() {
-    any i = new Func<nint, nint>((nint w) => w * 2);
+    any i = new Func<nint, nint>([GoFunc("main.func1")] (nint w) => w * 2);
     var c = lookup(i);
     fmt.Println(c(21));
 

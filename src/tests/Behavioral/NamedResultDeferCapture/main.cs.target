@@ -18,7 +18,7 @@ internal static (int64 written, error err) send(nint n) {
     try {
         ref var err = ref Ꮡerr.ValueSlot;
 
-        defer(() => {
+        defer([GoFunc("send.func1")] () => {
             fmt.Println("hook:", written, Ꮡerr.ValueSlot, written > 0);
         }, ref ᒐ);
         (var v, err) = pair(n);
@@ -45,13 +45,13 @@ internal static nint /*x*/ addrv() {
 }
 
 internal static (int64, error) lit(nint n) {
-    (int64 w, error e) f() {
+    [GoFunc("lit.func1")] (int64 w, error e) f() {
         int64 w = default;
         heap<error>(out var Ꮡe);
         GoFrame ᒐ = default;
         try {
             ref var e = ref Ꮡe.ValueSlot;
-            defer(() => {
+            defer([GoFunc("lit.func1.1")] () => {
                 fmt.Println("lit hook:", w, Ꮡe.ValueSlot);
             }, ref ᒐ);
             (var v, Ꮡe.ValueSlot) = pair(n);
@@ -71,7 +71,7 @@ internal static (int64, error) lit(nint n) {
 internal static error /*err*/ cls(nint n) {
     ref var err = ref heap<error>(out var Ꮡerr);
 
-    void set() {
+    [GoFunc("cls.func1")] void set() {
         Ꮡerr.ValueSlot = fmt.Errorf("cls %d"u8, n);
     }
     (var v, err) = pair(n);

@@ -13,19 +13,19 @@ partial struct ring {
 }
 
 internal static partial @string init(this ж<ring> Ꮡr) {
-    @string f() {
+    [GoFunc("(*ring).init.func1")] @string f() {
         Ꮡr.Value.n++;
         return here();
     }
     return f();
 }
 
-internal static Func<@string> fromVar = [MethodImpl(MethodImplOptions.NoInlining)] () => here();
+internal static Func<@string> fromVar = [MethodImpl(MethodImplOptions.NoInlining), GoFunc("init.func1")] () => here();
 
 internal static slice<@string> initNames;
 
 [GoInit] internal static void init() {
-    void f() {
+    [GoFunc("init.0.func1")] void f() {
         nint a = 1;
         nint b = a + 1;
         nint c = b + 1;
@@ -40,7 +40,7 @@ internal static slice<@string> initNames;
 }
 
 [GoInit] internal static void initΔ1() {
-    void g() {
+    [GoFunc("init.1.func1")] void g() {
         initNames = append(initNames, here());
     }
     g();
@@ -48,8 +48,8 @@ internal static slice<@string> initNames;
 
 internal static partial @string outer() {
     @string name = default;
-    call([MethodImpl(MethodImplOptions.NoInlining)] () => {
-        call(() => {
+    call([MethodImpl(MethodImplOptions.NoInlining), GoFunc("outer.func1")] () => {
+        call([GoFunc("outer.func1.1")] () => {
             name = here();
         });
     });
@@ -60,7 +60,7 @@ internal static partial void call(Action f) { f(); }
 
 internal static partial nint callLine() {
     nint line = default;
-    func([MethodImpl(MethodImplOptions.NoInlining)] () => {
+    func([MethodImpl(MethodImplOptions.NoInlining), GoFunc("callLine.func1")] () => {
         (_, _, line, _) = runtime.Caller(1);
     })();
     return line;

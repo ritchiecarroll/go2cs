@@ -141,15 +141,15 @@ internal static any build(@string arm, @string kind) {
 internal static reflect.Type namerType = reflect.TypeOf((ж<namer>)nil).Elem();
 
 [GoLazy] partial class lazyᴛprobes { internal static slice<probe> probes = [
-    new("l-isnil", (any a) => fmt.Sprint(a == nil)),
-    new("l-namer", (any a) => {
+    new("l-isnil", [GoFunc("init.func1")] (any a) => fmt.Sprint(a == nil)),
+    new("l-namer", [GoFunc("init.func2")] (any a) => {
         var (n, ok) = a._<namer>(ᐧ);
         if (!ok) {
             return "miss";
         }
         return n.Name();
     }),
-    new("l-reassert", (any a) => {
+    new("l-reassert", [GoFunc("init.func3")] (any a) => {
         any b = a._<namer>();
         var (n, ok) = b._<namer>(ᐧ);
         if (!ok) {
@@ -157,15 +157,15 @@ internal static reflect.Type namerType = reflect.TypeOf((ж<namer>)nil).Elem();
         }
         return n.Name();
     }),
-    new("l-namernil", (any a) => fmt.Sprint(a._<namer>() == nil)),
-    new("l-error", (any a) => {
+    new("l-namernil", [GoFunc("init.func4")] (any a) => fmt.Sprint(a._<namer>() == nil)),
+    new("l-error", [GoFunc("init.func5")] (any a) => {
         var (e, ok) = a._<error>(ᐧ);
         if (!ok) {
             return "miss";
         }
         return e.Error();
     }),
-    new("l-errnamer", (any a) => {
+    new("l-errnamer", [GoFunc("init.func6")] (any a) => {
         any b = a._<error>();
         var (n, ok) = b._<namer>(ᐧ);
         if (!ok) {
@@ -173,57 +173,57 @@ internal static reflect.Type namerType = reflect.TypeOf((ж<namer>)nil).Elem();
         }
         return n.Name();
     }),
-    new("l-eqself", (any a) => fmt.Sprint(AreEqual(a, a))),
-    new("l-fmtT", (any a) => fmt.Sprintf("%T"u8, a)),
-    new("l-fmtv", (any a) => fmt.Sprintf("%v"u8, a)),
-    new("kind", (any a) => reflect.ValueOf(a).Kind().String()),
-    new("type", (any a) => reflect.ValueOf(a).Type().String()),
-    new("typeof", (any a) => reflect.TypeOf(a).String()),
-    new("implements", (any a) => fmt.Sprint(reflect.TypeOf(a).Implements(namerType))),
-    new("zero", (any a) => fmt.Sprint(reflect.Zero(reflect.TypeOf(a)).IsNil())),
-    new("isnil", (any a) => fmt.Sprint(reflect.ValueOf(a).IsNil())),
-    new("iszero", (any a) => fmt.Sprint(reflect.ValueOf(a).IsZero())),
-    new("pointer", (any a) => fmt.Sprint(reflect.ValueOf(a).Pointer() == 0)),
-    new("nummethod", (any a) => fmt.Sprint(reflect.ValueOf(a).NumMethod())),
-    new("iface", (any a) => reflect.ValueOf(a).Interface()._<namer>().Name()),
-    new("ifacenil", (any a) => fmt.Sprint(reflect.ValueOf(a).Interface() == nil)),
-    new("ifaceT", (any a) => fmt.Sprintf("%T"u8, reflect.ValueOf(a).Interface())),
-    new("method", (any a) => reflect.ValueOf(a).MethodByName("Name").Call(default)[0].String()),
-    new("method0", (any a) => {
+    new("l-eqself", [GoFunc("init.func7")] (any a) => fmt.Sprint(AreEqual(a, a))),
+    new("l-fmtT", [GoFunc("init.func8")] (any a) => fmt.Sprintf("%T"u8, a)),
+    new("l-fmtv", [GoFunc("init.func9")] (any a) => fmt.Sprintf("%v"u8, a)),
+    new("kind", [GoFunc("init.func10")] (any a) => reflect.ValueOf(a).Kind().String()),
+    new("type", [GoFunc("init.func11")] (any a) => reflect.ValueOf(a).Type().String()),
+    new("typeof", [GoFunc("init.func12")] (any a) => reflect.TypeOf(a).String()),
+    new("implements", [GoFunc("init.func13")] (any a) => fmt.Sprint(reflect.TypeOf(a).Implements(namerType))),
+    new("zero", [GoFunc("init.func14")] (any a) => fmt.Sprint(reflect.Zero(reflect.TypeOf(a)).IsNil())),
+    new("isnil", [GoFunc("init.func15")] (any a) => fmt.Sprint(reflect.ValueOf(a).IsNil())),
+    new("iszero", [GoFunc("init.func16")] (any a) => fmt.Sprint(reflect.ValueOf(a).IsZero())),
+    new("pointer", [GoFunc("init.func17")] (any a) => fmt.Sprint(reflect.ValueOf(a).Pointer() == 0)),
+    new("nummethod", [GoFunc("init.func18")] (any a) => fmt.Sprint(reflect.ValueOf(a).NumMethod())),
+    new("iface", [GoFunc("init.func19")] (any a) => reflect.ValueOf(a).Interface()._<namer>().Name()),
+    new("ifacenil", [GoFunc("init.func20")] (any a) => fmt.Sprint(reflect.ValueOf(a).Interface() == nil)),
+    new("ifaceT", [GoFunc("init.func21")] (any a) => fmt.Sprintf("%T"u8, reflect.ValueOf(a).Interface())),
+    new("method", [GoFunc("init.func22")] (any a) => reflect.ValueOf(a).MethodByName("Name").Call(default)[0].String()),
+    new("method0", [GoFunc("init.func23")] (any a) => {
         var v = reflect.ValueOf(a);
         return reflect.TypeOf(a).Method(0).Name + " "u8 + v.Method(0).Call(default)[0].String();
     }),
-    new("call", (any a) => {
+    new("call", [GoFunc("init.func24")] (any a) => {
         var @out = reflect.ValueOf(a).Call(slice<reflect.Value>([reflect.ValueOf((nint)1)]));
         return fmt.Sprint(@out[0].Int());
     }),
-    new("same", (any a) => fmt.Sprint(reflect.ValueOf(a) == reflect.ValueOf(a))),
-    new("deep", (any a) => fmt.Sprint(reflect.DeepEqual(a, a))),
-    new("setslot", (any a) => {
+    new("same", [GoFunc("init.func25")] (any a) => fmt.Sprint(reflect.ValueOf(a) == reflect.ValueOf(a))),
+    new("deep", [GoFunc("init.func26")] (any a) => fmt.Sprint(reflect.DeepEqual(a, a))),
+    new("setslot", [GoFunc("init.func27")] (any a) => {
         ref var slot = ref heap<namer>(out var Ꮡslot);
         reflect.ValueOf(Ꮡslot).Elem().Set(reflect.ValueOf(a));
         return Ꮡslot.ValueSlot.Name();
     }),
-    new("setany", (any a) => {
+    new("setany", [GoFunc("init.func28")] (any a) => {
         ref var slot = ref heap<any>(out var Ꮡslot);
         reflect.ValueOf(Ꮡslot).Elem().Set(reflect.ValueOf(a));
         return fmt.Sprintf("%T"u8, Ꮡslot.ValueSlot) + " "u8 + fmt.Sprint(Ꮡslot.ValueSlot == nil);
     }),
-    new("setself", (any a) => {
+    new("setself", [GoFunc("init.func29")] (any a) => {
         var v = reflect.ValueOf(a);
         var s = reflect.New(v.Type()).Elem();
         s.Set(v);
         return fmt.Sprint(s.IsNil());
     }),
-    new("convert", (any a) => reflect.ValueOf(a).Convert(namerType).Interface()._<namer>().Name()),
-    new("fmtvalue", (any a) => fmt.Sprintf("%v"u8, reflect.ValueOf(a)))
+    new("convert", [GoFunc("init.func30")] (any a) => reflect.ValueOf(a).Convert(namerType).Interface()._<namer>().Name()),
+    new("fmtvalue", [GoFunc("init.func31")] (any a) => fmt.Sprintf("%v"u8, reflect.ValueOf(a)))
 ]; }
 
 internal static void runOne(@string arm, @string kind, probe p) {
     GoFrame ᒐ = default;
     try {
         var pʗ1 = p;
-        defer(() => {
+        defer([GoFunc("runOne.func1")] () => {
             var r = recover(); if (r != nil) {
                 fmt.Println(arm, kind, pʗ1.name, "= PANIC", r);
             }

@@ -64,7 +64,7 @@ internal static partial void main() {
     var pipe = new intQueue(0);
     fmt.Println(len(pipe), cap(pipe));
     var pipeʗ1 = pipe;
-    goǃ(() => {
+    goǃ([GoFunc("main.func1")] () => {
         pipeʗ1.ᐸꟷ(77);
     });
     fmt.Println(ᐸꟷ<nint>(pipe));

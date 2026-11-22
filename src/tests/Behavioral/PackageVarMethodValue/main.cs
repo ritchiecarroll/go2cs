@@ -83,7 +83,7 @@ internal static void main() {
     apply(Ꮡgp.inc);
     fmt.Println("argument", gp.n);
 
-    func(() => {
+    func([GoFunc("main.func1")] () => {
         var ff = Ꮡgf.inc;
         ff();
     })();

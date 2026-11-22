@@ -23,7 +23,7 @@ internal static partial nint round(nint n) {
     var cʗ1 = c;
     var dʗ1 = d;
     var eʗ1 = e;
-    goǃ(() => {
+    goǃ([GoFunc("round.func1")] () => {
         nint v = descend(n, cʗ1);
         v += ᐸꟷ(eʗ1);
         dʗ1.ᐸꟷ(v);
