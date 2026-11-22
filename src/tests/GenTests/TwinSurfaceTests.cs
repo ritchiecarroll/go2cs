@@ -290,6 +290,45 @@ public class TwinSurfaceTests
                       named.Any(message => message.Contains("GoTwinsGuardDrop")), string.Join("\n", named));
     }
 
+    // Every switch that changes what the generator writes is refused alone, by name, and the message says how to fix the
+    // build. The box arms' copies (GoTwinsBoxCopy, GoTwinsBoxArgCopy) are wrong on purpose, so they matter most.
+    [TestMethod]
+    [DataRow("GoTwinsIface", "hidden")]
+    [DataRow("GoTwinsIfaceAll", "true")]
+    [DataRow("GoTwinsIfaceUnmark", "go.box_package.IShape.Area")]
+    [DataRow("GoTwinsGo", "false")]
+    [DataRow("GoTwinsPairs", "false")]
+    [DataRow("GoTwinsCallerRule", "false")]
+    [DataRow("GoTwinsForwarders", "false")]
+    [DataRow("GoTwinsGuardWarn", "true")]
+    [DataRow("GoTwinsGuardDrop", "add")]
+    [DataRow("GoTwinsBoxRecv", "false")]
+    [DataRow("GoTwinsBoxForwarders", "false")]
+    [DataRow("GoTwinsBoxCopy", "true")]
+    [DataRow("GoTwinsBoxParam", "false")]
+    [DataRow("GoTwinsBoxArgCopy", "true")]
+    public void F10_EveryArmSwitchIsRefusedAloneWithItsFix(string name, string value)
+    {
+        RunWith(null, new() { ["build_property." + name] = value }, CannotPark);
+        Diagnostic[] refused = Guard("GO2CS0018");
+
+        Assert.AreEqual(1, refused.Length, name + ": " + string.Join("\n", refused.Select(diagnostic => diagnostic.ToString())));
+        Assert.AreEqual(DiagnosticSeverity.Error, refused[0].Severity);
+        StringAssert.Contains(refused[0].GetMessage(), "'" + name + "'", "it names the property");
+        StringAssert.Contains(refused[0].GetMessage(), "GoTwinsArm=true", "and the fix");
+
+        RunWith(null, new() { ["build_property." + name] = value, ["build_property.GoTwinsArm"] = "true" }, CannotPark);
+        Assert.AreEqual(0, Guard("GO2CS0018").Length, name + ": a prototype arm admits it");
+    }
+
+    [TestMethod]
+    public void F10_TheTwoSwitchesThatChangeNothingGeneratedAreAdmitted()
+    {
+        RunWith(null, new() { ["build_property.GoTwinsSiblings"] = "memo", ["build_property.GoTwinsTiming"] = "true" }, CannotPark);
+
+        Assert.AreEqual(0, Guard("GO2CS0018").Length, "GoTwinsSiblings picks how siblings are read, GoTwinsTiming adds a stopwatch");
+    }
+
     [TestMethod]
     public void F10_TheClosureArmSwitchesDoWhatTheySay()
     {
