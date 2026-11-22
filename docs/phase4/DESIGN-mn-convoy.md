@@ -155,3 +155,21 @@ int.MaxValue, nothing else changed), the same four blocks, 10 runs each, one ses
 reads P=2 MnHandBack p99 median at or under 1,000 us and wall median at or under 300 ms, and P=12 MnBlockReturn median
 within 10% of R1's base (at or under 989 ms), while F re-reads within 10% of its R1-R3 readings (the control). If
 F-nocap reads like F, the cost is in the other folds (fences, lazy event, reaping) and the cap is not the cause.
+
+**R5 reading** (one session, F then F-nocap, 10 runs per block):
+
+| block | F (the control) | F-nocap |
+|---|---|---|
+| P=12 MnBlockReturn median | 981 ms (845-1,155) | 990 ms (802-1,192) |
+| P=12 MnHandBack p50 / p99 / wall medians | 3.4 us / 436 us / 185 ms | 22.2 us / 381 us / 176 ms |
+| P=2 MnBlockReturn median | 971 ms | 833 ms |
+| P=2 MnHandBack p50 / p99 / wall medians | 15.5 us / 2,437 us / 643 ms | 1.8 us / 335 us / 236 ms |
+
+Scored: the P=2 leg is **met** (p99 335 us, wall 236 ms: the cap is the P=2 hand-back cost, and lifting it restores
+(A)'s band). The P=12 leg is **missed by 1 ms** (990 against 989), and moot: F and F-nocap read alike there. The
+control is **missed** on P=12 MnBlockReturn alone (981 here against 1,141 in R1, -14%): that block moves by about 15%
+between sessions, so R1's miss is not attributable to the folds; the control held on every MnHandBack block.
+
+Finding: at P=2 a cap of max(1, P/2) leaves one spinner, and a hand-back pair needs a second to take a token hot; at
+P=12 the cap (6) never binds in these fixtures. The cap stays as COORD folded it until a ruling: keep it, lift it, or
+floor it at 2 (max(2, P/2)), which would read as F-nocap at P=2 only if two spinners suffice there (not measured).
