@@ -648,5 +648,5 @@ reads back under its own name, and this refusal is retired.
 
 <!-- P3 code read of the R1 seat (inbox/COORD/20261122T045652Z-P3.md, finding 2), ruled by COORD 045750Z: refuse now
      (2a), durable cure as its own .5 seat (2b). The three projection sites: src/core/golib/GoReflect.FieldAccess.cs:404
-     `if (projected.StartsWith(ShadowVarMarker, StringComparison.Ordinal))` (fields), GoReflect.TypeNaming.cs:716 `if (name.StartsWith(ShadowVarMarker, StringComparison.Ordinal))` (type names), runtime/TypeExtensions.GoMethodSets.cs:704 `emittedName.StartsWith(ShadowVarMarker, StringComparison.Ordinal)` (methods). The
+     `if (projected.StartsWith(ShadowVarMarker, StringComparison.Ordinal))` (fields), GoReflect.TypeNaming.cs:718 `if (name.StartsWith(ShadowVarMarker, StringComparison.Ordinal))` (type names), runtime/TypeExtensions.GoMethodSets.cs:709 `emittedName.StartsWith(ShadowVarMarker, StringComparison.Ordinal)` (methods). The
      refusal: src/go2cs/markerGlyphRefusal.go, deltaProjectionReason. -->

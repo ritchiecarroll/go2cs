@@ -921,6 +921,7 @@
     <Project Path="tests/Behavioral/NamedPointerParamArgument/NamedPointerParamArgument.csproj" />
     <Project Path="tests/Behavioral/NamedPointerReflectElem/NamedPointerReflectElem.csproj" />
     <Project Path="tests/Behavioral/NamedPointerEquality/NamedPointerEquality.csproj" />
+    <Project Path="tests/Behavioral/NamedSliceMethodShadow/NamedSliceMethodShadow.csproj" />
     <Project Path="tests/Behavioral/NamedPointerReinterpret/NamedPointerReinterpret.csproj" />
     <Project Path="tests/Behavioral/NamedPointerValueSlot/NamedPointerValueSlot.csproj" />
     <Project Path="tests/Behavioral/NamedResultAddressEscape/NamedResultAddressEscape.csproj" />
