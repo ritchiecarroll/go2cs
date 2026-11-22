@@ -86,4 +86,92 @@ function Find-NugetgoHostPaths([byte[]]$Bytes, [string[]]$Roots) {
     return $found.ToArray()
 }
 
-Export-ModuleMember -Function Find-NugetgoHostPaths
+# ---- GoPositionMap identities (cgo against go.* INC 4, increment 1c; COORD's ruling 2026-11-22) -------------------------
+# A GoPositionMap record's first argument names the Go file a frame was converted from, in one of goSourceIdentity's forms:
+# GOROOT-relative (`fmt/print.go`), `<module>@<version>/<path>`, `<module>@/<path>` (the -trimpath forms) or a bare
+# `<file>.go`. None names a directory of the converting machine. An ABSOLUTE identity does (an untrimmed source path, or
+# the hashed Go build-cache file the -cgo route once recorded for a tree cmd/cgo rewrote), so it never ships: the host-path
+# scan above only finds the roots it is told, and a build cache is not one of them.
+
+<#
+.SYNOPSIS
+    Why -Identity may not ship, or $null when it may: it is rooted in either OS's spelling, or it names a Go build-cache
+    entry (`<2 hex>/<64 hex>-d`, the file cmd/cgo writes there).
+#>
+function Test-NugetgoPositionMapIdentity([string]$Identity) {
+    if ($Identity -match '(^|[\\/])[0-9a-f]{2}[\\/][0-9a-f]{64}-[a-z]$') { return "a Go build-cache path ($Identity)" }
+    if ($Identity -match '^([\\/]|[A-Za-z]:)') { return "an absolute path ($Identity)" }
+    return $null
+}
+
+<#
+.SYNOPSIS
+    The GoPositionMap identities a package_info.cs declares, in order.
+#>
+function Get-NugetgoSourcePositionMapIdentities([string]$Text) {
+    @([regex]::Matches($Text, 'GoPositionMap\("((?:[^"\\]|\\.)*)"') | ForEach-Object { [regex]::Unescape($_.Groups[1].Value) })
+}
+
+# A custom attribute's constructor names its type through a MemberReference (the attribute lives in go.lib) or a
+# MethodDefinition (it is declared in the assembly itself).
+function Get-NugetgoAttributeTypeName($reader, $ctorHandle) {
+    $kind = $ctorHandle.Kind.ToString()
+    if ($kind -eq 'MemberReference') {
+        $parent = $reader.GetMemberReference([System.Reflection.Metadata.MemberReferenceHandle]$ctorHandle).Parent
+        if ($parent.Kind.ToString() -ne 'TypeReference') { return '' }
+        $type = $reader.GetTypeReference([System.Reflection.Metadata.TypeReferenceHandle]$parent)
+    }
+    elseif ($kind -eq 'MethodDefinition') {
+        $declaring = $reader.GetMethodDefinition([System.Reflection.Metadata.MethodDefinitionHandle]$ctorHandle).GetDeclaringType()
+        $type = $reader.GetTypeDefinition($declaring)
+    }
+    else { return '' }
+    "$($reader.GetString($type.Namespace)).$($reader.GetString($type.Name))"
+}
+
+<#
+.SYNOPSIS
+    The GoPositionMap identities an assembly carries: the first argument of each assembly-level go.GoPositionMapAttribute,
+    read from its metadata. Empty for bytes that are not a managed assembly.
+#>
+function Get-NugetgoAssemblyPositionMapIdentities([byte[]]$Bytes) {
+    if ($script:PdbReaderMissing) {
+        throw "an assembly's GoPositionMap records are read with System.Reflection.Metadata, which this PowerShell ($($PSVersionTable.PSVersion)) cannot load: run the pack under PowerShell 7"
+    }
+    $pe = [System.Reflection.PortableExecutable.PEReader]::new([System.IO.MemoryStream]::new($Bytes))
+    try {
+        if (-not $pe.HasMetadata) { return @() }
+        $reader = [System.Reflection.Metadata.PEReaderExtensions]::GetMetadataReader($pe)
+        if (-not $reader.IsAssembly) { return @() }
+        $identities = New-Object System.Collections.Generic.List[string]
+        foreach ($handle in $reader.GetAssemblyDefinition().GetCustomAttributes()) {
+            $attribute = $reader.GetCustomAttribute($handle)
+            if ((Get-NugetgoAttributeTypeName $reader $attribute.Constructor) -cne 'go.GoPositionMapAttribute') { continue }
+            # ECMA-335 II.23.3: the prolog 0x0001, then the first fixed argument, a SerString -- a compressed length
+            # (0xFF for null) and that many UTF-8 bytes.
+            $blob = $reader.GetBlobBytes($attribute.Value)
+            $at = 2
+            $first = $blob[$at]
+            if ($first -eq 0xFF) { $identities.Add(''); continue }
+            if (($first -band 0x80) -eq 0) { $length = $first; $at += 1 }
+            elseif (($first -band 0xC0) -eq 0x80) { $length = (($first -band 0x3F) -shl 8) -bor $blob[$at + 1]; $at += 2 }
+            else { $length = (($first -band 0x1F) -shl 24) -bor ($blob[$at + 1] -shl 16) -bor ($blob[$at + 2] -shl 8) -bor $blob[$at + 3]; $at += 4 }
+            $identities.Add([System.Text.Encoding]::UTF8.GetString($blob, $at, $length))
+        }
+        return $identities.ToArray()
+    }
+    catch [System.BadImageFormatException] { return @() }
+    finally { $pe.Dispose() }
+}
+
+<#
+.SYNOPSIS
+    The reasons the GoPositionMap identities of a package_info.cs text (-Text) or an assembly (-Bytes) may not ship; empty
+    when every one may.
+#>
+function Find-NugetgoPositionMapIdentityHits([string]$Text, [byte[]]$Bytes) {
+    $identities = if ($PSBoundParameters.ContainsKey('Bytes')) { Get-NugetgoAssemblyPositionMapIdentities $Bytes } else { Get-NugetgoSourcePositionMapIdentities $Text }
+    @($identities | ForEach-Object { Test-NugetgoPositionMapIdentity $_ } | Where-Object { $_ })
+}
+
+Export-ModuleMember -Function Find-NugetgoHostPaths, Test-NugetgoPositionMapIdentity, Get-NugetgoSourcePositionMapIdentities, Get-NugetgoAssemblyPositionMapIdentities, Find-NugetgoPositionMapIdentityHits

@@ -197,6 +197,13 @@ $stdlibRange = "[$ClosureVersion, $goMajor.$($goMinor + 1))"
 $moduleSrc = Join-Path (Join-Path $RecurseRoot 'src') $ModulePath
 if (-not (Test-Path $moduleSrc)) { Refuse "no converted module at $moduleSrc (a -recurse=nuget output root is expected)" }
 $projects = @(Get-ChildItem -Path $moduleSrc -Recurse -Filter '*.csproj' | Where-Object { $_.Name -notlike '*.tests.csproj' } | Sort-Object FullName)
+# No GoPositionMap identity may name a directory of this machine: an absolute source path, or the Go build-cache file the
+# -cgo route recorded for a tree cmd/cgo rewrote until INC 4's increment 1c (COORD's ruling, 2026-11-22). Every
+# package_info.cs is read before anything is built, and every packed assembly again after the pack.
+$identityHits = @(Get-ChildItem -LiteralPath $moduleSrc -Recurse -Filter 'package_info.cs' -File | Sort-Object FullName | ForEach-Object {
+    $file = $_.FullName.Substring($moduleSrc.Length).TrimStart('\', '/')
+    Find-NugetgoPositionMapIdentityHits -Text ([System.IO.File]::ReadAllText($_.FullName)) | ForEach-Object { "$file records $_" } })
+if ($identityHits.Count) { Refuse "a GoPositionMap identity names a machine path -- $($identityHits -join '; ')" }
 $candidates = New-Object System.Collections.Generic.List[object]
 foreach ($p in $projects) {
     [xml]$x = Get-Content -Raw -LiteralPath $p.FullName
@@ -762,6 +769,9 @@ try {
         $stream = $entry.Open(); $buffer = New-Object System.IO.MemoryStream
         try { $stream.CopyTo($buffer) } finally { $stream.Dispose() }
         foreach ($root in @(Find-NugetgoHostPaths -Bytes $buffer.ToArray() -Roots $hostRoots)) { $hostPathHits.Add("$($entry.FullName) names $root") }
+        if ($entry.FullName -like '*.dll') {
+            foreach ($why in @(Find-NugetgoPositionMapIdentityHits -Bytes $buffer.ToArray())) { $identityHits += "$($entry.FullName) records $why" }
+        }
     }
     $nuspecEntry = $zip.Entries | Where-Object { $_.FullName -like '*.nuspec' } | Select-Object -First 1
     $reader = New-Object System.IO.StreamReader($nuspecEntry.Open())
@@ -889,6 +899,10 @@ Write-Host "    host paths: $($hostPathHits.Count) in $($entries.Count) packed e
 if ($hostPathHits.Count) {
     Remove-Item -LiteralPath $nupkg   # a refused package is never left where a push could pick it up
     throw "REFUSED: the package would publish a host path -- $($hostPathHits -join '; ')"
+}
+if ($identityHits.Count) {
+    Remove-Item -LiteralPath $nupkg
+    throw "REFUSED: a packed assembly's GoPositionMap identity names a machine path -- $($identityHits -join '; ')"
 }
 # S2: the self-description is in the package, byte for byte what was written, and the CONVERTER'S OWN parser reads it.
 if (-not $selfEntry) { throw 'the package carries no go2cs/source-metadata.txt' }
