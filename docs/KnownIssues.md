@@ -181,6 +181,15 @@ and the program ends; nothing can catch it. A Go goroutine is not a thread, so t
 **To avoid it**, bound how many goroutines are alive at once, with a worker pool for example. Two settings may raise
 the limit, but neither has been measured: `DOTNET_EnableWriteXorExecute=0` in the environment, which should cut the
 mappings each thread uses, and a larger `vm.max_map_count` on the machine.
+
+**Under the M:N scheduler** (experimental: `GoTwins=true` and `GO2CS_MN=1`), a goroutine parked in a twin holds no
+thread, so the limit counts only the goroutines blocked in calls the twins do not cover: a `sync.WaitGroup` or
+`sync.Cond` wait, a Lock reached through a `sync.Locker` interface, a cgo or system call. About 16,000 of those blocked
+at once end the program the same way (`PAL_SEHException`, then an abort); the same bound avoids it.
+<!-- Source (the M:N sentence): G's s_p convoy row, 2026-11-22, docs/phase4/DESIGN-mn-convoy.md section 7.
+     MnBlockReturn (n goroutines blocked on one sync.WaitGroup), linux flavour, Ubuntu 22.04 under WSL, default
+     vm.max_map_count 65530: n=20,000 aborted (PAL_SEHException, SIGABRT); a live n=10,000 run peaked at 40,427
+     mappings with 9,985 threads (about 4 per thread), so the limit falls near 16,000. -->
 <!-- Source: lane R's M:N R6 run, 2026-11-09, at master 0bbe3ab6e5: ParkStorm (DESIGN-mn-scheduler-sizing.md Appendix A),
      20,000 goroutines, linux flavour, Release, on R-WSL (Ubuntu 22.04, kernel 6.18, vm.max_map_count 65530). All six
      runs (bounded reserve 16 MiB and 1 MiB, three each) aborted at 16,226-16,229 threads. The record is the dated O1
