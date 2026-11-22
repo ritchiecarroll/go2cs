@@ -25,6 +25,7 @@
 package main
 
 import (
+	"fmt"
 	"go/ast"
 	"go/token"
 	"strings"
@@ -172,7 +173,7 @@ var reserved = hashset.NewHashSet([]string{
 	"AreEqual", "array", "builtin", "channel", "EmptyStruct", "Equals", "Finalize", "GetGoTypeName",
 	"GetHashCode", "GetType", "GoFrame", "GoFuncRoot", "GoImplement", "GoImplementAttribute", "GoImplicitConv",
 	"GoImplicitConvAttribute", "GoPackage", "GoPackageAttribute", "GoRecv", "GoRecvAttribute",
-	"GoTestMatchingConsoleOutput", "GoTestMatchingConsoleOutputAttribute", "GoTag", "GoTagAttribute",
+	"GoName", "GoNameAttribute", "GoTestMatchingConsoleOutput", "GoTestMatchingConsoleOutputAttribute", "GoTag", "GoTagAttribute",
 	"GoTypeAlias", "GoTypeAliasAttribute", "GoType", "GoTypeAttribute", "GoBigConst", "go\u01C3",
 	"IArray", "IChannel", "IMap", "ISlice", "ISupportMake", "make\u01C3", "ManagedPointerTokens", "MemberwiseClone", "NilType",
 	"PanicException", "PrintPointer", "slice", "sstring", "ToString", "ToUTF8Bytes", "TryCastAsInteger", "type",
@@ -409,6 +410,39 @@ func getAccess(name string) string {
 
 	// Otherwise, scope is "public"
 	return "public"
+}
+
+// getGoAccess is getAccess for a name read from a Go OBJECT. getAccess judges an emitted C# spelling and
+// removes the Δ rename marker first, which is right for a renamed name and wrong for a Go name that itself
+// starts with Δ: Go exports `Δt` (Δ is an upper-case letter, token.IsExported), so a site holding the
+// object asks this function instead. Every other name is judged exactly as getAccess judges it.
+func getGoAccess(goName string) string {
+	if strings.HasPrefix(goName, ShadowVarMarker) {
+		return "public"
+	}
+
+	return getAccess(goName)
+}
+
+// goNameAttr renders the `[GoName("<name>")] ` stamp for a declaration golib would otherwise misname, or ""
+// for any other. Golib projects an emitted name to its Go name by removing one leading Δ (the converter's rename
+// marker), and every projection reads the stamp first (golib GoNameAttribute). The stamp carries the Go name
+// where that removal does not give it: a Go name that itself starts with Δ, or a rename that adds more than the
+// one marker (typeCollidingFieldName's ΔΔfile beside its type, getCollisionAvoidanceIdentifier's Δsliceᴛ).
+func goNameAttr(goName, emitted string) string {
+	if !strings.HasPrefix(goName, ShadowVarMarker) && !goNameMisprojected(goName, emitted) {
+		return ""
+	}
+
+	return fmt.Sprintf("[GoName(\"%s\")] ", goName)
+}
+
+// goNameMisprojected reports whether removing one leading Δ from an emitted name (its C# metadata name, without
+// a keyword escape) fails to give the Go name. A name the converter did not rename is not projected at all.
+func goNameMisprojected(goName, emitted string) bool {
+	trimmed, renamed := strings.CutPrefix(strings.TrimPrefix(emitted, "@"), ShadowVarMarker)
+
+	return renamed && trimmed != goName
 }
 
 // isDiscardedVar reports whether a name is Go's blank identifier, i.e. a value the source

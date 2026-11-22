@@ -390,6 +390,38 @@ public static class StructDeclarationSyntaxExtensions
             .SelectMany(field => field.Declaration.Variables.Select(variable => (variable.Identifier.Text, variable.Identifier.ValueText)))
             .ToList();
 
+    // The fields the converter stamped [GoName] (a Go name that starts with the Δ rename marker), by unescaped C# name:
+    // the field-box table keys a field by the Go name golib's projection reports (Common.GetGoNameStamp).
+    public static Dictionary<string, string> GetGoNameMembers(this StructDeclarationSyntax structDeclaration)
+    {
+        Dictionary<string, string> members = new(StringComparer.Ordinal);
+
+        foreach (FieldDeclarationSyntax field in structDeclaration.Members.OfType<FieldDeclarationSyntax>())
+        {
+            if (Common.GetGoNameStamp(field.AttributeLists) is not { } goName)
+                continue;
+
+            foreach (VariableDeclaratorSyntax variable in field.Declaration.Variables)
+                members[variable.Identifier.ValueText] = goName;
+        }
+
+        return members;
+    }
+
+    // The same, read from a struct's symbol (a struct another assembly declares).
+    public static Dictionary<string, string> GetGoNameMembers(ITypeSymbol structSymbol)
+    {
+        Dictionary<string, string> members = new(StringComparer.Ordinal);
+
+        foreach (IFieldSymbol field in structSymbol.GetMembers().OfType<IFieldSymbol>())
+        {
+            if (Common.GetGoNameStamp(field) is { } goName)
+                members[field.Name] = goName;
+        }
+
+        return members;
+    }
+
     // The [GoAlignmentCarrier] fields: each stands for a Go [0]T field and SHARES bytes with the field Go places at the
     // same offset, so equality and hashing skip it (docs/phase4/DESIGN-array-value-storage.md, 7.6.2).
     public static HashSet<string> GetAlignmentCarrierMembers(this StructDeclarationSyntax structDeclaration) =>
@@ -1067,7 +1099,7 @@ public static class StructDeclarationSyntaxExtensions
 
             if (memberType is { TypeArguments.Length: 1 } named && named.Name == PointerPrefix &&
                 named.TypeArguments[0] is INamedTypeSymbol elementType &&
-                (member.Name == elementType.Name || ShadowVarMarker + member.Name == elementType.Name))
+                (member.Name == elementType.Name || ShadowVarMarker + member.Name == elementType.Name && Common.GetGoNameStamp(elementType) is null))
             {
                 embeds.Add((member.Name, elementType));
             }

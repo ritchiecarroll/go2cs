@@ -399,10 +399,9 @@ public static partial class GoReflect
                 continue;
             }
 
-            string projected = name;
-
-            if (projected.StartsWith(ShadowVarMarker, StringComparison.Ordinal))
-                projected = projected[ShadowVarMarker.Length..];
+            // A field the Go source names with a leading Δ carries its Go name in a [GoName] stamp;
+            // any other Δ-led field name is a converter rename, and the marker is removed.
+            string projected = GoNameAttribute.GoNameOf(field, name);
 
             if (projected.Length > 0 && isAllUnderscores(projected))
                 projected = "_";

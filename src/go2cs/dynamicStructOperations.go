@@ -88,6 +88,11 @@ func (v *Visitor) checkForDynamicStructs(argType types.Type, targetType types.Ty
 			// private and argument type is public, we need to manually apply conversions
 			// instead of relying on implicit conversions
 			argScope := getAccess(argTypeName)
+
+			// A named argument type is judged by its Go name (getGoAccess): a Δ-led Go name is exported.
+			if named, ok := argType.(*types.Named); ok {
+				argScope = getGoAccess(named.Obj().Name())
+			}
 			targetScope := getAccess(targetTypeName)
 
 			if argScope == "public" && targetScope == "internal" {

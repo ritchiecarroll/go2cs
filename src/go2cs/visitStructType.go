@@ -27,6 +27,7 @@ const StructPrefixMarker = ">>MARKER:STRUCT_%s_PREFIX<<"
 // declaration closes.
 type promotedInterfaceForwarder struct {
 	structName    string
+	structAccess  string // the struct's own access (structGoAccess)
 	embedName     string
 	method        *types.Func
 	valueReceiver bool
@@ -286,7 +287,6 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 
 	structTypeName = getSanitizedIdentifier(structTypeName)
 	typeParams, constraints := v.getGenericDefinition(identType)
-
 	// A LIFTED function-local type declares no type parameters of its own — they belong to the
 	// enclosing function — so getGenericDefinition returns empty for it and the lift emitted a
 	// struct whose fields name unbound parameters: net's `doBlockingWithCtx[T any]` declares
@@ -335,9 +335,10 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 		if named, ok := identType.(*types.Named); ok {
 			localNameAttr = fmt.Sprintf("[GoLocalName(\"%s\")] ", named.Obj().Name())
 		}
-	} else if cgoEmittingPseudoPackage {
+	} else if cgoEmittingPseudoPackage || !v.inFunction {
 		// A C struct, declared under its C name in the pseudo-package, keeps its Go name the same way
-		// (localNameAttrFor, cgoPseudoPackage.go).
+		// (localNameAttrFor, cgoPseudoPackage.go), as does a package-level struct whose Go name starts with
+		// Δ, in a [GoName] stamp.
 		localNameAttr = v.localNameAttrFor(identType)
 	}
 
@@ -479,7 +480,7 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 				for _, ident := range field.Names {
 					fieldName := getCoreSanitizedIdentifier(ident.Name)
 
-					if strings.TrimPrefix(fieldName, "@") == strings.TrimPrefix(strings.TrimPrefix(structTypeName, ShadowVarMarker), "@") {
+					if structFieldDeclCollides(ident.Name, declaredStructType, structTypeName) {
 						fieldName = typeCollidingFieldName(fieldName)
 					}
 
@@ -856,6 +857,14 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 				}
 			}
 
+			// The embed's field takes Go's access for its Go name when an object named it (an embedded Δ-led
+			// type is exported), and the emitted spelling's otherwise (getGoAccess, getAccess).
+			embedAccess := getAccess(goTypeName)
+
+			if _, ok := identObj.(*types.PkgName); !ok {
+				embedAccess = getGoAccess(goTypeName)
+			}
+
 			// An EMBEDDED field's member name is the unqualified type name (Go spec), so it can
 			// equal the ENCLOSING struct's own name — io_test.go's `type Buffer struct{
 			// bytes.Buffer }` derives the member `Buffer` inside struct `Buffer`, which C# forbids
@@ -866,7 +875,7 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 			// Both sides compare RAW, mirroring the named-field compare.
 			embedName := getCoreSanitizedIdentifier(goTypeName)
 
-			if strings.TrimPrefix(embedName, "@") == strings.TrimPrefix(strings.TrimPrefix(structTypeName, ShadowVarMarker), "@") {
+			if structFieldDeclCollides(goTypeName, declaredStructType, structTypeName) {
 				embedName = typeCollidingFieldName(embedName)
 			}
 
@@ -994,6 +1003,7 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 
 						v.promotedInterfaceForwarders = append(v.promotedInterfaceForwarders, promotedInterfaceForwarder{
 							structName:    structTypeName,
+							structAccess:  structGoAccess(declaredStructType, structTypeName),
 							embedName:     embedName,
 							method:        method,
 							valueReceiver: valueReceiver,
@@ -1008,7 +1018,7 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 				// promoted through another package's embed is unique in this struct's tree — an unmarked
 				// io_test `Buffer{bytes.Buffer; ReaderFrom; WriterTo}` would otherwise be given the
 				// embedded Buffer's ReadFrom and WriteTo, which Go drops as ambiguous.
-				v.writeString(target, "%s%s %s %s%s %s;%s", embedOffsetAttr, embedMarker, getAccess(goTypeName), embedReadOnly, csEmitTypeName, embedName, tagComment)
+				v.writeString(target, "%s%s %s %s%s %s;%s", embedOffsetAttr+goNameAttr(goTypeName, embedName), embedMarker, embedAccess, embedReadOnly, csEmitTypeName, embedName, tagComment)
 			} else {
 				var handled bool
 
@@ -1018,13 +1028,13 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 							// An embedded pointer to a PREDECLARED type has nothing to promote and is a plain field;
 							// the `/*embed*/` comment is what lets the reflection projection report it Anonymous
 							// (a field named after its type is otherwise indistinguishable from an embed).
-							v.writeString(target, "%s%s %s %s%s %s;%s", embedOffsetAttr, embedMarker, getAccess(goTypeName), embedReadOnly, csEmitTypeName, embedName, tagComment)
+							v.writeString(target, "%s%s %s %s%s %s;%s", embedOffsetAttr+goNameAttr(goTypeName, embedName), embedMarker, embedAccess, embedReadOnly, csEmitTypeName, embedName, tagComment)
 							handled = true
 						}
 					} else if _, ok = identType.(*types.Struct); !ok {
 						if _, ok := identObj.Type().(*types.Named); !ok {
 							// An embedded PREDECLARED type (`struct{ int }`): the same plain-field emission, marked.
-							v.writeString(target, "%s%s %s %s%s %s;%s", embedOffsetAttr, embedMarker, getAccess(goTypeName), embedReadOnly, csEmitTypeName, embedName, tagComment)
+							v.writeString(target, "%s%s %s %s%s %s;%s", embedOffsetAttr+goNameAttr(goTypeName, embedName), embedMarker, embedAccess, embedReadOnly, csEmitTypeName, embedName, tagComment)
 							handled = true
 						}
 					}
@@ -1038,7 +1048,7 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 				// struct read at Go's layout (runtime's lfstack node, `struct{ LFNode; data int }`) found its
 				// fields at the wrong offsets (owner ruling (A), 2026-10-16, uniform over value and pointer embeds).
 				if !handled {
-					v.writeString(target, "%s%s %s %s%s %s;%s", embedOffsetAttr, embedMarker, getAccess(goTypeName), embedReadOnly, csEmitTypeName, embedName, tagComment)
+					v.writeString(target, "%s%s %s %s%s %s;%s", embedOffsetAttr+goNameAttr(goTypeName, embedName), embedMarker, embedAccess, embedReadOnly, csEmitTypeName, embedName, tagComment)
 				}
 			}
 
@@ -1056,12 +1066,13 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 			canCombine := len(field.Names) > 1 && fieldInitializer == ""
 
 			if canCombine {
-				groupAccess := getAccess(field.Names[0].Name)
+				groupAccess := getGoAccess(field.Names[0].Name)
 
 				for _, ident := range field.Names {
 					fieldName := getCoreSanitizedIdentifier(ident.Name)
 
-					if fieldName == "_" || fieldName == structTypeName || getAccess(ident.Name) != groupAccess {
+					// A [GoName] stamp is per field, and one attribute list covers every name of a combined line.
+					if fieldName == "_" || structFieldDeclCollides(ident.Name, declaredStructType, structTypeName) || goNameAttr(ident.Name, fieldName) != "" || getGoAccess(ident.Name) != groupAccess {
 						canCombine = false
 						break
 					}
@@ -1083,7 +1094,7 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 
 				layoutFieldIndex += len(field.Names)
 
-				v.writeString(target, "%s %s%s %s;%s", getAccess(field.Names[0].Name), fieldDimsComment, csDisplayTypeName, strings.Join(fieldNames, ", "), tagComment)
+				v.writeString(target, "%s %s%s %s;%s", getGoAccess(field.Names[0].Name), fieldDimsComment, csDisplayTypeName, strings.Join(fieldNames, ", "), tagComment)
 				v.writeCommentString(target, field.Comment, goCommentPos(field.Type.End()+displayLenDeviation))
 				target.WriteString(v.newline)
 			} else {
@@ -1096,7 +1107,7 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 						}
 
 						prevNameDiscardedCount++
-					} else if strings.TrimPrefix(fieldName, "@") == strings.TrimPrefix(strings.TrimPrefix(structTypeName, ShadowVarMarker), "@") {
+					} else if structFieldDeclCollides(ident.Name, declaredStructType, structTypeName) {
 						// C# forbids a member sharing its enclosing type's name (CS0542), so rename a
 						// field whose name equals the struct type with the disambiguation marker. Field
 						// accesses are renamed to match (see convSelectorExpr / convIdent). Both sides
@@ -1122,7 +1133,7 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 
 					layoutFieldIndex++
 
-					v.writeString(target, "%s%s%s %s%s%s %s%s;%s", offsetAttr, carrierAttr, getAccess(ident.Name), readOnly, fieldDimsComment, csDisplayTypeName, fieldName, fieldInitializer, tagComment)
+					v.writeString(target, "%s%s%s %s%s%s %s%s;%s", offsetAttr, carrierAttr+goNameAttr(ident.Name, fieldName), getGoAccess(ident.Name), readOnly, fieldDimsComment, csDisplayTypeName, fieldName, fieldInitializer, tagComment)
 					v.writeCommentString(target, field.Comment, goCommentPos(field.Type.End()+displayLenDeviation))
 					target.WriteString(v.newline)
 				}
@@ -1412,9 +1423,9 @@ func (v *Visitor) emitPromotedInterfaceForwarders(target *strings.Builder, mark 
 		// C# forbids a method more accessible than its parameter types (CS0051), so an exported
 		// interface method promoted onto an UNEXPORTED struct takes the struct's accessibility —
 		// the same floor visitFuncDecl's explicit-method emission lands on.
-		access := getAccess(fwd.method.Name())
+		access := getGoAccess(fwd.method.Name())
 
-		if getAccess(fwd.structName) == "internal" {
+		if fwd.structAccess == "internal" {
 			access = "internal"
 		}
 
@@ -1425,11 +1436,11 @@ func (v *Visitor) emitPromotedInterfaceForwarders(target *strings.Builder, mark 
 		if fwd.valueReceiver {
 			// The method survives in Go's VALUE method set (nothing shadows it), so the forwarder
 			// is a value method — the generator's own Promoted-path extension form.
-			v.writeStringLn(target, "%s static %s %s(this %s recvᴛ%s) => recvᴛ.%s.%s(%s);", access, resultType, methodName, fwd.structName, params.String(), fwd.embedName, methodName, args.String())
+			v.writeStringLn(target, "%s%s static %s %s(this %s recvᴛ%s) => recvᴛ.%s.%s(%s);", goNameAttr(fwd.method.Name(), methodName), access, resultType, methodName, fwd.structName, params.String(), fwd.embedName, methodName, args.String())
 		} else {
 			// `this ref` is the pointer-receiver shape: golib reads an unmarked by-ref receiver as a
 			// POINTER-set method (docs/PLAN-marker-comment-parity.md, 5.1).
-			v.writeStringLn(target, "%s static %s %s(this ref %s recvᴛ%s) => recvᴛ.%s.%s(%s);", access, resultType, methodName, fwd.structName, params.String(), fwd.embedName, methodName, args.String())
+			v.writeStringLn(target, "%s%s static %s %s(this ref %s recvᴛ%s) => recvᴛ.%s.%s(%s);", goNameAttr(fwd.method.Name(), methodName), access, resultType, methodName, fwd.structName, params.String(), fwd.embedName, methodName, args.String())
 		}
 	}
 

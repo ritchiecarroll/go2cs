@@ -125,6 +125,7 @@ public class RecvGenerator : ISourceGenerator
                 NoInlining = HasNoInliningMark(methodSyntax, semanticModel),
                 CallerFrame = callerFrame,
                 OverloadResolutionPriority = GetOverloadResolutionPriority(methodSyntax),
+                GoName = GetGoNameStamp(methodSyntax.AttributeLists),
                 UsingStatements = usingStatements
             }
             .Generate();
@@ -182,6 +183,7 @@ public class RecvGenerator : ISourceGenerator
                 NoInlining = HasNoInliningMark(methodSyntax, semanticModel),
                 CallerFrame = callerFrame,
                 OverloadResolutionPriority = GetOverloadResolutionPriority(methodSyntax),
+                GoName = GetGoNameStamp(methodSyntax.AttributeLists),
                 ValueReceiver = true,
                 UsingStatements = GetFullyQualifiedUsingStatements(syntaxTree, semanticModel)
             }

@@ -49,6 +49,10 @@ internal class StructTypeTemplate : TemplateBase
     // bytes with the field Go places at the same offset, so equality and hashing skip them
     // (docs/phase4/DESIGN-array-value-storage.md, 7.6.2).
     public HashSet<string> AlignmentCarrierMembers = [];
+
+    // The fields carrying a [GoName] stamp, by unescaped C# name: the Go name, which starts with the Δ rename marker
+    // (StructDeclarationSyntaxExtensions.GetGoNameMembers).
+    public Dictionary<string, string> GoNameMembers = new(StringComparer.Ordinal);
     // The instance fields of a [GoInlineLayout] struct, in declaration order; null for every other struct. Non-null
     // emits the IGoManagedLayout part golib's inline-layout gate reads (7.6.3).
     public List<(string spelling, string name)>? InlineLayoutFields;
@@ -311,7 +315,10 @@ internal class StructTypeTemplate : TemplateBase
                     continue;
                 }
 
-                string goName = csName.StartsWith(ShadowVarMarker, StringComparison.Ordinal) ? csName.Substring(ShadowVarMarker.Length) : csName;
+                // A field whose Go name starts with Δ carries it in a [GoName] stamp (GoNameMembers), which golib's
+                // projection reads first; any other Δ-led name lost the converter's rename marker.
+                string goName = GoNameMembers.TryGetValue(csName, out string? stamped) ? stamped :
+                    csName.StartsWith(ShadowVarMarker, StringComparison.Ordinal) ? csName.Substring(ShadowVarMarker.Length) : csName;
 
                 if (!keys.Add(goName))
                     continue;
@@ -1851,7 +1858,7 @@ internal class StructTypeTemplate : TemplateBase
             foreach (INamedTypeSymbol each in iface.AllInterfaces.Prepend(iface))
             {
                 foreach (IMethodSymbol member in each.GetMembers().OfType<IMethodSymbol>().Where(m => !m.IsStatic))
-                    names.Add(GoName(member.Name));
+                    names.Add(GoNameOf(member));
             }
 
             foreach (string name in names)
@@ -1869,10 +1876,10 @@ internal class StructTypeTemplate : TemplateBase
                 HashSet<string> own = new(StringComparer.Ordinal);
 
                 foreach (MethodInfo m in decl.GetExtensionMethods(comp) ?? [])
-                    own.Add(GoName(m.Name));
+                    own.Add(m.ProjectedGoName);
 
                 foreach (MethodInfo m in decl.GetBoxReceiverExtensionMethods(comp))
-                    own.Add(GoName(m.Name));
+                    own.Add(m.ProjectedGoName);
 
                 foreach (string name in own)
                     add(name);
@@ -1965,7 +1972,7 @@ internal class StructTypeTemplate : TemplateBase
                     receiver = box.TypeArguments[0];
 
                 if (SymbolEqualityComparer.Default.Equals(receiver.OriginalDefinition, embed.OriginalDefinition))
-                    (inSibling ? siblingSurface : surface).Add(GoName(method.Name));
+                    (inSibling ? siblingSurface : surface).Add(GoNameOf(method));
             }
 
             foreach (ISymbol member in embed.GetMembers())
@@ -1983,7 +1990,7 @@ internal class StructTypeTemplate : TemplateBase
 
                     if (legacyInline || isGoEmbedded(field) && StructDeclarationSyntaxExtensions.IsPromotingEmbedType(field.Type))
                     {
-                        addTo(fieldsHere, GoName(legacyInline ? field.Name[1..] : field.Name), 1);
+                        addTo(fieldsHere, legacyInline ? GoName(field.Name[1..]) : GoNameOf(field), 1);
 
                         ITypeSymbol inline = field.Type;
 
@@ -2001,12 +2008,12 @@ internal class StructTypeTemplate : TemplateBase
                         continue;
                     }
 
-                    addTo(fieldsHere, GoName(field.Name), 1);
+                    addTo(fieldsHere, GoNameOf(field), 1);
 
                     if (isGoEmbedded(field) && field.Type is INamedTypeSymbol { TypeKind: TypeKind.Interface } iface)
                     {
                         foreach (string name in iface.AllInterfaces.Prepend(iface).SelectMany(i => i.GetMembers().OfType<IMethodSymbol>())
-                                     .Where(m => !m.IsStatic).Select(m => GoName(m.Name)).Distinct(StringComparer.Ordinal))
+                                     .Where(m => !m.IsStatic).Select(m => GoNameOf(m)).Distinct(StringComparer.Ordinal))
                             addTo(subCross, name, 1);
                     }
                 }
@@ -2053,7 +2060,7 @@ internal class StructTypeTemplate : TemplateBase
         // it when two occur at that depth; a name that occurs once is promoted, unambiguously,
         // whatever the depths are. A name that occurs twice or more is left exactly as it was —
         // not minted, and not counted against the same-package promotions either.
-        if (!TreeNameCounts.TryGetValue(GoName(method.Name), out int occurrences) || occurrences != 1)
+        if (!TreeNameCounts.TryGetValue(method.ProjectedGoName, out int occurrences) || occurrences != 1)
             return;
 
         // The forwarder is as visible as the struct, and it is skipped when its signature names

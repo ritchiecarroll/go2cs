@@ -59,5 +59,12 @@ func (v *Visitor) visitFuncType(funcType *ast.FuncType, identType types.Type, na
 
 	v.outputBuilder.WriteString(v.newline)
 	v.writePendingTypeDoc(v.outputBuilder)
-	v.writeOutputLn("%s delegate %s %s%s(%s)%s;", getAccess(name), resultsSignature, name, typeParams, parameterSignature, constraints)
+	// The delegate's access and [GoName] stamp follow its Go name when it has one (getGoAccess, localNameAttrFor).
+	access := getAccess(name)
+
+	if named, ok := identType.(*types.Named); ok && !v.inFunction {
+		access = getGoAccess(named.Obj().Name())
+	}
+
+	v.writeOutputLn("%s%s delegate %s %s%s(%s)%s;", v.localNameAttrFor(identType), access, resultsSignature, name, typeParams, parameterSignature, constraints)
 }

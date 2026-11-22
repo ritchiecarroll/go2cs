@@ -38,6 +38,10 @@ internal class ReceiverMethodTemplate : TemplateBase
     // Required for the same reason NoInlining is.
     public required string? OverloadResolutionPriority;
 
+    // The SOURCE method's [GoName] stamp (Common.GetGoNameStamp), or null. A twin is a member of the Go method
+    // set golib reads, so it carries the Go name its source carries.
+    public string? GoName;
+
     // Whether the SOURCE method is a Go VALUE-receiver method (`this T`, or a by-ref receiver marked
     // [GoCopyBound]) rather than a pointer-receiver one. Go's method set of *T holds T's value methods, and
     // `p.M()` on a pointer dereferences p and copies the pointee into the receiver AT THE CALL. The twin does
@@ -59,6 +63,9 @@ internal class ReceiverMethodTemplate : TemplateBase
 
             if (OverloadResolutionPriority is not null)
                 attributes += $", global::System.Runtime.CompilerServices.OverloadResolutionPriority({OverloadResolutionPriority})";
+
+            if (GoName is not null)
+                attributes += $", global::go.GoName(\"{GoName}\")";
 
             // The forwarder calls the user's method: Just My Code steps through it.
             attributes += $", {NonUserCodeAttribute}";

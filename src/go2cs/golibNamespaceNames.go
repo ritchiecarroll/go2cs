@@ -69,6 +69,7 @@ var golibNamespaceTypes = nameSet(
 	"GoMethodHostAttribute",
 	"GoMethodText",
 	"GoModInfoAttribute",
+	"GoNameAttribute",
 	"GoPackageAttribute",
 	"GoParamDimsAttribute",
 	"GoPlatformExclusiveAttribute",

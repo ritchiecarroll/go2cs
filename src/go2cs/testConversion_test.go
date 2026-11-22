@@ -1670,6 +1670,24 @@ func TestWhiteboxAdapterAnchoringOnlyRelocatesEmittedPairs(t *testing.T) {
 	}
 }
 
+// Go names one Δ apart are two types: `Matrix` and `ΔMatrix`, both the user's own, both cast to one interface.
+// The stripped key is the same for both, so the cast spelled exactly as a record wins first; record order put
+// Matrix's pair ahead and handed ΔMatrix's cast to MatrixжNamer.
+func TestEmittedAdapterPairPrefersTheExactStructSpelling(t *testing.T) {
+	pairs := [][2]string{{"Matrix", "Namer"}, {"ΔMatrix", "Namer"}}
+
+	for _, structBase := range []string{"Matrix", "ΔMatrix"} {
+		if pair, ok := emittedAdapterPair(pairs, structBase, "Namer"); !ok || pair[0] != structBase {
+			t.Fatalf("cast of %s resolved to %v, want its own record", structBase, pair)
+		}
+	}
+
+	// A renamed struct whose cast spells it without the marker still meets its record.
+	if pair, ok := emittedAdapterPair([][2]string{{"ΔHandler", "Namer"}}, "Handler", "Namer"); !ok || pair[0] != "ΔHandler" {
+		t.Fatalf("marker-off cast resolved to %v, want the ΔHandler record", pair)
+	}
+}
+
 // A bare cast spelling is ambiguous the way a bare C# name is: io's tests declare their own
 // `Buffer` under `using static io_package` while the record set also carries
 // `bytes_package.Buffer`. C# binds the bare name to the variant's own nested type before any

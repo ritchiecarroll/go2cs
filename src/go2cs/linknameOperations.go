@@ -265,7 +265,7 @@ func packageVarAccess(goIDName string, varType types.Type) string {
 		return "public"
 	}
 
-	return getAccess(goIDName)
+	return getGoAccess(goIDName)
 }
 
 // packageFuncAccess returns the C# access modifier for a package-level FUNC. It is normally the Go
@@ -314,7 +314,7 @@ func packageFuncAccess(goIDName string, isFreeFunction bool) string {
 		}
 	}
 
-	return getAccess(goIDName)
+	return getGoAccess(goIDName)
 }
 
 // linknamePush is the disposition of a `//go:linkname` PUSH — the direction where the DEFINING
