@@ -91,4 +91,63 @@ public class PTokensTests
             PTokens.BeforeCountForTest = null;
         }
     }
+
+    // The spin tier's own hazard (design (A)): releases that see a spinner free their tokens for the spinners, and the
+    // spinners take FEWER than were left. Only the last spinner's hand-off on leaving (LeaveSpin) gives the rest to a
+    // queued sleeper; without it the sleeper sleeps beside a free token until some later release. Deterministic through
+    // the InSpin seam: two releases while one spinner is counted; the spinner takes one and HOLDS it until the sleeper is
+    // served, so only the hand-off can serve it. (The first version of this row had the spinner give up instead; its own
+    // post-queue retry then won the token, and the row read green with the hand-off removed: vacuous.)
+    [TestMethod]
+    public void TokensLeftForASpinnerThatTakesFewerReachTheSleeper()
+    {
+        PTokens tokens = new(2);
+        tokens.Wait();
+        tokens.Wait();                                   // this thread holds both tokens
+
+        using ManualResetEventSlim inSpin = new(false), released = new(false), sleeperServed = new(false);
+        Thread? spinnerThread = null;
+        bool spun = false;
+
+        PTokens.InSpinForTest = () =>
+        {
+            if (Thread.CurrentThread == spinnerThread && !inSpin.IsSet)
+            {
+                inSpin.Set();
+                released.Wait();
+            }
+        };
+
+        try
+        {
+            Thread sleeper = new(() => { tokens.Wait(); sleeperServed.Set(); tokens.Release(); }) { IsBackground = true };
+            sleeper.Start();
+            SpinWait.SpinUntil(() => tokens.WaitingForTest == 1, TimeSpan.FromSeconds(30));
+            Assert.AreEqual(1, tokens.WaitingForTest, "the sleeper is queued");
+
+            spinnerThread = new Thread(() =>
+            {
+                tokens.Wait();                           // takes one token in its spin
+                spun = true;
+                sleeperServed.Wait(TimeSpan.FromSeconds(10));   // HOLDS it until the sleeper is served (or gives up)
+                tokens.Release();
+            }) { IsBackground = true };
+            spinnerThread.Start();
+            Assert.IsTrue(inSpin.Wait(TimeSpan.FromSeconds(30)), "the spinner is counted in its spin");
+
+            tokens.Release();                            // a spinner is counted: both tokens go to the free count
+            tokens.Release();
+            released.Set();                              // the spinner takes ONE and leaves the spin tier
+
+            Assert.IsTrue(sleeperServed.Wait(TimeSpan.FromSeconds(10)), "the last spinner's hand-off served the sleeper");
+            Assert.IsTrue(sleeper.Join(TimeSpan.FromSeconds(10)) && spinnerThread.Join(TimeSpan.FromSeconds(20)));
+            Assert.IsTrue(spun);
+            Assert.AreEqual(2, tokens.CurrentCount, "conservation: both tokens are free again");
+            Assert.AreEqual(0, tokens.WaitingForTest, "conservation: no waiter is left counted");
+        }
+        finally
+        {
+            PTokens.InSpinForTest = null;
+        }
+    }
 }
