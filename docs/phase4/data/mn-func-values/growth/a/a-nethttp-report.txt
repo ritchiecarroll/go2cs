@@ -1,0 +1,395 @@
+FACTORIES (fix 1, synchronous twins, leaf; over the arm's set=true) 79
+WHY sort.Slice: CAN PARK via [func-value seed]; path: sort.Slice -[static]-> sort.pdqsort_func
+WHY slices.SortFunc[[]int int]: not found
+WHY strings.Map: CANNOT PARK
+WHY (*sync.Once).Do: CANNOT PARK
+canpark net/http goos=windows exclude-runtime=true long-only=true static-only=false no-func-values=true
+FUNCTIONS 8647 can-park 2919 share 33.8% (direct parkers 72)
+DIRECT BY LEAF map[chan-recv:32 chan-send:28 netpoll-wait:2 select:43 sync-cond:1 sync-wait:1 time-sleep:2]
+SEEDS (-seed-func-calls=true leaf-only=false opt-out=true) 316, declared 173; CAN-PARK SSA INSTRUCTIONS 129928
+OPT-OUT functions wholly opted out 235, seeded but with callback-only sites 14; fallback sites 379
+OPT-OUT sites a REALLY parking value reaches (the opt-out's real cost): 128
+    (*internal/poll.FD).RawRead at <goroot>\src\internal\poll\fd_windows.go:1306:7 reaches parking net.sendFile$1
+    (*log.Logger).output at <goroot>\src\log\log.go:237:21 reaches parking (*log.Logger).Fatal$1
+    (*log.Logger).output at <goroot>\src\log\log.go:237:21 reaches parking (*log.Logger).Fatalf$1
+    (*log.Logger).output at <goroot>\src\log\log.go:237:21 reaches parking (*log.Logger).Fatalln$1
+    (*log.Logger).output at <goroot>\src\log\log.go:237:21 reaches parking (*log.Logger).Print$1
+    (*log.Logger).output at <goroot>\src\log\log.go:237:21 reaches parking (*log.Logger).Printf$1
+    (*log.Logger).output at <goroot>\src\log\log.go:237:21 reaches parking (*log.Logger).Println$1
+    (*log.Logger).output at <goroot>\src\log\log.go:237:21 reaches parking log.Fatal$1
+    (*log.Logger).output at <goroot>\src\log\log.go:237:21 reaches parking log.Fatalf$1
+    (*log.Logger).output at <goroot>\src\log\log.go:237:21 reaches parking log.Fatalln$1
+    (*log.Logger).output at <goroot>\src\log\log.go:237:21 reaches parking log.Print$1
+    (*log.Logger).output at <goroot>\src\log\log.go:237:21 reaches parking log.Printf$1
+    (*log.Logger).output at <goroot>\src\log\log.go:237:21 reaches parking log.Println$1
+    (*net/http.http2SettingsFrame).ForeachSetting at <goroot>\src\net\http\h2_bundle.go:2480:15 reaches parking (*net/http.http2clientConnReadLoop).processSettingsNoWrite$1
+    (*net/http.http2SettingsFrame).ForeachSetting at <goroot>\src\net\http\h2_bundle.go:2480:15 reaches parking (*net/http.http2serverConn).processSetting
+    (*net/http.http2SettingsFrame).ForeachSetting at <goroot>\src\net\http\h2_bundle.go:2480:15 reaches parking net/http.http2summarizeFrame$1
+    (*net/http.http2serverConn).runHandler at <goroot>\src\net\http\h2_bundle.go:6506:9 reaches parking (*net/http.ServeMux).ServeHTTP
+    (*net/http.http2serverConn).runHandler at <goroot>\src\net\http\h2_bundle.go:6506:9 reaches parking (net/http.initALPNRequest).ServeHTTP
+    (*net/http.http2serverConn).runHandler at <goroot>\src\net\http\h2_bundle.go:6506:9 reaches parking (net/http.unencryptedHTTP2Request).ServeHTTP
+    (*net/http.http2serverConn).runHandler at <goroot>\src\net\http\h2_bundle.go:6506:9 reaches parking net/http.http2handleHeaderListTooLong
+    (*net/http.http2serverConn).runHandler at <goroot>\src\net\http\h2_bundle.go:6506:9 reaches parking net/http.http2new400Handler$1
+    (*sync.Once).doSlow at <goroot>\src\sync\once.go:78:4 reaches parking (*crypto/x509.CertPool).AppendCertsFromPEM$1$1
+    (*sync.Once).doSlow at <goroot>\src\sync\once.go:78:4 reaches parking (*net.nsswitchConfig).init
+    (*sync.Once).doSlow at <goroot>\src\sync\once.go:78:4 reaches parking (*net/http.Server).onceSetNextProtoDefaults
+    (*sync.Once).doSlow at <goroot>\src\sync\once.go:78:4 reaches parking (*net/http.Server).onceSetNextProtoDefaults_Serve
+    (*sync.Once).doSlow at <goroot>\src\sync\once.go:78:4 reaches parking (*net/http.Transport).onceSetNextProtoDefaults
+    (*sync.Once).doSlow at <goroot>\src\sync\once.go:78:4 reaches parking (*net/http.http2requestBody).Close$1
+    (*sync.Once).doSlow at <goroot>\src\sync\once.go:78:4 reaches parking (*net/http.http2serverConn).startGracefulShutdown$1
+    (*sync.Once).doSlow at <goroot>\src\sync\once.go:78:4 reaches parking crypto/elliptic.initAll
+    (*sync.Once).doSlow at <goroot>\src\sync\once.go:78:4 reaches parking math/big.three$1
+    (*sync.Once).doSlow at <goroot>\src\sync\once.go:78:4 reaches parking mime.initMime
+    (*sync.Once).doSlow at <goroot>\src\sync\once.go:78:4 reaches parking net/http.envProxyFunc$1
+    (*vendor/golang.org/x/crypto/cryptobyte.Builder).callContinuation at <goroot>\src\vendor\golang.org\x\crypto\cryptobyte\builder.go:184:3 reaches parking (*crypto/tls.SessionState).Bytes$2
+    (*vendor/golang.org/x/crypto/cryptobyte.Builder).callContinuation at <goroot>\src\vendor\golang.org\x\crypto\cryptobyte\builder.go:184:3 reaches parking (*crypto/tls.SessionState).Bytes$3
+    (*vendor/golang.org/x/crypto/cryptobyte.Builder).callContinuation at <goroot>\src\vendor\golang.org\x\crypto\cryptobyte\builder.go:184:3 reaches parking (*crypto/tls.SessionState).Bytes$3$1
+    (*vendor/golang.org/x/crypto/cryptobyte.Builder).callContinuation at <goroot>\src\vendor\golang.org\x\crypto\cryptobyte\builder.go:184:3 reaches parking (*crypto/tls.certificateMsgTLS13).marshal$1
+    (*vendor/golang.org/x/crypto/cryptobyte.Builder).callContinuation at <goroot>\src\vendor\golang.org\x\crypto\cryptobyte\builder.go:184:3 reaches parking (*crypto/tls.certificateRequestMsgTLS13).marshal$1
+    (*vendor/golang.org/x/crypto/cryptobyte.Builder).callContinuation at <goroot>\src\vendor\golang.org\x\crypto\cryptobyte\builder.go:184:3 reaches parking (*crypto/tls.certificateRequestMsgTLS13).marshal$1$1
+    (*vendor/golang.org/x/crypto/cryptobyte.Builder).callContinuation at <goroot>\src\vendor\golang.org\x\crypto\cryptobyte\builder.go:184:3 reaches parking (*crypto/tls.certificateRequestMsgTLS13).marshal$1$1$1
+    (*vendor/golang.org/x/crypto/cryptobyte.Builder).callContinuation at <goroot>\src\vendor\golang.org\x\crypto\cryptobyte\builder.go:184:3 reaches parking (*crypto/tls.certificateRequestMsgTLS13).marshal$1$1$2
+    (*vendor/golang.org/x/crypto/cryptobyte.Builder).callContinuation at <goroot>\src\vendor\golang.org\x\crypto\cryptobyte\builder.go:184:3 reaches parking (*crypto/tls.certificateRequestMsgTLS13).marshal$1$1$3
+    (*vendor/golang.org/x/crypto/cryptobyte.Builder).callContinuation at <goroot>\src\vendor\golang.org\x\crypto\cryptobyte\builder.go:184:3 reaches parking (*crypto/tls.certificateRequestMsgTLS13).marshal$1$1$3$1
+    (*vendor/golang.org/x/crypto/cryptobyte.Builder).callContinuation at <goroot>\src\vendor\golang.org\x\crypto\cryptobyte\builder.go:184:3 reaches parking (*crypto/tls.certificateStatusMsg).marshal$1
+    (*vendor/golang.org/x/crypto/cryptobyte.Builder).callContinuation at <goroot>\src\vendor\golang.org\x\crypto\cryptobyte\builder.go:184:3 reaches parking (*crypto/tls.certificateVerifyMsg).marshal$1
+    (*vendor/golang.org/x/crypto/cryptobyte.Builder).callContinuation at <goroot>\src\vendor\golang.org\x\crypto\cryptobyte\builder.go:184:3 reaches parking (*crypto/tls.clientHelloMsg).marshalMsg$1
+    (*vendor/golang.org/x/crypto/cryptobyte.Builder).callContinuation at <goroot>\src\vendor\golang.org\x\crypto\cryptobyte\builder.go:184:3 reaches parking (*crypto/tls.clientHelloMsg).marshalMsg$1$1
+    (*vendor/golang.org/x/crypto/cryptobyte.Builder).callContinuation at <goroot>\src\vendor\golang.org\x\crypto\cryptobyte\builder.go:184:3 reaches parking (*crypto/tls.clientHelloMsg).marshalMsg$10
+    (*vendor/golang.org/x/crypto/cryptobyte.Builder).callContinuation at <goroot>\src\vendor\golang.org\x\crypto\cryptobyte\builder.go:184:3 reaches parking (*crypto/tls.clientHelloMsg).marshalMsg$11
+    (*vendor/golang.org/x/crypto/cryptobyte.Builder).callContinuation at <goroot>\src\vendor\golang.org\x\crypto\cryptobyte\builder.go:184:3 reaches parking (*crypto/tls.clientHelloMsg).marshalMsg$11$1
+    (*vendor/golang.org/x/crypto/cryptobyte.Builder).callContinuation at <goroot>\src\vendor\golang.org\x\crypto\cryptobyte\builder.go:184:3 reaches parking (*crypto/tls.clientHelloMsg).marshalMsg$12
+    (*vendor/golang.org/x/crypto/cryptobyte.Builder).callContinuation at <goroot>\src\vendor\golang.org\x\crypto\cryptobyte\builder.go:184:3 reaches parking (*crypto/tls.clientHelloMsg).marshalMsg$13
+    (*vendor/golang.org/x/crypto/cryptobyte.Builder).callContinuation at <goroot>\src\vendor\golang.org\x\crypto\cryptobyte\builder.go:184:3 reaches parking (*crypto/tls.clientHelloMsg).marshalMsg$14
+    (*vendor/golang.org/x/crypto/cryptobyte.Builder).callContinuation at <goroot>\src\vendor\golang.org\x\crypto\cryptobyte\builder.go:184:3 reaches parking (*crypto/tls.clientHelloMsg).marshalMsg$14$1
+    (*vendor/golang.org/x/crypto/cryptobyte.Builder).callContinuation at <goroot>\src\vendor\golang.org\x\crypto\cryptobyte\builder.go:184:3 reaches parking (*crypto/tls.clientHelloMsg).marshalMsg$15
+    (*vendor/golang.org/x/crypto/cryptobyte.Builder).callContinuation at <goroot>\src\vendor\golang.org\x\crypto\cryptobyte\builder.go:184:3 reaches parking (*crypto/tls.clientHelloMsg).marshalMsg$16
+    (*vendor/golang.org/x/crypto/cryptobyte.Builder).callContinuation at <goroot>\src\vendor\golang.org\x\crypto\cryptobyte\builder.go:184:3 reaches parking (*crypto/tls.clientHelloMsg).marshalMsg$17
+    (*vendor/golang.org/x/crypto/cryptobyte.Builder).callContinuation at <goroot>\src\vendor\golang.org\x\crypto\cryptobyte\builder.go:184:3 reaches parking (*crypto/tls.clientHelloMsg).marshalMsg$17$1
+    (*vendor/golang.org/x/crypto/cryptobyte.Builder).callContinuation at <goroot>\src\vendor\golang.org\x\crypto\cryptobyte\builder.go:184:3 reaches parking (*crypto/tls.clientHelloMsg).marshalMsg$17$2
+    (*vendor/golang.org/x/crypto/cryptobyte.Builder).callContinuation at <goroot>\src\vendor\golang.org\x\crypto\cryptobyte\builder.go:184:3 reaches parking (*crypto/tls.clientHelloMsg).marshalMsg$18
+    (*vendor/golang.org/x/crypto/cryptobyte.Builder).callContinuation at <goroot>\src\vendor\golang.org\x\crypto\cryptobyte\builder.go:184:3 reaches parking (*crypto/tls.clientHelloMsg).marshalMsg$2
+    (*vendor/golang.org/x/crypto/cryptobyte.Builder).callContinuation at <goroot>\src\vendor\golang.org\x\crypto\cryptobyte\builder.go:184:3 reaches parking (*crypto/tls.clientHelloMsg).marshalMsg$4
+    (*vendor/golang.org/x/crypto/cryptobyte.Builder).callContinuation at <goroot>\src\vendor\golang.org\x\crypto\cryptobyte\builder.go:184:3 reaches parking (*crypto/tls.clientHelloMsg).marshalMsg$8
+    (*vendor/golang.org/x/crypto/cryptobyte.Builder).callContinuation at <goroot>\src\vendor\golang.org\x\crypto\cryptobyte\builder.go:184:3 reaches parking (*crypto/tls.clientHelloMsg).marshalMsg$9
+    (*vendor/golang.org/x/crypto/cryptobyte.Builder).callContinuation at <goroot>\src\vendor\golang.org\x\crypto\cryptobyte\builder.go:184:3 reaches parking (*crypto/tls.encryptedExtensionsMsg).marshal$1
+    (*vendor/golang.org/x/crypto/cryptobyte.Builder).callContinuation at <goroot>\src\vendor\golang.org\x\crypto\cryptobyte\builder.go:184:3 reaches parking (*crypto/tls.encryptedExtensionsMsg).marshal$1$1
+    (*vendor/golang.org/x/crypto/cryptobyte.Builder).callContinuation at <goroot>\src\vendor\golang.org\x\crypto\cryptobyte\builder.go:184:3 reaches parking (*crypto/tls.encryptedExtensionsMsg).marshal$1$1$1
+    (*vendor/golang.org/x/crypto/cryptobyte.Builder).callContinuation at <goroot>\src\vendor\golang.org\x\crypto\cryptobyte\builder.go:184:3 reaches parking (*crypto/tls.encryptedExtensionsMsg).marshal$1$1$1$1
+    (*vendor/golang.org/x/crypto/cryptobyte.Builder).callContinuation at <goroot>\src\vendor\golang.org\x\crypto\cryptobyte\builder.go:184:3 reaches parking (*crypto/tls.newSessionTicketMsgTLS13).marshal$1
+    (*vendor/golang.org/x/crypto/cryptobyte.Builder).callContinuation at <goroot>\src\vendor\golang.org\x\crypto\cryptobyte\builder.go:184:3 reaches parking (*crypto/tls.newSessionTicketMsgTLS13).marshal$1$3
+    (*vendor/golang.org/x/crypto/cryptobyte.Builder).callContinuation at <goroot>\src\vendor\golang.org\x\crypto\cryptobyte\builder.go:184:3 reaches parking (*crypto/tls.serverHelloMsg).marshal$1
+    (*vendor/golang.org/x/crypto/cryptobyte.Builder).callContinuation at <goroot>\src\vendor\golang.org\x\crypto\cryptobyte\builder.go:184:3 reaches parking (*crypto/tls.serverHelloMsg).marshal$11
+    (*vendor/golang.org/x/crypto/cryptobyte.Builder).callContinuation at <goroot>\src\vendor\golang.org\x\crypto\cryptobyte\builder.go:184:3 reaches parking (*crypto/tls.serverHelloMsg).marshal$2
+    (*vendor/golang.org/x/crypto/cryptobyte.Builder).callContinuation at <goroot>\src\vendor\golang.org\x\crypto\cryptobyte\builder.go:184:3 reaches parking (*crypto/tls.serverHelloMsg).marshal$2$1
+    (*vendor/golang.org/x/crypto/cryptobyte.Builder).callContinuation at <goroot>\src\vendor\golang.org\x\crypto\cryptobyte\builder.go:184:3 reaches parking (*crypto/tls.serverHelloMsg).marshal$3
+    (*vendor/golang.org/x/crypto/cryptobyte.Builder).callContinuation at <goroot>\src\vendor\golang.org\x\crypto\cryptobyte\builder.go:184:3 reaches parking (*crypto/tls.serverHelloMsg).marshal$3$1
+    (*vendor/golang.org/x/crypto/cryptobyte.Builder).callContinuation at <goroot>\src\vendor\golang.org\x\crypto\cryptobyte\builder.go:184:3 reaches parking (*crypto/tls.serverHelloMsg).marshal$5
+    (*vendor/golang.org/x/crypto/cryptobyte.Builder).callContinuation at <goroot>\src\vendor\golang.org\x\crypto\cryptobyte\builder.go:184:3 reaches parking (*crypto/tls.serverHelloMsg).marshal$7
+    (*vendor/golang.org/x/crypto/cryptobyte.Builder).callContinuation at <goroot>\src\vendor\golang.org\x\crypto\cryptobyte\builder.go:184:3 reaches parking (*crypto/tls.serverHelloMsg).marshal$9
+    (*vendor/golang.org/x/crypto/cryptobyte.Builder).callContinuation at <goroot>\src\vendor\golang.org\x\crypto\cryptobyte\builder.go:184:3 reaches parking (*vendor/golang.org/x/crypto/cryptobyte.Builder).AddASN1ObjectIdentifier$1
+    (*vendor/golang.org/x/crypto/cryptobyte.Builder).callContinuation at <goroot>\src\vendor\golang.org\x\crypto\cryptobyte\builder.go:184:3 reaches parking (*vendor/golang.org/x/crypto/cryptobyte.Builder).AddASN1UTCTime$1
+    (*vendor/golang.org/x/crypto/cryptobyte.Builder).callContinuation at <goroot>\src\vendor\golang.org\x\crypto\cryptobyte\builder.go:184:3 reaches parking crypto/ecdsa.encodeSignature$1
+    (*vendor/golang.org/x/crypto/cryptobyte.Builder).callContinuation at <goroot>\src\vendor\golang.org\x\crypto\cryptobyte\builder.go:184:3 reaches parking crypto/tls.decodeInnerClientHello$1
+    (*vendor/golang.org/x/crypto/cryptobyte.Builder).callContinuation at <goroot>\src\vendor\golang.org\x\crypto\cryptobyte\builder.go:184:3 reaches parking crypto/tls.decodeInnerClientHello$1$4
+    (*vendor/golang.org/x/crypto/cryptobyte.Builder).callContinuation at <goroot>\src\vendor\golang.org\x\crypto\cryptobyte\builder.go:184:3 reaches parking crypto/tls.marshalCertificate$1
+    (*vendor/golang.org/x/crypto/cryptobyte.Builder).callContinuation at <goroot>\src\vendor\golang.org\x\crypto\cryptobyte\builder.go:184:3 reaches parking crypto/tls.marshalCertificate$1$2
+    (*vendor/golang.org/x/crypto/cryptobyte.Builder).callContinuation at <goroot>\src\vendor\golang.org\x\crypto\cryptobyte\builder.go:184:3 reaches parking crypto/tls.marshalCertificate$1$2$1
+    (*vendor/golang.org/x/crypto/cryptobyte.Builder).callContinuation at <goroot>\src\vendor\golang.org\x\crypto\cryptobyte\builder.go:184:3 reaches parking crypto/tls.marshalCertificate$1$2$2
+    (*vendor/golang.org/x/crypto/cryptobyte.Builder).callContinuation at <goroot>\src\vendor\golang.org\x\crypto\cryptobyte\builder.go:184:3 reaches parking crypto/tls.marshalCertificate$1$2$2$1
+    (*vendor/golang.org/x/crypto/cryptobyte.Builder).callContinuation at <goroot>\src\vendor\golang.org\x\crypto\cryptobyte\builder.go:184:3 reaches parking crypto/x509.buildCertExtensions$2$1
+    (*vendor/golang.org/x/crypto/cryptobyte.Builder).callContinuation at <goroot>\src\vendor\golang.org\x\crypto\cryptobyte\builder.go:184:3 reaches parking crypto/x509.buildCertExtensions$2$2
+    (*vendor/golang.org/x/crypto/cryptobyte.Builder).callContinuation at <goroot>\src\vendor\golang.org\x\crypto\cryptobyte\builder.go:184:3 reaches parking crypto/x509.buildCertExtensions$2$3
+    (*vendor/golang.org/x/crypto/cryptobyte.Builder).callContinuation at <goroot>\src\vendor\golang.org\x\crypto\cryptobyte\builder.go:184:3 reaches parking crypto/x509.buildCertExtensions$2$4
+    (*vendor/golang.org/x/crypto/cryptobyte.Builder).callContinuation at <goroot>\src\vendor\golang.org\x\crypto\cryptobyte\builder.go:184:3 reaches parking crypto/x509.buildCertExtensions$3
+    (*vendor/golang.org/x/crypto/cryptobyte.Builder).callContinuation at <goroot>\src\vendor\golang.org\x\crypto\cryptobyte\builder.go:184:3 reaches parking crypto/x509.marshalCertificatePolicies$1
+    (*vendor/golang.org/x/crypto/cryptobyte.Builder).callContinuation at <goroot>\src\vendor\golang.org\x\crypto\cryptobyte\builder.go:184:3 reaches parking crypto/x509.marshalCertificatePolicies$1$1
+    (*vendor/golang.org/x/crypto/cryptobyte.Builder).callContinuation at <goroot>\src\vendor\golang.org\x\crypto\cryptobyte\builder.go:184:3 reaches parking crypto/x509.marshalCertificatePolicies$1$2
+    (crypto/tls.marshalingFunction).Marshal at <goroot>\src\crypto\tls\handshake_messages.go:22:10 reaches parking crypto/tls.addBytesWithLength$1
+    (net/http.HandlerFunc).ServeHTTP at <goroot>\src\net\http\server.go:2306:3 reaches parking (*net/http.ServeMux).findHandler$1
+    (net/http.HandlerFunc).ServeHTTP at <goroot>\src\net\http\server.go:2306:3 reaches parking net/http.NotFound
+    crypto/fips140.WithoutEnforcement at <goroot>\src\crypto\fips140\enforcement.go:23:4 reaches parking (*crypto/hpke.hybridPublicKey).encap$1
+    crypto/fips140.WithoutEnforcement at <goroot>\src\crypto\fips140\enforcement.go:23:4 reaches parking (*crypto/tls.hybridKeyExchange).keyShares$1
+    crypto/fips140.WithoutEnforcement at <goroot>\src\crypto\fips140\enforcement.go:23:4 reaches parking (*crypto/tls.hybridKeyExchange).serverSharedSecret$1
+    crypto/fips140.WithoutEnforcement at <goroot>\src\crypto\fips140\enforcement.go:28:3 reaches parking (*crypto/hpke.hybridPublicKey).encap$1
+    crypto/fips140.WithoutEnforcement at <goroot>\src\crypto\fips140\enforcement.go:28:3 reaches parking (*crypto/tls.hybridKeyExchange).keyShares$1
+    crypto/fips140.WithoutEnforcement at <goroot>\src\crypto\fips140\enforcement.go:28:3 reaches parking (*crypto/tls.hybridKeyExchange).serverSharedSecret$1
+    crypto/internal/fips140/ecdsa.randomPoint at <goroot>\src\crypto\internal\fips140\ecdsa\ecdsa.go:229:21 reaches parking crypto/internal/fips140/ecdsa.GenerateKey$1
+    crypto/internal/fips140/ecdsa.randomPoint[*crypto/internal/fips140/nistec.P224Point] at <goroot>\src\crypto\internal\fips140\ecdsa\ecdsa.go:229:21 reaches parking crypto/internal/fips140/ecdsa.GenerateKey[*crypto/internal/fips140/nistec.P224Point]$1
+    crypto/internal/fips140/ecdsa.randomPoint[*crypto/internal/fips140/nistec.P256Point] at <goroot>\src\crypto\internal\fips140\ecdsa\ecdsa.go:229:21 reaches parking crypto/internal/fips140/ecdsa.GenerateKey[*crypto/internal/fips140/nistec.P256Point]$1
+    crypto/internal/fips140/ecdsa.randomPoint[*crypto/internal/fips140/nistec.P384Point] at <goroot>\src\crypto\internal\fips140\ecdsa\ecdsa.go:229:21 reaches parking crypto/internal/fips140/ecdsa.GenerateKey[*crypto/internal/fips140/nistec.P384Point]$1
+    crypto/internal/fips140/ecdsa.randomPoint[*crypto/internal/fips140/nistec.P521Point] at <goroot>\src\crypto\internal\fips140\ecdsa\ecdsa.go:229:21 reaches parking crypto/internal/fips140/ecdsa.GenerateKey[*crypto/internal/fips140/nistec.P521Point]$1
+    crypto/x509.forEachSAN at <goroot>\src\crypto\x509\parser.go:392:21 reaches parking crypto/x509.parseSANExtension$1
+    io/fs.WalkDir at <goroot>\src\io\fs\walk.go:120:11 reaches parking os.CopyFS$1
+    io/fs.walkDir at <goroot>\src\io\fs\walk.go:73:21 reaches parking os.CopyFS$1
+    io/fs.walkDir at <goroot>\src\io\fs\walk.go:84:18 reaches parking os.CopyFS$1
+    net.init$1 at <goroot>\src\net\hook.go:21:12 reaches parking (*net.Resolver).lookupIP
+    net/http.http2foreachHeaderElement at <goroot>\src\net\http\h2_bundle.go:7342:5 reaches parking (*net/http.http2responseWriterState).declareTrailer
+    net/http.http2foreachHeaderElement at <goroot>\src\net\http\h2_bundle.go:7347:6 reaches parking (*net/http.http2responseWriterState).declareTrailer
+    net/http.http2splitHeaderBlock at <goroot>\src\net\http\h2_bundle.go:11067:15 reaches parking (*net/http.http2writePushPromise).writeHeaderBlock
+    net/http.http2splitHeaderBlock at <goroot>\src\net\http\h2_bundle.go:11067:15 reaches parking (*net/http.http2writeResHeaders).writeHeaderBlock
+    os.readFileContents at <goroot>\src\os\file.go:908:17 reaches parking (*os.File).Read
+    slices.DeleteFunc[[][]*crypto/x509.Certificate, []*crypto/x509.Certificate] at <goroot>\src\slices\slices.go:246:21 reaches parking (*crypto/x509.Certificate).Verify$1
+    slices.DeleteFunc[[]crypto/tls.SignatureScheme, crypto/tls.SignatureScheme] at <goroot>\src\slices\slices.go:246:21 reaches parking crypto/tls.selectSignatureScheme$2
+    slices.DeleteFunc[[]crypto/tls.SignatureScheme, crypto/tls.SignatureScheme] at <goroot>\src\slices\slices.go:246:21 reaches parking crypto/tls.supportedSignatureAlgorithms$1
+    slices.DeleteFunc[[]crypto/tls.SignatureScheme, crypto/tls.SignatureScheme] at <goroot>\src\slices\slices.go:246:21 reaches parking crypto/tls.supportedSignatureAlgorithmsCert$1
+    slices.IndexFunc[[][]*crypto/x509.Certificate, []*crypto/x509.Certificate] at <goroot>\src\slices\slices.go:109:7 reaches parking (*crypto/x509.Certificate).Verify$1
+    slices.IndexFunc[[]crypto/tls.SignatureScheme, crypto/tls.SignatureScheme] at <goroot>\src\slices\slices.go:109:7 reaches parking crypto/tls.selectSignatureScheme$2
+    slices.IndexFunc[[]crypto/tls.SignatureScheme, crypto/tls.SignatureScheme] at <goroot>\src\slices\slices.go:109:7 reaches parking crypto/tls.supportedSignatureAlgorithms$1
+    slices.IndexFunc[[]crypto/tls.SignatureScheme, crypto/tls.SignatureScheme] at <goroot>\src\slices\slices.go:109:7 reaches parking crypto/tls.supportedSignatureAlgorithmsCert$1
+OPT-OUT wholly opted-out functions:
+    (*crypto/internal/fips140cache.Cache[byte, crypto/internal/fips140/ed25519.PrivateKey]).Get
+    (*crypto/internal/fips140cache.Cache[crypto/ecdsa.PrivateKey, crypto/internal/fips140/ecdsa.PrivateKey]).Get
+    (*crypto/x509.nameConstraintsSet[*net.IPNet, net.IP]).search
+    (*crypto/x509.nameConstraintsSet[*net.IPNet, net.IP]).sortAndPrune
+    (*crypto/x509.nameConstraintsSet[string, string]).search
+    (*crypto/x509.nameConstraintsSet[string, string]).sortAndPrune
+    (*fmt.ss).token
+    (*internal/poll.FD).Accept
+    (*internal/poll.FD).RawControl
+    (*internal/poll.FD).RawRead
+    (*internal/poll.FD).RawWrite
+    (*internal/poll.FD).execIO
+    (*internal/singleflight.Group).doCall
+    (*internal/sync.HashTrieMap[any, any]).iter
+    (*internal/sync.entry[any, any]).compareAndDelete
+    (*internal/sync.entry[any, any]).compareAndSwap
+    (*internal/synctest.Bubble).Run
+    (*log.Logger).output
+    (*math/rand.Rand).Shuffle
+    (*math/rand/v2.Rand).Shuffle
+    (*net.Resolver).lookupIPAddr$2
+    (*net/http.http2SettingsFrame).ForeachSetting
+    (*net/http.http2priorityNodeRFC7540).walkReadyInOrder
+    (*net/http.http2serverConn).runHandler
+    (*net/http.mapping[string, *net/http.routingNode]).eachPair
+    (*net/http.wantConnQueue).all
+    (*os.Process).withHandle
+    (*reflect.rtype).Fields$1
+    (*reflect.rtype).Ins$1
+    (*reflect.rtype).Methods$1
+    (*reflect.rtype).Outs$1
+    (*reflect.structType).FieldByNameFunc
+    (*sync.Once).doSlow
+    (*vendor/golang.org/x/crypto/cryptobyte.Builder).callContinuation
+    (crypto/tls.marshalingFunction).Marshal
+    (net.addrList).first
+    (net.addrList).partition
+    (net/http.HandlerFunc).ServeHTTP
+    (reflect.Value).Fields$1
+    (reflect.Value).Methods$1
+    (reflect.Value).Seq$2
+    (reflect.Value).Seq$3
+    (reflect.Value).Seq$4
+    (reflect.Value).Seq$5
+    (reflect.Value).Seq$6
+    (reflect.Value).Seq2$2
+    (reflect.Value).Seq2$3
+    (reflect.Value).Seq2$4
+    (reflect.Value).Seq2$5
+    (vendor/golang.org/x/text/transform.removeF).Transform
+    bytes.FieldsFunc
+    bytes.FieldsSeq$1
+    bytes.Lines$1
+    bytes.Map
+    bytes.indexFunc
+    bytes.lastIndexFunc
+    bytes.splitSeq$1
+    crypto/ecdsa.parseRawPrivateKey
+    crypto/ecdsa.parseRawPrivateKey[*crypto/internal/fips140/nistec.P224Point]
+    crypto/ecdsa.parseRawPrivateKey[*crypto/internal/fips140/nistec.P256Point]
+    crypto/ecdsa.parseRawPrivateKey[*crypto/internal/fips140/nistec.P384Point]
+    crypto/ecdsa.parseRawPrivateKey[*crypto/internal/fips140/nistec.P521Point]
+    crypto/fips140.WithoutEnforcement
+    crypto/hkdf.checkFIPS140Only
+    crypto/hkdf.checkFIPS140Only[hash.Hash]
+    crypto/internal/fips140.CAST
+    crypto/internal/fips140.PCT
+    crypto/internal/fips140/hkdf.Extract[*crypto/internal/fips140/sha256.Digest]
+    crypto/internal/fips140/hkdf.Extract[hash.Hash]
+    crypto/internal/fips140/hmac.New
+    crypto/internal/fips140/hmac.New[*crypto/internal/fips140/sha256.Digest]
+    crypto/internal/fips140/hmac.New[*crypto/internal/fips140/sha512.Digest]
+    crypto/internal/fips140/hmac.New[hash.Hash]
+    crypto/internal/fips140/tls12.MasterSecret[*crypto/internal/fips140/sha256.Digest]
+    crypto/internal/fips140/tls12.MasterSecret[hash.Hash]
+    crypto/internal/fips140/tls13.deriveSecret[hash.Hash]
+    crypto/internal/fips140/tls13.extract[*crypto/internal/fips140/sha256.Digest]
+    crypto/internal/fips140/tls13.extract[hash.Hash]
+    crypto/subtle.WithDataIndependentTiming
+    crypto/tls.computeAndUpdatePSK
+    crypto/tls.selectCipherSuite
+    crypto/x509.forEachSAN
+    internal/poll.ignoringEINTR
+    internal/poll.ignoringEINTR2
+    internal/syscall/windows.withPrivilege
+    io/fs.WalkDir
+    io/fs.walkDir
+    maps.All$1
+    maps.DeleteFunc
+    maps.EqualFunc
+    maps.Insert
+    maps.Keys$1
+    maps.Keys[map[string]bool, string, bool]$1
+    maps.Keys[map[string]string, string, string]$1
+    maps.Keys[net/textproto.MIMEHeader, string, []string]$1
+    maps.Values$1
+    maps.Values[map[string]*crypto/x509.policyGraphNode, string, *crypto/x509.policyGraphNode]$1
+    net.foreachField
+    net.init$1
+    net/http.awaitLegacyCancel
+    net/http.http2foreachHeaderElement
+    net/http.http2parseContinuationFrame
+    net/http.http2parseDataFrame
+    net/http.http2parseGoAwayFrame
+    net/http.http2parseHeadersFrame
+    net/http.http2parsePingFrame
+    net/http.http2parsePriorityFrame
+    net/http.http2parsePushPromise
+    net/http.http2parseRSTStreamFrame
+    net/http.http2parseSettingsFrame
+    net/http.http2parseWindowUpdateFrame
+    net/http.http2splitHeaderBlock
+    net/http.mapOpenError
+    net/http.sanitizeOrWarn
+    net/http.serveContent
+    net/http/internal/httpcommon.EncodeHeaders$1
+    os.Expand
+    os.ignoringEINTR
+    os.ignoringEINTR2
+    os.ignoringEINTR2[string]
+    os.readFileContents
+    path/filepath.Walk
+    path/filepath.WalkDir
+    path/filepath.toNorm
+    path/filepath.walkDir
+    reflect.rangeNum$1
+    reflect.rangeNum[int, int64]$1
+    reflect.rangeNum[int16, int64]$1
+    reflect.rangeNum[int32, int64]$1
+    reflect.rangeNum[int64, int64]$1
+    reflect.rangeNum[int8, int64]$1
+    reflect.rangeNum[uint, uint64]$1
+    reflect.rangeNum[uint16, uint64]$1
+    reflect.rangeNum[uint32, uint64]$1
+    reflect.rangeNum[uint64, uint64]$1
+    reflect.rangeNum[uint8, uint64]$1
+    reflect.rangeNum[uintptr, uint64]$1
+    slices.All$1
+    slices.AppendSeq
+    slices.AppendSeq[[]string, string]
+    slices.Backward$1
+    slices.BinarySearchFunc
+    slices.BinarySearchFunc[[]*net.IPNet, *net.IPNet, net.IP]
+    slices.BinarySearchFunc[[]string, string, string]
+    slices.Chunk$1
+    slices.CompactFunc
+    slices.CompareFunc
+    slices.DeleteFunc[[][]*crypto/x509.Certificate, []*crypto/x509.Certificate]
+    slices.DeleteFunc[[]crypto/tls.CurveID, crypto/tls.CurveID]
+    slices.DeleteFunc[[]crypto/tls.SignatureScheme, crypto/tls.SignatureScheme]
+    slices.DeleteFunc[[]string, string]
+    slices.DeleteFunc[[]uint16, uint16]
+    slices.EqualFunc
+    slices.IndexFunc
+    slices.IndexFunc[[]*crypto/x509.Certificate, *crypto/x509.Certificate]
+    slices.IndexFunc[[][]*crypto/x509.Certificate, []*crypto/x509.Certificate]
+    slices.IndexFunc[[]crypto/tls.CurveID, crypto/tls.CurveID]
+    slices.IndexFunc[[]crypto/tls.SignatureScheme, crypto/tls.SignatureScheme]
+    slices.IndexFunc[[]crypto/tls.keyShare, crypto/tls.keyShare]
+    slices.IndexFunc[[]string, string]
+    slices.IndexFunc[[]uint16, uint16]
+    slices.IsSortedFunc
+    slices.IsSortedFunc[[]string, string]
+    slices.MaxFunc
+    slices.MinFunc
+    slices.Values$1
+    slices.insertionSortCmpFunc
+    slices.insertionSortCmpFunc[*net.IPNet]
+    slices.insertionSortCmpFunc[*net.MX]
+    slices.insertionSortCmpFunc[*net.SRV]
+    slices.insertionSortCmpFunc[[]byte]
+    slices.insertionSortCmpFunc[internal/fmtsort.KeyValue]
+    slices.insertionSortCmpFunc[net.byRFC6724Info]
+    slices.insertionSortCmpFunc[net/http.keyValues]
+    slices.insertionSortCmpFunc[os.DirEntry]
+    slices.insertionSortCmpFunc[string]
+    slices.order2CmpFunc
+    slices.order2CmpFunc[*net.IPNet]
+    slices.order2CmpFunc[*net.MX]
+    slices.order2CmpFunc[*net.SRV]
+    slices.order2CmpFunc[[]byte]
+    slices.order2CmpFunc[net/http.keyValues]
+    slices.order2CmpFunc[os.DirEntry]
+    slices.order2CmpFunc[string]
+    slices.partialInsertionSortCmpFunc
+    slices.partialInsertionSortCmpFunc[*net.IPNet]
+    slices.partialInsertionSortCmpFunc[*net.MX]
+    slices.partialInsertionSortCmpFunc[*net.SRV]
+    slices.partialInsertionSortCmpFunc[[]byte]
+    slices.partialInsertionSortCmpFunc[net/http.keyValues]
+    slices.partialInsertionSortCmpFunc[os.DirEntry]
+    slices.partialInsertionSortCmpFunc[string]
+    slices.partitionCmpFunc
+    slices.partitionCmpFunc[*net.IPNet]
+    slices.partitionCmpFunc[*net.MX]
+    slices.partitionCmpFunc[*net.SRV]
+    slices.partitionCmpFunc[[]byte]
+    slices.partitionCmpFunc[net/http.keyValues]
+    slices.partitionCmpFunc[os.DirEntry]
+    slices.partitionCmpFunc[string]
+    slices.partitionEqualCmpFunc
+    slices.partitionEqualCmpFunc[*net.IPNet]
+    slices.partitionEqualCmpFunc[*net.MX]
+    slices.partitionEqualCmpFunc[*net.SRV]
+    slices.partitionEqualCmpFunc[[]byte]
+    slices.partitionEqualCmpFunc[net/http.keyValues]
+    slices.partitionEqualCmpFunc[os.DirEntry]
+    slices.partitionEqualCmpFunc[string]
+    slices.pdqsortCmpFunc[*net.IPNet]
+    slices.pdqsortCmpFunc[*net.MX]
+    slices.pdqsortCmpFunc[*net.SRV]
+    slices.pdqsortCmpFunc[[]byte]
+    slices.pdqsortCmpFunc[net/http.keyValues]
+    slices.pdqsortCmpFunc[os.DirEntry]
+    slices.pdqsortCmpFunc[string]
+    slices.siftDownCmpFunc
+    slices.siftDownCmpFunc[*net.IPNet]
+    slices.siftDownCmpFunc[*net.MX]
+    slices.siftDownCmpFunc[*net.SRV]
+    slices.siftDownCmpFunc[[]byte]
+    slices.siftDownCmpFunc[net/http.keyValues]
+    slices.siftDownCmpFunc[os.DirEntry]
+    slices.siftDownCmpFunc[string]
+    slices.symMergeCmpFunc[internal/fmtsort.KeyValue]
+    slices.symMergeCmpFunc[net.byRFC6724Info]
+    sort.Find
+    sort.Search
+    sort.SliceIsSorted
+    strings.FieldsFunc
+    strings.FieldsSeq$1
+    strings.Lines$1
+    strings.Map
+    strings.indexFunc
+    strings.lastIndexFunc
+    strings.splitSeq$1
+CLOSURES 706 can-park 333
+GO STATEMENTS 54 can-park 53 unresolved 1
+INTERFACE CALLS 1701 can-park 469 unresolved 282
+FUNC-VALUE CALLS 983 can-park 301 unresolved 255
+PACKAGES 163; top 15 by can-park:
+  net/http                                    561 /   1144   49.0%
+  net                                         324 /    582   55.7%
+  syscall                                     256 /    344   74.4%
+  os                                          210 /    323   65.0%
+  crypto/tls                                  209 /    384   54.4%
+  math/big                                    154 /    298   51.7%
+  internal/syscall/windows                     98 /    108   90.7%
+  crypto/x509                                  86 /    197   43.7%
+  fmt                                          70 /    131   53.4%
+  internal/poll                                66 /    110   60.0%
+  reflect                                      63 /    320   19.7%
+  vendor/golang.org/x/text/unicode/norm        50 /    131   38.2%
+  crypto/hpke                                  32 /    104   30.8%
+  net/textproto                                32 /     56   57.1%
+  internal/syscall/windows/registry            31 /     32   96.9%

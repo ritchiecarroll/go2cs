@@ -442,18 +442,18 @@ public static (Event e, error err) MakeEvent<T>(EventConfig<T> c)
         EventKind defaultKind = default;
         switch (c.Kind) {
         case var ᴛ when ᴛ == defaultKind: {
-            (e, err) = (new Event(), fmt.Errorf("the Kind field must be provided"u8)); goto ᒐdone;
+            (var eᴛ1, err) = (new Event(), fmt.Errorf("the Kind field must be provided"u8)); e.AssignFrom(eᴛ1); goto ᒐdone;
         }
         case var ᴛ when ᴛ == EventMetric: {
             if (((any)c.Details)._<Metric>(out var m)) {
-                (e, err) = makeMetricEvent(e, m); goto ᒐdone;
+                (var eᴛ2, err) = makeMetricEvent(e, m); e.AssignFrom(eᴛ2); goto ᒐdone;
             }
             break;
         }
         case var ᴛ when ᴛ == EventLabel: {
             {
                 var (l, ok) = ((any)c.Details)._<Label>(ᐧ); if (ok) {
-                    (e, err) = makeLabelEvent(e, l); goto ᒐdone;
+                    (var eᴛ3, err) = makeLabelEvent(e, l); e.AssignFrom(eᴛ3); goto ᒐdone;
                 }
             }
             break;
@@ -461,7 +461,7 @@ public static (Event e, error err) MakeEvent<T>(EventConfig<T> c)
         case var ᴛ when ᴛ == EventRangeBegin || ᴛ == EventRangeActive || ᴛ == EventRangeEnd: {
             {
                 var (r, ok) = ((any)c.Details)._<Range>(ᐧ); if (ok) {
-                    (e, err) = makeRangeEvent(e, c.Kind, r); goto ᒐdone;
+                    (var eᴛ4, err) = makeRangeEvent(e, c.Kind, r); e.AssignFrom(eᴛ4); goto ᒐdone;
                 }
             }
             break;
@@ -469,21 +469,21 @@ public static (Event e, error err) MakeEvent<T>(EventConfig<T> c)
         case var ᴛ when ᴛ == EventStateTransition: {
             {
                 var (t, ok) = ((any)c.Details)._<StateTransition>(ᐧ); if (ok) {
-                    (e, err) = makeStateTransitionEvent(e, t); goto ᒐdone;
+                    (var eᴛ5, err) = makeStateTransitionEvent(e, t); e.AssignFrom(eᴛ5); goto ᒐdone;
                 }
             }
             break;
         }
         case var ᴛ when ᴛ == EventSync: {
             if (((any)c.Details)._<Sync>(out var s)) {
-                (e, err) = makeSyncEvent(e, s); goto ᒐdone;
+                (var eᴛ6, err) = makeSyncEvent(e, s); e.AssignFrom(eᴛ6); goto ᒐdone;
             }
             break;
         }
         case var ᴛ when ᴛ == EventTaskBegin || ᴛ == EventTaskEnd: {
             {
                 var (t, ok) = ((any)c.Details)._<Task>(ᐧ); if (ok) {
-                    (e, err) = makeTaskEvent(e, c.Kind, t); goto ᒐdone;
+                    (var eᴛ7, err) = makeTaskEvent(e, c.Kind, t); e.AssignFrom(eᴛ7); goto ᒐdone;
                 }
             }
             break;
@@ -491,7 +491,7 @@ public static (Event e, error err) MakeEvent<T>(EventConfig<T> c)
         case var ᴛ when ᴛ == EventRegionBegin || ᴛ == EventRegionEnd: {
             {
                 var (r, ok) = ((any)c.Details)._<Region>(ᐧ); if (ok) {
-                    (e, err) = makeRegionEvent(e, c.Kind, r); goto ᒐdone;
+                    (var eᴛ8, err) = makeRegionEvent(e, c.Kind, r); e.AssignFrom(eᴛ8); goto ᒐdone;
                 }
             }
             break;
@@ -499,18 +499,18 @@ public static (Event e, error err) MakeEvent<T>(EventConfig<T> c)
         case var ᴛ when ᴛ == EventLog: {
             {
                 var (l, ok) = ((any)c.Details)._<Log>(ᐧ); if (ok) {
-                    (e, err) = makeLogEvent(e, l); goto ᒐdone;
+                    (var eᴛ9, err) = makeLogEvent(e, l); e.AssignFrom(eᴛ9); goto ᒐdone;
                 }
             }
             break;
         }
         case var ᴛ when ᴛ == EventStackSample: {
             if (((any)c.Details)._<StackSample>(out _)) {
-                (e, err) = makeStackSampleEvent(e, c.Stack); goto ᒐdone;
+                (var eᴛ10, err) = makeStackSampleEvent(e, c.Stack); e.AssignFrom(eᴛ10); goto ᒐdone;
             }
             break;
         }}
-        (e, err) = (new Event(), fmt.Errorf("the Kind field %s is incompatible with Details type %T"u8, c.Kind, c.Details));
+        (var eᴛ11, err) = (new Event(), fmt.Errorf("the Kind field %s is incompatible with Details type %T"u8, c.Kind, c.Details)); e.AssignFrom(eᴛ11);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }

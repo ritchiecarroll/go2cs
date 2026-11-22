@@ -705,3 +705,59 @@ func TestTheCgoCompilerProbeRunsOncePerCompilerAndTarget(t *testing.T) {
 		t.Errorf("three lookups ran the probe %d times, want 1", n)
 	}
 }
+
+// A route refusal under -recurse -cgo skips its package and names it; the rest of the module converts (COORD's ruling on
+// C2's 193007Z: the plan says skip, and a module with one Phase 4 package must still convert the rest). bad defines its C
+// function in the preamble, which is Phase 4's (compiled C), so the route refuses it. Single-package -cgo keeps the fatal
+// refusal.
+const cgoRecurseBad = `package bad
+
+/*
+static int two(void) { return 2; }
+*/
+import "C"
+
+// Two is C's two.
+func Two() int { return int(C.two()) }
+`
+
+func TestARecurseCgoConversionSkipsARouteRefusedPackageAndConvertsTheRest(t *testing.T) {
+	requireHostCC(t)
+
+	combined, output, _ := convertCgoRecurse(t, map[string]string{"cptr/cptr.go": cgoRecurseCptr, "bad/bad.go": cgoRecurseBad, "main.go": cgoRecurseMain},
+		"-recurse=nuget", "-cgo=true")
+
+	for _, want := range []string{"GO2CS2001", "Refused 1 package", "example.com/cgorecurse/bad"} {
+		if !strings.Contains(combined, want) {
+			t.Errorf("the run does not name %q:\n%s", want, combined)
+		}
+	}
+
+	if cgoRecurseConverted(t, output, "bad") {
+		t.Errorf("the refused bad was written:\n%s", combined)
+	}
+
+	requireCgoRecurseRestConverted(t, output, combined)
+}
+
+func TestASinglePackageCgoConversionKeepsTheFatalRouteRefusal(t *testing.T) {
+	requireHostCC(t)
+
+	treeSrc, err := filepath.Abs("..")
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	dir := t.TempDir()
+	writeCgoFixture(t, dir, "go.mod", "module example.com/bad\n\ngo 1.26\n")
+	writeCgoFixture(t, dir, "bad.go", cgoRecurseBad)
+	output := t.TempDir()
+	cmd := exec.Command(driverBinary(t), "-cgo=true", "-go2cspath", treeSrc, dir, output)
+	cmd.Env = append(os.Environ(), "GOWORK=off", "GOFLAGS=", "CGO_ENABLED=")
+	combined, err := cmd.CombinedOutput()
+
+	if err == nil || !strings.Contains(string(combined), "Refusing to convert") || !strings.Contains(string(combined), "GO2CS2001") {
+		t.Errorf("a single-package -cgo conversion of a refused package did not stop with the fatal refusal (%v):\n%s", err, combined)
+	}
+}

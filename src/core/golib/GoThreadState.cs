@@ -44,6 +44,9 @@ internal sealed class GoThreadState
     [MethodImpl(MethodImplOptions.NoInlining)]
     private static GoThreadState Create() => t_current = new GoThreadState();
 
+    // M:N SPIKE: exchanges this thread's holder with a goroutine's saved one (Goroutine.Mount / Unmount).
+    internal static void SwapMounted(ref GoThreadState? saved) => (saved, t_current) = (t_current, saved);
+
     // The panic slots (see GoFuncRoot for what each one means).
     internal PanicException? CapturedPanic;
     internal PanicException? HandledPanic;

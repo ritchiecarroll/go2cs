@@ -1,0 +1,3 @@
+jit build rc=0
+aot publish rc=0
+runs done

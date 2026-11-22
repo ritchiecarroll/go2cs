@@ -1,0 +1,11 @@
+SEEDS (-seed-func-calls=true leaf-only=false) 536, declared 252
+TWINNED 3317 of 8647 declared (closure); net/http 637 of 1144; twinned SSA instructions 141216
+CREATION CENSUS prefix=net/http: 31 can-park func-value call sites
+  covered            21
+  partial            2
+  uncovered          8
+  no-creation-found  0
+  caller entered: twin 31, twin-holed 0, plain 0
+  AWAITED (every creator a twin AND the caller entered as a twin): 21 of 31
+  caller twin            map[covered:13 partial:2 uncovered:7]
+  caller twin(closure)   map[covered:8 uncovered:1]

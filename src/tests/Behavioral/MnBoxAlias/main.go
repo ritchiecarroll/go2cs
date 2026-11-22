@@ -1,0 +1,330 @@
+// MnBoxAlias: N2's aliasing probe (DESIGN-mn-box-twin.md SN-6). A pointer-receiver method parks; while it is parked,
+// another goroutine writes through the SAME pointer; after the park the method reads the write, as Go shares memory.
+// Through a root pointer, a field of one, a slice element taken after an append (the old backing array), a value
+// method through a pointer (a copy: the write must NOT be seen, and a mutation inside must NOT reach *p), an element
+// of the own receiver's slice field, a nil receiver and a nil pointer's field (Go's panics). Every call is DIRECT, in a statement of its own, so a twin awaits
+// the box twin; a twin that COPIED its receiver (GoTwinsBoxCopy, the control) prints stale values.
+package main
+
+import (
+	"fmt"
+)
+
+type inner struct{ n int }
+
+type acct struct {
+	bal int
+	sub inner
+}
+
+type cell struct{ v int }
+
+type holder struct{ c cell }
+
+// P3's re-read of step 1: the chain over structs that hold REFERENCE fields (a slice, a string) at both levels.
+type rcell struct {
+	name string
+	v    int
+}
+
+type rholder struct {
+	s []int
+	c rcell
+}
+
+type rnest struct {
+	p []int
+	h rholder
+}
+
+// G's next step 1: a two-level field chain `&n.h.c` (the field pointer of a field pointer).
+type nest struct{ h holder }
+
+type bag struct{ s []cell }
+
+// The review's t.s[i] row: an element of a slice field of the box twin's OWN receiver.
+func (b *bag) waitAt(i int) int {
+	return b.s[i].waitAndRead()
+}
+
+// A package variable handed by address (12.1 (b)): its own static box.
+var pkgCell = cell{v: 1}
+
+var ready = make(chan struct{})
+var resume = make(chan struct{})
+
+func (a *acct) waitAndRead() int {
+	ready <- struct{}{}
+	<-resume
+	return a.bal
+}
+
+func (s *inner) waitAndRead() int {
+	ready <- struct{}{}
+	<-resume
+	return s.n
+}
+
+func (c *cell) waitAndRead() int {
+	ready <- struct{}{}
+	<-resume
+	return c.v
+}
+
+// A value method: Go copies the receiver at the call.
+func (a acct) valueRead() int {
+	ready <- struct{}{}
+	<-resume
+	got := a.bal // the copy's, taken at the call: the write during the park must NOT show
+	a.bal = 777  // a mutation of the copy: must NOT reach *p
+	return got
+}
+
+// byref-param rows (DESIGN-mn-box-twin.md 12): an unexported function whose pointer parameter the converter
+// ref-lowers to `ref cell c`; it parks, another goroutine writes through the same pointer, and it reads the write.
+func readCell(c *cell) int {
+	ready <- struct{}{}
+	<-resume
+	return c.v
+}
+
+// forward hands its own pointer parameter on: inside its twin the parameter is a box already.
+func forward(c *cell) int {
+	return readCell(c)
+}
+
+// byref-param probe rows of 12.1 (P4): each callee parks, a writer writes through the same storage, and the callee
+// reads after the park. Two parameters over one storage, an array and its element, a nil field. 12.1's later-parking-
+// argument row `f(p, <-ch)` is NOT here: gc reads p after the receive and the plain emission reads it before, a
+// pre-existing converter divergence (COORD 2026-11-16 15:12Z, a BOARD row) that would redden this fixture's Output
+// phase under every arm; its repro is src/tools/mnspike2/MnLaterArg.
+type ptrs struct{ p *cell }
+
+func readBoth(h *holder, c *cell) int {
+	ready <- struct{}{}
+	<-resume
+	return h.c.v*100 + c.v
+}
+
+func readArr(a *[2]cell, c *cell) int {
+	ready <- struct{}{}
+	<-resume
+	return a[1].v*100 + c.v
+}
+
+// thunkRead is launched by a go statement (12.1, Thunks): the converter wraps `go thunkRead(done, p)` in a literal
+// that binds p at the go statement and hands it to the ref parameter; its twin hands the bound box.
+func thunkRead(done chan int, c *cell) {
+	ready <- struct{}{}
+	<-resume
+	done <- c.v
+}
+
+// G's next step 1 through a byref-param: inside the twin `&n.h.c` is `nonnil(ref n).h.c` over the boxed parameter, the
+// field pointer of a field pointer from n's box.
+func chainRead(n *nest) int {
+	return readCell(&n.h.c)
+}
+
+func readRCell(c *rcell) int {
+	ready <- struct{}{}
+	<-resume
+	return c.v
+}
+
+func chainRef(n *rnest) int {
+	return readRCell(&n.h.c)
+}
+
+// The two-level chain over a nil: Go panics at the OUTER nil, at the call.
+func nilChain(n *nest) (out string) {
+	defer func() {
+		if r := recover(); r != nil {
+			out = fmt.Sprint("panic: ", r)
+		}
+	}()
+	v := readCell(&n.h.c)
+	return fmt.Sprint(v)
+}
+
+func nilParam(nh *holder) (out string) {
+	defer func() {
+		if r := recover(); r != nil {
+			out = fmt.Sprint("panic: ", r)
+		}
+	}()
+	v := readCell(&nh.c)
+	return fmt.Sprint(v)
+}
+
+// The spill (DESIGN-mn-box-twin.md 12.4): a parking call in a LATER argument of a byref-param call. Go evaluates the
+// pointer, then parkK (which parks once), then calls readCellK, which parks again and reads the write made during that
+// second park. The twin awaits parkK in place instead of blocking its carrier.
+func readCellK(c *cell, k int) int {
+	ready <- struct{}{}
+	<-resume
+	return c.v*100 + k
+}
+
+func parkK() int {
+	ready <- struct{}{}
+	<-resume
+	return 3
+}
+
+// PB-5 (DESIGN-mn-box-twin.md 12.5): a STACK local handed by address to a callee that parks and then writes through
+// the pointer; the caller reads the write after the return. The twin declares the local a heap local and hands its box.
+func bumpCell(c *cell) {
+	ready <- struct{}{}
+	<-resume
+	c.v += 20
+}
+
+// writer2 serves two parks in order: first, then second.
+func writer2(first, second func()) {
+	<-ready
+	first()
+	resume <- struct{}{}
+	<-ready
+	second()
+	resume <- struct{}{}
+}
+
+// writer waits for the method to park, writes, and lets it resume.
+func writer(write func()) {
+	<-ready
+	write()
+	resume <- struct{}{}
+}
+
+func nilRoot(np *acct) (out string) {
+	defer func() {
+		if r := recover(); r != nil {
+			out = fmt.Sprint("panic: ", r)
+		}
+	}()
+	v := np.waitAndRead()
+	return fmt.Sprint(v)
+}
+
+func nilField(nh *holder) (out string) {
+	defer func() {
+		if r := recover(); r != nil {
+			out = fmt.Sprint("panic: ", r)
+		}
+	}()
+	v := nh.c.waitAndRead()
+	return fmt.Sprint(v)
+}
+
+func main() {
+	a := &acct{bal: 1, sub: inner{n: 1}}
+
+	go writer(func() { a.bal = 2 })
+	root := a.waitAndRead()
+	fmt.Println("root", root)
+
+	go writer(func() { a.sub.n = 7 })
+	field := a.sub.waitAndRead()
+	fmt.Println("field", field)
+
+	cells := []cell{{v: 1}}
+	old := cells
+	cells = append(cells, cell{v: 9}) // a new backing array; old keeps the first
+	go writer(func() { old[0].v = 4 })
+	element := old[0].waitAndRead()
+	fmt.Println("element", element)
+	fmt.Println("element new-array", cells[0].v, "old-array", old[0].v)
+
+	b := &bag{s: []cell{{v: 1}, {v: 1}}}
+	go writer(func() { b.s[1].v = 3 })
+	ownElement := b.waitAt(1)
+	fmt.Println("own-element", ownElement)
+
+	pc := &cell{v: 1}
+	go writer(func() { pc.v = 5 })
+	param := readCell(pc)
+	fmt.Println("param", param)
+
+	go writer(func() { pc.v = 6 })
+	forwarded := forward(pc)
+	fmt.Println("param-forward", forwarded)
+
+	var hc cell
+	hc.v = 1
+	hp := &hc // the address escapes: hc is a heap local
+	go writer(func() { hp.v = 8 })
+	fmt.Println("param-heap", readCell(&hc))
+
+	cs := []cell{{v: 1}, {v: 1}}
+	go writer(func() { cs[1].v = 9 })
+	fmt.Println("param-element", readCell(&cs[1]))
+
+	h := &holder{c: cell{v: 1}}
+	go writer(func() { h.c.v = 10 })
+	fmt.Println("param-field", readCell(&h.c))
+
+	e := &ptrs{p: &cell{v: 1}}
+	go writer(func() { e.p.v = 11 })
+	fmt.Println("param-ptr-field", readCell(e.p))
+
+	hh := &holder{c: cell{v: 1}}
+	go writer(func() { hh.c.v = 12 })
+	fmt.Println("param-two", readBoth(hh, &hh.c))
+
+	var arr [2]cell
+	ap := &arr // the address escapes: arr is a heap local
+	go writer(func() { ap[1].v = 13 })
+	fmt.Println("param-array", readArr(&arr, &arr[1]))
+
+	tp := &cell{v: 1}
+	done := make(chan int)
+	go thunkRead(done, tp)
+	go writer(func() { tp.v = 14 })
+	fmt.Println("param-thunk", <-done)
+
+	go writer(func() { pkgCell.v = 15 })
+	fmt.Println("param-package", readCell(&pkgCell))
+
+	nc := &nest{h: holder{c: cell{v: 1}}}
+	go writer(func() { nc.h.c.v = 16 })
+	fmt.Println("param-chain", readCell(&nc.h.c))
+
+	go writer(func() { nc.h.c.v = 17 })
+	fmt.Println("param-chain-param", chainRead(nc))
+
+	rn := &rnest{p: []int{1}, h: rholder{s: []int{2}, c: rcell{name: "r", v: 1}}}
+	go writer(func() { rn.h.c.v = 18 })
+	fmt.Println("param-chain-ref", chainRef(rn))
+
+	pk := &cell{v: 1}
+	go writer2(func() {}, func() { pk.v = 19 })
+	fmt.Println("param-later-call", readCellK(pk, parkK()))
+
+	var sv cell
+	sv.v = 1
+	go writer(func() {})
+	bumpCell(&sv)
+	fmt.Println("param-stack", sv.v)
+
+	// The promoted local's INITIALIZER parks (G's 12.5 review, gap 1): the twin awaits it inside the heap declaration.
+	go writer2(func() {}, func() {})
+	si := cell{v: parkK()}
+	bumpCell(&si)
+	fmt.Println("param-stack-init", si.v)
+
+	go writer(func() { a.bal = 50 })
+	value := a.valueRead()
+	fmt.Println("value", value)
+	fmt.Println("value after", a.bal)
+
+	go writer(func() {})
+	fmt.Println("nil", nilRoot(nil))
+
+	fmt.Println("nil-field", nilField(nil))
+
+	// Last: under GoTwinsBoxCopy the callee's prologue copies through the nil box and faults before nilParam's recover
+	// is installed, which ends the program; every row above is read first.
+	fmt.Println("param-nil-field", nilParam(nil))
+	fmt.Println("param-nil-chain", nilChain(nil))
+}

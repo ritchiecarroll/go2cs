@@ -823,7 +823,7 @@ func cgoCalledFunction(node ast.Node, declarations map[types.Object]cgoDeclarati
 // planCgoRoute plans a package's conversion through the cgo route: the trees that convert and the bindings. It returns
 // nil when the package holds no cmd/cgo output (cmd/cgo did not run), so the caller's own refusal stands, and refuses,
 // exiting before anything is written, when any C use is outside Phase 2's set.
-func planCgoRoute(pkg *packages.Package, options Options, load cgoLoad) *cgoRoute {
+func planCgoRoute(pkg *packages.Package, options Options, load cgoLoad) (*cgoRoute, error) {
 	// C++ sources need a C++ compiler (CXX) for ANOTHER target, which INC 2 does not take: R3, by name (P3's INC 2 shape
 	// read, SHOULD 5). go/packages lists them among a package's OtherFiles. At the host's own target they convert as they
 	// did before INC 2 (measured at 6bdf33a157; P3's 2a CLEAR, SHOULD 4), so the refusal reads the host first.
@@ -838,14 +838,14 @@ func planCgoRoute(pkg *packages.Package, options Options, load cgoLoad) *cgoRout
 		switch strings.ToLower(filepath.Ext(file)) {
 		case ".cc", ".cpp", ".cxx", ".c++":
 			reportDiagnostic(file, diagnosticCgoRefused, fmt.Sprintf("cgo: R3: package %s has C++ source %s, which needs a C++ compiler (CXX) for %s; INC 2 takes a C compiler only", pkg.PkgPath, filepath.Base(file), options.targetPlatform))
-			log.Fatalf("Refusing to convert: cgo: R3: package %s has C++ sources, which need a C++ compiler (CXX); INC 2 takes a C compiler only\n", pkg.PkgPath)
+			return nil, fmt.Errorf("cgo: R3: package %s has C++ sources, which need a C++ compiler (CXX); INC 2 takes a C compiler only", pkg.PkgPath)
 		}
 	}
 
 	sources, typesFile, imports, refusals := cgoTreeRoles(pkg)
 
 	if typesFile == nil && len(refusals) == 0 {
-		return nil
+		return nil, nil
 	}
 
 	info := pkg.TypesInfo
@@ -1058,7 +1058,7 @@ func planCgoRoute(pkg *packages.Package, options Options, load cgoLoad) *cgoRout
 	sort.Strings(symbols)
 
 	if len(refusals) > 0 {
-		refuseCgoRoute(pkg, refusals)
+		return nil, refuseCgoRoute(pkg, refusals)
 	}
 
 	// The link flags cmd/cgo recorded, each a plain token (§11.15): the capture links with them.
@@ -1070,7 +1070,7 @@ func planCgoRoute(pkg *packages.Package, options Options, load cgoLoad) *cgoRout
 	}
 
 	if err != nil {
-		refuseCgoRoute(pkg, []cgoUseRefusal{{position: pkg.Fset.PositionFor(typesFile.Package, false), text: err.Error()}})
+		return nil, refuseCgoRoute(pkg, []cgoUseRefusal{{position: pkg.Fset.PositionFor(typesFile.Package, false), text: err.Error()}})
 	}
 
 	// The library each symbol loads from (§6.1, §11.5), and the C toolchain that answered.
@@ -1099,22 +1099,22 @@ func planCgoRoute(pkg *packages.Package, options Options, load cgoLoad) *cgoRout
 		captured, toolchain, undefined, err = cgoCapture(load, goos, goarch, flags, symbols, symbolUses)
 
 		if len(undefined) > 0 {
-			refuseCgoRoute(pkg, undefined)
+			return nil, refuseCgoRoute(pkg, undefined)
 		}
 	}
 
 	if err != nil {
-		refuseCgoRoute(pkg, []cgoUseRefusal{{position: pkg.Fset.PositionFor(typesFile.Package, false), text: err.Error()}})
+		return nil, refuseCgoRoute(pkg, []cgoUseRefusal{{position: pkg.Fset.PositionFor(typesFile.Package, false), text: err.Error()}})
 	}
 
 	// The capture asks a library for each PLAIN name, with no header in sight, so a name a header renames is found
 	// under the wrong function. Each name is held to what cmd/cgo's own binary imports.
 	if len(symbols) > 0 && imports == nil {
-		refuseCgoRoute(pkg, []cgoUseRefusal{{position: pkg.Fset.PositionFor(typesFile.Package, false), text: "cgo: cmd/cgo wrote no dynamic imports for this package (its C does not link as go builds it), so nothing shows which symbol each C call reaches, and Phase 2 binds only a name cmd/cgo itself imports"}})
+		return nil, refuseCgoRoute(pkg, []cgoUseRefusal{{position: pkg.Fset.PositionFor(typesFile.Package, false), text: "cgo: cmd/cgo wrote no dynamic imports for this package (its C does not link as go builds it), so nothing shows which symbol each C call reaches, and Phase 2 binds only a name cmd/cgo itself imports"}})
 	}
 
 	if unverified := cgoImportedByCmdCgo(symbols, imports, symbolUses); len(unverified) > 0 {
-		refuseCgoRoute(pkg, unverified)
+		return nil, refuseCgoRoute(pkg, unverified)
 	}
 
 	set := newCgoWrapperSet(target, sizes)
@@ -1128,7 +1128,7 @@ func planCgoRoute(pkg *packages.Package, options Options, load cgoLoad) *cgoRout
 		text, err := set.wrapper(declaration)
 
 		if err != nil {
-			refuseCgoRoute(pkg, []cgoUseRefusal{{position: usedAt[declaration.object], text: strings.TrimPrefix(err.Error(), "cgo wrapper: ")}})
+			return nil, refuseCgoRoute(pkg, []cgoUseRefusal{{position: usedAt[declaration.object], text: strings.TrimPrefix(err.Error(), "cgo wrapper: ")}})
 		}
 
 		members[declaration.cName+cgoKindMemberLabel(declaration.kind)] = text
@@ -1173,7 +1173,7 @@ func planCgoRoute(pkg *packages.Package, options Options, load cgoLoad) *cgoRout
 	cgoRouteFunctions = functions
 	cgoCheckClosures = closures
 
-	return route
+	return route, nil
 }
 
 // cgoSymbolOf is the C symbol a called declaration binds, which the capture finds a library for and the verified-names
@@ -1216,7 +1216,7 @@ func cgoMentionsPrefix(node ast.Node, prefix string) bool {
 }
 
 // refuseCgoRoute reports each refused C use at its source position, and exits before anything is written.
-func refuseCgoRoute(pkg *packages.Package, refusals []cgoUseRefusal) {
+func refuseCgoRoute(pkg *packages.Package, refusals []cgoUseRefusal) error {
 	sort.SliceStable(refusals, func(i, j int) bool {
 		a, b := refusals[i].position, refusals[j].position
 
@@ -1231,7 +1231,9 @@ func refuseCgoRoute(pkg *packages.Package, refusals []cgoUseRefusal) {
 		reportDiagnostic(refusal.position.String(), diagnosticCgoRefused, refusal.text)
 	}
 
-	log.Fatalf("Refusing to convert: package %s uses C in %d way(s) cgo Phase 2 does not bind, each named above with the phase that owns it; nothing was written\n", pkg.PkgPath, len(refusals))
+	// The caller hands this to refusePackage: fatal for a single package, and under -recurse the package is skipped and
+	// named while the rest of the module converts (recurseRefusal.go; COORD's ruling on C2's 193007Z).
+	return fmt.Errorf("package %s uses C in %d way(s) cgo Phase 2 does not bind, each named above with the phase that owns it; nothing was written", pkg.PkgPath, len(refusals))
 }
 
 // cgoBindingsHeader writes the bindings file's header (§4.1, as amended by §11.20, M4): the target, the C toolchain's
@@ -1506,6 +1508,14 @@ func cgoHostTarget(load cgoLoad, target string) error {
 	}
 
 	triple, err := cgoCompilerTriple(load, target)
+
+	// A C compiler that does not resolve at all is the case where cmd/cgo itself cannot run: R3 steps aside, and the
+	// no-compiler contract holds unchanged (a plain cgo-tag file converts; a raw cgo source is refused naming its file;
+	// "cmd/cgo did not run"). R3 guards against a compiler that TARGETS the wrong platform, so one that resolves and
+	// fails, or answers another triple, is still refused (COORD's ruling on the train 3 red: the i7, no gcc on PATH).
+	if errors.Is(err, exec.ErrNotFound) {
+		return nil
+	}
 
 	if err != nil {
 		return fmt.Errorf("cgo: R3: this -cgo conversion asks for %s (the host is %s), and the C compiler go env CC names in its load did not answer -dumpmachine: %w", target, hostTarget, err)

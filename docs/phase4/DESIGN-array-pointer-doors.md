@@ -2319,6 +2319,8 @@ panic. The base was wrong there too, since To's box read the element bytes as an
 regression; it is the window's limit, read from the code and not measured. A conversion taken after the assignment
 answers the new elements.
 
+*Amendment 2026-11-21: measured, the limit above holds for none of 22 whole-assignment shapes once two converter defects found by the measurement are fixed; one shape remains (a return into a named result under a defer); see section 21.*
+
 ### 20.3 Red first, and the readings
 
 GolibTests `KeptArrayDoorTests`, 11 arms: the C-memory tuple store (refused through `To`, written in place through the
@@ -2417,3 +2419,154 @@ way, so the tests after it in the root host are unmeasured in both runs. It is n
      disk out (1 GB left, MSB4017 on a full device) and also reds on SockaddrRoundTrip, a windows-only project the linux
      flavour cannot compile; its 105 members outside tests/Behavioral, built through a solution filter, compile with
      0 errors, and the behavioral members were compiled by the census run above. -->
+
+
+## 21. Amendment 2026-11-21 (P5): a whole assignment copies into the window's storage; one shape remains
+
+20.2 says a window kept past a whole assignment to its value addresses the old elements, because `a = b` is emitted
+`a = b.Clone()`. For a whole assignment in statement position that emission had already gone when door C landed: since
+the in-place reassign (DESIGN-array-reassign-in-place.md on claude/r-reassign-census, landed as 5953f454d0), a whole
+assignment to an existing array location is emitted `a.Assign(b)`, and to a struct holding an array `h.AssignFrom(...)`,
+and both copy into the storage the location already has. The window is cut over that storage, so it sees the new
+elements and a write through it lands in them. 20.2 was read from the code and not measured, and it misread that
+emission.
+
+It was right for the paths the in-place reassign did not reach. Measured (21.1), two converter defects and one
+remaining shape:
+
+- **A tuple assignment in a for clause** (`for a, n = b, 0; ...`, and the same in the post clause) still emitted
+  `(a, n) = (b.Clone(), 0)`: the tuple's in-place copy needed statement position (visitAssignStmt.go, "a for-loop
+  clause has neither"). Fixed in this seat (bb687e3e32): in the init clause the `Assign` calls follow as a C# expression
+  list, `for ((var aᴛ1, n) = (b.Clone(), 0), a.Assign(aᴛ1); ...)`, with a non-identifier target captured before the
+  loop; in the post clause, where C# allows no declaration, the temporary is declared in the hoist buffer, which lowers
+  the post to the end of the body behind the existing continue label. The standard library holds no such clause (21.2).
+- **An escaping named array result in a function with a defer** was boxed as `heap<array<T>>(out ...)`, which is
+  `default(array<T>)`: no storage. That is the "destination with none" this section first called unreachable through
+  the door. It is reachable: a window cut over the result threw at the cut, and, door or not, every index through the
+  result panicked with length 0. Fixed in this seat (901eb8fbf2): the result gets `heap(new array<T>(N), out ...)`, as a
+  local does. The committed corpus holds no instance of the bare form.
+- **What remains: `return v` into a named result, in a function with a defer**, is emitted `a = v` before the deferred
+  calls run, so it replaces the result's storage. A window, a slice (`s := a[:]`) or an element pointer (`&a[1]`) taken
+  earlier and written by a deferred call misses the returned value: Go returns `7 2` where the conversion returns `1 2`.
+  This is not door C's; it reaches plain slices too, and it is the in-place reassign's missing return path. Recorded in
+  Limitations.md ("A few quiet ones") and KnownIssues.md, with the workaround (assign the result, `a = v`, then a bare
+  `return`, which takes `a.Assign(v)`; measured green). The standard library has no instance (21.2). Fixing it means
+  the defer-mode return in visitReturnStmt taking `Assign`/`AssignFrom`, with tuple temporaries for a multi-result
+  return; sized at about one lane-day with its corpus footprint, so it is posted for scheduling rather than cut here.
+
+A map element (`m[k] = b`) keeps the clone by rule: a Go map value is not addressable, so no window can be cut over
+it.
+
+### 21.1 The guard, and its controls
+
+Behavioral `ArrayViewWholeAssign`, 30 lines, each taking a window (or, for a named result, an element through the result's
+address), assigning the whole value and printing the value's first element and the window's element 2, compared to Go:
+a variable from a variable, from a literal, from a call, a tuple, a swap, an array field, a whole struct (the field
+view), an element of an array of arrays, the outer array, `*p`, a package variable, an element of a slice of structs;
+the for init, for post and for-clause field tuples; if-init and switch-init tuples; a multi-value right side
+(`a, err = f()`); a range that assigns (`for _, a = range arrs`); a struct inside a struct; `*ph = holder{...}`; a named
+array type; an index through an escaping named result in a function with a defer; a select receive and a comma-ok
+receive (`a, ok = <-ch`); a single assignment in a for init and in a for post (`for a = b; ...`, `...; a = b`, the
+one-operand path); a labelled `continue outer` from an inner loop into a loop whose post was lowered; and an index
+through an escaping named result of a struct holding an array, and of an alias of an array type (`type A = [8]uint64`),
+each in a function with a defer. All four phases pass.
+
+Controls, each a scratch build, the converter source restored sha-identical:
+
+- In-place assignment off. The edit: the first statement of `valueAssignInPlace` (arrayCloneOperations.go) made
+  `if true { return false }`. The twelve statement-position lines red, each printing the old element and 0, which is
+  exactly the loss 20.2 described (run on the first twelve, before the other shapes existed).
+- The converter before bb687e3e32: the three for-clause lines red (`for cl  : 101 0 1`, `for post: 171 0 2`,
+  `for fld : 181 0 1`), the other seven new lines green, as predicted before the run.
+- The converter before 901eb8fbf2: the named-result line panics, `index out of range [1] with length 0`.
+- The converter at 10a8a1b325, before the alias fold (P3's review, COORD 144923Z): the alias-of-array result line
+  panics the same way, since `type A = [8]uint64` is a `*types.Alias` and missed the array test; the other four new
+  lines (both single assignments, the labelled continue, the struct result) green, all five as predicted before the run.
+  The fold unaliases the result type first.
+
+### 21.2 The standard library census
+
+A go/packages pass over `std` with test files, at windows/amd64, linux/amd64, darwin/amd64 and linux/arm64: a for
+clause whose tuple assigns an array or a struct holding one, 0 (positive control: the guard reads 3 of 3); a function
+with a defer, a named result of such a type and an explicit return, 4 (net goLookupIPCNAMEOrder, internal/trace
+MakeEvent and ReadEvent, log/slog Value.Resolve), none taking the address, a slice or an element address of the result
+(positive control: the probes read 3 of 3). The predicate does not see an alias taken through a field of a struct
+result or through a pointer-receiver method call; the four were read and take neither.
+
+## 22. Amendment 2026-11-21 (P5): the return into a named result copies in place; the remaining shape is fixed
+
+21's last bullet left one shape: `return v` into a named result, in a function with a defer, was emitted `a = v` before
+the deferred calls ran, so it replaced the result's storage, and a slice, an element pointer or a window taken from the
+result earlier and written by a deferred call missed the returned value (Go `7 2`, conversion `1 2`). COORD scheduled
+the fix as its own seat (134304Z). It is fixed, and the Limitations and KnownIssues entries are removed.
+
+### 22.1 The change
+
+- **The defer-mode return** (visitReturnStmt.go) asks `valueAssignMethod` of each named result's type, the predicate
+  the in-place reassign uses for `=`. A single result that owns array storage is emitted `a.Assign(v)` (an array) or
+  `h.AssignFrom(v)` (a struct holding one), without the clone: the call copies the elements into the result's own
+  storage. In a tuple, each such operand becomes a temporary in the deconstruction and its copy follows the statement,
+  left to right, as in the tuple path of visitAssignStmt: `(var aᴛ1, err) = (mk(), default); a.Assign(aᴛ1);`. A result
+  forwarded from a call (`return pair()`) takes the same form, `(var aᴛ1, err) = pair(); a.Assign(aᴛ1);`. A result
+  reached through its box inside a function literal is `Ꮡa.Value.Assign(...)`. Results with no value-assign method, and
+  every return outside defer mode, are emitted as before. In a tuple the clone of a variable operand is kept; it is
+  redundant before the copy, and correct.
+- **A function literal's escaping named array result** was declared `heap<array<T>>(out var Ꮡa)` outside the wrapper
+  (iifeOperations.go, namedReturnDeclLines), which is `default(array<T>)`: no storage, so every index through the result
+  panicked with length 0. It now takes `heap(new array<T>(N), out var Ꮡa)`, the literal twin of the 901eb8fbf2
+  declaration in visitFuncDecl, with the alias unwrapped as in the 21 fold. A literal whose result is not boxed takes the
+  frame form's plain local and was never affected by this half.
+
+### 22.2 The guard, red first
+
+`ArrayViewWholeAssign` gains 14 lines (44 in all), each a named result written by a deferred call through something
+taken from it before an explicit return: a slice, an element pointer, a window, a struct result's array field, a named
+array type, a tuple `return mk(), nil`, the second of two results with an early return, a recovered panic, a return of
+a variable, a function literal's result (plain and captured), a literal whose result's address is taken (an index
+through it, and `return [8]uint64{1, 2}` written through the pointer), and a forwarded call `return pair()`. Go output
+checked first.
+
+- The converter at d7df22c615 (door C with its fold): 11 lines lose the deferred write (`ret slice: 1 2` against Go's
+  `7 2`, and the same loss on each of the other ten), and the address-taken literal panics `index out of range [1] with
+  length 0`, which stops the program there, so the last two lines are not reached. The forwarded call is red by its
+  emission (`(a, err) = pair();`), read and not run. Predictions P-RD-3, P-RD-5 and P-RD-6 were
+  written before each run; P-RD-3 missed the plain literal in kind (it lost the write, it did not die, because a literal
+  whose result is not boxed takes the frame form's local), which is why the address-taken pair was added.
+- The fixed converter: 44 of 44 lines equal Go; the golden re-baselined from that emission and byte-equal to it.
+- check-no-regression moved one more behavioral file, not predicted: ZeroValueArrayNamedResult, whose `withDefer`
+  ends `return a4, nil` under a defer and now emits `(var a4ᴛ1, err) = (a4.Clone(), default); a4.Assign(a4ᴛ1);`. Its
+  golden is re-baselined and all four phases pass, output equal to Go. No other behavioral file moves.
+
+### 22.3 The corpus footprint
+
+Seeded `-stdlib -comments` reconverts, base converter d7df22c615 against the fix, one target per run (windows/amd64,
+linux/amd64, darwin/amd64, linux/arm64), both arms at one root path, seeded from this branch's `src/core` with
+`version.props`. On every target the same two files differ, by the same 27 lines: internal/trace event.cs (the 11
+returns of MakeEvent) and reader.cs (the 16 of Reader.ReadEvent), each line `(e, err) = (...)` becoming
+`(var eᴛN, err) = (...); e.AssignFrom(eᴛN);` on the same line. No line is added or removed, no position-map line moves,
+and no project file or README differs; the bare `heap<array<..>>(out var` count is 5 in both arms (all `:=` locals, none
+a literal's result). The hunks are applied verbatim in this seat and internal/trace builds clean.
+
+Of the four functions 21.2 named, net goLookupIPCNAMEOrder and log/slog Value.Resolve do not move: the first has no
+defer of its own (the census predicate saw one inside a function literal), and the second's result type, Value, holds
+only a zero-length array and has no value-assign method (its return is emitted `rv = v;` with no clone). Both were
+predicted 0 before the run (P-RD-7). The prediction missed the trace counts by one per file: it counted the
+`goto ᒐdone` returns and not each function's terminal return. Event's arrays are copied into the result's storage now;
+nothing in either function takes an alias of the result, so the banked internal/trace row should read as before. It
+was not re-run in this seat; the union sweep reads it.
+
+### 22.4 Amendment 2026-11-21 (P5): P3's review, three guard rows and one clause
+
+P3 cleared the seat (2026-11-21 17:41Z) with two SHOULD rows and one NIT. COORD ruled one commit on the seat:
+- **Three guard rows** in ArrayViewWholeAssign, each compared to Go. None reds at this tip, so none needed a fix:
+  - `retCrossed`, `func f() (a, b [8]uint64)` ending `return b, a`: the temps take both operands before either result
+    is stored, so the results swap. Go and C# print `7 2 8 1`.
+  - `retPanicAfter`, `return [8]uint64{1, 2}, boom()` under a recovering defer: the panic comes before any result is
+    stored, so `a` stays zero and only the deferred write reaches it. Go and C# print `0 5 <nil>`.
+  - `retNamedTuple`, a `named` array result in a tuple fed an unnamed array: the temp takes the operand's type and
+    `a.Assign(aᴛ1)` compiles. Go and C# print `7 2 <nil>`.
+  The guard is now 47 lines, all equal to Go, and its golden is re-baselined by `UpdateTestTargets --only`.
+- **The internal/trace banked row** (SHOULD 2) is COORD's to name in the batch's gate list; it was not re-run here.
+- **NIT, `visitReturnStmt.go`.** The tuple form names its temps from `namedReturnNames` by target index, so the
+  in-place condition now also requires `len(v.namedReturnNames) == len(assignTargets)`. Where they differ, the return
+  keeps the plain assignment instead of indexing past the names.
