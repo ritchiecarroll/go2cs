@@ -106,11 +106,14 @@ func checkOutputRootOutsideModule(moduleDir string, outRoot string) error {
 //
 // Only ordinary packages reachable from the variants are added, with their production imports.
 func (m *ModuleConverter) addTestOnlyPackages(moduleDir string, closure map[string]*packages.Package) error {
+	// The run's build tags and environment, as the production load (loadClosure) and each test conversion read the
+	// module: a test file under a -tags tag converts, so the packages only it imports must be discovered too.
 	cfg := &packages.Config{
-		Mode:  packages.NeedName | packages.NeedFiles | packages.NeedImports | packages.NeedDeps | packages.NeedModule | packages.NeedForTest,
-		Dir:   moduleDir,
-		Tests: true,
-		Env:   converterLoaderEnv(),
+		Mode:       packages.NeedName | packages.NeedFiles | packages.NeedImports | packages.NeedDeps | packages.NeedModule | packages.NeedForTest,
+		Dir:        moduleDir,
+		Tests:      true,
+		BuildFlags: m.options.loaderBuildFlags(),
+		Env:        m.closureLoaderEnv(),
 	}
 
 	roots, err := packages.Load(cfg, "./...")

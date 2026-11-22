@@ -288,6 +288,26 @@ func (m *ModuleConverter) ConvertModule(moduleDir string) (result error) {
 	return m.runError()
 }
 
+// closureLoaderEnv is the environment of every load that discovers the module's closure, the production one
+// (loadClosure) and the test one (addTestOnlyPackages): the converter's loader environment, for the target platform
+// when one is set. Under -recurse -cgo the closure is loaded cgo-ON, as Go builds it: a cgo-only package (every file
+// imports "C") has no cgo-off files, so its importers would not type-check against it otherwise. Each package's own
+// load is cgo-on too (processConversion), and a package whose selected files import "C" takes the cgo route there.
+func (m *ModuleConverter) closureLoaderEnv() []string {
+	env := converterLoaderEnv()
+	targetParts := strings.Split(m.options.targetPlatform, "/")
+
+	if len(targetParts) == 2 {
+		env = converterLoaderEnv("GOOS="+targetParts[0], "GOARCH="+targetParts[1])
+	}
+
+	if m.options.parseCgoTargets {
+		env = append(env, "CGO_ENABLED=1")
+	}
+
+	return env
+}
+
 // loadClosure loads the module at moduleDir and returns its transitive import closure keyed by
 // import path (roots + every reachable import, including the standard library, which is classified
 // out later).
@@ -309,21 +329,8 @@ func (m *ModuleConverter) loadClosure(moduleDir string) (map[string]*packages.Pa
 		Mode:       mode,
 		Dir:        moduleDir,
 		BuildFlags: m.options.loaderBuildFlags(),
-		Env:        converterLoaderEnv(),
+		Env:        m.closureLoaderEnv(),
 		ParseFile:  parseFileUnparenAddressOperands,
-	}
-
-	targetParts := strings.Split(m.options.targetPlatform, "/")
-
-	if len(targetParts) == 2 {
-		cfg.Env = converterLoaderEnv("GOOS="+targetParts[0], "GOARCH="+targetParts[1])
-	}
-
-	// Under -recurse -cgo the closure is loaded cgo-ON, as Go builds it: a cgo-only package (every file imports "C")
-	// has no cgo-off files, so its importers would not type-check against it otherwise. Each package's own load is
-	// cgo-on too (processConversion), and a package whose selected files import "C" takes the cgo route there.
-	if m.options.parseCgoTargets {
-		cfg.Env = append(cfg.Env, "CGO_ENABLED=1")
 	}
 
 	pkgs, err := packages.Load(cfg, "./...")
