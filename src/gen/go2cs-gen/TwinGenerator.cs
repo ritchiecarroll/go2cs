@@ -114,7 +114,7 @@ public sealed partial class TwinGenerator : ISourceGenerator
     // test seam (GoTwinsGuardDrop) is here too, and a twin-refuse.txt additional file is refused the same way.
     internal static readonly string[] ArmSwitches =
     [
-        "GoTwinsIface", "GoTwinsIfaceAll", "GoTwinsIfaceUnmark", "GoTwinsGo", "GoTwinsPairs", "GoTwinsCallerRule",
+        "GoTwinsIface", "GoTwinsIfaceAll", "GoTwinsIfaceUnmark", "GoTwinsGo", "GoTwinsCallerRule",
         "GoTwinsForwarders", "GoTwinsGuardWarn", "GoTwinsGuardDrop",
         "GoTwinsBoxRecv", "GoTwinsBoxForwarders", "GoTwinsBoxCopy", "GoTwinsBoxParam", "GoTwinsBoxArgCopy"
     ];
