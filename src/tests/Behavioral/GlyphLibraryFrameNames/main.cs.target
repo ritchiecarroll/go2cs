@@ -17,6 +17,25 @@ internal static @string Closure(this local l) {
     return f();
 }
 
+partial struct ring {
+}
+
+internal static @string init(this ref ring r) {
+    @string f() => framelib.Here();
+
+    return f();
+}
+
+internal static @string initClosure;
+
+[GoInit] internal static void init() {
+    void f() {
+        initClosure = framelib.Here();
+    }
+
+    f();
+}
+
 internal static @string funcName(any f) {
     return runtime.FuncForPC(reflect.ValueOf(f).Pointer()).Name();
 }
@@ -29,6 +48,8 @@ internal static void main() {
     fmt.Println("closure in value method:", c.Closure());
     fmt.Println("closure in pointer method:", p.Bump());
     fmt.Println("local closure:", new local().Closure());
+    fmt.Println("closure in func init:", initClosure);
+    fmt.Println("closure in method init:", (Ꮡ(new ring())).init());
 
     var cʗ1 = c;
     fmt.Println("value method value:", funcName(() => cʗ1.Name()));
