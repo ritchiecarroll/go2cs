@@ -7,7 +7,7 @@
 # $(Version) from version.props -- so this script only stamps the winres resource.
 #
 # WINDOWS-ONLY BY NATURE, and deliberately NOT ported (F14, docs/PLAN-linux-operation.md). What it
-# stamps is a Windows PE version resource; it also drives ReplaceInFiles.exe and `cmd /c pause`.
+# stamps is a Windows PE version resource (go-winres); it also drives `cmd /c pause`.
 # There is nothing for it to do on Linux or macOS, so it fails fast rather than half-running.
 
 # $IsWindows is a PowerShell 6+ automatic variable. On Windows PowerShell 5.1 it does not exist, and
@@ -15,14 +15,17 @@
 $isWindowsHost = if ($null -eq (Get-Variable -Name 'IsWindows' -ErrorAction SilentlyContinue)) { $true } else { $IsWindows }
 
 if (-not $isWindowsHost) {
-    throw "set-version.ps1 stamps a Windows PE version resource (go-winres + ReplaceInFiles.exe) and has no non-Windows equivalent. Run it from Windows."
+    throw "set-version.ps1 stamps a Windows PE version resource (go-winres) and has no non-Windows equivalent. Run it from Windows."
 }
 
 $version = "0.1.4"
 $fullVersion = "$version.0"
 
 # Update version in exe resource file
-.\utilities\ReplaceInFiles\ReplaceInFiles.exe -x -e:UTF8 .\go2cs\winres\winres.json "version\`"\: \`"((\*~!~\d+)\.)+(\*~!~\d+)\`" "version\`": \`"$fullVersion\`"
+$winres = Join-Path $PSScriptRoot 'go2cs\winres\winres.json'
+$json = [System.IO.File]::ReadAllText($winres)
+$json = [regex]::Replace($json, '(version": ")\d+(?:\.\d+)+(")', "`${1}$fullVersion`${2}")
+[System.IO.File]::WriteAllText($winres, $json, (New-Object System.Text.UTF8Encoding $false))
 
 # Rebuild resource file
 cd go2cs

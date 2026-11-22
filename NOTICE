@@ -15,6 +15,10 @@ not be limited to, the following:
 * Go Standard Library Source Files (converted to C#) (https://github.com/golang/go):
         Copyright (c) 2009 The Go Authors. All rights reserved.
 
+Portions of this software (src/forks/github.com/zeebo/xxh3@v1.1.0, a modified copy of
+github.com/zeebo/xxh3) were licensed using the BSD 2-clause license:
+https://opensource.org/licenses/BSD-2-Clause. See that directory's LICENSE and FORK.md.
+
 =========================================================================================================
 
 This software includes design resources that were licensed using the Creative Commons 3.0
