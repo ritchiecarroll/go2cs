@@ -45,7 +45,7 @@ Native AOT executable: 132,838,912 -> 132,839,936 bytes (+1,024).
 | P6-2 | ns per round trip fall 2-8%, JIT and AOT | JIT +0.53%; AOT -3.64% | AOT MET; JIT MISSED (no time gain), inside the +2% revert line |
 | P6-3 | the AOT park step clears 900 ns by >= 110 ns | 755 -> 728 ns: 172 ns under | MET (base on this instrument already read 755) |
 | P6-4 | controls within +-3% | 5 of 6 within +-1.5% | JIT call -16.9% MISSED: a FINDING, not a gain (below) |
-| P6-5 | no behaviour change: GolibTests R/D, GenTests, the Q1 kit, closure arm S | gates at the seat's push | (recorded with the gates) |
+| P6-5 | no behaviour change: GolibTests R/D, GenTests, the Q1 kit, closure arm S | all green (section below) | MET |
 
 **P6-4, the JIT call control.** The `call` mode never parks, yet every cut process read faster (cut 3.95-4.73 ns,
 base 4.85-5.51 ns), and a re-run alone reproduced it. With `DOTNET_TieredPGO=0` both arms read 7.7-7.9 ns, identical,
@@ -55,3 +55,18 @@ work, and is never to be quoted as a gain.
 **Every Native AOT run exits 2** after its timed lines, in both arms, with the scheduler on and off: MnCost's final
 `fmt.Println` reaches golib's `ReceiverKeyOf` (these arms predate P2's fix `18d5a2af71`). The timings are written
 before it. The JIT output is EQUAL to Go (`ok 55 10 55 10`).
+
+## The gates, P6-5 (2026-11-21, on d0330a86ac)
+
+Unfiltered, with GOROOT and PATH pinned to go1.26.11 so the oracle tests run:
+- GenTests 751 of 751.
+- GolibTests Release 3,056 passed / 52 skipped / 0 failed of 3,108; Debug 3,031 / 77 / 0 of 3,108 (the expected skips).
+- The 7b Q1 kit: 20 of 20 builds green (MnStormTwin and MnLaterArg fail as always), GO2CS0017 = 0 and GO2CS0018 = 0
+  in all 22, and every twin and ifhall run that has a plain build is EQUAL to it (8 of 8).
+- MnHttpClosure reconverted with this tree's converter (185 packages, 0 errors), arm S, the shipping rule: build 432 s,
+  GO2CS0017 = 0, GO2CS0018 = 0, entry `RunMainꞏtwin` (the precondition), 3 runs under `GO2CS_MN=1` each EQUAL to Go
+  with a READING line (steps 74, parks 36, thread-blocks 0).
+- repoguard, full: rc 0.
+
+The Q1 kit's first pass that evening built nothing and still read rc 0: its output folder did not exist. The kit now
+creates it and counts what it read; a run with under 20 builds or 8 twin runs fails by name.
