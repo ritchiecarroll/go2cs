@@ -968,13 +968,13 @@ internal static bool http2http2ConfigStrictMaxConcurrentRequests(ref HTTP2Config
 // TODO: Benchmark to determine if the pools are necessary. The GC may have
 // improved enough that we can instead allocate chunks like this:
 // make([]byte, max(16<<10, expectedBytesRemaining))
-[GoLazy] partial class lazyᴛhttp2dataChunkPools { internal static readonly ж<array<sync.Pool>> Ꮡhttp2dataChunkPools = new StaticBox<array<sync.Pool>>(array<sync.Pool>([
+[GoLazy] partial class lazyᴛhttp2dataChunkPools { internal static readonly ж<array<sync.Pool>> Ꮡhttp2dataChunkPools = new StaticBox<array<sync.Pool>>(new sync.Pool[]{
     new(New: [GoFunc("init.func1")] () => Ꮡ(new array<byte>(1024))),
     new(New: [GoFunc("init.func2")] () => Ꮡ(new array<byte>(2048))),
     new(New: [GoFunc("init.func3")] () => Ꮡ(new array<byte>(4096))),
     new(New: [GoFunc("init.func4")] () => Ꮡ(new array<byte>(8192))),
     new(New: [GoFunc("init.func5")] () => Ꮡ(new array<byte>(16384)))
-])); }
+}.array()); }
 internal static ref array<sync.Pool> http2dataChunkPools => ref ((StaticBox<array<sync.Pool>>)Ꮡhttp2dataChunkPools).ValueSlot;
 
 internal static slice<byte> http2getDataBufferChunk(int64 size) {

@@ -132,7 +132,7 @@ internal static void encode⁔(/*this*/ ref Profile p, ж<buffer> b) {
     encodeInt64Opt(ref (b).DerefOrNull(), 12, p.Period);
 }
 
-[GoLazy] partial class lazyᴛprofileDecoder { internal static slice<Func<ж<buffer>, message, error>> profileDecoder = [
+[GoLazy] partial class lazyᴛprofileDecoder { internal static slice<Func<ж<buffer>, message, error>> profileDecoder = new Func<ж<buffer>, message, error>[]{
     default, // 0
     // repeated ValueType sample_type = 1
     [GoFunc("init.func1")] (ж<buffer> b, message m) => {
@@ -201,7 +201,7 @@ internal static void encode⁔(/*this*/ ref Profile p, ж<buffer> b) {
     [GoFunc("init.func13")] (ж<buffer> b, message m) => decodeInt64s(ref (b).DerefOrNull(), m._<message, ж<Profile>>().ᏑcommentX),
     // int64 defaultSampleType = 14
     [GoFunc("init.func14")] (ж<buffer> b, message m) => decodeInt64(ref (b).DerefOrNull(), m._<message, ж<Profile>>().ᏑdefaultSampleTypeX)
-]; }
+}.slice(); }
 
 // postDecode takes the unexported fields populated by decode (with
 // suffix X) and populates the corresponding exported fields.
@@ -314,13 +314,13 @@ internal static void encode⁔(/*this*/ ref ValueType p, ж<buffer> b) {
     encodeInt64Opt(ref (b).DerefOrNull(), 2, p.unitX);
 }
 
-[GoLazy] partial class lazyᴛvalueTypeDecoder { internal static slice<Func<ж<buffer>, message, error>> valueTypeDecoder = [
+[GoLazy] partial class lazyᴛvalueTypeDecoder { internal static slice<Func<ж<buffer>, message, error>> valueTypeDecoder = new Func<ж<buffer>, message, error>[]{
     default, // 0
     // optional int64 type = 1
     [GoFunc("init.func15")] (ж<buffer> b, message m) => decodeInt64(ref (b).DerefOrNull(), m._<message, ж<ValueType>>().ᏑtypeX),
     // optional int64 unit = 2
     [GoFunc("init.func16")] (ж<buffer> b, message m) => decodeInt64(ref (b).DerefOrNull(), m._<message, ж<ValueType>>().ᏑunitX)
-]; }
+}.slice(); }
 
 internal static slice<Func<ж<buffer>, message, error>> decoder⁔(/*this*/ ref Sample p) {
     return sampleDecoder;
@@ -336,7 +336,7 @@ internal static void encode⁔(/*this*/ ref Sample p, ж<buffer> b) {
     }
 }
 
-[GoLazy] partial class lazyᴛsampleDecoder { internal static slice<Func<ж<buffer>, message, error>> sampleDecoder = [
+[GoLazy] partial class lazyᴛsampleDecoder { internal static slice<Func<ж<buffer>, message, error>> sampleDecoder = new Func<ж<buffer>, message, error>[]{
     default, // 0
     // repeated uint64 location = 1
     [GoFunc("init.func17")] (ж<buffer> b, message m) => decodeUint64s(ref (b).DerefOrNull(), m._<message, ж<Sample>>().ᏑlocationIDX),
@@ -349,7 +349,7 @@ internal static void encode⁔(/*this*/ ref Sample p, ж<buffer> b) {
         s.labelX = append(s.labelX, new Label());
         return decodeMessage(b, new Labelжmessage(Ꮡ(s.labelX, n)));
     }
-]; }
+}.slice(); }
 
 internal static slice<Func<ж<buffer>, message, error>> decoder⁔(/*this*/ Label p) {
     return labelDecoder;
@@ -361,7 +361,7 @@ internal static void encode⁔(/*this*/ Label p, ж<buffer> b) {
     encodeInt64Opt(ref (b).DerefOrNull(), 3, p.numX);
 }
 
-[GoLazy] partial class lazyᴛlabelDecoder { internal static slice<Func<ж<buffer>, message, error>> labelDecoder = [
+[GoLazy] partial class lazyᴛlabelDecoder { internal static slice<Func<ж<buffer>, message, error>> labelDecoder = new Func<ж<buffer>, message, error>[]{
     default, // 0
     // optional int64 key = 1
     [GoFunc("init.func20")] (ж<buffer> b, message m) => decodeInt64(ref (b).DerefOrNull(), m._<message, ж<Label>>().ᏑkeyX),
@@ -369,7 +369,7 @@ internal static void encode⁔(/*this*/ Label p, ж<buffer> b) {
     [GoFunc("init.func21")] (ж<buffer> b, message m) => decodeInt64(ref (b).DerefOrNull(), m._<message, ж<Label>>().ᏑstrX),
     // optional int64 num = 3
     [GoFunc("init.func22")] (ж<buffer> b, message m) => decodeInt64(ref (b).DerefOrNull(), m._<message, ж<Label>>().ᏑnumX)
-]; }
+}.slice(); }
 
 internal static slice<Func<ж<buffer>, message, error>> decoder⁔(/*this*/ ref Mapping p) {
     return mappingDecoder;
@@ -388,7 +388,7 @@ internal static void encode⁔(/*this*/ ref Mapping p, ж<buffer> b) {
     encodeBoolOpt(ref (b).DerefOrNull(), 10, p.HasInlineFrames);
 }
 
-[GoLazy] partial class lazyᴛmappingDecoder { internal static slice<Func<ж<buffer>, message, error>> mappingDecoder = [
+[GoLazy] partial class lazyᴛmappingDecoder { internal static slice<Func<ж<buffer>, message, error>> mappingDecoder = new Func<ж<buffer>, message, error>[]{
     default, // 0
     [GoFunc("init.func23")] (ж<buffer> b, message m) => decodeUint64(ref (b).DerefOrNull(), m._<message, ж<Mapping>>().ᏑID),           // optional uint64 id = 1
     [GoFunc("init.func24")] (ж<buffer> b, message m) => decodeUint64(ref (b).DerefOrNull(), m._<message, ж<Mapping>>().ᏑStart),        // optional uint64 memory_offset = 2
@@ -400,7 +400,7 @@ internal static void encode⁔(/*this*/ ref Mapping p, ж<buffer> b) {
     [GoFunc("init.func30")] (ж<buffer> b, message m) => decodeBool(ref (b).DerefOrNull(), m._<message, ж<Mapping>>().ᏑHasFilenames),   // optional bool has_filenames = 8
     [GoFunc("init.func31")] (ж<buffer> b, message m) => decodeBool(ref (b).DerefOrNull(), m._<message, ж<Mapping>>().ᏑHasLineNumbers), // optional bool has_line_numbers = 9
     [GoFunc("init.func32")] (ж<buffer> b, message m) => decodeBool(ref (b).DerefOrNull(), m._<message, ж<Mapping>>().ᏑHasInlineFrames) // optional bool has_inline_frames = 10
-]; }
+}.slice(); }
 
 internal static slice<Func<ж<buffer>, message, error>> decoder⁔(/*this*/ ref Location p) {
     return locationDecoder;
@@ -415,7 +415,7 @@ internal static void encode⁔(/*this*/ ref Location p, ж<buffer> b) {
     }
 }
 
-[GoLazy] partial class lazyᴛlocationDecoder { internal static slice<Func<ж<buffer>, message, error>> locationDecoder = [
+[GoLazy] partial class lazyᴛlocationDecoder { internal static slice<Func<ж<buffer>, message, error>> locationDecoder = new Func<ж<buffer>, message, error>[]{
     default, // 0
     [GoFunc("init.func33")] (ж<buffer> b, message m) => decodeUint64(ref (b).DerefOrNull(), m._<message, ж<Location>>().ᏑID),         // optional uint64 id = 1;
     [GoFunc("init.func34")] (ж<buffer> b, message m) => decodeUint64(ref (b).DerefOrNull(), m._<message, ж<Location>>().ᏑmappingIDX), // optional uint64 mapping_id = 2;
@@ -426,7 +426,7 @@ internal static void encode⁔(/*this*/ ref Location p, ж<buffer> b) {
         pp.Line = append(pp.Line, new Line());
         return decodeMessage(b, new Lineжmessage(Ꮡ(pp.Line, n)));
     }
-]; }
+}.slice(); }
 
 internal static slice<Func<ж<buffer>, message, error>> decoder⁔(/*this*/ ref Line p) {
     return lineDecoder;
@@ -437,13 +437,13 @@ internal static void encode⁔(/*this*/ ref Line p, ж<buffer> b) {
     encodeInt64Opt(ref (b).DerefOrNull(), 2, p.ΔLine);
 }
 
-[GoLazy] partial class lazyᴛlineDecoder { internal static slice<Func<ж<buffer>, message, error>> lineDecoder = [
+[GoLazy] partial class lazyᴛlineDecoder { internal static slice<Func<ж<buffer>, message, error>> lineDecoder = new Func<ж<buffer>, message, error>[]{
     default, // 0
     // optional uint64 function_id = 1
     [GoFunc("init.func37")] (ж<buffer> b, message m) => decodeUint64(ref (b).DerefOrNull(), m._<message, ж<Line>>().ᏑfunctionIDX),
     // optional int64 line = 2
     [GoFunc("init.func38")] (ж<buffer> b, message m) => decodeInt64(ref (b).DerefOrNull(), m._<message, ж<Line>>().ᏑΔLine)
-]; }
+}.slice(); }
 
 internal static slice<Func<ж<buffer>, message, error>> decoder⁔(/*this*/ ref Function p) {
     return functionDecoder;
@@ -457,7 +457,7 @@ internal static void encode⁔(/*this*/ ref Function p, ж<buffer> b) {
     encodeInt64Opt(ref (b).DerefOrNull(), 5, p.StartLine);
 }
 
-[GoLazy] partial class lazyᴛfunctionDecoder { internal static slice<Func<ж<buffer>, message, error>> functionDecoder = [
+[GoLazy] partial class lazyᴛfunctionDecoder { internal static slice<Func<ж<buffer>, message, error>> functionDecoder = new Func<ж<buffer>, message, error>[]{
     default, // 0
     // optional uint64 id = 1
     [GoFunc("init.func39")] (ж<buffer> b, message m) => decodeUint64(ref (b).DerefOrNull(), m._<message, ж<Function>>().ᏑID),
@@ -469,7 +469,7 @@ internal static void encode⁔(/*this*/ ref Function p, ж<buffer> b) {
     [GoFunc("init.func42")] (ж<buffer> b, message m) => decodeInt64(ref (b).DerefOrNull(), m._<message, ж<Function>>().ᏑfilenameX),
     // optional int64 start_line = 5
     [GoFunc("init.func43")] (ж<buffer> b, message m) => decodeInt64(ref (b).DerefOrNull(), m._<message, ж<Function>>().ᏑStartLine)
-]; }
+}.slice(); }
 
 internal static int64 addString(map<@string, nint> strings, @string s) {
     var (i, ok) = strings[s, ꟷ];

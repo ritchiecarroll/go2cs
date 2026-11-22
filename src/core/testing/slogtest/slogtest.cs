@@ -34,7 +34,7 @@ partial struct testCase {
     internal slice<Func<map<@string, any>, @string>> checks;
 }
 
-internal static slice<testCase> cases = slice<testCase>([
+internal static slice<testCase> cases = new testCase[]{
     new(
         name: "built-ins",
         explanation: withSource("this test expects slog.TimeKey, slog.LevelKey and slog.MessageKey"),
@@ -247,7 +247,7 @@ internal static slice<testCase> cases = slice<testCase>([
             missingKey(slog.SourceKey)
         ])
     )
-]);
+}.slice();
 
 // TestHandler tests a [slog.Handler].
 // If TestHandler finds any misbehaviors, it returns an error for each,
