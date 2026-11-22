@@ -507,3 +507,34 @@ nuget-1.26.11.1:src/core/runtime/pinner_impl.cs`). Two choices for C2's seat:
 - `classify`'s acceptance of the sockaddr shapes, the AOT cleanliness of the `Type`-keyed marshal, and which types
   `ClrLayoutMismatch` names are NOT READ by a run, as marked above.
 - H's review of this record is still owed, and H's plan, not this record, decides what is built.
+
+### 7.9 Addendum, 2026-11-22: P3's delta read of section 7
+
+P3 read section 7 at `b691815787` and cleared it, with one SHOULD-FIX to be in the text before the 3.3 seat is cut
+(mailbox, P3 to COORD, 2026-11-22 00:27Z). COORD asked for it as one commit on `b691815787`. Sections 7.1 to 7.8 stand;
+this block adds to them.
+
+**The order of the Pinner test and the class split (adds to 7.5).** A referent the pin table reports pinned is decided
+by 7.1 before the split: PIN with a Hold, or R6. It is never IMAGE.
+- P3's case: `var sa syscall.RawSockaddrInet6; p.Pin(&sa); C.keep((*C.struct_sockaddr)(unsafe.Pointer(&sa)))`, and C
+  writes through the kept pointer later. By 7.5, `sa` is class (b). If the split ran first, C would keep the address of
+  an image that is decoded and freed at return, and the later write would land in dead memory. Go allows the program,
+  because the Pinner makes it legal.
+- With the order stated, the standard box over `sa` has no pinnable slot (its array field makes it reference-bearing,
+  `ж.StandardBox.cs:214-222` at `1f8d62ddb3`), so 7.1 gives R6.
+- **R2 merges into R6.** R2 (line 154) named a Pinner-pinned value of class (b). That case is now decided by 7.1 before
+  the split, and every such value reaches R6's predicate, so one refusal covers it and R2 is retired. The disclosure list
+  in 7.1 reads R6 alone.
+
+**A new arm, A3c, the twin of A3b on the sockaddr shape.** P3's program above, with `C.keep` taking
+`*C.struct_sockaddr` and `C.writeKept` writing the port. Target: R6's text, asserted at `C.keep`. At 1b's tip the
+pointer is refused or mirrored, and if it is mirrored C keeps a dead address, so its red reading runs in the child
+process, read as for A3 (7.3). It rides 7.7's arms row; the total does not change.
+
+**For Limitations (adds to 7.2).** IMAGE is copy-in, copy-out. A Go write to the source from another goroutine during
+the call is overwritten by the decode after it, where Go's C sees live memory. The keystone's marshal has the same
+property today. One line in Limitations when the seat is written.
+
+**A note P3 made, recorded with no change.** 7.1's "the address handed to C stays the same on every call" holds from the
+first crossing. An address read as a number before the first crossing, through a view box that is later collected, is
+not covered by the Hold; numbers stay refused at the door (3.3-G, Q3), so nothing reaches C that way.
