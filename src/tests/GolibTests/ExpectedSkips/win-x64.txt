@@ -48,4 +48,5 @@ TheMintCounterMoves  # NOT MEASURED: the Q44 census is off. Set GO2CS_Q44_CENSUS
 TheSeamsCostOverARealKernelTransitionIsMeasured  # opt-in: set GO2CS_NATIVE_SEAM_PROBE to a file the READING lines are appended to
 TheStackSlotShapeIsHarmlessToANonVariadicCallee  # drives glibc's strtol; linux-only
 TheWorkingDirectoryKeepsPwdsLogicalSpellingUnderASymlink  # windows does not use PWD; ChdirTouchesPwdOnPosixAndLeavesItAloneOnWindows covers it
+ThisLinuxProcessReadsAsGlibc  # not linux
 TwentyDisjointRangesGrowTheSetPastItsInitialSixteenSlots  # the memory primitives are the linux flavour's
