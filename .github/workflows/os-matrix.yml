@@ -1441,6 +1441,49 @@ jobs:
           exit $runExit
 
       # -------------------------------------------------------------------------------------
+      # ChannelTests -- src/tests/ChannelTests, golib's own channel suite (buffered and unbuffered send, receive, close
+      # and select), which ran nowhere until 2026-11-22 (release review TC-9). It rides the golib-tests stage, in its own
+      # step so either suite's red names itself, and only when the stage has no filter: a filtered run is a targeted
+      # GolibTests probe.
+      # -------------------------------------------------------------------------------------
+      - name: ChannelTests — build and run for this GOOS
+        if: always() && needs.plan.outputs.stage == 'golib-tests' && needs.plan.outputs.filter == ''
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Continue'
+
+          $goos = $env:GOOS_TARGET
+          $rid = $env:RID
+          $art = Join-Path $PWD 'artifacts'
+          New-Item -ItemType Directory -Force -Path $art | Out-Null
+          $log = Join-Path $art "channel-tests-$goos-$rid.log"
+          $trx = Join-Path $art "channel-tests-$goos-$rid.trx"
+
+          $archArgs = @(if ($env:GoTargetArch) { "-p:GoTargetArch=$($env:GoTargetArch)" })
+          & dotnet test src/tests/ChannelTests -c Release "-p:GoTargetOS=$goos" @archArgs --blame-hang-timeout 10m `
+              --logger "trx;LogFileName=$trx" --logger 'console;verbosity=normal' -nologo *>&1 | Tee-Object -FilePath $log
+          $runExit = $LASTEXITCODE
+
+          $outcomes = @()
+          if (Test-Path -LiteralPath $trx) {
+              [xml]$doc = Get-Content -LiteralPath $trx -Raw
+              $outcomes = @($doc.TestRun.Results.UnitTestResult | Sort-Object testName | ForEach-Object { "  $($_.outcome) $($_.testName)" })
+          }
+
+          $summary = @(
+              "## ChannelTests -- GOOS=$goos ($rid)"
+              ''
+              "exit ``$runExit``"
+              ''
+              '```'
+          ) + @(Get-Content -LiteralPath $log -ErrorAction SilentlyContinue | Where-Object { $_ -match '^(Passed!|Failed!|Total tests|\s+(Passed|Failed|Skipped):)' } | Select-Object -Last 8) + $outcomes + @('```')
+
+          Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value $summary
+          & ./.github/annotate-summary.ps1 -Title "channel-tests $goos/$rid" -Lines $summary
+
+          exit $runExit
+
+      # -------------------------------------------------------------------------------------
       # gen-tests -- GenTests (the go2cs-gen analyzer's suite) on this leg's own host. Until this stage nothing hosted
       # ran GenTests off windows: batch 290 landed a GenTests red that only linux shows (AConversionBetweenCTypesCompiles,
       # a path spelled for windows), and no gate saw it until a lane ran the suite by hand (COORD, 2026-11-13). The
