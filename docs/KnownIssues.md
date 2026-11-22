@@ -627,3 +627,32 @@ With no user cache directory (neither `HOME` nor `XDG_CACHE_HOME` set), the cach
 the temporary directory, created with mode 0700. Because that directory is shared, go2cs uses it only while it is a
 directory owned by you that no other user can open; otherwise the run stops before its first probe and asks for
 `-probe-cache`. A run that does not probe, such as `-test-action build`, never needs the directory.
+
+## In optimized code, `runtime.Caller` can report an earlier line of the calling function {#in-optimized-code-runtimecaller-can-report-an-earlier-line-of-the-calling-function}
+
+<!-- Measured 2026-11-22 on linux-x64 (.NET 10), go1.26.11, converter/generator at claude/c2-m1-test-noopt, with a
+     converted program whose function keeps runtime.Caller(0)'s line in a local across a three-line method chain and
+     then reads its own line from a slice literal; Go answers line+5. Release, default tiering: +5 on the first call
+     and after 500 calls, 0 after 200,500 calls and a pause (tiered up). Release with DOTNET_TieredCompilation=0: 0 from
+     the first call. Debug build: +5. Release with DOTNET_JITMinOpts=1: +5. Cost, crypto/sha256 over 64 MiB in the same
+     program, two runs each: Release default 0.71 s, Release TieredCompilation=0 1.4-1.6 s, Release JITMinOpts=1
+     23.4-23.9 s, Debug 26.7-27.1 s (Go: 63 ms). COORD 211538Z and the owner (212210Z) ruled: test functions only are
+     compiled unoptimized; production keeps its optimizations, with these routes documented. -->
+A function compiled with optimizations can lose the exact position of a call it makes. A `runtime.Caller` that reads
+that function's frame, from a function it calls, then reports the line of the function's first statement instead of
+the line of the call. Go always reports the call's line. This is measured on `linux-x64` and follows from how .NET's
+optimizing JIT records positions, so it is expected on every platform.
+
+The loss needs a particular shape, measured here as a function that keeps `runtime.Caller`'s result in a variable
+across a method chain written over several lines. Most functions report Go's lines. Under the default runtime
+settings a converted program reports the right line until the JIT recompiles the function with full optimization,
+which happens after it has run many times. With `DOTNET_TieredCompilation=0` it is compiled optimized from the start.
+
+A converted Go test function that calls `runtime.Caller`, directly or through the functions it calls (as testify's
+assertions do), is compiled without optimization, so the lines read from it match Go.
+
+To get Go's lines in a program, use one of these, at a large cost in speed:
+- a `Debug` build: in the measurement above, about 38 times slower than the default `Release` build on a
+  `crypto/sha256` workload;
+- `DOTNET_JITMinOpts=1` in the program's environment, which keeps a `Release` build but turns off JIT optimization:
+  about 33 times slower on the same workload.

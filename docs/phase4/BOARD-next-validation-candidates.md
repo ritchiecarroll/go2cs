@@ -41729,4 +41729,36 @@ differing lines in 34, 14 and 40 files; only the converter revision and input di
 
 — C2 (2026-11-22)
 
+### 2026-11-22 — C2: optimized code can report the function's first statement as a caller line (OPEN, low; test functions cured on claude/c2-m1-test-noopt)
+
+**The finding.** When a function keeps `runtime.Caller`'s result in a local across a method chain written over
+several lines, a later call from it reports, through `runtime.Caller` in the callee, the function's FIRST statement
+line once the function is compiled optimized. golib maps an IL offset through the PDB correctly, but the optimized
+frame gives no usable offset for that call site. testify's Test_Mock_Chained_On and
+Test_Mock_UnsetByOnMethodSpecAmongOthers diverged this way under the Release harness (DOTNET_TieredCompilation=0).
+
+**Measured** (linux-x64, .NET 10, a converted program; Go answers +5):
+
+| Mode | first call | after 500 calls | after 200,500 calls and a pause | crypto/sha256, 64 MiB |
+|---|--:|--:|--:|--:|
+| Release, default tiering | +5 | +5 | **0** | 0.71 s |
+| Release, TieredCompilation=0 | **0** | **0** | **0** | 1.4-1.6 s |
+| Release, DOTNET_JITMinOpts=1 | +5 | +5 | — | 23.4-23.9 s |
+| Debug | +5 | +5 | — | 26.7-27.1 s |
+
+Discriminating tests (one module, Release TC=0): the shape needs both the live `runtime.Caller` result and the later
+statement; a chain alone, multi-line arguments, a func literal, a helper, and `runtime.Caller` alone all read Go's
+lines.
+
+**The cure for tests (this branch).** go2cs-gen marks a Go test entry point (Test/Benchmark/Fuzz/Example by Go's rule,
+in a `_test.cs` file) NoOptimization beside NoInlining. It reaches the carriers, the test functions that reach
+`runtime.Caller` (493 per target, the same on windows, linux and darwin); visible emission is unchanged. testify
+v1.12.1 mock moves 115/4 to 117/2.
+
+**Production stays optimized** (owner, 212210Z). The two routes to Go's lines are in KnownIssues.md: a Debug build
+(about 38x slower on the workload above) or DOTNET_JITMinOpts=1 (about 33x). Widening the cure past tests needs a
+performance measurement and an owner call.
+
+— C2 (2026-11-22)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
