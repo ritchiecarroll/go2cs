@@ -1,0 +1,28 @@
+WHY (net/http.HandlerFunc).ServeHTTP: CANNOT PARK
+WHY sort.Slice: CANNOT PARK
+WHY strings.Map: CANNOT PARK
+WHY (*sync.Once).Do: CANNOT PARK
+canpark net/http goos=windows exclude-runtime=true long-only=true static-only=false no-func-values=true
+FUNCTIONS 8647 can-park 1496 share 17.3% (direct parkers 72)
+DIRECT BY LEAF map[chan-recv:32 chan-send:28 netpoll-wait:2 select:43 sync-cond:1 sync-wait:1 time-sleep:2]
+SEEDS (-seed-func-calls=false) 0, declared 0; CAN-PARK SSA INSTRUCTIONS 81907
+CLOSURES 706 can-park 173
+GO STATEMENTS 54 can-park 51 unresolved 1
+INTERFACE CALLS 1701 can-park 265 unresolved 282
+FUNC-VALUE CALLS 983 can-park 64 unresolved 255
+PACKAGES 163; top 15 by can-park:
+  net/http                                    482 /   1144   42.1%
+  net                                         207 /    582   35.6%
+  crypto/tls                                  164 /    384   42.7%
+  math/big                                     78 /    298   26.2%
+  crypto/x509                                  74 /    197   37.6%
+  fmt                                          68 /    131   51.9%
+  net/textproto                                31 /     56   55.4%
+  internal/poll                                29 /    110   26.4%
+  os                                           27 /    323    8.4%
+  log                                          21 /     40   52.5%
+  mime/multipart                               21 /     39   53.8%
+  vendor/golang.org/x/net/http2/hpack          21 /     58   36.2%
+  io                                           20 /     52   38.5%
+  vendor/golang.org/x/crypto/cryptobyte        20 /     85   23.5%
+  bufio                                        19 /     51   37.3%

@@ -31,13 +31,20 @@ public static class GeneratedSource
     /// Adds <paramref name="source"/> as <paramref name="hintName"/>, normalized by <see cref="Normalize"/>.
     /// </summary>
     public static void AddGeneratedSource(this GeneratorExecutionContext context, string hintName, string source) =>
-        context.AddSource(hintName, Normalize(source));
+        context.AddSource(hintName, TwinGenerator.SiblingMemo.Record(context, hintName, Normalize(source)));
 
     /// <summary>
     /// Adds <paramref name="source"/> as <paramref name="hintName"/>, normalized by <see cref="Normalize"/>.
     /// </summary>
     public static void AddGeneratedSource(this SourceProductionContext context, string hintName, string source) =>
         context.AddSource(hintName, Normalize(source));
+
+    /// <summary>
+    /// M:N SPIKE (R5b, B2), never lands. Adds <paramref name="source"/> exactly as written: a twin is a copy of a
+    /// source method under a <c>#line</c> directive, and it keeps the source's line count only if no blank run is folded.
+    /// </summary>
+    public static void AddLineExactSource(this GeneratorExecutionContext context, string hintName, string source) =>
+        context.AddSource(hintName, source);
 
     /// <summary>
     /// The metadata name of golib's <c>GoExtensionHostAttribute</c>; a compilation that cannot resolve it gets no list.

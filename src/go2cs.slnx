@@ -390,6 +390,7 @@
     <Project Path="tests/Behavioral/ArrayReassignUnsafe/ArrayReassignUnsafe.csproj" />
     <Project Path="tests/Behavioral/ArraySwitchCases/ArraySwitchCases.csproj" />
     <Project Path="tests/Behavioral/ArrayValueCopySites/ArrayValueCopySites.csproj" />
+    <Project Path="tests/Behavioral/ArrayViewWholeAssign/ArrayViewWholeAssign.csproj" />
     <Project Path="tests/Behavioral/ArrayWideIndexAddress/ArrayWideIndexAddress.csproj" />
     <Project Path="tests/Behavioral/AtomicFieldThroughPointer/AtomicFieldThroughPointer.csproj" />
     <Project Path="tests/Behavioral/AtomicPointerToNil/AtomicPointerToNil.csproj" />
@@ -558,6 +559,7 @@
     <Project Path="tests/Behavioral/EmptyStructLiteralCtor/EmptyStructLiteralCtor.csproj" />
     <Project Path="tests/Behavioral/EmptyStructMapSet/EmptyStructMapSet.csproj" />
     <Project Path="tests/Behavioral/EnvironBlockWalk/EnvironBlockWalk.csproj" />
+    <Project Path="tests/Behavioral/ErrorMethodPanicFormat/ErrorMethodPanicFormat.csproj" />
     <Project Path="tests/Behavioral/ErrorfFormatting/ErrorfFormatting.csproj" />
     <Project Path="tests/Behavioral/EscapedLoopVarSiblingIndex/EscapedLoopVarSiblingIndex.csproj" />
     <Project Path="tests/Behavioral/ExportedAliasUnexportedTarget/ExportedAliasUnexportedTarget.csproj" />
@@ -846,6 +848,17 @@
     <Project Path="tests/Behavioral/MinMaxBuiltin/MinMaxBuiltin.csproj" />
     <Project Path="tests/Behavioral/MixedEmbedKindPromotion/MixedEmbedKindPromotion.csproj" />
     <Project Path="tests/Behavioral/MixedUntypedConstArithmetic/MixedUntypedConstArithmetic.csproj" />
+    <Project Path="tests/Behavioral/MnBlockedIO/MnBlockedIO.csproj" />
+    <Project Path="tests/Behavioral/MnIfaceTwin/MnIfaceTwin.csproj" />
+    <Project Path="tests/Behavioral/MnDeepUnwind/MnDeepUnwind.csproj" />
+    <Project Path="tests/Behavioral/MnFuncPair/MnFuncPair.csproj" />
+    <Project Path="tests/Behavioral/MnBoxAlias/MnBoxAlias.csproj" />
+    <Project Path="tests/Behavioral/MnParkedCallers/MnParkedCallers.csproj" />
+    <Project Path="tests/Behavioral/MnParkedMultiLine/MnParkedMultiLine.csproj" />
+    <Project Path="tests/Behavioral/MnParkedSameName/MnParkedSameName.csproj" />
+    <Project Path="tests/Behavioral/MnAotGeneric/MnAotGeneric.csproj" />
+    <Project Path="tests/Behavioral/MnMainExit/MnMainExit.csproj" />
+    <Project Path="tests/Behavioral/MnMixedStorm/MnMixedStorm.csproj" />
     <Project Path="tests/Behavioral/MultiFileInitOrder/MultiFileInitOrder.csproj" />
     <Project Path="tests/Behavioral/MultiPointerEmbedPromotion/MultiPointerEmbedPromotion.csproj" />
     <Project Path="tests/Behavioral/MultiValueFuncLiteralDefine/MultiValueFuncLiteralDefine.csproj" />

@@ -1,0 +1,5 @@
+nethttp report rc=0
+nethttp creation rc=0
+ts report rc=0
+ts creation rc=0
+a arms done

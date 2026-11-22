@@ -58,7 +58,7 @@ namespace go.golib;
 /// smaller than the one it replaces.
 /// </para>
 /// </remarks>
-[EditorBrowsable(EditorBrowsableState.Never)] public sealed class Goroutine
+[EditorBrowsable(EditorBrowsableState.Never)] public sealed partial class Goroutine
 {
     /// <summary>
     /// Environment variable overriding <see cref="StackReserve"/>.
@@ -199,7 +199,14 @@ namespace go.golib;
     internal static void NoteLockOSThread()
     {
         if (t_current is { } current)
+        {
             Volatile.Write(ref current.m_lockedExternal, current.m_lockedExternal + 1);
+
+            // DESIGN-mn-pin.md 11.4: a multiplexed goroutine locking on a thread that is no carrier (it resumed off
+            // its carrier after a foreign await) cannot be pinned. A reading, expected 0.
+            if (current.m_multiplexed && !GoScheduler.OnCarrier)
+                GoScheduler.NoteOffCarrierLock();
+        }
     }
 
     /// <summary>runtime.UnlockOSThread on the calling goroutine; a call with no lock outstanding does nothing, as in Go.</summary>
@@ -741,7 +748,7 @@ namespace go.golib;
     /// having woken.
     /// </para>
     /// </remarks>
-    public static ParkScope Park(WaitReason reason)
+    private static ParkScope ParkCore(WaitReason reason, bool handoff) // M:N SPIKE: Park is in Goroutine.Multiplexed.cs
     {
         if (t_current is not { } goroutine)
             return default;
@@ -783,7 +790,7 @@ namespace go.golib;
             bubble.Idled();
         }
 
-        return new ParkScope(goroutine, previous);
+        return new ParkScope(goroutine, previous, handoff && HandOffBeforeBlocking(goroutine, previous)); // M:N SPIKE
     }
 
     /// <summary>
@@ -1230,8 +1237,8 @@ namespace go.golib;
         // Captured HERE, on the thread executing the `go` statement -- the new thread's first frame
         // is Run, which knows nothing about who asked for it. `body` IS the goroutine's start
         // function on this overload: nothing wrapped it, so its Method names the Go function.
-        (System.Reflection.MethodBase? creator, int ilOffset) = CreatorOfSite(callerFile, callerLine, body.Method);
-        StartWithCreator(body, creator, ilOffset, body.Method, stack: stack);
+        (System.Reflection.MethodBase? creator, int ilOffset) = CreatorOfSite(callerFile, callerLine, GoFuncPair.Underlying(body).Method);
+        StartWithCreator(body, creator, ilOffset, GoFuncPair.Underlying(body).Method, stack: stack);
     }
 
     /// <summary>
@@ -1260,8 +1267,8 @@ namespace go.golib;
     /// </summary>
     public static void Start(Action body, Delegate entry, GoStack stack, string callerFile, int callerLine)
     {
-        (System.Reflection.MethodBase? creator, int ilOffset) = CreatorOfSite(callerFile, callerLine, entry.Method);
-        StartWithCreator(body, creator, ilOffset, entry.Method, stack: stack);
+        (System.Reflection.MethodBase? creator, int ilOffset) = CreatorOfSite(callerFile, callerLine, GoFuncPair.Underlying(entry).Method);
+        StartWithCreator(body, creator, ilOffset, GoFuncPair.Underlying(entry).Method, stack: stack);
     }
 
     // The creator of a `go` statement, ONCE per site. CreatorFrame resolves a frame for every frame on the stack, so
@@ -1308,7 +1315,7 @@ namespace go.golib;
     /// a runtime function -- so classifying by it would make every guard a user goroutine.
     /// </remarks>
     internal static void StartForGuard(Action body, System.Reflection.MethodBase? creator) =>
-        StartWithCreator(body, creator, System.Diagnostics.StackFrame.OFFSET_UNKNOWN, body.Method, systemBasis: creator);
+        StartWithCreator(body, creator, System.Diagnostics.StackFrame.OFFSET_UNKNOWN, GoFuncPair.Underlying(body).Method, systemBasis: creator);
 
     private static void StartWithCreator(Action body, System.Reflection.MethodBase? creator, int creatorILOffset, System.Reflection.MethodBase? entry,
         System.Reflection.MethodBase? systemBasis = null, GoStack stack = GoStack.Default)
@@ -1580,10 +1587,10 @@ namespace go.golib;
     // The goroutine ROOT itself, on the CALLING thread. Start queues it; GolibTests calls it directly,
     // because the root's policy can only be observed from a thread whose exception the caller can
     // still catch — the real path ends in an unhandled exception and a dead process by design.
-    internal static void Run(Action body) => Run(body, creator: null, parentId: 0, entry: body.Method);
+    internal static void Run(Action body) => Run(body, creator: null, parentId: 0, entry: GoFuncPair.Underlying(body).Method);
 
     // A goroutine whose creator was in a synctest bubble (and already counted it there) joins it here.
-    internal static void Run(Action body, SyncTestBubble? bubble) => Run(body, creator: null, parentId: 0, entry: body.Method, bubble);
+    internal static void Run(Action body, SyncTestBubble? bubble) => Run(body, creator: null, parentId: 0, entry: GoFuncPair.Underlying(body).Method, bubble);
 
     internal static void Run(Action body, System.Reflection.MethodBase? creator, long parentId, System.Reflection.MethodBase? entry) =>
         Run(body, creator, parentId, entry, bubble: null);
@@ -1700,11 +1707,13 @@ namespace go.golib;
     {
         private readonly Goroutine? m_goroutine;
         private readonly int m_previous;
+        private readonly bool m_handoff;
 
-        internal ParkScope(Goroutine goroutine, int previous)
+        internal ParkScope(Goroutine goroutine, int previous, bool handoff = false)
         {
             m_goroutine = goroutine;
             m_previous = previous;
+            m_handoff = handoff;
         }
 
         public void Dispose()
@@ -1712,6 +1721,10 @@ namespace go.golib;
             // Inert when Park found no identity: a thread that is not a goroutine parks nothing.
             if (m_goroutine is null)
                 return;
+
+            // M:N SPIKE: a thread that blocked under a hand-off takes a P back before it runs on.
+            if (m_handoff)
+                GoScheduler.ExitBlocked();
 
             int current = Volatile.Read(ref m_goroutine.m_waitReason);
 

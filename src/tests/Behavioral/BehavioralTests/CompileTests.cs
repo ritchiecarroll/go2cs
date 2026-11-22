@@ -208,6 +208,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckArrayValueCopySites() => CheckTarget("ArrayValueCopySites");
 
     [TestMethod]
+    public void CheckArrayViewWholeAssign() => CheckTarget("ArrayViewWholeAssign");
+
+    [TestMethod]
     public void CheckArrayWideIndexAddress() => CheckTarget("ArrayWideIndexAddress");
 
     [TestMethod]
@@ -680,6 +683,9 @@ public class B2_CompileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckEnvironBlockWalk() => CheckTarget("EnvironBlockWalk");
+
+    [TestMethod]
+    public void CheckErrorMethodPanicFormat() => CheckTarget("ErrorMethodPanicFormat");
 
     [TestMethod]
     public void CheckErrorfFormatting() => CheckTarget("ErrorfFormatting");
@@ -1463,6 +1469,39 @@ public class B2_CompileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckMixedUntypedConstArithmetic() => CheckTarget("MixedUntypedConstArithmetic");
+
+    [TestMethod]
+    public void CheckMnBlockedIO() => CheckTarget("MnBlockedIO");
+
+    [TestMethod]
+    public void CheckMnDeepUnwind() => CheckTarget("MnDeepUnwind");
+
+    [TestMethod]
+    public void CheckMnParkedCallers() => CheckTarget("MnParkedCallers");
+
+    [TestMethod]
+    public void CheckMnParkedMultiLine() => CheckTarget("MnParkedMultiLine");
+
+    [TestMethod]
+    public void CheckMnParkedSameName() => CheckTarget("MnParkedSameName");
+
+    [TestMethod]
+    public void CheckMnFuncPair() => CheckTarget("MnFuncPair");
+
+    [TestMethod]
+    public void CheckMnBoxAlias() => CheckTarget("MnBoxAlias");
+
+    [TestMethod]
+    public void CheckMnAotGeneric() => CheckTarget("MnAotGeneric");
+
+    [TestMethod]
+    public void CheckMnIfaceTwin() => CheckTarget("MnIfaceTwin");
+
+    [TestMethod]
+    public void CheckMnMainExit() => CheckTarget("MnMainExit");
+
+    [TestMethod]
+    public void CheckMnMixedStorm() => CheckTarget("MnMixedStorm");
 
     [TestMethod]
     public void CheckMultiFileInitOrder() => CheckTarget("MultiFileInitOrder");

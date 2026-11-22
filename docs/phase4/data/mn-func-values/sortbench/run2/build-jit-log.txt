@@ -1,0 +1,13 @@
+C:\go2cs\scratch\mn2\proto\b\n3code\sortbench\sortbench.csproj : warning NU1903: Package 'Microsoft.DotNet.ILCompiler' 10.0.11 has a known high severity vulnerability, https://github.com/advisories/GHSA-p3jp-9v83-76w9
+C:\go2cs\scratch\mn2\proto\b\n3code\sortbench\sortbench.csproj : warning NU1903: Package 'Microsoft.DotNet.ILCompiler' 10.0.11 has a known high severity vulnerability, https://github.com/advisories/GHSA-p3jp-9v83-76w9
+C:\go2cs\scratch\mn2\proto\b\n3code\sortbench\Program.cs(306,20): warning CS0649: Field 'Program.osink' is never assigned to, and will always have its default value null [C:\go2cs\scratch\mn2\proto\b\n3code\sortbench\sortbench.csproj]
+
+Build succeeded.
+
+C:\go2cs\scratch\mn2\proto\b\n3code\sortbench\sortbench.csproj : warning NU1903: Package 'Microsoft.DotNet.ILCompiler' 10.0.11 has a known high severity vulnerability, https://github.com/advisories/GHSA-p3jp-9v83-76w9
+C:\go2cs\scratch\mn2\proto\b\n3code\sortbench\sortbench.csproj : warning NU1903: Package 'Microsoft.DotNet.ILCompiler' 10.0.11 has a known high severity vulnerability, https://github.com/advisories/GHSA-p3jp-9v83-76w9
+C:\go2cs\scratch\mn2\proto\b\n3code\sortbench\Program.cs(306,20): warning CS0649: Field 'Program.osink' is never assigned to, and will always have its default value null [C:\go2cs\scratch\mn2\proto\b\n3code\sortbench\sortbench.csproj]
+    3 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:01.76

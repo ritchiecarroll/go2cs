@@ -692,8 +692,16 @@ func (v *Visitor) namedReturnDeclLines(sig *types.Signature, indentLevel int, de
 
 		if ident := v.namedResultHeapBoxIdent(param); ident != nil {
 			if declsOutsideWrapper {
-				decls.WriteString(fmt.Sprintf("%s%sheap<%s>(out var %s%s);", v.newline, v.indent(indentLevel),
-					v.getCSharpTypeName(param.Type()), AddressPrefix, v.boxBaseName(ident)))
+				// An unnamed array result takes its storage, as visitFuncDecl's defer-mode declaration gives it:
+				// `heap<array<T>>(out …)` boxes `default(array<T>)`, which has no backing, so every index through the
+				// result panicked with length 0. An alias of an unnamed array type is the unnamed type.
+				if arrayType, isArray := types.Unalias(param.Type()).(*types.Array); isArray {
+					decls.WriteString(fmt.Sprintf("%s%sheap(new array<%s>(%s), out var %s%s);", v.newline, v.indent(indentLevel),
+						v.getCSharpTypeName(arrayType.Elem()), v.arrayZeroValueArgs(fmt.Sprint(arrayType.Len()), arrayType), AddressPrefix, v.boxBaseName(ident)))
+				} else {
+					decls.WriteString(fmt.Sprintf("%s%sheap<%s>(out var %s%s);", v.newline, v.indent(indentLevel),
+						v.getCSharpTypeName(param.Type()), AddressPrefix, v.boxBaseName(ident)))
+				}
 			} else {
 				decls.WriteString(fmt.Sprintf("%s%s%s", v.newline, v.indent(indentLevel), v.convertToHeapTypeDecl(ident, true)))
 			}
