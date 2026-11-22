@@ -101,3 +101,17 @@ box-receiver shape (IsTwinMember keeps both out of every Go method set).
 Not in these pieces (stated): a Mutex the caller cannot name a box for stays a plain call; sync.Locker interface calls
 keep the plain path; a twin-built sync (piece 5) must not emit the generator's box forwarder beside this hand twin
 (CS0111). Go's mutex starvation mode is not modelled: the gate serves waiters in SemaphoreSlim's order.
+
+**Review folds (dated block, 2026-11-22, G; the review was CLEAR with no MUST).**
+
+- Both twins decide by the CALLING THREAD, `GoScheduler.OnCarrier` (made public, one line; hidden tier 2, read only by
+  go.sync and go.time), not by GO2CS_MN: off a carrier they take plain Lock and plain Sleep. Deciding by
+  GoScheduler.Enabled, a twin off a carrier with MN=1 queued a waiter on the gate and then threw in ParkPending, leaving
+  that waiter for a later Unlock to wake. GolibTests OffACarrierTheStdlibTwinsTakeTheirPlainPath holds it.
+- The wake cost, stated beside Lockꞏtwin: SemaphoreSlim completes an async waiter's task with
+  RunContinuationsAsynchronously, so a parked waiter is woken through one ThreadPool hop. MnLockWake (2,000 hand-offs,
+  windows, P=12): parked (twinned, MN=1) p50 17-19 us, p90 31-32 us, p99 55-58 us, max 2.9-5.3 ms; the plain blocking
+  hand-off (MN unset) p50 13 us, p90 24-28 us, p99 38-44 us, max about 3 ms. The hop costs about 5 us at the median and
+  15 us at p99. (Go's own figure on windows is below its clock's resolution there.)
+- StdlibTwinSurfaceTests also holds that no other public twin ships in go.sync or go.time. The slow path is
+  `lockSlowAsync`, with the park scope inside the try and `leave` in its own finally.

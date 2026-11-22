@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using go;
 using go.golib;
@@ -47,5 +48,66 @@ public class StdlibTwinSurfaceTests
         MethodInfo? twin = typeof(time_package).GetMethod("Sleepꞏtwin", BindingFlags.Public | BindingFlags.Static, [typeof(time_package.Duration)]);
 
         AssertFrozenTwin(twin, "time's Sleepꞏtwin(Duration)");
+    }
+
+    [TestMethod]
+    public void NoOtherPublicTwinShipsInSyncOrTime()
+    {
+        // The frozen surface is exactly these two members: a new public twin in either package is a surface change that
+        // needs its own ruling, so it reds here first.
+        string[] twins = [.. new[] { typeof(syncᴛMutex).Assembly, typeof(time_package).Assembly }
+            .SelectMany(static assembly => assembly.GetTypes())
+            .SelectMany(static type => type.GetMethods(BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance | BindingFlags.DeclaredOnly))
+            .Where(static method => method.Name.Contains("ꞏtwin", StringComparison.Ordinal) && method.DeclaringType is { IsVisible: true })
+            .Select(static method => method.DeclaringType!.Name + "." + method.Name)
+            .OrderBy(static name => name, StringComparer.Ordinal)];
+
+        CollectionAssert.AreEqual(new[] { "syncᴛMutex.Lockꞏtwin", "time_package.Sleepꞏtwin" }, twins, string.Join(", ", twins));
+    }
+
+    // Row 7's review (2026-11-22): a twin decides by the CALLING THREAD (GoScheduler.OnCarrier), not by GO2CS_MN, so off a
+    // carrier it takes the plain, blocking path and hands back a completed task. Before the fold it decided by
+    // GoScheduler.Enabled, and with MN=1 a twin off a carrier queued a waiter on the gate and then threw in ParkPending,
+    // leaving that waiter for a later Unlock to wake while a real waiter hung. This process runs with MN unset; the row
+    // holds the decision to the thread, the same answer the scheduler-on case needs.
+    [TestMethod]
+    public void OffACarrierTheStdlibTwinsTakeTheirPlainPath()
+    {
+        ж<sync_package.Mutex> box = builtin.Ꮡ(new sync_package.Mutex());
+        box.Value.Lock();
+
+        bool onCarrier = true, lockCompleted = false, sleepCompleted = false;
+        Exception? failure = null;
+        Thread thread = new(() =>
+        {
+            try
+            {
+                onCarrier = GoScheduler.OnCarrier;
+                GoTask locked = box.Lockꞏtwin();        // contended: blocks in plain Lock until the main thread unlocks
+                lockCompleted = locked.GetAwaiter().IsCompleted;
+                locked.GetAwaiter().GetResult();
+                box.Value.Unlock();
+
+                GoTask slept = time_package.Sleepꞏtwin(new time_package.Duration(1_000_000));
+                sleepCompleted = slept.GetAwaiter().IsCompleted;
+                slept.GetAwaiter().GetResult();
+            }
+            catch (Exception ex)
+            {
+                failure = ex;
+            }
+        });
+
+        thread.Start();
+        Thread.Sleep(100);
+        box.Value.Unlock();
+
+        Assert.IsTrue(thread.Join(TimeSpan.FromSeconds(30)), "both calls returned");
+        Assert.IsNull(failure, failure?.ToString());
+        Assert.IsFalse(onCarrier, "a plain thread is no carrier");
+        Assert.IsTrue(lockCompleted, "off a carrier, the Lock twin took the lock in plain Lock and returned a completed task");
+        Assert.IsTrue(sleepCompleted, "off a carrier, the Sleep twin slept in plain Sleep and returned a completed task");
+        Assert.IsTrue(box.Value.TryLock(), "the mutex is free afterwards: no waiter was left on its gate");
+        box.Value.Unlock();
     }
 }

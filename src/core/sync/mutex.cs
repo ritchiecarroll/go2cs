@@ -526,36 +526,46 @@ internal static readonly System.Runtime.CompilerServices.ConditionalWeakTable<Se
 // The protocol is Lock's, on the same gate: the CAS fast path (an uncontended Lock allocates nothing and parks
 // nowhere), then gateOf, the swap to 2, and leave. The only difference is the wait: the gate's WaitAsync completes a
 // GoParkSlot, so the goroutine parks; Unlock's Release serves a parked waiter and a blocked one (plain Lock, profiling
-// on) from the one SemaphoreSlim. With the scheduler off, and with the block or mutex profile on (so its stamps,
-// charges and Lock frame stay exactly Lock's), it takes plain Lock: the stated cost of profiling a twinned program.
+// on) from the one SemaphoreSlim. Off a carrier (GoScheduler.OnCarrier: the scheduler off, or a thread it did not
+// make, where a park would throw and abandon the queued waiter), and with the block or mutex profile on (so its stamps,
+// charges and Lock frame stay exactly Lock's), it takes plain Lock: the latter is the stated cost of profiling a
+// twinned program.
+//
+// THE WAKE COST. SemaphoreSlim completes an async waiter's task with RunContinuationsAsynchronously, so a parked waiter
+// is woken through ONE ThreadPool hop: Unlock's Release queues the task's completion, a pool thread runs the
+// continuation (Wake), and Wake queues the goroutine's step for a carrier. ExecuteSynchronously only keeps the
+// continuation on that pool thread. MnLockWake reads the hand-off's latency tail (row 7's record, section 6).
 [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
 public static global::go.golib.GoTask Lockꞏtwin(this ж<Mutex> Ꮡm) {
     if (Interlocked.CompareExchange(ref Ꮡm.Value.state, 1, 0) == 0) {
         return default;
     }
-    if (!global::go.golib.GoScheduler.Enabled || runtime_package.GoBlockProfileOn || runtime_package.GoMutexProfileOn) {
+    if (!global::go.golib.GoScheduler.OnCarrier || runtime_package.GoBlockProfileOn || runtime_package.GoMutexProfileOn) {
         Ꮡm.Value.Lock();
         return default;
     }
-    return lockSlowꞏtwin(Ꮡm);
+    return lockSlowAsync(Ꮡm);
 }
 
-private static async global::go.golib.GoTask lockSlowꞏtwin(ж<Mutex> Ꮡm) {
+private static async global::go.golib.GoTask lockSlowAsync(ж<Mutex> Ꮡm) {
     WaitQueue gate = gateOf(ref Ꮡm.Value);
-    Goroutine.ParkScope scope = Goroutine.ParkTwin(WaitReason.SyncMutexLock);
     try {
-        while (Interlocked.Exchange(ref Ꮡm.Value.state, 2) != 0) {
-            System.Threading.Tasks.Task wait = gate.WaitAsync();
-            if (wait.IsCompleted) {
-                continue;
+        Goroutine.ParkScope scope = Goroutine.ParkTwin(WaitReason.SyncMutexLock);
+        try {
+            while (Interlocked.Exchange(ref Ꮡm.Value.state, 2) != 0) {
+                System.Threading.Tasks.Task wait = gate.WaitAsync();
+                if (wait.IsCompleted) {
+                    continue;
+                }
+                global::go.golib.GoParkSlot slot = new();
+                _ = wait.ContinueWith(static (_, state) => ((global::go.golib.GoParkSlot)state!).Wake(), slot,
+                    CancellationToken.None, System.Threading.Tasks.TaskContinuationOptions.ExecuteSynchronously, System.Threading.Tasks.TaskScheduler.Default);
+                await slot;
             }
-            global::go.golib.GoParkSlot slot = new();
-            _ = wait.ContinueWith(static (_, state) => ((global::go.golib.GoParkSlot)state!).Wake(), slot,
-                CancellationToken.None, System.Threading.Tasks.TaskContinuationOptions.ExecuteSynchronously, System.Threading.Tasks.TaskScheduler.Default);
-            await slot;
+        } finally {
+            scope.Dispose();
         }
     } finally {
-        scope.Dispose();
         leave(ref Ꮡm.Value, gate);
     }
 }
