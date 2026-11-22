@@ -31,6 +31,11 @@ public unsafe class FuncOfWordTests
 
     private static nint Inc(nint a) => a + 1;
 
+    private static nint Add(nint a, nint b) => a + b;
+
+    // A named Go func type (`type binop func(int, int) int`) is its own delegate type.
+    public delegate nint Binop(nint a, nint b);
+
     private static void AssertRefused(Action action)
     {
         PanicException panic = Assert.ThrowsException<PanicException>(action);
@@ -69,8 +74,33 @@ public unsafe class FuncOfWordTests
         Assert.IsNull(@unsafe.Pointer.FuncOfWord<Func<nint, nint>>(@unsafe.Pointer.OfFunc(null)));
     }
 
+    // A word from a DIFFERENT func type, as a hand-written w4 can store it: a named func type and the unnamed one with
+    // its signature rebind, both ways.
+    [TestMethod]
+    public void AWordFromAnotherFuncTypeWithTheSameSignatureRebindsBothWays()
+    {
+        Func<nint, nint, nint> unnamed = Add;
+        Binop named = @unsafe.Pointer.FuncOfWord<Binop>(@unsafe.Pointer.OfFunc(unnamed));
+        Assert.AreEqual((nint)5, named(2, 3));
+
+        Binop source = Add;
+        Func<nint, nint, nint> back = @unsafe.Pointer.FuncOfWord<Func<nint, nint, nint>>(@unsafe.Pointer.OfFunc(source));
+        Assert.AreEqual((nint)9, back(4, 5));
+    }
+
+    // A word whose func has another signature cannot be read as this func type, and is refused by name.
+    [TestMethod]
+    public void AWordFromAFuncOfAnotherSignatureIsRefusedByName()
+    {
+        Func<nint, nint> other = Inc;
+        PanicException panic = Assert.ThrowsException<PanicException>(() => @unsafe.Pointer.FuncOfWord<Func<nint, nint, nint>>(@unsafe.Pointer.OfFunc(other)));
+        StringAssert.Contains(panic.Message, "which cannot be read as");
+    }
+
     // The runtime's shape (debugcall.go, cgocall.go): a funcval built by hand, its fn word a code PC, stored as the
     // func's word. go2cs binds no func to a PC before cgo callbacks, so the store is refused by name, never left nil.
+    // The decision reads only p's own number: any non-zero number outside the cookie band is refused. The funcval's
+    // contents, the synthetic PC included, are never read and play no part in it.
     [TestMethod]
     public void AFuncvalWhoseWordIsACodePCIsRefusedByName()
     {
