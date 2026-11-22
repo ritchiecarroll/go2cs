@@ -458,7 +458,7 @@ The assignment statement's position is that of `check` on its left, which preced
 ```csharp
 ref var check = ref heap<Func<uint32, slice<bool>, bool>>(out var Ꮡcheck);
 …
-check = (uint32 pc, slice<bool> mΔ1) => {
+check = [GoFunc("makeOnePass.func1")] (uint32 pc, slice<bool> mΔ1) => {
     …
 ok = Ꮡcheck.ValueSlot(inst.Out, mΔ1) && Ꮡcheck.ValueSlot(inst.Arg, mΔ1);
 …
@@ -476,10 +476,10 @@ ref var p = ref heap<payload>(new payload(vals: [1, 2, 3, 4]), out var Ꮡp);
 var @out = new channel<nint>(1);
 var outʗ1 = @out;
 var pʗ1 = p;
-[MethodImpl(MethodImplOptions.NoInlining)] void outer() {
+[MethodImpl(MethodImplOptions.NoInlining), GoFunc("nestedStructCapture.func1")] void outer() {
     var outʗ2 = outʗ1;
     var pʗ2 = pʗ1;
-    goǃ(() => {
+    goǃ([GoFunc("nestedStructCapture.func1.1")] () => {
         outʗ2.ᐸꟷ(pʗ2.sum());
     });
 }
@@ -541,7 +541,7 @@ internal static nint deepest(ж<node> n) {
         if (len(n.DerefOrNull().kids) == 0) {
             return n.DerefOrNull().val;
         }
-        n.DerefOrNull().each((ж<node> k) => {
+        n.DerefOrNull().each([GoFunc("deepest.func1")] (ж<node> k) => {
             n = k;
             return true;
         });
@@ -624,11 +624,11 @@ A literal that **defers or recovers** is no bar: its frame is an ordinary local 
 
 <!-- source: src/tests/Behavioral/LocalFunctionEmission/main.cs.target:77-94 -->
 ```csharp
-nint /*r*/ guard(nint n) {
+[GoFunc("p6.func1")] nint /*r*/ guard(nint n) {
     nint r = default;
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("p6.func1.1")] () => {
             var e = recover(); if (e != nil) {
                 r = -1;
             }
@@ -1958,7 +1958,7 @@ Guarded by `PointerCastSliceRange` (compile-shape).
 A literal with a single `unsafe.Pointer` result can mix return arms of DIFFERENT C# types (reflect `deepEqual`'s `ptrval`: `(uintptr)v.pointer()` on one arm, the raw `v.ptr` on the other), which defeats C# lambda return-type inference (CS8917). The emitted lambda states its return type explicitly; each arm then converts implicitly through the golib operators:
 <!-- source: src/tests/Behavioral/PointerCastSliceRange/PointerCastSliceRange.cs:35 -->
 ```csharp
-@unsafe.Pointer pick(bool u) {
+[GoFunc("main.func1")] @unsafe.Pointer pick(bool u) {
 ```
 (`pick` is only ever called, so it emits as a C# local function, which states its return type by
 construction; a literal in value position takes the lambda form `@unsafe.Pointer (bool u) => { … }`.)
@@ -1993,7 +1993,7 @@ NAMED results are included: the trigger — a multi-result literal with a return
 A literal with a single Go `string` result can mix return arms of DIFFERENT C# types even though every arm is a Go string: a bare string literal is a `"…"u8` `ReadOnlySpan<byte>`, a literal+variable concat binds golib's `operator +(@string, @string)` (so it is `@string` regardless of u8 suppression), and a call into a hand-written stub can return C# `string` (the baseline `fmt.Sprintf` does). `@string` and `string` convert implicitly in BOTH directions, so a lambda mixing those arms has no unique best common type and its delegate type is not inferable — CS8917 on `pick := func(v any) string {…}` whose `case string:` arm returns `"string:" + t` alongside `fmt.Sprintf` arms. In assignment position (`var pick = …`, where C# must infer the delegate type), the lambda states its return type explicitly and each arm then converts to `@string` in place:
 <!-- source: src/tests/Behavioral/FuncLitStringConcatReturn/main.cs:11 -->
 ```csharp
-@string pick(any v) {
+[GoFunc("main.func1")] @string pick(any v) {
 ```
 (The guard's `pick` is only ever called, so it emits as a local function with the declared result; a
 value-used literal takes `var pick = @string (any v) => { … };`.)
@@ -2021,7 +2021,7 @@ That Go-`int` exemption is **narrowed, not absolute**: it holds only while every
 The SINGLE-result numeric sibling of the string arm above <!-- history: added 2026-07-17, the Phase-4 blocker-map row B7b (strings ×3, bytes ×2) -->: a literal with a declared numeric result whose return arm references a **named untyped constant** — strings/bytes TestMap's `maxRune := func(rune) rune { return unicode.MaxRune }`. The const reference emits as a golib `Untyped*` wrapper reference (`Δunicode.MaxRune`, an `UntypedInt` static), and the wrapper's implicit conversions run in **both** directions with every numeric type. So in natural-inference position an all-const arm set infers the wrapper delegate — `var maxRune = (rune r) => Δunicode.MaxRune;` is `Func<rune, UntypedInt>`, rejected at the invariant-delegate `Map(maxRune, …)` call (CS1503) — and a mixed const/typed arm set (TestMap's `encode`, mixing `unicode.MaxRune`/`utf8.RuneSelf` with the `rune` parameter) has no unique best common type at all (CS8917). When any top-level return arm is a bare named untyped-const reference, the lambda states the declared return type explicitly and each arm converts in place:
 <!-- source: src/tests/Behavioral/FuncLitUntypedConstReturn/main.cs:24 -->
 ```csharp
-var maxFn = rune (rune _) => maxRune;
+var maxFn = [GoFunc("main.func1")] rune (rune _) => maxRune;
 ```
 Same gates as the string arm: assignment position only (argument/return/composite-element literals are target-typed — no inference to fail), and a BASIC numeric result (a named numeric type would need a second user conversion the wrapper cannot chain — the `lambdaConstReturnCastType` named-type rationale).
 

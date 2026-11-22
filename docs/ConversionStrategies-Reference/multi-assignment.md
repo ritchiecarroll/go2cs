@@ -98,8 +98,8 @@ d, t := double, triple
 
 <!-- source: src/tests/Behavioral/MultiValueFuncLiteralDefine/MultiValueFuncLiteralDefine.cs:25-26, 29-30 -->
 ```csharp
-var small = (nint v) => v < n;
-var even = (nint v) => v % 2 == 0;
+var small = [GoFunc("main.func1")] (nint v) => v < n;
+var even = [GoFunc("main.func2")] (nint v) => v % 2 == 0;
 …
 var d = @double;
 var t = triple;

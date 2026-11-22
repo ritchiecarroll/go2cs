@@ -239,7 +239,7 @@ arm("int64", func() string { return fmt.Sprint(i64/int64(m1), " ", i64%int64(m1)
 ```
 <!-- source: src/tests/Behavioral/MinIntDivide/main.cs.target:118 -->
 ```csharp
-arm("int64", () => fmt.Sprint(quo(i64, (int64)m1), " ", rem(i64, (int64)m1)));
+arm("int64", [GoFunc("main.func3")] () => fmt.Sprint(quo(i64, (int64)m1), " ", rem(i64, (int64)m1)));
 ```
 
 Here `i64` holds `math.MinInt64`, `m1` is an `int` holding -1, `arm` runs the function under `recover` and

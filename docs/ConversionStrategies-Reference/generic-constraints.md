@@ -1183,7 +1183,7 @@ Nothing converts it, because nothing needs to: the constraint is the **self-refe
 Func-literal parameters typed as the union type parameter render as the parameter itself (the enclosing method's type parameter is in scope inside a lambda or local function), matching the Go; `digitSum`'s literal emits as a local function:
 <!-- source: src/tests/Behavioral/StringByteUnionConstraint/main.cs:58 -->
 ```csharp
-nint parse(T part) {
+[GoFunc("digitSum[...].func1")] nint parse(T part) {
 ```
 
 <!-- history: when IByteSeq was single-parameter, its Range indexer returned the interface, and the emission wrapped

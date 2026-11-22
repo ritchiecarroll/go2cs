@@ -162,7 +162,7 @@ fmt.Println(fs[0](), fs[1](), fs[2]())   // Go 1.22+: 0 1 2
 ```csharp
 for (nint iᴛ1 = 0; iᴛ1 < 3; iᴛ1++) {
     var i = iᴛ1;
-    fs = append(fsᴷ, fs, () => i);
+    fs = append(fsᴷ, fs, [GoFunc("g1.func1")] () => i);
 }
 ```
 
@@ -179,7 +179,7 @@ for (nint iᴛ1 = 0; iᴛ1 < 6; iᴛ1++) {
         continue;
     }
     i++;
-    fs = append(fsᴷ, fs, () => i);
+    fs = append(fsᴷ, fs, [GoFunc("g2.func1")] () => i);
     iᴛ1 = i;
 }
 ```

@@ -533,7 +533,7 @@ func GetPrintLn() func(string) {
 <!-- source: src/tests/Behavioral/GoCallVariations/GoCallVariations.cs.target:57-61 -->
 ```csharp
 public static Action<@string> GetPrintLn() {
-    return (@string src) => {
+    return [GoFunc("GetPrintLn.func1")] (@string src) => {
         fmt.Println(src);
     };
 }
@@ -1225,7 +1225,7 @@ var computed = func() int { return base * 2 }()
 <!-- source: src/tests/Behavioral/PackageVarInitOrder/entries.cs.target:14-17 -->
 ```csharp
 internal static nint computed;
-internal static void initᴛcomputed() { computed = func(nint () => {
+internal static void initᴛcomputed() { computed = func([GoFunc("init.func1")] nint () => {
     return @base * 2;
 })(); }
 ```
@@ -6126,8 +6126,8 @@ Code in the importer then names the alias as `AliasImportLibꓸIntFn` where Go w
 ```csharp
 using AliasImportLib = AliasImportLib_package;
 …
-    AliasImportLibꓸIntFn f = (nint x) => x + 1;
-    AliasImportLibꓸBoxFn g = (AliasImportLib.Box b) => new AliasImportLib.Box(V: b.V * 2);
+    AliasImportLibꓸIntFn f = [GoFunc("main.func1")] (nint x) => x + 1;
+    AliasImportLibꓸBoxFn g = [GoFunc("main.func2")] (AliasImportLib.Box b) => new AliasImportLib.Box(V: b.V * 2);
 ```
 
 - `using AliasImportLib = AliasImportLib_package;` lets `AliasImportLib.` name the library's package class.
@@ -6813,7 +6813,7 @@ func returnsAFunction() Stringy {
 // type Stringy is a methodless func type — rendered inline as its base delegate
 …
 internal static Func<@string> returnsAFunction() {
-    return () => {
+    return [GoFunc("returnsAFunction.func1")] () => {
         fmt.Printf("Inner stringy function\n"u8);
         return "bar";
     };
@@ -6840,7 +6840,7 @@ func p2() {
 ```csharp
 internal static void p2() {
     nint @base = 10;
-    nint add(nint a, nint b) => a + b + @base;
+    [GoFunc("p2.func1")] nint add(nint a, nint b) => a + b + @base;
     @base = 20;
     fmt.Println("P2:", add(1, 2), add(3, 4));
 }
@@ -6871,7 +6871,7 @@ func p4() {
 ```csharp
 internal static void p4() {
     nint c = 0;
-    var next = () => {
+    var next = [GoFunc("p4.func1")] () => {
         c++;
         return c;
     };
@@ -6922,7 +6922,7 @@ partial struct Tally {
 …
 internal static void probeA1() {
     ref var t = ref heap<Tally>(new Tally(5, "s"), out var Ꮡt);
-    void bump() {
+    [GoFunc("probeA1.func1")] void bump() {
         Ꮡt.Value.total += 100;
     }
     bump();
@@ -6954,7 +6954,7 @@ internal static void probeA3() {
     ref var t = ref heap<Tally>(new Tally(5, "s"), out var Ꮡt);
     t.total += 2;
     var tʗ1 = t;
-    nint get() => tʗ1.total;
+    [GoFunc("probeA3.func1")] nint get() => tʗ1.total;
     fmt.Println("A3:", get());
 }
 ```
@@ -7249,7 +7249,7 @@ internal static void g1() {
     slice<Func<nint>> fs = default;
     for (nint iᴛ1 = 0; iᴛ1 < 3; iᴛ1++) {
         var i = iᴛ1;
-        fs = append(fsᴷ, fs, () => i);
+        fs = append(fsᴷ, fs, [GoFunc("g1.func1")] () => i);
     }
     fmt.Println("g1:", fs[0](), fs[1](), fs[2]());
 }
@@ -7299,7 +7299,7 @@ internal static void g2() {
             continue;
         }
         i++;
-        fs = append(fsᴷ, fs, () => i);
+        fs = append(fsᴷ, fs, [GoFunc("g2.func1")] () => i);
         iᴛ1 = i;
     }
     fmt.Println("g2:", len(fs));
@@ -7374,7 +7374,7 @@ func countdown(n int) Seq[int] {
 public delegate void Seq<V>(Func<V, bool> yield);
 …
 internal static Seq<nint> countdown(nint n) {
-    return (Func<nint, bool> yield) => {
+    return [GoFunc("countdown.func1")] (Func<nint, bool> yield) => {
         for (nint i = n; i > 0; i--) {
             if (!yield(i)) {
                 return;
@@ -7880,7 +7880,7 @@ whatAmI(nil)
 ```csharp
 private static readonly object heyˢ = (@string)"hey"u8;
 …
-void whatAmI(any i) {
+[GoFunc("main.func1")] void whatAmI(any i) {
     switch (i.type()) {
     case null: {
         fmt.Println("I'm nil");
@@ -8225,7 +8225,7 @@ internal static (nint code, @string msg) guarded(bool boom) {
     @string msg = default;
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("guarded.func1")] () => {
             var r = recover(); if (r != nil) {
                 code = -1;
                 msg = "recovered";
@@ -8346,7 +8346,7 @@ internal static (nint @out, @string label) compute(nint x) {
     @string label = default;
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("compute.func1")] () => {
             @out += 1000;
         }, ref ᒐ);
         if (x < 0) {
@@ -8389,7 +8389,7 @@ func pick(kind int) Shape {
 internal static Shape pick(nint kind) {
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("pick.func1")] () => {
             _ = recover();
         }, ref ᒐ);
         if (kind == 0) {
@@ -8438,7 +8438,7 @@ internal static bool /*ok*/ outerGuard(nint a, nint b) {
     bool ok = default;
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("outerGuard.func1")] () => {
             if (recover() != nil) {
                 ok = false;
             }
@@ -8641,7 +8641,7 @@ func main() {
 internal static partial void main() {
     …
     nint count = 1;
-    goǃ(() => {
+    goǃ([GoFunc("main.func1")] () => {
         fmt.Println("Go count (closure):", count);
     });
     count = 10;
@@ -8683,7 +8683,7 @@ internal static partial void main() {
 
     var done = new channel<EmptyStruct>(0);
 
-    goǃ(() => {
+    goǃ([GoFunc("main.func1")] () => {
         throw panic("goroutine boom");
     });
 
@@ -9989,7 +9989,7 @@ partial interface valued {
     nint Value();
 }
 …
-    var mv = ((valued)new meterᴠvalued(new meter(() => 11)));
+    var mv = ((valued)new meterᴠvalued(new meter([GoFunc("main.func1")] () => 11)));
     var gv = ((valued)((gauge)4));
     fmt.Println("func-source:", mv.Value(), "numeric-source:", gv.Value());
 ```
