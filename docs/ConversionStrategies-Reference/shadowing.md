@@ -935,6 +935,55 @@ Every non-function predeclared Go identifier, the golib public top-level type su
 
 Census rows verified fine with **no action needed** (each proven by a transpile-run-compare repro): locals named any predeclared identifier (`nil`, `iota`, `error`, `any`, `comparable`, `rune`, the numeric type names — Go-consistent shadowing carries over); user types named `error` or a predeclared type name in the common self-consistent cases; embedded predeclared fields (`struct{ float64; rune; any; int; string }` — the color-color form `internal rune rune;` compiles, with keyword-mapped embeds escaping only the field NAME: `internal nint @int;`); the golib `Defer`/`Recover` delegates (never spelled in emitted code — the defer machinery's lambda parameters are inferred); and a local named `heap` alongside heap-boxing machinery (`heap<nint>(out var Ꮡx)` is a *generic* invocation, which a non-generic local simple name cannot shadow) — but only the generic form is immune: the ARGUMENT-CARRYING form `heap(new T(), out var Ꮡx)` carries no type argument and does collide (see [A declaration named `heap` qualifies the boxing intrinsic](#a-declaration-named-heap-qualifies-the-boxing-intrinsic)).<!-- history: corrected 2026-08-28; the census row's repro never reached the argument-carrying form. --> Known residuals, documented rather than fixed (unreachable under default flags in any constructed repro, or pathological): a user TYPE named a numeric alias name (`float64`, `int32`, `uintptr`, `complex64`, …) in a package where an emission would be *forced* to spell that predeclared name through inference; and `type string struct{}` (the golib `@string` spelling is escape-identical to the keyword-escaped user name).
 
+## A Go name spelled with a go2cs marker letter refuses its package
+
+go2cs and go2cs-gen name what they generate with marker letters: `Ꮡx` (the address of `x`), `ᴛ1` (a temporary),
+`seedˢ` (the hoisted literal `"seed"`), `SжI` (an adapter), `Lockꞏtwin` (an M:N twin), and the rest of the glyph table.
+Every one is a Unicode letter (Lu, Ll, Lm or Lo), and Go's identifier rule accepts any letter, so a Go name can contain
+one and equal a generated name. A package that declares such a name is refused before any file is written, and the
+diagnostic names each identifier and the letter:
+
+```go
+package main
+
+import "fmt"
+
+func main() {
+	seedˢ := "x"
+	var v any = "seed" // go2cs hoists the literal "seed" into a field named seedˢ
+	fmt.Println(v, seedˢ)
+}
+```
+
+```
+main.go(6,2): error GO2CS2015: hoist.seedˢ contains ˢ (U+02E2), a letter go2cs writes into the names it generates (HoistedLiteralMarker); rename it
+```
+
+Without the refusal, that body converts to `@string seedˢ = "x"; any v = seedˢ;`, with the local bound where the
+hoisted literal was meant: Go prints `seed x`, and the C# would print `x x`, with no compile error. A user method `func (S) ΔClone() S` would lose the same way to the
+generated instance member of that name.
+
+`Δ` is the exception, because numeric Go code uses it as a letter. A `Δ` name is refused only when it equals a name go2cs
+generates in that package:
+- the `Δ` rename of one of its package-scope names, such as `Δslice` beside a type `slice`, or `ΔMain` beside a func `Main`;
+- a fixed generated member, such as `ΔClone`, `ΔAssign` or `ΔCopy`;
+- the shape witness of one of its types, `TΔshape`.
+
+`Δt`, `Δx`, a bare `Δ` and a parameter `Δv` convert unchanged. A local or parameter equal to a generated local (`xΔ1`,
+`initΔ1`, `ΔpN`) is left to C#, which refuses a duplicate or shadowing local outright.
+
+The marker set is the union of the converter's markers and the generator's and golib's. Only `‿` and `⁔` (Pc,
+connector punctuation) are names Go cannot spell.
+
+Guarded by: `TestMarkerGlyphIdentifiersAreRefused` (one site per refused letter class and each `Δ` kind, plus the
+must-convert `Δ` names), `TestMarkerGlyphsAreTheUnionOfEverySideThatWritesThem` (a non-ASCII letter in a converter
+literal, a go2cs-gen literal or a golib identifier that is not listed fails, and a listed letter none of them writes
+fails), `TestDeltaMintedMemberNamesAreEveryFixedDeltaLiteral` (a fixed `Δ` name the converter writes must be listed).
+<!-- src/go2cs/markerGlyphRefusal.go. The i9 name-collision census of 2026-11-21 (inbox/COORD/20261121T160231Z-i9.md)
+     found these classes latent: names containing a marker in its corpora were one, a ts local spelled `Δ` alone. Its
+     probes showed the silent ones: a local beats a same-named field (the seedˢ shape), and an instance member beats an
+     extension (the ΔClone shape). Ruled R1 by COORD 174705Z, with P3's marker-union and Δ changes. -->
+
 ## A Go type named `Value` yields its wrapper's `Value` property to the door `Value‿`
 
 Every named non-struct wrapper (slice, map, chan, array, numeric) exposes its underlying value through a generated
