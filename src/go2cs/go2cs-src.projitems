@@ -301,6 +301,7 @@
     <None Include="$(MSBuildThisFileDirectory)foreignTypeAliases_test.go" />
     <None Include="$(MSBuildThisFileDirectory)foreignWrittenRHS_test.go" />
     <None Include="$(MSBuildThisFileDirectory)forwardAliasChainTestRecord_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)funcLitCollection_test.go" />
     <None Include="$(MSBuildThisFileDirectory)funcLitGoNames.go" />
     <None Include="$(MSBuildThisFileDirectory)funcLitGoNames_test.go" />
     <None Include="$(MSBuildThisFileDirectory)funcLitNamedNumericLiteralArm_test.go" />

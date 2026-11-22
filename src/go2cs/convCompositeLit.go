@@ -287,7 +287,7 @@ func (v *Visitor) convCompositeLitAs(compositeLit *ast.CompositeLit, elidedType 
 
 				elements := v.convExprList(compositeLit.Elts, compositeLit.Lbrace, v.withValueCloneArgs(compositeLit.Elts, v.elidedElemContext(u.Elem(), compositeLit.Elts)))
 
-				if takesBuiltin {
+				if takesBuiltin && !attributedLiteralOpensCollection(elements) {
 					if v.targetedSliceLiterals[compositeLit] {
 						return addrOf(fmt.Sprintf("[%s]", elements))
 					}
@@ -340,7 +340,7 @@ func (v *Visitor) convCompositeLitAs(compositeLit *ast.CompositeLit, elidedType 
 
 				elements := v.convExprList(compositeLit.Elts, compositeLit.Lbrace, v.withValueCloneArgs(compositeLit.Elts, v.elidedElemContext(u.Elem(), compositeLit.Elts)))
 
-				if takesBuiltin {
+				if takesBuiltin && !attributedLiteralOpensCollection(elements) {
 					lengthArg := ""
 
 					if short {
@@ -1260,6 +1260,12 @@ func (v *Visitor) convCompositeLitAs(compositeLit *ast.CompositeLit, elidedType 
 		(compositeSuffix == ".array()" || arrayPadLen > 0) && !namedArrayComposite && !namedMapComposite &&
 		namedStructWrapRender == "" && !arrayTypeContext.indexedInitializer && arrayTypeContext.maxLength == 0
 
+	// A collection expression whose elements open with a function literal's attribute list is read by C# as that
+	// lambda (attributedLiteralOpensCollection): such a literal keeps the `new` form, decided once its elements are
+	// written, from where the collection starts.
+	fallbackHead, fallbackTail := fmt.Sprintf("new%s%s%s%s", newSpace, typeRender, lbracePrefix, lbrace), rbrace+compositeSuffix
+	collectionAt, collectionHead := -1, ""
+
 	if takesArrayBuiltin {
 		csElementType := convertToCSTypeName(v.getAliasQualifiedTypeName(elementType, false))
 		lengthArg := ""
@@ -1270,16 +1276,19 @@ func (v *Visitor) convCompositeLitAs(compositeLit *ast.CompositeLit, elidedType 
 
 		takesBuiltin = true
 		lbrace, rbrace, compositeSuffix = "[", "]", ")"
-		result.WriteString(fmt.Sprintf("array<%s>(%s%s%s", csElementType, lengthArg, lbracePrefix, lbrace))
+		collectionAt, collectionHead = result.Len(), fmt.Sprintf("array<%s>(%s%s%s", csElementType, lengthArg, lbracePrefix, lbrace)
+		result.WriteString(collectionHead)
 	} else if takesBuiltin && v.targetedSliceLiterals[compositeLit] {
 		// Where C# knows the target is this slice<T>, the collection expression stands alone, `[1, 2]`, and
 		// slice<T>'s [CollectionBuilder] builds it (markTargetedSliceLiterals).
 		lbrace, rbrace, compositeSuffix = "[", "]", ""
-		result.WriteString(fmt.Sprintf("%s%s", lbracePrefix, lbrace))
+		collectionAt, collectionHead = result.Len(), fmt.Sprintf("%s%s", lbracePrefix, lbrace)
+		result.WriteString(collectionHead)
 	} else if takesBuiltin {
 		csElementType := convertToCSTypeName(v.getAliasQualifiedTypeName(elementType, false))
 		lbrace, rbrace, compositeSuffix = "[", "]", ")"
-		result.WriteString(fmt.Sprintf("slice<%s>(%s%s", csElementType, lbracePrefix, lbrace))
+		collectionAt, collectionHead = result.Len(), fmt.Sprintf("slice<%s>(%s%s", csElementType, lbracePrefix, lbrace)
+		result.WriteString(collectionHead)
 	} else {
 		result.WriteString(fmt.Sprintf("new%s%s%s%s", newSpace, typeRender, lbracePrefix, lbrace))
 	}
@@ -1362,6 +1371,16 @@ func (v *Visitor) convCompositeLitAs(compositeLit *ast.CompositeLit, elidedType 
 
 		if endsInLineComment, _ := v.writeListComments(result, compositeLit.Lbrace, lastEnd, compositeLit.Rbrace, v.indentLevel+1); endsInLineComment && rbracePrefix == "" {
 			rbracePrefix = fmt.Sprintf("%s%s", v.newline, v.indent(v.indentLevel))
+		}
+	}
+
+	if collectionAt >= 0 {
+		written := result.String()
+
+		if elements := written[collectionAt+len(collectionHead):]; attributedLiteralOpensCollection(elements) {
+			result.Reset()
+			result.WriteString(written[:collectionAt] + fallbackHead + elements)
+			rbrace, compositeSuffix = fallbackTail[:1], fallbackTail[1:]
 		}
 	}
 

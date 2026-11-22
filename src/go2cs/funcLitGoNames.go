@@ -12,6 +12,7 @@ import (
 	"go/ast"
 	"go/types"
 	"strconv"
+	"strings"
 )
 
 // Every function literal is emitted with the name Go gives it, without its package, in a [GoFunc] attribute on the
@@ -205,4 +206,66 @@ func (v *Visitor) litAttributePrefix(funcLit *ast.FuncLit) string {
 	}
 
 	return prefix + "] "
+}
+
+// attributedLiteralOpensCollection reports whether the elements of a C# collection expression (the text after its
+// `[`) reach a function literal's attribute list before any other bracket. C# reads a `[` that could start an
+// attributed lambda by parsing attribute lists from it (Roslyn's LanguageParser.IsPossibleLambdaExpression): each
+// list ends at the first `[` or `]` it meets unless a token the surrounding context stops at comes first (a `new`
+// does; a `default`, a `(` or a literal's own `[` does not), and when the last list it consumed is the literal's
+// own, the lambda after it makes the whole collection read as that lambda. internal/profile's decoder tables,
+// `[default, [GoFunc("init.func1")] (ж<buffer> b, message m) => {…}, …]`, failed that way (CS1001). Such a
+// collection keeps the `new T[]{…}` form, whose braces are never read as attributes; the rule is the first bracket,
+// not the context, so it does not depend on which tokens a context happens to stop at.
+func attributedLiteralOpensCollection(elements string) bool {
+	for i := 0; i < len(elements); i++ {
+		switch rest := elements[i:]; {
+		case strings.HasPrefix(rest, "//"):
+			if end := strings.IndexByte(rest, '\n'); end >= 0 {
+				i += end
+			} else {
+				return false
+			}
+		case strings.HasPrefix(rest, "/*"):
+			if end := strings.Index(rest[2:], "*/"); end >= 0 {
+				i += end + 3
+			} else {
+				return false
+			}
+		case strings.HasPrefix(rest, `"""`):
+			if end := strings.Index(rest[3:], `"""`); end >= 0 {
+				i += end + 5
+			} else {
+				return false
+			}
+		case rest[0] == '"' || rest[0] == '\'':
+			verbatim := rest[0] == '"' && i > 0 && (elements[i-1] == '@' || i > 1 && elements[i-1] == '$' && elements[i-2] == '@')
+			j := 1
+
+			for j < len(rest) {
+				if rest[j] == rest[0] {
+					if verbatim && j+1 < len(rest) && rest[j+1] == '"' {
+						j += 2
+						continue
+					}
+
+					break
+				}
+
+				if rest[j] == '\\' && !verbatim {
+					j++
+				}
+
+				j++
+			}
+
+			i += j
+		case rest[0] == ']':
+			return false
+		case rest[0] == '[':
+			return strings.HasPrefix(rest, "[GoFunc(") || strings.HasPrefix(rest, "[MethodImpl(")
+		}
+	}
+
+	return false
 }
