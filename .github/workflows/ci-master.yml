@@ -1,0 +1,68 @@
+# CI on master — the automatic gates for the branch every train lands on.
+#
+# Master moves only when a train lands, so a run per push to master (and per pull request into it) is low-noise and
+# catches what a landing breaks before the next train builds on it. Train 3 landed a default-mode reflect regression
+# that no automatic check saw (release review TC-1/TC-2); this is the check that would have (owner-delegated, COORD,
+# 2026-11-22). Lane branches (claude/*) are NOT triggered here: they stay on-demand through os-matrix.yml.
+#
+# Every job is a call into os-matrix.yml, so the gates run with exactly its toolchain pins (Go from version.props,
+# the .NET SDK channel, GOTOOLCHAIN=local) and its stage steps, never a second copy of them.
+#
+#   push / pull_request to master: go-test, golib-tests (Release, GOROOT exported) and gen-tests, on linux and windows.
+#   nightly on master:             behavioral-full, in default mode, on linux and windows.
+#
+# Budget (hosted runner minutes, measured 2026-11-22 where stated):
+#   per push or PR:  golib-tests 12 (linux) + 17 (windows), gen-tests 1 + 2, go-test about 15 + 25 (PROVISIONAL,
+#                    not yet measured hosted), plus 6 one-minute plan jobs: about 78 runner minutes, about 30 wall.
+#   per night:       behavioral-full 47 (linux, measured) + about 70 (windows, PROVISIONAL), plus 2 plan jobs:
+#                    about 120 runner minutes.
+# The repository is public, so these minutes are not billed; the numbers are stated so a regression in cost is seen.
+#
+# Guide: docs/CIMatrix.md.
+
+name: CI on master
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+  # 03:17 UTC: after the day's trains, before os-matrix.yml's own 04:41 darwin census, and off the hour.
+  schedule:
+    - cron: '17 3 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# A newer push to the same ref cancels the older run: only the newest commit's verdict matters. The nightly and a
+# manual dispatch get their own group, so a push never cancels them.
+concurrency:
+  group: ci-master-${{ github.event_name == 'schedule' && 'nightly' || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'push' || github.event_name == 'pull_request' }}
+
+jobs:
+  gates:
+    if: github.event_name != 'schedule'
+    strategy:
+      fail-fast: false
+      matrix:
+        goos: [linux, windows]
+        stage: [go-test, golib-tests, gen-tests]
+    name: ${{ matrix.stage }} (${{ matrix.goos }})
+    uses: ./.github/workflows/os-matrix.yml
+    with:
+      goos: ${{ matrix.goos }}
+      stage: ${{ matrix.stage }}
+
+  nightly-behavioral:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    strategy:
+      fail-fast: false
+      matrix:
+        goos: [linux, windows]
+    name: behavioral-full (${{ matrix.goos }}, default mode)
+    uses: ./.github/workflows/os-matrix.yml
+    with:
+      goos: ${{ matrix.goos }}
+      stage: behavioral-full
