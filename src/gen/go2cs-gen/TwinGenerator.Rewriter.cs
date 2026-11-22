@@ -964,6 +964,57 @@ public sealed partial class TwinGenerator
                 return null;
             }
 
+            return StaticPair(argument, node, method, type, twinType);
+        }
+
+        public override SyntaxNode? VisitIdentifierName(IdentifierNameSyntax node) =>
+            PairImplicitGroup(node) ?? base.VisitIdentifierName(node);
+
+        public override SyntaxNode? VisitMemberAccessExpression(MemberAccessExpressionSyntax node) =>
+            PairImplicitGroup(node) ?? base.VisitMemberAccessExpression(node);
+
+        // The func-value seat: a method group the converter hands to a delegate-typed slot WITHOUT `new D(F)` (a struct
+        // literal's field, `new("receive", rowReceive)`; a slice literal's element, `[rowReceive, rowWait]`; an argument)
+        // is the same func value as fix 5's `new D(F)`, so it becomes the same pair. Without it, P5's table-driven main
+        // was twinned by the caller rule and still held its carrier: the stored delegates were plain, so the pair test
+        // found none and called them plain (MnTableMain: steps=1 parks=0 thread-blocks=2).
+        private ExpressionSyntax? PairImplicitGroup(ExpressionSyntax node)
+        {
+            // A call's own target, the name half of a member access (the whole access is visited instead), fix 5's sole
+            // argument of `new D(F)` (PairGroup's), and nameof are not implicit conversions to pair here.
+            if (!m_run.Pairs || m_passive > 0 || node.SyntaxTree != m_model.SyntaxTree ||
+                node.Parent is InvocationExpressionSyntax invocation && invocation.Expression == node ||
+                node.Parent is MemberAccessExpressionSyntax access && access.Name == node ||
+                node.Parent is ArgumentSyntax { Parent: ArgumentListSyntax { Arguments.Count: 1, Parent: ObjectCreationExpressionSyntax } } ||
+                node.Parent is ArgumentSyntax { Parent: ArgumentListSyntax { Parent: InvocationExpressionSyntax { Expression: IdentifierNameSyntax { Identifier.ValueText: "nameof" } } } })
+            {
+                return null;
+            }
+
+            if (m_model.GetSymbolInfo(node).Symbol is not IMethodSymbol { IsStatic: true, MethodKind: MethodKind.Ordinary, ReducedFrom: null, IsGenericMethod: false } method ||
+                m_model.GetTypeInfo(node).ConvertedType is not INamedTypeSymbol { TypeKind: TypeKind.Delegate } type ||
+                Run.TwinDelegateType(type) is not { } twinType ||
+                !m_run.CanPark(Run.Normalize(method)))
+            {
+                return null;
+            }
+
+            // A func value handed to a golib builtin (`goǃ(F, …)`, a defer) is that builtin's own twin machinery's to
+            // place; the pair is for a value the program stores and calls itself.
+            if (node.Parent is ArgumentSyntax { Parent: ArgumentListSyntax { Parent: InvocationExpressionSyntax call } } &&
+                m_model.GetSymbolInfo(call).Symbol is IMethodSymbol { ContainingType: { Name: "builtin", ContainingNamespace.Name: "go" } })
+            {
+                return null;
+            }
+
+            return StaticPair(node, node, method, type, twinType);
+        }
+
+        // The pair of static function `method` (named by `argument`) and its twin, as a `type` delegate bound to the pair's
+        // Invoke, in place of `replaced`: fix 5's `new D(F)` and the seat's implicit group alike.
+        private ExpressionSyntax StaticPair(ExpressionSyntax argument, SyntaxNode replaced, IMethodSymbol method, INamedTypeSymbol type, string twinType)
+        {
+            ExpressionSyntax node = (ExpressionSyntax)replaced;
             string plainType = type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
             string group = argument.WithoutTrivia().ToFullString();
             string pair = "new " + plainType + "(new " + m_run.PairClass(type, twinType) + "(" + group + ", " + Rename(argument.WithoutTrivia()).ToFullString() + ").Invoke)";

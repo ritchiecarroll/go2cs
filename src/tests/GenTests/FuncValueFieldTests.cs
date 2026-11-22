@@ -48,6 +48,14 @@ public class FuncValueFieldTests
                 m[1]();
             }
 
+            public static void runTable()
+            {
+                var rows = slice<entry>([new entry { id = 1, run = parks }]);
+                rows[0].run();
+                var steps = slice<Action>([parks, parks]);
+                steps[1]();
+            }
+
             internal static Action pick() => parks;
 
             public static void runResult()
@@ -81,6 +89,23 @@ public class FuncValueFieldTests
         string body = twins[twins.IndexOf("runIndexOnceꞏtwin", StringComparison.Ordinal)..];
         body = body[..Math.Min(body.Length, body.IndexOf("\n    }", StringComparison.Ordinal) is var end and > 0 ? end : body.Length)];
         Assert.AreEqual(1, body.Split("nextIndex()").Length - 1, "nextIndex() is called once: " + body);
+    }
+
+    [TestMethod]
+    public void AnImplicitGroupStoredInAFieldOrElementBecomesAPair()
+    {
+        // P5's table-driven main: the converter stores a method group with no `new D(F)` (a struct literal's field, a
+        // slice literal's element). In the twin it becomes the same cached pair as fix 5's `new D(F)`, so the stored
+        // value carries the twin the call test looks for.
+        (string twins, Diagnostic[] errors) = RunWith(null, null, Shapes);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        int start = twins.IndexOf("runTableꞏtwin", StringComparison.Ordinal);
+        Assert.IsTrue(start >= 0, "runTable is twinned");
+        string body = twins[start..];
+        body = body[..Math.Min(body.Length, body.IndexOf("\n    }", StringComparison.Ordinal) is var end and > 0 ? end : body.Length)];
+        Assert.AreEqual(3, body.Split("??= new global::System.Action(new ").Length - 1, "the field's and both elements' groups are pairs: " + body);
+        Assert.IsFalse(body.Contains("run = parks", StringComparison.Ordinal), "no plain group is stored: " + body);
     }
 
     [TestMethod]
