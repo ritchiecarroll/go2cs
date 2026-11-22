@@ -1235,7 +1235,7 @@ go.ж<T> :: property static go.ж<T> NilBox { get; }
 # code places or names ([GoParkForwarder], the [GoTwinOf] stamp), hidden or not, with one shape line per type, and
 # the named twin entry points (builtin RunMainꞏtwin, goǃtwin, selectꞏtwin, ᐸꟷꞏtwin, Goschedꞏtwin; channel`1 ᐸꟷꞏtwin), each
 # name's whole overload family. A twin-built assembly binds them, so a line never disappears and changes only where
-# its plain member does (src/tools/mnspike2/TwinRefs/FREEZE-SHEET.md, block 7b). Same spelling as [tier1-members];
+# its plain member does (docs/phase4/FREEZE-mn-surface.md, block 7b). Same spelling as [tier1-members];
 # GolibTests writes the lines with GO2CS_PUBLIC_SURFACE_MN_FROZEN=<path>. A change here needs a COORD ruling, cited
 # beside it. ONE section: train 3 met two [mn-frozen] headers (7a's and 7d's), so a repeated header now throws.
 
