@@ -260,6 +260,7 @@ jobs:
       sweep-timeout: ${{ steps.derive.outputs.sweep-timeout }}
       probe-at: ${{ steps.derive.outputs.probe-at }}
       jit-disasm: ${{ steps.derive.outputs.jit-disasm }}
+      mn: ${{ steps.derive.outputs.mn }}
       cgo-cc: ${{ steps.derive.outputs.cgo-cc }}
       cgo-cc-sha: ${{ steps.derive.outputs.cgo-cc-sha }}
     steps:
@@ -325,8 +326,8 @@ jobs:
           # go as CC (the cgo toolchain scout, H, 2026-11-10); sha=HEX replaces the pin's sha256, and exists so a wrong
           # hash can be shown to refuse before anything runs. An unknown or repeated key, an empty value, or any option on
           # any other stage FAILS the plan by name rather than being ignored.
-          $probeTest = ''; $probeAt = ''; $jitDisasm = ''; $dnsServers = ''; $cgoCc = ''; $cgoCcSha = ''; $dumpProof = ''; $sweepTimeout = ''
-          $optionKeys = @(switch ($stage) { 'golib-tests' { 'jit' } 'stack-probe' { 'test', 'at' } 'sweep-shard' { 'dns', 'dumpproof', 'timeout' } { $_ -in 'converter-cgo', 'cgo-e2e' } { 'cc', 'sha' } })
+          $probeTest = ''; $probeAt = ''; $jitDisasm = ''; $dnsServers = ''; $cgoCc = ''; $cgoCcSha = ''; $dumpProof = ''; $sweepTimeout = ''; $mnMode = '0'
+          $optionKeys = @(switch ($stage) { 'behavioral-smoke' { 'mn' } 'golib-tests' { 'jit' } 'stack-probe' { 'test', 'at' } 'sweep-shard' { 'dns', 'dumpproof', 'timeout' } { $_ -in 'converter-cgo', 'cgo-e2e' } { 'cc', 'sha' } })
           if ($optionKeys.Count) {
               $parts = @($filter -split ';')
               $filter = $parts[0].Trim()
@@ -340,6 +341,13 @@ jobs:
                   $seen[$key] = $value
               }
               $jitDisasm = "$($seen['jit'])"
+              # behavioral-smoke ;mn=1 runs the filtered programs in M:N mode (BehavioralRunner --mn: GO2CS_MN=1 and
+              # generated twins for every selected project); blank or 0 is default mode (release review TC-3/TC-4).
+              if ($seen.ContainsKey('mn')) {
+                  if ($seen['mn'] -notin '0', '1') { throw "behavioral-smoke filter option mn= is 0 (default mode) or 1 (M:N mode); got '$($seen['mn'])'." }
+                  $mnMode = $seen['mn']
+              }
+              if ($stage -eq 'behavioral-smoke') { Write-Host "behavioral-smoke: $(if ($mnMode -eq '1') { 'M:N mode (BehavioralRunner --mn)' } else { 'default mode' })" }
               if ($stage -eq 'stack-probe') {
                   if (-not $filter -or $filter.Contains(',')) { throw "stack-probe takes exactly ONE roster row before its options in filter; got '$filter'." }
                   $probeTest = "$($seen['test'])"
@@ -377,7 +385,7 @@ jobs:
                   if ($cgoCc) { Write-Host "converter-cgo: CC is the pinned $cgoCc$(if ($cgoCcSha) { ", its sha256 REPLACED by $cgoCcSha" })" }
               }
           }
-          elseif ($filter -match '(^|;)\s*(jit|test|at|dns|dumpproof|timeout|cc|sha)\s*=') { throw "filter options (;key=value) apply to stages golib-tests, stack-probe, sweep-shard, converter-cgo and cgo-e2e only; got stage '$stage' and filter '$filter'." }
+          elseif ($filter -match '(^|;)\s*(mn|jit|test|at|dns|dumpproof|timeout|cc|sha)\s*=') { throw "filter options (;key=value) apply to stages behavioral-smoke, golib-tests, stack-probe, sweep-shard, converter-cgo and cgo-e2e only; got stage '$stage' and filter '$filter'." }
 
           # The behavioral stages' per-program run budget. A schedule has no inputs and keeps 120, as
           # does a blank dispatch. A value that is not a whole number of seconds in 1..1800 FAILS the
@@ -690,6 +698,7 @@ jobs:
           Add-Content -Path $env:GITHUB_OUTPUT -Value "probe-test=$probeTest" -Encoding utf8
           Add-Content -Path $env:GITHUB_OUTPUT -Value "probe-at=$probeAt" -Encoding utf8
           Add-Content -Path $env:GITHUB_OUTPUT -Value "jit-disasm=$jitDisasm" -Encoding utf8
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "mn=$mnMode" -Encoding utf8
           Add-Content -Path $env:GITHUB_OUTPUT -Value "dns-servers=$dnsServers" -Encoding utf8
           Add-Content -Path $env:GITHUB_OUTPUT -Value "dump-proof=$dumpProof" -Encoding utf8
           Add-Content -Path $env:GITHUB_OUTPUT -Value "sweep-timeout=$(if ($sweepTimeout) { $sweepTimeout } else { '45m' })" -Encoding utf8
@@ -1427,16 +1436,84 @@ jobs:
               if ($readings.Count) { $outcomes += @('', 'Readings:') + $readings }
           }
 
+          # The expected skips (release review TC-5): on a whole-suite run, the tests this leg reports NotExecuted must
+          # be EXACTLY the ones src/tests/GolibTests/ExpectedSkips/<rid>.txt lists by name. A test newly skipped is a
+          # silent loss of coverage; a listed test that now runs is a stale manifest. Either fails the leg by name. A leg
+          # with no manifest for its RID fails too, rather than reading as checked.
+          $skipCheck = @()
+          if ([string]::IsNullOrWhiteSpace($env:GOLIB_FILTER) -and (Test-Path -LiteralPath $trx)) {
+              $manifest = "src/tests/GolibTests/ExpectedSkips/$rid.txt"
+              $skipped = @($doc.TestRun.Results.UnitTestResult | Where-Object { $_.outcome -eq 'NotExecuted' } | ForEach-Object { "$($_.testName)" } | Sort-Object)
+              if (-not (Test-Path -LiteralPath $manifest)) {
+                  $skipCheck = @("expected skips: NO MANIFEST at $manifest for $rid ($($skipped.Count) skipped)")
+                  Write-Host "::error::GolibTests expected skips: no manifest at $manifest for $rid"
+                  $runExit = 1
+              }
+              else {
+                  $expected = @(Get-Content -LiteralPath $manifest | ForEach-Object { ($_ -replace '#.*$', '').Trim() } | Where-Object { $_ } | Sort-Object)
+                  # Plain membership, not Compare-Object, which refuses an empty side.
+                  $newly = @($skipped | Where-Object { $expected -notcontains $_ } | Sort-Object -Unique)
+                  $nowRun = @($expected | Where-Object { $skipped -notcontains $_ } | Sort-Object -Unique)
+                  $skipCheck = @("expected skips: $($skipped.Count) skipped, $($expected.Count) listed in $manifest; newly skipped $($newly.Count), listed but ran $($nowRun.Count)")
+                  foreach ($t in $newly) { $skipCheck += "  NEWLY SKIPPED $t"; Write-Host "::error::GolibTests on ${rid}: $t is skipped and $manifest does not list it" }
+                  foreach ($t in $nowRun) { $skipCheck += "  LISTED BUT RAN $t"; Write-Host "::error::GolibTests on ${rid}: $manifest lists $t as skipped, and it ran" }
+                  if ($newly.Count -or $nowRun.Count) { $runExit = 1 }
+              }
+          }
+
           $summary = @(
               "## GolibTests -- GOOS=$goos ($rid)"
               ''
               "Filter ``$($env:GOLIB_FILTER)`` -- exit ``$runExit``"
               ''
               '```'
-          ) + @(Get-Content -LiteralPath $log -ErrorAction SilentlyContinue | Where-Object { $_ -match '^(Passed!|Failed!|Total tests|\s+(Passed|Failed|Skipped):)' } | Select-Object -Last 8) + $outcomes + @('```')
+          ) + $skipCheck + @(Get-Content -LiteralPath $log -ErrorAction SilentlyContinue | Where-Object { $_ -match '^(Passed!|Failed!|Total tests|\s+(Passed|Failed|Skipped):)' } | Select-Object -Last 8) + $outcomes + @('```')
 
           Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value $summary
           & ./.github/annotate-summary.ps1 -Title "golib-tests $goos/$rid" -Lines $summary
+
+          exit $runExit
+
+      # -------------------------------------------------------------------------------------
+      # ChannelTests -- src/tests/ChannelTests, golib's own channel suite (buffered and unbuffered send, receive, close
+      # and select), which ran nowhere until 2026-11-22 (release review TC-9). It rides the golib-tests stage, in its own
+      # step so either suite's red names itself, and only when the stage has no filter: a filtered run is a targeted
+      # GolibTests probe.
+      # -------------------------------------------------------------------------------------
+      - name: ChannelTests — build and run for this GOOS
+        if: always() && needs.plan.outputs.stage == 'golib-tests' && needs.plan.outputs.filter == ''
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Continue'
+
+          $goos = $env:GOOS_TARGET
+          $rid = $env:RID
+          $art = Join-Path $PWD 'artifacts'
+          New-Item -ItemType Directory -Force -Path $art | Out-Null
+          $log = Join-Path $art "channel-tests-$goos-$rid.log"
+          $trx = Join-Path $art "channel-tests-$goos-$rid.trx"
+
+          $archArgs = @(if ($env:GoTargetArch) { "-p:GoTargetArch=$($env:GoTargetArch)" })
+          & dotnet test src/tests/ChannelTests -c Release "-p:GoTargetOS=$goos" @archArgs --blame-hang-timeout 10m `
+              --logger "trx;LogFileName=$trx" --logger 'console;verbosity=normal' -nologo *>&1 | Tee-Object -FilePath $log
+          $runExit = $LASTEXITCODE
+
+          $outcomes = @()
+          if (Test-Path -LiteralPath $trx) {
+              [xml]$doc = Get-Content -LiteralPath $trx -Raw
+              $outcomes = @($doc.TestRun.Results.UnitTestResult | Sort-Object testName | ForEach-Object { "  $($_.outcome) $($_.testName)" })
+          }
+
+          $summary = @(
+              "## ChannelTests -- GOOS=$goos ($rid)"
+              ''
+              "exit ``$runExit``"
+              ''
+              '```'
+          ) + @(Get-Content -LiteralPath $log -ErrorAction SilentlyContinue | Where-Object { $_ -match '^(Passed!|Failed!|Total tests|\s+(Passed|Failed|Skipped):)' } | Select-Object -Last 8) + $outcomes + @('```')
+
+          Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value $summary
+          & ./.github/annotate-summary.ps1 -Title "channel-tests $goos/$rid" -Lines $summary
 
           exit $runExit
 
@@ -1541,9 +1618,32 @@ jobs:
               exit 1
           }
 
+          # Off windows, a behavioral project marked exclusive to other platforms ([GoPlatformExclusive(...)] in its
+          # package_info.cs, without this leg's GOOS) is not built: the windows-native projects compile Win32 syscall
+          # surface that linux's syscall does not have (82 errors in 10 projects on linux, master 1f8d62ddb3; release
+          # review TC-6). The leg builds a copy of go2cs.slnx without their entries (sub-libraries included) and names
+          # each one it left out. The windows leg builds the whole solution, as before.
+          $solution = 'src/go2cs.slnx'
+          if ($goos -ne 'windows') {
+              $excluded = @(Get-ChildItem -Directory 'src/tests/Behavioral' | Where-Object {
+                  $info = Join-Path $_.FullName 'package_info.cs'
+                  if (-not (Test-Path -LiteralPath $info)) { return $false }
+                  $m = Select-String -LiteralPath $info -Pattern '^\s*\[GoPlatformExclusive\((?<list>[^)]*)\)\]' | Select-Object -First 1
+                  if (-not $m) { return $false }
+                  $platforms = @([regex]::Matches($m.Matches[0].Groups['list'].Value, '"(?<p>[^"]+)"') | ForEach-Object { $_.Groups['p'].Value })
+                  $platforms -notcontains $goos
+              } | ForEach-Object Name | Sort-Object)
+              Write-Host "==> not built on ${goos}: $($excluded.Count) platform-exclusive behavioral project(s): $($excluded -join ', ')"
+              $lines = Get-Content -LiteralPath $solution
+              $kept = @($lines | Where-Object { $line = $_; -not ($excluded | Where-Object { $line -match ('Path="tests/Behavioral/' + [regex]::Escape($_) + '/') }) })
+              $solution = 'src/go2cs.ci-filtered.slnx'
+              Set-Content -LiteralPath $solution -Value $kept -Encoding utf8
+              Write-Host "==> building ${solution}: $($lines.Count - $kept.Count) project entr(ies) removed"
+          }
+
           $archArgs = @(if ($env:GoTargetArch) { "-p:GoTargetArch=$($env:GoTargetArch)" })
           $sw = [System.Diagnostics.Stopwatch]::StartNew()
-          & dotnet build src/go2cs.slnx -c $config "-p:GoTargetOS=$goos" @archArgs -nologo -clp:ErrorsOnly *>&1 | Tee-Object -FilePath $log
+          & dotnet build $solution -c $config "-p:GoTargetOS=$goos" @archArgs -nologo -clp:ErrorsOnly *>&1 | Tee-Object -FilePath $log
           $runExit = $LASTEXITCODE
           $sw.Stop()
 
@@ -1854,11 +1954,9 @@ jobs:
         shell: pwsh
         env:
           SMOKE_FILTER: ${{ needs.plan.outputs.filter }}
-          # M:N: every program the smoke runs is on the scheduler (GO2CS_MN), and each project the filter selects is
-          # built with generated twins. The step sets GoTwinsFor itself, below, to the EXACT project list: MSBuild
-          # matches GoTwinsFor by whole project name (src/Directory.Build.targets), and a substring filter passed
-          # straight through twinned nothing once it selected more than one project.
-          GO2CS_MN: '1'
+          # The run's mode is the runner's: ;mn=1 passes BehavioralRunner --mn (GO2CS_MN=1 and generated twins for every
+          # selected project, by exact name), and blank or ;mn=0 is default mode (release review TC-3/TC-4).
+          SMOKE_MN: ${{ needs.plan.outputs.mn }}
           # BehavioralRunner's OWN budgets, in seconds: no timeout the caller sets can influence
           # them, so a generous job budget alone would be worthless if the runner killed its child
           # first. Sized for a cold 4-core hosted runner, where the shared core closure is built
@@ -1885,23 +1983,19 @@ jobs:
 
           Write-Host "==> behavioral smoke: filter '$filter', GoTargetOS=$($env:GoTargetOS)"
 
-          # GoTwinsFor is the exact ';'-separated list of the projects the runner's --filter (a case-insensitive
-          # substring) selects, with each sub-library project beside them (`<Project>.<lib>.csproj`, whose methods the
-          # program calls). A filter that selects no project refuses by name: it would twin nothing and read nothing.
-          $twinNames = @(Get-ChildItem -Directory 'src/tests/Behavioral' |
-              Where-Object { $_.Name.IndexOf($filter, [StringComparison]::OrdinalIgnoreCase) -ge 0 -and
-                  (Test-Path (Join-Path $_.FullName "$($_.Name).csproj")) } |
-              ForEach-Object { Get-ChildItem -Path $_.FullName -Filter '*.csproj' -Recurse -File } |
-              Where-Object { $_.Extension -eq '.csproj' } |
-              ForEach-Object BaseName | Sort-Object -Unique)
-
-          if ($twinNames.Count -eq 0) {
-              Write-Host "::error::behavioral-smoke filter '$filter' selects no behavioral project, so GoTwinsFor would twin nothing; name a project or a substring of one"
+          # The runner's --filter is a case-insensitive substring, or a|b|c alternatives. A filter that selects no project
+          # refuses by name: it would run nothing and read nothing.
+          $parts = @($filter -split '\|' | Where-Object { $_ })
+          $selected = @(Get-ChildItem -Directory 'src/tests/Behavioral' | Where-Object {
+              $name = $_.Name
+              (Test-Path (Join-Path $_.FullName "$name.csproj")) -and @($parts | Where-Object { $name.IndexOf($_, [StringComparison]::OrdinalIgnoreCase) -ge 0 }).Count -gt 0
+          })
+          if ($selected.Count -eq 0) {
+              Write-Host "::error::behavioral-smoke filter '$filter' selects no behavioral project; name a project or a substring of one"
               exit 1
           }
-
-          $env:GoTwinsFor = $twinNames -join ';'
-          Write-Host "==> GoTwinsFor ($($twinNames.Count)): $env:GoTwinsFor"
+          $mnArgs = @(if ($env:SMOKE_MN -eq '1') { '--mn' })
+          Write-Host "==> $($selected.Count) project(s), $(if ($mnArgs) { 'M:N mode (--mn)' } else { 'default mode' })"
 
           # Build the converter explicitly. A hosted runner has no go2cs binary at all, and every
           # harness rebuild predicate keys on a converter *.go being NEWER than the binary -- which
@@ -1930,7 +2024,7 @@ jobs:
           # disk-exhaustion failure can still be recognized rather than guessed at.
           $log = Join-Path $art "behavioral-smoke-$goos-$rid.log"
 
-          & ./src/tests/Behavioral/run-behavioral.ps1 -IgnoreDiskPreflight --filter $filter *>&1 |
+          & ./src/tests/Behavioral/run-behavioral.ps1 -IgnoreDiskPreflight --filter $filter @mnArgs *>&1 |
               Tee-Object -FilePath $log
 
           $runExit = $LASTEXITCODE
@@ -1962,13 +2056,13 @@ jobs:
       # M:N spike (this branch never lands). After the smoke has built MnMixedStorm with generated twins, run the
       # program directly: Go's build for the reference output, then the C# build on the thread path (the sampler's
       # control) and on the scheduler at three sizes. A sampler outside the process counts its OS threads, and the
-      # scheduler prints its own reading. Then MnGoschedFair's chain check, the one part that FAILS the step: the
+      # scheduler prints its own reading. Then MnGoschedFair's chain check, which joins the direct runs' failures that FAIL the step: the
       # fairness row tests GoScheduler.MaxRunNextChain only while its ping-pong pair chains through run-next, so the
       # script asserts the chain formed (run-next steps >= 100 x Gosched yields) and reads CHAIN-FAIL by name when a
       # later change makes the row vacuous (P3's SHOULD 1 on the Gosched-park seat).
       # -------------------------------------------------------------------------------------
       - name: M:N spike — direct runs of the twinned storm
-        if: always() && needs.plan.outputs.stage == 'behavioral-smoke' && needs.plan.outputs.filter == 'MnMixedStorm'
+        if: always() && needs.plan.outputs.stage == 'behavioral-smoke' && needs.plan.outputs.filter == 'MnMixedStorm' && needs.plan.outputs.mn == '1'
         timeout-minutes: 30
         shell: bash
         run: |
@@ -1981,6 +2075,14 @@ jobs:
           grep -E '^// (candidates|await-sites|T )' "$dir/Generated/go2cs-gen/go2cs.TwinGenerator/go2cs.twins.report.g.cs" 2>/dev/null | tr -d '\r' | sed 's/^/READING mn-direct report: /'
           (cd "$dir" && go build -o "$RUNNER_TEMP/mnstorm-go" .) || echo "READING mn-direct go build failed"
           now() { python3 -c 'import time; print(time.time())'; }
+          # Every arm is a verdict, not only a reading (COORD, 2026-11-22: the twinned storm at 100,000 hangs about one run
+          # in 5-10, and an exit-0 step hid it). A run past its deadline is killed and named HANG; a non-zero exit, or an
+          # output that differs from Go's at the same n, is named too. Every arm still runs and prints its READING, and the
+          # step fails at the end, one ::error:: line per failure. 180 s is six times the slowest storm recorded (29.6 s,
+          # osx-arm64, 3 P, at 100,000), and seven arms at 180 s fit the step's 30 minutes.
+          deadline=${MN_DIRECT_DEADLINE_S:-180}
+          failures=()
+          declare -A goOut
           one() {
             label=$1; n=$2; mn=$3; shift 3
             export MN_STORM_N=$n MN_STORM_HOLD_MS=3000 GO2CS_MN_READING=1
@@ -1989,10 +2091,16 @@ jobs:
             "$@" > "$RUNNER_TEMP/mn-out.txt" 2> "$RUNNER_TEMP/mn-err.txt" &
             pid=$!
             peak=0
+            hung=0
             while kill -0 $pid 2>/dev/null; do
               if [ -d /proc/$pid/task ]; then t=$(ls /proc/$pid/task 2>/dev/null | wc -l); else t=$(ps -M -p $pid 2>/dev/null | tail -n +2 | wc -l); fi
               t=$(echo $t)
               if [ -n "$t" ] && [ "$t" -gt "$peak" ]; then peak=$t; fi
+              if python3 -c "import sys; sys.exit(0 if $(now) - $start > $deadline else 1)"; then
+                hung=1
+                kill -9 $pid 2>/dev/null
+                break
+              fi
               sleep 0.25
             done
             wait $pid
@@ -2001,9 +2109,23 @@ jobs:
             out=$(tr -d '\r' < "$RUNNER_TEMP/mn-out.txt" | tr '\n' ';')
             reading=$(grep -a 'READING go-scheduler' "$RUNNER_TEMP/mn-err.txt" | tail -n 1 | tr -d '\r')
             errs=$(grep -a -c -i 'exception\|panic\|fatal' "$RUNNER_TEMP/mn-err.txt")
-            echo "READING mn-direct arm=$label n=$n exit=$code wall=${wall}s sampled-peak-threads=$peak err-lines=$errs out=[$out] | $reading"
-            if [ "$code" != "0" ]; then head -n 5 "$RUNNER_TEMP/mn-err.txt" | cut -c1-300 | sed 's/^/READING mn-direct stderr: /'; fi
+            verdict=ok
+            if [ "$hung" = "1" ]; then
+              verdict=HANG
+              failures+=("arm=$label n=$n HANG: no completion within ${deadline}s (killed; sampled-peak-threads=$peak)")
+            elif [ "$code" != "0" ]; then
+              verdict=EXIT
+              failures+=("arm=$label n=$n exit=$code: $(head -n 1 "$RUNNER_TEMP/mn-err.txt" | tr -d '\r' | cut -c1-200)")
+            elif [ "$label" = "go" ]; then
+              goOut[$n]=$out
+            elif [ -n "${goOut[$n]+set}" ] && [ "$out" != "${goOut[$n]}" ]; then
+              verdict=OUTPUT
+              failures+=("arm=$label n=$n output differs from Go's: [$out] vs [${goOut[$n]}]")
+            fi
+            echo "READING mn-direct arm=$label n=$n verdict=$verdict exit=$code wall=${wall}s sampled-peak-threads=$peak err-lines=$errs out=[$out] | $reading"
+            if [ "$verdict" != "ok" ]; then head -n 5 "$RUNNER_TEMP/mn-err.txt" | cut -c1-300 | sed 's/^/READING mn-direct stderr: /'; fi
           }
+          if [ ! -x "$RUNNER_TEMP/mnstorm-go" ]; then failures+=("go build of MnMixedStorm failed: no reference output to compare"); fi
           for n in 1000 10000 100000; do
             if [ -x "$RUNNER_TEMP/mnstorm-go" ]; then one go $n 0 "$RUNNER_TEMP/mnstorm-go"; fi
           done
@@ -2012,8 +2134,12 @@ jobs:
             one cs-twins $n 1 dotnet "$dll"
           done
           unset GO2CS_MN MN_STORM_N MN_STORM_HOLD_MS GO2CS_MN_READING
-          bash src/tools/mnspike2/MnGoschedFair/chain-check.sh
-          exit $?
+          bash src/tools/mnspike2/MnGoschedFair/chain-check.sh || failures+=("MnGoschedFair chain check (rc $?)")
+          if [ ${#failures[@]} -gt 0 ]; then
+            for f in "${failures[@]}"; do echo "::error::M:N direct run: $f"; done
+            exit 1
+          fi
+          exit 0
 
       - name: Behavioral stderr — run named projects directly and keep the WHOLE stderr
         if: needs.plan.outputs.stage == 'behavioral-stderr'

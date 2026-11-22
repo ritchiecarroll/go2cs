@@ -180,6 +180,7 @@ namespace BehavioralRunner
             int sliceIndex = 0, sliceCount = 0;   // 0/0 = no slicing
             bool updateTargets = false;
             bool listOnly = false;
+            bool mn = false;
             HashSet<Phase> phases = new() { Phase.Transpile, Phase.Compile, Phase.Target, Phase.Output };
 
             // Held as nullable so "not given on the command line" stays distinguishable from "given a
@@ -228,6 +229,9 @@ namespace BehavioralRunner
                     case "--list":
                         listOnly = true;
                         break;
+                    case "--mn":
+                        mn = true;
+                        break;
                     case "--help" or "-h":
                         PrintUsage();
                         return 0;
@@ -264,7 +268,7 @@ namespace BehavioralRunner
                 .Where(d => Directory.GetFiles(d, "*.csproj").Length > 0)
                 .Where(d => Directory.GetFiles(d, "*.go").Length > 0)
                 .Select(Path.GetFileName)
-                .Where(n => filter is null || n!.Contains(filter, StringComparison.OrdinalIgnoreCase))
+                .Where(n => filter is null || filter.Split('|').Any(part => part.Length > 0 && n!.Contains(part, StringComparison.OrdinalIgnoreCase)))
                 .OrderBy(n => n, StringComparer.OrdinalIgnoreCase)
                 .ToList()!;
 
@@ -326,6 +330,43 @@ namespace BehavioralRunner
                 Console.WriteLine($"SLICE {sliceIndex}/{sliceCount}: {projects.Count} of {measurable} measurable projects");
                 Console.WriteLine();
             }
+
+            // ----- MODE: default, or M:N (--mn) -----
+            // The run's mode is the runner's to set, never inherited (release review TC-3/TC-4). --mn runs every
+            // program on the M:N scheduler (GO2CS_MN=1) and builds every project it selected with generated twins:
+            // GoTwinsFor is the EXACT ';' list MSBuild matches by whole project name (src/Directory.Build.targets),
+            // each project with the sub-library projects in its folder. Without --mn the run is DEFAULT mode, and a
+            // GO2CS_MN or GoTwinsFor inherited from the caller is cleared and named, so a default run is never half M:N.
+            // Every child build and run inherits the runner's environment, so the mode reaches them all.
+            if (mn)
+            {
+                List<string> twinNames = projects
+                    .SelectMany(n => Directory.GetFiles(Path.Combine(s_behavioralDir, n), "*.csproj", SearchOption.AllDirectories))
+                    .Where(path => !path.Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar).Any(part => part is "bin" or "obj"))
+                    .Select(path => Path.GetFileNameWithoutExtension(path))
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .OrderBy(name => name, StringComparer.OrdinalIgnoreCase)
+                    .ToList();
+
+                Environment.SetEnvironmentVariable("GO2CS_MN", "1");
+                Environment.SetEnvironmentVariable("GoTwinsFor", string.Join(';', twinNames));
+                Console.WriteLine($"MODE M:N: GO2CS_MN=1, GoTwinsFor ({twinNames.Count}): {string.Join(';', twinNames)}");
+            }
+            else
+            {
+                foreach (string inherited in new[] { "GO2CS_MN", "GoTwinsFor" })
+                {
+                    if (Environment.GetEnvironmentVariable(inherited) is { Length: > 0 } value)
+                    {
+                        Console.WriteLine($"MODE default: cleared the inherited {inherited}={value} (pass --mn for an M:N run)");
+                        Environment.SetEnvironmentVariable(inherited, null);
+                    }
+                }
+
+                Console.WriteLine("MODE default");
+            }
+
+            Console.WriteLine();
 
             if (listOnly)
             {
@@ -1732,12 +1773,18 @@ namespace BehavioralRunner
                 BehavioralRunner -- standalone go2cs behavioral test runner (no testhost).
 
                 Usage:
-                  BehavioralRunner [--filter <substr>] [--phase <list>] [--update-targets] [--list]
+                  BehavioralRunner [--filter <substr>] [--phase <list>] [--update-targets] [--list] [--mn]
                                    [--build-timeout <sec>] [--build-one-timeout <sec>]
                                    [--transpile-timeout <sec>] [--run-timeout <sec>]
 
                 Options:
-                  --filter <substr>     Only projects whose name contains <substr> (case-insensitive).
+                  --filter <substr>     Only projects whose name contains <substr> (case-insensitive);
+                                        a|b|c selects every project matching any of the parts.
+                  --mn                  M:N mode: every program runs on the M:N scheduler (GO2CS_MN=1),
+                                        and every selected project and its sub-libraries are built
+                                        with generated twins (GoTwinsFor, the exact project names).
+                                        Without it the run is default mode, and an inherited
+                                        GO2CS_MN or GoTwinsFor is cleared and named.
                   --slice <i>/<n>       Run only the i-th of n contiguous, disjoint pieces of the
                                         enumeration (1-based), applied after platform-exclusive
                                         skipping. Unlike --filter (a SUBSTRING match, which cannot

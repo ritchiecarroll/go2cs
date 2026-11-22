@@ -1,0 +1,61 @@
+# GolibTests expected skips on osx-arm64: every test this leg reports NotExecuted (an Assert.Inconclusive), one name
+# per line, sorted, with its reason after #. The golib-tests leg fails on ANY difference: a test newly skipped is a
+# silent loss of coverage, and a listed test that now runs is a stale manifest (release review TC-5). Taken from
+# run 45021456943, GOROOT exported. A whole-suite run only: a filtered run is not compared.
+ABoxDerivedFromStorageThatCannotBePinnedIsItsOwnClassWhateverThePointee  # NOT MEASURED: the native-box dereference census is off. Set GO2CS_NATIVEBOX_CENSUS to run this control.
+ABoxedReferenceRvalueIsCollectedOnceTheBoxIsCleared  # measures the caller-spill condition, Ꮡ NOT inlined at full optimization: run GolibTests -c Release with DOTNET_JitNoInline=1 (in a small frame Ꮡ inlines, and...
+ACensusPathWithoutPidIsMadePerProcess_BecauseASharedPathDESTROYSBlocks  # NOT MEASURED: the Q44 census is off. Set GO2CS_Q44_CENSUS to run this control; a green here with the instrument off would be a lie about a counter nothing dr...
+AFoldedReferenceInitIsCollectedOnceTheLocalIsCleared  # measures fips140cache's condition, heap NOT inlined at full optimization: run GolibTests -c Release with DOTNET_JitNoInline=1 (in a small frame heap inlines,...
+AFoldedStructInitDropsAFieldOnceTheFieldIsCleared  # measures fips140cache's condition, heap NOT inlined at full optimization: run GolibTests -c Release with DOTNET_JitNoInline=1 (in a small frame heap inlines,...
+AGoHogIsSampledAsItsSyntheticPCAndThinnedToTheRate  # hog as leaf 18 of 198, under the floor of 20: on macOS the CLR's SampleProfiler attributes a call-free loop's samples to its caller, about 80% (run 426136379...
+AHangingChildProbe  # runs only as ChildTimeoutDiagnosticsTests' child
+APointeeThatHoldsNoReferenceIsCountedInTheTotalAndInNoClass  # NOT MEASURED: the native-box dereference census is off. Set GO2CS_NATIVEBOX_CENSUS to run this control.
+APointeeThatIsItselfAReferenceIsRefusedAndNotCounted  # NOT MEASURED: the native-box dereference census is off. Set GO2CS_NATIVEBOX_CENSUS to run this control.
+APollCloseSnapshotWaitsForTheRetirement  # the overlapped records bind a socket to the CLR's completion port, a windows facility
+AProfileAddsUpToTheProcessCpuTime  # the per-thread names here are linux's /proc/self/task/<tid>/comm
+ARearmOnARetiredRecordPanicsByName  # the overlapped records bind a socket to the CLR's completion port, a windows facility
+ARecordWithAMissingSymbolThrowsRatherThanReportingNoRecord  # the missing-symbol record names libc.so.6; run this arm on Linux
+ARefusedDereferenceIsNotCounted  # NOT MEASURED: the native-box dereference census is off. Set GO2CS_NATIVEBOX_CENSUS to run this control.
+ARowSaysWhetherTheBoxKeepsASource  # NOT MEASURED: the native-box dereference census is off. Set GO2CS_NATIVEBOX_CENSUS to run this control.
+AStructThatHoldsAReferenceAndWasNotRefusedIsB2b  # NOT MEASURED: the native-box dereference census is off. Set GO2CS_NATIVEBOX_CENSUS to run this control.
+AThreadsSamplesAddUpToTheCpuTimeItUsed  # the per-thread on-CPU reading here is linux's /proc/thread-self/schedstat
+ATimedOutChildIsDescribedWithItsParkedFrameBeforeItIsKilled  # the parked-frame assertion is measured on Linux only
+AToolchainChildThatSetsItsOwnGodebugKeepsTheJunctionSetting  # the junction fallback exists only on Windows
+AValueKindPointeeThatHoldsAReferenceIsB2a  # NOT MEASURED: the native-box dereference census is off. Set GO2CS_NATIVEBOX_CENSUS to run this control.
+AdjacentRangesCoalesceIntoOne  # the memory primitives are the linux flavour's
+AnAssemblyFirstBoundUnderAnAnonymousTokenLoadsOnceTheClosureIsPreloaded  # anonymous-token impersonation is a Windows capability
+AnEmptyOrNonCpuGodebugLeavesEveryFlagAlone  # not an x86 host: internal/cpu registers no x86 options here
+AnEmptySetClonesEmpty  # the memory primitives are the linux flavour's
+AnExplicitSettingDoesNotFollow  # no process affinity to change on this host; hw.ncpu does not change while a process runs
+AnUnsafePointerOverManagedStorageIsRefusedByNameAndNotCountedAsB2a  # NOT MEASURED: the native-box dereference census is off. Set GO2CS_NATIVEBOX_CENSUS to run this control.
+AnX64ProcessLeavesArm64Unfilled  # not an x86 host: internal/cpu registers no x86 options here
+Arm1_SamePointeeType_IsCounted  # NOT MEASURED: the Q44 census is off. Set GO2CS_Q44_CENSUS to run this control; a green here with the instrument off would be a lie about a counter nothing dr...
+Arm2_DifferentPointeeTypeAtOffsetZero_IsCounted  # NOT MEASURED: the Q44 census is off. Set GO2CS_Q44_CENSUS to run this control; a green here with the instrument off would be a lie about a counter nothing dr...
+Arm3_InsideALiveBlockButNotTheToken_IsCounted  # NOT MEASURED: the Q44 census is off. Set GO2CS_Q44_CENSUS to run this control; a green here with the instrument off would be a lie about a counter nothing dr...
+Arm4_ARealAddress_IsCounted  # NOT MEASURED: the Q44 census is off. Set GO2CS_Q44_CENSUS to run this control; a green here with the instrument off would be a lie about a counter nothing dr...
+CloneRefusesByName  # GoCloneProbe exists only in the linux flavour of the runtime
+CpuAesOffClearsHasAesAndNothingElse  # not an x86 host: internal/cpu registers no x86 options here
+DenseTimersCostTheServiceThreadLittleCpu  # reads a thread's CPU time by its OS thread id, which this platform's ProcessThread does not carry
+GOMAXPROCSFollowsAnAffinityChange  # no process affinity to change on this host; hw.ncpu does not change while a process runs
+GetpidAnswersTheProcessId  # GoGetpidProbe exists only in the linux flavour of the runtime
+GotracebackWerAtStartReachesEnableWerAndClearsTheFaultBox  # enableWER acts only on Windows; elsewhere it is Go's own empty stub
+LinuxArm64OsInitMapsTheKernelsHwcapAsGoDoes  # not an arm64 process on Linux
+MultiBlockAbsorbMatchesTheOsImplementation  # OS SHA-3 unavailable; the FIPS vector tests still cover the single-block path.
+OnWindowsTheSameLibraryInTheApplicationDirectoryLoads  # only windows searches the application directory, as a Go binary's loader does: NOT MEASURED here
+RuntimeX86FlagsMatchInternalCpu  # not an x86 host: Go copies other flags there
+RuntimeX86HasAVXIsTrueOnAnAVXHost  # not an x86 host: Go copies other flags there
+StandardErrorKeepsGoBytesAndOrder  # descriptor 2 is redirected with libc dup2; linux only
+TgkillRefusesByName  # GoTgkillProbe exists only in the linux flavour of the runtime
+The2a2bDiscriminatorUsesTheRegistrysOwnProjection_NotACopyOfIt  # NOT MEASURED: the Q44 census is off. Set GO2CS_Q44_CENSUS to run this control; a green here with the instrument off would be a lie about a counter nothing dr...
+TheArmsAreExhaustive_TheSumReconcilesWithTheConversionCount  # NOT MEASURED: the Q44 census is off. Set GO2CS_Q44_CENSUS to run this control; a green here with the instrument off would be a lie about a counter nothing dr...
+TheCensusCanActuallyREPORT_TheFileAppears  # NOT MEASURED: the Q44 census is off. Set GO2CS_Q44_CENSUS to run this control; a green here with the instrument off would be a lie about a counter nothing dr...
+TheCensusReportsToAFileAndItsRowsReconcile  # NOT MEASURED: the native-box dereference census is off. Set GO2CS_NATIVEBOX_CENSUS to run this control.
+TheCensusWroteAStartBlockAtModuleInit_SoAZeroIsAMeasurement  # NOT MEASURED: the Q44 census is off. Set GO2CS_Q44_CENSUS to run this control; a green here with the instrument off would be a lie about a counter nothing dr...
+TheMintCounterMoves  # NOT MEASURED: the Q44 census is off. Set GO2CS_Q44_CENSUS to run this control; a green here with the instrument off would be a lie about a counter nothing dr...
+TheSeamsCostOverARealKernelTransitionIsMeasured  # opt-in: set GO2CS_NATIVE_SEAM_PROBE to a file the READING lines are appended to
+TheServiceThreadIsIdleUnderAFarFutureTimer  # reads a thread's CPU time by its OS thread id, which this platform's ProcessThread does not carry
+TheStackSlotShapeIsHarmlessToANonVariadicCallee  # drives glibc's strtol; linux-only
+TwentyDisjointRangesGrowTheSetPastItsInitialSixteenSlots  # the memory primitives are the linux flavour's
+TwoRetirementsAtOnceFreeTheBlockOnce  # the overlapped records bind a socket to the CLR's completion port, a windows facility
+UnalignedInputSliceMatchesTheOsImplementation  # OS SHA-3 unavailable.
+UpdatemaxprocsZeroTurnsItOff  # no process affinity to change on this host; hw.ncpu does not change while a process runs
