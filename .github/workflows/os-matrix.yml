@@ -331,9 +331,12 @@ jobs:
                       $rows = @(& git ls-tree $sha -- src/ | Where-Object { ($_ -split "`t")[1] -notin 'src/go2cs', 'src/tests', 'src/archived' })
                       $rows += @(& git ls-tree $sha -- global.json .github/pack-flavour-guard.ps1)
                       $yaml = (& git show "${sha}:.github/workflows/os-matrix.yml") -join "`n"
+                      # The job's steps: what J1 runs. Its if:, which only decides whether J1 runs, is left out, so the
+                      # condition this option itself adds there never refuses it (run 45012806147 refused on exactly that).
                       $job = [regex]::Match($yaml, '(?ms)^  pack:\n.*?(?=^  [a-z][a-z0-9-]*:\n)').Value
+                      $job = $job.Substring([Math]::Max(0, $job.IndexOf("`n    steps:`n")))
                       $hash = [Convert]::ToHexString([Security.Cryptography.SHA256]::HashData([Text.Encoding]::UTF8.GetBytes($job))).ToLowerInvariant()
-                      $rows + @("job`t.github/workflows/os-matrix.yml#pack $hash")
+                      $rows + @("job`t.github/workflows/os-matrix.yml#pack-steps $hash")
                   }
                   $here = @(Get-PackInputs $env:GITHUB_SHA); $there = @(Get-PackInputs $prior.head_sha)
                   $differ = @(Compare-Object $here $there | ForEach-Object { ($_.InputObject -split "`t")[-1] -replace ' .*$', '' } | Sort-Object -Unique)
