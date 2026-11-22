@@ -124,6 +124,20 @@ func (m *ModuleConverter) ConvertModule(moduleDir string) error {
 			m.options.mainModuleDir, synthesized, copyDir)
 		copiedModuleRoot, originalModuleRoot = copyDir, m.options.mainModuleDir
 		defer func() { copiedModuleRoot, originalModuleRoot = "", "" }()
+
+		// The copy sits outside the cache, so go loads it as a main module, where a user's GOWORK would apply
+		// ("directory ... does not contain modules listed in go.work"). A load from inside the cache turns it off
+		// (conversionDriver.go); so does the copy, for every go command of the run (P3's read, SHOULD 3).
+		savedGowork, hadGowork := os.LookupEnv("GOWORK")
+		_ = os.Setenv("GOWORK", "off")
+
+		defer func() {
+			if hadGowork {
+				_ = os.Setenv("GOWORK", savedGowork)
+			} else {
+				_ = os.Unsetenv("GOWORK")
+			}
+		}()
 		moduleDir, m.options.mainModuleDir = copyDir, copyDir
 	}
 

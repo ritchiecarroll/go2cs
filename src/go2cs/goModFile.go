@@ -14,6 +14,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 )
 
 // goModFile returns the go.mod that describes the module rooted at dir, and whether there is one.
@@ -90,6 +91,7 @@ func copyModuleCacheRelease(dir, synthesized string) (string, string, error) {
 		return "", "", fmt.Errorf("reading the module cache's synthesized go.mod %s: %w", synthesized, err)
 	}
 
+	sweepStaleModuleCopies(os.TempDir(), 24*time.Hour)
 	work, err := os.MkdirTemp("", "go2cs-modcopy-")
 
 	if err != nil {
@@ -153,9 +155,43 @@ func remapCopiedPaths(s string) string {
 	return strings.ReplaceAll(s, copiedModuleRoot, originalModuleRoot)
 }
 
-// goModOverlayFlag is the -overlay flag installGoModOverlay put in GOFLAGS, or "". A go command that runs with its own
-// GOFLAGS (the stack-append harvest empties it) carries this, or it cannot see a module that ships no go.mod.
-var goModOverlayFlag string
+// originalSourcePath is the release's own path for a source under the copy, else path unchanged: the same map, for the
+// Go file identity a package records (goSourceIdentity), which reads the module and its VERSION from the cache path
+// (P3's read of INC 4 increment 1, MUST 1: from the copy it recorded `<module>@/<file>`, with no version).
+func originalSourcePath(path string) string {
+	if copiedModuleRoot == "" || !isPathUnder(path, copiedModuleRoot) {
+		return path
+	}
+
+	rel, err := filepath.Rel(copiedModuleRoot, path)
+
+	if err != nil {
+		return path
+	}
+
+	return filepath.Join(originalModuleRoot, rel)
+}
+
+// sweepStaleModuleCopies removes go2cs-modcopy-* directories under dir older than maxAge: a run that ended by os.Exit or a
+// signal leaves its copy, since the deferred removal never runs. Whether another live run holds a younger one cannot be
+// told reliably on every OS, so only a copy older than any conversion runs is removed (P3's read, SHOULD 4).
+func sweepStaleModuleCopies(dir string, maxAge time.Duration) {
+	entries, err := os.ReadDir(dir)
+
+	if err != nil {
+		return
+	}
+
+	for _, entry := range entries {
+		if !entry.IsDir() || !strings.HasPrefix(entry.Name(), "go2cs-modcopy-") {
+			continue
+		}
+
+		if info, err := entry.Info(); err == nil && time.Since(info.ModTime()) > maxAge {
+			_ = os.RemoveAll(filepath.Join(dir, entry.Name()))
+		}
+	}
+}
 
 // installGoModOverlay hands the go commands of a -tests -recurse run the same answer goModFile gives
 // in-process: for a module-cache module with no go.mod it writes a `go build -overlay` file mapping
@@ -202,8 +238,6 @@ func installGoModOverlay(moduleDir string, outRoot string) (string, error) {
 	if err := os.Setenv("GOFLAGS", strings.TrimSpace(goflags+" -overlay="+overlayPath)); err != nil {
 		return "", err
 	}
-
-	goModOverlayFlag = "-overlay=" + overlayPath
 
 	fmt.Printf("go.mod: the module at %s ships none; using the module cache's %s, as go does (overlay %s)\n",
 		moduleDir, synthesized, overlayPath)
