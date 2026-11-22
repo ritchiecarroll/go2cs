@@ -1480,6 +1480,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckMnForeignThread() => CheckTarget("MnForeignThread");
 
     [TestMethod]
+    public void CheckMnGenericContended() => CheckTarget("MnGenericContended");
+
+    [TestMethod]
     public void CheckMnParkedCallers() => CheckTarget("MnParkedCallers");
 
     [TestMethod]

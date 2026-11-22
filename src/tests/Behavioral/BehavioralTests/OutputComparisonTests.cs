@@ -1436,6 +1436,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckMnForeignThread() => CheckTarget("MnForeignThread");
 
     [TestMethod]
+    public void CheckMnGenericContended() => CheckTarget("MnGenericContended");
+
+    [TestMethod]
     public void CheckMnParkedCallers() => CheckTarget("MnParkedCallers");
 
     [TestMethod]
