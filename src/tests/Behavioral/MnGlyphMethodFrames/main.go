@@ -1,12 +1,13 @@
 // MnGlyphMethodFrames reads the frames of a library method in the suffix form (`Take⁔`) after it parks, which under
 // generated twins is its async twin `Take⁔ꞏtwin`, and of a //go:noinline method reached through its forwarder by a
 // method value and a method expression, where the forwarder is not inlined. It also prints, names only, the
-// runtime.FuncForPC name of that method expression and method value. The local type's Take is the control:
-// package main keeps its methods in the holder form, so a difference that shows in both is not the suffix's.
+// runtime.FuncForPC name of that method expression and method value. The local type's Take is the control: package
+// main has no ⁔ (its methods stay extension methods in main_package), so a difference that shows in both is not the
+// suffix's.
 //
-// Not in this row: a function literal inside a library method. Its frame name (the receiver) and an inlined literal
-// call's line do not equal Go's yet, in package main as much as in a library; GolibTests' GlyphMethodFrameTests hold
-// the literal shape until the frame-naming seat lands with its own behavioral case.
+// Not in this row: a function literal inside a method, read with its line. Its NAME equals Go's (GlyphLibraryFrameNames
+// prints it), but an inlined literal call's LINE does not yet: it reads the call's opening line where Go reads its
+// closing `}()`, in package main as much as in a library, until the frame-naming seat lands with its own case.
 package main
 
 import (
