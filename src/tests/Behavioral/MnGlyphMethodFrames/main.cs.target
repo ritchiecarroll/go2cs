@@ -11,15 +11,9 @@ partial struct local {
     internal slice<@string> trail;
 }
 
-internal static nint Take(this ж<local> Ꮡl) {
-    ref var l = ref Ꮡl.DerefOrNull();
-
+internal static nint Take(this ref local l) {
     nint v = ᐸꟷ(l.ch);
     l.trail = append(l.trail, glyphlib.Frames("local Take"));
-
-    func(() => {
-        Ꮡl.Value.trail = append(Ꮡl.Value.trail, glyphlib.Frames("local Take literal"));
-    })();
 
     return v;
 }

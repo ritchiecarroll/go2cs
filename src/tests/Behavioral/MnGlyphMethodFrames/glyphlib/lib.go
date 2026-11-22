@@ -23,14 +23,10 @@ func (b *Box) Put(v int) {
 	b.ch <- v
 }
 
-// Take parks on the channel, then reads its callers, once in its own body and once in a literal it calls.
+// Take parks on the channel, then reads its callers.
 func (b *Box) Take() int {
 	v := <-b.ch
 	b.trail = append(b.trail, Frames("Take"))
-
-	func() {
-		b.trail = append(b.trail, Frames("Take literal"))
-	}()
 
 	return v
 }

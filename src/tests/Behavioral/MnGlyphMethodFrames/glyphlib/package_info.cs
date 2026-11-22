@@ -52,7 +52,7 @@ using System.Runtime.CompilerServices;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("lib.go", "lib.cs", "AA0igqiCqKKClIKmpoKsgqiigoKUlIKUgqaUgrg=", "31-33:1")]
+[assembly: GoPositionMap("lib.go", "lib.cs", "AA0igqiCqIKClKaCrIKoooKClJSClIKmlIK4")]
 // </GoSourcePositionMaps>
 
 namespace go.MnGlyphMethodFrames;
@@ -102,7 +102,7 @@ public static partial class glyphlib_package
 // <MethodForwarders>
 partial class glyphlibᴛBox {
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Put(this ref Box b, nint v) => glyphlib_package.Put⁔(ref b, v);
-    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Take(this ж<Box> Ꮡb) => glyphlib_package.Take⁔(Ꮡb);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Take(this ref Box b) => glyphlib_package.Take⁔(ref b);
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<@string> Trail(this ref Box b) => glyphlib_package.Trail⁔(ref b);
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Pass(this Box b, nint n) => glyphlib_package.Pass⁔(b, n);
 }

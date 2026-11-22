@@ -19,10 +19,6 @@ func (l *local) Take() int {
 	v := <-l.ch
 	l.trail = append(l.trail, glyphlib.Frames("local Take"))
 
-	func() {
-		l.trail = append(l.trail, glyphlib.Frames("local Take literal"))
-	}()
-
 	return v
 }
 
