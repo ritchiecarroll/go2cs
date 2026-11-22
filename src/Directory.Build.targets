@@ -52,10 +52,10 @@
     byref-param (M:N PROTOTYPE, DESIGN-mn-box-twin.md 12.1): GoTwinsBoxParam=false keeps every ref-lowered pointer
     parameter refused (its A/B control); GoTwinsBoxArgCopy=true makes each call hand a COPY of its box, wrong on purpose:
     the probe's call-site negative control only.
-    7a (M:N, DESIGN-mn-twin-set.md 12.1, O2): a package built with twins carries the whole twin set. GoTwinsIface,
-    GoTwinsIfaceAll, GoTwinsGo and GoTwinsRefuse select part of it and are refused (GO2CS0018) unless GoTwinsArm=true
-    marks the build as a prototype arm. Unset, the interface shape is hidden for every member. GoTwinsGuardDrop is
-    the guard's test seam (GO2CS0017): it drops the named functions' forwarders.
+    7a (M:N, DESIGN-mn-twin-set.md 12.1, O2): a package built with twins carries the whole twin set, built one way. Every
+    switch above that changes what is generated (all but GoTwins, GoTwinsFor, GoTwinsSiblings and GoTwinsTiming) is refused
+    (GO2CS0018) unless GoTwinsArm=true marks the build as a prototype arm. Unset, the interface shape is hidden for every
+    member. GoTwinsGuardDrop is the guard's test seam (GO2CS0017): it drops the named functions' forwarders.
   -->
   <PropertyGroup Condition="'$(GoAotFor)' != '' and $([System.String]::Copy(';$(GoAotFor);').Contains(';$(MSBuildProjectName);'))">
     <PublishAot>true</PublishAot>

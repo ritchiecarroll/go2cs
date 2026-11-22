@@ -239,11 +239,11 @@ internal static class GeneratorDiagnostics
         isEnabledByDefault: true);
 
     // GO2CS0018, TwinGenerator (M:N, 7a: DESIGN-mn-twin-set.md O2): a package built with twins ships the whole twin set,
-    // never a part of it. A switch that selects part of the set is refused in such a build.
+    // built one way. A switch that selects part of the set, or a measurement arm's control, is refused in such a build.
     public static readonly DiagnosticDescriptor PartialTwinSet = new(
         id: "GO2CS0018",
         title: "A partial twin set is selected in a package built with twins",
-        messageFormat: "'{0}' selects a partial twin set; a package built with twins ships the whole set",
+        messageFormat: "'{0}' changes the twin set; a package built with twins ships the whole set, built one way. Remove '{0}', or set GoTwinsArm=true for a measurement build that does not ship.",
         category: "go2cs-gen",
         defaultSeverity: DiagnosticSeverity.Error,
         isEnabledByDefault: true);
