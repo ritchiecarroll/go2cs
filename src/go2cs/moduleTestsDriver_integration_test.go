@@ -491,3 +491,52 @@ func TestTestsRecurseConvertsAModuleCacheReleaseWithNoGoMod(t *testing.T) {
 		t.Errorf("no emitted file records a Go source identity under example.com/Old@v0.9.1/\n%s", lastLines(output, 12))
 	}
 }
+
+// The test-closure discovery load reads the module with the run's build tags, as the production load and each test
+// conversion do. It used to load with none, so a helper package imported only from a test file under a -tags tag was
+// never discovered: the test file converted (its own load has the tags) and referenced a package that was not
+// converted, refused or named (github.com/davecgh/go-spew v1.1.1's dumpcgo_test.go under -tags testcgo, whose cgo
+// helper spew/testdata the run must refuse by name).
+func TestTestsRecurseDiscoversATaggedTestFilesImports(t *testing.T) {
+	if testing.Short() {
+		t.Skip("integration test: builds the converter and converts a module with its tests")
+	}
+
+	root := t.TempDir()
+	moduleDir := filepath.Join(root, "tagged")
+	writeModuleFile(t, filepath.Join(moduleDir, "go.mod"), "module example.test/tagged\n\ngo 1.23\n")
+	writeModuleFile(t, filepath.Join(moduleDir, "one.go"), "package tagged\n\nfunc One() int { return 1 }\n")
+	writeModuleFile(t, filepath.Join(moduleDir, "one_test.go"),
+		"package tagged\n\nimport \"testing\"\n\nfunc TestOne(t *testing.T) {\n\tif One() != 1 {\n\t\tt.Fatal(\"One\")\n\t}\n}\n")
+	writeModuleFile(t, filepath.Join(moduleDir, "extra_test.go"),
+		"//go:build extra\n\npackage tagged\n\nimport (\n\t\"testing\"\n\n\t\"example.test/tagged/testdata\"\n)\n\n"+
+			"func TestExtra(t *testing.T) {\n\tif testdata.Two() != 2 {\n\t\tt.Fatal(\"Two\")\n\t}\n}\n")
+	writeModuleFile(t, filepath.Join(moduleDir, "testdata", "two.go"), "package testdata\n\nfunc Two() int { return 2 }\n")
+
+	treeSrc, err := filepath.Abs("..")
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	outRoot := filepath.Join(root, "out")
+	cmd := exec.Command(driverBinary(t), "-tests", "-test-action", "convert", "-recurse", "-tags", "purego,safe,noasm,extra",
+		"-go2cspath", treeSrc, moduleDir, outRoot)
+	cmd.Env = append(os.Environ(), "GOWORK=off", "GOFLAGS=")
+	combined, err := cmd.CombinedOutput()
+	output := string(combined)
+
+	if err != nil {
+		t.Fatalf("go2cs -tests -recurse -tags ...,extra failed: %v\n%s", err, lastLines(output, 12))
+	}
+
+	srcRoot := filepath.Join(outRoot, "src", "example.test", "tagged")
+
+	if cs, _ := filepath.Glob(filepath.Join(srcRoot, "extra_test.cs")); len(cs) != 1 {
+		t.Fatalf("the tagged test file was not converted (want extra_test.cs under %s)\n%s", srcRoot, lastLines(output, 12))
+	}
+
+	if cs, _ := filepath.Glob(filepath.Join(srcRoot, "testdata", "*.cs")); len(cs) == 0 {
+		t.Errorf("example.test/tagged/testdata, imported only by the tagged test file, was not converted\n%s", lastLines(output, 12))
+	}
+}
