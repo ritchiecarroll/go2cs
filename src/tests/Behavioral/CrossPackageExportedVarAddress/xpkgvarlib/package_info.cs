@@ -14,6 +14,9 @@
 
 using go;
 using static go.go.xpkgvar_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -49,10 +52,12 @@ using static go.go.xpkgvar_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("lib.go", "lib.cs", "AA0YggATHqaW")]
+[assembly: GoPositionMap("lib.go", "lib.cs", "AAoYggARHqaW")]
 // </GoSourcePositionMaps>
 
 namespace go.go;
+
+using static global::go.go.xpkgvar_package;
 
 [GoPackage("xpkgvar")]
 public static partial class xpkgvar_package
@@ -86,5 +91,16 @@ public static partial class xpkgvar_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(xpkgvar_package.Counter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class xpkgvarᴛCounter;
+[GoMethodHost(typeof(xpkgvar_package.Counter)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class xpkgvarᴛCounter;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class xpkgvarᴛCounter {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Inc(this ref Counter c) => xpkgvar_package.Inc⁔(ref c);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Value(this Counter c) => xpkgvar_package.Value⁔(c);
+}
+// </MethodForwarders>

@@ -14,6 +14,9 @@
 
 using go;
 using static go.AnonLiftOnePerType.lib_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -52,11 +55,13 @@ using static go.AnonLiftOnePerType.lib_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("a.go", "a.cs", "ABQaggAJBogABxjW7A==")]
+[assembly: GoPositionMap("a.go", "a.cs", "ABAagvaIAAcY1uw=")]
 [assembly: GoPositionMap("b.go", "b.cs", "AAkc7A==")]
 // </GoSourcePositionMaps>
 
 namespace go.AnonLiftOnePerType;
+
+using static go.AnonLiftOnePerType.lib_package;
 
 [GoPackage("lib")]
 public static partial class lib_package
@@ -96,5 +101,16 @@ public static partial class lib_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(lib_package.both)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class libᴛboth;
+[GoMethodHost(typeof(lib_package.both)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class libᴛboth;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class libᴛboth {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint A(this ref both b) => lib_package.A⁔(ref b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint B(this ref both b) => lib_package.B⁔(ref b);
+}
+// </MethodForwarders>

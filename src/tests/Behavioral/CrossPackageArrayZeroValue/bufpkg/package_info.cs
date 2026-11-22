@@ -14,6 +14,9 @@
 
 using go;
 using static go.CrossPackageArrayZeroValue.bufpkg_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -49,10 +52,12 @@ using static go.CrossPackageArrayZeroValue.bufpkg_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("lib.go", "lib.cs", "ABMwgoKUzKKCuqKCgpQ=")]
+[assembly: GoPositionMap("lib.go", "lib.cs", "AA8wgoKUrKKCuqKCgpQ=")]
 // </GoSourcePositionMaps>
 
 namespace go.CrossPackageArrayZeroValue;
+
+using static go.CrossPackageArrayZeroValue.bufpkg_package;
 
 [GoPackage("bufpkg")]
 public static partial class bufpkg_package
@@ -85,5 +90,15 @@ public static partial class bufpkg_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(bufpkg_package.State)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class bufpkgᴛState;
+[GoMethodHost(typeof(bufpkg_package.State)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class bufpkgᴛState;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class bufpkgᴛState {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Fill(this ref State s) => bufpkg_package.Fill⁔(ref s);
+}
+// </MethodForwarders>

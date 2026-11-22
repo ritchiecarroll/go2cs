@@ -2,7 +2,6 @@ namespace go;
 
 using fmt = fmt_package;
 using ShadowedImportConstLib = ShadowedImportConstLib_package;
-using static main_package;
 
 partial class main_package {
 
@@ -10,11 +9,7 @@ partial struct gauge {
     internal nint level;
 }
 
-} partial class mainᴛgauge {
-
-internal static nint ShadowedImportConstLib(this gauge g) { return g.level; }
-
-} partial class main_package {
+internal static nint ShadowedImportConstLib⁔(/*this*/ gauge g) { return g.level; }
 
 internal static void main() {
     var g = new gauge(level: 3);

@@ -14,6 +14,9 @@
 
 using go;
 using static go.DefinedOverNamedComposite.fslike_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -49,10 +52,12 @@ using static go.DefinedOverNamedComposite.fslike_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("lib.go", "lib.cs", "AAoUlPqCgoKUAAgMoA==")]
+[assembly: GoPositionMap("lib.go", "lib.cs", "AAYUlLqCgoKUzKA=")]
 // </GoSourcePositionMaps>
 
 namespace go.DefinedOverNamedComposite;
+
+using static go.DefinedOverNamedComposite.fslike_package;
 
 [GoPackage("fslike")]
 public static partial class fslike_package
@@ -86,7 +91,24 @@ public static partial class fslike_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(fslike_package.Buf)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fslikeᴛBuf;
-[GoMethodHost(typeof(fslike_package.List)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fslikeᴛList;
-[GoMethodHost(typeof(fslike_package.MapFS)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fslikeᴛMapFS;
+[GoMethodHost(typeof(fslike_package.Buf)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class fslikeᴛBuf;
+[GoMethodHost(typeof(fslike_package.List)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class fslikeᴛList;
+[GoMethodHost(typeof(fslike_package.MapFS)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class fslikeᴛMapFS;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class fslikeᴛBuf {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint First(this Buf b) => fslike_package.First⁔(b);
+}
+partial class fslikeᴛList {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Sum(this List l) => fslike_package.Sum⁔(l);
+}
+partial class fslikeᴛMapFS {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Get(this MapFS m, @string k) => fslike_package.Get⁔(m, k);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Size(this MapFS m) => fslike_package.Size⁔(m);
+}
+// </MethodForwarders>

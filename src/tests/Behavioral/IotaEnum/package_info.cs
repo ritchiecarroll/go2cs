@@ -14,6 +14,9 @@
 
 using go;
 using static go.main_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -49,10 +52,12 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("IotaEnum.go", "IotaEnum.cs", "ADZugoKUxgAtZIKCAAcQooKmgoKClMaUgqailIKkgqQAEh6igpQADRSigpQADjiCqoKUlKSkpoKCgoKCgoI=")]
+[assembly: GoPositionMap("IotaEnum.go", "IotaEnum.cs", "ADNugoKUpgAtZIKCAAcQooKmgoKClKaUgqailIKkgqQADh6igpQACRSigpQADDiCqoKUlKSkpoKCgoKCgoI=")]
 // </GoSourcePositionMaps>
 
 namespace go;
+
+using static go.main_package;
 
 [GoPackage("main")]
 [GoTestMatchingConsoleOutput]
@@ -94,6 +99,23 @@ public static partial class main_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(main_package.Kind)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛKind;
-[GoMethodHost(typeof(main_package.Type)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛType;
+[GoMethodHost(typeof(main_package.Kind)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class mainᴛKind;
+[GoMethodHost(typeof(main_package.Type)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class mainᴛType;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class mainᴛKind {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this Kind k) => main_package.String⁔(k);
+}
+partial class mainᴛType {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static Kind Kind(this ref Type t) => main_package.Kind⁔(ref t);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool HasName(this ref Type t) => main_package.HasName⁔(ref t);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Type> Elem(this ж<Type> Ꮡt) => main_package.Elem⁔(Ꮡt);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<MapType> MapType(this ж<Type> Ꮡt) => main_package.MapType⁔(Ꮡt);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<ArrayType> ArrayType(this ж<Type> Ꮡt) => main_package.ArrayType⁔(Ꮡt);
+}
+// </MethodForwarders>

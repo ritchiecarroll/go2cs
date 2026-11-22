@@ -14,6 +14,9 @@
 
 using go;
 using static go.PromotedValueEmbedLib_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -49,10 +52,12 @@ using static go.PromotedValueEmbedLib_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("lib.go", "lib.cs", "AAwsggAIEoIACBSCyIIACRqUlJigAAkSgg==")]
+[assembly: GoPositionMap("lib.go", "lib.cs", "AAgsggAGEoIABhSCqIIABxqUlJigAAcSgg==")]
 // </GoSourcePositionMaps>
 
 namespace go;
+
+using static go.PromotedValueEmbedLib_package;
 
 [GoPackage("PromotedValueEmbedLib")]
 public static partial class PromotedValueEmbedLib_package
@@ -88,7 +93,26 @@ public static partial class PromotedValueEmbedLib_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(PromotedValueEmbedLib_package.Gadget)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class PromotedValueEmbedLibᴛGadget;
-[GoMethodHost(typeof(PromotedValueEmbedLib_package.Meta)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class PromotedValueEmbedLibᴛMeta;
-[GoMethodHost(typeof(PromotedValueEmbedLib_package.common)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class PromotedValueEmbedLibᴛcommon;
+[GoMethodHost(typeof(PromotedValueEmbedLib_package.Gadget)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class PromotedValueEmbedLibᴛGadget;
+[GoMethodHost(typeof(PromotedValueEmbedLib_package.Meta)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class PromotedValueEmbedLibᴛMeta;
+[GoMethodHost(typeof(PromotedValueEmbedLib_package.common)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class PromotedValueEmbedLibᴛcommon;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class PromotedValueEmbedLibᴛGadget {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Name(this ref Gadget g) => PromotedValueEmbedLib_package.Name⁔(ref g);
+}
+partial class PromotedValueEmbedLibᴛMeta {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Text(this Meta m) => PromotedValueEmbedLib_package.Text⁔(m);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Ok(this Meta m) => PromotedValueEmbedLib_package.Ok⁔(m);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (@string, bool) Both(this Meta m) => PromotedValueEmbedLib_package.Both⁔(m);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (ж<Meta>, @string) Self(this ж<Meta> Ꮡm) => PromotedValueEmbedLib_package.Self⁔(Ꮡm);
+}
+partial class PromotedValueEmbedLibᴛcommon {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string Name(this ref common c) => PromotedValueEmbedLib_package.Name⁔(ref c);
+}
+// </MethodForwarders>

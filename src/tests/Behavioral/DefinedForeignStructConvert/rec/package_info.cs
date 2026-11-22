@@ -14,6 +14,9 @@
 
 using go;
 using static go.DefinedForeignStructConvert.rec_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -49,10 +52,12 @@ using static go.DefinedForeignStructConvert.rec_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("rec.go", "rec.cs", "ABAgtA==")]
+[assembly: GoPositionMap("rec.go", "rec.cs", "AA4glA==")]
 // </GoSourcePositionMaps>
 
 namespace go.DefinedForeignStructConvert;
+
+using static go.DefinedForeignStructConvert.rec_package;
 
 [GoPackage("rec")]
 public static partial class rec_package
@@ -85,5 +90,15 @@ public static partial class rec_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(rec_package.Hidden)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class recᴛHidden;
+[GoMethodHost(typeof(rec_package.Hidden)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class recᴛHidden;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class recᴛHidden {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string S(this Hidden h) => rec_package.S⁔(h);
+}
+// </MethodForwarders>

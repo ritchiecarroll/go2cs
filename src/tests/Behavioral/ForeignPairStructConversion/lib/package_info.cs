@@ -14,6 +14,9 @@
 
 using go;
 using static go.ForeignPairStructConversion.lib_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -49,10 +52,12 @@ using static go.ForeignPairStructConversion.lib_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("lib.go", "lib.cs", "AAwOAAkOAA4Y")]
+[assembly: GoPositionMap("lib.go", "lib.cs", "AAgO3gAMGA==")]
 // </GoSourcePositionMaps>
 
 namespace go.ForeignPairStructConversion;
+
+using static go.ForeignPairStructConversion.lib_package;
 
 [GoPackage("lib")]
 public static partial class lib_package
@@ -87,6 +92,19 @@ public static partial class lib_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(lib_package.Pitch)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class libᴛPitch;
-[GoMethodHost(typeof(lib_package.Twin)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class libᴛTwin;
+[GoMethodHost(typeof(lib_package.Pitch)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class libᴛPitch;
+[GoMethodHost(typeof(lib_package.Twin)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class libᴛTwin;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class libᴛPitch {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Double(this Pitch p) => lib_package.Double⁔(p);
+}
+partial class libᴛTwin {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Half(this Twin t) => lib_package.Half⁔(t);
+}
+// </MethodForwarders>

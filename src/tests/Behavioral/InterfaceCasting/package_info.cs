@@ -14,6 +14,9 @@
 
 using go;
 using static go.main_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -72,10 +75,12 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("InterfaceCasting.go", "InterfaceCasting.cs", "AAsSgqiCAAkUgtyC3ILcggAGGIKmooKmgqaCAAsigq6CgoKUgoK0goK0goK0qpSilJSUgoKmgoKCgpSClIKClIKUgoKmgoKCgoKCnIKCgoKCnKKCnoKSgpqCgpSUlJyCnIKcgoLYgoKUAA4cgrSCAAsYABEi+IK0AAkWAAgSgoKCgoI=", "195-200:1")]
+[assembly: GoPositionMap("InterfaceCasting.go", "InterfaceCasting.cs", "AAoSgqiCAAkUgtyC3ILcggAGGIKmooKmgqaCAAsigq6CgoKUgoK0goK0goK0qpSilJSUgoKmgoKCgpSClIKClIKUgoKmgoKCgoKCnIKCgoKCnKKCnoKSgpqCgpSUlJyCnIKcgoLYgoKUAAwcgpSCAAsYABEi2IKUAAkWAAgSgoKCgoI=", "195-200:1")]
 // </GoSourcePositionMaps>
 
 namespace go;
+
+using static go.main_package;
 
 [GoPackage("main")]
 [GoTestMatchingConsoleOutput]
@@ -130,6 +135,21 @@ public static partial class main_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(main_package.badge)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛbadge;
-[GoMethodHost(typeof(main_package.fileRdr)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛfileRdr;
+[GoMethodHost(typeof(main_package.badge)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class mainᴛbadge;
+[GoMethodHost(typeof(main_package.fileRdr)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class mainᴛfileRdr;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class mainᴛbadge {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string @string(this ref badge b) => main_package.string⁔(ref b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint @int(this ref badge b) => main_package.int⁔(ref b);
+}
+partial class mainᴛfileRdr {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string read(this fileRdr f) => main_package.read⁔(f);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string close(this fileRdr f) => main_package.close⁔(f);
+}
+// </MethodForwarders>

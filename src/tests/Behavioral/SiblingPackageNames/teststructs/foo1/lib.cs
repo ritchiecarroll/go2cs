@@ -1,7 +1,5 @@
 namespace go.SiblingPackageNames.teststructs.foo1;
 
-using static foo_package;
-
 partial class foo_package {
 
 public static @string Name() {
@@ -12,10 +10,8 @@ partial struct Pair {
     public nint Left, Right;
 }
 
-} partial class fooᴛPair {
-
-public static nint Sum(this Pair p) {
+internal static nint Sum⁔(/*this*/ Pair p) {
     return p.Left + p.Right;
 }
 
-}
+} // end foo_package

@@ -14,6 +14,9 @@
 
 using go;
 using static go.NamedValueTypeClash.arrval_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -49,10 +52,12 @@ using static go.NamedValueTypeClash.arrval_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("lib.go", "lib.cs", "AAoOoKSUgoK4ooKUpg==")]
+[assembly: GoPositionMap("lib.go", "lib.cs", "7qCklIKCuKKClKY=")]
 // </GoSourcePositionMaps>
 
 namespace go.NamedValueTypeClash;
+
+using static go.NamedValueTypeClash.arrval_package;
 
 [GoPackage("arrval")]
 public static partial class arrval_package
@@ -84,5 +89,19 @@ public static partial class arrval_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(arrval_package.Value)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class arrvalᴛValue;
+[GoMethodHost(typeof(arrval_package.Value)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class arrvalᴛValue;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class arrvalᴛValue {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint First(this Value v) => arrval_package.First⁔(v);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Set(this ref Value v, nint i, nint x) => arrval_package.Set⁔(ref v, i, x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Bump(this ref Value v) => arrval_package.Bump⁔(ref v);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint /*s*/ Sum(this ref Value v) => arrval_package.Sum⁔(ref v);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<nint> Head(this ref Value v) => arrval_package.Head⁔(ref v);
+}
+// </MethodForwarders>

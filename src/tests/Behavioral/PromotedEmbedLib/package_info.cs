@@ -14,6 +14,9 @@
 
 using go;
 using static go.PromotedEmbedLib_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -53,10 +56,12 @@ using static go.PromotedEmbedLib_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("lib.go", "lib.cs", "ABA+goKqgoIACRaC")]
+[assembly: GoPositionMap("lib.go", "lib.cs", "AAw+goKqgoIABxaC")]
 // </GoSourcePositionMaps>
 
 namespace go;
+
+using static go.PromotedEmbedLib_package;
 
 [GoPackage("PromotedEmbedLib")]
 public static partial class PromotedEmbedLib_package
@@ -90,5 +95,16 @@ public static partial class PromotedEmbedLib_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(PromotedEmbedLib_package.common)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class PromotedEmbedLibᴛcommon;
+[GoMethodHost(typeof(PromotedEmbedLib_package.common)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class PromotedEmbedLibᴛcommon;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class PromotedEmbedLibᴛcommon {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void Add(this ж<common> Ꮡc, nint n) => PromotedEmbedLib_package.Add⁔(Ꮡc, n);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static Reading Report(this ж<common> Ꮡc) => PromotedEmbedLib_package.Report⁔(Ꮡc);
+}
+// </MethodForwarders>

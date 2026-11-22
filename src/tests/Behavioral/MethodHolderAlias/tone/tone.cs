@@ -1,18 +1,12 @@
 namespace go.MethodHolderAlias;
 
-using static tone_package;
-
 partial class tone_package {
 
 partial struct tone /*num:nint*/;
 
-} partial class toneᴛtone {
+internal static nint Pitch⁔(/*this*/ tone t) { return Pitch((nint)t) + (nint)Base; }
 
-internal static nint Pitch(this tone t) { return tone_package.Pitch((nint)t) + (nint)tone_package.Base; }
-
-internal static nint Base(this tone t) { return tone_package.Base * 2; }
-
-} partial class tone_package {
+internal static nint Base⁔(/*this*/ tone t) { return Base * 2; }
 
 public static UntypedInt Base => 100;
 

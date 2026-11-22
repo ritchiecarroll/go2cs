@@ -14,6 +14,9 @@
 
 using go;
 using static go.golang.org.x.text.transform_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -50,10 +53,12 @@ using static go.golang.org.x.text.transform_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("transform.go", "transform.cs", "AAcUABEkAAkIopSCpqaCyJailIKClIKCgoKUgoKmgqaCuA==")]
+[assembly: GoPositionMap("transform.go", "transform.cs", "AAYUAA8k2KKUgqamgqiWopSCgpSCgoKClIKCpoKmgrg=")]
 // </GoSourcePositionMaps>
 
 namespace go.golang.org.x.text;
+
+using static go.golang.org.x.text.transform_package;
 
 [GoPackage("transform", ImportPath = "golang.org/x/text/transform")]
 public static partial class transform_package
@@ -89,6 +94,20 @@ public static partial class transform_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(transform_package.NopResetter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class transformᴛNopResetter;
-[GoMethodHost(typeof(transform_package.nop)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class transformᴛnop;
+[GoMethodHost(typeof(transform_package.NopResetter)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class transformᴛNopResetter;
+[GoMethodHost(typeof(transform_package.nop)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class transformᴛnop;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class transformᴛNopResetter {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Reset(this NopResetter _) => transform_package.Reset⁔(_);
+}
+partial class transformᴛnop {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint nDst, nint nSrc, error err) Transform(this nop _, slice<byte> dst, slice<byte> src, bool atEOF) => transform_package.Transform⁔(_, dst, src, atEOF);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) Span(this nop _, slice<byte> src, bool atEOF) => transform_package.Span⁔(_, src, atEOF);
+}
+// </MethodForwarders>

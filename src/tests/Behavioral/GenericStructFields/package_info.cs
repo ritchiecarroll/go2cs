@@ -49,10 +49,12 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("GenericStructFields.go", "GenericStructFields.cs", "ABcwAAYYhAASKIKCgpqCgoKaguqCgoKUgoL8", "", "", "32=Errorf/1/1/15")]
+[assembly: GoPositionMap("GenericStructFields.go", "GenericStructFields.cs", "ABYwAAYYhAASKIKCgpqCgoKaguqCgoKUgoLc", "", "", "31=Errorf/1/1/15")]
 // </GoSourcePositionMaps>
 
 namespace go;
+
+using static go.main_package;
 
 [GoPackage("main")]
 [GoTestMatchingConsoleOutput]
@@ -93,3 +95,13 @@ public static partial class main_package
 // <MethodHolders>
 [GoMethodHost(typeof(main_package.keeper)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛkeeper;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class mainᴛkeeper {
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string pool(this keeper k) => main_package.pool⁔(k);
+}
+// </MethodForwarders>

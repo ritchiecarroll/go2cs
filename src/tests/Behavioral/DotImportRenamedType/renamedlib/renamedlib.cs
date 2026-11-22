@@ -1,7 +1,6 @@
 namespace go.DotImportRenamedType;
 
 using fmt = fmt_package;
-using static renamedlib_package;
 
 partial class renamedlib_package {
 
@@ -10,32 +9,22 @@ partial struct Marker {
     public nint Size;
 }
 
-} partial class renamedlibᴛMarker {
-
-public static @string Marker(this Marker m) {
+internal static @string Marker⁔(/*this*/ Marker m) {
     return fmt.Sprintf("%s/%d"u8, m.Name, m.Size);
 }
-
-} partial class renamedlib_package {
 
 partial struct Detail {
     public @string Label;
     public nint Rank;
 }
 
-} partial class renamedlibᴛDetail {
-
-public static @string Show(this Detail d) {
+internal static @string Show⁔(/*this*/ Detail d) {
     return fmt.Sprintf("%s#%d"u8, d.Label, d.Rank);
 }
 
-} partial class renamedlibᴛMarker {
-
-public static Detail Detail(this Marker m) {
+internal static Detail Detail⁔(/*this*/ Marker m) {
     return new Detail(Label: m.Name, Rank: m.Size);
 }
-
-} partial class renamedlib_package {
 
 partial struct Plain {
     public @string Note;

@@ -2,7 +2,6 @@ namespace go;
 
 using fmt = fmt_package;
 using @unsafe = unsafe_package;
-using static main_package;
 
 partial class main_package {
 
@@ -19,53 +18,45 @@ internal static holder hold;
 partial struct q {
 }
 
-} partial class mainᴛT {
-
-internal static void q(this ref T h) { }
-
-} partial class main_package {
+internal static void q⁔(/*this*/ ref T h) { }
 
 internal static void poke(@unsafe.Pointer p, nint v) { (@unsafe.Pointer.To<nint>(p)).Value = v; }
 
-} partial class mainᴛT {
-
-internal static void viaReceiver(this ж<T> Ꮡh) {
+internal static void viaReceiver⁔(/*this*/ ж<T> Ꮡh) {
     ref var h = ref Ꮡh.DerefOrNull();
 
     poke((uintptr)@unsafe.Pointer.FromRef(ref h), 7);
 }
 
-internal static void viaLocal(this ж<T> Ꮡh) {
+internal static void viaLocal⁔(/*this*/ ж<T> Ꮡh) {
     var p = Ꮡh;
     poke(@unsafe.Pointer.FromPinnedBox(p), 8);
 }
 
-internal static void viaParam(this ref T h, ж<T> Ꮡother) {
+internal static void viaParam⁔(/*this*/ ref T h, ж<T> Ꮡother) {
     ref var other = ref Ꮡother.DerefOrNull();
 
     poke((uintptr)@unsafe.Pointer.FromRef(ref other), 9);
 }
 
-internal static void viaFolded(this ж<T> Ꮡh) {
+internal static void viaFolded⁔(/*this*/ ж<T> Ꮡh) {
     var p = Ꮡh;
     (p.Reinterpret<T, nint>()).Value = 10;
 }
 
-internal static void viaField(this ref T h) { poke(@unsafe.Pointer.FromPinnedBox(hold.p), 11); }
+internal static void viaField⁔(/*this*/ ref T h) { poke(@unsafe.Pointer.FromPinnedBox(hold.p), 11); }
 
-internal static void viaRenamedReceiver(this ж<T> Ꮡq) {
+internal static void viaRenamedReceiver⁔(/*this*/ ж<T> Ꮡq) {
     ref var q = ref Ꮡq.DerefOrNull();
 
     poke((uintptr)@unsafe.Pointer.FromRef(ref q), 12);
 }
 
-internal static void viaLocalChain(this ж<T> Ꮡh) {
+internal static void viaLocalChain⁔(/*this*/ ж<T> Ꮡh) {
     var p = Ꮡh;
     var r = p;
     poke(@unsafe.Pointer.FromPinnedBox(r), 13);
 }
-
-} partial class main_package {
 
 internal static void main() {
     ref var a = ref heap(new T(), out var Ꮡa);

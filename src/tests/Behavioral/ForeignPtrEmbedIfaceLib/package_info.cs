@@ -14,6 +14,9 @@
 
 using go;
 using static go.ForeignPtrEmbedIfaceLib_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -53,10 +56,12 @@ using static go.ForeignPtrEmbedIfaceLib_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("lib.go", "lib.cs", "AAwkgoKCpoKCAAoSgqaCAAkYgqiC")]
+[assembly: GoPositionMap("lib.go", "lib.cs", "AAgkgoKCpoKCAAYSgqaCAAcYgqiC")]
 // </GoSourcePositionMaps>
 
 namespace go;
+
+using static go.ForeignPtrEmbedIfaceLib_package;
 
 [GoPackage("ForeignPtrEmbedIfaceLib")]
 public static partial class ForeignPtrEmbedIfaceLib_package
@@ -90,6 +95,21 @@ public static partial class ForeignPtrEmbedIfaceLib_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(ForeignPtrEmbedIfaceLib_package.Gauge)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ForeignPtrEmbedIfaceLibᴛGauge;
-[GoMethodHost(typeof(ForeignPtrEmbedIfaceLib_package.Meter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ForeignPtrEmbedIfaceLibᴛMeter;
+[GoMethodHost(typeof(ForeignPtrEmbedIfaceLib_package.Gauge)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class ForeignPtrEmbedIfaceLibᴛGauge;
+[GoMethodHost(typeof(ForeignPtrEmbedIfaceLib_package.Meter)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class ForeignPtrEmbedIfaceLibᴛMeter;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class ForeignPtrEmbedIfaceLibᴛGauge {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Set(this ref Gauge g, nint v) => ForeignPtrEmbedIfaceLib_package.Set⁔(ref g, v);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Get(this ref Gauge g) => ForeignPtrEmbedIfaceLib_package.Get⁔(ref g);
+}
+partial class ForeignPtrEmbedIfaceLibᴛMeter {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Add(this ж<Meter> Ꮡm, nint delta) => ForeignPtrEmbedIfaceLib_package.Add⁔(Ꮡm, delta);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Total(this ж<Meter> Ꮡm) => ForeignPtrEmbedIfaceLib_package.Total⁔(Ꮡm);
+}
+// </MethodForwarders>

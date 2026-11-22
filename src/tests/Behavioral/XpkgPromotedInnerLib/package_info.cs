@@ -14,6 +14,9 @@
 
 using go;
 using static go.XpkgPromotedInnerLib_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -49,10 +52,12 @@ using static go.XpkgPromotedInnerLib_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("lib.go", "lib.cs", "ABEmgoKCgpiClA==")]
+[assembly: GoPositionMap("lib.go", "lib.cs", "AA4mgoKCgpiClA==")]
 // </GoSourcePositionMaps>
 
 namespace go;
+
+using static go.XpkgPromotedInnerLib_package;
 
 [GoPackage("XpkgPromotedInnerLib")]
 public static partial class XpkgPromotedInnerLib_package
@@ -86,5 +91,20 @@ public static partial class XpkgPromotedInnerLib_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(XpkgPromotedInnerLib_package.Inner)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class XpkgPromotedInnerLibᴛInner;
+[GoMethodHost(typeof(XpkgPromotedInnerLib_package.Inner)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class XpkgPromotedInnerLibᴛInner;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class XpkgPromotedInnerLibᴛInner {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static Token Tok(this Inner i) => XpkgPromotedInnerLib_package.Tok⁔(i);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Name(this Inner i) => XpkgPromotedInnerLib_package.Name⁔(i);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint, error) Pair(this Inner i) => XpkgPromotedInnerLib_package.Pair⁔(i);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Set(this ref Inner i, nint v) => XpkgPromotedInnerLib_package.Set⁔(ref i, v);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this Inner i) => XpkgPromotedInnerLib_package.String⁔(i);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Where(this Inner i) => XpkgPromotedInnerLib_package.Where⁔(i);
+}
+// </MethodForwarders>
