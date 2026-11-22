@@ -41598,4 +41598,44 @@ changes nor depends on the `-tests` path.
 
 — C2 (2026-11-22)
 
+### 2026-11-22 — C2: the `-tests -recurse` go.mod overlay gap, CLOSED on claude/c2-tests-gomodless; two findings from its rows
+
+**Closes** the 2026-11-22 C2 entry above ("the `-tests -recurse` go.mod overlay is refused beneath GOMODCACHE").
+- `runModuleTests` now enters the copy route that plain `-recurse` takes (`enterModuleCacheReleaseCopy`, extracted
+  from `ConvertModule`) around both of its phases, so phase B's `go test` runs read the copy phase A converted.
+- `installGoModOverlay` is removed. Census: its one production caller could only install an overlay beneath
+  GOMODCACHE, which `go list` refuses. 0 of the 9 banked modules ship without a go.mod.
+- Reds: `TestTestsRecurseConvertsAModuleCacheReleaseWithNoGoMod`, with the hosted text. Its no-copy arm caught the
+  module banner printing the copy, which is now remapped.
+
+**Found on the way, fixed in the same seat.** The test-closure discovery load (`addTestOnlyPackages`) passed no build
+flags and not the target environment. A package imported only from a test file under a `-tags` tag was never
+discovered, while the test file converted against it.
+- Real case: go-spew v1.1.1 under `-tags ...,testcgo` with CGO_ENABLED=1. Its cgo helper `spew/testdata` was neither
+  converted nor refused.
+- It now loads with the run's `loaderBuildFlags` and the production load's environment (`closureLoaderEnv`).
+  `spew/testdata` is refused by name (GO2CS2001), and `spew` is named "its test closure imports the refused package".
+- Red: `TestTestsRecurseDiscoversATaggedTestFilesImports`.
+- Census: the 9 banked modules' non-std test closures are identical with no tags and with the default tags.
+
+**Finding 1 (OPEN, harness): Go's own `go test` fails go-difflib v1.0.0 at go1.26.11.**
+- The vet `tests` analyzer that `go test` runs rejects two examples: "difflib_test.go:105:1: ExampleGetUnifiedDiffCode
+  refers to unknown identifier: GetUnifiedDiffCode", and the same at :138.
+- Measured on a plain copy, outside go2cs. With `-vet=off` Go passes.
+- The converted tests pass 14 of 14, but the oracle reads "build failed", so the row cannot validate. The `-tests`
+  oracle has no vet setting.
+- go-difflib is in testify's closure. Whether a row may run its oracle with `-vet=off`, as a disclosure, is a ruling.
+
+**Finding 2 (OPEN, golib/converter): `%p` of a pointer and `unsafe.Pointer(&i)` disagree.**
+- go-spew v1.1.1: 7 of 9 tests equal Go. TestDump fails 6 cases and TestFormatter 24.
+- Each case compares `uintptr(unsafe.Pointer(&i))` or `unsafe.Pointer(&i)`, printed, with `fmt.Sprintf("%p", &i)`.
+  Go prints one address for both. Converted code prints a native address for the first (0x7f5bf01af368) and the
+  synthetic one for the second (0x800000bc00000000).
+- Sites: dump_test.go:756 and :785; format_test.go:1064 and :1112.
+- Not rooted. The emission is the copy route's ordinary emission: the go.mod twin arm of
+  `TestPlainRecurseConvertsAModuleCacheReleaseWithNoGoMod` reads it byte-equal to a release that ships a go.mod. Not
+  measured on go-spew without the copy.
+
+— C2 (2026-11-22)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
