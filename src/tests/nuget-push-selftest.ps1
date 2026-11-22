@@ -247,6 +247,23 @@ try {
     $thrown = $null
     try { [void](Invoke-Case @($a6Pack)) } catch { $thrown = "$_" }
     Check ($null -eq $thrown -and $state.Puts.Count -eq 1) "cgo: a -Cgo pack recording A6 was not pushed: $thrown; PUTs $($state.Puts.Count)"
+    # INC 4 (COORD's ruling (1), condition 2): a package packed against a LOCAL closure (nugetgo-pack -LocalClosure, a
+    # rehearsal-only go.* feed from the tree) records "# local-closure: " and is never pushed, whatever else it is.
+    # The planted package below is an ordinary one with that record only.
+    $localClosure = New-FakePackage 'nugetgo.localclosure' $version $cgoDir
+    Add-FakeEntry $localClosure 'go2cs/source-metadata.txt' "#go2cs-source-metadata v1`n# written by go2cs`n# local-closure: 1.26.11.9 from a local folder feed`nmodule example.com/lc`n"
+    $state.Puts.Clear()
+    $thrown = $null
+    try { [void](Invoke-Case @($localClosure)) } catch { $thrown = "$_" }
+    Check ($null -ne $thrown -and $thrown -match 'nugetgo\.localclosure' -and $thrown -match 'local-closure') "local-closure: a package recording a local closure was not refused by name: $thrown"
+    Check ($state.Puts.Count -eq 0) "local-closure: the planted package was PUT ($($state.Puts.Count))"
+    # The other direction: the same package with the record left out is pushed, so the refusal keys on the record alone.
+    $noLocalClosure = New-FakePackage 'nugetgo.nolocalclosure' $version $cgoDir
+    Add-FakeEntry $noLocalClosure 'go2cs/source-metadata.txt' "#go2cs-source-metadata v1`n# written by go2cs`nmodule example.com/lc`n"
+    $state.Puts.Clear()
+    $thrown = $null
+    try { [void](Invoke-Case @($noLocalClosure)) } catch { $thrown = "$_" }
+    Check ($null -eq $thrown -and $state.Puts.Count -eq 1) "local-closure: the same package without the record was not pushed: $thrown; PUTs $($state.Puts.Count)"
     # The control is every other case here: each pushes packages with no NUGETGOCGO001 through the same function.
     $state.Puts.Clear()
 

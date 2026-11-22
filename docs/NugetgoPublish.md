@@ -162,6 +162,16 @@ refuses a package whose `build/<id>.targets` carries `NUGETGOCGO001`, or whose `
 beside `runtimes/`, before it pushes anything. `-Cgo` runs under
 PowerShell 7 only.
 
+**A local closure** (`-LocalClosure <folder>`; COORD's ruling (1) for the cgo item's hosted proof, 2026-11-22). Before a
+published `go.lib` declares A6, a `-Cgo` pack can be made only against `go.*` packages built from the tree. The folder
+is a NuGet folder feed that holds them. The switch is accepted only with `-RehearsalSuffix` and `-Cgo`, and it is
+refused with `-Release`.
+- Every `go.*` package restores from that folder alone, through package source mapping.
+- The published-closure check is replaced by one that each restored `go.*` package is `-ClosureVersion` and
+  byte-equal to the folder's nupkg (SHA-512).
+- `go2cs/source-metadata.txt` records `local-closure:`. `src/_nugetpush.ps1` refuses any package that carries it, so
+  a local-closure pack is never pushed.
+
 Every pack also refuses a `GoPositionMap` record whose Go file is an absolute path or a Go build-cache file, and names
 the record. It checks each `package_info.cs` before it builds, and each packed assembly after the pack. A packed
 record names its file the way `go build -trimpath` does (`<module>@<version>/<file>`). Until the cgo item's increment
