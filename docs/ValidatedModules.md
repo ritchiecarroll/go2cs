@@ -38,6 +38,7 @@ RID it ships.
 | `github.com/itchyny/timefmt-go` | v0.1.8 | 1 | `linux/amd64` | [summary](validation/modules/github.com/itchyny/timefmt-go@v0.1.8/MODULE.md) |
 | `github.com/itchyny/gojq` | v0.12.19 | 1 | `linux/amd64` | [summary](validation/modules/github.com/itchyny/gojq@v0.12.19/MODULE.md) |
 | `github.com/pmezard/go-difflib` | v1.0.0 | 1 | `linux/amd64` | [summary](validation/modules/github.com/pmezard/go-difflib@v1.0.0/MODULE.md) |
+| `github.com/stretchr/objx` | v0.5.2 | 1 | `linux/amd64` | [summary](validation/modules/github.com/stretchr/objx@v0.5.2/MODULE.md) |
 
 **`golang.org/x/sync`:** `semaphore`'s `TestWeightedAcquire` gives each acquire attempt a 10 ms deadline. With
 the tiered JIT off, the first attempt compiles the acquire path at full optimization before it can wait, which
@@ -68,3 +69,12 @@ standard library as converted in this repository at the reading's commit, not on
 <!-- Provenance (2026-11-22, C2): go2cs -tests -recurse -test-action all -test-oracle-vet-off over the module cache's
 github.com/pmezard/go-difflib@v1.0.0, converter built at claude/c2-tests-vetoff 3f94b4818a, -go2cspath at that tree,
 linux/amd64, go1.26.11; both pages copied unedited (sha256-equal to the run's). -->
+
+**`github.com/stretchr/objx`:** its tests use testify, so the run also converts, as dependencies, the packages
+of testify v1.11.1 they import and testify's own dependencies (go-spew, go-difflib and gopkg.in/yaml.v3). Like
+go-difflib's, this reading is Go 1.26.11, built on the standard library as converted in this repository at the
+reading's commit.
+<!-- Provenance (2026-11-22, C2): go2cs -tests -recurse -test-action all over the module cache's
+github.com/stretchr/objx@v0.5.2, converter built at claude/c2-testify-closure 816dcd7067 (every module-cache release
+from a copy), -go2cspath at that tree, linux/amd64, go1.26.11, on a module cache whose gopkg.in/yaml.v3 and
+google/uuid entries were re-extracted and `go mod verify`-clean; both pages copied unedited (sha256-equal). -->
