@@ -337,10 +337,12 @@ public sealed partial class Goroutine
     public static ParkScope Park(WaitReason reason) => ParkCore(reason, handoff: true);
 
     // A multiplexed goroutine about to block its carrier's thread gives the P away first. An outermost plain park with
-    // no carrier to give away blocks its own thread: counted apart (`thread-blocks`), the other half of `handoffs`.
+    // no carrier to give away blocks its own thread: counted apart (`thread-blocks`), the other half of `handoffs`. With
+    // the scheduler off (GO2CS_MN unset) there is nothing to hand off and nothing is counted, so a default-mode park pays
+    // no interlocked add on the scheduler's shared counter (TC-8; GolibTests SchedulerOffTests).
     private static bool HandOffBeforeBlocking(Goroutine goroutine, int previous)
     {
-        if (previous != (int)WaitReason.Zero)
+        if (previous != (int)WaitReason.Zero || !GoScheduler.Enabled)
             return false;
 
         if (goroutine.m_multiplexed && GoScheduler.EnterBlocked())
