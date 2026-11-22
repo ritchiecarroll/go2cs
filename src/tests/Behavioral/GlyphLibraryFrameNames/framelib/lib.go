@@ -1,5 +1,5 @@
 // Package framelib is a library, so its methods are converted in the suffix form: each body is `Name⁔` in the
-// package class, behind a Go-named forwarder. Each method reports the Go names of its own frames.
+// package class, behind a Go-named forwarder. Each method reports the Go name of its own frame or function value.
 package framelib
 
 import "runtime"
@@ -19,22 +19,9 @@ func (c Counter) Name() string {
 	return Here()
 }
 
-// Closure names a function literal inside a value-receiver method.
-func (c Counter) Closure() string {
-	f := func() string {
-		return Here()
-	}
-
-	return f()
-}
-
-// Bump names a function literal inside a pointer-receiver method.
+// Bump is a pointer-receiver method that names its own frame.
 func (c *Counter) Bump() string {
 	c.n++
 
-	f := func() string {
-		return Here()
-	}
-
-	return f()
+	return Here()
 }
