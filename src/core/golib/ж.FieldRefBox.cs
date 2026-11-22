@@ -340,6 +340,12 @@ internal interface IFirstFieldView
     // of a native chain is itself native and addresses Go's layout, never the CLR slot.
     internal ж<T>? NativeFieldBox() => NativeFieldAt(m_source, m_token);
 
+    // A view whose source is NATIVE is one ж.of kept because its field had no known Go offset: its CLR slot is not where
+    // the field's bytes are. The `**C.T` door (GoCgoArgs.LoadPointer, StorePointer; cgo 3.2 seat 1c) refuses it with
+    // this, 1a's RequireGoFieldOffset text.
+    internal PanicException NoKnownGoOffset() =>
+        go.golib.RuntimeErrorPanic.NativeStructLayoutMismatch(PointeeTypeOf(m_source) ?? typeof(T), $"field {FieldNameOf(m_token)} has no known Go offset");
+
     /// <summary>
     /// The field <paramref name="token"/> names, of the struct a NATIVE root <paramref name="source"/> addresses: a native
     /// box at the field's GO offset, or for an array field whose Go length is known, the native window over it. Null when

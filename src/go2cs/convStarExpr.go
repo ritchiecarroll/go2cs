@@ -27,8 +27,8 @@ func (v *Visitor) convStarExpr(starExpr *ast.StarExpr, context StarExprContext) 
 		return emission
 	}
 
-	// A *unsafe.Pointer dereference read for its value is the word door's load (unsafePointerWordDoor.go, W1).
-	if load, ok := v.unsafePointerWordLoad(starExpr, context); ok {
+	// A *unsafe.Pointer dereference read for its value is the word door's load (W1); a **C.T one, the cgoPointerDoor.go's.
+	if load, ok := v.pointerWordDoorLoad(starExpr, context); ok {
 		return load
 	}
 

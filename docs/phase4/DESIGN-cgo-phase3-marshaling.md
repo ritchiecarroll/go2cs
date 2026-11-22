@@ -2701,3 +2701,33 @@ at the same site.
   P3: agreed, with the two sentences folded into item 1 (`**C.char` is in; a defined pointer typedef is out).
 
 — H (2026-11-21)
+
+**Record 2026-11-22: 18.11 as coded (dated corrections, the text above unchanged).** Code is cut on the folded 1a
+(`ad632f3c2b`), per [P3 N7]. Each miss below was posted to COORD on its own, before its fix.
+- **The managed arm is `ValueSlot`, not `.Value` (a correction to items 3 and 4).** golib's `.Value` reads a box that
+  HOLDS a nil pointer as a nil box (StandardBox.IsNull is `m_isNull || HeldValueIsNull`) and panics. Go's `*pp`, where
+  `*pp == nil`, reads nil. The converter's read of a managed `**T` slot today is `ValueSlot`, behind a nil check of the
+  box itself (`pp.ValueSlot`; golib's `~p`). The door now does the same:
+  - `IsNilPointer` (the box, never a box that holds nil) is Go's nil dereference;
+  - then `p.ValueSlot` and `p.ValueSlot = v`.
+  - E-2's red arm found it: the door coded as "`.Value`" panicked on the managed nil-holding row.
+  - The case is also an e2e arm, `s6nilslot` (COORD's ask: output EQUAL to Go). It is in testdata/cgo/p3 and not in a
+    behavioral project, because the door exists only on the cgo route and the behavioral corpus converts off it.
+- **The store's value renders in pointer context.** With a nil context, a deref-aliased pointer parameter `v` emitted
+  its value alias (`ref var v = ref Ꮡv.DerefOrNull()`). It now renders its box. E-1's DoorStore row asserts no alias.
+- **A fixture lesson: an unexported function with no callers ref-lowers its pointer parameter.** It then has no box,
+  so a pointer-door row inside one reads as the ref-lowered exclusion, never as the door.
+  - E-1's first red arm missed on control (d) for this reason.
+  - The rows are now EXPORTED functions, and only control (e) is unexported, with a caller.
+  - Any future pointer-door fixture uses exported functions, or says why not.
+- **E-1's typedef row** is a predicate unit test (TestCgoPointerDoorPredicateReadsTheTypeShape), because the Phase 2
+  fixture has no pointer typedef. A hand-written `_Ctype_` typedef in a cgo package is not cmd/cgo's output.
+- **[P3 M1], P3's open read, now RUN.** Through a naive `.Value`, the no-Go-offset view WAS refused, by the layout
+  floor ("cannot read native memory as Entry: its CLR layout is not its Go layout ..."). The unconditional guard stays
+  (COORD, 2026-11-21), and refuses first with 1a's text.
+- **P3's two-hop note:** `&o.in.next` over a native receiver, with every offset known, is a NativeBox at the Go offset,
+  and the door reads it (E-2 row ATwoHopFieldAddressOverANativeReceiverIsANativeBoxTheDoorReads).
+- **The resolver's walk shape, read offline:** `r = *entryNext(r)` emits `r = GoCgoArgs.LoadPointer(entryNext(r))`.
+  `entryNext`'s parameter does not ref-lower, and its body is `e.Ꮡnext`, a native box at the field's Go offset.
+- **The mint census:** `ж.CgoFields.cs|CgoPointerFieldRead` is re-keyed to `ж.CgoFields.cs|ReadWord`, count 1, the
+  core both seats read.
