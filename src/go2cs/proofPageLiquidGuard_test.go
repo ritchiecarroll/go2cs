@@ -13,6 +13,7 @@
 package main
 
 import (
+	"os"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -101,4 +102,50 @@ func TestProofPageWithoutALiquidDelimiterCarriesNoGuard(t *testing.T) {
 	if strings.Contains(page, "raw %}") {
 		t.Fatalf("a page with no Liquid delimiter carries a guard:\n%s", page)
 	}
+}
+
+// Every committed generated page is unchanged by the guard, so regenerating the tree moves no page that holds
+// neither delimiter; a page that already carries the guard is unchanged too.
+func TestLiquidGuardLeavesEveryCommittedProofPageUnchanged(t *testing.T) {
+	root, err := filepath.Abs(filepath.Join("..", "..", "docs", "validation"))
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	pages := 0
+
+	for _, dir := range []string{"current", "modules"} {
+		err := filepath.WalkDir(filepath.Join(root, dir), func(path string, entry os.DirEntry, err error) error {
+			if err != nil || entry.IsDir() || filepath.Ext(path) != ".md" {
+				return err
+			}
+
+			data, err := os.ReadFile(path)
+
+			if err != nil {
+				return err
+			}
+
+			page := strings.ReplaceAll(string(data), "\r\n", "\n")
+			pages++
+
+			if got := liquidGuardedPage(page); got != page {
+				rel, _ := filepath.Rel(root, path)
+				t.Errorf("%s: the guard changes a committed page", rel)
+			}
+
+			return nil
+		})
+
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	if pages == 0 {
+		t.Fatalf("no committed page found under %s: the measurement is vacuous", root)
+	}
+
+	t.Logf("%d committed pages read, all unchanged", pages)
 }

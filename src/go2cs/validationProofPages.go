@@ -749,7 +749,45 @@ func renderValidationProofPage(provenance proofPageProvenance, comparison testCo
 		}
 	}
 
-	return page.String()
+	return liquidGuardedPage(page.String())
+}
+
+// proofLiquidGuardOpener and proofLiquidGuardEndraw are the raw guard a generated page carries when it
+// quotes a Liquid delimiter. GitHub Pages renders every docs page through Liquid before Markdown, so a
+// test name holding `{{` or `{%` is published as empty text or breaks the site build
+// (src/go2cs/internal/repoguard/docsJekyllLiquid_test.go). Both lines are HTML comments, so GitHub's own
+// renderer shows nothing.
+const (
+	proofLiquidGuardOpener = "<!-- {% raw %} — Jekyll/Liquid guard: this page quotes test names that hold Liquid delimiters, which GitHub Pages would otherwise parse or publish as empty text. Keep the matching endraw as the final line. -->"
+	proofLiquidGuardEndraw = "<!-- {% endraw %} -->"
+)
+
+// liquidGuardedPage returns page with the raw guard when it holds `{{` or `{%`, and unchanged otherwise, so
+// a page without either is byte-identical to what the converter wrote before the guard existed. The opener
+// goes right after the H1, which must stay the first line: jekyll-titles-from-headings reads the published
+// title from it. The endraw is the last line. A page that already carries the opener is returned as is.
+func liquidGuardedPage(page string) string {
+	if !strings.Contains(page, "{{") && !strings.Contains(page, "{%") {
+		return page
+	}
+
+	if strings.Contains(page, proofLiquidGuardOpener) {
+		return page
+	}
+
+	end := strings.Index(page, "\n")
+
+	if end < 0 {
+		return page
+	}
+
+	guarded := page[:end+1] + proofLiquidGuardOpener + "\n" + page[end+1:]
+
+	if !strings.HasSuffix(guarded, "\n") {
+		guarded += "\n"
+	}
+
+	return guarded + proofLiquidGuardEndraw + "\n"
 }
 
 // renderValidationIndex renders the roster page from the dot-ids present under current/, sorted.
@@ -1426,7 +1464,7 @@ func writeThirdPartyModuleSummaryWith(moduleDir string, modulePath string, unval
 		}
 	}
 
-	_, err = writeStableDocFile(filepath.Join(moduleDir, thirdPartyModuleSummaryName), page.String())
+	_, err = writeStableDocFile(filepath.Join(moduleDir, thirdPartyModuleSummaryName), liquidGuardedPage(page.String()))
 
 	return err
 }
