@@ -61,6 +61,37 @@ function Get-GoNuGetPackageIdentity([string]$Path) {
     [pscustomobject]@{ Id = "$($meta.id)".Trim(); Version = "$($meta.version)".Trim() }
 }
 
+# Is the package a -Cgo pack (src/tools/nugetgo/nugetgo-pack.ps1 -Cgo)? Two keys, either one enough (P3's INC 2b read,
+# NIT 4), so a change to one cannot let a -Cgo pack through:
+#   - its build/ or buildTransitive/<id>.targets carries the RID guard's error code, NUGETGOCGO001 (NugetgoCgo.psm1);
+#   - its lib/ holds a REFERENCE assembly while it carries runtimes/ assemblies: the -Cgo layout, where the go.* and
+#     every other nugetgo RID-specific package put an implementation in lib/. Read as the attribute's name in the
+#     assembly's metadata strings, since Windows PowerShell 5.1 (the release's push) has no System.Reflection.Metadata.
+function Test-GoNuGetCgoPackage([string]$Path) {
+    $zip = [System.IO.Compression.ZipFile]::OpenRead($Path)
+
+    try {
+        foreach ($entry in @($zip.Entries | Where-Object { $_.FullName -match '^build(Transitive)?/[^/]+\.targets$' })) {
+            $reader = New-Object System.IO.StreamReader($entry.Open())
+            try { if ($reader.ReadToEnd().Contains('NUGETGOCGO001')) { return $true } } finally { $reader.Dispose() }
+        }
+
+        if (@($zip.Entries | Where-Object { $_.FullName -match '^runtimes/[^/]+/lib/[^/]+/[^/]+\.dll$' }).Count) {
+            foreach ($entry in @($zip.Entries | Where-Object { $_.FullName -match '^lib/[^/]+/[^/]+\.dll$' })) {
+                $buffer = New-Object System.IO.MemoryStream
+                $stream = $entry.Open()
+                try { $stream.CopyTo($buffer) } finally { $stream.Dispose() }
+                if ([System.Text.Encoding]::ASCII.GetString($buffer.ToArray()).Contains('ReferenceAssemblyAttribute')) { return $true }
+            }
+        }
+    }
+    finally {
+        $zip.Dispose()
+    }
+
+    $false
+}
+
 # NuGet's normalized version, the form the flat container keys a version by: build metadata dropped, numeric parts
 # without leading zeros, at least three of them, a fourth part of 0 dropped, and lower case. 1.26.10.0 is 1.26.10.
 function ConvertTo-GoNuGetNormalizedVersion([string]$Version) {
@@ -175,6 +206,11 @@ function Invoke-GoNuGetPush {
         [int] $MaxWaitsPerPackage = 6,
         [switch] $StopOnRateLimit
     )
+
+    # No -Cgo pack is pushed to any feed until the run-time RID check (A6, cgo-against-go.* INC 3) lands (COORD's ruling
+    # (a), condition 3). The whole set is refused before the first push, so a refusal never leaves a half-pushed release.
+    $cgoPacks = @($Packages | Where-Object { Test-GoNuGetCgoPackage $_.FullName } | ForEach-Object { $_.Name })
+    if ($cgoPacks.Count) { throw "REFUSED: $($cgoPacks -join ', ') $(if ($cgoPacks.Count -eq 1) { 'is a -Cgo pack' } else { 'are -Cgo packs' }) (its build/<id>.targets carries NUGETGOCGO001, or its lib/ holds reference assemblies beside runtimes/), and no -Cgo pack is pushed until the run-time RID check (A6) lands; nothing was pushed" }
 
     $pushed = 0
     $published = 0
