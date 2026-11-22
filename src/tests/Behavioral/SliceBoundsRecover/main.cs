@@ -116,7 +116,7 @@ internal static void main() {
         var a6ʗ2 = a6;
 
         var sʗ16 = s;
-    var cases = slice<main_cases>([
+    var cases = new main_cases[]{
         new("slice [:hi>cap]", [GoFunc("main.func1")] () => {
             sink = sʗ1.slice(0, hi11);
         }),
@@ -236,7 +236,7 @@ internal static void main() {
             sink = t;
             fmt.Println("len", len(t), "cap", cap(t));
         })
-    ]);
+    }.slice();
 
     foreach (var (_, c) in range(cases)) {
         @try(c.name, c.f);

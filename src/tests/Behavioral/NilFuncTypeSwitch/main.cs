@@ -336,7 +336,7 @@ internal static @string merged(any a) {
     return "other";
 }
 
-[GoLazy] partial class lazyᴛprobes { internal static slice<probe> probes = [
+[GoLazy] partial class lazyᴛprobes { internal static slice<probe> probes = new probe[]{
     new("bound", which),
     new("unbound", unbound),
     new("multi", multi),
@@ -348,7 +348,7 @@ internal static @string merged(any a) {
         return which(b);
     }),
     new("ifacesw", [GoFunc("init.func2")] (any a) => which(reflect.ValueOf(a).Interface()))
-]; }
+}.slice(); }
 
 internal static void runOne(@string arm, @string kind, probe p) {
     GoFrame ᒐ = default;

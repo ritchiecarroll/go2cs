@@ -19,7 +19,7 @@ internal static void main() {
         var valsʗ2 = vals;
 
         var countsʗ1 = counts;
-    foreach (var (_, p) in range(slice<probe>([
+    foreach (var (_, p) in range(new probe[]{
         new(name: "sum", run: [GoFunc("main.func1")] () => {
             nint t = 0;
             foreach (var (_, v) in range(valsʗ1)) {
@@ -29,7 +29,7 @@ internal static void main() {
         }),
         new(name: "len", run: [GoFunc("main.func2")] () => len(valsʗ2)),
         new(name: "map", run: [GoFunc("main.func3")] () => countsʗ1["a"] + countsʗ1["b"])
-    ]))) {
+    }.slice())) {
         nint n = p.run();
         total += n;
         fmt.Println(p.name, n);
@@ -40,14 +40,14 @@ internal static void main() {
     for (nint round = 0; round < 2; round++) {
         ref var seen = ref heap<slice<@string>>(slice<@string>([]), out var Ꮡseen);
 
-        foreach (var (_, add) in range(slice<Action<@string>>([
+        foreach (var (_, add) in range(new Action<@string>[]{
             [GoFunc("main.func4")] (@string s) => {
                 Ꮡseen.ValueSlot = append(Ꮡseen.ValueSlot, s + "!"u8);
             },
             [GoFunc("main.func5")] (@string s) => {
                 Ꮡseen.ValueSlot = append(Ꮡseen.ValueSlot, s + "?"u8);
             }
-        ]))) {
+        }.slice())) {
             add(fmt.Sprint(round));
         }
         fmt.Println(round, seen);

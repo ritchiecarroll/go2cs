@@ -140,7 +140,7 @@ internal static any build(@string arm, @string kind) {
 
 internal static reflect.Type namerType = reflect.TypeOf((ж<namer>)nil).Elem();
 
-[GoLazy] partial class lazyᴛprobes { internal static slice<probe> probes = [
+[GoLazy] partial class lazyᴛprobes { internal static slice<probe> probes = new probe[]{
     new("l-isnil", [GoFunc("init.func1")] (any a) => fmt.Sprint(a == nil)),
     new("l-namer", [GoFunc("init.func2")] (any a) => {
         var (n, ok) = a._<namer>(ᐧ);
@@ -217,7 +217,7 @@ internal static reflect.Type namerType = reflect.TypeOf((ж<namer>)nil).Elem();
     }),
     new("convert", [GoFunc("init.func30")] (any a) => reflect.ValueOf(a).Convert(namerType).Interface()._<namer>().Name()),
     new("fmtvalue", [GoFunc("init.func31")] (any a) => fmt.Sprintf("%v"u8, reflect.ValueOf(a)))
-]; }
+}.slice(); }
 
 internal static void runOne(@string arm, @string kind, probe p) {
     GoFrame ᒐ = default;

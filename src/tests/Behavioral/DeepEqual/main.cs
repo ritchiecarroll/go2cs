@@ -155,8 +155,8 @@ internal static void main() {
     fmt.Println(reflect.DeepEqual(h3, h3));
     fmt.Println(reflect.DeepEqual(new hooks(name: "a"), new hooks(name: "b")));
     fmt.Println(reflect.DeepEqual(slice<Action>([default, default]), slice<Action>([default, default])));
-    fmt.Println(reflect.DeepEqual(slice<Action>([default]), slice<Action>([[GoFunc("main.func2")] () => {
-    }])));
+    fmt.Println(reflect.DeepEqual(slice<Action>([default]), new Action[]{[GoFunc("main.func2")] () => {
+    }}.slice()));
     fmt.Println(reflect.DeepEqual(new map<@string, Action>{["k"] = default}, new map<@string, Action>{["k"] = default}));
     Action nilFn = default;
     fmt.Println(reflect.DeepEqual((nilFn).OrTypedNilFunc(), (nilFn).OrTypedNilFunc()));

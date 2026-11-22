@@ -149,9 +149,9 @@ internal static void main() {
 
     var @base = slice<nint>([3]);
         var baseʗ1 = @base;
-    var handlers = slice<Func<nint, nint>>([
+    var handlers = new Func<nint, nint>[]{
         [GoFunc("main.func8")] (nint k) => k + baseʗ1[0]
-    ]);
+    }.slice();
     fmt.Println("8:", handlers[0](100));
 
     var seed = slice<nint>([2]);

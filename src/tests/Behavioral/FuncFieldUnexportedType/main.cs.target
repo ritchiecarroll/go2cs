@@ -22,11 +22,11 @@ public partial struct cfg {
     [0x0002] = [GoFunc("init.func2")] () => Ꮡ(new hkdfState("sha512", 64))
 }; }
 
-[GoLazy] partial class lazyᴛAppliers { public static slice<Action<ж<cfg>>> Appliers = [
+[GoLazy] partial class lazyᴛAppliers { public static slice<Action<ж<cfg>>> Appliers = new Action<ж<cfg>>[]{
     [GoFunc("init.func3")] (ж<cfg> c) => {
         c.verbose = true;
     }
-]; }
+}.slice(); }
 
 internal static void main() {
     foreach (var (_, id) in range(slice<uint16>([0x0001, 0x0002]))) {

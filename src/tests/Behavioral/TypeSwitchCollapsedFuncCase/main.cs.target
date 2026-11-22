@@ -45,13 +45,13 @@ internal static @string kind(any raw) {
 
 internal static void main() {
     var (from, to) = (reflect.ValueOf((nint)21), reflect.ValueOf(""));
-    var hooks = slice<any>([
+    var hooks = new any[]{
         new Func<reflect.Type, reflect.Type, any, (any, error)>([GoFunc("main.func1")] (reflect.Type f, reflect.Type t, any data) => (fmt.Sprintf("%s->%s:%v"u8, f, t, data), default)),
         new Func<reflect.Kind, reflect.Kind, any, (any, error)>([GoFunc("main.func2")] (reflect.Kind f, reflect.Kind t, any data) => (fmt.Sprintf("%s->%s:%v"u8, f, t, data), default)),
         new Func<reflect.Value, reflect.Value, (any, error)>([GoFunc("main.func3")] (reflect.Value f, reflect.Value t) => (f.Int() * 2, default)),
         [GoFunc("main.func4")] nint (nint x) => x + 1,
         (nint)42
-    ]);
+    }.slice();
     foreach (var (_, h) in range(hooks)) {
         var (@out, err) = exec(h, from, to);
         fmt.Println(@out, err, kind(h));

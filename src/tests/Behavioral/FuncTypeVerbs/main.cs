@@ -55,7 +55,7 @@ internal static void main() {
     fmt.Printf("%T %T\n"u8, shrink('x'), r);
 
     any held = (shrink).OrTypedNilFunc();
-    var fns = slice<Func<rune>>([[GoFunc("main.func9")] () => (rune)'f']);
+    var fns = new Func<rune>[]{[GoFunc("main.func9")] () => (rune)'f'}.slice();
     var byName = new map<@string, Func<rune>>{["g"] = [GoFunc("main.func10")] () => (rune)'g'};
     fmt.Printf("%T %T %T %v %v\n"u8, held, fns, byName, fns[0](), byName["g"]());
     var (p, q) = pair();

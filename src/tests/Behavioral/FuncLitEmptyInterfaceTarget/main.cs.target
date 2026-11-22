@@ -82,12 +82,12 @@ internal static void main() {
         return (x * 7, default);
     }
     );
-    var elements = slice<any>([[GoFunc("main.func5")] (any, error) (nint x) => {
+    var elements = new any[]{[GoFunc("main.func5")] (any, error) (nint x) => {
         if (x < 0) {
             return (default, errors.New("negative"));
         }
         return (x * 8, default);
-    }, [GoFunc("main.func6")] int64 () => 2]);
+    }, [GoFunc("main.func6")] int64 () => 2}.slice();
     var converted = (any)([GoFunc("main.func7")] (any, error) (nint x) => {
         if (x < 0) {
             return (default, errors.New("negative"));
