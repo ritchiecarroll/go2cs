@@ -402,3 +402,54 @@ func TestTestsRecurseRunsWhatItCanPastARefusedPackage(t *testing.T) {
 		t.Errorf("phase B does not report exactly the three packages the refusal reaches as failed\n%s", output)
 	}
 }
+
+// -tests -recurse over a module-cache release that ships NO go.mod (github.com/pmezard/go-difflib v1.0.0 and
+// github.com/davecgh/go-spew v1.1.1 are two, both in testify's closure). The driver used to serve the cache's
+// synthesized go.mod through a `go build -overlay` in GOFLAGS, but go list and go build refuse any overlay of a file
+// beneath GOMODCACHE ("Files beneath GOMODCACHE ... must not be replaced"), so phase A failed before converting
+// anything. The release converts and tests as plain -recurse converts it: from a copy carrying the synthesized go.mod.
+// Run against an offline fabricated cache, under a private TMPDIR.
+func TestTestsRecurseConvertsAModuleCacheReleaseWithNoGoMod(t *testing.T) {
+	if testing.Short() {
+		t.Skip("integration test: builds the converter and converts a module with its tests")
+	}
+
+	cache, moduleDir := moduleCacheFixture(t)
+	writeModuleFile(t, filepath.Join(moduleDir, "old.go"), "package old\n\n// One is one.\nfunc One() int { return 1 }\n")
+	writeModuleFile(t, filepath.Join(moduleDir, "old_test.go"),
+		"package old\n\nimport \"testing\"\n\nfunc TestOne(t *testing.T) {\n\tif One() != 1 {\n\t\tt.Fatal(\"One\")\n\t}\n}\n")
+
+	treeSrc, err := filepath.Abs("..")
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	tmp := t.TempDir()
+	outRoot := filepath.Join(t.TempDir(), "out")
+	cmd := exec.Command(driverBinary(t), "-tests", "-test-action", "convert", "-recurse", "-go2cspath", treeSrc, moduleDir, outRoot)
+	cmd.Env = append(os.Environ(), "GOMODCACHE="+cache, "GOFLAGS=", "GOPROXY=off", "GOWORK=off", "GOTOOLCHAIN=local", "GONOSUMDB=*",
+		"TMPDIR="+tmp, "TMP="+tmp, "TEMP="+tmp)
+	combined, err := cmd.CombinedOutput()
+	output := string(combined)
+
+	if strings.Contains(output, "must not be replaced") {
+		t.Fatalf("the run overlaid a file beneath GOMODCACHE, which go refuses:\n%s", lastLines(output, 12))
+	}
+
+	if err != nil {
+		t.Fatalf("go2cs -tests -recurse failed on a module-cache release with no go.mod: %v\n%s", err, lastLines(output, 12))
+	}
+
+	if projects, _ := filepath.Glob(filepath.Join(outRoot, "src", "example.com", "Old", "*.tests.csproj")); len(projects) != 1 {
+		t.Errorf("want one test project for example.com/Old, got %v\n%s", projects, lastLines(output, 12))
+	}
+
+	if _, statErr := os.Stat(filepath.Join(moduleDir, "go.mod")); !os.IsNotExist(statErr) {
+		t.Error("a go.mod was written into the module cache")
+	}
+
+	if copies, _ := filepath.Glob(filepath.Join(tmp, "go2cs-modcopy-*")); len(copies) != 0 {
+		t.Errorf("the run left its copy behind: %v", copies)
+	}
+}
