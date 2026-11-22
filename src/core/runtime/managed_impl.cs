@@ -4954,6 +4954,14 @@ partial class runtime_package
         if (method.IsDefined(typeof(System.Diagnostics.StackTraceHiddenAttribute), inherit: false))
             return false;
 
+        // An async twin (M:N) is a Go frame exactly when the function it was generated from is. A suffix-form method's
+        // Go-named forwarder is [StackTraceHidden], and the twin generator gives it a twin of its own (`Nameꞏtwin`, awaiting
+        // the body's `Name⁔ꞏtwin`), which runs as its state machine's MoveNext. That MoveNext carries none of the marks
+        // above, so the twin is judged by its stamp's origin: Go has one frame for the method, its body's. A twin of other
+        // machinery (a go2cs-gen ж-overload forwarder) is dropped by the same rule. An origin is never itself a MoveNext.
+        if (goTwinOrigin(method) is { } twinOrigin && !isGoSourceFrame(twinOrigin, keepWrapper))
+            return false;
+
         foreach (object attribute in method.GetCustomAttributes(typeof(System.CodeDom.Compiler.GeneratedCodeAttribute), inherit: false))
         {
             if (attribute is System.CodeDom.Compiler.GeneratedCodeAttribute generated && generated.Tool == "go2cs-gen")

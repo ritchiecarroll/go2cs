@@ -19,15 +19,9 @@ internal static void Put⁔(/*this*/ ref Box b, nint v) {
     b.ch.ᐸꟷ(v);
 }
 
-internal static nint Take⁔(/*this*/ ж<Box> Ꮡb) {
-    ref var b = ref Ꮡb.DerefOrNull();
-
+internal static partial nint Take⁔(/*this*/ ref Box b) {
     nint v = ᐸꟷ(b.ch);
     b.trail = append(b.trail, Frames("Take"));
-
-    func(() => {
-        Ꮡb.Value.trail = append(Ꮡb.Value.trail, Frames("Take literal"));
-    })();
 
     return v;
 }
