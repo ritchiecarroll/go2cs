@@ -149,7 +149,7 @@ func (builder *cgoMirrorBuilder) mirror(named *types.Named) (*cgoMirror, error) 
 // member works out the C# type of one member of owner, and the size go/types gives it.
 func (builder *cgoMirrorBuilder) member(owner, field string, fieldType types.Type) (cgoMirrorField, error) {
 	refuse := func(reason string) (cgoMirrorField, error) {
-		return cgoMirrorField{}, fmt.Errorf("cgo mirror: %s.%s is %s, which Phase 2 cannot mirror", owner, field, reason)
+		return cgoMirrorField{}, fmt.Errorf("cgo mirror: %s.%s is %s, which go2cs cannot mirror in C# (docs/Limitations.md#cgo)", owner, field, reason)
 	}
 
 	member := cgoMirrorField{goSize: builder.sizes.Sizeof(fieldType)}

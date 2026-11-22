@@ -99,7 +99,7 @@ func refuseCgoDivergentStdImports(pkg *packages.Package, divergent map[string]bo
 
 	message := func(path string) string {
 		return fmt.Sprintf("package %s imports %q, which Go builds from different files with cgo on; the go.* packages are the "+
-			"standard library converted cgo-off, and %s's cgo-off build is not a working build of its cgo API (R5)", pkg.PkgPath, path, path)
+			"standard library converted cgo-off, and %s's cgo-off build is not a working build of its cgo API (docs/Limitations.md#cgo)", pkg.PkgPath, path, path)
 	}
 
 	for _, name := range pkg.GoFiles {
@@ -137,6 +137,6 @@ func refuseCgoDivergentStdImports(pkg *packages.Package, divergent map[string]bo
 		quoted[i] = fmt.Sprintf("%q", path)
 	}
 
-	return fmt.Errorf("package %s imports %s, built from different files with cgo on than in the cgo-off go.* packages (R5)",
+	return fmt.Errorf("package %s imports %s, built from different files with cgo on than in the cgo-off go.* packages (docs/Limitations.md#cgo)",
 		pkg.PkgPath, strings.Join(quoted, ", "))
 }

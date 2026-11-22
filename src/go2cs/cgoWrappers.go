@@ -75,13 +75,13 @@ func cgoScalarOf(function, role string, t types.Type) (cgoScalar, error) {
 	basic, ok := t.Underlying().(*types.Basic)
 
 	if !ok || basic.Kind() == types.UnsafePointer || basic.Kind() == types.String {
-		return cgoScalar{}, fmt.Errorf("cgo wrapper: C.%s's %s is not a scalar (a C struct is increment 3b2; any other pointer is Phase 3)", function, role)
+		return cgoScalar{}, fmt.Errorf("cgo wrapper: C.%s's %s is not a scalar", function, role)
 	}
 
 	primitive, found := cgoMirrorBasic[basic.Kind()]
 
 	if !found || basic.Kind() == types.Uintptr {
-		return cgoScalar{}, fmt.Errorf("cgo wrapper: C.%s's %s is of basic kind %s, which Phase 2 does not bind", function, role, basic.Name())
+		return cgoScalar{}, fmt.Errorf("cgo wrapper: C.%s's %s is of basic kind %s, which go2cs does not bind", function, role, basic.Name())
 	}
 
 	if goSide == "" {
@@ -122,7 +122,7 @@ func cgoScalarWrapper(declaration cgoDeclaration, target cgoBindingTarget) (stri
 	}
 
 	if cgoBuiltinNames[function] {
-		return "", fmt.Errorf("cgo wrapper: C.%s is one of cmd/cgo's own helpers, which Phase 3 provides", function)
+		return "", fmt.Errorf("cgo wrapper: C.%s is one of cmd/cgo's own helpers, which go2cs does not provide yet", function)
 	}
 
 	signature, ok := declaration.object.Type().(*types.Signature)

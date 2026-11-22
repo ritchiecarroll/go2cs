@@ -41,18 +41,18 @@ func TestCgoLinkFlagsTakeOnlyPlainTokens(t *testing.T) {
 	for _, refused := range []struct {
 		goos, arg, says string
 	}{
-		{"linux", "-l:libm.so.6", "names a library FILE"},
+		{"linux", "-l:libm.so.6", "names a library file"},
 		{"linux", "-l-whole-archive", "plain token"},
 		{"linux", "-l@file", "plain token"},
 		{"linux", "-lsub/dir", "plain token"},
 		{"linux", "-L" + filepath.Join(dir, "missing"), "is not a directory"},
 		{"linux", "-L", "names no directory"},
 		{"linux", "-framework", "is darwin's"},
-		{"linux", "-Wl,-rpath,/tmp", "is not one Phase 2 passes"},
-		{"linux", "-fplugin=x", "is not one Phase 2 passes"},
+		{"linux", "-Wl,-rpath,/tmp", "is not one go2cs reads"},
+		{"linux", "-fplugin=x", "is not one go2cs reads"},
 		// The admission of cmd/go's default CGO_LDFLAGS is token-exact (§11.15, as amended).
-		{"linux", "-O3", "is not one Phase 2 passes"},
-		{"linux", "-g3", "is not one Phase 2 passes"},
+		{"linux", "-O3", "is not one go2cs reads"},
+		{"linux", "-g3", "is not one go2cs reads"},
 	} {
 		if _, err := parseCgoLinkFlags(refused.goos, []string{refused.arg, "x"}, dir); err == nil || !strings.Contains(err.Error(), refused.says) {
 			t.Errorf("%s on %s: %v, want it to say %q", refused.arg, refused.goos, err, refused.says)
