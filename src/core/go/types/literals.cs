@@ -115,7 +115,7 @@ internal static void funcLit⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operand> Ꮡx,
                 var declʗ1 = decl;
                 var iotaʗ1 = iota;
                 var sigʗ1 = sig;
-                check.later(() => {
+                check.later([GoFunc("(*Checker).funcLit.func1")] () => {
                     Ꮡcheck.funcBody(declʗ1, functionLiteralˢ, sigʗ1, Ꮡe.Value.Body, iotaʗ1);
                 }).describef(new ast_FuncLitжpositioner(Ꮡe), "func literal");
             }

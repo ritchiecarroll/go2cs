@@ -314,7 +314,7 @@ internal static bool /*result*/ nify⁔(/*this*/ ж<unifier> Ꮡu, Type xʗp, Ty
         if (traceInference) {
             u.tracef("%s ≡ %s\t// %s", x, y, mode);
         }
-        defer(() => {
+        defer([GoFunc("(*unifier).nify.func1")] () => {
             if (traceInference && !result) {
                 Ꮡu.Value.tracef("%s ≢ %s", Ꮡx.ValueSlot, Ꮡy.ValueSlot);
             }

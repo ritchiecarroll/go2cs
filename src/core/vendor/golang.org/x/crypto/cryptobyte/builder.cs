@@ -169,7 +169,7 @@ internal static void callContinuation⁔(/*this*/ ж<Builder> Ꮡb, Action<ж<Bu
         if (!b.inContinuation.Value) {
             b.inContinuation.Value = true;
 
-            defer(() => {
+            defer([GoFunc("(*Builder).callContinuation.func1")] () => {
                 Ꮡb.Value.inContinuation.Value = false;
 
                 var r = recover();

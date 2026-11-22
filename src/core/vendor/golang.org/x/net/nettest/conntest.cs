@@ -53,37 +53,37 @@ private static readonly @string concurrentMethodsˢᵇ = "ConcurrentMethods"u8;
 // run multiple times. For maximal effectiveness, run the tests under the
 // race detector.
 public static void TestConn(ж<testing.T> t, Func<(net.Conn, net.Conn, Action, error)> mp) {
-    t.Run(basicIOˢ, (ж<testing.T> tΔ1) => {
+    t.Run(basicIOˢ, [GoFunc("TestConn.func1")] (ж<testing.T> tΔ1) => {
         timeoutWrapper(tΔ1, mp, new Action<ж<testing.T>, net.Conn, net.Conn>(testBasicIO));
     });
-    t.Run(pingPongˢ, (ж<testing.T> tΔ2) => {
+    t.Run(pingPongˢ, [GoFunc("TestConn.func2")] (ж<testing.T> tΔ2) => {
         timeoutWrapper(tΔ2, mp, new Action<ж<testing.T>, net.Conn, net.Conn>(testPingPong));
     });
-    t.Run(racyReadˢ, (ж<testing.T> tΔ3) => {
+    t.Run(racyReadˢ, [GoFunc("TestConn.func3")] (ж<testing.T> tΔ3) => {
         timeoutWrapper(tΔ3, mp, new Action<ж<testing.T>, net.Conn, net.Conn>(testRacyRead));
     });
-    t.Run(racyWriteˢ, (ж<testing.T> tΔ4) => {
+    t.Run(racyWriteˢ, [GoFunc("TestConn.func4")] (ж<testing.T> tΔ4) => {
         timeoutWrapper(tΔ4, mp, new Action<ж<testing.T>, net.Conn, net.Conn>(testRacyWrite));
     });
-    t.Run(readTimeoutˢ, (ж<testing.T> tΔ5) => {
+    t.Run(readTimeoutˢ, [GoFunc("TestConn.func5")] (ж<testing.T> tΔ5) => {
         timeoutWrapper(tΔ5, mp, new Action<ж<testing.T>, net.Conn, net.Conn>(testReadTimeout));
     });
-    t.Run(writeTimeoutˢ, (ж<testing.T> tΔ6) => {
+    t.Run(writeTimeoutˢ, [GoFunc("TestConn.func6")] (ж<testing.T> tΔ6) => {
         timeoutWrapper(tΔ6, mp, new Action<ж<testing.T>, net.Conn, net.Conn>(testWriteTimeout));
     });
-    t.Run(pastTimeoutˢ, (ж<testing.T> tΔ7) => {
+    t.Run(pastTimeoutˢ, [GoFunc("TestConn.func7")] (ж<testing.T> tΔ7) => {
         timeoutWrapper(tΔ7, mp, new Action<ж<testing.T>, net.Conn, net.Conn>(testPastTimeout));
     });
-    t.Run(presentTimeoutˢ, (ж<testing.T> tΔ8) => {
+    t.Run(presentTimeoutˢ, [GoFunc("TestConn.func8")] (ж<testing.T> tΔ8) => {
         timeoutWrapper(tΔ8, mp, new Action<ж<testing.T>, net.Conn, net.Conn>(testPresentTimeout));
     });
-    t.Run(futureTimeoutˢ, (ж<testing.T> tΔ9) => {
+    t.Run(futureTimeoutˢ, [GoFunc("TestConn.func9")] (ж<testing.T> tΔ9) => {
         timeoutWrapper(tΔ9, mp, new Action<ж<testing.T>, net.Conn, net.Conn>(testFutureTimeout));
     });
-    t.Run(closeTimeoutˢ, (ж<testing.T> tΔ10) => {
+    t.Run(closeTimeoutˢ, [GoFunc("TestConn.func10")] (ж<testing.T> tΔ10) => {
         timeoutWrapper(tΔ10, mp, new Action<ж<testing.T>, net.Conn, net.Conn>(testCloseTimeout));
     });
-    t.Run(concurrentMethodsˢ, (ж<testing.T> tΔ11) => {
+    t.Run(concurrentMethodsˢ, [GoFunc("TestConn.func11")] (ж<testing.T> tΔ11) => {
         timeoutWrapper(tΔ11, mp, new Action<ж<testing.T>, net.Conn, net.Conn>(testConcurrentMethods));
     });
 }
@@ -103,13 +103,13 @@ internal static void timeoutWrapper(ж<testing.T> t, Func<(net.Conn, net.Conn, A
         }
         ref var once = ref heap(new sync.Once(), out var Ꮡonce);
         var stopʗ1 = stop;
-        defer(Ꮡonce.Do, () => {
+        defer(Ꮡonce.Do, [GoFunc("timeoutWrapper.func1")] () => {
             stopʗ1();
         }, ref ᒐ);
         var stopʗ2 = stop;
-        var timer = time.AfterFunc(time.Minute, () => {
+        var timer = time.AfterFunc(time.Minute, [GoFunc("timeoutWrapper.func2")] () => {
             var stopʗ3 = stopʗ2;
-            Ꮡonce.Do(() => {
+            Ꮡonce.Do([GoFunc("timeoutWrapper.func2.1")] () => {
                 t.Error(testTimedOutTerminatingˢ);
                 stopʗ3();
             });
@@ -132,7 +132,7 @@ internal static partial void testBasicIO(ж<testing.T> t, net.Conn c1, net.Conn 
 
     var dataCh = new channel<slice<byte>>(0);
     var wantʗ1 = want;
-    goǃ(() => {
+    goǃ([GoFunc("testBasicIO.func1")] () => {
         var rd = bytes.NewReader(wantʗ1);
         {
             var err = chunkedCopy(new net_ConnᴠWriter(c1), new bytes_ReaderжReader(rd)); if (err != nil) {
@@ -147,7 +147,7 @@ internal static partial void testBasicIO(ж<testing.T> t, net.Conn c1, net.Conn 
     });
 
     var dataChʗ1 = dataCh;
-    goǃ(() => {
+    goǃ([GoFunc("testBasicIO.func2")] () => {
         var wr = @new<bytes.Buffer>();
         {
             var err = chunkedCopy(new bytes_BufferжWriter(wr), new net_ConnᴠReader(c2)); if (err != nil) {
@@ -175,7 +175,7 @@ internal static partial void testPingPong(ж<testing.T> t, net.Conn c1, net.Conn
         ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
         defer(Ꮡwg.Wait, ref ᒐ);
 
-        void pingPonger(net.Conn c) {
+        [GoFunc("testPingPong.func1")] void pingPonger(net.Conn c) {
             GoFrame ᒐ = default;
             try {
                 defer(Ꮡwg.Done, ref ᒐ);
@@ -248,7 +248,7 @@ internal static partial void testRacyRead(ж<testing.T> t, net.Conn c1, net.Conn
         c1.SetReadDeadline(time.Now().Add(time.Millisecond));
         for (nint i = 0; i < 10; i++) {
             Ꮡwg.Add(1);
-            goǃ(() => {
+            goǃ([GoFunc("testRacyRead.func1")] () => {
                 GoFrame ᒐ = default;
                 try {
                     defer(Ꮡwg.Done, ref ᒐ);
@@ -286,7 +286,7 @@ internal static partial void testRacyWrite(ж<testing.T> t, net.Conn c1, net.Con
         c1.SetWriteDeadline(time.Now().Add(time.Millisecond));
         for (nint i = 0; i < 10; i++) {
             Ꮡwg.Add(1);
-            goǃ(() => {
+            goǃ([GoFunc("testRacyWrite.func1")] () => {
                 GoFrame ᒐ = default;
                 try {
                     defer(Ꮡwg.Done, ref ᒐ);
@@ -372,7 +372,7 @@ internal static partial void testPresentTimeout(ж<testing.T> t, net.Conn c1, ne
 
         var deadlineSet = new channel<bool>(1);
         var deadlineSetʗ1 = deadlineSet;
-        goǃ(() => {
+        goǃ([GoFunc("testPresentTimeout.func1")] () => {
             GoFrame ᒐ = default;
             try {
                 defer(Ꮡwg.Done, ref ᒐ);
@@ -385,7 +385,7 @@ internal static partial void testPresentTimeout(ж<testing.T> t, net.Conn c1, ne
             finally { ᒐ.Run(); }
         });
         var deadlineSetʗ2 = deadlineSet;
-        goǃ(() => {
+        goǃ([GoFunc("testPresentTimeout.func2")] () => {
             GoFrame ᒐ = default;
             try {
                 defer(Ꮡwg.Done, ref ᒐ);
@@ -402,7 +402,7 @@ internal static partial void testPresentTimeout(ж<testing.T> t, net.Conn c1, ne
             finally { ᒐ.Run(); }
         });
         var deadlineSetʗ3 = deadlineSet;
-        goǃ(() => {
+        goǃ([GoFunc("testPresentTimeout.func3")] () => {
             GoFrame ᒐ = default;
             try {
                 defer(Ꮡwg.Done, ref ᒐ);
@@ -430,7 +430,7 @@ internal static partial void testFutureTimeout(ж<testing.T> t, net.Conn c1, net
     Ꮡwg.Add(2);
 
     c1.SetDeadline(time.Now().Add(100 * time.Millisecond));
-    goǃ(() => {
+    goǃ([GoFunc("testFutureTimeout.func1")] () => {
         GoFrame ᒐ = default;
         try {
             defer(Ꮡwg.Done, ref ᒐ);
@@ -440,7 +440,7 @@ internal static partial void testFutureTimeout(ж<testing.T> t, net.Conn c1, net
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
     });
-    goǃ(() => {
+    goǃ([GoFunc("testFutureTimeout.func2")] () => {
         GoFrame ᒐ = default;
         try {
             defer(Ꮡwg.Done, ref ᒐ);
@@ -473,7 +473,7 @@ internal static partial void testCloseTimeout(ж<testing.T> t, net.Conn c1, net.
 
         // Test for cancellation upon connection closure.
         c1.SetDeadline(neverTimeout);
-        goǃ(() => {
+        goǃ([GoFunc("testCloseTimeout.func1")] () => {
             GoFrame ᒐ = default;
             try {
                 defer(Ꮡwg.Done, ref ᒐ);
@@ -483,7 +483,7 @@ internal static partial void testCloseTimeout(ж<testing.T> t, net.Conn c1, net.
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
         });
-        goǃ(() => {
+        goǃ([GoFunc("testCloseTimeout.func2")] () => {
             GoFrame ᒐ = default;
             try {
                 defer(Ꮡwg.Done, ref ᒐ);
@@ -496,7 +496,7 @@ internal static partial void testCloseTimeout(ж<testing.T> t, net.Conn c1, net.
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
         });
-        goǃ(() => {
+        goǃ([GoFunc("testCloseTimeout.func3")] () => {
             GoFrame ᒐ = default;
             try {
                 defer(Ꮡwg.Done, ref ᒐ);
@@ -530,7 +530,7 @@ internal static partial void testConcurrentMethods(ж<testing.T> t, net.Conn c1,
     ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
     for (nint i = 0; i < 100; i++) {
         Ꮡwg.Add(7);
-        goǃ(() => {
+        goǃ([GoFunc("testConcurrentMethods.func1")] () => {
             GoFrame ᒐ = default;
             try {
                 defer(Ꮡwg.Done, ref ᒐ);
@@ -539,7 +539,7 @@ internal static partial void testConcurrentMethods(ж<testing.T> t, net.Conn c1,
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
         });
-        goǃ(() => {
+        goǃ([GoFunc("testConcurrentMethods.func2")] () => {
             GoFrame ᒐ = default;
             try {
                 defer(Ꮡwg.Done, ref ᒐ);
@@ -548,7 +548,7 @@ internal static partial void testConcurrentMethods(ж<testing.T> t, net.Conn c1,
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
         });
-        goǃ(() => {
+        goǃ([GoFunc("testConcurrentMethods.func3")] () => {
             GoFrame ᒐ = default;
             try {
                 defer(Ꮡwg.Done, ref ᒐ);
@@ -557,7 +557,7 @@ internal static partial void testConcurrentMethods(ж<testing.T> t, net.Conn c1,
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
         });
-        goǃ(() => {
+        goǃ([GoFunc("testConcurrentMethods.func4")] () => {
             GoFrame ᒐ = default;
             try {
                 defer(Ꮡwg.Done, ref ᒐ);
@@ -566,7 +566,7 @@ internal static partial void testConcurrentMethods(ж<testing.T> t, net.Conn c1,
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
         });
-        goǃ(() => {
+        goǃ([GoFunc("testConcurrentMethods.func5")] () => {
             GoFrame ᒐ = default;
             try {
                 defer(Ꮡwg.Done, ref ᒐ);
@@ -575,7 +575,7 @@ internal static partial void testConcurrentMethods(ж<testing.T> t, net.Conn c1,
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
         });
-        goǃ(() => {
+        goǃ([GoFunc("testConcurrentMethods.func6")] () => {
             GoFrame ᒐ = default;
             try {
                 defer(Ꮡwg.Done, ref ᒐ);
@@ -584,7 +584,7 @@ internal static partial void testConcurrentMethods(ж<testing.T> t, net.Conn c1,
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
         });
-        goǃ(() => {
+        goǃ([GoFunc("testConcurrentMethods.func7")] () => {
             GoFrame ᒐ = default;
             try {
                 defer(Ꮡwg.Done, ref ᒐ);
@@ -656,7 +656,7 @@ internal static partial void resyncConn(ж<testing.T> t, net.Conn c) {
     c.SetDeadline(neverTimeout);
     var errCh = new channel<error>(0);
     var errChʗ1 = errCh;
-    goǃ(() => {
+    goǃ([GoFunc("resyncConn.func1")] () => {
         var (_, err) = c.Write([0xff]);
         errChʗ1.ᐸꟷ(err);
     });

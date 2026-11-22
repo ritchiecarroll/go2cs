@@ -143,7 +143,7 @@ internal static void childCGIProcess() {
         os.Exit(0);
         break;
     }}
-    Serve(new http_HandlerFuncᴠHandler(new http.HandlerFunc((http.ResponseWriter rw, ж<http.Request> req) => {
+    Serve(new http_HandlerFuncᴠHandler(new http.HandlerFunc([GoFunc("childCGIProcess.func1")] (http.ResponseWriter rw, ж<http.Request> req) => {
         if (req.FormValue(nilRequestBodyˢ) == "1"u8) {
             fmt.Fprintf(new http_ResponseWriterᴠWriter(rw), "nil-request-body=%v\n"u8, req.Body == nil);
             return;

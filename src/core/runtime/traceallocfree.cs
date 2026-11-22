@@ -80,7 +80,7 @@ internal static void traceSnapshotMemory(uintptr gen) {
 
     // Write out all the goroutine stacks.
     var traceʗ1 = traceΔ1;
-    forEachGRace((ж<g> gp) => {
+    forEachGRace([GoFunc("traceSnapshotMemory.func1")] (ж<g> gp) => {
         traceʗ1.GoroutineStackExists((~gp).stack.lo, (~gp).stack.hi - (~gp).stack.lo);
     });
     traceRelease(traceΔ1);

@@ -17,7 +17,7 @@ partial class traceviewer_package {
 
 public static http.Handler MainHandler(slice<View> views) {
     var viewsʗ1 = views;
-    return new http_HandlerFuncᴠHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> _) => {
+    return new http_HandlerFuncᴠHandler(new http.HandlerFunc([GoFunc("MainHandler.func1")] (http.ResponseWriter w, ж<http.Request> _) => {
         var err = templMain.Execute(new http_ResponseWriterᴠWriter(w), viewsʗ1); if (err != nil) {
             http.Error(w, err.Error(), http.StatusInternalServerError);
             return;
@@ -292,7 +292,7 @@ private static ref readonly @string paramsˢ => ref paramsˢᵇ;
 private static readonly @string paramsˢᵇ = "{{PARAMS}}"u8;
 
 public static http.Handler TraceHandler() {
-    return new http_HandlerFuncᴠHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
+    return new http_HandlerFuncᴠHandler(new http.HandlerFunc([GoFunc("TraceHandler.func1")] (http.ResponseWriter w, ж<http.Request> r) => {
         var err = r.ParseForm(); if (err != nil) {
             http.Error(w, err.Error(), http.StatusInternalServerError);
             return;

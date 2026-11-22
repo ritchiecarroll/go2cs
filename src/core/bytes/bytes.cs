@@ -854,7 +854,7 @@ public static slice<byte> Title(slice<byte> s) {
     // the closure once per rune.
     var prev = (rune)' ';
     return Map(
-        (rune r) => {
+        [GoFunc("Title.func1")] (rune r) => {
             if (isSeparator(prev)) {
                 prev = r;
                 return Δunicode.ToTitle(r);

@@ -144,7 +144,7 @@ internal static (traceWriter, bool) ensure⁔(/*this*/ traceWriter w, nint maxSi
 //
 //go:nosplit
 internal static traceWriter flush⁔(/*this*/ traceWriter w) {
-    systemstack(() => {
+    systemstack([GoFunc("traceWriter.flush.func1")] () => {
         @lock(Ꮡtrace.of(traceᴛ1.Ꮡlock));
         if (w.traceBuf != nil) {
             traceBufFlush(w.traceBuf, w.gen);
@@ -163,7 +163,7 @@ private static readonly @string traceOutOfMemoryˢᵇ = "trace: out of memory"u8
 
 // refill puts w.traceBuf on the queue of full buffers and refresh's w's buffer.
 internal static traceWriter refill⁔(/*this*/ traceWriter w) {
-    systemstack(() => {
+    systemstack([GoFunc("traceWriter.refill.func1")] () => {
         @lock(Ꮡtrace.of(traceᴛ1.Ꮡlock));
         if (w.traceBuf != nil) {
             traceBufFlush(w.traceBuf, w.gen);

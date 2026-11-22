@@ -56,7 +56,7 @@ internal static Func<syscall.Sockaddr, Addr> addrFunc⁔(/*this*/ ref netFD fd) 
         }}
         break;
     }}
-    return (syscall.Sockaddr _) => default;
+    return [GoFunc("(*netFD).addrFunc.func1")] (syscall.Sockaddr _) => default;
 }
 
 } // end net_package

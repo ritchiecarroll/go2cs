@@ -53,7 +53,7 @@ internal static bool allNumericOrString(Type t) { return allBasic(t, (BasicInfo)
 internal static bool allBasic(Type t, BasicInfo info) {
     {
         var (tpar, _) = Unalias(t)._<ж<TypeParam>>(ᐧ); if (tpar != nil) {
-            return tpar.@is((ж<term> tΔ1) => tΔ1 != nil && isBasic(tΔ1.typ, info));
+            return tpar.@is([GoFunc("allBasic.func1")] (ж<term> tΔ1) => tΔ1 != nil && isBasic(tΔ1.typ, info));
         }
     }
     return isBasic(t, info);
@@ -238,7 +238,7 @@ internal static bool hasNil(Type t) {
         return true;
     }
     case ж<Interface> u: {
-        return !isTypeParam(t) || underIs(t, (Type uΔ1) => uΔ1 != nil && hasNil(uΔ1));
+        return !isTypeParam(t) || underIs(t, [GoFunc("hasNil.func1")] (Type uΔ1) => uΔ1 != nil && hasNil(uΔ1));
     }}
     return false;
 }

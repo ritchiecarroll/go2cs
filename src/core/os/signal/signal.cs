@@ -58,7 +58,7 @@ internal static void cancel(slice<os.Signal> sigs, Action<nint> action) {
         Ꮡhandlers.of(handlersᴛ1.ᏑMutex).Lock();
         defer(Ꮡhandlers.of(handlersᴛ1.ᏑMutex).Unlock, ref ᒐ);
 
-        void remove(nint n) {
+        [GoFunc("cancel.func1")] void remove(nint n) {
             handler zerohandler = new();
 
             foreach (var (c, h) in handlers.m) {
@@ -150,7 +150,7 @@ public static void Notify(channel/*<-*/<os.Signal> c, params ꓸꓸꓸosꓸSigna
         }
 
         var hʗ1 = h;
-        void add(nint n) {
+        [GoFunc("Notify.func1")] void add(nint n) {
             if (n < 0) {
                 return;
             }
@@ -161,7 +161,7 @@ public static void Notify(channel/*<-*/<os.Signal> c, params ꓸꓸꓸosꓸSigna
 
                     // The runtime requires that we enable a
                     // signal before starting the watcher.
-                    ᏑwatchSignalLoopOnce.Do([MethodImpl(MethodImplOptions.NoInlining)] () => {
+                    ᏑwatchSignalLoopOnce.Do([MethodImpl(MethodImplOptions.NoInlining), GoFunc("Notify.func1.1")] () => {
                         if (watchSignalLoop != nil) {
                             goǃ(watchSignalLoop);
                         }
@@ -326,7 +326,7 @@ public static partial (context.Context ctx, Action stop) NotifyContext(context.C
     Notify(c.ch.AsSendOnly(), c.signals.ꓸꓸꓸ);
     if (ctx.Err() == nil) {
         var cʗ1 = c;
-        goǃ(() => {
+        goǃ([GoFunc("NotifyContext.func1")] () => {
             var selᴛ3 = cʗ1.ch;
             var selᴛ4 = (~cʗ1).Context.Done();
             switch (select(ᐸꟷ(selᴛ3, ꓸꓸꓸ), ᐸꟷ(selᴛ4, ꓸꓸꓸ))) {

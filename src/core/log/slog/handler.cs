@@ -370,7 +370,7 @@ internal static void appendNonBuiltIns⁔(/*this*/ ж<handleState> Ꮡs, Record 
         s.openGroups();
         nOpenGroups = len(s.h.groups);
         var empty = true;
-        r.Attrs((Attr a) => {
+        r.Attrs([GoFunc("(*handleState).appendNonBuiltIns.func1")] (Attr a) => {
             if (Ꮡs.appendAttr(a)) {
                 empty = false;
             }
@@ -411,7 +411,7 @@ partial struct handleState {
     internal ж<slice<@string>> groups; // pool-allocated slice of active groups, for ReplaceAttr
 }
 
-[GoLazy] partial class lazyᴛgroupPool { internal static readonly ж<sync.Pool> ᏑgroupPool = new StaticBox<sync.Pool>(new sync.Pool(New: () => {
+[GoLazy] partial class lazyᴛgroupPool { internal static readonly ж<sync.Pool> ᏑgroupPool = new StaticBox<sync.Pool>(new sync.Pool(New: [GoFunc("init.func1")] () => {
     var s = new slice<@string>(0, 10);
     return Ꮡ(s);
 }
@@ -627,7 +627,7 @@ internal static void appendValue⁔(/*this*/ ж<handleState> Ꮡs, Value v) {
         ref var s = ref Ꮡs.DerefOrNull();
 
         var vʗ1 = v;
-        defer(() => {
+        defer([GoFunc("(*handleState).appendValue.func1")] () => {
             var r = recover(); if (r != nil) {
                 // If it panics with a nil pointer, the most likely cases are
                 // an encoding.TextMarshaler or error fails to guard against nil,

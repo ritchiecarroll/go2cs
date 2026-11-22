@@ -122,13 +122,13 @@ internal static (slice<byte>, error) Bytes⁔(/*this*/ ж<SessionState> Ꮡs) {
     }
     b.AddUint16(s.cipherSuite);
     addUint64(Ꮡb, s.createdAt);
-    Ꮡb.AddUint8LengthPrefixed((ж<cryptobyte.Builder> bΔ1) => {
+    Ꮡb.AddUint8LengthPrefixed([GoFunc("(*SessionState).Bytes.func1")] (ж<cryptobyte.Builder> bΔ1) => {
         bΔ1.AddBytes(Ꮡs.Value.secret);
     });
-    Ꮡb.AddUint24LengthPrefixed((ж<cryptobyte.Builder> bΔ2) => {
+    Ꮡb.AddUint24LengthPrefixed([GoFunc("(*SessionState).Bytes.func2")] (ж<cryptobyte.Builder> bΔ2) => {
         foreach (var (_, extra) in range(Ꮡs.Value.Extra)) {
             var extraʗ1 = extra;
-            bΔ2.AddUint24LengthPrefixed((ж<cryptobyte.Builder> bΔ3) => {
+            bΔ2.AddUint24LengthPrefixed([GoFunc("(*SessionState).Bytes.func2.1")] (ж<cryptobyte.Builder> bΔ3) => {
                 bΔ3.AddBytes(extraʗ1);
             });
         }
@@ -148,10 +148,10 @@ internal static (slice<byte>, error) Bytes⁔(/*this*/ ж<SessionState> Ꮡs) {
         OCSPStaple: s.ocspResponse,
         SignedCertificateTimestamps: s.scts
     ));
-    Ꮡb.AddUint24LengthPrefixed((ж<cryptobyte.Builder> bΔ4) => {
+    Ꮡb.AddUint24LengthPrefixed([GoFunc("(*SessionState).Bytes.func3")] (ж<cryptobyte.Builder> bΔ4) => {
         foreach (var (_, chain) in range(Ꮡs.Value.verifiedChains)) {
             var chainʗ1 = chain;
-            bΔ4.AddUint24LengthPrefixed((ж<cryptobyte.Builder> bΔ5) => {
+            bΔ4.AddUint24LengthPrefixed([GoFunc("(*SessionState).Bytes.func3.1")] (ж<cryptobyte.Builder> bΔ5) => {
                 // We elide the first certificate because it's always the leaf.
                 if (len(chainʗ1) == 0) {
                     bΔ5.SetError(errors.New(tlsInternalErrorEmptyˢ));
@@ -159,7 +159,7 @@ internal static (slice<byte>, error) Bytes⁔(/*this*/ ж<SessionState> Ꮡs) {
                 }
                 foreach (var (_, cert) in range(chainʗ1[1..])) {
                     var certʗ1 = cert;
-                    bΔ5.AddUint24LengthPrefixed((ж<cryptobyte.Builder> bΔ6) => {
+                    bΔ5.AddUint24LengthPrefixed([GoFunc("(*SessionState).Bytes.func3.1.1")] (ж<cryptobyte.Builder> bΔ6) => {
                         bΔ6.AddBytes(certʗ1.Raw);
                     });
                 }
@@ -167,7 +167,7 @@ internal static (slice<byte>, error) Bytes⁔(/*this*/ ж<SessionState> Ꮡs) {
         }
     });
     if (s.EarlyData) {
-        Ꮡb.AddUint8LengthPrefixed((ж<cryptobyte.Builder> bΔ7) => {
+        Ꮡb.AddUint8LengthPrefixed([GoFunc("(*SessionState).Bytes.func4")] (ж<cryptobyte.Builder> bΔ7) => {
             bΔ7.AddBytes(slice<byte>(Ꮡs.Value.alpnProtocol));
         });
     }

@@ -338,7 +338,7 @@ internal static partial void asyncPreempt();
 internal static void asyncPreempt2() {
     // We can't grow the stack with untyped data from asyncPreempt, so switch to
     // the system stack right away.
-    mcall((ж<g> gpΔ1) => {
+    mcall([GoFunc("asyncPreempt2.func1")] (ж<g> gpΔ1) => {
         gpΔ1.Value.asyncSafePoint = true;
 
         // Move the extended register state from the P to the G. We do this now that

@@ -49,7 +49,7 @@ public static partial void WithDataIndependentTiming(Action f) {
 
         // disableDIT is called in a deferred function so that if f panics we will
         // still disable DIT, in case the panic is recovered further up the stack.
-        defer(() => {
+        defer([GoFunc("WithDataIndependentTiming.func1")] () => {
             if (!alreadyEnabled) {
                 setDITDisabled();
             }

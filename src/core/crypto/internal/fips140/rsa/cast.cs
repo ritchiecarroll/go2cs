@@ -177,8 +177,8 @@ internal static ж<PrivateKey> testPrivateKey() {
 }
 
 internal static Action fipsSelfTest;
-internal static void initᴛfipsSelfTest() { fipsSelfTest = sync.OnceFunc(() => {
-    fips140.CAST("RSASSA-PKCS-v1.5 2048-bit sign and verify", error () => {
+internal static void initᴛfipsSelfTest() { fipsSelfTest = sync.OnceFunc([GoFunc("init.func1")] () => {
+    fips140.CAST("RSASSA-PKCS-v1.5 2048-bit sign and verify", [GoFunc("init.func1.1")] error () => {
         var k = testPrivateKey();
         var hash = slice<byte>([
             0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,

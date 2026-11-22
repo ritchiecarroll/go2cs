@@ -403,7 +403,7 @@ internal static partial void maybeRunStateHook⁔(/*this*/ ж<ClientConn> Ꮡcc)
     // the current goroutine indefinitely.
     hook = Ꮡcc.shouldRunStateHook(true);
     if (hook != nil) {
-        goǃ(() => {
+        goǃ([GoFunc("(*ClientConn).maybeRunStateHook.func1")] () => {
             while (Ꮡhook.ValueSlot != nil) {
                 Ꮡhook.ValueSlot(Ꮡcc);
                 Ꮡhook.ValueSlot = Ꮡcc.shouldRunStateHook(true);

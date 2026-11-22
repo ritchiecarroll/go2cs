@@ -103,7 +103,7 @@ internal static (fs.File, error) Open⁔(/*this*/ MapFS fsys, @string name) {
     foreach (var (nameΔ1, _) in need) {
         list = append(list, new mapFileInfo(nameΔ1, Ꮡ(new MapFile(Mode: (fs.FileMode)(fs.ModeDir | 365)))));
     }
-    slices.SortFunc(list, (mapFileInfo a, mapFileInfo b) => strings.Compare(a.name, b.name));
+    slices.SortFunc(list, [GoFunc("MapFS.Open.func1")] (mapFileInfo a, mapFileInfo b) => strings.Compare(a.name, b.name));
 
     if (@file == nil) {
         @file = Ꮡ(new MapFile(Mode: (fs.FileMode)(fs.ModeDir | 365)));

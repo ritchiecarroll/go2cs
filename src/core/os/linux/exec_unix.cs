@@ -61,7 +61,7 @@ internal static (ж<ProcessState>, error) pidWait⁔(/*this*/ ж<Process> Ꮡp) 
     ref var status = ref heap(new syscall.WaitStatus(), out var Ꮡstatus);
     ref var rusage = ref heap(new syscall.Rusage(), out var Ꮡrusage);
     ref var pid1 = ref heap<nint>(out var Ꮡpid1);
-    (pid1, err) = ignoringEINTR2((nint, error) () => syscall.Wait4(Ꮡp.Value.Pid, Ꮡstatus, 0, Ꮡrusage));
+    (pid1, err) = ignoringEINTR2([GoFunc("(*Process).pidWait.func1")] (nint, error) () => syscall.Wait4(Ꮡp.Value.Pid, Ꮡstatus, 0, Ꮡrusage));
     if (err != nil) {
         return (default, NewSyscallError(waitˢ, err));
     }

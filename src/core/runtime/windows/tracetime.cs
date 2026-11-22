@@ -93,7 +93,7 @@ internal static void traceSyncBatch(uintptr gen, uint64 frequency) {
 
     // Immediately flush the buffer.
     var wʗ1 = w;
-    systemstack(() => {
+    systemstack([GoFunc("traceSyncBatch.func1")] () => {
         @lock(Ꮡtrace.of(traceᴛ1.Ꮡlock));
         traceBufFlush(wʗ1.traceBuf, gen);
         unlock(Ꮡtrace.of(traceᴛ1.Ꮡlock));

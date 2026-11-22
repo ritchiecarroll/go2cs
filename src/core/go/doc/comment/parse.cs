@@ -283,7 +283,7 @@ internal static ж<Doc> Parse⁔(/*this*/ ж<Parser> Ꮡp, @string text) {
         Doc: @new<Doc>(),
         links: new map<@string, ж<LinkDef>>(),
         lines: lines,
-        lookupSym: (@string recv, @string name) => false
+        lookupSym: [GoFunc("(*Parser).Parse.func1")] (@string recv, @string name) => false
     ));
     if (p.LookupSym != nil) {
         d.lookupSym = p.LookupSym;
@@ -717,7 +717,7 @@ internal static ж<List> list⁔(/*this*/ ж<parseDoc> Ꮡd, slice<@string> line
     ж<List> list = Ꮡ(new List(ForceBlankBefore: forceBlankBefore));
     ref var item = ref heap<ж<ListItem>>(out var Ꮡitem);
     ref var text = ref heap<slice<@string>>(out var Ꮡtext);
-    void flush() {
+    [GoFunc("(*parseDoc).list.func1")] void flush() {
         if (Ꮡitem.ValueSlot != nil) {
             var para = Ꮡd.Value.paragraph(Ꮡtext.ValueSlot); if (para != nil) {
                 Ꮡitem.ValueSlot.Content = append(Ꮡitem.ValueSlot.Content, para);
@@ -810,7 +810,7 @@ internal static slice<Text> parseLinkedText⁔(/*this*/ ж<parseDoc> Ꮡd, @stri
 
     ref var @out = ref heap<slice<Text>>(out var Ꮡout);
     nint wrote = 0;
-    void flush(nint i) {
+    [GoFunc("(*parseDoc).parseLinkedText.func1")] void flush(nint i) {
         if (wrote < i) {
             Ꮡout.ValueSlot = Ꮡd.Value.parseText(Ꮡout.ValueSlot, text.slice(wrote, i), true);
             wrote = i;
@@ -933,12 +933,12 @@ internal static (@string before, @string name, bool foundDot) splitDocName(@stri
 internal static slice<Text> parseText⁔(/*this*/ ref parseDoc d, slice<Text> @out, @string s, bool autoLink) {
     ref var w = ref heap(new strings.Builder(), out var Ꮡw);
     nint wrote = 0;
-    void writeUntil(nint i) {
+    [GoFunc("(*parseDoc).parseText.func1")] void writeUntil(nint i) {
         Ꮡw.WriteString(s.slice(wrote, i));
         wrote = i;
     }
     var writeUntilʗ1 = writeUntil;
-    void flush(nint i) {
+    [GoFunc("(*parseDoc).parseText.func2")] void flush(nint i) {
         writeUntilʗ1(i);
         if (Ꮡw.Value.Len() > 0) {
             @out = append(@out, (Text)((Plain)Ꮡw.Value.String()));

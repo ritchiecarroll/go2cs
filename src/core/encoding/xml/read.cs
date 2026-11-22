@@ -220,7 +220,7 @@ internal static error unmarshalInterface⁔(/*this*/ ж<Decoder> Ꮡd, Unmarshal
 
         var savedInUnmarshalXML = d.inUnmarshalXML;
         d.inUnmarshalXML = true;
-        defer(() => {
+        defer([GoFunc("(*Decoder).unmarshalInterface.func1")] () => {
             Ꮡd.Value.inUnmarshalXML = savedInUnmarshalXML;
         }, ref ᒐ);
 

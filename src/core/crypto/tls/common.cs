@@ -1149,10 +1149,10 @@ internal static slice<uint16> cipherSuites⁔(/*this*/ ж<Config> Ꮡc, bool aes
         cipherSuites = defaultCipherSuites(aesGCMPreferred);
     } else {
         cipherSuites = supportedCipherSuites(aesGCMPreferred);
-        cipherSuites = slices.DeleteFunc(cipherSuites, (uint16 id) => !slices.Contains(Ꮡc.Value.CipherSuites, id));
+        cipherSuites = slices.DeleteFunc(cipherSuites, [GoFunc("(*Config).cipherSuites.func1")] (uint16 id) => !slices.Contains(Ꮡc.Value.CipherSuites, id));
     }
     if (fips140tls.Required()) {
-        cipherSuites = slices.DeleteFunc(cipherSuites, (uint16 id) => !slices.Contains(allowedCipherSuitesFIPS, id));
+        cipherSuites = slices.DeleteFunc(cipherSuites, [GoFunc("(*Config).cipherSuites.func2")] (uint16 id) => !slices.Contains(allowedCipherSuitesFIPS, id));
     }
     return cipherSuites;
 }
@@ -1233,10 +1233,10 @@ internal static slice<CurveID> curvePreferences⁔(/*this*/ ж<Config> Ꮡc, uin
 
     var curvePreferences = defaultCurvePreferences();
     if (fips140tls.Required()) {
-        curvePreferences = slices.DeleteFunc(curvePreferences, (CurveID x) => !slices.Contains(allowedCurvePreferencesFIPS, x));
+        curvePreferences = slices.DeleteFunc(curvePreferences, [GoFunc("(*Config).curvePreferences.func1")] (CurveID x) => !slices.Contains(allowedCurvePreferencesFIPS, x));
     }
     if (Ꮡc != nil && len(c.CurvePreferences) != 0) {
-        curvePreferences = slices.DeleteFunc(curvePreferences, (CurveID x) => !slices.Contains(Ꮡc.Value.CurvePreferences, x));
+        curvePreferences = slices.DeleteFunc(curvePreferences, [GoFunc("(*Config).curvePreferences.func2")] (CurveID x) => !slices.Contains(Ꮡc.Value.CurvePreferences, x));
     }
     if (version < VersionTLS13) {
         curvePreferences = slices.DeleteFunc<slice<CurveID>, CurveID>(curvePreferences, isTLS13OnlyKeyExchange);
@@ -1380,7 +1380,7 @@ internal static error SupportsCertificate⁔(/*this*/ ж<ClientHelloInfo> Ꮡchi
     // supporting static RSA is completely disjoint from the logic for
     // supporting signed key exchanges, so we just check it as a fallback.
     var configʗ1 = config;
-    error supportsRSAFallback(error unsupported) {
+    [GoFunc("(*ClientHelloInfo).SupportsCertificate.func1")] error supportsRSAFallback(error unsupported) {
         // TLS 1.3 dropped support for the static RSA key exchange.
         if (vers == VersionTLS13) {
             return unsupported;
@@ -1397,7 +1397,7 @@ internal static error SupportsCertificate⁔(/*this*/ ж<ClientHelloInfo> Ꮡchi
         }
         // Finally, there needs to be a mutual cipher suite that uses the static
         // RSA key exchange instead of ECDHE.
-        var rsaCipherSuite = selectCipherSuite(Ꮡchi.Value.CipherSuites, configʗ1.supportedCipherSuites(), (ж<cipherSuite> cΔ1) => {
+        var rsaCipherSuite = selectCipherSuite(Ꮡchi.Value.CipherSuites, configʗ1.supportedCipherSuites(), [GoFunc("(*ClientHelloInfo).SupportsCertificate.func1.1")] (ж<cipherSuite> cΔ1) => {
             if ((cΔ1.flags & (nint)suiteECDHE) != 0) {
                 return false;
             }
@@ -1494,7 +1494,7 @@ internal static error SupportsCertificate⁔(/*this*/ ж<ClientHelloInfo> Ꮡchi
     // Make sure that there is a mutually supported cipher suite that works with
     // this certificate. Cipher suite selection will then apply the logic in
     // reverse to pick it. See also serverHandshakeState.cipherSuiteOk.
-    var cipherSuite = selectCipherSuite(chi.CipherSuites, config.supportedCipherSuites(), (ж<cipherSuite> cΔ3) => {
+    var cipherSuite = selectCipherSuite(chi.CipherSuites, config.supportedCipherSuites(), [GoFunc("(*ClientHelloInfo).SupportsCertificate.func2")] (ж<cipherSuite> cΔ3) => {
         if ((cΔ3.flags & (nint)suiteECDHE) == 0) {
             return false;
         }
@@ -1779,7 +1779,7 @@ internal static slice<SignatureScheme> supportedSignatureAlgorithms(uint16 minVe
     if (testingOnlySupportedSignatureAlgorithms != nil) {
         sigAlgs = slices.Clone<slice<SignatureScheme>, SignatureScheme>(testingOnlySupportedSignatureAlgorithms);
     }
-    return slices.DeleteFunc(sigAlgs, (SignatureScheme s) => isDisabledSignatureAlgorithm(minVers, s, false));
+    return slices.DeleteFunc(sigAlgs, [GoFunc("supportedSignatureAlgorithms.func1")] (SignatureScheme s) => isDisabledSignatureAlgorithm(minVers, s, false));
 }
 
 internal static ж<godebug.Setting> tlssha1 = godebug.New("tlssha1");
@@ -1820,7 +1820,7 @@ internal static bool isDisabledSignatureAlgorithm(uint16 version, SignatureSchem
 // signatures in certificates.
 internal static slice<SignatureScheme> supportedSignatureAlgorithmsCert() {
     var sigAlgs = defaultSupportedSignatureAlgorithms();
-    return slices.DeleteFunc(sigAlgs, (SignatureScheme s) => isDisabledSignatureAlgorithm(0, s, true));
+    return slices.DeleteFunc(sigAlgs, [GoFunc("supportedSignatureAlgorithmsCert.func1")] (SignatureScheme s) => isDisabledSignatureAlgorithm(0, s, true));
 }
 
 internal static bool isSupportedSignatureAlgorithm(SignatureScheme sigAlg, slice<SignatureScheme> supportedSignatureAlgorithms) {
@@ -1894,7 +1894,7 @@ internal static bool anyValidVerifiedChain(slice<slice<ж<Δx509.Certificate>>> 
         if (len(chain) == 0) {
             continue;
         }
-        if (slices.ContainsFunc(chain, (ж<Δx509.Certificate> cert) => opts.CurrentTime.Before(cert.NotBefore) || opts.CurrentTime.After(cert.NotAfter))) {
+        if (slices.ContainsFunc(chain, [GoFunc("anyValidVerifiedChain.func1")] (ж<Δx509.Certificate> cert) => opts.CurrentTime.Before(cert.NotBefore) || opts.CurrentTime.After(cert.NotAfter))) {
             continue;
         }
         // Since we already validated the chain, we only care that it is rooted

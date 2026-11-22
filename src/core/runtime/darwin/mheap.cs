@@ -949,7 +949,7 @@ internal static ж<mspan> alloc⁔(/*this*/ ж<mheap> Ꮡh, uintptr npages, span
     // It might trigger stack growth, and the stack growth code needs
     // to be able to allocate heap.
     ref var s = ref heap<ж<mspan>>(out var Ꮡs);
-    systemstack(() => {
+    systemstack([GoFunc("(*mheap).alloc.func1")] () => {
         // To prevent excessive heap growth, before allocating n pages
         // we need to sweep and reclaim at least n pages.
         if (!isSweepDone()) {
@@ -1337,7 +1337,7 @@ HaveSpan:
         var track = pp.of(p.ᏑlimiterEvent).start(limiterEventScavengeAssist, start);
 
         // Scavenge, but back out if the limiter turns on.
-        var released = Ꮡh.Ꮡpages.scavenge(bytesToScavenge, () => ᏑgcCPULimiter.limiting(), forceScavenge);
+        var released = Ꮡh.Ꮡpages.scavenge(bytesToScavenge, [GoFunc("(*mheap).allocSpan.func1")] () => ᏑgcCPULimiter.limiting(), forceScavenge);
 
         Ꮡmheap_.Ꮡpages.Ꮡscav.of(pageAlloc_scav.ᏑreleasedEager).Add(released);
 
@@ -1634,7 +1634,7 @@ internal static (uintptr, bool) grow⁔(/*this*/ ж<mheap> Ꮡh, uintptr npage) 
 
 // Free the span back into the heap.
 internal static void freeSpan⁔(/*this*/ ж<mheap> Ꮡh, ж<mspan> s) {
-    systemstack(() => {
+    systemstack([GoFunc("(*mheap).freeSpan.func1")] () => {
         // Trace the span free.
         if (traceAllocFreeEnabled()) {
             var trace = traceAcquire();
@@ -1807,7 +1807,7 @@ internal static void scavengeAll⁔(/*this*/ ж<mheap> Ꮡh) {
 //go:linkname runtime_debug_freeOSMemory runtime/debug.freeOSMemory
 internal static void runtime_debug_freeOSMemory() {
     GC();
-    systemstack(() => {
+    systemstack([GoFunc("runtime_debug_freeOSMemory.func1")] () => {
         Ꮡmheap_.scavengeAll();
     });
 }

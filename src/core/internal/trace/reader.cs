@@ -138,7 +138,7 @@ internal static (Event e, error err) ReadEvent⁔(/*this*/ ж<Reader> Ꮡr) {
 
         // Set us up to track the last timestamp and fix up
         // the timestamp of any event that comes through.
-        defer(() => {
+        defer([GoFunc("(*Reader).ReadEvent.func1")] () => {
             if (err != nil) {
                 return;
             }
@@ -176,7 +176,7 @@ internal static (Event e, error err) ReadEvent⁔(/*this*/ ж<Reader> Ꮡr) {
             }
             (var eᴛ10, err) = r.installGen(gen); e.AssignFrom(eᴛ10); goto ᒐdone;
         }
-        (bool, error) tryAdvance(nint i) {
+        [GoFunc("(*Reader).ReadEvent.func2")] (bool, error) tryAdvance(nint i) {
             var bc = Ꮡr.Value.frontier[i];
 
             var (okΔ3, errΔ3) = Ꮡr.Ꮡorder.Advance(bc.Ꮡev, Ꮡr.Value.gen.evTable, bc.m, Ꮡr.Value.gen.gen); if (!okΔ3 || errΔ3 != nil) {

@@ -63,7 +63,7 @@ public static void SetGlobalRandom(ж<testing.T> t, uint64 seed) {
     var previous = cryptorand.Reader;
     cryptorand.Reader = new lockedReaderжReader(r);
     var previousʗ1 = previous;
-    t.Cleanup(() => {
+    t.Cleanup([GoFunc("SetGlobalRandom.func1")] () => {
         cryptorand.Reader = previousʗ1;
         randSetTestingReader(default);
     });

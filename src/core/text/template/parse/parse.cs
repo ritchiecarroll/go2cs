@@ -1033,7 +1033,7 @@ internal static Node term⁔(/*this*/ ж<Tree> Ꮡt) {
                     t.errorf("max expression depth exceeded");
                 }
                 t.stackDepth++;
-                defer(() => {
+                defer([GoFunc("(*Tree).term.func1")] () => {
                     Ꮡt.Value.stackDepth--;
                 }, ref ᒐ);
                 return new PipeNodeжNode(Ꮡt.pipeline(parenthesizedPipelineˢ, itemRightParen));

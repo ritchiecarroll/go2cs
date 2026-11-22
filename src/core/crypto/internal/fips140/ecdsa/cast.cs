@@ -61,7 +61,7 @@ private static readonly @string ecdsaPctˢᵇ = "ECDSA PCT"u8;
 internal static void fipsPCT<P>(ж<Curve<P>> c, ж<PrivateKey> k)
     where P : Point<P>
 {
-    fips140.PCT(ecdsaPctˢ, () => {
+    fips140.PCT(ecdsaPctˢ, [GoFunc("fipsPCT[...].func1")] () => {
         var hash = testHash();
         var drbg = newDRBG<hash.Hash>(widen<ж<sha512.Digest>, hash.Hash>(sha512.New, elemᴛ0 => new sha512_DigestжHash(elemᴛ0)), k.Value.d, bits2octets<P256PointжPoint>(ref (P256()).DerefOrNull(), hash), default);
         var (sig, err) = sign(ref (c).DerefOrNull(), ref (k).DerefOrNull(), drbg, hash);
@@ -73,8 +73,8 @@ internal static void fipsPCT<P>(ж<Curve<P>> c, ж<PrivateKey> k)
 }
 
 internal static Action fipsSelfTest;
-internal static void initᴛfipsSelfTest() { fipsSelfTest = sync.OnceFunc(() => {
-    fips140.CAST("ECDSA P-256 SHA2-512 sign and verify", error () => {
+internal static void initᴛfipsSelfTest() { fipsSelfTest = sync.OnceFunc([GoFunc("init.func5")] () => {
+    fips140.CAST("ECDSA P-256 SHA2-512 sign and verify", [GoFunc("init.func5.1")] error () => {
         var k = testPrivateKey();
         var Z = slice<byte>([
             0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
@@ -114,8 +114,8 @@ internal static void initᴛfipsSelfTest() { fipsSelfTest = sync.OnceFunc(() => 
 }); }
 
 internal static Action fipsSelfTestDeterministic;
-internal static void initᴛfipsSelfTestDeterministic() { fipsSelfTestDeterministic = sync.OnceFunc(() => {
-    fips140.CAST("DetECDSA P-256 SHA2-512 sign", error () => {
+internal static void initᴛfipsSelfTestDeterministic() { fipsSelfTestDeterministic = sync.OnceFunc([GoFunc("init.func6")] () => {
+    fips140.CAST("DetECDSA P-256 SHA2-512 sign", [GoFunc("init.func6.1")] error () => {
         var k = testPrivateKey();
         var hash = testHash();
         var want = Ꮡ(new Signature(

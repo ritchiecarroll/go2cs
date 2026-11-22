@@ -60,7 +60,7 @@ internal static void checkSetFileCompletionNotificationModes() {
 // InitWSA initiates the use of the Winsock DLL by the current process.
 // It is called from the net package at init time to avoid
 // loading ws2_32.dll when net is not used.
-public static readonly ж<Action> ᏑInitWSA = new StaticBox<Action>(sync.OnceFunc(() => {
+public static readonly ж<Action> ᏑInitWSA = new StaticBox<Action>(sync.OnceFunc([GoFunc("init.func2")] () => {
     ref var d = ref heap(new Δsyscall.WSAData(), out var Ꮡd);
     var e = Δsyscall.WSAStartup((uint32)0x202, Ꮡd);
     if (e != nil) {
@@ -96,7 +96,7 @@ internal static ж<Δsyscall.WSABuf> newWsaBuf(slice<byte> b) {
 }
 
 [GoLazy] partial class lazyᴛwsaBufsPool { internal static readonly ж<sync.Pool> ᏑwsaBufsPool = new StaticBox<sync.Pool>(new sync.Pool(
-    New: () => {
+    New: [GoFunc("init.func3")] () => {
         var buf = new slice<Δsyscall.WSABuf>(0, 16);
         return Ꮡ(buf);
     }
@@ -146,7 +146,7 @@ internal static void freeWSABufs(ж<slice<Δsyscall.WSABuf>> ᏑbufsPtr) {
 
 // wsaMsgPool is a pool of WSAMsg structures that can only hold a single WSABuf.
 [GoLazy] partial class lazyᴛwsaMsgPool { internal static readonly ж<sync.Pool> ᏑwsaMsgPool = new StaticBox<sync.Pool>(new sync.Pool(
-    New: () => Ꮡ(new windows.WSAMsg(
+    New: [GoFunc("init.func4")] () => Ꮡ(new windows.WSAMsg(
             Buffers: Ꮡ(new Δsyscall.WSABuf()),
             BufferCount: 1
         ))
@@ -204,7 +204,7 @@ partial struct wsaRsa {
 }
 
 internal static readonly ж<sync.Pool> ᏑwsaRsaPool = new StaticBox<sync.Pool>(new sync.Pool(
-    New: () => @new<wsaRsa>()
+    New: [GoFunc("init.func5")] () => @new<wsaRsa>()
 ));
 internal static ref sync.Pool wsaRsaPool => ref ((StaticBox<sync.Pool>)ᏑwsaRsaPool).ValueSlot;
 
@@ -216,7 +216,7 @@ internal static ж<wsaRsa> newWSARsa() {
 }
 
 internal static readonly ж<sync.Pool> ᏑoperationPool = new StaticBox<sync.Pool>(new sync.Pool(
-    New: () => @new<operation>()
+    New: [GoFunc("init.func6")] () => @new<operation>()
 ));
 internal static ref sync.Pool operationPool => ref ((StaticBox<sync.Pool>)ᏑoperationPool).ValueSlot;
 
@@ -620,7 +620,7 @@ internal static (nint, error) Read⁔(/*this*/ ж<FD> Ꮡfd, slice<byte> buf) {
         }
         case var ᴛ when ᴛ == kindFile || ᴛ == kindPipe: {
             var bufʗ1 = buf;
-            (n, err) = Ꮡfd.execIO('r', (ж<operation> o) => {
+            (n, err) = Ꮡfd.execIO('r', [GoFunc("(*FD).Read.func1")] (ж<operation> o) => {
                 ref var qty = ref heap(new uint32(), out var Ꮡqty);
                 error errΔ5 = default;
                 errΔ5 = Δsyscall.ReadFile(Ꮡfd.Value.Sysfd, bufʗ1, Ꮡqty, Ꮡfd.Value.overlapped(o));
@@ -643,7 +643,7 @@ internal static (nint, error) Read⁔(/*this*/ ж<FD> Ꮡfd, slice<byte> buf) {
         }
         case var ᴛ when ᴛ == kindNet: {
             var bufʗ2 = buf;
-            (n, err) = Ꮡfd.execIO('r', (ж<operation> o) => {
+            (n, err) = Ꮡfd.execIO('r', [GoFunc("(*FD).Read.func2")] (ж<operation> o) => {
                 ref var qty = ref heap(new uint32(), out var Ꮡqty);
                 error errΔ6 = default;
                 ref var flags = ref heap(new uint32(), out var Ꮡflags);
@@ -781,7 +781,7 @@ internal static (nint, error) Pread⁔(/*this*/ ж<FD> Ꮡfd, slice<byte> buf, i
         }
         fd.setOffset(off);
         var bufʗ1 = buf;
-        var (n, err) = Ꮡfd.execIO('r', (ж<operation> o) => {
+        var (n, err) = Ꮡfd.execIO('r', [GoFunc("(*FD).Pread.func1")] (ж<operation> o) => {
             ref var qty = ref heap(new uint32(), out var Ꮡqty);
             error errΔ3 = default;
             errΔ3 = Δsyscall.ReadFile(Ꮡfd.Value.Sysfd, bufʗ1, Ꮡqty, o.Ꮡo);
@@ -822,7 +822,7 @@ internal static (nint, Δsyscall.Sockaddr, error) ReadFrom⁔(/*this*/ ж<FD> �
         defer(ᏑwsaRsaPool.Put, rsa.OrTypedNil(), ref ᒐ);
         var bufʗ1 = buf;
         var rsaʗ1 = rsa;
-        var (n, err) = Ꮡfd.execIO('r', (ж<operation> o) => {
+        var (n, err) = Ꮡfd.execIO('r', [GoFunc("(*FD).ReadFrom.func1")] (ж<operation> o) => {
             ref var qty = ref heap(new uint32(), out var Ꮡqty);
             error errΔ2 = default;
             ref var flags = ref heap(new uint32(), out var Ꮡflags);
@@ -863,7 +863,7 @@ internal static (nint, error) ReadFromInet4⁔(/*this*/ ж<FD> Ꮡfd, slice<byte
         defer(ᏑwsaRsaPool.Put, rsa.OrTypedNil(), ref ᒐ);
         var bufʗ1 = buf;
         var rsaʗ1 = rsa;
-        var (n, err) = Ꮡfd.execIO('r', (ж<operation> o) => {
+        var (n, err) = Ꮡfd.execIO('r', [GoFunc("(*FD).ReadFromInet4.func1")] (ж<operation> o) => {
             ref var qty = ref heap(new uint32(), out var Ꮡqty);
             error errΔ2 = default;
             ref var flags = ref heap(new uint32(), out var Ꮡflags);
@@ -904,7 +904,7 @@ internal static (nint, error) ReadFromInet6⁔(/*this*/ ж<FD> Ꮡfd, slice<byte
         defer(ᏑwsaRsaPool.Put, rsa.OrTypedNil(), ref ᒐ);
         var bufʗ1 = buf;
         var rsaʗ1 = rsa;
-        var (n, err) = Ꮡfd.execIO('r', (ж<operation> o) => {
+        var (n, err) = Ꮡfd.execIO('r', [GoFunc("(*FD).ReadFromInet6.func1")] (ж<operation> o) => {
             ref var qty = ref heap(new uint32(), out var Ꮡqty);
             error errΔ2 = default;
             ref var flags = ref heap(new uint32(), out var Ꮡflags);
@@ -961,7 +961,7 @@ internal static (nint, error) Write⁔(/*this*/ ж<FD> Ꮡfd, slice<byte> buf) {
             }
             case var ᴛ when ᴛ == kindPipe || ᴛ == kindFile: {
                 var bʗ1 = b;
-                (n, err) = Ꮡfd.execIO('w', (ж<operation> o) => {
+                (n, err) = Ꮡfd.execIO('w', [GoFunc("(*FD).Write.func1")] (ж<operation> o) => {
                     ref var qty = ref heap(new uint32(), out var Ꮡqty);
                     error errΔ3 = default;
                     errΔ3 = Δsyscall.WriteFile(Ꮡfd.Value.Sysfd, bʗ1, Ꮡqty, Ꮡfd.Value.overlapped(o));
@@ -975,7 +975,7 @@ internal static (nint, error) Write⁔(/*this*/ ж<FD> Ꮡfd, slice<byte> buf) {
                     race.ReleaseMerge(@unsafe.Pointer.FromPinnedBox(ᏑioSync));
                 }
                 var bʗ2 = b;
-                (n, err) = Ꮡfd.execIO('w', (ж<operation> o) => {
+                (n, err) = Ꮡfd.execIO('w', [GoFunc("(*FD).Write.func2")] (ж<operation> o) => {
                     ref var qty = ref heap(new uint32(), out var Ꮡqty);
                     error errΔ4 = default;
                     errΔ4 = Δsyscall.WSASend(Ꮡfd.Value.Sysfd, newWsaBuf(bʗ2), 1, Ꮡqty, 0, o.Ꮡo, nil);
@@ -1087,7 +1087,7 @@ internal static (nint, error) Pwrite⁔(/*this*/ ж<FD> Ꮡfd, slice<byte> buf, 
             }
             fd.setOffset(off + (int64)ntotal);
             var bufʗ1 = buf;
-            var (n, err) = Ꮡfd.execIO('w', (ж<operation> o) => {
+            var (n, err) = Ꮡfd.execIO('w', [GoFunc("(*FD).Pwrite.func1")] (ж<operation> o) => {
                 ref var qty = ref heap(new uint32(), out var Ꮡqty);
                 error errΔ1 = default;
                 errΔ1 = Δsyscall.WriteFile(Ꮡfd.Value.Sysfd, bufʗ1.slice(ntotal, max), Ꮡqty, o.Ꮡo);
@@ -1127,7 +1127,7 @@ internal static (int64, error) Writev⁔(/*this*/ ж<FD> Ꮡfd, ж<slice<slice<b
         var bufs = newWSABufs(ref (Ꮡbuf).DerefOrNull());
         defer(freeWSABufs, bufs, ref ᒐ);
         var bufsʗ1 = bufs;
-        var (n, err) = Ꮡfd.execIO('w', (ж<operation> o) => {
+        var (n, err) = Ꮡfd.execIO('w', [GoFunc("(*FD).Writev.func1")] (ж<operation> o) => {
             ref var qty = ref heap(new uint32(), out var Ꮡqty);
             error errΔ2 = default;
             errΔ2 = Δsyscall.WSASend(Ꮡfd.Value.Sysfd, Ꮡ((bufsʗ1.ValueSlot), 0), (uint32)len(bufsʗ1.ValueSlot), Ꮡqty, 0, o.Ꮡo, nil);
@@ -1157,7 +1157,7 @@ internal static (nint, error) WriteTo⁔(/*this*/ ж<FD> Ꮡfd, slice<byte> buf,
 
         if (len(buf) == 0) {
             // handle zero-byte payload
-            var (n, err) = Ꮡfd.execIO('w', (ж<operation> o) => {
+            var (n, err) = Ꮡfd.execIO('w', [GoFunc("(*FD).WriteTo.func1")] (ж<operation> o) => {
                 ref var qty = ref heap(new uint32(), out var Ꮡqty);
                 error errΔ1 = default;
                 errΔ1 = Δsyscall.WSASendto(Ꮡfd.Value.Sysfd, Ꮡ(new Δsyscall.WSABuf()), 1, Ꮡqty, 0, sa, o.Ꮡo, nil);
@@ -1174,7 +1174,7 @@ internal static (nint, error) WriteTo⁔(/*this*/ ж<FD> Ꮡfd, slice<byte> buf,
             if (len(b) > maxRW) {
                 b = b[..(int)(maxRW)];
             }
-            var (n, err) = Ꮡfd.execIO('w', (ж<operation> o) => {
+            var (n, err) = Ꮡfd.execIO('w', [GoFunc("(*FD).WriteTo.func2")] (ж<operation> o) => {
                 ref var qty = ref heap(new uint32(), out var Ꮡqty);
                 error errΔ1 = default;
                 errΔ1 = Δsyscall.WSASendto(Ꮡfd.Value.Sysfd, newWsaBuf(Ꮡb.ValueSlot), 1, Ꮡqty, 0, sa, o.Ꮡo, nil);
@@ -1208,7 +1208,7 @@ internal static (nint, error) WriteToInet4⁔(/*this*/ ж<FD> Ꮡfd, slice<byte>
 
         if (len(buf) == 0) {
             // handle zero-byte payload
-            var (n, err) = Ꮡfd.execIO('w', (ж<operation> o) => {
+            var (n, err) = Ꮡfd.execIO('w', [GoFunc("(*FD).WriteToInet4.func1")] (ж<operation> o) => {
                 ref var qty = ref heap(new uint32(), out var Ꮡqty);
                 error errΔ1 = default;
                 errΔ1 = windows.WSASendtoInet4(Ꮡfd.Value.Sysfd, Ꮡ(new Δsyscall.WSABuf()), 1, Ꮡqty, 0, sa4, o.Ꮡo, nil);
@@ -1225,7 +1225,7 @@ internal static (nint, error) WriteToInet4⁔(/*this*/ ж<FD> Ꮡfd, slice<byte>
             if (len(b) > maxRW) {
                 b = b[..(int)(maxRW)];
             }
-            var (n, err) = Ꮡfd.execIO('w', (ж<operation> o) => {
+            var (n, err) = Ꮡfd.execIO('w', [GoFunc("(*FD).WriteToInet4.func2")] (ж<operation> o) => {
                 ref var qty = ref heap(new uint32(), out var Ꮡqty);
                 error errΔ1 = default;
                 errΔ1 = windows.WSASendtoInet4(Ꮡfd.Value.Sysfd, newWsaBuf(Ꮡb.ValueSlot), 1, Ꮡqty, 0, sa4, o.Ꮡo, nil);
@@ -1259,7 +1259,7 @@ internal static (nint, error) WriteToInet6⁔(/*this*/ ж<FD> Ꮡfd, slice<byte>
 
         if (len(buf) == 0) {
             // handle zero-byte payload
-            var (n, err) = Ꮡfd.execIO('w', (ж<operation> o) => {
+            var (n, err) = Ꮡfd.execIO('w', [GoFunc("(*FD).WriteToInet6.func1")] (ж<operation> o) => {
                 ref var qty = ref heap(new uint32(), out var Ꮡqty);
                 error errΔ1 = default;
                 errΔ1 = windows.WSASendtoInet6(Ꮡfd.Value.Sysfd, Ꮡ(new Δsyscall.WSABuf()), 1, Ꮡqty, 0, sa6, o.Ꮡo, nil);
@@ -1276,7 +1276,7 @@ internal static (nint, error) WriteToInet6⁔(/*this*/ ж<FD> Ꮡfd, slice<byte>
             if (len(b) > maxRW) {
                 b = b[..(int)(maxRW)];
             }
-            var (n, err) = Ꮡfd.execIO('w', (ж<operation> o) => {
+            var (n, err) = Ꮡfd.execIO('w', [GoFunc("(*FD).WriteToInet6.func2")] (ж<operation> o) => {
                 ref var qty = ref heap(new uint32(), out var Ꮡqty);
                 error errΔ1 = default;
                 errΔ1 = windows.WSASendtoInet6(Ꮡfd.Value.Sysfd, newWsaBuf(Ꮡb.ValueSlot), 1, Ꮡqty, 0, sa6, o.Ꮡo, nil);
@@ -1298,7 +1298,7 @@ internal static (nint, error) WriteToInet6⁔(/*this*/ ж<FD> Ꮡfd, slice<byte>
 // called when the descriptor is first created. This is here rather
 // than in the net package so that it can use fd.wop.
 internal static error ConnectEx⁔(/*this*/ ж<FD> Ꮡfd, Δsyscall.Sockaddr ra) {
-    var (_, err) = Ꮡfd.execIO('w', (ж<operation> o) => ((uint32)(0), ConnectExFunc(Ꮡfd.Value.Sysfd, ra, nil, 0, nil, o.Ꮡo)));
+    var (_, err) = Ꮡfd.execIO('w', [GoFunc("(*FD).ConnectEx.func1")] (ж<operation> o) => ((uint32)(0), ConnectExFunc(Ꮡfd.Value.Sysfd, ra, nil, 0, nil, o.Ꮡo)));
     return err;
 }
 
@@ -1312,7 +1312,7 @@ internal static (@string, error) acceptOne⁔(/*this*/ ж<FD> Ꮡfd, Δsyscall.H
     // Submit accept request.
     var rsan = (uint32)/* unsafe.Sizeof(rawsa[0]) */ (uintptr)116;
     var rawsaʗ1 = rawsa;
-    var (_, err) = Ꮡfd.execIO('r', (ж<operation> o) => {
+    var (_, err) = Ꮡfd.execIO('r', [GoFunc("(*FD).acceptOne.func1")] (ж<operation> o) => {
         ref var qty = ref heap(new uint32(), out var Ꮡqty);
         error errΔ1 = default;
         errΔ1 = AcceptFunc(Ꮡfd.Value.Sysfd, s, Ꮡ(rawsaʗ1, 0).Reinterpret<Δsyscall.RawSockaddrAny, byte>(), 0, rsan, rsan, Ꮡqty, o.Ꮡo);
@@ -1543,7 +1543,7 @@ internal static error RawRead⁔(/*this*/ ж<FD> Ꮡfd, Func<uintptr, bool> f) {
 
             // Use a zero-byte read as a way to get notified when this
             // socket is readable. h/t https://stackoverflow.com/a/42019668/332798
-            var (_, err) = Ꮡfd.execIO('r', (ж<operation> o) => {
+            var (_, err) = Ꮡfd.execIO('r', [GoFunc("(*FD).RawRead.func1")] (ж<operation> o) => {
                 ref var qty = ref heap(new uint32(), out var Ꮡqty);
                 error errΔ1 = default;
                 ref var flags = ref heap(new uint32(), out var Ꮡflags);
@@ -1631,7 +1631,7 @@ internal static (nint, nint, nint, Δsyscall.Sockaddr, error) ReadMsg⁔(/*this*
         var msg = newWSAMsg(p, oob, flags, rsa);
         defer(freeWSAMsg, msg, ref ᒐ);
         var msgʗ1 = msg;
-        var (n, err) = Ꮡfd.execIO('r', (ж<operation> o) => {
+        var (n, err) = Ꮡfd.execIO('r', [GoFunc("(*FD).ReadMsg.func1")] (ж<operation> o) => {
             ref var qty = ref heap(new uint32(), out var Ꮡqty);
             error errΔ2 = default;
             errΔ2 = windows.WSARecvMsg(Ꮡfd.Value.Sysfd, msgʗ1, Ꮡqty, o.Ꮡo, nil);
@@ -1668,7 +1668,7 @@ internal static (nint, nint, nint, error) ReadMsgInet4⁔(/*this*/ ж<FD> Ꮡfd,
         var msg = newWSAMsg(p, oob, flags, rsa);
         defer(freeWSAMsg, msg, ref ᒐ);
         var msgʗ1 = msg;
-        var (n, err) = Ꮡfd.execIO('r', (ж<operation> o) => {
+        var (n, err) = Ꮡfd.execIO('r', [GoFunc("(*FD).ReadMsgInet4.func1")] (ж<operation> o) => {
             ref var qty = ref heap(new uint32(), out var Ꮡqty);
             error errΔ2 = default;
             errΔ2 = windows.WSARecvMsg(Ꮡfd.Value.Sysfd, msgʗ1, Ꮡqty, o.Ꮡo, nil);
@@ -1704,7 +1704,7 @@ internal static (nint, nint, nint, error) ReadMsgInet6⁔(/*this*/ ж<FD> Ꮡfd,
         var msg = newWSAMsg(p, oob, flags, rsa);
         defer(freeWSAMsg, msg, ref ᒐ);
         var msgʗ1 = msg;
-        var (n, err) = Ꮡfd.execIO('r', (ж<operation> o) => {
+        var (n, err) = Ꮡfd.execIO('r', [GoFunc("(*FD).ReadMsgInet6.func1")] (ж<operation> o) => {
             ref var qty = ref heap(new uint32(), out var Ꮡqty);
             error errΔ2 = default;
             errΔ2 = windows.WSARecvMsg(Ꮡfd.Value.Sysfd, msgʗ1, Ꮡqty, o.Ꮡo, nil);
@@ -1750,7 +1750,7 @@ internal static (nint, nint, error) WriteMsg⁔(/*this*/ ж<FD> Ꮡfd, slice<byt
         var msg = newWSAMsg(p, oob, 0, rsa);
         defer(freeWSAMsg, msg, ref ᒐ);
         var msgʗ1 = msg;
-        var (n, err) = Ꮡfd.execIO('w', (ж<operation> o) => {
+        var (n, err) = Ꮡfd.execIO('w', [GoFunc("(*FD).WriteMsg.func1")] (ж<operation> o) => {
             uint32 qty = default;
             error errΔ3 = default;
             errΔ3 = windows.WSASendMsg(Ꮡfd.Value.Sysfd, msgʗ1, 0, nil, o.Ꮡo, nil);
@@ -1784,7 +1784,7 @@ internal static (nint, nint, error) WriteMsgInet4⁔(/*this*/ ж<FD> Ꮡfd, slic
         var msg = newWSAMsg(p, oob, 0, rsa);
         defer(freeWSAMsg, msg, ref ᒐ);
         var msgʗ1 = msg;
-        var (n, err) = Ꮡfd.execIO('w', (ж<operation> o) => {
+        var (n, err) = Ꮡfd.execIO('w', [GoFunc("(*FD).WriteMsgInet4.func1")] (ж<operation> o) => {
             uint32 qty = default;
             error errΔ2 = default;
             errΔ2 = windows.WSASendMsg(Ꮡfd.Value.Sysfd, msgʗ1, 0, nil, o.Ꮡo, nil);
@@ -1818,7 +1818,7 @@ internal static (nint, nint, error) WriteMsgInet6⁔(/*this*/ ж<FD> Ꮡfd, slic
         var msg = newWSAMsg(p, oob, 0, rsa);
         defer(freeWSAMsg, msg, ref ᒐ);
         var msgʗ1 = msg;
-        var (n, err) = Ꮡfd.execIO('w', (ж<operation> o) => {
+        var (n, err) = Ꮡfd.execIO('w', [GoFunc("(*FD).WriteMsgInet6.func1")] (ж<operation> o) => {
             uint32 qty = default;
             error errΔ2 = default;
             errΔ2 = windows.WSASendMsg(Ꮡfd.Value.Sysfd, msgʗ1, 0, nil, o.Ꮡo, nil);

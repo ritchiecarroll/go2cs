@@ -117,7 +117,7 @@ public static ж<Location> FixedZone(@string name, nint offset) {
     UntypedInt hoursAfterUTC = 14;
     nint hour = offset / 60 / 60;
     if (name == ""u8 && (nint)(-hoursBeforeUTC) <= hour && hour <= (nint)(+hoursAfterUTC) && hour * 60 * 60 == offset) {
-        ᏑunnamedFixedZonesOnce.Do(() => {
+        ᏑunnamedFixedZonesOnce.Do([GoFunc("FixedZone.func1")] () => {
             unnamedFixedZones = new slice<ж<Location>>(hoursBeforeUTC + 1 + hoursAfterUTC);
             for (nint hr = -hoursBeforeUTC; hr <= (nint)(+hoursAfterUTC); hr++) {
                 unnamedFixedZones[hr + (nint)hoursBeforeUTC] = fixedZone(""u8, hr * 60 * 60);
@@ -701,7 +701,7 @@ public static (ж<Location>, error) LoadLocation(@string name) {
         // much less dot dot. Likewise, none begin with a slash.
         return (default, errLocation);
     }
-    ᏑzoneinfoOnce.Do(() => {
+    ᏑzoneinfoOnce.Do([GoFunc("LoadLocation.func1")] () => {
         ref var env = ref heap<@string>(out var Ꮡenv);
         (env, _) = syscall.Getenv(zoneinfoˢ);
         zoneinfo = Ꮡenv;

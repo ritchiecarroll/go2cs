@@ -1325,7 +1325,7 @@ internal static (slice<pkix.Extension> ret, error err) buildCertExtensions(ref C
         ret[n].Id = oidExtensionNameConstraints;
         ret[n].Critical = template.PermittedDNSDomainsCritical;
 
-        slice<byte> ipAndMask(ж<net.IPNet> ipNet) {
+        [GoFunc("buildCertExtensions.func1")] slice<byte> ipAndMask(ж<net.IPNet> ipNet) {
             var maskedIP = ipNet.IP.Mask(ipNet.Mask);
             var ipAndMaskΔ1 = new slice<byte>(0, len(maskedIP) + len(ipNet.Mask));
             ipAndMaskΔ1 = appendꓸꓸꓸ(ipAndMaskΔ1, maskedIP);
@@ -1334,7 +1334,7 @@ internal static (slice<pkix.Extension> ret, error err) buildCertExtensions(ref C
         }
 
         var ipAndMaskʗ1 = ipAndMask;
-        (slice<byte> der, error err) serialiseConstraints(slice<@string> dns, slice<ж<net.IPNet>> ips, slice<@string> emails, slice<@string> uriDomains) {
+        [GoFunc("buildCertExtensions.func2")] (slice<byte> der, error err) serialiseConstraints(slice<@string> dns, slice<ж<net.IPNet>> ips, slice<@string> emails, slice<@string> uriDomains) {
             error errΔ1 = default;
             ref var bΔ1 = ref heap(new cryptobyte.Builder(), out var ᏑbΔ1);
 
@@ -1343,8 +1343,8 @@ internal static (slice<pkix.Extension> ret, error err) buildCertExtensions(ref C
                     return (default, errΔ1);
                 }
 
-                ᏑbΔ1.AddASN1(cryptobyte_asn1.SEQUENCE, (ж<cryptobyte.Builder> bΔ2) => {
-                    bΔ2.AddASN1(((cryptobyte_asn1.Tag)2).ContextSpecific(), (ж<cryptobyte.Builder> bΔ3) => {
+                ᏑbΔ1.AddASN1(cryptobyte_asn1.SEQUENCE, [GoFunc("buildCertExtensions.func2.1")] (ж<cryptobyte.Builder> bΔ2) => {
+                    bΔ2.AddASN1(((cryptobyte_asn1.Tag)2).ContextSpecific(), [GoFunc("buildCertExtensions.func2.1.1")] (ж<cryptobyte.Builder> bΔ3) => {
                         bΔ3.AddBytes(slice<byte>(name));
                     });
                 });
@@ -1353,10 +1353,10 @@ internal static (slice<pkix.Extension> ret, error err) buildCertExtensions(ref C
             foreach (var (_, ipNet) in range(ips)) {
                 var ipAndMaskʗ2 = ipAndMaskʗ1;
                 var ipNetʗ1 = ipNet;
-                ᏑbΔ1.AddASN1(cryptobyte_asn1.SEQUENCE, (ж<cryptobyte.Builder> bΔ4) => {
+                ᏑbΔ1.AddASN1(cryptobyte_asn1.SEQUENCE, [GoFunc("buildCertExtensions.func2.2")] (ж<cryptobyte.Builder> bΔ4) => {
                     var ipAndMaskʗ3 = ipAndMaskʗ2;
                     var ipNetʗ2 = ipNetʗ1;
-                    bΔ4.AddASN1(((cryptobyte_asn1.Tag)7).ContextSpecific(), (ж<cryptobyte.Builder> bΔ5) => {
+                    bΔ4.AddASN1(((cryptobyte_asn1.Tag)7).ContextSpecific(), [GoFunc("buildCertExtensions.func2.2.1")] (ж<cryptobyte.Builder> bΔ5) => {
                         bΔ5.AddBytes(ipAndMaskʗ3(ipNetʗ2));
                     });
                 });
@@ -1367,8 +1367,8 @@ internal static (slice<pkix.Extension> ret, error err) buildCertExtensions(ref C
                     return (default, errΔ1);
                 }
 
-                ᏑbΔ1.AddASN1(cryptobyte_asn1.SEQUENCE, (ж<cryptobyte.Builder> bΔ6) => {
-                    bΔ6.AddASN1(((cryptobyte_asn1.Tag)1).ContextSpecific(), (ж<cryptobyte.Builder> bΔ7) => {
+                ᏑbΔ1.AddASN1(cryptobyte_asn1.SEQUENCE, [GoFunc("buildCertExtensions.func2.3")] (ж<cryptobyte.Builder> bΔ6) => {
+                    bΔ6.AddASN1(((cryptobyte_asn1.Tag)1).ContextSpecific(), [GoFunc("buildCertExtensions.func2.3.1")] (ж<cryptobyte.Builder> bΔ7) => {
                         bΔ7.AddBytes(slice<byte>(email));
                     });
                 });
@@ -1379,8 +1379,8 @@ internal static (slice<pkix.Extension> ret, error err) buildCertExtensions(ref C
                     return (default, errΔ1);
                 }
 
-                ᏑbΔ1.AddASN1(cryptobyte_asn1.SEQUENCE, (ж<cryptobyte.Builder> bΔ8) => {
-                    bΔ8.AddASN1(((cryptobyte_asn1.Tag)6).ContextSpecific(), (ж<cryptobyte.Builder> bΔ9) => {
+                ᏑbΔ1.AddASN1(cryptobyte_asn1.SEQUENCE, [GoFunc("buildCertExtensions.func2.4")] (ж<cryptobyte.Builder> bΔ8) => {
+                    bΔ8.AddASN1(((cryptobyte_asn1.Tag)6).ContextSpecific(), [GoFunc("buildCertExtensions.func2.4.1")] (ж<cryptobyte.Builder> bΔ9) => {
                         bΔ9.AddBytes(slice<byte>(uriDomain));
                     });
                 });
@@ -1402,17 +1402,17 @@ internal static (slice<pkix.Extension> ret, error err) buildCertExtensions(ref C
         ref var b = ref heap(new cryptobyte.Builder(), out var Ꮡb);
         var excludedʗ1 = excluded;
         var permittedʗ1 = permitted;
-        Ꮡb.AddASN1(cryptobyte_asn1.SEQUENCE, (ж<cryptobyte.Builder> bΔ1) => {
+        Ꮡb.AddASN1(cryptobyte_asn1.SEQUENCE, [GoFunc("buildCertExtensions.func3")] (ж<cryptobyte.Builder> bΔ1) => {
             if (len(permittedʗ1) > 0) {
                 var permittedʗ2 = permittedʗ1;
-                bΔ1.AddASN1(((cryptobyte_asn1.Tag)0).ContextSpecific().Constructed(), (ж<cryptobyte.Builder> bΔ2) => {
+                bΔ1.AddASN1(((cryptobyte_asn1.Tag)0).ContextSpecific().Constructed(), [GoFunc("buildCertExtensions.func3.1")] (ж<cryptobyte.Builder> bΔ2) => {
                     bΔ2.AddBytes(permittedʗ2);
                 });
             }
 
             if (len(excludedʗ1) > 0) {
                 var excludedʗ2 = excludedʗ1;
-                bΔ1.AddASN1(((cryptobyte_asn1.Tag)1).ContextSpecific().Constructed(), (ж<cryptobyte.Builder> bΔ3) => {
+                bΔ1.AddASN1(((cryptobyte_asn1.Tag)1).ContextSpecific().Constructed(), [GoFunc("buildCertExtensions.func3.2")] (ж<cryptobyte.Builder> bΔ3) => {
                     bΔ3.AddBytes(excludedʗ2);
                 });
             }
@@ -1518,7 +1518,7 @@ internal static (pkix.Extension, error) marshalCertificatePolicies(slice<OID> po
     var b = cryptobyte.NewBuilder(new slice<byte>(0, 128));
     var policiesʗ1 = policies;
     var policyIdentifiersʗ1 = policyIdentifiers;
-    b.AddASN1(cryptobyte_asn1.SEQUENCE, (ж<cryptobyte.Builder> child) => {
+    b.AddASN1(cryptobyte_asn1.SEQUENCE, [GoFunc("marshalCertificatePolicies.func1")] (ж<cryptobyte.Builder> child) => {
         if (x509usepolicies.Value() != "0"u8) {
             x509usepolicies.IncNonDefault();
             foreach (var (_, vᴛ1) in range(policiesʗ1)) {
@@ -1526,9 +1526,9 @@ internal static (pkix.Extension, error) marshalCertificatePolicies(slice<OID> po
                 v = vᴛ1;
 
                 var vʗ1 = v;
-                child.AddASN1(cryptobyte_asn1.SEQUENCE, (ж<cryptobyte.Builder> childΔ1) => {
+                child.AddASN1(cryptobyte_asn1.SEQUENCE, [GoFunc("marshalCertificatePolicies.func1.1")] (ж<cryptobyte.Builder> childΔ1) => {
                     var vʗ2 = vʗ1;
-                    childΔ1.AddASN1(cryptobyte_asn1.OBJECT_IDENTIFIER, (ж<cryptobyte.Builder> childΔ2) => {
+                    childΔ1.AddASN1(cryptobyte_asn1.OBJECT_IDENTIFIER, [GoFunc("marshalCertificatePolicies.func1.1.1")] (ж<cryptobyte.Builder> childΔ2) => {
                         if (len(vʗ2.der) == 0) {
                             childΔ2.SetError(errors.New(invalidPolicyObjectˢ));
                             return;
@@ -1540,7 +1540,7 @@ internal static (pkix.Extension, error) marshalCertificatePolicies(slice<OID> po
         } else {
             foreach (var (_, v) in range(policyIdentifiersʗ1)) {
                 var vʗ3 = v;
-                child.AddASN1(cryptobyte_asn1.SEQUENCE, (ж<cryptobyte.Builder> childΔ3) => {
+                child.AddASN1(cryptobyte_asn1.SEQUENCE, [GoFunc("marshalCertificatePolicies.func1.2")] (ж<cryptobyte.Builder> childΔ3) => {
                     childΔ3.AddASN1ObjectIdentifier(vʗ3);
                 });
             }

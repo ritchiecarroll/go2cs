@@ -69,7 +69,7 @@ internal static void initScanner⁔(/*this*/ ж<parser> Ꮡp, @string filename, 
     ref var p = ref Ꮡp.DerefOrNull();
 
     p.scanner.Init(src);
-    p.scanner.Error = (ж<scanner.Scanner> _, @string msg) => {
+    p.scanner.Error = [GoFunc("(*parser).initScanner.func1")] (ж<scanner.Scanner> _, @string msg) => {
         Ꮡp.Value.error(msg);
     };
     p.scanner.Mode = (nuint)((nuint)(UntypedInt)((UntypedInt)(scanner.ScanIdents | scanner.ScanInts) | scanner.ScanFloats) | (nuint)scanner.ScanStrings);
@@ -1172,7 +1172,7 @@ internal static void skipInlineBody⁔(/*this*/ ж<parser> Ꮡp) {
         nint want = p.parseInt();
         p.expect('>');
 
-        defer((uint64 w) => {
+        defer([GoFunc("(*parser).skipInlineBody.func1")] (uint64 w) => {
             Ꮡp.Value.scanner.Whitespace = w;
         }, Ꮡp.Value.scanner.Whitespace, ref ᒐ);
         p.scanner.Whitespace = 0;
@@ -1214,7 +1214,7 @@ internal static void parseTypes⁔(/*this*/ ж<parser> Ꮡp, ж<types.Package> p
             total += len;
         }
 
-        defer((uint64 w) => {
+        defer([GoFunc("(*parser).parseTypes.func1")] (uint64 w) => {
             Ꮡp.Value.scanner.Whitespace = w;
         }, Ꮡp.Value.scanner.Whitespace, ref ᒐ);
         p.scanner.Whitespace = 0;
@@ -1252,7 +1252,7 @@ internal static void parseSavedType⁔(/*this*/ ж<parser> Ꮡp, ж<types.Packag
     try {
         ref var p = ref Ꮡp.DerefOrNull();
 
-        defer((ж<scanner.Scanner> s, rune tok, @string lit) => {
+        defer([GoFunc("(*parser).parseSavedType.func1")] (ж<scanner.Scanner> s, rune tok, @string lit) => {
             Ꮡp.Value.scanner = s;
             Ꮡp.Value.tok = tok;
             Ꮡp.Value.lit = lit;
@@ -1348,7 +1348,7 @@ internal static void parseInitDataDirective⁔(/*this*/ ж<parser> Ꮡp) {
         }
         case {} when exprᴛ1 == "checksum"u8: {
             // Don't let the scanner try to parse the checksum as a number.
-            defer((nuint mode) => {
+            defer([GoFunc("(*parser).parseInitDataDirective.func1")] (nuint mode) => {
                 Ꮡp.Value.scanner.Mode = mode;
             }, Ꮡp.Value.scanner.Mode, ref ᒐ);
             p.scanner.Mode &= unchecked((nuint)~(nuint)((nuint)((nuint)scanner.ScanInts | (nuint)scanner.ScanFloats)));

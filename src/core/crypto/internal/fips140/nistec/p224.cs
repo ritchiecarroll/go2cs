@@ -125,7 +125,7 @@ internal static readonly ж<sync.Once> Ꮡ_p224BOnce = new StaticBox<sync.Once>(
 internal static ref sync.Once _p224BOnce => ref ((StaticBox<sync.Once>)Ꮡ_p224BOnce).ValueSlot;
 
 internal static ж<fiat.P224Element> p224B() {
-    Ꮡ_p224BOnce.Do(() => {
+    Ꮡ_p224BOnce.Do([GoFunc("p224B.func1")] () => {
         (_p224B, _) = @new<fiat.P224Element>().SetBytes([0xb4, 0x5, 0xa, 0x85, 0xc, 0x4, 0xb3, 0xab, 0xf5, 0x41, 0x32, 0x56, 0x50, 0x44, 0xb0, 0xb7, 0xd7, 0xbf, 0xd8, 0xba, 0x27, 0xb, 0x39, 0x43, 0x23, 0x55, 0xff, 0xb4]);
     });
     return _p224B;
@@ -430,7 +430,7 @@ internal static ref sync.Once p224GeneratorTableOnce => ref ((StaticBox<sync.Onc
 // multiples of G. Each successive table is the previous table doubled four
 // times.
 internal static ж<array<p224Table>> generatorTable⁔(/*this*/ ref P224Point p) {
-    Ꮡp224GeneratorTableOnce.Do(() => {
+    Ꮡp224GeneratorTableOnce.Do([GoFunc("(*P224Point).generatorTable.func1")] () => {
         p224GeneratorTable = Ꮡ(new array<p224Table>(56));
         var @base = NewP224Point().SetGenerator();
         for (nint i = 0; i < (nint)(p224ElementLength * 2); i++) {

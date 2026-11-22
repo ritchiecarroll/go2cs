@@ -414,7 +414,7 @@ internal static partial error /*err*/ start⁔(/*this*/ ж<worker> Ꮡw) {
         var m = newMutator();
         w.client = newWorkerClient(comm, m);
 
-        goǃ(() => {
+        goǃ([GoFunc("(*worker).start.func1")] () => {
             Ꮡw.Value.waitErr = Ꮡw.Value.cmd.Wait();
             close(Ꮡw.Value.termC);
         });
@@ -464,7 +464,7 @@ internal static partial error stop⁔(/*this*/ ж<worker> Ꮡw) {
     // finishes with earlier calls.
     var closeC = new channel<EmptyStruct>(0);
     var closeCʗ1 = closeC;
-    goǃ(() => {
+    goǃ([GoFunc("(*worker).stop.func1")] () => {
         Ꮡw.Value.client.Close();
         close(closeCʗ1);
     });
@@ -536,10 +536,10 @@ public static error RunFuzzWorker(context.Context ctx, Func<CorpusEntry, error> 
     }
     var srv = Ꮡ(new workerServer(
         workerComm: comm,
-        fuzzFn: (CorpusEntry e) => {
+        fuzzFn: [GoFunc("RunFuzzWorker.func1")] (CorpusEntry e) => {
             GoFrame ᒐ = default;
             try {
-                var timer = time.AfterFunc((time.Duration)(10000000000L), () => {
+                var timer = time.AfterFunc((time.Duration)(10000000000L), [GoFunc("RunFuzzWorker.func1.1")] () => {
                     throw panic("deadlocked!"); // this error message won't be printed
                 });
                 var timerʗ1 = timer;
@@ -778,7 +778,7 @@ internal static fuzzResponse /*resp*/ fuzz⁔(/*this*/ ж<workerServer> Ꮡws, c
         }
         ref var start = ref heap<time.Time>(time.Now(), out var Ꮡstart);
         var startʗ1 = start;
-        defer(() => {
+        defer([GoFunc("(*workerServer).fuzz.func1")] () => {
             resp.TotalDuration = time.Since(startʗ1);
         }, ref ᒐ);
 
@@ -791,7 +791,7 @@ internal static fuzzResponse /*resp*/ fuzz⁔(/*this*/ ж<workerServer> Ꮡws, c
         var mem = ᐸꟷ(ws.memMu);
         ws.m.r.save(mem.header().ᏑrandState, mem.header().ᏑrandInc);
         var memʗ1 = mem;
-        defer(() => {
+        defer([GoFunc("(*workerServer).fuzz.func2")] () => {
             resp.Count = memʗ1.header().count;
             Ꮡws.Value.memMu.ᐸꟷ(memʗ1);
         }, ref ᒐ);
@@ -810,9 +810,9 @@ internal static fuzzResponse /*resp*/ fuzz⁔(/*this*/ ж<workerServer> Ꮡws, c
 
         var argsʗ1 = args;
         var memʗ2 = mem;
-        bool shouldStop() => argsʗ1.Limit > 0 && memʗ2.header().count >= argsʗ1.Limit;
+        [GoFunc("(*workerServer).fuzz.func3")] bool shouldStop() => argsʗ1.Limit > 0 && memʗ2.header().count >= argsʗ1.Limit;
         var memʗ3 = mem;
-        (time.Duration dur, slice<byte> cov, @string errMsg) fuzzOnce(CorpusEntry entry) {
+        [GoFunc("(*workerServer).fuzz.func4")] (time.Duration dur, slice<byte> cov, @string errMsg) fuzzOnce(CorpusEntry entry) {
             time.Duration dur = default;
             @string errMsg = default;
             memʗ3.header().count++;
@@ -888,12 +888,12 @@ internal static minimizeResponse /*resp*/ minimize⁔(/*this*/ ж<workerServer> 
 
         ref var start = ref heap<time.Time>(time.Now(), out var Ꮡstart);
         var startʗ1 = start;
-        defer(() => {
+        defer([GoFunc("(*workerServer).minimize.func1")] () => {
             resp.Duration = time.Since(startʗ1);
         }, ref ᒐ);
         var mem = ᐸꟷ(ws.memMu);
         var memʗ1 = mem;
-        defer(() => {
+        defer([GoFunc("(*workerServer).minimize.func2")] () => {
             Ꮡws.Value.memMu.ᐸꟷ(memʗ1);
         }, ref ᒐ);
         var (vals, err) = unmarshalCorpusFile(mem.valueCopy());
@@ -953,7 +953,7 @@ internal static (bool success, error retErr) minimizeInput⁔(/*this*/ ж<worker
     var count = mem.header().Ꮡcount;
     var argsʗ1 = args;
     var countʗ1 = count;
-    var shouldStop = () => ctx.Err() != nil || (argsʗ1.Limit > 0 && countʗ1.Value >= argsʗ1.Limit);
+    var shouldStop = [GoFunc("(*workerServer).minimizeInput.func1")] () => ctx.Err() != nil || (argsʗ1.Limit > 0 && countʗ1.Value >= argsʗ1.Limit);
     if (shouldStop()) {
         return (false, default);
     }
@@ -980,7 +980,7 @@ internal static (bool success, error retErr) minimizeInput⁔(/*this*/ ж<worker
     var bPtrʗ1 = bPtr;
     var countʗ2 = count;
     var valsʗ1 = vals;
-    var tryMinimized = (slice<byte> candidate) => {
+    var tryMinimized = [GoFunc("(*workerServer).minimizeInput.func2")] (slice<byte> candidate) => {
         var prev = valsʗ1[argsʗ2.Index];
         switch (prev.type()) {
         case slice<byte>: {
@@ -1129,7 +1129,7 @@ internal static (CorpusEntry entryOut, minimizeResponse resp, error retErr) mini
         if (!ok) {
             (entryOut, resp, retErr) = (new CorpusEntry(), new minimizeResponse(), errSharedMemClosed); goto ᒐdone;
         }
-        defer(() => {
+        defer([GoFunc("(*workerClient).minimize.func1")] () => {
             Ꮡwc.Value.memMu.ᐸꟷ(Ꮡmem.ValueSlot);
         }, ref ᒐ);
         mem.header().count = 0;
@@ -1258,7 +1258,7 @@ internal static (CorpusEntry entryOut, fuzzResponse resp, bool isInternalError, 
             (entryOut, resp, isInternalError, err) = (new CorpusEntry(), new fuzzResponse(), true, errSharedMemClosed); goto ᒐdone;
         }
         var memʗ1 = mem;
-        defer(() => {
+        defer([GoFunc("(*workerClient).fuzz.func1")] () => {
             Ꮡwc.Value.memMu.ᐸꟷ(memʗ1);
         }, ref ᒐ);
         resp.Count = mem.header().count;
@@ -1359,7 +1359,7 @@ internal static partial (nint, error) Read⁔(/*this*/ ж<contextReader> Ꮡcr, 
     ref var err = ref heap<error>(out var Ꮡerr);
     var bʗ1 = b;
     var doneʗ1 = done;
-    goǃ(() => {
+    goǃ([GoFunc("(*contextReader).Read.func1")] () => {
         (n, Ꮡerr.ValueSlot) = Ꮡcr.Value.r.Read(bʗ1);
         close(doneʗ1);
     });

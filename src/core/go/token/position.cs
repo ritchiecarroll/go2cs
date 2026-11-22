@@ -366,7 +366,7 @@ internal static nint Line⁔(/*this*/ ж<File> Ꮡf, Pos p) {
 }
 
 internal static nint searchLineInfos(slice<lineInfo> a, nint x) {
-    var (i, found) = slices.BinarySearchFunc(a, x, (lineInfo aΔ1, nint xΔ1) => cmp.Compare(aΔ1.Offset, xΔ1));
+    var (i, found) = slices.BinarySearchFunc(a, x, [GoFunc("searchLineInfos.func1")] (lineInfo aΔ1, nint xΔ1) => cmp.Compare(aΔ1.Offset, xΔ1));
     if (!found) {
         // We want the lineInfo containing x, but if we didn't
         // find x then i is the next one.
@@ -631,7 +631,7 @@ internal static void Iterate⁔(/*this*/ ж<FileSet> Ꮡs, Func<ж<File>, bool> 
         // Unlock around user code.
         // The iterator is robust to modification by yield.
         // Avoid range here, so we can use defer.
-        Ꮡs.Ꮡtree.all()((ж<File> f) => {
+        Ꮡs.Ꮡtree.all()([GoFunc("(*FileSet).Iterate.func1")] (ж<File> f) => {
             GoFrame ᒐ = default;
             try {
                 Ꮡs.Ꮡmutex.RUnlock();

@@ -81,17 +81,17 @@ internal static readonly object rpcErrorExecutingˢ = (@string)"rpc: error execu
 internal static void ServeHTTP⁔(/*this*/ debugHTTP server, Δhttp.ResponseWriter w, ж<Δhttp.Request> req) {
     // Build a sorted version of the data.
     ref var services = ref heap<serviceArray>(out var Ꮡservices);
-    Ꮡ(server).of(debugHTTP.ᏑserviceMap).Range((any snamei, any svci) => {
+    Ꮡ(server).of(debugHTTP.ᏑserviceMap).Range([GoFunc("debugHTTP.ServeHTTP.func1")] (any snamei, any svci) => {
         var svc = svci._<ж<service>>();
         var ds = new debugService(svc, snamei._<@string>(), new slice<debugMethod>(0, len(svc.method)));
         foreach (var (mname, method) in svc.method) {
             ds.Method = append(ds.Method, new debugMethod(method, mname));
         }
-        slices.SortFunc(ds.Method, (debugMethod a, debugMethod b) => strings.Compare(a.Name, b.Name));
+        slices.SortFunc(ds.Method, [GoFunc("debugHTTP.ServeHTTP.func1.1")] (debugMethod a, debugMethod b) => strings.Compare(a.Name, b.Name));
         Ꮡservices.ValueSlot = append(Ꮡservices.ValueSlot, ds);
         return true;
     });
-    slices.SortFunc(services, (debugService a, debugService b) => strings.Compare(a.Name, b.Name));
+    slices.SortFunc(services, [GoFunc("debugHTTP.ServeHTTP.func2")] (debugService a, debugService b) => strings.Compare(a.Name, b.Name));
     var err = debug.Execute(new http_ResponseWriterᴠWriter(w), services);
     if (err != nil) {
         fmt.Fprintln(new http_ResponseWriterᴠWriter(w), rpcErrorExecutingˢ, err.Error());

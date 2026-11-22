@@ -87,7 +87,7 @@ internal static void handle⁔(/*this*/ ж<serveMux121> Ꮡmux, @string pattern,
 internal static slice<muxEntry> appendSorted(slice<muxEntry> es, muxEntry e) {
     nint n = len(es);
     var eʗ1 = e;
-    nint i = sort.Search(n, (nint iΔ1) => len(es[iΔ1].pattern) < len(eʗ1.pattern));
+    nint i = sort.Search(n, [GoFunc("appendSorted.func1")] (nint iΔ1) => len(es[iΔ1].pattern) < len(eʗ1.pattern));
     if (i == n) {
         return append(es, e);
     }

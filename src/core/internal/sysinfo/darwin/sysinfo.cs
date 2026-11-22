@@ -15,7 +15,7 @@ partial class sysinfo_package {
 
 public static readonly ж<Func<@string>> ᏑCPUName = new StaticBox<Func<@string>>(default(Func<@string>));
 public static ref Func<@string> CPUName => ref ((StaticBox<Func<@string>>)ᏑCPUName).ValueSlot;
-internal static void initᴛCPUName() { CPUName = sync.OnceValue(@string () => {
+internal static void initᴛCPUName() { CPUName = sync.OnceValue([GoFunc("init.func1")] @string () => {
     {
         @string name = cpu.Name(); if (name != ""u8) {
             return name;

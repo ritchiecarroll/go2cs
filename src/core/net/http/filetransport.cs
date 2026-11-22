@@ -59,7 +59,7 @@ internal static partial (ж<Response> resp, error err) RoundTrip⁔(/*this*/ fil
     // written to the res.Body, a pipe)
     var (rw, resc) = newPopulateResponseWriter(req);
     var rwʗ1 = rw;
-    goǃ(() => {
+    goǃ([GoFunc("fileTransport.RoundTrip.func1")] () => {
         t.fh.ServeHTTP(new populateResponseжResponseWriter(rwʗ1), req);
         rwʗ1.finish();
     });

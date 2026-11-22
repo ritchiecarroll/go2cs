@@ -598,7 +598,7 @@ internal static partial (context.Context, Action) dialCtx⁔(/*this*/ ref Dialer
             var cancel2ʗ1 = cancel2Δ1;
             var oldCancelʗ1 = oldCancel;
             var subCtxʗ1 = subCtx;
-            goǃ(() => {
+            goǃ([GoFunc("(*Dialer).dialCtx.func1")] () => {
                 var oldCancelᴛ1 = oldCancelʗ1;
                 var selᴛ4 = subCtxʗ1.Done();
                 switch (select(ᐸꟷ(oldCancelᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ4, ꓸꓸꓸ))) {
@@ -615,7 +615,7 @@ internal static partial (context.Context, Action) dialCtx⁔(/*this*/ ref Dialer
     }
     var cancel1ʗ1 = cancel1;
     var cancel2ʗ2 = cancel2;
-    return (ctx, () => {
+    return (ctx, [GoFunc("(*Dialer).dialCtx.func2")] () => {
         if (cancel1ʗ1 != nil) {
             cancel1ʗ1();
         }
@@ -763,7 +763,7 @@ internal static partial (Conn, error) dialParallel⁔(/*this*/ ж<sysDialer> Ꮡ
         var primariesʗ1 = primaries;
         var resultsʗ1 = results;
         var returnedʗ1 = returned;
-        void startRacer(context.Context ctxΔ1, bool primaryΔ1) {
+        [GoFunc("(*sysDialer).dialParallel.func1")] void startRacer(context.Context ctxΔ1, bool primaryΔ1) {
             var ras = primariesʗ1;
             if (!primaryΔ1) {
                 ras = fallbacksʗ1;
@@ -911,7 +911,7 @@ internal static (Conn c, error err) dialSingle⁔(/*this*/ ж<sysDialer> Ꮡsd, 
             }
             if (trace.ConnectDone != nil) {
                 var traceʗ1 = trace;
-                defer(() => {
+                defer([GoFunc("(*sysDialer).dialSingle.func1")] () => {
                     traceʗ1.ConnectDone(Ꮡsd.Value.network, raStr, err);
                 }, ref ᒐ);
             }

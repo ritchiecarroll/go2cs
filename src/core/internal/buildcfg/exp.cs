@@ -30,7 +30,7 @@ partial struct ExperimentFlags {
 // configuration and any variation from this is an experiment.
 public static readonly ж<ExperimentFlags> ᏑExperiment = new StaticBox<ExperimentFlags>(default(ExperimentFlags));
 public static ref ExperimentFlags Experiment => ref ((StaticBox<ExperimentFlags>)ᏑExperiment).ValueSlot;
-internal static void initᴛExperiment() { Experiment = func(ExperimentFlags () => {
+internal static void initᴛExperiment() { Experiment = func([GoFunc("init.func1")] ExperimentFlags () => {
     var (flags, err) = ParseGOEXPERIMENT(GOOS, GOARCH, envOr("GOEXPERIMENT", defaultGOEXPERIMENT));
     if (err != nil) {
         Error = err;
@@ -124,7 +124,7 @@ public static (ж<ExperimentFlags>, error) ParseGOEXPERIMENT(@string goos, @stri
         // this as an alias make both "regabi" and "noregabi"
         // do the right thing.
         var flagsʗ1 = flags;
-        names[regabiˢ] = (bool v) => {
+        names[regabiˢ] = [GoFunc("ParseGOEXPERIMENT.func1")] (bool v) => {
             flagsʗ1.RegabiWrappers = v;
             flagsʗ1.RegabiArgs = v;
         };

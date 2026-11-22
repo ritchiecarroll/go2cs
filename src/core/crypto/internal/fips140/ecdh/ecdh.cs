@@ -191,7 +191,7 @@ public static (ж<PrivateKey>, error) GenerateKey<P>(ж<Curve<P>> Ꮡc, io.Reade
         // consistent [...], even if the underlying standard does not require a
         // PCT". So we do it. And make ECDH nearly 50% slower (only) in FIPS mode.
         var privateKeyʗ1 = privateKey;
-        fips140.PCT(ecdhPctˢ, error () => {
+        fips140.PCT(ecdhPctˢ, [GoFunc("GenerateKey[...].func1")] error () => {
             var (p1, errΔ1) = Ꮡc.Value.newPoint().ScalarBaseMult(privateKeyʗ1.d);
             if (errΔ1 != nil) {
                 return errΔ1;

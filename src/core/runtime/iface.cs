@@ -588,7 +588,7 @@ internal static ж<abi.TypeAssertCache> buildTypeAssertCache(ж<abi.TypeAssertCa
 
     // Fill the new table.
     var newEntriesʗ1 = newEntries;
-    void addEntry(ж<_type> typΔ1, ж<itab> tabΔ1) {
+    [GoFunc("buildTypeAssertCache.func1")] void addEntry(ж<_type> typΔ1, ж<itab> tabΔ1) {
         nint h = (nint)typΔ1.Hash & (newN - 1);
         for (;;) {
             if (newEntriesʗ1[h].Typ == 0) {
@@ -699,7 +699,7 @@ internal static ж<abi.InterfaceSwitchCache> buildInterfaceSwitchCache(ж<abi.In
 
     // Fill the new table.
     var newEntriesʗ1 = newEntries;
-    void addEntry(ж<_type> typΔ1, nint case_Δ1, ж<itab> tabΔ1) {
+    [GoFunc("buildInterfaceSwitchCache.func1")] void addEntry(ж<_type> typΔ1, nint case_Δ1, ж<itab> tabΔ1) {
         nint h = (nint)typΔ1.Hash & (newN - 1);
         for (;;) {
             if (newEntriesʗ1[h].Typ == 0) {

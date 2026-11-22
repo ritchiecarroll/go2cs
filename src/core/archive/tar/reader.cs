@@ -464,11 +464,11 @@ internal static (ж<Header>, ж<block>, error) readHeader⁔(/*this*/ ж<Reader>
 
             // For Format detection, check if block is properly formatted since
             // the parser is more liberal than what USTAR actually permits.
-            var notASCII = (rune r) => r >= 0x80;
+            var notASCII = [GoFunc("(*Reader).readHeader.func1")] (rune r) => r >= 0x80;
             if (bytes.IndexFunc(tr.blk[..], notASCII) >= 0) {
                 hdr.Format = FormatUnknown; // Non-ASCII characters in block.
             }
-            bool nul(slice<byte> b) => (nint)b[len(b) - 1] == 0;
+            [GoFunc("(*Reader).readHeader.func2")] bool nul(slice<byte> b) => (nint)b[len(b) - 1] == 0;
             if (!(nul(v7.size()) && nul(v7.mode()) && nul(v7.uid()) && nul(v7.gid()) && nul(v7.modTime()) && nul(ustarΔ3.devMajor()) && nul(ustarΔ3.devMinor()))) {
                 hdr.Format = FormatUnknown; // Numeric fields must end in NUL
             }
@@ -613,7 +613,7 @@ internal static (sparseDatas, error) readGNUSparseMap1x0(io.Reader r) {
     // feedTokens copies data in blocks from r into buf until there are
     // at least cnt newlines in buf. It will not read more blocks than needed.
     var blkʗ1 = blk;
-    error feedTokens(int64 n) {
+    [GoFunc("readGNUSparseMap1x0.func1")] error feedTokens(int64 n) {
         while (cntNewline < n) {
             totalSize += len(blkʗ1);
             if (totalSize > maxSpecialFileSize) {
@@ -634,7 +634,7 @@ internal static (sparseDatas, error) readGNUSparseMap1x0(io.Reader r) {
 
     // nextToken gets the next token delimited by a newline. This assumes that
     // at least one newline exists in the buffer.
-    @string nextToken() {
+    [GoFunc("readGNUSparseMap1x0.func2")] @string nextToken() {
         cntNewline--;
         var (tok, _) = buf.ReadString((byte)'\n');
         return strings.TrimRight(tok, "\n");

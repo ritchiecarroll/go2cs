@@ -178,7 +178,7 @@ internal static error init⁔(/*this*/ ж<traceV1Converter> Ꮡit, tracev1.Trace
     }
     ref var addErr = ref heap<error>(out var ᏑaddErr);
     var evtʗ1 = evt;
-    void add(stringID id, @string s) {
+    [GoFunc("(*traceV1Converter).init.func1")] void add(stringID id, @string s) {
         var err = evtʗ1.Ꮡstrings.insert(id, s); if (err != nil && ᏑaddErr.ValueSlot == nil) {
             ᏑaddErr.ValueSlot = err;
         }
@@ -197,7 +197,7 @@ internal static error init⁔(/*this*/ ж<traceV1Converter> Ꮡit, tracev1.Trace
     }
     it.builtinToStringID = new slice<uint64>(sLast);
     var addʗ1 = add;
-    void addBuiltin(nint c, @string s) {
+    [GoFunc("(*traceV1Converter).init.func2")] void addBuiltin(nint c, @string s) {
         var nid = max + 1 + (uint64)c;
         Ꮡit.Value.builtinToStringID[c] = nid;
         addʗ1((stringID)nid, s);
@@ -521,7 +521,7 @@ internal static (Event OUT, error ERR) convertEvent⁔(/*this*/ ж<traceV1Conver
         // Look for the next event for the same G to determine if the syscall
         // blocked.
         var blocked = false;
-        Ꮡit.Ꮡevents.All()((ж<tracev1.Event> nev) => {
+        Ꮡit.Ꮡevents.All()([GoFunc("(*traceV1Converter).convertEvent.func1")] (ж<tracev1.Event> nev) => {
             if (nev.G != Ꮡev.Value.G) {
                 return true;
             }

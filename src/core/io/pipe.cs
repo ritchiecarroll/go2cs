@@ -91,7 +91,7 @@ internal static error closeRead⁔(/*this*/ ж<pipe> Ꮡp, error err) {
         err = ErrClosedPipe;
     }
     Ꮡp.Ꮡrerr.Store(err);
-    Ꮡp.Ꮡonce.Do(() => {
+    Ꮡp.Ꮡonce.Do([GoFunc("(*pipe).closeRead.func1")] () => {
         close(Ꮡp.Value.done);
     });
     return default;
@@ -141,7 +141,7 @@ internal static error closeWrite⁔(/*this*/ ж<pipe> Ꮡp, error err) {
         err = EOF;
     }
     Ꮡp.Ꮡwerr.Store(err);
-    Ꮡp.Ꮡonce.Do(() => {
+    Ꮡp.Ꮡonce.Do([GoFunc("(*pipe).closeWrite.func1")] () => {
         close(Ꮡp.Value.done);
     });
     return default;

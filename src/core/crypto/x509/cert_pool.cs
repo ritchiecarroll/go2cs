@@ -199,7 +199,7 @@ internal static void AddCert⁔(/*this*/ ref CertPool s, ж<Certificate> Ꮡcert
     if (Ꮡcert == nil) {
         throw panic("adding nil Certificate to CertPool");
     }
-    s.addCertFunc(sha256.Sum224(cert.Raw), (@string)cert.RawSubject, () => (Ꮡcert, default), default);
+    s.addCertFunc(sha256.Sum224(cert.Raw), (@string)cert.RawSubject, [GoFunc("(*CertPool).AddCert.func1")] () => (Ꮡcert, default), default);
 }
 
 // addCertFunc adds metadata about a certificate to a pool, along with
@@ -258,8 +258,8 @@ internal static bool /*ok*/ AppendCertsFromPEM⁔(/*this*/ ref CertPool s, slice
             continue;
         }
         ref var lazyCert = ref heap(new AppendCertsFromPEM_lazyCert(), out var ᏑlazyCert);
-        s.addCertFunc(sha256.Sum224(cert.Raw), (@string)cert.RawSubject, () => {
-            ᏑlazyCert.of(AppendCertsFromPEM_lazyCert.ᏑOnce).Do(() => {
+        s.addCertFunc(sha256.Sum224(cert.Raw), (@string)cert.RawSubject, [GoFunc("(*CertPool).AppendCertsFromPEM.func1")] () => {
+            ᏑlazyCert.of(AppendCertsFromPEM_lazyCert.ᏑOnce).Do([GoFunc("(*CertPool).AppendCertsFromPEM.func1.1")] () => {
                 // This can't fail, as the same bytes already parsed above.
                 (ᏑlazyCert.Value.v, _) = ParseCertificate(ᏑcertBytes.ValueSlot);
                 ᏑcertBytes.ValueSlot = default;
@@ -319,7 +319,7 @@ internal static void AddCertWithConstraint⁔(/*this*/ ref CertPool s, ж<Certif
     if (Ꮡcert == nil) {
         throw panic("adding nil Certificate to CertPool");
     }
-    s.addCertFunc(sha256.Sum224(cert.Raw), (@string)cert.RawSubject, () => (Ꮡcert, default), constraint);
+    s.addCertFunc(sha256.Sum224(cert.Raw), (@string)cert.RawSubject, [GoFunc("(*CertPool).AddCertWithConstraint.func1")] () => (Ꮡcert, default), constraint);
 }
 
 } // end x509_package

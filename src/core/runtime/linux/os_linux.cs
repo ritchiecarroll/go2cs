@@ -87,7 +87,7 @@ internal static void futexwakeup(ж<uint32> addr, uint32 cnt) {
     // I don't know that futex wakeup can return
     // EAGAIN or EINTR, but if it does, it would be
     // safe to loop and call futex again.
-    systemstack(() => {
+    systemstack([GoFunc("futexwakeup.func1")] () => {
         print((@string)"futexwakeup addr=", addr.OrTypedNil(), (@string)" returned ", ret, (@string)"\n");
     });
 
@@ -186,7 +186,7 @@ internal static void newosproc(ж<m> Ꮡmp) {
     // with signals disabled. It will enable them in minit.
     ref var oset = ref heap(new sigset(), out var Ꮡoset);
     sigprocmask(_SIG_SETMASK, Ꮡsigset_all, Ꮡoset);
-    var ret = retryOnEAGAIN(() => {
+    var ret = retryOnEAGAIN([GoFunc("newosproc.func1")] () => {
         var r = clone(cloneFlags, stk, @unsafe.Pointer.FromPinnedBox(Ꮡmp), @unsafe.Pointer.FromPinnedBox(Ꮡmp.Value.g0), (@unsafe.Pointer)abi.FuncPCABI0(mstart));
         // clone returns positive TID, negative errno.
         // We don't care about the TID.
@@ -566,7 +566,7 @@ internal static void sysSigaction(uint32 sig, ж<sigactiont> @new, ж<sigactiont
         // anything we can do about it anyhow.
         if (sig != 32 && sig != 33 && sig != 64) {
             // Use system stack to avoid split stack overflow on ppc64/ppc64le.
-            systemstack(() => {
+            systemstack([GoFunc("sysSigaction.func1")] () => {
                 @throw(sigactionFailedˢ);
             });
         }
@@ -783,7 +783,7 @@ internal static (nint major, nint minor, nint patch, bool ok) parseRelease(@stri
     // '.', it is consumed and more is set so the caller knows to
     // parse another component; otherwise scanning terminates and
     // the rest of rel is discarded.
-    (nint n, bool more, bool ok) next() {
+    [GoFunc("parseRelease.func1")] (nint n, bool more, bool ok) next() {
         nint n = default;
         nint i = 0;
         while (i < len(rel) && rel[i] >= '0' && rel[i] <= '9') {

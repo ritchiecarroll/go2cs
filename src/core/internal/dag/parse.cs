@@ -88,7 +88,7 @@ internal static slice<@string> Edges⁔(/*this*/ ж<Graph> Ꮡg, @string from) {
     foreach (var (k, _) in g.edges[from]) {
         edges = append(edges, k);
     }
-    slices.SortFunc(edges, (@string a, @string b) => cmp.Compare(Ꮡg.Value.byLabel[a], Ꮡg.Value.byLabel[b]));
+    slices.SortFunc(edges, [GoFunc("(*Graph).Edges.func1")] (@string a, @string b) => cmp.Compare(Ꮡg.Value.byLabel[a], Ꮡg.Value.byLabel[b]));
     return edges;
 }
 
@@ -106,7 +106,7 @@ public static (ж<Graph>, error) Parse(@string dag) {
 
     // TODO: Add line numbers to errors.
     ref var errors = ref heap<slice<@string>>(out var Ꮡerrors);
-    void errorf(@string format, params ꓸꓸꓸany aʗp) {
+    [GoFunc("Parse.func1")] void errorf(@string format, params ꓸꓸꓸany aʗp) {
         var a = aʗp.sslice();
         Ꮡerrors.ValueSlot = append(Ꮡerrors.ValueSlot, fmt.Sprintf(format, a.ꓸꓸꓸ));
     }
@@ -205,7 +205,7 @@ internal static (slice<rule> @out, error err) parseRules(@string rules) {
     error err = default;
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("parseRules.func1")] () => {
             var e = recover();
             switch (e.type()) {
             case null: {

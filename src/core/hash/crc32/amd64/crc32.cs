@@ -82,7 +82,7 @@ internal static readonly ж<atomic.Bool> ᏑhaveCastagnoli = new StaticBox<atomi
 internal static ref atomic.Bool haveCastagnoli => ref ((StaticBox<atomic.Bool>)ᏑhaveCastagnoli).ValueSlot;
 
 internal static Action castagnoliInitOnce;
-internal static void initᴛcastagnoliInitOnce() { castagnoliInitOnce = sync.OnceFunc(() => {
+internal static void initᴛcastagnoliInitOnce() { castagnoliInitOnce = sync.OnceFunc([GoFunc("init.func1")] () => {
     castagnoliTable = simpleMakeTable(Castagnoli);
 
     if (archAvailableCastagnoli()) {
@@ -91,7 +91,7 @@ internal static void initᴛcastagnoliInitOnce() { castagnoliInitOnce = sync.Onc
     } else {
         // Initialize the slicing-by-8 table.
         castagnoliTable8 = slicingMakeTable(Castagnoli);
-        updateCastagnoli = (uint32 crc, slice<byte> p) => slicingUpdate(crc, castagnoliTable8, p);
+        updateCastagnoli = [GoFunc("init.func1.1")] (uint32 crc, slice<byte> p) => slicingUpdate(crc, castagnoliTable8, p);
     }
 
     ᏑhaveCastagnoli.Store(true);
@@ -105,14 +105,14 @@ internal static ж<slicing8Table> ieeeTable8;
 internal static Func<uint32, slice<byte>, uint32> updateIEEE;
 
 internal static Action ieeeInitOnce;
-internal static void initᴛieeeInitOnce() { ieeeInitOnce = sync.OnceFunc(() => {
+internal static void initᴛieeeInitOnce() { ieeeInitOnce = sync.OnceFunc([GoFunc("init.func2")] () => {
     if (archAvailableIEEE()) {
         archInitIEEE();
         updateIEEE = archUpdateIEEE;
     } else {
         // Initialize the slicing-by-8 table.
         ieeeTable8 = slicingMakeTable(IEEE);
-        updateIEEE = (uint32 crc, slice<byte> p) => slicingUpdate(crc, ieeeTable8, p);
+        updateIEEE = [GoFunc("init.func2.1")] (uint32 crc, slice<byte> p) => slicingUpdate(crc, ieeeTable8, p);
     }
 }); }
 

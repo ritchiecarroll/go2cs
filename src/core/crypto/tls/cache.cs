@@ -37,7 +37,7 @@ internal static (ж<Δx509.Certificate>, error) newCert⁔(/*this*/ ж<weakCertC
         var (entry, loaded) = Ꮡwcc.of(weakCertCache.ᏑMap).LoadOrStore((@string)der, wp); if (!loaded) {
             var derʗ1 = der;
             var entryʗ1 = entry;
-            runtime.AddCleanup(cert, (any _) => {
+            runtime.AddCleanup(cert, [GoFunc("(*weakCertCache).newCert.func1")] (any _) => {
                 Ꮡwcc.of(weakCertCache.ᏑMap).CompareAndDelete((@string)derʗ1, entryʗ1);
             }, (any)((@string)der), new object?[] { Ꮡwcc, entry });
         } else if (entry._<weak.Pointer<Δx509.Certificate>>().Value() is var v && v != nil) {
@@ -46,7 +46,7 @@ internal static (ж<Δx509.Certificate>, error) newCert⁔(/*this*/ ж<weakCertC
             if (Ꮡwcc.of(weakCertCache.ᏑMap).CompareAndSwap((@string)der, entry, wp)) {
                 var derʗ2 = der;
                 var wpʗ1 = wp;
-                runtime.AddCleanup(cert, (any _) => {
+                runtime.AddCleanup(cert, [GoFunc("(*weakCertCache).newCert.func2")] (any _) => {
                     Ꮡwcc.of(weakCertCache.ᏑMap).CompareAndDelete((@string)derʗ2, wpʗ1);
                 }, (any)((@string)der), new object?[] { Ꮡwcc }, new object?[] { wp });
             }

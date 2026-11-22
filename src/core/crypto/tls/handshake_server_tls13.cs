@@ -253,12 +253,12 @@ internal static error processClientHello⁔(/*this*/ ж<serverHandshakeStateTLS1
     //
     // Finally, pick in our fixed preference order.
     var preferredGroups = c.config.curvePreferences(c.vers);
-    preferredGroups = slices.DeleteFunc(preferredGroups, (CurveID group) => !slices.Contains(Ꮡhs.Value.clientHello.supportedCurves, group));
+    preferredGroups = slices.DeleteFunc(preferredGroups, [GoFunc("(*serverHandshakeStateTLS13).processClientHello.func1")] (CurveID group) => !slices.Contains(Ꮡhs.Value.clientHello.supportedCurves, group));
     if (len(preferredGroups) == 0) {
         c.sendAlert(alertHandshakeFailure);
         return errors.New(tlsNoKeyExchangesˢ);
     }
-    bool hasKeyShare(CurveID group) {
+    [GoFunc("(*serverHandshakeStateTLS13).processClientHello.func2")] bool hasKeyShare(CurveID group) {
         foreach (var (_, ks) in range(Ꮡhs.Value.clientHello.keyShares)) {
             if (ks.group == group) {
                 return true;
@@ -268,9 +268,9 @@ internal static error processClientHello⁔(/*this*/ ж<serverHandshakeStateTLS1
     }
     var hasKeyShareʗ1 = hasKeyShare;
     var preferredGroupsʗ1 = preferredGroups;
-    sort.SliceStable(preferredGroups, (nint i, nint j) => hasKeyShareʗ1(preferredGroupsʗ1[i]) && !hasKeyShareʗ1(preferredGroupsʗ1[j]));
+    sort.SliceStable(preferredGroups, [GoFunc("(*serverHandshakeStateTLS13).processClientHello.func3")] (nint i, nint j) => hasKeyShareʗ1(preferredGroupsʗ1[i]) && !hasKeyShareʗ1(preferredGroupsʗ1[j]));
     var preferredGroupsʗ2 = preferredGroups;
-    sort.SliceStable(preferredGroups, (nint i, nint j) => isPQKeyExchange(preferredGroupsʗ2[i]) && !isPQKeyExchange(preferredGroupsʗ2[j]));
+    sort.SliceStable(preferredGroups, [GoFunc("(*serverHandshakeStateTLS13).processClientHello.func4")] (nint i, nint j) => isPQKeyExchange(preferredGroupsʗ2[i]) && !isPQKeyExchange(preferredGroupsʗ2[j]));
     var selectedGroup = preferredGroups[0];
 
     ж<keyShare> clientKeyShare = default;

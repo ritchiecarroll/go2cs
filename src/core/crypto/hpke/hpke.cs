@@ -86,7 +86,7 @@ internal static (ж<context>, error) newContext(slice<byte> sharedSecret, uint16
         }
         var expSecretʗ1 = expSecretΔ1;
         var sidʗ1 = sid;
-        var exportΔ1 = (@string exporterContext, uint16 length) => kdf.labeledDerive(sidʗ1, expSecretʗ1, secˢ, slice<byte>(exporterContext), length);
+        var exportΔ1 = [GoFunc("newContext.func1")] (@string exporterContext, uint16 length) => kdf.labeledDerive(sidʗ1, expSecretʗ1, secˢ, slice<byte>(exporterContext), length);
 
         return (Ꮡ(new context(
             aead: aΔ1,
@@ -129,7 +129,7 @@ internal static (ж<context>, error) newContext(slice<byte> sharedSecret, uint16
     }
     var expSecretʗ2 = expSecret;
     var sidʗ2 = sid;
-    var export = (@string exporterContext, uint16 length) => kdf.labeledExpand(sidʗ2, expSecretʗ2, secˢ, slice<byte>(exporterContext), length);
+    var export = [GoFunc("newContext.func2")] (@string exporterContext, uint16 length) => kdf.labeledExpand(sidʗ2, expSecretʗ2, secˢ, slice<byte>(exporterContext), length);
 
     return (Ꮡ(new context(
         aead: a,

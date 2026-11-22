@@ -132,7 +132,7 @@ public static partial (slice<byte>, error) DumpRequestOut(ж<http.Request> Ꮡre
             var drʗ1 = dr;
             var pwʗ2 = pw;
         var t = Ꮡ(new http.Transport(
-            Dial: (@string netΔ1, @string addr) => (new dumpConnжConn(Ꮡ(new dumpConn(io.MultiWriter(new bytes_BufferжWriter(Ꮡbuf), new io.PipeWriterжWriter(pwʗ2)), new delegateReaderжReader(drʗ1)))), default)
+            Dial: [GoFunc("DumpRequestOut.func1")] (@string netΔ1, @string addr) => (new dumpConnжConn(Ꮡ(new dumpConn(io.MultiWriter(new bytes_BufferжWriter(Ꮡbuf), new io.PipeWriterжWriter(pwʗ2)), new delegateReaderжReader(drʗ1)))), default)
         ));
         var tʗ1 = t;
         defer(tʗ1.CloseIdleConnections, ref ᒐ);
@@ -145,7 +145,7 @@ public static partial (slice<byte>, error) DumpRequestOut(ж<http.Request> Ꮡre
         var drʗ2 = dr;
         var prʗ2 = pr;
         var quitReadChʗ1 = quitReadCh;
-        goǃ(() => {
+        goǃ([GoFunc("DumpRequestOut.func2")] () => {
             var (reqΔ1, errΔ2) = http.ReadRequest(bufio.NewReader(new io.PipeReaderжReader(prʗ2)));
             if (errΔ2 == nil) {
                 // Ensure all the body is read; otherwise

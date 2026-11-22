@@ -905,7 +905,7 @@ internal static slice<ж<Value>> sortedValues(slice<ж<Value>> m, token.Token to
     }
     list = list.slice(0, i);
 
-    slices.SortFunc(list, (ж<Value> a, ж<Value> b) => {
+    slices.SortFunc(list, [GoFunc("sortedValues.func1")] (ж<Value> a, ж<Value> b) => {
         nint r = strings.Compare(sortingName(ref (a.Decl).DerefOrNull()), sortingName(ref (b.Decl).DerefOrNull()));
         if (r != 0) {
             return r;
@@ -932,7 +932,7 @@ internal static slice<ж<Type>> sortedTypes(map<@string, ж<namedType>> m, bool 
         i++;
     }
 
-    slices.SortFunc(list, (ж<Type> a, ж<Type> b) => strings.Compare(a.Name, b.Name));
+    slices.SortFunc(list, [GoFunc("sortedTypes.func1")] (ж<Type> a, ж<Type> b) => strings.Compare(a.Name, b.Name));
 
     return list;
 }
@@ -963,7 +963,7 @@ internal static slice<ж<Func>> sortedFuncs(methodSet m, bool allMethods) {
         }}
     }
     list = list.slice(0, i);
-    slices.SortFunc(list, (ж<Func> a, ж<Func> b) => strings.Compare(a.Name, b.Name));
+    slices.SortFunc(list, [GoFunc("sortedFuncs.func1")] (ж<Func> a, ж<Func> b) => strings.Compare(a.Name, b.Name));
     return list;
 }
 
@@ -1042,7 +1042,7 @@ internal static map<@string, bool> predeclaredConstants = new map<@string, bool>
 // for a given import path. This is a copy of
 // golang.org/x/tools/internal/imports.ImportPathToAssumedName.
 internal static @string assumedPackageName(@string importPath) {
-    var notIdentifier = (rune ch) => !('a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z' || '0' <= ch && ch <= '9' || ch == '_' || ch >= utf8.RuneSelf && (unicode.IsLetter(ch) || unicode.IsDigit(ch)));
+    var notIdentifier = [GoFunc("assumedPackageName.func1")] (rune ch) => !('a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z' || '0' <= ch && ch <= '9' || ch == '_' || ch >= utf8.RuneSelf && (unicode.IsLetter(ch) || unicode.IsDigit(ch)));
 
     @string @base = path.Base(importPath);
     if (strings.HasPrefix(@base, "v")) {

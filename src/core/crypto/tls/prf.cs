@@ -75,7 +75,7 @@ internal static slice<byte> prf10(slice<byte> secret, @string label, slice<byte>
 
 // prf12 implements the TLS 1.2 pseudo-random function, as defined in RFC 5246, Section 5.
 internal static Func<slice<byte>, @string, slice<byte>, nint, slice<byte>> prf12(Func<hash.Hash> hashFunc) {
-    return (slice<byte> secret, @string label, slice<byte> seed, nint keyLen) => tls12.PRF(hashFunc, secret, label, seed, keyLen);
+    return [GoFunc("prf12.func1")] (slice<byte> secret, @string label, slice<byte> seed, nint keyLen) => tls12.PRF(hashFunc, secret, label, seed, keyLen);
 }
 
 internal static UntypedInt masterSecretLength => 48;   // Length of a master secret in TLS 1.1.
@@ -277,7 +277,7 @@ internal static Func<@string, slice<byte>, nint, (slice<byte>, error)> ekmFromMa
     var clientRandomʗ1 = clientRandom;
     var masterSecretʗ1 = masterSecret;
     var serverRandomʗ1 = serverRandom;
-    return (@string label, slice<byte> context, nint length) => {
+    return [GoFunc("ekmFromMasterSecret.func1")] (@string label, slice<byte> context, nint length) => {
         switch (ᐧ) {
         case {} when label == "client finished"u8 || label == "server finished"u8 || label == "master secret"u8 || label == "key expansion"u8: {
             // These values are reserved and may not be used.

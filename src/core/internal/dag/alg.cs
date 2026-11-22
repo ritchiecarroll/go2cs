@@ -30,7 +30,7 @@ internal static slice<@string> Topo⁔(/*this*/ ж<Graph> Ꮡg) {
 
     ref var visit = ref heap<Action<@string>>(out var Ꮡvisit);
     var marksʗ1 = marks;
-    visit = (@string n) => {
+    visit = [GoFunc("(*Graph).Topo.func1")] (@string n) => {
         if (marksʗ1[n]) {
             return;
         }

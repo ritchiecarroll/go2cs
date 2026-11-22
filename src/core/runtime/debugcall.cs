@@ -52,7 +52,7 @@ internal static @string debugCallCheck(uintptr pc) {
     // Switch to the system stack to avoid overflowing the user
     // stack.
     @string ret = default;
-    systemstack(() => {
+    systemstack([GoFunc("debugCallCheck.func1")] () => {
         var f = findfunc(pc);
         if (!f.valid()) {
             ret = debugCallUnknownFunc;
@@ -120,7 +120,7 @@ internal static void debugCallWrap(uintptr dispatch) {
     // Create a new goroutine to execute the call on. Run this on
     // the system stack to avoid growing our stack.
     var gpʗ1 = gp;
-    systemstack(() => {
+    systemstack([GoFunc("debugCallWrap.func1")] () => {
         // TODO(mknyszek): It would be nice to wrap these arguments in an allocated
         // closure and start the goroutine with that closure, but the compiler disallows
         // implicit closure allocation in the runtime.
@@ -161,7 +161,7 @@ internal static void debugCallWrap(uintptr dispatch) {
     });
 
     // Switch to the new goroutine.
-    mcall((ж<g> gpΔ1) => {
+    mcall([GoFunc("debugCallWrap.func2")] (ж<g> gpΔ1) => {
         // Get newg.
         var newg = (~gpΔ1).schedlink.ptr();
         gpΔ1.Value.schedlink = 0;
@@ -219,7 +219,7 @@ internal static void debugCallWrap1() {
 
     // Resume the caller goroutine.
     getg().of(g.Ꮡschedlink).set(callingG);
-    mcall((ж<g> gpΔ1) => {
+    mcall([GoFunc("debugCallWrap1.func1")] (ж<g> gpΔ1) => {
         var callingGΔ1 = (~gpΔ1).schedlink.ptr();
         gpΔ1.Value.schedlink = 0;
 
@@ -268,7 +268,7 @@ internal static void debugCallWrap2(uintptr dispatch) {
         (Ꮡ(@unsafe.Pointer.OfFunc(dispatchF))).Value = noescape(@unsafe.Pointer.FromPinnedBox(ᏑdispatchFV));
 
         bool ok = default;
-        defer(() => {
+        defer([GoFunc("debugCallWrap2.func1")] () => {
             if (!ok) {
                 var err = recover();
                 debugCallPanicked(err);

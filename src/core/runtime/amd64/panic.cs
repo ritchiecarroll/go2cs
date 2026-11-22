@@ -746,7 +746,7 @@ internal static void preprintpanics(ж<_panic> Ꮡp) {
     try {
         ref var p = ref Ꮡp.DerefOrNull();
 
-        defer(() => {
+        defer([GoFunc("preprintpanics.func1")] () => {
             @string text = panicWhilePrintingPanicˢ;
             var switchᴛ1 = recover();
             switch (switchᴛ1.type()) {
@@ -1087,7 +1087,7 @@ internal static bool /*ok*/ nextFrame⁔(/*this*/ ж<_panic> Ꮡp) {
 
     var gp = getg();
     var gpʗ1 = gp;
-    systemstack(() => {
+    systemstack([GoFunc("(*_panic).nextFrame.func1")] () => {
         uintptr limit = default;
         var d = gpʗ1.Value._defer; if (d != nil) {
             limit = d.Value.sp;
@@ -1210,7 +1210,7 @@ internal static any gorecover() {
     var canRecover = false;
     var gpʗ1 = gp;
     var pʗ1 = p;
-    systemstack(() => {
+    systemstack([GoFunc("gorecover.func1")] () => {
         ref var u = ref heap(new unwinder(), out var Ꮡu);
         Ꮡu.init(gpʗ1, 0);
         Ꮡu.next(); // skip systemstack_switch
@@ -1491,7 +1491,7 @@ internal static void fatalthrow(throwType t) {
     // Switch to the system stack to avoid any stack growth, which may make
     // things worse if the runtime is in a bad state.
     var gpʗ1 = gp;
-    systemstack(() => {
+    systemstack([GoFunc("fatalthrow.func1")] () => {
         if (isSecureMode()) {
             exit(2);
         }
@@ -1524,7 +1524,7 @@ internal static void fatalpanic(ж<_panic> msgs) {
     // Switch to the system stack to avoid any stack growth, which
     // may make things worse if the runtime is in a bad state.
     var gpʗ1 = gp;
-    systemstack(() => {
+    systemstack([GoFunc("fatalpanic.func1")] () => {
         if (startpanic_m() && msgs != nil) {
             // There were panic messages and startpanic_m
             // says it's okay to try to print them.
@@ -1554,7 +1554,7 @@ internal static void fatalpanic(ж<_panic> msgs) {
         crash();
     }
 
-    systemstack(() => {
+    systemstack([GoFunc("fatalpanic.func2")] () => {
         exit(2);
     });
 
@@ -1667,7 +1667,7 @@ internal static bool dopanic_m(ж<g> Ꮡgp, uintptr pc, uintptr sp, ж<synctestB
             } else if (Ꮡbubble != nil) {
                 // This panic is caused by a synctest bubble deadlock.
                 // Print stacks for goroutines in the deadlocked bubble.
-                tracebacksomeothers(Ꮡgp, (ж<g> other) => Ꮡbubble == (~other).bubble);
+                tracebacksomeothers(Ꮡgp, [GoFunc("dopanic_m.func1")] (ж<g> other) => Ꮡbubble == (~other).bubble);
             }
         }
     }

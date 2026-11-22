@@ -54,7 +54,7 @@ public static http.HandlerFunc MMUHandlerFunc(slice<Range> ranges, Func<trace.Ut
         ranges: ranges
     ));
     var mmuʗ1 = mmu;
-    return (http.ResponseWriter w, ж<http.Request> r) => {
+    return [GoFunc("MMUHandlerFunc.func1")] (http.ResponseWriter w, ж<http.Request> r) => {
         var exprᴛ1 = r.FormValue(modeˢ);
         switch (ᐧ) {
         case {} when exprᴛ1 == "plot"u8: {
@@ -115,7 +115,7 @@ internal static (slice<slice<trace.MutatorUtil>>, ж<trace.MMUCurve>, error) get
     m.mu.Unlock();
 
     var entryʗ1 = entry;
-    entry.Ꮡinit.Do(() => {
+    entry.Ꮡinit.Do([GoFunc("(*mmu).get.func1")] () => {
         var (util, err) = Ꮡm.Value.f(flags);
         if (err != nil) {
             entryʗ1.err = err;

@@ -183,10 +183,10 @@ public static ж<HMAC> New<H>(Func<H> h, slice<byte> key)
     hm.inner = h();
     var unique = true;
     var hmʗ1 = hm;
-    func(() => {
+    func([GoFunc("New[...].func1")] () => {
         GoFrame ᒐ = default;
         try {
-            defer(() => {
+            defer([GoFunc("New[...].func1.1")] () => {
                 // The comparison might panic if the underlying types are not comparable.
                 _ = recover();
             }, ref ᒐ);

@@ -716,7 +716,7 @@ internal static void traceThreadDestroy(ж<m> mp) {
         @throw(badUseOfTraceWritingˢ);
     }
     mp.of(m.Ꮡtrace).Ꮡwriting.Store(true);
-    systemstack(() => {
+    systemstack([GoFunc("traceThreadDestroy.func1")] () => {
         @lock(Ꮡtrace.of(traceᴛ1.Ꮡlock));
         foreach (var i in range(len(mp.Value.trace.buf))) {
             foreach (var (exp, buf) in range(mp.Value.trace.buf[i].ΔRangeSnapshot())) {

@@ -69,7 +69,7 @@ internal static ж<notInHeap> alloc⁔(/*this*/ ж<traceRegionAlloc> Ꮡa, uintp
 
     // Try to install a new block.
     ref var x = ref heap<ж<notInHeap>>(out var Ꮡx);
-    systemstack(() => {
+    systemstack([GoFunc("(*traceRegionAlloc).alloc.func1")] () => {
         // Acquire a.lock on the systemstack to avoid stack growth
         // and accidentally entering the tracer again.
         @lock(Ꮡa.Ꮡlock);

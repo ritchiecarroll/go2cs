@@ -78,7 +78,7 @@ internal static void rlock⁔(/*this*/ ж<rwmutex> Ꮡrw) {
 
     if (Ꮡrw.ᏑreaderCount.Add(1) < 0) {
         // A writer is pending. Park on the reader queue.
-        systemstack(() => {
+        systemstack([GoFunc("(*rwmutex).rlock.func1")] () => {
             @lock(Ꮡrw.ᏑrLock);
             if (Ꮡrw.Value.readerPass > 0) {
                 // Writer finished.
@@ -136,7 +136,7 @@ internal static void lock⁔(/*this*/ ж<rwmutex> Ꮡrw) {
     if (r != 0 && Ꮡrw.ᏑreaderWait.Add(r) != 0) {
         // Wait for reader to wake us up.
         var mʗ1 = m;
-        systemstack(() => {
+        systemstack([GoFunc("(*rwmutex).lock.func1")] () => {
             Ꮡrw.Value.writer.set(mʗ1);
             unlock(Ꮡrw.ᏑrLock);
             notesleep(mʗ1.of(runtime_package.m.Ꮡpark));

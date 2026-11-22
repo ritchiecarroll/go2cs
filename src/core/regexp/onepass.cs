@@ -177,7 +177,7 @@ internal static (slice<rune>, slice<uint32>) mergeRuneSets(ж<slice<rune>> Ꮡle
         ref var merged = ref heap<slice<rune>>(new slice<rune>(0), out var Ꮡmerged);
         ref var next = ref heap<slice<uint32>>(new slice<uint32>(0), out var Ꮡnext);
         var ok = true;
-        defer(() => {
+        defer([GoFunc("mergeRuneSets.func1")] () => {
             if (!ok) {
                 Ꮡmerged.ValueSlot = default;
                 Ꮡnext.ValueSlot = default;
@@ -185,7 +185,7 @@ internal static (slice<rune>, slice<uint32>) mergeRuneSets(ж<slice<rune>> Ꮡle
         }, ref ᒐ);
 
         nint ix = -1;
-        bool extend(ж<nint> newLow, ж<slice<rune>> newArray, uint32 pc) {
+        [GoFunc("mergeRuneSets.func2")] bool extend(ж<nint> newLow, ж<slice<rune>> newArray, uint32 pc) {
             if (ix > 0 && (newArray.ValueSlot)[newLow.Value] <= Ꮡmerged.ValueSlot[ix]) {
                 return false;
             }
@@ -336,7 +336,7 @@ internal static ж<onePassProg> makeOnePass(ж<onePassProg> Ꮡp) {
     var instQueueʗ1 = instQueue;
     var onePassRunesʗ1 = onePassRunes;
     var visitQueueʗ1 = visitQueue;
-    check = (uint32 pc, slice<bool> mΔ1) => {
+    check = [GoFunc("makeOnePass.func1")] (uint32 pc, slice<bool> mΔ1) => {
         bool ok = default;
         ok = true;
         var inst = Ꮡ(Ꮡp.Value.Inst, pc);

@@ -117,7 +117,7 @@ internal static void sysGrow⁔(/*this*/ ж<pageAlloc> Ꮡp, uintptr @base, uint
     // addrRangeToSummaryRange converts a range of addresses into a range
     // of summary indices which must be mapped to support those addresses
     // in the summary range.
-    (nint, nint) addrRangeToSummaryRange(nint level, addrRange r) {
+    [GoFunc("(*pageAlloc).sysGrow.func1")] (nint, nint) addrRangeToSummaryRange(nint level, addrRange r) {
         var (sumIdxBase, sumIdxLimit) = addrsToSummaryRange(level, r.@base.addr(), r.limit.addr());
         return blockAlignSummaryRange(level, sumIdxBase, sumIdxLimit);
     }
@@ -125,7 +125,7 @@ internal static void sysGrow⁔(/*this*/ ж<pageAlloc> Ꮡp, uintptr @base, uint
     // summaryRangeToSumAddrRange converts a range of indices in any
     // level of p.summary into page-aligned addresses which cover that
     // range of indices.
-    addrRange summaryRangeToSumAddrRange(nint level, nint sumIdxBase, nint sumIdxLimit) {
+    [GoFunc("(*pageAlloc).sysGrow.func2")] addrRange summaryRangeToSumAddrRange(nint level, nint sumIdxBase, nint sumIdxLimit) {
         var baseOffset = alignDown((uintptr)sumIdxBase * pallocSumBytes, physPageSize);
         var limitOffset = alignUp((uintptr)sumIdxLimit * pallocSumBytes, physPageSize);
         @unsafe.Pointer baseΔ1 = @unsafe.Pointer.FromPinnedBox(Ꮡ(Ꮡp.Value.summary[level], 0));
@@ -140,7 +140,7 @@ internal static void sysGrow⁔(/*this*/ ж<pageAlloc> Ꮡp, uintptr @base, uint
     // that stores the summaries for r.
     var addrRangeToSummaryRangeʗ1 = addrRangeToSummaryRange;
     var summaryRangeToSumAddrRangeʗ1 = summaryRangeToSumAddrRange;
-    addrRange addrRangeToSumAddrRange(nint level, addrRange r) {
+    [GoFunc("(*pageAlloc).sysGrow.func3")] addrRange addrRangeToSumAddrRange(nint level, addrRange r) {
         var (sumIdxBase, sumIdxLimit) = addrRangeToSummaryRangeʗ1(level, r);
         return summaryRangeToSumAddrRangeʗ1(level, sumIdxBase, sumIdxLimit);
     }

@@ -137,7 +137,7 @@ internal static (syscall.Sockaddr, error) connect⁔(/*this*/ ж<netFD> Ꮡfd, c
 
                 var done = new channel<EmptyStruct>(0);
                 var doneʗ1 = done;
-                var stop = context.AfterFunc(ctx, () => {
+                var stop = context.AfterFunc(ctx, [GoFunc("(*netFD).connect.func1")] () => {
                     // Force the runtime's poller to immediately give
                     // up waiting for writability.
                     Ꮡfd.Ꮡpfd.SetWriteDeadline(aLongTimeAgo);
@@ -145,7 +145,7 @@ internal static (syscall.Sockaddr, error) connect⁔(/*this*/ ж<netFD> Ꮡfd, c
                 });
                 var doneʗ2 = done;
                 var stopʗ1 = stop;
-                defer(() => {
+                defer([GoFunc("(*netFD).connect.func2")] () => {
                     if (!stopʗ1()) {
                         // Wait for the call to SetWriteDeadline to complete so that we can
                         // reset the deadline if everything else succeeded.
@@ -260,7 +260,7 @@ internal static (int64, error) writeBuffers⁔(/*this*/ ж<netFD> Ꮡfd, ж<Buff
 internal static (ж<netFD>, error) accept⁔(/*this*/ ж<netFD> Ꮡfd) {
     ref var fd = ref Ꮡfd.DerefOrNull();
 
-    var (s, rawsa, rsan, errcall, err) = Ꮡfd.Ꮡpfd.Accept(() => sysSocket(Ꮡfd.Value.family, Ꮡfd.Value.sotype, 0));
+    var (s, rawsa, rsan, errcall, err) = Ꮡfd.Ꮡpfd.Accept([GoFunc("(*netFD).accept.func1")] () => sysSocket(Ꮡfd.Value.family, Ꮡfd.Value.sotype, 0));
 
     if (err != nil) {
         if (errcall != ""u8) {
@@ -310,7 +310,7 @@ internal static (ж<os.File>, error) dup⁔(/*this*/ ж<netFD> Ꮡfd) {
     }
     syscall.Handle h = default;
     ref var syserr = ref heap<error>(out var Ꮡsyserr);
-    var err = Ꮡfd.Ꮡpfd.RawControl((uintptr fdΔ1) => {
+    var err = Ꮡfd.Ꮡpfd.RawControl([GoFunc("(*netFD).dup.func1")] (uintptr fdΔ1) => {
         (h, Ꮡsyserr.ValueSlot) = dupSocket((syscall.Handle)fdΔ1);
     });
     if (err == nil) {

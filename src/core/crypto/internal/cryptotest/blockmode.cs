@@ -27,17 +27,17 @@ public static void TestBlockMode(ж<testing.T> t, cipher.Block block, Func<ciphe
 
 internal static void testBlockModePair(ж<testing.T> t, cipher.Block b, Func<cipher.Block, slice<byte>, cipher.BlockMode> enc, Func<cipher.Block, slice<byte>, cipher.BlockMode> dec, slice<byte> iv) {
     var ivʗ1 = iv;
-    t.Run(encryptionˢ, (ж<testing.T> tΔ1) => {
+    t.Run(encryptionˢ, [GoFunc("testBlockModePair.func1")] (ж<testing.T> tΔ1) => {
         testBlockMode(tΔ1, enc, b, ivʗ1);
     });
 
     var ivʗ2 = iv;
-    t.Run(decryptionˢ, (ж<testing.T> tΔ2) => {
+    t.Run(decryptionˢ, [GoFunc("testBlockModePair.func2")] (ж<testing.T> tΔ2) => {
         testBlockMode(tΔ2, dec, b, ivʗ2);
     });
 
     var ivʗ3 = iv;
-    t.Run(roundtripˢ, (ж<testing.T> tΔ3) => {
+    t.Run(roundtripˢ, [GoFunc("testBlockModePair.func3")] (ж<testing.T> tΔ3) => {
         var rng = newRandReader(tΔ3);
 
         nint blockSize = enc(b, ivʗ3).BlockSize();
@@ -75,16 +75,16 @@ private static readonly @string keepStateˢᵇ = "KeepState"u8;
 internal static void testBlockMode(ж<testing.T> t, Func<cipher.Block, slice<byte>, cipher.BlockMode> bm, cipher.Block b, slice<byte> iv) {
     nint blockSize = bm(b, iv).BlockSize();
 
-    t.Run(wrongIVLenˢ, (ж<testing.T> tΔ1) => {
+    t.Run(wrongIVLenˢ, [GoFunc("testBlockMode.func1")] (ж<testing.T> tΔ1) => {
         var ivΔ1 = new slice<byte>(b.BlockSize() + 1);
         var ivʗ1 = ivΔ1;
-        mustPanic(tΔ1, ivLengthMustEqualBlockˢ, () => {
+        mustPanic(tΔ1, ivLengthMustEqualBlockˢ, [GoFunc("testBlockMode.func1.1")] () => {
             bm(b, ivʗ1);
         });
     });
 
     var ivʗ2 = iv;
-    t.Run(emptyInputˢ, (ж<testing.T> tΔ2) => {
+    t.Run(emptyInputˢ, [GoFunc("testBlockMode.func2")] (ж<testing.T> tΔ2) => {
         var rng = newRandReader(tΔ2);
 
         var (src, dst) = (new slice<byte>(blockSize), new slice<byte>(blockSize));
@@ -98,7 +98,7 @@ internal static void testBlockMode(ж<testing.T> t, Func<cipher.Block, slice<byt
     });
 
     var ivʗ3 = iv;
-    t.Run(alterInputˢ, (ж<testing.T> tΔ3) => {
+    t.Run(alterInputˢ, [GoFunc("testBlockMode.func3")] (ж<testing.T> tΔ3) => {
         var rng = newRandReader(tΔ3);
 
         var (src, dst, before) = (new slice<byte>(blockSize * 2), new slice<byte>(blockSize * 2), new slice<byte>(blockSize * 2));
@@ -115,7 +115,7 @@ internal static void testBlockMode(ж<testing.T> t, Func<cipher.Block, slice<byt
     });
 
     var ivʗ4 = iv;
-    t.Run(aliasingˢ, (ж<testing.T> tΔ4) => {
+    t.Run(aliasingˢ, [GoFunc("testBlockMode.func4")] (ж<testing.T> tΔ4) => {
         var rng = newRandReader(tΔ4);
 
         var (buff, expectedOutput) = (new slice<byte>(blockSize * 2), new slice<byte>(blockSize * 2));
@@ -135,7 +135,7 @@ internal static void testBlockMode(ж<testing.T> t, Func<cipher.Block, slice<byt
     });
 
     var ivʗ5 = iv;
-    t.Run(outOfBoundsWriteˢ, (ж<testing.T> tΔ5) => { // Issue 21104
+    t.Run(outOfBoundsWriteˢ, [GoFunc("testBlockMode.func5")] (ж<testing.T> tΔ5) => { // Issue 21104
         var rng = newRandReader(tΔ5);
 
         ref var src = ref heap<slice<byte>>(new slice<byte>(blockSize), out var Ꮡsrc);
@@ -177,7 +177,7 @@ internal static void testBlockMode(ж<testing.T> t, Func<cipher.Block, slice<byt
         rng.Read(Ꮡsrc.ValueSlot);
 
         var ivʗ6 = ivʗ5;
-        mustPanic(tΔ5, outputSmallerThanInputˢ, () => {
+        mustPanic(tΔ5, outputSmallerThanInputˢ, [GoFunc("testBlockMode.func5.1")] () => {
             bm(b, ivʗ6).CryptBlocks(Ꮡdst.ValueSlot, Ꮡsrc.ValueSlot);
         });
 
@@ -192,7 +192,7 @@ internal static void testBlockMode(ж<testing.T> t, Func<cipher.Block, slice<byt
     // Check that output of cipher isn't affected by adjacent data beyond input
     // slice scope
     var ivʗ7 = iv;
-    t.Run(outOfBoundsReadˢ, (ж<testing.T> tΔ6) => {
+    t.Run(outOfBoundsReadˢ, [GoFunc("testBlockMode.func6")] (ж<testing.T> tΔ6) => {
         var rng = newRandReader(tΔ6);
 
         var src = new slice<byte>(blockSize);
@@ -218,7 +218,7 @@ internal static void testBlockMode(ж<testing.T> t, Func<cipher.Block, slice<byt
     });
 
     var ivʗ8 = iv;
-    t.Run(bufferOverlapˢ, (ж<testing.T> tΔ7) => {
+    t.Run(bufferOverlapˢ, [GoFunc("testBlockMode.func7")] (ж<testing.T> tΔ7) => {
         var rng = newRandReader(tΔ7);
 
         var buff = new slice<byte>(blockSize * 2);
@@ -228,7 +228,7 @@ internal static void testBlockMode(ж<testing.T> t, Func<cipher.Block, slice<byt
         ref var src = ref heap<slice<byte>>(buff.slice(0, blockSize), out var Ꮡsrc);
         ref var dst = ref heap<slice<byte>>(buff.slice(1, blockSize + 1), out var Ꮡdst);
         var ivʗ9 = ivʗ8;
-        mustPanic(tΔ7, invalidBufferOverlapˢ, () => {
+        mustPanic(tΔ7, invalidBufferOverlapˢ, [GoFunc("testBlockMode.func7.1")] () => {
             bm(b, ivʗ9).CryptBlocks(Ꮡdst.ValueSlot, Ꮡsrc.ValueSlot);
         });
 
@@ -236,7 +236,7 @@ internal static void testBlockMode(ж<testing.T> t, Func<cipher.Block, slice<byt
         Ꮡsrc.ValueSlot = buff.slice(0, blockSize);
         Ꮡdst.ValueSlot = buff.slice(blockSize - 1, 2 * blockSize - 1);
         var ivʗ10 = ivʗ8;
-        mustPanic(tΔ7, invalidBufferOverlapˢ, () => {
+        mustPanic(tΔ7, invalidBufferOverlapˢ, [GoFunc("testBlockMode.func7.2")] () => {
             bm(b, ivʗ10).CryptBlocks(Ꮡdst.ValueSlot, Ꮡsrc.ValueSlot);
         });
 
@@ -244,14 +244,14 @@ internal static void testBlockMode(ж<testing.T> t, Func<cipher.Block, slice<byt
         Ꮡsrc.ValueSlot = buff.slice(blockSize - 1, 2 * blockSize - 1);
         Ꮡdst.ValueSlot = buff.slice(0, blockSize);
         var ivʗ11 = ivʗ8;
-        mustPanic(tΔ7, invalidBufferOverlapˢ, () => {
+        mustPanic(tΔ7, invalidBufferOverlapˢ, [GoFunc("testBlockMode.func7.3")] () => {
             bm(b, ivʗ11).CryptBlocks(Ꮡdst.ValueSlot, Ꮡsrc.ValueSlot);
         });
     });
 
     // Input to CryptBlocks should be a multiple of BlockSize
     var ivʗ12 = iv;
-    t.Run(partialBlocksˢ, (ж<testing.T> tΔ8) => {
+    t.Run(partialBlocksˢ, [GoFunc("testBlockMode.func8")] (ж<testing.T> tΔ8) => {
         // Check a few cases of not being a multiple of BlockSize
         foreach (var (_, srcSize) in range(slice<nint>([blockSize - 1, blockSize + 1, 2 * blockSize - 1, 2 * blockSize + 1]))) {
             var src = new slice<byte>(srcSize);
@@ -259,14 +259,14 @@ internal static void testBlockMode(ж<testing.T> t, Func<cipher.Block, slice<byt
             var dstʗ1 = dst;
             var ivʗ13 = ivʗ12;
             var srcʗ1 = src;
-            mustPanic(tΔ8, inputNotFullBlocksˢ, () => {
+            mustPanic(tΔ8, inputNotFullBlocksˢ, [GoFunc("testBlockMode.func8.1")] () => {
                 bm(b, ivʗ13).CryptBlocks(dstʗ1, srcʗ1);
             });
         }
     });
 
     var ivʗ14 = iv;
-    t.Run(keepStateˢ, (ж<testing.T> tΔ9) => {
+    t.Run(keepStateˢ, [GoFunc("testBlockMode.func9")] (ж<testing.T> tΔ9) => {
         var rng = newRandReader(tΔ9);
 
         var (src, serialDst, compositeDst) = (new slice<byte>(blockSize * 4), new slice<byte>(blockSize * 4), new slice<byte>(blockSize * 4));

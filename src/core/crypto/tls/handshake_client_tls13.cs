@@ -383,7 +383,7 @@ internal static error processHelloRetryRequest⁔(/*this*/ ref clientHandshakeSt
                 c.sendAlert(alertIllegalParameter);
                 return errors.New(tlsServerSelectedˢ3);
             }
-            if (slices.ContainsFunc(hs.hello.keyShares, (keyShare ks) => ks.group == curveID)) {
+            if (slices.ContainsFunc(hs.hello.keyShares, [GoFunc("(*clientHandshakeStateTLS13).processHelloRetryRequest.func1")] (keyShare ks) => ks.group == curveID)) {
                 c.sendAlert(alertIllegalParameter);
                 return errors.New(tlsServerSentAnˢ2);
             }
@@ -517,7 +517,7 @@ internal static error processServerHello⁔(/*this*/ ж<clientHandshakeStateTLS1
         c.sendAlert(alertIllegalParameter);
         return errors.New(tlsServerDidNotSendAKeyˢ);
     }
-    if (!slices.ContainsFunc(hs.hello.keyShares, (keyShare ks) => ks.group == Ꮡhs.Value.serverHello.serverShare.group)) {
+    if (!slices.ContainsFunc(hs.hello.keyShares, [GoFunc("(*clientHandshakeStateTLS13).processServerHello.func1")] (keyShare ks) => ks.group == Ꮡhs.Value.serverHello.serverShare.group)) {
         c.sendAlert(alertIllegalParameter);
         return errors.New(tlsServerSelectedˢ3);
     }

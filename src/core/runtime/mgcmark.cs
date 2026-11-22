@@ -109,7 +109,7 @@ internal static void gcPrepareMarkRoots() {
     assertWorldStopped();
 
     // Compute how many data and BSS root blocks there are.
-    nint nBlocks(uintptr bytes) => (nint)divRoundUp(bytes, rootBlockBytes);
+    [GoFunc("gcPrepareMarkRoots.func1")] nint nBlocks(uintptr bytes) => (nint)divRoundUp(bytes, rootBlockBytes);
 
     work.nDataRoots = 0;
     work.nBSSRoots = 0;
@@ -191,7 +191,7 @@ internal static void gcMarkRootCheck() {
     // Since we don't care about newer Gs (see comment in
     // gcPrepareMarkRoots), no locking is required.
     nint i = 0;
-    forEachGRace((ж<g> gp) => {
+    forEachGRace([GoFunc("gcMarkRootCheck.func1")] (ж<g> gp) => {
         if (i >= work.nStackRoots) {
             return;
         }
@@ -294,7 +294,7 @@ internal static int64 markroot(ж<gcWork> gcw, uint32 i, bool flushBgCredit) {
         // scanstack must be done on the system stack in case
         // we're trying to scan our own stack.
         var gpʗ1 = gp;
-        systemstack(() => {
+        systemstack([GoFunc("markroot.func1")] () => {
             // If this is a self-scan, put the user G in
             // _Gwaiting to prevent self-deadlock. It may
             // already be in _Gwaiting if this is a mark
@@ -555,7 +555,7 @@ internal static void gcAssistAlloc(ж<g> Ꮡgp) {
                 gpΔ1.Value.bubble = default;
                 var bubbleʗ1 = bubble;
                 var gpʗ1 = gpΔ1;
-                defer(() => {
+                defer([GoFunc("gcAssistAlloc.func1")] () => {
                     gpʗ1.Value.bubble = bubbleʗ1;
                 }, ref ᒐ);
             }
@@ -679,7 +679,7 @@ retry:
         }
 
         // Perform assist work
-        systemstack(() => {
+        systemstack([GoFunc("gcAssistAlloc.func2")] () => {
             gcAssistAlloc1(Ꮡgp, scanWork);
             // The user stack may have moved, so this can't touch
             // anything on it until it returns from systemstack.
@@ -1626,7 +1626,7 @@ internal static void scanConservative(uintptr b, uintptr n, ж<uint8> ptrmask, �
     if (debugScanConservative) {
         printlock();
         print((@string)"conservatively scanning [", (hex)(uint64)b, (@string)",", (hex)(uint64)(b + n), (@string)")\n");
-        hexdumpWords(b, n, (uintptr p, hexdumpMarker m) => {
+        hexdumpWords(b, n, [GoFunc("scanConservative.func1")] (uintptr p, hexdumpMarker m) => {
             if (ptrmask != nil) {
                 var word = (p - b) / (uintptr)goarch.PtrSize;
                 var bits = addb(ptrmask, word / 8).Value;

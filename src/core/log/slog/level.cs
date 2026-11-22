@@ -65,7 +65,7 @@ private static readonly @string errorˢᵇ = "ERROR"u8;
 //	LevelWarn.String() => "WARN"
 //	(LevelInfo+2).String() => "INFO+2"
 internal static @string String⁔(/*this*/ Level l) {
-    @string str(@string @base, Level val) {
+    [GoFunc("Level.String.func1")] @string str(@string @base, Level val) {
         if (val == 0) {
             return @base;
         }
@@ -144,7 +144,7 @@ internal static error /*err*/ parse⁔(/*this*/ ж<Level> Ꮡl, @string s) {
     try {
         ref var l = ref Ꮡl.DerefOrNull();
 
-        defer(() => {
+        defer([GoFunc("(*Level).parse.func1")] () => {
             if (err != nil) {
                 err = fmt.Errorf("slog: level string %q: %w"u8, s, err);
             }

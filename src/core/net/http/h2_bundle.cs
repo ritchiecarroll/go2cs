@@ -969,11 +969,11 @@ internal static bool http2http2ConfigStrictMaxConcurrentRequests(ref HTTP2Config
 // improved enough that we can instead allocate chunks like this:
 // make([]byte, max(16<<10, expectedBytesRemaining))
 [GoLazy] partial class lazyᴛhttp2dataChunkPools { internal static readonly ж<array<sync.Pool>> Ꮡhttp2dataChunkPools = new StaticBox<array<sync.Pool>>(array<sync.Pool>([
-    new(New: () => Ꮡ(new array<byte>(1024))),
-    new(New: () => Ꮡ(new array<byte>(2048))),
-    new(New: () => Ꮡ(new array<byte>(4096))),
-    new(New: () => Ꮡ(new array<byte>(8192))),
-    new(New: () => Ꮡ(new array<byte>(16384)))
+    new(New: [GoFunc("init.func1")] () => Ꮡ(new array<byte>(1024))),
+    new(New: [GoFunc("init.func2")] () => Ꮡ(new array<byte>(2048))),
+    new(New: [GoFunc("init.func3")] () => Ꮡ(new array<byte>(4096))),
+    new(New: [GoFunc("init.func4")] () => Ꮡ(new array<byte>(8192))),
+    new(New: [GoFunc("init.func5")] () => Ꮡ(new array<byte>(16384)))
 ])); }
 internal static ref array<sync.Pool> http2dataChunkPools => ref ((StaticBox<array<sync.Pool>>)Ꮡhttp2dataChunkPools).ValueSlot;
 
@@ -1613,7 +1613,7 @@ internal static void invalidate⁔(/*this*/ ref http2FrameHeader h) { h.valid = 
 // frame header bytes.
 // Used only by ReadFrameHeader.
 [GoLazy] partial class lazyᴛhttp2fhBytes { internal static readonly ж<sync.Pool> Ꮡhttp2fhBytes = new StaticBox<sync.Pool>(new sync.Pool(
-    New: () => {
+    New: [GoFunc("init.func6")] () => {
         var buf = new slice<byte>(http2frameHeaderLen);
         return Ꮡ(buf);
     }
@@ -1832,7 +1832,7 @@ internal static ж<http2Framer> http2NewFramer(io.Writer w, io.Reader r) {
     var fr = Ꮡ(new http2Framer(
         w: w,
         r: r,
-        countError: (@string _) => {
+        countError: [GoFunc("http2NewFramer.func1")] (@string _) => {
         },
         logReads: http2logFrameReads,
         logWrites: http2logFrameWrites,
@@ -1840,7 +1840,7 @@ internal static ж<http2Framer> http2NewFramer(io.Writer w, io.Reader r) {
         debugWriteLoggerf: log.Printf
     ));
     var frʗ1 = fr;
-    fr.getReadBuf = (uint32 size) => {
+    fr.getReadBuf = [GoFunc("http2NewFramer.func2")] (uint32 size) => {
         if (cap(frʗ1.readBuf) >= (nint)size) {
             return frʗ1.readBuf.slice(0, (nint)(size));
         }
@@ -3115,7 +3115,7 @@ internal static (http2Frame, error) readMetaFrame⁔(/*this*/ ж<http2Framer> �
         hdec.SetMaxStringLength(fr.maxHeaderStringLen());
         var hdecʗ1 = hdec;
         var mhʗ1 = mh;
-        hdec.SetEmitFunc((hpack.HeaderField hfΔ1) => {
+        hdec.SetEmitFunc([GoFunc("(*http2Framer).readMetaFrame.func1")] (hpack.HeaderField hfΔ1) => {
             if (http2VerboseLogs && Ꮡfr.Value.logReads) {
                 Ꮡfr.Value.debugReadLoggerf("http2: decoded hpack field %+v", hfΔ1);
             }
@@ -3168,7 +3168,7 @@ internal static (http2Frame, error) readMetaFrame⁔(/*this*/ ж<http2Framer> �
         });
         // Lose reference to MetaHeadersFrame:
         var hdecʗ2 = hdec;
-        defer(hdecʗ2.SetEmitFunc, (hpack.HeaderField hfΔ2) => {
+        defer(hdecʗ2.SetEmitFunc, [GoFunc("(*http2Framer).readMetaFrame.func2")] (hpack.HeaderField hfΔ2) => {
         }, ref ᒐ);
 
         http2headersOrContinuation hc = new http2HeadersFrameжhttp2headersOrContinuation(hf);
@@ -3264,7 +3264,7 @@ internal static @string http2summarizeFrame(http2Frame f) {
     switch (f.type()) {
     case ж<http2SettingsFrame> fΔ1: {
         nint n = 0;
-        fΔ1.ForeachSetting((http2Setting s) => {
+        fΔ1.ForeachSetting([GoFunc("http2summarizeFrame.func1")] (http2Setting s) => {
             n++;
             if (n == 1) {
                 Ꮡbuf.Value.WriteString(settingsˢ);
@@ -3379,7 +3379,7 @@ internal static partial uint64 http2curGoroutineID() {
 }
 
 [GoLazy] partial class lazyᴛhttp2littleBuf { internal static readonly ж<sync.Pool> Ꮡhttp2littleBuf = new StaticBox<sync.Pool>(new sync.Pool(
-    New: () => {
+    New: [GoFunc("init.func7")] () => {
         var buf = new slice<byte>(64);
         return Ꮡ(buf);
     }
@@ -3744,7 +3744,7 @@ internal static ж<http2bufferedWriter> http2newBufferedWriter(net.Conn conn, ti
 internal static UntypedInt http2bufWriterPoolBufferSize => /* 4 << 10 */ 4096;
 
 [GoLazy] partial class lazyᴛhttp2bufWriterPool { internal static readonly ж<sync.Pool> Ꮡhttp2bufWriterPool = new StaticBox<sync.Pool>(new sync.Pool(
-    New: () => bufio.NewWriterSize(default, http2bufWriterPoolBufferSize).OrTypedNil()
+    New: [GoFunc("init.func8")] () => bufio.NewWriterSize(default, http2bufWriterPoolBufferSize).OrTypedNil()
 )); }
 internal static ref sync.Pool http2bufWriterPool => ref ((StaticBox<sync.Pool>)Ꮡhttp2bufWriterPool).ValueSlot;
 
@@ -3847,7 +3847,7 @@ partial interface http2connectionStater {
     tls.ConnectionState ConnectionState();
 }
 
-internal static readonly ж<sync.Pool> Ꮡhttp2sorterPool = new StaticBox<sync.Pool>(new sync.Pool(New: () => @new<http2sorter>()));
+internal static readonly ж<sync.Pool> Ꮡhttp2sorterPool = new StaticBox<sync.Pool>(new sync.Pool(New: [GoFunc("init.func9")] () => @new<http2sorter>()));
 internal static ref sync.Pool http2sorterPool => ref ((StaticBox<sync.Pool>)Ꮡhttp2sorterPool).ValueSlot;
 
 partial struct http2sorter {
@@ -4147,7 +4147,7 @@ internal static error http2errHandlerComplete = errors.New("http2: request body 
 internal static error http2errStreamClosed = errors.New("http2: stream closed");
 
 [GoLazy] partial class lazyᴛhttp2responseWriterStatePool { internal static readonly ж<sync.Pool> Ꮡhttp2responseWriterStatePool = new StaticBox<sync.Pool>(new sync.Pool(
-    New: () => {
+    New: [GoFunc("init.func10")] () => {
         var rws = Ꮡ(new http2responseWriterState());
         rws.bw = bufio.NewWriterSize(new http2chunkWriter(rws), http2handlerChunkWriteSize);
         return rws.OrTypedNil();
@@ -4283,7 +4283,7 @@ internal static void startGracefulShutdown⁔(/*this*/ ж<http2serverInternalSta
 // Global error channel pool used for uninitialized Servers.
 // We use a per-Server pool when possible to avoid using channels across synctest bubbles.
 internal static readonly ж<sync.Pool> Ꮡhttp2errChanPool = new StaticBox<sync.Pool>(new sync.Pool(
-    New: () => new channel<error>(1)
+    New: [GoFunc("init.func11")] () => new channel<error>(1)
 ));
 internal static ref sync.Pool http2errChanPool => ref ((StaticBox<sync.Pool>)Ꮡhttp2errChanPool).ValueSlot;
 
@@ -4327,7 +4327,7 @@ internal static error http2ConfigureServer(ж<Server> Ꮡs, ж<http2Server> Ꮡc
     }
     conf.state = Ꮡ(new http2serverInternalState(
         activeConns: new map<ж<http2serverConn>, EmptyStruct>(),
-        errChanPool: new sync.Pool(New: () => new channel<error>(1))
+        errChanPool: new sync.Pool(New: [GoFunc("http2ConfigureServer.func1")] () => new channel<error>(1))
     ));
     var (h1, h2) = (Ꮡs, Ꮡconf); if (h2.IdleTimeout == 0) {
         if (h1.IdleTimeout != 0) {
@@ -4378,7 +4378,7 @@ internal static error http2ConfigureServer(ж<Server> Ꮡs, ж<http2Server> Ꮡc
     if (s.TLSNextProto == nil) {
         s.TLSNextProto = new map<@string, Action<ж<Server>, ж<tls.Conn>, Handler>>{};
     }
-    void protoHandler(ж<Server> hs, net.Conn c, Handler h, bool sawClientPreface) {
+    [GoFunc("http2ConfigureServer.func2")] void protoHandler(ж<Server> hs, net.Conn c, Handler h, bool sawClientPreface) {
         if (http2testHookOnConn != nil) {
             http2testHookOnConn();
         }
@@ -4399,14 +4399,14 @@ internal static error http2ConfigureServer(ж<Server> Ꮡs, ж<http2Server> Ꮡc
         )));
     }
     var protoHandlerʗ1 = protoHandler;
-    s.TLSNextProto[http2NextProtoTLS] = (ж<Server> hs, ж<tls.Conn> c, Handler h) => {
+    s.TLSNextProto[http2NextProtoTLS] = [GoFunc("http2ConfigureServer.func3")] (ж<Server> hs, ж<tls.Conn> c, Handler h) => {
         protoHandlerʗ1(hs, new tls.ConnжConn(c), h, false);
     };
     // The "unencrypted_http2" TLSNextProto key is used to pass off non-TLS HTTP/2 conns.
     //
     // A connection passed in this method has already had the HTTP/2 preface read from it.
     var protoHandlerʗ2 = protoHandler;
-    s.TLSNextProto[http2nextProtoUnencryptedHTTP2] = [MethodImpl(MethodImplOptions.NoInlining)] (ж<Server> hs, ж<tls.Conn> c, Handler h) => {
+    s.TLSNextProto[http2nextProtoUnencryptedHTTP2] = [MethodImpl(MethodImplOptions.NoInlining), GoFunc("http2ConfigureServer.func4")] (ж<Server> hs, ж<tls.Conn> c, Handler h) => {
         var (nc, err) = http2unencryptedNetConnFromTLSConn(c);
         if (err != nil) {
             var lg = hs.ErrorLog; if (lg != nil) {
@@ -4953,7 +4953,7 @@ partial struct http2readFrameResult {
 internal static void readFrames⁔(/*this*/ ref http2serverConn sc) {
     var gate = new channel<EmptyStruct>(0);
     var gateʗ1 = gate;
-    var gateDone = () => {
+    var gateDone = [GoFunc("(*http2serverConn).readFrames.func1")] () => {
         gateʗ1.ᐸꟷ(new EmptyStruct());
     };
     for (;;) {
@@ -5317,7 +5317,7 @@ internal static partial error readPreface⁔(/*this*/ ж<http2serverConn> Ꮡsc)
         }
         var errc = new channel<error>(1);
         var errcʗ1 = errc;
-        goǃ(() => {
+        goǃ([GoFunc("(*http2serverConn).readPreface.func1")] () => {
             // Read the client preface
             var buf = new slice<byte>(len(http2ClientPreface));
             var (_, err) = io.ReadFull(new net_ConnᴠReader(Ꮡsc.Value.conn), buf); if (err != nil) {
@@ -5352,7 +5352,7 @@ internal static partial error readPreface⁔(/*this*/ ж<http2serverConn> Ꮡsc)
 }
 
 internal static readonly ж<sync.Pool> Ꮡhttp2writeDataPool = new StaticBox<sync.Pool>(new sync.Pool(
-    New: () => @new<http2writeData>()
+    New: [GoFunc("init.func12")] () => @new<http2writeData>()
 ));
 internal static ref sync.Pool http2writeDataPool => ref ((StaticBox<sync.Pool>)Ꮡhttp2writeDataPool).ValueSlot;
 
@@ -5725,7 +5725,7 @@ internal static void startGracefulShutdown⁔(/*this*/ ж<http2serverConn> Ꮡsc
     ref var sc = ref Ꮡsc.DerefOrNull();
 
     sc.serveG.checkNotOn(); // NOT
-    Ꮡsc.ᏑshutdownOnce.Do(() => {
+    Ꮡsc.ᏑshutdownOnce.Do([GoFunc("(*http2serverConn).startGracefulShutdown.func1")] () => {
         Ꮡsc.Value.sendServeMsg(http2gracefulShutdownMsg.OrTypedNil());
     });
 }
@@ -6850,7 +6850,7 @@ internal static void runHandler⁔(/*this*/ ж<http2serverConn> Ꮡsc, ж<http2r
     try {
         defer(Ꮡsc.sendServeMsg, http2handlerDoneMsg.OrTypedNil(), ref ᒐ);
         var didPanic = true;
-        defer([MethodImpl(MethodImplOptions.NoInlining)] () => {
+        defer([MethodImpl(MethodImplOptions.NoInlining), GoFunc("(*http2serverConn).runHandler.func1")] () => {
             rw.Value.rws.stream.cancelCtx();
             var b = rw.Value.rws.stream.reqBody; if (b != nil) {
                 // Closing the body refunds flow control credit for any unconsumed data.
@@ -7032,7 +7032,7 @@ partial struct http2requestBody {
 }
 
 internal static error Close⁔(/*this*/ ж<http2requestBody> Ꮡb) {
-    Ꮡb.ᏑcloseOnce.Do(() => {
+    Ꮡb.ᏑcloseOnce.Do([GoFunc("(*http2requestBody).Close.func1")] () => {
         if (Ꮡb.Value.pipe != nil) {
             Ꮡb.Value.pipe.BreakWithError(http2errClosedBody);
             nint unread = Ꮡb.Value.pipe.Len(); if (unread > 0) {
@@ -7326,7 +7326,7 @@ internal static error SetReadDeadline⁔(/*this*/ ref http2responseWriter w, tim
     }
     var deadlineʗ1 = deadline;
     var stʗ1 = st;
-    w.rws.conn.sendServeMsg((ж<http2serverConn> sc) => {
+    w.rws.conn.sendServeMsg([GoFunc("(*http2responseWriter).SetReadDeadline.func1")] (ж<http2serverConn> sc) => {
         if (stʗ1.readDeadline != nil) {
             if (!stʗ1.readDeadline.Stop()) {
                 // Deadline already exceeded, or stream has been closed.
@@ -7354,7 +7354,7 @@ internal static error SetWriteDeadline⁔(/*this*/ ref http2responseWriter w, ti
     }
     var deadlineʗ1 = deadline;
     var stʗ1 = st;
-    w.rws.conn.sendServeMsg((ж<http2serverConn> sc) => {
+    w.rws.conn.sendServeMsg([GoFunc("(*http2responseWriter).SetWriteDeadline.func1")] (ж<http2serverConn> sc) => {
         if (stʗ1.writeDeadline != nil) {
             if (!stʗ1.writeDeadline.Stop()) {
                 // Deadline already exceeded, or stream has been closed.
@@ -7423,7 +7423,7 @@ internal static partial /*<-*/channel<bool> CloseNotify⁔(/*this*/ ref http2res
         var cw = rws.stream.cw;
         var chʗ1 = ch;
         var cwʗ1 = cw;
-        goǃ(() => {
+        goǃ([GoFunc("(*http2responseWriter).CloseNotify.func1")] () => {
             cwʗ1.Wait(); // wait for close
             chʗ1.ᐸꟷ(true);
         });
@@ -7738,7 +7738,7 @@ internal static void startPush⁔(/*this*/ ж<http2serverConn> Ꮡsc, ж<http2st
     // PUSH_PROMISE frames must be sent in increasing order by stream ID, so
     // we allocate an ID for the promised stream lazily, when the PUSH_PROMISE
     // is written. Once the ID is allocated, we start the request handler.
-    var allocatePromisedID = [MethodImpl(MethodImplOptions.NoInlining)] (uint32, error) () => {
+    var allocatePromisedID = [MethodImpl(MethodImplOptions.NoInlining), GoFunc("(*http2serverConn).startPush.func1")] (uint32, error) () => {
         Ꮡsc.Value.serveG.check();
 
         // Check this again, just in case. Technically, we might have received
@@ -7848,7 +7848,7 @@ internal static error http2checkValidHTTP2RequestHeaders(Header h) {
 }
 
 internal static HandlerFunc http2new400Handler(error err) {
-    return (ResponseWriter w, ж<Request> r) => {
+    return [GoFunc("http2new400Handler.func1")] (ResponseWriter w, ж<Request> r) => {
         Error(w, err.Error(), StatusBadRequest);
     };
 }
@@ -8109,7 +8109,7 @@ internal static (ж<http2Transport>, error) http2configureTransports(ж<Transpor
     }
     var connPoolʗ1 = connPool;
     var t2ʗ1 = t2;
-    [MethodImpl(MethodImplOptions.NoInlining)] RoundTripper upgradeFn(@string scheme, @string authority, net.Conn c) {
+    [MethodImpl(MethodImplOptions.NoInlining), GoFunc("http2configureTransports.func1")] RoundTripper upgradeFn(@string scheme, @string authority, net.Conn c) {
         @string addr = http2authorityAddr(scheme, authority);
         {
             var (used, err) = connPoolʗ1.addConnIfNeeded(addr, t2ʗ1, c); if (err != nil) {
@@ -8132,10 +8132,10 @@ internal static (ж<http2Transport>, error) http2configureTransports(ж<Transpor
         t1.TLSNextProto = new map<@string, Func<@string, ж<tls.Conn>, RoundTripper>>();
     }
     var upgradeFnʗ1 = upgradeFn;
-    t1.TLSNextProto[http2NextProtoTLS] = (@string authority, ж<tls.Conn> c) => upgradeFnʗ1(httpsˢ, authority, new tls.ConnжConn(c));
+    t1.TLSNextProto[http2NextProtoTLS] = [GoFunc("http2configureTransports.func2")] (@string authority, ж<tls.Conn> c) => upgradeFnʗ1(httpsˢ, authority, new tls.ConnжConn(c));
     // The "unencrypted_http2" TLSNextProto key is used to pass off non-TLS HTTP/2 conns.
     var upgradeFnʗ2 = upgradeFn;
-    t1.TLSNextProto[http2nextProtoUnencryptedHTTP2] = [MethodImpl(MethodImplOptions.NoInlining)] RoundTripper (@string authority, ж<tls.Conn> c) => {
+    t1.TLSNextProto[http2nextProtoUnencryptedHTTP2] = [MethodImpl(MethodImplOptions.NoInlining), GoFunc("http2configureTransports.func3")] RoundTripper (@string authority, ж<tls.Conn> c) => {
         var (nc, err) = http2unencryptedNetConnFromTLSConn(c);
         if (err != nil) {
             goǃ(() => c.Close());
@@ -8326,7 +8326,7 @@ internal static void abortStream⁔(/*this*/ ж<http2clientStream> Ꮡcs, error 
 internal static void abortStreamLocked⁔(/*this*/ ж<http2clientStream> Ꮡcs, error err) {
     ref var cs = ref Ꮡcs.DerefOrNull();
 
-    Ꮡcs.ᏑabortOnce.Do(() => {
+    Ꮡcs.ᏑabortOnce.Do([GoFunc("(*http2clientStream).abortStreamLocked.func1")] () => {
         Ꮡcs.Value.abortErr = err;
         close(Ꮡcs.Value.abort);
     });
@@ -8367,7 +8367,7 @@ internal static partial void closeReqBodyLocked⁔(/*this*/ ж<http2clientStream
     cs.reqBodyClosed = new channel<EmptyStruct>(0);
     var reqBodyClosed = cs.reqBodyClosed;
     var reqBodyClosedʗ1 = reqBodyClosed;
-    goǃ(() => {
+    goǃ([GoFunc("(*http2clientStream).closeReqBodyLocked.func1")] () => {
         Ꮡcs.Value.reqBody.Close();
         close(reqBodyClosedʗ1);
     });
@@ -9153,7 +9153,7 @@ internal static bool isDoNotReuseAndIdle⁔(/*this*/ ж<http2ClientConn> Ꮡcc) 
     finally { if (ᒐd1) Ꮡcc.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
-internal static Action http2shutdownEnterWaitStateHook = () => {
+internal static Action http2shutdownEnterWaitStateHook = [GoFunc("init.func13")] () => {
 };
 
 // Shutdown gracefully closes the client connection, waiting for running streams to complete.
@@ -9167,7 +9167,7 @@ internal static partial error Shutdown⁔(/*this*/ ж<http2ClientConn> Ꮡcc, co
     var done = new channel<EmptyStruct>(0);
     var cancelled = false; // guarded by cc.mu
     var doneʗ1 = done;
-    goǃ(() => {
+    goǃ([GoFunc("(*http2ClientConn).Shutdown.func1")] () => {
         GoFrame ᒐ = default;
         try {
             Ꮡcc.Value.mu.Lock();
@@ -9258,7 +9258,7 @@ internal static partial void goAwayAndClose⁔(/*this*/ ж<http2ClientConn> Ꮡc
     }
     var done = new channel<EmptyStruct>(0);
     var doneʗ1 = done;
-    goǃ(() => {
+    goǃ([GoFunc("(*http2ClientConn).goAwayAndClose.func1")] () => {
         GoFrame ᒐ = default;
         try {
             defer(ᴛ1 => close(ᴛ1), doneʗ1, ref ᒐ);
@@ -9398,7 +9398,7 @@ internal static partial (ж<Response>, error) roundTrip⁔(/*this*/ ж<http2Clie
 
     var csʗ2 = cs;
     var ctxʗ1 = ctx;
-    error waitDone() {
+    [GoFunc("(*http2ClientConn).roundTrip.func1")] error waitDone() {
         var selᴛ46 = csʗ2.donec;
         var selᴛ47 = ctxʗ1.Done();
         var selᴛ48 = csʗ2.reqCancel;
@@ -9417,7 +9417,7 @@ internal static partial (ж<Response>, error) roundTrip⁔(/*this*/ ж<http2Clie
 
     var csʗ3 = cs;
     var waitDoneʗ1 = waitDone;
-    (ж<Response>, error) handleResponseHeaders() {
+    [GoFunc("(*http2ClientConn).roundTrip.func2")] (ж<Response>, error) handleResponseHeaders() {
         var res = csʗ3.res;
         if (res.StatusCode > 299) {
             // On error or status code 3xx, 4xx, 5xx, etc abort any
@@ -9444,7 +9444,7 @@ internal static partial (ж<Response>, error) roundTrip⁔(/*this*/ ж<http2Clie
         return (res, default);
     }
 
-    error cancelRequest(ж<http2clientStream> csΔ1, error err) {
+    [GoFunc("(*http2ClientConn).roundTrip.func3")] error cancelRequest(ж<http2clientStream> csΔ1, error err) {
         csΔ1.cc.Ꮡmu.Lock();
         var bodyClosed = csΔ1.reqBodyClosed;
         csΔ1.cc.Ꮡmu.Unlock();
@@ -9759,7 +9759,7 @@ internal static error encodeAndWriteHeaders⁔(/*this*/ ж<http2clientStream> �
         // again in form HEADERS{1}, CONTINUATION{0,})
         cc.Ꮡhbuf.Reset();
         var ccʗ2 = cc;
-        var (res, err) = http2encodeRequestHeaders(req, cs.requestedGzip, cc.peerMaxHeaderListSize, (@string name, @string value) => {
+        var (res, err) = http2encodeRequestHeaders(req, cs.requestedGzip, cc.peerMaxHeaderListSize, [GoFunc("(*http2clientStream).encodeAndWriteHeaders.func1")] (@string name, @string value) => {
             ccʗ2.writeHeader(name, value);
         });
         if (err != nil) {
@@ -10422,7 +10422,7 @@ internal static void cleanup⁔(/*this*/ ж<http2clientConnReadLoop> Ꮡrl) {
         var idleTime = time.Now().Sub(cc.lastActive);
         if (atomic.LoadUint32(cc.ᏑatomicReused) == 0 && idleTime < unusedWaitTime && !cc.closedOnIdle) {
             var ccʗ2 = cc;
-            cc.idleTimer = time.AfterFunc(unusedWaitTime - idleTime, () => {
+            cc.idleTimer = time.AfterFunc(unusedWaitTime - idleTime, [GoFunc("(*http2clientConnReadLoop).cleanup.func1")] () => {
                 ccʗ2.t.connPool().MarkDead(ccʗ2);
             });
         } else {
@@ -10704,7 +10704,7 @@ internal static (ж<Response>, error) handleResponse⁔(/*this*/ ref http2client
                 t = new Header(0);
                 res.Trailer = t;
             }
-            http2foreachHeaderElement(hf.Value, (@string v) => {
+            http2foreachHeaderElement(hf.Value, [GoFunc("(*http2clientConnReadLoop).handleResponse.func1")] (@string v) => {
                 Ꮡt.ValueSlot[httpcommon.CanonicalHeader(v)] = default;
             });
         } else {
@@ -10796,7 +10796,7 @@ internal static (ж<Response>, error) handleResponse⁔(/*this*/ ref http2client
             // Non-canonical headers are already rejected by our framer at this
             // point.
             var clensʗ1 = clens;
-            var conflicting = slices.ContainsFunc(clens[1..], (@string clen) => clen != clensʗ1[0]);
+            var conflicting = slices.ContainsFunc(clens[1..], [GoFunc("(*http2clientConnReadLoop).handleResponse.func2")] (@string clen) => clen != clensʗ1[0]);
             var (cl, errΔ2) = strconv.ParseUint(clens[0], 10, 63);
             if (conflicting || errΔ2 != nil) {
                 delete(res.Header, "Content-Length"u8);
@@ -11251,7 +11251,7 @@ internal static error processSettingsNoWrite⁔(/*this*/ ж<http2clientConnReadL
 
         bool seenMaxConcurrentStreams = default;
         var ccʗ3 = cc;
-        var err = f.ForeachSetting(error (http2Setting s) => {
+        var err = f.ForeachSetting([GoFunc("(*http2clientConnReadLoop).processSettingsNoWrite.func1")] error (http2Setting s) => {
             var errΔ1 = s.Valid(); if (errΔ1 != nil) {
                 return errΔ1;
             }
@@ -11410,7 +11410,7 @@ internal static partial error Ping⁔(/*this*/ ж<http2ClientConn> Ꮡcc, contex
     var errc = new channel<EmptyStruct>(0);
     var errcʗ1 = errc;
     var pʗ1 = p;
-    goǃ(() => {
+    goǃ([GoFunc("(*http2ClientConn).Ping.func1")] () => {
         GoFrame ᒐ = default;
         try {
             Ꮡcc.Value.wmu.Lock();
@@ -11601,7 +11601,7 @@ internal static (nint, error) Read⁔(/*this*/ http2eofReader _Δp0, slice<byte>
 
 internal static (byte, error) ReadByte⁔(/*this*/ http2eofReader _) { return (0, io.EOF); }
 
-internal static readonly ж<sync.Pool> Ꮡhttp2gzipPool = new StaticBox<sync.Pool>(new sync.Pool(New: () => @new<gzip.Reader>()));
+internal static readonly ж<sync.Pool> Ꮡhttp2gzipPool = new StaticBox<sync.Pool>(new sync.Pool(New: [GoFunc("init.func14")] () => @new<gzip.Reader>()));
 internal static ref sync.Pool http2gzipPool => ref ((StaticBox<sync.Pool>)Ꮡhttp2gzipPool).ValueSlot;
 
 // gzipPoolGet gets a gzip.Reader from the pool and resets it to read from r.
@@ -11740,7 +11740,7 @@ internal static error /*err*/ http2registerHTTPSProtocol(ж<Transport> t, http2n
     error err = default;
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("http2registerHTTPSProtocol.func1")] () => {
             var e = recover(); if (e != nil) {
                 err = fmt.Errorf("%v"u8, e);
             }
@@ -13118,7 +13118,7 @@ internal static (http2FrameWriteRequest wr, bool ok) Pop⁔(/*this*/ ж<http2pri
     http2FrameWriteRequest wr = default;
     bool ok = default;
 
-    Ꮡws.Ꮡroot.walkReadyInOrder(false, Ꮡws.Ꮡtmp, (ж<http2priorityNodeRFC7540> n, bool openParent) => {
+    Ꮡws.Ꮡroot.walkReadyInOrder(false, Ꮡws.Ꮡtmp, [GoFunc("(*http2priorityWriteSchedulerRFC7540).Pop.func1")] (ж<http2priorityNodeRFC7540> n, bool openParent) => {
         var limit = (int32)math.MaxInt32;
         if (openParent) {
             limit = Ꮡws.Value.writeThrottleLimit;

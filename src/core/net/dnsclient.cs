@@ -210,7 +210,7 @@ internal static void shuffleByWeight⁔(/*this*/ byPriorityWeight addrs) {
 
 // sort reorders SRV records as specified in RFC 2782.
 internal static void sort⁔(/*this*/ byPriorityWeight addrs) {
-    slices.SortFunc(addrs, (ж<SRV> a, ж<SRV> b) => {
+    slices.SortFunc(addrs, [GoFunc("byPriorityWeight.sort.func1")] (ж<SRV> a, ж<SRV> b) => {
         nint r = cmp.Compare(a.Priority, b.Priority); if (r != 0) {
             return r;
         }
@@ -241,7 +241,7 @@ internal static void sort⁔(/*this*/ byPref s) {
         nint j = randIntn(i + 1);
         (s[i], s[j]) = (s[j], s[i]);
     }
-    slices.SortFunc(s, (ж<MX> a, ж<MX> b) => cmp.Compare(a.Pref, b.Pref));
+    slices.SortFunc(s, [GoFunc("byPref.sort.func1")] (ж<MX> a, ж<MX> b) => cmp.Compare(a.Pref, b.Pref));
 }
 
 // An NS represents a single DNS NS record.

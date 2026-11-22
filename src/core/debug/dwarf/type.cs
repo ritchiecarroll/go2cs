@@ -475,7 +475,7 @@ internal static (Type, error) readType⁔(/*this*/ ж<Data> Ꮡd, @string name, 
         // readType encounters them.
         if (Ꮡfixups == nil) {
             ref var fixer = ref heap(new typeFixer(), out var Ꮡfixer);
-            defer(() => {
+            defer([GoFunc("(*Data).readType.func1")] () => {
                 Ꮡfixer.Value.apply();
             }, ref ᒐ);
             Ꮡfixups = Ꮡfixer; fixups = ref Ꮡfixups.DerefOrNull();
@@ -490,7 +490,7 @@ internal static (Type, error) readType⁔(/*this*/ ж<Data> Ꮡd, @string name, 
 
         // Get next child; set err if error happens.
         var eʗ1 = e;
-        ж<Entry> next() {
+        [GoFunc("(*Data).readType.func2")] ж<Entry> next() {
             if (!eʗ1.Children) {
                 return default;
             }
@@ -529,7 +529,7 @@ internal static (Type, error) readType⁔(/*this*/ ж<Data> Ꮡd, @string name, 
         // Get Type referred to by Entry's AttrType field.
         // Set err if error happens. Not having a type is an error.
         var typeCacheʗ1 = typeCache;
-        Type typeOf(ж<Entry> eΔ1) {
+        [GoFunc("(*Data).readType.func3")] Type typeOf(ж<Entry> eΔ1) {
             var tval = eΔ1.Val(AttrType);
             Type t = default;
             switch (tval.type()) {

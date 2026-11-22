@@ -71,7 +71,7 @@ using System.Runtime.CompilerServices;
 [assembly: GoPositionMap("internal/coverage/cfile/apis.go", "apis.cs", "ABEikoKUqJKClIKUgqiSgpSokoKUgqaCgpSCpoK4qJKCgpSCADt4goKUgoKmgoKmpg==")]
 [assembly: GoPositionMap("internal/coverage/cfile/emit.go", "emit.cs", "ACRKAFOgAbKClIKCgoKmgoKmgoKCpoKCgsqCgpSCgpSmgoKClKzE7oKm7pSCgoKigoKUlIKCgsqCgqKClIKCgpSCgsqCpoKCgpSqooKClIKmlO6CuIKCpqyygpSCgoLMpIKUpoK4ggAHEICCpIK4gIKkgILagIK2qJKClAACEAAIBoKCgpSCgoKCpqzSgoKCgoKCgpQAAhwADQKCgpSCpoKCpoKCpqzSgIKkgILagIK2rLLmspSCooKUpoKUgoKClKaCgoKUgoK4goKCgsqCgoKCppSCpoKCgqYACBKCgoKCgoKUggAHEKaCgriUgqYAChDSgoKClIKCqsKCgpQAAhDSpoKClIKUgoKCgqKCgpSUgoI=", "455-461:1", "", "189=Getenv/1/1/2;263=Getenv/1/1/2;313=Getenv/1/1/4")]
 [assembly: GoPositionMap("internal/coverage/cfile/hooks.go", "hooks.cs", "AAo4ABYIgoKU")]
-[assembly: GoPositionMap("internal/coverage/cfile/testsupport.go", "testsupport.cs", "AB484oKCuILKgpSCAAcQgoKokoKCgoKClJKCgtwACBKCgoKClIK4goKCyoK4goKUgoK4AAwW5IKClJKUgoKClIKClIKCuKaygoKUkoKCgpSCgoKClIK4gpSCpoKClOiCgsqCgoKCgoKUgoKCgoKCpoKCgqaClIKClLgACQ6GooKClIIABxCCgoKUgoKCpgACEuKClKaCgoKCgpSCpoKUgpSCgoKmpoKU", "69-74:1;138-140:1;159-193:2", "", "86=NewFormatter/1/1/2", "184:29", "77:25,78:17,154:21,155:13")]
+[assembly: GoPositionMap("internal/coverage/cfile/testsupport.go", "testsupport.cs", "AB484oKCuILKgpSCAAcQgoKokoKCgoKClJKCgtwACBKCgoKClIK4goKCyoK4goKUgoK4AAwW5IKClJKUgoKClIKClIKCuKaygoKUkoKCgpSCgoKClIK4gpSCpoKClOiCgsqCgoKCgoKUgoKCgoKCpoKCgqaClIKClLgACQ6GooKClIIABxCCgoKUgoKCpgACEuKClKaCgoKCgpSCpoKUgpSCgoKmpoKU", "69-74:1;138-140:1;159-193:2", "", "86=NewFormatter/1/1/2", "184:29", "77:63,78:17,154:60,155:13")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.coverage;

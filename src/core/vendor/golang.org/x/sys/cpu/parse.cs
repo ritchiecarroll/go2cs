@@ -26,7 +26,7 @@ internal static (nint major, nint minor, nint patch, bool ok) parseRelease(@stri
         }
     }
 
-    (nint, bool) next() {
+    [GoFunc("parseRelease.func1")] (nint, bool) next() {
         foreach (var i in range(len(rel))) {
             if (rel[i] == '.') {
                 var (verΔ1, errΔ1) = strconv.Atoi(rel.slice(0, i));

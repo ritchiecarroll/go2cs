@@ -141,7 +141,7 @@ internal static void AddUnit⁔(/*this*/ ref Formatter fm, @string @file, @strin
 // include function name as part of the sorting criteria, the thinking
 // being that is better to provide things in the original source order.
 internal static void sortUnits⁔(/*this*/ ж<pstate> Ꮡp, slice<extcu> units) {
-    slices.SortFunc(units, (extcu ui, extcu uj) => {
+    slices.SortFunc(units, [GoFunc("(*pstate).sortUnits.func1")] (extcu ui, extcu uj) => {
         @string ifile = Ꮡp.Value.funcs[ui.fnfid].@file;
         @string jfile = Ꮡp.Value.funcs[uj.fnfid].@file;
         {
@@ -236,7 +236,7 @@ internal static error EmitPercent⁔(/*this*/ ref Formatter fm, io.Writer w, sli
         }
     }
 
-    error rep(uint64 cov, uint64 tot) {
+    [GoFunc("(*Formatter).EmitPercent.func1")] error rep(uint64 cov, uint64 tot) {
         if (tot != 0) {
             var (_, err) = fmt.Fprintf(w, "coverage: %.1f%% of statements%s\n"u8,
                 100.0D * (float64)cov / (float64)tot, inpkgs); if (err != nil) {
@@ -310,7 +310,7 @@ internal static error EmitFuncs⁔(/*this*/ ж<Formatter> Ꮡfm, io.Writer w) {
         if (fm.cm == coverage.CtrModeInvalid) {
             throw panic("internal error, counter mode unset");
         }
-        float64 perc(uint64 covered, uint64 total) {
+        [GoFunc("(*Formatter).EmitFuncs.func1")] float64 perc(uint64 covered, uint64 total) {
             if (total == 0) {
                 total = 1;
             }
@@ -345,7 +345,7 @@ internal static error EmitFuncs⁔(/*this*/ ж<Formatter> Ꮡfm, io.Writer w) {
             uint64 cstmts = default;
             uint64 tstmts = default;
             var pʗ1 = p;
-            void captureFuncStart(extcu u) {
+            [GoFunc("(*Formatter).EmitFuncs.func2")] void captureFuncStart(extcu u) {
                 fname = pʗ1.funcs[u.fnfid].fname;
                 ffile = pʗ1.funcs[u.fnfid].@file;
                 flit = pʗ1.funcs[u.fnfid].lit;
@@ -354,7 +354,7 @@ internal static error EmitFuncs⁔(/*this*/ ж<Formatter> Ꮡfm, io.Writer w) {
             var captureFuncStartʗ1 = captureFuncStart;
             var percʗ1 = perc;
             var tabberʗ2 = tabber;
-            error emitFunc(extcu u) {
+            [GoFunc("(*Formatter).EmitFuncs.func3")] error emitFunc(extcu u) {
                 // Don't emit entries for function literals (see discussion
                 // in function header comment above).
                 if (!flit) {

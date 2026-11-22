@@ -47,7 +47,7 @@ internal static bool IsComparable⁔(/*this*/ ref _TypeSet s, map<Type, bool> se
         return s.comparable;
     }
     var seenʗ1 = seen;
-    return s.@is((ж<term> t) => t != nil && comparableType(t.typ, false, seenʗ1) == nil);
+    return s.@is([GoFunc("(*_TypeSet).IsComparable.func1")] (ж<term> t) => t != nil && comparableType(t.typ, false, seenʗ1) == nil);
 }
 
 // NumMethods returns the number of methods available.
@@ -200,7 +200,7 @@ internal static ж<_TypeSet> computeInterfaceTypeSet(ж<Checker> Ꮡcheck, token
 
             Ꮡcheck.trace(pos, typeSetForSˢ, Ꮡityp.OrTypedNil());
             check.indent++;
-            defer(() => {
+            defer([GoFunc("computeInterfaceTypeSet.func1")] () => {
                 Ꮡcheck.Value.indent--;
                 Ꮡcheck.trace(pos, "=> %s ", Ꮡityp.typeSet().OrTypedNil());
             }, ref ᒐ);
@@ -240,7 +240,7 @@ internal static ж<_TypeSet> computeInterfaceTypeSet(ж<Checker> Ꮡcheck, token
         ref var allMethods = ref heap<slice<ж<Func>>>(out var ᏑallMethods);
         var mpos = new map<ж<Func>, token.Pos>(); // method specification or method embedding position, for good error messages
         var mposʗ1 = mpos;
-        void addMethod(token.Pos posΔ1, ж<Func> m, bool @explicit) {
+        [GoFunc("computeInterfaceTypeSet.func2")] void addMethod(token.Pos posΔ1, ж<Func> m, bool @explicit) {
             {
                 var other = Ꮡseen.ValueSlot.insert(new FuncжObject(m));
                 switch (ᐧ) {
@@ -267,7 +267,7 @@ internal static ж<_TypeSet> computeInterfaceTypeSet(ж<Checker> Ꮡcheck, token
                     if (Ꮡcheck != nil) {
                         var mposʗ2 = mposʗ1;
                         var otherʗ1 = other;
-                        Ꮡcheck.Value.later(() => {
+                        Ꮡcheck.Value.later([GoFunc("computeInterfaceTypeSet.func2.1")] () => {
                             if (posΔ1.IsValid() && !Ꮡcheck.Value.allowVersion(go1_14) || !Identical(m.typ, otherʗ1.Type())) {
                                 var err = Ꮡcheck.newError(DuplicateDecl);
                                 err.addf((atPos)posΔ1, "duplicate method %s", m.name);

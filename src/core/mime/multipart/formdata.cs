@@ -72,7 +72,7 @@ internal static (ж<Form>, error err) readForm⁔(/*this*/ ж<Reader> Ꮡr, int6
         var maxHeaders = maxMIMEHeaders();
 
         var formʗ1 = form;
-        defer(() => {
+        defer([GoFunc("(*Reader).readForm.func1")] () => {
             if (Ꮡfile.ValueSlot != nil) {
                 var cerr = Ꮡfile.ValueSlot.Close(); if (err == nil) {
                     err = cerr;

@@ -162,7 +162,7 @@ partial struct pp {
 }
 
 internal static readonly ж<Δsync.Pool> ᏑppFree = new StaticBox<Δsync.Pool>(new Δsync.Pool(
-    New: () => @new<pp>()
+    New: [GoFunc("init.func1")] () => @new<pp>()
 ));
 internal static ref Δsync.Pool ppFree => ref ((StaticBox<Δsync.Pool>)ᏑppFree).ValueSlot;
 

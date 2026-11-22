@@ -196,7 +196,7 @@ public static (@string host, @string port, error err) SplitHostPort(@string host
 
     @string missingPort = missingPortᶜ;
     @string tooManyColons = tooManyColonsᶜ;
-    (@string host, @string port, error err) addrErr(@string addr, @string why) {
+    [GoFunc("SplitHostPort.func1")] (@string host, @string port, error err) addrErr(@string addr, @string why) {
         return ("", "", new AddrErrorжerror(Ꮡ(new AddrError(Err: why, Addr: addr))));
     }
     nint j = 0;
@@ -310,7 +310,7 @@ internal static (addrList, error) internetAddrList⁔(/*this*/ ж<Resolver> Ꮡr
         return (default, ((UnknownNetworkError)net));
     }}
     var portnumʗ1 = portnum;
-    var inetaddr = Addr (IPAddr ip) => {
+    var inetaddr = [GoFunc("(*Resolver).internetAddrList.func1")] Addr (IPAddr ip) => {
         var netᴛ2 = net;
         switch (ᐧ) {
         case {} when netᴛ2 == "tcp"u8 || netᴛ2 == "tcp4"u8 || netᴛ2 == "tcp6"u8: {

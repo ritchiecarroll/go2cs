@@ -179,7 +179,7 @@ partial struct jsonEncoder {
 }
 
 [GoLazy] partial class lazyᴛjsonEncoderPool { internal static ж<sync.Pool> jsonEncoderPool = Ꮡ(new sync.Pool(
-    New: () => {
+    New: [GoFunc("init.func2")] () => {
         var enc = Ꮡ(new jsonEncoder(
             buf: @new<bytes.Buffer>()
         ));
@@ -196,7 +196,7 @@ internal static error appendJSONMarshal(ж<buffer.Buffer> Ꮡbuf, any v) {
 
         var j = jsonEncoderPool.Get()._<ж<jsonEncoder>>();
         var jʗ1 = j;
-        defer(() => {
+        defer([GoFunc("appendJSONMarshal.func1")] () => {
             // To reduce peak allocation, return only smaller buffers to the pool.
             const nint maxBufferSize = /* 16 << 10 */ 16384;
             if (jʗ1.buf.Cap() > maxBufferSize) {
@@ -232,10 +232,10 @@ private static readonly @string u202ˢᵇ = @"\u202"u8;
 // Modified from encoding/json/encode.go:encodeState.string,
 // with escapeHTML set to false.
 internal static slice<byte> appendEscapedJSONString(slice<byte> buf, @string s) {
-    void @char(byte b) {
+    [GoFunc("appendEscapedJSONString.func1")] void @char(byte b) {
         buf = append(buf, b);
     }
-    void str(@string sΔ1) {
+    [GoFunc("appendEscapedJSONString.func2")] void str(@string sΔ1) {
         buf = append(buf, sΔ1.ꓸꓸꓸ);
     }
 

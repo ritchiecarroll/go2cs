@@ -33,11 +33,11 @@ internal static ж<hybridKEM> mlkem768X25519 = Ꮡ(new hybridKEM(
     pqEncapsKeySize: mlkem.EncapsulationKeySize768,
     pqCiphertextSize: mlkem.CiphertextSize768,
 
-    pqNewPublicKey: (slice<byte> data) => {
+    pqNewPublicKey: [GoFunc("init.func1")] (slice<byte> data) => {
         var (ᴛ1, ᴛ2) = mlkem.NewEncapsulationKey768(data);
         return (new mlkem.EncapsulationKey768жEncapsulator(ᴛ1), ᴛ2);
     },
-    pqNewPrivateKey: (slice<byte> data) => {
+    pqNewPrivateKey: [GoFunc("init.func2")] (slice<byte> data) => {
         var (ᴛ1, ᴛ2) = mlkem.NewDecapsulationKey768(data);
         return (new mlkem.DecapsulationKey768жDecapsulator(ᴛ1), ᴛ2);
     }
@@ -59,11 +59,11 @@ internal static ж<hybridKEM> mlkem768P256 = Ꮡ(new hybridKEM(
     pqEncapsKeySize: mlkem.EncapsulationKeySize768,
     pqCiphertextSize: mlkem.CiphertextSize768,
 
-    pqNewPublicKey: (slice<byte> data) => {
+    pqNewPublicKey: [GoFunc("init.func3")] (slice<byte> data) => {
         var (ᴛ1, ᴛ2) = mlkem.NewEncapsulationKey768(data);
         return (new mlkem.EncapsulationKey768жEncapsulator(ᴛ1), ᴛ2);
     },
-    pqNewPrivateKey: (slice<byte> data) => {
+    pqNewPrivateKey: [GoFunc("init.func4")] (slice<byte> data) => {
         var (ᴛ1, ᴛ2) = mlkem.NewDecapsulationKey768(data);
         return (new mlkem.DecapsulationKey768жDecapsulator(ᴛ1), ᴛ2);
     }
@@ -84,11 +84,11 @@ internal static ж<hybridKEM> mlkem1024P384 = Ꮡ(new hybridKEM(
     pqEncapsKeySize: mlkem.EncapsulationKeySize1024,
     pqCiphertextSize: mlkem.CiphertextSize1024,
 
-    pqNewPublicKey: (slice<byte> data) => {
+    pqNewPublicKey: [GoFunc("init.func5")] (slice<byte> data) => {
         var (ᴛ1, ᴛ2) = mlkem.NewEncapsulationKey1024(data);
         return (new mlkem.EncapsulationKey1024жEncapsulator(ᴛ1), ᴛ2);
     },
-    pqNewPrivateKey: (slice<byte> data) => {
+    pqNewPrivateKey: [GoFunc("init.func6")] (slice<byte> data) => {
         var (ᴛ1, ᴛ2) = mlkem.NewDecapsulationKey1024(data);
         return (new mlkem.DecapsulationKey1024жDecapsulator(ᴛ1), ᴛ2);
     }
@@ -200,7 +200,7 @@ internal static (PublicKey, error) NewPublicKey⁔(/*this*/ ж<hybridKEM> Ꮡkem
     }
     ref var k = ref heap<ж<ecdh.PublicKey>>(out var Ꮡk);
     var dataʗ1 = data;
-    fips140.WithoutEnforcement(() => { // Hybrid of ML-KEM, which is Approved.
+    fips140.WithoutEnforcement([GoFunc("(*hybridKEM).NewPublicKey.func1")] () => { // Hybrid of ML-KEM, which is Approved.
         (Ꮡk.ValueSlot, Ꮡerr.ValueSlot) = Ꮡkem.Value.curve.NewPublicKey(dataʗ1.slice(Ꮡkem.Value.pqEncapsKeySize));
     });
     if (err != nil) {
@@ -224,7 +224,7 @@ internal static (slice<byte> sharedSecret, slice<byte> encapPub, error err) enca
     ref var pk = ref Ꮡpk.DerefOrNull();
 
     ref var skE = ref heap<ж<ecdh.PrivateKey>>(out var ᏑskE);
-    fips140.WithoutEnforcement(() => { // Hybrid of ML-KEM, which is Approved.
+    fips140.WithoutEnforcement([GoFunc("(*hybridPublicKey).encap.func1")] () => { // Hybrid of ML-KEM, which is Approved.
         (ᏑskE.ValueSlot, err) = Ꮡpk.Value.t.Curve().GenerateKey(rand.Reader);
     });
     if (err != nil) {
@@ -234,7 +234,7 @@ internal static (slice<byte> sharedSecret, slice<byte> encapPub, error err) enca
         skE = testingOnlyGenerateKey();
     }
     ref var ssT = ref heap<slice<byte>>(out var ᏑssT);
-    fips140.WithoutEnforcement(() => {
+    fips140.WithoutEnforcement([GoFunc("(*hybridPublicKey).encap.func2")] () => {
         (ᏑssT.ValueSlot, err) = ᏑskE.ValueSlot.ECDH(Ꮡpk.Value.t);
     });
     if (err != nil) {
@@ -311,7 +311,7 @@ internal static (PrivateKey, error) NewPrivateKey⁔(/*this*/ ж<hybridKEM> Ꮡk
         s.Read(seedT);
         ref var k = ref heap<ecdh.KeyExchanger>(out var Ꮡk);
         var seedTʗ1 = seedT;
-        fips140.WithoutEnforcement(() => { // Hybrid of ML-KEM, which is Approved.
+        fips140.WithoutEnforcement([GoFunc("(*hybridKEM).NewPrivateKey.func1")] () => { // Hybrid of ML-KEM, which is Approved.
             var (ᴛ1, ᴛ2) = Ꮡkem.Value.curve.NewPrivateKey(seedTʗ1);
             (Ꮡk.ValueSlot, Ꮡerr.ValueSlot) = (new ecdh.PrivateKeyжKeyExchanger(ᴛ1), ᴛ2);
         });
@@ -403,14 +403,14 @@ internal static (slice<byte>, error) decap⁔(/*this*/ ж<hybridPrivateKey> Ꮡk
     }
     ref var pub = ref heap<ж<ecdh.PublicKey>>(out var Ꮡpub);
     var ctTʗ1 = ctT;
-    fips140.WithoutEnforcement(() => { // Hybrid of ML-KEM, which is Approved.
+    fips140.WithoutEnforcement([GoFunc("(*hybridPrivateKey).decap.func1")] () => { // Hybrid of ML-KEM, which is Approved.
         (Ꮡpub.ValueSlot, Ꮡerr.ValueSlot) = Ꮡk.Value.t.Curve().NewPublicKey(ctTʗ1);
     });
     if (err != nil) {
         return (default, err);
     }
     ref var ssT = ref heap<slice<byte>>(out var ᏑssT);
-    fips140.WithoutEnforcement(() => {
+    fips140.WithoutEnforcement([GoFunc("(*hybridPrivateKey).decap.func2")] () => {
         (ᏑssT.ValueSlot, Ꮡerr.ValueSlot) = Ꮡk.Value.t.ECDH(Ꮡpub.ValueSlot);
     });
     if (err != nil) {
@@ -423,15 +423,15 @@ internal static (slice<byte>, error) decap⁔(/*this*/ ж<hybridPrivateKey> Ꮡk
 [GoLazy] partial class lazyᴛmlkem768 { internal static ж<mlkemKEM> mlkem768 = Ꮡ(new mlkemKEM(
     id: 0x0041,
     ciphertextSize: mlkem.CiphertextSize768,
-    newPublicKey: (slice<byte> data) => {
+    newPublicKey: [GoFunc("init.func7")] (slice<byte> data) => {
         var (ᴛ1, ᴛ2) = mlkem.NewEncapsulationKey768(data);
         return (new mlkem.EncapsulationKey768жEncapsulator(ᴛ1), ᴛ2);
     },
-    newPrivateKey: (slice<byte> data) => {
+    newPrivateKey: [GoFunc("init.func8")] (slice<byte> data) => {
         var (ᴛ1, ᴛ2) = mlkem.NewDecapsulationKey768(data);
         return (new mlkem.DecapsulationKey768жDecapsulator(ᴛ1), ᴛ2);
     },
-    generateKey: () => {
+    generateKey: [GoFunc("init.func9")] () => {
         var (ᴛ1, ᴛ2) = mlkem.GenerateKey768();
         return (new mlkem.DecapsulationKey768жDecapsulator(ᴛ1), ᴛ2);
     }
@@ -445,15 +445,15 @@ public static KEM MLKEM768() {
 [GoLazy] partial class lazyᴛmlkem1024 { internal static ж<mlkemKEM> mlkem1024 = Ꮡ(new mlkemKEM(
     id: 0x0042,
     ciphertextSize: mlkem.CiphertextSize1024,
-    newPublicKey: (slice<byte> data) => {
+    newPublicKey: [GoFunc("init.func10")] (slice<byte> data) => {
         var (ᴛ1, ᴛ2) = mlkem.NewEncapsulationKey1024(data);
         return (new mlkem.EncapsulationKey1024жEncapsulator(ᴛ1), ᴛ2);
     },
-    newPrivateKey: (slice<byte> data) => {
+    newPrivateKey: [GoFunc("init.func11")] (slice<byte> data) => {
         var (ᴛ1, ᴛ2) = mlkem.NewDecapsulationKey1024(data);
         return (new mlkem.DecapsulationKey1024жDecapsulator(ᴛ1), ᴛ2);
     },
-    generateKey: () => {
+    generateKey: [GoFunc("init.func12")] () => {
         var (ᴛ1, ᴛ2) = mlkem.GenerateKey1024();
         return (new mlkem.DecapsulationKey1024жDecapsulator(ᴛ1), ᴛ2);
     }

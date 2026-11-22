@@ -35,7 +35,7 @@ public static Func<ж<Package>, @string> RelativeTo(ж<Package> pkg) {
     if (pkg == nil) {
         return default;
     }
-    return (ж<Package> other) => {
+    return [GoFunc("RelativeTo.func1")] (ж<Package> other) => {
         if (pkg == other) {
             return ""u8; // same package; unqualified
         }
@@ -558,7 +558,7 @@ internal static void signature⁔(/*this*/ ж<typeWriter> Ꮡw, ж<Signature> �
             if (w.ctxt != nil) {
                 assert(w.tparams == nil);
                 w.tparams = sig.TypeParams();
-                defer(() => {
+                defer([GoFunc("(*typeWriter).signature.func1")] () => {
                     Ꮡw.Value.tparams = default;
                 }, ref ᒐ);
             }

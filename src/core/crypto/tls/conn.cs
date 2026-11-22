@@ -1033,7 +1033,7 @@ internal static (nint, error) flush⁔(/*this*/ ref Conn c) {
 
 // outBufPool pools the record-sized scratch buffers used by writeRecordLocked.
 internal static readonly ж<sync.Pool> ᏑoutBufPool = new StaticBox<sync.Pool>(new sync.Pool(
-    New: () => @new<slice<byte>>()
+    New: [GoFunc("init.func1")] () => @new<slice<byte>>()
 ));
 internal static ref sync.Pool outBufPool => ref ((StaticBox<sync.Pool>)ᏑoutBufPool).ValueSlot;
 
@@ -1064,7 +1064,7 @@ internal static (nint, error) writeRecordLocked⁔(/*this*/ ж<Conn> Ꮡc, recor
         var outBufPtr = ᏑoutBufPool.Get()._<ж<slice<byte>>>();
         ref var outBuf = ref heap<slice<byte>>(outBufPtr.ValueSlot, out var ᏑoutBuf);
         var outBufPtrʗ1 = outBufPtr;
-        defer(() => {
+        defer([GoFunc("(*Conn).writeRecordLocked.func1")] () => {
             // You might be tempted to simplify this by just passing &outBuf to Put,
             // but that would make the local copy of the outBuf slice header escape
             // to the heap, causing an allocation. Instead, we keep around the
@@ -1740,11 +1740,11 @@ internal static error /*ret*/ handshakeContext⁔(/*this*/ ж<Conn> Ꮡc, contex
             c.quic.cancel = cancel;
         } else if (ctx.Done() != nil) {
             // Close the connection if ctx is canceled before the function returns.
-            var stop = context.AfterFunc(ctx, () => {
+            var stop = context.AfterFunc(ctx, [GoFunc("(*Conn).handshakeContext.func1")] () => {
                 _ = Ꮡc.Value.conn.Close();
             });
             var stopʗ1 = stop;
-            defer(() => {
+            defer([GoFunc("(*Conn).handshakeContext.func2")] () => {
                 if (!stopʗ1()) {
                     // Return context error to user.
                     ret = ctx.Err();
@@ -1861,7 +1861,7 @@ internal static ConnectionState connectionStateLocked⁔(/*this*/ ж<Conn> Ꮡc)
     if (c.config.Renegotiation != RenegotiateNever) {
         state.ekm = noEKMBecauseRenegotiation;
     } else if (c.vers != VersionTLS13 && !c.extMasterSecret) {
-        state.ekm = (@string label, slice<byte> context, nint length) => {
+        state.ekm = [GoFunc("(*Conn).connectionStateLocked.func1")] (@string label, slice<byte> context, nint length) => {
             if (tlsunsafeekm.Value() == "1"u8) {
                 tlsunsafeekm.IncNonDefault();
                 return Ꮡc.Value.ekm(label, context, length);

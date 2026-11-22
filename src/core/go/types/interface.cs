@@ -179,7 +179,7 @@ internal static void interfaceType⁔(/*this*/ ж<Checker> Ꮡcheck, ж<Interfac
     ref var iface = ref Ꮡiface.DerefOrNull();
     ref var def = ref Ꮡdef.DerefOrNull();
 
-    void addEmbedded(token.Pos pos, Type typ) {
+    [GoFunc("(*Checker).interfaceType.func1")] void addEmbedded(token.Pos pos, Type typ) {
         Ꮡityp.Value.embeddeds = append(Ꮡityp.Value.embeddeds, typ);
         if (Ꮡityp.Value.embedPos == nil) {
             Ꮡityp.Value.embedPos = @new<slice<token.Pos>>();
@@ -250,7 +250,7 @@ internal static void interfaceType⁔(/*this*/ ж<Checker> Ꮡcheck, ж<Interfac
     // Compute type set as soon as possible to report any errors.
     // Subsequent uses of type sets will use this computed type
     // set and won't need to pass in a *Checker.
-    check.later(() => {
+    check.later([GoFunc("(*Checker).interfaceType.func2")] () => {
         computeInterfaceTypeSet(Ꮡcheck, Ꮡiface.Value.Pos(), Ꮡityp);
     }).describef(new ast_InterfaceTypeжpositioner(Ꮡiface), "compute type set for %s", Ꮡityp.OrTypedNil());
 }

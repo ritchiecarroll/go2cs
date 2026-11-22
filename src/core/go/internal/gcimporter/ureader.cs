@@ -98,7 +98,7 @@ internal static ж<types.Package> readUnifiedPackage(ж<token.FileSet> fset, ж<
                 imps = append(imps, imp);
             }
         }
-        slices.SortFunc(imps, (ж<types.Package> a, ж<types.Package> b) => strings.Compare(a.Path(), b.Path()));
+        slices.SortFunc(imps, [GoFunc("readUnifiedPackage.func1")] (ж<types.Package> a, ж<types.Package> b) => strings.Compare(a.Path(), b.Path()));
         pkg.SetImports(imps);
 
         pkg.MarkComplete();
@@ -514,7 +514,7 @@ internal static (ж<types.Package>, @string) objIdx⁔(/*this*/ ж<pkgReader> �
         r.dict = dict;
 
         var objPkgʗ1 = objPkg;
-        void declare(types.Object obj) {
+        [GoFunc("(*pkgReader).objIdx.func1")] void declare(types.Object obj) {
             objPkgʗ1.Scope().Insert(obj);
         }
 
@@ -680,7 +680,7 @@ internal static slice<ж<types.TypeParam>> typeParamNames⁔(/*this*/ ж<reader>
     var tparams = r.dict.tparams;
     var tparamsʗ1 = tparams;
     var typsʗ1 = typs;
-    r.p.later(() => {
+    r.p.later([GoFunc("(*reader).typeParamNames.func1")] () => {
         foreach (var (i, typ) in range(typsʗ1)) {
             tparamsʗ1[i].SetConstraint(typ);
         }

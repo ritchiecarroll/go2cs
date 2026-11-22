@@ -87,7 +87,7 @@ partial struct scanner {
 }
 
 internal static readonly ж<sync.Pool> ᏑscannerPool = new StaticBox<sync.Pool>(new sync.Pool(
-    New: () => Ꮡ(new scanner())
+    New: [GoFunc("init.func1")] () => Ꮡ(new scanner())
 ));
 internal static ref sync.Pool scannerPool => ref ((StaticBox<sync.Pool>)ᏑscannerPool).ValueSlot;
 

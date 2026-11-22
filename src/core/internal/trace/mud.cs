@@ -164,7 +164,7 @@ internal static (float64, bool) invCumulativeSum⁔(/*this*/ ref mud d, float64 
 
     // Sort edges.
     var edges = d.unsorted;
-    slices.SortFunc(edges, (edge a, edge b) => cmp.Compare(a.x, b.x));
+    slices.SortFunc(edges, [GoFunc("(*mud).invCumulativeSum.func1")] (edge a, edge b) => cmp.Compare(a.x, b.x));
     // Merge with sorted edges.
     d.unsorted = default;
     if (d.sorted == nil) {

@@ -423,7 +423,7 @@ public static partial ж<Cmd> Command(@string name, params ꓸꓸꓸstring argʗ
                 cmd.createdByStack = stack;
             }
 
-            runtime.SetFinalizer(cmd.OrTypedNil(), (ж<Cmd> c) => {
+            runtime.SetFinalizer(cmd.OrTypedNil(), [GoFunc("Command.func1")] (ж<Cmd> c) => {
                 if (c.Process != nil && c.ProcessState == nil) {
                     @string debugHint = ""u8;
                     if (c.createdByStack == nil) {
@@ -487,7 +487,7 @@ public static ж<Cmd> CommandContext(context.Context ctx, @string name, params �
     var cmd = Command(name, arg.ꓸꓸꓸ);
     cmd.ctx = ctx;
     var cmdʗ1 = cmd;
-    cmd.Cancel = () => cmdʗ1.Process.Kill();
+    cmd.Cancel = [GoFunc("CommandContext.func1")] () => cmdʗ1.Process.Kill();
     return cmd;
 }
 
@@ -515,7 +515,7 @@ internal static @string String⁔(/*this*/ ref Cmd c) {
 internal static bool interfaceEqual(any a, any b) {
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("interfaceEqual.func1")] () => {
             recover();
         }, ref ᒐ);
         return AreEqual(a, b);
@@ -557,7 +557,7 @@ internal static (ж<os.File>, error) childStdin⁔(/*this*/ ж<Cmd> Ꮡc) {
     c.childIOFiles = append(c.childIOFiles, (io.Closer)(new os_FileжCloser(pr)));
     c.parentIOPipes = append(c.parentIOPipes, (io.Closer)(new os_FileжCloser(pw)));
     var pwʗ1 = pw;
-    c.goroutine = append(c.goroutine, () => {
+    c.goroutine = append(c.goroutine, [GoFunc("(*Cmd).childStdin.func1")] () => {
         var (_, errΔ2) = io.Copy(new os.FileжWriter(pwʗ1), Ꮡc.Value.Stdin);
         if (skipStdinCopyError(errΔ2)) {
             errΔ2 = default;
@@ -609,7 +609,7 @@ internal static (ж<os.File>, error) writerDescriptor⁔(/*this*/ ref Cmd c, io.
     c.childIOFiles = append(c.childIOFiles, (io.Closer)(new os_FileжCloser(pw)));
     c.parentIOPipes = append(c.parentIOPipes, (io.Closer)(new os_FileжCloser(pr)));
     var prʗ1 = pr;
-    c.goroutine = append(c.goroutine, () => {
+    c.goroutine = append(c.goroutine, [GoFunc("(*Cmd).writerDescriptor.func1")] () => {
         var (_, errΔ2) = io.Copy(w, new os_FileжReader(prʗ1));
         prʗ1.Close(); // in case io.Copy stopped due to write error
         return errΔ2;
@@ -675,7 +675,7 @@ internal static partial error Start⁔(/*this*/ ж<Cmd> Ꮡc) {
         }
 
         var started = false;
-        defer(() => {
+        defer([GoFunc("(*Cmd).Start.func1")] () => {
             closeDescriptors(Ꮡc.Value.childIOFiles);
             Ꮡc.Value.childIOFiles = default;
 
@@ -781,7 +781,7 @@ internal static partial error Start⁔(/*this*/ ж<Cmd> Ꮡc) {
             foreach (var (_, fn) in range(c.goroutine)) {
                 var goroutineErrʗ1 = goroutineErr;
                 var statuscʗ1 = statusc;
-                goǃ((Func<error> fnΔ1) => {
+                goǃ([GoFunc("(*Cmd).Start.func2")] (Func<error> fnΔ1) => {
                     var errΔ2 = fnΔ1();
 
                     ref var status = ref heap<Start_goroutineStatus>(ᐸꟷ(statuscʗ1), out var Ꮡstatus);
@@ -1020,7 +1020,7 @@ internal static error awaitGoroutines⁔(/*this*/ ж<Cmd> Ꮡc, ж<time.Timer> �
         ref var c = ref Ꮡc.DerefOrNull();
         ref var timer = ref Ꮡtimer.DerefOrNull();
 
-        defer(() => {
+        defer([GoFunc("(*Cmd).awaitGoroutines.func1")] () => {
             if (Ꮡtimer != nil) {
                 Ꮡtimer.Stop();
             }

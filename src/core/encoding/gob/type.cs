@@ -499,7 +499,7 @@ internal static (gobType, error) newTypeObject(@string name, ref userTypeInfo ut
         ref var err = ref heap<error>(out var Ꮡerr);
         gobType type0 = default;
         gobType type1 = default;
-        defer(() => {
+        defer([GoFunc("newTypeObject.func1")] () => {
             if (Ꮡerr.ValueSlot != nil) {
                 delete(types, rt);
             }

@@ -261,7 +261,7 @@ public static Context TODO() {
 public static (Context ctx, Action cancel) WithCancel(Context parent) {
     var c = withCancel(parent);
     var cʗ1 = c;
-    return (new cancelCtxжContext(c), () => {
+    return (new cancelCtxжContext(c), [GoFunc("WithCancel.func1")] () => {
         cʗ1.cancel(true, Canceled, default);
     });
 }
@@ -292,7 +292,7 @@ public static (Context ctx, Action cancel) WithCancel(Context parent) {
 public static (Context ctx, Action<error> cancel) WithCancelCause(Context parent) {
     var c = withCancel(parent);
     var cʗ1 = c;
-    return (new cancelCtxжContext(c), (error cause) => {
+    return (new cancelCtxжContext(c), [GoFunc("WithCancelCause.func1")] (error cause) => {
         cʗ1.cancel(true, Canceled, cause);
     });
 }
@@ -355,9 +355,9 @@ public static Func<bool> /*stop*/ AfterFunc(Context ctx, Action f) {
     ));
     a.ᏑcancelCtx.propagateCancel(ctx, new afterFuncCtxжcanceler(a));
     var aʗ1 = a;
-    return () => {
+    return [GoFunc("AfterFunc.func1")] () => {
         var stopped = false;
-        aʗ1.Ꮡonce.Do(() => {
+        aʗ1.Ꮡonce.Do([GoFunc("AfterFunc.func1.1")] () => {
             stopped = true;
         });
         if (stopped) {
@@ -384,7 +384,7 @@ internal static void cancel⁔(/*this*/ ж<afterFuncCtx> Ꮡa, bool removeFromPa
     if (removeFromParent) {
         removeChild(a.Context, new afterFuncCtxжcanceler(Ꮡa));
     }
-    Ꮡa.Ꮡonce.Do([MethodImpl(MethodImplOptions.NoInlining)] () => {
+    Ꮡa.Ꮡonce.Do([MethodImpl(MethodImplOptions.NoInlining), GoFunc("(*afterFuncCtx).cancel.func1")] () => {
         goǃ(Ꮡa.Value.f);
     });
 }
@@ -560,7 +560,7 @@ internal static partial void propagateCancel⁔(/*this*/ ж<cancelCtx> Ꮡc, Con
         var (a, ok) = parent._<afterFuncer>(ᐧ); if (ok) {
             // parent implements an AfterFunc method.
             c.mu.Lock();
-            var stop = a.AfterFunc(() => {
+            var stop = a.AfterFunc([GoFunc("(*cancelCtx).propagateCancel.func1")] () => {
                 child.cancel(false, parent.Err(), Cause(parent));
             });
             c.Context = new stopCtx(
@@ -573,7 +573,7 @@ internal static partial void propagateCancel⁔(/*this*/ ж<cancelCtx> Ꮡc, Con
     }
 
     Ꮡgoroutines.Add(1);
-    goǃ(() => {
+    goǃ([GoFunc("(*cancelCtx).propagateCancel.func2")] () => {
         var selᴛ2 = parent.Done();
         var selᴛ3 = child.Done();
         switch (select(ᐸꟷ(selᴛ2, ꓸꓸꓸ), ᐸꟷ(selᴛ3, ꓸꓸꓸ))) {
@@ -711,7 +711,7 @@ public static (Context, Action) WithDeadlineCause(Context parent, time.Time d, e
         if (dur <= 0) {
             c.cancel(true, DeadlineExceeded, cause); // deadline has already passed
             var cʗ1 = c;
-            return (new timerCtxжContext(c), () => {
+            return (new timerCtxжContext(c), [GoFunc("WithDeadlineCause.func1")] () => {
                 cʗ1.cancel(false, Canceled, default);
             });
         }
@@ -720,12 +720,12 @@ public static (Context, Action) WithDeadlineCause(Context parent, time.Time d, e
         defer(cʗ2.of(timerCtx.Ꮡmu).Unlock, ref ᒐ);
         if (c.of(timerCtx.Ꮡerr).Load() == nil) {
             var cʗ3 = c;
-            c.timer = time.AfterFunc(dur, () => {
+            c.timer = time.AfterFunc(dur, [GoFunc("WithDeadlineCause.func2")] () => {
                 cʗ3.cancel(true, DeadlineExceeded, cause);
             });
         }
         var cʗ4 = c;
-        return (new timerCtxжContext(c), () => {
+        return (new timerCtxжContext(c), [GoFunc("WithDeadlineCause.func3")] () => {
             cʗ4.cancel(true, Canceled, default);
         });
     }

@@ -48,7 +48,7 @@ internal static slice<byte> newNetlinkRouteRequest(nint proto, nint seq, nint fa
     return rr.toWireFormat();
 }
 
-[GoLazy] partial class lazyᴛpageBufPool { internal static ж<Δsync.Pool> pageBufPool = Ꮡ(new Δsync.Pool(New: () => {
+[GoLazy] partial class lazyᴛpageBufPool { internal static ж<Δsync.Pool> pageBufPool = Ꮡ(new Δsync.Pool(New: [GoFunc("init.func2")] () => {
     var b = new slice<byte>(Getpagesize());
     return Ꮡ(b);
 }

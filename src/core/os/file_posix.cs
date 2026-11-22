@@ -93,7 +93,7 @@ internal static uint32 /*o*/ syscallMode(FileMode i) {
 // See docs in file.go:Chmod.
 internal static error chmod(@string name, FileMode mode) {
     @string longName = fixLongPath(name);
-    var e = ignoringEINTR(() => syscall.Chmod(longName, syscallMode(mode)));
+    var e = ignoringEINTR([GoFunc("chmod.func1")] () => syscall.Chmod(longName, syscallMode(mode)));
     if (e != nil) {
         return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "chmod", Path: name, Err: e)));
     }
@@ -125,7 +125,7 @@ internal static error chmod⁔(/*this*/ ж<File> Ꮡf, FileMode mode) {
 // On Windows or Plan 9, Chown always returns the [syscall.EWINDOWS] or
 // [syscall.EPLAN9] error, wrapped in [*PathError].
 public static error Chown(@string name, nint uid, nint gid) {
-    var e = ignoringEINTR(() => syscall.Chown(name, uid, gid));
+    var e = ignoringEINTR([GoFunc("Chown.func1")] () => syscall.Chown(name, uid, gid));
     if (e != nil) {
         return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "chown", Path: name, Err: e)));
     }
@@ -139,7 +139,7 @@ public static error Chown(@string name, nint uid, nint gid) {
 // On Windows, it always returns the [syscall.EWINDOWS] error, wrapped
 // in [*PathError].
 public static error Lchown(@string name, nint uid, nint gid) {
-    var e = ignoringEINTR(() => syscall.Lchown(name, uid, gid));
+    var e = ignoringEINTR([GoFunc("Lchown.func1")] () => syscall.Lchown(name, uid, gid));
     if (e != nil) {
         return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "lchown", Path: name, Err: e)));
     }
@@ -222,7 +222,7 @@ public static error Chtimes(@string name, time.Time atime, time.Time mtime) {
 
 internal static array<syscall.Timespec> chtimesUtimes(time.Time atime, time.Time mtime) {
     ref var utimes = ref heap(new array<syscall.Timespec>(2), out var Ꮡutimes);
-    void set(nint i, time.Time t) {
+    [GoFunc("chtimesUtimes.func1")] void set(nint i, time.Time t) {
         if (t.IsZero()) {
             Ꮡutimes.Value[i] = new syscall.Timespec(Sec: _UTIME_OMIT, Nsec: _UTIME_OMIT);
         } else {

@@ -84,7 +84,7 @@ public static (slice<fs.FileInfo>, error) ReadDir(@string dirname) {
     if (err != nil) {
         return (default, err);
     }
-    slices.SortFunc(list, (fs.FileInfo a, fs.FileInfo b) => strings.Compare(a.Name(), b.Name()));
+    slices.SortFunc(list, [GoFunc("ReadDir.func1")] (fs.FileInfo a, fs.FileInfo b) => strings.Compare(a.Name(), b.Name()));
     return (list, default);
 }
 

@@ -248,7 +248,7 @@ internal static void matchingMethodsPath⁔(/*this*/ ж<routingNode> Ꮡn, @stri
         return;
     }
     var setʗ1 = set;
-    Ꮡn.Ꮡchildren.eachPair((@string method, ж<routingNode> c) => {
+    Ꮡn.Ꮡchildren.eachPair([GoFunc("(*routingNode).matchingMethodsPath.func1")] (@string method, ж<routingNode> c) => {
         var (p, _) = c.matchPath(path, default); if (p != nil) {
             setʗ1[method] = true;
         }

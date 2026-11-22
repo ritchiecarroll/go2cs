@@ -18,7 +18,7 @@ internal static error Fstatat⁔(/*this*/ ж<FD> Ꮡfd, @string name, ж<Δsysca
             return err;
         }
         ᒐd1 = true;
-        return ignoringEINTR(() => unix.Fstatat(Ꮡfd.Value.Sysfd, name, s, flags));
+        return ignoringEINTR([GoFunc("(*FD).Fstatat.func1")] () => unix.Fstatat(Ꮡfd.Value.Sysfd, name, s, flags));
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡfd.decref(); ᒐ.Run(); }

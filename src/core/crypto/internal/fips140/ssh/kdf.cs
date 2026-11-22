@@ -39,7 +39,7 @@ public static (slice<byte> ivKey, slice<byte> key, slice<byte> macKey) Keys<Hash
     var Kʗ1 = K;
     var hʗ1 = h;
     var sessionIDʗ1 = sessionID;
-    slice<byte> generateKeyMaterial(slice<byte> tag, nint length) {
+    [GoFunc("Keys[...].func1")] slice<byte> generateKeyMaterial(slice<byte> tag, nint length) {
         slice<byte> keyΔ1 = default;
         while (len(keyΔ1) < length) {
             hʗ1.Reset();

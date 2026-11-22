@@ -724,9 +724,9 @@ internal static (slice<IPAddr> addrs, dnsmessage.Name cname, error err) goLookup
     Action<@string, dnsmessage.Type> queryFn = default;
     Func<@string, dnsmessage.Type, goLookupIPCNAMEOrder_result> responseFn = default;
     if (conf.singleRequest) {
-        queryFn = (@string fqdn, dnsmessage.Type qtype) => {
+        queryFn = [GoFunc("(*Resolver).goLookupIPCNAMEOrder.func1")] (@string fqdn, dnsmessage.Type qtype) => {
         };
-        responseFn = (@string fqdn, dnsmessage.Type qtype) => {
+        responseFn = [GoFunc("(*Resolver).goLookupIPCNAMEOrder.func2")] (@string fqdn, dnsmessage.Type qtype) => {
             GoFrame ᒐ = default;
             try {
                 ᏑdnsWaitGroup.Add(1);
@@ -739,10 +739,10 @@ internal static (slice<IPAddr> addrs, dnsmessage.Name cname, error err) goLookup
         };
     } else {
         var laneʗ1 = lane;
-        queryFn = [MethodImpl(MethodImplOptions.NoInlining)] (@string fqdn, dnsmessage.Type qtype) => {
+        queryFn = [MethodImpl(MethodImplOptions.NoInlining), GoFunc("(*Resolver).goLookupIPCNAMEOrder.func3")] (@string fqdn, dnsmessage.Type qtype) => {
             ᏑdnsWaitGroup.Add(1);
             var laneʗ2 = laneʗ1;
-            goǃ((dnsmessage.Type qtypeΔ1) => {
+            goǃ([GoFunc("(*Resolver).goLookupIPCNAMEOrder.func3.1")] (dnsmessage.Type qtypeΔ1) => {
                 ref var p = ref heap<dnsmessage.Parser>(out var Ꮡp);
                 (p, var server, var errΔ3) = Ꮡr.tryOneName(ctx, Ꮡconf, fqdn, qtypeΔ1);
                 laneʗ2.ᐸꟷ(new goLookupIPCNAMEOrder_result(p, server, errΔ3));
@@ -750,7 +750,7 @@ internal static (slice<IPAddr> addrs, dnsmessage.Name cname, error err) goLookup
             }, qtype);
         };
         var laneʗ3 = lane;
-        responseFn = (@string fqdn, dnsmessage.Type qtype) => ᐸꟷ(laneʗ3);
+        responseFn = [GoFunc("(*Resolver).goLookupIPCNAMEOrder.func4")] (@string fqdn, dnsmessage.Type qtype) => ᐸꟷ(laneʗ3);
     }
     error lastErr = default;
     foreach (var (_, fqdn) in range(conf.nameList(name))) {

@@ -117,7 +117,7 @@ internal static @string String⁔(/*this*/ ref BuildInfo bi) {
     }
     ref var formatMod = ref heap<Action<@string, Module>>(out var ᏑformatMod);
     var bufʗ1 = buf;
-    formatMod = (@string word, Module m) => {
+    formatMod = [GoFunc("(*BuildInfo).String.func1")] (@string word, Module m) => {
         bufʗ1.WriteString(word);
         bufʗ1.WriteByte((byte)'\t');
         bufʗ1.WriteString(m.Path);
@@ -193,7 +193,7 @@ public static (ж<BuildInfo> bi, error err) ParseBuildInfo(@string data) {
     GoFrame ᒐ = default;
     try {
         nint lineNum = 1;
-        defer(() => {
+        defer([GoFunc("ParseBuildInfo.func1")] () => {
             if (err != nil) {
                 err = fmt.Errorf("could not parse Go build info: line %d: %w"u8, lineNum, err);
             }
@@ -207,7 +207,7 @@ public static (ж<BuildInfo> bi, error err) ParseBuildInfo(@string data) {
         @string newline = newlineᶜ;
         @string tab = tabᶜ;
 
-        (Module, error) readModuleLine(slice<@string> elem) {
+        [GoFunc("ParseBuildInfo.func2")] (Module, error) readModuleLine(slice<@string> elem) {
             if (len(elem) != 2 && len(elem) != 3) {
                 return (new Module(), fmt.Errorf("expected 2 or 3 columns; got %d"u8, len(elem)));
             }

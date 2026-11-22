@@ -135,42 +135,42 @@ internal static void encode⁔(/*this*/ ref Profile p, ж<buffer> b) {
 [GoLazy] partial class lazyᴛprofileDecoder { internal static slice<Func<ж<buffer>, message, error>> profileDecoder = [
     default, // 0
     // repeated ValueType sample_type = 1
-    (ж<buffer> b, message m) => {
+    [GoFunc("init.func1")] (ж<buffer> b, message m) => {
         var x = @new<ValueType>();
         var pp = m._<message, ж<Profile>>();
         pp.SampleType = append(pp.SampleType, x);
         return decodeMessage(b, new ValueTypeжmessage(x));
     },
     // repeated Sample sample = 2
-    (ж<buffer> b, message m) => {
+    [GoFunc("init.func2")] (ж<buffer> b, message m) => {
         var x = @new<Sample>();
         var pp = m._<message, ж<Profile>>();
         pp.Sample = append(pp.Sample, x);
         return decodeMessage(b, new Sampleжmessage(x));
     },
     // repeated Mapping mapping = 3
-    (ж<buffer> b, message m) => {
+    [GoFunc("init.func3")] (ж<buffer> b, message m) => {
         var x = @new<Mapping>();
         var pp = m._<message, ж<Profile>>();
         pp.Mapping = append(pp.Mapping, x);
         return decodeMessage(b, new Mappingжmessage(x));
     },
     // repeated Location location = 4
-    (ж<buffer> b, message m) => {
+    [GoFunc("init.func4")] (ж<buffer> b, message m) => {
         var x = @new<Location>();
         var pp = m._<message, ж<Profile>>();
         pp.Location = append(pp.Location, x);
         return decodeMessage(b, new Locationжmessage(x));
     },
     // repeated Function function = 5
-    (ж<buffer> b, message m) => {
+    [GoFunc("init.func5")] (ж<buffer> b, message m) => {
         var x = @new<Function>();
         var pp = m._<message, ж<Profile>>();
         pp.Function = append(pp.Function, x);
         return decodeMessage(b, new Functionжmessage(x));
     },
     // repeated string string_table = 6
-    error (ж<buffer> b, message m) => {
+    [GoFunc("init.func6")] error (ж<buffer> b, message m) => {
         var err = decodeStrings(ref (b).DerefOrNull(), m._<message, ж<Profile>>().ᏑstringTable);
         if (err != nil) {
             return err;
@@ -181,26 +181,26 @@ internal static void encode⁔(/*this*/ ref Profile p, ж<buffer> b) {
         return default;
     },
     // repeated int64 drop_frames = 7
-    (ж<buffer> b, message m) => decodeInt64(ref (b).DerefOrNull(), m._<message, ж<Profile>>().ᏑdropFramesX),
+    [GoFunc("init.func7")] (ж<buffer> b, message m) => decodeInt64(ref (b).DerefOrNull(), m._<message, ж<Profile>>().ᏑdropFramesX),
     // repeated int64 keep_frames = 8
-    (ж<buffer> b, message m) => decodeInt64(ref (b).DerefOrNull(), m._<message, ж<Profile>>().ᏑkeepFramesX),
+    [GoFunc("init.func8")] (ж<buffer> b, message m) => decodeInt64(ref (b).DerefOrNull(), m._<message, ж<Profile>>().ᏑkeepFramesX),
     // repeated int64 time_nanos = 9
-    (ж<buffer> b, message m) => decodeInt64(ref (b).DerefOrNull(), m._<message, ж<Profile>>().ᏑTimeNanos),
+    [GoFunc("init.func9")] (ж<buffer> b, message m) => decodeInt64(ref (b).DerefOrNull(), m._<message, ж<Profile>>().ᏑTimeNanos),
     // repeated int64 duration_nanos = 10
-    (ж<buffer> b, message m) => decodeInt64(ref (b).DerefOrNull(), m._<message, ж<Profile>>().ᏑDurationNanos),
+    [GoFunc("init.func10")] (ж<buffer> b, message m) => decodeInt64(ref (b).DerefOrNull(), m._<message, ж<Profile>>().ᏑDurationNanos),
     // optional string period_type = 11
-    (ж<buffer> b, message m) => {
+    [GoFunc("init.func11")] (ж<buffer> b, message m) => {
         var x = @new<ValueType>();
         var pp = m._<message, ж<Profile>>();
         pp.PeriodType = x;
         return decodeMessage(b, new ValueTypeжmessage(x));
     },
     // repeated int64 period = 12
-    (ж<buffer> b, message m) => decodeInt64(ref (b).DerefOrNull(), m._<message, ж<Profile>>().ᏑPeriod),
+    [GoFunc("init.func12")] (ж<buffer> b, message m) => decodeInt64(ref (b).DerefOrNull(), m._<message, ж<Profile>>().ᏑPeriod),
     // repeated int64 comment = 13
-    (ж<buffer> b, message m) => decodeInt64s(ref (b).DerefOrNull(), m._<message, ж<Profile>>().ᏑcommentX),
+    [GoFunc("init.func13")] (ж<buffer> b, message m) => decodeInt64s(ref (b).DerefOrNull(), m._<message, ж<Profile>>().ᏑcommentX),
     // int64 defaultSampleType = 14
-    (ж<buffer> b, message m) => decodeInt64(ref (b).DerefOrNull(), m._<message, ж<Profile>>().ᏑdefaultSampleTypeX)
+    [GoFunc("init.func14")] (ж<buffer> b, message m) => decodeInt64(ref (b).DerefOrNull(), m._<message, ж<Profile>>().ᏑdefaultSampleTypeX)
 ]; }
 
 // postDecode takes the unexported fields populated by decode (with
@@ -317,9 +317,9 @@ internal static void encode⁔(/*this*/ ref ValueType p, ж<buffer> b) {
 [GoLazy] partial class lazyᴛvalueTypeDecoder { internal static slice<Func<ж<buffer>, message, error>> valueTypeDecoder = [
     default, // 0
     // optional int64 type = 1
-    (ж<buffer> b, message m) => decodeInt64(ref (b).DerefOrNull(), m._<message, ж<ValueType>>().ᏑtypeX),
+    [GoFunc("init.func15")] (ж<buffer> b, message m) => decodeInt64(ref (b).DerefOrNull(), m._<message, ж<ValueType>>().ᏑtypeX),
     // optional int64 unit = 2
-    (ж<buffer> b, message m) => decodeInt64(ref (b).DerefOrNull(), m._<message, ж<ValueType>>().ᏑunitX)
+    [GoFunc("init.func16")] (ж<buffer> b, message m) => decodeInt64(ref (b).DerefOrNull(), m._<message, ж<ValueType>>().ᏑunitX)
 ]; }
 
 internal static slice<Func<ж<buffer>, message, error>> decoder⁔(/*this*/ ref Sample p) {
@@ -339,11 +339,11 @@ internal static void encode⁔(/*this*/ ref Sample p, ж<buffer> b) {
 [GoLazy] partial class lazyᴛsampleDecoder { internal static slice<Func<ж<buffer>, message, error>> sampleDecoder = [
     default, // 0
     // repeated uint64 location = 1
-    (ж<buffer> b, message m) => decodeUint64s(ref (b).DerefOrNull(), m._<message, ж<Sample>>().ᏑlocationIDX),
+    [GoFunc("init.func17")] (ж<buffer> b, message m) => decodeUint64s(ref (b).DerefOrNull(), m._<message, ж<Sample>>().ᏑlocationIDX),
     // repeated int64 value = 2
-    (ж<buffer> b, message m) => decodeInt64s(ref (b).DerefOrNull(), m._<message, ж<Sample>>().of(Sample.ᏑValue)),
+    [GoFunc("init.func18")] (ж<buffer> b, message m) => decodeInt64s(ref (b).DerefOrNull(), m._<message, ж<Sample>>().of(Sample.ᏑValue)),
     // repeated Label label = 3
-    (ж<buffer> b, message m) => {
+    [GoFunc("init.func19")] (ж<buffer> b, message m) => {
         var s = m._<message, ж<Sample>>();
         nint n = len(s.labelX);
         s.labelX = append(s.labelX, new Label());
@@ -364,11 +364,11 @@ internal static void encode⁔(/*this*/ Label p, ж<buffer> b) {
 [GoLazy] partial class lazyᴛlabelDecoder { internal static slice<Func<ж<buffer>, message, error>> labelDecoder = [
     default, // 0
     // optional int64 key = 1
-    (ж<buffer> b, message m) => decodeInt64(ref (b).DerefOrNull(), m._<message, ж<Label>>().ᏑkeyX),
+    [GoFunc("init.func20")] (ж<buffer> b, message m) => decodeInt64(ref (b).DerefOrNull(), m._<message, ж<Label>>().ᏑkeyX),
     // optional int64 str = 2
-    (ж<buffer> b, message m) => decodeInt64(ref (b).DerefOrNull(), m._<message, ж<Label>>().ᏑstrX),
+    [GoFunc("init.func21")] (ж<buffer> b, message m) => decodeInt64(ref (b).DerefOrNull(), m._<message, ж<Label>>().ᏑstrX),
     // optional int64 num = 3
-    (ж<buffer> b, message m) => decodeInt64(ref (b).DerefOrNull(), m._<message, ж<Label>>().ᏑnumX)
+    [GoFunc("init.func22")] (ж<buffer> b, message m) => decodeInt64(ref (b).DerefOrNull(), m._<message, ж<Label>>().ᏑnumX)
 ]; }
 
 internal static slice<Func<ж<buffer>, message, error>> decoder⁔(/*this*/ ref Mapping p) {
@@ -390,16 +390,16 @@ internal static void encode⁔(/*this*/ ref Mapping p, ж<buffer> b) {
 
 [GoLazy] partial class lazyᴛmappingDecoder { internal static slice<Func<ж<buffer>, message, error>> mappingDecoder = [
     default, // 0
-    (ж<buffer> b, message m) => decodeUint64(ref (b).DerefOrNull(), m._<message, ж<Mapping>>().ᏑID),           // optional uint64 id = 1
-    (ж<buffer> b, message m) => decodeUint64(ref (b).DerefOrNull(), m._<message, ж<Mapping>>().ᏑStart),        // optional uint64 memory_offset = 2
-    (ж<buffer> b, message m) => decodeUint64(ref (b).DerefOrNull(), m._<message, ж<Mapping>>().ᏑLimit),        // optional uint64 memory_limit = 3
-    (ж<buffer> b, message m) => decodeUint64(ref (b).DerefOrNull(), m._<message, ж<Mapping>>().ᏑOffset),       // optional uint64 file_offset = 4
-    (ж<buffer> b, message m) => decodeInt64(ref (b).DerefOrNull(), m._<message, ж<Mapping>>().ᏑfileX),         // optional int64 filename = 5
-    (ж<buffer> b, message m) => decodeInt64(ref (b).DerefOrNull(), m._<message, ж<Mapping>>().ᏑbuildIDX),      // optional int64 build_id = 6
-    (ж<buffer> b, message m) => decodeBool(ref (b).DerefOrNull(), m._<message, ж<Mapping>>().ᏑHasFunctions),   // optional bool has_functions = 7
-    (ж<buffer> b, message m) => decodeBool(ref (b).DerefOrNull(), m._<message, ж<Mapping>>().ᏑHasFilenames),   // optional bool has_filenames = 8
-    (ж<buffer> b, message m) => decodeBool(ref (b).DerefOrNull(), m._<message, ж<Mapping>>().ᏑHasLineNumbers), // optional bool has_line_numbers = 9
-    (ж<buffer> b, message m) => decodeBool(ref (b).DerefOrNull(), m._<message, ж<Mapping>>().ᏑHasInlineFrames) // optional bool has_inline_frames = 10
+    [GoFunc("init.func23")] (ж<buffer> b, message m) => decodeUint64(ref (b).DerefOrNull(), m._<message, ж<Mapping>>().ᏑID),           // optional uint64 id = 1
+    [GoFunc("init.func24")] (ж<buffer> b, message m) => decodeUint64(ref (b).DerefOrNull(), m._<message, ж<Mapping>>().ᏑStart),        // optional uint64 memory_offset = 2
+    [GoFunc("init.func25")] (ж<buffer> b, message m) => decodeUint64(ref (b).DerefOrNull(), m._<message, ж<Mapping>>().ᏑLimit),        // optional uint64 memory_limit = 3
+    [GoFunc("init.func26")] (ж<buffer> b, message m) => decodeUint64(ref (b).DerefOrNull(), m._<message, ж<Mapping>>().ᏑOffset),       // optional uint64 file_offset = 4
+    [GoFunc("init.func27")] (ж<buffer> b, message m) => decodeInt64(ref (b).DerefOrNull(), m._<message, ж<Mapping>>().ᏑfileX),         // optional int64 filename = 5
+    [GoFunc("init.func28")] (ж<buffer> b, message m) => decodeInt64(ref (b).DerefOrNull(), m._<message, ж<Mapping>>().ᏑbuildIDX),      // optional int64 build_id = 6
+    [GoFunc("init.func29")] (ж<buffer> b, message m) => decodeBool(ref (b).DerefOrNull(), m._<message, ж<Mapping>>().ᏑHasFunctions),   // optional bool has_functions = 7
+    [GoFunc("init.func30")] (ж<buffer> b, message m) => decodeBool(ref (b).DerefOrNull(), m._<message, ж<Mapping>>().ᏑHasFilenames),   // optional bool has_filenames = 8
+    [GoFunc("init.func31")] (ж<buffer> b, message m) => decodeBool(ref (b).DerefOrNull(), m._<message, ж<Mapping>>().ᏑHasLineNumbers), // optional bool has_line_numbers = 9
+    [GoFunc("init.func32")] (ж<buffer> b, message m) => decodeBool(ref (b).DerefOrNull(), m._<message, ж<Mapping>>().ᏑHasInlineFrames) // optional bool has_inline_frames = 10
 ]; }
 
 internal static slice<Func<ж<buffer>, message, error>> decoder⁔(/*this*/ ref Location p) {
@@ -417,10 +417,10 @@ internal static void encode⁔(/*this*/ ref Location p, ж<buffer> b) {
 
 [GoLazy] partial class lazyᴛlocationDecoder { internal static slice<Func<ж<buffer>, message, error>> locationDecoder = [
     default, // 0
-    (ж<buffer> b, message m) => decodeUint64(ref (b).DerefOrNull(), m._<message, ж<Location>>().ᏑID),         // optional uint64 id = 1;
-    (ж<buffer> b, message m) => decodeUint64(ref (b).DerefOrNull(), m._<message, ж<Location>>().ᏑmappingIDX), // optional uint64 mapping_id = 2;
-    (ж<buffer> b, message m) => decodeUint64(ref (b).DerefOrNull(), m._<message, ж<Location>>().ᏑAddress),    // optional uint64 address = 3;
-    (ж<buffer> b, message m) => { // repeated Line line = 4
+    [GoFunc("init.func33")] (ж<buffer> b, message m) => decodeUint64(ref (b).DerefOrNull(), m._<message, ж<Location>>().ᏑID),         // optional uint64 id = 1;
+    [GoFunc("init.func34")] (ж<buffer> b, message m) => decodeUint64(ref (b).DerefOrNull(), m._<message, ж<Location>>().ᏑmappingIDX), // optional uint64 mapping_id = 2;
+    [GoFunc("init.func35")] (ж<buffer> b, message m) => decodeUint64(ref (b).DerefOrNull(), m._<message, ж<Location>>().ᏑAddress),    // optional uint64 address = 3;
+    [GoFunc("init.func36")] (ж<buffer> b, message m) => { // repeated Line line = 4
         var pp = m._<message, ж<Location>>();
         nint n = len(pp.Line);
         pp.Line = append(pp.Line, new Line());
@@ -440,9 +440,9 @@ internal static void encode⁔(/*this*/ ref Line p, ж<buffer> b) {
 [GoLazy] partial class lazyᴛlineDecoder { internal static slice<Func<ж<buffer>, message, error>> lineDecoder = [
     default, // 0
     // optional uint64 function_id = 1
-    (ж<buffer> b, message m) => decodeUint64(ref (b).DerefOrNull(), m._<message, ж<Line>>().ᏑfunctionIDX),
+    [GoFunc("init.func37")] (ж<buffer> b, message m) => decodeUint64(ref (b).DerefOrNull(), m._<message, ж<Line>>().ᏑfunctionIDX),
     // optional int64 line = 2
-    (ж<buffer> b, message m) => decodeInt64(ref (b).DerefOrNull(), m._<message, ж<Line>>().ᏑΔLine)
+    [GoFunc("init.func38")] (ж<buffer> b, message m) => decodeInt64(ref (b).DerefOrNull(), m._<message, ж<Line>>().ᏑΔLine)
 ]; }
 
 internal static slice<Func<ж<buffer>, message, error>> decoder⁔(/*this*/ ref Function p) {
@@ -460,15 +460,15 @@ internal static void encode⁔(/*this*/ ref Function p, ж<buffer> b) {
 [GoLazy] partial class lazyᴛfunctionDecoder { internal static slice<Func<ж<buffer>, message, error>> functionDecoder = [
     default, // 0
     // optional uint64 id = 1
-    (ж<buffer> b, message m) => decodeUint64(ref (b).DerefOrNull(), m._<message, ж<Function>>().ᏑID),
+    [GoFunc("init.func39")] (ж<buffer> b, message m) => decodeUint64(ref (b).DerefOrNull(), m._<message, ж<Function>>().ᏑID),
     // optional int64 function_name = 2
-    (ж<buffer> b, message m) => decodeInt64(ref (b).DerefOrNull(), m._<message, ж<Function>>().ᏑnameX),
+    [GoFunc("init.func40")] (ж<buffer> b, message m) => decodeInt64(ref (b).DerefOrNull(), m._<message, ж<Function>>().ᏑnameX),
     // optional int64 function_system_name = 3
-    (ж<buffer> b, message m) => decodeInt64(ref (b).DerefOrNull(), m._<message, ж<Function>>().ᏑsystemNameX),
+    [GoFunc("init.func41")] (ж<buffer> b, message m) => decodeInt64(ref (b).DerefOrNull(), m._<message, ж<Function>>().ᏑsystemNameX),
     // repeated int64 filename = 4
-    (ж<buffer> b, message m) => decodeInt64(ref (b).DerefOrNull(), m._<message, ж<Function>>().ᏑfilenameX),
+    [GoFunc("init.func42")] (ж<buffer> b, message m) => decodeInt64(ref (b).DerefOrNull(), m._<message, ж<Function>>().ᏑfilenameX),
     // optional int64 start_line = 5
-    (ж<buffer> b, message m) => decodeInt64(ref (b).DerefOrNull(), m._<message, ж<Function>>().ᏑStartLine)
+    [GoFunc("init.func43")] (ж<buffer> b, message m) => decodeInt64(ref (b).DerefOrNull(), m._<message, ж<Function>>().ᏑStartLine)
 ]; }
 
 internal static int64 addString(map<@string, nint> strings, @string s) {

@@ -62,7 +62,7 @@ internal static error Handle⁔(/*this*/ ж<fastTextHandler> Ꮡh, context.Conte
         buf.WriteString(msgˢ);
         buf.WriteString(r.Message);
         var bufʗ2 = buf;
-        r.Attrs((slog.Attr a) => {
+        r.Attrs([GoFunc("(*fastTextHandler).Handle.func1")] (slog.Attr a) => {
             bufʗ2.WriteByte((byte)' ');
             bufʗ2.WriteString(a.Key);
             bufʗ2.WriteByte((byte)'=');

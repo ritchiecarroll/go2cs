@@ -409,7 +409,7 @@ internal static ж<schedContext> getOrCreateThread⁔(/*this*/ ж<Validator> Ꮡ
     ref var e = ref Ꮡe.DerefOrNull();
 
     var evʗ1 = ev;
-    bool lenient() {
+    [GoFunc("(*Validator).getOrCreateThread.func1")] bool lenient() {
         // Be lenient about GoUndetermined -> GoSyscall transitions if they
         // originate from an old trace. These transitions lack thread
         // information in trace formats older than 1.22.

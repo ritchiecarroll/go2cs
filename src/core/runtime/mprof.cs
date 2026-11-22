@@ -356,7 +356,7 @@ internal static partial void mProf_Malloc(ref m mp, @unsafe.Pointer p, uintptr s
     // deadlocks. Since the object must be alive during the call to
     // mProf_Malloc, it's fine to do this non-atomically.
     var bʗ1 = b;
-    systemstack(() => {
+    systemstack([GoFunc("mProf_Malloc.func1")] () => {
         setprofilebucket(p, bʗ1);
     });
 }
@@ -430,7 +430,7 @@ internal static nint fpTracebackPartialExpand(nint skip, @unsafe.Pointer fp, sli
     nint n = default;
     var lastFuncID = abi.FuncIDNormal;
     var pcBufʗ1 = pcBuf;
-    bool skipOrAdd(uintptr retPC) {
+    [GoFunc("fpTracebackPartialExpand.func1")] bool skipOrAdd(uintptr retPC) {
         if (skip > 0) {
             skip--;
         } else if (n < len(pcBufʗ1)) {
@@ -594,7 +594,7 @@ internal static void captureStack⁔(/*this*/ ж<mLockProfile> Ꮡprof) {
     var sp = sys.GetCallerSP();
     var pc = sys.GetCallerPC();
     var gpʗ1 = gp;
-    systemstack(() => {
+    systemstack([GoFunc("(*mLockProfile).captureStack.func1")] () => {
         ref var u = ref heap(new unwinder(), out var Ꮡu);
         Ꮡu.initAt(pc, sp, 0, gpʗ1, (unwindFlags)(unwindSilentErrors | unwindJumpStack));
         nstk = 1 + tracebackPCs(Ꮡu, skip, Ꮡprof.Value.stack[1..]);
@@ -792,7 +792,7 @@ internal static slice<uintptr> Stack⁔(/*this*/ ref MemProfileRecord r) {
 // the testing package's -test.memprofile flag instead
 // of calling MemProfile directly.
 public static (nint n, bool ok) MemProfile(slice<MemProfileRecord> p, bool inuseZero) {
-    return memProfileInternal(len(p), inuseZero, (profilerecord.MemProfileRecord r) => {
+    return memProfileInternal(len(p), inuseZero, [GoFunc("MemProfile.func1")] (profilerecord.MemProfileRecord r) => {
         copyMemProfileRecord(Ꮡ(p, 0), r);
         p = p[1..];
     });
@@ -893,7 +893,7 @@ internal static void copyMemProfileRecord(ж<MemProfileRecord> Ꮡdst, profilere
 
 //go:linkname pprof_memProfileInternal
 public static (nint n, bool ok) pprof_memProfileInternal(slice<profilerecord.MemProfileRecord> p, bool inuseZero) {
-    return memProfileInternal(len(p), inuseZero, (profilerecord.MemProfileRecord r) => {
+    return memProfileInternal(len(p), inuseZero, [GoFunc("pprof_memProfileInternal.func1")] (profilerecord.MemProfileRecord r) => {
         p[0] = r;
         p = p[1..];
     });
@@ -930,7 +930,7 @@ public static (nint n, bool ok) BlockProfile(slice<BlockProfileRecord> p) {
 
     nint m = default;
     var pʗ1 = p;
-    (n, ok) = blockProfileInternal(len(p), (profilerecord.BlockProfileRecord r) => {
+    (n, ok) = blockProfileInternal(len(p), [GoFunc("BlockProfile.func1")] (profilerecord.BlockProfileRecord r) => {
         copyBlockProfileRecord(Ꮡ(pʗ1, m), r);
         m++;
     });
@@ -1020,7 +1020,7 @@ internal static void copyBlockProfileRecord(ж<BlockProfileRecord> Ꮡdst, profi
 
 //go:linkname pprof_blockProfileInternal
 public static (nint n, bool ok) pprof_blockProfileInternal(slice<profilerecord.BlockProfileRecord> p) {
-    return blockProfileInternal(len(p), (profilerecord.BlockProfileRecord r) => {
+    return blockProfileInternal(len(p), [GoFunc("pprof_blockProfileInternal.func1")] (profilerecord.BlockProfileRecord r) => {
         p[0] = r;
         p = p[1..];
     });
@@ -1038,7 +1038,7 @@ public static (nint n, bool ok) MutexProfile(slice<BlockProfileRecord> p) {
 
     nint m = default;
     var pʗ1 = p;
-    (n, ok) = mutexProfileInternal(len(p), (profilerecord.BlockProfileRecord r) => {
+    (n, ok) = mutexProfileInternal(len(p), [GoFunc("MutexProfile.func1")] (profilerecord.BlockProfileRecord r) => {
         copyBlockProfileRecord(Ꮡ(pʗ1, m), r);
         m++;
     });
@@ -1078,7 +1078,7 @@ internal static (nint n, bool ok) mutexProfileInternal(nint size, Action<profile
 
 //go:linkname pprof_mutexProfileInternal
 public static (nint n, bool ok) pprof_mutexProfileInternal(slice<profilerecord.BlockProfileRecord> p) {
-    return mutexProfileInternal(len(p), (profilerecord.BlockProfileRecord r) => {
+    return mutexProfileInternal(len(p), [GoFunc("pprof_mutexProfileInternal.func1")] (profilerecord.BlockProfileRecord r) => {
         p[0] = r;
         p = p[1..];
     });
@@ -1091,7 +1091,7 @@ public static (nint n, bool ok) pprof_mutexProfileInternal(slice<profilerecord.B
 // Most clients should use the runtime/pprof package instead
 // of calling ThreadCreateProfile directly.
 public static (nint n, bool ok) ThreadCreateProfile(slice<StackRecord> p) {
-    return threadCreateProfileInternal(len(p), (profilerecord.StackRecord r) => {
+    return threadCreateProfileInternal(len(p), [GoFunc("ThreadCreateProfile.func1")] (profilerecord.StackRecord r) => {
         nint i = copy(p[0].Stack0[..], r.Stack);
         clear(p[0].Stack0.slice(i));
         p = p[1..];
@@ -1121,7 +1121,7 @@ internal static (nint n, bool ok) threadCreateProfileInternal(nint size, Action<
 
 //go:linkname pprof_threadCreateInternal
 public static (nint n, bool ok) pprof_threadCreateInternal(slice<profilerecord.StackRecord> p) {
-    return threadCreateProfileInternal(len(p), (profilerecord.StackRecord r) => {
+    return threadCreateProfileInternal(len(p), [GoFunc("pprof_threadCreateInternal.func1")] (profilerecord.StackRecord r) => {
         p[0] = r;
         p = p[1..];
     });
@@ -1216,11 +1216,11 @@ internal static (nint n, bool ok) goroutineLeakProfileWithLabelsConcurrent(slice
     var labelsʗ1 = labels;
     var pʗ1 = p;
     var pcbufʗ1 = pcbuf;
-    forEachGRace((ж<g> gp1) => {
+    forEachGRace([GoFunc("goroutineLeakProfileWithLabelsConcurrent.func1")] (ж<g> gp1) => {
         if ((readgstatus(gp1) & ~(uint32)_Gscan) == _Gleaked) {
             var pʗ2 = pʗ1;
             var pcbufʗ2 = pcbufʗ1;
-            systemstack(() => {
+            systemstack([GoFunc("goroutineLeakProfileWithLabelsConcurrent.func1.1")] () => {
                 saveg(~(uintptr)0, ~(uintptr)0, gp1, ref (Ꮡ(pʗ2, offset)).DerefOrNull(), pcbufʗ2);
             });
             if (labelsʗ1 != nil) {
@@ -1282,7 +1282,7 @@ internal static (nint n, bool ok) goroutineProfileWithLabelsConcurrent(slice<pro
     var ourgʗ1 = ourg;
     var pʗ1 = p;
     var pcbufʗ1 = pcbuf;
-    systemstack(() => {
+    systemstack([GoFunc("goroutineProfileWithLabelsConcurrent.func1")] () => {
         saveg(pc, sp, ourgʗ1, ref (Ꮡ(pʗ1, 0)).DerefOrNull(), pcbufʗ1);
     });
     if (labels != nil) {
@@ -1313,7 +1313,7 @@ internal static (nint n, bool ok) goroutineProfileWithLabelsConcurrent(slice<pro
     // call will start by adding itself to the profile (before the act of
     // executing can cause any changes in its stack).
     var pcbufʗ2 = pcbuf;
-    forEachGRace((ж<g> gp1) => {
+    forEachGRace([GoFunc("goroutineProfileWithLabelsConcurrent.func2")] (ж<g> gp1) => {
         tryRecordGoroutineProfile(gp1, pcbufʗ2, Gosched);
     });
 
@@ -1326,7 +1326,7 @@ internal static (nint n, bool ok) goroutineProfileWithLabelsConcurrent(slice<pro
 
     // Restore the invariant that every goroutine struct in allgs has its
     // goroutineProfiled field cleared.
-    forEachGRace((ж<g> gp1) => {
+    forEachGRace([GoFunc("goroutineProfileWithLabelsConcurrent.func3")] (ж<g> gp1) => {
         gp1.of(g.ᏑgoroutineProfiled).Store(goroutineProfileAbsent);
     });
 
@@ -1464,7 +1464,7 @@ internal static void doRecordGoroutineProfile(ж<g> Ꮡgp1, slice<uintptr> pcbuf
     // preventing it from being truly _Grunnable. So we'll use the system stack
     // to avoid schedule delays.
     var pcbufʗ1 = pcbuf;
-    systemstack(() => {
+    systemstack([GoFunc("doRecordGoroutineProfile.func1")] () => {
         saveg(~(uintptr)0, ~(uintptr)0, Ꮡgp1, ref (Ꮡ(goroutineProfile.records, offset)).DerefOrNull(), pcbufʗ1);
     });
 
@@ -1480,7 +1480,7 @@ internal static (nint n, bool ok) goroutineProfileWithLabelsSync(slice<profilere
     var gp = getg();
 
     var gpʗ1 = gp;
-    bool isOK(ж<g> gp1) {
+    [GoFunc("goroutineProfileWithLabelsSync.func1")] bool isOK(ж<g> gp1) {
         // Checking isSystemGoroutine here makes GoroutineProfile
         // consistent with both NumGoroutine and Stack.
         if (gp1 == gpʗ1) {
@@ -1501,7 +1501,7 @@ internal static (nint n, bool ok) goroutineProfileWithLabelsSync(slice<profilere
     // World is stopped, no locking required.
     n = 1;
     var isOKʗ1 = isOK;
-    forEachGRace((ж<g> gp1) => {
+    forEachGRace([GoFunc("goroutineProfileWithLabelsSync.func2")] (ж<g> gp1) => {
         if (isOKʗ1(gp1)) {
             n++;
         }
@@ -1519,7 +1519,7 @@ internal static (nint n, bool ok) goroutineProfileWithLabelsSync(slice<profilere
         var pc = sys.GetCallerPC();
         var gpʗ2 = gp;
         var pcbufʗ1 = pcbuf;
-        systemstack(() => {
+        systemstack([GoFunc("goroutineProfileWithLabelsSync.func3")] () => {
             saveg(pc, sp, gpʗ2, ref (Ꮡ(Ꮡr.ValueSlot, 0)).DerefOrNull(), pcbufʗ1);
         });
         r = r[1..];
@@ -1534,7 +1534,7 @@ internal static (nint n, bool ok) goroutineProfileWithLabelsSync(slice<profilere
         var isOKʗ2 = isOK;
         var labelsʗ1 = labels;
         var pcbufʗ2 = pcbuf;
-        forEachGRace((ж<g> gp1) => {
+        forEachGRace([GoFunc("goroutineProfileWithLabelsSync.func4")] (ж<g> gp1) => {
             if (!isOKʗ2(gp1)) {
                 return;
             }
@@ -1549,7 +1549,7 @@ internal static (nint n, bool ok) goroutineProfileWithLabelsSync(slice<profilere
             // blocked at exitsyscall). Do it on the system stack so it won't
             // call into the schedular (see traceback.go:cgoContextPCs).
             var pcbufʗ3 = pcbufʗ2;
-            systemstack(() => {
+            systemstack([GoFunc("goroutineProfileWithLabelsSync.func4.1")] () => {
                 saveg(~(uintptr)0, ~(uintptr)0, gp1, ref (Ꮡ(Ꮡr.ValueSlot, 0)).DerefOrNull(), pcbufʗ3);
             });
             if (labelsʗ1 != nil) {

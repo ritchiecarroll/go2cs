@@ -189,10 +189,10 @@ public static Curve P256() { return new nistCurveжCurve(p256); }
 
 [GoLazy] partial class lazyᴛp256 { internal static ж<nistCurve> p256 = Ꮡ(new nistCurve(
     name: "P-256",
-    generate: (io.Reader r) => ecdh.GenerateKey<ecdh.P256PointжPoint>(ecdh.P256(), r),
-    newPrivateKey: (slice<byte> b) => ecdh.NewPrivateKey<ecdh.P256PointжPoint>(ecdh.P256(), b),
-    newPublicKey: (slice<byte> publicKey) => ecdh.NewPublicKey<ecdh.P256PointжPoint>(ecdh.P256(), publicKey),
-    sharedSecret: (ж<ecdh.PrivateKey> priv, ж<ecdh.PublicKey> pub) => {
+    generate: [GoFunc("init.func1")] (io.Reader r) => ecdh.GenerateKey<ecdh.P256PointжPoint>(ecdh.P256(), r),
+    newPrivateKey: [GoFunc("init.func2")] (slice<byte> b) => ecdh.NewPrivateKey<ecdh.P256PointжPoint>(ecdh.P256(), b),
+    newPublicKey: [GoFunc("init.func3")] (slice<byte> publicKey) => ecdh.NewPublicKey<ecdh.P256PointжPoint>(ecdh.P256(), publicKey),
+    sharedSecret: [GoFunc("init.func4")] (ж<ecdh.PrivateKey> priv, ж<ecdh.PublicKey> pub) => {
         return ecdh.ECDH<ecdh.P256PointжPoint>(ecdh.P256(), priv, pub);
     }
 )); }
@@ -206,10 +206,10 @@ public static Curve P384() { return new nistCurveжCurve(p384); }
 
 [GoLazy] partial class lazyᴛp384 { internal static ж<nistCurve> p384 = Ꮡ(new nistCurve(
     name: "P-384",
-    generate: (io.Reader r) => ecdh.GenerateKey<ecdh.P384PointжPoint>(ecdh.P384(), r),
-    newPrivateKey: (slice<byte> b) => ecdh.NewPrivateKey<ecdh.P384PointжPoint>(ecdh.P384(), b),
-    newPublicKey: (slice<byte> publicKey) => ecdh.NewPublicKey<ecdh.P384PointжPoint>(ecdh.P384(), publicKey),
-    sharedSecret: (ж<ecdh.PrivateKey> priv, ж<ecdh.PublicKey> pub) => {
+    generate: [GoFunc("init.func5")] (io.Reader r) => ecdh.GenerateKey<ecdh.P384PointжPoint>(ecdh.P384(), r),
+    newPrivateKey: [GoFunc("init.func6")] (slice<byte> b) => ecdh.NewPrivateKey<ecdh.P384PointжPoint>(ecdh.P384(), b),
+    newPublicKey: [GoFunc("init.func7")] (slice<byte> publicKey) => ecdh.NewPublicKey<ecdh.P384PointжPoint>(ecdh.P384(), publicKey),
+    sharedSecret: [GoFunc("init.func8")] (ж<ecdh.PrivateKey> priv, ж<ecdh.PublicKey> pub) => {
         return ecdh.ECDH<ecdh.P384PointжPoint>(ecdh.P384(), priv, pub);
     }
 )); }
@@ -223,10 +223,10 @@ public static Curve P521() { return new nistCurveжCurve(p521); }
 
 [GoLazy] partial class lazyᴛp521 { internal static ж<nistCurve> p521 = Ꮡ(new nistCurve(
     name: "P-521",
-    generate: (io.Reader r) => ecdh.GenerateKey<ecdh.P521PointжPoint>(ecdh.P521(), r),
-    newPrivateKey: (slice<byte> b) => ecdh.NewPrivateKey<ecdh.P521PointжPoint>(ecdh.P521(), b),
-    newPublicKey: (slice<byte> publicKey) => ecdh.NewPublicKey<ecdh.P521PointжPoint>(ecdh.P521(), publicKey),
-    sharedSecret: (ж<ecdh.PrivateKey> priv, ж<ecdh.PublicKey> pub) => {
+    generate: [GoFunc("init.func9")] (io.Reader r) => ecdh.GenerateKey<ecdh.P521PointжPoint>(ecdh.P521(), r),
+    newPrivateKey: [GoFunc("init.func10")] (slice<byte> b) => ecdh.NewPrivateKey<ecdh.P521PointжPoint>(ecdh.P521(), b),
+    newPublicKey: [GoFunc("init.func11")] (slice<byte> publicKey) => ecdh.NewPublicKey<ecdh.P521PointжPoint>(ecdh.P521(), publicKey),
+    sharedSecret: [GoFunc("init.func12")] (ж<ecdh.PrivateKey> priv, ж<ecdh.PublicKey> pub) => {
         return ecdh.ECDH<ecdh.P521PointжPoint>(ecdh.P521(), priv, pub);
     }
 )); }

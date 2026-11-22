@@ -105,7 +105,7 @@ internal static (huffmanTree, error) newHuffmanTree(slice<uint8> lengths) {
         pairs[i].length = lengthΔ1;
     }
 
-    slices.SortFunc(pairs, (huffmanSymbolLengthPair a, huffmanSymbolLengthPair b) => {
+    slices.SortFunc(pairs, [GoFunc("newHuffmanTree.func1")] (huffmanSymbolLengthPair a, huffmanSymbolLengthPair b) => {
         nint c = cmp.Compare(a.length, b.length); if (c != 0) {
             return c;
         }
@@ -134,7 +134,7 @@ internal static (huffmanTree, error) newHuffmanTree(slice<uint8> lengths) {
 
     // Now we can sort by the code so that the left half of each branch are
     // grouped together, recursively.
-    slices.SortFunc(codes, (huffmanCode a, huffmanCode b) => cmp.Compare(a.code, b.code));
+    slices.SortFunc(codes, [GoFunc("newHuffmanTree.func2")] (huffmanCode a, huffmanCode b) => cmp.Compare(a.code, b.code));
 
     t.nodes = new slice<huffmanNode>(len(codes));
     var (_, err) = buildHuffmanNode(Ꮡt, codes, 0);

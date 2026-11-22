@@ -655,7 +655,7 @@ internal static (slice<slice<ж<Certificate>>>, error) Verify⁔(/*this*/ ж<Cer
     nint invalidPoliciesChains = default;
     nint incompatibleKeyUsageChains = default;
     ref var constraintsHintErr = ref heap<error>(out var ᏑconstraintsHintErr);
-    candidateChains = slices.DeleteFunc(candidateChains, (slice<ж<Certificate>> chain) => {
+    candidateChains = slices.DeleteFunc(candidateChains, [GoFunc("(*Certificate).Verify.func1")] (slice<ж<Certificate>> chain) => {
         if (!policiesValid(chain, Ꮡopts.Value)) {
             invalidPoliciesChains++;
             return true;
@@ -781,7 +781,7 @@ internal static (slice<slice<ж<Certificate>>> chains, error err) buildChains⁔
     ref var hintCert = ref heap<ж<Certificate>>(out var ᏑhintCert);
 
     var currentChainʗ1 = currentChain;
-    void considerCandidate(nint certType, potentialParent candidate) {
+    [GoFunc("(*Certificate).buildChains.func1")] void considerCandidate(nint certType, potentialParent candidate) {
         if (sigChecks == nil) {
             sigChecks = @new<nint>();
         }

@@ -268,7 +268,7 @@ internal static (slice<nssCriterion> c, error err) parseCriteria(@string x) {
     slice<nssCriterion> c = default;
     error err = default;
 
-    err = foreachField(x, error (@string f) => {
+    err = foreachField(x, [GoFunc("parseCriteria.func1")] error (@string f) => {
         var not = false;
         if (len(f) > 0 && f[0] == '!') {
             not = true;

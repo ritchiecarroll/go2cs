@@ -12,7 +12,7 @@ internal static iter.Seq<Value> rangeNum<T, N>(N num, Type t)
     where T : /* int8 | int16 | int32 | int64 | int | uint8 | uint16 | uint32 | uint64 | uint | uintptr */ IAdditionOperators<T, T, T>, ISubtractionOperators<T, T, T>, IMultiplyOperators<T, T, T>, IDivisionOperators<T, T, T>, IIncrementOperators<T>, IDecrementOperators<T>, IUnaryNegationOperators<T, T>, IModulusOperators<T, T, T>, IBitwiseOperators<T, T, T>, IShiftOperators<T, int, T>, IEqualityOperators<T, T, bool>, IComparisonOperators<T, T, bool>, new()
     where N : /* int64 | uint64 */ IAdditionOperators<N, N, N>, ISubtractionOperators<N, N, N>, IMultiplyOperators<N, N, N>, IDivisionOperators<N, N, N>, IIncrementOperators<N>, IDecrementOperators<N>, IUnaryNegationOperators<N, N>, IModulusOperators<N, N, N>, IBitwiseOperators<N, N, N>, IShiftOperators<N, int, N>, IEqualityOperators<N, N, bool>, IComparisonOperators<N, N, bool>, new()
 {
-    return (Func<Value, bool> yield) => {
+    return [GoFunc("rangeNum[...].func1")] (Func<Value, bool> yield) => {
         var convert = t.PkgPath() != ""u8;
         // cannot use range T(v) because no core type.
         for (var i = ConvertToType<T>(0); i < ConvertToType<T>(ConvertToUInt64<N>(num)); i++) {
@@ -38,8 +38,8 @@ internal static iter.Seq<Value> rangeNum<T, N>(N num, Type t)
 // Array, Chan, Map, Slice, or String.
 internal static iter.Seq<Value> Seq⁔(/*this*/ Value v) {
     if (canRangeFunc(v.abiType())) {
-        return (Func<Value, bool> yield) => {
-            var rf = MakeFunc(v.Type().In(0), (slice<Value> @in) => slice<Value>([ValueOf(yield(@in[0]))]));
+        return [GoFunc("Value.Seq.func1")] (Func<Value, bool> yield) => {
+            var rf = MakeFunc(v.Type().In(0), [GoFunc("Value.Seq.func1.1")] (slice<Value> @in) => slice<Value>([ValueOf(yield(@in[0]))]));
             v.Call([rf]);
         };
     }
@@ -81,7 +81,7 @@ internal static iter.Seq<Value> Seq⁔(/*this*/ Value v) {
         if (v.Elem().kind() != Array) {
             break;
         }
-        return (Func<Value, bool> yield) => {
+        return [GoFunc("Value.Seq.func2")] (Func<Value, bool> yield) => {
             v = v.Elem();
             foreach (var i in range(v.Len())) {
                 if (!yield(ValueOf(i))) {
@@ -91,7 +91,7 @@ internal static iter.Seq<Value> Seq⁔(/*this*/ Value v) {
         };
     }
     case var ᴛ when ᴛ == Array || ᴛ == Slice: {
-        return (Func<Value, bool> yield) => {
+        return [GoFunc("Value.Seq.func3")] (Func<Value, bool> yield) => {
             foreach (var i in range(v.Len())) {
                 if (!yield(ValueOf(i))) {
                     return;
@@ -100,7 +100,7 @@ internal static iter.Seq<Value> Seq⁔(/*this*/ Value v) {
         };
     }
     case var ᴛ when ᴛ == String: {
-        return (Func<Value, bool> yield) => {
+        return [GoFunc("Value.Seq.func4")] (Func<Value, bool> yield) => {
             foreach (var (i, _) in v.String()) {
                 if (!yield(ValueOf(i))) {
                     return;
@@ -109,7 +109,7 @@ internal static iter.Seq<Value> Seq⁔(/*this*/ Value v) {
         };
     }
     case var ᴛ when ᴛ == Map: {
-        return (Func<Value, bool> yield) => {
+        return [GoFunc("Value.Seq.func5")] (Func<Value, bool> yield) => {
             var i = v.MapRange();
             while (i.Next()) {
                 if (!yield(i.Key())) {
@@ -119,7 +119,7 @@ internal static iter.Seq<Value> Seq⁔(/*this*/ Value v) {
         };
     }
     case var ᴛ when ᴛ == Chan: {
-        return (Func<Value, bool> yield) => {
+        return [GoFunc("Value.Seq.func6")] (Func<Value, bool> yield) => {
             for (var (value, ok) = v.Recv(); ok; (value, ok) = v.Recv()) {
                 if (!yield(value)) {
                     return;
@@ -137,8 +137,8 @@ internal static iter.Seq<Value> Seq⁔(/*this*/ Value v) {
 // Otherwise v's kind must be Array, Map, Slice, or String.
 internal static iter.Seq2<Value, Value> Seq2⁔(/*this*/ Value v) {
     if (canRangeFunc2(v.abiType())) {
-        return (Func<Value, Value, bool> yield) => {
-            var rf = MakeFunc(v.Type().In(0), (slice<Value> @in) => slice<Value>([ValueOf(yield(@in[0], @in[1]))]));
+        return [GoFunc("Value.Seq2.func1")] (Func<Value, Value, bool> yield) => {
+            var rf = MakeFunc(v.Type().In(0), [GoFunc("Value.Seq2.func1.1")] (slice<Value> @in) => slice<Value>([ValueOf(yield(@in[0], @in[1]))]));
             v.Call([rf]);
         };
     }
@@ -147,7 +147,7 @@ internal static iter.Seq2<Value, Value> Seq2⁔(/*this*/ Value v) {
         if (v.Elem().kind() != Array) {
             break;
         }
-        return (Func<Value, Value, bool> yield) => {
+        return [GoFunc("Value.Seq2.func2")] (Func<Value, Value, bool> yield) => {
             v = v.Elem();
             foreach (var i in range(v.Len())) {
                 if (!yield(ValueOf(i), v.Index(i))) {
@@ -157,7 +157,7 @@ internal static iter.Seq2<Value, Value> Seq2⁔(/*this*/ Value v) {
         };
     }
     case var ᴛ when ᴛ == Array || ᴛ == Slice: {
-        return (Func<Value, Value, bool> yield) => {
+        return [GoFunc("Value.Seq2.func3")] (Func<Value, Value, bool> yield) => {
             foreach (var i in range(v.Len())) {
                 if (!yield(ValueOf(i), v.Index(i))) {
                     return;
@@ -166,7 +166,7 @@ internal static iter.Seq2<Value, Value> Seq2⁔(/*this*/ Value v) {
         };
     }
     case var ᴛ when ᴛ == String: {
-        return (Func<Value, Value, bool> yield) => {
+        return [GoFunc("Value.Seq2.func4")] (Func<Value, Value, bool> yield) => {
             foreach (var (i, vΔ2) in v.String()) {
                 if (!yield(ValueOf(i), ValueOf(vΔ2))) {
                     return;
@@ -175,7 +175,7 @@ internal static iter.Seq2<Value, Value> Seq2⁔(/*this*/ Value v) {
         };
     }
     case var ᴛ when ᴛ == Map: {
-        return (Func<Value, Value, bool> yield) => {
+        return [GoFunc("Value.Seq2.func5")] (Func<Value, Value, bool> yield) => {
             var i = v.MapRange();
             while (i.Next()) {
                 if (!yield(i.Key(), i.Value())) {

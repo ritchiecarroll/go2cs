@@ -42,7 +42,7 @@ partial struct encBuffer {
 }
 
 [GoLazy] partial class lazyᴛencBufferPool { internal static readonly ж<sync.Pool> ᏑencBufferPool = new StaticBox<sync.Pool>(new sync.Pool(
-    New: () => {
+    New: [GoFunc("init.func1")] () => {
         var e = @new<encBuffer>();
         e.data = e.scratch[0..0];
         return e.OrTypedNil();
@@ -576,7 +576,7 @@ internal static (ж<Action<ж<encInstr>, ж<encoderState>, reflect.Value>>, nint
                 var helper = encSliceHelper[t.Elem().Kind()];
                 var elemOpʗ1 = elemOp;
                 var helperʗ1 = helper;
-                op = (ж<encInstr> i, ж<encoderState> state, reflect.Value Δslice) => {
+                op = [GoFunc("encOpFor.func1")] (ж<encInstr> i, ж<encoderState> state, reflect.Value Δslice) => {
                     if (!state.sendZero && Δslice.Len() == 0) {
                         return;
                     }
@@ -591,7 +591,7 @@ internal static (ж<Action<ж<encInstr>, ж<encoderState>, reflect.Value>>, nint
                 var helper = encArrayHelper[t.Elem().Kind()];
                 var elemOpʗ2 = elemOp;
                 var helperʗ2 = helper;
-                op = (ж<encInstr> i, ж<encoderState> state, reflect.Value Δarray) => {
+                op = [GoFunc("encOpFor.func2")] (ж<encInstr> i, ж<encoderState> state, reflect.Value Δarray) => {
                     state.update(i);
                     state.enc.encodeArray(state.b, Δarray, elemOpʗ2.ValueSlot, elemIndir, Δarray.Len(), helperʗ2);
                 };
@@ -602,7 +602,7 @@ internal static (ж<Action<ж<encInstr>, ж<encoderState>, reflect.Value>>, nint
                 var (elemOp, elemIndir) = encOpFor(t.Elem(), inProgress, building);
                 var elemOpʗ3 = elemOp;
                 var keyOpʗ1 = keyOp;
-                op = (ж<encInstr> i, ж<encoderState> state, reflect.Value mv) => {
+                op = [GoFunc("encOpFor.func3")] (ж<encInstr> i, ж<encoderState> state, reflect.Value mv) => {
                     // We send zero-length (but non-nil) maps because the
                     // receiver might want to use the map.  (Maps don't use append.)
                     if (!state.sendZero && mv.IsNil()) {
@@ -618,7 +618,7 @@ internal static (ж<Action<ж<encInstr>, ж<encoderState>, reflect.Value>>, nint
                 getEncEngine(ref (userType(typ)).DerefOrNull(), building);
                 var info = mustGetTypeInfo(typ);
                 var infoʗ1 = info;
-                op = (ж<encInstr> i, ж<encoderState> state, reflect.Value sv) => {
+                op = [GoFunc("encOpFor.func4")] (ж<encInstr> i, ж<encoderState> state, reflect.Value sv) => {
                     state.update(i);
                     // indirect through info to delay evaluation for recursive structs
                     var enc = infoʗ1.Ꮡencoder.Load();
@@ -627,7 +627,7 @@ internal static (ж<Action<ж<encInstr>, ж<encoderState>, reflect.Value>>, nint
                 break;
             }
             case var ᴛ when ᴛ == reflect.Interface: {
-                op = (ж<encInstr> i, ж<encoderState> state, reflect.Value iv) => {
+                op = [GoFunc("encOpFor.func5")] (ж<encInstr> i, ж<encoderState> state, reflect.Value iv) => {
                     if (!state.sendZero && (!iv.IsValid() || iv.IsNil())) {
                         return;
                     }
@@ -658,7 +658,7 @@ internal static (ж<Action<ж<encInstr>, ж<encoderState>, reflect.Value>>, nint
     }
     ref var op = ref heap<Action<ж<encInstr>, ж<encoderState>, reflect.Value>>(out var Ꮡop);
     var rtʗ1 = rt;
-    op = (ж<encInstr> i, ж<encoderState> state, reflect.Value v) => {
+    op = [GoFunc("gobEncodeOpFor.func1")] (ж<encInstr> i, ж<encoderState> state, reflect.Value v) => {
         if (Ꮡut.Value.encIndir == -1) {
             // Need to climb up one level to turn value into pointer.
             if (!v.CanAddr()) {
