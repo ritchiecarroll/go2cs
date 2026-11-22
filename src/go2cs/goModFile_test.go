@@ -283,6 +283,27 @@ func TestPlainRecurseConvertsAModuleCacheReleaseWithNoGoMod(t *testing.T) {
 		}
 	})
 
+	// COORD's ruling on increment 1: a diagnostic or load warning names the release's own path, never the copy's. The
+	// release imports a package no module provides, so the run reports it, and every line of it that names a source
+	// file names the cache path; only the "go.mod:" line, which says what was copied where, names the copy.
+	t.Run("diagnostics name the cache path, not the copy's", func(t *testing.T) {
+		needy := filepath.Join(cache, "example.com", "needy@v1.0.0")
+		writeModuleFile(t, filepath.Join(needy, "needy.go"), "package needy\n\nimport \"example.com/other\"\n\n// V is other's value.\nvar V = other.V\n")
+		writeModuleFile(t, filepath.Join(cache, "cache", "download", "example.com", "needy", "@v", "v1.0.0.mod"), "module example.com/needy\n")
+		combined, _, _ := run(needy)
+		cached := filepath.Join(needy, "needy.go")
+
+		if !strings.Contains(combined, cached) {
+			t.Fatalf("no diagnostic names the release's own file %s:\n%s", cached, lastLines(combined, 12))
+		}
+
+		for _, line := range strings.Split(combined, "\n") {
+			if strings.Contains(line, "go2cs-modcopy-") && !strings.HasPrefix(line, "go.mod: ") {
+				t.Errorf("a line names the copy: %s", line)
+			}
+		}
+	})
+
 	refused := func(t *testing.T, dir string) {
 		t.Helper()
 		combined, _, err := run(dir)

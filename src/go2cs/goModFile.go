@@ -140,6 +140,19 @@ func copyModuleCacheRelease(dir, synthesized string) (string, string, error) {
 	return copyDir, work, nil
 }
 
+// copiedModuleRoot and originalModuleRoot are set while a go.mod-less module-cache release converts from its copy:
+// remapCopiedPaths writes the release's own path for the copy's in every diagnostic and load warning, so a user reads
+// paths that exist on their machine (COORD's ruling on INC 4 increment 1).
+var copiedModuleRoot, originalModuleRoot string
+
+func remapCopiedPaths(s string) string {
+	if copiedModuleRoot == "" {
+		return s
+	}
+
+	return strings.ReplaceAll(s, copiedModuleRoot, originalModuleRoot)
+}
+
 // goModOverlayFlag is the -overlay flag installGoModOverlay put in GOFLAGS, or "". A go command that runs with its own
 // GOFLAGS (the stack-append harvest empties it) carries this, or it cannot see a module that ships no go.mod.
 var goModOverlayFlag string

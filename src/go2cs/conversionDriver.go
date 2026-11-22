@@ -255,7 +255,7 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 	// than print a bare "Errors:" (issue #33).
 	for _, pkg := range pkgs {
 		if len(pkg.Errors) > 0 {
-			log.Printf("WARNING: %s did not fully type-check; converting best-effort — code depending on the following is emitted untyped: %v", pkg.PkgPath, pkg.Errors)
+			log.Print(remapCopiedPaths(fmt.Sprintf("WARNING: %s did not fully type-check; converting best-effort — code depending on the following is emitted untyped: %v", pkg.PkgPath, pkg.Errors)))
 
 			for _, loadError := range pkg.Errors {
 				reportDiagnostic(loadError.Pos, loadErrorCode(loadError.Kind), loadError.Msg)

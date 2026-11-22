@@ -122,6 +122,8 @@ func (m *ModuleConverter) ConvertModule(moduleDir string) error {
 
 		fmt.Printf("go.mod: the module at %s ships none; converting a copy carrying the module cache's %s, as go reads it (%s, removed at exit)\n",
 			m.options.mainModuleDir, synthesized, copyDir)
+		copiedModuleRoot, originalModuleRoot = copyDir, m.options.mainModuleDir
+		defer func() { copiedModuleRoot, originalModuleRoot = "", "" }()
 		moduleDir, m.options.mainModuleDir = copyDir, copyDir
 	}
 
@@ -333,7 +335,7 @@ func (m *ModuleConverter) loadClosure(moduleDir string) (map[string]*packages.Pa
 	// is acceptable at this stage).
 	for _, pkg := range pkgs {
 		for _, e := range pkg.Errors {
-			log.Printf("WARNING: load error in %s: %v", pkg.PkgPath, e)
+			log.Print(remapCopiedPaths(fmt.Sprintf("WARNING: load error in %s: %v", pkg.PkgPath, e)))
 		}
 	}
 
