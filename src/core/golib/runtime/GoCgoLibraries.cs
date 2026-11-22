@@ -53,8 +53,7 @@ namespace go.golib;
         // never calls C is as wrong on another target as a call is. Resolve keeps its own check as the second layer.
         // A process on the target the bindings were converted for sees no change: one compare, and on linux the libc
         // readings below, once per cgo assembly at load.
-        if (Refusal(target) is { } refusal)
-            throw new GoCgoTargetMismatchException(refusal);
+        // THROWAWAY RED: the eager check is removed; Resolve's lazy check remains.
 
         // A process that links a cgo package keeps the pin-extent index, which the void pointer's door asks
         // (docs/phase4/DESIGN-cgo-pin-extents.md, D4). Every other process never creates it.
