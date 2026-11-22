@@ -65,3 +65,38 @@ The B lines keep the right-hand side text unchanged. The delegate type is the ta
 `package_info.cs` in the diff.
 
 ## 2. Score (appended after the regen)
+
+Regen run at arm A `afb01dfb6c` against arm B `14fe938a7a` (this record's prediction commit). The converter source
+from A to B differs only in `funcWordOperations.go` and its test. Each of the eight conversions exited 0, with 0
+degraded packages and 0 out-of-memory lines. Each seed held 4,690 `.cs` files.
+
+| Target | Files | Lines out / in | `GoPositionMap` | Files |
+|---|---|---|---|---|
+| windows/amd64 | 2 | 2 / 2 | 0 | `runtime/debugcall.cs`, `runtime/windows/cgocall.cs` |
+| linux/amd64 | 2 | 2 / 2 | 0 | `runtime/debugcall.cs`, `runtime/linux/cgocall.cs` |
+| darwin/amd64 | 2 | 2 / 2 | 0 | `runtime/debugcall.cs`, `runtime/darwin/cgocall.cs` |
+| linux/arm64 | 2 | 2 / 2 | 0 | `runtime/debugcall.cs`, `runtime/linux/cgocall.cs` |
+
+**Scored as worded:**
+- **Footprint, per target: MET** on all four. There are 8 file differences and 16 changed lines. Each hunk is at
+  the predicted line: `@@ -265,7 +265,7 @@` for debugcall.cs:268 and `@@ -479,7 +479,7 @@` for cgocall.cs:482.
+- **The lines: MET, byte for byte.** Across the four targets, each of the four predicted lines occurs exactly 4
+  times, and no other line moves. The right-hand side is unchanged. The type arguments are `Action` and
+  `Action<@unsafe.Pointer>`.
+- **Line kinds: MET.** There are 0 `GoPositionMap` lines, 0 alias lines and 0 declaration lines, and no
+  `package_info.cs` in any diff.
+- **Ranked misses: none fired.** The declarations stay `heap<...>`, linux/arm64 writes `runtime/linux/cgocall.cs`,
+  and no file outside the four moves.
+
+The emitted-newer counts agree: arm B writes exactly 2 more files than arm A on each target (109/111, 118/120,
+123/125 and 117/119). Every other rewrite is the same in both arms.
+
+**Applied.** The applier compares only the changed line: each committed line had to equal arm A's line exactly
+once, at the predicted line number, before it was replaced with arm B's. The applied change is 4 files, +1/-1 each.
+
+**Compiles.** runtime.csproj, Release, builds with 0 warnings and 0 errors on all four targets: windows (the
+default), linux, darwin, and linux with arm64.
+
+The four sites now refuse by name instead of calling a nil func. Each one stores a funcval whose word is a code PC,
+which `FuncOfWord` refuses (arm 3). Neither site is reachable today. debugCallWrap2 runs only under debugger call
+injection, and cgocallbackg1 only for cgo callbacks, which are Phase 5.
