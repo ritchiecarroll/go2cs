@@ -585,3 +585,47 @@ carried its own small C library, linked through `CGO_LDFLAGS` for both sides.
 
 **3.4's size.** 3.4-A goes from 0.5 to about 0.25, a guard arm. 3.4 is now about **2.5 lane-days** (3.4-A 0.25, 3.4-B
 1.5, 3.4-C 0.25, arms and the hosted reading 0.5). 3.3's size does not change.
+
+### 7.11 Addendum, 2026-11-22: H's review of section 7
+
+H read section 7 at `b691815787` for cgo fit and cleared it, with two SHOULDs and one NIT (mailbox, COORD to P5,
+2026-11-22 07:52Z). H checked every golib and runtime cite in 7.1, 7.2, 7.5 and 7.6 at `1f8d62ddb3`, and the sums in 7.7
+(8.75; 7.25 without 3.3-E; 2.75 for 3.4, which 7.10 has since taken to 2.5). All of them hold. Sections 7.1 to 7.10
+stand; this block adds to them. H agrees with 7.6: the converter emits the existing `GoCgoCheckPointer`, and the runtime
+floor stays 1.26.11.1.
+
+**One cite, made exact (7.1).** `pinner_impl.cs:138-139` is `PinTable.Pin(referent)` and the add to the Pinner's list.
+The referent those lines pin comes from `pinnerReferentOf` (`:131`, defined at `:183`), which reaches `goReferentOfBox`
+(`:197`, defined at `:212`). The claim in 7.1 holds; only its cite was loose.
+
+**SHOULD 1: the precedence, in one place (replaces the order spread over 7.4, 7.5 and 7.9).** For a pointee handed to C
+whose referent the pin table reports pinned, the wrapper decides in this order:
+1. **Class (c) first.** R1 when Go's walk panics, or R3 when the type holds a string or interface word, R3 at
+   `cgocheck=0` as well, in the order 7.4 gives (R3 before the walk).
+2. **Then class (b).** R2 when 7.5's predicate fails and the shape is marshallable. 7.9 retired R2 into R6, so this step
+   reads R6's text; it stays listed so the order is complete.
+3. **Then class (a).** PIN with a Hold (7.1), or R6 when no hold can be taken (`PointerStorage.Unpinnable`, or `PinOnly`
+   returns null).
+
+A referent the table does not report pinned skips this list and is split by 7.5 alone.
+
+**Where R6 is never met.** A field reference whose own `T` is reference-bearing reads `PointerStorage.None`, not
+`Unpinnable` (`ж.FieldRefBox.cs:468-469`, at `1f8d62ddb3`: `IsReferenceOrContainsReferences<T>()` is the first arm). Its
+type holds a pointer, string or interface word, so it is decided at step 1 or 2 and never reaches step 3. R6's
+`Unpinnable` arm covers only a reference-free field inside a reference-bearing root, as 7.1 says.
+
+**SHOULD 2: 3.3-E's side table serves two seats (adds to 3.3-E, lines 131-141).** H reports that, since 1a's fold and
+1c, the field read and store and the `**C.T` door share one core, `CgoPointerWords.ReadWord` and `WriteWord` in
+`ж.CgoFields.cs`. 3.3-E's side table is keyed in that core, so one table covers `*pp = g` through the `**C.T` door and
+`l.next = g` through the field store, and W1 and 1a's load read it on the same path. NOT READ by me: neither the class
+nor the file is at any pushed ref I can read (`1f8d62ddb3`, master `42d78181d4`, `claude/h-cgo-1c` `fbf26a020b`), so the
+name is H's. The 3.3-E seat cut after 1c reads the core at its own base before it writes the table. Size unchanged.
+
+**NIT: cites move after 1c.** Every cite in section 7 is `1f8d62ddb3`'s, which is right for a record. After 1c lands,
+`GoCgoArgs.cs:302-303` (`IsGenuinelyNative`) moves to about `:352-353`, and the `ж.FieldRefBox.cs` cites move by 6. A
+3.3 seat cut after 1c re-reads them at its base.
+
+**Settled by H's measurement (7.2, 3.4-A).** `&x.f` over a native receiver with a known Go offset IS a `NativeBox` at
+base plus the Go offset: 1a's `CgoPointerFieldTests` and 1c's two-hop row, 24 of 24. 7.10's B1 reads the same through
+`(*[2]byte)(unsafe.Pointer(&sa.Port))`, by its printed value only. Whether `unsafe.Pointer(&x.f)` of such a box gives
+exactly that number is NOT run yet; 3.4-A's guard arm asserts it.
