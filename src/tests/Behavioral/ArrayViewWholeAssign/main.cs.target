@@ -362,6 +362,350 @@ internal static aliasArr /*a*/ aliasedResultIndex() {
     return Ꮡa.Value;
 }
 
+internal static array<uint64> /*a*/ retSlice() {
+    array<uint64> a = new(8);
+    GoFrame ᒐ = default;
+    try {
+        var s = a[..];
+        var sʗ1 = s;
+        defer(() => {
+            sʗ1[0] = 7;
+        }, ref ᒐ);
+        a.Assign(array<uint64>(8, [1, 2]));
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+    finally { ᒐ.Run(); }
+    return a;
+}
+
+internal static array<uint64> /*a*/ retElemPtr() {
+    heap(new array<uint64>(8), out var Ꮡa);
+    GoFrame ᒐ = default;
+    try {
+        ref var a = ref Ꮡa.Value;
+
+        var p = Ꮡa.at<uint64>(1);
+        var pʗ1 = p;
+        defer(() => {
+            pʗ1.Value = 9;
+        }, ref ᒐ);
+        a.Assign(array<uint64>(8, [1, 2]));
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+    finally { ᒐ.Run(); }
+    return Ꮡa.Value;
+}
+
+internal static array<uint64> /*a*/ retWindow() {
+    heap(new array<uint64>(8), out var Ꮡa);
+    GoFrame ᒐ = default;
+    try {
+        ref var a = ref Ꮡa.Value;
+
+        var f = @unsafe.Pointer.ToArray<uint32>(@unsafe.Pointer.FromPinnedBox(Ꮡa), 16);
+        var fʗ1 = f;
+        defer(() => {
+            fʗ1.ElementRef(2) = 5;
+        }, ref ᒐ);
+        a.Assign(array<uint64>(8, [1, 2]));
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+    finally { ᒐ.Run(); }
+    return Ꮡa.Value;
+}
+
+internal static holder /*h*/ retStruct() {
+    holder h = new();
+    GoFrame ᒐ = default;
+    try {
+        var s = h.x[..];
+        var sʗ1 = s;
+        defer(() => {
+            sʗ1[0] = 7;
+        }, ref ᒐ);
+        h.AssignFrom(new holder(n: 3, x: array<uint64>(8, [1, 2])));
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+    finally { ᒐ.Run(); }
+    return h;
+}
+
+internal static named /*a*/ retNamed() {
+    named a = default;
+    GoFrame ᒐ = default;
+    try {
+        var s = a[..];
+        var sʗ1 = s;
+        defer(() => {
+            sʗ1[0] = 7;
+        }, ref ᒐ);
+        a.Assign(new named(new uint64[]{1, 2}.array(8)));
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+    finally { ᒐ.Run(); }
+    return a;
+}
+
+internal static (array<uint64> a, error err) retMulti() {
+    array<uint64> a = new(8);
+    error err = default;
+    GoFrame ᒐ = default;
+    try {
+        var s = a[..];
+        var sʗ1 = s;
+        defer(() => {
+            sʗ1[0] = 7;
+        }, ref ᒐ);
+        (var aᴛ1, err) = (mk(), default); a.Assign(aᴛ1);
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+    finally { ᒐ.Run(); }
+    return (a, err);
+}
+
+internal static (nint n, array<uint64> a) retSecond(bool early) {
+    nint n = default;
+    array<uint64> a = new(8);
+    GoFrame ᒐ = default;
+    try {
+        var s = a[..];
+        var sʗ1 = s;
+        defer(() => {
+            sʗ1[0] = 7;
+        }, ref ᒐ);
+        if (early) {
+            (n, var aᴛ1) = (5, array<uint64>(8, [3, 4])); a.Assign(aᴛ1); goto ᒐdone;
+        }
+        (n, var aᴛ2) = (6, array<uint64>(8, [1, 2])); a.Assign(aᴛ2);
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+    finally { ᒐ.Run(); }
+    ᒐdone: return (n, a);
+}
+
+internal static array<uint64> /*a*/ retRecover() {
+    array<uint64> a = new(8);
+    GoFrame ᒐ = default;
+    try {
+        var s = a[..];
+        var sʗ1 = s;
+        defer(() => {
+            recover();
+            sʗ1[0] = 7;
+        }, ref ᒐ);
+        a.Assign(array<uint64>(8, [1, 2]));
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+    finally { ᒐ.Run(); }
+    return a;
+}
+
+internal static array<uint64> /*a*/ retFromVar() {
+    array<uint64> a = new(8);
+    GoFrame ᒐ = default;
+    try {
+        ref var v = ref heap<array<uint64>>(array<uint64>(8, [1, 2]), out var Ꮡv);
+        var s = a[..];
+        var sʗ1 = s;
+        defer(() => {
+            sʗ1[0] = 7;
+            Ꮡv.Value[1] = 99;
+        }, ref ᒐ);
+        a.Assign(v);
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+    finally { ᒐ.Run(); }
+    return a;
+}
+
+[GoLazy] partial class lazyᴛretLit { internal static Func<array<uint64>> retLit = () => {
+    array<uint64> a = new(8);
+    GoFrame ᒐ = default;
+    try {
+        var s = a[..];
+        var sʗ1 = s;
+        defer(() => {
+            sʗ1[0] = 7;
+        }, ref ᒐ);
+        a.Assign(array<uint64>(8, [1, 2])); goto ᒐdone;
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+    finally { ᒐ.Run(); }
+    ᒐdone: return a;
+}; }
+
+internal static array<uint64> retLitCaptured() {
+    array<uint64> /*a*/ f() {
+        array<uint64> a = new(8);
+        GoFrame ᒐ = default;
+        try {
+            defer(() => {
+                a[0] += 10;
+            }, ref ᒐ);
+            var s = a[..];
+            var sʗ1 = s;
+            defer(() => {
+                sʗ1[1] = 8;
+            }, ref ᒐ);
+            a.Assign(array<uint64>(8, [1, 2])); goto ᒐdone;
+        }
+        catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+        finally { ᒐ.Run(); }
+        ᒐdone: return a;
+    }
+    return f();
+}
+
+[GoLazy] partial class lazyᴛretLitIndex { internal static Func<array<uint64>> retLitIndex = () => {
+    heap(new array<uint64>(8), out var Ꮡa);
+    GoFrame ᒐ = default;
+    try {
+        ref var a = ref Ꮡa.Value;
+        var p = Ꮡa;
+        defer(() => {
+            Ꮡa.Value[0] = 0xEEEE;
+        }, ref ᒐ);
+        p.Value[1] = 505;
+        goto ᒐdone;
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+    finally { ᒐ.Run(); }
+    ᒐdone: return Ꮡa.Value;
+}; }
+
+[GoLazy] partial class lazyᴛretLitAddr { internal static Func<array<uint64>> retLitAddr = () => {
+    heap(new array<uint64>(8), out var Ꮡa);
+    GoFrame ᒐ = default;
+    try {
+        ref var a = ref Ꮡa.Value;
+        var p = Ꮡa;
+        var pʗ1 = p;
+        defer(() => {
+            pʗ1.Value[0] = 7;
+        }, ref ᒐ);
+        Ꮡa.Value.Assign(array<uint64>(8, [1, 2])); goto ᒐdone;
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+    finally { ᒐ.Run(); }
+    ᒐdone: return Ꮡa.Value;
+}; }
+
+internal static (array<uint64> a, error err) retForward() {
+    array<uint64> a = new(8);
+    error err = default;
+    GoFrame ᒐ = default;
+    try {
+        var s = a[..];
+        var sʗ1 = s;
+        defer(() => {
+            sʗ1[0] = 7;
+        }, ref ᒐ);
+        (var aᴛ1, err) = pair(); a.Assign(aᴛ1);
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+    finally { ᒐ.Run(); }
+    return (a, err);
+}
+
+internal static (array<uint64> a, array<uint64> b) retCrossed() {
+    array<uint64> a = new(8);
+    array<uint64> b = new(8);
+    GoFrame ᒐ = default;
+    try {
+        var (sa, sb) = (a[..], b[..]);
+        var saʗ1 = sa;
+        var sbʗ1 = sb;
+        defer(() => {
+            saʗ1[0] = 7;
+            sbʗ1[0] = 8;
+        }, ref ᒐ);
+        (a[1], b[1]) = (1, 2);
+        (var aᴛ1, var bᴛ1) = (b.Clone(), a.Clone()); a.Assign(aᴛ1); b.Assign(bᴛ1);
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+    finally { ᒐ.Run(); }
+    return (a, b);
+}
+
+internal static error boom() { throw panic("boom"); }
+
+internal static (array<uint64> a, error err) retPanicAfter() {
+    array<uint64> a = new(8);
+    error err = default;
+    GoFrame ᒐ = default;
+    try {
+        var s = a[..];
+        var sʗ1 = s;
+        defer(() => {
+            recover();
+            sʗ1[1] = 5;
+        }, ref ᒐ);
+        (var aᴛ1, err) = (array<uint64>(8, [1, 2]), boom()); a.Assign(aᴛ1);
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+    finally { ᒐ.Run(); }
+    return (a, err);
+}
+
+internal static (named a, error err) retNamedTuple() {
+    named a = default;
+    error err = default;
+    GoFrame ᒐ = default;
+    try {
+        var s = a[..];
+        var sʗ1 = s;
+        defer(() => {
+            sʗ1[0] = 7;
+        }, ref ᒐ);
+        (var aᴛ1, err) = (array<uint64>(8, [1, 2]), default); a.Assign(aᴛ1);
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+    finally { ᒐ.Run(); }
+    return (a, err);
+}
+
+internal static void returns() {
+    var a = retSlice();
+    fmt.Println("ret slice  :", a[0], a[1]);
+    a.Assign(retElemPtr());
+    fmt.Println("ret elemPtr:", a[0], a[1]);
+    a.Assign(retWindow());
+    fmt.Println("ret window :", a[0], a[1]);
+    var h = retStruct();
+    fmt.Println("ret struct :", h.n, h.x[0], h.x[1]);
+    var b = retNamed();
+    fmt.Println("ret named  :", b[0], b[1]);
+    (var aᴛ1, var err) = retMulti();
+    a.Assign(aᴛ1);
+    fmt.Println("ret multi  :", a[0], a[1], err);
+    var (n1, a1) = retSecond(true);
+    var (n2, a2) = retSecond(false);
+    fmt.Println("ret second :", n1, a1[0], a1[1], n2, a2[0], a2[1]);
+    a.Assign(retRecover());
+    fmt.Println("ret recover:", a[0], a[1]);
+    a.Assign(retFromVar());
+    fmt.Println("ret fromVar:", a[0], a[1]);
+    a.Assign(retLit());
+    fmt.Println("ret lit    :", a[0], a[1]);
+    a.Assign(retLitCaptured());
+    fmt.Println("ret litCapt:", a[0], a[1]);
+    a.Assign(retLitIndex());
+    fmt.Println("ret litIdx :", a[0], a[1], len(a));
+    a.Assign(retLitAddr());
+    fmt.Println("ret litAddr:", a[0], a[1]);
+    (var aᴛ2, err) = retForward();
+    a.Assign(aᴛ2);
+    fmt.Println("ret forward:", a[0], a[1], err);
+    var (c1, c2) = retCrossed();
+    fmt.Println("ret crossed:", c1[0], c1[1], c2[0], c2[1]);
+    (var aᴛ3, err) = retPanicAfter();
+    a.Assign(aᴛ3);
+    fmt.Println("ret panicAf:", a[0], a[1], err);
+    (var bᴛ1, err) = retNamedTuple();
+    b.Assign(bᴛ1);
+    fmt.Println("ret namedTp:", b[0], b[1], err);
+}
+
 internal static void main() {
     variable();
     literal();
@@ -396,6 +740,7 @@ internal static void main() {
     fmt.Println("res sidx:", h.x[0], h.x[1], len(h.x));
     var ra = aliasedResultIndex();
     fmt.Println("res aidx:", ra[0], ra[1], len(ra));
+    returns();
 }
 
 } // end main_package

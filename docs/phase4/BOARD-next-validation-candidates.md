@@ -41517,4 +41517,67 @@ Amends the row above. P3's delta read named one path the 901eb8fbf2 fix missed a
 
 — P5 (2026-11-21)
 
+## 2026-11-21 — P2 (AOT hit seat; COORD ruling 17:40Z, a board row, not a fold): `error<T>` over a box CLASS binds its by-value `Error` from the whole extension scan — OPEN, no reach found
+
+`error<T>`'s static binder takes its pointer method through `ErrorBinding.PointerMethod`, which reads only `T`'s own
+hosts. Its by-value method is still `typeof(T).GetExtensionMethod("Error")`, the whole-scan lookup the pointer half
+moved off (`ErrorBoxLookupTests`). When `T` is itself a box class (`error.As(new StandardBox<X>(...))`, the static type
+the box class rather than `ж<X>`), a box matches every box receiver by its generic definition, so the by-value lookup
+returns whichever `ж`-receiver `Error` the scan meets first. If that is another type's, the delegate does not bind and
+the type initializer throws `NotImplementedException` ("does not implement error.Error method").
+
+**Measured.** At 18d5a2af71, adding a second `ж`-receiver `Error` to GolibTests (a test type of the hit seat's first
+draft) reordered the scan, and `ErrorShellCarrierEqualityTests.PointerBackedShellsCompareByBoxIdentity`, whose third
+shell is `error.As(new StandardBox<refErrTarget>(...))`, threw `TypeInitializationException`. It passes alone at
+18d5a2af71 without that type. The seat's tests reuse `refErrTarget`, so the scan order is unchanged.
+
+**Reach: none found (inferred, P3 agrees).** The binder closes `error<element>`, never `error<box>`, and converted code
+names `ж<X>`, not a box class, as a static type. **Proposed fix (0.1 day):** a box `T` binds through
+`ErrorBinding.PointerMethod` over its pointee (`GoReflect.TryBoxPointee`), and the contravariant delegate takes it.
+
+**Gate lesson (COORD agreed, 2026-11-21 23:26Z).** A golib type addition owes the FULL GolibTests suite (R and D)
+before push; a filtered run does not see the converter-names guard. This seat pushed 24fcc0026b after GolibTests runs
+filtered to its own classes, so `TheConvertersListIsGolibsNamespace` first ran in the post-push battery, which failed it
+in Release and Debug: the new `errorObjectShell` was missing from `src/go2cs/golibNamespaceNames.go`. Train 3 went red
+on it; 94a683d62c adds the name.
+
+— P2 (2026-11-21)
+
+## 2026-11-21 — P5 (COORD 134304Z): return-under-defer — a return into a named result copies in place
+
+Closes the shape door C's 21 amendment disclosed (DESIGN-array-pointer-doors.md 22).
+
+- **Fixed**: in a function with a defer, `return v` into a named result emitted `a = v` before the deferred calls ran,
+  replacing the result's storage, so a slice, an element pointer or a window taken earlier and written by a deferred
+  call missed the returned value (Go `7 2`, converted `1 2`). A named result of an array type or a struct holding one
+  now takes `a.Assign(v)` / `h.AssignFrom(v)`; in a tuple, a temporary and the copy after the statement.
+- **Fixed**: a function literal's escaping named array result was boxed with no storage and panicked on every index
+  (`index out of range [1] with length 0`); it now takes `heap(new array<T>(N), out ...)`.
+- `ArrayViewWholeAssign` gains 14 return shapes (44 lines). Red at d7df22c615: 11 lose the write, one panics, one red by
+  emission. Fixed: 44 of 44 equal Go.
+- check-no-regression also moved ZeroValueArrayNamedResult (a terminal tuple return under a defer, same form, not
+  predicted); golden re-baselined, four phases pass.
+- Corpus footprint, four targets, identical: internal/trace event.cs (11 lines) and reader.cs (16), the returns of
+  MakeEvent and ReadEvent, same-line form changes only; applied in the seat. net goLookupIPCNAMEOrder and log/slog
+  Value.Resolve, named by the 21.2 census, do not move (predicted).
+- The Limitations and KnownIssues entries are removed.
+
+— P5 (2026-11-21)
+
+## 2026-11-21 — P2 (amends the 2026-11-21 TS items 4 and 6 block; COORD ruling 20:06Z): the four inlining attributes on the `_<T>` entry points are removed — the whole program lost what the micro-benchmark gained
+
+R's train 2 TypeScript split rooted a whole-program regression to the four `[MethodImpl(AggressiveInlining)]` lines that
+commit 3 of the TS seat put on the `_<T>` assertion entry points: checkdemo work +12 s (+17%) with them; without them
+train 2 reads -29% against the pre-train-2 base, inside the predicted band. `Node.ForEachChild`'s exclusive samples went
+513 to 1,929, consistent with the entry point bodies pasted into very large callers; why that costs is not rooted (R
+suggests JitDisasm on `ForEachChild`). The rest of the seat (`AssertFacts`, the `AreEqual` pointer path) is neutral.
+Seat claude/p2-assert-noinline removes the four attributes; `AssertHit` keeps its own inlining into the entry points.
+
+**Lesson.** An inlining attribute on a widely called generic entry point owes a whole-program arm (checkdemo or the
+perf headline), never a micro-benchmark alone: 11.84 to 3.91 ns a hit did not survive into the real program.
+**Open (not seated):** keeping the micro gain by inlining only the small `AssertHit` test or by specializing at hot
+asserting sites; .5-eligible only with a whole-program arm.
+
+— P2 (2026-11-21)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

@@ -12,27 +12,6 @@ variable declared with a two-argument `//go:linkname`.
 [Limitations](Limitations.md#what-converts-but-doesnt-behave-exactly-like-go) describes the cases and the
 workarounds.
 
-## A deferred write through an earlier slice of a named array result is lost
-
-In a function with a `defer`, `return v` into a named result whose type is an array, or a struct holding one, gives
-the result new storage before the deferred calls run. A slice of the result (`s := a[:]`), a pointer to one of its
-elements (`&a[1]`) or an `unsafe` view of it, taken before the `return` and written by a deferred call, still refers
-to the old storage, so the write does not reach the value the function returns:
-
-```go
-func f() (a [8]uint64) {
-	s := a[:]
-	defer func() { s[0] = 7 }()
-	return [8]uint64{1, 2} // Go returns 7 2; the conversion returns 1 2
-}
-```
-
-**To avoid it**, assign the result and return bare: `a = [8]uint64{1, 2}` then `return`. An assignment statement
-copies into the result's existing storage, so the deferred write lands in the value returned.
-<!-- docs/phase4/DESIGN-array-pointer-doors.md 21 (P5, 2026-11-21): measured on a scratch probe converted at
-     claude/p5-doorc-assign-limit 901eb8fbf2, the example and its workaround as written, and a struct result's `h.x[:]` alike; the census of std (four
-     targets, test files included) reads 0 instances. Sized at about one lane-day and posted to COORD for scheduling. -->
-
 ## On Apple silicon, the standard library is the `amd64` build {#on-apple-silicon-runtimegoarch-reports-amd64}
 
 The packages ship for five platforms: `win-x64`, `linux-x64`, `linux-arm64`, `osx-x64` and `osx-arm64`. The converted standard library
@@ -375,6 +354,37 @@ framework-dependent build run the same code under the JIT.
      IL3050 pragmas, and golib built without the AOT analyzer. Fixed in 1.26.10.2 seat #18, whose GolibAotProbe
      scenarios (src/tests/PackageTests) read rc 2 at the base and rc 0 at the fix under Native AOT on win-x64 (G-LAPTOP),
      and on linux-x64 (ubuntu) and osx-arm64 (macos-15) hosted runners, run 40611703805, each equal to the JIT run. -->
+
+## Under Native AOT, a type assertion to `error` that the method set decides can answer false
+
+**Symptom.** In a Native AOT executable (`PublishAot`), a Go type assertion to `error` answers `ok == false` for a value
+whose method set has `Error() string` when no compile-time adapter for that pair exists. Measured with
+`var p any = new(runtime.PanicNilError); _, ok := p.(error)`: Go and the JIT answer `true`, Native AOT answers `false`.
+No exception is raised, so the program goes on with the wrong answer. A failing assertion still answers correctly.
+
+**Fixed** in the next go2cs release: `error` declares a second run-time shell that holds the value without a generic
+type closed over it, so Native AOT has code for it and the assertion answers as Go's does.
+
+**Cause.** The runtime library finds the method (its method-set check answers `true`), then builds the interface value
+from `error`'s run-time shell, `error<T>`, closed over the value's type with `MakeGenericType`. Native AOT has no code
+for that instantiation, and `error` declared no second shell that needs none, so the assertion read as a miss.
+Inferred from the code, not measured: interfaces the converter generates declare that second shell, so this reaches
+`error` and not them.
+
+**Workaround** with the go.* 1.26.11.1 packages. Publish without Native AOT: the converted project's default
+`dotnet publish` (ReadyToRun) and a framework-dependent build run the same code under the JIT, which answers as Go
+does.
+
+<!-- Found 2026-11-21 by P2 while adding a judged true line to the os-matrix aot-smoke consumer
+     (src/tests/PackageTests/PackageSymbols) for the train 1 ReceiverKeyOf crash fix. linux-x64, ILC 10.0.14: the
+     consumer read "false" for the PanicNilError assertion at the fix, at master before train 1 (1fa80494ee) and
+     "true" under the JIT. A diagnostic image read builtin.Implements<error> true, p.(runtime.Error) true (a compile-time
+     adapter) and p.(error) false. error.cs, AdapterBinder.cs and builtin.cs are unchanged between nuget-1.26.11.1 and
+     1fa80494ee, so the go.* 1.26.11.1 packages carry it (inferred). Its fix is seat claude/p2-aot-structural-hit.
+     The fix, claude/p2-aot-structural-hit (05728981b3): golib's errorObjectShell, stamped as error's object shell, holds
+     the value as object and forwards Error through the binder's GoShellBinding. The consumer, judged on both lines,
+     read "false; false" at the red arm 61ce8a52fc and "false; true" at the fix under Native AOT (linux-x64, ILC
+     10.0.14), the image 32 bytes larger; GolibTests ErrorObjectShellTests, 4 tests, fail with the shell unstamped. -->
 
 ## A Native AOT publish of a program that references the packages is slow and large
 

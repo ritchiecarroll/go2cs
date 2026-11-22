@@ -306,7 +306,7 @@ linux/amd64, darwin/amd64, darwin/arm64 and windows/amd64. Every arm printed wha
 memory, was refused by name. A `-cgo` conversion is one package, and it builds against a go2cs clone
 (`dotnet build -p:go2csPath=<go2cs>/src/`); it does not use the `go.*` packages yet. Building a cgo package against
 the `go.*` packages from the feed is planned for the next release.
-<!-- src/go2cs/main.go:306 (`Not combinable with -stdlib, -tests or -recurse`); src/go2cs/csproj-template.xml:135 (`<ProjectReference Include="$(go2csPath)gen/go2cs-gen/go2cs-gen.csproj"`) and src/go2cs/csproj-template.xml:187 (`<ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />`). COORD's ruling O2, 2026-11-14 (cgo 3.1's release-path seat). -->
+<!-- src/go2cs/main.go:306 (`Convert a single cgo package`; this entry describes the November 19 release, when -cgo did not combine with -recurse); src/go2cs/csproj-template.xml:135 (`<ProjectReference Include="$(go2csPath)gen/go2cs-gen/go2cs-gen.csproj"`) and src/go2cs/csproj-template.xml:187 (`<ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />`). COORD's ruling O2, 2026-11-14 (cgo 3.1's release-path seat). -->
 
 **A pointer rebuilt from a number is refused too, with a narrow memory-safety gap left.** go2cs refuses, by name,
 any address inside Go memory that it is holding still, even after the address has been through a `uintptr`:
@@ -1174,7 +1174,7 @@ reported it abandoned instead of its own result. `t.Deadline()` now reports the 
      time"; GolibTests ProfilerOwnAllocationTests, child-process bound; found as an 84-minute hang of GolibTests Debug in
      batch 283's battery; no platform named). GOARCH: merge 26186c1739 (28cfcf657e darwin, 030725e30e windows: Windows on
      Arm UNMEASURED, no package ships for it; osx-arm64 debug/buildinfo 211, net/http/pprof 15, go/build 57, gcimporter
-     634 validate per the merge subject); KnownIssues.md:36-54#b91ee1 already describes the behaviour; NEWS 1.26.10.3 (line
+     634 validate per the merge subject); KnownIssues.md:15-33#b91ee1 already describes the behaviour; NEWS 1.26.10.3 (line
      229) called it planned work. FuncForPC: merge 40b021f8c4 (b20b20c5db; rows read as master on linux, darwin both
      RIDs and windows). os.Args: merge 813f55b5e8 (6a87a161f4: GolibTests WindowsCommandLineTests, windows/amd64; the
      self-re-exec limitation is disclosed in the hand-own's header). recvfrom: merge 872df69010 (9d31496d45:

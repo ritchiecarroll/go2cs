@@ -116,6 +116,19 @@ $wrongSet = $null
 try { New-Package $short @{ 'Other.dll' = $bravo }; Set-NugetgoRidAssets -Package $short -Assemblies $assemblies -TargetFramework net10.0 }
 catch { $wrongSet = $_.Exception.Message }
 Check 'a package whose lib/ is not the flavors'' assembly set is refused' ($wrongSet -like '*Other.dll*') "got: $wrongSet"
+
+Write-Host 'the pack''s layout decision covers every package (P3''s INC 2b read: a -Cgo block re-parented its elseif)'
+$neutral = Join-Path $scratch 'neutral.nupkg'
+New-Package $neutral @{ 'App.dll' = $bravo }
+Check 'a RID-specific package with the release''s layout is accepted' (@(Test-NugetgoPackedLayout -Package $pkg -Assemblies $assemblies -TargetFramework net10.0 -RidSpecific).Count -eq 0) "$(@(Test-NugetgoPackedLayout -Package $pkg -Assemblies $assemblies -TargetFramework net10.0 -RidSpecific) -join ' | ')"
+Check 'a neutral package with no runtimes/ is accepted' (@(Test-NugetgoPackedLayout -Package $neutral -Assemblies $assemblies -TargetFramework net10.0).Count -eq 0) "$(@(Test-NugetgoPackedLayout -Package $neutral -Assemblies $assemblies -TargetFramework net10.0) -join ' | ')"
+$why = @(Test-NugetgoPackedLayout -Package $pkg -Assemblies $assemblies -TargetFramework net10.0)
+Check 'a package read as neutral that carries runtimes/ is refused, naming an entry' ($why.Count -eq 1 -and $why[0] -like '*neutral*runtimes/*') "reasons: $($why -join ' | ')"
+$why = @(Test-NugetgoPackedLayout -Package $short -Assemblies $assemblies -TargetFramework net10.0 -RidSpecific)
+Check 'a RID-specific package with no runtimes/ is refused' (@($why | Where-Object { $_ -like '*win-x64*' }).Count -ge 1) "reasons: $($why -join ' | ')"
+$packText = [System.IO.File]::ReadAllText((Join-Path $PSScriptRoot 'nugetgo-pack.ps1'))
+$calls = [regex]::Matches($packText, '(?m)^(?<indent>[ \t]*)\$layout = @\(Test-NugetgoPackedLayout -Package \$nupkg ')
+Check 'nugetgo-pack.ps1 makes the layout decision once, at top level, for every package' ($calls.Count -eq 1 -and $calls[0].Groups['indent'].Value -eq '' -and $packText -notmatch 'Test-NugetgoRidLayout -Package \$nupkg') "calls at top level: $(@($calls | Where-Object { $_.Groups['indent'].Value -eq '' }).Count) of $($calls.Count)"
 Remove-Item -Recurse -Force $scratch
 
 Write-Host 'requires are the union of the flavors'' (COORD ruling 2026-10-12, for cobra)'

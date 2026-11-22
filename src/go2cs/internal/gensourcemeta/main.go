@@ -12,7 +12,7 @@
 // accepts what was packed.
 //
 //	gensourcemeta -src <recurse root>/src -module <path> -module-version <v> -go2cs-release <release>
-//	              -package <import-path>=<assembly> ... [-require <module>@<version>=<nuget-id> ...] -out <file>
+//	              -package <import-path>=<assembly> ... [-require <module>@<version>=<nuget-id> ...] [-note <text> ...] -out <file>
 //	gensourcemeta -verify <file>
 package main
 
@@ -47,7 +47,7 @@ func run(args []string, stdout io.Writer) error {
 	fs := flag.NewFlagSet("gensourcemeta", flag.ContinueOnError)
 	fs.SetOutput(io.Discard)
 
-	var packages, requires listFlag
+	var packages, requires, notes listFlag
 	src := fs.String("src", "", "the -recurse output root's src/ tree")
 	modulePath := fs.String("module", "", "the Go module path")
 	moduleVersion := fs.String("module-version", "", "the Go module version converted, with its leading v")
@@ -56,6 +56,7 @@ func run(args []string, stdout io.Writer) error {
 	verify := fs.String("verify", "", "parse this file and print a summary instead of writing one")
 	fs.Var(&packages, "package", "<import-path>=<assembly>, one per packed Go package")
 	fs.Var(&requires, "require", "<module>@<version>=<nuget-id>, one per third-party module the assemblies depend on")
+	fs.Var(&notes, "note", "one comment line after the header, written as given (a -Cgo pack's RID statement)")
 
 	if err := fs.Parse(args); err != nil {
 		return err
@@ -80,6 +81,14 @@ func run(args []string, stdout io.Writer) error {
 	}
 
 	d := sourcemeta.Description{Module: *modulePath, ModuleVersion: *moduleVersion, Go2csRelease: *release}
+
+	for _, note := range notes {
+		if strings.ContainsAny(note, "\r\n") {
+			return fmt.Errorf("-note %q: a line break would end the comment line", note)
+		}
+
+		d.Notes = append(d.Notes, note)
+	}
 
 	for _, value := range packages {
 		importPath, assembly, ok := strings.Cut(value, "=")

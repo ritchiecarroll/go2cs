@@ -86,6 +86,17 @@
     as an additional row set: VALIDATION.md gains a "Sample behavior" section under the comparison, the README a
     Sample behavior badge after the Tests badge, and the rows are bound to the packed bytes by the same check.
 
+    Cgo (-Cgo, the cgo-against-go.* item's INC 2b; COORD's ruling (a), 2026-11-21): a module with a cgo package. Each
+    flavor converts with `-recurse=nuget -cgo`, its CC the pinned zig (-Zig) for that flavor's target
+    (NugetgoCgo.psm1), and the package is RID-specific whatever the material check says, since a cgo package's C binding
+    is per target. It ships the RIDs whose go.* bytes are true for them -- win-x64, linux-x64, osx-x64, linux-arm64 --
+    and leaves osx-arm64 out by name until true darwin/arm64 go.* assets ship. lib/<tfm>/ carries the reference
+    flavor's REFERENCE assemblies, never an implementation another RID could fall back to; build/<id>.targets fails a
+    consumer build for a RID the package does not carry with NUGETGOCGO001, reading the set from the package's own
+    runtimes/ folders. VALIDATION.md and the self-description state both. The read-back adds R7: each RID's assembly has
+    exactly the public surface of lib/'s reference assembly (ApiCompat, strict). No -Cgo pack is pushed to any feed
+    until the run-time RID check (A6) lands: src/_nugetpush.ps1 refuses one.
+
     The restore is isolated: a nuget.config with <clear/> and only -Feed as a source, and a private NUGET_PACKAGES.
     The user's global packages folder is censused for nugetgo.* and go.* before and after, and the run fails if it
     grew. Nothing is pushed anywhere, and nothing is signed: signing is the release's last step.
@@ -125,6 +136,10 @@ param(
     # The go2cs that converted -RecurseRoot (the runbook's G). Each flavor is converted with it, so the flavors share its
     # GoInputDigest revision; when it is not given, the pack builds one from this tree.
     [string]$Converter,
+    # A module with a cgo package (see Cgo above). -Zig is the pinned zig (.github/cgo-toolchain.ps1), every flavor's C
+    # compiler.
+    [switch]$Cgo,
+    [string]$Zig,
     [string]$RehearsalSuffix,
     [switch]$Release,
     [string[]]$ExistingIds = @(),
@@ -151,6 +166,7 @@ Import-Module (Join-Path $PSScriptRoot 'NugetgoLicense.psm1') -Force
 Import-Module (Join-Path $PSScriptRoot 'NugetgoHostPaths.psm1') -Force
 Import-Module (Join-Path $PSScriptRoot 'NugetgoReadme.psm1') -Force
 Import-Module (Join-Path $PSScriptRoot 'NugetgoFlavors.psm1') -Force
+Import-Module (Join-Path $PSScriptRoot 'NugetgoCgo.psm1') -Force
 Import-Module (Join-Path $PSScriptRoot 'NugetgoBehaviorProof.psm1') -Force
 # The list parameters arrive comma-joined from the rebuild driver (Split-NugetgoListArgument).
 $ThirdPartyPackage = @(Split-NugetgoListArgument $ThirdPartyPackage)
@@ -429,7 +445,18 @@ New-Item -ItemType Directory -Force $flavorDir | Out-Null
 $rootProps = [System.IO.File]::ReadAllText((Join-Path $RecurseRoot 'Directory.Build.props'))
 if ($rootProps -notmatch '<GoCompileRuntimeIdentifier>(?<rid>[^<]+)</GoCompileRuntimeIdentifier>') { Refuse "$RecurseRoot/Directory.Build.props names no GoCompileRuntimeIdentifier: the target -RecurseRoot was converted for cannot be read" }
 $proofRid = $Matches['rid']
-$ridFlavors = Get-NugetgoRidFlavors
+$ridFlavors = if ($Cgo) { Get-NugetgoCgoRidFlavors } else { Get-NugetgoRidFlavors }
+if ($Cgo) {
+    if ($PSVersionTable.PSEdition -ne 'Core') { Refuse '-Cgo runs under PowerShell 7 (pwsh): its read-back reads reference assemblies through System.Reflection.Metadata, which Windows PowerShell 5.1 does not ship' }
+    if (-not $Zig) { Refuse '-Cgo needs -Zig, the pinned zig every flavor cross-compiles its C with (.github/cgo-toolchain.ps1)' }
+    $zigProblem = Test-NugetgoCgoZig -Zig $Zig
+    if ($zigProblem) { Refuse $zigProblem }
+    $Zig = [System.IO.Path]::GetFullPath($Zig)
+    $cgoExcluded = Get-NugetgoCgoExcludedRids
+    if ($cgoExcluded.Contains($proofRid)) { Refuse "-RecurseRoot was converted for $proofRid, which a -Cgo pack does not carry: $($cgoExcluded[$proofRid]). Convert it for one of $(@($ridFlavors.Keys) -join ', ')" }
+    Write-Host "  cgo: RIDs $(@($ridFlavors.Keys) -join ', '); $(@($cgoExcluded.Keys | ForEach-Object { "$_ out by name" }) -join ', '); C compiler zig $(Get-NugetgoCgoZigVersion) ($Zig)"
+}
+elseif ($Zig) { Refuse '-Zig is for -Cgo' }
 if (-not $ridFlavors.Contains($proofRid)) { Refuse "-RecurseRoot was converted for $proofRid, a RID the go.* release does not ship ($(@($ridFlavors.Keys) -join ', '))" }
 $proofFlavor = $ridFlavors[$proofRid]
 $proofTarget = Get-NugetgoRidTarget $proofRid
@@ -450,8 +477,18 @@ foreach ($flavor in Get-NugetgoFlavors) {
     $root = Join-Path $flavorDir (Get-NugetgoFlavorFolder $flavor)
     $log = Join-Path $flavorDir "$(Get-NugetgoFlavorFolder $flavor).log"
     $target = if ($flavor -ceq $proofFlavor) { $proofTarget } else { $flavor }
-    & $converter -recurse=nuget @provenanceArgs -platforms $target -go2cspath (Split-Path $flavorConverterDir) $moduleCacheDir $root *> $log
-    if ($LASTEXITCODE -ne 0) { Refuse "the $flavor flavor of $ModulePath did not convert at $target ($LASTEXITCODE): $log" }
+    $cgoArgs = @()
+    $savedCc = @{ CC = $env:CC; CGO_ENABLED = $env:CGO_ENABLED; CGO_CFLAGS = $env:CGO_CFLAGS; CGO_CPPFLAGS = $env:CGO_CPPFLAGS; CGO_CXXFLAGS = $env:CGO_CXXFLAGS; CGO_LDFLAGS = $env:CGO_LDFLAGS }
+    if ($Cgo) {
+        # The flavor's own C compiler: the converter's R3 reads its triple back and refuses one that is not the target's.
+        # No flag the caller's shell carries reaches a flavor (P3's INC 2b read, NIT 5): each converts with the pin alone.
+        $cgoArgs = @('-cgo=true'); $env:CC = Get-NugetgoCgoCompiler -Zig $Zig -Flavor $flavor; $env:CGO_ENABLED = '1'
+        foreach ($flag in 'CGO_CFLAGS', 'CGO_CPPFLAGS', 'CGO_CXXFLAGS', 'CGO_LDFLAGS') { Remove-Item "env:$flag" -ErrorAction SilentlyContinue }
+        Write-Host "  cgo: $flavor converts at $target with CC=$env:CC"
+    }
+    try { & $converter -recurse=nuget @provenanceArgs -platforms $target @cgoArgs -go2cspath (Split-Path $flavorConverterDir) $moduleCacheDir $root *> $log; $convertCode = $LASTEXITCODE }
+    finally { foreach ($k in $savedCc.Keys) { if ($null -eq $savedCc[$k]) { Remove-Item "env:$k" -ErrorAction SilentlyContinue } else { Set-Item "env:$k" $savedCc[$k] } } }
+    if ($convertCode -ne 0) { Refuse "the $flavor flavor of $ModulePath did not convert at $target ($convertCode): $log" }
     $flavorSrc = Join-Path (Join-Path $root 'src') $ModulePath
     $flavorProjects[$flavor] = @(foreach ($p in $libraries) {
         $rel = $p.FullName.Substring($moduleSrc.Length).TrimStart('\', '/')
@@ -479,6 +516,7 @@ $flavorConfig = Join-Path $flavorDir 'nuget.config'
 </configuration>
 "@, (New-Object System.Text.UTF8Encoding($false)))
 $flavorAssemblies = @{}
+$flavorRefs = @{}   # -Cgo: each flavor's reference assemblies, by file name; lib/ takes the reference flavor's
 $flavorPdbs = New-Object System.Collections.Generic.List[string]
 $isolated = Join-Path $Scratch 'nuget-packages'
 New-Item -ItemType Directory -Force $isolated | Out-Null
@@ -497,12 +535,21 @@ try {
             $targetPath = (& dotnet msbuild $p.FullName -getProperty:TargetPath -p:Configuration=Release | Out-String).Trim()
             if (-not (Test-Path -LiteralPath $targetPath -PathType Leaf)) { throw "the $flavor flavor of $($p.Name) built no assembly at '$targetPath'" }
             $flavorAssemblies[$flavor][(Split-Path -Leaf $targetPath)] = [System.IO.File]::ReadAllBytes($targetPath)
+            if ($Cgo) {
+                if (-not $flavorRefs.Contains($flavor)) { $flavorRefs[$flavor] = @{} }
+                $refPath = (& dotnet msbuild $p.FullName -getProperty:TargetRefPath -p:Configuration=Release | Out-String).Trim()
+                if (-not $refPath -or -not (Test-Path -LiteralPath $refPath -PathType Leaf)) { throw "the $flavor flavor of $($p.Name) built no reference assembly at '$refPath' (a -Cgo pack's lib/ is reference assemblies)" }
+                $flavorRefs[$flavor][(Split-Path -Leaf $targetPath)] = [System.IO.File]::ReadAllBytes($refPath)
+            }
             $flavorPdbs.Add([System.IO.Path]::ChangeExtension($targetPath, '.pdb'))
         }
     }
 }
 finally { foreach ($k in $saved.Keys) { Set-Item "env:$k" $saved[$k] -ErrorAction SilentlyContinue; if ($null -eq $saved[$k]) { Remove-Item "env:$k" -ErrorAction SilentlyContinue } } }
 $flavorDecision = Get-NugetgoFlavorDecision -Assemblies $flavorAssemblies -ProofFlavor $proofFlavor
+# A cgo package's C binding is per target, so a -Cgo pack is RID-specific whatever the material check reads.
+$ridSpecific = $flavorDecision.RidSpecific -or $Cgo
+$layoutArgs = if ($Cgo) { @{ RidFlavors = $ridFlavors; LibAssemblies = $flavorRefs[(Get-NugetgoReferenceFlavor)] } } else { @{} }
 # Third-party requires, per TFM: the union of every flavor's (COORD ruling 2026-10-12). A neutral package's flavors agree,
 # so for one the union is -RecurseRoot's own list.
 $flavorRequires = @{}
@@ -512,8 +559,9 @@ foreach ($flavor in Get-NugetgoFlavors) {
 }
 try { $requires = @(Merge-NugetgoFlavorRequires -Requires $flavorRequires -ThirdPartyPackage $ThirdPartyPackage) }
 catch { Refuse ($_.Exception.Message -replace '^REFUSED: ', '') }
-if ($flavorDecision.RidSpecific) {
-    Write-Host "  flavors: $((Get-NugetgoFlavors) -join ', ') differ in meaning: RID-specific assets ($(@($ridFlavors.Keys) -join ', ')), lib/ the $(Get-NugetgoReferenceFlavor) flavor, as the go.* release packs them"
+if ($ridSpecific) {
+    if ($Cgo) { Write-Host "  flavors: -Cgo: RID-specific assets ($(@($ridFlavors.Keys) -join ', ')), lib/ the $(Get-NugetgoReferenceFlavor) flavor's reference assemblies (the material check read $(if ($flavorDecision.RidSpecific) { 'a difference' } else { 'none' }))" }
+    else { Write-Host "  flavors: $((Get-NugetgoFlavors) -join ', ') differ in meaning: RID-specific assets ($(@($ridFlavors.Keys) -join ', ')), lib/ the $(Get-NugetgoReferenceFlavor) flavor, as the go.* release packs them" }
     foreach ($why in $flavorDecision.Reasons) { Write-Host "    $why" }
     # Dependencies are per target framework, never per RID (push-nuget.ps1): the package declares every flavor's.
     foreach ($flavor in Get-NugetgoFlavors) {
@@ -536,9 +584,10 @@ Copy-Item -LiteralPath $packageIcon.Path (Join-Path $packDir $packageIcon.Name)
 [System.IO.File]::WriteAllText((Join-Path $packDir 'README.md'), $readme, (New-Object System.Text.UTF8Encoding($false)))
 # VALIDATION.md = the ruled two sentences as its header, then the proof page itself, unchanged below them.
 # A RID-specific package's page discloses, in one line, the flavors its self-description does not describe.
-$flavorDisclosure = Get-NugetgoFlavorDisclosure -ProofFlavor $proofFlavor -RidSpecific:$flavorDecision.RidSpecific
+$flavorDisclosure = Get-NugetgoFlavorDisclosure -ProofFlavor $proofFlavor -RidSpecific:$ridSpecific
+$cgoStatement = if ($Cgo) { Get-NugetgoCgoStatement -PackageId $id.Id } else { $null }
 [System.IO.File]::WriteAllText((Join-Path $packDir 'VALIDATION.md'),
-    ("> $description`n`n" + $(if ($flavorDisclosure) { "> $flavorDisclosure`n`n" } else { '' }) + $proofSummary +
+    ("> $description`n`n" + $(if ($flavorDisclosure) { "> $flavorDisclosure`n`n" } else { '' }) + $(if ($cgoStatement) { "> $cgoStatement`n`n" } else { '' }) + $proofSummary +
         $(if ($proofMode.SampleRows) { "`n" + (New-NugetgoSampleBehaviorSection -ModulePath $ModulePath -GoVersion $GoVersion -Rows $behaviorRows) } else { '' })), (New-Object System.Text.UTF8Encoding($false)))
 $esc = { param($s) [System.Security.SecurityElement]::Escape($s) }
 
@@ -550,6 +599,7 @@ $genArgs = @('run', './internal/gensourcemeta', '-src', (Join-Path $RecurseRoot 
     '-go2cs-release', $ClosureVersion, '-out', $selfDescription)
 foreach ($p in $packed) { $genArgs += @('-package', "$($p.ImportPath)=$($p.Assembly)") }
 foreach ($r in $requires) { $genArgs += @('-require', "$($r.Module)@$($r.Version)=$($r.NuGetId)") }
+if ($cgoStatement) { $genArgs += @('-note', $cgoStatement) }
 Push-Location $converterDir
 try { & go @genArgs; if ($LASTEXITCODE -ne 0) { Refuse "gensourcemeta could not write the self-description ($LASTEXITCODE)" } }
 finally { Pop-Location }
@@ -562,6 +612,15 @@ $packTargets = Join-Path (Split-Path (Split-Path $PSScriptRoot)) 'core/golib/bui
 if (-not (Test-Path -LiteralPath $packTargets -PathType Leaf)) { Refuse "no go.lib.pack.targets at $packTargets" }
 $pkgRefs = ((@($goRefs | ForEach-Object { "    <PackageReference Include=`"$_`" Version=`"`$(GoStdLibVersion)`" />" }) +
     @($requires | ForEach-Object { "    <PackageReference Include=`"$(& $esc $_.NuGetId)`" Version=`"$(& $esc $_.PackageVersion)`" />" })) -join "`n")
+$cgoGuardItem = ''
+if ($Cgo) {
+    [System.IO.File]::WriteAllText((Join-Path $packDir 'nugetgo-cgo-rid-guard.targets'), (New-NugetgoCgoRidGuard -PackageId $id.Id), (New-Object System.Text.UTF8Encoding($false)))
+    # build/ for a direct reference, buildTransitive/ for a consumer that reaches the package through a project reference
+    # (P3's INC 2b read, SHOULD 2). A direct consumer still imports the package's build/<id>.props beside them
+    # (Test-NugetgoCgo.ps1 measures both).
+    $cgoGuardItem = "    <None Include=`"nugetgo-cgo-rid-guard.targets`" Pack=`"true`" PackagePath=`"build/$(& $esc $id.Id).targets`" />`n" +
+        "    <None Include=`"nugetgo-cgo-rid-guard.targets`" Pack=`"true`" PackagePath=`"buildTransitive/$(& $esc $id.Id).targets`" />"
+}
 $pageItems = ($pages | ForEach-Object {
     $rel = $_.FullName.Substring($ValidationDir.TrimEnd('\', '/').Length + 1)
     "    <None Include=`"$(& $esc $_.FullName)`" Pack=`"true`" PackagePath=`"$(& $esc ([System.IO.Path]::GetDirectoryName($rel)))`" />"
@@ -608,6 +667,7 @@ $pkgRefs
     <None Include="$(& $esc $packageIcon.Name)" Pack="true" PackagePath="" />
     <None Include="VALIDATION.md" Pack="true" PackagePath="" />
     <None Include="go2cs/source-metadata.txt" Pack="true" PackagePath="go2cs" />
+$cgoGuardItem
 $pageItems
   </ItemGroup>
   <Import Project="$(& $esc $packTargets)" Condition="'`$(GoLibPackTargetsImported)' != 'true'" />
@@ -672,7 +732,7 @@ if ($grown.Count) { throw "the global packages folder GREW: $($grown -join ', ')
 # ---- read the package back ---------------------------------------------------------------------------------------------
 $nupkg = Join-Path $OutDir "$($id.Id).$packageVersion.nupkg"
 if (-not (Test-Path $nupkg)) { $nupkg = @(Get-ChildItem $OutDir -Filter "$($id.Id).*.nupkg" | Sort-Object LastWriteTime -Descending)[0].FullName }
-if ($flavorDecision.RidSpecific) { Set-NugetgoRidAssets -Package $nupkg -Assemblies $flavorAssemblies -TargetFramework 'net10.0' }
+if ($ridSpecific) { Set-NugetgoRidAssets -Package $nupkg -Assemblies $flavorAssemblies -TargetFramework 'net10.0' @layoutArgs }
 # The behavioral proof must be OF the packed bytes: each RID's row ran the assembly this package carries for that RID,
 # on that RID and its GOOS, and printed what go run printed.
 if ($proofMode.Mode -ceq 'behavioral' -or $proofMode.SampleRows) {
@@ -728,7 +788,7 @@ $deps = @($md.dependencies.group | ForEach-Object { $_.dependency } | Where-Obje
 $badDeps = @($deps | Where-Object { $_.id -like 'go.*' -and -not ([string]$_.version).StartsWith("[$ClosureVersion, ", [StringComparison]::Ordinal) })
 Write-Host "==> read back: $($md.id) $($md.version)"
 Write-Host "    lib: $((@($entries | Where-Object { $_ -like 'lib/*' })) -join ', ')"
-Write-Host "    runtimes: $(if ($flavorDecision.RidSpecific) { (@($entries | Where-Object { $_ -like 'runtimes/*' })) -join ', ' } else { 'none (one neutral assembly set)' })"
+Write-Host "    runtimes: $(if ($ridSpecific) { (@($entries | Where-Object { $_ -like 'runtimes/*' })) -join ', ' } else { 'none (one neutral assembly set)' })"
 Write-Host "    dependencies: $($deps.Count), each go.* at $(@($deps | ForEach-Object { $_.version } | Sort-Object -Unique) -join ' | ')"
 Write-Host "    license file: $($md.license.'#text') ($($md.license.type)); readme: $($md.readme); repository: $($md.repository.url)"
 Write-Host "    copyright: $($md.copyright)"
@@ -764,11 +824,34 @@ if ($presentation.Count) {
     throw "REFUSED: the package's nuget.org page -- $($presentation -join '; ')"
 }
 if ($badDeps.Count) { throw "go.* dependencies not at the B4 range: $(($badDeps | ForEach-Object { "$($_.id) $($_.version)" }) -join ', ')" }
-if ($flavorDecision.RidSpecific) {
-    $layout = @(Test-NugetgoRidLayout -Package $nupkg -Assemblies $flavorAssemblies -TargetFramework 'net10.0')
-    if ($layout.Count) { Remove-Item -LiteralPath $nupkg; throw "REFUSED: the RID-specific layout -- $($layout -join '; ')" }
+# The layout, one decision for every package (Test-NugetgoPackedLayout; Test-NugetgoFlavors.ps1 holds this call at top
+# level): a RID-specific package's runtimes/ and lib/, or no runtimes/ at all for a neutral one. P3's INC 2b read: a
+# -Cgo block once sat between this check's `if` and its `elseif`, and refused every non-cgo RID-specific pack.
+$layout = @(Test-NugetgoPackedLayout -Package $nupkg -Assemblies $flavorAssemblies -TargetFramework 'net10.0' -RidSpecific:$ridSpecific @layoutArgs)
+if ($layout.Count) { Remove-Item -LiteralPath $nupkg; throw "REFUSED: $(if ($ridSpecific) { 'the RID-specific layout -- ' })$($layout -join '; ')" }
+if ($Cgo) {
+    # lib/ is reference assemblies only, the guard is packed, and R7: each RID's assembly has exactly lib/'s surface.
+    $cgoReasons = New-Object System.Collections.Generic.List[string]
+    foreach ($dll in $libFiles) { if (-not (Test-NugetgoReferenceAssembly ([System.IO.File]::ReadAllBytes($dll)))) { $cgoReasons.Add("lib/net10.0/$(Split-Path -Leaf $dll) is not a reference assembly") } }
+    foreach ($guard in "build/$($id.Id).targets", "buildTransitive/$($id.Id).targets") {
+        if (@($entries | Where-Object { $_ -ceq $guard }).Count -ne 1) { $cgoReasons.Add("no $guard (the RID guard)") }
+    }
+    $surfaceRuntimes = [ordered]@{}
+    foreach ($rid in $ridFlavors.Keys) {
+        $surfaceRuntimes[$rid] = @{}
+        foreach ($f in @($runtimeFiles | Where-Object { (Split-Path -Leaf $_).StartsWith("runtimes_$($rid)_lib_net10.0_", [StringComparison]::Ordinal) })) {
+            $surfaceRuntimes[$rid][(Split-Path -Leaf $f).Substring("runtimes_$($rid)_lib_net10.0_".Length)] = $f
+        }
+    }
+    $surfaceReference = @{}
+    foreach ($dll in $libFiles) { $surfaceReference[(Split-Path -Leaf $dll)] = $dll }
+    $surface = Test-NugetgoCgoSurface -RepoRoot ([System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../../..'))) -WorkDir (Join-Path $Scratch 'r7') -Reference $surfaceReference -Runtimes $surfaceRuntimes
+    foreach ($why in $surface.Reasons) { $cgoReasons.Add("R7 $why") }
+    $expectedSurface = $ridFlavors.Count * $surfaceReference.Count
+    if ($surface.Compared -ne $expectedSurface) { $cgoReasons.Add("R7 compared $($surface.Compared) of $expectedSurface assemblies") }
+    if ($cgoReasons.Count) { Remove-Item -LiteralPath $nupkg; throw "REFUSED: the -Cgo pack -- $($cgoReasons -join '; ')" }
+    Write-Host "    cgo: lib/ reference assemblies only; build/ and buildTransitive/$($id.Id).targets packed; R7 clean, $($surface.Compared) assemblies compared with lib/"
 }
-elseif (@($entries | Where-Object { $_ -like 'runtimes/*' }).Count) { Remove-Item -LiteralPath $nupkg; throw 'REFUSED: a neutral package carries runtimes/ entries' }
 if (@($entries | Where-Object { $_ -like 'lib/*.dll' }).Count -ne $libraries.Count) { throw "lib/ carries $(@($entries | Where-Object { $_ -like 'lib/*.dll' }).Count) assemblies for $($libraries.Count) packages" }
 # Each assembly's copyright and company, read from the dll taken back OUT of the nupkg: its version resource, the
 # values a file's properties show.

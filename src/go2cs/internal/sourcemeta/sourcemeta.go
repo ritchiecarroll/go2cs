@@ -79,6 +79,9 @@ type Description struct {
 	Requires      []Require
 	Packages      []Package
 	Sections      map[string][]string
+	// Notes are written as comment lines after the header comment (a -Cgo pack states its RIDs there). Parse skips
+	// comments, so they are never read back.
+	Notes []string
 }
 
 // sectionName is a package's section key: its import path dotted, the stdlib record's spelling.
@@ -139,6 +142,15 @@ func Generate(d Description) ([]byte, error) {
 
 	var out bytes.Buffer
 	fmt.Fprintf(&out, "%s\n%s\n", Magic, comment)
+
+	for _, note := range d.Notes {
+		if strings.ContainsAny(note, "\r\n") {
+			return nil, fmt.Errorf("note %q: a line break would end the comment line", note)
+		}
+
+		fmt.Fprintf(&out, "# %s\n", note)
+	}
+
 	fmt.Fprintf(&out, "module %s\nmodule-version %s\ngo2cs-release %s\n", d.Module, d.ModuleVersion, d.Go2csRelease)
 
 	for _, r := range requires {

@@ -154,6 +154,13 @@ func (m *ModuleConverter) ConvertModule(moduleDir string) error {
 		}
 
 		m.nugetDecisions, m.nugetWarnings = decisions, append(warnings, substitutionWarnings...)
+
+		// Under -recurse -cgo a substituted module's published package was converted cgo-OFF while the closure
+		// type-checks cgo-ON: a package of it built from different files with cgo on is refused (cgoRecurseSubstitution.go).
+		if err := m.refuseCgoSplitSubstitutions(moduleDir, substitutions); err != nil {
+			return err
+		}
+
 		m.divertNuGetSubstitutions(substitutions)
 		nugetSubstitutions = substitutions
 	}
@@ -275,6 +282,13 @@ func (m *ModuleConverter) loadClosure(moduleDir string) (map[string]*packages.Pa
 
 	if len(targetParts) == 2 {
 		cfg.Env = converterLoaderEnv("GOOS="+targetParts[0], "GOARCH="+targetParts[1])
+	}
+
+	// Under -recurse -cgo the closure is loaded cgo-ON, as Go builds it: a cgo-only package (every file imports "C")
+	// has no cgo-off files, so its importers would not type-check against it otherwise. Each package's own load is
+	// cgo-on too (processConversion), and a package whose selected files import "C" takes the cgo route there.
+	if m.options.parseCgoTargets {
+		cfg.Env = append(cfg.Env, "CGO_ENABLED=1")
 	}
 
 	pkgs, err := packages.Load(cfg, "./...")

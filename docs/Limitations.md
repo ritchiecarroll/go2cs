@@ -219,15 +219,6 @@ standard library, and runs on Windows, Linux or macOS. **A longer evening:** lot
   * A variadic function that keeps, returns or captures its `...T` parameter, or `append`s or `copy`s
     into it, works on a private copy: after `f(s...)`, its writes are not the caller's `s`.
   * Copying a struct by value shares any fixed-size array inside an embedded struct.
-  * In a function with a `defer`, `return v` into a named result of array type (or a struct holding one) gives the
-    result new storage: a slice, an element pointer or an `unsafe` view of the result taken earlier, and written by a
-    deferred call, does not reach the value returned. Assign the result and return bare (`a = v`, then `return`)
-    ([known issue](KnownIssues.md#a-deferred-write-through-an-earlier-slice-of-a-named-array-result-is-lost)).
-  <!-- docs/phase4/DESIGN-array-pointer-doors.md 21 (P5, 2026-11-21, COORD 123226Z): measured on a scratch probe at
-       claude/p5-doorc-assign-limit 901eb8fbf2, `s := a[:]; defer func() { s[0] = 7 }(); return [8]uint64{1, 2}` prints
-       `7 2` in Go and `1 2` converted; `&a[1]` and a struct result's `h.x[:]` likewise; the workaround prints Go's line. The defer-mode return emits
-       `a = v` (visitReturnStmt, namedDeferAssign), not the in-place `a.Assign(v)` a statement takes. The standard
-       library census reads 0 instances. -->
   * A slice of one number type laid over another's storage
     (`unsafe.Slice((*uint64)(unsafe.Pointer(&b[0])), n)`) is a copy: writes through it never reach `b`.
   * A pointer's number kept in a `uintptr` and turned back into a pointer in a later statement
@@ -265,11 +256,17 @@ pointer, or a `void *` that is nil or points at C memory. `C.CString`, `C.CBytes
 `C.GoBytes`, `C.malloc`, `C.free` and `defer C.f(…)` convert, with the package's C types and constants. A
 program that uses the converted package needs only the C library.
 
-**One package, one machine.** A `-cgo` conversion is one package, for the machine's own operating system and
-architecture, and the converted package refuses to call C anywhere else. It builds against a go2cs clone
-(`dotnet build -p:go2csPath=<go2cs>/src/`), not against the `go.*` packages
-([Roadmap](Roadmap.md#cgo)). The standard library itself is converted with `CGO_ENABLED=0`.
-<!-- src/go2cs/main.go:306 (`Not combinable with -stdlib, -tests or -recurse`); src/go2cs/csproj-template.xml:135 (`<ProjectReference Include="$(go2csPath)gen/go2cs-gen/go2cs-gen.csproj"`) and src/go2cs/csproj-template.xml:187 (`<ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />`). COORD's ruling O2, 2026-11-14 (cgo 3.1's release-path seat). -->
+**One target.** A `-cgo` conversion is for one operating system and architecture: the machine's own, or another one
+named with `-platforms` when `CC` names that target's C compiler (for example `zig cc -target <triple>`). The converted
+package refuses to call C on any other. A single-package conversion builds against a go2cs clone
+(`dotnet build -p:go2csPath=<go2cs>/src/`). Under `-recurse -cgo` a module's cgo packages convert with the module.
+Packing a cgo package against the `go.*` packages for every platform is still to come ([Roadmap](Roadmap.md#cgo)).
+The standard library itself is converted with `CGO_ENABLED=0`, and a module converted with `-recurse -cgo` uses it as
+it is. So a package that imports `net` or `os/user` gets their builds without cgo, the ones Go itself uses with
+`CGO_ENABLED=0`: `net` resolves host names with Go's own resolver, not the C library's, and `os/user` reads the user
+database files directly. Converting the `net` resolver with cgo is planned, and is what will change this. A package
+that imports `runtime/cgo` or `plugin` is refused by name: without cgo they are not working builds.
+<!-- src/go2cs/main.go:306 (`Not combinable with -stdlib or -tests. With -recurse, every non-standard-library package of the module loads cgo-on and each cgo package converts this way`); src/go2cs/csproj-template.xml:135 (`<ProjectReference Include="$(go2csPath)gen/go2cs-gen/go2cs-gen.csproj"`) and src/go2cs/csproj-template.xml:187 (`<ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />`). COORD's ruling O2, 2026-11-14 (cgo 3.1's release-path seat). -->
 
 **What is refused, by name, with the phase that will cover it:**
 - a pointer into Go memory handed to C as a `void *`, or to `C.GoBytes`, `C.GoString` or `C.GoStringN`
