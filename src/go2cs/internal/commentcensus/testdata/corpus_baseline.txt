@@ -50,7 +50,7 @@ partial:decl-doc	68
 partial:directive	6
 partial:free-stmt	7
 top:go-blank-cs-none	79
-top:go-none-cs-blank	227
+top:go-none-cs-blank	39
 top:unmapped:const	2
 top:unmapped:func	381
 top:unmapped:method	168

@@ -576,7 +576,8 @@ func analyze(p pair, r *results, verbose bool) {
 		var re *regexp.Regexp
 		switch kind {
 		case "func":
-			re = regexp.MustCompile(q + `\s*[(<]`)
+			// A Go method with a holder is emitted as its suffix-form body `<Name>⁔(`.
+			re = regexp.MustCompile(q + `⁔?\s*[(<]`)
 		case "type":
 			re = regexp.MustCompile(`(struct|interface|class|record|delegate)\s+Δ?@?` + regexp.QuoteMeta(name) + `([^\pL\pN_]|$)`)
 		default:
