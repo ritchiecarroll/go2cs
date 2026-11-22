@@ -13040,11 +13040,14 @@ line that prints the warning:
 
 <!-- source: src/go2cs/conversionDriver.go:258 -->
 ```go
-log.Printf("WARNING: %s did not fully type-check; converting best-effort — code depending on the following is emitted untyped: %v", pkg.PkgPath, pkg.Errors)
+log.Print(remapCopiedPaths(fmt.Sprintf("WARNING: %s did not fully type-check; converting best-effort — code depending on the following is emitted untyped: %v", pkg.PkgPath, pkg.Errors)))
 ```
 
 On the console, `%s` becomes the package's import path, such as `example.com/app`. `%v` becomes the
 list of errors Go reported. Each error names a file, a line and the name that did not resolve.
+`remapCopiedPaths` changes the text only for a module-cache release that ships no go.mod, which is
+converted from a temporary copy: it writes each file under the copy as the release's own path in the
+module cache.
 "Emitted untyped" means Go recorded no type for that code, so the converter writes it without one.
 Each error is then printed again on a line of its own, in the error format compilers and IDEs read, with
 the code `GO2CS1003` for a type error ([diagnostic codes](DiagnosticCodes.md)).
