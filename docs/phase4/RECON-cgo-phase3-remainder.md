@@ -538,3 +538,50 @@ property today. One line in Limitations when the seat is written.
 **A note P3 made, recorded with no change.** 7.1's "the address handed to C stays the same on every call" holds from the
 first crossing. An address read as a number before the first crossing, through a view box that is later collected, is
 not covered by the Hold; numbers stay refused at the door (3.3-G, Q3), so nothing reaches C that way.
+
+### 7.10 Addendum, 2026-11-22: 3.4's red arms and 7.8's open points, measured at master
+
+COORD asked for a scout run of 3.4's arms B1-B4 at master `1f8d62ddb3`, and for 7.8's three NOT READ points to be closed
+where an arm could do it cheaply (mailbox, COORD to P5, 2026-11-22 00:25Z). Nothing in golib or the converter changed and
+nothing was committed. Predictions were written before any run; the two that missed are kept below as predicted. Go was
+the oracle for every arm (linux/amd64, gcc, go1.26.11). The converted side ran under the JIT unless stated. The program
+carried its own small C library, linked through `CGO_LDFLAGS` for both sides.
+
+**3.4's arms.**
+
+| Arm | Shape | Predicted | Measured at master |
+|:--|:--|:--|:--|
+| B1 | `(*[2]byte)(unsafe.Pointer(&sa.Port))`, `sa` a `*syscall.RawSockaddrInet4` over C memory | red, a refusal | **green**, `port: 8080` as Go. **Missed.** |
+| B1, Inet6 | the same over `*syscall.RawSockaddrInet6` | as B1 | green, `port: 443` |
+| B1, control | `sa.Family` read directly | green | green |
+| B2 | `sa.Addr[:]`: copy out, append spread, copy in and C reads | red, refused by name | red, all three, exit 2, refused by name |
+| B3 | `unsafe.Sizeof` of `struct sockaddr_in`, `sockaddr_in6`, a padded `{char; double; short; void *}` | green | green: 16/16, 28/28, 32/32 against C's `sizeof` |
+| B4 | `unsafe.Slice` over `malloc` memory: Go writes and C sums; `append` within capacity; beyond capacity | green | green, all three |
+
+- **B1 is carried at master.** The converter emits `@unsafe.ArrayPointer<byte>.Of(sa.ᏑPort, 2)`, and the field address
+  over the native box already reads at Go's offset. Design 13.7 S1's red prediction does not hold at this tree. 3.4-A
+  becomes a guard arm.
+- **B2's door, corrected.** 4.3 says the field accessor refuses. The refusal text is `cannot read native memory as
+  syscall.RawSockaddrInet4: its CLR layout is not its Go layout (field Addr is a managed reference where Go stores the
+  value inline)`, and the door is NativeBox's whole-struct read (`ValueAddress`, `ж.NativeBox.cs:123-127`): `sa.Addr[..]`
+  is emitted as a read through the struct's value, not as a field view. 3.4-B's design, taking the field through its
+  address, stands.
+- **B3** is green because the converter emits Go's folded constant (`/* unsafe.Sizeof(...) */ (uintptr)16`).
+
+**7.8's three points.**
+1. **The keystone's `classify` accepts the sockaddr shapes.** `MarshalledSizeOf` reads `RawSockaddrInet4` 16,
+   `RawSockaddrInet6` 28 and `RawSockaddrAny` 112. A live round trip agrees: raw `SYS_BIND` then `SYS_GETSOCKNAME` with a
+   `RawSockaddrInet4` behind its order token, through the linux keystone's marshal and no cgo, reads errno 0 and 0,
+   family 2, `[127 0 0 1]`, a port, length 16, as Go. Inet6 had no live round trip: the box has no IPv6 interface.
+2. **What `ClrLayoutMismatch` names.** It names `b` for `{a uint32; b [4]byte}` and for `{a uint32; b *uint32}`, and
+   `Addr` for all three sockaddrs. It answers null for `{a, b uint32}`, for `{flag bool; n int64}` (a bool leaves the
+   offsets unproven), and for `{inner; data int64}`. **The last missed:** I predicted an offset difference, but the
+   converter declares a value embed as the first field, so the offsets agree. No reference-free struct it names was
+   found, so 7.5's third near-miss control stays NOT READ until one is.
+3. **The `Type`-keyed marshal under Native AOT is clean for the keystone's path.** A linux-x64 publish of the keystone
+   program (20.6 minutes, exit 0, a 123 MB binary) runs the round trip in item 1 with output identical to Go, and none of
+   the publish's 124 trim warnings names `NativeStructMarshal`. This measures the keystone's call into the marshal only.
+   The cgo wrapper's call, which 7.2 has reuse the same marshal, is not built, and its AOT reading is still owed to A7.
+
+**3.4's size.** 3.4-A goes from 0.5 to about 0.25, a guard arm. 3.4 is now about **2.5 lane-days** (3.4-A 0.25, 3.4-B
+1.5, 3.4-C 0.25, arms and the hosted reading 0.5). 3.3's size does not change.
