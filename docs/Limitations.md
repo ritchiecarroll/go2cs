@@ -159,6 +159,11 @@ standard library, and runs on Windows, Linux or macOS. **A longer evening:** lot
   string, slice, map, interface, pointer or fixed-size array gets a stand-in number, not an address, so
   the older tricks (the `*(*string)(unsafe.Pointer(&b))` pun, a hand-built slice header) don't convert
   mechanically.
+* **A func variable takes a pointer word stored into it only when the word is another func value's word.**
+  `*(*unsafe.Pointer)(unsafe.Pointer(&f)) = p` copies the func when `p` was read the same way from another func,
+  and nil is the nil func. A hand-built `funcval` whose word is a code address panics by name, until cgo callbacks
+  bind functions to code addresses
+  ([func words](ConversionStrategies-Reference/pointers.md#a-func-value-carried-as-a-number--one-word-per-static-function-through-gofunccookie)).
 * **One array view can end the process.** Go's `(*[N]E)(unsafe.Pointer(&x.f))[:]`, where `f` is an array field
   read as an array of another element type (an `[8]int8` name read as `[8]byte`), works when `x` is a variable or
   a pointer, and through any chain of named fields from one (`&x.a.f`). When the field is promoted from an embedded

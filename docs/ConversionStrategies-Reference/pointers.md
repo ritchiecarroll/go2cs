@@ -1458,6 +1458,7 @@ its types in a package pre-pass (`funcWordOperations.go`):
 | w1 | `*(*uintptr)(unsafe.Pointer(&f)) = x` | `f = GoFuncCookie.Func<F>(x);` |
 | w2 | `*(*F)(unsafe.Pointer(&v)) = fn`, `v` a `uintptr` | `v = (uintptr)GoFuncCookie.Of(fn);` |
 | w3 | `*(*F)(e) = fn`, `e` any other `unsafe.Pointer` | `@unsafe.Pointer.StoreFunc(e, fn);` |
+| w4 | `*(*unsafe.Pointer)(unsafe.Pointer(&f)) = p`, `f` a func variable | `f = @unsafe.Pointer.FuncOfWord<F>(p);` |
 
 ```go
 func ccgoFP(f interface{}) uintptr {
@@ -1494,7 +1495,7 @@ method table this way: a func stored at a computed address inside a variable of 
 ```go
 	*(*func(int, int) int)(unsafe.Add(unsafe.Pointer(&gwords), 8)) = add
 ```
-<!-- source: src/tests/Behavioral/FuncWordShapes/main.cs:98 -->
+<!-- source: src/tests/Behavioral/FuncWordShapes/main.cs:107 -->
 ```csharp
     @unsafe.Pointer.StoreFunc(@unsafe.Add(@unsafe.Pointer.FromPinnedBox(Ꮡgwords), 8), (Func<nint, nint, nint>)add);
 ```
@@ -1517,10 +1518,35 @@ store into `f`'s own box. <!-- 2026-11-14, DESIGN-interior-pointer-root.md 4.8 B
 Census at go1.26.10: 0 such stores in the standard library, tests included, on windows/amd64, linux/amd64,
 darwin/amd64 and linux/arm64; 9 in modernc.org/sqlite v1.62.0 (vfs/patches64.go:18-26), all of top-level functions. -->
 
+**A pointer word stored into a func variable (w4)** sets the func. Go stores `p` as `f`'s word. A func value's word
+in go2cs is its `GoFuncCookie` (`unsafe.Pointer.OfFunc`), so `FuncOfWord` reads `p` at run time:
+
+- a func value's word (one func copied into another through their words) is that func;
+- 0 is the nil func;
+- any other word panics by name: Go's `funcval` built by hand, whose word names code by a PC, or C memory.
+
+```go
+	var cp func(int, int) int
+	*(*unsafe.Pointer)(unsafe.Pointer(&cp)) = *(*unsafe.Pointer)(unsafe.Pointer(&stored))
+```
+<!-- source: src/tests/Behavioral/FuncWordShapes/main.cs:93 -->
+```csharp
+    cp = @unsafe.Pointer.FuncOfWord<Func<nint, nint, nint>>(~Ꮡ(@unsafe.Pointer.OfFunc(stored)));
+```
+<!-- 2026-11-22, TC-13 (BOARD 2026-11-20, "a store of a pointer word INTO a func variable lands in a fresh box"; COORD's
+ruling the same day). Before it the store kept the pointer reinterpret, `(Ꮡ(@unsafe.Pointer.OfFunc(f))).Value = p`,
+which wrote p into a fresh box nothing reads: f stayed nil, and the next call through it was a nil func call, the
+one `*unsafe.Pointer` store whose failure was SILENT. The corpus held 4 such stores, all in runtime: debugcall.cs
+(debugCallWrap2's dispatchF) and the per-OS cgocall.cs (cgocallbackg1's cb), each a funcval built over a PC from
+abi.FuncPCABIInternal, which golib's synthetic-PC registry answers. Binding a func to a PC (Delegate.CreateDelegate
+over the resolved method) was ruled out for now: both sites are dormant (debugger call injection; cgo callbacks are
+Phase 5), no user Go code can build that shape, and the binding is unread under Native AOT. So the two sites refuse
+by name instead of calling nil. -->
+
 **The shapes that keep today's pointer reinterpret, deliberately:**
 - a recovery from a pointer or from memory (runtime's mcleanup and panic);
-- the `*unsafe.Pointer` forms, which already carry the same word through `unsafe.Pointer.OfFunc` (the
-  section above).
+- the `*unsafe.Pointer` READ, which already carries the same word through `unsafe.Pointer.OfFunc` (the section
+  above).
 
 <!-- The design, its census per target and its predictions are docs/phase4/DESIGN-sqlite-cs-funcptr.md. -->
 
@@ -1529,7 +1555,8 @@ darwin/amd64 and linux/arm64; 9 in modernc.org/sqlite v1.62.0 (vfs/patches64.go:
   shape 1 is the w3 store into a package variable, read back and called);
 - the converter's `TestFuncWordShapes`, which also asserts the near misses and the m1 call site's form;
 - GolibTests' `GoFuncCookieTests` and `FuncStoreThroughPointerTests` (each case of w3, the refusals, and a
-  closure's word after the closure is dropped).
+  closure's word after the closure is dropped), and `FuncOfWordTests` (w4: the copy, a closure, nil, and the two
+  refusals).
 
 ## A pointer `reflect` handed out as an `unsafe.Pointer` must convert BACK — the order token is remembered, not redefined
 
