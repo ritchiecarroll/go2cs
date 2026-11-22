@@ -105,3 +105,38 @@ func TestMalformedArgumentsAreRefusedByName(t *testing.T) {
 		}
 	}
 }
+
+// A -Cgo pack states its RIDs in its self-description (COORD's ruling on INC 2b's condition 2): each -note is one
+// comment line after the header, which the parser skips, so the file still reads back as v1. A note with a line break
+// would end the comment and is refused.
+func TestNotesAreWrittenAsCommentLinesAndReadBack(t *testing.T) {
+	out := filepath.Join(t.TempDir(), "source-metadata.txt")
+	args := []string{"-src", fixtureSrc(t), "-module", "example.com/mod", "-module-version", "v1.6.0", "-go2cs-release", "1.24.13.3",
+		"-package", "example.com/mod=example.com.mod", "-note", "Cgo: carries win-x64 only.", "-note", "osx-arm64 is not packed.", "-out", out}
+
+	if err := run(args, &bytes.Buffer{}); err != nil {
+		t.Fatal(err)
+	}
+
+	data, err := os.ReadFile(out)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	lines := strings.Split(string(data), "\n")
+
+	if len(lines) < 4 || lines[2] != "# Cgo: carries win-x64 only." || lines[3] != "# osx-arm64 is not packed." {
+		t.Fatalf("the notes are not lines 3 and 4:\n%s", data)
+	}
+
+	if err := run([]string{"-verify", out}, &bytes.Buffer{}); err != nil {
+		t.Errorf("-verify refused a file with notes: %v", err)
+	}
+
+	bad := append(append([]string{}, args[:len(args)-2]...), "-note", "two\nlines", "-out", out)
+
+	if err := run(bad, &bytes.Buffer{}); err == nil || !strings.Contains(err.Error(), "-note") {
+		t.Errorf("a note with a line break was not refused naming -note (err %v)", err)
+	}
+}
