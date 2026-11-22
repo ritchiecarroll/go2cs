@@ -96,7 +96,7 @@ function Get-NugetgoCgoStatement([Parameter(Mandatory)][string]$PackageId) {
     foreach ($rid in $excluded.Keys) { $out += " $rid is not packed: $($excluded[$rid])." }
     $out += " A build for any other RID fails with NUGETGOCGO001. A portable build (no -r) is checked against the .NET SDK's own RID, so on a host the package does not carry it is refused even when it will run elsewhere: build with -r and one of the packed RIDs."
     $out += " lib/ holds reference assemblies only, so a portable build deployed to a RID the package does not carry fails at load, never binding another target's code."
-    $out += " One deployment neither check refuses yet: a portable build made on a packed host and run on linux-musl (Alpine) takes runtimes/linux-x64 by .NET's RID fallback, whose C binding is glibc's; the run-time check (A6) is what will refuse it. A build for linux-musl itself, -r or portable on such a host, is refused by NUGETGOCGO001."
+    $out += " A portable build made on a packed host and run on linux-musl (Alpine) takes runtimes/linux-x64 by .NET's RID fallback, whose C binding is glibc's: there the package's go.lib refuses those bindings at load, before any C call (its run-time target check). A build for linux-musl itself, -r or portable on such a host, is refused by NUGETGOCGO001."
     $out
 }
 

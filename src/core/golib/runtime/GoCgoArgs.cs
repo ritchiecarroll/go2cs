@@ -124,7 +124,7 @@ namespace go.golib;
         string? what = GoMemory(pointer, out nuint address);
 
         if (what is not null)
-            throw RuntimeErrorPanic.ErrorString($"cgo: the void pointer handed to C.{function} is {what}, which go2cs does not hand to C until cgo Phase 3's increment 3.2, so it refuses the call");
+            throw RuntimeErrorPanic.ErrorString($"cgo: the void pointer handed to C.{function} is {what}, and handing C a pointer into Go memory is not supported yet, so go2cs refuses the call (docs/Limitations.md#cgo)");
 
         return address;
     }
@@ -292,7 +292,7 @@ namespace go.golib;
         ManagedPointerTokens.IsTaggedToken(address) || ManagedPointerTokens.Resolve(address) is not null || PinExtents.Find(address) is not null;
 
     private static PanicException HelperRefused(string helper, string what) =>
-        RuntimeErrorPanic.ErrorString($"cgo: C.{helper} over Go memory: the pointer it was handed is {what}. Reading Go memory through cmd/cgo's helpers is cgo Phase 3's increment 3.2; until then go2cs refuses the call");
+        RuntimeErrorPanic.ErrorString($"cgo: C.{helper} over Go memory: the pointer it was handed is {what}. Reading Go memory through cmd/cgo's helpers is not supported yet, so go2cs refuses the call (docs/Limitations.md#cgo)");
 
     // A native box says what it was minted WITH, and a native box minted from a bare NUMBER was minted with nothing:
     // (*T)(unsafe.Pointer(&array)) over a Go array of another element type goes through the number, and comes back as a

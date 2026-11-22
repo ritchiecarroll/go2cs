@@ -26,7 +26,7 @@ public unsafe partial class GoCgoArgsTests
         public int32 N;
     }
 
-    private const string GoMemoryOwner = "increment 3.2";
+    private const string GoMemoryOwner = "not supported yet, so go2cs refuses the call";
 
     [TestMethod]
     public void AVoidPointerThatIsNilCrossesAsZero()
