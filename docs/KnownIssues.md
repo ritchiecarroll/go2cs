@@ -186,6 +186,26 @@ mappings each thread uses, and a larger `vm.max_map_count` on the machine.
      runs (bounded reserve 16 MiB and 1 MiB, three each) aborted at 16,226-16,229 threads. The record is the dated O1
      amendment in docs/phase4/DESIGN-mn-scheduler.md. -->
 
+## Goroutines on a shared pool of threads (M:N) are experimental, and off unless you build and run for them {#goroutines-on-a-shared-pool-of-threads-mn-are-experimental-and-off-unless-you-build-and-run-for-them}
+
+By default each goroutine is an operating-system thread, which is what the two sections above describe. go2cs also has
+an experimental M:N scheduler, in which goroutines take turns on a small pool of threads as Go's do. It is inert unless
+both halves are switched on:
+
+- **The build**: the projects are built with twins, an async copy of each function that can wait without holding a
+  thread. The `GoTwinsFor` property names the projects to build with twins, separated by `;`. Set it in the
+  environment: on the `dotnet build` command line each `;` must be written `%3B`, or MSBuild ends the property there.
+  `GoTwins=true` in one project's own file builds that project with twins. These properties are read by `src/Directory.Build.targets`, so
+  they work only in a project built inside a go2cs repository clone. The published `go.*` packages are not built
+  with twins, and a project that references them gets no twins from them.
+- **The run**: the environment sets `GO2CS_MN=1`. `GO2CS_MN_PROCS=<n>` sets how many goroutines run at once (default:
+  the number of processors). It does not read `GOMAXPROCS`, and `runtime.GOMAXPROCS(n)` does not change it.
+
+Without `GO2CS_MN=1` a program built with twins runs on threads as usual. With it, a goroutine that waits inside code
+built without twins keeps its thread while it waits. The other `GO2CS_MN_*` variables the scheduler reads are
+measurement switches, not settings: none is supported, and they may change or go away. The diagnostics `GO2CS0014`
+through `GO2CS0018` ([Diagnostic codes](DiagnosticCodes.md)) come only from a build with twins.
+
 ## With go2cs 1.26.10.2 or earlier, a program converted with local standard-library references runs its standard library built Debug
 
 **Symptom.** A program converted by go2cs 1.26.10.2 or earlier with plain `-recurse` or `-recurse=module`
