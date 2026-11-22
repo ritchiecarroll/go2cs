@@ -94,6 +94,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckAnonInterfaceVarWitness() => CheckTarget("AnonInterfaceVarWitness");
 
     [TestMethod]
+    public void CheckAnonLiftOnePerType() => CheckTarget("AnonLiftOnePerType");
+
+    [TestMethod]
     public void CheckAnonStructAliasForwardFile() => CheckTarget("AnonStructAliasForwardFile");
 
     [TestMethod]
@@ -2054,6 +2057,9 @@ public class A1_TranspileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckPointerParamCapturedInClosure() => CheckTarget("PointerParamCapturedInClosure");
+
+    [TestMethod]
+    public void CheckPointerParamClosureRepoint() => CheckTarget("PointerParamClosureRepoint");
 
     [TestMethod]
     public void CheckPointerParamInClosure() => CheckTarget("PointerParamInClosure");

@@ -1,4 +1,4 @@
-<Solution>
+﻿<Solution>
   <Configurations>
     <Platform Name="Any CPU" />
     <Platform Name="x64" />
@@ -303,6 +303,8 @@
     <Project Path="tests/Behavioral/AnonIfaceMethodSetWidening/AnonIfaceMethodSetWidening.csproj" />
     <Project Path="tests/Behavioral/AnonIfaceParamCrossPackage/AnonIfaceParamCrossPackage.csproj" />
     <Project Path="tests/Behavioral/AnonIfaceParamCrossPackage/anonifacelib/go.anonifacedbg.csproj" />
+    <Project Path="tests/Behavioral/AnonLiftOnePerType/AnonLiftOnePerType.csproj" />
+    <Project Path="tests/Behavioral/AnonLiftOnePerType/lib/AnonLiftOnePerType.lib.csproj" />
     <Project Path="tests/Behavioral/AnonStructAliasForwardFile/AnonStructAliasForwardFile.csproj" />
     <Project Path="tests/Behavioral/AnonStructAssertLiftDedupe/AnonStructAssertLiftDedupe.csproj" />
     <Project Path="tests/Behavioral/AdapterNameInterfaceCollision/AdapterNameInterfaceCollision.csproj" />
@@ -1045,6 +1047,7 @@
     <Project Path="tests/Behavioral/PointerConversionAliasing/PointerConversionAliasing.csproj" />
     <Project Path="tests/Behavioral/PointerConversionAnonymousTarget/PointerConversionAnonymousTarget.csproj" />
     <Project Path="tests/Behavioral/PointerReinterpretIdentity/PointerReinterpretIdentity.csproj" />
+    <Project Path="tests/Behavioral/PointerParamClosureRepoint/PointerParamClosureRepoint.csproj" />
     <Project Path="tests/Behavioral/PointerReceiverRepoint/PointerReceiverRepoint.csproj" />
     <Project Path="tests/Behavioral/PointerReceiverSliceSwap/PointerReceiverSliceSwap.csproj" />
     <Project Path="tests/Behavioral/PointerCoreConstraints/PointerCoreConstraints.csproj" />

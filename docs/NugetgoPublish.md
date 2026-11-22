@@ -51,7 +51,7 @@ Stop at the first one that fails.
 4. **The host reaches the services.** `proxy.golang.org`, `api.nuget.org`, `apiint.nugettest.org` (when the rehearsal
    takes the test gallery), `nugetgo.net` and `github.com`. The toolchain is the corpus Go (`go version`), with
    `GOTOOLCHAIN=local`, the .NET SDK and pwsh 7.
-   Free disk is preflighted as for any battery.
+   Free disk is preflighted as for any battery, counting the probe cache the conversion fills (trap 13).
 5. **`ID` is free on nuget.org.** This reads 404, or an index listing only this project's earlier versions (`id` is
    `ID` in lower case):
    ```
@@ -450,3 +450,18 @@ PLAN section 6, step 5: the launch demo and the standing integration test.
          test_deadcode/test_deadcode_elimination.go: no such file or directory". With the cache chmod u+w it read
          405 + 0, the reading the 1.26.10.1 wave had banked; COORD ruled it accepted (2026-11-05). -->
 
+13. **The conversion fills its probe cache.** For each package with an `append` the converter may lower, it
+    compiles the package once per corpus target (four) with `go build -trimpath -gcflags=-m ...`, and under `-tests`
+    once more per target with `go test -c`, to read the compiler's escape decisions (`src/go2cs/stackAppendHints.go`).
+    Those builds go into the probe cache, not `GOCACHE`: `-probe-cache <dir>`, else `GO2CS_PROBE_CACHE`, else
+    `go2cs/probe-cache` under the user cache directory ([Known issues](KnownIssues.md#a-conversion-keeps-a-go-build-cache-of-its-own)).
+    Each target caches its own dependency closure there, and Go removes an entry only after five days unused, so
+    the growth stays after the run. A large module can fill a cloud box's disk mid-run. Before step 1.2 on a large
+    module, give the run a probe cache on a volume with room (`-probe-cache` or `GO2CS_PROBE_CACHE`), count it in
+    the disk preflight, and delete it after the run's results are recorded if the space is needed; the next
+    conversion rebuilds what it needs. Measured on linux/amd64: one package of the TypeScript module, from an empty
+    cache, added 322 MB for its `go build` and 1,152 MB more for its `go test -c` on one target; each further
+    package added 0 to 76 MB per target.
+    <!-- 2026-11-21 (P1, F3; COORD 2026-11-20 08:55Z asked for a BOARD row and a runbook line): the readings and the
+         three runs behind them are in the BOARD row of 2026-11-21, "the converter's escape harvest fills the Go
+         build cache". Go 1.26.11, GOTOOLCHAIN=local, CGO_ENABLED=0, the harvest's own command line. -->

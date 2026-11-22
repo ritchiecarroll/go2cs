@@ -75,6 +75,14 @@ public record MethodInfo
     // exported promoted method by the plain `t.M(…)` call.
     public bool IsValueEmbedBoxRecv { get; init; }
 
+    // With IsValueEmbedBoxRecv: the embedded FIELD that holds the type declaring the method, and the depth of
+    // that type below the enclosing struct (1 = the direct embed). A shim deeper than one level names the
+    // enclosing struct's promoted accessor reference for that field (`Ꮡt.of(T.Ꮡ<field>).M()`): one view of the
+    // receiver, where descending through each level's own shim mints one view per level.
+    public string? ViaField { get; init; }
+
+    public int PromotedDepth { get; init; }
+
     // Set on a PROMOTED method when the embed path from the enclosing struct down to the type that
     // declares it crosses a POINTER embed at any depth. It is Go's method-set rule in one bit: a
     // pointer-receiver method reached through a pointer hop belongs to the enclosing type's VALUE

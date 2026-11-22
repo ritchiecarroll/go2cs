@@ -145,6 +145,18 @@ public class EmbedDepthMethodPromotionTests
                 /*embed*/ internal fBoth fBoth;
                 /*embed*/ internal fWrap fWrap;
             }
+
+            // G: a box primary two embeds down, whose holding field's name a sibling embed also declares.
+            partial struct gNode { internal nint k; }
+            internal static ж<gNode> Ping(this ж<gNode> Ꮡn) => Ꮡn;
+            partial struct gHold {
+                /*embed*/ internal gNode gNode;
+            }
+            partial struct gSide { internal nint gNode; }
+            partial struct gOuter {
+                /*embed*/ internal gHold gHold;
+                /*embed*/ internal gSide gSide;
+            }
         }
         """;
 
@@ -197,16 +209,21 @@ public class EmbedDepthMethodPromotionTests
     public void ABoxPrimaryBelowTheDirectEmbedIsPromotedAtEveryLevel()
     {
         // Root is declared once, three embeds below aStmt; Self twice, and aDefault's shadows aNode's. Each type
-        // above takes a shim that descends ONE level, into its direct embed's box.
+        // above takes a shim that takes ONE view, through its own promoted accessor reference for the field that
+        // holds the declaring type: aNode for Root, aDefault for Self.
         //
         // RED at the base (0c553534df's generator): aBase, aStmt and aIf have neither method, and the
         // pointer adapter of a type whose chain passes aStmt's two embeds calls them on the outer box (CS1929).
-        foreach ((string outer, string embed) in new[] { ("aBase", "aDefault"), ("aStmt", "aBase"), ("aIf", "aStmt") })
+        //
+        // RE-CITED for TS perf item 1b (2026-11-21): the shims descended ONE level, into the direct embed's box
+        // (`aIf.ᏑaStmt` for both), and recursed through each level's own shim. The PRESENCE this test guards is
+        // unchanged; the one-view FORM is APromotedBoxPrimaryTakesOneViewThroughTheDeepAccessor's.
+        foreach (string outer in new[] { "aBase", "aStmt", "aIf" })
         {
             string generated = GeneratedFor(outer);
 
-            StringAssert.Contains(generated, $"Root(this ж<global::go.dtest_package.{outer}> Ꮡtarget) => Ꮡtarget.of(global::go.dtest_package.{outer}.Ꮡ{embed}).Root();", $"{outer} must promote Root:\n{generated}");
-            StringAssert.Contains(generated, $"Self(this ж<global::go.dtest_package.{outer}> Ꮡtarget) => Ꮡtarget.of(global::go.dtest_package.{outer}.Ꮡ{embed}).Self();", $"{outer} must promote Self:\n{generated}");
+            StringAssert.Contains(generated, $"Root(this ж<global::go.dtest_package.{outer}> Ꮡtarget) => Ꮡtarget.of(global::go.dtest_package.{outer}.ᏑaNode).Root();", $"{outer} must promote Root:\n{generated}");
+            StringAssert.Contains(generated, $"Self(this ж<global::go.dtest_package.{outer}> Ꮡtarget) => Ꮡtarget.of(global::go.dtest_package.{outer}.ᏑaDefault).Self();", $"{outer} must promote Self:\n{generated}");
             Assert.IsFalse(generated.Contains($"Self(this ref global::go.dtest_package.{outer} "), $"a box primary has no by-ref forwarder on {outer}");
         }
 
@@ -239,11 +256,12 @@ public class EmbedDepthMethodPromotionTests
         // must take a shim too.
         //
         // RED at the base: cStmt forwarded cNode's Visit by ref through cBase, which has no such method (CS1929).
+        // RE-CITED for TS perf item 1b (2026-11-21): cStmt's shim took `cStmt.ᏑcBase` and recursed through cBase's.
         StringAssert.Contains(GeneratedFor("cBase"), "Visit(this ж<global::go.dtest_package.cBase> Ꮡtarget) => Ꮡtarget.of(global::go.dtest_package.cBase.ᏑcDefault).Visit();");
 
         string stmt = GeneratedFor("cStmt");
 
-        StringAssert.Contains(stmt, "Visit(this ж<global::go.dtest_package.cStmt> Ꮡtarget) => Ꮡtarget.of(global::go.dtest_package.cStmt.ᏑcBase).Visit();", "cStmt must promote the shadowing Visit:\n" + stmt);
+        StringAssert.Contains(stmt, "Visit(this ж<global::go.dtest_package.cStmt> Ꮡtarget) => Ꮡtarget.of(global::go.dtest_package.cStmt.ᏑcDefault).Visit();", "cStmt must promote the shadowing Visit:\n" + stmt);
         Assert.IsFalse(stmt.Contains("Visit(this ref global::go.dtest_package.cStmt "), "the shadowed by-ref Visit must not be promoted:\n" + stmt);
     }
 
@@ -292,5 +310,34 @@ public class EmbedDepthMethodPromotionTests
         StringAssert.Contains(all, "'fBoth.Tie' is AMBIGUOUS inside the embed itself");
         StringAssert.Contains(all, "'fWrap.Tie' promotion is AMBIGUOUS across embeds");
         StringAssert.Contains(GeneratedFor("fWrap"), "Tie(this ref global::go.dtest_package.fWrap target) => target.fDeep.Tie();");
+    }
+
+    [TestMethod]
+    public void APromotedBoxPrimaryTakesOneViewThroughTheDeepAccessor()
+    {
+        // TS PERF ITEM 1b (COORD 2026-11-21 06:58Z). aIf reaches Root three value embeds down. The shim once
+        // descended one level and recursed through each level's own shim, one view minted and kept per level:
+        // `Ꮡtarget.of(aIf.ᏑaStmt).Root()` → `.of(aStmt.ᏑaBase)` → `.of(aBase.ᏑaDefault)` → `.of(aDefault.ᏑaNode)`.
+        // aIf already carries the promoted accessor reference `ᏑaNode` (a ref to `instance.aStmt.aNode`), so the
+        // shim takes ONE view of the receiver through it, the same Go pointer (golib resolves its offset by name).
+        //
+        // RED at the base: `Ꮡtarget.of(global::go.dtest_package.aIf.ᏑaStmt).Root();`.
+        string generated = GeneratedFor("aIf");
+
+        StringAssert.Contains(generated, "ᏑaNode(ref aIf instance)", "the accessor the shim names must exist:\n" + generated);
+        StringAssert.Contains(generated, "Root(this ж<global::go.dtest_package.aIf> Ꮡtarget) => Ꮡtarget.of(global::go.dtest_package.aIf.ᏑaNode).Root();", "aIf's Root must take one view:\n" + generated);
+        Assert.IsFalse(generated.Contains("Ꮡtarget.of(global::go.dtest_package.aIf.ᏑaStmt).Root()"), "aIf's Root must not descend level by level:\n" + generated);
+    }
+
+    [TestMethod]
+    public void AnAmbiguousHoldingFieldKeepsTheOneLevelDescent()
+    {
+        // gOuter reaches Ping two embeds down, through gHold's field gNode; gSide declares a field gNode at the
+        // same depth, so Go selects neither field and gOuter has no `ᏑgNode` accessor reference to name. The shim
+        // keeps the one-level descent through gHold. The control: the same before the change and after it.
+        string generated = GeneratedFor("gOuter");
+
+        Assert.IsFalse(generated.Contains("ᏑgNode(ref gOuter instance)"), "an ambiguous promoted field has no accessor reference:\n" + generated);
+        StringAssert.Contains(generated, "Ping(this ж<global::go.dtest_package.gOuter> Ꮡtarget) => Ꮡtarget.of(global::go.dtest_package.gOuter.ᏑgHold).Ping();", "gOuter's Ping must keep the one-level descent:\n" + generated);
     }
 }

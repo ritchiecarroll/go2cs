@@ -197,10 +197,10 @@ func unresolvedDynamicTypeError() error {
 func registerDynamicTypeName(signature, csTypeName string) {
 	packageLock.Lock()
 
-	// Deterministic winner when one signature registers from multiple files/functions
-	// (file visits are concurrent, so last-wins would vary run to run — the converter is
-	// byte-deterministic): keep the lexically smallest name. Every registrant is a lifted
-	// file-level type of the same package, so any winner resolves.
+	// Deterministic winner when one signature registers from multiple files/functions: keep
+	// the lexically smallest name. File visits are sequential, in sorted file order
+	// (conversionDriver), so the winner does not depend on the visit order either way. Every
+	// registrant is a lifted file-level type of the same package, so any winner resolves.
 	if existing, ok := packageDynamicTypeNames[signature]; !ok || csTypeName < existing {
 		packageDynamicTypeNames[signature] = csTypeName
 	}
@@ -399,9 +399,11 @@ func (v *Visitor) importedStructLift(st *types.Struct) string {
 	return codeName
 }
 
-// importedStructLiftSource returns the import whose lift importedStructLift names for st, and that lift's name, or nil.
-// The import's lift is taken only when its inline admission matches this package's (liftAdmissionMatches) and every
-// struct it holds resolves to that import's lift here too (nestedLiftsMatch).
+// importedStructLiftSource returns the package whose lift importedStructLift names for st, and that lift's name, or nil.
+// Each direct import, in import-path order, offers the lift ITS code uses for st (liftUsedBy): one it declares, or one
+// it names from the package that declares it (W18 ruling C item 3, shape A). The lift is taken only when its inline
+// admission matches this package's (liftAdmissionMatches, read at the declaring package) and every struct it holds
+// resolves here to the lift the declaring package's lift holds (nestedLiftsMatch).
 func (v *Visitor) importedStructLiftSource(st *types.Struct) (*types.Package, string) {
 	if st == nil || isEmptyStructType(st) || v.pkg == nil {
 		return nil, ""
@@ -409,67 +411,46 @@ func (v *Visitor) importedStructLiftSource(st *types.Struct) (*types.Package, st
 
 	imports := slices.Clone(v.pkg.Imports())
 	slices.SortFunc(imports, func(a, b *types.Package) int { return strings.Compare(a.Path(), b.Path()) })
-	signature := st.String()
 
 	for _, pkg := range imports {
-		meta, ok := importPackageDirs[pkg.Path()]
+		owner, name, spelled := v.liftUsedBy(pkg, st)
 
-		if !ok {
+		if owner == nil {
 			continue
 		}
 
-		key := filepath.Clean(meta.Dir)
+		ownerDir := importPackageDirs[owner.Path()].Dir
 
-		publicLift := func(spelling string) string {
-			packageLock.Lock()
-			defer packageLock.Unlock()
-
-			if name := importedDynamicTypeNames[key][spelling]; name != "" && importedPublicLiftNames[key][name] {
-				return name
-			}
-
-			return ""
-		}
-
-		var name string
-
-		// The import's own spelling of the struct: its admission record keys an anonymous struct by it.
-		spelled := st
-
-		if name = publicLift(signature); name != "" {
-			if !packageDeclaresIdenticalStruct(pkg, st) {
-				name = ""
-			}
-		} else {
-			for _, identical := range packageIdenticalStructs(pkg, st) {
-				if name = publicLift(identical.String()); name != "" {
-					spelled = identical
-					break
-				}
-			}
-		}
-
-		if name == "" || !v.liftAdmissionMatches(pkg, meta.Dir, key, name, st, spelled) || !v.nestedLiftsMatch(pkg, name, st) {
+		if !v.liftAdmissionMatches(owner, ownerDir, filepath.Clean(ownerDir), name, st, spelled) || !v.nestedLiftsMatch(owner, name, st) {
 			continue
 		}
 
-		return pkg, name
+		if owner != pkg {
+			traceLiftChain(v.pkg, pkg, owner, name)
+		}
+
+		return owner, name
 	}
 
 	return nil, ""
 }
 
 // nestedLiftsMatch reports whether every anonymous struct that st holds by value (through fields, embedded ones included,
-// and array elements) resolves here to pkg's lift too, as pkg's lift name of st names it. A reused lift fixes its
-// fields' C# types to pkg's choices, while this package types its own values of those fields by ITS choices: libc's
-// Titimerval reused libc/uuid/uuid's Itimervalᴛ1 (neither admits it) while its field type Ttimeval kept libc's own
-// admitted lift, and libc's literal `new Titimerval(Fit_value: new Ttimeval(...))` was CS1503 (G's linux-x64 build,
-// COORD 2026-11-17 10:32Z). The match is transitive: each nested struct is resolved by importedStructLiftSource, which
-// checks that struct's own nested structs. A struct held through a NAMED type is that type's declaration, the same
-// C# type on both sides, and an empty struct is never lifted, so neither is checked.
+// and array elements) resolves here to the lift that pkg's lift of st holds for it (liftUsedBy, asked of pkg). A reused
+// lift fixes its fields' C# types to pkg's choices, while this package types its own values of those fields by ITS
+// choices: libc's Titimerval reused libc/uuid/uuid's Itimervalᴛ1 (neither admits it) while its field type Ttimeval kept
+// libc's own admitted lift, and libc's literal `new Titimerval(Fit_value: new Ttimeval(...))` was CS1503 (G's linux-x64
+// build, COORD 2026-11-17 10:32Z). The match is transitive: each nested struct is resolved by importedStructLiftSource,
+// which checks that struct's own nested structs. pkg's lift of a nested struct may itself be named from a third package
+// (libc's Tstat holds libc/uuid/uuid's Timespecᴛ1 once libc reuses it), so the two are compared as lifts, package and
+// name. A struct held through a NAMED type is that type's declaration, the same C# type on both sides, and an empty
+// struct is never lifted, so neither is checked.
 func (v *Visitor) nestedLiftsMatch(pkg *types.Package, name string, st *types.Struct) bool {
 	for _, nested := range heldAnonymousStructs(st) {
-		if from, nestedName := v.importedStructLiftSource(nested); from != pkg {
+		from, nestedName := v.importedStructLiftSource(nested)
+		heldBy, heldName, _ := v.liftUsedBy(pkg, nested)
+
+		if from == nil || from != heldBy || nestedName != heldName {
 			resolved := "own"
 
 			if from != nil {
@@ -926,4 +907,30 @@ func interfaceSignatureIdentifiesIt(iface *types.Interface) bool {
 	}
 
 	return true
+}
+
+// recordLiftDeclaredPublic notes that a lift this package declares is public, so a later site whose
+// own lift would need public may reuse it (board (jj)): one Go type, one lift. access is the modifier
+// the declaration carries: "public " (publicized), "internal " (function-local, localTypeAccess), or
+// "" (go2cs-gen scopes the type by its name, as generatedTypeScope does). The record is keyed by the
+// lift name alone, which is sound because a lift name is unique within a package
+// (getUniqueLiftedTypeName claims each name package-wide).
+func recordLiftDeclaredPublic(csTypeName, access string) {
+	if csTypeName == "" || !(access == "public " || access == "" && generatedTypeScope(csTypeName) == "public") {
+		return
+	}
+
+	packageLock.Lock()
+	packagePublicLiftNames[csTypeName] = true
+	packageLock.Unlock()
+}
+
+// liftDeclaredPublic reports whether a lift registered for reuse was declared public by
+// recordLiftDeclaredPublic. This is the declaration's real accessibility, not a guess from its
+// name, which is what the removed name-based disjunct got wrong for function-local lifts.
+func liftDeclaredPublic(csTypeName string) bool {
+	packageLock.Lock()
+	public := packagePublicLiftNames[csTypeName]
+	packageLock.Unlock()
+	return public
 }
