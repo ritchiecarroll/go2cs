@@ -104,6 +104,6 @@ with 704/0, against a predicted 1 (MISSED). Its tests no longer import gopkg.in/
 its own row, and the CS0104 cure is not exercised by this release. I assumed v3.0.1's test layout without reading
 v3.0.5's test files. Both cache entries are byte-equal to their zips after the runs, and no copy was left.
 objx v0.5.3 is banked on claude/c2-closure12-bank. yaml v3.0.5 is held: its generated proof page carries
-`{{.}}` in two test names and no raw guard (repoguard's Jekyll/Liquid check names lines 48 and 713), and the
+a Liquid double-brace token in two test names and no raw guard (repoguard's Jekyll/Liquid check names lines 48 and 713), and the
 identifier census refuses a dotted-quad YAML input that five test names carry, since its converted mode admits only
 `docs/validation/current/` pages.
