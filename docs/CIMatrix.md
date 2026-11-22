@@ -79,7 +79,7 @@ gh workflow run os-matrix.yml -f goos=linux  -f stage=sweep-shard -f filter=comp
 | Input | Values | Meaning |
 |:--|:--|:--|
 | `goos` | `windows` · `linux` · `darwin` | The corpus flavor to bind. Each maps to a runner + RID pair; **`darwin` fans out to BOTH mac runners** (arm64 and x64) in one dispatch. |
-| `stage` | `census` · `behavioral-smoke` · `behavioral-full` · `behavioral-stderr` · `sweep-shard` · `release-smoke` · `aot-smoke` · `nugetgo-behavior` · `golib-tests` · `gen-tests` · `solution-build` · `stack-probe` · `converter-cgo` · `cgo-e2e` | What to run. One stage per dispatch. `behavioral-full` runs the whole behavioral enumeration in slices; `behavioral-stderr` runs named projects directly and keeps their whole stderr; `golib-tests` builds and runs `src/tests/GolibTests` for the GOOS on each of its runners, with `filter` as an MSTest `--filter` expression (blank runs the whole suite), and annotates each test's outcome by name. `solution-build` runs `dotnet build src/go2cs.slnx`, every member of the converter-dev workspace, for the GOOS on each of its runners, with `filter` as the configuration (`Release`, the blank default, or `Debug`); it names the distinct errors by code and by project, and refuses to run where `$(USERPROFILE)/go2cs` exists, since a member that fell back to that deployed tree would pass against it. `stack-probe` is an opt-in diagnostic that never banks: it sweeps ONE row with `run-validated-sweep.ps1 -TestFilter` while `.github/stack-probe.ps1` takes `dotnet-stack` reports of that row's converted test host at fixed offsets (`filter` options below). It first proves the instrument on a deliberately hung program, and fails as blind if the planted frame is missing. `converter-cgo` is opt-in: it runs the converter's `go test` in `src/go2cs` on each runner, where a C compiler lets `go list` run cmd/cgo, with `filter` as a `go test -run` regular expression (blank selects the cgo tests), and opens its summary with the compiler `go env CC` names. It is the only hosted stage that gives the converter's compiler-gated cgo tests a compiler, including cgo Phase 1's exit gate. `filter` may end `;cc=zig` or `;cc=llvm-mingw` (windows only), with an optional `;sha=HEX`: the leg then downloads that pinned toolchain, refuses it unless its sha256 is the pin's (or `sha=`'s, which exists to show the refusal), and only then hands it to go as `CC`. |
+| `stage` | `census` · `behavioral-smoke` · `behavioral-full` · `behavioral-stderr` · `sweep-shard` · `release-smoke` · `aot-smoke` · `nugetgo-behavior` · `golib-tests` · `gen-tests` · `solution-build` · `stack-probe` · `converter-cgo` · `cgo-e2e` · `cgo-nuget-e2e` | What to run. One stage per dispatch. `behavioral-full` runs the whole behavioral enumeration in slices; `behavioral-stderr` runs named projects directly and keeps their whole stderr; `golib-tests` builds and runs `src/tests/GolibTests` for the GOOS on each of its runners, with `filter` as an MSTest `--filter` expression (blank runs the whole suite), and annotates each test's outcome by name. `solution-build` runs `dotnet build src/go2cs.slnx`, every member of the converter-dev workspace, for the GOOS on each of its runners, with `filter` as the configuration (`Release`, the blank default, or `Debug`); it names the distinct errors by code and by project, and refuses to run where `$(USERPROFILE)/go2cs` exists, since a member that fell back to that deployed tree would pass against it. `stack-probe` is an opt-in diagnostic that never banks: it sweeps ONE row with `run-validated-sweep.ps1 -TestFilter` while `.github/stack-probe.ps1` takes `dotnet-stack` reports of that row's converted test host at fixed offsets (`filter` options below). It first proves the instrument on a deliberately hung program, and fails as blind if the planted frame is missing. `converter-cgo` is opt-in: it runs the converter's `go test` in `src/go2cs` on each runner, where a C compiler lets `go list` run cmd/cgo, with `filter` as a `go test -run` regular expression (blank selects the cgo tests), and opens its summary with the compiler `go env CC` names. It is the only hosted stage that gives the converter's compiler-gated cgo tests a compiler, including cgo Phase 1's exit gate. `filter` may end `;cc=zig` or `;cc=llvm-mingw` (windows only), with an optional `;sha=HEX`: the leg then downloads that pinned toolchain, refuses it unless its sha256 is the pin's (or `sha=`'s, which exists to show the refusal), and only then hands it to go as `CC`. |
 | `filter` | free text, optional | The shard. Comma-separated **exact** roster package names for `sweep-shard` (each swept with `-Exact`, and a name not on the roster refuses the run), a project-name substring for `behavioral-smoke`, comma-separated project names for `behavioral-stderr`. `behavioral-full` ignores it. Blank takes the stage's documented default. |
 | `dotnet` | `10.0.x` · `10.0.402` | The SDK channel for `setup-dotnet`. Blank takes `10.0.x`. |
 | `run_timeout` | 1-1800, optional | The behavioral stages' per-program run budget in seconds (`GO2CS_RUN_TIMEOUT`). Blank takes 120. |
@@ -281,6 +281,35 @@ gh workflow run os-matrix.yml -f stage=nugetgo-behavior \
   -f nugetgo_module=github.com/inconshreveable/mousetrap@v1.1.0 -f nugetgo_package=1.1.0-int.1
 ```
 
+### `cgo-nuget-e2e` — a third-party cgo module, packed and consumed on every shipped RID (opt-in)
+
+The hosted proof that a cgo package can ship as a nugetgo package against the go.* packages: it packs
+`github.com/mattn/go-pointer` v0.0.1, a real third-party cgo module, and runs it on all five shipped RIDs. It is
+OPT-IN: no schedule starts it, and it never runs as part of another stage. `goos` and `filter` are ignored.
+- **J1** is `release-smoke`'s own `pack` job, unchanged: every go.* package of this tree, packed on windows with the
+  run's rehearsal suffix `ci.<run id>`.
+- **J2** (`cgo-nuget-pack`, linux, the pinned zig) runs `.github/cgo-nuget-pack.ps1`.
+  - **R-c**, the before reading: `master`'s converter refuses go-pointer by name.
+  - It converts the module with `-recurse=nuget -cgo`.
+  - It packs it with `nugetgo-pack.ps1 -Cgo -LocalClosure <J1's feed>`. The package records `local-closure:`, so
+    `src/_nugetpush.ps1` refuses it.
+  - It writes R-a's input: the same package with `runtimes/win-x64/` holding the linux flavor.
+- **J3** is one leg per shipped RID, running `.github/cgo-nuget-consume.ps1`. The sample under
+  `src/tests/CgoNugetE2E/` is run with `go run`, converted against J2's package, and built and run against J1's go.*
+  closure through `Invoke-NugetgoBehaviorRow.ps1 -ClosureFeed -ClosureVersion`.
+  - The restore is private, and a stale `go.lib` planted in the global packages folder must not reach it.
+  - **R-b**: osx-arm64, which the package leaves out by name, must be refused `NUGETGOCGO001`.
+  - **R-a**: on win-x64 the doctored package must build and be refused at load by A6, naming `linux/amd64` and
+    `windows/amd64`.
+
+The legs provision the OS's default pinned C toolchain (`.github/cgo-toolchain.ps1`: zig, llvm-mingw on windows),
+because `go run` and the sample's conversion both load go-pointer with cgo on. The built program needs none.
+Every artifact is named with the run's suffix, and no feed outside the run's artifacts is written.
+
+```
+gh workflow run os-matrix.yml -f stage=cgo-nuget-e2e -f goos=linux
+```
+
 ## Results flow
 
 Nothing is automatic and nothing is written back. Every leg uploads an `artifacts/` bundle
@@ -374,6 +403,7 @@ disclosure count is half of what makes a row honest.
 | `cgo-e2e` | 45 min | 68 min | cgo's end-to-end gate: a cgo program is built by Go and converted by go2cs with the leg's C compiler, the converted project is built with the .NET SDK, and each check is run both ways and compared. Provisional. |
 | `release-smoke` | 90 min | 135 min | The leg only: converter `go build` plus eight small restore/build/run arms. The `pack` job (windows, 240 min) is separate. Provisional. |
 | `release-smoke` cgo job | 60 min | 60 min | One per shipped RID, beside the legs: one cold module download and converter test build, the probe library, and cgo-e2e's Phase 3 test alone, which builds golib and the converted closure cold. The slowest cgo-e2e job, four more tests, read 22 min (osx-x64). Provisional. |
+| `cgo-nuget-e2e` | 90 min | 135 min | J3's leg: the `nugetgo-behavior` row's shape plus the pinned C toolchain's download, and on win-x64 a second row for R-a. `pack` (J1, windows, 240 min) and J2 (linux, 90 min) are separate jobs. PROVISIONAL until the first run. |
 | `nugetgo-behavior` | 90 min | 135 min | The leg: converter `go build`, one `go run`, one conversion against the feed, and one cold restore, build and run of the sample. `release-smoke`'s leg is the closest shape. Provisional. |
 | `aot-smoke` | 240 min | 360 min | The leg only, five RIDs: one Native AOT publish of a 31-package consumer under `TrimMode=partial` -- linux 56, windows 71, osx-x64 293 min before golib's generic-cycle fix (37523439849, where osx-arm64 did not finish in 360); after it, linux 212 s, windows 167 s, osx-arm64 354 s (38587876788), osx-x64 654 s (38575258530). |
 

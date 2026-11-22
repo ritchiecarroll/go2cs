@@ -1,0 +1,2 @@
+# module-path	nuget-id	status	source-repo	registered	contact
+github.com/mattn/go-pointer	nugetgo.github.com.mattn.go-pointer	community	https://github.com/ritchiecarroll/go-pointer-cs	2026-11-22	ritchiecarroll
