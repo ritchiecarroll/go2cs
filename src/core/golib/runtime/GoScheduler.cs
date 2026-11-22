@@ -230,7 +230,7 @@ public static class GoScheduler
             return claimed;
         }
     }
-    private static readonly SemaphoreSlim s_p = new(s_procs);   // the P tokens
+    private static readonly PTokens s_p = new(s_procs);   // the P tokens (lock-free hand-back: GoScheduler.PTokens.cs)
     private static readonly List<Carrier> s_carriers = [];
     private static readonly object s_carriersLock = new();
 
