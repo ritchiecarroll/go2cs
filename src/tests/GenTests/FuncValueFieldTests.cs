@@ -1,0 +1,98 @@
+//******************************************************************************************************
+//  FuncValueFieldTests.cs - Gbtc
+//
+//  The func-value seat (COORD's approval of 2026-11-21, docs/phase4/inbox/G/20261121T233319Z-COORD.md): P5's S2 arm 3
+//  found a table-driven main ([]struct{name string; run func()}) never twinned, because N3's pair test reached only a
+//  call through a bare identifier. A field or element callee is now tested too, read ONCE into a temp, and a shape the
+//  test still cannot reach reports GO2CS0020.
+//******************************************************************************************************
+
+using System;
+using System.Linq;
+using Microsoft.CodeAnalysis;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using static GenTests.TwinBoxTests;
+
+namespace GenTests;
+
+[TestClass]
+public class FuncValueFieldTests
+{
+    private const string Shapes = """
+            public partial struct entry { public nint id; public Action run; }
+
+            internal static nint next;
+
+            internal static nint nextIndex() { next++; return 0; }
+
+            public static void parks() { ᐸꟷ(ch); }
+
+            public static void runField(ж<entry> Ꮡe)
+            {
+                ref var e = ref Ꮡe.DerefOrNull();
+                e.run();
+            }
+
+            public static void runElem(slice<Action> fs, nint i)
+            {
+                fs[i]();
+            }
+
+            public static void runIndexOnce(slice<Action> fs)
+            {
+                fs[nextIndex()]();
+            }
+
+            public static void runMap(map<nint, Action> m)
+            {
+                m[1]();
+            }
+
+            internal static Action pick() => parks;
+
+            public static void runResult()
+            {
+                pick()();
+            }
+
+        """;
+
+    [TestMethod]
+    public void AFieldCalleeIsTestedForAPairReadOnce()
+    {
+        (string twins, Diagnostic[] errors) = RunWith(null, null, Shapes);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        StringAssert.Contains(twins, "runFieldꞏtwin", "a function that calls a func value in a field is twinned (the caller rule)");
+        StringAssert.Contains(twins, "var ᴛfv", "a field or element callee is read once into a temp");
+        StringAssert.Contains(twins, "?.Target is global::go.golib.GoFuncPair", "and tested for a pair");
+    }
+
+    [TestMethod]
+    public void AnElementCalleeIsTestedAndItsIndexRunsOnce()
+    {
+        (string twins, Diagnostic[] errors) = RunWith(null, null, Shapes);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        StringAssert.Contains(twins, "runElemꞏtwin", "an element callee twins its caller");
+        StringAssert.Contains(twins, "runMapꞏtwin", "a map element callee twins its caller");
+
+        // The index expression is evaluated exactly once: it appears in the read, never in the test or the call.
+        string body = twins[twins.IndexOf("runIndexOnceꞏtwin", StringComparison.Ordinal)..];
+        body = body[..Math.Min(body.Length, body.IndexOf("\n    }", StringComparison.Ordinal) is var end and > 0 ? end : body.Length)];
+        Assert.AreEqual(1, body.Split("nextIndex()").Length - 1, "nextIndex() is called once: " + body);
+    }
+
+    [TestMethod]
+    public void ACallResultCalleeReportsGo2cs0020()
+    {
+        (_, Diagnostic[] errors) = RunWith(null, null, Shapes);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        Diagnostic[] uncovered = [.. (LastGeneratorDiagnostics ?? []).Where(diagnostic => diagnostic.Id == "GO2CS0020")];
+        Assert.AreEqual(1, uncovered.Length, "one GO2CS0020, for runResult only: " + string.Join("\n", uncovered.Select(d => d.ToString())));
+        StringAssert.Contains(uncovered[0].GetMessage(), "runResult", "it names the function");
+        StringAssert.Contains(uncovered[0].GetMessage(), "a call's result", "and the shape");
+        Assert.AreEqual(DiagnosticSeverity.Warning, uncovered[0].Severity, "a warning by default, as GO2CS0014/0015");
+    }
+}

@@ -370,7 +370,7 @@ public sealed partial class TwinGenerator
                 .Append(" go-other=").Append(sites.Count(site => site.Go == GoKind.Other || site.Go == GoKind.Literal && !LiteralLaunches(site)))
                 .Append(" go-passive=").Append(sites.Count(site => site.Go != GoKind.None && !site.Active))
                 .Append(" unbound=").Append(sites.Count(site => site.Unbound))
-                .Append(" delegate-calls=").Append(sites.Count(site => site.Delegate))
+                .Append(" delegate-calls=").Append(sites.Count(site => site.Delegate)).Append(" delegate-uncovered=").Append(UncoveredFuncValueCalls)
                 .Append(" interface-calls=").Append(sites.Count(site => site.Interface))
                 .Append(" closure-parks=").Append(sites.Count(site => site is { Active: false, Go: GoKind.None, Renameable: true } && CanPark(site.Target)))
                 .Append(" not-renameable=").Append(sites.Count(site => site is { Active: true, Go: GoKind.None, Renameable: false } && CanPark(site.Target))).Append("\r\n");
