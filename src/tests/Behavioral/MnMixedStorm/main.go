@@ -11,7 +11,7 @@
 //
 // n is 1,000 unless MN_STORM_N names another count. The program exists for MN_STORM_N=100,000: with one
 // OS thread per goroutine that is past the thread cap of both hosted macOS runners (2,048 and 3,072),
-// and the M:N spike's direct-runs step names it. The default is small because the behavioral suite
+// and os-matrix's M:N direct-runs step names it. The default is small because the behavioral suite
 // runs it on the thread path, where 100,000 threads ended a linux runner with OutOfMemoryException
 // (COORD's ruling, 2026-11-22); Go runs the same default, so its output still compares equal.
 // MN_STORM_HOLD_MS holds the parked goroutines so a sampler can read the process.

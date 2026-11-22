@@ -1,5 +1,5 @@
 //******************************************************************************************************
-//  GoScheduler.cs - M:N SPIKE (R5b, B1). Spike code: it stays on the spike branch and never lands.
+//  GoScheduler.cs - M:N scheduler, experimental and opt-in (GoTwins=true + GO2CS_MN=1); inert otherwise.
 //
 //  A goroutine started with a hidden async twin (Goroutine.StartTwin) runs here, multiplexed over a
 //  small set of carrier threads, when GO2CS_MN=1. With the switch off nothing in this file runs.
@@ -310,7 +310,7 @@ public static class GoScheduler
     /// <summary>Whether the calling thread is a carrier with a goroutine mounted: where a twin may park.</summary>
     public static bool OnCarrier => t_carrier is { Mounted: not null };
 
-    // M:N PROTOTYPE (A1). GO2CS_MN_CONTEXT=0 (a reading) turns the context rule off: a goroutine's
+    // M:N (A1). GO2CS_MN_CONTEXT=0 (a reading) turns the context rule off: a goroutine's
     // ExecutionContext is then not carried from step to step, and a carrier starts under its starter's.
     private static readonly bool s_contextSwap = Environment.GetEnvironmentVariable("GO2CS_MN_CONTEXT") != "0";
 
@@ -322,7 +322,7 @@ public static class GoScheduler
     private static long s_offCarrierResumes;
     private static long s_nestedResumes;
 
-    // A twin's step is starting from a delegate: a wake, or an awaiter that is not a twin's.
+    // A twin's step is starting from its ResumeAction (a foreign awaiter) or from a parked box (RunStep).
     internal static void NoteStep(GoTaskCore twin)
     {
         if (t_carrier is { Mounted: not null } carrier)
@@ -331,7 +331,7 @@ public static class GoScheduler
             Interlocked.Increment(ref s_offCarrierResumes);
     }
 
-    // M:N PROTOTYPE (A2). The twin the calling carrier's step resumed, or null: no goroutine is mounted, or
+    // M:N (A2). The twin the calling carrier's step resumed, or null: no goroutine is mounted, or
     // the step is a goroutine's first, whose calls are all frames on this thread. The resumed twin is the
     // lowest frame of the goroutine that the thread holds; its callers are the suspended twins up its
     // parent link (GoTaskCore.Parent), which a stack walk reads after the thread's own frames.
@@ -1067,7 +1067,7 @@ public static class GoScheduler
             Mounted = goroutine;
             Interlocked.Increment(ref s_steps);
 
-            // M:N PROTOTYPE (A4). The reading's proof that goroutines moved: a step on a carrier other than the
+            // M:N (A4). The reading's proof that goroutines moved: a step on a carrier other than the
             // one that ran the goroutine's last step is a migration.
             if (goroutine.m_lastCarrier is { } last && !ReferenceEquals(last, this))
             {

@@ -1,5 +1,5 @@
 //******************************************************************************************************
-//  Goroutine.Multiplexed.cs - M:N scheduler, experimental and opt-in (GoTwins=true to build, GO2CS_MN=1 to run); inert otherwise.
+//  Goroutine.Multiplexed.cs - M:N scheduler, experimental and opt-in (GoTwins=true + GO2CS_MN=1); inert otherwise.
 //
 //  The goroutine half of the spike's scheduler (GoScheduler.cs): a goroutine started with a hidden async
 //  twin is not bound to a thread. A carrier MOUNTS it for one step (from its start, or from a wake, to its

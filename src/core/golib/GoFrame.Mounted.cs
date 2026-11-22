@@ -1,5 +1,5 @@
 //******************************************************************************************************
-//  GoFrame.Mounted.cs - M:N scheduler, experimental and opt-in (GoTwins=true to build, GO2CS_MN=1 to run); inert otherwise.
+//  GoFrame.Mounted.cs - M:N scheduler, experimental and opt-in (GoTwins=true + GO2CS_MN=1); inert otherwise.
 //
 //  GoFrame's share of Goroutine.Mount / Unmount. It sits in its own file so that no line of GoFrame.cs
 //  moves under the documents that cite it.

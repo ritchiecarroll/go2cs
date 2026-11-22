@@ -1,5 +1,5 @@
 //******************************************************************************************************
-//  builtin.Twins.cs - M:N scheduler, experimental and opt-in (GoTwins=true to build, GO2CS_MN=1 to run); inert otherwise.
+//  builtin.Twins.cs - M:N scheduler, experimental and opt-in (GoTwins=true + GO2CS_MN=1); inert otherwise.
 //
 //  The hidden twins of builtin's parking members, and the launchers a generated twin calls. They sit in
 //  their own file so that no line of builtin.cs moves under the documents that cite it.
