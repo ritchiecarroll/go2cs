@@ -268,20 +268,20 @@ database files directly. Converting the `net` resolver with cgo is planned, and 
 that imports `runtime/cgo` or `plugin` is refused by name: without cgo they are not working builds.
 <!-- src/go2cs/main.go:306 (`Not combinable with -stdlib or -tests. With -recurse, every non-standard-library package of the module loads cgo-on and each cgo package converts this way`); src/go2cs/csproj-template.xml:135 (`<ProjectReference Include="$(go2csPath)gen/go2cs-gen/go2cs-gen.csproj"`) and src/go2cs/csproj-template.xml:187 (`<ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />`). COORD's ruling O2, 2026-11-14 (cgo 3.1's release-path seat). -->
 
-**What is refused, by name, with the phase that will cover it:**
-- a pointer into Go memory handed to C as a `void *`, or to `C.GoBytes`, `C.GoString` or `C.GoStringN`
-  (Phase 3). A pointer into a slice or an array is refused when the package is converted;
+**What is refused, by name.** Each of these is not supported yet; [the Roadmap](Roadmap.md#cgo) says what is planned.
+- a pointer into Go memory handed to C as a `void *`, or to `C.GoBytes`, `C.GoString` or `C.GoStringN`.
+  A pointer into a slice or an array is refused when the package is converted;
   `unsafe.Pointer(&x)` is refused when the call runs, with a message that names the call. Inside a method
   with a pointer receiver, `unsafe.Pointer(p)` of a pointer of the receiver's own type is refused when the
   package is converted: move the call into a function that takes the pointer as a parameter;
 - a function the preamble itself defines, and a `#define` that is not a constant, both of which need
-  compiled C (Phase 4);
-- `//export` (Phase 5);
-- a C variable, a C function used as a value, and `go C.f(…)` with a pointer cmd/cgo checks (Phase 2);
+  compiled C;
+- `//export`;
+- a C variable, a C function used as a value, and `go C.f(…)` with a pointer cmd/cgo checks;
 - a C function Go's own cgo build does not import by its C name: one a header renames (macOS on x64 makes
   `fstat` the symbol `fstat$INODE64`), or one the C compiler inlines. go2cs cannot tell the two apart, so it
   refuses both rather than bind a function C would not call:
-  `error GO2CS2001: C.abs: cmd/cgo's own binary does not import a symbol named abs, ...` (Phase 2). Which
+  `error GO2CS2001: C.abs: cmd/cgo's own binary does not import a symbol named abs, ...`. Which
   functions those are depends on the compiler and the C library: `abs` and `labs` everywhere, and with glibc
   also `atoi`, `atol`, `toupper`, `tolower` and `fabs`.
   <!-- abs and labs refused on Linux, macOS and Windows; the glibc set measured on Linux x64 with gcc 15 and with

@@ -4,7 +4,7 @@
 
 namespace go;
 
-// The C pseudo-package of Go package cgotest (docs/phase4/DESIGN-cgo-phase2-pinvoke.md §11.17): what cmd/cgo
+// The C pseudo-package of Go package cgotest (docs/Limitations.md#cgo): what cmd/cgo
 // declared for its C names, reached from each converted file that imports "C" through `using C = <this class>;`.
 // The class name cannot collide with a real Go package's: 'ꓸ' is not a Go identifier character, and Go reserves
 // `import "C"` for cgo. Every member is internal: cgo forbids a C type in an exported Go signature.
@@ -644,8 +644,8 @@ static unsafe partial class cgotestꓸC_package
         return default;
     }
 
-    // The package's C libraries, as the converter captured them (§6.1, §11.5), registered with golib's resolver for this
-    // assembly's own [LibraryImport] bindings when the module loads (§6.2, §11.11).
+    // The package's C libraries, as the converter captured them, registered with golib's resolver for this
+    // assembly's own [LibraryImport] bindings when the module loads.
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     internal static void registerᴍlibraries() => global::go.golib.GoCgoLibraries.Register(typeof(cgotestꓸC_package).Assembly, "windows/amd64",
         new global::go.golib.GoCgoLibrary("-lgo2csprobe", "go2csprobe.dll"),
@@ -842,7 +842,7 @@ static unsafe partial class cgotestꓸC_package
         private byte m_element;
     }
 
-    // _Ctype_POINT's copy-in and copy-out, member by member (§5.2).
+    // _Ctype_POINT's copy-in and copy-out, member by member.
     private static void ᴍin__Ctype_POINTᴍ(ref _Ctype_POINTᴍ m, in POINT v)
     {
         m.x = (int32)v.x;
@@ -855,7 +855,7 @@ static unsafe partial class cgotestꓸC_package
         v.y = (@long)(int32)m.y;
     }
 
-    // _Ctype_RECT's copy-in and copy-out, member by member (§5.2).
+    // _Ctype_RECT's copy-in and copy-out, member by member.
     private static void ᴍin__Ctype_RECTᴍ(ref _Ctype_RECTᴍ m, in RECT v)
     {
         m.left = (int32)v.left;
@@ -872,7 +872,7 @@ static unsafe partial class cgotestꓸC_package
         v.bottom = (@long)(int32)m.bottom;
     }
 
-    // _Ctype_SYSTEMTIME's copy-in and copy-out, member by member (§5.2).
+    // _Ctype_SYSTEMTIME's copy-in and copy-out, member by member.
     private static void ᴍin__Ctype_SYSTEMTIMEᴍ(ref _Ctype_SYSTEMTIMEᴍ m, in SYSTEMTIME v)
     {
         m.wYear = (uint16)v.wYear;
@@ -897,7 +897,7 @@ static unsafe partial class cgotestꓸC_package
         v.wMilliseconds = (@ushort)(uint16)m.wMilliseconds;
     }
 
-    // _Ctype_div_t's copy-in and copy-out, member by member (§5.2).
+    // _Ctype_div_t's copy-in and copy-out, member by member.
     private static void ᴍin__Ctype_div_tᴍ(ref _Ctype_div_tᴍ m, in div_t v)
     {
         m.quot = (int32)v.quot;
@@ -910,7 +910,7 @@ static unsafe partial class cgotestꓸC_package
         v.rem = (@int)(int32)m.rem;
     }
 
-    // _Ctype_struct_go2cs_probe_hfa's copy-in and copy-out, member by member (§5.2).
+    // _Ctype_struct_go2cs_probe_hfa's copy-in and copy-out, member by member.
     private static void ᴍin__Ctype_struct_go2cs_probe_hfaᴍ(ref _Ctype_struct_go2cs_probe_hfaᴍ m, in struct_go2cs_probe_hfa v)
     {
         m.x = (float64)v.x;
@@ -923,7 +923,7 @@ static unsafe partial class cgotestꓸC_package
         v.y = (@double)(float64)m.y;
     }
 
-    // _Ctype_struct_go2cs_probe_pair's copy-in and copy-out, member by member (§5.2).
+    // _Ctype_struct_go2cs_probe_pair's copy-in and copy-out, member by member.
     private static void ᴍin__Ctype_struct_go2cs_probe_pairᴍ(ref _Ctype_struct_go2cs_probe_pairᴍ m, in struct_go2cs_probe_pair v)
     {
         m.a = (int32)v.a;
@@ -936,7 +936,7 @@ static unsafe partial class cgotestꓸC_package
         v.b = (@int)(int32)m.b;
     }
 
-    // _Ctype_struct_go2cs_probe_tagged's copy-in and copy-out, member by member (§5.2).
+    // _Ctype_struct_go2cs_probe_tagged's copy-in and copy-out, member by member.
     private static void ᴍin__Ctype_struct_go2cs_probe_taggedᴍ(ref _Ctype_struct_go2cs_probe_taggedᴍ m, in struct_go2cs_probe_tagged v)
     {
         m.tag = (int32)v.tag;
@@ -951,7 +951,7 @@ static unsafe partial class cgotestꓸC_package
             v.u[i0] = (byte)(byte)m.u[i0];
     }
 
-    // _Ctype_struct_tm's copy-in and copy-out, member by member (§5.2).
+    // _Ctype_struct_tm's copy-in and copy-out, member by member.
     private static void ᴍin__Ctype_struct_tmᴍ(ref _Ctype_struct_tmᴍ m, in struct_tm v)
     {
         m.tm_sec = (int32)v.tm_sec;
@@ -979,7 +979,7 @@ static unsafe partial class cgotestꓸC_package
     }
 
     // The calling thread's errno slot in ucrtbase.dll, the C runtime the bound library uses: on windows SetLastError
-    // captures GetLastError, not errno, so an errno form reads the C runtime's own slot (§11.3).
+    // captures GetLastError, not errno, so an errno form reads the C runtime's own slot.
     [global::System.Runtime.InteropServices.LibraryImport("ucrtbase.dll", EntryPoint = "_errno")]
     [global::System.Runtime.InteropServices.UnmanagedCallConv(CallConvs = new[] { typeof(global::System.Runtime.CompilerServices.CallConvCdecl) })]
     private static partial nint errnoᴍlocation();

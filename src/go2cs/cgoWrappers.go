@@ -293,7 +293,7 @@ func cgoErrnoLocationBinding(crt string) string {
 	var text strings.Builder
 
 	fmt.Fprintf(&text, "    // The calling thread's errno slot in %s, the C runtime the bound library uses: on windows SetLastError\n", crt)
-	text.WriteString("    // captures GetLastError, not errno, so an errno form reads the C runtime's own slot (§11.3).\n")
+	text.WriteString("    // captures GetLastError, not errno, so an errno form reads the C runtime's own slot.\n")
 	fmt.Fprintf(&text, "    [%sLibraryImport(%q, EntryPoint = \"_errno\")]\n", interop, crt)
 	fmt.Fprintf(&text, "    [%sUnmanagedCallConv(CallConvs = new[] { typeof(%sCallConvCdecl) })]\n", interop, compiler)
 	fmt.Fprintf(&text, "    private static partial nint %s();\n", cgoErrnoLocation)
@@ -313,7 +313,7 @@ func cgoPseudoPackageText(packageName string, members map[string]string) string 
 
 	var text strings.Builder
 
-	fmt.Fprintf(&text, "// The C pseudo-package of Go package %s (docs/phase4/DESIGN-cgo-phase2-pinvoke.md §11.17): what cmd/cgo\n", packageName)
+	fmt.Fprintf(&text, "// The C pseudo-package of Go package %s (docs/Limitations.md#cgo): what cmd/cgo\n", packageName)
 	text.WriteString("// declared for its C names, reached from each converted file that imports \"C\" through `using C = <this class>;`.\n")
 	text.WriteString("// The class name cannot collide with a real Go package's: 'ꓸ' is not a Go identifier character, and Go reserves\n")
 	text.WriteString("// `import \"C\"` for cgo. Every member is internal: cgo forbids a C type in an exported Go signature.\n")

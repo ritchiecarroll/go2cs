@@ -1282,7 +1282,7 @@ func cgoBindingsHeader(pkg *packages.Package, sources []syntaxSourceFile, reduce
 	var header strings.Builder
 
 	fmt.Fprintf(&header, "// %s.cgo.cs - the C bindings of Go package %s, made by go2cs from cmd/cgo's output for its import \"C\"\n", pkg.Name, pkg.PkgPath)
-	header.WriteString("// sources (docs/phase4/DESIGN-cgo-phase2-pinvoke.md §4.1, §11.20). DO NOT EDIT: convert the package again with -cgo.\n")
+	header.WriteString("// sources (docs/Limitations.md#cgo). DO NOT EDIT: convert the package again with -cgo.\n")
 	fmt.Fprintf(&header, "// target: %s\n", targetPlatform)
 	fmt.Fprintf(&header, "// C toolchain: %s\n", cgoToolchainLine(toolchain))
 

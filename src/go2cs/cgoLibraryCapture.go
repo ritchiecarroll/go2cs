@@ -153,7 +153,7 @@ type cgoSymbolLibrary struct {
 func cgoProbeSource(symbols []string) string {
 	var source strings.Builder
 
-	source.WriteString("/* go2cs cgo load-name probe: references every bound symbol (docs/phase4/DESIGN-cgo-phase2-pinvoke.md §11.5). */\n")
+	source.WriteString("/* go2cs cgo load-name probe: references every bound symbol, so the link names the library that defines each. */\n")
 
 	for _, symbol := range symbols {
 		fmt.Fprintf(&source, "extern void %s(void);\n", symbol)

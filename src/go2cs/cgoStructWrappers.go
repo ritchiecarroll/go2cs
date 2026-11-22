@@ -130,7 +130,7 @@ func (set *cgoWrapperSet) copyFunctions(function string, named *types.Named, mir
 
 	var text strings.Builder
 
-	fmt.Fprintf(&text, "    // %s's copy-in and copy-out, member by member (§5.2).\n", named.Obj().Name())
+	fmt.Fprintf(&text, "    // %s's copy-in and copy-out, member by member.\n", named.Obj().Name())
 	fmt.Fprintf(&text, "    private static void ᴍin_%s(ref %s m, in %s v)\n    {\n%s    }\n\n", mirror.name, mirror.name, goSide, copyIn.String())
 	fmt.Fprintf(&text, "    private static void ᴍout_%s(ref %s v, in %s m)\n    {\n%s    }\n", mirror.name, goSide, mirror.name, copyOut.String())
 
