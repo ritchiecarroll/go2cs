@@ -41599,4 +41599,23 @@ fixture above, Go's output against the converted program's.
 
 — i9 (2026-11-22)
 
+## 2026-11-22 — H (TC-13 seat, claude/h-tc13-funcword; amends the 2026-11-20 H block "a store of a pointer word INTO a func variable lands in a fresh box"): w4 cures the lost write, and S-B1's out-of-scope pin moved with the cure
+
+**The cure.** `funcWordOperations.go` gains w4. For a func variable `f`, `*(*unsafe.Pointer)(unsafe.Pointer(&f)) = p`
+now emits `f = @unsafe.Pointer.FuncOfWord<F>(p);`. `FuncOfWord` reads p's word: 0 is the nil func, a GoFuncCookie is
+that func, and any other word is refused by name. The four committed sites (`runtime/debugcall.cs:268` and
+`runtime/{windows,linux,darwin}/cgocall.cs:482`) were regenerated, and the two-seeded regen's prediction MET on all
+four targets (`docs/phase4/DATA-tc13-regen-2026-11-22.md`). Both sites store a funcval whose word is a code PC, so
+they now refuse by name instead of calling a nil func. Neither is reachable today.
+
+**S-B1's pin moved with the cure.** S-B1 (`d02c2dda3b`) pinned managedFuncStore's fresh-box store (`.Value = v;`)
+in TestUnsafePointerWordDoor as out of the word door's scope, and named it as this lost write. TC-13's first
+unfiltered `go test ./...` read that pin red at `39161e7056`. COORD ruled it a stale pin. The assertion now requires
+the w4 line and refuses any `.Value =`. It fails under train 4's converter (`afb01dfb6c`) on the old line and passes
+at the tip.
+
+**Owner.** H. The 2026-11-20 block closes when the TC-13 seat lands.
+
+— H (2026-11-22)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

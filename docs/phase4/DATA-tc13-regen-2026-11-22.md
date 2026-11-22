@@ -122,3 +122,40 @@ other total is predicted as a difference from train 4's.
 - **D-5, go2cs-gen output at the base against the tip:** 0 differ, 0 only-in-base and 0 only-in-tip, with equal
   file counts. If this misses, the files to expect are FuncWordShapes' generated files, because its `main.cs` and
   `package_info.cs` are the only behavioral sources that change.
+
+## 4. Battery score (appended after the battery)
+
+The battery ran at `39161e7056` with base `afb01dfb6c`. Every gate ran unfiltered.
+
+- **GenTests: MET on 0 failed.** 764 passed, 0 failed, 0 skipped. The total is not scored, because no train-4
+  GenTests reading is held on this box.
+- **GolibTests, Release and Debug: 0 failed MET; total MET; skips MISSED as worded.**
+  - Each configuration read 3,171 total and 0 failed. COORD's train-4 battery, the run that landed `afb01dfb6c`,
+    read 3,164 at both configurations. 3,171 = 3,164 + 7, so the total is MET.
+  - The skips read 53 for Release and 79 for Debug, where the prediction said 52 and 77. Those two numbers were a
+    reading from before train 4, quoted from memory, while the clause itself said "equal to train 4's". Train 4 adds
+    two gated tests. `ThisLinuxProcessReadsAsGlibc` is Inconclusive off linux, at both configurations.
+    `ANoInlineBodyThroughAForwarderTheJitDidNotInlineIsOneGoFrame` needs optimized code, so it skips at Debug only.
+    Train 4's own reading is 53 and 79, so the skips equal train 4's: the clause is MET and its numbers MISSED. No
+    skipped test is in `FuncOfWordTests`.
+- **go test ./...: MISSED.** It read 1 FAIL where 0 was predicted: TestUnsafePointerWordDoor. TestLicensing and
+  TestFuncWordShapes passed, and the other 10 packages were ok.
+- **repoguard, full, -count=1: MET.** rc 0.
+- **CNR: MET.** NO REGRESSION. It transpiled 1,176 packages: 1,164 byte-identical and 12 platform-exclusive skips.
+- **D-5: MET.** 0 differ, 0 only-in-base and 0 only-in-tip, with 129 files on each side.
+
+**The red, and its fix.** The failing assertion (`unsafePointerWordDoor_test.go`, S-B1 `d02c2dda3b`) required
+managedFuncStore, `*(*unsafe.Pointer)(unsafe.Pointer(&f)) = v` over a func parameter, to keep `.Value = v;`. That
+line is the fresh-box store that the BOARD's 2026-11-20 entry names as the LOST WRITE, and S-B1 had pinned it as out
+of the word door's scope. TC-13 emits `f = @unsafe.Pointer.FuncOfWord<Action>(v);` there, and the declaration is
+still `ref var f = ref heap(fʗp, out var Ꮡf);`. COORD ruled this a stale pin. The pin moved with the cure: the
+assertion now requires the w4 line and refuses any `.Value =`.
+- **Red arm:** the new assertion over train 4's converter source (`afb01dfb6c`) FAILS and names that site, which
+  still emits `(Ꮡ(@unsafe.Pointer.OfFunc(f))).Value = v;`.
+- **Green arm:** at the tip it passes. Both arms are filtered to this one test.
+- No TC-13 gate before this battery ran the unfiltered `go test ./...`. It is now a fixed leg of every TC-13 gate.
+
+**Rerun prediction (committed before the rerun).** At the fix commit, an unfiltered `go test -count=1 ./...` reads
+0 FAIL across the same 11 packages, with TestLicensing, TestFuncWordShapes and TestUnsafePointerWordDoor passing.
+From `39161e7056` to the fix commit, only this test file, this record and the BOARD change. So the CNR, D-5,
+GenTests and GolibTests readings above carry over.
