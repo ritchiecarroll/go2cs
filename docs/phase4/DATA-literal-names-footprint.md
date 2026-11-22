@@ -106,3 +106,28 @@ a Go line in any flavour (distinct lines equal literals in all four), so no C# l
   test binary numbers the variant's whole file set. On linux/amd64, of 125 production var-initializer literals in std
   packages with an internal test variant, 0 are numbered differently in the test binary. That is measured on that
   flavour only.
+
+## Correction, 2026-11-22, before the measurement
+
+The `package_info.cs` rows above are wrong in mechanism, found while updating the converter's emission tests and
+before any regen ran. They count only the line half. A second record argument also moves: GoPositionMap's
+deferred-closure sites (the eighth argument), which record each literal handed straight to `defer` at the C# column of
+its `{` and of its first statement. The `{` sits on the lambda's header line, where `GoFunc("…")` now lands, so its
+column moves by the attribute's length. Every record with a non-empty eighth argument therefore changes, by those
+columns and nothing else. The corrected prediction counts the records in the committed tree, read per flavour (a
+package's per-key `package_info.cs` where it has one, else the flat one):
+
+| Flavour | Records with deferred-closure sites | in `package_info.cs` | Line-half files | Overlap | `package_info.cs` moved |
+|---|---|---|---|---|---|
+| windows/amd64 | 94 | 50 | 4 | 2 | 52 |
+| linux/amd64 | 93 | 51 | 5 | 3 | 53 |
+| darwin/amd64 | 93 | 50 | 5 | 3 | 52 |
+| linux/arm64 | 93 | 51 | 5 | 3 | 53 |
+
+Behavioral: 127 `package_info.cs` carry deferred-closure sites (127 records). With the line half's 35 (24 of them in
+both), 138 `package_info.cs` move.
+
+Added falsifiers: a deferred-closure column that moves by anything other than the length of `[GoFunc("<name>")] ` (or
+of `, GoFunc("<name>")` where a NoInlining list was already there); a moved site that is a first-statement site rather
+than a `{` site on a header line; and a thunk site (the seventh argument) or a bounded-go site that moves at all. The
+thunk and bounded-go sentinels sit ahead of any literal on their lines, so neither should move.
