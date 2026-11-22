@@ -253,12 +253,13 @@ func runModuleTests(moduleDir string, outRoot string, options Options, corpusRel
 		return err
 	}
 
-	// A module-cache release with no go.mod (github.com/pmezard/go-difflib v1.0.0, github.com/davecgh/go-spew v1.1.1)
-	// converts AND tests from the copy plain -recurse converts it from: both phases run in it, so phase B's go test
-	// runs read the go.mod phase A's load read. The go.mod overlay this used to install failed every such run: go list
-	// refuses an overlay beneath GOMODCACHE, and the overlay could only ever name a file there.
-	if synthesized := moduleCacheGoMod(moduleDir); synthesized != "" {
-		copyDir, leave, err := enterModuleCacheReleaseCopy(moduleDir, synthesized)
+	// A module-cache release converts AND tests from the copy plain -recurse converts it from: both phases run in it, so
+	// phase B's go test runs read the go.mod phase A's load read, and no go command runs in the cache (one with a go.mod
+	// and no go line had it rewritten there: gopkg.in/yaml.v3 v3.0.1). A release with no go.mod
+	// (github.com/pmezard/go-difflib v1.0.0, github.com/davecgh/go-spew v1.1.1) carries the cache's synthesized one; the
+	// go.mod overlay this used to install failed every such run, since go list refuses an overlay beneath GOMODCACHE.
+	if goModSource := moduleCacheReleaseGoMod(moduleDir); goModSource != "" {
+		copyDir, leave, err := enterModuleCacheReleaseCopy(moduleDir, goModSource)
 
 		if err != nil {
 			return err

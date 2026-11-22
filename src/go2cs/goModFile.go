@@ -40,31 +40,58 @@ func goModFile(dir string) (string, bool) {
 	return "", false
 }
 
-// moduleCacheGoMod returns the module cache's synthesized go.mod for dir when dir IS a module-cache
-// module root (<GOMODCACHE>/<escaped path>@<version>, never a package below one) that ships no
-// go.mod of its own, else "".
-func moduleCacheGoMod(dir string) string {
+// moduleCacheReleaseRoot reports whether dir IS a module-cache module root (<GOMODCACHE>/<escaped path>@<version>,
+// never a package below one and never under cache/), with its escaped path and version.
+func moduleCacheReleaseRoot(dir string) (escapedPath, version string, ok bool) {
 	cache := goModCacheDir()
 
 	if cache == "" {
-		return ""
+		return "", "", false
 	}
 
 	rel, err := filepath.Rel(cache, dir)
 
 	if err != nil || rel == "." || filepath.IsAbs(rel) || rel == ".." || strings.HasPrefix(rel, ".."+string(filepath.Separator)) {
-		return ""
+		return "", "", false
 	}
 
 	rel = filepath.ToSlash(rel)
 
 	if rel == "cache" || strings.HasPrefix(rel, "cache/") {
-		return ""
+		return "", "", false
 	}
 
 	at := strings.LastIndex(rel, "@")
 
 	if at <= 0 || strings.Contains(rel[at:], "/") {
+		return "", "", false
+	}
+
+	return rel[:at], rel[at+1:], true
+}
+
+// moduleCacheReleaseGoMod returns, for dir a module-cache module root, the go.mod a copy of it carries: its own when
+// it ships one, else the cache's synthesized one (moduleCacheGoMod). "" when dir is not a cache release root, or is a
+// go.mod-less one whose synthesized go.mod the cache does not hold.
+func moduleCacheReleaseGoMod(dir string) string {
+	if _, _, ok := moduleCacheReleaseRoot(dir); !ok {
+		return ""
+	}
+
+	if info, err := os.Stat(filepath.Join(dir, "go.mod")); err == nil && info.Mode().IsRegular() {
+		return filepath.Join(dir, "go.mod")
+	}
+
+	return moduleCacheGoMod(dir)
+}
+
+// moduleCacheGoMod returns the module cache's synthesized go.mod for dir when dir IS a module-cache
+// module root (<GOMODCACHE>/<escaped path>@<version>, never a package below one) that ships no
+// go.mod of its own, else "".
+func moduleCacheGoMod(dir string) string {
+	escapedPath, version, ok := moduleCacheReleaseRoot(dir)
+
+	if !ok {
 		return ""
 	}
 
@@ -72,7 +99,7 @@ func moduleCacheGoMod(dir string) string {
 		return ""
 	}
 
-	synthesized := filepath.Join(cache, "cache", "download", filepath.FromSlash(rel[:at]), "@v", rel[at+1:]+".mod")
+	synthesized := filepath.Join(goModCacheDir(), "cache", "download", filepath.FromSlash(escapedPath), "@v", version+".mod")
 
 	if info, err := os.Stat(synthesized); err != nil || info.IsDir() {
 		return ""
@@ -81,14 +108,15 @@ func moduleCacheGoMod(dir string) string {
 	return synthesized
 }
 
-// copyModuleCacheRelease copies the module-cache release at dir (a root moduleCacheGoMod answers for) into a new work
-// directory, under the same <escaped path>@<version> leaf, and writes the cache's synthesized go.mod into the COPY. The
-// cache is only read. It returns the copy and the work directory, which the caller removes.
-func copyModuleCacheRelease(dir, synthesized string) (string, string, error) {
-	goMod, err := os.ReadFile(synthesized)
+// copyModuleCacheRelease copies the module-cache release at dir (a root moduleCacheReleaseGoMod answers for) into a new
+// work directory, under the same <escaped path>@<version> leaf, and writes goModSource -- the release's own go.mod, or
+// the cache's synthesized one -- into the COPY. The cache is only read. It returns the copy and the work directory,
+// which the caller removes.
+func copyModuleCacheRelease(dir, goModSource string) (string, string, error) {
+	goMod, err := os.ReadFile(goModSource)
 
 	if err != nil {
-		return "", "", fmt.Errorf("reading the module cache's synthesized go.mod %s: %w", synthesized, err)
+		return "", "", fmt.Errorf("reading the go.mod %s for a copy of the module-cache release %s: %w", goModSource, dir, err)
 	}
 
 	sweepStaleModuleCopies(os.TempDir(), 24*time.Hour)
@@ -267,15 +295,24 @@ func sweepStaleModuleCopies(dir string, maxAge time.Duration) {
 // removes the copy. A caller that returns an error from inside defers remapCopiedError AFTER leave, so it runs first.
 // Plain -recurse enters it in ConvertModule; -tests -recurse in runModuleTests, around both of its phases, so its go
 // test runs see the same copy its conversion read.
-func enterModuleCacheReleaseCopy(dir, synthesized string) (copyDir string, leave func(), err error) {
-	copyDir, work, err := copyModuleCacheRelease(dir, synthesized)
+//
+// EVERY module-cache release enters it, not only a go.mod-less one (COORD's ruling on the 2026-11-22 STOP-LINE): with a
+// cache directory as its main module, the dependency preflight's `go mod download` rewrites a go.mod that has no `go`
+// directive and writes a go.sum, even under -mod=readonly, and a root process is not stopped by the cache's read-only
+// modes (gopkg.in/yaml.v3 v3.0.1 and github.com/google/uuid v1.6.0, measured). In the copy those writes are harmless.
+func enterModuleCacheReleaseCopy(dir, goModSource string) (copyDir string, leave func(), err error) {
+	copyDir, work, err := copyModuleCacheRelease(dir, goModSource)
 
 	if err != nil {
 		return "", nil, err
 	}
 
-	fmt.Printf("go.mod: the module at %s ships none; converting a copy carrying the module cache's %s, as go reads it (%s, removed at exit)\n",
-		dir, synthesized, copyDir)
+	if goModSource == filepath.Join(dir, "go.mod") {
+		fmt.Printf("module cache: converting a copy of %s, so that no go command runs in the cache (%s, removed at exit)\n", dir, copyDir)
+	} else {
+		fmt.Printf("go.mod: the module at %s ships none; converting a copy carrying the module cache's %s, as go reads it (%s, removed at exit)\n",
+			dir, goModSource, copyDir)
+	}
 
 	copiedModuleRoot, originalModuleRoot = copyDir, dir
 	savedGowork, hadGowork := os.LookupEnv("GOWORK")

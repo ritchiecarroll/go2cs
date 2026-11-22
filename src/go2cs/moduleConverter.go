@@ -100,9 +100,11 @@ func (m *ModuleConverter) ConvertModule(moduleDir string) (result error) {
 		m.options.mainModuleDir = moduleDir
 	}
 
-	// 0a. A module-cache release that ships no go.mod (github.com/mattn/go-pointer v0.0.1, the cgo against go.* INC 4
-	//     proof; a `+incompatible` release with no requires: the synthesized go.mod names the module and nothing else)
-	//     converts from a COPY carrying the go.mod the cache synthesized for it,
+	// 0a. EVERY module-cache release converts from a COPY, so no go command runs with a cache directory as its main
+	//     module: the dependency preflight's `go mod download` rewrote a go.mod with no go line in the cache, and wrote a
+	//     go.sum there (COORD's ruling on the 2026-11-22 STOP-LINE; enterModuleCacheReleaseCopy). A release that ships no
+	//     go.mod (github.com/mattn/go-pointer v0.0.1, the cgo against go.* INC 4 proof; a `+incompatible` release with
+	//     no requires: the synthesized go.mod names the module and nothing else) carries the go.mod the cache synthesized for it,
 	//     the one go itself reads (cache/download/<escaped path>/@v/<version>.mod; read, never written). Not a go.mod
 	//     overlay: go list refuses one beneath GOMODCACHE ("Files beneath GOMODCACHE must not be replaced"), where go
 	//     mod download accepts it (enterModuleCacheReleaseCopy). Under -tests -recurse the driver has entered the copy
@@ -117,8 +119,8 @@ func (m *ModuleConverter) ConvertModule(moduleDir string) (result error) {
 			m.options.mainModuleDir, goModCacheDir())
 	}
 
-	if synthesized := moduleCacheGoMod(m.options.mainModuleDir); synthesized != "" {
-		copyDir, leave, err := enterModuleCacheReleaseCopy(m.options.mainModuleDir, synthesized)
+	if goModSource := moduleCacheReleaseGoMod(m.options.mainModuleDir); goModSource != "" {
+		copyDir, leave, err := enterModuleCacheReleaseCopy(m.options.mainModuleDir, goModSource)
 
 		if err != nil {
 			return err
