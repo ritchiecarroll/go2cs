@@ -524,7 +524,7 @@ func TestInitScopeKeepsTheBlockForEachRefusal(t *testing.T) {
     slice<Func<nint>> fns = default;
     {
         nint x = h(); if (x > 0) {
-            fns = append(fns, () => x);
+            fns = append(fns, [GoFunc("refuseClosureSibling.func1")] () => x);
         }
     }
     {
@@ -555,7 +555,7 @@ func TestInitScopeKeepsTheBlockForEachRefusal(t *testing.T) {
     slice<Func<nint>> fns = default;
     {
         nint x = h(); if (x > 0) {
-            fns = append(fns, () => x);
+            fns = append(fns, [GoFunc("refuseClosure.func1")] () => x);
         }
     }
     return fns;

@@ -345,7 +345,8 @@ func (v *Visitor) noInliningPrefix(fnObj types.Object) string {
 // to an already-marked package function, against the same forwarder shape thinForwarderTarget
 // already recognizes for declarations — both in callerInliningAnalysis.go — and a closure whose own
 // body executes a `go` keeps its frame as that goroutine's creator (executesGoStatement). Every convFuncLit emission
-// site writes it through litAttributePrefix (funcLitGoNames.go), in one list with the literal's [GoFunc] name.
+// site writes it through litAttributePrefix (funcLitGoNames.go), in one attribute list with the literal's [GoFunc]
+// name, which C#'s lambda-attribute grammar places before everything else, an explicit return type included.
 func (v *Visitor) litNoInliningPrefix(funcLit *ast.FuncLit) string {
 	needsIt := literalCallsSkipCountedRuntimeCaller(v.info, funcLit) ||
 		(funcLit.Body != nil && callsSkipCountedWalker(v.info, funcLit.Body)) ||

@@ -140,10 +140,10 @@ func main() {
 	// they are emitted at the same site and a change to either would otherwise be invisible: the
 	// result type must still be stated INSIDE the cast, not replaced by it.
 	for _, want := range []string{
-		"[\"die\"] = bool () =>", // a `string` map key takes the plain literal
-		"[\"live\"] = @string () =>",
-		"[\"pred\"] = ((Funcꓸꓸꓸ<any, (any, error)>)((any, error) (params ",
-		"fn: nint () =>",
+		`["die"] = [GoFunc("main.func1")] bool () =>`, // a `string` map key takes the plain literal
+		`["live"] = [GoFunc("main.func2")] @string () =>`,
+		`["pred"] = ((Funcꓸꓸꓸ<any, (any, error)>)([GoFunc("main.func3")] (any, error) (params `,
+		`fn: [GoFunc("main.func4")] nint () =>`,
 	} {
 		if !strings.Contains(mainCs, want) {
 			t.Errorf("func literal in an any slot must state its Go result type (%q): %s", want, mainCs)
@@ -153,7 +153,7 @@ func main() {
 	// CONTROL: the concrete map[string]func() bool slot keeps the bare, target-typed lambda.
 	// A return-type prefix here would be pure churn — the delegate type is already stated by
 	// the map's own value type.
-	if !strings.Contains(mainCs, "new map<@string, Func<bool>>{[\"t\"] = () => {") {
+	if !strings.Contains(mainCs, `new map<@string, Func<bool>>{["t"] = [GoFunc("main.func5")] () => {`) {
 		t.Errorf("a concrete func-typed slot must keep its target-typed lambda unchanged: %s", mainCs)
 	}
 }

@@ -79,13 +79,8 @@ var packageTestInitHookMethod = "init" + TempVarMarker + TempVarMarker + "tests"
 // bodies, which Go's own analysis also treats as references), then flags the initializer when a
 // dependency is cross-file, a same-file forward reference, or itself already flagged.
 func collectMovedInitVars(fset *token.FileSet, pkg *types.Package, info *types.Info, syntax []*ast.File) {
-	// The vars built on their first read stay out of the ordered ctor (lazyPackageVarOperations.go); decided here so every
-	// driver that relocates initializers decides laziness alike.
+	// Decided here so every driver agrees: lazy vars (lazyPackageVarOperations.go), literal names (funcLitGoNames.go).
 	collectLazyPackageVars(fset, pkg, info, syntax)
-
-	// Every function literal's Go name, for its [GoFunc] attribute (funcLitGoNames.go): named here because the var
-	// initializers' literals are numbered in InitOrder, and this is the pass every driver already runs over the whole
-	// syntax set before any file emits.
 	collectFuncLitGoNames(info, syntax)
 
 	scope := pkg.Scope()

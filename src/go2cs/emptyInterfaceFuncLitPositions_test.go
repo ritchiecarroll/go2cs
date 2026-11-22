@@ -110,15 +110,15 @@ func main() {
 	mainCs := readGenerated(t, filepath.Join(options.go2csPath, "src", "example.com", "eifl", "main.cs"))
 
 	for _, want := range []string{
-		"return (any, error) (nint x) => {", // return through a NAMED empty interface (mapstructure)
-		"return int64 () => 1;",             // return through interface{}
-		"any declared = int64 () => 2;",     // declared variable
-		"(Hook)(int64 () => 3)",             // conversion
-		"slice<any>([int64 () => 4])",       // unkeyed composite element
-		"new holder(int64 () => 5)",         // positional struct field
-		"ꟷ(int64 () => 6)",                  // channel send
-		"any first = int64 () => 7;",        // multi-name var
-		"any second = int64 () => 8;",
+		`return [GoFunc("retNamed.func1")] (any, error) (nint x) => {`, // return through a NAMED empty interface (mapstructure)
+		`return [GoFunc("retConst.func1")] int64 () => 1;`,             // return through interface{}
+		`any declared = [GoFunc("main.func1")] int64 () => 2;`,         // declared variable
+		`(Hook)([GoFunc("main.func2")] int64 () => 3)`,                 // conversion
+		`slice<any>([[GoFunc("main.func3")] int64 () => 4])`,           // unkeyed composite element
+		`new holder([GoFunc("main.func4")] int64 () => 5)`,             // positional struct field
+		`ꟷ([GoFunc("main.func5")] int64 () => 6)`,                      // channel send
+		`any first = [GoFunc("main.func6")] int64 () => 7;`,            // multi-name var
+		`any second = [GoFunc("main.func7")] int64 () => 8;`,
 	} {
 		if !strings.Contains(mainCs, want) {
 			t.Errorf("func literal at an empty-interface position must state its Go result type (%q): %s", want, mainCs)
@@ -126,7 +126,7 @@ func main() {
 	}
 
 	// CONTROL: the concrete func-typed result keeps the bare lambda its delegate target types.
-	if !strings.Contains(mainCs, "return () => 9;") {
+	if !strings.Contains(mainCs, `return [GoFunc("retTyped.func1")] () => 9;`) {
 		t.Errorf("a concrete func-typed return must keep its target-typed lambda unchanged: %s", mainCs)
 	}
 }

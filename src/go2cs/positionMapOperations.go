@@ -416,8 +416,9 @@ func (v *Visitor) laterLineCallName(call *ast.CallExpr) (name string, counted bo
 		return obj.Name(), true, true
 	}
 
-	// A func-typed variable, field or parameter, an immediately invoked literal, or any other expression
-	// yielding a func value: a delegate, invoked through Invoke.
+	// A func-typed variable, field or parameter, an immediately invoked literal (`func() { … }()`), or any
+	// other expression yielding a func value: a delegate, invoked through Invoke, whose call the per-call
+	// table counts like any other.
 	return "Invoke", true, true
 }
 
