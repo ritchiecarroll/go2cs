@@ -31,6 +31,7 @@
     <None Include="$(MSBuildThisFileDirectory)cgoLoadTag_test.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoPhase3_test.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoResiduals_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)cgoTargetCheck_test.go" />
     <None Include="$(MSBuildThisFileDirectory)corpusRelease.go" />
     <None Include="$(MSBuildThisFileDirectory)genericAllocCallerFrames_test.go" />
     <None Include="$(MSBuildThisFileDirectory)anonInterfaceParamPublic_test.go" />

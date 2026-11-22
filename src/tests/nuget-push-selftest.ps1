@@ -208,7 +208,7 @@ try {
     $state.Puts.Clear()
     $thrown = $null
     try { [void](Invoke-Case @($plain, $cgoPack)) } catch { $thrown = "$_" }
-    Check ($null -ne $thrown -and $thrown -match 'nugetgo\.cgo' -and $thrown -match 'A6') "cgo: a -Cgo pack was not refused by name, with A6: $thrown"
+    Check ($null -ne $thrown -and $thrown -match 'nugetgo\.cgo' -and $thrown -match 'A6') "cgo: a -Cgo pack without the a6 note was not refused by name, with A6: $thrown"
     Check ($state.Puts.Count -eq 0) "cgo: $($state.Puts.Count) package(s) were PUT before the refusal: $(@($state.Puts) -join ', ')"
     $folderFeed = Join-Path $work 'cgo-folder-feed'
     New-Item -ItemType Directory -Path $folderFeed | Out-Null
@@ -238,6 +238,15 @@ try {
     $thrown = $null
     try { [void](Invoke-Case @($implLayout)) } catch { $thrown = "$_" }
     Check ($null -eq $thrown -and $state.Puts.Count -eq 1) "cgo: the control (an implementation in lib/ beside runtimes/) did not push: $thrown; PUTs $($state.Puts.Count)"
+    # COORD's push-lift ruling (a): a -Cgo pack whose go2cs/source-metadata.txt records A6 ("# a6: ", written only over a
+    # go.lib that declares GoCgoRunTimeTargetCheck) pushes; the same pack without that line is refused above.
+    $a6Pack = New-FakePackage 'nugetgo.cgoa6' $version $cgoDir
+    Add-FakeEntry $a6Pack 'build/nugetgo.cgoa6.targets' '<Project><Target Name="G"><Error Code="NUGETGOCGO001" Text="x" /></Target></Project>'
+    Add-FakeEntry $a6Pack 'go2cs/source-metadata.txt' "#go2cs-source-metadata v1`n# written by go2cs`n# Cgo: ...`n# a6: the go.lib this package was packed against ...`nmodule example.com/cgo`n"
+    $state.Puts.Clear()
+    $thrown = $null
+    try { [void](Invoke-Case @($a6Pack)) } catch { $thrown = "$_" }
+    Check ($null -eq $thrown -and $state.Puts.Count -eq 1) "cgo: a -Cgo pack recording A6 was not pushed: $thrown; PUTs $($state.Puts.Count)"
     # The control is every other case here: each pushes packages with no NUGETGOCGO001 through the same function.
     $state.Puts.Clear()
 
