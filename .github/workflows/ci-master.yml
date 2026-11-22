@@ -24,7 +24,7 @@ name: CI on master
 
 on:
   push:
-    branches: [master]
+    branches: [master, claude/c1-scratch-ci-red]
   pull_request:
     branches: [master]
   # 03:17 UTC: after the day's trains, before os-matrix.yml's own 04:41 darwin census, and off the hour.
