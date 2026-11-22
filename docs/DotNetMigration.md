@@ -483,6 +483,12 @@ around:
   - **The publish profiles** under `src/go2cs/profiles/` — one per shipped RID, each carrying a
     `<TargetFramework>` and a TFM-bearing `<PublishDir>`.
   - **The two converter csproj templates'** conditioned fallbacks.
+  - **`src/go2cs/glyphSystemNames.go`'s name list**, read from the reference assemblies of the TFM it names
+    (Microsoft.NETCore.App.Ref 10.0.0): every public type of System.ComponentModel, System.Diagnostics and
+    System.Runtime.CompilerServices, each attribute under both its names. A package declaring one keeps the
+    `global::` spelling of its package_info.cs System attributes (packageInfoSystemUsings.go). A new TFM can add
+    types to those namespaces, and a name missing from the list is a CS0104 at build, not a silent change: re-read
+    the list from the new reference assemblies and rerun the converter tests.
 
 ### 5.2 The embedded-asset false-green route — closed
 
