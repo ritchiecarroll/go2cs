@@ -2050,12 +2050,12 @@ jobs:
           exit $runExit
 
       # -------------------------------------------------------------------------------------
-      # M:N spike (this branch never lands). After the smoke has built MnMixedStorm with generated twins, run the
+      # M:N (experimental, opt-in). After the smoke has built MnMixedStorm with generated twins, run the
       # program directly: Go's build for the reference output, then the C# build on the thread path (the sampler's
       # control) and on the scheduler at three sizes. A sampler outside the process counts its OS threads, and the
       # scheduler prints its own reading.
       # -------------------------------------------------------------------------------------
-      - name: M:N spike — direct runs of the twinned storm
+      - name: M:N — direct runs of the twinned storm
         if: always() && needs.plan.outputs.stage == 'behavioral-smoke' && needs.plan.outputs.filter == 'MnMixedStorm' && needs.plan.outputs.mn == '1'
         timeout-minutes: 30
         shell: bash

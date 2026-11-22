@@ -190,7 +190,7 @@ internal static class GeneratorDiagnostics
         defaultSeverity: DiagnosticSeverity.Error,
         isEnabledByDefault: true);
 
-    // GO2CS0014, TwinGenerator (M:N PROTOTYPE, N3's must-fix 3, DESIGN-mn-func-values.md 10.4): under the propagating
+    // GO2CS0014, TwinGenerator (M:N, experimental: N3's must-fix 3, DESIGN-mn-func-values.md 10.4): under the propagating
     // caller rule a function that calls through a func value is twinned, so its call can await a pair's twin. A function
     // the generator REFUSES a twin (a by-ref or ref-like parameter, unsafe, an iterator, ...) keeps calling the plain
     // delegate, so a func value that can park blocks its carrier there. Reported once per function, not per call.
@@ -202,7 +202,7 @@ internal static class GeneratorDiagnostics
         defaultSeverity: DiagnosticSeverity.Warning,
         isEnabledByDefault: true);
 
-    // GO2CS0015, TwinGenerator (M:N PROTOTYPE, the LOUD fallback: COORD's A3 ruling 2026-11-12; severity by the owner,
+    // GO2CS0015, TwinGenerator (M:N, experimental: the LOUD fallback: COORD's A3 ruling 2026-11-12; severity by the owner,
     // FREEZE-SHEET.md 2026-11-13): a go statement the generator does not launch as a twin, where its goroutine could
     // park, keeps its plain launch on a thread. A WARNING by default; WarningsAsErrors (or an .editorconfig severity) on
     // this code is the opt-in that makes it an error. Reported once per go statement, naming the reason.

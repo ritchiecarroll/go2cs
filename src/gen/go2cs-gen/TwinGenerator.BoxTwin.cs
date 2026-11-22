@@ -13,7 +13,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace go2cs;
 
-// M:N PROTOTYPE, N2 (docs/phase4/DESIGN-mn-box-twin.md, revision 1, section 9; COORD's GO after the re-review): the BOX
+// M:N (experimental), N2 (docs/phase4/DESIGN-mn-box-twin.md, revision 1, section 9; COORD's GO after the re-review): the BOX
 // TWIN. A Go method with a pointer receiver converts to `M(this ref T t, …)`, which no async method can take. Its twin
 // takes the receiver's box instead, `Mꞏtwin(this ж<T> Ꮡt, …)`, under the prologue `ref var t = ref Ꮡt.DerefOrNull();`
 // -- the shape a Go pointer parameter already has, which Rule R derives again after each await (C1). A call names the

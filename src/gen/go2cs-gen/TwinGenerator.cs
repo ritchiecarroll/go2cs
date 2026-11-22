@@ -17,7 +17,7 @@ using Microsoft.CodeAnalysis.Diagnostics;
 namespace go2cs;
 
 /// <summary>
-/// M:N SPIKE (R5b, B2). Spike code: it stays on the spike branch and never lands.
+/// M:N scheduler, experimental and opt-in (GoTwins=true to build, GO2CS_MN=1 to run); inert otherwise.
 /// Writes a hidden async twin beside each converted function that can park: the function's own text, with each call
 /// that has a twin awaited. It runs only for a project built with <c>GoTwins=true</c>.
 /// </summary>
@@ -470,11 +470,11 @@ public sealed partial class TwinGenerator : ISourceGenerator
             m_ordered.Add(candidate);
         }
 
-        // M:N PROTOTYPE (A1): the never-twinned rule for native wrappers (the cgo design's M4). A method that is extern, that
+        // M:N (A1): the never-twinned rule for native wrappers (the cgo design's M4). A method that is extern, that
         // carries DllImport or LibraryImport, or whose body pins with `fixed`, is synchronous: a `fixed` scope cannot span a
         // park. A twin that calls one calls the plain method, and blocks its carrier for the length of the call.
         //
-        // M:N PROTOTYPE (A2): the closed list. A method is refused as "native" when any one of these holds, and for no
+        // M:N (A2): the closed list. A method is refused as "native" when any one of these holds, and for no
         // other reason:
         //   1. it is extern;
         //   2. it carries DllImport or LibraryImport;

@@ -1,4 +1,4 @@
-// The M:N spike's mixed storm (docs/phase4/DATA-mn-spike-2.md): n goroutines that are all alive at
+// The M:N scheduler's mixed storm (docs/phase4/DATA-mn-spike-2.md): n goroutines that are all alive at
 // once, and each one parks four ways before it finishes.
 //
 //   - park 1, a select over two channels: a token from main, or the start gate closing
