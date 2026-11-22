@@ -64,7 +64,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "ABMsggAGEKKmooKClKiCqJAACRD8kJSigoKCpqaQAA0U+KCAAAgIoICkwoIABhCC3JSCgoKCgpSCgpSClIKCgoKCgpSCgoKClIKClJSClIKClIKCgpiCgpSCggAPJpSipqKCgoKClA==")]
+[assembly: GoPositionMap("main.go", "main.cs", "ABMsggAGEKKmooKClKiCqJAACRD8kJSigoKCpqaQAA0U+KCAAAgIoICkwoIABhCC3JSCgoKCgpSCgpSClIKCgoKCgpSCgoKClIKClJSClIKClIKCgpiCgpSCgpiCggAQLJSiqKCkmKKCpqKCgoKClA==")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -116,16 +116,16 @@ public static partial class main_package
 
     // <ShapeWitnesses>
     internal readonly struct boxedжValueΔshape : ValueΔshape<ж<boxed>> { public static @string kind(ж<boxed> self) => self.kind(); }
-    internal readonly struct memSrcжSourceΔshape : SourceΔshape<ж<memSrc>> { public static @string Join(ж<memSrc> self, @string sep, params global::System.Span<@string> parts) => self.Join(sep, parts); public static io_package.Reader Open(ж<memSrc> self) => self.Open(); }
+    internal readonly struct memSrcжSourceΔshape : SourceΔshape<ж<memSrc>> { public static @string Join(ж<memSrc> self, @string sep, params global::go.variadic<@string> parts) => self.Join(sep, parts); public static io_package.Reader Open(ж<memSrc> self) => self.Open(); public static void Stamp(ж<memSrc> self, params global::go.variadic<@string> parts) => self.Stamp(parts); }
     public interface NamedΔshape<T> { static abstract @string Name(T self); }
     public interface ScriptΔshape<T> { static abstract @string FileName(T self); static abstract @string Text(T self); }
-    public interface SourceΔshape<T> { static abstract @string Join(T self, @string sep, params global::System.Span<@string> parts); static abstract io_package.Reader Open(T self); }
+    public interface SourceΔshape<T> { static abstract @string Join(T self, @string sep, params global::go.variadic<@string> parts); static abstract io_package.Reader Open(T self); static abstract void Stamp(T self, params global::go.variadic<@string> parts); }
     public interface ValueΔshape<T> { static abstract @string kind(T self); }
     public readonly struct ExportжNamedΔshape : NamedΔshape<ж<Export>> { public static @string Name(ж<Export> self) => self.Name(); }
     public readonly struct NamedΔshapeOf<T> : NamedΔshape<T> where T : Named { public static @string Name(T self) => self.Name(); }
     public readonly struct ScriptΔshapeOf<T> : ScriptΔshape<T> where T : Script { public static @string FileName(T self) => self.FileName(); public static @string Text(T self) => self.Text(); }
     public readonly struct SourceFileжScriptΔshape : ScriptΔshape<ж<SourceFile>> { public static @string FileName(ж<SourceFile> self) => self.FileName(); public static @string Text(ж<SourceFile> self) => self.Text(); }
-    public readonly struct SourceΔshapeOf<T> : SourceΔshape<T> where T : Source { public static @string Join(T self, @string sep, params global::System.Span<@string> parts) => self.Join(sep, parts); public static io_package.Reader Open(T self) => self.Open(); }
+    public readonly struct SourceΔshapeOf<T> : SourceΔshape<T> where T : Source { public static @string Join(T self, @string sep, params global::go.variadic<@string> parts) => self.Join(sep, parts); public static io_package.Reader Open(T self) => self.Open(); public static void Stamp(T self, params global::go.variadic<@string> parts) => self.Stamp(parts); }
     public readonly struct ValueΔshapeOf<T> : ValueΔshape<T> where T : Value { public static @string kind(T self) => self.kind(); }
     // </ShapeWitnesses>
 }

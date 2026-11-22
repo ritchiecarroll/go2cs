@@ -166,20 +166,29 @@ func main() {
 	srcs, n := Readers([]*memSrc{{"abc"}, {"de"}})
 	fmt.Println("foreign type in the signature:", len(srcs), n, srcs[1].data)
 	fmt.Println("package Span:", Span[int]{1, 2}.hi)
+
+	// Go's f(s...) hands the callee the caller's slice itself, through a witness as anywhere else: the callee's
+	// write reaches parts.
+	parts := []string{"x", "y"}
+	stamped := StampThrough(srcs[0], parts)
+	fmt.Println("spread through the witness:", parts[0], parts[1], stamped[0] == srcs[0])
 }
 
 // ---- a constraint whose method names ANOTHER package's type, imported under an ALIAS ----
 
 // The witness declarations live in package_info.cs, where `stdio` is not in scope: they must name io.Reader by its
 // package class, not by this file's alias.
-// Join is variadic: its witness member takes `params global::System.Span<...>`, and package_info.cs has no `using System;`.
+// Join and Stamp are variadic: a witness member takes `params global::go.variadic<...>`, so a spread passes through it
+// whole, and package_info.cs has no `using System;`.
 type Source interface {
 	Open() stdio.Reader
 	Join(sep string, parts ...string) string
+	Stamp(parts ...string)
 }
 
-// A package type named Span: the witness declarations sit inside this package's class, where it hides System.Span, so
-// the variadic witness member must name System.Span in full.
+// A package type named Span: the witness declarations sit inside this package's class, where it hides System.Span.
+// The variadic witness member names its pack type in full (global::go.variadic), as a package type could be named
+// variadic too.
 type Span[T any] struct{ lo, hi T }
 
 type memSrc struct{ data string }
@@ -188,6 +197,18 @@ func (m *memSrc) Open() stdio.Reader { return strings.NewReader(m.data) }
 
 func (m *memSrc) Join(sep string, parts ...string) string {
 	return m.data + ":" + strings.Join(parts, sep)
+}
+
+// Stamp hands its pack on as a slice, so the callee's pack becomes a slice: for a spread, the caller's own.
+func (m *memSrc) Stamp(parts ...string) { stampFirst(parts, m.data) }
+
+func stampFirst(dst []string, v string) { dst[0] = v }
+
+// StampThrough spreads the caller's slice into a method reached through the shape witness: []T in its result selects
+// the witness route (a proxy cannot carry T into a slice), so the call is a static call through the witness.
+func StampThrough[T Source](s T, parts []string) []T {
+	s.Stamp(parts...)
+	return []T{s}
 }
 
 func Readers[T Source](srcs []T) ([]T, int) {
