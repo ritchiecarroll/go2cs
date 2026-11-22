@@ -1541,9 +1541,32 @@ jobs:
               exit 1
           }
 
+          # Off windows, a behavioral project marked exclusive to other platforms ([GoPlatformExclusive(...)] in its
+          # package_info.cs, without this leg's GOOS) is not built: the windows-native projects compile Win32 syscall
+          # surface that linux's syscall does not have (82 errors in 10 projects on linux, master 1f8d62ddb3; release
+          # review TC-6). The leg builds a copy of go2cs.slnx without their entries (sub-libraries included) and names
+          # each one it left out. The windows leg builds the whole solution, as before.
+          $solution = 'src/go2cs.slnx'
+          if ($goos -ne 'windows') {
+              $excluded = @(Get-ChildItem -Directory 'src/tests/Behavioral' | Where-Object {
+                  $info = Join-Path $_.FullName 'package_info.cs'
+                  if (-not (Test-Path -LiteralPath $info)) { return $false }
+                  $m = Select-String -LiteralPath $info -Pattern '^\s*\[GoPlatformExclusive\((?<list>[^)]*)\)\]' | Select-Object -First 1
+                  if (-not $m) { return $false }
+                  $platforms = @([regex]::Matches($m.Matches[0].Groups['list'].Value, '"(?<p>[^"]+)"') | ForEach-Object { $_.Groups['p'].Value })
+                  $platforms -notcontains $goos
+              } | ForEach-Object Name | Sort-Object)
+              Write-Host "==> not built on ${goos}: $($excluded.Count) platform-exclusive behavioral project(s): $($excluded -join ', ')"
+              $lines = Get-Content -LiteralPath $solution
+              $kept = @($lines | Where-Object { $line = $_; -not ($excluded | Where-Object { $line -match ('Path="tests/Behavioral/' + [regex]::Escape($_) + '/') }) })
+              $solution = 'src/go2cs.ci-filtered.slnx'
+              Set-Content -LiteralPath $solution -Value $kept -Encoding utf8
+              Write-Host "==> building ${solution}: $($lines.Count - $kept.Count) project entr(ies) removed"
+          }
+
           $archArgs = @(if ($env:GoTargetArch) { "-p:GoTargetArch=$($env:GoTargetArch)" })
           $sw = [System.Diagnostics.Stopwatch]::StartNew()
-          & dotnet build src/go2cs.slnx -c $config "-p:GoTargetOS=$goos" @archArgs -nologo -clp:ErrorsOnly *>&1 | Tee-Object -FilePath $log
+          & dotnet build $solution -c $config "-p:GoTargetOS=$goos" @archArgs -nologo -clp:ErrorsOnly *>&1 | Tee-Object -FilePath $log
           $runExit = $LASTEXITCODE
           $sw.Stop()
 
