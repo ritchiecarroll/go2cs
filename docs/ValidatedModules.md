@@ -40,6 +40,7 @@ RID it ships.
 | `github.com/pmezard/go-difflib` | v1.0.0 | 1 | `linux/amd64` | [summary](validation/modules/github.com/pmezard/go-difflib@v1.0.0/MODULE.md) |
 | `github.com/stretchr/objx` | v0.5.2 | 1 | `linux/amd64` | [summary](validation/modules/github.com/stretchr/objx@v0.5.2/MODULE.md) |
 | `github.com/stretchr/objx` | v0.5.3 | 1 | `linux/amd64` | [summary](validation/modules/github.com/stretchr/objx@v0.5.3/MODULE.md) |
+| `go.yaml.in/yaml/v3` | v3.0.5 | 1 | `linux/amd64` | [summary](validation/modules/go.yaml.in/yaml/v3@v3.0.5/MODULE.md) |
 
 **`golang.org/x/sync`:** `semaphore`'s `TestWeightedAcquire` gives each acquire attempt a 10 ms deadline. With
 the tiered JIT off, the first attempt compiles the acquire path at full optimization before it can wait, which
@@ -87,3 +88,13 @@ standard library as converted in this repository at the reading's commit.
 github.com/stretchr/objx@v0.5.3, converter built at claude/c2-objx-bank ea636be70d (every module-cache release from
 a copy), -go2cspath at that tree, linux/amd64, go1.26.11; the cache entry byte-equal to its module zip after the
 run; both pages copied unedited (sha256-equal). -->
+
+**`go.yaml.in/yaml/v3` v3.0.5:** the version testify v1.12.1 requires. Its tests are plain `testing` tests (v3.0.1,
+as `gopkg.in/yaml.v3`, ran its suite through `gopkg.in/check.v1`), so each test and subtest is its own row. Two of
+its test names hold a Liquid delimiter, so its proof page carries the raw guard the converter adds to such a page.
+This reading is Go 1.26.11, built on the standard library as converted in this repository at the reading's commit.
+<!-- Provenance (2026-11-22, C2): go2cs -tests -recurse -test-action all over the module cache's
+go.yaml.in/yaml/v3@v3.0.5, converter built at claude/c2-proofpage-plumbing 306a4e9044 (the raw guard), -go2cspath at
+that tree, linux/amd64, go1.26.11; both pages copied unedited (sha256-equal). Against the earlier run at ea636be70d
+the page differs only in the two guard lines and the input digest. The identifier census reads it in converted mode
+(ee4ffe12d8): CLEAN, the dotted-quad YAML input in five test names reported; entry mode still refuses it. -->

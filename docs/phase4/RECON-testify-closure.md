@@ -107,3 +107,14 @@ objx v0.5.3 is banked on claude/c2-closure12-bank. yaml v3.0.5 is held: its gene
 a Liquid double-brace token in two test names and no raw guard (repoguard's Jekyll/Liquid check names lines 48 and 713), and the
 identifier census refuses a dotted-quad YAML input that five test names carry, since its converted mode admits only
 `docs/validation/current/` pages.
+
+**2026-11-22, the yaml v3.0.5 hold lifted (claude/c2-proofpage-plumbing).** The proof-page writer adds the raw guard to a
+page that holds a Liquid delimiter (306a4e9044, red first at 94a07a2191; 280 committed pages unchanged), and the
+identifier census admits a generated module proof page in converted mode (ee4ffe12d8, red first at 8a46da4854; a
+hand-written record in the same tree is still refused at the door). v3.0.5 regenerated at 306a4e9044 reads 704/0, the
+same verdicts, and is banked on that branch.
+
+**TestEventuallyTrue (E), ruled for disclosure.** Alone on an idle box, 5 runs per side: Go 5/5 PASS at 0.04 s, C# 5/5
+PASS at 0.10-0.11 s. It diverged in 1 of 2 full v1.11.1 runs and matched in the v1.12.1 run. The converted run takes the
+whole 100 ms `Eventually` window where Go's takes 40%, so it is timing-flaky under load; the disclosure lands with
+testify's bank.
