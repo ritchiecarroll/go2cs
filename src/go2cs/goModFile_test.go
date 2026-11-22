@@ -9,6 +9,10 @@
 package main
 
 import (
+	"archive/zip"
+	"bytes"
+	"crypto/sha256"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
@@ -534,5 +538,165 @@ func TestACopyRunMapsEverySourceOrRefusesByName(t *testing.T) {
 
 	if remapCopiedError(nil) != nil || remapCopiedError(sentinel) != sentinel {
 		t.Error("nil stays nil, and an error naming no copy is returned as it is")
+	}
+}
+
+// go2cs never writes into the module cache (COORD's ruling on the 2026-11-22 STOP-LINE). A release converted from the
+// cache used to be its own main module, and the dependency preflight's `go mod download` rewrites a go.mod with no
+// `go` directive (it adds the toolchain's) and writes a go.sum, even under -mod=readonly; the cache's read-only
+// modes do not stop a root process. Measured on gopkg.in/yaml.v3 v3.0.1 and github.com/google/uuid v1.6.0. Every cache
+// release now converts and tests from a copy, so the cache is byte-unchanged, go.sum absence included: a release whose
+// go.mod has no go line under plain -recurse and under -tests -recurse, and (the control) one that has a go line.
+func TestARunLeavesTheModuleCacheByteUnchanged(t *testing.T) {
+	if testing.Short() {
+		t.Skip("integration test: builds the converter and converts from a fabricated module cache")
+	}
+
+	treeSrc, err := filepath.Abs("..")
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Every file under the cache by its path, as a hash of its bytes (directories by their presence).
+	snapshot := func(t *testing.T, cache string) map[string]string {
+		t.Helper()
+		files := map[string]string{}
+
+		err := filepath.WalkDir(cache, func(path string, entry os.DirEntry, err error) error {
+			if err != nil {
+				return err
+			}
+
+			rel, _ := filepath.Rel(cache, path)
+
+			// The go command's own lock file, which any go command that reads the cache takes: housekeeping, not content.
+			if filepath.ToSlash(rel) == "cache/lock" {
+				return nil
+			}
+
+			if entry.IsDir() {
+				files[filepath.ToSlash(rel)+"/"] = "dir"
+				return nil
+			}
+
+			data, err := os.ReadFile(path)
+
+			if err != nil {
+				return err
+			}
+
+			files[filepath.ToSlash(rel)] = fmt.Sprintf("%x", sha256.Sum256(data))
+
+			return nil
+		})
+
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		return files
+	}
+
+	run := func(t *testing.T, cache, dir string, args ...string) string {
+		t.Helper()
+		tmp := t.TempDir()
+		output := filepath.Join(t.TempDir(), "out")
+		cmd := exec.Command(driverBinary(t), append(append(args, "-go2cspath", treeSrc), dir, output)...)
+		cmd.Env = append(os.Environ(), "GOMODCACHE="+cache, "GOFLAGS=", "GOPROXY=off", "GOWORK=off", "GOTOOLCHAIN=local", "GONOSUMDB=*",
+			"TMPDIR="+tmp, "TMP="+tmp, "TEMP="+tmp)
+		combined, err := cmd.CombinedOutput()
+
+		if err != nil {
+			t.Fatalf("go2cs %s failed: %v\n%s", strings.Join(args, " "), err, lastLines(string(combined), 12))
+		}
+
+		return string(combined)
+	}
+
+	// `go mod download` rewrites the go.mod only when it has a dependency to fetch, so the release requires one: a
+	// module served by a file proxy and primed into the cache BEFORE the snapshot, as go itself populates a cache. The
+	// run then reads it with GOPROXY=off, and any byte it adds to the cache is go2cs's doing.
+	proxy := t.TempDir()
+	depRoot := "example.com/dep@v1.0.0/"
+	writeModuleFile(t, filepath.Join(proxy, "example.com", "dep", "@v", "list"), "v1.0.0\n")
+	writeModuleFile(t, filepath.Join(proxy, "example.com", "dep", "@v", "v1.0.0.info"), `{"Version":"v1.0.0","Time":"2026-01-01T00:00:00Z"}`)
+	writeModuleFile(t, filepath.Join(proxy, "example.com", "dep", "@v", "v1.0.0.mod"), "module example.com/dep\n\ngo 1.21\n")
+
+	var zipped bytes.Buffer
+	archive := zip.NewWriter(&zipped)
+
+	for name, body := range map[string]string{"go.mod": "module example.com/dep\n\ngo 1.21\n", "dep.go": "package dep\n\n// Two is two.\nfunc Two() int { return 2 }\n"} {
+		w, err := archive.Create(depRoot + name)
+
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		_, _ = w.Write([]byte(body))
+	}
+
+	if err := archive.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	writeModuleFile(t, filepath.Join(proxy, "example.com", "dep", "@v", "v1.0.0.zip"), zipped.String())
+
+	primed := func(t *testing.T, cache string) string {
+		t.Helper()
+		cmd := exec.Command("go", "mod", "download", "-json", "example.com/dep@v1.0.0")
+		cmd.Dir = t.TempDir()
+		cmd.Env = append(os.Environ(), "GOMODCACHE="+cache, "GOFLAGS=", "GOPROXY=file://"+filepath.ToSlash(proxy), "GOSUMDB=off", "GOWORK=off", "GOTOOLCHAIN=local")
+		out, err := cmd.Output()
+
+		if err != nil {
+			t.Fatalf("priming the cache with example.com/dep: %v\n%s", err, out)
+		}
+
+		var info struct{ Sum, GoModSum string }
+
+		if err := json.Unmarshal(out, &info); err != nil || info.Sum == "" {
+			t.Fatalf("reading the primed sums: %v\n%s", err, out)
+		}
+
+		return "example.com/dep v1.0.0 " + info.Sum + "\nexample.com/dep v1.0.0/go.mod " + info.GoModSum + "\n"
+	}
+
+	for _, arm := range []struct {
+		name  string
+		goMod string
+	}{
+		{"a release whose go.mod has no go line", "module example.com/plain\n\nrequire example.com/dep v1.0.0\n"},
+		{"the control: a release whose go.mod has a go line", "module example.com/plain\n\ngo 1.21\n\nrequire example.com/dep v1.0.0\n"},
+	} {
+		for _, args := range [][]string{{"-recurse"}, {"-tests", "-test-action", "convert", "-recurse"}} {
+			t.Run(arm.name+" under "+strings.Join(args, " "), func(t *testing.T) {
+				cache := t.TempDir()
+				sums := primed(t, cache)
+				dir := filepath.Join(cache, "example.com", "plain@v1.0.0")
+				writeModuleFile(t, filepath.Join(dir, "go.mod"), arm.goMod)
+				writeModuleFile(t, filepath.Join(dir, "go.sum"), sums)
+				writeModuleFile(t, filepath.Join(dir, "plain.go"), "package plain\n\n// One is one.\nfunc One() int { return 1 }\n")
+				writeModuleFile(t, filepath.Join(dir, "plain_test.go"),
+					"package plain\n\nimport \"testing\"\n\nfunc TestOne(t *testing.T) {\n\tif One() != 1 {\n\t\tt.Fatal(\"One\")\n\t}\n}\n")
+				writeModuleFile(t, filepath.Join(cache, "cache", "download", "example.com", "plain", "@v", "v1.0.0.mod"), arm.goMod)
+
+				before := snapshot(t, cache)
+				run(t, cache, dir, args...)
+				after := snapshot(t, cache)
+
+				for path, hash := range after {
+					if before[path] != hash {
+						t.Errorf("the run wrote %s into the module cache", path)
+					}
+				}
+
+				for path := range before {
+					if _, kept := after[path]; !kept {
+						t.Errorf("the run removed %s from the module cache", path)
+					}
+				}
+			})
+		}
 	}
 }
