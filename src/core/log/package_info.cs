@@ -10,10 +10,14 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+using Δio = go.io_package;
 // </ImportedTypeAliases>
 
 using go;
 using static go.log_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -59,10 +63,14 @@ using static go.log_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("log/log.go", "log.cs", "AESOAdKCgoKCyOKCgoKixJaAlpSSgoKCgoKCpoIAAhDSgpSCgpSCgoKCgoKClIKCgoKCgoKCgpSmgoKCgoKCppSCgoKUgrikgoKCpgAIDoKUAAQS4oK84oKmuIKUgoKCgoKCgoKmgoKCgpS4goKCgoKmgoKC9oKCAAYQwr7CvsK8spaospaospaosoKGqLKChqiygoaqoqqiqJKClKiyqOKCgviSqqKqoqiSqJKokq7ivsK+wryylqiylqiylqiygoaosoKGqLKChgACFPKC", "194-196:1;249-253:1;250-252:1.1;259-261:1;267-269:1;275-277:1;282-284:1;290-292:1;298-300:1;307-309:1;316-318:1;325-327:1;400-402:1;408-410:1;416-418:1;423-425:1;431-433:1;439-441:1;448-450:1;457-459:1;466-468:1;480-482:1")]
+[assembly: GoPositionMap("log/log.go", "log.cs", "AEKOAdKCgoKCqOKCgoKipJaAlpSSgoKCgoKCpoIAAhDSgpSCgpSCgoKCgoKClIKCgoKCgoKCgpSmgoKCgoKCppSCgoKUgrikgoKCpgAIDoKUAAIS4oK84oKmuIKUgoKCgoKCgoKmgoKCgpS4goKCgoKmgoKC1oKCAAQQwr7CvsK8spaospaospaosoKGqLKChqiygoaqoqqiqJKClKiyqOKCgtiSqqKqoqiSqJKokq7ivsK+wryylqiylqiylqiygoaosoKGqLKChgACFPKC", "194-196:1;249-253:1;250-252:1.1;259-261:1;267-269:1;275-277:1;282-284:1;290-292:1;298-300:1;307-309:1;316-318:1;325-327:1;400-402:1;408-410:1;416-418:1;423-425:1;431-433:1;439-441:1;448-450:1;457-459:1;466-468:1;480-482:1")]
 // </GoSourcePositionMaps>
 
 namespace go;
+
+using static go.log_package;
+using Δio = go.io_package;
+using ꓸꓸꓸany = Span<any>;
 
 [GoPackage("log")]
 public static partial class log_package
@@ -101,5 +109,31 @@ public static partial class log_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(log_package.Logger)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class logᴛLogger;
+[GoMethodHost(typeof(log_package.Logger)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class logᴛLogger;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class logᴛLogger {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void SetOutput(this ж<Logger> Ꮡl, Δio.Writer w) => log_package.SetOutput⁔(Ꮡl, w);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Output(this ж<Logger> Ꮡl, nint calldepth, @string s) => log_package.Output⁔(Ꮡl, calldepth, s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error output(this ж<Logger> Ꮡl, uintptr pc, nint calldepth, Func<slice<byte>, slice<byte>> appendOutput) => log_package.output⁔(Ꮡl, pc, calldepth, appendOutput);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Print(this ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) => log_package.Print⁔(Ꮡl, vʗp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Printf(this ж<Logger> Ꮡl, @string format, params ꓸꓸꓸany vʗp) => log_package.Printf⁔(Ꮡl, format, vʗp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Println(this ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) => log_package.Println⁔(Ꮡl, vʗp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Fatal(this ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) => log_package.Fatal⁔(Ꮡl, vʗp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Fatalf(this ж<Logger> Ꮡl, @string format, params ꓸꓸꓸany vʗp) => log_package.Fatalf⁔(Ꮡl, format, vʗp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Fatalln(this ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) => log_package.Fatalln⁔(Ꮡl, vʗp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Panic(this ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) => log_package.Panic⁔(Ꮡl, vʗp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Panicf(this ж<Logger> Ꮡl, @string format, params ꓸꓸꓸany vʗp) => log_package.Panicf⁔(Ꮡl, format, vʗp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Panicln(this ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) => log_package.Panicln⁔(Ꮡl, vʗp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Flags(this ж<Logger> Ꮡl) => log_package.Flags⁔(Ꮡl);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void SetFlags(this ж<Logger> Ꮡl, nint flag) => log_package.SetFlags⁔(Ꮡl, flag);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Prefix(this ж<Logger> Ꮡl) => log_package.Prefix⁔(Ꮡl);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void SetPrefix(this ж<Logger> Ꮡl, @string prefixʗp) => log_package.SetPrefix⁔(Ꮡl, prefixʗp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static Δio.Writer Writer(this ж<Logger> Ꮡl) => log_package.Writer⁔(Ꮡl);
+}
+// </MethodForwarders>

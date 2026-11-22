@@ -13,7 +13,6 @@ using runtime = runtime_package;
 using syscall = syscall_package;
 /* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
 using @internal;
-using static time_package;
 
 partial class time_package {
 
@@ -38,13 +37,9 @@ internal static UntypedInt maxFileSize => /* 10 << 20 */ 10485760;
 
 partial struct fileSizeError /*@string*/;
 
-} partial class timeᴛfileSizeError {
-
-internal static @string Error(this fileSizeError f) {
+internal static @string Error⁔(/*this*/ fileSizeError f) {
     return "time: file "u8 + ((@string)f) + " is too large"u8;
 }
-
-} partial class time_package {
 
 // Copies of io.Seek* constants to avoid importing "io":
 internal static UntypedInt seekStart => 0;
@@ -57,9 +52,7 @@ partial struct dataIO {
     internal bool error;
 }
 
-} partial class timeᴛdataIO {
-
-internal static slice<byte> read(this ref dataIO d, nint n) {
+internal static slice<byte> read⁔(/*this*/ ref dataIO d, nint n) {
     if (len(d.p) < n) {
         d.p = default;
         d.error = true;
@@ -70,7 +63,7 @@ internal static slice<byte> read(this ref dataIO d, nint n) {
     return p;
 }
 
-internal static (uint32 n, bool ok) big4(this ref dataIO d) {
+internal static (uint32 n, bool ok) big4⁔(/*this*/ ref dataIO d) {
     var p = d.read(4);
     if (len(p) < 4) {
         d.error = true;
@@ -79,7 +72,7 @@ internal static (uint32 n, bool ok) big4(this ref dataIO d) {
     return ((uint32)p[3] | (uint32)p[2] << 8 | (uint32)p[1] << 16 | (uint32)p[0] << 24, true);
 }
 
-internal static (uint64 n, bool ok) big8(this ref dataIO d) {
+internal static (uint64 n, bool ok) big8⁔(/*this*/ ref dataIO d) {
     var (n1, ok1) = d.big4();
     var (n2, ok2) = d.big4();
     if (!ok1 || !ok2) {
@@ -89,7 +82,7 @@ internal static (uint64 n, bool ok) big8(this ref dataIO d) {
     return (((uint64)n1 << 32) | (uint64)n2, true);
 }
 
-internal static (byte n, bool ok) @byte(this ref dataIO d) {
+internal static (byte n, bool ok) byte⁔(/*this*/ ref dataIO d) {
     var p = d.read(1);
     if (len(p) < 1) {
         d.error = true;
@@ -99,13 +92,11 @@ internal static (byte n, bool ok) @byte(this ref dataIO d) {
 }
 
 // rest returns the rest of the data in the buffer.
-internal static slice<byte> rest(this ref dataIO d) {
+internal static slice<byte> rest⁔(/*this*/ ref dataIO d) {
     var r = d.p;
     d.p = default;
     return r;
 }
-
-} partial class time_package {
 
 // Make a string by stopping at the first NUL
 internal static @string byteString(slice<byte> p) {

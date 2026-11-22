@@ -10,10 +10,16 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+using http = go.net.http_package;
+using net = go.net_package;
+using x509 = go.crypto.x509_package;
 // </ImportedTypeAliases>
 
 using go;
 using static go.net.http.httptest_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -70,11 +76,16 @@ using static go.net.http.httptest_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("net/http/httptest/httptest.go", "httptest.cs", "ABMmkgAMNAAXAoKUgoKUpoKClIKUtLTEpIKUgpTulIKmgu4=")]
-[assembly: GoPositionMap("net/http/httptest/recorder.go", "recorder.cs", "AC9mkgANHsKCgoKUAAgU8oKUgqaUgoKCgpSmqrSCgpSClKq0goKUgpTKopSkpJSmAAsYgtqSgqaCgoKClKqigpQACCQADwKClIKU7oKClIKClJSUgIKCgpKClJSCgpSCgsiCgpSClIKmAAQQ0oKClIKClA==")]
-[assembly: GoPositionMap("net/http/httptest/server.go", "server.cs", "AD56goKCgpSUgoKCpgAOHIKCuIKCgqaqooKCAAIS4gAMDrKCpoKCuJKClIKUlJaCgoKCgvqygpSClIKCpoKClJSCgoKUlIKUgoKUgoLcgpKClIKUlIKCgoLKooKCAAgS4oKCgoKCABImgriCpMqAgsiCgrii5NKCgoKCgpSiptKCgoKClAAHEIKSgvjGqKIAAhLipoKCooKiusKCsoKUlIKUgriCgsrGgIKClNaAgoKUpILqgIKmxoK0upCYooKC", "137-145:1;200-208:1;339-342:1;349-402:1", "", "122=newLocalListener/1/1/1", "289:25,360:21")]
+[assembly: GoPositionMap("net/http/httptest/recorder.go", "recorder.cs", "AC5mkgALHsKCgoKUAAgU8oKUgqaUgoKCgpSmqrSCgpSClKq0goKUgpSqopSkpJSmAAsYgrqSgqaCgoKClKqigpQACCQADwKClIKU7oKClIKClJSUgIKCgpKClJSCgpSCgsiCgpSClIKmAAIQ0oKClIKClA==")]
+[assembly: GoPositionMap("net/http/httptest/server.go", "server.cs", "AD16goKCgpSUgoKCpgAOHIKCuIKCgqaqooKCAAIS4gAKDrKCpoKCuJKClIKUlJaCgoKCgvqygpSClIKCpoKClJSCgoKUlIKUgoKUgoLcgpKClIKUlIKCgoKqooKCAAYS4oKCgoKCABImgriCpMqAgsiCgrii5NKCgoKCgpSiptKCgoKClAAHEIKSgvjGqKIAAhLipoKCooKiusKCsoKUlIKUgriCgsrGgIKClNaAgoKUpILqgIKmxoK0upCYooKC", "137-145:1;200-208:1;339-342:1;349-402:1", "", "121=newLocalListener/1/1/1", "282:25,353:21")]
 // </GoSourcePositionMaps>
 
 namespace go.net.http;
+
+using static go.net.http.httptest_package;
+using http = go.net.http_package;
+using net = go.net_package;
+using x509 = go.crypto.x509_package;
 
 [GoPackage("httptest")]
 public static partial class httptest_package
@@ -127,6 +138,35 @@ public static partial class httptest_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(httptest_package.ResponseRecorder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class httptestᴛResponseRecorder;
-[GoMethodHost(typeof(httptest_package.Server)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class httptestᴛServer;
+[GoMethodHost(typeof(httptest_package.ResponseRecorder)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class httptestᴛResponseRecorder;
+[GoMethodHost(typeof(httptest_package.Server)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class httptestᴛServer;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class httptestᴛResponseRecorder {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static http.Header Header(this ref ResponseRecorder rw) => httptest_package.Header⁔(ref rw);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void writeHeader(this ref ResponseRecorder rw, slice<byte> b, @string str) => httptest_package.writeHeader⁔(ref rw, b, str);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint, error) Write(this ref ResponseRecorder rw, slice<byte> buf) => httptest_package.Write⁔(ref rw, buf);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint, error) WriteString(this ref ResponseRecorder rw, @string str) => httptest_package.WriteString⁔(ref rw, str);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void WriteHeader(this ref ResponseRecorder rw, nint code) => httptest_package.WriteHeader⁔(ref rw, code);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Flush(this ref ResponseRecorder rw) => httptest_package.Flush⁔(ref rw);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<http.Response> Result(this ref ResponseRecorder rw) => httptest_package.Result⁔(ref rw);
+}
+partial class httptestᴛServer {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Start(this ж<Server> Ꮡs) => httptest_package.Start⁔(Ꮡs);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void StartTLS(this ж<Server> Ꮡs) => httptest_package.StartTLS⁔(Ꮡs);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Close(this ж<Server> Ꮡs) => httptest_package.Close⁔(Ꮡs);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void logCloseHangDebugInfo(this ж<Server> Ꮡs) => httptest_package.logCloseHangDebugInfo⁔(Ꮡs);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void CloseClientConnections(this ж<Server> Ꮡs) => httptest_package.CloseClientConnections⁔(Ꮡs);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<x509.Certificate> Certificate(this ref Server s) => httptest_package.Certificate⁔(ref s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<http.Client> Client(this ref Server s) => httptest_package.Client⁔(ref s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void goServe(this ж<Server> Ꮡs) => httptest_package.goServe⁔(Ꮡs);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void wrap(this ж<Server> Ꮡs) => httptest_package.wrap⁔(Ꮡs);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void closeConn(this ref Server s, net.Conn c) => httptest_package.closeConn⁔(ref s, c);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void closeConnChan(this ref Server s, net.Conn c, channel/*<-*/<EmptyStruct> done) => httptest_package.closeConnChan⁔(ref s, c, done);
+}
+// </MethodForwarders>

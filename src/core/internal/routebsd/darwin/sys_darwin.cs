@@ -4,18 +4,13 @@
 namespace go.@internal;
 
 using syscall = syscall_package;
-using static routebsd_package;
 
 partial class routebsd_package {
 
-} partial class routebsdᴛInterfaceMessage {
-
 // MTU returns the interface MTU.
-public static nint MTU(this ref InterfaceMessage m) {
+internal static nint MTU⁔(/*this*/ ref InterfaceMessage m) {
     return (nint)nativeEndian.Uint32(m.raw.slice(m.extOff + 8, m.extOff + 12));
 }
-
-} partial class routebsd_package {
 
 // sizeofIfMsghdr2 is copied from x/sys/unix.
 internal static UntypedInt sizeofIfMsghdr2 => 0xa0;

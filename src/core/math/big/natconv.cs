@@ -12,7 +12,6 @@ using bits = go.math.bits_package;
 using slices = slices_package;
 using sync = sync_package;
 using go.math;
-using static big_package;
 
 partial class big_package {
 
@@ -66,8 +65,6 @@ internal static Word /*p*/ pow(Word x, nint n) {
 internal static error errNoDigits = errors.New("number has no digits");
 internal static error errInvalSep = errors.New("'_' must separate successive digits");
 
-} partial class bigᴛnat {
-
 // scan scans the number corresponding to the longest possible prefix
 // from r representing an unsigned number in a given conversion base.
 // scan returns the corresponding natural number res, the actual base b,
@@ -112,7 +109,7 @@ internal static error errInvalSep = errors.New("'_' must separate successive dig
 // parsed. A digit count <= 0 indicates the presence of a period (if fracOk
 // is set, only), and -count is the number of fractional digits found.
 // In this case, the actual value of the scanned number is res * b**count.
-internal static (nat res, nint b, nint count, error err) scan(this nat z, io.ByteScanner r, nint @base, bool fracOk) {
+internal static (nat res, nint b, nint count, error err) scan⁔(/*this*/ nat z, io.ByteScanner r, nint @base, bool fracOk) {
     nat res = default;
     nint b = default;
     nint count = default;
@@ -320,12 +317,12 @@ internal static (nat res, nint b, nint count, error err) scan(this nat z, io.Byt
 
 // utoa converts x to an ASCII representation in the given base;
 // base must be between 2 and MaxBase, inclusive.
-internal static slice<byte> utoa(this nat x, nint @base) {
+internal static slice<byte> utoa⁔(/*this*/ nat x, nint @base) {
     return x.itoa(false, @base);
 }
 
 // itoa is like utoa but it prepends a '-' if neg && x != 0.
-internal static slice<byte> itoa(this nat x, bool neg, nint @base) {
+internal static slice<byte> itoa⁔(/*this*/ nat x, bool neg, nint @base) {
     GoFrame ᒐ = default;
     try {
         if (@base < 2 || @base > MaxBase) {
@@ -440,7 +437,7 @@ internal static slice<byte> itoa(this nat x, bool neg, nint @base) {
 // range 2..64 shows that values of 8 and 16 work well, with a 4x speedup at medium lengths and
 // ~30x for 20000 digits. Use nat_test.go's BenchmarkLeafSize tests to optimize leafSize for
 // specific hardware.
-internal static void convertWords(this nat q, ж<stack> stk, slice<byte> s, Word b, nint ndigits, Word bb, slice<divisor> table) {
+internal static void convertWords⁔(/*this*/ nat q, ж<stack> stk, slice<byte> s, Word b, nint ndigits, Word bb, slice<divisor> table) {
     // split larger blocks recursively
     if (table != nil) {
         // len(q) > leafSize > 0
@@ -507,8 +504,6 @@ internal static void convertWords(this nat q, ж<stack> stk, slice<byte> s, Word
     }
 }
 
-} partial class big_package {
-
 // Split blocks greater than leafSize Words (or set to 0 to disable recursive conversion)
 // Benchmark and configure leafSize using: go test -bench="Leaf"
 //
@@ -529,14 +524,10 @@ partial struct cacheBase10ᴛ1 /*dyn*/ {
 internal static readonly ж<cacheBase10ᴛ1> ᏑcacheBase10 = new StaticBox<cacheBase10ᴛ1>(new cacheBase10ᴛ1(nil));
 internal static ref cacheBase10ᴛ1 cacheBase10 => ref ((StaticBox<cacheBase10ᴛ1>)ᏑcacheBase10).ValueSlot;
 
-} partial class bigᴛnat {
-
 // expWW computes x**y
-internal static nat expWW(this nat z, ж<stack> stk, Word x, Word y) {
+internal static nat expWW⁔(/*this*/ nat z, ж<stack> stk, Word x, Word y) {
     return z.expNN(stk, ((nat)default).setWord(x), ((nat)default).setWord(y), default, false);
 }
-
-} partial class big_package {
 
 // construct table of powers of bb*leafSize to use in subdivisions.
 internal static slice<divisor> divisors(ж<stack> stk, nint m, Word b, nint ndigits, Word bb) {

@@ -14,6 +14,9 @@
 
 using go;
 using static go.path_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -56,10 +59,12 @@ using static go.path_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("path/match.go", "match.cs", "AA4cAAEuABUCgoKCgoKUpriCgpSClKaCgpSClIKUgtyCgoKmtKrCgoKUgoKmgsa0tILIrAAICIKCgqaSgoKClJSCgoKmgoKCgoKUkoKUgoKCpoKUpoKCgpSmgoKUpoKClKaClKjSgoKUgoKCgqaCgpSCgpQ=")]
-[assembly: GoPositionMap("path/path.go", "path.cs", "ACA0goKUpoKCgoKUgpSCpoKClAAELAATAoKmgu6CkoKCpoKmxsaCpoKC2IKUgoL6gqaC7IKmAAIQ0oIAAhAACAKCgpSClIKCgoKUpq7CgoKmrsKCpoKmgqaClKiSAAIU8oI=")]
+[assembly: GoPositionMap("path/path.go", "path.cs", "AB00goKUpoKCgoKUgpSCpoKClAACLAATAoKmgu6CkoKCpoKmxsaCpoKC2IKUgoL6gqaC7IKmAAIQ0oIAAhAACAKCgpSClIKCgoKUpq7CgoKmrsKCpoKmgqaClKiSAAIU8oI=")]
 // </GoSourcePositionMaps>
 
 namespace go;
+
+using static go.path_package;
 
 [GoPackage("path")]
 public static partial class path_package
@@ -94,5 +99,17 @@ public static partial class path_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(path_package.lazybuf)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class pathᴛlazybuf;
+[GoMethodHost(typeof(path_package.lazybuf)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class pathᴛlazybuf;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class pathᴛlazybuf {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static byte index(this ref lazybuf b, nint i) => path_package.index⁔(ref b, i);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void append(this ref lazybuf b, byte c) => path_package.append⁔(ref b, c);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string @string(this ref lazybuf b) => path_package.string⁔(ref b);
+}
+// </MethodForwarders>

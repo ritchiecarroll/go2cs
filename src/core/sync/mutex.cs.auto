@@ -18,11 +18,8 @@ namespace go;
 
 using isync = @internal.sync_package;
 using @internal;
-using FieldOffsetAttribute = global::System.Runtime.InteropServices.FieldOffsetAttribute;
-using LayoutKind = global::System.Runtime.InteropServices.LayoutKind;
-using StructLayoutAttribute = global::System.Runtime.InteropServices.StructLayoutAttribute;
+using System.Runtime.InteropServices;
 using Δsync = @internal.sync_package;
-using static sync_package;
 
 partial class sync_package {
 
@@ -50,12 +47,10 @@ partial interface Locker {
     void Unlock();
 }
 
-} partial class syncᴛMutex {
-
 // Lock locks m.
 // If the lock is already in use, the calling goroutine
 // blocks until the mutex is available.
-public static void Lock(this ж<Mutex> Ꮡm) {
+internal static void Lock⁔(/*this*/ ж<Mutex> Ꮡm) {
     Ꮡm.of(Mutex.Ꮡmu).Lock();
 }
 
@@ -64,7 +59,7 @@ public static void Lock(this ж<Mutex> Ꮡm) {
 // Note that while correct uses of TryLock do exist, they are rare,
 // and use of TryLock is often a sign of a deeper problem
 // in a particular use of mutexes.
-public static bool TryLock(this ж<Mutex> Ꮡm) {
+internal static bool TryLock⁔(/*this*/ ж<Mutex> Ꮡm) {
     return Ꮡm.of(Mutex.Ꮡmu).TryLock();
 }
 
@@ -74,8 +69,8 @@ public static bool TryLock(this ж<Mutex> Ꮡm) {
 // A locked [Mutex] is not associated with a particular goroutine.
 // It is allowed for one goroutine to lock a Mutex and then
 // arrange for another goroutine to unlock it.
-public static void Unlock(this ж<Mutex> Ꮡm) {
+internal static void Unlock⁔(/*this*/ ж<Mutex> Ꮡm) {
     Ꮡm.of(Mutex.Ꮡmu).Unlock();
 }
 
-}
+} // end sync_package

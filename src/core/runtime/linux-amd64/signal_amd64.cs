@@ -8,7 +8,6 @@ using abi = @internal.abi_package;
 using goarch = @internal.goarch_package;
 using @unsafe = unsafe_package;
 using @internal;
-using static runtime_package;
 
 partial class runtime_package {
 
@@ -38,19 +37,17 @@ internal static void dumpregs(ж<sigctxt> Ꮡc) {
     print((@string)"gs     ", (hex)c.gs(), (@string)"\n");
 }
 
-} partial class runtimeᴛsigctxt {
-
 //go:nosplit
 //go:nowritebarrierrec
-internal static uintptr sigpc(this ref sigctxt c) { return (uintptr)c.rip(); }
+internal static uintptr sigpc⁔(/*this*/ ref sigctxt c) { return (uintptr)c.rip(); }
 
-internal static void setsigpc(this ref sigctxt c, uint64 x) { c.set_rip(x); }
-internal static uintptr sigsp(this ref sigctxt c) { return (uintptr)c.rsp(); }
-internal static uintptr siglr(this ref sigctxt c) { return 0; }
-internal static uintptr fault(this ref sigctxt c) { return (uintptr)c.sigaddr(); }
+internal static void setsigpc⁔(/*this*/ ref sigctxt c, uint64 x) { c.set_rip(x); }
+internal static uintptr sigsp⁔(/*this*/ ref sigctxt c) { return (uintptr)c.rsp(); }
+internal static uintptr siglr⁔(/*this*/ ref sigctxt c) { return 0; }
+internal static uintptr fault⁔(/*this*/ ref sigctxt c) { return (uintptr)c.sigaddr(); }
 
 // preparePanic sets up the stack to look like a call to sigpanic.
-internal static void preparePanic(this ref sigctxt c, uint32 sig, ж<g> Ꮡgp) {
+internal static void preparePanic⁔(/*this*/ ref sigctxt c, uint32 sig, ж<g> Ꮡgp) {
     ref var gp = ref Ꮡgp.DerefOrNull();
 
     // Work around Leopard bug that doesn't set FPE_INTDIV.
@@ -83,7 +80,7 @@ internal static void preparePanic(this ref sigctxt c, uint32 sig, ж<g> Ꮡgp) {
     }
 }
 
-internal static void pushCall(this ref sigctxt c, uintptr targetPC, uintptr resumePC) {
+internal static void pushCall⁔(/*this*/ ref sigctxt c, uintptr targetPC, uintptr resumePC) {
     // Make it look like we called target at resumePC.
     var sp = (uintptr)c.rsp();
     sp -= goarch.PtrSize;
@@ -92,4 +89,4 @@ internal static void pushCall(this ref sigctxt c, uintptr targetPC, uintptr resu
     c.set_rip((uint64)targetPC);
 }
 
-}
+} // end runtime_package

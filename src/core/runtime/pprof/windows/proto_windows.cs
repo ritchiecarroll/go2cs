@@ -8,15 +8,10 @@ using windows = @internal.syscall.windows_package;
 using os = os_package;
 using syscall = syscall_package;
 using @internal.syscall;
-using static pprof_package;
 
 partial class pprof_package {
 
-} partial class pprofᴛprofileBuilder {
-
 // go2cs generated this placeholder — func readMapping is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
-
-} partial class pprof_package {
 
 // go2cs generated this placeholder — func readMainModuleMapping is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 

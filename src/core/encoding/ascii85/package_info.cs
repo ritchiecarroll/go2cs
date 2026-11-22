@@ -14,6 +14,9 @@
 
 using go;
 using static go.encoding.ascii85_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -58,10 +61,12 @@ using static go.encoding.ascii85_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("encoding/ascii85/ascii85.go", "ascii85.cs", "AA42AA0CgqaCgoKCgoKWkrSCpIKkgqS4goKCgoK4goK4goKClJSClKiAnsAACxSygriCgoKClIKCgpSCgpS4goKClIKCgoKmgriCgoKqtIKCgpQACBKyAAQgABECgoKCgpSUtIK0grSUgoKCgoKCgoKmgoLKgpS4lIKCgriogAANGLKClIKmlIKCgqiygoKCgoKUpoKCgoKmyoKUgoK4gg==")]
+[assembly: GoPositionMap("encoding/ascii85/ascii85.go", "ascii85.cs", "AA02AA0CgqaCgoKCgoKWkrSCpIKkgqS4goKCgoK4goK4goKClJSClKiAnsAACRSygriCgoKClIKCgpSCgpS4goKClIKCgoKmgriCgoKqtIKCgpQABBKyAAIgABECgoKCgpSUtIK0grSUgoKCgoKCgoKmgoLKgpS4lIKCgriogAALGLKClIKmlIKCgqiygoKCgoKUpoKCgoKmyoKUgoK4gg==")]
 // </GoSourcePositionMaps>
 
 namespace go.encoding;
+
+using static go.encoding.ascii85_package;
 
 [GoPackage("ascii85")]
 public static partial class ascii85_package
@@ -97,7 +102,24 @@ public static partial class ascii85_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(ascii85_package.CorruptInputError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ascii85ᴛCorruptInputError;
-[GoMethodHost(typeof(ascii85_package.decoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ascii85ᴛdecoder;
-[GoMethodHost(typeof(ascii85_package.encoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ascii85ᴛencoder;
+[GoMethodHost(typeof(ascii85_package.CorruptInputError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class ascii85ᴛCorruptInputError;
+[GoMethodHost(typeof(ascii85_package.decoder)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class ascii85ᴛdecoder;
+[GoMethodHost(typeof(ascii85_package.encoder)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class ascii85ᴛencoder;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class ascii85ᴛCorruptInputError {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this CorruptInputError e) => ascii85_package.Error⁔(e);
+}
+partial class ascii85ᴛdecoder {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) Read(this ref decoder d, slice<byte> p) => ascii85_package.Read⁔(ref d, p);
+}
+partial class ascii85ᴛencoder {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) Write(this ref encoder e, slice<byte> p) => ascii85_package.Write⁔(ref e, p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error Close(this ref encoder e) => ascii85_package.Close⁔(ref e);
+}
+// </MethodForwarders>

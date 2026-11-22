@@ -14,6 +14,9 @@
 
 using go;
 using static go.net.http.httptrace_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -59,10 +62,12 @@ using static go.net.http.httptrace_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("net/http/httptrace/trace.go", "trace.cs", "ABowooIAAhDygpSClIKCuIKCpoKCgoKU7pQAXNgBooKUgoKCgoKCgpSCgpSCgsqmooKUABguooKU", "48-50:1;53-63:2;202-205:1")]
+[assembly: GoPositionMap("net/http/httptrace/trace.go", "trace.cs", "ABkwooIAAhDygpSClIKCuIKCpoKCgoKU7pQAWtgBooKUgoKCgoKCgpSCgpSCgsqmooKUABQuooKU", "48-50:1;53-63:2;202-205:1")]
 // </GoSourcePositionMaps>
 
 namespace go.net.http;
+
+using static go.net.http.httptrace_package;
 
 [GoPackage("httptrace")]
 public static partial class httptrace_package
@@ -105,5 +110,16 @@ public static partial class httptrace_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(httptrace_package.ClientTrace)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class httptraceᴛClientTrace;
+[GoMethodHost(typeof(httptrace_package.ClientTrace)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class httptraceᴛClientTrace;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class httptraceᴛClientTrace {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void compose(this ж<ClientTrace> Ꮡt, ж<ClientTrace> Ꮡold) => httptrace_package.compose⁔(Ꮡt, Ꮡold);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool hasNetHooks(this ж<ClientTrace> Ꮡt) => httptrace_package.hasNetHooks⁔(Ꮡt);
+}
+// </MethodForwarders>

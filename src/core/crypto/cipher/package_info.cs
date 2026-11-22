@@ -14,6 +14,9 @@
 
 using go;
 using static go.crypto.cipher_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -71,15 +74,17 @@ using static go.crypto.cipher_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("crypto/cipher/cbc.go", "cbc.cs", "ABw6ggAQKLKClIKUgpSClK7CgpTGlIKClIKUgpSCppSUgqaCgrimgoKUAA0esoKUgpSClIKUrsKClMaUgoKUgpSClIKUgsqCgqamgoKUgoK4gqamgoKU", "", "", "30=BlockSize/1/2/2,Clone/1/1/3,BlockSize/2/2/4")]
-[assembly: GoPositionMap("crypto/cipher/cfb.go", "cfb.cs", "ABowgoKUgpSCgoKmypSCgpSCggAFGgAJAoKUAAIYAAkCgpSmgoKUlO6U")]
-[assembly: GoPositionMap("crypto/cipher/ctr.go", "ctr.cs", "ACZSooKUgpSAgqSClIKClAAOGoLGgoKCgoKCgqaCgoK4gqaCgpSClIKUgoKUgoKC", "", "", "60=Clone/1/1/2")]
-[assembly: GoPositionMap("crypto/cipher/gcm.go", "gcm.cs", "AB484oKUAAIU8oKUAAIWAAgCgpTmgoKCgpS4goKUAAYaAAoCgoKUgoKUAAgOgqaCpoKCpoKClIKUggAYMoKCpoKmgoKUgqaCgpSC3IKCgoKUgqaCgpQAExSCgpSClIKUgpQADRiCpoKmgoKUgpSCpoKClIKmooKClJSCgpTGtIKClIKmgpSCpoKClIKmooKClIKUgoLKgqaUxqKCgpSCgoK4ooKCgpSCgpSCgoK4ooKmooKCgoKu8oKUgpSC")]
-[assembly: GoPositionMap("crypto/cipher/io.go", "io.cs", "ABYmsoKCABEcsoKCgoKUqqKClA==")]
-[assembly: GoPositionMap("crypto/cipher/ofb.go", "ofb.cs", "ABc+AAkCgqaCgpSCgpTugsaCgoKClIKCgoKClIKmgoKUgpSCgpSCgoI=")]
+[assembly: GoPositionMap("crypto/cipher/cbc.go", "cbc.cs", "ABs6ggAQKLKClIKUgpSClK7CgpSmlIKClIKUgpSCppSUgqaCgrimgoKUAAsesoKUgpSClIKUrsKClKaUgoKUgpSClIKUgsqCgqamgoKUgoK4gqamgoKU", "", "", "29=BlockSize/1/2/2,Clone/1/1/3,BlockSize/2/2/4")]
+[assembly: GoPositionMap("crypto/cipher/cfb.go", "cfb.cs", "ABcwgoKUgpSCgoKmypSCgpSCggADGgAJAoKUAAIYAAkCgpSmgoKUlO6U")]
+[assembly: GoPositionMap("crypto/cipher/ctr.go", "ctr.cs", "ACVSooKUgpSAgqSClIKClAAMGoKmgoKCgoKCgqaCgoK4gqaCgpSClIKUgoKUgoKC", "", "", "59=Clone/1/1/2")]
+[assembly: GoPositionMap("crypto/cipher/gcm.go", "gcm.cs", "AB084oKUAAIU8oKUAAIWAAgCgpTmgoKCgpS4goKUAAYaAAoCgoKUgoKU7oKmgqaCgqaCgpSClIIAGDKCgqaCpoKClIKmgoKUgtyCgoKClIKmgoKUABEUgoKUgpSClIKUAAsYgqaCpoKClIKUgqaCgpSCpqKCgpSUgoKUppSCgpSCpoKUgqaCgpSCpqKCgpSClIKCyoKmlKaigoKUgoKCuKKCgoKUgoKUgoKCuKKCpqKCgoKCrvKClIKUgg==")]
+[assembly: GoPositionMap("crypto/cipher/io.go", "io.cs", "ABMmsoKCAA0csoKCgoKUqqKClA==")]
+[assembly: GoPositionMap("crypto/cipher/ofb.go", "ofb.cs", "ABY+AAkCgqaCgpSCgpTugqaCgoKClIKCgoKClIKmgoKUgpSCgpSCgoI=")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;
+
+using static go.crypto.cipher_package;
 
 [GoPackage("cipher")]
 public static partial class cipher_package
@@ -136,14 +141,64 @@ public static partial class cipher_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(cipher_package.StreamReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class cipherᴛStreamReader;
-[GoMethodHost(typeof(cipher_package.StreamWriter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class cipherᴛStreamWriter;
-[GoMethodHost(typeof(cipher_package.aesCtrWrapper)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class cipherᴛaesCtrWrapper;
-[GoMethodHost(typeof(cipher_package.cbcDecrypter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class cipherᴛcbcDecrypter;
-[GoMethodHost(typeof(cipher_package.cbcEncrypter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class cipherᴛcbcEncrypter;
-[GoMethodHost(typeof(cipher_package.cfb)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class cipherᴛcfb;
-[GoMethodHost(typeof(cipher_package.ctr)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class cipherᴛctr;
-[GoMethodHost(typeof(cipher_package.gcmFallback)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class cipherᴛgcmFallback;
-[GoMethodHost(typeof(cipher_package.gcmWithRandomNonce)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class cipherᴛgcmWithRandomNonce;
-[GoMethodHost(typeof(cipher_package.ofb)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class cipherᴛofb;
+[GoMethodHost(typeof(cipher_package.StreamReader)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class cipherᴛStreamReader;
+[GoMethodHost(typeof(cipher_package.StreamWriter)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class cipherᴛStreamWriter;
+[GoMethodHost(typeof(cipher_package.aesCtrWrapper)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class cipherᴛaesCtrWrapper;
+[GoMethodHost(typeof(cipher_package.cbcDecrypter)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class cipherᴛcbcDecrypter;
+[GoMethodHost(typeof(cipher_package.cbcEncrypter)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class cipherᴛcbcEncrypter;
+[GoMethodHost(typeof(cipher_package.cfb)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class cipherᴛcfb;
+[GoMethodHost(typeof(cipher_package.ctr)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class cipherᴛctr;
+[GoMethodHost(typeof(cipher_package.gcmFallback)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class cipherᴛgcmFallback;
+[GoMethodHost(typeof(cipher_package.gcmWithRandomNonce)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class cipherᴛgcmWithRandomNonce;
+[GoMethodHost(typeof(cipher_package.ofb)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class cipherᴛofb;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class cipherᴛStreamReader {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint n, error err) Read(this StreamReader r, slice<byte> dst) => cipher_package.Read⁔(r, dst);
+}
+partial class cipherᴛStreamWriter {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint n, error err) Write(this StreamWriter w, slice<byte> src) => cipher_package.Write⁔(w, src);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Close(this StreamWriter w) => cipher_package.Close⁔(w);
+}
+partial class cipherᴛaesCtrWrapper {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void XORKeyStream(this aesCtrWrapper x, slice<byte> dst, slice<byte> src) => cipher_package.XORKeyStream⁔(x, dst, src);
+}
+partial class cipherᴛcbcDecrypter {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint BlockSize(this ref cbcDecrypter x) => cipher_package.BlockSize⁔(ref x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void CryptBlocks(this ref cbcDecrypter x, slice<byte> dst, slice<byte> src) => cipher_package.CryptBlocks⁔(ref x, dst, src);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void SetIV(this ref cbcDecrypter x, slice<byte> iv) => cipher_package.SetIV⁔(ref x, iv);
+}
+partial class cipherᴛcbcEncrypter {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint BlockSize(this ref cbcEncrypter x) => cipher_package.BlockSize⁔(ref x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void CryptBlocks(this ref cbcEncrypter x, slice<byte> dst, slice<byte> src) => cipher_package.CryptBlocks⁔(ref x, dst, src);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void SetIV(this ref cbcEncrypter x, slice<byte> iv) => cipher_package.SetIV⁔(ref x, iv);
+}
+partial class cipherᴛcfb {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void XORKeyStream(this ref cfb x, slice<byte> dst, slice<byte> src) => cipher_package.XORKeyStream⁔(ref x, dst, src);
+}
+partial class cipherᴛctr {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void refill(this ref ctr x) => cipher_package.refill⁔(ref x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void XORKeyStream(this ref ctr x, slice<byte> dst, slice<byte> src) => cipher_package.XORKeyStream⁔(ref x, dst, src);
+}
+partial class cipherᴛgcmFallback {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint NonceSize(this ref gcmFallback g) => cipher_package.NonceSize⁔(ref g);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint Overhead(this ref gcmFallback g) => cipher_package.Overhead⁔(ref g);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<byte> Seal(this ref gcmFallback g, slice<byte> dst, slice<byte> nonce, slice<byte> plaintext, slice<byte> additionalData) => cipher_package.Seal⁔(ref g, dst, nonce, plaintext, additionalData);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<byte>, error) Open(this ref gcmFallback g, slice<byte> dst, slice<byte> nonce, slice<byte> ciphertext, slice<byte> additionalData) => cipher_package.Open⁔(ref g, dst, nonce, ciphertext, additionalData);
+}
+partial class cipherᴛgcmWithRandomNonce {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint NonceSize(this gcmWithRandomNonce g) => cipher_package.NonceSize⁔(g);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint Overhead(this gcmWithRandomNonce g) => cipher_package.Overhead⁔(g);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<byte> Seal(this gcmWithRandomNonce g, slice<byte> dst, slice<byte> nonce, slice<byte> plaintext, slice<byte> additionalData) => cipher_package.Seal⁔(g, dst, nonce, plaintext, additionalData);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<byte>, error) Open(this gcmWithRandomNonce g, slice<byte> dst, slice<byte> nonce, slice<byte> ciphertext, slice<byte> additionalData) => cipher_package.Open⁔(g, dst, nonce, ciphertext, additionalData);
+}
+partial class cipherᴛofb {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void refill(this ref ofb x) => cipher_package.refill⁔(ref x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void XORKeyStream(this ref ofb x, slice<byte> dst, slice<byte> src) => cipher_package.XORKeyStream⁔(ref x, dst, src);
+}
+// </MethodForwarders>

@@ -10,8 +10,6 @@
 namespace go;
 
 using @unsafe = unsafe_package;
-using syscall = syscall_package;
-using static syscall_package;
 
 partial class syscall_package {
 
@@ -162,11 +160,9 @@ public static (ж<SID> sid, @string domain, uint32 accType, error err) LookupSID
     }
 }
 
-} partial class syscallᴛSID {
-
 // String converts sid to a string format
 // suitable for display, storage, or transmission.
-public static (@string, error) String(this ж<SID> Ꮡsid) {
+internal static (@string, error) String⁔(/*this*/ ж<SID> Ꮡsid) {
     GoFrame ᒐ = default;
     try {
         ref var s = ref heap<ж<uint16>>(out var Ꮡs);
@@ -182,12 +178,12 @@ public static (@string, error) String(this ж<SID> Ꮡsid) {
 }
 
 // Len returns the length, in bytes, of a valid security identifier sid.
-public static nint Len(this ж<SID> Ꮡsid) {
+internal static nint Len⁔(/*this*/ ж<SID> Ꮡsid) {
     return (nint)GetLengthSid(Ꮡsid);
 }
 
 // Copy creates a duplicate of security identifier sid.
-public static (ж<SID>, error) Copy(this ж<SID> Ꮡsid) {
+internal static (ж<SID>, error) Copy⁔(/*this*/ ж<SID> Ꮡsid) {
     var b = new slice<byte>(Ꮡsid.Len());
     var sid2 = Ꮡ(b, 0).Reinterpret<byte, SID>();
     var e = CopySid((uint32)len(b), sid2, Ꮡsid);
@@ -200,7 +196,7 @@ public static (ж<SID>, error) Copy(this ж<SID> Ꮡsid) {
 // LookupAccount retrieves the name of the account for this sid
 // and the name of the first domain on which this sid is found.
 // System specify target computer to search for.
-public static (@string account, @string domain, uint32 accType, error err) LookupAccount(this ж<SID> Ꮡsid, @string system) {
+internal static (@string account, @string domain, uint32 accType, error err) LookupAccount⁔(/*this*/ ж<SID> Ꮡsid, @string system) {
     ref var accType = ref heap(new uint32(), out var ᏑaccType);
     error err = default;
 
@@ -228,8 +224,6 @@ public static (@string account, @string domain, uint32 accType, error err) Looku
         }
     }
 }
-
-} partial class syscall_package {
 
 // do not reorder
 public static UntypedInt TOKEN_ASSIGN_PRIMARY => /* 1 << iota */ 1;
@@ -331,15 +325,13 @@ public static (Token, error) OpenCurrentProcessToken() {
     return (t, default);
 }
 
-} partial class syscallᴛToken {
-
 // Close releases access to access token.
-public static error Close(this Token t) {
+internal static error Close⁔(/*this*/ Token t) {
     return CloseHandle((Handle)(uintptr)t);
 }
 
 // getInfo retrieves a specified type of information about an access token.
-internal static (@unsafe.Pointer, error) getInfo(this Token t, uint32 @class, nint initSize) {
+internal static (@unsafe.Pointer, error) getInfo⁔(/*this*/ Token t, uint32 @class, nint initSize) {
     ref var n = ref heap<uint32>((uint32)initSize, out var Ꮡn);
     for (;;) {
         var b = new slice<byte>((nint)(n));
@@ -357,7 +349,7 @@ internal static (@unsafe.Pointer, error) getInfo(this Token t, uint32 @class, ni
 }
 
 // GetTokenUser retrieves access token t user account information.
-public static (ж<Tokenuser>, error) GetTokenUser(this Token t) {
+internal static (ж<Tokenuser>, error) GetTokenUser⁔(/*this*/ Token t) {
     var (i, e) = t.getInfo(TokenUser, 50);
     if (e != nil) {
         return (default, e);
@@ -368,7 +360,7 @@ public static (ж<Tokenuser>, error) GetTokenUser(this Token t) {
 // GetTokenPrimaryGroup retrieves access token t primary group information.
 // A pointer to a SID structure representing a group that will become
 // the primary group of any objects created by a process using this access token.
-public static (ж<Tokenprimarygroup>, error) GetTokenPrimaryGroup(this Token t) {
+internal static (ж<Tokenprimarygroup>, error) GetTokenPrimaryGroup⁔(/*this*/ Token t) {
     var (i, e) = t.getInfo(TokenPrimaryGroup, 50);
     if (e != nil) {
         return (default, e);
@@ -378,11 +370,11 @@ public static (ж<Tokenprimarygroup>, error) GetTokenPrimaryGroup(this Token t) 
 
 // GetUserProfileDirectory retrieves path to the
 // root directory of the access token t user's profile.
-public static (@string, error) GetUserProfileDirectory(this Token t) {
+internal static (@string, error) GetUserProfileDirectory⁔(/*this*/ Token t) {
     ref var n = ref heap<uint32>((uint32)100, out var Ꮡn);
     for (;;) {
         var b = new slice<uint16>((nint)(n));
-        var e = syscall.GetUserProfileDirectory(t, Ꮡ(b, 0), Ꮡn);
+        var e = GetUserProfileDirectory(t, Ꮡ(b, 0), Ꮡn);
         if (e == nil) {
             return (UTF16ToString(b), default);
         }
@@ -395,4 +387,4 @@ public static (@string, error) GetUserProfileDirectory(this Token t) {
     }
 }
 
-}
+} // end syscall_package

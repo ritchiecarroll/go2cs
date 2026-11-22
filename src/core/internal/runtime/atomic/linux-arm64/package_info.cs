@@ -14,6 +14,9 @@
 
 using go;
 using static go.@internal.runtime.atomic_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -70,13 +73,15 @@ using static go.@internal.runtime.atomic_package;
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("internal/runtime/atomic/atomic_arm64.go", "atomic_arm64.cs", "AA4mpqampqamABAwpqampqampqampqampqampqam")]
 [assembly: GoPositionMap("internal/runtime/atomic/stubs.go", "stubs.cs", "AAoYpqampqampqamqsampqam")]
-[assembly: GoPositionMap("internal/runtime/atomic/types.go", "types.cs", "ABgosqyyAAIQ0q7CAAIU8gARIrKssgACENKuwgACFPIADhyyrLIAAhTyAAIU8gAOHLKssoKClAAOHLIAAhgACQKssgACGAAJAgACENIAAhoACgKuwgACFPIAAhTyAAIU8gARIrKssgACENKuwgACFPIADhyyAAIYAAkCrLIAAhgACQIAAhDSrsIAAhTyABAgsoKssgAUKLIAAhgACQKokswABhwADAKsssYACBSyAAIYAAkCrLIAAh4ADAKuwgAOFpI=")]
-[assembly: GoPositionMap("internal/runtime/atomic/types_64bit.go", "types_64bit.cs", "AAwkAAkCAAIYAAkC")]
+[assembly: GoPositionMap("internal/runtime/atomic/types.go", "types.cs", "ABIosqyyAAIQ0q7CAAIU8gANIrKssgACENKuwgACFPIAChyyrLIAAhTyAAIU8gAKHLKssoKClAAKHLIAAhgACQKssgACGAAJAgACENIAAhoACgKuwgACFPIAAhTyAAIU8gANIrKssgACENKuwgACFPIAChyyAAIYAAkCrLIAAhgACQIAAhDSrsIAAhTyAAwgsoKssgAQKLIAAhgACQKokqwABBwADAKssqYABhSyAAIYAAkCrLIAAh4ADAKuwgAKFpI=")]
+[assembly: GoPositionMap("internal/runtime/atomic/types_64bit.go", "types_64bit.cs", "AAgkAAkCAAIYAAkC")]
 [assembly: GoPositionMap("internal/runtime/atomic/unaligned.go", "unaligned.cs", "/oI=")]
 [assembly: GoPositionMap("internal/runtime/atomic/xchg8.go", "xchg8.cs", "AAsapIKCgpSCgpSClJQ=")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.runtime;
+
+using static go.@internal.runtime.atomic_package;
 
 [GoPackage("atomic")]
 public static partial class atomic_package
@@ -119,15 +124,98 @@ public static partial class atomic_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(atomic_package.Bool)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class atomicᴛBool;
-[GoMethodHost(typeof(atomic_package.Float64)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class atomicᴛFloat64;
-[GoMethodHost(typeof(atomic_package.Int32)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class atomicᴛInt32;
-[GoMethodHost(typeof(atomic_package.Int64)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class atomicᴛInt64;
-[GoMethodHost(typeof(atomic_package.Pointer<>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class atomicᴛPointer;
-[GoMethodHost(typeof(atomic_package.Uint32)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class atomicᴛUint32;
-[GoMethodHost(typeof(atomic_package.Uint64)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class atomicᴛUint64;
-[GoMethodHost(typeof(atomic_package.Uint8)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class atomicᴛUint8;
-[GoMethodHost(typeof(atomic_package.Uintptr)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class atomicᴛUintptr;
-[GoMethodHost(typeof(atomic_package.UnsafePointer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class atomicᴛUnsafePointer;
-[GoMethodHost(typeof(atomic_package.noCopy)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class atomicᴛnoCopy;
+[GoMethodHost(typeof(atomic_package.Bool)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class atomicᴛBool;
+[GoMethodHost(typeof(atomic_package.Float64)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class atomicᴛFloat64;
+[GoMethodHost(typeof(atomic_package.Int32)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class atomicᴛInt32;
+[GoMethodHost(typeof(atomic_package.Int64)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class atomicᴛInt64;
+[GoMethodHost(typeof(atomic_package.Pointer<>)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class atomicᴛPointer;
+[GoMethodHost(typeof(atomic_package.Uint32)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class atomicᴛUint32;
+[GoMethodHost(typeof(atomic_package.Uint64)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class atomicᴛUint64;
+[GoMethodHost(typeof(atomic_package.Uint8)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class atomicᴛUint8;
+[GoMethodHost(typeof(atomic_package.Uintptr)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class atomicᴛUintptr;
+[GoMethodHost(typeof(atomic_package.UnsafePointer)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class atomicᴛUnsafePointer;
+[GoMethodHost(typeof(atomic_package.noCopy)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class atomicᴛnoCopy;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class atomicᴛBool {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Load(this ж<Bool> Ꮡb) => atomic_package.Load⁔(Ꮡb);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Store(this ж<Bool> Ꮡb, bool value) => atomic_package.Store⁔(Ꮡb, value);
+}
+partial class atomicᴛFloat64 {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static float64 Load(this ж<Float64> Ꮡf) => atomic_package.Load⁔(Ꮡf);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Store(this ж<Float64> Ꮡf, float64 value) => atomic_package.Store⁔(Ꮡf, value);
+}
+partial class atomicᴛInt32 {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static int32 Load(this ж<Int32> Ꮡi) => atomic_package.Load⁔(Ꮡi);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Store(this ж<Int32> Ꮡi, int32 value) => atomic_package.Store⁔(Ꮡi, value);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool CompareAndSwap(this ж<Int32> Ꮡi, int32 old, int32 @new) => atomic_package.CompareAndSwap⁔(Ꮡi, old, @new);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static int32 Swap(this ж<Int32> Ꮡi, int32 @new) => atomic_package.Swap⁔(Ꮡi, @new);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static int32 Add(this ж<Int32> Ꮡi, int32 delta) => atomic_package.Add⁔(Ꮡi, delta);
+}
+partial class atomicᴛInt64 {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static int64 Load(this ж<Int64> Ꮡi) => atomic_package.Load⁔(Ꮡi);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Store(this ж<Int64> Ꮡi, int64 value) => atomic_package.Store⁔(Ꮡi, value);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool CompareAndSwap(this ж<Int64> Ꮡi, int64 old, int64 @new) => atomic_package.CompareAndSwap⁔(Ꮡi, old, @new);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static int64 Swap(this ж<Int64> Ꮡi, int64 @new) => atomic_package.Swap⁔(Ꮡi, @new);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static int64 Add(this ж<Int64> Ꮡi, int64 delta) => atomic_package.Add⁔(Ꮡi, delta);
+}
+partial class atomicᴛPointer {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<T> Load<T>(this ж<Pointer<T>> Ꮡp) => atomic_package.Load⁔<T>(Ꮡp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void StoreNoWB<T>(this ж<Pointer<T>> Ꮡp, ж<T> Ꮡvalue) => atomic_package.StoreNoWB⁔<T>(Ꮡp, Ꮡvalue);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Store<T>(this ж<Pointer<T>> Ꮡp, ж<T> Ꮡvalue) => atomic_package.Store⁔<T>(Ꮡp, Ꮡvalue);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool CompareAndSwapNoWB<T>(this ж<Pointer<T>> Ꮡp, ж<T> Ꮡold, ж<T> Ꮡnew) => atomic_package.CompareAndSwapNoWB⁔<T>(Ꮡp, Ꮡold, Ꮡnew);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool CompareAndSwap<T>(this ж<Pointer<T>> Ꮡp, ж<T> Ꮡold, ж<T> Ꮡnew) => atomic_package.CompareAndSwap⁔<T>(Ꮡp, Ꮡold, Ꮡnew);
+}
+partial class atomicᴛUint32 {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static uint32 Load(this ж<Uint32> Ꮡu) => atomic_package.Load⁔(Ꮡu);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static uint32 LoadAcquire(this ж<Uint32> Ꮡu) => atomic_package.LoadAcquire⁔(Ꮡu);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Store(this ж<Uint32> Ꮡu, uint32 value) => atomic_package.Store⁔(Ꮡu, value);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void StoreRelease(this ж<Uint32> Ꮡu, uint32 value) => atomic_package.StoreRelease⁔(Ꮡu, value);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool CompareAndSwap(this ж<Uint32> Ꮡu, uint32 old, uint32 @new) => atomic_package.CompareAndSwap⁔(Ꮡu, old, @new);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool CompareAndSwapRelease(this ж<Uint32> Ꮡu, uint32 old, uint32 @new) => atomic_package.CompareAndSwapRelease⁔(Ꮡu, old, @new);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static uint32 Swap(this ж<Uint32> Ꮡu, uint32 value) => atomic_package.Swap⁔(Ꮡu, value);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void And(this ж<Uint32> Ꮡu, uint32 value) => atomic_package.And⁔(Ꮡu, value);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Or(this ж<Uint32> Ꮡu, uint32 value) => atomic_package.Or⁔(Ꮡu, value);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static uint32 Add(this ж<Uint32> Ꮡu, int32 delta) => atomic_package.Add⁔(Ꮡu, delta);
+}
+partial class atomicᴛUint64 {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static uint64 Load(this ж<Uint64> Ꮡu) => atomic_package.Load⁔(Ꮡu);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Store(this ж<Uint64> Ꮡu, uint64 value) => atomic_package.Store⁔(Ꮡu, value);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool CompareAndSwap(this ж<Uint64> Ꮡu, uint64 old, uint64 @new) => atomic_package.CompareAndSwap⁔(Ꮡu, old, @new);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static uint64 Swap(this ж<Uint64> Ꮡu, uint64 value) => atomic_package.Swap⁔(Ꮡu, value);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static uint64 Add(this ж<Uint64> Ꮡu, int64 delta) => atomic_package.Add⁔(Ꮡu, delta);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static uint64 LoadAcquire(this ж<Uint64> Ꮡu) => atomic_package.LoadAcquire⁔(Ꮡu);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void StoreRelease(this ж<Uint64> Ꮡu, uint64 value) => atomic_package.StoreRelease⁔(Ꮡu, value);
+}
+partial class atomicᴛUint8 {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static uint8 Load(this ж<Uint8> Ꮡu) => atomic_package.Load⁔(Ꮡu);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Store(this ж<Uint8> Ꮡu, uint8 value) => atomic_package.Store⁔(Ꮡu, value);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void And(this ж<Uint8> Ꮡu, uint8 value) => atomic_package.And⁔(Ꮡu, value);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Or(this ж<Uint8> Ꮡu, uint8 value) => atomic_package.Or⁔(Ꮡu, value);
+}
+partial class atomicᴛUintptr {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static uintptr Load(this ж<Uintptr> Ꮡu) => atomic_package.Load⁔(Ꮡu);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static uintptr LoadAcquire(this ж<Uintptr> Ꮡu) => atomic_package.LoadAcquire⁔(Ꮡu);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Store(this ж<Uintptr> Ꮡu, uintptr value) => atomic_package.Store⁔(Ꮡu, value);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void StoreRelease(this ж<Uintptr> Ꮡu, uintptr value) => atomic_package.StoreRelease⁔(Ꮡu, value);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool CompareAndSwap(this ж<Uintptr> Ꮡu, uintptr old, uintptr @new) => atomic_package.CompareAndSwap⁔(Ꮡu, old, @new);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static uintptr Swap(this ж<Uintptr> Ꮡu, uintptr value) => atomic_package.Swap⁔(Ꮡu, value);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static uintptr Add(this ж<Uintptr> Ꮡu, uintptr delta) => atomic_package.Add⁔(Ꮡu, delta);
+}
+partial class atomicᴛUnsafePointer {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static unsafe_package.Pointer Load(this ж<UnsafePointer> Ꮡu) => atomic_package.Load⁔(Ꮡu);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void StoreNoWB(this ж<UnsafePointer> Ꮡu, unsafe_package.Pointer value) => atomic_package.StoreNoWB⁔(Ꮡu, value);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Store(this ж<UnsafePointer> Ꮡu, unsafe_package.Pointer value) => atomic_package.Store⁔(Ꮡu, value);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool CompareAndSwapNoWB(this ж<UnsafePointer> Ꮡu, unsafe_package.Pointer old, unsafe_package.Pointer @new) => atomic_package.CompareAndSwapNoWB⁔(Ꮡu, old, @new);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool CompareAndSwap(this ж<UnsafePointer> Ꮡu, unsafe_package.Pointer old, unsafe_package.Pointer @new) => atomic_package.CompareAndSwap⁔(Ꮡu, old, @new);
+}
+partial class atomicᴛnoCopy {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void Lock(this ref noCopy _) => atomic_package.Lock⁔(ref _);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void Unlock(this ref noCopy _) => atomic_package.Unlock⁔(ref _);
+}
+// </MethodForwarders>

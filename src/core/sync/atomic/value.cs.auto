@@ -10,7 +10,6 @@
 namespace go.sync;
 
 using @unsafe = unsafe_package;
-using static atomic_package;
 
 partial class atomic_package {
 
@@ -29,11 +28,9 @@ partial struct efaceWords {
     internal @unsafe.Pointer data;
 }
 
-} partial class atomicᴛValue {
-
 // Load returns the value set by the most recent Store.
 // It returns nil if there has been no call to Store for this Value.
-public static any /*val*/ Load(this ж<Value> Ꮡv) {
+internal static any /*val*/ Load⁔(/*this*/ ж<Value> Ꮡv) {
     ref var val = ref heap<any>(out var Ꮡval);
 
     var vp = Ꮡv.Reinterpret<Value, efaceWords>();
@@ -49,17 +46,13 @@ public static any /*val*/ Load(this ж<Value> Ꮡv) {
     return val;
 }
 
-} partial class atomic_package {
-
 internal static readonly ж<byte> ᏑfirstStoreInProgress = new StaticBox<byte>(default(byte));
 internal static ref byte firstStoreInProgress => ref ((StaticBox<byte>)ᏑfirstStoreInProgress).ValueSlot;
-
-} partial class atomicᴛValue {
 
 // Store sets the value of the [Value] v to val.
 // All calls to Store for a given Value must use values of the same concrete type.
 // Store of an inconsistent type panics, as does Store(nil).
-public static void Store(this ж<Value> Ꮡv, any valʗp) {
+internal static void Store⁔(/*this*/ ж<Value> Ꮡv, any valʗp) {
     ref var val = ref heap(valʗp, out var Ꮡval);
 
     if (val == nil) {
@@ -104,7 +97,7 @@ public static void Store(this ж<Value> Ꮡv, any valʗp) {
 //
 // All calls to Swap for a given Value must use values of the same concrete
 // type. Swap of an inconsistent type panics, as does Swap(nil).
-public static any /*old*/ Swap(this ж<Value> Ꮡv, any @newʗp) {
+internal static any /*old*/ Swap⁔(/*this*/ ж<Value> Ꮡv, any @newʗp) {
     ref var old = ref heap<any>(out var Ꮡold);
     ref var @new = ref heap(@newʗp, out var Ꮡnew);
 
@@ -151,7 +144,7 @@ public static any /*old*/ Swap(this ж<Value> Ꮡv, any @newʗp) {
 // All calls to CompareAndSwap for a given Value must use values of the same
 // concrete type. CompareAndSwap of an inconsistent type panics, as does
 // CompareAndSwap(old, nil).
-public static bool /*swapped*/ CompareAndSwap(this ж<Value> Ꮡv, any oldʗp, any @newʗp) {
+internal static bool /*swapped*/ CompareAndSwap⁔(/*this*/ ж<Value> Ꮡv, any oldʗp, any @newʗp) {
     ref var old = ref heap(oldʗp, out var Ꮡold);
     ref var @new = ref heap(@newʗp, out var Ꮡnew);
 
@@ -209,8 +202,6 @@ public static bool /*swapped*/ CompareAndSwap(this ж<Value> Ꮡv, any oldʗp, a
         return CompareAndSwapPointer(vp.of(efaceWords.Ꮡdata), data, np.of(efaceWords.Ꮡdata).Value);
     }
 }
-
-} partial class atomic_package {
 
 // Disable/enable preemption, implemented in runtime.
 internal static partial nint runtime_procPin();

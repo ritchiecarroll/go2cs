@@ -8,7 +8,6 @@ using reflect = reflect_package;
 using sync = sync_package;
 using parse = go.text.template.parse_package;
 using go.text.template;
-using static template_package;
 
 partial class template_package {
 
@@ -45,10 +44,8 @@ public static ж<Template> New(@string name) {
     return t;
 }
 
-} partial class templateᴛTemplate {
-
 // Name returns the name of the template.
-public static @string Name(this ref Template t) {
+internal static @string Name⁔(/*this*/ ref Template t) {
     return t.name;
 }
 
@@ -59,7 +56,7 @@ public static @string Name(this ref Template t) {
 // Because associated templates share underlying data, template construction
 // cannot be done safely in parallel. Once the templates are constructed, they
 // can be executed in parallel.
-public static ж<Template> New(this ref Template t, @string name) {
+internal static ж<Template> New⁔(/*this*/ ref Template t, @string name) {
     t.init();
     var nt = Ꮡ(new Template(
         name: name,
@@ -71,7 +68,7 @@ public static ж<Template> New(this ref Template t, @string name) {
 }
 
 // init guarantees that t has a valid common structure.
-internal static void init(this ref Template t) {
+internal static void init⁔(/*this*/ ref Template t) {
     if (t.common == nil) {
         var c = @new<common>();
         c.tmpl = new map<@string, ж<Template>>();
@@ -87,7 +84,7 @@ internal static void init(this ref Template t) {
 // templates to the copy but not to the original. Clone can be used to prepare
 // common templates and use them with variant definitions for other templates
 // by adding the variants after the clone is made.
-public static (ж<Template>, error) Clone(this ж<Template> Ꮡt) {
+internal static (ж<Template>, error) Clone⁔(/*this*/ ж<Template> Ꮡt) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     bool ᒐd2 = false;
@@ -122,7 +119,7 @@ public static (ж<Template>, error) Clone(this ж<Template> Ꮡt) {
 }
 
 // copy returns a shallow copy of t, with common set to the argument.
-internal static ж<Template> copy(this ref Template t, ж<common> c) {
+internal static ж<Template> copy⁔(/*this*/ ref Template t, ж<common> c) {
     return Ꮡ(new Template(
         name: t.name,
         Tree: t.Tree,
@@ -136,7 +133,7 @@ internal static ж<Template> copy(this ref Template t, ж<common> c) {
 // it the specified name. If the template has not been defined, this tree becomes
 // its definition. If it has been defined and already has that name, the existing
 // definition is replaced; otherwise a new template is created, defined, and returned.
-public static (ж<Template>, error) AddParseTree(this ж<Template> Ꮡt, @string name, ж<parse.Tree> tree) {
+internal static (ж<Template>, error) AddParseTree⁔(/*this*/ ж<Template> Ꮡt, @string name, ж<parse.Tree> tree) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -160,7 +157,7 @@ public static (ж<Template>, error) AddParseTree(this ж<Template> Ꮡt, @string
 }
 
 // Templates returns a slice of defined templates associated with t.
-public static slice<ж<Template>> Templates(this ж<Template> Ꮡt) {
+internal static slice<ж<Template>> Templates⁔(/*this*/ ж<Template> Ꮡt) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -187,7 +184,7 @@ public static slice<ж<Template>> Templates(this ж<Template> Ꮡt) {
 // definitions will inherit the settings. An empty delimiter stands for the
 // corresponding default: {{ or }}.
 // The return value is the template, so calls can be chained.
-public static ж<Template> Delims(this ж<Template> Ꮡt, @string left, @string right) {
+internal static ж<Template> Delims⁔(/*this*/ ж<Template> Ꮡt, @string left, @string right) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     t.init();
@@ -202,7 +199,7 @@ public static ж<Template> Delims(this ж<Template> Ꮡt, @string left, @string 
 // type or if the name cannot be used syntactically as a function in a template.
 // It is legal to overwrite elements of the map. The return value is the template,
 // so calls can be chained.
-public static ж<Template> Funcs(this ж<Template> Ꮡt, FuncMap funcMap) {
+internal static ж<Template> Funcs⁔(/*this*/ ж<Template> Ꮡt, FuncMap funcMap) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -221,7 +218,7 @@ public static ж<Template> Funcs(this ж<Template> Ꮡt, FuncMap funcMap) {
 
 // Lookup returns the template with the given name that is associated with t.
 // It returns nil if there is no such template or the template has no definition.
-public static ж<Template> Lookup(this ж<Template> Ꮡt, @string name) {
+internal static ж<Template> Lookup⁔(/*this*/ ж<Template> Ꮡt, @string name) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -248,7 +245,7 @@ public static ж<Template> Lookup(this ж<Template> Ꮡt, @string name) {
 // is considered empty and will not replace an existing template's body.
 // This allows using Parse to add new named template definitions without
 // overwriting the main template body.
-public static (ж<Template>, error) Parse(this ж<Template> Ꮡt, @string text) {
+internal static (ж<Template>, error) Parse⁔(/*this*/ ж<Template> Ꮡt, @string text) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     t.init();
@@ -270,7 +267,7 @@ public static (ж<Template>, error) Parse(this ж<Template> Ꮡt, @string text) 
 // associate installs the new template into the group of templates associated
 // with t. The two are already known to share the common structure.
 // The boolean return value reports whether to store this tree as t.Tree.
-internal static bool associate(this ref Template t, ж<Template> Ꮡnew, ж<parse.Tree> Ꮡtree) {
+internal static bool associate⁔(/*this*/ ref Template t, ж<Template> Ꮡnew, ж<parse.Tree> Ꮡtree) {
     ref var @new = ref Ꮡnew.DerefOrNull();
     ref var tree = ref Ꮡtree.DerefOrNull();
 
@@ -286,4 +283,4 @@ internal static bool associate(this ref Template t, ж<Template> Ꮡnew, ж<pars
     return true;
 }
 
-}
+} // end template_package

@@ -10,10 +10,16 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+using http = go.net.http_package;
+using time = go.time_package;
+using url = go.net.url_package;
 // </ImportedTypeAliases>
 
 using go;
 using static go.net.http.cookiejar_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -59,11 +65,16 @@ using static go.net.http.cookiejar_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("net/http/cookiejar/jar.go", "jar.cs", "AE6gAcKmgpQAHDqSrLKssoKUqJKClIKCgoKmrLKUppSmgpSCgpQACAaCgoKUqJLMsqjygpSCgpSUgpSCgqaCgoKmgoKigoKClIKUgoKClIKClNyCgIKkgIKklIKW3LKo8oKUgpSCgpSClIKUlIKCgoKUgoKCgoKmlIKmgoKUgoKUgoKmgoKUxsiigoKCgriCgoKmgqqigoKUgpSokoKmgoKCgqaCgpSCptyCqJLKlKqigqaCgpQADBgADQKUgpSmgoK4goKCgpSCgpSClIK4goKClJS0tLbIgsy2kqamABAiggALGNyUpqaClKbuuIKCppTcgqY=", "247-255:1")]
+[assembly: GoPositionMap("net/http/cookiejar/jar.go", "jar.cs", "AE2gAcKmgpQAGjqSrLKssoKUqJKClIKCgoKmrLKUppSmgpSCgpTmgoKClKiSrLKo8oKUgoKUlIKUgoKmgoKCpoKCooKCgpSClIKCgpSCgpTcgoCCpICCpJSCltyyqPKClIKUgoKUgpSClJSCgoKClIKCgoKCppSCpoKClIKClIKCpoKClMaoooKCgoK4goKCpoKqooKClIKUqJKCpoKCgoKmgoKUgqbcgqiSypSqooKmgoKUAAoYAA0ClIKUpoKCuIKCgoKUgoKUgpSCuIKCgpSUtLS2qILMlpKmpgAQIoIACxjclKamgpSm7riCgqaU3IKm", "247-255:1")]
 [assembly: GoPositionMap("net/http/cookiejar/punycode.go", "punycode.cs", "ABtG8oKCgoKCgoKUpoKClIKCgoKmgoKUgoKCgoKUlIKUgoKCgoKClIKUgpSCgoKClIKUpoKUpJSokoKUlIKCgoKUAAkYsoKUgoKCgoKUpg==")]
 // </GoSourcePositionMaps>
 
 namespace go.net.http;
+
+using static go.net.http.cookiejar_package;
+using http = go.net.http_package;
+using time = go.time_package;
+using url = go.net.url_package;
 
 [GoPackage("cookiejar")]
 public static partial class cookiejar_package
@@ -110,6 +121,28 @@ public static partial class cookiejar_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(cookiejar_package.Jar)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class cookiejarᴛJar;
-[GoMethodHost(typeof(cookiejar_package.entry)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class cookiejarᴛentry;
+[GoMethodHost(typeof(cookiejar_package.Jar)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class cookiejarᴛJar;
+[GoMethodHost(typeof(cookiejar_package.entry)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class cookiejarᴛentry;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class cookiejarᴛJar {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<ж<http.Cookie>> /*cookies*/ Cookies(this ж<Jar> Ꮡj, ж<url.URL> Ꮡu) => cookiejar_package.Cookies⁔(Ꮡj, Ꮡu);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<ж<http.Cookie>> /*cookies*/ cookies(this ж<Jar> Ꮡj, ж<url.URL> Ꮡu, time.Time now) => cookiejar_package.cookies⁔(Ꮡj, Ꮡu, now);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void SetCookies(this ж<Jar> Ꮡj, ж<url.URL> Ꮡu, slice<ж<http.Cookie>> cookies) => cookiejar_package.SetCookies⁔(Ꮡj, Ꮡu, cookies);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void setCookies(this ж<Jar> Ꮡj, ж<url.URL> Ꮡu, slice<ж<http.Cookie>> cookies, time.Time now) => cookiejar_package.setCookies⁔(Ꮡj, Ꮡu, cookies, now);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (entry e, bool remove, error err) newEntry(this ref Jar j, ж<http.Cookie> Ꮡc, time.Time now, @string defPath, @string host) => cookiejar_package.newEntry⁔(ref j, Ꮡc, now, defPath, host);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (@string, bool, error) domainAndType(this ref Jar j, @string host, @string domain) => cookiejar_package.domainAndType⁔(ref j, host, domain);
+}
+partial class cookiejarᴛentry {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string id(this ref entry e) => cookiejar_package.id⁔(ref e);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool shouldSend(this ref entry e, bool https, @string host, @string path) => cookiejar_package.shouldSend⁔(ref e, https, host, path);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool domainMatch(this ref entry e, @string host) => cookiejar_package.domainMatch⁔(ref e, host);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool pathMatch(this ref entry e, @string requestPath) => cookiejar_package.pathMatch⁔(ref e, requestPath);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool secureMatch(this ref entry e, bool https) => cookiejar_package.secureMatch⁔(ref e, https);
+}
+// </MethodForwarders>

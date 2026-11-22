@@ -14,6 +14,9 @@
 
 using go;
 using static go.io.fs_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -68,17 +71,19 @@ using static go.io.fs_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("io/fs/format.go", "format.cs", "AAkiAAgCgoKClIKCgpSClIKCgoKCgpSCgpSClIKCpgACEgAIAoK4gpSCgoKClA==")]
-[assembly: GoPositionMap("io/fs/fs.go", "fs.cs", "ADmAAQAKAoKmlLiCgoKUgoKUgpQAPoYBgoKCgpaCgoKCADZegoKCgoKCgqaCgpSCgoKUlJSqoqqiqJKokgANFJQACQaSgg==")]
+[assembly: GoPositionMap("io/fs/fs.go", "fs.cs", "ADiAAQAKAoKmlLiCgoKUgoKUgpQAPoYBgoKCgpaCgoKCADRegoKCgoKCgqaCgpSCgoKUlJSqoqqiqJKokgAJFJTWkoI=")]
 [assembly: GoPositionMap("io/fs/glob.go", "glob.cs", "ABNCAAwCpraigpSCuIKUgoKUpoKUgriCpoKCgpSCgoKmqJKUpAADEPKCgoKmgoKCgpSCpqqigpSm")]
-[assembly: GoPositionMap("io/fs/readdir.go", "readdir.cs", "ABs6AAgCgqaCgpSkgoKmgoYADBCCpoKmgqaCpoLKooKU", "46-48:1", "", "", "46:21")]
+[assembly: GoPositionMap("io/fs/readdir.go", "readdir.cs", "ABo6AAgCgqaCgpSkgoKmgoYAChCCpoKmgqaCpoKqooKU", "46-48:1", "", "", "45:21")]
 [assembly: GoPositionMap("io/fs/readfile.go", "readfile.cs", "ABhAAAoCgqaCgpSkgoKCgriCgoKClIKCgoKU", "", "", "", "45:21")]
 [assembly: GoPositionMap("io/fs/readlink.go", "readlink.cs", "ABY0soKClAACENKCgpQ=")]
 [assembly: GoPositionMap("io/fs/stat.go", "stat.cs", "ABAo4oKmgoKUkg==", "", "", "", "33:21")]
-[assembly: GoPositionMap("io/fs/sub.go", "sub.cs", "ABRGAA8CgpSClIKUpoKCgoIACBCSgpSokoKUgpSokoKCpuaCgoKUguaCgoKUgqaCgoKUguaCgoKUgoKU5oKCgpSCgpSmlIKUgqaCgoKCgpSU5qKClJKClA==")]
+[assembly: GoPositionMap("io/fs/sub.go", "sub.cs", "ABJGAA8CgpSClIKUpoKCgoIABhCSgpSokoKUgpSokoKCpuaCgoKUguaCgoKUgqaCgoKUguaCgoKUgoKU5oKCgpSCgpSmlIKUgqaCgoKCgpSU5qKClJKClA==")]
 [assembly: GoPositionMap("io/fs/walk.go", "walk.cs", "AA0eygAyaJKClJSmgpSCgoKUuIKCgoKUpgACHgAMAoKClJSClA==")]
 // </GoSourcePositionMaps>
 
 namespace go.io;
+
+using static go.io.fs_package;
 
 [GoPackage("fs")]
 public static partial class fs_package
@@ -133,8 +138,46 @@ public static partial class fs_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(fs_package.FileMode)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fsᴛFileMode;
-[GoMethodHost(typeof(fs_package.PathError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fsᴛPathError;
-[GoMethodHost(typeof(fs_package.dirInfo)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fsᴛdirInfo;
-[GoMethodHost(typeof(fs_package.subFS)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fsᴛsubFS;
+[GoMethodHost(typeof(fs_package.FileMode)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class fsᴛFileMode;
+[GoMethodHost(typeof(fs_package.PathError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class fsᴛPathError;
+[GoMethodHost(typeof(fs_package.dirInfo)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class fsᴛdirInfo;
+[GoMethodHost(typeof(fs_package.subFS)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class fsᴛsubFS;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class fsᴛFileMode {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this FileMode m) => fs_package.String⁔(m);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool IsDir(this FileMode m) => fs_package.IsDir⁔(m);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool IsRegular(this FileMode m) => fs_package.IsRegular⁔(m);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static FileMode Perm(this FileMode m) => fs_package.Perm⁔(m);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static FileMode Type(this FileMode m) => fs_package.Type⁔(m);
+}
+partial class fsᴛPathError {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this ref PathError e) => fs_package.Error⁔(ref e);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Unwrap(this ref PathError e) => fs_package.Unwrap⁔(ref e);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Timeout(this ref PathError e) => fs_package.Timeout⁔(ref e);
+}
+partial class fsᴛdirInfo {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool IsDir(this dirInfo di) => fs_package.IsDir⁔(di);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static FileMode Type(this dirInfo di) => fs_package.Type⁔(di);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (FileInfo, error) Info(this dirInfo di) => fs_package.Info⁔(di);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string Name(this dirInfo di) => fs_package.Name⁔(di);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string String(this dirInfo di) => fs_package.String⁔(di);
+}
+partial class fsᴛsubFS {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (@string, error) fullName(this ref subFS f, @string op, @string name) => fs_package.fullName⁔(ref f, op, name);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (@string rel, bool ok) shorten(this ref subFS f, @string name) => fs_package.shorten⁔(ref f, name);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error fixErr(this ref subFS f, error err) => fs_package.fixErr⁔(ref f, err);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (File, error) Open(this ref subFS f, @string name) => fs_package.Open⁔(ref f, name);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<DirEntry>, error) ReadDir(this ref subFS f, @string name) => fs_package.ReadDir⁔(ref f, name);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<byte>, error) ReadFile(this ref subFS f, @string name) => fs_package.ReadFile⁔(ref f, name);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (@string, error) ReadLink(this ref subFS f, @string name) => fs_package.ReadLink⁔(ref f, name);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (FileInfo, error) Lstat(this ref subFS f, @string name) => fs_package.Lstat⁔(ref f, name);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<@string>, error) Glob(this ref subFS f, @string pattern) => fs_package.Glob⁔(ref f, pattern);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (FS, error) Sub(this ж<subFS> Ꮡf, @string dir) => fs_package.Sub⁔(Ꮡf, dir);
+}
+// </MethodForwarders>

@@ -10,10 +10,16 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+using image = go.image_package;
+using io = go.io_package;
+using Δcolor = go.image.color_package;
 // </ImportedTypeAliases>
 
 using go;
 using static go.image.gif_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -66,11 +72,16 @@ using static go.image.gif_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("image/gif/reader.go", "reader.cs", "ABYqgoIAIlaCgoKUpoKCgpQAK16CgpSCgpSCpoKCgriCgoKCuIKCqqKClIKCgriCggACFgAIApSClKamgoKCgoKC3IKCgoKmyMSClKaUgoKUgqaCgoKUlILIgqaCyIKUpsqCgoKUgoKUgoKClIK4poKCgoKUkoKClKaCgoKUgpS06IKCprSUgoLcgoKClIKUgqaCgoKUgsqCgpSClIKCgoKClIKU5sKCgpSCgoKCpoKUlIKUlILcgoKClKaCgpSCpoKCkoKClAAMGoKClMqCgoK4goKC3IKmgoKCyoKCAAkGgoKUgoKCggARJIKU3IKCgpSClAAKEgAGELKCgoKCgoKCgoKCpqqigoKUACBGooKClAALGKqigoKU7oI=", "", "", "", "440:21")]
-[assembly: GoPositionMap("image/gif/writer.go", "writer.cs", "AB02goKUACREgqaCpoKCuIKCgriCgqqigoKmpqaClIKClMaCgpSmgoKUpoKClAAIBoKClIKCuIKClIKCgoKCgoKCgoKUuIKCgriCgoKCgoKCgpSCgoKCAAsIgoKUgoKUxoKUgpSCgpSClJTGgoKCgpYADAaygqaCgqaCgoKUgoKmgoKCgpSCgriCgoKCgpSUpoKUlIKUgoKCgoLcgoKUgoKClMqCpoK4goKUlIKCgoKCgoKmgoKCgriCABsowoKmgqa4gpSCgoKCgoK4gpSmgoKCgpSUgoLoxIKCpoKClIKUgqaCgoKCgoLKyoKClNyCgoKm", "", "", "250=Equal/2/2/1;513=Dx/1/1/5,Dy/1/1/6")]
+[assembly: GoPositionMap("image/gif/reader.go", "reader.cs", "ABUqgoIAIlaCgoKUpoKCgpQAKV6CgpSCgpSCpoKCgriCgoKCuIKCqqKClIKCgriCggACFgAIApSClKamgoKCgoKC3IKCgoKmqMSClKaUgoKUgqaCgoKUlILIgqaCyIKUpsqCgoKUgoKUgoKClIK4poKCgoKUkoKClKaCgoKUgpS06IKCprSUgoLcgoKClIKUgqaCgoKUgsqCgpSClIKCgoKClIKU5sKCgpSCgoKCpoKUlIKUlILcgoKClKaCgpSCpoKCkoKClAAMGoKClMqCgoK4goKC3IKmgoKCyoKCAAkGgoKUgoKCggARJIKU3IKCgpSClAAIEgAGELKCgoKCgoKCgoKCpqqigoKUACBGooKClAALGKqigoKU7oI=", "", "", "", "435:21")]
+[assembly: GoPositionMap("image/gif/writer.go", "writer.cs", "ABw2goKUACJEgqaCpoKCuIKCgriCgqqigoKmpqaClIKClKaCgpSmgoKUpoKClAAIBoKClIKCuIKClIKCgoKCgoKCgoKUuIKCgriCgoKCgoKCgpSCgoKCAAkIgoKUgoKUxoKUgpSCgpSClJSmgoKCgpYACgaygqaCgqaCgoKUgoKmgoKCgpSCgriCgoKCgpSUpoKUlIKUgoKCgoLcgoKUgoKClMqCpoK4goKUlIKCgoKCgoKmgoKCgriCABkowoKmgqa4gpSCgoKCgoK4gpSmgoKCgpSUgoLoxIKCpoKClIKUgqaCgoKCgoLKyoKClNyCgoKm", "", "", "241=Equal/2/2/1;500=Dx/1/1/5,Dy/1/1/6")]
 // </GoSourcePositionMaps>
 
 namespace go.image;
+
+using static go.image.gif_package;
+using image = go.image_package;
+using io = go.io_package;
+using Δcolor = go.image.color_package;
 
 [GoPackage("gif")]
 public static partial class gif_package
@@ -121,8 +132,46 @@ public static partial class gif_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(gif_package.blockReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class gifᴛblockReader;
-[GoMethodHost(typeof(gif_package.blockWriter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class gifᴛblockWriter;
-[GoMethodHost(typeof(gif_package.decoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class gifᴛdecoder;
-[GoMethodHost(typeof(gif_package.encoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class gifᴛencoder;
+[GoMethodHost(typeof(gif_package.blockReader)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class gifᴛblockReader;
+[GoMethodHost(typeof(gif_package.blockWriter)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class gifᴛblockWriter;
+[GoMethodHost(typeof(gif_package.decoder)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class gifᴛdecoder;
+[GoMethodHost(typeof(gif_package.encoder)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class gifᴛencoder;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class gifᴛblockReader {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void fill(this ref blockReader b) => gif_package.fill⁔(ref b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (byte, error) ReadByte(this ref blockReader b) => gif_package.ReadByte⁔(ref b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint, error) Read(this ref blockReader b, slice<byte> p) => gif_package.Read⁔(ref b, p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error close(this ref blockReader b) => gif_package.close⁔(ref b);
+}
+partial class gifᴛblockWriter {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void setup(this blockWriter b) => gif_package.setup⁔(b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error Flush(this blockWriter b) => gif_package.Flush⁔(b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error WriteByte(this blockWriter b, byte c) => gif_package.WriteByte⁔(b, c);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint, error) Write(this blockWriter b, slice<byte> data) => gif_package.Write⁔(b, data);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void close(this blockWriter b) => gif_package.close⁔(b);
+}
+partial class gifᴛdecoder {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error decode(this ж<decoder> Ꮡd, io.Reader r, bool configOnly, bool keepAllFrames) => gif_package.decode⁔(Ꮡd, r, configOnly, keepAllFrames);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error readHeaderAndScreenDescriptor(this ref decoder d) => gif_package.readHeaderAndScreenDescriptor⁔(ref d);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (Δcolor.Palette, error) readColorTable(this ref decoder d, byte fields) => gif_package.readColorTable⁔(ref d, fields);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error readExtension(this ref decoder d) => gif_package.readExtension⁔(ref d);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error readGraphicControl(this ref decoder d) => gif_package.readGraphicControl⁔(ref d);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error readImageDescriptor(this ж<decoder> Ꮡd, bool keepAllFrames) => gif_package.readImageDescriptor⁔(Ꮡd, keepAllFrames);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (ж<image.Paletted>, error) newImageFromDescriptor(this ref decoder d) => gif_package.newImageFromDescriptor⁔(ref d);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint, error) readBlock(this ref decoder d) => gif_package.readBlock⁔(ref d);
+}
+partial class gifᴛencoder {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void flush(this ref encoder e) => gif_package.flush⁔(ref e);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void write(this ref encoder e, slice<byte> p) => gif_package.write⁔(ref e, p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void writeByte(this ref encoder e, byte b) => gif_package.writeByte⁔(ref e, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void writeHeader(this ref encoder e) => gif_package.writeHeader⁔(ref e);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool colorTablesMatch(this ref encoder e, nint localLen, nint transparentIndex) => gif_package.colorTablesMatch⁔(ref e, localLen, transparentIndex);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void writeImageBlock(this ж<encoder> Ꮡe, ж<image.Paletted> Ꮡpm, nint delay, byte disposal) => gif_package.writeImageBlock⁔(Ꮡe, Ꮡpm, delay, disposal);
+}
+// </MethodForwarders>

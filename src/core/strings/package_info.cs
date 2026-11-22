@@ -10,10 +10,14 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+using io = go.io_package;
 // </ImportedTypeAliases>
 
 using go;
 using static go.strings_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -68,17 +72,20 @@ using static go.strings_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("strings/builder.go", "builder.cs", "ABxAAAgC3IKCupKogJqglpKCqqKCgqzSgoKUgrzCgoKqwoKCqsKCgoKqwoKC")]
+[assembly: GoPositionMap("strings/builder.go", "builder.cs", "ABlAAAgC3IKCupKogJqglpKCqqKCgqzSgoKUgrzCgoKqwoKCqsKCgoKqwoKC")]
 [assembly: GoPositionMap("strings/clone.go", "clone.cs", "AAoqAAoC")]
 [assembly: GoPositionMap("strings/compare.go", "compare.cs", "AAoe4g==")]
 [assembly: GoPositionMap("strings/iter.go", "iter.cs", "AAwk0oKCgoKUlIIABRCigoKCgoKUlJSCgoKUgoKUlAADEMKuwq7CgoKCgoKCgoKUgoKClJSClJSCAAQSwoKCgoKCgoKUlIKUlII=", "19-31:1;37-60:1;84-109:1;117-136:1")]
-[assembly: GoPositionMap("strings/reader.go", "reader.cs", "ABkyooKUrrCWwoKUgoKC6NSClIKUgoKUqJKCgpSCguiSgpSCgqjSgoKUgoKCAAgIkoKUgpSCggAICJKCgpS0tLSUgpSCqMKCgpSCgoKUgoKClKiAuJA=")]
-[assembly: GoPositionMap("strings/replace.go", "replace.cs", "ABpAAAgCgpTGgoKmgoKCpoKCgpSCuIKCgriCgoKUpqaCgpS4lJaosoKosoIAOG6igoKClKaEkoKCpoKCiLKClMqCgoKCgoKmuIKClJSCgpSUgoLY9oKCgoKCgoKCpoKUgoKClIKCgoKCgpSmAA8cgpSCgoK4gqaCgoKUgriUgpTskoKokoIACg6CxoKCgpTGgoKCpsKCkoKUgoKCgsqCgoKCgoKUgoKClIKClJSCgpQADBaCxoKCkoKCgpSCgoKClIKUgqaygpKCgoKUgoKClIKCgpSUgoIACxCCgoKCgoKUpoKUpqKCgoKCgpSCgoKCpoKCgoKmgoKCgqYAGzCCgpSCgpSCuoKClIK4gpSCgoKCgpSCpqaygoKCgoKUgoKCgqaCgoKCpoKCgpQ=")]
-[assembly: GoPositionMap("strings/search.go", "search.cs", "ADBggsq4gsqC3IKCgqamgoKUuKaigoKmyqKClIKCgpSClJQ=")]
-[assembly: GoPositionMap("strings/strings.go", "strings.cs", "ABcusoKClIKCgoKUgpSqtIKUgpSCgoKClIK6kqiSqJKokqiSgpSkpIKUpKaCgoKClIKUgoKCgoKmqJKuwoKUpIKCpqTagoKCgoKCgoKUpoKCpoKCgoKEppSEkoKmgoKCgoKCgqbYvKKUlJSCgpSUgoKCgqamgoKmrLKUlIKCgpSClJSCgoKCpqaCgoKUgoKCgqaUgoKCgqaokqqigpSClIKmgpSCgoKCgoKUgoKUggACHgALAAABGAAKAgACHgALAAABGAAKAqae9oKUgoKCgoKCppSmgoKClIKUgoKCgpSCgpSClJSClAAJFgAKBgAFFIKCgoK4poLcgriCgqaqopSkpoKCgpSUgoKUpoKCgoKClKiSqJKs/rSigoKmgoKCgqamgoKCpoK4gqaClLiCpsoAETjClKTcgpSCgpSUgriUlKSkpKQABBwACgKCgoKCuIKCgoKClKiSgoKCgoKUpoKClJiCgoKCgoKUgqaClJSokoKCgoKClKaCgpSYgoKCgoKClIKmgpSUqpCYorqiuqK6opSCgqaCgoKCgsqCpoKCgoKCgoKUgoKCgoKUlIKCpqq0gpSkpKSUpoKmAAIQAAgIgpSCgpSCzqKCgpSqooKCgpSUqqKqoqqirLKCgqassoKCgoKmAAwewoKCgpSUyJLKooKUgpSSlK7CgpSClJKUpoKClKaigoKUlKaCgoKClJSuwoKUgpSSlKaCgpSmooKClJSmgoKSgpSClJSsxIKmlIKUlIKCgpS4uKqiqqIAAhLigriCgoKokoKCgoKCgoKmgoKCgoKCpoIAAhDSrMSCgoKCgriCuIKmgpSmlIKCgrSCuILKgriCppSClMqCgpSClLiokq7CrsKuwg==", "874-881:1", "773=unicode.SpecialCase.ToUpper;779=unicode.SpecialCase.ToLower;785=unicode.SpecialCase.ToTitle")]
+[assembly: GoPositionMap("strings/reader.go", "reader.cs", "ABYyooKUrrCWwoKUgoKC6NSClIKUgoKUqJKCgpSCguiSgpSCgqjSgoKUgoKCAAgIkoKUgpSCggAICJKCgpS0tLSUgpSCqMKCgpSCgoKUgoKClKiAmJA=")]
+[assembly: GoPositionMap("strings/replace.go", "replace.cs", "ABlAAAgCgpSmgoKmgoKCpoKCgpSCuIKCgriCgoKUpqaCgpS4lJaosoKosoIANG6igoKClKaEkoKCpoKCiLKClMqCgoKCgoKmuIKClJSCgpSUgoK49oKCgoKCgoKCpoKUgoKClIKCgoKCgpSmAA0cgpSCgoK4gqaCgoKUgriUgpTMkoKokoLugqaCgoKUpoKCgqbCgpKClIKCgoLKgoKCgoKClIKCgpSCgpSUgoKUAAoWgqaCgpKCgoKUgoKCgpSClIKmsoKSgoKClIKCgpSCgoKUlIKCAAcQgoKCgoKClKaClKaigoKCgoKUgoKCgqaCgoKCpoKCgoKmABcwgoKUgoKUgrqCgpSCuIKUgoKCgoKUgqamsoKCgoKClIKCgoKmgoKCgqaCgoKU")]
+[assembly: GoPositionMap("strings/search.go", "search.cs", "AC5ggsq4gsqC3IKCgqamgoKUuKaigoKmqqKClIKCgpSClJQ=")]
+[assembly: GoPositionMap("strings/strings.go", "strings.cs", "ABYusoKClIKCgoKUgpSqtIKUgpSCgoKClIK6kqiSqJKokqiSgpSkpIKUpKaCgoKClIKUgoKCgoKmqJKuwoKUpIKCpqTagoKCgoKCgoKUpoKCpoKCgoKEppSEkoKmgoKCgoKCgqbYvKKUlJSCgpSUgoKCgqamgoKmrLKUlIKCgpSClJSCgoKCpqaCgoKUgoKCgqaUgoKCgqaokqqigpSClIKmgpSCgoKCgoKUgoKUggACHgALAAABGAAKAgACHgALAAABGAAKAqae9oKUgoKCgoKCppSmgoKClIKUgoKCgpSCgpSClJSClAAJFgAKBgAFFIKCgoK4poLcgriCgqaqopSkpoKCgpSUgoKUpoKCgoKClKiSqJKs/rSigoKmgoKCgqamgoKCpoK4gqaClLiCpsoAETjClKTcgpSCgpSUgriUlKSkpKQABBwACgKCgoKCuIKCgoKClKiSgoKCgoKUpoKClJiCgoKCgoKUgqaClJSokoKCgoKClKaCgpSYgoKCgoKClIKmgpSUqpCYorqiuqK6opSCgqaCgoKCgsqCpoKCgoKCgoKUgoKCgoKUlIKCpqq0gpSkpKSUpoKmAAIQAAgIgpSCgpSCzqKCgpSqooKCgpSUqqKqoqqirLKCgqassoKCgoKmAAwewoKCgpSUqJKqooKUgpSSlK7CgpSClJKUpoKClKaigoKUlKaCgoKClJSuwoKUgpSSlKaCgpSmooKClJSmgoKSgpSClJSsxIKmlIKUlIKCgpS4uKqiqqIAAhLigriCgoKokoKCgoKCgoKmgoKCgoKCpoIAAhDSrMSCgoKCgriCuIKmgpSmlIKCgrSCuILKgriCppSClMqCgpSClLiokq7CrsKuwg==", "874-881:1", "773=unicode.SpecialCase.ToUpper;779=unicode.SpecialCase.ToLower;785=unicode.SpecialCase.ToTitle")]
 // </GoSourcePositionMaps>
 
 namespace go;
+
+using static go.strings_package;
+using io = go.io_package;
 
 [GoPackage("strings")]
 public static partial class strings_package
@@ -133,16 +140,88 @@ public static partial class strings_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(strings_package.Builder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class stringsᴛBuilder;
-[GoMethodHost(typeof(strings_package.Reader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class stringsᴛReader;
-[GoMethodHost(typeof(strings_package.Replacer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class stringsᴛReplacer;
-[GoMethodHost(typeof(strings_package.appendSliceWriter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class stringsᴛappendSliceWriter;
-[GoMethodHost(typeof(strings_package.asciiSet)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class stringsᴛasciiSet;
-[GoMethodHost(typeof(strings_package.byteReplacer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class stringsᴛbyteReplacer;
-[GoMethodHost(typeof(strings_package.byteStringReplacer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class stringsᴛbyteStringReplacer;
-[GoMethodHost(typeof(strings_package.genericReplacer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class stringsᴛgenericReplacer;
-[GoMethodHost(typeof(strings_package.singleStringReplacer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class stringsᴛsingleStringReplacer;
-[GoMethodHost(typeof(strings_package.stringFinder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class stringsᴛstringFinder;
-[GoMethodHost(typeof(strings_package.stringWriter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class stringsᴛstringWriter;
-[GoMethodHost(typeof(strings_package.trieNode)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class stringsᴛtrieNode;
+[GoMethodHost(typeof(strings_package.Builder)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class stringsᴛBuilder;
+[GoMethodHost(typeof(strings_package.Reader)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class stringsᴛReader;
+[GoMethodHost(typeof(strings_package.Replacer)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class stringsᴛReplacer;
+[GoMethodHost(typeof(strings_package.appendSliceWriter)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class stringsᴛappendSliceWriter;
+[GoMethodHost(typeof(strings_package.asciiSet)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class stringsᴛasciiSet;
+[GoMethodHost(typeof(strings_package.byteReplacer)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class stringsᴛbyteReplacer;
+[GoMethodHost(typeof(strings_package.byteStringReplacer)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class stringsᴛbyteStringReplacer;
+[GoMethodHost(typeof(strings_package.genericReplacer)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class stringsᴛgenericReplacer;
+[GoMethodHost(typeof(strings_package.singleStringReplacer)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class stringsᴛsingleStringReplacer;
+[GoMethodHost(typeof(strings_package.stringFinder)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class stringsᴛstringFinder;
+[GoMethodHost(typeof(strings_package.stringWriter)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class stringsᴛstringWriter;
+[GoMethodHost(typeof(strings_package.trieNode)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class stringsᴛtrieNode;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class stringsᴛBuilder {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void copyCheck(this ж<Builder> Ꮡb) => strings_package.copyCheck⁔(Ꮡb);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this ref Builder b) => strings_package.String⁔(ref b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Len(this ref Builder b) => strings_package.Len⁔(ref b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Cap(this ref Builder b) => strings_package.Cap⁔(ref b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Reset(this ref Builder b) => strings_package.Reset⁔(ref b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void grow(this ref Builder b, nint n) => strings_package.grow⁔(ref b, n);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Grow(this ж<Builder> Ꮡb, nint n) => strings_package.Grow⁔(Ꮡb, n);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint, error) Write(this ж<Builder> Ꮡb, slice<byte> p) => strings_package.Write⁔(Ꮡb, p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error WriteByte(this ж<Builder> Ꮡb, byte c) => strings_package.WriteByte⁔(Ꮡb, c);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint, error) WriteRune(this ж<Builder> Ꮡb, rune r) => strings_package.WriteRune⁔(Ꮡb, r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint, error) WriteString(this ж<Builder> Ꮡb, @string s) => strings_package.WriteString⁔(Ꮡb, s);
+}
+partial class stringsᴛReader {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Len(this ref Reader r) => strings_package.Len⁔(ref r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static int64 Size(this ref Reader r) => strings_package.Size⁔(ref r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint n, error err) Read(this ref Reader r, slice<byte> b) => strings_package.Read⁔(ref r, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint n, error err) ReadAt(this ref Reader r, slice<byte> b, int64 off) => strings_package.ReadAt⁔(ref r, b, off);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (byte, error) ReadByte(this ref Reader r) => strings_package.ReadByte⁔(ref r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error UnreadByte(this ref Reader r) => strings_package.UnreadByte⁔(ref r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (rune ch, nint size, error err) ReadRune(this ref Reader r) => strings_package.ReadRune⁔(ref r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error UnreadRune(this ref Reader r) => strings_package.UnreadRune⁔(ref r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (int64, error) Seek(this ref Reader r, int64 offset, nint whence) => strings_package.Seek⁔(ref r, offset, whence);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (int64 n, error err) WriteTo(this ref Reader r, io.Writer w) => strings_package.WriteTo⁔(ref r, w);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Reset(this ref Reader r, @string s) => strings_package.Reset⁔(ref r, s);
+}
+partial class stringsᴛReplacer {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void buildOnce(this ref Replacer r) => strings_package.buildOnce⁔(ref r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static replacer build(this ref Replacer b) => strings_package.build⁔(ref b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Replace(this ж<Replacer> Ꮡr, @string s) => strings_package.Replace⁔(Ꮡr, s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint n, error err) WriteString(this ж<Replacer> Ꮡr, io.Writer w, @string s) => strings_package.WriteString⁔(Ꮡr, w, s);
+}
+partial class stringsᴛappendSliceWriter {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint, error) Write(this ref appendSliceWriter w, slice<byte> p) => strings_package.Write⁔(ref w, p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint, error) WriteString(this ref appendSliceWriter w, @string s) => strings_package.WriteString⁔(ref w, s);
+}
+partial class stringsᴛasciiSet {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool contains(this ref asciiSet @as, byte c) => strings_package.contains⁔(ref @as, c);
+}
+partial class stringsᴛbyteReplacer {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string Replace(this ref byteReplacer r, @string s) => strings_package.Replace⁔(ref r, s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) WriteString(this ref byteReplacer r, io.Writer w, @string s) => strings_package.WriteString⁔(ref r, w, s);
+}
+partial class stringsᴛbyteStringReplacer {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string Replace(this ref byteStringReplacer r, @string s) => strings_package.Replace⁔(ref r, s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) WriteString(this ref byteStringReplacer r, io.Writer w, @string s) => strings_package.WriteString⁔(ref r, w, s);
+}
+partial class stringsᴛgenericReplacer {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (@string val, nint keylen, bool found) lookup(this ж<genericReplacer> Ꮡr, @string s, bool ignoreRoot) => strings_package.lookup⁔(Ꮡr, s, ignoreRoot);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string Replace(this ж<genericReplacer> Ꮡr, @string s) => strings_package.Replace⁔(Ꮡr, s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) WriteString(this ж<genericReplacer> Ꮡr, io.Writer w, @string s) => strings_package.WriteString⁔(Ꮡr, w, s);
+}
+partial class stringsᴛsingleStringReplacer {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string Replace(this ref singleStringReplacer r, @string s) => strings_package.Replace⁔(ref r, s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) WriteString(this ref singleStringReplacer r, io.Writer w, @string s) => strings_package.WriteString⁔(ref r, w, s);
+}
+partial class stringsᴛstringFinder {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint next(this ref stringFinder f, @string text) => strings_package.next⁔(ref f, text);
+}
+partial class stringsᴛstringWriter {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint, error) WriteString(this stringWriter w, @string s) => strings_package.WriteString⁔(w, s);
+}
+partial class stringsᴛtrieNode {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void add(this ref trieNode t, @string key, @string val, nint priority, ж<genericReplacer> Ꮡr) => strings_package.add⁔(ref t, key, val, priority, Ꮡr);
+}
+// </MethodForwarders>

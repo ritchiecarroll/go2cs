@@ -14,6 +14,9 @@
 
 using go;
 using static go.crypto.x509.@internal.macos_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -57,7 +60,7 @@ using static go.crypto.x509.@internal.macos_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("crypto/x509/internal/macos/corefoundation.go", "corefoundation.cs", "AB0+koKCgqqigoKUgoKokoKCAAcUkoKigpSasoK0gpSYsqSClJT8koKkgpSUmJKClJiSgpSYkoKUmJKClJiSgpSYkpSYkpKUmJKUmJKClJiSgpSYkpTYkoKClJSWqrKCgpQ=")]
-[assembly: GoPositionMap("crypto/x509/internal/macos/security.go", "security.cs", "ACNKgsqSgqSClJSYsoKCpoKUxJiygoKClJKClMSYkoKClJSYkoKigpSUmJKCooKCgoKCgpSU2JKCgpSCgpSYkoKClJQ=")]
+[assembly: GoPositionMap("crypto/x509/internal/macos/security.go", "security.cs", "ACBKgqqSgqSClJSYsoKCpoKUxJiygoKClJKClMSYkoKClJSYkoKigpSUmJKCooKCgoKCgpSU2JKCgpSCgpSYkoKClJQ=")]
 // </GoSourcePositionMaps>
 
 // Dynamically imported C entry points are recorded here, one `GoCgoImportDynamic` attribute
@@ -95,6 +98,8 @@ using static go.crypto.x509.@internal.macos_package;
 // </CgoDynamicImports>
 
 namespace go.crypto.x509.@internal;
+
+using static go.crypto.x509.@internal.macos_package;
 
 [GoPackage("macos")]
 public static partial class macos_package
@@ -134,5 +139,15 @@ public static partial class macos_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(macos_package.OSStatus)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class macosᴛOSStatus;
+[GoMethodHost(typeof(macos_package.OSStatus)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class macosᴛOSStatus;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class macosᴛOSStatus {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this OSStatus s) => macos_package.Error⁔(s);
+}
+// </MethodForwarders>

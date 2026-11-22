@@ -10,10 +10,14 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+using io = go.io_package;
 // </ImportedTypeAliases>
 
 using go;
 using static go.net.textproto_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -69,14 +73,18 @@ using static go.net.textproto_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("net/textproto/header.go", "header.cs", "AA8aooKssgACENKClIKClAACENKClKiS")]
-[assembly: GoPositionMap("net/textproto/pipeline.go", "pipeline.cs", "ACRIsoKCgoKqoqqiqqKqogAQINKCgoKUgoKUgoKs0oKCgpSCgoKUgoKUgoI=")]
-[assembly: GoPositionMap("net/textproto/reader.go", "reader.cs", "ABUsAAke0sqigqiSgoKUrLKCgoKCgpSCpoKUgoKmAAIqABICgsqigoKUgoKClMqigoKUAAIQ0oK4goKUgqaC7oKChNyUgpSmgoKClIKClJSokoKCgpSUgoKUlKbSgoKUxtKCgpSCgoKClIKGlAAEKAAVAoKClAACOgAeAoKCgoKCgoKmgoKCgoKCgpSClIKUlAACJgASAoKCAAsS2AAIEIKCgoKCgpSUlIKClIKClLaCgpSCgpS2goK4goK2goKmgoK2goKUgraClIKUgpTKooKUgqa+sq7osoKCgoKCgpS4goKUlJTWAAMqABMCAAQQ8oKssoKCgpSmpoCCgoKClLaCgoK4goKUgoKUgoK4goK4lIKGtIKUgoKUyoKClKaCzpCasoKUprjUgoKClIKCgoKUlJSUlAAEFgAJBIKCgoKUgoKUgoKUlAAIGgAICgAXJgAGIAAMDAALCAACHAAKAoK4goKCpriClJSCpoLqgoKClIKUuIKUAAgQgoIAKFI=")]
-[assembly: GoPositionMap("net/textproto/textproto.go", "textproto.cs", "AC5WggAKDoIAECCSAAgQksqigoKUAAQ2ABwCgoKCgoKUyJKClIKUqJKClIKUpoKmgoI=", "", "", "79=NewReader/1/1/1,NewWriter/1/1/2")]
-[assembly: GoPositionMap("net/textproto/writer.go", "writer.cs", "ABQqkqaCtrKCgoIAAhQACQKCgqaCggARILKCgoKkgpSUpoKUgoK4goKmgpSUpqKClIK0gqSCpJQ=")]
+[assembly: GoPositionMap("net/textproto/header.go", "header.cs", "AAsaooKssgACENKClIKClAACENKClKiS")]
+[assembly: GoPositionMap("net/textproto/pipeline.go", "pipeline.cs", "ACFIsoKCgoKqoqqiqqKqogAMINKCgoKUgoKUgoKs0oKCgpSCgoKUgoKUgoI=")]
+[assembly: GoPositionMap("net/textproto/reader.go", "reader.cs", "ABQsAAke0qqigqiSgoKUrLKCgoKCgpSCpoKUgoKmAAIqABICgqqigoKUgoKClKqigoKUAAIQ0oK4goKUgqaC7oKChNyUgpSmgoKClIKClJSokoKCgpSUgoKUlKbSgoKUptKCgpSCgoKClIKGlAACKAAVAoKClAACOgAeAoKCgoKCgoKmgoKCgoKCgpSClIKUlAACJgASAoKCAAcS2AAIEIKCgoKCgpSUlIKClIKClLaCgpSCgpS2goK4goK2goKmgoK2goKUgraClIKUgpSqooKUgqa+sq7osoKCgoKCgpS4goKUlJS2AAEqABMCAAIQ8oKssoKCgpSmpoCCgoKClLaCgoK4goKUgoKUgoK4goK4lIKGtIKUgoKUyoKClKaCzpCasoKUppjUgoKClIKCgoKUlJSUlAACFgAJBIKCgoKUgoKUgoKUlAAIGgAICgAXJgAGIAAMDAALCAACHAAKAoK4goKCpriClJSCpoLqgoKClIKUuIKUAAgQgoIAKFI=")]
+[assembly: GoPositionMap("net/textproto/textproto.go", "textproto.cs", "ACtWgu6CAA4gkgAGEJKqooKClAACNgAcAoKCgoKClKiSgpSClKiSgpSClKaCpoKC", "", "", "70=NewReader/1/1/1,NewWriter/1/1/2")]
+[assembly: GoPositionMap("net/textproto/writer.go", "writer.cs", "ABMqkqaClrKCgoIAAhQACQKCgqaCggANILKCgoKkgpSUpoKUgoK4goKmgpSUpqKClIK0gqSCpJQ=")]
 // </GoSourcePositionMaps>
 
 namespace go.net;
+
+using static go.net.textproto_package;
+using io = go.io_package;
+using ꓸꓸꓸany = Span<any>;
 
 [GoPackage("textproto")]
 public static partial class textproto_package
@@ -127,14 +135,79 @@ public static partial class textproto_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(textproto_package.Conn)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class textprotoᴛConn;
-[GoMethodHost(typeof(textproto_package.Error)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class textprotoᴛError;
-[GoMethodHost(typeof(textproto_package.MIMEHeader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class textprotoᴛMIMEHeader;
-[GoMethodHost(typeof(textproto_package.Pipeline)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class textprotoᴛPipeline;
-[GoMethodHost(typeof(textproto_package.ProtocolError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class textprotoᴛProtocolError;
-[GoMethodHost(typeof(textproto_package.Reader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class textprotoᴛReader;
-[GoMethodHost(typeof(textproto_package.Writer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class textprotoᴛWriter;
-[GoMethodHost(typeof(textproto_package.dotReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class textprotoᴛdotReader;
-[GoMethodHost(typeof(textproto_package.dotWriter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class textprotoᴛdotWriter;
-[GoMethodHost(typeof(textproto_package.sequencer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class textprotoᴛsequencer;
+[GoMethodHost(typeof(textproto_package.Conn)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class textprotoᴛConn;
+[GoMethodHost(typeof(textproto_package.Error)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class textprotoᴛError;
+[GoMethodHost(typeof(textproto_package.MIMEHeader)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class textprotoᴛMIMEHeader;
+[GoMethodHost(typeof(textproto_package.Pipeline)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class textprotoᴛPipeline;
+[GoMethodHost(typeof(textproto_package.ProtocolError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class textprotoᴛProtocolError;
+[GoMethodHost(typeof(textproto_package.Reader)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class textprotoᴛReader;
+[GoMethodHost(typeof(textproto_package.Writer)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class textprotoᴛWriter;
+[GoMethodHost(typeof(textproto_package.dotReader)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class textprotoᴛdotReader;
+[GoMethodHost(typeof(textproto_package.dotWriter)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class textprotoᴛdotWriter;
+[GoMethodHost(typeof(textproto_package.sequencer)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class textprotoᴛsequencer;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class textprotoᴛConn {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Close(this ref Conn c) => textproto_package.Close⁔(ref c);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nuint id, error err) Cmd(this ж<Conn> Ꮡc, @string format, params ꓸꓸꓸany argsʗp) => textproto_package.Cmd⁔(Ꮡc, format, argsʗp);
+}
+partial class textprotoᴛError {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this ref Error e) => textproto_package.Error⁔(ref e);
+}
+partial class textprotoᴛMIMEHeader {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Add(this MIMEHeader h, @string key, @string value) => textproto_package.Add⁔(h, key, value);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Set(this MIMEHeader h, @string key, @string value) => textproto_package.Set⁔(h, key, value);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Get(this MIMEHeader h, @string key) => textproto_package.Get⁔(h, key);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<@string> Values(this MIMEHeader h, @string key) => textproto_package.Values⁔(h, key);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Del(this MIMEHeader h, @string key) => textproto_package.Del⁔(h, key);
+}
+partial class textprotoᴛPipeline {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nuint Next(this ж<Pipeline> Ꮡp) => textproto_package.Next⁔(Ꮡp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void StartRequest(this ж<Pipeline> Ꮡp, nuint id) => textproto_package.StartRequest⁔(Ꮡp, id);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void EndRequest(this ж<Pipeline> Ꮡp, nuint id) => textproto_package.EndRequest⁔(Ꮡp, id);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void StartResponse(this ж<Pipeline> Ꮡp, nuint id) => textproto_package.StartResponse⁔(Ꮡp, id);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void EndResponse(this ж<Pipeline> Ꮡp, nuint id) => textproto_package.EndResponse⁔(Ꮡp, id);
+}
+partial class textprotoᴛProtocolError {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this ProtocolError p) => textproto_package.Error⁔(p);
+}
+partial class textprotoᴛReader {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (@string, error) ReadLine(this ref Reader r) => textproto_package.ReadLine⁔(ref r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<byte>, error) ReadLineBytes(this ref Reader r) => textproto_package.ReadLineBytes⁔(ref r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<byte>, error) readLineSlice(this ref Reader r, int64 lim) => textproto_package.readLineSlice⁔(ref r, lim);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (@string, error) ReadContinuedLine(this ref Reader r) => textproto_package.ReadContinuedLine⁔(ref r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<byte>, error) ReadContinuedLineBytes(this ref Reader r) => textproto_package.ReadContinuedLineBytes⁔(ref r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<byte>, error) readContinuedLineSlice(this ref Reader r, int64 lim, Func<slice<byte>, error> validateFirstLine) => textproto_package.readContinuedLineSlice⁔(ref r, lim, validateFirstLine);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint skipSpace(this ref Reader r) => textproto_package.skipSpace⁔(ref r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint code, bool continued, @string message, error err) readCodeLine(this ref Reader r, nint expectCode) => textproto_package.readCodeLine⁔(ref r, expectCode);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint code, @string message, error err) ReadCodeLine(this ref Reader r, nint expectCode) => textproto_package.ReadCodeLine⁔(ref r, expectCode);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint code, @string message, error err) ReadResponse(this ref Reader r, nint expectCode) => textproto_package.ReadResponse⁔(ref r, expectCode);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static io.Reader DotReader(this ж<Reader> Ꮡr) => textproto_package.DotReader⁔(Ꮡr);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void closeDot(this ref Reader r) => textproto_package.closeDot⁔(ref r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<byte>, error) ReadDotBytes(this ж<Reader> Ꮡr) => textproto_package.ReadDotBytes⁔(Ꮡr);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<@string>, error) ReadDotLines(this ref Reader r) => textproto_package.ReadDotLines⁔(ref r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (MIMEHeader, error) ReadMIMEHeader(this ж<Reader> Ꮡr) => textproto_package.ReadMIMEHeader⁔(Ꮡr);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint /*n*/ upcomingHeaderKeys(this ref Reader r) => textproto_package.upcomingHeaderKeys⁔(ref r);
+}
+partial class textprotoᴛWriter {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error PrintfLine(this ref Writer w, @string format, params ꓸꓸꓸany argsʗp) => textproto_package.PrintfLine⁔(ref w, format, argsʗp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static io.WriteCloser DotWriter(this ж<Writer> Ꮡw) => textproto_package.DotWriter⁔(Ꮡw);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void closeDot(this ref Writer w) => textproto_package.closeDot⁔(ref w);
+}
+partial class textprotoᴛdotReader {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) Read(this ж<dotReader> Ꮡd, slice<byte> b) => textproto_package.Read⁔(Ꮡd, b);
+}
+partial class textprotoᴛdotWriter {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) Write(this ref dotWriter d, slice<byte> b) => textproto_package.Write⁔(ref d, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error Close(this ж<dotWriter> Ꮡd) => textproto_package.Close⁔(Ꮡd);
+}
+partial class textprotoᴛsequencer {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void Start(this ж<sequencer> Ꮡs, nuint id) => textproto_package.Start⁔(Ꮡs, id);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void End(this ж<sequencer> Ꮡs, nuint id) => textproto_package.End⁔(Ꮡs, id);
+}
+// </MethodForwarders>

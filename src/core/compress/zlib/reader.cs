@@ -33,7 +33,6 @@ using io = io_package;
 using encoding;
 using go.compress;
 using go.hash;
-using static zlib_package;
 
 partial class zlib_package {
 
@@ -89,9 +88,7 @@ public static (io.ReadCloser, error) NewReaderDict(io.Reader r, slice<byte> dict
     return (new readerжReadCloser(z), default);
 }
 
-} partial class zlibᴛreader {
-
-internal static (nint, error) Read(this ref reader z, slice<byte> p) {
+internal static (nint, error) Read⁔(/*this*/ ref reader z, slice<byte> p) {
     if (z.err != nil) {
         return (0, z.err);
     }
@@ -124,7 +121,7 @@ internal static (nint, error) Read(this ref reader z, slice<byte> p) {
 // Calling Close does not close the wrapped [io.Reader] originally passed to [NewReader].
 // In order for the ZLIB checksum to be verified, the reader must be
 // fully consumed until the [io.EOF].
-internal static error Close(this ref reader z) {
+internal static error Close⁔(/*this*/ ref reader z) {
     if (z.err != nil && !AreEqual(z.err, io.EOF)) {
         return z.err;
     }
@@ -132,7 +129,7 @@ internal static error Close(this ref reader z) {
     return z.err;
 }
 
-internal static error Reset(this ref reader z, io.Reader r, slice<byte> dict) {
+internal static error Reset⁔(/*this*/ ref reader z, io.Reader r, slice<byte> dict) {
     z.AssignFrom(new reader(decompressor: z.decompressor));
     var (fr, ok) = r._<flate.Reader>(ᐧ); if (ok) {
         z.r = fr;
@@ -182,4 +179,4 @@ internal static error Reset(this ref reader z, io.Reader r, slice<byte> dict) {
     return default;
 }
 
-}
+} // end zlib_package

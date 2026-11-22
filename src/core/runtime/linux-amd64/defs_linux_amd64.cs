@@ -3,7 +3,6 @@
 namespace go;
 
 using @unsafe = unsafe_package;
-using static runtime_package;
 
 partial class runtime_package {
 
@@ -100,28 +99,20 @@ partial struct timespec {
     internal int64 tv_nsec;
 }
 
-} partial class runtimeᴛtimespec {
-
 //go:nosplit
-internal static void setNsec(this ref timespec ts, int64 ns) {
+internal static void setNsec⁔(/*this*/ ref timespec ts, int64 ns) {
     ts.tv_sec = ns / 1000000000;
     ts.tv_nsec = ns % 1000000000;
 }
-
-} partial class runtime_package {
 
 partial struct timeval {
     internal int64 tv_sec;
     internal int64 tv_usec;
 }
 
-} partial class runtimeᴛtimeval {
-
-internal static void set_usec(this ref timeval tv, int32 x) {
+internal static void set_usec⁔(/*this*/ ref timeval tv, int32 x) {
     tv.tv_usec = (int64)x;
 }
-
-} partial class runtime_package {
 
 partial struct sigactiont {
     internal uintptr sa_handler;

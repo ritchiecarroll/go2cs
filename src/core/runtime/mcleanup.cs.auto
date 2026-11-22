@@ -18,7 +18,6 @@ using sys = @internal.runtime.sys_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
-using static runtime_package;
 
 partial class runtime_package {
 
@@ -226,13 +225,11 @@ partial struct Cleanup {
     internal uintptr ptr;
 }
 
-} partial class runtimeᴛCleanup {
-
 // Stop cancels the cleanup call. Stop will have no effect if the cleanup call
 // has already been queued for execution (because ptr became unreachable).
 // To guarantee that Stop removes the cleanup function, the caller must ensure
 // that the pointer that was passed to AddCleanup is reachable across the call to Stop.
-public static void Stop(this Cleanup c) {
+internal static void Stop⁔(/*this*/ Cleanup c) {
     if (c.id == 0) {
         // id is set to zero when the cleanup is a noop.
         return;
@@ -295,8 +292,6 @@ public static void Stop(this Cleanup c) {
     }
 }
 
-} partial class runtime_package {
-
 internal static UntypedInt cleanupBlockSize => 512;
 
 // cleanupBlock is an block of cleanups to be executed.
@@ -338,8 +333,6 @@ partial struct cleanupBlockHeader {
     internal uint32 n;
 }
 
-} partial class runtimeᴛcleanupBlock {
-
 // enqueue pushes a single cleanup function into the block.
 //
 // Returns if this enqueue call filled the block. This is odd,
@@ -348,24 +341,24 @@ partial struct cleanupBlockHeader {
 //
 // Must only be called if the GC is in the sweep phase (gcphase == _GCoff),
 // because it does not synchronize with the garbage collector.
-internal static bool enqueue(this ref cleanupBlock b, cleanupFn c) {
+internal static bool enqueue⁔(/*this*/ ref cleanupBlock b, cleanupFn c) {
     b.cleanups[b.n] = c;
     b.n++;
     return b.full();
 }
 
 // full returns true if the cleanup block is full.
-internal static bool full(this ref cleanupBlock b) {
+internal static bool full⁔(/*this*/ ref cleanupBlock b) {
     return b.n == (uint32)len(b.cleanups);
 }
 
 // empty returns true if the cleanup block is empty.
-internal static bool empty(this ref cleanupBlock b) {
+internal static bool empty⁔(/*this*/ ref cleanupBlock b) {
     return b.n == 0;
 }
 
 // take moves as many cleanups as possible from b into a.
-internal static void take(this ref cleanupBlock a, ж<cleanupBlock> Ꮡb) {
+internal static void take⁔(/*this*/ ref cleanupBlock a, ж<cleanupBlock> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var dst = a.cleanups.slice((nint)(a.n));
@@ -382,8 +375,6 @@ internal static void take(this ref cleanupBlock a, ж<cleanupBlock> Ꮡb) {
         b.n -= (uint32)len(dst);
     }
 }
-
-} partial class runtime_package {
 
 // cleanupQueue is a queue of ready-to-run cleanup functions.
 partial struct cleanupQueue {
@@ -447,16 +438,14 @@ partial struct cleanupQueue {
     internal atomic.Uint64 executed;
 }
 
-} partial class runtimeᴛcleanupQueue {
-
 // addWork indicates that n units of parallelizable work have been added to the queue.
-internal static void addWork(this ж<cleanupQueue> Ꮡq, nint n) {
+internal static void addWork⁔(/*this*/ ж<cleanupQueue> Ꮡq, nint n) {
     Ꮡq.of(cleanupQueue.ᏑworkUnits).Add((int64)n);
 }
 
 // tryTakeWork is an attempt to dequeue some work by a cleanup goroutine.
 // This might fail if there's no work to do.
-internal static bool tryTakeWork(this ж<cleanupQueue> Ꮡq) {
+internal static bool tryTakeWork⁔(/*this*/ ж<cleanupQueue> Ꮡq) {
     for (;;) {
         var wu = Ꮡq.of(cleanupQueue.ᏑworkUnits).Load();
         if (wu == 0) {
@@ -472,7 +461,7 @@ internal static bool tryTakeWork(this ж<cleanupQueue> Ꮡq) {
 // enqueue queues a single cleanup for execution.
 //
 // Called by the sweeper, and only the sweeper.
-internal static void enqueue(this ж<cleanupQueue> Ꮡq, cleanupFn c) {
+internal static void enqueue⁔(/*this*/ ж<cleanupQueue> Ꮡq, cleanupFn c) {
     var mp = acquirem();
     var pp = (~mp).p.ptr();
     var b = pp.Value.cleanups;
@@ -504,7 +493,7 @@ internal static void enqueue(this ж<cleanupQueue> Ꮡq, cleanupFn c) {
 
 // dequeue pops a block of cleanups from the queue. Blocks until one is available
 // and never returns nil.
-internal static ж<cleanupBlock> dequeue(this ж<cleanupQueue> Ꮡq) {
+internal static ж<cleanupBlock> dequeue⁔(/*this*/ ж<cleanupQueue> Ꮡq) {
     ref var q = ref Ꮡq.DerefOrNull();
 
     for (;;) {
@@ -545,7 +534,7 @@ internal static ж<cleanupBlock> dequeue(this ж<cleanupQueue> Ꮡq) {
 // Must only be called at a point when we can guarantee that no more cleanups
 // are being queued, such as after the final sweeper for the cycle is done
 // but before the next mark phase.
-internal static void flush(this ж<cleanupQueue> Ꮡq) {
+internal static void flush⁔(/*this*/ ж<cleanupQueue> Ꮡq) {
     var mp = acquirem();
     nint flushed = 0;
     nint emptied = 0;
@@ -601,14 +590,14 @@ internal static void flush(this ж<cleanupQueue> Ꮡq) {
 }
 
 // needsWake returns true if cleanup goroutines may need to be awoken or created to handle cleanup load.
-internal static bool needsWake(this ж<cleanupQueue> Ꮡq) {
+internal static bool needsWake⁔(/*this*/ ж<cleanupQueue> Ꮡq) {
     return Ꮡq.of(cleanupQueue.ᏑworkUnits).Load() > 0 && (Ꮡq.of(cleanupQueue.Ꮡasleep).Load() > 0 || Ꮡq.of(cleanupQueue.Ꮡng).Load() < maxCleanupGs());
 }
 
 // wake wakes up one or more goroutines to process the cleanup queue. If there aren't
 // enough sleeping goroutines to handle the demand, wake will arrange for new goroutines
 // to be created.
-internal static void wake(this ж<cleanupQueue> Ꮡq) {
+internal static void wake⁔(/*this*/ ж<cleanupQueue> Ꮡq) {
     ref var q = ref Ꮡq.DerefOrNull();
 
     @lock(Ꮡq.of(cleanupQueue.Ꮡlock));
@@ -662,7 +651,7 @@ internal static void wake(this ж<cleanupQueue> Ꮡq) {
     return;
 }
 
-internal static bool needG(this ж<cleanupQueue> Ꮡq) {
+internal static bool needG⁔(/*this*/ ж<cleanupQueue> Ꮡq) {
     var have = Ꮡq.of(cleanupQueue.Ꮡng).Load();
     if (have >= maxCleanupGs()) {
         return false;
@@ -674,7 +663,7 @@ internal static bool needG(this ж<cleanupQueue> Ꮡq) {
     return Ꮡq.of(cleanupQueue.Ꮡneedg).Load() > 0;
 }
 
-internal static partial void createGs(this ж<cleanupQueue> Ꮡq) {
+internal static partial void createGs⁔(/*this*/ ж<cleanupQueue> Ꮡq) {
     @lock(Ꮡq.of(cleanupQueue.Ꮡlock));
     var have = Ꮡq.of(cleanupQueue.Ꮡng).Load();
     var need = min(Ꮡq.of(cleanupQueue.Ꮡneedg).Swap(0), maxCleanupGs() - have);
@@ -692,7 +681,7 @@ internal static partial void createGs(this ж<cleanupQueue> Ꮡq) {
     }
 }
 
-internal static void beginRunningCleanups(this ж<cleanupQueue> Ꮡq) {
+internal static void beginRunningCleanups⁔(/*this*/ ж<cleanupQueue> Ꮡq) {
     // Update runningCleanups and running atomically with respect
     // to goroutine profiles by disabling preemption.
     var mp = acquirem();
@@ -701,7 +690,7 @@ internal static void beginRunningCleanups(this ж<cleanupQueue> Ꮡq) {
     releasem(ref (mp).DerefOrNull());
 }
 
-internal static void endRunningCleanups(this ж<cleanupQueue> Ꮡq) {
+internal static void endRunningCleanups⁔(/*this*/ ж<cleanupQueue> Ꮡq) {
     // Update runningCleanups and running atomically with respect
     // to goroutine profiles by disabling preemption.
     var mp = acquirem();
@@ -710,7 +699,7 @@ internal static void endRunningCleanups(this ж<cleanupQueue> Ꮡq) {
     releasem(ref (mp).DerefOrNull());
 }
 
-internal static (uint64 queued, uint64 executed) readQueueStats(this ж<cleanupQueue> Ꮡq) {
+internal static (uint64 queued, uint64 executed) readQueueStats⁔(/*this*/ ж<cleanupQueue> Ꮡq) {
     uint64 queued = default;
     uint64 executed = default;
     ref var q = ref Ꮡq.DerefOrNull();
@@ -726,8 +715,6 @@ internal static (uint64 queued, uint64 executed) readQueueStats(this ж<cleanupQ
     }
     return (queued, executed);
 }
-
-} partial class runtime_package {
 
 internal static uint32 maxCleanupGs() {
     // N.B. Left as a function to make changing the policy easier.
@@ -783,13 +770,11 @@ internal static void runCleanups() {
     }
 }
 
-} partial class runtimeᴛcleanupQueue {
-
 // blockUntilEmpty blocks until either the cleanup queue is emptied
 // and the cleanups have been executed, or the timeout is reached.
 // Returns true if the cleanup queue was emptied.
 // This is used by the sync and unique tests.
-internal static bool blockUntilEmpty(this ж<cleanupQueue> Ꮡq, int64 timeout) {
+internal static bool blockUntilEmpty⁔(/*this*/ ж<cleanupQueue> Ꮡq, int64 timeout) {
     ref var q = ref Ꮡq.DerefOrNull();
 
     var start = nanotime();
@@ -806,8 +791,6 @@ internal static bool blockUntilEmpty(this ж<cleanupQueue> Ꮡq, int64 timeout) 
     }
     return false;
 }
-
-} partial class runtime_package {
 
 //go:linkname unique_runtime_blockUntilEmptyCleanupQueue unique.runtime_blockUntilEmptyCleanupQueue
 public static bool unique_runtime_blockUntilEmptyCleanupQueue(int64 timeout) {

@@ -12,7 +12,6 @@ using io = io_package;
 using encoding;
 using go.compress;
 using go.hash;
-using static zlib_package;
 
 partial class zlib_package {
 
@@ -73,12 +72,10 @@ public static (ж<Writer>, error) NewWriterLevelDict(io.Writer w, nint level, sl
     )), default);
 }
 
-} partial class zlibᴛWriter {
-
 // Reset clears the state of the [Writer] z such that it is equivalent to its
 // initial state from [NewWriterLevel] or [NewWriterLevelDict], but instead writing
 // to w.
-public static void Reset(this ref Writer z, io.Writer w) {
+internal static void Reset⁔(/*this*/ ref Writer z, io.Writer w) {
     z.w = w;
     // z.level and z.dict left unchanged.
     if (z.compressor != nil) {
@@ -93,7 +90,7 @@ public static void Reset(this ref Writer z, io.Writer w) {
 }
 
 // writeHeader writes the ZLIB header.
-internal static error /*err*/ writeHeader(this ref Writer z) {
+internal static error /*err*/ writeHeader⁔(/*this*/ ref Writer z) {
     error err = default;
 
     z.wroteHeader = true;
@@ -155,7 +152,7 @@ internal static error /*err*/ writeHeader(this ref Writer z) {
 // Write writes a compressed form of p to the underlying [io.Writer]. The
 // compressed bytes are not necessarily flushed until the [Writer] is closed or
 // explicitly flushed.
-public static (nint n, error err) Write(this ref Writer z, slice<byte> p) {
+internal static (nint n, error err) Write⁔(/*this*/ ref Writer z, slice<byte> p) {
     nint n = default;
     error err = default;
 
@@ -178,7 +175,7 @@ public static (nint n, error err) Write(this ref Writer z, slice<byte> p) {
 }
 
 // Flush flushes the Writer to its underlying [io.Writer].
-public static error Flush(this ref Writer z) {
+internal static error Flush⁔(/*this*/ ref Writer z) {
     if (!z.wroteHeader) {
         z.err = z.writeHeader();
     }
@@ -191,7 +188,7 @@ public static error Flush(this ref Writer z) {
 
 // Close closes the Writer, flushing any unwritten data to the underlying
 // [io.Writer], but does not close the underlying io.Writer.
-public static error Close(this ref Writer z) {
+internal static error Close⁔(/*this*/ ref Writer z) {
     if (!z.wroteHeader) {
         z.err = z.writeHeader();
     }
@@ -209,4 +206,4 @@ public static error Close(this ref Writer z) {
     return z.err;
 }
 
-}
+} // end zlib_package

@@ -10,10 +10,15 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+using io = go.io_package;
+using syntax = go.regexp.syntax_package;
 // </ImportedTypeAliases>
 
 using go;
 using static go.regexp_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -73,13 +78,17 @@ using static go.regexp_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("regexp/backtrack.go", "backtrack.cs", "AC9igoKClKaigqqigpSqoszSlIKUpoKClIKmgpSUgqaClJSCvKKCgpSCquaC2sKUgoKUgoKCAAgSgoKClISUlLQACxSUgoKUgoLapoKCgraCgraCgpSCgraCgpSCgraCgpSCgraCgpSCgraUgpSUgpSCyIKClIK2gtqC3IKUgriCuIK4yKiygoKUlKaCgqaCgpSCggAIFIKClIKCgpSmgpSUlJSCpoKCgg==")]
-[assembly: GoPositionMap("regexp/exec.go", "exec.cs", "ADlwooKmooKmooKCgqamgoKClLiCgpSClMaCgpSqooKCgpSClIIACxSCxoKClIKCgpSUgoKUlIKUgoKClJSCgpSUgpSClJTM0oKClIKClIKCkoKClIKClJSCgpSUlJSUgoKUgoKmgoKUlIKCgpSmlIKCgpSUgqiygoKmAAIQ8oKCgoKClIKClIKClLaCgpSUgoKmlLa0tLSkgpSCpq7ygoKUgqaCgoKCgpSClPiCgrSCgsaCtIKCgoKUgsaClJSClIKkAAwUgoKClKaigsiygoKmgoKUpoKCppSCkoKClIKClJSClJaClIKCgoKUgoKClLSCgoKUtILGggAICoLYgrS0tIKUtIKUpIKUgoKCgriCgoKmgoKokq7ilKaCpoKUgqaClIKCgqaCgg==", "", "", "490=canCheckPrefix/1/1/1")]
-[assembly: GoPositionMap("regexp/onepass.go", "onepass.cs", "ACVSAAkCgoKUgoKCgqaCqJKCgpSGlK7igoKUgpSmgoKUpAALFIKmooKCpoKCpoKClKaCgriCgpSCgsaCAAwcgpbSgoKClJaCgoKCgoK4goKClIKCgoKmgpS0tLSkgqbYkoLGtILcksqCAAcQgpTGgpSCgoKCgqaUlLiCgoKCgoKClILKgsimgp4ACASCpgAGEsKCgoKUgpSUgoKCgqaCgpSCgriUgoLGgpSCgoLGgoKCgoLGtIKClIKCgoKUgoKCgoKUlJSCgoKUtIKClIKUgoKCgpSUlIKCgpS0goKUgoK0goKUgoKCgramgoKCgoKCgoKmgoKmruKCpoSUgoKCgsqCgpSCxoLGgoKU7KaUgpQ=", "170-175:1;178-187:2;308-434:1", "", "", "", "185:21,186:13")]
-[assembly: GoPositionMap("regexp/regexp.go", "regexp.cs", "AGnOAZIAAhYACAKCAAQaAAoCAAIsABMCAAQS4saCgoKUgpSCgoKUgoKUAAoWgoKUlKaCpoKCgpSUAAgU3tKCgpSCgoKCgtyCgpSCgpSosoKCgsiSlKSkgoKClKakpKSCgpSkgoKCgoKmvrKCgpSssoKClKaCgpTIkgACENIAAhTygoKCuAAXKIKClKaCpqKmoqaClIKmgpQACxCCgpSmgqaipqKmgpSCpoKUAA0UgoKWgoKClIKmgqaCpoKmgsyyqqKqoqqizNKCgpSs0oKClKzSgoKUzNKCgpSGrLIAAhLChqaigoKCgoKUlIKmgoKCgriClO6ClJaSgpSUgoKmlMqClKas0oKClIKigpSUrLIAAxLCAAgSkqaCgr60koKCuIKmgoKCgoKClIKUAAQQ0pSUgoKUrNKCgpSmgoKCpoKUppSCgoKUgpSClKaUlIKCzqKCgoKUrsKCgpQAAhDSgoKClK7CgoKUAAIQ0oKClAACEPKCgoKUgoKCpgACKAARAqyypoKCgoKUgoKUgoKUgpSClIKCgoKUuIKCgpSUyoLMAAgCgpSCgoKUgoKCgpSUlJSCgpSUuIKCgoKUpoKmgoIABBDyAAIQ8oKCgpSCgoKmAAIQ8gACEPIACBLCgpSCkoKUlK7CgpSCgoKUlK7CgpSCgoKUlK7CgpSCgoKUlK7CgpSCkoKUgoKCppSuwoKUgoKClJSuwoKUgoKClIKCgqaUAAIQ0oKUgoKClJQAAiYAEgSCpoKmgpSCgoKCpoKClKaCpgACEuKuwqqigoKUgg==", "557-559:1;567-569:1;577-579:1;657-662:1;670-672:1;680-682:1;1062-1067:1;1080-1085:1;1098-1103:1;1116-1121:1;1134-1145:1;1158-1163:1;1176-1187:1;1201-1206:1", "", "194=compileOnePass/1/1/3,StartCond/1/1/6,minInputLen/1/1/9")]
+[assembly: GoPositionMap("regexp/backtrack.go", "backtrack.cs", "AC5igoKClKaigqqigpSqoqzSlIKUpoKClIKmgpSUgqaClJSCvKKCgpSCquaCusKUgoKUgoKCAAgSgoKClISUlLQACxSUgoKUgoLapoKCgraCgraCgpSCgraCgpSCgraCgpSCgraCgpSCgraUgpSUgpSCyIKClIK2gtqC3IKUgriCuIK4yKiygoKUlKaCgqaCgpSCggAIFIKClIKCgpSmgpSUlJSCpoKCgg==")]
+[assembly: GoPositionMap("regexp/exec.go", "exec.cs", "ADZwooKmooKmooKCgqamgoKClLiCgpSClKaCgpSqooKCgpSClIIACRSCpoKClIKCgpSUgoKUlIKUgoKClJSCgpSUgpSClJSs0oKClIKClIKCkoKClIKClJSCgpSUlJSUgoKUgoKmgoKUlIKCgpSmlIKCgpSUgqiygoKmAAIQ8oKCgoKClIKClIKClLaCgpSUgoKmlLa0tLSkgpSCpq7ygoKUgqaCgoKCgpSClPiCgrSCgsaCtIKCgoKUgsaClJSClIKkAAoUgoKClKaigqiygoKmgoKUpoKCppSCkoKClIKClJSClJaClIKCgoKUgoKClLSCgoKUtILGggAICoLYgrS0tIKUtIKUpIKUgoKCgriCgoKmgoKokq7ilKaCpoKUgqaClIKCgqaCgg==", "", "", "475=canCheckPrefix/1/1/1")]
+[assembly: GoPositionMap("regexp/onepass.go", "onepass.cs", "ACRSAAkCgoKUgoKCgqaCqJKCgpSGlK7igoKUgpSmgoKUpAAJFIKmooKCpoKCpoKClKaCgriCgpSCgqaCAAwcgpbSgoKClJaCgoKCgoK4goKClIKCgoKmgpS0tLSkgqbYkoLGtILcksqCAAcQgpTGgpSCgoKCgqaUlLiCgoKCgoKClILKgsimgp4ACASCpgAGEsKCgoKUgpSUgoKCgqaCgpSCgriUgoLGgpSCgoLGgoKCgoLGtIKClIKCgoKUgoKCgoKUlJSCgoKUtIKClIKUgoKCgpSUlIKCgpS0goKUgoK0goKUgoKCgramgoKCgoKCgoKmgoKmruKCpoSUgoKCgsqCgpSCxoLGgoKU7KaUgpQ=", "170-175:1;178-187:2;308-434:1", "", "", "", "180:21,181:13")]
+[assembly: GoPositionMap("regexp/regexp.go", "regexp.cs", "AGbOAZIAAhYACAKCAAIaAAoCAAIsABMCAAIS4qaCgoKUgpSCgoKUgoKUAAoWgoKUlKaCpoKCgpSUAAgUvtKCgpSCgoKCgtyCgpSCgpSosoKCgqiSlKSkgoKClKakpKSCgpSkgoKCgoKmvrKCgpSssoKClKaCgpSokgACENIAAhTygoKCuAATKIKClKaCpqKmoqaClIKmgpQABxCCgpSmgqaipqKmgpSCpoKUAAkUgoKWgoKClIKmgqaCpoKmgqyyqqKqoqqirNKCgpSs0oKClKzSgoKUrNKCgpSGrLIAAhLChqaigoKCgoKUlIKmgoKCgriClO6ClJaSgpSUgoKmlMqClKas0oKClIKigpSUrLIAAxLCAAYSkqaCgr60koKCuIKmgoKCgoKClIKUAAIQ0pSUgoKUrNKCgpSmgoKCpoKUppSCgoKUgpSClKaUlIKCzqKCgoKUrsKCgpQAAhDSgoKClK7CgoKUAAIQ0oKClAACEPKCgoKUgoKCpgACKAARAqyypoKCgoKUgoKUgoKUgpSClIKCgoKUuIKCgpSUyoKsAAgCgpSCgoKUgoKCgpSUlJSCgpSUuIKCgoKUpoKmgoIAAhDyAAIQ8oKCgpSCgoKmAAIQ8gACEPIABBLCgpSCkoKUlK7CgpSCgoKUlK7CgpSCgoKUlK7CgpSCgoKUlK7CgpSCkoKUgoKCppSuwoKUgoKClJSuwoKUgoKClIKCgqaUAAIQ0oKUgoKClJQAAiYAEgSCpoKmgpSCgoKCpoKClKaCpgACEuKuwqqigoKUgg==", "557-559:1;567-569:1;577-579:1;657-662:1;670-672:1;680-682:1;1062-1067:1;1080-1085:1;1098-1103:1;1116-1121:1;1134-1145:1;1158-1163:1;1176-1187:1;1201-1206:1", "", "185=compileOnePass/1/1/3,StartCond/1/1/6,minInputLen/1/1/9")]
 // </GoSourcePositionMaps>
 
 namespace go;
+
+using static go.regexp_package;
+using io = go.io_package;
+using syntax = go.regexp.syntax_package;
 
 [GoPackage("regexp")]
 public static partial class regexp_package
@@ -136,13 +145,125 @@ public static partial class regexp_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(regexp_package.Regexp)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class regexpᴛRegexp;
-[GoMethodHost(typeof(regexp_package.bitState)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class regexpᴛbitState;
-[GoMethodHost(typeof(regexp_package.inputBytes)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class regexpᴛinputBytes;
-[GoMethodHost(typeof(regexp_package.inputReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class regexpᴛinputReader;
-[GoMethodHost(typeof(regexp_package.inputString)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class regexpᴛinputString;
-[GoMethodHost(typeof(regexp_package.inputs)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class regexpᴛinputs;
-[GoMethodHost(typeof(regexp_package.lazyFlag)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class regexpᴛlazyFlag;
-[GoMethodHost(typeof(regexp_package.machine)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class regexpᴛmachine;
-[GoMethodHost(typeof(regexp_package.queueOnePass)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class regexpᴛqueueOnePass;
+[GoMethodHost(typeof(regexp_package.Regexp)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class regexpᴛRegexp;
+[GoMethodHost(typeof(regexp_package.bitState)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class regexpᴛbitState;
+[GoMethodHost(typeof(regexp_package.inputBytes)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class regexpᴛinputBytes;
+[GoMethodHost(typeof(regexp_package.inputReader)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class regexpᴛinputReader;
+[GoMethodHost(typeof(regexp_package.inputString)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class regexpᴛinputString;
+[GoMethodHost(typeof(regexp_package.inputs)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class regexpᴛinputs;
+[GoMethodHost(typeof(regexp_package.lazyFlag)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class regexpᴛlazyFlag;
+[GoMethodHost(typeof(regexp_package.machine)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class regexpᴛmachine;
+[GoMethodHost(typeof(regexp_package.queueOnePass)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class regexpᴛqueueOnePass;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class regexpᴛRegexp {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool tryBacktrack(this ж<Regexp> Ꮡre, ж<bitState> Ꮡb, input i, uint32 pc, nint pos) => regexp_package.tryBacktrack⁔(Ꮡre, Ꮡb, i, pc, pos);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<nint> backtrack(this ж<Regexp> Ꮡre, slice<byte> ib, @string @is, nint pos, nint ncap, slice<nint> dstCap) => regexp_package.backtrack⁔(Ꮡre, ib, @is, pos, ncap, dstCap);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<nint> doOnePass(this ж<Regexp> Ꮡre, io.RuneReader ir, slice<byte> ib, @string @is, nint pos, nint ncap, slice<nint> dstCap) => regexp_package.doOnePass⁔(Ꮡre, ir, ib, @is, pos, ncap, dstCap);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool doMatch(this ж<Regexp> Ꮡre, io.RuneReader r, slice<byte> b, @string s) => regexp_package.doMatch⁔(Ꮡre, r, b, s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<nint> doExecute(this ж<Regexp> Ꮡre, io.RuneReader r, slice<byte> b, @string s, nint pos, nint ncap, slice<nint> dstCap) => regexp_package.doExecute⁔(Ꮡre, r, b, s, pos, ncap, dstCap);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this ref Regexp re) => regexp_package.String⁔(ref re);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Regexp> Copy(this ref Regexp re) => regexp_package.Copy⁔(ref re);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Longest(this ref Regexp re) => regexp_package.Longest⁔(ref re);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<machine> get(this ж<Regexp> Ꮡre) => regexp_package.get⁔(Ꮡre);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void put(this ref Regexp re, ж<machine> Ꮡm) => regexp_package.put⁔(ref re, Ꮡm);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint NumSubexp(this ref Regexp re) => regexp_package.NumSubexp⁔(ref re);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<@string> SubexpNames(this ref Regexp re) => regexp_package.SubexpNames⁔(ref re);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint SubexpIndex(this ref Regexp re, @string name) => regexp_package.SubexpIndex⁔(ref re, name);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (@string prefix, bool complete) LiteralPrefix(this ref Regexp re) => regexp_package.LiteralPrefix⁔(ref re);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool MatchReader(this ж<Regexp> Ꮡre, io.RuneReader r) => regexp_package.MatchReader⁔(Ꮡre, r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool MatchString(this ж<Regexp> Ꮡre, @string s) => regexp_package.MatchString⁔(Ꮡre, s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Match(this ж<Regexp> Ꮡre, slice<byte> b) => regexp_package.Match⁔(Ꮡre, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string ReplaceAllString(this ж<Regexp> Ꮡre, @string src, @string repl) => regexp_package.ReplaceAllString⁔(Ꮡre, src, repl);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string ReplaceAllLiteralString(this ж<Regexp> Ꮡre, @string src, @string repl) => regexp_package.ReplaceAllLiteralString⁔(Ꮡre, src, repl);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string ReplaceAllStringFunc(this ж<Regexp> Ꮡre, @string src, Func<@string, @string> repl) => regexp_package.ReplaceAllStringFunc⁔(Ꮡre, src, repl);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<byte> replaceAll(this ж<Regexp> Ꮡre, slice<byte> bsrc, @string src, nint nmatch, Func<slice<byte>, slice<nint>, slice<byte>> repl) => regexp_package.replaceAll⁔(Ꮡre, bsrc, src, nmatch, repl);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> ReplaceAll(this ж<Regexp> Ꮡre, slice<byte> src, slice<byte> repl) => regexp_package.ReplaceAll⁔(Ꮡre, src, repl);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> ReplaceAllLiteral(this ж<Regexp> Ꮡre, slice<byte> src, slice<byte> repl) => regexp_package.ReplaceAllLiteral⁔(Ꮡre, src, repl);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> ReplaceAllFunc(this ж<Regexp> Ꮡre, slice<byte> src, Func<slice<byte>, slice<byte>> repl) => regexp_package.ReplaceAllFunc⁔(Ꮡre, src, repl);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<nint> pad(this ref Regexp re, slice<nint> a) => regexp_package.pad⁔(ref re, a);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void allMatches(this ж<Regexp> Ꮡre, @string s, slice<byte> b, nint n, Action<slice<nint>> deliver) => regexp_package.allMatches⁔(Ꮡre, s, b, n, deliver);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> Find(this ж<Regexp> Ꮡre, slice<byte> b) => regexp_package.Find⁔(Ꮡre, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<nint> /*loc*/ FindIndex(this ж<Regexp> Ꮡre, slice<byte> b) => regexp_package.FindIndex⁔(Ꮡre, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string FindString(this ж<Regexp> Ꮡre, @string s) => regexp_package.FindString⁔(Ꮡre, s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<nint> /*loc*/ FindStringIndex(this ж<Regexp> Ꮡre, @string s) => regexp_package.FindStringIndex⁔(Ꮡre, s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<nint> /*loc*/ FindReaderIndex(this ж<Regexp> Ꮡre, io.RuneReader r) => regexp_package.FindReaderIndex⁔(Ꮡre, r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<slice<byte>> FindSubmatch(this ж<Regexp> Ꮡre, slice<byte> b) => regexp_package.FindSubmatch⁔(Ꮡre, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> Expand(this ref Regexp re, slice<byte> dst, slice<byte> template, slice<byte> src, slice<nint> match) => regexp_package.Expand⁔(ref re, dst, template, src, match);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> ExpandString(this ref Regexp re, slice<byte> dst, @string template, @string src, slice<nint> match) => regexp_package.ExpandString⁔(ref re, dst, template, src, match);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<byte> expand(this ref Regexp re, slice<byte> dst, @string template, slice<byte> bsrc, @string src, slice<nint> match) => regexp_package.expand⁔(ref re, dst, template, bsrc, src, match);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<nint> FindSubmatchIndex(this ж<Regexp> Ꮡre, slice<byte> b) => regexp_package.FindSubmatchIndex⁔(Ꮡre, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<@string> FindStringSubmatch(this ж<Regexp> Ꮡre, @string s) => regexp_package.FindStringSubmatch⁔(Ꮡre, s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<nint> FindStringSubmatchIndex(this ж<Regexp> Ꮡre, @string s) => regexp_package.FindStringSubmatchIndex⁔(Ꮡre, s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<nint> FindReaderSubmatchIndex(this ж<Regexp> Ꮡre, io.RuneReader r) => regexp_package.FindReaderSubmatchIndex⁔(Ꮡre, r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<slice<byte>> FindAll(this ж<Regexp> Ꮡre, slice<byte> b, nint n) => regexp_package.FindAll⁔(Ꮡre, b, n);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<slice<nint>> FindAllIndex(this ж<Regexp> Ꮡre, slice<byte> b, nint n) => regexp_package.FindAllIndex⁔(Ꮡre, b, n);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<@string> FindAllString(this ж<Regexp> Ꮡre, @string s, nint n) => regexp_package.FindAllString⁔(Ꮡre, s, n);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<slice<nint>> FindAllStringIndex(this ж<Regexp> Ꮡre, @string s, nint n) => regexp_package.FindAllStringIndex⁔(Ꮡre, s, n);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<slice<slice<byte>>> FindAllSubmatch(this ж<Regexp> Ꮡre, slice<byte> b, nint n) => regexp_package.FindAllSubmatch⁔(Ꮡre, b, n);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<slice<nint>> FindAllSubmatchIndex(this ж<Regexp> Ꮡre, slice<byte> b, nint n) => regexp_package.FindAllSubmatchIndex⁔(Ꮡre, b, n);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<slice<@string>> FindAllStringSubmatch(this ж<Regexp> Ꮡre, @string s, nint n) => regexp_package.FindAllStringSubmatch⁔(Ꮡre, s, n);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<slice<nint>> FindAllStringSubmatchIndex(this ж<Regexp> Ꮡre, @string s, nint n) => regexp_package.FindAllStringSubmatchIndex⁔(Ꮡre, s, n);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<@string> Split(this ж<Regexp> Ꮡre, @string s, nint n) => regexp_package.Split⁔(Ꮡre, s, n);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<byte>, error) AppendText(this ref Regexp re, slice<byte> b) => regexp_package.AppendText⁔(ref re, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<byte>, error) MarshalText(this ref Regexp re) => regexp_package.MarshalText⁔(ref re);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error UnmarshalText(this ref Regexp re, slice<byte> text) => regexp_package.UnmarshalText⁔(ref re, text);
+}
+partial class regexpᴛbitState {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void reset(this ref bitState b, ж<syntax.Prog> Ꮡprog, nint end, nint ncap) => regexp_package.reset⁔(ref b, Ꮡprog, end, ncap);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool shouldVisit(this ref bitState b, uint32 pc, nint pos) => regexp_package.shouldVisit⁔(ref b, pc, pos);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void push(this ref bitState b, ж<Regexp> Ꮡre, uint32 pc, nint pos, bool arg) => regexp_package.push⁔(ref b, Ꮡre, pc, pos, arg);
+}
+partial class regexpᴛinputBytes {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (rune, nint) step(this ref inputBytes i, nint pos) => regexp_package.step⁔(ref i, pos);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool canCheckPrefix(this ref inputBytes i) => regexp_package.canCheckPrefix⁔(ref i);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool hasPrefix(this ref inputBytes i, ж<Regexp> Ꮡre) => regexp_package.hasPrefix⁔(ref i, Ꮡre);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint index(this ref inputBytes i, ж<Regexp> Ꮡre, nint pos) => regexp_package.index⁔(ref i, Ꮡre, pos);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static lazyFlag context(this ref inputBytes i, nint pos) => regexp_package.context⁔(ref i, pos);
+}
+partial class regexpᴛinputReader {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (rune, nint) step(this ref inputReader i, nint pos) => regexp_package.step⁔(ref i, pos);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool canCheckPrefix(this ref inputReader i) => regexp_package.canCheckPrefix⁔(ref i);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool hasPrefix(this ref inputReader i, ж<Regexp> Ꮡre) => regexp_package.hasPrefix⁔(ref i, Ꮡre);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint index(this ref inputReader i, ж<Regexp> Ꮡre, nint pos) => regexp_package.index⁔(ref i, Ꮡre, pos);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static lazyFlag context(this ref inputReader i, nint pos) => regexp_package.context⁔(ref i, pos);
+}
+partial class regexpᴛinputString {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (rune, nint) step(this ref inputString i, nint pos) => regexp_package.step⁔(ref i, pos);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool canCheckPrefix(this ref inputString i) => regexp_package.canCheckPrefix⁔(ref i);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool hasPrefix(this ref inputString i, ж<Regexp> Ꮡre) => regexp_package.hasPrefix⁔(ref i, Ꮡre);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint index(this ref inputString i, ж<Regexp> Ꮡre, nint pos) => regexp_package.index⁔(ref i, Ꮡre, pos);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static lazyFlag context(this ref inputString i, nint pos) => regexp_package.context⁔(ref i, pos);
+}
+partial class regexpᴛinputs {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static input newBytes(this ж<inputs> Ꮡi, slice<byte> b) => regexp_package.newBytes⁔(Ꮡi, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static input newString(this ж<inputs> Ꮡi, @string s) => regexp_package.newString⁔(Ꮡi, s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static input newReader(this ж<inputs> Ꮡi, io.RuneReader r) => regexp_package.newReader⁔(Ꮡi, r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void clear(this ref inputs i) => regexp_package.clear⁔(ref i);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (input, nint) init(this ж<inputs> Ꮡi, io.RuneReader r, slice<byte> b, @string s) => regexp_package.init⁔(Ꮡi, r, b, s);
+}
+partial class regexpᴛlazyFlag {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool match(this lazyFlag f, syntax.EmptyOp op) => regexp_package.match⁔(f, op);
+}
+partial class regexpᴛmachine {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void init(this ref machine m, nint ncap) => regexp_package.init⁔(ref m, ncap);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<thread> alloc(this ref machine m, ж<syntax.Inst> Ꮡi) => regexp_package.alloc⁔(ref m, Ꮡi);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool match(this ж<machine> Ꮡm, input i, nint pos) => regexp_package.match⁔(Ꮡm, i, pos);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void clear(this ref machine m, ж<queue> Ꮡq) => regexp_package.clear⁔(ref m, Ꮡq);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void step(this ref machine m, ж<queue> Ꮡrunq, ж<queue> Ꮡnextq, nint pos, nint nextPos, rune c, ж<lazyFlag> ᏑnextCond) => regexp_package.step⁔(ref m, Ꮡrunq, Ꮡnextq, pos, nextPos, c, ᏑnextCond);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<thread> add(this ref machine m, ж<queue> Ꮡq, uint32 pc, nint pos, slice<nint> cap, ж<lazyFlag> Ꮡcond, ж<thread> Ꮡt) => regexp_package.add⁔(ref m, Ꮡq, pc, pos, cap, Ꮡcond, Ꮡt);
+}
+partial class regexpᴛqueueOnePass {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool empty(this ref queueOnePass q) => regexp_package.empty⁔(ref q);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static uint32 /*n*/ next(this ref queueOnePass q) => regexp_package.next⁔(ref q);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void clear(this ref queueOnePass q) => regexp_package.clear⁔(ref q);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool contains(this ref queueOnePass q, uint32 u) => regexp_package.contains⁔(ref q, u);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void insert(this ref queueOnePass q, uint32 u) => regexp_package.insert⁔(ref q, u);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void insertNew(this ref queueOnePass q, uint32 u) => regexp_package.insertNew⁔(ref q, u);
+}
+// </MethodForwarders>

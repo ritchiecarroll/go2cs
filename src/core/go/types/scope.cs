@@ -13,7 +13,6 @@ using slices = slices_package;
 using strings = strings_package;
 using sync = sync_package;
 using global::go.go;
-using static types_package;
 
 partial class types_package {
 
@@ -45,16 +44,14 @@ public static ж<Scope> NewScope(ж<Scope> Ꮡparent, token.Pos pos, token.Pos e
     return s;
 }
 
-} partial class typesᴛScope {
-
 // Parent returns the scope's containing (parent) scope.
-public static ж<Scope> Parent(this ref Scope s) { return s.parent; }
+internal static ж<Scope> Parent⁔(/*this*/ ref Scope s) { return s.parent; }
 
 // Len returns the number of scope elements.
-public static nint Len(this ref Scope s) { return len(s.elems); }
+internal static nint Len⁔(/*this*/ ref Scope s) { return len(s.elems); }
 
 // Names returns the scope's element names in sorted order.
-public static slice<@string> Names(this ref Scope s) {
+internal static slice<@string> Names⁔(/*this*/ ref Scope s) {
     var names = new slice<@string>(len(s.elems));
     nint i = 0;
     foreach (var (name, _) in s.elems) {
@@ -66,14 +63,14 @@ public static slice<@string> Names(this ref Scope s) {
 }
 
 // NumChildren returns the number of scopes nested in s.
-public static nint NumChildren(this ref Scope s) { return len(s.children); }
+internal static nint NumChildren⁔(/*this*/ ref Scope s) { return len(s.children); }
 
 // Child returns the i'th child scope for 0 <= i < NumChildren().
-public static ж<Scope> Child(this ref Scope s, nint i) { return s.children[i]; }
+internal static ж<Scope> Child⁔(/*this*/ ref Scope s, nint i) { return s.children[i]; }
 
 // Lookup returns the object in scope s with the given name if such an
 // object exists; otherwise the result is nil.
-public static Object Lookup(this ref Scope s, @string name) {
+internal static Object Lookup⁔(/*this*/ ref Scope s, @string name) {
     var obj = resolve(name, s.elems[name]);
     // Hijack Lookup for "any": with gotypesalias=1, we want the Universe to
     // return an Alias for "any", and with gotypesalias=0 we want to return
@@ -92,7 +89,7 @@ public static Object Lookup(this ref Scope s, @string name) {
 // lookupIgnoringCase returns the objects in scope s whose names match
 // the given name ignoring case. If exported is set, only exported names
 // are returned.
-internal static slice<Object> lookupIgnoringCase(this ref Scope s, @string name, bool exported) {
+internal static slice<Object> lookupIgnoringCase⁔(/*this*/ ref Scope s, @string name, bool exported) {
     var matchesᴷ = new stackAppend<Object>(moves: true);
 
     slice<Object> matches = default;
@@ -110,7 +107,7 @@ internal static slice<Object> lookupIgnoringCase(this ref Scope s, @string name,
 // the same name, Insert leaves s unchanged and returns alt.
 // Otherwise it inserts obj, sets the object's parent scope
 // if not already set, and returns nil.
-public static Object Insert(this ж<Scope> Ꮡs, Object obj) {
+internal static Object Insert⁔(/*this*/ ж<Scope> Ꮡs, Object obj) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     @string name = obj.Name();
@@ -136,7 +133,7 @@ public static Object Insert(this ж<Scope> Ꮡs, Object obj) {
 // InsertLazy leaves s unchanged and returns false. Otherwise it
 // records the binding and returns true. The object's parent scope
 // will be set to s after resolve is called.
-internal static bool _InsertLazy(this ж<Scope> Ꮡs, @string name, Func<Object> resolve) {
+internal static bool _InsertLazy⁔(/*this*/ ж<Scope> Ꮡs, @string name, Func<Object> resolve) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     if (s.elems[name] != nil) {
@@ -146,7 +143,7 @@ internal static bool _InsertLazy(this ж<Scope> Ꮡs, @string name, Func<Object>
     return true;
 }
 
-internal static void insert(this ref Scope s, @string name, Object obj) {
+internal static void insert⁔(/*this*/ ref Scope s, @string name, Object obj) {
     if (s.elems == nil) {
         s.elems = new map<@string, Object>();
     }
@@ -162,7 +159,7 @@ private static readonly @string indᶜᵇ = ".  "u8;
 // The level of indentation is controlled by n >= 0, with
 // n == 0 for no indentation.
 // If recurse is set, it also writes nested (children) scopes.
-public static void WriteTo(this ж<Scope> Ꮡs, io.Writer w, nint n, bool recurse) {
+internal static void WriteTo⁔(/*this*/ ж<Scope> Ꮡs, io.Writer w, nint n, bool recurse) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     @string ind = indᶜ;
@@ -185,13 +182,11 @@ public static void WriteTo(this ж<Scope> Ꮡs, io.Writer w, nint n, bool recurs
 }
 
 // String returns a string representation of the scope, for debugging.
-public static @string String(this ж<Scope> Ꮡs) {
+internal static @string String⁔(/*this*/ ж<Scope> Ꮡs) {
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
     Ꮡs.WriteTo(new strings_BuilderжWriter(Ꮡbuf), 0, false);
     return buf.String();
 }
-
-} partial class types_package {
 
 // A lazyObject represents an imported Object that has not been fully
 // resolved yet by its importer.
@@ -230,24 +225,22 @@ internal static Object resolve(@string name, Object obj) {
     return obj;
 }
 
-} partial class typesᴛlazyObject {
-
 // stub implementations so *lazyObject implements Object and we can
 // store them directly into Scope.elems.
-internal static ж<Scope> Parent(this ref lazyObject _) { throw panic("unreachable"); }
-internal static token.Pos Pos(this ref lazyObject _) { throw panic("unreachable"); }
-internal static ж<Package> Pkg(this ref lazyObject _) { throw panic("unreachable"); }
-internal static @string Name(this ref lazyObject _) { throw panic("unreachable"); }
-internal static Type Type(this ref lazyObject _) { throw panic("unreachable"); }
-internal static bool Exported(this ref lazyObject _) { throw panic("unreachable"); }
-internal static @string Id(this ref lazyObject _) { throw panic("unreachable"); }
-internal static @string String(this ref lazyObject _) { throw panic("unreachable"); }
-internal static uint32 order(this ref lazyObject _) { throw panic("unreachable"); }
-internal static void setType(this ref lazyObject _Δp0, Type _Δp1) { throw panic("unreachable"); }
-internal static void setOrder(this ref lazyObject _Δp0, uint32 _Δp1) { throw panic("unreachable"); }
-internal static void setParent(this ref lazyObject _Δp0, ж<Scope> _Δp1) { throw panic("unreachable"); }
-internal static bool sameId(this ref lazyObject _Δp0, ж<Package> _Δp1, @string _Δp2, bool _Δp3) { throw panic("unreachable"); }
-internal static token.Pos scopePos(this ref lazyObject _) { throw panic("unreachable"); }
-internal static void setScopePos(this ref lazyObject _Δp0, token.Pos _Δp1) { throw panic("unreachable"); }
+internal static ж<Scope> Parent⁔(/*this*/ ref lazyObject _) { throw panic("unreachable"); }
+internal static token.Pos Pos⁔(/*this*/ ref lazyObject _) { throw panic("unreachable"); }
+internal static ж<Package> Pkg⁔(/*this*/ ref lazyObject _) { throw panic("unreachable"); }
+internal static @string Name⁔(/*this*/ ref lazyObject _) { throw panic("unreachable"); }
+internal static Type Type⁔(/*this*/ ref lazyObject _) { throw panic("unreachable"); }
+internal static bool Exported⁔(/*this*/ ref lazyObject _) { throw panic("unreachable"); }
+internal static @string Id⁔(/*this*/ ref lazyObject _) { throw panic("unreachable"); }
+internal static @string String⁔(/*this*/ ref lazyObject _) { throw panic("unreachable"); }
+internal static uint32 order⁔(/*this*/ ref lazyObject _) { throw panic("unreachable"); }
+internal static void setType⁔(/*this*/ ref lazyObject _Δp0, Type _Δp1) { throw panic("unreachable"); }
+internal static void setOrder⁔(/*this*/ ref lazyObject _Δp0, uint32 _Δp1) { throw panic("unreachable"); }
+internal static void setParent⁔(/*this*/ ref lazyObject _Δp0, ж<Scope> _Δp1) { throw panic("unreachable"); }
+internal static bool sameId⁔(/*this*/ ref lazyObject _Δp0, ж<Package> _Δp1, @string _Δp2, bool _Δp3) { throw panic("unreachable"); }
+internal static token.Pos scopePos⁔(/*this*/ ref lazyObject _) { throw panic("unreachable"); }
+internal static void setScopePos⁔(/*this*/ ref lazyObject _Δp0, token.Pos _Δp1) { throw panic("unreachable"); }
 
-}
+} // end types_package

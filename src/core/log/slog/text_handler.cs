@@ -15,7 +15,6 @@ using utf8 = go.unicode.utf8_package;
 using go.log.slog.@internal;
 using go.unicode;
 using time = time_package;
-using static slog_package;
 
 partial class slog_package {
 
@@ -44,21 +43,19 @@ public static ж<TextHandler> NewTextHandler(io.Writer w, ж<HandlerOptions> Ꮡ
     ));
 }
 
-} partial class slogᴛTextHandler {
-
 // Enabled reports whether the handler handles records at the given level.
 // The handler ignores records whose level is lower.
-public static bool Enabled(this ref TextHandler h, context.Context _, Level level) {
+internal static bool Enabled⁔(/*this*/ ref TextHandler h, context.Context _, Level level) {
     return h.commonHandler.enabled(level);
 }
 
 // WithAttrs returns a new [TextHandler] whose attributes consists
 // of h's attributes followed by attrs.
-public static Handler WithAttrs(this ref TextHandler h, slice<Attr> attrs) {
+internal static Handler WithAttrs⁔(/*this*/ ref TextHandler h, slice<Attr> attrs) {
     return new TextHandlerжHandler(Ꮡ(new TextHandler(commonHandler: h.commonHandler.withAttrs(attrs))));
 }
 
-public static Handler WithGroup(this ref TextHandler h, @string name) {
+internal static Handler WithGroup⁔(/*this*/ ref TextHandler h, @string name) {
     return new TextHandlerжHandler(Ꮡ(new TextHandler(commonHandler: h.commonHandler.withGroup(name))));
 }
 
@@ -96,13 +93,11 @@ public static Handler WithGroup(this ref TextHandler h, @string name) {
 //
 // Each call to Handle results in a single serialized call to
 // io.Writer.Write.
-public static error Handle(this ref TextHandler h, context.Context _, Record r) {
+internal static error Handle⁔(/*this*/ ref TextHandler h, context.Context _, Record r) {
     r = r.ΔClone();
 
     return h.commonHandler.handle(r);
 }
-
-} partial class slog_package {
 
 internal static error appendTextValue(ж<handleState> Ꮡs, Value v) {
     ref var s = ref Ꮡs.DerefOrNull();

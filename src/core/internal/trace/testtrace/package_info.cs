@@ -10,10 +10,14 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+using trace = go.@internal.trace_package;
 // </ImportedTypeAliases>
 
 using go;
 using static go.@internal.trace.testtrace_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -68,14 +72,18 @@ using static go.@internal.trace.testtrace_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/trace/testtrace/expectation.go", "expectation.cs", "ABcukgAEENKClIKUgpTIkoKCgoLWgoKUgoKUtJSUpoKCgpSCgpQ=")]
+[assembly: GoPositionMap("internal/trace/testtrace/expectation.go", "expectation.cs", "ABYukgACENKClIKUgpSokoKCgoLWgoKUgoKUtJSUpoKCgpSCgpQ=")]
 [assembly: GoPositionMap("internal/trace/testtrace/format.go", "format.cs", "ABAikoKClIKUgpSClIKClIKCgpSCgoKUgpSCpoKClA==")]
 [assembly: GoPositionMap("internal/trace/testtrace/helpers.go", "helpers.cs", "ABookoKUuILulIK4uIKUgoKUgoKClIKCgpSClIKmpqKUgoKClJKClA==", "", "", "", "93:21")]
 [assembly: GoPositionMap("internal/trace/testtrace/platforms.go", "platforms.cs", "AA0cooKUqqLalA==")]
-[assembly: GoPositionMap("internal/trace/testtrace/validation.go", "validation.cs", "ADJgkgALHMKs4qaCgpSmuJSUgoLugoKUgpSClIKUgoKUgpSCyrSClKaClKbWpoK4gpSUgoLGgoLGgoIAEhyCgqaCkoKUgpSClIKCgpSUgpSCpoKCgoKUgpSCppSCgoKUgpTqgpKClIKUgpSCgoKUlIKUgqaCgoKClIKUgoKCgpSClAAIDIKUgpS0gsaClOiClJSUpuqCgoKUAAkQpKaCgqaCgoKmgoKmgoKClIKClKbCyIKUgpSCgpSClIKClIKCgoKUxrSCuJSCAAoSoqaC", "368-384:1")]
+[assembly: GoPositionMap("internal/trace/testtrace/validation.go", "validation.cs", "ADFgkgAJHMKs4qaCgpSmuJSUgoLugoKUgpSClIKUgoKUgpSCyrSClKaClKbWpoK4gpSUgoLGgoLGgoIAEhyCgqaCkoKUgpSClIKCgpSUgpSCpoKCgoKUgpSCppSCgoKUgpTqgpKClIKUgpSCgoKUlIKUgqaCgoKClIKUgoKCgpSClAAIDIKUgpS0gsaClOiClJSUpuqCgoKUAAkQpKaCgqaCgoKmgoKmgoKClIKClKbCyIKUgpSCgpSClIKClIKCgoKUprSCuJSCAAgSoqaC", "368-384:1")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.trace;
+
+using static go.@internal.trace.testtrace_package;
+using trace = go.@internal.trace_package;
+using ꓸꓸꓸany = Span<any>;
 
 [GoPackage("testtrace")]
 public static partial class testtrace_package
@@ -129,7 +137,30 @@ public static partial class testtrace_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(testtrace_package.Expectation)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class testtraceᴛExpectation;
-[GoMethodHost(typeof(testtrace_package.Validator)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class testtraceᴛValidator;
-[GoMethodHost(typeof(testtrace_package.errAccumulator)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class testtraceᴛerrAccumulator;
+[GoMethodHost(typeof(testtrace_package.Expectation)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class testtraceᴛExpectation;
+[GoMethodHost(typeof(testtrace_package.Validator)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class testtraceᴛValidator;
+[GoMethodHost(typeof(testtrace_package.errAccumulator)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class testtraceᴛerrAccumulator;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class testtraceᴛExpectation {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Check(this ref Expectation e, error err) => testtrace_package.Check⁔(ref e, err);
+}
+partial class testtraceᴛValidator {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void SkipClockSnapshotChecks(this ref Validator v) => testtrace_package.SkipClockSnapshotChecks⁔(ref v);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Event(this ж<Validator> Ꮡv, trace.Event ev) => testtrace_package.Event⁔(Ꮡv, ev);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool hasRange(this ref Validator v, trace.ResourceID r, @string name) => testtrace_package.hasRange⁔(ref v, r, name);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void addRange(this ref Validator v, trace.ResourceID r, @string name) => testtrace_package.addRange⁔(ref v, r, name);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool hasAnyRange(this ref Validator v, trace.ResourceID r) => testtrace_package.hasAnyRange⁔(ref v, r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void deleteRange(this ref Validator v, trace.ResourceID r, @string name) => testtrace_package.deleteRange⁔(ref v, r, name);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<schedContext> getOrCreateThread(this ж<Validator> Ꮡv, ж<errAccumulator> Ꮡe, trace.Event ev, trace.ThreadID m) => testtrace_package.getOrCreateThread⁔(Ꮡv, Ꮡe, ev, m);
+}
+partial class testtraceᴛerrAccumulator {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void Errorf(this ref errAccumulator e, @string f, params ꓸꓸꓸany argsʗp) => testtrace_package.Errorf⁔(ref e, f, argsʗp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error Errors(this ref errAccumulator e) => testtrace_package.Errors⁔(ref e);
+}
+// </MethodForwarders>

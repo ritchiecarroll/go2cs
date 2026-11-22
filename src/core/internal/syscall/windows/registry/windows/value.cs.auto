@@ -15,7 +15,6 @@ using syscall = syscall_package;
 using utf16 = unicode.utf16_package;
 using @unsafe = unsafe_package;
 using unicode;
-using static registry_package;
 
 partial class registry_package {
 
@@ -44,8 +43,6 @@ public static ref syscall.Errno ErrNotExist => ref ((StaticBox<syscall.Errno>)�
 // ErrUnexpectedType is returned by Get*Value when the value's type was unexpected.
 public static error ErrUnexpectedType = errors.New("unexpected key value type"u8);
 
-} partial class registryᴛKey {
-
 // GetValue retrieves the type and data for the specified value associated
 // with an open key k. It fills up buffer buf and returns the retrieved
 // byte count n. If buf is too small to fit the stored value it returns
@@ -56,7 +53,7 @@ public static error ErrUnexpectedType = errors.New("unexpected key value type"u8
 //
 // GetValue is a low level function. If value's type is known, use the appropriate
 // Get*Value function instead.
-public static (nint n, uint32 valtype, error err) GetValue(this Key k, @string name, slice<byte> buf) {
+internal static (nint n, uint32 valtype, error err) GetValue⁔(/*this*/ Key k, @string name, slice<byte> buf) {
     ref var valtype = ref heap(new uint32(), out var Ꮡvaltype);
     error err = default;
 
@@ -76,7 +73,7 @@ public static (nint n, uint32 valtype, error err) GetValue(this Key k, @string n
     return ((nint)l, valtype, default);
 }
 
-internal static (slice<byte> date, uint32 valtype, error err) getValue(this Key k, @string name, slice<byte> buf) {
+internal static (slice<byte> date, uint32 valtype, error err) getValue⁔(/*this*/ Key k, @string name, slice<byte> buf) {
     error err = default;
 
     (var p, err) = syscall.UTF16PtrFromString(name);
@@ -105,7 +102,7 @@ internal static (slice<byte> date, uint32 valtype, error err) getValue(this Key 
 // If value does not exist, GetStringValue returns ErrNotExist.
 // If value is not SZ or EXPAND_SZ, it will return the correct value
 // type and ErrUnexpectedType.
-public static (@string val, uint32 valtype, error err) GetStringValue(this Key k, @string name) {
+internal static (@string val, uint32 valtype, error err) GetStringValue⁔(/*this*/ Key k, @string name) {
     var (data, typ, err2) = k.getValue(name, new slice<byte>(64));
     if (err2 != nil) {
         return ("", typ, err2);
@@ -128,7 +125,7 @@ public static (@string val, uint32 valtype, error err) GetStringValue(this Key k
 // the specified value name associated with an open key k.
 // If the value name doesn't exist or the localized string value
 // can't be resolved, GetMUIStringValue returns ErrNotExist.
-public static (@string, error) GetMUIStringValue(this Key k, @string name) {
+internal static (@string, error) GetMUIStringValue⁔(/*this*/ Key k, @string name) {
     var (pname, err) = syscall.UTF16PtrFromString(name);
     if (err != nil) {
         return ("", err);
@@ -175,8 +172,6 @@ public static (@string, error) GetMUIStringValue(this Key k, @string name) {
     return (syscall.UTF16ToString(buf), default);
 }
 
-} partial class registry_package {
-
 // ExpandString expands environment-variable strings and replaces
 // them with the values defined for the current user.
 // Use ExpandString to expand EXPAND_SZ strings.
@@ -201,14 +196,12 @@ public static (@string, error) ExpandString(@string value) {
     }
 }
 
-} partial class registryᴛKey {
-
 // GetStringsValue retrieves the []string value for the specified
 // value name associated with an open key k. It also returns the value's type.
 // If value does not exist, GetStringsValue returns ErrNotExist.
 // If value is not MULTI_SZ, it will return the correct value
 // type and ErrUnexpectedType.
-public static (slice<@string> val, uint32 valtype, error err) GetStringsValue(this Key k, @string name) {
+internal static (slice<@string> val, uint32 valtype, error err) GetStringsValue⁔(/*this*/ Key k, @string name) {
     slice<@string> val = default;
 
     var (data, typ, err2) = k.getValue(name, new slice<byte>(64));
@@ -244,7 +237,7 @@ public static (slice<@string> val, uint32 valtype, error err) GetStringsValue(th
 // If value does not exist, GetIntegerValue returns ErrNotExist.
 // If value is not DWORD or QWORD, it will return the correct value
 // type and ErrUnexpectedType.
-public static (uint64 val, uint32 valtype, error err) GetIntegerValue(this Key k, @string name) {
+internal static (uint64 val, uint32 valtype, error err) GetIntegerValue⁔(/*this*/ Key k, @string name) {
     var (data, typ, err2) = k.getValue(name, new slice<byte>(8));
     if (err2 != nil) {
         return (0, typ, err2);
@@ -272,7 +265,7 @@ public static (uint64 val, uint32 valtype, error err) GetIntegerValue(this Key k
 // If value does not exist, GetBinaryValue returns ErrNotExist.
 // If value is not BINARY, it will return the correct value
 // type and ErrUnexpectedType.
-public static (slice<byte> val, uint32 valtype, error err) GetBinaryValue(this Key k, @string name) {
+internal static (slice<byte> val, uint32 valtype, error err) GetBinaryValue⁔(/*this*/ Key k, @string name) {
     var (data, typ, err2) = k.getValue(name, new slice<byte>(64));
     if (err2 != nil) {
         return (default, typ, err2);
@@ -283,7 +276,7 @@ public static (slice<byte> val, uint32 valtype, error err) GetBinaryValue(this K
     return (data, typ, default);
 }
 
-internal static error setValue(this Key k, @string name, uint32 valtype, slice<byte> data) {
+internal static error setValue⁔(/*this*/ Key k, @string name, uint32 valtype, slice<byte> data) {
     var (p, err) = syscall.UTF16PtrFromString(name);
     if (err != nil) {
         return err;
@@ -296,7 +289,7 @@ internal static error setValue(this Key k, @string name, uint32 valtype, slice<b
 
 // SetDWordValue sets the data and type of a name value
 // under key k to value and DWORD.
-public static error SetDWordValue(this Key k, @string name, uint32 valueʗp) {
+internal static error SetDWordValue⁔(/*this*/ Key k, @string name, uint32 valueʗp) {
     ref var value = ref heap(valueʗp, out var Ꮡvalue);
 
     return k.setValue(name, DWORD, @unsafe.Pointer.View<byte>(@unsafe.Pointer.FromPinnedBox(Ꮡvalue), 0, 4));
@@ -304,13 +297,13 @@ public static error SetDWordValue(this Key k, @string name, uint32 valueʗp) {
 
 // SetQWordValue sets the data and type of a name value
 // under key k to value and QWORD.
-public static error SetQWordValue(this Key k, @string name, uint64 valueʗp) {
+internal static error SetQWordValue⁔(/*this*/ Key k, @string name, uint64 valueʗp) {
     ref var value = ref heap(valueʗp, out var Ꮡvalue);
 
     return k.setValue(name, QWORD, @unsafe.Pointer.View<byte>(@unsafe.Pointer.FromPinnedBox(Ꮡvalue), 0, 8));
 }
 
-internal static error setStringValue(this Key k, @string name, uint32 valtype, @string value) {
+internal static error setStringValue⁔(/*this*/ Key k, @string name, uint32 valtype, @string value) {
     var (v, err) = syscall.UTF16FromString(value);
     if (err != nil) {
         return err;
@@ -321,20 +314,20 @@ internal static error setStringValue(this Key k, @string name, uint32 valtype, @
 
 // SetStringValue sets the data and type of a name value
 // under key k to value and SZ. The value must not contain a zero byte.
-public static error SetStringValue(this Key k, @string name, @string value) {
+internal static error SetStringValue⁔(/*this*/ Key k, @string name, @string value) {
     return k.setStringValue(name, SZ, value);
 }
 
 // SetExpandStringValue sets the data and type of a name value
 // under key k to value and EXPAND_SZ. The value must not contain a zero byte.
-public static error SetExpandStringValue(this Key k, @string name, @string value) {
+internal static error SetExpandStringValue⁔(/*this*/ Key k, @string name, @string value) {
     return k.setStringValue(name, EXPAND_SZ, value);
 }
 
 // SetStringsValue sets the data and type of a name value
 // under key k to value and MULTI_SZ. The value strings
 // must not contain a zero byte.
-public static error SetStringsValue(this Key k, @string name, slice<@string> value) {
+internal static error SetStringsValue⁔(/*this*/ Key k, @string name, slice<@string> value) {
     @string ss = ""u8;
     foreach (var (_, s) in range(value)) {
         for (nint i = 0; i < len(s); i++) {
@@ -351,12 +344,12 @@ public static error SetStringsValue(this Key k, @string name, slice<@string> val
 
 // SetBinaryValue sets the data and type of a name value
 // under key k to value and BINARY.
-public static error SetBinaryValue(this Key k, @string name, slice<byte> value) {
+internal static error SetBinaryValue⁔(/*this*/ Key k, @string name, slice<byte> value) {
     return k.setValue(name, BINARY, value);
 }
 
 // DeleteValue removes a named value from the key k.
-public static error DeleteValue(this Key k, @string name) {
+internal static error DeleteValue⁔(/*this*/ Key k, @string name) {
     var (namep, err) = syscall.UTF16PtrFromString(name);
     if (err != nil) {
         return err;
@@ -365,7 +358,7 @@ public static error DeleteValue(this Key k, @string name) {
 }
 
 // ReadValueNames returns the value names of key k.
-public static (slice<@string>, error) ReadValueNames(this Key k) {
+internal static (slice<@string>, error) ReadValueNames⁔(/*this*/ Key k) {
     var (ki, err) = k.Stat();
     if (err != nil) {
         return (default, err);
@@ -398,4 +391,4 @@ break_loopItems:;
     return (names, default);
 }
 
-}
+} // end registry_package

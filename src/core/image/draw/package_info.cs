@@ -10,10 +10,14 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+using image = go.image_package;
 // </ImportedTypeAliases>
 
 using go;
 using static go.image.draw_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -67,10 +71,13 @@ using static go.image.draw_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("image/draw/draw.go", "draw.cs", "ADluogANGOiigoKUzOKCgoKClIKCgpSCgoKCuIKskqrSgoIACRSUgoKUgoKUlKSCpILsgsaCpIKUgpSCpIKkgsiCuIKUgoKkgoKUpIKkgsaCpIK4gqSCgoKCgoKUgoKCgpSCgoLYgoKCgpTYgoKCgpTaoqKCggAJFICCgoKCgoKCgoKClIKCggAIEoSCgoKCgoKCgpSmxrSCgoKC7gAKFAAKFIKCgoKCgoKCgpSUpsa0goKCgoKCgpSCgoLc7LSCgoKCgoKCgpSCgoKUgriigoKCuIKCgoKCgpSCgoKCuLKSgoLIgoKCuIKCgoKUgoKCgoKCgoKmlIKCgoKUgr66wtyCgoKUgoKCuIKCgoKUgoKCgpSUgoKCgpSCgoKCppSCgoLKgoKCgpSCgoKClJSCgoKClIKCgoLKgoKCgpSCgoKClIKCgoKCgsqCgoKClIKCgoKUgoKCgsrCgoKCgoKCgoKUppSCgoKClIKCuMKiooKCgriCgoKCgoKCgoKCgoKCgoKUgoKCggAHEJSCgoKUuMKiooKCgriCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCAAcQlIKCgpS4sqKigoKCuIKCgoKCgoKCgoKCgoKCgoKCAAcQlIKCgpS4oqKigoKCuIKCgoKCggAHEIKCgoKCgoKCgoKCgoKCgpSmgoKCgoKCgpSmhIKCgoKCgoKCgoKCgoKCgpSmgoKCgoKCgoKUpgAIEoKCgoKUgoKCgoKCAAcQlIKCgpaCgoKmupKClIKUrviCpgAIEqKAgoKCgoKCgpS8woKClIDIlIDEgMSA2IKCpoKCgoKCgqa4kqKCgoKCuJSClIKCgpaCgoLKlIKUgoKCgriCgoKCgoKCgoKCgoKCgoK4goI=", "986-986:1;992-992:2;994-994:3;996-996:4", "", "121=Sub/1/1/1,Add/1/1/1,Overlaps/1/1/1;219=Dx/1/1/1;274=Dx/1/1/1;286=Dx/1/1/1")]
+[assembly: GoPositionMap("image/draw/draw.go", "draw.cs", "ADZuogALGMiigoKUrOKCgoKClIKCgpSCgoKCuIKskqrSgoIACRSUgoKUgoKUlKSCpILsgsaCpIKUgpSCpIKkgsiCuIKUgoKkgoKUpIKkgsaCpIK4gqSCgoKCgoKUgoKCgpSCgoLYgoKCgpTYgoKCgpTaoqKCggAJFICCgoKCgoKCgoKClIKCggAIEoSCgoKCgoKCgpSmxrSCgoKC7gAKFAAKFIKCgoKCgoKCgpSUpsa0goKCgoKCgpSCgoLc7LSCgoKCgoKCgpSCgoKUgriigoKCuIKCgoKCgpSCgoKCuLKSgoLIgoKCuIKCgoKUgoKCgoKCgoKmlIKCgoKUgr66wtyCgoKUgoKCuIKCgoKUgoKCgpSUgoKCgpSCgoKCppSCgoLKgoKCgpSCgoKClJSCgoKClIKCgoLKgoKCgpSCgoKClIKCgoKCgsqCgoKClIKCgoKUgoKCgsrCgoKCgoKCgoKUppSCgoKClIKCuMKiooKCgriCgoKCgoKCgoKCgoKCgoKUgoKCggAHEJSCgoKUuMKiooKCgriCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCAAcQlIKCgpS4sqKigoKCuIKCgoKCgoKCgoKCgoKCgoKCAAcQlIKCgpS4oqKigoKCuIKCgoKCggAHEIKCgoKCgoKCgoKCgoKCgpSmgoKCgoKCgpSmhIKCgoKCgoKCgoKCgoKCgpSmgoKCgoKCgoKUpgAIEoKCgoKUgoKCgoKCAAcQlIKCgpaCgoKmupKClIKUrviCpgAIEqKAgoKCgoKCgpS8woKClIDIlIDEgMSA2IKCpoKCgoKCgqa4kqKCgoKCuJSClIKCgpaCgoLKlIKUgoKCgriCgoKCgoKCgoKCgoKCgoK4goI=", "986-986:1;992-992:2;994-994:3;996-996:4", "", "112=Sub/1/1/1,Add/1/1/1,Overlaps/1/1/1;210=Dx/1/1/1;265=Dx/1/1/1;277=Dx/1/1/1")]
 // </GoSourcePositionMaps>
 
 namespace go.image;
+
+using static go.image.draw_package;
+using image = go.image_package;
 
 [GoPackage("draw")]
 public static partial class draw_package
@@ -110,6 +117,19 @@ public static partial class draw_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(draw_package.Op)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class drawᴛOp;
-[GoMethodHost(typeof(draw_package.floydSteinberg)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class drawᴛfloydSteinberg;
+[GoMethodHost(typeof(draw_package.Op)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class drawᴛOp;
+[GoMethodHost(typeof(draw_package.floydSteinberg)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class drawᴛfloydSteinberg;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class drawᴛOp {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Draw(this Op op, Image dst, image.Rectangle r, image.Image src, image.Point sp) => draw_package.Draw⁔(op, dst, r, src, sp);
+}
+partial class drawᴛfloydSteinberg {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void Draw(this floydSteinberg _, Image dst, image.Rectangle rʗp, image.Image src, image.Point sp) => draw_package.Draw⁔(_, dst, rʗp, src, sp);
+}
+// </MethodForwarders>

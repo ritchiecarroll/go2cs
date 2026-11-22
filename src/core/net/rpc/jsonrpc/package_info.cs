@@ -10,10 +10,14 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+using rpc = go.net.rpc_package;
 // </ImportedTypeAliases>
 
 using go;
 using static go.net.rpc.jsonrpc_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -66,11 +70,14 @@ using static go.net.rpc.jsonrpc_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("net/rpc/jsonrpc/client.go", "client.cs", "ACRKkgAPHLKCgoKCgoIADBKCgoIACAaygoKmgoKClIKCgoKClIKUlKaCgpSmgsqiqJKCgpQ=", "", "", "39=NewDecoder/1/1/1,NewEncoder/1/1/2")]
-[assembly: GoPositionMap("net/rpc/jsonrpc/server.go", "server.cs", "ABAeABIskgAPHIKCggAMErKCgpTKgoKCgoKUpoKClIKcwoLGAAgEsoKCgoKUgpSUlIKClJSmgsyy", "", "", "38=NewDecoder/1/1/1,NewEncoder/1/1/2")]
+[assembly: GoPositionMap("net/rpc/jsonrpc/client.go", "client.cs", "ACNKkgANHLKCgoKCgoIACBKCgoLmsoKCpoKCgpSCgoKCgpSClJSmgoKUpoKqoqiSgoKU", "", "", "38=NewDecoder/1/1/1,NewEncoder/1/1/2")]
+[assembly: GoPositionMap("net/rpc/jsonrpc/server.go", "server.cs", "AA8eABIskgANHIKCggAIErKCgpTKgoKCgoKUpoKClIKcwoKm5LKCgoKClIKUlJSCgpSUpoKssg==", "", "", "37=NewDecoder/1/1/1,NewEncoder/1/1/2")]
 // </GoSourcePositionMaps>
 
 namespace go.net.rpc;
+
+using static global::go.net.rpc.jsonrpc_package;
+using rpc = global::go.net.rpc_package;
 
 [GoPackage("jsonrpc")]
 public static partial class jsonrpc_package
@@ -114,8 +121,33 @@ public static partial class jsonrpc_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(jsonrpc_package.clientCodec)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class jsonrpcᴛclientCodec;
-[GoMethodHost(typeof(jsonrpc_package.clientResponse)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class jsonrpcᴛclientResponse;
-[GoMethodHost(typeof(jsonrpc_package.serverCodec)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class jsonrpcᴛserverCodec;
-[GoMethodHost(typeof(jsonrpc_package.serverRequest)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class jsonrpcᴛserverRequest;
+[GoMethodHost(typeof(jsonrpc_package.clientCodec)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class jsonrpcᴛclientCodec;
+[GoMethodHost(typeof(jsonrpc_package.clientResponse)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class jsonrpcᴛclientResponse;
+[GoMethodHost(typeof(jsonrpc_package.serverCodec)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class jsonrpcᴛserverCodec;
+[GoMethodHost(typeof(jsonrpc_package.serverRequest)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class jsonrpcᴛserverRequest;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class jsonrpcᴛclientCodec {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error WriteRequest(this ж<clientCodec> Ꮡc, ж<rpc.Request> Ꮡr, any param) => jsonrpc_package.WriteRequest⁔(Ꮡc, Ꮡr, param);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error ReadResponseHeader(this ж<clientCodec> Ꮡc, ж<rpc.Response> Ꮡr) => jsonrpc_package.ReadResponseHeader⁔(Ꮡc, Ꮡr);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error ReadResponseBody(this ref clientCodec c, any x) => jsonrpc_package.ReadResponseBody⁔(ref c, x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error Close(this ref clientCodec c) => jsonrpc_package.Close⁔(ref c);
+}
+partial class jsonrpcᴛclientResponse {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void reset(this ref clientResponse r) => jsonrpc_package.reset⁔(ref r);
+}
+partial class jsonrpcᴛserverCodec {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error ReadRequestHeader(this ж<serverCodec> Ꮡc, ж<rpc.Request> Ꮡr) => jsonrpc_package.ReadRequestHeader⁔(Ꮡc, Ꮡr);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error ReadRequestBody(this ref serverCodec c, any x) => jsonrpc_package.ReadRequestBody⁔(ref c, x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error WriteResponse(this ж<serverCodec> Ꮡc, ж<rpc.Response> Ꮡr, any x) => jsonrpc_package.WriteResponse⁔(Ꮡc, Ꮡr, x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error Close(this ref serverCodec c) => jsonrpc_package.Close⁔(ref c);
+}
+partial class jsonrpcᴛserverRequest {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void reset(this ref serverRequest r) => jsonrpc_package.reset⁔(ref r);
+}
+// </MethodForwarders>

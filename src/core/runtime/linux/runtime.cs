@@ -8,7 +8,6 @@ using atomic = @internal.runtime.atomic_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
-using static runtime_package;
 
 partial class runtime_package {
 
@@ -27,19 +26,15 @@ partial struct ticksType {
     internal atomic.Int64 val;
 }
 
-} partial class runtimeᴛticksType {
-
 // init initializes ticks to maximize the chance that we have a good ticksPerSecond reference.
 //
 // Must not run concurrently with ticksPerSecond.
-internal static void init(this ref ticksType t) {
+internal static void init⁔(/*this*/ ref ticksType t) {
     @lock(Ꮡticks.Ꮡlock);
     t.startTime = nanotime();
     t.startTicks = cputicks();
     unlock(Ꮡticks.Ꮡlock);
 }
-
-} partial class runtime_package {
 
 // minTimeForTicksPerSecond is the minimum elapsed time we require to consider our ticksPerSecond
 // measurement to be of decent enough quality for profiling.
@@ -171,9 +166,7 @@ partial struct godebugInc {
     internal atomic.Pointer<Action> inc;
 }
 
-} partial class runtimeᴛgodebugInc {
-
-internal static void IncNonDefault(this ж<godebugInc> Ꮡg) {
+internal static void IncNonDefault⁔(/*this*/ ж<godebugInc> Ꮡg) {
     ref var g = ref Ꮡg.DerefOrNull();
 
     var inc = Ꮡg.Ꮡinc.Load();
@@ -196,8 +189,6 @@ internal static void IncNonDefault(this ж<godebugInc> Ꮡg) {
     }
     inc.ValueSlot();
 }
-
-} partial class runtime_package {
 
 internal static void godebugNotify(bool envChanged) {
     var update = ᏑgodebugUpdate.Load();

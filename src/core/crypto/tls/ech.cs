@@ -11,7 +11,6 @@ using strings = strings_package;
 using cryptobyte = vendor.golang.org.x.crypto.cryptobyte_package;
 using go.crypto;
 using vendor.golang.org.x.crypto;
-using static tls_package;
 
 partial class tls_package {
 
@@ -44,20 +43,16 @@ partial struct echConfigErr {
     internal @string field;
 }
 
-} partial class tlsᴛechConfigErr {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string tlsMalformedECHConfigˢ => ref tlsMalformedECHConfigˢᵇ;
 private static readonly @string tlsMalformedECHConfigˢᵇ = "tls: malformed ECHConfig"u8;
 
-internal static @string Error(this ref echConfigErr e) {
+internal static @string Error⁔(/*this*/ ref echConfigErr e) {
     if (e.field == ""u8) {
         return tlsMalformedECHConfigˢ;
     }
     return fmt.Sprintf("tls: malformed ECHConfig, invalid %s field"u8, e.field);
 }
-
-} partial class tls_package {
 
 internal static (bool skip, echConfig ec, error err) parseECHConfig(slice<byte> enc) {
     ref var ec = ref heap(new echConfig(), out var Ꮡec);
@@ -126,10 +121,6 @@ internal static (bool skip, echConfig ec, error err) parseECHConfig(slice<byte> 
 
     return (false, ec, default);
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string tlsMalformedECHConfigˢ => ref tlsMalformedECHConfigˢᵇ;
-private static readonly @string tlsMalformedECHConfigˢᵇ = "tls: malformed ECHConfig"u8;
 
 // parseECHConfigList parses a draft-ietf-tls-esni-18 ECHConfigList, returning a
 // slice of parsed ECHConfigs, in the same order they were parsed, or an error
@@ -545,17 +536,13 @@ partial struct ECHRejectionError {
     public slice<byte> RetryConfigList;
 }
 
-} partial class tlsᴛECHRejectionError {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string tlsServerRejectedEchˢ => ref tlsServerRejectedEchˢᵇ;
 private static readonly @string tlsServerRejectedEchˢᵇ = "tls: server rejected ECH"u8;
 
-public static @string Error(this ref ECHRejectionError e) {
+internal static @string Error⁔(/*this*/ ref ECHRejectionError e) {
     return tlsServerRejectedEchˢ;
 }
-
-} partial class tls_package {
 
 internal static error errMalformedECHExt = errors.New("tls: malformed encrypted_client_hello extension");
 internal static error errInvalidECHExt = errors.New("tls: client sent invalid encrypted_client_hello extension");
@@ -619,9 +606,7 @@ internal static (echExtType echType, echCipher cs, uint8 configID, slice<byte> e
     return (echType, cs, configID, bytes.Clone(encap), bytes.Clone(payload), default);
 }
 
-} partial class tlsᴛConn {
-
-internal static (ж<clientHelloMsg>, ж<echServerContext>, error) processECHClientHello(this ж<Conn> Ꮡc, ж<clientHelloMsg> Ꮡouter, slice<EncryptedClientHelloKey> echKeys) {
+internal static (ж<clientHelloMsg>, ж<echServerContext>, error) processECHClientHello⁔(/*this*/ ж<Conn> Ꮡc, ж<clientHelloMsg> Ꮡouter, slice<EncryptedClientHelloKey> echKeys) {
     ref var c = ref Ꮡc.DerefOrNull();
     ref var outer = ref Ꮡouter.DerefOrNull();
 
@@ -711,8 +696,6 @@ internal static (ж<clientHelloMsg>, ж<echServerContext>, error) processECHClie
 
     return (Ꮡouter, default, default);
 }
-
-} partial class tls_package {
 
 internal static (slice<byte>, error) buildRetryConfigList(slice<EncryptedClientHelloKey> keys) {
     bool atLeastOneRetryConfig = default;

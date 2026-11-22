@@ -9,8 +9,6 @@
 // in multiprecision binary precisely.
 namespace go.@internal;
 
-using static strconv_package;
-
 partial class strconv_package {
 
 public partial struct @decimal {
@@ -21,9 +19,7 @@ public partial struct @decimal {
     internal bool trunc;               // discarded nonzero digits beyond d[:nd]
 }
 
-} partial class strconvᴛdecimal {
-
-public static @string String(this ref @decimal a) {
+internal static @string String⁔(/*this*/ ref @decimal a) {
     nint n = 10 + a.nd;
     if (a.dp > 0) {
         n += a.dp;
@@ -65,8 +61,6 @@ public static @string String(this ref @decimal a) {
     return (@string)(buf.slice(0, w));
 }
 
-} partial class strconv_package {
-
 internal static nint digitZero(slice<byte> dst) {
     foreach (var i in range(len(dst))) {
         dst[i] = (byte)'0';
@@ -86,10 +80,8 @@ internal static void trim(ref @decimal a) {
     }
 }
 
-} partial class strconvᴛdecimal {
-
 // Assign v to a.
-public static void Assign(this ж<@decimal> Ꮡa, uint64 v) {
+internal static void Assign⁔(/*this*/ ж<@decimal> Ꮡa, uint64 v) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     array<byte> buf = new(24);
@@ -113,8 +105,6 @@ public static void Assign(this ж<@decimal> Ꮡa, uint64 v) {
     a.dp = a.nd;
     trim(ref (Ꮡa).DerefOrNull());
 }
-
-} partial class strconv_package {
 
 // Maximum shift that we can do in one pass without overflow.
 // A uint has 32 or 64 bits, and we have to be able to accommodate 9<<k.
@@ -325,10 +315,8 @@ internal static void leftShift(ref @decimal a, nuint k) {
     trim(ref a);
 }
 
-} partial class strconvᴛdecimal {
-
 // Binary shift left (k > 0) or right (k < 0).
-public static void Shift(this ж<@decimal> Ꮡa, nint k) {
+internal static void Shift⁔(/*this*/ ж<@decimal> Ꮡa, nint k) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     switch (ᐧ) {
@@ -354,8 +342,6 @@ public static void Shift(this ж<@decimal> Ꮡa, nint k) {
     }}
 }
 
-} partial class strconv_package {
-
 // If we chop a at nd digits, should we round up?
 internal static bool shouldRoundUp(ref @decimal a, nint nd) {
     if (nd < 0 || nd >= a.nd) {
@@ -372,13 +358,11 @@ internal static bool shouldRoundUp(ref @decimal a, nint nd) {
     return a.d[nd] >= '5';
 }
 
-} partial class strconvᴛdecimal {
-
 // Round a to nd digits (or fewer).
 // If nd is zero, it means we're rounding
 // just to the left of the digits, as in
 // 0.09 -> 0.1.
-public static void Round(this ж<@decimal> Ꮡa, nint nd) {
+internal static void Round⁔(/*this*/ ж<@decimal> Ꮡa, nint nd) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (nd < 0 || nd >= a.nd) {
@@ -392,7 +376,7 @@ public static void Round(this ж<@decimal> Ꮡa, nint nd) {
 }
 
 // Round a down to nd digits (or fewer).
-public static void RoundDown(this ж<@decimal> Ꮡa, nint nd) {
+internal static void RoundDown⁔(/*this*/ ж<@decimal> Ꮡa, nint nd) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (nd < 0 || nd >= a.nd) {
@@ -403,7 +387,7 @@ public static void RoundDown(this ж<@decimal> Ꮡa, nint nd) {
 }
 
 // Round a up to nd digits (or fewer).
-public static void RoundUp(this ref @decimal a, nint nd) {
+internal static void RoundUp⁔(/*this*/ ref @decimal a, nint nd) {
     if (nd < 0 || nd >= a.nd) {
         return;
     }
@@ -427,7 +411,7 @@ public static void RoundUp(this ref @decimal a, nint nd) {
 
 // Extract integer part, rounded appropriately.
 // No guarantees about overflow.
-public static uint64 RoundedInteger(this ж<@decimal> Ꮡa) {
+internal static uint64 RoundedInteger⁔(/*this*/ ж<@decimal> Ꮡa) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (a.dp > 20) {
@@ -447,4 +431,4 @@ public static uint64 RoundedInteger(this ж<@decimal> Ꮡa) {
     return n;
 }
 
-}
+} // end strconv_package

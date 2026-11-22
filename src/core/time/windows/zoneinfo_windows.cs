@@ -264,10 +264,6 @@ internal static ref syscall.Timezoneinformation usPacific => ref ((StaticBox<sys
 )); }
 internal static ref syscall.Timezoneinformation aus => ref ((StaticBox<syscall.Timezoneinformation>)Ꮡaus).ValueSlot;
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string utcˢ => ref utcˢᵇ;
-private static readonly @string utcˢᵇ = "UTC"u8;
-
 internal static void initLocal() {
     ref var i = ref heap(new syscall.Timezoneinformation(), out var Ꮡi);
     var (_, err) = syscall.GetTimeZoneInformation(Ꮡi); if (err != nil) {

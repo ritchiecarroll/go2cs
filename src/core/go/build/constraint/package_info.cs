@@ -14,6 +14,9 @@
 
 using go;
 using static go.go.build.constraint_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -69,11 +72,13 @@ using static go.go.build.constraint_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("go/build/constraint/expr.go", "expr.cs", "ADBalIKmgsYACA6UgqaCgqSkxgAIDpSUgoKmgsaCgoKUpoIACRCUlIKCpoLGgoKClKaCAAoSgsaYooCCpICCpKqiguq0gpSCpoKmgtyCgqYADCDSgoKCgpS4goKClAAIDNKCgpSs0oKClKzSgoKUgoKCgpSU7AAIBIKCgoKClKaCgpSCpoKClJSCggAFEuKCgpSCgoKUlIKCgqaClIKCgqaCgoKCpoKCpoKCgsqiguq0gpSCpoKUlJSClNyCgqbomLKUgoKCkoKCgpSCgpSClJSCpoKUgpSmgpSClKaClKyygpSCgqam2AAICJaSgoKCgoKktKaU3IKCgqaCgoKUqJKCgoKCgoKClKamvLK2pIKUpIKUpIKCgpSClKSCgoKUgpS8ooKCgpSqooKCgpQ=", "214-222:1;280-287:1", "", "", "", "248:21,249:13,334:25,335:17")]
+[assembly: GoPositionMap("go/build/constraint/expr.go", "expr.cs", "ACxalIKmgqbulIKmgoKkpKbulJSCgqaCpoKCgpSmggAHEJSUgoKmgqaCgoKUpoIACBKCppiigIKkgIKkqqKC6rSClIKmgqaC3IKCpgAMINKCgoKClLiCgoKU7NKCgpSs0oKClKzSgoKUgoKCgpSU7AAIBIKCgoKClKaCgpSCpoKClJSCggAFEuKCgpSCgoKUlIKCgqaClIKCgqaCgoKCpoKCpoKCgqqiguq0gpSCpoKUlJSClNyCgqbomLKUgoKCkoKCgpSCgpSClJSCpoKUgpSmgpSClKaClKyygpSCgqam2AAICJaSgoKCgoKktKaU3IKCgqaCgoKUqJKCgoKCgoKClKamvLK2pIKUpIKUpIKCgpSClKSCgoKUgpS8ooKCgpSqooKCgpQ=", "214-222:1;280-287:1", "", "", "", "226:21,227:13,310:25,311:17")]
 [assembly: GoPositionMap("go/build/constraint/vers.go", "vers.cs", "AA48ABICgoKUgpTqoqSkgoKUpIKClKSklJSClIKClJS+soKUrLKClA==")]
 // </GoSourcePositionMaps>
 
 namespace go.go.build;
+
+using static global::go.go.build.constraint_package;
 
 [GoPackage("constraint")]
 public static partial class constraint_package
@@ -116,10 +121,47 @@ public static partial class constraint_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(constraint_package.AndExpr)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class constraintᴛAndExpr;
-[GoMethodHost(typeof(constraint_package.NotExpr)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class constraintᴛNotExpr;
-[GoMethodHost(typeof(constraint_package.OrExpr)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class constraintᴛOrExpr;
-[GoMethodHost(typeof(constraint_package.SyntaxError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class constraintᴛSyntaxError;
-[GoMethodHost(typeof(constraint_package.TagExpr)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class constraintᴛTagExpr;
-[GoMethodHost(typeof(constraint_package.exprParser)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class constraintᴛexprParser;
+[GoMethodHost(typeof(constraint_package.AndExpr)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class constraintᴛAndExpr;
+[GoMethodHost(typeof(constraint_package.NotExpr)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class constraintᴛNotExpr;
+[GoMethodHost(typeof(constraint_package.OrExpr)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class constraintᴛOrExpr;
+[GoMethodHost(typeof(constraint_package.SyntaxError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class constraintᴛSyntaxError;
+[GoMethodHost(typeof(constraint_package.TagExpr)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class constraintᴛTagExpr;
+[GoMethodHost(typeof(constraint_package.exprParser)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class constraintᴛexprParser;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class constraintᴛAndExpr {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void isExpr(this ref AndExpr x) => constraint_package.isExpr⁔(ref x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Eval(this ref AndExpr x, Func<@string, bool> ok) => constraint_package.Eval⁔(ref x, ok);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this ref AndExpr x) => constraint_package.String⁔(ref x);
+}
+partial class constraintᴛNotExpr {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void isExpr(this ref NotExpr x) => constraint_package.isExpr⁔(ref x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Eval(this ref NotExpr x, Func<@string, bool> ok) => constraint_package.Eval⁔(ref x, ok);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this ref NotExpr x) => constraint_package.String⁔(ref x);
+}
+partial class constraintᴛOrExpr {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void isExpr(this ref OrExpr x) => constraint_package.isExpr⁔(ref x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Eval(this ref OrExpr x, Func<@string, bool> ok) => constraint_package.Eval⁔(ref x, ok);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this ref OrExpr x) => constraint_package.String⁔(ref x);
+}
+partial class constraintᴛSyntaxError {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this ref SyntaxError e) => constraint_package.Error⁔(ref e);
+}
+partial class constraintᴛTagExpr {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void isExpr(this ref TagExpr x) => constraint_package.isExpr⁔(ref x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Eval(this ref TagExpr x, Func<@string, bool> ok) => constraint_package.Eval⁔(ref x, ok);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this ref TagExpr x) => constraint_package.String⁔(ref x);
+}
+partial class constraintᴛexprParser {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static Expr or(this ж<exprParser> Ꮡp) => constraint_package.or⁔(Ꮡp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static Expr and(this ж<exprParser> Ꮡp) => constraint_package.and⁔(Ꮡp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static Expr not(this ж<exprParser> Ꮡp) => constraint_package.not⁔(Ꮡp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static Expr atom(this ж<exprParser> Ꮡp) => constraint_package.atom⁔(Ꮡp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void lex(this ref exprParser p) => constraint_package.lex⁔(ref p);
+}
+// </MethodForwarders>

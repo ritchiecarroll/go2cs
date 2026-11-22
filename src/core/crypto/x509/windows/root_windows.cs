@@ -10,7 +10,6 @@ using strings = strings_package;
 using syscall = syscall_package;
 using @unsafe = unsafe_package;
 using encoding;
-using static x509_package;
 
 partial class x509_package {
 
@@ -230,11 +229,9 @@ internal static (slice<ж<Certificate>> chain, error err) verifyChain(ж<Certifi
     return (chain, default);
 }
 
-} partial class x509ᴛCertificate {
-
 // systemVerify is like Verify, except that it uses CryptoAPI calls
 // to build certificate chains and verify them.
-internal static (slice<slice<ж<Certificate>>> chains, error err) systemVerify(this ж<Certificate> Ꮡc, ж<VerifyOptions> Ꮡopts) {
+internal static (slice<slice<ж<Certificate>>> chains, error err) systemVerify⁔(/*this*/ ж<Certificate> Ꮡc, ж<VerifyOptions> Ꮡopts) {
     slice<slice<ж<Certificate>>> chains = default;
     error err = default;
     GoFrame ᒐ = default;
@@ -325,4 +322,4 @@ internal static (slice<slice<ж<Certificate>>> chains, error err) systemVerify(t
     ᒐdone: return (chains, err);
 }
 
-}
+} // end x509_package

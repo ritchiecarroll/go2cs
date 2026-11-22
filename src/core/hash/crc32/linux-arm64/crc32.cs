@@ -19,8 +19,6 @@ using sync = sync_package;
 using atomic = go.sync.atomic_package;
 using @internal;
 using go.sync;
-using crc32 = crc32_package;
-using static crc32_package;
 
 partial class crc32_package {
 
@@ -158,30 +156,24 @@ public static hash.Hash32 New(ж<Table> tab) {
 // and unmarshal the internal state of the hash.
 public static hash.Hash32 NewIEEE() { return New(IEEETable); }
 
-} partial class crc32ᴛdigest {
+internal static nint Size⁔(/*this*/ ref digest d) { return Size; }
 
-internal static nint Size(this ref digest d) { return crc32.Size; }
+internal static nint BlockSize⁔(/*this*/ ref digest d) { return 1; }
 
-internal static nint BlockSize(this ref digest d) { return 1; }
-
-internal static void Reset(this ref digest d) { d.crc = 0; }
-
-} partial class crc32_package {
+internal static void Reset⁔(/*this*/ ref digest d) { d.crc = 0; }
 
 internal static ref readonly @string magic => ref magicᵇ;
 private static readonly @string magicᵇ = "crc\x01"u8;
 internal const nint marshaledSize = /* len(magic) + 4 + 4 */ 12;
 
-} partial class crc32ᴛdigest {
-
-internal static (slice<byte>, error) AppendBinary(this ref digest d, slice<byte> b) {
+internal static (slice<byte>, error) AppendBinary⁔(/*this*/ ref digest d, slice<byte> b) {
     b = append(b, magic.ꓸꓸꓸ);
     b = byteorder.BEAppendUint32(b, tableSum(d.tab));
     b = byteorder.BEAppendUint32(b, d.crc);
     return (b, default);
 }
 
-internal static (slice<byte>, error) MarshalBinary(this ref digest d) {
+internal static (slice<byte>, error) MarshalBinary⁔(/*this*/ ref digest d) {
     return d.AppendBinary(new slice<byte>(0, marshaledSize));
 }
 
@@ -193,7 +185,7 @@ private static readonly @string hashCrc32InvalidHashˢ2ᵇ = "hash/crc32: invali
 internal static ref readonly @string hashCrc32TablesDoNotˢ => ref hashCrc32TablesDoNotˢᵇ;
 private static readonly @string hashCrc32TablesDoNotˢᵇ = "hash/crc32: tables do not match"u8;
 
-internal static error UnmarshalBinary(this ref digest d, slice<byte> b) {
+internal static error UnmarshalBinary⁔(/*this*/ ref digest d, slice<byte> b) {
     if (len(b) < len(magic) || ((sstring)(b[..(int)(len(magic))])) != magic) {
         return errors.New(hashCrc32InvalidHashˢ);
     }
@@ -207,12 +199,10 @@ internal static error UnmarshalBinary(this ref digest d, slice<byte> b) {
     return default;
 }
 
-internal static (hash.Cloner, error) Clone(this ref digest d) {
+internal static (hash.Cloner, error) Clone⁔(/*this*/ ref digest d) {
     ref var r = ref heap<digest>(d, out var Ꮡr);
     return (new digestжCloner(Ꮡr), default);
 }
-
-} partial class crc32_package {
 
 internal static uint32 update(uint32 crc, ж<Table> tab, slice<byte> p, bool checkInitIEEE) {
     switch (ᐧ) {
@@ -237,23 +227,19 @@ public static uint32 Update(uint32 crc, ж<Table> tab, slice<byte> p) {
     return update(crc, tab, p, true);
 }
 
-} partial class crc32ᴛdigest {
-
-internal static (nint n, error err) Write(this ref digest d, slice<byte> p) {
+internal static (nint n, error err) Write⁔(/*this*/ ref digest d, slice<byte> p) {
     // We only create digest objects through New() which takes care of
     // initialization in this case.
     d.crc = update(d.crc, d.tab, p, false);
     return (len(p), default);
 }
 
-internal static uint32 Sum32(this ref digest d) { return d.crc; }
+internal static uint32 Sum32⁔(/*this*/ ref digest d) { return d.crc; }
 
-internal static slice<byte> Sum(this ref digest d, slice<byte> @in) {
+internal static slice<byte> Sum⁔(/*this*/ ref digest d, slice<byte> @in) {
     var s = d.Sum32();
     return append(@in, (byte)(s >> 24), (byte)(s >> 16), (byte)(s >> 8), (byte)s);
 }
-
-} partial class crc32_package {
 
 // Checksum returns the CRC-32 checksum of data
 // using the polynomial represented by the [Table].

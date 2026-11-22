@@ -10,7 +10,6 @@ namespace go.vendor.golang.org.x.crypto;
 using cipher = go.crypto.cipher_package;
 using errors = errors_package;
 using go.crypto;
-using static chacha20poly1305_package;
 
 partial class chacha20poly1305_package {
 
@@ -55,18 +54,16 @@ public static (cipher.AEAD, error) New(slice<byte> key) {
     return (new chacha20poly1305жAEAD(ret), default);
 }
 
-} partial class chacha20poly1305ᴛchacha20poly1305 {
-
-internal static nint NonceSize(this ref chacha20poly1305 c) {
-    return chacha20poly1305_package.NonceSize;
+internal static nint NonceSize⁔(/*this*/ ref chacha20poly1305 c) {
+    return NonceSize;
 }
 
-internal static nint Overhead(this ref chacha20poly1305 c) {
-    return chacha20poly1305_package.Overhead;
+internal static nint Overhead⁔(/*this*/ ref chacha20poly1305 c) {
+    return Overhead;
 }
 
-internal static slice<byte> Seal(this ref chacha20poly1305 c, slice<byte> dst, slice<byte> nonce, slice<byte> plaintext, slice<byte> additionalData) {
-    if (len(nonce) != chacha20poly1305_package.NonceSize) {
+internal static slice<byte> Seal⁔(/*this*/ ref chacha20poly1305 c, slice<byte> dst, slice<byte> nonce, slice<byte> plaintext, slice<byte> additionalData) {
+    if (len(nonce) != NonceSize) {
         throw panic("chacha20poly1305: bad nonce length passed to Seal");
     }
 
@@ -77,14 +74,10 @@ internal static slice<byte> Seal(this ref chacha20poly1305 c, slice<byte> dst, s
     return c.seal(dst, nonce, plaintext, additionalData);
 }
 
-} partial class chacha20poly1305_package {
-
 internal static error errOpen = errors.New("chacha20poly1305: message authentication failed");
 
-} partial class chacha20poly1305ᴛchacha20poly1305 {
-
-internal static (slice<byte>, error) Open(this ref chacha20poly1305 c, slice<byte> dst, slice<byte> nonce, slice<byte> ciphertext, slice<byte> additionalData) {
-    if (len(nonce) != chacha20poly1305_package.NonceSize) {
+internal static (slice<byte>, error) Open⁔(/*this*/ ref chacha20poly1305 c, slice<byte> dst, slice<byte> nonce, slice<byte> ciphertext, slice<byte> additionalData) {
+    if (len(nonce) != NonceSize) {
         throw panic("chacha20poly1305: bad nonce length passed to Open");
     }
     if (len(ciphertext) < 16) {
@@ -96,8 +89,6 @@ internal static (slice<byte>, error) Open(this ref chacha20poly1305 c, slice<byt
 
     return c.open(dst, nonce, ciphertext, additionalData);
 }
-
-} partial class chacha20poly1305_package {
 
 // sliceForAppend takes a slice and a requested number of bytes. It returns a
 // slice with the contents of the given slice followed by that many bytes and a

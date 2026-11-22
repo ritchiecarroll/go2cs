@@ -10,10 +10,14 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+using iter = go.iter_package;
 // </ImportedTypeAliases>
 
 using go;
 using static go.go.token_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -63,13 +67,17 @@ using static go.go.token_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("go/token/position.go", "position.cs", "ACVEgAABFAAIAoKCgpSCgqaClAAkRJIAGC6SqJKokqiSqLKCgoKs0oKClK4ACQKClIKCgu6CoqjCgoKCAAIWAAsEgoKCyoKCgqrSgoKCgpSCgsqCkqwACAKClIKCgpQAEx6iAAIWAAoCgoKUqJKUgsaCxriCuAACGAAJAgACGAAJAqqixoKGppTMAAgCgoKAgqSUgoKClIKCyoKm7oKmsoKCggACEPKClKyyACRIku7CgoKCAAIkABUElIKCgpSClIKCpoKCpoKCgt4AHCaClIKCtAACEAAMAoKUlIKCtKjCgsqigoLkpMSCpoKUgqaClNzSgpSu4oKCpqqizAALFJKClIKUpg==", "334-336:1;559-563:1")]
-[assembly: GoPositionMap("go/token/serialize.go", "serialize.cs", "ABwwsoKCpoKCggAHEIKUqLKUgoKCgoLulIKU", "", "", "66=Clone/1/2/4,Clone/2/2/5")]
-[assembly: GoPositionMap("go/token/token.go", "token.cs", "AIUBjAIAZ9YB0oKClIKUAA8ispSkpKSklOqCgoK6koKUzrCYoqqQtpKCqKSCrLKClIKCpg==")]
-[assembly: GoPositionMap("go/token/tree.go", "tree.cs", "ADdqggAEGAAJApSklMrSgoKClIKUgoK4goKCgpSClIKCAAUQAAgCkoKCgoKClKauwoKClIKCgqaClKYABhDClKSkpNiigoKUlIKClMaigoLYsoKCuLKCgriigpSmgoKCxqKUgpS0tLQABBQACAKCgoKUgpS2gpSkuJS81IKClIKUgoKUgoKq1IKClIKUgoKUgoKq0oKCgpSCAAUQ0riClIKUgoKospSCyoKUpoKUtoKCtraCgoKCgqrCgpSCgoKUgoKCgpSs4oKUgoKClA==", "132-151:1", "", "379=Name/1/2/1,Base/1/2/1,End/1/2/1,Name/2/2/2,Base/2/2/2,End/2/2/2")]
+[assembly: GoPositionMap("go/token/position.go", "position.cs", "ACJEgAABFAAIAoKCgpSCgqaClAAgRJIAFC6SqJKokqiSqLKCgoKs0oKClK4ACQKClIKCgu6CoqjCgoKCAAIWAAsEgoKCyoKCgqrSgoKCgpSCgsqCkqwACAKClIKCgpQADx6iAAIWAAoCgoKUqJKUgsaCxriCuAACGAAJAgACGAAJAqqipoKGppSsAAgCgoKAgqSUgoKClIKCyoKm7oKmsoKCggACEPKClKyyACJIks7CgoKCAAIkABUElIKCgpSClIKCpoKCpoKCgt4AHCaClIKCtAACEAAMAoKUlIKCtKjCgsqigoLkpMSCpoKUgqaClNzSgpSu4oKCpqqirAALFJKClIKUpg==", "334-336:1;559-563:1")]
+[assembly: GoPositionMap("go/token/serialize.go", "serialize.cs", "ABkwsoKCpoKCggAHEIKUqLKUgoKCgoLulIKU", "", "", "63=Clone/1/2/4,Clone/2/2/5")]
+[assembly: GoPositionMap("go/token/token.go", "token.cs", "AIQBjAIAZdYB0oKClIKUAAsispSkpKSklMqCgoK6koKUrrCYoqqQlpKCqKSCrLKClIKCpg==")]
+[assembly: GoPositionMap("go/token/tree.go", "tree.cs", "ADRqggACGAAJApSklKrSgoKClIKUgoK4goKCgpSClIKCAAMQAAgCkoKCgoKClKauwoKClIKCgqaClKYABhDClKSkpLiigoKUlIKClKaigoK4soKCuLKCgriigpSmgoKCpqKUgpS0tLQABBQACAKCgoKUgpS2gpSkuJS81IKClIKUgoKUgoKq1IKClIKUgoKUgoKq0oKCgpSCAAUQ0riClIKUgoKospSCyoKUpoKUtoKCtraCgoKCgqrCgpSCgoKUgoKCgpSs4oKUgoKClA==", "132-151:1", "", "362=Name/1/2/1,Base/1/2/1,End/1/2/1,Name/2/2/2,Base/2/2/2,End/2/2/2")]
 // </GoSourcePositionMaps>
 
 namespace go.go;
+
+using static global::go.go.token_package;
+using iter = global::go.iter_package;
+using ꓸꓸꓸжFile = Span<ж<token_package.File>>;
 
 [GoPackage("token")]
 public static partial class token_package
@@ -119,11 +127,93 @@ public static partial class token_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(token_package.File)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class tokenᴛFile;
-[GoMethodHost(typeof(token_package.FileSet)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class tokenᴛFileSet;
-[GoMethodHost(typeof(token_package.Pos)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class tokenᴛPos;
-[GoMethodHost(typeof(token_package.Position)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class tokenᴛPosition;
-[GoMethodHost(typeof(token_package.Token)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class tokenᴛToken;
-[GoMethodHost(typeof(token_package.node)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class tokenᴛnode;
-[GoMethodHost(typeof(token_package.tree)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class tokenᴛtree;
+[GoMethodHost(typeof(token_package.File)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class tokenᴛFile;
+[GoMethodHost(typeof(token_package.FileSet)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class tokenᴛFileSet;
+[GoMethodHost(typeof(token_package.Pos)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class tokenᴛPos;
+[GoMethodHost(typeof(token_package.Position)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class tokenᴛPosition;
+[GoMethodHost(typeof(token_package.Token)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class tokenᴛToken;
+[GoMethodHost(typeof(token_package.node)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class tokenᴛnode;
+[GoMethodHost(typeof(token_package.tree)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class tokenᴛtree;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class tokenᴛFile {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Name(this ref File f) => token_package.Name⁔(ref f);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Base(this ref File f) => token_package.Base⁔(ref f);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Size(this ref File f) => token_package.Size⁔(ref f);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static Pos End(this ref File f) => token_package.End⁔(ref f);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint LineCount(this ж<File> Ꮡf) => token_package.LineCount⁔(Ꮡf);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void AddLine(this ж<File> Ꮡf, nint offset) => token_package.AddLine⁔(Ꮡf, offset);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void MergeLine(this ж<File> Ꮡf, nint line) => token_package.MergeLine⁔(Ꮡf, line);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<nint> Lines(this ж<File> Ꮡf) => token_package.Lines⁔(Ꮡf);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool SetLines(this ж<File> Ꮡf, slice<nint> lines) => token_package.SetLines⁔(Ꮡf, lines);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void SetLinesForContent(this ж<File> Ꮡf, slice<byte> content) => token_package.SetLinesForContent⁔(Ꮡf, content);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static Pos LineStart(this ж<File> Ꮡf, nint line) => token_package.LineStart⁔(Ꮡf, line);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void AddLineInfo(this ж<File> Ꮡf, nint offset, @string filename, nint line) => token_package.AddLineInfo⁔(Ꮡf, offset, filename, line);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void AddLineColumnInfo(this ж<File> Ꮡf, nint offset, @string filename, nint line, nint column) => token_package.AddLineColumnInfo⁔(Ꮡf, offset, filename, line, column);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint fixOffset(this ref File f, nint offset) => token_package.fixOffset⁔(ref f, offset);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static Pos Pos(this ref File f, nint offset) => token_package.Pos⁔(ref f, offset);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Offset(this ref File f, Pos p) => token_package.Offset⁔(ref f, p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Line(this ж<File> Ꮡf, Pos p) => token_package.Line⁔(Ꮡf, p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (@string filename, nint line, nint column) unpack(this ж<File> Ꮡf, nint offset, bool adjusted) => token_package.unpack⁔(Ꮡf, offset, adjusted);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static Position /*pos*/ position(this ж<File> Ꮡf, Pos p, bool adjusted) => token_package.position⁔(Ꮡf, p, adjusted);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static Position /*pos*/ PositionFor(this ж<File> Ꮡf, Pos p, bool adjusted) => token_package.PositionFor⁔(Ꮡf, p, adjusted);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static Position /*pos*/ Position(this ж<File> Ꮡf, Pos p) => token_package.Position⁔(Ꮡf, p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static key key(this ref File f) => token_package.key⁔(ref f);
+}
+partial class tokenᴛFileSet {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Base(this ж<FileSet> Ꮡs) => token_package.Base⁔(Ꮡs);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<File> AddFile(this ж<FileSet> Ꮡs, @string filename, nint @base, nint size) => token_package.AddFile⁔(Ꮡs, filename, @base, size);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void AddExistingFiles(this ж<FileSet> Ꮡs, params ꓸꓸꓸжFile filesʗp) => token_package.AddExistingFiles⁔(Ꮡs, filesʗp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void RemoveFile(this ж<FileSet> Ꮡs, ж<File> Ꮡfile) => token_package.RemoveFile⁔(Ꮡs, Ꮡfile);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Iterate(this ж<FileSet> Ꮡs, Func<ж<File>, bool> yield) => token_package.Iterate⁔(Ꮡs, yield);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<File> @file(this ж<FileSet> Ꮡs, Pos p) => token_package.file⁔(Ꮡs, p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<File> /*f*/ File(this ж<FileSet> Ꮡs, Pos p) => token_package.File⁔(Ꮡs, p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static Position /*pos*/ PositionFor(this ж<FileSet> Ꮡs, Pos p, bool adjusted) => token_package.PositionFor⁔(Ꮡs, p, adjusted);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static Position /*pos*/ Position(this ж<FileSet> Ꮡs, Pos p) => token_package.Position⁔(Ꮡs, p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Read(this ж<FileSet> Ꮡs, Func<any, error> decode) => token_package.Read⁔(Ꮡs, decode);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Write(this ж<FileSet> Ꮡs, Func<any, error> encode) => token_package.Write⁔(Ꮡs, encode);
+}
+partial class tokenᴛPos {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool IsValid(this Pos p) => token_package.IsValid⁔(p);
+}
+partial class tokenᴛPosition {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool IsValid(this ref Position pos) => token_package.IsValid⁔(ref pos);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this Position pos) => token_package.String⁔(pos);
+}
+partial class tokenᴛToken {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this Token tok) => token_package.String⁔(tok);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Precedence(this Token op) => token_package.Precedence⁔(op);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool IsLiteral(this Token tok) => token_package.IsLiteral⁔(tok);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool IsOperator(this Token tok) => token_package.IsOperator⁔(tok);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool IsKeyword(this Token tok) => token_package.IsKeyword⁔(tok);
+}
+partial class tokenᴛnode {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void check(this ж<node> Ꮡn, ж<node> Ꮡparent) => token_package.check⁔(Ꮡn, Ꮡparent);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void checkBalance(this ref node n) => token_package.checkBalance⁔(ref n);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<node> next(this ж<node> Ꮡx) => token_package.next⁔(Ꮡx);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void setLeft(this ж<node> Ꮡx, ж<node> Ꮡy) => token_package.setLeft⁔(Ꮡx, Ꮡy);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void setRight(this ж<node> Ꮡx, ж<node> Ꮡy) => token_package.setRight⁔(Ꮡx, Ꮡy);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static int32 safeHeight(this ж<node> Ꮡn) => token_package.safeHeight⁔(Ꮡn);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void update(this ref node n) => token_package.update⁔(ref n);
+}
+partial class tokenᴛtree {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (ж<ж<node>> pos, ж<node> parent) locate(this ж<tree> Ꮡt, key k) => token_package.locate⁔(Ꮡt, k);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static iter.Seq<ж<File>> all(this ж<tree> Ꮡt) => token_package.all⁔(Ꮡt);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<node> nextAfter(this ref tree t, ж<ж<node>> Ꮡpos, ж<node> Ꮡparent) => token_package.nextAfter⁔(ref t, Ꮡpos, Ꮡparent);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void setRoot(this ref tree t, ж<node> Ꮡx) => token_package.setRoot⁔(ref t, Ꮡx);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void replaceChild(this ref tree t, ж<node> Ꮡparent, ж<node> Ꮡold, ж<node> Ꮡnew) => token_package.replaceChild⁔(ref t, Ꮡparent, Ꮡold, Ꮡnew);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void rebalanceUp(this ref tree t, ж<node> Ꮡx) => token_package.rebalanceUp⁔(ref t, Ꮡx);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<node> rotateRight(this ref tree t, ж<node> Ꮡy) => token_package.rotateRight⁔(ref t, Ꮡy);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<node> rotateLeft(this ref tree t, ж<node> Ꮡx) => token_package.rotateLeft⁔(ref t, Ꮡx);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void add(this ж<tree> Ꮡt, ж<File> Ꮡfile) => token_package.add⁔(Ꮡt, Ꮡfile);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void set(this ref tree t, ж<File> Ꮡfile, ж<ж<node>> Ꮡpos, ж<node> Ꮡparent) => token_package.set⁔(ref t, Ꮡfile, Ꮡpos, Ꮡparent);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void delete(this ref tree t, ж<ж<node>> Ꮡpos) => token_package.delete⁔(ref t, Ꮡpos);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void deleteSwap(this ref tree t, ж<ж<node>> Ꮡpos) => token_package.deleteSwap⁔(ref t, Ꮡpos);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<node> /*z*/ deleteMin(this ref tree t, ж<ж<node>> Ꮡzpos) => token_package.deleteMin⁔(ref t, Ꮡzpos);
+}
+// </MethodForwarders>

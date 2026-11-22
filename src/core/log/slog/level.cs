@@ -9,7 +9,6 @@ using strconv = strconv_package;
 using strings = strings_package;
 using atomic = go.sync.atomic_package;
 using go.sync;
-using static slog_package;
 
 partial class slog_package {
 
@@ -46,8 +45,6 @@ public static Level LevelInfo => 0;
 public static Level LevelWarn => 4;
 public static Level LevelError => 8;
 
-} partial class slogᴛLevel {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string debugˢ => ref debugˢᵇ;
 private static readonly @string debugˢᵇ = "DEBUG"u8;
@@ -67,7 +64,7 @@ private static readonly @string errorˢᵇ = "ERROR"u8;
 //
 //	LevelWarn.String() => "WARN"
 //	(LevelInfo+2).String() => "INFO+2"
-public static @string String(this Level l) {
+internal static @string String⁔(/*this*/ Level l) {
     @string str(@string @base, Level val) {
         if (val == 0) {
             return @base;
@@ -96,7 +93,7 @@ public static @string String(this Level l) {
 
 // MarshalJSON implements [encoding/json.Marshaler]
 // by quoting the output of [Level.String].
-public static (slice<byte>, error) MarshalJSON(this Level l) {
+internal static (slice<byte>, error) MarshalJSON⁔(/*this*/ Level l) {
     // AppendQuote is sufficient for JSON-encoding all Level strings.
     // They don't contain any runes that would produce invalid JSON
     // when escaped.
@@ -108,7 +105,7 @@ public static (slice<byte>, error) MarshalJSON(this Level l) {
 // ignoring case.
 // It also accepts numeric offsets that would result in a different string on
 // output. For example, "Error-8" would marshal as "INFO".
-public static error UnmarshalJSON(this ж<Level> Ꮡl, slice<byte> data) {
+internal static error UnmarshalJSON⁔(/*this*/ ж<Level> Ꮡl, slice<byte> data) {
     var (s, err) = strconv.Unquote((@string)data);
     if (err != nil) {
         return err;
@@ -118,13 +115,13 @@ public static error UnmarshalJSON(this ж<Level> Ꮡl, slice<byte> data) {
 
 // AppendText implements [encoding.TextAppender]
 // by calling [Level.String].
-public static (slice<byte>, error) AppendText(this Level l, slice<byte> b) {
+internal static (slice<byte>, error) AppendText⁔(/*this*/ Level l, slice<byte> b) {
     return (append(b, l.String().ꓸꓸꓸ), default);
 }
 
 // MarshalText implements [encoding.TextMarshaler]
 // by calling [Level.AppendText].
-public static (slice<byte>, error) MarshalText(this Level l) {
+internal static (slice<byte>, error) MarshalText⁔(/*this*/ Level l) {
     return l.AppendText(default);
 }
 
@@ -133,7 +130,7 @@ public static (slice<byte>, error) MarshalText(this Level l) {
 // ignoring case.
 // It also accepts numeric offsets that would result in a different string on
 // output. For example, "Error-8" would marshal as "INFO".
-public static error UnmarshalText(this ж<Level> Ꮡl, slice<byte> data) {
+internal static error UnmarshalText⁔(/*this*/ ж<Level> Ꮡl, slice<byte> data) {
     return Ꮡl.parse((@string)data);
 }
 
@@ -141,7 +138,7 @@ public static error UnmarshalText(this ж<Level> Ꮡl, slice<byte> data) {
 internal static ref readonly @string unknownNameˢ => ref unknownNameˢᵇ;
 private static readonly @string unknownNameˢᵇ = "unknown name"u8;
 
-internal static error /*err*/ parse(this ж<Level> Ꮡl, @string s) {
+internal static error /*err*/ parse⁔(/*this*/ ж<Level> Ꮡl, @string s) {
     error err = default;
     GoFrame ᒐ = default;
     try {
@@ -193,9 +190,7 @@ internal static error /*err*/ parse(this ж<Level> Ꮡl, @string s) {
 
 // Level returns the receiver.
 // It implements [Leveler].
-public static Level Level(this Level l) { return l; }
-
-} partial class slog_package {
+internal static Level Level⁔(/*this*/ Level l) { return l; }
 
 // A LevelVar is a [Level] variable, to allow a [Handler] level to change
 // dynamically.
@@ -206,37 +201,35 @@ partial struct LevelVar {
     internal atomic.Int64 val;
 }
 
-} partial class slogᴛLevelVar {
-
 // Level returns v's level.
-public static Level Level(this ж<LevelVar> Ꮡv) {
+internal static Level Level⁔(/*this*/ ж<LevelVar> Ꮡv) {
     return (Level)(nint)Ꮡv.Ꮡval.Load();
 }
 
 // Set sets v's level to l.
-public static void Set(this ж<LevelVar> Ꮡv, Level l) {
+internal static void Set⁔(/*this*/ ж<LevelVar> Ꮡv, Level l) {
     Ꮡv.Ꮡval.Store((int64)l);
 }
 
-public static @string String(this ж<LevelVar> Ꮡv) {
+internal static @string String⁔(/*this*/ ж<LevelVar> Ꮡv) {
     return fmt.Sprintf("LevelVar(%s)"u8, Ꮡv.Level());
 }
 
 // AppendText implements [encoding.TextAppender]
 // by calling [Level.AppendText].
-public static (slice<byte>, error) AppendText(this ж<LevelVar> Ꮡv, slice<byte> b) {
+internal static (slice<byte>, error) AppendText⁔(/*this*/ ж<LevelVar> Ꮡv, slice<byte> b) {
     return Ꮡv.Level().AppendText(b);
 }
 
 // MarshalText implements [encoding.TextMarshaler]
 // by calling [LevelVar.AppendText].
-public static (slice<byte>, error) MarshalText(this ж<LevelVar> Ꮡv) {
+internal static (slice<byte>, error) MarshalText⁔(/*this*/ ж<LevelVar> Ꮡv) {
     return Ꮡv.AppendText(default);
 }
 
 // UnmarshalText implements [encoding.TextUnmarshaler]
 // by calling [Level.UnmarshalText].
-public static error UnmarshalText(this ж<LevelVar> Ꮡv, slice<byte> data) {
+internal static error UnmarshalText⁔(/*this*/ ж<LevelVar> Ꮡv, slice<byte> data) {
     ref var l = ref heap(new Level(), out var Ꮡl);
     var err = Ꮡl.UnmarshalText(data); if (err != nil) {
         return err;
@@ -244,8 +237,6 @@ public static error UnmarshalText(this ж<LevelVar> Ꮡv, slice<byte> data) {
     Ꮡv.Set(l);
     return default;
 }
-
-} partial class slog_package {
 
 // A Leveler provides a [Level] value.
 //

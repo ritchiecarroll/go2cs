@@ -2,7 +2,6 @@
 namespace go.html;
 
 using strconv = strconv_package;
-using static template_package;
 
 partial class template_package {
 
@@ -24,13 +23,11 @@ private static readonly @string _attr_nameᵇ = "attrNoneattrScriptattrScriptTyp
 
 internal static array<uint8> _attr_index = array<uint8>([0, 8, 18, 32, 41, 48, 58, 73]);
 
-} partial class templateᴛattr {
-
-internal static @string String(this attr i) {
+internal static @string String⁔(/*this*/ attr i) {
     if (i >= ((attr)(uint8)(len(_attr_index) - 1))) {
         return "attr("u8 + strconv.FormatInt((int64)i, 10) + ")"u8;
     }
     return _attr_name.slice(_attr_index[i], _attr_index[i + 1]);
 }
 
-}
+} // end template_package
