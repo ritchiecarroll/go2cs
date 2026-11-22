@@ -5,9 +5,9 @@
 // main has no ⁔ (its methods stay extension methods in main_package), so a difference that shows in both is not the
 // suffix's.
 //
-// Not in this row: a function literal inside a method, read with its line. Its NAME equals Go's (GlyphLibraryFrameNames
-// prints it), but an inlined literal call's LINE does not yet: it reads the call's opening line where Go reads its
-// closing `}()`, in package main as much as in a library, until the frame-naming seat lands with its own case.
+// Not in this row: a function literal inside a method. Neither its name (Go's carries the method's receiver,
+// `pkg.(*T).M.func1`) nor an inlined literal call's line (Go reads its closing `}()`) equals Go's yet, in package main
+// as much as in a library; the converter will emit both in their own seat.
 package main
 
 import (

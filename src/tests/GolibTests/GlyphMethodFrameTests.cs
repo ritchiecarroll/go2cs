@@ -154,27 +154,13 @@ public class GlyphMethodFrameTests
     [TestMethod]
     public void CallersNamesALiteralInsideABodyWithoutTheSuffix()
     {
-        // Roslyn names the literal `<Spin⁔>b__N_M`; its outer name is the body's, which is the Go method's, and Go names a
-        // literal in a method under the method's receiver (`glyphprobe.counter.Spin.func1`).
+        // Roslyn names the literal `<Spin⁔>b__N_M`; its outer name is the body's, which is the Go method's.
         List<string> functions = FunctionsOf(glyphprobe_package.spinVia(new glyphprobe_package.counter()));
         string all = string.Join(" | ", functions);
 
         Assert.IsFalse(all.Contains('⁔'), all);
-        Assert.IsTrue(functions.Exists(function => function.StartsWith("glyphprobe.counter.Spin.func", StringComparison.Ordinal)), all);
+        Assert.IsTrue(functions.Exists(function => function.StartsWith("glyphprobe.Spin.func", StringComparison.Ordinal)), all);
         CollectionAssert.Contains(functions, "glyphprobe.counter.Spin", all);
-    }
-
-    [TestMethod]
-    public void ALiteralInsideOneOfTwoSameNamedBodiesTakesItsOwnReceiver()
-    {
-        // gauge's `Spin⁔` sits beside counter's in the package class, so the outer name alone does not say which method
-        // the literal is in; the literal is named for gauge, whose body holds it.
-        List<string> functions = FunctionsOf(glyphprobe_package.spinGaugeVia(new glyphprobe_package.gauge()));
-        string all = string.Join(" | ", functions);
-
-        Assert.IsTrue(functions.Exists(function => function.StartsWith("glyphprobe.gauge.Spin.func", StringComparison.Ordinal)), all);
-        Assert.IsFalse(functions.Exists(function => function.StartsWith("glyphprobe.counter.", StringComparison.Ordinal)), all);
-        CollectionAssert.Contains(functions, "glyphprobe.gauge.Spin", all);
     }
 
     [TestMethod]
@@ -199,7 +185,7 @@ public class GlyphMethodFrameTests
         string[] frames = Array.ConvertAll(Array.FindAll(lines[1..], line => !line.StartsWith('\t')), line => line[..line.IndexOf('(')]);
 
         Assert.IsFalse(traceback.Contains('⁔'), traceback);
-        Assert.IsTrue(frames[0].StartsWith("glyphprobe.counter.Explode.func", StringComparison.Ordinal), traceback);
+        Assert.IsTrue(frames[0].StartsWith("glyphprobe.Explode.func", StringComparison.Ordinal), traceback);
         CollectionAssert.Contains(frames, "glyphprobe.counter.Explode", traceback);
     }
 

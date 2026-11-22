@@ -52,7 +52,7 @@ using System.Runtime.CompilerServices;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("lib.go", "lib.cs", "AAsYgoKogqiCmKiClJg=", "24-26:1;35-37:1")]
+[assembly: GoPositionMap("lib.go", "lib.cs", "AAoYgoKogqiClA==")]
 // </GoSourcePositionMaps>
 
 namespace go.GlyphLibraryFrameNames;
@@ -100,7 +100,6 @@ public static partial class framelib_package
 // <MethodForwarders>
 partial class framelibᴛCounter {
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Name(this Counter c) => framelib_package.Name⁔(c);
-    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Closure(this Counter c) => framelib_package.Closure⁔(c);
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Bump(this ref Counter c) => framelib_package.Bump⁔(ref c);
 }
 // </MethodForwarders>

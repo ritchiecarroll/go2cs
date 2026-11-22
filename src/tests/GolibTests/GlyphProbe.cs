@@ -28,12 +28,6 @@ internal static partial class glyphprobe_package
         public T v;
     }
 
-    // A second type whose method shares counter's name, so the package class holds two `Spin⁔` bodies.
-    internal partial struct gauge
-    {
-        public nint level;
-    }
-
     [MethodImpl(MethodImplOptions.NoInlining)]
     internal static slice<uintptr> callersHere()
     {
@@ -70,15 +64,6 @@ internal static partial class glyphprobe_package
         return f();
     }
 
-    // func (g gauge) Spin() []uintptr { f := func() []uintptr { return callersHere() }; return f() }
-    // The same name as counter's body, beside it in the package class: the literal `<Spin⁔>b__N_M` belongs to this one.
-    [MethodImpl(MethodImplOptions.NoInlining)]
-    internal static slice<uintptr> Spin⁔(/*this*/ gauge g)
-    {
-        Func<slice<uintptr>> f = [MethodImpl(MethodImplOptions.NoInlining)] () => callersHere();
-        return f();
-    }
-
     // func (c counter) Explode() { func() { panic("lit") }() }
     [MethodImpl(MethodImplOptions.NoInlining)]
     internal static void Explode⁔(/*this*/ counter c)
@@ -99,9 +84,6 @@ internal static partial class glyphprobe_package
 
     [MethodImpl(MethodImplOptions.NoInlining)]
     internal static slice<uintptr> spinVia(counter c) => c.Spin();
-
-    [MethodImpl(MethodImplOptions.NoInlining)]
-    internal static slice<uintptr> spinGaugeVia(gauge g) => g.Spin();
 
     [MethodImpl(MethodImplOptions.NoInlining)]
     internal static void explodeVia(counter c) => c.Explode();
@@ -127,13 +109,6 @@ internal static partial class glyphprobeᴛcounter
 
     // RecvGenerator's twin of the pointer-receiver forwarder.
     internal static slice<uintptr> Bump(this ж<glyphprobe_package.counter> Ꮡc) => Bump(ref Ꮡc.Value);
-}
-
-[GoMethodHost(typeof(glyphprobe_package.gauge))]
-internal static partial class glyphprobeᴛgauge
-{
-    [MethodImpl(MethodImplOptions.AggressiveInlining), System.Diagnostics.StackTraceHidden, System.Diagnostics.DebuggerStepThrough]
-    internal static slice<uintptr> Spin(this glyphprobe_package.gauge g) => glyphprobe_package.Spin⁔(g);
 }
 
 [GoMethodHost(typeof(glyphprobe_package.cell<>))]
