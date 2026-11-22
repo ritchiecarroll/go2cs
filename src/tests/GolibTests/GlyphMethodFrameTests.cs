@@ -150,4 +150,71 @@ public class GlyphMethodFrameTests
 
         Assert.AreEqual("glyphprobe.(*counter).Bump-fm", (string)FuncForPC(pc).Name());
     }
+
+    [TestMethod]
+    public void CallersNamesALiteralInsideABodyWithoutTheSuffix()
+    {
+        // Roslyn names the literal `<Spin⁔>b__N_M`; its outer name is the body's, which is the Go method's.
+        List<string> functions = FunctionsOf(glyphprobe_package.spinVia(new glyphprobe_package.counter()));
+        string all = string.Join(" | ", functions);
+
+        Assert.IsFalse(all.Contains('⁔'), all);
+        Assert.IsTrue(functions.Exists(function => function.StartsWith("glyphprobe.Spin.func", StringComparison.Ordinal)), all);
+        CollectionAssert.Contains(functions, "glyphprobe.counter.Spin", all);
+    }
+
+    [TestMethod]
+    public void APanicTraceNamesALiteralInsideABodyWithoutTheSuffix()
+    {
+        Exception escaped = null;
+
+        try
+        {
+            glyphprobe_package.explodeVia(new glyphprobe_package.counter());
+        }
+        catch (Exception ex)
+        {
+            escaped = ex;
+        }
+
+        Assert.IsNotNull(escaped, "the probe's panic must escape");
+        Assert.IsTrue(CrashReport.TryUnwrapPanic(escaped, out PanicException panic, out Exception thrown), "the escape must be a panic");
+
+        string traceback = GoCrashTraceback(panic, thrown);
+        string[] lines = traceback.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+        string[] frames = Array.ConvertAll(Array.FindAll(lines[1..], line => !line.StartsWith('\t')), line => line[..line.IndexOf('(')]);
+
+        Assert.IsFalse(traceback.Contains('⁔'), traceback);
+        Assert.IsTrue(frames[0].StartsWith("glyphprobe.Explode.func", StringComparison.Ordinal), traceback);
+        CollectionAssert.Contains(frames, "glyphprobe.counter.Explode", traceback);
+    }
+
+    [TestMethod]
+    public void FuncForPCNamesAValueReceiverForwarderAsItsMethod()
+    {
+        // A method expression another package takes of a value-receiver method binds the holder's forwarder (the
+        // converter binds the body only for its own package's methods): the function is the Go method, named with its
+        // receiver and placed at the body.
+        uintptr pc = reflect_package.ValueOf((Func<glyphprobe_package.counter, slice<uintptr>>)glyphprobeᴛcounter.Walk).Pointer();
+        var fn = FuncForPC(pc);
+        var (file, _) = fn.FileLine(pc);
+
+        Assert.AreEqual("glyphprobe.counter.Walk", (string)fn.Name());
+        Assert.IsFalse(((string)file).EndsWith("package_info.cs", StringComparison.Ordinal), (string)file);
+    }
+
+    [TestMethod]
+    public void ACallOfAForwarderTargetsItsBodyAsTheCallee()
+    {
+        // A caller's IL names the forwarder; where the JIT inlines it, the raw frame the call is suspended in is the
+        // body, so a call of the forwarder is a call of that callee (the call-site line correction reads it).
+        MethodInfo forwarder = typeof(glyphprobeᴛcounter).GetMethod("Walk", AnyStatic)!;
+        MethodInfo body = typeof(glyphprobe_package).GetMethod("Walk⁔", AnyStatic)!;
+        MethodInfo targetsCallee = typeof(runtime_package).GetMethod("targetsCallee", BindingFlags.NonPublic | BindingFlags.Static)!;
+
+        Assert.IsNotNull(targetsCallee, "runtime_package.targetsCallee");
+        Assert.IsTrue((bool)targetsCallee.Invoke(null, [forwarder, body])!, "a call naming the forwarder is a call of its body");
+        Assert.IsTrue((bool)targetsCallee.Invoke(null, [body, body])!, "control: a call of the body itself");
+        Assert.IsFalse((bool)targetsCallee.Invoke(null, [forwarder, typeof(glyphprobe_package).GetMethod("Bump⁔", AnyStatic)!])!, "another body is not this forwarder's");
+    }
 }

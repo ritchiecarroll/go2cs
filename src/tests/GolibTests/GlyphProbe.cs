@@ -55,6 +55,23 @@ internal static partial class glyphprobe_package
     [MethodImpl(MethodImplOptions.NoInlining)]
     internal static T Get⁔<T>(/*this*/ ref cell<T> c) => c.v;
 
+    // func (c counter) Spin() []uintptr { f := func() []uintptr { return callersHere() }; return f() }
+    // The literal is a Roslyn lambda named for its enclosing body, `<Spin⁔>b__N_M`.
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    internal static slice<uintptr> Spin⁔(/*this*/ counter c)
+    {
+        Func<slice<uintptr>> f = [MethodImpl(MethodImplOptions.NoInlining)] () => callersHere();
+        return f();
+    }
+
+    // func (c counter) Explode() { func() { panic("lit") }() }
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    internal static void Explode⁔(/*this*/ counter c)
+    {
+        Action f = [MethodImpl(MethodImplOptions.NoInlining)] () => throw panic((@string)"lit");
+        f();
+    }
+
     // The callers, through the Go-named forwarders, as converted call sites read them.
     [MethodImpl(MethodImplOptions.NoInlining)]
     internal static slice<uintptr> walkVia(counter c) => c.Walk();
@@ -64,6 +81,12 @@ internal static partial class glyphprobe_package
 
     [MethodImpl(MethodImplOptions.NoInlining)]
     internal static void failVia(counter c) => c.Fail();
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    internal static slice<uintptr> spinVia(counter c) => c.Spin();
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    internal static void explodeVia(counter c) => c.Explode();
 }
 
 [GoMethodHost(typeof(glyphprobe_package.counter))]
@@ -77,6 +100,12 @@ internal static partial class glyphprobeᴛcounter
 
     [MethodImpl(MethodImplOptions.AggressiveInlining), System.Diagnostics.StackTraceHidden, System.Diagnostics.DebuggerStepThrough]
     internal static void Fail(this glyphprobe_package.counter c) => glyphprobe_package.Fail⁔(c);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining), System.Diagnostics.StackTraceHidden, System.Diagnostics.DebuggerStepThrough]
+    internal static slice<uintptr> Spin(this glyphprobe_package.counter c) => glyphprobe_package.Spin⁔(c);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining), System.Diagnostics.StackTraceHidden, System.Diagnostics.DebuggerStepThrough]
+    internal static void Explode(this glyphprobe_package.counter c) => glyphprobe_package.Explode⁔(c);
 
     // RecvGenerator's twin of the pointer-receiver forwarder.
     internal static slice<uintptr> Bump(this ж<glyphprobe_package.counter> Ꮡc) => Bump(ref Ꮡc.Value);
