@@ -41696,4 +41696,37 @@ older-version issues, present tense; not a front-page Known Issue):
 
 — C2 (2026-11-22)
 
+### 2026-11-22 — C2: a fatal exit leaves the module-cache release copy behind (OPEN, low)
+
+**The residual.** A module-cache release converts and tests from a copy under the temp directory
+(`go2cs-modcopy-*`, `src/go2cs/goModFile.go`). The copy is removed by a deferred `leave`. A run that ends through
+`log.Fatal*` (84 call sites in the converter's non-test sources at 5fda7c1322), `os.Exit` or a signal skips that
+removal, so the copy stays on disk.
+
+**What bounds it.** Every later copy first runs `sweepStaleModuleCopies(os.TempDir(), 24*time.Hour)`, which removes
+copies older than a day. A copy younger than that is left, because whether a live run still holds it cannot be told
+reliably on every OS.
+
+**Cost.** Disk only: one release-sized directory per fatal run, for at most a day. The module cache itself is not
+touched. A cure would route the fatal sites through an exit hook that runs `leave`; it is not scheduled.
+
+— C2 (2026-11-22)
+
+### 2026-11-22 — C2: CS0104 on a pointer adapter cast in a method holder under a dot import; CURED on claude/c2-objx-bank
+
+**The defect.** A receiver method that goes into its holder class (`<pkg>ᴛ<Type>`) sees the package class and every
+dot-imported package through `using static` with equal standing. When a dot-imported package defines a pointer adapter
+with the same name as one the holder's cast needs (for example `bytes_BufferжWriter`), the bare name is ambiguous:
+CS0104. gopkg.in/yaml.v3 v3.0.1's tests hit it through the dot-imported gopkg.in/check.v1.
+
+**The cure** (5fda7c1322). Where a holder needs an adapter whose name a dot-imported package also defines, the cast
+names the file's own package class (`<pkg>_package.<adapter>`). Red first: behavioral `DotImportAdapterNameInHolder`
+(07d5fe81fe) fails CS0104 before the fix and passes after it.
+
+**Footprint.** Production corpus: 0 by construction (its one dot import, internal/types/errors, has no pointer
+adapters). Test emission of the three standard packages the census flagged (go/types, html/template, net/http): 0
+differing lines in 34, 14 and 40 files; only the converter revision and input digest stamps differ.
+
+— C2 (2026-11-22)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
