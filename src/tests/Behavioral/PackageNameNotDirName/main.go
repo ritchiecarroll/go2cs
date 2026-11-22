@@ -5,6 +5,7 @@ import (
 	"unsafe"
 
 	"PackageNameNotDirName/lib"
+	"PackageNameNotDirName/user"
 )
 
 // sqlite-cs S19: modernc.org/sqlite imports "modernc.org/sqlite/lib", whose package is NAMED sqlite3. busy.go's
@@ -21,4 +22,6 @@ func main() {
 	buf := make([]int64, 4) // the struct's memory, never declared as the struct: busy.go only casts pointers to it
 	busy(unsafe.Pointer(&buf[0]), 250, 9)
 	fmt.Println(int32(buf[0]), buf[3]) // Go: 250 9
+
+	fmt.Println(user.Rows(20)) // Go: 41
 }

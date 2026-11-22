@@ -51,7 +51,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "AAkYgoKCgsyCgpQACBC6goKClMyCgoKUgoKUgpSChKKUgoKCgoKUgpSClIKCgg==", "", "65=main.V.Clone")]
+[assembly: GoPositionMap("main.go", "main.cs", "AAkYgoKCgsyCgpQACBC6goKClMyCgoKUgoKUgpSChKKUgoKCgoKUgpSClIKCgpSCgs6CgoI=", "", "65=main.V.Clone")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -68,6 +68,7 @@ public static partial class main_package
 
     // <TypeAccessibility>
     public partial interface Cloner {}
+    public partial struct Arr {}
     public partial struct GS<T> {}
     public partial struct M {}
     public partial struct U {}

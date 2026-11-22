@@ -28,6 +28,8 @@ using static go.main_package;
 
 // <ExportedTypeAliases>
 [assembly: GoTypeAlias("TLARGE_INTEGER", "go.ImportedAnonStructLiftReuse.lib_package.largeIntegerᴛ1")]
+[assembly: GoTypeAlias("TLONG", "int")]
+[assembly: GoTypeAlias("TRECT", "go.ImportedAnonStructLiftReuse.lib_package.rectᴛ1")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -50,7 +52,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "AAocgoKClpaCgg==")]
+[assembly: GoPositionMap("main.go", "main.cs", "AAwugoKClpaCgoI=")]
 // </GoSourcePositionMaps>
 
 namespace go;

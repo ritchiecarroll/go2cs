@@ -10,6 +10,15 @@ package main
 
 import "fmt"
 
+// drain has a lone blank parameter and a select that receives and drops the value. The parameter must not stay
+// `_` in C#, or the dropped receive's `out _` binds to it.
+func drain(_ string, ch chan struct{}) string {
+	select {
+	case <-ch:
+		return "drained"
+	}
+}
+
 func main() {
 	// (1) void IIFE
 	func() {
@@ -85,4 +94,8 @@ func main() {
 	func(_ int) {
 		fmt.Println("ignored arg; calls =", calls)
 	}(bump())
+
+	done := make(chan struct{})
+	close(done)
+	fmt.Println(drain("unused", done))
 }

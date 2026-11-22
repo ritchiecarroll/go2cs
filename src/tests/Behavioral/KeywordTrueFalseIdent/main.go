@@ -15,6 +15,10 @@ func setFlag(true bool) string {
 	return "off"
 }
 
+// with is named like C# 15's collection-expression `with(...)` arguments element, so as the first element of a
+// slice literal it is escaped (`[@with(), 2]`); at the C# 14 the harness builds, only the emitted spelling shows it.
+func with() int { return 40 }
+
 func main() {
 	// The arguments `true`/`false` here are the PREDECLARED constants → bare C# literals.
 	fmt.Println(setFlag(true), setFlag(false)) // on off
@@ -22,4 +26,7 @@ func main() {
 	// A LOCAL variable shadowing the predeclared `false`.
 	false := 7
 	fmt.Println(false + 1) // 8
+
+	ws := []int{with(), 2}
+	fmt.Println(len(ws), ws[0]+ws[1]) // 2 42
 }

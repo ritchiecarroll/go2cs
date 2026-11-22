@@ -46,6 +46,14 @@ func grid(p unsafe.Pointer) *Grid { return (*Grid)(p) }
 
 func box(v any) any { return v }
 
+// PairHolder holds pair.go's Pair by value beside an array, converted whole through unsafe.Pointer.
+type PairHolder struct {
+	P Pair
+	B [4]byte
+}
+
+func pairView(p unsafe.Pointer) *PairHolder { return (*PairHolder)(p) }
+
 func main() {
 	var raw [16]byte
 	for i := range raw {
@@ -86,4 +94,8 @@ func main() {
 	fmt.Println(m[[3]int16{1, 2, 3}], reflect.ValueOf(g.Off).Cap(), reflect.ValueOf(g.Cells).Index(1).Len())
 	fmt.Printf("%T %v\n", g.Cells, g.Cells[1])
 	_ = grid
+
+	pr := [12]byte{1, 0, 0, 0, 2, 0, 0, 0, 9, 8, 7, 6}
+	ph := pairView(unsafe.Pointer(&pr[0]))
+	fmt.Println(ph.P.X, ph.P.Y, ph.B[0], ph.B[3], unsafe.Sizeof(*ph))
 }

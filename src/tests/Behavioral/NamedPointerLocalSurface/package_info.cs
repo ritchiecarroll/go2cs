@@ -53,7 +53,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "ABQolIKCgpSCgpSCgpSUgg==")]
+[assembly: GoPositionMap("main.go", "main.cs", "ABUuvJSCgoKUgoKUgoKUlIKUgg==")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -69,6 +69,7 @@ public static partial class main_package
     // via declarations below.
 
     // <TypeAccessibility>
+    internal partial class timeLocation {}
     internal partial struct holder {}
     public partial class Features {}
     public partial class PP {}
@@ -84,5 +85,6 @@ public static partial class main_package
 
     // <ImportInitializers>
     [GoInit] internal static void initᴛᴛimportꓸfmt() => builtin.initPackage(typeof(fmt_package));
+    [GoInit] internal static void initᴛᴛimportꓸtime() => builtin.initPackage(typeof(time_package));
     // </ImportInitializers>
 }

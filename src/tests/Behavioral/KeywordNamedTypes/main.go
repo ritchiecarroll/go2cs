@@ -98,6 +98,25 @@ func plainLocalStruct() uintptr {
 	return sizes.size
 }
 
+// file is named after C#'s contextual `file` keyword (emitted @file). Its exported value method makes go2cs-gen
+// write a method-set part for it, which must escape the name too (CS9056).
+type file struct{ size int }
+
+func (f file) Size() int { return f.size * 2 }
+
+// extension is a C# 14 keyword, banned as a type name (CS9306), so the type and a type parameter so named are
+// renamed. closed, union and safe take the same rename for C# 15, where they become keywords; at the C# 14 the
+// harness builds, only the emitted spelling shows it.
+type extension struct{ n int }
+
+func pass[extension any](v extension) extension { return v }
+
+type closed int
+
+type union struct{ a, b int }
+
+func keep[safe any](v safe) safe { return v }
+
 var std sizer = fixed{n: 3}
 
 func main() {
@@ -126,4 +145,8 @@ func main() {
 	fmt.Println(keywordLocalIface())
 	fmt.Println(keywordLocalRef())
 	fmt.Println(plainLocalStruct())
+
+	fmt.Println(file{size: 21}.Size())
+	fmt.Println(extension{n: 5}.n, pass(42))
+	fmt.Println(closed(6), union{a: 3, b: 4}.a+union{a: 3, b: 4}.b, keep("s"))
 }

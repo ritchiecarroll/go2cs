@@ -4,6 +4,15 @@ using fmt = fmt_package;
 
 partial class main_package {
 
+internal static @string drain(@string _Δp0, channel<EmptyStruct> ch) {
+    var chᴛ1 = ch;
+    switch (select(ᐸꟷ(chᴛ1, ꓸꓸꓸ))) {
+    case 0 when chᴛ1.ꟷᐳ(out _): {
+        return "drained";
+    }}
+    return default;
+}
+
 internal static void main() {
     func(() => {
         fmt.Println("a");
@@ -84,6 +93,10 @@ internal static void main() {
     func((nint _) => {
         fmt.Println("ignored arg; calls =", calls);
     })(bump());
+
+    var done = new channel<EmptyStruct>(0);
+    close(done);
+    fmt.Println(drain("unused", done));
 }
 
 } // end main_package

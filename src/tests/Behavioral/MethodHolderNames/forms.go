@@ -61,7 +61,35 @@ func (c *Chest) Forms(v any) string {
 
 func pick[T any](s []T, i int) T { return s[i] }
 
+// SliceBuilder is named like a public type of golib's namespace go, which a method holder reads before the
+// package's own types; Limit, named like the constant, gives it a holder.
+type SliceBuilder struct{ n int }
+
+func (s *SliceBuilder) Limit() int {
+	next := SliceBuilder{n: s.n + Limit}
+	*s = next
+	return s.n
+}
+
+// math is named like the namespace go.math, which others.go's import of math/bits puts in view; a method
+// holder reads that namespace before the package's own types. Limit gives math a holder.
+type math struct{ n int }
+
+func (m *math) Limit() int {
+	next := math{n: m.n + Limit}
+	*m = next
+	return m.n
+}
+
 func forms() {
 	c := &Chest{tags: []Tag{{id: 2}}}
 	fmt.Println("forms", c.Forms(Tag{}), c.Forms(&Tag{}), c.Forms(1), c.Tag().id, len(c.tags))
+
+	sb := SliceBuilder{n: 2}
+	sbGot := sb.Limit()
+	fmt.Println("golib-named type", sbGot, sb.n)
+
+	mt := math{n: 1}
+	mtGot := mt.Limit()
+	fmt.Println("namespace-named type", mtGot, mt.n)
 }

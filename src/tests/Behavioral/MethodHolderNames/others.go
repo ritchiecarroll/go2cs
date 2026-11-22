@@ -32,6 +32,13 @@ func Sort(data sort.Interface) { sort.Sort(data) }
 
 func Run() int { return 4 }
 
+// measure names gauge's method through its type beside a parameter of the method's name; gauge keeps no
+// holder, so the method expression must not read the parameter.
+func measure(size int) int {
+	f := gauge.size
+	return f(gauge{n: size}, words{1, 2})
+}
+
 func others() {
 	w := words{3, 1, 2}
 	w.Sort()
@@ -41,4 +48,5 @@ func others() {
 	_, isFunc := boxed.(func() int)
 
 	fmt.Println("others", w, w.cap(), cap(w), w.bits(), bits.Len64(w[0]), gauge{n: 5}.size(w), run(), isFunc, w.Run())
+	fmt.Println("method expression", measure(5))
 }

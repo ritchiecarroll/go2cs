@@ -1,4 +1,6 @@
 global using TLARGE_INTEGER = go.ImportedAnonStructLiftReuse.lib_package.largeIntegerᴛ1;
+global using TLONG = int;
+global using TRECT = go.ImportedAnonStructLiftReuse.lib_package.rectᴛ1;
 
 namespace go;
 
@@ -18,6 +20,7 @@ internal static void main() {
     Func<TLARGE_INTEGER, ж<TLARGE_INTEGER>, int64> seek = lib.SetFilePointerEx;
     fmt.Println(seek(new TLARGE_INTEGER(QuadPart: 5), Ꮡmoved), moved.QuadPart);
     fmt.Printf("%T\n"u8, distance);
+    fmt.Println(lib.Area(new TRECT(W: 6, H: 7)));
 }
 
 } // end main_package

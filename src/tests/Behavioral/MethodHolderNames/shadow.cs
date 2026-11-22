@@ -23,9 +23,12 @@ internal static nint Count(this meter m) { return main.Count + m.main; }
 
 } partial class main_package {
 
+internal static Func<nint> limitPlus = () => (nint)Limit + Scale(1);
+
 internal static void shadows() {
     var m = new meter(main: 2);
     fmt.Println("shadows", m.Limit(), m.Scale(3), m.Count());
+    fmt.Println("after a method", limitPlus());
 }
 
 } // end main_package

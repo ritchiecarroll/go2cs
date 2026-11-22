@@ -82,4 +82,18 @@ func main() {
 	uc := slices.Clone(u)
 	uc[0] = "r"
 	fmt.Printf("%T %v %v\n", uc, u, uc)
+
+	arr := Arr{1, 2}
+	ac, acErr := arr.Clone()
+	fmt.Println(*ac.(*Arr), arr, acErr)
+}
+
+// Arr is a named ARRAY declaring Clone, as Go 1.26 hash/fnv's sum128 does: the array's by-value copy inside the
+// method must not call Go's Clone.
+type Arr [2]uint64
+
+func (d *Arr) Clone() (any, error) {
+	r := *d
+	r[0] += 100
+	return &r, nil
 }

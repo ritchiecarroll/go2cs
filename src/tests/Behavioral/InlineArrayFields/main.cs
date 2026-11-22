@@ -45,6 +45,13 @@ internal static ж<Grid> grid(@unsafe.Pointer p) { return @unsafe.Pointer.To<Gri
 
 internal static any box(any v) { return v; }
 
+[global::go.golib.GoInlineLayout(Size = 12, Align = 4), StructLayout(LayoutKind.Explicit, Size = 12)] partial struct PairHolder {
+    [FieldOffset(0)] public Pair P;
+    [FieldOffset(8)] public array4<byte> B;
+}
+
+internal static ж<PairHolder> pairView(@unsafe.Pointer p) { return @unsafe.Pointer.To<PairHolder>(p); }
+
 internal static void main() {
     ref var raw = ref heap(new array<byte>(16), out var Ꮡraw);
     foreach (var i in range(len(raw))) {
@@ -90,6 +97,10 @@ internal static void main() {
     fmt.Println(m[array<int16>([1, 2, 3])], reflect.ValueOf(g.Off.ΔCopy()).Cap(), reflect.ValueOf(g.Cells.ΔSelect(static Δe1 => Δe1.ΔCopy())).Index(1).Len());
     fmt.Printf("%T %v\n"u8, g.Cells.ΔSelect(static Δe1 => Δe1.ΔCopy()), g.Cells[1].ΔCopy());
     _ = (Func<@unsafe.Pointer, ж<Grid>>)(grid);
+
+    ref var pr = ref heap<array<byte>>(array<byte>([1, 0, 0, 0, 2, 0, 0, 0, 9, 8, 7, 6]), out var Ꮡpr);
+    var ph = pairView(@unsafe.Pointer.FromPinnedBox(Ꮡpr.at<byte>(0)));
+    fmt.Println(ph.P.X, ph.P.Y, ph.B[0], ph.B[3], /* unsafe.Sizeof(*ph) */ (uintptr)12);
 }
 
 } // end main_package

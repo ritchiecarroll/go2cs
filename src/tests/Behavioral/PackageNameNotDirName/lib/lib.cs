@@ -5,6 +5,8 @@ namespace go.PackageNameNotDirName.lib;
 
 partial class sqlite3_package {
 
+public static int64 Twice(int64 n) { return n * 2; }
+
 partial struct Tdbᴛ1 /*dyn*/ {
     public int32 FbusyTimeout;
     public array<int64> FaDb = new(2);

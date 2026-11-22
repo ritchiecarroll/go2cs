@@ -10,6 +10,7 @@ using MethodHolderAlias.geom;
 using MethodHolderAlias.html;
 using geom = MethodHolderAlias.geom_package;
 using plate = MethodHolderAlias.html.plate_package;
+using main = main_package;
 using static main_package;
 
 partial class main_package {
@@ -24,6 +25,14 @@ internal static nint Area(this field f) { return MethodHolderAlias.geom_package.
 
 } partial class main_package {
 
+public static nint 量 = 5;
+
+} partial class mainᴛfield {
+
+internal static nint Weight(this field f) { return main.量 * 2; }
+
+} partial class main_package {
+
 internal static void main() {
     ref var s = ref heap<geom.Shape>(new Shape(W: new part.Side(Len: 4), H: new part.Side(Len: 5)), out var Ꮡs);
     fmt.Println("child namespace", s.Area(), s.Unit(), Area(2, 3), (nint)(Unit));
@@ -33,6 +42,7 @@ internal static void main() {
     fmt.Println("expressions", area(s), unit(Ꮡs), ((Func<part.Side, nint>)(global::go.MethodHolderAlias.geom.partᴛSide.Double))(new part.Side(Len: 7)));
 
     fmt.Println("dot import", new field(s).Area());
+    fmt.Println("caseless name", new field(s).Weight());
 
     var (pitch, @base) = tone.Play(2);
     fmt.Println("type named like its package", pitch, @base, tone.Pitch(1), (nint)(tone.Base));

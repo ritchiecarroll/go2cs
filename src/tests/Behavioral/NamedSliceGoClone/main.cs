@@ -79,6 +79,18 @@ internal static void main() {
     var uc = slices.Clone<U, @string>(u);
     uc[0] = "r";
     fmt.Printf("%T %v %v\n"u8, uc, u, uc);
+
+    var arr = new Arr(new uint64[]{1, 2}.array());
+    var (ac, acErr) = arr.Clone();
+    fmt.Println(ac._<ж<Arr>>().Value, arr, acErr);
+}
+
+partial struct Arr /*[2]uint64*/;
+
+public static (any, error) Clone(this ref Arr d) {
+    ref var r = ref heap<Arr>(d.ΔClone(), out var Ꮡr);
+    r[0] += 100;
+    return (Ꮡr, default);
 }
 
 } // end main_package

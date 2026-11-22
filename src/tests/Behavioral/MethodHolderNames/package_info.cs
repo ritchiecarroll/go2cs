@@ -57,10 +57,10 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("forms.go", "forms.cs", "ABgolpaigpSUgoKUgpSClIKUgpSUlMS2lMaUgoI=")]
+[assembly: GoPositionMap("forms.go", "forms.cs", "ABkolpaigpSUgoKUgpSClIKUgpSUlMS2lMb8goKCAAoOgoKCxoKClIKClIKC")]
 [assembly: GoPositionMap("main.go", "main.cs", "ABAclPiUgoKmlIKCpoKUpKaCpqiClLSmAAoMlLoAChDkgoKCgoKCgoKClIKUlIKWgoKilIKC", "", "103=main.Box.Scale")]
-[assembly: GoPositionMap("others.go", "others.cs", "AA8cgoKUgpaU+pSUlIKClIKClA==")]
-[assembly: GoPositionMap("shadow.go", "shadow.cs", "AA4SgoKolrSCgg==")]
+[assembly: GoPositionMap("others.go", "others.cs", "AA8cgoKUgpaU+pSUmIKCpoKClIKClII=")]
+[assembly: GoPositionMap("shadow.go", "shadow.cs", "AA4SgoKolraUgoKC")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -77,6 +77,7 @@ public static partial class main_package
 
     // <TypeAccessibility>
     internal partial struct gauge {}
+    internal partial struct math {}
     internal partial struct meter {}
     internal partial struct words {}
     public partial struct Box {}
@@ -85,6 +86,7 @@ public static partial class main_package
     public partial struct Pair<T> {}
     public partial struct Seal {}
     public partial struct Shelf {}
+    public partial struct SliceBuilder {}
     public partial struct Tag {}
     // </TypeAccessibility>
 
@@ -96,7 +98,7 @@ public static partial class main_package
 
     // <ImportInitializers>
     [GoInit] internal static void initᴛᴛimportꓸfmt() => builtin.initPackage(typeof(fmt_package));
-    [GoInit] internal static void initᴛᴛimportꓸmathꓸbits() => builtin.initPackage(typeof(math.bits_package));
+    [GoInit] internal static void initᴛᴛimportꓸmathꓸbits() => builtin.initPackage(typeof(global::go.math.bits_package));
     [GoInit] internal static void initᴛᴛimportꓸsort() => builtin.initPackage(typeof(sort_package));
     // </ImportInitializers>
 }
@@ -112,6 +114,8 @@ public static partial class main_package
 [GoMethodHost(typeof(main_package.Chest)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛChest;
 [GoMethodHost(typeof(main_package.Pair<>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛPair;
 [GoMethodHost(typeof(main_package.Shelf)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛShelf;
+[GoMethodHost(typeof(main_package.SliceBuilder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛSliceBuilder;
+[GoMethodHost(typeof(main_package.math)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛmath;
 [GoMethodHost(typeof(main_package.meter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛmeter;
 [GoMethodHost(typeof(main_package.words)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛwords;
 // </MethodHolders>

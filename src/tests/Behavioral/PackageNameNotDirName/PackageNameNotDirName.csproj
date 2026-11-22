@@ -189,6 +189,7 @@
     <ProjectReference Include="$(go2csPath)core/fmt/fmt.csproj" />
     <ProjectReference Include="$(go2csPath)core/unsafe/unsafe.csproj" />
     <ProjectReference Include="lib/PackageNameNotDirName.lib.csproj" />
+    <ProjectReference Include="user/PackageNameNotDirName.user.csproj" />
   </ItemGroup>
 
   <ItemGroup>

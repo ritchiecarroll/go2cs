@@ -3,6 +3,8 @@ namespace go;
 using fmt = fmt_package;
 using @unsafe = unsafe_package;
 using sqlite3 = PackageNameNotDirName.lib.sqlite3_package;
+using user = PackageNameNotDirName.user_package;
+using PackageNameNotDirName;
 using PackageNameNotDirName.lib;
 
 partial class main_package {
@@ -17,6 +19,8 @@ internal static void main() {
     var buf = new slice<int64>(4);
     busy(@unsafe.Pointer.FromPinnedBox(Ꮡ(buf, 0)), 250, 9);
     fmt.Println((int32)buf[0], buf[3]);
+
+    fmt.Println(user.Rows(20));
 }
 
 } // end main_package

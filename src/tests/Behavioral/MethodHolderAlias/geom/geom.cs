@@ -23,4 +23,6 @@ public static nint Unit(this ref Shape s) { return (nint)Δgeom.Unit + s.W.Doubl
 
 public static nint Area(nint w, nint h) { return w * h; }
 
+public static nint 量 = 1000;
+
 } // end geom_package

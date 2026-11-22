@@ -127,4 +127,22 @@ func main() {
 	fmt.Println(capturedLocalNamedAfterType()) // 37
 
 	fmt.Println(boxRefCapturedValueNamedAfterType()) // 220
+
+	bm := boxMembers{ReinterpretUnaliased: 4, ΔInlineSlice: 5}
+	got := bumpBoxMembers(&bm)
+	fmt.Println(got, bm.ReinterpretUnaliased, bm.ΔInlineSlice) // 1415 14 15
+}
+
+// boxMembers' fields are named like members of golib's pointer box ж<T>: ReinterpretUnaliased (an extension
+// method over ж<T>) and ΔInlineSlice (an instance method). Through a pointer, Go's p.f names the field.
+type boxMembers struct {
+	ReinterpretUnaliased int
+	ΔInlineSlice         int
+}
+
+//go:noinline
+func bumpBoxMembers(p *boxMembers) int {
+	p.ReinterpretUnaliased += 10
+	p.ΔInlineSlice *= 3
+	return p.ReinterpretUnaliased*100 + p.ΔInlineSlice
 }

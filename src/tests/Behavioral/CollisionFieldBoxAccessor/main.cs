@@ -95,6 +95,21 @@ internal static void main() {
     fmt.Println(capturedLocalNamedAfterType());
 
     fmt.Println(boxRefCapturedValueNamedAfterType());
+
+    var bm = new boxMembers(ReinterpretUnaliased: 4, ΔInlineSlice: 5);
+    nint got = bumpBoxMembers(ref bm);
+    fmt.Println(got, bm.ReinterpretUnaliased, bm.ΔInlineSlice);
+}
+
+partial struct boxMembers {
+    public nint ReinterpretUnaliased;
+    public nint ΔInlineSlice;
+}
+
+internal static partial nint bumpBoxMembers(ref boxMembers p) {
+    p.ReinterpretUnaliased += 10;
+    p.ΔInlineSlice *= 3;
+    return p.ReinterpretUnaliased * 100 + p.ΔInlineSlice;
 }
 
 } // end main_package
