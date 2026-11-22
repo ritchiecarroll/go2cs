@@ -10,10 +10,16 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+using io = go.io_package;
+using os = go.os_package;
+using time = go.time_package;
 // </ImportedTypeAliases>
 
 using go;
 using static go.os.exec_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -73,13 +79,18 @@ using static go.os.exec_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("os/exec/exec.go", "exec.cs", "AH/uAYKm6gAJEIKmggDcAdwDggAHMAAYAsqAgqaCgoKCgpSmgpSmgoKCgpSCgoKU2oKCuJSClAAIEoKUpgACGAALAoKUgoKWzsKUpoKCgoKUysKClPaCgpSmooKCgpSCpoCCtoKCpoKCkoKClIKUlKaCpoKClK7CgoKClIKmgIK2goKmgoKSgoKUxoKCAAUiAA0CgpQAExIADQiCpoKCgpSCgoK4gpSCgpSUgoK4AAEgAA4CgoK4gpSCpOqCgoKUgoKClIKCgpSClIKCptyClKaCgoSKgoKilIKClIKClLgACBKCgoKmAAUU8rTYgoK4gsrcgoKmgtjYgsqCgtyCyIIADRimgoLspgAWKIIACigAEwKClIKmgoKUlIKCgriCuLiUgpQAAhQADAKCgpSmgqaCgqa2/Ka0poKmAAsS8oKUgpSCgqaCgoKm6sKClIKUgoKCggAIEuKClIKUgoKUgoKCAAYWAAgCgpSClIKClIKCggAGFgAIAoKUgpSCgpSCgoIAESjygqaCgpSmgoKCgoKCpqrCgoKClAAIBoKClIKUgoKCgoKCgoLMspSCgoKCuIIADxqCgoLsgoKUqrSCAAQQ0uy2ooKCgriCgqaCuJSCuJSUgoKUgqaCuIKCpuyygpSCgoKUlKYACRSYopSU", "430-443:1;490-492:1;518-520:1;552-561:1;601-605:1;650-659:1;756-769:2;968-973:1", "", "", "", "531:21,532:13,701:21,702:13,1052:21,1053:13")]
+[assembly: GoPositionMap("os/exec/exec.go", "exec.cs", "AHzuAYKmygAHEIKmggDaAdwDggAHMAAYAsqAgqaCgoKCgpSmgpSmgoKCgpSCgoKU2oKCuJSClAAIEoKUpgACGAALAoKUgoKWrsKUpoKCgoKUqsKClNaCgpSmooKCgpSCpoCCtoKCpoKCkoKClIKUlKaCpoKClK7CgoKClIKmgIK2goKmgoKSgoKUpoKCAAMiAA0CgpQADxIADQiCpoKCgpSCgoK4gpSCgpSUgoK4AAEgAA4CgoK4gpSCpOqCgoKUgoKClIKCgpSClIKCptyClKaCgoSKgoKilIKClIKClLgACBKCgoKmAAUU8rTYgoK4gsrcgoKmgtjYgsqCgtyCyIIADRimgoLspgASKIIACCgAEwKClIKmgoKUlIKCgriCuLiUgpQAAhQADAKCgpSmgqaCgqa2/Ka0poKmAAsS8oKUgpSCgqaCgoKm6sKClIKUgoKCggAIEuKClIKUgoKUgoKCAAYWAAgCgpSClIKClIKCggAGFgAIAoKUgpSCgpSCgoIADSjygqaCgpSmgoKCgoKCpqrCgoKClAAIBoKClIKUgoKCgoKCgoKsspSCgoKCuIIADxqCgoLsgoKUqrSCAAIQ0uy2ooKCgriCgqaCuJSCuJSUgoKUgqaCuIKCpuyygpSCgoKUlKYACRSYopSU", "430-443:1;490-492:1;518-520:1;552-561:1;601-605:1;650-659:1;756-769:2;968-973:1", "", "", "", "518:21,519:13,678:21,679:13,1023:21,1024:13")]
 [assembly: GoPositionMap("os/exec/exec_windows.go", "exec_windows.cs", "AAscqLKC")]
 [assembly: GoPositionMap("os/exec/lookpath.go", "lookpath.cs", "AAc4ABUC")]
 [assembly: GoPositionMap("os/exec/lp_windows.go", "lp_windows.cs", "ABIglIKCgpSClKaCgoKUpoKClIKCyoKCpoKUpoKCpgACGAAJAoKmgpSCgoKUuIKUgpSClJSCgpSC5oKCgoKSgpSClKaU6JKCgoKUAAIYAAoIgoKCgpS4goKmpoIABxCCgoK4gsqClJSUuIKU")]
 // </GoSourcePositionMaps>
 
 namespace go.os;
+
+using static go.os.exec_package;
+using io = go.io_package;
+using os = go.os_package;
+using time = go.time_package;
 
 [GoPackage("exec")]
 public static partial class exec_package
@@ -133,9 +144,52 @@ public static partial class exec_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(exec_package.Cmd)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class execᴛCmd;
-[GoMethodHost(typeof(exec_package.Error)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class execᴛError;
-[GoMethodHost(typeof(exec_package.ExitError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class execᴛExitError;
-[GoMethodHost(typeof(exec_package.prefixSuffixSaver)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class execᴛprefixSuffixSaver;
-[GoMethodHost(typeof(exec_package.wrappedError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class execᴛwrappedError;
+[GoMethodHost(typeof(exec_package.Cmd)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class execᴛCmd;
+[GoMethodHost(typeof(exec_package.Error)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class execᴛError;
+[GoMethodHost(typeof(exec_package.ExitError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class execᴛExitError;
+[GoMethodHost(typeof(exec_package.prefixSuffixSaver)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class execᴛprefixSuffixSaver;
+[GoMethodHost(typeof(exec_package.wrappedError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class execᴛwrappedError;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class execᴛCmd {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this ref Cmd c) => exec_package.String⁔(ref c);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<@string> argv(this ref Cmd c) => exec_package.argv⁔(ref c);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (ж<os.File>, error) childStdin(this ж<Cmd> Ꮡc) => exec_package.childStdin⁔(Ꮡc);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (ж<os.File>, error) childStdout(this ref Cmd c) => exec_package.childStdout⁔(ref c);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (ж<os.File>, error) childStderr(this ref Cmd c, ж<os.File> ᏑchildStdout) => exec_package.childStderr⁔(ref c, ᏑchildStdout);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (ж<os.File>, error) writerDescriptor(this ref Cmd c, io.Writer w) => exec_package.writerDescriptor⁔(ref c, w);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Run(this ж<Cmd> Ꮡc) => exec_package.Run⁔(Ꮡc);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Start(this ж<Cmd> Ꮡc) => exec_package.Start⁔(Ꮡc);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void watchCtx(this ref Cmd c, channel/*<-*/<ctxResult> resultc) => exec_package.watchCtx⁔(ref c, resultc);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Wait(this ж<Cmd> Ꮡc) => exec_package.Wait⁔(Ꮡc);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error awaitGoroutines(this ж<Cmd> Ꮡc, ж<time.Timer> Ꮡtimer) => exec_package.awaitGoroutines⁔(Ꮡc, Ꮡtimer);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<byte>, error) Output(this ж<Cmd> Ꮡc) => exec_package.Output⁔(Ꮡc);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<byte>, error) CombinedOutput(this ж<Cmd> Ꮡc) => exec_package.CombinedOutput⁔(Ꮡc);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (io.WriteCloser, error) StdinPipe(this ref Cmd c) => exec_package.StdinPipe⁔(ref c);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (io.ReadCloser, error) StdoutPipe(this ref Cmd c) => exec_package.StdoutPipe⁔(ref c);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (io.ReadCloser, error) StderrPipe(this ref Cmd c) => exec_package.StderrPipe⁔(ref c);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<@string>, error) environ(this ref Cmd c) => exec_package.environ⁔(ref c);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<@string> Environ(this ref Cmd c) => exec_package.Environ⁔(ref c);
+}
+partial class execᴛError {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this ref Error e) => exec_package.Error⁔(ref e);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Unwrap(this ref Error e) => exec_package.Unwrap⁔(ref e);
+}
+partial class execᴛExitError {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this ref ExitError e) => exec_package.Error⁔(ref e);
+}
+partial class execᴛprefixSuffixSaver {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) Write(this ж<prefixSuffixSaver> Ꮡw, slice<byte> p) => exec_package.Write⁔(Ꮡw, p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<byte> /*pRemain*/ fill(this ref prefixSuffixSaver w, ж<slice<byte>> Ꮡdst, slice<byte> p) => exec_package.fill⁔(ref w, Ꮡdst, p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<byte> Bytes(this ref prefixSuffixSaver w) => exec_package.Bytes⁔(ref w);
+}
+partial class execᴛwrappedError {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string Error(this wrappedError w) => exec_package.Error⁔(w);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error Unwrap(this wrappedError w) => exec_package.Unwrap⁔(w);
+}
+// </MethodForwarders>

@@ -9,12 +9,8 @@ using runtime = runtime_package;
 using syscall = syscall_package;
 using time = time_package;
 using @internal.syscall;
-using os = os_package;
-using static os_package;
 
 partial class os_package {
-
-} partial class osᴛProcess {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string waitForSingleObjectˢ => ref waitForSingleObjectˢᵇ;
@@ -28,7 +24,7 @@ private static readonly @string getProcessTimesˢᵇ = "GetProcessTimes"u8;
 
 // Note that Process.handle is never nil because Windows always requires
 // a handle. A manually-created Process literal is not valid.
-internal static (ж<ProcessState> ps, error err) wait(this ж<Process> Ꮡp) {
+internal static (ж<ProcessState> ps, error err) wait⁔(/*this*/ ж<Process> Ꮡp) {
     ж<ProcessState> ps = default;
     error err = default;
     GoFrame ᒐ = default;
@@ -85,7 +81,7 @@ private static readonly @string duplicateHandleˢᵇ = "DuplicateHandle"u8;
 internal static ref readonly @string terminateProcessˢ => ref terminateProcessˢᵇ;
 private static readonly @string terminateProcessˢᵇ = "TerminateProcess"u8;
 
-internal static error signal(this ж<Process> Ꮡp, Signal sig) {
+internal static error signal⁔(/*this*/ ж<Process> Ꮡp, Signal sig) {
     GoFrame ᒐ = default;
     try {
         var (handle, status) = Ꮡp.handleTransientAcquire();
@@ -98,7 +94,7 @@ internal static error signal(this ж<Process> Ꮡp, Signal sig) {
         }}
         defer(Ꮡp.handleTransientRelease, ref ᒐ);
 
-        if (AreEqual(sig, os.Kill)) {
+        if (AreEqual(sig, Kill)) {
             ref var terminationHandle = ref heap(new syscall.Handle(), out var ᏑterminationHandle);
             var e = syscall.DuplicateHandle(~((syscall.Handle)((syscall.Handle)0)), (syscall.Handle)handle, ~((syscall.Handle)((syscall.Handle)0)), ᏑterminationHandle, syscall.PROCESS_TERMINATE, false, 0);
             if (e != nil) {
@@ -116,13 +112,9 @@ internal static error signal(this ж<Process> Ꮡp, Signal sig) {
     finally { ᒐ.Run(); }
 }
 
-} partial class osᴛprocessHandle {
-
-internal static void closeHandle(this ref processHandle ph) {
+internal static void closeHandle⁔(/*this*/ ref processHandle ph) {
     syscall.CloseHandle((syscall.Handle)ph.handle);
 }
-
-} partial class os_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string openProcessˢ => ref openProcessˢᵇ;
@@ -228,14 +220,12 @@ internal static time.Duration ftToDuration(ж<syscall.Filetime> Ꮡft) {
     return ((time.Duration)(n * 100)) * time.Nanosecond;
 }
 
-} partial class osᴛProcessState {
-
-internal static time.Duration userTime(this ref ProcessState p) {
+internal static time.Duration userTime⁔(/*this*/ ref ProcessState p) {
     return ftToDuration(p.rusage.ᏑUserTime);
 }
 
-internal static time.Duration systemTime(this ref ProcessState p) {
+internal static time.Duration systemTime⁔(/*this*/ ref ProcessState p) {
     return ftToDuration(p.rusage.ᏑKernelTime);
 }
 
-}
+} // end os_package

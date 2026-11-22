@@ -10,10 +10,16 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+using encodecounter = go.@internal.coverage.encodecounter_package;
+using io = go.io_package;
+using pods = go.@internal.coverage.pods_package;
 // </ImportedTypeAliases>
 
 using go;
 using static go.@internal.coverage.cfile_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -63,12 +69,17 @@ using static go.@internal.coverage.cfile_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("internal/coverage/cfile/apis.go", "apis.cs", "ABEikoKUqJKClIKUgqiSgpSokoKUgqaCgpSCpoK4qJKCgpSCADt4goKUgoKmgoKmpg==")]
-[assembly: GoPositionMap("internal/coverage/cfile/emit.go", "emit.cs", "ACVKAFOgAbKClIKCgoKmgoKmgoKCpoKCgsqCgpSCgpSmgoKClKzE7oKm7pSCgoKigoKUlIKCgsqCgqKClIKCgpSCgsqCpoKCgpSqooKClIKmlO6CuIKCpqyygpSCgoLMpIKUpoK4ggAHEICCpIK4gIKkgILagIK2yJKClAACEAAIBoKCgpSCgoKCpqzSgoKCgoKCgpQAAhwADQKCgpSCpoKCpoKCpqzSgIKkgILagIK2rLIACAaylIKigpTGgpSCgoKUpoKCgpSCgriCgoKCyoKCgoKmlIKmgoKCpgAIEoKCgoKCgpSCAAcQpoKCuJSCpgAMENKCgoKUgoLKwoKClAAEENKmgoKUgpSCgoKCooKClJSCgg==", "455-461:1", "", "190=Getenv/1/1/2;264=Getenv/1/1/2;314=Getenv/1/1/4")]
+[assembly: GoPositionMap("internal/coverage/cfile/emit.go", "emit.cs", "ACRKAFOgAbKClIKCgoKmgoKmgoKCpoKCgsqCgpSCgpSmgoKClKzE7oKm7pSCgoKigoKUlIKCgsqCgqKClIKCgpSCgsqCpoKCgpSqooKClIKmlO6CuIKCpqyygpSCgoLMpIKUpoK4ggAHEICCpIK4gIKkgILagIK2qJKClAACEAAIBoKCgpSCgoKCpqzSgoKCgoKCgpQAAhwADQKCgpSCpoKCpoKCpqzSgIKkgILagIK2rLLmspSCooKUpoKUgoKClKaCgoKUgoK4goKCgsqCgoKCppSCpoKCgqYACBKCgoKCgoKUggAHEKaCgriUgqYAChDSgoKClIKCqsKCgpQAAhDSpoKClIKUgoKCgqKCgpSUgoI=", "455-461:1", "", "189=Getenv/1/1/2;263=Getenv/1/1/2;313=Getenv/1/1/4")]
 [assembly: GoPositionMap("internal/coverage/cfile/hooks.go", "hooks.cs", "AAo4ABYIgoKU")]
-[assembly: GoPositionMap("internal/coverage/cfile/testsupport.go", "testsupport.cs", "AB884oKCuILKgpSCAAcQgoKokoKCgoKClJKCgtwACBKCgoKClIK4goKCyoK4goKUgoK4AA4W5IKClJKUgoKClIKClIKCuKaygoKUkoKCgpSCgoKClIK4gpSCpoKClOiCgsqCgoKCgoKUgoKCgoKCpoKCgqaClIKClLgADQ6GooKClIIABxCCgoKUgoKCpgAEEuKClKaCgoKCgpSCpoKUgpSCgoKmpoKU", "69-74:1;138-140:1;159-193:2", "", "87=NewFormatter/1/1/2", "187:29", "78:25,79:17,157:21,158:13")]
+[assembly: GoPositionMap("internal/coverage/cfile/testsupport.go", "testsupport.cs", "AB484oKCuILKgpSCAAcQgoKokoKCgoKClJKCgtwACBKCgoKClIK4goKCyoK4goKUgoK4AAwW5IKClJKUgoKClIKClIKCuKaygoKUkoKCgpSCgoKClIK4gpSCpoKClOiCgsqCgoKCgoKUgoKCgoKCpoKCgqaClIKClLgACQ6GooKClIIABxCCgoKUgoKCpgACEuKClKaCgoKCgpSCpoKUgpSCgoKmpoKU", "69-74:1;138-140:1;159-193:2", "", "86=NewFormatter/1/1/2", "184:29", "77:25,78:17,154:21,155:13")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.coverage;
+
+using static go.@internal.coverage.cfile_package;
+using encodecounter = go.@internal.coverage.encodecounter_package;
+using io = go.io_package;
+using pods = go.@internal.coverage.pods_package;
 
 [GoPackage("cfile")]
 public static partial class cfile_package
@@ -122,6 +133,27 @@ public static partial class cfile_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(cfile_package.emitState)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class cfileᴛemitState;
-[GoMethodHost(typeof(cfile_package.tstate)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class cfileᴛtstate;
+[GoMethodHost(typeof(cfile_package.emitState)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class cfileᴛemitState;
+[GoMethodHost(typeof(cfile_package.tstate)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class cfileᴛtstate;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class cfileᴛemitState {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error emitCounterDataToWriter(this ж<emitState> Ꮡs, io.Writer w) => cfile_package.emitCounterDataToWriter⁔(Ꮡs, w);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error openMetaFile(this ref emitState s, /*[16]*/ array<byte> metaHash, uint64 metaLen) => cfile_package.openMetaFile⁔(ref s, metaHash, metaLen);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error openCounterFile(this ref emitState s, /*[16]*/ array<byte> metaHash) => cfile_package.openCounterFile⁔(ref s, metaHash);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error openOutputFiles(this ref emitState s, /*[16]*/ array<byte> metaHash, uint64 metaLen, fileType which) => cfile_package.openOutputFiles⁔(ref s, metaHash, metaLen, which);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error emitMetaDataFile(this ref emitState s, /*[16]*/ array<byte> finalHash, uint64 tlen) => cfile_package.emitMetaDataFile⁔(ref s, finalHash, tlen);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool needMetaDataFile(this ref emitState s) => cfile_package.needMetaDataFile⁔(ref s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error VisitFuncs(this ref emitState s, Func<uint32, uint32, slice<uint32>, error> f) => cfile_package.VisitFuncs⁔(ref s, f);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error emitCounterDataFile(this ж<emitState> Ꮡs, /*[16]*/ array<byte> finalHash, io.Writer w) => cfile_package.emitCounterDataFile⁔(Ꮡs, finalHash, w);
+}
+partial class cfileᴛtstate {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error processPod(this ж<tstate> Ꮡts, pods.Pod p, map<@string, EmptyStruct> importpaths) => cfile_package.processPod⁔(Ꮡts, p, importpaths);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error readAuxMetaFiles(this ж<tstate> Ꮡts, @string metafiles, map<@string, EmptyStruct> importpaths) => cfile_package.readAuxMetaFiles⁔(Ꮡts, metafiles, importpaths);
+}
+// </MethodForwarders>

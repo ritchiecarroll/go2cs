@@ -14,6 +14,9 @@
 
 using go;
 using static go.@internal.coverage_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -55,11 +58,13 @@ using static go.@internal.coverage_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/coverage/defs.go", "defs.cs", "ADlwAKcBsgKClKSkpKSUxoKClLS0tLS0pAAUGoKUpJQAHDYARooBgg==")]
+[assembly: GoPositionMap("internal/coverage/defs.go", "defs.cs", "ADdwAKUBsgKClKSkpKSUpoKClLS0tLS0pAAQGoKUpJQAGjYARooBgg==")]
 [assembly: GoPositionMap("internal/coverage/pkid.go", "pkid.cs", "AC5eACVSsoKCpg==")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;
+
+using static go.@internal.coverage_package;
 
 [GoPackage("coverage")]
 public static partial class coverage_package
@@ -101,6 +106,19 @@ public static partial class coverage_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(coverage_package.CounterGranularity)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class coverageᴛCounterGranularity;
-[GoMethodHost(typeof(coverage_package.CounterMode)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class coverageᴛCounterMode;
+[GoMethodHost(typeof(coverage_package.CounterGranularity)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class coverageᴛCounterGranularity;
+[GoMethodHost(typeof(coverage_package.CounterMode)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class coverageᴛCounterMode;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class coverageᴛCounterGranularity {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this CounterGranularity cm) => coverage_package.String⁔(cm);
+}
+partial class coverageᴛCounterMode {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this CounterMode cm) => coverage_package.String⁔(cm);
+}
+// </MethodForwarders>

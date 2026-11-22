@@ -132,7 +132,7 @@ func TestGoCommentsAreNeverMarkers(t *testing.T) {
 		"internal /*[5]*/ slice<ж<array<byte>>> s;",
 		"internal static nint hash(/*[32]*/ array<byte> b) {",
 		", /*[4][8]*/ array<array<byte>> grid) {",
-		"internal static void put(this ref holder h, /*[3]*/ array<nint> v) {",
+		"internal static void put⁔(/*this*/ ref holder h, /*[3]*/ array<nint> v) {",
 		"internal static nint noted(/*[4]*/ array<byte> a, nint b) {",
 		"internal static T first<T>(/*[2]*/ array<T> a) {",
 		"var lambda = ([GoArrayDims(32)] array<byte> x) => {",

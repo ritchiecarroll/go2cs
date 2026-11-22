@@ -1,7 +1,6 @@
 namespace go.go;
 
 using sync = sync_package;
-using static xpkgmu_package;
 
 partial class xpkgmu_package {
 
@@ -15,13 +14,9 @@ partial struct Counter {
     internal nint n;
 }
 
-} partial class xpkgmuᴛCounter {
+internal static void Inc⁔(/*this*/ ref Counter c) { c.n++; }
 
-public static void Inc(this ref Counter c) { c.n++; }
-
-public static nint Value(this Counter c) { return c.n; }
-
-} partial class xpkgmu_package {
+internal static nint Value⁔(/*this*/ Counter c) { return c.n; }
 
 public static readonly ж<Counter> ᏑCnt = new StaticBox<Counter>(default(Counter));
 public static ref Counter Cnt => ref ((StaticBox<Counter>)ᏑCnt).ValueSlot;

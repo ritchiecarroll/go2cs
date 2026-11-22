@@ -62,10 +62,8 @@ using Δsync = sync_package;
 using atomic = go.sync.atomic_package;
 using time = time_package;
 using @internal;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
+using System.Runtime.CompilerServices;
 using go.sync;
-using static context_package;
 
 partial class context_package {
 
@@ -175,77 +173,61 @@ public static error DeadlineExceeded = new deadlineExceededError();
 partial struct deadlineExceededError {
 }
 
-} partial class contextᴛdeadlineExceededError {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string contextDeadlineExceededˢ => ref contextDeadlineExceededˢᵇ;
 private static readonly @string contextDeadlineExceededˢᵇ = "context deadline exceeded"u8;
 
-internal static @string Error(this deadlineExceededError _) { return contextDeadlineExceededˢ; }
-internal static bool Timeout(this deadlineExceededError _) { return true; }
-internal static bool Temporary(this deadlineExceededError _) { return true; }
-
-} partial class context_package {
+internal static @string Error⁔(/*this*/ deadlineExceededError _) { return contextDeadlineExceededˢ; }
+internal static bool Timeout⁔(/*this*/ deadlineExceededError _) { return true; }
+internal static bool Temporary⁔(/*this*/ deadlineExceededError _) { return true; }
 
 // An emptyCtx is never canceled, has no values, and has no deadline.
 // It is the common base of backgroundCtx and todoCtx.
 partial struct emptyCtx {
 }
 
-} partial class contextᴛemptyCtx {
-
-internal static (time.Time deadline, bool ok) Deadline(this emptyCtx _) {
+internal static (time.Time deadline, bool ok) Deadline⁔(/*this*/ emptyCtx _) {
     time.Time deadline = default;
     bool ok = default;
 
     return (deadline, ok);
 }
 
-internal static /*<-*/channel<EmptyStruct> Done(this emptyCtx _) {
+internal static /*<-*/channel<EmptyStruct> Done⁔(/*this*/ emptyCtx _) {
     return default;
 }
 
-internal static error Err(this emptyCtx _) {
+internal static error Err⁔(/*this*/ emptyCtx _) {
     return default;
 }
 
-internal static any Value(this emptyCtx _, any key) {
+internal static any Value⁔(/*this*/ emptyCtx _, any key) {
     return default;
 }
-
-} partial class context_package {
 
 partial struct backgroundCtx {
     /*embed*/ internal emptyCtx emptyCtx;
 }
 
-} partial class contextᴛbackgroundCtx {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string contextBackgroundˢ => ref contextBackgroundˢᵇ;
 private static readonly @string contextBackgroundˢᵇ = "context.Background"u8;
 
-internal static @string String(this backgroundCtx _) {
+internal static @string String⁔(/*this*/ backgroundCtx _) {
     return contextBackgroundˢ;
 }
-
-} partial class context_package {
 
 partial struct todoCtx {
     /*embed*/ internal emptyCtx emptyCtx;
 }
 
-} partial class contextᴛtodoCtx {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string contextTodoˢ => ref contextTodoˢᵇ;
 private static readonly @string contextTodoˢᵇ = "context.TODO"u8;
 
-internal static @string String(this todoCtx _) {
+internal static @string String⁔(/*this*/ todoCtx _) {
     return contextTodoˢ;
 }
-
-} partial class context_package {
 
 // Background returns a non-nil, empty [Context]. It is never canceled, has no
 // values, and has no deadline. It is typically used by the main function,
@@ -395,9 +377,7 @@ partial struct afterFuncCtx {
     internal Action f;
 }
 
-} partial class contextᴛafterFuncCtx {
-
-internal static void cancel(this ж<afterFuncCtx> Ꮡa, bool removeFromParent, error err, error cause) {
+internal static void cancel⁔(/*this*/ ж<afterFuncCtx> Ꮡa, bool removeFromParent, error err, error cause) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     Ꮡa.ᏑcancelCtx.cancel(false, err, cause);
@@ -408,8 +388,6 @@ internal static void cancel(this ж<afterFuncCtx> Ꮡa, bool removeFromParent, e
         goǃ(Ꮡa.Value.f);
     });
 }
-
-} partial class context_package {
 
 // A stopCtx is used as the parent context of a cancelCtx when
 // an AfterFunc has been registered with the parent.
@@ -491,13 +469,11 @@ partial struct cancelCtx {
     internal error cause;                         // set to non-nil by the first cancel call
 }
 
-} partial class contextᴛcancelCtx {
-
 // Go method set entry for the promoted 'Context.Deadline()' - provided ONLY by the embedded
 // interface field in *cancelCtx's method set; see the pointer-only satisfaction record.
-internal static (time.Time, bool) Deadline(this cancelCtx recvᴛ) => recvᴛ.Context.Deadline();
+internal static (time.Time, bool) Deadline⁔(/*this*/ cancelCtx recvᴛ) => recvᴛ.Context.Deadline();
 
-internal static any Value(this ж<cancelCtx> Ꮡc, any key) {
+internal static any Value⁔(/*this*/ ж<cancelCtx> Ꮡc, any key) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (AreEqual(key, ᏑcancelCtxKey)) {
@@ -506,7 +482,7 @@ internal static any Value(this ж<cancelCtx> Ꮡc, any key) {
     return value(c.Context, key);
 }
 
-internal static /*<-*/channel<EmptyStruct> Done(this ж<cancelCtx> Ꮡc) {
+internal static /*<-*/channel<EmptyStruct> Done⁔(/*this*/ ж<cancelCtx> Ꮡc) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -529,7 +505,7 @@ internal static /*<-*/channel<EmptyStruct> Done(this ж<cancelCtx> Ꮡc) {
     finally { if (ᒐd1) Ꮡc.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
-internal static error Err(this ж<cancelCtx> Ꮡc) {
+internal static error Err⁔(/*this*/ ж<cancelCtx> Ꮡc) {
     // An atomic load is ~5x faster than a mutex, which can matter in tight loops.
     var err = Ꮡc.Ꮡerr.Load(); if (err != nil) {
         // Ensure the done channel has been closed before returning a non-nil error.
@@ -541,7 +517,7 @@ internal static error Err(this ж<cancelCtx> Ꮡc) {
 
 // propagateCancel arranges for child to be canceled when parent is.
 // It sets the parent context of cancelCtx.
-internal static partial void propagateCancel(this ж<cancelCtx> Ꮡc, Context parent, canceler child) {
+internal static partial void propagateCancel⁔(/*this*/ ж<cancelCtx> Ꮡc, Context parent, canceler child) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     c.Context = parent;
@@ -611,8 +587,6 @@ internal static partial void propagateCancel(this ж<cancelCtx> Ꮡc, Context pa
     });
 }
 
-} partial class context_package {
-
 partial interface stringer {
     @string String();
 }
@@ -624,16 +598,14 @@ internal static @string contextName(Context c) {
     return reflectlite.TypeOf(c).String();
 }
 
-} partial class contextᴛcancelCtx {
-
-internal static @string String(this ref cancelCtx c) {
+internal static @string String⁔(/*this*/ ref cancelCtx c) {
     return contextName(c.Context) + ".WithCancel"u8;
 }
 
 // cancel closes c.done, cancels each of c's children, and, if
 // removeFromParent is true, removes c from its parent's children.
 // cancel sets c.cause to cause if this is the first time c is canceled.
-internal static void cancel(this ж<cancelCtx> Ꮡc, bool removeFromParent, error err, error cause) {
+internal static void cancel⁔(/*this*/ ж<cancelCtx> Ꮡc, bool removeFromParent, error err, error cause) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (err == nil) {
@@ -667,8 +639,6 @@ internal static void cancel(this ж<cancelCtx> Ꮡc, bool removeFromParent, erro
     }
 }
 
-} partial class context_package {
-
 // WithoutCancel returns a derived context that points to the parent context
 // and is not canceled when parent is canceled.
 // The returned context returns no Deadline or Err, and its Done channel is nil.
@@ -684,32 +654,28 @@ partial struct withoutCancelCtx {
     internal Context c;
 }
 
-} partial class contextᴛwithoutCancelCtx {
-
-internal static (time.Time deadline, bool ok) Deadline(this withoutCancelCtx _) {
+internal static (time.Time deadline, bool ok) Deadline⁔(/*this*/ withoutCancelCtx _) {
     time.Time deadline = default;
     bool ok = default;
 
     return (deadline, ok);
 }
 
-internal static /*<-*/channel<EmptyStruct> Done(this withoutCancelCtx _) {
+internal static /*<-*/channel<EmptyStruct> Done⁔(/*this*/ withoutCancelCtx _) {
     return default;
 }
 
-internal static error Err(this withoutCancelCtx _) {
+internal static error Err⁔(/*this*/ withoutCancelCtx _) {
     return default;
 }
 
-internal static any Value(this withoutCancelCtx c, any key) {
+internal static any Value⁔(/*this*/ withoutCancelCtx c, any key) {
     return value(c, key);
 }
 
-internal static @string String(this withoutCancelCtx c) {
+internal static @string String⁔(/*this*/ withoutCancelCtx c) {
     return contextName(c.c) + ".WithoutCancel"u8;
 }
-
-} partial class context_package {
 
 // WithDeadline returns a derived context that points to the parent context
 // but has the deadline adjusted to be no later than d. If the parent's
@@ -776,17 +742,15 @@ partial struct timerCtx {
     internal time.Time deadline;
 }
 
-} partial class contextᴛtimerCtx {
-
-internal static (time.Time deadline, bool ok) Deadline(this ref timerCtx c) {
+internal static (time.Time deadline, bool ok) Deadline⁔(/*this*/ ref timerCtx c) {
     return (c.deadline, true);
 }
 
-internal static @string String(this ref timerCtx c) {
+internal static @string String⁔(/*this*/ ref timerCtx c) {
     return contextName(c.cancelCtx.Context) + ".WithDeadline("u8 + c.deadline.String() + " ["u8 + time.Until(c.deadline).String() + "])"u8;
 }
 
-internal static void cancel(this ж<timerCtx> Ꮡc, bool removeFromParent, error err, error cause) {
+internal static void cancel⁔(/*this*/ ж<timerCtx> Ꮡc, bool removeFromParent, error err, error cause) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     Ꮡc.ᏑcancelCtx.cancel(false, err, cause);
@@ -801,8 +765,6 @@ internal static void cancel(this ж<timerCtx> Ꮡc, bool removeFromParent, error
     }
     c.mu.Unlock();
 }
-
-} partial class context_package {
 
 // WithTimeout returns WithDeadline(parent, time.Now().Add(timeout)).
 //
@@ -858,21 +820,17 @@ partial struct valueCtx {
     internal any key, val;
 }
 
-} partial class contextᴛvalueCtx {
-
 // Go method set entry for the promoted 'Context.Deadline()' - provided ONLY by the embedded
 // interface field in *valueCtx's method set; see the pointer-only satisfaction record.
-internal static (time.Time, bool) Deadline(this valueCtx recvᴛ) => recvᴛ.Context.Deadline();
+internal static (time.Time, bool) Deadline⁔(/*this*/ valueCtx recvᴛ) => recvᴛ.Context.Deadline();
 
 // Go method set entry for the promoted 'Context.Done()' - provided ONLY by the embedded
 // interface field in *valueCtx's method set; see the pointer-only satisfaction record.
-internal static /*<-*/channel<EmptyStruct> Done(this valueCtx recvᴛ) => recvᴛ.Context.Done();
+internal static /*<-*/channel<EmptyStruct> Done⁔(/*this*/ valueCtx recvᴛ) => recvᴛ.Context.Done();
 
 // Go method set entry for the promoted 'Context.Err()' - provided ONLY by the embedded
 // interface field in *valueCtx's method set; see the pointer-only satisfaction record.
-internal static error Err(this valueCtx recvᴛ) => recvᴛ.Context.Err();
-
-} partial class context_package {
+internal static error Err⁔(/*this*/ valueCtx recvᴛ) => recvᴛ.Context.Err();
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string nilˢ => ref nilˢᵇ;
@@ -895,20 +853,16 @@ internal static @string stringify(any v) {
     return reflectlite.TypeOf(v).String();
 }
 
-} partial class contextᴛvalueCtx {
-
-internal static @string String(this ref valueCtx c) {
+internal static @string String⁔(/*this*/ ref valueCtx c) {
     return contextName(c.Context) + ".WithValue("u8 + stringify(c.key) + ", "u8 + stringify(c.val) + ")"u8;
 }
 
-internal static any Value(this ref valueCtx c, any key) {
+internal static any Value⁔(/*this*/ ref valueCtx c, any key) {
     if (AreEqual(c.key, key)) {
         return c.val;
     }
     return value(c.Context, key);
 }
-
-} partial class context_package {
 
 internal static any value(Context c, any key) {
     for (;;) {

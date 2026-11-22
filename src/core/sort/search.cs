@@ -4,8 +4,6 @@
 // This file implements binary search.
 namespace go;
 
-using static sort_package;
-
 partial class sort_package {
 
 // Search uses binary search to find and return the smallest index i
@@ -149,19 +147,13 @@ public static nint SearchStrings(slice<@string> a, @string x) {
     return Search(len(a), (nint i) => aʗ1[i] >= x);
 }
 
-} partial class sortᴛIntSlice {
-
 // Search returns the result of applying [SearchInts] to the receiver and x.
-public static nint Search(this IntSlice p, nint x) { return SearchInts(p, x); }
-
-} partial class sortᴛFloat64Slice {
+internal static nint Search⁔(/*this*/ IntSlice p, nint x) { return SearchInts(p, x); }
 
 // Search returns the result of applying [SearchFloat64s] to the receiver and x.
-public static nint Search(this Float64Slice p, float64 x) { return SearchFloat64s(p, x); }
-
-} partial class sortᴛStringSlice {
+internal static nint Search⁔(/*this*/ Float64Slice p, float64 x) { return SearchFloat64s(p, x); }
 
 // Search returns the result of applying [SearchStrings] to the receiver and x.
-public static nint Search(this StringSlice p, @string x) { return SearchStrings(p, x); }
+internal static nint Search⁔(/*this*/ StringSlice p, @string x) { return SearchStrings(p, x); }
 
-}
+} // end sort_package

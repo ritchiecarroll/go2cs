@@ -49,10 +49,11 @@ const (
 
 // mintMemberDecls match a member declaration and capture its name, tried in order: a property (modifiers, a type,
 // a name, then `=>`, `{` or the line's end); a method, constructor or operator (modifiers, then the name that hugs
-// the parameter list); an explicit interface implementation; a bare interface member.
+// the parameter list, a Go method's suffix-form body `<Name>⁔` keyed by its Go name); an explicit interface
+// implementation; a bare interface member.
 var mintMemberDecls = []*regexp.Regexp{
 	regexp.MustCompile(mintAttrs + mintMods + `(?:ref\s+(?:readonly\s+)?)?` + mintType + `\s+(?:[\p{L}\p{N}_.]+\.)?(` + mintIdent + `)\s*(?:=>.*|\{.*)?$`),
-	regexp.MustCompile(mintAttrs + mintMods + `.*?(` + mintIdent + `)\s*(?:<[^>()]*>)?\s*\(`),
+	regexp.MustCompile(mintAttrs + mintMods + `.*?(` + mintIdent + `)⁔?\s*(?:<[^>()]*>)?\s*\(`),
 	regexp.MustCompile(`^\s*` + mintType + `\s+I[\p{L}\p{N}_]*(?:<[^>()]*>)?\.(` + mintIdent + `)\s*(?:\(|=>)`),
 	regexp.MustCompile(`^\s*` + mintType + `\s+(` + mintIdent + `)\s*(?:<[^>()]*>)?\s*\((?:\s*` + mintType + `\s+` + mintIdent + `(?:\s*=\s*[^,()]+)?\s*,?)*\)\s*;\s*$`),
 }

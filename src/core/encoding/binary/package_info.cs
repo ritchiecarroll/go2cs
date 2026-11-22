@@ -10,10 +10,14 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+using reflect = go.reflect_package;
 // </ImportedTypeAliases>
 
 using go;
 using static go.encoding.binary_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -61,11 +65,14 @@ using static go.encoding.binary_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("encoding/binary/binary.go", "binary.cs", "ACFCACdIkoKokoKCqJLOkoKokoKCgoKokgAGEpKCqpKCgoKCgoKCgqiSAA4Y1AAICpKCqJKCgqiSzpKCqJKCgoKCqJIABhKSgqqSgoKCgoKCgoKokgAOGNT01AADJAARBIKCgqaCyoKClIK0pIKmgoCCpIKuwoKCpoLKgoKUgrSkgqaClIKCpoKUtLS0tLS0tLS0tLSCxoLGtILGgsaCxoLGgsaCxoLGgtaUAAIWAAkEgoKCpoK4goKCpoKCgoKu1IKCpoK4goKCpoKUgoKu1IKCgriCgoKmgoKCpoKUgpTGgpTGgoKU2LS0gsa0tLS0tILGtLSCxrS0gsa0tILGtLSCxrS0gsa0tILGtLSCAAUQssSkgpSkgpSkgpSkpKTEpIKUpIKUpKTEpIKUpIKUpKTEpIKUpIKUpKSkpIKUpKSClKSklAAFEsKUgoCCtoKCgpTIgoCCpIKCpoLIqJKUgILYgoKCgpSUrKYADRiCgoLGgoKUlMaCgoLGgoLGgoKCxoKCxoKCgsaCgsaCgoLGgoLGtLS0tLS0tLSClIKCyIKC3IKU2oKCyLa0tLS2tLS0trS22gAIDoKUgoLIgoKUgpTagoLItrS0tLa0tLS2tLaCgrSCguiCxoKCgsyy9KSkpOSkpOSkpOSkpMTEpKSUqqKCgg==", "", "", "1153=uint32/1/2/1,Float32frombits/1/2/1,uint32/2/2/2,Float32frombits/2/2/2;1159=uint64/1/2/1,Float64frombits/1/2/1,uint64/2/2/2,Float64frombits/2/2/2")]
+[assembly: GoPositionMap("encoding/binary/binary.go", "binary.cs", "ACBCACVIkoKokoKCqJLOkoKokoKCgoKokgAGEpKCqpKCgoKCgoKCgqiSAA4Y1MqSgqiSgoKoks6SgqiSgoKCgqiSAAYSkoKqkoKCgoKCgoKCqJIADhjU1NQAASQAEQSCgoKmgsqCgpSCtKSCpoKAgqSCrsKCgqaCyoKClIK0pIKmgpSCgqaClLS0tLS0tLS0tLS0gsaCxrSCxoLGgsaCxoLGgsaCxoLWlAACFgAJBIKCgqaCuIKCgqaCgoKCrtSCgqaCuIKCgqaClIKCrtSCgoK4goKCpoKCgqaClIKUxoKUxoKClNi0tILGtLS0tLSCxrS0gsa0tILGtLSCxrS0gsa0tILGtLSCxrS0ggAFELLEpIKUpIKUpIKUpKSkxKSClKSClKSkxKSClKSClKSkxKSClKSClKSkpKSClKSkgpSkpJQABRLClIKAgraCgoKUyIKAgqSCgqaCyKiSlICC2IKCgoKUlKymAAsYgoKCpoKClJSmgoKCpoKCpoKCgqaCgqaCgoKmgoKmgoKCpoKCppSUlJSUlJSUgpSCgsiCgtyClNqCgsi2tLS0trS0tLa0ttrugpSCgsiCgpSClNqCgsi2tLS0trS0tLa0toKCtIKCyIKmgoKCrLL0pKSk5KSk5KSk5KSkxMSkpJSqooKC", "", "", "1104=uint32/1/2/1,Float32frombits/1/2/1,uint32/2/2/2,Float32frombits/2/2/2;1110=uint64/1/2/1,Float64frombits/1/2/1,uint64/2/2/2,Float64frombits/2/2/2")]
 [assembly: GoPositionMap("encoding/binary/varint.go", "varint.cs", "ACJSooKClKqigoKCgpSCAAIS4oKCgqaUgoKUlIKUqqKCgpSqooKClAACEuKCgoKUppzCgoKCgoKClJSCgpSUgpSuwoKCgpQ=")]
 // </GoSourcePositionMaps>
 
 namespace go.encoding;
+
+using static go.encoding.binary_package;
+using reflect = go.reflect_package;
 
 [GoPackage("binary")]
 public static partial class binary_package
@@ -110,9 +117,72 @@ public static partial class binary_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(binary_package.bigEndian)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class binaryᴛbigEndian;
-[GoMethodHost(typeof(binary_package.decoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class binaryᴛdecoder;
-[GoMethodHost(typeof(binary_package.encoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class binaryᴛencoder;
-[GoMethodHost(typeof(binary_package.littleEndian)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class binaryᴛlittleEndian;
-[GoMethodHost(typeof(binary_package.nativeEndian)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class binaryᴛnativeEndian;
+[GoMethodHost(typeof(binary_package.bigEndian)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class binaryᴛbigEndian;
+[GoMethodHost(typeof(binary_package.decoder)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class binaryᴛdecoder;
+[GoMethodHost(typeof(binary_package.encoder)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class binaryᴛencoder;
+[GoMethodHost(typeof(binary_package.littleEndian)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class binaryᴛlittleEndian;
+[GoMethodHost(typeof(binary_package.nativeEndian)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class binaryᴛnativeEndian;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class binaryᴛbigEndian {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static uint16 Uint16(this bigEndian _Δp0, slice<byte> b) => binary_package.Uint16⁔(_Δp0, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void PutUint16(this bigEndian _Δp0, slice<byte> b, uint16 v) => binary_package.PutUint16⁔(_Δp0, b, v);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> AppendUint16(this bigEndian _, slice<byte> b, uint16 v) => binary_package.AppendUint16⁔(_, b, v);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static uint32 Uint32(this bigEndian _Δp0, slice<byte> b) => binary_package.Uint32⁔(_Δp0, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void PutUint32(this bigEndian _Δp0, slice<byte> b, uint32 v) => binary_package.PutUint32⁔(_Δp0, b, v);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> AppendUint32(this bigEndian _, slice<byte> b, uint32 v) => binary_package.AppendUint32⁔(_, b, v);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static uint64 Uint64(this bigEndian _Δp0, slice<byte> b) => binary_package.Uint64⁔(_Δp0, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void PutUint64(this bigEndian _Δp0, slice<byte> b, uint64 v) => binary_package.PutUint64⁔(_Δp0, b, v);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> AppendUint64(this bigEndian _, slice<byte> b, uint64 v) => binary_package.AppendUint64⁔(_, b, v);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this bigEndian _) => binary_package.String⁔(_);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string GoString(this bigEndian _) => binary_package.GoString⁔(_);
+}
+partial class binaryᴛdecoder {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool @bool(this ref decoder d) => binary_package.bool⁔(ref d);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static uint8 uint8(this ref decoder d) => binary_package.uint8⁔(ref d);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static uint16 uint16(this ref decoder d) => binary_package.uint16⁔(ref d);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static uint32 uint32(this ref decoder d) => binary_package.uint32⁔(ref d);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static uint64 uint64(this ref decoder d) => binary_package.uint64⁔(ref d);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static int8 int8(this ref decoder d) => binary_package.int8⁔(ref d);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static int16 int16(this ref decoder d) => binary_package.int16⁔(ref d);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static int32 int32(this ref decoder d) => binary_package.int32⁔(ref d);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static int64 int64(this ref decoder d) => binary_package.int64⁔(ref d);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void value(this ref decoder d, reflect.Value v) => binary_package.value⁔(ref d, v);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void skip(this ref decoder d, reflect.Value v) => binary_package.skip⁔(ref d, v);
+}
+partial class binaryᴛencoder {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void @bool(this ref encoder e, bool x) => binary_package.bool⁔(ref e, x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void uint8(this ref encoder e, uint8 x) => binary_package.uint8⁔(ref e, x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void uint16(this ref encoder e, uint16 x) => binary_package.uint16⁔(ref e, x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void uint32(this ref encoder e, uint32 x) => binary_package.uint32⁔(ref e, x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void uint64(this ref encoder e, uint64 x) => binary_package.uint64⁔(ref e, x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void int8(this ref encoder e, int8 x) => binary_package.int8⁔(ref e, x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void int16(this ref encoder e, int16 x) => binary_package.int16⁔(ref e, x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void int32(this ref encoder e, int32 x) => binary_package.int32⁔(ref e, x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void int64(this ref encoder e, int64 x) => binary_package.int64⁔(ref e, x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void value(this ref encoder e, reflect.Value v) => binary_package.value⁔(ref e, v);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void skip(this ref encoder e, reflect.Value v) => binary_package.skip⁔(ref e, v);
+}
+partial class binaryᴛlittleEndian {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static uint16 Uint16(this littleEndian _Δp0, slice<byte> b) => binary_package.Uint16⁔(_Δp0, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void PutUint16(this littleEndian _Δp0, slice<byte> b, uint16 v) => binary_package.PutUint16⁔(_Δp0, b, v);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> AppendUint16(this littleEndian _, slice<byte> b, uint16 v) => binary_package.AppendUint16⁔(_, b, v);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static uint32 Uint32(this littleEndian _Δp0, slice<byte> b) => binary_package.Uint32⁔(_Δp0, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void PutUint32(this littleEndian _Δp0, slice<byte> b, uint32 v) => binary_package.PutUint32⁔(_Δp0, b, v);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> AppendUint32(this littleEndian _, slice<byte> b, uint32 v) => binary_package.AppendUint32⁔(_, b, v);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static uint64 Uint64(this littleEndian _Δp0, slice<byte> b) => binary_package.Uint64⁔(_Δp0, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void PutUint64(this littleEndian _Δp0, slice<byte> b, uint64 v) => binary_package.PutUint64⁔(_Δp0, b, v);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> AppendUint64(this littleEndian _, slice<byte> b, uint64 v) => binary_package.AppendUint64⁔(_, b, v);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this littleEndian _) => binary_package.String⁔(_);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string GoString(this littleEndian _) => binary_package.GoString⁔(_);
+}
+partial class binaryᴛnativeEndian {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this nativeEndian _) => binary_package.String⁔(_);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string GoString(this nativeEndian _) => binary_package.GoString⁔(_);
+}
+// </MethodForwarders>

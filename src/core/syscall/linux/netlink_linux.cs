@@ -6,7 +6,6 @@ namespace go;
 
 using Δsync = sync_package;
 using @unsafe = unsafe_package;
-using static syscall_package;
 
 partial class syscall_package {
 
@@ -28,9 +27,7 @@ partial struct NetlinkRouteRequest {
     public RtGenmsg Data;
 }
 
-} partial class syscallᴛNetlinkRouteRequest {
-
-internal static slice<byte> toWireFormat(this ref NetlinkRouteRequest rr) {
+internal static slice<byte> toWireFormat⁔(/*this*/ ref NetlinkRouteRequest rr) {
     var b = new slice<byte>((nint)(rr.Header.Len));
     (Ꮡ(b[0..4], 0).Reinterpret<byte, uint32>()).Value = rr.Header.Len;
     (Ꮡ(b[4..6], 0).Reinterpret<byte, uint16>()).Value = rr.Header.Type;
@@ -40,8 +37,6 @@ internal static slice<byte> toWireFormat(this ref NetlinkRouteRequest rr) {
     b[16] = rr.Data.Family;
     return b;
 }
-
-} partial class syscall_package {
 
 internal static slice<byte> newNetlinkRouteRequest(nint proto, nint seq, nint family) {
     var rr = Ꮡ(new NetlinkRouteRequest());

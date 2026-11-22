@@ -5,8 +5,6 @@ namespace go.io;
 
 using errors = errors_package;
 using path = path_package;
-using fs = fs_package;
-using static fs_package;
 
 partial class fs_package {
 
@@ -57,10 +55,8 @@ partial struct subFS {
     internal @string dir;
 }
 
-} partial class fsᴛsubFS {
-
 // fullName maps name to the fully-qualified name dir/name.
-internal static (@string, error) fullName(this ref subFS f, @string op, @string name) {
+internal static (@string, error) fullName⁔(/*this*/ ref subFS f, @string op, @string name) {
     if (!ValidPath(name)) {
         return ("", new PathErrorжerror(Ꮡ(new PathError(Op: op, Path: name, Err: ErrInvalid))));
     }
@@ -68,7 +64,7 @@ internal static (@string, error) fullName(this ref subFS f, @string op, @string 
 }
 
 // shorten maps name, which should start with f.dir, back to the suffix after f.dir.
-internal static (@string rel, bool ok) shorten(this ref subFS f, @string name) {
+internal static (@string rel, bool ok) shorten⁔(/*this*/ ref subFS f, @string name) {
     if (name == f.dir) {
         return (".", true);
     }
@@ -79,7 +75,7 @@ internal static (@string rel, bool ok) shorten(this ref subFS f, @string name) {
 }
 
 // fixErr shortens any reported names in PathErrors by stripping f.dir.
-internal static error fixErr(this ref subFS f, error err) {
+internal static error fixErr⁔(/*this*/ ref subFS f, error err) {
     var (e, ok) = err._<ж<PathError>>(ᐧ); if (ok) {
         var (@short, okΔ1) = f.shorten(e.Path); if (okΔ1) {
             e.Path = @short;
@@ -92,7 +88,7 @@ internal static error fixErr(this ref subFS f, error err) {
 private static ref readonly @string openˢ => ref openˢᵇ;
 private static readonly @string openˢᵇ = "open"u8;
 
-internal static (File, error) Open(this ref subFS f, @string name) {
+internal static (File, error) Open⁔(/*this*/ ref subFS f, @string name) {
     var (full, err) = f.fullName(openˢ, name);
     if (err != nil) {
         return (default, err);
@@ -105,21 +101,21 @@ internal static (File, error) Open(this ref subFS f, @string name) {
 private static ref readonly @string readˢ => ref readˢᵇ;
 private static readonly @string readˢᵇ = "read"u8;
 
-internal static (slice<DirEntry>, error) ReadDir(this ref subFS f, @string name) {
+internal static (slice<DirEntry>, error) ReadDir⁔(/*this*/ ref subFS f, @string name) {
     var (full, err) = f.fullName(readˢ, name);
     if (err != nil) {
         return (default, err);
     }
-    (var dir, err) = fs.ReadDir(f.fsys, full);
+    (var dir, err) = ReadDir(f.fsys, full);
     return (dir, f.fixErr(err));
 }
 
-internal static (slice<byte>, error) ReadFile(this ref subFS f, @string name) {
+internal static (slice<byte>, error) ReadFile⁔(/*this*/ ref subFS f, @string name) {
     var (full, err) = f.fullName(readˢ, name);
     if (err != nil) {
         return (default, err);
     }
-    (var data, err) = fs.ReadFile(f.fsys, full);
+    (var data, err) = ReadFile(f.fsys, full);
     return (data, f.fixErr(err));
 }
 
@@ -127,12 +123,12 @@ internal static (slice<byte>, error) ReadFile(this ref subFS f, @string name) {
 private static ref readonly @string readlinkˢ => ref readlinkˢᵇ;
 private static readonly @string readlinkˢᵇ = "readlink"u8;
 
-internal static (@string, error) ReadLink(this ref subFS f, @string name) {
+internal static (@string, error) ReadLink⁔(/*this*/ ref subFS f, @string name) {
     var (full, err) = f.fullName(readlinkˢ, name);
     if (err != nil) {
         return ("", err);
     }
-    (var target, err) = fs.ReadLink(f.fsys, full);
+    (var target, err) = ReadLink(f.fsys, full);
     if (err != nil) {
         return ("", f.fixErr(err));
     }
@@ -143,19 +139,19 @@ internal static (@string, error) ReadLink(this ref subFS f, @string name) {
 private static ref readonly @string lstatˢ => ref lstatˢᵇ;
 private static readonly @string lstatˢᵇ = "lstat"u8;
 
-internal static (FileInfo, error) Lstat(this ref subFS f, @string name) {
+internal static (FileInfo, error) Lstat⁔(/*this*/ ref subFS f, @string name) {
     var (full, err) = f.fullName(lstatˢ, name);
     if (err != nil) {
         return (default, err);
     }
-    (var info, err) = fs.Lstat(f.fsys, full);
+    (var info, err) = Lstat(f.fsys, full);
     if (err != nil) {
         return (default, f.fixErr(err));
     }
     return (info, default);
 }
 
-internal static (slice<@string>, error) Glob(this ref subFS f, @string pattern) {
+internal static (slice<@string>, error) Glob⁔(/*this*/ ref subFS f, @string pattern) {
     // Check pattern is well-formed.
     var (_, errΔ1) = path.Match(pattern, ""u8); if (errΔ1 != nil) {
         return (default, errΔ1);
@@ -165,7 +161,7 @@ internal static (slice<@string>, error) Glob(this ref subFS f, @string pattern) 
     }
 
     @string full = f.dir + "/"u8 + pattern;
-    var (list, err) = fs.Glob(f.fsys, full);
+    var (list, err) = Glob(f.fsys, full);
     foreach (var (i, name) in range(list)) {
         var (nameΔ1, ok) = f.shorten(name);
         if (!ok) {
@@ -180,7 +176,7 @@ internal static (slice<@string>, error) Glob(this ref subFS f, @string pattern) 
 private static ref readonly @string subˢ => ref subˢᵇ;
 private static readonly @string subˢᵇ = "sub"u8;
 
-internal static (FS, error) Sub(this ж<subFS> Ꮡf, @string dir) {
+internal static (FS, error) Sub⁔(/*this*/ ж<subFS> Ꮡf, @string dir) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     if (dir == "."u8) {
@@ -194,4 +190,4 @@ internal static (FS, error) Sub(this ж<subFS> Ꮡf, @string dir) {
     return (new subFSжFS(Ꮡ(new subFS(f.fsys, full))), default);
 }
 
-}
+} // end fs_package

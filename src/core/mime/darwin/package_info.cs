@@ -10,10 +10,14 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+using strings = go.strings_package;
 // </ImportedTypeAliases>
 
 using go;
 using static go.mime_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -58,14 +62,17 @@ using static go.mime_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("mime/encodedword.go", "encodedword.cs", "ABs6vLKClMaCgoKmyJK4lIKClJSUAAsYtpKmgoKCpqKmlIKUgoKCgqaCqrSCgqaSgoaigpSCpoKClILakoKktLSCgvySgoKCgsiSyJKCggAIBoIAEiK2gpSmgoKUgoKmgoKmgoKUqrSCgqaUgpSCgoKClJSCgpSClIKUgpSClJSCgpSClIKCgoKCyoKmgqaCpoKmxoKUpKQADQiClLSCxoKClNiClIKClIK2yqKC6qaokoKCgqS0gpSCgpSCtLSUpqiSkoKClIKUpoKUpLaU")]
+[assembly: GoPositionMap("mime/encodedword.go", "encodedword.cs", "ABo6nLKClKaCgoKmqJK4lIKClJSUAAkYlpKmgoKCpqKmlIKUgoKCgqaCqrSCgqaSgoaigpSCpoKClIK6koKktLSCgtySgoKCgqiSqJKCguaCABAitoKUpoKClIKCpoKCpoKClKq0goKmlIKUgoKCgpSUgoKUgpSClIKUgpSUgoKUgpSCgoKCgsqCpoKmgqaCpqaClKSkAAsIgpS0gsaCgpTYgpSCgpSCtqqiguqmqJKCgoKktIKUgoKUgrS0lKaokpKCgpSClKaClKS2lA==")]
 [assembly: GoPositionMap("mime/grammar.go", "grammar.cs", "AAsSAAISABgg7AACEAAcKqyigpSCgqY=")]
 [assembly: GoPositionMap("mime/mediatype.go", "mediatype.cs", "ABMq0oKCgpSUgpSCgqaCgoKCgpSUgpSUlIKUgoKmiIKUgoKmgqaCgqaCgoKCgoKCpoKUpoKCgpSClIKClIKClIKUqIKCgswAARgADgKClIKCpprEgoKCgpSCgqampoKCgpSCgqaUlIKqooKCgoKUpoKCgoKCgoKUgoKClIKCgqaCpoK4ppSCgoLKgoKUgtiUrsKCgqYAAhAACAKClIK4goKCggALGIKCgpSClKamwoKCgqaCgoKCpoKClIKCgpSCppSCgoKClIKClJSCpoKCgpSCgrSCgramgpSkpJSmgpSkpJQ=", "", "", "65=isTSpecial/1/1/2")]
-[assembly: GoPositionMap("mime/type.go", "type.cs", "ABo0soKClIKUgqaCgoKCgpSCgpS0AA0aAEiOAYKClIIAAzAAFgKmgqyygoKCgpSCgpSClKaCggACKAARAoKCpoKCgpSCgqyygpSCAAoGooKClIKClJSClIKCgoKUgoKmgg==")]
+[assembly: GoPositionMap("mime/type.go", "type.cs", "ABo0soKClIKUgqaCgoKCgpSCgpS0AA0aAEiOAYKClIIAAzAAFgKmgqyygoKCgpSCgpSClKaCggACKAARAoKCpoKCgpSCgqyygpSCAAgGooKClIKClJSClIKCgoKUgoKmgg==")]
 [assembly: GoPositionMap("mime/type_unix.go", "type_unix.cs", "AA0egsrc7qKCgpSkgpSCgoKCpoIACRSUuKaUgpTWooKClKSCgoKClIKCgpSmgrSkgoKCyoK4goKC", "", "", "", "41:21,92:21")]
 // </GoSourcePositionMaps>
 
 namespace go;
+
+using static go.mime_package;
+using strings = go.strings_package;
 
 [GoPackage("mime")]
 public static partial class mime_package
@@ -111,6 +118,26 @@ public static partial class mime_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(mime_package.WordDecoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mimeᴛWordDecoder;
-[GoMethodHost(typeof(mime_package.WordEncoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mimeᴛWordEncoder;
+[GoMethodHost(typeof(mime_package.WordDecoder)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class mimeᴛWordDecoder;
+[GoMethodHost(typeof(mime_package.WordEncoder)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class mimeᴛWordEncoder;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class mimeᴛWordDecoder {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (@string, error) Decode(this ref WordDecoder d, @string word) => mime_package.Decode⁔(ref d, word);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (@string, error) DecodeHeader(this ref WordDecoder d, @string header) => mime_package.DecodeHeader⁔(ref d, header);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error convert(this ref WordDecoder d, ж<strings.Builder> Ꮡbuf, @string charset, slice<byte> content) => mime_package.convert⁔(ref d, Ꮡbuf, charset, content);
+}
+partial class mimeᴛWordEncoder {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Encode(this WordEncoder e, @string charset, @string s) => mime_package.Encode⁔(e, charset, s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string encodeWord(this WordEncoder e, @string charset, @string s) => mime_package.encodeWord⁔(e, charset, s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void bEncode(this WordEncoder e, ж<strings.Builder> Ꮡbuf, @string charset, @string s) => mime_package.bEncode⁔(e, Ꮡbuf, charset, s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void qEncode(this WordEncoder e, ж<strings.Builder> Ꮡbuf, @string charset, @string s) => mime_package.qEncode⁔(e, Ꮡbuf, charset, s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void openWord(this WordEncoder e, ж<strings.Builder> Ꮡbuf, @string charset) => mime_package.openWord⁔(e, Ꮡbuf, charset);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void splitWord(this WordEncoder e, ж<strings.Builder> Ꮡbuf, @string charset) => mime_package.splitWord⁔(e, Ꮡbuf, charset);
+}
+// </MethodForwarders>

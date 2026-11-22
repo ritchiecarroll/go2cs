@@ -20,7 +20,6 @@ using go.crypto.@internal.fips140;
 using go.sync;
 using io = io_package;
 using Δx509 = go.crypto.x509_package;
-using static tls_package;
 
 partial class tls_package {
 
@@ -43,8 +42,6 @@ partial struct clientHandshakeStateTLS13 {
     internal ж<echClientContext> echContext;
 }
 
-} partial class tlsᴛclientHandshakeStateTLS13 {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string tlsServerSelectedTls13Inˢ => ref tlsServerSelectedTls13Inˢᵇ;
 private static readonly @string tlsServerSelectedTls13Inˢᵇ = "tls: server selected TLS 1.3 in a renegotiation"u8;
@@ -57,7 +54,7 @@ private static readonly @string tlsUnexpectedServerNameˢᵇ = "tls: unexpected 
 
 // handshake requires hs.c, hs.hello, hs.serverHello, hs.keyShareKeys, and,
 // optionally, hs.session, hs.earlySecret and hs.binderKey to be set.
-internal static error handshake(this ж<clientHandshakeStateTLS13> Ꮡhs) {
+internal static error handshake⁔(/*this*/ ж<clientHandshakeStateTLS13> Ꮡhs) {
     ref var hs = ref Ꮡhs.DerefOrNull();
 
     var c = hs.c;
@@ -219,12 +216,10 @@ internal static ref readonly @string tlsServerSentNonZeroˢ => ref tlsServerSent
 private static readonly @string tlsServerSentNonZeroˢᵇ = "tls: server sent non-zero legacy TLS compression method"u8;
 internal static ref readonly @string tlsServerChangedCipherˢ => ref tlsServerChangedCipherˢᵇ;
 private static readonly @string tlsServerChangedCipherˢᵇ = "tls: server changed cipher suite after a HelloRetryRequest"u8;
-internal static ref readonly @string tlsServerChoseAnˢ => ref tlsServerChoseAnˢᵇ;
-private static readonly @string tlsServerChoseAnˢᵇ = "tls: server chose an unconfigured cipher suite"u8;
 
 // checkServerHelloOrHRR does validity checks that apply to both ServerHello and
 // HelloRetryRequest messages. It sets hs.suite.
-internal static error checkServerHelloOrHRR(this ref clientHandshakeStateTLS13 hs) {
+internal static error checkServerHelloOrHRR⁔(/*this*/ ref clientHandshakeStateTLS13 hs) {
     var c = hs.c;
 
     if (hs.serverHello.supportedVersion == 0) {
@@ -274,7 +269,7 @@ internal static error checkServerHelloOrHRR(this ref clientHandshakeStateTLS13 h
 
 // sendDummyChangeCipherSpec sends a ChangeCipherSpec record for compatibility
 // with middleboxes that didn't implement TLS correctly. See RFC 8446, Appendix D.4.
-internal static error sendDummyChangeCipherSpec(this ref clientHandshakeStateTLS13 hs) {
+internal static error sendDummyChangeCipherSpec⁔(/*this*/ ref clientHandshakeStateTLS13 hs) {
     if (hs.c.quic != nil) {
         return default;
     }
@@ -301,12 +296,10 @@ internal static ref readonly @string tlsServerSelectedˢ3 => ref tlsServerSelect
 private static readonly @string tlsServerSelectedˢ3ᵇ = "tls: server selected unsupported group"u8;
 internal static ref readonly @string tlsServerSentAnˢ2 => ref tlsServerSentAnˢ2ᵇ;
 private static readonly @string tlsServerSentAnˢ2ᵇ = "tls: server sent an unnecessary HelloRetryRequest key_share"u8;
-internal static ref readonly @string tlsCurvePreferencesˢ => ref tlsCurvePreferencesˢᵇ;
-private static readonly @string tlsCurvePreferencesˢᵇ = "tls: CurvePreferences includes unsupported curve"u8;
 
 // processHelloRetryRequest handles the HRR in hs.serverHello, modifies and
 // resends hs.hello, and reads the new ServerHello into hs.serverHello.
-internal static error processHelloRetryRequest(this ref clientHandshakeStateTLS13 hs) {
+internal static error processHelloRetryRequest⁔(/*this*/ ref clientHandshakeStateTLS13 hs) {
     var c = hs.c;
 
     // The first ClientHello gets double-hashed into the transcript upon a
@@ -500,7 +493,7 @@ private static readonly @string tlsServerSelectedAnˢ2ᵇ = "tls: server selecte
 internal static ref readonly @string tlsServerSelectedAnˢ3 => ref tlsServerSelectedAnˢ3ᵇ;
 private static readonly @string tlsServerSelectedAnˢ3ᵇ = "tls: server selected an invalid PSK and cipher suite pair"u8;
 
-internal static error processServerHello(this ж<clientHandshakeStateTLS13> Ꮡhs) {
+internal static error processServerHello⁔(/*this*/ ж<clientHandshakeStateTLS13> Ꮡhs) {
     ref var hs = ref Ꮡhs.DerefOrNull();
 
     var c = hs.c;
@@ -563,7 +556,7 @@ internal static error processServerHello(this ж<clientHandshakeStateTLS13> Ꮡh
 internal static ref readonly @string tlsInvalidServerKeyShareˢ => ref tlsInvalidServerKeyShareˢᵇ;
 private static readonly @string tlsInvalidServerKeyShareˢᵇ = "tls: invalid server key share"u8;
 
-internal static error establishHandshakeKeys(this ref clientHandshakeStateTLS13 hs) {
+internal static error establishHandshakeKeys⁔(/*this*/ ref clientHandshakeStateTLS13 hs) {
     var c = hs.c;
 
     var (ke, err) = keyExchangeForCurveID(hs.serverHello.serverShare.group);
@@ -630,7 +623,7 @@ private static readonly @string tlsServerAccepted0Rttˢ2ᵇ = "tls: server accep
 internal static ref readonly @string tlsServerSentEncryptedˢ => ref tlsServerSentEncryptedˢᵇ;
 private static readonly @string tlsServerSentEncryptedˢᵇ = "tls: server sent encrypted client hello retry configs after accepting encrypted client hello"u8;
 
-internal static error readServerParameters(this ref clientHandshakeStateTLS13 hs) {
+internal static error readServerParameters⁔(/*this*/ ref clientHandshakeStateTLS13 hs) {
     var c = hs.c;
 
     var (msg, err) = c.readHandshake(new hash_HashᴠtranscriptHash(hs.transcript));
@@ -703,7 +696,7 @@ private static readonly @string tlsReceivedEmptyˢᵇ = "tls: received empty cer
 internal static ref readonly @string tlsCertificateUsedWithˢ => ref tlsCertificateUsedWithˢᵇ;
 private static readonly @string tlsCertificateUsedWithˢᵇ = "tls: certificate used with invalid signature algorithm"u8;
 
-internal static error readServerCertificate(this ref clientHandshakeStateTLS13 hs) {
+internal static error readServerCertificate⁔(/*this*/ ref clientHandshakeStateTLS13 hs) {
     var c = hs.c;
 
     // Either a PSK or a certificate is always used, but not both.
@@ -800,7 +793,7 @@ internal static error readServerCertificate(this ref clientHandshakeStateTLS13 h
 internal static ref readonly @string tlsInvalidServerFinishedˢ => ref tlsInvalidServerFinishedˢᵇ;
 private static readonly @string tlsInvalidServerFinishedˢᵇ = "tls: invalid server finished hash"u8;
 
-internal static error readServerFinished(this ref clientHandshakeStateTLS13 hs) {
+internal static error readServerFinished⁔(/*this*/ ref clientHandshakeStateTLS13 hs) {
     var c = hs.c;
 
     // finishedMsg is included in the transcript, but not until after we
@@ -851,7 +844,7 @@ internal static error readServerFinished(this ref clientHandshakeStateTLS13 hs) 
     return default;
 }
 
-internal static error sendClientCertificate(this ref clientHandshakeStateTLS13 hs) {
+internal static error sendClientCertificate⁔(/*this*/ ref clientHandshakeStateTLS13 hs) {
     var c = hs.c;
 
     if (hs.certReq == nil) {
@@ -926,7 +919,7 @@ internal static error sendClientCertificate(this ref clientHandshakeStateTLS13 h
     return default;
 }
 
-internal static error sendClientFinished(this ref clientHandshakeStateTLS13 hs) {
+internal static error sendClientFinished⁔(/*this*/ ref clientHandshakeStateTLS13 hs) {
     var c = hs.c;
 
     var finished = Ꮡ(new finishedMsg(
@@ -950,8 +943,6 @@ internal static error sendClientFinished(this ref clientHandshakeStateTLS13 hs) 
     return default;
 }
 
-} partial class tlsᴛConn {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string tlsReceivedNewSessionˢ => ref tlsReceivedNewSessionˢᵇ;
 private static readonly @string tlsReceivedNewSessionˢᵇ = "tls: received new session ticket from a client"u8;
@@ -964,7 +955,7 @@ private static readonly @string tlsInvalidEarlyDataForˢᵇ = "tls: invalid earl
 internal static ref readonly @string resumptionˢ => ref resumptionˢᵇ;
 private static readonly @string resumptionˢᵇ = "resumption"u8;
 
-internal static error handleNewSessionTicket(this ж<Conn> Ꮡc, ж<newSessionTicketMsgTLS13> Ꮡmsg) {
+internal static error handleNewSessionTicket⁔(/*this*/ ж<Conn> Ꮡc, ж<newSessionTicketMsgTLS13> Ꮡmsg) {
     ref var c = ref Ꮡc.DerefOrNull();
     ref var msg = ref Ꮡmsg.DerefOrNull();
 
@@ -1024,4 +1015,4 @@ internal static error handleNewSessionTicket(this ж<Conn> Ꮡc, ж<newSessionTi
     return default;
 }
 
-}
+} // end tls_package

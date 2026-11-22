@@ -10,7 +10,6 @@ using strings = strings_package;
 using time = time_package;
 using html;
 using io = io_package;
-using static traceviewer_package;
 
 partial class traceviewer_package {
 
@@ -24,10 +23,8 @@ partial struct TimeHistogram {
 // Five buckets for every power of 10.
 internal static float64 logDiv = math.Log(math.Pow(10D, 1.0D / 5D));
 
-} partial class traceviewerᴛTimeHistogram {
-
 // Add adds a single sample to the histogram.
-public static void Add(this ref TimeHistogram h, time.Duration d) {
+internal static void Add⁔(/*this*/ ref TimeHistogram h, time.Duration d) {
     nint bucket = default;
     if (d > 0) {
         bucket = (nint)(math.Log((float64)d) / logDiv);
@@ -47,12 +44,12 @@ public static void Add(this ref TimeHistogram h, time.Duration d) {
 }
 
 // BucketMin returns the minimum duration value for a provided bucket.
-public static time.Duration BucketMin(this ref TimeHistogram h, nint bucket) {
+internal static time.Duration BucketMin⁔(/*this*/ ref TimeHistogram h, nint bucket) {
     return (time.Duration)(int64)math.Exp((float64)bucket * logDiv);
 }
 
 // ToHTML renders the histogram as HTML.
-public static template.HTML ToHTML(this ж<TimeHistogram> Ꮡh, Func<time.Duration, time.Duration, @string> urlmaker) {
+internal static template.HTML ToHTML⁔(/*this*/ ж<TimeHistogram> Ꮡh, Func<time.Duration, time.Duration, @string> urlmaker) {
     ref var h = ref Ꮡh.DerefOrNull();
 
     if (Ꮡh == nil || h.Count == 0) {
@@ -90,4 +87,4 @@ public static template.HTML ToHTML(this ж<TimeHistogram> Ꮡh, Func<time.Durati
     return (template.HTML)w.String();
 }
 
-}
+} // end traceviewer_package

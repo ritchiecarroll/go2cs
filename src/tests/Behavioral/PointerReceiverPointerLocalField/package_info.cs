@@ -14,6 +14,9 @@
 
 using go;
 using static go.main_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -53,10 +56,12 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "AA0cgoL+lIKClIKClg==")]
+[assembly: GoPositionMap("main.go", "main.cs", "AAocgoLelIKClIKClg==")]
 // </GoSourcePositionMaps>
 
 namespace go;
+
+using static go.main_package;
 
 [GoPackage("main")]
 [GoTestMatchingConsoleOutput]
@@ -91,5 +96,17 @@ public static partial class main_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(main_package.slot)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛslot;
+[GoMethodHost(typeof(main_package.slot)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class mainᴛslot;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class mainᴛslot {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void inc(this ref slot s) => main_package.inc⁔(ref s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void add(this ref slot s, nint d) => main_package.add⁔(ref s, d);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint get(this ref slot s) => main_package.get⁔(ref s);
+}
+// </MethodForwarders>

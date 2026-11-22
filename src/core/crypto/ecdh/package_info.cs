@@ -12,10 +12,15 @@
 // <ImportedTypeAliases>
 global using cryptoꓸPrivateKey = object;
 global using cryptoꓸPublicKey = object;
+using crypto = go.crypto_package;
+using io = go.io_package;
 // </ImportedTypeAliases>
 
 using go;
 using static go.crypto.ecdh_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -65,12 +70,16 @@ using static go.crypto.ecdh_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("crypto/ecdh/ecdh.go", "ecdh.cs", "AEWIAZaiAAIU8oKClKiCAA4aABQ0AA4CgpSolqIAAhTygoKUqIKmgqqi", "", "", "90=ConstantTimeCompare/1/1/1;171=ConstantTimeCompare/1/1/1")]
-[assembly: GoPositionMap("crypto/ecdh/nist.go", "nist.cs", "AB0yguaigoKClIKClNymlIKmgoKmAAkUgoKClIKClIKU5qKCgoKUgoKU3KaCgpQACRTmxoKUuIKCgpSUgoKUlKYAChCClAAEEMCUAAUYAAMSwJQABRgAAxLAlAAFGA==", "", "", "50=Bytes/1/1/3;70=Bytes/1/2/2,PublicKey/1/2/6,Bytes/2/2/6,PublicKey/2/2/7;111=Clone/1/1/2,Bytes/1/1/3;124=Clone/1/1/2,PublicKey/1/2/6,Bytes/1/1/6,PublicKey/2/2/7;149=Clone/1/1/2")]
-[assembly: GoPositionMap("crypto/ecdh/x25519.go", "x25519.cs", "ABU2wJQACgiC5oKClIKCgpTmgoKUgpSCgrgACg6CgpSClAAJDLKCgoKUxoKUgoKClOKCgoKUgoKCgoKCgpSCgoKCgoKCgoKCgoKUgoKCgqaClIKCqJKCgpQ=", "", "", "77=Clone/1/1/2;95=Clone/1/1/2")]
+[assembly: GoPositionMap("crypto/ecdh/ecdh.go", "ecdh.cs", "AEKIAZaiAAIU8oKClKiCAAwaABI0AA4CgpSolqIAAhTygoKUqIKmgqqi", "", "", "87=ConstantTimeCompare/1/1/1;164=ConstantTimeCompare/1/1/1")]
+[assembly: GoPositionMap("crypto/ecdh/nist.go", "nist.cs", "ABoyguaigoKClIKClNymlIKmgoKmAAkUgoKClIKClIKU5qKCgoKUgoKU3KaCgpQACRTmxoKUuIKCgpSUgoKUlKYAChCClAACEMCUAAUYAAMSwJQABRgAAxLAlAAFGA==", "", "", "47=Bytes/1/1/3;67=Bytes/1/2/2,PublicKey/1/2/6,Bytes/2/2/6,PublicKey/2/2/7;108=Clone/1/1/2,Bytes/1/1/3;121=Clone/1/1/2,PublicKey/1/2/6,Bytes/1/1/6,PublicKey/2/2/7;146=Clone/1/1/2")]
+[assembly: GoPositionMap("crypto/ecdh/x25519.go", "x25519.cs", "ABQ2wJQACAiC5oKClIKCgpTmgoKUgpSCgrjugoKUgpQACQyygoKClKaClIKCgpTigoKClIKCgoKCgoKUgoKCgoKCgoKCgoKClIKCgoKmgpSCgqiSgoKU", "", "", "74=Clone/1/1/2;88=Clone/1/1/2")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;
+
+using static go.crypto.ecdh_package;
+using crypto = go.crypto_package;
+using io = go.io_package;
 
 [GoPackage("ecdh")]
 public static partial class ecdh_package
@@ -117,8 +126,42 @@ public static partial class ecdh_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(ecdh_package.PrivateKey)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ecdhᴛPrivateKey;
-[GoMethodHost(typeof(ecdh_package.PublicKey)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ecdhᴛPublicKey;
-[GoMethodHost(typeof(ecdh_package.nistCurve)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ecdhᴛnistCurve;
-[GoMethodHost(typeof(ecdh_package.x25519Curve)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ecdhᴛx25519Curve;
+[GoMethodHost(typeof(ecdh_package.PrivateKey)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class ecdhᴛPrivateKey;
+[GoMethodHost(typeof(ecdh_package.PublicKey)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class ecdhᴛPublicKey;
+[GoMethodHost(typeof(ecdh_package.nistCurve)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class ecdhᴛnistCurve;
+[GoMethodHost(typeof(ecdh_package.x25519Curve)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class ecdhᴛx25519Curve;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class ecdhᴛPrivateKey {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<byte>, error) ECDH(this ж<PrivateKey> Ꮡk, ж<PublicKey> Ꮡremote) => ecdh_package.ECDH⁔(Ꮡk, Ꮡremote);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> Bytes(this ref PrivateKey k) => ecdh_package.Bytes⁔(ref k);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Equal(this ref PrivateKey k, cryptoꓸPrivateKey x) => ecdh_package.Equal⁔(ref k, x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static Curve Curve(this ref PrivateKey k) => ecdh_package.Curve⁔(ref k);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<PublicKey> PublicKey(this ref PrivateKey k) => ecdh_package.PublicKey⁔(ref k);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static cryptoꓸPublicKey Public(this ref PrivateKey k) => ecdh_package.Public⁔(ref k);
+}
+partial class ecdhᴛPublicKey {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> Bytes(this ref PublicKey k) => ecdh_package.Bytes⁔(ref k);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Equal(this ref PublicKey k, cryptoꓸPublicKey x) => ecdh_package.Equal⁔(ref k, x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static Curve Curve(this ref PublicKey k) => ecdh_package.Curve⁔(ref k);
+}
+partial class ecdhᴛnistCurve {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string String(this ref nistCurve c) => ecdh_package.String⁔(ref c);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (ж<PrivateKey>, error) GenerateKey(this ж<nistCurve> Ꮡc, io.Reader r) => ecdh_package.GenerateKey⁔(Ꮡc, r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (ж<PrivateKey>, error) NewPrivateKey(this ж<nistCurve> Ꮡc, slice<byte> key) => ecdh_package.NewPrivateKey⁔(Ꮡc, key);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (ж<PublicKey>, error) NewPublicKey(this ж<nistCurve> Ꮡc, slice<byte> key) => ecdh_package.NewPublicKey⁔(Ꮡc, key);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<byte>, error) ecdh(this ref nistCurve c, ж<PrivateKey> Ꮡlocal, ж<PublicKey> Ꮡremote) => ecdh_package.ecdh⁔(ref c, Ꮡlocal, Ꮡremote);
+}
+partial class ecdhᴛx25519Curve {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string String(this ref x25519Curve c) => ecdh_package.String⁔(ref c);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (ж<PrivateKey>, error) GenerateKey(this ж<x25519Curve> Ꮡc, io.Reader r) => ecdh_package.GenerateKey⁔(Ꮡc, r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (ж<PrivateKey>, error) NewPrivateKey(this ж<x25519Curve> Ꮡc, slice<byte> key) => ecdh_package.NewPrivateKey⁔(Ꮡc, key);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (ж<PublicKey>, error) NewPublicKey(this ж<x25519Curve> Ꮡc, slice<byte> key) => ecdh_package.NewPublicKey⁔(Ꮡc, key);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<byte>, error) ecdh(this ref x25519Curve c, ж<PrivateKey> Ꮡlocal, ж<PublicKey> Ꮡremote) => ecdh_package.ecdh⁔(ref c, Ꮡlocal, Ꮡremote);
+}
+// </MethodForwarders>

@@ -322,9 +322,8 @@ at landing: 570 behavioral packages, and exactly one non-`int` range operand in 
 is re-measured by a guard. -->
 
 ## An index-only range over a slice or array reads no element
-<!-- src/go2cs/visitRangeStmt.go:812 `} else if (isSlice || isArray) && valExpr == "_" {` and :892
-`foreach (%s%s in range(%s(%s)))`, the length named by :886 `lenName := "len"` (`builtin.len` where the package
-declares its own len); src/core/golib/builtin.cs:2194 `public static nint len<T>(in slice<T> slice)`,
+<!-- src/go2cs/visitRangeStmt.go:812 `} else if (isSlice || isArray) && valExpr == "_" {` and :884
+`foreach (%s%s in range(len(%s)))`; src/core/golib/builtin.cs:2194 `public static nint len<T>(in slice<T> slice)`,
 :2204 `public static nint len<T>(in sslice<T> slice)`, :2154 `public static nint len<T>(in array<T> array)`. -->
 Go's index-only range (`for i := range s`, `for i, _ := range s`, or `for range s`) reads the length once and
 loads no element. The converter ranges the length, `foreach (var i in range(len(s)))`, when the operand is a
@@ -381,7 +380,8 @@ receiver faulted at `range(p)`; runtime's pageBits.setAll and image/jpeg's diffe
 
 Guarded by the converter's `TestIndexOnlyRangeEmitsTheIndexEnumerator`, which pins every operand kind above, the
 scalar escapes and the string, map and value-variable controls, and a pointer to an array, a nil one, a pointer
-parameter and a pointer receiver; by `TestAnIndexOnlyRangeQualifiesAShadowedLen`; by
+parameter and a pointer receiver; by `TestAnIndexOnlyRangeInAMethodOfATypeWithALenMethodReadsTheBuiltinBare` (a method's
+body stands in the package class under its suffixed name, so a `len` method hides no built-in there); by
 `TestRangeOverPointerArrayValueIsCountRange`, which pins the count range for a lowered parameter, an aliased one, a
 named array and a receiver beside the box, value and slice controls; and by the behavioral goldens
 `ArrayRangeSnapshot`, `SlicePointerIdentity`, `VariadicPackPassThrough`, `PointerArraySlice`, whose `rangeIndexOnly`
@@ -392,7 +392,7 @@ ranges a nil `*[3]int` and a nil `*grid` and prints Go's counts, and whose `fill
 :261 `expect("overNilPointer", "foreach (var i in range(nilp, 4))")`; :267 `expect("overPointerParam", "foreach (var i in range(2))")`;
 :269 `expect("setAll", "foreach (var i in range(4))")`;
 :281 `expect("overString", "foreach (var (i, _) in str)")`; :282 `expect("overMap", "foreach (var (k, _) in m)")`.
-src/go2cs/collectionExpressionTargets_test.go:219 `func TestAnIndexOnlyRangeQualifiesAShadowedLen(t *testing.T) {`.
+src/go2cs/collectionExpressionTargets_test.go:220 `func TestAnIndexOnlyRangeInAMethodOfATypeWithALenMethodReadsTheBuiltinBare(t *testing.T) {`.
 src/go2cs/rangeNilPointerArray_test.go `func TestRangeOverPointerArrayValueIsCountRange(t *testing.T) {`.
 src/tests/Behavioral/PointerArraySlice/main.go:63 `func rangeIndexOnly() {`, :90 `func (b *grid) fill() {`.
 src/tests/Behavioral/ArrayRangeSnapshot/ArrayRangeSnapshot.go:113 `for i := range a {` -> .cs.target:105 `foreach (var i in range(len(a))) {`;

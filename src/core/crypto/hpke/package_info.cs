@@ -10,10 +10,14 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+using cipher = go.crypto.cipher_package;
 // </ImportedTypeAliases>
 
 using go;
 using static go.crypto.hpke_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -75,15 +79,18 @@ using static go.crypto.hpke_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("crypto/hpke/aead.go", "aead.cs", "ABg4wpSkpKSkuoCWgJaAnLAACBLu7gAIDoLmgoKUpoKmggAJCoKmgqaCpoI=")]
+[assembly: GoPositionMap("crypto/hpke/aead.go", "aead.cs", "ABc4wpSkpKSkuoCWgJaAnLAACBLu7u6C5oKClKaCpoLagqaCpoKmgg==")]
 [assembly: GoPositionMap("crypto/hpke/aead_fips140v1.26.go", "aead_fips140v1.26.cs", "AA8egoKClA==")]
-[assembly: GoPositionMap("crypto/hpke/hpke.go", "hpke.cs", "ADtWgpSCgoKClIKCgoKUlIKUgoKUgoKUuAAHEIKClIKClIKUgoKUgoKUgoKUgoKUgoKUuAAHIgALAoKClIKClAACFPKCgpSCgpQACBDSgpSCgsyygoKUgoKUAAgKooKUAAgQ0oKUgoKUggAIDLKCgpSSgoKUAAgKooKUxoKCgoKUxoKCgoKCgg==", "71-73:1;114-116:2", "", "75=keySize/1/1/1,nonceSize/1/1/1,size/1/1/1")]
-[assembly: GoPositionMap("crypto/hpke/kdf.go", "kdf.cs", "AB5CwpSkpKSkpLqAloCWgAAHEIKCtIKmgqaC5oKmgoKCgoKCpoKCgoKCgoLIkqiSAAgSgrSCpoKmgqaCgoKCgoKCgoKCguaC5oI=")]
-[assembly: GoPositionMap("crypto/hpke/kem.go", "kem.cs", "ACxcwpSkpKSkpKSkpKQANGSCgoKClKaCpoLWkpKSAAEUAAgClKSkpNoACAyC1IKUgpSClIKUggANKgAPAoKClPyCgoKUxoKmggAKDrKCgpSClIKClJSCgoKClAAJLAAOAoKClPyCgoKUpoKCgpQACAa0goKClIKCgpSUgoKCgpSClIKCgpSUxoLmAAkUgoKUgoKCgoKUpoLcgoKClIKClII=", "", "", "435=PublicKey/1/1/2")]
-[assembly: GoPositionMap("crypto/hpke/pq.go", "pq.cs", "ABgoAAwYtsyipgAKFrbKkqYACha2ypIAECKCpoKmgoKCgoKCggASLAAPApSClKSClKSClKQACQiigpSSgpSCkpSClMaCpoIACAqygoKUgpSClIKClIKUlIKCpoKCAAsyAA8CxoKCguaigqaClIKCkoKmgoKCgpKkgpTYgpSClKSClKSClKQACQiigoKClMaC5oKClKaCAAoOooKUgpKClIKSlIKUgoKUgpSCxri2tsqSpri2tsqSAAwWgqaCAA0mAAsClKSk2IKCgpTGgqaCpoKCgpQACSYACwKUpKTYgoKClKaCgoKU5oKCgoKUxoIADgaChoKUpoLcgg==", "173-175:1;194-196:1;204-206:2;273-275:1;343-345:1;350-352:2", "", "25=X25519/1/1/4;53=P256/1/1/3;78=P384/1/1/3;404=PublicKey/1/1/2,Encapsulator/1/1/3;662=Encapsulator/1/1/2")]
+[assembly: GoPositionMap("crypto/hpke/hpke.go", "hpke.cs", "ADpWgpSCgoKClIKCgoKUlIKUgoKUgoKUuAAHEIKClIKClIKUgoKUgoKUgoKUgoKUgoKUuAAHIgALAoKClIKClAACFPKCgpSCgpQABhDSgpSCgqyygoKUgoKU6qKClAACENKClIKClILssoKClJKCgpSqooKUpoKCgoKUpoKCgoKCgg==", "71-73:1;114-116:2", "", "74=keySize/1/1/1,nonceSize/1/1/1,size/1/1/1")]
+[assembly: GoPositionMap("crypto/hpke/kdf.go", "kdf.cs", "AB1CwpSkpKSkpLqAloCWgAAHEIKClIKmgqaC5oKmgoKCgoKCpoKCgoKCgoKokqiSAAgSgpSCpoKmgqaCgoKCgoKCgoKCguaC5oI=")]
+[assembly: GoPositionMap("crypto/hpke/kem.go", "kem.cs", "ACtcwpSkpKSkpKSkpKQAMmSCgoKClKaCpoK2kpKSAAEUAAgClKSkpNrsgtSClIKUgpSClIIAByoADwKCgpTcgoKClKaCpoLusoKClIKUgoKUlIKCgoKUAAcsAA4CgoKU3IKCgpSmgoKClAAIBrSCgoKUgoKClJSCgoKClIKUgoKClJSmguYACRSCgpSCgoKCgpSmgtyCgoKUgoKUgg==", "", "", "408=PublicKey/1/1/2")]
+[assembly: GoPositionMap("crypto/hpke/pq.go", "pq.cs", "ABcoAAwYtsyipgAKFrbKkqYACha2ypIADiKCpoKmgoKCgoKCggAQLAAPApSClKSClKSClKT4ooKUkoKUgpKUgpSmgqaCyrKCgpSClIKUgoKUgpSUgoKmgoIACTIADwKmgoKC5qKCpoKUgoKSgqaCgoKCkqSClLiClIKUpIKUpIKUpPiigoKClKaC5oKClKaCAAoOooKUgpKClIKSlIKUgoKUgpSCpri2tsqSpri2tsqSAAoWgqaCAAsmAAsClKSkuIKCgpSmgqaCpoKCgpQAByYACwKUpKS4goKClKaCgoKUpoKCgoKUpoLmgoaClKaC3II=", "173-175:1;194-196:1;204-206:2;273-275:1;343-345:1;350-352:2", "", "24=X25519/1/1/4;52=P256/1/1/3;77=P384/1/1/3;381=PublicKey/1/1/2,Encapsulator/1/1/3;611=Encapsulator/1/1/2")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;
+
+using static go.crypto.hpke_package;
+using cipher = go.crypto.cipher_package;
 
 [GoPackage("hpke")]
 public static partial class hpke_package
@@ -156,21 +163,134 @@ public static partial class hpke_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(hpke_package.Recipient)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class hpkeᴛRecipient;
-[GoMethodHost(typeof(hpke_package.Sender)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class hpkeᴛSender;
-[GoMethodHost(typeof(hpke_package.aead)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class hpkeᴛaead;
-[GoMethodHost(typeof(hpke_package.context)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class hpkeᴛcontext;
-[GoMethodHost(typeof(hpke_package.dhKEM)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class hpkeᴛdhKEM;
-[GoMethodHost(typeof(hpke_package.dhKEMPrivateKey)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class hpkeᴛdhKEMPrivateKey;
-[GoMethodHost(typeof(hpke_package.dhKEMPublicKey)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class hpkeᴛdhKEMPublicKey;
-[GoMethodHost(typeof(hpke_package.exportOnlyAEAD)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class hpkeᴛexportOnlyAEAD;
-[GoMethodHost(typeof(hpke_package.hkdfKDF)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class hpkeᴛhkdfKDF;
-[GoMethodHost(typeof(hpke_package.hybridKEM)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class hpkeᴛhybridKEM;
-[GoMethodHost(typeof(hpke_package.hybridPrivateKey)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class hpkeᴛhybridPrivateKey;
-[GoMethodHost(typeof(hpke_package.hybridPublicKey)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class hpkeᴛhybridPublicKey;
-[GoMethodHost(typeof(hpke_package.mlkemKEM)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class hpkeᴛmlkemKEM;
-[GoMethodHost(typeof(hpke_package.mlkemPrivateKey)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class hpkeᴛmlkemPrivateKey;
-[GoMethodHost(typeof(hpke_package.mlkemPublicKey)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class hpkeᴛmlkemPublicKey;
-[GoMethodHost(typeof(hpke_package.shakeKDF)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class hpkeᴛshakeKDF;
-[GoMethodHost(typeof(hpke_package.unsupportedCurveKEM)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class hpkeᴛunsupportedCurveKEM;
+[GoMethodHost(typeof(hpke_package.Recipient)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class hpkeᴛRecipient;
+[GoMethodHost(typeof(hpke_package.Sender)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class hpkeᴛSender;
+[GoMethodHost(typeof(hpke_package.aead)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class hpkeᴛaead;
+[GoMethodHost(typeof(hpke_package.context)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class hpkeᴛcontext;
+[GoMethodHost(typeof(hpke_package.dhKEM)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class hpkeᴛdhKEM;
+[GoMethodHost(typeof(hpke_package.dhKEMPrivateKey)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class hpkeᴛdhKEMPrivateKey;
+[GoMethodHost(typeof(hpke_package.dhKEMPublicKey)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class hpkeᴛdhKEMPublicKey;
+[GoMethodHost(typeof(hpke_package.exportOnlyAEAD)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class hpkeᴛexportOnlyAEAD;
+[GoMethodHost(typeof(hpke_package.hkdfKDF)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class hpkeᴛhkdfKDF;
+[GoMethodHost(typeof(hpke_package.hybridKEM)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class hpkeᴛhybridKEM;
+[GoMethodHost(typeof(hpke_package.hybridPrivateKey)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class hpkeᴛhybridPrivateKey;
+[GoMethodHost(typeof(hpke_package.hybridPublicKey)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class hpkeᴛhybridPublicKey;
+[GoMethodHost(typeof(hpke_package.mlkemKEM)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class hpkeᴛmlkemKEM;
+[GoMethodHost(typeof(hpke_package.mlkemPrivateKey)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class hpkeᴛmlkemPrivateKey;
+[GoMethodHost(typeof(hpke_package.mlkemPublicKey)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class hpkeᴛmlkemPublicKey;
+[GoMethodHost(typeof(hpke_package.shakeKDF)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class hpkeᴛshakeKDF;
+[GoMethodHost(typeof(hpke_package.unsupportedCurveKEM)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class hpkeᴛunsupportedCurveKEM;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class hpkeᴛRecipient {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<byte>, error) Open(this ref Recipient r, slice<byte> aad, slice<byte> ciphertext) => hpke_package.Open⁔(ref r, aad, ciphertext);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<byte>, error) Export(this ref Recipient r, @string exporterContext, nint length) => hpke_package.Export⁔(ref r, exporterContext, length);
+}
+partial class hpkeᴛSender {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<byte>, error) Seal(this ref Sender s, slice<byte> aad, slice<byte> plaintext) => hpke_package.Seal⁔(ref s, aad, plaintext);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<byte>, error) Export(this ref Sender s, @string exporterContext, nint length) => hpke_package.Export⁔(ref s, exporterContext, length);
+}
+partial class hpkeᴛaead {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static uint16 ID(this ref aead a) => hpke_package.ID⁔(ref a);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (cipher.AEAD, error) aead(this ref aead a, slice<byte> key) => hpke_package.aead⁔(ref a, key);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint keySize(this ref aead a) => hpke_package.keySize⁔(ref a);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint nonceSize(this ref aead a) => hpke_package.nonceSize⁔(ref a);
+}
+partial class hpkeᴛcontext {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<byte> nextNonce(this ref context ctx) => hpke_package.nextNonce⁔(ref ctx);
+}
+partial class hpkeᴛdhKEM {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<byte>, error) extractAndExpand(this ref dhKEM kem, slice<byte> dhKey, slice<byte> kemContext) => hpke_package.extractAndExpand⁔(ref kem, dhKey, kemContext);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static uint16 ID(this ref dhKEM kem) => hpke_package.ID⁔(ref kem);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint encSize(this ref dhKEM kem) => hpke_package.encSize⁔(ref kem);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (PublicKey, error) NewPublicKey(this ref dhKEM kem, slice<byte> data) => hpke_package.NewPublicKey⁔(ref kem, data);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (PrivateKey, error) GenerateKey(this ref dhKEM kem) => hpke_package.GenerateKey⁔(ref kem);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (PrivateKey, error) NewPrivateKey(this ref dhKEM kem, slice<byte> ikm) => hpke_package.NewPrivateKey⁔(ref kem, ikm);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (PrivateKey, error) DeriveKeyPair(this ж<dhKEM> Ꮡkem, slice<byte> ikm) => hpke_package.DeriveKeyPair⁔(Ꮡkem, ikm);
+}
+partial class hpkeᴛdhKEMPrivateKey {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static KEM KEM(this ref dhKEMPrivateKey k) => hpke_package.KEM⁔(ref k);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<byte>, error) Bytes(this ref dhKEMPrivateKey k) => hpke_package.Bytes⁔(ref k);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static PublicKey PublicKey(this ref dhKEMPrivateKey k) => hpke_package.PublicKey⁔(ref k);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<byte>, error) decap(this ref dhKEMPrivateKey k, slice<byte> encPubEph) => hpke_package.decap⁔(ref k, encPubEph);
+}
+partial class hpkeᴛdhKEMPublicKey {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static KEM KEM(this ref dhKEMPublicKey pk) => hpke_package.KEM⁔(ref pk);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<byte> Bytes(this ref dhKEMPublicKey pk) => hpke_package.Bytes⁔(ref pk);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<byte> sharedSecret, slice<byte> encapPub, error err) encap(this ref dhKEMPublicKey pk) => hpke_package.encap⁔(ref pk);
+}
+partial class hpkeᴛexportOnlyAEAD {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static uint16 ID(this exportOnlyAEAD _) => hpke_package.ID⁔(_);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (cipher.AEAD, error) aead(this exportOnlyAEAD _, slice<byte> key) => hpke_package.aead⁔(_, key);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint keySize(this exportOnlyAEAD _) => hpke_package.keySize⁔(_);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint nonceSize(this exportOnlyAEAD _) => hpke_package.nonceSize⁔(_);
+}
+partial class hpkeᴛhkdfKDF {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static uint16 ID(this ref hkdfKDF kdf) => hpke_package.ID⁔(ref kdf);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint size(this ref hkdfKDF kdf) => hpke_package.size⁔(ref kdf);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool oneStage(this ref hkdfKDF kdf) => hpke_package.oneStage⁔(ref kdf);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<byte>, error) labeledDerive(this ref hkdfKDF kdf, slice<byte> _Δp1, slice<byte> _Δp2, @string _Δp3, slice<byte> _Δp4, uint16 _Δp5) => hpke_package.labeledDerive⁔(ref kdf, _Δp1, _Δp2, _Δp3, _Δp4, _Δp5);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<byte>, error) labeledExtract(this ref hkdfKDF kdf, slice<byte> suiteID, slice<byte> salt, @string label, slice<byte> inputKey) => hpke_package.labeledExtract⁔(ref kdf, suiteID, salt, label, inputKey);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<byte>, error) labeledExpand(this ref hkdfKDF kdf, slice<byte> suiteID, slice<byte> randomKey, @string label, slice<byte> info, uint16 length) => hpke_package.labeledExpand⁔(ref kdf, suiteID, randomKey, label, info, length);
+}
+partial class hpkeᴛhybridKEM {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static uint16 ID(this ref hybridKEM kem) => hpke_package.ID⁔(ref kem);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint encSize(this ref hybridKEM kem) => hpke_package.encSize⁔(ref kem);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<byte> sharedSecret(this ref hybridKEM kem, slice<byte> ssPQ, slice<byte> ssT, slice<byte> ctT, slice<byte> ekT) => hpke_package.sharedSecret⁔(ref kem, ssPQ, ssT, ctT, ekT);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (PublicKey, error) NewPublicKey(this ж<hybridKEM> Ꮡkem, slice<byte> data) => hpke_package.NewPublicKey⁔(Ꮡkem, data);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (PrivateKey, error) GenerateKey(this ж<hybridKEM> Ꮡkem) => hpke_package.GenerateKey⁔(Ꮡkem);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (PrivateKey, error) NewPrivateKey(this ж<hybridKEM> Ꮡkem, slice<byte> priv) => hpke_package.NewPrivateKey⁔(Ꮡkem, priv);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (PrivateKey, error) DeriveKeyPair(this ж<hybridKEM> Ꮡkem, slice<byte> ikm) => hpke_package.DeriveKeyPair⁔(Ꮡkem, ikm);
+}
+partial class hpkeᴛhybridPrivateKey {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static KEM KEM(this ref hybridPrivateKey k) => hpke_package.KEM⁔(ref k);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<byte>, error) Bytes(this ref hybridPrivateKey k) => hpke_package.Bytes⁔(ref k);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static PublicKey PublicKey(this ref hybridPrivateKey k) => hpke_package.PublicKey⁔(ref k);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<byte>, error) decap(this ж<hybridPrivateKey> Ꮡk, slice<byte> enc) => hpke_package.decap⁔(Ꮡk, enc);
+}
+partial class hpkeᴛhybridPublicKey {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static KEM KEM(this ref hybridPublicKey pk) => hpke_package.KEM⁔(ref pk);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<byte> Bytes(this ref hybridPublicKey pk) => hpke_package.Bytes⁔(ref pk);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<byte> sharedSecret, slice<byte> encapPub, error err) encap(this ж<hybridPublicKey> Ꮡpk) => hpke_package.encap⁔(Ꮡpk);
+}
+partial class hpkeᴛmlkemKEM {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static uint16 ID(this ref mlkemKEM kem) => hpke_package.ID⁔(ref kem);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint encSize(this ref mlkemKEM kem) => hpke_package.encSize⁔(ref kem);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (PublicKey, error) NewPublicKey(this ref mlkemKEM kem, slice<byte> data) => hpke_package.NewPublicKey⁔(ref kem, data);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (PrivateKey, error) GenerateKey(this ref mlkemKEM kem) => hpke_package.GenerateKey⁔(ref kem);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (PrivateKey, error) NewPrivateKey(this ref mlkemKEM kem, slice<byte> priv) => hpke_package.NewPrivateKey⁔(ref kem, priv);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (PrivateKey, error) DeriveKeyPair(this ref mlkemKEM kem, slice<byte> ikm) => hpke_package.DeriveKeyPair⁔(ref kem, ikm);
+}
+partial class hpkeᴛmlkemPrivateKey {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static KEM KEM(this ref mlkemPrivateKey k) => hpke_package.KEM⁔(ref k);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<byte>, error) Bytes(this ref mlkemPrivateKey k) => hpke_package.Bytes⁔(ref k);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static PublicKey PublicKey(this ref mlkemPrivateKey k) => hpke_package.PublicKey⁔(ref k);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<byte>, error) decap(this ref mlkemPrivateKey k, slice<byte> enc) => hpke_package.decap⁔(ref k, enc);
+}
+partial class hpkeᴛmlkemPublicKey {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static KEM KEM(this ref mlkemPublicKey pk) => hpke_package.KEM⁔(ref pk);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<byte> Bytes(this ref mlkemPublicKey pk) => hpke_package.Bytes⁔(ref pk);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<byte> sharedSecret, slice<byte> encapPub, error err) encap(this ref mlkemPublicKey pk) => hpke_package.encap⁔(ref pk);
+}
+partial class hpkeᴛshakeKDF {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static uint16 ID(this ref shakeKDF kdf) => hpke_package.ID⁔(ref kdf);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint size(this ref shakeKDF kdf) => hpke_package.size⁔(ref kdf);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool oneStage(this ref shakeKDF kdf) => hpke_package.oneStage⁔(ref kdf);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<byte>, error) labeledDerive(this ref shakeKDF kdf, slice<byte> suiteID, slice<byte> inputKey, @string label, slice<byte> context, uint16 length) => hpke_package.labeledDerive⁔(ref kdf, suiteID, inputKey, label, context, length);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<byte>, error) labeledExtract(this ref shakeKDF kdf, slice<byte> _Δp1, slice<byte> _Δp2, @string _Δp3, slice<byte> _Δp4) => hpke_package.labeledExtract⁔(ref kdf, _Δp1, _Δp2, _Δp3, _Δp4);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<byte>, error) labeledExpand(this ref shakeKDF kdf, slice<byte> _Δp1, slice<byte> _Δp2, @string _Δp3, slice<byte> _Δp4, uint16 _Δp5) => hpke_package.labeledExpand⁔(ref kdf, _Δp1, _Δp2, _Δp3, _Δp4, _Δp5);
+}
+partial class hpkeᴛunsupportedCurveKEM {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static uint16 ID(this unsupportedCurveKEM _) => hpke_package.ID⁔(_);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (PrivateKey, error) GenerateKey(this unsupportedCurveKEM _) => hpke_package.GenerateKey⁔(_);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (PublicKey, error) NewPublicKey(this unsupportedCurveKEM _Δp0, slice<byte> _Δp1) => hpke_package.NewPublicKey⁔(_Δp0, _Δp1);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (PrivateKey, error) NewPrivateKey(this unsupportedCurveKEM _Δp0, slice<byte> _Δp1) => hpke_package.NewPrivateKey⁔(_Δp0, _Δp1);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (PrivateKey, error) DeriveKeyPair(this unsupportedCurveKEM _Δp0, slice<byte> _Δp1) => hpke_package.DeriveKeyPair⁔(_Δp0, _Δp1);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint encSize(this unsupportedCurveKEM _) => hpke_package.encSize⁔(_);
+}
+// </MethodForwarders>

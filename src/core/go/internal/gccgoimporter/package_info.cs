@@ -10,10 +10,16 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+using constant = go.go.constant_package;
+using io = go.io_package;
+using types = go.go.types_package;
 // </ImportedTypeAliases>
 
 using go;
 using static go.go.@internal.gccgoimporter_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -71,13 +77,20 @@ using static go.go.@internal.gccgoimporter_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("go/internal/gccgoimporter/ar.go", "ar.cs", "ADVq0oCCtoKAgrakpKSkupKCgoKAgqSUgqaCgqaCuIKCgriClIKCAAgOooKClIKClKiSgoKCpoKCgpSCgrissoKUAAgOgoKU")]
-[assembly: GoPositionMap("go/internal/gccgoimporter/gccgoinstallation.go", "gccgoinstallation.cs", "ACc80oKCgoKmgoKmgoKClLaCgoLsgoKClJSosoKCgoKUlIKCgpSmlKqi")]
+[assembly: GoPositionMap("go/internal/gccgoimporter/ar.go", "ar.cs", "ADRq0oCCtoKAgrakpKSkupKCgoKAgqSUgqaCgqaCuIKCgriClIKCAAgOooKClIKClKiSgoKCpoKCgpSCgrissoKU7oKClA==")]
+[assembly: GoPositionMap("go/internal/gccgoimporter/gccgoinstallation.go", "gccgoinstallation.cs", "ACM80oKCgoKmgoKmgoKClLaCgoLsgoKClJSosoKCgoKUlIKCgpSmlKqi")]
 [assembly: GoPositionMap("go/internal/gccgoimporter/importer.go", "importer.cs", "AC1UooKClO6CgsoADyAACwKCgpSCkoK4goKCpoK2gqaCpraCgoKCgpSCpoKCgoKClIKmggASGIIACgqCpoKCgoKClIKCpoKSgoKUgpSCpoKCpoKClIKkpoKCgqaCgoKUgoK4lIKCgoIAFzK2/KKCgIKkgIKk", "83-87:1;146-247:1", "", "", "202:29,225:33", "101:21,102:13")]
-[assembly: GoPositionMap("go/internal/gccgoimporter/parser.go", "parser.cs", "ADxwooKCgoKmooKAkoKCggALEILGgoKmpqKmgoKClIKmgoKUpoKCgriCgoKU2qKClIKmgoKUgqaCgpS0yIKmgqzigoKmlMaCxoK2rMSClIKCgpSu8oKCgpSCgpSokpSCpoLGgoKU+NKCgoKClIKUpLTEyIKClAAICNKUgpSUgoKCgpSCgoKClIKClIKCqLKCgriU6NKCgoKCgoIACAoACAaCgoK4lIKCgqaC1ramtoKCgqaCgoKmlIKCpoKCgpTIgpSClIK2gsiCtoKClIKmgoKClIKClIK2tqiygoKClIKCgpQADBC2AAgQgoKUlIKUAAMS0oKUgpSClIKUgpS0goKClJTEAAoQ0oKCgoKmgu6CgoKUgoKClIKCgrimgoKCuIKUgpSCgpSmgoKCgpS4gpSCgpSCgoKUgpSCgoKCgoKClIK4poKCgoKUpoKCgoKUqLKCgpSClIKmgpSClILospSClIKCgpSC6LKUgpSClIKCyIKCgsiC6LKUgpSClIKCgoKClJSC2LKClIKCgpSCgoKClKaUqLKUgoKUgoKCpoKmurKClIKUgqiylIKCgpSCpoKClMqm6LKUgpSClIKCgoKUgoKmlJSC6LKCgoKCgqaClJSospSmpKampsimpqaCACc8ggAFOOKCgujilIKUgoKClIKClJSCyIKCgraCpoKmgqwACAKCguoACAaCgoKClKaCgpSClJSCgoKClLQACwbigoKEnIKCgoKmgpTKgoKCgpSUlIKSpoK0ptKCgoKmgoKCgoKUgpSCgpSCtKaSgoKCgpSokoIAAxIACQKUpqSCgoK2goK2goKUtpSCgpTIgpSCgoK2xAACGgANApSmpLaCgoKCgpS2goKCtoKCtoKCgoKCtoKCgoK2goK2goKClLaCgraCgoKUtoKCgrbKsoKUgoKUlIKCgqaC", "66-66:1;1014-1016:1;1048-1050:1;1078-1082:1;1162-1164:1", "", "1088=Lookup/1/4/18,Type/1/4/18,Lookup/2/4/19,Type/2/4/19,Lookup/3/4/20,Type/3/4/20,Lookup/4/4/21,Type/4/4/21", "", "1198:29,1199:13,1244:29,1245:13,1282:64,1283:13,1378:35,1379:17")]
+[assembly: GoPositionMap("go/internal/gccgoimporter/parser.go", "parser.cs", "ADlwooKCgoKmooKAkoKCggAHEIKmgoKmpqKmgoKClIKmgoKUpoKCgriCgoKU2qKClIKmgoKUgqaCgpS0yIKmgqzigoKmlMaCxoK2rMSClIKCgpSu8oKCgpSCgpSokpSCpoKmgoKU2NKCgoKClIKUpLTEyIKClAAICNKUgpSUgoKCgpSCgoKClIKClIKCqLKCgriU6NKCgoKCgoIACAoACAaCgoK4lIKCgqaC1ramtoKCgqaCgoKmlIKCpoKCgpTIgpSClIK2gsiCtoKClIKmgoKClIKClIK2tqiygoKClIKCgpQAChCWAAgQgoKUlIKUAAMS0oKUgpSClIKUgpS0goKClJTEAAoQ0oKCgoKmgu6CgoKUgoKClIKCgrimgoKCuIKUgpSCgpSmgoKCgpS4gpSCgpSCgoKUgpSCgoKCgoKClIK4poKCgoKUpoKCgoKUqLKCgpSClIKmgpSClILospSClIKCgpSC6LKUgpSClIKCyIKCgsiC6LKUgpSClIKCgoKClJSC2LKClIKCgpSCgoKClKaUqLKUgoKUgoKCpoKmurKClIKUgqiylIKCgpSCpoKClMqm6LKUgpSClIKCgoKUgoKmlJSC6LKCgoKCgqaClJSospSmpKampsimpqaCACM8ggADOOKCgujilIKUgoKClIKClJSCyIKCgraCpoKmgqwACAKCguoACAaCgoKClKaCgpSClJSCgoKClLT24oKChJyCgoKCpoKUyoKCgoKUlJSCkqaCtKbSgoKCpoKCgoKClIKUgoKUgrSmkoKCgoKUqJKCAAMSAAkClKakgoKCtoKCtoKClLaUgoKUyIKUgoKCtsQAAhoADQKUpqS2goKCgoKUtoKCgraCgraCgoKCgraCgoKCtoKCtoKCgpS2goK2goKClLaCgoK2yrKClIKClJSCgoKmgg==", "66-66:1;1014-1016:1;1048-1050:1;1078-1082:1;1162-1164:1", "", "1067=Lookup/1/4/18,Type/1/4/18,Lookup/2/4/19,Type/2/4/19,Lookup/3/4/20,Type/3/4/20,Lookup/4/4/21,Type/4/4/21", "", "1175:29,1176:13,1217:29,1218:13,1255:64,1256:13,1351:35,1352:17")]
 // </GoSourcePositionMaps>
 
 namespace go.go.@internal;
+
+using static global::go.go.@internal.gccgoimporter_package;
+using constant = global::go.go.constant_package;
+using io = global::go.io_package;
+using types = global::go.go.types_package;
+using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸstring = Span<@string>;
 
 [GoPackage("gccgoimporter")]
 public static partial class gccgoimporter_package
@@ -135,8 +148,77 @@ public static partial class gccgoimporter_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(gccgoimporter_package.GccgoInstallation)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class gccgoimporterᴛGccgoInstallation;
-[GoMethodHost(typeof(gccgoimporter_package.importError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class gccgoimporterᴛimportError;
-[GoMethodHost(typeof(gccgoimporter_package.parser)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class gccgoimporterᴛparser;
-[GoMethodHost(typeof(gccgoimporter_package.seekerReadAt)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class gccgoimporterᴛseekerReadAt;
+[GoMethodHost(typeof(gccgoimporter_package.GccgoInstallation)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class gccgoimporterᴛGccgoInstallation;
+[GoMethodHost(typeof(gccgoimporter_package.importError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class gccgoimporterᴛimportError;
+[GoMethodHost(typeof(gccgoimporter_package.parser)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class gccgoimporterᴛparser;
+[GoMethodHost(typeof(gccgoimporter_package.seekerReadAt)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class gccgoimporterᴛseekerReadAt;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class gccgoimporterᴛGccgoInstallation {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error /*err*/ InitFromDriver(this ref GccgoInstallation inst, @string gccgoPath, params ꓸꓸꓸstring argsʗp) => gccgoimporter_package.InitFromDriver⁔(ref inst, gccgoPath, argsʗp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<@string> /*paths*/ SearchPaths(this ref GccgoInstallation inst) => gccgoimporter_package.SearchPaths⁔(ref inst);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static Func<map<@string, ж<types.Package>>, @string, @string, Func<@string, (io.ReadCloser, error)>, (ж<types.Package>, error)> GetImporter(this ref GccgoInstallation inst, slice<@string> incpaths, map<ж<types.Package>, InitData> initmap) => gccgoimporter_package.GetImporter⁔(ref inst, incpaths, initmap);
+}
+partial class gccgoimporterᴛimportError {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string Error(this importError e) => gccgoimporter_package.Error⁔(e);
+}
+partial class gccgoimporterᴛparser {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void init(this ж<parser> Ꮡp, @string filename, io.Reader src, map<@string, ж<types.Package>> imports) => gccgoimporter_package.init⁔(Ꮡp, filename, src, imports);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void initScanner(this ж<parser> Ꮡp, @string filename, io.Reader src) => gccgoimporter_package.initScanner⁔(Ꮡp, filename, src);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void error(this ref parser p, any err) => gccgoimporter_package.error⁔(ref p, err);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void errorf(this ref parser p, @string format, params ꓸꓸꓸany argsʗp) => gccgoimporter_package.errorf⁔(ref p, format, argsʗp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string expect(this ref parser p, rune tok) => gccgoimporter_package.expect⁔(ref p, tok);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void expectEOL(this ref parser p) => gccgoimporter_package.expectEOL⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void expectKeyword(this ref parser p, @string keyword) => gccgoimporter_package.expectKeyword⁔(ref p, keyword);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string parseString(this ref parser p) => gccgoimporter_package.parseString⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string parseUnquotedString(this ref parser p) => gccgoimporter_package.parseUnquotedString⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void next(this ref parser p) => gccgoimporter_package.next⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (@string path, @string name) parseQualifiedName(this ref parser p) => gccgoimporter_package.parseQualifiedName⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (@string path, @string name) parseUnquotedQualifiedName(this ref parser p) => gccgoimporter_package.parseUnquotedQualifiedName⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (@string pkgpath, @string name) parseQualifiedNameStr(this ref parser p, @string unquotedName) => gccgoimporter_package.parseQualifiedNameStr⁔(ref p, unquotedName);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<types.Package> getPkg(this ref parser p, @string pkgpath, @string name) => gccgoimporter_package.getPkg⁔(ref p, pkgpath, name);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (ж<types.Package> pkg, @string name) parseExportedName(this ref parser p) => gccgoimporter_package.parseExportedName⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string parseName(this ref parser p) => gccgoimporter_package.parseName⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (ж<types.Var> field, @string tag) parseField(this ж<parser> Ꮡp, ж<types.Package> Ꮡpkg) => gccgoimporter_package.parseField⁔(Ꮡp, Ꮡpkg);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (ж<types.Var> param, bool isVariadic) parseParam(this ж<parser> Ꮡp, types.VarKind kind, ж<types.Package> Ꮡpkg) => gccgoimporter_package.parseParam⁔(Ꮡp, kind, Ꮡpkg);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<types.Var> parseVar(this ж<parser> Ꮡp, ж<types.Package> Ꮡpkg) => gccgoimporter_package.parseVar⁔(Ꮡp, Ꮡpkg);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (constant.Value val, types.Type typ) parseConversion(this ж<parser> Ꮡp, ж<types.Package> Ꮡpkg) => gccgoimporter_package.parseConversion⁔(Ꮡp, Ꮡpkg);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (constant.Value val, types.Type typ) parseConstValue(this ж<parser> Ꮡp, ж<types.Package> Ꮡpkg) => gccgoimporter_package.parseConstValue⁔(Ꮡp, Ꮡpkg);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<types.Const> parseConst(this ж<parser> Ꮡp, ж<types.Package> Ꮡpkg) => gccgoimporter_package.parseConst⁔(Ꮡp, Ꮡpkg);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void reserve(this ref parser p, nint n) => gccgoimporter_package.reserve⁔(ref p, n);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void update(this ref parser p, types.Type t, slice<any> nlist) => gccgoimporter_package.update⁔(ref p, t, nlist);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static types.Type parseNamedType(this ж<parser> Ꮡp, slice<any> nlist) => gccgoimporter_package.parseNamedType⁔(Ꮡp, nlist);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static int64 parseInt64(this ref parser p) => gccgoimporter_package.parseInt64⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint parseInt(this ref parser p) => gccgoimporter_package.parseInt⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static types.Type parseArrayOrSliceType(this ж<parser> Ꮡp, ж<types.Package> Ꮡpkg, slice<any> nlist) => gccgoimporter_package.parseArrayOrSliceType⁔(Ꮡp, Ꮡpkg, nlist);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static types.Type parseMapType(this ж<parser> Ꮡp, ж<types.Package> Ꮡpkg, slice<any> nlist) => gccgoimporter_package.parseMapType⁔(Ꮡp, Ꮡpkg, nlist);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static types.Type parseChanType(this ж<parser> Ꮡp, ж<types.Package> Ꮡpkg, slice<any> nlist) => gccgoimporter_package.parseChanType⁔(Ꮡp, Ꮡpkg, nlist);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static types.Type parseStructType(this ж<parser> Ꮡp, ж<types.Package> Ꮡpkg, slice<any> nlist) => gccgoimporter_package.parseStructType⁔(Ꮡp, Ꮡpkg, nlist);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (ж<types.Tuple>, bool) parseParamList(this ж<parser> Ꮡp, types.VarKind kind, ж<types.Package> Ꮡpkg) => gccgoimporter_package.parseParamList⁔(Ꮡp, kind, Ꮡpkg);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<types.Tuple> parseResultList(this ж<parser> Ꮡp, ж<types.Package> Ꮡpkg) => gccgoimporter_package.parseResultList⁔(Ꮡp, Ꮡpkg);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<types.Signature> parseFunctionType(this ж<parser> Ꮡp, ж<types.Package> Ꮡpkg, slice<any> nlist) => gccgoimporter_package.parseFunctionType⁔(Ꮡp, Ꮡpkg, nlist);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<types.Func> parseFunc(this ж<parser> Ꮡp, ж<types.Package> Ꮡpkg) => gccgoimporter_package.parseFunc⁔(Ꮡp, Ꮡpkg);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static types.Type parseInterfaceType(this ж<parser> Ꮡp, ж<types.Package> Ꮡpkg, slice<any> nlist) => gccgoimporter_package.parseInterfaceType⁔(Ꮡp, Ꮡpkg, nlist);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static types.Type parsePointerType(this ж<parser> Ꮡp, ж<types.Package> Ꮡpkg, slice<any> nlist) => gccgoimporter_package.parsePointerType⁔(Ꮡp, Ꮡpkg, nlist);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static types.Type parseTypeSpec(this ж<parser> Ꮡp, ж<types.Package> Ꮡpkg, slice<any> nlist) => gccgoimporter_package.parseTypeSpec⁔(Ꮡp, Ꮡpkg, nlist);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static types.Type parseType(this ж<parser> Ꮡp, ж<types.Package> Ꮡpkg, params ꓸꓸꓸany nʗp) => gccgoimporter_package.parseType⁔(Ꮡp, Ꮡpkg, nʗp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (types.Type t, nint n1) parseTypeAfterAngle(this ж<parser> Ꮡp, ж<types.Package> Ꮡpkg, params ꓸꓸꓸany nʗp) => gccgoimporter_package.parseTypeAfterAngle⁔(Ꮡp, Ꮡpkg, nʗp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (types.Type t, nint n1) parseTypeExtended(this ж<parser> Ꮡp, ж<types.Package> Ꮡpkg, params ꓸꓸꓸany nʗp) => gccgoimporter_package.parseTypeExtended⁔(Ꮡp, Ꮡpkg, nʗp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void skipInlineBody(this ж<parser> Ꮡp) => gccgoimporter_package.skipInlineBody⁔(Ꮡp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void parseTypes(this ж<parser> Ꮡp, ж<types.Package> Ꮡpkg) => gccgoimporter_package.parseTypes⁔(Ꮡp, Ꮡpkg);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void parseSavedType(this ж<parser> Ꮡp, ж<types.Package> Ꮡpkg, nint i, slice<any> nlist) => gccgoimporter_package.parseSavedType⁔(Ꮡp, Ꮡpkg, i, nlist);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static PackageInit parsePackageInit(this ref parser p) => gccgoimporter_package.parsePackageInit⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void maybeCreatePackage(this ref parser p) => gccgoimporter_package.maybeCreatePackage⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void parseInitDataDirective(this ж<parser> Ꮡp) => gccgoimporter_package.parseInitDataDirective⁔(Ꮡp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void parseDirective(this ж<parser> Ꮡp) => gccgoimporter_package.parseDirective⁔(Ꮡp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<types.Package> parsePackage(this ж<parser> Ꮡp) => gccgoimporter_package.parsePackage⁔(Ꮡp);
+}
+partial class gccgoimporterᴛseekerReadAt {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint, error) ReadAt(this seekerReadAt sra, slice<byte> p, int64 off) => gccgoimporter_package.ReadAt⁔(sra, p, off);
+}
+// </MethodForwarders>

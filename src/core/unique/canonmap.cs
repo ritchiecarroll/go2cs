@@ -12,7 +12,6 @@ using @unsafe = unsafe_package;
 using weak = weak_package;
 using @internal;
 using go.sync;
-using static unique_package;
 
 partial class unique_package {
 
@@ -36,9 +35,7 @@ internal static ж<canonMap<T>> newCanonMap<T>() {
     return cm;
 }
 
-} partial class uniqueᴛcanonMap {
-
-internal static ж<T> Load<T>(this ж<canonMap<T>> Ꮡm, T keyʗp) {
+internal static ж<T> Load⁔<T>(/*this*/ ж<canonMap<T>> Ꮡm, T keyʗp) {
     ref var m = ref Ꮡm.DerefOrNull();
     ref var key = ref heap(keyʗp, out var Ꮡkey);
 
@@ -63,7 +60,7 @@ internal static ж<T> Load<T>(this ж<canonMap<T>> Ꮡm, T keyʗp) {
     throw panic("unique.canonMap: ran out of hash bits while iterating");
 }
 
-internal static ж<T> LoadOrStore<T>(this ж<canonMap<T>> Ꮡm, T keyʗp) {
+internal static ж<T> LoadOrStore⁔<T>(/*this*/ ж<canonMap<T>> Ꮡm, T keyʗp) {
     GoFrame ᒐ = default;
     try {
         ref var m = ref Ꮡm.DerefOrNull();
@@ -162,7 +159,7 @@ internal static ж<T> LoadOrStore<T>(this ж<canonMap<T>> Ꮡm, T keyʗp) {
 // expand takes oldEntry and newEntry whose hashes conflict from bit 64 down to hashShift and
 // produces a subtree of indirect nodes to hold the two new entries. newHash is the hash of
 // the value in the new entry.
-internal static ж<node<T>> expand<T>(this ref canonMap<T> m, ж<entry<T>> ᏑoldEntry, ж<entry<T>> newEntry, uintptr newHash, nuint hashShift, ж<indirect<T>> parent) {
+internal static ж<node<T>> expand⁔<T>(/*this*/ ref canonMap<T> m, ж<entry<T>> ᏑoldEntry, ж<entry<T>> newEntry, uintptr newHash, nuint hashShift, ж<indirect<T>> parent) {
     ref var oldEntry = ref ᏑoldEntry.DerefOrNull();
 
     // Check for a hash collision.
@@ -199,7 +196,7 @@ internal static ж<node<T>> expand<T>(this ref canonMap<T> m, ж<entry<T>> Ꮡol
 // still in the map. wp must have a Value method that returns nil by the
 // time this function is called. hash must be the hash of the value that
 // wp once pointed to (that is, the hash of *wp.Value()).
-internal static void cleanup<T>(this ж<canonMap<T>> Ꮡm, uintptr hash, weak.Pointer<T> wp) {
+internal static void cleanup⁔<T>(/*this*/ ж<canonMap<T>> Ꮡm, uintptr hash, weak.Pointer<T> wp) {
     ж<indirect<T>> i = default;
     nuint hashShift = default;
     ж<atomic.Pointer<node<T>>> slot = default;
@@ -274,17 +271,13 @@ internal static void cleanup<T>(this ж<canonMap<T>> Ꮡm, uintptr hash, weak.Po
     }
 }
 
-} partial class unique_package {
-
 // node is the header for a node. It's polymorphic and
 // is actually either an entry or an indirect.
 partial struct node<T> {
     internal bool isEntry;
 }
 
-} partial class uniqueᴛnode {
-
-internal static ж<entry<T>> entry<T>(this ж<node<T>> Ꮡn) {
+internal static ж<entry<T>> entry⁔<T>(/*this*/ ж<node<T>> Ꮡn) {
     ref var n = ref Ꮡn.DerefOrNull();
 
     if (!n.isEntry) {
@@ -293,7 +286,7 @@ internal static ж<entry<T>> entry<T>(this ж<node<T>> Ꮡn) {
     return Ꮡn.Reinterpret<node<T>, entry<T>>();
 }
 
-internal static ж<indirect<T>> indirect<T>(this ж<node<T>> Ꮡn) {
+internal static ж<indirect<T>> indirect⁔<T>(/*this*/ ж<node<T>> Ꮡn) {
     ref var n = ref Ꮡn.DerefOrNull();
 
     if (n.isEntry) {
@@ -301,8 +294,6 @@ internal static ж<indirect<T>> indirect<T>(this ж<node<T>> Ꮡn) {
     }
     return Ꮡn.Reinterpret<node<T>, indirect<T>>();
 }
-
-} partial class unique_package {
 
 // 16 children. This seems to be the sweet spot for
 // load performance: any smaller and we lose out on
@@ -325,9 +316,7 @@ internal static ж<indirect<T>> newIndirectNode<T>(ж<indirect<T>> parent) {
     return Ꮡ(new indirect<T>(node: new node<T>(isEntry: false), parent: parent));
 }
 
-} partial class uniqueᴛindirect {
-
-internal static bool empty<T>(this ref indirect<T> i) {
+internal static bool empty⁔<T>(/*this*/ ref indirect<T> i) {
     foreach (var j in range(len(i.children))) {
         if (Ꮡ(i.children, j).Load() != nil) {
             return false;
@@ -335,8 +324,6 @@ internal static bool empty<T>(this ref indirect<T> i) {
     }
     return true;
 }
-
-} partial class unique_package {
 
 // entry is a leaf node in the hash-trie.
 partial struct entry<T> {
@@ -357,12 +344,10 @@ internal static (ж<entry<T>>, ж<T>, weak.Pointer<T>) newEntryNode<T>(T key, ui
     )), k, wp);
 }
 
-} partial class uniqueᴛentry {
-
 // lookup finds the entry in the overflow chain that has the provided key.
 //
 // Returns the key's canonical pointer and the weak pointer for that canonical pointer.
-internal static (ж<T>, weak.Pointer<T>) lookup<T>(this ж<entry<T>> Ꮡe, T key) {
+internal static (ж<T>, weak.Pointer<T>) lookup⁔<T>(/*this*/ ж<entry<T>> Ꮡe, T key) {
     ref var e = ref Ꮡe.DerefOrNull();
 
     while (Ꮡe != nil) {
@@ -376,7 +361,7 @@ internal static (ж<T>, weak.Pointer<T>) lookup<T>(this ж<entry<T>> Ꮡe, T key
 }
 
 // hasWeakPointer returns true if the provided weak pointer can be found in the overflow chain.
-internal static bool hasWeakPointer<T>(this ж<entry<T>> Ꮡe, weak.Pointer<T> wp) {
+internal static bool hasWeakPointer⁔<T>(/*this*/ ж<entry<T>> Ꮡe, weak.Pointer<T> wp) {
     ref var e = ref Ꮡe.DerefOrNull();
 
     while (Ꮡe != nil) {
@@ -391,7 +376,7 @@ internal static bool hasWeakPointer<T>(this ж<entry<T>> Ꮡe, weak.Pointer<T> w
 // prune removes all entries in the overflow chain whose keys are nil.
 //
 // The caller must hold the lock on e's parent node.
-internal static ж<entry<T>> prune<T>(this ж<entry<T>> Ꮡe) {
+internal static ж<entry<T>> prune⁔<T>(/*this*/ ж<entry<T>> Ꮡe) {
     ref var e = ref Ꮡe.DerefOrNull();
 
     // Prune the head of the list.
@@ -419,8 +404,6 @@ internal static ж<entry<T>> prune<T>(this ж<entry<T>> Ꮡe) {
     }
     return newHead;
 }
-
-} partial class unique_package {
 
 // Pull in runtime.rand so that we don't need to take a dependency
 // on math/rand/v2.

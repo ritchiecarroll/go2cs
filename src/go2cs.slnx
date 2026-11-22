@@ -864,6 +864,10 @@
     <Project Path="tests/Behavioral/MnAotGeneric/MnAotGeneric.csproj" />
     <Project Path="tests/Behavioral/MnMainExit/MnMainExit.csproj" />
     <Project Path="tests/Behavioral/MnMixedStorm/MnMixedStorm.csproj" />
+    <Project Path="tests/Behavioral/MnGlyphMethodFrames/MnGlyphMethodFrames.csproj" />
+    <Project Path="tests/Behavioral/MnGlyphMethodFrames/glyphlib/MnGlyphMethodFrames.glyphlib.csproj" />
+    <Project Path="tests/Behavioral/GlyphLibraryFrameNames/GlyphLibraryFrameNames.csproj" />
+    <Project Path="tests/Behavioral/GlyphLibraryFrameNames/framelib/GlyphLibraryFrameNames.framelib.csproj" />
     <Project Path="tests/Behavioral/MultiFileInitOrder/MultiFileInitOrder.csproj" />
     <Project Path="tests/Behavioral/MultiPointerEmbedPromotion/MultiPointerEmbedPromotion.csproj" />
     <Project Path="tests/Behavioral/MultiValueFuncLiteralDefine/MultiValueFuncLiteralDefine.csproj" />
@@ -1021,6 +1025,8 @@
     <Project Path="tests/Behavioral/P384CurveBytes/P384CurveBytes.csproj" />
     <Project Path="tests/Behavioral/P521CurveBytes/P521CurveBytes.csproj" />
     <Project Path="tests/Behavioral/PackageAliasRootedTypeArgs/PackageAliasRootedTypeArgs.csproj" />
+    <Project Path="tests/Behavioral/PackageInfoUsingsClash/PackageInfoUsingsClash.csproj" />
+    <Project Path="tests/Behavioral/PackageInfoUsingsClash/clashlib/PackageInfoUsingsClash.clashlib.csproj" />
     <Project Path="tests/Behavioral/PackageNameShadowing/PackageNameShadowing.csproj" />
     <Project Path="tests/Behavioral/PackageShadowParam/PackageShadowParam.csproj" />
     <Project Path="tests/Behavioral/PackageShadowPointerParam/PackageShadowPointerParam.csproj" />

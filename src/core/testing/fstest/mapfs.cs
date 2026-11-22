@@ -10,7 +10,6 @@ using slices = slices_package;
 using strings = strings_package;
 using time = time_package;
 using go.io;
-using static fstest_package;
 
 partial class fstest_package {
 
@@ -45,10 +44,8 @@ internal static fs.FS _ᴛ1ʗ = ((MapFS)default);
 internal static fs.ReadLinkFS _ᴛ2ʗ = ((MapFS)default);
 internal static fs.File _ᴛ3ʗ = new openMapFileжFile(((ж<openMapFile>)nil));
 
-} partial class fstestᴛMapFS {
-
 // Open opens the named file after following any symbolic links.
-public static (fs.File, error) Open(this MapFS fsys, @string name) {
+internal static (fs.File, error) Open⁔(/*this*/ MapFS fsys, @string name) {
     if (!fs.ValidPath(name)) {
         return (default, new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "open", Path: name, Err: fs.ErrNotExist))));
     }
@@ -120,7 +117,7 @@ public static (fs.File, error) Open(this MapFS fsys, @string name) {
     return (new mapDirжFile(Ꮡ(new mapDir(name, new mapFileInfo(elem, @file), list, 0))), default);
 }
 
-internal static (@string, bool ok) resolveSymlinks(this MapFS fsys, @string name) {
+internal static (@string, bool ok) resolveSymlinks⁔(/*this*/ MapFS fsys, @string name) {
     // Fast path: if a symlink is in the map, resolve it.
     {
         var @file = fsys[name]; if (@file != nil && @file.Mode.Type() == fs.ModeSymlink) {
@@ -156,7 +153,7 @@ internal static (@string, bool ok) resolveSymlinks(this MapFS fsys, @string name
 }
 
 // ReadLink returns the destination of the named symbolic link.
-public static (@string, error) ReadLink(this MapFS fsys, @string name) {
+internal static (@string, error) ReadLink⁔(/*this*/ MapFS fsys, @string name) {
     var (info, err) = fsys.lstat(name);
     if (err != nil) {
         return ("", new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "readlink", Path: name, Err: err))));
@@ -170,7 +167,7 @@ public static (@string, error) ReadLink(this MapFS fsys, @string name) {
 // Lstat returns a FileInfo describing the named file.
 // If the file is a symbolic link, the returned FileInfo describes the symbolic link.
 // Lstat makes no attempt to follow the link.
-public static (fs.FileInfo, error) Lstat(this MapFS fsys, @string name) {
+internal static (fs.FileInfo, error) Lstat⁔(/*this*/ MapFS fsys, @string name) {
     var (info, err) = fsys.lstat(name);
     if (err != nil) {
         return (default, new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "lstat", Path: name, Err: err))));
@@ -178,7 +175,7 @@ public static (fs.FileInfo, error) Lstat(this MapFS fsys, @string name) {
     return (new mapFileInfoжFileInfo(info), default);
 }
 
-internal static (ж<mapFileInfo>, error) lstat(this MapFS fsys, @string name) {
+internal static (ж<mapFileInfo>, error) lstat⁔(/*this*/ MapFS fsys, @string name) {
     if (!fs.ValidPath(name)) {
         return (default, fs.ErrNotExist);
     }
@@ -210,8 +207,6 @@ internal static (ж<mapFileInfo>, error) lstat(this MapFS fsys, @string name) {
     return (default, fs.ErrNotExist);
 }
 
-} partial class fstest_package {
-
 // fsOnly is a wrapper that hides all but the fs.FS methods,
 // to avoid an infinite recursion when implementing special
 // methods in terms of helpers that would use them.
@@ -222,42 +217,32 @@ partial struct fsOnly {
     /*embed*/ public go.io.fs_package.FS FS;
 }
 
-} partial class fstestᴛMapFS {
-
-public static (slice<byte>, error) ReadFile(this MapFS fsys, @string name) {
+internal static (slice<byte>, error) ReadFile⁔(/*this*/ MapFS fsys, @string name) {
     return fs.ReadFile(new fsOnly(fsys), name);
 }
 
-public static (fs.FileInfo, error) Stat(this MapFS fsys, @string name) {
+internal static (fs.FileInfo, error) Stat⁔(/*this*/ MapFS fsys, @string name) {
     return fs.Stat(new fsOnly(fsys), name);
 }
 
-public static (slice<fs.DirEntry>, error) ReadDir(this MapFS fsys, @string name) {
+internal static (slice<fs.DirEntry>, error) ReadDir⁔(/*this*/ MapFS fsys, @string name) {
     return fs.ReadDir(new fsOnly(fsys), name);
 }
 
-public static (slice<@string>, error) Glob(this MapFS fsys, @string pattern) {
+internal static (slice<@string>, error) Glob⁔(/*this*/ MapFS fsys, @string pattern) {
     return fs.Glob(new fsOnly(fsys), pattern);
 }
-
-} partial class fstest_package {
 
 partial struct noSub {
     /*embed*/ public MapFS MapFS;
 }
 
-} partial class fstestᴛnoSub {
-
-internal static void Sub(this noSub _) { }
-
-} partial class fstestᴛMapFS {
+internal static void Sub⁔(/*this*/ noSub _) { }
 
 // not the fs.SubFS signature
-public static (fs.FS, error) Sub(this MapFS fsys, @string dir) {
+internal static (fs.FS, error) Sub⁔(/*this*/ MapFS fsys, @string dir) {
     return fs.Sub(new noSub(fsys), dir);
 }
-
-} partial class fstest_package {
 
 // A mapFileInfo implements fs.FileInfo and fs.DirEntry for a given map file.
 partial struct mapFileInfo {
@@ -265,22 +250,18 @@ partial struct mapFileInfo {
     internal ж<MapFile> f;
 }
 
-} partial class fstestᴛmapFileInfo {
+internal static @string Name⁔(/*this*/ ref mapFileInfo i) { return path.Base(i.name); }
+internal static int64 Size⁔(/*this*/ ref mapFileInfo i) { return (int64)len(i.f.Data); }
+internal static fs.FileMode Mode⁔(/*this*/ ref mapFileInfo i) { return i.f.Mode; }
+internal static fs.FileMode Type⁔(/*this*/ ref mapFileInfo i) { return i.f.Mode.Type(); }
+internal static time.Time ModTime⁔(/*this*/ ref mapFileInfo i) { return i.f.ModTime; }
+internal static bool IsDir⁔(/*this*/ ref mapFileInfo i) { return (fs.FileMode)(i.f.Mode & fs.ModeDir) != 0; }
+internal static any Sys⁔(/*this*/ ref mapFileInfo i) { return i.f.Sys; }
+internal static (fs.FileInfo, error) Info⁔(/*this*/ ж<mapFileInfo> Ꮡi) { return (new mapFileInfoжFileInfo(Ꮡi), default); }
 
-internal static @string Name(this ref mapFileInfo i) { return path.Base(i.name); }
-internal static int64 Size(this ref mapFileInfo i) { return (int64)len(i.f.Data); }
-internal static fs.FileMode Mode(this ref mapFileInfo i) { return i.f.Mode; }
-internal static fs.FileMode Type(this ref mapFileInfo i) { return i.f.Mode.Type(); }
-internal static time.Time ModTime(this ref mapFileInfo i) { return i.f.ModTime; }
-internal static bool IsDir(this ref mapFileInfo i) { return (fs.FileMode)(i.f.Mode & fs.ModeDir) != 0; }
-internal static any Sys(this ref mapFileInfo i) { return i.f.Sys; }
-internal static (fs.FileInfo, error) Info(this ж<mapFileInfo> Ꮡi) { return (new mapFileInfoжFileInfo(Ꮡi), default); }
-
-internal static @string String(this ж<mapFileInfo> Ꮡi) {
+internal static @string String⁔(/*this*/ ж<mapFileInfo> Ꮡi) {
     return fs.FormatFileInfo(new mapFileInfoжFileInfo(Ꮡi));
 }
-
-} partial class fstest_package {
 
 // An openMapFile is a regular (non-directory) fs.File open for reading.
 partial struct openMapFile {
@@ -289,13 +270,11 @@ partial struct openMapFile {
     internal int64 offset;
 }
 
-} partial class fstestᴛopenMapFile {
+internal static (fs.FileInfo, error) Stat⁔(/*this*/ ж<openMapFile> Ꮡf) { return (new mapFileInfoжFileInfo(Ꮡf.ᏑmapFileInfo), default); }
 
-internal static (fs.FileInfo, error) Stat(this ж<openMapFile> Ꮡf) { return (new mapFileInfoжFileInfo(Ꮡf.ᏑmapFileInfo), default); }
+internal static error Close⁔(/*this*/ ref openMapFile f) { return default; }
 
-internal static error Close(this ref openMapFile f) { return default; }
-
-internal static (nint, error) Read(this ref openMapFile f, slice<byte> b) {
+internal static (nint, error) Read⁔(/*this*/ ref openMapFile f, slice<byte> b) {
     if (f.offset >= (int64)len(f.f.Data)) {
         return (0, io.EOF);
     }
@@ -307,7 +286,7 @@ internal static (nint, error) Read(this ref openMapFile f, slice<byte> b) {
     return (n, default);
 }
 
-internal static (int64, error) Seek(this ref openMapFile f, int64 offset, nint whence) {
+internal static (int64, error) Seek⁔(/*this*/ ref openMapFile f, int64 offset, nint whence) {
     switch (whence) {
     case 0: {
         // offset += 0
@@ -328,7 +307,7 @@ internal static (int64, error) Seek(this ref openMapFile f, int64 offset, nint w
     return (offset, default);
 }
 
-internal static (nint, error) ReadAt(this ref openMapFile f, slice<byte> b, int64 offset) {
+internal static (nint, error) ReadAt⁔(/*this*/ ref openMapFile f, slice<byte> b, int64 offset) {
     if (offset < 0 || offset > (int64)len(f.f.Data)) {
         return (0, new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "read", Path: f.path, Err: fs.ErrInvalid))));
     }
@@ -339,8 +318,6 @@ internal static (nint, error) ReadAt(this ref openMapFile f, slice<byte> b, int6
     return (n, default);
 }
 
-} partial class fstest_package {
-
 // A mapDir is a directory fs.File (so also an fs.ReadDirFile) open for reading.
 partial struct mapDir {
     internal @string path;
@@ -349,15 +326,13 @@ partial struct mapDir {
     internal nint offset;
 }
 
-} partial class fstestᴛmapDir {
-
-internal static (fs.FileInfo, error) Stat(this ж<mapDir> Ꮡd) { return (new mapFileInfoжFileInfo(Ꮡd.ᏑmapFileInfo), default); }
-internal static error Close(this ref mapDir d) { return default; }
-internal static (nint, error) Read(this ref mapDir d, slice<byte> b) {
+internal static (fs.FileInfo, error) Stat⁔(/*this*/ ж<mapDir> Ꮡd) { return (new mapFileInfoжFileInfo(Ꮡd.ᏑmapFileInfo), default); }
+internal static error Close⁔(/*this*/ ref mapDir d) { return default; }
+internal static (nint, error) Read⁔(/*this*/ ref mapDir d, slice<byte> b) {
     return (0, new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "read", Path: d.path, Err: fs.ErrInvalid))));
 }
 
-internal static (slice<fs.DirEntry>, error) ReadDir(this ref mapDir d, nint count) {
+internal static (slice<fs.DirEntry>, error) ReadDir⁔(/*this*/ ref mapDir d, nint count) {
     nint n = len(d.entry) - d.offset;
     if (n == 0 && count > 0) {
         return (default, io.EOF);
@@ -373,4 +348,4 @@ internal static (slice<fs.DirEntry>, error) ReadDir(this ref mapDir d, nint coun
     return (list, default);
 }
 
-}
+} // end fstest_package

@@ -1336,7 +1336,7 @@ FORWARDED — the pushed body is ordinary converted Go, so call it (`crypto/inte
 
 UNHONORABLE — announce the pair, never fabricate a body (`weak/pointer.cs`'s `.cs.auto` review sibling):
 
-<!-- source: src/core/weak/pointer.cs.auto:107-110 -->
+<!-- source: src/core/weak/pointer.cs.auto:102-105 -->
 ```csharp
 //go:linkname runtime_registerWeakPointer
 internal static @unsafe.Pointer runtime_registerWeakPointer(@unsafe.Pointer _) {
@@ -3888,7 +3888,7 @@ levels. Anything the IL cannot prove keeps the frames the trace has, and an impl
 nil dereference) inside an inlinee is not covered, since a statement cannot say which instruction faulted. Nothing
 is emitted for this and nothing runs off the panic path. Guarded by GolibTests' `PanicFramesInlinedPanicTests`,
 including the controls where the IL names no single callee.
-<!-- src/core/runtime/managed_impl.cs:5509 (`INLINED PANIC SITES`), :5517 (`NEVER A GUESS. A frame is added only when the IL proves which one`);
+<!-- src/core/runtime/managed_impl.cs:5543 (`INLINED PANIC SITES`), :5551 (`NEVER A GUESS. A frame is added only when the IL proves which one`);
      src/tests/GolibTests/PanicFramesInlinedPanicTests.cs:14 (`AN EXPLICIT PANIC RAISED INSIDE A GO FUNCTION THE JIT INLINED`). -->
 
 ## `runtime.Stack(all: true)` enumerates every goroutine, and each one names the wait it is parked on

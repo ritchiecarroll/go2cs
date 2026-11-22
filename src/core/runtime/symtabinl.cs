@@ -7,7 +7,6 @@ using abi = @internal.abi_package;
 /* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
 using @internal;
 using @unsafe = unsafe_package;
-using static runtime_package;
 
 partial class runtime_package {
 
@@ -76,9 +75,7 @@ internal static (inlineUnwinder, inlineFrame) newInlineUnwinder(funcInfo f, uint
     return (u, ᴛ1);
 }
 
-} partial class runtimeᴛinlineUnwinder {
-
-internal static inlineFrame resolveInternal(this ref inlineUnwinder u, uintptr pc) {
+internal static inlineFrame resolveInternal⁔(/*this*/ ref inlineUnwinder u, uintptr pc) {
     return new inlineFrame(
         pc: pc,
         // Conveniently, this returns -1 if there's an error, which is the same
@@ -87,16 +84,12 @@ internal static inlineFrame resolveInternal(this ref inlineUnwinder u, uintptr p
     );
 }
 
-} partial class runtimeᴛinlineFrame {
-
-internal static bool valid(this inlineFrame uf) {
+internal static bool valid⁔(/*this*/ inlineFrame uf) {
     return uf.pc != 0;
 }
 
-} partial class runtimeᴛinlineUnwinder {
-
 // next returns the frame representing uf's logical caller.
-internal static inlineFrame next(this ref inlineUnwinder u, inlineFrame uf) {
+internal static inlineFrame next⁔(/*this*/ ref inlineUnwinder u, inlineFrame uf) {
     if (uf.index < 0) {
         uf.pc = 0;
         return uf;
@@ -106,7 +99,7 @@ internal static inlineFrame next(this ref inlineUnwinder u, inlineFrame uf) {
 }
 
 // isInlined returns whether uf is an inlined frame.
-internal static bool isInlined(this ref inlineUnwinder u, inlineFrame uf) {
+internal static bool isInlined⁔(/*this*/ ref inlineUnwinder u, inlineFrame uf) {
     return uf.index >= 0;
 }
 
@@ -121,7 +114,7 @@ internal static bool isInlined(this ref inlineUnwinder u, inlineFrame uf) {
 // See go.dev/issue/67401.
 //
 // The go:linkname is below.
-internal static srcFunc srcFunc(this ref inlineUnwinder u, inlineFrame uf) {
+internal static srcFunc srcFunc⁔(/*this*/ ref inlineUnwinder u, inlineFrame uf) {
     if (uf.index < 0) {
         return u.f.srcFunc();
     }
@@ -134,12 +127,8 @@ internal static srcFunc srcFunc(this ref inlineUnwinder u, inlineFrame uf) {
     );
 }
 
-} partial class runtime_package {
-
 //go:linkname badSrcFunc runtime.(*inlineUnwinder).srcFunc
 internal static partial srcFunc badSrcFunc(ж<inlineUnwinder> _Δp0, inlineFrame _Δp1);
-
-} partial class runtimeᴛinlineUnwinder {
 
 // fileLine returns the file name and line number of the call within the given
 // frame. As a convenience, for the innermost frame, it returns the file and
@@ -147,11 +136,11 @@ internal static partial srcFunc badSrcFunc(ж<inlineUnwinder> _Δp0, inlineFrame
 // physical function).
 //
 // It returns "?", 0 if something goes wrong.
-internal static (@string @file, nint line) fileLine(this ref inlineUnwinder u, inlineFrame uf) {
+internal static (@string @file, nint line) fileLine⁔(/*this*/ ref inlineUnwinder u, inlineFrame uf) {
     @string @file = default;
 
     (@file, var line32) = funcline1(u.f, uf.pc, false);
     return (@file, (nint)line32);
 }
 
-}
+} // end runtime_package

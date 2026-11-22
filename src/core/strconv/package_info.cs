@@ -14,6 +14,9 @@
 
 using go;
 using static go.strconv_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -58,11 +61,13 @@ using static go.strconv_package;
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("strconv/bytealg.go", "bytealg.cs", "AAsYkg==")]
 [assembly: GoPositionMap("strconv/isprint.go", "isprint.cs", "AAkWANYBrgMAhwGQAgCAAoIEAHPoAQ==")]
-[assembly: GoPositionMap("strconv/number.go", "number.cs", "ABQmsoKClKiSqqIABi4AFAKCgpQABjwAGwKCgpTssoKClAAGOAAbAoKClOiSgoKUAAIU8gACNgAYAqqirLKssqiSqqKqoqiSlKSkpJS4pgAKEoKmAAMU8qaCpoKmgg==")]
+[assembly: GoPositionMap("strconv/number.go", "number.cs", "ABMmsoKClKiSqqIABi4AFAKCgpQABjwAGwKCgpTssoKClAAGOAAbAoKClOiSgoKUAAIU8gACNgAYAqqirLKssqiSqqKqoqiSlKSkpJS4pgAIEoKmAAEU8qaCpoKmgg==")]
 [assembly: GoPositionMap("strconv/quote.go", "quote.cs", "ABAmkqaCpoKmpoKCgpSCgoKCgoKClJSCpoKCgpSCgqaCgoKClIKCgpSClJS0tLS0tLS0lIKCpIKkgoK2goLIrsKqoqyyqqKuwqqiAAIQ0qqiAAIS4qqiAAIS4qqirLKCgoKCgpSUgpSCpqaygpSkpJQAAiIAFASCgpSkgqSCpLiCgpSClJS0tLS0tLS0gpS0tKSCgoKUgoKCgpSUgpSClIKClIK0goKClIKCgoKUlIKCgpS0tIKClLSClIKqooIAAhLigoKUrgAJBIKUgoKClJSUlLTYgoKCpv62goKUtIKkgoKClLqSgoKClKaCgpSmgoKUyoLKgpSUgpSkvNKCkoKCgpSmAAIYAAoEgpSUlJQACBKCgoKClIKmgoKClIKUgoKssoKUrMSClII=")]
 // </GoSourcePositionMaps>
 
 namespace go;
+
+using static go.strconv_package;
 
 [GoPackage("strconv")]
 public static partial class strconv_package
@@ -99,5 +104,16 @@ public static partial class strconv_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(strconv_package.NumError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class strconvᴛNumError;
+[GoMethodHost(typeof(strconv_package.NumError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class strconvᴛNumError;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class strconvᴛNumError {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this ref NumError e) => strconv_package.Error⁔(ref e);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Unwrap(this ref NumError e) => strconv_package.Unwrap⁔(ref e);
+}
+// </MethodForwarders>

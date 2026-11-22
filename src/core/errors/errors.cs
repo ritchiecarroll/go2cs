@@ -59,8 +59,6 @@
 // because the former will succeed if err wraps an [*io/fs.PathError].
 namespace go;
 
-using static errors_package;
-
 partial class errors_package {
 
 // New returns an error that formats as the given text.
@@ -74,13 +72,9 @@ partial struct errorString {
     internal @string s;
 }
 
-} partial class errorsᴛerrorString {
-
-internal static @string Error(this ref errorString e) {
+internal static @string Error⁔(/*this*/ ref errorString e) {
     return e.s;
 }
-
-} partial class errors_package {
 
 // ErrUnsupported indicates that a requested operation cannot be performed,
 // because it is unsupported. For example, a call to [os.Link] when using a

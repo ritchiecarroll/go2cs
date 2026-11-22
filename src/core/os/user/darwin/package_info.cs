@@ -14,6 +14,9 @@
 
 using go;
 using static go.os.user_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -67,13 +70,15 @@ using static go.os.user_package;
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("os/user/cgo_listgroups_unix.go", "cgo_listgroups_unix.cs", "AA4igoKClIKClIKCgqaCpoKCgpSq5IKUgoKClA==")]
 [assembly: GoPositionMap("os/user/cgo_lookup_syscall.go", "cgo_lookup_syscall.cs", "ABUugoKCgoKClIKUlLKCgqaygoKmsoKCprKCggAFEA==")]
-[assembly: GoPositionMap("os/user/cgo_lookup_unix.go", "cgo_lookup_unix.cs", "ABAkgqaCgoKClJKClJSClIKUpoKCgpSmgoKUgoKUlIKUgpSmggAKFoKmgoKUgpSSgpSUgpSClKaCgoKUpoKClIKClJSClIKUpoK4AAkUgoK4lJSUzLKCgoKCgqaClIKClNyCqJKCgoI=", "28-33:1;55-60:1;93-98:1;120-125:1", "", "71=_C_pw_uid/1/1/1,FormatUint/1/2/1,_C_pw_gid/1/1/2,FormatUint/2/2/2,_C_pw_name/1/1/3,_C_GoString/1/3/3,_C_pw_gecos/1/1/4,_C_GoString/2/3/4,_C_pw_dir/1/1/5,_C_GoString/3/3/5;137=_C_gr_gid/1/1/1,Itoa/1/1/1,_C_gr_name/1/1/2,_C_GoString/1/1/2")]
+[assembly: GoPositionMap("os/user/cgo_lookup_unix.go", "cgo_lookup_unix.cs", "AA8kgqaCgoKClJKClJSClIKUpoKCgpSmgoKUgoKUlIKUgpSmggAKFoKmgoKUgpSSgpSUgpSClKaCgoKUpoKClIKClJSClIKUpoK4AAcUgoK4lJSUrLKCgoKCgqaClIKClNyCqJKCgoI=", "28-33:1;55-60:1;93-98:1;120-125:1", "", "70=_C_pw_uid/1/1/1,FormatUint/1/2/1,_C_pw_gid/1/1/2,FormatUint/2/2/2,_C_pw_name/1/1/3,_C_GoString/1/3/3,_C_pw_gecos/1/1/4,_C_GoString/2/3/4,_C_pw_dir/1/1/5,_C_GoString/3/3/5;136=_C_gr_gid/1/1/1,Itoa/1/1/1,_C_gr_name/1/1/2,_C_GoString/1/1/2")]
 [assembly: GoPositionMap("os/user/getgrouplist_syscall.go", "getgrouplist_syscall.cs", "AAsagoKClA==")]
-[assembly: GoPositionMap("os/user/lookup.go", "lookup.cs", "AA8cntKAkoKUggALGKKClKqigpSqoqqiyJI=", "22-22:1")]
-[assembly: GoPositionMap("os/user/user.go", "user.cs", "AEWKAYIACg6CAAoOggAKDoI=")]
+[assembly: GoPositionMap("os/user/lookup.go", "lookup.cs", "AA4cntKAkoKUggALGKKClKqigpSqoqqiqJI=", "22-22:1")]
+[assembly: GoPositionMap("os/user/user.go", "user.cs", "AEKKAYLugu6C7oI=")]
 // </GoSourcePositionMaps>
 
 namespace go.os;
+
+using static go.os.user_package;
 
 [GoPackage("user")]
 public static partial class user_package
@@ -119,10 +124,35 @@ public static partial class user_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(user_package.UnknownGroupError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class userᴛUnknownGroupError;
-[GoMethodHost(typeof(user_package.UnknownGroupIdError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class userᴛUnknownGroupIdError;
-[GoMethodHost(typeof(user_package.UnknownUserError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class userᴛUnknownUserError;
-[GoMethodHost(typeof(user_package.UnknownUserIdError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class userᴛUnknownUserIdError;
-[GoMethodHost(typeof(user_package.User)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class userᴛUser;
-[GoMethodHost(typeof(user_package.bufferKind)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class userᴛbufferKind;
+[GoMethodHost(typeof(user_package.UnknownGroupError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class userᴛUnknownGroupError;
+[GoMethodHost(typeof(user_package.UnknownGroupIdError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class userᴛUnknownGroupIdError;
+[GoMethodHost(typeof(user_package.UnknownUserError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class userᴛUnknownUserError;
+[GoMethodHost(typeof(user_package.UnknownUserIdError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class userᴛUnknownUserIdError;
+[GoMethodHost(typeof(user_package.User)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class userᴛUser;
+[GoMethodHost(typeof(user_package.bufferKind)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class userᴛbufferKind;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class userᴛUnknownGroupError {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this UnknownGroupError e) => user_package.Error⁔(e);
+}
+partial class userᴛUnknownGroupIdError {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this UnknownGroupIdError e) => user_package.Error⁔(e);
+}
+partial class userᴛUnknownUserError {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this UnknownUserError e) => user_package.Error⁔(e);
+}
+partial class userᴛUnknownUserIdError {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this UnknownUserIdError e) => user_package.Error⁔(e);
+}
+partial class userᴛUser {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<@string>, error) GroupIds(this ж<User> Ꮡu) => user_package.GroupIds⁔(Ꮡu);
+}
+partial class userᴛbufferKind {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static _C_size_t initialSize(this bufferKind k) => user_package.initialSize⁔(k);
+}
+// </MethodForwarders>

@@ -4,7 +4,6 @@
 namespace go.crypto.@internal.fips140;
 
 using sync = sync_package;
-using static edwards25519_package;
 
 partial class edwards25519_package {
 
@@ -30,13 +29,11 @@ partial struct basepointTablePrecompᴛ1 /*dyn*/ {
 internal static readonly ж<basepointTablePrecompᴛ1> ᏑbasepointTablePrecomp = new StaticBox<basepointTablePrecompᴛ1>(new basepointTablePrecompᴛ1());
 internal static ref basepointTablePrecompᴛ1 basepointTablePrecomp => ref ((StaticBox<basepointTablePrecompᴛ1>)ᏑbasepointTablePrecomp).ValueSlot;
 
-} partial class edwards25519ᴛPoint {
-
 // ScalarBaseMult sets v = x * B, where B is the canonical generator, and
 // returns v.
 //
 // The scalar multiplication is done in constant time.
-public static ж<Point> ScalarBaseMult(this ж<Point> Ꮡv, ж<Scalar> x) {
+internal static ж<Point> ScalarBaseMult⁔(/*this*/ ж<Point> Ꮡv, ж<Scalar> x) {
     var basepointTableΔ1 = basepointTable();
 
     // Write x = sum(x_i * 16^i) so  x*B = sum( B*x_i*16^i )
@@ -88,7 +85,7 @@ public static ж<Point> ScalarBaseMult(this ж<Point> Ꮡv, ж<Scalar> x) {
 // ScalarMult sets v = x * q, and returns v.
 //
 // The scalar multiplication is done in constant time.
-public static ж<Point> ScalarMult(this ж<Point> Ꮡv, ж<Scalar> x, ж<Point> q) {
+internal static ж<Point> ScalarMult⁔(/*this*/ ж<Point> Ꮡv, ж<Scalar> x, ж<Point> q) {
     checkInitialized(q);
 
     projLookupTable table = new();
@@ -128,8 +125,6 @@ public static ж<Point> ScalarMult(this ж<Point> Ꮡv, ж<Scalar> x, ж<Point> 
     return Ꮡv;
 }
 
-} partial class edwards25519_package {
-
 // basepointNafTable is the nafLookupTable8 for the basepoint.
 // It is precomputed the first time it's used.
 internal static ж<nafLookupTable8> basepointNafTable() {
@@ -146,13 +141,11 @@ partial struct basepointNafTablePrecompᴛ1 /*dyn*/ {
 internal static readonly ж<basepointNafTablePrecompᴛ1> ᏑbasepointNafTablePrecomp = new StaticBox<basepointNafTablePrecompᴛ1>(new basepointNafTablePrecompᴛ1());
 internal static ref basepointNafTablePrecompᴛ1 basepointNafTablePrecomp => ref ((StaticBox<basepointNafTablePrecompᴛ1>)ᏑbasepointNafTablePrecomp).ValueSlot;
 
-} partial class edwards25519ᴛPoint {
-
 // VarTimeDoubleScalarBaseMult sets v = a * A + b * B, where B is the canonical
 // generator, and returns v.
 //
 // Execution time depends on the inputs.
-public static ж<Point> VarTimeDoubleScalarBaseMult(this ж<Point> Ꮡv, ж<Scalar> a, ж<Point> A, ж<Scalar> b) {
+internal static ж<Point> VarTimeDoubleScalarBaseMult⁔(/*this*/ ж<Point> Ꮡv, ж<Scalar> a, ж<Point> A, ж<Scalar> b) {
     checkInitialized(A);
 
     // Similarly to the single variable-base approach, we compute
@@ -225,4 +218,4 @@ public static ж<Point> VarTimeDoubleScalarBaseMult(this ж<Point> Ꮡv, ж<Scal
     return Ꮡv;
 }
 
-}
+} // end edwards25519_package

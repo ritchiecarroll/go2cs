@@ -22,7 +22,6 @@ using go.@internal;
 using go.@internal.coverage;
 using hash;
 using hash = hash_package;
-using static decodemeta_package;
 
 partial class decodemeta_package {
 
@@ -59,9 +58,7 @@ public static (ж<CoverageMetaFileReader>, error) NewCoverageMetaFileReader(ж<o
     return (r, default);
 }
 
-} partial class decodemetaᴛCoverageMetaFileReader {
-
-internal static error readFileHeader(this ж<CoverageMetaFileReader> Ꮡr) {
+internal static error readFileHeader⁔(/*this*/ ж<CoverageMetaFileReader> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     error err = default;
@@ -128,7 +125,7 @@ internal static error readFileHeader(this ж<CoverageMetaFileReader> Ꮡr) {
     return default;
 }
 
-internal static (uint64, error) rdUint64(this ref CoverageMetaFileReader r) {
+internal static (uint64, error) rdUint64⁔(/*this*/ ref CoverageMetaFileReader r) {
     r.tmp = r.tmp[..0];
     r.tmp = appendꓸꓸꓸ(r.tmp, makeꓸꓸꓸ<byte>(8));
     var (n, err) = r.fileRdr.Read(r.tmp);
@@ -144,28 +141,28 @@ internal static (uint64, error) rdUint64(this ref CoverageMetaFileReader r) {
 
 // NumPackages returns the number of packages for which this file
 // contains meta-data.
-public static uint64 NumPackages(this ref CoverageMetaFileReader r) {
+internal static uint64 NumPackages⁔(/*this*/ ref CoverageMetaFileReader r) {
     return r.hdr.Entries;
 }
 
 // CounterMode returns the counter mode (set, count, atomic) used
 // when building for coverage for the program that produce this
 // meta-data file.
-public static coverage.CounterMode CounterMode(this ref CoverageMetaFileReader r) {
+internal static coverage.CounterMode CounterMode⁔(/*this*/ ref CoverageMetaFileReader r) {
     return r.hdr.CMode;
 }
 
 // CounterGranularity returns the counter granularity (single counter per
 // function, or counter per block) selected when building for coverage
 // for the program that produce this meta-data file.
-public static coverage.CounterGranularity CounterGranularity(this ref CoverageMetaFileReader r) {
+internal static coverage.CounterGranularity CounterGranularity⁔(/*this*/ ref CoverageMetaFileReader r) {
     return r.hdr.CGranularity;
 }
 
 // FileHash returns the hash computed for all of the package meta-data
 // blobs. Coverage counter data files refer to this hash, and the
 // hash will be encoded into the meta-data file name.
-public static array<byte> FileHash(this ref CoverageMetaFileReader r) {
+internal static array<byte> FileHash⁔(/*this*/ ref CoverageMetaFileReader r) {
     return r.hdr.MetaFileHash.Clone();
 }
 
@@ -176,7 +173,7 @@ public static array<byte> FileHash(this ref CoverageMetaFileReader r) {
 // 'payloadbuf' will be written to (or if it is not of sufficient
 // size, a new buffer will be allocated). Return value is the decoder,
 // a byte slice with the encoded meta-data, and an error.
-public static (ж<CoverageMetaDataDecoder>, slice<byte>, error) GetPackageDecoder(this ref CoverageMetaFileReader r, uint32 pkIdx, slice<byte> payloadbuf) {
+internal static (ж<CoverageMetaDataDecoder>, slice<byte>, error) GetPackageDecoder⁔(/*this*/ ref CoverageMetaFileReader r, uint32 pkIdx, slice<byte> payloadbuf) {
     var (pp, err) = r.GetPackagePayload(pkIdx, payloadbuf);
     if (r.debug) {
         var h = fnv.New128a();
@@ -201,7 +198,7 @@ public static (ж<CoverageMetaDataDecoder>, slice<byte>, error) GetPackageDecode
 // 'payloadbuf' will be written to (or if it is not of sufficient
 // size, a new buffer will be allocated). Return value is the decoder,
 // a byte slice with the encoded meta-data, and an error.
-public static (slice<byte>, error) GetPackagePayload(this ref CoverageMetaFileReader r, uint32 pkIdx, slice<byte> payloadbuf) {
+internal static (slice<byte>, error) GetPackagePayload⁔(/*this*/ ref CoverageMetaFileReader r, uint32 pkIdx, slice<byte> payloadbuf) {
     // Determine correct offset/length.
     if ((uint64)pkIdx >= r.hdr.Entries) {
         return (default, fmt.Errorf("GetPackagePayload: illegal pkg index %d"u8, pkIdx));
@@ -235,4 +232,4 @@ public static (slice<byte>, error) GetPackagePayload(this ref CoverageMetaFileRe
     return (payload, default);
 }
 
-}
+} // end decodemeta_package

@@ -15,7 +15,6 @@ using atomic = go.sync.atomic_package;
 using @unsafe = unsafe_package;
 using @internal;
 using go.sync;
-using static sync_package;
 
 partial class sync_package {
 
@@ -102,10 +101,8 @@ internal static @unsafe.Pointer poolRaceAddr(any xʗp) {
     return @unsafe.Pointer.FromPinnedBox(ᏑpoolRaceHash.at<uint64>((ulong)(h % (uint32)len(poolRaceHash))));
 }
 
-} partial class syncᴛPool {
-
 // Put adds x to the pool.
-public static void Put(this ж<Pool> Ꮡp, any x) {
+internal static void Put⁔(/*this*/ ж<Pool> Ꮡp, any x) {
     if (x == nil) {
         return;
     }
@@ -137,7 +134,7 @@ public static void Put(this ж<Pool> Ꮡp, any x) {
 //
 // If Get would otherwise return nil and p.New is non-nil, Get returns
 // the result of calling p.New.
-public static any Get(this ж<Pool> Ꮡp) {
+internal static any Get⁔(/*this*/ ж<Pool> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     if (race.Enabled) {
@@ -168,7 +165,7 @@ public static any Get(this ж<Pool> Ꮡp) {
     return x;
 }
 
-internal static any getSlow(this ж<Pool> Ꮡp, nint pid) {
+internal static any getSlow⁔(/*this*/ ж<Pool> Ꮡp, nint pid) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     // See the comment in pin regarding ordering of the loads.
@@ -214,7 +211,7 @@ internal static any getSlow(this ж<Pool> Ꮡp, nint pid) {
 // pin pins the current goroutine to P, disables preemption and
 // returns poolLocal pool for the P and the P's id.
 // Caller must call runtime_procUnpin() when done with the pool.
-internal static (ж<poolLocal>, nint) pin(this ж<Pool> Ꮡp) {
+internal static (ж<poolLocal>, nint) pin⁔(/*this*/ ж<Pool> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     // Check whether p is nil to get a panic.
@@ -237,7 +234,7 @@ internal static (ж<poolLocal>, nint) pin(this ж<Pool> Ꮡp) {
     return Ꮡp.pinSlow();
 }
 
-internal static (ж<poolLocal>, nint) pinSlow(this ж<Pool> Ꮡp) {
+internal static (ж<poolLocal>, nint) pinSlow⁔(/*this*/ ж<Pool> Ꮡp) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -267,8 +264,6 @@ internal static (ж<poolLocal>, nint) pinSlow(this ж<Pool> Ꮡp) {
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
-
-} partial class sync_package {
 
 // poolCleanup should be an internal detail,
 // but widely used packages access it using linkname.

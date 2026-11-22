@@ -96,6 +96,26 @@ func convertMethodHolderTree(t *testing.T, modulePath string, files, dependencie
 	return emitted
 }
 
+// requireRecordedForwarder fails the test unless the conversion just run recorded, for the holder, a forwarder whose
+// declaration holds text (recordMethodForwarder; the -tests flow writes them with the variant's metadata).
+func requireRecordedForwarder(t *testing.T, holder string, text string) {
+	t.Helper()
+
+	var recorded []string
+
+	for _, forwarder := range packageMethodForwarders {
+		if forwarder.holder == holder {
+			if strings.Contains(forwarder.line, text) {
+				return
+			}
+
+			recorded = append(recorded, forwarder.line)
+		}
+	}
+
+	t.Errorf("no forwarder of holder %s holds %q; the holder's forwarders:\n%s", holder, text, strings.Join(recorded, "\n"))
+}
+
 // requireEmitted fails the test for each wanted text the emitted file does not hold, and for each
 // refused text it does.
 func requireEmitted(t *testing.T, name string, emitted string, wanted []string, refused []string) {
@@ -154,65 +174,80 @@ func main() {
 }
 `
 
-// A method is a member of its receiver type's holder, a class beside the package class that the file
-// switches into in place, and the holder is declared once in package_info.cs with the type it holds.
-func TestMethodsAreEmittedInTheirReceiverTypesHolder(t *testing.T) {
+// A method with a holder takes the suffix form (GlyphMethodSuffix): its body `<Name>⁔` stands in the package class
+// beside its type, its receiver the first parameter, and the file never switches class. The holder is declared once
+// in package_info.cs with the type it holds, and package_info.cs carries the holder's Go-named forwarders to the bodies.
+func TestMethodsTakeTheSuffixFormWithAForwarderInTheirHolder(t *testing.T) {
 	emitted := convertMethodHolderFixture(t, map[string]string{"main.go": methodHolderSource})
 
 	requireEmitted(t, "main.cs", emitted["main.cs"], []string{
-		"using static main_package;\n",
 		"partial class main_package {\n",
-		"\n} partial class mainᴛBox {\n\npublic static nint Limit(this Box b)",
-		"\n} partial class main_package {\n\ninternal static UntypedInt other => 1;",
+		"\ninternal static nint Limit⁔(/*this*/ Box b) { return b.n + (nint)Limit; }\n",
+		"\ninternal static nint Count⁔(/*this*/ ref Box b) {\n",
+		"\ninternal static UntypedInt other => 1;",
 		"} // end main_package\n",
 	}, []string{
 		"Δ",
+		"partial class mainᴛBox",
+		"using static main_package;",
 	})
 
 	requireEmitted(t, "package_info.cs", emitted["package_info.cs"], []string{
 		"// <MethodHolders>\n",
-		"[GoMethodHost(typeof(main_package.Box)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛBox;\n",
+		"[GoMethodHost(typeof(main_package.Box)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class mainᴛBox;\n",
 		"// </MethodHolders>\n",
+		"// <MethodForwarders>\npartial class mainᴛBox {\n",
+		"    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Limit(this Box b) => main_package.Limit⁔(b);\n",
+		"    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Count(this ref Box b) => main_package.Count⁔(ref b);\n",
+		"    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static Kind Kind(this Box b) => main_package.Kind⁔(b);\n",
+		"}\n// </MethodForwarders>\n",
 	}, nil)
 }
 
-// A constant, a variable and a function named like a method of the holder are written through the
-// file's alias of its own package class; a name no method of the holder shares stays bare; and no
-// declaration takes a rename because a method shares its name.
-func TestHolderQualifiesThePackageNamesItsMethodsShare(t *testing.T) {
+// A constant, a variable and a function named like a method are read bare in the method's body: the body stands in
+// the package class, where the method's own name is the suffixed one, so nothing hides them. No declaration takes a
+// rename because a method shares its name, and the file takes no alias of its own package class.
+func TestABodyReadsThePackageNamesItsMethodsShareBare(t *testing.T) {
 	emitted := convertMethodHolderFixture(t, map[string]string{"main.go": methodHolderSource})
 
 	requireEmitted(t, "main.cs", emitted["main.cs"], []string{
-		"using main = main_package;\n",
-		"{ return b.n + (nint)main.Limit; }",
-		"main.Count++;",
-		"return b.n + main.Count;",
-		"var f = main.Scale;",
-		"return main.Scale(b.n) + f(1);",
+		"{ return b.n + (nint)Limit; }",
+		"\n    Count++;",
+		"return b.n + Count;",
+		"var f = Scale;",
+		"return Scale(b.n) + f(1);",
 		"{ return b.n + (nint)other; }",
 		"public static UntypedInt Limit => 7;",
 		"public static nint Count = 3;",
 		"public static nint Scale(nint n)",
-		"public static Kind Kind(this Box b) { return (Kind)b.n; }",
+		"internal static Kind Kind⁔(/*this*/ Box b) { return (Kind)b.n; }",
 	}, []string{
+		"using main = ",
+		"main.Limit",
+		"main.Count",
+		"main.Scale",
 		"main.other",
-		"main_package.Limit",
+		"(nint)main_package.Limit",
 	})
 }
 
-// A method expression names the method's static form in the holder.
-func TestMethodExpressionNamesTheHolder(t *testing.T) {
+// A method expression of a value receiver binds the method's body, so the function is the method's own; a pointer
+// receiver's body takes `ref T`, which the expression's ж<T> delegate cannot bind, so it names RecvGenerator's twin
+// of the forwarder in the holder (methodExpressionBody).
+func TestMethodExpressionBindsTheBodyOrTheHoldersTwin(t *testing.T) {
 	emitted := convertMethodHolderFixture(t, map[string]string{"main.go": methodHolderSource})
 
 	requireEmitted(t, "main.cs", emitted["main.cs"], []string{
-		"((Func<Box, nint>)(mainᴛBox.Limit))",
+		"((Func<Box, nint>)(main_package.Limit⁔))",
 		"((Func<ж<Box>, nint>)(mainᴛBox.Count))",
-	}, nil)
+	}, []string{
+		"mainᴛBox.Limit",
+	})
 }
 
-// A file whose methods share no package name takes no alias line, and a file without a method takes
-// neither line. The package is a library: package main keeps such methods in its package class.
-func TestSelfAliasIsDeclaredOnlyWhereAHolderUsesIt(t *testing.T) {
+// No file takes an alias of its own package class or a `using static` of it: every body stands in the package class.
+// The package is a library: package main keeps such methods in its package class.
+func TestNoFileTakesASelfAliasOrAUsingStaticOfItsPackage(t *testing.T) {
 	emitted := convertMethodHolderFixture(t, map[string]string{
 		"main.go": `package app
 
@@ -232,14 +267,13 @@ func double(n int) int { return n * 2 }
 `,
 	})
 
-	requireEmitted(t, "main.cs", emitted["main.cs"], []string{"using static app_package;\n"}, []string{"using app = "})
+	requireEmitted(t, "main.cs", emitted["main.cs"], []string{"internal static nint Size⁔(/*this*/ Box b) { return b.n + (nint)unit; }"}, []string{"using app = ", "using static app_package;", "partial class appᴛ"})
 	requireEmitted(t, "plain.cs", emitted["plain.cs"], nil, []string{"using app = ", "using static app_package;", "partial class appᴛ"})
 }
 
-// Where the alias's name means something else, the package class is written out: for a function that
-// declares a variable of that name, and for a holder that declares a method of that name. A function
-// named like its package (Go's main) does not take the name from the alias.
-func TestHolderFallsBackToThePackageClassWhereTheAliasIsShadowed(t *testing.T) {
+// A local or parameter named like the package (`main`) and a method named like it (odd's `main`) change nothing in a
+// body: it names the package's constant bare, as the package class reads it, with no alias to shadow.
+func TestABodyNamesItsPackagesConstantBareBesideALocalNamedLikeThePackage(t *testing.T) {
 	emitted := convertMethodHolderFixture(t, map[string]string{"main.go": `package main
 
 import "fmt"
@@ -270,15 +304,19 @@ func main() {
 `})
 
 	requireEmitted(t, "main.cs", emitted["main.cs"], []string{
-		"return main + (nint)main_package.Limit;",
-		"internal static nint Scale(this meter m, nint main) { return main + (nint)main_package.Limit; }",
-		"internal static nint Count(this meter m) { return (nint)main.Limit + m.main; }",
-		"internal static nint Limit(this odd o) { return (nint)main_package.Limit + o.main(); }",
-	}, nil)
+		"return main + (nint)Limit;",
+		"internal static nint Scale⁔(/*this*/ meter m, nint main) { return main + (nint)Limit; }",
+		"internal static nint Count⁔(/*this*/ meter m) { return (nint)Limit + m.main; }",
+		"internal static nint main⁔(/*this*/ odd o) { return 1; }",
+		"internal static nint Limit⁔(/*this*/ odd o) { return (nint)Limit + o.main(); }",
+	}, []string{
+		"main.Limit",
+		"main_package.Limit",
+	})
 }
 
-// A package that declares a type of its own name takes no alias: the alias would take the type's name
-// in every holder of the file.
+// A package that declares a type of its own name takes no alias, and its method's body names the package's constant
+// bare beside the type.
 func TestPackageWithATypeOfItsOwnNameTakesNoSelfAlias(t *testing.T) {
 	isolateConverterPathGlobals(t)
 
@@ -323,11 +361,16 @@ func Play(n int) int { return tone(n).Base() }
 	}
 
 	emitted := strings.ReplaceAll(readGenerated(t, filepath.Join(outDir, "tone.cs")), "\r", "")
+	packageInfo := strings.ReplaceAll(readGenerated(t, filepath.Join(outDir, "package_info.cs")), "\r", "")
 
 	requireEmitted(t, "tone.cs", emitted, []string{
-		"} partial class toneᴛtone {",
-		"{ return tone_package.Base * 2; }",
-	}, []string{"using tone = "})
+		"internal static nint Base⁔(/*this*/ tone t) { return Base * 2; }",
+	}, []string{"using tone = ", "partial class toneᴛtone"})
+
+	requireEmitted(t, "package_info.cs", packageInfo, []string{
+		"partial class toneᴛtone {\n",
+		"internal static nint Base(this tone t) => tone_package.Base⁔(t);\n",
+	}, nil)
 }
 
 const narrowedRulesSource = `package main
@@ -367,38 +410,34 @@ func main() {
 }
 `
 
-// The four rules below existed package-wide while every method stood in the package class. Each now
-// holds only inside the holder that declares the method, and two of them hold nowhere.
+// The four rules below existed package-wide while every method stood in the package class, and held only inside
+// the holder that declared the method while its body stood there. A body stands in the package class under its
+// suffixed name, so none of them holds anywhere.
 
-// A built-in is written through `builtin` only inside the holder that declares a method of its name.
-func TestBuiltinIsQualifiedOnlyInTheHolderThatDeclaresItsName(t *testing.T) {
+// A built-in named like a method is read bare in the method's own body.
+func TestABodyReadsABuiltinOfItsMethodsNameBare(t *testing.T) {
 	emitted := convertMethodHolderFixture(t, map[string]string{"main.go": narrowedRulesSource})["main.cs"]
 
 	requireEmitted(t, "main.cs", emitted, []string{
-		"internal static nint cap(this words w) { return builtin.cap(w) + 1; }",
+		"internal static nint cap⁔(/*this*/ words w) { return cap(w) + 1; }",
 		"internal static nint size(this other o, words w) { return cap(w) + ",
 		"w.cap(), cap(w), ",
-	}, nil)
-
-	if got := strings.Count(emitted, "builtin.cap("); got != 1 {
-		t.Errorf("main.cs qualifies cap through builtin %d times, want 1: only in the holder of words\n%s", got, emitted)
-	}
+	}, []string{
+		"builtin.cap(",
+	})
 }
 
-// An import is written through its package class only inside the holder that declares a method of
-// its name; every other class of the package keeps the alias.
-func TestImportIsQualifiedOnlyInTheHolderThatDeclaresItsName(t *testing.T) {
+// An import named like a method is read through its alias in the method's own body.
+func TestABodyReadsAnImportOfItsMethodsNameThroughItsAlias(t *testing.T) {
 	emitted := convertMethodHolderFixture(t, map[string]string{"main.go": narrowedRulesSource})["main.cs"]
 
 	requireEmitted(t, "main.cs", emitted, []string{
-		"internal static nint bits(this words w) { return math.bits_package.Len64(w[0]); }",
+		"internal static nint bits⁔(/*this*/ words w) { return bits.Len64(w[0]); }",
 		"cap(w) + bits.Len64((uint64)o.n); }",
 		"w.bits(), bits.Len64(w[0]), ",
-	}, nil)
-
-	if got := strings.Count(emitted, "bits_package.Len64("); got != 1 {
-		t.Errorf("main.cs qualifies bits through its package class %d times, want 1: only in the holder of words\n%s", got, emitted)
-	}
+	}, []string{
+		"bits_package.Len64(",
+	})
 }
 
 // A method a test file declares stands in a holder of its own, so it changes no production reference:
@@ -452,15 +491,13 @@ func TestFunctionNamedLikeAMethodIsAPlainMethodGroup(t *testing.T) {
 func TestCallOfAFunctionNamedLikeItsArgumentsMethodTakesNoCast(t *testing.T) {
 	emitted := convertMethodHolderFixture(t, map[string]string{"main.go": narrowedRulesSource})["main.cs"]
 
-	requireEmitted(t, "main.cs", emitted, []string{"internal static void Sort(this words w) { main.Sort(w); }"}, []string{"(sort.Interface)(w)"})
+	requireEmitted(t, "main.cs", emitted, []string{"internal static void Sort⁔(/*this*/ words w) { Sort(w); }"}, []string{"(sort.Interface)(w)", "main.Sort("})
 }
 
-// A type named like a METHOD of the holder a body stands in. A C# type position reads only types,
-// so the type keeps its bare name in every declaration, literal, conversion and type argument. Two
-// forms read the name as an EXPRESSION first, where the holder's method group binds: a box
-// accessor (`Tag.ᏑValue`, CS0119) and a type-switch label with no binding (`case Tag:`, CS8917).
-// The accessor names the package class, and the label takes the discard form, which is a type
-// position. Outside the holder both forms stay as they were.
+// A type named like a METHOD. While the body stood in the method's holder, two forms read the name as an EXPRESSION
+// first, where the holder's method group bound: a box accessor (`Tag.ᏑValue`, CS0119) and a type-switch label with
+// no binding (`case Tag:`, CS8917). The body stands in the package class, where the method is the suffixed `Tag⁔`,
+// so both forms read the type there as everywhere else.
 const typeNamedLikeMethodSource = `package main
 
 import "fmt"
@@ -510,25 +547,25 @@ func main() {
 }
 `
 
-func TestTypeNamedLikeAMethodOfItsHolderIsReadAsAType(t *testing.T) {
+func TestATypeNamedLikeAMethodIsReadAsATypeInTheMethodsBody(t *testing.T) {
 	emitted := convertMethodHolderFixture(t, map[string]string{"main.go": typeNamedLikeMethodSource})["main.cs"]
 
-	inside, outside, found := strings.Cut(emitted, "} partial class main_package {")
+	body, outside, found := strings.Cut(emitted, "internal static @string outside(any v) {")
 
 	if !found {
-		t.Fatalf("main.cs does not return to the package class after the holder:\n%s", emitted)
+		t.Fatalf("main.cs does not declare outside after the bodies:\n%s", emitted)
 	}
 
-	requireEmitted(t, "the holder of Chest", inside, []string{
-		"public static Tag Tag(this ref Chest c) { return c.tag; }",
+	requireEmitted(t, "the bodies of Chest's methods", body, []string{
+		"internal static Tag Tag⁔(/*this*/ ref Chest c) { return c.tag; }",
 		"var ptr = Ꮡ(new Tag(id: 3));",
-		"var valueAddr = ptr.of(main_package.Tag.ᏑValue);",
-		"case Tag _: {",
+		"var valueAddr = ptr.of(Tag.ᏑValue);",
+		"case Tag: {",
 		"case ж<Tag> _:",
 		"slice<Tag>(",
 	}, []string{
-		"ptr.of(Tag.ᏑValue)",
-		"case Tag: {",
+		"main_package.Tag",
+		"case Tag _:",
 	})
 
 	requireEmitted(t, "the package class", outside, []string{
@@ -538,6 +575,10 @@ func TestTypeNamedLikeAMethodOfItsHolderIsReadAsAType(t *testing.T) {
 		"main_package.Tag",
 		"case Tag _:",
 	})
+
+	if strings.Contains(emitted, "partial class mainᴛChest") {
+		t.Errorf("main.cs switches into the holder of Chest:\n%s", emitted)
+	}
 }
 
 const holderEndsWithItsMethodSource = `package main
@@ -563,27 +604,21 @@ func main() {
 }
 `
 
-// A package-level variable that follows a method in file order stands in the package class, where a
-// method's name hides nothing: its function literal names the package's function and the built-in
-// bare. Only the bodies of the two methods are qualified.
-func TestDeclarationAfterAMethodIsNotReadAsInsideItsHolder(t *testing.T) {
+// A method's name hides nothing in the package class, where its body stands as the suffixed name: the bodies and the
+// function literals of the package-level variables that follow them name the package's function and the built-in
+// bare alike.
+func TestNoBodyOrDeclarationAfterItQualifiesANameItsMethodShares(t *testing.T) {
 	emitted := convertMethodHolderFixture(t, map[string]string{"main.go": holderEndsWithItsMethodSource})
 	main := emitted["main.cs"]
 
 	requireEmitted(t, "main.cs", main, []string{
-		"return b.n + main.Limit();",
-		"return builtin.len(w);",
+		"internal static nint Limit⁔(/*this*/ Box b) { return b.n + Limit(); }",
+		"internal static nint len⁔(/*this*/ words w) { return len(w); }",
 	}, []string{
 		"main_package.Limit()",
+		"main.Limit()",
+		"builtin.len(",
 	})
-
-	if got := strings.Count(main, "main.Limit()"); got != 1 {
-		t.Errorf("main.cs qualifies Limit() %d times, want 1 (inside the holder of Box only)\n%s", got, main)
-	}
-
-	if got := strings.Count(main, "builtin.len("); got != 1 {
-		t.Errorf("main.cs qualifies len( %d times, want 1 (inside the holder of words only)\n%s", got, main)
-	}
 }
 
 const holderHiddenTypeSource = `package app
@@ -623,33 +658,30 @@ func Run() {
 
 // A type of the package named like a child namespace of the package's own namespace (`go.sync`, in view
 // here through the import of sync/atomic, for a package in the root namespace) is hidden by that
-// namespace inside a method holder, in a type position as in any other: a holder is not nested in the
-// package class, and the namespace's own members are read before the file's `using static`. The holder
-// names the type through the package class; the package class, where the nested type is read first,
-// keeps the bare name. A package in any other namespace (TestHolderKeepsATypeNoNamespaceHidesBare) has
-// no such child, and its holder keeps the bare name too.
-func TestHolderNamesATypeANamespaceHidesThroughThePackageClass(t *testing.T) {
+// namespace outside the package class, in a type position as in any other: a holder is not nested in the
+// package class, and the namespace's own members are read before package_info.cs's `using static`. A
+// method's forwarder repeats its body's signature in the holder, so the method's signature and body name
+// the type through the package class (holderHiddenTypes); the package's other functions keep the bare name.
+// A package in any other namespace (TestASignatureKeepsATypeNoNamespaceHidesBare) has no such child.
+func TestASignatureNamesATypeANamespaceHidesThroughThePackageClass(t *testing.T) {
 	emitted := convertMethodHolderModule(t, "go2cs/app", map[string]string{"main.go": holderHiddenTypeSource})
-	main := emitted["main.cs"]
+	main, packageInfo := emitted["main.cs"], emitted["package_info.cs"]
 
 	if !strings.HasPrefix(main, "namespace go;") {
 		t.Fatalf("main.cs is not in the root namespace, where `go.sync` is a child of the package's own\n%s", main)
 	}
 
-	holderStart := strings.Index(main, "partial class appᴛsync {")
-	holderEnd := strings.LastIndex(main, "} partial class app_package {")
+	bodies, outside, found := strings.Cut(main, "internal static sync fresh()")
 
-	if holderStart == -1 || holderEnd == -1 || holderEnd < holderStart {
-		t.Fatalf("main.cs has no holder of sync followed by the package class\n%s", main)
+	if !found {
+		t.Fatalf("main.cs does not declare fresh after the bodies\n%s", main)
 	}
 
-	holder, outside := main[holderStart:holderEnd], main[:holderStart]+main[holderEnd:]
-
-	requireEmitted(t, "the holder of sync", holder, []string{
-		"bump(this ref app_package.sync s, ",
-		"app_package.sync again(this app_package.sync s)",
+	requireEmitted(t, "the bodies of sync's methods", bodies, []string{
+		"bump⁔(/*this*/ ref app_package.sync s, ",
+		"app_package.sync again⁔(/*this*/ app_package.sync s)",
 		"new app_package.sync(label: s.label",
-		"slice<app_package.sync> all(this app_package.sync s)",
+		"slice<app_package.sync> all⁔(/*this*/ app_package.sync s)",
 		"other._<app_package.sync>(",
 	}, []string{
 		" sync s",
@@ -658,26 +690,40 @@ func TestHolderNamesATypeANamespaceHidesThroughThePackageClass(t *testing.T) {
 		"(sync)",
 	})
 
-	requireEmitted(t, "the package class", outside, []string{
-		"partial struct sync {",
+	requireEmitted(t, "the package class", "internal static sync fresh()"+outside, []string{
 		"internal static sync fresh()",
 		"new sync(label: \"fresh\")",
 		"each(slice<sync> all)",
 	}, []string{
 		"app_package.sync",
 	})
+
+	requireEmitted(t, "package_info.cs", packageInfo, []string{
+		"partial class appᴛsync {\n",
+		"bump(this ref app_package.sync s, ",
+		"app_package.sync again(this app_package.sync s) => app_package.again⁔(s);",
+	}, []string{
+		" sync s",
+	})
 }
 
-func TestHolderKeepsATypeNoNamespaceHidesBare(t *testing.T) {
+func TestASignatureKeepsATypeNoNamespaceHidesBare(t *testing.T) {
 	emitted := convertMethodHolderFixture(t, map[string]string{"main.go": holderHiddenTypeSource})
-	main := emitted["main.cs"]
 
-	requireEmitted(t, "main.cs", main, []string{
+	requireEmitted(t, "main.cs", emitted["main.cs"], []string{
 		"namespace go.example.com;",
-		"bump(this ref sync s, ",
-		"internal static sync again(this sync s)",
+		"bump⁔(/*this*/ ref sync s, ",
+		"internal static sync again⁔(/*this*/ sync s)",
 	}, []string{
 		"app_package.sync",
+	})
+
+	requireEmitted(t, "package_info.cs", emitted["package_info.cs"], []string{
+		"bump(this ref sync s, ",
+		"internal static sync again(this sync s) => app_package.again⁔(s);",
+	}, []string{
+		"ref app_package.sync s",
+		"app_package.sync again(",
 	})
 }
 
@@ -800,22 +846,26 @@ func main() {
 `
 
 // A promoted forwarder the converter writes for a struct (a method its pointer gets only through an
-// embedded interface) is one of the struct's methods, so it is a member of the struct's holder, beside the
-// methods Go declares on it. In the package class it shared a class with the type of its name: CS0102,
-// `Driver` beside `Driver`. The next type of a grouped declaration is back in the package class.
-func TestPromotedForwarderIsEmittedInItsStructsHolder(t *testing.T) {
+// embedded interface) is one of the struct's methods, so it takes the suffix form as the methods Go declares
+// on it do: its body `Driver⁔` in the package class right after the struct, and its Go-named forwarder in the
+// struct's holder. The Go name in the package class would share a class with the type of its name: CS0102,
+// `Driver` beside `Driver`. No file switches into the holder.
+func TestPromotedForwarderTakesTheSuffixFormInItsStructsHolder(t *testing.T) {
 	emitted := convertMethodHolderFixture(t, map[string]string{"main.go": promotedForwarderHolderSource})
 
 	requireEmitted(t, "main.cs", emitted["main.cs"], []string{
-		"\n} partial class mainᴛcounting {\n\n// Go method set entry for the promoted 'Connector.Driver()'",
-		"internal static Driver Driver(this counting recvᴛ) => recvᴛ.Connector.Driver();\n\n} partial class main_package {\n\npartial struct after {",
-		"\n} partial class mainᴛcounting {\n\ninternal static @string Name(this ref counting c)",
+		"\n// Go method set entry for the promoted 'Connector.Driver()'",
+		"internal static Driver Driver⁔(/*this*/ counting recvᴛ) => recvᴛ.Connector.Driver();\n\npartial struct after {",
+		"\ninternal static @string Name⁔(/*this*/ ref counting c)",
 	}, []string{
 		"Δ",
+		"partial class mainᴛ",
 	})
 
 	requireEmitted(t, "package_info.cs", emitted["package_info.cs"], []string{
-		"[GoMethodHost(typeof(main_package.counting)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛcounting;\n",
+		"[GoMethodHost(typeof(main_package.counting)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class mainᴛcounting;\n",
+		"internal static Driver Driver(this counting recvᴛ) => main_package.Driver⁔(recvᴛ);\n",
+		"internal static @string Name(this ref counting c) => main_package.Name⁔(ref c);\n",
 	}, nil)
 }
 
@@ -863,26 +913,29 @@ func Run() {
 
 // A dot import (`. "runtime"`) is written `using static runtime_package;`, which in C# brings in every name
 // of the class the assembly can see, unexported ones included, where Go brings in none of them. In the
-// package class the class's own member wins; a method holder is not nested in the package class, so there
-// the two using-statics supply a name both packages declare with equal standing (CS0229, runtime's
-// hashSize in hash_test.go; for a type, net/http's dumpConn, CS0104). The holder writes such a name through
-// its own package's class, which is the binding Go gives it. A name only the package declares, and every
-// name outside a holder, stays bare. The package is a library: package main keeps these methods in its
-// package class, where its own members win.
-func TestHolderQualifiesAnOwnNameADotImportedPackageAlsoDeclares(t *testing.T) {
+// package class the class's own member wins, so a method's body reads every name bare. Outside the package
+// class two using-statics supply a type both packages declare with equal standing (net/http's dumpConn,
+// CS0104), so a type such a signature names is written through its own package's class, which the forwarder
+// in the holder repeats. The package is a library: package main keeps these methods in its package class.
+func TestABodyReadsAnOwnNameADotImportedPackageAlsoDeclaresBare(t *testing.T) {
 	emitted := convertMethodHolderTree(t, "example.com/app",
 		map[string]string{"main.go": dotImportHolderMainSource},
 		map[string]string{"lib/lib.go": dotImportHolderLibSource})
 
 	requireEmitted(t, "main.cs", emitted["main.cs"], []string{
 		"using static go.example.com.app.lib_package;\n",
-		"return s.n + (nint)prog.size + prog.shared + alone;",
+		"internal static nint Bits⁔(/*this*/ Set s) { return s.n + (nint)size + shared + alone; }",
 		"return (nint)size + shared + alone;",
-		"Sum(this prog_package.pair p, single q) { return p.x + q.y + new prog_package.pair(x: 1).x; }",
+		"Sum⁔(/*this*/ prog_package.pair p, single q) { return p.x + q.y + new prog_package.pair(x: 1).x; }",
 	}, []string{
 		"prog.alone",
+		"prog.size",
 		"lib_package.size",
 	})
+
+	requireEmitted(t, "package_info.cs", emitted["package_info.cs"], []string{
+		"Sum(this prog_package.pair p, single q) => prog_package.Sum⁔(p, q);",
+	}, nil)
 }
 
 const packageClassMethodsLibSource = `package lib
@@ -965,7 +1018,8 @@ func main() {
 // like something a file of the package reads bare, which the method would hide there from the whole package: a
 // package-level name, a name of the universe, an import's name, a name a dot-imported package declares (an
 // unexported one included), or a member of golib's builtin class. Such a type keeps its holder, as does a struct
-// whose forwarder for an embedded interface's method is named so (TestPromotedForwarderIsEmittedInItsStructsHolder).
+// whose forwarder for an embedded interface's method is named so (TestPromotedForwarderTakesTheSuffixFormInItsStructsHolder):
+// its methods take the suffix form, a body in the package class and a forwarder in the holder.
 // A method expression of a type without a holder names the method through the package class, under the delegate
 // cast that picks the receiver's overload: bare, it would bind a local, parameter or result of its name first
 // (apply, pick, main), and nothing from a holder (withBuiltin's len). withDotExported keeps its holder because
@@ -983,21 +1037,22 @@ func TestMethodsOfPackageMainStayInItsPackageClassUnlessTheyHideAName(t *testing
 		"internal static void Grow(this ref plain p, nint by)",
 		"((Func<plain, nint>)(main_package.Size))",
 		"=> main_package.Size(panicwrapRecv(p0, ",
-		"partial class mainᴛwithFunc {",
-		"partial class mainᴛwithBuiltin {",
-		"partial class mainᴛwithImport {",
-		"partial class mainᴛwithGolib {",
-		"partial class mainᴛwithDot {",
-		"partial class mainᴛwithDotExported {",
+		"internal static nint Limit⁔(/*this*/ withFunc _) { return Limit(); }",
+		"internal static nint len⁔(/*this*/ withBuiltin w) {",
+		"internal static void sort⁔(/*this*/ withImport w) { sort.Ints(w); }",
+		"internal static nint zero⁔(/*this*/ withGolib _) { return 0; }",
+		"internal static nint hidden⁔(/*this*/ withDot _) { return 1; }",
+		"internal static nint Area⁔(/*this*/ withDotExported _) { return Area(); }",
 	}, []string{
-		"partial class mainᴛplain",
+		"partial class mainᴛ",
 		"mainᴛplain.",
+		"Size⁔",
 		"((Func<plain, nint>)(Size))",
 		"=> Size(",
 	})
 
 	for _, kept := range []string{"withFunc", "withBuiltin", "withImport", "withGolib", "withDot", "withDotExported"} {
-		requireEmitted(t, "package_info.cs", packageInfo, []string{"partial class mainᴛ" + kept + ";"}, nil)
+		requireEmitted(t, "package_info.cs", packageInfo, []string{"partial class mainᴛ" + kept + ";", "partial class mainᴛ" + kept + " {\n"}, nil)
 	}
 
 	requireEmitted(t, "package_info.cs", packageInfo, nil, []string{"mainᴛplain"})
@@ -1010,13 +1065,13 @@ type plain struct{ n int }
 func (p plain) Size() int { return p.n }
 `})
 
-	requireEmitted(t, "the library's main.cs", library["main.cs"], []string{"partial class appᴛplain {"}, nil)
-	requireEmitted(t, "the library's package_info.cs", library["package_info.cs"], []string{"partial class appᴛplain;"}, nil)
+	requireEmitted(t, "the library's main.cs", library["main.cs"], []string{"internal static nint Size⁔(/*this*/ plain p) { return p.n; }"}, nil)
+	requireEmitted(t, "the library's package_info.cs", library["package_info.cs"], []string{"partial class appᴛplain;", "partial class appᴛplain {\n"}, nil)
 }
 
-// A file closes its own class with the class's name, and a method holder its last method left open with a bare
-// brace, as a holder closes wherever the next declaration switches class.
-func TestFileThatEndsInAHolderClosesItBare(t *testing.T) {
+// A file that ends in a method closes its package class by name: the method's body stands in the package class, and
+// no file opens a method holder.
+func TestFileThatEndsInAMethodClosesItsPackageClass(t *testing.T) {
 	emitted := convertMethodHolderFixture(t, map[string]string{
 		"box.go": `package app
 
@@ -1036,11 +1091,12 @@ func Use() int { return Make().Twice() }
 
 	box, use := emitted["box.cs"], emitted["make.cs"]
 
-	if !strings.HasSuffix(box, "public static nint Size(this Box b) { return b.n; }\n\n}\n") {
-		t.Errorf("box.cs does not close the holder of Box with a bare brace\n%s", box)
+	if !strings.HasSuffix(box, "internal static nint Size⁔(/*this*/ Box b) { return b.n; }\n\n} // end app_package\n") {
+		t.Errorf("box.cs does not close its package class by name after the body of Size\n%s", box)
 	}
 
-	requireEmitted(t, "box.cs", box, nil, []string{"// end appᴛBox", "// end app_package"})
+	requireEmitted(t, "box.cs", box, nil, []string{"partial class appᴛBox", "// end appᴛBox"})
+	requireEmitted(t, "make.cs", use, []string{"internal static nint Twice⁔(/*this*/ Box b) { return b.n * 2; }"}, []string{"partial class appᴛBox"})
 
 	if !strings.HasSuffix(use, "\n} // end app_package\n") {
 		t.Errorf("make.cs does not close its package class by name\n%s", use)
@@ -1185,7 +1241,8 @@ func TestSize(t *testing.T) {
 	program := convertMethodHolderFixture(t, map[string]string{"main.go": production, "main_test.go": test})
 
 	requireEmitted(t, "the program's package_info.cs", program["package_info.cs"], []string{"partial class mainᴛplain;"}, nil)
-	requireEmitted(t, "the program's main.cs", program["main.cs"], []string{"partial class mainᴛplain {"}, nil)
+	requireEmitted(t, "the program's main.cs", program["main.cs"], []string{"internal static nint Size⁔(/*this*/ plain p) { return (nint)p; }"}, []string{"partial class mainᴛplain"})
+	requireEmitted(t, "the program's package_info.cs", program["package_info.cs"], []string{"partial class mainᴛplain {\n"}, nil)
 	requireEmitted(t, "main_test.cs", convertMainTestsVariant(t, production, test), []string{"global::go.mainᴛplain.Size))"}, nil)
 }
 
@@ -1222,16 +1279,150 @@ func TestGenericHolderIsNamedByTheTypeWhateverItsConstraint(t *testing.T) {
 		map[string]string{"lib/lib.go": foreignConstraintHolderLibSource})
 
 	requireEmitted(t, "iterators.cs", emitted["iterators.cs"], []string{
-		"\n} partial class iteratorsᴛIterator {\n",
-		"\n} partial class iteratorsᴛWindow {\n",
+		"internal static void SetText⁔<T>(/*this*/ ref Iterator<T> it, T data)\n",
+		"internal static nint Len⁔<K, T>(/*this*/ Window<K, T> w)\n",
 	}, []string{
 		"Text>",
+		"partial class iteratorsᴛ",
 	})
 
 	requireEmitted(t, "package_info.cs", emitted["package_info.cs"], []string{
-		"[GoMethodHost(typeof(iterators_package.Iterator<>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class iteratorsᴛIterator;\n",
-		"[GoMethodHost(typeof(iterators_package.Window<,>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class iteratorsᴛWindow;\n",
+		"[GoMethodHost(typeof(iterators_package.Iterator<>)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class iteratorsᴛIterator;\n",
+		"[GoMethodHost(typeof(iterators_package.Window<,>)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class iteratorsᴛWindow;\n",
+		"partial class iteratorsᴛIterator {\n",
+		"partial class iteratorsᴛWindow {\n",
+		"public static void SetText<T>(this ref Iterator<T> it, T data) where T : /* lib.Text */ IByteSeq<T, byte>, new() => iterators_package.SetText⁔<T>(ref it, data);\n",
 	}, []string{
 		"Text>",
 	})
+}
+
+const forwarderNamespaceScopeSource = `package buf
+
+import (
+	"io"
+	"unsafe"
+)
+
+type Buffer struct{ n int }
+
+type Type int
+
+func (b Buffer) Grow(t Type) Buffer { return Buffer{n: b.n + int(t)} }
+
+func (b *Buffer) Add(xs ...any) int {
+	b.n += len(xs)
+	return b.n
+}
+
+func (b Buffer) Many(ts ...Type) int { return len(ts) + b.n }
+
+func (b *Buffer) At(p unsafe.Pointer) unsafe.Pointer { return unsafe.Add(p, b.n) }
+
+type slice struct{ lo, hi int }
+
+func (b Buffer) Span(data []byte) slice { return slice{hi: len(data) + b.n} }
+
+func (b Buffer) WriteTo(w io.Writer) (int64, error) { return 0, nil }
+`
+
+// A forwarder repeats its body's spelling (`this Buffer b`), which in the package class finds the package's nested
+// type first. package_info.cs reads it at namespace scope, where the project's `using System;` makes `Buffer` and
+// `Type` System's as much as the package's (CS0104) among the compilation unit's directives; so the file repeats its
+// `using static` right after the namespace declaration, as each converted file declares it, where a declaration's
+// own usings are searched first. The aliases the forwarders name follow it: a variadic parameter's `ꓸꓸꓸT`, whose
+// referent resolves there as in the body's file. unsafe.Pointer is spelled through a file alias package_info.cs
+// does not declare, so a forwarder names its package class, as an assembly attribute does (`unsafe_package.Pointer`).
+// The receiver keeps the bare spelling the generators read a method set by. An imported package's alias is repeated
+// there too: inside the namespace a qualifier such as `io` finds the namespace `go.io` first (io/fs makes one), so
+// `io.Writer` reads the package class only through an alias the declaration itself carries, as each converted file's
+// does.
+func TestAForwarderNamesItsPackagesTypesAndVariadicAliasesForNamespaceScope(t *testing.T) {
+	emitted := convertMethodHolderFixture(t, map[string]string{"buf.go": forwarderNamespaceScopeSource})
+
+	requireEmitted(t, "buf.cs", emitted["buf.cs"], []string{
+		"internal static Buffer Grow⁔(/*this*/ Buffer b, Type t)",
+		"using ꓸꓸꓸany = Span<any>;",
+	}, nil)
+
+	requireEmitted(t, "package_info.cs", emitted["package_info.cs"], []string{
+		"namespace go.example.com.app;\n\nusing static go.example.com.app.buf_package;\nusing io = go.io_package;\nusing ꓸꓸꓸType = Span<buf_package.Type>;\nusing ꓸꓸꓸany = Span<any>;\n\n",
+		"public static (int64, error) WriteTo(this Buffer b, io.Writer w) => buf_package.WriteTo⁔(b, w);\n",
+		"public static Buffer Grow(this Buffer b, Type t) => buf_package.Grow⁔(b, t);\n",
+		"public static nint Add(this ref Buffer b, params ꓸꓸꓸany xsʗp) => buf_package.Add⁔(ref b, xsʗp);\n",
+		"public static nint Many(this Buffer b, params ꓸꓸꓸType tsʗp) => buf_package.Many⁔(b, tsʗp);\n",
+		"public static unsafe_package.Pointer At(this ref Buffer b, unsafe_package.Pointer p) => buf_package.At⁔(ref b, p);\n",
+		"public static Δslice Span(this Buffer b, slice<byte> data) => buf_package.Span⁔(b, data);\n",
+	}, []string{
+		"(this buf_package.Buffer b",
+		"@unsafe.",
+	})
+}
+
+const handOwnedHolderSource = `package app
+
+type gptr uintptr
+
+func (g gptr) ptr() int { return int(g) }
+
+func (g gptr) set(v int) gptr { return gptr(v) }
+
+type kept struct{ n int }
+
+func (k kept) N() int { return k.n }
+
+func Use() int { return gptr(1).ptr() + kept{}.N() }
+`
+
+// A method whose C# a hand-owned file supplies (manualConversionFuncs) is emitted as a placeholder; its hand-written
+// extension method stands in the holder, `partial class appᴛgptr`, which only package_info.cs declares static. So the
+// holder is declared as for a converted method, even where every method of the type is hand-owned, and no forwarder
+// is written for a body that does not exist.
+func TestAHandOwnedMethodKeepsItsHoldersDeclaration(t *testing.T) {
+	displacedFixture(t, "example.com/app", "gptr.ptr", "gptr.set")
+
+	emitted := convertMethodHolderFixture(t, map[string]string{"app.go": handOwnedHolderSource})
+
+	requireEmitted(t, "package_info.cs", emitted["package_info.cs"], []string{
+		"[GoMethodHost(typeof(app_package.gptr)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class appᴛgptr;\n",
+		"[GoMethodHost(typeof(app_package.kept)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class appᴛkept;\n",
+		"internal static nint N(this kept k) => app_package.N⁔(k);\n",
+	}, []string{
+		"ptr⁔",
+		"set⁔",
+	})
+}
+
+// Under a `go.go` namespace (a go/* package), a `go.`-rooted directive inside the namespace declaration finds `go.go`
+// first, so the namespace-level copies of package_info.cs's compilation-unit directives are rooted at global::, as a
+// converted file's `using static` is (globalQualifyRooted).
+func TestForwarderDirectivesUnderAShadowedRootTakeGlobal(t *testing.T) {
+	savedNamespace := packageNamespace
+	t.Cleanup(func() { packageNamespace = savedNamespace })
+
+	lines := []string{
+		"using iter = go.iter_package;",
+		"using go;",
+		"using static go.go.token_package;",
+		"",
+		"namespace go.go;",
+		"",
+		"[GoPackage(\"token\")]",
+	}
+
+	for _, test := range []struct {
+		namespace string
+		want      []string
+	}{
+		{"go.go", []string{"using static global::go.go.token_package;", "using iter = global::go.iter_package;", "using ꓸꓸꓸжFile = Span<ж<token_package.File>>;"}},
+		{"go.example", []string{"using static go.go.token_package;", "using iter = go.iter_package;", "using ꓸꓸꓸжFile = Span<ж<token_package.File>>;"}},
+	} {
+		packageNamespace = test.namespace
+		got := insertForwarderAliasDirectives(append([]string(nil), lines...), []string{"using ꓸꓸꓸжFile = Span<ж<token_package.File>>;"}, true)
+		want := append(append(append([]string(nil), lines[:5]...), ""), append(test.want, lines[5:]...)...)
+
+		if strings.Join(got, "\n") != strings.Join(want, "\n") {
+			t.Errorf("under namespace %s the directive block is\n%s\nwant\n%s", test.namespace, strings.Join(got, "\n"), strings.Join(want, "\n"))
+		}
+	}
 }

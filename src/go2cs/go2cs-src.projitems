@@ -311,6 +311,7 @@
     <None Include="$(MSBuildThisFileDirectory)genericLiftedInterfaceField_test.go" />
     <None Include="$(MSBuildThisFileDirectory)genericTypeAlias_test.go" />
     <None Include="$(MSBuildThisFileDirectory)globalAddressOperations.go" />
+    <None Include="$(MSBuildThisFileDirectory)glyphSystemNames.go" />
     <None Include="$(MSBuildThisFileDirectory)go.mod" />
     <None Include="$(MSBuildThisFileDirectory)go.sum" />
     <None Include="$(MSBuildThisFileDirectory)goDeferConstArgs.go" />
@@ -619,6 +620,8 @@
     <None Include="$(MSBuildThisFileDirectory)packageImportPathStamp_test.go" />
     <None Include="$(MSBuildThisFileDirectory)packageInfoAdoption_test.go" />
     <None Include="$(MSBuildThisFileDirectory)packageInfoLongLine_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)packageInfoSystemUsings.go" />
+    <None Include="$(MSBuildThisFileDirectory)packageInfoSystemUsings_test.go" />
     <None Include="$(MSBuildThisFileDirectory)packageInfoWriter.go" />
     <None Include="$(MSBuildThisFileDirectory)packageInitFacts.go" />
     <None Include="$(MSBuildThisFileDirectory)packageInputDigest.go" />

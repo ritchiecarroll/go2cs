@@ -8,7 +8,6 @@ using goarch = @internal.goarch_package;
 using goos = @internal.goos_package;
 using @unsafe = unsafe_package;
 using @internal;
-using static runtime_package;
 
 partial class runtime_package {
 
@@ -71,10 +70,8 @@ internal static taggedPointer taggedPointerPack(@unsafe.Pointer ptr, uintptr tag
     return t;
 }
 
-} partial class runtimeᴛtaggedPointer {
-
 // Pointer returns the pointer from a taggedPointer.
-internal static @unsafe.Pointer pointer(this taggedPointer tp) {
+internal static @unsafe.Pointer pointer⁔(/*this*/ taggedPointer tp) {
     if (GOARCH == "amd64"u8) {
         // amd64 systems can place the stack above the VA hole, so we need to sign extend
         // val before unpacking.
@@ -87,8 +84,8 @@ internal static @unsafe.Pointer pointer(this taggedPointer tp) {
 }
 
 // Tag returns the tag from a taggedPointer.
-internal static uintptr tag(this taggedPointer tp) {
+internal static uintptr tag⁔(/*this*/ taggedPointer tp) {
     return (uintptr)((taggedPointer)(tp & (uint64)((1 << (int)(tagBits)) - 1)));
 }
 
-}
+} // end runtime_package

@@ -12,7 +12,6 @@ using atomic = go.sync.atomic_package;
 // blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
 using @internal.trace;
 using go.sync;
-using static trace_package;
 
 partial class trace_package {
 
@@ -28,9 +27,7 @@ partial struct traceMultiplexer {
     internal ж<recorder> flightRecorder;
 }
 
-} partial class traceᴛtraceMultiplexer {
-
-internal static error subscribeFlightRecorder(this ж<traceMultiplexer> Ꮡt, ж<recorder> r) {
+internal static error subscribeFlightRecorder⁔(/*this*/ ж<traceMultiplexer> Ꮡt, ж<recorder> r) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -59,7 +56,7 @@ internal static error subscribeFlightRecorder(this ж<traceMultiplexer> Ꮡt, ж
     finally { if (ᒐd1) Ꮡt.of(traceMultiplexer.ᏑMutex).Unlock(); ᒐ.Run(); }
 }
 
-internal static error unsubscribeFlightRecorder(this ж<traceMultiplexer> Ꮡt) {
+internal static error unsubscribeFlightRecorder⁔(/*this*/ ж<traceMultiplexer> Ꮡt) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -85,7 +82,7 @@ internal static error unsubscribeFlightRecorder(this ж<traceMultiplexer> Ꮡt) 
     finally { if (ᒐd1) Ꮡt.of(traceMultiplexer.ᏑMutex).Unlock(); ᒐ.Run(); }
 }
 
-internal static error subscribeTraceStartWriter(this ж<traceMultiplexer> Ꮡt, io.Writer w) {
+internal static error subscribeTraceStartWriter⁔(/*this*/ ж<traceMultiplexer> Ꮡt, io.Writer w) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -114,7 +111,7 @@ internal static error subscribeTraceStartWriter(this ж<traceMultiplexer> Ꮡt, 
     finally { if (ᒐd1) Ꮡt.of(traceMultiplexer.ᏑMutex).Unlock(); ᒐ.Run(); }
 }
 
-internal static void unsubscribeTraceStartWriter(this ж<traceMultiplexer> Ꮡt) {
+internal static void unsubscribeTraceStartWriter⁔(/*this*/ ж<traceMultiplexer> Ꮡt) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -140,7 +137,7 @@ internal static void unsubscribeTraceStartWriter(this ж<traceMultiplexer> Ꮡt)
     finally { if (ᒐd1) Ꮡt.of(traceMultiplexer.ᏑMutex).Unlock(); ᒐ.Run(); }
 }
 
-internal static error addedSubscriber(this ж<traceMultiplexer> Ꮡt) {
+internal static error addedSubscriber⁔(/*this*/ ж<traceMultiplexer> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (Ꮡt.Ꮡenabled.Load()) {
@@ -155,7 +152,7 @@ internal static error addedSubscriber(this ж<traceMultiplexer> Ꮡt) {
     return default;
 }
 
-internal static void removingSubscriber(this ж<traceMultiplexer> Ꮡt) {
+internal static void removingSubscriber⁔(/*this*/ ж<traceMultiplexer> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (t.subscribers == 0) {
@@ -171,14 +168,14 @@ internal static void removingSubscriber(this ж<traceMultiplexer> Ꮡt) {
     }
 }
 
-internal static void removedSubscriber(this ref traceMultiplexer t) {
+internal static void removedSubscriber⁔(/*this*/ ref traceMultiplexer t) {
     if (t.subscribers > 0) {
         // This is necessary for the trace reader goroutine to pick up on the new subscriber.
         runtime_traceAdvance(false);
     }
 }
 
-internal static partial error startLocked(this ж<traceMultiplexer> Ꮡt) {
+internal static partial error startLocked⁔(/*this*/ ж<traceMultiplexer> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     var err = runtime.StartTrace(); if (err != nil) {
@@ -241,8 +238,6 @@ internal static partial error startLocked(this ж<traceMultiplexer> Ꮡt) {
     Ꮡt.Ꮡenabled.Store(true);
     return default;
 }
-
-} partial class trace_package {
 
 //go:linkname runtime_readTrace
 internal static partial slice<byte> /*buf*/ runtime_readTrace();

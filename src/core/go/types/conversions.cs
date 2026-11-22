@@ -13,15 +13,12 @@ using ast = global::go.go.ast_package;
 using errors = global::go.@internal.types.errors_package;
 using global::go.go;
 using ꓸꓸꓸany = Span<any>;
-using static types_package;
 
 partial class types_package {
 
-} partial class typesᴛChecker {
-
 // conversion type-checks the conversion T(x).
 // The result is in x.
-internal static void conversion(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, Type T) {
+internal static void conversion⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operand> Ꮡx, Type T) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     var constArg = x.mode == constant_;
@@ -138,8 +135,6 @@ internal static void conversion(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, Typ
     x.typ = T;
 }
 
-} partial class typesᴛoperand {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string conversionOfSliceToArrayˢ => ref conversionOfSliceToArrayˢᵇ;
 private static readonly @string conversionOfSliceToArrayˢᵇ = "conversion of slice to array requires go1.20 or later"u8;
@@ -160,7 +155,7 @@ private static readonly @string conversionOfSliceToArrayˢ2ᵇ = "conversion of 
 // may be set to the cause for the failure.
 // The check parameter may be nil if convertibleTo is invoked through an
 // exported API call, i.e., when all methods have been type-checked.
-internal static bool convertibleTo(this ж<operand> Ꮡx, ж<Checker> Ꮡcheck, Type T, ж<@string> Ꮡcause) {
+internal static bool convertibleTo⁔(/*this*/ ж<operand> Ꮡx, ж<Checker> Ꮡcheck, Type T, ж<@string> Ꮡcause) {
     ref var x = ref Ꮡx.DerefOrNull();
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var cause = ref Ꮡcause.DerefOrNull();
@@ -338,8 +333,6 @@ internal static bool convertibleTo(this ж<operand> Ꮡx, ж<Checker> Ꮡcheck, 
 
     return false;
 }
-
-} partial class types_package {
 
 internal static bool isUintptr(Type typ) {
     var (t, _) = typ.Underlying()._<ж<Basic>>(ᐧ);

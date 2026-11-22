@@ -10,7 +10,6 @@ using Δunicode = unicode_package;
 using utf8 = go.unicode.utf8_package;
 using go.unicode;
 using regexp;
-using static regexp_package;
 
 partial class regexp_package {
 
@@ -106,13 +105,11 @@ partial struct queueOnePass {
     internal uint32 size, nextIndex;
 }
 
-} partial class regexpᴛqueueOnePass {
-
-internal static bool empty(this ref queueOnePass q) {
+internal static bool empty⁔(/*this*/ ref queueOnePass q) {
     return q.nextIndex >= q.size;
 }
 
-internal static uint32 /*n*/ next(this ref queueOnePass q) {
+internal static uint32 /*n*/ next⁔(/*this*/ ref queueOnePass q) {
     uint32 n = default;
 
     n = q.dense[q.nextIndex];
@@ -120,25 +117,25 @@ internal static uint32 /*n*/ next(this ref queueOnePass q) {
     return n;
 }
 
-internal static void clear(this ref queueOnePass q) {
+internal static void clear⁔(/*this*/ ref queueOnePass q) {
     q.size = 0;
     q.nextIndex = 0;
 }
 
-internal static bool contains(this ref queueOnePass q, uint32 u) {
+internal static bool contains⁔(/*this*/ ref queueOnePass q, uint32 u) {
     if (u >= (uint32)len(q.sparse)) {
         return false;
     }
     return q.sparse[u] < q.size && q.dense[q.sparse[u]] == u;
 }
 
-internal static void insert(this ref queueOnePass q, uint32 u) {
+internal static void insert⁔(/*this*/ ref queueOnePass q, uint32 u) {
     if (!q.contains(u)) {
         q.insertNew(u);
     }
 }
 
-internal static void insertNew(this ref queueOnePass q, uint32 u) {
+internal static void insertNew⁔(/*this*/ ref queueOnePass q, uint32 u) {
     if (u >= (uint32)len(q.sparse)) {
         return;
     }
@@ -146,8 +143,6 @@ internal static void insertNew(this ref queueOnePass q, uint32 u) {
     q.dense[q.size] = u;
     q.size++;
 }
-
-} partial class regexp_package {
 
 internal static ж<queueOnePass> /*q*/ newQueue(nint size) {
     return Ꮡ(new queueOnePass(

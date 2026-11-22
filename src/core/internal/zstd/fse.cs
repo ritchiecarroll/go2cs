@@ -5,7 +5,6 @@ namespace go.@internal;
 
 using bits = math.bits_package;
 using math;
-using static zstd_package;
 
 partial class zstd_package {
 
@@ -15,8 +14,6 @@ partial struct fseEntry {
     internal uint8 bits;   // number of bits to read to determine next state
     internal uint16 @base; // add those bits to this state to get the next state
 }
-
-} partial class zstdᴛReader {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string fseAccuracyLogTooLargeˢ => ref fseAccuracyLogTooLargeˢᵇ;
@@ -34,7 +31,7 @@ private static readonly @string tooManySymbolsInFseTableˢᵇ = "too many symbol
 // The FSE is written into table, which must be at least 1<<maxBits in size.
 // This returns the number of bits in the FSE table and the new offset.
 // RFC 4.1.1.
-internal static (nint tableBits, nint roff, error err) readFSE(this ж<Reader> Ꮡr, block data, nint off, nint maxSym, nint maxBits, slice<fseEntry> table) {
+internal static (nint tableBits, nint roff, error err) readFSE⁔(/*this*/ ж<Reader> Ꮡr, block data, nint off, nint maxSym, nint maxBits, slice<fseEntry> table) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     var br = Ꮡr.makeBitReader(data, off);
@@ -174,7 +171,7 @@ private static readonly @string fseStateErrorˢᵇ = "FSE state error"u8;
 // buildFSE builds an FSE decoding table from a list of probabilities.
 // The probabilities are in norm. next is scratch space. The number of bits
 // in the table is tableBits.
-internal static error buildFSE(this ref Reader r, nint off, slice<int16> norm, slice<fseEntry> table, nint tableBits) {
+internal static error buildFSE⁔(/*this*/ ref Reader r, nint off, slice<int16> norm, slice<fseEntry> table, nint tableBits) {
     nint tableSize = ((nint)1).Lsh((int64)(tableBits));
     nint highThreshold = tableSize - 1;
 
@@ -225,8 +222,6 @@ internal static error buildFSE(this ref Reader r, nint off, slice<int16> norm, s
     return default;
 }
 
-} partial class zstd_package {
-
 // fseBaselineEntry is an entry in an FSE baseline table.
 // We use these for literal/match/length values.
 // Those require mapping the symbol to a baseline value,
@@ -268,14 +263,12 @@ internal static UntypedInt literalLengthOffset => 16;
     (uint32)(65536 | (16 << 24))
 ]; }
 
-} partial class zstdᴛReader {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string fseBaselineSymbolˢ => ref fseBaselineSymbolˢᵇ;
 private static readonly @string fseBaselineSymbolˢᵇ = "FSE baseline symbol overflow"u8;
 
 // makeLiteralBaselineFSE converts the literal length fseTable to baselineTable.
-internal static error makeLiteralBaselineFSE(this ref Reader r, nint off, slice<fseEntry> fseTable, slice<fseBaselineEntry> baselineTable) {
+internal static error makeLiteralBaselineFSE⁔(/*this*/ ref Reader r, nint off, slice<fseEntry> fseTable, slice<fseBaselineEntry> baselineTable) {
     foreach (var (i, e) in range(fseTable)) {
         var be = new fseBaselineEntry(
             bits: e.bits,
@@ -303,7 +296,7 @@ internal static ref readonly @string fseOffsetSymbolOverflowˢ => ref fseOffsetS
 private static readonly @string fseOffsetSymbolOverflowˢᵇ = "FSE offset symbol overflow"u8;
 
 // makeOffsetBaselineFSE converts the offset length fseTable to baselineTable.
-internal static error makeOffsetBaselineFSE(this ref Reader r, nint off, slice<fseEntry> fseTable, slice<fseBaselineEntry> baselineTable) {
+internal static error makeOffsetBaselineFSE⁔(/*this*/ ref Reader r, nint off, slice<fseEntry> fseTable, slice<fseBaselineEntry> baselineTable) {
     foreach (var (i, e) in range(fseTable)) {
         var be = new fseBaselineEntry(
             bits: e.bits,
@@ -341,8 +334,6 @@ internal static error makeOffsetBaselineFSE(this ref Reader r, nint off, slice<f
     return default;
 }
 
-} partial class zstd_package {
-
 // Given a match length code, we need to read a number of bits and add
 // that to a baseline. For states 0 to 31 the baseline is state+3 and
 // the number of bits is zero. RFC 3.1.1.3.2.1.1.
@@ -372,10 +363,8 @@ internal static UntypedInt matchLengthOffset => 32;
     (uint32)(65539 | (16 << 24))
 ]; }
 
-} partial class zstdᴛReader {
-
 // makeMatchBaselineFSE converts the match length fseTable to baselineTable.
-internal static error makeMatchBaselineFSE(this ref Reader r, nint off, slice<fseEntry> fseTable, slice<fseBaselineEntry> baselineTable) {
+internal static error makeMatchBaselineFSE⁔(/*this*/ ref Reader r, nint off, slice<fseEntry> fseTable, slice<fseBaselineEntry> baselineTable) {
     foreach (var (i, e) in range(fseTable)) {
         var be = new fseBaselineEntry(
             bits: e.bits,
@@ -397,8 +386,6 @@ internal static error makeMatchBaselineFSE(this ref Reader r, nint off, slice<fs
     }
     return default;
 }
-
-} partial class zstd_package {
 
 // predefinedLiteralTable is the predefined table to use for literal lengths.
 // Generated from table in RFC 3.1.1.3.2.2.1.

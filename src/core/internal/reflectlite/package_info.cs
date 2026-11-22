@@ -15,6 +15,9 @@ using abi = go.@internal.abi_package;
 
 using go;
 using static go.@internal.reflectlite_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -66,11 +69,14 @@ using static go.@internal.reflectlite_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/reflectlite/type.go", "type.cs", "AIsBrAKCpoKmgqaC6qKCgoKCggAICoKClIKmgoKUgoIACgaCgpSCgoKClKaCggACGgALDgAIBIKmgqaCAAQWlIKCgpSmgoKClAAEHIKClIKCgoKUtKSUxoKmgoKClO6CgoKUpoKCgpSmgoKClKaCgoKUpoKCgpSmgoKClKaCgoKUAAQU8qqiAAYagoKUgoKmggAGvgEACQSCyoK4prKCpoKmAATYAdKClA==")]
-[assembly: GoPositionMap("internal/reflectlite/value.go", "value.cs", "AE+kAYKmgoKUxtyqooKUgpTIkoKClJSCpoKCgoKU2MbsggAONIKClAAIIKKClIK+soKmgpSCAAUS0gAMvAHSqqLMxgAGMpKClAAELJKCgqYABBQACxwACQq4goKmgpS4lIKClJS4AAgU8qaayrKC")]
+[assembly: GoPositionMap("internal/reflectlite/type.go", "type.cs", "AIgBrAKCpoKmgqaC6qKCgoKCggAICoKClIKmgoKUgoIACAaCgpSCgoKClKaCggACGgALDuSCpoKmggAEFpSCgoKUpoKCgpQABByCgpSCgoKClLSklKaCpoKCgpTOgoKClKaCgoKUpoKCgpSmgoKClKaCgoKUpoKCgpSmgoKClAACFPKqogAEGoKClIKCpoIABL4BAAkEgsqCuKaygqaCpgAE2AHSgpQ=")]
+[assembly: GoPositionMap("internal/reflectlite/value.go", "value.cs", "AEykAYKmgoKUptyqooKUgpSokoKClJSCpoKCgoKU2MbsggAMNIKClAAEIKKClIK+soKmgpSCAAMS0gAIvAHSqqKsxgAEMpKClAAELJKCgqYAAhQACRwACQq4goKmgpS4lIKClJS4AAYU8qaayrKC")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;
+
+using static go.@internal.reflectlite_package;
+using abi = go.@internal.abi_package;
 
 [GoPackage("reflectlite")]
 public static partial class reflectlite_package
@@ -110,9 +116,62 @@ public static partial class reflectlite_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(reflectlite_package.Value)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class reflectliteᴛValue;
-[GoMethodHost(typeof(reflectlite_package.ValueError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class reflectliteᴛValueError;
-[GoMethodHost(typeof(reflectlite_package.flag)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class reflectliteᴛflag;
-[GoMethodHost(typeof(reflectlite_package.name)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class reflectliteᴛname;
-[GoMethodHost(typeof(reflectlite_package.rtype)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class reflectliteᴛrtype;
+[GoMethodHost(typeof(reflectlite_package.Value)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class reflectliteᴛValue;
+[GoMethodHost(typeof(reflectlite_package.ValueError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class reflectliteᴛValueError;
+[GoMethodHost(typeof(reflectlite_package.flag)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class reflectliteᴛflag;
+[GoMethodHost(typeof(reflectlite_package.name)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class reflectliteᴛname;
+[GoMethodHost(typeof(reflectlite_package.rtype)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class reflectliteᴛrtype;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class reflectliteᴛValue {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<abi.Type> typ(this Value v) => reflectlite_package.typ⁔(v);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static unsafe_package.Pointer pointer(this Value v) => reflectlite_package.pointer⁔(v);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool CanSet(this Value v) => reflectlite_package.CanSet⁔(v);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool IsValid(this Value v) => reflectlite_package.IsValid⁔(v);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static Kind Kind(this Value v) => reflectlite_package.Kind⁔(v);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint numMethod(this Value v) => reflectlite_package.numMethod⁔(v);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static Type Type(this Value v) => reflectlite_package.Type⁔(v);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static Value assignTo(this Value v, @string context, ж<abi.Type> Ꮡdst, unsafe_package.Pointer target) => reflectlite_package.assignTo⁔(v, context, Ꮡdst, target);
+}
+partial class reflectliteᴛValueError {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this ref ValueError e) => reflectlite_package.Error⁔(ref e);
+}
+partial class reflectliteᴛflag {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static Kind kind(this flag f) => reflectlite_package.kind⁔(f);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static flag ro(this flag f) => reflectlite_package.ro⁔(f);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void mustBeExported(this flag f) => reflectlite_package.mustBeExported⁔(f);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void mustBeAssignable(this flag f) => reflectlite_package.mustBeAssignable⁔(f);
+}
+partial class reflectliteᴛname {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<byte> data(this name n, nint off, @string whySafe) => reflectlite_package.data⁔(n, off, whySafe);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool isExported(this name n) => reflectlite_package.isExported⁔(n);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool hasTag(this name n) => reflectlite_package.hasTag⁔(n);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool embedded(this name n) => reflectlite_package.embedded⁔(n);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint, nint) readVarint(this name n, nint off) => reflectlite_package.readVarint⁔(n, off);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string name(this name n) => reflectlite_package.name⁔(n);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string tag(this name n) => reflectlite_package.tag⁔(n);
+}
+partial class reflectliteᴛrtype {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static abi.Name nameOff(this rtype t, nameOff off) => reflectlite_package.nameOff⁔(t, off);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<abi.Type> typeOff(this rtype t, typeOff off) => reflectlite_package.typeOff⁔(t, off);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<uncommonType> uncommon(this rtype t) => reflectlite_package.uncommon⁔(t);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<abi.Type> common(this rtype t) => reflectlite_package.common⁔(t);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<abi.Method> exportedMethods(this rtype t) => reflectlite_package.exportedMethods⁔(t);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint NumMethod(this rtype t) => reflectlite_package.NumMethod⁔(t);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string Name(this rtype t) => reflectlite_package.Name⁔(t);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static Type In(this rtype t, nint i) => reflectlite_package.In⁔(t, i);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static Type Key(this rtype t) => reflectlite_package.Key⁔(t);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint Len(this rtype t) => reflectlite_package.Len⁔(t);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint NumField(this rtype t) => reflectlite_package.NumField⁔(t);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint NumIn(this rtype t) => reflectlite_package.NumIn⁔(t);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint NumOut(this rtype t) => reflectlite_package.NumOut⁔(t);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static Type Out(this rtype t, nint i) => reflectlite_package.Out⁔(t, i);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool AssignableTo(this rtype t, Type u) => reflectlite_package.AssignableTo⁔(t, u);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool Comparable(this rtype t) => reflectlite_package.Comparable⁔(t);
+}
+// </MethodForwarders>

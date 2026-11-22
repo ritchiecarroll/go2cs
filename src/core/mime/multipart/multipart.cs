@@ -42,7 +42,6 @@ using @internal;
 using go.mime;
 using net;
 using path;
-using static multipart_package;
 
 partial class multipart_package {
 
@@ -72,15 +71,13 @@ partial struct Part {
     internal error readErr; // read error observed from mr.bufReader
 }
 
-} partial class multipartᴛPart {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string nameˢ => ref nameˢᵇ;
 private static readonly @string nameˢᵇ = "name"u8;
 
 // FormName returns the name parameter if p has a Content-Disposition
 // of type "form-data".  Otherwise it returns the empty string.
-public static @string FormName(this ref Part p) {
+internal static @string FormName⁔(/*this*/ ref Part p) {
     // See https://tools.ietf.org/html/rfc2183 section 2 for EBNF
     // of Content-Disposition value format.
     if (p.dispositionParams == nil) {
@@ -99,7 +96,7 @@ private static readonly @string filenameˢᵇ = "filename"u8;
 // FileName returns the filename parameter of the [Part]'s Content-Disposition
 // header. If not empty, the filename is passed through filepath.Base (which is
 // platform dependent) before being returned.
-public static @string FileName(this ref Part p) {
+internal static @string FileName⁔(/*this*/ ref Part p) {
     if (p.dispositionParams == nil) {
         p.parseContentDisposition();
     }
@@ -116,7 +113,7 @@ public static @string FileName(this ref Part p) {
 internal static ref readonly @string contentDispositionˢ => ref contentDispositionˢᵇ;
 private static readonly @string contentDispositionˢᵇ = "Content-Disposition"u8;
 
-internal static void parseContentDisposition(this ref Part p) {
+internal static void parseContentDisposition⁔(/*this*/ ref Part p) {
     @string v = p.Header.Get(contentDispositionˢ);
     error err = default;
     (p.disposition, p.dispositionParams, err) = mime.ParseMediaType(v);
@@ -124,8 +121,6 @@ internal static void parseContentDisposition(this ref Part p) {
         p.dispositionParams = emptyParams;
     }
 }
-
-} partial class multipart_package {
 
 // NewReader creates a new multipart [Reader] reading from r using the
 // given MIME boundary.
@@ -154,9 +149,7 @@ partial struct stickyErrorReader {
     internal error err;
 }
 
-} partial class multipartᴛstickyErrorReader {
-
-internal static (nint n, error) Read(this ref stickyErrorReader r, slice<byte> p) {
+internal static (nint n, error) Read⁔(/*this*/ ref stickyErrorReader r, slice<byte> p) {
     nint n = default;
 
     if (r.err != nil) {
@@ -165,8 +158,6 @@ internal static (nint n, error) Read(this ref stickyErrorReader r, slice<byte> p
     (n, r.err) = r.r.Read(p);
     return (n, r.err);
 }
-
-} partial class multipart_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string quotedPrintableˢ => ref quotedPrintableˢᵇ;
@@ -197,9 +188,7 @@ internal static (ж<Part>, error) newPart(ж<Reader> mr, bool rawPart, int64 max
     return (bp, default);
 }
 
-} partial class multipartᴛPart {
-
-internal static error populateHeaders(this ref Part p, int64 maxMIMEHeaderSize, int64 maxMIMEHeaders) {
+internal static error populateHeaders⁔(/*this*/ ref Part p, int64 maxMIMEHeaderSize, int64 maxMIMEHeaders) {
     var r = textproto.NewReader(p.mr.bufReader);
     var (header, err) = readMIMEHeader(r, maxMIMEHeaderSize, maxMIMEHeaders);
     if (err == nil) {
@@ -214,11 +203,9 @@ internal static error populateHeaders(this ref Part p, int64 maxMIMEHeaderSize, 
 
 // Read reads the body of a part, after its headers and before the
 // next part (if any) begins.
-public static (nint n, error err) Read(this ref Part p, slice<byte> d) {
+internal static (nint n, error err) Read⁔(/*this*/ ref Part p, slice<byte> d) {
     return p.r.Read(d);
 }
-
-} partial class multipart_package {
 
 // partReader implements io.Reader by reading raw bytes directly from the
 // wrapped *Part, without doing any Transfer-Encoding decoding.
@@ -226,9 +213,7 @@ partial struct partReader {
     internal ж<Part> p;
 }
 
-} partial class multipartᴛpartReader {
-
-internal static (nint, error) Read(this partReader pr, slice<byte> d) {
+internal static (nint, error) Read⁔(/*this*/ partReader pr, slice<byte> d) {
     var p = pr.p;
     var br = p.mr.bufReader;
 
@@ -262,8 +247,6 @@ internal static (nint, error) Read(this partReader pr, slice<byte> d) {
     }
     return (n, default);
 }
-
-} partial class multipart_package {
 
 // scanUntilBoundary scans buf to identify how much of it can be safely
 // returned as part of the Part body.
@@ -365,14 +348,10 @@ internal static nint matchAfterPrefix(slice<byte> buf, slice<byte> prefix, error
     return -1;
 }
 
-} partial class multipartᴛPart {
-
-public static error Close(this ж<Part> Ꮡp) {
+internal static error Close⁔(/*this*/ ж<Part> Ꮡp) {
     io.Copy(io.Discard, new PartжReader(Ꮡp));
     return default;
 }
-
-} partial class multipart_package {
 
 // Reader is an iterator over parts in a MIME multipart body.
 // Reader's underlying parser consumes its input as needed. Seeking
@@ -407,15 +386,13 @@ internal static int64 maxMIMEHeaders() {
     return 10000;
 }
 
-} partial class multipartᴛReader {
-
 // NextPart returns the next part in the multipart or an error.
 // When there are no more parts, the error [io.EOF] is returned.
 //
 // As a special case, if the "Content-Transfer-Encoding" header
 // has a value of "quoted-printable", that header is instead
 // hidden and the body is transparently decoded during Read calls.
-public static (ж<Part>, error) NextPart(this ж<Reader> Ꮡr) {
+internal static (ж<Part>, error) NextPart⁔(/*this*/ ж<Reader> Ꮡr) {
     return Ꮡr.nextPart(false, maxMIMEHeaderSize, maxMIMEHeaders());
 }
 
@@ -424,11 +401,11 @@ public static (ж<Part>, error) NextPart(this ж<Reader> Ꮡr) {
 //
 // Unlike [Reader.NextPart], it does not have special handling for
 // "Content-Transfer-Encoding: quoted-printable".
-public static (ж<Part>, error) NextRawPart(this ж<Reader> Ꮡr) {
+internal static (ж<Part>, error) NextRawPart⁔(/*this*/ ж<Reader> Ꮡr) {
     return Ꮡr.nextPart(true, maxMIMEHeaderSize, maxMIMEHeaders());
 }
 
-internal static (ж<Part>, error) nextPart(this ж<Reader> Ꮡr, bool rawPart, int64 maxMIMEHeaderSize, int64 maxMIMEHeaders) {
+internal static (ж<Part>, error) nextPart⁔(/*this*/ ж<Reader> Ꮡr, bool rawPart, int64 maxMIMEHeaderSize, int64 maxMIMEHeaders) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     if (r.currentPart != nil) {
@@ -493,7 +470,7 @@ internal static (ж<Part>, error) nextPart(this ж<Reader> Ꮡr, bool rawPart, i
 // isFinalBoundary reports whether line is the final boundary line
 // indicating that all parts are over.
 // It matches `^--boundary--[ \t]*(\r\n)?$`
-internal static bool isFinalBoundary(this ref Reader r, slice<byte> line) {
+internal static bool isFinalBoundary⁔(/*this*/ ref Reader r, slice<byte> line) {
     if (!bytes.HasPrefix(line, r.dashBoundaryDash)) {
         return false;
     }
@@ -502,7 +479,7 @@ internal static bool isFinalBoundary(this ref Reader r, slice<byte> line) {
     return len(rest) == 0 || bytes.Equal(rest, r.nl);
 }
 
-internal static bool /*ret*/ isBoundaryDelimiterLine(this ref Reader r, slice<byte> line) {
+internal static bool /*ret*/ isBoundaryDelimiterLine⁔(/*this*/ ref Reader r, slice<byte> line) {
     // https://tools.ietf.org/html/rfc2046#section-5.1
     //   The boundary delimiter line is then defined as a line
     //   consisting entirely of two hyphen characters ("-",
@@ -524,8 +501,6 @@ internal static bool /*ret*/ isBoundaryDelimiterLine(this ref Reader r, slice<by
     }
     return bytes.Equal(rest, r.nl);
 }
-
-} partial class multipart_package {
 
 // skipLWSPChar returns b with leading spaces and tabs removed.
 // RFC 822 defines:

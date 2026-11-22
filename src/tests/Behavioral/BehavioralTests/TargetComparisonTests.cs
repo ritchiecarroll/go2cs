@@ -1522,6 +1522,12 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckMnSpinCap() => CheckTarget("MnSpinCap");
 
     [TestMethod]
+    public void CheckMnGlyphMethodFrames() => CheckTarget("MnGlyphMethodFrames");
+
+    [TestMethod]
+    public void CheckGlyphLibraryFrameNames() => CheckTarget("GlyphLibraryFrameNames");
+
+    [TestMethod]
     public void CheckMultiFileInitOrder() => CheckTarget("MultiFileInitOrder");
 
     [TestMethod]
@@ -1967,6 +1973,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckPackageAliasRootedTypeArgs() => CheckTarget("PackageAliasRootedTypeArgs");
+
+    [TestMethod]
+    public void CheckPackageInfoUsingsClash() => CheckTarget("PackageInfoUsingsClash");
 
     [TestMethod]
     public void CheckPackageNameNotDirName() => CheckTarget("PackageNameNotDirName");

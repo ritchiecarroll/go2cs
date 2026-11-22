@@ -14,6 +14,9 @@
 
 using go;
 using static go.crypto.@internal.fips140.aes.gcm_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -64,16 +67,18 @@ using static go.crypto.@internal.fips140.aes.gcm_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("crypto/internal/fips140/aes/gcm/cast.go", "cast.cs", "AA4cuIK4uNyCgpSCgpQ=", "18-42:1")]
-[assembly: GoPositionMap("crypto/internal/fips140/aes/gcm/cmac.go", "cmac.cs", "ABkwooKCxqKCgpSCgqaigoKClIKCgpSCgpSUgpSUgoKClMiygoKU")]
-[assembly: GoPositionMap("crypto/internal/fips140/aes/gcm/ctrkdf.go", "ctrkdf.cs", "ABs2ksiygpSCgpSClIKUgoI=")]
-[assembly: GoPositionMap("crypto/internal/fips140/aes/gcm/gcm.go", "gcm.cs", "ABcslAAKDvKClIKUgpSCgoKCAAkUgqaCpoKCpqKClIKUgqaCgpSCpoLGtKKCuIKmgpSCpoKClIKmgsqClM7ygpSClII=")]
+[assembly: GoPositionMap("crypto/internal/fips140/aes/gcm/cmac.go", "cmac.cs", "ABgwooKCpqKCgpSCgqaigoKClIKCgpSCgpSUgpSUgoKClKiygoKU")]
+[assembly: GoPositionMap("crypto/internal/fips140/aes/gcm/ctrkdf.go", "ctrkdf.cs", "ABo2kqiygpSCgpSClIKUgoI=")]
+[assembly: GoPositionMap("crypto/internal/fips140/aes/gcm/gcm.go", "gcm.cs", "ABYslAAKDvKClIKUgpSCgoKCAAcUgqaCpoKCpqKClIKUgqaCgpSCpoKmlKKCuIKmgpSCpoKClIKmgsqClK7ygpSClII=")]
 [assembly: GoPositionMap("crypto/internal/fips140/aes/gcm/gcm_generic.go", "gcm_generic.cs", "AA0agqKCgpSUgoKmoqKCgpSClIKCgqaUrAALDoKClIKCvtKUgoKUgoKmgoKCvMKCqsKCgoKCgoI=")]
 [assembly: GoPositionMap("crypto/internal/fips140/aes/gcm/gcm_noasm.go", "gcm_noasm.cs", "AAgSyJSCpoI=")]
-[assembly: GoPositionMap("crypto/internal/fips140/aes/gcm/gcm_nonces.go", "gcm_nonces.cs", "ABMyAAgCgpSClIKUgpSClIKCAAIWAAgCgoKUAAIQ0oKCpq7CgoKUAA0YlJzigqaClIKUgqaClIKUpoKUgpSmgqaCggAEGgAKAoKClK7CgoKUrsKCgpQAAhwACwKCgpSCgpQAEigACQKClIKUgoKCppSc4oKmgoK4goKUgpSmgpSClKaCpoKC")]
+[assembly: GoPositionMap("crypto/internal/fips140/aes/gcm/gcm_nonces.go", "gcm_nonces.cs", "ABIyAAgCgpSClIKUgpSClIKCAAIWAAgCgoKUAAIQ0oKCpq7CgoKUAAsYlJzigqaClIKUgqaClIKUpoKUgpSmgqaCggACGgAKAoKClK7CgoKUrsKCgpQAAhwACwKCgpSCgpQAECgACQKClIKUgoKCppSc4oKmgoK4goKUgpSmgpSClKaCpoKC")]
 [assembly: GoPositionMap("crypto/internal/fips140/aes/gcm/ghash.go", "ghash.cs", "ABg20oKCgq4ACAYACA64lIKCpoKCpoKokoKCqKSosqaCggAIEoKmpsySlIKCgsqCgoKCgriUgoK4qqKCgoKCvKKClIKCgg==", "", "", "55=BEUint64/1/2/1,BEUint64/2/2/2")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140.aes;
+
+using static go.crypto.@internal.fips140.aes.gcm_package;
 
 [GoPackage("gcm")]
 public static partial class gcm_package
@@ -118,9 +123,43 @@ public static partial class gcm_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(gcm_package.CMAC)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class gcmᴛCMAC;
-[GoMethodHost(typeof(gcm_package.CounterKDF)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class gcmᴛCounterKDF;
-[GoMethodHost(typeof(gcm_package.GCM)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class gcmᴛGCM;
-[GoMethodHost(typeof(gcm_package.GCMWithCounterNonce)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class gcmᴛGCMWithCounterNonce;
-[GoMethodHost(typeof(gcm_package.GCMWithXORCounterNonce)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class gcmᴛGCMWithXORCounterNonce;
+[GoMethodHost(typeof(gcm_package.CMAC)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class gcmᴛCMAC;
+[GoMethodHost(typeof(gcm_package.CounterKDF)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class gcmᴛCounterKDF;
+[GoMethodHost(typeof(gcm_package.GCM)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class gcmᴛGCM;
+[GoMethodHost(typeof(gcm_package.GCMWithCounterNonce)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class gcmᴛGCMWithCounterNonce;
+[GoMethodHost(typeof(gcm_package.GCMWithXORCounterNonce)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class gcmᴛGCMWithXORCounterNonce;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class gcmᴛCMAC {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void deriveSubkeys(this ж<CMAC> Ꮡc) => gcm_package.deriveSubkeys⁔(Ꮡc);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static array<byte> MAC(this ж<CMAC> Ꮡc, slice<byte> m) => gcm_package.MAC⁔(Ꮡc, m);
+}
+partial class gcmᴛCounterKDF {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static array<byte> DeriveKey(this ж<CounterKDF> Ꮡkdf, byte label, /*[12]*/ array<byte> context) => gcm_package.DeriveKey⁔(Ꮡkdf, label, context);
+}
+partial class gcmᴛGCM {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint NonceSize(this ref GCM g) => gcm_package.NonceSize⁔(ref g);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Overhead(this ref GCM g) => gcm_package.Overhead⁔(ref g);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> Seal(this ж<GCM> Ꮡg, slice<byte> dst, slice<byte> nonce, slice<byte> plaintext, slice<byte> data) => gcm_package.Seal⁔(Ꮡg, dst, nonce, plaintext, data);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<byte> sealAfterIndicator(this ж<GCM> Ꮡg, slice<byte> dst, slice<byte> nonce, slice<byte> plaintext, slice<byte> data) => gcm_package.sealAfterIndicator⁔(Ꮡg, dst, nonce, plaintext, data);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<byte>, error) Open(this ж<GCM> Ꮡg, slice<byte> dst, slice<byte> nonce, slice<byte> ciphertext, slice<byte> data) => gcm_package.Open⁔(Ꮡg, dst, nonce, ciphertext, data);
+}
+partial class gcmᴛGCMWithCounterNonce {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint NonceSize(this ref GCMWithCounterNonce g) => gcm_package.NonceSize⁔(ref g);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Overhead(this ref GCMWithCounterNonce g) => gcm_package.Overhead⁔(ref g);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> Seal(this ж<GCMWithCounterNonce> Ꮡg, slice<byte> dst, slice<byte> nonce, slice<byte> plaintext, slice<byte> data) => gcm_package.Seal⁔(Ꮡg, dst, nonce, plaintext, data);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<byte>, error) Open(this ж<GCMWithCounterNonce> Ꮡg, slice<byte> dst, slice<byte> nonce, slice<byte> ciphertext, slice<byte> data) => gcm_package.Open⁔(Ꮡg, dst, nonce, ciphertext, data);
+}
+partial class gcmᴛGCMWithXORCounterNonce {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error SetNoncePrefixAndMask(this ref GCMWithXORCounterNonce g, slice<byte> nonce) => gcm_package.SetNoncePrefixAndMask⁔(ref g, nonce);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint NonceSize(this ref GCMWithXORCounterNonce g) => gcm_package.NonceSize⁔(ref g);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Overhead(this ref GCMWithXORCounterNonce g) => gcm_package.Overhead⁔(ref g);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> Seal(this ж<GCMWithXORCounterNonce> Ꮡg, slice<byte> dst, slice<byte> nonce, slice<byte> plaintext, slice<byte> data) => gcm_package.Seal⁔(Ꮡg, dst, nonce, plaintext, data);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<byte>, error) Open(this ж<GCMWithXORCounterNonce> Ꮡg, slice<byte> dst, slice<byte> nonce, slice<byte> ciphertext, slice<byte> data) => gcm_package.Open⁔(Ꮡg, dst, nonce, ciphertext, data);
+}
+// </MethodForwarders>

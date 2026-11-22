@@ -5,7 +5,6 @@ namespace go.crypto.@internal.fips140.edwards25519;
 
 using bits = math.bits_package;
 using math;
-using static field_package;
 
 partial class field_package {
 
@@ -259,11 +258,9 @@ internal static void feSquareGeneric(ref Element v, ref Element a) {
     v.l4 = (rr4 & maskLow51Bits) + (rr3 >> 51);
 }
 
-} partial class fieldᴛElement {
-
 // carryPropagate brings the limbs below 52 bits by applying the reduction
 // identity (a * 2²⁵⁵ + b = a * 19 + b) to the l4 carry.
-internal static ж<Element> carryPropagate(this ж<Element> Ꮡv) {
+internal static ж<Element> carryPropagate⁔(/*this*/ ж<Element> Ꮡv) {
     ref var v = ref Ꮡv.DerefOrNull();
 
     // (l4>>51) is at most 64 - 51 = 13 bits, so (l4>>51)*19 is at most 18 bits, and
@@ -278,4 +275,4 @@ internal static ж<Element> carryPropagate(this ж<Element> Ꮡv) {
     return Ꮡv;
 }
 
-}
+} // end field_package

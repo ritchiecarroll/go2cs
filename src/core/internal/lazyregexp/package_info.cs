@@ -10,10 +10,14 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+using regexp = go.regexp_package;
 // </ImportedTypeAliases>
 
 using go;
 using static go.@internal.lazyregexp_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -59,10 +63,13 @@ using static go.@internal.lazyregexp_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/lazyregexp/lazyre.go", "lazyre.cs", "ABswooKmgoKmgqaCpoKmgqaCpoKmgqaCxpqygpSU")]
+[assembly: GoPositionMap("internal/lazyregexp/lazyre.go", "lazyre.cs", "ABgwooKmgoKmgqaCpoKmgqaCpoKmgqaCppqygpSU")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;
+
+using static go.@internal.lazyregexp_package;
+using regexp = go.regexp_package;
 
 [GoPackage("lazyregexp")]
 public static partial class lazyregexp_package
@@ -98,5 +105,24 @@ public static partial class lazyregexp_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(lazyregexp_package.Regexp)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class lazyregexpᴛRegexp;
+[GoMethodHost(typeof(lazyregexp_package.Regexp)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class lazyregexpᴛRegexp;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class lazyregexpᴛRegexp {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<regexp.Regexp> re(this ж<Regexp> Ꮡr) => lazyregexp_package.re⁔(Ꮡr);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void build(this ref Regexp r) => lazyregexp_package.build⁔(ref r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<slice<byte>> FindSubmatch(this ж<Regexp> Ꮡr, slice<byte> s) => lazyregexp_package.FindSubmatch⁔(Ꮡr, s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<@string> FindStringSubmatch(this ж<Regexp> Ꮡr, @string s) => lazyregexp_package.FindStringSubmatch⁔(Ꮡr, s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<nint> FindStringSubmatchIndex(this ж<Regexp> Ꮡr, @string s) => lazyregexp_package.FindStringSubmatchIndex⁔(Ꮡr, s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string ReplaceAllString(this ж<Regexp> Ꮡr, @string src, @string repl) => lazyregexp_package.ReplaceAllString⁔(Ꮡr, src, repl);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string FindString(this ж<Regexp> Ꮡr, @string s) => lazyregexp_package.FindString⁔(Ꮡr, s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<@string> FindAllString(this ж<Regexp> Ꮡr, @string s, nint n) => lazyregexp_package.FindAllString⁔(Ꮡr, s, n);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool MatchString(this ж<Regexp> Ꮡr, @string s) => lazyregexp_package.MatchString⁔(Ꮡr, s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<@string> SubexpNames(this ж<Regexp> Ꮡr) => lazyregexp_package.SubexpNames⁔(Ꮡr);
+}
+// </MethodForwarders>

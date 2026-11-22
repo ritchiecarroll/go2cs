@@ -14,6 +14,9 @@
 
 using go;
 using static go.crypto.@internal.fips140.drbg_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -60,12 +63,14 @@ using static go.crypto.@internal.fips140.drbg_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("crypto/internal/fips140/drbg/cast.go", "cast.cs", "AA0cuIIABxAABxAABxDcgoKCgoKU", "18-57:1")]
-[assembly: GoPositionMap("crypto/internal/fips140/drbg/ctrdrbg.go", "ctrdrbg.cs", "AC5clJSCuJSCgqaCgoKCxtaCgoKmlIKClMaigoKCgoLG1JSCgoKo1JSCuIK4gsq4goKmpqY=")]
+[assembly: GoPositionMap("crypto/internal/fips140/drbg/ctrdrbg.go", "ctrdrbg.cs", "AC1clJSCuJSCgqaCgoKCptaCgoKmlIKClKaigoKCgoKm1JSCgoKo1JSCuIK4gsq4goKmpqY=")]
 [assembly: GoPositionMap("crypto/internal/fips140/drbg/entropy_fips140.go", "entropy_fips140.cs", "AB48goKS7oKUpA==")]
 [assembly: GoPositionMap("crypto/internal/fips140/drbg/rand.go", "rand.cs", "ABwwAAMS0oKUgoKCpoKCAAcQgpSCgpSSgriCgsqCgpS0AAQS0gAMGqKCgqaCgg==", "60-64:1", "", "", "", "66:21,67:13")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140;
+
+using static go.crypto.@internal.fips140.drbg_package;
 
 [GoPackage("drbg")]
 public static partial class drbg_package
@@ -110,5 +115,17 @@ public static partial class drbg_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(drbg_package.Counter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class drbgᴛCounter;
+[GoMethodHost(typeof(drbg_package.Counter)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class drbgᴛCounter;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class drbgᴛCounter {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void update(this ж<Counter> Ꮡc, /*[48]*/ ж<array<byte>> Ꮡseed) => drbg_package.update⁔(Ꮡc, Ꮡseed);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Reseed(this ж<Counter> Ꮡc, /*[48]*/ ж<array<byte>> Ꮡentropy, /*[48]*/ ж<array<byte>> ᏑadditionalInput) => drbg_package.Reseed⁔(Ꮡc, Ꮡentropy, ᏑadditionalInput);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool /*reseedRequired*/ Generate(this ж<Counter> Ꮡc, slice<byte> @out, /*[48]*/ ж<array<byte>> ᏑadditionalInput) => drbg_package.Generate⁔(Ꮡc, @out, ᏑadditionalInput);
+}
+// </MethodForwarders>

@@ -14,6 +14,9 @@
 
 using go;
 using static go.@internal.types.errors_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -55,10 +58,12 @@ using static go.@internal.types.errors_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/types/errors/code_string.go", "code_string.cs", "AAkOhqKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCggAPGoKCgoK2gpSkgqSCpIKkgqSCpA==")]
+[assembly: GoPositionMap("internal/types/errors/code_string.go", "code_string.cs", "AAgOhqKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCggAPGoKCgoKWgpSkgqSCpIKkgqSCpA==")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.types;
+
+using static go.@internal.types.errors_package;
 
 [GoPackage("errors")]
 public static partial class errors_package
@@ -91,5 +96,15 @@ public static partial class errors_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(errors_package.Code)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class errorsᴛCode;
+[GoMethodHost(typeof(errors_package.Code)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class errorsᴛCode;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class errorsᴛCode {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this Code i) => errors_package.String⁔(i);
+}
+// </MethodForwarders>
