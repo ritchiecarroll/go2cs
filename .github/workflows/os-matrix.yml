@@ -1825,6 +1825,28 @@ jobs:
       # control) and on the scheduler at three sizes. A sampler outside the process counts its OS threads, and the
       # scheduler prints its own reading.
       # -------------------------------------------------------------------------------------
+      # SCRATCH (claude/c1-scratch-glyph-twins, never merges): print the filtered program's stdout three ways, so a
+      # stdout mismatch names its lines: the C# build on the scheduler (GO2CS_MN=1), the same build on the thread path,
+      # and go run.
+      - name: scratch — direct stdout of the filtered program
+        if: always() && needs.plan.outputs.stage == 'behavioral-smoke'
+        timeout-minutes: 10
+        shell: bash
+        env:
+          F: ${{ needs.plan.outputs.filter }}
+        run: |
+          set +e
+          dir="src/tests/Behavioral/$F"
+          dll=$(find "$dir" -path '*/bin/*' -name "$F.dll" | grep -v '/ref/' | head -1)
+          echo "DIRECT dll=$dll"
+          ls "$dir/Generated/go2cs-gen/go2cs.TwinGenerator/" 2>/dev/null | sed 's/^/DIRECT generated: /'
+          ls "$dir/glyphlib/Generated/go2cs-gen/go2cs.TwinGenerator/" 2>/dev/null | sed 's/^/DIRECT lib generated: /'
+          if [ -n "$dll" ]; then
+            echo "---- C# GO2CS_MN=1"; GO2CS_MN=1 dotnet "$dll" 2>&1 | tr -d '\r' | sed 's/^/MN| /'; echo "rc=${PIPESTATUS[0]}"
+            echo "---- C# thread path"; env -u GO2CS_MN dotnet "$dll" 2>&1 | tr -d '\r' | sed 's/^/TP| /'; echo "rc=${PIPESTATUS[0]}"
+          fi
+          echo "---- go run"; (cd "$dir" && go run . 2>&1) | tr -d '\r' | sed 's/^/GO| /'
+
       - name: M:N spike — direct runs of the twinned storm
         if: always() && needs.plan.outputs.stage == 'behavioral-smoke' && needs.plan.outputs.filter == 'MnMixedStorm'
         timeout-minutes: 30
