@@ -100,3 +100,25 @@ default), linux, darwin, and linux with arm64.
 The four sites now refuse by name instead of calling a nil func. Each one stores a funcval whose word is a code PC,
 which `FuncOfWord` refuses (arm 3). Neither site is reachable today. debugCallWrap2 runs only under debugger call
 injection, and cgocallbackg1 only for cgo callbacks, which are Phase 5.
+
+## 3. Battery prediction (committed before the battery)
+
+The battery runs at this section's own commit, with train 4's tip `afb01dfb6c` as the base. Every gate runs
+unfiltered. D-1 is the regen above, the same instrument, so the battery does not run it again. Absolute suite
+totals are given only where this tree can derive them. No train-4 union reading is held on this box, so each
+other total is predicted as a difference from train 4's.
+
+- **GenTests:** 0 failed. The total equals train 4's, because TC-13 adds no GenTests row and touches no generator.
+- **GolibTests, Release and Debug:** 0 failed at both configurations. Each total is train 4's plus 7, which are
+  `FuncOfWordTests`' 7 methods. None of the 7 is behind `Assert.Inconclusive` or an OS gate, so the skips equal
+  train 4's at each configuration. By every earlier reading that is 52 for Release and 77 for Debug.
+- **go test ./...:** 0 FAIL, including TestLicensing and TestFuncWordShapes.
+- **repoguard, full, -count=1:** rc 0. The pointer on pointers.md's w4 comment line moves no line, and the
+  record is in docs/phase4, which the provenance guard does not read.
+- **CNR:** NO REGRESSION. It transpiles 1,176 behavioral packages, a count derived from the tree: every directory
+  under src/tests/Behavioral that holds a non-test `.go` file. Calibrated against 1c's tip, this count read 1,151
+  where that CNR printed 1,151. The byte-identical count is 1,176 minus the platform-exclusive skips, which TC-13
+  does not change.
+- **D-5, go2cs-gen output at the base against the tip:** 0 differ, 0 only-in-base and 0 only-in-tip, with equal
+  file counts. If this misses, the files to expect are FuncWordShapes' generated files, because its `main.cs` and
+  `package_info.cs` are the only behavioral sources that change.
