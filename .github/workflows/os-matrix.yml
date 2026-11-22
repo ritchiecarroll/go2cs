@@ -1961,7 +1961,7 @@ jobs:
           # output that differs from Go's at the same n, is named too. Every arm still runs and prints its READING, and the
           # step fails at the end, one ::error:: line per failure. 180 s is six times the slowest storm recorded (29.6 s,
           # osx-arm64, 3 P, at 100,000), and seven arms at 180 s fit the step's 30 minutes.
-          deadline=${MN_DIRECT_DEADLINE_S:-180}
+          deadline=${MN_DIRECT_DEADLINE_S:-1}
           failures=()
           declare -A goOut
           one() {
