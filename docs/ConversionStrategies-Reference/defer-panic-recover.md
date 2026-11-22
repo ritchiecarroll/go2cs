@@ -33,7 +33,7 @@ Each part does one of the three things Go's runtime does for free:
   path — normal return, panic, `runtime.Goexit`, or a mapped runtime fault. They run **after** the
   panic has been parked, which is exactly what lets a deferred call recover the panic raised by the
   body it was registered in;
-- the **frame** is the defer list. It is a `ref struct`, so it lives in the method's own stack frame,
+- the **frame** is the defer list. It is a struct local (GO2CS0016 refuses a copy), so it lives in the method's own stack frame,
   the JIT can enregister its four inline slots, and the machinery allocates **nothing**.
 
 `GoFrame.Run()` is the whole of the ordering contract: LIFO drain, the `HandledPanic` save/restore
@@ -1225,6 +1225,15 @@ internal static (ж<Regexp>, error err) parse(@string s, Flags flags) {
 ```
 
 A result list that is entirely **unnamed** (`func f() (int, error)`) or entirely blank keeps the plain form: there is nothing deferred code could mutate, and Go likewise returns the zero results after a recover. Go forbids mixing named and unnamed results, so seeing one truly unnamed result settles the whole signature. (Guarded by the `NamedReturnDefer` extension — a `(_ *box, err error)` function whose recover sets `err`; the pre-fix converter compiles it and returns `(nil, nil)`.)
+
+A named result that **owns array storage** — an array, or a struct holding one (`valueAssignMethod`) — is assigned **in place** by an explicit `return`, as an `=` to it is: in Go the result IS its storage, so a slice, an element pointer or a window taken from it before the `return` still names it when a deferred call writes through it afterwards. The swap `a = v` left every one of those on the old storage and the deferred write missed the result (Go `7 2`, converted `1 2`). A single result emits `a.Assign(v)` / `h.AssignFrom(v)` with no clone; in a tuple each such operand becomes a temporary in the deconstruction and its copy follows the statement, as in `internal/trace`'s `Reader.ReadEvent` (Go `return Event{}, io.EOF`):
+
+<!-- source: src/core/internal/trace/reader.cs:102 -->
+```csharp
+            (var eᴛ1, err) = (new Event(), io.EOF); e.AssignFrom(eᴛ1); goto ᒐdone;
+```
+
+A function literal's escaping named array result takes `heap(new array<T>(N), out var Ꮡa)`, never `heap<array<T>>(out …)`, which boxes `default(array<T>)` with no storage. (Guarded by `ArrayViewWholeAssign`'s 14 `ret` lines, output-compared vs Go; DESIGN-array-pointer-doors.md §22.)
 
 ## Function-literal named results
 

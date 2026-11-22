@@ -338,6 +338,12 @@ zero
 ᐧᐧ
 ᐸꟷ
 ꓸꓸꓸ
+# M:N PROTOTYPE ONLY (claude/g-mn-proto-b0, which never lands as it is): the twin entry points the prototype adds
+# to builtin, listed here so the public-surface guard master landed in batch 302 reads them as known.
+RunMainꞏtwin
+goǃtwin
+selectꞏtwin
+ᐸꟷꞏtwin
 
 [tier1-members]
 go.EmptyStruct :: ctor (go.NilType)
@@ -1239,3 +1245,83 @@ go.ж<T> :: property T& Value { get; }
 go.ж<T> :: property T& ValueSlot { get; }
 go.ж<T> :: property go.PointerStorage StorageKind { get; }
 go.ж<T> :: property static go.ж<T> NilBox { get; }
+
+# [mn-frozen] The M:N surface frozen for L-min (COORD ruling 2026-11-20, on G's 7b ask; the owner ruled L-min the same
+# day): every public or protected member of the six task types, of GoFuncPair, and of the two attributes generated
+# code places or names ([GoParkForwarder], the [GoTwinOf] stamp), hidden or not, with one shape line per type, and
+# the named twin entry points (builtin RunMainꞏtwin, goǃtwin, selectꞏtwin, ᐸꟷꞏtwin; channel`1 ᐸꟷꞏtwin), each
+# name's whole overload family. A twin-built assembly binds them, so a line never disappears and changes only where
+# its plain member does (src/tools/mnspike2/TwinRefs/FREEZE-SHEET.md, block 7b). Same spelling as [tier1-members];
+# GolibTests writes the lines with GO2CS_PUBLIC_SURFACE_MN_FROZEN=<path>. A change here needs a COORD ruling, cited
+# beside it. ONE section: train 3 met two [mn-frozen] headers (7a's and 7d's), so a repeated header now throws.
+
+[mn-frozen]
+go.builtin :: method static System.Void RunMainꞏtwin(System.Action, System.Func<go.golib.GoTask>)
+go.builtin :: method static System.Void goǃtwin(System.Action, System.Func<go.golib.GoTask>, System.String = , System.Int32 = 0)
+go.builtin :: method static System.Void goǃtwin<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(System.Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>, System.Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, go.golib.GoTask>, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, System.String = , System.Int32 = 0)
+go.builtin :: method static System.Void goǃtwin<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(System.Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>, System.Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, go.golib.GoTask>, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, System.String = , System.Int32 = 0)
+go.builtin :: method static System.Void goǃtwin<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(System.Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>, System.Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, go.golib.GoTask>, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, System.String = , System.Int32 = 0)
+go.builtin :: method static System.Void goǃtwin<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>(System.Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>, System.Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, go.golib.GoTask>, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, System.String = , System.Int32 = 0)
+go.builtin :: method static System.Void goǃtwin<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>(System.Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>, System.Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, go.golib.GoTask>, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, System.String = , System.Int32 = 0)
+go.builtin :: method static System.Void goǃtwin<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(System.Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>, System.Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, go.golib.GoTask>, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, System.String = , System.Int32 = 0)
+go.builtin :: method static System.Void goǃtwin<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(System.Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>, System.Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, go.golib.GoTask>, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, System.String = , System.Int32 = 0)
+go.builtin :: method static System.Void goǃtwin<T1, T2, T3, T4, T5, T6, T7, T8, T9>(System.Action<T1, T2, T3, T4, T5, T6, T7, T8, T9>, System.Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, go.golib.GoTask>, T1, T2, T3, T4, T5, T6, T7, T8, T9, System.String = , System.Int32 = 0)
+go.builtin :: method static System.Void goǃtwin<T1, T2, T3, T4, T5, T6, T7, T8>(System.Action<T1, T2, T3, T4, T5, T6, T7, T8>, System.Func<T1, T2, T3, T4, T5, T6, T7, T8, go.golib.GoTask>, T1, T2, T3, T4, T5, T6, T7, T8, System.String = , System.Int32 = 0)
+go.builtin :: method static System.Void goǃtwin<T1, T2, T3, T4, T5, T6, T7>(System.Action<T1, T2, T3, T4, T5, T6, T7>, System.Func<T1, T2, T3, T4, T5, T6, T7, go.golib.GoTask>, T1, T2, T3, T4, T5, T6, T7, System.String = , System.Int32 = 0)
+go.builtin :: method static System.Void goǃtwin<T1, T2, T3, T4, T5, T6>(System.Action<T1, T2, T3, T4, T5, T6>, System.Func<T1, T2, T3, T4, T5, T6, go.golib.GoTask>, T1, T2, T3, T4, T5, T6, System.String = , System.Int32 = 0)
+go.builtin :: method static System.Void goǃtwin<T1, T2, T3, T4, T5>(System.Action<T1, T2, T3, T4, T5>, System.Func<T1, T2, T3, T4, T5, go.golib.GoTask>, T1, T2, T3, T4, T5, System.String = , System.Int32 = 0)
+go.builtin :: method static System.Void goǃtwin<T1, T2, T3, T4>(System.Action<T1, T2, T3, T4>, System.Func<T1, T2, T3, T4, go.golib.GoTask>, T1, T2, T3, T4, System.String = , System.Int32 = 0)
+go.builtin :: method static System.Void goǃtwin<T1, T2, T3>(System.Action<T1, T2, T3>, System.Func<T1, T2, T3, go.golib.GoTask>, T1, T2, T3, System.String = , System.Int32 = 0)
+go.builtin :: method static System.Void goǃtwin<T1, T2>(System.Action<T1, T2>, System.Func<T1, T2, go.golib.GoTask>, T1, T2, System.String = , System.Int32 = 0)
+go.builtin :: method static System.Void goǃtwin<T>(System.Action<T>, System.Func<T, go.golib.GoTask>, T, System.String = , System.Int32 = 0)
+go.builtin :: method static go.golib.GoTask<System.Int32> selectꞏtwin(params go.SelectOp[])
+go.builtin :: method static go.golib.GoTask<System.ValueTuple<T, System.Boolean>> ᐸꟷꞏtwin<T>(go.channel<T>, System.Boolean)
+go.builtin :: method static go.golib.GoTask<T> ᐸꟷꞏtwin<T>(go.channel<T>)
+go.channel<T> :: method go.golib.GoTask ᐸꟷꞏtwin(T)
+go.golib.GoFuncPair :: ctor protected ()
+go.golib.GoFuncPair :: method static System.Delegate Underlying(System.Delegate)
+go.golib.GoFuncPair :: property abstract System.Delegate Plain { get; }
+go.golib.GoFuncPair :: property abstract System.Delegate Twin { get; }
+go.golib.GoFuncPair :: shape abstract class; abstract-members get_Plain(), get_Twin()
+go.golib.GoParkForwarderAttribute :: ctor public ()
+go.golib.GoParkForwarderAttribute :: shape sealed class; base System.Attribute; usage Method, multiple False, inherited False
+go.golib.GoTask :: method go.golib.GoTaskAwaiter GetAwaiter()
+go.golib.GoTask :: shape readonly struct; builder go.golib.GoTaskBuilder
+go.golib.GoTask<T> :: ctor public (T)
+go.golib.GoTask<T> :: method go.golib.GoTaskAwaiter<T> GetAwaiter()
+go.golib.GoTask<T> :: shape readonly struct; builder go.golib.GoTaskBuilder<T>
+go.golib.GoTaskAwaiter :: method System.Void GetResult()
+go.golib.GoTaskAwaiter :: property System.Boolean IsCompleted { get; }
+go.golib.GoTaskAwaiter :: shape readonly struct; implements System.Runtime.CompilerServices.ICriticalNotifyCompletion, System.Runtime.CompilerServices.INotifyCompletion
+go.golib.GoTaskAwaiter<T> :: method T GetResult()
+go.golib.GoTaskAwaiter<T> :: property System.Boolean IsCompleted { get; }
+go.golib.GoTaskAwaiter<T> :: shape readonly struct; implements System.Runtime.CompilerServices.ICriticalNotifyCompletion, System.Runtime.CompilerServices.INotifyCompletion
+go.golib.GoTaskBuilder :: method System.Void AwaitOnCompleted<TAwaiter, TStateMachine>(ref TAwaiter, ref TStateMachine) where TAwaiter : System.Runtime.CompilerServices.INotifyCompletion; TStateMachine : System.Runtime.CompilerServices.IAsyncStateMachine
+go.golib.GoTaskBuilder :: method System.Void AwaitUnsafeOnCompleted<TAwaiter, TStateMachine>(ref TAwaiter, ref TStateMachine) where TAwaiter : System.Runtime.CompilerServices.ICriticalNotifyCompletion; TStateMachine : System.Runtime.CompilerServices.IAsyncStateMachine
+go.golib.GoTaskBuilder :: method System.Void SetException(System.Exception)
+go.golib.GoTaskBuilder :: method System.Void SetResult()
+go.golib.GoTaskBuilder :: method System.Void SetStateMachine(System.Runtime.CompilerServices.IAsyncStateMachine)
+go.golib.GoTaskBuilder :: method System.Void Start<TStateMachine>(ref TStateMachine) where TStateMachine : System.Runtime.CompilerServices.IAsyncStateMachine
+go.golib.GoTaskBuilder :: method static go.golib.GoTaskBuilder Create()
+go.golib.GoTaskBuilder :: property go.golib.GoTask Task { get; }
+go.golib.GoTaskBuilder :: shape struct
+go.golib.GoTaskBuilder<T> :: method System.Void AwaitOnCompleted<TAwaiter, TStateMachine>(ref TAwaiter, ref TStateMachine) where TAwaiter : System.Runtime.CompilerServices.INotifyCompletion; TStateMachine : System.Runtime.CompilerServices.IAsyncStateMachine
+go.golib.GoTaskBuilder<T> :: method System.Void AwaitUnsafeOnCompleted<TAwaiter, TStateMachine>(ref TAwaiter, ref TStateMachine) where TAwaiter : System.Runtime.CompilerServices.ICriticalNotifyCompletion; TStateMachine : System.Runtime.CompilerServices.IAsyncStateMachine
+go.golib.GoTaskBuilder<T> :: method System.Void SetException(System.Exception)
+go.golib.GoTaskBuilder<T> :: method System.Void SetResult(T)
+go.golib.GoTaskBuilder<T> :: method System.Void SetStateMachine(System.Runtime.CompilerServices.IAsyncStateMachine)
+go.golib.GoTaskBuilder<T> :: method System.Void Start<TStateMachine>(ref TStateMachine) where TStateMachine : System.Runtime.CompilerServices.IAsyncStateMachine
+go.golib.GoTaskBuilder<T> :: method static go.golib.GoTaskBuilder<T> Create()
+go.golib.GoTaskBuilder<T> :: property go.golib.GoTask<T> Task { get; }
+go.golib.GoTaskBuilder<T> :: shape struct
+# G's ruling on M:N item 7d (2026-11-20): the [GoTwinOf] stamp, docs/phase4/DATA-mn-origin-table.md
+# G 2026-11-21: a second int[], the call ordinals, before it shipped (one array, one meaning)
+# Generated code in every converted assembly names its ctor, so these lines hold across a break floor; train 3 folded
+# 7d's own [mn-frozen] block into this one section (G's ruling 2026-11-21), the lines taken from the writer.
+go.golib.GoTwinOfAttribute :: ctor public (System.Type, System.String, System.Type[], System.Int32[], System.Int32[])
+go.golib.GoTwinOfAttribute :: property System.Int32[] AwaitSites { get; }
+go.golib.GoTwinOfAttribute :: property System.Int32[] CallOrdinals { get; }
+go.golib.GoTwinOfAttribute :: property System.String Name { get; }
+go.golib.GoTwinOfAttribute :: property System.Type Host { get; }
+go.golib.GoTwinOfAttribute :: property System.Type[] Parameters { get; }
+go.golib.GoTwinOfAttribute :: shape sealed class; base System.Attribute; usage Method, multiple False, inherited False

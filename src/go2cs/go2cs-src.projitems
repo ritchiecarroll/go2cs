@@ -77,6 +77,7 @@
     <None Include="$(MSBuildThisFileDirectory)callerInliningAnalysis.go" />
     <None Include="$(MSBuildThisFileDirectory)callerSkipWindowFrames_test.go" />
     <None Include="$(MSBuildThisFileDirectory)candidateFixpoint_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)nugetgoCgoPackSuite_test.go" />
     <None Include="$(MSBuildThisFileDirectory)paramSkipWindowFrames_test.go" />
     <None Include="$(MSBuildThisFileDirectory)canonicalDiagnostics_test.go" />
     <None Include="$(MSBuildThisFileDirectory)goCreatorFrame_test.go" />
@@ -118,6 +119,10 @@
     <None Include="$(MSBuildThisFileDirectory)cgoMirrors_test.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoPseudoPackage.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoPseudoPackage_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)cgoRecurseStd.go" />
+    <None Include="$(MSBuildThisFileDirectory)cgoRecurseSubstitution.go" />
+    <None Include="$(MSBuildThisFileDirectory)cgoRecurseSubstitution_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)cgoRecurse_test.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoRealRoute_test.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoRoute.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoWrappers.go" />

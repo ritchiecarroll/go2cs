@@ -100,13 +100,13 @@ standard library, and runs on Windows, Linux or macOS. **A longer evening:** lot
          goroutines;
        - osx-x64, macOS 15.7.9: kern.num_taskthreads 3072; the first failure at 3,051.
        Each is the cap less about 21 runtime and host threads, exact to the thread. The go statement itself throws
-       System.OutOfMemoryException, synchronously, from the thread start at src/core/golib/runtime/Goroutine.cs:1345
+       System.OutOfMemoryException, synchronously, from the thread start at src/core/golib/runtime/Goroutine.cs:1352
        (`GoroutineThreadPool.Run(() => Run(body, goroutine, bubble), stack);`); a smaller stack reserve does not raise
        the cap. Found when internal/synctest's TestWaitGroupManyBubbles (about 10,100 live goroutines) died on both mac
        runners at the 1.26.10.3 re-bank. A developer Mac's cap may differ. -->
   <!-- [Sizing M:N scheduling](DESIGN-mn-scheduler-sizing.md) has the measurements and what removing
        the limit would take (internal record, unlinked 2026-10-26, OQ-1). -->
-  <!-- Thread reuse: src/core/golib/runtime/Goroutine.cs:1345 `GoroutineThreadPool.Run(() => Run(body, goroutine, bubble), stack);`.
+  <!-- Thread reuse: src/core/golib/runtime/Goroutine.cs:1352 `GoroutineThreadPool.Run(() => Run(body, goroutine, bubble), stack);`.
        The figures are lane R's ParkStorm reading in docs/DESIGN-mn-scheduler-sizing.md §1 (Windows x64, 16 hardware
        threads, 31 GB RAM, Go 1.26.10, Release, today's 256 MiB stack reserve): 10,000 parked at 622 MB and 4.4 s against
        Go's 99 MB and 0.07 s; 100,000 at 5,904 MB and 302 s; 1,000,000 never parked within 600 s. -->
@@ -114,8 +114,8 @@ standard library, and runs on Windows, Linux or macOS. **A longer evening:** lot
   appears only when every goroutine, `main` included, waits on a nil channel or an empty `select {}`, and then
   with Go's goroutine blocks. A deadlock on an ordinary channel or lock blocks forever: break in with a debugger,
   where, by default, each goroutine is a thread named `goroutine-N`.
-  <!-- src/core/golib/runtime/Goroutine.cs:1089 `internal static bool IsForeverWait(WaitReason reason) =>`
-       and :1162 `internal static bool IsProvableDeadlock(IEnumerable<(WaitReason Reason, bool Readied, bool IsMain)> users)`. -->
+  <!-- src/core/golib/runtime/Goroutine.cs:1096 `internal static bool IsForeverWait(WaitReason reason) =>`
+       and :1169 `internal static bool IsProvableDeadlock(IEnumerable<(WaitReason Reason, bool Readied, bool IsMain)> users)`. -->
 * **Stacks don't grow.** `main` runs on a thread that reserves 1 GiB, which covers Go's 1 GB limit for it, and
   a goroutine's thread reserves 256 MB (`GO2CS_GOROUTINE_STACK` changes it), or 16 MB when the converter proves it
   cannot recurse ([how](ConversionStrategies.md#goroutines)). Recursion past a thread's reserve ends the process
@@ -256,11 +256,17 @@ pointer, or a `void *` that is nil or points at C memory. `C.CString`, `C.CBytes
 `C.GoBytes`, `C.malloc`, `C.free` and `defer C.f(…)` convert, with the package's C types and constants. A
 program that uses the converted package needs only the C library.
 
-**One package, one machine.** A `-cgo` conversion is one package, for the machine's own operating system and
-architecture, and the converted package refuses to call C anywhere else. It builds against a go2cs clone
-(`dotnet build -p:go2csPath=<go2cs>/src/`), not against the `go.*` packages
-([Roadmap](Roadmap.md#cgo)). The standard library itself is converted with `CGO_ENABLED=0`.
-<!-- src/go2cs/main.go:306 (`Not combinable with -stdlib, -tests or -recurse`); src/go2cs/csproj-template.xml:135 (`<ProjectReference Include="$(go2csPath)gen/go2cs-gen/go2cs-gen.csproj"`) and src/go2cs/csproj-template.xml:187 (`<ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />`). COORD's ruling O2, 2026-11-14 (cgo 3.1's release-path seat). -->
+**One target.** A `-cgo` conversion is for one operating system and architecture: the machine's own, or another one
+named with `-platforms` when `CC` names that target's C compiler (for example `zig cc -target <triple>`). The converted
+package refuses to call C on any other. A single-package conversion builds against a go2cs clone
+(`dotnet build -p:go2csPath=<go2cs>/src/`). Under `-recurse -cgo` a module's cgo packages convert with the module.
+Packing a cgo package against the `go.*` packages for every platform is still to come ([Roadmap](Roadmap.md#cgo)).
+The standard library itself is converted with `CGO_ENABLED=0`, and a module converted with `-recurse -cgo` uses it as
+it is. So a package that imports `net` or `os/user` gets their builds without cgo, the ones Go itself uses with
+`CGO_ENABLED=0`: `net` resolves host names with Go's own resolver, not the C library's, and `os/user` reads the user
+database files directly. Converting the `net` resolver with cgo is planned, and is what will change this. A package
+that imports `runtime/cgo` or `plugin` is refused by name: without cgo they are not working builds.
+<!-- src/go2cs/main.go:306 (`Not combinable with -stdlib or -tests. With -recurse, every non-standard-library package of the module loads cgo-on and each cgo package converts this way`); src/go2cs/csproj-template.xml:135 (`<ProjectReference Include="$(go2csPath)gen/go2cs-gen/go2cs-gen.csproj"`) and src/go2cs/csproj-template.xml:187 (`<ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />`). COORD's ruling O2, 2026-11-14 (cgo 3.1's release-path seat). -->
 
 **What is refused, by name, with the phase that will cover it:**
 - a pointer into Go memory handed to C as a `void *`, or to `C.GoBytes`, `C.GoString` or `C.GoStringN`
