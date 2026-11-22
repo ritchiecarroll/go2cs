@@ -225,6 +225,7 @@ var golibFriendNamespaceTypes = nameSet(
 	"ViewTable",
 	"Waiter",
 	"WaiterQueue",
+	"errorObjectShell",
 )
 
 // golibFriendAssemblies holds the assemblies golib names in InternalsVisibleTo.
@@ -312,6 +313,7 @@ var golibBuiltinMembers = nameSet(
 	"ElementAddressUnchecked",
 	"GetGoTypeName",
 	"GoZero",
+	"Goschedꞏtwin",
 	"Implements",
 	"LiteralByteAt",
 	"NativeArrayPointer",

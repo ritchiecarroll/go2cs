@@ -16,7 +16,7 @@ namespace go;
 partial class main_package {
 
 private static readonly string[] s_shapeNames =
-    ["chan", "select", "nested", "foreign", "sleep", "mutex", "wait", "nest", "exit", "unpin", "scenA", "scenB"];
+    ["chan", "select", "nested", "foreign", "sleep", "mutex", "wait", "nest", "exit", "unpin", "scenA", "scenB", "gosched"];
 
 private static readonly Thread?[] s_pinned = new Thread?[s_shapeNames.Length];
 private static readonly long[] s_changes = new long[s_shapeNames.Length];
@@ -151,7 +151,7 @@ private readonly struct PreWoken : ICriticalNotifyCompletion {
 
 internal static void report() {
     for (int i = 0; i < s_shapeNames.Length; i++) {
-        if (i == shapeExit || i >= shapeScenA)
+        if (i == shapeExit || i == shapeScenA || i == shapeScenB)
             continue;
 
         fmt_package.Println("shape", s_shapeNames[i], "thread-changes:", s_changes[i]);

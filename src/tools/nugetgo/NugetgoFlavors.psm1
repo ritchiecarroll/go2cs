@@ -105,14 +105,16 @@ function Write-NugetgoZipEntry([System.IO.Compression.ZipArchive]$Zip, [string]$
 
 # Rewrite a packed package into the RID-specific layout: lib/<tfm>/ takes the reference flavor's assemblies, and each
 # RID's runtimes/<rid>/lib/<tfm>/ its own flavor's. The package's lib/<tfm>/*.dll set must be the flavors' assembly
-# set; anything else is refused by name rather than packed half-promoted.
+# set; anything else is refused by name rather than packed half-promoted. A -Cgo pack (NugetgoCgo.psm1) passes its own
+# -RidFlavors, and -LibAssemblies for lib/: the reference flavor's REFERENCE assemblies, never an implementation.
 function Set-NugetgoRidAssets {
     [CmdletBinding()]
-    param([Parameter(Mandatory)][string]$Package, [Parameter(Mandatory)]$Assemblies, [Parameter(Mandatory)][string]$TargetFramework)
+    param([Parameter(Mandatory)][string]$Package, [Parameter(Mandatory)]$Assemblies, [Parameter(Mandatory)][string]$TargetFramework,
+        $RidFlavors = (Get-NugetgoRidFlavors), $LibAssemblies = $null)
 
     Add-Type -AssemblyName System.IO.Compression, System.IO.Compression.FileSystem
-    $rids = Get-NugetgoRidFlavors
-    $reference = $Assemblies[(Get-NugetgoReferenceFlavor)]
+    $rids = $RidFlavors
+    $reference = if ($null -ne $LibAssemblies) { $LibAssemblies } else { $Assemblies[(Get-NugetgoReferenceFlavor)] }
     $zip = [System.IO.Compression.ZipFile]::Open($Package, 'Update')
     try {
         $lib = @($zip.Entries | Where-Object { $_.FullName -like "lib/$TargetFramework/*.dll" } | ForEach-Object { $_.Name } | Sort-Object)
@@ -129,12 +131,15 @@ function Set-NugetgoRidAssets {
 
 # The read-back of a RID-specific package: lib/ is the reference flavor, every shipped RID carries the full assembly
 # set of its flavor and nothing else, and RIDs that share a flavor carry the same bytes. No reason means accepted.
+# -RidFlavors and -LibAssemblies as Set-NugetgoRidAssets takes them.
 function Test-NugetgoRidLayout {
     [CmdletBinding()]
-    param([Parameter(Mandatory)][string]$Package, [Parameter(Mandatory)]$Assemblies, [Parameter(Mandatory)][string]$TargetFramework)
+    param([Parameter(Mandatory)][string]$Package, [Parameter(Mandatory)]$Assemblies, [Parameter(Mandatory)][string]$TargetFramework,
+        $RidFlavors = (Get-NugetgoRidFlavors), $LibAssemblies = $null)
 
     Add-Type -AssemblyName System.IO.Compression, System.IO.Compression.FileSystem
-    $rids = Get-NugetgoRidFlavors
+    $rids = $RidFlavors
+    $libSet = if ($null -ne $LibAssemblies) { $LibAssemblies } else { $Assemblies[(Get-NugetgoReferenceFlavor)] }
     $reasons = New-Object System.Collections.Generic.List[string]
     $zip = [System.IO.Compression.ZipFile]::OpenRead($Package)
     try {
@@ -146,7 +151,7 @@ function Test-NugetgoRidLayout {
     $names = @($Assemblies[(Get-NugetgoReferenceFlavor)].Keys | Sort-Object)
     $same = { param($a, $b) $null -ne $a -and $null -ne $b -and [System.Linq.Enumerable]::SequenceEqual([byte[]]$a, [byte[]]$b) }
     foreach ($name in $names) {
-        if (-not (& $same $entries["lib/$TargetFramework/$name"] $Assemblies[(Get-NugetgoReferenceFlavor)][$name])) { $reasons.Add("lib/$TargetFramework/$name is not the reference ($(Get-NugetgoReferenceFlavor)) flavor") }
+        if (-not (& $same $entries["lib/$TargetFramework/$name"] $libSet[$name])) { $reasons.Add("lib/$TargetFramework/$name is not the reference ($(Get-NugetgoReferenceFlavor)) flavor's $(if ($null -ne $LibAssemblies) { 'reference assembly' } else { 'assembly' })") }
     }
     foreach ($rid in $rids.Keys) {
         $folder = "runtimes/$rid/lib/$TargetFramework/"
@@ -167,6 +172,23 @@ function Test-NugetgoRidLayout {
     $stray = @($entries.Keys | Where-Object { $_ -match '^runtimes/([^/]+)/' -and -not $rids.Contains($Matches[1]) })
     if ($stray.Count) { $reasons.Add("runtimes/ holds a RID this layout does not ship: $($stray -join ', ')") }
     $reasons.ToArray()
+}
+
+# The read-back's layout decision, for every package nugetgo-pack.ps1 packs: a RID-specific package is read by
+# Test-NugetgoRidLayout (-RidFlavors and -LibAssemblies passed through), and a neutral package carries no runtimes/
+# entry at all. One call, so no branch of the pack can skip it. No reason means accepted.
+function Test-NugetgoPackedLayout {
+    [CmdletBinding()]
+    param([Parameter(Mandatory)][string]$Package, [Parameter(Mandatory)]$Assemblies, [Parameter(Mandatory)][string]$TargetFramework,
+        [switch]$RidSpecific, $RidFlavors = (Get-NugetgoRidFlavors), $LibAssemblies = $null)
+
+    if ($RidSpecific) { return @(Test-NugetgoRidLayout -Package $Package -Assemblies $Assemblies -TargetFramework $TargetFramework -RidFlavors $RidFlavors -LibAssemblies $LibAssemblies) }
+    Add-Type -AssemblyName System.IO.Compression, System.IO.Compression.FileSystem
+    $zip = [System.IO.Compression.ZipFile]::OpenRead($Package)
+    try { $runtimes = @($zip.Entries | Where-Object { $_.FullName -like 'runtimes/*' } | ForEach-Object { $_.FullName }) }
+    finally { $zip.Dispose() }
+    if ($runtimes.Count) { return @("a neutral package carries runtimes/ entries ($($runtimes[0])$(if ($runtimes.Count -gt 1) { " and $($runtimes.Count - 1) more" }))") }
+    @()
 }
 
 # The package's third-party requires: the UNION of its flavors' (COORD ruling 2026-10-12, for cobra, whose command_win.go
@@ -210,4 +232,4 @@ function Get-NugetgoFlavorDisclosure {
     "Flavors: this package carries RID-specific assemblies; its go2cs/source-metadata.txt describes the $ProofFlavor flavor's package metadata, and the $named flavors' metadata is not described."
 }
 
-Export-ModuleMember -Function Get-NugetgoRidFlavors, Get-NugetgoReferenceFlavor, Get-NugetgoFlavors, Get-NugetgoFlavorPlatforms, Get-NugetgoFlavorGoos, Get-NugetgoRidTarget, Get-NugetgoFlavorFolder, Get-NugetgoFlavorDecision, Set-NugetgoRidAssets, Test-NugetgoRidLayout, Merge-NugetgoFlavorRequires, Get-NugetgoFlavorDisclosure
+Export-ModuleMember -Function Get-NugetgoRidFlavors, Get-NugetgoReferenceFlavor, Get-NugetgoFlavors, Get-NugetgoFlavorPlatforms, Get-NugetgoFlavorGoos, Get-NugetgoRidTarget, Get-NugetgoFlavorFolder, Get-NugetgoFlavorDecision, Set-NugetgoRidAssets, Test-NugetgoRidLayout, Test-NugetgoPackedLayout, Merge-NugetgoFlavorRequires, Get-NugetgoFlavorDisclosure
