@@ -56,10 +56,29 @@ public class FuncValueFieldTests
                 steps[1]();
             }
 
+            public partial struct job { public Action run; }
+
+            public static void runJob()
+            {
+                var j = new job(run: parks);
+                j.run();
+            }
+
+            internal static nint arg() => 20;
+
+            public static nint parksInt(nint v) { ᐸꟷ(ch); return v * 2; }
+
+            public static nint runValue(slice<Func<nint, nint>> fs)
+            {
+                nint x = fs[nextIndex()](arg());
+                return x;
+            }
+
             internal static Action pick() => parks;
 
             public static void runResult()
             {
+                pick()();
                 pick()();
             }
 
@@ -109,6 +128,43 @@ public class FuncValueFieldTests
     }
 
     [TestMethod]
+    public void AOneFieldStructLiteralsGroupIsPaired()
+    {
+        // Go `job{run: work}` converts to `new job(work)`: a one-argument creation that is a STRUCT, not fix 5's `new D(F)`,
+        // so its argument is an implicit group and becomes a pair (P3's SHOULD 1 on the seat: it was skipped by count).
+        (string twins, Diagnostic[] errors) = RunWith(null, null, Shapes);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        string body = Body(twins, "runJobꞏtwin");
+        StringAssert.Contains(body, "new job(run: (ꞏpair", "the struct's argument is replaced: " + body);
+        StringAssert.Contains(body, "??= new global::System.Action(new ", "by the cached pair: " + body);
+    }
+
+    [TestMethod]
+    public void AValueCallReadsItsCalleeBeforeItsArguments()
+    {
+        // The value path (a call whose result is used) spills the read ahead of the expression: the callee's index is
+        // evaluated once and BEFORE the arguments, as Go evaluates the function value first. MnTableMain's value row runs
+        // it and prints the order Go prints.
+        (string twins, Diagnostic[] errors) = RunWith(null, null, Shapes);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        string body = Body(twins, "runValueꞏtwin");
+        Assert.AreEqual(1, body.Split("nextIndex()").Length - 1, "nextIndex() is written once: " + body);
+        int read = body.IndexOf("var ᴛfv", StringComparison.Ordinal), index = body.IndexOf("nextIndex()", StringComparison.Ordinal), argument = body.IndexOf("arg()", StringComparison.Ordinal);
+        Assert.IsTrue(read >= 0 && read < index && index < argument, "the read, holding the index, precedes the argument: " + body);
+        StringAssert.Contains(body, "global::System.Func<nint, global::go.golib.GoTask<nint>>", "the twin is awaited for its result: " + body);
+    }
+
+    private static string Body(string twins, string name)
+    {
+        int start = twins.IndexOf(name, StringComparison.Ordinal);
+        Assert.IsTrue(start >= 0, name + " is emitted");
+        string body = twins[start..];
+        return body[..Math.Min(body.Length, body.IndexOf("\n    }", StringComparison.Ordinal) is var end and > 0 ? end : body.Length)];
+    }
+
+    [TestMethod]
     public void ACallResultCalleeReportsGo2cs0020()
     {
         (_, Diagnostic[] errors) = RunWith(null, null, Shapes);
@@ -118,6 +174,7 @@ public class FuncValueFieldTests
         Assert.AreEqual(1, uncovered.Length, "one GO2CS0020, for runResult only: " + string.Join("\n", uncovered.Select(d => d.ToString())));
         StringAssert.Contains(uncovered[0].GetMessage(), "runResult", "it names the function");
         StringAssert.Contains(uncovered[0].GetMessage(), "a call's result", "and the shape");
+        StringAssert.Contains(uncovered[0].GetMessage(), "2 such call(s)", "ONCE per function: both of runResult's calls in one report");
         Assert.AreEqual(DiagnosticSeverity.Warning, uncovered[0].Severity, "a warning by default, as GO2CS0014/0015");
     }
 }

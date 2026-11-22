@@ -348,19 +348,24 @@ public sealed partial class TwinGenerator : ISourceGenerator
                 // value warns ONCE, at the function, naming its refusal. Its calls run the plain delegate even when the
                 // value is a pair, so a can-park func value blocks a carrier there; iterators, the yield callers, are the
                 // largest such set. A function with a twin of its own (has-twin) is not a hole.
+                bool refusedCaller = false;
+
                 if (candidate.Refusal is { } refusal && refusal != "has-twin" &&
                     candidate.Sites.Any(site => site.Direct && site.Delegate && CallerRuleTwins(site)))
                 {
+                    refusedCaller = true;
                     Context.ReportDiagnostic(Diagnostic.Create(GeneratorDiagnostics.RefusedFuncValueCaller,
                         candidate.Syntax.Identifier.GetLocation(), candidate.Symbol.ToDisplayString(), refusal));
                 }
 
                 ReportPlainLaunches(candidate);
 
-                // GO2CS0020: a func-value call the pair test cannot reach, once per function (the func-value seat).
+                // GO2CS0020: a func-value call the pair test cannot reach, once per function (the func-value seat). Not for
+                // a function GO2CS0014 already names (every call of it runs plain), and not with the pair core off
+                // (GoTwinsPairs=false: no call is tested at all, the A/B control).
                 Site[] uncovered = [.. candidate.Sites.Where(site => site is { Active: true, Delegate: true, PairBody: false, PairUncovered: not null })];
 
-                if (uncovered.Length > 0)
+                if (uncovered.Length > 0 && Pairs && !refusedCaller)
                 {
                     UncoveredFuncValueCalls += uncovered.Length;
                     Context.ReportDiagnostic(Diagnostic.Create(GeneratorDiagnostics.UncoveredFuncValueCall,
@@ -709,7 +714,6 @@ public sealed partial class TwinGenerator : ISourceGenerator
         internal static string PairUncoveredShape(ExpressionSyntax callee, SemanticModel model) => callee switch
         {
             InvocationExpressionSyntax => "a call's result",
-            MemberAccessExpressionSyntax access when model.GetSymbolInfo(access).Symbol is IMethodSymbol => "a method value",
             ParenthesizedExpressionSyntax or CastExpressionSyntax => "a converted or parenthesized value",
             ConditionalAccessExpressionSyntax => "a conditional access",
             _ => "a " + callee.Kind().ToString()

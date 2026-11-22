@@ -980,12 +980,11 @@ public sealed partial class TwinGenerator
         // found none and called them plain (MnTableMain: steps=1 parks=0 thread-blocks=2).
         private ExpressionSyntax? PairImplicitGroup(ExpressionSyntax node)
         {
-            // A call's own target, the name half of a member access (the whole access is visited instead), fix 5's sole
-            // argument of `new D(F)` (PairGroup's), and nameof are not implicit conversions to pair here.
+            // A call's own target, the name half of a member access (the whole access is visited instead), and nameof are
+            // not implicit conversions to pair here.
             if (!m_run.Pairs || m_passive > 0 || node.SyntaxTree != m_model.SyntaxTree ||
                 node.Parent is InvocationExpressionSyntax invocation && invocation.Expression == node ||
                 node.Parent is MemberAccessExpressionSyntax access && access.Name == node ||
-                node.Parent is ArgumentSyntax { Parent: ArgumentListSyntax { Arguments.Count: 1, Parent: ObjectCreationExpressionSyntax } } ||
                 node.Parent is ArgumentSyntax { Parent: ArgumentListSyntax { Parent: InvocationExpressionSyntax { Expression: IdentifierNameSyntax { Identifier.ValueText: "nameof" } } } })
             {
                 return null;
@@ -995,6 +994,15 @@ public sealed partial class TwinGenerator
                 m_model.GetTypeInfo(node).ConvertedType is not INamedTypeSymbol { TypeKind: TypeKind.Delegate } type ||
                 Run.TwinDelegateType(type) is not { } twinType ||
                 !m_run.CanPark(Run.Normalize(method)))
+            {
+                return null;
+            }
+
+            // Fix 5's own `new D(F)` (the creation IS the delegate: PairGroup's) is not paired twice. Any other one-argument
+            // creation is a struct literal (Go `job{run: work}` -> `new job(work)`), whose argument is an implicit group like
+            // any other: decided by the creation's type, as the literal path decides it, never by the argument count.
+            if (node.Parent is ArgumentSyntax { Parent: ArgumentListSyntax { Arguments.Count: 1, Parent: ObjectCreationExpressionSyntax creation } } &&
+                SymbolEqualityComparer.Default.Equals(m_model.GetTypeInfo(creation).Type, type))
             {
                 return null;
             }

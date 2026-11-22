@@ -45,6 +45,7 @@ using static go.main_package;
 // their goǃ call: go2cs-gen starts each on golib's bounded stack reservation rather than the Go-scale default.
 [assembly: GoBoundedGoroutine("main.cs", 13, 5, 0)]
 [assembly: GoBoundedGoroutine("main.cs", 21, 5, 1)]
+[assembly: GoBoundedGoroutine("main.cs", 55, 5, 3)]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -54,7 +55,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "AAYagqaCgoKmgoKCkpSigpSmgoKCAAgIggAFEoKC", "26-28:1;29-32:2", "", "", "13:15")]
+[assembly: GoPositionMap("main.go", "main.cs", "AAYggqaCgoKmgoKCkpSigpSmgoKC3IKCpoKCpoKCkpSmgoKC7oKC9oIABxaCgg==", "29-31:1;32-35:2;60-62:1", "", "", "13:15")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -69,6 +70,7 @@ public static partial class main_package
     // via declarations below.
 
     // <TypeAccessibility>
+    internal partial struct job {}
     internal partial struct main_rows {}
     // </TypeAccessibility>
 

@@ -250,7 +250,8 @@ internal static class GeneratorDiagnostics
 
     // GO2CS0020, TwinGenerator (the func-value seat: COORD's ruling of 2026-11-21, docs/phase4/inbox/G/
     // 20261121T233319Z-COORD.md and its approval): in a package built with twins, a call through a func value whose
-    // shape the pair test cannot reach (a call's result, a method value, a signature with no twin delegate) runs the
+    // shape the pair test cannot reach (a call's result, a conditional access, a parenthesized or converted value, a
+    // signature with no twin delegate type, else the expression's syntax kind) runs the
     // plain delegate, so a stored function that parks holds its carrier there, with nothing else to say so. A WARNING
     // by default, as GO2CS0014 and GO2CS0015; WarningsAsErrors makes it an error. Reported once per function, naming the
     // first such shape and how many calls there are.

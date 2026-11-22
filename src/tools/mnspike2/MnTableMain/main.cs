@@ -37,6 +37,42 @@ internal static void rowElement() {
     }
 }
 
+internal static slice<@string> trace;
+
+internal static nint nextIndex() {
+    trace = append(trace, (@string)"index");
+    return 0;
+}
+
+internal static nint arg() {
+    trace = append(trace, (@string)"arg");
+    return 20;
+}
+
+internal static partial nint @double(nint v) {
+    var ch = new channel<nint>(0);
+    var chʗ1 = ch;
+    goǃ(() => {
+        chʗ1.ᐸꟷ(v * 2);
+    });
+    return ᐸꟷ(ch);
+}
+
+internal static void rowValue() {
+    var fs = slice<Func<nint, nint>>([@double]);
+    nint x = fs[nextIndex()](arg());
+    fmt.Println("value:", x, trace);
+}
+
+partial struct job {
+    internal Action run;
+}
+
+internal static void rowJob() {
+    var j = new job(run: rowReceive);
+    j.run();
+}
+
 internal partial struct main_rows /*dyn*/ {
     internal @string name;
     internal Action run;
@@ -46,7 +82,9 @@ internal static void main() {
     var rows = slice<main_rows>([
         new("receive", rowReceive),
         new("wait", rowWait),
-        new("element", rowElement)
+        new("element", rowElement),
+        new("value", rowValue),
+        new("job", rowJob)
     ]);
 
     foreach (var (_, r) in range(rows)) {
