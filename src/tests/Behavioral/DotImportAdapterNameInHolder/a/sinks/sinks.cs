@@ -1,0 +1,33 @@
+namespace go.DotImportAdapterNameInHolder.a;
+
+using bytes = bytes_package;
+using io = io_package;
+using static sinks_package;
+
+partial class sinks_package {
+
+partial struct sink {
+    internal nint n;
+}
+
+} partial class sinksᴛsink {
+
+internal static (nint, error) Write(this ref sink s, slice<byte> p) {
+    s.n += len(p);
+    return (len(p), default);
+}
+
+} partial class sinks_package {
+
+public static (io.Writer, ж<bytes.Buffer>) NewWriter() {
+    var buf = Ꮡ(new bytes.Buffer());
+    return (new bytes_BufferжWriter(buf), buf);
+}
+
+public static (io.Writer, Func<nint>) Counted() {
+    var s = Ꮡ(new sink());
+    var sʗ1 = s;
+    return (new sinkжWriter(s), () => sʗ1.n);
+}
+
+} // end sinks_package

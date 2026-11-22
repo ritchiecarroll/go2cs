@@ -604,6 +604,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckDivideByZeroPanic() => CheckTarget("DivideByZeroPanic");
 
     [TestMethod]
+    public void CheckDotImportAdapterNameInHolder() => CheckTarget("DotImportAdapterNameInHolder");
+
+    [TestMethod]
     public void CheckDotImportNameCollision() => CheckTarget("DotImportNameCollision");
 
     [TestMethod]
