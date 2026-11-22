@@ -98,6 +98,51 @@ func TestACgoRewrittenTreeRecordsItsImportCSource(t *testing.T) {
 		}
 	})
 
+	// -provenance's header (nugetgo-pack converts every flavor with it) named the same build-cache intermediate, by its
+	// hashed base name, so it changed with every machine and run. It names the import "C" source; cmd/cgo's types file,
+	// which no Go source wrote, is named as cmd/cgo names it.
+	t.Run("-provenance names the import \"C\" source and cmd/cgo's types file, never a build-cache name", func(t *testing.T) {
+		combined, output, err := convertCgoRecurse(t, map[string]string{"cptr/cptr.go": cgoRecurseCptr}, "-recurse", "-cgo=true", "-provenance")
+
+		if err != nil {
+			t.Fatalf("the conversion failed: %v\n%s", err, lastLines(combined, 12))
+		}
+
+		headers := map[string]string{}
+		hashed := regexp.MustCompile(`"[0-9a-f]{64}-[a-z]"`)
+
+		for path, text := range cgoRecurseWritten(t, output, "cptr", ".cs") {
+			for _, line := range strings.Split(text, "\n") {
+				if strings.HasPrefix(line, "// Converted from Go source: ") {
+					headers[path] = strings.TrimSpace(line)
+
+					if hashed.MatchString(line) {
+						t.Errorf("%s names a build-cache file: %s", path, line)
+					}
+				}
+			}
+		}
+
+		var source, bindings string
+
+		for path, header := range headers {
+			switch {
+			case strings.HasSuffix(path, "/cptr/cptr.cs"):
+				source = header
+			case strings.HasSuffix(path, ".cgo.cs"):
+				bindings = header
+			}
+		}
+
+		if want := `// Converted from Go source: "cptr/cptr.go" in module example.com/cgorecurse.`; source != want {
+			t.Errorf("cptr.cs: want %s, got %q (headers: %v)", want, source, headers)
+		}
+
+		if want := `// Converted from Go source: "_cgo_gotypes.go".`; bindings != want {
+			t.Errorf("the bindings file: want %s, got %q (headers: %v)", want, bindings, headers)
+		}
+	})
+
 	// The go.mod-less release converts from a copy (copyModuleCacheRelease), so this arm also reads the copy's map back
 	// to the cache path through the //line-adjusted name.
 	t.Run("a module-cache release records <module>@<version>/<file>", func(t *testing.T) {

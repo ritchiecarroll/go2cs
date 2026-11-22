@@ -56,7 +56,9 @@ Check 'nugetgo-pack.ps1 restores, checks the closure, then packs without restori
 
 Write-Host 'a LOCAL closure (-LocalClosure; cgo against go.* INC 4, COORD''s ruling (1))'
 $plain = Get-NugetgoRestoreConfig -Feed '/srv/feed'
-Check 'without -LocalClosure the restore config is -Feed alone, as before' ($plain -ceq "<?xml version=`"1.0`" encoding=`"utf-8`"?>`n<configuration>`n  <packageSources>`n    <clear />`n    <add key=`"nugetgo-closure`" value=`"/srv/feed`" />`n  </packageSources>`n</configuration>") $plain
+# The SAME TEXT as the here-string it replaced, not the same bytes: a here-string took the script file's line endings,
+# and this joins with LF, so on a CRLF checkout the temp nuget.config changes CRLF to LF. NuGet reads both (P3, NIT 3).
+Check 'without -LocalClosure the restore config is the same text as before: -Feed alone' ($plain -ceq "<?xml version=`"1.0`" encoding=`"utf-8`"?>`n<configuration>`n  <packageSources>`n    <clear />`n    <add key=`"nugetgo-closure`" value=`"/srv/feed`" />`n  </packageSources>`n</configuration>") $plain
 [xml]$local = Get-NugetgoRestoreConfig -Feed '/srv/feed' -LocalClosure '/srv/local & closure'
 $goSource = @($local.configuration.packageSourceMapping.packageSource | Where-Object { @($_.package | ForEach-Object { $_.pattern }) -contains 'go.*' })
 Check 'with -LocalClosure, both sources, and go.* maps to the local folder alone' (

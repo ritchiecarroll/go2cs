@@ -1227,7 +1227,7 @@ func (v *Visitor) goSourceIdentity(outputFileName string) string {
 	}
 
 	// A go.mod-less module-cache release converts from a copy (copyModuleCacheRelease): its sources are the release's.
-	source = originalSourcePath(source)
+	source = releaseSourcePath(source)
 
 	// A standard library source: GOROOT/src-relative, which IS the import-path form.
 	if goRoot := strings.TrimSpace(v.options.goRoot); goRoot != "" {

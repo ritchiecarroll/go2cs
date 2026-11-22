@@ -68,7 +68,8 @@ function Test-NugetgoPublishedClosure([hashtable]$Restored, [string]$ClosureVers
 <#
 .SYNOPSIS
     The nuget.config a pack restores with: -Feed alone, or with -LocalClosure, that folder too, and package source mapping
-    that sends every go.* package to it and nothing else.
+    that sends every go.* package to it and nothing else. Without -LocalClosure it is the same text the pack wrote as a
+    here-string before, joined with LF where the here-string took the script's line endings.
 #>
 function Get-NugetgoRestoreConfig([Parameter(Mandatory)][string]$Feed, [string]$LocalClosure) {
     $esc = { param($s) [System.Security.SecurityElement]::Escape($s) }

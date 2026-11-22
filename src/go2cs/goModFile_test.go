@@ -12,6 +12,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"sort"
 	"strings"
 	"testing"
 	"time"
@@ -392,6 +393,80 @@ func TestPlainRecurseConvertsAModuleCacheReleaseWithNoGoMod(t *testing.T) {
 		}
 	})
 
+	// P3's delta read: licensing.go and embedDirective.go read the module directory, which is now the copy. A release with
+	// a //go:embed file and a LICENSE, converted the way nugetgo-pack converts each flavor (-recurse=nuget -provenance),
+	// emits every file -- not only the .cs -- equal to its go.mod twin's, read from its own cache at the same version.
+	t.Run("a release with an embedded file and a LICENSE emits what its go.mod twin emits, every file", func(t *testing.T) {
+		const embedSource = "package emb\n\nimport _ \"embed\"\n\n// Data is the embedded file.\n//\n//go:embed data.txt\nvar Data string\n"
+		const license = "MIT License\n\nCopyright (c) 2026 Example Authors\n\nPermission is hereby granted, free of charge, to any person obtaining a copy.\n"
+		files := map[string]string{"emb.go": embedSource, "data.txt": "embedded bytes\n", "LICENSE": license}
+
+		release := filepath.Join(cache, "example.com", "emb@v1.0.0")
+
+		for name, contents := range files {
+			writeModuleFile(t, filepath.Join(release, name), contents)
+		}
+
+		writeModuleFile(t, filepath.Join(cache, "cache", "download", "example.com", "emb", "@v", "v1.0.0.mod"), "module example.com/emb\n")
+
+		twinFiles := map[string]string{"go.mod": "module example.com/emb\n"}
+
+		for name, contents := range files {
+			twinFiles[name] = contents
+		}
+
+		twinModCache, twinDir := twinCache(t, "example.com/emb@v1.0.0", twinFiles)
+
+		every := func(t *testing.T, moduleCache, dir string) map[string]string {
+			t.Helper()
+			output := t.TempDir()
+			cmd := exec.Command(driverBinary(t), "-recurse=nuget", "-provenance", "-go2cspath", treeSrc, dir, output)
+			cmd.Env = append(os.Environ(), "GOMODCACHE="+moduleCache, "GOFLAGS=", "GOPROXY=off", "GOWORK=off", "GOTOOLCHAIN=local", "GONOSUMDB=*",
+				"TMPDIR="+tmp, "TMP="+tmp, "TEMP="+tmp)
+			combined, err := cmd.CombinedOutput()
+
+			if err != nil {
+				t.Fatalf("%s did not convert (%v):\n%s", dir, err, lastLines(string(combined), 12))
+			}
+
+			all := map[string]string{}
+
+			_ = filepath.WalkDir(output, func(path string, entry os.DirEntry, err error) error {
+				if err == nil && !entry.IsDir() {
+					data, _ := os.ReadFile(path)
+					rel, _ := filepath.Rel(output, path)
+					all[filepath.ToSlash(rel)] = string(data)
+				}
+
+				return nil
+			})
+
+			return all
+		}
+
+		got, want := every(t, cache, release), every(t, twinModCache, twinDir)
+
+		if len(want) == 0 || !strings.Contains(strings.Join(mapKeys(want), "\n"), "emb.cs") {
+			t.Fatalf("the twin emitted no emb.cs, so this arm measures nothing: %v", mapKeys(want))
+		}
+
+		if !strings.Contains(want["src/example.com/emb/emb.cs"], "in module example.com/emb@v1.0.0") {
+			t.Errorf("the twin's emb.cs carries no versioned provenance, so the provenance half measures nothing")
+		}
+
+		for name, contents := range want {
+			if got[name] != contents {
+				t.Errorf("%s differs from the go.mod twin's:\n--- go.mod-less release ---\n%s\n--- twin ---\n%s", name, firstLines(got[name], 8), firstLines(contents, 8))
+			}
+		}
+
+		for name := range got {
+			if _, ok := want[name]; !ok {
+				t.Errorf("%s is emitted only for the go.mod-less release", name)
+			}
+		}
+	})
+
 	refused := func(t *testing.T, dir string) {
 		t.Helper()
 		combined, _, err := run(dir)
@@ -412,4 +487,72 @@ func TestPlainRecurseConvertsAModuleCacheReleaseWithNoGoMod(t *testing.T) {
 		writeModuleFile(t, filepath.Join(missing, "gone.go"), "package gone\n")
 		refused(t, missing)
 	})
+}
+
+// mapKeys is m's keys, sorted.
+func mapKeys(m map[string]string) []string {
+	keys := make([]string, 0, len(m))
+
+	for key := range m {
+		keys = append(keys, key)
+	}
+
+	sort.Strings(keys)
+
+	return keys
+}
+
+// firstLines is text's first n lines.
+func firstLines(text string, n int) string {
+	lines := strings.Split(text, "\n")
+
+	if len(lines) > n {
+		lines = lines[:n]
+	}
+
+	return strings.Join(lines, "\n")
+}
+
+// P3's delta read of INC 4, SHOULD 1 and NIT 2: in a copy run, a source under a go2cs-modcopy-* directory that is not
+// this run's copy (the loader reporting the copy under another spelling: a symlinked TMPDIR, a Windows 8.3 name) is an
+// error naming both spellings, never the main-module `<module>@/<file>` form; and a message quoting the copy
+// forward-slashed is remapped too. No route to the first is known (a symlinked TMPDIR on linux keeps its spelling).
+func TestACopyRunMapsEverySourceOrRefusesByName(t *testing.T) {
+	work := t.TempDir()
+	copyRoot := filepath.Join(work, "go2cs-modcopy-111", "example.com", "!old@v0.9.1")
+	release := filepath.Join(work, "cache", "example.com", "!old@v0.9.1")
+
+	previousCopy, previousOriginal := copiedModuleRoot, originalModuleRoot
+	t.Cleanup(func() { copiedModuleRoot, originalModuleRoot = previousCopy, previousOriginal })
+
+	copiedModuleRoot, originalModuleRoot = "", ""
+
+	if got, err := originalSourcePath(filepath.Join(work, "go2cs-modcopy-222", "x.go")); err != nil || got != filepath.Join(work, "go2cs-modcopy-222", "x.go") {
+		t.Errorf("outside a copy run every path passes through: got (%s, %v)", got, err)
+	}
+
+	copiedModuleRoot, originalModuleRoot = copyRoot, release
+
+	if got, err := originalSourcePath(filepath.Join(copyRoot, "sub", "sub.go")); err != nil || got != filepath.Join(release, "sub", "sub.go") {
+		t.Errorf("a source under the copy maps to the release: got (%s, %v)", got, err)
+	}
+
+	other := filepath.Join(work, "elsewhere", "go2cs-modcopy-111", "example.com", "!old@v0.9.1", "old.go")
+
+	if got, err := originalSourcePath(other); err == nil || !strings.Contains(err.Error(), other) || !strings.Contains(err.Error(), copyRoot) {
+		t.Errorf("a source under another spelling of a copy is refused naming both: got (%s, %v)", got, err)
+	}
+
+	plain := filepath.Join(work, "module", "a.go")
+
+	if got, err := originalSourcePath(plain); err != nil || got != plain {
+		t.Errorf("a source outside every copy passes through: got (%s, %v)", got, err)
+	}
+
+	message := "WARNING: " + filepath.Join(copyRoot, "old.go") + " and " + filepath.ToSlash(filepath.Join(copyRoot, "old.go"))
+
+	if got := remapCopiedPaths(message); strings.Contains(got, "go2cs-modcopy-") ||
+		!strings.Contains(got, filepath.ToSlash(filepath.Join(release, "old.go"))) {
+		t.Errorf("both spellings of the copy are remapped: %s", got)
+	}
 }

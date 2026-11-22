@@ -11,6 +11,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -152,24 +153,60 @@ func remapCopiedPaths(s string) string {
 		return s
 	}
 
-	return strings.ReplaceAll(s, copiedModuleRoot, originalModuleRoot)
+	s = strings.ReplaceAll(s, copiedModuleRoot, originalModuleRoot)
+
+	// A message may quote the copy forward-slashed (on Windows the native spelling has backslashes), and the copy is
+	// gone when the user reads it (P3's delta read, NIT 2).
+	return strings.ReplaceAll(s, filepath.ToSlash(copiedModuleRoot), filepath.ToSlash(originalModuleRoot))
 }
 
 // originalSourcePath is the release's own path for a source under the copy, else path unchanged: the same map, for the
 // Go file identity a package records (goSourceIdentity), which reads the module and its VERSION from the cache path
 // (P3's read of INC 4 increment 1, MUST 1: from the copy it recorded `<module>@/<file>`, with no version).
-func originalSourcePath(path string) string {
-	if copiedModuleRoot == "" || !isPathUnder(path, copiedModuleRoot) {
-		return path
+//
+// In a copy run, a source that lies under a go2cs-modcopy-* directory but not under this run's copy is an error naming
+// both spellings: the loader reported the copy under another spelling (a TMPDIR reached through a symlink, a Windows
+// 8.3 name), and passing it through would record the main-module `<module>@/<file>` form again, which the pack guard
+// accepts (P3's delta read, SHOULD 1). No route to it is known; it fails loud rather than silently.
+func originalSourcePath(path string) (string, error) {
+	if copiedModuleRoot == "" {
+		return path, nil
 	}
 
-	rel, err := filepath.Rel(copiedModuleRoot, path)
+	if isPathUnder(path, copiedModuleRoot) {
+		if rel, err := filepath.Rel(copiedModuleRoot, path); err == nil {
+			return filepath.Join(originalModuleRoot, rel), nil
+		}
+	}
+
+	if underModuleCopy(path) {
+		return "", fmt.Errorf("the Go source %s lies under a go2cs-modcopy-* directory, but not under this run's copy %s of the module-cache release %s, so its identity cannot be mapped back to the release", path, copiedModuleRoot, originalModuleRoot)
+	}
+
+	return path, nil
+}
+
+// releaseSourcePath is originalSourcePath for a reader that records the source in emitted output (goSourceIdentity,
+// sourceProvenance): an unmapped copy source refuses the conversion rather than record the copy.
+func releaseSourcePath(path string) string {
+	mapped, err := originalSourcePath(path)
 
 	if err != nil {
-		return path
+		log.Fatalf("Refusing to convert: %s\n", err)
 	}
 
-	return filepath.Join(originalModuleRoot, rel)
+	return mapped
+}
+
+// underModuleCopy reports whether a directory of path is named go2cs-modcopy-* (copyModuleCacheRelease's work directory).
+func underModuleCopy(path string) bool {
+	for _, segment := range strings.Split(filepath.ToSlash(path), "/") {
+		if strings.HasPrefix(segment, "go2cs-modcopy-") {
+			return true
+		}
+	}
+
+	return false
 }
 
 // sweepStaleModuleCopies removes go2cs-modcopy-* directories under dir older than maxAge: a run that ended by os.Exit or a

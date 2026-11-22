@@ -274,6 +274,7 @@ func newFileVisitor(fset *token.FileSet, packageTypes *types.Package, info *type
 		manualConversion:          fileEntry.manualConversion,
 		handOwnedTypeNames:        fileEntry.handOwnedTypeNames,
 		sourceFilePath:            entrySourcePath(fset, fileEntry),
+		cgoBindings:               fileEntry.cgoBindings,
 		identEscapesHeap:          fileEntry.identEscapesHeap,
 		sstringEligible:           fileEntry.sstringEligible,
 		ssliceEligible:            fileEntry.ssliceEligible,
