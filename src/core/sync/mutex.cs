@@ -513,21 +513,51 @@ internal static readonly System.Runtime.CompilerServices.ConditionalWeakTable<Se
 // TryLock tries to lock m and reports whether it succeeded.
 [GoRecv] public static bool TryLock(this ref Mutex m) => Interlocked.CompareExchange(ref m.state, 1, 0) == 0;
 
-// M:N SPIKE: the hidden twin of Lock, which a twin awaits. It takes the lock through Lock itself: the CAS fast
-// path, and on contention Lock's own slow path, which holds the carrier while it waits (Goroutine.Park counts
-// the block), and the profiling arms with it. That is the cost FREEZE-SHEET.md states for L-min: an opted-in
-// program holds its carrier on a contended sync.Mutex.Lock, as on any plain call.
+// The M:N twin of Lock, which a twinned program's twin awaits (M:N scheduler, experimental, opt-in: GoTwins=true and
+// GO2CS_MN=1; inert otherwise). FROZEN SURFACE from .5 (COORD's ruling, docs/phase4/inbox/G/20261122T114603Z-COORD.md;
+// row 7 pieces 2+3, DESIGN-mn-stdlib-twins.md): generated code in user assemblies names it, so its signature holds.
 //
-// 7a (DESIGN-mn-twin-set.md 12.4, 2026-11-21): the twin this replaces ran the protocol before W9a, when the
-// gate was SemaphoreSlim(1,1) and was itself the lock. W9a moved the lock into m.state and made the gate a
-// zero-permit WaitQueue, so on a FREE mutex the old twin's Wait(0) failed and it parked forever without
-// writing m.state: MnHttpClosure hung under GO2CS_MN=1 (main parked on SyncMutexLock; red row MnMutexTwin). A
-// twin that parks instead of blocking needs the box receiver (state is written after the await) and the
-// generator's own-shape rule with it: the stdlib-twins arm (row 7), as FREEZE-SHEET.md lists it.
-[GoRecv, System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
-internal static global::go.golib.GoTask Lockꞏtwin(this ref Mutex m) {
-    m.Lock();
-    return default;
+// A contended Lock PARKS here instead of blocking its carrier. Before row 7 this twin was `internal Lockꞏtwin(this ref
+// Mutex)` and forwarded to Lock, so every contended Lock in a twinned program blocked an OS thread: MnMixedStorm at
+// 100,000 goroutines held 25,409 threads in Lock and hung about 1 run in 10 (the train-4 capture). The receiver is the
+// BOX: the lock word is written after the await, which a `ref` cannot cross, and with no own-shape `this ref` twin
+// beside it the generator routes a twinned caller's `s.mu.Lock()` here, naming `s.mu`'s box without a copy.
+//
+// The protocol is Lock's, on the same gate: the CAS fast path (an uncontended Lock allocates nothing and parks
+// nowhere), then gateOf, the swap to 2, and leave. The only difference is the wait: the gate's WaitAsync completes a
+// GoParkSlot, so the goroutine parks; Unlock's Release serves a parked waiter and a blocked one (plain Lock, profiling
+// on) from the one SemaphoreSlim. With the scheduler off, and with the block or mutex profile on (so its stamps,
+// charges and Lock frame stay exactly Lock's), it takes plain Lock: the stated cost of profiling a twinned program.
+[System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+public static global::go.golib.GoTask Lockꞏtwin(this ж<Mutex> Ꮡm) {
+    if (Interlocked.CompareExchange(ref Ꮡm.Value.state, 1, 0) == 0) {
+        return default;
+    }
+    if (!global::go.golib.GoScheduler.Enabled || runtime_package.GoBlockProfileOn || runtime_package.GoMutexProfileOn) {
+        Ꮡm.Value.Lock();
+        return default;
+    }
+    return lockSlowꞏtwin(Ꮡm);
+}
+
+private static async global::go.golib.GoTask lockSlowꞏtwin(ж<Mutex> Ꮡm) {
+    WaitQueue gate = gateOf(ref Ꮡm.Value);
+    Goroutine.ParkScope scope = Goroutine.ParkTwin(WaitReason.SyncMutexLock);
+    try {
+        while (Interlocked.Exchange(ref Ꮡm.Value.state, 2) != 0) {
+            System.Threading.Tasks.Task wait = gate.WaitAsync();
+            if (wait.IsCompleted) {
+                continue;
+            }
+            global::go.golib.GoParkSlot slot = new();
+            _ = wait.ContinueWith(static (_, state) => ((global::go.golib.GoParkSlot)state!).Wake(), slot,
+                CancellationToken.None, System.Threading.Tasks.TaskContinuationOptions.ExecuteSynchronously, System.Threading.Tasks.TaskScheduler.Default);
+            await slot;
+        }
+    } finally {
+        scope.Dispose();
+        leave(ref Ꮡm.Value, gate);
+    }
 }
 
 // Unlock unlocks m.
