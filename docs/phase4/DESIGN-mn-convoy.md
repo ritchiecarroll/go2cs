@@ -138,10 +138,20 @@ session, GO2CS_MN=1, 10 runs per arm per row; MnBlockReturn n=20,000):
 
 | # | prediction | reading | score |
 |---|---|---|---|
-| R1 (A1) | P=12: F's MnBlockReturn median within 10% of the base's, 0 over 5 s | | |
-| R2 (A2) | P=12: F's MnHandBack p50 median under 60 us, p99 median at or under 700 us, wall median at or under 250 ms | | |
-| R3 (AP1) | P=2: F's MnHandBack p50 and wall medians at or under the base's, p99 median at or under 1,000 us | | |
-| R4 (AP2) | P=2: F's MnBlockReturn median under 2,000 ms, 0 over 5 s (the base convoys: every run over 5 s) | | |
+| R1 (A1) | P=12: F's MnBlockReturn median within 10% of the base's, 0 over 5 s | base median 899 ms (750-1,905, p90 1,443); F 1,141 (890-1,193), +27%; 0 over 5 s in both | **missed** |
+| R2 (A2) | P=12: F's MnHandBack p50 median under 60 us, p99 median at or under 700 us, wall median at or under 250 ms | F p50 med 5.5 us, p99 med 429 us, wall med 179 ms (base 34.8, 357, 185) | **met** |
+| R3 (AP1) | P=2: F's MnHandBack p50 and wall medians at or under the base's, p99 median at or under 1,000 us | base p50 14.5, p99 3,949, wall 668; F p50 14.1, p99 2,558, wall 626 ((A) before the folds: p50 1.6, p99 509, wall 237) | **missed** (p99) |
+| R4 (AP2) | P=2: F's MnBlockReturn median under 2,000 ms, 0 over 5 s (the base convoys: every run over 5 s) | base median 24,847 ms (all 10 over 5 s); F 910 ms, 0 over 5 s | **met** |
 
 The cap is the fold most likely to move a reading: at P=2 it admits one spinner where (A) admitted any number, so a
 hand-back that a second spinner took hot may now wake a sleeper. R3's p99 bar is wider than A2's for that reason.
+
+Read at c11cb99971, windows, one session. Against (A)'s own readings before the folds (section 6), F lost the P=2
+hand-back gain (wall 237 to 626 ms, p99 509 to 2,558 us) and moved MnBlockReturn at P=12 from 995 to 1,141 ms. The
+prediction named the cap as the likeliest cause; the folds also added fences and the lazy event.
+
+**R5, the attribution arm, predicted before its run.** One axis: F against F with the spin cap lifted (m_spinCap =
+int.MaxValue, nothing else changed), the same four blocks, 10 runs each, one session. If the cap is the cost, F-nocap
+reads P=2 MnHandBack p99 median at or under 1,000 us and wall median at or under 300 ms, and P=12 MnBlockReturn median
+within 10% of R1's base (at or under 989 ms), while F re-reads within 10% of its R1-R3 readings (the control). If
+F-nocap reads like F, the cost is in the other folds (fences, lazy event, reaping) and the cap is not the cause.
