@@ -72,6 +72,44 @@ public static nint Make(this Vec v) {
 
 } partial class main_package {
 
+partial struct V /*Vec*/;
+
+public static V Clone(this V v) {
+    v = v.ΔClone();
+
+    v[0] = -1;
+    return v.ΔClone();
+}
+
+public static slice<nint> Slice(this V v, nint i, nint n) {
+    v = v.ΔClone();
+
+    return v.slice(i, n);
+}
+
+partial struct Near /*[]nint*/;
+
+public static nint Lengths(this Near n) { return 1000 + len(n); }
+public static nint Slices(this Near n) { return 2000; }
+public static nint Sourced(this Near n) { return 3000; }
+public static nint Appends(this Near n) { return 4000; }
+public static nint Capacitys(this Near n) { return 5000; }
+public static nint ToSpans(this Near n) { return 6000; }
+
+partial struct NearArr /*[3]nint*/;
+
+public static nint Slicer(this NearArr a) {
+    a = a.Clone();
+
+    return 7000;
+}
+
+public static nint Len(this NearArr a) {
+    a = a.Clone();
+
+    return 8000;
+}
+
 partial struct Capacity /*[]@string*/;
 partial struct Length /*[2]nint*/;
 
@@ -112,6 +150,22 @@ internal static void main() {
     var vʗ1 = v;
     var vl = () => vʗ1.Length();
     fmt.Println("Vec method value:", vl(), len(v));
+
+    var w = new V(new nint[]{5, 6, 7, 8}.array());
+    var w2 = w.ΔClone();
+    w2[0] = 50;
+    fmt.Println("V value copy:", w[0], w2[0]);
+    fmt.Println("V Slice:", w.Slice(1, 3), "V Clone:", w.Clone()[0], w[0]);
+
+    var nr = new Near(new nint[]{1, 2, 3}.slice());
+    nr = append(nr, (nint)4);
+    fmt.Println("near-miss methods:", nr.Lengths(), nr.Slices(), nr.Sourced(), nr.Appends(), nr.Capacitys(), nr.ToSpans());
+    fmt.Println("near-miss wrapper:", len(nr), cap(nr) >= 4, nr[1..3], nr[len(nr) - 1]);
+    foreach (var (i, x) in range<nint>(nr[2..])) {
+        fmt.Println("near-miss range:", i, x);
+    }
+    var na = new NearArr(new nint[]{9, 8, 7}.array());
+    fmt.Println("near-miss array:", na.Slicer(), na.Len(), len(na), na[1..]);
 
     var c = new Capacity(new @string[]{"a", "b"}.slice());
     c = append(c, (@string)"c");

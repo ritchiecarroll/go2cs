@@ -44,6 +44,31 @@ func (v Vec) Length() int           { return 40 }
 func (v Vec) Source() string        { return "vec source" }
 func (v Vec) Make() int             { return 4 }
 
+// V is defined over the named array Vec (IArrayViewTypeTemplate's kind): its Clone and Slice are its own, so the
+// wrapper's copy goes through ΔClone and its Slice becomes ΔSlice, while a value copy still copies.
+type V Vec
+
+func (v V) Clone() V             { v[0] = -1; return v }
+func (v V) Slice(i, n int) []int { return v[i:n] }
+
+// Near's methods are each ONE NAME AWAY from a claimed member (the near-miss rows): nothing is claimed, so the wrapper
+// keeps Length, Source, Slice, Append, Capacity and ToSpan, and len, cap, append, range and slicing still read as Go
+// beside the Go methods.
+type Near []int
+
+func (n Near) Lengths() int   { return 1000 + len(n) }
+func (n Near) Slices() int    { return 2000 }
+func (n Near) Sourced() int   { return 3000 }
+func (n Near) Appends() int   { return 4000 }
+func (n Near) Capacitys() int { return 5000 }
+func (n Near) ToSpans() int   { return 6000 }
+
+// NearArr is the array near-miss: Slicer and Len are not the wrapper's names.
+type NearArr [3]int
+
+func (a NearArr) Slicer() int { return 7000 }
+func (a NearArr) Len() int    { return 8000 }
+
 // Capacity and Length are types NAMED like wrapper members, with no methods.
 type Capacity []string
 type Length [2]int
@@ -78,6 +103,22 @@ func main() {
 	fmt.Println("Vec Length/Source/Make:", v.Length(), v.Source(), v.Make())
 	vl := v.Length
 	fmt.Println("Vec method value:", vl(), len(v))
+
+	w := V{5, 6, 7, 8}
+	w2 := w
+	w2[0] = 50
+	fmt.Println("V value copy:", w[0], w2[0])
+	fmt.Println("V Slice:", w.Slice(1, 3), "V Clone:", w.Clone()[0], w[0])
+
+	nr := Near{1, 2, 3}
+	nr = append(nr, 4)
+	fmt.Println("near-miss methods:", nr.Lengths(), nr.Slices(), nr.Sourced(), nr.Appends(), nr.Capacitys(), nr.ToSpans())
+	fmt.Println("near-miss wrapper:", len(nr), cap(nr) >= 4, nr[1:3], nr[len(nr)-1])
+	for i, x := range nr[2:] {
+		fmt.Println("near-miss range:", i, x)
+	}
+	na := NearArr{9, 8, 7}
+	fmt.Println("near-miss array:", na.Slicer(), na.Len(), len(na), na[1:])
 
 	c := Capacity{"a", "b"}
 	c = append(c, "c")

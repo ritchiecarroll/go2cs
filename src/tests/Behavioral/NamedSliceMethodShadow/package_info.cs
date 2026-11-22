@@ -49,7 +49,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "AAsclpSWloKCgoKCgpaC+qCioKKgoqCioKKg/IKCgoKCgoKCgoKCgoYACAKWgoKmgoKCgqKUgoKCgoI=", "", "66=main.Stack.Capacity;66=main.Stack.Length;66=main.Stack.Source;79=main.Vec.Length")]
+[assembly: GoPositionMap("main.go", "main.cs", "AAsclpSWloKCgoKCgpaC+qCioKKgoqCioKKg7KCAoqDOgoKCgoK6oKKg3IKCgoKCgoKCgoKCgoYACAKWgoKmgoKCgqKUgoKCgpSCgoKCgpSClIKCgoKC", "", "91=main.Stack.Capacity;91=main.Stack.Length;91=main.Stack.Source;104=main.Vec.Length")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -67,7 +67,10 @@ public static partial class main_package
     // <TypeAccessibility>
     public partial struct Capacity {}
     public partial struct Length {}
+    public partial struct Near {}
+    public partial struct NearArr {}
     public partial struct Stack {}
+    public partial struct V {}
     public partial struct Vec {}
     // </TypeAccessibility>
 
