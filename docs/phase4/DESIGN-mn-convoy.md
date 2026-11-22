@@ -138,7 +138,7 @@ session, GO2CS_MN=1, 10 runs per arm per row; MnBlockReturn n=20,000):
 
 | # | prediction | reading | score |
 |---|---|---|---|
-| R1 (A1) | P=12: F's MnBlockReturn median within 10% of the base's, 0 over 5 s | base median 899 ms (750-1,905, p90 1,443); F 1,141 (890-1,193), +27%; 0 over 5 s in both | **missed** |
+| R1 (A1) | P=12: F's MnBlockReturn median within 10% of the base's, 0 over 5 s | base median 899 ms (750-1,905, p90 1,443); F 1,141 (890-1,193), +27%; 0 over 5 s in both | **not charged to the folds**: session drift, controlled by R5 (F re-read 981 ms) |
 | R2 (A2) | P=12: F's MnHandBack p50 median under 60 us, p99 median at or under 700 us, wall median at or under 250 ms | F p50 med 5.5 us, p99 med 429 us, wall med 179 ms (base 34.8, 357, 185) | **met** |
 | R3 (AP1) | P=2: F's MnHandBack p50 and wall medians at or under the base's, p99 median at or under 1,000 us | base p50 14.5, p99 3,949, wall 668; F p50 14.1, p99 2,558, wall 626 ((A) before the folds: p50 1.6, p99 509, wall 237) | **missed** (p99) |
 | R4 (AP2) | P=2: F's MnBlockReturn median under 2,000 ms, 0 over 5 s (the base convoys: every run over 5 s) | base median 24,847 ms (all 10 over 5 s); F 910 ms, 0 over 5 s | **met** |
@@ -173,3 +173,20 @@ between sessions, so R1's miss is not attributable to the folds; the control hel
 Finding: at P=2 a cap of max(1, P/2) leaves one spinner, and a hand-back pair needs a second to take a token hot; at
 P=12 the cap (6) never binds in these fixtures. The cap stays as COORD folded it until a ruling: keep it, lift it, or
 floor it at 2 (max(2, P/2)), which would read as F-nocap at P=2 only if two spinners suffice there (not measured).
+
+**R6, COORD's cap ruling, predicted before its run.** COORD ruled (2026-11-22): read the floor first. One axis, the cap
+line only: floor = max(2, P/2) against lifted = int.MaxValue, one session at the commit that carries this prediction,
+10 runs per block: P=2 MnHandBack, P=2 MnBlockReturn, P=12 MnBlockReturn. Then one starvation read outside the A/B:
+each arm plus a measurement-only instrument (never committed) that records every sleeper's wait from enqueue to grant,
+P=12 MnHandBack with the reading on, 10 runs; the number is the oldest sleeper's wait, the max per run.
+
+Decision rule (COORD's): the floor within 15% of lifted at P=2 with p99 under 1,000 us keeps max(2, P/2) (the guard
+stays for large P); else, if lifted shows no starvation outlier at P=12, the cap is lifted; else COORD rules.
+
+Predictions:
+- R6a: the floor reads within 15% of lifted at P=2 on MnHandBack p99 and wall medians, p99 median under 1,000 us. A
+  hand-back pair needs one spinner beside the releasing thread, so two suffice at P=2.
+- R6b: the floor reads within 15% of lifted on P=2 and P=12 MnBlockReturn medians (the cap never bound at P=12).
+- R6c: no starvation outlier: lifted's per-run oldest-sleeper wait has a median within 2x of the floor's and no run over
+  100 ms. Outlier here means a lifted run over 3x the floor's median or over 100 ms.
+If R6a holds, the decision is the floor whatever R6c reads; R6c is then the record of what the guard costs at P=12.
