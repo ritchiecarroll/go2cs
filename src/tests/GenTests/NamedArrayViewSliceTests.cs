@@ -110,7 +110,7 @@ public class NamedArrayViewSliceTests
                 "public slice<uint64> slice(nint low) => view.slice(low);",
                 "public slice<uint64> slice(nint low, nint high) => view.slice(low, high);",
                 "public slice<uint64> slice(nint low, nint high, nint max) => view.slice(low, high, max);",
-                "public slice<uint64> Slice(nint start, nint length) => view.Slice(start, length);"])
+                "public slice<uint64> Slice(nint start, nint length) => view.Value.Slice(start, length);"])
             {
                 StringAssert.Contains(part, member, $"the view type {name} does not forward a slice member");
             }
