@@ -33,6 +33,11 @@ public sealed class GoParkSlot
 
     // null (not woken, not parked), s_woken, or the parked continuation: an Action, or the parked twin's box (row 6).
     private object? m_state;
+
+    // A Gosched yield park (GoScheduler.GoschedTwin): the carrier requeues the goroutine at the global queue's tail instead
+    // of committing the park. Carried on the SLOT, never on the carrier, so a park attempt that fails (ParkPending throws)
+    // cannot turn the step's earlier, real park into a requeue (P3's read of the Gosched seat).
+    internal bool IsYield { get; init; }
     private Goroutine? m_goroutine;
 
     /// <summary>Whether <see cref="Wake"/> has run.</summary>
@@ -267,6 +272,7 @@ public static class GoScheduler
     private static int s_peakThreads;
     private static long s_steps;
     private static long s_parks;
+    private static long s_goschedYields;
     private static long s_migrations;
     private static long s_migrated;
     private static long s_handoffs;
@@ -460,7 +466,8 @@ public static class GoScheduler
                $" pins={Interlocked.Read(ref s_pins)} pinned-wakes={Interlocked.Read(ref s_pinnedWakes)}" +
                $" pin-retired={Interlocked.Read(ref s_pinRetired)} peak-pinned-waiting={Volatile.Read(ref s_peakPinnedWaiting)}" +
                $" off-carrier-locks={Interlocked.Read(ref s_offCarrierLocks)} idle-handoffs={Interlocked.Read(ref s_idleHandoffs)} idle-set-violations={Interlocked.Read(ref s_idleSetViolations)} shared-floor-violations={Interlocked.Read(ref s_sharedFloorViolations)} pinned-blocked-violations={Interlocked.Read(ref s_pinnedBlockedViolations)}" +
-               $" context={(s_contextSwap ? "goroutine" : "off")}" + Goroutine.MainReading() + Goroutine.MountReading();
+               $" context={(s_contextSwap ? "goroutine" : "off")}" + Goroutine.MainReading() + Goroutine.MountReading() +
+               $" gosched-yields={Interlocked.Read(ref s_goschedYields)}";
     }
 
     private static void SampleThreads()
@@ -482,6 +489,33 @@ public static class GoScheduler
             // A reading, never a failure.
         }
     }
+
+    // The Gosched-park seat (COORD's ruling of 2026-11-21, docs/phase4/inbox/G/20261121T231225Z-COORD.md): a twin's
+    // runtime.Gosched is a park point that requeues the goroutine at the GLOBAL run queue's tail, as Go's goschedImpl
+    // puts it on the global queue, so a goroutine that spins on Gosched ends its step and every goroutine queued
+    // before it runs first (S2 arm 1, MnSpinCap: spinners beyond the P count starved parked goroutines while Gosched
+    // was a thread yield). Off a carrier (the scheduler off, a plain thread) it is runtime.Gosched's own thread yield.
+    internal static GoTask GoschedTwin()
+    {
+        if (t_carrier is not { Mounted: not null })
+        {
+            GoschedBackoff.Yield();
+            return default;
+        }
+
+        return YieldPark();
+    }
+
+    // A park on a slot nobody wakes, marked a yield: the carrier requeues the goroutine itself (RunStep).
+    private static async GoTask YieldPark() => await YieldSlot();
+
+    // The slot a Gosched yield parks on (its own factory, so a row can read the mark the carrier reads).
+    internal static GoParkSlot YieldSlot() => new() { IsYield = true };
+
+    // What the carrier does with a committed park after the unmount (P3's read): a yield slot's goroutine is requeued, any
+    // other slot is committed. The decision reads the PENDING slot alone, so nothing a failed park attempt left behind can
+    // change it.
+    internal static bool RequeuesOnCommit(GoParkSlot slot) => slot.IsYield;
 
     // Records the park of the goroutine mounted on this carrier. The carrier commits it after the unmount.
     internal static void ParkPending(GoParkSlot slot, object continuation)
@@ -1141,7 +1175,27 @@ public static class GoScheduler
                         s_pinnedCount--;
                 }
 
-                slot.Commit(goroutine, continuation);
+                // A Gosched yield goes to the GLOBAL queue's tail (Go's goschedImpl -> globrunqput), never the run-next
+                // slot, so every goroutine queued before it runs first. A pinned goroutine goes back to its own carrier, after a
+                // Thread.Yield, so its thread still gives the processor up as runtime.Gosched did (P3's nit).
+                if (RequeuesOnCommit(slot))
+                {
+                    Interlocked.Increment(ref s_goschedYields);
+
+                    if (goroutine.m_pin is Carrier pin)
+                    {
+                        Thread.Yield();
+                        pin.Deliver(continuation);
+                    }
+                    else
+                    {
+                        Enqueue(goroutine, continuation);
+                    }
+                }
+                else
+                {
+                    slot.Commit(goroutine, continuation);
+                }
             }
             else if (m_pinned is not null || locked)
             {

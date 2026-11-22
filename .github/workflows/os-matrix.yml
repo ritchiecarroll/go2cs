@@ -1823,7 +1823,10 @@ jobs:
       # M:N spike (this branch never lands). After the smoke has built MnMixedStorm with generated twins, run the
       # program directly: Go's build for the reference output, then the C# build on the thread path (the sampler's
       # control) and on the scheduler at three sizes. A sampler outside the process counts its OS threads, and the
-      # scheduler prints its own reading.
+      # scheduler prints its own reading. Then MnGoschedFair's chain check, the one part that FAILS the step: the
+      # fairness row tests GoScheduler.MaxRunNextChain only while its ping-pong pair chains through run-next, so the
+      # script asserts the chain formed (run-next steps >= 100 x Gosched yields) and reads CHAIN-FAIL by name when a
+      # later change makes the row vacuous (P3's SHOULD 1 on the Gosched-park seat).
       # -------------------------------------------------------------------------------------
       - name: M:N spike — direct runs of the twinned storm
         if: always() && needs.plan.outputs.stage == 'behavioral-smoke' && needs.plan.outputs.filter == 'MnMixedStorm'
@@ -1869,7 +1872,9 @@ jobs:
           for n in 1000 10000 100000; do
             one cs-twins $n 1 dotnet "$dll"
           done
-          exit 0
+          unset GO2CS_MN MN_STORM_N MN_STORM_HOLD_MS GO2CS_MN_READING
+          bash src/tools/mnspike2/MnGoschedFair/chain-check.sh
+          exit $?
 
       - name: Behavioral stderr — run named projects directly and keep the WHOLE stderr
         if: needs.plan.outputs.stage == 'behavioral-stderr'
