@@ -2895,7 +2895,7 @@ partial class runtime_package
     // literal is in a function, in package initialization, or in a method that cannot be found. The literal's C# method is
     // `<outer>b__…` (or a local function) on a closure class nested in the class that declares `outer`: the package class
     // for a suffix-form body (`Bump⁔`), or the class that holds a holder-form method. Every overload of `outer` there with
-    // a receiver is a candidate: a pointer method's `this ref T` and go2cs-gen's `this ж<T>` both read `(*T)`. Where two
+    // a receiver that is itself a Go frame is a candidate (go2cs-gen's `this ж<T>` overloads are not). Where two
     // receivers share the name (bodies of two types' `Name⁔` in one package class), the literal belongs to the candidate
     // whose body starts closest above the literal's line in the same file, read through this file's PDB reader.
     private static string? goLiteralReceiver(System.Reflection.MethodBase literal, string outer, int ilOffset)
@@ -2923,7 +2923,9 @@ partial class runtime_package
 
         foreach (System.Reflection.MethodInfo candidate in host.GetMethods(anyStatic))
         {
-            if (candidate.Name == outer && goReceiverName(candidate) is string receiver)
+            // Only a method that is itself a Go frame can hold a literal: never go2cs-gen output (a value method's
+            // `this ж<T>` twin, which would read `(*T)` beside the method's `T`) or a [StackTraceHidden] forwarder.
+            if (candidate.Name == outer && isGoSourceFrame(candidate) && goReceiverName(candidate) is string receiver)
                 candidates.Add((candidate, receiver));
         }
 
