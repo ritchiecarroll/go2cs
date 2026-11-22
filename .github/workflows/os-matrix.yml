@@ -1917,9 +1917,10 @@ jobs:
         shell: pwsh
         env:
           SMOKE_FILTER: ${{ needs.plan.outputs.filter }}
-          # M:N spike (this branch never lands): the filtered program is built with generated twins (the
-          # property reaches MSBuild from the environment) and every program the smoke runs is on the scheduler.
-          GoTwinsFor: ${{ needs.plan.outputs.filter }}
+          # M:N: every program the smoke runs is on the scheduler (GO2CS_MN), and each project the filter selects is
+          # built with generated twins. The step sets GoTwinsFor itself, below, to the EXACT project list: MSBuild
+          # matches GoTwinsFor by whole project name (src/Directory.Build.targets), and a substring filter passed
+          # straight through twinned nothing once it selected more than one project.
           GO2CS_MN: '1'
           # BehavioralRunner's OWN budgets, in seconds: no timeout the caller sets can influence
           # them, so a generous job budget alone would be worthless if the runner killed its child
@@ -1946,6 +1947,24 @@ jobs:
           if ([string]::IsNullOrWhiteSpace($filter)) { $filter = 'Defer' }
 
           Write-Host "==> behavioral smoke: filter '$filter', GoTargetOS=$($env:GoTargetOS)"
+
+          # GoTwinsFor is the exact ';'-separated list of the projects the runner's --filter (a case-insensitive
+          # substring) selects, with each sub-library project beside them (`<Project>.<lib>.csproj`, whose methods the
+          # program calls). A filter that selects no project refuses by name: it would twin nothing and read nothing.
+          $twinNames = @(Get-ChildItem -Directory 'src/tests/Behavioral' |
+              Where-Object { $_.Name.IndexOf($filter, [StringComparison]::OrdinalIgnoreCase) -ge 0 -and
+                  (Test-Path (Join-Path $_.FullName "$($_.Name).csproj")) } |
+              ForEach-Object { Get-ChildItem -Path $_.FullName -Filter '*.csproj' -Recurse -File } |
+              Where-Object { $_.Extension -eq '.csproj' } |
+              ForEach-Object BaseName | Sort-Object -Unique)
+
+          if ($twinNames.Count -eq 0) {
+              Write-Host "::error::behavioral-smoke filter '$filter' selects no behavioral project, so GoTwinsFor would twin nothing; name a project or a substring of one"
+              exit 1
+          }
+
+          $env:GoTwinsFor = $twinNames -join ';'
+          Write-Host "==> GoTwinsFor ($($twinNames.Count)): $env:GoTwinsFor"
 
           # Build the converter explicitly. A hosted runner has no go2cs binary at all, and every
           # harness rebuild predicate keys on a converter *.go being NEWER than the binary -- which
