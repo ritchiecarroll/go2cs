@@ -1460,6 +1460,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckMnMixedStorm() => CheckTarget("MnMixedStorm");
 
     [TestMethod]
+    public void CheckMnGlyphMethodFrames() => CheckTarget("MnGlyphMethodFrames");
+
+    [TestMethod]
     public void CheckMultiFileInitOrder() => CheckTarget("MultiFileInitOrder");
 
     [TestMethod]

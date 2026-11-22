@@ -86,6 +86,48 @@ public class TailCallFrameGuardTests
             "(golib's DynamicSecurityMethodAttribute)");
     }
 
+    // A //go:noinline Go method in the suffix form (GlyphProbe.cs: the NoInlining body `Walk⁔` and its AggressiveInlining,
+    // [StackTraceHidden] forwarder `Walk`), reached through a method value. A delegate's target is never inlined into its
+    // caller, and an AggressiveOptimization caller has no PGO to devirtualize the delegate, so the forwarder is a call the
+    // JIT declined to inline: it runs as a frame of its own, or it tail-calls the body and leaves none. Either way Go has
+    // exactly one frame for the method, named for it, between the frame that read the callers and the method's caller.
+    private static readonly Func<glyphprobe_package.counter, slice<uintptr>> s_walkValue = glyphprobeᴛcounter.Walk;
+
+    private static readonly Func<slice<uintptr>> s_callsWalkValue =
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)] () => s_walkValue(new glyphprobe_package.counter());
+
+    [TestMethod]
+    public void ANoInlineBodyThroughAForwarderTheJitDidNotInlineIsOneGoFrame()
+    {
+        RequireOptimizedCode();
+
+        // The control: the method value's target is the forwarder itself, not the body, so the call into it is the
+        // declined inline this arm exists for.
+        Assert.AreEqual(nameof(glyphprobeᴛcounter.Walk), s_walkValue.Method.Name, "the method value no longer binds the forwarder");
+        Assert.IsTrue(s_walkValue.Method.IsDefined(typeof(StackTraceHiddenAttribute), inherit: false), "the forwarder lost [StackTraceHidden]");
+
+        slice<uintptr> pcs = s_callsWalkValue();
+        System.Collections.Generic.List<string> functions = [];
+        var frames = runtime_package.CallersFrames(pcs);
+
+        while (true)
+        {
+            var (frame, more) = frames.Next();
+            functions.Add((string)frame.Function);
+
+            if (!more)
+                break;
+        }
+
+        string all = string.Join(" | ", functions);
+
+        Assert.IsTrue(functions.Count >= 3, all);
+        Assert.AreEqual("glyphprobe.callersHere", functions[1], all);
+        Assert.AreEqual("glyphprobe.counter.Walk", functions[2], all);
+        Assert.AreEqual(1, functions.Count(name => name == "glyphprobe.counter.Walk"), "the method has a second frame (the forwarder's): " + all);
+        Assert.IsFalse(all.Contains('\u2054'), all);
+    }
+
     [TestMethod]
     public void FrameApisCarryRequireSecObject()
     {

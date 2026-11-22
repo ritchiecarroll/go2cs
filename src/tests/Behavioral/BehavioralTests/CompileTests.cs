@@ -1504,6 +1504,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckMnMixedStorm() => CheckTarget("MnMixedStorm");
 
     [TestMethod]
+    public void CheckMnGlyphMethodFrames() => CheckTarget("MnGlyphMethodFrames");
+
+    [TestMethod]
     public void CheckMultiFileInitOrder() => CheckTarget("MultiFileInitOrder");
 
     [TestMethod]

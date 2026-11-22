@@ -1507,6 +1507,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckMnMixedStorm() => CheckTarget("MnMixedStorm");
 
     [TestMethod]
+    public void CheckMnGlyphMethodFrames() => CheckTarget("MnGlyphMethodFrames");
+
+    [TestMethod]
     public void CheckMultiFileInitOrder() => CheckTarget("MultiFileInitOrder");
 
     [TestMethod]
