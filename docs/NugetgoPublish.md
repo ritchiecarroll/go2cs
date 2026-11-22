@@ -162,6 +162,11 @@ refuses a package whose `build/<id>.targets` carries `NUGETGOCGO001`, or whose `
 beside `runtimes/`, before it pushes anything. `-Cgo` runs under
 PowerShell 7 only.
 
+Every pack also refuses a `GoPositionMap` record whose Go file is an absolute path or a Go build-cache file, and names
+the record. It checks each `package_info.cs` before it builds, and each packed assembly after the pack. A packed
+record names its file the way `go build -trimpath` does (`<module>@<version>/<file>`). Until the cgo item's increment
+1c, the `-cgo` route recorded the build-cache file that cmd/cgo wrote for each `import "C"` source.
+
 The package README is `PR/src/M/nuget/README.md`, in the style of the `go.*` packages (owner, 2026-10-10). The pack
 writes it on the first pack (see *Customizing the package page* below). Its generated block holds the description,
 whose module path links the Go source at its version, a badge row, and the license line. There is no "PROOF:" in it
