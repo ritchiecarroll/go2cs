@@ -2465,6 +2465,12 @@ partial class runtime_package
                 // method without the suffix; the lookups above keep the raw spelling.
                 string goOuter = goInitFrameName(goEnclosingMethod(method, outer), glyphGoName(goLiteralOuterName(method, outer)));
 
+                // A literal written in a METHOD is named under the method's receiver, as Go names it
+                // (`pkg.(*T).M.func1`): the receiver is the enclosing method's, since the literal's own C#
+                // method has none (goLiteralReceiver).
+                if (goLiteralReceiver(method, outer, ilOffset) is string literalReceiver)
+                    goOuter = $"{literalReceiver}.{goOuter}";
+
                 if (recorded is not null)
                 {
                     name = $"{goOuter}.func{recorded}";
@@ -2885,6 +2891,70 @@ partial class runtime_package
     // (`<>c`, `<>c__DisplayClassN_M`) nested in the package class, a local function on the package
     // class itself; either way the enclosing method is the package class's static method of that name.
     // An init function takes no parameters, so a parameterless lookup is the only one that matters.
+    // The Go receiver (`T` or `(*T)`, goReceiverName) of the method a function literal is written in, or null when the
+    // literal is in a function, in package initialization, or in a method that cannot be found. The literal's C# method is
+    // `<outer>b__…` (or a local function) on a closure class nested in the class that declares `outer`: the package class
+    // for a suffix-form body (`Bump⁔`), or the class that holds a holder-form method. Every overload of `outer` there with
+    // a receiver is a candidate: a pointer method's `this ref T` and go2cs-gen's `this ж<T>` both read `(*T)`. Where two
+    // receivers share the name (bodies of two types' `Name⁔` in one package class), the literal belongs to the candidate
+    // whose body starts closest above the literal's line in the same file, read through this file's PDB reader.
+    private static string? goLiteralReceiver(System.Reflection.MethodBase literal, string outer, int ilOffset)
+    {
+        if (outer == ".cctor")
+            return null;
+
+        Type? host = null;
+
+        for (Type? type = literal.DeclaringType; type is not null; type = type.DeclaringType)
+        {
+            if (!type.Name.StartsWith('<'))
+            {
+                host = type;
+                break;
+            }
+        }
+
+        if (host is null)
+            return null;
+
+        const System.Reflection.BindingFlags anyStatic = System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.DeclaredOnly;
+
+        List<(System.Reflection.MethodInfo method, string receiver)> candidates = [];
+
+        foreach (System.Reflection.MethodInfo candidate in host.GetMethods(anyStatic))
+        {
+            if (candidate.Name == outer && goReceiverName(candidate) is string receiver)
+                candidates.Add((candidate, receiver));
+        }
+
+        if (candidates.Count == 0)
+            return null;
+
+        if (candidates.TrueForAll(entry => entry.receiver == candidates[0].receiver))
+            return candidates[0].receiver;
+
+        (string? file, int line) = methodSourcePosition(literal, ilOffset < 0 ? 0 : ilOffset);
+
+        if (file is null || line <= 0)
+            return null;
+
+        string? closest = null;
+        int closestLine = 0;
+
+        foreach ((System.Reflection.MethodInfo candidate, string receiver) in candidates)
+        {
+            (string? candidateFile, int candidateLine) = methodSourcePosition(candidate, 0);
+
+            if (candidateFile == file && candidateLine > closestLine && candidateLine <= line)
+            {
+                closest = receiver;
+                closestLine = candidateLine;
+            }
+        }
+
+        return closest;
+    }
+
     private static System.Reflection.MethodBase? goEnclosingMethod(System.Reflection.MethodBase literal, string outer)
     {
         if (outer == ".cctor")
