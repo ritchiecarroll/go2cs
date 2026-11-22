@@ -6,6 +6,8 @@
 # own — both macOS legs above all — and a native-Linux control for readings the WSL lane produced.
 # It is never triggered by code: no push trigger and no pull_request trigger. It runs on
 # workflow_dispatch, and on ONE daily schedule that runs the darwin census and nothing else.
+# ci-master.yml CALLS its stages (workflow_call) on push and pull_request to master and nightly: those
+# runs are that workflow's, triggered by its events, and use the stages here unchanged.
 #
 # Why darwin has a schedule and the other flavors do not: windows and linux are each compiled by
 # standing gates on the fleet's own machines, so a mechanical break in either surfaces the day it
@@ -33,6 +35,72 @@ on:
   # "daily" gets `0 4`, and GitHub delays a congested cron rather than dropping it.
   schedule:
     - cron: '41 4 * * *'
+
+  # ci-master.yml calls the plain stages here (go-test, golib-tests, gen-tests, behavioral-full) on push and pull_request
+  # to master and on its nightly schedule, so the gates run with exactly this workflow's toolchain pins. A called run
+  # sees the CALLER's event (push, pull_request, schedule); plan's EVENT_NAME below reports `workflow_call` whenever a
+  # stage was passed in, so only this workflow's own schedule takes the darwin-census branch. Kept ABOVE
+  # workflow_dispatch: Test-NugetgoBehaviorProof.ps1 reads the dispatch inputs up to the next top-level key.
+  workflow_call:
+    inputs:
+      goos:
+        description: 'windows, linux or darwin'
+        type: string
+        required: true
+      stage:
+        description: 'One of the dispatch stages; the callers use go-test, golib-tests, gen-tests and behavioral-full'
+        type: string
+        required: true
+      filter:
+        type: string
+        required: false
+        default: ''
+      # The rest of what plan reads, declared so a called run reads them as blank, which plan defaults as a
+      # REST dispatch that omits them.
+      dotnet:
+        type: string
+        required: false
+        default: ''
+      published_version:
+        type: string
+        required: false
+        default: ''
+      consumer_ref:
+        type: string
+        required: false
+        default: ''
+      consumer_override:
+        type: string
+        required: false
+        default: ''
+      run_timeout:
+        type: string
+        required: false
+        default: ''
+      nugetgo_module:
+        type: string
+        required: false
+        default: ''
+      nugetgo_package:
+        type: string
+        required: false
+        default: ''
+      nugetgo_feed:
+        type: string
+        required: false
+        default: ''
+      nugetgo_feed_sha256:
+        type: string
+        required: false
+        default: ''
+      aot_bound_minutes:
+        type: string
+        required: false
+        default: ''
+      arch:
+        type: string
+        required: false
+        default: ''
 
   workflow_dispatch:
     inputs:
@@ -65,6 +133,7 @@ on:
           - stack-probe
           - converter-cgo
           - cgo-e2e
+          - go-test
       filter:
         description: 'Shard filter — comma-separated EXACT roster package names for sweep-shard ("sort" sweeps sort and never internal/fmtsort), project substring for behavioral-smoke. IGNORED by behavioral-full, which runs the whole enumeration in slices. Blank takes the stage default. Comma-separated project NAMES for behavioral-stderr. The configuration for solution-build: Release (blank) or Debug. golib-tests and stack-probe take options after the filter as ;key=value pairs (no ; inside a value): golib-tests ;jit=PATTERN (a DOTNET_JitDisasm pattern, e.g. p256Mul p384Mul; with tiering off, each matching method''s JIT listing is printed to the job log), stack-probe ROW;test=REGEX (required: the -TestFilter regex, both sides of the compare);at=S,S (seconds after the test host starts at which dotnet-stack dumps it; blank takes 120,870, the per-test deadline being 900 s). Options on any other stage are refused.'
         type: string
@@ -144,7 +213,9 @@ concurrency:
   # A scheduled run has no `github.event.inputs`, so both halves fall back to the schedule's own
   # pair; without the fallback every scheduled run would share one empty group with any other
   # input-less event.
-  group: os-matrix-${{ github.ref }}-${{ github.event.inputs.goos || 'darwin' }}-${{ github.event.inputs.stage || 'census' }}
+  # A CALLED run (workflow_call) has no github.event.inputs either: its event is the caller's, so the inputs context is
+  # read first, or every stage ci-master.yml calls would share one group and run one after another.
+  group: os-matrix-${{ github.ref }}-${{ inputs.goos || github.event.inputs.goos || 'darwin' }}-${{ inputs.stage || github.event.inputs.stage || 'census' }}
   cancel-in-progress: false
 
 env:
@@ -213,7 +284,9 @@ jobs:
           INPUT_NUGETGO_FEED: ${{ inputs.nugetgo_feed }}
           INPUT_NUGETGO_FEED_SHA256: ${{ inputs.nugetgo_feed_sha256 }}
           INPUT_ARCH: ${{ inputs.arch }}
-          EVENT_NAME: ${{ github.event_name }}
+          # A called run carries its caller's event; ci-master.yml's nightly is a `schedule` WITH a stage, which is not
+          # this workflow's own darwin-census schedule.
+          EVENT_NAME: ${{ (github.event_name == 'schedule' && inputs.stage != '') && 'workflow_call' || github.event_name }}
         run: |
           $ErrorActionPreference = 'Stop'
 
@@ -527,6 +600,9 @@ jobs:
               'golib-tests'      = 90    # one Release build of GolibTests and its core closure for this GOOS from
                                          # cold, then `dotnet test` (whole suite, or a --filter). PROVISIONAL until
                                          # the first run; added for the AES seat's osx-arm64 guard (C1, 2026-11-06).
+              'go-test'          = 60    # `go test ./...` in src/go2cs with this leg's .NET SDK installed: about 11 min of
+                                         # tests on a cloud box without .NET (GO2CS_GUARD_NO_DOTNET=1, 2026-11-22), and the
+                                         # dotnet-gated arms run here too. PROVISIONAL until the first run (C1, 2026-11-22).
               'gen-tests'        = 30    # one Release build of GenTests (go2cs-gen and golib) from cold, then
                                          # `dotnet test` (whole suite, or a --filter): 526 tests in about 2 min on a
                                          # laptop. PROVISIONAL until the first run (R, 2026-11-14).
@@ -854,6 +930,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v5
+        # go-test needs the history: its doc-sample and retired-hand-own guards read files at older commits, which a
+        # depth-1 checkout does not have. Every other stage keeps the shallow checkout. The string '0', because a
+        # number 0 is falsy in an expression and would select '1'.
+        with:
+          fetch-depth: ${{ needs.plan.outputs.stage == 'go-test' && '0' || '1' }}
 
       - name: Set up Go (pinned to the corpus release)
         uses: actions/setup-go@v6
@@ -1285,6 +1366,13 @@ jobs:
           $log = Join-Path $art "golib-tests-$goos-$rid.log"
           $trx = Join-Path $art "golib-tests-$goos-$rid.trx"
 
+          # GOROOT exported for the test host, spelled exactly as `go env GOROOT` prints it (a forward-slash spelling
+          # misroutes emission on Windows), so the tests that read a Go tree (internal/trace's testprog, math/big, the
+          # toolchain-child arms) run here instead of reading Inconclusive: until 2026-11-22 no hosted leg exported it
+          # (release review TC-5).
+          $env:GOROOT = "$(& go env GOROOT)".Trim()
+          Write-Host "==> GOROOT=$($env:GOROOT)"
+
           Push-Location 'src/tests/GolibTests'
           try {
               # The arch axis beside the OS axis, when the leg binds one (seat S5b).
@@ -1584,6 +1672,54 @@ jobs:
 
           Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value $summary
           & ./.github/annotate-summary.ps1 -Title "$($env:STAGE) $goos/$rid" -Lines $summary
+
+          exit $runExit
+
+      # -------------------------------------------------------------------------------------
+      # go-test -- the converter's whole Go suite, `go test ./...` in src/go2cs, on this leg's runner with the Go setup-go
+      # pinned (GOTOOLCHAIN=local, so go.mod's toolchain line never fetches another) and this leg's .NET SDK. ci-master.yml runs it on every push and pull request to
+      # master (COORD, 2026-11-22: train 3 landed a default-mode regression no automatic check saw).
+      # -------------------------------------------------------------------------------------
+      - name: Converter tests — go test ./... for this GOOS
+        if: needs.plan.outputs.stage == 'go-test'
+        shell: pwsh
+        env:
+          GOTOOLCHAIN: local
+        run: |
+          $ErrorActionPreference = 'Continue'
+
+          $goos = $env:GOOS_TARGET
+          $rid = $env:RID
+          $art = Join-Path $PWD 'artifacts'
+          New-Item -ItemType Directory -Force -Path $art | Out-Null
+          $log = Join-Path $art "go-test-$goos-$rid.log"
+
+          # The repository's pinned .NET tools (.config/dotnet-tools.json: apicompat), which the nugetgo and pushnuget
+          # suites run as `dotnet tool run`; a fresh runner has restored none of them.
+          & dotnet tool restore *>&1 | Tee-Object -FilePath $log
+          if ($LASTEXITCODE -ne 0) { Write-Host "::error::dotnet tool restore failed with exit $LASTEXITCODE"; exit $LASTEXITCODE }
+
+          Push-Location 'src/go2cs'
+          try {
+              & go test -buildvcs=false -count=1 -timeout 50m ./... *>&1 | Tee-Object -FilePath $log -Append
+              $runExit = $LASTEXITCODE
+          }
+          finally { Pop-Location }
+
+          # Each package's verdict and every failing test by name; the full output is the artifact.
+          $lines = @(Get-Content -LiteralPath $log -ErrorAction SilentlyContinue)
+          $packages = @($lines | Where-Object { $_ -match '^(ok|FAIL|---|\?)\s' -or $_ -match '^--- FAIL:' } | ForEach-Object { $_.TrimEnd() })
+
+          $summary = @(
+              "## Converter tests (go test ./...) -- $goos ($rid)"
+              ''
+              "exit ``$runExit``"
+              ''
+              '```'
+          ) + $packages + @('```')
+
+          Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value $summary
+          & ./.github/annotate-summary.ps1 -Title "go-test $goos/$rid" -Lines $summary
 
           exit $runExit
 

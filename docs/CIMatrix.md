@@ -1,7 +1,7 @@
 # CIMatrix — the on-demand OS matrix
 
 > `.github/workflows/os-matrix.yml` runs go2cs's own instruments on GitHub-hosted runners, on
-> demand only. It reaches platforms the project's own test machines do not cover — **both macOS
+> demand, and as the stages [CI on master](#ci-on-master) calls. It reaches platforms the project's own test machines do not cover — **both macOS
 > legs above all** — and gives Linux a second, independent host. It is **never a merge gate**: the
 > project's own machines and their measured budgets stay authoritative, and nothing this workflow
 > produces lands in the repository. Its timeouts are scaled from the budgets measured on the project's
@@ -67,6 +67,21 @@ newly discovered wall. darwin compiles clean on both architectures. Root it agai
 <!-- darwin has compiled clean since 2026-08-23 (census run 32649840220, zero errors on both architectures). -->
 <!-- Pre-2026-10-26 wording: "attributable to that day's trains ... exactly as the CS0266 above was rooted". -->
 
+## CI on master
+
+`.github/workflows/ci-master.yml` is the automatic check on `master`, the branch every change lands on. Every job
+calls a stage of this workflow (`workflow_call`), so it runs with exactly the same toolchain pins and steps.
+
+| Event | Jobs (each on `linux` and `windows`) | Runner minutes |
+|:--|:--|:--|
+| `push` to `master`, `pull_request` into `master` | `go-test`, `golib-tests` (Release, with `GOROOT` exported), `gen-tests` | about 78: `golib-tests` 12 and 17, `gen-tests` 1 and 2 (measured), `go-test` about 15 and 25 (provisional), and the plan jobs |
+| nightly, 03:17 UTC | `behavioral-full`, default mode | about 120: linux 47 (measured), windows about 70 (provisional) |
+
+A newer push to the same ref cancels an older run; the nightly is never cancelled by a push. Other branches are not
+triggered: they use this workflow on demand. A run called this way reports `workflow_call` as its event in the plan
+job, so a nightly call is never mistaken for this workflow's own darwin schedule. `golib-tests` exports `GOROOT`, spelled
+as `go env GOROOT` prints it, on every leg, so the tests that read a Go tree run instead of reading Inconclusive.
+
 ## How to trigger
 
 Actions → **OS matrix (on demand)** → *Run workflow*. Or from the CLI:
@@ -79,7 +94,7 @@ gh workflow run os-matrix.yml -f goos=linux  -f stage=sweep-shard -f filter=comp
 | Input | Values | Meaning |
 |:--|:--|:--|
 | `goos` | `windows` · `linux` · `darwin` | The corpus flavor to bind. Each maps to a runner + RID pair; **`darwin` fans out to BOTH mac runners** (arm64 and x64) in one dispatch. |
-| `stage` | `census` · `behavioral-smoke` · `behavioral-full` · `behavioral-stderr` · `sweep-shard` · `release-smoke` · `aot-smoke` · `nugetgo-behavior` · `golib-tests` · `gen-tests` · `solution-build` · `stack-probe` · `converter-cgo` · `cgo-e2e` | What to run. One stage per dispatch. `behavioral-full` runs the whole behavioral enumeration in slices; `behavioral-stderr` runs named projects directly and keeps their whole stderr; `golib-tests` builds and runs `src/tests/GolibTests` for the GOOS on each of its runners, with `filter` as an MSTest `--filter` expression (blank runs the whole suite), and annotates each test's outcome by name. `solution-build` runs `dotnet build src/go2cs.slnx`, every member of the converter-dev workspace, for the GOOS on each of its runners, with `filter` as the configuration (`Release`, the blank default, or `Debug`); it names the distinct errors by code and by project, and refuses to run where `$(USERPROFILE)/go2cs` exists, since a member that fell back to that deployed tree would pass against it. `stack-probe` is an opt-in diagnostic that never banks: it sweeps ONE row with `run-validated-sweep.ps1 -TestFilter` while `.github/stack-probe.ps1` takes `dotnet-stack` reports of that row's converted test host at fixed offsets (`filter` options below). It first proves the instrument on a deliberately hung program, and fails as blind if the planted frame is missing. `converter-cgo` is opt-in: it runs the converter's `go test` in `src/go2cs` on each runner, where a C compiler lets `go list` run cmd/cgo, with `filter` as a `go test -run` regular expression (blank selects the cgo tests), and opens its summary with the compiler `go env CC` names. It is the only hosted stage that gives the converter's compiler-gated cgo tests a compiler, including cgo Phase 1's exit gate. `filter` may end `;cc=zig` or `;cc=llvm-mingw` (windows only), with an optional `;sha=HEX`: the leg then downloads that pinned toolchain, refuses it unless its sha256 is the pin's (or `sha=`'s, which exists to show the refusal), and only then hands it to go as `CC`. |
+| `stage` | `census` · `behavioral-smoke` · `behavioral-full` · `behavioral-stderr` · `sweep-shard` · `release-smoke` · `aot-smoke` · `nugetgo-behavior` · `golib-tests` · `gen-tests` · `solution-build` · `stack-probe` · `converter-cgo` · `cgo-e2e` · `go-test` | What to run. One stage per dispatch. `behavioral-full` runs the whole behavioral enumeration in slices; `behavioral-stderr` runs named projects directly and keeps their whole stderr; `golib-tests` builds and runs `src/tests/GolibTests` for the GOOS on each of its runners, with `filter` as an MSTest `--filter` expression (blank runs the whole suite), and annotates each test's outcome by name. `solution-build` runs `dotnet build src/go2cs.slnx`, every member of the converter-dev workspace, for the GOOS on each of its runners, with `filter` as the configuration (`Release`, the blank default, or `Debug`); it names the distinct errors by code and by project, and refuses to run where `$(USERPROFILE)/go2cs` exists, since a member that fell back to that deployed tree would pass against it. `stack-probe` is an opt-in diagnostic that never banks: it sweeps ONE row with `run-validated-sweep.ps1 -TestFilter` while `.github/stack-probe.ps1` takes `dotnet-stack` reports of that row's converted test host at fixed offsets (`filter` options below). It first proves the instrument on a deliberately hung program, and fails as blind if the planted frame is missing. `converter-cgo` is opt-in: it runs the converter's `go test` in `src/go2cs` on each runner, where a C compiler lets `go list` run cmd/cgo, with `filter` as a `go test -run` regular expression (blank selects the cgo tests), and opens its summary with the compiler `go env CC` names. It is the only hosted stage that gives the converter's compiler-gated cgo tests a compiler, including cgo Phase 1's exit gate. `go-test` runs the converter's whole suite, `go test ./...` in `src/go2cs`, with the pinned Go (`GOTOOLCHAIN=local`) and the leg's .NET SDK, and lists each package's verdict and every failing test in its summary. `filter` may end `;cc=zig` or `;cc=llvm-mingw` (windows only), with an optional `;sha=HEX`: the leg then downloads that pinned toolchain, refuses it unless its sha256 is the pin's (or `sha=`'s, which exists to show the refusal), and only then hands it to go as `CC`. |
 | `filter` | free text, optional | The shard. Comma-separated **exact** roster package names for `sweep-shard` (each swept with `-Exact`, and a name not on the roster refuses the run), a project-name substring for `behavioral-smoke`, comma-separated project names for `behavioral-stderr`. `behavioral-full` ignores it. Blank takes the stage's documented default. |
 | `dotnet` | `10.0.x` · `10.0.402` | The SDK channel for `setup-dotnet`. Blank takes `10.0.x`. |
 | `run_timeout` | 1-1800, optional | The behavioral stages' per-program run budget in seconds (`GO2CS_RUN_TIMEOUT`). Blank takes 120. |
@@ -370,6 +385,7 @@ disclosure count is half of what makes a row honest.
 | `gen-tests` | 30 min | 45 min | One Release build of `GenTests` (go2cs-gen and golib), from cold, then `dotnet test` (the whole suite, or a `--filter`)<!-- 526 tests in about 2 min on a laptop (machine not recorded) -->. Provisional. |
 | `solution-build` | 60 min | 90 min | One cold build of `src/go2cs.slnx`: golib, go2cs-gen, the test projects, every behavioral and performance member and their core closure<!-- 622 s on a laptop (machine not recorded) -->. Provisional. |
 | `stack-probe` | 90 min | 135 min | One row's `-tests` convert and build, the filtered compare, and up to the 900 s per-test deadline while the probe waits. Provisional. |
+| `go-test` | 60 min | 90 min | `go test ./...` in `src/go2cs`: about 11 minutes of tests on a host without .NET, plus the arms that need one. Provisional. |
 | `converter-cgo` | 15 min | 23 min | The converter's `go test` filtered to its cgo tests: one cold module download and build, plus one converter `go build` for the driver-level arms. Provisional. |
 | `cgo-e2e` | 45 min | 68 min | cgo's end-to-end gate: a cgo program is built by Go and converted by go2cs with the leg's C compiler, the converted project is built with the .NET SDK, and each check is run both ways and compared. Provisional. |
 | `release-smoke` | 90 min | 135 min | The leg only: converter `go build` plus eight small restore/build/run arms. The `pack` job (windows, 240 min) is separate. Provisional. |
