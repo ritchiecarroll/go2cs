@@ -9,7 +9,6 @@ using poll = @internal.poll_package;
 using os = os_package;
 using syscall = syscall_package;
 using @internal;
-using static net_package;
 
 partial class net_package {
 
@@ -78,9 +77,7 @@ internal static (ж<netFD> fd, error err) socket(context.Context ctx, @string ne
     return (fd, default);
 }
 
-} partial class netᴛnetFD {
-
-internal static @string ctrlNetwork(this ref netFD fd) {
+internal static @string ctrlNetwork⁔(/*this*/ ref netFD fd) {
     var exprᴛ1 = fd.net;
     switch (ᐧ) {
     case {} when exprᴛ1 == "unix"u8 || exprᴛ1 == "unixgram"u8 || exprᴛ1 == "unixpacket"u8: {
@@ -96,7 +93,7 @@ internal static @string ctrlNetwork(this ref netFD fd) {
     return fd.net + "6"u8;
 }
 
-internal static error dial(this ж<netFD> Ꮡfd, context.Context ctx, sockaddr laddr, sockaddr raddr, Func<context.Context, @string, @string, syscall.RawConn, error> ctrlCtxFn) {
+internal static error dial⁔(/*this*/ ж<netFD> Ꮡfd, context.Context ctx, sockaddr laddr, sockaddr raddr, Func<context.Context, @string, @string, syscall.RawConn, error> ctrlCtxFn) {
     ref var fd = ref Ꮡfd.DerefOrNull();
 
     ж<rawConn> c = default;
@@ -158,11 +155,7 @@ internal static error dial(this ж<netFD> Ꮡfd, context.Context ctx, sockaddr l
     return default;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string listenˢ => ref listenˢᵇ;
-private static readonly @string listenˢᵇ = "listen"u8;
-
-internal static error listenStream(this ж<netFD> Ꮡfd, context.Context ctx, sockaddr laddr, nint backlog, Func<context.Context, @string, @string, syscall.RawConn, error> ctrlCtxFn) {
+internal static error listenStream⁔(/*this*/ ж<netFD> Ꮡfd, context.Context ctx, sockaddr laddr, nint backlog, Func<context.Context, @string, @string, syscall.RawConn, error> ctrlCtxFn) {
     ref var fd = ref Ꮡfd.DerefOrNull();
 
     error err = default;
@@ -195,7 +188,7 @@ internal static error listenStream(this ж<netFD> Ꮡfd, context.Context ctx, so
     return default;
 }
 
-internal static error listenDatagram(this ж<netFD> Ꮡfd, context.Context ctx, sockaddr laddr, Func<context.Context, @string, @string, syscall.RawConn, error> ctrlCtxFn) {
+internal static error listenDatagram⁔(/*this*/ ж<netFD> Ꮡfd, context.Context ctx, sockaddr laddr, Func<context.Context, @string, @string, syscall.RawConn, error> ctrlCtxFn) {
     ref var fd = ref Ꮡfd.DerefOrNull();
 
     switch (laddr.type()) {
@@ -248,4 +241,4 @@ internal static error listenDatagram(this ж<netFD> Ꮡfd, context.Context ctx, 
     return default;
 }
 
-}
+} // end net_package

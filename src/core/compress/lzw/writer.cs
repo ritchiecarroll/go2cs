@@ -7,7 +7,6 @@ using bufio = bufio_package;
 using errors = errors_package;
 using fmt = fmt_package;
 using io = io_package;
-using static lzw_package;
 
 partial class lzw_package {
 
@@ -60,10 +59,8 @@ partial struct Writer {
     internal array<uint32> table = new(tableSize);
 }
 
-} partial class lzwᴛWriter {
-
 // writeLSB writes the code c for "Least Significant Bits first" data.
-internal static error writeLSB(this ref Writer w, uint32 c) {
+internal static error writeLSB⁔(/*this*/ ref Writer w, uint32 c) {
     w.bits |= (uint32)(c.Lsh(w.nBits));
     w.nBits += w.width;
     while (w.nBits >= 8) {
@@ -77,7 +74,7 @@ internal static error writeLSB(this ref Writer w, uint32 c) {
 }
 
 // writeMSB writes the code c for "Most Significant Bits first" data.
-internal static error writeMSB(this ref Writer w, uint32 c) {
+internal static error writeMSB⁔(/*this*/ ref Writer w, uint32 c) {
     w.bits |= (uint32)(c.Lsh((32 - w.width - w.nBits)));
     w.nBits += w.width;
     while (w.nBits >= 8) {
@@ -90,18 +87,14 @@ internal static error writeMSB(this ref Writer w, uint32 c) {
     return default;
 }
 
-} partial class lzw_package {
-
 // errOutOfCodes is an internal error that means that the writer has run out
 // of unused codes and a clear code needs to be sent next.
 internal static error errOutOfCodes = errors.New("lzw: out of codes");
 
-} partial class lzwᴛWriter {
-
 // incHi increments e.hi and checks for both overflow and running out of
 // unused codes. In the latter case, incHi sends a clear code, resets the
 // writer state and returns errOutOfCodes.
-internal static error incHi(this ж<Writer> Ꮡw) {
+internal static error incHi⁔(/*this*/ ж<Writer> Ꮡw) {
     ref var w = ref Ꮡw.DerefOrNull();
 
     w.hi++;
@@ -130,7 +123,7 @@ internal static ref readonly @string lzwInputByteTooLargeForˢ => ref lzwInputBy
 private static readonly @string lzwInputByteTooLargeForˢᵇ = "lzw: input byte too large for the litWidth"u8;
 
 // Write writes a compressed representation of p to w's underlying writer.
-public static (nint n, error err) Write(this ж<Writer> Ꮡw, slice<byte> p) {
+internal static (nint n, error err) Write⁔(/*this*/ ж<Writer> Ꮡw, slice<byte> p) {
     nint n = default;
     ref var w = ref Ꮡw.DerefOrNull();
 
@@ -213,7 +206,7 @@ break_loop:;
 
 // Close closes the [Writer], flushing any pending output. It does not close
 // w's underlying writer.
-public static error Close(this ж<Writer> Ꮡw) {
+internal static error Close⁔(/*this*/ ж<Writer> Ꮡw) {
     ref var w = ref Ꮡw.DerefOrNull();
 
     if (w.err != nil) {
@@ -264,12 +257,10 @@ public static error Close(this ж<Writer> Ꮡw) {
 
 // Reset clears the [Writer]'s state and allows it to be reused again
 // as a new [Writer].
-public static void Reset(this ref Writer w, io.Writer dst, Order order, nint litWidth) {
+internal static void Reset⁔(/*this*/ ref Writer w, io.Writer dst, Order order, nint litWidth) {
     w.AssignFrom(new Writer());
     w.init(dst, order, litWidth);
 }
-
-} partial class lzw_package {
 
 // NewWriter creates a new [io.WriteCloser].
 // Writes to the returned [io.WriteCloser] are compressed and written to w.
@@ -290,13 +281,7 @@ internal static ж<Writer> newWriter(io.Writer dst, Order order, nint litWidth) 
     return w;
 }
 
-} partial class lzwᴛWriter {
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string lzwUnknownOrderˢ => ref lzwUnknownOrderˢᵇ;
-private static readonly @string lzwUnknownOrderˢᵇ = "lzw: unknown order"u8;
-
-internal static void init(this ref Writer w, io.Writer dst, Order order, nint litWidth) {
+internal static void init⁔(/*this*/ ref Writer w, io.Writer dst, Order order, nint litWidth) {
     switch (order) {
     case var ᴛ when ᴛ == LSB: {
         w.write = ((Func<ж<Writer>, uint32, error>)(lzwᴛWriter.writeLSB));
@@ -328,4 +313,4 @@ internal static void init(this ref Writer w, io.Writer dst, Order order, nint li
     w.savedCode = invalidCode;
 }
 
-}
+} // end lzw_package

@@ -9,7 +9,6 @@ using atomic = @internal.runtime.atomic_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
-using static runtime_package;
 
 partial class runtime_package {
 
@@ -74,11 +73,9 @@ partial struct spanSetBlock {
     internal array<atomicMSpanPointer> spans = new(spanSetBlockEntries);
 }
 
-} partial class runtimeᴛspanSet {
-
 // push adds span s to buffer b. push is safe to call concurrently
 // with other push and pop operations.
-internal static void push(this ж<spanSet> Ꮡb, ж<mspan> s) {
+internal static void push⁔(/*this*/ ж<spanSet> Ꮡb, ж<mspan> s) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     // Obtain our slot.
@@ -147,7 +144,7 @@ retry:
 
 // pop removes and returns a span from buffer b, or nil if b is empty.
 // pop is safe to call concurrently with other pop and push operations.
-internal static ж<mspan> pop(this ж<spanSet> Ꮡb) {
+internal static ж<mspan> pop⁔(/*this*/ ж<spanSet> Ꮡb) {
     uint32 head = default;
     uint32 tail = default;
     uint32 backoff = default;
@@ -260,7 +257,7 @@ private static readonly @string fullyEmptyUnfreedSpanSetˢᵇ = "fully empty unf
 //
 // reset may not be called concurrently with any other operations
 // on the span set.
-internal static void reset(this ж<spanSet> Ꮡb) {
+internal static void reset⁔(/*this*/ ж<spanSet> Ꮡb) {
     var (head, tail) = Ꮡb.Ꮡindex.load().split();
     if (head < tail) {
         print((@string)"head = ", head, (@string)", tail = ", tail, (@string)"\n");
@@ -301,8 +298,6 @@ internal static void reset(this ж<spanSet> Ꮡb) {
     Ꮡb.ᏑspineLen.Store(0);
 }
 
-} partial class runtime_package {
-
 // atomicSpanSetSpinePointer is an atomically-accessed spanSetSpinePointer.
 //
 // It has the same semantics as atomic.UnsafePointer.
@@ -310,37 +305,29 @@ partial struct atomicSpanSetSpinePointer {
     internal atomic.UnsafePointer a;
 }
 
-} partial class runtimeᴛatomicSpanSetSpinePointer {
-
 // Loads the spanSetSpinePointer and returns it.
 //
 // It has the same semantics as atomic.UnsafePointer.
-internal static spanSetSpinePointer Load(this ж<atomicSpanSetSpinePointer> Ꮡs) {
+internal static spanSetSpinePointer Load⁔(/*this*/ ж<atomicSpanSetSpinePointer> Ꮡs) {
     return new spanSetSpinePointer(Ꮡs.Ꮡa.Load());
 }
 
 // Stores the spanSetSpinePointer.
 //
 // It has the same semantics as [atomic.UnsafePointer].
-internal static void StoreNoWB(this ж<atomicSpanSetSpinePointer> Ꮡs, spanSetSpinePointer p) {
+internal static void StoreNoWB⁔(/*this*/ ж<atomicSpanSetSpinePointer> Ꮡs, spanSetSpinePointer p) {
     Ꮡs.Ꮡa.StoreNoWB(p.p);
 }
-
-} partial class runtime_package {
 
 // spanSetSpinePointer represents a pointer to a contiguous block of atomic.Pointer[spanSetBlock].
 partial struct spanSetSpinePointer {
     internal @unsafe.Pointer p;
 }
 
-} partial class runtimeᴛspanSetSpinePointer {
-
 // lookup returns &s[idx].
-internal static ж<atomic.Pointer<spanSetBlock>> lookup(this spanSetSpinePointer s, uintptr idx) {
+internal static ж<atomic.Pointer<spanSetBlock>> lookup⁔(/*this*/ spanSetSpinePointer s, uintptr idx) {
     return @unsafe.Pointer.To<atomic.Pointer<spanSetBlock>>(add(s.p, (uintptr)goarch.PtrSize * idx));
 }
-
-} partial class runtime_package {
 
 // spanSetBlockPool is a global pool of spanSetBlocks.
 internal static readonly ж<spanSetBlockAlloc> ᏑspanSetBlockPool = new StaticBox<spanSetBlockAlloc>(default(spanSetBlockAlloc));
@@ -351,11 +338,9 @@ partial struct spanSetBlockAlloc {
     internal lfstack stack;
 }
 
-} partial class runtimeᴛspanSetBlockAlloc {
-
 // alloc tries to grab a spanSetBlock out of the pool, and if it fails
 // persistentallocs a new one and returns it.
-internal static ж<spanSetBlock> alloc(this ж<spanSetBlockAlloc> Ꮡp) {
+internal static ж<spanSetBlock> alloc⁔(/*this*/ ж<spanSetBlockAlloc> Ꮡp) {
     var s = @unsafe.Pointer.To<spanSetBlock>(Ꮡp.Ꮡstack.pop()); if (s != nil) {
         return s;
     }
@@ -363,12 +348,10 @@ internal static ж<spanSetBlock> alloc(this ж<spanSetBlockAlloc> Ꮡp) {
 }
 
 // free returns a spanSetBlock back to the pool.
-internal static void free(this ж<spanSetBlockAlloc> Ꮡp, ж<spanSetBlock> block) {
+internal static void free⁔(/*this*/ ж<spanSetBlockAlloc> Ꮡp, ж<spanSetBlock> block) {
     block.of(spanSetBlock.Ꮡpopped).Store(0);
     Ꮡp.Ꮡstack.push(block.of(spanSetBlock.Ꮡlfnode));
 }
-
-} partial class runtime_package {
 
 // headTailIndex represents a combined 32-bit head and 32-bit tail
 // of a queue into a single 64-bit value.
@@ -380,49 +363,43 @@ internal static headTailIndex makeHeadTailIndex(uint32 head, uint32 tail) {
     return (headTailIndex)((uint64)head << 32 | (uint64)tail);
 }
 
-} partial class runtimeᴛheadTailIndex {
-
 // head returns the head of a headTailIndex value.
-internal static uint32 head(this headTailIndex h) {
+internal static uint32 head⁔(/*this*/ headTailIndex h) {
     return (uint32)(h >> 32);
 }
 
 // tail returns the tail of a headTailIndex value.
-internal static uint32 tail(this headTailIndex h) {
+internal static uint32 tail⁔(/*this*/ headTailIndex h) {
     return (uint32)h;
 }
 
 // split splits the headTailIndex value into its parts.
-internal static (uint32 head, uint32 tail) split(this headTailIndex h) {
+internal static (uint32 head, uint32 tail) split⁔(/*this*/ headTailIndex h) {
     return (h.head(), h.tail());
 }
-
-} partial class runtime_package {
 
 // atomicHeadTailIndex is an atomically-accessed headTailIndex.
 partial struct atomicHeadTailIndex {
     internal atomic.Uint64 u;
 }
 
-} partial class runtimeᴛatomicHeadTailIndex {
-
 // load atomically reads a headTailIndex value.
-internal static headTailIndex load(this ж<atomicHeadTailIndex> Ꮡh) {
+internal static headTailIndex load⁔(/*this*/ ж<atomicHeadTailIndex> Ꮡh) {
     return (headTailIndex)Ꮡh.Ꮡu.Load();
 }
 
 // cas atomically compares-and-swaps a headTailIndex value.
-internal static bool cas(this ж<atomicHeadTailIndex> Ꮡh, headTailIndex old, headTailIndex @new) {
+internal static bool cas⁔(/*this*/ ж<atomicHeadTailIndex> Ꮡh, headTailIndex old, headTailIndex @new) {
     return Ꮡh.Ꮡu.CompareAndSwap((uint64)old, (uint64)@new);
 }
 
 // incHead atomically increments the head of a headTailIndex.
-internal static headTailIndex incHead(this ж<atomicHeadTailIndex> Ꮡh) {
+internal static headTailIndex incHead⁔(/*this*/ ж<atomicHeadTailIndex> Ꮡh) {
     return (headTailIndex)Ꮡh.Ꮡu.Add(4294967296L);
 }
 
 // decHead atomically decrements the head of a headTailIndex.
-internal static headTailIndex decHead(this ж<atomicHeadTailIndex> Ꮡh) {
+internal static headTailIndex decHead⁔(/*this*/ ж<atomicHeadTailIndex> Ꮡh) {
     return (headTailIndex)Ꮡh.Ꮡu.Add(-(4294967296L));
 }
 
@@ -431,7 +408,7 @@ internal static ref readonly @string headTailIndexOverflowˢ => ref headTailInde
 private static readonly @string headTailIndexOverflowˢᵇ = "headTailIndex overflow"u8;
 
 // incTail atomically increments the tail of a headTailIndex.
-internal static headTailIndex incTail(this ж<atomicHeadTailIndex> Ꮡh) {
+internal static headTailIndex incTail⁔(/*this*/ ж<atomicHeadTailIndex> Ꮡh) {
     var ht = (headTailIndex)Ꮡh.Ꮡu.Add(1);
     // Check for overflow.
     if (ht.tail() == 0) {
@@ -442,27 +419,23 @@ internal static headTailIndex incTail(this ж<atomicHeadTailIndex> Ꮡh) {
 }
 
 // reset clears the headTailIndex to (0, 0).
-internal static void reset(this ж<atomicHeadTailIndex> Ꮡh) {
+internal static void reset⁔(/*this*/ ж<atomicHeadTailIndex> Ꮡh) {
     Ꮡh.Ꮡu.Store(0);
 }
-
-} partial class runtime_package {
 
 // atomicMSpanPointer is an atomic.Pointer[mspan]. Can't use generics because it's NotInHeap.
 partial struct atomicMSpanPointer {
     internal atomic.UnsafePointer p;
 }
 
-} partial class runtimeᴛatomicMSpanPointer {
-
 // Load returns the *mspan.
-internal static ж<mspan> Load(this ж<atomicMSpanPointer> Ꮡp) {
+internal static ж<mspan> Load⁔(/*this*/ ж<atomicMSpanPointer> Ꮡp) {
     return @unsafe.Pointer.To<mspan>(Ꮡp.Ꮡp.Load());
 }
 
 // StoreNoWB stores an *mspan.
-internal static void StoreNoWB(this ж<atomicMSpanPointer> Ꮡp, ж<mspan> s) {
+internal static void StoreNoWB⁔(/*this*/ ж<atomicMSpanPointer> Ꮡp, ж<mspan> s) {
     Ꮡp.Ꮡp.StoreNoWB(@unsafe.Pointer.FromPinnedBox(s));
 }
 
-}
+} // end runtime_package

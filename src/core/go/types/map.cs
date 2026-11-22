@@ -5,8 +5,6 @@
 // license that can be found in the LICENSE file.
 namespace go.go;
 
-using static types_package;
-
 partial class types_package {
 
 // A Map represents a map type.
@@ -19,15 +17,13 @@ public static ж<Map> NewMap(Type key, Type elem) {
     return Ꮡ(new Map(key: key, elem: elem));
 }
 
-} partial class typesᴛMap {
-
 // Key returns the key type of map m.
-public static Type Key(this ref Map m) { return m.key; }
+internal static Type Key⁔(/*this*/ ref Map m) { return m.key; }
 
 // Elem returns the element type of map m.
-public static Type Elem(this ref Map m) { return m.elem; }
+internal static Type Elem⁔(/*this*/ ref Map m) { return m.elem; }
 
-public static Type Underlying(this ж<Map> Ꮡt) { return new MapжType(Ꮡt); }
-public static @string String(this ж<Map> Ꮡt) { return TypeString(new MapжType(Ꮡt), default); }
+internal static Type Underlying⁔(/*this*/ ж<Map> Ꮡt) { return new MapжType(Ꮡt); }
+internal static @string String⁔(/*this*/ ж<Map> Ꮡt) { return TypeString(new MapжType(Ꮡt), default); }
 
-}
+} // end types_package

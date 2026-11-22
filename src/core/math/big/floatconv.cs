@@ -7,21 +7,18 @@ namespace go.math;
 using fmt = fmt_package;
 using io = io_package;
 using strings = strings_package;
-using static big_package;
 
 partial class big_package {
 
 internal static readonly ж<Float> ᏑfloatZero = new StaticBox<Float>(default(Float));
 internal static ref Float floatZero => ref ((StaticBox<Float>)ᏑfloatZero).ValueSlot;
 
-} partial class bigᴛFloat {
-
 // SetString sets z to the value of s and returns z and a boolean indicating
 // success. s must be a floating-point number of the same format as accepted
 // by [Float.Parse], with base argument 0. The entire string (not just a prefix) must
 // be valid for success. If the operation failed, the value of z is undefined
 // but the returned value is nil.
-public static (ж<Float>, bool) SetString(this ж<Float> Ꮡz, @string s) {
+internal static (ж<Float>, bool) SetString⁔(/*this*/ ж<Float> Ꮡz, @string s) {
     var (f, _, err) = Ꮡz.Parse(s, 0); if (err == nil) {
         return (f, true);
     }
@@ -32,7 +29,7 @@ public static (ж<Float>, bool) SetString(this ж<Float> Ꮡz, @string s) {
 // floating point number from an io.ByteScanner rather than a string. It serves
 // as the implementation of Parse. It does not recognize ±Inf and does not expect
 // EOF at the end.
-internal static (ж<Float> f, nint b, error err) scan(this ж<Float> Ꮡz, io.ByteScanner r, nint @base) {
+internal static (ж<Float> f, nint b, error err) scan⁔(/*this*/ ж<Float> Ꮡz, io.ByteScanner r, nint @base) {
     ж<Float> f = default;
     nint b = default;
     error err = default;
@@ -161,8 +158,6 @@ internal static (ж<Float> f, nint b, error err) scan(this ж<Float> Ꮡz, io.By
     return (f, b, err);
 }
 
-} partial class big_package {
-
 // These powers of 5 fit into a uint64.
 //
 //	for p, q := uint64(0), uint64(1); p < q; p, q = q, q*5 {
@@ -199,11 +194,9 @@ internal static (ж<Float> f, nint b, error err) scan(this ж<Float> Ꮡz, io.By
     7450580596923828125UL
 ]); }
 
-} partial class bigᴛFloat {
-
 // pow5 sets z to 5**n and returns z.
 // n must not be negative.
-internal static ж<Float> pow5(this ж<Float> Ꮡz, uint64 n) {
+internal static ж<Float> pow5⁔(/*this*/ ж<Float> Ꮡz, uint64 n) {
     ref var z = ref Ꮡz.DerefOrNull();
 
     const uint64 m = /* uint64(len(pow5tab) - 1) */ 27;
@@ -275,7 +268,7 @@ internal static ж<Float> pow5(this ж<Float> Ꮡz, uint64 n) {
 //
 // The returned *Float f is nil and the value of z is valid but not
 // defined if an error is reported.
-public static (ж<Float> f, nint b, error err) Parse(this ж<Float> Ꮡz, @string s, nint @base) {
+internal static (ж<Float> f, nint b, error err) Parse⁔(/*this*/ ж<Float> Ꮡz, @string s, nint @base) {
     ж<Float> f = default;
     nint b = default;
     error err = default;
@@ -305,8 +298,6 @@ public static (ж<Float> f, nint b, error err) Parse(this ж<Float> Ꮡz, @strin
     return (f, b, err);
 }
 
-} partial class big_package {
-
 // ParseFloat is like f.Parse(s, base) with f set to the given precision
 // and rounding mode.
 public static (ж<Float> f, nint b, error err) ParseFloat(@string s, nint @base, nuint prec, RoundingMode mode) {
@@ -315,17 +306,15 @@ public static (ж<Float> f, nint b, error err) ParseFloat(@string s, nint @base,
 
 internal static fmt.Scanner _ᴛ2ʗ = new FloatжScanner(((ж<Float>)nil)); // *Float must implement fmt.Scanner
 
-} partial class bigᴛFloat {
-
 // Scan is a support routine for [fmt.Scanner]; it sets z to the value of
 // the scanned number. It accepts formats whose verbs are supported by
 // [fmt.Scan] for floating point values, which are:
 // 'b' (binary), 'e', 'E', 'f', 'F', 'g' and 'G'.
 // Scan doesn't handle ±Inf.
-public static error Scan(this ж<Float> Ꮡz, fmt.ScanState s, rune ch) {
+internal static error Scan⁔(/*this*/ ж<Float> Ꮡz, fmt.ScanState s, rune ch) {
     s.SkipSpace();
     var (_, _, err) = Ꮡz.scan(new byteReader(s), 0);
     return err;
 }
 
-}
+} // end big_package

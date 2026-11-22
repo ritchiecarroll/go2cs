@@ -11,7 +11,6 @@
 namespace go.debug;
 
 using strconv = strconv_package;
-using static macho_package;
 
 partial class macho_package {
 
@@ -48,12 +47,8 @@ public static Type TypeBundle => 8;
     new((uint32)TypeBundle, "Bundle")
 ]; }
 
-} partial class machoᴛType {
-
-public static @string String(this Type t) { return stringName((uint32)t, typeStrings, false); }
-public static @string GoString(this Type t) { return stringName((uint32)t, typeStrings, true); }
-
-} partial class macho_package {
+internal static @string String⁔(/*this*/ Type t) { return stringName((uint32)t, typeStrings, false); }
+internal static @string GoString⁔(/*this*/ Type t) { return stringName((uint32)t, typeStrings, true); }
 
 // A Cpu is a Mach-O cpu type.
 partial struct Cpu /*num:uint32*/;
@@ -76,12 +71,8 @@ public static Cpu CpuPpc64 => /* CpuPpc | cpuArch64 */ 16777234;
     new((uint32)CpuPpc64, "CpuPpc64")
 ]; }
 
-} partial class machoᴛCpu {
-
-public static @string String(this Cpu i) { return stringName((uint32)i, cpuStrings, false); }
-public static @string GoString(this Cpu i) { return stringName((uint32)i, cpuStrings, true); }
-
-} partial class macho_package {
+internal static @string String⁔(/*this*/ Cpu i) { return stringName((uint32)i, cpuStrings, false); }
+internal static @string GoString⁔(/*this*/ Cpu i) { return stringName((uint32)i, cpuStrings, true); }
 
 // A LoadCmd is a Mach-O load command.
 partial struct LoadCmd /*num:uint32*/;
@@ -105,12 +96,8 @@ public static LoadCmd LoadCmdRpath => 0x8000001c;
     new((uint32)LoadCmdRpath, "LoadCmdRpath")
 ]; }
 
-} partial class machoᴛLoadCmd {
-
-public static @string String(this LoadCmd i) { return stringName((uint32)i, cmdStrings, false); }
-public static @string GoString(this LoadCmd i) { return stringName((uint32)i, cmdStrings, true); }
-
-} partial class macho_package {
+internal static @string String⁔(/*this*/ LoadCmd i) { return stringName((uint32)i, cmdStrings, false); }
+internal static @string GoString⁔(/*this*/ LoadCmd i) { return stringName((uint32)i, cmdStrings, true); }
 
 // A Segment32 is a 32-bit Mach-O segment load command.
 partial struct Segment32 {

@@ -85,7 +85,9 @@ func newShapeModuleProxy(t *testing.T) (appDir string, options Options) {
 	t.Setenv("GOPROXY", proxyURL)
 	t.Setenv("GOSUMDB", "off")
 	t.Setenv("GOMODCACHE", cache)
-	t.Setenv("GOFLAGS", "-mod=readonly")
+	// -modcacherw: the go command writes its module cache read-only, so as any user but root TempDir's cleanup
+	// cannot remove this fixture's cache (unlinkat: permission denied on a hosted linux runner, 2026-11-22).
+	t.Setenv("GOFLAGS", "-mod=readonly -modcacherw")
 	t.Setenv("GOWORK", "off")
 	t.Setenv("GOTOOLCHAIN", "local")
 

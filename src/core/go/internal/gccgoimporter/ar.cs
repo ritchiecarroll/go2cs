@@ -13,7 +13,6 @@ using strconv = strconv_package;
 using strings = strings_package;
 using debug;
 using global::go.@internal;
-using static gccgoimporter_package;
 
 partial class gccgoimporter_package {
 
@@ -183,13 +182,11 @@ partial struct seekerReadAt {
     internal io.ReadSeeker seeker;
 }
 
-} partial class gccgoimporterᴛseekerReadAt {
-
-internal static (nint, error) ReadAt(this seekerReadAt sra, slice<byte> p, int64 off) {
+internal static (nint, error) ReadAt⁔(/*this*/ seekerReadAt sra, slice<byte> p, int64 off) {
     var (_, err) = sra.seeker.Seek(off, io.SeekStart); if (err != nil) {
         return (0, err);
     }
     return sra.seeker.Read(p);
 }
 
-}
+} // end gccgoimporter_package

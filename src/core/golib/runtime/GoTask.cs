@@ -333,18 +333,24 @@ internal class GoTaskCore
     internal void ThrowIfFailed() => m_error?.Throw();
 
     // The twin behind `box` suspends on `awaiter`. On another twin the caller's box itself is the
-    // continuation, with no delegate; on anything else (a GoParkSlot, as a rule) it is the box's step.
+    // continuation, with no delegate. On a GoParkSlot the box itself is the parked continuation too (row 6 of the .5
+    // plan: a leaf park's twin is a fresh box on every call, so a delegate here cost 64 B per park). On anything else it
+    // is the box's step.
     internal static void UnsafeSuspend<TAwaiter>(ref TAwaiter awaiter, GoTaskCore box) where TAwaiter : ICriticalNotifyCompletion
     {
         if (default(TAwaiter) is not null && awaiter is IGoTaskAwaiter)
         {
             Link(((IGoTaskAwaiter)awaiter).Core, box);
         }
+        else if (typeof(TAwaiter) == typeof(GoParkAwaiter))
+        {
+            GoScheduler.ParkPending(Unsafe.As<TAwaiter, GoParkAwaiter>(ref awaiter).Slot, box);
+        }
         else if (awaiter is not GoParkAwaiter && Goroutine.LockedOnCarrier)
         {
             GoParkSlot slot = PinnedForeignAwait();
             awaiter.UnsafeOnCompleted(slot.Wake);
-            GoScheduler.ParkPending(slot, box.ResumeAction);
+            GoScheduler.ParkPending(slot, box);
         }
         else
         {
@@ -358,11 +364,15 @@ internal class GoTaskCore
         {
             Link(((IGoTaskAwaiter)awaiter).Core, box);
         }
+        else if (typeof(TAwaiter) == typeof(GoParkAwaiter))
+        {
+            GoScheduler.ParkPending(Unsafe.As<TAwaiter, GoParkAwaiter>(ref awaiter).Slot, box);
+        }
         else if (awaiter is not GoParkAwaiter && Goroutine.LockedOnCarrier)
         {
             GoParkSlot slot = PinnedForeignAwait();
             awaiter.OnCompleted(slot.Wake);
-            GoScheduler.ParkPending(slot, box.ResumeAction);
+            GoScheduler.ParkPending(slot, box);
         }
         else
         {

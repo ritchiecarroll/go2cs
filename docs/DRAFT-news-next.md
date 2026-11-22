@@ -43,6 +43,20 @@
        (inbox/COORD/20261119T211252Z-P1.md; P3's read 20261119T212356Z-P3.md). The rule and the clash list:
        docs/ConversionStrategies.md, "Package main keeps its methods in the package class" (383eeb05c3, b9195efa78);
        the converter 4d22819305 and 3a5109de87; a type a test file adds a method to keeps its holder, a2035f6656. -->
+- **[QUEUED claude/r-r7-slice-array (tip in its READY post)]** **A Go method on a named slice or array type takes the
+  generated wrapper member of the same name.** A Go method named `Slice`, `Append`, `ToSpan`, `GetEnumerator`,
+  `Length`, `Source`, `Capacity`, `Low`, `High`, `Available`, `IsNil`, `Make` or `Wrap` on a named slice or array type
+  (or on a type defined over a named array) now runs when Go code calls it; before, the wrapper's own member of that
+  name could run instead, silently when the call fit its parameters. The wrapper member stays reachable through its
+  golib interface, e.g. `((ISlice)s).Capacity`; an array's `Slice`, which no interface declares, becomes `ΔSlice`. A
+  type named like one of those members now converts as well. C# source written by hand that called such a member on
+  such a type calls it through the interface instead.
+  <!-- R7 seat 1 (COORD 212140Z, the name-collision campaign; P3's read inbox/COORD/20261122T061749Z-P3.md, its wording).
+       The rule: ISliceTypeTemplate / IArrayTypeTemplate / IArrayViewTypeTemplate ClaimableMembers, bf8153dbb8; the
+       guard GenTests NamedSliceArrayClaimedMemberTests; behavioral NamedSliceMethodShadow b5c2b6b7a2. Census by the
+       generator over src/core's 4126 generated slice/array/struct wrappers: the only claiming types are hash/fnv's
+       sum128 and sum128a (Clone, claimed before this seat). sqlite-cs's modules and typescript-go, by the syntactic
+       census: no slice or array type claims a listed name. -->
 
 **What changed.**
 

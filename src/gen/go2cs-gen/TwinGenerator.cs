@@ -680,8 +680,23 @@ public sealed partial class TwinGenerator : ISourceGenerator
             if (target is null)
                 return false;
 
-            return HasTwinMember(target) || HasBoxTwinMember(target) || m_candidates.TryGetValue(target, out Candidate? candidate) && candidate.Twinned;
+            return HasTwinMember(target) || HasBoxTwinMember(target) || IsGoschedIntrinsic(target) ||
+                   m_candidates.TryGetValue(target, out Candidate? candidate) && candidate.Twinned;
         }
+
+        // The Gosched-park seat (COORD's ruling of 2026-11-21, docs/phase4/inbox/G/20261121T231225Z-COORD.md): in a twin,
+        // runtime.Gosched is a park point that requeues the goroutine, as in Go. runtime is a hand-owned stdlib package
+        // with no public hand twin under L-min, so the twin is golib's builtin.Goschedꞏtwin: CanPark reads the call as a
+        // park, and the rewriter awaits the builtin in its place. Only where that twin binds (golib carries it).
+        private bool? m_goschedTwin;
+
+        internal bool IsGoschedIntrinsic(IMethodSymbol? target) =>
+            target is
+            {
+                Name: "Gosched", IsStatic: true, Parameters.Length: 0, TypeParameters.Length: 0,
+                ContainingType: { Name: "runtime_package", ContainingType: null, ContainingNamespace: { Name: "go", ContainingNamespace.IsGlobalNamespace: true } }
+            } &&
+            (m_goschedTwin ??= Context.Compilation.GetTypeByMetadataName("go.builtin")?.GetMembers("Goschedꞏtwin").OfType<IMethodSymbol>().Any(TwinBinds) == true);
 
         internal bool ShouldAwait(Site site) =>
             site is { Active: true, Go: GoKind.None, Renameable: true, Delegate: false } &&

@@ -10,6 +10,7 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+using syscall = go.syscall_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -61,13 +62,16 @@ using static go.net.@internal.socktest_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("net/internal/socktest/switch.go", "switch.cs", "ABs0goKCqLKCgoKClIKosoKCgpSCAAoQgJaAloC0ggALFIIAFyyCAAgKgoKCgpQAGzSCgpQADxiCgpTIsoKCgg==")]
+[assembly: GoPositionMap("net/internal/socktest/switch.go", "switch.cs", "ABg0goKCqLKCgoKClIKosoKCgpSCAAYQgJaAloCUggAJFIIAEyyCyoKCgoKUABc0goKUAAsYgoKUqLKCgoI=")]
 [assembly: GoPositionMap("net/internal/socktest/switch_posix.go", "switch_posix.cs", "ABMcgpSkpKQADQiCgpS0tLS0pIKUAAoGgpSkpKQ=")]
-[assembly: GoPositionMap("net/internal/socktest/switch_windows.go", "switch_windows.cs", "AA8Y0oKCkoKU2sKCgoI=")]
-[assembly: GoPositionMap("net/internal/socktest/sys_windows.go", "sys_windows.cs", "AA4a8pSCgoKUgoKUgoKClKaCgoKClIKC6OKCgpSCgpSCgpSCgqaCgoKClIKC6OKCgpSCgpSCgpSCgqaCgoKClILo4oKClIKClIKClIKCpoKCgoKUgujigoKUgoKUgoKUgoKmgoKCgpSC6OKCgpSCgpSCgpSCgqaCgoKClIKC")]
+[assembly: GoPositionMap("net/internal/socktest/switch_windows.go", "switch_windows.cs", "AAwY0oKCkoKU2sKCgoI=")]
+[assembly: GoPositionMap("net/internal/socktest/sys_windows.go", "sys_windows.cs", "AAsa8pSCgoKUgoKUgoKClKaCgoKClIKC6OKCgpSCgpSCgpSCgqaCgoKClIKC6OKCgpSCgpSCgpSCgqaCgoKClILo4oKClIKClIKClIKCpoKCgoKUgujigoKUgoKUgoKUgoKmgoKCgpSC6OKCgpSCgpSCgpSCgqaCgoKClIKC")]
 // </GoSourcePositionMaps>
 
 namespace go.net.@internal;
+
+using static go.net.@internal.socktest_package;
+using syscall = go.syscall_package;
 
 [GoPackage("socktest")]
 public static partial class socktest_package
@@ -117,3 +121,44 @@ public static partial class socktest_package
 [GoMethodHost(typeof(socktest_package.Switch)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class socktestᴛSwitch;
 [GoMethodHost(typeof(socktest_package.stats)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class socktestᴛstats;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class socktestᴛAfterFilter {
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error apply(this AfterFilter f, ж<Status> Ꮡst) => socktest_package.apply⁔(f, Ꮡst);
+}
+partial class socktestᴛCookie {
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Family(this Cookie c) => socktest_package.Family⁔(c);
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Type(this Cookie c) => socktest_package.Type⁔(c);
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Protocol(this Cookie c) => socktest_package.Protocol⁔(c);
+}
+partial class socktestᴛFilter {
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (AfterFilter, error) apply(this Filter f, ж<Status> Ꮡst) => socktest_package.apply⁔(f, Ꮡst);
+}
+partial class socktestᴛStat {
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this Stat st) => socktest_package.String⁔(st);
+}
+partial class socktestᴛStatus {
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this Status so) => socktest_package.String⁔(so);
+}
+partial class socktestᴛSwitch {
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void init(this ref Switch sw) => socktest_package.init⁔(ref sw);
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<Stat> Stats(this ж<Switch> Ꮡsw) => socktest_package.Stats⁔(Ꮡsw);
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Sockets Sockets(this ж<Switch> Ꮡsw) => socktest_package.Sockets⁔(Ꮡsw);
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Set(this ж<Switch> Ꮡsw, FilterType t, Filter f) => socktest_package.Set⁔(Ꮡsw, t, f);
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<Status> sockso(this ж<Switch> Ꮡsw, syscall.Handle s) => socktest_package.sockso⁔(Ꮡsw, s);
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<Status> addLocked(this ж<Switch> Ꮡsw, syscall.Handle s, nint family, nint sotype, nint proto) => socktest_package.addLocked⁔(Ꮡsw, s, family, sotype, proto);
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (syscall.Handle s, error err) WSASocket(this ж<Switch> Ꮡsw, int32 family, int32 sotype, int32 proto, ж<syscall.WSAProtocolInfo> Ꮡprotinfo, uint32 group, uint32 flags) => socktest_package.WSASocket⁔(Ꮡsw, family, sotype, proto, Ꮡprotinfo, group, flags);
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error /*err*/ Closesocket(this ж<Switch> Ꮡsw, syscall.Handle s) => socktest_package.Closesocket⁔(Ꮡsw, s);
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error /*err*/ Connect(this ж<Switch> Ꮡsw, syscall.Handle s, syscall.Sockaddr sa) => socktest_package.Connect⁔(Ꮡsw, s, sa);
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error /*err*/ ConnectEx(this ж<Switch> Ꮡsw, syscall.Handle s, syscall.Sockaddr sa, ж<byte> Ꮡb, uint32 n, ж<uint32> Ꮡnwr, ж<syscall.Overlapped> Ꮡo) => socktest_package.ConnectEx⁔(Ꮡsw, s, sa, Ꮡb, n, Ꮡnwr, Ꮡo);
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error /*err*/ Listen(this ж<Switch> Ꮡsw, syscall.Handle s, nint backlog) => socktest_package.Listen⁔(Ꮡsw, s, backlog);
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error AcceptEx(this ж<Switch> Ꮡsw, syscall.Handle ls, syscall.Handle @as, ж<byte> Ꮡb, uint32 rxdatalen, uint32 laddrlen, uint32 raddrlen, ж<uint32> Ꮡrcvd, ж<syscall.Overlapped> Ꮡoverlapped) => socktest_package.AcceptEx⁔(Ꮡsw, ls, @as, Ꮡb, rxdatalen, laddrlen, raddrlen, Ꮡrcvd, Ꮡoverlapped);
+}
+partial class socktestᴛstats {
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<Stat> getLocked(this stats st, Cookie c) => socktest_package.getLocked⁔(st, c);
+}
+// </MethodForwarders>

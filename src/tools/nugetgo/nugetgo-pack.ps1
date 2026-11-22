@@ -547,6 +547,14 @@ try {
 }
 finally { foreach ($k in $saved.Keys) { Set-Item "env:$k" $saved[$k] -ErrorAction SilentlyContinue; if ($null -eq $saved[$k]) { Remove-Item "env:$k" -ErrorAction SilentlyContinue } } }
 $flavorDecision = Get-NugetgoFlavorDecision -Assemblies $flavorAssemblies -ProofFlavor $proofFlavor
+# A6's floor (COORD's push-lift ruling (a)): the flavors' builds restored the go.lib this package declares as its floor, and
+# a -Cgo pack is made only on one whose Register refuses bindings at load in a process they were not converted for.
+if ($Cgo) {
+    $cgoGoLibTargets = Join-Path $isolated "go.lib/$($ClosureVersion.ToLowerInvariant())/buildTransitive/go.lib.targets"
+    $floorProblem = Test-NugetgoCgoGoLibFloor -GoLibTargets $(if (Test-Path -LiteralPath $cgoGoLibTargets -PathType Leaf) { [System.IO.File]::ReadAllText($cgoGoLibTargets) } else { '' }) -Version $ClosureVersion
+    if ($floorProblem) { Refuse $floorProblem }
+    Write-Host "  cgo: the restored go.lib $ClosureVersion declares GoCgoRunTimeTargetCheck (A6)"
+}
 # A cgo package's C binding is per target, so a -Cgo pack is RID-specific whatever the material check reads.
 $ridSpecific = $flavorDecision.RidSpecific -or $Cgo
 $layoutArgs = if ($Cgo) { @{ RidFlavors = $ridFlavors; LibAssemblies = $flavorRefs[(Get-NugetgoReferenceFlavor)] } } else { @{} }
@@ -599,7 +607,7 @@ $genArgs = @('run', './internal/gensourcemeta', '-src', (Join-Path $RecurseRoot 
     '-go2cs-release', $ClosureVersion, '-out', $selfDescription)
 foreach ($p in $packed) { $genArgs += @('-package', "$($p.ImportPath)=$($p.Assembly)") }
 foreach ($r in $requires) { $genArgs += @('-require', "$($r.Module)@$($r.Version)=$($r.NuGetId)") }
-if ($cgoStatement) { $genArgs += @('-note', $cgoStatement) }
+if ($cgoStatement) { $genArgs += @('-note', $cgoStatement, '-note', (Get-NugetgoCgoA6Note -Version $ClosureVersion)) }
 Push-Location $converterDir
 try { & go @genArgs; if ($LASTEXITCODE -ne 0) { Refuse "gensourcemeta could not write the self-description ($LASTEXITCODE)" } }
 finally { Pop-Location }

@@ -14,6 +14,9 @@
 
 using go;
 using static go.@internal.trace.tracev2_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -55,11 +58,13 @@ using static go.@internal.trace.tracev2_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/trace/tracev2/events.go", "events.cs", "AGPCAYIAChaCpgAfRIKmAPYC1AWClKSkpJQAJTSClKSklA==")]
+[assembly: GoPositionMap("internal/trace/tracev2/events.go", "events.cs", "AF/CAYIACBaCpgAfRIKmAPQC1AWClKSkpJQAGzSClKSklA==")]
 [assembly: GoPositionMap("internal/trace/tracev2/spec.go", "spec.cs", "AEmiAQANHJKCgpQ=")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.trace;
+
+using static go.@internal.trace.tracev2_package;
 
 [GoPackage("tracev2")]
 public static partial class tracev2_package
@@ -95,7 +100,23 @@ public static partial class tracev2_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(tracev2_package.EventType)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class tracev2ᴛEventType;
-[GoMethodHost(typeof(tracev2_package.GoStatus)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class tracev2ᴛGoStatus;
-[GoMethodHost(typeof(tracev2_package.ProcStatus)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class tracev2ᴛProcStatus;
+[GoMethodHost(typeof(tracev2_package.EventType)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class tracev2ᴛEventType;
+[GoMethodHost(typeof(tracev2_package.GoStatus)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class tracev2ᴛGoStatus;
+[GoMethodHost(typeof(tracev2_package.ProcStatus)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class tracev2ᴛProcStatus;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class tracev2ᴛEventType {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Experimental(this EventType ev) => tracev2_package.Experimental⁔(ev);
+}
+partial class tracev2ᴛGoStatus {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this GoStatus s) => tracev2_package.String⁔(s);
+}
+partial class tracev2ᴛProcStatus {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this ProcStatus s) => tracev2_package.String⁔(s);
+}
+// </MethodForwarders>

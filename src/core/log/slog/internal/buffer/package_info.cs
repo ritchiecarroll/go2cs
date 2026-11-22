@@ -14,6 +14,9 @@
 
 using go;
 using static go.log.slog.@internal.buffer_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -55,10 +58,12 @@ using static go.log.slog.@internal.buffer_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("log/slog/internal/buffer/buffer.go", "buffer.cs", "ABMilILIgsakkoKCuIKmgoKmgoKmgoKmgqaCpoI=")]
+[assembly: GoPositionMap("log/slog/internal/buffer/buffer.go", "buffer.cs", "ABIilILIgqakkoKCuIKmgoKmgoKmgoKmgqaCpoI=")]
 // </GoSourcePositionMaps>
 
 namespace go.log.slog.@internal;
+
+using static go.log.slog.@internal.buffer_package;
 
 [GoPackage("buffer")]
 public static partial class buffer_package
@@ -91,5 +96,22 @@ public static partial class buffer_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(buffer_package.Buffer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class bufferᴛBuffer;
+[GoMethodHost(typeof(buffer_package.Buffer)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class bufferᴛBuffer;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class bufferᴛBuffer {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Free(this ж<Buffer> Ꮡb) => buffer_package.Free⁔(Ꮡb);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Reset(this ref Buffer b) => buffer_package.Reset⁔(ref b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint, error) Write(this ref Buffer b, slice<byte> p) => buffer_package.Write⁔(ref b, p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint, error) WriteString(this ref Buffer b, @string s) => buffer_package.WriteString⁔(ref b, s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error WriteByte(this ref Buffer b, byte c) => buffer_package.WriteByte⁔(ref b, c);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this ref Buffer b) => buffer_package.String⁔(ref b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Len(this ref Buffer b) => buffer_package.Len⁔(ref b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void SetLen(this ref Buffer b, nint n) => buffer_package.SetLen⁔(ref b, n);
+}
+// </MethodForwarders>

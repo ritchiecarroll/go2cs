@@ -19,7 +19,6 @@ namespace go.vendor.golang.org.x.crypto.@internal;
 
 using subtle = go.crypto.subtle_package;
 using go.crypto;
-using static poly1305_package;
 
 partial class poly1305_package {
 
@@ -73,16 +72,14 @@ partial struct MAC {
     internal bool finalized;
 }
 
-} partial class poly1305ᴛMAC {
-
 // Size returns the number of bytes Sum will return.
-public static nint Size(this ref MAC h) { return TagSize; }
+internal static nint Size⁔(/*this*/ ref MAC h) { return TagSize; }
 
 // Write adds more data to the running message authentication code.
 // It never returns an error.
 //
 // It must not be called after the first call of Sum or Verify.
-public static (nint n, error err) Write(this ж<MAC> Ꮡh, slice<byte> p) {
+internal static (nint n, error err) Write⁔(/*this*/ ж<MAC> Ꮡh, slice<byte> p) {
     ref var h = ref Ꮡh.DerefOrNull();
 
     if (h.finalized) {
@@ -93,7 +90,7 @@ public static (nint n, error err) Write(this ж<MAC> Ꮡh, slice<byte> p) {
 
 // Sum computes the authenticator of all data written to the
 // message authentication code.
-public static slice<byte> Sum(this ref MAC h, slice<byte> b) {
+internal static slice<byte> Sum⁔(/*this*/ ref MAC h, slice<byte> b) {
     ref var mac = ref heap(new array<byte>(16), out var Ꮡmac);
     h.mac.macGeneric.Sum(Ꮡmac);
     h.finalized = true;
@@ -102,11 +99,11 @@ public static slice<byte> Sum(this ref MAC h, slice<byte> b) {
 
 // Verify returns whether the authenticator of all data written to
 // the message authentication code matches the expected value.
-public static bool Verify(this ref MAC h, slice<byte> expected) {
+internal static bool Verify⁔(/*this*/ ref MAC h, slice<byte> expected) {
     ref var mac = ref heap(new array<byte>(16), out var Ꮡmac);
     h.mac.macGeneric.Sum(Ꮡmac);
     h.finalized = true;
     return subtle.ConstantTimeCompare(expected, mac[..]) == 1;
 }
 
-}
+} // end poly1305_package

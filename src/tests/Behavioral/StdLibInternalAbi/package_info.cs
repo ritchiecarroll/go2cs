@@ -14,6 +14,9 @@
 
 using go;
 using static go.main_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -67,10 +70,12 @@ using static go.main_package;
 [assembly: GoPositionMap("escape.go", "escape.cs", "AAomgoLegoKU")]
 [assembly: GoPositionMap("main.go", "main.cs", "7oKCgpSUgoI=")]
 [assembly: GoPositionMap("switch.go", "switch.cs", "ABtAgoKYlKQ=")]
-[assembly: GoPositionMap("type.go", "type.cs", "AEuIAoKClMYAHT6ijKiCgoKUxpSCqJaCqIKmggATLqKClKaigpQAAhSCABAkooKUpoIAGDKigoKUAC4IooKUlKSsrKysrKysAAQSopSCpIKkgqSCpIKkqKKClKiigpSoooKUqKKClKiigpSolpQACxCCgoKUpqKCgpTIAA0igpSClIKUgpSCxqKClAAPMoKmgqaCpoKmooKClIKUlKKCgpSCgpSmggANHIIADlKCqoKogqiCqIKqgoKCgoKCzIKClILMgoKCgoKClNqCgpSCqIKClIKCxoKClIKUgoKClIKCgpSCgpSCpoKCgoKCgoKm")]
+[assembly: GoPositionMap("type.go", "type.cs", "AEiIAoKClKYAHT6ijKiCgoKUppSCqJaCqIKmggARLqKClKaigpQAAhSCAA4kooKUpoIAFDKigoKUACoIooKUlKSsrKysrKysAAQSopSCpIKkgqSCpIKkqKKClKiigpSoooKUqKKClKiigpSolpQABxCCgoKUpqKCgpSoAA0igpSClIKUgpSCpqKClAANMoKmgqaCpoKmooKClIKUlKKCgpSCgpSmggANHIIADFKCqoKogqiCqIKqgoKCgoKCzIKClIKsgoKCgoKClLqCgpSCqIKClIKCpoKClIKUgoKClIKCgpSCgpSCpoKCgoKCgoKm")]
 // </GoSourcePositionMaps>
 
 namespace go;
+
+using static go.main_package;
 
 [GoPackage("main")]
 [GoArchExclusive("amd64")]
@@ -147,7 +152,52 @@ public static partial class main_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(main_package.Kind)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛKind;
-[GoMethodHost(typeof(main_package.Name)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛName;
-[GoMethodHost(typeof(main_package.Type)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛType;
+[GoMethodHost(typeof(main_package.Kind)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class mainᴛKind;
+[GoMethodHost(typeof(main_package.Name)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class mainᴛName;
+[GoMethodHost(typeof(main_package.Type)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class mainᴛType;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class mainᴛKind {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this Kind k) => main_package.String⁔(k);
+}
+partial class mainᴛName {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<byte> DataChecked(this Name n, nint off, @string whySafe) => main_package.DataChecked⁔(n, off, whySafe);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<byte> Data(this Name n, nint off) => main_package.Data⁔(n, off);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool IsExported(this Name n) => main_package.IsExported⁔(n);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool HasTag(this Name n) => main_package.HasTag⁔(n);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool IsEmbedded(this Name n) => main_package.IsEmbedded⁔(n);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint, nint) ReadVarint(this Name n, nint off) => main_package.ReadVarint⁔(n, off);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool IsBlank(this Name n) => main_package.IsBlank⁔(n);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Name(this Name n) => main_package.Name⁔(n);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Tag(this Name n) => main_package.Tag⁔(n);
+}
+partial class mainᴛType {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static Kind Kind(this ref Type t) => main_package.Kind⁔(ref t);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool HasName(this ref Type t) => main_package.HasName⁔(ref t);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Pointers(this ref Type t) => main_package.Pointers⁔(ref t);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool IfaceIndir(this ref Type t) => main_package.IfaceIndir⁔(ref t);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool IsDirectIface(this ref Type t) => main_package.IsDirectIface⁔(ref t);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> GcSlice(this ref Type t, uintptr begin, uintptr end) => main_package.GcSlice⁔(ref t, begin, end);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Len(this ж<Type> Ꮡt) => main_package.Len⁔(Ꮡt);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Type> Common(this ж<Type> Ꮡt) => main_package.Common⁔(Ꮡt);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ChanDir ChanDir(this ж<Type> Ꮡt) => main_package.ChanDir⁔(Ꮡt);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<UncommonType> Uncommon(this ж<Type> Ꮡt) => main_package.Uncommon⁔(Ꮡt);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Type> Elem(this ж<Type> Ꮡt) => main_package.Elem⁔(Ꮡt);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<StructType> StructType(this ж<Type> Ꮡt) => main_package.StructType⁔(Ꮡt);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<MapType> MapType(this ж<Type> Ꮡt) => main_package.MapType⁔(Ꮡt);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<ArrayType> ArrayType(this ж<Type> Ꮡt) => main_package.ArrayType⁔(Ꮡt);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<FuncType> FuncType(this ж<Type> Ꮡt) => main_package.FuncType⁔(Ꮡt);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<InterfaceType> InterfaceType(this ж<Type> Ꮡt) => main_package.InterfaceType⁔(Ꮡt);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static uintptr Size(this ref Type t) => main_package.Size⁔(ref t);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Align(this ref Type t) => main_package.Align⁔(ref t);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint FieldAlign(this ref Type t) => main_package.FieldAlign⁔(ref t);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<Method> ExportedMethods(this ж<Type> Ꮡt) => main_package.ExportedMethods⁔(Ꮡt);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint NumMethod(this ж<Type> Ꮡt) => main_package.NumMethod⁔(Ꮡt);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Type> Key(this ж<Type> Ꮡt) => main_package.Key⁔(Ꮡt);
+}
+// </MethodForwarders>

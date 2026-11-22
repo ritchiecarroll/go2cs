@@ -11,7 +11,6 @@ using os = os_package;
 using reflect = reflect_package;
 using global::go.go;
 using ꓸꓸꓸany = Span<any>;
-using static ast_package;
 
 partial class ast_package {
 
@@ -92,9 +91,7 @@ partial struct printer {
 
 internal static slice<byte> indent = slice<byte>(".  "u8);
 
-} partial class astᴛprinter {
-
-internal static (nint n, error err) Write(this ref printer p, slice<byte> data) {
+internal static (nint n, error err) Write⁔(/*this*/ ref printer p, slice<byte> data) {
     nint n = default;
     error err = default;
 
@@ -129,18 +126,14 @@ internal static (nint n, error err) Write(this ref printer p, slice<byte> data) 
     return (n, err);
 }
 
-} partial class ast_package {
-
 // localError wraps locally caught errors so we can distinguish
 // them from genuine panics which we don't want to return as errors.
 partial struct localError {
     internal error err;
 }
 
-} partial class astᴛprinter {
-
 // printf is a convenience wrapper that takes care of print errors.
-internal static void printf(this ж<printer> Ꮡp, @string format, params ꓸꓸꓸany argsʗp) {
+internal static void printf⁔(/*this*/ ж<printer> Ꮡp, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     var (_, err) = fmt.Fprintf(new printerжWriter(Ꮡp), format, args.ꓸꓸꓸ); if (err != nil) {
@@ -156,7 +149,7 @@ internal static void printf(this ж<printer> Ꮡp, @string format, params ꓸꓸ
 // not cycles that are created via slices or maps containing the
 // same slice or map. Code for general data structures probably
 // should catch those as well.
-internal static void print(this ж<printer> Ꮡp, reflect.Value x) {
+internal static void print⁔(/*this*/ ж<printer> Ꮡp, reflect.Value x) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     if (!NotNilFilter(""u8, x)) {
@@ -280,4 +273,4 @@ internal static void print(this ж<printer> Ꮡp, reflect.Value x) {
     }}
 }
 
-}
+} // end ast_package

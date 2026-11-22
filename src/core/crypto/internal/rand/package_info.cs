@@ -14,6 +14,9 @@
 
 using go;
 using static go.crypto.@internal.rand_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -57,11 +60,13 @@ using static go.crypto.@internal.rand_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("crypto/internal/rand/rand.go", "rand.cs", "ABgogoKClJSCAAkQAAEUAAgCppzCgoKClJSssoI=")]
+[assembly: GoPositionMap("crypto/internal/rand/rand.go", "rand.cs", "ABUogoKClJSCAAcQAAEUAAgCppzCgoKClJSssoI=")]
 [assembly: GoPositionMap("crypto/internal/rand/rand_fips140v1.26.go", "rand_fips140v1.26.cs", "AAwcgg==")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal;
+
+using static go.crypto.@internal.rand_package;
 
 [GoPackage("rand")]
 public static partial class rand_package
@@ -98,5 +103,15 @@ public static partial class rand_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(rand_package.reader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class randᴛreader;
+[GoMethodHost(typeof(rand_package.reader)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class randᴛreader;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class randᴛreader {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) Read(this reader r, slice<byte> b) => rand_package.Read⁔(r, b);
+}
+// </MethodForwarders>

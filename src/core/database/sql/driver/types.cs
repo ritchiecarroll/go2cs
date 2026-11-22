@@ -7,7 +7,6 @@ using fmt = fmt_package;
 using reflect = reflect_package;
 using strconv = strconv_package;
 using time = time_package;
-using static driver_package;
 
 partial class driver_package {
 
@@ -64,15 +63,13 @@ public partial struct boolType {
 
 internal static ValueConverter _ᴛ3ʗ = new boolType();
 
-} partial class driverᴛboolType {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string boolˢ => ref boolˢᵇ;
 private static readonly @string boolˢᵇ = "Bool"u8;
 
-public static @string String(this boolType _) { return boolˢ; }
+internal static @string String⁔(/*this*/ boolType _) { return boolˢ; }
 
-public static (Value, error) ConvertValue(this boolType _, any src) {
+internal static (Value, error) ConvertValue⁔(/*this*/ boolType _, any src) {
     switch (src.type()) {
     case bool s: {
         return (s, default);
@@ -112,8 +109,6 @@ public static (Value, error) ConvertValue(this boolType _, any src) {
     return (default, fmt.Errorf("sql/driver: couldn't convert %v (%T) into type bool"u8, src, src));
 }
 
-} partial class driver_package {
-
 // Int32 is a [ValueConverter] that converts input values to int64,
 // respecting the limits of an int32 value.
 public static readonly ж<int32Type> ᏑInt32 = new StaticBox<int32Type>(default(int32Type));
@@ -124,9 +119,7 @@ public partial struct int32Type {
 
 internal static ValueConverter _ᴛ4ʗ = new int32Type();
 
-} partial class driverᴛint32Type {
-
-public static (Value, error) ConvertValue(this int32Type _, any v) {
+internal static (Value, error) ConvertValue⁔(/*this*/ int32Type _, any v) {
     var rv = reflect.ValueOf(v);
     switch (rv.Kind()) {
     case var ᴛ when ᴛ == reflect.Int || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64: {
@@ -153,8 +146,6 @@ public static (Value, error) ConvertValue(this int32Type _, any v) {
     return (default, fmt.Errorf("sql/driver: unsupported value %v (type %T) converting to int32"u8, v, v));
 }
 
-} partial class driver_package {
-
 // String is a [ValueConverter] that converts its input to a string.
 // If the value is already a string or []byte, it's unchanged.
 // If the value is of another type, conversion to string is done
@@ -165,9 +156,7 @@ public static ref stringType String => ref ((StaticBox<stringType>)ᏑString).Va
 public partial struct stringType {
 }
 
-} partial class driverᴛstringType {
-
-public static (Value, error) ConvertValue(this stringType _, any v) {
+internal static (Value, error) ConvertValue⁔(/*this*/ stringType _, any v) {
     switch (v.type()) {
     case @string _:
     case slice<byte> _: {
@@ -176,24 +165,18 @@ public static (Value, error) ConvertValue(this stringType _, any v) {
     return (fmt.Sprintf("%v"u8, v), default);
 }
 
-} partial class driver_package {
-
 // Null is a type that implements [ValueConverter] by allowing nil
 // values but otherwise delegating to another [ValueConverter].
 partial struct Null {
     public ValueConverter Converter;
 }
 
-} partial class driverᴛNull {
-
-public static (Value, error) ConvertValue(this Null n, any v) {
+internal static (Value, error) ConvertValue⁔(/*this*/ Null n, any v) {
     if (v == nil) {
         return (default, default);
     }
     return n.Converter.ConvertValue(v);
 }
-
-} partial class driver_package {
 
 // NotNull is a type that implements [ValueConverter] by disallowing nil
 // values but otherwise delegating to another [ValueConverter].
@@ -201,16 +184,12 @@ partial struct NotNull {
     public ValueConverter Converter;
 }
 
-} partial class driverᴛNotNull {
-
-public static (Value, error) ConvertValue(this NotNull n, any v) {
+internal static (Value, error) ConvertValue⁔(/*this*/ NotNull n, any v) {
     if (v == nil) {
         return (default, fmt.Errorf("nil value not allowed"u8));
     }
     return n.Converter.ConvertValue(v);
 }
-
-} partial class driver_package {
 
 // IsValue reports whether v is a valid [Value] parameter type.
 public static bool IsValue(any v) {
@@ -280,9 +259,7 @@ internal static (Value v, error err) callValuerValue(Valuer vr) {
     return vr.Value();
 }
 
-} partial class driverᴛdefaultConverter {
-
-public static (Value, error) ConvertValue(this defaultConverter _, any v) {
+internal static (Value, error) ConvertValue⁔(/*this*/ defaultConverter _, any v) {
     if (IsValue(v)) {
         return (v, default);
     }
@@ -345,8 +322,6 @@ public static (Value, error) ConvertValue(this defaultConverter _, any v) {
     }}
     return (default, fmt.Errorf("unsupported type %T, a %s"u8, v, rv.Kind()));
 }
-
-} partial class driver_package {
 
 partial interface decimalDecompose {
     // Decompose returns the internal decimal state into parts.

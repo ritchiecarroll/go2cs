@@ -7,7 +7,6 @@ using io = io_package;
 using syntax = regexp.syntax_package;
 using Δsync = sync_package;
 using regexp;
-using static regexp_package;
 
 partial class regexp_package {
 
@@ -53,23 +52,21 @@ partial struct inputs {
     internal inputReader reader;
 }
 
-} partial class regexpᴛinputs {
-
-internal static input newBytes(this ж<inputs> Ꮡi, slice<byte> b) {
+internal static input newBytes⁔(/*this*/ ж<inputs> Ꮡi, slice<byte> b) {
     ref var i = ref Ꮡi.DerefOrNull();
 
     i.bytes.str = b;
     return new inputBytesжinput(Ꮡi.Ꮡbytes);
 }
 
-internal static input newString(this ж<inputs> Ꮡi, @string s) {
+internal static input newString⁔(/*this*/ ж<inputs> Ꮡi, @string s) {
     ref var i = ref Ꮡi.DerefOrNull();
 
     i.@string.str = s;
     return new inputStringжinput(Ꮡi.Ꮡstring);
 }
 
-internal static input newReader(this ж<inputs> Ꮡi, io.RuneReader r) {
+internal static input newReader⁔(/*this*/ ж<inputs> Ꮡi, io.RuneReader r) {
     ref var i = ref Ꮡi.DerefOrNull();
 
     i.reader.r = r;
@@ -78,7 +75,7 @@ internal static input newReader(this ж<inputs> Ꮡi, io.RuneReader r) {
     return new inputReaderжinput(Ꮡi.Ꮡreader);
 }
 
-internal static void clear(this ref inputs i) {
+internal static void clear⁔(/*this*/ ref inputs i) {
     // We need to clear 1 of these.
     // Avoid the expense of clearing the others (pointer write barrier).
     if (i.bytes.str != nil) {
@@ -90,7 +87,7 @@ internal static void clear(this ref inputs i) {
     }
 }
 
-internal static (input, nint) init(this ж<inputs> Ꮡi, io.RuneReader r, slice<byte> b, @string s) {
+internal static (input, nint) init⁔(/*this*/ ж<inputs> Ꮡi, io.RuneReader r, slice<byte> b, @string s) {
     if (r != nil) {
         return (Ꮡi.newReader(r), 0);
     }
@@ -100,9 +97,7 @@ internal static (input, nint) init(this ж<inputs> Ꮡi, io.RuneReader r, slice<
     return (Ꮡi.newString(s), len(s));
 }
 
-} partial class regexpᴛmachine {
-
-internal static void init(this ref machine m, nint ncap) {
+internal static void init⁔(/*this*/ ref machine m, nint ncap) {
     foreach (var (_, t) in range(m.pool)) {
         t.cap = t.cap.slice(0, ncap);
     }
@@ -111,7 +106,7 @@ internal static void init(this ref machine m, nint ncap) {
 
 // alloc allocates a new thread with the given instruction.
 // It uses the free pool if possible.
-internal static ж<thread> alloc(this ref machine m, ж<syntax.Inst> i) {
+internal static ж<thread> alloc⁔(/*this*/ ref machine m, ж<syntax.Inst> i) {
     ж<thread> t = default;
     nint n = len(m.pool); if (n > 0) {
         t = m.pool[n - 1];
@@ -124,8 +119,6 @@ internal static ж<thread> alloc(this ref machine m, ж<syntax.Inst> i) {
     return t;
 }
 
-} partial class regexp_package {
-
 // A lazyFlag is a lazily-evaluated syntax.EmptyOp,
 // for checking zero-width flags like ^ $ \A \z \B \b.
 // It records the pair of relevant runes and does not
@@ -137,9 +130,7 @@ internal static lazyFlag newLazyFlag(rune r1, rune r2) {
     return (lazyFlag)((uint64)r1 << 32 | (uint64)(uint32)r2);
 }
 
-} partial class regexpᴛlazyFlag {
-
-internal static bool match(this lazyFlag f, syntax.EmptyOp op) {
+internal static bool match⁔(/*this*/ lazyFlag f, syntax.EmptyOp op) {
     if (op == 0) {
         return true;
     }
@@ -183,12 +174,10 @@ internal static bool match(this lazyFlag f, syntax.EmptyOp op) {
     return op == 0;
 }
 
-} partial class regexpᴛmachine {
-
 // match runs the machine over the input starting at pos.
 // It reports whether a match was found.
 // If so, m.matchcap holds the submatch information.
-internal static bool match(this ж<machine> Ꮡm, input i, nint pos) {
+internal static bool match⁔(/*this*/ ж<machine> Ꮡm, input i, nint pos) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     var startCond = m.re.cond;
@@ -262,7 +251,7 @@ internal static bool match(this ж<machine> Ꮡm, input i, nint pos) {
 }
 
 // clear frees all threads on the thread queue.
-internal static void clear(this ref machine m, ж<queue> Ꮡq) {
+internal static void clear⁔(/*this*/ ref machine m, ж<queue> Ꮡq) {
     ref var q = ref Ꮡq.DerefOrNull();
 
     foreach (var (_, d) in range(q.dense)) {
@@ -278,7 +267,7 @@ internal static void clear(this ref machine m, ж<queue> Ꮡq) {
 // The step processes the rune c (which may be endOfText),
 // which starts at position pos and ends at nextPos.
 // nextCond gives the setting for the empty-width flags after c.
-internal static void step(this ref machine m, ж<queue> Ꮡrunq, ж<queue> nextq, nint pos, nint nextPos, rune c, ж<lazyFlag> nextCond) {
+internal static void step⁔(/*this*/ ref machine m, ж<queue> Ꮡrunq, ж<queue> nextq, nint pos, nint nextPos, rune c, ж<lazyFlag> nextCond) {
     ref var runq = ref Ꮡrunq.DerefOrNull();
 
     var longest = m.re.longest;
@@ -346,7 +335,7 @@ internal static void step(this ref machine m, ж<queue> Ꮡrunq, ж<queue> nextq
 // It also recursively adds an entry for all instructions reachable from pc by following
 // empty-width conditions satisfied by cond.  pos gives the current position
 // in the input.
-internal static ж<thread> add(this ref machine m, ж<queue> Ꮡq, uint32 pc, nint pos, slice<nint> cap, ж<lazyFlag> cond, ж<thread> Ꮡt) {
+internal static ж<thread> add⁔(/*this*/ ref machine m, ж<queue> Ꮡq, uint32 pc, nint pos, slice<nint> cap, ж<lazyFlag> cond, ж<thread> Ꮡt) {
     ref var q = ref Ꮡq.DerefOrNull();
     ref var t = ref Ꮡt.DerefOrNull();
 
@@ -421,8 +410,6 @@ Again:
     return Ꮡt;
 }
 
-} partial class regexp_package {
-
 partial struct onePassMachine {
     internal inputs inputs;
     internal slice<nint> matchcap;
@@ -446,10 +433,8 @@ internal static void freeOnePassMachine(ж<onePassMachine> Ꮡm) {
     ᏑonePassPool.Put(Ꮡm.OrTypedNil());
 }
 
-} partial class regexpᴛRegexp {
-
 // doOnePass implements r.doExecute using the one-pass execution engine.
-internal static slice<nint> doOnePass(this ж<Regexp> Ꮡre, io.RuneReader ir, slice<byte> ib, @string @is, nint pos, nint ncap, slice<nint> dstCap) {
+internal static slice<nint> doOnePass⁔(/*this*/ ж<Regexp> Ꮡre, io.RuneReader ir, slice<byte> ib, @string @is, nint pos, nint ncap, slice<nint> dstCap) {
     ref var re = ref Ꮡre.DerefOrNull();
 
     var startCond = re.cond;
@@ -588,7 +573,7 @@ Return:
 }
 
 // doMatch reports whether either r, b or s match the regexp.
-internal static bool doMatch(this ж<Regexp> Ꮡre, io.RuneReader r, slice<byte> b, @string s) {
+internal static bool doMatch⁔(/*this*/ ж<Regexp> Ꮡre, io.RuneReader r, slice<byte> b, @string s) {
     return Ꮡre.doExecute(r, b, s, 0, 0, default) != nil;
 }
 
@@ -596,7 +581,7 @@ internal static bool doMatch(this ж<Regexp> Ꮡre, io.RuneReader r, slice<byte>
 // of its subexpressions to dstCap and returns dstCap.
 //
 // nil is returned if no matches are found and non-nil if matches are found.
-internal static slice<nint> doExecute(this ж<Regexp> Ꮡre, io.RuneReader r, slice<byte> b, @string s, nint pos, nint ncap, slice<nint> dstCap) {
+internal static slice<nint> doExecute⁔(/*this*/ ж<Regexp> Ꮡre, io.RuneReader r, slice<byte> b, @string s, nint pos, nint ncap, slice<nint> dstCap) {
     ref var re = ref Ꮡre.DerefOrNull();
 
     if (dstCap == nil) {
@@ -628,8 +613,6 @@ internal static slice<nint> doExecute(this ж<Regexp> Ꮡre, io.RuneReader r, sl
     re.put(m);
     return dstCap;
 }
-
-} partial class regexp_package {
 
 // arrayNoInts is returned by doExecute match if nil dstCap is passed
 // to it with ncap=0.

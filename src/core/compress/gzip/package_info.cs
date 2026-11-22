@@ -10,10 +10,14 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+using io = go.io_package;
 // </ImportedTypeAliases>
 
 using go;
 using static go.compress.gzip_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -56,11 +60,14 @@ using static go.compress.gzip_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("compress/gzip/gunzip.go", "gunzip.cs", "ACBAlJaWkoKUAChg8oKClMyyuIKUlIIAAiYAEAKu4oKCgoKUgoKUgpSUpoKCgpSUztIABxCUgpSCpqaClIKClIKCgpSCpoKCgpSmgoKUpoKClIKCuIKClJSosoKmgoKCgpS4goKUgoKCgpSmgpSUgrisoA==")]
-[assembly: GoPositionMap("compress/gzip/gzip.go", "gzip.cs", "ACliAAgCggACEuKClIKCxoKCgpQACRzC6JKClIKCgpSC6tSCgoKUgqaCgoKUlJSCpoKCqqKClJSCgoKClIKUgpSmlIKCgpSCgoKUgoKCpoKCgqaCgoKmgqaCgoIAAhYACAKClIKUgoKCpoKssoKUgpSCgoKCpoKClIKCgg==")]
+[assembly: GoPositionMap("compress/gzip/gunzip.go", "gunzip.cs", "AB9AlJaWkoKUAChg8oKClKyyuIKUlIIAAiYAEAKu4oKCgoKUgoKUgpSUpoKCgpSUztIABxCUgpSCpqaClIKClIKCgpSCpoKCgpSmgoKUpoKClIKCuIKClJSosoKmgoKCgpS4goKUgoKCgpSmgpSUgrisoA==")]
+[assembly: GoPositionMap("compress/gzip/gzip.go", "gzip.cs", "AChiAAgCggACEuKClIKCpoKCgpQACRzC6JKClIKCgpSC6tSCgoKUgqaCgoKUlJSCpoKCqqKClJSCgoKClIKUgpSmlIKCgpSCgoKUgoKCpoKCgqaCgoKmgqaCgoIAAhYACAKClIKUgoKCpoKssoKUgpSCgoKCpoKClIKCgg==")]
 // </GoSourcePositionMaps>
 
 namespace go.compress;
+
+using static go.compress.gzip_package;
+using io = go.io_package;
 
 [GoPackage("gzip")]
 public static partial class gzip_package
@@ -102,6 +109,30 @@ public static partial class gzip_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(gzip_package.Reader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class gzipᴛReader;
-[GoMethodHost(typeof(gzip_package.Writer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class gzipᴛWriter;
+[GoMethodHost(typeof(gzip_package.Reader)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class gzipᴛReader;
+[GoMethodHost(typeof(gzip_package.Writer)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class gzipᴛWriter;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class gzipᴛReader {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Reset(this ref Reader z, io.Reader r) => gzip_package.Reset⁔(ref z, r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Multistream(this ref Reader z, bool ok) => gzip_package.Multistream⁔(ref z, ok);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (@string, error) readString(this ref Reader z) => gzip_package.readString⁔(ref z);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (Header hdr, error err) readHeader(this ref Reader z) => gzip_package.readHeader⁔(ref z);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint n, error err) Read(this ref Reader z, slice<byte> p) => gzip_package.Read⁔(ref z, p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Close(this ref Reader z) => gzip_package.Close⁔(ref z);
+}
+partial class gzipᴛWriter {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void init(this ref Writer z, io.Writer w, nint level) => gzip_package.init⁔(ref z, w, level);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Reset(this ref Writer z, io.Writer w) => gzip_package.Reset⁔(ref z, w);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error writeBytes(this ref Writer z, slice<byte> b) => gzip_package.writeBytes⁔(ref z, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error /*err*/ writeString(this ref Writer z, @string s) => gzip_package.writeString⁔(ref z, s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint, error) Write(this ref Writer z, slice<byte> p) => gzip_package.Write⁔(ref z, p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Flush(this ref Writer z) => gzip_package.Flush⁔(ref z);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Close(this ref Writer z) => gzip_package.Close⁔(ref z);
+}
+// </MethodForwarders>

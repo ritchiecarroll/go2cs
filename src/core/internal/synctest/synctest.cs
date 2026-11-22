@@ -10,7 +10,6 @@ namespace go.@internal;
 using abi = go.@internal.abi_package;
 using @unsafe = unsafe_package;
 using go.@internal;
-using static synctest_package;
 
 partial class synctest_package {
 
@@ -84,11 +83,9 @@ public static ж<Bubble> Acquire() {
     return default;
 }
 
-} partial class synctestᴛBubble {
-
 // Release releases the reference to the bubble,
 // allowing it to become idle again.
-public static void Release(this ж<Bubble> Ꮡb) {
+internal static void Release⁔(/*this*/ ж<Bubble> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     if (Ꮡb == nil) {
@@ -100,7 +97,7 @@ public static void Release(this ж<Bubble> Ꮡb) {
 
 // Run executes f in the bubble.
 // The current goroutine must not be part of a bubble.
-public static void Run(this ж<Bubble> Ꮡb, Action f) {
+internal static void Run⁔(/*this*/ ж<Bubble> Ꮡb, Action f) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     if (Ꮡb == nil) {
@@ -110,4 +107,4 @@ public static void Run(this ж<Bubble> Ꮡb, Action f) {
     }
 }
 
-}
+} // end synctest_package

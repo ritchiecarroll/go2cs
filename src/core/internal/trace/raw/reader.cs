@@ -11,7 +11,6 @@ using tracev2 = go.@internal.trace.tracev2_package;
 using version = go.@internal.trace.version_package;
 using encoding;
 using go.@internal.trace;
-using static raw_package;
 
 partial class raw_package {
 
@@ -34,15 +33,13 @@ public static (ж<Reader>, error) NewReader(io.Reader r) {
     return (Ꮡ(new Reader(r: br, v: v, specs: v.Specs())), default);
 }
 
-} partial class rawᴛReader {
-
 // Version returns the version of the trace that we're reading.
-public static version.Version Version(this ref Reader r) {
+internal static version.Version Version⁔(/*this*/ ref Reader r) {
     return r.v;
 }
 
 // ReadEvent reads and returns the next trace event in the byte stream.
-public static (Event, error) ReadEvent(this ref Reader r) {
+internal static (Event, error) ReadEvent⁔(/*this*/ ref Reader r) {
     var (evb, err) = r.r.ReadByte();
     if (AreEqual(err, io.EOF)) {
         return (new Event(), io.EOF);
@@ -85,7 +82,7 @@ public static (Event, error) ReadEvent(this ref Reader r) {
     ), default);
 }
 
-internal static (slice<uint64>, error) readArgs(this ref Reader r, nint n) {
+internal static (slice<uint64>, error) readArgs⁔(/*this*/ ref Reader r, nint n) {
     var argsᴷ = new stackAppend<uint64>(moves: true);
 
     slice<uint64> args = default;
@@ -100,7 +97,7 @@ internal static (slice<uint64>, error) readArgs(this ref Reader r, nint n) {
     return (args, default);
 }
 
-internal static (slice<byte>, error) readData(this ref Reader r) {
+internal static (slice<byte>, error) readData⁔(/*this*/ ref Reader r) {
     var dataᴷ = new stackAppend<byte>(moves: true);
 
     var (len, err) = binary.ReadUvarint(new bufio_ReaderжByteReader(r.r));
@@ -119,4 +116,4 @@ internal static (slice<byte>, error) readData(this ref Reader r) {
     return (data, default);
 }
 
-}
+} // end raw_package

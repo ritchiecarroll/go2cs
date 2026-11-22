@@ -7,11 +7,8 @@ namespace go;
 using syscall = syscall_package;
 using @internal;
 using fs = go.io.fs_package;
-using static os_package;
 
 partial class os_package {
-
-} partial class osᴛFile {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string statˢ => ref statˢᵇ;
@@ -19,7 +16,7 @@ private static readonly @string statˢᵇ = "stat"u8;
 
 // Stat returns the [FileInfo] structure describing file.
 // If there is an error, it will be of type [*PathError].
-public static (FileInfo, error) Stat(this ж<File> Ꮡf) {
+internal static (FileInfo, error) Stat⁔(/*this*/ ж<File> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     if (Ꮡf == nil) {
@@ -33,8 +30,6 @@ public static (FileInfo, error) Stat(this ж<File> Ꮡf) {
     fillFileStatFromSys(Ꮡfs, f.name);
     return (new fileStatжFileInfo(Ꮡfs), default);
 }
-
-} partial class os_package {
 
 // statNolog stats a file with no test logging.
 internal static (FileInfo, error) statNolog(@string name) {

@@ -6,15 +6,12 @@ namespace go.@internal;
 
 using io = io_package;
 using Δsyscall = syscall_package;
-using static poll_package;
 
 partial class poll_package {
 
-} partial class pollᴛFD {
-
 // eofError returns io.EOF when fd is available for reading end of
 // file.
-internal static error eofError(this ref FD fd, nint n, error err) {
+internal static error eofError⁔(/*this*/ ref FD fd, nint n, error err) {
     if (n == 0 && err == nil && fd.ZeroReadIsEOF) {
         return io.EOF;
     }
@@ -22,7 +19,7 @@ internal static error eofError(this ref FD fd, nint n, error err) {
 }
 
 // Shutdown wraps syscall.Shutdown.
-public static error Shutdown(this ж<FD> Ꮡfd, nint how) {
+internal static error Shutdown⁔(/*this*/ ж<FD> Ꮡfd, nint how) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -39,7 +36,7 @@ public static error Shutdown(this ж<FD> Ꮡfd, nint how) {
 }
 
 // Fchown wraps syscall.Fchown.
-public static error Fchown(this ж<FD> Ꮡfd, nint uid, nint gid) {
+internal static error Fchown⁔(/*this*/ ж<FD> Ꮡfd, nint uid, nint gid) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -54,7 +51,7 @@ public static error Fchown(this ж<FD> Ꮡfd, nint uid, nint gid) {
 }
 
 // Ftruncate wraps syscall.Ftruncate.
-public static error Ftruncate(this ж<FD> Ꮡfd, int64 size) {
+internal static error Ftruncate⁔(/*this*/ ж<FD> Ꮡfd, int64 size) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -70,7 +67,7 @@ public static error Ftruncate(this ж<FD> Ꮡfd, int64 size) {
 
 // RawControl invokes the user-defined function f for a non-IO
 // operation.
-public static error RawControl(this ж<FD> Ꮡfd, Action<uintptr> f) {
+internal static error RawControl⁔(/*this*/ ж<FD> Ꮡfd, Action<uintptr> f) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -86,8 +83,6 @@ public static error RawControl(this ж<FD> Ꮡfd, Action<uintptr> f) {
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡfd.decref(); ᒐ.Run(); }
 }
-
-} partial class poll_package {
 
 // ignoringEINTR makes a function call and repeats it if it returns
 // an EINTR error. This appears to be required even though we install all

@@ -2,7 +2,6 @@ namespace go;
 
 using fmt = fmt_package;
 using @unsafe = unsafe_package;
-using static main_package;
 
 partial class main_package {
 
@@ -50,16 +49,12 @@ public static Kind String => 24;
 public static Kind Struct => 25;
 public static Kind UnsafePointer => 26;
 
-} partial class mainᴛKind {
-
-public static @string String(this Kind k) {
+internal static @string String⁔(/*this*/ Kind k) {
     if ((nint)k < len(kindNames)) {
         return kindNames[k];
     }
     return kindNames[0];
 }
-
-} partial class main_package {
 
 [GoLazy] partial class lazyᴛkindNames { internal static slice<@string> kindNames = new golib.SparseArray<@string>{
     [Invalid] = "invalid",
@@ -132,31 +127,27 @@ public static ж<Type> TypeFor<T>() {
     return TypeOf((ж<T>)nil).Elem();
 }
 
-} partial class mainᴛType {
+internal static Kind Kind⁔(/*this*/ ref Type t) { return (Kind)(t.Kind_ & KindMask); }
 
-public static Kind Kind(this ref Type t) { return (Kind)(t.Kind_ & KindMask); }
-
-public static bool HasName(this ref Type t) {
+internal static bool HasName⁔(/*this*/ ref Type t) {
     return (TFlag)(t.TFlag & TFlagNamed) != 0;
 }
 
-public static ж<Type> Elem(this ж<Type> Ꮡt) {
+internal static ж<Type> Elem⁔(/*this*/ ж<Type> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     switch (t.Kind()) {
     case var ᴛ when ᴛ == Array: {
         var tt = Ꮡt.Reinterpret<Type, ArrayType>();
-        return tt.of(main_package.ArrayType.ᏑElem).Value;
+        return tt.of(ArrayType.ᏑElem).Value;
     }
     case var ᴛ when ᴛ == Map: {
         var tt = Ꮡt.Reinterpret<Type, MapType>();
-        return tt.of(main_package.MapType.ᏑElem).Value;
+        return tt.of(MapType.ᏑElem).Value;
     }}
 
     return default;
 }
-
-} partial class main_package {
 
 partial struct MapType {
     /*embed*/ public Type Type;
@@ -170,9 +161,7 @@ partial struct MapType {
     public uint32 Flags;
 }
 
-} partial class mainᴛType {
-
-public static ж<MapType> MapType(this ж<Type> Ꮡt) {
+internal static ж<MapType> MapType⁔(/*this*/ ж<Type> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (t.Kind() != Map) {
@@ -181,8 +170,6 @@ public static ж<MapType> MapType(this ж<Type> Ꮡt) {
     return Ꮡt.Reinterpret<Type, MapType>();
 }
 
-} partial class main_package {
-
 partial struct ArrayType {
     /*embed*/ public Type Type;
     public ж<Type> Elem;
@@ -190,9 +177,7 @@ partial struct ArrayType {
     public uintptr Len;
 }
 
-} partial class mainᴛType {
-
-public static ж<ArrayType> ArrayType(this ж<Type> Ꮡt) {
+internal static ж<ArrayType> ArrayType⁔(/*this*/ ж<Type> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (t.Kind() != Array) {
@@ -200,8 +185,6 @@ public static ж<ArrayType> ArrayType(this ж<Type> Ꮡt) {
     }
     return Ꮡt.Reinterpret<Type, ArrayType>();
 }
-
-} partial class main_package {
 
 internal const nint seqFirst = iota;
 internal const nint seqSecond = 1;

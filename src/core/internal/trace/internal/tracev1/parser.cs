@@ -23,7 +23,6 @@ using slices = slices_package;
 using sort = sort_package;
 using encoding;
 using go.@internal.trace;
-using static tracev1_package;
 
 partial class tracev1_package {
 
@@ -109,9 +108,7 @@ partial struct parser {
     internal int32 lastP;
 }
 
-} partial class tracev1ᴛparser {
-
-internal static bool discard(this ref parser p, uint64 n) {
+internal static bool discard⁔(/*this*/ ref parser p, uint64 n) {
     if (n > math.MaxInt) {
         return false;
     }
@@ -122,8 +119,6 @@ internal static bool discard(this ref parser p, uint64 n) {
     }
     return true;
 }
-
-} partial class tracev1_package {
 
 internal static (ж<parser>, error) newParser(io.Reader r, version.Version ver) {
     slice<byte> buf = default;
@@ -175,14 +170,12 @@ public static (Trace, error) Parse(io.Reader r, version.Version vers) {
     return p.parse();
 }
 
-} partial class tracev1ᴛparser {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string noEvFrequencyEventˢ => ref noEvFrequencyEventˢᵇ;
 private static readonly @string noEvFrequencyEventˢᵇ = "no EvFrequency event"u8;
 
 // parse parses, post-processes and verifies the trace.
-internal static (Trace, error) parse(this ж<parser> Ꮡp) {
+internal static (Trace, error) parse⁔(/*this*/ ж<parser> Ꮡp) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -263,8 +256,6 @@ internal static (Trace, error) parse(this ж<parser> Ꮡp) {
     finally { ᒐ.Run(); }
 }
 
-} partial class tracev1_package {
-
 // rawEvent is a helper type used during parsing.
 partial struct rawEvent {
     internal EventType typ;
@@ -297,14 +288,12 @@ partial struct Events {
     internal nint off;
 }
 
-} partial class tracev1ᴛEvents {
-
 // grow grows the slice by one and returns a pointer to the new element, without
 // overwriting it.
-internal static ж<Event> grow(this ref Events l) {
+internal static ж<Event> grow⁔(/*this*/ ref Events l) {
     var (a, b) = l.index(l.n);
     if (a >= len(l.buckets)) {
-        l.buckets = builtin.append(l.buckets, Ꮡ(new array<Event>(524288, () => new())));
+        l.buckets = append(l.buckets, Ꮡ(new array<Event>(524288, () => new())));
     }
     var ptr = l.buckets[a].at<Event>(b);
     l.n++;
@@ -312,7 +301,7 @@ internal static ж<Event> grow(this ref Events l) {
 }
 
 // append appends v to the slice and returns a pointer to the new element.
-internal static ж<Event> append(this ref Events l, Event v) {
+internal static ж<Event> append⁔(/*this*/ ref Events l, Event v) {
     v = v.ΔClone();
 
     var ptr = l.grow();
@@ -320,27 +309,27 @@ internal static ж<Event> append(this ref Events l, Event v) {
     return ptr;
 }
 
-public static ж<Event> Ptr(this ref Events l, nint i) {
+internal static ж<Event> Ptr⁔(/*this*/ ref Events l, nint i) {
     var (a, b) = l.index(i + l.off);
     return l.buckets[a].at<Event>(b);
 }
 
-internal static (nint, nint) index(this ref Events l, nint i) {
+internal static (nint, nint) index⁔(/*this*/ ref Events l, nint i) {
     // Doing the division on uint instead of int compiles this function to a
     // shift and an AND (for power of 2 bucket sizes), versus a whole bunch of
     // instructions for int.
     return ((nint)((nuint)i / (nuint)eventsBucketSize), (nint)((nuint)i % (nuint)eventsBucketSize));
 }
 
-public static nint Len(this ref Events l) {
+internal static nint Len⁔(/*this*/ ref Events l) {
     return l.n - l.off;
 }
 
-public static bool Less(this ref Events l, nint i, nint j) {
+internal static bool Less⁔(/*this*/ ref Events l, nint i, nint j) {
     return l.Ptr(i).Ts < l.Ptr(j).Ts;
 }
 
-public static void Swap(this ref Events l, nint i, nint j) {
+internal static void Swap⁔(/*this*/ ref Events l, nint i, nint j) {
     ref var valᴛ1 = ref l.Ptr(i).Value;
     ref var valᴛ3 = ref l.Ptr(j).Value;
     (var valᴛ2, var valᴛ4) = (l.Ptr(j).Value.ΔClone(), l.Ptr(i).Value.ΔClone());
@@ -348,7 +337,7 @@ public static void Swap(this ref Events l, nint i, nint j) {
     valᴛ3.AssignFrom(valᴛ4);
 }
 
-public static (ж<Event>, bool) Pop(this ref Events l) {
+internal static (ж<Event>, bool) Pop⁔(/*this*/ ref Events l) {
     if (l.off == l.n) {
         return (default, false);
     }
@@ -363,7 +352,7 @@ public static (ж<Event>, bool) Pop(this ref Events l) {
     return (ptr, true);
 }
 
-public static (ж<Event>, bool) Peek(this ref Events l) {
+internal static (ж<Event>, bool) Peek⁔(/*this*/ ref Events l) {
     if (l.off == l.n) {
         return (default, false);
     }
@@ -371,7 +360,7 @@ public static (ж<Event>, bool) Peek(this ref Events l) {
     return (l.buckets[a].at<Event>(b), true);
 }
 
-public static Action<Func<ж<Event>, bool>> All(this ж<Events> Ꮡl) {
+internal static Action<Func<ж<Event>, bool>> All⁔(/*this*/ ж<Events> Ꮡl) {
     return (Func<ж<Event>, bool> yield) => {
         for (nint i = 0; i < Ꮡl.Value.Len(); i++) {
             var (a, b) = Ꮡl.Value.index(i + Ꮡl.Value.off);
@@ -383,8 +372,6 @@ public static Action<Func<ж<Event>, bool>> All(this ж<Events> Ꮡl) {
     };
 }
 
-} partial class tracev1ᴛparser {
-
 // parseEventBatches reads per-P event batches and merges them into a single, consistent
 // stream. The high level idea is as follows. Events within an individual batch
 // are in correct order, because they are emitted by a single P. So we need to
@@ -394,7 +381,7 @@ public static Action<Func<ж<Event>, bool>> All(this ж<Events> Ꮡl) {
 // Then we choose event with the lowest timestamp from the subset, merge it and
 // repeat. This approach ensures that we form a consistent stream even if
 // timestamps are incorrect (condition observed on some machines).
-internal static (Events, error) parseEventBatches(this ref parser p) {
+internal static (Events, error) parseEventBatches⁔(/*this*/ ref parser p) {
     var availableProcsᴷ = new stackAppend<ж<proc>>();
 
     // The ordering of CPU profile sample events in the data stream is based on
@@ -570,7 +557,7 @@ break_pidLoop:;
 }
 
 // collectBatchesAndCPUSamples records the offsets of batches and parses CPU samples.
-internal static error collectBatchesAndCPUSamples(this ref parser p) {
+internal static error collectBatchesAndCPUSamples⁔(/*this*/ ref parser p) {
     // Read events.
     ref var raw = ref heap(new rawEvent(), out var Ꮡraw);
     int32 curP = default;
@@ -640,14 +627,10 @@ internal static error collectBatchesAndCPUSamples(this ref parser p) {
     return default;
 }
 
-} partial class tracev1_package {
-
 internal static UntypedInt skipArgs => /* 1 << iota */ 1;
 internal static UntypedInt skipStrings => 2;
 
-} partial class tracev1ᴛparser {
-
-internal static (byte, bool) readByte(this ref parser p) {
+internal static (byte, bool) readByte⁔(/*this*/ ref parser p) {
     if (p.off < len(p.data) && p.off >= 0) {
         var b = p.data[p.off];
         p.off++;
@@ -657,7 +640,7 @@ internal static (byte, bool) readByte(this ref parser p) {
     }
 }
 
-internal static (slice<byte>, error) readFull(this ref parser p, nint n) {
+internal static (slice<byte>, error) readFull⁔(/*this*/ ref parser p, nint n) {
     if (p.off >= len(p.data) || p.off < 0 || p.off + n > len(p.data)) {
         // p.off < 0 is impossible but makes BCE happy.
         //
@@ -678,7 +661,7 @@ private static readonly @string stringHasInvalidLength0ˢᵇ = "string has inval
 
 // readRawEvent reads a raw event into ev. The slices in ev are only valid until
 // the next call to readRawEvent, even when storing to a different location.
-internal static error readRawEvent(this ref parser p, nuint flags, ж<rawEvent> Ꮡev) {
+internal static error readRawEvent⁔(/*this*/ ref parser p, nuint flags, ж<rawEvent> Ꮡev) {
     ref var ev = ref Ꮡev.DerefOrNull();
 
     // The number of arguments is encoded using two bits and can thus only
@@ -872,7 +855,7 @@ internal static error readRawEvent(this ref parser p, nuint flags, ж<rawEvent> 
 }
 
 // loadBatch loads the next batch for pid and appends its contents to events.
-internal static (slice<Event>, error) loadBatch(this ref parser p, int32 pid, slice<Event> events) {
+internal static (slice<Event>, error) loadBatch⁔(/*this*/ ref parser p, int32 pid, slice<Event> events) {
     var offsets = p.batchOffsets[pid];
     if (len(offsets) == 0) {
         return (default, io.EOF);
@@ -922,7 +905,7 @@ internal static (slice<Event>, error) loadBatch(this ref parser p, int32 pid, sl
     return (events, default);
 }
 
-internal static (@string s, error err) readStr(this ref parser p) {
+internal static (@string s, error err) readStr⁔(/*this*/ ref parser p) {
     error err = default;
 
     (var sz, err) = p.readVal();
@@ -944,7 +927,7 @@ internal static (@string s, error err) readStr(this ref parser p) {
 
 // parseEvent transforms raw events into events.
 // It does analyze and verify per-event-type arguments.
-internal static error parseEvent(this ref parser p, ж<rawEvent> Ꮡraw, ж<Event> Ꮡev) {
+internal static error parseEvent⁔(/*this*/ ref parser p, ж<rawEvent> Ꮡraw, ж<Event> Ꮡev) {
     ref var raw = ref Ꮡraw.DerefOrNull();
     ref var ev = ref Ꮡev.DerefOrNull();
 
@@ -1077,8 +1060,6 @@ internal static error parseEvent(this ref parser p, ж<rawEvent> Ꮡraw, ж<Even
     return default;
 }
 
-} partial class tracev1_package {
-
 // ErrTimeOrder is returned by Parse when the trace contains
 // time stamps that do not respect actual event ordering.
 public static error ErrTimeOrder = errors.New("time stamps out of order");
@@ -1097,13 +1078,11 @@ internal partial struct postProcessTrace_pdesc /*dyn*/ {
     internal ж<Event> evSweep;
 }
 
-} partial class tracev1ᴛparser {
-
 // postProcessTrace does inter-event verification and information restoration.
 // The resulting trace is guaranteed to be consistent
 // (for example, a P does not run two Gs at the same time, or a G is indeed
 // blocked before an unblock event).
-internal static error postProcessTrace(this ж<parser> Ꮡp, Events events) {
+internal static error postProcessTrace⁔(/*this*/ ж<parser> Ꮡp, Events events) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     const nint gDead = iota;
@@ -1460,14 +1439,10 @@ internal static error postProcessTrace(this ж<parser> Ꮡp, Events events) {
     return default;
 }
 
-} partial class tracev1_package {
-
 internal static error errMalformedVarint = errors.New("malformatted base-128 varint");
 
-} partial class tracev1ᴛparser {
-
 // readVal reads unsigned base-128 value from r.
-internal static (uint64, error) readVal(this ref parser p) {
+internal static (uint64, error) readVal⁔(/*this*/ ref parser p) {
     var (v, n) = binary.Uvarint(p.data.slice(p.off));
     if (n <= 0) {
         return (0, errMalformedVarint);
@@ -1475,8 +1450,6 @@ internal static (uint64, error) readVal(this ref parser p) {
     p.off += n;
     return (v, default);
 }
-
-} partial class tracev1_package {
 
 internal static (uint64 v, slice<byte> rem, error err) readValFrom(slice<byte> buf) {
     uint64 v = default;
@@ -1488,9 +1461,7 @@ internal static (uint64 v, slice<byte> rem, error err) readValFrom(slice<byte> b
     return (v, buf.slice(n), default);
 }
 
-} partial class tracev1ᴛEvent {
-
-public static @string String(this ref Event ev) {
+internal static @string String⁔(/*this*/ ref Event ev) {
     var desc = ᏑEventDescriptions.at<EventDescriptionsᴛ1>((nint)(ev.Type));
     var w = @new<bytes.Buffer>();
     fmt.Fprintf(new bytes_BufferжWriter(w), "%d %s p=%d g=%d stk=%d"u8, ev.Ts, (~desc).Name, ev.P, ev.G, ev.StkID);
@@ -1500,11 +1471,9 @@ public static @string String(this ref Event ev) {
     return w.String();
 }
 
-} partial class tracev1ᴛrawEvent {
-
 // argNum returns total number of args for the event accounting for timestamps,
 // sequence numbers and differences between trace format versions.
-internal static nint argNum(this ref rawEvent raw) {
+internal static nint argNum⁔(/*this*/ ref rawEvent raw) {
     var desc = ᏑEventDescriptions.at<EventDescriptionsᴛ1>((nint)(raw.typ));
     if (raw.typ == EvStack) {
         return len(raw.args);
@@ -1520,8 +1489,6 @@ internal static nint argNum(this ref rawEvent raw) {
     narg++; // timestamp
     return narg;
 }
-
-} partial class tracev1_package {
 
 partial struct EventType /*num:uint8*/;
 
@@ -1640,10 +1607,8 @@ partial struct EventDescriptionsᴛ1 /*dyn*/ {
 }.array(256)); }
 public static ref array<EventDescriptionsᴛ1> EventDescriptions => ref ((StaticBox<array<EventDescriptionsᴛ1>>)ᏑEventDescriptions).ValueSlot;
 
-} partial class tracev1ᴛparser {
-
 //gcassert:inline
-internal static slice<uint64> allocateStack(this ref parser p, uint64 size) {
+internal static slice<uint64> allocateStack⁔(/*this*/ ref parser p, uint64 size) {
     if (size == 0) {
         return default;
     }
@@ -1660,9 +1625,7 @@ internal static slice<uint64> allocateStack(this ref parser p, uint64 size) {
     return @out.slice(0, (nint)(size), (nint)(size));
 }
 
-} partial class tracev1ᴛTrace {
-
-public static STWReason STWReason(this ref Trace tr, uint64 kindID) {
+internal static STWReason STWReason⁔(/*this*/ ref Trace tr, uint64 kindID) {
     if (tr.Version < 21) {
         if (kindID == 0 || kindID == 1) {
             return (STWReason)(nint)(kindID + 1);
@@ -1679,8 +1642,6 @@ public static STWReason STWReason(this ref Trace tr, uint64 kindID) {
         return STWUnknown;
     }
 }
-
-} partial class tracev1_package {
 
 partial struct STWReason /*num:nint*/;
 

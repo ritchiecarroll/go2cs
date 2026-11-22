@@ -8,7 +8,6 @@ using runtime = runtime_package;
 using sync = sync_package;
 using weak = weak_package;
 using go.crypto;
-using static tls_package;
 
 partial class tls_package {
 
@@ -19,9 +18,7 @@ partial struct weakCertCache {
     /*embed*/ public sync_package.Map Map;
 }
 
-} partial class tlsᴛweakCertCache {
-
-internal static (ж<Δx509.Certificate>, error) newCert(this ж<weakCertCache> Ꮡwcc, slice<byte> der) {
+internal static (ж<Δx509.Certificate>, error) newCert⁔(/*this*/ ж<weakCertCache> Ꮡwcc, slice<byte> der) {
     {
         var (entry, ok) = Ꮡwcc.of(weakCertCache.ᏑMap).Load((@string)der); if (ok) {
             var v = entry._<weak.Pointer<Δx509.Certificate>>().Value(); if (v != nil) {
@@ -57,8 +54,6 @@ internal static (ж<Δx509.Certificate>, error) newCert(this ж<weakCertCache> �
     }
     return (cert, default);
 }
-
-} partial class tls_package {
 
 internal static ж<weakCertCache> globalCertCache = @new<weakCertCache>();
 

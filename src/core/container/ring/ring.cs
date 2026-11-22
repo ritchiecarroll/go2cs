@@ -5,8 +5,6 @@
 // Package ring implements operations on circular lists.
 namespace go.container;
 
-using static ring_package;
-
 partial class ring_package {
 
 // A Ring is an element of a circular list, or ring.
@@ -19,9 +17,7 @@ partial struct Ring {
     public any Value; // for use by client; untouched by this library
 }
 
-} partial class ringᴛRing {
-
-internal static ж<Ring> init(this ж<Ring> Ꮡr) {
+internal static ж<Ring> init⁔(/*this*/ ж<Ring> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     r.next = Ꮡr;
@@ -30,7 +26,7 @@ internal static ж<Ring> init(this ж<Ring> Ꮡr) {
 }
 
 // Next returns the next ring element. r must not be empty.
-public static ж<Ring> Next(this ж<Ring> Ꮡr) {
+internal static ж<Ring> Next⁔(/*this*/ ж<Ring> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     if (r.next == nil) {
@@ -40,7 +36,7 @@ public static ж<Ring> Next(this ж<Ring> Ꮡr) {
 }
 
 // Prev returns the previous ring element. r must not be empty.
-public static ж<Ring> Prev(this ж<Ring> Ꮡr) {
+internal static ж<Ring> Prev⁔(/*this*/ ж<Ring> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     if (r.next == nil) {
@@ -51,7 +47,7 @@ public static ж<Ring> Prev(this ж<Ring> Ꮡr) {
 
 // Move moves n % r.Len() elements backward (n < 0) or forward (n >= 0)
 // in the ring and returns that ring element. r must not be empty.
-public static ж<Ring> Move(this ж<Ring> Ꮡr, nint n) {
+internal static ж<Ring> Move⁔(/*this*/ ж<Ring> Ꮡr, nint n) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     if (r.next == nil) {
@@ -73,8 +69,6 @@ public static ж<Ring> Move(this ж<Ring> Ꮡr, nint n) {
     return Ꮡr;
 }
 
-} partial class ring_package {
-
 // New creates a ring of n elements.
 public static ж<Ring> New(nint n) {
     if (n <= 0) {
@@ -91,8 +85,6 @@ public static ж<Ring> New(nint n) {
     return r;
 }
 
-} partial class ringᴛRing {
-
 // Link connects ring r with ring s such that r.Next()
 // becomes s and returns the original value for r.Next().
 // r must not be empty.
@@ -108,7 +100,7 @@ public static ж<Ring> New(nint n) {
 // them creates a single ring with the elements of s inserted
 // after r. The result points to the element following the
 // last element of s after insertion.
-public static ж<Ring> Link(this ж<Ring> Ꮡr, ж<Ring> Ꮡs) {
+internal static ж<Ring> Link⁔(/*this*/ ж<Ring> Ꮡr, ж<Ring> Ꮡs) {
     ref var r = ref Ꮡr.DerefOrNull();
     ref var s = ref Ꮡs.DerefOrNull();
 
@@ -128,7 +120,7 @@ public static ж<Ring> Link(this ж<Ring> Ꮡr, ж<Ring> Ꮡs) {
 // Unlink removes n % r.Len() elements from the ring r, starting
 // at r.Next(). If n % r.Len() == 0, r remains unchanged.
 // The result is the removed subring. r must not be empty.
-public static ж<Ring> Unlink(this ж<Ring> Ꮡr, nint n) {
+internal static ж<Ring> Unlink⁔(/*this*/ ж<Ring> Ꮡr, nint n) {
     if (n <= 0) {
         return default;
     }
@@ -137,7 +129,7 @@ public static ж<Ring> Unlink(this ж<Ring> Ꮡr, nint n) {
 
 // Len computes the number of elements in ring r.
 // It executes in time proportional to the number of elements.
-public static nint Len(this ж<Ring> Ꮡr) {
+internal static nint Len⁔(/*this*/ ж<Ring> Ꮡr) {
     nint n = 0;
     if (Ꮡr != nil) {
         n = 1;
@@ -150,7 +142,7 @@ public static nint Len(this ж<Ring> Ꮡr) {
 
 // Do calls function f on each element of the ring, in forward order.
 // The behavior of Do is undefined if f changes *r.
-public static void Do(this ж<Ring> Ꮡr, Action<any> f) {
+internal static void Do⁔(/*this*/ ж<Ring> Ꮡr, Action<any> f) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     if (Ꮡr != nil) {
@@ -161,4 +153,4 @@ public static void Do(this ж<Ring> Ꮡr, Action<any> f) {
     }
 }
 
-}
+} // end ring_package

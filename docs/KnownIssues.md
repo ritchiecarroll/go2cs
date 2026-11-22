@@ -627,3 +627,26 @@ With no user cache directory (neither `HOME` nor `XDG_CACHE_HOME` set), the cach
 the temporary directory, created with mode 0700. Because that directory is shared, go2cs uses it only while it is a
 directory owned by you that no other user can open; otherwise the run stops before its first probe and asks for
 `-probe-cache`. A run that does not probe, such as `-test-action build`, never needs the directory.
+
+## A Go struct field, method or type whose name starts with `Δ` refuses its package {#delta-led-field-method-type-refused}
+
+**Symptom.** Converting a package that declares a struct field, a method (an interface method included) or a named type
+whose name starts with `Δ`, such as `type P struct{ Δt float64 }`, stops with `error GO2CS2015`, which names the
+identifier and what Go would report for it. A `Δ`-led local, parameter, package variable, constant or function converts.
+
+**Cause.** go2cs renames a Go name that collides with something it generates by adding a leading `Δ`, and the runtime
+library reads a leading `Δ` back as that marker: it drops it when it gives a converted field, method or type its Go name.
+A Go name that itself starts with `Δ` would then lose it: `P.Δt` would reflect and json-encode as `t`, unexported, so
+`json.Marshal(P{1})` would write `{}` where Go writes `{"Δt":1}`, and `reflect.TypeOf(ΔMatrix{}).Name()` would read
+`Matrix`. The refusal turns that silent difference into a stop at conversion.
+
+**Workaround.** Rename the field, method or type so it does not start with `Δ` (`Dt`, `DeltaT`). A struct tag keeps the
+encoded name: `` Dt float64 `json:"Δt"` ``.
+
+**Fix owed.** The runtime library is told which `Δ` go2cs added, so a user's `Δ`-led field, method or type converts and
+reads back under its own name, and this refusal is retired.
+
+<!-- P3 code read of the R1 seat (inbox/COORD/20261122T045652Z-P3.md, finding 2), ruled by COORD 045750Z: refuse now
+     (2a), durable cure as its own .5 seat (2b). The three projection sites: src/core/golib/GoReflect.FieldAccess.cs:404
+     `if (projected.StartsWith(ShadowVarMarker, StringComparison.Ordinal))` (fields), GoReflect.TypeNaming.cs:718 `if (name.StartsWith(ShadowVarMarker, StringComparison.Ordinal))` (type names), runtime/TypeExtensions.GoMethodSets.cs:709 `emittedName.StartsWith(ShadowVarMarker, StringComparison.Ordinal)` (methods). The
+     refusal: src/go2cs/markerGlyphRefusal.go, deltaProjectionReason. -->

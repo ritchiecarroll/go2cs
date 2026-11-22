@@ -62,7 +62,6 @@ using sys = @internal.runtime.sys_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
-using static runtime_package;
 
 partial class runtime_package {
 
@@ -102,8 +101,6 @@ partial struct typePointers {
     internal ж<_type> typ;
 }
 
-} partial class runtimeᴛmspan {
-
 // typePointersOf returns an iterator over all heap pointers in the range [addr, addr+size).
 //
 // addr and addr+size must be in the range [span.base(), span.limit).
@@ -115,7 +112,7 @@ partial struct typePointers {
 // nosplit because it is used during write barriers and must not be preempted.
 //
 //go:nosplit
-internal static typePointers typePointersOf(this ж<mspan> Ꮡspan, uintptr addr, uintptr size) {
+internal static typePointers typePointersOf⁔(/*this*/ ж<mspan> Ꮡspan, uintptr addr, uintptr size) {
     ref var span = ref Ꮡspan.DerefOrNull();
 
     var @base = span.objBase(addr);
@@ -138,7 +135,7 @@ private static readonly @string typePointersOfUncheckedˢᵇ = "typePointersOfUn
 // nosplit because it is used during write barriers and must not be preempted.
 //
 //go:nosplit
-internal static typePointers typePointersOfUnchecked(this ж<mspan> Ꮡspan, uintptr addr) {
+internal static typePointers typePointersOfUnchecked⁔(/*this*/ ж<mspan> Ꮡspan, uintptr addr) {
     ref var span = ref Ꮡspan.DerefOrNull();
 
     const bool doubleCheck = false;
@@ -188,7 +185,7 @@ private static readonly @string badTypePassedToˢᵇ = "bad type passed to typeP
 // nosplit because its callers are nosplit and require all their callees to be nosplit.
 //
 //go:nosplit
-internal static typePointers typePointersOfType(this ref mspan span, ж<abi.Type> typ, uintptr addr) {
+internal static typePointers typePointersOfType⁔(/*this*/ ref mspan span, ж<abi.Type> typ, uintptr addr) {
     const bool doubleCheck = false;
     if (doubleCheck && typ == nil) {
         @throw(badTypePassedToˢ);
@@ -200,8 +197,6 @@ internal static typePointers typePointersOfType(this ref mspan span, ж<abi.Type
     var gcmask = getGCMask(typ);
     return new typePointers(elem: addr, addr: addr, mask: readUintptr(gcmask), typ: typ);
 }
-
-} partial class runtimeᴛtypePointers {
 
 // nextFast is the fast path of next. nextFast is written to be inlineable and,
 // as the name implies, fast.
@@ -223,7 +218,7 @@ internal static typePointers typePointersOfType(this ref mspan span, ж<abi.Type
 // nosplit because it is used during write barriers and must not be preempted.
 //
 //go:nosplit
-internal static (typePointers, uintptr) nextFast(this typePointers tp) {
+internal static (typePointers, uintptr) nextFast⁔(/*this*/ typePointers tp) {
     // TESTQ/JEQ
     if (tp.mask == 0) {
         return (tp, 0);
@@ -254,7 +249,7 @@ internal static (typePointers, uintptr) nextFast(this typePointers tp) {
 // nosplit because it is used during write barriers and must not be preempted.
 //
 //go:nosplit
-internal static (typePointers, uintptr) next(this typePointers tp, uintptr limit) {
+internal static (typePointers, uintptr) next⁔(/*this*/ typePointers tp, uintptr limit) {
     for (;;) {
         if (tp.mask != 0) {
             return tp.nextFast();
@@ -294,7 +289,7 @@ internal static (typePointers, uintptr) next(this typePointers tp, uintptr limit
 // nosplit because it is used during write barriers and must not be preempted.
 //
 //go:nosplit
-internal static typePointers fastForward(this typePointers tp, uintptr n, uintptr limit) {
+internal static typePointers fastForward⁔(/*this*/ typePointers tp, uintptr n, uintptr limit) {
     // Basic bounds check.
     var target = tp.addr + n;
     if (target >= limit) {
@@ -348,18 +343,14 @@ internal static typePointers fastForward(this typePointers tp, uintptr n, uintpt
     return tp;
 }
 
-} partial class runtimeᴛmspan {
-
 // objBase returns the base pointer for the object containing addr in span.
 //
 // Assumes that addr points into a valid part of span (span.base() <= addr < span.limit).
 //
 //go:nosplit
-internal static uintptr objBase(this ref mspan span, uintptr addr) {
+internal static uintptr objBase⁔(/*this*/ ref mspan span, uintptr addr) {
     return span.@base() + span.objIndex(addr) * span.elemsize;
 }
-
-} partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string bulkBarrierPreWriteˢ => ref bulkBarrierPreWriteˢᵇ;
@@ -526,10 +517,8 @@ internal static void bulkBarrierPreWriteSrcOnly(uintptr dst, uintptr src, uintpt
     }
 }
 
-} partial class runtimeᴛmspan {
-
 // initHeapBits initializes the heap bitmap for a span.
-internal static void initHeapBits(this ref mspan s) {
+internal static void initHeapBits⁔(/*this*/ ref mspan s) {
     if (goarch.PtrSize == 8 && !s.spanclass.noscan() && s.spanclass.sizeclass() == 1) {
         var b = s.heapBits();
         foreach (var i in range(len(b))) {
@@ -564,7 +553,7 @@ private static readonly @string heapBitsCalledForSpanˢᵇ = "heapBits called fo
 // heapBitsInSpan(span.elemsize) or span.isUserArenaChunk must be true.
 //
 //go:nosplit
-internal static slice<uintptr> heapBits(this ref mspan span) {
+internal static slice<uintptr> heapBits⁔(/*this*/ ref mspan span) {
     const bool doubleCheck = false;
 
     if (doubleCheck && !span.isUserArenaChunk) {
@@ -584,8 +573,6 @@ internal static slice<uintptr> heapBits(this ref mspan span) {
     }
     return heapBitsSlice(span.@base(), span.npages * (uintptr)pageSize, span.elemsize);
 }
-
-} partial class runtime_package {
 
 // Helper for constructing a slice for the span's heap bits.
 //
@@ -611,15 +598,13 @@ internal static (uintptr @base, uintptr size) spanHeapBitsRange(uintptr spanBase
     return (@base, size);
 }
 
-} partial class runtimeᴛmspan {
-
 // heapBitsSmallForAddr loads the heap bits for the object stored at addr from span.heapBits.
 //
 // addr must be the base pointer of an object in the span. heapBitsInSpan(span.elemsize)
 // must be true.
 //
 //go:nosplit
-internal static uintptr heapBitsSmallForAddr(this ref mspan span, uintptr addr) {
+internal static uintptr heapBitsSmallForAddr⁔(/*this*/ ref mspan span, uintptr addr) {
     var (hbitsBase, _) = spanHeapBitsRange(span.@base(), span.npages * (uintptr)pageSize, span.elemsize);
     var hbits = @unsafe.Pointer.To<byte>((@unsafe.Pointer)hbitsBase);
 
@@ -651,12 +636,6 @@ internal static uintptr heapBitsSmallForAddr(this ref mspan span, uintptr addr) 
     return read;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string runtimeMspanˢ => ref runtimeMspanˢᵇ;
-private static readonly @string runtimeMspanˢᵇ = "runtime: (*mspan).writeHeapBitsSmall: dataSize is not a multiple of typ.Size_"u8;
-internal static ref readonly @string badPointerBitsWrittenForˢ => ref badPointerBitsWrittenForˢᵇ;
-private static readonly @string badPointerBitsWrittenForˢᵇ = "bad pointer bits written for small object"u8;
-
 // writeHeapBitsSmall writes the heap bits for small objects whose ptr/scalar data is
 // stored as a bitmap at the end of the span.
 //
@@ -664,7 +643,7 @@ private static readonly @string badPointerBitsWrittenForˢᵇ = "bad pointer bit
 // heapBitsInSpan(dataSize) must be true. dataSize must be >= typ.Size_.
 //
 //go:nosplit
-internal static uintptr /*scanSize*/ writeHeapBitsSmall(this ref mspan span, uintptr x, uintptr dataSize, ж<_type> Ꮡtyp) {
+internal static uintptr /*scanSize*/ writeHeapBitsSmall⁔(/*this*/ ref mspan span, uintptr x, uintptr dataSize, ж<_type> Ꮡtyp) {
     uintptr scanSize = default;
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
@@ -728,8 +707,6 @@ internal static uintptr /*scanSize*/ writeHeapBitsSmall(this ref mspan span, uin
     }
     return scanSize;
 }
-
-} partial class runtime_package {
 
 // heapSetType* functions record that the new allocation [x, x+size)
 // holds in [x, x+dataSize) one or more values of type typ.
@@ -1166,10 +1143,8 @@ partial struct markBits {
     internal uintptr index;
 }
 
-} partial class runtimeᴛmspan {
-
 //go:nosplit
-internal static markBits allocBitsForIndex(this ref mspan s, uintptr allocBitIndex) {
+internal static markBits allocBitsForIndex⁔(/*this*/ ref mspan s, uintptr allocBitIndex) {
     var (bytep, mask) = s.allocBits.bitp(allocBitIndex);
     return new markBits(bytep, mask, allocBitIndex);
 }
@@ -1178,7 +1153,7 @@ internal static markBits allocBitsForIndex(this ref mspan s, uintptr allocBitInd
 // and negates them so that ctz (count trailing zeros) instructions
 // can be used. It then places these 8 bytes into the cached 64 bit
 // s.allocCache.
-internal static void refillAllocCache(this ref mspan s, uint16 whichByte) {
+internal static void refillAllocCache⁔(/*this*/ ref mspan s, uint16 whichByte) {
     var bytes = array<uint8>.AliasPointer(s.allocBits.bytep((uintptr)whichByte), 8);
     var aCache = (uint64)0;
     aCache |= (uint64)((uint64)bytes.Value[0]);
@@ -1200,7 +1175,7 @@ private static readonly @string sFreeindexSNelemsˢᵇ = "s.freeindex > s.nelems
 // or after s.freeindex.
 // There are hardware instructions that can be used to make this
 // faster if profiling warrants it.
-internal static uint16 nextFreeIndex(this ref mspan s) {
+internal static uint16 nextFreeIndex⁔(/*this*/ ref mspan s) {
     var sfreeindex = s.freeindex;
     var snelems = s.nelems;
     if (sfreeindex == snelems) {
@@ -1259,7 +1234,7 @@ internal static uint16 nextFreeIndex(this ref mspan s) {
 // Callers must ensure that the index passed here must not have been
 // produced from a pointer that came from 'thin air', as might happen
 // with conservative scanning.
-internal static bool isFree(this ref mspan s, uintptr index) {
+internal static bool isFree⁔(/*this*/ ref mspan s, uintptr index) {
     if (index < (uintptr)s.freeindex) {
         return false;
     }
@@ -1280,7 +1255,7 @@ internal static bool isFree(this ref mspan s, uintptr index) {
 // with conservative scanning, unless the GC is currently in the mark
 // phase. If the GC is currently in the mark phase, this function is
 // safe to call for out-of-thin-air pointers.
-internal static bool isFreeOrNewlyAllocated(this ref mspan s, uintptr index) {
+internal static bool isFreeOrNewlyAllocated⁔(/*this*/ ref mspan s, uintptr index) {
     if (index < (uintptr)s.freeIndexForScan) {
         return false;
     }
@@ -1300,7 +1275,7 @@ private static readonly @string badMagicDivisionˢᵇ = "bad magic division"u8;
 // nosplit, because it is called by objIndex, which is nosplit
 //
 //go:nosplit
-internal static uintptr divideByElemSize(this ref mspan s, uintptr n) {
+internal static uintptr divideByElemSize⁔(/*this*/ ref mspan s, uintptr n) {
     const bool doubleCheck = false;
 
     // See explanation in mksizeclasses.go's computeDivMagic.
@@ -1316,11 +1291,9 @@ internal static uintptr divideByElemSize(this ref mspan s, uintptr n) {
 // nosplit, because it is called by other nosplit code like findObject
 //
 //go:nosplit
-internal static uintptr objIndex(this ref mspan s, uintptr p) {
+internal static uintptr objIndex⁔(/*this*/ ref mspan s, uintptr p) {
     return s.divideByElemSize(p - s.@base());
 }
-
-} partial class runtime_package {
 
 internal static markBits markBitsForAddr(uintptr p) {
     var s = spanOf(p);
@@ -1328,15 +1301,13 @@ internal static markBits markBitsForAddr(uintptr p) {
     return s.markBitsForIndex(objIndex);
 }
 
-} partial class runtimeᴛmarkBits {
-
 // isMarked reports whether mark bit m is set.
-internal static bool isMarked(this markBits m) {
+internal static bool isMarked⁔(/*this*/ markBits m) {
     return (uint8)(m.bytep.Value & m.mask) != 0;
 }
 
 // setMarked sets the marked bit in the markbits, atomically.
-internal static void setMarked(this markBits m) {
+internal static void setMarked⁔(/*this*/ markBits m) {
     // Might be racing with other updates, so use atomic update always.
     // We used to be clever here and use a non-atomic update in certain
     // cases, but it's not worth the risk.
@@ -1344,19 +1315,17 @@ internal static void setMarked(this markBits m) {
 }
 
 // setMarkedNonAtomic sets the marked bit in the markbits, non-atomically.
-internal static void setMarkedNonAtomic(this markBits m) {
+internal static void setMarkedNonAtomic⁔(/*this*/ markBits m) {
     m.bytep.Value |= (uint8)(m.mask);
 }
 
 // clearMarked clears the marked bit in the markbits, atomically.
-internal static void clearMarked(this markBits m) {
+internal static void clearMarked⁔(/*this*/ markBits m) {
     // Might be racing with other updates, so use atomic update always.
     // We used to be clever here and use a non-atomic update in certain
     // cases, but it's not worth the risk.
     atomic.And8(m.bytep, (uint8)((uint8)(~m.mask)));
 }
-
-} partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string markBitsForSpanUnalignedˢ => ref markBitsForSpanUnalignedˢᵇ;
@@ -1395,10 +1364,8 @@ internal static bool isMarkedOrNotInHeap(@unsafe.Pointer p) {
     return true;
 }
 
-} partial class runtimeᴛmarkBits {
-
 // advance advances the markBits to the next object in the span.
-internal static void advance(this ref markBits m) {
+internal static void advance⁔(/*this*/ ref markBits m) {
     if (m.mask == (uint8)(1 << 7)) {
         m.bytep = @unsafe.Pointer.To<uint8>(@unsafe.Add(@unsafe.Pointer.FromPinnedBox(m.bytep), 1));
         m.mask = 1;
@@ -1407,8 +1374,6 @@ internal static void advance(this ref markBits m) {
     }
     m.index++;
 }
-
-} partial class runtime_package {
 
 // clobberdeadPtr is a special value that is used by the compiler to
 // clobber dead stack slots, when -clobberdead flag is set.
@@ -1622,11 +1587,9 @@ internal static void typeBitsBulkBarrier(ж<_type> Ꮡtyp, uintptr dst, uintptr 
     }
 }
 
-} partial class runtimeᴛmspan {
-
 // countAlloc returns the number of objects allocated in span s by
 // scanning the mark bitmap.
-internal static nint countAlloc(this ref mspan s) {
+internal static nint countAlloc⁔(/*this*/ ref mspan s) {
     nint count = 0;
     var bytes = divRoundUp((uintptr)s.nelems, 8);
     // Iterate over each 8-byte chunk and count allocations
@@ -1643,8 +1606,6 @@ internal static nint countAlloc(this ref mspan s) {
     }
     return count;
 }
-
-} partial class runtime_package {
 
 // Read the bytes starting at the aligned pointer p into a uintptr.
 // Read is little-endian.

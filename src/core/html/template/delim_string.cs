@@ -2,7 +2,6 @@
 namespace go.html;
 
 using strconv = strconv_package;
-using static template_package;
 
 partial class template_package {
 
@@ -21,13 +20,11 @@ private static readonly @string _delim_nameᵇ = "delimNonedelimDoubleQuotedelim
 
 internal static array<uint8> _delim_index = array<uint8>([0, 9, 25, 41, 59]);
 
-} partial class templateᴛdelim {
-
-internal static @string String(this delim i) {
+internal static @string String⁔(/*this*/ delim i) {
     if (i >= ((delim)(uint8)(len(_delim_index) - 1))) {
         return "delim("u8 + strconv.FormatInt((int64)i, 10) + ")"u8;
     }
     return _delim_name.slice(_delim_index[i], _delim_index[i + 1]);
 }
 
-}
+} // end template_package

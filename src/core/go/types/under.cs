@@ -7,7 +7,6 @@ namespace go.go;
 
 using iter = iter_package;
 using ꓸꓸꓸany = Span<any>;
-using static types_package;
 
 partial class types_package {
 
@@ -56,15 +55,11 @@ internal static ж<typeError> typeErrorf(@string format, params ꓸꓸꓸany arg
     return Ꮡ(new typeError(format, args));
 }
 
-} partial class typesᴛtypeError {
-
 // format formats a type error as a string.
 // check may be nil.
-internal static @string format(this ref typeError err, ж<Checker> check) {
+internal static @string format⁔(/*this*/ ref typeError err, ж<Checker> check) {
     return check.sprintf(err.format_, err.args.ꓸꓸꓸ);
 }
-
-} partial class types_package {
 
 // If t is a type parameter, cond is nil, and t's type set contains no channel types,
 // commonUnder returns the common underlying type of all types in t's type set if

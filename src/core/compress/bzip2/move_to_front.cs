@@ -3,8 +3,6 @@
 // license that can be found in the LICENSE file.
 namespace go.compress;
 
-using static bzip2_package;
-
 partial class bzip2_package {
 
 // moveToFrontDecoder implements a move-to-front list. Such a list is an
@@ -39,9 +37,7 @@ internal static moveToFrontDecoder newMTFDecoderWithRange(nint n) {
     return (moveToFrontDecoder)m;
 }
 
-} partial class bzip2ᴛmoveToFrontDecoder {
-
-internal static byte /*b*/ Decode(this moveToFrontDecoder m, nint n) {
+internal static byte /*b*/ Decode⁔(/*this*/ moveToFrontDecoder m, nint n) {
     byte b = default;
 
     // Implement move-to-front with a simple copy. This approach
@@ -55,8 +51,8 @@ internal static byte /*b*/ Decode(this moveToFrontDecoder m, nint n) {
 }
 
 // First returns the symbol at the front of the list.
-internal static byte First(this moveToFrontDecoder m) {
+internal static byte First⁔(/*this*/ moveToFrontDecoder m) {
     return m[0];
 }
 
-}
+} // end bzip2_package

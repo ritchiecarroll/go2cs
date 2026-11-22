@@ -15,7 +15,6 @@ using static global::go.@internal.types.errors_package;
 using errors = global::go.@internal.types.errors_package;
 using global::go.go;
 using ꓸꓸꓸany = Span<any>;
-using static types_package;
 
 partial class types_package {
 
@@ -63,19 +62,15 @@ partial struct operand {
     internal builtinId id;
 }
 
-} partial class typesᴛoperand {
-
 // Pos returns the position of the expression corresponding to x.
 // If x is invalid the position is nopos.
-internal static token.Pos Pos(this ref operand x) {
+internal static token.Pos Pos⁔(/*this*/ ref operand x) {
     // x.expr may not be set if x is invalid
     if (x.expr == nil) {
         return nopos;
     }
     return x.expr.Pos();
 }
-
-} partial class types_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string nilWithInvalidTypeˢ => ref nilWithInvalidTypeˢᵇ;
@@ -318,14 +313,12 @@ internal static @string compositeKind(Type typ) {
     }}
 }
 
-} partial class typesᴛoperand {
-
-internal static @string String(this ж<operand> Ꮡx) {
+internal static @string String⁔(/*this*/ ж<operand> Ꮡx) {
     return operandString(ref (Ꮡx).DerefOrNull(), default);
 }
 
 // setConst sets x to the untyped constant for literal lit.
-internal static void setConst(this ref operand x, token.Token k, @string lit) {
+internal static void setConst⁔(/*this*/ ref operand x, token.Token k, @string lit) {
     BasicKind kind = default;
     switch (k) {
     case var ᴛ when ᴛ == token.INT: {
@@ -365,7 +358,7 @@ internal static void setConst(this ref operand x, token.Token k, @string lit) {
 }
 
 // isNil reports whether x is the (untyped) nil value.
-internal static bool isNil(this ref operand x) {
+internal static bool isNil⁔(/*this*/ ref operand x) {
     if (isTypes2) {
         return x.mode == nilvalue;
     } else { // go/types
@@ -383,7 +376,7 @@ private static readonly @string needTypeAssertionˢᵇ = "need type assertion"u8
 // is only valid if the (first) result is false. The check parameter may be nil
 // if assignableTo is invoked through an exported API call, i.e., when all
 // methods have been type-checked.
-internal static (bool, errors.Code) assignableTo(this ж<operand> Ꮡx, ж<Checker> check, Type T, ж<@string> Ꮡcause) {
+internal static (bool, errors.Code) assignableTo⁔(/*this*/ ж<operand> Ꮡx, ж<Checker> check, Type T, ж<@string> Ꮡcause) {
     ref var x = ref Ꮡx.DerefOrNull();
     ref var cause = ref Ꮡcause.DerefOrNull();
 
@@ -540,4 +533,4 @@ internal static (bool, errors.Code) assignableTo(this ж<operand> Ꮡx, ж<Check
     return (false, IncompatibleAssign);
 }
 
-}
+} // end types_package

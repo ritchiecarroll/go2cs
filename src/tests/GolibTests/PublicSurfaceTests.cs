@@ -293,7 +293,7 @@ public class PublicSurfaceTests
 
     private static readonly (string Type, string[] Names)[] s_mnFrozenMembers =
     [
-        ("go.builtin", ["RunMainꞏtwin", "goǃtwin", "selectꞏtwin", "ᐸꟷꞏtwin"]),
+        ("go.builtin", ["RunMainꞏtwin", "goǃtwin", "selectꞏtwin", "ᐸꟷꞏtwin", "Goschedꞏtwin"]),
         ("go.channel`1", ["ᐸꟷꞏtwin"])
     ];
 

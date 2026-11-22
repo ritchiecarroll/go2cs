@@ -29,7 +29,6 @@ using utf8 = unicode.utf8_package;
 using @internal;
 using io = io_package;
 using unicode;
-using static fs_package;
 
 partial class fs_package {
 
@@ -206,8 +205,6 @@ public static FileMode ModeType => /* ModeDir | ModeSymlink | ModeNamedPipe | Mo
 
 public static FileMode ModePerm => /* 0777 */ 511; // Unix permission bits
 
-} partial class fsᴛFileMode {
-
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 private static ref readonly @string strᶜ => ref strᶜᵇ;
 private static readonly @string strᶜᵇ = "dalTLDpSugct?"u8;
@@ -216,7 +213,7 @@ private static readonly @string strᶜᵇ = "dalTLDpSugct?"u8;
 private static ref readonly @string rwxᶜ => ref rwxᶜᵇ;
 private static readonly @string rwxᶜᵇ = "rwxrwxrwx"u8;
 
-public static @string String(this FileMode m) {
+internal static @string String⁔(/*this*/ FileMode m) {
     @string str = strᶜ;
     array<byte> buf = new(32); // Mode is uint32.
     nint w = 0;
@@ -244,27 +241,25 @@ public static @string String(this FileMode m) {
 
 // IsDir reports whether m describes a directory.
 // That is, it tests for the [ModeDir] bit being set in m.
-public static bool IsDir(this FileMode m) {
+internal static bool IsDir⁔(/*this*/ FileMode m) {
     return (FileMode)(m & ModeDir) != 0;
 }
 
 // IsRegular reports whether m describes a regular file.
 // That is, it tests that no mode type bits are set.
-public static bool IsRegular(this FileMode m) {
+internal static bool IsRegular⁔(/*this*/ FileMode m) {
     return (FileMode)(m & ModeType) == 0;
 }
 
 // Perm returns the Unix permission bits in m (m & [ModePerm]).
-public static FileMode Perm(this FileMode m) {
+internal static FileMode Perm⁔(/*this*/ FileMode m) {
     return (FileMode)(m & ModePerm);
 }
 
 // Type returns type bits in m (m & [ModeType]).
-public static FileMode Type(this FileMode m) {
+internal static FileMode Type⁔(/*this*/ FileMode m) {
     return (FileMode)(m & ModeType);
 }
-
-} partial class fs_package {
 
 // PathError records an error and the operation and file path that caused it.
 partial struct PathError {
@@ -273,24 +268,18 @@ partial struct PathError {
     public error Err;
 }
 
-} partial class fsᴛPathError {
+internal static @string Error⁔(/*this*/ ref PathError e) { return e.Op + " "u8 + e.Path + ": "u8 + e.Err.Error(); }
 
-public static @string Error(this ref PathError e) { return e.Op + " "u8 + e.Path + ": "u8 + e.Err.Error(); }
-
-public static error Unwrap(this ref PathError e) { return e.Err; }
-
-} partial class fs_package {
+internal static error Unwrap⁔(/*this*/ ref PathError e) { return e.Err; }
 
 internal partial interface Timeout_type /*dyn*/ {
     bool Timeout();
 }
 
-} partial class fsᴛPathError {
-
 // Timeout reports whether this error represents a timeout.
-public static bool Timeout(this ref PathError e) {
+internal static bool Timeout⁔(/*this*/ ref PathError e) {
     var (t, ok) = e.Err._<Timeout_type>(ᐧ);
     return ok && t.Timeout();
 }
 
-}
+} // end fs_package

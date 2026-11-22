@@ -4,8 +4,6 @@
 // Constants
 namespace go.debug;
 
-using static dwarf_package;
-
 partial class dwarf_package {
 
 //go:generate stringer -type Attr -trimprefix=Attr
@@ -138,16 +136,12 @@ public static Attr AttrDeleted => 0x8A;
 public static Attr AttrDefaulted => 0x8B;
 public static Attr AttrLoclistsBase => 0x8C;
 
-} partial class dwarfᴛAttr {
-
-public static @string GoString(this Attr a) {
+internal static @string GoString⁔(/*this*/ Attr a) {
     var (str, ok) = _Attr_map[a, ꟷ]; if (ok) {
         return "dwarf.Attr"u8 + str;
     }
     return "dwarf."u8 + a.String();
 }
-
-} partial class dwarf_package {
 
 // A format is a DWARF data encoding format.
 partial struct format /*num:uint32*/;
@@ -281,16 +275,12 @@ public static Tag TagCallSiteParameter => 0x49;
 public static Tag TagSkeletonUnit => 0x4A;
 public static Tag TagImmutableType => 0x4B;
 
-} partial class dwarfᴛTag {
-
-public static @string GoString(this Tag t) {
+internal static @string GoString⁔(/*this*/ Tag t) {
     if (t <= TagTemplateAlias) {
         return "dwarf.Tag"u8 + t.String();
     }
     return "dwarf."u8 + t.String();
 }
-
-} partial class dwarf_package {
 
 // Location expression operators.
 // The debug info encodes value locations like 8(R3)

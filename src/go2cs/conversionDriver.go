@@ -422,6 +422,13 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 			return refusePackage(options, diagnosticAsmForwardSignatureRefused, refusal)
 		}
 
+		// ...and an identifier spelled with a marker letter go2cs writes into generated names, or a Δ name equal to
+		// one it generates here (markerGlyphRefusal.go).
+		if refusal := refuseMarkerGlyphIdentifiers(pkg); refusal != nil {
+			refusal.report()
+			return refusePackage(options, diagnosticMarkerGlyphIdentifierRefused, refusal)
+		}
+
 		// Which structs hold their arrays inline (inlineArrayAdmission.go): decided once, from the package's non-test
 		// files, before any file emits. A reinterpret chain whose sides disagree keeps its admitted side out under the
 		// automatic rule (GO2CS2009) and refuses the package when forced (GO2CS2010).

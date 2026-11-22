@@ -22,6 +22,12 @@ public static partial class builtin
         return SelectRuntime.RunTwin(ops);
     }
 
+    // The twin of runtime.Gosched, which a twin awaits where its body calls runtime.Gosched (the Gosched-park seat;
+    // COORD's ruling of 2026-11-21, docs/phase4/inbox/G/20261121T231225Z-COORD.md). The generator maps the call here:
+    // runtime is a hand-owned stdlib package, and under L-min no stdlib hand twin is public.
+    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+    public static GoTask Goschedꞏtwin() => GoScheduler.GoschedTwin();
+
     // The hidden twins of the receive operator methods (B2).
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
     public static GoTask<T> ᐸꟷꞏtwin<T>(channel<T> channel)

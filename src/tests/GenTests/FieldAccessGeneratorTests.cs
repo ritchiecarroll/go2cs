@@ -34,12 +34,13 @@ public class FieldAccessGeneratorTests
         namespace go;
 
         public delegate ref TField FieldRefFunc<T, TField>(ref T instance);
-        public class ж<T> { public ref TF field<TF>(FieldRefFunc<T, TF> f) => throw null!; public ж<TF> of<TF>(FieldRefFunc<T, TF> f) => throw null!; public ref T Value => throw null!; }
+        public class ж<T> { public ref TF field<TF>(FieldRefFunc<T, TF> f) => throw null!; public ж<TF> of<TF>(FieldRefFunc<T, TF> f) => throw null!; public ref T Value => throw null!;
+            public ж<U> cgoPointerField<U>(FieldRefFunc<T, ж<U>> f) => throw null!; public void cgoPointerField<U>(FieldRefFunc<T, ж<U>> f, ж<U> v) => throw null!; public ж<TF> cgoWordField<TF>(FieldRefFunc<T, TF> f) => throw null!; }
         public sealed class NativeBox<T> : ж<T> { }
         public struct array<T> { }
         public sealed class GoFieldAccessAttribute(params System.Type[] types) : System.Attribute { }
         public interface IUnsafePointer { }
-        public static partial class unsafe_package { public class Pointer : IUnsafePointer { } }
+        public static partial class unsafe_package { public class Pointer : IUnsafePointer { public static Pointer LoadWord(ж<Pointer> p) => throw null!; public static void StoreWord(ж<Pointer> p, Pointer v) => throw null!; } }
         public struct uintptr { public nuint Value; }
         """;
 
@@ -417,6 +418,166 @@ public class FieldAccessGeneratorTests
         StringAssert.Contains(generated, Ref("nint", "Elem", $"{Package}.ArrayType"), "a sibling that shadows nothing keeps its property");
         StringAssert.Contains(generated, Ref("nint", "Cap", $"{Package}.deeper"));
         StringAssert.Contains(generated, Ref("nint", "Len", $"{Package}.unrelated"), "a method of an unrelated type shadows nothing");
+    }
+
+    // cgo Phase 3, seat 1a (docs/phase4/DESIGN-cgo-phase3-marshaling.md 18.9, D-3): a struct carrying golib's
+    // GoCgoStructAttribute (go.golib) gets a GET/SET property for each pointer field. A ж<U> field reads and writes through
+    // ж<T>.cgoPointerField, an unsafe.Pointer field through the word doors over ж<T>.cgoWordField. Every other field
+    // keeps its ref property, and so does every field of the same struct unmarked (the near miss).
+    private const string CgoMarker = """
+        namespace go.golib
+        {
+            [System.AttributeUsage(System.AttributeTargets.Struct)]
+            public sealed class GoCgoStructAttribute : System.Attribute { }
+        }
+        """;
+
+    private const string CgoStructs = """
+        namespace go;
+
+        [GoFieldAccess(typeof(struct_entry), typeof(struct_plain))]
+        partial class main_package
+        {
+            [global::go.golib.GoCgoStruct]
+            public partial struct struct_entry { public int family; public ж<struct_entry> next; public unsafe_package.Pointer data; public array<sbyte> name; }
+
+            public partial struct struct_plain { public int family; public ж<struct_plain> next; public unsafe_package.Pointer data; }
+        }
+        """;
+
+    private static string CgoPointer(string fieldType, string name, string type) =>
+        $"public {fieldType} {name} {{ {Getter} get => ʗp.cgoPointerField({type}.Ꮡ{name}); {Getter} set => ʗp.cgoPointerField({type}.Ꮡ{name}, value); }}";
+
+    private static string CgoWord(string fieldType, string name, string type) =>
+        $"public {fieldType} {name} {{ {Getter} get => global::go.unsafe_package.Pointer.LoadWord(ʗp.cgoWordField({type}.Ꮡ{name})); " +
+        $"{Getter} set => global::go.unsafe_package.Pointer.StoreWord(ʗp.cgoWordField({type}.Ꮡ{name}), value); }}";
+
+    [TestMethod]
+    public void ACgoStructsPointerFieldsGetGetSetPropertiesOverTheCWord()
+    {
+        string generated = GenerateFiles([("", CgoStructs), ("", CgoMarker)]);
+        const string Entry = "global::go.main_package.struct_entry";
+
+        StringAssert.Contains(generated, CgoPointer($"global::go.ж<{Entry}>", "next", Entry));
+        StringAssert.Contains(generated, CgoWord("global::go.unsafe_package.Pointer", "data", Entry));
+
+        // Its other fields keep their ref properties, and every field keeps its address property: &l.next still compiles
+        // and still reaches the reference floor (s6next).
+        StringAssert.Contains(generated, Ref("int", "family", Entry));
+        StringAssert.Contains(generated, Ref("global::go.array<sbyte>", "name", Entry));
+        StringAssert.Contains(generated, Address($"global::go.ж<{Entry}>", "next", Entry));
+        StringAssert.Contains(generated, Address("global::go.unsafe_package.Pointer", "data", Entry));
+    }
+
+    [TestMethod]
+    public void TheSameFieldsUnmarkedKeepTheirRefProperties()
+    {
+        string generated = GenerateFiles([("", CgoStructs), ("", CgoMarker)]);
+        const string Plain = "global::go.main_package.struct_plain";
+
+        StringAssert.Contains(generated, Ref($"global::go.ж<{Plain}>", "next", Plain));
+        StringAssert.Contains(generated, Ref("global::go.unsafe_package.Pointer", "data", Plain));
+        Assert.IsFalse(generated.Contains($"cgoPointerField({Plain}"), "an unmarked struct reads no field through cgoPointerField");
+        Assert.IsFalse(generated.Contains($"cgoWordField({Plain}"), "nor through cgoWordField");
+
+        // And no ordinary package's property changes.
+        Assert.IsFalse(Generate(Package).Contains("cgoPointerField") || Generate(Headers).Contains("cgoWordField"));
+    }
+
+    // The compile arm (D-3): under the SDK's compiler, a read, a store and the address of a marked struct's pointer fields
+    // compile, and a ref to one does not. The struct is a referenced assembly's, with its accessors in metadata, so the
+    // generated class compiles as it does in a converted package.
+    private const string CgoLibrary = """
+        namespace go;
+
+        public static partial class cgo_package
+        {
+            [global::go.golib.GoCgoStruct]
+            public partial struct struct_entry
+            {
+                public int family;
+                public ж<struct_entry> next;
+                public unsafe_package.Pointer data;
+
+                public static ref int Ꮡfamily(ref struct_entry instance) => ref instance.family;
+                public static ref ж<struct_entry> Ꮡnext(ref struct_entry instance) => ref instance.next;
+                public static ref unsafe_package.Pointer Ꮡdata(ref struct_entry instance) => ref instance.data;
+            }
+        }
+        """;
+
+    private const string CgoUser = """
+        namespace go;
+
+        [GoFieldAccess(typeof(cgo_package.struct_entry))]
+        partial class user_package { }
+        """;
+
+    [TestMethod]
+    public void ACgoStructsPointerFieldReadsAndStoresAndARefToItDoesNotCompile()
+    {
+        if (SdkCompiler() is not { } compiler)
+        {
+            Assert.Inconclusive("no SDK csc.dll resolves (DOTNET_HOST_PATH, DOTNET_ROOT, PATH): nothing here can compile a C# 14 extension block");
+            return;
+        }
+
+        string directory = Directory.CreateTempSubdirectory("go2cs-cgofield-").FullName;
+
+        try
+        {
+            File.WriteAllText(Path.Combine(directory, "golib.cs"), Stubs);
+            File.WriteAllText(Path.Combine(directory, "marker.cs"), CgoMarker);
+            (int code, string log) = Compile(compiler, directory, "golib.dll", ["golib.cs", "marker.cs"], []);
+            Assert.AreEqual(0, code, $"the golib stubs compile:\n{log}");
+
+            File.WriteAllText(Path.Combine(directory, "cgo.cs"), CgoLibrary);
+            (code, log) = Compile(compiler, directory, "cgo.dll", ["cgo.cs"], ["golib.dll"]);
+            Assert.AreEqual(0, code, $"the cgo fixture compiles:\n{log}");
+
+            CSharpCompilation compilation = CSharpCompilation.Create("user",
+                [CSharpSyntaxTree.ParseText(CgoUser)],
+                [MetadataReference.CreateFromFile(typeof(object).Assembly.Location), MetadataReference.CreateFromFile(Path.Combine(directory, "golib.dll")),
+                 MetadataReference.CreateFromFile(Path.Combine(directory, "cgo.dll"))],
+                new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+
+            GeneratorDriverRunResult result = CSharpGeneratorDriver.Create(new FieldAccessGenerator()).RunGenerators(compilation).GetRunResult();
+            Assert.AreEqual(0, result.Diagnostics.Length, string.Join("\n", result.Diagnostics));
+
+            string generated = result.GeneratedTrees.SingleOrDefault()?.ToString() ?? "";
+            StringAssert.Contains(generated, "cgoPointerField(global::go.cgo_package.struct_entry.Ꮡnext)", "the metadata struct's marker is read");
+
+            File.WriteAllText(Path.Combine(directory, "user.cs"), CgoUser);
+            File.WriteAllText(Path.Combine(directory, "generated.cs"), generated);
+
+            (int Code, string Output) Site(string name, string body)
+            {
+                File.WriteAllText(Path.Combine(directory, $"{name}.cs"), $$"""
+                    namespace go;
+
+                    static class {{name}}
+                    {
+                        {{body}}
+                    }
+                    """);
+
+                return Compile(compiler, directory, $"{name}.dll", ["user.cs", "generated.cs", $"{name}.cs"], ["golib.dll", "cgo.dll"]);
+            }
+
+            (code, log) = Site("reads", "static void use(ж<cgo_package.struct_entry> e) { e.next = e.next; unsafe_package.Pointer d = e.data; e.data = d; ж<ж<cgo_package.struct_entry>> a = e.Ꮡnext; }");
+            Assert.AreEqual(0, code, $"a read, a store and the field's address compile:\n{log}");
+
+            (code, log) = Site("refs", "static ref ж<cgo_package.struct_entry> use(ж<cgo_package.struct_entry> e) => ref e.next;");
+            Assert.AreNotEqual(0, code, "a ref to a marked pointer field does not compile, by design");
+            StringAssert.Contains(log, "CS8156", $"the compiler names the ref it refuses:\n{log}");
+
+            Directory.Delete(directory, recursive: true);
+        }
+        catch
+        {
+            Console.WriteLine($"the cgo field compile arm's files are in {directory}");
+            throw;
+        }
     }
 
     // HEADER-SHAPED structs: an unsafe.Pointer field, then one or two ints, in declaration order. Go's slice and string

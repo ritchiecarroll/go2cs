@@ -14,6 +14,9 @@
 
 using go;
 using static go.@internal.chacha8rand_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -60,11 +63,13 @@ using static go.@internal.chacha8rand_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/chacha8rand/chacha8.go", "chacha8.cs", "ABo8ABEwAAkCgoKUgqiyAAcSwoKCgoKs0oIABxCCgoKClIKCgoIAAxDigoKCgoKClKYABBDygoKCgoKUAAsKgsiygpSCgpSClIKCgoKClA==", "", "", "67=LEUint64/1/4/1,LEUint64/2/4/2,LEUint64/3/4/3,LEUint64/4/4/4")]
+[assembly: GoPositionMap("internal/chacha8rand/chacha8.go", "chacha8.cs", "ABk8AA8wAAkCgoKUgqiyAAcSwoKCgoKs0oIABxCCgoKClIKCgoIAAxDigoKCgoKClKYAAhDygoKCgoKUAAkKgqiygpSCgpSClIKCgoKClA==", "", "", "64=LEUint64/1/4/1,LEUint64/2/4/2,LEUint64/3/4/3,LEUint64/4/4/4")]
 [assembly: GoPositionMap("internal/chacha8rand/chacha8_generic.go", "chacha8_generic.cs", "ADqWApSCggAEnAGSgoKCgoKCgoKCgoKC")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;
+
+using static go.@internal.chacha8rand_package;
 
 [GoPackage("chacha8rand")]
 public static partial class chacha8rand_package
@@ -97,6 +102,23 @@ public static partial class chacha8rand_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(chacha8rand_package.State)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class chacha8randᴛState;
-[GoMethodHost(typeof(chacha8rand_package.errUnmarshalChaCha8)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class chacha8randᴛerrUnmarshalChaCha8;
+[GoMethodHost(typeof(chacha8rand_package.State)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class chacha8randᴛState;
+[GoMethodHost(typeof(chacha8rand_package.errUnmarshalChaCha8)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class chacha8randᴛerrUnmarshalChaCha8;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class chacha8randᴛState {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (uint64, bool) Next(this ref State s) => chacha8rand_package.Next⁔(ref s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Init(this ж<State> Ꮡs, /*[32]*/ array<byte> seed) => chacha8rand_package.Init⁔(Ꮡs, seed);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Init64(this ж<State> Ꮡs, /*[4]*/ array<uint64> seed) => chacha8rand_package.Init64⁔(Ꮡs, seed);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Refill(this ж<State> Ꮡs) => chacha8rand_package.Refill⁔(Ꮡs);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Reseed(this ж<State> Ꮡs) => chacha8rand_package.Reseed⁔(Ꮡs);
+}
+partial class chacha8randᴛerrUnmarshalChaCha8 {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string Error(this ref errUnmarshalChaCha8 _) => chacha8rand_package.Error⁔(ref _);
+}
+// </MethodForwarders>

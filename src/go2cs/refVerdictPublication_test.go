@@ -281,11 +281,12 @@ func TestPublishedRefVerdictsMatchEmitted(t *testing.T) {
 			t.Skip("the flags-on arm did not run")
 		}
 
-		// The one line the FLAG itself legitimately moves is the position-map record: a `ref`
-		// primary lays counter.cs out differently, so its C#-line-to-Go-line table differs between
-		// the two conversions. Masked here — measured, not assumed: it was the only differing line.
-		stripped := maskPositionMapRecords(applyRefVerdictSection(append([]string(nil), flagsOnInfo...), nil, false))
-		flagsOff := maskPositionMapRecords(append([]string(nil), lines...))
+		// The lines the FLAG itself legitimately moves are the position-map record and the method forwarders: a `ref`
+		// primary lays counter.cs out differently, so its C#-line-to-Go-line table differs between the two
+		// conversions, and each forwarder repeats its method's signature, which the primary is. Masked here —
+		// measured, not assumed: they were the only differing lines.
+		stripped := maskMethodForwarders(maskPositionMapRecords(applyRefVerdictSection(append([]string(nil), flagsOnInfo...), nil, false)))
+		flagsOff := maskMethodForwarders(maskPositionMapRecords(append([]string(nil), lines...)))
 
 		if strings.Join(stripped, "\n") != strings.Join(flagsOff, "\n") {
 			t.Errorf("removing the section from the flags-on file must reproduce the flags-off file exactly (position-map records masked):\n--- stripped flags-on ---\n%s\n--- flags-off ---\n%s", strings.Join(stripped, "\n"), strings.Join(flagsOff, "\n"))
@@ -393,6 +394,17 @@ func maskPositionMapRecords(lines []string) []string {
 	for i, line := range lines {
 		if strings.HasPrefix(respellRootAttribute(line, "GoPositionMap", true), "[assembly: GoPositionMap(") {
 			lines[i] = "[assembly: go.GoPositionMap(<masked>)]"
+		}
+	}
+
+	return lines
+}
+
+// maskMethodForwarders masks each forwarder declaration of the <MethodForwarders> section (recordMethodForwarder).
+func maskMethodForwarders(lines []string) []string {
+	for i, line := range lines {
+		if _, forwarder := systemAttributeLineKind(strings.TrimSpace(line)); forwarder {
+			lines[i] = "    <masked forwarder>"
 		}
 	}
 

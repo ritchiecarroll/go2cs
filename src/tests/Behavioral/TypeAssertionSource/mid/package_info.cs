@@ -14,6 +14,9 @@
 
 using go;
 using static go.TypeAssertionSource.mid_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -49,10 +52,12 @@ using static go.TypeAssertionSource.mid_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("mid.go", "mid.cs", "AAkW6oI=")]
+[assembly: GoPositionMap("mid.go", "mid.cs", "AAgWyoI=")]
 // </GoSourcePositionMaps>
 
 namespace go.TypeAssertionSource;
+
+using static go.TypeAssertionSource.mid_package;
 
 [GoPackage("mid")]
 public static partial class mid_package
@@ -86,5 +91,16 @@ public static partial class mid_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(mid_package.Other)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class midᴛOther;
+[GoMethodHost(typeof(mid_package.Other)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class midᴛOther;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class midᴛOther {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint, error) Read(this ref Other _, slice<byte> p) => mid_package.Read⁔(ref _, p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint, error) Write(this ref Other _, slice<byte> p) => mid_package.Write⁔(ref _, p);
+}
+// </MethodForwarders>

@@ -19,7 +19,6 @@ using crypto;
 using go.net;
 using httptrace = go.net.http.httptrace_package;
 using vendor.golang.org.x.net.http;
-using static http_package;
 
 partial class http_package {
 
@@ -114,30 +113,20 @@ partial struct Response {
     public ж<tls.ConnectionState> TLS;
 }
 
-} partial class httpᴛResponse {
-
 // Cookies parses and returns the cookies set in the Set-Cookie headers.
-public static slice<ж<Cookie>> Cookies(this ref Response r) {
+internal static slice<ж<Cookie>> Cookies⁔(/*this*/ ref Response r) {
     return readSetCookies(r.Header);
 }
-
-} partial class http_package {
 
 // ErrNoLocation is returned by the [Response.Location] method
 // when no Location header is present.
 public static error ErrNoLocation = errors.New("http: no Location header in response");
 
-} partial class httpᴛResponse {
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string locationˢ => ref locationˢᵇ;
-private static readonly @string locationˢᵇ = "Location"u8;
-
 // Location returns the URL of the response's "Location" header,
 // if present. Relative redirects are resolved relative to
 // [Response.Request]. [ErrNoLocation] is returned if no
 // Location header is present.
-public static (ж<url.URL>, error) Location(this ref Response r) {
+internal static (ж<url.URL>, error) Location⁔(/*this*/ ref Response r) {
     @string lv = r.Header.Get(locationˢ);
     if (lv == ""u8) {
         return (default, ErrNoLocation);
@@ -147,8 +136,6 @@ public static (ж<url.URL>, error) Location(this ref Response r) {
     }
     return url.Parse(lv);
 }
-
-} partial class http_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string malformedHttpResponseˢ => ref malformedHttpResponseˢᵇ;
@@ -236,26 +223,20 @@ internal static void fixPragmaCacheControl(Header header) {
     }
 }
 
-} partial class httpᴛResponse {
-
 // ProtoAtLeast reports whether the HTTP protocol used
 // in the response is at least major.minor.
-public static bool ProtoAtLeast(this ref Response r, nint major, nint minor) {
+internal static bool ProtoAtLeast⁔(/*this*/ ref Response r, nint major, nint minor) {
     return r.ProtoMajor > major || r.ProtoMajor == major && r.ProtoMinor >= minor;
 }
 
-} partial class http_package {
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string contentLength0ˢ => ref contentLength0ˢᵇ;
+private static readonly @string contentLength0ˢᵇ = "Content-Length: 0\r\n"u8;
 
 internal partial struct Write_r1 /*dyn*/ {
     /*embed*/ public io_package.Reader Reader;
     /*embed*/ public io_package.Closer Closer;
 }
-
-} partial class httpᴛResponse {
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string contentLength0ˢ => ref contentLength0ˢᵇ;
-private static readonly @string contentLength0ˢᵇ = "Content-Length: 0\r\n"u8;
 
 // Write writes r to w in the HTTP/1.x server response format,
 // including the status line, headers, body, and optional trailer.
@@ -273,7 +254,7 @@ private static readonly @string contentLength0ˢᵇ = "Content-Length: 0\r\n"u8;
 //	Header, values for non-canonical keys will have unpredictable behavior
 //
 // The Response Body is closed after it is sent.
-public static error Write(this ref Response r, io.Writer w) {
+internal static error Write⁔(/*this*/ ref Response r, io.Writer w) {
     // Status line
     @string text = r.Status;
     if (text == ""u8) {
@@ -361,7 +342,7 @@ public static error Write(this ref Response r, io.Writer w) {
     return default;
 }
 
-internal static void closeBody(this ref Response r) {
+internal static void closeBody⁔(/*this*/ ref Response r) {
     if (r.Body != nil) {
         r.Body.Close();
     }
@@ -374,28 +355,22 @@ internal static void closeBody(this ref Response r) {
 // connection is done being managed from its perspective. Once we
 // return a writable response body to a user, the net/http package is
 // done managing that connection.
-internal static bool bodyIsWritable(this ref Response r) {
+internal static bool bodyIsWritable⁔(/*this*/ ref Response r) {
     var (_, ok) = r.Body._<io.Writer>(ᐧ);
     return ok;
 }
 
 // isProtocolSwitch reports whether the response code and header
 // indicate a successful protocol upgrade response.
-internal static bool isProtocolSwitch(this ref Response r) {
+internal static bool isProtocolSwitch⁔(/*this*/ ref Response r) {
     return isProtocolSwitchResponse(r.StatusCode, r.Header);
 }
-
-} partial class http_package {
 
 // isProtocolSwitchResponse reports whether the response code and
 // response header indicate a successful protocol upgrade response.
 internal static bool isProtocolSwitchResponse(nint code, Header h) {
     return code == StatusSwitchingProtocols && isProtocolSwitchHeader(h);
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string upgradeˢ2 => ref upgradeˢ2ᵇ;
-private static readonly @string upgradeˢ2ᵇ = "Upgrade"u8;
 
 // isProtocolSwitchHeader reports whether the request or response header
 // is for a protocol switch.

@@ -13,7 +13,6 @@ using sync = go.sync_package;
 using template = text.template_package;
 using go;
 using text;
-using static lazytemplate_package;
 
 partial class lazytemplate_package {
 
@@ -25,26 +24,22 @@ partial struct Template {
     internal ж<template.Template> tmpl;
 }
 
-} partial class lazytemplateᴛTemplate {
-
-internal static ж<template.Template> tp(this ж<Template> Ꮡr) {
+internal static ж<template.Template> tp⁔(/*this*/ ж<Template> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     Ꮡr.Ꮡonce.Do(Ꮡr.build);
     return r.tmpl;
 }
 
-internal static void build(this ref Template r) {
+internal static void build⁔(/*this*/ ref Template r) {
     var (ᴛ1, ᴛ2) = template.New(r.name).Parse(r.text);
     r.tmpl = template.Must(ᴛ1, ᴛ2);
     (r.name, r.text) = ("", "");
 }
 
-public static error Execute(this ж<Template> Ꮡr, io.Writer w, any data) {
+internal static error Execute⁔(/*this*/ ж<Template> Ꮡr, io.Writer w, any data) {
     return Ꮡr.tp().Execute(w, data);
 }
-
-} partial class lazytemplate_package {
 
 internal static bool inTest = len(os.Args) > 0 && strings.HasSuffix(strings.TrimSuffix(os.Args[0], ".exe"), ".test");
 

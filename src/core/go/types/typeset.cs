@@ -11,7 +11,6 @@ using slices = slices_package;
 using strings = strings_package;
 using errors = global::go.@internal.types.errors_package;
 using global::go.go;
-using static types_package;
 
 partial class types_package {
 
@@ -33,19 +32,17 @@ partial struct _TypeSet {
     internal bool comparable;        // invariant: !comparable || terms.isAll()
 }
 
-} partial class typesᴛ_TypeSet {
-
 // IsEmpty reports whether s is the empty set.
-internal static bool IsEmpty(this ref _TypeSet s) { return s.terms.isEmpty(); }
+internal static bool IsEmpty⁔(/*this*/ ref _TypeSet s) { return s.terms.isEmpty(); }
 
 // IsAll reports whether s is the set of all types (corresponding to the empty interface).
-internal static bool IsAll(this ref _TypeSet s) { return s.IsMethodSet() && len(s.methods) == 0; }
+internal static bool IsAll⁔(/*this*/ ref _TypeSet s) { return s.IsMethodSet() && len(s.methods) == 0; }
 
 // IsMethodSet reports whether the interface t is fully described by its method set.
-internal static bool IsMethodSet(this ref _TypeSet s) { return !s.comparable && s.terms.isAll(); }
+internal static bool IsMethodSet⁔(/*this*/ ref _TypeSet s) { return !s.comparable && s.terms.isAll(); }
 
 // IsComparable reports whether each type in the set is comparable.
-internal static bool IsComparable(this ref _TypeSet s, map<Type, bool> seen) {
+internal static bool IsComparable⁔(/*this*/ ref _TypeSet s, map<Type, bool> seen) {
     if (s.terms.isAll()) {
         return s.comparable;
     }
@@ -54,14 +51,14 @@ internal static bool IsComparable(this ref _TypeSet s, map<Type, bool> seen) {
 }
 
 // NumMethods returns the number of methods available.
-internal static nint NumMethods(this ref _TypeSet s) { return len(s.methods); }
+internal static nint NumMethods⁔(/*this*/ ref _TypeSet s) { return len(s.methods); }
 
 // Method returns the i'th method of s for 0 <= i < s.NumMethods().
 // The methods are ordered by their unique ID.
-internal static ж<Func> Method(this ref _TypeSet s, nint i) { return s.methods[i]; }
+internal static ж<Func> Method⁔(/*this*/ ref _TypeSet s, nint i) { return s.methods[i]; }
 
 // LookupMethod returns the index of and method with matching package and name, or (-1, nil).
-internal static (nint, ж<Func>) LookupMethod(this ref _TypeSet s, ж<Package> pkg, @string name, bool foldCase) {
+internal static (nint, ж<Func>) LookupMethod⁔(/*this*/ ref _TypeSet s, ж<Package> pkg, @string name, bool foldCase) {
     return methodIndex(s.methods, pkg, name, foldCase);
 }
 
@@ -69,7 +66,7 @@ internal static (nint, ж<Func>) LookupMethod(this ref _TypeSet s, ж<Package> p
 internal static ref readonly @string comparableˢ => ref comparableˢᵇ;
 private static readonly @string comparableˢᵇ = "comparable"u8;
 
-internal static @string String(this ref _TypeSet s) {
+internal static @string String⁔(/*this*/ ref _TypeSet s) {
     switch (ᐧ) {
     case {} when s.IsEmpty(): {
         return "∅";
@@ -109,10 +106,10 @@ internal static @string String(this ref _TypeSet s) {
 // Implementation
 
 // hasTerms reports whether s has specific type terms.
-internal static bool hasTerms(this ref _TypeSet s) { return !s.terms.isEmpty() && !s.terms.isAll(); }
+internal static bool hasTerms⁔(/*this*/ ref _TypeSet s) { return !s.terms.isEmpty() && !s.terms.isAll(); }
 
 // subsetOf reports whether s1 ⊆ s2.
-internal static bool subsetOf(this ref _TypeSet s1, ж<_TypeSet> Ꮡs2) {
+internal static bool subsetOf⁔(/*this*/ ref _TypeSet s1, ж<_TypeSet> Ꮡs2) {
     ref var s2 = ref Ꮡs2.DerefOrNull();
 
     return s1.terms.subsetOf(s2.terms);
@@ -121,7 +118,7 @@ internal static bool subsetOf(this ref _TypeSet s1, ж<_TypeSet> Ꮡs2) {
 // all reports whether f(t, u) is true for each (type/underlying type) pairs in s.
 // If s has no specific terms, all calls f(nil, nil).
 // In any case, all is guaranteed to call f at least once.
-internal static bool all(this ref _TypeSet s, Func<Type, Type, bool> f) {
+internal static bool all⁔(/*this*/ ref _TypeSet s, Func<Type, Type, bool> f) {
     if (!s.hasTerms()) {
         return f(default, default);
     }
@@ -146,7 +143,7 @@ internal static bool all(this ref _TypeSet s, Func<Type, Type, bool> f) {
 // is calls f with the specific type terms of s and reports whether
 // all calls to f returned true. If there are no specific terms, is
 // returns the result of f(nil).
-internal static bool @is(this ref _TypeSet s, Func<ж<term>, bool> f) {
+internal static bool is⁔(/*this*/ ref _TypeSet s, Func<ж<term>, bool> f) {
     if (!s.hasTerms()) {
         return f(nil);
     }
@@ -158,8 +155,6 @@ internal static bool @is(this ref _TypeSet s, Func<ж<term>, bool> f) {
     }
     return true;
 }
-
-} partial class types_package {
 
 // topTypeSet may be used as type set for the empty interface.
 internal static readonly ж<_TypeSet> ᏑtopTypeSet = new StaticBox<_TypeSet>(default(_TypeSet));

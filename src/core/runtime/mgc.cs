@@ -131,7 +131,6 @@ using gc = @internal.runtime.gc_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
-using static runtime_package;
 
 partial class runtime_package {
 
@@ -612,12 +611,10 @@ internal static gcTriggerKind gcTriggerTime => 1;
 // to work.cycles).
 internal static gcTriggerKind gcTriggerCycle => 2;
 
-} partial class runtimeᴛgcTrigger {
-
 // test reports whether the trigger condition is satisfied, meaning
 // that the exit condition for the _GCoff phase has been met. The exit
 // condition should be tested when allocating.
-internal static bool test(this gcTrigger t) {
+internal static bool test⁔(/*this*/ gcTrigger t) {
     if (!memstats.enablegc || Ꮡpanicking.Load() != 0 || gcphase != _GCoff) {
         return false;
     }
@@ -639,8 +636,6 @@ internal static bool test(this gcTrigger t) {
     }}
     return true;
 }
-
-} partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string pMcacheNotFlushedˢ => ref pMcacheNotFlushedˢᵇ;
@@ -1112,13 +1107,11 @@ top:
     gcMarkTermination(stw);
 }
 
-} partial class runtimeᴛg {
-
 // isMaybeRunnable checks whether a goroutine may still be semantically runnable.
 // For goroutines which are semantically runnable, this will eventually return true
 // as the GC marking phase progresses. It returns false for leaked goroutines, or for
 // goroutines which are not yet computed as possibly runnable by the GC.
-internal static bool isMaybeRunnable(this ж<g> Ꮡgp) {
+internal static bool isMaybeRunnable⁔(/*this*/ ж<g> Ꮡgp) {
     ref var gp = ref Ꮡgp.DerefOrNull();
 
     // Check whether the goroutine is actually in a waiting state first.
@@ -1153,8 +1146,6 @@ internal static bool isMaybeRunnable(this ж<g> Ꮡgp) {
     }}
     return true;
 }
-
-} partial class runtime_package {
 
 // findMaybeRunnableGoroutines checks to see if more blocked but maybe-runnable goroutines exist.
 // If so, it adds them into root set and increments work.markrootJobs accordingly.
@@ -2249,8 +2240,6 @@ internal static void gcTestMoveStackOnNextCall() {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string stackˢ => ref stackˢᵇ;
 private static readonly @string stackˢᵇ = "stack"u8;
-internal static ref readonly @string heapˢ => ref heapˢᵇ;
-private static readonly @string heapˢᵇ = "heap"u8;
 internal static ref readonly @string dataˢ => ref dataˢᵇ;
 private static readonly @string dataˢᵇ = "data"u8;
 internal static ref readonly @string bssˢ => ref bssˢᵇ;

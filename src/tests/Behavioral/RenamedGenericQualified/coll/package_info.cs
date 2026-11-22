@@ -14,6 +14,9 @@
 
 using go;
 using static go.RenamedGenericQualified.coll_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -49,10 +52,12 @@ using static go.RenamedGenericQualified.coll_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("coll.go", "coll.cs", "AAwQgoKUpoCApLSigoKUAA4cgoKUgpQACgqUAAsQlA==")]
+[assembly: GoPositionMap("coll.go", "coll.cs", "AAgQgoKUpoCApJSigoKUAAwcgoKUgpTqlAAHEJQ=")]
 // </GoSourcePositionMaps>
 
 namespace go.RenamedGenericQualified;
+
+using static go.RenamedGenericQualified.coll_package;
 
 [GoPackage("coll")]
 public static partial class coll_package
@@ -89,8 +94,31 @@ public static partial class coll_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(coll_package.Bag<>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class collᴛBag;
-[GoMethodHost(typeof(coll_package.Entry)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class collᴛEntry;
-[GoMethodHost(typeof(coll_package.OrderedMap<,>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class collᴛOrderedMap;
-[GoMethodHost(typeof(coll_package.Set<>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class collᴛSet;
+[GoMethodHost(typeof(coll_package.Bag<>)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class collᴛBag;
+[GoMethodHost(typeof(coll_package.Entry)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class collᴛEntry;
+[GoMethodHost(typeof(coll_package.OrderedMap<,>)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class collᴛOrderedMap;
+[GoMethodHost(typeof(coll_package.Set<>)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class collᴛSet;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class collᴛBag {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Put<T>(this ref Bag<T> b, T v) => coll_package.Put⁔<T>(ref b, v);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Count<T>(this ref Bag<T> b) => coll_package.Count⁔<T>(ref b);
+}
+partial class collᴛEntry {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static Pair<@string, nint> Pair(this Entry e) => coll_package.Pair⁔(e);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static Kind Kind(this Entry e) => coll_package.Kind⁔(e);
+}
+partial class collᴛOrderedMap {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Set<K, V>(this ref OrderedMap<K, V> o, K k, V v) => coll_package.Set⁔<K, V>(ref o, k, v);
+}
+partial class collᴛSet {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Add<T>(this ref Set<T> s, T v) => coll_package.Add⁔<T>(ref s, v);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Has<T>(this ref Set<T> s, T v) => coll_package.Has⁔<T>(ref s, v);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Len<T>(this ref Set<T> s) => coll_package.Len⁔<T>(ref s);
+}
+// </MethodForwarders>

@@ -2460,8 +2460,10 @@ partial class runtime_package
                     outer = outer[..^TwinSuffix.Length];
 
                 // The outer function's Go name: package initialization's (goInitFrameName) or, for the
-                // entry point, Go's `main` (goLiteralOuterName); any other outer keeps its own name.
-                string goOuter = goInitFrameName(goEnclosingMethod(method, outer), goLiteralOuterName(method, outer));
+                // entry point, Go's `main` (goLiteralOuterName); any other outer keeps its own name. A literal
+                // inside a suffix-form body is named for the body (`<Walk⁔>b__N_M`), so its outer is the Go
+                // method without the suffix; the lookups above keep the raw spelling.
+                string goOuter = goInitFrameName(goEnclosingMethod(method, outer), glyphGoName(goLiteralOuterName(method, outer)));
 
                 if (recorded is not null)
                 {
@@ -2517,7 +2519,26 @@ partial class runtime_package
         method.Name == "Main" && method.IsStatic && method.GetParameters().Length == 0 &&
         !method.IsDefined(typeof(System.Runtime.CompilerServices.ExtensionAttribute), inherit: false)
             ? "main"
-            : method.Name;
+            : glyphMethodGoName(method) ?? method.Name;
+
+    // A Go method in the suffix form (the converter's GlyphMethodSuffix, owner ruling 2026-11-21) has its BODY as a plain
+    // static `<name>⁔` in the package class, its receiver the first parameter, and the Go-named extension method in its
+    // holder is a [StackTraceHidden] forwarder to it. The body's frame is the method's: its name is the spelling without
+    // the trailing ⁔, and its receiver is read from parameter 0 (goReceiverName). U+2054 is connector punctuation, which a
+    // Go identifier cannot spell (Go's letter is a Unicode L* code point or `_`), so the suffix alone is the discriminator.
+    private const string GlyphMethodSuffix = "\u2054";
+
+    private static string? glyphMethodGoName(System.Reflection.MethodBase method) =>
+        method.IsStatic && method.Name.Length > GlyphMethodSuffix.Length && method.Name.EndsWith(GlyphMethodSuffix, StringComparison.Ordinal)
+            ? method.Name[..^GlyphMethodSuffix.Length]
+            : null;
+
+    // A name with a suffix-form body's trailing ⁔ removed: the Go name a literal's outer body reads as.
+    private static string glyphGoName(string name) =>
+        name.Length > GlyphMethodSuffix.Length && name.EndsWith(GlyphMethodSuffix, StringComparison.Ordinal) ? name[..^GlyphMethodSuffix.Length] : name;
+
+    private static bool isGlyphMethodBody(System.Reflection.MethodBase method) =>
+        glyphMethodGoName(method) is not null && method.GetParameters().Length > 0;
 
     private static readonly System.Collections.Concurrent.ConcurrentDictionary<System.Reflection.MethodBase, (string? Suffix, string? MethodValue)?> s_statementSiblingNames = new();
 
@@ -3143,7 +3164,7 @@ partial class runtime_package
     // static method and keeps its bare `<pkg>.<name>`, exactly as Go renders one.
     private static string? goReceiverName(System.Reflection.MethodBase method)
     {
-        if (!method.IsDefined(typeof(System.Runtime.CompilerServices.ExtensionAttribute), inherit: false))
+        if (!method.IsDefined(typeof(System.Runtime.CompilerServices.ExtensionAttribute), inherit: false) && !isGlyphMethodBody(method))
             return null;
 
         System.Reflection.ParameterInfo[] parameters = method.GetParameters();
@@ -4933,6 +4954,14 @@ partial class runtime_package
         if (method.IsDefined(typeof(System.Diagnostics.StackTraceHiddenAttribute), inherit: false))
             return false;
 
+        // An async twin (M:N) is a Go frame exactly when the function it was generated from is. A suffix-form method's
+        // Go-named forwarder is [StackTraceHidden], and the twin generator gives it a twin of its own (`Nameꞏtwin`, awaiting
+        // the body's `Name⁔ꞏtwin`), which runs as its state machine's MoveNext. That MoveNext carries none of the marks
+        // above, so the twin is judged by its stamp's origin: Go has one frame for the method, its body's. A twin of other
+        // machinery (a go2cs-gen ж-overload forwarder) is dropped by the same rule. An origin is never itself a MoveNext.
+        if (goTwinOrigin(method) is { } twinOrigin && !isGoSourceFrame(twinOrigin, keepWrapper))
+            return false;
+
         foreach (object attribute in method.GetCustomAttributes(typeof(System.CodeDom.Compiler.GeneratedCodeAttribute), inherit: false))
         {
             if (attribute is System.CodeDom.Compiler.GeneratedCodeAttribute generated && generated.Tool == "go2cs-gen")
@@ -5225,6 +5254,11 @@ partial class runtime_package
     private static bool targetsCallee(System.Reflection.MethodBase target, System.Reflection.MethodBase callee)
     {
         if (target.Module == callee.Module && target.MetadataToken == callee.MetadataToken)
+            return true;
+
+        // A call names a Go-named forwarder; where the JIT inlines it, the frame is its suffix-form body.
+        if (target is System.Reflection.MethodInfo forwarder && glyphBodyOf(forwarder) is { } body &&
+            body.Module == callee.Module && body.MetadataToken == callee.MetadataToken)
             return true;
 
         // A virtual or interface call names the slot; the frame is the override or the implementation.
@@ -6081,8 +6115,10 @@ partial class runtime_package
     private static CallerFrameRecord newMethodFrameRecord(System.Reflection.MethodBase method, bool methodValue)
     {
         // A pointer-receiver func value binds RecvGenerator's `this ж<T>` forwarder, which is go2cs-gen
-        // output and so never a Go frame; it is named and positioned as the Go method it forwards to.
-        method = goRecvForwardee(method) ?? method;
+        // output and so never a Go frame; it is named and positioned as the Go method it forwards to. A
+        // value-receiver one binds the holder's Go-named forwarder itself (another package's method expression,
+        // or one the converter does not bind to the body), named and positioned as its suffix-form body.
+        method = goRecvForwardee(method) ?? (method is System.Reflection.MethodInfo forwarder ? glyphBodyOf(forwarder) : null) ?? method;
 
         // A METHOD VALUE is Go's autogenerated `-fm` wrapper (`main.T.M-fm`, at <autogenerated>:1), and
         // one taken through an INTERFACE is named by the interface (`fmt.Stringer.String-fm`).
@@ -6162,10 +6198,77 @@ partial class runtime_package
                 (receiver.IsGenericType && referent.IsGenericType && receiver.GetGenericTypeDefinition() == referent.GetGenericTypeDefinition());
 
             if (sameReceiver)
+                return glyphBodyOf(candidate) ?? candidate;
+        }
+
+        return null;
+    }
+
+    // The suffix-form BODY a Go-named forwarder forwards to, or null when the method is no such forwarder. The forwarder
+    // is a [StackTraceHidden] extension method of a holder; its body `<name>⁔` sits in the holder's package class with the
+    // forwarder's parameter list, so the body is matched by name and parameter shape (glyphSameShape: each method
+    // declares its own type parameters).
+    private static System.Reflection.MethodBase? glyphBodyOf(System.Reflection.MethodInfo forwarder)
+    {
+        if (!forwarder.IsDefined(typeof(System.Diagnostics.StackTraceHiddenAttribute), inherit: false) || forwarder.DeclaringType is not { } holder)
+            return null;
+
+        Type? package = GoMethodHostAttribute.PackageClassOf(holder);
+
+        if (package is null || package == holder)
+            return null;
+
+        Type[] parameterTypes = Array.ConvertAll(forwarder.GetParameters(), parameter => parameter.ParameterType);
+        const System.Reflection.BindingFlags anyStatic = System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.DeclaredOnly;
+
+        foreach (System.Reflection.MethodInfo candidate in package.GetMethods(anyStatic))
+        {
+            if (glyphMethodGoName(candidate) != forwarder.Name)
+                continue;
+
+            System.Reflection.ParameterInfo[] parameters = candidate.GetParameters();
+
+            if (parameters.Length != parameterTypes.Length)
+                continue;
+
+            bool same = true;
+
+            for (int i = 0; i < parameters.Length && same; i++)
+                same = glyphSameShape(parameters[i].ParameterType, parameterTypes[i]);
+
+            if (same)
                 return candidate;
         }
 
         return null;
+    }
+
+    // Two parameter types of two methods that declare their own type parameters: the same type, or the same shape with a
+    // method type parameter in the same position (`ref cell<T>` against `ref cell<T>`, each T the declaring method's own).
+    private static bool glyphSameShape(Type a, Type b)
+    {
+        if (a == b)
+            return true;
+
+        if (a.IsGenericParameter || b.IsGenericParameter)
+            return a.IsGenericParameter && b.IsGenericParameter && a.GenericParameterPosition == b.GenericParameterPosition;
+
+        if (a.HasElementType || b.HasElementType)
+            return a.HasElementType && b.HasElementType && a.IsByRef == b.IsByRef && a.IsArray == b.IsArray && a.IsPointer == b.IsPointer &&
+                   glyphSameShape(a.GetElementType()!, b.GetElementType()!);
+
+        if (!a.IsGenericType || !b.IsGenericType || a.GetGenericTypeDefinition() != b.GetGenericTypeDefinition())
+            return false;
+
+        Type[] left = a.GetGenericArguments(), right = b.GetGenericArguments();
+
+        for (int i = 0; i < left.Length; i++)
+        {
+            if (!glyphSameShape(left[i], right[i]))
+                return false;
+        }
+
+        return true;
     }
 
     // `<pkg>.<Interface>.<Method>` when the method implements an interface method on its declaring Go

@@ -5,7 +5,6 @@ using atomic = sync.atomic_package;
 using lib = CollisionRenamedGlobalReceiver.lib_package;
 using CollisionRenamedGlobalReceiver;
 using sync;
-using static main_package;
 
 partial class main_package {
 
@@ -38,13 +37,9 @@ partial struct TLS {
     internal int32 id;
 }
 
-} partial class mainᴛTLS {
+internal static int32 tid⁔(/*this*/ ref TLS tls) { return tls.id; }
 
-internal static int32 tid(this ref TLS tls) { return tls.id; }
-
-internal static nint count(this ref TLS tls) { return (nint)tls.id * 10; }
-
-} partial class main_package {
+internal static nint count⁔(/*this*/ ref TLS tls) { return (nint)tls.id * 10; }
 
 internal static void main() {
     var first = Ꮡtid.Add(1);

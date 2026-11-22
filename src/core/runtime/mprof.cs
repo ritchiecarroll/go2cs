@@ -13,7 +13,6 @@ using sys = @internal.runtime.sys_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
-using static runtime_package;
 
 partial class runtime_package {
 
@@ -150,10 +149,8 @@ partial struct memRecordCycle {
     internal uintptr alloc_bytes, free_bytes;
 }
 
-} partial class runtimeᴛmemRecordCycle {
-
 // add accumulates b into a. It does not zero b.
-internal static void add(this ref memRecordCycle a, ж<memRecordCycle> Ꮡb) {
+internal static void add⁔(/*this*/ ref memRecordCycle a, ж<memRecordCycle> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     a.allocs += b.allocs;
@@ -161,8 +158,6 @@ internal static void add(this ref memRecordCycle a, ж<memRecordCycle> Ꮡb) {
     a.alloc_bytes += b.alloc_bytes;
     a.free_bytes += b.free_bytes;
 }
-
-} partial class runtime_package {
 
 // A blockRecord is the bucket data for a bucket of type blockProfile,
 // which is used in blocking and mutex profiles.
@@ -196,10 +191,8 @@ partial struct mProfCycleHolder {
     internal atomic.Uint32 value;
 }
 
-} partial class runtimeᴛmProfCycleHolder {
-
 // read returns the current cycle count.
-internal static uint32 /*cycle*/ read(this ж<mProfCycleHolder> Ꮡc) {
+internal static uint32 /*cycle*/ read⁔(/*this*/ ж<mProfCycleHolder> Ꮡc) {
     uint32 cycle = default;
 
     var v = Ꮡc.Ꮡvalue.Load();
@@ -209,7 +202,7 @@ internal static uint32 /*cycle*/ read(this ж<mProfCycleHolder> Ꮡc) {
 
 // setFlushed sets the flushed flag. It returns the current cycle count and the
 // previous value of the flushed flag.
-internal static (uint32 cycle, bool alreadyFlushed) setFlushed(this ж<mProfCycleHolder> Ꮡc) {
+internal static (uint32 cycle, bool alreadyFlushed) setFlushed⁔(/*this*/ ж<mProfCycleHolder> Ꮡc) {
     uint32 cycle = default;
     bool alreadyFlushed = default;
 
@@ -226,7 +219,7 @@ internal static (uint32 cycle, bool alreadyFlushed) setFlushed(this ж<mProfCycl
 
 // increment increases the cycle count by one, wrapping the value at
 // mProfCycleWrap. It clears the flushed flag.
-internal static void increment(this ж<mProfCycleHolder> Ꮡc) {
+internal static void increment⁔(/*this*/ ж<mProfCycleHolder> Ꮡc) {
     // We explicitly wrap mProfCycle rather than depending on
     // uint wraparound because the memRecord.future ring does not
     // itself wrap at a power of two.
@@ -241,19 +234,13 @@ internal static void increment(this ж<mProfCycleHolder> Ꮡc) {
     }
 }
 
-} partial class runtime_package {
-
 // go2cs generated this placeholder — func newBucket is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
-
-} partial class runtimeᴛbucket {
 
 // go2cs generated this placeholder — func stk is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // go2cs generated this placeholder — func mp is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // go2cs generated this placeholder — func bp is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
-
-} partial class runtime_package {
 
 // go2cs generated this placeholder — func stkbucket is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
@@ -522,16 +509,14 @@ partial struct mLockProfile {
     internal bool disabled;         // attribute all time to "lost"
 }
 
-} partial class runtimeᴛmLockProfile {
-
-internal static int64 start(this ref mLockProfile prof) {
+internal static int64 start⁔(/*this*/ ref mLockProfile prof) {
     if (cheaprandn(gTrackingPeriod) == 0) {
         return nanotime();
     }
     return 0;
 }
 
-internal static void end(this ж<mLockProfile> Ꮡprof, int64 start) {
+internal static void end⁔(/*this*/ ж<mLockProfile> Ꮡprof, int64 start) {
     if (start != 0) {
         Ꮡprof.ᏑwaitTime.Add((nanotime() - start) * (int64)gTrackingPeriod);
     }
@@ -543,7 +528,7 @@ internal static void end(this ж<mLockProfile> Ꮡprof, int64 start) {
 // From unlock2, we might not be holding a p in this code.
 //
 //go:nowritebarrierrec
-internal static void recordUnlock(this ж<mLockProfile> Ꮡprof, int64 cycles) {
+internal static void recordUnlock⁔(/*this*/ ж<mLockProfile> Ꮡprof, int64 cycles) {
     ref var prof = ref Ꮡprof.DerefOrNull();
 
     if (cycles < 0) {
@@ -578,7 +563,7 @@ internal static void recordUnlock(this ж<mLockProfile> Ꮡprof, int64 cycles) {
     prof.cycles = cycles;
 }
 
-internal static void captureStack(this ж<mLockProfile> Ꮡprof) {
+internal static void captureStack⁔(/*this*/ ж<mLockProfile> Ꮡprof) {
     ref var prof = ref Ꮡprof.DerefOrNull();
 
     if (debug.profstackdepth == 0) {
@@ -624,13 +609,13 @@ internal static void captureStack(this ж<mLockProfile> Ꮡprof) {
 // From unlock2, we might not be holding a p in this code.
 //
 //go:nowritebarrierrec
-internal static void store(this ref mLockProfile prof) {
+internal static void store⁔(/*this*/ ref mLockProfile prof) {
     var gp = getg(); if ((~(~gp).m).locks == 1 && (~(~gp).m).mLockProfile.haveStack) {
         prof.storeSlow();
     }
 }
 
-internal static void storeSlow(this ref mLockProfile prof) {
+internal static void storeSlow⁔(/*this*/ ref mLockProfile prof) {
     // Report any contention we experience within this function as "lost"; it's
     // important that the act of reporting a contention event not lead to a
     // reportable contention event. This also means we can use prof.stack
@@ -663,8 +648,6 @@ internal static void storeSlow(this ref mLockProfile prof) {
     prof.disabled = false;
     releasem(ref (mp).DerefOrNull());
 }
-
-} partial class runtime_package {
 
 internal static void saveBlockEventStack(int64 cycles, int64 rate, slice<uintptr> stk, bucketType which) {
     var b = stkbucket(which, 0, stk, true);
@@ -727,11 +710,9 @@ partial struct StackRecord {
     public array<uintptr> Stack0 = new(32); // stack trace for this record; ends at first 0 entry
 }
 
-} partial class runtimeᴛStackRecord {
-
 // Stack returns the stack trace associated with the record,
 // a prefix of r.Stack0.
-public static slice<uintptr> Stack(this ref StackRecord r) {
+internal static slice<uintptr> Stack⁔(/*this*/ ref StackRecord r) {
     foreach (var (i, v) in range(r.Stack0.ΔRangeSnapshot())) {
         if (v == 0) {
             return r.Stack0.slice(0, i);
@@ -739,8 +720,6 @@ public static slice<uintptr> Stack(this ref StackRecord r) {
     }
     return r.Stack0[0..];
 }
-
-} partial class runtime_package {
 
 // MemProfileRate controls the fraction of memory allocations
 // that are recorded and reported in the memory profile.
@@ -772,19 +751,17 @@ partial struct MemProfileRecord {
     public array<uintptr> Stack0 = new(32); // stack trace for this record; ends at first 0 entry
 }
 
-} partial class runtimeᴛMemProfileRecord {
-
 // InUseBytes returns the number of bytes in use (AllocBytes - FreeBytes).
-public static int64 InUseBytes(this ref MemProfileRecord r) { return r.AllocBytes - r.FreeBytes; }
+internal static int64 InUseBytes⁔(/*this*/ ref MemProfileRecord r) { return r.AllocBytes - r.FreeBytes; }
 
 // InUseObjects returns the number of objects in use (AllocObjects - FreeObjects).
-public static int64 InUseObjects(this ref MemProfileRecord r) {
+internal static int64 InUseObjects⁔(/*this*/ ref MemProfileRecord r) {
     return r.AllocObjects - r.FreeObjects;
 }
 
 // Stack returns the stack trace associated with the record,
 // a prefix of r.Stack0.
-public static slice<uintptr> Stack(this ref MemProfileRecord r) {
+internal static slice<uintptr> Stack⁔(/*this*/ ref MemProfileRecord r) {
     foreach (var (i, v) in range(r.Stack0.ΔRangeSnapshot())) {
         if (v == 0) {
             return r.Stack0.slice(0, i);
@@ -792,8 +769,6 @@ public static slice<uintptr> Stack(this ref MemProfileRecord r) {
     }
     return r.Stack0[0..];
 }
-
-} partial class runtime_package {
 
 // MemProfile returns a profile of memory allocated and freed per allocation
 // site.
@@ -1204,21 +1179,17 @@ internal static goroutineProfileState goroutineProfileSatisfied => 2;
 
 partial struct goroutineProfileStateHolder /*global::go.@internal.runtime.atomic_package.Uint32*/;
 
-} partial class runtimeᴛgoroutineProfileStateHolder {
-
-internal static goroutineProfileState Load(this ж<goroutineProfileStateHolder> Ꮡp) {
+internal static goroutineProfileState Load⁔(/*this*/ ж<goroutineProfileStateHolder> Ꮡp) {
     return (goroutineProfileState)(Ꮡp.Reinterpret<goroutineProfileStateHolder, atomic.Uint32>()).Load();
 }
 
-internal static void Store(this ж<goroutineProfileStateHolder> Ꮡp, goroutineProfileState value) {
+internal static void Store⁔(/*this*/ ж<goroutineProfileStateHolder> Ꮡp, goroutineProfileState value) {
     (Ꮡp.Reinterpret<goroutineProfileStateHolder, atomic.Uint32>()).Store((uint32)value);
 }
 
-internal static bool CompareAndSwap(this ж<goroutineProfileStateHolder> Ꮡp, goroutineProfileState old, goroutineProfileState @new) {
+internal static bool CompareAndSwap⁔(/*this*/ ж<goroutineProfileStateHolder> Ꮡp, goroutineProfileState old, goroutineProfileState @new) {
     return (Ꮡp.Reinterpret<goroutineProfileStateHolder, atomic.Uint32>()).CompareAndSwap((uint32)old, (uint32)@new);
 }
-
-} partial class runtime_package {
 
 internal static (nint n, bool ok) goroutineLeakProfileWithLabelsConcurrent(slice<profilerecord.StackRecord> p, slice<@unsafe.Pointer> labels) {
     nint n = default;

@@ -8,7 +8,6 @@ using atomic = @internal.runtime.atomic_package;
 using sys = @internal.runtime.sys_package;
 using @unsafe = unsafe_package;
 using @internal.runtime;
-using static runtime_package;
 
 partial class runtime_package {
 
@@ -39,8 +38,6 @@ partial struct traceRegionAllocBlockHeader {
 
 internal static uintptr traceRegionAllocBlockData => /* 64<<10 - unsafe.Sizeof(traceRegionAllocBlockHeader{}) */ 65520;
 
-} partial class runtimeᴛtraceRegionAlloc {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string traceRegionAllocTooLargeˢ => ref traceRegionAllocTooLargeˢᵇ;
 private static readonly @string traceRegionAllocTooLargeˢᵇ = "traceRegion: alloc too large"u8;
@@ -52,7 +49,7 @@ internal static ref readonly @string traceRegionOutOfMemoryˢ => ref traceRegion
 private static readonly @string traceRegionOutOfMemoryˢᵇ = "traceRegion: out of memory"u8;
 
 // alloc allocates n-byte block. The block is always aligned to 8 bytes, regardless of platform.
-internal static ж<notInHeap> alloc(this ж<traceRegionAlloc> Ꮡa, uintptr n) {
+internal static ж<notInHeap> alloc⁔(/*this*/ ж<traceRegionAlloc> Ꮡa, uintptr n) {
     n = alignUp(n, 8);
     if (n > traceRegionAllocBlockData) {
         @throw(traceRegionAllocTooLargeˢ);
@@ -115,7 +112,7 @@ internal static ж<notInHeap> alloc(this ж<traceRegionAlloc> Ꮡa, uintptr n) {
 //
 // drop is not safe to call concurrently with other calls to drop or with calls to alloc. The caller
 // must ensure that it is not possible for anything else to be using the same structure.
-internal static void drop(this ж<traceRegionAlloc> Ꮡa) {
+internal static void drop⁔(/*this*/ ж<traceRegionAlloc> Ꮡa) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     Ꮡa.Ꮡdropping.Store(true);
@@ -131,4 +128,4 @@ internal static void drop(this ж<traceRegionAlloc> Ꮡa) {
     Ꮡa.Ꮡdropping.Store(false);
 }
 
-}
+} // end runtime_package

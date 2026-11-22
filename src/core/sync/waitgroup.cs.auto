@@ -14,11 +14,8 @@ using synctest = @internal.synctest_package;
 using atomic = go.sync.atomic_package;
 using @unsafe = unsafe_package;
 using @internal;
-using FieldOffsetAttribute = global::System.Runtime.InteropServices.FieldOffsetAttribute;
-using LayoutKind = global::System.Runtime.InteropServices.LayoutKind;
-using StructLayoutAttribute = global::System.Runtime.InteropServices.StructLayoutAttribute;
+using System.Runtime.InteropServices;
 using go.sync;
-using static sync_package;
 
 partial class sync_package {
 
@@ -69,8 +66,6 @@ partial class sync_package {
 // waitGroupBubbleFlag indicates that a WaitGroup is associated with a synctest bubble.
 internal static UntypedInt waitGroupBubbleFlag => 0x8000_0000;
 
-} partial class syncᴛWaitGroup {
-
 // Add adds delta, which may be negative, to the [WaitGroup] task counter.
 // If the counter becomes zero, all goroutines blocked on [WaitGroup.Wait] are released.
 // If the counter goes negative, Add panics.
@@ -86,7 +81,7 @@ internal static UntypedInt waitGroupBubbleFlag => 0x8000_0000;
 // If a WaitGroup is reused to wait for several independent sets of events,
 // new Add calls must happen after all previous Wait calls have returned.
 // See the WaitGroup example.
-public static void Add(this ж<WaitGroup> Ꮡwg, nint delta) {
+internal static void Add⁔(/*this*/ ж<WaitGroup> Ꮡwg, nint delta) {
     GoFrame ᒐ = default;
     try {
         ref var wg = ref Ꮡwg.DerefOrNull();
@@ -176,12 +171,12 @@ public static void Add(this ж<WaitGroup> Ꮡwg, nint delta) {
 // "synchronizes before" the return of any Wait call that it unblocks.
 //
 // [the Go memory model]: https://go.dev/ref/mem
-public static void Done(this ж<WaitGroup> Ꮡwg) {
+internal static void Done⁔(/*this*/ ж<WaitGroup> Ꮡwg) {
     Ꮡwg.Add(-1);
 }
 
 // Wait blocks until the [WaitGroup] task counter is zero.
-public static void Wait(this ж<WaitGroup> Ꮡwg) {
+internal static void Wait⁔(/*this*/ ж<WaitGroup> Ꮡwg) {
     ref var wg = ref Ꮡwg.DerefOrNull();
 
     if (race.Enabled) {
@@ -259,7 +254,7 @@ public static void Wait(this ж<WaitGroup> Ꮡwg) {
 // "synchronizes before" the return of any Wait call that it unblocks.
 //
 // [the Go memory model]: https://go.dev/ref/mem
-public static partial void Go(this ж<WaitGroup> Ꮡwg, Action f) {
+internal static partial void Go⁔(/*this*/ ж<WaitGroup> Ꮡwg, Action f) {
     Ꮡwg.Add(1);
     goǃ(() => {
         GoFrame ᒐ = default;
@@ -290,4 +285,4 @@ public static partial void Go(this ж<WaitGroup> Ꮡwg, Action f) {
     });
 }
 
-}
+} // end sync_package

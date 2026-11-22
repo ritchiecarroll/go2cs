@@ -247,7 +247,7 @@ saw a null descriptor:
 tBytes     = bootstrapType("bytes", (*[]byte)(nil))
 tReserved7 = bootstrapType("_reserved1", (*struct{ r7 int })(nil))
 ```
-<!-- source: src/core/encoding/gob/type.cs:281-289 -->
+<!-- source: src/core/encoding/gob/type.cs:272-280 -->
 ```csharp
 internal static typeId tBytes = bootstrapType("bytes", (ж<slice<byte>>)nil);
 …

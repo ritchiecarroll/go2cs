@@ -10,10 +10,14 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+using io = go.io_package;
 // </ImportedTypeAliases>
 
 using go;
 using static go.compress.zlib_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -58,11 +62,14 @@ using static go.compress.zlib_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("compress/zlib/reader.go", "reader.cs", "ACtWlJQAEjbyAAIQ0oKCgpTGgoKmgoKClLiCgpSCpoKCgpSssoKUgqaCgoKUuIKCgpSUgoKClIKCgoKClJSCgoK4goKUppSC")]
-[assembly: GoPositionMap("compress/zlib/writer.go", "writer.cs", "ACdY0oIAAhLiAAIQ0oKUAAgUspSClIKUgoKosrjKlLS0tLSkgpSCgpSUgoKmpoKClJSs4oKUgpSClIKCgpSCqJKClIKUgqqigpSClIKClJSCgg==")]
+[assembly: GoPositionMap("compress/zlib/reader.go", "reader.cs", "ACpWlJQAEjbyAAIQ0oKCgpSmgoKmgoKClLiCgpSCpoKCgpSssoKUgqaCgoKUuIKCgpSUgoKClIKCgoKClJSCgoK4goKUppSC")]
+[assembly: GoPositionMap("compress/zlib/writer.go", "writer.cs", "ACZY0oIAAhLiAAIQ0oKUAAYUspSClIKUgoKosrjKlLS0tLSkgpSCgpSUgoKmpoKClJSs4oKUgpSClIKCgpSCqJKClIKUgqqigpSClIKClJSCgg==")]
 // </GoSourcePositionMaps>
 
 namespace go.compress;
+
+using static go.compress.zlib_package;
+using io = go.io_package;
 
 [GoPackage("zlib")]
 public static partial class zlib_package
@@ -104,6 +111,25 @@ public static partial class zlib_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(zlib_package.Writer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class zlibᴛWriter;
-[GoMethodHost(typeof(zlib_package.reader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class zlibᴛreader;
+[GoMethodHost(typeof(zlib_package.Writer)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class zlibᴛWriter;
+[GoMethodHost(typeof(zlib_package.reader)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class zlibᴛreader;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class zlibᴛWriter {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Reset(this ref Writer z, io.Writer w) => zlib_package.Reset⁔(ref z, w);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error /*err*/ writeHeader(this ref Writer z) => zlib_package.writeHeader⁔(ref z);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint n, error err) Write(this ref Writer z, slice<byte> p) => zlib_package.Write⁔(ref z, p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Flush(this ref Writer z) => zlib_package.Flush⁔(ref z);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Close(this ref Writer z) => zlib_package.Close⁔(ref z);
+}
+partial class zlibᴛreader {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint, error) Read(this ref reader z, slice<byte> p) => zlib_package.Read⁔(ref z, p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error Close(this ref reader z) => zlib_package.Close⁔(ref z);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error Reset(this ref reader z, io.Reader r, slice<byte> dict) => zlib_package.Reset⁔(ref z, r, dict);
+}
+// </MethodForwarders>

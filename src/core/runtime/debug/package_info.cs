@@ -14,6 +14,9 @@
 
 using go;
 using static go.runtime.debug_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -63,12 +66,14 @@ using static go.runtime.debug_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("runtime/debug/garbage.go", "garbage.cs", "ABU+AAoM0oIACBKCgoKCgoKUgpSCgqaCgriCgoKCgpQABCAACwKuwgACHgAMAgACIgAOAgACJgAQAgACGAAKFgAKbgA1Ag==")]
-[assembly: GoPositionMap("runtime/debug/mod.go", "mod.cs", "AA4eqrKCgpSCgoLulAA3epKokgAKCJKCgpSClIKSgoKCgoKCgpSClJSClIKUgoKClIKClKYAIBIACgKCgoK4AAcUgoKUgoKClO6CvIKCgpSUgrSCgoKCxoKCgoKCxoKClIKUyrSCgqaSlKaCgpSClIKUgraCgoKUgsiCgpSCgoLIgoLapJQ=", "117-131:1;161-165:1;177-191:2", "", "", "", "201:21,202:13")]
+[assembly: GoPositionMap("runtime/debug/mod.go", "mod.cs", "AA0eqrKCgpSCgoLulAA3epKokgAICJKCgpSClIKSgoKCgoKCgpSClJSClIKUgoKClIKClKYAHhIACgKCgoK4AAcUgoKUgoKClO6CvIKCgpSUgrSCgoKCxoKCgoKCxoKClIKUyrSCgqaSlKaCgpSClIKUgraCgoKUgsiCgpSCgoLIgoLapJQ=", "117-131:1;161-165:1;177-191:2", "", "", "", "196:21,197:13")]
 [assembly: GoPositionMap("runtime/debug/stack.go", "stack.cs", "ABAikqqigoKCgpQACCYACwKCABk0goKUgpSmlKg=")]
 [assembly: GoPositionMap("runtime/debug/stubs.go", "stubs.cs", "AAkYkoKCgoKC")]
 // </GoSourcePositionMaps>
 
 namespace go.runtime;
+
+using static go.runtime.debug_package;
 
 [GoPackage("debug")]
 public static partial class debug_package
@@ -112,5 +117,15 @@ public static partial class debug_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(debug_package.BuildInfo)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class debugᴛBuildInfo;
+[GoMethodHost(typeof(debug_package.BuildInfo)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class debugᴛBuildInfo;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class debugᴛBuildInfo {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this ref BuildInfo bi) => debug_package.String⁔(ref bi);
+}
+// </MethodForwarders>

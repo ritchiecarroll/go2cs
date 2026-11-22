@@ -811,6 +811,11 @@ func isGoHeaderShaped(structType *types.Struct) bool {
 var (
 	packageHandOwnedTypes = map[*types.TypeName]bool{}
 	packageHandOwnedVars  = map[*types.Var]bool{}
+
+	// packageHandOwnedMethods holds the methods whose C# a hand-owned file supplies: every method a hand-owned file
+	// declares, and every method manualConversionFuncs displaces for this target. Their hand-written extension methods
+	// stand in their holders as declared, so no suffix-form body exists for a method expression to bind.
+	packageHandOwnedMethods = map[*types.Func]bool{}
 )
 
 // collectHandOwnedDecls records the types and vars declared by the files whose destination is a hand-owned `.cs`, and
@@ -818,6 +823,20 @@ var (
 // nothing may assume the shape it would have emitted (lazyPackageVarOperations.go keeps such a var eager).
 func collectHandOwnedDecls(files []FileEntry, pkg *types.Package, info *types.Info, goos string) {
 	for _, entry := range files {
+		for _, decl := range entry.file.Decls {
+			funcDecl, ok := decl.(*ast.FuncDecl)
+
+			if !ok || funcDecl.Recv == nil {
+				continue
+			}
+
+			if entry.manualConversion || pkg != nil && isManualFuncDeclInPackage(pkg.Path(), goos, funcDecl) {
+				if fn, ok := info.Defs[funcDecl.Name].(*types.Func); ok {
+					packageHandOwnedMethods[fn] = true
+				}
+			}
+		}
+
 		if !entry.manualConversion {
 			continue
 		}
