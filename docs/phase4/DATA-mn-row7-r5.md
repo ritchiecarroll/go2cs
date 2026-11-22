@@ -40,3 +40,65 @@ Distinct = one per (package, host chain, name, arity). Instrument: `C:\go2cs\scr
 - R5-b: internal/runtime/atomic and sync/atomic stay the two largest; together more than half the distinct count.
 - R5-c: 0 generic.
 - R5-d: linux and darwin differ from windows only in OS-folder packages (syscall, internal/syscall/unix), by under 15.
+
+## R5 reading (2026-11-22, tip ea68ced798)
+
+Per target: windows 109 declarations in 13 packages, linux 118 in 14, darwin 121 in 13; each declaration is distinct
+by (package, host, name, arity) within its target. Union across the three targets (P3's definition): **124 distinct
+in 15 packages**. internal/runtime/atomic 42, sync/atomic 39, syscall 8, internal/syscall/unix 8, internal/bytealg 8,
+then internal/synctest, internal/runtime/sys and crypto/internal/boring/sig 3 each, runtime/debug,
+internal/runtime/gc/scan and internal/abi 2 each, and time, internal/runtime/syscall/windows,
+internal/runtime/syscall/linux and internal/runtime/startlinetest 1 each. 0 generic. 2 hand-owned packages skipped
+(testing, unsafe).
+
+Controls: P3's three examples present (windows: syscall.cs Getpagesize and Exit, garbage.cs WriteHeapDump);
+`runtime_BeforeFork` absent. **The implementing-part control fired** on 4 distinct functions (10 rows over the
+targets): internal/runtime/gc/scan `ExpandAVX512` and `FilterNilAVX512`, internal/runtime/sys `GetClosurePtr`, and
+internal/runtime/syscall/windows `StdCall`. Their implementing parts are not hand-written. They are
+`PartialStubGenerator` output (a generated stub for an assembly-only body), so they exist only in a generator's
+output. That is a fourth body class, named here: **stub-bodied**. The tool is not at fault.
+
+Scored: R5-a **met** on P3's definition (124 against 127, 15 packages); per target windows reads 109. R5-b **met**
+(the two atomic packages are 81 of 124). R5-c **met** (0). R5-d **met**: linux is 9 and darwin 12 over windows, all in
+OS-folder packages (syscall, internal/syscall/unix, internal/runtime/syscall/*).
+
+`time.Sleep` is R5 and already has its author-written twin (row 7 piece 3), so R5's own rule covers it: an
+author-written twin replaces the forwarder.
+
+## Piece 4: the shape (stated before code)
+
+No per-package list. The declaration itself names the Go function. The generator already normalizes a partial
+method to its definition part (TwinGenerator Normalize), so the implementing part's candidate carries the
+declaration's symbol. Three changes:
+
+1. **InPopulation reads the declaration's file.** For a partial method, the converted-file test reads the DEFINITION
+   part's tree, not the implementing part's. R5 then joins the population, and the existing machinery decides
+   every row: a state-machine twin where the hand body parks, else a forwarder (R3), else GO2CS0017.
+2. **Stub-bodied declarations become candidates.** A bodyless `partial` definition whose implementation is not in
+   the compilation's own trees (a generator's stub) is admitted as a candidate, refused `bodyless` (never twinned:
+   there is no body to rewrite), and so gets a forwarder.
+3. **An author-written twin satisfies the guard.** A population member refused `has-twin` classifies as
+   `author-twin`, not GUARD (R5: the author's twin replaces the forwarder).
+
+GenTests rows, each red first: a hand body that does not park gets a marked forwarder; a hand body that parks gets a
+state-machine twin and no GO2CS0017; a stub-bodied declaration (PartialStubGenerator in the driver) gets a forwarder;
+an author-written twin gets neither a forwarder nor GO2CS0017.
+
+Predictions (windows, each R5 package built with twins on and GoTwinsGuardWarn=true, so every GUARD row prints):
+- P4-a: of windows' 109 declarations, at most 6 classify `twin` (hand bodies that park: internal/synctest's Run and
+  Wait among them); 1 `author-twin` (time.Sleep); the rest are forwarders.
+- P4-b: GO2CS0017 = 0 over the R5 packages on all three targets, with no new exclusion.
+- P4-c: the 4 stub-bodied functions get forwarders on every target where they compile.
+- P4-d: no R5 package's plain build moves. Without GoTwins the generator writes nothing, so types, fields and IL are
+  identical, read with piece 1's metadata dump.
+
+## Piece 5: COORD's ruling (a) (2026-11-22)
+
+`GoStdlibTwins`, a property in src/core/Directory.Build.props, **default off**. When it is set, every converted
+package builds with `GoTwins=true`; golib, hand-owned packages and the `*.tests` projects are excluded. Piece 6's
+gates and row 10 build with it on. The default flips, and the pack carries twins, **only on row 10's T1-T5 ruling**
+(the owner's 2026-11-21 ruling: stdlib twins are gated on T1-T5). That follows O3: the first twinned pack is
+permanent, so nothing twinned ships before the window passes. Option (b), on by default now, was refused. The seat
+owes a guard that fails when the property's default reads anything but off, and one DESIGN line naming the flip as
+row 10's ruling. That line goes into DESIGN-mn-stdlib-twins.md with the pointer once train 5 has merged it onto this
+seat's base.
