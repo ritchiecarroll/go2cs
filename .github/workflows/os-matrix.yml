@@ -1956,6 +1956,14 @@ jobs:
           grep -E '^// (candidates|await-sites|T )' "$dir/Generated/go2cs-gen/go2cs.TwinGenerator/go2cs.twins.report.g.cs" 2>/dev/null | tr -d '\r' | sed 's/^/READING mn-direct report: /'
           (cd "$dir" && go build -o "$RUNNER_TEMP/mnstorm-go" .) || echo "READING mn-direct go build failed"
           now() { python3 -c 'import time; print(time.time())'; }
+          # Every arm is a verdict, not only a reading (COORD, 2026-11-22: the twinned storm at 100,000 hangs about one run
+          # in 5-10, and an exit-0 step hid it). A run past its deadline is killed and named HANG; a non-zero exit, or an
+          # output that differs from Go's at the same n, is named too. Every arm still runs and prints its READING, and the
+          # step fails at the end, one ::error:: line per failure. 180 s is six times the slowest storm recorded (29.6 s,
+          # osx-arm64, 3 P, at 100,000), and seven arms at 180 s fit the step's 30 minutes.
+          deadline=${MN_DIRECT_DEADLINE_S:-180}
+          failures=()
+          declare -A goOut
           one() {
             label=$1; n=$2; mn=$3; shift 3
             export MN_STORM_N=$n MN_STORM_HOLD_MS=3000 GO2CS_MN_READING=1
@@ -1964,10 +1972,16 @@ jobs:
             "$@" > "$RUNNER_TEMP/mn-out.txt" 2> "$RUNNER_TEMP/mn-err.txt" &
             pid=$!
             peak=0
+            hung=0
             while kill -0 $pid 2>/dev/null; do
               if [ -d /proc/$pid/task ]; then t=$(ls /proc/$pid/task 2>/dev/null | wc -l); else t=$(ps -M -p $pid 2>/dev/null | tail -n +2 | wc -l); fi
               t=$(echo $t)
               if [ -n "$t" ] && [ "$t" -gt "$peak" ]; then peak=$t; fi
+              if python3 -c "import sys; sys.exit(0 if $(now) - $start > $deadline else 1)"; then
+                hung=1
+                kill -9 $pid 2>/dev/null
+                break
+              fi
               sleep 0.25
             done
             wait $pid
@@ -1976,9 +1990,23 @@ jobs:
             out=$(tr -d '\r' < "$RUNNER_TEMP/mn-out.txt" | tr '\n' ';')
             reading=$(grep -a 'READING go-scheduler' "$RUNNER_TEMP/mn-err.txt" | tail -n 1 | tr -d '\r')
             errs=$(grep -a -c -i 'exception\|panic\|fatal' "$RUNNER_TEMP/mn-err.txt")
-            echo "READING mn-direct arm=$label n=$n exit=$code wall=${wall}s sampled-peak-threads=$peak err-lines=$errs out=[$out] | $reading"
-            if [ "$code" != "0" ]; then head -n 5 "$RUNNER_TEMP/mn-err.txt" | cut -c1-300 | sed 's/^/READING mn-direct stderr: /'; fi
+            verdict=ok
+            if [ "$hung" = "1" ]; then
+              verdict=HANG
+              failures+=("arm=$label n=$n HANG: no completion within ${deadline}s (killed; sampled-peak-threads=$peak)")
+            elif [ "$code" != "0" ]; then
+              verdict=EXIT
+              failures+=("arm=$label n=$n exit=$code: $(head -n 1 "$RUNNER_TEMP/mn-err.txt" | tr -d '\r' | cut -c1-200)")
+            elif [ "$label" = "go" ]; then
+              goOut[$n]=$out
+            elif [ -n "${goOut[$n]+set}" ] && [ "$out" != "${goOut[$n]}" ]; then
+              verdict=OUTPUT
+              failures+=("arm=$label n=$n output differs from Go's: [$out] vs [${goOut[$n]}]")
+            fi
+            echo "READING mn-direct arm=$label n=$n verdict=$verdict exit=$code wall=${wall}s sampled-peak-threads=$peak err-lines=$errs out=[$out] | $reading"
+            if [ "$verdict" != "ok" ]; then head -n 5 "$RUNNER_TEMP/mn-err.txt" | cut -c1-300 | sed 's/^/READING mn-direct stderr: /'; fi
           }
+          if [ ! -x "$RUNNER_TEMP/mnstorm-go" ]; then failures+=("go build of MnMixedStorm failed: no reference output to compare"); fi
           for n in 1000 10000 100000; do
             if [ -x "$RUNNER_TEMP/mnstorm-go" ]; then one go $n 0 "$RUNNER_TEMP/mnstorm-go"; fi
           done
@@ -1986,6 +2014,10 @@ jobs:
           for n in 1000 10000 100000; do
             one cs-twins $n 1 dotnet "$dll"
           done
+          if [ ${#failures[@]} -gt 0 ]; then
+            for f in "${failures[@]}"; do echo "::error::M:N direct run: $f"; done
+            exit 1
+          fi
           exit 0
 
       - name: Behavioral stderr — run named projects directly and keep the WHOLE stderr
