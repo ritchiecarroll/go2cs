@@ -83,6 +83,11 @@ func collectMovedInitVars(fset *token.FileSet, pkg *types.Package, info *types.I
 	// driver that relocates initializers decides laziness alike.
 	collectLazyPackageVars(fset, pkg, info, syntax)
 
+	// Every function literal's Go name, for its [GoFunc] attribute (funcLitGoNames.go): named here because the var
+	// initializers' literals are numbered in InitOrder, and this is the pass every driver already runs over the whole
+	// syntax set before any file emits.
+	collectFuncLitGoNames(info, syntax)
+
 	scope := pkg.Scope()
 
 	// Per-function direct references: package-level vars read and package functions/methods
