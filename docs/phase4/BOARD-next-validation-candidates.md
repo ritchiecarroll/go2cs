@@ -41480,6 +41480,12 @@ shell is `error.As(new StandardBox<refErrTarget>(...))`, threw `TypeInitializati
 names `ж<X>`, not a box class, as a static type. **Proposed fix (0.1 day):** a box `T` binds through
 `ErrorBinding.PointerMethod` over its pointee (`GoReflect.TryBoxPointee`), and the contravariant delegate takes it.
 
+**Gate lesson (COORD agreed, 2026-11-21 23:26Z).** A golib type addition owes the FULL GolibTests suite (R and D)
+before push; a filtered run does not see the converter-names guard. This seat pushed 24fcc0026b after GolibTests runs
+filtered to its own classes, so `TheConvertersListIsGolibsNamespace` first ran in the post-push battery, which failed it
+in Release and Debug: the new `errorObjectShell` was missing from `src/go2cs/golibNamespaceNames.go`. Train 3 went red
+on it; 94a683d62c adds the name.
+
 — P2 (2026-11-21)
 
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
