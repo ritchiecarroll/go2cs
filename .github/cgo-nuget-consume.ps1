@@ -61,10 +61,24 @@ if (-not $closureVersion) { Failure "J1's feed holds $($goLib.Count) go.lib pack
 $cc = "$(& go env CC)".Trim()
 Reading "instrument: go env CC = $cc; dotnet $("$(& dotnet --version)".Trim()); package $version; closure $closureVersion"
 
+# THE REHEARSAL CONVERTER. A -recurse=nuget conversion maps a module to its package only when the package's
+# self-description names this converter's own corpus release (nugetPackage.go, qualifyNuGetPackage: the strict match).
+# J2's package names the local closure's release, J1's prerelease of the next revision, as a release's packages name
+# that release. So the consumer converts with this tree's converter stamped as that release, the way a release stamps
+# its converter before it packs. The stamp file is rewritten in this job's checkout only, and restored after the build.
+# Without it the module converts locally (run 45014928125: "built for go2cs 1.26.11.2-ci.45001845693, and this converter
+# is 1.26.11.1"), and the row reads the module's local conversion, not the package.
 $exeName = if ($IsWindows) { 'go2cs.exe' } else { 'go2cs' }
 $converter = Join-Path $OutDir "bin/$exeName"
+$stamp = Join-Path $src 'go2cs/corpus-release.txt'
+$stamped = [System.IO.File]::ReadAllText($stamp)
 Push-Location (Join-Path $src 'go2cs')
-try { & go build -o $converter . ; if ($LASTEXITCODE -ne 0) { Failure "the converter did not build ($LASTEXITCODE)" } } finally { Pop-Location }
+try {
+    [System.IO.File]::WriteAllText($stamp, "$closureVersion`n")
+    & go build -o $converter . ; if ($LASTEXITCODE -ne 0) { Failure "the converter did not build ($LASTEXITCODE)" }
+}
+finally { [System.IO.File]::WriteAllText($stamp, $stamped); Pop-Location }
+Reading "converter: this tree's, stamped as the closure's release $closureVersion for this job only (it was $($stamped.Trim()))"
 
 # ---- the planted stale go.lib ------------------------------------------------------------------------------------------
 $global = if ($env:NUGET_PACKAGES) { $env:NUGET_PACKAGES } else { Join-Path ([Environment]::GetFolderPath('UserProfile')) '.nuget/packages' }
