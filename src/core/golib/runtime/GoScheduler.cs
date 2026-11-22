@@ -33,6 +33,11 @@ public sealed class GoParkSlot
 
     // null (not woken, not parked), s_woken, or the parked continuation (an Action).
     private object? m_state;
+
+    // A Gosched yield park (GoScheduler.GoschedTwin): the carrier requeues the goroutine at the global queue's tail instead
+    // of committing the park. Carried on the SLOT, never on the carrier, so a park attempt that fails (ParkPending throws)
+    // cannot turn the step's earlier, real park into a requeue (P3's read of the Gosched seat).
+    internal bool IsYield { get; init; }
     private Goroutine? m_goroutine;
 
     /// <summary>Whether <see cref="Wake"/> has run.</summary>
@@ -487,18 +492,25 @@ public static class GoScheduler
     // was a thread yield). Off a carrier (the scheduler off, a plain thread) it is runtime.Gosched's own thread yield.
     internal static GoTask GoschedTwin()
     {
-        if (t_carrier is not { Mounted: not null } carrier)
+        if (t_carrier is not { Mounted: not null })
         {
             GoschedBackoff.Yield();
             return default;
         }
 
-        carrier.PendingYield = true;
         return YieldPark();
     }
 
-    // A park on a slot nobody wakes: the carrier sees PendingYield and requeues the goroutine itself (RunStep).
-    private static async GoTask YieldPark() => await new GoParkSlot();
+    // A park on a slot nobody wakes, marked a yield: the carrier requeues the goroutine itself (RunStep).
+    private static async GoTask YieldPark() => await YieldSlot();
+
+    // The slot a Gosched yield parks on (its own factory, so a row can read the mark the carrier reads).
+    internal static GoParkSlot YieldSlot() => new() { IsYield = true };
+
+    // What the carrier does with a committed park after the unmount (P3's read): a yield slot's goroutine is requeued, any
+    // other slot is committed. The decision reads the PENDING slot alone, so nothing a failed park attempt left behind can
+    // change it.
+    internal static bool RequeuesOnCommit(GoParkSlot slot) => slot.IsYield;
 
     // Records the park of the goroutine mounted on this carrier. The carrier commits it after the unmount.
     internal static void ParkPending(GoParkSlot slot, Action continuation)
@@ -791,9 +803,6 @@ public static class GoScheduler
         internal Goroutine? Mounted;
         internal GoParkSlot? PendingSlot;
         internal Action? PendingContinuation;
-
-        // The pending park is a Gosched yield (GoschedTwin): requeued at the global queue's tail, not committed to its slot.
-        internal bool PendingYield;
         internal long RunningSince;
         internal long PauseAtStart;
         internal volatile bool Injected;
@@ -1152,16 +1161,21 @@ public static class GoScheduler
                 }
 
                 // A Gosched yield goes to the GLOBAL queue's tail (Go's goschedImpl -> globrunqput), never the run-next
-                // slot, so every goroutine queued before it runs first. A pinned goroutine goes back to its own carrier.
-                if (PendingYield)
+                // slot, so every goroutine queued before it runs first. A pinned goroutine goes back to its own carrier, after a
+                // Thread.Yield, so its thread still gives the processor up as runtime.Gosched did (P3's nit).
+                if (RequeuesOnCommit(slot))
                 {
-                    PendingYield = false;
                     Interlocked.Increment(ref s_goschedYields);
 
                     if (goroutine.m_pin is Carrier pin)
+                    {
+                        Thread.Yield();
                         pin.Deliver(continuation);
+                    }
                     else
+                    {
                         Enqueue(goroutine, continuation);
+                    }
                 }
                 else
                 {
