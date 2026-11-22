@@ -1427,28 +1427,19 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckMixedUntypedConstArithmetic() => CheckTarget("MixedUntypedConstArithmetic");
 
     [TestMethod]
+    public void CheckMnAotGeneric() => CheckTarget("MnAotGeneric");
+
+    [TestMethod]
     public void CheckMnBlockedIO() => CheckTarget("MnBlockedIO");
-
-    [TestMethod]
-    public void CheckMnDeepUnwind() => CheckTarget("MnDeepUnwind");
-
-    [TestMethod]
-    public void CheckMnParkedCallers() => CheckTarget("MnParkedCallers");
-
-    [TestMethod]
-    public void CheckMnParkedMultiLine() => CheckTarget("MnParkedMultiLine");
-
-    [TestMethod]
-    public void CheckMnParkedSameName() => CheckTarget("MnParkedSameName");
-
-    [TestMethod]
-    public void CheckMnFuncPair() => CheckTarget("MnFuncPair");
 
     [TestMethod]
     public void CheckMnBoxAlias() => CheckTarget("MnBoxAlias");
 
     [TestMethod]
-    public void CheckMnAotGeneric() => CheckTarget("MnAotGeneric");
+    public void CheckMnDeepUnwind() => CheckTarget("MnDeepUnwind");
+
+    [TestMethod]
+    public void CheckMnFuncPair() => CheckTarget("MnFuncPair");
 
     [TestMethod]
     public void CheckMnIfaceTwin() => CheckTarget("MnIfaceTwin");
@@ -1458,6 +1449,15 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckMnMixedStorm() => CheckTarget("MnMixedStorm");
+
+    [TestMethod]
+    public void CheckMnParkedCallers() => CheckTarget("MnParkedCallers");
+
+    [TestMethod]
+    public void CheckMnParkedMultiLine() => CheckTarget("MnParkedMultiLine");
+
+    [TestMethod]
+    public void CheckMnParkedSameName() => CheckTarget("MnParkedSameName");
 
     [TestMethod]
     public void CheckMultiFileInitOrder() => CheckTarget("MultiFileInitOrder");
