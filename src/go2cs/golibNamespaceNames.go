@@ -49,6 +49,7 @@ var golibNamespaceTypes = nameSet(
 	"GoFieldAccessAttribute",
 	"GoForeignMemory",
 	"GoFrame",
+	"GoFuncAttribute",
 	"GoFuncCookie",
 	"GoFuncRoot",
 	"GoHandOwnedPackageAttribute",
