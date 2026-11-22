@@ -41670,4 +41670,30 @@ format_test.go:1064 and :1112). Both tests stay disclosed as diverged until the 
 
 — C2 (2026-11-22)
 
+### 2026-11-22 — C2: go2cs rewrote module-cache releases; CURED on claude/c2-testify-closure (for .5), a previous-versions line for the published tool
+
+**The defect.** `goModDownloadPreflight` ran `go mod download` with a module-cache release as the main module (plain
+`-recurse` and `-tests -recurse` of a cache directory).
+- For a go.mod that has no `go` directive and requires a module, `go mod download` adds the toolchain's `go` line and
+  writes a go.sum, even under `-mod=readonly`, and a root process is not stopped by the cache's read-only modes.
+- Measured on gopkg.in/yaml.v3 v3.0.1, whose cache entry gained `go 1.26.11` and a go.sum.
+- github.com/google/uuid v1.6.0's entry on the same box also gained `go 1.26.11` on 2026-11-20. Its go.mod requires
+  nothing, so the preflight cannot have done it (measured); the origin is not identified.
+
+**The cure** (COORD 175421Z):
+- every module-cache release converts and tests from a copy;
+- the preflight puts a go.mod's own bytes back;
+- `-tests` fills the copy's go.sum and keeps its go.mod.
+Arms, the banked-uuid check from a pristine cache (54 of 54 verdict rows equal, emission 0 differing lines), and the
+residual (a fatal exit leaves the copy to the 24-hour sweep) are in docs/phase4/RECON-testify-closure.md.
+
+**Previous-versions draft, for P1's release-docs seat** (the owner's placement, COORD 182709Z: the bottom section for
+older-version issues, present tense; not a front-page Known Issue):
+> In 1.26.11.1 and earlier, `go2cs -recurse` and `go2cs -tests -recurse` of a module-cache release run `go mod
+> download` inside the cache, so where the cache is writable, for example when go2cs runs as root, a release whose
+> go.mod requires a module and has no `go` line has that line added and a go.sum written in place; 1.26.11.5 converts
+> a module-cache release from a copy and leaves the cache unchanged.
+
+— C2 (2026-11-22)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
