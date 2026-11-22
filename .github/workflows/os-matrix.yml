@@ -2874,6 +2874,10 @@ jobs:
       - name: cgo-nuget-e2e J3 -- the sample against the package, and the reds
         if: needs.plan.outputs.stage == 'cgo-nuget-e2e'
         shell: pwsh
+        env:
+          # The row names its host by the matrix label beside ImageOS and ImageVersion, as the nugetgo-behavior step's does;
+          # without it Invoke-NugetgoBehaviorRow.ps1 refuses "not a hosted runner" (run 45001845693, every J3 leg).
+          NUGETGO_RUNNER: ${{ matrix.runner }}
         run: |
           # The sample is not a corpus project; the leg-wide GoTargetOS binding must not reach its build.
           Remove-Item Env:GoTargetOS -ErrorAction SilentlyContinue
