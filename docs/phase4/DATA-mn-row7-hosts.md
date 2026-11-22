@@ -104,3 +104,38 @@ partial writes the same twins, and edits 47 more hand-owned type declarations fo
 
 Interfaces: `TB` (23 members) is the big one. Under the hidden all-members policy, making it partial gives every member
 a twin slot. That is a cost with no parker to justify it today, so interfaces stay as they are unless a member parks.
+
+## Piece 1 seated as ruled (B) (2026-11-22, G)
+
+COORD's ruling: (B). The 7 hosts with a parking member are made `partial`, with all 14 members, internal/sync's
+`hookedHash` included. The guard is **GO2CS0021**, an error: a member that parks in a host (or an enclosing type)
+that is not `partial`, in any assembly built with twins, hand-owned or not. Its predicate is exactly that, with no
+exception list. GenTests' `AMethodOfANonPartialHostIsRefusedByNameAndCalledPlain` now also asserts that GO2CS0021
+names `Loop` and its host `Ticker`, once, and does not name the partial host beside it. docs/DiagnosticCodes.md lists
+the code. (GO2CS0019 is held by the N1 design and GO2CS0020 by the func-value seat, so this takes 0021.)
+
+**What partial bought: 4 twins, not 14.** With each host `partial`, a later refusal in the generator's order applies:
+a twin is written only for a static method, and 10 of the 14 parkers are instance methods (`instance`, outside R1:
+hand-written C# only). Twinned now: testing `TestOptions.Matches` and `TestRunner.WaitForSerialBoundary` (both
+static), runtime `PoolCleanupCadence.AgeForCollection` and `Sysmon.Tick` (and `Sysmon.Loop`, which calls Tick).
+Refused `instance`, still plain: testing's other 9 parkers (in `TestExecution`, `TestRunner`, `ChattyPrinter`), plus
+`hookedHash.GetHashCode`. The guard stays satisfied either way: once a host is partial, its member is no longer
+refused as `host-not-partial`. The record's earlier "14 methods" was the number the guard governs, not a twin count.
+
+**Correction to the plan row above.** The piece 1 gate row proposed "a twinned `-tests` row on a package whose tests
+use `t.Run`". It would prove nothing. A converted test host's entry is plain (go2cs_test_host.cs registers plain
+delegates and calls `TestHost.Run`), so no `-tests` program reaches testing's twins. They are reached only from a
+twinned caller. The gate is replaced by the twinned builds below.
+
+**Gates** (kit `C:\go2cs\scratch\mn2\proto\row7`: p1-gates.sh, p1-ident.sh, p1-mdident.sh, mddump):
+- Twinned builds of every census package on windows, linux and darwin (27 builds): all rc=0, GO2CS0021 = 0, and the
+  report's `host-not-partial` blocked = 0 on every one. Refusals now: testing 133, runtime 49 (were 251 and 56).
+- Made to fail, each restored byte-identical. N1 (COORD's): runtime's `Sysmon` without `partial` fails the twinned
+  runtime build: "'go.runtime_package.Sysmon.Tick()' parks but gets no twin: its host 'Sysmon' is not partial".
+  N2: the guard's report removed reds exactly that GenTests row.
+- Plain build (no twins): runtime, testing and internal/sync built with the edits and with the 7 words reverted. Every
+  type, flag, type attribute, field and method IL hash is identical (39,931, 1,247 and 536 dump lines). Only the
+  module identity moves, as with any source edit (MVID and the PDB id: the PDB records the source's checksums). The
+  dump's own negative: sync plain against sync twinned differs on 1,293 lines.
+- GenTests 764/764; GolibTests Release 3,111 passed (53 skipped), Debug 3,085 passed (79 skipped); the Q1 kit 22
+  builds, 14 twin runs, 0 differing, GO2CS0021 = 0; repoguard rc=0.

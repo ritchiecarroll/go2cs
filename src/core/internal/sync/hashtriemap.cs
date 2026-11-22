@@ -199,7 +199,7 @@ internal sealed class mapStore<K, V> : ConcurrentDictionary<K, valueCell<V>>
 // The comparer an installed hash hook is honored through. Equality is untouched — Go's test replaces
 // keyHash alone — so membership still answers exactly as it did; only bucket placement moves, to
 // wherever the hook says.
-internal sealed class hookedHash<K> : IEqualityComparer<K>
+internal sealed partial class hookedHash<K> : IEqualityComparer<K>
 {
     private readonly Func<@unsafe.Pointer, uintptr, uintptr> hook;
     private readonly uintptr seed;
