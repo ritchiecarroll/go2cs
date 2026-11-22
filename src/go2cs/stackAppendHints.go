@@ -699,7 +699,10 @@ func newStackAppendHarvestCommand(tests bool, target string, options Options) st
 	return stackAppendHarvestCommand{
 		goTool: goTool,
 		args:   args,
-		env:    []string{"GOOS=" + goos, "GOARCH=" + goarch, "GOTOOLCHAIN=local", "CGO_ENABLED=0", "GOFLAGS=", "GOCACHE=" + probeCacheDirOrExit()},
+		// GOFLAGS is emptied, except for the go.mod overlay of a module that ships none (installGoModOverlay): without it
+		// the build of a go.mod-less module fails and the module converts with no stack-append hints (P3's read of cgo
+		// against go.* INC 4, SHOULD 2; the -tests driver had the same gap since it gained the overlay).
+		env: []string{"GOOS=" + goos, "GOARCH=" + goarch, "GOTOOLCHAIN=local", "CGO_ENABLED=0", "GOFLAGS=" + goModOverlayFlag, "GOCACHE=" + probeCacheDirOrExit()},
 	}
 }
 

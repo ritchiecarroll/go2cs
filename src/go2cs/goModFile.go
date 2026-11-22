@@ -80,12 +80,76 @@ func moduleCacheGoMod(dir string) string {
 	return synthesized
 }
 
+// copyModuleCacheRelease copies the module-cache release at dir (a root moduleCacheGoMod answers for) into a new work
+// directory, under the same <escaped path>@<version> leaf, and writes the cache's synthesized go.mod into the COPY. The
+// cache is only read. It returns the copy and the work directory, which the caller removes.
+func copyModuleCacheRelease(dir, synthesized string) (string, string, error) {
+	goMod, err := os.ReadFile(synthesized)
+
+	if err != nil {
+		return "", "", fmt.Errorf("reading the module cache's synthesized go.mod %s: %w", synthesized, err)
+	}
+
+	work, err := os.MkdirTemp("", "go2cs-modcopy-")
+
+	if err != nil {
+		return "", "", err
+	}
+
+	copyDir := filepath.Join(work, filepath.Base(dir))
+
+	err = filepath.WalkDir(dir, func(path string, entry os.DirEntry, walkErr error) error {
+		if walkErr != nil {
+			return walkErr
+		}
+
+		rel, err := filepath.Rel(dir, path)
+
+		if err != nil {
+			return err
+		}
+
+		target := filepath.Join(copyDir, rel)
+
+		if entry.IsDir() {
+			return os.MkdirAll(target, 0o755)
+		}
+
+		if !entry.Type().IsRegular() {
+			return nil
+		}
+
+		data, err := os.ReadFile(path)
+
+		if err != nil {
+			return err
+		}
+
+		return os.WriteFile(target, data, 0o644)
+	})
+
+	if err == nil {
+		err = os.WriteFile(filepath.Join(copyDir, "go.mod"), goMod, 0o644)
+	}
+
+	if err != nil {
+		_ = os.RemoveAll(work)
+		return "", "", fmt.Errorf("copying the module-cache release %s: %w", dir, err)
+	}
+
+	return copyDir, work, nil
+}
+
+// goModOverlayFlag is the -overlay flag installGoModOverlay put in GOFLAGS, or "". A go command that runs with its own
+// GOFLAGS (the stack-append harvest empties it) carries this, or it cannot see a module that ships no go.mod.
+var goModOverlayFlag string
+
 // installGoModOverlay hands the go commands of a -tests -recurse run the same answer goModFile gives
 // in-process: for a module-cache module with no go.mod it writes a `go build -overlay` file mapping
 // <moduleDir>/go.mod to the cache's synthesized go.mod, and appends -overlay=<file> to GOFLAGS so the
 // loader's `go list`, and every `go test` the run starts, read it. It says so on stdout. A module with
 // its own go.mod is untouched (returns ""), as is every other conversion: this runs only from the
-// -tests -recurse driver.
+// -tests -recurse driver. (Plain -recurse converts a copy instead: copyModuleCacheRelease.)
 func installGoModOverlay(moduleDir string, outRoot string) (string, error) {
 	synthesized := moduleCacheGoMod(moduleDir)
 
@@ -125,6 +189,8 @@ func installGoModOverlay(moduleDir string, outRoot string) (string, error) {
 	if err := os.Setenv("GOFLAGS", strings.TrimSpace(goflags+" -overlay="+overlayPath)); err != nil {
 		return "", err
 	}
+
+	goModOverlayFlag = "-overlay=" + overlayPath
 
 	fmt.Printf("go.mod: the module at %s ships none; using the module cache's %s, as go does (overlay %s)\n",
 		moduleDir, synthesized, overlayPath)

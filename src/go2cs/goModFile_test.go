@@ -10,7 +10,9 @@ package main
 
 import (
 	"os"
+	"os/exec"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -26,9 +28,9 @@ func moduleCacheFixture(t *testing.T) (cache string, moduleDir string) {
 	writeModuleFile(t, filepath.Join(moduleDir, "sub", "sub.go"), "package sub\n")
 	writeModuleFile(t, filepath.Join(cache, "cache", "download", "example.com", "!old", "@v", "v0.9.1.mod"), "module example.com/Old\n")
 
-	previous := goModCache
+	previous, previousFlag := goModCache, goModOverlayFlag
 	goModCache = cache
-	t.Cleanup(func() { goModCache = previous })
+	t.Cleanup(func() { goModCache, goModOverlayFlag = previous, previousFlag })
 
 	return cache, moduleDir
 }
@@ -153,4 +155,152 @@ func quoteJSON(s string) string {
 	}
 
 	return string(append(out, '"'))
+}
+
+// PLAIN -recurse over a module-cache release with no go.mod (cgo against go.* INC 4: github.com/mattn/go-pointer
+// v0.0.1 is one, and nugetgo-pack converts each flavor with -recurse=nuget from its cache directory). Only the -tests
+// -recurse driver installed the go.mod overlay, so plain -recurse failed the dependency preflight: "go: no modules
+// specified". Driven through the real binary against an offline fabricated cache (the escaped-path release of
+// moduleCacheFixture), COORD's conditions as arms: the release converts; a near-miss copy of it outside the cache is
+// refused by name; and so is a cache release whose synthesized go.mod is missing from cache/download.
+func TestPlainRecurseConvertsAModuleCacheReleaseWithNoGoMod(t *testing.T) {
+	cache, moduleDir := moduleCacheFixture(t)
+	treeSrc, err := filepath.Abs("..")
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	runIn := func(cwd, dir string) (string, string, error) {
+		output := t.TempDir()
+		cmd := exec.Command(driverBinary(t), "-recurse", "-go2cspath", treeSrc, dir, output)
+		cmd.Dir = cwd
+		cmd.Env = append(os.Environ(), "GOMODCACHE="+cache, "GOFLAGS=", "GOPROXY=off", "GOWORK=off", "GOTOOLCHAIN=local", "GONOSUMDB=*")
+		combined, err := cmd.CombinedOutput()
+
+		return string(combined), output, err
+	}
+
+	run := func(dir string) (string, string, error) { return runIn("", dir) }
+
+	emitted := func(t *testing.T, output string) map[string]string {
+		t.Helper()
+		files := map[string]string{}
+
+		_ = filepath.WalkDir(output, func(path string, entry os.DirEntry, err error) error {
+			if err == nil && !entry.IsDir() && strings.HasSuffix(entry.Name(), ".cs") && entry.Name() != "package_info.cs" {
+				data, _ := os.ReadFile(path)
+				files[entry.Name()] = string(data)
+			}
+
+			return nil
+		})
+
+		return files
+	}
+
+	t.Run("the cache release converts", func(t *testing.T) {
+		combined, output, err := run(moduleDir)
+
+		if err != nil {
+			t.Fatalf("plain -recurse refused the module-cache release with no go.mod: %v\n%s", err, lastLines(combined, 12))
+		}
+
+		var converted []string
+
+		_ = filepath.WalkDir(output, func(path string, entry os.DirEntry, err error) error {
+			if err == nil && !entry.IsDir() && (entry.Name() == "old.cs" || entry.Name() == "sub.cs") {
+				converted = append(converted, entry.Name())
+			}
+
+			return nil
+		})
+
+		if len(converted) != 2 {
+			t.Fatalf("want old.cs and sub.cs converted, got %v\n%s", converted, lastLines(combined, 12))
+		}
+
+		if _, err := os.Stat(filepath.Join(moduleDir, "go.mod")); !os.IsNotExist(err) {
+			t.Fatal("a go.mod was written into the module cache")
+		}
+	})
+
+	// P3's read, MUST 1: the overlay and the refusal take the ABSOLUTE directory, so a relative spelling into a real cache
+	// release converts rather than being refused as "not a module-cache release".
+	t.Run("a relative spelling of the cache release converts", func(t *testing.T) {
+		combined, output, err := runIn(filepath.Join(cache, "example.com"), "!old@v0.9.1")
+
+		if err != nil || len(emitted(t, output)) == 0 {
+			t.Fatalf("a relative spelling of the cache release did not convert (%v):\n%s", err, lastLines(combined, 12))
+		}
+	})
+
+	// P3's read, SHOULD 4: a `+incompatible` release, the most common go.mod-less shape on the proxy. Its synthesized
+	// go.mod is named with the suffix in cache/download.
+	t.Run("a +incompatible cache release converts", func(t *testing.T) {
+		incompatible := filepath.Join(cache, "example.com", "inc@v2.0.0+incompatible")
+		writeModuleFile(t, filepath.Join(incompatible, "inc.go"), "package inc\n\n// Two is two.\nfunc Two() int { return 2 }\n")
+		writeModuleFile(t, filepath.Join(cache, "cache", "download", "example.com", "inc", "@v", "v2.0.0+incompatible.mod"), "module example.com/inc\n")
+		combined, output, err := run(incompatible)
+
+		if err != nil || emitted(t, output)["inc.cs"] == "" {
+			t.Fatalf("the +incompatible release did not convert (%v):\n%s", err, lastLines(combined, 12))
+		}
+	})
+
+	// P3's read, SHOULD 2: the stack-append harvest runs its own go build with GOFLAGS emptied, and so never saw the overlay;
+	// a go.mod-less module then converted with no stack-append hints. The same sources with the same go.mod text, beside
+	// it, are the twin: the two emissions must be byte-equal, and must carry hints at all.
+	t.Run("a go.mod-less release emits what its go.mod twin emits, stack-append hints included", func(t *testing.T) {
+		hint := filepath.Join(cache, "example.com", "hint@v1.0.0")
+		writeModuleFile(t, filepath.Join(hint, "sappend.go"), stackAppendEmissionFixture)
+		writeModuleFile(t, filepath.Join(cache, "cache", "download", "example.com", "hint", "@v", "v1.0.0.mod"), "module example.com/hint\n")
+		twin := filepath.Join(t.TempDir(), "hint")
+		writeModuleFile(t, filepath.Join(twin, "sappend.go"), stackAppendEmissionFixture)
+		writeModuleFile(t, filepath.Join(twin, "go.mod"), "module example.com/hint\n")
+
+		combined, cacheOut, err := run(hint)
+
+		if err != nil {
+			t.Fatalf("the go.mod-less release did not convert (%v):\n%s", err, lastLines(combined, 12))
+		}
+
+		twinCombined, twinOut, err := run(twin)
+
+		if err != nil {
+			t.Fatalf("its go.mod twin did not convert (%v):\n%s", err, lastLines(twinCombined, 12))
+		}
+
+		got, want := emitted(t, cacheOut)["sappend.cs"], emitted(t, twinOut)["sappend.cs"]
+
+		if !strings.Contains(want, "new stackAppend<") {
+			t.Fatalf("the twin carries no stack-append hint, so this arm measures nothing:\n%s", want)
+		}
+
+		if got != want {
+			t.Fatalf("the go.mod-less release's sappend.cs differs from its go.mod twin's (stack-append hints: %d here, %d in the twin)",
+				strings.Count(got, "new stackAppend<"), strings.Count(want, "new stackAppend<"))
+		}
+	})
+
+	refused := func(t *testing.T, dir string) {
+		t.Helper()
+		combined, _, err := run(dir)
+
+		if err == nil || !strings.Contains(combined, "-recurse needs a module") || !strings.Contains(combined, dir) {
+			t.Fatalf("not refused by name (%v):\n%s", err, lastLines(combined, 12))
+		}
+	}
+
+	t.Run("a near-miss copy outside the cache is refused by name", func(t *testing.T) {
+		copyDir := filepath.Join(t.TempDir(), "example.com", "!old@v0.9.1")
+		writeModuleFile(t, filepath.Join(copyDir, "old.go"), "package old\n")
+		refused(t, copyDir)
+	})
+
+	t.Run("a cache release whose synthesized go.mod is missing is refused by name", func(t *testing.T) {
+		missing := filepath.Join(cache, "example.com", "gone@v1.0.0")
+		writeModuleFile(t, filepath.Join(missing, "gone.go"), "package gone\n")
+		refused(t, missing)
+	})
 }

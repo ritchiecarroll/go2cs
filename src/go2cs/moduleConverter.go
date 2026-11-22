@@ -98,6 +98,33 @@ func (m *ModuleConverter) ConvertModule(moduleDir string) error {
 		m.options.mainModuleDir = moduleDir
 	}
 
+	// 0a. A module-cache release that ships no go.mod (github.com/mattn/go-pointer v0.0.1, the cgo against go.* INC 4
+	//     proof; most `+incompatible` releases) converts from a COPY carrying the go.mod the cache synthesized for it,
+	//     the one go itself reads (cache/download/<escaped path>/@v/<version>.mod; read, never written). Not the -tests
+	//     driver's go.mod overlay: go list refuses one beneath GOMODCACHE ("Files beneath GOMODCACHE must not be
+	//     replaced"), where go mod download accepts it. The copy keeps the <escaped path>@<version> leaf and lives in a
+	//     work directory removed at exit, never in the output root nugetgo-pack reads. Anything else without a go.mod is
+	//     refused by name here, not by the preflight's "no modules specified". All on the ABSOLUTE directory, which
+	//     moduleCacheGoMod relates to GOMODCACHE (P3's read of INC 4, MUST 1).
+	if _, ok := goModFile(m.options.mainModuleDir); !ok {
+		return fmt.Errorf("-recurse needs a module: %s has no go.mod, and it is not a module-cache release whose synthesized go.mod the cache holds (%s/cache/download)",
+			m.options.mainModuleDir, goModCacheDir())
+	}
+
+	if synthesized := moduleCacheGoMod(m.options.mainModuleDir); synthesized != "" {
+		copyDir, work, err := copyModuleCacheRelease(m.options.mainModuleDir, synthesized)
+
+		if err != nil {
+			return err
+		}
+
+		defer func() { _ = os.RemoveAll(work) }()
+
+		fmt.Printf("go.mod: the module at %s ships none; converting a copy carrying the module cache's %s, as go reads it (%s, removed at exit)\n",
+			m.options.mainModuleDir, synthesized, copyDir)
+		moduleDir, m.options.mainModuleDir = copyDir, copyDir
+	}
+
 	// 0. Every dependency must already be in the module cache and verify against the module's own
 	//    go.sum: one refusal naming the missing module, not a load warning per importing package.
 	if err := goModDownloadPreflight(moduleDir); err != nil {
