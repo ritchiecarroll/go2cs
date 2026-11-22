@@ -461,10 +461,9 @@ partial class runtime_package
         {
             Volatile.Write(ref s_gomaxprocs, n);
 
-            // procresize's time bookkeeping, verbatim (proc.go): sched.totaltime integrates
-            // gomaxprocs over time, and cpuStats.accumulate reads it and the gomaxprocs global to
-            // compute /cpu/classes/total. There are no Ps to resize, so this is all of procresize
-            // the managed host has.
+            // procresize's time bookkeeping, verbatim (proc.go): sched.totaltime integrates gomaxprocs over time, and
+            // cpuStats.accumulate reads it and the gomaxprocs global to compute /cpu/classes/total. The resize itself is
+            // the M:N scheduler's P count, below (GoScheduler.SetProcs; a remembered value with the scheduler off).
             int64 now = nanotime();
             if (sched.procresizetime != 0)
                 sched.totaltime += (int64)gomaxprocs * (now - sched.procresizetime);
@@ -473,6 +472,7 @@ partial class runtime_package
         }
 
         sched.customGOMAXPROCS = custom;
+        GoScheduler.SetProcs((int)n);
     }
 
     // THE AUTOMATIC UPDATE (W-gmp-e). Go's sysmon, at most once a second, recomputes defaultGOMAXPROCS
@@ -589,8 +589,7 @@ partial class runtime_package
         gomaxprocsUpdateEnable();
     }
 
-    // schedinit's starting value, verbatim: the GOMAXPROCS environment variable when it parses as a
-    // positive number, which marks the setting custom, and Go's default for NumCPU otherwise.
+    // schedinit's starting value, verbatim: GOMAXPROCS when a positive number (custom), else Go's default for NumCPU.
     private static void initialGOMAXPROCS()
     {
         int32 procs;
@@ -612,6 +611,7 @@ partial class runtime_package
             Volatile.Write(ref s_gomaxprocs, procs);
             gomaxprocs = procs;
         }
+        GoScheduler.SetProcs(procs); // the M:N scheduler's P count starts from it, as Go's Ps do
     }
 
     // TEST SEAM (goenvs_impl.cs's pattern): the starting value over a given environment, as a process started

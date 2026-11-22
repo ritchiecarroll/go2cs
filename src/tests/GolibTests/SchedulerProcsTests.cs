@@ -37,9 +37,11 @@ public class SchedulerProcsTests
             Assert.AreEqual(target, runtime_package.GOMAXPROCS(0), "n < 1 reads the setting");
             Assert.AreEqual(target, runtime_package.GOMAXPROCS(-1), "and changes nothing");
             Assert.AreEqual((long)target, Procs(), "the scheduler's P count follows the setting");
+            Assert.AreEqual(Expected(target), GoScheduler.FreePs, "and so do its P tokens, all free with no step running");
 
             Assert.AreEqual(target, runtime_package.GOMAXPROCS(target + 1));
             Assert.AreEqual((long)target + 1, Procs(), "upward too");
+            Assert.AreEqual(Expected(target + 1), GoScheduler.FreePs);
         }
         finally
         {
@@ -47,7 +49,11 @@ public class SchedulerProcsTests
         }
 
         Assert.AreEqual((long)before, Procs(), "and back");
+        Assert.AreEqual(Expected(before), GoScheduler.FreePs, "a P removed takes its free token with it");
     }
+
+    // With the scheduler off no step holds a P, so every token is free; with it on (GO2CS_MN=1) steps may hold some.
+    private static int Expected(nint procs) => GoScheduler.Enabled ? GoScheduler.FreePs : (int)procs;
 
     // The scheduler's own count, from its one-line reading.
     private static long Procs()
