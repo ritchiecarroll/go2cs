@@ -41638,4 +41638,36 @@ discovered, while the test file converted against it.
 
 — C2 (2026-11-22)
 
+### 2026-11-22 — C2: `%p` of a pointer and `unsafe.Pointer` of it print different addresses (OPEN, owner H; COORD's ruling)
+
+**Repro** (go1.26.11, linux/amd64; converted at bf213b3cc9 and run with `-p:GoTargetOS=linux`):
+
+```go
+i := 1
+fmt.Printf("%p\n", &i)
+fmt.Printf("%v\n", unsafe.Pointer(&i))
+fmt.Printf("%#x\n", uintptr(unsafe.Pointer(&i)))
+fmt.Println(fmt.Sprintf("%p", &i) == fmt.Sprintf("%v", unsafe.Pointer(&i)))
+```
+
+| Line | Go | go2cs |
+|---|---|---|
+| `%p` of `&i` | `0x1db928e680f8` | `0x8000000500000000` |
+| `unsafe.Pointer(&i)` | `0x1db928e680f8` | `0x7fda2dd110d8` |
+| `uintptr(unsafe.Pointer(&i))` | `0x1db928e680f8` | `0x7fda2dd110d8` |
+| equal? | `true` | `false` |
+
+**Rooted, by reading.** One Go pointer has two numbers in converted code.
+- The emission hands `%p` the box `Ꮡi`, and `unsafe.Pointer(&i)` becomes `unsafe.Pointer.FromPinnedBox(Ꮡi)`.
+- `%p` prints the box's managed-pointer token. 0x8000000500000000 has bit 63 set, the id in bits 61..32 and
+  displacement 0: the layout `AllocationBase` mints (`src/core/golib/ж.cs:708-709`).
+- `FromPinnedBox` (`src/core/unsafe/unsafe.cs:595-601`) takes the box's `uintptr` conversion. That conversion pins it
+  (`EnsureStableAddress`) and answers the pinned native address.
+- NOT READ: which golib member fmt's `%p` reaches for a box (the reflect pointer path).
+
+**Reach.** go-spew v1.1.1: TestDump 6 cases and TestFormatter 24 compare the two (dump_test.go:756 and :785,
+format_test.go:1064 and :1112). Both tests stay disclosed as diverged until the cure lands (COORD).
+
+— C2 (2026-11-22)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
