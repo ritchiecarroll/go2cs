@@ -39,6 +39,7 @@ RID it ships.
 | `github.com/itchyny/gojq` | v0.12.19 | 1 | `linux/amd64` | [summary](validation/modules/github.com/itchyny/gojq@v0.12.19/MODULE.md) |
 | `github.com/pmezard/go-difflib` | v1.0.0 | 1 | `linux/amd64` | [summary](validation/modules/github.com/pmezard/go-difflib@v1.0.0/MODULE.md) |
 | `github.com/stretchr/objx` | v0.5.2 | 1 | `linux/amd64` | [summary](validation/modules/github.com/stretchr/objx@v0.5.2/MODULE.md) |
+| `github.com/stretchr/objx` | v0.5.3 | 1 | `linux/amd64` | [summary](validation/modules/github.com/stretchr/objx@v0.5.3/MODULE.md) |
 
 **`golang.org/x/sync`:** `semaphore`'s `TestWeightedAcquire` gives each acquire attempt a 10 ms deadline. With
 the tiered JIT off, the first attempt compiles the acquire path at full optimization before it can wait, which
@@ -78,3 +79,11 @@ reading's commit.
 github.com/stretchr/objx@v0.5.2, converter built at claude/c2-testify-closure 816dcd7067 (every module-cache release
 from a copy), -go2cspath at that tree, linux/amd64, go1.26.11, on a module cache whose gopkg.in/yaml.v3 and
 google/uuid entries were re-extracted and `go mod verify`-clean; both pages copied unedited (sha256-equal). -->
+
+**`github.com/stretchr/objx` v0.5.3:** the version testify v1.12.1 requires. Its tests use testify, so its run
+also converts, as dependencies, the testify packages they import. This reading is Go 1.26.11, built on the
+standard library as converted in this repository at the reading's commit.
+<!-- Provenance (2026-11-22, C2): go2cs -tests -recurse -test-action all over the module cache's
+github.com/stretchr/objx@v0.5.3, converter built at claude/c2-objx-bank ea636be70d (every module-cache release from
+a copy), -go2cspath at that tree, linux/amd64, go1.26.11; the cache entry byte-equal to its module zip after the
+run; both pages copied unedited (sha256-equal). -->

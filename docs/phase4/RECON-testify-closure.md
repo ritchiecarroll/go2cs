@@ -78,3 +78,32 @@ pair counted as 2. No row is disclosed: nothing is banked from this table but go
 
 **Restored and verified (COORD's item 4).** yaml.v3@v3.0.1 and uuid@v1.6.0 on this box were deleted and re-extracted
 from cache/download. `go mod verify` in a scratch module requiring both: "all modules verified".
+
+## 2026-11-22 (later) — testify's 11 divergences by root cause, and the v1.12.1 closure measured
+
+Converter at claude/c2-objx-bank ea636be70d, linux/amd64, go1.26.11, from a copy of each module-cache release. The
+root-cause table went to COORD before any cure (posted 20:20Z). In short:
+
+| Rows | Package | Root cause | Established by |
+|--:|---|---|---|
+| 4 | suite | two different subtests' `*testing.T` compare deep-equal (hand-owned `testing.T` holds only a host `TestExecution` reference) | failure text; the reflect member is not read |
+| 3 | mock | a method chain spanning lines is emitted on one C# line, so `runtime.Caller` gives every call in it the first call's line | repro: Go offsets 3 4, C# 3 3 (predicted 2 2: mechanism right, line wrong) |
+| 2 | assert | harness: the subtest name formats `time.Now()`, and the two runs start about 40 s apart; both sides pass | both runs |
+| 1 | mock | a defined func type boxed into an interface reads as its underlying type (`%T`: Go `main.F`, C# `func(string) error`) | repro |
+| 1 | assert | TestEventuallyTrue (100 ms window, 20 ms tick) diverged in 1 of 2 v1.11.1 runs and matched in the v1.12.1 run | not rooted |
+
+**testify v1.12.1** (requires objx v0.5.3 and go.yaml.in/yaml/v3 v3.0.5; vendors spew and difflib under
+`internal/`). go test's vet passes on all 8 tested packages. Predicted before the run: 8 packages, 12-14 diverged,
+no new mechanism. Measured (matched/diverged): root 1/0, assert 588/2, assert/internal/unsafetests 1/0,
+internal/difflib 11/0, internal/spew 7/2, mock 115/4, require 116/0, suite 59/4. Total 898/12: the table's
+mechanisms plus spew's TestDump and TestFormatter on `%p` (the BOARD's pointer-number finding). MET.
+Both sides fail assert's TestDirExists and TestNoDirExists on this box, so they count as matched.
+
+**The closure modules.** objx v0.5.3: 255/0, predicted MET. go.yaml.in/yaml/v3 v3.0.5: converts and builds (MET)
+with 704/0, against a predicted 1 (MISSED). Its tests no longer import gopkg.in/check.v1, so each test and subtest is
+its own row, and the CS0104 cure is not exercised by this release. I assumed v3.0.1's test layout without reading
+v3.0.5's test files. Both cache entries are byte-equal to their zips after the runs, and no copy was left.
+objx v0.5.3 is banked on claude/c2-closure12-bank. yaml v3.0.5 is held: its generated proof page carries
+`{{.}}` in two test names and no raw guard (repoguard's Jekyll/Liquid check names lines 48 and 713), and the
+identifier census refuses a dotted-quad YAML input that five test names carry, since its converted mode admits only
+`docs/validation/current/` pages.
