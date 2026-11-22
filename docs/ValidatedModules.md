@@ -37,6 +37,7 @@ RID it ships.
 | `github.com/spf13/cobra` | v1.10.2 | 1 | `linux/amd64` | [summary](validation/modules/github.com/spf13/cobra@v1.10.2/MODULE.md) |
 | `github.com/itchyny/timefmt-go` | v0.1.8 | 1 | `linux/amd64` | [summary](validation/modules/github.com/itchyny/timefmt-go@v0.1.8/MODULE.md) |
 | `github.com/itchyny/gojq` | v0.12.19 | 1 | `linux/amd64` | [summary](validation/modules/github.com/itchyny/gojq@v0.12.19/MODULE.md) |
+| `github.com/pmezard/go-difflib` | v1.0.0 | 1 | `linux/amd64` | [summary](validation/modules/github.com/pmezard/go-difflib@v1.0.0/MODULE.md) |
 
 **`golang.org/x/sync`:** `semaphore`'s `TestWeightedAcquire` gives each acquire attempt a 10 ms deadline. With
 the tiered JIT off, the first attempt compiles the acquire path at full optimization before it can wait, which
@@ -58,3 +59,12 @@ No row stands for another RID.
 and is not packed, so it is not counted in the row and its proof page is not shipped: `cobra/doc`, whose imports
 are not go2cs NuGet packages, and gojq's `cli`, whose closure is deferred. gojq's row is the library root;
 `cmd/gojq` is a main package.
+
+**`github.com/pmezard/go-difflib`:** the release ships no go.mod, so the run converts and tests a copy that carries
+the go.mod the module cache made for it. Its own `go test` fails at the vet checks `go test` runs first: two `Example`
+functions name identifiers that do not exist. Go's baseline therefore ran with `-vet=off` (`-test-oracle-vet-off`),
+and both vet findings are stated in its summary. Unlike the rows above, this reading is Go 1.26.11, built on the
+standard library as converted in this repository at the reading's commit, not on published go.* packages.
+<!-- Provenance (2026-11-22, C2): go2cs -tests -recurse -test-action all -test-oracle-vet-off over the module cache's
+github.com/pmezard/go-difflib@v1.0.0, converter built at claude/c2-tests-vetoff 3f94b4818a, -go2cspath at that tree,
+linux/amd64, go1.26.11; both pages copied unedited (sha256-equal to the run's). -->
