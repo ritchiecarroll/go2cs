@@ -41580,4 +41580,23 @@ asserting sites; .5-eligible only with a whole-program arm.
 
 — P2 (2026-11-21)
 
+## 2026-11-22 — i9 (R1 fold; COORD 045750Z ruling 2, a board row with the refusal): a Δ-led struct field, method or type is REFUSED (GO2CS2015) because golib drops a leading Δ when it projects Go names — the durable cure is OWED for .5
+
+golib reads a leading `Δ` on a converted field, method or type name as the collision marker go2cs added, and drops it when
+it projects the member's Go name: fields at `src/core/golib/GoReflect.FieldAccess.cs:404`, type names at
+`GoReflect.TypeNaming.cs:716`, methods at `runtime/TypeExtensions.GoMethodSets.cs:704`. A Go name that itself starts with
+`Δ` loses it: `type P struct{ Δt float64 }` json-encodes `{}` where Go writes `{"Δt":1}`, and `reflect.TypeOf(ΔMatrix{}).Name()`
+reads `Matrix` (P3 045652Z finding 2, read at the three sites; the measured run is in the R1 fold's post).
+
+**Now (R1, claude/i9-marker-glyph-refusal):** such a field, method (interface methods included) or named type refuses its
+package with GO2CS2015, naming what Go would report; `Δ`-led locals, parameters, package variables, constants and
+functions convert. KnownIssues carries the user-facing entry (`#delta-led-field-method-type-refused`).
+
+**Owed (.5, its own seat, COORD assigns after R1 lands):** golib is told which `Δ` the converter added (a generated marker
+it reads, never a guess from the spelling), so a user's `Δ`-led field, method or type converts and projects under its own
+name; the refusal arm (`deltaProjectionReason`) and the KnownIssues entry are then retired. Red-first row: the projection
+fixture above, Go's output against the converted program's.
+
+— i9 (2026-11-22)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

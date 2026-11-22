@@ -11,8 +11,12 @@ package main
 import (
 	"fmt"
 	"go/ast"
+	"go/scanner"
 	"go/token"
 	"go/types"
+	"os"
+	"path/filepath"
+	"regexp"
 	"sort"
 	"strings"
 	"unicode"
@@ -29,14 +33,19 @@ import (
 // a marker letter is therefore refused (GO2CS2015), with each identifier named.
 //
 // Δ is the exception. It is also an ordinary letter (`Δt`, `Δx` in numeric code), and such names convert correctly,
-// so a Δ name is refused only when it EQUALS a name go2cs generates in that package: the Δ rename of one of its
-// package-scope names (deltaMintedPackageNames), a fixed generated member (deltaMintedMemberNames), or the shape
-// witness of one of its types (<T>Δshape). Local and parameter names that equal a generated local (xΔ1, initΔ1,
-// ΔpN) are left to C#, which refuses a duplicate or shadowing local outright (CS0128, CS0136, CS0100).
+// so a Δ name is refused only where go2cs or golib would read it as theirs:
+//   - A Δ-LED struct field, method or named type. golib drops one leading Δ when it projects a converted member's Go
+//     name (fields, GoReflect.FieldAccess.cs; type names, GoReflect.TypeNaming.cs; methods,
+//     TypeExtensions.GoMethodSets.cs), so `type P struct{ Δt float64 }` would reflect and json-encode as `t`.
+//     Locals, parameters, package variables, constants and functions are never projected and keep converting.
+//   - A name EQUAL to one go2cs generates in that package (deltaMintedNames): the Δ rename of any name the package
+//     declares, in any scope (a C# local may shadow a static member silently, so a renamed local `slice` -> `Δslice`
+//     would capture a package-level `Δslice`); a fixed generated member (deltaMintedMemberNames); a type's shape
+//     witness (<T>Δshape); and the generated local shapes deltaMintedShapeOf reads (xΔ1, ΔpN, xΔp, Δe1).
 //
 // The set is the union of the converter's markers and the generator's and golib's: markerGlyphRefusal_test.go fails
-// when a non-ASCII letter appears in a converter string literal, a go2cs-gen string literal or a golib identifier
-// without being listed here, and when a listed marker appears in none of them.
+// when a non-ASCII letter appears in a converter string literal or embedded template, a go2cs-gen source or a golib
+// identifier without being listed here, and when a listed marker appears in none of them.
 
 // markerGlyphSource names one emitted name part that carries a marker letter, and where it is written.
 type markerGlyphSource struct {
@@ -130,27 +139,34 @@ func (refusal *markerGlyphRefusal) report() {
 	}
 }
 
-// refuseMarkerGlyphIdentifiers finds every identifier pkg declares that contains a marker letter other than Δ, or a Δ
-// name equal to one go2cs generates in pkg. It returns nil when there is none.
+// refuseMarkerGlyphIdentifiers finds every identifier pkg declares that contains a marker letter other than Δ, a Δ-led
+// field, method or type golib would project under another name, or a Δ name equal to one go2cs generates in pkg. It
+// returns nil when there is none.
 func refuseMarkerGlyphIdentifiers(pkg *packages.Package) *markerGlyphRefusal {
 	if pkg.TypesInfo == nil || pkg.Types == nil {
 		return nil
 	}
 
-	declared := map[*ast.Ident]bool{}
+	// Every identifier the package declares, with its object: the package clauses (no object), and every definition
+	// in every scope, a type switch's symbolic binding included (also no object).
+	declared := map[*ast.Ident]types.Object{}
+	clauses := map[*ast.Ident]bool{}
 
 	for _, file := range pkg.Syntax {
-		declared[file.Name] = true
+		declared[file.Name] = nil
+		clauses[file.Name] = true
 	}
 
-	for ident := range pkg.TypesInfo.Defs {
-		declared[ident] = true
+	for ident, obj := range pkg.TypesInfo.Defs {
+		if ident != nil {
+			declared[ident] = obj
+		}
 	}
 
 	idents := make([]*ast.Ident, 0, len(declared))
 
 	for ident := range declared {
-		if ident != nil && ident.Name != "_" && hasNonASCII(ident.Name) {
+		if ident.Name != "_" && hasNonASCII(ident.Name) {
 			idents = append(idents, ident)
 		}
 	}
@@ -161,11 +177,11 @@ func refuseMarkerGlyphIdentifiers(pkg *packages.Package) *markerGlyphRefusal {
 
 	sort.Slice(idents, func(i, j int) bool { return idents[i].Pos() < idents[j].Pos() })
 
-	minted := deltaMintedPackageNames(pkg)
+	minted, names, typeNames := deltaMintedNames(pkg, declared, clauses)
 	var refusal *markerGlyphRefusal
 
 	for _, ident := range idents {
-		reason := markerGlyphReason(ident.Name, minted, pkg.Types.Scope())
+		reason := markerGlyphReason(ident.Name, declared[ident], minted, names, typeNames)
 
 		if reason == "" {
 			continue
@@ -184,8 +200,8 @@ func refuseMarkerGlyphIdentifiers(pkg *packages.Package) *markerGlyphRefusal {
 	return refusal
 }
 
-// markerGlyphReason says why name is refused, or "" when it is not.
-func markerGlyphReason(name string, minted map[string]string, scope *types.Scope) string {
+// markerGlyphReason says why name, declaring obj, is refused, or "" when it is not.
+func markerGlyphReason(name string, obj types.Object, minted map[string]string, names, typeNames map[string]bool) string {
 	for _, r := range name {
 		if string(r) == ShadowVarMarker {
 			continue
@@ -200,49 +216,221 @@ func markerGlyphReason(name string, minted map[string]string, scope *types.Scope
 		return ""
 	}
 
+	if reason := deltaProjectionReason(name, obj); reason != "" {
+		return reason
+	}
+
 	if what, isMember := deltaMintedMemberNames[name]; isMember {
 		return "is the name go2cs generates for " + what
 	}
 
-	if renamed, isRename := minted[name]; isRename {
-		return fmt.Sprintf("is the name go2cs gives this package's %s when it renames it", renamed)
+	if what, isMinted := minted[name]; isMinted {
+		return "is " + what
 	}
 
-	if base, isWitness := strings.CutSuffix(name, ShapeWitnessSuffix); isWitness {
-		if _, isType := scope.Lookup(base).(*types.TypeName); isType {
-			return fmt.Sprintf("is the name of the shape witness go2cs generates for this package's type %s", base)
+	if base, isWitness := strings.CutSuffix(name, ShapeWitnessSuffix); isWitness && typeNames[base] {
+		return fmt.Sprintf("is the name of the shape witness go2cs generates for this package's type %s", base)
+	}
+
+	return deltaMintedShapeOf(name, names)
+}
+
+// deltaProjectionReason refuses a Δ-led struct field, method or named type: golib drops one leading Δ when it projects
+// a converted member's Go name, reading it as the collision marker go2cs added, so the name Go reports would differ.
+func deltaProjectionReason(name string, obj types.Object) string {
+	if !strings.HasPrefix(name, ShadowVarMarker) {
+		return ""
+	}
+
+	projected := strings.TrimPrefix(name, ShadowVarMarker)
+
+	switch declared := obj.(type) {
+	case *types.Var:
+		if declared.IsField() {
+			return fmt.Sprintf("is a struct field whose name starts with Δ: golib drops a leading Δ when it projects a converted field's Go name, so reflect, encoding/json and fmt would name it %q where Go names it %q", projected, name)
+		}
+	case *types.Func:
+		if signature, ok := declared.Type().(*types.Signature); ok && signature.Recv() != nil && projected != "" {
+			return fmt.Sprintf("is a method whose name starts with Δ: golib drops a leading Δ when it projects a converted method's Go name, so reflect and dynamic interface checks would see %q where Go sees %q", projected, name)
+		}
+	case *types.TypeName:
+		if _, isTypeParam := declared.Type().(*types.TypeParam); !isTypeParam {
+			return fmt.Sprintf("is a type whose name starts with Δ: golib drops a leading Δ when it names a converted type, so reflect and fmt's %%T would print %q where Go prints %q", projected, name)
 		}
 	}
 
 	return ""
 }
 
-// deltaMintedPackageNames maps each Δ name go2cs gives one of pkg's package-scope names to that name, through the
-// converter's own renaming functions: a package-wide collision rename (packageNameCollisions,
-// getCollisionAvoidanceIdentifier), a reserved or `_package` name (getCoreSanitizedIdentifier), and `Main`
-// (getSanitizedFunctionName).
-func deltaMintedPackageNames(pkg *packages.Package) map[string]string {
-	minted := map[string]string{}
+// deltaMintedShapePatterns are the Δ local and parameter names go2cs generates by shape, each read against the
+// package's declared names where the shape carries one. A C# local or parameter may shadow a static member silently,
+// so a package-level name of one of these shapes could be captured inside the function that generates it.
+var (
+	deltaShadowRenamePattern   = regexp.MustCompile(`^(.+)Δ(\d+)$`) // xΔ1, initΔ1 (variableAnalysisOperations.go, visitFuncDecl.go, stackAppendHints.go)
+	deltaParamPattern          = regexp.MustCompile(`^_?Δp\d+$`)    // ΔpN, _ΔpN (constraintOperations.go, convCompositeLit.go, visitFuncDecl.go)
+	deltaLiteralParamPattern   = regexp.MustCompile(`^(.+)Δp$`)     // xΔp (getConstraintProxyLitParamName)
+	deltaInlineLambdaParamPatt = regexp.MustCompile(`^Δe\d+$`)      // Δe0 (inlineArrayEmission.go)
+)
 
-	for name := range packageNameCollisions(pkg) {
-		minted[getCollisionAvoidanceIdentifier(name)] = name
+// deltaMintedShapeOf says which generated local or parameter shape name has, or "" when none.
+func deltaMintedShapeOf(name string, names map[string]bool) string {
+	if match := deltaShadowRenamePattern.FindStringSubmatch(name); match != nil && names[match[1]] {
+		return fmt.Sprintf("is the name go2cs gives a shadowed or repeated %s", match[1])
 	}
 
-	scope := pkg.Types.Scope()
+	if deltaParamPattern.MatchString(name) {
+		return "is a parameter name go2cs generates (ΔpN)"
+	}
 
-	for _, name := range scope.Names() {
-		if renamed := getCoreSanitizedIdentifier(name); renamed != name && strings.HasPrefix(renamed, ShadowVarMarker) {
-			minted[renamed] = name
+	if match := deltaLiteralParamPattern.FindStringSubmatch(name); match != nil && names[match[1]] {
+		return fmt.Sprintf("is the incoming parameter name go2cs generates for a function literal's %s", match[1])
+	}
+
+	if deltaInlineLambdaParamPatt.MatchString(name) {
+		return "is a lambda parameter name go2cs generates (ΔeN)"
+	}
+
+	return ""
+}
+
+// deltaMintedNames maps each Δ name go2cs generates from a name pkg declares, in ANY scope, to what it generates it
+// for, through the converter's own renaming functions: a package-wide collision rename (packageNameCollisions,
+// getCollisionAvoidanceIdentifier), a reserved or `_package` name (getCoreSanitizedIdentifier), `Main`
+// (getSanitizedFunctionName), and a type switch's bound temporary. It also answers every declared name, and every
+// declared type name, for the shape rules.
+func deltaMintedNames(pkg *packages.Package, declared map[*ast.Ident]types.Object, clauses map[*ast.Ident]bool) (minted map[string]string, names, typeNames map[string]bool) {
+	minted = map[string]string{}
+	names = map[string]bool{}
+	typeNames = map[string]bool{}
+
+	for name := range packageNameCollisions(pkg) {
+		minted[getCollisionAvoidanceIdentifier(name)] = fmt.Sprintf("the name go2cs gives this package's %s when it renames it", name)
+	}
+
+	for ident, obj := range declared {
+		name := ident.Name
+
+		if name == "_" || clauses[ident] {
+			continue
 		}
 
-		if _, isFunc := scope.Lookup(name).(*types.Func); isFunc {
-			if renamed := getSanitizedFunctionName(name); renamed != name && strings.HasPrefix(renamed, ShadowVarMarker) {
-				minted[renamed] = name
+		names[name] = true
+
+		if renamed := getCoreSanitizedIdentifier(name); renamed != name && strings.HasPrefix(renamed, ShadowVarMarker) {
+			minted[renamed] = fmt.Sprintf("the name go2cs gives this package's %s when it renames it", name)
+		}
+
+		switch declaredObj := obj.(type) {
+		case nil:
+			// A type switch's symbolic binding: the converter binds its value through a temporary named Δ<binding>.
+			minted[ShadowVarMarker+name] = fmt.Sprintf("the temporary go2cs generates for the type switch binding %s", name)
+		case *types.Func:
+			if signature, ok := declaredObj.Type().(*types.Signature); ok && signature.Recv() == nil {
+				if renamed := getSanitizedFunctionName(name); renamed != name && strings.HasPrefix(renamed, ShadowVarMarker) {
+					minted[renamed] = fmt.Sprintf("the name go2cs gives this package's %s when it renames it", name)
+				}
+			}
+		case *types.TypeName:
+			if _, isTypeParam := declaredObj.Type().(*types.TypeParam); !isTypeParam {
+				typeNames[name] = true
 			}
 		}
 	}
 
-	return minted
+	return minted, names, typeNames
+}
+
+// refuseMarkerGlyphTestFiles refuses a -tests conversion BEFORE its production half is written when one of the
+// package's test files spells an identifier with a marker letter other than Δ. The full check, Δ rules included, needs
+// type information, which the test variants get only inside processTestConversion, after the production half has been
+// written; the marker letters need none, so their part is read here from the test files' identifier tokens. A Go file
+// can only declare such a name or name one another Go package declares, and that package is refused by the same rule.
+// The Δ rules still refuse a test file's name in processTestConversion, after the production half is written; the
+// test output itself is restored on that refusal (snapshotTestOutput).
+func refuseMarkerGlyphTestFiles(inputPath string, options Options) *markerGlyphRefusal {
+	targetParts := strings.Split(options.targetPlatform, "/")
+
+	if len(targetParts) != 2 {
+		return nil
+	}
+
+	absolute, err := filepath.Abs(inputPath)
+
+	if err != nil {
+		return nil
+	}
+
+	loaded, err := packages.Load(&packages.Config{
+		Mode:       packages.NeedName | packages.NeedFiles,
+		Dir:        absolute,
+		Tests:      true,
+		BuildFlags: options.loaderBuildFlags(),
+		Env: converterLoaderEnv(
+			fmt.Sprintf("GOOS=%s", targetParts[0]),
+			fmt.Sprintf("GOARCH=%s", targetParts[1])),
+	}, ".")
+
+	if err != nil {
+		return nil
+	}
+
+	var refusal *markerGlyphRefusal
+	read := map[string]bool{}
+	named := map[string]bool{}
+
+	for _, pkg := range loaded {
+		for _, file := range pkg.GoFiles {
+			if !strings.HasSuffix(file, "_test.go") || read[file] {
+				continue
+			}
+
+			read[file] = true
+			source, err := os.ReadFile(file)
+
+			if err != nil {
+				continue
+			}
+
+			fset := token.NewFileSet()
+			var scan scanner.Scanner
+			scan.Init(fset.AddFile(file, -1, len(source)), source, nil, 0)
+
+			for {
+				pos, tok, lit := scan.Scan()
+
+				if tok == token.EOF {
+					break
+				}
+
+				if tok != token.IDENT || !hasNonASCII(lit) || named[pkg.PkgPath+"."+lit] {
+					continue
+				}
+
+				for _, r := range lit {
+					if string(r) == ShadowVarMarker {
+						continue
+					}
+
+					if source, isMarker := markerGlyphRunes[r]; isMarker {
+						if refusal == nil {
+							refusal = &markerGlyphRefusal{pkgPath: pkg.PkgPath}
+						}
+
+						named[pkg.PkgPath+"."+lit] = true
+						refusal.sites = append(refusal.sites, markerGlyphSite{
+							position: fset.Position(pos),
+							text: fmt.Sprintf("%s.%s contains %c (U+%04X), a letter go2cs writes into the names it generates (%s); rename it",
+								pkg.PkgPath, lit, r, r, source),
+						})
+
+						break
+					}
+				}
+			}
+		}
+	}
+
+	return refusal
 }
 
 func hasNonASCII(name string) bool {

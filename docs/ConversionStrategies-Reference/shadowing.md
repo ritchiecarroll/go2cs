@@ -963,22 +963,39 @@ Without the refusal, that body converts to `@string seedˢ = "x"; any v = seedˢ
 hoisted literal was meant: Go prints `seed x`, and the C# would print `x x`, with no compile error. A user method `func (S) ΔClone() S` would lose the same way to the
 generated instance member of that name.
 
-`Δ` is the exception, because numeric Go code uses it as a letter. A `Δ` name is refused only when it equals a name go2cs
-generates in that package:
-- the `Δ` rename of one of its package-scope names, such as `Δslice` beside a type `slice`, or `ΔMain` beside a func `Main`;
-- a fixed generated member, such as `ΔClone`, `ΔAssign` or `ΔCopy`;
-- the shape witness of one of its types, `TΔshape`.
+`Δ` is the exception, because numeric Go code uses it as a letter. A `Δ` name is refused only where go2cs or golib would
+read it as theirs:
+- **A struct field, method (interface methods included) or named type whose name starts with `Δ`.** golib drops one
+  leading `Δ` when it projects a converted member's Go name, so `type P struct{ Δt float64 }` would reflect and
+  json-encode its field as `t` (unexported, so `{}`) where Go writes `{"Δt":1}`, and `reflect.TypeOf(ΔMatrix{}).Name()`
+  would read `Matrix`. Locals, parameters, package variables, constants and functions are never projected and convert.
+- **A name equal to one go2cs generates in that package:**
+  - the `Δ` rename of any name the package declares, in any scope: a local `slice` is renamed `Δslice`, and C# lets a
+    local shadow a static member silently, so it would capture a package-level `Δslice`;
+  - `ΔMain` beside a func `Main`;
+  - a fixed generated member, such as `ΔCopy` or `ΔAssign`;
+  - the shape witness of one of its types, `TΔshape`;
+  - a generated local or parameter shape: `xΔ1` (a shadowed or repeated `x`), the temporary `Δt` a type switch binds
+    `t` through, `ΔpN`, `xΔp` and `ΔeN`.
 
-`Δt`, `Δx`, a bare `Δ` and a parameter `Δv` convert unchanged. A local or parameter equal to a generated local (`xΔ1`,
-`initΔ1`, `ΔpN`) is left to C#, which refuses a duplicate or shadowing local outright.
+`Δt` beside a plain local `t`, `Δx`, a bare `Δ`, a parameter `Δv`, and `Δ`-led package variables, constants and functions
+convert unchanged.
+
+A `-tests` conversion refuses a marker letter declared only in a test file before the production half is written (it
+reads the test files' identifier tokens; a marker needs no types). A `Δ` rule a test-file name breaks needs type
+information, which the test variants get only after the production half is written; the test output is restored on that
+refusal.
 
 The marker set is the union of the converter's markers and the generator's and golib's. Only `‿` and `⁔` (Pc,
 connector punctuation) are names Go cannot spell.
 
 Guarded by: `TestMarkerGlyphIdentifiersAreRefused` (one site per refused letter class and each `Δ` kind, plus the
-must-convert `Δ` names), `TestMarkerGlyphsAreTheUnionOfEverySideThatWritesThem` (a non-ASCII letter in a converter
-literal, a go2cs-gen literal or a golib identifier that is not listed fails, and a listed letter none of them writes
-fails), `TestDeltaMintedMemberNamesAreEveryFixedDeltaLiteral` (a fixed `Δ` name the converter writes must be listed).
+must-convert `Δ` names), `TestMarkerGlyphInATestFileRefusesTheTestVariant` (a marker only in a test file: both test
+variants refused, the production package not, and the pre-check naming each name once),
+`TestMarkerGlyphsAreTheUnionOfEverySideThatWritesThem` (a non-ASCII letter in a converter literal or embedded template, a
+go2cs-gen source or a golib identifier that is not listed fails, and a listed letter none of them writes fails),
+`TestDeltaMintedMemberNamesAreEveryFixedDeltaLiteral` (a fixed `Δ` name the converter writes must be listed). The
+projection refusal is temporary: [KnownIssues](../KnownIssues.md#delta-led-field-method-type-refused).
 <!-- src/go2cs/markerGlyphRefusal.go. The i9 name-collision census of 2026-11-21 (inbox/COORD/20261121T160231Z-i9.md)
      found these classes latent: names containing a marker in its corpora were one, a ts local spelled `Δ` alone. Its
      probes showed the silent ones: a local beats a same-named field (the seedˢ shape), and an instance member beats an
