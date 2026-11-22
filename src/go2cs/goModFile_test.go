@@ -665,12 +665,15 @@ func dependencyProxy(t *testing.T) string {
 	depRoot := "example.com/dep@v1.0.0/"
 	writeModuleFile(t, filepath.Join(proxy, "example.com", "dep", "@v", "list"), "v1.0.0\n")
 	writeModuleFile(t, filepath.Join(proxy, "example.com", "dep", "@v", "v1.0.0.info"), `{"Version":"v1.0.0","Time":"2026-01-01T00:00:00Z"}`)
-	writeModuleFile(t, filepath.Join(proxy, "example.com", "dep", "@v", "v1.0.0.mod"), "module example.com/dep\n\ngo 1.21\n")
+	// No go line, as gopkg.in/check.v1's synthesized go.mod has none: a dependency that declared a newer Go than the
+	// release's implied 1.16 would make go itself refuse to load the release as a main module ("updates to go.mod
+	// needed"), which go2cs reports as go does.
+	writeModuleFile(t, filepath.Join(proxy, "example.com", "dep", "@v", "v1.0.0.mod"), "module example.com/dep\n")
 
 	var zipped bytes.Buffer
 	archive := zip.NewWriter(&zipped)
 
-	for name, body := range map[string]string{"go.mod": "module example.com/dep\n\ngo 1.21\n", "dep.go": "package dep\n\n// Two is two.\nfunc Two() int { return 2 }\n"} {
+	for name, body := range map[string]string{"go.mod": "module example.com/dep\n", "dep.go": "package dep\n\n// Two is two.\nfunc Two() int { return 2 }\n"} {
 		w, err := archive.Create(depRoot + name)
 
 		if err != nil {

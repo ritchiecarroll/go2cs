@@ -269,6 +269,10 @@ func runModuleTests(moduleDir string, outRoot string, options Options, corpusRel
 		defer func() { result = remapCopiedError(result) }()
 
 		moduleDir = copyDir
+
+		if err := fillModuleCopySums(moduleDir); err != nil {
+			return err
+		}
 	}
 
 	if err := checkModuleGoLine(moduleDir, corpusRelease); err != nil {
