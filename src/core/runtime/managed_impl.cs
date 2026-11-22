@@ -2895,9 +2895,9 @@ partial class runtime_package
     // keeps its methods there as extension methods. Every overload of `outer` there that is itself a Go frame is a
     // candidate (go2cs-gen's `this ж<T>` overloads are not), WITH its receiver or WITHOUT one: package main can hold a
     // method named `init` beside its [GoInit] init(), since go/types puts no init in package scope. Candidates that all
-    // agree answer at once. Otherwise the literal belongs to the candidate whose body starts closest above the literal's
-    // line in the same file, read through this file's PDB reader; without a PDB the answer is null, the name with no
-    // receiver, which is never a wrong one.
+    // agree answer at once. Otherwise the literal belongs to the candidate whose lines (its sequence points, read through
+    // this file's PDB reader) lie nearest the literal's line in the same file; without a PDB the answer is null, the name
+    // with no receiver, which is never a wrong one.
     //
     // Native AOT keeps reflection metadata only for the methods it roots, so a same-named body the literal is NOT in can
     // be the only candidate visible, and its receiver would be wrong. Under AOT (no dynamic code) the answer is null.
@@ -2954,21 +2954,78 @@ partial class runtime_package
         if (file is null || line <= 0)
             return null;
 
+        // Each candidate's own lines, its first to its last sequence point. Not its declaration: a C# local function
+        // declaration emits no sequence point, so a literal declared at the top of its method lies ABOVE that method's
+        // first point (measured: the literal at main.cs:24 in a method whose first point is :26). The literal belongs
+        // to the candidate whose span is nearest: zero inside it, else the gap to its nearer end. A tie answers null.
         string? closest = null;
-        int closestLine = 0;
+        int closestDistance = int.MaxValue;
+        bool tied = false;
 
         foreach ((System.Reflection.MethodInfo candidate, string? receiver) in candidates)
         {
-            (string? candidateFile, int candidateLine) = methodSourcePosition(candidate, 0);
+            (string? candidateFile, int first, int last) = methodSourceSpan(candidate);
 
-            if (candidateFile == file && candidateLine > closestLine && candidateLine <= line)
+            if (candidateFile != file || first <= 0)
+                continue;
+
+            int distance = line < first ? first - line : line > last ? line - last : 0;
+
+            if (distance < closestDistance)
             {
                 closest = receiver;
-                closestLine = candidateLine;
+                closestDistance = distance;
+                tied = false;
+            }
+            else if (distance == closestDistance && receiver != closest)
+            {
+                tied = true;
             }
         }
 
-        return closest;
+        return tied ? null : closest;
+    }
+
+    // A method's source file and the first and last lines of its non-hidden sequence points, through this file's PDB
+    // reader; (null, 0, 0) where there is no PDB or no point.
+    private static (string? file, int first, int last) methodSourceSpan(System.Reflection.MethodBase method)
+    {
+        System.Reflection.Metadata.MetadataReaderProvider? provider = symbolReader(method.Module.Assembly);
+
+        if (provider is null)
+            return (null, 0, 0);
+
+        try
+        {
+            lock (s_pdbLock)
+            {
+                System.Reflection.Metadata.MetadataReader pdb = provider.GetMetadataReader();
+                var definition = System.Reflection.Metadata.Ecma335.MetadataTokens.MethodDefinitionHandle(method.MetadataToken);
+                System.Reflection.Metadata.MethodDebugInformation information = pdb.GetMethodDebugInformation(definition.ToDebugInformationHandle());
+
+                string? file = null;
+                int first = int.MaxValue, last = 0;
+
+                foreach (System.Reflection.Metadata.SequencePoint point in information.GetSequencePoints())
+                {
+                    if (point.IsHidden)
+                        continue;
+
+                    file ??= pdb.GetString(pdb.GetDocument(point.Document).Name);
+                    first = System.Math.Min(first, point.StartLine);
+                    last = System.Math.Max(last, point.EndLine);
+                }
+
+                if (file is not null)
+                    return (file, first, last);
+            }
+        }
+        catch (Exception)
+        {
+            // An unreadable PDB names no position.
+        }
+
+        return (null, 0, 0);
     }
 
     // The method a compiler-generated literal is declared in: a lambda lives on a closure class
