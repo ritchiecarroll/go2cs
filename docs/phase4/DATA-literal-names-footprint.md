@@ -196,3 +196,19 @@ lines; one written on a single line moves that line):
   `package_info.cs`, 0 `.csproj`.
 - **Falsifiers:** any other file, a line-count change, any `package_info.cs`, or a collection left as a collection
   expression whose first bracket opens a literal's attributes.
+
+## Scoring, 2026-11-22: the collection fallback's two-seeded regen
+
+Base converter `e122bcfbb0` (the seat's converter, unchanged since `0b44b1e4f1`) against `361c0cac97`, each emission
+single-target into its own root seeded from this tree, one at a time, every run exit 0.
+
+- **Corpus: met on every flavour.** windows/amd64, linux/amd64, darwin/amd64 and linux/arm64 each move exactly the
+  three predicted files, byte-identical across flavours: `internal/profile/encode.cs` at the 16 predicted lines,
+  `net/http/h2_bundle.cs` at 971 and 977, `testing/slogtest/slogtest.cs` at 37 and 250. 20 lines, no line added or
+  removed, 0 `package_info.cs`, 0 `.csproj`. Applied in `4d6208e7ec`.
+- **Behavioral: met, line for line.** All 1,178 packages exit 0 on both arms. The 14 predicted projects and the nested
+  `LazyPackageVars/tables/tables.cs` move at exactly the predicted lines: 14 goldens by 31 lines, the nested file by
+  2, 0 `package_info.cs`, 0 `.csproj`. Applied in `caa24ab509`; every file equals the seat emission with CRs stripped.
+- **The hosted reading that found the defect** (battery at `e122bcfbb0`): census windows, linux and darwin failed on
+  `internal/profile/encode.cs` alone; solution-build windows on that file plus the seven behavioral projects; linux
+  likewise, plus ten windows-exclusive behavioral projects the seat does not touch (attributed by a control on master).
