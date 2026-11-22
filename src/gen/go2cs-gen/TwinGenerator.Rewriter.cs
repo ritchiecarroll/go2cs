@@ -202,10 +202,12 @@ public sealed partial class TwinGenerator
 
             return twin switch
             {
-                ParenthesizedLambdaExpressionSyntax parenthesized => parenthesized.WithAttributeLists(SingletonList(stamp)),
+                // The stamp joins the literal's own attribute lists, never replaces them: the converter's [GoFunc] name and
+                // no-inlining mark belong to the twin as much as to the plain half.
+                ParenthesizedLambdaExpressionSyntax parenthesized => parenthesized.WithAttributeLists(parenthesized.AttributeLists.Add(stamp)),
                 SimpleLambdaExpressionSyntax simple => ParenthesizedLambdaExpression(simple.AsyncKeyword, ParameterList(SingletonSeparatedList(simple.Parameter)),
                         simple.ArrowToken, simple.Block, simple.ExpressionBody)
-                    .WithAttributeLists(SingletonList(stamp)),
+                    .WithAttributeLists(simple.AttributeLists.Add(stamp)),
                 _ => twin
             };
         }
