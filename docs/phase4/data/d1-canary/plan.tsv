@@ -1,0 +1,96 @@
+rank	package	family	score	linux_s	i7_est_s	decision	note
+1	sync	sync	235	46	58	IN p1 (cum 58)	warm re-measure (first read 272 s cold)
+2	sync/atomic	sync	49	191	241	IN p1 (cum 299)	
+3	internal/sync	sync	24	35	44	IN p1 (cum 343)	
+4	runtime	runtime-adj	1048	1627	2050	out: over 10 i7-min alone	
+5	runtime/pprof	runtime-adj	195	623	785	out: over 10 i7-min alone	
+6	internal/synctest	runtime-adj	178	59	74	IN p1 (cum 417)	
+7	testing	runtime-adj	121	76	96	IN p1 (cum 513)	
+8	os/signal	runtime-adj	88	60	76	IN p1 (cum 589)	
+9	internal/runtime/atomic	runtime-adj	44	30	38	IN p1 (cum 627)	
+10	internal/poll	runtime-adj	24	1844	41	IN p1 (cum 668)	estimate from i9 windows 17 s / 0.415: linux-only cost here
+11	testing/synctest	runtime-adj	17	153	193	out: budget	warm re-measure (first read 176 s cold)
+12	weak	runtime-adj	16	19	24	IN p2 (cum 2700)	warm re-measure (first read 212 s cold)
+13	unique	runtime-adj	9	42	53	out: budget	
+14	runtime/trace	runtime-adj	6	45	57	out: budget	
+15	iter	runtime-adj	4	16	20	out: budget	
+16	internal/runtime/gc/scan	runtime-adj	1	31	39	out: host-dependent red at master here (AVX-512 path), score 1	RED at master on this box
+17	time	time	205	376	474	IN p1 (cum 1142)	
+18	context	context	198	44	55	IN p1 (cum 1197)	
+19	net/http	net/http	1310	350	441	IN p1 (cum 1638)	
+20	net/http/httputil	net/http	124	99	125	IN p1 (cum 1763)	
+21	net/http/httptest	net/http	114	121	152	IN p1 (cum 1915)	warm re-measure (first read 339 s cold)
+22	net/http/pprof	net/http	22	68	86	IN p1 (cum 2001)	
+23	net/http/fcgi	net/http	18	45	57	out: budget	
+24	net/http/cgi	net/http	11	80	101	out: budget	
+25	net/http/internal	net/http	3	23	29	out: budget	
+26	net/http/cookiejar	net/http	1	97	122	out: budget	
+27	os	io	188	147	185	IN p1 (cum 2186)	RED at master on this box
+28	os/exec	io	85	182	229	IN p1 (cum 2415)	
+29	io	io	61	38	48	IN p1 (cum 2463)	
+30	bufio	io	13	44	55	out: budget	
+31	fmt	fmt	3	42	53	IN p1 (cum 2516)	
+32	net	net	665	335	422	out: budget	RED at master on this box
+33	net/rpc	net	48	127	160	IN p1 (cum 2676)	
+34	net/smtp	net	25	41	52	out: budget	
+35	net/rpc/jsonrpc	net	20	44	55	out: budget	
+36	net/textproto	net	3	21	26	out: budget	
+37	crypto/tls	other	252	930	1172	out: over 10 i7-min alone	
+38	database/sql	other	156	67	84	out: budget	
+39	reflect	other	148	122	154	out: budget	
+40	syscall	other	34	61	77	out: budget	
+41	internal/singleflight	other	24	29	37	out: budget	
+42	internal/reflectlite	other	22	32	40	out: budget	
+43	expvar	other	20	43	54	out: budget	warm re-measure (first read 147 s cold)
+44	go/token	other	20	33	42	out: budget	
+45	internal/fuzz	other	16	38	48	out: budget	
+46	math/rand	other	16	38	48	out: budget	
+47	encoding/gob	other	14	65	82	out: budget	
+48	go/types	other	14	155	195	out: budget	
+49	compress/gzip	other	13	230	290	out: budget	read cold after a disk purge
+50	encoding/base64	other	13	23	29	out: budget	
+51	compress/flate	other	12	42	53	out: budget	
+52	go/printer	other	12	31	39	out: budget	
+53	crypto/rsa	other	11	117	147	out: budget	
+54	encoding/json	other	10	141	178	out: budget	
+55	internal/fmtsort	other	9	18	23	out: budget	
+56	math/big	other	9	107	135	out: budget	
+57	mime/quotedprintable	other	9	23	29	out: budget	
+58	strings	other	9	47	59	out: budget	
+59	text/template	other	9	32	40	out: budget	
+60	crypto/internal/fips140cache	other	8	19	24	out: budget	
+61	crypto/internal/fips140test	other	8	194	244	out: budget	
+62	html/template	other	8	250	315	out: budget	read cold after a disk purge
+63	math/rand/v2	other	8	51	64	out: budget	
+64	mime/multipart	other	8	53	67	out: budget	
+65	crypto/fips140	other	7	25	32	out: budget	
+66	log/slog	other	6	62	78	out: budget	
+67	bytes	other	5	44	55	out: budget	
+68	archive/zip	other	4	62	78	out: budget	
+69	crypto/internal/boring/bcache	other	4	18	23	out: budget	
+70	encoding/base32	other	4	21	26	out: budget	
+71	log	other	4	42	53	out: budget	
+72	crypto/subtle	other	3	42	53	out: budget	
+73	encoding/xml	other	3	73	92	out: budget	
+74	hash/maphash	other	3	314	396	out: budget	
+75	mime	other	3	21	26	out: budget	
+76	compress/lzw	other	2	24	30	out: budget	
+77	compress/zlib	other	2	25	32	out: budget	
+78	crypto/internal/sysrand	other	2	31	39	out: budget	
+79	crypto/rand	other	2	35	44	out: budget	
+80	crypto/x509	other	2	240	302	out: budget	RED at master on this box
+81	go/internal/gcimporter	other	2	110	139	out: budget	RED at master on this box
+82	image/png	other	2	229	289	out: budget	read cold after a disk purge
+83	internal/zstd	other	2	31	39	out: budget	
+84	encoding/binary	other	1	21	26	out: budget	
+85	go/internal/srcimporter	other	1	69	87	out: budget	
+86	hash/crc32	other	1	20	25	out: budget	
+87	image/jpeg	other	1	32	40	out: budget	
+88	internal/strconv	other	1	142	179	out: budget	
+89	os/user	other	1	223	281	out: budget	read cold after a disk purge
+90	internal/testenv	other	0	21	26	out: budget	
+91	plugin	other	0	17	21	out: budget	
+92	runtime/metrics	runtime-adj(judgement)	0	32	40	out: budget	
+93	runtime/debug	runtime-adj(judgement)	0	23	29	out: budget	
+94	internal/godebug	other(judgement)	0	70	88	out: budget	
+95	net/http/httptrace	net/http(judgement)	0	75	94	out: budget	

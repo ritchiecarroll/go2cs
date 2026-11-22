@@ -1,0 +1,14 @@
+diff --git a/src/core/golib/channel.cs b/src/core/golib/channel.cs
+index 7ae2cc34e7..20fad5efd5 100644
+--- a/src/core/golib/channel.cs
++++ b/src/core/golib/channel.cs
+@@ -1214,6 +1214,9 @@ internal static class SelectRuntime
+ 
+         LockAll(lockOrder);
+ 
++        // D1 PLANT (throwaway local branch, never pushed): a non-blocking select misses a closed, drained receive case.
++        pollOrder = Array.FindAll(pollOrder, i => ops[i].IsSend || !(ops[i].Core!.Closed && ops[i].Core!.Qcount == 0));
++
+         int committed = PollPassLocked(ops, pollOrder, lockOrder);
+ 
+         if (committed >= 0)

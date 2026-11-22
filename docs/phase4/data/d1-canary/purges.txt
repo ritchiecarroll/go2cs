@@ -1,0 +1,6 @@
+purged all at testing/synctest (avail 4G)
+purged all at net/http/httputil (avail 4G)
+purged all at go/types (avail 4G)
+purged all at crypto/internal/fips140test (avail 4G)
+purged all at go/internal/gcimporter (avail 4G)
+purged all at internal/strconv (avail 4G)

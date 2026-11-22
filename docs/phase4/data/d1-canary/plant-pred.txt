@@ -1,0 +1,11 @@
+D1 plant predictions, written 2026-11-22 before the planted run.
+PLANT: golib SelectRuntime.TryRun (non-blocking select, the default: form) drops every receive case whose
+channel is closed and drained from its poll order, so `select { case <-done: ...; default: }` takes default
+after done is closed. Blocking select, plain receive and close are untouched.
+P1 (confident): context REDS by name. Go tests whose own select-with-default expects a closed Done to be
+    ready: TestWithCancel (x_test.go:118), TestCanceledTimeout (:193), TestWithCancelCanceledParent (:508),
+    TestParentFinishesChild (context_test.go:108), TestLayersCancel/TestLayersTimeout (:493). Also production
+    propagateCancel's select on parent.Done() misses an already-canceled custom parent.
+P2 (uncertain): net/http, net/http/httputil, os/exec may red or slow down (context Done polled with default).
+P3 (expectation): sync, sync/atomic, internal/sync, time stay green (their closes are read by blocking forms).
+P4: the sweep exits non-zero and its failed: list names every red row.

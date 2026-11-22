@@ -1,0 +1,6 @@
+sync	0	46	sync	  PASS  sync                               48 (linux) [44s]
+testing/synctest	0	153	runtime-adj	  PASS  testing/synctest                   18 (linux) [151s]
+weak	0	19	runtime-adj	  PASS  weak                               9 (linux) [18s]
+net/http/httptest	0	121	net/http	  PASS  net/http/httptest                  62 (linux) [119s]
+expvar	0	43	other	  PASS  expvar                             11 (linux) [41s]
+DONE

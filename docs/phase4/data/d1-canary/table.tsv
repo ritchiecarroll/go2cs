@@ -1,0 +1,96 @@
+rank	package	family	score	rc	linux_s	cold	i9_go12610_s	i7_est_from_linux	i7_est_from_i9
+1	sync	sync	235	0	272	cold	26	343	63
+2	sync/atomic	sync	49	0	191		80	241	193
+3	internal/sync	sync	24	0	35		17	44	41
+4	runtime	runtime-adj	1048	0	1627		1227	2050	2957
+5	runtime/pprof	runtime-adj	195	0	623			785	
+6	internal/synctest	runtime-adj	178	0	59			74	
+7	testing	runtime-adj	121	0	76			96	
+8	os/signal	runtime-adj	88	0	60			76	
+9	internal/runtime/atomic	runtime-adj	44	0	30		15	38	36
+10	internal/poll	runtime-adj	24	0	1844		17	2323	41
+11	testing/synctest	runtime-adj	17	0	176		35	222	84
+12	weak	runtime-adj	16	0	212	cold		267	
+13	unique	runtime-adj	9	0	42		32	53	77
+14	runtime/trace	runtime-adj	6	0	45			57	
+15	iter	runtime-adj	4	0	16			20	
+16	internal/runtime/gc/scan	runtime-adj	1	1	31		12	39	29
+17	time	time	205	0	376		194	474	467
+18	context	context	198	0	44			55	
+19	net/http	net/http	1310	0	350			441	
+20	net/http/httputil	net/http	124	0	99			125	
+21	net/http/httptest	net/http	114	0	339	cold		427	
+22	net/http/pprof	net/http	22	0	68			86	
+23	net/http/fcgi	net/http	18	0	45		80	57	193
+24	net/http/cgi	net/http	11	0	80			101	
+25	net/http/internal	net/http	3	0	23			29	
+26	net/http/cookiejar	net/http	1	0	97			122	
+27	os	io	188	1	147			185	
+28	os/exec	io	85	0	182			229	
+29	io	io	61	0	38			48	
+30	bufio	io	13	0	44		20	55	48
+31	fmt	fmt	3	0	42		22	53	53
+32	net	net	665	1	335			422	
+33	net/rpc	net	48	0	127			160	
+34	net/smtp	net	25	0	41			52	
+35	net/rpc/jsonrpc	net	20	0	44			55	
+36	net/textproto	net	3	0	21		15	26	36
+37	crypto/tls	other	252	0	930			1172	
+38	database/sql	other	156	0	67		38	84	92
+39	reflect	other	148	0	122			154	
+40	syscall	other	34	0	61			77	
+41	internal/singleflight	other	24	0	29			37	
+42	internal/reflectlite	other	22	0	32		15	40	36
+43	expvar	other	20	0	147		32	185	77
+44	go/token	other	20	0	33		20	42	48
+45	internal/fuzz	other	16	0	38			48	
+46	math/rand	other	16	0	38			48	
+47	encoding/gob	other	14	0	65			82	
+48	go/types	other	14	0	155			195	
+49	compress/gzip	other	13	0	230	cold		290	
+50	encoding/base64	other	13	0	23			29	
+51	compress/flate	other	12	0	42		25	53	60
+52	go/printer	other	12	0	31		30	39	72
+53	crypto/rsa	other	11	0	117			147	
+54	encoding/json	other	10	0	141			178	
+55	internal/fmtsort	other	9	0	18			23	
+56	math/big	other	9	0	107			135	
+57	mime/quotedprintable	other	9	0	23			29	
+58	strings	other	9	0	47			59	
+59	text/template	other	9	0	32			40	
+60	crypto/internal/fips140cache	other	8	0	19		14	24	34
+61	crypto/internal/fips140test	other	8	0	194			244	
+62	html/template	other	8	0	250	cold	26	315	63
+63	math/rand/v2	other	8	0	51			64	
+64	mime/multipart	other	8	0	53			67	
+65	crypto/fips140	other	7	0	25			32	
+66	log/slog	other	6	0	62			78	
+67	bytes	other	5	0	44			55	
+68	archive/zip	other	4	0	62		44	78	106
+69	crypto/internal/boring/bcache	other	4	0	18			23	
+70	encoding/base32	other	4	0	21			26	
+71	log	other	4	0	42		25	53	60
+72	crypto/subtle	other	3	0	42			53	
+73	encoding/xml	other	3	0	73			92	
+74	hash/maphash	other	3	0	314		155	396	373
+75	mime	other	3	0	21			26	
+76	compress/lzw	other	2	0	24		16	30	39
+77	compress/zlib	other	2	0	25			32	
+78	crypto/internal/sysrand	other	2	0	31		17	39	41
+79	crypto/rand	other	2	0	35		18	44	43
+80	crypto/x509	other	2	1	240			302	
+81	go/internal/gcimporter	other	2	1	110			139	
+82	image/png	other	2	0	229	cold		289	
+83	internal/zstd	other	2	0	31			39	
+84	encoding/binary	other	1	0	21		13	26	31
+85	go/internal/srcimporter	other	1	0	69			87	
+86	hash/crc32	other	1	0	20			25	
+87	image/jpeg	other	1	0	32			40	
+88	internal/strconv	other	1	0	142		23	179	55
+89	os/user	other	1	0	223	cold	18	281	43
+90	internal/testenv	other	0	0	21		23	26	55
+91	plugin	other	0	0	17			21	
+92	runtime/metrics	runtime-adj(judgement)	0	0	32			40	
+93	runtime/debug	runtime-adj(judgement)	0	0	23			29	
+94	internal/godebug	other(judgement)	0	0	70			88	
+95	net/http/httptrace	net/http(judgement)	0	0	75			94	
