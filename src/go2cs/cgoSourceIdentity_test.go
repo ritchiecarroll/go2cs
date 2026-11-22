@@ -143,6 +143,64 @@ func TestACgoRewrittenTreeRecordsItsImportCSource(t *testing.T) {
 		}
 	})
 
+	// GoInputDigest reads a cgo tree as its import "C" source. It read the build-cache intermediate, whose //line names
+	// the source by absolute path, so a go.mod-less release, converted from a fresh copy each run, recorded a different
+	// digest every run, and nugetgo-pack refused its own flavor ("does not reproduce -RecurseRoot"; cgo-nuget-e2e's
+	// first J2, run 44995089337). Two runs, and the release's go.mod twin read from its own cache, record one digest.
+	t.Run("a cgo package's GoInputDigest is one across runs, and equal to its go.mod twin's", func(t *testing.T) {
+		treeSrc, err := filepath.Abs("..")
+
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		digest := func(t *testing.T, cache, dir string) string {
+			t.Helper()
+			output := t.TempDir()
+			cmd := exec.Command(driverBinary(t), "-recurse=nuget", "-cgo=true", "-go2cspath", treeSrc, dir, output)
+			cmd.Env = append(os.Environ(), "GOMODCACHE="+cache, "GOWORK=off", "GOFLAGS=", "CGO_ENABLED=", "GOPROXY=off", "GOTOOLCHAIN=local", "TMPDIR="+t.TempDir())
+			out, err := cmd.CombinedOutput()
+
+			if err != nil {
+				t.Fatalf("%s did not convert: %v\n%s", dir, err, lastLines(string(out), 12))
+			}
+
+			var digests []string
+
+			for path, text := range cgoRecurseWritten(t, output, "", ".csproj") {
+				if match := inputDigestPropertyPattern.FindStringSubmatch(text); match != nil && strings.Contains(path, "digest") {
+					digests = append(digests, match[1])
+				}
+			}
+
+			if len(digests) != 1 || !strings.HasPrefix(digests[0], "sha256-") {
+				t.Fatalf("want one GoInputDigest for the package, have %v\n%s", digests, lastLines(string(out), 12))
+			}
+
+			return digests[0]
+		}
+
+		cache := t.TempDir()
+		release := filepath.Join(cache, "example.com", "digest@v1.0.0")
+		writeModuleFile(t, filepath.Join(release, "cptr.go"), strings.Replace(cgoRecurseCptr, "package cptr", "package digest", 1))
+		writeModuleFile(t, filepath.Join(cache, "cache", "download", "example.com", "digest", "@v", "v1.0.0.mod"), "module example.com/digest\n")
+
+		twinCache := t.TempDir()
+		twin := filepath.Join(twinCache, "example.com", "digest@v1.0.0")
+		writeModuleFile(t, filepath.Join(twin, "cptr.go"), strings.Replace(cgoRecurseCptr, "package cptr", "package digest", 1))
+		writeModuleFile(t, filepath.Join(twin, "go.mod"), "module example.com/digest\n")
+
+		first, second, twinDigest := digest(t, cache, release), digest(t, cache, release), digest(t, twinCache, twin)
+
+		if first != second {
+			t.Errorf("two conversions of the go.mod-less release record two digests: %s, %s", first, second)
+		}
+
+		if first != twinDigest {
+			t.Errorf("the go.mod-less release records %s, its go.mod twin %s", first, twinDigest)
+		}
+	})
+
 	// The go.mod-less release converts from a copy (copyModuleCacheRelease), so this arm also reads the copy's map back
 	// to the cache path through the //line-adjusted name.
 	t.Run("a module-cache release records <module>@<version>/<file>", func(t *testing.T) {
