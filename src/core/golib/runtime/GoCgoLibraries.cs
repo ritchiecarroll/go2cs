@@ -127,15 +127,17 @@ namespace go.golib;
     /// Why linux bindings, which narrow v1 converts against glibc only (the converter's R3 refuses a musl compiler), cannot
     /// run in a process with these libc readings, or <see langword="null"/> when every reading says glibc:
     /// <paramref name="glibcExport"/>, a POSITIVE signal, that gnu_get_libc_version resolves in the process;
-    /// <paramref name="runtimeIdentifier"/>, a second reading, refusing only a musl form (a distribution-built glibc runtime
-    /// reports a distribution RID, ubuntu.24.04-x64, and is glibc); and <paramref name="ldMuslMapped"/>, musl's loader in the
+    /// <paramref name="runtimeIdentifier"/>, a second reading, refusing only a musl form, a "musl" RID or an Alpine
+    /// distribution RID (alpine.3.22-x64; Alpine is musl only), where a distribution-built glibc runtime reports a
+    /// distribution RID too (ubuntu.24.04-x64) and is glibc; and <paramref name="ldMuslMapped"/>, musl's loader in the
     /// process's maps, which gcompat (Alpine's glibc shim, which exports gnu_get_libc_version) cannot hide.
     /// </summary>
     internal static string? LinuxLibcMismatch(string target, bool glibcExport, string runtimeIdentifier, bool ldMuslMapped)
     {
         string? why =
             ldMuslMapped ? "musl's loader (ld-musl) is mapped in this process" :
-            runtimeIdentifier.Contains("musl", StringComparison.OrdinalIgnoreCase) ? $"this runtime reports the musl RID {runtimeIdentifier}" :
+            runtimeIdentifier.Contains("musl", StringComparison.OrdinalIgnoreCase) || runtimeIdentifier.StartsWith("alpine", StringComparison.OrdinalIgnoreCase) ?
+                $"this runtime reports the musl RID {runtimeIdentifier}" :
             !glibcExport ? $"glibc's gnu_get_libc_version does not resolve in this process (RID {runtimeIdentifier})" :
             null;
 

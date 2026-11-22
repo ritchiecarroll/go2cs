@@ -126,7 +126,8 @@ public class CgoLibrariesTests
     {
         (string flag, string name) = SystemLibrary;
 
-        Assert.ThrowsException<PlatformNotSupportedException>(() => GoCgoLibraries.Resolve(name, s_assembly, Table((flag, "someotherlibrary")), "plan9/mips"),
+        // ThrowsException matches the EXACT type: A6's refusal is GoCgoTargetMismatchException, a PlatformNotSupportedException.
+        Assert.ThrowsException<GoCgoTargetMismatchException>(() => GoCgoLibraries.Resolve(name, s_assembly, Table((flag, "someotherlibrary")), "plan9/mips"),
             "an import of an assembly whose bindings were converted for another target must not load here");
     }
 
@@ -216,6 +217,7 @@ public class CgoLibrariesTests
     [DataRow(false, "linux-x64", false, true, "no glibc signal, whatever the RID says")]
     [DataRow(true, "linux-musl-x64", false, true, "a musl RID")]
     [DataRow(true, "alpine.3.22-x64", true, true, "musl's loader mapped, with gcompat exporting glibc's symbol")]
+    [DataRow(true, "alpine.3.22-x64", false, true, "an Alpine RID with gcompat exporting glibc's symbol and the maps unreadable")]
     [DataRow(false, "alpine.3.22-x64", true, true, "Alpine's packaged runtime")]
     public void LinuxBindingsRunOnlyWhereEveryLibcReadingSaysGlibc(bool glibcExport, string rid, bool ldMusl, bool refused, string why)
     {
@@ -239,6 +241,7 @@ public class CgoLibrariesTests
         Assert.IsFalse(go.AdapterBinder.IsBindingFailure(refusal), "A6's refusal itself");
         Assert.IsFalse(go.AdapterBinder.IsBindingFailure(new TypeInitializationException("pkg", refusal)), "A6's refusal from a module initializer");
         Assert.IsFalse(go.AdapterBinder.IsBindingFailure(new TargetInvocationException(new TypeInitializationException("pkg", refusal))), "nested twice");
+        Assert.IsFalse(go.AdapterBinder.IsBindingFailure(new AggregateException(new InvalidOperationException(), new TypeInitializationException("pkg", refusal))), "inside an AggregateException");
         Assert.IsTrue(go.AdapterBinder.IsBindingFailure(new PlatformNotSupportedException("aot")), "an ordinary PlatformNotSupportedException is still a miss");
         Assert.IsTrue(go.AdapterBinder.IsBindingFailure(new TypeInitializationException("pkg", new InvalidOperationException())), "an ordinary static-initializer failure is still a miss");
     }

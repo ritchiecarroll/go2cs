@@ -76,6 +76,8 @@ if ($published) {
     Check 'the published go.lib 1.26.11.1, which predates A6, is refused by name (the natural control)' ($why -and $why.Contains('1.26.11.1') -and $why.Contains('GoCgoRunTimeTargetCheck')) "got '$why'"
 }
 else { Write-Host '  NOT MEASURED: the nuget-1.26.11.1 tag is not in this clone' }
+$commented = $treeTargets -replace '(<GoCgoRunTimeTargetCheck>true</GoCgoRunTimeTargetCheck>)', '<!-- $1 -->'
+Check 'a go.lib.targets whose property is commented out is refused (it is parsed, not matched as text)' ($commented -ne $treeTargets -and $null -ne (Test-NugetgoCgoGoLibFloor -GoLibTargets $commented -Version 'commented')) 'accepted, or the property was not found to comment out'
 Check 'an empty go.lib.targets (none restored) is refused' ($null -ne (Test-NugetgoCgoGoLibFloor -GoLibTargets '' -Version 'none')) 'accepted'
 Check 'the a6 note starts with the "a6: " the push reads' ((Get-NugetgoCgoA6Note -Version '1.26.12.1').StartsWith('a6: ', [StringComparison]::Ordinal)) (Get-NugetgoCgoA6Note -Version '1.26.12.1')
 

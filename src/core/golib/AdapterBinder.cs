@@ -470,13 +470,31 @@ namespace go;
     // its module initializer, which throws it wrapped in a TypeInitializationException; reading that as "does not implement"
     // would let a wrong-target program print the default form and carry on (P3's read of cgo INC 3, MUST 1). The filter
     // returning false rethrows it as it is.
+    // A6's refusal anywhere in the chain: an InnerException, or any of an AggregateException's InnerExceptions.
+    private static bool CarriesCgoTargetMismatch(Exception? ex)
+    {
+        for (; ex is not null; ex = ex.InnerException)
+        {
+            if (ex is global::go.golib.GoCgoTargetMismatchException)
+                return true;
+
+            if (ex is AggregateException aggregate)
+            {
+                foreach (Exception inner in aggregate.InnerExceptions)
+                {
+                    if (CarriesCgoTargetMismatch(inner))
+                        return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
     internal static bool IsBindingFailure(Exception ex)
     {
-        for (Exception? inner = ex; inner is not null; inner = inner.InnerException)
-        {
-            if (inner is global::go.golib.GoCgoTargetMismatchException)
-                return false;
-        }
+        if (CarriesCgoTargetMismatch(ex))
+            return false;
 
         return ex is NotSupportedException
             or PlatformNotSupportedException

@@ -153,7 +153,14 @@ function Test-NugetgoReferenceAssembly([Parameter(Mandatory)][byte[]]$Bytes) {
 # GoCgoLibraries.Register refuses bindings at load in a process they were not converted for. Returns the reason it does
 # not, or $null.
 function Test-NugetgoCgoGoLibFloor([AllowEmptyString()][string]$GoLibTargets, [string]$Version) {
-    if ($GoLibTargets -match '<GoCgoRunTimeTargetCheck>\s*true\s*</GoCgoRunTimeTargetCheck>') { return $null }
+    # Parsed, never matched as text: a commented-out element must not pass (P3's read of INC 3, NIT 4).
+    $declared = $false
+    try {
+        [xml]$xml = $GoLibTargets
+        $declared = @($xml.SelectNodes("//*[local-name()='GoCgoRunTimeTargetCheck']") | Where-Object { $_.InnerText.Trim() -ceq 'true' }).Count -gt 0
+    }
+    catch { $declared = $false }
+    if ($declared) { return $null }
     "the go.lib $Version this pack restores does not declare GoCgoRunTimeTargetCheck: its GoCgoLibraries.Register does not refuse C bindings at load in a process they were not converted for (A6), so a -Cgo pack built on it is never pushed. Pack against a go.* release that carries A6"
 }
 

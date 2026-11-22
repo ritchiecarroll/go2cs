@@ -242,6 +242,12 @@ func TestACgoPackageIsRefusedByNameInAProcessItWasNotConvertedFor(t *testing.T) 
 	docker, err := exec.LookPath("docker")
 
 	if err != nil || exec.Command(docker, "info").Run() != nil {
+		// A leg that requires the musl arms (GO2CS_REQUIRE_DOCKER=1: the hosted linux cgo-e2e legs) fails here rather
+		// than reading green with them unmeasured (P3's read of INC 3, SHOULD 1).
+		if os.Getenv("GO2CS_REQUIRE_DOCKER") == "1" {
+			t.Fatal("docker does not answer, and GO2CS_REQUIRE_DOCKER=1 requires the musl arms")
+		}
+
 		t.Logf("READING NOT MEASURED: docker does not answer here, so the musl arms did not run")
 		return
 	}
@@ -284,6 +290,10 @@ func TestACgoPackageIsRefusedByNameInAProcessItWasNotConvertedFor(t *testing.T) 
 			text := strings.ReplaceAll(string(out), "\r\n", "\n")
 
 			if code, ok := err.(*exec.ExitError); ok && code.ExitCode() == 97 {
+				if os.Getenv("GO2CS_REQUIRE_DOCKER") == "1" {
+					t.Fatalf("%s could not be set up (%s), and GO2CS_REQUIRE_DOCKER=1 requires its arm:\n%s", image.name, image.setup, lastLines(text, 10))
+				}
+
 				t.Skipf("NOT MEASURED: %s could not be set up (%s):\n%s", image.name, image.setup, lastLines(text, 10))
 			}
 
