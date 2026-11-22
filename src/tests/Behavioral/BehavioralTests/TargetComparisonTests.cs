@@ -1483,10 +1483,19 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckMnBoxAlias() => CheckTarget("MnBoxAlias");
 
     [TestMethod]
+    public void CheckMnContended() => CheckTarget("MnContended");
+
+    [TestMethod]
     public void CheckMnDeepUnwind() => CheckTarget("MnDeepUnwind");
 
     [TestMethod]
+    public void CheckMnForeignThread() => CheckTarget("MnForeignThread");
+
+    [TestMethod]
     public void CheckMnFuncPair() => CheckTarget("MnFuncPair");
+
+    [TestMethod]
+    public void CheckMnGenericContended() => CheckTarget("MnGenericContended");
 
     [TestMethod]
     public void CheckMnIfaceTwin() => CheckTarget("MnIfaceTwin");
@@ -1505,6 +1514,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckMnParkedSameName() => CheckTarget("MnParkedSameName");
+
+    [TestMethod]
+    public void CheckMnSpinCap() => CheckTarget("MnSpinCap");
 
     [TestMethod]
     public void CheckMultiFileInitOrder() => CheckTarget("MultiFileInitOrder");

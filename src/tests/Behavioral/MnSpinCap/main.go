@@ -8,6 +8,10 @@
 // hidden twin and runs on the scheduler under GO2CS_MN=1, as the parked goroutines do; without it the
 // spinner would start on a thread of its own and the arm would measure nothing.
 //
+// MN_SPIN_PURE=1 drops the Gosched call, so a spinner yields to nothing: Go still completes, by async
+// preemption. It tells apart two scheduler cures: Gosched as a park point helps only the Gosched loop, while
+// re-armed injection reaches both loops up to its budget.
+//
 // MN_SPIN_EXTRA names how many spinners there are beyond the P count (default 4). MN_SPIN_READING=1
 // prints the wall time and the spin count to stderr, which the output comparison does not read.
 //
@@ -23,6 +27,8 @@ import (
 	"sync/atomic"
 	"time"
 )
+
+var pure = os.Getenv("MN_SPIN_PURE") == "1"
 
 type arm struct {
 	start chan struct{} // closed by main: the release gate
@@ -42,7 +48,9 @@ func (a *arm) spinner() {
 	var n int64
 	for !a.stop.Load() {
 		n++
-		runtime.Gosched()
+		if !pure {
+			runtime.Gosched()
+		}
 	}
 	a.spins.Add(n)
 }
@@ -89,7 +97,7 @@ func main() {
 	fmt.Println("spinners beyond the P count:", spinners > procs)
 	fmt.Println("the sleeper received:", a.got.Load())
 	fmt.Println("every spinner stopped:", a.stop.Load())
-	fmt.Println("the spinners yielded:", a.spins.Load() > 0)
+	fmt.Println("the spinners ran:", a.spins.Load() > 0)
 
 	if os.Getenv("MN_SPIN_READING") == "1" {
 		fmt.Fprintf(os.Stderr, "reading: procs=%d spinners=%d elapsed_ms=%.1f spins=%d\n",

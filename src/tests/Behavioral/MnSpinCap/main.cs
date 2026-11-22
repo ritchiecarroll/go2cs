@@ -12,6 +12,8 @@ using Δio = io_package;
 
 partial class main_package {
 
+internal static bool pure = os.Getenv("MN_SPIN_PURE") == "1"u8;
+
 partial struct arm {
     internal channel<EmptyStruct> start;
     internal channel<nint> wake;
@@ -32,7 +34,9 @@ internal static void spinner(this ж<arm> Ꮡa) {
         int64 n = default;
         while (!Ꮡa.Ꮡstop.Load()) {
             n++;
-            runtime.Gosched();
+            if (!pure) {
+                runtime.Gosched();
+            }
         }
         Ꮡa.Ꮡspins.Add(n);
     }
@@ -99,7 +103,7 @@ internal static partial void main() {
     fmt.Println("spinners beyond the P count:", spinners > procs);
     fmt.Println("the sleeper received:", a.Ꮡgot.Load());
     fmt.Println("every spinner stopped:", a.Ꮡstop.Load());
-    fmt.Println("the spinners yielded:", a.Ꮡspins.Load() > 0);
+    fmt.Println("the spinners ran:", a.Ꮡspins.Load() > 0);
 
     if (os.Getenv("MN_SPIN_READING") == "1"u8) {
         fmt.Fprintf(new os.FileжWriter(os.Stderr), "reading: procs=%d spinners=%d elapsed_ms=%.1f spins=%d\n"u8,
