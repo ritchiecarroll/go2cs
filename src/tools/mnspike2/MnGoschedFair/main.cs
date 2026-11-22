@@ -21,7 +21,11 @@ internal static void pinger(channel<nint> a, channel<nint> b, ж<atomic.Bool> st
 }
 
 internal static void ponger(channel<nint> a, channel<nint> b) {
-    foreach (var v in a) {
+    for (;;) {
+        var (v, ok) = ᐸꟷ(a, ꟷ);
+        if (!ok) {
+            return;
+        }
         b.ᐸꟷ(v);
     }
 }
