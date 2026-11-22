@@ -930,6 +930,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v5
+        # go-test needs the history: its doc-sample and retired-hand-own guards read files at older commits, which a
+        # depth-1 checkout does not have. Every other stage keeps the shallow checkout. The string '0', because a
+        # number 0 is falsy in an expression and would select '1'.
+        with:
+          fetch-depth: ${{ needs.plan.outputs.stage == 'go-test' && '0' || '1' }}
 
       - name: Set up Go (pinned to the corpus release)
         uses: actions/setup-go@v6
@@ -1686,9 +1691,14 @@ jobs:
           New-Item -ItemType Directory -Force -Path $art | Out-Null
           $log = Join-Path $art "go-test-$goos-$rid.log"
 
+          # The repository's pinned .NET tools (.config/dotnet-tools.json: apicompat), which the nugetgo and pushnuget
+          # suites run as `dotnet tool run`; a fresh runner has restored none of them.
+          & dotnet tool restore *>&1 | Tee-Object -FilePath $log
+          if ($LASTEXITCODE -ne 0) { Write-Host "::error::dotnet tool restore failed with exit $LASTEXITCODE"; exit $LASTEXITCODE }
+
           Push-Location 'src/go2cs'
           try {
-              & go test -buildvcs=false -count=1 -timeout 50m ./... *>&1 | Tee-Object -FilePath $log
+              & go test -buildvcs=false -count=1 -timeout 50m ./... *>&1 | Tee-Object -FilePath $log -Append
               $runExit = $LASTEXITCODE
           }
           finally { Pop-Location }
