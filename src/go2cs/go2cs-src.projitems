@@ -31,6 +31,7 @@
     <None Include="$(MSBuildThisFileDirectory)cgoLoadTag_test.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoPhase3_test.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoResiduals_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)cgoTargetCheck_test.go" />
     <None Include="$(MSBuildThisFileDirectory)corpusRelease.go" />
     <None Include="$(MSBuildThisFileDirectory)genericAllocCallerFrames_test.go" />
     <None Include="$(MSBuildThisFileDirectory)anonInterfaceParamPublic_test.go" />
@@ -77,6 +78,8 @@
     <None Include="$(MSBuildThisFileDirectory)callerInliningAnalysis.go" />
     <None Include="$(MSBuildThisFileDirectory)callerSkipWindowFrames_test.go" />
     <None Include="$(MSBuildThisFileDirectory)candidateFixpoint_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)markerGlyphRefusal.go" />
+    <None Include="$(MSBuildThisFileDirectory)markerGlyphRefusal_test.go" />
     <None Include="$(MSBuildThisFileDirectory)nugetgoCgoPackSuite_test.go" />
     <None Include="$(MSBuildThisFileDirectory)paramSkipWindowFrames_test.go" />
     <None Include="$(MSBuildThisFileDirectory)canonicalDiagnostics_test.go" />

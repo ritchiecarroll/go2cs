@@ -313,6 +313,7 @@ var golibBuiltinMembers = nameSet(
 	"ElementAddressUnchecked",
 	"GetGoTypeName",
 	"GoZero",
+	"Goschedꞏtwin",
 	"Implements",
 	"LiteralByteAt",
 	"NativeArrayPointer",

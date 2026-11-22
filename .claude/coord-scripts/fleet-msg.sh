@@ -84,6 +84,8 @@ rc=$?
 # The explicit refspec, not `fetch origin master`: a clone made --single-branch has no refspec that
 # would create refs/remotes/origin/master, and the census would then be read from nothing.
 git -C "$CLONE" fetch --quiet origin "+refs/heads/master:refs/remotes/origin/master" >/dev/null 2>&1; frc=$?
+# The mailbox lives in a private repository that carries no master; the census is the public tree's.
+[ "$frc" -eq 0 ] || { git -C "$CLONE" fetch --quiet https://github.com/ritchiecarroll/go2cs.git "+refs/heads/master:refs/remotes/origin/master" >/dev/null 2>&1; frc=$?; }
 [ "$frc" -eq 0 ] || echo "  note: could not fetch origin master (rc=$frc) -- censusing with the local origin/master" >&2
 for f in coord-identifier-census.sh coord-identifier-patterns.txt coord-identifier-hashes.txt; do
     gshow "$CLONE" "origin/master:.claude/coord-scripts/$f" > "$TMPD/$f" 2>/dev/null; rc=$?

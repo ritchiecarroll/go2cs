@@ -309,7 +309,14 @@ The machinery behind these forms has its own sections: [Source Generators](#sour
 
 Converted C# keeps Go's names wherever it can: `bindAdd` stays `bindAdd`, and `main` stays `main`. The naming rules in this section and the glyphs in the tables are the exceptions. The glyphs mark the
 names and helpers the converter adds. Most are Unicode letters that C# accepts in identifiers and ordinary Go
-code does not use, so they never clash with a Go name.
+code does not use. Go accepts them too, so the converter refuses a package that declares a name spelled with
+one, and they never clash with a Go name. `Δ` is the exception, because numeric Go code uses it as a letter
+(`Δt`): a Go name with `Δ` converts unchanged unless it equals a name the converter adds in that package.
+<!-- The refusal: src/go2cs/markerGlyphRefusal.go (GO2CS2015, docs/DiagnosticCodes.md); every marker letter is
+     Lu/Ll/Lm/Lo, which Go's identifier rule accepts, and only ‿ and ⁔ (Pc) are not. The i9 census of 2026-11-21
+     found two silent misbinds through such names (a local `seedˢ` capturing a hoisted literal, a user `ΔClone`
+     losing to the generated member). -->
+
 
 Go types such as `slice<T>`, `@string` (Go's `string`) and `ж<T>` (Go's pointer) come from golib, the
 runtime library every converted project uses: see [The golib Runtime Library](#the-golib-runtime-library).
@@ -328,7 +335,7 @@ Lookalike code points (python unicodedata): ꓸ U+A4F8 LISU LETTER TONE MYA TI; 
 ᴷ is StackBufferMarker (src/core/go2cs/symbols.json); its declaration and site: src/tests/Behavioral/StackAppendBackingStore/main.cs.target:8 `var xᴷ = new stackAppend<int64>();` and :12 `x = append(xᴷ, x, (int64)i);`, for Go main.go:16 `x = append(x, int64(i))`.
 ᶠ is FuncValueMarker (symbols.json:200-211#c870aa): only an sstring-twinned function has it, because a twinned function has no single method group; an ordinary function value stays a plain method group (GoCallVariations.cs.target:14#ee6601).
 _ΔpN: src/go2cs/visitFuncDecl.go:1445-1459#03b3c7 and :3020-3028#701c82; :60-68#c625cd and :2104#dbca80 (a lone blank parameter stays `_` unless the body uses a `_ =` discard or a select receive-and-discard, `case <-ch:`, because a parameter named `_` captures C#'s discards); in a function declaration, UnnamedParams/main.cs.target:17 `internal static void discard(nint _) {` (Go UnnamedParams/main.go:14 `func discard(int)`) and UnnamedParams/main.cs.target:22 `internal static void bothUnnamed(nint _Δp0, params ꓸꓸꓸstring ʗp) {`; a body-less signature (a function type, or an interface method) takes its discard test from the function being converted or last converted, src/go2cs/visitFuncDecl.go:2105 `dupBlankParams := hasDuplicateBlankParams(parameters) || bodyUsesBlankDiscard(v.currentFuncDecl)`, set at src/go2cs/visitFuncDecl.go:515 `v.currentFuncDecl = funcDecl` and never cleared; a lone `_`: CaptureHoistThroughConversion/main.cs.target:7 `public delegate void Handler(nint _);` (Go CaptureHoistThroughConversion/main.go:23 `type Handler func(int)`, converted before any function); a lone `_Δp0`: BlankIdentifierCollision/main.cs.target:36 `internal delegate stateFn stateFn(nint _Δp0);` (converted after BlankIdentifierCollision/main.go:40 `_, _, _, _ = a, b, c, d`) and AnonymousInterfaces.cs.target:38 `(nint, error) Read(slice<byte> _Δp0);` (lifted from AnonymousInterfaces.go:28 `func takesReader(r interface{ Read([]byte) (int, error) }) {`, whose body has AnonymousInterfaces.go:30 `n, _ := r.Read(buf)`); several: GenericTypeInstantiation.cs.target:45#f1c413.
-Δio: the import alias `io` collides with the child namespace `go.io` (from io/fs) inside `namespace go`: src/go2cs/conversionDriver.go:671#df2c73, src/go2cs/perUnitAliasRenames_test.go:57#b26865.
+Δio: the import alias `io` collides with the child namespace `go.io` (from io/fs) inside `namespace go`: src/go2cs/conversionDriver.go:678#df2c73, src/go2cs/perUnitAliasRenames_test.go:57#b26865.
 `main` -> `Main` until C46 (2026-11-11); since then `main` keeps its name and go2cs-gen's MainEntryGenerator writes `Main`. A Go function named `Main` becomes `ΔMain` (src/go2cs/identifierNaming.go:369-377#95eaaa).
 A member golib adds itself: src/core/golib/array.cs:589 `public array<T> ΔClone()`.
 The ʗp box-forwarder: the [GoRecv] generator's ж-forwarder, src/gen/go2cs-gen/Templates/ReceiverMethod/ReceiverMethodTemplate.cs:86-90#b0ed6c and :144#941a6a.
@@ -3122,7 +3129,7 @@ value embed by its own `new T(nil)`, and a pointer embed as a nil `ж<T>` box ra
 promoted access through it panics as Go does. `new(nil)` calls it. Here `Padded` is a struct of plain fields, so
 it stays `default!`, and `Embedded` embeds it:
 <!-- src/go2cs/visitValueSpec.go:451-456 `structHasPromotedEmbeds … a value embed by its own … new(nil);`; the
-     embed is declared as a field: src/go2cs/visitStructType.go:1041#87d05a (commit 814ff707c7). -->
+     embed is declared as a field: src/go2cs/visitStructType.go:1045#87d05a (commit 814ff707c7). -->
 
 <!-- source: src/tests/Behavioral/UnsafeOperations/UnsafeOperations.go:33-40,44-48,140-141 -->
 ```go
@@ -9268,8 +9275,8 @@ of its own package, is built with `new(nil)`. That generated constructor builds 
 embedded type that itself needs construction (one with an array field) is usable, and an embedded pointer
 holds a nil `ж<T>` box rather than a C# `null`.
 <!-- embedded: src/tests/Behavioral/UnsafeOperations/UnsafeOperations.go:44-48,141 `var e Embedded` -> UnsafeOperations.cs.target:38-42,120 `Embedded e = new(nil);` -->
-<!-- the predicate: src/go2cs/visitStructType.go:1178 `func (v *Visitor) structHasPromotedEmbeds(t types.Type) bool {`,
-     which skips :1224 `// A same-package interface embed renders as a plain interface field — no box.` and a
+<!-- the predicate: src/go2cs/visitStructType.go:1182 `func (v *Visitor) structHasPromotedEmbeds(t types.Type) bool {`,
+     which skips :1228 `// A same-package interface embed renders as a plain interface field — no box.` and a
      builtin or unnamed embed; a cross-package embed always counts. The zero-value emission:
      src/go2cs/visitValueSpec.go:451 `} else if v.structHasPromotedEmbeds(def.Type()) {`. -->
 
@@ -9439,7 +9446,7 @@ assigned, have its address taken, or receive a method call. Because every field 
 struct whose fields are all plain values is laid out exactly as Go lays it, and a pointer that views raw
 memory as the struct (`(*T)(unsafe.Pointer(p))`) reads Go's bytes.
 <!-- Owner ruling (A), 2026-10-16, uniform over value and pointer embeds: the emission is
-src/go2cs/visitStructType.go:1041#87d05a; the generator reads such a field as the embed
+src/go2cs/visitStructType.go:1045#87d05a; the generator reads such a field as the embed
 (src/gen/go2cs-gen/StructDeclarationSyntaxExtensions.cs:27#95fa84, IsPromotingEmbedType) and declares no storage or
 accessor for it (src/gen/go2cs-gen/Templates/StructType/StructTypeTemplate.cs:446#0e4b57, :484#0e4b57). Before (A) the
 converter emitted `partial ref T T { get; }` and the generator stored the value in a private `ʗT` field in a
@@ -10512,7 +10519,7 @@ a func value converted to an interface, a func nested in such a value's paramete
 method. Most registrations are queued when the package loads and run on the registry's first miss. Under
 Native AOT a variadic signature over value types that nothing registered is refused by name, as a Go panic
 that `recover` can catch.
-<!-- golib: src/core/golib/GoReflect.VariadicRegistry.cs:17-32#3ea1de (header), :80-93#5475b8 (closeVariadicTrampoline refuses a value-type family without dynamic code), :95-103#5336d5 (refuseVariadic, builtin.panic naming the family and the registry). go2cs-gen: src/gen/go2cs-gen/EscapeRegistryGenerator.cs:421-456#15e775 (VariadicRegistration), src/gen/go2cs-gen/MethodSet.cs:430-447#01c819 (a variadic method's arms). Lazy queue: src/core/golib/GoDeferredRegistrations.cs (EscapeRegistry; "Native AOT is unchanged"), src/gen/go2cs-gen/DeferredRegistration.cs. Guards: src/tests/Behavioral/ReflectVariadicCall; GolibTests GoReflectBridgeClosureTests ARegisteredVariadicSignatureIsServedByItsCompiledTrampolines, AnUnregisteredValueTypeVariadicIsRefusedByNameWithoutDynamicCode; GenTests EveryEscapingVariadicFuncSignatureIsRegistered, AVariadicArmRegistersItsSignatures; GolibTests DeferredRegistrationTests. -->
+<!-- golib: src/core/golib/GoReflect.VariadicRegistry.cs:17-32#3ea1de (header), :80-93#5475b8 (closeVariadicTrampoline refuses a value-type family without dynamic code), :95-103#5336d5 (refuseVariadic, builtin.panic naming the family and the registry). go2cs-gen: src/gen/go2cs-gen/EscapeRegistryGenerator.cs:421-456#15e775 (VariadicRegistration), src/gen/go2cs-gen/MethodSet.cs:435-452#01c819 (a variadic method's arms). Lazy queue: src/core/golib/GoDeferredRegistrations.cs (EscapeRegistry; "Native AOT is unchanged"), src/gen/go2cs-gen/DeferredRegistration.cs. Guards: src/tests/Behavioral/ReflectVariadicCall; GolibTests GoReflectBridgeClosureTests ARegisteredVariadicSignatureIsServedByItsCompiledTrampolines, AnUnregisteredValueTypeVariadicIsRefusedByNameWithoutDynamicCode; GenTests EveryEscapingVariadicFuncSignatureIsRegistered, AVariadicArmRegistersItsSignatures; GolibTests DeferredRegistrationTests. -->
 
 **Full detail:** [Reference → Manually-Converted Declarations: the reflection bridge](ConversionStrategies-Reference/manual-conversions.md#structfieldtag-is-a-real-read--the-converter-has-always-emitted-the-tag-nothing-had-ever-read-it) — the bridge's rules one by one, from tag reads and type names to assignability, the array-length and channel-direction attributes, and the run-time type constructors.
 
@@ -11573,7 +11580,7 @@ internal/unsafeheader's own tests, which build a slice and a string this way, pa
      (docs/phase4/DATA-rebank-prep-c1-2026-10-22.md, section 2). The page said "on linux and windows"; no
      windows reading at go1.26.10 is recorded (the re-bank owes it,
      docs/PLAN-rebank-go126.md:450 (`E3 retires, and the row rejoins`)), so windows is left off until one is. -->
-<!-- emission: a probe at 8c091fc3a (the field-by-field build of internal/unsafeheader's TestWriteThroughHeader over a local `type sliceHeader struct { Data unsafe.Pointer; Len, Cap int }`) converts to `var hdr = Ꮡalias.Reinterpret<slice<byte>, sliceHeader>();` then `hdr.Data = @unsafe.Pointer.FromPinnedBox(Ꮡ(s, 0)); hdr.Cap = cap(s); hdr.Len = len(s);`. Dispatch: src/core/golib/ж.PointerExtensions.cs:298-304#fe0797 (SliceHeaderBox, StringHeaderBox). The setter: src/gen/go2cs-gen/FieldAccessGenerator.cs:53-59#0b034b (remarks), :349 (`{receiver}.OnHeaderStore();`, the setter, receiver being ʗp or the box a named pointer wrapper holds), :656-672#f10245 (IsHeaderShaped). The commit and limits L1-L3: src/core/golib/ж.SliceHeaderBox.cs:62-80#63bcd1 (remarks), :435#9f58e1 (OnHeaderStore); the string half: src/core/golib/ж.StringHeaderBox.cs:32-59#3cb9c4. Guards: GolibTests HeaderWriteThroughTests; GenTests AHeaderShapedStructGetsGetSetPropertiesWhoseSetterCommitsTheHeader, ANearMissOfTheHeaderShapeKeepsItsRefProperties. Reference: docs/ConversionStrategies-Reference/pointers.md:2818-2827#cc40fb. Platform: see the note above. -->
+<!-- emission: a probe at 8c091fc3a (the field-by-field build of internal/unsafeheader's TestWriteThroughHeader over a local `type sliceHeader struct { Data unsafe.Pointer; Len, Cap int }`) converts to `var hdr = Ꮡalias.Reinterpret<slice<byte>, sliceHeader>();` then `hdr.Data = @unsafe.Pointer.FromPinnedBox(Ꮡ(s, 0)); hdr.Cap = cap(s); hdr.Len = len(s);`. Dispatch: src/core/golib/ж.PointerExtensions.cs:298-304#fe0797 (SliceHeaderBox, StringHeaderBox). The setter: src/gen/go2cs-gen/FieldAccessGenerator.cs:53-59#ffae8d (remarks), :364 (`{receiver}.OnHeaderStore();`, the setter, receiver being ʗp or the box a named pointer wrapper holds), :671-687#f10245 (IsHeaderShaped). The commit and limits L1-L3: src/core/golib/ж.SliceHeaderBox.cs:62-80#63bcd1 (remarks), :435#9f58e1 (OnHeaderStore); the string half: src/core/golib/ж.StringHeaderBox.cs:32-59#3cb9c4. Guards: GolibTests HeaderWriteThroughTests; GenTests AHeaderShapedStructGetsGetSetPropertiesWhoseSetterCommitsTheHeader, ANearMissOfTheHeaderShapeKeepsItsRefProperties. Reference: docs/ConversionStrategies-Reference/pointers.md:2818-2827#cc40fb. Platform: see the note above. -->
 
 **A pointer passed to a system call stays alive until the call returns, as in Go.** Go guarantees this
 for `uintptr(unsafe.Pointer(p))` written directly in a `syscall.Syscall` argument list. The converter

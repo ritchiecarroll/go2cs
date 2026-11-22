@@ -149,6 +149,26 @@ function Test-NugetgoReferenceAssembly([Parameter(Mandatory)][byte[]]$Bytes) {
     finally { $pe.Dispose(); $stream.Dispose() }
 }
 
+# A6's floor (COORD's push-lift ruling (a)): the restored go.lib's go.lib.targets declares GoCgoRunTimeTargetCheck, so its
+# GoCgoLibraries.Register refuses bindings at load in a process they were not converted for. Returns the reason it does
+# not, or $null.
+function Test-NugetgoCgoGoLibFloor([AllowEmptyString()][string]$GoLibTargets, [string]$Version) {
+    # Parsed, never matched as text: a commented-out element must not pass (P3's read of INC 3, NIT 4).
+    $declared = $false
+    try {
+        [xml]$xml = $GoLibTargets
+        $declared = @($xml.SelectNodes("//*[local-name()='GoCgoRunTimeTargetCheck']") | Where-Object { $_.InnerText.Trim() -ceq 'true' }).Count -gt 0
+    }
+    catch { $declared = $false }
+    if ($declared) { return $null }
+    "the go.lib $Version this pack restores does not declare GoCgoRunTimeTargetCheck: its GoCgoLibraries.Register does not refuse C bindings at load in a process they were not converted for (A6), so a -Cgo pack built on it is never pushed. Pack against a go.* release that carries A6"
+}
+
+# The self-description's record that the pack's go.lib floor carries A6; src/_nugetpush.ps1 reads its "a6: " prefix.
+function Get-NugetgoCgoA6Note([Parameter(Mandatory)][string]$Version) {
+    "a6: the go.lib this package was packed against, $Version, the floor of its go.lib range, declares GoCgoRunTimeTargetCheck: its bindings are refused at load in a process they were not converted for"
+}
+
 # R7: every packed RID's assembly has exactly the public surface of lib/'s reference assembly of the same name, read by
 # the pinned ApiCompat (src/tools/pushnuget/GoApiCompat.psm1's engine) in strict mode, so a member one side has and the
 # other lacks is named either way. -Reference maps assembly name -> path; -Runtimes maps RID -> (assembly name -> path).
@@ -196,4 +216,4 @@ function Test-NugetgoCgoSurface {
 }
 
 Export-ModuleMember -Function Get-NugetgoCgoExcludedRids, Get-NugetgoCgoRidFlavors, Get-NugetgoCgoZigVersion, Get-NugetgoCgoTriple,
-    Get-NugetgoCgoCompiler, Test-NugetgoCgoZig, Get-NugetgoCgoStatement, New-NugetgoCgoRidGuard, Test-NugetgoReferenceAssembly, Test-NugetgoCgoSurface
+    Get-NugetgoCgoCompiler, Test-NugetgoCgoZig, Get-NugetgoCgoStatement, New-NugetgoCgoRidGuard, Test-NugetgoReferenceAssembly, Test-NugetgoCgoSurface, Test-NugetgoCgoGoLibFloor, Get-NugetgoCgoA6Note

@@ -35,12 +35,13 @@ public sealed partial class Goroutine
     private bool m_savedGoexitStarted;
     private bool m_savedSplicesRefused;
 
-    // The step this goroutine runs next, while it waits in a carrier's run-next slot (GoScheduler.Ready).
-    internal Action? m_readyStep;
+    // The step this goroutine runs next, while it waits in a carrier's run-next slot (GoScheduler.Ready): an Action, or
+    // the box of the twin that parked (row 6).
+    internal object? m_readyStep;
 
-    internal Action TakeReadyStep()
+    internal object TakeReadyStep()
     {
-        Action step = m_readyStep!;
+        object step = m_readyStep!;
         m_readyStep = null;
         return step;
     }
@@ -77,7 +78,7 @@ public sealed partial class Goroutine
         goroutine.m_context = ExecutionContext.Capture();
         TwinStart start = new(goroutine, twin, bubble);
 
-        GoScheduler.Ready(goroutine, start.Run);
+        GoScheduler.Ready(goroutine, (Action)start.Run);
     }
 
     // M:N (A1). The ExecutionContext of a multiplexed goroutine while no carrier has it mounted.
@@ -129,7 +130,7 @@ public sealed partial class Goroutine
         main.m_context = ExecutionContext.Capture();
         MainTwin run = new(twin, main);
 
-        GoScheduler.Ready(main, run.Run);
+        GoScheduler.Ready(main, (Action)run.Run);
 
         run.Done.Wait();
 
