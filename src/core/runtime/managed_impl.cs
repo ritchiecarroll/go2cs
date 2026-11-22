@@ -4951,9 +4951,7 @@ partial class runtime_package
 
         // A converted //go:linkname or assembly-trampoline forwarder (the converter marks it): Go binds
         // the pull to the target's symbol, so no frame of the puller exists.
-        if (method.IsDefined(typeof(System.Diagnostics.StackTraceHiddenAttribute), inherit: false))
-            return false;
-
+        // PLANT (scratch, never merges): the [StackTraceHidden] skip removed, to make the noinline-through-forwarder arm fail.
         // An async twin (M:N) is a Go frame exactly when the function it was generated from is. A suffix-form method's
         // Go-named forwarder is [StackTraceHidden], and the twin generator gives it a twin of its own (`Nameꞏtwin`, awaiting
         // the body's `Name⁔ꞏtwin`), which runs as its state machine's MoveNext. That MoveNext carries none of the marks
