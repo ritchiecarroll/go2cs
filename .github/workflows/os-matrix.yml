@@ -1436,13 +1436,38 @@ jobs:
               if ($readings.Count) { $outcomes += @('', 'Readings:') + $readings }
           }
 
+          # The expected skips (release review TC-5): on a whole-suite run, the tests this leg reports NotExecuted must
+          # be EXACTLY the ones src/tests/GolibTests/ExpectedSkips/<rid>.txt lists by name. A test newly skipped is a
+          # silent loss of coverage; a listed test that now runs is a stale manifest. Either fails the leg by name. A leg
+          # with no manifest for its RID fails too, rather than reading as checked.
+          $skipCheck = @()
+          if ([string]::IsNullOrWhiteSpace($env:GOLIB_FILTER) -and (Test-Path -LiteralPath $trx)) {
+              $manifest = "src/tests/GolibTests/ExpectedSkips/$rid.txt"
+              $skipped = @($doc.TestRun.Results.UnitTestResult | Where-Object { $_.outcome -eq 'NotExecuted' } | ForEach-Object { "$($_.testName)" } | Sort-Object)
+              if (-not (Test-Path -LiteralPath $manifest)) {
+                  $skipCheck = @("expected skips: NO MANIFEST at $manifest for $rid ($($skipped.Count) skipped)")
+                  Write-Host "::error::GolibTests expected skips: no manifest at $manifest for $rid"
+                  $runExit = 1
+              }
+              else {
+                  $expected = @(Get-Content -LiteralPath $manifest | ForEach-Object { ($_ -replace '#.*$', '').Trim() } | Where-Object { $_ } | Sort-Object)
+                  # Plain membership, not Compare-Object, which refuses an empty side.
+                  $newly = @($skipped | Where-Object { $expected -notcontains $_ } | Sort-Object -Unique)
+                  $nowRun = @($expected | Where-Object { $skipped -notcontains $_ } | Sort-Object -Unique)
+                  $skipCheck = @("expected skips: $($skipped.Count) skipped, $($expected.Count) listed in $manifest; newly skipped $($newly.Count), listed but ran $($nowRun.Count)")
+                  foreach ($t in $newly) { $skipCheck += "  NEWLY SKIPPED $t"; Write-Host "::error::GolibTests on ${rid}: $t is skipped and $manifest does not list it" }
+                  foreach ($t in $nowRun) { $skipCheck += "  LISTED BUT RAN $t"; Write-Host "::error::GolibTests on ${rid}: $manifest lists $t as skipped, and it ran" }
+                  if ($newly.Count -or $nowRun.Count) { $runExit = 1 }
+              }
+          }
+
           $summary = @(
               "## GolibTests -- GOOS=$goos ($rid)"
               ''
               "Filter ``$($env:GOLIB_FILTER)`` -- exit ``$runExit``"
               ''
               '```'
-          ) + @(Get-Content -LiteralPath $log -ErrorAction SilentlyContinue | Where-Object { $_ -match '^(Passed!|Failed!|Total tests|\s+(Passed|Failed|Skipped):)' } | Select-Object -Last 8) + $outcomes + @('```')
+          ) + $skipCheck + @(Get-Content -LiteralPath $log -ErrorAction SilentlyContinue | Where-Object { $_ -match '^(Passed!|Failed!|Total tests|\s+(Passed|Failed|Skipped):)' } | Select-Object -Last 8) + $outcomes + @('```')
 
           Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value $summary
           & ./.github/annotate-summary.ps1 -Title "golib-tests $goos/$rid" -Lines $summary
