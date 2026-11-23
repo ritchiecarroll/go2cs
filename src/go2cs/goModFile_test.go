@@ -18,6 +18,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"sort"
 	"strings"
 	"testing"
@@ -777,11 +778,23 @@ func dependencyProxy(t *testing.T) string {
 }
 
 // primeDependency downloads example.com/dep v1.0.0 from proxy into cache and returns its two go.sum lines.
+//
+// Two host rules, both from train 6's hosted go-test. A file proxy on Windows is file:///C:/..., since Go refuses
+// file://C:/... as "a file:// proxy URL with non-path elements". And -modcacherw: the go command writes the module it
+// extracts read-only, so as any user but root t.TempDir's cleanup cannot remove the cache ("unlinkat ...: permission
+// denied" on linux and darwin). The snapshot these tests compare reads bytes, not modes, so a writable cache only makes
+// a stray write succeed where it is seen.
 func primeDependency(t *testing.T, proxy, cache string) string {
 	t.Helper()
+	proxyURL := "file://" + filepath.ToSlash(proxy)
+
+	if runtime.GOOS == "windows" {
+		proxyURL = "file:///" + filepath.ToSlash(proxy)
+	}
+
 	cmd := exec.Command("go", "mod", "download", "-json", "example.com/dep@v1.0.0")
 	cmd.Dir = t.TempDir()
-	cmd.Env = append(os.Environ(), "GOMODCACHE="+cache, "GOFLAGS=", "GOPROXY=file://"+filepath.ToSlash(proxy), "GOSUMDB=off", "GOWORK=off", "GOTOOLCHAIN=local")
+	cmd.Env = append(os.Environ(), "GOMODCACHE="+cache, "GOFLAGS=-modcacherw", "GOPROXY="+proxyURL, "GOSUMDB=off", "GOWORK=off", "GOTOOLCHAIN=local")
 	out, err := cmd.Output()
 
 	if err != nil {
