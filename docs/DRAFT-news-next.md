@@ -43,7 +43,7 @@
        (inbox/COORD/20261119T211252Z-P1.md; P3's read 20261119T212356Z-P3.md). The rule and the clash list:
        docs/ConversionStrategies.md, "Package main keeps its methods in the package class" (383eeb05c3, b9195efa78);
        the converter 4d22819305 and 3a5109de87; a type a test file adds a method to keeps its holder, a2035f6656. -->
-- **[QUEUED claude/r-r7-slice-array (tip in its READY post)]** **A Go method on a named slice or array type takes the
+- **[LANDED afb01dfb6c]** **A Go method on a named slice or array type takes the
   generated wrapper member of the same name.** A Go method named `Slice`, `Append`, `ToSpan`, `GetEnumerator`,
   `Length`, `Source`, `Capacity`, `Low`, `High`, `Available`, `IsNil`, `Make` or `Wrap` on a named slice or array type
   (or on a type defined over a named array) now runs when Go code calls it; before, the wrapper's own member of that
@@ -57,6 +57,24 @@
        generator over src/core's 4126 generated slice/array/struct wrappers: the only claiming types are hash/fnv's
        sum128 and sum128a (Clone, claimed before this seat). sqlite-cs's modules and typescript-go, by the syntactic
        census: no slice or array type claims a listed name. -->
+- **[QUEUED claude/r-r7-chan-map-num (tip in its READY post)]** **The same holds for named channel, map, numeric,
+  string and pointer types.** A Go method named `Capacity`, `Length`, `IsClosed`, `IsUnbuffered`, `Receive`,
+  `Received`, `Receiving`, `Sending`, `Make` or `GetEnumerator` on a named channel; `Length`, `IsNil`, `Count`, `Make`
+  or `GetEnumerator` on a named map; `CompareTo` on a named number; or `Length`, `CompareTo` or `GetEnumerator` on a
+  named string now runs when Go code calls it, and the type still ranges, selects, sorts and measures as Go's does. A
+  type named like one of its own wrapper's members converts as well, a named pointer type included: `type Value
+  *[3]int`, `type of *point`. The member stays reachable through its golib interface where one declares it, e.g.
+  `((IChannel)ch).Capacity`, and becomes `Δ<name>` otherwise (`ΔIsClosed`); a pointer type named `Value` reads its
+  pointee through `Value‿`. With `-uco=false`, a channel whose type declares one of those methods is sent to and
+  received from with the default mode's operators. Slicing a named pointer to an unnamed array (`type P *[3]int`,
+  `p[1:]`) also converts now. C# source written by hand that called such a member on such a type calls it through
+  the interface instead.
+  <!-- R7 seat 2: GenTests NamedChanMapNumericClaimedMemberTests (red b6733d8a1a); behavioral NamedChanMapNumericShadow;
+       go2cs TestNamedChanMethodModeSpelling; the fix 62f1816922. Census over std at go1.26.11 through go/types, four
+       targets (windows, linux, darwin amd64; linux arm64), 966-968 packages each: the only claiming types are net/http
+       Header, net/textproto MIMEHeader and net/url Values (Add, Set: claimed before this seat), no named pointer or
+       channel carries a listed name, and no site slices a named pointer to an array. -->
+
 
 **What changed.**
 
