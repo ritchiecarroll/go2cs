@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!-- D: every defined func type is a delegate of its own, where it was the underlying Action or Func. Each entry below is a member whose signature names such a type. Announced in the release notes of the release that ships it; GoBreakFloor moves at that release (F = R). -->
+<Suppressions>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:go.go.importer_package.For(go.string,System.Func{go.string,System.ValueTuple{go.io_package.ReadCloser,go.error}})</Target>
+    <Left>lib/net10.0/go.go.importer.dll</Left>
+    <Right>lib/net10.0/go.go.importer.dll</Right>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:go.go.importer_package.ForCompiler(go.ж{go.go.token_package.FileSet},go.string,System.Func{go.string,System.ValueTuple{go.io_package.ReadCloser,go.error}})</Target>
+    <Left>lib/net10.0/go.go.importer.dll</Left>
+    <Right>lib/net10.0/go.go.importer.dll</Right>
+  </Suppression>
+</Suppressions>

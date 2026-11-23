@@ -1,0 +1,34 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!-- D: every defined func type is a delegate of its own, where it was the underlying Action or Func. Each entry below is a member whose signature names such a type. Announced in the release notes of the release that ships it; GoBreakFloor moves at that release (F = R). -->
+<Suppressions>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:go.crypto.internal.cryptotest_package.TestAEAD(go.ж{go.testing_package.T},System.Func{System.ValueTuple{go.crypto.cipher_package.AEAD,go.error}})</Target>
+    <Left>lib/net10.0/go.crypto.internal.cryptotest.dll</Left>
+    <Right>lib/net10.0/go.crypto.internal.cryptotest.dll</Right>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:go.crypto.internal.cryptotest_package.TestBlock(go.ж{go.testing_package.T},System.IntPtr,System.Func{go.slice{System.Byte},System.ValueTuple{go.crypto.cipher_package.Block,go.error}})</Target>
+    <Left>lib/net10.0/go.crypto.internal.cryptotest.dll</Left>
+    <Right>lib/net10.0/go.crypto.internal.cryptotest.dll</Right>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:go.crypto.internal.cryptotest_package.TestBlockMode(go.ж{go.testing_package.T},go.crypto.cipher_package.Block,System.Func{go.crypto.cipher_package.Block,go.slice{System.Byte},go.crypto.cipher_package.BlockMode},System.Func{go.crypto.cipher_package.Block,go.slice{System.Byte},go.crypto.cipher_package.BlockMode})</Target>
+    <Left>lib/net10.0/go.crypto.internal.cryptotest.dll</Left>
+    <Right>lib/net10.0/go.crypto.internal.cryptotest.dll</Right>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:go.crypto.internal.cryptotest_package.TestHash(go.ж{go.testing_package.T},System.Func{go.hash_package.Hash})</Target>
+    <Left>lib/net10.0/go.crypto.internal.cryptotest.dll</Left>
+    <Right>lib/net10.0/go.crypto.internal.cryptotest.dll</Right>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:go.crypto.internal.cryptotest_package.TestStream(go.ж{go.testing_package.T},System.Func{go.crypto.cipher_package.Stream})</Target>
+    <Left>lib/net10.0/go.crypto.internal.cryptotest.dll</Left>
+    <Right>lib/net10.0/go.crypto.internal.cryptotest.dll</Right>
+  </Suppression>
+</Suppressions>

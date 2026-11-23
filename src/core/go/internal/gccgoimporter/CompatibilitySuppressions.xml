@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!-- D: every defined func type is a delegate of its own, where it was the underlying Action or Func. Each entry below is a member whose signature names such a type. Announced in the release notes of the release that ships it; GoBreakFloor moves at that release (F = R). -->
+<Suppressions>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:go.go.internal.gccgoimporter_package.GetImporter(go.slice{go.string},go.map{go.ж{go.go.types_package.Package},go.go.internal.gccgoimporter_package.InitData})</Target>
+    <Left>lib/net10.0/go.go.internal.gccgoimporter.dll</Left>
+    <Right>lib/net10.0/go.go.internal.gccgoimporter.dll</Right>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:go.go.internal.gccgoimporterᴛGccgoInstallation.GetImporter(go.go.internal.gccgoimporter_package.GccgoInstallation@,go.slice{go.string},go.map{go.ж{go.go.types_package.Package},go.go.internal.gccgoimporter_package.InitData})</Target>
+    <Left>lib/net10.0/go.go.internal.gccgoimporter.dll</Left>
+    <Right>lib/net10.0/go.go.internal.gccgoimporter.dll</Right>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:go.go.internal.gccgoimporterᴛGccgoInstallation.GetImporter(go.ж{go.go.internal.gccgoimporter_package.GccgoInstallation},go.slice{go.string},go.map{go.ж{go.go.types_package.Package},go.go.internal.gccgoimporter_package.InitData})</Target>
+    <Left>lib/net10.0/go.go.internal.gccgoimporter.dll</Left>
+    <Right>lib/net10.0/go.go.internal.gccgoimporter.dll</Right>
+  </Suppression>
+</Suppressions>

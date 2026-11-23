@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!-- D: every defined func type is a delegate of its own, where it was the underlying Action or Func. Each entry below is a member whose signature names such a type. Announced in the release notes of the release that ships it; GoBreakFloor moves at that release (F = R). -->
+<Suppressions>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:go.internal.trace.traceviewer_package.MMUHandlerFunc(go.slice{go.internal.trace.traceviewer_package.Range},System.Func{go.internal.trace_package.UtilFlags,System.ValueTuple{go.slice{go.slice{go.internal.trace_package.MutatorUtil}},go.error}})</Target>
+    <Left>lib/net10.0/go.internal.trace.traceviewer.dll</Left>
+    <Right>lib/net10.0/go.internal.trace.traceviewer.dll</Right>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:go.internal.trace.traceviewer_package.SVGProfileHandlerFunc(System.Func{go.ж{go.net.http_package.Request},System.ValueTuple{go.slice{go.internal.trace.traceviewer_package.ProfileRecord},go.error}})</Target>
+    <Left>lib/net10.0/go.internal.trace.traceviewer.dll</Left>
+    <Right>lib/net10.0/go.internal.trace.traceviewer.dll</Right>
+  </Suppression>
+</Suppressions>
