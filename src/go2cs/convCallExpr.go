@@ -2742,7 +2742,22 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 				// methodGroupDelegateType) even though go/types keeps it structural. Method
 				// groups and func literals themselves convert natively and are excluded by both
 				// gates.
-				if _, paramIsSig := types.Unalias(paramType).(*types.Signature); paramIsSig && paramHasArg && !typeContainsTypeParams(paramType) {
+				//
+				// A generic callee's structural parameter can name its type parameters inside the signature
+				// (`count[T any](p func(T) bool, v T)`), which typeContainsTypeParams does not look into. The wrap
+				// then targets the parameter as this call instantiates it (`func(int) bool`), from which C# also
+				// infers T; a parameter still open after that keeps the value as it is.
+				structuralParamType := paramType
+
+				if signatureMentionsTypeParams(paramType) {
+					structuralParamType = v.instantiatedParamType(callExpr, i)
+
+					if structuralParamType == nil || signatureMentionsTypeParams(structuralParamType) {
+						structuralParamType = nil
+					}
+				}
+
+				if _, paramIsSig := types.Unalias(paramType).(*types.Signature); paramIsSig && paramHasArg && structuralParamType != nil && !typeContainsTypeParams(paramType) {
 					if argType := v.getType(callExpr.Args[i], false); argType != nil {
 						argRendersNamedDelegate := false
 
@@ -2758,7 +2773,7 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 						}
 
 						if argRendersNamedDelegate {
-							v.recordDelegateArgWrap(callExprContext, i, paramType, callExpr.Args[i], argType)
+							v.recordDelegateArgWrap(callExprContext, i, structuralParamType, callExpr.Args[i], argType)
 						}
 					}
 				}
@@ -6593,6 +6608,30 @@ func typeContainsTypeParams(t types.Type) bool {
 				if typeContainsTypeParams(args.At(i)) {
 					return true
 				}
+			}
+		}
+	}
+
+	return false
+}
+
+// signatureMentionsTypeParams reports whether t is a func signature any of whose parameters or results is, or
+// contains, an unbound type parameter, looking into nested signatures as well.
+func signatureMentionsTypeParams(t types.Type) bool {
+	sig, ok := types.Unalias(t).(*types.Signature)
+
+	if !ok {
+		return false
+	}
+
+	for _, tuple := range []*types.Tuple{sig.Params(), sig.Results()} {
+		if tuple == nil {
+			continue
+		}
+
+		for i := range tuple.Len() {
+			if element := tuple.At(i).Type(); typeContainsTypeParams(element) || signatureMentionsTypeParams(element) {
+				return true
 			}
 		}
 	}

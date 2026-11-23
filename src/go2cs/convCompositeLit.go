@@ -685,7 +685,7 @@ func (v *Visitor) convCompositeLitAs(compositeLit *ast.CompositeLit, elidedType 
 				if _, isSig := named.Underlying().(*types.Signature); isSig {
 					wrapDelegate = !types.Identical(types.Unalias(valueType), types.Unalias(fieldVar.Type()))
 				}
-			} else if _, isSig := types.Unalias(fieldVar.Type()).(*types.Signature); isSig && !typeContainsTypeParams(fieldVar.Type()) {
+			} else if _, isSig := types.Unalias(fieldVar.Type()).(*types.Signature); isSig && !typeContainsTypeParams(fieldVar.Type()) && !signatureMentionsTypeParams(fieldVar.Type()) {
 				// The MIRROR: STRUCTURAL func-type field ← value rendering as a named delegate.
 				// Same two named-rendering shapes as the call-site rule (convCallExpr): a value
 				// whose GO type is a named func type, and a `:=` local
@@ -1377,7 +1377,7 @@ func (v *Visitor) recordFuncElementConversions(elts []ast.Expr, elementType type
 		return
 	}
 
-	if _, isSig := elementType.Underlying().(*types.Signature); !isSig || typeContainsTypeParams(elementType) {
+	if _, isSig := elementType.Underlying().(*types.Signature); !isSig || typeContainsTypeParams(elementType) || signatureMentionsTypeParams(elementType) {
 		return
 	}
 
@@ -1388,7 +1388,7 @@ func (v *Visitor) recordFuncElementConversions(elts []ast.Expr, elementType type
 
 		eltType := v.info.TypeOf(elt)
 
-		if eltType == nil || types.Identical(eltType, elementType) || typeContainsTypeParams(eltType) {
+		if eltType == nil || types.Identical(eltType, elementType) || typeContainsTypeParams(eltType) || signatureMentionsTypeParams(eltType) {
 			continue
 		}
 

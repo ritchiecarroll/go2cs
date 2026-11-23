@@ -120,7 +120,17 @@ func (v *Visitor) recordDelegateArgWrap(context *CallExprContext, index int, tar
 // golib's NilSafeDelegateConversion (a nil value stays nil, as in Go). Every other value is returned as it was: the
 // same Go type, a non-func slot or value (untyped nil included), a func literal or method group (each converts to
 // the target delegate natively), or two types that render as one delegate.
+//
+// targetExpr, when the slot is a variable (an assignment's left side), is that variable: a `:=` local declared from a
+// method group renders as the package's matching named delegate though Go types it with the unnamed signature
+// (`state := stateA`, then `state = state(m)` with `type stateFn func(*machine) stateFn`), so what it renders as, not
+// its Go type, decides whether the value needs converting.
 func (v *Visitor) funcValueForSlot(target types.Type, expr ast.Expr, rendered string) string {
+	return v.funcValueForTarget(nil, target, expr, rendered)
+}
+
+// funcValueForTarget is funcValueForSlot for a slot that is a variable, targetExpr.
+func (v *Visitor) funcValueForTarget(targetExpr ast.Expr, target types.Type, expr ast.Expr, rendered string) string {
 	if target == nil || expr == nil {
 		return rendered
 	}
@@ -139,7 +149,7 @@ func (v *Visitor) funcValueForSlot(target types.Type, expr ast.Expr, rendered st
 		return rendered
 	}
 
-	if typeContainsTypeParams(target) || typeContainsTypeParams(source) {
+	if typeContainsTypeParams(target) || typeContainsTypeParams(source) || signatureMentionsTypeParams(target) || signatureMentionsTypeParams(source) {
 		return rendered
 	}
 
@@ -149,5 +159,15 @@ func (v *Visitor) funcValueForSlot(target types.Type, expr ast.Expr, rendered st
 		return rendered
 	}
 
-	return fmt.Sprintf("NilSafeDelegateConversion<%s, %s>(%s)", v.getCSharpTypeName(target), sourceName, rendered)
+	targetName := v.getCSharpTypeName(target)
+
+	if targetExpr != nil {
+		targetName = v.funcValueDelegateType(targetExpr, target)
+	}
+
+	if targetName == sourceName {
+		return rendered
+	}
+
+	return fmt.Sprintf("NilSafeDelegateConversion<%s, %s>(%s)", targetName, sourceName, rendered)
 }
