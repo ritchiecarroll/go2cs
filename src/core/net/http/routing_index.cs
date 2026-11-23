@@ -67,7 +67,7 @@ internal static error /*err*/ possiblyConflictingPatterns⁔(/*this*/ ref routin
     //   ordinary pattern: neither of the above
 
     // apply f to all the pats, stopping on error.
-    error apply(slice<ж<pattern>> pats) {
+    [GoFunc("(*routingIndex).possiblyConflictingPatterns.func1")] error apply(slice<ж<pattern>> pats) {
         if (err != nil) {
             return err;
         }

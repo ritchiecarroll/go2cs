@@ -23,7 +23,7 @@ internal static error Fsync⁔(/*this*/ ж<FD> Ꮡfd) {
             }
         }
         ᒐd1 = true;
-        return ignoringEINTR(() => {
+        return ignoringEINTR([GoFunc("(*FD).Fsync.func1")] () => {
             var (_, err) = unix.Fcntl(Ꮡfd.Value.Sysfd, Δsyscall.F_FULLFSYNC, 0);
 
             // There are scenarios such as SMB mounts where fcntl will fail

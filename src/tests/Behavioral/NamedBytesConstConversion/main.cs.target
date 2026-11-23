@@ -55,7 +55,7 @@ internal static nint @double(nint x) { return x * 2; }
     fmt.Println(((lib.Name)(@string)"constant").Len(), ((lib.Name)@null).Len(), ((lib.Name)s).Len());
 
     var f = @double;
-    fmt.Println(NilSafeDelegateConversion<lib.Handler, Func<nint, nint>>(f).Run(3), new lib.Handler(@double).Run(4), new lib.Handler((nint x) => x + 1).Run(5), default(lib.Handler)!.Run(6));
+    fmt.Println(NilSafeDelegateConversion<lib.Handler, Func<nint, nint>>(f).Run(3), new lib.Handler(@double).Run(4), new lib.Handler([GoFunc("init.0.func1")] (nint x) => x + 1).Run(5), default(lib.Handler)!.Run(6));
 }
 
 } // end main_package

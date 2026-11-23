@@ -132,8 +132,8 @@ internal static void main() {
     fmt.Println("m2 nil word is 0:", wordOf(nf) == 0);
 
     nint @base = 10;
-    var c1 = (nint a, nint b) => a + b + @base;
-    var c2 = (nint a, nint b) => a + b + @base;
+    var c1 = [GoFunc("main.func1")] (nint a, nint b) => a + b + @base;
+    var c2 = [GoFunc("main.func2")] (nint a, nint b) => a + b + @base;
     var w1c = wordOf(c1);
     fmt.Println("closure same value twice equal:", w1c == wordOf(c1));
     fmt.Println("closure two values differ:", w1c != wordOf(c2));

@@ -101,7 +101,7 @@ internal static void main() {
     var sv = (@string p1) => recvʗ1.Say(p1);
     fmt.Println("own{}.Say:", sv("why"));
 
-    fmt.Println("as value:", strings.ToUpper(fmt.Sprint(func(nint (Func<ж<myType>, slice<byte>, (nint, error)> f) => {
+    fmt.Println("as value:", strings.ToUpper(fmt.Sprint(func([GoFunc("main.func1")] nint (Func<ж<myType>, slice<byte>, (nint, error)> f) => {
         ref var t = ref heap(new myType(), out var Ꮡt);
         var (k, _) = f(Ꮡt, slice<byte>("xyz"u8));
         return k + Ꮡt.of(myType.ᏑBuffer).Len();

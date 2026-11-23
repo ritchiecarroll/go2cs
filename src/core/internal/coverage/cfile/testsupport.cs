@@ -74,7 +74,7 @@ public static error ProcessCoverTestDir(@string dir, @string cfile, @string cm, 
                 return fmt.Errorf("internal error: opening coverage data output file %q: %v"u8, cfile, errΔ3);
             }
             var tfʗ1 = tf;
-            defer(() => {
+            defer([GoFunc("ProcessCoverTestDir.func1")] () => {
                 if (!tfClosed) {
                     tfClosed = true;
                     tfʗ1.Close();
@@ -151,7 +151,7 @@ internal static error processPod⁔(/*this*/ ж<tstate> Ꮡts, pods.Pod p, map<@
             return fmt.Errorf("unable to open meta-data file %s: %v"u8, p.MetaFile, err);
         }
         var fʗ1 = f;
-        defer(() => {
+        defer([GoFunc("(*tstate).processPod.func1")] () => {
             fʗ1.Close();
         }, ref ᒐ);
         ж<decodemeta.CoverageMetaFileReader> mfr = default;
@@ -173,7 +173,7 @@ internal static error processPod⁔(/*this*/ ж<tstate> Ꮡts, pods.Pod p, map<@
 
         // Helper to read a single counter data file.
         var pmmʗ1 = pmm;
-        error readcdf(@string cdf) {
+        [GoFunc("(*tstate).processPod.func2")] error readcdf(@string cdf) {
             GoFrame ᒐ = default;
             try {
                 var (cf, errΔ2) = os.Open(cdf);

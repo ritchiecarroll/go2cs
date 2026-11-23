@@ -1684,7 +1684,7 @@ internal static iter.Seq2<StructField, Value> Fields⁔(/*this*/ Value v) {
     }
     var tʗ1 = t;
     var vʗ1 = v;
-    return (Func<StructField, Value, bool> yield) => {
+    return [GoFunc("Value.Fields.func1")] (Func<StructField, Value, bool> yield) => {
         foreach (var i in range(vʗ1.NumField())) {
             if (!yield(tʗ1.Field(i), vʗ1.Field(i))) {
                 return;
@@ -1706,7 +1706,7 @@ internal static iter.Seq2<StructField, Value> Fields⁔(/*this*/ Value v) {
 // This may make the executable binary larger but will not affect execution time.
 internal static iter.Seq2<Method, Value> Methods⁔(/*this*/ Value v) {
     var vʗ1 = v;
-    return (Func<Method, Value, bool> yield) => {
+    return [GoFunc("Value.Methods.func1")] (Func<Method, Value, bool> yield) => {
         var rtype = vʗ1.Type();
         foreach (var i in range(vʗ1.NumMethod())) {
             if (!yield(rtype.Method(i), vʗ1.Method(i))) {

@@ -36,7 +36,7 @@ internal static void funcBody⁔(/*this*/ ж<Checker> Ꮡcheck, ж<declInfo> dec
 
         // save/restore current environment and set up function environment
         // (and use 0 indentation at function start)
-        defer((environment env, nint indent) => {
+        defer([GoFunc("(*Checker).funcBody.func1")] (environment env, nint indent) => {
             Ꮡcheck.Value.environment = env;
             Ꮡcheck.Value.indent = indent;
         }, Ꮡcheck.Value.environment, Ꮡcheck.Value.indent, ref ᒐ);
@@ -72,7 +72,7 @@ internal static void usage⁔(/*this*/ ж<Checker> Ꮡcheck, ж<Scope> Ꮡscope)
     ref var scope = ref Ꮡscope.DerefOrNull();
     var unusedᴷ = new stackAppend<ж<Var>>();
 
-    bool needUse(VarKind kind) => !(kind == RecvVar || kind == ParamVar || kind == ResultVar);
+    [GoFunc("(*Checker).usage.func1")] bool needUse(VarKind kind) => !(kind == RecvVar || kind == ParamVar || kind == ResultVar);
     slice<ж<Var>> unused = default;
     foreach (var (name, vᴛ1) in scope.elems) {
         var elem = vᴛ1;
@@ -82,7 +82,7 @@ internal static void usage⁔(/*this*/ ж<Checker> Ꮡcheck, ж<Scope> Ꮡscope)
             unused = append(unusedᴷ, unused, v);
         }
     }
-    slices.SortFunc(unused, (ж<Var> a, ж<Var> b) => cmpPos(a.pos, b.pos));
+    slices.SortFunc(unused, [GoFunc("(*Checker).usage.func2")] (ж<Var> a, ж<Var> b) => cmpPos(a.pos, b.pos));
     foreach (var (_, v) in range(unused)) {
         Ꮡcheck.softErrorf(new Varжpositioner(v), UnusedVar, "declared and not used: %s", v.name);
     }
@@ -530,7 +530,7 @@ internal static void stmt⁔(/*this*/ ж<Checker> Ꮡcheck, stmtContext ctxt, as
 
         // statements must end with the same top scope as they started with
         if (debug) {
-            defer((ж<Scope> scope) => {
+            defer([GoFunc("(*Checker).stmt.func1")] (ж<Scope> scope) => {
                 // don't check if code is panicking
                 var p = recover(); if (p != nil) {
                     throw panic(p);

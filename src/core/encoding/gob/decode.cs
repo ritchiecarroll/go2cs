@@ -980,7 +980,7 @@ internal static ж<Action<ж<decInstr>, ж<decoderState>, reflect.Value>> decOpF
                 var helperʗ1 = helper;
                 var ovflʗ1 = ovfl;
                 var tʗ1 = t;
-                op = (ж<decInstr> i, ж<decoderState> state, reflect.Value value) => {
+                op = [GoFunc("(*Decoder).decOpFor.func1")] (ж<decInstr> i, ж<decoderState> state, reflect.Value value) => {
                     state.dec.decodeArray(state, value, elemOpʗ1.ValueSlot, tʗ1.Len(), ovflʗ1, helperʗ1);
                 };
                 break;
@@ -995,7 +995,7 @@ internal static ж<Action<ж<decInstr>, ж<decoderState>, reflect.Value>> decOpF
                 var keyOpʗ1 = keyOp;
                 var ovflʗ2 = ovfl;
                 var tʗ2 = t;
-                op = (ж<decInstr> i, ж<decoderState> state, reflect.Value value) => {
+                op = [GoFunc("(*Decoder).decOpFor.func2")] (ж<decInstr> i, ж<decoderState> state, reflect.Value value) => {
                     state.dec.decodeMap(tʗ2, state, value, keyOpʗ1.ValueSlot, elemOpʗ2.ValueSlot, ovflʗ2);
                 };
                 break;
@@ -1018,7 +1018,7 @@ internal static ж<Action<ж<decInstr>, ж<decoderState>, reflect.Value>> decOpF
                 var elemOpʗ3 = elemOp;
                 var helperʗ2 = helper;
                 var ovflʗ3 = ovfl;
-                op = (ж<decInstr> i, ж<decoderState> state, reflect.Value value) => {
+                op = [GoFunc("(*Decoder).decOpFor.func3")] (ж<decInstr> i, ж<decoderState> state, reflect.Value value) => {
                     state.dec.decodeSlice(state, value, elemOpʗ3.ValueSlot, ovflʗ3, helperʗ2);
                 };
                 break;
@@ -1031,7 +1031,7 @@ internal static ж<Action<ж<decInstr>, ж<decoderState>, reflect.Value>> decOpF
                     error_(err);
                 }
                 var enginePtrʗ1 = enginePtr;
-                op = (ж<decInstr> i, ж<decoderState> state, reflect.Value value) => {
+                op = [GoFunc("(*Decoder).decOpFor.func4")] (ж<decInstr> i, ж<decoderState> state, reflect.Value value) => {
                     // indirect through enginePtr to delay evaluation for recursive structs.
                     Ꮡdec.decodeStruct(enginePtrʗ1.ValueSlot, value);
                 };
@@ -1039,7 +1039,7 @@ internal static ж<Action<ж<decInstr>, ж<decoderState>, reflect.Value>> decOpF
             }
             case var ᴛ when ᴛ == reflect.Interface: {
                 var tʗ3 = t;
-                op = (ж<decInstr> i, ж<decoderState> state, reflect.Value value) => {
+                op = [GoFunc("(*Decoder).decOpFor.func5")] (ж<decInstr> i, ж<decoderState> state, reflect.Value value) => {
                     state.dec.decodeInterface(tʗ3, state, value);
                 };
                 break;
@@ -1066,7 +1066,7 @@ internal static ж<Action<ж<decInstr>, ж<decoderState>, reflect.Value>> decIgn
 
         // Track how deep we've recursed trying to skip nested ignored fields.
         dec.ignoreDepth++;
-        defer(() => {
+        defer([GoFunc("(*Decoder).decIgnoreOpFor.func1")] () => {
             Ꮡdec.Value.ignoreDepth--;
         }, ref ᒐ);
         if (dec.ignoreDepth > maxIgnoreNestingDepth) {
@@ -1084,7 +1084,7 @@ internal static ж<Action<ж<decInstr>, ж<decoderState>, reflect.Value>> decIgn
             if (wireId == tInterface) {
                 // Special case because it's a method: the ignored item might
                 // define types and we need to record their state in the decoder.
-                op = (ж<decInstr> i, ж<decoderState> state, reflect.Value value) => {
+                op = [GoFunc("(*Decoder).decIgnoreOpFor.func2")] (ж<decInstr> i, ж<decoderState> state, reflect.Value value) => {
                     state.dec.ignoreInterface(state);
                 };
                 return Ꮡop;
@@ -1101,7 +1101,7 @@ internal static ж<Action<ж<decInstr>, ж<decoderState>, reflect.Value>> decIgn
                 var elemOp = Ꮡdec.decIgnoreOpFor(elemId, inProgress);
                 var elemOpʗ1 = elemOp;
                 var wireʗ1 = wire;
-                op = (ж<decInstr> i, ж<decoderState> state, reflect.Value value) => {
+                op = [GoFunc("(*Decoder).decIgnoreOpFor.func3")] (ж<decInstr> i, ж<decoderState> state, reflect.Value value) => {
                     state.dec.ignoreArray(state, elemOpʗ1.ValueSlot, wireʗ1.ArrayT.Len);
                 };
                 break;
@@ -1113,7 +1113,7 @@ internal static ж<Action<ж<decInstr>, ж<decoderState>, reflect.Value>> decIgn
                 var elemOp = Ꮡdec.decIgnoreOpFor(elemId, inProgress);
                 var elemOpʗ2 = elemOp;
                 var keyOpʗ1 = keyOp;
-                op = (ж<decInstr> i, ж<decoderState> state, reflect.Value value) => {
+                op = [GoFunc("(*Decoder).decIgnoreOpFor.func4")] (ж<decInstr> i, ж<decoderState> state, reflect.Value value) => {
                     state.dec.ignoreMap(state, keyOpʗ1.ValueSlot, elemOpʗ2.ValueSlot);
                 };
                 break;
@@ -1122,7 +1122,7 @@ internal static ж<Action<ж<decInstr>, ж<decoderState>, reflect.Value>> decIgn
                 var elemId = wire.SliceT.Elem;
                 var elemOp = Ꮡdec.decIgnoreOpFor(elemId, inProgress);
                 var elemOpʗ3 = elemOp;
-                op = (ж<decInstr> i, ж<decoderState> state, reflect.Value value) => {
+                op = [GoFunc("(*Decoder).decIgnoreOpFor.func5")] (ж<decInstr> i, ж<decoderState> state, reflect.Value value) => {
                     state.dec.ignoreSlice(state, elemOpʗ3.ValueSlot);
                 };
                 break;
@@ -1134,14 +1134,14 @@ internal static ж<Action<ж<decInstr>, ж<decoderState>, reflect.Value>> decIgn
                     error_(err);
                 }
                 var enginePtrʗ1 = enginePtr;
-                op = (ж<decInstr> i, ж<decoderState> state, reflect.Value value) => {
+                op = [GoFunc("(*Decoder).decIgnoreOpFor.func6")] (ж<decInstr> i, ж<decoderState> state, reflect.Value value) => {
                     // indirect through enginePtr to delay evaluation for recursive structs
                     state.dec.ignoreStruct(enginePtrʗ1.ValueSlot);
                 };
                 break;
             }
             case {} when (wire.GobEncoderT != nil) || (wire.BinaryMarshalerT != nil) || (wire.TextMarshalerT != nil): {
-                op = (ж<decInstr> i, ж<decoderState> state, reflect.Value value) => {
+                op = [GoFunc("(*Decoder).decIgnoreOpFor.func7")] (ж<decInstr> i, ж<decoderState> state, reflect.Value value) => {
                     state.dec.ignoreGobDecoder(state);
                 };
                 break;
@@ -1171,7 +1171,7 @@ internal static ж<Action<ж<decInstr>, ж<decoderState>, reflect.Value>> gobDec
     }
     ref var op = ref heap<Action<ж<decInstr>, ж<decoderState>, reflect.Value>>(out var Ꮡop);
     var rcvrTypeʗ1 = rcvrType;
-    op = (ж<decInstr> i, ж<decoderState> state, reflect.Value value) => {
+    op = [GoFunc("(*Decoder).gobDecodeOpFor.func1")] (ж<decInstr> i, ж<decoderState> state, reflect.Value value) => {
         // We now have the base type. We need its address if the receiver is a pointer.
         if (value.Kind() != reflect.Pointer && rcvrTypeʗ1.Kind() == reflect.Pointer) {
             value = value.Addr();

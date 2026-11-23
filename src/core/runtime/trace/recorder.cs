@@ -27,7 +27,7 @@ internal static (nint n, error err) Write⁔(/*this*/ ж<recorder> Ꮡw, slice<b
         var r = w.r;
 
         var rʗ1 = r;
-        defer(() => {
+        defer([GoFunc("(*recorder).Write.func1")] () => {
             if (Ꮡerr.ValueSlot != nil) {
                 // Propagate errors to the flightrecorder.
                 if (rʗ1.err == nil) {

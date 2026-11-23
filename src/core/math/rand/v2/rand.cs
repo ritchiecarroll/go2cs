@@ -225,7 +225,7 @@ internal static slice<nint> Perm⁔(/*this*/ ref Rand r, nint n) {
         p[i] = i;
     }
     var pʗ1 = p;
-    r.Shuffle(len(p), (nint i, nint j) => {
+    r.Shuffle(len(p), [GoFunc("(*Rand).Perm.func1")] (nint i, nint j) => {
         (pʗ1[i], pʗ1[j]) = (pʗ1[j], pʗ1[i]);
     });
     return p;

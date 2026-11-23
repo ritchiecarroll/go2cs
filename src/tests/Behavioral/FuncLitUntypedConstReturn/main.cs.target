@@ -21,10 +21,10 @@ internal static float32 applyFloat32(Func<float32> f) { return f(); }
 internal static float64 applyFloat64(Func<float64> f) { return f(); }
 
 internal static void main() {
-    var maxFn = rune (rune _) => maxRune;
+    var maxFn = [GoFunc("main.func1")] rune (rune _) => maxRune;
     fmt.Println(apply(maxFn, 'a'));
 
-    var encode = rune (rune r) => {
+    var encode = [GoFunc("main.func2")] rune (rune r) => {
         if (r == runeSelf) {
             return maxRune;
         }
@@ -37,7 +37,7 @@ internal static void main() {
     fmt.Println(apply(encode, maxRune));
     fmt.Println(apply(encode, 'x'));
 
-    int64 pick(bool neg) {
+    [GoFunc("main.func3")] int64 pick(bool neg) {
         if (neg) {
             return -1;
         }
@@ -45,13 +45,13 @@ internal static void main() {
     }
     fmt.Println(pick(false), pick(true));
 
-    var invalid = rune (rune r) => maxRune + 1;
+    var invalid = [GoFunc("main.func4")] rune (rune r) => maxRune + 1;
     fmt.Println(apply(invalid, 'c'));
 
-    var shrink = (rune r) => (rune)'a';
+    var shrink = [GoFunc("main.func5")] (rune r) => (rune)'a';
     fmt.Println(apply(shrink, maxRune));
 
-    var isBetter = nint (uint16 a, uint16 b) => {
+    var isBetter = [GoFunc("main.func6")] nint (uint16 a, uint16 b) => {
         if (a < b) {
             return -1;
         } else if (a > b) {
@@ -61,7 +61,7 @@ internal static void main() {
     };
     fmt.Println(compareWith(3, 9, isBetter), compareWith(9, 3, isBetter), compareWith(4, 4, isBetter));
 
-    var scale = int64 (bool on) => {
+    var scale = [GoFunc("main.func7")] int64 (bool on) => {
         if (on) {
             return 9;
         }
@@ -69,13 +69,13 @@ internal static void main() {
     };
     fmt.Println(applyInt64(scale, true), applyInt64(scale, false));
 
-    var half = () => 0.5F;
+    var half = [GoFunc("main.func8")] () => 0.5F;
     fmt.Println(applyFloat32(half));
 
-    var whole = () => 3D;
+    var whole = [GoFunc("main.func9")] () => 3D;
     fmt.Println(applyFloat64(whole));
 
-    var rank = (bool hi) => {
+    var rank = [GoFunc("main.func10")] (bool hi) => {
         if (hi) {
             return 100;
         }
@@ -83,7 +83,7 @@ internal static void main() {
     };
     fmt.Println(applyInt32(rank, true), applyInt32(rank, false));
 
-    fmt.Println(apply((rune _) => maxRune, 'b'));
+    fmt.Println(apply([GoFunc("main.func11")] (rune _) => maxRune, 'b'));
 }
 
 } // end main_package

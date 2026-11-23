@@ -215,7 +215,7 @@ internal static void unary⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operand> Ꮡx, �
 internal static Type chanElem⁔(/*this*/ ж<Checker> Ꮡcheck, positioner pos, ж<operand> Ꮡx, bool recv) {
     ref var x = ref Ꮡx.DerefOrNull();
 
-    var (u, err) = commonUnder(x.typ, (Type t, Type uΔ1) => {
+    var (u, err) = commonUnder(x.typ, [GoFunc("(*Checker).chanElem.func1")] (Type t, Type uΔ1) => {
         if (uΔ1 == nil) {
             return typeErrorf("no specific channel type");
         }
@@ -488,7 +488,7 @@ internal static (Type, constant.Value, errors.Code) implicitTypeAndValue⁔(/*th
     }
     case ж<Interface> u: {
         if (isTypeParam(target)) {
-            if (!underIs(target, (Type uΔ1) => {
+            if (!underIs(target, [GoFunc("(*Checker).implicitTypeAndValue.func1")] (Type uΔ1) => {
                 if (uΔ1 == nil) {
                     return false;
                 }
@@ -966,7 +966,7 @@ internal static void matchTypes⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operand> �
     // If mayConvert returns false, we continue without an
     // attempt at conversion, and if the operand types are
     // not compatible, we report a type mismatch error.
-    bool mayConvert(ж<operand> xΔ1, ж<operand> yΔ1) {
+    [GoFunc("(*Checker).matchTypes.func1")] bool mayConvert(ж<operand> xΔ1, ж<operand> yΔ1) {
         // If both operands are typed, there's no need for an implicit conversion.
         if (isTyped(xΔ1.typ) && isTyped(yΔ1.typ)) {
             return false;
@@ -1063,7 +1063,7 @@ internal static exprKind rawExpr⁔(/*this*/ ж<Checker> Ꮡcheck, ж<target> T,
         if (check.conf._Trace) {
             Ꮡcheck.trace(e.Pos(), exprSˢ, e);
             check.indent++;
-            defer(() => {
+            defer([GoFunc("(*Checker).rawExpr.func1")] () => {
                 Ꮡcheck.Value.indent--;
                 Ꮡcheck.trace(e.Pos(), "=> %s", x.OrTypedNil());
             }, ref ᒐ);
@@ -1282,7 +1282,7 @@ internal static exprKind exprInternal⁔(/*this*/ ж<Checker> Ꮡcheck, ж<targe
         }
         default: {
             ref var @base = ref heap<Type>(out var Ꮡbase);
-            if (!underIs(x.typ, (Type u) => {
+            if (!underIs(x.typ, [GoFunc("(*Checker).exprInternal.func1")] (Type u) => {
                 var (p, _) = u._<ж<Pointer>>(ᐧ);
                 if (p == nil) {
                     Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidIndirection, invalidOp + "cannot indirect %s", Ꮡx.OrTypedNil());

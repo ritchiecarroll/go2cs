@@ -38,7 +38,7 @@ partial struct dirInfo {
 internal static UntypedInt dirBufSize => /* 64 * 1024 */ 65536; // 64kB
 
 [GoLazy] partial class lazyᴛdirBufPool { internal static readonly ж<Δsync.Pool> ᏑdirBufPool = new StaticBox<Δsync.Pool>(new Δsync.Pool(
-    New: () => {
+    New: [GoFunc("init.func1")] () => {
         // The buffer must be at least a block long.
         var buf = new slice<byte>(dirBufSize);
         return Ꮡ(buf);

@@ -167,7 +167,7 @@ internal static nint offsetToUnit⁔(/*this*/ ж<Data> Ꮡd, Offset off) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     // Find the unit after off
-    nint next = sort.Search(len(d.unit), (nint i) => Ꮡd.Value.unit[i].off > off);
+    nint next = sort.Search(len(d.unit), [GoFunc("(*Data).offsetToUnit.func1")] (nint i) => Ꮡd.Value.unit[i].off > off);
     if (next == 0) {
         return -1;
     }

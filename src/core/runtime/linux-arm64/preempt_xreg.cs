@@ -129,7 +129,7 @@ internal static void xRegRestore(ж<g> Ꮡgp) {
     if ((~pp).xRegs.cache != nil) {
         // Don't grow the G stack.
         var ppʗ1 = pp;
-        systemstack(() => {
+        systemstack([GoFunc("xRegRestore.func1")] () => {
             ppʗ1.of(p.ᏑxRegs).free();
         });
     }

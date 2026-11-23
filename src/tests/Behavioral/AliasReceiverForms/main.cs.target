@@ -59,7 +59,7 @@ public static void LinkFrom(this ж<AttrNode> Ꮡn, ж<Node> Ꮡother) {
     other.next = Ꮡn;
 }
 
-public static Func<@string> Namer(this ж<AttrNode> Ꮡn) { return () => Ꮡn.Value.name; }
+public static Func<@string> Namer(this ж<AttrNode> Ꮡn) { return [GoFunc("(*AttrNode).Namer.func1")] () => Ꮡn.Value.name; }
 
 public static Func<nint, (nint, bool)> ModeFunc(this ж<AttrNode> Ꮡn) { return Ꮡn.Mode; }
 
@@ -98,7 +98,7 @@ public static @string /*s*/ Deferred(this ж<AttrNode> Ꮡn) {
     try {
         ref var n = ref Ꮡn.DerefOrNull();
 
-        defer(() => {
+        defer([GoFunc("(*AttrNode).Deferred.func1")] () => {
             var r = recover(); if (r != nil) {
                 s = "recovered";
             }
@@ -122,7 +122,7 @@ public static @string String(this ж<AttrNode> Ꮡn) {
 internal static void @try(@string label, Action fn) {
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("try.func1")] () => {
             var r = recover(); if (r != nil) {
                 fmt.Println(label, "panic:", r);
             }
@@ -140,70 +140,70 @@ partial struct holder {
 
 internal static void run(@string tag, ж<holder> h) {
     fmt.Println("==", tag);
-    @try("Mode", () => {
+    @try("Mode", [GoFunc("run.func1")] () => {
         var (ᴛ1, ᴛ2) = h.Value.attrs.Mode(7);
         fmt.Println(ᴛ1, ᴛ2);
     });
-    @try("ModeNamed", () => {
+    @try("ModeNamed", [GoFunc("run.func2")] () => {
         var (ᴛ3, ᴛ4) = h.Value.attrs.ModeNamed(7);
         fmt.Println(ᴛ3, ᴛ4);
     });
-    @try("Self", () => {
+    @try("Self", [GoFunc("run.func3")] () => {
         fmt.Println(h.Value.attrs.Self() == h.Value.attrs);
     });
-    @try("Describe", () => {
+    @try("Describe", [GoFunc("run.func4")] () => {
         fmt.Println(h.Value.attrs.Describe());
     });
-    @try("Register", () => {
+    @try("Register", [GoFunc("run.func5")] () => {
         h.Value.attrs.Register();
         fmt.Println(len(registry), registry[len(registry) - 1] == h.Value.attrs);
     });
-    @try("KindPtr", () => {
+    @try("KindPtr", [GoFunc("run.func6")] () => {
         var p = h.Value.attrs.KindPtr();
         p.Value = p.Value + 1;
         fmt.Println(p.Value, h.Value.attrs.kind);
     });
-    @try("LinkFrom", () => {
+    @try("LinkFrom", [GoFunc("run.func7")] () => {
         ref var o = ref heap(new Node(), out var Ꮡo);
         h.Value.attrs.LinkFrom(Ꮡo);
         fmt.Println(o.next == h.Value.attrs);
     });
-    @try("Namer", () => {
+    @try("Namer", [GoFunc("run.func8")] () => {
         var f = h.Value.attrs.Namer();
         fmt.Println("namer made");
         fmt.Println(f());
     });
-    @try("ModeFunc", () => {
+    @try("ModeFunc", [GoFunc("run.func9")] () => {
         var f = h.Value.attrs.ModeFunc();
         var (ᴛ5, ᴛ6) = f(9);
         fmt.Println(ᴛ5, ᴛ6);
     });
-    @try("Announce", () => {
+    @try("Announce", [GoFunc("run.func10")] () => {
         fmt.Println(h.Value.attrs.Announce());
     });
-    @try("SafeName", () => {
+    @try("SafeName", [GoFunc("run.func11")] () => {
         fmt.Println(h.Value.attrs.SafeName());
     });
-    @try("IsNil", () => {
+    @try("IsNil", [GoFunc("run.func12")] () => {
         fmt.Println(h.Value.attrs.IsNil());
     });
-    @try("Kind", () => {
+    @try("Kind", [GoFunc("run.func13")] () => {
         fmt.Println(h.Value.attrs.Kind());
     });
-    @try("Len", () => {
+    @try("Len", [GoFunc("run.func14")] () => {
         fmt.Println(h.Value.list.Len());
     });
-    @try("Push", () => {
+    @try("Push", [GoFunc("run.func15")] () => {
         h.Value.list.Push(4);
         fmt.Println(h.Value.list.Len(), h.Value.list.ValueSlot);
     });
-    @try("Deferred", () => {
+    @try("Deferred", [GoFunc("run.func16")] () => {
         fmt.Println(h.Value.attrs.Deferred());
     });
-    @try("String", () => {
+    @try("String", [GoFunc("run.func17")] () => {
         fmt.Println(h.Value.attrs.String());
     });
-    @try("Stringer", () => {
+    @try("Stringer", [GoFunc("run.func18")] () => {
         fmt.Println(h.Value.attrs.OrTypedNil());
     });
 }

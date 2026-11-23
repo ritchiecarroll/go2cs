@@ -16,7 +16,7 @@ internal static readonly ж<threeOnceᴛ1> ᏑthreeOnce = new StaticBox<threeOnc
 internal static ref threeOnceᴛ1 threeOnce => ref ((StaticBox<threeOnceᴛ1>)ᏑthreeOnce).ValueSlot;
 
 internal static ж<Float> three() {
-    ᏑthreeOnce.of(threeOnceᴛ1.ᏑOnce).Do(() => {
+    ᏑthreeOnce.of(threeOnceᴛ1.ᏑOnce).Do([GoFunc("three.func1")] () => {
         threeOnce.v = NewFloat(3.0D);
     });
     return threeOnce.v;
@@ -110,7 +110,7 @@ internal static void sqrtInverse⁔(/*this*/ ж<Float> Ꮡz, ж<Float> x) {
     var threeʗ1 = threeΔ1;
     var uʗ1 = u;
     var vʗ1 = v;
-    ж<Float> ng(ж<Float> t) {
+    [GoFunc("(*Float).sqrtInverse.func1")] ж<Float> ng(ж<Float> t) {
         uʗ1.prec = t.prec;
         vʗ1.prec = t.prec;
         uʗ1.Mul(t, t);         // u = t²

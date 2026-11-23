@@ -387,14 +387,14 @@ internal static error convertAssignRows(any dest, any src, ж<Rows> Ꮡrows) {
             }
             d.Value = new Rows(
                 dc: rows.dc,
-                releaseConn: (error _) => {
+                releaseConn: [GoFunc("convertAssignRows.func1")] (error _) => {
                 },
                 rowsi: s
             );
             // Chain the cancel function.
             var parentCancel = rows.cancel;
             var parentCancelʗ1 = parentCancel;
-            rows.cancel = () => {
+            rows.cancel = [GoFunc("convertAssignRows.func2")] () => {
                 // When Rows.cancel is called, the closemu will be locked as well.
                 // So we can access rs.lasterr.
                 d.close(Ꮡrows.Value.lasterr);

@@ -44,11 +44,11 @@ internal static void use<T>(T v)
     var c = v.Clone();
     fmt.Println(c.Name(), c.Size(), v.Name(), v.Size());
 
-    var ok = v.Each("leaf", (T child) => {
+    var ok = v.Each("leaf", [GoFunc("use[...].func1")] (T child) => {
         fmt.Println("each", child.Name(), child.Size());
     });
 
-    var picked = v.Pick(T () => v.Clone());
+    var picked = v.Pick([GoFunc("use[...].func2")] T () => v.Clone());
 
     fmt.Println(ok, picked.Name(), picked.Size());
 }
@@ -73,14 +73,14 @@ internal static void main() {
 
     fmt.Println(second<ImplжConstrained>(Ꮡ(new Impl("gamma", 100))));
 
-    callback<ImplжConstrained>(Ꮡ(new Impl("delta", 1000)), (ImplжConstrained tΔ1Δp, nint mode) => {
+    callback<ImplжConstrained>(Ꮡ(new Impl("delta", 1000)), [GoFunc("main.func1")] (ImplжConstrained tΔ1Δp, nint mode) => {
         var tΔ1 = (ж<Impl>)tΔ1Δp;
         fmt.Println(tΔ1.Name(), tΔ1.Size(), mode);
     });
 
     @string t = "outer";
 
-    callback<ImplжConstrained>(Ꮡ(new Impl("epsilon", 2000)), (ImplжConstrained tΔ2Δp, nint mode) => {
+    callback<ImplжConstrained>(Ꮡ(new Impl("epsilon", 2000)), [GoFunc("main.func2")] (ImplжConstrained tΔ2Δp, nint mode) => {
         var tΔ2 = (ж<Impl>)tΔ2Δp;
         fmt.Println(tΔ2.Name(), tΔ2.Size(), mode);
     });

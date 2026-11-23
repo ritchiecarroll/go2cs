@@ -82,9 +82,9 @@ public static slice<slice<MutatorUtil>> MutatorUtilizationV2(slice<Event> events
     nint nSync = 0;
 
     // Helpers.
-    bool handleSTW(Range r) => (UtilFlags)(flags & UtilSTW) != 0 && isGCSTW(r);
-    bool handleMarkAssist(Range r) => (UtilFlags)(flags & UtilAssist) != 0 && isGCMarkAssist(r);
-    bool handleSweep(Range r) => (UtilFlags)(flags & UtilSweep) != 0 && isGCSweep(r);
+    [GoFunc("MutatorUtilizationV2.func1")] bool handleSTW(Range r) => (UtilFlags)(flags & UtilSTW) != 0 && isGCSTW(r);
+    [GoFunc("MutatorUtilizationV2.func2")] bool handleMarkAssist(Range r) => (UtilFlags)(flags & UtilAssist) != 0 && isGCMarkAssist(r);
+    [GoFunc("MutatorUtilizationV2.func3")] bool handleSweep(Range r) => (UtilFlags)(flags & UtilSweep) != 0 && isGCSweep(r);
 
     // Iterate through the trace, tracking mutator utilization.
     ж<Event> lastEv = default;

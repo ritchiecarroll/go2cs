@@ -51,12 +51,12 @@ public static context.Context WithClientTrace(context.Context ctx, ж<ClientTrac
             ConnectDone: trace.ConnectDone
         ));
         if (trace.DNSStart != nil) {
-            nt.DNSStart = (@string name) => {
+            nt.DNSStart = [GoFunc("WithClientTrace.func1")] (@string name) => {
                 Ꮡtrace.Value.DNSStart(new DNSStartInfo(Host: name));
             };
         }
         if (trace.DNSDone != nil) {
-            nt.DNSDone = (slice<any> netIPs, bool coalesced, error err) => {
+            nt.DNSDone = [GoFunc("WithClientTrace.func2")] (slice<any> netIPs, bool coalesced, error err) => {
                 var addrs = new slice<net.IPAddr>(len(netIPs));
                 foreach (var (i, ip) in range(netIPs)) {
                     addrs[i] = ip._<net.IPAddr>();
@@ -192,7 +192,7 @@ internal static void compose⁔(/*this*/ ж<ClientTrace> Ꮡt, ж<ClientTrace> o
         // We need to call both tf and of in some order.
         var ofʗ1 = of;
         var tfCopyʗ1 = tfCopy;
-        var newFunc = reflect.MakeFunc(hookType, (slice<reflect.Value> args) => {
+        var newFunc = reflect.MakeFunc(hookType, [GoFunc("(*ClientTrace).compose.func1")] (slice<reflect.Value> args) => {
             tfCopyʗ1.Call(args);
             return ofʗ1.Call(args);
         });

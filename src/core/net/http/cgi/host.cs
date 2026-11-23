@@ -39,7 +39,7 @@ partial class cgi_package {
 
 internal static ж<regexp.Regexp> trailingPort = regexp.MustCompile(@":([0-9]+)$");
 
-internal static slice<@string> osDefaultInheritEnv = func(slice<@string> () => {
+internal static slice<@string> osDefaultInheritEnv = func([GoFunc("init.func1")] slice<@string> () => {
     var exprᴛ1 = runtime.GOOS;
     switch (ᐧ) {
     case {} when exprᴛ1 == "darwin"u8 || exprᴛ1 == "ios"u8: {
@@ -245,7 +245,7 @@ internal static void ServeHTTP⁔(/*this*/ ж<Handler> Ꮡh, http.ResponseWriter
             cwd = ".";
         }
 
-        void internalError(error errΔ3) {
+        [GoFunc("(*Handler).ServeHTTP.func1")] void internalError(error errΔ3) {
             rw.WriteHeader(http.StatusInternalServerError);
             Ꮡh.Value.printf("CGI error: %v", errΔ3);
         }

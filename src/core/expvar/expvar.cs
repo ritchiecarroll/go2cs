@@ -138,16 +138,16 @@ internal static slice<byte> appendJSON⁔(/*this*/ ж<Map> Ꮡv, slice<byte> b) 
 
 internal static slice<byte> appendJSONMayExpand⁔(/*this*/ ж<Map> Ꮡv, slice<byte> b, bool expand) {
     var afterCommaDelim = (byte)' ';
-    var mayAppendNewline = (slice<byte> bΔ1) => bΔ1;
+    var mayAppendNewline = [GoFunc("(*Map).appendJSONMayExpand.func1")] (slice<byte> bΔ1) => bΔ1;
     if (expand) {
         afterCommaDelim = (byte)'\n';
-        mayAppendNewline = (slice<byte> bΔ2) => append(bΔ2, (byte)'\n');
+        mayAppendNewline = [GoFunc("(*Map).appendJSONMayExpand.func2")] (slice<byte> bΔ2) => append(bΔ2, (byte)'\n');
     }
 
     b = append(b, (byte)'{');
     b = mayAppendNewline(b);
     var first = true;
-    Ꮡv.Do((KeyValue kv) => {
+    Ꮡv.Do([GoFunc("(*Map).appendJSONMayExpand.func3")] (KeyValue kv) => {
         if (!first) {
             b = append(b, (byte)',', afterCommaDelim);
         }

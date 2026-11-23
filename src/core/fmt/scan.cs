@@ -297,7 +297,7 @@ internal static (slice<byte> tok, error err) Token⁔(/*this*/ ж<ss> Ꮡs, bool
     try {
         ref var s = ref Ꮡs.DerefOrNull();
 
-        defer(() => {
+        defer([GoFunc("(*ss).Token.func1")] () => {
             var e = recover(); if (e != nil) {
                 ref var se = ref heap<scanError>(out var Ꮡse);
                 (se, var ok) = e._<scanError>(ᐧ); if (ok) {
@@ -445,7 +445,7 @@ internal static error UnreadRune⁔(/*this*/ ref readRune r) {
 }
 
 internal static readonly ж<Δsync.Pool> ᏑssFree = new StaticBox<Δsync.Pool>(new Δsync.Pool(
-    New: () => @new<ss>()
+    New: [GoFunc("init.func2")] () => @new<ss>()
 ));
 internal static ref Δsync.Pool ssFree => ref ((StaticBox<Δsync.Pool>)ᏑssFree).ValueSlot;
 

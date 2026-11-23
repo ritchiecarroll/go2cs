@@ -35,10 +35,10 @@ internal static void main() {
     fmt.Println(fmt.Sprintf("%s"u8, e));
 
     var eʗ1 = e;
-    func(() => {
+    func([GoFunc("main.func1")] () => {
         GoFrame ᒐ = default;
         try {
-            defer(() => {
+            defer([GoFunc("main.func1.1")] () => {
                 fmt.Println("recovered:", recover());
             }, ref ᒐ);
             var (err, ok) = eʗ1._<error>(ᐧ); if (ok) {

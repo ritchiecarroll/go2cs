@@ -55,7 +55,7 @@ public static (uint32 major, uint32 minor, uint32 build) Version() {
 // https://golang.org/issue/73746
 public static readonly ж<Func<bool>> ᏑSupportUnlimitedTransmitFile = new StaticBox<Func<bool>>(default(Func<bool>));
 public static ref Func<bool> SupportUnlimitedTransmitFile => ref ((StaticBox<Func<bool>>)ᏑSupportUnlimitedTransmitFile).ValueSlot;
-internal static void initᴛSupportUnlimitedTransmitFile() { SupportUnlimitedTransmitFile = sync.OnceValue(bool () => {
+internal static void initᴛSupportUnlimitedTransmitFile() { SupportUnlimitedTransmitFile = sync.OnceValue([GoFunc("init.func2")] bool () => {
     var info = getVersionInfo();
     return info.productType != VER_NT_WORKSTATION;
 }); }
@@ -65,7 +65,7 @@ internal static bool supportTCPKeepAliveInterval;
 internal static bool supportTCPKeepAliveCount;
 
 internal static Action initTCPKeepAlive;
-internal static void initᴛinitTCPKeepAlive() { initTCPKeepAlive = sync.OnceFunc(() => {
+internal static void initᴛinitTCPKeepAlive() { initTCPKeepAlive = sync.OnceFunc([GoFunc("init.func4")] () => {
     GoFrame ᒐ = default;
     try {
         var (s, err) = WSASocket(syscall.AF_INET, syscall.SOCK_STREAM, syscall.IPPROTO_TCP, nil, 0, WSA_FLAG_NO_HANDLE_INHERIT);
@@ -78,7 +78,7 @@ internal static void initᴛinitTCPKeepAlive() { initTCPKeepAlive = sync.OnceFun
             return;
         }
         defer(syscall.Closesocket, s, ref ᒐ);
-        Func<nint, bool> optSupported = (nint opt) => {
+        Func<nint, bool> optSupported = [GoFunc("init.func4.1")] (nint opt) => {
             var errΔ1 = syscall.SetsockoptInt(s, syscall.IPPROTO_TCP, opt, 1);
             return !errors.Is(errΔ1, syscall.WSAENOPROTOOPT);
         };
@@ -117,7 +117,7 @@ public static bool SupportTCPKeepAliveCount() {
 // The minimal requirement is Windows 10.0.16299.
 public static readonly ж<Func<bool>> ᏑSupportTCPInitialRTONoSYNRetransmissions = new StaticBox<Func<bool>>(default(Func<bool>));
 public static ref Func<bool> SupportTCPInitialRTONoSYNRetransmissions => ref ((StaticBox<Func<bool>>)ᏑSupportTCPInitialRTONoSYNRetransmissions).ValueSlot;
-internal static void initᴛSupportTCPInitialRTONoSYNRetransmissions() { SupportTCPInitialRTONoSYNRetransmissions = sync.OnceValue(bool () => {
+internal static void initᴛSupportTCPInitialRTONoSYNRetransmissions() { SupportTCPInitialRTONoSYNRetransmissions = sync.OnceValue([GoFunc("init.func3")] bool () => {
     var (major, _, build) = Version();
     return major >= 10 && build >= 16299;
 }); }
@@ -125,7 +125,7 @@ internal static void initᴛSupportTCPInitialRTONoSYNRetransmissions() { Support
 // SupportUnixSocket indicates whether the current Windows version supports
 // Unix Domain Sockets.
 // The minimal requirement is Windows 10.0.17063.
-public static readonly ж<Func<bool>> ᏑSupportUnixSocket = new StaticBox<Func<bool>>(sync.OnceValue(bool () => {
+public static readonly ж<Func<bool>> ᏑSupportUnixSocket = new StaticBox<Func<bool>>(sync.OnceValue([GoFunc("init.func1")] bool () => {
     ref var size = ref heap(new uint32(), out var Ꮡsize);
     // First call to get the required buffer size in bytes.
     // Ignore the error, it will always fail.

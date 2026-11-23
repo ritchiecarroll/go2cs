@@ -17,7 +17,7 @@ private static ref readonly @string ed25519SignAndVerifyPctˢ => ref ed25519Sign
 private static readonly @string ed25519SignAndVerifyPctˢᵇ = "Ed25519 sign and verify PCT"u8;
 
 internal static void fipsPCT(ж<PrivateKey> k) {
-    fips140.PCT(ed25519SignAndVerifyPctˢ, () => pairwiseTest(k));
+    fips140.PCT(ed25519SignAndVerifyPctˢ, [GoFunc("fipsPCT.func1")] () => pairwiseTest(k));
 }
 
 // pairwiseTest needs to be a top-level function declaration to let the calls
@@ -47,8 +47,8 @@ internal static error verifyWithoutSelfTest(ж<PublicKey> pub, slice<byte> messa
 }
 
 internal static Action fipsSelfTest;
-internal static void initᴛfipsSelfTest() { fipsSelfTest = sync.OnceFunc(() => {
-    fips140.CAST("Ed25519 sign and verify", () => {
+internal static void initᴛfipsSelfTest() { fipsSelfTest = sync.OnceFunc([GoFunc("init.func1")] () => {
+    fips140.CAST("Ed25519 sign and verify", [GoFunc("init.func1.1")] () => {
         ref var seed = ref heap<array<byte>>(array<byte>([
             0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
             0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10,

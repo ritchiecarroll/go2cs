@@ -293,7 +293,7 @@ internal static void lengths() {
 internal static void pastTheEnd() {
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("pastTheEnd.func1")] () => {
             fmt.Println("index past the length   :", recover());
         }, ref ᒐ);
 
@@ -308,7 +308,7 @@ internal static void pastTheEnd() {
 internal static void negative() {
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("negative.func1")] () => {
             fmt.Println("negative index          :", recover());
         }, ref ᒐ);
 
@@ -323,7 +323,7 @@ internal static void negative() {
 internal static void nilPointer() {
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("nilPointer.func1")] () => {
             fmt.Println("nil pointer             :", recover());
         }, ref ᒐ);
 

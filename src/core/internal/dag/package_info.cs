@@ -64,7 +64,7 @@ using System.Runtime.CompilerServices;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("internal/dag/alg.go", "alg.cs", "AAcQkpSCgqaCgsyygpSCkoKUgpSClIKUgpSqtIKCgoKC", "29-38:1")]
-[assembly: GoPositionMap("internal/dag/parse.go", "parse.cs", "ADlygqaCgpSCgoKmgqaCpoKmooKClIassoKUgoKokpKUgoKClIKCgpSClIKClIKU7oKCgtyCgoKCuJTugoKCgtyCpgALGIIACAjSgoKUpMS2lIKCgoKCgpSUgpSCgoKClIKUlgAMFpLosoKClIKUpJSUgoIACA6igoKUpIKCpoKUgqaCgpSCpoKkgqaCgpSCgoI=", "88-90:1;108-110:1;196-206:1", "", "", "", "208:21,209:13")]
+[assembly: GoPositionMap("internal/dag/parse.go", "parse.cs", "ADlygqaCgpSCgoKmgqaCpoKmooKClIassoKUgoKokpKUgoKClIKCgpSClIKClIKU7oKCgtyCgoKCuJTugoKCgtyCpgALGIIACAjSgoKUpMS2lIKCgoKCgpSUgpSCgoKClIKUlgAMFpLosoKClIKUpJSUgoIACA6igoKUpIKCpoKUgqaCgpSCpoKkgqaCgpSCgoI=", "88-90:1;108-110:1;196-206:1", "", "", "", "208:50,209:13")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;

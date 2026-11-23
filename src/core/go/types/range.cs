@@ -81,7 +81,7 @@ internal static void rangeStmt⁔(/*this*/ ж<Checker> Ꮡcheck, stmtContext inn
         Type key = default;
         Type val = default;
         if (x.mode != invalid) {
-            var (k, v, cause, ok) = rangeKeyVal(Ꮡcheck, x.typ, (goVersion vΔ1) => Ꮡcheck.Value.allowVersion(vΔ1));
+            var (k, v, cause, ok) = rangeKeyVal(Ꮡcheck, x.typ, [GoFunc("(*Checker).rangeStmt.func1")] (goVersion vΔ1) => Ꮡcheck.Value.allowVersion(vΔ1));
             switch (ᐧ) {
             case {} when !ok && cause != ""u8: {
                 Ꮡcheck.softErrorf(new operandжpositioner(Ꮡx), InvalidRangeExpr, "cannot range over %s: %s", Ꮡx, cause);
@@ -254,9 +254,9 @@ internal static (Type key, Type val, @string cause, bool ok) rangeKeyVal(ж<Chec
     @string cause = default;
     bool ok = default;
 
-    (Type, Type, @string, bool) bad(@string causeΔ1) => (new BasicжType(Typ[Invalid]), new BasicжType(Typ[Invalid]), causeΔ1, false);
+    [GoFunc("rangeKeyVal.func1")] (Type, Type, @string, bool) bad(@string causeΔ1) => (new BasicжType(Typ[Invalid]), new BasicжType(Typ[Invalid]), causeΔ1, false);
 
-    var (rtyp, err) = commonUnder(orig, (Type t, Type u) => {
+    var (rtyp, err) = commonUnder(orig, [GoFunc("rangeKeyVal.func2")] (Type t, Type u) => {
         // A channel must permit receive operations.
         var (ch, _) = u._<ж<Chan>>(ᐧ); if (ch != nil && ch.dir == SendOnly) {
             return typeErrorf("receive from send-only channel %s", t);

@@ -173,7 +173,7 @@ internal static partial @string closureArm(big b) {
     var gʗ1 = g;
     var outʗ1 = @out;
     var ptsʗ1 = pts;
-    goǃ(() => {
+    goǃ([GoFunc("closureArm.func1")] () => {
         nint w = park(arrʗ1[1]);
         ref var c = ref heap<big>(bʗ1.ΔClone(), out var Ꮡc);
         c.a += (int64)w;
@@ -203,7 +203,7 @@ internal static partial (nint, nint) storm(nint count) {
     for (nint iᴛ1 = 0; iᴛ1 < count; iᴛ1++) {
         var i = iᴛ1;
         var doneʗ1 = done;
-        goǃ(() => {
+        goǃ([GoFunc("storm.func1")] () => {
             doneʗ1.ᐸꟷ(stormOne(i));
         });
     }
@@ -318,7 +318,7 @@ internal static partial void main() {
     var @out = new channel<@string>(0);
 
     var outʗ1 = @out;
-    goǃ(() => {
+    goǃ([GoFunc("main.func1")] () => {
         @string s = nameTop(2);
         outʗ1.ᐸꟷ(s);
     });

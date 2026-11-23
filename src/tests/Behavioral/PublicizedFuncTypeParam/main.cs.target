@@ -11,7 +11,7 @@ public partial struct options {
 // type Option is a methodless func type — rendered inline as its base delegate
 
 internal static Action<ж<options>> withLevel(nint n) {
-    return (ж<options> o) => {
+    return [GoFunc("withLevel.func1")] (ж<options> o) => {
         o.level = n;
     };
 }

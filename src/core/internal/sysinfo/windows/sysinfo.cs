@@ -13,7 +13,7 @@ using go.@internal;
 
 partial class sysinfo_package {
 
-public static readonly ж<Func<@string>> ᏑCPUName = new StaticBox<Func<@string>>(sync.OnceValue(@string () => {
+public static readonly ж<Func<@string>> ᏑCPUName = new StaticBox<Func<@string>>(sync.OnceValue([GoFunc("init.func1")] @string () => {
     {
         @string name = cpu.Name(); if (name != ""u8) {
             return name;

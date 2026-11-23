@@ -21,7 +21,7 @@ internal static void with(ж<sink> s, Action<ж<sink>> f) {
 
 internal static void main() {
     var s = Ꮡ(new sink());
-    with(s, (ж<sink> c) => {
+    with(s, [GoFunc("main.func1")] (ж<sink> c) => {
         c.add(0xff);
         c.add(1, 2, 3);
         c.add();

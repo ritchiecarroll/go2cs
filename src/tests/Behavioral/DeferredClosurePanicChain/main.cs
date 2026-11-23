@@ -30,11 +30,11 @@ internal static @string /*got*/ normalReturnPanic() {
     @string got = default;
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("normalReturnPanic.func1")] () => {
             recover();
             got = frames("normalReturnPanic");
         }, ref ᒐ);
-        defer(() => {
+        defer([GoFunc("normalReturnPanic.func2")] () => {
             throw panic("d");
         }, ref ᒐ);
     }
@@ -47,14 +47,14 @@ internal static @string /*got*/ panicAfterRecovery() {
     @string got = default;
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("panicAfterRecovery.func1")] () => {
             recover();
             got = frames("panicAfterRecovery");
         }, ref ᒐ);
-        defer(() => {
+        defer([GoFunc("panicAfterRecovery.func2")] () => {
             throw panic("p3");
         }, ref ᒐ);
-        defer(() => {
+        defer([GoFunc("panicAfterRecovery.func3")] () => {
             recover();
         }, ref ᒐ);
         throw panic("p1");
@@ -68,11 +68,11 @@ internal static @string /*got*/ recoverThenPanic() {
     @string got = default;
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("recoverThenPanic.func1")] () => {
             recover();
             got = frames("recoverThenPanic");
         }, ref ᒐ);
-        defer(() => {
+        defer([GoFunc("recoverThenPanic.func2")] () => {
             recover();
             throw panic("p2");
         }, ref ᒐ);
@@ -87,14 +87,14 @@ internal static @string /*got*/ parenAndArgument() {
     @string got = default;
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("parenAndArgument.func1")] () => {
             recover();
             got = frames("parenAndArgument");
         }, ref ᒐ);
-        defer(() => {
+        defer([GoFunc("parenAndArgument.func2")] () => {
             throw panic("paren");
         }, ref ᒐ);
-        defer((@string v) => {
+        defer([GoFunc("parenAndArgument.func3")] (@string v) => {
             recover();
             throw panic(v);
         }, (@string)"argument", ref ᒐ);
@@ -109,16 +109,16 @@ internal static @string /*got*/ twoLinkChain() {
     @string got = default;
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("twoLinkChain.func1")] () => {
             recover();
         }, ref ᒐ);
-        defer(() => {
+        defer([GoFunc("twoLinkChain.func2")] () => {
             got = frames("twoLinkChain");
         }, ref ᒐ);
-        defer(() => {
+        defer([GoFunc("twoLinkChain.func3")] () => {
             throw panic("p3");
         }, ref ᒐ);
-        defer(() => {
+        defer([GoFunc("twoLinkChain.func4")] () => {
             throw panic("p2");
         }, ref ᒐ);
         throw panic("p1");

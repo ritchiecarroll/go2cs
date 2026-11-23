@@ -367,7 +367,7 @@ internal static (nint n, error err) WriteString⁔(/*this*/ ж<File> Ꮡf, @stri
 // If there is an error, it will be of type [*PathError].
 public static error Mkdir(@string name, FileMode perm) {
     @string longName = fixLongPath(name);
-    var e = ignoringEINTR(() => syscall.Mkdir(longName, syscallMode(perm)));
+    var e = ignoringEINTR([GoFunc("Mkdir.func1")] () => syscall.Mkdir(longName, syscallMode(perm)));
 
     if (e != nil) {
         return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "mkdir", Path: name, Err: e)));

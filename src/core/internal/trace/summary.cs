@@ -648,7 +648,7 @@ internal static ж<Summary> ΔFinalize⁔(/*this*/ ref Summarizer s) {
         g.finalize(s.lastTs, nil);
 
         // Sort based on region start time.
-        slices.SortFunc(g.Regions, (ж<UserRegionSummary> a, ж<UserRegionSummary> b) => {
+        slices.SortFunc(g.Regions, [GoFunc("(*Summarizer).Finalize.func1")] (ж<UserRegionSummary> a, ж<UserRegionSummary> b) => {
             var x = a.Start;
             var y = b.Start;
             if (x == nil) {

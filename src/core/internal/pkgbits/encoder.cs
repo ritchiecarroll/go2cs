@@ -63,7 +63,7 @@ internal static array<byte> /*fingerprint*/ DumpTo⁔(/*this*/ ж<PkgEncoder> �
     var @out = io.MultiWriter(out0, h);
 
     var outʗ1 = @out;
-    void writeUint32(uint32 x) {
+    [GoFunc("(*PkgEncoder).DumpTo.func1")] void writeUint32(uint32 x) {
         assert(binary.Write(outʗ1, binary.LittleEndian, x) == nil);
     }
 

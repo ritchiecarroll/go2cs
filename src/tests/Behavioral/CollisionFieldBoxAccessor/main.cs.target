@@ -43,7 +43,7 @@ internal static partial nint capturedLocalNamedAfterType() {
     var w = Ꮡ(new w(park: 30, other: 4));
     nint got = 0;
     var wʗ1 = w;
-    run(() => {
+    run([GoFunc("capturedLocalNamedAfterType.func1")] () => {
         var p = wʗ1.Ꮡpark;
         p.Value = p.Value + 3;
         got = p.Value;
@@ -54,7 +54,7 @@ internal static partial nint capturedLocalNamedAfterType() {
 internal static partial nint boxRefCapturedValueNamedAfterType() {
     ref var w = ref heap<w>(new w(park: 100, other: 9), out var Ꮡw);
     nint got = 0;
-    run(() => {
+    run([GoFunc("boxRefCapturedValueNamedAfterType.func1")] () => {
         var p = Ꮡw.Ꮡpark;
         p.Value = p.Value + 5;
         got = p.Value;

@@ -318,7 +318,7 @@ private static readonly @string tlsUnknownPublicKeyˢᵇ = "tls: unknown public 
 // discarded. This behavior can be re-enabled by setting "x509keypairleaf=0"
 // in the GODEBUG environment variable.
 public static (Certificate, error) X509KeyPair(slice<byte> certPEMBlock, slice<byte> keyPEMBlock) {
-    (Certificate, error) fail(error errΔ1) => (new Certificate(), errΔ1);
+    [GoFunc("X509KeyPair.func1")] (Certificate, error) fail(error errΔ1) => (new Certificate(), errΔ1);
 
     Certificate cert = default;
     slice<@string> skippedBlockTypes = default;

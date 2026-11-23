@@ -53,7 +53,7 @@ internal static (int64 written, error err, bool handled) sendFile(ж<netFD> c, �
     }
 
     ref var werr = ref heap<error>(out var Ꮡwerr);
-    err = sc.Read((uintptr fd) => {
+    err = sc.Read([GoFunc("sendFile.func1")] (uintptr fd) => {
         (written, Ꮡwerr.ValueSlot, handled) = poll.SendFile(c.Ꮡpfd, fd, remain);
         return true;
     });

@@ -24,7 +24,7 @@ partial class os_package {
 // It does not actually call p.Wait.
 internal static (bool, error) blockUntilWaitable⁔(/*this*/ ж<Process> Ꮡp) {
     ref var info = ref heap(new unix.SiginfoChild(), out var Ꮡinfo);
-    var err = ignoringEINTR(() => unix.Waitid(unix.P_PID, Ꮡp.Value.Pid, Ꮡinfo, (nint)((nint)syscall.WEXITED | (nint)syscall.WNOWAIT), nil));
+    var err = ignoringEINTR([GoFunc("(*Process).blockUntilWaitable.func1")] () => unix.Waitid(unix.P_PID, Ꮡp.Value.Pid, Ꮡinfo, (nint)((nint)syscall.WEXITED | (nint)syscall.WNOWAIT), nil));
     runtime.KeepAlive(Ꮡp.OrTypedNil());
     if (err != nil) {
         // waitid has been available since Linux 2.6.9, but

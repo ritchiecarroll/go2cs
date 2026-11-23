@@ -11,7 +11,7 @@ partial struct B /*[]byte*/;
 internal static void @try(@string label, Action set) {
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("try.func1")] () => {
             var r = recover(); if (r != nil) {
                 fmt.Printf("%s: PANIC %v\n"u8, label, r);
                 return;
@@ -26,22 +26,22 @@ internal static void @try(@string label, Action set) {
 
 internal static void main() {
     ref var dstString = ref heap(new @string(), out var ᏑdstString);
-    @try("S->string (must PANIC)", () => {
+    @try("S->string (must PANIC)", [GoFunc("main.func1")] () => {
         reflect.ValueOf(ᏑdstString).Elem().Set(reflect.ValueOf((S)(@string)"x"));
     });
 
     ref var dstB = ref heap<B>(out var ᏑdstB);
-    @try("[]byte->B (must be ok)", () => {
+    @try("[]byte->B (must be ok)", [GoFunc("main.func2")] () => {
         reflect.ValueOf(ᏑdstB).Elem().Set(reflect.ValueOf(slice<byte>("y"u8)));
     });
 
     ref var dstBytes = ref heap<slice<byte>>(out var ᏑdstBytes);
-    @try("B->[]byte (must be ok)", () => {
+    @try("B->[]byte (must be ok)", [GoFunc("main.func3")] () => {
         reflect.ValueOf(ᏑdstBytes).Elem().Set(reflect.ValueOf((B)slice<byte>((@string)"z"u8)));
     });
 
     ref var dstS = ref heap(new S(), out var ᏑdstS);
-    @try("string->S (must PANIC)", () => {
+    @try("string->S (must PANIC)", [GoFunc("main.func4")] () => {
         reflect.ValueOf(ᏑdstS).Elem().Set(reflect.ValueOf("w"));
     });
 

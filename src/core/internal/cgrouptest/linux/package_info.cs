@@ -58,7 +58,7 @@ using System.Runtime.CompilerServices;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/cgrouptest/cgrouptest_linux.go", "cgrouptest_linux.cs", "AB00guiS6JKCgpSCAAoUAAkCgqaCgpTKppKC3JKmuIKUuKKmmLKCgoKUgpSoABRcABoCgoKmgoKCgoKCgqaUpoKmgrjokoKC", "77-83:1", "", "", "", "101:21,102:13")]
+[assembly: GoPositionMap("internal/cgrouptest/cgrouptest_linux.go", "cgrouptest_linux.cs", "AB00guiS6JKCgpSCAAoUAAkCgqaCgpTKppKC3JKmuIKUuKKmmLKCgoKUgpSoABRcABoCgoKmgoKCgoKCgqaUpoKmgrjokoKC", "77-83:1", "", "", "", "101:50,102:13")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;

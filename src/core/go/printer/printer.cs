@@ -149,7 +149,7 @@ internal static nint commentSizeBefore⁔(/*this*/ ж<printer> Ꮡp, token.Posit
         ref var p = ref Ꮡp.DerefOrNull();
 
         // save/restore current p.commentInfo (p.nextComment() modifies it)
-        defer((commentInfo info) => {
+        defer([GoFunc("(*printer).commentSizeBefore.func1")] (commentInfo info) => {
             Ꮡp.Value.commentInfo = info;
         }, Ꮡp.Value.commentInfo, ref ᒐ);
 
@@ -661,7 +661,7 @@ internal static void writeComment⁔(/*this*/ ж<printer> Ꮡp, ж<ast.Comment> 
         if (strings.HasPrefix(text, linePrefix) && (!pos.IsValid() || pos.Column == 1)) {
             // Possibly a //-style line directive.
             // Suspend indentation temporarily to keep line directive valid.
-            defer((nint indent) => {
+            defer([GoFunc("(*printer).writeComment.func1")] (nint indent) => {
                 Ꮡp.Value.indent = indent;
             }, Ꮡp.Value.indent, ref ᒐ);
             p.indent = 0;
@@ -1455,7 +1455,7 @@ partial struct Config {
 }
 
 [GoLazy] partial class lazyᴛprinterPool { internal static readonly ж<sync.Pool> ᏑprinterPool = new StaticBox<sync.Pool>(new sync.Pool(
-    New: () => Ꮡ(new printer(
+    New: [GoFunc("init.func1")] () => Ꮡ(new printer(
             // Whitespace sequences are short.
             wsbuf: new slice<whiteSpace>(0, 16),
             // We start the printer with a 16K output buffer, which is currently

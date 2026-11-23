@@ -303,7 +303,7 @@ internal static void mutateBytes⁔(/*this*/ ж<mutator> Ꮡm, ж<slice<byte>> �
         ref var ptrB = ref ᏑptrB.DerefOrNull();
 
         ref var b = ref heap<slice<byte>>(ptrB, out var Ꮡb);
-        defer(() => {
+        defer([GoFunc("(*mutator).mutateBytes.func1")] () => {
             if (@unsafe.SliceData(ᏑptrB.ValueSlot) != @unsafe.SliceData(Ꮡb.ValueSlot)) {
                 throw panic("data moved to new address");
             }

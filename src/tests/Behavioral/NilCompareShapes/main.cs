@@ -30,7 +30,7 @@ internal static bool /*recovered*/ tryRecover(bool doPanic) {
     bool recovered = default;
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("tryRecover.func1")] () => {
             recovered = recover() != nil;
         }, ref ᒐ);
 
@@ -66,13 +66,13 @@ internal static void main() {
 
     Action fn = default;
     fmt.Println("nil func == nil:", fn == nil);
-    fn = () => {
+    fn = [GoFunc("main.func1")] () => {
     };
     fmt.Println("assigned func != nil:", fn != nil);
 
     Func<nint, nint> h = default;
     fmt.Println("nil named func == nil:", h == nil);
-    h = (nint x) => x * 2;
+    h = [GoFunc("main.func2")] (nint x) => x * 2;
     fmt.Println("assigned named func != nil:", nil != h, h(21));
 
     fmt.Println("recover() != nil after panic:", tryRecover(true));
@@ -92,7 +92,7 @@ internal static void main() {
     holder hd = default;
     fmt.Println("zero struct fields are nil:", hd.err == nil, hd.fn == nil);
     hd.err = fmt.Errorf("wrapped"u8);
-    hd.fn = @string () => "set";
+    hd.fn = [GoFunc("main.func3")] @string () => "set";
     fmt.Println("assigned fields are non-nil:", hd.err != nil, hd.fn != nil, hd.fn());
 
     fmt.Println(describe(default));

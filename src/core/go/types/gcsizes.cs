@@ -20,7 +20,7 @@ internal static int64 /*result*/ Alignof⁔(/*this*/ ж<gcSizes> Ꮡs, Type T) {
     try {
         ref var s = ref Ꮡs.DerefOrNull();
 
-        defer([MethodImpl(MethodImplOptions.NoInlining)] () => {
+        defer([MethodImpl(MethodImplOptions.NoInlining), GoFunc("(*gcSizes).Alignof.func1")] () => {
             assert(result >= 1);
         }, ref ᒐ);
 

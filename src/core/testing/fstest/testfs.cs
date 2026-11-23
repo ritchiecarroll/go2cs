@@ -541,7 +541,7 @@ internal static void checkDirList⁔(/*this*/ ж<fsTester> Ꮡt, @string dir, @s
     var diffsᴷ = new stackAppend<@string>();
 
     var old = new map<@string, fs.DirEntry>();
-    void checkMode(fs.DirEntry entry) {
+    [GoFunc("(*fsTester).checkDirList.func1")] void checkMode(fs.DirEntry entry) {
         if (entry.IsDir() != ((fs.FileMode)(entry.Type() & fs.ModeDir) != 0)) {
             if (entry.IsDir()) {
                 Ꮡt.Value.errorf("%s: ReadDir returned %s with IsDir() = true, Type() & ModeDir = 0", dir, entry.Name());
@@ -577,7 +577,7 @@ internal static void checkDirList⁔(/*this*/ ж<fsTester> Ꮡt, @string dir, @s
         return;
     }
 
-    slices.SortFunc(diffs, (@string a, @string b) => {
+    slices.SortFunc(diffs, [GoFunc("(*fsTester).checkDirList.func2")] (@string a, @string b) => {
         var fa = strings.Fields(a);
         var fb = strings.Fields(b);
         // sort by name (i < j) and then +/- (j < i, because + < -)
@@ -651,7 +651,7 @@ internal static void checkFile⁔(/*this*/ ж<fsTester> Ꮡt, @string @file) {
 
                     var fsysʗ1 = fsys;
                 t.checkBadPath(@file, readFileˢ,
-                    (@string name) => {
+                    [GoFunc("(*fsTester).checkFile.func1")] (@string name) => {
                         var (_, errΔ3) = fsysʗ1.ReadFile(name);
                         return errΔ3;
                     });
@@ -697,7 +697,7 @@ private static readonly @string openˢᵇ = "Open"u8;
 internal static void checkOpen⁔(/*this*/ ж<fsTester> Ꮡt, @string @file) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-    t.checkBadPath(@file, openˢ, (@string fileΔ1) => {
+    t.checkBadPath(@file, openˢ, [GoFunc("(*fsTester).checkOpen.func1")] (@string fileΔ1) => {
         var (f, err) = Ꮡt.Value.fsys.Open(fileΔ1);
         if (err == nil) {
             f.Close();

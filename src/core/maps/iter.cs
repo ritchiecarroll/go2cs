@@ -13,7 +13,7 @@ partial class maps_package {
 public static iter.Seq2<K, V> All<Map, K, V>(Map m)
     where Map : /* ~map[K]V */ IMap<K, V>, ISupportMake<Map>, new()
 {
-    return (Func<K, V, bool> yield) => {
+    return [GoFunc("All[...].func1")] (Func<K, V, bool> yield) => {
         foreach (var (k, v) in m) {
             if (!yield(k, v)) {
                 return;
@@ -28,7 +28,7 @@ public static iter.Seq2<K, V> All<Map, K, V>(Map m)
 public static iter.Seq<K> Keys<Map, K, V>(Map m)
     where Map : /* ~map[K]V */ IMap<K, V>, ISupportMake<Map>, new()
 {
-    return (Func<K, bool> yield) => {
+    return [GoFunc("Keys[...].func1")] (Func<K, bool> yield) => {
         foreach (var (k, _) in m) {
             if (!yield(k)) {
                 return;
@@ -43,7 +43,7 @@ public static iter.Seq<K> Keys<Map, K, V>(Map m)
 public static iter.Seq<V> Values<Map, K, V>(Map m)
     where Map : /* ~map[K]V */ IMap<K, V>, ISupportMake<Map>, new()
 {
-    return (Func<V, bool> yield) => {
+    return [GoFunc("Values[...].func1")] (Func<V, bool> yield) => {
         foreach (var (_, v) in m) {
             if (!yield(v)) {
                 return;

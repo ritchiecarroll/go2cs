@@ -125,7 +125,7 @@ internal static readonly ж<sync.Once> Ꮡ_p521BOnce = new StaticBox<sync.Once>(
 internal static ref sync.Once _p521BOnce => ref ((StaticBox<sync.Once>)Ꮡ_p521BOnce).ValueSlot;
 
 internal static ж<fiat.P521Element> p521B() {
-    Ꮡ_p521BOnce.Do(() => {
+    Ꮡ_p521BOnce.Do([GoFunc("p521B.func1")] () => {
         (_p521B, _) = @new<fiat.P521Element>().SetBytes([0x0, 0x51, 0x95, 0x3e, 0xb9, 0x61, 0x8e, 0x1c, 0x9a, 0x1f, 0x92, 0x9a, 0x21, 0xa0, 0xb6, 0x85, 0x40, 0xee, 0xa2, 0xda, 0x72, 0x5b, 0x99, 0xb3, 0x15, 0xf3, 0xb8, 0xb4, 0x89, 0x91, 0x8e, 0xf1, 0x9, 0xe1, 0x56, 0x19, 0x39, 0x51, 0xec, 0x7e, 0x93, 0x7b, 0x16, 0x52, 0xc0, 0xbd, 0x3b, 0xb1, 0xbf, 0x7, 0x35, 0x73, 0xdf, 0x88, 0x3d, 0x2c, 0x34, 0xf1, 0xef, 0x45, 0x1f, 0xd4, 0x6b, 0x50, 0x3f, 0x0]);
     });
     return _p521B;
@@ -430,7 +430,7 @@ internal static ref sync.Once p521GeneratorTableOnce => ref ((StaticBox<sync.Onc
 // multiples of G. Each successive table is the previous table doubled four
 // times.
 internal static ж<array<p521Table>> generatorTable⁔(/*this*/ ref P521Point p) {
-    Ꮡp521GeneratorTableOnce.Do(() => {
+    Ꮡp521GeneratorTableOnce.Do([GoFunc("(*P521Point).generatorTable.func1")] () => {
         p521GeneratorTable = Ꮡ(new array<p521Table>(132));
         var @base = NewP521Point().SetGenerator();
         for (nint i = 0; i < (nint)(p521ElementLength * 2); i++) {

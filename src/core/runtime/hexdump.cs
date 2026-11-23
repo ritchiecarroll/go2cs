@@ -154,7 +154,7 @@ internal static void flushLine⁔(/*this*/ ref hexdumper h, slice<byte> data) {
     nint nlPos = asciiStart + asciiChars;
 
     ref var lineBuf = ref heap(new array<byte>(73), out var ᏑlineBuf);
-    void clear() {
+    [GoFunc("(*hexdumper).flushLine.func1")] void clear() {
         foreach (var i in range(len(ᏑlineBuf.Value))) {
             ᏑlineBuf.Value[i] = (byte)' ';
         }

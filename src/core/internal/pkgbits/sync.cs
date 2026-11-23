@@ -19,7 +19,7 @@ internal static slice<@string> fmtFrames(params ꓸꓸꓸuintptr pcsʗp) {
     var pcs = pcsʗp.slice();
 
     ref var res = ref heap<slice<@string>>(new slice<@string>(0, len(pcs)), out var Ꮡres);
-    walkFrames(pcs, (@string @file, nint line, @string name, uintptr offset) => {
+    walkFrames(pcs, [GoFunc("fmtFrames.func1")] (@string @file, nint line, @string name, uintptr offset) => {
         // Trim package from function name. It's just redundant noise.
         name = strings.TrimPrefix(name, cmdCompileInternalNoderˢ);
 

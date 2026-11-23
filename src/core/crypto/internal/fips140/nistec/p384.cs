@@ -125,7 +125,7 @@ internal static readonly ж<sync.Once> Ꮡ_p384BOnce = new StaticBox<sync.Once>(
 internal static ref sync.Once _p384BOnce => ref ((StaticBox<sync.Once>)Ꮡ_p384BOnce).ValueSlot;
 
 internal static ж<fiat.P384Element> p384B() {
-    Ꮡ_p384BOnce.Do(() => {
+    Ꮡ_p384BOnce.Do([GoFunc("p384B.func1")] () => {
         (_p384B, _) = @new<fiat.P384Element>().SetBytes([0xb3, 0x31, 0x2f, 0xa7, 0xe2, 0x3e, 0xe7, 0xe4, 0x98, 0x8e, 0x5, 0x6b, 0xe3, 0xf8, 0x2d, 0x19, 0x18, 0x1d, 0x9c, 0x6e, 0xfe, 0x81, 0x41, 0x12, 0x3, 0x14, 0x8, 0x8f, 0x50, 0x13, 0x87, 0x5a, 0xc6, 0x56, 0x39, 0x8d, 0x8a, 0x2e, 0xd1, 0x9d, 0x2a, 0x85, 0xc8, 0xed, 0xd3, 0xec, 0x2a, 0xef]);
     });
     return _p384B;
@@ -430,7 +430,7 @@ internal static ref sync.Once p384GeneratorTableOnce => ref ((StaticBox<sync.Onc
 // multiples of G. Each successive table is the previous table doubled four
 // times.
 internal static ж<array<p384Table>> generatorTable⁔(/*this*/ ref P384Point p) {
-    Ꮡp384GeneratorTableOnce.Do(() => {
+    Ꮡp384GeneratorTableOnce.Do([GoFunc("(*P384Point).generatorTable.func1")] () => {
         p384GeneratorTable = Ꮡ(new array<p384Table>(96));
         var @base = NewP384Point().SetGenerator();
         for (nint i = 0; i < (nint)(p384ElementLength * 2); i++) {

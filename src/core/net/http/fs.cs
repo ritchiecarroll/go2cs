@@ -171,7 +171,7 @@ internal static void dirList(ResponseWriter w, ж<Request> r, File f) {
         return;
     }
     var dirsʗ1 = dirs;
-    sort.Slice(dirs, (nint i, nint j) => dirsʗ1.name(i) < dirsʗ1.name(j));
+    sort.Slice(dirs, [GoFunc("dirList.func1")] (nint i, nint j) => dirsʗ1.name(i) < dirsʗ1.name(j));
 
     w.Header().Set(contentTypeˢ, textHtmlCharsetUtf8ˢ);
     fmt.Fprintf(new ResponseWriterᴠWriter(w), "<!doctype html>\n"u8);
@@ -257,7 +257,7 @@ internal static void serveError(ResponseWriter w, @string text, nint code) {
 // The GODEBUG setting httpservecontentkeepheaders=1 causes ServeContent
 // to preserve these headers.
 public static void ServeContent(ResponseWriter w, ж<Request> req, @string name, time.Time modtime, io.ReadSeeker content) {
-    var sizeFunc = (int64, error) () => {
+    var sizeFunc = [GoFunc("ServeContent.func1")] (int64, error) () => {
         var (size, err) = content.Seek(0, io.SeekEnd);
         if (err != nil) {
             return (0, errSeeker);
@@ -414,7 +414,7 @@ internal static partial void serveContent(ResponseWriter w, ref Request r, @stri
             var mwʗ1 = mw;
             var pwʗ1 = pw;
             var rangesʗ1 = ranges;
-            goǃ(() => {
+            goǃ([GoFunc("serveContent.func1")] () => {
                 foreach (var (_, vᴛ1) in range(rangesʗ1)) {
                     ref var ra = ref heap(new httpRange(), out var Ꮡra);
                     ra = vᴛ1;
@@ -857,7 +857,7 @@ internal static void serveFile(ResponseWriter w, ж<Request> Ꮡr, FileSystem fs
 
         // serveContent will check modification time
         var dʗ1 = d;
-        var sizeFunc = (int64, error) () => (dʗ1.Size(), default);
+        var sizeFunc = [GoFunc("serveFile.func1")] (int64, error) () => (dʗ1.Size(), default);
         serveContent(w, ref (Ꮡr).DerefOrNull(), d.Name(), d.ModTime(), sizeFunc, new FileᴠReadSeeker(f));
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -1012,7 +1012,7 @@ internal static (File, error) Open⁔(/*this*/ ioFS f, @string name) {
     var (@file, err) = f.fsys.Open(name);
     if (err != nil) {
         var fʗ1 = f;
-        return (default, mapOpenError(err, name, '/', (@string path) => fs.Stat(fʗ1.fsys, path)));
+        return (default, mapOpenError(err, name, '/', [GoFunc("ioFS.Open.func1")] (@string path) => fs.Stat(fʗ1.fsys, path)));
     }
     return (new ioFile(@file), default);
 }

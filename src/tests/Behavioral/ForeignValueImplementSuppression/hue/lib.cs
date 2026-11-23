@@ -29,7 +29,7 @@ internal static (uint32, uint32) Shade⁔(/*this*/ Tinter f) { return f(); }
 
 public static Tint Default = new Shade(L: 1, A: 2);
 public static Tint DefaultGray = new Gray(Y: 4);
-public static Tint DefaultFunc = new TinterᴠTint(new Tinter(() => ((uint32)(8), (uint32)(9))));
+public static Tint DefaultFunc = new TinterᴠTint(new Tinter([GoFunc("init.func1")] () => ((uint32)(8), (uint32)(9))));
 
 public static Tint Describe(Shade s) { return s; }
 

@@ -224,10 +224,10 @@ internal static (slice<HeaderField>, error) DecodeFull⁔(/*this*/ ж<Decoder> �
         ref var hf = ref heap<slice<HeaderField>>(out var Ꮡhf);
         var saveFunc = d.emit;
         var saveFuncʗ1 = saveFunc;
-        defer(() => {
+        defer([GoFunc("(*Decoder).DecodeFull.func1")] () => {
             Ꮡd.Value.emit = saveFuncʗ1;
         }, ref ᒐ);
-        d.emit = (HeaderField f) => {
+        d.emit = [GoFunc("(*Decoder).DecodeFull.func2")] (HeaderField f) => {
             Ꮡhf.ValueSlot = append(Ꮡhf.ValueSlot, f);
         };
         {

@@ -8,7 +8,7 @@ internal static partial void main() {
     channel<nint> c = new channel<nint>(100);
     for (nint i = 0; i < 10; i++) {
         var cʗ1 = c;
-        goǃ(() => {
+        goǃ([GoFunc("main.func1")] () => {
             for (nint j = 0; j < 10; j++) {
                 cʗ1.ᐸꟷ(j);
             }

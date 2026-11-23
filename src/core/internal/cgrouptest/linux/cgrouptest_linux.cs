@@ -98,7 +98,7 @@ public static void InCgroupV2(ж<testing.T> t, Action<ж<CgroupV2>> fn) {
         // TODO(prattmic): Consider running everything in a subprocess just so
         // we can clean up if it throws or otherwise doesn't run the defers.
         var pathʗ1 = path;
-        defer(() => {
+        defer([GoFunc("InCgroupV2.func1")] () => {
             var errΔ1 = os.Remove(pathʗ1); if (errΔ1 != nil) {
                 // Not much we can do, but at least inform of the
                 // problem.

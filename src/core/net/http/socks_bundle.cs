@@ -54,7 +54,7 @@ internal static partial (net.Addr, error ctxErr) connect⁔(/*this*/ ж<socksDia
             var done = new channel<EmptyStruct>(0);
             var doneʗ1 = done;
             var errChʗ1 = errCh;
-            defer(() => {
+            defer([GoFunc("(*socksDialer).connect.func1")] () => {
                 close(doneʗ1);
                 if (ctxErr == nil) {
                     ctxErr = ᐸꟷ(errChʗ1);
@@ -62,7 +62,7 @@ internal static partial (net.Addr, error ctxErr) connect⁔(/*this*/ ж<socksDia
             }, ref ᒐ);
             var doneʗ2 = done;
             var errChʗ2 = errCh;
-            goǃ(() => {
+            goǃ([GoFunc("(*socksDialer).connect.func2")] () => {
                 var selᴛ94 = ctx.Done();
                 var doneᴛ1 = doneʗ2;
                 switch (select(ᐸꟷ(selᴛ94, ꓸꓸꓸ), ᐸꟷ(doneᴛ1, ꓸꓸꓸ))) {

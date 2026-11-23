@@ -62,7 +62,7 @@ public static (@string, error) ToUnicode(@string s) {
 // compatibility. It is used by some browsers when resolving domain names. This
 // option is only meaningful if combined with MapForLookup.
 public static Action<ж<options>> Transitional(bool transitional) {
-    return (ж<options> o) => {
+    return [GoFunc("Transitional.func1")] (ж<options> o) => {
         o.transitional = transitional;
     };
 }
@@ -72,7 +72,7 @@ public static Action<ж<options>> Transitional(bool transitional) {
 //
 // This option corresponds to the VerifyDnsLength flag in UTS #46.
 public static Action<ж<options>> VerifyDNSLength(bool verify) {
-    return (ж<options> o) => {
+    return [GoFunc("VerifyDNSLength.func1")] (ж<options> o) => {
         o.verifyDNSLength = verify;
     };
 }
@@ -80,7 +80,7 @@ public static Action<ж<options>> VerifyDNSLength(bool verify) {
 // RemoveLeadingDots removes leading label separators. Leading runes that map to
 // dots, such as U+3002 IDEOGRAPHIC FULL STOP, are removed as well.
 public static Action<ж<options>> RemoveLeadingDots(bool remove) {
-    return (ж<options> o) => {
+    return [GoFunc("RemoveLeadingDots.func1")] (ж<options> o) => {
         o.removeLeadingDots = remove;
     };
 }
@@ -91,7 +91,7 @@ public static Action<ж<options>> RemoveLeadingDots(bool remove) {
 // In particular, ValidateLabels also sets the CheckHyphens and CheckJoiners flags
 // in UTS #46.
 public static Action<ж<options>> ValidateLabels(bool enable) {
-    return (ж<options> o) => {
+    return [GoFunc("ValidateLabels.func1")] (ж<options> o) => {
         // Don't override existing mappings, but set one that at least checks
         // normalization if it is not set.
         if (o.mapping == nil && enable) {
@@ -114,7 +114,7 @@ public static Action<ж<options>> ValidateLabels(bool enable) {
 //
 // This option corresponds to the CheckHyphens flag in UTS #46.
 public static Action<ж<options>> CheckHyphens(bool enable) {
-    return (ж<options> o) => {
+    return [GoFunc("CheckHyphens.func1")] (ж<options> o) => {
         o.checkHyphens = enable;
     };
 }
@@ -124,7 +124,7 @@ public static Action<ж<options>> CheckHyphens(bool enable) {
 //
 // This option corresponds to the CheckJoiners flag in UTS #46.
 public static Action<ж<options>> CheckJoiners(bool enable) {
-    return (ж<options> o) => {
+    return [GoFunc("CheckJoiners.func1")] (ж<options> o) => {
         o.trie = trie;
         o.checkJoiners = enable;
     };
@@ -141,7 +141,7 @@ public static Action<ж<options>> CheckJoiners(bool enable) {
 //
 // This option corresponds to the UseSTD3ASCIIRules flag in UTS #46.
 public static Action<ж<options>> StrictDomainName(bool use) {
-    return (ж<options> o) => {
+    return [GoFunc("StrictDomainName.func1")] (ж<options> o) => {
         o.useSTD3Rules = use;
     };
 }
@@ -154,7 +154,7 @@ public static Action<ж<options>> StrictDomainName(bool use) {
 //
 // This option corresponds to the CheckBidi flag in UTS #46.
 public static Action<ж<options>> BidiRule() {
-    return (ж<options> o) => {
+    return [GoFunc("BidiRule.func1")] (ж<options> o) => {
         o.bidirule = bidirule.ValidString;
     };
 }
@@ -162,7 +162,7 @@ public static Action<ж<options>> BidiRule() {
 // ValidateForRegistration sets validation options to verify that a given IDN is
 // properly formatted for registration as defined by Section 4 of RFC 5891.
 public static Action<ж<options>> ValidateForRegistration() {
-    return (ж<options> o) => {
+    return [GoFunc("ValidateForRegistration.func1")] (ж<options> o) => {
         o.mapping = validateRegistration;
         StrictDomainName(true)(o);
         ValidateLabels(true)(o);
@@ -180,7 +180,7 @@ public static Action<ж<options>> ValidateForRegistration() {
 // The mappings include normalization and mapping case, width and other
 // compatibility mappings.
 public static Action<ж<options>> MapForLookup() {
-    return (ж<options> o) => {
+    return [GoFunc("MapForLookup.func1")] (ж<options> o) => {
         o.mapping = validateAndMap;
         StrictDomainName(true)(o);
         ValidateLabels(true)(o);

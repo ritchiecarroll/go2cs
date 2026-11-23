@@ -528,7 +528,7 @@ internal static void maybeRunAsync⁔(/*this*/ ж<timer> Ꮡt) {
         // timer ourselves now is fine.)
         {
             var now = nanotime(); if (t.when <= now) {
-                systemstack(() => {
+                systemstack([GoFunc("(*timer).maybeRunAsync.func1")] () => {
                     Ꮡt.unlockAndRun(now, nil); // resets t.when
                 });
                 Ꮡt.@lock();
@@ -707,7 +707,7 @@ internal static bool modify⁔(/*this*/ ж<timer> Ꮡt, int64 when, int64 period
         }
         if ((uint8)(t.state & timerHeaped) == 0 && when <= bubble.now) {
             var bubbleʗ1 = bubble;
-            systemstack(() => {
+            systemstack([GoFunc("(*timer).modify.func1")] () => {
                 if (!async && Ꮡt.Value.isChan) {
                     unlock(Ꮡt.ᏑsendLock);
                 }
@@ -1377,7 +1377,7 @@ internal static void unlockAndRun⁔(/*this*/ ж<timer> Ꮡt, int64 now, ж<sync
         }
 
         if (t.seq != seq) {
-            f = (any _Δp0, uintptr _Δp1, int64 _Δp2) => {
+            f = [GoFunc("(*timer).unlockAndRun.func1")] (any _Δp0, uintptr _Δp1, int64 _Δp2) => {
             };
         }
     }
@@ -1629,7 +1629,7 @@ internal static void maybeRunChan⁔(/*this*/ ж<timer> Ꮡt, ж<hchan> Ꮡc) {
         return;
     }
     Ꮡt.trace(maybeRunChanˢ2);
-    systemstack(() => {
+    systemstack([GoFunc("(*timer).maybeRunChan.func1")] () => {
         Ꮡt.unlockAndRun(now, Ꮡc.Value.bubble);
     });
 }

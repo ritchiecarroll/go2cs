@@ -256,7 +256,7 @@ internal static (ж<UDPConn>, error) dialUDP⁔(/*this*/ ж<sysDialer> Ꮡsd, co
 
     var ctrlCtxFn = sd.Dialer.ControlContext;
     if (ctrlCtxFn == nil && sd.Dialer.Control != nil) {
-        ctrlCtxFn = (context.Context ctxΔ1, @string network, @string address, syscall.RawConn c) => Ꮡsd.Value.Dialer.Control(network, address, c);
+        ctrlCtxFn = [GoFunc("(*sysDialer).dialUDP.func1")] (context.Context ctxΔ1, @string network, @string address, syscall.RawConn c) => Ꮡsd.Value.Dialer.Control(network, address, c);
     }
     var (fd, err) = internetSocket(ctx, sd.network, new UDPAddrжsockaddr(laddr), new UDPAddrжsockaddr(raddr), syscall.SOCK_DGRAM, 0, dialˢ, ctrlCtxFn);
     if (err != nil) {
@@ -270,7 +270,7 @@ internal static (ж<UDPConn>, error) listenUDP⁔(/*this*/ ж<sysListener> Ꮡsl
 
     Func<context.Context, @string, @string, syscall.RawConn, error> ctrlCtxFn = default;
     if (sl.ListenConfig.Control != nil) {
-        ctrlCtxFn = (context.Context ctxΔ1, @string network, @string address, syscall.RawConn c) => Ꮡsl.Value.ListenConfig.Control(network, address, c);
+        ctrlCtxFn = [GoFunc("(*sysListener).listenUDP.func1")] (context.Context ctxΔ1, @string network, @string address, syscall.RawConn c) => Ꮡsl.Value.ListenConfig.Control(network, address, c);
     }
     var (fd, err) = internetSocket(ctx, sl.network, new UDPAddrжsockaddr(laddr), default, syscall.SOCK_DGRAM, 0, listenˢ, ctrlCtxFn);
     if (err != nil) {
@@ -285,7 +285,7 @@ internal static (ж<UDPConn>, error) listenMulticastUDP⁔(/*this*/ ж<sysListen
 
     Func<context.Context, @string, @string, syscall.RawConn, error> ctrlCtxFn = default;
     if (sl.ListenConfig.Control != nil) {
-        ctrlCtxFn = (context.Context ctxΔ1, @string network, @string address, syscall.RawConn cΔ1) => Ꮡsl.Value.ListenConfig.Control(network, address, cΔ1);
+        ctrlCtxFn = [GoFunc("(*sysListener).listenMulticastUDP.func1")] (context.Context ctxΔ1, @string network, @string address, syscall.RawConn cΔ1) => Ꮡsl.Value.ListenConfig.Control(network, address, cΔ1);
     }
     var (fd, err) = internetSocket(ctx, sl.network, new UDPAddrжsockaddr(Ꮡgaddr), default, syscall.SOCK_DGRAM, 0, listenˢ, ctrlCtxFn);
     if (err != nil) {

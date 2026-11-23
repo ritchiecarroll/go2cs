@@ -503,7 +503,7 @@ public static (ж<url.URL>, error) ProxyFromEnvironment(ж<Request> Ꮡreq) {
 // ProxyURL returns a proxy function (for use in a [Transport])
 // that always returns the same URL.
 public static Func<ж<Request>, (ж<url.URL>, error)> ProxyURL(ж<url.URL> fixedURL) {
-    return (ж<Request> _) => (fixedURL, default);
+    return [GoFunc("ProxyURL.func1")] (ж<Request> _) => (fixedURL, default);
 }
 
 // transportRequest is a wrapper around a *Request that adds
@@ -671,7 +671,7 @@ internal static partial (ж<Response>, error err) roundTrip⁔(/*this*/ ж<Trans
         cancel = Ꮡt.prepareTransportCancel(origReq, cancel);
 
         var cancelʗ1 = cancel;
-        defer(() => {
+        defer([GoFunc("(*Transport).roundTrip.func1")] () => {
             if (err != nil) {
                 cancelʗ1(err);
             }
@@ -952,7 +952,7 @@ internal static void CloseIdleConnections⁔(/*this*/ ж<Transport> Ꮡt) {
         }
     }
     t.connsPerHostMu.Lock();
-    t.dialsInProgress.all((ж<wantConn> w) => {
+    t.dialsInProgress.all([GoFunc("(*Transport).CloseIdleConnections.func1")] (ж<wantConn> w) => {
         if (w.cancelCtx != nil && !w.waiting()) {
             w.cancelCtx();
         }
@@ -973,7 +973,7 @@ internal static Action<error> prepareTransportCancel⁔(/*this*/ ж<Transport> �
     // while the request is in-flight. Callers aren't supposed to reuse a Request
     // until after the response body is closed, so this wouldn't violate any
     // concurrency guarantees.
-    var cancel = (error err) => {
+    var cancel = [GoFunc("(*Transport).prepareTransportCancel.func1")] (error err) => {
         origCancel(err);
         Ꮡt.Value.reqMu.Lock();
         delete(Ꮡt.Value.reqCanceler, req);
@@ -1015,7 +1015,7 @@ internal static Func<ж<url.URL>, (ж<url.URL>, error)> envProxyFuncValue;
 // envProxyFunc returns a function that reads the
 // environment variable to determine the proxy address.
 internal static Func<ж<url.URL>, (ж<url.URL>, error)> envProxyFunc() {
-    ᏑenvProxyOnce.Do(() => {
+    ᏑenvProxyOnce.Do([GoFunc("envProxyFunc.func1")] () => {
         envProxyFuncValue = httpproxy.FromEnvironment().ProxyFunc();
     });
     return envProxyFuncValue;
@@ -1673,7 +1673,7 @@ internal static (ж<persistConn>, error err) getConn⁔(/*this*/ ж<Transport> �
             afterDial: testHookPostPendingDial
         ));
         var wʗ1 = w;
-        defer(() => {
+        defer([GoFunc("(*Transport).getConn.func1")] () => {
             if (err != nil) {
                 wʗ1.cancel(Ꮡt);
             }
@@ -1782,7 +1782,7 @@ internal static partial void startDialConnForLocked⁔(/*this*/ ж<Transport> �
 
     t.dialsInProgress.cleanFrontCanceled();
     t.dialsInProgress.pushBack(w);
-    goǃ(() => {
+    goǃ([GoFunc("(*Transport).startDialConnForLocked.func1")] () => {
         GoFrame ᒐ = default;
         try {
             Ꮡt.dialConnFor(w);
@@ -1906,7 +1906,7 @@ internal static partial error addTLS⁔(/*this*/ ref persistConn pconn, context.
     {
         var d = pconn.t.TLSHandshakeTimeout; if (d != 0) {
             var errcʗ1 = errc;
-            timer = time.AfterFunc(d, () => {
+            timer = time.AfterFunc(d, [GoFunc("(*persistConn).addTLS.func1")] () => {
                 errcʗ1.ᐸꟷ(new tlsHandshakeTimeoutError());
             });
         }
@@ -1914,7 +1914,7 @@ internal static partial error addTLS⁔(/*this*/ ref persistConn pconn, context.
     var errcʗ2 = errc;
     var timerʗ1 = timer;
     var tlsConnʗ1 = tlsConn;
-    goǃ(() => {
+    goǃ([GoFunc("(*persistConn).addTLS.func2")] () => {
         if (Ꮡtrace != nil && Ꮡtrace.Value.TLSHandshakeStart != nil) {
             Ꮡtrace.Value.TLSHandshakeStart();
         }
@@ -1982,7 +1982,7 @@ internal static partial (ж<persistConn> pconn, error err) dialConn⁔(/*this*/ 
             internalStateHook: internalStateHook
         ));
         var trace = httptrace.ContextClientTrace(ctx);
-        error wrapErr(error errΔ1) {
+        [GoFunc("(*Transport).dialConn.func1")] error wrapErr(error errΔ1) {
             if (cm.proxyURL != nil) {
                 // Return a typed error, per Issue 16997
                 return new net.OpErrorжerror(Ꮡ(new net.OpError(Op: "proxyconnect", Net: "tcp", Err: errΔ1)));
@@ -2068,7 +2068,7 @@ internal static partial (ж<persistConn> pconn, error err) dialConn⁔(/*this*/ 
             pconn.isProxy = true;
             {
                 @string pa = cm.proxyAuth(); if (pa != ""u8) {
-                    pconn.mutateHeaderFunc = (Header h) => {
+                    pconn.mutateHeaderFunc = [GoFunc("(*Transport).dialConn.func2")] (Header h) => {
                         h.Set(proxyAuthorizationˢ, pa);
                     };
                 }
@@ -2118,7 +2118,7 @@ internal static partial (ж<persistConn> pconn, error err) dialConn⁔(/*this*/ 
             var connʗ1 = conn;
             var connectReqʗ1 = connectReq;
             var didReadResponseʗ1 = didReadResponse;
-            goǃ(() => {
+            goǃ([GoFunc("(*Transport).dialConn.func3")] () => {
                 GoFrame ᒐ = default;
                 try {
                     defer(ᴛ1 => close(ᴛ1), didReadResponseʗ1, ref ᒐ);
@@ -2562,7 +2562,7 @@ internal static void readLoop⁔(/*this*/ ж<persistConn> Ꮡpc) {
         ref var pc = ref Ꮡpc.DerefOrNull();
 
         ref var closeErr = ref heap<error>(errReadLoopExiting, out var ᏑcloseErr); // default value, if not changed below
-        defer(() => {
+        defer([GoFunc("(*persistConn).readLoop.func1")] () => {
             Ꮡpc.close(ᏑcloseErr.ValueSlot);
             Ꮡpc.Value.t.removeIdleConn(Ꮡpc);
             if (Ꮡpc.Value.internalStateHook != nil) {
@@ -2570,7 +2570,7 @@ internal static void readLoop⁔(/*this*/ ж<persistConn> Ꮡpc) {
             }
         }, ref ᒐ);
 
-        bool tryPutIdleConn(ж<transportRequest> treq) {
+        [GoFunc("(*persistConn).readLoop.func2")] bool tryPutIdleConn(ж<transportRequest> treq) {
             var trace = treq.trace;
             var err = Ꮡpc.Value.t.tryPutIdleConn(Ꮡpc); if (err != nil) {
                 ᏑcloseErr.ValueSlot = err;
@@ -2696,12 +2696,12 @@ internal static void readLoop⁔(/*this*/ ж<persistConn> Ꮡpc) {
                 var waitForBodyReadʗ2 = waitForBodyRead;
             var body = Ꮡ(new bodyEOFSignal(
                 body: resp.Body,
-                earlyCloseFn: () => {
+                earlyCloseFn: [GoFunc("(*persistConn).readLoop.func3")] () => {
                     waitForBodyReadʗ1.ᐸꟷ(false);
                     ᐸꟷ(eofcʗ1); // will be closed by deferred call at the end of the function
                     return default;
                 },
-                fn: (error errΔ1) => {
+                fn: [GoFunc("(*persistConn).readLoop.func4")] (error errΔ1) => {
                     var isEOF = AreEqual(errΔ1, io.EOF);
                     waitForBodyReadʗ2.ᐸꟷ(isEOF);
                     if (isEOF) {
@@ -2884,7 +2884,7 @@ internal static Func<bool> waitForContinue⁔(/*this*/ ж<persistConn> Ꮡpc, /*
         return default;
     }
     var continueChʗ1 = continueCh;
-    return () => {
+    return [GoFunc("(*persistConn).waitForContinue.func1")] () => {
         GoFrame ᒐ = default;
         try {
             var timer = time.NewTimer(Ꮡpc.Value.t.ExpectContinueTimeout);
@@ -3257,7 +3257,7 @@ internal static (ж<Response> resp, error err) roundTrip⁔(/*this*/ ж<persistC
             callerGone: gone
         ));
 
-        (ж<Response>, error) handleResponse(responseAndError re) {
+        [GoFunc("(*persistConn).roundTrip.func1")] (ж<Response>, error) handleResponse(responseAndError re) {
             if ((re.res == nil) == (re.err == nil)) {
                 throw panic(fmt.Sprintf("internal error: exactly one of res or err should be set; nil=%v"u8, re.res == nil));
             }
@@ -3554,7 +3554,7 @@ partial struct eofReader {
 internal static (nint, error) Read⁔(/*this*/ eofReader _Δp0, slice<byte> _Δp1) { return (0, io.EOF); }
 internal static (byte, error) ReadByte⁔(/*this*/ eofReader _) { return (0, io.EOF); }
 
-internal static readonly ж<sync.Pool> ᏑgzipPool = new StaticBox<sync.Pool>(new sync.Pool(New: () => @new<gzip.Reader>()));
+internal static readonly ж<sync.Pool> ᏑgzipPool = new StaticBox<sync.Pool>(new sync.Pool(New: [GoFunc("init.func17")] () => @new<gzip.Reader>()));
 internal static ref sync.Pool gzipPool => ref ((StaticBox<sync.Pool>)ᏑgzipPool).ValueSlot;
 
 // gzipPoolGet gets a gzip.Reader from the pool and resets it to read from r.

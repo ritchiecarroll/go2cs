@@ -569,7 +569,7 @@ internal static (slice<byte>, error) encodeSignature(slice<byte> r, slice<byte> 
     ref var b = ref heap(new cryptobyte.Builder(), out var Ꮡb);
     var rʗ1 = r;
     var sʗ1 = s;
-    Ꮡb.AddASN1(asn1.SEQUENCE, (ж<cryptobyte.Builder> bΔ1) => {
+    Ꮡb.AddASN1(asn1.SEQUENCE, [GoFunc("encodeSignature.func1")] (ж<cryptobyte.Builder> bΔ1) => {
         addASN1IntBytes(bΔ1, rʗ1);
         addASN1IntBytes(bΔ1, sʗ1);
     });
@@ -593,7 +593,7 @@ internal static void addASN1IntBytes(ж<cryptobyte.Builder> Ꮡb, slice<byte> by
         return;
     }
     var bytesʗ1 = bytes;
-    Ꮡb.AddASN1(asn1.INTEGER, (ж<cryptobyte.Builder> c) => {
+    Ꮡb.AddASN1(asn1.INTEGER, [GoFunc("addASN1IntBytes.func1")] (ж<cryptobyte.Builder> c) => {
         if ((byte)(bytesʗ1[0] & 0x80) != 0) {
             c.AddUint8(0);
         }
@@ -740,7 +740,7 @@ internal static (ж<ecdsa.PrivateKey>, error) privateKeyToFIPS<P>(ж<ecdsa.Curve
 
     var Dʗ2 = D;
     var Qʗ2 = Q;
-    return ᏑprivateKeyCache.Get(Ꮡpriv, () => ecdsa.NewPrivateKey(c, Dʗ1, Qʗ1), (ж<ecdsa.PrivateKey> k) => subtle.ConstantTimeCompare(k.PublicKey().Bytes(), Qʗ2) == 1 && subtle.ConstantTimeCompare(k.Bytes(), Dʗ2) == 1);
+    return ᏑprivateKeyCache.Get(Ꮡpriv, [GoFunc("privateKeyToFIPS[...].func1")] () => ecdsa.NewPrivateKey(c, Dʗ1, Qʗ1), [GoFunc("privateKeyToFIPS[...].func2")] (ж<ecdsa.PrivateKey> k) => subtle.ConstantTimeCompare(k.PublicKey().Bytes(), Qʗ2) == 1 && subtle.ConstantTimeCompare(k.Bytes(), Dʗ2) == 1);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

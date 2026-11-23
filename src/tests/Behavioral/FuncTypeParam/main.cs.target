@@ -38,19 +38,19 @@ internal static void main() {
     ref var v = ref heap(new atomic.Int32(), out var Ꮡv);
     Ꮡv.Store(10);
 
-    nint n = apply(Ꮡv, (ж<atomic.Int32> x) => (nint)x.Load() + 5);
+    nint n = apply(Ꮡv, [GoFunc("main.func1")] (ж<atomic.Int32> x) => (nint)x.Load() + 5);
     fmt.Println(n);
 
-    consume(Ꮡv, (ж<atomic.Int32> x) => {
+    consume(Ꮡv, [GoFunc("main.func2")] (ж<atomic.Int32> x) => {
         x.Store(99);
     });
     fmt.Println(Ꮡv.Load());
 
-    var @double = new runner(gen: (ж<atomic.Int32> x) => (nint)x.Load() * 2
+    var @double = new runner(gen: [GoFunc("main.func3")] (ж<atomic.Int32> x) => (nint)x.Load() * 2
     );
     fmt.Println(@double.invoke(Ꮡv));
 
-    var seven = new runner(gen: (ж<atomic.Int32> x) => 7
+    var seven = new runner(gen: [GoFunc("main.func4")] (ж<atomic.Int32> x) => 7
     );
     fmt.Println(seven.invoke(Ꮡv));
 

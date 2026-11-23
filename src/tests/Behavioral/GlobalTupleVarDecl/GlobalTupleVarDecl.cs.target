@@ -47,7 +47,7 @@ partial struct sval {
 internal static @string String(this sval v) { return v.s; }
 
 internal static (stringer, Func<nint>) ifaceAndFunc() {
-    return (new sval(s: "iface"), () => 9);
+    return (new sval(s: "iface"), [GoFunc("ifaceAndFunc.func1")] () => 9);
 }
 
 } // end main_package

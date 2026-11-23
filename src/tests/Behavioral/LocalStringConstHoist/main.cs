@@ -57,7 +57,7 @@ internal static @string labelTwo() {
 
 internal static @string shadow() {
     @string s = "outer-scope";
-    @string inner() {
+    [GoFunc("shadow.func1")] @string inner() {
         @string sΔ1 = "inner-scope";
         return sΔ1;
     }
@@ -66,7 +66,7 @@ internal static @string shadow() {
 
 internal static Func<@string> closure() {
     @string captured = "captured-const";
-    return () => captured;
+    return [GoFunc("closure.func1")] () => captured;
 }
 
 internal static nint empty() {

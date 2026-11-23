@@ -380,7 +380,7 @@ internal static (ж<Var>, ж<TypeParamList>) collectRecv⁔(/*this*/ ж<Checker>
     // the receiver type is dependent on (see go.dev/issue/51232, go.dev/issue/51233).
     var rbaseʗ1 = rbase;
     var recvʗ1 = recv;
-    check.later(() => {
+    check.later([GoFunc("(*Checker).collectRecv.func1")] () => {
         Ꮡcheck.validRecv(new ast_Exprᴠpositioner(rbaseʗ1), recvʗ1);
     }).describef(new Varжpositioner(recv), "validRecv(%s)", recv.OrTypedNil());
 

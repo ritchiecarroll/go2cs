@@ -1312,6 +1312,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckLiteralFloatConstFold() => CheckTarget("LiteralFloatConstFold");
 
     [TestMethod]
+    public void CheckLiteralFrameNames() => CheckTarget("LiteralFrameNames");
+
+    [TestMethod]
     public void CheckLocalFunctionEmission() => CheckTarget("LocalFunctionEmission");
 
     [TestMethod]

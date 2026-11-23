@@ -33,7 +33,7 @@ internal static uint64 put⁔(/*this*/ ж<traceStringTable> Ꮡt, uintptr gen, @
     var (id, added) = Ꮡt.Ꮡtab.put((~ss).str, (uintptr)(~ss).len);
     if (added) {
         // Write the string to the buffer.
-        systemstack(() => {
+        systemstack([GoFunc("(*traceStringTable).put.func1")] () => {
             Ꮡt.writeString(gen, id, Ꮡs.Value);
         });
     }
@@ -47,7 +47,7 @@ internal static uint64 emit⁔(/*this*/ ж<traceStringTable> Ꮡt, uintptr gen, 
     }
     // Grab an ID and write the string to the buffer.
     var id = Ꮡt.Ꮡtab.stealID();
-    systemstack(() => {
+    systemstack([GoFunc("(*traceStringTable).emit.func1")] () => {
         Ꮡt.writeString(gen, id, s);
     });
     return id;
@@ -96,7 +96,7 @@ internal static void reset⁔(/*this*/ ж<traceStringTable> Ꮡt, uintptr gen) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (t.buf != nil) {
-        systemstack(() => {
+        systemstack([GoFunc("(*traceStringTable).reset.func1")] () => {
             @lock(Ꮡtrace.of(traceᴛ1.Ꮡlock));
             traceBufFlush(Ꮡt.Value.buf, gen);
             unlock(Ꮡtrace.of(traceᴛ1.Ꮡlock));

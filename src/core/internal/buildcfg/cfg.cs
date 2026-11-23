@@ -428,7 +428,7 @@ internal static nint goriscv64() {
     }}
     Error = fmt.Errorf("invalid GORISCV64: must be rva20u64, rva22u64, rva23u64"u8);
     @string v = DefaultGORISCV64[(int)(len("rva"))..];
-    nint i = strings.IndexFunc(v, (rune r) => r < '0' || r > '9');
+    nint i = strings.IndexFunc(v, [GoFunc("goriscv64.func1")] (rune r) => r < '0' || r > '9');
     var (year, _) = strconv.Atoi(v.slice(0, i));
     return year;
 }

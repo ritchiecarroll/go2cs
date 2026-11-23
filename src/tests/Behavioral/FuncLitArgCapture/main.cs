@@ -38,10 +38,10 @@ internal static nint nestedStructCapture() {
     var @out = new channel<nint>(1);
     var outʗ1 = @out;
     var pʗ1 = p;
-    [MethodImpl(MethodImplOptions.NoInlining)] void outer() {
+    [MethodImpl(MethodImplOptions.NoInlining), GoFunc("nestedStructCapture.func1")] void outer() {
         var outʗ2 = outʗ1;
         var pʗ2 = pʗ1;
-        goǃ(() => {
+        goǃ([GoFunc("nestedStructCapture.func1.1")] () => {
             outʗ2.ᐸꟷ(pʗ2.sum());
         });
     }
@@ -52,12 +52,12 @@ internal static nint nestedStructCapture() {
 internal static partial nint selfRefCapture() {
     var done = new channel<nint>(1);
     var doneʗ1 = done;
-    void worker(Action cb) {
+    [GoFunc("selfRefCapture.func1")] void worker(Action cb) {
         cb();
         doneʗ1.ᐸꟷ(5);
     }
     var workerʗ1 = worker;
-    goǃ(workerʗ1, () => {
+    goǃ(workerʗ1, [GoFunc("selfRefCapture.func2")] () => {
     });
     return ᐸꟷ(done);
 }
@@ -67,7 +67,7 @@ internal static void deferArgCapture(ж<box> @out) {
     try {
         var pf = @out;
         var pfʗ1 = pf;
-        defer(run, () => {
+        defer(run, [GoFunc("deferArgCapture.func1")] () => {
             pfʗ1.x = 77;
         }, ref ᒐ);
         pf.x = 5;
@@ -79,14 +79,14 @@ internal static void deferArgCapture(ж<box> @out) {
 internal static nint nestedArgLiteralCapture() {
     var total = new channel<nint>(1);
     var totalʗ1 = total;
-    run([MethodImpl(MethodImplOptions.NoInlining)] () => {
+    run([MethodImpl(MethodImplOptions.NoInlining), GoFunc("nestedArgLiteralCapture.func1")] () => {
         var items = slice<nint>([1, 2, 3]);
         var done = new channel<nint>(len(items));
         foreach (var i in range(len(items))) {
             nint iΔ1 = i;
             var doneʗ1 = done;
             var itemsʗ1 = items;
-            goǃ(() => {
+            goǃ([GoFunc("nestedArgLiteralCapture.func1.1")] () => {
                 doneʗ1.ᐸꟷ(itemsʗ1[iΔ1] * 10);
             });
         }
@@ -101,27 +101,27 @@ internal static nint nestedArgLiteralCapture() {
 
 internal static void main() {
     ref var m = ref heap(new box(), out var Ꮡm);
-    run(() => {
+    run([GoFunc("main.func1")] () => {
         set(ref (Ꮡm).DerefOrNull());
     });
     fmt.Println("1:", m.x);
 
     ref var n = ref heap(new box(), out var Ꮡn);
-    run(() => {
+    run([GoFunc("main.func2")] () => {
         set(ref (Ꮡn).DerefOrNull());
         Ꮡn.Value.y = Ꮡn.Value.x + 1;
     });
     fmt.Println("2:", n.x, n.y);
 
     ref var c = ref heap(new box(), out var Ꮡc);
-    run(() => {
+    run([GoFunc("main.func3")] () => {
         var p = Ꮡc.Ꮡx;
         p.Value = 99;
     });
     fmt.Println("3:", c.x);
 
     ref var d = ref heap(new box(), out var Ꮡd);
-    void f() {
+    [GoFunc("main.func4")] void f() {
         set(ref (Ꮡd).DerefOrNull());
     }
     f();
@@ -130,37 +130,37 @@ internal static void main() {
     ref var e = ref heap(new box(), out var Ꮡe);
     var pe = Ꮡe;
     var peʗ1 = pe;
-    run(() => {
+    run([GoFunc("main.func5")] () => {
         peʗ1.x = 11;
         peʗ1.y = peʗ1.x + 1;
     });
     fmt.Println("5:", e.x, e.y);
 
     gPtr = Ꮡe;
-    run(() => {
+    run([GoFunc("main.func6")] () => {
         gPtr.x = gVal.x;
     });
     fmt.Println("6:", e.x);
 
     var vals = slice<nint>([5]);
     var valsʗ1 = vals;
-    nint adder(nint k) => k + valsʗ1[0];
+    [GoFunc("main.func7")] nint adder(nint k) => k + valsʗ1[0];
     fmt.Println("7:", adder(10));
 
     var @base = slice<nint>([3]);
         var baseʗ1 = @base;
-    var handlers = slice<Func<nint, nint>>([
-        (nint k) => k + baseʗ1[0]
-    ]);
+    var handlers = new Func<nint, nint>[]{
+        [GoFunc("main.func8")] (nint k) => k + baseʗ1[0]
+    }.slice();
     fmt.Println("8:", handlers[0](100));
 
     var seed = slice<nint>([2]);
 
     var seedʗ1 = seed;
-    Func<nint, nint> mul = (nint k) => k * seedʗ1[0];
+    Func<nint, nint> mul = [GoFunc("main.func9")] (nint k) => k * seedʗ1[0];
     fmt.Println("9:", mul(21));
 
-    (nint x, bool ok) pick(nint sel) {
+    [GoFunc("main.func10")] (nint x, bool ok) pick(nint sel) {
         nint x = default;
         bool ok = default;
         if (sel > 0) {
@@ -174,7 +174,7 @@ internal static void main() {
     var (zx, zok) = pick(-1);
     fmt.Println("10:", a, b, zx, zok);
 
-    (nint n, @string s) zero() {
+    [GoFunc("main.func11")] (nint n, @string s) zero() {
         nint nΔ1 = default;
         @string s = default;
         return (nΔ1, s);

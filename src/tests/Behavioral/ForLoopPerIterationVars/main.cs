@@ -22,7 +22,7 @@ internal static void g1() {
     slice<Func<nint>> fs = default;
     for (nint iᴛ1 = 0; iᴛ1 < 3; iᴛ1++) {
         var i = iᴛ1;
-        fs = append(fsᴷ, fs, () => i);
+        fs = append(fsᴷ, fs, [GoFunc("g1.func1")] () => i);
     }
     fmt.Println("g1:", fs[0](), fs[1](), fs[2]());
 }
@@ -38,7 +38,7 @@ internal static void g2() {
             continue;
         }
         i++;
-        fs = append(fsᴷ, fs, () => i);
+        fs = append(fsᴷ, fs, [GoFunc("g2.func1")] () => i);
         iᴛ1 = i;
     }
     fmt.Println("g2:", len(fs));
@@ -71,7 +71,7 @@ internal static void g4() {
         var p = Ꮡi;
         var iʗ1 = i;
         var pʗ1 = p;
-        fs = append(fsᴷ, fs, () => {
+        fs = append(fsᴷ, fs, [GoFunc("g4.func1")] () => {
             fmt.Println("g4:", pʗ1.Value, iʗ1);
         });
         iᴛ1 = i;
@@ -96,7 +96,7 @@ outer:
             }
             _ = j;
         }
-        fs = append(fsᴷ, fs, () => i);
+        fs = append(fsᴷ, fs, [GoFunc("g5.func1")] () => i);
 continue_outer:;
         iᴛ1 = i;
     }
@@ -115,9 +115,9 @@ internal static void g6() {
         var i = iᴛ1;
         for (nint iΔ1ᴛ1 = 10; iΔ1ᴛ1 < 12; iΔ1ᴛ1++) {
             var iΔ1 = iΔ1ᴛ1;
-            fs = append(fsᴷ, fs, () => iΔ1);
+            fs = append(fsᴷ, fs, [GoFunc("g6.func1")] () => iΔ1);
         }
-        fs = append(fs, () => i);
+        fs = append(fs, [GoFunc("g6.func2")] () => i);
     }
     foreach (var (_, f) in range(fs)) {
         fmt.Println("g6:", f());
@@ -131,7 +131,7 @@ internal static void g7() {
     for ((nint iᴛ1, nint j) = (0, 100); iᴛ1 < 3; (iᴛ1, j) = (iᴛ1 + 1, j + 2)) {
         var i = iᴛ1;
         _ = j;
-        fs = append(fsᴷ, fs, () => i);
+        fs = append(fsᴷ, fs, [GoFunc("g7.func1")] () => i);
     }
     fmt.Println("g7:", fs[0](), fs[1](), fs[2]());
 }
@@ -148,7 +148,7 @@ internal static void g8() {
         ref var s = ref heap<pt>(out var Ꮡs);
         s = sᴛ1;
         var sʗ1 = s;
-        fs = append(fsᴷ, fs, () => sʗ1.x);
+        fs = append(fsᴷ, fs, [GoFunc("g8.func1")] () => sʗ1.x);
         sᴛ1 = s;
     }
     fmt.Println("g8:", fs[0](), fs[1](), fs[2]());
@@ -158,7 +158,7 @@ internal static void g9() {
     nint sum = 0;
     for (nint iᴛ1 = 0; iᴛ1 < 3; iᴛ1++) {
         var i = iᴛ1;
-        func(() => {
+        func([GoFunc("g9.func1")] () => {
             i++;
         })();
         sum += i;

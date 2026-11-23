@@ -275,7 +275,7 @@ public static (Func<(V, bool)> next, Action stop) Pull<V>(Seq<V> seq) {
     Action stop = default;
 
     ref var pull = ref heap(new Pull_pull<V>(), out var Ꮡpull);
-    var c = newcoro((ж<coro> cΔ1) => {
+    var c = newcoro([GoFunc("Pull[...].func1")] (ж<coro> cΔ1) => {
         GoFrame ᒐ = default;
         try {
             race.Acquire(@unsafe.Pointer.FromPinnedBox(Ꮡpull.of(Pull_pull<V>.Ꮡracer)));
@@ -283,7 +283,7 @@ public static (Func<(V, bool)> next, Action stop) Pull<V>(Seq<V> seq) {
                 race.Release(@unsafe.Pointer.FromPinnedBox(Ꮡpull.of(Pull_pull<V>.Ꮡracer)));
                 return;
             }
-            var yield = (V v1) => {
+            var yield = [GoFunc("Pull[...].func1.1")] (V v1) => {
                 if (Ꮡpull.Value.done) {
                     return false;
                 }
@@ -298,7 +298,7 @@ public static (Func<(V, bool)> next, Action stop) Pull<V>(Seq<V> seq) {
                 return !Ꮡpull.Value.done;
             };
             // Recover and propagate panics from seq.
-            defer(() => {
+            defer([GoFunc("Pull[...].func1.2")] () => {
                 var p = recover(); if (p != nil) {
                     Ꮡpull.Value.panicValue = p;
                 } else if (!Ꮡpull.Value.seqDone) {
@@ -316,7 +316,7 @@ public static (Func<(V, bool)> next, Action stop) Pull<V>(Seq<V> seq) {
         finally { ᒐ.Run(); }
     });
     var cʗ1 = c;
-    next = () => {
+    next = [GoFunc("Pull[...].func2")] () => {
         V v1 = GoZero<V>();
         bool ok1 = default;
         race.Write(@unsafe.Pointer.FromPinnedBox(Ꮡpull.of(Pull_pull<V>.Ꮡracer))); // detect races
@@ -344,7 +344,7 @@ public static (Func<(V, bool)> next, Action stop) Pull<V>(Seq<V> seq) {
         return (Ꮡpull.Value.v, Ꮡpull.Value.ok);
     };
     var cʗ2 = c;
-    stop = () => {
+    stop = [GoFunc("Pull[...].func3")] () => {
         race.Write(@unsafe.Pointer.FromPinnedBox(Ꮡpull.of(Pull_pull<V>.Ꮡracer))); // detect races
 
         if (!Ꮡpull.Value.done) {
@@ -405,7 +405,7 @@ public static (Func<(K, V, bool)> next, Action stop) Pull2<K, V>(Seq2<K, V> seq)
     Action stop = default;
 
     ref var pull = ref heap(new Pull2_pull<K, V>(), out var Ꮡpull);
-    var c = newcoro((ж<coro> cΔ1) => {
+    var c = newcoro([GoFunc("Pull2[...].func1")] (ж<coro> cΔ1) => {
         GoFrame ᒐ = default;
         try {
             race.Acquire(@unsafe.Pointer.FromPinnedBox(Ꮡpull.of(Pull2_pull<K, V>.Ꮡracer)));
@@ -413,7 +413,7 @@ public static (Func<(K, V, bool)> next, Action stop) Pull2<K, V>(Seq2<K, V> seq)
                 race.Release(@unsafe.Pointer.FromPinnedBox(Ꮡpull.of(Pull2_pull<K, V>.Ꮡracer)));
                 return;
             }
-            var yield = (K k1, V v1) => {
+            var yield = [GoFunc("Pull2[...].func1.1")] (K k1, V v1) => {
                 if (Ꮡpull.Value.done) {
                     return false;
                 }
@@ -428,7 +428,7 @@ public static (Func<(K, V, bool)> next, Action stop) Pull2<K, V>(Seq2<K, V> seq)
                 return !Ꮡpull.Value.done;
             };
             // Recover and propagate panics from seq.
-            defer(() => {
+            defer([GoFunc("Pull2[...].func1.2")] () => {
                 var p = recover(); if (p != nil) {
                     Ꮡpull.Value.panicValue = p;
                 } else if (!Ꮡpull.Value.seqDone) {
@@ -447,7 +447,7 @@ public static (Func<(K, V, bool)> next, Action stop) Pull2<K, V>(Seq2<K, V> seq)
         finally { ᒐ.Run(); }
     });
     var cʗ1 = c;
-    next = () => {
+    next = [GoFunc("Pull2[...].func2")] () => {
         K k1 = GoZero<K>();
         V v1 = GoZero<V>();
         bool ok1 = default;
@@ -476,7 +476,7 @@ public static (Func<(K, V, bool)> next, Action stop) Pull2<K, V>(Seq2<K, V> seq)
         return (Ꮡpull.Value.k, Ꮡpull.Value.v, Ꮡpull.Value.ok);
     };
     var cʗ2 = c;
-    stop = () => {
+    stop = [GoFunc("Pull2[...].func3")] () => {
         race.Write(@unsafe.Pointer.FromPinnedBox(Ꮡpull.of(Pull2_pull<K, V>.Ꮡracer))); // detect races
 
         if (!Ꮡpull.Value.done) {

@@ -189,7 +189,7 @@ internal static void main() {
         mainStarted = true;
 
         if (haveSysmon) {
-            systemstack(() => {
+            systemstack([GoFunc("main.func1")] () => {
                 newm(sysmon, nil, -1);
             });
         }
@@ -222,7 +222,7 @@ internal static void main() {
 
         // Defer unlock so that runtime.Goexit during init does the unlock too.
         var needUnlock = true;
-        defer(() => {
+        defer([GoFunc("main.func2")] () => {
             if (needUnlock) {
                 unlockOSThread();
             }
@@ -371,7 +371,7 @@ internal static void os_beforeExit(nint exitCode) {
 
 /* [GoInit] runtime bootstrap init - not run; .NET is the runtime */ internal static void initΔ6() {
     exithook.Gosched = Gosched;
-    exithook.Goid = () => (~getg()).goid;
+    exithook.Goid = [GoFunc("init.6.func1")] () => (~getg()).goid;
     exithook.Throw = @throw;
 }
 
@@ -451,7 +451,7 @@ internal static void goparkunlock(ж<mutex> @lock, waitReason reason, traceBlock
 //
 //go:linkname goready
 internal static void goready(ж<g> gp, nint traceskip) {
-    systemstack(() => {
+    systemstack([GoFunc("goready.func1")] () => {
         ready(gp, traceskip, true);
     });
 }
@@ -608,7 +608,7 @@ internal static void badmorestackg0() {
 
     var g = getg();
     var gʗ1 = g;
-    switchToCrashStack(() => {
+    switchToCrashStack([GoFunc("badmorestackg0.func1")] () => {
         print((@string)"runtime: morestack on g0, stack [", (hex)(uint64)(~gʗ1).stack.lo, (@string)" ", (hex)(uint64)(~gʗ1).stack.hi, (@string)"], sp=", (hex)(uint64)(~gʗ1).sched.sp, (@string)", called from\n");
         gʗ1.Value.m.Value.traceback = 2; // include pc and sp in stack trace
         traceback1((~gʗ1).sched.pc, (~gʗ1).sched.sp, (~gʗ1).sched.lr, gʗ1, 0);
@@ -1331,7 +1331,7 @@ internal static void casgstatus(ж<g> Ꮡgp, uint32 oldval, uint32 newval) {
     ref var gp = ref Ꮡgp.DerefOrNull();
 
     if (((oldval & (uint32)_Gscan) != 0) || ((newval & (uint32)_Gscan) != 0) || oldval == newval) {
-        systemstack(() => {
+        systemstack([GoFunc("casgstatus.func1")] () => {
             // Call on the systemstack to prevent print and throw from counting
             // against the nosplit stack reservation.
             print((@string)"runtime: casgstatus: oldval=", (hex)(uint64)oldval, (@string)" newval=", (hex)(uint64)newval, (@string)"\n");
@@ -1349,7 +1349,7 @@ internal static void casgstatus(ж<g> Ꮡgp, uint32 oldval, uint32 newval) {
     // GC time to finish and change the state to oldval.
     for (nint i = 0; !Ꮡgp.of(g.Ꮡatomicstatus).CompareAndSwap(oldval, newval); i++) {
         if (oldval == _Gwaiting && Ꮡgp.of(g.Ꮡatomicstatus).Load() == _Grunnable) {
-            systemstack(() => {
+            systemstack([GoFunc("casgstatus.func2")] () => {
                 // Call on the systemstack to prevent throw from counting
                 // against the nosplit stack reservation.
                 @throw(casgstatusWaitingForˢ);
@@ -1369,7 +1369,7 @@ internal static void casgstatus(ж<g> Ꮡgp, uint32 oldval, uint32 newval) {
     }
 
     if (gp.bubble != nil) {
-        systemstack(() => {
+        systemstack([GoFunc("casgstatus.func3")] () => {
             Ꮡgp.Value.bubble.changegstatus(Ꮡgp, oldval, newval);
         });
     }
@@ -2160,7 +2160,7 @@ found:
 // The caller must hold worldsema. fn must not refer to any
 // part of the current goroutine's stack, since the GC may move it.
 internal static void forEachP(waitReason reason, Action<ж<p>> fn) {
-    systemstack(() => {
+    systemstack([GoFunc("forEachP.func1")] () => {
         var gp = getg().Value.m.Value.curg;
         // Mark the user stack as preemptible so that it may be scanned
         // by the GC or observed by the execution tracer. Otherwise, our
@@ -2369,7 +2369,7 @@ internal static ж<m> allocm(ж<p> pp, Action fn, int64 id) {
                 // reachable off the system stack transitively from
                 // startm.
                 var freemʗ1 = freem;
-                systemstack(() => {
+                systemstack([GoFunc("allocm.func1")] () => {
                     stackfree((~(~freemʗ1).g0).stack);
                     if (valgrindenabled) {
                         valgrindDeregisterStack((~(~freemʗ1).g0).valgrindStackID);
@@ -5007,7 +5007,7 @@ internal static ж<g> malg(int32 stacksize) {
     if (stacksize >= 0) {
         stacksize = round2((int32)stackSystem + stacksize);
         var newgʗ1 = newg;
-        systemstack(() => {
+        systemstack([GoFunc("malg.func1")] () => {
             newgʗ1.Value.stack = @stackalloc((uint32)stacksize);
             if (valgrindenabled) {
                 newgʗ1.Value.valgrindStackID = valgrindRegisterStack((@unsafe.Pointer)(~newgʗ1).stack.lo, (@unsafe.Pointer)(~newgʗ1).stack.hi);
@@ -5029,7 +5029,7 @@ internal static void newproc(ж<funcval> fn) {
     var gp = getg();
     var pc = sys.GetCallerPC();
     var gpʗ1 = gp;
-    systemstack(() => {
+    systemstack([GoFunc("newproc.func1")] () => {
         var newg = newproc1(fn, gpʗ1, pc, false, waitReasonZero);
 
         var pp = (~(~getg()).m).p.ptr();
@@ -5286,7 +5286,7 @@ retry:
         // right size when the goroutine was put on the free list, but
         // the right size has changed since then.
         var gpʗ1 = gp;
-        systemstack(() => {
+        systemstack([GoFunc("gfget.func1")] () => {
             stackfree((~gpʗ1).stack);
             gpʗ1.Value.stack.lo = 0;
             gpʗ1.Value.stack.hi = 0;
@@ -5300,7 +5300,7 @@ retry:
     if ((~gp).stack.lo == 0) {
         // Stack was deallocated in gfput or just above. Allocate a new one.
         var gpʗ2 = gp;
-        systemstack(() => {
+        systemstack([GoFunc("gfget.func2")] () => {
             gpʗ2.Value.stack = @stackalloc(startingStackSize);
             if (valgrindenabled) {
                 gpʗ2.Value.valgrindStackID = valgrindRegisterStack((@unsafe.Pointer)(~gpʗ2).stack.lo, (@unsafe.Pointer)(~gpʗ2).stack.hi);
@@ -5680,7 +5680,7 @@ internal static void destroy⁔(/*this*/ ж<p> Ꮡpp) {
     pp.pinnerCache = default;
     clear(pp.deferpoolbuf[..]);
     pp.deferpool = pp.deferpoolbuf[..0];
-    systemstack(() => {
+    systemstack([GoFunc("(*p).destroy.func1")] () => {
         for (nint i = 0; i < Ꮡpp.Value.mspancache.len; i++) {
             // Safe to call since the world is stopped.
             Ꮡmheap_.Ꮡspanalloc.free(@unsafe.Pointer.FromPinnedBox(Ꮡpp.Value.mspancache.buf[i]));
@@ -6015,14 +6015,14 @@ internal static void wirep(ж<p> Ꮡpp) {
     if ((~(~gp).m).p != 0) {
         // Call on the systemstack to avoid a nosplit overflow build failure
         // on some platforms when built with -N -l. See #64113.
-        systemstack(() => {
+        systemstack([GoFunc("wirep.func1")] () => {
             @throw(wirepAlreadyInGoˢ);
         });
     }
     if (pp.m != 0 || pp.status != _Pidle) {
         // Call on the systemstack to avoid a nosplit overflow build failure
         // on some platforms when built with -N -l. See #64113.
-        systemstack(() => {
+        systemstack([GoFunc("wirep.func2")] () => {
             var id = (int64)0;
             if (Ꮡpp.Value.m != 0) {
                 id = Ꮡpp.Value.m.ptr().Value.id;
@@ -6140,7 +6140,7 @@ internal static void checkdead() {
     }
 
     nint grunning = 0;
-    forEachG((ж<g> gp) => {
+    forEachG([GoFunc("checkdead.func1")] (ж<g> gp) => {
         if (isSystemGoroutine(gp, false)) {
             return;
         }
@@ -6718,7 +6718,7 @@ internal static void schedtrace(bool detailed) {
         print((@string)"\n");
     }
 
-    forEachG((ж<g> gp) => {
+    forEachG([GoFunc("schedtrace.func1")] (ж<g> gp) => {
         print((@string)"  G", (~gp).goid, (@string)": status=", readgstatus(gp), (@string)"(", (~gp).waitreason.String(), (@string)") m=");
         if ((~gp).m != nil) {
             print((~(~gp).m).id);
@@ -7334,7 +7334,7 @@ internal static void runqputbatch(ж<p> Ꮡpp, ж<gQueue> Ꮡq) {
     }
 
     if (randomizeScheduler) {
-        uint32 off(uint32 o) => (Ꮡpp.Value.runqtail + o) % (uint32)len(Ꮡpp.Value.runq);
+        [GoFunc("runqputbatch.func1")] uint32 off(uint32 o) => (Ꮡpp.Value.runqtail + o) % (uint32)len(Ꮡpp.Value.runq);
         for (var i = (uint32)1; i < n; i++) {
             var j = cheaprandn(i + 1);
             (pp.runq[off(i)], pp.runq[off(j)]) = (pp.runq[off(j)], pp.runq[off(i)]);

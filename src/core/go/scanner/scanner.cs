@@ -53,7 +53,7 @@ partial struct Scanner {
 
 // Provide go/parser with backdoor access to the StringEnd information.
 [GoInit] internal static void init() {
-    scannerhooks.StringEnd = (any scanner) => scanner._<ж<Scanner>>().stringEnd;
+    scannerhooks.StringEnd = [GoFunc("init.0.func1")] (any scanner) => scanner._<ж<Scanner>>().stringEnd;
 }
 
 internal static UntypedInt bom => 0xFEFF; // byte order mark, only permitted as very first character

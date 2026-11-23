@@ -439,7 +439,7 @@ internal static slice<ж<Flag>> sortFlags(map<@string, ж<Flag>> flags) {
         result[i] = f;
         i++;
     }
-    slices.SortFunc(result, (ж<Flag> a, ж<Flag> b) => strings.Compare(a.Name, b.Name));
+    slices.SortFunc(result, [GoFunc("sortFlags.func1")] (ж<Flag> a, ж<Flag> b) => strings.Compare(a.Name, b.Name));
     return result;
 }
 
@@ -572,7 +572,7 @@ internal static (bool ok, error err) isZeroValue(ж<Flag> Ꮡflag, @string value
         // Catch panics calling the String method, which shouldn't prevent the
         // usage message from being printed, but that we should report to the
         // user so that they know to fix their code.
-        defer(() => {
+        defer([GoFunc("isZeroValue.func1")] () => {
             var e = recover(); if (e != nil) {
                 if (Ꮡtyp.ValueSlot.Kind() == reflect.Pointer) {
                     Ꮡtyp.ValueSlot = Ꮡtyp.ValueSlot.Elem();
@@ -668,7 +668,7 @@ internal static void PrintDefaults⁔(/*this*/ ж<FlagSet> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     ref var isZeroValueErrs = ref heap<slice<error>>(out var ᏑisZeroValueErrs);
-    f.VisitAll((ж<Flag> flag) => {
+    f.VisitAll([GoFunc("(*FlagSet).PrintDefaults.func1")] (ж<Flag> flag) => {
         ref var b = ref heap(new strings.Builder(), out var Ꮡb);
         fmt.Fprintf(new strings_BuilderжWriter(Ꮡb), "  -%s"u8, flag.Name); // Two spaces before -; see next two comments.
         var (name, usage) = UnquoteUsage(flag);
@@ -767,7 +767,7 @@ internal static void defaultUsage⁔(/*this*/ ж<FlagSet> Ꮡf) {
 // Custom usage functions may choose to exit the program; by default exiting
 // happens anyway as the command line's error handling strategy is set to
 // [ExitOnError].
-[GoLazy] partial class lazyᴛUsage { public static readonly ж<Action> ᏑUsage = new StaticBox<Action>(() => {
+[GoLazy] partial class lazyᴛUsage { public static readonly ж<Action> ᏑUsage = new StaticBox<Action>([GoFunc("init.func1")] () => {
     fmt.Fprintf(CommandLine.Output(), "Usage of %s:\n"u8, os.Args[0]);
     PrintDefaults();
 }); }

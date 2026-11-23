@@ -84,7 +84,7 @@ internal static bool representableConst(constant.Value x, ж<Checker> Ꮡcheck, 
     }
 
     var confʗ1 = conf;
-    int64 @sizeof(Type T) {
+    [GoFunc("representableConst.func1")] int64 @sizeof(Type T) {
         var s = confʗ1.@sizeof(T);
         return s;
     }

@@ -180,7 +180,7 @@ internal static (Trace, error) parse⁔(/*this*/ ж<parser> Ꮡp) {
     try {
         ref var p = ref Ꮡp.DerefOrNull();
 
-        defer(() => {
+        defer([GoFunc("(*parser).parse.func1")] () => {
             Ꮡp.Value.data = default;
         }, ref ᒐ);
 
@@ -361,7 +361,7 @@ internal static (ж<Event>, bool) Peek⁔(/*this*/ ref Events l) {
 }
 
 internal static Action<Func<ж<Event>, bool>> All⁔(/*this*/ ж<Events> Ꮡl) {
-    return (Func<ж<Event>, bool> yield) => {
+    return [GoFunc("(*Events).All.func1")] (Func<ж<Event>, bool> yield) => {
         for (nint i = 0; i < Ꮡl.Value.Len(); i++) {
             var (a, b) = Ꮡl.Value.index(i + Ꮡl.Value.off);
             var ptr = Ꮡl.Value.buckets[a].at<Event>(b);
@@ -389,7 +389,7 @@ internal static (Events, error) parseEventBatches⁔(/*this*/ ref parser p) {
     // with original timestamps corresponding to when ReadTrace pulled the data
     // off of the profBuf queue. Re-sort them by the timestamp we captured
     // inside the signal handler.
-    slices.SortFunc(p.cpuSamples, (Event a, Event b) => {
+    slices.SortFunc(p.cpuSamples, [GoFunc("(*parser).parseEventBatches.func1")] (Event a, Event b) => {
         a = a.ΔClone();
         b = b.ΔClone();
         return cmp.Compare(a.Ts, b.Ts);
@@ -1098,7 +1098,7 @@ internal static error postProcessTrace⁔(/*this*/ ж<parser> Ꮡp, Events event
     ж<Event> evGC = default;
     ref var evSTW = ref heap<ж<Event>>(out var ᏑevSTW);
 
-    error checkRunning(postProcessTrace_pdesc pΔ1, postProcessTrace_gdesc g, ж<Event> ev, bool allowG0) {
+    [GoFunc("(*parser).postProcessTrace.func1")] error checkRunning(postProcessTrace_pdesc pΔ1, postProcessTrace_gdesc g, ж<Event> ev, bool allowG0) {
         @string name = EventDescriptions[ev.Type].Name;
         if (g.state != gRunning) {
             return fmt.Errorf("g %d is not running while %s (time %d)"u8, ev.G, name, ev.Ts);

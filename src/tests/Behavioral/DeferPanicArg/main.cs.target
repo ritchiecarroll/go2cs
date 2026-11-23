@@ -15,7 +15,7 @@ internal static @string Error(this ref myErr e) {
 internal static void valueCapture() {
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("valueCapture.func1")] () => {
             fmt.Println("valueCapture recovered:", recover());
         }, ref ᒐ);
         defer(ᴛ1 => throw panic(ᴛ1), (nint)42, ref ᒐ);
@@ -27,7 +27,7 @@ internal static void valueCapture() {
 internal static void reassignedAfterDefer() {
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("reassignedAfterDefer.func1")] () => {
             fmt.Println("reassignedAfterDefer recovered:", recover());
         }, ref ᒐ);
         var err = fmt.Errorf("first"u8);
@@ -42,7 +42,7 @@ internal static void reassignedAfterDefer() {
 internal static void computedExpr() {
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("computedExpr.func1")] () => {
             fmt.Println("computedExpr recovered:", recover());
         }, ref ᒐ);
         nint n = 3;
@@ -57,7 +57,7 @@ internal static void computedExpr() {
 internal static void pointerValue() {
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("pointerValue.func1")] () => {
             var r = recover();
             var (e, ok) = r._<ж<myErr>>(ᐧ); if (ok) {
                 fmt.Println("pointerValue recovered typed:", e.msg);
@@ -77,10 +77,10 @@ internal static void pointerValue() {
 internal static void replacesInFlight() {
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("replacesInFlight.func1")] () => {
             fmt.Println("replacesInFlight recovered:", recover());
         }, ref ᒐ);
-        func(() => {
+        func([GoFunc("replacesInFlight.func2")] () => {
             GoFrame ᒐ = default;
             try {
                 defer(ᴛ1 => throw panic(ᴛ1), (@string)"from defer", ref ᒐ);
@@ -97,7 +97,7 @@ internal static void replacesInFlight() {
 internal static void multiple() {
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("multiple.func1")] () => {
             fmt.Println("multiple recovered:", recover());
         }, ref ᒐ);
         @string a = "A";

@@ -9,7 +9,7 @@ partial class main_package {
 internal static void arm(@string name, Action f) {
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("arm.func1")] () => {
             var r = recover(); if (r != nil) {
                 fmt.Println(name, "recovered:", r);
             }
@@ -26,55 +26,55 @@ internal static void main() {
     int64 wideI = 4294967301L;
     nint wideInt = unchecked((nint)(4294967301L));
 
-    arm("address uint64:", () => {
+    arm("address uint64:", [GoFunc("main.func1")] () => {
         var a = new slice<nint>(10);
         var p = Ꮡ(a, wideU);
         p.Value = 7;
         fmt.Println("a[5] =", a[5]);
     });
-    arm("address int64:", () => {
+    arm("address int64:", [GoFunc("main.func2")] () => {
         var a = new slice<nint>(10);
         var p = Ꮡ(a, (nint)(wideI));
         p.Value = 7;
         fmt.Println("a[5] =", a[5]);
     });
-    arm("address int:", () => {
+    arm("address int:", [GoFunc("main.func3")] () => {
         var a = new slice<nint>(10);
         var p = Ꮡ(a, wideInt);
         p.Value = 7;
         fmt.Println("a[5] =", a[5]);
     });
-    arm("address past length:", () => {
+    arm("address past length:", [GoFunc("main.func4")] () => {
         var s = new slice<nint>(3, 10);
         nint i = 5;
         var p = Ꮡ(s, i);
         p.Value = 7;
         fmt.Println("s[:6][5] =", s[..6][5]);
     });
-    arm("3-index bound:", () => {
+    arm("3-index bound:", [GoFunc("main.func5")] () => {
         var s = new slice<nint>(10);
         var t = s.slice(0, (nint)(wideU), (nint)(wideU));
         fmt.Println("len", len(t), "cap", cap(t));
     });
-    arm("element method:", () => {
+    arm("element method:", [GoFunc("main.func6")] () => {
         var a = new slice<atomic.Uint64>(10);
         Ꮡ(a, wideU).Add(1);
         fmt.Println("a[5] =", Ꮡ(a, 5).Load());
     });
     nint past = 5;
-    arm("literal index:", () => {
+    arm("literal index:", [GoFunc("main.func7")] () => {
         fmt.Println("byte", LiteralByteAt("abc"u8, past));
     });
     nint neg = -1;
-    arm("literal negative index:", () => {
+    arm("literal negative index:", [GoFunc("main.func8")] () => {
         fmt.Println("byte", LiteralByteAt("abc"u8, neg));
     });
-    arm("string past end:", () => {
+    arm("string past end:", [GoFunc("main.func9")] () => {
         @string s = "abc";
         fmt.Println(s.slice(1, past));
     });
     nint low = 4;
-    arm("string low past end:", () => {
+    arm("string low past end:", [GoFunc("main.func10")] () => {
         @string s = "abc";
         fmt.Println(s.slice(low));
     });

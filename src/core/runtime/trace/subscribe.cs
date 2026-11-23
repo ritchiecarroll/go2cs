@@ -193,7 +193,7 @@ internal static partial error startLocked⁔(/*this*/ ж<traceMultiplexer> Ꮡt)
     ref var traceStartWriter = ref heap<io.Writer>(t.traceStartWriter, out var ᏑtraceStartWriter);
     t.subscribersMu.Unlock();
 
-    goǃ(() => {
+    goǃ([GoFunc("(*traceMultiplexer).startLocked.func1")] () => {
         var header = runtime.ReadTrace();
         if (ᏑtraceStartWriter.ValueSlot != nil) {
             ᏑtraceStartWriter.ValueSlot.Write(header);

@@ -92,7 +92,7 @@ public static ж<EarlySecret> NewEarlySecret<H>(Func<H> h, slice<byte> psk)
 {
     return Ꮡ(new EarlySecret(
         secret: extract(h, psk, default),
-        hash: () => h()
+        hash: [GoFunc("NewEarlySecret[...].func1")] () => h()
     ));
 }
 

@@ -18,15 +18,15 @@ internal static (nint, error) @double(nint x) {
 
 internal static void main() {
     var m = new machine(
-        apply: (nint seed, Func<nint, (nint, error)> op) => {
+        apply: [GoFunc("main.func1")] (nint seed, Func<nint, (nint, error)> op) => {
             var (v, err) = op(seed);
             return (v + 1, err);
         },
-        named: (nint seed, Func<nint, (nint, error)> op) => {
+        named: [GoFunc("main.func2")] (nint seed, Func<nint, (nint, error)> op) => {
             var (v, err) = op(seed);
             return (v * 10, err);
         },
-        lookup: (@string name) => {
+        lookup: [GoFunc("main.func3")] (@string name) => {
             return (name + "!", true);
         }
     );

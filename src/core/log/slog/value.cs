@@ -571,7 +571,7 @@ internal static Value /*rv*/ Resolve⁔(/*this*/ Value v) {
     GoFrame ᒐ = default;
     try {
         var orig = v;
-        defer(() => {
+        defer([GoFunc("Value.Resolve.func1")] () => {
             var r = recover(); if (r != nil) {
                 rv = AnyValue(fmt.Errorf("LogValue panicked\n%s"u8, stack(3, 5)));
             }

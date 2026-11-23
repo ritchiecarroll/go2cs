@@ -123,7 +123,7 @@ internal static (ж<clientHelloMsg>, ж<keySharePrivateKeys>, ж<echClientContex
     hello.cipherSuites = config.cipherSuites(hasAESGCMHardwareSupport);
     // Don't advertise TLS 1.2-only cipher suites unless we're attempting TLS 1.2.
     if (maxVersion < VersionTLS12) {
-        hello.cipherSuites = slices.DeleteFunc(hello.cipherSuites, (uint16 id) => (cipherSuiteByID(id).flags & (nint)suiteTLS12) != 0);
+        hello.cipherSuites = slices.DeleteFunc(hello.cipherSuites, [GoFunc("(*Conn).makeClientHello.func1")] (uint16 id) => (cipherSuiteByID(id).flags & (nint)suiteTLS12) != 0);
     }
 
     var (_, err) = io.ReadFull(config.rand(), hello.random);
@@ -273,7 +273,7 @@ internal static error /*err*/ clientHandshake⁔(/*this*/ ж<Conn> Ꮡc, context
             goto ᒐdone;
         }
         if (session != nil) {
-            defer(() => {
+            defer([GoFunc("(*Conn).clientHandshake.func1")] () => {
                 // If we got a handshake failure when resuming a session, throw away
                 // the session ticket. See RFC 5077, Section 3.2.
                 //

@@ -798,7 +798,7 @@ internal static iter.Seq<StructField> Fields⁔(/*this*/ ж<rtype> Ꮡt) {
     if (t.Kind() != Struct) {
         throw panic("reflect: Fields of non-struct type " + Ꮡt.String());
     }
-    return (Func<StructField, bool> yield) => {
+    return [GoFunc("(*rtype).Fields.func1")] (Func<StructField, bool> yield) => {
         foreach (var i in range(Ꮡt.NumField())) {
             if (!yield(Ꮡt.Field(i))) {
                 return;
@@ -808,7 +808,7 @@ internal static iter.Seq<StructField> Fields⁔(/*this*/ ж<rtype> Ꮡt) {
 }
 
 internal static iter.Seq<Method> Methods⁔(/*this*/ ж<rtype> Ꮡt) {
-    return (Func<Method, bool> yield) => {
+    return [GoFunc("(*rtype).Methods.func1")] (Func<Method, bool> yield) => {
         foreach (var i in range(Ꮡt.NumMethod())) {
             if (!yield(Ꮡt.Method(i))) {
                 return;
@@ -823,7 +823,7 @@ internal static iter.Seq<Type> Ins⁔(/*this*/ ж<rtype> Ꮡt) {
     if (t.Kind() != Func) {
         throw panic("reflect: Ins of non-func type " + Ꮡt.String());
     }
-    return (Func<Type, bool> yield) => {
+    return [GoFunc("(*rtype).Ins.func1")] (Func<Type, bool> yield) => {
         foreach (var i in range(Ꮡt.NumIn())) {
             if (!yield(Ꮡt.In(i))) {
                 return;
@@ -838,7 +838,7 @@ internal static iter.Seq<Type> Outs⁔(/*this*/ ж<rtype> Ꮡt) {
     if (t.Kind() != Func) {
         throw panic("reflect: Outs of non-func type " + Ꮡt.String());
     }
-    return (Func<Type, bool> yield) => {
+    return [GoFunc("(*rtype).Outs.func1")] (Func<Type, bool> yield) => {
         foreach (var i in range(Ꮡt.NumOut())) {
             if (!yield(Ꮡt.Out(i))) {
                 return;
@@ -1243,7 +1243,7 @@ internal static (StructField f, bool present) FieldByName⁔(/*this*/ ж<structT
     if (!hasEmbeds) {
         return (f, present);
     }
-    return Ꮡt.FieldByNameFunc((@string s) => s == name);
+    return Ꮡt.FieldByNameFunc([GoFunc("(*structType).FieldByName.func1")] (@string s) => s == name);
 }
 
 // TypeOf returns the reflection [Type] that represents the dynamic type of i.
@@ -1932,7 +1932,7 @@ internal static (ж<abi.Type> frametype, ж<Δsync.Pool> framePool, abiDesc abid
 
     // cache result for future callers
     var xʗ1 = x;
-    framePool = Ꮡ(new Δsync.Pool(New: () => @unsafe.Pointer.OrTypedNil(unsafe_New(xʗ1))
+    framePool = Ꮡ(new Δsync.Pool(New: [GoFunc("funcLayout.func1")] () => @unsafe.Pointer.OrTypedNil(unsafe_New(xʗ1))
     ));
     var (lti, _) = ᏑlayoutCache.LoadOrStore(k, new layoutType(
         t: x,

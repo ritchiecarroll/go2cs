@@ -282,7 +282,7 @@ internal static void newosproc(ж<m> Ꮡmp) {
     // setup and then calls mstart.
     ref var oset = ref heap(new sigset(), out var Ꮡoset);
     sigprocmask(_SIG_SETMASK, Ꮡsigset_all, Ꮡoset);
-    err = retryOnEAGAIN(() => pthread_create(Ꮡattr, abi.FuncPCABI0(mstart_stub), @unsafe.Pointer.FromPinnedBox(Ꮡmp)));
+    err = retryOnEAGAIN([GoFunc("newosproc.func1")] () => pthread_create(Ꮡattr, abi.FuncPCABI0(mstart_stub), @unsafe.Pointer.FromPinnedBox(Ꮡmp)));
     sigprocmask(_SIG_SETMASK, Ꮡoset, nil);
     if (err != 0) {
         writeErrStr(failthreadcreate);

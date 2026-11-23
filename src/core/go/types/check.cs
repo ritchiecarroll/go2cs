@@ -485,7 +485,7 @@ internal static void handleBailout⁔(/*this*/ ж<Checker> Ꮡcheck, ж<error> �
         default: {
             var p = switchᴛ5;
             if (len(check.posStack) > 0) {
-                void doPrint(slice<positioner> ps) {
+                [GoFunc("(*Checker).handleBailout.func1")] void doPrint(slice<positioner> ps) {
                     for (nint i = len(ps) - 1; i >= 0; i--) {
                         fmt.Fprintf(new os.FileжWriter(os.Stderr), "\t%v\n"u8, Ꮡcheck.Value.fset.Position(ps[i].Pos()));
                     }
@@ -583,7 +583,7 @@ internal static void checkFiles⁔(/*this*/ ж<Checker> Ꮡcheck, slice<ж<ast.F
             defer(atomic.AddInt32, Ꮡ_aliasAny, (int32)1, ref ᒐ);
         }
 
-        void print(@string msg) {
+        [GoFunc("(*Checker).checkFiles.func1")] void print(@string msg) {
             if (Ꮡcheck.Value.conf._Trace) {
                 fmt.Println();
                 fmt.Println(msg);

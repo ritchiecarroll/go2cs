@@ -205,7 +205,7 @@ internal static (nint, error) Pread⁔(/*this*/ ж<FD> Ꮡfd, slice<byte> p, int
         p = p[..(int)(maxRW)];
     }
     var pʗ1 = p;
-    var (n, err) = ignoringEINTR2((nint, error) () => Δsyscall.Pread(Ꮡfd.Value.Sysfd, pʗ1, off));
+    var (n, err) = ignoringEINTR2([GoFunc("(*FD).Pread.func1")] (nint, error) () => Δsyscall.Pread(Ꮡfd.Value.Sysfd, pʗ1, off));
     if (err != nil) {
         n = 0;
     }
@@ -836,7 +836,7 @@ internal static error Fchmod⁔(/*this*/ ж<FD> Ꮡfd, uint32 mode) {
             return err;
         }
         ᒐd1 = true;
-        return ignoringEINTR(() => Δsyscall.Fchmod(Ꮡfd.Value.Sysfd, mode));
+        return ignoringEINTR([GoFunc("(*FD).Fchmod.func1")] () => Δsyscall.Fchmod(Ꮡfd.Value.Sysfd, mode));
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡfd.decref(); ᒐ.Run(); }
@@ -851,7 +851,7 @@ internal static error Fstat⁔(/*this*/ ж<FD> Ꮡfd, ж<Δsyscall.Stat_t> s) {
             return err;
         }
         ᒐd1 = true;
-        return ignoringEINTR(() => Δsyscall.Fstat(Ꮡfd.Value.Sysfd, s));
+        return ignoringEINTR([GoFunc("(*FD).Fstat.func1")] () => Δsyscall.Fstat(Ꮡfd.Value.Sysfd, s));
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡfd.decref(); ᒐ.Run(); }

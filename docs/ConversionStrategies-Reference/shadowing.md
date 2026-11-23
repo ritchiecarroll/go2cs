@@ -285,7 +285,7 @@ internal static slice<nint> captures() {
 loop:
     {
         nint x = i; if (x < 3) {
-            fns = append(fnsᴷ, fns, () => x);
+            fns = append(fnsᴷ, fns, [GoFunc("captures.func1")] () => x);
             i++;
             goto loop;
         }

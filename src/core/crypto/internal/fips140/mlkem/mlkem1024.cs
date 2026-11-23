@@ -124,7 +124,7 @@ internal static (ж<DecapsulationKey1024>, error) generateKey1024(ж<Decapsulati
     ref var z = ref heap(new array<byte>(32), out var Ꮡz);
     drbg.Read(z[..]);
     kemKeyGen1024(dk, Ꮡd, ref z);
-    fips140.PCT(mlKemPctˢ, () => kemPCT1024(dk));
+    fips140.PCT(mlKemPctˢ, [GoFunc("generateKey1024.func1")] () => kemPCT1024(dk));
     fips140.RecordApproved();
     return (dk, default);
 }

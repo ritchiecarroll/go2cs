@@ -1315,6 +1315,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckLiteralFloatConstFold() => CheckTarget("LiteralFloatConstFold");
 
     [TestMethod]
+    public void CheckLiteralFrameNames() => CheckTarget("LiteralFrameNames");
+
+    [TestMethod]
     public void CheckLocalFunctionEmission() => CheckTarget("LocalFunctionEmission");
 
     [TestMethod]

@@ -227,7 +227,7 @@ internal static error writePAXHeader⁔(/*this*/ ж<Writer> Ꮡtw, ж<Header> �
 
     // Pack the main header.
     ref var f = ref heap(new formatter(), out var Ꮡf); // Ignore errors since they are expected
-    var fmtStr = (slice<byte> b, @string s) => {
+    var fmtStr = [GoFunc("(*Writer).writePAXHeader.func1")] (slice<byte> b, @string s) => {
         Ꮡf.Value.formatString(b, toASCII(s));
     };
     var blk = Ꮡtw.templateV7Plus(Ꮡhdr, fmtStr, new Action<slice<byte>, int64>(Ꮡf.formatOctal));
@@ -452,7 +452,7 @@ private static readonly @string tarCannotAddNonRegularˢᵇ = "tar: cannot add n
 // It walks the directory tree starting at the root of the filesystem
 // adding each file to the tar archive while maintaining the directory structure.
 internal static error AddFS⁔(/*this*/ ж<Writer> Ꮡtw, fs.FS fsys) {
-    return fs.WalkDir(fsys, ".", error (@string name, fs.DirEntry d, error err) => {
+    return fs.WalkDir(fsys, ".", [GoFunc("(*Writer).AddFS.func1")] error (@string name, fs.DirEntry d, error err) => {
         GoFrame ᒐ = default;
         try {
             if (err != nil) {

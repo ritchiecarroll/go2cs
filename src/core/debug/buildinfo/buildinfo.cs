@@ -76,7 +76,7 @@ public static (ж<BuildInfo> info, error err) ReadFile(@string name) {
     try {
         ref var err = ref Ꮡerr.ValueSlot;
 
-        defer(() => {
+        defer([GoFunc("ReadFile.func1")] () => {
             var (_, ok) = errors.AsType<ж<fs.PathError>>(Ꮡerr.ValueSlot); if (ok) {
                 Ꮡerr.ValueSlot = fmt.Errorf("could not read Go build info: %w"u8, Ꮡerr.ValueSlot);
             } else if (Ꮡerr.ValueSlot != nil) {
@@ -276,7 +276,7 @@ internal static (@string vers, @string mod, error err) readRawBuildInfo(io.Reade
         Func<slice<byte>, uint64> readPtr = default;
         if (ptrSize == 4) {
             var boʗ1 = bo;
-            readPtr = (slice<byte> b) => (uint64)boʗ1.Uint32(b);
+            readPtr = [GoFunc("readRawBuildInfo.func1")] (slice<byte> b) => (uint64)boʗ1.Uint32(b);
         } else if (ptrSize == 8) {
             var boʗ2 = bo;
                         readPtr = boʗ2.Uint64;

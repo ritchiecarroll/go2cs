@@ -96,7 +96,7 @@ internal static void initConfVal() {
         confVal.dnsDebugLevel = debugLevel;
 
         if (confVal.dnsDebugLevel > 0) {
-            defer(() => {
+            defer([GoFunc("initConfVal.func1")] () => {
                 if (confVal.dnsDebugLevel > 1) {
                     println((@string)"go package net: confVal.netCgo =", confVal.netCgo, (@string)" netGo =", confVal.netGo);
                 }
@@ -244,7 +244,7 @@ internal static (hostLookupOrder ret, ж<dnsConfig> dnsConf) addrLookupOrder⁔(
         ref var c = ref Ꮡc.DerefOrNull();
 
         if (c.dnsDebugLevel > 1) {
-            defer(() => {
+            defer([GoFunc("(*conf).addrLookupOrder.func1")] () => {
                 print((@string)"go package net: addrLookupOrder(", addr, (@string)") = ", ret.String(), (@string)"\n");
             }, ref ᒐ);
         }
@@ -266,7 +266,7 @@ internal static (hostLookupOrder ret, ж<dnsConfig> dnsConf) hostLookupOrder⁔(
         ref var c = ref Ꮡc.DerefOrNull();
 
         if (c.dnsDebugLevel > 1) {
-            defer(() => {
+            defer([GoFunc("(*conf).hostLookupOrder.func1")] () => {
                 print((@string)"go package net: hostLookupOrder(", hostname, (@string)") = ", ret.String(), (@string)"\n");
             }, ref ᒐ);
         }
@@ -570,7 +570,7 @@ internal static (@string dnsMode, nint debugLevel) goDebugNetDNS() {
     nint debugLevel = default;
 
     @string goDebug = netdns.Value();
-    void parsePart(@string s) {
+    [GoFunc("goDebugNetDNS.func1")] void parsePart(@string s) {
         if (s == ""u8) {
             return;
         }

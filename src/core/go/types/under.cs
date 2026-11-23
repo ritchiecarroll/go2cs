@@ -13,7 +13,7 @@ partial class types_package {
 // If typ is a type parameter, underIs returns the result of typ.underIs(f).
 // Otherwise, underIs returns the result of f(typ.Underlying()).
 internal static bool underIs(Type typ, Func<Type, bool> f) {
-    return all(typ, (Type _, Type u) => f(u));
+    return all(typ, [GoFunc("underIs.func1")] (Type _, Type u) => f(u));
 }
 
 // all reports whether f(t, u) is true for all (type/underlying type)
@@ -32,7 +32,7 @@ internal static bool all(Type t, Func<Type, Type, bool> f) {
 // If t is not a type parameter, the implied type set consists of just t.
 // In any case, typeset is guaranteed to produce at least one set of results.
 internal static iter.Seq2<Type, Type> typeset(Type t) {
-    return (Func<Type, Type, bool> yield) => {
+    return [GoFunc("typeset.func1")] (Func<Type, Type, bool> yield) => {
         all(t, yield);
     };
 }

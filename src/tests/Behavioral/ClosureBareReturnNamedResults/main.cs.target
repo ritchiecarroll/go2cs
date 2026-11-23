@@ -15,7 +15,7 @@ internal static partial (nint n, bool ok) run() {
     bool ok = default;
 
     var items = slice<nint>([1, 2, 3, -1, 4]);
-    forEach(items, (nint x) => {
+    forEach(items, [GoFunc("run.func1")] (nint x) => {
         if (x < 0) {
             return;
         }

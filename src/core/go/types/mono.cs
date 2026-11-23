@@ -206,7 +206,7 @@ internal static void assign⁔(/*this*/ ж<monoGraph> Ꮡw, ж<Package> pkg, tok
     }
 
     // flow adds an edge from vertex src representing that typ flows to tpar.
-    void flow(nint src, Type typ) {
+    [GoFunc("(*monoGraph).assign.func1")] void flow(nint src, Type typ) {
         nint weight = 1;
         if (AreEqual(typ, targ)) {
             weight = 0;
@@ -219,7 +219,7 @@ internal static void assign⁔(/*this*/ ж<monoGraph> Ꮡw, ж<Package> pkg, tok
     // type parameters.
     ref var @do = ref heap<Action<Type>>(out var Ꮡdo);
     var flowʗ1 = flow;
-    @do = (Type typ) => {
+    @do = [GoFunc("(*monoGraph).assign.func2")] (Type typ) => {
         var switchᴛ9 = Unalias(typ);
         switch (switchᴛ9.type()) {
         default: {
@@ -275,7 +275,7 @@ internal static void assign⁔(/*this*/ ж<monoGraph> Ꮡw, ж<Package> pkg, tok
             break;
         }
         case ж<Signature> typΔ1: {
-            void tuple(ж<Tuple> tup) {
+            [GoFunc("(*monoGraph).assign.func2.1")] void tuple(ж<Tuple> tup) {
                 for (nint i = 0; i < tup.Len(); i++) {
                     Ꮡdo.ValueSlot(tup.At(i).of(Var.Ꮡobject).Type());
                 }

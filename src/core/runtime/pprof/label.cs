@@ -121,7 +121,7 @@ public static LabelSet Labels(params ꓸꓸꓸstring argsʗp) {
     }
     if (!sortedNoDupes) {
         // slow path: keys are unsorted, contain duplicates, or both
-        slices.SortStableFunc(list, (label.Label a, label.Label b) => strings.Compare(a.Key, b.Key));
+        slices.SortStableFunc(list, [GoFunc("Labels.func1")] (label.Label a, label.Label b) => strings.Compare(a.Key, b.Key));
         var deduped = new slice<label.Label>(0, len(list));
         foreach (var (i, lbl) in range(list)) {
             if (i == 0 || lbl.Key != list[i - 1].Key) {

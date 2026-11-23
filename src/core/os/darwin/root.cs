@@ -426,7 +426,7 @@ internal static (slice<DirEntry>, error) ReadDir⁔(/*this*/ ж<rootFS> Ꮡrfs, 
         var fʗ1 = f;
         defer(() => fʗ1.Close(), ref ᒐ);
         (var dirs, err) = f.ReadDir(-1);
-        slices.SortFunc(dirs, (DirEntry a, DirEntry b) => bytealg.CompareString(a.Name(), b.Name()));
+        slices.SortFunc(dirs, [GoFunc("(*rootFS).ReadDir.func1")] (DirEntry a, DirEntry b) => bytealg.CompareString(a.Name(), b.Name()));
         return (dirs, err);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }

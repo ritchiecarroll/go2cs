@@ -104,7 +104,7 @@ internal static (ж<http.Request>, error) Read⁔(/*this*/ ж<ServerConn> Ꮡsc)
         // Ensure ordered execution of Reads and Writes
         nuint id = Ꮡsc.Ꮡpipe.Next();
         Ꮡsc.Ꮡpipe.StartRequest(id);
-        defer(() => {
+        defer([GoFunc("(*ServerConn).Read.func1")] () => {
             Ꮡsc.Ꮡpipe.EndRequest(id);
             if (Ꮡreq.ValueSlot == nil) {
                 Ꮡsc.Ꮡpipe.StartResponse(id);
@@ -351,7 +351,7 @@ internal static error Write⁔(/*this*/ ж<ClientConn> Ꮡcc, ж<http.Request> �
         // Ensure ordered execution of Writes
         nuint id = Ꮡcc.Ꮡpipe.Next();
         Ꮡcc.Ꮡpipe.StartRequest(id);
-        defer(() => {
+        defer([GoFunc("(*ClientConn).Write.func1")] () => {
             Ꮡcc.Ꮡpipe.EndRequest(id);
             if (Ꮡerr.ValueSlot != nil) {
                 Ꮡcc.Ꮡpipe.StartResponse(id);

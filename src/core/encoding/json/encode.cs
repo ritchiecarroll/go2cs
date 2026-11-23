@@ -346,7 +346,7 @@ internal static error /*err*/ marshal⁔(/*this*/ ж<encodeState> Ꮡe, any v, e
     error err = default;
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("(*encodeState).marshal.func1")] () => {
             var r = recover(); if (r != nil) {
                 ref var je = ref heap<jsonError>(out var Ꮡje);
                 (je, var ok) = r._<jsonError>(ᐧ); if (ok) {
@@ -414,9 +414,9 @@ internal static Action<ж<encodeState>, reflect.Value, encOpts> typeEncoder(refl
     //
     // This indirect func is only used for recursive types,
     // and briefly during racing calls to typeEncoder.
-    var indirect = sync.OnceValue(Action<ж<encodeState>, reflect.Value, encOpts> () => newTypeEncoder(t, true));
+    var indirect = sync.OnceValue([GoFunc("typeEncoder.func1")] Action<ж<encodeState>, reflect.Value, encOpts> () => newTypeEncoder(t, true));
     var indirectʗ1 = indirect;
-    var (fi, loaded) = ᏑencoderCache.LoadOrStore(t, new Action<ж<encodeState>, reflect.Value, encOpts>((ж<encodeState> e, reflect.Value v, encOpts opts) => {
+    var (fi, loaded) = ᏑencoderCache.LoadOrStore(t, new Action<ж<encodeState>, reflect.Value, encOpts>([GoFunc("typeEncoder.func2")] (ж<encodeState> e, reflect.Value v, encOpts opts) => {
         indirectʗ1()(e, v, opts);
     }));
     if (loaded) {
@@ -838,7 +838,7 @@ internal static void encode⁔(/*this*/ mapEncoder me, ж<encodeState> Ꮡe, ref
             }
             sv[i].v = mi.Value();
         }
-        slices.SortFunc(sv, (reflectWithString i, reflectWithString j) => strings.Compare(i.ks, j.ks));
+        slices.SortFunc(sv, [GoFunc("mapEncoder.encode.func1")] (reflectWithString i, reflectWithString j) => strings.Compare(i.ks, j.ks));
 
         foreach (var (i, kv) in range(sv)) {
             if (i > 0) {
@@ -1292,7 +1292,7 @@ internal static structFields typeFields(reflect.Type t) {
                         // Provide a function that uses a type's IsZero method.
                         switch (ᐧ) {
                         case {} when tΔ2.Kind() == reflect.Interface && tΔ2.Implements(isZeroerType): {
-                            field.isZero = (reflect.Value v) => {
+                            field.isZero = [GoFunc("typeFields.func1")] (reflect.Value v) => {
                                 // Avoid panics calling IsZero on a nil interface or
                                 // non-nil interface with nil pointer.
                                 return v.IsNil() || (v.Elem().Kind() == reflect.Pointer && v.Elem().IsNil()) || v.Interface()._<isZeroer>().IsZero();
@@ -1300,18 +1300,18 @@ internal static structFields typeFields(reflect.Type t) {
                             break;
                         }
                         case {} when tΔ2.Kind() == reflect.Pointer && tΔ2.Implements(isZeroerType): {
-                            field.isZero = (reflect.Value v) => {
+                            field.isZero = [GoFunc("typeFields.func2")] (reflect.Value v) => {
                                 // Avoid panics calling IsZero on nil pointer.
                                 return v.IsNil() || v.Interface()._<isZeroer>().IsZero();
                             };
                             break;
                         }
                         case {} when tΔ2.Implements(isZeroerType): {
-                            field.isZero = (reflect.Value v) => v.Interface()._<isZeroer>().IsZero();
+                            field.isZero = [GoFunc("typeFields.func3")] (reflect.Value v) => v.Interface()._<isZeroer>().IsZero();
                             break;
                         }
                         case {} when reflect.PointerTo(tΔ2).Implements(isZeroerType): {
-                            field.isZero = (reflect.Value v) => {
+                            field.isZero = [GoFunc("typeFields.func4")] (reflect.Value v) => {
                                 if (!v.CanAddr()) {
                                     // Temporarily box v so we can take the address.
                                     var v2 = reflect.New(v.Type()).Elem();
@@ -1344,7 +1344,7 @@ internal static structFields typeFields(reflect.Type t) {
         }
     }
 
-    slices.SortFunc(fields, (field a, field b) => {
+    slices.SortFunc(fields, [GoFunc("typeFields.func5")] (field a, field b) => {
         // sort field by name, breaking ties with depth, then
         // breaking ties with "name came from json tag", then
         // breaking ties with index sequence.
@@ -1396,7 +1396,7 @@ internal static structFields typeFields(reflect.Type t) {
     }
 
     fields = @out;
-    slices.SortFunc(fields, (field i, field j) => slices.Compare<slice<nint>, nint>(i.index, j.index));
+    slices.SortFunc(fields, [GoFunc("typeFields.func6")] (field i, field j) => slices.Compare<slice<nint>, nint>(i.index, j.index));
 
     foreach (var i in range(len(fields))) {
         var f = Ꮡ(fields, i);

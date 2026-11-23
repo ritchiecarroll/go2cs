@@ -14,10 +14,10 @@ internal static @string registered() {
     var done = new channel<EmptyStruct>(0);
 
     var doneʗ1 = done;
-    func(() => {
+    func([GoFunc("registered.func1")] () => {
         var p = Ꮡ(new payload(n: 1));
         var doneʗ2 = doneʗ1;
-        runtime.SetFinalizer(p.OrTypedNil(), (ж<payload> _Δp0) => {
+        runtime.SetFinalizer(p.OrTypedNil(), [GoFunc("registered.func1.1")] (ж<payload> _Δp0) => {
             close(doneʗ2);
         });
         _ = p.n;
@@ -42,10 +42,10 @@ internal static @string cleared() {
     var done = new channel<EmptyStruct>(0);
 
     var doneʗ1 = done;
-    func(() => {
+    func([GoFunc("cleared.func1")] () => {
         var p = Ꮡ(new payload(n: 2));
         var doneʗ2 = doneʗ1;
-        runtime.SetFinalizer(p.OrTypedNil(), (ж<payload> _Δp0) => {
+        runtime.SetFinalizer(p.OrTypedNil(), [GoFunc("cleared.func1.1")] (ж<payload> _Δp0) => {
             close(doneʗ2);
         });
         runtime.SetFinalizer(p.OrTypedNil(), default);

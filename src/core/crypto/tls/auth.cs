@@ -303,11 +303,11 @@ internal static (SignatureScheme, error) selectSignatureScheme(uint16 vers, ж<C
     }
     var supportedAlgs = signatureSchemesForPublicKey(vers, priv.Public());
     if (c.SupportedSignatureAlgorithms != nil) {
-        supportedAlgs = slices.DeleteFunc(supportedAlgs, (SignatureScheme sigAlg) => !isSupportedSignatureAlgorithm(sigAlg, Ꮡc.Value.SupportedSignatureAlgorithms));
+        supportedAlgs = slices.DeleteFunc(supportedAlgs, [GoFunc("selectSignatureScheme.func1")] (SignatureScheme sigAlg) => !isSupportedSignatureAlgorithm(sigAlg, Ꮡc.Value.SupportedSignatureAlgorithms));
     }
     // Filter out any unsupported signature algorithms, for example due to
     // FIPS 140-3 policy, tlssha1=0, or protocol version.
-    supportedAlgs = slices.DeleteFunc(supportedAlgs, (SignatureScheme sigAlg) => isDisabledSignatureAlgorithm(vers, sigAlg, false));
+    supportedAlgs = slices.DeleteFunc(supportedAlgs, [GoFunc("selectSignatureScheme.func2")] (SignatureScheme sigAlg) => isDisabledSignatureAlgorithm(vers, sigAlg, false));
     if (len(supportedAlgs) == 0) {
         return (0, unsupportedCertificateError(ref (Ꮡc).DerefOrNull()));
     }

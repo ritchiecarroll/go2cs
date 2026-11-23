@@ -53,7 +53,7 @@ internal static void main() {
 internal static void readNil() {
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("readNil.func1")] () => {
             fmt.Println("recovered:", recover() != nil);
         }, ref ᒐ);
 

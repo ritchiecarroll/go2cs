@@ -153,8 +153,8 @@ internal static readonly ж<sync.Map> Ꮡdecompressors = new StaticBox<sync.Map>
 internal static ref sync.Map decompressors => ref ((StaticBox<sync.Map>)Ꮡdecompressors).ValueSlot; // map[uint16]Decompressor
 
 [GoInit] internal static void init() {
-    Ꮡcompressors.Store(Store, new Func<io.Writer, (io.WriteCloser, error)>((io.Writer w) => (new nopCloserжWriteCloser(Ꮡ(new nopCloser(w))), default)));
-    Ꮡcompressors.Store(Deflate, new Func<io.Writer, (io.WriteCloser, error)>((io.Writer w) => (newFlateWriter(w), default)));
+    Ꮡcompressors.Store(Store, new Func<io.Writer, (io.WriteCloser, error)>([GoFunc("init.0.func1")] (io.Writer w) => (new nopCloserжWriteCloser(Ꮡ(new nopCloser(w))), default)));
+    Ꮡcompressors.Store(Deflate, new Func<io.Writer, (io.WriteCloser, error)>([GoFunc("init.0.func2")] (io.Writer w) => (newFlateWriter(w), default)));
 
     Ꮡdecompressors.Store(Store, NilSafeDelegateConversion<Func<io.Reader, io.ReadCloser>, Func<io.Reader, io.ReadCloser>>(io.NopCloser));
     Ꮡdecompressors.Store(Deflate, new Func<io.Reader, io.ReadCloser>(newFlateReader));

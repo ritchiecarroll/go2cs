@@ -9,7 +9,7 @@ internal static (nint result, bool recovered) safeDiv(nint a, nint b) {
     bool recovered = default;
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("safeDiv.func1")] () => {
             var r = recover(); if (r != nil) {
                 fmt.Println("  recovered:", r);
                 (result, recovered) = (-1, true);
@@ -28,7 +28,7 @@ internal static (nint result, bool recovered) safeMod(nint a, nint b) {
     bool recovered = default;
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("safeMod.func1")] () => {
             var r = recover(); if (r != nil) {
                 (result, recovered) = (-2, true);
             }
@@ -47,7 +47,7 @@ internal static bool /*ok*/ outerGuard(nint a, nint b) {
     bool ok = default;
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("outerGuard.func1")] () => {
             if (recover() != nil) {
                 ok = false;
             }

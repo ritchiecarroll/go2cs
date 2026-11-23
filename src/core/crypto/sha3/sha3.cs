@@ -15,10 +15,10 @@ using go.crypto.@internal.fips140;
 partial class sha3_package {
 
 [GoInit] internal static void init() {
-    crypto.RegisterHash(crypto.SHA3_224, () => new SHA3жHash(New224()));
-    crypto.RegisterHash(crypto.SHA3_256, () => new SHA3жHash(New256()));
-    crypto.RegisterHash(crypto.SHA3_384, () => new SHA3жHash(New384()));
-    crypto.RegisterHash(crypto.SHA3_512, () => new SHA3жHash(New512()));
+    crypto.RegisterHash(crypto.SHA3_224, [GoFunc("init.0.func1")] () => new SHA3жHash(New224()));
+    crypto.RegisterHash(crypto.SHA3_256, [GoFunc("init.0.func2")] () => new SHA3жHash(New256()));
+    crypto.RegisterHash(crypto.SHA3_384, [GoFunc("init.0.func3")] () => new SHA3жHash(New384()));
+    crypto.RegisterHash(crypto.SHA3_512, [GoFunc("init.0.func4")] () => new SHA3жHash(New512()));
 }
 
 // Sum224 returns the SHA3-224 hash of data.

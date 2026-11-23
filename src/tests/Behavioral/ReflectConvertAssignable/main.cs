@@ -121,10 +121,10 @@ internal static void main() {
     fmt.Println("struct", unnamedStruct.AssignableTo(structA), unnamedStruct.AssignableTo(structTagged));
     fmt.Println("struct", unnamedStruct.ConvertibleTo(structTagged), unnamedStruct.AssignableTo(structShort));
 
-    var funcIB = reflect.TypeOf(bool (nint _) => false);
-    var funcSB = reflect.TypeOf(bool (@string _) => false);
-    var funcII = reflect.TypeOf(nint (nint _) => 0);
-    var funcI2B = reflect.TypeOf(bool (nint _Δp0, nint _Δp1) => false);
+    var funcIB = reflect.TypeOf([GoFunc("main.func1")] bool (nint _) => false);
+    var funcSB = reflect.TypeOf([GoFunc("main.func2")] bool (@string _) => false);
+    var funcII = reflect.TypeOf([GoFunc("main.func3")] nint (nint _) => 0);
+    var funcI2B = reflect.TypeOf([GoFunc("main.func4")] bool (nint _Δp0, nint _Δp1) => false);
     fmt.Println("func", funcIB.ConvertibleTo(funcIB), funcIB.ConvertibleTo(funcSB));
     fmt.Println("func", funcIB.ConvertibleTo(funcII), funcIB.ConvertibleTo(funcI2B));
 

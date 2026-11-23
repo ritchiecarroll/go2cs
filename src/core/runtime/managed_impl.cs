@@ -2411,25 +2411,25 @@ partial class runtime_package
         if (method.GetCustomAttributes(typeof(GoTwinForwarderAttribute), inherit: false) is [GoTwinForwarderAttribute { GoName: { } goName }])
             name = goName;
 
-        // A function literal is emitted as a compiler-generated method — `<Outer>b__X_Y` for a
-        // lambda on a `<>c__DisplayClassX_Y` nested in the package class, `<Outer>g__name|X_Y`
-        // for a local function; Go renders the same literal as `Outer.funcN` (a nested one as
-        // `Outer.funcN.M`). The counter is Go's per-enclosing-function, source-order counter
-        // starting at 1, which the conversion RECORDS in the file's GoPositionMap funcLits map:
-        // the frame's C# line maps through the record's line table to its Go line, and the
-        // innermost recorded literal span containing that line names the frame. Roslyn's own
-        // X_Y numbering is a closure-GROUP index plus a per-group index that matches Go's
-        // counter only by coincidence (measured: two sibling literals answered func0/func1 for
-        // Go's func1/func2, and a nested literal cannot be represented at all), so the derived
-        // ordinal below is kept ONLY as the fallback for frames no conversion recorded — an
-        // older artifact, a hand-written lambda, a frame with no PDB, or a literal outside a
-        // function declaration.
+        // A function literal is emitted as a compiler-generated method (`<Outer>b__X_Y` for a lambda, `<Outer>g__name|X_Y`
+        // for a local function), and Go names it `Outer.funcN`, a nested one `Outer.funcN.M`, one in a method
+        // `(*T).M.funcN`, one in the second `func init` `init.1.funcN`, one in a package var's initializer `init.funcN`.
+        // The converter writes that name on every literal it emits (GoFuncAttribute, without the package), so it is read
+        // FIRST: no PDB, no `<Outer>` parse, the same under Native AOT. A twin's literal reads its stub's (goFuncLiteral).
+        if (name.Length > 0 && name[0] == '<' && goFuncLiteral(method) is string goFunc)
+            return symbol = $"{importPath}.{goFunc}";
+
+        // FALLBACK, for a literal frame without the attribute: an older artifact, a hand-written lambda. The counter is
+        // Go's per-enclosing-function, source-order one starting at 1, which the conversion also RECORDS in the file's
+        // GoPositionMap funcLits map: the frame's C# line maps through the record's line table to its Go line, and the
+        // innermost recorded literal span containing that line names the frame. That path needs the PDB, and its
+        // `<Outer>` text cannot say which receiver type an outer method belongs to. Roslyn's own X_Y numbering is a
+        // closure-GROUP index plus a per-group index that matches Go's counter only by coincidence (measured: two sibling
+        // literals answered func0/func1 for Go's func1/func2, and a nested literal cannot be represented at all), so the
+        // derived ordinal below is kept only for a frame no record names either.
         //
-        // A literal in a package-level var initializer is one of those: it is a lambda in the
-        // package class's static constructor, which Go names `init.funcN` with a 1-based counter.
-        // Its N is Roslyn's 0-based ordinal + 1, exact for a package whose var initializers sit in one
-        // file. Where they span files, Roslyn's order within the merged static constructor and Go's
-        // package-wide counter may differ -- stated, not guarded.
+        // A literal in a package-level var initializer is a lambda in the package class's static constructor; its N below
+        // is Roslyn's 0-based ordinal + 1, where Go numbers those literals in initialization order, as the attribute does.
         if (name.Length > 0 && name[0] == '<')
         {
             int close = name.IndexOf('>');
@@ -7362,6 +7362,29 @@ partial class runtime_package
         }
 
         return twinStamp(type).Origin;
+    }
+
+    // A function literal's Go name without its package, from the GoFuncAttribute the converter writes on the lambda or
+    // local function it emits, or null. A twin's literal frame is the MoveNext of its state machine (goTwinLiteralName);
+    // the attribute is on the stub the machine was generated for, which TwinGenerator writes beside its [GoTwinOf] stamp.
+    private static string? goFuncLiteral(System.Reflection.MethodBase method)
+    {
+        if (method.GetCustomAttributes(typeof(GoFuncAttribute), inherit: false) is [GoFuncAttribute literal])
+            return literal.Name;
+
+        if (goTwinLiteralName(method) is not string stub || method.DeclaringType?.DeclaringType is not Type closure)
+            return null;
+
+        const System.Reflection.BindingFlags all = System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Instance |
+            System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.DeclaredOnly;
+
+        foreach (System.Reflection.MethodInfo candidate in closure.GetMethods(all))
+        {
+            if (candidate.Name == stub && candidate.GetCustomAttributes(typeof(GoFuncAttribute), inherit: false) is [GoFuncAttribute twin])
+                return twin.Name;
+        }
+
+        return null;
     }
 
     // M:N (A2). A function literal written in a twin and started as a goroutine is an async lambda:

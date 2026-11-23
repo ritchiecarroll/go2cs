@@ -78,7 +78,7 @@ public static bool HasGoBuild() {
 }
 
 internal static Func<error> tryGoBuild;
-internal static void initᴛtryGoBuild() { tryGoBuild = sync.OnceValue(error () => {
+internal static void initᴛtryGoBuild() { tryGoBuild = sync.OnceValue([GoFunc("init.func5")] error () => {
     // To run 'go build', we need to be able to exec a 'go' command.
     // We somewhat arbitrarily choose to exec 'go tool -n compile' because that
     // also confirms that cmd/go can find the compiler. (Before CL 472096,
@@ -198,7 +198,7 @@ public static @string GoToolPath(testing.TB t) {
     return path;
 }
 
-internal static Func<(@string, error)> findGOROOT = sync.OnceValues((@string path, error err) () => {
+internal static Func<(@string, error)> findGOROOT = sync.OnceValues([GoFunc("init.func3")] (@string path, error err) () => {
     error err = default;
     @string pathΔ1 = Δruntime.GOROOT(); if (pathΔ1 != ""u8) {
         // If runtime.GOROOT() is non-empty, assume that it is valid.
@@ -292,7 +292,7 @@ public static (@string, error) GoTool() {
     return goTool();
 }
 
-internal static Func<(@string, error)> goTool = sync.OnceValues((@string, error) () => exec.LookPath("go"));
+internal static Func<(@string, error)> goTool = sync.OnceValues([GoFunc("init.func4")] (@string, error) () => exec.LookPath("go"));
 
 // MustHaveSource checks that the entire source tree is available under GOROOT.
 // If not, it calls t.Skip with an explanation.
@@ -331,7 +331,7 @@ public static bool HasCGO() {
     return hasCgo();
 }
 
-internal static Func<bool> hasCgo = sync.OnceValue(bool () => {
+internal static Func<bool> hasCgo = sync.OnceValue([GoFunc("init.func6")] bool () => {
     var (goToolΔ1, err) = goTool();
     if (err != nil) {
         return false;

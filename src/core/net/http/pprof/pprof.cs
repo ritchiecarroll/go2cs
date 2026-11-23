@@ -501,7 +501,7 @@ public static void Index(http.ResponseWriter w, ж<http.Request> Ꮡr) {
         ));
     }
 
-    slices.SortFunc(profiles, (profileEntry a, profileEntry b) => strings.Compare(a.Name, b.Name));
+    slices.SortFunc(profiles, [GoFunc("Index.func1")] (profileEntry a, profileEntry b) => strings.Compare(a.Name, b.Name));
 
     var err = indexTmplExecute(new http_ResponseWriterᴠWriter(w), profiles); if (err != nil) {
         log.Print(err);

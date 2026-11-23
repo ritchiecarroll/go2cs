@@ -35,7 +35,7 @@ internal static error /*err*/ doit() {
 internal static void main() {
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("main.func1")] () => {
             var e = recover(); if (e != nil) {
                 fmt.Println(e);
             }

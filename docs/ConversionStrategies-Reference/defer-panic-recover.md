@@ -86,7 +86,7 @@ internal static (nint @out, @string label) compute(nint x) {
     @string label = default;
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("compute.func1")] () => {
             @out += 1000;
         }, ref ᒐ);
         if (x < 0) {
@@ -963,7 +963,7 @@ the call — the guard's `defer run(func(){ pf.x = 77 })` shape:
 <!-- source: src/tests/Behavioral/FuncLitArgCapture/main.cs:69-72 -->
 ```csharp
 var pfʗ1 = pf;
-defer(run, () => {
+defer(run, [GoFunc("deferArgCapture.func1")] () => {
     pfʗ1.x = 77;
 }, ref ᒐ);
 ```
@@ -988,11 +988,11 @@ the copy is a statement before the call and the deferred literal reads its varia
 <!-- source: src/tests/Behavioral/ParenFuncLitGoDefer/ParenFuncLitGoDefer.cs.target:15-27 -->
 ```csharp
     var doneʗ1 = done;
-    goǃ(() => {
+    goǃ([GoFunc("(*runner).fork.func1")] () => {
         GoFrame ᒐ = default;
         try {
             var doneʗ2 = doneʗ1;
-            defer(() => {
+            defer([GoFunc("(*runner).fork.func1.1")] () => {
                 doneʗ2.ᐸꟷ(true);
             }, ref ᒐ);
             dispatch(c);
@@ -1022,10 +1022,10 @@ state, so the arguments render exactly like any other expression in the enclosin
 <!-- source: src/tests/Behavioral/DeferArgEnclosingCapture/main.cs:37-47 -->
 ```csharp
 var baseʗ1 = @base;
-func(() => {
+func([GoFunc("main.func1")] () => {
     GoFrame ᒐ = default;
     try {
-        defer((Tally t) => {
+        defer([GoFunc("main.func1.1")] (Tally t) => {
             report("deferred:", t, 4);
         }, baseʗ1, ref ᒐ);
     }
@@ -1058,7 +1058,7 @@ the `if`/`for`, mirroring `visitExprStmt`:
 <!-- source: src/tests/Behavioral/FuncLitCaptureInCondition/main.cs.target:20-23 -->
 ```csharp
     var lookupʗ1 = lookup;
-    if (anyMatch(vals, (nint u) => lookupʗ1[u])) {
+    if (anyMatch(vals, [GoFunc("main.func1")] (nint u) => lookupʗ1[u])) {
         fmt.Println("if:", true);
     }
 ```
@@ -1093,7 +1093,7 @@ a 4-error cascade in traceviewer). `visitReturnStmt` provides the same hoist buf
 <!-- source: src/tests/Behavioral/ReturnTupleFuncLitArg/main.cs.target:15-18 -->
 ```csharp
     var allowedʗ1 = allowed;
-    return (new handler((@string msg) => {
+    return (new handler([GoFunc("makeHandlers.func1")] (@string msg) => {
         fmt.Println(allowedʗ1[0] + ":" + msg, len(allowedʗ1));
     }), "label", default);
 ```
@@ -1344,7 +1344,7 @@ This is not merely a compile fix — a value snapshot is taken at defer time, so
 The same box-ref treatment covers a **promoted** pointer-receiver method reached through **value embeds** — `lazyCert.Do(…)` on `var lazyCert struct { sync.Once; v *Certificate }` (crypto/x509 `AppendCertsFromPEM`): Go takes `&lazyCert.Once`, an address into the variable's own storage, so the closure must share the original variable. The detection resolves the call through `info.Selections` and walks the selection's embedded-field index path — only **value** embeds along the path root the address at the variable (a **pointer** embed re-roots it at that pointer's target, where the snapshot, which copies the pointer, stays sound). Emission then renders the promoted call through the box's field projection and field uses through the box read; the snapshot form had referenced a never-declared snapshot box (`ᏑlazyCertʗ1`, CS0103) *and* divorced the closure's writes from the original:
 <!-- source: src/core/crypto/x509/cert_pool.cs:262-267 -->
 ```csharp
-ᏑlazyCert.of(AppendCertsFromPEM_lazyCert.ᏑOnce).Do(() => {
+ᏑlazyCert.of(AppendCertsFromPEM_lazyCert.ᏑOnce).Do([GoFunc("(*CertPool).AppendCertsFromPEM.func1.1")] () => {
     // This can't fail, as the same bytes already parsed above.
     (ᏑlazyCert.Value.v, _) = ParseCertificate(ᏑcertBytes.ValueSlot);
     ᏑcertBytes.ValueSlot = default;

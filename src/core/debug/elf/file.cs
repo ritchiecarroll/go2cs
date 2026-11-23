@@ -171,7 +171,7 @@ internal static io.ReadSeeker Open⁔(/*this*/ ж<Section> Ꮡs) {
         break;
     }
     case var ᴛ when ᴛ == COMPRESS_ZSTD: {
-        zrd = (io.ReadCloser, error) (io.Reader r) => (io.NopCloser(new zstd_ReaderжReader(zstd.NewReader(r))), default);
+        zrd = [GoFunc("(*Section).Open.func1")] (io.ReadCloser, error) (io.Reader r) => (io.NopCloser(new zstd_ReaderжReader(zstd.NewReader(r))), default);
         break;
     }}
 
@@ -181,7 +181,7 @@ internal static io.ReadSeeker Open⁔(/*this*/ ж<Section> Ꮡs) {
 
         var zrdʗ1 = zrd;
     return new readSeekerFromReaderжReadSeeker(Ꮡ(new readSeekerFromReader(
-        reset: () => {
+        reset: [GoFunc("(*Section).Open.func2")] () => {
             var fr = io.NewSectionReader(new io.SectionReaderжReaderAt(Ꮡs.Value.sr), Ꮡs.Value.compressionOffset, (int64)Ꮡs.Value.FileSize - Ꮡs.Value.compressionOffset);
             return zrdʗ1(new io.SectionReaderжReader(fr));
         },
@@ -1384,7 +1384,7 @@ private static readonly @string strˢᵇ = "str"u8;
 internal static (ж<dwarf.Data>, error) DWARF⁔(/*this*/ ж<File> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
-    @string dwarfSuffix(ж<Section> s) {
+    [GoFunc("(*File).DWARF.func1")] @string dwarfSuffix(ж<Section> s) {
         switch (ᐧ) {
         case {} when strings.HasPrefix(s.Name, debugˢ): {
             return s.Name[7..];
@@ -1398,7 +1398,7 @@ internal static (ж<dwarf.Data>, error) DWARF⁔(/*this*/ ж<File> Ꮡf) {
     }
     // sectionData gets the data for s, checks its size, and
     // applies any applicable relations.
-    (slice<byte>, error) sectionData(nint i, ж<Section> s) {
+    [GoFunc("(*File).DWARF.func2")] (slice<byte>, error) sectionData(nint i, ж<Section> s) {
         var (b, errΔ1) = s.Data();
         if (errΔ1 != nil && (uint64)len(b) < s.Size) {
             return (default, errΔ1);

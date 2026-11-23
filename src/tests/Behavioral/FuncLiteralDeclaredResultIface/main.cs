@@ -12,7 +12,7 @@ internal static void use(Func<@string, (Δio.ReadCloser, error)> open) {
 }
 
 internal static void main() {
-    var open = (Δio.ReadCloser, error) (@string name) => {
+    var open = [GoFunc("main.func1")] (Δio.ReadCloser, error) (@string name) => {
         var (ᴛ1, ᴛ2) = os.Open(name);
         return (new os_FileжReadCloser(ᴛ1), ᴛ2);
     };

@@ -45,7 +45,7 @@ internal static void main() {
     fmt.Println("g:", g.cells, g.name, "h:", h.cells, h.name, "kept:", keptGrids[0].cells, keptGrids[1].cells, keptInts[0].Value);
 
     ref var c = ref heap<nint>(1, out var Ꮡc);
-    void inc() {
+    [GoFunc("main.func1")] void inc() {
         var p = Ꮡc;
         p.Value += 10;
     }

@@ -219,7 +219,7 @@ internal static map<ж<op>, loc> assignLocs⁔(/*this*/ ж<Func> Ꮡfn) {
     var locsʗ1 = locs;
     var opIndexesʗ1 = opIndexes;
     var regUsedʗ1 = regUsed;
-    void assign(ж<op> o, loc l) {
+    [GoFunc("(*Func).assignLocs.func1")] void assign(ж<op> o, loc l) {
         var (have, ok) = locsʗ1[o, ꟷ]; if (ok) {
             fatalf("op %+v already assigned location %v (new %v)", o.OrTypedNil(), have, l);
             return;

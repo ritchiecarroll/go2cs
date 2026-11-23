@@ -10,7 +10,7 @@ internal partial struct closureReturningAnonStruct_func_R0 /*dyn*/ {
 }
 
 internal static void closureReturningAnonStruct() {
-    closureReturningAnonStruct_func_R0 makeEntry(@string name, nint size) => new closureReturningAnonStruct_func_R0(name, size);
+    [GoFunc("closureReturningAnonStruct.func1")] closureReturningAnonStruct_func_R0 makeEntry(@string name, nint size) => new closureReturningAnonStruct_func_R0(name, size);
 
     var e1 = makeEntry("alpha", 10);
     var e2 = makeEntry("beta", 20);

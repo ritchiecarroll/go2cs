@@ -202,7 +202,7 @@ internal static void Compile⁔(/*this*/ ж<File> Ꮡf) {
         f.emitConst(c.name, c.data);
     }
 
-    void trace(ж<Func> fn, @string step) {
+    [GoFunc("(*File).Compile.func1")] void trace(ж<Func> fn, @string step) {
         if (!logCompile) {
             return;
         }
@@ -261,7 +261,7 @@ internal static bool cse⁔(/*this*/ ref Func fn) {
     var canon = new map<uint64, slice<ж<op>>>();
     var canonʗ1 = canon;
     var hashesʗ1 = hashes;
-    ж<op> lookup(ж<op> o) {
+    [GoFunc("(*Func).cse.func1")] ж<op> lookup(ж<op> o) {
         var hash = hashesʗ1[o];
         foreach (var (_, o2) in range(canonʗ1[hash])) {
             if (o.equalNoName(o2)) {
@@ -291,7 +291,7 @@ internal static bool deadcode⁔(/*this*/ ref Func fn) {
     var marks = new map<ж<op>, bool>();
     ref var mark = ref heap<Action<ж<op>>>(out var Ꮡmark);
     var marksʗ1 = marks;
-    mark = (ж<op> o) => {
+    mark = [GoFunc("(*Func).deadcode.func1")] (ж<op> o) => {
         if (marksʗ1[o]) {
             return;
         }
@@ -415,7 +415,7 @@ partial struct opHeap /*[]ж<op>*/;
 internal static nint Len⁔(/*this*/ opHeap h) { return len(h); }
 internal static void Swap⁔(/*this*/ opHeap h, nint i, nint j) { (h[i], h[j]) = (h[j], h[i]); }
 internal static bool Less⁔(/*this*/ opHeap h, nint i, nint j) {
-    nint priority(ж<op> o) {
+    [GoFunc("opHeap.Less.func1")] nint priority(ж<op> o) {
         if (o.Δop == "deref"u8 || o.Δop == "const"u8) {
             // Input to memory load
             return 1;

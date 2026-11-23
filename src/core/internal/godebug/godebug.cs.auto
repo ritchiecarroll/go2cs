@@ -175,7 +175,7 @@ internal static ref value empty => ref ((StaticBox<value>)Ꮡempty).ValueSlot;
 // Clients should therefore typically not attempt their own
 // caching of Value's result.
 internal static @string Value⁔(/*this*/ ж<Setting> Ꮡs) {
-    Ꮡs.of(Setting.Ꮡonce).Do(() => {
+    Ꮡs.of(Setting.Ꮡonce).Do([GoFunc("(*Setting).Value.func1")] () => {
         Ꮡs.Value.setting = lookup(Ꮡs.Value.Name());
         if (Ꮡs.Value.info == nil && !Ꮡs.Value.Undocumented()) {
             throw panic("godebug: Value of name not listed in godebugs.All: " + Ꮡs.Value.name);
@@ -267,7 +267,7 @@ internal static void update(@string def, @string env) {
         // the defaults. Existing immutable settings are always locked.
         var did = new map<@string, bool>();
         var didʗ1 = did;
-        Ꮡcache.Range((any name, any s) => {
+        Ꮡcache.Range([GoFunc("update.func1")] (any name, any s) => {
             var info = s._<ж<setting>>().Value.info; if (info != nil && info.Immutable) {
                 didʗ1[name._<@string>()] = true;
             }
@@ -278,7 +278,7 @@ internal static void update(@string def, @string env) {
 
         // Clear any cached values that are no longer present.
         var didʗ2 = did;
-        Ꮡcache.Range((any name, any s) => {
+        Ꮡcache.Range([GoFunc("update.func2")] (any name, any s) => {
             if (!didʗ2[name._<@string>()]) {
                 s._<ж<setting>>().of(setting.Ꮡvalue).Store(Ꮡempty);
             }

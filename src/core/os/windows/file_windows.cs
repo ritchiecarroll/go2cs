@@ -317,7 +317,7 @@ public static (ж<File> r, ж<File> w, error err) Pipe() {
     return (newFile(p[0], "|0", kindPipe, false), newFile(p[1], "|1", kindPipe, false), default);
 }
 
-internal static Func<bool> useGetTempPath2 = Δsync.OnceValue(bool () => windows.ErrorLoadingGetTempPath2() == nil);
+internal static Func<bool> useGetTempPath2 = Δsync.OnceValue([GoFunc("init.func2")] bool () => windows.ErrorLoadingGetTempPath2() == nil);
 
 internal static @string tempDir() {
     var getTempPath = syscall.GetTempPath;

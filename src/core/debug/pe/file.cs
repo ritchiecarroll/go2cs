@@ -230,7 +230,7 @@ internal static ref readonly @string strˢ => ref strˢᵇ;
 private static readonly @string strˢᵇ = "str"u8;
 
 internal static (ж<dwarf.Data>, error) DWARF⁔(/*this*/ ref File f) {
-    @string dwarfSuffix(ж<Section> s) {
+    [GoFunc("(*File).DWARF.func1")] @string dwarfSuffix(ж<Section> s) {
         switch (ᐧ) {
         case {} when strings.HasPrefix(s.Name, debugˢ): {
             return s.Name[7..];
@@ -244,7 +244,7 @@ internal static (ж<dwarf.Data>, error) DWARF⁔(/*this*/ ref File f) {
     }
 
     // sectionData gets the data for s and checks its size.
-    (slice<byte>, error) sectionData(ж<Section> s) {
+    [GoFunc("(*File).DWARF.func2")] (slice<byte>, error) sectionData(ж<Section> s) {
         var (b, errΔ1) = s.Data();
         if (errΔ1 != nil && (uint32)len(b) < s.Size) {
             return (default, errΔ1);
@@ -530,7 +530,7 @@ internal static (any, error) readOptionalHeader(io.ReadSeeker r, uint16 sz) {
 
     // read reads from io.ReadSeeke, r, into data.
     ref var err = ref heap<error>(out var Ꮡerr);
-    bool read(any data) {
+    [GoFunc("readOptionalHeader.func1")] bool read(any data) {
         Ꮡerr.ValueSlot = binary.Read(r, binary.LittleEndian, data);
         return Ꮡerr.ValueSlot == nil;
     }

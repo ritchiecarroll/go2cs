@@ -696,7 +696,7 @@ internal static (nint, error) WriteString⁔(/*this*/ discard _, @string s) {
 }
 
 [GoLazy] partial class lazyᴛblackHolePool { internal static readonly ж<Δsync.Pool> ᏑblackHolePool = new StaticBox<Δsync.Pool>(new Δsync.Pool(
-    New: () => {
+    New: [GoFunc("init.func1")] () => {
         var b = new slice<byte>(8192);
         return Ꮡ(b);
     }

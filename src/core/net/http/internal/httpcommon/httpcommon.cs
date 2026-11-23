@@ -326,7 +326,7 @@ public static (EncodeHeadersResult res, error) EncodeHeaders(context.Context ctx
 
     var paramʗ1 = param;
     var reqʗ1 = req;
-    void enumerateHeaders(Action<@string, @string> f) {
+    [GoFunc("EncodeHeaders.func1")] void enumerateHeaders(Action<@string, @string> f) {
         // 8.1.2.3 Request Pseudo-Header Fields
         // The :path pseudo-header field includes the path and query parts of the
         // target URI (the path-absolute production and optionally a '?' character
@@ -427,7 +427,7 @@ public static (EncodeHeadersResult res, error) EncodeHeaders(context.Context ctx
     // modifying the hpack state.
     if (param.PeerMaxHeaderListSize > 0) {
         var hlSize = (uint64)0;
-        enumerateHeaders((@string name, @string value) => {
+        enumerateHeaders([GoFunc("EncodeHeaders.func2")] (@string name, @string value) => {
             var hf = new hpack.HeaderField(Name: name, Value: value);
             hlSize += (uint64)hf.Size();
         });
@@ -441,7 +441,7 @@ public static (EncodeHeadersResult res, error) EncodeHeaders(context.Context ctx
 
     // Header list size is ok. Write the headers.
     var traceʗ1 = trace;
-    enumerateHeaders((@string name, @string value) => {
+    enumerateHeaders([GoFunc("EncodeHeaders.func3")] (@string name, @string value) => {
         (name, var ascii) = LowerHeader(name);
         if (!ascii) {
             // Skip writing invalid headers. Per RFC 7540, Section 8.1.2, header

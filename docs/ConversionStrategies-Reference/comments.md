@@ -67,11 +67,11 @@ the two groups is dropped and leaves no extra blank behind:
     var (result, turnIsOver) = converted(new score(player: 3, opponent: 5, thisTurn: 7));
     fmt.Println("converted func type call:", result.player, result.opponent, result.thisTurn, turnIsOver);
 
-    var m = new machine(split: (@string s) => (len(s), s + "!", default));
+    var m = new machine(split: [GoFunc("main.func1")] (@string s) => (len(s), s + "!", default));
     var (n, @out, serr) = m.split("hi");
     fmt.Println(n, @out, serr == nil);
 
-    var p = new provider(produce: (nint x) => x * 2);
+    var p = new provider(produce: [GoFunc("main.func2")] (nint x) => x * 2);
     var r = new registry(h: NilSafeDelegateConversion<handler, Func<nint, nint>>(p.produce));
     fmt.Println(r.h(21));
 ```

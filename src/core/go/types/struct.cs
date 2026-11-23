@@ -96,7 +96,7 @@ internal static void structType⁔(/*this*/ ж<Checker> Ꮡcheck, ж<Struct> Ꮡ
     // current field typ and tag
     ref var typ = ref heap<Type>(out var Ꮡtyp);
     @string tag = default;
-    void add(ж<ast.Ident> ident, bool embedded) {
+    [GoFunc("(*Checker).structType.func1")] void add(ж<ast.Ident> ident, bool embedded) {
         if (tag != ""u8 && Ꮡtags.ValueSlot == nil) {
             Ꮡtags.ValueSlot = new slice<@string>(len(Ꮡfields.ValueSlot));
         }
@@ -119,7 +119,7 @@ internal static void structType⁔(/*this*/ ж<Checker> Ꮡcheck, ж<Struct> Ꮡ
     // with the source as long as the fields are _ or have different names
     // (go.dev/issue/25627).
     var addʗ1 = add;
-    void addInvalid(ж<ast.Ident> ident) {
+    [GoFunc("(*Checker).structType.func2")] void addInvalid(ж<ast.Ident> ident) {
         Ꮡtyp.ValueSlot = new BasicжType(Typ[Invalid]);
         tag = ""u8;
         addʗ1(ident, true);
@@ -160,7 +160,7 @@ internal static void structType⁔(/*this*/ ж<Checker> Ꮡcheck, ж<Struct> Ꮡ
 
             var embeddedPosʗ1 = embeddedPos;
             var embeddedTypʗ1 = embeddedTyp;
-            check.later(() => {
+            check.later([GoFunc("(*Checker).structType.func3")] () => {
                 var (t, isPtr) = deref(embeddedTypʗ1);
                 switch (t.Underlying().type()) {
                 case ж<Basic> u: {

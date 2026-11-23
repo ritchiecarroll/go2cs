@@ -790,7 +790,7 @@ internal static (bool, int64) assignWaitingGCWorker⁔(/*this*/ ж<gcControllerS
         return (false, now);
     }
 
-    bool decIfPositive(ж<atomic.Int64> val) {
+    [GoFunc("(*gcControllerState).assignWaitingGCWorker.func1")] bool decIfPositive(ж<atomic.Int64> val) {
         for (;;) {
             var v = val.Load();
             if (v <= 0) {
@@ -1372,7 +1372,7 @@ internal static int32 /*out*/ setGCPercent(int32 @in) {
     int32 @out = default;
 
     // Run on the system stack since we grab the heap lock.
-    systemstack(() => {
+    systemstack([GoFunc("setGCPercent.func1")] () => {
         @lock(Ꮡmheap_.Ꮡlock);
         @out = ᏑgcController.setGCPercent(@in);
         gcControllerCommit();
@@ -1427,7 +1427,7 @@ internal static int64 /*out*/ setMemoryLimit(int64 @in) {
     int64 @out = default;
 
     // Run on the system stack since we grab the heap lock.
-    systemstack(() => {
+    systemstack([GoFunc("setMemoryLimit.func1")] () => {
         @lock(Ꮡmheap_.Ꮡlock);
         @out = ᏑgcController.setMemoryLimit(@in);
         if (@in < 0 || @out == @in) {

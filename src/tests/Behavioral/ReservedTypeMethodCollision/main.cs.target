@@ -26,7 +26,7 @@ internal static void main() {
     fmt.Println(s);
 
     var sv = new Sieve(vals: [1, 2, 3, 4, 5, 6]);
-    Func<nint, bool> even = (nint n) => n % 2 == 0;
+    Func<nint, bool> even = [GoFunc("main.func1")] (nint n) => n % 2 == 0;
     fmt.Println(sv.Filter(even));
 }
 

@@ -579,7 +579,7 @@ internal static @string ReplaceAllString⁔(/*this*/ ж<Regexp> Ꮡre, @string s
     if (strings.Contains(repl, "$")) {
         n = 2 * (re.numSubexp + 1);
     }
-    var b = Ꮡre.replaceAll(default, src, n, (slice<byte> dst, slice<nint> match) => Ꮡre.Value.expand(dst, repl, default, src, match));
+    var b = Ꮡre.replaceAll(default, src, n, [GoFunc("(*Regexp).ReplaceAllString.func1")] (slice<byte> dst, slice<nint> match) => Ꮡre.Value.expand(dst, repl, default, src, match));
     return (@string)b;
 }
 
@@ -587,7 +587,7 @@ internal static @string ReplaceAllString⁔(/*this*/ ж<Regexp> Ꮡre, @string s
 // with the replacement string repl. The replacement repl is substituted directly,
 // without using [Regexp.Expand].
 internal static @string ReplaceAllLiteralString⁔(/*this*/ ж<Regexp> Ꮡre, @string src, @string repl) {
-    return (@string)Ꮡre.replaceAll(default, src, 2, (slice<byte> dst, slice<nint> match) => append(dst, repl.ꓸꓸꓸ));
+    return (@string)Ꮡre.replaceAll(default, src, 2, [GoFunc("(*Regexp).ReplaceAllLiteralString.func1")] (slice<byte> dst, slice<nint> match) => append(dst, repl.ꓸꓸꓸ));
 }
 
 // ReplaceAllStringFunc returns a copy of src in which all matches of the
@@ -595,7 +595,7 @@ internal static @string ReplaceAllLiteralString⁔(/*this*/ ж<Regexp> Ꮡre, @s
 // to the matched substring. The replacement returned by repl is substituted
 // directly, without using [Regexp.Expand].
 internal static @string ReplaceAllStringFunc⁔(/*this*/ ж<Regexp> Ꮡre, @string src, Func<@string, @string> repl) {
-    var b = Ꮡre.replaceAll(default, src, 2, (slice<byte> dst, slice<nint> match) => append(dst, repl(src.slice(match[0], match[1])).ꓸꓸꓸ));
+    var b = Ꮡre.replaceAll(default, src, 2, [GoFunc("(*Regexp).ReplaceAllStringFunc.func1")] (slice<byte> dst, slice<nint> match) => append(dst, repl(src.slice(match[0], match[1])).ꓸꓸꓸ));
     return (@string)b;
 }
 
@@ -679,7 +679,7 @@ internal static slice<byte> ReplaceAll⁔(/*this*/ ж<Regexp> Ꮡre, slice<byte>
     @string srepl = ""u8;
     var replʗ1 = repl;
     var srcʗ1 = src;
-    var b = Ꮡre.replaceAll(src, ""u8, n, (slice<byte> dst, slice<nint> match) => {
+    var b = Ꮡre.replaceAll(src, ""u8, n, [GoFunc("(*Regexp).ReplaceAll.func1")] (slice<byte> dst, slice<nint> match) => {
         if (len(srepl) != len(replʗ1)) {
             srepl = (@string)replʗ1;
         }
@@ -693,7 +693,7 @@ internal static slice<byte> ReplaceAll⁔(/*this*/ ж<Regexp> Ꮡre, slice<byte>
 // without using [Regexp.Expand].
 internal static slice<byte> ReplaceAllLiteral⁔(/*this*/ ж<Regexp> Ꮡre, slice<byte> src, slice<byte> repl) {
     var replʗ1 = repl;
-    return Ꮡre.replaceAll(src, ""u8, 2, (slice<byte> dst, slice<nint> match) => appendꓸꓸꓸ(dst, replʗ1));
+    return Ꮡre.replaceAll(src, ""u8, 2, [GoFunc("(*Regexp).ReplaceAllLiteral.func1")] (slice<byte> dst, slice<nint> match) => appendꓸꓸꓸ(dst, replʗ1));
 }
 
 // ReplaceAllFunc returns a copy of src in which all matches of the
@@ -702,7 +702,7 @@ internal static slice<byte> ReplaceAllLiteral⁔(/*this*/ ж<Regexp> Ꮡre, slic
 // directly, without using [Regexp.Expand].
 internal static slice<byte> ReplaceAllFunc⁔(/*this*/ ж<Regexp> Ꮡre, slice<byte> src, Func<slice<byte>, slice<byte>> repl) {
     var srcʗ1 = src;
-    return Ꮡre.replaceAll(src, ""u8, 2, (slice<byte> dst, slice<nint> match) => appendꓸꓸꓸ(dst, repl(srcʗ1.slice(match[0], match[1]))));
+    return Ꮡre.replaceAll(src, ""u8, 2, [GoFunc("(*Regexp).ReplaceAllFunc.func1")] (slice<byte> dst, slice<nint> match) => appendꓸꓸꓸ(dst, repl(srcʗ1.slice(match[0], match[1]))));
 }
 
 // Bitmap used by func special to check whether a character needs to be escaped.
@@ -1100,7 +1100,7 @@ internal static slice<slice<byte>> FindAll⁔(/*this*/ ж<Regexp> Ꮡre, slice<b
     }
     ref var result = ref heap<slice<slice<byte>>>(out var Ꮡresult);
     var bʗ1 = b;
-    Ꮡre.allMatches(""u8, b, n, (slice<nint> match) => {
+    Ꮡre.allMatches(""u8, b, n, [GoFunc("(*Regexp).FindAll.func1")] (slice<nint> match) => {
         if (Ꮡresult.ValueSlot == nil) {
             Ꮡresult.ValueSlot = new slice<slice<byte>>(0, startSize);
         }
@@ -1118,7 +1118,7 @@ internal static slice<slice<nint>> FindAllIndex⁔(/*this*/ ж<Regexp> Ꮡre, sl
         n = len(b) + 1;
     }
     ref var result = ref heap<slice<slice<nint>>>(out var Ꮡresult);
-    Ꮡre.allMatches(""u8, b, n, (slice<nint> match) => {
+    Ꮡre.allMatches(""u8, b, n, [GoFunc("(*Regexp).FindAllIndex.func1")] (slice<nint> match) => {
         if (Ꮡresult.ValueSlot == nil) {
             Ꮡresult.ValueSlot = new slice<slice<nint>>(0, startSize);
         }
@@ -1136,7 +1136,7 @@ internal static slice<@string> FindAllString⁔(/*this*/ ж<Regexp> Ꮡre, @stri
         n = len(s) + 1;
     }
     ref var result = ref heap<slice<@string>>(out var Ꮡresult);
-    Ꮡre.allMatches(s, default, n, (slice<nint> match) => {
+    Ꮡre.allMatches(s, default, n, [GoFunc("(*Regexp).FindAllString.func1")] (slice<nint> match) => {
         if (Ꮡresult.ValueSlot == nil) {
             Ꮡresult.ValueSlot = new slice<@string>(0, startSize);
         }
@@ -1154,7 +1154,7 @@ internal static slice<slice<nint>> FindAllStringIndex⁔(/*this*/ ж<Regexp> Ꮡ
         n = len(s) + 1;
     }
     ref var result = ref heap<slice<slice<nint>>>(out var Ꮡresult);
-    Ꮡre.allMatches(s, default, n, (slice<nint> match) => {
+    Ꮡre.allMatches(s, default, n, [GoFunc("(*Regexp).FindAllStringIndex.func1")] (slice<nint> match) => {
         if (Ꮡresult.ValueSlot == nil) {
             Ꮡresult.ValueSlot = new slice<slice<nint>>(0, startSize);
         }
@@ -1173,7 +1173,7 @@ internal static slice<slice<slice<byte>>> FindAllSubmatch⁔(/*this*/ ж<Regexp>
     }
     ref var result = ref heap<slice<slice<slice<byte>>>>(out var Ꮡresult);
     var bʗ1 = b;
-    Ꮡre.allMatches(""u8, b, n, (slice<nint> match) => {
+    Ꮡre.allMatches(""u8, b, n, [GoFunc("(*Regexp).FindAllSubmatch.func1")] (slice<nint> match) => {
         if (Ꮡresult.ValueSlot == nil) {
             Ꮡresult.ValueSlot = new slice<slice<slice<byte>>>(0, startSize);
         }
@@ -1197,7 +1197,7 @@ internal static slice<slice<nint>> FindAllSubmatchIndex⁔(/*this*/ ж<Regexp> �
         n = len(b) + 1;
     }
     ref var result = ref heap<slice<slice<nint>>>(out var Ꮡresult);
-    Ꮡre.allMatches(""u8, b, n, (slice<nint> match) => {
+    Ꮡre.allMatches(""u8, b, n, [GoFunc("(*Regexp).FindAllSubmatchIndex.func1")] (slice<nint> match) => {
         if (Ꮡresult.ValueSlot == nil) {
             Ꮡresult.ValueSlot = new slice<slice<nint>>(0, startSize);
         }
@@ -1215,7 +1215,7 @@ internal static slice<slice<@string>> FindAllStringSubmatch⁔(/*this*/ ж<Regex
         n = len(s) + 1;
     }
     ref var result = ref heap<slice<slice<@string>>>(out var Ꮡresult);
-    Ꮡre.allMatches(s, default, n, (slice<nint> match) => {
+    Ꮡre.allMatches(s, default, n, [GoFunc("(*Regexp).FindAllStringSubmatch.func1")] (slice<nint> match) => {
         if (Ꮡresult.ValueSlot == nil) {
             Ꮡresult.ValueSlot = new slice<slice<@string>>(0, startSize);
         }
@@ -1240,7 +1240,7 @@ internal static slice<slice<nint>> FindAllStringSubmatchIndex⁔(/*this*/ ж<Reg
         n = len(s) + 1;
     }
     ref var result = ref heap<slice<slice<nint>>>(out var Ꮡresult);
-    Ꮡre.allMatches(s, default, n, (slice<nint> match) => {
+    Ꮡre.allMatches(s, default, n, [GoFunc("(*Regexp).FindAllStringSubmatchIndex.func1")] (slice<nint> match) => {
         if (Ꮡresult.ValueSlot == nil) {
             Ꮡresult.ValueSlot = new slice<slice<nint>>(0, startSize);
         }

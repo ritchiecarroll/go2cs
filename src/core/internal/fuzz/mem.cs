@@ -72,7 +72,7 @@ internal static (ж<sharedMem> m, error err) sharedMemTempFile(nint size) {
         }
         var errʗ1 = err;
         var fʗ1 = f;
-        defer(() => {
+        defer([GoFunc("sharedMemTempFile.func1")] () => {
             if (errʗ1 != nil) {
                 fʗ1.Close();
                 os.Remove(fʗ1.Name());

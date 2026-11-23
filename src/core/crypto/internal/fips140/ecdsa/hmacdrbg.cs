@@ -53,7 +53,7 @@ internal static ж<hmacDRBG> newDRBG<H>(Func<H> hashΔ1, slice<byte> entropy, sl
     fips140.RecordApproved();
 
     var d = Ꮡ(new hmacDRBG(
-        newHMAC: (slice<byte> key) => hmac.New(hashΔ1, key)
+        newHMAC: [GoFunc("newDRBG[...].func1")] (slice<byte> key) => hmac.New(hashΔ1, key)
     ));
     nint size = hashΔ1().Size();
 

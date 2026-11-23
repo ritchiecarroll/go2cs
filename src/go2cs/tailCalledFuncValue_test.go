@@ -173,7 +173,7 @@ func TestTailCalledFuncValueKeepsTheCallersFrame(t *testing.T) {
 		t.Fatalf("literalCaller's body not found in the emission:\n%s", mainCs)
 	}
 
-	if body := mainCs[start:end]; !strings.Contains(body, "[MethodImpl(MethodImplOptions.NoInlining)]") {
+	if body := mainCs[start:end]; !strings.Contains(body, `[MethodImpl(MethodImplOptions.NoInlining), GoFunc("literalCaller.func1")]`) {
 		t.Errorf("the literal ending with a call through whereValue is not marked:\n%s", body)
 	}
 }

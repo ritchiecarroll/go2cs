@@ -19,21 +19,21 @@ internal static error mustOpen(@string path) {
 }
 
 internal static void main() {
-    fmt.Println("recovered:", recoverText(() => {
+    fmt.Println("recovered:", recoverText([GoFunc("main.func1")] () => {
         throw panic(mustOpen("a.txt"));
     }));
 
     var wrapped = fmt.Errorf("load config: %w"u8, mustOpen("cfg.yaml"));
     var wrappedʗ1 = wrapped;
-    fmt.Println("recovered:", recoverText(() => {
+    fmt.Println("recovered:", recoverText([GoFunc("main.func2")] () => {
         throw panic(wrappedʗ1);
     }));
 
-    fmt.Println("recovered:", recoverText(() => {
+    fmt.Println("recovered:", recoverText([GoFunc("main.func3")] () => {
         throw panic("plain string");
     }));
 
-    fmt.Println("recovered:", recoverText(() => {
+    fmt.Println("recovered:", recoverText([GoFunc("main.func4")] () => {
         throw panic(errors.New("simple"));
     }));
 
@@ -44,7 +44,7 @@ internal static @string /*msg*/ recoverText(Action f) {
     @string msg = default;
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("recoverText.func1")] () => {
             var r = recover(); if (r != nil) {
                 msg = fmt.Sprintf("%v"u8, r);
             }

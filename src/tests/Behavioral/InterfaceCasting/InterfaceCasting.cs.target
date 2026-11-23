@@ -174,7 +174,7 @@ internal static void main() {
     inc2.Inc();
     fmt.Println("deconstructed into iface:", inc2.Total(), err == nil);
 
-    Animal makeAnimal(bool feline) {
+    [GoFunc("main.func1")] Animal makeAnimal(bool feline) {
         if (feline) {
             return new CatжAnimal(Ꮡ(new Cat()));
         }

@@ -336,7 +336,7 @@ internal static (slice<byte>, error) readLiteralsFourStreams⁔(/*this*/ ж<Read
         var use4 = i < regeneratedStreamSize4;
 
         var huffTableʗ1 = huffTable;
-        (uint16, error) fetchHuff(ж<reverseBitReader> rbr) {
+        [GoFunc("(*Reader).readLiteralsFourStreams.func1")] (uint16, error) fetchHuff(ж<reverseBitReader> rbr) {
             if (!rbr.fetch((uint8)huffBits)) {
                 return (0, rbr.makeError(literalsHuffmanStreamOutˢ));
             }

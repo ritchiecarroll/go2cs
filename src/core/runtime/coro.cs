@@ -44,7 +44,7 @@ internal static ж<coro> newcoro(Action<ж<coro>> f) {
     var pc = sys.GetCallerPC();
     ref var gp = ref heap<ж<g>>(getg(), out var Ꮡgp);
     var cʗ1 = c;
-    systemstack(() => {
+    systemstack([GoFunc("newcoro.func1")] () => {
         var mp = Ꮡgp.ValueSlot.Value.m;
         ref var start = ref heap<Action>(corostart, out var Ꮡstart);
         var startfv = ~Ꮡstart.Reinterpret<Action, ж<funcval>>();

@@ -34,7 +34,7 @@ internal static any /*text*/ nilIndirection() {
     any text = default;
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("nilIndirection.func1")] () => {
             text = recover();
         }, ref ᒐ);
 
@@ -74,7 +74,7 @@ internal static void main() {
     atomic.StoreInt32(Ꮡh.Reinterpret<rec2, rec>().Ꮡcnt, 6);
     fmt.Println("named pointer conversion:", h.cnt);
 
-    ж<rec> mk() => Ꮡg;
+    [GoFunc("main.func1")] ж<rec> mk() => Ꮡg;
     atomic.AddInt32(mk().Ꮡcnt, 1);
     fmt.Println("call base:", g.cnt);
 

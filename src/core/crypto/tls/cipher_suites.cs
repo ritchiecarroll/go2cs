@@ -606,7 +606,7 @@ internal static slice<byte> Sum⁔(/*this*/ ref cthWrapper c, slice<byte> b) { r
 
 internal static Func<hash.Hash> newConstantTimeHash(Func<hash.Hash> h) {
     boring.Unreachable();
-    return () => new cthWrapperжHash(Ꮡ(new cthWrapper(h()._<constantTimeHash>())));
+    return [GoFunc("newConstantTimeHash.func1")] () => new cthWrapperжHash(Ꮡ(new cthWrapper(h()._<constantTimeHash>())));
 }
 
 // tls10MAC implements the TLS 1.0 MAC function. RFC 2246, Section 6.2.3.

@@ -64,7 +64,7 @@ public partial struct options {
 // DefaultDirection sets the default direction for a Paragraph. The direction is
 // overridden if the text contains directional characters.
 public static Action<ж<options>> DefaultDirection(Direction d) {
-    return (ж<options> opts) => {
+    return [GoFunc("DefaultDirection.func1")] (ж<options> opts) => {
         opts.defaultDirection = d;
     };
 }

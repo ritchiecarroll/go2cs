@@ -109,7 +109,7 @@ internal static (ж<types.Package>, error) ImportFrom⁔(/*this*/ ж<Importer> �
 
         p.packages[bp.ImportPath] = Ꮡimporting;
         var bpʗ1 = bp;
-        defer(() => {
+        defer([GoFunc("(*Importer).ImportFrom.func1")] () => {
             // clean up in case of error
             // TODO(gri) Eventually we may want to leave a (possibly empty)
             // package in the map in all cases (and use that package to
@@ -133,7 +133,7 @@ internal static (ж<types.Package>, error) ImportFrom⁔(/*this*/ ж<Importer> �
         ref var conf = ref heap<types.Config>(new types.Config(
             IgnoreFuncBodies: true,
             // continue type-checking after the first error
-            Error: (error errΔ2) => {
+            Error: [GoFunc("(*Importer).ImportFrom.func2")] (error errΔ2) => {
                 if (ᏑfirstHardErr.ValueSlot == nil && !errΔ2._<types.Error>().Soft) {
                     ᏑfirstHardErr.ValueSlot = errΔ2;
                 }
@@ -185,7 +185,7 @@ internal static partial (slice<ж<ast.File>>, error) parseFiles⁔(/*this*/ ж<I
     // use build.Context's OpenFile if there is one
     var open = p.ctxt.OpenFile;
     if (open == nil) {
-        open = (io.ReadCloser, error) (@string name) => {
+        open = [GoFunc("(*Importer).parseFiles.func1")] (io.ReadCloser, error) (@string name) => {
             var (ᴛ1, ᴛ2) = os.Open(name);
             return (new os_FileжReadCloser(ᴛ1), ᴛ2);
         };
@@ -200,7 +200,7 @@ internal static partial (slice<ж<ast.File>>, error) parseFiles⁔(/*this*/ ж<I
         var errorsʗ1 = errors;
         var filesʗ1 = files;
         var openʗ1 = open;
-        goǃ((nint iΔ1, @string filepath) => {
+        goǃ([GoFunc("(*Importer).parseFiles.func2")] (nint iΔ1, @string filepath) => {
             GoFrame ᒐ = default;
             try {
                 defer(Ꮡwg.Done, ref ᒐ);

@@ -19,7 +19,7 @@ internal static partial void runForeign(Action f) {
         foreign(f);
         return;
     }
-    goǃ(() => {
+    goǃ([GoFunc("runForeign.func1")] () => {
         GoFrame ᒐ = default;
         try {
             runtime.LockOSThread();
@@ -43,11 +43,11 @@ internal static partial void f1() {
     var began = time.Now();
     var chʗ1 = ch;
     var doneʗ1 = done;
-    runForeign(() => {
+    runForeign([GoFunc("f1.func1")] () => {
         doneʗ1.ᐸꟷ(ᐸꟷ(chʗ1));
     });
     var chʗ2 = ch;
-    goǃ(() => {
+    goǃ([GoFunc("f1.func2")] () => {
         time.Sleep(5 * time.Millisecond);
         chʗ2.ᐸꟷ(7);
     });
@@ -62,11 +62,11 @@ internal static partial void f2() {
     var began = time.Now();
     var chʗ1 = ch;
     var gotʗ1 = got;
-    goǃ(() => {
+    goǃ([GoFunc("f2.func1")] () => {
         gotʗ1.ᐸꟷ(ᐸꟷ(chʗ1));
     });
     var chʗ2 = ch;
-    runForeign(() => {
+    runForeign([GoFunc("f2.func2")] () => {
         time.Sleep(5 * time.Millisecond);
         chʗ2.ᐸꟷ(9);
     });
@@ -93,7 +93,7 @@ internal static void f3() {
     var done = new channel<nint>(0);
     var began = time.Now();
     var doneʗ1 = done;
-    runForeign([MethodImpl(MethodImplOptions.NoInlining)] () => {
+    runForeign([MethodImpl(MethodImplOptions.NoInlining), GoFunc("f3.func1")] () => {
         ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
         ref var mu = ref heap(new Δsync.Mutex(), out var Ꮡmu);
         ref var nΔ1 = ref heap<nint>(0, out var ᏑnΔ1);
@@ -119,7 +119,7 @@ internal static partial void f4() {
     var began = time.Now();
     var heldʗ1 = held;
     var releaseʗ1 = release;
-    goǃ(() => {
+    goǃ([GoFunc("f4.func1")] () => {
         Ꮡmu.Lock();
         close(heldʗ1);
         ᐸꟷ(releaseʗ1);
@@ -127,7 +127,7 @@ internal static partial void f4() {
     });
     var doneʗ1 = done;
     var heldʗ2 = held;
-    runForeign(() => {
+    runForeign([GoFunc("f4.func2")] () => {
         ᐸꟷ(heldʗ2);
         Ꮡmu.Lock();
         doneʗ1.ᐸꟷ(true);
@@ -135,7 +135,7 @@ internal static partial void f4() {
     });
     var heldʗ3 = held;
     var releaseʗ2 = release;
-    goǃ(() => {
+    goǃ([GoFunc("f4.func3")] () => {
         ᐸꟷ(heldʗ3);
         time.Sleep(5 * time.Millisecond);
         close(releaseʗ2);
@@ -174,7 +174,7 @@ internal static partial void f5() {
         Ꮡbusy.Add(1);
         var sinksʗ1 = sinks;
         var startBusyʗ1 = startBusy;
-        goǃ(() => {
+        goǃ([GoFunc("f5.func1")] () => {
             GoFrame ᒐ = default;
             try {
                 defer(Ꮡbusy.Done, ref ᒐ);
@@ -197,7 +197,7 @@ internal static partial void f5() {
         var reqʗ1 = req;
         var respʗ1 = resp;
         var resultsʗ1 = results;
-        runForeign(() => {
+        runForeign([GoFunc("f5.func2")] () => {
             var ok = true;
             for (nint i = 0; i < trips; i++) {
                 reqʗ1.ᐸꟷ(i);
@@ -222,11 +222,11 @@ internal static void f6() {
     var res = new channel<@string>(0);
     var began = time.Now();
     var resʗ1 = res;
-    runForeign(() => {
+    runForeign([GoFunc("f6.func1")] () => {
         GoFrame ᒐ = default;
         try {
             var resʗ2 = resʗ1;
-            defer(() => {
+            defer([GoFunc("f6.func1.1")] () => {
                 resʗ2.ᐸꟷ(fmt.Sprint(recover()));
             }, ref ᒐ);
             throw panic("foreign boom");

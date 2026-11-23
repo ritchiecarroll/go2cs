@@ -70,7 +70,7 @@ internal static bool /*_*/ Δbuiltin⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operan
         // Note: We must do this _before_ calling exprList because exprList evaluates
         //       all arguments.
         if (id == _Len || id == _Cap) {
-            defer((bool b) => {
+            defer([GoFunc("(*Checker).builtin.func1")] (bool b) => {
                 Ꮡcheck.Value.hasCallOrRecv = b;
             }, Ꮡcheck.Value.hasCallOrRecv, ref ᒐ);
             check.hasCallOrRecv = false;
@@ -233,7 +233,7 @@ internal static bool /*_*/ Δbuiltin⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operan
                 if (!isTypeParam(x.typ)) {
                     break;
                 }
-                if (underIs(x.typ, (Type u) => {
+                if (underIs(x.typ, [GoFunc("(*Checker).builtin.func2")] (Type u) => {
                     var switchᴛ2 = arrayPtrDeref(u);
                     switch (switchᴛ2.type()) {
                     case ж<Basic> tΔ1: {
@@ -287,7 +287,7 @@ internal static bool /*_*/ Δbuiltin⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operan
             // clear(m)
             Ꮡcheck.verifyVersionf(new ast_Exprᴠpositioner(call.Fun), go1_21, "clear");
 
-            if (!underIs(x.typ, (Type u) => {
+            if (!underIs(x.typ, [GoFunc("(*Checker).builtin.func3")] (Type u) => {
                 switch (u.type()) {
                 case ж<Map> _:
                 case ж<Slice> _: {
@@ -307,7 +307,7 @@ internal static bool /*_*/ Δbuiltin⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operan
         }
         case var ᴛ when ᴛ == _Close: {
             // close(c)
-            if (!underIs(x.typ, (Type u) => {
+            if (!underIs(x.typ, [GoFunc("(*Checker).builtin.func4")] (Type u) => {
                 var (uch, _) = u._<ж<Chan>>(ᐧ);
                 if (uch == nil) {
                     Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidClose, invalidOp + "cannot close non-channel %s", Ꮡx.OrTypedNil());
@@ -364,7 +364,7 @@ internal static bool /*_*/ Δbuiltin⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operan
                 //    same type to succeed (this will result in an error
                 //    because shifts of floats are not permitted)
                 if (x.mode == constant_ && y.mode == constant_) {
-                    void toFloat(ж<operand> xΔ4) {
+                    [GoFunc("(*Checker).builtin.func5")] void toFloat(ж<operand> xΔ4) {
                         if (isNumeric(xΔ4.typ) && constant.Sign(constant.Imag(xΔ4.val)) == 0) {
                             xΔ4.typ = new BasicжType(Typ[ΔUntypedFloat]);
                         }
@@ -391,7 +391,7 @@ internal static bool /*_*/ Δbuiltin⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operan
 
             // the argument types must be of floating-point type
             // (applyTypeFunc never calls f with a type parameter)
-            var f = Type (Type typ) => {
+            var f = [GoFunc("(*Checker).builtin.func6")] Type (Type typ) => {
                 assert(!isTypeParam(typ));
                 var (t, _) = typ.Underlying()._<ж<Basic>>(ᐧ); if (t != nil) {
                     switch (t.kind) {
@@ -493,7 +493,7 @@ internal static bool /*_*/ Δbuiltin⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operan
             // The key cannot be a type parameter for now.
             var map_ = x.typ;
             ref var key = ref heap<Type>(out var Ꮡkey);
-            if (!underIs(map_, (Type u) => {
+            if (!underIs(map_, [GoFunc("(*Checker).builtin.func7")] (Type u) => {
                 var (map_Δ1, _) = u._<ж<Map>>(ᐧ);
                 if (map_Δ1 == nil) {
                     Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidDelete, invalidArg + "%s is not a map", Ꮡx.OrTypedNil());
@@ -548,7 +548,7 @@ internal static bool /*_*/ Δbuiltin⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operan
 
             // the argument must be of complex type
             // (applyTypeFunc never calls f with a type parameter)
-            var f = Type (Type typ) => {
+            var f = [GoFunc("(*Checker).builtin.func8")] Type (Type typ) => {
                 assert(!isTypeParam(typ));
                 var (t, _) = typ.Underlying()._<ж<Basic>>(ᐧ); if (t != nil) {
                     switch (t.kind) {
@@ -602,7 +602,7 @@ internal static bool /*_*/ Δbuiltin⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operan
                 return default;
             }
 
-            var (u, err) = commonUnder(T, (Type _Δp0, Type uΔ1) => {
+            var (u, err) = commonUnder(T, [GoFunc("(*Checker).builtin.func9")] (Type _Δp0, Type uΔ1) => {
                 switch (uΔ1.type()) {
                 case ж<Slice> _:
                 case ж<Map> _:
@@ -1139,7 +1139,7 @@ internal static bool /*varSized*/ hasVarSize(Type t, map<ж<Named>, bool> seen) 
                 seen[named] = true; // possibly cyclic until proven otherwise
                 var namedʗ1 = named;
                 var seenʗ1 = seen;
-                defer(() => {
+                defer([GoFunc("hasVarSize.func1")] () => {
                     seenʗ1[namedʗ1] = varSized; // record final determination for named
                 }, ref ᒐ);
             }
@@ -1190,7 +1190,7 @@ internal static Type applyTypeFunc⁔(/*this*/ ж<Checker> Ꮡcheck, Func<Type, 
             // Test if t satisfies the requirements for the argument
             // type and collect possible result types at the same time.
             ref var terms = ref heap<slice<ж<Term>>>(out var Ꮡterms);
-            if (!tp.@is((ж<term> t) => {
+            if (!tp.@is([GoFunc("(*Checker).applyTypeFunc.func1")] (ж<term> t) => {
                 if (t == nil) {
                     return false;
                 }

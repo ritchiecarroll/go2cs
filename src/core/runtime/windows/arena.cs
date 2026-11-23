@@ -661,7 +661,7 @@ internal static (@unsafe.Pointer, ж<mspan>) newUserArenaChunk() {
 
     // Allocate a new user arena.
     ref var span = ref heap<ж<mspan>>(out var Ꮡspan);
-    systemstack(() => {
+    systemstack([GoFunc("newUserArenaChunk.func1")] () => {
         Ꮡspan.ValueSlot = Ꮡmheap_.allocUserArenaChunk();
     });
     if (span == nil) {
@@ -817,7 +817,7 @@ internal static void setUserArenaChunkToFault⁔(/*this*/ ж<mspan> Ꮡs) {
         racefree((@unsafe.Pointer)s.@base(), s.elemsize);
     }
 
-    systemstack(() => {
+    systemstack([GoFunc("(*mspan).setUserArenaChunkToFault.func1")] () => {
         // Add the user arena to the quarantine list.
         @lock(Ꮡmheap_.Ꮡlock);
         Ꮡmheap_.ᏑuserArena.of(mheap_userArena.ᏑquarantineList).insert(Ꮡs);

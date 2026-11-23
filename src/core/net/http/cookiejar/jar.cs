@@ -257,7 +257,7 @@ internal static slice<ж<http.Cookie>> /*cookies*/ cookies⁔(/*this*/ ж<Jar> �
 
         // sort according to RFC 6265 section 5.4 point 2: by longest
         // path and then by earliest creation time.
-        slices.SortFunc(selected, (entry a, entry b) => {
+        slices.SortFunc(selected, [GoFunc("(*Jar).cookies.func1")] (entry a, entry b) => {
             {
                 nint r = cmp.Compare(b.Path, a.Path); if (r != 0) {
                     return r;

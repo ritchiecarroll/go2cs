@@ -6,7 +6,7 @@ using ꓸꓸꓸany = Span<any>;
 partial class main_package {
 
 internal static void add(@string verb, slice<@string> args) {
-    void errorf(@string format, params ꓸꓸꓸany argsΔ1ʗp) {
+    [GoFunc("add.func1")] void errorf(@string format, params ꓸꓸꓸany argsΔ1ʗp) {
         var argsΔ1 = argsΔ1ʗp.sslice();
         fmt.Println(fmt.Sprintf(format, argsΔ1.ꓸꓸꓸ));
     }

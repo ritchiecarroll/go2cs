@@ -2504,7 +2504,7 @@ internal static ref ж<notInHeap> persistentChunks => ref ((StaticBox<ж<notInHe
 //go:nosplit
 internal static @unsafe.Pointer persistentalloc(uintptr size, uintptr align, ж<sysMemStat> sysStat) {
     ref var p = ref heap<ж<notInHeap>>(out var Ꮡp);
-    systemstack(() => {
+    systemstack([GoFunc("persistentalloc.func1")] () => {
         Ꮡp.ValueSlot = persistentalloc1(size, align, sysStat);
     });
     return @unsafe.Pointer.FromPinnedBox(p);

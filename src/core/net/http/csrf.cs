@@ -235,7 +235,7 @@ internal static bool isRequestExempt⁔(/*this*/ ж<CrossOriginProtection> Ꮡc,
 // with a 403 Forbidden status or handled with the handler passed
 // to [CrossOriginProtection.SetDenyHandler].
 internal static Handler Handler⁔(/*this*/ ж<CrossOriginProtection> Ꮡc, Handler h) {
-    return new HandlerFuncᴠHandler(new HandlerFunc((ResponseWriter w, ж<Request> r) => {
+    return new HandlerFuncᴠHandler(new HandlerFunc([GoFunc("(*CrossOriginProtection).Handler.func1")] (ResponseWriter w, ж<Request> r) => {
         var err = Ꮡc.Check(r); if (err != nil) {
             var deny = Ꮡc.Ꮡdeny.Load(); if (deny != nil) {
                 (deny.ValueSlot).ServeHTTP(w, r);

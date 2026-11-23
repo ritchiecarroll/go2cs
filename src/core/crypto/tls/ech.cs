@@ -325,19 +325,19 @@ internal static (ж<clientHelloMsg>, error) decodeInnerClientHello(ж<clientHell
     var recon = cryptobyte.NewBuilder(default);
     recon.AddUint8(typeClientHello);
     var rawOuterExtsʗ1 = rawOuterExts;
-    recon.AddUint24LengthPrefixed((ж<cryptobyte.Builder> reconΔ1) => {
+    recon.AddUint24LengthPrefixed([GoFunc("decodeInnerClientHello.func1")] (ж<cryptobyte.Builder> reconΔ1) => {
         reconΔ1.AddBytes(ᏑversionAndRandom.ValueSlot);
-        reconΔ1.AddUint8LengthPrefixed((ж<cryptobyte.Builder> reconΔ2) => {
+        reconΔ1.AddUint8LengthPrefixed([GoFunc("decodeInnerClientHello.func1.1")] (ж<cryptobyte.Builder> reconΔ2) => {
             reconΔ2.AddBytes(outer.Value.sessionId);
         });
-        reconΔ1.AddUint16LengthPrefixed((ж<cryptobyte.Builder> reconΔ3) => {
+        reconΔ1.AddUint16LengthPrefixed([GoFunc("decodeInnerClientHello.func1.2")] (ж<cryptobyte.Builder> reconΔ3) => {
             reconΔ3.AddBytes(ᏑcipherSuites.ValueSlot);
         });
-        reconΔ1.AddUint8LengthPrefixed((ж<cryptobyte.Builder> reconΔ4) => {
+        reconΔ1.AddUint8LengthPrefixed([GoFunc("decodeInnerClientHello.func1.3")] (ж<cryptobyte.Builder> reconΔ4) => {
             reconΔ4.AddBytes(ᏑcompressionMethods.ValueSlot);
         });
         var rawOuterExtsʗ2 = rawOuterExtsʗ1;
-        reconΔ1.AddUint16LengthPrefixed((ж<cryptobyte.Builder> reconΔ5) => {
+        reconΔ1.AddUint16LengthPrefixed([GoFunc("decodeInnerClientHello.func1.4")] (ж<cryptobyte.Builder> reconΔ5) => {
             bool outerExtensionsSeen = default;
             while (!Ꮡextensions.ValueSlot.Empty()) {
                 ref var extension = ref heap(new uint16(), out var Ꮡextension);
@@ -383,14 +383,14 @@ internal static (ж<clientHelloMsg>, error) decodeInnerClientHello(ж<clientHell
                         }
                         reconΔ5.AddUint16(rawOuterExtsʗ2[i].extType);
                         var rawOuterExtsʗ3 = rawOuterExtsʗ2;
-                        reconΔ5.AddUint16LengthPrefixed((ж<cryptobyte.Builder> reconΔ6) => {
+                        reconΔ5.AddUint16LengthPrefixed([GoFunc("decodeInnerClientHello.func1.4.1")] (ж<cryptobyte.Builder> reconΔ6) => {
                             reconΔ6.AddBytes(rawOuterExtsʗ3[i].data);
                         });
                         i++;
                     }
                 } else {
                     reconΔ5.AddUint16(extension);
-                    reconΔ5.AddUint16LengthPrefixed((ж<cryptobyte.Builder> reconΔ7) => {
+                    reconΔ5.AddUint16LengthPrefixed([GoFunc("decodeInnerClientHello.func1.4.2")] (ж<cryptobyte.Builder> reconΔ7) => {
                         reconΔ7.AddBytes(ᏑextData.ValueSlot);
                     });
                 }
@@ -452,11 +452,11 @@ internal static (slice<byte>, error) generateOuterECHExt(uint8 id, uint16 kdfID,
     b.AddUint16(aeadID);
     b.AddUint8(id);
     var encodedKeyʗ1 = encodedKey;
-    Ꮡb.AddUint16LengthPrefixed((ж<cryptobyte.Builder> bΔ1) => {
+    Ꮡb.AddUint16LengthPrefixed([GoFunc("generateOuterECHExt.func1")] (ж<cryptobyte.Builder> bΔ1) => {
         bΔ1.AddBytes(encodedKeyʗ1);
     });
     var payloadʗ1 = payload;
-    Ꮡb.AddUint16LengthPrefixed((ж<cryptobyte.Builder> bΔ2) => {
+    Ꮡb.AddUint16LengthPrefixed([GoFunc("generateOuterECHExt.func2")] (ж<cryptobyte.Builder> bΔ2) => {
         bΔ2.AddBytes(payloadʗ1);
     });
     return b.Bytes();
@@ -701,7 +701,7 @@ internal static (slice<byte>, error) buildRetryConfigList(slice<EncryptedClientH
     bool atLeastOneRetryConfig = default;
     ref var retryBuilder = ref heap(new cryptobyte.Builder(), out var ᏑretryBuilder);
     var keysʗ1 = keys;
-    ᏑretryBuilder.AddUint16LengthPrefixed((ж<cryptobyte.Builder> b) => {
+    ᏑretryBuilder.AddUint16LengthPrefixed([GoFunc("buildRetryConfigList.func1")] (ж<cryptobyte.Builder> b) => {
         foreach (var (_, c) in range(keysʗ1)) {
             if (!c.SendAsRetry) {
                 continue;

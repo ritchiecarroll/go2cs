@@ -9,7 +9,7 @@ internal static void exitFromHelper(channel/*<-*/<@string> log) {
     GoFrame ᒐ = default;
     try {
         var logʗ1 = log;
-        defer(() => {
+        defer([GoFunc("exitFromHelper.func1")] () => {
             logʗ1.ᐸꟷ("helper defer ran");
         }, ref ᒐ);
 
@@ -27,18 +27,18 @@ internal static partial void main() {
 
     var doneʗ1 = done;
     var logʗ1 = log;
-    goǃ(() => {
+    goǃ([GoFunc("main.func1")] () => {
         GoFrame ᒐ = default;
         try {
             defer(ᴛ1 => close(ᴛ1), doneʗ1, ref ᒐ);
 
             var logʗ2 = logʗ1;
-            defer(() => {
+            defer([GoFunc("main.func1.1")] () => {
                 logʗ2.ᐸꟷ("goroutine defer 2 ran");
             }, ref ᒐ);
 
             var logʗ3 = logʗ1;
-            defer(() => {
+            defer([GoFunc("main.func1.2")] () => {
                 if (recover() == nil) {
                     logʗ3.ᐸꟷ("recover() during Goexit returned nil");
                 } else {
@@ -63,7 +63,7 @@ internal static partial void main() {
 
     var after = new channel<@string>(0);
     var afterʗ1 = after;
-    goǃ(() => {
+    goǃ([GoFunc("main.func2")] () => {
         afterʗ1.ᐸꟷ("a later goroutine still runs");
     });
     fmt.Println(ᐸꟷ(after));

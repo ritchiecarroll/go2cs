@@ -46,7 +46,7 @@ internal static void sendOnly(channel/*<-*/<@string> s) {
 
 public static Action<Func<nint, bool>> All(this IntSlice s) {
     var sʗ1 = s;
-    return (Func<nint, bool> yield) => {
+    return [GoFunc("IntSlice.All.func1")] (Func<nint, bool> yield) => {
         foreach (var (_, v) in range<nint>(sʗ1)) {
             if (!yield(v)) {
                 return;
@@ -177,7 +177,7 @@ internal static partial void main() {
     var quit = new channel<nint>(0);
     var fʗ1 = fΔ1;
     var quitʗ1 = quit;
-    goǃ(() => {
+    goǃ([GoFunc("main.func1")] () => {
         for (nint i = 0; i < 10; i++) {
             fmt.Println(ᐸꟷ(fʗ1));
         }
@@ -245,7 +245,7 @@ internal static (raceResult, bool) raceSend() {
     var primary = true;
     var doneʗ1 = done;
     var resultsʗ1 = results;
-    void racer(bool primaryΔ1) {
+    [GoFunc("raceSend.func1")] void racer(bool primaryΔ1) {
         var resultsᴛ1 = resultsʗ1.ᐸꟷ(new raceResult(value: 7, primary: primaryΔ1), ꓸꓸꓸ);
         var doneᴛ1 = doneʗ1;
         switch (select(resultsᴛ1, ᐸꟷ(doneᴛ1, ꓸꓸꓸ))) {

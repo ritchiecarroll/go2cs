@@ -217,7 +217,7 @@ internal static void parsePclnTab⁔(/*this*/ ж<LineTable> Ꮡt) {
         t.version = ver11;
 
         if (!disableRecover) {
-            defer(() => {
+            defer([GoFunc("(*LineTable).parsePclnTab.func1")] () => {
                 // If we panic parsing, assume it's a Go 1.1 pclntab.
                 recover();
             }, ref ᒐ);
@@ -279,9 +279,9 @@ internal static void parsePclnTab⁔(/*this*/ ж<LineTable> Ꮡt) {
         t.quantum = (uint32)t.Data[6];
         t.ptrsize = (uint32)t.Data[7];
 
-        uint64 offset(uint32 word) => Ꮡt.Value.uintptr(Ꮡt.Value.Data.slice((nint)(8 + word * Ꮡt.Value.ptrsize)));
+        [GoFunc("(*LineTable).parsePclnTab.func2")] uint64 offset(uint32 word) => Ꮡt.Value.uintptr(Ꮡt.Value.Data.slice((nint)(8 + word * Ꮡt.Value.ptrsize)));
         var offsetʗ1 = offset;
-        slice<byte> data(uint32 word) => Ꮡt.Value.Data.slice((nint)(offsetʗ1(word)));
+        [GoFunc("(*LineTable).parsePclnTab.func3")] slice<byte> data(uint32 word) => Ꮡt.Value.Data.slice((nint)(offsetʗ1(word)));
 
         switch (possibleVersion) {
         case var ᴛ when ᴛ == ver118 || ᴛ == ver120: {
@@ -342,7 +342,7 @@ internal static slice<Func> go12Funcs⁔(/*this*/ ж<LineTable> Ꮡt) {
 
         // Assume it is malformed and return nil on error.
         if (!disableRecover) {
-            defer(() => {
+            defer([GoFunc("(*LineTable).go12Funcs.func1")] () => {
                 recover();
             }, ref ᒐ);
         }
@@ -382,7 +382,7 @@ internal static funcData findFunc⁔(/*this*/ ж<LineTable> Ꮡt, uint64 pc) {
         return new funcData();
     }
     var ftʗ1 = ft;
-    nint idx = sort.Search((nint)t.nfunctab, (nint i) => ftʗ1.pc(i) > pc);
+    nint idx = sort.Search((nint)t.nfunctab, [GoFunc("(*LineTable).findFunc.func1")] (nint i) => ftʗ1.pc(i) > pc);
     idx--;
     return Ꮡt.funcData((uint32)idx);
 }
@@ -628,7 +628,7 @@ internal static nint /*line*/ go12PCToLine⁔(/*this*/ ж<LineTable> Ꮡt, uint6
     try {
         ref var t = ref Ꮡt.DerefOrNull();
 
-        defer(() => {
+        defer([GoFunc("(*LineTable).go12PCToLine.func1")] () => {
             if (!disableRecover && recover() != nil) {
                 line = -1;
             }
@@ -654,7 +654,7 @@ internal static @string /*file*/ go12PCToFile⁔(/*this*/ ж<LineTable> Ꮡt, ui
     try {
         ref var t = ref Ꮡt.DerefOrNull();
 
-        defer(() => {
+        defer([GoFunc("(*LineTable).go12PCToFile.func1")] () => {
             if (!disableRecover && recover() != nil) {
                 @file = ""u8;
             }
@@ -695,7 +695,7 @@ internal static uint64 /*pc*/ go12LineToPC⁔(/*this*/ ж<LineTable> Ꮡt, @stri
     try {
         ref var t = ref Ꮡt.DerefOrNull();
 
-        defer(() => {
+        defer([GoFunc("(*LineTable).go12LineToPC.func1")] () => {
             if (!disableRecover && recover() != nil) {
                 pc = 0;
             }
@@ -778,7 +778,7 @@ internal static void go12MapFiles⁔(/*this*/ ж<LineTable> Ꮡt, map<@string, �
         ref var t = ref Ꮡt.DerefOrNull();
 
         if (!disableRecover) {
-            defer(() => {
+            defer([GoFunc("(*LineTable).go12MapFiles.func1")] () => {
                 recover();
             }, ref ᒐ);
         }

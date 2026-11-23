@@ -223,7 +223,7 @@ internal static (Expr x, error err) parseExpr(@string text) {
     error err = default;
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("parseExpr.func1")] () => {
             var e = recover(); if (e != nil) {
                 var (eΔ1, ok) = e._<ж<SyntaxError>>(ᐧ); if (ok) {
                     err = new SyntaxErrorжerror(eΔ1);
@@ -307,7 +307,7 @@ internal static Expr atom⁔(/*this*/ ж<exprParser> Ꮡp) {
         // first token already in p.tok
         if (p.tok == "("u8) {
             ref var pos = ref heap<nint>(p.pos, out var Ꮡpos);
-            defer(() => {
+            defer([GoFunc("(*exprParser).atom.func1")] () => {
                 var e = recover(); if (e != nil) {
                     var (eΔ1, ok) = e._<ж<SyntaxError>>(ᐧ); if (ok && eΔ1.Err == "unexpected end of expression"u8) {
                         eΔ1.Err = missingCloseParenˢ;

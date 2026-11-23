@@ -97,7 +97,7 @@ func main() { shapes() }
 
 	// Control: the variadic form's literal is invoked from inside a thunk, which is then the deferred function, so the
 	// literal is not one the record lists. Pinned, so a change that passed the literal to defer directly fails here.
-	if !strings.Contains(mainCs, "defer((ᴛ1, ᴛ2) => ((Actionꓸꓸꓸ<@string>)((params ꓸꓸꓸstring tagsʗp) => {") {
+	if !strings.Contains(mainCs, "defer((ᴛ1, ᴛ2) => ((Actionꓸꓸꓸ<@string>)([GoFunc(\"shapes.func6\")] (params ꓸꓸꓸstring tagsʗp) => {") {
 		t.Fatalf("control: the variadic form no longer emits its thunk-invoked literal:\n%s", mainCs)
 	}
 

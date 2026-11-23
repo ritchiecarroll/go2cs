@@ -16,7 +16,7 @@ internal static (@string @out, error err) fprint⁔(/*this*/ ж<Config> Ꮡcfg, 
     try {
         ref var cfg = ref Ꮡcfg.DerefOrNull();
 
-        defer(() => {
+        defer([GoFunc("(*Config).fprint.func1")] () => {
             var e = recover(); if (e != nil) {
                 err = fmt.Errorf("panic: %v"u8, e);
             }

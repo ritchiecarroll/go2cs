@@ -63,7 +63,7 @@ internal static partial (T, error) doBlockingWithCtx<T>(context.Context ctx, @st
 
         var res = new channel<doBlockingWithCtx_result<T>>(1);
         var resʗ1 = res;
-        goǃ(() => {
+        goǃ([GoFunc("doBlockingWithCtx[...].func1")] () => {
             GoFrame ᒐ = default;
             try {
                 defer(releaseThread, ref ᒐ);
@@ -140,7 +140,7 @@ internal static (nint port, error err) cgoLookupPort(context.Context ctx, @strin
         break;
     }}
 
-    return doBlockingWithCtx(ctx, network + "/"u8 + service, (nint, error) () => cgoLookupServicePort(Ꮡhints, network, service));
+    return doBlockingWithCtx(ctx, network + "/"u8 + service, [GoFunc("cgoLookupPort.func1")] (nint, error) () => cgoLookupServicePort(Ꮡhints, network, service));
 }
 
 internal static (nint port, error err) cgoLookupServicePort(ж<_C_struct_addrinfo> hints, @string network, @string service) {
@@ -282,7 +282,7 @@ internal static (slice<IPAddr> addrs, error err) cgoLookupHostIP(@string network
 }
 
 internal static (slice<IPAddr> addrs, error err) cgoLookupIP(context.Context ctx, @string network, @string name) {
-    return doBlockingWithCtx(ctx, name, (slice<IPAddr>, error) () => cgoLookupHostIP(network, name));
+    return doBlockingWithCtx(ctx, name, [GoFunc("cgoLookupIP.func1")] (slice<IPAddr>, error) () => cgoLookupHostIP(network, name));
 }
 
 // These are roughly enough for the following:
@@ -309,7 +309,7 @@ internal static (slice<@string> names, error err) cgoLookupPTR(context.Context c
     }
 
     var saʗ1 = sa;
-    return doBlockingWithCtx(ctx, addr, (slice<@string>, error) () => cgoLookupAddrPTR(addr, saʗ1, salen));
+    return doBlockingWithCtx(ctx, addr, [GoFunc("cgoLookupPTR.func1")] (slice<@string>, error) () => cgoLookupAddrPTR(addr, saʗ1, salen));
 }
 
 internal static (slice<@string> names, error err) cgoLookupAddrPTR(@string addr, ж<_C_struct_sockaddr> sa, _C_socklen_t salen) {
@@ -373,7 +373,7 @@ internal static (@string cname, error err) cgoLookupCNAME(context.Context ctx, @
 // resSearch will make a call to the 'res_nsearch' routine in the C library
 // and parse the output as a slice of DNS resources.
 internal static (slice<dnsmessage.Resource>, error) resSearch(context.Context ctx, @string hostname, nint rtype, nint @class) {
-    return doBlockingWithCtx(ctx, hostname, (slice<dnsmessage.Resource>, error) () => cgoResSearch(hostname, rtype, @class));
+    return doBlockingWithCtx(ctx, hostname, [GoFunc("resSearch.func1")] (slice<dnsmessage.Resource>, error) () => cgoResSearch(hostname, rtype, @class));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -407,7 +407,7 @@ internal static (slice<dnsmessage.Resource>, error) cgoResSearch(@string hostnam
         // useful in the response, even though there *is* a response.
         nint bufSize = maxDNSPacketSize;
         ref var buf = ref heap<ж<_C_uchar>>(@unsafe.Pointer.To<_C_uchar>(_C_malloc((uintptr)bufSize)), out var Ꮡbuf);
-        defer(() => {
+        defer([GoFunc("cgoResSearch.func1")] () => {
             // Free in a closure which captures buf to pick up a reallocated buffer from below.
             _C_free(@unsafe.Pointer.FromPinnedBox(Ꮡbuf.ValueSlot));
         }, ref ᒐ);

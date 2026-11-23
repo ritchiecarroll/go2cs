@@ -91,7 +91,7 @@ internal static ref mspan emptymspan => ref ((StaticBox<mspan>)Ꮡemptymspan).Va
 
 internal static ж<mcache> allocmcache() {
     ref var c = ref heap<ж<mcache>>(out var Ꮡc);
-    systemstack(() => {
+    systemstack([GoFunc("allocmcache.func1")] () => {
         @lock(Ꮡmheap_.Ꮡlock);
         Ꮡc.ValueSlot = @unsafe.Pointer.To<mcache>(Ꮡmheap_.Ꮡcachealloc.alloc());
         Ꮡc.ValueSlot.ᏑflushGen.Store(mheap_.sweepgen);
@@ -112,7 +112,7 @@ internal static ж<mcache> allocmcache() {
 // resources, such as statistics, so donate them to
 // a different mcache (the recipient).
 internal static void freemcache(ж<mcache> c) {
-    systemstack(() => {
+    systemstack([GoFunc("freemcache.func1")] () => {
         c.Value.releaseAll();
         stackcache_clear(ref (c).DerefOrNull());
 

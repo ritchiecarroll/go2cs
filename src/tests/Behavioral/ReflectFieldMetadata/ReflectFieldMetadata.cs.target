@@ -95,7 +95,7 @@ internal static void main() {
     fmt.Println("local.Field(1) PkgPath is foreign (not this package, not empty):", lt.Field(1).PkgPath != mine, lt.Field(1).PkgPath != ""u8);
     fmt.Println("anon unexported PkgPath is this package:", mine == "main"u8);
 
-    void anon(@string label, reflect.Type t) {
+    [GoFunc("main.func1")] void anon(@string label, reflect.Type t) {
         var f = t.Field(0);
         fmt.Printf("%-14s name=%-5s anonymous=%-5v type=%-6v pkgPath=%q\n"u8, label, f.Name, f.Anonymous, f.Type, f.PkgPath);
     }

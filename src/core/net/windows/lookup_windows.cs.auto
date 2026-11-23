@@ -61,7 +61,7 @@ internal static (nint proto, error err) getprotobyname(@string name) {
 internal static partial (nint, error) lookupProtocol(context.Context ctx, @string name) {
     var ch = new channel<lookupProtocol_result>(1); // buffer so that next goroutine never blocks
     var chʗ1 = ch;
-    goǃ(() => {
+    goǃ([GoFunc("lookupProtocol.func1")] () => {
         GoFrame ᒐ = default;
         try {
             var errΔ1 = acquireThread(ctx); if (errΔ1 != nil) {
@@ -133,7 +133,7 @@ internal static partial (slice<IPAddr>, error) lookupIP⁔(/*this*/ ж<Resolver>
         break;
     }}
 
-    (slice<IPAddr>, error) getaddr() {
+    [GoFunc("(*Resolver).lookupIP.func1")] (slice<IPAddr>, error) getaddr() {
         GoFrame ᒐ = default;
         try {
             var errΔ1 = acquireThread(ctx); if (errΔ1 != nil) {
@@ -195,7 +195,7 @@ internal static partial (slice<IPAddr>, error) lookupIP⁔(/*this*/ ж<Resolver>
         ch = new channel<lookupIP_ret>(1);
         var chʗ1 = ch;
         var getaddrʗ1 = getaddr;
-        goǃ(() => {
+        goǃ([GoFunc("(*Resolver).lookupIP.func2")] () => {
             var (addr, err) = getaddrʗ1();
             chʗ1.ᐸꟷ(new lookupIP_ret(addrs: addr, err: err));
         });

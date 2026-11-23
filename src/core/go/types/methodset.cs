@@ -52,7 +52,7 @@ internal static ж<Selection> Lookup⁔(/*this*/ ж<MethodSet> Ꮡs, ж<Package>
     }
 
     @string key = Id(pkg, name);
-    nint i = sort.Search(len(s.list), (nint iΔ1) => {
+    nint i = sort.Search(len(s.list), [GoFunc("(*MethodSet).Lookup.func1")] (nint iΔ1) => {
         var m = Ꮡs.Value.list[iΔ1];
         return m.obj.Id() >= key;
     });
@@ -215,7 +215,7 @@ public static ж<MethodSet> NewMethodSet(Type T) {
     }
     // sort by unique name
     var listʗ1 = list;
-    sort.Slice(list, (nint i, nint j) => listʗ1[i].obj.Id() < listʗ1[j].obj.Id());
+    sort.Slice(list, [GoFunc("NewMethodSet.func1")] (nint i, nint j) => listʗ1[i].obj.Id() < listʗ1[j].obj.Id());
     return Ꮡ(new MethodSet(list));
 }
 

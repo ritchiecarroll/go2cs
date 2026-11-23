@@ -135,7 +135,7 @@ internal static (ж<Root>, error) newRoot(syscall.Handle fd, @string name) {
 internal static (ж<Root>, error) openRootInRoot(ж<Root> Ꮡr, @string name) {
     ref var r = ref Ꮡr.DerefOrNull();
 
-    var (fd, err) = doInRoot(ref (Ꮡr).DerefOrNull(), name, 0, default, (syscall.Handle, error) (syscall.Handle parent, @string nameΔ1, bool endsInSlash) => rootOpenDir(parent, nameΔ1));
+    var (fd, err) = doInRoot(ref (Ꮡr).DerefOrNull(), name, 0, default, [GoFunc("openRootInRoot.func1")] (syscall.Handle, error) (syscall.Handle parent, @string nameΔ1, bool endsInSlash) => rootOpenDir(parent, nameΔ1));
     if (err != nil) {
         return (default, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "openat", Path: name, Err: err))));
     }
@@ -146,7 +146,7 @@ internal static (ж<Root>, error) openRootInRoot(ж<Root> Ꮡr, @string name) {
 internal static (ж<File>, error) rootOpenFileNolog(ж<Root> Ꮡroot, @string name, nint flag, FileMode perm) {
     ref var root = ref Ꮡroot.DerefOrNull();
 
-    var (fd, err) = doInRoot(ref (Ꮡroot).DerefOrNull(), name, doInRootNoHandleTerminalSlash, default, (syscall.Handle, error) (syscall.Handle parent, @string nameΔ1, bool endsInSlash) => {
+    var (fd, err) = doInRoot(ref (Ꮡroot).DerefOrNull(), name, doInRootNoHandleTerminalSlash, default, [GoFunc("rootOpenFileNolog.func1")] (syscall.Handle, error) (syscall.Handle parent, @string nameΔ1, bool endsInSlash) => {
         if (endsInSlash) {
             flag |= (nint)(windows.O_DIRECTORY);
         }
@@ -238,7 +238,7 @@ internal static (FileInfo, error) rootStat(ref Root r, @string name, bool lstat)
         // but empirically os.Lstat behaves this way.
         flags = doInRootAlwaysResolveTerminalSlash;
     }
-    var (fi, err) = doInRoot(ref r, name, flags, default, (FileInfo, error) (syscall.Handle parent, @string n, bool endsInSlash) => {
+    var (fi, err) = doInRoot(ref r, name, flags, default, [GoFunc("rootStat.func1")] (FileInfo, error) (syscall.Handle parent, @string n, bool endsInSlash) => {
         GoFrame ᒐ = default;
         try {
             var (fd, errΔ1) = openat(parent, n, windows.O_FILE_FLAG_OPEN_REPARSE_POINT, 0);
@@ -305,7 +305,7 @@ internal static error rootSymlink(ж<Root> r, @string oldname, @string newname) 
         flags |= (windows.SymlinkatFlags)(windows.SYMLINKAT_RELATIVE);
     }
 
-    var (_, err) = doInRoot(ref (r).DerefOrNull(), newname, 0, default, (EmptyStruct, error) (sysfdType parent, @string name, bool endsInSlash) => (new EmptyStruct(), windows.Symlinkat(oldname, parent, name, flags)));
+    var (_, err) = doInRoot(ref (r).DerefOrNull(), newname, 0, default, [GoFunc("rootSymlink.func1")] (EmptyStruct, error) (sysfdType parent, @string name, bool endsInSlash) => (new EmptyStruct(), windows.Symlinkat(oldname, parent, name, flags)));
     if (err != nil) {
         return new LinkErrorжerror(Ꮡ(new LinkError("symlinkat", oldname, newname, err)));
     }

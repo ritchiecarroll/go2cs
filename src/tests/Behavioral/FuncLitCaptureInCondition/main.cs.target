@@ -18,26 +18,26 @@ internal static void main() {
     var lookup = new map<nint, bool>{[2] = true, [5] = true};
 
     var lookupʗ1 = lookup;
-    if (anyMatch(vals, (nint u) => lookupʗ1[u])) {
+    if (anyMatch(vals, [GoFunc("main.func1")] (nint u) => lookupʗ1[u])) {
         fmt.Println("if:", true);
     }
 
     {
         nint extra = 7;
         var lookupʗ2 = lookup;
-        if (anyMatch(vals, (nint u) => lookupʗ2[u] || u == extra)) {
+        if (anyMatch(vals, [GoFunc("main.func2")] (nint u) => lookupʗ2[u] || u == extra)) {
             fmt.Println("if-init:", true);
         }
     }
 
     var lookupʗ3 = lookup;
-    for (nint i = 0; i < 2 && anyMatch(vals, (nint u) => lookupʗ3[u + i]); i++) {
+    for (nint i = 0; i < 2 && anyMatch(vals, [GoFunc("main.func3")] (nint u) => lookupʗ3[u + i]); i++) {
         fmt.Println("for:", i);
     }
 
     nint n = 0;
     var lookupʗ4 = lookup;
-    while (anyMatch(vals, (nint u) => lookupʗ4[u] && n < 2)) {
+    while (anyMatch(vals, [GoFunc("main.func4")] (nint u) => lookupʗ4[u] && n < 2)) {
         fmt.Println("while:", n);
         n++;
     }

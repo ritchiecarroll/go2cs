@@ -190,7 +190,7 @@ internal static (@string name, slice<byte> b, error err) readFileOS(@string @fil
 }
 
 internal static Func<@string, (@string, slice<byte>, error)> readFileFS(fs.FS fsys) {
-    return (@string @file) => {
+    return [GoFunc("readFileFS.func1")] (@string @file) => {
         @string name = default;
         slice<byte> b = default;
         error err = default;

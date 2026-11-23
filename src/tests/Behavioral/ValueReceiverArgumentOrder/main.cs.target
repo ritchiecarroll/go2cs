@@ -28,7 +28,7 @@ internal static ж<V> current() { return shared; }
 internal static void main() {
     var p = Ꮡ(new V(X: 1));
     var pʗ1 = p;
-    nint set(nint x) {
+    [GoFunc("main.func1")] nint set(nint x) {
         pʗ1.X = x;
         return x;
     }
@@ -39,29 +39,29 @@ internal static void main() {
 
     var b = Ꮡ(new Box<@string>(Item: "old"));
     var bʗ1 = b;
-    @string retag() {
+    [GoFunc("main.func2")] @string retag() {
         bʗ1.Item = "new";
         return "tag";
     }
     fmt.Println("generic receiver:", b.Get(retag()));
 
-    fmt.Println("call result as the pointer:", current().Show(func(nint () => {
+    fmt.Println("call result as the pointer:", current().Show(func([GoFunc("main.func3")] nint () => {
         shared.X = 5;
         return 6;
     })()));
 
     ж<V> q = default;
     var ran = false;
-    nint side() {
+    [GoFunc("main.func4")] nint side() {
         ran = true;
         return 0;
     }
     var qʗ1 = q;
     var sideʗ1 = side;
-    func(() => {
+    func([GoFunc("main.func5")] () => {
         GoFrame ᒐ = default;
         try {
-            defer(() => {
+            defer([GoFunc("main.func5.1")] () => {
                 fmt.Println("nil pointer:", recover(), "| argument ran:", ran);
             }, ref ᒐ);
             fmt.Println(qʗ1.Show(sideʗ1()));

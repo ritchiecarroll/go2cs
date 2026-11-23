@@ -15,7 +15,7 @@ internal static partial void main() {
     var done = new channel<@string>(1);
     var doneʗ1 = done;
     var rʗ1 = r;
-    goǃ(() => {
+    goǃ([GoFunc("main.func1")] () => {
         ref var buf = ref heap(new array<byte>(16), out var Ꮡbuf);
         var (_, rerr) = rʗ1.Read(buf[..]);
         if (rerr != nil) {

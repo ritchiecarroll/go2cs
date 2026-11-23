@@ -68,7 +68,7 @@ internal static partial nint drive(Parker p, nint n, time.Duration hold) {
     for (nint i = 0; i < n; i++) {
         Ꮡwg.Add(1);
         var resultsʗ1 = results;
-        goǃ(() => {
+        goǃ([GoFunc("drive.func1")] () => {
             GoFrame ᒐ = default;
             try {
                 defer(Ꮡwg.Done, ref ᒐ);

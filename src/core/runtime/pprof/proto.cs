@@ -369,7 +369,7 @@ internal static error build⁔(/*this*/ ж<profileBuilder> Ꮡb) {
         Action labels = default;
         if (e.tag != nil) {
             var eʗ1 = e;
-            labels = () => {
+            labels = [GoFunc("(*profileBuilder).build.func1")] () => {
                 foreach (var (_, lbl) in range((@unsafe.Pointer.To<labelMap>(eʗ1.tag)).Value.Set.List)) {
                     Ꮡb.Value.pbLabel(tagSample_Label, lbl.Key, lbl.Value, 0);
                 }
@@ -716,7 +716,7 @@ internal static void parseProcSelfMaps(slice<byte> data, Action<uint64, uint64, 
     ref var line = ref heap<slice<byte>>(out var Ꮡline);
     // next removes and returns the next field in the line.
     // It also removes from line any spaces following the field.
-    slice<byte> next() {
+    [GoFunc("parseProcSelfMaps.func1")] slice<byte> next() {
         slice<byte> f = default;
         (f, Ꮡline.ValueSlot, _) = bytes.Cut(Ꮡline.ValueSlot, space);
         Ꮡline.ValueSlot = bytes.TrimLeft(Ꮡline.ValueSlot, " ");

@@ -1363,7 +1363,7 @@ internal static ast.Expr stripParens(ast.Expr x) {
             // parentheses must not be stripped if there are any
             // unparenthesized composite literals starting with
             // a type name
-            ast.Inspect(px.X, (ast.Node node) => {
+            ast.Inspect(px.X, [GoFunc("stripParens.func1")] (ast.Node node) => {
                 switch (node.type()) {
                 case ж<ast.ParenExpr> xΔ1: {
                     // parentheses protect enclosed composite literals
@@ -1725,7 +1725,7 @@ internal static slice<bool> keepTypeColumn(slice<ast.Spec> specs) {
     var m = new slice<bool>(len(specs));
 
     var mʗ1 = m;
-    void populate(nint i, nint j, bool keepTypeΔ1) {
+    [GoFunc("keepTypeColumn.func1")] void populate(nint i, nint j, bool keepTypeΔ1) {
         if (keepTypeΔ1) {
             for (; i < j; i++) {
                 mʗ1[i] = true;
@@ -2056,7 +2056,7 @@ internal static void funcBody⁔(/*this*/ ж<printer> Ꮡp, nint headerSize, whi
         }
 
         // save/restore composite literal nesting level
-        defer((nint level) => {
+        defer([GoFunc("(*printer).funcBody.func1")] (nint level) => {
             Ꮡp.Value.level = level;
         }, Ꮡp.Value.level, ref ᒐ);
         p.level = 0;

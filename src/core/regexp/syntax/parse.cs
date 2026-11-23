@@ -932,7 +932,7 @@ internal static (ж<Regexp>, error err) parse(@string s, Flags flags) {
     error err = default;
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("parse.func1")] () => {
             var r = recover();
             switch (r) {
             default: {
@@ -2132,7 +2132,7 @@ internal static slice<rune> cleanClass(ж<slice<rune>> Ꮡrp) {
 // It assumes the class has been cleaned by cleanClass.
 internal static bool inCharClass(rune r, slice<rune> @class) {
     var classʗ1 = @class;
-    var (_, ok) = sort.Find(len(@class) / 2, (nint i) => {
+    var (_, ok) = sort.Find(len(@class) / 2, [GoFunc("inCharClass.func1")] (nint i) => {
         var (lo, hi) = (classʗ1[2 * i], classʗ1[2 * i + 1]);
         if (r > hi) {
             return +1;

@@ -67,7 +67,7 @@ public static (ж<types.Package> pkg, error err) Import(ж<token.FileSet> fset, 
             if (errΔ2 != nil) {
                 (pkg, err) = (default, errΔ2); goto ᒐdone;
             }
-            defer(() => {
+            defer([GoFunc("Import.func1")] () => {
                 if (ᏑerrΔ2.ValueSlot != nil) {
                     // add file name to error
                     ᏑerrΔ2.ValueSlot = fmt.Errorf("%s: %v"u8, filename, ᏑerrΔ2.ValueSlot);
