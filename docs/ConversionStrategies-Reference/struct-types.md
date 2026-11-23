@@ -946,8 +946,9 @@ internal static laterTempo_r /*r*/ laterTempo() {
 Go's, by `TestEachNamedUnnamedStructMoveRecordsItsConversion` in the converter, one package per site, and by the
 `ForeignStructSourceConversionTests` generator tests.)
 
-**Limits, each loud (a C# compile error, never a wrong value), with repros in
-`docs/phase4/probes/p2-struct-lift-neighbours` and a BOARD row of 2026-11-15:**
+**Limits, each loud (a C# compile error, never a wrong value):**
+<!-- 2026-11-23 .5 docs pass (P1), UX-7: process term moved out of visible text: the repros are in docs/phase4/probes/p2-struct-lift-neighbours, with the findings ledger row of
+     2026-11-15 (docs/phase4/BOARD-next-validation-candidates.md). -->
 
 - two lifts in two FILES of one package record nothing (CS0029): a lift's name is known per file;
 - the unnamed type behind a pointer, slice, map or channel, `*struct{…}` against a second lift's pointer: no

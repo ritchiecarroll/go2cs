@@ -310,7 +310,7 @@ partial class atomic_package
     public static partial bool Casp1(ж<@unsafe.Pointer> ptr, @unsafe.Pointer old, @unsafe.Pointer @new) =>
         casPointerLatched(ptr, old, @new);
 
-    // W3 (docs/phase4/DESIGN-cgo-phase3-marshaling.md 18.3-18.7, seat S-B1): over a native slot the word doors decide.
+    // W3 (docs/phase4/DESIGN-cgo-phase3-marshaling.md 18.3-18.7, cure S-B1): over a native slot the word doors decide.
     // A word of Go memory publishes the referent's PROJECTED number with an entry that keeps it (golib GoPointerWords);
     // a word of C memory is a number, and a Go pointer stored there is refused by name.
     internal static partial void storePointer(ж<@unsafe.Pointer> ptr, @unsafe.Pointer @new)

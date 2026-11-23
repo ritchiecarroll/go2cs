@@ -1239,7 +1239,7 @@ public class Pointer : StandardBox<uintptr>, IUnsafePointer {
     }
 
     // Go's `*(*unsafe.Pointer)(unsafe.Pointer(&f)) = p` for a func variable f of type F (funcWordOperations.go, w4;
-    // BOARD 2026-11-20, TC-13): f's word becomes p. A managed func value is a delegate, and the word it answers is its
+    // TC-13, 2026-11-20): f's word becomes p. A managed func value is a delegate, and the word it answers is its
     // GoFuncCookie (OfFunc above), so a p that IS a func word -- one func value's word copied into another -- is that
     // func, and 0 is the nil func. Any other word is Go's funcval pointer, whose fn names code by a PC, or C memory.
     // go2cs has no func a PC names before cgo callbacks (Phase 5), so that store is refused by name. It is never stored
@@ -1342,7 +1342,7 @@ public class Pointer : StandardBox<uintptr>, IUnsafePointer {
     }
 
     // ---- W1 / W2 / W3: a *unsafe.Pointer load and store over a WORD (docs/phase4/DESIGN-cgo-phase3-marshaling.md,
-    //      18.3 to 18.7, seat S-B1) ----
+    //      18.3 to 18.7, cure S-B1) ----
     //
     // The converter emits `*p` as LoadWord(p) and `*p = v` as StoreWord(p, v) when p's static type is *unsafe.Pointer, and
     // the hand-owned atomic doors take SwapWord and CompareAndSwapWord over a native slot. Over a box that holds a CLR
@@ -1359,7 +1359,7 @@ public class Pointer : StandardBox<uintptr>, IUnsafePointer {
     //   pointer), and a word read there that names Go memory is refused by name (its storage may have moved).
     //
     // Before this, `p.Value` went through the reference floor's exemption and stored a CLR REFERENCE in the word, which
-    // the collector does not trace (the .5 BOARD row of 2026-11-16); the exemption is deleted with this door (W4).
+    // the collector does not trace (found 2026-11-16); the exemption is deleted with this door (W4).
 
     private const string StoreUnheldText = "unsafe.Pointer store: the stored pointer's storage can be neither pinned nor tokened";
     private const string StoreIntoCText = "unsafe.Pointer store: storing a Go pointer into C memory is refused (C memory must not hold a Go pointer)";
@@ -1567,7 +1567,7 @@ public class Pointer : StandardBox<uintptr>, IUnsafePointer {
             throw go.golib.RuntimeErrorPanic.RuntimeRaised("unsafe.Pointer store-through: the pointer carries no recoverable managed referent (raw-address stores are not part of the managed model)");
 
         // A WORD of Go memory (a slot that holds a uintptr): the W2 door, so the word is the projected number and its
-        // entry keeps the referent (seat S-B1). Before, the raw number arm below wrote a FromBox mint's transient number.
+        // entry keeps the referent (cure S-B1). Before, the raw number arm below wrote a FromBox mint's transient number.
         if (WordSlotForThrough(slot) is { } word)
         {
             StoreWord(word, val);
@@ -1623,7 +1623,7 @@ public class Pointer : StandardBox<uintptr>, IUnsafePointer {
         if (ResolveReferent() is not IUntypedSlotAccess slot)
             throw go.golib.RuntimeErrorPanic.RuntimeRaised("unsafe.Pointer load-through: the pointer carries no recoverable managed referent (raw-address loads are not part of the managed model)");
 
-        // A WORD of Go memory: the W1 door (seat S-B1).
+        // A WORD of Go memory: the W1 door (cure S-B1).
         if (WordSlotForThrough(slot) is { } word)
             return LoadWord(word);
 

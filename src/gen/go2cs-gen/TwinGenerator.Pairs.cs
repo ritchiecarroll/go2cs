@@ -19,7 +19,7 @@ public sealed partial class TwinGenerator
 {
     internal sealed partial class Run
     {
-        // N3's CALLER RULE (the owner's ruling, 2026-11-14 via COORD: PROPAGATING, sections 10.2-10.3): a function whose
+        // N3's CALLER RULE (the owner's ruling, 2026-11-14: PROPAGATING, sections 10.2-10.3): a function whose
         // body calls through a func value that a twin can test for a pair is twinned for that call alone. It propagates
         // through CanPark: a twinned function's callers park on it, so they are twinned too. The test is the rewriter's
         // own (PairShape), so every function twinned by this rule has a call that takes the pair test -- HOISTED to the

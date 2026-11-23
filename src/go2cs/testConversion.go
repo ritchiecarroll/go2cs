@@ -6105,8 +6105,8 @@ func declarationClosureImportsFrom(roots []*packages.Package, compileExcluded ma
 	// a ж receiver and under a value receiver, and from a VALUE-receiver method (`this T`, which go2cs-gen also gives a
 	// `this ж<T>` twin) under a ж receiver.
 	//
-	// So the candidate set is every same-named method a visible package declares, at an arity the call accepts (COORD
-	// rulings 20261117T145209Z and 20261117T172451Z). C# weighs fewer: it searches namespace scopes innermost first and
+	// So the candidate set is every same-named method a visible package declares, at an arity the call accepts (design
+	// decisions of 2026-11-17, 8bb34759dd). C# weighs fewer: it searches namespace scopes innermost first and
 	// stops at the first that holds an applicable candidate, which is why registry's banked windows suite builds with
 	// no io/fs reference beside os's `Stat(this ж<File>)` (its own `Key.Stat` is in its namespace; os's is in the outer
 	// `go`). This set over-approximates that search, never under. A visible package is one this project references,
@@ -9091,7 +9091,7 @@ func hostFatalMintAgainstPage(page, importPath, dir, absentReason string, names 
 
 // hostFatalMintViolationsFor is the mint rule for the package a -tests run compares: hostFatalMintViolations for a
 // standard-library package, and for a MODULE row (options.mainModulePath set) the same rule against the module's
-// committed proof page (COORD 20261120T091624Z, GAP 2). A module row's banked record is the page copied into the go2cs
+// committed proof page (GAP 2, 874493f734). A module row's banked record is the page copied into the go2cs
 // checkout the run converts against: docs/validation/modules/<module>@<version>/<package path in the module>.md, the
 // module's root package as index.md. Before this, a module output, never under <root>/core, reported every host-fatal
 // entry UNCHECKED and no module page was read.
@@ -11177,7 +11177,7 @@ func oracleVetFindings(dir string, options Options, packagePath string) ([]strin
 
 	// go vet names each file with its symlinks resolved, so a dir spelled through a symlink trims nothing: on macOS
 	// /var is /private/var, and a module-cache release tested from its copy under TMPDIR (/var/folders/...) put a
-	// /private/var/folders/... host path into the proof page and MODULE.md (train 6's darwin go-test). The dir is
+	// /private/var/folders/... host path into the proof page and MODULE.md (a darwin go-test, 172ea25705). The dir is
 	// resolved once, as moduleCacheRel resolves a cache path, and the textual spelling is still tried first.
 	resolvedDir, resolveErr := filepath.EvalSymlinks(dir)
 
@@ -11380,7 +11380,7 @@ func compareGoAndConvertedTests(inputPath, outputPath, testProject, packagePath 
 	}
 
 	// -test-oracle-vet-off: what go test's vet reports is read first, by analyzer, and the option is refused for a
-	// package it does not stop: the oracle drops vet only where Go's own run fails at it (COORD, 2026-11-22).
+	// package it does not stop: the oracle drops vet only where Go's own run fails at it (decided 2026-11-22, 3f94b4818a).
 	var vetFindings []string
 
 	if options.testOracleVetOff {
