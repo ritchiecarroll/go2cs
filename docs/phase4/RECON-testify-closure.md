@@ -118,3 +118,8 @@ same verdicts, and is banked on that branch.
 PASS at 0.10-0.11 s. It diverged in 1 of 2 full v1.11.1 runs and matched in the v1.12.1 run. The converted run takes the
 whole 100 ms `Eventually` window where Go's takes 40%, so it is timing-flaky under load; the disclosure lands with
 testify's bank.
+
+**2026-11-22, M1 (claude/c2-m1-test-noopt).** The two mock rows read from an optimized test function
+(Test_Mock_Chained_On, Test_Mock_UnsetByOnMethodSpecAmongOthers) match Go once go2cs-gen marks Go test entry points
+NoOptimization. testify v1.12.1 at that branch, predicted mock 117/2 with nothing else moving: root 1/0, assert 588/2,
+unsafetests 1/0, internal/difflib 11/0, internal/spew 7/2, mock 117/2, require 116/0, suite 59/4. MET.
