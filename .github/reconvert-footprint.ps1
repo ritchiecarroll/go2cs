@@ -208,8 +208,10 @@ if (Test-Path -LiteralPath $diffFile) {
 }
 
 $files = $rows.Count
-$added = ($rows | Measure-Object Added -Sum).Sum; if ($null -eq $added) { $added = 0 }
-$removed = ($rows | Measure-Object Removed -Sum).Sum; if ($null -eq $removed) { $removed = 0 }
+# A loop, not Measure-Object: over zero rows (the base == changed control) Measure-Object returns no Sum, which
+# strict mode refuses (run 45107295889).
+$added = 0; $removed = 0
+foreach ($row in $rows) { $added += $row.Added; $removed += $row.Removed }
 $b = $report['base']; $c = $report['changed']
 
 $failures = @()
