@@ -196,7 +196,7 @@ Compiling is not the same as running correctly, which is what Phase 4 is for.
      rulings it cited are in the 2026-11-15 block above. -->
 
 **In short.** 1.26.11.1, built from Go 1.26.11, is the published release. The main line of development carries
-the work for the release after it, which has no version number or date yet: goroutine scheduling, more of cgo,
+the work for the next release, 1.26.11.2, which has no date yet: goroutine scheduling, more of cgo,
 and Native AOT and start-up work.
 
 **1.26.11.1** shipped on November 19, 2026, with both of the programs that gated it converting and running as Go
@@ -204,7 +204,7 @@ runs them: a `modernc.org/sqlite` program prints exactly what native Go prints, 
 converted TypeScript compiler (written in Go) emits what the Go build emits. It also brought `go2cs -cgo` and
 linux-arm64 packages. [News](NEWS.md) has the full list.
 
-**On the main line now**, for the release after 1.26.11.1:
+**On the main line now**, for 1.26.11.2:
 - goroutine scheduling, many goroutines over a few threads, as an experimental mode that is off unless you build
   and run for it ([Known issues](KnownIssues.md#goroutines-on-a-shared-pool-of-threads-mn-are-experimental-and-off-unless-you-build-and-run-for-them));
   work on it continues ([Performance](#performance));
@@ -224,7 +224,7 @@ linux-arm64 packages. [News](NEWS.md) has the full list.
        are listed in docs/DRAFT-news-next.md for the release notes. -->
 
 **Not on the main line yet:** handing Go memory to C without a copy, and converting the `net` resolver with cgo,
-are planned for a release after the one that follows 1.26.11.1 ([cgo](#cgo)).
+are planned for a release after 1.26.11.2 ([cgo](#cgo)).
 
 ## Phase 4: validation against Go's own tests
 
@@ -478,9 +478,11 @@ The standard library is converted with `CGO_ENABLED=0`.
   <!-- docs/phase4/REHEARSAL-cgo-nuget-e2e-go-pointer.md: github.com/mattn/go-pointer v0.0.1, final reading run
        45016867041 and the re-read 45033824268, J3 PASS on win-x64, linux-x64, osx-x64, linux-arm64; R-b NUGETGOCGO001 on
        osx-arm64; R-a, the load-time target check on win-x64. Publishing it is after the release that follows
-       1.26.11.1, "by construction" (its appendix). --> Such a package is published only against a `go.lib` that checks, when
-  the package loads, that its C binding is for the platform it runs on: `go.lib` 1.26.11.1 does not, and the
-  release after 1.26.11.1 does. `osx-arm64` waits for a standard-library build of its own for Apple silicon.
+       1.26.11.1, "by construction" (its appendix).
+     2026-11-23 (P1, P3 nit 3 relayed by COORD 224946Z): the next release's number is ruled, 1.26.11.2; the page names it
+     and keeps "no date yet". --> Such a package is published only against a `go.lib` that checks, when
+  the package loads, that its C binding is for the platform it runs on: `go.lib` 1.26.11.1 does not, and
+  1.26.11.2 does. `osx-arm64` waits for a standard-library build of its own for Apple silicon.
 - C memory can be read and written through a C struct's pointer field and through a pointer to a C pointer
   (`**C.T`), as code that walks a list C allocated does.
 
@@ -489,7 +491,7 @@ The standard library is converted with `CGO_ENABLED=0`.
 - A real standard-library cgo package, the `net` resolver, converted and validated against its own tests as the
   proof.
 
-Both are planned for a release after the one that follows 1.26.11.1.
+Both are planned for a release after 1.26.11.2.
 
 **Later:** C code written inline in the Go file (Phase 4), then `//export` and callbacks from C into Go
 (Phase 5). Until each lands, it is refused by name.
@@ -680,7 +682,7 @@ something else finishing first.
 
 | When | Planned |
 |:--|:--|
-| Now | On the main line, for the release after 1.26.11.1: goroutine scheduling, cgo packages built with their module and against the `go.*` packages, the trimming work for Native AOT, and the start-up cost of a converted process ([1.26.11.1, and the release after it](#the-next-two-releases)). |
+| Now | On the main line, for 1.26.11.2: goroutine scheduling, cgo packages built with their module and against the `go.*` packages, the trimming work for Native AOT, and the start-up cost of a converted process ([1.26.11.1, and the release after it](#the-next-two-releases)). |
 | Next | Publishing cgo packages, once a `go.lib` with the load-time platform check is published. Go memory handed to C without a copy, and the `net` resolver converted with cgo. The .NET 11 measurement stage. The generic-methods design for Go 1.27. The decision on how often later hops run. |
 | Q1 2027 | Go 1.27 hop, by about February. The Phase 4D design kickoff. The allocation work, whose design is written. |
 | Unscheduled | Inline C and callbacks from C (cgo Phases 4 and 5). The Phase 5 stubs that no exported call reaches, each closed when a real use needs it. Interface-conversion performance work. The remaining stack-string increments. Open converter items. |
