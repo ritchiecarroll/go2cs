@@ -210,3 +210,30 @@ then through the layout-identical `(*count)`. Go prints `convert back, reference
 `bin/Release/Go`, left by the 18:48 BehavioralTests run of the 14-line source. The reading above names its path.
 Sections 1 to 6 ran before any BehavioralTests run, so their program had only the one output folder. Section 7's run
 followed that test run, which had built the same source.
+
+## 11. Battery prediction (committed before the battery)
+
+The battery runs at this section's own commit, with base `afb01dfb6c` (train 4, which is still master). Every gate
+runs unfiltered, on windows/amd64, alone on the box. This is a golib and reflect seat with no converter or generator
+source, so there is no regen and no D-5.
+
+- **GenTests:** 764 passed, 0 failed, 0 skipped. That is train 4's reading, and the seat adds no row.
+- **GolibTests, Release and Debug:** 0 failed at both. Each total is 3,168: train 4's 3,164 (COORD's train-4
+  battery) plus the 4 `PointerNumberTests`. Skips stay at train 4's 53 and 79, because none of the 4 is gated.
+- **go test -count=1 ./...:** 0 FAIL across 11 packages, TestLicensing passing.
+- **repoguard, full, -count=1:** rc 0. pointers.md moves no line. The one shifted sample cite in
+  manual-conversions.md is moved by 8, and the shift was checked line for line.
+- **CNR:** NO REGRESSION. It transpiles 1,177 packages (train 4's 1,176 plus `PointerPrintIdentity`): 1,165
+  byte-identical plus 12 platform-exclusive. Solution integrity reads 1,167 registered projects.
+- **The full behavioral suite** (`run-behavioral.ps1 --run-timeout 120`, all four phases): 0 failures and 0 NOT
+  MEASURED, with `PointerPrintIdentity` passing every phase. No train-4 reading of this suite is held on this box.
+  The likeliest miss is a timing-sensitive Output row under load that is unrelated to the seat. Any failure is
+  re-run alone and compared against base before it is called the seat's.
+- **The canaries** (`run-validated-sweep.ps1 -Filter <row> -Exact`, one row at a time): every row PASSES at its banked
+  windows count.
+  - The five largest banked reflect consumers, derived at gate time from the roster by parsed imports (production,
+    test and external test), are crypto/cipher (27,289), runtime (11,083), crypto/tls (4,920), net/http (1,538)
+    and go/types (597). The controls hold: encoding/json is IN; cmp and go/doc/comment are OUT.
+  - Go's net tests do not run on H, so crypto/tls and net/http are named for a box that can run them. The next two
+    non-net reflect importers stand in: encoding/json (550) and crypto/x509 (540).
+  - fmt (62) and internal/fmtsort (3) run by name, per COORD's ruling.
