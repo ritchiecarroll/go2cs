@@ -94,7 +94,13 @@ func TestModuleCacheGoModReadsThroughASymlinkedSpelling(t *testing.T) {
 		t.Skipf("this host cannot create a symlink: %v", err)
 	}
 
-	want := filepath.Join(cache, "cache", "download", "example.com", "!old", "@v", "v0.9.1.mod")
+	// Compared resolved: the test's own temp directory can sit behind a symlink too (macOS's /var).
+	want, err := filepath.EvalSymlinks(filepath.Join(cache, "cache", "download", "example.com", "!old", "@v", "v0.9.1.mod"))
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	viaLink := filepath.Join(link, "example.com", "!old@v0.9.1")
 
 	// GOMODCACHE through the link, the release by its real path (macOS's /var against /private/var).
