@@ -629,8 +629,8 @@ jobs:
                                          # tests on a cloud box without .NET (GO2CS_GUARD_NO_DOTNET=1, 2026-11-22), and the
                                          # dotnet-gated arms run here too. PROVISIONAL until the first run (C1, 2026-11-22).
               'reconvert-footprint' = 60 # two converter go builds and two full -stdlib conversions, one after the other,
-                                         # each about 3-4 min on a desktop, plus two seeded roots extracted from git and
-                                         # one diff. PROVISIONAL until the first run (C2, 2026-11-23).
+                                         # plus two seeded roots extracted from git and one diff. Measured whole jobs
+                                         # (C2, 2026-11-23): linux 8-9 min, windows 15, darwin osx-arm64 18.
               'gen-tests'        = 30    # one Release build of GenTests (go2cs-gen and golib) from cold, then
                                          # `dotnet test` (whole suite, or a --filter): 526 tests in about 2 min on a
                                          # laptop. PROVISIONAL until the first run (R, 2026-11-14).
