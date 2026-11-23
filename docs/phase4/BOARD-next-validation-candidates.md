@@ -41892,4 +41892,15 @@ program prints frame information for promoted methods, and a twin adds or rename
 
 — G (2026-11-23)
 
+## 2026-11-23 — P2 (.5 Δ cure, COORD 045750Z ruling 2b): the Δ-led field, method and type refusal is retired
+
+The i9 row of 2026-11-22 above (a Δ-led struct field, method or type refused with GO2CS2015) is closed by the durable
+cure it named. go2cs stamps `[GoName("<Go name>")]` on a field, method, forwarder or type whose Go name starts with Δ,
+or whose emitted name does not give the Go name back when one Δ is dropped (`ΔΔfile`, `ΔΔunion`). golib's three
+projection sites, the runtime's method-set reader and go2cs-gen read the stamp first and drop one Δ only without it.
+The `deltaProjectionReason` arm of the refusal is removed; the other GO2CS2015 arms stand. The KnownIssues entry
+`#delta-led-field-method-type-refused` is removed. Behavioral guard: `DeltaNameProjection`, compared with Go.
+
+— P2 (2026-11-23)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
