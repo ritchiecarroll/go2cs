@@ -317,6 +317,14 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		return door
 	}
 
+	// A conversion from a defined func type TO its unnamed signature, `(func(string) error)(f)`, converts as an
+	// assignment does (funcValueForSlot). Its callee is a func-type LITERAL, which isTypeConversion does not
+	// classify, so it would otherwise render as the cast `(Func<…>)(f)`: no cast exists between two delegate
+	// types, and followed by a call, `(Func<…>)(f)(x)` does not parse as one.
+	if converted, ok := v.funcTypeLiteralConversion(callExpr); ok {
+		return converted
+	}
+
 	// The //go:cgo_unsafe_args block lift (cgoUnsafeArgsLift.go): the ONE `unsafe.Pointer(&first)` the
 	// current declaration's lift consumes renders as the synthesized block's pinned box. Intercepted
 	// ahead of every arm because the conversion reaches two of them -- the type-conversion arm for a
@@ -2727,9 +2735,8 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 				// parameter is the written `func(ResponseWriter, *Request)` (CS1503). Go converts
 				// named→structural implicitly; C# needs the same delegate re-wrap, targeting the
 				// synthesized structural delegate: `new Action<ResponseWriter, ж<Request>>(handler)`.
-				// Two argument shapes render named: a value whose GO type is a named func type
-				// (with methods — a METHODLESS named func type already renders as the structural
-				// delegate itself and stays bare), and a `:=` local DECLARED from a method group,
+				// Two argument shapes render named: a value whose GO type is a named func type,
+				// and a `:=` local DECLARED from a method group,
 				// which the declaration emission types with the matching package named delegate
 				// (`HandlerFunc handler = Ꮡsc.Value.handler.ServeHTTP;` — see visitAssignStmt's
 				// methodGroupDelegateType) even though go/types keeps it structural. Method
@@ -2741,9 +2748,7 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 
 						if argNamed, ok := types.Unalias(argType).(*types.Named); ok {
 							if _, argIsSig := argNamed.Underlying().(*types.Signature); argIsSig {
-								if _, collapses := methodlessNamedFuncSignature(argNamed); !collapses {
-									argRendersNamedDelegate = true
-								}
+								argRendersNamedDelegate = true
 							}
 						} else if argSig, ok := types.Unalias(argType).(*types.Signature); ok {
 							if argIdent, ok := callExpr.Args[i].(*ast.Ident); ok &&
@@ -3397,8 +3402,10 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 					// family).
 					if named, isNamed := types.Unalias(sliceUnder.Elem()).(*types.Named); isNamed {
 						switch named.Underlying().(type) {
-						case *types.Basic, *types.Interface:
-							// numeric / interface element casts are handled above
+						case *types.Basic, *types.Interface, *types.Signature:
+							// numeric / interface element casts are handled above; a defined func type element
+							// converts through the nil-safe delegate wrap the variadic arguments take (a cast
+							// between two delegate types does not compile)
 						default:
 							elemCSType := convertToCSTypeName(v.getAliasQualifiedTypeName(sliceUnder.Elem(), false))
 
@@ -6435,6 +6442,45 @@ func (v *Visitor) needsParentheses(expr ast.Expr) bool {
 		// For any other expression types, err on the side of caution
 		return true
 	}
+}
+
+// funcTypeLiteralConversion renders `(func(…) …)(x)` where x is a value of a defined func type of that signature.
+// Any other func-type conversion (a nil, a func literal, a value already of the unnamed type) is left to the
+// regular path.
+func (v *Visitor) funcTypeLiteralConversion(callExpr *ast.CallExpr) (string, bool) {
+	if len(callExpr.Args) != 1 || callExpr.Ellipsis.IsValid() {
+		return "", false
+	}
+
+	if _, isFuncType := ast.Unparen(callExpr.Fun).(*ast.FuncType); !isFuncType {
+		return "", false
+	}
+
+	calleeTV, ok := v.info.Types[callExpr.Fun]
+
+	if !ok || !calleeTV.IsType() {
+		return "", false
+	}
+
+	arg := callExpr.Args[0]
+	argType := v.info.TypeOf(arg)
+
+	if argType == nil || types.Identical(argType, calleeTV.Type) {
+		return "", false
+	}
+
+	if _, isNamed := types.Unalias(argType).(*types.Named); !isNamed {
+		return "", false
+	}
+
+	rendered := v.convExpr(arg, nil)
+	converted := v.funcValueForSlot(calleeTV.Type, arg, rendered)
+
+	if converted == rendered {
+		return "", false
+	}
+
+	return converted, true
 }
 
 func (v *Visitor) isConstructorCall(callExpr *ast.CallExpr) bool {

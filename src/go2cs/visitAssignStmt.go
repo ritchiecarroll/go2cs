@@ -1825,6 +1825,10 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 				rhsExpr = narrowedChan
 			}
 
+			// A func value reaching a slot of a different func type: a defined func type and its unnamed
+			// signature convert implicitly in Go (see funcValueForSlot).
+			rhsExpr = v.funcValueForSlot(v.info.TypeOf(lhs), rhs, rhsExpr)
+
 			// A slice- or map-cored type parameter assigned to its core type (see coreTypeParamValue).
 			if materialized := v.coreTypeParamValue(v.info.TypeOf(lhs), v.info.TypeOf(rhs), rhsExpr); materialized != "" {
 				rhsExpr = materialized
@@ -2474,6 +2478,10 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 					if narrowedChan := v.chanDirNarrowedValue(v.info.TypeOf(lhs), v.info.TypeOf(rhs), rhsExpr); narrowedChan != "" {
 						rhsExpr = narrowedChan
 					}
+
+					// A func value reaching a slot of a different func type: a defined func type and its unnamed
+					// signature convert implicitly in Go (see funcValueForSlot).
+					rhsExpr = v.funcValueForSlot(v.info.TypeOf(lhs), rhs, rhsExpr)
 
 					// A slice- or map-cored type parameter assigned to its core type (see coreTypeParamValue).
 					if materialized := v.coreTypeParamValue(v.info.TypeOf(lhs), v.info.TypeOf(rhs), rhsExpr); materialized != "" {

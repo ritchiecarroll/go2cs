@@ -523,7 +523,7 @@
     <None Include="$(MSBuildThisFileDirectory)literalFloatConstFold_test.go" />
     <None Include="$(MSBuildThisFileDirectory)loaderEnvironment.go" />
     <None Include="$(MSBuildThisFileDirectory)loaderEnvironment_test.go" />
-    <None Include="$(MSBuildThisFileDirectory)localFuncTypeMarker_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)localFuncTypeLift_test.go" />
     <None Include="$(MSBuildThisFileDirectory)localStringConstHoist_test.go" />
     <None Include="$(MSBuildThisFileDirectory)localTypeLift_test.go" />
     <None Include="$(MSBuildThisFileDirectory)localValueIfaceCallConversion_test.go" />
@@ -850,7 +850,7 @@
     <None Include="$(MSBuildThisFileDirectory)typePredicates.go" />
     <None Include="$(MSBuildThisFileDirectory)typeSignatureParsing.go" />
     <None Include="$(MSBuildThisFileDirectory)typeSpecTrailingComment_test.go" />
-    <None Include="$(MSBuildThisFileDirectory)typeSwitchCollapsedFuncCase_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)typeSwitchNamedFuncCase_test.go" />
     <None Include="$(MSBuildThisFileDirectory)uint8SliceLiteralConversion_test.go" />
     <None Include="$(MSBuildThisFileDirectory)uniformLineEndings_test.go" />
     <None Include="$(MSBuildThisFileDirectory)unsafePointerWordRead_test.go" />
