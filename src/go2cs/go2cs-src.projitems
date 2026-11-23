@@ -786,6 +786,7 @@
     <None Include="$(MSBuildThisFileDirectory)symbolsInSync_test.go" />
     <None Include="$(MSBuildThisFileDirectory)syncCopyChecker_test.go" />
     <None Include="$(MSBuildThisFileDirectory)testAliasShadowOperations.go" />
+    <None Include="$(MSBuildThisFileDirectory)testAssemblyOptimize_test.go" />
     <None Include="$(MSBuildThisFileDirectory)testConversion.go" />
     <None Include="$(MSBuildThisFileDirectory)testConversion_test.go" />
     <None Include="$(MSBuildThisFileDirectory)testDeadline_test.go" />
