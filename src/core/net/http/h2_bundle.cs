@@ -1510,9 +1510,9 @@ internal static http2Flags http2FlagPushPromisePadded => 0x8;
 // a frameParser parses a frame given its FrameHeader and payload
 // bytes. The length of payload will always equal fh.Length (which
 // might be 0).
-// type http2frameParser is a methodless func type — rendered inline as its base delegate
+internal delegate (http2Frame, error) http2frameParser(ж<http2frameCache> fc, http2FrameHeader fh, Action<@string> countError, slice<byte> payload);
 
-[GoLazy] partial class lazyᴛhttp2frameParsers { internal static array<Func<ж<http2frameCache>, http2FrameHeader, Action<@string>, slice<byte>, (http2Frame, error)>> http2frameParsers = new golib.SparseArray<Func<ж<http2frameCache>, http2FrameHeader, Action<@string>, slice<byte>, (http2Frame, error)>>{
+[GoLazy] partial class lazyᴛhttp2frameParsers { internal static array<http2frameParser> http2frameParsers = new golib.SparseArray<http2frameParser>{
     [http2FrameData] = http2parseDataFrame,
     [http2FrameHeaders] = http2parseHeadersFrame,
     [http2FramePriority] = http2parsePriorityFrame,
@@ -1525,7 +1525,7 @@ internal static http2Flags http2FlagPushPromisePadded => 0x8;
     [http2FrameContinuation] = http2parseContinuationFrame
 }.array(); }
 
-internal static Func<ж<http2frameCache>, http2FrameHeader, Action<@string>, slice<byte>, (http2Frame, error)> http2typeFrameParser(http2FrameType t) {
+internal static http2frameParser http2typeFrameParser(http2FrameType t) {
     if ((nint)t < len(http2frameParsers)) {
         return http2frameParsers[t];
     }
@@ -6607,7 +6607,7 @@ internal static ж<http2stream> newStream⁔(/*this*/ ж<http2serverConn> Ꮡsc,
         id: id,
         state: state,
         ctx: ctx,
-        cancelCtx: cancelCtx
+        cancelCtx: NilSafeDelegateConversion<Action, context.CancelFunc>(cancelCtx)
     ));
     st.Ꮡcw.Init();
     st.flow.conn = Ꮡsc.Ꮡflow; // link to conn-level counter

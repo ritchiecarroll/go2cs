@@ -247,7 +247,7 @@ partial class sqlᴛColumnType {
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string DatabaseTypeName(this ref ColumnType ci) => sql_package.DatabaseTypeName⁔(ref ci);
 }
 partial class sqlᴛConn {
-    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (ж<driverConn>, Action<error>, error) grabConn(this ж<Conn> Ꮡc, context.Context _) => sql_package.grabConn⁔(Ꮡc, _);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (ж<driverConn>, releaseConn, error) grabConn(this ж<Conn> Ꮡc, context.Context _) => sql_package.grabConn⁔(Ꮡc, _);
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error PingContext(this ж<Conn> Ꮡc, context.Context ctx) => sql_package.PingContext⁔(Ꮡc, ctx);
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (Result, error) ExecContext(this ж<Conn> Ꮡc, context.Context ctx, @string query, params ꓸꓸꓸany argsʗp) => sql_package.ExecContext⁔(Ꮡc, ctx, query, argsʗp);
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (ж<Rows>, error) QueryContext(this ж<Conn> Ꮡc, context.Context ctx, @string query, params ꓸꓸꓸany argsʗp) => sql_package.QueryContext⁔(Ꮡc, ctx, query, argsʗp);
@@ -386,7 +386,7 @@ partial class sqlᴛTx {
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void awaitDone(this ж<Tx> Ꮡtx) => sql_package.awaitDone⁔(Ꮡtx);
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool isDone(this ж<Tx> Ꮡtx) => sql_package.isDone⁔(Ꮡtx);
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void close(this ref Tx tx, error err) => sql_package.close⁔(ref tx, err);
-    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (ж<driverConn>, Action<error>, error) grabConn(this ж<Tx> Ꮡtx, context.Context ctx) => sql_package.grabConn⁔(Ꮡtx, ctx);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (ж<driverConn>, releaseConn, error) grabConn(this ж<Tx> Ꮡtx, context.Context ctx) => sql_package.grabConn⁔(Ꮡtx, ctx);
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static context.Context txCtx(this ref Tx tx) => sql_package.txCtx⁔(ref tx);
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void closemuRUnlockRelease(this ж<Tx> Ꮡtx, error _) => sql_package.closemuRUnlockRelease⁔(Ꮡtx, _);
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void closePrepared(this ж<Tx> Ꮡtx) => sql_package.closePrepared⁔(Ꮡtx);

@@ -39,7 +39,7 @@ partial struct Reader {
     internal io.ReaderAt r;
     public slice<ж<File>> File;
     public @string Comment;
-    internal map<uint16, Func<io.Reader, io.ReadCloser>> decompressors;
+    internal map<uint16, Decompressor> decompressors;
     // Some JAR files are zip files with a prefix that is a bash script.
     // The baseOffset field is the start of the zip file proper.
     internal int64 baseOffset;
@@ -186,14 +186,14 @@ internal static error init⁔(/*this*/ ж<Reader> Ꮡr, io.ReaderAt rdr, int64 s
 // RegisterDecompressor registers or overrides a custom decompressor for a
 // specific method ID. If a decompressor for a given method is not found,
 // [Reader] will default to looking up the decompressor at the package level.
-internal static void RegisterDecompressor⁔(/*this*/ ref Reader r, uint16 method, Func<io.Reader, io.ReadCloser> dcomp) {
+internal static void RegisterDecompressor⁔(/*this*/ ref Reader r, uint16 method, Decompressor dcomp) {
     if (r.decompressors == nil) {
-        r.decompressors = new map<uint16, Func<io.Reader, io.ReadCloser>>();
+        r.decompressors = new map<uint16, Decompressor>();
     }
     r.decompressors[method] = dcomp;
 }
 
-internal static Func<io.Reader, io.ReadCloser> decompressor⁔(/*this*/ ref Reader r, uint16 method) {
+internal static Decompressor decompressor⁔(/*this*/ ref Reader r, uint16 method) {
     var dcomp = r.decompressors[method];
     if (dcomp == nil) {
         dcomp = decompressor(method);

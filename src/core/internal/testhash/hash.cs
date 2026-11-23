@@ -13,7 +13,7 @@ using math;
 
 partial class testhash_package {
 
-// type MakeHash is a methodless func type — rendered inline as its base delegate
+public delegate hash.Hash MakeHash();
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static ref readonly @string cloneˢ => ref cloneˢᵇ;
@@ -21,7 +21,7 @@ private static readonly @string cloneˢᵇ = "Clone"u8;
 
 // TestHash performs a set of tests on hash.Hash implementations, checking the
 // documented requirements of Write, Sum, Reset, Size, and BlockSize.
-public static void TestHash(ж<testing.T> t, Func<hash.Hash> mh) {
+public static void TestHash(ж<testing.T> t, MakeHash mh) {
     TestHashWithoutClone(t, mh);
 
     // Test whether the results after cloning are consistent.
@@ -76,7 +76,7 @@ private static readonly @string outOfBoundsReadˢᵇ = "OutOfBoundsRead"u8;
 private static ref readonly @string statefulWriteˢ => ref statefulWriteˢᵇ;
 private static readonly @string statefulWriteˢᵇ = "StatefulWrite"u8;
 
-public static void TestHashWithoutClone(ж<testing.T> t, Func<hash.Hash> mh) {
+public static void TestHashWithoutClone(ж<testing.T> t, MakeHash mh) {
     // Test that Sum returns an appended digest matching output of Size
     t.Run(sumAppendˢ, (ж<testing.T> tΔ1) => {
         var h = mh();

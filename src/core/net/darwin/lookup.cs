@@ -369,7 +369,7 @@ internal static partial (slice<IPAddr>, error) lookupIPAddr⁔(/*this*/ ж<Resol
         return (ᴛ1, ᴛ2);
     });
 
-    void dnsWaitGroupDone(/*<-*/channel<singleflight.Result> chΔ1, Action cancelFn) {
+    void dnsWaitGroupDone(/*<-*/channel<singleflight.Result> chΔ1, context.CancelFunc cancelFn) {
         ᐸꟷ(chΔ1);
         ᏑdnsWaitGroup.Done();
         cancelFn();

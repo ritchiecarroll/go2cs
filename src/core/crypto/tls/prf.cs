@@ -18,7 +18,7 @@ using go.crypto.@internal.fips140;
 
 partial class tls_package {
 
-// type prfFunc is a methodless func type — rendered inline as its base delegate
+internal delegate slice<byte> prfFunc(slice<byte> secret, @string label, slice<byte> seed, nint keyLen);
 
 // Split a premaster secret in two as specified in RFC 4346, Section 5.
 internal static (slice<byte> s1, slice<byte> s2) splitPreMasterSecret(slice<byte> secret) {
@@ -74,7 +74,7 @@ internal static slice<byte> prf10(slice<byte> secret, @string label, slice<byte>
 }
 
 // prf12 implements the TLS 1.2 pseudo-random function, as defined in RFC 5246, Section 5.
-internal static Func<slice<byte>, @string, slice<byte>, nint, slice<byte>> prf12(Func<hash.Hash> hashFunc) {
+internal static prfFunc prf12(Func<hash.Hash> hashFunc) {
     return (slice<byte> secret, @string label, slice<byte> seed, nint keyLen) => tls12.PRF(hashFunc, secret, label, seed, keyLen);
 }
 
@@ -92,7 +92,7 @@ private static readonly @string clientFinishedLabelᵇ = "client finished"u8;
 internal static ref readonly @string serverFinishedLabel => ref serverFinishedLabelᵇ;
 private static readonly @string serverFinishedLabelᵇ = "server finished"u8;
 
-internal static (Func<slice<byte>, @string, slice<byte>, nint, slice<byte>>, crypto.Hash) prfAndHashForVersion(uint16 version, ref cipherSuite suite) {
+internal static (prfFunc, crypto.Hash) prfAndHashForVersion(uint16 version, ref cipherSuite suite) {
     switch (version) {
     case var ᴛ when ᴛ == VersionTLS10 || ᴛ == VersionTLS11: {
         return (prf10, (crypto.Hash)0);
@@ -109,7 +109,7 @@ internal static (Func<slice<byte>, @string, slice<byte>, nint, slice<byte>>, cry
     }}
 }
 
-internal static Func<slice<byte>, @string, slice<byte>, nint, slice<byte>> prfForVersion(uint16 version, ref cipherSuite suite) {
+internal static prfFunc prfForVersion(uint16 version, ref cipherSuite suite) {
     var (prf, _) = prfAndHashForVersion(version, ref suite);
     return prf;
 }
@@ -193,7 +193,7 @@ partial struct finishedHash {
     // In TLS 1.2, a full buffer is sadly required.
     internal slice<byte> buffer;
     internal uint16 version;
-    internal Func<slice<byte>, @string, slice<byte>, nint, slice<byte>> prf;
+    internal prfFunc prf;
 }
 
 internal static (nint n, error err) Write⁔(/*this*/ ref finishedHash h, slice<byte> msg) {

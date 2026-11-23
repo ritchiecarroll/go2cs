@@ -490,7 +490,7 @@ internal static error writeMetaData(io.Writer w, slice<rtcov.CovMetaBlob> metali
     return mfw.Write(finalHash, blobs, cmode, gran);
 }
 
-internal static error VisitFuncs⁔(/*this*/ ref emitState s, Func<uint32, uint32, slice<uint32>, error> f) {
+internal static error VisitFuncs⁔(/*this*/ ref emitState s, encodecounter.CounterVisitorFn f) {
     slice<uint32> tcounters = default;
 
     slice<uint32> rdCounters(slice<atomic.Uint32> actrs, slice<uint32> ctrs) {

@@ -27,11 +27,11 @@ partial class types_package {
 //
 // Using a nil Qualifier is equivalent to using (*[Package]).Path: the
 // object is qualified by the import path, e.g., "encoding/json.Marshal".
-// type Qualifier is a methodless func type — rendered inline as its base delegate
+public delegate @string Qualifier(ж<Package> _);
 
 // RelativeTo returns a [Qualifier] that fully qualifies members of
 // all packages other than pkg.
-public static Func<ж<Package>, @string> RelativeTo(ж<Package> pkg) {
+public static Qualifier RelativeTo(ж<Package> pkg) {
     if (pkg == nil) {
         return default;
     }
@@ -46,7 +46,7 @@ public static Func<ж<Package>, @string> RelativeTo(ж<Package> pkg) {
 // TypeString returns the string representation of typ.
 // The [Qualifier] controls the printing of
 // package-level objects, and may be nil.
-public static @string TypeString(Type typ, Func<ж<Package>, @string> qf) {
+public static @string TypeString(Type typ, Qualifier qf) {
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     WriteType(Ꮡbuf, typ, qf);
     return Ꮡbuf.String();
@@ -55,21 +55,21 @@ public static @string TypeString(Type typ, Func<ж<Package>, @string> qf) {
 // WriteType writes the string representation of typ to buf.
 // The [Qualifier] controls the printing of
 // package-level objects, and may be nil.
-public static void WriteType(ж<bytes.Buffer> buf, Type typ, Func<ж<Package>, @string> qf) {
+public static void WriteType(ж<bytes.Buffer> buf, Type typ, Qualifier qf) {
     newTypeWriter(buf, qf).typ(typ);
 }
 
 // WriteSignature writes the representation of the signature sig to buf,
 // without a leading "func" keyword. The [Qualifier] controls the printing
 // of package-level objects, and may be nil.
-public static void WriteSignature(ж<bytes.Buffer> buf, ж<Signature> sig, Func<ж<Package>, @string> qf) {
+public static void WriteSignature(ж<bytes.Buffer> buf, ж<Signature> sig, Qualifier qf) {
     newTypeWriter(buf, qf).signature(sig);
 }
 
 partial struct typeWriter {
     internal ж<bytes.Buffer> buf;
     internal map<Type, bool> seen;
-    internal Func<ж<Package>, @string> qf;
+    internal Qualifier qf;
     internal ж<Context> ctxt;          // if non-nil, we are type hashing
     internal ж<TypeParamList> tparams; // local type parameters
     internal bool paramNames;          // if set, write function parameter names, otherwise, write types only
@@ -77,7 +77,7 @@ partial struct typeWriter {
     internal bool pkgInfo;             // package-annotate first unexported-type field to avoid confusing type description
 }
 
-internal static ж<typeWriter> newTypeWriter(ж<bytes.Buffer> buf, Func<ж<Package>, @string> qf) {
+internal static ж<typeWriter> newTypeWriter(ж<bytes.Buffer> buf, Qualifier qf) {
     return Ꮡ(new typeWriter(buf, new map<Type, bool>(), qf, nil, nil, true, false, false));
 }
 

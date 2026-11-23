@@ -21,7 +21,7 @@ partial class nettest_package {
 // as c1 and c2, such that anything written to c1 is read by c2 and vice-versa.
 // The stop function closes all resources, including c1, c2, and the underlying
 // net.Listener (if there is one), and should not be nil.
-// type MakePipe is a methodless func type — rendered inline as its base delegate
+public delegate (net.Conn c1, net.Conn c2, Action stop, error err) MakePipe();
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static ref readonly @string basicIOˢ => ref basicIOˢᵇ;
@@ -52,48 +52,48 @@ private static readonly @string concurrentMethodsˢᵇ = "ConcurrentMethods"u8;
 // false negatives. Thus, some issues may only be detected when the test is
 // run multiple times. For maximal effectiveness, run the tests under the
 // race detector.
-public static void TestConn(ж<testing.T> t, Func<(net.Conn, net.Conn, Action, error)> mp) {
+public static void TestConn(ж<testing.T> t, MakePipe mp) {
     t.Run(basicIOˢ, (ж<testing.T> tΔ1) => {
-        timeoutWrapper(tΔ1, mp, new Action<ж<testing.T>, net.Conn, net.Conn>(testBasicIO));
+        timeoutWrapper(tΔ1, mp, new connTester(testBasicIO));
     });
     t.Run(pingPongˢ, (ж<testing.T> tΔ2) => {
-        timeoutWrapper(tΔ2, mp, new Action<ж<testing.T>, net.Conn, net.Conn>(testPingPong));
+        timeoutWrapper(tΔ2, mp, new connTester(testPingPong));
     });
     t.Run(racyReadˢ, (ж<testing.T> tΔ3) => {
-        timeoutWrapper(tΔ3, mp, new Action<ж<testing.T>, net.Conn, net.Conn>(testRacyRead));
+        timeoutWrapper(tΔ3, mp, new connTester(testRacyRead));
     });
     t.Run(racyWriteˢ, (ж<testing.T> tΔ4) => {
-        timeoutWrapper(tΔ4, mp, new Action<ж<testing.T>, net.Conn, net.Conn>(testRacyWrite));
+        timeoutWrapper(tΔ4, mp, new connTester(testRacyWrite));
     });
     t.Run(readTimeoutˢ, (ж<testing.T> tΔ5) => {
-        timeoutWrapper(tΔ5, mp, new Action<ж<testing.T>, net.Conn, net.Conn>(testReadTimeout));
+        timeoutWrapper(tΔ5, mp, new connTester(testReadTimeout));
     });
     t.Run(writeTimeoutˢ, (ж<testing.T> tΔ6) => {
-        timeoutWrapper(tΔ6, mp, new Action<ж<testing.T>, net.Conn, net.Conn>(testWriteTimeout));
+        timeoutWrapper(tΔ6, mp, new connTester(testWriteTimeout));
     });
     t.Run(pastTimeoutˢ, (ж<testing.T> tΔ7) => {
-        timeoutWrapper(tΔ7, mp, new Action<ж<testing.T>, net.Conn, net.Conn>(testPastTimeout));
+        timeoutWrapper(tΔ7, mp, new connTester(testPastTimeout));
     });
     t.Run(presentTimeoutˢ, (ж<testing.T> tΔ8) => {
-        timeoutWrapper(tΔ8, mp, new Action<ж<testing.T>, net.Conn, net.Conn>(testPresentTimeout));
+        timeoutWrapper(tΔ8, mp, new connTester(testPresentTimeout));
     });
     t.Run(futureTimeoutˢ, (ж<testing.T> tΔ9) => {
-        timeoutWrapper(tΔ9, mp, new Action<ж<testing.T>, net.Conn, net.Conn>(testFutureTimeout));
+        timeoutWrapper(tΔ9, mp, new connTester(testFutureTimeout));
     });
     t.Run(closeTimeoutˢ, (ж<testing.T> tΔ10) => {
-        timeoutWrapper(tΔ10, mp, new Action<ж<testing.T>, net.Conn, net.Conn>(testCloseTimeout));
+        timeoutWrapper(tΔ10, mp, new connTester(testCloseTimeout));
     });
     t.Run(concurrentMethodsˢ, (ж<testing.T> tΔ11) => {
-        timeoutWrapper(tΔ11, mp, new Action<ж<testing.T>, net.Conn, net.Conn>(testConcurrentMethods));
+        timeoutWrapper(tΔ11, mp, new connTester(testConcurrentMethods));
     });
 }
 
-// type connTester is a methodless func type — rendered inline as its base delegate
+internal delegate void connTester(ж<testing.T> t, net.Conn c1, net.Conn c2);
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object testTimedOutTerminatingˢ = (@string)"test timed out; terminating pipe"u8;
 
-internal static void timeoutWrapper(ж<testing.T> t, Func<(net.Conn, net.Conn, Action, error)> mp, Action<ж<testing.T>, net.Conn, net.Conn> f) {
+internal static void timeoutWrapper(ж<testing.T> t, MakePipe mp, connTester f) {
     GoFrame ᒐ = default;
     try {
         t.Helper();

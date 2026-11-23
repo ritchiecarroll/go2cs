@@ -27,7 +27,7 @@ partial class importer_package {
 
 // A Lookup function returns a reader to access package data for
 // a given import path, or an error if no matching package is found.
-// type Lookup is a methodless func type — rendered inline as its base delegate
+public delegate (io.ReadCloser, error) Lookup(@string path);
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string gccgoˢ => ref gccgoˢᵇ;
@@ -50,7 +50,7 @@ private static readonly @string gccgoˢᵇ = "gccgo"u8;
 // A lookup function must be provided for correct module-aware operation.
 // Deprecated: If lookup is nil, for backwards-compatibility, the importer
 // will attempt to resolve imports in the $GOPATH workspace.
-public static types.Importer ForCompiler(ж<token.FileSet> fset, @string compiler, Func<@string, (io.ReadCloser, error)> lookup) {
+public static types.Importer ForCompiler(ж<token.FileSet> fset, @string compiler, Lookup lookup) {
     switch (ᐧ) {
     case {} when compiler == "gc"u8: {
         return new gcimportsжImporter(Ꮡ(new gcimports(
@@ -88,7 +88,7 @@ public static types.Importer ForCompiler(ж<token.FileSet> fset, @string compile
 // with the positions of objects created by the importer.
 //
 //go:fix inline
-public static types.Importer For(@string compiler, Func<@string, (io.ReadCloser, error)> lookup) {
+public static types.Importer For(@string compiler, Lookup lookup) {
     return ForCompiler(token.NewFileSet(), compiler, lookup);
 }
 
@@ -108,7 +108,7 @@ public static types.Importer Default() {
 partial struct gcimports {
     internal ж<token.FileSet> fset;
     internal map<@string, ж<types.Package>> packages;
-    internal Func<@string, (io.ReadCloser, error)> lookup;
+    internal Lookup lookup;
 }
 
 internal static (ж<types.Package>, error) Import⁔(/*this*/ ref gcimports m, @string path) {
@@ -119,14 +119,14 @@ internal static (ж<types.Package>, error) ImportFrom⁔(/*this*/ ref gcimports 
     if (mode != 0) {
         throw panic("mode must be 0");
     }
-    return gcimporter.Import(m.fset, m.packages, path, srcDir, m.lookup);
+    return gcimporter.Import(m.fset, m.packages, path, srcDir, NilSafeDelegateConversion<Func<@string, (io.ReadCloser, error)>, Lookup>(m.lookup));
 }
 
 // gccgo importer
 partial struct gccgoimports {
     internal map<@string, ж<types.Package>> packages;
-    internal Func<map<@string, ж<types.Package>>, @string, @string, Func<@string, (io.ReadCloser, error)>, (ж<types.Package>, error)> importer;
-    internal Func<@string, (io.ReadCloser, error)> lookup;
+    internal gccgoimporter.Importer importer;
+    internal Lookup lookup;
 }
 
 internal static (ж<types.Package>, error) Import⁔(/*this*/ ref gccgoimports m, @string path) {
@@ -137,7 +137,7 @@ internal static (ж<types.Package>, error) ImportFrom⁔(/*this*/ ref gccgoimpor
     if (mode != 0) {
         throw panic("mode must be 0");
     }
-    return m.importer(m.packages, path, srcDir, m.lookup);
+    return m.importer(m.packages, path, srcDir, NilSafeDelegateConversion<Func<@string, (io.ReadCloser, error)>, Lookup>(m.lookup));
 }
 
 } // end importer_package

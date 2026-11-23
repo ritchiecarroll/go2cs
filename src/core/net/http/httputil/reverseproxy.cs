@@ -463,7 +463,7 @@ internal static partial void ServeHTTP⁔(/*this*/ ж<ReverseProxy> Ꮡp, http.R
             // Context implementation with no cancellation signal),
             // then consult the CloseNotifier if available.
         } else if (rw._<http.CloseNotifier>(out var cn)) {
-            Action cancel = default;
+            context.CancelFunc cancel = default;
             (ctx, cancel) = context.WithCancel(ctx);
             var cancelʗ1 = cancel;
             defer(() => cancelʗ1(), ref ᒐ);

@@ -557,7 +557,7 @@ private static readonly @string builtinˢᵇ = "builtin"u8;
 internal static ref readonly @string nilˢ2 => ref nilˢ2ᵇ;
 private static readonly @string nilˢ2ᵇ = "nil"u8;
 
-internal static void writeObject(ж<bytes.Buffer> Ꮡbuf, Object obj, Func<ж<Package>, @string> qf) {
+internal static void writeObject(ж<bytes.Buffer> Ꮡbuf, Object obj, Qualifier qf) {
     ref var buf = ref Ꮡbuf.DerefOrNull();
 
     ж<TypeName> tname = default;
@@ -670,7 +670,7 @@ internal static void writeObject(ж<bytes.Buffer> Ꮡbuf, Object obj, Func<ж<Pa
     WriteType(Ꮡbuf, typ, qf);
 }
 
-internal static @string packagePrefix(ж<Package> Ꮡpkg, Func<ж<Package>, @string> qf) {
+internal static @string packagePrefix(ж<Package> Ꮡpkg, Qualifier qf) {
     ref var pkg = ref Ꮡpkg.DerefOrNull();
 
     if (Ꮡpkg == nil) {
@@ -691,7 +691,7 @@ internal static @string packagePrefix(ж<Package> Ꮡpkg, Func<ж<Package>, @str
 // ObjectString returns the string form of obj.
 // The Qualifier controls the printing of
 // package-level objects, and may be nil.
-public static @string ObjectString(Object obj, Func<ж<Package>, @string> qf) {
+public static @string ObjectString(Object obj, Qualifier qf) {
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     writeObject(Ꮡbuf, obj, qf);
     return Ꮡbuf.String();
@@ -710,7 +710,7 @@ internal static @string String⁔(/*this*/ ж<Nil> Ꮡobj) { return ObjectString
 internal static ref readonly @string interfaceˢ2 => ref interfaceˢ2ᵇ;
 private static readonly @string interfaceˢ2ᵇ = "interface"u8;
 
-internal static void writeFuncName(ж<bytes.Buffer> Ꮡbuf, ref Func f, Func<ж<Package>, @string> qf) {
+internal static void writeFuncName(ж<bytes.Buffer> Ꮡbuf, ref Func f, Qualifier qf) {
     ref var buf = ref Ꮡbuf.DerefOrNull();
 
     if (f.typ != nil) {

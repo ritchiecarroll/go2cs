@@ -18,7 +18,7 @@ internal static slice<nint> lengths = [0, 156, 8192, 8193, 8208];
 //
 // Multiple calls to MakeAEAD must return equivalent instances, so for example
 // the key must be fixed.
-// type MakeAEAD is a methodless func type — rendered inline as its base delegate
+public delegate (cipher.AEAD, error) MakeAEAD();
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static ref readonly @string roundtripˢ => ref roundtripˢᵇ;
@@ -45,7 +45,7 @@ private static readonly @string wrongCiphertextˢᵇ = "WrongCiphertext"u8;
 
 // TestAEAD performs a set of tests on cipher.AEAD implementations, checking
 // the documented requirements of NonceSize, Overhead, Seal and Open.
-public static void TestAEAD(ж<testing.T> t, Func<(cipher.AEAD, error)> mAEAD) {
+public static void TestAEAD(ж<testing.T> t, MakeAEAD mAEAD) {
     var (aead, err) = mAEAD();
     if (err != nil) {
         t.Fatal(err);

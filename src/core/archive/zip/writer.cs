@@ -29,7 +29,7 @@ partial struct Writer {
     internal slice<ж<header>> dir;
     internal ж<fileWriter> last;
     internal bool closed;
-    internal map<uint16, Func<io.Writer, (io.WriteCloser, error)>> compressors;
+    internal map<uint16, Compressor> compressors;
     internal @string comment;
     // testHookCloseSizeOffset if non-nil is called with the size
     // of offset of the central directory at Close.
@@ -534,9 +534,9 @@ internal static error Copy⁔(/*this*/ ref Writer w, ж<File> Ꮡf) {
 // RegisterCompressor registers or overrides a custom compressor for a specific
 // method ID. If a compressor for a given method is not found, [Writer] will
 // default to looking up the compressor at the package level.
-internal static void RegisterCompressor⁔(/*this*/ ref Writer w, uint16 method, Func<io.Writer, (io.WriteCloser, error)> comp) {
+internal static void RegisterCompressor⁔(/*this*/ ref Writer w, uint16 method, Compressor comp) {
     if (w.compressors == nil) {
-        w.compressors = new map<uint16, Func<io.Writer, (io.WriteCloser, error)>>();
+        w.compressors = new map<uint16, Compressor>();
     }
     w.compressors[method] = comp;
 }
@@ -595,7 +595,7 @@ internal static error AddFS⁔(/*this*/ ж<Writer> Ꮡw, fs.FS fsys) {
     });
 }
 
-internal static Func<io.Writer, (io.WriteCloser, error)> compressor⁔(/*this*/ ref Writer w, uint16 method) {
+internal static Compressor compressor⁔(/*this*/ ref Writer w, uint16 method) {
     var comp = w.compressors[method];
     if (comp == nil) {
         comp = compressor(method);

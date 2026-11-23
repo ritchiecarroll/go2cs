@@ -163,13 +163,13 @@ internal static (io.ReadSeeker reader, io.Closer closer, error err) openExportFi
 // the map entry. Otherwise, the importer must load the package data for the
 // given path into a new *Package, record it in imports map, and return the
 // package.
-// type Importer is a methodless func type — rendered inline as its base delegate
+public delegate (ж<types.Package>, error) Importer(map<@string, ж<types.Package>> imports, @string path, @string srcDir, Func<@string, (io.ReadCloser, error)> lookup);
 
 internal partial interface GetImporter_type /*dyn*/ {
     @string Name();
 }
 
-public static Func<map<@string, ж<types.Package>>, @string, @string, Func<@string, (io.ReadCloser, error)>, (ж<types.Package>, error)> GetImporter(slice<@string> searchpaths, map<ж<types.Package>, InitData> initmap) {
+public static Importer GetImporter(slice<@string> searchpaths, map<ж<types.Package>, InitData> initmap) {
     var initmapʗ1 = initmap;
     var searchpathsʗ1 = searchpaths;
     return (map<@string, ж<types.Package>> imports, @string pkgpath, @string srcDir, Func<@string, (io.ReadCloser, error)> lookup) => {

@@ -25,6 +25,7 @@ using norm = go.vendor.golang.org.x.text.unicode.norm_package;
 using go.vendor.golang.org.x.text.secure;
 using go.vendor.golang.org.x.text.unicode;
 using unicode;
+using ꓸꓸꓸOption = Span<idna_package.Option>;
 
 partial class idna_package {
 
@@ -54,14 +55,14 @@ public static (@string, error) ToUnicode(@string s) {
 }
 
 // An Option configures a Profile at creation time.
-// type Option is a methodless func type — rendered inline as its base delegate
+public delegate void Option(ж<options> _);
 
 // Transitional sets a Profile to use the Transitional mapping as defined in UTS
 // #46. This will cause, for example, "ß" to be mapped to "ss". Using the
 // transitional mapping provides a compromise between IDNA2003 and IDNA2008
 // compatibility. It is used by some browsers when resolving domain names. This
 // option is only meaningful if combined with MapForLookup.
-public static Action<ж<options>> Transitional(bool transitional) {
+public static Option Transitional(bool transitional) {
     return (ж<options> o) => {
         o.transitional = transitional;
     };
@@ -71,7 +72,7 @@ public static Action<ж<options>> Transitional(bool transitional) {
 // are longer than allowed by the RFC.
 //
 // This option corresponds to the VerifyDnsLength flag in UTS #46.
-public static Action<ж<options>> VerifyDNSLength(bool verify) {
+public static Option VerifyDNSLength(bool verify) {
     return (ж<options> o) => {
         o.verifyDNSLength = verify;
     };
@@ -79,7 +80,7 @@ public static Action<ж<options>> VerifyDNSLength(bool verify) {
 
 // RemoveLeadingDots removes leading label separators. Leading runes that map to
 // dots, such as U+3002 IDEOGRAPHIC FULL STOP, are removed as well.
-public static Action<ж<options>> RemoveLeadingDots(bool remove) {
+public static Option RemoveLeadingDots(bool remove) {
     return (ж<options> o) => {
         o.removeLeadingDots = remove;
     };
@@ -90,7 +91,7 @@ public static Action<ж<options>> RemoveLeadingDots(bool remove) {
 // of hyphens ('-'), normalization, validity of runes, and the context rules.
 // In particular, ValidateLabels also sets the CheckHyphens and CheckJoiners flags
 // in UTS #46.
-public static Action<ж<options>> ValidateLabels(bool enable) {
+public static Option ValidateLabels(bool enable) {
     return (ж<options> o) => {
         // Don't override existing mappings, but set one that at least checks
         // normalization if it is not set.
@@ -113,7 +114,7 @@ public static Action<ж<options>> ValidateLabels(bool enable) {
 // "r3---sn-apo3qvuoxuxbt-j5pe" are in common use.
 //
 // This option corresponds to the CheckHyphens flag in UTS #46.
-public static Action<ж<options>> CheckHyphens(bool enable) {
+public static Option CheckHyphens(bool enable) {
     return (ж<options> o) => {
         o.checkHyphens = enable;
     };
@@ -123,7 +124,7 @@ public static Action<ж<options>> CheckHyphens(bool enable) {
 // A of RFC 5892, concerning the use of joiner runes.
 //
 // This option corresponds to the CheckJoiners flag in UTS #46.
-public static Action<ж<options>> CheckJoiners(bool enable) {
+public static Option CheckJoiners(bool enable) {
     return (ж<options> o) => {
         o.trie = trie;
         o.checkJoiners = enable;
@@ -140,7 +141,7 @@ public static Action<ж<options>> CheckJoiners(bool enable) {
 // http://www.rfc-editor.org/std/std3.txt for more details.
 //
 // This option corresponds to the UseSTD3ASCIIRules flag in UTS #46.
-public static Action<ж<options>> StrictDomainName(bool use) {
+public static Option StrictDomainName(bool use) {
     return (ж<options> o) => {
         o.useSTD3Rules = use;
     };
@@ -153,7 +154,7 @@ public static Action<ж<options>> StrictDomainName(bool use) {
 // that relies on proper validation of labels should include this rule.
 //
 // This option corresponds to the CheckBidi flag in UTS #46.
-public static Action<ж<options>> BidiRule() {
+public static Option BidiRule() {
     return (ж<options> o) => {
         o.bidirule = bidirule.ValidString;
     };
@@ -161,7 +162,7 @@ public static Action<ж<options>> BidiRule() {
 
 // ValidateForRegistration sets validation options to verify that a given IDN is
 // properly formatted for registration as defined by Section 4 of RFC 5891.
-public static Action<ж<options>> ValidateForRegistration() {
+public static Option ValidateForRegistration() {
     return (ж<options> o) => {
         o.mapping = validateRegistration;
         StrictDomainName(true)(o);
@@ -179,7 +180,7 @@ public static Action<ж<options>> ValidateForRegistration() {
 //
 // The mappings include normalization and mapping case, width and other
 // compatibility mappings.
-public static Action<ж<options>> MapForLookup() {
+public static Option MapForLookup() {
     return (ж<options> o) => {
         o.mapping = validateAndMap;
         StrictDomainName(true)(o);
@@ -210,7 +211,7 @@ partial struct Profile {
     /*embed*/ internal options options;
 }
 
-internal static void apply(ж<options> o, slice<Action<ж<options>>> opts) {
+internal static void apply(ж<options> o, slice<Option> opts) {
     foreach (var (_, f) in range(opts)) {
         f(o);
     }
@@ -224,7 +225,7 @@ internal static void apply(ж<options> o, slice<Action<ж<options>>> opts) {
 // for lookup and registration purposes respectively, which can be tailored by
 // adding more fine-grained options, where later options override earlier
 // options.
-public static ж<Profile> New(params Span<Action<ж<options>>> oʗp) {
+public static ж<Profile> New(params ꓸꓸꓸOption oʗp) {
     var o = oʗp.slice();
 
     var p = Ꮡ(new Profile());

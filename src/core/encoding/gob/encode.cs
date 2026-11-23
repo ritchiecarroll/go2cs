@@ -19,7 +19,7 @@ partial class gob_package {
 
 internal static UntypedInt uint64Size => 8;
 
-// type encHelper is a methodless func type — rendered inline as its base delegate
+internal delegate bool encHelper(ж<encoderState> state, reflect.Value v);
 
 // encoderState is the global execution state of an instance of the encoder.
 // Field numbers are delta encoded and always increase. The field
@@ -139,11 +139,11 @@ internal static void encodeInt⁔(/*this*/ ref encoderState state, int64 i) {
 }
 
 // encOp is the signature of an encoding operator for a given type.
-// type encOp is a methodless func type — rendered inline as its base delegate
+internal delegate void encOp(ж<encInstr> i, ж<encoderState> state, reflect.Value v);
 
 // The 'instructions' of the encoding machine
 partial struct encInstr {
-    internal Action<ж<encInstr>, ж<encoderState>, reflect.Value> op;
+    internal encOp op;
     internal nint field;        // field number in input
     internal slice<nint> index; // struct index
     internal nint indir;        // how many pointer indirections to reach the value in the struct
@@ -372,7 +372,7 @@ internal static void encodeStruct⁔(/*this*/ ж<Encoder> Ꮡenc, ж<encBuffer> 
 }
 
 // encodeArray encodes an array.
-internal static void encodeArray⁔(/*this*/ ж<Encoder> Ꮡenc, ж<encBuffer> b, reflect.Value value, Action<ж<encInstr>, ж<encoderState>, reflect.Value> op, nint elemIndir, nint length, Func<ж<encoderState>, reflect.Value, bool> helper) {
+internal static void encodeArray⁔(/*this*/ ж<Encoder> Ꮡenc, ж<encBuffer> b, reflect.Value value, encOp op, nint elemIndir, nint length, encHelper helper) {
     GoFrame ᒐ = default;
     try {
         var state = Ꮡenc.newEncoderState(b);
@@ -400,7 +400,7 @@ internal static void encodeArray⁔(/*this*/ ж<Encoder> Ꮡenc, ж<encBuffer> b
 }
 
 // encodeReflectValue is a helper for maps. It encodes the value v.
-internal static void encodeReflectValue(ж<encoderState> state, reflect.Value v, Action<ж<encInstr>, ж<encoderState>, reflect.Value> op, nint indir) {
+internal static void encodeReflectValue(ж<encoderState> state, reflect.Value v, encOp op, nint indir) {
     for (nint i = 0; i < indir && v.IsValid(); i++) {
         v = reflect.Indirect(v);
     }
@@ -411,7 +411,7 @@ internal static void encodeReflectValue(ж<encoderState> state, reflect.Value v,
 }
 
 // encodeMap encodes a map as unsigned count followed by key:value pairs.
-internal static void encodeMap⁔(/*this*/ ж<Encoder> Ꮡenc, ж<encBuffer> b, reflect.Value mv, Action<ж<encInstr>, ж<encoderState>, reflect.Value> keyOp, Action<ж<encInstr>, ж<encoderState>, reflect.Value> elemOp, nint keyIndir, nint elemIndir) {
+internal static void encodeMap⁔(/*this*/ ж<Encoder> Ꮡenc, ж<encBuffer> b, reflect.Value mv, encOp keyOp, encOp elemOp, nint keyIndir, nint elemIndir) {
     ref var enc = ref Ꮡenc.DerefOrNull();
 
     var state = Ꮡenc.newEncoderState(b);
@@ -520,7 +520,7 @@ internal static void encodeGobEncoder⁔(/*this*/ ж<Encoder> Ꮡenc, ж<encBuff
     enc.freeEncoderState(state);
 }
 
-[GoLazy] partial class lazyᴛencOpTable { internal static array<Action<ж<encInstr>, ж<encoderState>, reflect.Value>> encOpTable = new golib.SparseArray<Action<ж<encInstr>, ж<encoderState>, reflect.Value>>{
+[GoLazy] partial class lazyᴛencOpTable { internal static array<encOp> encOpTable = new golib.SparseArray<encOp>{
     [1] = encBool,
     [2] = encInt,
     [3] = encInt,
@@ -542,7 +542,7 @@ internal static void encodeGobEncoder⁔(/*this*/ ж<Encoder> Ꮡenc, ж<encBuff
 
 // encOpFor returns (a pointer to) the encoding op for the base type under rt and
 // the indirection count to reach it.
-internal static (ж<Action<ж<encInstr>, ж<encoderState>, reflect.Value>>, nint) encOpFor(reflect.Type rt, map<reflect.Type, ж<Action<ж<encInstr>, ж<encoderState>, reflect.Value>>> inProgress, map<ж<typeInfo>, bool> building) {
+internal static (ж<encOp>, nint) encOpFor(reflect.Type rt, map<reflect.Type, ж<encOp>> inProgress, map<ж<typeInfo>, bool> building) {
     var ut = userType(rt);
     // If the type implements GobEncoder, we handle it without further processing.
     if (ut.externalEnc != 0) {
@@ -556,7 +556,7 @@ internal static (ж<Action<ж<encInstr>, ж<encoderState>, reflect.Value>>, nint
     var typ = ut.@base;
     nint indir = ut.indir;
     reflect.Kind k = typ.Kind();
-    ref var op = ref heap<Action<ж<encInstr>, ж<encoderState>, reflect.Value>>(out var Ꮡop);
+    ref var op = ref heap<encOp>(out var Ꮡop);
     if ((nint)k < len(encOpTable)) {
         op = encOpTable[k];
     }
@@ -645,7 +645,7 @@ internal static (ж<Action<ж<encInstr>, ж<encoderState>, reflect.Value>>, nint
 }
 
 // gobEncodeOpFor returns the op for a type that is known to implement GobEncoder.
-internal static (ж<Action<ж<encInstr>, ж<encoderState>, reflect.Value>>, nint) gobEncodeOpFor(ж<userTypeInfo> Ꮡut) {
+internal static (ж<encOp>, nint) gobEncodeOpFor(ж<userTypeInfo> Ꮡut) {
     ref var ut = ref Ꮡut.DerefOrNull();
 
     var rt = ut.user;
@@ -656,7 +656,7 @@ internal static (ж<Action<ж<encInstr>, ж<encoderState>, reflect.Value>>, nint
             rt = rt.Elem();
         }
     }
-    ref var op = ref heap<Action<ж<encInstr>, ж<encoderState>, reflect.Value>>(out var Ꮡop);
+    ref var op = ref heap<encOp>(out var Ꮡop);
     var rtʗ1 = rt;
     op = (ж<encInstr> i, ж<encoderState> state, reflect.Value v) => {
         if (Ꮡut.Value.encIndir == -1) {
@@ -679,7 +679,7 @@ internal static (ж<Action<ж<encInstr>, ж<encoderState>, reflect.Value>>, nint
 internal static ж<encEngine> compileEnc(ref userTypeInfo ut, map<ж<typeInfo>, bool> building) {
     var srt = ut.@base;
     var engine = @new<encEngine>();
-    var seen = new map<reflect.Type, ж<Action<ж<encInstr>, ж<encoderState>, reflect.Value>>>();
+    var seen = new map<reflect.Type, ж<encOp>>();
     var rt = ut.@base;
     if (ut.externalEnc != 0) {
         rt = ut.user;
@@ -697,7 +697,7 @@ internal static ж<encEngine> compileEnc(ref userTypeInfo ut, map<ж<typeInfo>, 
         if (srt.NumField() > 0 && len(engine.instr) == 0) {
             errorf("type %s has no exported fields", rt);
         }
-        engine.instr = append(engine.instr, new encInstr(new Action<ж<encInstr>, ж<encoderState>, reflect.Value>(encStructTerminator), 0, default, 0));
+        engine.instr = append(engine.instr, new encInstr(new encOp(encStructTerminator), 0, default, 0));
     } else {
         engine.instr = new slice<encInstr>(1);
         var (op, indir) = encOpFor(rt, seen, building);

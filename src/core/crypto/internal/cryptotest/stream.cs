@@ -22,7 +22,7 @@ internal static nint bufCap = 10000;
 //
 // Multiple calls to MakeStream must return equivalent instances,
 // so for example the key and/or IV must be fixed.
-// type MakeStream is a methodless func type — rendered inline as its base delegate
+public delegate cipher.Stream MakeStream();
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static ref readonly @string xorSemanticsˢ => ref xorSemanticsˢᵇ;
@@ -35,7 +35,7 @@ private static readonly @string directXORˢᵇ = "DirectXOR"u8;
 
 // TestStream performs a set of tests on cipher.Stream implementations,
 // checking the documented requirements of XORKeyStream.
-public static void TestStream(ж<testing.T> t, Func<cipher.Stream> ms) {
+public static void TestStream(ж<testing.T> t, MakeStream ms) {
     t.Run(xorSemanticsˢ, (ж<testing.T> tΔ1) => {
         if (strings.Contains(tΔ1.Name(), testCFBStreamˢ)) {
             // This is ugly, but so is CFB's abuse of cipher.Stream.

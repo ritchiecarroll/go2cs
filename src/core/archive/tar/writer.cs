@@ -128,7 +128,7 @@ internal static error writeUSTARHeader⁔(/*this*/ ж<Writer> Ꮡtw, ж<Header> 
 
     // Pack the main header.
     ref var f = ref heap(new formatter(), out var Ꮡf);
-    var blk = Ꮡtw.templateV7Plus(Ꮡhdr, new Action<slice<byte>, @string>(Ꮡf.formatString), new Action<slice<byte>, int64>(Ꮡf.formatOctal));
+    var blk = Ꮡtw.templateV7Plus(Ꮡhdr, new stringFormatter(Ꮡf.formatString), new numberFormatter(Ꮡf.formatOctal));
     f.formatString(blk.toUSTAR().prefix(), namePrefix);
     blk.setFormat(FormatUSTAR);
     if (f.err != nil) {
@@ -230,7 +230,7 @@ internal static error writePAXHeader⁔(/*this*/ ж<Writer> Ꮡtw, ж<Header> �
     var fmtStr = (slice<byte> b, @string s) => {
         Ꮡf.Value.formatString(b, toASCII(s));
     };
-    var blk = Ꮡtw.templateV7Plus(Ꮡhdr, fmtStr, new Action<slice<byte>, int64>(Ꮡf.formatOctal));
+    var blk = Ꮡtw.templateV7Plus(Ꮡhdr, NilSafeDelegateConversion<stringFormatter, Action<slice<byte>, @string>>(fmtStr), new numberFormatter(Ꮡf.formatOctal));
     blk.setFormat(FormatPAX);
     {
         var err = tw.writeRawHeader(blk, hdr.Size, hdr.Typeflag); if (err != nil) {
@@ -280,7 +280,7 @@ internal static error writeGNUHeader⁔(/*this*/ ж<Writer> Ꮡtw, ж<Header> �
     ref var f = ref heap(new formatter(), out var Ꮡf); // Ignore errors since they are expected
     sparseDatas spd = default;
     slice<byte> spb = default;
-    var blk = Ꮡtw.templateV7Plus(Ꮡhdr, new Action<slice<byte>, @string>(Ꮡf.formatString), new Action<slice<byte>, int64>(Ꮡf.formatNumeric));
+    var blk = Ꮡtw.templateV7Plus(Ꮡhdr, new stringFormatter(Ꮡf.formatString), new numberFormatter(Ꮡf.formatNumeric));
     if (!hdr.AccessTime.IsZero()) {
         f.formatNumeric(blk.toGNU().accessTime(), hdr.AccessTime.Unix());
     }
@@ -343,9 +343,9 @@ internal static error writeGNUHeader⁔(/*this*/ ж<Writer> Ꮡtw, ж<Header> �
     return default;
 }
 
-// type stringFormatter is a methodless func type — rendered inline as its base delegate
+internal delegate void stringFormatter(slice<byte> _Δp0, @string _Δp1);
 
-// type numberFormatter is a methodless func type — rendered inline as its base delegate
+internal delegate void numberFormatter(slice<byte> _Δp0, int64 _Δp1);
 
 // templateV7Plus fills out the V7 fields of a block using values from hdr.
 // It also fills out fields (uname, gname, devmajor, devminor) that are
@@ -353,7 +353,7 @@ internal static error writeGNUHeader⁔(/*this*/ ж<Writer> Ꮡtw, ж<Header> �
 //
 // The block returned is only valid until the next call to
 // templateV7Plus or writeRawFile.
-internal static ж<block> templateV7Plus⁔(/*this*/ ж<Writer> Ꮡtw, ж<Header> Ꮡhdr, Action<slice<byte>, @string> fmtStr, Action<slice<byte>, int64> fmtNum) {
+internal static ж<block> templateV7Plus⁔(/*this*/ ж<Writer> Ꮡtw, ж<Header> Ꮡhdr, stringFormatter fmtStr, numberFormatter fmtNum) {
     ref var tw = ref Ꮡtw.DerefOrNull();
     ref var hdr = ref Ꮡhdr.DerefOrNull();
 

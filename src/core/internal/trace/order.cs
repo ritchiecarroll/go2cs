@@ -97,10 +97,10 @@ internal static @string evName⁔(/*this*/ ref ordering o, tracev2.EventType typ
     return o.traceVer.EventName(typ);
 }
 
-// type orderingHandleFunc is a methodless func type — rendered inline as its base delegate
+internal delegate (schedCtx, bool, error) orderingHandleFunc(ж<ordering> o, ж<baseEvent> ev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx);
 
-internal static array<Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>> orderingDispatch;
-internal static void initᴛorderingDispatch() { orderingDispatch = new golib.SparseArray<Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>>{
+internal static array<orderingHandleFunc> orderingDispatch;
+internal static void initᴛorderingDispatch() { orderingDispatch = new golib.SparseArray<orderingHandleFunc>{
     // Procs.
     [tracev2.EvProcsChange] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceAnnotation)),
     [tracev2.EvProcStart] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceProcStart)),

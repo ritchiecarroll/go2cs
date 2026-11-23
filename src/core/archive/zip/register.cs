@@ -16,14 +16,14 @@ partial class zip_package {
 // The Compressor itself must be safe to invoke from multiple goroutines
 // simultaneously, but each returned writer will be used only by
 // one goroutine at a time.
-// type Compressor is a methodless func type — rendered inline as its base delegate
+public delegate (io.WriteCloser, error) Compressor(io.Writer w);
 
 // A Decompressor returns a new decompressing reader, reading from r.
 // The [io.ReadCloser]'s Close method must be used to release associated resources.
 // The Decompressor itself must be safe to invoke from multiple goroutines
 // simultaneously, but each returned reader will be used only by
 // one goroutine at a time.
-// type Decompressor is a methodless func type — rendered inline as its base delegate
+public delegate io.ReadCloser Decompressor(io.Reader r);
 
 internal static readonly ж<sync.Pool> ᏑflateWriterPool = new StaticBox<sync.Pool>(default(sync.Pool));
 internal static ref sync.Pool flateWriterPool => ref ((StaticBox<sync.Pool>)ᏑflateWriterPool).ValueSlot;
@@ -153,16 +153,16 @@ internal static readonly ж<sync.Map> Ꮡdecompressors = new StaticBox<sync.Map>
 internal static ref sync.Map decompressors => ref ((StaticBox<sync.Map>)Ꮡdecompressors).ValueSlot; // map[uint16]Decompressor
 
 [GoInit] internal static void init() {
-    Ꮡcompressors.Store(Store, new Func<io.Writer, (io.WriteCloser, error)>((io.Writer w) => (new nopCloserжWriteCloser(Ꮡ(new nopCloser(w))), default)));
-    Ꮡcompressors.Store(Deflate, new Func<io.Writer, (io.WriteCloser, error)>((io.Writer w) => (newFlateWriter(w), default)));
+    Ꮡcompressors.Store(Store, new Compressor((io.Writer w) => (new nopCloserжWriteCloser(Ꮡ(new nopCloser(w))), default)));
+    Ꮡcompressors.Store(Deflate, new Compressor((io.Writer w) => (newFlateWriter(w), default)));
 
-    Ꮡdecompressors.Store(Store, NilSafeDelegateConversion<Func<io.Reader, io.ReadCloser>, Func<io.Reader, io.ReadCloser>>(io.NopCloser));
-    Ꮡdecompressors.Store(Deflate, new Func<io.Reader, io.ReadCloser>(newFlateReader));
+    Ꮡdecompressors.Store(Store, NilSafeDelegateConversion<Decompressor, Func<io.Reader, io.ReadCloser>>(io.NopCloser));
+    Ꮡdecompressors.Store(Deflate, new Decompressor(newFlateReader));
 }
 
 // RegisterDecompressor allows custom decompressors for a specified method ID.
 // The common methods [Store] and [Deflate] are built in.
-public static void RegisterDecompressor(uint16 method, Func<io.Reader, io.ReadCloser> dcomp) {
+public static void RegisterDecompressor(uint16 method, Decompressor dcomp) {
     var (_, dup) = Ꮡdecompressors.LoadOrStore(method, (dcomp).OrTypedNilFunc()); if (dup) {
         throw panic("decompressor already registered");
     }
@@ -170,26 +170,26 @@ public static void RegisterDecompressor(uint16 method, Func<io.Reader, io.ReadCl
 
 // RegisterCompressor registers custom compressors for a specified method ID.
 // The common methods [Store] and [Deflate] are built in.
-public static void RegisterCompressor(uint16 method, Func<io.Writer, (io.WriteCloser, error)> comp) {
+public static void RegisterCompressor(uint16 method, Compressor comp) {
     var (_, dup) = Ꮡcompressors.LoadOrStore(method, (comp).OrTypedNilFunc()); if (dup) {
         throw panic("compressor already registered");
     }
 }
 
-internal static Func<io.Writer, (io.WriteCloser, error)> compressor(uint16 method) {
+internal static Compressor compressor(uint16 method) {
     var (ci, ok) = Ꮡcompressors.Load(method);
     if (!ok) {
         return default;
     }
-    return ci._<Func<io.Writer, (io.WriteCloser, error)>>();
+    return ci._<Compressor>();
 }
 
-internal static Func<io.Reader, io.ReadCloser> decompressor(uint16 method) {
+internal static Decompressor decompressor(uint16 method) {
     var (di, ok) = Ꮡdecompressors.Load(method);
     if (!ok) {
         return default;
     }
-    return di._<Func<io.Reader, io.ReadCloser>>();
+    return di._<Decompressor>();
 }
 
 } // end zip_package
