@@ -625,8 +625,13 @@ public class TwinBoxTests
         """;
 
     // A hand-written `this ref` method with another `ref` parameter (the converter emits none: ref-lowering skips methods).
+    // Beside it, each modifier RecvGenerator's box overload carries, once: `out` and `in` on a ref receiver, a `ref` on a
+    // VALUE receiver (the second construction site), and a defaulted parameter, whose default the call must not carry.
     private const string MixedRef = """
             internal static void mx(this ref T t, ref T u) { ᐸꟷ(ch); }
+            internal static void mo(this ref T t, out T u, in T w) { u = w; }
+            internal static void mv(this T t, ref T u) { u = t; }
+            internal static nint md(this ref T t, nint u = 5) => u;
 
         """;
 
@@ -1114,6 +1119,13 @@ public class TwinBoxTests
         Assert.AreEqual(0, errors.Length, Errors(errors));
         StringAssert.Contains(twins, "mx(this ж<global::go.box_package.T> Ꮡt, ref global::go.box_package.T u)", "the box overload takes u by ref");
         StringAssert.Contains(twins, "t.mx(ref u)", "and passes it by ref");
+        StringAssert.Contains(twins, "mo(this ж<global::go.box_package.T> Ꮡt, out global::go.box_package.T u, in global::go.box_package.T w)", "out and in in the signature");
+        StringAssert.Contains(twins, "t.mo(out u, in w)", "and in the call");
+        StringAssert.Contains(twins, "mv(this ж<global::go.box_package.T> Ꮡt, ref global::go.box_package.T u)", "a value receiver's overload takes u by ref");
+        StringAssert.Contains(twins, "t.mv(ref u)", "and passes it by ref");
+        StringAssert.Contains(twins, "md(this ж<global::go.box_package.T> Ꮡt, nint u = 5)", "the default stays on the declaration");
+        StringAssert.Contains(twins, "t.md(u)", "the call passes the caller's argument, not `u = 5`");
+        Assert.IsFalse(twins.Contains("t.md(u = 5)", StringComparison.Ordinal), "no assignment in the call");
         Assert.IsFalse(twins.Contains("mxꞏtwin(", StringComparison.Ordinal), "no twin");
         StringAssert.Contains(twins, "|mx|byref-mixed", "refused by name");
     }

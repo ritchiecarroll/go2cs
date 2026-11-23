@@ -134,6 +134,8 @@ internal class ReceiverMethodTemplate : TemplateBase
     {
         get
         {
+            // The limit: `scoped` and `ref readonly` are written as plain `ref` and `in` (ParameterRefKinds records only
+            // ref, out and in), and the converter emits neither.
             List<string> result = [];
 
             for (int i = 0; i < Method.Parameters.Length; i++)
@@ -149,9 +151,11 @@ internal class ReceiverMethodTemplate : TemplateBase
     private string ReturnStatement =>
         Method.ReturnType == "void" ? "" : "return ";
 
-    // A by-ref parameter is passed on by-ref (`ref u`), as the overload takes it.
+    // A by-ref parameter is passed on by-ref (`ref u`), as the overload takes it. A parameter's name carries its default
+    // (`u = 5`, for the declaration above), so the call takes the bare identifier: `t.M(u = 5)` would overwrite the caller's
+    // argument with the default.
     private string CallParams =>
-        string.Join(", ", Method.Parameters.Select((item, i) => RefKind(i) + item.name).Skip(1));
+        string.Join(", ", Method.Parameters.Select((item, i) => RefKind(i) + MethodInfo.ParameterIdentifier(item.name)).Skip(1));
 
     private string RefKind(int index) =>
         index < Method.ParameterRefKinds.Length ? Method.ParameterRefKinds[index] : "";
