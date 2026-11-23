@@ -36,7 +36,7 @@ public sealed class GoParkSlot
 
     // A Gosched yield park (GoScheduler.GoschedTwin): the carrier requeues the goroutine at the global queue's tail instead
     // of committing the park. Carried on the SLOT, never on the carrier, so a park attempt that fails (ParkPending throws)
-    // cannot turn the step's earlier, real park into a requeue (P3's read of the Gosched seat).
+    // cannot turn the step's earlier, real park into a requeue (review of the Gosched park, 3849220da4).
     internal bool IsYield { get; init; }
     private Goroutine? m_goroutine;
 
@@ -189,13 +189,13 @@ public static class GoScheduler
             }
         }
 
-        // DESIGN-mn-pin.md 15 (P3's SHOULD 3): the shared-pool floor, a standing reading: at least P shared carriers.
+        // DESIGN-mn-pin.md 15 (review SHOULD 3): the shared-pool floor, a standing reading: at least P shared carriers.
         lock (s_carriersLock)
         {
             if (s_carriers.Count - s_pinnedCount < s_procs)
                 Interlocked.Increment(ref s_sharedFloorViolations);
 
-            // 15.3 (P3's NIT): the pinned-blocked count stays within 0 and the pinned count, a standing reading.
+            // 15.3 (review NIT): the pinned-blocked count stays within 0 and the pinned count, a standing reading.
             int pinnedBlocked = Volatile.Read(ref s_pinnedBlocked);
 
             if (pinnedBlocked < 0 || pinnedBlocked > s_pinnedCount)
@@ -240,11 +240,11 @@ public static class GoScheduler
     private static int s_overBudget;
     private static int s_blocked;
 
-    // DESIGN-mn-pin.md 15 (P3's MUST on the pin build): carriers pinned to a goroutine, running or waiting, kept under
+    // DESIGN-mn-pin.md 15 (review MUST on the pin build): carriers pinned to a goroutine, running or waiting, kept under
     // s_carriersLock at pin, unpin and retire. A pinned carrier serves one goroutine, so it is never shared capacity.
     private static int s_pinnedCount;
 
-    // DESIGN-mn-pin.md 15.2 (P3's SHOULD on the floor fix): the pinned carriers counted in s_blocked, waiting pinned, in a
+    // DESIGN-mn-pin.md 15.2 (review SHOULD on the floor fix): the pinned carriers counted in s_blocked, waiting pinned, in a
     // plain park (EnterBlocked) or retaken in a native call; raised and lowered with s_blocked through each carrier's flag.
     private static int s_pinnedBlocked;
     private static long s_sharedFloorViolations;
@@ -278,7 +278,7 @@ public static class GoScheduler
     private static long s_migrated;
     private static long s_handoffs;
 
-    // The other half of the hand-off counter (COORD's split for byref-param, 2026-11-16): an outermost PLAIN park of a
+    // The other half of the hand-off counter (the split for byref-param, 2026-11-16, 56baaf2de4): an outermost PLAIN park of a
     // goroutine with no carrier to hand off (a thread goroutine, or one off its carrier), so it blocks its own thread.
     // `handoffs` alone rose under N2 as more goroutines came onto carriers; the two together show where blocks went.
     private static long s_threadBlocks;
@@ -316,7 +316,7 @@ public static class GoScheduler
     internal static int Procs => Volatile.Read(ref s_procs);
 
     /// <summary>
-    /// The P count follows GOMAXPROCS, as Go's procresize does (COORD's ruling for .5, C1/20261122T141803Z): runtime's one
+    /// The P count follows GOMAXPROCS, as Go's procresize does (design decision, commit c11cb99971): runtime's one
     /// writer of the setting hands every new value here, the GOMAXPROCS variable at start and runtime.GOMAXPROCS(n) live.
     /// With the scheduler off the count is only kept, so a later start uses it. A P added is a token released and, once
     /// started, a shared carrier; a P removed takes a token out of circulation, now if one is free and otherwise once a
@@ -466,7 +466,7 @@ public static class GoScheduler
         Enqueue(goroutine, step);
     }
 
-    // DESIGN-mn-pin.md 14.2 (COORD's arm (c)): the locked waker's hand-off, kept out of Ready's hot path as a cold static
+    // DESIGN-mn-pin.md 14.2 (arm (c)): the locked waker's hand-off, kept out of Ready's hot path as a cold static
     // helper, so the lock-taking call cannot change how Ready is compiled for the unlocked path.
     [MethodImpl(MethodImplOptions.NoInlining)]
     private static bool HandToIdle(Goroutine goroutine, object step)
@@ -557,7 +557,7 @@ public static class GoScheduler
         }
     }
 
-    // The Gosched-park seat (COORD's ruling of 2026-11-21, docs/phase4/inbox/G/20261121T231225Z-COORD.md): a twin's
+    // The Gosched park (a design decision of 2026-11-21, commit ed6fc23e74): a twin's
     // runtime.Gosched is a park point that requeues the goroutine at the GLOBAL run queue's tail, as Go's goschedImpl
     // puts it on the global queue, so a goroutine that spins on Gosched ends its step and every goroutine queued
     // before it runs first (S2 arm 1, MnSpinCap: spinners beyond the P count starved parked goroutines while Gosched
@@ -579,7 +579,7 @@ public static class GoScheduler
     // The slot a Gosched yield parks on (its own factory, so a row can read the mark the carrier reads).
     internal static GoParkSlot YieldSlot() => new() { IsYield = true };
 
-    // What the carrier does with a committed park after the unmount (P3's read): a yield slot's goroutine is requeued, any
+    // What the carrier does with a committed park after the unmount (from review): a yield slot's goroutine is requeued, any
     // other slot is committed. The decision reads the PENDING slot alone, so nothing a failed park attempt left behind can
     // change it.
     internal static bool RequeuesOnCommit(GoParkSlot slot) => slot.IsYield;
@@ -1013,7 +1013,7 @@ public static class GoScheduler
                 // 3.4: the goroutine ended locked to this thread, so the thread ends with it, as Go terminates it.
                 if (m_retiring)
                 {
-                    // DESIGN-mn-pin.md 15 (P3's MUST, (i)): the retiring thread starts its replacement whenever fewer
+                    // DESIGN-mn-pin.md 15 (review MUST (i)): the retiring thread starts its replacement whenever fewer
                     // than P shared carriers remain, whatever the queue holds: a later Enqueue would strand too.
                     lock (s_carriersLock)
                     {
@@ -1244,7 +1244,7 @@ public static class GoScheduler
 
                 // A Gosched yield goes to the GLOBAL queue's tail (Go's goschedImpl -> globrunqput), never the run-next
                 // slot, so every goroutine queued before it runs first. A pinned goroutine goes back to its own carrier, after a
-                // Thread.Yield, so its thread still gives the processor up as runtime.Gosched did (P3's nit).
+                // Thread.Yield, so its thread still gives the processor up as runtime.Gosched did (a review nit).
                 if (RequeuesOnCommit(slot))
                 {
                     Interlocked.Increment(ref s_goschedYields);

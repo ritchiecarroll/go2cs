@@ -71,7 +71,7 @@ func resetShapeWitnessState() {
 	shapeWitnessPairs = map[string]string{}
 }
 
-// shapeWitnessSelfReferential is the SELECTION-ONLY predicate (COORD's ruling (b), 2026-11-18): the constraint mentions
+// shapeWitnessSelfReferential is the SELECTION-ONLY predicate (decision (b), 2026-11-18): the constraint mentions
 // the type parameter anywhere, interface METHOD SIGNATURES included, so `interface{ Less(T) bool }` is self-referential
 // and stays on the self route. typeMentionsTypeParam itself is not changed: it has nine other callers.
 func shapeWitnessSelfReferential(tp *types.TypeParam) bool {
@@ -209,10 +209,10 @@ func shapeWitnessOrigin(info *types.Info, ident *ast.Ident) types.Object {
 }
 
 // computeShapeWitnessSelection selects the package's narrow declarations: declaration-level selection, the closure over
-// bodies and types to a fixed point, upward and downward (P3 MUST 1, widened by P3's re-read finding 3 and stage 1's
+// bodies and types to a fixed point, upward and downward (review MUST 1, widened by the re-read's finding 3 and stage 1's
 // downward discovery), and the predicate: a declaration is kept only if an instantiation in the package binds a
 // selected position to a pointer, or a kept declaration forwards into it -- exported declarations included until
-// stage 2 (COORD's ruling on P3's stage-1 finding 3).
+// stage 2 (decision on the stage-1 review's finding 3).
 func computeShapeWitnessSelection(pkg *packages.Package) map[types.Object]*shapeWitnessDecl {
 	return computeShapeWitnessSelectionFiles(pkg, nil)
 }
@@ -437,7 +437,7 @@ func computeShapeWitnessSelectionFiles(pkg *packages.Package, include func(*ast.
 		}
 	}
 
-	// THE PREDICATE (P3's, under COORD's stage-1 ruling of 2026-11-19 on finding 3): a declaration is kept only where
+	// THE PREDICATE (from review, under the stage-1 decision of 2026-11-19 on finding 3): a declaration is kept only where
 	// an instantiation in the files read binds a selected position to a POINTER, or a kept declaration forwards into
 	// it. An exported declaration takes the same predicate until stage 2 lands, so a declaration nothing in its own
 	// package instantiates with a pointer is never witnessed: other packages keep instantiating it as they do today.
@@ -603,7 +603,7 @@ func appendUniqueObject(list []types.Object, object types.Object) []types.Object
 
 // shapeWitnessNonNominal reports whether an instantiation binds a type argument stage 1 witnesses: a POINTER, the box
 // golib cannot make implement the constraint, and the one argument today's routes refuse for these shapes. A value of
-// any package, or an interface, keeps today's route (COORD's stage-1 ruling, 2026-11-19).
+// any package, or an interface, keeps today's route (stage-1 decision, 2026-11-19).
 func shapeWitnessNonNominal(arg types.Type) bool {
 	_, isPointer := types.Unalias(arg).(*types.Pointer)
 
@@ -673,7 +673,7 @@ func (v *Visitor) shapeWitnessInterfaceRef(iface *types.Named, self string) stri
 
 // shapeWitnessParamName is the witness type parameter for a declaration's type parameter: its name, the converter's
 // reserved Δ marker, and the constraint's name (`TΔScript`, `WΔwrap`), so the body's `TΔScript.Text(s)` reads back to
-// `s.Text()`. The marker keeps it apart from any name the Go source declares (P3's NIT): a plain `TScript` could be a
+// `s.Text()`. The marker keeps it apart from any name the Go source declares (review NIT): a plain `TScript` could be a
 // user's own type parameter or package-level type.
 func (v *Visitor) shapeWitnessParamName(tp *types.TypeParam) string {
 	iface, _ := types.Unalias(tp.Constraint()).(*types.Named)

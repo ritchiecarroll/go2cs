@@ -61,7 +61,7 @@ function Get-GoNuGetPackageIdentity([string]$Path) {
     [pscustomobject]@{ Id = "$($meta.id)".Trim(); Version = "$($meta.version)".Trim() }
 }
 
-# Is the package a -Cgo pack (src/tools/nugetgo/nugetgo-pack.ps1 -Cgo)? Two keys, either one enough (P3's INC 2b read,
+# Is the package a -Cgo pack (src/tools/nugetgo/nugetgo-pack.ps1 -Cgo)? Two keys, either one enough (INC 2b review, 38aae0ec3e,
 # NIT 4), so a change to one cannot let a -Cgo pack through:
 #   - its build/ or buildTransitive/<id>.targets carries the RID guard's error code, NUGETGOCGO001 (NugetgoCgo.psm1);
 #   - its lib/ holds a REFERENCE assembly while it carries runtimes/ assemblies: the -Cgo layout, where the go.* and
@@ -227,12 +227,12 @@ function Invoke-GoNuGetPush {
         [switch] $StopOnRateLimit
     )
 
-    # No -Cgo pack is pushed to any feed until the run-time RID check (A6, cgo-against-go.* INC 3) lands (COORD's ruling
+    # No -Cgo pack is pushed to any feed until the run-time RID check (A6, cgo-against-go.* INC 3) lands (the push decision
     # (a), condition 3). The whole set is refused before the first push, so a refusal never leaves a half-pushed release.
     # A -Cgo pack is pushed only when its self-description records that its go.lib floor carries the run-time target check
-    # (A6; COORD's push-lift ruling (a)): nugetgo-pack.ps1 -Cgo writes "# a6: " only over a go.lib that declares it.
+    # (A6; the push-lift decision (a), 77e91b3c0c): nugetgo-pack.ps1 -Cgo writes "# a6: " only over a go.lib that declares it.
     # A package packed against a LOCAL go.* closure (nugetgo-pack.ps1 -LocalClosure, a rehearsal from the tree; cgo against
-    # go.* INC 4, COORD's ruling (1)) records "# local-closure: " and is never pushed: its go.* dependencies are not a
+    # go.* INC 4, decision (1), 3a05dc2a9a) records "# local-closure: " and is never pushed: its go.* dependencies are not a
     # published release.
     $localPacks = @($Packages | Where-Object { Test-GoNuGetSelfDescriptionNote $_.FullName 'local-closure' } | ForEach-Object { $_.Name })
     if ($localPacks.Count) { throw "REFUSED: $($localPacks -join ', ') $(if ($localPacks.Count -eq 1) { 'was' } else { 'were' }) packed against a local go.* closure (its go2cs/source-metadata.txt records `"# local-closure: `"), a rehearsal never pushed; nothing was pushed" }

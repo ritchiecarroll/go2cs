@@ -10,7 +10,7 @@ using go.golib;
 
 namespace go;
 
-// cgo Phase 3, increment 3.2, seat 1a (docs/phase4/DESIGN-cgo-phase3-marshaling.md 18.9): the pointer field of a C
+// cgo Phase 3, increment 3.2, part 1a (docs/phase4/DESIGN-cgo-phase3-marshaling.md 18.9): the pointer field of a C
 // struct. A struct cmd/cgo declared for a C struct with a pointer field carries GoCgoStructAttribute, and go2cs-gen
 // reads and writes each such field through the members below in place of a ref property. In C memory the field is a
 // word at its Go offset, where the struct's CLR slot holds a managed reference.

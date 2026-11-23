@@ -341,7 +341,7 @@ internal interface IFirstFieldView
     internal ж<T>? NativeFieldBox() => NativeFieldAt(m_source, m_token);
 
     // A view whose source is NATIVE is one ж.of kept because its field had no known Go offset: its CLR slot is not where
-    // the field's bytes are. The `**C.T` door (GoCgoArgs.LoadPointer, StorePointer; cgo 3.2 seat 1c) refuses it with
+    // the field's bytes are. The `**C.T` door (GoCgoArgs.LoadPointer, StorePointer; cgo 3.2 part 1c) refuses it with
     // this, 1a's RequireGoFieldOffset text.
     internal PanicException NoKnownGoOffset() =>
         go.golib.RuntimeErrorPanic.NativeStructLayoutMismatch(PointeeTypeOf(m_source) ?? typeof(T), $"field {FieldNameOf(m_token)} has no known Go offset");
@@ -353,7 +353,7 @@ internal interface IFirstFieldView
     /// own route and nothing is viewed at a guess.
     /// </summary>
     /// <remarks>
-    /// The one door two callers share (P3, Change A): a field view's own <see cref="NativeFieldBox"/>, with its source
+    /// The one door two callers share (Change A, d17cd3c66e): a field view's own <see cref="NativeFieldBox"/>, with its source
     /// and token, and <c>ж&lt;T&gt;.of</c> on a <see cref="NativeBox{T}"/> root, with the root and the ORIGINAL accessor,
     /// before the view cache is consulted at all (ж.Views.cs). <paramref name="token"/> must be the accessor the field's
     /// name is read off (FieldNameOf), never a per-call wrapper. The derived box retains

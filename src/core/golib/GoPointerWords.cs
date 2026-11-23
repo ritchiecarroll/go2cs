@@ -39,7 +39,7 @@ namespace go.golib;
 /// reaches count 0.
 /// </para>
 /// <para>
-/// THE NAMED LEAK (BOARD, 2026-11-17, widened 2026-11-20): a published word whose referent reaches the box that pins the
+/// THE NAMED LEAK (found 2026-11-17, widened 2026-11-20; df230c8d43): a published word whose referent reaches the box that pins the
 /// destination's storage roots its own key, so the slot is retained until a word of the cycle is overwritten through a
 /// store or cleared. Instances: a self word (c3), a mutual pair (c4), and a referent that holds the destination's box (c1).
 /// </para>
@@ -184,7 +184,7 @@ public static class GoPointerWords
     /// W3's compare-and-swap. The current word matches when it is <paramref name="oldWord"/>, or when the slot's entry for
     /// it names <paramref name="oldReferent"/> (an object pinned again can show a second number; defence in depth). Over a
     /// TOKEN with an entry, a number match also needs the entry's referent to be <paramref name="oldReferent"/>, because
-    /// past the 2^29 id wrap two live boxes can share a token (P3's confirm of 18.7, item (ii)).
+    /// past the 2^29 id wrap two live boxes can share a token (design 18.7, item (ii), confirmed in review).
     /// </summary>
     public static bool CompareAndSwap<T>(ж<T> slot, nuint oldWord, object? oldReferent, nuint newWord, object? newReferent)
     {
@@ -417,7 +417,7 @@ public static class GoPointerWords
     /// The post-projection check (design 18.7 finding 1): whether <paramref name="word"/>, the number a store took through
     /// the pinning projection, names <paramref name="referent"/> as storage that stays put while the word is published:
     /// a native alias, the zerobase, an order token, or an address the referent's box (or the Go value it was derived
-    /// from) holds still. A pinned address that is also a TAG is refused by name (COORD ruling (B), 2026-11-20).
+    /// from) holds still. A pinned address that is also a TAG is refused by name (design decision (B), 2026-11-20).
     /// </summary>
     public static bool NamesHeldStorage(object referent, nuint word)
     {

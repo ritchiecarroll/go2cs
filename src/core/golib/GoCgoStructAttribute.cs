@@ -11,7 +11,7 @@ namespace go.golib;
 
 /// <summary>
 /// Marks a struct cmd/cgo declared for a C struct that has a pointer or <c>unsafe.Pointer</c> field (cgo Phase 3,
-/// increment 3.2, seat 1a: docs/phase4/DESIGN-cgo-phase3-marshaling.md 18.9).
+/// increment 3.2, part 1a: docs/phase4/DESIGN-cgo-phase3-marshaling.md 18.9).
 /// </summary>
 /// <remarks>
 /// <para>

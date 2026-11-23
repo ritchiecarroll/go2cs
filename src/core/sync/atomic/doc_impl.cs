@@ -56,7 +56,7 @@ partial class atomic_package
     // `new @unsafe.Pointer(n)` marks the zero address nil, so a nil pointer round-trips exactly.
     // The managed arm is unchanged.
 
-    // W3 (docs/phase4/DESIGN-cgo-phase3-marshaling.md 18.3-18.7, seat S-B1): over a native slot the word doors decide.
+    // W3 (docs/phase4/DESIGN-cgo-phase3-marshaling.md 18.3-18.7, cure S-B1): over a native slot the word doors decide.
     // A word of Go memory publishes the referent's PROJECTED number with an entry that keeps it (golib GoPointerWords);
     // a word of C memory is a number, and a Go pointer stored there is refused by name.
     public static partial @unsafe.Pointer /*old*/ SwapPointer(ж<@unsafe.Pointer> addr, @unsafe.Pointer @new)

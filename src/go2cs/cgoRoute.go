@@ -824,9 +824,9 @@ func cgoCalledFunction(node ast.Node, declarations map[types.Object]cgoDeclarati
 // nil when the package holds no cmd/cgo output (cmd/cgo did not run), so the caller's own refusal stands, and refuses,
 // exiting before anything is written, when any C use is outside Phase 2's set.
 func planCgoRoute(pkg *packages.Package, options Options, load cgoLoad) (*cgoRoute, error) {
-	// C++ sources need a C++ compiler (CXX) for ANOTHER target, which INC 2 does not take: R3, by name (P3's INC 2 shape
+	// C++ sources need a C++ compiler (CXX) for ANOTHER target, which INC 2 does not take: R3, by name (INC 2 shape
 	// read, SHOULD 5). go/packages lists them among a package's OtherFiles. At the host's own target they convert as they
-	// did before INC 2 (measured at 6bdf33a157; P3's 2a CLEAR, SHOULD 4), so the refusal reads the host first.
+	// did before INC 2 (measured at 6bdf33a157; INC 2a review, SHOULD 4), so the refusal reads the host first.
 	host, hostErr := cgoGoEnv(load, "GOHOSTOS", "GOHOSTARCH")
 	crossTarget := hostErr != nil || host[0]+"/"+host[1] != options.targetPlatform
 
@@ -1088,7 +1088,7 @@ func planCgoRoute(pkg *packages.Package, options Options, load cgoLoad) (*cgoRou
 	}
 
 	// The C compiler's target triple, which cgoHostTarget checked against the requested target, is recorded in the
-	// bindings' header beside its --version line (P3's INC 2 shape read, MUST 1).
+	// bindings' header beside its --version line (INC 2 shape read, MUST 1).
 	var triple string
 
 	if cgoCaptureOverride != nil {
@@ -1232,7 +1232,7 @@ func refuseCgoRoute(pkg *packages.Package, refusals []cgoUseRefusal) error {
 	}
 
 	// The caller hands this to refusePackage: fatal for a single package, and under -recurse the package is skipped and
-	// named while the rest of the module converts (recurseRefusal.go; COORD's ruling on C2's 193007Z).
+	// named while the rest of the module converts (recurseRefusal.go; 2b4e84400e).
 	return fmt.Errorf("package %s uses C in %d way(s) go2cs does not convert, each named above (docs/Limitations.md#cgo); nothing was written", pkg.PkgPath, len(refusals))
 }
 
@@ -1486,7 +1486,7 @@ func cgoGoEnv(load cgoLoad, keys ...string) ([]string, error) {
 }
 
 // cgoHostTarget refuses a -cgo conversion whose C compiler does not compile for the requested target (§11.20, S3; cgo
-// against go.* INC 2a, R3, as amended by P3's shape read, MUST 1). cmd/cgo lays out C types, and the library capture
+// against go.* INC 2a, R3, as amended by the shape read, MUST 1). cmd/cgo lays out C types, and the library capture
 // links its probe, with the C compiler `go env CC` reads in the load's environment, which also honours a `go env -w CC`.
 // A compiler that is merely SET proves nothing: the host's gcc named for a windows target sizes C.long at 8 bytes where
 // windows has 4, under windows' Register string, and nothing links at conversion time to notice. So the compiler is
@@ -1521,7 +1521,7 @@ func cgoHostTarget(load cgoLoad, target string) error {
 	// A C compiler that does not resolve at all is the case where cmd/cgo itself cannot run: R3 steps aside, and the
 	// no-compiler contract holds unchanged (a plain cgo-tag file converts; a raw cgo source is refused naming its file;
 	// "cmd/cgo did not run"). R3 guards against a compiler that TARGETS the wrong platform, so one that resolves and
-	// fails, or answers another triple, is still refused (COORD's ruling on the train 3 red: the i7, no gcc on PATH).
+	// fails, or answers another triple, is still refused (decided on a red gate run with no gcc on PATH; 78e369a4a9).
 	if errors.Is(err, exec.ErrNotFound) {
 		return nil
 	}
@@ -1536,7 +1536,7 @@ func cgoHostTarget(load cgoLoad, target string) error {
 		return fmt.Errorf("cgo: this -cgo conversion asks for %s, and the C compiler go env CC names in its load targets %q (-dumpmachine; the host is %s): name a C compiler for %s in CC (for example the pinned zig: CC=\"zig cc -target <triple>\")", target, triple, hostTarget, target)
 	}
 
-	// The ABI narrow v1 binds against: glibc on linux, the gnu or mingw C runtime on windows (P3's 2a CLEAR, SHOULD 1).
+	// The ABI narrow v1 binds against: glibc on linux, the gnu or mingw C runtime on windows (INC 2a review, SHOULD 1).
 	if abi == "musl" || abi == "android" || abi == "msvc" {
 		return fmt.Errorf("cgo: this -cgo conversion for %s has a C compiler for the %s ABI (-dumpmachine %q); go2cs's cgo support takes the gnu ABI on linux, and gnu or mingw on windows", target, abi, triple)
 	}
@@ -1550,7 +1550,7 @@ var (
 )
 
 // cgoCompilerTriple is what the load's C compiler (go env CC, split as cmd/go splits it) answers to -dumpmachine, asked
-// once per run for each CC value and target (P3's 2a CLEAR, SHOULD 3).
+// once per run for each CC value and target (INC 2a review, SHOULD 3).
 func cgoCompilerTriple(load cgoLoad, target string) (string, error) {
 	values, err := cgoGoEnv(load, "CC")
 

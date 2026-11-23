@@ -90,7 +90,7 @@ func resolveDisclosureManifestDir(outputPath, root, modulePath, moduleDir, claim
 		sort.Strings(present)
 
 		// With a CLAIMED version this is most likely a wrong claim, and a note would leave the run exactly where GAP 1
-		// found it: nothing applied, a host-fatal test not withdrawn (P3 093309Z, SHOULD 2). A RESOLVED version keeps
+		// found it: nothing applied, a host-fatal test not withdrawn (review SHOULD 2, 6c978b079b). A RESOLVED version keeps
 		// the ruled line (2026-10-05).
 		if claimed {
 			return outputPath, "", fmt.Errorf("-module-version %s: %s holds %s only under other versions (%s); the claim is "+
@@ -108,7 +108,7 @@ func resolveDisclosureManifestDir(outputPath, root, modulePath, moduleDir, claim
 // module source that is not one, such as a copy of the module. A copy carries no version of its own: the extracted
 // tree has no version file and its go.mod does not name it. The two must agree when both are present.
 //
-// A root that cannot be applied is REFUSED, not noted (COORD 20261120T091624Z, GAP 1). With a note, P5's sqlite run
+// A root that cannot be applied is REFUSED, not noted (GAP 1, 3edeaaffab). With a note, a sqlite run
 // from a copy applied nothing, the host-fatal disclosure never withdrew its test, and the host aborted.
 func moduleDisclosureVersion(root, modulePath, moduleDir, claimedVersion string) (string, string, error) {
 	escapedPath, err := module.EscapePath(modulePath)
@@ -151,8 +151,8 @@ func moduleDisclosureVersion(root, modulePath, moduleDir, claimedVersion string)
 // A variable so a test can point it at a cache of its own; goModCacheDir memoizes the real one.
 var claimedVersionCacheDir = goModCacheDir
 
-// moduleDisclosureFlagsError refuses -module-disclosures and -module-version where they cannot take effect (P3
-// 093309Z, SHOULD 3 and NIT 4), rather than accepting and ignoring them. Only a -tests -recurse run resolves the main
+// moduleDisclosureFlagsError refuses -module-disclosures and -module-version where they cannot take effect (review
+// SHOULD 3 and NIT 4), rather than accepting and ignoring them. Only a -tests -recurse run resolves the main
 // module (runModuleTests); the single-package -tests route never does, so a root given there was ignored silently.
 // -module-version names the version a root is read for, so it means nothing without one.
 func moduleDisclosureFlagsError(options Options) error {
@@ -171,8 +171,8 @@ func moduleDisclosureFlagsError(options Options) error {
 
 // moduleVersionClaimed is the version a run took from -module-version because the module directory is not a
 // module-cache directory: CLAIMED, not resolved. The comparison record carries it (testEnvironmentRecord.
-// ModuleVersionClaimed) and the proof page says so, so a row read under a claim cannot be banked unnoticed (P3
-// 093309Z, MUST 1a). "" when the version was resolved, including a cache directory -module-version agrees with.
+// ModuleVersionClaimed) and the proof page says so, so a row read under a claim cannot be banked unnoticed (review
+// MUST 1a). "" when the version was resolved, including a cache directory -module-version agrees with.
 func moduleVersionClaimed(options Options) string {
 	if options.testModuleVersion == "" || options.mainModulePath == "" {
 		return ""
@@ -187,7 +187,7 @@ func moduleVersionClaimed(options Options) string {
 	return options.testModuleVersion
 }
 
-// claimedGoModMismatch is the cheap contradiction check on a claimed version (P3 093309Z, MUST 1b): when the module
+// claimedGoModMismatch is the cheap contradiction check on a claimed version (review MUST 1b): when the module
 // cache holds that version's go.mod (cache/download/<escaped path>/@v/<escaped version>.mod) and the copy has a
 // go.mod, the two must be the same file, line endings aside. A trimmed copy rules out a whole-tree hash, so this is
 // the check that can be made; "" when they agree or either is absent.
@@ -290,7 +290,7 @@ func moduleCacheVersion(moduleDir, escapedPath string) string {
 
 // moduleVersionDirs lists the directories a -module-disclosures root keeps a module under, one per version:
 // <moduleBase>@<version>, sorted. Read with os.ReadDir and a name prefix rather than filepath.Glob, which read a root
-// path holding a glob metacharacter ([ or *) as a pattern and matched nothing (P3's NIT 6).
+// path holding a glob metacharacter ([ or *) as a pattern and matched nothing (review NIT 6).
 func moduleVersionDirs(moduleBase string) []string {
 	entries, err := os.ReadDir(filepath.Dir(moduleBase))
 

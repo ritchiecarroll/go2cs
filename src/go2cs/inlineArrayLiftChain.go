@@ -17,7 +17,7 @@ import (
 	"strings"
 )
 
-// AN IMPORTER FOLLOWS ITS IMPORT'S RESOLUTION (W18 ruling C, item 3, shape A; COORD 2026-11-17 19:34Z)
+// AN IMPORTER FOLLOWS ITS IMPORT'S RESOLUTION (W18 ruling C, item 3, shape A; a76c8bf2eb)
 //
 // An importer reuses the lift an import's code uses for an anonymous struct, so that a value of that Go type crosses
 // between the two by value. An import does not always DECLARE that lift: when it reuses one itself, its code names a
@@ -183,7 +183,7 @@ func liftCodeName(pkg *types.Package, name string) string {
 func (v *Visitor) loadImportLiftRecords(pkg *types.Package, meta importedPackageMeta) bool {
 	key := filepath.Clean(meta.Dir)
 
-	// One lock for the check and the mark, so two goroutines cannot both read the records (P3 review 2.4).
+	// One lock for the check and the mark, so two goroutines cannot both read the records (review 2.4).
 	packageLock.Lock()
 	_, loaded := importedDynamicTypeNames[key]
 	tried := liftRecordsRead[key]
@@ -209,7 +209,7 @@ func (v *Visitor) loadImportLiftRecords(pkg *types.Package, meta importedPackage
 	}
 
 	// The one reader that knows every source of a package's records: a NuGet-substituted package's self-description, the
-	// package_info.cs in the root, a published std package's embedded record (P3 review 2.1).
+	// package_info.cs in the root, a published std package's embedded record (review 2.1).
 	lines, ok := importPackageInfoLines(info, v.options)
 
 	if !ok {

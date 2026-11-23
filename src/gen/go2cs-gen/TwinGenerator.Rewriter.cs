@@ -168,7 +168,7 @@ public sealed partial class TwinGenerator
         // The [GoTwinOf] stamp of the function this twin is generated from, with the given await lines.
         public string Stamp() => m_method is IMethodSymbol origin ? StampFor(origin, m_sites, m_calls) : "";
 
-        // A trimmed build keeps the methods the stamp names while it keeps the twin (G's condition 2 on 7d): the runtime
+        // A trimmed build keeps the methods the stamp names while it keeps the twin (condition 2 on M:N item 7d): the runtime
         // reads the origin by reflection, and a trimmed-away origin would leave the frame without its Go name.
         public string KeepOrigin() => m_method is IMethodSymbol origin
             ? "[global::System.Diagnostics.CodeAnalysis.DynamicDependency(\"" + origin.Name + (origin.Arity > 0 ? "``" + origin.Arity : "") + "\", typeof(" + HostText(origin.ContainingType) + "))]"
@@ -303,7 +303,7 @@ public sealed partial class TwinGenerator
                     m_spilled.Add(node);
                     NoteSite(node);
 
-                    // A field or element callee is read once, ahead of the test (the func-value seat).
+                    // A field or element callee is read once, ahead of the test (the func-value fix).
                     if (read is not null)
                         m_spills.Add(ParseStatement(read));
 
@@ -362,7 +362,7 @@ public sealed partial class TwinGenerator
                 ? m_run.IfaceCall(site.IfaceTarget!, visited)
                 : visited.WithExpression(Rename(visited.Expression)).WithoutTrivia();
 
-            // The Gosched-park seat: runtime.Gosched's twin is golib's builtin.Goschedꞏtwin, not a member of runtime.
+            // The Gosched park: runtime.Gosched's twin is golib's builtin.Goschedꞏtwin, not a member of runtime.
             if (m_run.IsGoschedIntrinsic(site.Target))
                 call = call.WithExpression(ParseExpression("global::go.builtin.Goschedꞏtwin"));
 
@@ -467,7 +467,7 @@ public sealed partial class TwinGenerator
                 while (bare is ParenthesizedExpressionSyntax parenthesized)
                     bare = parenthesized.Expression;
 
-                // Row 7, the Go-order move (DATA-mn-row7-refblock.md, COORD's ruling): a PURE READ evaluated before the call
+                // Row 7, the Go-order move (DATA-mn-row7-refblock.md, design decision): a PURE READ evaluated before the call
                 // no longer pins it. Go orders only calls, method calls, receives and logical operators; a variable's read
                 // is unordered against a call, and gc reads after the calls (go1.26.11, MnGoOrder: a local, a parameter,
                 // a field of a value or through a pointer, a unary operand, a binary left operand and a numeric cast all
@@ -575,7 +575,7 @@ public sealed partial class TwinGenerator
                     // once, and the spec leaves that read and the call on the right unordered, as for a plain store.
                     case AssignmentExpressionSyntax assignment when child == assignment.Right &&
                                                                     (assignment.IsKind(SyntaxKind.SimpleAssignmentExpression) || WritesThroughRef(assignment.Left)):
-                        // C2 (COORD's approval, 2026-11-15): a store into a ref local, or through one or a ref-returning
+                        // C2 (approved 2026-11-15, 79437adb79): a store into a ref local, or through one or a ref-returning
                         // member (`err = …`, `(t.Trailer, err) = …`), would hold the target's reference over the await
                         // (CS9217 / CS8178). The awaited value moves ahead instead, the live ref locals are derived
                         // again (Rule S), and the store runs after: every store still lands in the box the Go variable
@@ -620,7 +620,7 @@ public sealed partial class TwinGenerator
         private bool ByRefReceiver(ExpressionSyntax receiver) =>
             m_model.GetTypeInfo(receiver).Type is { IsValueType: true } && WritesThroughRef(receiver);
 
-        // Row 7, the Go-order move's operand classes (COORD's ruling; each probed in src/tools/mnspike2/MnGoOrder against
+        // Row 7, the Go-order move's operand classes (design decision; each probed in src/tools/mnspike2/MnGoOrder against
         // gc): a read of a local, a parameter (a box parameter or receiver included), a ref local or a field; a member
         // chain of such reads, a field of a value or through a pointer or box (a nil one panics after the call, as in gc);
         // a numeric cast of a pure read; a unary operator on one. A call, an indexer, an element access, an object
@@ -914,7 +914,7 @@ public sealed partial class TwinGenerator
                 NoteSite(call);
                 string pairIf = "if (" + test + ") await " + twin + "; else " + plain + ";";
 
-                // A field or element callee is read once, into a temp the test and the call share (the func-value seat).
+                // A field or element callee is read once, into a temp the test and the call share (the func-value fix).
                 return ParseStatement(read is null ? pairIf : "{ " + read + " " + pairIf + " }").WithTriviaFrom(node);
             }
 
@@ -966,7 +966,7 @@ public sealed partial class TwinGenerator
         // parameter never reassigned (HOISTED), else at the call -- and the twin, typed by the Go signature's canonical
         // twin delegate, is awaited; anything else is called as before. Null where the shape is not covered: the call
         // stays plain, as today.
-        // The func-value seat: a FIELD or ELEMENT callee (t.run, fs[i], m[k]) is read once into a temp first (Read, a
+        // The func-value fix: a FIELD or ELEMENT callee (t.run, fs[i], m[k]) is read once into a temp first (Read, a
         // statement the caller places ahead of the test), so the test and the call see one value and an index expression
         // runs once, in its own order before the arguments, as C# evaluates a delegate call's target first.
         private (string Test, string Twin, string Plain, string? Read) BuildPairCall(InvocationExpressionSyntax node, (string TwinType, bool Void) shape)
@@ -1074,7 +1074,7 @@ public sealed partial class TwinGenerator
                     .WithModifiers(node.Modifiers.Add(Token(SyntaxKind.AsyncKeyword).WithTrailingTrivia(Space))), literalSites, literalCalls)
                 .WithLeadingTrivia(ParseLeadingTrivia(directive));
 
-            // C3 (COORD's approval, 2026-11-15): a literal with an EXPLICIT return type (`(uint32, error) () => {…}`)
+            // C3 (approved 2026-11-15, 79437adb79): a literal with an EXPLICIT return type (`(uint32, error) () => {…}`)
             // keeps it on the plain half; the twin half returns the task of it, as its twin delegate does (CS8934).
             if (twin is ParenthesizedLambdaExpressionSyntax { ReturnType: { } declared } typed)
             {
@@ -1139,9 +1139,9 @@ public sealed partial class TwinGenerator
         public override SyntaxNode? VisitMemberAccessExpression(MemberAccessExpressionSyntax node) =>
             PairImplicitGroup(node) ?? base.VisitMemberAccessExpression(node);
 
-        // The func-value seat: a method group the converter hands to a delegate-typed slot WITHOUT `new D(F)` (a struct
+        // The func-value fix: a method group the converter hands to a delegate-typed slot WITHOUT `new D(F)` (a struct
         // literal's field, `new("receive", rowReceive)`; a slice literal's element, `[rowReceive, rowWait]`; an argument)
-        // is the same func value as fix 5's `new D(F)`, so it becomes the same pair. Without it, P5's table-driven main
+        // is the same func value as fix 5's `new D(F)`, so it becomes the same pair. Without it, a table-driven main (MnTableMain)
         // was twinned by the caller rule and still held its carrier: the stored delegates were plain, so the pair test
         // found none and called them plain (MnTableMain: steps=1 parks=0 thread-blocks=2).
         private ExpressionSyntax? PairImplicitGroup(ExpressionSyntax node)
@@ -1185,7 +1185,7 @@ public sealed partial class TwinGenerator
         }
 
         // The pair of static function `method` (named by `argument`) and its twin, as a `type` delegate bound to the pair's
-        // Invoke, in place of `replaced`: fix 5's `new D(F)` and the seat's implicit group alike.
+        // Invoke, in place of `replaced`: fix 5's `new D(F)` and the fix's implicit group alike.
         private ExpressionSyntax StaticPair(ExpressionSyntax argument, SyntaxNode replaced, IMethodSymbol method, INamedTypeSymbol type, string twinType)
         {
             ExpressionSyntax node = (ExpressionSyntax)replaced;

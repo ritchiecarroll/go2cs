@@ -102,7 +102,7 @@ func (m *ModuleConverter) ConvertModule(moduleDir string) (result error) {
 
 	// 0a. EVERY module-cache release converts from a COPY, so no go command runs with a cache directory as its main
 	//     module: the dependency preflight's `go mod download` rewrote a go.mod with no go line in the cache, and wrote a
-	//     go.sum there (COORD's ruling on the 2026-11-22 STOP-LINE; enterModuleCacheReleaseCopy). A release that ships no
+	//     go.sum there (decided 2026-11-22 at a stop line; enterModuleCacheReleaseCopy). A release that ships no
 	//     go.mod (github.com/mattn/go-pointer v0.0.1, the cgo against go.* INC 4 proof; a `+incompatible` release with
 	//     no requires: the synthesized go.mod names the module and nothing else) carries the go.mod the cache synthesized for it,
 	//     the one go itself reads (cache/download/<escaped path>/@v/<version>.mod; read, never written). Not a go.mod
@@ -112,8 +112,8 @@ func (m *ModuleConverter) ConvertModule(moduleDir string) (result error) {
 	//     work directory removed at exit, never in the output root nugetgo-pack reads. A directory inside a module (a
 	//     package below its go.mod) converts as it always did: go finds the go.mod above it. Only a directory that NO
 	//     go.mod covers -- none in it or above it, and no synthesized one in the cache -- is refused, by name here rather
-	//     than by the preflight's "no modules specified" (COORD's INC 4 review, fold 1). All on the ABSOLUTE directory,
-	//     which moduleCacheGoMod relates to GOMODCACHE (P3's read of INC 4, MUST 1).
+	//     than by the preflight's "no modules specified" (INC 4 review, fold 1). All on the ABSOLUTE directory,
+	//     which moduleCacheGoMod relates to GOMODCACHE (review of INC 4, MUST 1).
 	if _, ok := goModFile(moduleRootDir(m.options.mainModuleDir)); !ok {
 		return fmt.Errorf("-recurse needs a module: no go.mod covers %s (none in it or above it), and it is not a module-cache release whose synthesized go.mod the cache holds (%s/cache/download)",
 			m.options.mainModuleDir, goModCacheDir())
@@ -128,7 +128,7 @@ func (m *ModuleConverter) ConvertModule(moduleDir string) (result error) {
 
 		defer leave()
 
-		// An error returned from here on names the release, not the copy, which is gone when the user reads it (COORD's
+		// An error returned from here on names the release, not the copy, which is gone when the user reads it (the
 		// INC 4 review, NIT). It runs before leave clears the roots, and keeps the error's chain (errors.As).
 		defer func() { result = remapCopiedError(result) }()
 

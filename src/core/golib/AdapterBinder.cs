@@ -468,7 +468,7 @@ namespace go;
     // One exception is never a miss: A6's refusal of C bindings converted for another target (GoCgoTargetMismatchException,
     // a PlatformNotSupportedException), anywhere in the chain. A type assertion that is a cgo assembly's first touch runs
     // its module initializer, which throws it wrapped in a TypeInitializationException; reading that as "does not implement"
-    // would let a wrong-target program print the default form and carry on (P3's read of cgo INC 3, MUST 1). The filter
+    // would let a wrong-target program print the default form and carry on (review of cgo INC 3, MUST 1; 77e91b3c0c). The filter
     // returning false rethrows it as it is.
     // A6's refusal anywhere in the chain: an InnerException, or any of an AggregateException's InnerExceptions.
     private static bool CarriesCgoTargetMismatch(Exception? ex)

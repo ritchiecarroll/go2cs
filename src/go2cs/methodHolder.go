@@ -57,10 +57,10 @@ var packageMethodHolders map[string]string
 // GlyphMethodSuffix ends the name of a Go method's BODY in its package class: U+2054 INVERTED UNDERTIE, connector
 // punctuation, which a C# identifier admits and a Go identifier cannot spell (Go's letter is a Unicode L* code
 // point or `_`). A method takes the suffix form exactly when it has a method holder (methodHolderClass): every
-// method of a library package, and in package main only a method on P1's clash list. Its body is then a plain
+// method of a library package, and in package main only a method on the clash list (methodsMayStayInPackageClass). Its body is then a plain
 // static `<Name>⁔(/*this*/ recv, …)` beside its type, and the Go-named extension method its holder declares is a
 // one-line forwarder the converter writes into package_info.cs (MethodForwarderSection). Owner ruling 2026-11-21
-// (COORD 20261121T151802Z): the body reads where Go wrote it, the forwarder keeps every caller and every
+// (187c6f88d0): the body reads where Go wrote it, the forwarder keeps every caller and every
 // go2cs-gen reader of the holder's extension methods unchanged, and the runtime names a frame by stripping the
 // suffix (runtime managed_impl.cs, golib GoSyntheticPC).
 const GlyphMethodSuffix = "\u2054"

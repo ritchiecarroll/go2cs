@@ -1362,7 +1362,7 @@ public static uintptr Pointer(this Value v) {
 // had no storage to resolve. Through Addr the answer is the aliased box's token, REGISTERED by
 // reflectPointerToken, so NewAt resolves it, and token + a Go field offset, back to real storage.
 //
-// It stays the ORDER TOKEN where Pointer now answers the box's own number (COORD's %p ruling, 2026-11-22, option A):
+// It stays the ORDER TOKEN where Pointer now answers the box's own number (the %p decision, 2026-11-22, option A; 1721a77ac4):
 // NewAt resolves EXACT ONLY through the token table (ruled 2026-10-04), so a pinned address plus a field offset would
 // miss it and fall to a zero box, which is go-cmp's unexported-field read. The cost is the disclosed residual: for
 // reference-free storage, UnsafeAddr differs from uintptr(unsafe.Pointer(&field)).
