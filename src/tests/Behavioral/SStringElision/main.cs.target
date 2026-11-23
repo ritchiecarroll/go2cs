@@ -50,7 +50,7 @@ internal static void main() {
 
     fmt.Println("twoConv:", matchTwoConversions(slice<byte>("abc"u8), slice<byte>("abc"u8)));
 
-    fmt.Println("callOperand:", staysHeapCallOperand(slice<byte>("y"u8), () => "y"));
+    fmt.Println("callOperand:", staysHeapCallOperand(slice<byte>("y"u8), [GoFunc("main.func1")] () => "y"));
 
     fmt.Println("switchTag:", switchTag(slice<byte>("put"u8)));
 
@@ -68,7 +68,7 @@ internal static void main() {
 
     fmt.Println("concatTwo:", concatTwo(slice<byte>("x"u8), slice<byte>("y"u8)));
 
-    fmt.Println("concatCall:", concatCall(slice<byte>("q"u8), () => "z"));
+    fmt.Println("concatCall:", concatCall(slice<byte>("q"u8), [GoFunc("main.func2")] () => "z"));
 
     fmt.Println("concatObj:", concatObj(slice<byte>("x"u8)));
 }

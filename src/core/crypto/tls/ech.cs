@@ -11,7 +11,6 @@ using strings = strings_package;
 using cryptobyte = vendor.golang.org.x.crypto.cryptobyte_package;
 using go.crypto;
 using vendor.golang.org.x.crypto;
-using static tls_package;
 
 partial class tls_package {
 
@@ -44,20 +43,16 @@ partial struct echConfigErr {
     internal @string field;
 }
 
-} partial class tlsᴛechConfigErr {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string tlsMalformedECHConfigˢ => ref tlsMalformedECHConfigˢᵇ;
 private static readonly @string tlsMalformedECHConfigˢᵇ = "tls: malformed ECHConfig"u8;
 
-internal static @string Error(this ref echConfigErr e) {
+internal static @string Error⁔(/*this*/ ref echConfigErr e) {
     if (e.field == ""u8) {
         return tlsMalformedECHConfigˢ;
     }
     return fmt.Sprintf("tls: malformed ECHConfig, invalid %s field"u8, e.field);
 }
-
-} partial class tls_package {
 
 internal static (bool skip, echConfig ec, error err) parseECHConfig(slice<byte> enc) {
     ref var ec = ref heap(new echConfig(), out var Ꮡec);
@@ -126,10 +121,6 @@ internal static (bool skip, echConfig ec, error err) parseECHConfig(slice<byte> 
 
     return (false, ec, default);
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string tlsMalformedECHConfigˢ => ref tlsMalformedECHConfigˢᵇ;
-private static readonly @string tlsMalformedECHConfigˢᵇ = "tls: malformed ECHConfig"u8;
 
 // parseECHConfigList parses a draft-ietf-tls-esni-18 ECHConfigList, returning a
 // slice of parsed ECHConfigs, in the same order they were parsed, or an error
@@ -334,19 +325,19 @@ internal static (ж<clientHelloMsg>, error) decodeInnerClientHello(ж<clientHell
     var recon = cryptobyte.NewBuilder(default);
     recon.AddUint8(typeClientHello);
     var rawOuterExtsʗ1 = rawOuterExts;
-    recon.AddUint24LengthPrefixed((ж<cryptobyte.Builder> reconΔ1) => {
+    recon.AddUint24LengthPrefixed([GoFunc("decodeInnerClientHello.func1")] (ж<cryptobyte.Builder> reconΔ1) => {
         reconΔ1.AddBytes(ᏑversionAndRandom.ValueSlot);
-        reconΔ1.AddUint8LengthPrefixed((ж<cryptobyte.Builder> reconΔ2) => {
+        reconΔ1.AddUint8LengthPrefixed([GoFunc("decodeInnerClientHello.func1.1")] (ж<cryptobyte.Builder> reconΔ2) => {
             reconΔ2.AddBytes(outer.Value.sessionId);
         });
-        reconΔ1.AddUint16LengthPrefixed((ж<cryptobyte.Builder> reconΔ3) => {
+        reconΔ1.AddUint16LengthPrefixed([GoFunc("decodeInnerClientHello.func1.2")] (ж<cryptobyte.Builder> reconΔ3) => {
             reconΔ3.AddBytes(ᏑcipherSuites.ValueSlot);
         });
-        reconΔ1.AddUint8LengthPrefixed((ж<cryptobyte.Builder> reconΔ4) => {
+        reconΔ1.AddUint8LengthPrefixed([GoFunc("decodeInnerClientHello.func1.3")] (ж<cryptobyte.Builder> reconΔ4) => {
             reconΔ4.AddBytes(ᏑcompressionMethods.ValueSlot);
         });
         var rawOuterExtsʗ2 = rawOuterExtsʗ1;
-        reconΔ1.AddUint16LengthPrefixed((ж<cryptobyte.Builder> reconΔ5) => {
+        reconΔ1.AddUint16LengthPrefixed([GoFunc("decodeInnerClientHello.func1.4")] (ж<cryptobyte.Builder> reconΔ5) => {
             bool outerExtensionsSeen = default;
             while (!Ꮡextensions.ValueSlot.Empty()) {
                 ref var extension = ref heap(new uint16(), out var Ꮡextension);
@@ -392,14 +383,14 @@ internal static (ж<clientHelloMsg>, error) decodeInnerClientHello(ж<clientHell
                         }
                         reconΔ5.AddUint16(rawOuterExtsʗ2[i].extType);
                         var rawOuterExtsʗ3 = rawOuterExtsʗ2;
-                        reconΔ5.AddUint16LengthPrefixed((ж<cryptobyte.Builder> reconΔ6) => {
+                        reconΔ5.AddUint16LengthPrefixed([GoFunc("decodeInnerClientHello.func1.4.1")] (ж<cryptobyte.Builder> reconΔ6) => {
                             reconΔ6.AddBytes(rawOuterExtsʗ3[i].data);
                         });
                         i++;
                     }
                 } else {
                     reconΔ5.AddUint16(extension);
-                    reconΔ5.AddUint16LengthPrefixed((ж<cryptobyte.Builder> reconΔ7) => {
+                    reconΔ5.AddUint16LengthPrefixed([GoFunc("decodeInnerClientHello.func1.4.2")] (ж<cryptobyte.Builder> reconΔ7) => {
                         reconΔ7.AddBytes(ᏑextData.ValueSlot);
                     });
                 }
@@ -461,11 +452,11 @@ internal static (slice<byte>, error) generateOuterECHExt(uint8 id, uint16 kdfID,
     b.AddUint16(aeadID);
     b.AddUint8(id);
     var encodedKeyʗ1 = encodedKey;
-    Ꮡb.AddUint16LengthPrefixed((ж<cryptobyte.Builder> bΔ1) => {
+    Ꮡb.AddUint16LengthPrefixed([GoFunc("generateOuterECHExt.func1")] (ж<cryptobyte.Builder> bΔ1) => {
         bΔ1.AddBytes(encodedKeyʗ1);
     });
     var payloadʗ1 = payload;
-    Ꮡb.AddUint16LengthPrefixed((ж<cryptobyte.Builder> bΔ2) => {
+    Ꮡb.AddUint16LengthPrefixed([GoFunc("generateOuterECHExt.func2")] (ж<cryptobyte.Builder> bΔ2) => {
         bΔ2.AddBytes(payloadʗ1);
     });
     return b.Bytes();
@@ -545,17 +536,13 @@ partial struct ECHRejectionError {
     public slice<byte> RetryConfigList;
 }
 
-} partial class tlsᴛECHRejectionError {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string tlsServerRejectedEchˢ => ref tlsServerRejectedEchˢᵇ;
 private static readonly @string tlsServerRejectedEchˢᵇ = "tls: server rejected ECH"u8;
 
-public static @string Error(this ref ECHRejectionError e) {
+internal static @string Error⁔(/*this*/ ref ECHRejectionError e) {
     return tlsServerRejectedEchˢ;
 }
-
-} partial class tls_package {
 
 internal static error errMalformedECHExt = errors.New("tls: malformed encrypted_client_hello extension");
 internal static error errInvalidECHExt = errors.New("tls: client sent invalid encrypted_client_hello extension");
@@ -619,9 +606,7 @@ internal static (echExtType echType, echCipher cs, uint8 configID, slice<byte> e
     return (echType, cs, configID, bytes.Clone(encap), bytes.Clone(payload), default);
 }
 
-} partial class tlsᴛConn {
-
-internal static (ж<clientHelloMsg>, ж<echServerContext>, error) processECHClientHello(this ж<Conn> Ꮡc, ж<clientHelloMsg> Ꮡouter, slice<EncryptedClientHelloKey> echKeys) {
+internal static (ж<clientHelloMsg>, ж<echServerContext>, error) processECHClientHello⁔(/*this*/ ж<Conn> Ꮡc, ж<clientHelloMsg> Ꮡouter, slice<EncryptedClientHelloKey> echKeys) {
     ref var c = ref Ꮡc.DerefOrNull();
     ref var outer = ref Ꮡouter.DerefOrNull();
 
@@ -712,13 +697,11 @@ internal static (ж<clientHelloMsg>, ж<echServerContext>, error) processECHClie
     return (Ꮡouter, default, default);
 }
 
-} partial class tls_package {
-
 internal static (slice<byte>, error) buildRetryConfigList(slice<EncryptedClientHelloKey> keys) {
     bool atLeastOneRetryConfig = default;
     ref var retryBuilder = ref heap(new cryptobyte.Builder(), out var ᏑretryBuilder);
     var keysʗ1 = keys;
-    ᏑretryBuilder.AddUint16LengthPrefixed((ж<cryptobyte.Builder> b) => {
+    ᏑretryBuilder.AddUint16LengthPrefixed([GoFunc("buildRetryConfigList.func1")] (ж<cryptobyte.Builder> b) => {
         foreach (var (_, c) in range(keysʗ1)) {
             if (!c.SendAsRetry) {
                 continue;

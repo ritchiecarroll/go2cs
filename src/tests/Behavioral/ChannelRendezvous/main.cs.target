@@ -35,7 +35,7 @@ internal static partial void main() {
     var reply = new channel<nint>(0);
     var chʗ1 = ch;
     var replyʗ1 = reply;
-    goǃ(() => {
+    goǃ([GoFunc("main.func1")] () => {
         nint v = ᐸꟷ(chʗ1);
         replyʗ1.ᐸꟷ(v * 2);
     });
@@ -47,7 +47,7 @@ internal static partial void main() {
     var pong = new channel<nint>(0);
     var pingʗ1 = ping;
     var pongʗ1 = pong;
-    goǃ(() => {
+    goǃ([GoFunc("main.func2")] () => {
         for (nint i = 0; i < 3; i++) {
             nint v = ᐸꟷ(pingʗ1);
             pongʗ1.ᐸꟷ(v + 1);

@@ -25,7 +25,7 @@ partial class os_package {
 // openRootNolog is OpenRoot.
 internal static (ж<Root>, error) openRootNolog(@string name) {
     nint fd = default;
-    var err = ignoringEINTR(() => {
+    var err = ignoringEINTR([GoFunc("openRootNolog.func1")] () => {
         error errΔ1 = default;
         (fd, _, errΔ1) = open(name, syscall.O_CLOEXEC, 0);
         return errΔ1;
@@ -44,7 +44,7 @@ private static readonly @string notADirectoryˢᵇ = "not a directory"u8;
 // If fd is not a directory, it closes it and returns an error.
 internal static (ж<Root>, error) newRoot(nint fd, @string name) {
     ref var fs = ref heap(new fileStat(), out var Ꮡfs);
-    var err = ignoringEINTR(() => syscall.Fstat(fd, Ꮡfs.Ꮡsys));
+    var err = ignoringEINTR([GoFunc("newRoot.func1")] () => syscall.Fstat(fd, Ꮡfs.Ꮡsys));
     fillFileStatFromSys(Ꮡfs, name);
     if (err == nil && !fs.IsDir()) {
         syscall.Close(fd);
@@ -62,7 +62,7 @@ internal static (ж<Root>, error) newRoot(nint fd, @string name) {
         name: name
     ))
     ));
-    runtime.SetFinalizer(r.root.OrTypedNil(), ((Func<ж<root>, error>)(osᴛroot.Close)));
+    runtime.SetFinalizer(r.root.OrTypedNil(), ((Func<ж<root>, error>)(os_package.Close⁔)));
     return (r, default);
 }
 
@@ -70,10 +70,10 @@ internal static (ж<Root>, error) newRoot(nint fd, @string name) {
 internal static (ж<Root>, error) openRootInRoot(ж<Root> Ꮡr, @string name) {
     ref var r = ref Ꮡr.DerefOrNull();
 
-    var (fd, err) = doInRoot(ref (Ꮡr).DerefOrNull(), name, 0, default, (nint fd, error err) (nint parent, @string nameΔ1, bool endsInSlash) => {
+    var (fd, err) = doInRoot(ref (Ꮡr).DerefOrNull(), name, 0, default, [GoFunc("openRootInRoot.func1")] (nint fd, error err) (nint parent, @string nameΔ1, bool endsInSlash) => {
         nint fdΔ1 = default;
         error errΔ1 = default;
-        ignoringEINTR(() => {
+        ignoringEINTR([GoFunc("openRootInRoot.func1.1")] () => {
             (fdΔ1, errΔ1) = unix.Openat(parent, nameΔ1, (nint)((nint)syscall.O_NOFOLLOW | (nint)syscall.O_CLOEXEC), 0);
             if (isNoFollowErr(errΔ1)) {
                 errΔ1 = checkSymlink(parent, nameΔ1, errΔ1);
@@ -92,10 +92,10 @@ internal static (ж<Root>, error) openRootInRoot(ж<Root> Ꮡr, @string name) {
 internal static (ж<File>, error) rootOpenFileNolog(ж<Root> Ꮡroot, @string name, nint flag, FileMode perm) {
     ref var root = ref Ꮡroot.DerefOrNull();
 
-    var (fd, err) = doInRoot(ref (Ꮡroot).DerefOrNull(), name, 0, default, (nint fd, error err) (nint parent, @string nameΔ1, bool endsInSlash) => {
+    var (fd, err) = doInRoot(ref (Ꮡroot).DerefOrNull(), name, 0, default, [GoFunc("rootOpenFileNolog.func1")] (nint fd, error err) (nint parent, @string nameΔ1, bool endsInSlash) => {
         nint fdΔ1 = default;
         error errΔ1 = default;
-        ignoringEINTR(() => {
+        ignoringEINTR([GoFunc("rootOpenFileNolog.func1.1")] () => {
             nint openFlag = (nint)((nint)(nint)((nint)syscall.O_NOFOLLOW | (nint)syscall.O_CLOEXEC) | flag);
             (fdΔ1, errΔ1) = unix.Openat(parent, nameΔ1, openFlag, (uint32)perm);
             if (errΔ1 != nil) {
@@ -126,7 +126,7 @@ internal static (ж<File>, error) rootOpenFileNolog(ж<Root> Ꮡroot, @string na
 internal static (nint, error) rootOpenDir(nint parent, @string name) {
     nint fd = default;
     ref var err = ref heap<error>(out var Ꮡerr);
-    ignoringEINTR(() => {
+    ignoringEINTR([GoFunc("rootOpenDir.func1")] () => {
         (fd, Ꮡerr.ValueSlot) = unix.Openat(parent, name, (nint)((nint)(UntypedInt)(syscall.O_NOFOLLOW | syscall.O_CLOEXEC) | (nint)syscall.O_DIRECTORY), 0);
         if (isNoFollowErr(Ꮡerr.ValueSlot) || AreEqual(Ꮡerr.ValueSlot, syscall.ENOTDIR)) {
             Ꮡerr.ValueSlot = checkSymlink(parent, name, Ꮡerr.ValueSlot);
@@ -142,7 +142,7 @@ internal static (nint, error) rootOpenDir(nint parent, @string name) {
 }
 
 internal static (FileInfo, error) rootStat(ref Root r, @string name, bool lstat) {
-    var (fi, err) = doInRoot(ref r, name, 0, default, (FileInfo, error) (sysfdType parent, @string n, bool endsInSlash) => {
+    var (fi, err) = doInRoot(ref r, name, 0, default, [GoFunc("rootStat.func1")] (FileInfo, error) (sysfdType parent, @string n, bool endsInSlash) => {
         var (fiΔ1, errΔ1) = lstatatWithName(parent, name, n);
         if (errΔ1 != nil) {
             return (default, errΔ1);
@@ -159,7 +159,7 @@ internal static (FileInfo, error) rootStat(ref Root r, @string name, bool lstat)
 }
 
 internal static error rootSymlink(ref Root r, @string oldname, @string newname) {
-    var (_, err) = doInRoot(ref r, newname, 0, default, (EmptyStruct, error) (sysfdType parent, @string name, bool endsInSlash) => (new EmptyStruct(), symlinkat(oldname, parent, name)));
+    var (_, err) = doInRoot(ref r, newname, 0, default, [GoFunc("rootSymlink.func1")] (EmptyStruct, error) (sysfdType parent, @string name, bool endsInSlash) => (new EmptyStruct(), symlinkat(oldname, parent, name)));
     if (err != nil) {
         return new LinkErrorжerror(Ꮡ(new LinkError("symlinkat", oldname, newname, err)));
     }
@@ -185,24 +185,24 @@ internal static error afterResolvingSymlink(nint parent, @string name, Func<erro
 }
 
 internal static error chmodat(nint parent, @string name, FileMode mode) {
-    return afterResolvingSymlink(parent, name, () => ignoringEINTR(() => unix.Fchmodat(parent, name, syscallMode(mode), unix.AT_SYMLINK_NOFOLLOW)));
+    return afterResolvingSymlink(parent, name, [GoFunc("chmodat.func1")] () => ignoringEINTR([GoFunc("chmodat.func1.1")] () => unix.Fchmodat(parent, name, syscallMode(mode), unix.AT_SYMLINK_NOFOLLOW)));
 }
 
 internal static error chownat(nint parent, @string name, nint uid, nint gid) {
-    return afterResolvingSymlink(parent, name, () => ignoringEINTR(() => unix.Fchownat(parent, name, uid, gid, unix.AT_SYMLINK_NOFOLLOW)));
+    return afterResolvingSymlink(parent, name, [GoFunc("chownat.func1")] () => ignoringEINTR([GoFunc("chownat.func1.1")] () => unix.Fchownat(parent, name, uid, gid, unix.AT_SYMLINK_NOFOLLOW)));
 }
 
 internal static error lchownat(nint parent, @string name, nint uid, nint gid) {
-    return ignoringEINTR(() => unix.Fchownat(parent, name, uid, gid, unix.AT_SYMLINK_NOFOLLOW));
+    return ignoringEINTR([GoFunc("lchownat.func1")] () => unix.Fchownat(parent, name, uid, gid, unix.AT_SYMLINK_NOFOLLOW));
 }
 
 internal static error chtimesat(nint parent, @string name, time.Time atime, time.Time mtime) {
     var atimeʗ1 = atime;
     var mtimeʗ1 = mtime;
-    return afterResolvingSymlink(parent, name, () => {
+    return afterResolvingSymlink(parent, name, [GoFunc("chtimesat.func1")] () => {
         var atimeʗ2 = atimeʗ1;
         var mtimeʗ2 = mtimeʗ1;
-        return ignoringEINTR(() => {
+        return ignoringEINTR([GoFunc("chtimesat.func1.1")] () => {
             ref var utimes = ref heap<array<syscall.Timespec>>(chtimesUtimes(atimeʗ2, mtimeʗ2), out var Ꮡutimes);
             return unix.Utimensat(parent, name, Ꮡutimes, unix.AT_SYMLINK_NOFOLLOW);
         });
@@ -210,17 +210,17 @@ internal static error chtimesat(nint parent, @string name, time.Time atime, time
 }
 
 internal static error mkdirat(nint fd, @string name, FileMode perm) {
-    return ignoringEINTR(() => unix.Mkdirat(fd, name, syscallMode(perm)));
+    return ignoringEINTR([GoFunc("mkdirat.func1")] () => unix.Mkdirat(fd, name, syscallMode(perm)));
 }
 
 internal static error removeat(nint fd, @string name) {
     // The system call interface forces us to know whether
     // we are removing a file or directory. Try both.
-    var e = ignoringEINTR(() => unix.Unlinkat(fd, name, 0));
+    var e = ignoringEINTR([GoFunc("removeat.func1")] () => unix.Unlinkat(fd, name, 0));
     if (e == nil) {
         return default;
     }
-    var e1 = ignoringEINTR(() => unix.Unlinkat(fd, name, unix.AT_REMOVEDIR));
+    var e1 = ignoringEINTR([GoFunc("removeat.func2")] () => unix.Unlinkat(fd, name, unix.AT_REMOVEDIR));
     if (e1 == nil) {
         return default;
     }
@@ -232,11 +232,11 @@ internal static error removeat(nint fd, @string name) {
 }
 
 internal static error removefileat(nint fd, @string name) {
-    return ignoringEINTR(() => unix.Unlinkat(fd, name, 0));
+    return ignoringEINTR([GoFunc("removefileat.func1")] () => unix.Unlinkat(fd, name, 0));
 }
 
 internal static error removedirat(nint fd, @string name) {
-    return ignoringEINTR(() => unix.Unlinkat(fd, name, unix.AT_REMOVEDIR));
+    return ignoringEINTR([GoFunc("removedirat.func1")] () => unix.Unlinkat(fd, name, unix.AT_REMOVEDIR));
 }
 
 internal static error renameat(nint oldfd, @string oldname, nint newfd, @string newname) {
@@ -282,7 +282,7 @@ internal static (@string, error) readlinkat(nint fd, @string name) {
         nint n = default;
         ref var e = ref heap<error>(out var Ꮡe);
         var bʗ1 = b;
-        ignoringEINTR(() => {
+        ignoringEINTR([GoFunc("readlinkat.func1")] () => {
             (n, Ꮡe.ValueSlot) = unix.Readlinkat(fd, name, bʗ1);
             return Ꮡe.ValueSlot;
         });

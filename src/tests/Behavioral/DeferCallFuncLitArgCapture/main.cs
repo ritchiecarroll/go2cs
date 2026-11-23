@@ -16,7 +16,7 @@ partial struct compiler {
 }
 
 internal static Action lazy(this ref compiler c, Func<nint> f) {
-    return () => {
+    return [GoFunc("(*compiler).lazy.func1")] () => {
         fmt.Println("lazy:", f());
     };
 }
@@ -37,11 +37,11 @@ internal static void define(this ж<compiler> Ꮡc, bool Δbuiltin, ж<scope> ou
         } else {
             s = c.scopes[len(c.scopes) - 1];
         }
-        defer(Ꮡc.Value.lazy(() => Ꮡc.Value.count), ref ᒐ);
+        defer(Ꮡc.Value.lazy([GoFunc("(*compiler).define.func1")] () => Ꮡc.Value.count), ref ᒐ);
         fmt.Println("defining in scope", s.id);
         s = c.newScope();
         var sʗ1 = s;
-        defer(Ꮡc.Value.lazy(() => sʗ1.id * 10), ref ᒐ);
+        defer(Ꮡc.Value.lazy([GoFunc("(*compiler).define.func2")] () => sʗ1.id * 10), ref ᒐ);
         s.names = append(s.names, (@string)"x");
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -49,7 +49,7 @@ internal static void define(this ж<compiler> Ꮡc, bool Δbuiltin, ж<scope> ou
 }
 
 internal static Action later(Func<@string> f) {
-    return () => {
+    return [GoFunc("later.func1")] () => {
         fmt.Println("later:", f());
     };
 }
@@ -64,7 +64,7 @@ internal static void twoCaptures() {
         @string label = "total";
         ref var point = ref heap<twoCaptures_point>(new twoCaptures_point(3, 4), out var Ꮡpoint);
         var pointʗ1 = point;
-        defer(later(() => fmt.Sprint(label, "=", pointʗ1.x + pointʗ1.y)), ref ᒐ);
+        defer(later([GoFunc("twoCaptures.func1")] () => fmt.Sprint(label, "=", pointʗ1.x + pointʗ1.y)), ref ᒐ);
         fmt.Println("two captures");
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -72,7 +72,7 @@ internal static void twoCaptures() {
 }
 
 internal static Action spawn(Func<@string> f, ж<Δsync.WaitGroup> wg) {
-    return () => {
+    return [GoFunc("spawn.func1")] () => {
         GoFrame ᒐ = default;
         try {
             defer(wg.Done, ref ᒐ);
@@ -88,7 +88,7 @@ internal static partial void goCapture(nint n) {
     Ꮡwg.Add(1);
     var labels = slice<@string>(["n", fmt.Sprint(n)]);
     var labelsʗ1 = labels;
-    goǃ(spawn(() => labelsʗ1[0] + "=" + labelsʗ1[1], Ꮡwg));
+    goǃ(spawn([GoFunc("goCapture.func1")] () => labelsʗ1[0] + "=" + labelsʗ1[1], Ꮡwg));
     Ꮡwg.Wait();
 }
 

@@ -12,7 +12,7 @@ partial struct tally {
 internal static void p1() {
     var ok = true;
     nint calls = 0;
-    nint /*x*/ parseUint(@string s, nint min, nint max) {
+    [GoFunc("p1.func1")] nint /*x*/ parseUint(@string s, nint min, nint max) {
         nint x = default;
         calls++;
         foreach (var (_, cΔ1) in range(slice<byte>(s))) {
@@ -36,7 +36,7 @@ internal static void p1() {
 
 internal static void p2() {
     nint @base = 10;
-    nint add(nint a, nint b) => a + b + @base;
+    [GoFunc("p2.func1")] nint add(nint a, nint b) => a + b + @base;
     @base = 20;
     fmt.Println("P2:", add(1, 2), add(3, 4));
 }
@@ -44,7 +44,7 @@ internal static void p2() {
 internal static void p3() {
     ref var t = ref heap<tally>(new tally(1, "a"), out var Ꮡt);
     ref var arr = ref heap<array<nint>>(array<nint>([1, 2, 3]), out var Ꮡarr);
-    void bump(nint k) {
+    [GoFunc("p3.func1")] void bump(nint k) {
         Ꮡt.Value.n += k;
         Ꮡt.Value.log += "!"u8;
         Ꮡarr.Value[0] += k;
@@ -57,7 +57,7 @@ internal static void p3() {
 
 internal static void p4() {
     nint c = 0;
-    var next = () => {
+    var next = [GoFunc("p4.func1")] () => {
         c++;
         return c;
     };
@@ -67,18 +67,18 @@ internal static void p4() {
 }
 
 internal static void p5() {
-    var step = (nint n) => n + 1;
+    var step = [GoFunc("p5.func1")] (nint n) => n + 1;
     fmt.Println("P5a:", step(1));
-    step = (nint n) => n + 2;
+    step = [GoFunc("p5.func2")] (nint n) => n + 2;
     fmt.Println("P5b:", step(1));
 }
 
 internal static void p6() {
-    nint /*r*/ guard(nint n) {
+    [GoFunc("p6.func1")] nint /*r*/ guard(nint n) {
         nint r = default;
         GoFrame ᒐ = default;
         try {
-            defer(() => {
+            defer([GoFunc("p6.func1.1")] () => {
                 var e = recover(); if (e != nil) {
                     r = -1;
                 }
@@ -97,7 +97,7 @@ internal static void p6() {
 
 internal static void p7() {
     ref var fact = ref heap<Func<nint, nint>>(out var Ꮡfact);
-    fact = (nint n) => {
+    fact = [GoFunc("p7.func1")] (nint n) => {
         if (n <= 1) {
             return 1;
         }
@@ -110,14 +110,14 @@ internal static nint apply(Func<nint, nint> f, nint v) { return f(v); }
 
 internal static void p8() {
     nint m = 3;
-    var scale = (nint v) => v * m;
+    var scale = [GoFunc("p8.func1")] (nint v) => v * m;
     fmt.Println("P8:", apply(scale, 5), scale(2));
 }
 
 internal static void p9() {
     nint total = 0;
-    nint outer(nint k) {
-        nint inner(nint v) {
+    [GoFunc("p9.func1")] nint outer(nint k) {
+        [GoFunc("p9.func1.1")] nint inner(nint v) {
             total += v;
             return total;
         }
@@ -129,9 +129,9 @@ internal static void p9() {
 }
 
 internal static void p10() {
-    nint pure(nint a, nint b) => a * b;
+    [GoFunc("p10.func1")] nint pure(nint a, nint b) => a * b;
     nint sum = 0;
-    void acc(nint v) {
+    [GoFunc("p10.func2")] void acc(nint v) {
         sum += v;
     }
     for (nint i = 1; i <= 3; i++) {

@@ -20,8 +20,8 @@ internal partial interface main_type /*dyn*/ {
 
 internal static void main() {
     fn none = default;
-    var seven = new fn(() => 7);
-    var eight = new fn(() => 8);
+    var seven = new fn([GoFunc("main.func1")] () => 7);
+    var eight = new fn([GoFunc("main.func2")] () => 8);
     var values = slice<any>([(none).OrTypedNilFunc(), (seven).OrTypedNilFunc(), (eight).OrTypedNilFunc(), (none).OrTypedNilFunc()]);
 
     for (nint round = 0; round < 3; round++) {

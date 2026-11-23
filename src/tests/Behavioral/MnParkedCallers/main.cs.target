@@ -105,7 +105,7 @@ internal static partial nint /*r*/ btop(channel<nint> c) {
     nint r = default;
     GoFrame ᒐ = default;
     try {
-        defer([MethodImpl(MethodImplOptions.NoInlining)] () => {
+        defer([MethodImpl(MethodImplOptions.NoInlining), GoFunc("btop.func1")] () => {
             var pcs = new slice<uintptr>(16);
             nint n = runtime.Callers(1, pcs);
 
@@ -152,7 +152,7 @@ internal static partial void main() {
 
     var cʗ1 = c;
     var dʗ1 = d;
-    goǃ(() => {
+    goǃ([GoFunc("main.func1")] () => {
         nint vΔ1 = mid(cʗ1);
         dʗ1.ᐸꟷ(vΔ1 + 10);
     });

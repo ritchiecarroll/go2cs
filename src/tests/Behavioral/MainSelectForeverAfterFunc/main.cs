@@ -7,7 +7,7 @@ using time = time_package;
 partial class main_package {
 
 internal static void main() {
-    time.AfterFunc(500 * time.Millisecond, () => {
+    time.AfterFunc(500 * time.Millisecond, [GoFunc("main.func1")] () => {
         fmt.Println("the timer fired while main sat in select {}");
         os.Exit(0);
     });

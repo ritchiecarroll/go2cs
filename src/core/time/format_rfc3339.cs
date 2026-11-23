@@ -4,11 +4,8 @@
 namespace go;
 
 using errors = errors_package;
-using static time_package;
 
 partial class time_package {
-
-} partial class timeᴛTime {
 
 // RFC 3339 is the most commonly used format.
 //
@@ -18,7 +15,7 @@ partial class time_package {
 // with the second most popular format only being used 8% of the time.
 // The overwhelming use of RFC 3339 compared to all other formats justifies
 // the addition of logic to optimize formatting and parsing.
-internal static slice<byte> appendFormatRFC3339(this Time t, slice<byte> b, bool nanos) {
+internal static slice<byte> appendFormatRFC3339⁔(/*this*/ Time t, slice<byte> b, bool nanos) {
     var (_, offset, abs) = t.locabs();
 
     // Format date.
@@ -68,14 +65,14 @@ private static readonly @string yearOutsideOfRange09999ˢᵇ = "year outside of 
 internal static ref readonly @string timezoneHourOutsideOfˢ => ref timezoneHourOutsideOfˢᵇ;
 private static readonly @string timezoneHourOutsideOfˢᵇ = "timezone hour outside of range [0,23]"u8;
 
-internal static (slice<byte>, error) appendStrictRFC3339(this Time t, slice<byte> b) {
+internal static (slice<byte>, error) appendStrictRFC3339⁔(/*this*/ Time t, slice<byte> b) {
     nint n0 = len(b);
     b = t.appendFormatRFC3339(b, true);
 
     // Not all valid Go timestamps can be serialized as valid RFC 3339.
     // Explicitly check for these edge cases.
     // See https://go.dev/issue/4556 and https://go.dev/issue/54580.
-    byte num2(slice<byte> bΔ1) => (byte)(10 * (bΔ1[0] - '0') + (bΔ1[1] - '0'));
+    [GoFunc("Time.appendStrictRFC3339.func1")] byte num2(slice<byte> bΔ1) => (byte)(10 * (bΔ1[0] - '0') + (bΔ1[1] - '0'));
     switch (ᐧ) {
     case {} when b[n0 + len("9999")] != (byte)'-': { // year must be exactly 4 digits wide
         return (b, errors.New(yearOutsideOfRange09999ˢ));
@@ -90,8 +87,6 @@ internal static (slice<byte>, error) appendStrictRFC3339(this Time t, slice<byte
     return (b, default);
 }
 
-} partial class time_package {
-
 internal static (Time, bool) parseRFC3339<bytes>(bytes s, ж<Location> local)
     where bytes : /* []byte | string */ IByteSeq<bytes, byte>, new()
 {
@@ -100,7 +95,7 @@ internal static (Time, bool) parseRFC3339<bytes>(bytes s, ж<Location> local)
     // If it is invalid or out-of-range,
     // it sets ok to false and returns the min value.
     var ok = true;
-    nint /*x*/ parseUint(bytes sΔ1, nint minΔ1, nint max) {
+    [GoFunc("parseRFC3339[...].func1")] nint /*x*/ parseUint(bytes sΔ1, nint minΔ1, nint max) {
         nint x = default;
         foreach (var (_, c) in range(sΔ1.ToSlice())) {
             if (c < '0' || '9' < c) {
@@ -179,7 +174,7 @@ internal static (Time, error) parseStrictRFC3339(slice<byte> b) {
         // The parse template syntax cannot correctly validate RFC 3339.
         // Explicitly check for cases that Parse is unable to validate for.
         // See https://go.dev/issue/54580.
-        byte num2(slice<byte> bΔ1) => (byte)(10 * (bΔ1[0] - '0') + (bΔ1[1] - '0'));
+        [GoFunc("parseStrictRFC3339.func1")] byte num2(slice<byte> bΔ1) => (byte)(10 * (bΔ1[0] - '0') + (bΔ1[1] - '0'));
         switch (ᐧ) {
         // TODO(https://go.dev/issue/54580): Strict parsing is disabled for now.
         // Enable this again with a GODEBUG opt-out.

@@ -8,7 +8,7 @@ internal static partial any /*r*/ tryMake(nint length, nint capacity) {
     any r = default;
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("tryMake.func1")] () => {
             r = recover();
         }, ref ᒐ);
 

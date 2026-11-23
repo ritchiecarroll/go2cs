@@ -7,14 +7,13 @@ namespace go.go;
 
 using iter = iter_package;
 using ꓸꓸꓸany = Span<any>;
-using static types_package;
 
 partial class types_package {
 
 // If typ is a type parameter, underIs returns the result of typ.underIs(f).
 // Otherwise, underIs returns the result of f(typ.Underlying()).
 internal static bool underIs(Type typ, Func<Type, bool> f) {
-    return all(typ, (Type _, Type u) => f(u));
+    return all(typ, [GoFunc("underIs.func1")] (Type _, Type u) => f(u));
 }
 
 // all reports whether f(t, u) is true for all (type/underlying type)
@@ -33,7 +32,7 @@ internal static bool all(Type t, Func<Type, Type, bool> f) {
 // If t is not a type parameter, the implied type set consists of just t.
 // In any case, typeset is guaranteed to produce at least one set of results.
 internal static iter.Seq2<Type, Type> typeset(Type t) {
-    return (Func<Type, Type, bool> yield) => {
+    return [GoFunc("typeset.func1")] (Func<Type, Type, bool> yield) => {
         all(t, yield);
     };
 }
@@ -56,15 +55,11 @@ internal static ж<typeError> typeErrorf(@string format, params ꓸꓸꓸany arg
     return Ꮡ(new typeError(format, args));
 }
 
-} partial class typesᴛtypeError {
-
 // format formats a type error as a string.
 // check may be nil.
-internal static @string format(this ref typeError err, ж<Checker> check) {
+internal static @string format⁔(/*this*/ ref typeError err, ж<Checker> check) {
     return check.sprintf(err.format_, err.args.ꓸꓸꓸ);
 }
-
-} partial class types_package {
 
 // If t is a type parameter, cond is nil, and t's type set contains no channel types,
 // commonUnder returns the common underlying type of all types in t's type set if

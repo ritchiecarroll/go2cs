@@ -29,7 +29,7 @@ internal partial struct inClosure_s /*dyn*/ {
 internal partial class inClosure_sPtr /*ж<inClosure_s>*/;
 
 internal static void inClosure() {
-    void run() {
+    [GoFunc("inClosure.func1")] void run() {
         var ps = Ꮡ(new inClosure_s(2));
         var dps = new inClosure_sPtr(ps);
         (dps.Value).i = 3;

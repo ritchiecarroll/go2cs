@@ -42,4 +42,29 @@
                              ExcludeFromSingleFile="true" />
     </ItemGroup>
   </Target>
+
+  <!--
+    A CONVERTED TEST ASSEMBLY IS COMPILED WITHOUT OPTIMIZATION.
+
+    runtime.Caller answers a call's line from its frame's IL offset, and a Release frame carries only its STATEMENT's
+    offset: two same-name calls in one statement read one line (testify's Test_Mock_Chained_UnsetOnlyUnsetsLastCall),
+    and an optimized frame can lose the offset altogether and read the function's first statement. Measured with a C#
+    probe: Release, under the tiered JIT, TieredCompilation=0 and JITMinOpts alike, gives three chained calls the IL
+    offsets 5, 5, 5; a method marked NoOptimization still 5, 5, 5; the same IL in an assembly marked
+    DisableOptimizations 5, 11, 16. So the switch is the compilation's own, Optimize=false, which marks the assembly
+    DisableOptimizations.
+
+    Test code only (COORD 2026-11-22 23:57Z, the owner's scope of 11-22: production stays optimized). A converted test
+    host is the project the converter names <package>.tests.csproj, with a `go` root namespace; it compiles the
+    package's converted _test.go files and references the package's own, optimized, assembly, so the code under test
+    keeps its optimizations. Measured at TieredCompilation=0 on linux-x64, as built and with the switch: crypto/sha256
+    2.2 / 2.1 s, math/big 50.2 / 50.4 s, compress/flate 17.8 / 17.8 s, every verdict the same.
+
+    This file is the one every converted test host imports: src/Directory.Build.targets (the stdlib's), the
+    Directory.Build.targets `go2cs -recurse` generates (a module's), and go.lib.targets (a NuGet consumer's). Set
+    GoTestOptimize=true to build a test assembly optimized, for a benchmark run.
+  -->
+  <PropertyGroup Condition="'$(GoTestOptimize)' != 'true' and $(MSBuildProjectName.EndsWith('.tests')) and ('$(RootNamespace)' == 'go' or $(RootNamespace.StartsWith('go.')))">
+    <Optimize>false</Optimize>
+  </PropertyGroup>
 </Project>

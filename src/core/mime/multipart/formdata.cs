@@ -13,15 +13,12 @@ using os = os_package;
 using strconv = strconv_package;
 using @internal;
 using net;
-using static multipart_package;
 
 partial class multipart_package {
 
 // ErrMessageTooLarge is returned by ReadForm if the message form
 // data is too large to be processed.
 public static error ErrMessageTooLarge = errors.New("multipart: message too large");
-
-} partial class multipartᴛReader {
 
 // TODO(adg,bradfitz): find a way to unify the DoS-prevention strategy here
 // with that of the http package's ParseForm.
@@ -33,27 +30,23 @@ public static error ErrMessageTooLarge = errors.New("multipart: message too larg
 // disk in temporary files.
 // It returns [ErrMessageTooLarge] if all non-file parts can't be stored in
 // memory.
-public static (ж<Form>, error) ReadForm(this ж<Reader> Ꮡr, int64 maxMemory) {
+internal static (ж<Form>, error) ReadForm⁔(/*this*/ ж<Reader> Ꮡr, int64 maxMemory) {
     return Ꮡr.readForm(maxMemory);
 }
 
-} partial class multipart_package {
-
 internal static ж<godebug.Setting> multipartfiles = godebug.New("#multipartfiles"); // TODO: document and remove #
 internal static ж<godebug.Setting> multipartmaxparts = godebug.New("multipartmaxparts");
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string multipartˢ => ref multipartˢᵇ;
+private static readonly @string multipartˢᵇ = "multipart-"u8;
 
 // os.File.ReadFrom will allocate its own copy buffer if we let io.Copy use it.
 internal partial struct readForm_writerOnly /*dyn*/ {
     /*embed*/ public io_package.Writer Writer;
 }
 
-} partial class multipartᴛReader {
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string multipartˢ => ref multipartˢᵇ;
-private static readonly @string multipartˢᵇ = "multipart-"u8;
-
-internal static (ж<Form>, error err) readForm(this ж<Reader> Ꮡr, int64 maxMemory) {
+internal static (ж<Form>, error err) readForm⁔(/*this*/ ж<Reader> Ꮡr, int64 maxMemory) {
     ж<Form> _ᴛ1 = default;
     error err = default;
     GoFrame ᒐ = default;
@@ -79,7 +72,7 @@ internal static (ж<Form>, error err) readForm(this ж<Reader> Ꮡr, int64 maxMe
         var maxHeaders = maxMIMEHeaders();
 
         var formʗ1 = form;
-        defer(() => {
+        defer([GoFunc("(*Reader).readForm.func1")] () => {
             if (Ꮡfile.ValueSlot != nil) {
                 var cerr = Ꮡfile.ValueSlot.Close(); if (err == nil) {
                     err = cerr;
@@ -235,8 +228,6 @@ internal static (ж<Form>, error err) readForm(this ж<Reader> Ꮡr, int64 maxMe
     ᒐdone: return (_ᴛ1, err);
 }
 
-} partial class multipart_package {
-
 internal static int64 /*size*/ mimeHeaderSize(textproto.MIMEHeader h) {
     int64 size = default;
 
@@ -261,10 +252,8 @@ partial struct Form {
     public map<@string, slice<ж<FileHeader>>> File;
 }
 
-} partial class multipartᴛForm {
-
 // RemoveAll removes any temporary files associated with a [Form].
-public static error RemoveAll(this ref Form f) {
+internal static error RemoveAll⁔(/*this*/ ref Form f) {
     error err = default;
     foreach (var (_, fhs) in f.File) {
         foreach (var (_, fh) in range(fhs)) {
@@ -279,8 +268,6 @@ public static error RemoveAll(this ref Form f) {
     return err;
 }
 
-} partial class multipart_package {
-
 // A FileHeader describes a file part of a multipart request.
 partial struct FileHeader {
     public @string Filename;
@@ -292,10 +279,8 @@ partial struct FileHeader {
     internal bool tmpshared;
 }
 
-} partial class multipartᴛFileHeader {
-
 // Open opens and returns the [FileHeader]'s associated File.
-public static (File, error) Open(this ref FileHeader fh) {
+internal static (File, error) Open⁔(/*this*/ ref FileHeader fh) {
     var b = fh.content; if (b != nil) {
         var r = io.NewSectionReader(new bytes_ReaderжReaderAt(bytes.NewReader(b)), 0, (int64)len(b));
         return (new sectionReadCloser(r, default), default);
@@ -311,8 +296,6 @@ public static (File, error) Open(this ref FileHeader fh) {
     var (ᴛ1, ᴛ2) = os.Open(fh.tmpfile);
     return (new os_FileжFile(ᴛ1), ᴛ2);
 }
-
-} partial class multipart_package {
 
 // File is an interface to access the file part of a multipart message.
 // Its contents may be either stored in memory or on disk.
@@ -332,13 +315,11 @@ partial struct sectionReadCloser {
     /*embed*/ public io_package.Closer Closer;
 }
 
-} partial class multipartᴛsectionReadCloser {
-
-internal static error Close(this sectionReadCloser rc) {
+internal static error Close⁔(/*this*/ sectionReadCloser rc) {
     if (rc.Closer != nil) {
         return rc.Closer.Close();
     }
     return default;
 }
 
-}
+} // end multipart_package

@@ -83,7 +83,7 @@ internal static void main() {
 
         nint visited = 0;
         nint files = 0;
-        var werr = filepath.WalkDir(dir, error (@string p, fs.DirEntry d, error errΔ4) => {
+        var werr = filepath.WalkDir(dir, [GoFunc("main.func1")] error (@string p, fs.DirEntry d, error errΔ4) => {
             if (errΔ4 != nil) {
                 return errΔ4;
             }

@@ -14,6 +14,9 @@
 
 using go;
 using static go.DotImportRenamedType.renamedlib_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -49,10 +52,12 @@ using static go.DotImportRenamedType.renamedlib_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("renamedlib.go", "renamedlib.cs", "AA4uggALFoLIggAIFIKogqiC")]
+[assembly: GoPositionMap("renamedlib.go", "renamedlib.cs", "AAsuggAHFoKoggAGFIKogqiC")]
 // </GoSourcePositionMaps>
 
 namespace go.DotImportRenamedType;
+
+using static go.DotImportRenamedType.renamedlib_package;
 
 [GoPackage("renamedlib")]
 public static partial class renamedlib_package
@@ -87,6 +92,20 @@ public static partial class renamedlib_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(renamedlib_package.Detail)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class renamedlibᴛDetail;
-[GoMethodHost(typeof(renamedlib_package.Marker)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class renamedlibᴛMarker;
+[GoMethodHost(typeof(renamedlib_package.Detail)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class renamedlibᴛDetail;
+[GoMethodHost(typeof(renamedlib_package.Marker)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class renamedlibᴛMarker;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class renamedlibᴛDetail {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Show(this Detail d) => renamedlib_package.Show⁔(d);
+}
+partial class renamedlibᴛMarker {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Marker(this Marker m) => renamedlib_package.Marker⁔(m);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static Detail Detail(this Marker m) => renamedlib_package.Detail⁔(m);
+}
+// </MethodForwarders>

@@ -35,7 +35,7 @@ internal static (@unsafe.Pointer, nint) mmap(@unsafe.Pointer addr, uintptr n, in
         // that mmap uses the same value both as a pointer and
         // an errno value.
         uintptr ret = default;
-        systemstack(() => {
+        systemstack([GoFunc("mmap.func1")] () => {
             ret = callCgoMmap(addr, n, prot, flags, fd, off);
         });
         if (ret < 4096) {
@@ -48,7 +48,7 @@ internal static (@unsafe.Pointer, nint) mmap(@unsafe.Pointer addr, uintptr n, in
 
 internal static void munmap(@unsafe.Pointer addr, uintptr n) {
     if (_cgo_munmap != nil) {
-        systemstack(() => {
+        systemstack([GoFunc("munmap.func1")] () => {
             callCgoMunmap(addr, n);
         });
         return;

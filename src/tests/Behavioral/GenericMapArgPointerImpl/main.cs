@@ -50,8 +50,8 @@ internal static void main() {
         fmt.Println(i, x.IsPresent(), x.Describe());
     }
 
-    Func<ж<Expected<map<@string, @string>>>, nint> count = (ж<Expected<map<@string, @string>>> e) => len((~e).Value);
-    Func<Expected<map<@string, @string>>> make1 = () => new Expected<map<@string, @string>>(Value: new map<@string, @string>{["x"] = "y", ["z"] = "w"}, Valid: true);
+    Func<ж<Expected<map<@string, @string>>>, nint> count = [GoFunc("main.func1")] (ж<Expected<map<@string, @string>>> e) => len((~e).Value);
+    Func<Expected<map<@string, @string>>> make1 = [GoFunc("main.func2")] () => new Expected<map<@string, @string>>(Value: new map<@string, @string>{["x"] = "y", ["z"] = "w"}, Valid: true);
 
     fmt.Println(count(Ꮡf.ᏑImports), len(make1().Value));
 

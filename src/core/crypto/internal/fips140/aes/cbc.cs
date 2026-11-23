@@ -8,8 +8,6 @@ using alias = go.crypto.@internal.fips140.alias_package;
 using subtle = go.crypto.@internal.fips140.subtle_package;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140;
-using aes = aes_package;
-using static aes_package;
 
 partial class aes_package {
 
@@ -27,14 +25,12 @@ public static ж<CBCEncrypter> NewCBCEncrypter(ж<Block> Ꮡb, /*[16]*/ array<by
     return Ꮡ(new CBCEncrypter(b: b.ΔClone(), iv: iv.Clone()));
 }
 
-} partial class aesᴛCBCEncrypter {
+internal static nint BlockSize⁔(/*this*/ ref CBCEncrypter c) { return BlockSize; }
 
-public static nint BlockSize(this ref CBCEncrypter c) { return aes.BlockSize; }
-
-public static void CryptBlocks(this ж<CBCEncrypter> Ꮡc, slice<byte> dst, slice<byte> src) {
+internal static void CryptBlocks⁔(/*this*/ ж<CBCEncrypter> Ꮡc, slice<byte> dst, slice<byte> src) {
     ref var c = ref Ꮡc.DerefOrNull();
 
-    if (len(src) % (nint)aes.BlockSize != 0) {
+    if (len(src) % (nint)BlockSize != 0) {
         throw panic("crypto/cipher: input not full blocks");
     }
     if (len(dst) < len(src)) {
@@ -50,14 +46,12 @@ public static void CryptBlocks(this ж<CBCEncrypter> Ꮡc, slice<byte> dst, slic
     cryptBlocksEnc(ref nonnil(ref c).b, Ꮡc.Ꮡiv, dst, src);
 }
 
-public static void SetIV(this ref CBCEncrypter x, slice<byte> iv) {
+internal static void SetIV⁔(/*this*/ ref CBCEncrypter x, slice<byte> iv) {
     if (len(iv) != len(x.iv)) {
         throw panic("cipher: incorrect length IV");
     }
     copy(x.iv[..], iv);
 }
-
-} partial class aes_package {
 
 internal static void cryptBlocksEncGeneric(ref Block b, /*[16]*/ ж<array<byte>> Ꮡciv, slice<byte> dst, slice<byte> src) {
     ref var civ = ref Ꮡciv.DerefOrNull();
@@ -92,14 +86,12 @@ public static ж<CBCDecrypter> NewCBCDecrypter(ж<Block> Ꮡb, /*[16]*/ array<by
     return Ꮡ(new CBCDecrypter(b: b.ΔClone(), iv: iv.Clone()));
 }
 
-} partial class aesᴛCBCDecrypter {
+internal static nint BlockSize⁔(/*this*/ ref CBCDecrypter c) { return BlockSize; }
 
-public static nint BlockSize(this ref CBCDecrypter c) { return aes.BlockSize; }
-
-public static void CryptBlocks(this ж<CBCDecrypter> Ꮡc, slice<byte> dst, slice<byte> src) {
+internal static void CryptBlocks⁔(/*this*/ ж<CBCDecrypter> Ꮡc, slice<byte> dst, slice<byte> src) {
     ref var c = ref Ꮡc.DerefOrNull();
 
-    if (len(src) % (nint)aes.BlockSize != 0) {
+    if (len(src) % (nint)BlockSize != 0) {
         throw panic("crypto/cipher: input not full blocks");
     }
     if (len(dst) < len(src)) {
@@ -115,14 +107,12 @@ public static void CryptBlocks(this ж<CBCDecrypter> Ꮡc, slice<byte> dst, slic
     cryptBlocksDec(ref nonnil(ref c).b, Ꮡc.Ꮡiv, dst, src);
 }
 
-public static void SetIV(this ref CBCDecrypter x, slice<byte> iv) {
+internal static void SetIV⁔(/*this*/ ref CBCDecrypter x, slice<byte> iv) {
     if (len(iv) != len(x.iv)) {
         throw panic("cipher: incorrect length IV");
     }
     copy(x.iv[..], iv);
 }
-
-} partial class aes_package {
 
 internal static void cryptBlocksDecGeneric(ref Block b, /*[16]*/ ж<array<byte>> Ꮡciv, slice<byte> dst, slice<byte> src) {
     ref var civ = ref Ꮡciv.DerefOrNull();

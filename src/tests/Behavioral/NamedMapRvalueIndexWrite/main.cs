@@ -1,7 +1,6 @@
 namespace go;
 
 using fmt = fmt_package;
-using static main_package;
 
 partial class main_package {
 
@@ -13,11 +12,7 @@ partial struct response {
     internal Header hdr;
 }
 
-} partial class mainᴛresponse {
-
-internal static Header Header(this ref response r) { return r.hdr; }
-
-} partial class main_package {
+internal static Header Header⁔(/*this*/ ref response r) { return r.hdr; }
 
 internal static ж<response> newResponse() { return Ꮡ(new response(hdr: new Header(new map<@string, slice<@string>>{}))); }
 
@@ -31,7 +26,7 @@ internal static void main() {
 
     var c = new Counts(new map<@string, nint>{});
     var cʗ1 = c;
-    Counts get() => cʗ1;
+    [GoFunc("main.func1")] Counts get() => cʗ1;
 
     get()["hits"] = 3;
     get()["hits"] = get()["hits"] + 1;

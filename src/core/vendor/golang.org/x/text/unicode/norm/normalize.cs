@@ -14,8 +14,6 @@ using transform = go.vendor.golang.org.x.text.transform_package;
 using go.unicode;
 using go.vendor.golang.org.x.text;
 using ꓸꓸꓸbyte = Span<byte>;
-using norm = norm_package;
-using static norm_package;
 
 partial class norm_package {
 
@@ -43,10 +41,8 @@ public static Form NFD => 1;
 public static Form NFKC => 2;
 public static Form NFKD => 3;
 
-} partial class normᴛForm {
-
 // Bytes returns f(b). May return b if f(b) = b.
-public static slice<byte> Bytes(this Form f, slice<byte> b) {
+internal static slice<byte> Bytes⁔(/*this*/ Form f, slice<byte> b) {
     var src = inputBytes(b);
     var ft = formTable[f];
     var (n, ok) = ft.quickSpan(src, 0, len(b), true);
@@ -60,7 +56,7 @@ public static slice<byte> Bytes(this Form f, slice<byte> b) {
 }
 
 // String returns f(s).
-public static @string String(this Form f, @string s) {
+internal static @string String⁔(/*this*/ Form f, @string s) {
     var src = inputString(s);
     var ft = formTable[f];
     var (n, ok) = ft.quickSpan(src, 0, len(s), true);
@@ -74,7 +70,7 @@ public static @string String(this Form f, @string s) {
 }
 
 // IsNormal returns true if b == f(b).
-public static bool IsNormal(this Form f, slice<byte> b) {
+internal static bool IsNormal⁔(/*this*/ Form f, slice<byte> b) {
     var src = inputBytes(b);
     var ft = formTable[f];
     var (bp, ok) = ft.quickSpan(src, 0, len(b), true);
@@ -92,8 +88,6 @@ public static bool IsNormal(this Form f, slice<byte> b) {
     }
     return true;
 }
-
-} partial class norm_package {
 
 internal static bool cmpNormalBytes(ж<reorderBuffer> Ꮡrb) {
     ref var rb = ref Ꮡrb.DerefOrNull();
@@ -116,10 +110,8 @@ internal static bool cmpNormalBytes(ж<reorderBuffer> Ꮡrb) {
     return true;
 }
 
-} partial class normᴛForm {
-
 // IsNormalString returns true if s == f(s).
-public static bool IsNormalString(this Form f, @string s) {
+internal static bool IsNormalString⁔(/*this*/ Form f, @string s) {
     var src = inputString(s);
     var ft = formTable[f];
     var (bp, ok) = ft.quickSpan(src, 0, len(s), true);
@@ -127,7 +119,7 @@ public static bool IsNormalString(this Form f, @string s) {
         return true;
     }
     ref var rb = ref heap<reorderBuffer>(new reorderBuffer(f: ft.Value, src: src, nsrc: len(s)), out var Ꮡrb);
-    rb.setFlusher(default, (ж<reorderBuffer> rbΔ1) => {
+    rb.setFlusher(default, [GoFunc("Form.IsNormalString.func1")] (ж<reorderBuffer> rbΔ1) => {
         for (nint i = 0; i < rbΔ1.nrune; i++) {
             var info = rbΔ1.rune[i];
             if (bp + (nint)info.size > len(s)) {
@@ -152,8 +144,6 @@ public static bool IsNormalString(this Form f, @string s) {
     }
     return true;
 }
-
-} partial class norm_package {
 
 // patchTail fixes a case where a rune may be incorrectly normalized
 // if it is followed by illegal continuation bytes. It returns the
@@ -204,17 +194,15 @@ internal static nint appendQuick(ж<reorderBuffer> Ꮡrb, nint i) {
     return end;
 }
 
-} partial class normᴛForm {
-
 // Append returns f(append(out, b...)).
 // The buffer out must be nil, empty, or equal to f(out).
-public static slice<byte> Append(this Form f, slice<byte> @out, params ꓸꓸꓸbyte srcʗp) {
+internal static slice<byte> Append⁔(/*this*/ Form f, slice<byte> @out, params ꓸꓸꓸbyte srcʗp) {
     var src = srcʗp.slice();
 
     return f.doAppend(@out, inputBytes(src), len(src));
 }
 
-internal static slice<byte> doAppend(this Form f, slice<byte> @out, input src, nint n) {
+internal static slice<byte> doAppend⁔(/*this*/ Form f, slice<byte> @out, input src, nint n) {
     if (n == 0) {
         return @out;
     }
@@ -230,10 +218,8 @@ internal static slice<byte> doAppend(this Form f, slice<byte> @out, input src, n
         return doAppendInner(ᏑrbΔ1, p);
     }
     ref var rb = ref heap<reorderBuffer>(new reorderBuffer(f: ft.Value, src: src, nsrc: n), out var Ꮡrb);
-    return norm.doAppend(Ꮡrb, @out, 0);
+    return doAppend(Ꮡrb, @out, 0);
 }
-
-} partial class norm_package {
 
 internal static slice<byte> doAppend(ж<reorderBuffer> Ꮡrb, slice<byte> @out, nint p) {
     ref var rb = ref Ꮡrb.DerefOrNull();
@@ -283,33 +269,31 @@ internal static slice<byte> doAppendInner(ж<reorderBuffer> Ꮡrb, nint p) {
     return rb.@out;
 }
 
-} partial class normᴛForm {
-
 // AppendString returns f(append(out, []byte(s))).
 // The buffer out must be nil, empty, or equal to f(out).
-public static slice<byte> AppendString(this Form f, slice<byte> @out, @string src) {
+internal static slice<byte> AppendString⁔(/*this*/ Form f, slice<byte> @out, @string src) {
     return f.doAppend(@out, inputString(src), len(src));
 }
 
 // QuickSpan returns a boundary n such that b[0:n] == f(b[0:n]).
 // It is not guaranteed to return the largest such n.
-public static nint QuickSpan(this Form f, slice<byte> b) {
+internal static nint QuickSpan⁔(/*this*/ Form f, slice<byte> b) {
     var (n, _) = formTable[f].quickSpan(inputBytes(b), 0, len(b), true);
     return n;
 }
 
 // Span implements transform.SpanningTransformer. It returns a boundary n such
 // that b[0:n] == f(b[0:n]). It is not guaranteed to return the largest such n.
-public static (nint n, error err) Span(this Form f, slice<byte> b, bool atEOF) {
+internal static (nint n, error err) Span⁔(/*this*/ Form f, slice<byte> b, bool atEOF) {
     nint n = default;
     error err = default;
 
     (n, var ok) = formTable[f].quickSpan(inputBytes(b), 0, len(b), atEOF);
     if (n < len(b)) {
         if (!ok) {
-            err = go.vendor.golang.org.x.text.transform_package.ErrEndOfSpan;
+            err = transform.ErrEndOfSpan;
         } else {
-            err = go.vendor.golang.org.x.text.transform_package.ErrShortSrc;
+            err = transform.ErrShortSrc;
         }
     }
     return (n, err);
@@ -317,28 +301,26 @@ public static (nint n, error err) Span(this Form f, slice<byte> b, bool atEOF) {
 
 // SpanString returns a boundary n such that s[0:n] == f(s[0:n]).
 // It is not guaranteed to return the largest such n.
-public static (nint n, error err) SpanString(this Form f, @string s, bool atEOF) {
+internal static (nint n, error err) SpanString⁔(/*this*/ Form f, @string s, bool atEOF) {
     nint n = default;
     error err = default;
 
     (n, var ok) = formTable[f].quickSpan(inputString(s), 0, len(s), atEOF);
     if (n < len(s)) {
         if (!ok) {
-            err = go.vendor.golang.org.x.text.transform_package.ErrEndOfSpan;
+            err = transform.ErrEndOfSpan;
         } else {
-            err = go.vendor.golang.org.x.text.transform_package.ErrShortSrc;
+            err = transform.ErrShortSrc;
         }
     }
     return (n, err);
 }
 
-} partial class normᴛformInfo {
-
 // quickSpan returns a boundary n such that src[0:n] == f(src[0:n]) and
 // whether any non-normalized parts were found. If atEOF is false, n will
 // not point past the last segment if this segment might be become
 // non-normalized by appending other runes.
-internal static (nint n, bool ok) quickSpan(this ref formInfo f, input src, nint i, nint end, bool atEOF) {
+internal static (nint n, bool ok) quickSpan⁔(/*this*/ ref formInfo f, input src, nint i, nint end, bool atEOF) {
     nint n = default;
 
     uint8 lastCC = default;
@@ -397,22 +379,20 @@ internal static (nint n, bool ok) quickSpan(this ref formInfo f, input src, nint
     return (lastSegStart, false);
 }
 
-} partial class normᴛForm {
-
 // QuickSpanString returns a boundary n such that s[0:n] == f(s[0:n]).
 // It is not guaranteed to return the largest such n.
-public static nint QuickSpanString(this Form f, @string s) {
+internal static nint QuickSpanString⁔(/*this*/ Form f, @string s) {
     var (n, _) = formTable[f].quickSpan(inputString(s), 0, len(s), true);
     return n;
 }
 
 // FirstBoundary returns the position i of the first boundary in b
 // or -1 if b contains no boundary.
-public static nint FirstBoundary(this Form f, slice<byte> b) {
+internal static nint FirstBoundary⁔(/*this*/ Form f, slice<byte> b) {
     return f.firstBoundary(inputBytes(b), len(b));
 }
 
-internal static nint firstBoundary(this Form f, input src, nint nsrc) {
+internal static nint firstBoundary⁔(/*this*/ Form f, input src, nint nsrc) {
     nint i = src.skipContinuationBytes(0);
     if (i >= nsrc) {
         return -1;
@@ -442,25 +422,25 @@ internal static nint firstBoundary(this Form f, input src, nint nsrc) {
 
 // FirstBoundaryInString returns the position i of the first boundary in s
 // or -1 if s contains no boundary.
-public static nint FirstBoundaryInString(this Form f, @string s) {
+internal static nint FirstBoundaryInString⁔(/*this*/ Form f, @string s) {
     return f.firstBoundary(inputString(s), len(s));
 }
 
 // NextBoundary reports the index of the boundary between the first and next
 // segment in b or -1 if atEOF is false and there are not enough bytes to
 // determine this boundary.
-public static nint NextBoundary(this Form f, slice<byte> b, bool atEOF) {
+internal static nint NextBoundary⁔(/*this*/ Form f, slice<byte> b, bool atEOF) {
     return f.nextBoundary(inputBytes(b), len(b), atEOF);
 }
 
 // NextBoundaryInString reports the index of the boundary between the first and
 // next segment in b or -1 if atEOF is false and there are not enough bytes to
 // determine this boundary.
-public static nint NextBoundaryInString(this Form f, @string s, bool atEOF) {
+internal static nint NextBoundaryInString⁔(/*this*/ Form f, @string s, bool atEOF) {
     return f.nextBoundary(inputString(s), len(s), atEOF);
 }
 
-internal static nint nextBoundary(this Form f, input src, nint nsrc, bool atEOF) {
+internal static nint nextBoundary⁔(/*this*/ Form f, input src, nint nsrc, bool atEOF) {
     if (nsrc == 0) {
         if (atEOF) {
             return 0;
@@ -500,11 +480,9 @@ internal static nint nextBoundary(this Form f, input src, nint nsrc, bool atEOF)
 
 // LastBoundary returns the position i of the last boundary in b
 // or -1 if b contains no boundary.
-public static nint LastBoundary(this Form f, slice<byte> b) {
+internal static nint LastBoundary⁔(/*this*/ Form f, slice<byte> b) {
     return lastBoundary(ref (formTable[f]).DerefOrNull(), b);
 }
-
-} partial class norm_package {
 
 internal static nint lastBoundary(ref formInfo fd, slice<byte> b) {
     nint i = len(b);

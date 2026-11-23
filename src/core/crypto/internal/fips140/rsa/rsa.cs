@@ -9,7 +9,6 @@ using bigmod = go.crypto.@internal.fips140.bigmod_package;
 using errors = errors_package;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140;
-using static rsa_package;
 
 partial class rsa_package {
 
@@ -18,15 +17,11 @@ partial struct PublicKey {
     public nint E;
 }
 
-} partial class rsaᴛPublicKey {
-
 // Size returns the modulus size in bytes. Raw signatures and ciphertexts
 // for or by this public key will have the same size.
-public static nint Size(this ref PublicKey pub) {
+internal static nint Size⁔(/*this*/ ref PublicKey pub) {
     return (pub.N.BitLen() + 7) / 8;
 }
-
-} partial class rsa_package {
 
 partial struct PrivateKey {
     // pub has already been checked with checkPublicKey.
@@ -47,13 +42,9 @@ partial struct PrivateKey {
     internal bool fipsApproved;
 }
 
-} partial class rsaᴛPrivateKey {
-
-public static ж<PublicKey> PublicKey(this ж<PrivateKey> Ꮡpriv) {
+internal static ж<PublicKey> PublicKey⁔(/*this*/ ж<PrivateKey> Ꮡpriv) {
     return Ꮡpriv.Ꮡpub;
 }
-
-} partial class rsa_package {
 
 // NewPrivateKey creates a new RSA private key from the given parameters.
 //
@@ -188,13 +179,11 @@ public static (ж<PrivateKey>, error) NewPrivateKeyWithoutCRT(slice<byte> N, nin
     return (pk, default);
 }
 
-} partial class rsaᴛPrivateKey {
-
 // Export returns the key parameters in big-endian byte slice format.
 //
 // P, Q, dP, dQ, and qInv may be nil if the key was created with
 // NewPrivateKeyWithoutCRT.
-public static (slice<byte> N, nint e, slice<byte> d, slice<byte> P, slice<byte> Q, slice<byte> dP, slice<byte> dQ, slice<byte> qInv) Export(this ref PrivateKey priv) {
+internal static (slice<byte> N, nint e, slice<byte> d, slice<byte> P, slice<byte> Q, slice<byte> dP, slice<byte> dQ, slice<byte> qInv) Export⁔(/*this*/ ref PrivateKey priv) {
     slice<byte> N = default;
     nint e = default;
     slice<byte> d = default;
@@ -217,8 +206,6 @@ public static (slice<byte> N, nint e, slice<byte> d, slice<byte> P, slice<byte> 
     qInv = priv.qInv.Bytes(priv.p);
     return (N, e, d, P, Q, dP, dQ, qInv);
 }
-
-} partial class rsa_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string cryptoRsaInvalidPrimeˢ => ref cryptoRsaInvalidPrimeˢᵇ;

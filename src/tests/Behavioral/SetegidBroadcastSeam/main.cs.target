@@ -39,7 +39,7 @@ internal static partial void main() {
     var doneʗ1 = done;
     var releaseʗ1 = release;
     var tidChʗ1 = tidCh;
-    goǃ(() => {
+    goǃ([GoFunc("main.func1")] () => {
         GoFrame ᒐ = default;
         try {
             runtime.LockOSThread();

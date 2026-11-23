@@ -130,7 +130,7 @@ func (set *cgoWrapperSet) copyFunctions(function string, named *types.Named, mir
 
 	var text strings.Builder
 
-	fmt.Fprintf(&text, "    // %s's copy-in and copy-out, member by member (§5.2).\n", named.Obj().Name())
+	fmt.Fprintf(&text, "    // %s's copy-in and copy-out, member by member.\n", named.Obj().Name())
 	fmt.Fprintf(&text, "    private static void ᴍin_%s(ref %s m, in %s v)\n    {\n%s    }\n\n", mirror.name, mirror.name, goSide, copyIn.String())
 	fmt.Fprintf(&text, "    private static void ᴍout_%s(ref %s v, in %s m)\n    {\n%s    }\n", mirror.name, goSide, mirror.name, copyOut.String())
 
@@ -169,7 +169,7 @@ func (set *cgoWrapperSet) copyMember(function, member string, depth int, m, g st
 
 	case *types.Pointer:
 		if pointee, ok := types.Unalias(underlying.Elem()).(*types.Named); !ok || !strings.HasPrefix(pointee.Obj().Name(), "_Ctype_") {
-			return "", fmt.Errorf("cgo wrapper: C.%s crosses %s, a pointer member to something other than a C type, which is Phase 3's", function, member)
+			return "", fmt.Errorf("cgo wrapper: C.%s crosses %s, a pointer member to something other than a C type, which go2cs does not pass to C yet", function, member)
 		}
 
 		// A pointer member is checked as cgo checks it (§5.2): nil is 0, a native pointer is its address, and a pointer
@@ -242,7 +242,7 @@ func (set *cgoWrapperSet) param(function string, index int, t types.Type) (cgoSt
 			scalar, err := cgoScalarOf(function, role, pointer.Elem())
 
 			if err != nil || scalar.isVoid {
-				return cgoStructParam{}, fmt.Errorf("cgo wrapper: C.%s's %s is a pointer to something other than a C struct or one C scalar, which is Phase 3's", function, role)
+				return cgoStructParam{}, fmt.Errorf("cgo wrapper: C.%s's %s is a pointer to something other than a C struct or one C scalar, which go2cs does not pass to C yet", function, role)
 			}
 
 			return cgoStructParam{scalar: scalar, goSide: scalar.goSide, pointer: true}, nil
@@ -265,7 +265,7 @@ func (set *cgoWrapperSet) param(function string, index int, t types.Type) (cgoSt
 		}
 
 		if !set.mirrors.passableByValue(mirror) {
-			return cgoStructParam{}, fmt.Errorf("cgo wrapper: C.%s's %s is %s by value, which §11.7 refuses (a float, union or inline array member, or an all-padding eightbyte)", function, role, named.Obj().Name())
+			return cgoStructParam{}, fmt.Errorf("cgo wrapper: C.%s's %s is %s by value, which go2cs does not pass by value: it has a float, union or inline array member, or an all-padding eightbyte", function, role, named.Obj().Name())
 		}
 
 		return cgoStructParam{mirror: mirror, goSide: cgoGoSideName(named)}, nil
@@ -366,7 +366,7 @@ func (set *cgoWrapperSet) wrapper(declaration cgoDeclaration) (string, error) {
 		}
 
 		if !set.mirrors.passableByValue(mirror) {
-			return "", fmt.Errorf("cgo wrapper: C.%s returns %s by value, which §11.7 refuses", function, resultStruct.Obj().Name())
+			return "", fmt.Errorf("cgo wrapper: C.%s returns %s by value, which go2cs does not return by value: it has a float, union or inline array member, or an all-padding eightbyte", function, resultStruct.Obj().Name())
 		}
 
 		resultMirror = mirror

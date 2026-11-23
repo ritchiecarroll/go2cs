@@ -7,7 +7,6 @@ using atomic = @internal.runtime.atomic_package;
 using sys = @internal.runtime.sys_package;
 using @unsafe = unsafe_package;
 using @internal.runtime;
-using static runtime_package;
 
 partial class runtime_package {
 
@@ -38,8 +37,6 @@ partial struct synctestBubble {
     internal nint active;  // other sources of activity
 }
 
-} partial class runtimeᴛsynctestBubble {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string total0ˢ => ref total0ˢᵇ;
 private static readonly @string total0ˢᵇ = "total < 0"u8;
@@ -48,7 +45,7 @@ private static readonly @string running0ˢᵇ = "running < 0"u8;
 
 // changegstatus is called when the non-lock status of a g changes.
 // It is never called with a Gscanstatus.
-internal static void changegstatus(this ж<synctestBubble> Ꮡbubble, ж<g> Ꮡgp, uint32 oldval, uint32 newval) {
+internal static void changegstatus⁔(/*this*/ ж<synctestBubble> Ꮡbubble, ж<g> Ꮡgp, uint32 oldval, uint32 newval) {
     ref var bubble = ref Ꮡbubble.DerefOrNull();
     ref var gp = ref Ꮡgp.DerefOrNull();
 
@@ -125,7 +122,7 @@ internal static void changegstatus(this ж<synctestBubble> Ꮡbubble, ж<g> Ꮡg
 
 // incActive increments the active-count for the bubble.
 // A bubble does not become durably blocked while the active-count is non-zero.
-internal static void incActive(this ж<synctestBubble> Ꮡbubble) {
+internal static void incActive⁔(/*this*/ ж<synctestBubble> Ꮡbubble) {
     ref var bubble = ref Ꮡbubble.DerefOrNull();
 
     @lock(Ꮡbubble.Ꮡmu);
@@ -138,7 +135,7 @@ internal static ref readonly @string active0ˢ => ref active0ˢᵇ;
 private static readonly @string active0ˢᵇ = "active < 0"u8;
 
 // decActive decrements the active-count for the bubble.
-internal static void decActive(this ж<synctestBubble> Ꮡbubble) {
+internal static void decActive⁔(/*this*/ ж<synctestBubble> Ꮡbubble) {
     ref var bubble = ref Ꮡbubble.DerefOrNull();
 
     @lock(Ꮡbubble.Ꮡmu);
@@ -154,7 +151,7 @@ internal static void decActive(this ж<synctestBubble> Ꮡbubble) {
 }
 
 // maybeWakeLocked returns a g to wake if the bubble is durably blocked.
-internal static ж<g> maybeWakeLocked(this ж<synctestBubble> Ꮡbubble) {
+internal static ж<g> maybeWakeLocked⁔(/*this*/ ж<synctestBubble> Ꮡbubble) {
     ref var bubble = ref Ꮡbubble.DerefOrNull();
 
     if (bubble.running > 0 || bubble.active > 0) {
@@ -184,7 +181,7 @@ internal static ж<g> maybeWakeLocked(this ж<synctestBubble> Ꮡbubble) {
     return bubble.root;
 }
 
-internal static @unsafe.Pointer raceaddr(this ж<synctestBubble> Ꮡbubble) {
+internal static @unsafe.Pointer raceaddr⁔(/*this*/ ж<synctestBubble> Ꮡbubble) {
     ref var bubble = ref Ꮡbubble.DerefOrNull();
 
     // Address used to record happens-before relationships created by the bubble.
@@ -194,14 +191,10 @@ internal static @unsafe.Pointer raceaddr(this ж<synctestBubble> Ꮡbubble) {
     return (uintptr)@unsafe.Pointer.FromRef(ref bubble);
 }
 
-} partial class runtime_package {
-
 internal static readonly ж<atomic.Uint64> ᏑbubbleGen = new StaticBox<atomic.Uint64>(default(atomic.Uint64));
 internal static ref atomic.Uint64 bubbleGen => ref ((StaticBox<atomic.Uint64>)ᏑbubbleGen).ValueSlot; // bubble ID counter
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string active0ˢ => ref active0ˢᵇ;
-private static readonly @string active0ˢᵇ = "active < 0"u8;
 internal static ref readonly @string timeWentBackwardsˢ => ref timeWentBackwardsˢᵇ;
 private static readonly @string timeWentBackwardsˢᵇ = "time went backwards"u8;
 internal static ref readonly @string deadlockMainBubbleˢ => ref deadlockMainBubbleˢᵇ;
@@ -238,7 +231,7 @@ internal static void synctestRun(Action fʗp) {
 
         gp.Value.bubble = bubble;
         var gpʗ1 = gp;
-        defer(() => {
+        defer([GoFunc("synctestRun.func1")] () => {
             gpʗ1.Value.bubble = default;
         }, ref ᒐ);
 
@@ -246,7 +239,7 @@ internal static void synctestRun(Action fʗp) {
         var pc = sys.GetCallerPC();
         var bubbleʗ1 = bubble;
         var gpʗ2 = gp;
-        systemstack(() => {
+        systemstack([GoFunc("synctestRun.func2")] () => {
             var fv = ~Ꮡf.Reinterpret<Action, ж<funcval>>();
             bubbleʗ1.main = newproc1(fv, gpʗ2, pc, false, waitReasonZero);
             var pp = (~(~getg()).m).p.ptr();
@@ -260,7 +253,7 @@ internal static void synctestRun(Action fʗp) {
             unlock(bubble.Ꮡmu);
             var bubbleʗ2 = bubble;
             var gpʗ3 = gp;
-            systemstack(() => {
+            systemstack([GoFunc("synctestRun.func3")] () => {
                 // Clear gp.m.curg while running timers,
                 // so timer goroutines inherit their child race context from g0.
                 var curg = gpʗ3.Value.m.Value.curg;
@@ -318,13 +311,9 @@ partial struct synctestDeadlockError {
     internal ж<synctestBubble> bubble;
 }
 
-} partial class runtimeᴛsynctestDeadlockError {
-
-internal static @string Error(this synctestDeadlockError e) {
+internal static @string Error⁔(/*this*/ synctestDeadlockError e) {
     return e.reason;
 }
-
-} partial class runtime_package {
 
 internal static bool synctestidle_c(ж<g> Ꮡgp, @unsafe.Pointer _) {
     ref var gp = ref Ꮡgp.DerefOrNull();
@@ -421,7 +410,7 @@ internal static void synctest_inBubble(any bubble, Action f) {
         }
         gp.Value.bubble = bubble._<ж<synctestBubble>>();
         var gpʗ1 = gp;
-        defer(() => {
+        defer([GoFunc("synctest_inBubble.func1")] () => {
             gpʗ1.Value.bubble = default;
         }, ref ᒐ);
         f();

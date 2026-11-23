@@ -185,7 +185,7 @@ internal static slice<Spec> sortSpecs(ж<token.FileSet> fset, ref File f, ref Ge
     // Reassign the import paths to have the same position sequence.
     // Reassign each comment to the spec on the same line.
     // Sort the comments by new position.
-    slices.SortFunc(specs, (Spec a, Spec b) => {
+    slices.SortFunc(specs, [GoFunc("sortSpecs.func1")] (Spec a, Spec b) => {
         @string ipath = importPath(a);
         @string jpath = importPath(b);
         nint r = cmp.Compare(ipath, jpath);
@@ -241,7 +241,7 @@ internal static slice<Spec> sortSpecs(ж<token.FileSet> fset, ref File f, ref Ge
         }
     }
 
-    slices.SortFunc(comments, (ж<CommentGroup> a, ж<CommentGroup> b) => cmp.Compare(a.Pos(), b.Pos()));
+    slices.SortFunc(comments, [GoFunc("sortSpecs.func2")] (ж<CommentGroup> a, ж<CommentGroup> b) => cmp.Compare(a.Pos(), b.Pos()));
 
     return specs;
 }

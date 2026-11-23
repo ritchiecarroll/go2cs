@@ -27,7 +27,7 @@ internal static void main() {
     fmt.Println(p.X + p.Y);
     fmt.Printf("%T %T\n"u8, p, Ꮡp);
 
-    describe(nint (nint x) => 0);
+    describe([GoFunc("main.func1")] nint (nint x) => 0);
 
     embeddedLocalTypes();
     foreignUnderlyingLocalTypes();

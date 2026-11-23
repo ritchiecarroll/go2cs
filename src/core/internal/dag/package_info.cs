@@ -14,6 +14,9 @@
 
 using go;
 using static go.@internal.dag_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -60,11 +63,13 @@ using static go.@internal.dag_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/dag/alg.go", "alg.cs", "AAsQkpSCgqaCgsyygpSCkoKUgpSClIKUgpSqtIKCgoKC", "29-38:1")]
-[assembly: GoPositionMap("internal/dag/parse.go", "parse.cs", "ADpygsaCgpSCgoKmgqaCpoKmooKClIbMsoKUgoKokpKUgoKClIKCgpSClIKClIKU7oKCgtyCgoKCuJTugoKCgtyCpgANGIIACgjSgoKUpMS2lIKCgoKCgpSUgpSCgoKClIKUlgAOFpLosoKClIKUpJSUgoIACA6igoKUpIKCpoKUgqaCgpSCpoKkgqaCgpSCgoI=", "88-90:1;108-110:1;196-206:1", "", "", "", "217:21,218:13")]
+[assembly: GoPositionMap("internal/dag/alg.go", "alg.cs", "AAcQkpSCgqaCgsyygpSCkoKUgpSClIKUgpSqtIKCgoKC", "29-38:1")]
+[assembly: GoPositionMap("internal/dag/parse.go", "parse.cs", "ADlygqaCgpSCgoKmgqaCpoKmooKClIassoKUgoKokpKUgoKClIKCgpSClIKClIKU7oKCgtyCgoKCuJTugoKCgtyCpgALGIIACAjSgoKUpMS2lIKCgoKCgpSUgpSCgoKClIKUlgAMFpLosoKClIKUpJSUgoIACA6igoKUpIKCpoKUgqaCgpSCpoKkgqaCgpSCgoI=", "88-90:1;108-110:1;196-206:1", "", "", "", "208:50,209:13")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;
+
+using static go.@internal.dag_package;
 
 [GoPackage("dag")]
 public static partial class dag_package
@@ -102,7 +107,32 @@ public static partial class dag_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(dag_package.Graph)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dagᴛGraph;
-[GoMethodHost(typeof(dag_package.rulesParser)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dagᴛrulesParser;
-[GoMethodHost(typeof(dag_package.syntaxError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dagᴛsyntaxError;
+[GoMethodHost(typeof(dag_package.Graph)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class dagᴛGraph;
+[GoMethodHost(typeof(dag_package.rulesParser)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class dagᴛrulesParser;
+[GoMethodHost(typeof(dag_package.syntaxError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class dagᴛsyntaxError;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class dagᴛGraph {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Transpose(this ref Graph g) => dag_package.Transpose⁔(ref g);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<@string> Topo(this ж<Graph> Ꮡg) => dag_package.Topo⁔(Ꮡg);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void TransitiveReduction(this ref Graph g) => dag_package.TransitiveReduction⁔(ref g);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool addNode(this ref Graph g, @string label) => dag_package.addNode⁔(ref g, label);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void AddEdge(this ref Graph g, @string from, @string to) => dag_package.AddEdge⁔(ref g, from, to);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void DelEdge(this ref Graph g, @string from, @string to) => dag_package.DelEdge⁔(ref g, from, to);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool HasEdge(this ref Graph g, @string from, @string to) => dag_package.HasEdge⁔(ref g, from, to);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<@string> Edges(this ж<Graph> Ꮡg, @string from) => dag_package.Edges⁔(Ꮡg, from);
+}
+partial class dagᴛrulesParser {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void syntaxError(this ref rulesParser p, @string msg) => dag_package.syntaxError⁔(ref p, msg);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<@string> list, @string token) nextList(this ref rulesParser p) => dag_package.nextList⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string nextToken(this ref rulesParser p) => dag_package.nextToken⁔(ref p);
+}
+partial class dagᴛsyntaxError {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string Error(this syntaxError e) => dag_package.Error⁔(e);
+}
+// </MethodForwarders>

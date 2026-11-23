@@ -13,7 +13,7 @@ partial class main_package {
 internal static error writeRawConn(syscall.RawConn c, slice<byte> b) {
     ref var operr = ref heap<error>(out var Ꮡoperr);
     var bʗ1 = b;
-    var err = c.Write((uintptr s) => {
+    var err = c.Write([GoFunc("writeRawConn.func1")] (uintptr s) => {
         ref var written = ref heap(new uint32(), out var Ꮡwritten);
         ref var buf = ref heap<syscall.WSABuf>(new syscall.WSABuf(Len: (uint32)len(bʗ1), Buf: Ꮡ(bʗ1, 0)), out var Ꮡbuf);
         Ꮡoperr.ValueSlot = syscall.WSASend((syscall.Handle)s, Ꮡbuf, 1, Ꮡwritten, 0, nil, nil);
@@ -29,7 +29,7 @@ internal static (nint, error) readRawConn(syscall.RawConn c, slice<byte> b) {
     ref var operr = ref heap<error>(out var Ꮡoperr);
     nint n = default;
     var bʗ1 = b;
-    var err = c.Read((uintptr s) => {
+    var err = c.Read([GoFunc("readRawConn.func1")] (uintptr s) => {
         ref var read = ref heap(new uint32(), out var Ꮡread);
         ref var flags = ref heap(new uint32(), out var Ꮡflags);
         ref var buf = ref heap(new syscall.WSABuf(), out var Ꮡbuf);
@@ -58,7 +58,7 @@ internal static partial (ж<Δnet.TCPConn>, ж<Δnet.TCPConn>) pair() {
         var accepted = new channel<Δnet.Conn>(1);
         var acceptedʗ1 = accepted;
         var lnʗ2 = ln;
-        goǃ(() => {
+        goǃ([GoFunc("pair.func1")] () => {
             var (c, errΔ1) = lnʗ2.Accept();
             if (errΔ1 != nil) {
                 throw panic(fmt.Sprintf("Accept: %v"u8, errΔ1));
@@ -115,7 +115,7 @@ internal static @string rawReadFull(ж<Δnet.TCPConn> c, nint n) {
 internal static partial void step(@string name, Func<@string> body) {
     var done = new channel<@string>(1);
     var doneʗ1 = done;
-    goǃ(() => {
+    goǃ([GoFunc("step.func1")] () => {
         doneʗ1.ᐸꟷ(body());
     });
 
@@ -143,7 +143,7 @@ internal static void main() {
 
         var clientʗ2 = client;
         var serverʗ2 = server;
-        step("1 raw write", () => {
+        step("1 raw write", [GoFunc("main.func1")] () => {
             var err = writeRawConn(rawOf(clientʗ2), slice<byte>("raw hello"u8)); if (err != nil) {
                 return "write: "u8 + err.Error();
             }
@@ -152,7 +152,7 @@ internal static void main() {
 
         var clientʗ3 = client;
         var serverʗ3 = server;
-        step("2 raw read", () => {
+        step("2 raw read", [GoFunc("main.func2")] () => {
             var (_, err) = serverʗ3.Write(slice<byte>("plain reply"u8)); if (err != nil) {
                 return "write: "u8 + err.Error();
             }
@@ -161,7 +161,7 @@ internal static void main() {
 
         var clientʗ4 = client;
         var serverʗ4 = server;
-        step("3 ordinary after raw", () => {
+        step("3 ordinary after raw", [GoFunc("main.func3")] () => {
             {
                 var (_, err) = clientʗ4.Write(slice<byte>("ping"u8)); if (err != nil) {
                     return "client write: "u8 + err.Error();
@@ -176,7 +176,7 @@ internal static void main() {
             return got + " "u8 + readFull(clientʗ4, 4);
         });
 
-        step("4 two connections at once", [MethodImpl(MethodImplOptions.NoInlining)] () => {
+        step("4 two connections at once", [MethodImpl(MethodImplOptions.NoInlining), GoFunc("main.func4")] () => {
             GoFrame ᒐ = default;
             try {
                 const nint rounds = 200;
@@ -194,7 +194,7 @@ internal static void main() {
                 var results = new slice<@string>(2);
                 ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
                 var resultsʗ1 = results;
-                void run(nint i, ж<Δnet.TCPConn> from, ж<Δnet.TCPConn> to, byte tag) {
+                [GoFunc("main.func4.1")] void run(nint i, ж<Δnet.TCPConn> from, ж<Δnet.TCPConn> to, byte tag) {
                     GoFrame ᒐ = default;
                     try {
                         defer(Ꮡwg.Done, ref ᒐ);

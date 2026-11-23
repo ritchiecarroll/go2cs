@@ -86,7 +86,7 @@ internal static partial void boundaryCaps() {
 }
 
 internal static partial void closureLocalCaps() {
-    var f = () => {
+    var f = [GoFunc("closureLocalCaps.func1")] () => {
         var wᴷ = new stackAppend<int64>();
         slice<int64> w = default;
         w = append(wᴷ, w, (int64)1);
@@ -99,7 +99,7 @@ internal static partial nint run(Func<nint> f) { return f(); }
 
 internal static partial void closureOuterCap() {
     ref var w = ref heap<slice<int64>>(out var Ꮡw);
-    var f = () => {
+    var f = [GoFunc("closureOuterCap.func1")] () => {
         Ꮡw.ValueSlot = append(Ꮡw.ValueSlot, (int64)1);
         return len(Ꮡw.ValueSlot);
     };
@@ -137,7 +137,7 @@ internal static partial void literalNameCaps() {
         buf = append(bufᴷ, buf, (int64)1);
         fmt.Print(cap(buf), " ");
     }
-    var f = () => {
+    var f = [GoFunc("literalNameCaps.func1")] () => {
         var bufᴷ = new stackAppend<int64>();
         slice<int64> buf = default;
         buf = append(bufᴷ, buf, (int64)1);

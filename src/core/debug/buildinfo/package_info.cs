@@ -10,10 +10,14 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+using io = go.io_package;
 // </ImportedTypeAliases>
 
 using go;
 using static go.debug.buildinfo_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -86,10 +90,13 @@ using static go.debug.buildinfo_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("debug/buildinfo/buildinfo.go", "buildinfo.cs", "AC1OAA0cygAEFAAJAoKCgoK4goKUkuyygoKUgoKUggAMIgAJBoKCpoKUgoKUtIKClLSCgpS0goKUtIKClLSCgpS0AAcQgoKmgoK4goKCgpSCpgAiSoKCgoKUgoK4goKCgpSUgoKSgqSUgpSClKaUpqaCgoKUpqbcgoKCgqaCgpSUgoKClIKClJSmqJKCgpSCgoKClM6igpS4goKmgtyCgoKmgriCpoKUgoKmgoKCgpSUlJSCuJSCpqampoKCgqaCgpSmgoKCpoKClAAJEIKCgoKmpoKCgqaCgqYACxCClKSUpoKCgoKCpqaEAAkWgoSmAAsQgoKCgpSCgpSCpqaUgoKokoKCgqYADxCCgoKCpqaCgpQADxCCgpTmgoKCgqY=", "69-75:1;250-250:1", "", "", "93:21", "80:21,81:13")]
+[assembly: GoPositionMap("debug/buildinfo/buildinfo.go", "buildinfo.cs", "ACxOAA0cygAEFAAJAoKCgoK4goKUkuyygoKUgoKUggAMIgAJBoKCpoKUgoKUtIKClLSCgpS0goKUtIKClLSCgpS0AAcQgoKmgoK4goKCgpSCpgAiSoKCgoKUgoK4goKCgpSUgoKSgqSUgpSClKaUpqaCgoKUpqbcgoKCgqaCgpSUgoKClIKClJSmqJKCgpSCgoKClM6igpS4goKmgtyCgoKmgriCpoKUgoKmgoKCgpSUlJSCuJSCpqampoKCgqaCgpSmgoKCpoKClAAHEIKCgoKmpoKCgqaCgqYABxCClKSUpoKCgoKCpqaEAAkWgoSmAAcQgoKCgpSCgpSCpqaUgoKokoKCgqYACxCCgoKCpqaCgpQACxCCgpSmgoKCgqY=", "69-75:1;250-250:1", "", "", "92:21", "79:48,80:13")]
 // </GoSourcePositionMaps>
 
 namespace go.debug;
+
+using static go.debug.buildinfo_package;
+using io = go.io_package;
 
 [GoPackage("buildinfo")]
 public static partial class buildinfo_package
@@ -140,9 +147,37 @@ public static partial class buildinfo_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(buildinfo_package.elfExe)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class buildinfoᴛelfExe;
-[GoMethodHost(typeof(buildinfo_package.machoExe)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class buildinfoᴛmachoExe;
-[GoMethodHost(typeof(buildinfo_package.peExe)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class buildinfoᴛpeExe;
-[GoMethodHost(typeof(buildinfo_package.plan9objExe)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class buildinfoᴛplan9objExe;
-[GoMethodHost(typeof(buildinfo_package.xcoffExe)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class buildinfoᴛxcoffExe;
+[GoMethodHost(typeof(buildinfo_package.elfExe)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class buildinfoᴛelfExe;
+[GoMethodHost(typeof(buildinfo_package.machoExe)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class buildinfoᴛmachoExe;
+[GoMethodHost(typeof(buildinfo_package.peExe)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class buildinfoᴛpeExe;
+[GoMethodHost(typeof(buildinfo_package.plan9objExe)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class buildinfoᴛplan9objExe;
+[GoMethodHost(typeof(buildinfo_package.xcoffExe)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class buildinfoᴛxcoffExe;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class buildinfoᴛelfExe {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (io.ReaderAt, error) DataReader(this ref elfExe x, uint64 addr) => buildinfo_package.DataReader⁔(ref x, addr);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (uint64, uint64) DataStart(this ref elfExe x) => buildinfo_package.DataStart⁔(ref x);
+}
+partial class buildinfoᴛmachoExe {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (io.ReaderAt, error) DataReader(this ref machoExe x, uint64 addr) => buildinfo_package.DataReader⁔(ref x, addr);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (uint64, uint64) DataStart(this ref machoExe x) => buildinfo_package.DataStart⁔(ref x);
+}
+partial class buildinfoᴛpeExe {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static uint64 imageBase(this ref peExe x) => buildinfo_package.imageBase⁔(ref x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (io.ReaderAt, error) DataReader(this ref peExe x, uint64 addr) => buildinfo_package.DataReader⁔(ref x, addr);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (uint64, uint64) DataStart(this ref peExe x) => buildinfo_package.DataStart⁔(ref x);
+}
+partial class buildinfoᴛplan9objExe {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (uint64, uint64) DataStart(this ref plan9objExe x) => buildinfo_package.DataStart⁔(ref x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (io.ReaderAt, error) DataReader(this ref plan9objExe x, uint64 addr) => buildinfo_package.DataReader⁔(ref x, addr);
+}
+partial class buildinfoᴛxcoffExe {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (io.ReaderAt, error) DataReader(this ref xcoffExe x, uint64 addr) => buildinfo_package.DataReader⁔(ref x, addr);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (uint64, uint64) DataStart(this ref xcoffExe x) => buildinfo_package.DataStart⁔(ref x);
+}
+// </MethodForwarders>

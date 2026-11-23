@@ -14,7 +14,6 @@ namespace go.crypto.@internal.boring;
 using atomic = sync.atomic_package;
 using @unsafe = unsafe_package;
 using sync;
-using static bcache_package;
 
 partial class bcache_package {
 
@@ -47,29 +46,23 @@ partial struct cacheEntry<K, V> {
 
 internal static partial void registerCache(@unsafe.Pointer _);
 
-} partial class bcacheᴛCache {
-
 // provided by runtime
 
 // Register registers the cache with the runtime,
 // so that c.ptable can be cleared at the start of each GC.
 // Register must be called during package initialization.
-public static void Register<K, V>(this ж<Cache<K, V>> Ꮡc) {
+internal static void Register⁔<K, V>(/*this*/ ж<Cache<K, V>> Ꮡc) {
     registerCache(@unsafe.Pointer.FromPinnedBox(Ꮡc.of(Cache<K, V>.Ꮡptable)));
 }
-
-} partial class bcache_package {
 
 // cacheSize is the number of entries in the hash table.
 // The hash is the pointer value mod cacheSize, a prime.
 // Collisions are resolved by maintaining a linked list in each hash slot.
 internal static UntypedInt cacheSize => 1021;
 
-} partial class bcacheᴛCache {
-
 // table returns a pointer to the current cache hash table,
 // coping with the possibility of the GC clearing it out from under us.
-internal static ж<cacheTable<K, V>> table<K, V>(this ж<Cache<K, V>> Ꮡc) {
+internal static ж<cacheTable<K, V>> table⁔<K, V>(/*this*/ ж<Cache<K, V>> Ꮡc) {
     for (;;) {
         var p = Ꮡc.of(Cache<K, V>.Ꮡptable).Load();
         if (p == nil) {
@@ -85,7 +78,7 @@ internal static ж<cacheTable<K, V>> table<K, V>(this ж<Cache<K, V>> Ꮡc) {
 // Clear clears the cache.
 // The runtime does this automatically at each garbage collection;
 // this method is exposed only for testing.
-public static void Clear<K, V>(this ж<Cache<K, V>> Ꮡc) {
+internal static void Clear⁔<K, V>(/*this*/ ж<Cache<K, V>> Ꮡc) {
     // The runtime does this at the start of every garbage collection
     // (itself, not by calling this function).
     Ꮡc.of(Cache<K, V>.Ꮡptable).Store(ж<cacheTable<K, V>>.NilBoxOfDims(1021L));
@@ -94,7 +87,7 @@ public static void Clear<K, V>(this ж<Cache<K, V>> Ꮡc) {
 // Get returns the cached value associated with v,
 // which is either the value v corresponding to the most recent call to Put(k, v)
 // or nil if that cache entry has been dropped.
-public static ж<V> Get<K, V>(this ж<Cache<K, V>> Ꮡc, ж<K> Ꮡk) {
+internal static ж<V> Get⁔<K, V>(/*this*/ ж<Cache<K, V>> Ꮡc, ж<K> Ꮡk) {
     ref var k = ref Ꮡk.DerefOrNull();
 
     var head = Ꮡc.table().at<atomic.Pointer<cacheEntry<K, V>>>((ulong)((uintptr)Ꮡk % (uintptr)cacheSize));
@@ -108,7 +101,7 @@ public static ж<V> Get<K, V>(this ж<Cache<K, V>> Ꮡc, ж<K> Ꮡk) {
 }
 
 // Put sets the cached value associated with k to v.
-public static void Put<K, V>(this ж<Cache<K, V>> Ꮡc, ж<K> Ꮡk, ж<V> v) {
+internal static void Put⁔<K, V>(/*this*/ ж<Cache<K, V>> Ꮡc, ж<K> Ꮡk, ж<V> v) {
     ref var k = ref Ꮡk.DerefOrNull();
 
     var head = Ꮡc.table().at<atomic.Pointer<cacheEntry<K, V>>>((ulong)((uintptr)Ꮡk % (uintptr)cacheSize));
@@ -161,4 +154,4 @@ public static void Put<K, V>(this ж<Cache<K, V>> Ꮡc, ж<K> Ꮡk, ж<V> v) {
     }
 }
 
-}
+} // end bcache_package

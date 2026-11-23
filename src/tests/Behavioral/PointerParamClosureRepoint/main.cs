@@ -23,7 +23,7 @@ internal static nint deepest(ж<node> n) {
         if (len(n.DerefOrNull().kids) == 0) {
             return n.DerefOrNull().val;
         }
-        n.DerefOrNull().each((ж<node> k) => {
+        n.DerefOrNull().each([GoFunc("deepest.func1")] (ж<node> k) => {
             n = k;
             return true;
         });
@@ -32,7 +32,7 @@ internal static nint deepest(ж<node> n) {
 }
 
 internal static nint afterCall(ж<node> n) {
-    void step() {
+    [GoFunc("afterCall.func1")] void step() {
         n = n.DerefOrNull().kids[0];
     }
     step();
@@ -41,7 +41,7 @@ internal static nint afterCall(ж<node> n) {
 
 internal static void writeAfter(ж<node> n) {
     var root = n;
-    void step() {
+    [GoFunc("writeAfter.func1")] void step() {
         n = n.DerefOrNull().kids[0];
     }
     step();
@@ -51,7 +51,7 @@ internal static void writeAfter(ж<node> n) {
 }
 
 internal static nint copyAfter(ж<node> n) {
-    void step() {
+    [GoFunc("copyAfter.func1")] void step() {
         n = n.DerefOrNull().kids[0];
     }
     step();
@@ -62,7 +62,7 @@ internal static nint copyAfter(ж<node> n) {
 internal static partial nint goMoved(ж<node> n) {
     var done = new channel<bool>(0);
     var doneʗ1 = done;
-    goǃ(() => {
+    goǃ([GoFunc("goMoved.func1")] () => {
         n = n.DerefOrNull().kids[0];
         doneʗ1.ᐸꟷ(true);
     });
@@ -74,10 +74,10 @@ internal static nint /*v*/ deferMoved(ж<node> n) {
     nint v = default;
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("deferMoved.func1")] () => {
             v = n.DerefOrNull().val;
         }, ref ᒐ);
-        defer(() => {
+        defer([GoFunc("deferMoved.func2")] () => {
             n = n.DerefOrNull().kids[0];
         }, ref ᒐ);
         v = n.DerefOrNull().val;
@@ -88,7 +88,7 @@ internal static nint /*v*/ deferMoved(ж<node> n) {
 }
 
 internal static nint rangeMoved(ж<node> n) {
-    void f() {
+    [GoFunc("rangeMoved.func1")] void f() {
         foreach (var (_, vᴛ1) in range(n.DerefOrNull().kids)) {
             n = vᴛ1;
 
@@ -122,7 +122,7 @@ internal static nint lastKid(this ж<node> Ꮡn) {
 
 internal static nint mixed(ж<node> n) {
     n = n.DerefOrNull().kids[0];
-    void step() {
+    [GoFunc("mixed.func1")] void step() {
         n = n.DerefOrNull().kids[0];
     }
     step();
@@ -130,7 +130,7 @@ internal static nint mixed(ж<node> n) {
 }
 
 internal static nint last(this ж<node> Ꮡn) {
-    Ꮡn.DerefOrNull().each((ж<node> k) => {
+    Ꮡn.DerefOrNull().each([GoFunc("(*node).last.func1")] (ж<node> k) => {
         Ꮡn = k;
         return false;
     });
@@ -139,7 +139,7 @@ internal static nint last(this ж<node> Ꮡn) {
 
 internal static bool errAfter(ж<error> e) {
     ref var other = ref heap<error>(out var Ꮡother);
-    void set() {
+    [GoFunc("errAfter.func1")] void set() {
         e = Ꮡother;
     }
     set();
@@ -148,7 +148,7 @@ internal static bool errAfter(ж<error> e) {
 
 internal static (nint, nint) sliceAfter(ж<slice<nint>> s) {
     ref var other = ref heap<slice<nint>>(slice<nint>([7]), out var Ꮡother);
-    void set() {
+    [GoFunc("sliceAfter.func1")] void set() {
         s = Ꮡother;
     }
     set();
@@ -170,7 +170,7 @@ internal static nint tag(this ref node n) {
 internal static nint nilCount(ж<node> n) {
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("nilCount.func1")] () => {
             n = default;
         }, ref ᒐ);
         return n.count();
@@ -183,12 +183,12 @@ internal static nint /*v*/ nilTag(ж<node> n) {
     nint v = default;
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("nilTag.func1")] () => {
             if (recover() != nil) {
                 v = -1;
             }
         }, ref ᒐ);
-        defer(() => {
+        defer([GoFunc("nilTag.func2")] () => {
             n = default;
         }, ref ᒐ);
         v = n.DerefOrNull().tag();

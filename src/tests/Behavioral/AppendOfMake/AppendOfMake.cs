@@ -62,10 +62,10 @@ internal static void main() {
     fmt.Println("refused:", withCap([1], 2), named([1], 1), arrays(default, 2));
 
     var sʗ1 = s;
-    func(() => {
+    func([GoFunc("main.func1")] () => {
         GoFrame ᒐ = default;
         try {
-            defer(() => {
+            defer([GoFunc("main.func1.1")] () => {
                 fmt.Println("negative:", recover() != nil);
             }, ref ᒐ);
             nint k = -1;

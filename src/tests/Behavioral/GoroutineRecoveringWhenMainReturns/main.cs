@@ -18,11 +18,11 @@ internal static partial void main() {
     var release = new channel<EmptyStruct>(0);
 
     var releaseʗ1 = release;
-    goǃ(() => {
+    goǃ([GoFunc("main.func1")] () => {
         GoFrame ᒐ = default;
         try {
             var releaseʗ2 = releaseʗ1;
-            defer(() => {
+            defer([GoFunc("main.func1.1")] () => {
                 recover();
                 ᐸꟷ(releaseʗ2);
                 fmt.Println("recovered");
@@ -37,7 +37,7 @@ internal static partial void main() {
     Ꮡwg.Wait();
 
     var releaseʗ3 = release;
-    time.AfterFunc(500 * time.Millisecond, () => {
+    time.AfterFunc(500 * time.Millisecond, [GoFunc("main.func2")] () => {
         close(releaseʗ3);
     });
 }

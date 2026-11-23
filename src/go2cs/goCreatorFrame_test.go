@@ -151,12 +151,12 @@ func TestGoCreatorFramesAreNotInlined(t *testing.T) {
 	// POSITIVE 5 and CONTROL 4: inside withLit, the literal that executes `go work(5)` is marked; inside
 	// spawnLit, the literal that IS the goroutine body is not.
 	withLitBody := bodyOf(t, mainCs, "withLit")
-	if !strings.Contains(withLitBody, attribute) {
+	if !strings.Contains(withLitBody, `[MethodImpl(MethodImplOptions.NoInlining), GoFunc("withLit.func1")]`) {
 		t.Errorf("withLit's literal executes a go statement, but it is not marked:\n%s", withLitBody)
 	}
 
 	spawnLitBody := bodyOf(t, mainCs, "spawnLit")
-	if strings.Contains(spawnLitBody, attribute) {
+	if strings.Contains(spawnLitBody, "MethodImpl(MethodImplOptions.NoInlining)") {
 		t.Errorf("spawnLit's literal is the goroutine body, not its creator, but it is marked:\n%s", spawnLitBody)
 	}
 }

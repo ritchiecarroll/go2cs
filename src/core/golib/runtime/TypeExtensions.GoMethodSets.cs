@@ -533,6 +533,11 @@ public static partial class TypeExtensions
             if (!ReceiverElementMatches(receiverElement, valueElement))
                 continue;
 
+            // An M:N twin (`Mꞏtwin`) is never a Go method, so it is never a candidate: reflect's NumMethod / Method(i),
+            // fmt's method checks and the interface probe and binder all read this list (IsTwinMember).
+            if (IsTwinMember(method))
+                continue;
+
             // Pointer-receiver methods are NOT part of a plain value's method set (Go semantics).
             // A pointer receiver appears in TWO emitted shapes: the RecvGenerator's ж<X> overload
             // (receiverIsPointer above) and the original `this ref X` extension — the byref strip on
@@ -706,6 +711,25 @@ public static partial class TypeExtensions
             : emittedName;
     }
 
+    /// <summary>
+    /// Whether <paramref name="method"/> is an M:N twin: a member that returns <see cref="GoTask"/> or
+    /// <see cref="GoTask{T}"/>. A twin is never part of a Go method set as reflect, fmt or the interface checks see it
+    /// (COORD's ruling, 2026-11-22, on train 3's default-mode regression: RootedUsingCapture counted sync's hand-written
+    /// <c>Lockꞏtwin</c> in <c>(*Mutex).NumMethod</c>).
+    /// </summary>
+    /// <remarks>
+    /// Decided by the return TYPE, not by the name's <c>ꞏ</c>: no Go type converts to <see cref="GoTask"/>, so no
+    /// converted Go method returns one, and every twin does, whoever wrote it. go2cs-gen's twins carry a stamp as well
+    /// (<see cref="GoTwinOfAttribute"/> on a state machine, <see cref="GoParkForwarderAttribute"/> on a forwarder), but
+    /// a hand-written twin carries neither (sync's <c>Lockꞏtwin</c>, time's <c>Sleepꞏtwin</c>), and the type read costs
+    /// no custom-attribute decode under Native AOT.
+    /// </remarks>
+    internal static bool IsTwinMember(MethodInfo method)
+    {
+        Type result = method.ReturnType;
+        return result == typeof(GoTask) || result.IsGenericType && result.GetGenericTypeDefinition() == typeof(GoTask<>);
+    }
+
     // Whether `M(this ж<X>, …)` is the ж<X> twin of a VALUE method: its own class also declares `M(this X, …)` with the
     // same remaining parameters. Go forbids a value and a pointer method of one name on X, so such a pair is one Go
     // method in two shapes. A pointer method's twin pairs with a `this ref X` original instead and is not matched. A
@@ -866,8 +890,13 @@ public static partial class TypeExtensions
         if (!interfaceType.IsInterface)
             throw new ArgumentException($"The type '{interfaceType.FullName}' is not an interface.", nameof(interfaceType));
 
-        // Get all methods directly defined on this interface
+        // Get all methods directly defined on this interface. An M:N twin member (the opt-in `GoTwinsIface=default`
+        // shape writes `Mꞏtwin` onto the interface itself) is never a Go method (IsTwinMember): the probe would demand
+        // it of every dynamic value, and reflect would count it.
         MethodInfo[] methods = interfaceType.GetMethods(BindingFlags.Public | BindingFlags.Instance);
+
+        if (methods.Any(IsTwinMember))
+            methods = [.. methods.Where(method => !IsTwinMember(method))];
 
         // Get all base interfaces
         Type[] baseInterfaces = interfaceType.GetInterfaces();
@@ -892,7 +921,10 @@ public static partial class TypeExtensions
             MethodInfo[] baseMethods = baseInterface.GetMethods(BindingFlags.Public | BindingFlags.Instance);
 
             foreach (MethodInfo method in baseMethods)
-                allMethods.Add(method);
+            {
+                if (!IsTwinMember(method))
+                    allMethods.Add(method);
+            }
         }
 
         return allMethods;

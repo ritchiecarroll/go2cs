@@ -37,7 +37,7 @@ public static void TestAllImplementations(ж<testing.T> t, @string pkg, Action<�
         return;
     }
 
-    t.Cleanup(() => {
+    t.Cleanup([GoFunc("TestAllImplementations.func1")] () => {
         impl.Reset(pkg);
     });
 
@@ -46,7 +46,7 @@ public static void TestAllImplementations(ж<testing.T> t, @string pkg, Action<�
             var available = impl.Select(pkg, name); if (available) {
                 t.Run(name, f);
             } else {
-                t.Run(name, (ж<testing.T> tΔ1) => {
+                t.Run(name, [GoFunc("TestAllImplementations.func2")] (ж<testing.T> tΔ1) => {
                     // Report an error if we're on the most capable builder for the
                     // architecture and the builder can't test this implementation.
                     if (flagshipBuilder()) {

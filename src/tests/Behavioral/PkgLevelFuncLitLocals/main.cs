@@ -20,19 +20,19 @@ partial struct entry {
     internal Func<nint> f;
 }
 
-[GoLazy] partial class lazyᴛtable { internal static slice<entry> table = [
-    new("var-decl", () => {
+[GoLazy] partial class lazyᴛtable { internal static slice<entry> table = new entry[]{
+    new("var-decl", [GoFunc("init.func1")] () => {
         ref var c = ref heap(new counter(), out var Ꮡc);
         Ꮡc.inc(3);
         Ꮡc.inc(4);
         return c.get();
     }),
-    new("short-define", () => {
+    new("short-define", [GoFunc("init.func2")] () => {
         ref var c = ref heap<counter>(new counter(n: 10), out var Ꮡc);
         Ꮡc.inc(5);
         return c.get();
     }),
-    new("for-init", () => {
+    new("for-init", [GoFunc("init.func3")] () => {
         nint total = 0;
         for (var cᴛ1 = (new counter(n: 1)); cᴛ1.get() < 4; ) {
             ref var c = ref heap<counter>(out var Ꮡc);
@@ -43,14 +43,14 @@ partial struct entry {
         }
         return total;
     }),
-    new("if-init", () => {
+    new("if-init", [GoFunc("init.func4")] () => {
         ref var c = ref heap<counter>((new counter(n: 7)), out var Ꮡc); if (c.get() > 0) {
             Ꮡc.inc(2);
             return c.get();
         }
         return -1;
     }),
-    new("switch-init", () => {
+    new("switch-init", [GoFunc("init.func5")] () => {
         ref var c = ref heap<counter>((new counter(n: 20)), out var Ꮡc);
         switch (ᐧ) {
         default: {
@@ -59,7 +59,7 @@ partial struct entry {
         }}
 
     }),
-    new("range-value", () => {
+    new("range-value", [GoFunc("init.func6")] () => {
         nint total = 0;
         foreach (var (_, vᴛ1) in range(slice<counter>([new(n: 1), new(n: 2)]))) {
             ref var c = ref heap(new counter(), out var Ꮡc);
@@ -70,18 +70,18 @@ partial struct entry {
         }
         return total;
     }),
-    new("nested-literal", () => {
+    new("nested-literal", [GoFunc("init.func7")] () => {
         ref var c = ref heap(new counter(), out var Ꮡc);
-        void inner() {
+        [GoFunc("init.func7.1")] void inner() {
             Ꮡc.inc(6);
         }
         inner();
         inner();
         return Ꮡc.Value.get();
     })
-]; }
+}.slice(); }
 
-[GoLazy] partial class lazyᴛsingle { internal static Func<nint> single = () => {
+[GoLazy] partial class lazyᴛsingle { internal static Func<nint> single = [GoFunc("init.func8")] () => {
     ref var c = ref heap(new counter(), out var Ꮡc);
     Ꮡc.inc(21);
     Ꮡc.inc(21);

@@ -246,7 +246,7 @@ internal static slice<pair> tgs(slice<@string> x, slice<@string> y) {
         var i = iᴛ1;
         var Jʗ1 = J;
         var Tʗ1 = T;
-        nint kΔ1 = sort.Search(n, (nint kΔ2) => Tʗ1[kΔ2] >= Jʗ1[i]);
+        nint kΔ1 = sort.Search(n, [GoFunc("tgs.func1")] (nint kΔ2) => Tʗ1[kΔ2] >= Jʗ1[i]);
         T[kΔ1] = J[i];
         L[i] = kΔ1 + 1;
     }

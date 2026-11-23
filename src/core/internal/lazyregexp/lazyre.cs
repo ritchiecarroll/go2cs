@@ -11,7 +11,6 @@ using regexp = regexp_package;
 using strings = strings_package;
 using sync = go.sync_package;
 using go;
-using static lazyregexp_package;
 
 partial class lazyregexp_package {
 
@@ -23,53 +22,49 @@ partial struct Regexp {
     internal ж<regexp.Regexp> rx;
 }
 
-} partial class lazyregexpᴛRegexp {
-
-internal static ж<regexp.Regexp> re(this ж<Regexp> Ꮡr) {
+internal static ж<regexp.Regexp> re⁔(/*this*/ ж<Regexp> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     Ꮡr.Ꮡonce.Do(Ꮡr.build);
     return r.rx;
 }
 
-internal static void build(this ref Regexp r) {
+internal static void build⁔(/*this*/ ref Regexp r) {
     r.rx = regexp.MustCompile(r.str);
     r.str = ""u8;
 }
 
-public static slice<slice<byte>> FindSubmatch(this ж<Regexp> Ꮡr, slice<byte> s) {
+internal static slice<slice<byte>> FindSubmatch⁔(/*this*/ ж<Regexp> Ꮡr, slice<byte> s) {
     return Ꮡr.re().FindSubmatch(s);
 }
 
-public static slice<@string> FindStringSubmatch(this ж<Regexp> Ꮡr, @string s) {
+internal static slice<@string> FindStringSubmatch⁔(/*this*/ ж<Regexp> Ꮡr, @string s) {
     return Ꮡr.re().FindStringSubmatch(s);
 }
 
-public static slice<nint> FindStringSubmatchIndex(this ж<Regexp> Ꮡr, @string s) {
+internal static slice<nint> FindStringSubmatchIndex⁔(/*this*/ ж<Regexp> Ꮡr, @string s) {
     return Ꮡr.re().FindStringSubmatchIndex(s);
 }
 
-public static @string ReplaceAllString(this ж<Regexp> Ꮡr, @string src, @string repl) {
+internal static @string ReplaceAllString⁔(/*this*/ ж<Regexp> Ꮡr, @string src, @string repl) {
     return Ꮡr.re().ReplaceAllString(src, repl);
 }
 
-public static @string FindString(this ж<Regexp> Ꮡr, @string s) {
+internal static @string FindString⁔(/*this*/ ж<Regexp> Ꮡr, @string s) {
     return Ꮡr.re().FindString(s);
 }
 
-public static slice<@string> FindAllString(this ж<Regexp> Ꮡr, @string s, nint n) {
+internal static slice<@string> FindAllString⁔(/*this*/ ж<Regexp> Ꮡr, @string s, nint n) {
     return Ꮡr.re().FindAllString(s, n);
 }
 
-public static bool MatchString(this ж<Regexp> Ꮡr, @string s) {
+internal static bool MatchString⁔(/*this*/ ж<Regexp> Ꮡr, @string s) {
     return Ꮡr.re().MatchString(s);
 }
 
-public static slice<@string> SubexpNames(this ж<Regexp> Ꮡr) {
+internal static slice<@string> SubexpNames⁔(/*this*/ ж<Regexp> Ꮡr) {
     return Ꮡr.re().SubexpNames();
 }
-
-} partial class lazyregexp_package {
 
 internal static bool inTest = len(os.Args) > 0 && strings.HasSuffix(strings.TrimSuffix(os.Args[0], ".exe"), ".test");
 

@@ -125,6 +125,47 @@ public class TwinStampTests
         }
         """;
 
+    // A literal the converter writes with attributes of its own (a caller-observing literal's NoInlining, and the literal
+    // name a GoFunc attribute will carry): its twin keeps them beside the [GoTwinOf] stamp. StampLiteral replaced the
+    // literal's attribute lists with the stamp, so the twin lost both.
+    private const string AttributedLiteral = """
+        using System;
+        using System.Runtime.CompilerServices;
+        using static go.builtin;
+
+        namespace go;
+
+        public static partial class attributed_package
+        {
+            internal static channel<nint> ch;
+
+            internal static nint two() { var a = ᐸꟷ(ch); var b = ᐸꟷ(ch); return a + b; }
+
+            public static void starts()
+            {
+                goǃ([MethodImpl(MethodImplOptions.NoInlining), System.ComponentModel.Description("kept")] () => { var v = two(); ch.ᐸꟷ(v); });
+                _ = two();
+            }
+        }
+        """;
+
+    [TestMethod]
+    public void ATwinnedLiteralKeepsItsOwnAttributesBesideTheStamp()
+    {
+        using Built built = Build(AttributedLiteral);
+
+        (Type Machine, System.Reflection.MethodInfo Kickoff)[] literals = [.. built.Twins().Where(twin => twin.Machine.Name.Contains(">b__", StringComparison.Ordinal))];
+        Assert.IsTrue(literals.Length > 0, "the go statement's literal has a twin: " + string.Join(", ", built.Twins().Select(twin => twin.Machine.Name)));
+
+        foreach ((Type machine, System.Reflection.MethodInfo kickoff) in literals)
+        {
+            Assert.IsNotNull(Stamp(kickoff), $"{machine.Name}: the twin's stamp");
+            Assert.IsTrue(kickoff.GetCustomAttributesData().Any(attribute => attribute.AttributeType.FullName == "System.ComponentModel.DescriptionAttribute"),
+                $"{machine.Name}: the literal's own attribute is kept beside the stamp");
+            Assert.IsTrue(kickoff.MethodImplementationFlags.HasFlag(MethodImplAttributes.NoInlining), $"{machine.Name}: and so is its NoInlining");
+        }
+    }
+
     [TestMethod]
     public void SameNamedTwinsInOneClassStampTheirOwnOrigins()
     {

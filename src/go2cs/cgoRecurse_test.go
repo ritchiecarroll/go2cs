@@ -415,7 +415,7 @@ func TestARecurseCgoConversionForAnotherTargetWithoutANamedCCIsRefused(t *testin
 		t.Fatalf("a -cgo conversion for %s with no C compiler named for it converted:\n%s", target, combined)
 	}
 
-	for _, want := range []string{"R3", target, "CC"} {
+	for _, want := range []string{"this -cgo conversion", target, "CC"} {
 		if !strings.Contains(combined, want) {
 			t.Errorf("the refusal does not name %q:\n%s", want, combined)
 		}
@@ -442,7 +442,7 @@ func TestARecurseCgoConversionForAnotherTargetWithTheHostsCCIsRefused(t *testing
 		t.Fatalf("a -cgo conversion for %s with the host's C compiler named as CC converted:\n%s", target, combined)
 	}
 
-	for _, want := range []string{"R3", target, "-dumpmachine"} {
+	for _, want := range []string{"this -cgo conversion", target, "-dumpmachine"} {
 		if !strings.Contains(combined, want) {
 			t.Errorf("the refusal does not name %q:\n%s", want, combined)
 		}
@@ -509,7 +509,7 @@ func TestARecurseCgoConversionWithASysrootIsRefused(t *testing.T) {
 		t.Fatalf("a -cgo conversion with a sysroot converted:\n%s", combined)
 	}
 
-	for _, want := range []string{"R3", "sysroot", "CGO_CFLAGS"} {
+	for _, want := range []string{"this -cgo conversion", "sysroot", "CGO_CFLAGS"} {
 		if !strings.Contains(combined, want) {
 			t.Errorf("the refusal does not name %q:\n%s", want, combined)
 		}
@@ -526,7 +526,7 @@ func TestARecurseCgoConversionWithCppSourcesAtTheHostsTargetConvertsAsBefore(t *
 	combined, output, err := convertCgoRecurse(t, map[string]string{"cptr/cptr.go": cgoRecurseCptr, "cptr/helper.cc": "int go2cs_helper() { return 1; }\n",
 		"main.go": cgoRecurseMain}, "-recurse=nuget", "-cgo=true")
 
-	if err != nil || strings.Contains(combined, "R3") {
+	if err != nil || strings.Contains(combined, "C compiler only") {
 		t.Fatalf("a host-target conversion of a package with C++ sources did not convert as it did before 2a (%v):\n%s", err, combined)
 	}
 
@@ -551,7 +551,7 @@ func TestARecurseCgoConversionWithCppSourcesForAnotherTargetIsRefused(t *testing
 
 	_ = err
 
-	for _, want := range []string{"R3", "C++", "CXX", "helper.cc"} {
+	for _, want := range []string{"C compiler only", "C++", "CXX", "helper.cc"} {
 		if !strings.Contains(combined, want) {
 			t.Errorf("the refusal does not name %q:\n%s", want, combined)
 		}
@@ -624,7 +624,7 @@ func TestARecurseCgoConversionWithAMuslCompilerIsRefused(t *testing.T) {
 		t.Fatalf("a -cgo conversion with a musl C compiler converted:\n%s", combined)
 	}
 
-	for _, want := range []string{"R3", "musl"} {
+	for _, want := range []string{"this -cgo conversion", "musl"} {
 		if !strings.Contains(combined, want) {
 			t.Errorf("the refusal does not name %q:\n%s", want, combined)
 		}
@@ -643,7 +643,7 @@ func TestARecurseCgoConversionWithATargetFlagInCgoCflagsIsRefused(t *testing.T) 
 				t.Fatalf("a -cgo conversion with a target flag in %s converted:\n%s", name, combined)
 			}
 
-			for _, want := range []string{"R3", name, "--target"} {
+			for _, want := range []string{"this -cgo conversion", name, "--target"} {
 				if !strings.Contains(combined, want) {
 					t.Errorf("the refusal does not name %q:\n%s", want, combined)
 				}

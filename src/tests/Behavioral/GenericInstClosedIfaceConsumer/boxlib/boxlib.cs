@@ -1,7 +1,5 @@
 namespace go.GenericInstClosedIfaceConsumer;
 
-using static boxlib_package;
-
 partial class boxlib_package {
 
 partial struct Point {
@@ -12,11 +10,7 @@ partial struct Box<T> {
     public T V;
 }
 
-} partial class boxlibᴛBox {
-
-public static T Val<T>(this Box<T> b) { return b.V; }
-
-} partial class boxlib_package {
+internal static T Val⁔<T>(/*this*/ Box<T> b) { return b.V; }
 
 partial interface Valuer {
     Point Val();

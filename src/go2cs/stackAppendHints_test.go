@@ -542,7 +542,7 @@ func TestStackAppendEmission(t *testing.T) {
 		}
 	}
 
-	if lambda, buffer := strings.Index(emitted, "run(() =>"), strings.Index(emitted, "var innerᴷ"); lambda < 0 || buffer < lambda {
+	if lambda, buffer := strings.Index(emitted, `run([GoFunc("closures.func1")] () =>`), strings.Index(emitted, "var innerᴷ"); lambda < 0 || buffer < lambda {
 		t.Errorf("innerᴷ is declared at %d, want inside the literal's body (after %d):\n%s", buffer, lambda, emitted)
 	}
 }

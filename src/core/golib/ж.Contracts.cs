@@ -352,6 +352,9 @@ public interface IGoReflectPointer
 /// </summary>
 internal interface IGoReflectBox
 {
+    /// <summary>Whether the box's number is a token, a held address or an address nothing holds still.</summary>
+    PointerStorage StorageKind { get; }
+
     /// <summary>Whether this is a nil pointer.</summary>
     bool IsNilPointer { get; }
 

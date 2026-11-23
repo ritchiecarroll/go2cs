@@ -59,7 +59,7 @@ internal static void main() {
     nint minValue = Min<nint>(42, 17);
     fmt.Printf("Min value: %d\n"u8, minValue);
 
-    nint strLength = Convert<@string, nint>(helloˢ, (@string s) => len(s));
+    nint strLength = Convert<@string, nint>(helloˢ, [GoFunc("main.func1")] (@string s) => len(s));
     fmt.Printf("String length: %d\n"u8, strLength);
 
     ref var n = ref heap<nint>(5, out var Ꮡn);

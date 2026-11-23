@@ -10,10 +10,15 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+using io = go.io_package;
+using time = go.time_package;
 // </ImportedTypeAliases>
 
 using go;
 using static go.runtime.trace_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -61,16 +66,20 @@ using static go.runtime.trace_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("runtime/trace/annotation.go", "annotation.cs", "ABJMABYCgoKCggAVLIKClAAJFLL6lKaqsoKosqaCAAYgABgggoKCogACFAAIAoKUgoIACBK2soKUzLIAAhDmpqY=")]
+[assembly: GoPositionMap("runtime/trace/annotation.go", "annotation.cs", "ABFMABYCgoKCggAVLIKClAAHFLLalKaqsoKosqaCAAYgABgggoKCogACFAAIAoKUgoIACBKWsoKUrLIAAhDmpqY=")]
 [assembly: GoPositionMap("runtime/trace/batch.go", "batch.cs", "ABQuooKUgqaAgoKUpICCpIKmgoKUgqaCgpSCpoKClIKmgoKUgpSCgoKUpg==")]
 [assembly: GoPositionMap("runtime/trace/encoding.go", "encoding.cs", "AAwegpiSgoKCgoKCgpSUgpSssoKCgoKUgg==")]
-[assembly: GoPositionMap("runtime/trace/flightrecorder.go", "flightrecorder.cs", "ACpgkoKClKaClJTO4oKUgoKCuIKmgqiSgpSCpoKsoAABEAAMAoKUppSmAAcQgoKmgoKUpoKUgoKCuAAdNMY=")]
-[assembly: GoPositionMap("runtime/trace/recorder.go", "recorder.cs", "ABUq8pSSlILKgoKUgoKUgpSCgpSmgpSClIKU5oKmpgAHEIKCuIKUgpSCgqYACxSCqPySABsykg==", "24-31:1", "", "", "", "33:21,34:13")]
-[assembly: GoPositionMap("runtime/trace/subscribe.go", "subscribe.cs", "ACA60oKUgoKClIKUgoKCgpTW0oKUlIKCgpSClILW0oKUgoKClIKUgoKCgpTW0oKUlIKCgpSClILWopSUgqaCpqKClIKCgqa4gpS4ooIACBKCgoKUgoKClIKmgoKClIKUgpSCgriCgoKCgpSClILKgsg=", "157-198:1")]
+[assembly: GoPositionMap("runtime/trace/flightrecorder.go", "flightrecorder.cs", "AClgkoKClKaClJSu4oKUgoKCuIKmgqiSgpSCpoKsoAABEAAMAoKUppSmAAcQgoKmgoKUpoKUgoKCuAAbNMY=")]
+[assembly: GoPositionMap("runtime/trace/recorder.go", "recorder.cs", "ABIq8pSSlILKgoKUgoKUgpSCgpSmgpSClIKU5oKmpgAHEIKCuIKUgpSCgqYACRSCqNySABcykg==", "24-31:1", "", "", "", "30:57,31:13")]
+[assembly: GoPositionMap("runtime/trace/subscribe.go", "subscribe.cs", "AB060oKUgoKClIKUgoKCgpTW0oKUlIKCgpSClILW0oKUgoKClIKUgoKCgpTW0oKUlIKCgpSClILWopSUgqaCpqKClIKCgqa4gpS4ooIACBKCgoKUgoKClIKmgoKClIKUgpSCgriCgoKCgpSClILKgqg=", "157-198:1")]
 [assembly: GoPositionMap("runtime/trace/trace.go", "trace.cs", "AHLsAbKqog==")]
 // </GoSourcePositionMaps>
 
 namespace go.runtime;
+
+using static go.runtime.trace_package;
+using io = go.io_package;
+using time = go.time_package;
 
 [GoPackage("trace")]
 public static partial class trace_package
@@ -123,11 +132,50 @@ public static partial class trace_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(trace_package.FlightRecorder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class traceᴛFlightRecorder;
-[GoMethodHost(typeof(trace_package.Region)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class traceᴛRegion;
-[GoMethodHost(typeof(trace_package.Task)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class traceᴛTask;
-[GoMethodHost(typeof(trace_package.eventTime)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class traceᴛeventTime;
-[GoMethodHost(typeof(trace_package.frequency)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class traceᴛfrequency;
-[GoMethodHost(typeof(trace_package.recorder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class traceᴛrecorder;
-[GoMethodHost(typeof(trace_package.traceMultiplexer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class traceᴛtraceMultiplexer;
+[GoMethodHost(typeof(trace_package.FlightRecorder)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class traceᴛFlightRecorder;
+[GoMethodHost(typeof(trace_package.Region)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class traceᴛRegion;
+[GoMethodHost(typeof(trace_package.Task)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class traceᴛTask;
+[GoMethodHost(typeof(trace_package.eventTime)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class traceᴛeventTime;
+[GoMethodHost(typeof(trace_package.frequency)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class traceᴛfrequency;
+[GoMethodHost(typeof(trace_package.recorder)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class traceᴛrecorder;
+[GoMethodHost(typeof(trace_package.traceMultiplexer)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class traceᴛtraceMultiplexer;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class traceᴛFlightRecorder {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Start(this ж<FlightRecorder> Ꮡfr) => trace_package.Start⁔(Ꮡfr);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Stop(this ref FlightRecorder fr) => trace_package.Stop⁔(ref fr);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Enabled(this ref FlightRecorder fr) => trace_package.Enabled⁔(ref fr);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (int64 n, error err) WriteTo(this ж<FlightRecorder> Ꮡfr, io.Writer w) => trace_package.WriteTo⁔(Ꮡfr, w);
+}
+partial class traceᴛRegion {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void End(this ж<Region> Ꮡr) => trace_package.End⁔(Ꮡr);
+}
+partial class traceᴛTask {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void End(this ref Task t) => trace_package.End⁔(ref t);
+}
+partial class traceᴛeventTime {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static time.Duration Sub(this eventTime t, eventTime t0) => trace_package.Sub⁔(t, t0);
+}
+partial class traceᴛfrequency {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static eventTime mul(this frequency f, timestamp t) => trace_package.mul⁔(f, t);
+}
+partial class traceᴛrecorder {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) Write(this ж<recorder> Ꮡw, slice<byte> b) => trace_package.Write⁔(Ꮡw, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void endGeneration(this ref recorder w) => trace_package.endGeneration⁔(ref w);
+}
+partial class traceᴛtraceMultiplexer {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error subscribeFlightRecorder(this ж<traceMultiplexer> Ꮡt, ж<recorder> Ꮡr) => trace_package.subscribeFlightRecorder⁔(Ꮡt, Ꮡr);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error unsubscribeFlightRecorder(this ж<traceMultiplexer> Ꮡt) => trace_package.unsubscribeFlightRecorder⁔(Ꮡt);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error subscribeTraceStartWriter(this ж<traceMultiplexer> Ꮡt, io.Writer w) => trace_package.subscribeTraceStartWriter⁔(Ꮡt, w);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void unsubscribeTraceStartWriter(this ж<traceMultiplexer> Ꮡt) => trace_package.unsubscribeTraceStartWriter⁔(Ꮡt);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error addedSubscriber(this ж<traceMultiplexer> Ꮡt) => trace_package.addedSubscriber⁔(Ꮡt);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void removingSubscriber(this ж<traceMultiplexer> Ꮡt) => trace_package.removingSubscriber⁔(Ꮡt);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void removedSubscriber(this ref traceMultiplexer t) => trace_package.removedSubscriber⁔(ref t);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error startLocked(this ж<traceMultiplexer> Ꮡt) => trace_package.startLocked⁔(Ꮡt);
+}
+// </MethodForwarders>

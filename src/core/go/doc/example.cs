@@ -125,7 +125,7 @@ public static slice<ж<Example>> Examples(params ꓸꓸꓸжastꓸFile testFiles
         list = appendꓸꓸꓸ(list, flist);
     }
     // sort by name
-    slices.SortFunc(list, (ж<Example> a, ж<Example> b) => cmp.Compare(a.Name, b.Name));
+    slices.SortFunc(list, [GoFunc("Examples.func1")] (ж<Example> a, ж<Example> b) => cmp.Compare(a.Name, b.Name));
     return list;
 }
 
@@ -237,7 +237,7 @@ internal static ж<ast.File> playExample(ref ast.File @file, ref ast.FuncDecl f)
     // imports from that group.
     var groupStarts = findImportGroupStarts(@file.Imports);
     var groupStartsʗ1 = groupStarts;
-    token.Pos groupStart(ж<ast.ImportSpec> s) {
+    [GoFunc("playExample.func1")] token.Pos groupStart(ж<ast.ImportSpec> s) {
         foreach (var (i, start) in range(groupStartsʗ1)) {
             if (s.Path.ValuePos < start) {
                 return groupStartsʗ1[i - 1];
@@ -350,8 +350,8 @@ internal static ж<ast.File> playExample(ref ast.File @file, ref ast.FuncDecl f)
     decls = appendꓸꓸꓸ(decls, depDecls);
     decls = append(decls, (ast.Decl)(new ast.FuncDeclжDecl(funcDecl)));
 
-    slices.SortFunc(decls, (ast.Decl a, ast.Decl b) => cmp.Compare(a.Pos(), b.Pos()));
-    slices.SortFunc(comments, (ж<ast.CommentGroup> a, ж<ast.CommentGroup> b) => cmp.Compare(a.Pos(), b.Pos()));
+    slices.SortFunc(decls, [GoFunc("playExample.func2")] (ast.Decl a, ast.Decl b) => cmp.Compare(a.Pos(), b.Pos()));
+    slices.SortFunc(comments, [GoFunc("playExample.func3")] (ж<ast.CommentGroup> a, ж<ast.CommentGroup> b) => cmp.Compare(a.Pos(), b.Pos()));
 
     // Synthesize file.
     return Ꮡ(new ast.File(
@@ -384,7 +384,7 @@ internal static (slice<ast.Decl>, map<@string, bool>) findDeclsAndUnresolved(ast
     var unresolvedʗ1 = unresolved;
     var usedDeclsʗ1 = usedDecls;
     var usedObjsʗ1 = usedObjs;
-    inspectFunc = (ast.Node n) => {
+    inspectFunc = [GoFunc("findDeclsAndUnresolved.func1")] (ast.Node n) => {
         switch (n.type()) {
         case ж<ast.Ident> e: {
             if (e.Obj == nil && e.Name != "_"u8) {
@@ -415,7 +415,7 @@ internal static (slice<ast.Decl>, map<@string, bool>) findDeclsAndUnresolved(ast
         return true;
     };
 
-    void inspectFieldList(ж<ast.FieldList> fl) {
+    [GoFunc("findDeclsAndUnresolved.func2")] void inspectFieldList(ж<ast.FieldList> fl) {
         if (fl != nil) {
             foreach (var (_, f) in range(fl.List)) {
                 ast.Inspect(f.Type, ᏑinspectFunc.ValueSlot);
@@ -573,7 +573,7 @@ internal static slice<ж<ast.ImportSpec>> findImportGroupStarts1(slice<ж<ast.Im
     var imps = new slice<ж<ast.ImportSpec>>(len(origImps));
     copy(imps, origImps);
     // Assume the imports are sorted by position.
-    slices.SortFunc(imps, (ж<ast.ImportSpec> a, ж<ast.ImportSpec> b) => cmp.Compare(a.Pos(), b.Pos()));
+    slices.SortFunc(imps, [GoFunc("findImportGroupStarts1.func1")] (ж<ast.ImportSpec> a, ж<ast.ImportSpec> b) => cmp.Compare(a.Pos(), b.Pos()));
     // Assume gofmt has been applied, so there is a blank line between adjacent imps
     // if and only if they are more than 2 positions apart (newline, tab).
     slice<ж<ast.ImportSpec>> groupStarts = default;
@@ -747,7 +747,7 @@ internal static void classifyExamples(ж<Package> Ꮡp, slice<ж<Example>> examp
 
     // Sort list of example according to the user-specified suffix name.
     foreach (var (_, exs) in ids) {
-        slices.SortFunc(exs.ValueSlot, (ж<Example> a, ж<Example> b) => cmp.Compare(a.Suffix, b.Suffix));
+        slices.SortFunc(exs.ValueSlot, [GoFunc("classifyExamples.func1")] (ж<Example> a, ж<Example> b) => cmp.Compare(a.Suffix, b.Suffix));
     }
 }
 

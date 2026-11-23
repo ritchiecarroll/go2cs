@@ -13,7 +13,6 @@ using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
 using @internal.runtime.pprof;
-using static runtime_package;
 
 partial class runtime_package {
 
@@ -110,13 +109,11 @@ partial struct unwinder {
     internal unwindFlags flags;
 }
 
-} partial class runtimeᴛunwinder {
-
 // init initializes u to start unwinding gp's stack and positions the
 // iterator on gp's innermost frame. gp must not be the current G.
 //
 // A single unwinder can be reused for multiple unwinds.
-internal static void init(this ж<unwinder> Ꮡu, ж<g> gp, unwindFlags flags) {
+internal static void init⁔(/*this*/ ж<unwinder> Ꮡu, ж<g> gp, unwindFlags flags) {
     // Implementation note: This starts the iterator on the first frame and we
     // provide a "valid" method. Alternatively, this could start in a "before
     // the first frame" state and "next" could return whether it was able to
@@ -132,7 +129,7 @@ private static readonly @string cannotTraceUserGoroutineˢᵇ = "cannot trace us
 internal static ref readonly @string unknownPcˢ => ref unknownPcˢᵇ;
 private static readonly @string unknownPcˢᵇ = "unknown pc"u8;
 
-internal static void initAt(this ж<unwinder> Ꮡu, uintptr pc0, uintptr sp0, uintptr lr0, ж<g> Ꮡgp, unwindFlags flags) {
+internal static void initAt⁔(/*this*/ ж<unwinder> Ꮡu, uintptr pc0, uintptr sp0, uintptr lr0, ж<g> Ꮡgp, unwindFlags flags) {
     ref var u = ref Ꮡu.DerefOrNull();
     ref var gp = ref Ꮡgp.DerefOrNull();
 
@@ -230,7 +227,7 @@ internal static void initAt(this ж<unwinder> Ꮡu, uintptr pc0, uintptr sp0, ui
     Ꮡu.resolveInternal(true, isSyscall);
 }
 
-internal static bool valid(this ref unwinder u) {
+internal static bool valid⁔(/*this*/ ref unwinder u) {
     return u.frame.pc != 0;
 }
 
@@ -259,7 +256,7 @@ private static readonly @string tracebackˢᵇ = "traceback"u8;
 // frame state to follow that stack jump.
 //
 // This is internal to unwinder.
-internal static void resolveInternal(this ж<unwinder> Ꮡu, bool innermost, bool isSyscall) {
+internal static void resolveInternal⁔(/*this*/ ж<unwinder> Ꮡu, bool innermost, bool isSyscall) {
     ref var u = ref Ꮡu.DerefOrNull();
 
     var frame = Ꮡu.Ꮡframe;
@@ -452,13 +449,9 @@ internal static void resolveInternal(this ж<unwinder> Ꮡu, bool innermost, boo
     }
 }
 
-} partial class runtime_package {
-
 internal static bool isInjectedCall(abi.FuncID id) {
     return id == abi.FuncID_sigpanic || id == abi.FuncID_asyncPreempt || id == abi.FuncID_debugCallV2;
 }
-
-} partial class runtimeᴛunwinder {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string unknownCallerPcˢ => ref unknownCallerPcˢᵇ;
@@ -466,7 +459,7 @@ private static readonly @string unknownCallerPcˢᵇ = "unknown caller pc"u8;
 internal static ref readonly @string tracebackStuckˢ => ref tracebackStuckˢᵇ;
 private static readonly @string tracebackStuckˢᵇ = "traceback stuck"u8;
 
-internal static void next(this ж<unwinder> Ꮡu) {
+internal static void next⁔(/*this*/ ж<unwinder> Ꮡu) {
     ref var u = ref Ꮡu.DerefOrNull();
 
     var frame = Ꮡu.Ꮡframe;
@@ -552,7 +545,7 @@ private static readonly @string tracebackDidNotUnwindˢᵇ = "traceback did not 
 // finishInternal is an unwinder-internal helper called after the stack has been
 // exhausted. It sets the unwinder to an invalid state and checks that it
 // successfully unwound the entire stack.
-internal static void finishInternal(this ref unwinder u) {
+internal static void finishInternal⁔(/*this*/ ref unwinder u) {
     u.frame.pc = 0;
 
     // Note that panic != nil is okay here: there can be leftover panics,
@@ -613,7 +606,7 @@ internal static void finishInternal(this ref unwinder u) {
 // frame.pc can be at function entry when the frame is initialized without
 // actually running code, like in runtime.mstart, in which case this returns
 // frame.pc because that's the best we can do.
-internal static uintptr symPC(this ref unwinder u) {
+internal static uintptr symPC⁔(/*this*/ ref unwinder u) {
     if ((unwindFlags)(u.flags & unwindTrap) == 0 && u.frame.pc > u.frame.fn.entry()) {
         // Regular call.
         return u.frame.pc - 1;
@@ -626,7 +619,7 @@ internal static uintptr symPC(this ref unwinder u) {
 // the registered cgo unwinder. It returns the number of PCs written to pcBuf.
 // If the current frame is not a cgo frame or if there's no registered cgo
 // unwinder, it returns 0.
-internal static nint cgoCallers(this ref unwinder u, slice<uintptr> pcBuf) {
+internal static nint cgoCallers⁔(/*this*/ ref unwinder u, slice<uintptr> pcBuf) {
     if (!cgoTracebackAvailable() || u.frame.fn.funcID != abi.FuncID_cgocallback || u.cgoCtxt < 0) {
         // We don't have a cgo unwinder (typical case), or we do but we're not
         // in a cgo frame or we're out of cgo context.
@@ -643,8 +636,6 @@ internal static nint cgoCallers(this ref unwinder u, slice<uintptr> pcBuf) {
     }
     return len(pcBuf);
 }
-
-} partial class runtime_package {
 
 // tracebackPCs populates pcBuf with the return addresses for each frame from u
 // and returns the number of PCs written to pcBuf. The returned PCs correspond
@@ -706,7 +697,7 @@ internal static void printArgs(funcInfo f, @unsafe.Pointer argp, uintptr pc) {
         startOffset = ~@unsafe.Pointer.To<uint8>(liveInfo);
     }
 
-    bool isLive(uint8 off, uint8 slotIdxΔ1) {
+    [GoFunc("printArgs.func1")] bool isLive(uint8 off, uint8 slotIdxΔ1) {
         if (liveInfo == nil || liveIdx <= 0) {
             return true; // no liveness info, always live
         }
@@ -718,7 +709,7 @@ internal static void printArgs(funcInfo f, @unsafe.Pointer argp, uintptr pc) {
     }
 
     var isLiveʗ1 = isLive;
-    void print1(uint8 off, uint8 sz, uint8 slotIdxΔ2) {
+    [GoFunc("printArgs.func2")] void print1(uint8 off, uint8 sz, uint8 slotIdxΔ2) {
         var x = readUnaligned64(add(argp, (uintptr)off));
         // mask out irrelevant bits
         if (sz < 8) {
@@ -736,7 +727,7 @@ internal static void printArgs(funcInfo f, @unsafe.Pointer argp, uintptr pc) {
     }
 
     var start = true;
-    void printcomma() {
+    [GoFunc("printArgs.func3")] void printcomma() {
         if (!start) {
             print((@string)", ");
         }
@@ -957,7 +948,7 @@ internal static void traceback1(uintptr pc, uintptr sp, uintptr lr, ж<g> Ꮡgp,
     // cgo expansion boundaries. It's not clear that's much simpler.
     flags |= (unwindFlags)(unwindPrintErrors);
     ref var u = ref heap(new unwinder(), out var Ꮡu);
-    nint tracebackWithRuntime(bool showRuntime) {
+    [GoFunc("traceback1.func1")] nint tracebackWithRuntime(bool showRuntime) {
         const nint maxInt = 0x7fffffff;
         Ꮡu.initAt(pc, sp, lr, Ꮡgp, flags);
         var (n, lastN) = traceback2(Ꮡu, showRuntime, 0, tracebackInnerFrames);
@@ -1008,7 +999,7 @@ internal static (nint n, nint lastN) traceback2(ж<unwinder> Ꮡu, bool showRunt
 
     // commitFrame commits to a logical frame and returns whether this frame
     // should be printed and whether iteration should stop.
-    var commitFrame = () => {
+    var commitFrame = [GoFunc("traceback2.func1")] () => {
         if (skip == 0 && max == 0) {
             // Stop
             return (false, true);
@@ -1337,7 +1328,7 @@ internal static void goroutineheader(ж<g> Ꮡgp) {
 }
 
 internal static void tracebackothers(ж<g> me) {
-    tracebacksomeothers(me, (ж<g> _) => true);
+    tracebacksomeothers(me, [GoFunc("tracebackothers.func1")] (ж<g> _) => true);
 }
 
 internal static void tracebacksomeothers(ж<g> me, Func<ж<g>, bool> showf) {
@@ -1359,7 +1350,7 @@ internal static void tracebacksomeothers(ж<g> me, Func<ж<g>, bool> showf) {
     // against concurrent creation of new Gs, but even with allglock we may
     // miss Gs created after this loop.
     var curgpʗ1 = curgp;
-    forEachGRace((ж<g> gp) => {
+    forEachGRace([GoFunc("tracebacksomeothers.func1")] (ж<g> gp) => {
         if (gp == me || gp == curgpʗ1) {
             return;
         }
@@ -1432,7 +1423,7 @@ internal static void tracebackHexdump(stack stk, ж<stkframe> Ꮡframe, uintptr 
 
     // Print the hex dump.
     print((@string)"stack: frame={sp:", (hex)(uint64)frame.sp, (@string)", fp:", (hex)(uint64)frame.fp, (@string)"} stack=[", (hex)(uint64)stk.lo, (@string)",", (hex)(uint64)stk.hi, (@string)")\n");
-    hexdumpWords(lo, hi - lo, (uintptr p, hexdumpMarker m) => {
+    hexdumpWords(lo, hi - lo, [GoFunc("tracebackHexdump.func1")] (uintptr p, hexdumpMarker m) => {
         if (p == Ꮡframe.Value.fp) {
             m.start();
             println((@string)"FP");
@@ -1734,7 +1725,7 @@ internal static void printCgoTraceback(ref cgoCallers callers) {
         return;
     }
 
-    var commitFrame = () => {
+    var commitFrame = [GoFunc("printCgoTraceback.func1")] () => {
         return (true, false);
     };
     ref var arg = ref heap(new cgoSymbolizerArg(), out var Ꮡarg);

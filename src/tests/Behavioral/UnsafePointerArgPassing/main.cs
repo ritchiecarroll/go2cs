@@ -2,7 +2,6 @@ namespace go;
 
 using fmt = fmt_package;
 using @unsafe = unsafe_package;
-using static main_package;
 
 partial class main_package {
 
@@ -10,11 +9,7 @@ partial struct counter {
     internal nint n;
 }
 
-} partial class mainᴛcounter {
-
-internal static void add(this ref counter c, uintptr d) { c.n += (nint)d; }
-
-} partial class main_package {
+internal static void add⁔(/*this*/ ref counter c, uintptr d) { c.n += (nint)d; }
 
 internal static partial @unsafe.Pointer add(@unsafe.Pointer p, uintptr x) {
     return @unsafe.Add(p, x);

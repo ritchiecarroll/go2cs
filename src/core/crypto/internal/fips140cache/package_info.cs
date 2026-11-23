@@ -10,10 +10,14 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+using weak = go.weak_package;
 // </ImportedTypeAliases>
 
 using go;
 using static go.crypto.@internal.fips140cache_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -59,10 +63,13 @@ using static go.crypto.@internal.fips140cache_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("crypto/internal/fips140cache/cache.go", "cache.cs", "ABtA8oKCgoKmgoKUgIKkpoI=")]
+[assembly: GoPositionMap("crypto/internal/fips140cache/cache.go", "cache.cs", "ABhA8oKCgoKmgoKUgIKkpoI=")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal;
+
+using static go.crypto.@internal.fips140cache_package;
+using weak = go.weak_package;
 
 [GoPackage("fips140cache")]
 public static partial class fips140cache_package
@@ -97,5 +104,16 @@ public static partial class fips140cache_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(fips140cache_package.Cache<,>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fips140cacheᴛCache;
+[GoMethodHost(typeof(fips140cache_package.Cache<,>)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class fips140cacheᴛCache;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class fips140cacheᴛCache {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (ж<V>, error) Get<K, V>(this ж<Cache<K, V>> Ꮡc, ж<K> Ꮡk, Func<(ж<V>, error)> @new, Func<ж<V>, bool> check) => fips140cache_package.Get⁔<K, V>(Ꮡc, Ꮡk, @new, check);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void evict<K, V>(this ж<Cache<K, V>> Ꮡc, weak.Pointer<K> p) => fips140cache_package.evict⁔<K, V>(Ꮡc, p);
+}
+// </MethodForwarders>

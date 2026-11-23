@@ -51,7 +51,7 @@ internal static void main() {
     var k = (KA)(uint32)h;
     fmt.Println("numeric wrapper:", k, ((Handle)(uint32)k) + 1);
 
-    var f = (Func<nint, bool> yield) => {
+    var f = [GoFunc("main.func1")] (Func<nint, bool> yield) => {
         for (nint i = 0; i < 3; i++) {
             if (!yield(i)) {
                 return;
@@ -59,7 +59,7 @@ internal static void main() {
         }
     };
     var s = NilSafeDelegateConversion<SeqInt, Action<Func<nint, bool>>>(f);
-    s((nint i) => {
+    s([GoFunc("main.func2")] (nint i) => {
         fmt.Println("seq", i);
         return i < 1;
     });

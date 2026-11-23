@@ -15,20 +15,20 @@ internal static nint call(this handlerFunc h, @string s) {
 }
 
 internal static void main() {
-    func(() => {
+    func([GoFunc("main.func1")] () => {
         fmt.Println("paren iife");
     })();
 
-    nint sum = func(nint (nint a, nint b) => {
+    nint sum = func([GoFunc("main.func2")] nint (nint a, nint b) => {
         return a + b;
     })(3, 4);
     fmt.Println(sum);
 
-    func(() => {
+    func([GoFunc("main.func3")] () => {
         fmt.Println("bare iife");
     })();
 
-    nint product = func(nint (nint a, nint b) => {
+    nint product = func([GoFunc("main.func4")] nint (nint a, nint b) => {
         return a * b;
     })(3, 4);
     fmt.Println(product);
@@ -36,7 +36,7 @@ internal static void main() {
     var h = default(handlerFunc)!;
     fmt.Println(h == nil, h.call("x"));
 
-    h = new handlerFunc((@string s) => len(s));
+    h = new handlerFunc([GoFunc("main.func5")] (@string s) => len(s));
     fmt.Println(h == nil, h.call("abcd"));
 
     var table = slice<handlerFunc>([default(handlerFunc)!, h]);

@@ -1100,7 +1100,7 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 		// the same helper visitFuncDecl uses, so a local function reads exactly like a declared
 		// one. A collapsed single-return body arrives as an EXPRESSION and takes the
 		// expression-bodied form (which needs its own terminating `;`); a block body does not.
-		result.WriteString(v.litNoInliningPrefix(funcLit) + v.generateResultSignature(litSig) + " " + context.localFuncName + "(" + parameterSignature + ") ")
+		result.WriteString(v.litAttributePrefix(funcLit) + v.generateResultSignature(litSig) + " " + context.localFuncName + "(" + parameterSignature + ") ")
 
 		if strings.HasPrefix(inner, "{") {
 			result.WriteString(inner)
@@ -1127,7 +1127,15 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 
 		v.funcLitHeapBoxParamNames = nil
 
-		result.WriteString(v.litNoInliningPrefix(funcLit) + iifeParams + " => " + inner)
+		// An attributed lambda takes a parenthesized parameter list, so the one-name form `x => …` gains its
+		// parentheses when the literal carries an attribute list.
+		attributes := v.litAttributePrefix(funcLit)
+
+		if attributes != "" && !strings.HasPrefix(iifeParams, "(") && !context.iifeTyped {
+			iifeParams = "(" + iifeParams + ")"
+		}
+
+		result.WriteString(attributes + iifeParams + " => " + inner)
 	} else {
 		// A literal with a single unsafe.Pointer result can mix return arms of DIFFERENT C#
 		// types — reflect deepEqual's ptrval returns `(uintptr)v.pointer()` on one arm and the
@@ -1457,7 +1465,7 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 			inner = v.markDeferredClosureBody(inner)
 		}
 
-		result.WriteString(v.litNoInliningPrefix(funcLit) + returnTypePrefix + "(" + parameterSignature + ") => " + inner)
+		result.WriteString(v.litAttributePrefix(funcLit) + returnTypePrefix + "(" + parameterSignature + ") => " + inner)
 	}
 
 	return result.String()

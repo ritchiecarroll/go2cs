@@ -14,6 +14,9 @@
 
 using go;
 using static go.os.user_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -66,13 +69,15 @@ using static go.os.user_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("os/user/listgroups_unix.go", "listgroups_unix.cs", "ABQmgoKUgoKmgoKCppSCgoKCgoKUAAkUgsoABxCClJSUlJSCuIKClJSCgqampqKCgpSk", "", "", "", "111:21")]
-[assembly: GoPositionMap("os/user/lookup.go", "lookup.cs", "AA8cntKAkoKUggALGKKClKqigpSqoqqiyJI=", "22-22:1")]
+[assembly: GoPositionMap("os/user/lookup.go", "lookup.cs", "AA4cntKAkoKUggALGKKClKqigpSqoqqiqJI=", "22-22:1")]
 [assembly: GoPositionMap("os/user/lookup_stubs.go", "lookup_stubs.cs", "ABougqaCgqaSAAcQpIKUgtqClIKClIKClJSmgoLKpoKClA==", "", "", "38=currentGID/1/1/2,Getenv/1/1/3")]
 [assembly: GoPositionMap("os/user/lookup_unix.go", "lookup_unix.cs", "ABM4AAkCpoKCyoKClKaClMqCgqa4gu6CgpSCgriClIKU3IKCgpSCsoKmgtyUgpS4goKCgpSmgoKCgpSqooKClIKygqaChJSClIKUAAoWgriCgoKUgoKClKaCgoKClKaigoKUktaigoKUktaigoKUktaigoKUkg==", "99-117:1;146-175:1", "", "", "214:21,229:21,244:21,259:21")]
-[assembly: GoPositionMap("os/user/user.go", "user.cs", "AEWKAYIACg6CAAoOggAKDoI=")]
+[assembly: GoPositionMap("os/user/user.go", "user.cs", "AEKKAYLugu6C7oI=")]
 // </GoSourcePositionMaps>
 
 namespace go.os;
+
+using static go.os.user_package;
 
 [GoPackage("user")]
 public static partial class user_package
@@ -120,9 +125,31 @@ public static partial class user_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(user_package.UnknownGroupError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class userᴛUnknownGroupError;
-[GoMethodHost(typeof(user_package.UnknownGroupIdError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class userᴛUnknownGroupIdError;
-[GoMethodHost(typeof(user_package.UnknownUserError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class userᴛUnknownUserError;
-[GoMethodHost(typeof(user_package.UnknownUserIdError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class userᴛUnknownUserIdError;
-[GoMethodHost(typeof(user_package.User)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class userᴛUser;
+[GoMethodHost(typeof(user_package.UnknownGroupError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class userᴛUnknownGroupError;
+[GoMethodHost(typeof(user_package.UnknownGroupIdError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class userᴛUnknownGroupIdError;
+[GoMethodHost(typeof(user_package.UnknownUserError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class userᴛUnknownUserError;
+[GoMethodHost(typeof(user_package.UnknownUserIdError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class userᴛUnknownUserIdError;
+[GoMethodHost(typeof(user_package.User)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class userᴛUser;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class userᴛUnknownGroupError {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this UnknownGroupError e) => user_package.Error⁔(e);
+}
+partial class userᴛUnknownGroupIdError {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this UnknownGroupIdError e) => user_package.Error⁔(e);
+}
+partial class userᴛUnknownUserError {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this UnknownUserError e) => user_package.Error⁔(e);
+}
+partial class userᴛUnknownUserIdError {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this UnknownUserIdError e) => user_package.Error⁔(e);
+}
+partial class userᴛUser {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<@string>, error) GroupIds(this ж<User> Ꮡu) => user_package.GroupIds⁔(Ꮡu);
+}
+// </MethodForwarders>

@@ -10,10 +10,14 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+using coverage = go.@internal.coverage_package;
 // </ImportedTypeAliases>
 
 using go;
 using static go.@internal.coverage.cmerge_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -55,10 +59,13 @@ using static go.@internal.coverage.cmerge_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/coverage/cmerge/merge.go", "merge.cs", "ACJEgqqigpSCgoK4gqaCgqyygoKUyqKCgoKCgpQABBDSlIKmgriCgriCuKaCgoKmgqaC")]
+[assembly: GoPositionMap("internal/coverage/cmerge/merge.go", "merge.cs", "AB5EgqqigpSCgoK4gqaCgqyygoKUqqKCgoKCgpQAAhDSlIKmgriCgriCuKaCgoKmgqaC")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.coverage;
+
+using static go.@internal.coverage.cmerge_package;
+using coverage = go.@internal.coverage_package;
 
 [GoPackage("cmerge")]
 public static partial class cmerge_package
@@ -94,5 +101,21 @@ public static partial class cmerge_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(cmerge_package.Merger)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class cmergeᴛMerger;
+[GoMethodHost(typeof(cmerge_package.Merger)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class cmergeᴛMerger;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class cmergeᴛMerger {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void SetModeMergePolicy(this ref Merger cm, ModeMergePolicy policy) => cmerge_package.SetModeMergePolicy⁔(ref cm, policy);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (error, bool) MergeCounters(this ref Merger m, slice<uint32> dst, slice<uint32> src) => cmerge_package.MergeCounters⁔(ref m, dst, src);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static uint32 SaturatingAdd(this ref Merger m, uint32 dst, uint32 src) => cmerge_package.SaturatingAdd⁔(ref m, dst, src);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error SetModeAndGranularity(this ref Merger cm, @string mdf, coverage.CounterMode cmode, coverage.CounterGranularity cgran) => cmerge_package.SetModeAndGranularity⁔(ref cm, mdf, cmode, cgran);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void ResetModeAndGranularity(this ref Merger cm) => cmerge_package.ResetModeAndGranularity⁔(ref cm);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static coverage.CounterMode Mode(this ref Merger cm) => cmerge_package.Mode⁔(ref cm);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static coverage.CounterGranularity Granularity(this ref Merger cm) => cmerge_package.Granularity⁔(ref cm);
+}
+// </MethodForwarders>

@@ -18,7 +18,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace GenTests;
 
 /// <summary>
-/// M:N PROTOTYPE, N3's CS9217 / CS8178 / CS8934 cut (COORD's approval, 2026-11-15): the shapes that kept net/http's twins
+/// M:N (experimental, opt-in), N3's CS9217 / CS8178 / CS8934 cut (COORD's approval, 2026-11-15): the shapes that kept net/http's twins
 /// from compiling. A ref local cannot live across an await, so a twin derives each one again after it (Rule R); these
 /// pin the three gaps in that: a root the converter reassigns in its own re-alias form (C1), an awaited value stored
 /// into a ref target (C2), and a paired literal with an explicit return type (C3) -- and C1's refusal, by name, of a ref

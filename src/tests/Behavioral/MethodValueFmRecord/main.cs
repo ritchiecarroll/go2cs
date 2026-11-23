@@ -32,7 +32,7 @@ internal static void main() {
     var recvʗ1 = ~p;
     fmt.Println("method value, via pointer, value rcv:", nameOf(() => recvʗ1.valueMethod()));
 
-    var literal = () => Ꮡt.Value.valueMethod();
+    var literal = [GoFunc("main.func1")] () => Ꮡt.Value.valueMethod();
     fmt.Println("literal calling the same method:     ", nameOf((literal).OrTypedNilFunc()));
 
     var tʗ2 = t;

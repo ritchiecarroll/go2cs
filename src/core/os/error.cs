@@ -11,7 +11,6 @@ using poll = @internal.poll_package;
 using fs = go.io.fs_package;
 using @internal;
 using go.io;
-using static os_package;
 
 partial class os_package {
 
@@ -52,19 +51,15 @@ partial struct SyscallError {
     public error Err;
 }
 
-} partial class osᴛSyscallError {
+internal static @string Error⁔(/*this*/ ref SyscallError e) { return e.Syscall + ": "u8 + e.Err.Error(); }
 
-public static @string Error(this ref SyscallError e) { return e.Syscall + ": "u8 + e.Err.Error(); }
-
-public static error Unwrap(this ref SyscallError e) { return e.Err; }
+internal static error Unwrap⁔(/*this*/ ref SyscallError e) { return e.Err; }
 
 // Timeout reports whether this error represents a timeout.
-public static bool Timeout(this ref SyscallError e) {
+internal static bool Timeout⁔(/*this*/ ref SyscallError e) {
     var (t, ok) = e.Err._<timeout>(ᐧ);
     return ok && t.Timeout();
 }
-
-} partial class os_package {
 
 // NewSyscallError returns, as an error, a new [SyscallError]
 // with the given system call name and error details.

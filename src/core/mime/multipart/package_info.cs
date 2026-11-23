@@ -10,10 +10,15 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+using io = go.io_package;
+using textproto = go.net.textproto_package;
 // </ImportedTypeAliases>
 
 using go;
 using static go.mime.multipart_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -78,13 +83,17 @@ using static go.mime.multipart_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("mime/multipart/formdata.go", "formdata.cs", "ABUoAAMYAAoCyIIADAbigpiCgoKmgoKCgqaUkoKCpoKCgriCgoIAESSClIKClIKClIKCgoKUgpSClJSCgpSasoKCpqaUlIKClIKClIKokoKCgoKUgpS4goKUgoKCgqaCgpSCloSClIKCgoKCgpSmgoKClKYACAaigoKCgoKmAA4ckoKCgoKCgsoAESCSgoKUgoKClIKUABkogoKU", "62-81:1", "", "", "", "82:21,83:13")]
-[assembly: GoPositionMap("mime/multipart/multipart.go", "multipart.cs", "ADBYAB9AxoKUgpTssoKUgoK45oKCgoKCAAUU4oIAFCaigpSCAAwGgriClKaCgoKCpsaCgoKCpoKUqqIADBKCgriCgoKUgoLcgpSCgpSCgoKClAAEGgAKApSClKSkpoLKgpSkpKaC7oKClAACHgAMAoKClJSUgriCgpSUlIK4xoKCABk0lIKCgoKmAAQS4gACENKmooKUgpSCgpTclIKmgoKCgpSCppSmgqaU7oKCpr6ygpSCgqbugpSCyoKClM7CgpQ=", "", "", "138=NewReaderSize/1/1/1")]
+[assembly: GoPositionMap("mime/multipart/formdata.go", "formdata.cs", "ABQoAAEYAAoCqIIACgbigpiCgoKmgoKCgqaUkoKCpoKCgriCgoIAESSClIKClIKClIKCgoKUgpSClJSCgpSasoKCpqaUlIKClIKClIKokoKCgoKUgpS4goKUgoKCgqaCgpSCloSClIKCgoKCgpSmgoKClKbmooKCgoKCpgAMHJKCgoKCgoLKAA0gkoKClIKCgpSClAAVKIKClA==", "62-81:1", "", "", "", "75:58,76:13")]
+[assembly: GoPositionMap("mime/multipart/multipart.go", "multipart.cs", "AC9YAB1AxoKUgpTssoKUgoK45oKCgoKCAAMU4oIAEiaigpSCAAoGgriClKaCgoKCpqaCgoKCpoKUqqIACBKCgriCgoKUgoLcgpSCgpSCgoKClAACGgAKApSClKSkpoLKgpSkpKaC7oKClAACHgAMAoKClJSUgriCgpSUlIK4poKCABc0lIKCgoKmAAIS4gACENKmooKUgpSCgpTclIKmgoKCgpSCppSmgqaU7oKCpr6ygpSCgqbugpSCyoKClK7CgpQ=", "", "", "133=NewReaderSize/1/1/1")]
 [assembly: GoPositionMap("mime/multipart/readmimeheader.go", "readmimeheader.cs", "AAse")]
-[assembly: GoPositionMap("mime/multipart/writer.go", "writer.cs", "ABw4ov6SAAoS4oKmgpSCgoKUlLSCtpSCqqKmgpTGgoKCgpTO4oKCpoKClKaCgqaCgoKUpoLGAAEcAAwCAAwKooKCgqqigpTKotqSgoKUgqqigoKUlIIADBKCguaygpSCgpQ=", "", "", "32=randomBoundary/1/1/2;193=escapeQuotes/1/1/1,Sprintf/1/1/1;203=escapeQuotes/1/2/1,escapeQuotes/2/2/1")]
+[assembly: GoPositionMap("mime/multipart/writer.go", "writer.cs", "ABs4ot6SAAoS4oKmgpSCgoKUlLSCtpSCqqKmgpSmgoKCgpSu4oKCpoKClKaCgqaCgoKUpoKmAAEcAAwCAAgKooKCgqqigpSqorqSgoKUgqqigoKUlIIACBKCguaygpSCgpQ=", "", "", "31=randomBoundary/1/1/2;180=escapeQuotes/1/1/1,Sprintf/1/1/1;188=escapeQuotes/1/2/1,escapeQuotes/2/2/1")]
 // </GoSourcePositionMaps>
 
 namespace go.mime;
+
+using static go.mime.multipart_package;
+using io = go.io_package;
+using textproto = go.net.textproto_package;
 
 [GoPackage("multipart")]
 public static partial class multipart_package
@@ -143,13 +152,66 @@ public static partial class multipart_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(multipart_package.FileHeader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class multipartᴛFileHeader;
-[GoMethodHost(typeof(multipart_package.Form)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class multipartᴛForm;
-[GoMethodHost(typeof(multipart_package.Part)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class multipartᴛPart;
-[GoMethodHost(typeof(multipart_package.Reader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class multipartᴛReader;
-[GoMethodHost(typeof(multipart_package.Writer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class multipartᴛWriter;
-[GoMethodHost(typeof(multipart_package.part)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class multipartᴛpart;
-[GoMethodHost(typeof(multipart_package.partReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class multipartᴛpartReader;
-[GoMethodHost(typeof(multipart_package.sectionReadCloser)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class multipartᴛsectionReadCloser;
-[GoMethodHost(typeof(multipart_package.stickyErrorReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class multipartᴛstickyErrorReader;
+[GoMethodHost(typeof(multipart_package.FileHeader)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class multipartᴛFileHeader;
+[GoMethodHost(typeof(multipart_package.Form)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class multipartᴛForm;
+[GoMethodHost(typeof(multipart_package.Part)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class multipartᴛPart;
+[GoMethodHost(typeof(multipart_package.Reader)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class multipartᴛReader;
+[GoMethodHost(typeof(multipart_package.Writer)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class multipartᴛWriter;
+[GoMethodHost(typeof(multipart_package.part)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class multipartᴛpart;
+[GoMethodHost(typeof(multipart_package.partReader)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class multipartᴛpartReader;
+[GoMethodHost(typeof(multipart_package.sectionReadCloser)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class multipartᴛsectionReadCloser;
+[GoMethodHost(typeof(multipart_package.stickyErrorReader)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class multipartᴛstickyErrorReader;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class multipartᴛFileHeader {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (File, error) Open(this ref FileHeader fh) => multipart_package.Open⁔(ref fh);
+}
+partial class multipartᴛForm {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error RemoveAll(this ref Form f) => multipart_package.RemoveAll⁔(ref f);
+}
+partial class multipartᴛPart {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string FormName(this ref Part p) => multipart_package.FormName⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string FileName(this ref Part p) => multipart_package.FileName⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void parseContentDisposition(this ref Part p) => multipart_package.parseContentDisposition⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error populateHeaders(this ref Part p, int64 maxMIMEHeaderSize, int64 maxMIMEHeaders) => multipart_package.populateHeaders⁔(ref p, maxMIMEHeaderSize, maxMIMEHeaders);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint n, error err) Read(this ref Part p, slice<byte> d) => multipart_package.Read⁔(ref p, d);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Close(this ж<Part> Ꮡp) => multipart_package.Close⁔(Ꮡp);
+}
+partial class multipartᴛReader {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (ж<Form>, error) ReadForm(this ж<Reader> Ꮡr, int64 maxMemory) => multipart_package.ReadForm⁔(Ꮡr, maxMemory);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (ж<Form>, error err) readForm(this ж<Reader> Ꮡr, int64 maxMemory) => multipart_package.readForm⁔(Ꮡr, maxMemory);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (ж<Part>, error) NextPart(this ж<Reader> Ꮡr) => multipart_package.NextPart⁔(Ꮡr);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (ж<Part>, error) NextRawPart(this ж<Reader> Ꮡr) => multipart_package.NextRawPart⁔(Ꮡr);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (ж<Part>, error) nextPart(this ж<Reader> Ꮡr, bool rawPart, int64 maxMIMEHeaderSize, int64 maxMIMEHeaders) => multipart_package.nextPart⁔(Ꮡr, rawPart, maxMIMEHeaderSize, maxMIMEHeaders);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool isFinalBoundary(this ref Reader r, slice<byte> line) => multipart_package.isFinalBoundary⁔(ref r, line);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool /*ret*/ isBoundaryDelimiterLine(this ref Reader r, slice<byte> line) => multipart_package.isBoundaryDelimiterLine⁔(ref r, line);
+}
+partial class multipartᴛWriter {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Boundary(this ref Writer w) => multipart_package.Boundary⁔(ref w);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error SetBoundary(this ref Writer w, @string boundary) => multipart_package.SetBoundary⁔(ref w, boundary);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string FormDataContentType(this ref Writer w) => multipart_package.FormDataContentType⁔(ref w);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (io.Writer, error) CreatePart(this ж<Writer> Ꮡw, textproto.MIMEHeader header) => multipart_package.CreatePart⁔(Ꮡw, header);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (io.Writer, error) CreateFormFile(this ж<Writer> Ꮡw, @string fieldname, @string filename) => multipart_package.CreateFormFile⁔(Ꮡw, fieldname, filename);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (io.Writer, error) CreateFormField(this ж<Writer> Ꮡw, @string fieldname) => multipart_package.CreateFormField⁔(Ꮡw, fieldname);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error WriteField(this ж<Writer> Ꮡw, @string fieldname, @string value) => multipart_package.WriteField⁔(Ꮡw, fieldname, value);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Close(this ref Writer w) => multipart_package.Close⁔(ref w);
+}
+partial class multipartᴛpart {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error close(this ref part p) => multipart_package.close⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) Write(this ref part p, slice<byte> d) => multipart_package.Write⁔(ref p, d);
+}
+partial class multipartᴛpartReader {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint, error) Read(this partReader pr, slice<byte> d) => multipart_package.Read⁔(pr, d);
+}
+partial class multipartᴛsectionReadCloser {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error Close(this sectionReadCloser rc) => multipart_package.Close⁔(rc);
+}
+partial class multipartᴛstickyErrorReader {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error) Read(this ref stickyErrorReader r, slice<byte> p) => multipart_package.Read⁔(ref r, p);
+}
+// </MethodForwarders>

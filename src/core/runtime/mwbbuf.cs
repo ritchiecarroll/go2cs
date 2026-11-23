@@ -25,7 +25,6 @@ using atomic = @internal.runtime.atomic_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
-using static runtime_package;
 
 partial class runtime_package {
 
@@ -71,14 +70,12 @@ internal static UntypedInt wbBufEntries => 512;
 // buffer in a single call.
 internal static UntypedInt wbMaxEntriesPerCall => 8;
 
-} partial class runtimeᴛwbBuf {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string badWriteBarrierBufferˢ => ref badWriteBarrierBufferˢᵇ;
 private static readonly @string badWriteBarrierBufferˢᵇ = "bad write barrier buffer bounds"u8;
 
 // reset empties b by resetting its next and end pointers.
-internal static void reset(this ref wbBuf b) {
+internal static void reset⁔(/*this*/ ref wbBuf b) {
     var start = (uintptr)@unsafe.Pointer.FromBox(Ꮡ(b.buf, 0));
     b.next = start;
     if (testSmallBuf) {
@@ -100,12 +97,12 @@ internal static void reset(this ref wbBuf b) {
 // This must be nosplit because it's called by wbBufFlush.
 //
 //go:nosplit
-internal static void discard(this ref wbBuf b) {
+internal static void discard⁔(/*this*/ ref wbBuf b) {
     b.next = (uintptr)@unsafe.Pointer.FromBox(Ꮡ(b.buf, 0));
 }
 
 // empty reports whether b contains no pointers.
-internal static bool empty(this ref wbBuf b) {
+internal static bool empty⁔(/*this*/ ref wbBuf b) {
     return b.next == (uintptr)@unsafe.Pointer.FromBox(Ꮡ(b.buf, 0));
 }
 
@@ -131,7 +128,7 @@ internal static bool empty(this ref wbBuf b) {
 //
 //go:nowritebarrierrec
 //go:nosplit
-internal static ж<array<uintptr>> get1(this ref wbBuf b) {
+internal static ж<array<uintptr>> get1⁔(/*this*/ ref wbBuf b) {
     if (b.next + (uintptr)goarch.PtrSize > b.end) {
         wbBufFlush();
     }
@@ -142,7 +139,7 @@ internal static ж<array<uintptr>> get1(this ref wbBuf b) {
 
 //go:nowritebarrierrec
 //go:nosplit
-internal static ж<array<uintptr>> get2(this ref wbBuf b) {
+internal static ж<array<uintptr>> get2⁔(/*this*/ ref wbBuf b) {
     if (b.next + (uintptr)(2 * goarch.PtrSize) > b.end) {
         wbBufFlush();
     }
@@ -150,8 +147,6 @@ internal static ж<array<uintptr>> get2(this ref wbBuf b) {
     b.next += 2 * goarch.PtrSize;
     return p;
 }
-
-} partial class runtime_package {
 
 // wbBufFlush flushes the current P's write barrier buffer to the GC
 // workbufs.
@@ -182,7 +177,7 @@ internal static void wbBufFlush() {
 
     // Switch to the system stack so we don't have to worry about
     // safe points.
-    systemstack(() => {
+    systemstack([GoFunc("wbBufFlush.func1")] () => {
         wbBufFlush1((~(~getg()).m).p.ptr());
     });
 }

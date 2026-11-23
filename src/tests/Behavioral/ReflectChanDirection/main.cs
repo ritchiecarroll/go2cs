@@ -47,7 +47,7 @@ internal static @string walkRangeShape(reflect.Value v) {
 internal static partial channel<@string> count(nint n) {
     var ch = new channel<@string>(0);
     var chʗ1 = ch;
-    goǃ(() => {
+    goǃ([GoFunc("count.func1")] () => {
         for (nint i = 0; i < n; i++) {
             chʗ1.ᐸꟷ(fmt.Sprint(i));
         }
@@ -60,7 +60,7 @@ internal static @string /*msg*/ recovered(Action fn) {
     @string msg = default;
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("recovered.func1")] () => {
             var r = recover(); if (r != nil) {
                 msg = fmt.Sprint(r);
             }
@@ -113,7 +113,7 @@ internal static partial void main() {
 
     var done = new channel<@string>(1);
     var doneʗ1 = done;
-    goǃ(() => {
+    goǃ([GoFunc("main.func1")] () => {
         doneʗ1.ᐸꟷ(walkRangeShape(reflect.ValueOf(new channel/*<-*/<nint>(0, GoChanDir.Send))));
     });
     var doneᴛ1 = done;
@@ -149,11 +149,11 @@ internal static partial void main() {
     fmt.Printf("closed: %q %v then %q %v\n"u8, drainedVal.String(), okDrain, zeroVal.String(), okZero);
 
     var sendʗ1 = send;
-    fmt.Println("recv on send-only:", recovered(() => {
+    fmt.Println("recv on send-only:", recovered([GoFunc("main.func2")] () => {
         reflect.ValueOf(sendʗ1).Recv();
     }));
     var recvʗ1 = recv;
-    fmt.Println("send on recv-only:", recovered(() => {
+    fmt.Println("send on recv-only:", recovered([GoFunc("main.func3")] () => {
         reflect.ValueOf(recvʗ1).Send(reflect.ValueOf((nint)1));
     }));
 }

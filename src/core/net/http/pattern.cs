@@ -10,7 +10,6 @@ using url = go.net.url_package;
 using strings = strings_package;
 using unicode = unicode_package;
 using go.net;
-using static http_package;
 
 partial class http_package {
 
@@ -34,15 +33,11 @@ partial struct pattern {
     internal @string loc; // source location of registering call, for helpful messages
 }
 
-} partial class httpᴛpattern {
+internal static @string String⁔(/*this*/ ref pattern p) { return p.str; }
 
-internal static @string String(this ref pattern p) { return p.str; }
-
-internal static segment lastSegment(this ref pattern p) {
+internal static segment lastSegment⁔(/*this*/ ref pattern p) {
     return p.segments[len(p.segments) - 1];
 }
-
-} partial class http_package {
 
 // A segment is a pattern piece that matches one or more path segments, or
 // a trailing slash.
@@ -114,7 +109,7 @@ internal static (ж<pattern>, error err) parsePattern(@string s) {
             (_ᴛ1, err) = (default, errors.New(emptyPatternˢ)); goto ᒐdone;
         }
         nint off = 0; // offset into string
-        defer(() => {
+        defer([GoFunc("parsePattern.func1")] () => {
             if (err != nil) {
                 err = fmt.Errorf("at offset %d: %w"u8, off, err);
             }
@@ -254,8 +249,6 @@ private static readonly relationship disjointᵇ = "disjoint"u8;         // ther
 internal static ref readonly relationship overlaps => ref overlapsᵇ;
 private static readonly relationship overlapsᵇ = "overlaps"u8;         // there is a request that both match, but neither is more specific
 
-} partial class httpᴛpattern {
-
 // conflictsWith reports whether p1 conflicts with p2, that is, whether
 // there is a request that both match but where neither is higher precedence
 // than the other.
@@ -269,7 +262,7 @@ private static readonly relationship overlapsᵇ = "overlaps"u8;         // ther
 // If rule 1 doesn't apply, then two patterns conflict if their relationship
 // is either equivalence (they match the same set of requests) or overlap
 // (they both match some requests, but neither is more specific than the other).
-internal static bool conflictsWith(this ref pattern p1, ж<pattern> Ꮡp2) {
+internal static bool conflictsWith⁔(/*this*/ ref pattern p1, ж<pattern> Ꮡp2) {
     ref var p2 = ref Ꮡp2.DerefOrNull();
 
     if (p1.host != p2.host) {
@@ -282,7 +275,7 @@ internal static bool conflictsWith(this ref pattern p1, ж<pattern> Ꮡp2) {
     return rel == equivalent || rel == overlaps;
 }
 
-internal static relationship comparePathsAndMethods(this ref pattern p1, ж<pattern> p2) {
+internal static relationship comparePathsAndMethods⁔(/*this*/ ref pattern p1, ж<pattern> p2) {
     relationship mrel = p1.compareMethods(p2);
     // Optimization: avoid a call to comparePaths.
     if (mrel == disjoint) {
@@ -299,7 +292,7 @@ internal static relationship comparePathsAndMethods(this ref pattern p1, ж<patt
 // The empty string matches any method, so it is the most general.
 // "GET" matches both GET and HEAD.
 // Anything else matches only itself.
-internal static relationship compareMethods(this ref pattern p1, ж<pattern> Ꮡp2) {
+internal static relationship compareMethods⁔(/*this*/ ref pattern p1, ж<pattern> Ꮡp2) {
     ref var p2 = ref Ꮡp2.DerefOrNull();
 
     if (p1.method == p2.method) {
@@ -324,7 +317,7 @@ internal static relationship compareMethods(this ref pattern p1, ж<pattern> Ꮡ
 
 // comparePaths determines the relationship between the path
 // part of two patterns.
-internal static relationship comparePaths(this ref pattern p1, ж<pattern> Ꮡp2) {
+internal static relationship comparePaths⁔(/*this*/ ref pattern p1, ж<pattern> Ꮡp2) {
     ref var p2 = ref Ꮡp2.DerefOrNull();
 
     // Optimization: if a path pattern doesn't end in a multi ("...") wildcard, then it
@@ -360,8 +353,6 @@ internal static relationship comparePaths(this ref pattern p1, ж<pattern> Ꮡp2
     }
     return disjoint;
 }
-
-} partial class http_package {
 
 // compareSegments determines the relationship between two segments.
 internal static relationship compareSegments(segment s1, segment s2) {

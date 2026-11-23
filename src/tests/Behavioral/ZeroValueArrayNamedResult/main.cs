@@ -53,7 +53,7 @@ internal static partial (array<byte> a4, error err) withDefer() {
     error err = default;
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("withDefer.func1")] () => {
             a4[0]++;
         }, ref ᒐ);
         a4[1] = 2;
@@ -64,7 +64,7 @@ internal static partial (array<byte> a4, error err) withDefer() {
     return (a4, err);
 }
 
-internal static Func<array<byte>> literalAs3 = () => {
+internal static Func<array<byte>> literalAs3 = [GoFunc("init.func1")] () => {
     array<byte> a3 = new(3);
     a3[2] = 5;
     return a3.Clone();

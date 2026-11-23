@@ -8,7 +8,7 @@ using syscall = syscall_package;
 
 partial class net_package {
 
-internal static Action testHookCanceledDial = () => {
+internal static Action testHookCanceledDial = [GoFunc("init.func5")] () => {
 }; // for golang.org/issue/16523
 
 internal static @string hostsFilePath = "/etc/hosts";

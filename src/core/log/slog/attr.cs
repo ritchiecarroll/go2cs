@@ -6,7 +6,6 @@ namespace go.log;
 using time = time_package;
 using ꓸꓸꓸAttr = Span<slog_package.Attr>;
 using ꓸꓸꓸany = Span<any>;
-using static slog_package;
 
 partial class slog_package {
 
@@ -98,21 +97,19 @@ public static Attr Any(@string key, any value) {
     return new Attr(key, AnyValue(value));
 }
 
-} partial class slogᴛAttr {
-
 // Equal reports whether a and b have equal keys and values.
-public static bool Equal(this Attr a, Attr b) {
+internal static bool Equal⁔(/*this*/ Attr a, Attr b) {
     return a.Key == b.Key && a.Value.Equal(b.Value);
 }
 
-public static @string String(this Attr a) {
+internal static @string String⁔(/*this*/ Attr a) {
     return a.Key + "="u8 + a.Value.String();
 }
 
 // isEmpty reports whether a has an empty key and a nil value.
 // That can be written as Attr{} or Any("", nil).
-internal static bool isEmpty(this Attr a) {
+internal static bool isEmpty⁔(/*this*/ Attr a) {
     return a.Key == ""u8 && a.Value.num == 0 && a.Value.any == nil;
 }
 
-}
+} // end slog_package

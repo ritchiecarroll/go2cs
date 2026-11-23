@@ -19,7 +19,7 @@ internal static UntypedInt longestEntityWithoutSemicolon => 6;
 // http://www.w3.org/TR/html4/sgml/entities.html
 //
 // entity2 is a map of HTML entities to two unicode codepoints.
-internal static Func<(map<@string, rune>, map<@string, array<rune>>)> entityMaps = Δsync.OnceValues((map<@string, rune> entity, map<@string, array<rune>> entity2) () => {
+internal static Func<(map<@string, rune>, map<@string, array<rune>>)> entityMaps = Δsync.OnceValues([GoFunc("init.func1")] (map<@string, rune> entity, map<@string, array<rune>> entity2) () => {
     map<@string, rune> entity = default;
     map<@string, array<rune>> entity2 = default;
     entity = new map<@string, rune>{

@@ -71,9 +71,9 @@ internal static void main() {
     hdrs h = slice<Header>([new(Name: "n", Size: 1)]);
     rdrs i = slice<Δio.Reader>([default]);
     ptrs j = slice<ж<Header>>([default]);
-    fn k = (@string sΔ1) => len(sΔ1);
-    fn2 k2 = (Header x) => (x.Name, default);
-    fn0 k0 = () => {
+    fn k = [GoFunc("main.func1")] (@string sΔ1) => len(sΔ1);
+    fn2 k2 = [GoFunc("main.func2")] (Header x) => (x.Name, default);
+    fn0 k0 = [GoFunc("main.func3")] () => {
         fmt.Println("fn0 ran");
     };
     nested l = new nested{["z"] = [new(Name: "q", Size: 2)]};

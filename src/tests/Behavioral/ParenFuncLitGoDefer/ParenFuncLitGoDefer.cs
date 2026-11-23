@@ -13,11 +13,11 @@ partial struct runner {
 internal static partial nint fork(this ref runner r, nint c, Action<nint> dispatch) {
     var done = new channel<bool>(0);
     var doneʗ1 = done;
-    goǃ(() => {
+    goǃ([GoFunc("(*runner).fork.func1")] () => {
         GoFrame ᒐ = default;
         try {
             var doneʗ2 = doneʗ1;
-            defer(() => {
+            defer([GoFunc("(*runner).fork.func1.1")] () => {
                 doneʗ2.ᐸꟷ(true);
             }, ref ᒐ);
             dispatch(c);
@@ -32,7 +32,7 @@ internal static partial nint fork(this ref runner r, nint c, Action<nint> dispat
 internal static void later(channel<bool> done) {
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("later.func1")] () => {
             fmt.Println("defer sees the reassigned channel:", done == nil);
         }, ref ᒐ);
         done = default;
@@ -43,7 +43,7 @@ internal static void later(channel<bool> done) {
 
 internal static void main() {
     var r = Ꮡ(new runner());
-    fmt.Println(r.fork(5, (nint v) => {
+    fmt.Println(r.fork(5, [GoFunc("main.func1")] (nint v) => {
         fmt.Println("dispatch", v);
     }));
     later(sink);

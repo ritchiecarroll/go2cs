@@ -14,6 +14,9 @@
 
 using go;
 using static go.errors_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -65,12 +68,14 @@ using static go.errors_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("errors/errors.go", "errors.cs", "AEGAAaIACRCCABEg")]
-[assembly: GoPositionMap("errors/join.go", "join.cs", "AAsoAAsCgoKCpoKUpoKCpgAIDqaCpoKCgqamgg==")]
+[assembly: GoPositionMap("errors/errors.go", "errors.cs", "AD+AAaIABxCCAA8g")]
+[assembly: GoPositionMap("errors/join.go", "join.cs", "AAooAAsCgoKCpoKUpoKCpu6mgqaCgoKmpoI=")]
 [assembly: GoPositionMap("errors/wrap.go", "wrap.cs", "AA8i4oaClAACKgASAoKmggAKBoKCgpSAgqSUgoLGgoKmtAAENAAVAoKUgpSCgoKUgoKU5oKCgoKUgIKklIKCxoKClIKmtMoAAR4ADQKCgpSCpoKCgpSAgoKUgraUgoLGgoKUgqa0")]
 // </GoSourcePositionMaps>
 
 namespace go;
+
+using static go.errors_package;
 
 [GoPackage("errors")]
 public static partial class errors_package
@@ -108,6 +113,20 @@ public static partial class errors_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(errors_package.errorString)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class errorsᴛerrorString;
-[GoMethodHost(typeof(errors_package.joinError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class errorsᴛjoinError;
+[GoMethodHost(typeof(errors_package.errorString)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class errorsᴛerrorString;
+[GoMethodHost(typeof(errors_package.joinError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class errorsᴛjoinError;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class errorsᴛerrorString {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string Error(this ref errorString e) => errors_package.Error⁔(ref e);
+}
+partial class errorsᴛjoinError {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string Error(this ref joinError e) => errors_package.Error⁔(ref e);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<error> Unwrap(this ref joinError e) => errors_package.Unwrap⁔(ref e);
+}
+// </MethodForwarders>

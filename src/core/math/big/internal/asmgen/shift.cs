@@ -79,7 +79,7 @@ internal static void shiftVU(ж<Asm> Ꮡa, @string name) {
         var prevʗ1 = prev;
         var sʗ1 = s;
         var shiftWideʗ1 = shiftWide;
-        p.Loop((slice<slice<Reg>> @in, slice<slice<Reg>> @out) => {
+        p.Loop([GoFunc("shiftVU.func1")] (slice<slice<Reg>> @in, slice<slice<Reg>> @out) => {
             // We reuse the input registers as output, delayed one cycle; prev is the first output.
             // After writing the outputs to memory, we can copy the final x value into prev
             // for the next iteration.
@@ -117,7 +117,7 @@ internal static void shiftVU(ж<Asm> Ꮡa, @string name) {
         var sʗ2 = s;
         var sNegʗ1 = sNeg;
         var shiftʗ1 = shift;
-        p.Loop((slice<slice<Reg>> @in, slice<slice<Reg>> @out) => {
+        p.Loop([GoFunc("shiftVU.func2")] (slice<slice<Reg>> @in, slice<slice<Reg>> @out) => {
             if (Ꮡa.Value.HasRegShift()) {
                 // ARM (32-bit) allows shifts in most arithmetic expressions,
                 // including OR, letting us combine the negShift and a.Or.

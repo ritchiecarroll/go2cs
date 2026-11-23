@@ -2014,7 +2014,7 @@ public class ImplementGenerator : ISourceGenerator
     // The method set a constraint proxy forwards, each method paired with the interface that DECLARES it closed over
     // the proxy: the constraint's own members first, in declaration order, then every embedded interface's, ordered
     // by its rendered reference (see EmitConstraintProxy, whose order this repeats).
-    // M:N PROTOTYPE, stage (c) (2026-11-15): a hidden twin member a package built with interface twins (shape `default`)
+    // M:N (experimental), stage (c) (2026-11-15): a hidden twin member a package built with interface twins (shape `default`)
     // adds beside a marked member (`Readꞏtwin`). It has a default body, the sync fallback, so an adapter never forwards
     // it: the implementer's own twin may not exist (refused, a by-ref receiver), and `m_box.Readꞏtwin(p)` then binds
     // nothing (CS1929). The twin generator adds a twin forwarder where the implementer has one (its forwarders pass).

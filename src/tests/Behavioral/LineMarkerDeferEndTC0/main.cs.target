@@ -63,7 +63,7 @@ internal static nint endsInSwitch(nint k) {
 internal static void main() {
     fallsOffEnd();
     loopDefer();
-    func(() => {
+    func([GoFunc("main.func1")] () => {
         GoFrame ᒐ = default;
         try {
             defer(() => where("func literal, falls off the end"), ref ᒐ);

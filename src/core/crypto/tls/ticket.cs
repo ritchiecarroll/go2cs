@@ -16,7 +16,6 @@ using go.crypto;
 using hash = hash_package;
 using time = time_package;
 using vendor.golang.org.x.crypto;
-using static tls_package;
 
 partial class tls_package {
 
@@ -101,8 +100,6 @@ partial struct SessionState {
     internal CurveID curveID;
 }
 
-} partial class tlsᴛSessionState {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string tlsInternalErrorEmptyˢ => ref tlsInternalErrorEmptyˢᵇ;
 private static readonly @string tlsInternalErrorEmptyˢᵇ = "tls: internal error: empty verified chain"u8;
@@ -113,7 +110,7 @@ private static readonly @string tlsInternalErrorEmptyˢᵇ = "tls: internal erro
 //
 // The specific encoding should be considered opaque and may change incompatibly
 // between Go versions.
-public static (slice<byte>, error) Bytes(this ж<SessionState> Ꮡs) {
+internal static (slice<byte>, error) Bytes⁔(/*this*/ ж<SessionState> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     ref var b = ref heap(new cryptobyte.Builder(), out var Ꮡb);
@@ -125,13 +122,13 @@ public static (slice<byte>, error) Bytes(this ж<SessionState> Ꮡs) {
     }
     b.AddUint16(s.cipherSuite);
     addUint64(Ꮡb, s.createdAt);
-    Ꮡb.AddUint8LengthPrefixed((ж<cryptobyte.Builder> bΔ1) => {
+    Ꮡb.AddUint8LengthPrefixed([GoFunc("(*SessionState).Bytes.func1")] (ж<cryptobyte.Builder> bΔ1) => {
         bΔ1.AddBytes(Ꮡs.Value.secret);
     });
-    Ꮡb.AddUint24LengthPrefixed((ж<cryptobyte.Builder> bΔ2) => {
+    Ꮡb.AddUint24LengthPrefixed([GoFunc("(*SessionState).Bytes.func2")] (ж<cryptobyte.Builder> bΔ2) => {
         foreach (var (_, extra) in range(Ꮡs.Value.Extra)) {
             var extraʗ1 = extra;
-            bΔ2.AddUint24LengthPrefixed((ж<cryptobyte.Builder> bΔ3) => {
+            bΔ2.AddUint24LengthPrefixed([GoFunc("(*SessionState).Bytes.func2.1")] (ж<cryptobyte.Builder> bΔ3) => {
                 bΔ3.AddBytes(extraʗ1);
             });
         }
@@ -151,10 +148,10 @@ public static (slice<byte>, error) Bytes(this ж<SessionState> Ꮡs) {
         OCSPStaple: s.ocspResponse,
         SignedCertificateTimestamps: s.scts
     ));
-    Ꮡb.AddUint24LengthPrefixed((ж<cryptobyte.Builder> bΔ4) => {
+    Ꮡb.AddUint24LengthPrefixed([GoFunc("(*SessionState).Bytes.func3")] (ж<cryptobyte.Builder> bΔ4) => {
         foreach (var (_, chain) in range(Ꮡs.Value.verifiedChains)) {
             var chainʗ1 = chain;
-            bΔ4.AddUint24LengthPrefixed((ж<cryptobyte.Builder> bΔ5) => {
+            bΔ4.AddUint24LengthPrefixed([GoFunc("(*SessionState).Bytes.func3.1")] (ж<cryptobyte.Builder> bΔ5) => {
                 // We elide the first certificate because it's always the leaf.
                 if (len(chainʗ1) == 0) {
                     bΔ5.SetError(errors.New(tlsInternalErrorEmptyˢ));
@@ -162,7 +159,7 @@ public static (slice<byte>, error) Bytes(this ж<SessionState> Ꮡs) {
                 }
                 foreach (var (_, cert) in range(chainʗ1[1..])) {
                     var certʗ1 = cert;
-                    bΔ5.AddUint24LengthPrefixed((ж<cryptobyte.Builder> bΔ6) => {
+                    bΔ5.AddUint24LengthPrefixed([GoFunc("(*SessionState).Bytes.func3.1.1")] (ж<cryptobyte.Builder> bΔ6) => {
                         bΔ6.AddBytes(certʗ1.Raw);
                     });
                 }
@@ -170,7 +167,7 @@ public static (slice<byte>, error) Bytes(this ж<SessionState> Ꮡs) {
         }
     });
     if (s.EarlyData) {
-        Ꮡb.AddUint8LengthPrefixed((ж<cryptobyte.Builder> bΔ7) => {
+        Ꮡb.AddUint8LengthPrefixed([GoFunc("(*SessionState).Bytes.func4")] (ж<cryptobyte.Builder> bΔ7) => {
             bΔ7.AddBytes(slice<byte>(Ꮡs.Value.alpnProtocol));
         });
     }
@@ -184,8 +181,6 @@ public static (slice<byte>, error) Bytes(this ж<SessionState> Ꮡs) {
     }
     return b.Bytes();
 }
-
-} partial class tls_package {
 
 internal static slice<slice<byte>> certificatesToBytesSlice(slice<ж<Δx509.Certificate>> certs) {
     var s = new slice<slice<byte>>(0, len(certs));
@@ -318,11 +313,9 @@ public static (ж<SessionState>, error) ParseSessionState(slice<byte> data) {
     return (ss, default);
 }
 
-} partial class tlsᴛConn {
-
 // sessionState returns a partially filled-out [SessionState] with information
 // from the current connection.
-internal static ж<SessionState> sessionState(this ref Conn c) {
+internal static ж<SessionState> sessionState⁔(/*this*/ ref Conn c) {
     return Ꮡ(new SessionState(
         version: c.vers,
         cipherSuite: c.cipherSuite,
@@ -338,11 +331,9 @@ internal static ж<SessionState> sessionState(this ref Conn c) {
     ));
 }
 
-} partial class tlsᴛConfig {
-
 // EncryptTicket encrypts a ticket with the [Config]'s configured (or default)
 // session ticket keys. It can be used as a [Config.WrapSession] implementation.
-public static (slice<byte>, error) EncryptTicket(this ж<Config> Ꮡc, ConnectionState cs, ж<SessionState> ss) {
+internal static (slice<byte>, error) EncryptTicket⁔(/*this*/ ж<Config> Ꮡc, ConnectionState cs, ж<SessionState> ss) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     var ticketKeys = Ꮡc.ticketKeys(nil);
@@ -357,7 +348,7 @@ public static (slice<byte>, error) EncryptTicket(this ж<Config> Ꮡc, Connectio
 internal static ref readonly @string tlsInternalErrorSessionˢ => ref tlsInternalErrorSessionˢᵇ;
 private static readonly @string tlsInternalErrorSessionˢᵇ = "tls: internal error: session ticket keys unavailable"u8;
 
-internal static (slice<byte>, error) encryptTicket(this ref Config c, slice<byte> state, slice<ticketKey> ticketKeys) {
+internal static (slice<byte>, error) encryptTicket⁔(/*this*/ ref Config c, slice<byte> state, slice<ticketKey> ticketKeys) {
     if (len(ticketKeys) == 0) {
         return (default, errors.New(tlsInternalErrorSessionˢ));
     }
@@ -389,7 +380,7 @@ internal static (slice<byte>, error) encryptTicket(this ref Config c, slice<byte
 // be used as a [Config.UnwrapSession] implementation.
 //
 // If the ticket can't be decrypted or parsed, DecryptTicket returns (nil, nil).
-public static (ж<SessionState>, error) DecryptTicket(this ж<Config> Ꮡc, slice<byte> identity, ConnectionState cs) {
+internal static (ж<SessionState>, error) DecryptTicket⁔(/*this*/ ж<Config> Ꮡc, slice<byte> identity, ConnectionState cs) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     var ticketKeys = Ꮡc.ticketKeys(nil);
@@ -404,7 +395,7 @@ public static (ж<SessionState>, error) DecryptTicket(this ж<Config> Ꮡc, slic
     return (s, default);
 }
 
-internal static slice<byte> decryptTicket(this ref Config c, slice<byte> encrypted, slice<ticketKey> ticketKeys) {
+internal static slice<byte> decryptTicket⁔(/*this*/ ref Config c, slice<byte> encrypted, slice<ticketKey> ticketKeys) {
     if (len(encrypted) < (nint)(aes.BlockSize + sha256.Size)) {
         return default;
     }
@@ -438,22 +429,18 @@ internal static slice<byte> decryptTicket(this ref Config c, slice<byte> encrypt
     return default;
 }
 
-} partial class tls_package {
-
 // ClientSessionState contains the state needed by a client to
 // resume a previous TLS session.
 partial struct ClientSessionState {
     internal ж<SessionState> session;
 }
 
-} partial class tlsᴛClientSessionState {
-
 // ResumptionState returns the session ticket sent by the server (also known as
 // the session's identity) and the state necessary to resume this session.
 //
 // It can be called by [ClientSessionCache.Put] to serialize (with
 // [SessionState.Bytes]) and store the session.
-public static (slice<byte> ticket, ж<SessionState> state, error err) ResumptionState(this ж<ClientSessionState> Ꮡcs) {
+internal static (slice<byte> ticket, ж<SessionState> state, error err) ResumptionState⁔(/*this*/ ж<ClientSessionState> Ꮡcs) {
     ref var cs = ref Ꮡcs.DerefOrNull();
 
     if (Ꮡcs == nil || cs.session == nil) {
@@ -461,8 +448,6 @@ public static (slice<byte> ticket, ж<SessionState> state, error err) Resumption
     }
     return (cs.session.ticket, cs.session, default);
 }
-
-} partial class tls_package {
 
 // NewResumptionState returns a state value that can be returned by
 // [ClientSessionCache.Get] to resume a previous session.

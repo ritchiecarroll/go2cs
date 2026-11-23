@@ -14,7 +14,6 @@ using go.@internal.trace;
 using iter = iter_package;
 using time = time_package;
 using ꓸꓸꓸany = Span<any>;
-using static testtrace_package;
 
 partial class testtrace_package {
 
@@ -60,20 +59,18 @@ public static ж<Validator> NewValidator() {
     ));
 }
 
-} partial class testtraceᴛValidator {
-
 // SkipClockSnapshotChecks causes the validator to skip checks on the clock snapshots.
 //
 // Some platforms like Windows, with a small enough trace period, are unable to produce
 // monotonically increasing timestamps due to very coarse clock granularity.
-public static void SkipClockSnapshotChecks(this ref Validator v) {
+internal static void SkipClockSnapshotChecks⁔(/*this*/ ref Validator v) {
     v.skipClockSnapshotChecks = true;
 }
 
 // Event validates ev as the next event in a stream of trace.Events.
 //
 // Returns an error if validation fails.
-public static error Event(this ж<Validator> Ꮡv, trace.Event ev) {
+internal static error Event⁔(/*this*/ ж<Validator> Ꮡv, trace.Event ev) {
     ev = ev.ΔClone();
     ref var v = ref Ꮡv.DerefOrNull();
 
@@ -378,23 +375,23 @@ public static error Event(this ж<Validator> Ꮡv, trace.Event ev) {
     return e.Errors();
 }
 
-internal static bool hasRange(this ref Validator v, trace.ResourceID r, @string name) {
+internal static bool hasRange⁔(/*this*/ ref Validator v, trace.ResourceID r, @string name) {
     var (ranges, ok) = v.ranges[r, ꟷ];
     return ok && slices.Contains(ranges, name);
 }
 
-internal static void addRange(this ref Validator v, trace.ResourceID r, @string name) {
+internal static void addRange⁔(/*this*/ ref Validator v, trace.ResourceID r, @string name) {
     var (ranges, _) = v.ranges[r, ꟷ];
     ranges = append(ranges, name);
     v.ranges[r] = ranges;
 }
 
-internal static bool hasAnyRange(this ref Validator v, trace.ResourceID r) {
+internal static bool hasAnyRange⁔(/*this*/ ref Validator v, trace.ResourceID r) {
     var (ranges, ok) = v.ranges[r, ꟷ];
     return ok && len(ranges) != 0;
 }
 
-internal static void deleteRange(this ref Validator v, trace.ResourceID r, @string name) {
+internal static void deleteRange⁔(/*this*/ ref Validator v, trace.ResourceID r, @string name) {
     var (ranges, ok) = v.ranges[r, ꟷ];
     if (!ok) {
         return;
@@ -406,13 +403,13 @@ internal static void deleteRange(this ref Validator v, trace.ResourceID r, @stri
     v.ranges[r] = slices.Delete<slice<@string>, @string>(ranges, i, i + 1);
 }
 
-internal static ж<schedContext> getOrCreateThread(this ж<Validator> Ꮡv, ж<errAccumulator> Ꮡe, trace.Event ev, trace.ThreadID m) {
+internal static ж<schedContext> getOrCreateThread⁔(/*this*/ ж<Validator> Ꮡv, ж<errAccumulator> Ꮡe, trace.Event ev, trace.ThreadID m) {
     ev = ev.ΔClone();
     ref var v = ref Ꮡv.DerefOrNull();
     ref var e = ref Ꮡe.DerefOrNull();
 
     var evʗ1 = ev;
-    bool lenient() {
+    [GoFunc("(*Validator).getOrCreateThread.func1")] bool lenient() {
         // Be lenient about GoUndetermined -> GoSyscall transitions if they
         // originate from an old trace. These transitions lack thread
         // information in trace formats older than 1.22.
@@ -442,8 +439,6 @@ internal static ж<schedContext> getOrCreateThread(this ж<Validator> Ꮡv, ж<e
     return s;
 }
 
-} partial class testtrace_package {
-
 internal static void checkStack(ж<errAccumulator> Ꮡe, trace.Stack stk) {
     ref var e = ref Ꮡe.DerefOrNull();
 
@@ -465,16 +460,14 @@ partial struct errAccumulator {
     internal slice<error> errs;
 }
 
-} partial class testtraceᴛerrAccumulator {
-
-internal static void Errorf(this ref errAccumulator e, @string f, params ꓸꓸꓸany argsʗp) {
+internal static void Errorf⁔(/*this*/ ref errAccumulator e, @string f, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     e.errs = append(e.errs, fmt.Errorf(f, args.ꓸꓸꓸ));
 }
 
-internal static error Errors(this ref errAccumulator e) {
+internal static error Errors⁔(/*this*/ ref errAccumulator e) {
     return errors.Join(e.errs.ꓸꓸꓸ);
 }
 
-}
+} // end testtrace_package

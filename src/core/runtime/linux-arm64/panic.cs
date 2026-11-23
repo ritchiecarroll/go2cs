@@ -11,7 +11,6 @@ using stringslite = @internal.stringslite_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
-using static runtime_package;
 
 partial class runtime_package {
 
@@ -747,7 +746,7 @@ internal static void preprintpanics(ж<_panic> Ꮡp) {
     try {
         ref var p = ref Ꮡp.DerefOrNull();
 
-        defer(() => {
+        defer([GoFunc("preprintpanics.func1")] () => {
             @string text = panicWhilePrintingPanicˢ;
             var switchᴛ1 = recover();
             switch (switchᴛ1.type()) {
@@ -851,16 +850,12 @@ partial struct PanicNilError {
     internal array<ж<PanicNilError>> _ = new(0);
 }
 
-} partial class runtimeᴛPanicNilError {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string panicCalledWithNilˢ => ref panicCalledWithNilˢᵇ;
 private static readonly @string panicCalledWithNilˢᵇ = "panic called with nil argument"u8;
 
-public static @string Error(this ref PanicNilError _) { return panicCalledWithNilˢ; }
-public static void RuntimeError(this ref PanicNilError _) { }
-
-} partial class runtime_package {
+internal static @string Error⁔(/*this*/ ref PanicNilError _) { return panicCalledWithNilˢ; }
+internal static void RuntimeError⁔(/*this*/ ref PanicNilError _) { }
 
 internal static ж<godebugInc> panicnil = Ꮡ(new godebugInc(name: "panicnil"));
 
@@ -958,12 +953,10 @@ internal static void gopanic(any e) {
     (((ж<nint>)nil)).Value = 0; // not reached
 }
 
-} partial class runtimeᴛ_panic {
-
 // start initializes a panic to start unwinding the stack.
 //
 // If p.goexit is true, then start may return multiple times.
-internal static void start(this ж<_panic> Ꮡp, uintptr pc, @unsafe.Pointer sp) {
+internal static void start⁔(/*this*/ ж<_panic> Ꮡp, uintptr pc, @unsafe.Pointer sp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     var gp = getg();
@@ -1016,7 +1009,7 @@ private static readonly @string recoveryFailedˢᵇ = "recovery failed"u8;
 //
 // Note: The "ok bool" result is necessary to correctly handle when
 // the deferred function itself was nil (e.g., "defer (func())(nil)").
-internal static (Action, bool) nextDefer(this ж<_panic> Ꮡp) {
+internal static (Action, bool) nextDefer⁔(/*this*/ ж<_panic> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     var gp = getg();
@@ -1084,7 +1077,7 @@ Recheck:
 }
 
 // nextFrame finds the next frame that contains deferred calls, if any.
-internal static bool /*ok*/ nextFrame(this ж<_panic> Ꮡp) {
+internal static bool /*ok*/ nextFrame⁔(/*this*/ ж<_panic> Ꮡp) {
     bool ok = default;
     ref var p = ref Ꮡp.DerefOrNull();
 
@@ -1094,7 +1087,7 @@ internal static bool /*ok*/ nextFrame(this ж<_panic> Ꮡp) {
 
     var gp = getg();
     var gpʗ1 = gp;
-    systemstack(() => {
+    systemstack([GoFunc("(*_panic).nextFrame.func1")] () => {
         uintptr limit = default;
         var d = gpʗ1.Value._defer; if (d != nil) {
             limit = d.Value.sp;
@@ -1138,7 +1131,7 @@ internal static bool /*ok*/ nextFrame(this ж<_panic> Ꮡp) {
 internal static ref readonly @string missingDeferreturnˢ => ref missingDeferreturnˢᵇ;
 private static readonly @string missingDeferreturnˢᵇ = "missing deferreturn"u8;
 
-internal static bool initOpenCodedDefers(this ref _panic p, funcInfo fn, @unsafe.Pointer varp) {
+internal static bool initOpenCodedDefers⁔(/*this*/ ref _panic p, funcInfo fn, @unsafe.Pointer varp) {
     @unsafe.Pointer fd = funcdata(fn, abi.FUNCDATA_OpenCodedDeferInfo);
     if (fd == nil) {
         return false;
@@ -1162,8 +1155,6 @@ internal static bool initOpenCodedDefers(this ref _panic p, funcInfo fn, @unsafe
 
     return true;
 }
-
-} partial class runtime_package {
 
 // The implementation of the predeclared function recover.
 internal static any gorecover() {
@@ -1219,7 +1210,7 @@ internal static any gorecover() {
     var canRecover = false;
     var gpʗ1 = gp;
     var pʗ1 = p;
-    systemstack(() => {
+    systemstack([GoFunc("gorecover.func1")] () => {
         ref var u = ref heap(new unwinder(), out var Ꮡu);
         Ꮡu.init(gpʗ1, 0);
         Ꮡu.next(); // skip systemstack_switch
@@ -1500,7 +1491,7 @@ internal static void fatalthrow(throwType t) {
     // Switch to the system stack to avoid any stack growth, which may make
     // things worse if the runtime is in a bad state.
     var gpʗ1 = gp;
-    systemstack(() => {
+    systemstack([GoFunc("fatalthrow.func1")] () => {
         if (isSecureMode()) {
             exit(2);
         }
@@ -1533,7 +1524,7 @@ internal static void fatalpanic(ж<_panic> msgs) {
     // Switch to the system stack to avoid any stack growth, which
     // may make things worse if the runtime is in a bad state.
     var gpʗ1 = gp;
-    systemstack(() => {
+    systemstack([GoFunc("fatalpanic.func1")] () => {
         if (startpanic_m() && msgs != nil) {
             // There were panic messages and startpanic_m
             // says it's okay to try to print them.
@@ -1563,7 +1554,7 @@ internal static void fatalpanic(ж<_panic> msgs) {
         crash();
     }
 
-    systemstack(() => {
+    systemstack([GoFunc("fatalpanic.func2")] () => {
         exit(2);
     });
 
@@ -1676,7 +1667,7 @@ internal static bool dopanic_m(ж<g> Ꮡgp, uintptr pc, uintptr sp, ж<synctestB
             } else if (Ꮡbubble != nil) {
                 // This panic is caused by a synctest bubble deadlock.
                 // Print stacks for goroutines in the deadlocked bubble.
-                tracebacksomeothers(Ꮡgp, (ж<g> other) => Ꮡbubble == (~other).bubble);
+                tracebacksomeothers(Ꮡgp, [GoFunc("dopanic_m.func1")] (ж<g> other) => Ꮡbubble == (~other).bubble);
             }
         }
     }

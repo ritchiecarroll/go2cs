@@ -491,7 +491,7 @@ public static void SetFinalizer(any objʗp, any finalizerʗp) {
     if (ftyp == nil) {
         // switch to system stack and remove finalizer
         var eʗ1 = e;
-        systemstack(() => {
+        systemstack([GoFunc("SetFinalizer.func1")] () => {
             removefinalizer((~eʗ1).data);
 
             if (debug.checkfinalizers != 0) {
@@ -555,7 +555,7 @@ okarg:
     var fʗ1 = f;
     var fintʗ1 = fint;
     var otʗ1 = ot;
-    systemstack(() => {
+    systemstack([GoFunc("SetFinalizer.func2")] () => {
         if (!addfinalizer((~eʗ2).data, @unsafe.Pointer.To<funcval>((~fʗ1).data), nret, fintʗ1, otʗ1)) {
             @throw("runtime.SetFinalizer: finalizer already set"u8);
         }

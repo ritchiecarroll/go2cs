@@ -64,7 +64,7 @@ internal static void main() {
     fmt.Println("ident   ", identV());
 
     var h4 = new holder(p: Ꮡ(new frame(Name: "d")));
-    @string call(Func<@string> f) => f();
+    [GoFunc("main.func1")] @string call(Func<@string> f) => f();
     var recvʗ4 = ~h4.p;
     @string got = call(() => recvʗ4.label());
     h4.p.Name = "D";

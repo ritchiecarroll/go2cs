@@ -17,19 +17,15 @@
 // started.
 namespace go.vendor.golang.org.x.crypto;
 
-using static cryptobyte_package;
-
 partial class cryptobyte_package {
 
 // String represents a string of bytes. It provides methods for parsing
 // fixed-length and length-prefixed values from it.
 partial struct String /*[]byte*/;
 
-} partial class cryptobyteᴛString {
-
 // read advances a String by n bytes and returns them. If less than n bytes
 // remain, it returns nil.
-internal static slice<byte> read(this ref String s, nint n) {
+internal static slice<byte> read⁔(/*this*/ ref String s, nint n) {
     if (len(s) < n || n < 0) {
         return default;
     }
@@ -39,13 +35,13 @@ internal static slice<byte> read(this ref String s, nint n) {
 }
 
 // Skip advances the String by n byte and reports whether it was successful.
-public static bool Skip(this ref String s, nint n) {
+internal static bool Skip⁔(/*this*/ ref String s, nint n) {
     return s.read(n) != nil;
 }
 
 // ReadUint8 decodes an 8-bit value into out and advances over it.
 // It reports whether the read was successful.
-public static bool ReadUint8(this ref String s, ж<uint8> Ꮡout) {
+internal static bool ReadUint8⁔(/*this*/ ref String s, ж<uint8> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     var v = s.read(1);
@@ -58,7 +54,7 @@ public static bool ReadUint8(this ref String s, ж<uint8> Ꮡout) {
 
 // ReadUint16 decodes a big-endian, 16-bit value into out and advances over it.
 // It reports whether the read was successful.
-public static bool ReadUint16(this ref String s, ж<uint16> Ꮡout) {
+internal static bool ReadUint16⁔(/*this*/ ref String s, ж<uint16> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     var v = s.read(2);
@@ -71,7 +67,7 @@ public static bool ReadUint16(this ref String s, ж<uint16> Ꮡout) {
 
 // ReadUint24 decodes a big-endian, 24-bit value into out and advances over it.
 // It reports whether the read was successful.
-public static bool ReadUint24(this ref String s, ж<uint32> Ꮡout) {
+internal static bool ReadUint24⁔(/*this*/ ref String s, ж<uint32> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     var v = s.read(3);
@@ -84,7 +80,7 @@ public static bool ReadUint24(this ref String s, ж<uint32> Ꮡout) {
 
 // ReadUint32 decodes a big-endian, 32-bit value into out and advances over it.
 // It reports whether the read was successful.
-public static bool ReadUint32(this ref String s, ж<uint32> Ꮡout) {
+internal static bool ReadUint32⁔(/*this*/ ref String s, ж<uint32> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     var v = s.read(4);
@@ -97,7 +93,7 @@ public static bool ReadUint32(this ref String s, ж<uint32> Ꮡout) {
 
 // ReadUint48 decodes a big-endian, 48-bit value into out and advances over it.
 // It reports whether the read was successful.
-public static bool ReadUint48(this ref String s, ж<uint64> Ꮡout) {
+internal static bool ReadUint48⁔(/*this*/ ref String s, ж<uint64> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     var v = s.read(6);
@@ -110,7 +106,7 @@ public static bool ReadUint48(this ref String s, ж<uint64> Ꮡout) {
 
 // ReadUint64 decodes a big-endian, 64-bit value into out and advances over it.
 // It reports whether the read was successful.
-public static bool ReadUint64(this ref String s, ж<uint64> Ꮡout) {
+internal static bool ReadUint64⁔(/*this*/ ref String s, ж<uint64> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     var v = s.read(8);
@@ -121,7 +117,7 @@ public static bool ReadUint64(this ref String s, ж<uint64> Ꮡout) {
     return true;
 }
 
-internal static bool readUnsigned(this ref String s, ж<uint32> Ꮡout, nint length) {
+internal static bool readUnsigned⁔(/*this*/ ref String s, ж<uint32> Ꮡout, nint length) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     var v = s.read(length);
@@ -137,7 +133,7 @@ internal static bool readUnsigned(this ref String s, ж<uint32> Ꮡout, nint len
     return true;
 }
 
-internal static bool readLengthPrefixed(this ref String s, nint lenLen, ж<String> ᏑoutChild) {
+internal static bool readLengthPrefixed⁔(/*this*/ ref String s, nint lenLen, ж<String> ᏑoutChild) {
     ref var outChild = ref ᏑoutChild.DerefOrNull();
 
     var lenBytes = s.read(lenLen);
@@ -159,27 +155,27 @@ internal static bool readLengthPrefixed(this ref String s, nint lenLen, ж<Strin
 
 // ReadUint8LengthPrefixed reads the content of an 8-bit length-prefixed value
 // into out and advances over it. It reports whether the read was successful.
-public static bool ReadUint8LengthPrefixed(this ref String s, ж<String> @out) {
+internal static bool ReadUint8LengthPrefixed⁔(/*this*/ ref String s, ж<String> @out) {
     return s.readLengthPrefixed(1, @out);
 }
 
 // ReadUint16LengthPrefixed reads the content of a big-endian, 16-bit
 // length-prefixed value into out and advances over it. It reports whether the
 // read was successful.
-public static bool ReadUint16LengthPrefixed(this ref String s, ж<String> @out) {
+internal static bool ReadUint16LengthPrefixed⁔(/*this*/ ref String s, ж<String> @out) {
     return s.readLengthPrefixed(2, @out);
 }
 
 // ReadUint24LengthPrefixed reads the content of a big-endian, 24-bit
 // length-prefixed value into out and advances over it. It reports whether
 // the read was successful.
-public static bool ReadUint24LengthPrefixed(this ref String s, ж<String> @out) {
+internal static bool ReadUint24LengthPrefixed⁔(/*this*/ ref String s, ж<String> @out) {
     return s.readLengthPrefixed(3, @out);
 }
 
 // ReadBytes reads n bytes into out and advances over them. It reports
 // whether the read was successful.
-public static bool ReadBytes(this ref String s, ж<slice<byte>> Ꮡout, nint n) {
+internal static bool ReadBytes⁔(/*this*/ ref String s, ж<slice<byte>> Ꮡout, nint n) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     var v = s.read(n);
@@ -192,7 +188,7 @@ public static bool ReadBytes(this ref String s, ж<slice<byte>> Ꮡout, nint n) 
 
 // CopyBytes copies len(out) bytes into out and advances over them. It reports
 // whether the copy operation was successful
-public static bool CopyBytes(this ref String s, slice<byte> @out) {
+internal static bool CopyBytes⁔(/*this*/ ref String s, slice<byte> @out) {
     nint n = len(@out);
     var v = s.read(n);
     if (v == nil) {
@@ -202,8 +198,8 @@ public static bool CopyBytes(this ref String s, slice<byte> @out) {
 }
 
 // Empty reports whether the string does not contain any bytes.
-public static bool Empty(this String s) {
+internal static bool Empty⁔(/*this*/ String s) {
     return len(s) == 0;
 }
 
-}
+} // end cryptobyte_package

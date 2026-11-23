@@ -748,7 +748,7 @@ namespace go.golib;
     /// having woken.
     /// </para>
     /// </remarks>
-    private static ParkScope ParkCore(WaitReason reason, bool handoff) // M:N SPIKE: Park is in Goroutine.Multiplexed.cs
+    private static ParkScope ParkCore(WaitReason reason, bool handoff) // M:N: Park is in Goroutine.Multiplexed.cs
     {
         if (t_current is not { } goroutine)
             return default;
@@ -790,7 +790,7 @@ namespace go.golib;
             bubble.Idled();
         }
 
-        return new ParkScope(goroutine, previous, handoff && HandOffBeforeBlocking(goroutine, previous)); // M:N SPIKE
+        return new ParkScope(goroutine, previous, handoff && HandOffBeforeBlocking(goroutine, previous)); // M:N
     }
 
     /// <summary>
@@ -1722,7 +1722,7 @@ namespace go.golib;
             if (m_goroutine is null)
                 return;
 
-            // M:N SPIKE: a thread that blocked under a hand-off takes a P back before it runs on.
+            // M:N: a thread that blocked under a hand-off takes a P back before it runs on.
             if (m_handoff)
                 GoScheduler.ExitBlocked();
 

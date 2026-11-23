@@ -245,7 +245,9 @@ public class MemberRecordGeneratorTests
         string[] generated = Run(MarkerCommentsFixture());
 
         string[] parameters = Recorded(generated, "GoParamDims");
-        CollectionAssert.AreEqual(new[] { "fill", "first", "hash", "noted", "put" }, parameters.Select(record => record.Split(' ')[0]).ToArray(), string.Join("\n", parameters));
+        // `put` takes the suffix form (its type keeps a holder in package main): the fixture's main.cs holds its body
+        // `put⁔`, keyed in the package class like any function; its forwarder's record rides package_info.cs.
+        CollectionAssert.AreEqual(new[] { "fill", "first", "hash", "noted", "put\u2054" }, parameters.Select(record => record.Split(' ')[0]).ToArray(), string.Join("\n", parameters));
         StringAssert.EndsWith(parameters[0], "} 2 4 8");
         Assert.AreEqual("first new global::System.Type[] { typeof(global::go.array<>) } 0 2", parameters[1], "a generic func is keyed by the open definition (D2)");
         StringAssert.EndsWith(parameters[2], "} 0 32");
@@ -302,7 +304,8 @@ public class MemberRecordGeneratorTests
     // Trim stage 3b (docs/PLAN-golib-full-trim.md, 9.6): golib finds a [GoParamDims] record's method by GetMethods on its
     // declaring type (GoReflect.ParamDimsRecords) and suppresses the trim warning there on the strength of this: every
     // recorded method, and only those, is kept by a DynamicDependency on an empty module initializer of its outermost
-    // class: the package class, or the method holder a method stands in (the fixture has both). A recorded method with
+    // class: the package class, or the method holder a method stands in (a holder's methods are forwarders in package_info.cs,
+    // which the fixture leaves out, so its main.cs has the package class alone). A recorded method with
     // no dependency is exactly the miss that suppression must not survive.
     [TestMethod]
     public void EveryParamDimsRecordedMethodIsKeptForTrimming()
@@ -318,7 +321,7 @@ public class MemberRecordGeneratorTests
 
         string[] keepClasses = keepTrees.Select(tree => Regex.Match(tree.ToString(), @"partial class (\S+)").Groups[1].Value).OrderBy(name => name, StringComparer.Ordinal).ToArray();
 
-        CollectionAssert.AreEqual(new[] { "main_package", "mainᴛholder" }, keepClasses, "one keep-alive per class that declares a recorded method");
+        CollectionAssert.AreEqual(new[] { "main_package" }, keepClasses, "one keep-alive per class that declares a recorded method");
 
         foreach (SyntaxTree tree in keepTrees)
             StringAssert.Contains(tree.ToString(), "[global::System.Runtime.CompilerServices.ModuleInitializer]", "a module initializer is always kept, so its dependencies are");

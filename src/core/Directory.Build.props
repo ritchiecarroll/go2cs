@@ -62,6 +62,23 @@
            Text="go2cs: $(_GoLayoutTarget) is not a target the converted standard library is laid out for (windows/amd64, linux/amd64, darwin/amd64, linux/arm64); set GoTargetOS and GoTargetArch to one of them." />
   </Target>
 
+  <!-- M:N row 7 piece 5 (DATA-mn-row7-r5.md, COORD's ruling (a)): GoStdlibTwins builds every converted package of the
+       standard library WITH twins (GoTwins=true). It is OFF by default and stays off until row 10's T1-T5 ruling flips
+       it: by O3 (DESIGN-mn-twin-set.md) the first package shipped with twins ships them for good, so nothing twinned is
+       packed before that window passes. Piece 6's gates and row 10 set it on the command line (-p:GoStdlibTwins=true).
+       golib and the *.tests projects are excluded here; a hand-owned package ([assembly: GoHandOwnedPackage]) is
+       excluded by the twin generator itself, by that attribute. The repoguard TestStdlibTwinsDefaultOff fails if the
+       default reads anything but false, or if any tracked file turns it on. -->
+  <PropertyGroup>
+    <GoStdlibTwins Condition="'$(GoStdlibTwins)' == ''">false</GoStdlibTwins>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(GoStdlibTwins)' == 'true' And '$(MSBuildProjectName)' != 'golib' And !$(MSBuildProjectName.EndsWith('.tests'))">
+    <GoTwins>true</GoTwins>
+  </PropertyGroup>
+  <ItemGroup>
+    <CompilerVisibleProperty Include="GoStdlibTwins" />
+  </ItemGroup>
+
   <!-- Shared NuGet version for every converted stdlib package (single source: src/version.props) -->
   <Import Project="$(MSBuildThisFileDirectory)../version.props" />
 

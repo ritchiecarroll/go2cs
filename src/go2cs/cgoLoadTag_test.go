@@ -114,14 +114,14 @@ func TestR3StepsAsideOnlyWhereTheCCompilerDoesNotResolve(t *testing.T) {
 			stderr, output, err := convertCgoGateFixture(t, dir, []string{"-cgo"}, "CGO_ENABLED=", "CC="+arm.cc)
 
 			if arm.refused {
-				if err == nil || !strings.Contains(stderr, "cgo: R3") || !strings.Contains(stderr, "freebsd") {
+				if err == nil || !strings.Contains(stderr, "cgo: this -cgo conversion") || !strings.Contains(stderr, "freebsd") {
 					t.Fatalf("a C compiler answering another platform's triple was not refused by R3 (%v):\n%s", err, stderr)
 				}
 
 				return
 			}
 
-			if err != nil || strings.Contains(stderr, "cgo: R3") {
+			if err != nil || strings.Contains(stderr, "cgo: this -cgo conversion") {
 				t.Fatalf("with a C compiler that does not resolve, R3 did not step aside (%v):\n%s", err, stderr)
 			}
 

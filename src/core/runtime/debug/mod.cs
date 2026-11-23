@@ -8,7 +8,6 @@ using runtime = runtime_package;
 using strconv = strconv_package;
 using strings = strings_package;
 using io = io_package;
-using static debug_package;
 
 partial class debug_package {
 
@@ -101,8 +100,6 @@ internal static bool quoteValue(@string value) {
     return strings.ContainsAny(value, " \t\r\n\"`");
 }
 
-} partial class debugᴛBuildInfo {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static ref readonly @string modˢ => ref modˢᵇ;
 private static readonly @string modˢᵇ = "mod"u8;
@@ -110,7 +107,7 @@ private static ref readonly @string depˢ => ref depˢᵇ;
 private static readonly @string depˢᵇ = "dep"u8;
 
 // String returns a string representation of a [BuildInfo].
-public static @string String(this ref BuildInfo bi) {
+internal static @string String⁔(/*this*/ ref BuildInfo bi) {
     var buf = @new<strings.Builder>();
     if (bi.GoVersion != ""u8) {
         fmt.Fprintf(new strings_BuilderжWriter(buf), "go\t%s\n"u8, bi.GoVersion);
@@ -120,7 +117,7 @@ public static @string String(this ref BuildInfo bi) {
     }
     ref var formatMod = ref heap<Action<@string, Module>>(out var ᏑformatMod);
     var bufʗ1 = buf;
-    formatMod = (@string word, Module m) => {
+    formatMod = [GoFunc("(*BuildInfo).String.func1")] (@string word, Module m) => {
         bufʗ1.WriteString(word);
         bufʗ1.WriteByte((byte)'\t');
         bufʗ1.WriteString(m.Path);
@@ -155,8 +152,6 @@ public static @string String(this ref BuildInfo bi) {
 
     return buf.String();
 }
-
-} partial class debug_package {
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 private static ref readonly @string pathLineᶜ => ref pathLineᶜᵇ;
@@ -198,7 +193,7 @@ public static (ж<BuildInfo> bi, error err) ParseBuildInfo(@string data) {
     GoFrame ᒐ = default;
     try {
         nint lineNum = 1;
-        defer(() => {
+        defer([GoFunc("ParseBuildInfo.func1")] () => {
             if (err != nil) {
                 err = fmt.Errorf("could not parse Go build info: line %d: %w"u8, lineNum, err);
             }
@@ -212,7 +207,7 @@ public static (ж<BuildInfo> bi, error err) ParseBuildInfo(@string data) {
         @string newline = newlineᶜ;
         @string tab = tabᶜ;
 
-        (Module, error) readModuleLine(slice<@string> elem) {
+        [GoFunc("ParseBuildInfo.func2")] (Module, error) readModuleLine(slice<@string> elem) {
             if (len(elem) != 2 && len(elem) != 3) {
                 return (new Module(), fmt.Errorf("expected 2 or 3 columns; got %d"u8, len(elem)));
             }

@@ -16,7 +16,7 @@ partial class strings_package {
 // If s does not end in a newline, the final yielded line will not end in a newline.
 // It returns a single-use iterator.
 public static iter.Seq<@string> Lines(@string s) {
-    return (Func<@string, bool> yield) => {
+    return [GoFunc("Lines.func1")] (Func<@string, bool> yield) => {
         while (len(s) > 0) {
             @string line = default;
             nint i = IndexByte(s, (byte)'\n'); if (i >= 0) {
@@ -34,7 +34,7 @@ public static iter.Seq<@string> Lines(@string s) {
 // splitSeq is SplitSeq or SplitAfterSeq, configured by how many
 // bytes of sep to include in the results (none or all).
 internal static iter.Seq<@string> splitSeq(@string s, @string sep, nint sepSave) {
-    return (Func<@string, bool> yield) => {
+    return [GoFunc("splitSeq.func1")] (Func<@string, bool> yield) => {
         if (len(sep) == 0) {
             while (len(s) > 0) {
                 var (_, size) = utf8.DecodeRuneInString(s);
@@ -81,7 +81,7 @@ public static iter.Seq<@string> SplitAfterSeq(@string s, @string sep) {
 // The iterator yields the same strings that would be returned by [Fields](s),
 // but without constructing the slice.
 public static iter.Seq<@string> FieldsSeq(@string s) {
-    return (Func<@string, bool> yield) => {
+    return [GoFunc("FieldsSeq.func1")] (Func<@string, bool> yield) => {
         nint start = -1;
         for (nint i = 0; i < len(s); ) {
             nint size = 1;
@@ -114,7 +114,7 @@ public static iter.Seq<@string> FieldsSeq(@string s) {
 // The iterator yields the same strings that would be returned by [FieldsFunc](s),
 // but without constructing the slice.
 public static iter.Seq<@string> FieldsFuncSeq(@string s, Func<rune, bool> f) {
-    return (Func<@string, bool> yield) => {
+    return [GoFunc("FieldsFuncSeq.func1")] (Func<@string, bool> yield) => {
         nint start = -1;
         for (nint i = 0; i < len(s); ) {
             var (r, size) = utf8.DecodeRuneInString(s.slice(i));

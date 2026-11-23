@@ -493,9 +493,11 @@ public static partial class GoReflect
     {
         List<System.Reflection.MethodInfo> methods = [];
 
+        // An M:N twin member (the opt-in GoTwinsIface=default shape writes `Mꞏtwin` onto the interface) is never a Go
+        // method, so `%T` never prints it (golib.TypeExtensions.IsTwinMember).
         foreach (System.Reflection.MethodInfo method in t.GetMethods())
         {
-            if (!method.IsSpecialName)
+            if (!method.IsSpecialName && !golib.TypeExtensions.IsTwinMember(method))
                 methods.Add(method);
         }
 
@@ -503,7 +505,7 @@ public static partial class GoReflect
         {
             foreach (System.Reflection.MethodInfo method in embedded.GetMethods())
             {
-                if (!method.IsSpecialName)
+                if (!method.IsSpecialName && !golib.TypeExtensions.IsTwinMember(method))
                     methods.Add(method);
             }
         }

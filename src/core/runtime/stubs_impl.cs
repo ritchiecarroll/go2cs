@@ -179,7 +179,7 @@ partial class runtime_package
 
         if (gp is null || !ReferenceEquals(t_getgOwner, current))
         {
-            // M:N SPIKE: a multiplexed goroutine resumes on whichever carrier is free, and it is still the
+            // M:N: a multiplexed goroutine resumes on whichever carrier is free, and it is still the
             // goroutine it was: its g is the one it minted on its first step, not a fresh one.
             // GO2CS_MN_NOGETGFIX=1 takes this out, to show what it prevents.
             gp = s_mnReuseG && current is { IsMultiplexed: true, RuntimeDescriptor: ж<g> existing } ? existing : mintGoroutineDescriptor();

@@ -15,7 +15,7 @@ partial class drbg_package {
     // Per IG 10.3.A, Resolution 7: "A KAT of a DRBG may be performed by:
     // Instantiate with known data, Reseed with other known data, Generate and
     // then compare the result to a pre-computed value."
-    fips140.CAST("CTR_DRBG", error () => {
+    fips140.CAST("CTR_DRBG", [GoFunc("init.0.func1")] error () => {
         var entropy = Ꮡ(array<byte>([
             0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
             0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10,

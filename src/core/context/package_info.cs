@@ -10,10 +10,14 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+using time = go.time_package;
 // </ImportedTypeAliases>
 
 using go;
 using static go.context_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -75,10 +79,13 @@ using static go.context_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("context/context.go", "context.cs", "AKgBzgK4AAoIgoIACgyypoKmgqaCAA4KggAOCoLOwq7CAAgg8oKQAA80AAsCgpC2goKUgoIAAhLigoKUgoKCgoLuAAIoABECpoKSgoKUgpQADxyigoKUggAVMOKCgpSCgpSCgpSokoKClIKClIKClAAKFpSCABMeooKUptKCgpSCgoKCgpTWlJSClKrClIKCpraC2ICUgpSUgpSUgraAlIKClLiCtoKCtAAOFIKClMaCrNKClIKUgoKClIKCgoKUlJSUgpSCAAUQwoKUAAgOsqaCpoKmgqaCAAQYAAkCrNKClJSUpoKCgoKQpIKSgpKmkAARGoKmgqqigpSUgoKClAAEGgAKAqyyAAIgAA0CgpSClIKUAB0aspSkpJTGgqqCgpTGgoKUgpS0gpS0ppS0gpTUtA==", "242-242:1;270-270:1;330-339:1;332-334:1.1;357-359:1;510-512:1;522-528:2;647-647:1;652-654:2;656-656:3", "", "786=String/1/2/1,Until/1/1/2,String/2/2/2;901=stringify/1/2/1,stringify/2/2/2")]
+[assembly: GoPositionMap("context/context.go", "context.cs", "AKYBzgK4AAgIgoLssqaCpoKmggAKCoIACgqCrsKuwgAIIPKCkAAPNAALAoKQtoKClIKCAAIS4oKClIKCgoKC7gACKAARAqaCkoKClIKUAA0cooKClIIAEzDigoKUgoKUgoKUqJKCgpSCgpSCgpQAChaUggARHqKClKbSgoKUgoKCgoKU1pSUgpSqwpSCgqa2gtiAlIKUlIKUlIK2gJSCgpS4graCgrQADBSCgpSmgqzSgpSClIKCgpSCgoKClJSUlIKUggADEMKClO6ypoKmgqaCpoIAAhgACQKs0oKUlJSmgoKCgpCkgpKCkqaQAA8agqaCqqKClJSCgoKUAAIaAAoCrLIAAiAADQKClIKUgpQAGRqylKSklKaCqoKClKaCgpSClLSClLSmlLSClNS0", "242-242:1;270-270:1;330-339:1;332-334:1.1;357-359:1;510-512:1;522-528:2;647-647:1;652-654:2;656-656:3", "", "750=String/1/2/1,Until/1/1/2,String/2/2/2;857=stringify/1/2/1,stringify/2/2/2")]
 // </GoSourcePositionMaps>
 
 namespace go;
+
+using static go.context_package;
+using time = go.time_package;
 
 [GoPackage("context")]
 public static partial class context_package
@@ -128,13 +135,68 @@ public static partial class context_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(context_package.afterFuncCtx)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class contextᴛafterFuncCtx;
-[GoMethodHost(typeof(context_package.backgroundCtx)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class contextᴛbackgroundCtx;
-[GoMethodHost(typeof(context_package.cancelCtx)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class contextᴛcancelCtx;
-[GoMethodHost(typeof(context_package.deadlineExceededError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class contextᴛdeadlineExceededError;
-[GoMethodHost(typeof(context_package.emptyCtx)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class contextᴛemptyCtx;
-[GoMethodHost(typeof(context_package.timerCtx)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class contextᴛtimerCtx;
-[GoMethodHost(typeof(context_package.todoCtx)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class contextᴛtodoCtx;
-[GoMethodHost(typeof(context_package.valueCtx)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class contextᴛvalueCtx;
-[GoMethodHost(typeof(context_package.withoutCancelCtx)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class contextᴛwithoutCancelCtx;
+[GoMethodHost(typeof(context_package.afterFuncCtx)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class contextᴛafterFuncCtx;
+[GoMethodHost(typeof(context_package.backgroundCtx)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class contextᴛbackgroundCtx;
+[GoMethodHost(typeof(context_package.cancelCtx)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class contextᴛcancelCtx;
+[GoMethodHost(typeof(context_package.deadlineExceededError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class contextᴛdeadlineExceededError;
+[GoMethodHost(typeof(context_package.emptyCtx)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class contextᴛemptyCtx;
+[GoMethodHost(typeof(context_package.timerCtx)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class contextᴛtimerCtx;
+[GoMethodHost(typeof(context_package.todoCtx)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class contextᴛtodoCtx;
+[GoMethodHost(typeof(context_package.valueCtx)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class contextᴛvalueCtx;
+[GoMethodHost(typeof(context_package.withoutCancelCtx)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class contextᴛwithoutCancelCtx;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class contextᴛafterFuncCtx {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void cancel(this ж<afterFuncCtx> Ꮡa, bool removeFromParent, error err, error cause) => context_package.cancel⁔(Ꮡa, removeFromParent, err, cause);
+}
+partial class contextᴛbackgroundCtx {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string String(this backgroundCtx _) => context_package.String⁔(_);
+}
+partial class contextᴛcancelCtx {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (time.Time, bool) Deadline(this cancelCtx recvᴛ) => context_package.Deadline⁔(recvᴛ);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static any Value(this ж<cancelCtx> Ꮡc, any key) => context_package.Value⁔(Ꮡc, key);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static /*<-*/channel<EmptyStruct> Done(this ж<cancelCtx> Ꮡc) => context_package.Done⁔(Ꮡc);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error Err(this ж<cancelCtx> Ꮡc) => context_package.Err⁔(Ꮡc);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void propagateCancel(this ж<cancelCtx> Ꮡc, Context parent, canceler child) => context_package.propagateCancel⁔(Ꮡc, parent, child);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string String(this ref cancelCtx c) => context_package.String⁔(ref c);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void cancel(this ж<cancelCtx> Ꮡc, bool removeFromParent, error err, error cause) => context_package.cancel⁔(Ꮡc, removeFromParent, err, cause);
+}
+partial class contextᴛdeadlineExceededError {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string Error(this deadlineExceededError _) => context_package.Error⁔(_);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool Timeout(this deadlineExceededError _) => context_package.Timeout⁔(_);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool Temporary(this deadlineExceededError _) => context_package.Temporary⁔(_);
+}
+partial class contextᴛemptyCtx {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (time.Time deadline, bool ok) Deadline(this emptyCtx _) => context_package.Deadline⁔(_);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static /*<-*/channel<EmptyStruct> Done(this emptyCtx _) => context_package.Done⁔(_);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error Err(this emptyCtx _) => context_package.Err⁔(_);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static any Value(this emptyCtx _, any key) => context_package.Value⁔(_, key);
+}
+partial class contextᴛtimerCtx {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (time.Time deadline, bool ok) Deadline(this ref timerCtx c) => context_package.Deadline⁔(ref c);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string String(this ref timerCtx c) => context_package.String⁔(ref c);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void cancel(this ж<timerCtx> Ꮡc, bool removeFromParent, error err, error cause) => context_package.cancel⁔(Ꮡc, removeFromParent, err, cause);
+}
+partial class contextᴛtodoCtx {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string String(this todoCtx _) => context_package.String⁔(_);
+}
+partial class contextᴛvalueCtx {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (time.Time, bool) Deadline(this valueCtx recvᴛ) => context_package.Deadline⁔(recvᴛ);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static /*<-*/channel<EmptyStruct> Done(this valueCtx recvᴛ) => context_package.Done⁔(recvᴛ);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error Err(this valueCtx recvᴛ) => context_package.Err⁔(recvᴛ);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string String(this ref valueCtx c) => context_package.String⁔(ref c);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static any Value(this ref valueCtx c, any key) => context_package.Value⁔(ref c, key);
+}
+partial class contextᴛwithoutCancelCtx {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (time.Time deadline, bool ok) Deadline(this withoutCancelCtx _) => context_package.Deadline⁔(_);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static /*<-*/channel<EmptyStruct> Done(this withoutCancelCtx _) => context_package.Done⁔(_);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error Err(this withoutCancelCtx _) => context_package.Err⁔(_);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static any Value(this withoutCancelCtx c, any key) => context_package.Value⁔(c, key);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string String(this withoutCancelCtx c) => context_package.String⁔(c);
+}
+// </MethodForwarders>

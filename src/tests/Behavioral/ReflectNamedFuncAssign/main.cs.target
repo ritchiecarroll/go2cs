@@ -16,7 +16,7 @@ public static bool Equal(this AssignA x, Func<nint> y) { return x() == y(); }
 internal static nint apply(Func<nint> f) { return f() * 10; }
 
 internal static void main() {
-    var a = new AssignA(() => 7);
+    var a = new AssignA([GoFunc("main.func1")] () => 7);
 
     var (m, _) = reflect.TypeOf((a).OrTypedNilFunc()).MethodByName("Equal");
     fmt.Println("assignable:", m.Type.In(0).AssignableTo(m.Type.In(1)));
@@ -29,14 +29,14 @@ internal static void main() {
     fmt.Println("named into unnamed:", f());
 
     ref var b = ref heap<AssignA>(out var Ꮡb);
-    reflect.ValueOf(Ꮡb).Elem().Set(reflect.ValueOf(nint () => 9));
+    reflect.ValueOf(Ꮡb).Elem().Set(reflect.ValueOf([GoFunc("main.func2")] nint () => 9));
     fmt.Println("unnamed into named:", b());
 
     var aʗ1 = a;
-    func(() => {
+    func([GoFunc("main.func3")] () => {
         GoFrame ᒐ = default;
         try {
-            defer(() => {
+            defer([GoFunc("main.func3.1")] () => {
                 fmt.Println("named into other named:", recover());
             }, ref ᒐ);
             ref var o = ref heap<Other>(out var Ꮡo);

@@ -27,7 +27,7 @@ internal static partial void main() {
     var deep = new channel<nint>(0);
 
     var deepʗ1 = deep;
-    goǃ(() => {
+    goǃ([GoFunc("main.func1")] () => {
         deepʗ1.ᐸꟷ(depthOf(depth, new nint[]{}.array(4)));
     });
 

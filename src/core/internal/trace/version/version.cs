@@ -7,7 +7,6 @@ using fmt = fmt_package;
 using io = io_package;
 using tracev2 = go.@internal.trace.tracev2_package;
 using go.@internal.trace;
-using static version_package;
 
 partial class version_package {
 
@@ -36,10 +35,8 @@ internal static map<Version, slice<tracev2.EventSpec>> versions = new map<Versio
     [Go126] = tracev2.Specs()
 };
 
-} partial class versionᴛVersion {
-
 // Specs returns the set of event.Specs for this version.
-public static slice<tracev2.EventSpec> Specs(this Version v) {
+internal static slice<tracev2.EventSpec> Specs⁔(/*this*/ Version v) {
     return versions[v];
 }
 
@@ -51,7 +48,7 @@ private static readonly @string v1TraceEventTypeˢᵇ = "<v1 trace event type>"u
 
 // EventName returns a string name of a wire format event
 // for a particular trace version.
-public static @string EventName(this Version v, tracev2.EventType typ) {
+internal static @string EventName⁔(/*this*/ Version v, tracev2.EventType typ) {
     if (!v.Valid()) {
         return invalidTraceVersionˢ;
     }
@@ -65,12 +62,10 @@ public static @string EventName(this Version v, tracev2.EventType typ) {
     return fmt.Sprintf("Invalid(%d)"u8, typ);
 }
 
-public static bool Valid(this Version v) {
+internal static bool Valid⁔(/*this*/ Version v) {
     var (_, ok) = versions[v, ꟷ];
     return ok;
 }
-
-} partial class version_package {
 
 // headerFmt is the format of the header of all Go execution traces.
 internal static ref readonly @string headerFmt => ref headerFmtᵇ;

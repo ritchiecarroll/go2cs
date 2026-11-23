@@ -125,7 +125,7 @@ internal static void main() {
     fmt.Println("method   :", callString(m.Interface(), (nint)1, (nint)2));
 
     var funcs = new map<@string, any>{
-        ["cat"] = ((Funcꓸꓸꓸ<@string, @string, @string>)(@string (@string sep, params ꓸꓸꓸstring partsʗp) => {
+        ["cat"] = ((Funcꓸꓸꓸ<@string, @string, @string>)([GoFunc("main.func1")] @string (@string sep, params ꓸꓸꓸstring partsʗp) => {
             var parts = partsʗp.sslice();
             @string @out = "";
             foreach (var (i, p) in range(parts)) {
@@ -136,11 +136,11 @@ internal static void main() {
             }
             return @out;
         })),
-        ["count"] = ((Funcꓸꓸꓸ<any, nint>)(nint (params ꓸꓸꓸany valsʗp) => {
+        ["count"] = ((Funcꓸꓸꓸ<any, nint>)([GoFunc("main.func2")] nint (params ꓸꓸꓸany valsʗp) => {
             var vals = valsʗp.sslice();
             return len(vals);
         })),
-        ["pair"] = ((Funcꓸꓸꓸ<nint, nint, (nint, nint)>)((nint, nint) (nint a, params ꓸꓸꓸnint restʗp) => {
+        ["pair"] = ((Funcꓸꓸꓸ<nint, nint, (nint, nint)>)([GoFunc("main.func3")] (nint, nint) (nint a, params ꓸꓸꓸnint restʗp) => {
             var rest = restʗp.sslice();
             nint t = 0;
             foreach (var (_, r) in range(rest)) {
@@ -163,10 +163,10 @@ internal static void main() {
     fmt.Println("count    :", callString(funcs["count"], (nint)1, (nint)2, (nint)3, (nint)4));
     fmt.Println("pair     :", callString(funcs["pair"], (nint)7, (nint)1, (nint)2));
 
-    fmt.Println("toofew   :", recoverText(() => {
+    fmt.Println("toofew   :", recoverText([GoFunc("main.func4")] () => {
         reflect.ValueOf(join).Call(default);
     }));
-    fmt.Println("ok-empty :", recoverText(() => {
+    fmt.Println("ok-empty :", recoverText([GoFunc("main.func5")] () => {
         reflect.ValueOf(sum).Call(default);
     }));
 }
@@ -175,7 +175,7 @@ internal static @string /*msg*/ recoverText(Action f) {
     @string msg = default;
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("recoverText.func1")] () => {
             var r = recover(); if (r != nil) {
                 msg = fmt.Sprintf("%v"u8, r);
             }

@@ -41580,4 +41580,316 @@ asserting sites; .5-eligible only with a whole-program arm.
 
 — P2 (2026-11-21)
 
+## 2026-11-22 — i9 (R1 fold; COORD 045750Z ruling 2, a board row with the refusal): a Δ-led struct field, method or type is REFUSED (GO2CS2015) because golib drops a leading Δ when it projects Go names — the durable cure is OWED for .5
+
+golib reads a leading `Δ` on a converted field, method or type name as the collision marker go2cs added, and drops it when
+it projects the member's Go name: fields at `src/core/golib/GoReflect.FieldAccess.cs:404`, type names at
+`GoReflect.TypeNaming.cs:716`, methods at `runtime/TypeExtensions.GoMethodSets.cs:704`. A Go name that itself starts with
+`Δ` loses it: `type P struct{ Δt float64 }` json-encodes `{}` where Go writes `{"Δt":1}`, and `reflect.TypeOf(ΔMatrix{}).Name()`
+reads `Matrix` (P3 045652Z finding 2, read at the three sites; the measured run is in the R1 fold's post).
+
+**Now (R1, claude/i9-marker-glyph-refusal):** such a field, method (interface methods included) or named type refuses its
+package with GO2CS2015, naming what Go would report; `Δ`-led locals, parameters, package variables, constants and
+functions convert. KnownIssues carries the user-facing entry (`#delta-led-field-method-type-refused`).
+
+**Owed (.5, its own seat, COORD assigns after R1 lands):** golib is told which `Δ` the converter added (a generated marker
+it reads, never a guess from the spelling), so a user's `Δ`-led field, method or type converts and projects under its own
+name; the refusal arm (`deltaProjectionReason`) and the KnownIssues entry are then retired. Red-first row: the projection
+fixture above, Go's output against the converted program's.
+
+— i9 (2026-11-22)
+
+### 2026-11-22 — C2: the `-tests -recurse` go.mod overlay is refused beneath GOMODCACHE (OPEN, likely cure named)
+
+`installGoModOverlay` (`src/go2cs/goModFile.go`) serves a module-cache release that ships no go.mod to a `-tests
+-recurse` run. It writes a `go build -overlay` file that maps `<release>/go.mod` to the cache's synthesized
+`cache/download/<escaped path>/@v/<version>.mod`, and appends `-overlay=` to GOFLAGS. At Go 1.26.11 only `go mod
+download` accepts that overlay. `go list` (C2, INC 4 increment 1) and `go build` (P3's read of the increment) both
+refuse it: "overlay contains a replacement for .../go.mod. Files beneath GOMODCACHE must not be replaced". So the
+overlay has most likely never served a release converted from inside the module cache. Not measured: whether any
+banked `-tests` row has gone through it.
+
+**Likely cure, not seated:** the route plain `-recurse` now takes (INC 4 increment 1). `ConvertModule` converts a
+COPY (`copyModuleCacheRelease`) that carries the synthesized go.mod, keeps the `<escaped path>@<version>` leaf,
+runs with GOWORK=off, and maps every source path and diagnostic back to the cache path. The `-tests` driver would
+also need its `go test` runs pointed at the copy. Ruled out of INC 4's seat (COORD, option (a)): INC 4 neither
+changes nor depends on the `-tests` path.
+
+— C2 (2026-11-22)
+
+### 2026-11-22 — C2: the `-tests -recurse` go.mod overlay gap, CLOSED on claude/c2-tests-gomodless; two findings from its rows
+
+**Closes** the 2026-11-22 C2 entry above ("the `-tests -recurse` go.mod overlay is refused beneath GOMODCACHE").
+- `runModuleTests` now enters the copy route that plain `-recurse` takes (`enterModuleCacheReleaseCopy`, extracted
+  from `ConvertModule`) around both of its phases, so phase B's `go test` runs read the copy phase A converted.
+- `installGoModOverlay` is removed. Census: its one production caller could only install an overlay beneath
+  GOMODCACHE, which `go list` refuses. 0 of the 9 banked modules ship without a go.mod.
+- Reds: `TestTestsRecurseConvertsAModuleCacheReleaseWithNoGoMod`, with the hosted text. Its no-copy arm caught the
+  module banner printing the copy, which is now remapped.
+
+**Found on the way, fixed in the same seat.** The test-closure discovery load (`addTestOnlyPackages`) passed no build
+flags and not the target environment. A package imported only from a test file under a `-tags` tag was never
+discovered, while the test file converted against it.
+- Real case: go-spew v1.1.1 under `-tags ...,testcgo` with CGO_ENABLED=1. Its cgo helper `spew/testdata` was neither
+  converted nor refused.
+- It now loads with the run's `loaderBuildFlags` and the production load's environment (`closureLoaderEnv`).
+  `spew/testdata` is refused by name (GO2CS2001), and `spew` is named "its test closure imports the refused package".
+- Red: `TestTestsRecurseDiscoversATaggedTestFilesImports`.
+- Census: the 9 banked modules' non-std test closures are identical with no tags and with the default tags.
+
+**Finding 1 (OPEN, harness): Go's own `go test` fails go-difflib v1.0.0 at go1.26.11.**
+- The vet `tests` analyzer that `go test` runs rejects two examples: "difflib_test.go:105:1: ExampleGetUnifiedDiffCode
+  refers to unknown identifier: GetUnifiedDiffCode", and the same at :138.
+- Measured on a plain copy, outside go2cs. With `-vet=off` Go passes.
+- The converted tests pass 14 of 14, but the oracle reads "build failed", so the row cannot validate. The `-tests`
+  oracle has no vet setting.
+- go-difflib is in testify's closure. Whether a row may run its oracle with `-vet=off`, as a disclosure, is a ruling.
+
+**Finding 2 (OPEN, golib/converter): `%p` of a pointer and `unsafe.Pointer(&i)` disagree.**
+- go-spew v1.1.1: 7 of 9 tests equal Go. TestDump fails 6 cases and TestFormatter 24.
+- Each case compares `uintptr(unsafe.Pointer(&i))` or `unsafe.Pointer(&i)`, printed, with `fmt.Sprintf("%p", &i)`.
+  Go prints one address for both. Converted code prints a native address for the first (0x7f5bf01af368) and the
+  synthetic one for the second (0x800000bc00000000).
+- Sites: dump_test.go:756 and :785; format_test.go:1064 and :1112.
+- Not rooted. The emission is the copy route's ordinary emission: the go.mod twin arm of
+  `TestPlainRecurseConvertsAModuleCacheReleaseWithNoGoMod` reads it byte-equal to a release that ships a go.mod. Not
+  measured on go-spew without the copy.
+
+— C2 (2026-11-22)
+
+### 2026-11-22 — C2: `%p` of a pointer and `unsafe.Pointer` of it print different addresses (OPEN, owner H; COORD's ruling)
+
+**Repro** (go1.26.11, linux/amd64; converted at bf213b3cc9 and run with `-p:GoTargetOS=linux`):
+
+```go
+i := 1
+fmt.Printf("%p\n", &i)
+fmt.Printf("%v\n", unsafe.Pointer(&i))
+fmt.Printf("%#x\n", uintptr(unsafe.Pointer(&i)))
+fmt.Println(fmt.Sprintf("%p", &i) == fmt.Sprintf("%v", unsafe.Pointer(&i)))
+```
+
+| Line | Go | go2cs |
+|---|---|---|
+| `%p` of `&i` | `0x1db928e680f8` | `0x8000000500000000` |
+| `unsafe.Pointer(&i)` | `0x1db928e680f8` | `0x7fda2dd110d8` |
+| `uintptr(unsafe.Pointer(&i))` | `0x1db928e680f8` | `0x7fda2dd110d8` |
+| equal? | `true` | `false` |
+
+**Rooted, by reading.** One Go pointer has two numbers in converted code.
+- The emission hands `%p` the box `Ꮡi`, and `unsafe.Pointer(&i)` becomes `unsafe.Pointer.FromPinnedBox(Ꮡi)`.
+- `%p` prints the box's managed-pointer token. 0x8000000500000000 has bit 63 set, the id in bits 61..32 and
+  displacement 0: the layout `AllocationBase` mints (`src/core/golib/ж.cs:708-709`).
+- `FromPinnedBox` (`src/core/unsafe/unsafe.cs:595-601`) takes the box's `uintptr` conversion. That conversion pins it
+  (`EnsureStableAddress`) and answers the pinned native address.
+- NOT READ: which golib member fmt's `%p` reaches for a box (the reflect pointer path).
+
+**Reach.** go-spew v1.1.1: TestDump 6 cases and TestFormatter 24 compare the two (dump_test.go:756 and :785,
+format_test.go:1064 and :1112). Both tests stay disclosed as diverged until the cure lands (COORD).
+
+— C2 (2026-11-22)
+
+### 2026-11-22 — C2: go2cs rewrote module-cache releases; CURED on claude/c2-testify-closure (for .5), a previous-versions line for the published tool
+
+**The defect.** `goModDownloadPreflight` ran `go mod download` with a module-cache release as the main module (plain
+`-recurse` and `-tests -recurse` of a cache directory).
+- For a go.mod that has no `go` directive and requires a module, `go mod download` adds the toolchain's `go` line and
+  writes a go.sum, even under `-mod=readonly`, and a root process is not stopped by the cache's read-only modes.
+- Measured on gopkg.in/yaml.v3 v3.0.1, whose cache entry gained `go 1.26.11` and a go.sum.
+- github.com/google/uuid v1.6.0's entry on the same box also gained `go 1.26.11` on 2026-11-20. Its go.mod requires
+  nothing, so the preflight cannot have done it (measured); the origin is not identified.
+
+**The cure** (COORD 175421Z):
+- every module-cache release converts and tests from a copy;
+- the preflight puts a go.mod's own bytes back;
+- `-tests` fills the copy's go.sum and keeps its go.mod.
+Arms, the banked-uuid check from a pristine cache (54 of 54 verdict rows equal, emission 0 differing lines), and the
+residual (a fatal exit leaves the copy to the 24-hour sweep) are in docs/phase4/RECON-testify-closure.md.
+
+**Previous-versions draft, for P1's release-docs seat** (the owner's placement, COORD 182709Z: the bottom section for
+older-version issues, present tense; not a front-page Known Issue):
+> In 1.26.11.1 and earlier, `go2cs -recurse` and `go2cs -tests -recurse` of a module-cache release run `go mod
+> download` inside the cache, so where the cache is writable, for example when go2cs runs as root, a release whose
+> go.mod requires a module and has no `go` line has that line added and a go.sum written in place; 1.26.11.5 converts
+> a module-cache release from a copy and leaves the cache unchanged.
+
+— C2 (2026-11-22)
+
+### 2026-11-22 — C2: a fatal exit leaves the module-cache release copy behind (OPEN, low)
+
+**The residual.** A module-cache release converts and tests from a copy under the temp directory
+(`go2cs-modcopy-*`, `src/go2cs/goModFile.go`). The copy is removed by a deferred `leave`. A run that ends through
+`log.Fatal*` (84 call sites in the converter's non-test sources at 5fda7c1322), `os.Exit` or a signal skips that
+removal, so the copy stays on disk.
+
+**What bounds it.** Every later copy first runs `sweepStaleModuleCopies(os.TempDir(), 24*time.Hour)`, which removes
+copies older than a day. A copy younger than that is left, because whether a live run still holds it cannot be told
+reliably on every OS.
+
+**Cost.** Disk only: one release-sized directory per fatal run, for at most a day. The module cache itself is not
+touched. A cure would route the fatal sites through an exit hook that runs `leave`; it is not scheduled.
+
+— C2 (2026-11-22)
+
+### 2026-11-22 — C2: CS0104 on a pointer adapter cast in a method holder under a dot import; CURED on claude/c2-objx-bank
+
+**The defect.** A receiver method that goes into its holder class (`<pkg>ᴛ<Type>`) sees the package class and every
+dot-imported package through `using static` with equal standing. When a dot-imported package defines a pointer adapter
+with the same name as one the holder's cast needs (for example `bytes_BufferжWriter`), the bare name is ambiguous:
+CS0104. gopkg.in/yaml.v3 v3.0.1's tests hit it through the dot-imported gopkg.in/check.v1.
+
+**The cure** (5fda7c1322). Where a holder needs an adapter whose name a dot-imported package also defines, the cast
+names the file's own package class (`<pkg>_package.<adapter>`). Red first: behavioral `DotImportAdapterNameInHolder`
+(07d5fe81fe) fails CS0104 before the fix and passes after it.
+
+**Footprint.** Production corpus: 0 by construction (its one dot import, internal/types/errors, has no pointer
+adapters). Test emission of the three standard packages the census flagged (go/types, html/template, net/http): 0
+differing lines in 34, 14 and 40 files; only the converter revision and input digest stamps differ.
+
+— C2 (2026-11-22)
+
+## 2026-11-22 — H (TC-13 seat, claude/h-tc13-funcword; amends the 2026-11-20 H block "a store of a pointer word INTO a func variable lands in a fresh box"): w4 cures the lost write, and S-B1's out-of-scope pin moved with the cure
+
+**The cure.** `funcWordOperations.go` gains w4. For a func variable `f`, `*(*unsafe.Pointer)(unsafe.Pointer(&f)) = p`
+now emits `f = @unsafe.Pointer.FuncOfWord<F>(p);`. `FuncOfWord` reads p's word: 0 is the nil func, a GoFuncCookie is
+that func, and any other word is refused by name. The four committed sites (`runtime/debugcall.cs:268` and
+`runtime/{windows,linux,darwin}/cgocall.cs:482`) were regenerated, and the two-seeded regen's prediction MET on all
+four targets (`docs/phase4/DATA-tc13-regen-2026-11-22.md`). Both sites store a funcval whose word is a code PC, so
+they now refuse by name instead of calling a nil func. Neither is reachable today.
+
+**S-B1's pin moved with the cure.** S-B1 (`d02c2dda3b`) pinned managedFuncStore's fresh-box store (`.Value = v;`)
+in TestUnsafePointerWordDoor as out of the word door's scope, and named it as this lost write. TC-13's first
+unfiltered `go test ./...` read that pin red at `39161e7056`. COORD ruled it a stale pin. The assertion now requires
+the w4 line and refuses any `.Value =`. It fails under train 4's converter (`afb01dfb6c`) on the old line and passes
+at the tip.
+
+**Owner.** H. The 2026-11-20 block closes when the TC-13 seat lands.
+
+## 2026-11-22 — H (seat claude/h-pfmt-identity; closes C2's 2026-11-22 entry "`%p` of a pointer and `unsafe.Pointer` of it print different addresses", COORD's ruling option A): one Go pointer, one number
+
+**The cure.** reflect's `Value.Pointer` and `Value.UnsafePointer`, and through them fmt's `%p` and internal/fmtsort's
+ordering of pointer keys, answer `ManagedPointerTokens.PointerNumber`. That is the box's own `uintptr` conversion,
+the number `unsafe.Pointer(p)` carries.
+- For reference-free storage, the number is the pinned address. The first such projection pins the box for its
+  life, and the pin dies with the box.
+- For a reference-bearing pointee, the number is the order token, as before.
+- An `unsafe.Pointer` value answers the number it carries.
+
+**Measured** (`docs/phase4/DATA-pfmt-identity-2026-11-22.md`, every reading predicted first):
+- The `PointerPrintIdentity` program read false on every machine-address row at `afb01dfb6c`. It now reads true on
+  all 14 identity lines, and its convert-back over a reference-free root reads Go's `7 0`.
+- Leak arm: 100,000 `%p` pins come and go with their boxes.
+- Pointer-keyed-map arm: 0.91x to 0.98x of the token build, against COORD's 2x threshold.
+
+**Kept, and disclosed in pointers.md** (replacing "Not covered"):
+- `Value.UnsafeAddr` keeps the order token, so go-cmp's `NewAt(f.Type, v.UnsafeAddr() + f.Offset)` is unchanged.
+  `NewAt` resolves exactly, by the 2026-10-04 ruling. For reference-free storage, `UnsafeAddr` therefore differs from
+  `uintptr(unsafe.Pointer(&field))`.
+- A reference-free field inside a struct that holds a reference (`Unpinnable`) keeps its token, so that its `%p`
+  stays stable. `%p` of it differs from `unsafe.Pointer` of it.
+
+**Withdrawn on the way.** COORD first ruled that fmtsort keep the token. That carve-out was withdrawn once it proved
+to need a converter registration, a hand-own and a new reflect accessor. fmtsort stays as converted.
+
+**Guards.** The `PointerPrintIdentity` output test, and GolibTests `PointerNumberTests`, one arm per storage kind. Its
+reference-free arm reds by name when `PointerNumber` answers the token.
+
+**Reach.** go-spew v1.1.1's TestDump (6 cases) and TestFormatter (24 cases) compare `%p` with `unsafe.Pointer`. Not
+re-run here: go-spew is not on this box, and its row stays C2's to re-measure.
+
+— H (2026-11-22)
+
+### 2026-11-22 — C2: optimized code can report the function's first statement as a caller line (OPEN, low; test functions cured on claude/c2-m1-test-noopt)
+
+**The finding.** When a function keeps `runtime.Caller`'s result in a local across a method chain written over
+several lines, a later call from it reports, through `runtime.Caller` in the callee, the function's FIRST statement
+line once the function is compiled optimized. golib maps an IL offset through the PDB correctly, but the optimized
+frame gives no usable offset for that call site. testify's Test_Mock_Chained_On and
+Test_Mock_UnsetByOnMethodSpecAmongOthers diverged this way under the Release harness (DOTNET_TieredCompilation=0).
+
+**Measured** (linux-x64, .NET 10, a converted program; Go answers +5):
+
+| Mode | first call | after 500 calls | after 200,500 calls and a pause | crypto/sha256, 64 MiB |
+|---|--:|--:|--:|--:|
+| Release, default tiering | +5 | +5 | **0** | 0.71 s |
+| Release, TieredCompilation=0 | **0** | **0** | **0** | 1.4-1.6 s |
+| Release, DOTNET_JITMinOpts=1 | +5 | +5 | — | 23.4-23.9 s |
+| Debug | +5 | +5 | — | 26.7-27.1 s |
+
+Discriminating tests (one module, Release TC=0): the shape needs both the live `runtime.Caller` result and the later
+statement; a chain alone, multi-line arguments, a func literal, a helper, and `runtime.Caller` alone all read Go's
+lines.
+
+**The cure for tests (this branch).** go2cs-gen marks a Go test entry point (Test/Benchmark/Fuzz/Example by Go's rule,
+in a `_test.cs` file) NoOptimization beside NoInlining. It reaches the carriers, the test functions that reach
+`runtime.Caller` (493 per target, the same on windows, linux and darwin); visible emission is unchanged. testify
+v1.12.1 mock moves 115/4 to 117/2.
+
+**Production stays optimized** (owner, 212210Z). The two routes to Go's lines are in KnownIssues.md: a Debug build
+(about 38x slower on the workload above) or DOTNET_JITMinOpts=1 (about 33x). Widening the cure past tests needs a
+performance measurement and an owner call.
+
+— C2 (2026-11-22)
+
+### 2026-11-23 — C2: a Release frame carries its statement's IL offset, not its call's (M2; test assemblies cured on claude/c2-m2-test-switch)
+
+**The finding.** runtime.Caller answers a call's line from the frame's IL offset, and golib's per-call table tells
+same-name calls in one statement apart by counting call sites up to that offset. A Release frame carries only the
+statement's offset, so the count has nothing to count with: two calls to one function in one statement both read the
+first call's line (testify's Test_Mock_Chained_UnsetOnlyUnsetsLastCall). A C# probe, three chained calls of one
+method: Release 5, 5, 5 under the tiered JIT, TieredCompilation=0 and JITMinOpts; NoOptimization on the method 5, 5, 5;
+a declared Debuggable(Default) 5, 5, 5; Release IL in an assembly marked DisableOptimizations 5, 11, 16; Debug 7, 13,
+18. golib cannot recover a per-call offset from a Release frame.
+
+**The cure for tests** (COORD 23:57Z, option 2, provisional): go.lib.symbols.targets compiles a converted test
+assembly with Optimize=false (GoTestOptimize=true opts out), which also covers M1. No cost measured on crypto/sha256,
+math/big and compress/flate; the code under test stays in its own optimized assembly.
+
+**Production** keeps the limit: only a Debug build reports two same-name calls in one statement apart
+(DOTNET_JITMinOpts=1 does not). KnownIssues states it.
+
+— C2 (2026-11-23)
+
+## 2026-11-23 -- CURED: a vet-off finding named its file by a host path on macOS (moduleCacheRel's class)
+
+**OPEN -> CURED in one commit (claude/c2-t6-union-fix).** `oracleVetFindings` (`src/go2cs/testConversion.go`) names
+each `-test-oracle-vet-off` finding's file relative to the package directory with `filepath.Rel(dir, posn)`. `go vet
+-json` reports `posn` with symlinks resolved, so a directory spelled through a symlink trims nothing. On macOS `/var` is
+`/private/var`: a module-cache release tests from its copy under TMPDIR (`/var/folders/...`), and its finding would have
+carried `/private/var/folders/<host>/...` into the proof page and MODULE.md. Train 6's hosted darwin go-test read it on
+TestOracleVetFindingsNameTheAnalyzerAndTheSite (45156271038, x64 and arm64), which stays unchanged as the guard.
+
+**Cure.** The directory is resolved once with `filepath.EvalSymlinks` (falling back to it as given) and tried after the
+textual spelling, so linux and windows keep their answer. Same class as train 5's `moduleCacheRel` cure for the module
+cache root. A linux control through a symlinked directory read the absolute path without the cure and the relative one
+with it. Emission footprint 0: the oracle's disclosure text is the only output it touches.
+
+— C2 (2026-11-23)
+
+## 2026-11-23 — G (the refblock seat's full `--mn` run; COORD ruling: a board row each, OPEN, not in that seat): three behavioral programs fail in M:N mode
+
+**How found.** The refblock seat ran the WHOLE behavioral suite in M:N mode for the first time (`BehavioralRunner --mn`:
+every project built with twins, every program run with `GO2CS_MN=1`, output compared with Go), with the standard
+library twinned too (`GoStdlibTwins=true`). 1,040 projects, 1,012 compared, 4 failing. All 4 fail in every arm of a
+4-arm attribution (that seat's cure on and off, the standard library twinned and plain), so none is that seat's, and
+none comes from twinning the standard library. The fourth, MnIfaceTwin, is the train 6 union fix
+(claude/g-t6-union-fix). The three below are pre-existing M:N gaps the battery's `--mn` leg never reached: its filter
+is `Mn|Select|Channel|GoCall|Defer`, which selects none of them.
+
+**GoroutineStackReserve [Output]: OPEN.** Under `GO2CS_MN=1` the program exits with "Stack overflow." (exit
+-1073741571), and Go exits 0. Default mode passes. The likely seat is the stack depth a twin's goroutine gets on a
+carrier against the reserve a plain goroutine's thread gets. Not read further.
+
+**GoStmtValueReturn [Compile]: OPEN.** Built with twins it fails CS8030, "Anonymous function converted to a void
+returning delegate cannot return a value", at main.cs:62. The program launches a function literal that returns a value
+in a `go` statement (`go func(...) error {...}(...)`). The twin of that launch hands the literal to a void delegate.
+Default mode compiles and passes.
+
+**PromotedMethodFrames [Output]: OPEN.** Under `GO2CS_MN=1` stdout differs from Go's, and default mode passes. The
+program prints frame information for promoted methods, and a twin adds or renames frames. Not read further.
+
+**Owner.** Unassigned; COORD routes. None gates train 6.
+
+— G (2026-11-23)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

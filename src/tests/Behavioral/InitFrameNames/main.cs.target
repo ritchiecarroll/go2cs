@@ -13,18 +13,18 @@ internal static partial @string here() {
 
 internal static @string direct = here();
 
-internal static @string viaClosure = func([MethodImpl(MethodImplOptions.NoInlining)] @string () => {
+internal static @string viaClosure = func([MethodImpl(MethodImplOptions.NoInlining), GoFunc("init.func1")] @string () => {
     return here();
 })();
 
-internal static @string viaClosure2 = func([MethodImpl(MethodImplOptions.NoInlining)] @string () => {
+internal static @string viaClosure2 = func([MethodImpl(MethodImplOptions.NoInlining), GoFunc("init.func2")] @string () => {
     return here();
 })();
 
 [GoInit] internal static void initΔ1() { fmt.Println("main.go init 1:", here()); }
 
 [GoInit] internal static void initΔ2() {
-    [MethodImpl(MethodImplOptions.NoInlining)] @string literal() => here();
+    [MethodImpl(MethodImplOptions.NoInlining), GoFunc("init.2.func1")] @string literal() => here();
     fmt.Println("main.go init 2:", here(), "literal:", literal());
 }
 

@@ -14,6 +14,9 @@
 
 using go;
 using static go.encoding.pem_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -61,10 +64,12 @@ using static go.encoding.pem_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("encoding/pem/pem.go", "pem.cs", "ACRQ0oKCgoKUgoKmAAIQ0qaUgpSCgpSCpqaCgoKcAAkGlIKmgpTKgoKUgoKClIKClIKCgoKCgpSUyqaClJSCgriCgoKCgsqCyoKCgqaCgoS4gqaCgoKCgoKUyoIACxi0soKCgqaCgpSClIKCpoKCpqaigoKClKbGgoIACgjUgoLugpSCpoKCgoKCgoKUuIKCuIKCgqaCuIKUgoKUgpSClIIAAhDSgoKU", "", "", "177=HasSuffix/1/1/1")]
+[assembly: GoPositionMap("encoding/pem/pem.go", "pem.cs", "ACNQ0oKCgoKUgoKmAAIQ0qaUgpSCgpSCpqaCgoKcAAkGlIKmgpTKgoKUgoKClIKClIKCgoKCgpSUyqaClJSCgriCgoKCgsqCyoKCgqaCgoS4gqaCgoKCgoKUyoIACxiUsoKCgqaCgpSClIKCpoKCpqaigoKClKamgoIACgjUgoLugpSCpoKCgoKCgoKUuIKCuIKCgqaCuIKUgoKUgpSClIIAAhDSgoKU", "", "", "176=HasSuffix/1/1/1")]
 // </GoSourcePositionMaps>
 
 namespace go.encoding;
+
+using static go.encoding.pem_package;
 
 [GoPackage("pem")]
 public static partial class pem_package
@@ -103,5 +108,16 @@ public static partial class pem_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(pem_package.lineBreaker)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class pemᴛlineBreaker;
+[GoMethodHost(typeof(pem_package.lineBreaker)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class pemᴛlineBreaker;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class pemᴛlineBreaker {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) Write(this ref lineBreaker l, slice<byte> b) => pem_package.Write⁔(ref l, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error /*err*/ Close(this ref lineBreaker l) => pem_package.Close⁔(ref l);
+}
+// </MethodForwarders>

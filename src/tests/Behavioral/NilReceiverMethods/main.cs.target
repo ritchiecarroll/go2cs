@@ -59,7 +59,7 @@ public static @string ValAnnounce(this ref File f) {
 internal static void @try(@string label, Action fn) {
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("try.func1")] () => {
             var r = recover(); if (r != nil) {
                 fmt.Printf("%s -> panic: %v\n"u8, label, r);
                 return;
@@ -77,11 +77,11 @@ internal static void main() {
 
     fmt.Println("== 1. nil receiver, DELEGATED guard: must not panic ==");
     var nilFileʗ1 = nilFile;
-    @try("nilFile.checkValid", () => {
+    @try("nilFile.checkValid", [GoFunc("main.func1")] () => {
         fmt.Printf("  checkValid -> %v (is errInvalid: %v)\n"u8, nilFileʗ1.checkValid("x"), AreEqual(nilFileʗ1.checkValid("x"), errInvalid));
     });
     var nilFileʗ2 = nilFile;
-    @try("nilFile.Chdir", () => {
+    @try("nilFile.Chdir", [GoFunc("main.func2")] () => {
         var err = nilFileʗ2.Chdir();
         fmt.Printf("  Chdir -> %v (is errInvalid: %v)\n"u8, err, AreEqual(err, errInvalid));
     });
@@ -89,22 +89,22 @@ internal static void main() {
     fmt.Println();
     fmt.Println("== 2. nil receiver, UNCONDITIONAL deref: must panic ==");
     var nilFileʗ3 = nilFile;
-    @try("nilFile.BoxName", () => {
+    @try("nilFile.BoxName", [GoFunc("main.func3")] () => {
         _ = nilFileʗ3.BoxName();
     });
     var nilFileʗ4 = nilFile;
-    @try("nilFile.ValName", () => {
+    @try("nilFile.ValName", [GoFunc("main.func4")] () => {
         _ = nilFileʗ4.ValName();
     });
 
     fmt.Println();
     fmt.Println("== 3. nil receiver, side effect BEFORE the deref: effect then panic ==");
     var nilFileʗ5 = nilFile;
-    @try("nilFile.BoxAnnounce", () => {
+    @try("nilFile.BoxAnnounce", [GoFunc("main.func5")] () => {
         _ = nilFileʗ5.BoxAnnounce();
     });
     var nilFileʗ6 = nilFile;
-    @try("nilFile.ValAnnounce", () => {
+    @try("nilFile.ValAnnounce", [GoFunc("main.func6")] () => {
         _ = nilFileʗ6.ValAnnounce();
     });
 
@@ -112,27 +112,27 @@ internal static void main() {
     fmt.Println("== 4. non-nil receiver, both shapes: values identical ==");
     var real = Ꮡ(new File(name: "real.txt", fd: 41));
     var realʗ1 = real;
-    @try("real.checkValid", () => {
+    @try("real.checkValid", [GoFunc("main.func7")] () => {
         fmt.Printf("  checkValid -> %v\n"u8, realʗ1.checkValid("x"));
     });
     var realʗ2 = real;
-    @try("real.Chdir", () => {
+    @try("real.Chdir", [GoFunc("main.func8")] () => {
         fmt.Printf("  Chdir -> %v\n"u8, realʗ2.Chdir());
     });
     var realʗ3 = real;
-    @try("real.BoxName", () => {
+    @try("real.BoxName", [GoFunc("main.func9")] () => {
         fmt.Printf("  BoxName -> %s\n"u8, realʗ3.BoxName());
     });
     var realʗ4 = real;
-    @try("real.ValName", () => {
+    @try("real.ValName", [GoFunc("main.func10")] () => {
         fmt.Printf("  ValName -> %s\n"u8, realʗ4.ValName());
     });
     var realʗ5 = real;
-    @try("real.ValFd", () => {
+    @try("real.ValFd", [GoFunc("main.func11")] () => {
         fmt.Printf("  ValFd -> %d\n"u8, realʗ5.ValFd());
     });
     var realʗ6 = real;
-    @try("real.BoxAnnounce", () => {
+    @try("real.BoxAnnounce", [GoFunc("main.func12")] () => {
         fmt.Printf("  BoxAnnounce -> %s\n"u8, realʗ6.BoxAnnounce());
     });
     fmt.Printf("  box/ref shapes agree on the name: %v\n"u8, real.BoxName() == real.ValName());

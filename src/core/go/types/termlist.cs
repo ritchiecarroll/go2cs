@@ -6,7 +6,6 @@
 namespace go.go;
 
 using strings = strings_package;
-using static types_package;
 
 partial class types_package {
 
@@ -25,10 +24,8 @@ internal static termlist allTermlist = new termlist(new ж<term>[]{@new<term>()}
 internal static ref readonly @string termSep => ref termSepᵇ;
 private static readonly @string termSepᵇ = " | "u8;
 
-} partial class typesᴛtermlist {
-
 // String prints the termlist exactly (without normalization).
-internal static @string String(this termlist xl) {
+internal static @string String⁔(/*this*/ termlist xl) {
     if (len(xl) == 0) {
         return "∅";
     }
@@ -43,7 +40,7 @@ internal static @string String(this termlist xl) {
 }
 
 // isEmpty reports whether the termlist xl represents the empty set of types.
-internal static bool isEmpty(this termlist xl) {
+internal static bool isEmpty⁔(/*this*/ termlist xl) {
     // If there's a non-nil term, the entire list is not empty.
     // If the termlist is in normal form, this requires at most
     // one iteration.
@@ -56,7 +53,7 @@ internal static bool isEmpty(this termlist xl) {
 }
 
 // isAll reports whether the termlist xl represents the set of all types.
-internal static bool isAll(this termlist xl) {
+internal static bool isAll⁔(/*this*/ termlist xl) {
     // If there's a 𝓤 term, the entire list is 𝓤.
     // If the termlist is in normal form, this requires at most
     // one iteration.
@@ -69,7 +66,7 @@ internal static bool isAll(this termlist xl) {
 }
 
 // norm returns the normal form of xl.
-internal static termlist norm(this termlist xl) {
+internal static termlist norm⁔(/*this*/ termlist xl) {
     var rlᴷ = new stackAppend<ж<term>>(moves: true);
 
     // Quadratic algorithm, but good enough for now.
@@ -108,12 +105,12 @@ internal static termlist norm(this termlist xl) {
 }
 
 // union returns the union xl ∪ yl.
-internal static termlist union(this termlist xl, termlist yl) {
+internal static termlist union⁔(/*this*/ termlist xl, termlist yl) {
     return appendꓸꓸꓸ(xl, yl).norm();
 }
 
 // intersect returns the intersection xl ∩ yl.
-internal static termlist intersect(this termlist xl, termlist yl) {
+internal static termlist intersect⁔(/*this*/ termlist xl, termlist yl) {
     var rlᴷ = new stackAppend<ж<term>>();
 
     if (xl.isEmpty() || yl.isEmpty()) {
@@ -134,13 +131,13 @@ internal static termlist intersect(this termlist xl, termlist yl) {
 }
 
 // equal reports whether xl and yl represent the same type set.
-internal static bool equal(this termlist xl, termlist yl) {
+internal static bool equal⁔(/*this*/ termlist xl, termlist yl) {
     // TODO(gri) this should be more efficient
     return xl.subsetOf(yl) && yl.subsetOf(xl);
 }
 
 // includes reports whether t ∈ xl.
-internal static bool includes(this termlist xl, Type t) {
+internal static bool includes⁔(/*this*/ termlist xl, Type t) {
     foreach (var (_, x) in range<ж<term>>(xl)) {
         if (x.includes(t)) {
             return true;
@@ -150,7 +147,7 @@ internal static bool includes(this termlist xl, Type t) {
 }
 
 // supersetOf reports whether y ⊆ xl.
-internal static bool supersetOf(this termlist xl, ж<term> y) {
+internal static bool supersetOf⁔(/*this*/ termlist xl, ж<term> y) {
     foreach (var (_, x) in range<ж<term>>(xl)) {
         if (y.subsetOf(x)) {
             return true;
@@ -160,7 +157,7 @@ internal static bool supersetOf(this termlist xl, ж<term> y) {
 }
 
 // subsetOf reports whether xl ⊆ yl.
-internal static bool subsetOf(this termlist xl, termlist yl) {
+internal static bool subsetOf⁔(/*this*/ termlist xl, termlist yl) {
     if (yl.isEmpty()) {
         return xl.isEmpty();
     }
@@ -174,4 +171,4 @@ internal static bool subsetOf(this termlist xl, termlist yl) {
     return true;
 }
 
-}
+} // end types_package

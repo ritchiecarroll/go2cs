@@ -227,7 +227,7 @@ internal static any newPoolPipe() {
         return default;
     }
 
-    p.cleanup = Δruntime.AddCleanup(p, (splicePipeFields spf) => {
+    p.cleanup = Δruntime.AddCleanup(p, [GoFunc("newPoolPipe.func1")] (splicePipeFields spf) => {
         var ᴛ1 = new splicePipe(splicePipeFields: spf);
         destroyPipe(ref ᴛ1);
     }, p.splicePipeFields);

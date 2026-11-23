@@ -10,7 +10,6 @@ using errors = errors_package;
 using sync = sync_package;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140.nistec;
-using static nistec_package;
 
 partial class nistec_package {
 
@@ -34,10 +33,8 @@ public static ж<P521Point> NewP521Point() {
     ));
 }
 
-} partial class nistecᴛP521Point {
-
 // SetGenerator sets p to the canonical generator and returns p.
-public static ж<P521Point> SetGenerator(this ж<P521Point> Ꮡp) {
+internal static ж<P521Point> SetGenerator⁔(/*this*/ ж<P521Point> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     p.x.SetBytes([0x0, 0xc6, 0x85, 0x8e, 0x6, 0xb7, 0x4, 0x4, 0xe9, 0xcd, 0x9e, 0x3e, 0xcb, 0x66, 0x23, 0x95, 0xb4, 0x42, 0x9c, 0x64, 0x81, 0x39, 0x5, 0x3f, 0xb5, 0x21, 0xf8, 0x28, 0xaf, 0x60, 0x6b, 0x4d, 0x3d, 0xba, 0xa1, 0x4b, 0x5e, 0x77, 0xef, 0xe7, 0x59, 0x28, 0xfe, 0x1d, 0xc1, 0x27, 0xa2, 0xff, 0xa8, 0xde, 0x33, 0x48, 0xb3, 0xc1, 0x85, 0x6a, 0x42, 0x9b, 0xf9, 0x7e, 0x7e, 0x31, 0xc2, 0xe5, 0xbd, 0x66]);
@@ -47,7 +44,7 @@ public static ж<P521Point> SetGenerator(this ж<P521Point> Ꮡp) {
 }
 
 // Set sets p = q and returns p.
-public static ж<P521Point> Set(this ж<P521Point> Ꮡp, ж<P521Point> Ꮡq) {
+internal static ж<P521Point> Set⁔(/*this*/ ж<P521Point> Ꮡp, ж<P521Point> Ꮡq) {
     ref var p = ref Ꮡp.DerefOrNull();
     ref var q = ref Ꮡq.DerefOrNull();
 
@@ -67,7 +64,7 @@ private static readonly @string invalidP521PointEncodingˢᵇ = "invalid P521 po
 // b, as specified in SEC 1, Version 2.0, Section 2.3.4. If the point is not on
 // the curve, it returns nil and an error, and the receiver is unchanged.
 // Otherwise, it returns p.
-public static (ж<P521Point>, error) SetBytes(this ж<P521Point> Ꮡp, slice<byte> b) {
+internal static (ж<P521Point>, error) SetBytes⁔(/*this*/ ж<P521Point> Ꮡp, slice<byte> b) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     switch (ᐧ) {
@@ -123,14 +120,12 @@ public static (ж<P521Point>, error) SetBytes(this ж<P521Point> Ꮡp, slice<byt
     }}
 }
 
-} partial class nistec_package {
-
 internal static ж<fiat.P521Element> _p521B;
 internal static readonly ж<sync.Once> Ꮡ_p521BOnce = new StaticBox<sync.Once>(default(sync.Once));
 internal static ref sync.Once _p521BOnce => ref ((StaticBox<sync.Once>)Ꮡ_p521BOnce).ValueSlot;
 
 internal static ж<fiat.P521Element> p521B() {
-    Ꮡ_p521BOnce.Do(() => {
+    Ꮡ_p521BOnce.Do([GoFunc("p521B.func1")] () => {
         (_p521B, _) = @new<fiat.P521Element>().SetBytes([0x0, 0x51, 0x95, 0x3e, 0xb9, 0x61, 0x8e, 0x1c, 0x9a, 0x1f, 0x92, 0x9a, 0x21, 0xa0, 0xb6, 0x85, 0x40, 0xee, 0xa2, 0xda, 0x72, 0x5b, 0x99, 0xb3, 0x15, 0xf3, 0xb8, 0xb4, 0x89, 0x91, 0x8e, 0xf1, 0x9, 0xe1, 0x56, 0x19, 0x39, 0x51, 0xec, 0x7e, 0x93, 0x7b, 0x16, 0x52, 0xc0, 0xbd, 0x3b, 0xb1, 0xbf, 0x7, 0x35, 0x73, 0xdf, 0x88, 0x3d, 0x2c, 0x34, 0xf1, 0xef, 0x45, 0x1f, 0xd4, 0x6b, 0x50, 0x3f, 0x0]);
     });
     return _p521B;
@@ -162,19 +157,17 @@ internal static error p521CheckOnCurve(ж<fiat.P521Element> x, ж<fiat.P521Eleme
     return default;
 }
 
-} partial class nistecᴛP521Point {
-
 // Bytes returns the uncompressed or infinity encoding of p, as specified in
 // SEC 1, Version 2.0, Section 2.3.3. Note that the encoding of the point at
 // infinity is shorter than all other encodings.
-public static slice<byte> Bytes(this ref P521Point p) {
+internal static slice<byte> Bytes⁔(/*this*/ ref P521Point p) {
     // This function is outlined to make the allocations inline in the caller
     // rather than happen on the heap.
     ref var @out = ref heap(new array<byte>(133), out var Ꮡout);
     return p.bytes(Ꮡout);
 }
 
-internal static slice<byte> bytes(this ref P521Point p, /*[133]*/ ж<array<byte>> Ꮡout) {
+internal static slice<byte> bytes⁔(/*this*/ ref P521Point p, /*[133]*/ ж<array<byte>> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     if (p.z.IsZero() == 1) {
@@ -193,7 +186,7 @@ internal static slice<byte> bytes(this ref P521Point p, /*[133]*/ ж<array<byte>
 
 // BytesX returns the encoding of the x-coordinate of p, as specified in SEC 1,
 // Version 2.0, Section 2.3.5, or an error if p is the point at infinity.
-public static (slice<byte>, error) BytesX(this ref P521Point p) {
+internal static (slice<byte>, error) BytesX⁔(/*this*/ ref P521Point p) {
     // This function is outlined to make the allocations inline in the caller
     // rather than happen on the heap.
     ref var @out = ref heap(new array<byte>(66), out var Ꮡout);
@@ -204,7 +197,7 @@ public static (slice<byte>, error) BytesX(this ref P521Point p) {
 internal static ref readonly @string p521PointIsThePointAtˢ => ref p521PointIsThePointAtˢᵇ;
 private static readonly @string p521PointIsThePointAtˢᵇ = "P521 point is the point at infinity"u8;
 
-internal static (slice<byte>, error) bytesX(this ref P521Point p, /*[66]*/ ж<array<byte>> Ꮡout) {
+internal static (slice<byte>, error) bytesX⁔(/*this*/ ref P521Point p, /*[66]*/ ж<array<byte>> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     if (p.z.IsZero() == 1) {
@@ -220,14 +213,14 @@ internal static (slice<byte>, error) bytesX(this ref P521Point p, /*[66]*/ ж<ar
 // BytesCompressed returns the compressed or infinity encoding of p, as
 // specified in SEC 1, Version 2.0, Section 2.3.3. Note that the encoding of the
 // point at infinity is shorter than all other encodings.
-public static slice<byte> BytesCompressed(this ref P521Point p) {
+internal static slice<byte> BytesCompressed⁔(/*this*/ ref P521Point p) {
     // This function is outlined to make the allocations inline in the caller
     // rather than happen on the heap.
     ref var @out = ref heap(new array<byte>(67), out var Ꮡout);
     return p.bytesCompressed(Ꮡout);
 }
 
-internal static slice<byte> bytesCompressed(this ref P521Point p, /*[67]*/ ж<array<byte>> Ꮡout) {
+internal static slice<byte> bytesCompressed⁔(/*this*/ ref P521Point p, /*[67]*/ ж<array<byte>> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     if (p.z.IsZero() == 1) {
@@ -247,7 +240,7 @@ internal static slice<byte> bytesCompressed(this ref P521Point p, /*[67]*/ ж<ar
 }
 
 // Add sets q = p1 + p2, and returns q. The points may overlap.
-public static ж<P521Point> Add(this ж<P521Point> Ꮡq, ж<P521Point> Ꮡp1, ж<P521Point> Ꮡp2) {
+internal static ж<P521Point> Add⁔(/*this*/ ж<P521Point> Ꮡq, ж<P521Point> Ꮡp1, ж<P521Point> Ꮡp2) {
     ref var q = ref Ꮡq.DerefOrNull();
     ref var p1 = ref Ꮡp1.DerefOrNull();
     ref var p2 = ref Ꮡp2.DerefOrNull();
@@ -306,7 +299,7 @@ public static ж<P521Point> Add(this ж<P521Point> Ꮡq, ж<P521Point> Ꮡp1, ж
 }
 
 // Double sets q = p + p, and returns q. The points may overlap.
-public static ж<P521Point> Double(this ж<P521Point> Ꮡq, ж<P521Point> Ꮡp) {
+internal static ж<P521Point> Double⁔(/*this*/ ж<P521Point> Ꮡq, ж<P521Point> Ꮡp) {
     ref var q = ref Ꮡq.DerefOrNull();
     ref var p = ref Ꮡp.DerefOrNull();
 
@@ -355,7 +348,7 @@ public static ж<P521Point> Double(this ж<P521Point> Ꮡq, ж<P521Point> Ꮡp) 
 }
 
 // Select sets q to p1 if cond == 1, and to p2 if cond == 0.
-public static ж<P521Point> Select(this ж<P521Point> Ꮡq, ж<P521Point> Ꮡp1, ж<P521Point> Ꮡp2, nint cond) {
+internal static ж<P521Point> Select⁔(/*this*/ ж<P521Point> Ꮡq, ж<P521Point> Ꮡp1, ж<P521Point> Ꮡp2, nint cond) {
     ref var q = ref Ꮡq.DerefOrNull();
     ref var p1 = ref Ꮡp1.DerefOrNull();
     ref var p2 = ref Ꮡp2.DerefOrNull();
@@ -366,18 +359,14 @@ public static ж<P521Point> Select(this ж<P521Point> Ꮡq, ж<P521Point> Ꮡp1,
     return Ꮡq;
 }
 
-} partial class nistec_package {
-
 // A p521Table holds the first 15 multiples of a point at offset -1, so [1]P
 // is at table[0], [15]P is at table[14], and [0]P is implicitly the identity
 // point.
 partial struct p521Table /*[15]ж<P521Point>*/;
 
-} partial class nistecᴛp521Table {
-
 // Select selects the n-th multiple of the table base point into p. It works in
 // constant time by iterating over every entry of the table. n must be in [0, 15].
-internal static void Select(this ref p521Table table, ж<P521Point> p, uint8 n) {
+internal static void Select⁔(/*this*/ ref p521Table table, ж<P521Point> p, uint8 n) {
     if (n >= 16) {
         throw panic("nistec: internal error: p521Table called with out-of-bounds value");
     }
@@ -388,10 +377,8 @@ internal static void Select(this ref p521Table table, ж<P521Point> p, uint8 n) 
     }
 }
 
-} partial class nistecᴛP521Point {
-
 // ScalarMult sets p = scalar * q, and returns p.
-public static (ж<P521Point>, error) ScalarMult(this ж<P521Point> Ꮡp, ж<P521Point> q, slice<byte> scalar) {
+internal static (ж<P521Point>, error) ScalarMult⁔(/*this*/ ж<P521Point> Ꮡp, ж<P521Point> q, slice<byte> scalar) {
     // Compute a p521Table for the base point q. The explicit NewP521Point
     // calls get inlined, letting the allocations live on the stack.
     p521Table table = new p521Table(new ж<P521Point>[]{NewP521Point(), NewP521Point(), NewP521Point(),
@@ -435,19 +422,15 @@ public static (ж<P521Point>, error) ScalarMult(this ж<P521Point> Ꮡp, ж<P521
     return (Ꮡp, default);
 }
 
-} partial class nistec_package {
-
 internal static ж<array<p521Table>> p521GeneratorTable;
 internal static readonly ж<sync.Once> Ꮡp521GeneratorTableOnce = new StaticBox<sync.Once>(default(sync.Once));
 internal static ref sync.Once p521GeneratorTableOnce => ref ((StaticBox<sync.Once>)Ꮡp521GeneratorTableOnce).ValueSlot;
 
-} partial class nistecᴛP521Point {
-
 // generatorTable returns a sequence of p521Tables. The first table contains
 // multiples of G. Each successive table is the previous table doubled four
 // times.
-internal static ж<array<p521Table>> generatorTable(this ref P521Point p) {
-    Ꮡp521GeneratorTableOnce.Do(() => {
+internal static ж<array<p521Table>> generatorTable⁔(/*this*/ ref P521Point p) {
+    Ꮡp521GeneratorTableOnce.Do([GoFunc("(*P521Point).generatorTable.func1")] () => {
         p521GeneratorTable = Ꮡ(new array<p521Table>(132));
         var @base = NewP521Point().SetGenerator();
         for (nint i = 0; i < (nint)(p521ElementLength * 2); i++) {
@@ -464,13 +447,9 @@ internal static ж<array<p521Table>> generatorTable(this ref P521Point p) {
     return p521GeneratorTable;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string invalidScalarLengthˢ => ref invalidScalarLengthˢᵇ;
-private static readonly @string invalidScalarLengthˢᵇ = "invalid scalar length"u8;
-
 // ScalarBaseMult sets p = scalar * B, where B is the canonical generator, and
 // returns p.
-public static (ж<P521Point>, error) ScalarBaseMult(this ж<P521Point> Ꮡp, slice<byte> scalar) {
+internal static (ж<P521Point>, error) ScalarBaseMult⁔(/*this*/ ж<P521Point> Ꮡp, slice<byte> scalar) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     if (len(scalar) != p521ElementLength) {
@@ -501,8 +480,6 @@ public static (ж<P521Point>, error) ScalarBaseMult(this ж<P521Point> Ꮡp, sli
 
     return (Ꮡp, default);
 }
-
-} partial class nistec_package {
 
 // p521Sqrt sets e to a square root of x. If x is not a square, p521Sqrt returns
 // false and e is unchanged. e and x can overlap.

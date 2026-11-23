@@ -48,6 +48,9 @@ func shapes(c *chain, s []int) {
 		int64(line())
 	_ = func() int { return 1 }() +
 		line()
+	_ = func() int {
+		return line()
+	}()
 	_ = line()
 	go three(line(),
 		line(), 0)
@@ -100,8 +103,11 @@ func TestLaterLineCallPayloadDescribesEachShape(t *testing.T) {
 		"Invoke/2/2/1",
 		// A conversion and a builtin are not calls a frame can be suspended in: only `line` counts.
 		"line/1/1/1",
-		// A statement that invokes a function literal is not described at all.
-		"",
+		// An immediately invoked literal is a delegate invoked through Invoke; this one's call is on the
+		// statement's own line, and its body's calls are its own.
+		"line/1/1/1",
+		// Go answers a literal's caller with the line of its `}(`: the Invoke two lines down.
+		"Invoke/1/1/2",
 		// A single-line statement records nothing.
 		"",
 		// A `go` statement runs its call elsewhere: no roots.

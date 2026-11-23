@@ -130,7 +130,7 @@ internal static @string /*msg*/ panicked() {
     @string msg = default;
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("panicked.func1")] () => {
             var r = recover();
             var (q, ok) = r._<ж<AErr>>(ᐧ); if (ok) {
                 msg = fmt.Sprintf("panic-recovered *AErr nil=%v"u8, q == nil);

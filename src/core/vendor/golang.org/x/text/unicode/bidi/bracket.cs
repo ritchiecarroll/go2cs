@@ -7,7 +7,6 @@ using list = container.list_package;
 using fmt = fmt_package;
 using sort = sort_package;
 using container;
-using static bidi_package;
 
 partial class bidi_package {
 
@@ -52,24 +51,16 @@ partial struct bracketPair {
     internal nint closer;
 }
 
-} partial class bidiᴛbracketPair {
-
-internal static @string String(this ref bracketPair b) {
+internal static @string String⁔(/*this*/ ref bracketPair b) {
     return fmt.Sprintf("(%v, %v)"u8, b.opener, b.closer);
 }
-
-} partial class bidi_package {
 
 // bracketPairs is a slice of bracketPairs with a sort.Interface implementation.
 partial struct bracketPairs /*[]bracketPair*/;
 
-} partial class bidiᴛbracketPairs {
-
-internal static nint Len(this bracketPairs b) { return len(b); }
-internal static void Swap(this bracketPairs b, nint i, nint j) { (b[i], b[j]) = (b[j], b[i]); }
-internal static bool Less(this bracketPairs b, nint i, nint j) { return b[i].opener < b[j].opener; }
-
-} partial class bidi_package {
+internal static nint Len⁔(/*this*/ bracketPairs b) { return len(b); }
+internal static void Swap⁔(/*this*/ bracketPairs b, nint i, nint j) { (b[i], b[j]) = (b[j], b[i]); }
+internal static bool Less⁔(/*this*/ bracketPairs b, nint i, nint j) { return b[i].opener < b[j].opener; }
 
 // resolvePairedBrackets runs the paired bracket part of the UBA algorithm.
 //
@@ -120,26 +111,20 @@ partial struct bracketPairer {
     internal slice<nint> indexes;           // array of index values into the original string
 }
 
-} partial class bidiᴛbracketPairer {
-
 // matchOpener reports whether characters at given positions form a matching
 // bracket pair.
-internal static bool matchOpener(this ref bracketPairer p, slice<rune> pairValues, nint opener, nint closer) {
+internal static bool matchOpener⁔(/*this*/ ref bracketPairer p, slice<rune> pairValues, nint opener, nint closer) {
     return pairValues[p.indexes[opener]] == pairValues[p.indexes[closer]];
 }
 
-} partial class bidi_package {
-
 internal static UntypedInt maxPairingDepth => 63;
-
-} partial class bidiᴛbracketPairer {
 
 // locateBrackets locates matching bracket pairs according to BD16.
 //
 // This implementation uses a linked list instead of a stack, because, while
 // elements are added at the front (like a push) they are not generally removed
 // in atomic 'pop' operations, reducing the benefit of the stack archetype.
-internal static void locateBrackets(this ref bracketPairer p, slice<bracketType> pairTypes, slice<rune> pairValues) {
+internal static void locateBrackets⁔(/*this*/ ref bracketPairer p, slice<bracketType> pairTypes, slice<rune> pairValues) {
     // traverse the run
     // do that explicitly (not in a for-each) so we can record position
     foreach (var (i, index) in range(p.indexes)) {
@@ -238,7 +223,7 @@ internal static void locateBrackets(this ref bracketPairer p, slice<bracketType>
 // by rule N0.
 //
 // TODO: have separate type for "strong" directionality.
-internal static Class getStrongTypeN0(this ref bracketPairer p, nint index) {
+internal static Class getStrongTypeN0⁔(/*this*/ ref bracketPairer p, nint index) {
     switch (p.codesIsolatedRun[index]) {
     // in the scope of N0, number types are treated as R
     case var ᴛ when ᴛ == EN || ᴛ == AN || ᴛ == AL || ᴛ == R: {
@@ -259,7 +244,7 @@ internal static Class getStrongTypeN0(this ref bracketPairer p, nint index) {
 // it returns this type. Otherwise it returns the embedding direction.
 //
 // TODO: use separate type for "strong" directionality.
-internal static Class classifyPairContent(this ref bracketPairer p, bracketPair loc, Class dirEmbed) {
+internal static Class classifyPairContent⁔(/*this*/ ref bracketPairer p, bracketPair loc, Class dirEmbed) {
     Class dirOpposite = ON;
     for (nint i = loc.opener + 1; i < loc.closer; i++) {
         Class dir = p.getStrongTypeN0(i);
@@ -277,7 +262,7 @@ internal static Class classifyPairContent(this ref bracketPairer p, bracketPair 
 
 // classBeforePair determines which strong types are present before a Bracket
 // Pair. Return R or L if strong type found, otherwise ON.
-internal static Class classBeforePair(this ref bracketPairer p, bracketPair loc) {
+internal static Class classBeforePair⁔(/*this*/ ref bracketPairer p, bracketPair loc) {
     for (nint i = loc.opener - 1; i >= 0; i--) {
         Class dir = p.getStrongTypeN0(i); if (dir != ON) {
             return dir;
@@ -288,7 +273,7 @@ internal static Class classBeforePair(this ref bracketPairer p, bracketPair loc)
 }
 
 // assignBracketType implements rule N0 for a single bracket pair.
-internal static void assignBracketType(this ref bracketPairer p, bracketPair loc, Class dirEmbed, slice<Class> initialTypes) {
+internal static void assignBracketType⁔(/*this*/ ref bracketPairer p, bracketPair loc, Class dirEmbed, slice<Class> initialTypes) {
     // rule "N0, a", inspect contents of pair
     Class dirPair = p.classifyPairContent(loc, dirEmbed);
 
@@ -316,7 +301,7 @@ internal static void assignBracketType(this ref bracketPairer p, bracketPair loc
     p.setBracketsToType(loc, dirPair, initialTypes);
 }
 
-internal static void setBracketsToType(this ref bracketPairer p, bracketPair loc, Class dirPair, slice<Class> initialTypes) {
+internal static void setBracketsToType⁔(/*this*/ ref bracketPairer p, bracketPair loc, Class dirPair, slice<Class> initialTypes) {
     p.codesIsolatedRun[loc.opener] = dirPair;
     p.codesIsolatedRun[loc.closer] = dirPair;
 
@@ -338,10 +323,10 @@ internal static void setBracketsToType(this ref bracketPairer p, bracketPair loc
 }
 
 // resolveBrackets implements rule N0 for a list of pairs.
-internal static void resolveBrackets(this ref bracketPairer p, Class dirEmbed, slice<Class> initialTypes) {
+internal static void resolveBrackets⁔(/*this*/ ref bracketPairer p, Class dirEmbed, slice<Class> initialTypes) {
     foreach (var (_, loc) in range<bracketPair>(p.pairPositions)) {
         p.assignBracketType(loc, dirEmbed, initialTypes);
     }
 }
 
-}
+} // end bidi_package

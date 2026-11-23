@@ -10,7 +10,6 @@ using errors = errors_package;
 using sync = sync_package;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140.nistec;
-using static nistec_package;
 
 partial class nistec_package {
 
@@ -34,10 +33,8 @@ public static ж<P224Point> NewP224Point() {
     ));
 }
 
-} partial class nistecᴛP224Point {
-
 // SetGenerator sets p to the canonical generator and returns p.
-public static ж<P224Point> SetGenerator(this ж<P224Point> Ꮡp) {
+internal static ж<P224Point> SetGenerator⁔(/*this*/ ж<P224Point> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     p.x.SetBytes([0xb7, 0xe, 0xc, 0xbd, 0x6b, 0xb4, 0xbf, 0x7f, 0x32, 0x13, 0x90, 0xb9, 0x4a, 0x3, 0xc1, 0xd3, 0x56, 0xc2, 0x11, 0x22, 0x34, 0x32, 0x80, 0xd6, 0x11, 0x5c, 0x1d, 0x21]);
@@ -47,7 +44,7 @@ public static ж<P224Point> SetGenerator(this ж<P224Point> Ꮡp) {
 }
 
 // Set sets p = q and returns p.
-public static ж<P224Point> Set(this ж<P224Point> Ꮡp, ж<P224Point> Ꮡq) {
+internal static ж<P224Point> Set⁔(/*this*/ ж<P224Point> Ꮡp, ж<P224Point> Ꮡq) {
     ref var p = ref Ꮡp.DerefOrNull();
     ref var q = ref Ꮡq.DerefOrNull();
 
@@ -67,7 +64,7 @@ private static readonly @string invalidP224PointEncodingˢᵇ = "invalid P224 po
 // b, as specified in SEC 1, Version 2.0, Section 2.3.4. If the point is not on
 // the curve, it returns nil and an error, and the receiver is unchanged.
 // Otherwise, it returns p.
-public static (ж<P224Point>, error) SetBytes(this ж<P224Point> Ꮡp, slice<byte> b) {
+internal static (ж<P224Point>, error) SetBytes⁔(/*this*/ ж<P224Point> Ꮡp, slice<byte> b) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     switch (ᐧ) {
@@ -123,14 +120,12 @@ public static (ж<P224Point>, error) SetBytes(this ж<P224Point> Ꮡp, slice<byt
     }}
 }
 
-} partial class nistec_package {
-
 internal static ж<fiat.P224Element> _p224B;
 internal static readonly ж<sync.Once> Ꮡ_p224BOnce = new StaticBox<sync.Once>(default(sync.Once));
 internal static ref sync.Once _p224BOnce => ref ((StaticBox<sync.Once>)Ꮡ_p224BOnce).ValueSlot;
 
 internal static ж<fiat.P224Element> p224B() {
-    Ꮡ_p224BOnce.Do(() => {
+    Ꮡ_p224BOnce.Do([GoFunc("p224B.func1")] () => {
         (_p224B, _) = @new<fiat.P224Element>().SetBytes([0xb4, 0x5, 0xa, 0x85, 0xc, 0x4, 0xb3, 0xab, 0xf5, 0x41, 0x32, 0x56, 0x50, 0x44, 0xb0, 0xb7, 0xd7, 0xbf, 0xd8, 0xba, 0x27, 0xb, 0x39, 0x43, 0x23, 0x55, 0xff, 0xb4]);
     });
     return _p224B;
@@ -162,19 +157,17 @@ internal static error p224CheckOnCurve(ж<fiat.P224Element> x, ж<fiat.P224Eleme
     return default;
 }
 
-} partial class nistecᴛP224Point {
-
 // Bytes returns the uncompressed or infinity encoding of p, as specified in
 // SEC 1, Version 2.0, Section 2.3.3. Note that the encoding of the point at
 // infinity is shorter than all other encodings.
-public static slice<byte> Bytes(this ref P224Point p) {
+internal static slice<byte> Bytes⁔(/*this*/ ref P224Point p) {
     // This function is outlined to make the allocations inline in the caller
     // rather than happen on the heap.
     ref var @out = ref heap(new array<byte>(57), out var Ꮡout);
     return p.bytes(Ꮡout);
 }
 
-internal static slice<byte> bytes(this ref P224Point p, /*[57]*/ ж<array<byte>> Ꮡout) {
+internal static slice<byte> bytes⁔(/*this*/ ref P224Point p, /*[57]*/ ж<array<byte>> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     if (p.z.IsZero() == 1) {
@@ -193,7 +186,7 @@ internal static slice<byte> bytes(this ref P224Point p, /*[57]*/ ж<array<byte>>
 
 // BytesX returns the encoding of the x-coordinate of p, as specified in SEC 1,
 // Version 2.0, Section 2.3.5, or an error if p is the point at infinity.
-public static (slice<byte>, error) BytesX(this ref P224Point p) {
+internal static (slice<byte>, error) BytesX⁔(/*this*/ ref P224Point p) {
     // This function is outlined to make the allocations inline in the caller
     // rather than happen on the heap.
     ref var @out = ref heap(new array<byte>(28), out var Ꮡout);
@@ -204,7 +197,7 @@ public static (slice<byte>, error) BytesX(this ref P224Point p) {
 internal static ref readonly @string p224PointIsThePointAtˢ => ref p224PointIsThePointAtˢᵇ;
 private static readonly @string p224PointIsThePointAtˢᵇ = "P224 point is the point at infinity"u8;
 
-internal static (slice<byte>, error) bytesX(this ref P224Point p, /*[28]*/ ж<array<byte>> Ꮡout) {
+internal static (slice<byte>, error) bytesX⁔(/*this*/ ref P224Point p, /*[28]*/ ж<array<byte>> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     if (p.z.IsZero() == 1) {
@@ -220,14 +213,14 @@ internal static (slice<byte>, error) bytesX(this ref P224Point p, /*[28]*/ ж<ar
 // BytesCompressed returns the compressed or infinity encoding of p, as
 // specified in SEC 1, Version 2.0, Section 2.3.3. Note that the encoding of the
 // point at infinity is shorter than all other encodings.
-public static slice<byte> BytesCompressed(this ref P224Point p) {
+internal static slice<byte> BytesCompressed⁔(/*this*/ ref P224Point p) {
     // This function is outlined to make the allocations inline in the caller
     // rather than happen on the heap.
     ref var @out = ref heap(new array<byte>(29), out var Ꮡout);
     return p.bytesCompressed(Ꮡout);
 }
 
-internal static slice<byte> bytesCompressed(this ref P224Point p, /*[29]*/ ж<array<byte>> Ꮡout) {
+internal static slice<byte> bytesCompressed⁔(/*this*/ ref P224Point p, /*[29]*/ ж<array<byte>> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     if (p.z.IsZero() == 1) {
@@ -247,7 +240,7 @@ internal static slice<byte> bytesCompressed(this ref P224Point p, /*[29]*/ ж<ar
 }
 
 // Add sets q = p1 + p2, and returns q. The points may overlap.
-public static ж<P224Point> Add(this ж<P224Point> Ꮡq, ж<P224Point> Ꮡp1, ж<P224Point> Ꮡp2) {
+internal static ж<P224Point> Add⁔(/*this*/ ж<P224Point> Ꮡq, ж<P224Point> Ꮡp1, ж<P224Point> Ꮡp2) {
     ref var q = ref Ꮡq.DerefOrNull();
     ref var p1 = ref Ꮡp1.DerefOrNull();
     ref var p2 = ref Ꮡp2.DerefOrNull();
@@ -306,7 +299,7 @@ public static ж<P224Point> Add(this ж<P224Point> Ꮡq, ж<P224Point> Ꮡp1, ж
 }
 
 // Double sets q = p + p, and returns q. The points may overlap.
-public static ж<P224Point> Double(this ж<P224Point> Ꮡq, ж<P224Point> Ꮡp) {
+internal static ж<P224Point> Double⁔(/*this*/ ж<P224Point> Ꮡq, ж<P224Point> Ꮡp) {
     ref var q = ref Ꮡq.DerefOrNull();
     ref var p = ref Ꮡp.DerefOrNull();
 
@@ -355,7 +348,7 @@ public static ж<P224Point> Double(this ж<P224Point> Ꮡq, ж<P224Point> Ꮡp) 
 }
 
 // Select sets q to p1 if cond == 1, and to p2 if cond == 0.
-public static ж<P224Point> Select(this ж<P224Point> Ꮡq, ж<P224Point> Ꮡp1, ж<P224Point> Ꮡp2, nint cond) {
+internal static ж<P224Point> Select⁔(/*this*/ ж<P224Point> Ꮡq, ж<P224Point> Ꮡp1, ж<P224Point> Ꮡp2, nint cond) {
     ref var q = ref Ꮡq.DerefOrNull();
     ref var p1 = ref Ꮡp1.DerefOrNull();
     ref var p2 = ref Ꮡp2.DerefOrNull();
@@ -366,18 +359,14 @@ public static ж<P224Point> Select(this ж<P224Point> Ꮡq, ж<P224Point> Ꮡp1,
     return Ꮡq;
 }
 
-} partial class nistec_package {
-
 // A p224Table holds the first 15 multiples of a point at offset -1, so [1]P
 // is at table[0], [15]P is at table[14], and [0]P is implicitly the identity
 // point.
 partial struct p224Table /*[15]ж<P224Point>*/;
 
-} partial class nistecᴛp224Table {
-
 // Select selects the n-th multiple of the table base point into p. It works in
 // constant time by iterating over every entry of the table. n must be in [0, 15].
-internal static void Select(this ref p224Table table, ж<P224Point> p, uint8 n) {
+internal static void Select⁔(/*this*/ ref p224Table table, ж<P224Point> p, uint8 n) {
     if (n >= 16) {
         throw panic("nistec: internal error: p224Table called with out-of-bounds value");
     }
@@ -388,10 +377,8 @@ internal static void Select(this ref p224Table table, ж<P224Point> p, uint8 n) 
     }
 }
 
-} partial class nistecᴛP224Point {
-
 // ScalarMult sets p = scalar * q, and returns p.
-public static (ж<P224Point>, error) ScalarMult(this ж<P224Point> Ꮡp, ж<P224Point> q, slice<byte> scalar) {
+internal static (ж<P224Point>, error) ScalarMult⁔(/*this*/ ж<P224Point> Ꮡp, ж<P224Point> q, slice<byte> scalar) {
     // Compute a p224Table for the base point q. The explicit NewP224Point
     // calls get inlined, letting the allocations live on the stack.
     p224Table table = new p224Table(new ж<P224Point>[]{NewP224Point(), NewP224Point(), NewP224Point(),
@@ -435,19 +422,15 @@ public static (ж<P224Point>, error) ScalarMult(this ж<P224Point> Ꮡp, ж<P224
     return (Ꮡp, default);
 }
 
-} partial class nistec_package {
-
 internal static ж<array<p224Table>> p224GeneratorTable;
 internal static readonly ж<sync.Once> Ꮡp224GeneratorTableOnce = new StaticBox<sync.Once>(default(sync.Once));
 internal static ref sync.Once p224GeneratorTableOnce => ref ((StaticBox<sync.Once>)Ꮡp224GeneratorTableOnce).ValueSlot;
 
-} partial class nistecᴛP224Point {
-
 // generatorTable returns a sequence of p224Tables. The first table contains
 // multiples of G. Each successive table is the previous table doubled four
 // times.
-internal static ж<array<p224Table>> generatorTable(this ref P224Point p) {
-    Ꮡp224GeneratorTableOnce.Do(() => {
+internal static ж<array<p224Table>> generatorTable⁔(/*this*/ ref P224Point p) {
+    Ꮡp224GeneratorTableOnce.Do([GoFunc("(*P224Point).generatorTable.func1")] () => {
         p224GeneratorTable = Ꮡ(new array<p224Table>(56));
         var @base = NewP224Point().SetGenerator();
         for (nint i = 0; i < (nint)(p224ElementLength * 2); i++) {
@@ -470,7 +453,7 @@ private static readonly @string invalidScalarLengthˢᵇ = "invalid scalar lengt
 
 // ScalarBaseMult sets p = scalar * B, where B is the canonical generator, and
 // returns p.
-public static (ж<P224Point>, error) ScalarBaseMult(this ж<P224Point> Ꮡp, slice<byte> scalar) {
+internal static (ж<P224Point>, error) ScalarBaseMult⁔(/*this*/ ж<P224Point> Ꮡp, slice<byte> scalar) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     if (len(scalar) != p224ElementLength) {
@@ -501,8 +484,6 @@ public static (ж<P224Point>, error) ScalarBaseMult(this ж<P224Point> Ꮡp, sli
 
     return (Ꮡp, default);
 }
-
-} partial class nistec_package {
 
 // p224Sqrt sets e to a square root of x. If x is not a square, p224Sqrt returns
 // false and e is unchanged. e and x can overlap.

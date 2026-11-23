@@ -10,10 +10,15 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+using dwarf = go.debug.dwarf_package;
+using io = go.io_package;
 // </ImportedTypeAliases>
 
 using go;
 using static go.debug.macho_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -87,14 +92,18 @@ using static go.debug.macho_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("debug/macho/fat.go", "fat.cs", "ACpSmrKCuIKCgoaigoKClKaWkoKClJSCyoTIgoKUgoKCgoKUlIKCgriCgpSmgpSCuKaqooKClIKCgpSCxoKCgoKU")]
-[assembly: GoPositionMap("debug/macho/file.go", "file.cs", "ADhqACJCkqiAACxWkqiAADdogoKClILIkoKClIKCgpSCzLKCgoKUyqKCmKKClIKClIK0grS4griCgpSCgpSCgpSCgpSClIKClIKCgoKUtoKCgpSCgpSCgraCgoKUgoKUgoKCgoK2goKClIKClIKClJSCgpSCgpSCtoKCgpSCgoKmgriCgpSCgpSCgoKCgraCgoKUgoKCgoKCgoKCgoKCgoKCgoKUgoKCgoKCgoKCgoLagoKClIKCgoKCgoKCgoKCgoKCgoKClIKCgoKCgoKCgoKCyIKClIKUgqbGooKCgpSCgoKCgoKmgoKUgoKCgpSCpoKClAAHEIKCggALEKKCgpSCgoKUlJSCgpSCgqaCgoKCgoKUlIKCgoKCtIKCgoKCtOzGgoKClMiSgoKmqqKCgqYAEgiSgoKClLS0uAAIEoKCppSCgoKmgoKCgoKUgpSClJSssoKCgpSClIKClKaCgriCgoKUlKaCgqaClJSCuKyygqaCgoKCgqi6goK4rNKCgoKm", "612-640:1;641-663:2")]
-[assembly: GoPositionMap("debug/macho/macho.go", "macho.cs", "ACtiAAgOggAPIAAKEoIAECIAChKCANoBugOCgoKClKY=")]
-[assembly: GoPositionMap("debug/macho/reloctype.go", "reloctype.cs", "ABUoABIiABIiABMk")]
-[assembly: GoPositionMap("debug/macho/reloctype_string.go", "reloctype_string.cs", "AAgOhqKCgoKCgtq0goKUxIaigoKCgoKCgoKC2rSCgpTEhqKCgoKCgoKCgoLatIKClMSGooKCgoKCgoKCgoLatIKClA==")]
+[assembly: GoPositionMap("debug/macho/fat.go", "fat.cs", "AClSmrKCuIKCgoaigoKClKaWkoKClJSCyoTIgoKUgoKCgoKUlIKCgriCgpSmgpSCuKaqooKClIKCgpSCpoKCgoKU")]
+[assembly: GoPositionMap("debug/macho/file.go", "file.cs", "ADVqAB5CkqiAAChWkqiAADNogoKClIKokoKClIKCgpSCrLKCgoKUqqKCmKKClIKClIK0grS4griCgpSCgpSCgpSCgpSClIKClIKCgoKUtoKCgpSCgpSCgraCgoKUgoKUgoKCgoK2goKClIKClIKClJSCgpSCgpSCtoKCgpSCgoKmgriCgpSCgpSCgoKCgraCgoKUgoKCgoKCgoKCgoKCgoKCgoKUgoKCgoKCgoKCgoLagoKClIKCgoKCgoKCgoKCgoKCgoKClIKCgoKCgoKCgoKCyIKClIKUgqamooKCgpSCgoKCgoKmgoKUgoKCgpSCpoKClAAHEIKCggAHEKKCgpSCgoKUlJSCgpSCgqaCgoKCgoKUlIKCgoKCtIKCgoKCtOymgoKClKiSgoKmqqKCgqYAEgiSgoKClLS0uAAIEoKCppSCgoKmgoKCgoKUgpSClJSssoKCgpSClIKClKaCgriCgoKUlKaCgqaClJSCuKyygqaCgoKCgqi6goK4rNKCgoKm", "612-640:1;641-663:2")]
+[assembly: GoPositionMap("debug/macho/macho.go", "macho.cs", "ACpi7oIADSAACBKCAA4iAAgSggDYAboDgoKCgpSm")]
+[assembly: GoPositionMap("debug/macho/reloctype.go", "reloctype.cs", "ABEoAA4iAA4iAA8k")]
+[assembly: GoPositionMap("debug/macho/reloctype_string.go", "reloctype_string.cs", "/oaigoKCgoLalIKClJSGooKCgoKCgoKCgtqUgoKUlIaigoKCgoKCgoKC2pSCgpSUhqKCgoKCgoKCgoKC2pSCgpQ=")]
 // </GoSourcePositionMaps>
 
 namespace go.debug;
+
+using static go.debug.macho_package;
+using dwarf = go.debug.dwarf_package;
+using io = go.io_package;
 
 [GoPackage("macho")]
 public static partial class macho_package
@@ -175,17 +184,79 @@ public static partial class macho_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(macho_package.Cpu)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class machoᴛCpu;
-[GoMethodHost(typeof(macho_package.FatFile)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class machoᴛFatFile;
-[GoMethodHost(typeof(macho_package.File)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class machoᴛFile;
-[GoMethodHost(typeof(macho_package.FormatError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class machoᴛFormatError;
-[GoMethodHost(typeof(macho_package.LoadBytes)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class machoᴛLoadBytes;
-[GoMethodHost(typeof(macho_package.LoadCmd)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class machoᴛLoadCmd;
-[GoMethodHost(typeof(macho_package.RelocTypeARM)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class machoᴛRelocTypeARM;
-[GoMethodHost(typeof(macho_package.RelocTypeARM64)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class machoᴛRelocTypeARM64;
-[GoMethodHost(typeof(macho_package.RelocTypeGeneric)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class machoᴛRelocTypeGeneric;
-[GoMethodHost(typeof(macho_package.RelocTypeX86_64)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class machoᴛRelocTypeX86_64;
-[GoMethodHost(typeof(macho_package.Section)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class machoᴛSection;
-[GoMethodHost(typeof(macho_package.Segment)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class machoᴛSegment;
-[GoMethodHost(typeof(macho_package.Type)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class machoᴛType;
+[GoMethodHost(typeof(macho_package.Cpu)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class machoᴛCpu;
+[GoMethodHost(typeof(macho_package.FatFile)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class machoᴛFatFile;
+[GoMethodHost(typeof(macho_package.File)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class machoᴛFile;
+[GoMethodHost(typeof(macho_package.FormatError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class machoᴛFormatError;
+[GoMethodHost(typeof(macho_package.LoadBytes)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class machoᴛLoadBytes;
+[GoMethodHost(typeof(macho_package.LoadCmd)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class machoᴛLoadCmd;
+[GoMethodHost(typeof(macho_package.RelocTypeARM)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class machoᴛRelocTypeARM;
+[GoMethodHost(typeof(macho_package.RelocTypeARM64)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class machoᴛRelocTypeARM64;
+[GoMethodHost(typeof(macho_package.RelocTypeGeneric)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class machoᴛRelocTypeGeneric;
+[GoMethodHost(typeof(macho_package.RelocTypeX86_64)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class machoᴛRelocTypeX86_64;
+[GoMethodHost(typeof(macho_package.Section)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class machoᴛSection;
+[GoMethodHost(typeof(macho_package.Segment)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class machoᴛSegment;
+[GoMethodHost(typeof(macho_package.Type)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class machoᴛType;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class machoᴛCpu {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this Cpu i) => macho_package.String⁔(i);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string GoString(this Cpu i) => macho_package.GoString⁔(i);
+}
+partial class machoᴛFatFile {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Close(this ref FatFile ff) => macho_package.Close⁔(ref ff);
+}
+partial class machoᴛFile {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Close(this ref File f) => macho_package.Close⁔(ref f);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (ж<Symtab>, error) parseSymtab(this ref File f, slice<byte> symdat, slice<byte> strtab, slice<byte> cmddat, ж<SymtabCmd> Ꮡhdr, int64 offset) => macho_package.parseSymtab⁔(ref f, symdat, strtab, cmddat, Ꮡhdr, offset);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error pushSection(this ref File f, ж<Section> Ꮡsh, io.ReaderAt r) => macho_package.pushSection⁔(ref f, Ꮡsh, r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Segment> Segment(this ref File f, @string name) => macho_package.Segment⁔(ref f, name);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Section> Section(this ref File f, @string name) => macho_package.Section⁔(ref f, name);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (ж<dwarf.Data>, error) DWARF(this ref File f) => macho_package.DWARF⁔(ref f);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<@string>, error) ImportedSymbols(this ref File f) => macho_package.ImportedSymbols⁔(ref f);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<@string>, error) ImportedLibraries(this ref File f) => macho_package.ImportedLibraries⁔(ref f);
+}
+partial class machoᴛFormatError {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this ref FormatError e) => macho_package.Error⁔(ref e);
+}
+partial class machoᴛLoadBytes {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> Raw(this LoadBytes b) => macho_package.Raw⁔(b);
+}
+partial class machoᴛLoadCmd {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this LoadCmd i) => macho_package.String⁔(i);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string GoString(this LoadCmd i) => macho_package.GoString⁔(i);
+}
+partial class machoᴛRelocTypeARM {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string GoString(this RelocTypeARM r) => macho_package.GoString⁔(r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this RelocTypeARM i) => macho_package.String⁔(i);
+}
+partial class machoᴛRelocTypeARM64 {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string GoString(this RelocTypeARM64 r) => macho_package.GoString⁔(r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this RelocTypeARM64 i) => macho_package.String⁔(i);
+}
+partial class machoᴛRelocTypeGeneric {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string GoString(this RelocTypeGeneric r) => macho_package.GoString⁔(r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this RelocTypeGeneric i) => macho_package.String⁔(i);
+}
+partial class machoᴛRelocTypeX86_64 {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string GoString(this RelocTypeX86_64 r) => macho_package.GoString⁔(r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this RelocTypeX86_64 i) => macho_package.String⁔(i);
+}
+partial class machoᴛSection {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<byte>, error) Data(this ref Section s) => macho_package.Data⁔(ref s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static io.ReadSeeker Open(this ref Section s) => macho_package.Open⁔(ref s);
+}
+partial class machoᴛSegment {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<byte>, error) Data(this ref Segment s) => macho_package.Data⁔(ref s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static io.ReadSeeker Open(this ref Segment s) => macho_package.Open⁔(ref s);
+}
+partial class machoᴛType {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this Type t) => macho_package.String⁔(t);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string GoString(this Type t) => macho_package.GoString⁔(t);
+}
+// </MethodForwarders>

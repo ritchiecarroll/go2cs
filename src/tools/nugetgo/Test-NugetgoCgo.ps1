@@ -61,9 +61,25 @@ Check 'the pinned zig version is .github/cgo-toolchain.ps1''s' ($pin -and (Get-N
 
 Write-Host 'statement: what the pack says about its RIDs'
 $statement = Get-NugetgoCgoStatement -PackageId 'nugetgo.example.cgo'
-foreach ($rid in @($cgo.Keys) + @($excluded.Keys) + @('NUGETGOCGO001', '-r ', 'reference assemblies', 'linux-musl', 'A6')) {
+foreach ($rid in @($cgo.Keys) + @($excluded.Keys) + @('NUGETGOCGO001', '-r ', 'reference assemblies', 'linux-musl', 'run-time target check')) {
     Check "the statement names $rid" ($statement.Contains($rid)) $statement
 }
+
+Write-Host 'A6''s floor: the push lift (COORD''s ruling (a))'
+$treeTargets = [System.IO.File]::ReadAllText((Join-Path $repoRoot 'src/core/golib/buildTransitive/go.lib.targets'))
+Check 'this tree''s go.lib.targets declares GoCgoRunTimeTargetCheck' ($null -eq (Test-NugetgoCgoGoLibFloor -GoLibTargets $treeTargets -Version 'tree')) (Test-NugetgoCgoGoLibFloor -GoLibTargets $treeTargets -Version 'tree')
+$golibSource = [System.IO.File]::ReadAllText((Join-Path $repoRoot 'src/core/golib/runtime/GoCgoLibraries.cs'))
+Check 'and its golib''s Register refuses at registration (the property is never declared without the check)' ($golibSource -match '(?s)public static void Register\(Assembly assembly, string target, params GoCgoLibrary\[\] libraries\)\s*\{.*?if \(Refusal\(target\) is \{ \} refusal\)\s*throw new GoCgoTargetMismatchException') 'Register no longer begins with the A6 refusal'
+$published = "$(& git -C $repoRoot show 'nuget-1.26.11.1:src/core/golib/buildTransitive/go.lib.targets' 2>$null)"
+if ($published) {
+    $why = Test-NugetgoCgoGoLibFloor -GoLibTargets $published -Version '1.26.11.1'
+    Check 'the published go.lib 1.26.11.1, which predates A6, is refused by name (the natural control)' ($why -and $why.Contains('1.26.11.1') -and $why.Contains('GoCgoRunTimeTargetCheck')) "got '$why'"
+}
+else { Write-Host '  NOT MEASURED: the nuget-1.26.11.1 tag is not in this clone' }
+$commented = $treeTargets -replace '(<GoCgoRunTimeTargetCheck>true</GoCgoRunTimeTargetCheck>)', '<!-- $1 -->'
+Check 'a go.lib.targets whose property is commented out is refused (it is parsed, not matched as text)' ($commented -ne $treeTargets -and $null -ne (Test-NugetgoCgoGoLibFloor -GoLibTargets $commented -Version 'commented')) 'accepted, or the property was not found to comment out'
+Check 'an empty go.lib.targets (none restored) is refused' ($null -ne (Test-NugetgoCgoGoLibFloor -GoLibTargets '' -Version 'none')) 'accepted'
+Check 'the a6 note starts with the "a6: " the push reads' ((Get-NugetgoCgoA6Note -Version '1.26.12.1').StartsWith('a6: ', [StringComparison]::Ordinal)) (Get-NugetgoCgoA6Note -Version '1.26.12.1')
 
 if ($SkipDotnet) { Write-Host "SKIPPED guard and surface (-SkipDotnet): NOT MEASURED"; Write-Host "ran $ran, failed $failed"; exit $failed }
 

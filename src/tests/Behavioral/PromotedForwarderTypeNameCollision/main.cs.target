@@ -5,7 +5,6 @@ using driver = database.sql.driver_package;
 using fmt = fmt_package;
 using reflect = reflect_package;
 using database.sql;
-using static main_package;
 
 partial class main_package {
 
@@ -24,58 +23,42 @@ partial struct @base {
     internal @string tag;
 }
 
-} partial class mainᴛbase {
-
-internal static Driver Driver(this ref @base b) { return new Driver(name: "driver:"u8 + b.tag); }
-internal static @string Name(this ref @base b) { return "base:"u8 + b.tag; }
-
-} partial class main_package {
+internal static Driver Driver⁔(/*this*/ ref @base b) { return new Driver(name: "driver:"u8 + b.tag); }
+internal static @string Name⁔(/*this*/ ref @base b) { return "base:"u8 + b.tag; }
 
 partial struct counting {
     /*embed*/ public Connector Connector;
     internal nint hits;
 }
 
-} partial class mainᴛcounting {
-
 // Go method set entry for the promoted 'Connector.Driver()' - provided ONLY by the embedded
 // interface field in *counting's method set; see the pointer-only satisfaction record.
-internal static Driver Driver(this counting recvᴛ) => recvᴛ.Connector.Driver();
+internal static Driver Driver⁔(/*this*/ counting recvᴛ) => recvᴛ.Connector.Driver();
 
-internal static @string Name(this ref counting c) {
+internal static @string Name⁔(/*this*/ ref counting c) {
     c.hits++;
     return fmt.Sprintf("counting(%d):%s"u8, c.hits, c.Connector.Name());
 }
 
-} partial class main_package {
-
 partial struct fbase {
 }
 
-} partial class mainᴛfbase {
-
-internal static (driver.Conn, error) Connect(this fbase _Δp0, context.Context _Δp1) { return (default, default); }
-internal static driver.Driver Driver(this fbase _) { return new DriverжDriver(Ꮡ(new Driver(name: "foreign"))); }
-
-} partial class main_package {
+internal static (driver.Conn, error) Connect⁔(/*this*/ fbase _Δp0, context.Context _Δp1) { return (default, default); }
+internal static driver.Driver Driver⁔(/*this*/ fbase _) { return new DriverжDriver(Ꮡ(new Driver(name: "foreign"))); }
 
 partial struct fcounting {
     /*embed*/ public database.sql.driver_package.Connector Connector;
     internal nint n;
 }
 
-} partial class mainᴛfcounting {
-
 // Go method set entry for the promoted 'Connector.Driver()' - provided ONLY by the embedded
 // interface field in *fcounting's method set; see the pointer-only satisfaction record.
-internal static driver.Driver Driver(this fcounting recvᴛ) => recvᴛ.Connector.Driver();
+internal static driver.Driver Driver⁔(/*this*/ fcounting recvᴛ) => recvᴛ.Connector.Driver();
 
-internal static (driver.Conn, error) Connect(this ref fcounting c, context.Context ctx) {
+internal static (driver.Conn, error) Connect⁔(/*this*/ ref fcounting c, context.Context ctx) {
     c.n++;
     return c.Connector.Connect(ctx);
 }
-
-} partial class main_package {
 
 internal static @string use(Connector c) { return c.Name() + " / "u8 + c.Driver().name; }
 

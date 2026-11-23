@@ -13,7 +13,6 @@ using runtime = runtime_package;
 using Δsync = sync_package;
 using @internal;
 using go.io;
-using static net_package;
 
 partial class net_package {
 
@@ -97,7 +96,7 @@ internal static void initConfVal() {
         confVal.dnsDebugLevel = debugLevel;
 
         if (confVal.dnsDebugLevel > 0) {
-            defer(() => {
+            defer([GoFunc("initConfVal.func1")] () => {
                 if (confVal.dnsDebugLevel > 1) {
                     println((@string)"go package net: confVal.netCgo =", confVal.netCgo, (@string)" netGo =", confVal.netGo);
                 }
@@ -208,12 +207,10 @@ internal static bool goosPrefersCgo() {
     }}
 }
 
-} partial class netᴛconf {
-
 // mustUseGoResolver reports whether a DNS lookup of any sort is
 // required to use the go resolver. The provided Resolver is optional.
 // This will report true if the cgo resolver is not available.
-internal static bool mustUseGoResolver(this ref conf c, ж<Resolver> Ꮡr) {
+internal static bool mustUseGoResolver⁔(/*this*/ ref conf c, ж<Resolver> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     if (!cgoAvailable) {
@@ -239,7 +236,7 @@ internal static bool mustUseGoResolver(this ref conf c, ж<Resolver> Ꮡr) {
 // addrLookupOrder determines which strategy to use to resolve addresses.
 // The provided Resolver is optional. nil means to not consider its options.
 // It also returns dnsConfig when it was used to determine the lookup order.
-internal static (hostLookupOrder ret, ж<dnsConfig> dnsConf) addrLookupOrder(this ж<conf> Ꮡc, ж<Resolver> r, @string addr) {
+internal static (hostLookupOrder ret, ж<dnsConfig> dnsConf) addrLookupOrder⁔(/*this*/ ж<conf> Ꮡc, ж<Resolver> r, @string addr) {
     hostLookupOrder ret = default;
     ж<dnsConfig> dnsConf = default;
     GoFrame ᒐ = default;
@@ -247,7 +244,7 @@ internal static (hostLookupOrder ret, ж<dnsConfig> dnsConf) addrLookupOrder(thi
         ref var c = ref Ꮡc.DerefOrNull();
 
         if (c.dnsDebugLevel > 1) {
-            defer(() => {
+            defer([GoFunc("(*conf).addrLookupOrder.func1")] () => {
                 print((@string)"go package net: addrLookupOrder(", addr, (@string)") = ", ret.String(), (@string)"\n");
             }, ref ᒐ);
         }
@@ -261,7 +258,7 @@ internal static (hostLookupOrder ret, ж<dnsConfig> dnsConf) addrLookupOrder(thi
 // hostLookupOrder determines which strategy to use to resolve hostname.
 // The provided Resolver is optional. nil means to not consider its options.
 // It also returns dnsConfig when it was used to determine the lookup order.
-internal static (hostLookupOrder ret, ж<dnsConfig> dnsConf) hostLookupOrder(this ж<conf> Ꮡc, ж<Resolver> r, @string hostname) {
+internal static (hostLookupOrder ret, ж<dnsConfig> dnsConf) hostLookupOrder⁔(/*this*/ ж<conf> Ꮡc, ж<Resolver> r, @string hostname) {
     hostLookupOrder ret = default;
     ж<dnsConfig> dnsConf = default;
     GoFrame ᒐ = default;
@@ -269,7 +266,7 @@ internal static (hostLookupOrder ret, ж<dnsConfig> dnsConf) hostLookupOrder(thi
         ref var c = ref Ꮡc.DerefOrNull();
 
         if (c.dnsDebugLevel > 1) {
-            defer(() => {
+            defer([GoFunc("(*conf).hostLookupOrder.func1")] () => {
                 print((@string)"go package net: hostLookupOrder(", hostname, (@string)") = ", ret.String(), (@string)"\n");
             }, ref ᒐ);
         }
@@ -292,7 +289,7 @@ private static readonly @string etcMdnsAllowˢᵇ = "/etc/mdns.allow"u8;
 internal static ref readonly @string dnsˢ => ref dnsˢᵇ;
 private static readonly @string dnsˢᵇ = "dns"u8;
 
-internal static (hostLookupOrder ret, ж<dnsConfig> dnsConf) lookupOrder(this ref conf c, ж<Resolver> r, @string hostname) {
+internal static (hostLookupOrder ret, ж<dnsConfig> dnsConf) lookupOrder⁔(/*this*/ ref conf c, ж<Resolver> r, @string hostname) {
     ж<dnsConfig> dnsConf = default;
 
     // fallbackOrder is the order we return if we can't figure it out.
@@ -554,8 +551,6 @@ internal static (hostLookupOrder ret, ж<dnsConfig> dnsConf) lookupOrder(this re
     return (fallbackOrder, dnsConf);
 }
 
-} partial class net_package {
-
 internal static ж<godebug.Setting> netdns = godebug.New("netdns");
 
 // goDebugNetDNS parses the value of the GODEBUG "netdns" value.
@@ -575,7 +570,7 @@ internal static (@string dnsMode, nint debugLevel) goDebugNetDNS() {
     nint debugLevel = default;
 
     @string goDebug = netdns.Value();
-    void parsePart(@string s) {
+    [GoFunc("goDebugNetDNS.func1")] void parsePart(@string s) {
         if (s == ""u8) {
             return;
         }

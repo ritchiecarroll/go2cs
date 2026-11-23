@@ -566,17 +566,17 @@ partial class time_package
         }
     }
 
-    // M:N SPIKE: the hidden twin of Sleep, which a twin awaits. The sleeper's timer wakes a GoParkSlot
-    // instead of an event, so the sleep gives its carrier back instead of blocking it. A bubbled sleep
-    // takes the thread path. The timer and the slot are allocated per sleep here; a real build hangs the
-    // timer off the goroutine, as Go's gp.timer.
+    // The M:N twin of Sleep, which a twinned program's twin awaits; FROZEN from .5 (COORD, inbox/G 20261122T114603Z).
+    // The sleeper's timer wakes a GoParkSlot instead of an event, so the sleep gives its carrier back instead of
+    // blocking it. A bubbled sleep, and one off a carrier (GoScheduler.OnCarrier), take the thread path. The timer and
+    // the slot are allocated per sleep here; a later build can hang the timer off the goroutine, as Go's gp.timer.
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
-    internal static global::go.golib.GoTask Sleepꞏtwin(Duration d)
+    public static global::go.golib.GoTask Sleepꞏtwin(Duration d)
     {
         if (d <= 0)
             return default;
 
-        if (SyncTestBubble.Current is not null)
+        if (SyncTestBubble.Current is not null || !global::go.golib.GoScheduler.OnCarrier)
         {
             Sleep(d);
             return default;

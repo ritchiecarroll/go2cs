@@ -28,9 +28,22 @@ namespace go2cs.Templates.InheritedType;
 /// </remarks>
 internal static class IArrayViewTypeTemplate
 {
+    // The members this wrapper declares for its own use under an ASCII name a Go method can also declare (R7; see
+    // ISliceTypeTemplate.ClaimableMembers): a claimed member moves to its explicit IArray / IArray<T> form, or to ΔSlice,
+    // and a claimed Clone leaves the copy to ValueCloneMethod alone, the spelling the converter then uses at its copy sites
+    // (valueCloneSuffix), exactly as IArrayTypeTemplate.CloneMembers does. GenTests' NamedSliceArrayClaimedMemberTests.
+    internal static readonly string[] ClaimableMembers = ["Assign", "Clone", "GetEnumerator", "Length", "Slice", "Source", "ToSpan"];
+
+    private static string Claimable(ICollection<string> goMethods, string name, string own, string claimed) =>
+        goMethods.Contains(name) ? claimed : own;
+
     public static string Generate(string objectName, string typeName, string targetTypeName, ICollection<string> goMethods) =>
         $$"""
 
+                // Every member below reads the underlying wrapper's backing through its Value (view.Value), never a member
+                // by name: a Go method on the UNDERLYING named array takes that name (R7), so `view.Source` bound the
+                // extension method Go's Source became (CS0428, NamedSliceMethodShadow's V over Vec). The copy goes through
+                // the underlying's ValueCloneMethod, which every array and view wrapper declares.
                 // View over the underlying array wrapper: first touches m_value.Value ON THE FIELD
                 // (mutable — no defensive copy), materializing the lazily-allocated backing in THIS
                 // wrapper's own storage; the returned VALUE copy then shares that heap T[] by
@@ -45,9 +58,9 @@ internal static class IArrayViewTypeTemplate
                     }
                 }
 
-                public {{targetTypeName}}[] Source => view.Source;
+                {{Claimable(goMethods, "Source", $"public {targetTypeName}[] Source => view.{WrapperValueMember(typeName)}.Source;", $"{targetTypeName}[] IArray<{targetTypeName}>.Source => view.{WrapperValueMember(typeName)}.Source;")}}
 
-                public nint Length => view.Length;
+                {{Claimable(goMethods, "Length", $"public nint Length => view.{WrapperValueMember(typeName)}.Length;", $"nint IArray.Length => view.{WrapperValueMember(typeName)}.Length;")}}
 
                 global::System.Array IArray.Source => ((IArray)view).Source!;
 
@@ -78,14 +91,16 @@ internal static class IArrayViewTypeTemplate
 
                 public slice<{{targetTypeName}}> slice(nint low, nint high, nint max) => view.slice(low, high, max);
 
-                public slice<{{targetTypeName}}> Slice(nint start, nint length) => view.Slice(start, length);
+                public slice<{{targetTypeName}}> {{(goMethods.Contains("Slice") ? "ΔSlice" : "Slice")}}(nint start, nint length) => view.{{WrapperValueMember(typeName)}}.Slice(start, length);
 
-                public global::System.Span<{{targetTypeName}}> {{EllipsisOperator}} => ToSpan();
+                public global::System.Span<{{targetTypeName}}> {{EllipsisOperator}} => view.{{WrapperValueMember(typeName)}}.ToSpan();
 
-                public global::System.Span<{{targetTypeName}}> ToSpan() => view.ToSpan();
+                {{Claimable(goMethods, "ToSpan",
+                    $"public global::System.Span<{targetTypeName}> ToSpan() => view.{WrapperValueMember(typeName)}.ToSpan();",
+                    $"global::System.Span<{targetTypeName}> IArray<{targetTypeName}>.ToSpan() => view.{WrapperValueMember(typeName)}.ToSpan();")}}
 
                 // Forwards the CONCRETE struct enumerator over the VALUES — see IArrayTypeTemplate.
-                public global::go.array<{{targetTypeName}}>.Enumerator GetEnumerator() => view.GetEnumerator();
+                {{Claimable(goMethods, "GetEnumerator", $"public global::go.array<{targetTypeName}>.Enumerator GetEnumerator() => view.{WrapperValueMember(typeName)}.GetEnumerator();", "")}}
 
                 global::System.Collections.Generic.IEnumerator<{{targetTypeName}}> global::System.Collections.Generic.IEnumerable<{{targetTypeName}}>.GetEnumerator() => ((global::System.Collections.Generic.IEnumerable<{{targetTypeName}}>)view).GetEnumerator();
 
@@ -94,17 +109,17 @@ internal static class IArrayViewTypeTemplate
                 // Go's range-expression copy — see IArrayTypeTemplate.
                 public global::go.array<{{targetTypeName}}>.RangeSnapshot {{RangeSnapshotMethod}}() => view.{{RangeSnapshotMethod}}();
 
-                public {{objectName}} Clone() => new {{objectName}}(view.Clone());
-
-                // Uniform value-copy member name a generated struct clone calls on every
-                // clone-needing field (see GoValueCloneAttribute); copy SITES use Clone().
-                public {{objectName}} {{ValueCloneMethod}}() => Clone();
-
-                object global::System.ICloneable.Clone() => Clone();
+                {{(goMethods.Contains("Clone") ?
+                    $"public {objectName} {ValueCloneMethod}() => new {objectName}(view.{ValueCloneMethod}());\r\n\r\n        object global::System.ICloneable.Clone() => {ValueCloneMethod}();" :
+                    $"public {objectName} Clone() => new {objectName}(view.{ValueCloneMethod}());\r\n\r\n        // Uniform value-copy member name a generated struct clone calls on every\r\n        // clone-needing field (see GoValueCloneAttribute); copy SITES use Clone().\r\n        public {objectName} {ValueCloneMethod}() => Clone();\r\n\r\n        object global::System.ICloneable.Clone() => Clone();")}}
 
                 // Go's whole assignment into this array's own storage, through `view` so the underlying wrapper's lazy
                 // backing lands in THIS wrapper's field (see IArrayTypeTemplate's Assign; P5's Q2).
-                public void {{IArrayTypeTemplate.AssignMethod(goMethods)}}({{objectName}} source) => view.Assign(source.view);
+                public void {{IArrayTypeTemplate.AssignMethod(goMethods)}}({{objectName}} source)
+                {
+                    var target = view.{{WrapperValueMember(typeName)}};
+                    target.Assign(source.view.{{WrapperValueMember(typeName)}});
+                }
 
                 {{objectName}} global::go.golib.IGoValueAssign<{{objectName}}>.AssignedFrom(in {{objectName}} source)
                 {

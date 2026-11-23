@@ -10,38 +10,38 @@ internal static void main() {
     GoFrame ᒐ = default;
     try {
         nint count = 1;
-        defer((nint cnt) => {
+        defer([GoFunc("main.func1")] (nint cnt) => {
             fmt.Println("Deferred count (closure):", cnt);
         }, count, ref ᒐ);
 
         @string a = "one";
         @string b = "two";
-        defer((ᴛ1, ᴛ2) => ((Actionꓸꓸꓸ<@string>)((params ꓸꓸꓸstring partsʗp) => {
+        defer((ᴛ1, ᴛ2) => ((Actionꓸꓸꓸ<@string>)([GoFunc("main.func2")] (params ꓸꓸꓸstring partsʗp) => {
             var parts = partsʗp.slice();
             fmt.Println("Deferred variadic:", len(parts), parts);
         }))(ᴛ1, ᴛ2), a, b, ref ᒐ);
         (a, b) = ("CHANGED", "ALSO-CHANGED");
 
-        defer(ᴛ1 => ((Actionꓸꓸꓸ<nint>)((params ꓸꓸꓸnint partsʗp) => {
+        defer(ᴛ1 => ((Actionꓸꓸꓸ<nint>)([GoFunc("main.func3")] (params ꓸꓸꓸnint partsʗp) => {
             var parts = partsʗp.slice();
             fmt.Println("Deferred variadic (1 arg):", parts);
         }))(ᴛ1), 7, ref ᒐ);
-        defer((ᴛ1, ᴛ2, ᴛ3, ᴛ4) => ((Actionꓸꓸꓸ<@string, nint>)((@string label, params ꓸꓸꓸnint partsʗp) => {
+        defer((ᴛ1, ᴛ2, ᴛ3, ᴛ4) => ((Actionꓸꓸꓸ<@string, nint>)([GoFunc("main.func4")] (@string label, params ꓸꓸꓸnint partsʗp) => {
             var parts = partsʗp.slice();
             fmt.Println("Deferred variadic (fixed + tail):", label, parts);
         }))(ᴛ1, ᴛ2, ᴛ3, ᴛ4), (@string)"L", 1, 2, 3, ref ᒐ);
-        defer(() => ((Actionꓸꓸꓸ<nint>)((params ꓸꓸꓸnint partsʗp) => {
+        defer(() => ((Actionꓸꓸꓸ<nint>)([GoFunc("main.func5")] (params ꓸꓸꓸnint partsʗp) => {
             var parts = partsʗp.sslice();
             fmt.Println("Deferred variadic (no args):", len(parts));
         }))(), ref ᒐ);
 
-        defer((ᴛ1, ᴛ2) => ((Funcꓸꓸꓸ<@string, nint>)((params ꓸꓸꓸstring partsʗp) => {
+        defer((ᴛ1, ᴛ2) => ((Funcꓸꓸꓸ<@string, nint>)([GoFunc("main.func6")] (params ꓸꓸꓸstring partsʗp) => {
             var parts = partsʗp.slice();
             fmt.Println("Deferred variadic (with result):", parts);
             return len(parts);
         }))(ᴛ1, ᴛ2), (@string)"r1", (@string)"r2", ref ᒐ);
 
-        fmt.Println("IIFE variadic:", ((Funcꓸꓸꓸ<nint, nint>)((params ꓸꓸꓸnint partsʗp) => {
+        fmt.Println("IIFE variadic:", ((Funcꓸꓸꓸ<nint, nint>)([GoFunc("main.func7")] (params ꓸꓸꓸnint partsʗp) => {
             var parts = partsʗp.sslice();
             nint total = 0;
             foreach (var (_, p) in range(parts)) {

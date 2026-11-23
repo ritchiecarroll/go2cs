@@ -15,7 +15,6 @@ using atomic = sync.atomic_package;
 using @unsafe = unsafe_package;
 using go.@internal;
 using sync;
-using static sync_package;
 
 partial class sync_package {
 
@@ -35,16 +34,14 @@ partial struct HashTrieMap<K, V> {
     internal uintptr seed;
 }
 
-} partial class syncᴛHashTrieMap {
-
-internal static void init<K, V>(this ж<HashTrieMap<K, V>> Ꮡht) {
+internal static void init⁔<K, V>(/*this*/ ж<HashTrieMap<K, V>> Ꮡht) {
     if (Ꮡht.of(HashTrieMap<K, V>.Ꮡinited).Load() == 0) {
         Ꮡht.initSlow();
     }
 }
 
 //go:noinline
-internal static partial void initSlow<K, V>(this ж<HashTrieMap<K, V>> Ꮡht) {
+internal static partial void initSlow⁔<K, V>(/*this*/ ж<HashTrieMap<K, V>> Ꮡht) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -73,17 +70,13 @@ internal static partial void initSlow<K, V>(this ж<HashTrieMap<K, V>> Ꮡht) {
     finally { if (ᒐd1) Ꮡht.of(HashTrieMap<K, V>.ᏑinitMu).Unlock(); ᒐ.Run(); }
 }
 
-} partial class sync_package {
-
 // type hashFunc is a methodless func type — rendered inline as its base delegate
 // type equalFunc is a methodless func type — rendered inline as its base delegate
-
-} partial class syncᴛHashTrieMap {
 
 // Load returns the value stored in the map for a key, or nil if no
 // value is present.
 // The ok result indicates whether value was found in the map.
-public static (V value, bool ok) Load<K, V>(this ж<HashTrieMap<K, V>> Ꮡht, K keyʗp) {
+internal static (V value, bool ok) Load⁔<K, V>(/*this*/ ж<HashTrieMap<K, V>> Ꮡht, K keyʗp) {
     ref var ht = ref Ꮡht.DerefOrNull();
     ref var key = ref heap(keyʗp, out var Ꮡkey);
 
@@ -111,7 +104,7 @@ public static (V value, bool ok) Load<K, V>(this ж<HashTrieMap<K, V>> Ꮡht, K 
 // LoadOrStore returns the existing value for the key if present.
 // Otherwise, it stores and returns the given value.
 // The loaded result is true if the value was loaded, false if stored.
-public static (V result, bool loaded) LoadOrStore<K, V>(this ж<HashTrieMap<K, V>> Ꮡht, K keyʗp, V value) {
+internal static (V result, bool loaded) LoadOrStore⁔<K, V>(/*this*/ ж<HashTrieMap<K, V>> Ꮡht, K keyʗp, V value) {
     V result = GoZero<V>();
     bool loaded = default;
     GoFrame ᒐ = default;
@@ -203,7 +196,7 @@ public static (V result, bool loaded) LoadOrStore<K, V>(this ж<HashTrieMap<K, V
 
 // expand takes oldEntry and newEntry whose hashes conflict from bit 64 down to hashShift and
 // produces a subtree of indirect nodes to hold the two new entries.
-internal static ж<node<K, V>> expand<K, V>(this ref HashTrieMap<K, V> ht, ж<entry<K, V>> oldEntry, ж<entry<K, V>> newEntry, uintptr newHash, nuint hashShift, ж<indirect<K, V>> parent) {
+internal static ж<node<K, V>> expand⁔<K, V>(/*this*/ ref HashTrieMap<K, V> ht, ж<entry<K, V>> oldEntry, ж<entry<K, V>> newEntry, uintptr newHash, nuint hashShift, ж<indirect<K, V>> parent) {
     // Check for a hash collision.
     var oldHash = ht.keyHash(@unsafe.Pointer.FromPinnedBox(oldEntry.of(entry<K, V>.Ꮡkey)), ht.seed);
     if (oldHash == newHash) {
@@ -235,13 +228,13 @@ internal static ж<node<K, V>> expand<K, V>(this ref HashTrieMap<K, V> ht, ж<en
 }
 
 // Store sets the value for a key.
-public static void Store<K, V>(this ж<HashTrieMap<K, V>> Ꮡht, K key, V @new) {
+internal static void Store⁔<K, V>(/*this*/ ж<HashTrieMap<K, V>> Ꮡht, K key, V @new) {
     (_, _) = Ꮡht.Swap(key, @new);
 }
 
 // Swap swaps the value for a key and returns the previous value if any.
 // The loaded result reports whether the key was present.
-public static (V previous, bool loaded) Swap<K, V>(this ж<HashTrieMap<K, V>> Ꮡht, K keyʗp, V @new) {
+internal static (V previous, bool loaded) Swap⁔<K, V>(/*this*/ ж<HashTrieMap<K, V>> Ꮡht, K keyʗp, V @new) {
     V previous = GoZero<V>();
     bool loaded = default;
     GoFrame ᒐ = default;
@@ -329,7 +322,7 @@ public static (V previous, bool loaded) Swap<K, V>(this ж<HashTrieMap<K, V>> �
 // CompareAndSwap swaps the old and new values for key
 // if the value stored in the map is equal to old.
 // The value type must be of a comparable type, otherwise CompareAndSwap will panic.
-public static bool /*swapped*/ CompareAndSwap<K, V>(this ж<HashTrieMap<K, V>> Ꮡht, K keyʗp, V old, V @new) {
+internal static bool /*swapped*/ CompareAndSwap⁔<K, V>(/*this*/ ж<HashTrieMap<K, V>> Ꮡht, K keyʗp, V old, V @new) {
     bool swapped = default;
     GoFrame ᒐ = default;
     try {
@@ -370,7 +363,7 @@ public static bool /*swapped*/ CompareAndSwap<K, V>(this ж<HashTrieMap<K, V>> �
 
 // LoadAndDelete deletes the value for a key, returning the previous value if any.
 // The loaded result reports whether the key was present.
-public static (V value, bool loaded) LoadAndDelete<K, V>(this ж<HashTrieMap<K, V>> Ꮡht, K keyʗp) {
+internal static (V value, bool loaded) LoadAndDelete⁔<K, V>(/*this*/ ж<HashTrieMap<K, V>> Ꮡht, K keyʗp) {
     bool loaded = default;
     ref var ht = ref Ꮡht.DerefOrNull();
     ref var key = ref heap(keyʗp, out var Ꮡkey);
@@ -425,7 +418,7 @@ public static (V value, bool loaded) LoadAndDelete<K, V>(this ж<HashTrieMap<K, 
 }
 
 // Delete deletes the value for a key.
-public static void Delete<K, V>(this ж<HashTrieMap<K, V>> Ꮡht, K key) {
+internal static void Delete⁔<K, V>(/*this*/ ж<HashTrieMap<K, V>> Ꮡht, K key) {
     (_, _) = Ꮡht.LoadAndDelete(key);
 }
 
@@ -434,7 +427,7 @@ public static void Delete<K, V>(this ж<HashTrieMap<K, V>> Ꮡht, K key) {
 //
 // If there is no current value for key in the map, CompareAndDelete returns false
 // (even if the old value is the nil interface value).
-public static bool /*deleted*/ CompareAndDelete<K, V>(this ж<HashTrieMap<K, V>> Ꮡht, K keyʗp, V old) {
+internal static bool /*deleted*/ CompareAndDelete⁔<K, V>(/*this*/ ж<HashTrieMap<K, V>> Ꮡht, K keyʗp, V old) {
     bool deleted = default;
     ref var ht = ref Ꮡht.DerefOrNull();
     ref var key = ref heap(keyʗp, out var Ꮡkey);
@@ -497,7 +490,7 @@ public static bool /*deleted*/ CompareAndDelete<K, V>(this ж<HashTrieMap<K, V>>
 // Returns a non-nil node, which will always be an entry, if found.
 //
 // If i != nil then i.mu is locked, and it is the caller's responsibility to unlock it.
-internal static (ж<indirect<K, V>> i, nuint hashShift, ж<atomic.Pointer<node<K, V>>> slot, ж<node<K, V>> n) find<K, V>(this ж<HashTrieMap<K, V>> Ꮡht, K key, uintptr hash, Func<@unsafe.Pointer, @unsafe.Pointer, bool> valEqual, V value) {
+internal static (ж<indirect<K, V>> i, nuint hashShift, ж<atomic.Pointer<node<K, V>>> slot, ж<node<K, V>> n) find⁔<K, V>(/*this*/ ж<HashTrieMap<K, V>> Ꮡht, K key, uintptr hash, Func<@unsafe.Pointer, @unsafe.Pointer, bool> valEqual, V value) {
     ж<indirect<K, V>> i = default;
     nuint hashShift = default;
     ж<atomic.Pointer<node<K, V>>> slot = default;
@@ -557,9 +550,9 @@ internal static (ж<indirect<K, V>> i, nuint hashShift, ж<atomic.Pointer<node<K
 // may reflect any mapping for that key from any point during iteration. The iterator
 // does not block other methods on the receiver; even yield itself may call any
 // method on the HashTrieMap.
-public static Action<Func<K, V, bool>> All<K, V>(this ж<HashTrieMap<K, V>> Ꮡht) {
+internal static Action<Func<K, V, bool>> All⁔<K, V>(/*this*/ ж<HashTrieMap<K, V>> Ꮡht) {
     Ꮡht.init();
-    return (Func<K, V, bool> yield) => {
+    return [GoFunc("(*HashTrieMap[...]).All.func1")] (Func<K, V, bool> yield) => {
         Ꮡht.Value.iter(Ꮡht.of(HashTrieMap<K, V>.Ꮡroot).Load(), yield);
     };
 }
@@ -569,14 +562,14 @@ public static Action<Func<K, V, bool>> All<K, V>(this ж<HashTrieMap<K, V>> Ꮡh
 //
 // This exists for compatibility with sync.Map; All should be preferred.
 // It provides the same guarantees as sync.Map, and All.
-public static void Range<K, V>(this ж<HashTrieMap<K, V>> Ꮡht, Func<K, V, bool> yield) {
+internal static void Range⁔<K, V>(/*this*/ ж<HashTrieMap<K, V>> Ꮡht, Func<K, V, bool> yield) {
     ref var ht = ref Ꮡht.DerefOrNull();
 
     Ꮡht.init();
     ht.iter(Ꮡht.of(HashTrieMap<K, V>.Ꮡroot).Load(), yield);
 }
 
-internal static bool iter<K, V>(this ref HashTrieMap<K, V> ht, ж<indirect<K, V>> Ꮡi, Func<K, V, bool> yield) {
+internal static bool iter⁔<K, V>(/*this*/ ref HashTrieMap<K, V> ht, ж<indirect<K, V>> Ꮡi, Func<K, V, bool> yield) {
     ref var i = ref Ꮡi.DerefOrNull();
 
     foreach (var j in range(len(i.children))) {
@@ -602,15 +595,13 @@ internal static bool iter<K, V>(this ref HashTrieMap<K, V> ht, ж<indirect<K, V>
 }
 
 // Clear deletes all the entries, resulting in an empty HashTrieMap.
-public static void Clear<K, V>(this ж<HashTrieMap<K, V>> Ꮡht) {
+internal static void Clear⁔<K, V>(/*this*/ ж<HashTrieMap<K, V>> Ꮡht) {
     Ꮡht.init();
 
     // It's sufficient to just drop the root on the floor, but the root
     // must always be non-nil.
     Ꮡht.of(HashTrieMap<K, V>.Ꮡroot).Store(newIndirectNode<K, V>(nil));
 }
-
-} partial class sync_package {
 
 // 16 children. This seems to be the sweet spot for
 // load performance: any smaller and we lose out on
@@ -633,9 +624,7 @@ internal static ж<indirect<K, V>> newIndirectNode<K, V>(ж<indirect<K, V>> pare
     return Ꮡ(new indirect<K, V>(node: new node<K, V>(isEntry: false), parent: parent));
 }
 
-} partial class syncᴛindirect {
-
-internal static bool empty<K, V>(this ref indirect<K, V> i) {
+internal static bool empty⁔<K, V>(/*this*/ ref indirect<K, V> i) {
     nint nc = 0;
     foreach (var j in range(len(i.children))) {
         if (Ꮡ(i.children, j).Load() != nil) {
@@ -644,8 +633,6 @@ internal static bool empty<K, V>(this ref indirect<K, V> i) {
     }
     return nc == 0;
 }
-
-} partial class sync_package {
 
 // entry is a leaf node in the hash-trie.
 partial struct entry<K, V> {
@@ -663,9 +650,7 @@ internal static ж<entry<K, V>> newEntryNode<K, V>(K key, V value) {
     ));
 }
 
-} partial class syncᴛentry {
-
-internal static (V, bool) lookup<K, V>(this ж<entry<K, V>> Ꮡe, K key) {
+internal static (V, bool) lookup⁔<K, V>(/*this*/ ж<entry<K, V>> Ꮡe, K key) {
     ref var e = ref Ꮡe.DerefOrNull();
 
     while (Ꮡe != nil) {
@@ -677,7 +662,7 @@ internal static (V, bool) lookup<K, V>(this ж<entry<K, V>> Ꮡe, K key) {
     return (@new<V>().ValueSlot, false);
 }
 
-internal static (V, bool) lookupWithValue<K, V>(this ж<entry<K, V>> Ꮡe, K key, V valueʗp, Func<@unsafe.Pointer, @unsafe.Pointer, bool> valEqual) {
+internal static (V, bool) lookupWithValue⁔<K, V>(/*this*/ ж<entry<K, V>> Ꮡe, K key, V valueʗp, Func<@unsafe.Pointer, @unsafe.Pointer, bool> valEqual) {
     ref var e = ref Ꮡe.DerefOrNull();
     ref var value = ref heap(valueʗp, out var Ꮡvalue);
 
@@ -695,7 +680,7 @@ internal static (V, bool) lookupWithValue<K, V>(this ж<entry<K, V>> Ꮡe, K key
 // the old value, and whether or not anything was swapped.
 //
 // swap must be called under the mutex of the indirect node which e is a child of.
-internal static (ж<entry<K, V>>, V, bool) swap<K, V>(this ж<entry<K, V>> Ꮡhead, K key, V @new) {
+internal static (ж<entry<K, V>>, V, bool) swap⁔<K, V>(/*this*/ ж<entry<K, V>> Ꮡhead, K key, V @new) {
     ref var head = ref Ꮡhead.DerefOrNull();
 
     if (AreEqual(head.key, key)) {
@@ -726,7 +711,7 @@ internal static (ж<entry<K, V>>, V, bool) swap<K, V>(this ж<entry<K, V>> Ꮡhe
 // equal. Returns the new entry chain and whether or not anything was swapped.
 //
 // compareAndSwap must be called under the mutex of the indirect node which e is a child of.
-internal static (ж<entry<K, V>>, bool) compareAndSwap<K, V>(this ж<entry<K, V>> Ꮡhead, K key, V oldʗp, V @new, Func<@unsafe.Pointer, @unsafe.Pointer, bool> valEqual) {
+internal static (ж<entry<K, V>>, bool) compareAndSwap⁔<K, V>(/*this*/ ж<entry<K, V>> Ꮡhead, K key, V oldʗp, V @new, Func<@unsafe.Pointer, @unsafe.Pointer, bool> valEqual) {
     ref var head = ref Ꮡhead.DerefOrNull();
     ref var old = ref heap(oldʗp, out var Ꮡold);
 
@@ -759,7 +744,7 @@ internal static (ж<entry<K, V>>, bool) compareAndSwap<K, V>(this ж<entry<K, V>
 // entry chain and whether or not anything was loaded (and deleted).
 //
 // loadAndDelete must be called under the mutex of the indirect node which e is a child of.
-internal static (V, ж<entry<K, V>>, bool) loadAndDelete<K, V>(this ж<entry<K, V>> Ꮡhead, K key) {
+internal static (V, ж<entry<K, V>>, bool) loadAndDelete⁔<K, V>(/*this*/ ж<entry<K, V>> Ꮡhead, K key) {
     ref var head = ref Ꮡhead.DerefOrNull();
 
     if (AreEqual(head.key, key)) {
@@ -783,7 +768,7 @@ internal static (V, ж<entry<K, V>>, bool) loadAndDelete<K, V>(this ж<entry<K, 
 // equal. Returns the new entry chain and whether or not anything was deleted.
 //
 // compareAndDelete must be called under the mutex of the indirect node which e is a child of.
-internal static (ж<entry<K, V>>, bool) compareAndDelete<K, V>(this ж<entry<K, V>> Ꮡhead, K key, V valueʗp, Func<@unsafe.Pointer, @unsafe.Pointer, bool> valEqual) {
+internal static (ж<entry<K, V>>, bool) compareAndDelete⁔<K, V>(/*this*/ ж<entry<K, V>> Ꮡhead, K key, V valueʗp, Func<@unsafe.Pointer, @unsafe.Pointer, bool> valEqual) {
     ref var head = ref Ꮡhead.DerefOrNull();
     ref var value = ref heap(valueʗp, out var Ꮡvalue);
 
@@ -807,17 +792,13 @@ internal static (ж<entry<K, V>>, bool) compareAndDelete<K, V>(this ж<entry<K, 
     return (Ꮡhead, false);
 }
 
-} partial class sync_package {
-
 // node is the header for a node. It's polymorphic and
 // is actually either an entry or an indirect.
 partial struct node<K, V> {
     internal bool isEntry;
 }
 
-} partial class syncᴛnode {
-
-internal static ж<entry<K, V>> entry<K, V>(this ж<node<K, V>> Ꮡn) {
+internal static ж<entry<K, V>> entry⁔<K, V>(/*this*/ ж<node<K, V>> Ꮡn) {
     ref var n = ref Ꮡn.DerefOrNull();
 
     if (!n.isEntry) {
@@ -826,7 +807,7 @@ internal static ж<entry<K, V>> entry<K, V>(this ж<node<K, V>> Ꮡn) {
     return Ꮡn.Reinterpret<node<K, V>, entry<K, V>>();
 }
 
-internal static ж<indirect<K, V>> indirect<K, V>(this ж<node<K, V>> Ꮡn) {
+internal static ж<indirect<K, V>> indirect⁔<K, V>(/*this*/ ж<node<K, V>> Ꮡn) {
     ref var n = ref Ꮡn.DerefOrNull();
 
     if (n.isEntry) {
@@ -834,8 +815,6 @@ internal static ж<indirect<K, V>> indirect<K, V>(this ж<node<K, V>> Ꮡn) {
     }
     return Ꮡn.Reinterpret<node<K, V>, indirect<K, V>>();
 }
-
-} partial class sync_package {
 
 // Pull in runtime.rand so that we don't need to take a dependency
 // on math/rand/v2.

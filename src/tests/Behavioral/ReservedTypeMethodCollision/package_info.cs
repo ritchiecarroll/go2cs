@@ -14,6 +14,9 @@
 
 using go;
 using static go.main_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -49,10 +52,12 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "AAsg/oLGgoKCgoKUgoIAChiCgoKCpg==", "35-35:1")]
+[assembly: GoPositionMap("main.go", "main.cs", "AAog3oKmgoKCgoKUgoIACBiCgoKCpg==", "35-35:1")]
 // </GoSourcePositionMaps>
 
 namespace go;
+
+using static go.main_package;
 
 [GoPackage("main")]
 [GoTestMatchingConsoleOutput]
@@ -88,6 +93,19 @@ public static partial class main_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(main_package.Sieve)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛSieve;
-[GoMethodHost(typeof(main_package.builder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛbuilder;
+[GoMethodHost(typeof(main_package.Sieve)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class mainᴛSieve;
+[GoMethodHost(typeof(main_package.builder)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class mainᴛbuilder;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class mainᴛSieve {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Filter(this Sieve sv, Func<nint, bool> f) => main_package.Filter⁔(sv, f);
+}
+partial class mainᴛbuilder {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static Δslice Δslice(this ref builder b, nint n) => main_package.Δslice⁔(ref b, n);
+}
+// </MethodForwarders>
