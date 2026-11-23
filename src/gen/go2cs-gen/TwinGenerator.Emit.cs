@@ -25,6 +25,7 @@ public sealed partial class TwinGenerator
 
         // The ref-blocked census (row 7, DATA-mn-row7-refblock.md): the report's `// B` rows.
         private readonly List<string> m_refBlockedRows = [];
+        private int m_inlineRederived;
 
         // One file of twins per source file: each twin sits in its function's own namespace and class, under a
         // #line directive that puts it on the function's own lines, so a trace or a breakpoint reads the source.
@@ -186,6 +187,7 @@ public sealed partial class TwinGenerator
             m_spills += rewriter.Spills;
             m_refBlocked += rewriter.RefBlocked;
             m_refBlockedRows.AddRange(rewriter.RefBlockedRows);
+            m_inlineRederived += rewriter.InlineRederived;
 
             SyntaxToken first = method.Modifiers.Count > 0 ? method.Modifiers[0] : method.ReturnType.GetFirstToken();
             LinePosition start = tree.GetLineSpan(first.Span).StartLinePosition;
@@ -358,7 +360,7 @@ public sealed partial class TwinGenerator
             }
             report.Append("// await-sites=").Append(m_awaitSites).Append(" go-twinned=").Append(m_goTwinned).Append(" go-literals=").Append(m_goLiterals)
                 .Append(" ref-unrederivable=").Append(m_unrederivable).Append(" ref-spills=").Append(m_spills)
-                .Append(" ref-blocked=").Append(m_refBlocked).Append(" go-plain=").Append(GoPlain).Append("\r\n");
+                .Append(" ref-blocked=").Append(m_refBlocked).Append(" inline-rederived=").Append(m_inlineRederived).Append(" go-plain=").Append(GoPlain).Append("\r\n");
 
             foreach (string row in m_refBlockedRows)
                 report.Append("// B ").Append(row).Append("\r\n");

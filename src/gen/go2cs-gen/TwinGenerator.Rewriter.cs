@@ -46,6 +46,13 @@ public sealed partial class TwinGenerator
         public List<string> RefBlockedRows { get; } = [];
         private string LastRefBlockWhy = "";
 
+        // Row 7, inline re-derivation: whether the last RefLikeBefore's only reason was a ref read after the call, the
+        // call it stopped at, the reads to rewrite (each to its re-derivation source), and how many calls were served.
+        private bool LastOnlyReadAfter;
+        private SyntaxNode? LastMoved;
+        private readonly Dictionary<IdentifierNameSyntax, string> m_inline = [];
+        public int InlineRederived;
+
         // 7d (DATA-mn-origin-table.md): the line of each await the current state machine writes, in the order written,
         // which is source order and the compiler's state numbering (TwinStampTests holds every stamp to the compiler). The
         // method's own list is the twin's [GoTwinOf] stamp; an async literal swaps in a list of its own while its body is
@@ -319,6 +326,18 @@ public sealed partial class TwinGenerator
             // statement; anywhere else the call stays a blocking one, which hands its P off as a thread park does.
             bool spill = RefLikeBefore(node, out bool movable);
 
+            // Row 7, inline re-derivation (DATA-mn-row7-refblock.md): a call that cannot move only because a ref local is read
+            // after it in the same evaluation (an if, else-if or while header, a case guard) is awaited in place, and each
+            // such read becomes its re-derivation source, read through the box after the await. Every ref must have one.
+            if (spill && !movable && LastOnlyReadAfter && InlineSources(node, LastMoved) is { } sources)
+            {
+                foreach ((IdentifierNameSyntax read, string source) in sources)
+                    m_inline[read] = source;
+
+                InlineRederived++;
+                spill = false;
+            }
+
             if (spill && !movable)
             {
                 RefBlocked++;
@@ -446,7 +465,14 @@ public sealed partial class TwinGenerator
                 while (bare is ParenthesizedExpressionSyntax parenthesized)
                     bare = parenthesized.Expression;
 
-                if (!m_spilled.Contains(bare) && !bare.IsKind(SyntaxKind.Utf8StringLiteralExpression) && !m_model.GetConstantValue(bare).HasValue)
+                // Row 7, the Go-order move (DATA-mn-row7-refblock.md, COORD's ruling): a PURE READ evaluated before the call
+                // no longer pins it. Go orders only calls, method calls, receives and logical operators; a variable's read
+                // is unordered against a call, and gc reads after the calls (go1.26.11, MnGoOrder: a local, a parameter,
+                // a field of a value or through a pointer, a unary operand, a binary left operand and a numeric cast all
+                // read the call's write; a nil pointer panics after the call's side effect). So the call moves ahead, as
+                // gc runs it, and Rule S derives the refs again before the read.
+                if (!m_spilled.Contains(bare) && !bare.IsKind(SyntaxKind.Utf8StringLiteralExpression) && !m_model.GetConstantValue(bare).HasValue &&
+                    !IsPureRead(bare))
                     Block("earlier:" + bare.Kind());
             }
 
@@ -481,6 +507,18 @@ public sealed partial class TwinGenerator
                     case InvocationExpressionSyntax invocation when child == invocation.Expression:
                         break;
                     case BinaryExpressionSyntax binary when child == binary.Left:
+                        break;
+                    // Row 7, the Go-order move: a call in a binary operator's RIGHT operand moves when the left operand is a
+                    // pure read (`b + f()` reads b after f in gc). A logical operator stays ordered (Go orders `&&` and `||`,
+                    // and the right side runs only on the left's value), as does `??`.
+                    case BinaryExpressionSyntax binary when child == binary.Right &&
+                                                           !binary.IsKind(SyntaxKind.LogicalAndExpression) && !binary.IsKind(SyntaxKind.LogicalOrExpression) &&
+                                                           !binary.IsKind(SyntaxKind.CoalesceExpression):
+                        Earlier(binary.Left);
+                        break;
+                    // A unary operator applies after its operand: nothing is evaluated before a call under `-`, `!`, `~`, `+`.
+                    case PrefixUnaryExpressionSyntax unary when unary.IsKind(SyntaxKind.UnaryMinusExpression) || unary.IsKind(SyntaxKind.UnaryPlusExpression) ||
+                                                                unary.IsKind(SyntaxKind.LogicalNotExpression) || unary.IsKind(SyntaxKind.BitwiseNotExpression):
                         break;
                     case VariableDeclarationSyntax declaration:
                         if (declaration.Variables.Count != 1)
@@ -565,6 +603,8 @@ public sealed partial class TwinGenerator
             movable = inert;
 
             bool readAfter = !refLike && !refTarget && RefReadAfter(node, moved);
+            LastOnlyReadAfter = readAfter;
+            LastMoved = moved;
             LastRefBlockWhy = string.Join("+", new[] { refLike ? "ref-like-before" : null, refTarget ? "store-through-ref" : null,
                     readAfter ? "ref-read-after:" + RederivableReads(node, moved) : null }
                 .Where(reason => reason is not null)) + "|" + (blocker ?? "movable");
@@ -577,6 +617,37 @@ public sealed partial class TwinGenerator
         // ref-returning call -- so evaluating it before an await holds that reference across it.
         private bool ByRefReceiver(ExpressionSyntax receiver) =>
             m_model.GetTypeInfo(receiver).Type is { IsValueType: true } && WritesThroughRef(receiver);
+
+        // Row 7, the Go-order move's operand classes (COORD's ruling; each probed in src/tools/mnspike2/MnGoOrder against
+        // gc): a read of a local, a parameter (a box parameter or receiver included), a ref local or a field; a member
+        // chain of such reads, a field of a value or through a pointer or box (a nil one panics after the call, as in gc);
+        // a numeric cast of a pure read; a unary operator on one. A call, an indexer, an element access, an object
+        // creation (the slice-to-array conversion among them: gc converts BEFORE the call) or anything else is not.
+        private bool IsPureRead(ExpressionSyntax expression)
+        {
+            switch (expression)
+            {
+                case ParenthesizedExpressionSyntax parenthesized:
+                    return IsPureRead(parenthesized.Expression);
+                case IdentifierNameSyntax identifier:
+                    return m_model.GetSymbolInfo(identifier).Symbol is ILocalSymbol or IParameterSymbol or IFieldSymbol or IPropertySymbol { ReturnsByRef: true };
+                case MemberAccessExpressionSyntax member when member.IsKind(SyntaxKind.SimpleMemberAccessExpression):
+                    return m_model.GetSymbolInfo(member).Symbol is IFieldSymbol or IPropertySymbol { ReturnsByRef: true } &&
+                           (IsPureRead(member.Expression) || member.Expression is ThisExpressionSyntax ||
+                            m_model.GetSymbolInfo(member.Expression).Symbol is INamedTypeSymbol or INamespaceSymbol);
+                case CastExpressionSyntax cast:
+                    return IsNumeric(m_model.GetTypeInfo(cast.Type).Type) && IsNumeric(m_model.GetTypeInfo(cast.Expression).Type) && IsPureRead(cast.Expression);
+                case PrefixUnaryExpressionSyntax unary when unary.IsKind(SyntaxKind.UnaryMinusExpression) || unary.IsKind(SyntaxKind.UnaryPlusExpression) ||
+                                                            unary.IsKind(SyntaxKind.LogicalNotExpression) || unary.IsKind(SyntaxKind.BitwiseNotExpression):
+                    return IsPureRead(unary.Operand);
+                default:
+                    return false;
+            }
+
+            static bool IsNumeric(ITypeSymbol? type) =>
+                type is { SpecialType: >= SpecialType.System_Char and <= SpecialType.System_Double or SpecialType.System_IntPtr or SpecialType.System_UIntPtr } ||
+                type is { TypeKind: TypeKind.Enum };
+        }
 
         // Stage (c): whether a ref local is read LATER in the call's statement than the call (math/big's
         // `@new<Float>().SetPrec(n).SetMode(x.mode)`, crypto/rsa's `encryptOAEP(opts.Hash.New(), opts.Hash.New(), …)`).
@@ -605,6 +676,27 @@ public sealed partial class TwinGenerator
                     yield return name;
                 }
             }
+        }
+
+        // Row 7, inline re-derivation: each read RefReadAfter counts, with its re-derivation source (the text after
+        // ` = ref ` in its live re-derivation), or null when any of them has none.
+        private List<(IdentifierNameSyntax read, string source)>? InlineSources(InvocationExpressionSyntax node, SyntaxNode? moved)
+        {
+            string[] live = [.. m_scopes.SelectMany(scope => scope)];
+            List<(IdentifierNameSyntax, string)> sources = [];
+
+            foreach (IdentifierNameSyntax read in RefReadsAfter(node, moved))
+            {
+                string prefix = read.Identifier.Text + " = ref ";
+                string? rederive = live.LastOrDefault(entry => entry.StartsWith(prefix, System.StringComparison.Ordinal));
+
+                if (rederive is null)
+                    return null;
+
+                sources.Add((read, rederive.Substring(prefix.Length).TrimEnd().TrimEnd(';')));
+            }
+
+            return sources.Count > 0 ? sources : null;
         }
 
         // The ref-blocked census: whether every ref local read after the call is one Rule S can derive again (it has a
@@ -1038,7 +1130,9 @@ public sealed partial class TwinGenerator
         }
 
         public override SyntaxNode? VisitIdentifierName(IdentifierNameSyntax node) =>
-            PairImplicitGroup(node) ?? base.VisitIdentifierName(node);
+            m_inline.TryGetValue(node, out string? source)
+                ? ParenthesizedExpression(ParseExpression(source)).WithTriviaFrom(node)
+                : PairImplicitGroup(node) ?? base.VisitIdentifierName(node);
 
         public override SyntaxNode? VisitMemberAccessExpression(MemberAccessExpressionSyntax node) =>
             PairImplicitGroup(node) ?? base.VisitMemberAccessExpression(node);

@@ -131,3 +131,98 @@ and after it gc's.
   residual is mostly an object creation evaluated first, a call evaluated first, and calls inside lambdas.
 - RB-g: in the MN CNR set and the behavioral suite run twinned, a plain-vs-twinned output difference appears in at
   most 2 programs, and each reads twinned == Go.
+
+## The cure, read (2026-11-23, working tree on 7f77fb387e)
+
+**The probe** (`src/tools/mnspike2/MnGoOrder`, go1.26.11). gc reads every admitted class AFTER the call: local,
+parameter, field of a value, field through a pointer, unary, binary left operand, cast. In the nil-pointer case the
+call's side effect is visible before the panic. The slice-to-array conversion panics BEFORE the call (gc converts
+first), so it stays out of the move set, as ruled. **RB-d met.**
+Run three ways: Go; plain (plain program, plain standard library); twinned (GoTwinsFor, the whole standard library
+twinned) with GO2CS_MN unset and set. Before the cure all 9 calls are ref-blocked, and plain and twinned both print
+the C# order on 8 lines (each one value stale; the nil pointer panics before the call). After the cure, the twinned
+run under GO2CS_MN=1 is **EQUAL to Go on all 9 lines**. 8 calls now move; the slice-to-array call stays ref-blocked
+by design. The plain run still prints the C# order: that is the disclosed plain-path gap. **RB-e met.** (With
+GO2CS_MN unset the twinned build runs its plain bodies, so it prints the plain order, as it must.) The probe's first
+form put the nil-pointer and slice-to-array cases in function literals called in place. A literal invoked directly
+runs its plain half (a func-value pair whose call site the generator does not test), so the twin never ran there. The
+cases moved into named functions, and the record keeps the reason.
+
+**GenTests**, red first. `TwinOrderTests`, 6 rows, each executing the twin against Go's value: a local, a unary
+operand, a binary left operand and a numeric cast each read after the call; a call evaluated first still pins the
+parking call (the residual control); an if header awaits in place and reads the ref through its box. Without the cure
+the 5 cure rows fail and the control passes. Two existing rows change with the behavior: `P28` (a stack ref's later
+parking call now moves ahead instead of staying plain) and piece 6's else-if row (the call now awaits, and p is read
+through its box). GenTests 802/802.
+
+**The post-cure census** (windows, the whole standard library twinned, every project rebuilt): rc=0,
+GO2CS0017/0018/0021 = 0, 358 reports, rows equal the count in every one. **120 ref-blocked calls in 35 packages, from
+341: 221 unblocked (65%).** 40 by inline re-derivation; the rest move ahead (ref spills 995 to 1,189). **RB-f
+MISSED**: at most 90 were predicted to remain, and 120 do (221 unblocked against the at-least-250 predicted). A first
+read counted 118 over 336 reports: projects the probe had already rebuilt were skipped as up to date and wrote no
+fresh report. That read is void, and the census is now run with --no-incremental.
+
+**The residual (COORD's (c)), by class, with counts.** Each one stays a plain call that holds its carrier when it
+parks, and each is a real ordering constraint the move cannot cross:
+| class (first blocker) | calls |
+|---|---|
+| a cast of a call evaluated first (e.g. elf's `(ProgFlag)bo.Uint32(…)`, an interface call that does not spill) | 33 |
+| an object creation evaluated first | 18 |
+| an element access or indexer evaluated first (or the call is an index) | 18 |
+| a call evaluated first | 10 |
+| a tuple element (`return (x, f())`-shaped, the earlier element not a pure read) | 8 |
+| an identifier that is not a pure read (a property or method group) | 8 |
+| a call inside a lambda | 5 |
+| a throw statement | 4 |
+| an if header whose reason is ref-like (not a ref read) | 3 |
+| inside a call that already moves | 3 |
+| a compound assignment | 3 |
+| a collection-expression element | 2 |
+| a declaration expression target | 1 |
+| a unary operand, a member read or an equality that is not a pure read (one each), a `default` literal | 4 |
+| **total** | **120** |
+By reason: ref-like-before 75, store-through-ref 40, ref-read-after:unrederivable 5.
+
+## (b): the whole behavioral suite in M:N mode, with the standard library twinned (2026-11-23)
+
+`BehavioralRunner --mn` (every project built with twins, every program run with GO2CS_MN=1, output compared with Go)
+over all 1,040 projects, with `GoStdlibTwins=true` in the environment (so every child build twins the standard library
+too). This is the first full-suite `--mn` run; the battery's `--mn` leg runs the 87 projects of its filter
+`Mn|Select|Channel|GoCall|Defer`. Result: **1,012 compared, 4 failing**, 8 not compared (no
+GoTestMatchingConsoleOutput, as always). Attributed in four arms on the four projects: the cure on and off, the
+standard library twinned and plain. **All four fail in every arm**, so none is this seat's, and none comes from
+twinning the standard library; they are at this seat's base:
+- MnIfaceTwin [Compile]: piece 1's GO2CS0021 on a consumer's hand-written instance method, once train 5 made
+  time.Sleep's twin public. COORD ruled it a train 6 union fix of its own: claude/g-t6-union-fix 4b5c8d96e2
+  (host-not-partial checked after the structural refusals). This seat merges or rebases over it and carries no copy.
+- GoroutineStackReserve [Output, stack overflow], GoStmtValueReturn [Compile, CS8030], PromotedMethodFrames [Output]:
+  pre-existing `--mn` gaps outside the battery's filter. A BOARD row each, OPEN (they ride the union-fix commit).
+
+**No program shows a plain-against-twinned difference from the order change.** The plain suite passes against Go (train
+5's battery), and every compared program reads twinned == Go except the two pre-existing output failures above, neither
+an operand-order case. **RB-g met** (at most 2 predicted; 0 from the order).
+The run cost about 40 GB of build output (free disk fell to 7 GB), purged after.
+
+## Gates (2026-11-23, working tree on 7f77fb387e)
+
+Kit `C:\go2cs\scratch\mn2\proto\row7`: rb-gates.sh, rb-probe.sh, rb-tally.sh, p6-probe.sh, rb-behav.sh, rb-attr.sh.
+- **Made to fail, each restored byte-identical.** N7a (a pure read no longer counts) reds 5 rows: P28 and the local,
+  unary, binary-left and cast rows. N7b (no inline re-derivation) reds the if-header and else-if rows. N7c (no binary
+  right-operand case) reds the binary-left row alone.
+- **The whole standard library twinned**, every project rebuilt, rc=0 with GO2CS0017/0018/0021 = 0 on windows (120
+  ref-blocked), linux (117) and darwin (117); `// B` rows equal the count in every report.
+- **CNR both ways**, 8 programs: MnSpinCap, MnContended, MnForeignThread, MnMixedStorm (n=1,000), MnLockPin,
+  MnMutexTwin, MnBlockedIO and MnGoOrder. Every run of the first seven is identical to its baseline, and EQUAL to Go
+  where a Go source exists (MnLockPin has none: pins=11, off-carrier-locks=0, 210,121 parks). MnGoOrder: plain and
+  twinned-with-MN-unset are identical to the plain baseline (the C# order); twinned under GO2CS_MN=1 is EQUAL to Go
+  and differs from that baseline, which is the cure and the disclosed plain-path gap. MnSpinCap's parks under the
+  scheduler rose from 80,345 to 92,953 with the cure: more calls park instead of holding their carrier.
+- **Plain build unchanged**: the 13 R5 packages, fmt, runtime and sync built plain with the seat's generator and with
+  the generator at 7f77fb387e. 0 differing lines in each (types, fields, method IL).
+- GenTests 802/802; GolibTests Release 3,135 passed (53 skipped), Debug 3,109 passed (79 skipped).
+- The Q1 kit: 0 differing over the twin runs it made (12). Three of its builds fail at this base and not from the
+  cure: MnIfaceTwin's twins and ifhall builds (the GO2CS0021 the train 6 union fix cures); MnStormTwin's twins build
+  (its hand-written main.cs calls `Lockꞏtwin` on a `Mutex` value, and train 5's row 7 piece 2 made it take the box);
+  and MnLaterArg, whose converted project is not on this base (go.mod and main.go only).
+
+**Scored:** RB-d met, RB-e met, RB-f MISSED (120 remain, against at most 90 predicted; 221 unblocked), RB-g met.
