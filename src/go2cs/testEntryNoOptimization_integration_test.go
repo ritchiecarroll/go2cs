@@ -24,12 +24,13 @@ import (
 // callerInfo, a log.Lshortfile prefix written from the test. Under the Release harness's DOTNET_TieredCompilation=0
 // the JIT optimized it, and an optimized frame lost the call's IL offset after a statement that keeps runtime.Caller's
 // result live across a multi-line chain: runtime.Caller answered the function's first statement (testify's
-// Test_Mock_Chained_On and Test_Mock_UnsetByOnMethodSpecAmongOthers). go2cs-gen now marks a Go test entry point
-// NoOptimization beside NoInlining (COORD 211538Z, owner confirmed 212210Z: test functions only).
+// Test_Mock_Chained_On and Test_Mock_UnsetByOnMethodSpecAmongOthers). A converted test assembly is now compiled without
+// optimization (go.lib.symbols.targets; COORD 2026-11-22 23:57Z, option 2, which replaced a per-method NoOptimization
+// mark: a Release frame carries only its statement's IL offset even with that mark).
 //
-// The four tests read a test function's line three ways after that shape: an argument of Sprintf, an element of a
-// slice literal, an argument of a variadic helper, and a log.Lshortfile prefix. Before the mark, the first, second
-// and fourth read the first statement's line on the converted side (Go pass, C# fail) and the third matched; with it,
+// The four tests read a test function's line four ways after that shape: an argument of Sprintf, an element of a
+// slice literal, an argument of a variadic helper, and a log.Lshortfile prefix. Optimized, the first, second
+// and fourth read the first statement's line on the converted side (Go pass, C# fail) and the third matched; unoptimized,
 // all four match Go.
 
 const testEntryLinesGo = `package lines

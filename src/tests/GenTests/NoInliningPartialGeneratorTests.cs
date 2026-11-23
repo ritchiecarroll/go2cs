@@ -509,11 +509,12 @@ public class NoInliningPartialGeneratorTests
     }
 
     // A Go test entry point's frame is the one every testing.T report reads (t.Logf's own file:line, testify's
-    // callerInfo). Under the Release harness's DOTNET_TieredCompilation=0 the JIT optimizes it, and an optimized
-    // frame can lose the call's IL offset, so golib answers the function's first statement (COORD 211538Z, owner
-    // confirmed 212210Z: test functions only). Such a carrier's declaring part adds NoOptimization to NoInlining.
-    // The predicate is Go's own: a file ending _test.cs, a name Test*/Benchmark*/Fuzz*/Example* whose next rune
-    // is not lower case, and that kind's signature.
+    // callerInfo). Its line is kept by compiling the whole test assembly without optimization
+    // (go.lib.symbols.targets; COORD 2026-11-22 23:57Z, option 2), not by a per-method mark: a Release frame carries
+    // only its statement's IL offset even with NoOptimization on its method. So a test entry point is a carrier like
+    // any other and its declaring part keeps NoInlining alone; these arms hold the generator to that, with Go's own
+    // predicate for an entry point (a file ending _test.cs, a name Test*/Benchmark*/Fuzz*/Example* whose next rune is
+    // not lower case, and that kind's signature) and its near misses.
     private const string TestingStubs = """
         namespace go
         {
@@ -587,14 +588,14 @@ public class NoInliningPartialGeneratorTests
     [DataRow("BenchmarkChain")]
     [DataRow("FuzzChain")]
     [DataRow("ExampleChain")]
-    public void AGoTestEntryPointIsNotOptimized(string name)
+    public void AGoTestEntryPointKeepsNoInliningAlone(string name)
     {
         Run run = TestEntryRun();
 
         Assert.AreEqual(0, run.Errors.Length, Describe(run));
         Assert.IsTrue(run.Methods.TryGetValue(name, out MethodImplAttributes flags), $"{name} was not emitted; {Describe(run)}");
         Assert.IsTrue(flags.HasFlag(MethodImplAttributes.NoInlining), $"{name} lost NoInlining; {Describe(run)}");
-        Assert.IsTrue(flags.HasFlag(MethodImplAttributes.NoOptimization), $"{name} is a Go test entry point and must not be optimized; {Describe(run)}");
+        Assert.IsFalse(flags.HasFlag(MethodImplAttributes.NoOptimization), $"{name}: the test assembly switch, not a per-method mark, keeps a test function's lines; {Describe(run)}");
     }
 
     [DataTestMethod]
@@ -610,6 +611,6 @@ public class NoInliningPartialGeneratorTests
         Assert.AreEqual(0, run.Errors.Length, Describe(run));
         Assert.IsTrue(run.Methods.TryGetValue(name, out MethodImplAttributes flags), $"{name} was not emitted; {Describe(run)}");
         Assert.IsTrue(flags.HasFlag(MethodImplAttributes.NoInlining), $"{name} lost NoInlining; {Describe(run)}");
-        Assert.IsFalse(flags.HasFlag(MethodImplAttributes.NoOptimization), $"{name} is not a Go test entry point and stays optimized; {Describe(run)}");
+        Assert.IsFalse(flags.HasFlag(MethodImplAttributes.NoOptimization), $"{name} carries no per-method NoOptimization; {Describe(run)}");
     }
 }

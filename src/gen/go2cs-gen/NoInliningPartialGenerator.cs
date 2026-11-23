@@ -38,57 +38,6 @@ public static class NoInliningPartials
         callerFrame ? Attribute.Substring(0, Attribute.Length - 1) + ", " + CallerFrameAttribute + "]" : Attribute;
 
     /// <summary>
-    /// The mark a Go TEST ENTRY POINT's declaring part carries (<see cref="IsGoTestEntryPoint"/>): no-inline and not
-    /// optimized. Every testing.T report reads the test function's own frame (t.Logf's file:line, testify's callerInfo),
-    /// and under the Release harness's DOTNET_TieredCompilation=0 an optimized frame can lose the call's IL offset, so
-    /// runtime.Caller answered the function's first statement (COORD 211538Z, owner confirmed 212210Z: test functions
-    /// only; production code keeps its optimizations).
-    /// </summary>
-    public const string TestEntryAttribute =
-        "[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.NoInlining | global::System.Runtime.CompilerServices.MethodImplOptions.NoOptimization)]";
-
-    /// <summary><see cref="TestEntryAttribute"/>, with <see cref="CallerFrameAttribute"/> beside it when the compilation can name it.</summary>
-    public static string TestEntryAttributeFor(bool callerFrame) =>
-        callerFrame ? TestEntryAttribute.Substring(0, TestEntryAttribute.Length - 1) + ", " + CallerFrameAttribute + "]" : TestEntryAttribute;
-
-    /// <summary>
-    /// Whether <paramref name="method"/> is a Go test entry point, by Go's own rule (cmd/go's isTest): it sits in a converted
-    /// <c>_test.cs</c> file; its name is <c>Test</c>, <c>Benchmark</c>, <c>Fuzz</c> or <c>Example</c>, alone or followed by a
-    /// rune that is not lower case; and it has that kind's signature, one <c>ж&lt;testing.T&gt;</c>, <c>ж&lt;testing.B&gt;</c> or
-    /// <c>ж&lt;testing.F&gt;</c> parameter, or none for an example, returning nothing.
-    /// </summary>
-    public static bool IsGoTestEntryPoint(MethodDeclarationSyntax method, IMethodSymbol? symbol)
-    {
-        if (symbol is null || !symbol.ReturnsVoid || symbol.IsGenericMethod)
-            return false;
-
-        string path = method.SyntaxTree.FilePath;
-
-        if (!path.EndsWith("_test.cs", System.StringComparison.OrdinalIgnoreCase))
-            return false;
-
-        string name = symbol.Name;
-
-        foreach ((string prefix, string? testingType) in new[] { ("Test", "T"), ("Benchmark", "B"), ("Fuzz", "F"), ("Example", (string?)null) })
-        {
-            if (!name.StartsWith(prefix, System.StringComparison.Ordinal))
-                continue;
-
-            if (name.Length > prefix.Length && char.IsLower(name, prefix.Length))
-                return false;
-
-            if (testingType is null)
-                return symbol.Parameters.Length == 0;
-
-            return symbol.Parameters.Length == 1 &&
-                symbol.Parameters[0].Type is INamedTypeSymbol { Name: "ж", TypeArguments: [INamedTypeSymbol { ContainingType.Name: "testing_package" } argument] } &&
-                argument.Name == testingType;
-        }
-
-        return false;
-    }
-
-    /// <summary>
     /// Whether the compilation sees a PUBLIC <c>System.Security.DynamicSecurityMethodAttribute</c> -- golib's, which every
     /// converted project references. CoreLib's own is internal, so a compilation without golib (a generator test's
     /// snippet) cannot name it, and gets the no-inline mark alone. Scanned per assembly: GetTypeByMetadataName answers
@@ -289,13 +238,8 @@ public class NoInliningPartialGenerator : ISourceGenerator
                         .WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken))
                         .WithoutTrivia();
 
-                    // A forwarder's declaring part carries [StackTraceHidden]; a Go test entry point's, the no-inline mark
-                    // with NoOptimization; every other carrier's, the no-inline mark.
-                    string mark = NoInliningPartials.IsForwarder(method) ? NoInliningPartials.ForwarderAttribute :
-                        NoInliningPartials.IsGoTestEntryPoint(method, semanticModel.GetDeclaredSymbol(method) as IMethodSymbol) ? NoInliningPartials.TestEntryAttributeFor(callerFrame) :
-                        NoInliningPartials.AttributeFor(callerFrame);
-
-                    source.Append(memberIndent).Append(mark).Append("\r\n");
+                    // A forwarder's declaring part carries [StackTraceHidden]; every other carrier's the no-inline mark.
+                    source.Append(memberIndent).Append(NoInliningPartials.IsForwarder(method) ? NoInliningPartials.ForwarderAttribute : NoInliningPartials.AttributeFor(callerFrame)).Append("\r\n");
                     source.Append(memberIndent).Append(declaring.ToFullString().TrimEnd()).Append("\r\n");
                 }
 
