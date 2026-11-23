@@ -563,13 +563,6 @@ public sealed partial class TwinGenerator : ISourceGenerator
             if (HasTwinMember(symbol))
                 return "has-twin";
 
-            // Stage (c)'s SC-1 (COORD's GO, 2026-11-15): a twin is written into its host reopened as `partial`, so a method
-            // whose host chain is not all partial (a hand-owned helper such as runtime's Sysmon) cannot get one: CS0260.
-            // Refused by name, as the interface forwarders skip such a host (ForwarderSkip). Its callers keep their twins
-            // and call it plain: a thread, never a wrong answer. The count is record 10.8's owed number.
-            if (method.Ancestors().OfType<TypeDeclarationSyntax>().Any(type => !type.Modifiers.Any(SyntaxKind.PartialKeyword)))
-                return "host-not-partial";
-
             if (method.Parent is InterfaceDeclarationSyntax)
                 return "interface-member";
 
@@ -599,6 +592,17 @@ public sealed partial class TwinGenerator : ISourceGenerator
 
             if (method.DescendantNodes().OfType<YieldStatementSyntax>().Any())
                 return "iterator";
+
+            // Stage (c)'s SC-1 (COORD's GO, 2026-11-15): a twin is written into its host reopened as `partial`, so a method
+            // whose host chain is not all partial (a hand-owned helper such as runtime's Sysmon) cannot get one: CS0260.
+            // Refused by name, as the interface forwarders skip such a host (ForwarderSkip). Its callers keep their twins
+            // and call it plain: a thread, never a wrong answer. The count is record 10.8's owed number.
+            // Train 6's union fix (COORD's ruling, 2026-11-23): checked AFTER every structural refusal above, so a member
+            // refused here is one `partial` would actually twin, and GO2CS0021 names only such a member. Before, an instance
+            // method a C# consumer writes by hand (MnIfaceTwin's HandParker.Park, which calls time.Sleep) was refused here
+            // first and named, though partial would only have refused it `instance`: its file must compile unchanged.
+            if (method.Ancestors().OfType<TypeDeclarationSyntax>().Any(type => !type.Modifiers.Any(SyntaxKind.PartialKeyword)))
+                return "host-not-partial";
 
             FileLinePositionSpan span = method.SyntaxTree.GetLineSpan(method.Span);
 

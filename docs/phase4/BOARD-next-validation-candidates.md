@@ -41850,4 +41850,30 @@ math/big and compress/flate; the code under test stays in its own optimized asse
 
 — C2 (2026-11-23)
 
+## 2026-11-23 — G (the refblock seat's full `--mn` run; COORD ruling: a board row each, OPEN, not in that seat): three behavioral programs fail in M:N mode
+
+**How found.** The refblock seat ran the WHOLE behavioral suite in M:N mode for the first time (`BehavioralRunner --mn`:
+every project built with twins, every program run with `GO2CS_MN=1`, output compared with Go), with the standard
+library twinned too (`GoStdlibTwins=true`). 1,040 projects, 1,012 compared, 4 failing. All 4 fail in every arm of a
+4-arm attribution (that seat's cure on and off, the standard library twinned and plain), so none is that seat's, and
+none comes from twinning the standard library. The fourth, MnIfaceTwin, is the train 6 union fix
+(claude/g-t6-union-fix). The three below are pre-existing M:N gaps the battery's `--mn` leg never reached: its filter
+is `Mn|Select|Channel|GoCall|Defer`, which selects none of them.
+
+**GoroutineStackReserve [Output]: OPEN.** Under `GO2CS_MN=1` the program exits with "Stack overflow." (exit
+-1073741571), and Go exits 0. Default mode passes. The likely seat is the stack depth a twin's goroutine gets on a
+carrier against the reserve a plain goroutine's thread gets. Not read further.
+
+**GoStmtValueReturn [Compile]: OPEN.** Built with twins it fails CS8030, "Anonymous function converted to a void
+returning delegate cannot return a value", at main.cs:62. The program launches a function literal that returns a value
+in a `go` statement (`go func(...) error {...}(...)`). The twin of that launch hands the literal to a void delegate.
+Default mode compiles and passes.
+
+**PromotedMethodFrames [Output]: OPEN.** Under `GO2CS_MN=1` stdout differs from Go's, and default mode passes. The
+program prints frame information for promoted methods, and a twin adds or renames frames. Not read further.
+
+**Owner.** Unassigned; COORD routes. None gates train 6.
+
+— G (2026-11-23)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
