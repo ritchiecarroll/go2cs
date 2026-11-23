@@ -114,7 +114,7 @@ public class TwinHostTests
         Dictionary<string, string> properties = new() { ["build_property.GoTwins"] = "true" };
 
         CSharpGeneratorDriver.Create([new TwinGenerator()], parseOptions: options, optionsProvider: new BuildProperties(properties))
-            .RunGeneratorsAndUpdateCompilation(compilation, out Compilation output, out _);
+            .RunGeneratorsAndUpdateCompilation(compilation, out Compilation output, out var generated);
 
         global::go2cs.Tests.TwinStampTests.AssertStampsHold(output); // 7d: every stamp agrees with the compiler
 
@@ -126,6 +126,15 @@ public class TwinHostTests
         StringAssert.Contains(twins, "|Loop|host-not-partial", "the report's refusal row names it");
         StringAssert.Contains(twins, "Waitꞏtwin(", "the partial host's method is twinned");
         StringAssert.Contains(twins, "runꞏtwin(", "the caller keeps its twin");
+
+        // Row 7 piece 1 (GO2CS0021): Loop PARKS in a host that is not partial, so the build names it and its host, once;
+        // Wait, in the partial host beside it, is not named.
+        Diagnostic[] parking = generated.Where(diagnostic => diagnostic.Id == "GO2CS0021").ToArray();
+
+        Assert.AreEqual(1, parking.Length, string.Join("\n", parking.Select(diagnostic => diagnostic.ToString())));
+        Assert.AreEqual(DiagnosticSeverity.Error, parking[0].Severity);
+        StringAssert.Contains(parking[0].GetMessage(), "Loop", "names the member");
+        StringAssert.Contains(parking[0].GetMessage(), "'Ticker' is not partial", "names the host");
     }
 
     private static IEnumerable<MetadataReference> References()

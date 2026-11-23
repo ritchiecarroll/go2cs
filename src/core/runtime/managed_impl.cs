@@ -783,7 +783,7 @@ partial class runtime_package
     // takes sync's allPoolsMu and walks the pools that held a shard array in the last two cycles
     // (oldPools then allPools): O(pools used in two cycles), with no per-item work, since aging swaps
     // whole shard arrays.
-    private static class PoolCleanupCadence
+    private static partial class PoolCleanupCadence
     {
         private static int s_armed;
         private static long s_servedThrough;
@@ -1199,7 +1199,7 @@ partial class runtime_package
 
     // The tick's own state, in its own class so that starting it at module load touches none of the
     // runtime package's statics; the first tick does that, on the sysmon thread.
-    private static class Sysmon
+    private static partial class Sysmon
     {
         private const int TickMs = 100;
 

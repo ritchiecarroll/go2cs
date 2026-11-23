@@ -60,7 +60,7 @@ namespace go.testing_runtime;
 /// than to whatever happened to be running.
 /// </para>
 /// </remarks>
-public sealed class TestExecution
+public sealed partial class TestExecution
 {
     // Go goroutine stacks GROW (to ~1GB on 64-bit), so deeply recursive test code is legal Go —
     // io/fs's TestCVE202230630 legitimately recurses 10,001 frames through globWithLimit before

@@ -329,6 +329,19 @@ public sealed partial class TwinGenerator : ISourceGenerator
                 }
             }
 
+            // GO2CS0021 (row 7 piece 1): a member that parks in a host that is not partial, in any assembly built with
+            // twins, hand-owned or not. Its predicate is the refusal and the park alone, with no exception list.
+            foreach (Candidate candidate in m_ordered)
+            {
+                if (candidate is not { Refusal: "host-not-partial", Parks: true })
+                    continue;
+
+                string host = candidate.Syntax.Ancestors().OfType<TypeDeclarationSyntax>().First(type => !type.Modifiers.Any(SyntaxKind.PartialKeyword)).Identifier.Text;
+
+                Context.ReportDiagnostic(Diagnostic.Create(GeneratorDiagnostics.ParkingHostNotPartial, candidate.Syntax.Identifier.GetLocation(),
+                    GuardWarn ? DiagnosticSeverity.Warning : DiagnosticSeverity.Error, null, null, candidate.Symbol.ToDisplayString(), host));
+            }
+
             foreach (Candidate candidate in m_ordered)
             {
                 // N2 (SN-7): a function whose only parks were calls to a box twin it has no box for parks NOT AT ALL, so
