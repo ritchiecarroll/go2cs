@@ -1361,6 +1361,11 @@ public static uintptr Pointer(this Value v) {
 // number named nothing: go-cmp's unexported-field read, NewAt(f.Type, v.UnsafeAddr()+f.Offset), then
 // had no storage to resolve. Through Addr the answer is the aliased box's token, REGISTERED by
 // reflectPointerToken, so NewAt resolves it, and token + a Go field offset, back to real storage.
+//
+// It stays the ORDER TOKEN where Pointer now answers the box's own number (COORD's %p ruling, 2026-11-22, option A):
+// NewAt resolves EXACT ONLY through the token table (ruled 2026-10-04), so a pinned address plus a field offset would
+// miss it and fall to a zero box, which is go-cmp's unexported-field read. The cost is the disclosed residual: for
+// reference-free storage, UnsafeAddr differs from uintptr(unsafe.Pointer(&field)).
 public static uintptr UnsafeAddr(this Value v) {
     if (v.typ() == nil) {
         throw panic(Ꮡ(new ValueError("reflect.Value.UnsafeAddr"u8, Invalid)));
@@ -1368,7 +1373,7 @@ public static uintptr UnsafeAddr(this Value v) {
     if ((flag)(v.flag & flagAddr) == 0) {
         throw panic("reflect.Value.UnsafeAddr of unaddressable value");
     }
-    return v.Addr().Pointer();
+    return reflectPointerToken(v.Addr(), asNumber: false);
 }
 
 // InterfaceData returns a pair of unspecified uintptr values.
@@ -1472,7 +1477,10 @@ private static uintptr delegateMethodToken(Delegate d) {
     return ((uintptr)ManagedPointerTokens.IdentityToken(method));
 }
 
-internal static uintptr reflectPointerToken(Value v) {
+// asNumber: whether a pointer answers its own number (ManagedPointerTokens.PointerNumber: what unsafe.Pointer(p) carries,
+// so `%p` agrees with it) or its order token (UnsafeAddr, for NewAt's exact resolve). Every other kind answers the same
+// either way.
+internal static uintptr reflectPointerToken(Value v, bool asNumber = true) {
     object? cur = v.live;
     while (cur is IInterfaceAdapter { Value: not null } interfaceAdapter) {
         cur = interfaceAdapter.Value;
@@ -1522,7 +1530,7 @@ internal static uintptr reflectPointerToken(Value v) {
     // what "the same map" means. A slice folds its window offset in, as Go's `&s[0]` does.
     // Anything else (a func delegate) falls back to reference identity.
     uintptr token = cur switch {
-        INilPointer p => ((uintptr)ManagedPointerTokens.PointerNumber(p)),
+        INilPointer p => ((uintptr)(asNumber ? ManagedPointerTokens.PointerNumber(p) : p.PointerOrderToken)),
         IChannel c => ((uintptr)c.PointerOrderToken),
         IMap => ((uintptr)ManagedPointerTokens.IdentityToken(mapBacking(cur) ?? cur)),
         ISlice => sliceStorageToken(cur),

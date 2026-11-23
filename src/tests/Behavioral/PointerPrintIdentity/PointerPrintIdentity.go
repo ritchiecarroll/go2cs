@@ -14,6 +14,11 @@ type pair struct {
 	s string
 }
 
+// plain holds no reference, so a field of it is held still with the struct.
+type plain struct {
+	n, m int
+}
+
 func check(name string, p any, up unsafe.Pointer) {
 	viaP := fmt.Sprintf("%p", p)
 	viaV := fmt.Sprintf("%v", up)
@@ -40,8 +45,10 @@ func main() {
 	h := new(int64)
 	check("new(int64):", h, unsafe.Pointer(h))
 
+	var pl plain
+	check("reference-free field:", &pl.m, unsafe.Pointer(&pl.m))
+
 	var pr pair
-	check("reference-free field:", &pr.n, unsafe.Pointer(&pr.n))
 	check("reference-bearing field:", &pr.s, unsafe.Pointer(&pr.s))
 
 	xs := []int32{1, 2, 3}
@@ -55,6 +62,9 @@ func main() {
 
 	ps := &pair{n: 1, s: "x"}
 	check("struct with a string:", ps, unsafe.Pointer(ps))
+
+	z := new(struct{})
+	check("zero-size:", z, unsafe.Pointer(z))
 
 	// Two pointers to one variable print one address; two variables print two.
 	a, b := 1, 2

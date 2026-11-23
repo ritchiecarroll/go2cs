@@ -92,3 +92,34 @@ Its `uintptr` is an address that nothing holds still, so its projection keeps th
     pinned address plus an offset misses that table and falls to a zero box. The field at offset 0 still resolves.
   - The direct Go form, `unsafe.Pointer(uintptr(unsafe.Pointer(&q)) + off)`, already reaches `NewAt` as a pinned
     address. So that route misses today, before any change. Not measured.
+
+## 7. COORD's ruling, the withdrawn carve-out, and the next prediction
+
+**Ruling (COORD, 2026-11-22): option A, NARROW.**
+- `Value.Pointer` and `Value.UnsafePointer` answer `PointerNumber`, and so does fmt's `%p` through them.
+- `Value.UnsafeAddr` keeps the order token, so go-cmp's `NewAt(f.Type, v.UnsafeAddr() + f.Offset)` is unchanged.
+- Option B (a pinned address plus an offset resolving through `NewAt`) is refused. It would reopen the 2026-10-04
+  EXACT ONLY scope for a shape no measured consumer needs.
+- Two residuals are disclosed in pointers.md, replacing "Not covered":
+  - for reference-free storage, `UnsafeAddr` differs from `uintptr(unsafe.Pointer(&field))`;
+  - an `Unpinnable` box keeps its token.
+
+**Withdrawn: the fmtsort carve-out.** COORD first ruled that internal/fmtsort keep the token, so that printing a
+pointer-keyed map would pin nothing. The converted `compare` calls `aVal.Pointer()` itself. So keeping the token
+there would have cost a converter registration displacing `compare` to a hand-own (which drifts at every hop), a new
+public reflect accessor, and a regen. That bill was paid to avoid a cost nobody had measured. COORD withdrew the
+carve-out: fmtsort stays as converted, and each pointer key pins once, like any other `Pointer()` observer. Instead,
+the cost canary gains a pointer-keyed-map arm. If that arm reads more than 2x wall time, or a pinned count that does
+not return to baseline once the map is dropped, it is posted before seating.
+
+**The change since section 6.**
+- `reflectPointerToken` takes `asNumber`. `UnsafeAddr` calls it with `false` and keeps the token, where it used to
+  call `Addr().Pointer()`.
+- The program's `Unpinnable` row moves off the output test, because Go's oracle prints true there. `reference-free
+  field` is now a field of a reference-free struct, which is `Pinnable`.
+- A `zero-size` row is added: `new(struct{})`, whose token and number are both the zerobase's but differ.
+
+**Prediction (committed before the run).**
+- The converted program, Release, windows/amd64, at this commit: all 14 lines true.
+- The filtered output tests `PointerPrintIdentity` and `ReflectNewAtField` both pass.
+- **Falsifier:** any false line, or either test failing.
