@@ -22,7 +22,7 @@ public static (io.Writer, ж<bytes.Buffer>) NewWriter() {
 public static (io.Writer, Func<nint>) Counted() {
     var s = Ꮡ(new sink());
     var sʗ1 = s;
-    return (new sinkжWriter(s), () => sʗ1.n);
+    return (new sinkжWriter(s), [GoFunc("Counted.func1")] () => sʗ1.n);
 }
 
 } // end sinks_package
