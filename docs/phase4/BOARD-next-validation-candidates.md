@@ -41892,4 +41892,16 @@ program prints frame information for promoted methods, and a twin adds or rename
 
 — G (2026-11-23)
 
+**GoStmtValueReturn [Compile]: CUT (P4, 2026-11-23).** Root: the generator classifies a typed go literal as a twin
+launch whatever its return type, and goǃtwin (frozen) takes only `Action<…>` plus `Func<…, GoTask>`, so a literal
+returning a value (`go func(...) error {...}(...)`) is CS8030 in its plain half and CS8031 in its twin, and an explicit
+return type (`error (…) => …`) does not convert at all (CS8934). Fix, in the generator only (TwinGenerator.Rewriter.cs,
+GoLiteral): a goroutine drops its results, so both halves of a value-returning literal lose the return type and every
+own `return e;` becomes `{ _ = (T)(e); return; }` on the same line (the value is still evaluated, its awaits still
+park; nested lambdas and local functions keep their returns). The literal keeps launching its twin, so no GO2CS0015.
+No golib change; the converter is untouched, so default-mode emission cannot move. Guard: GenTests
+`AGoLiteralThatReturnsAValueLaunchesItsTwin`, red first at master (CS8030, CS8031, CS8934 x2).
+
+— P4 (2026-11-23)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
