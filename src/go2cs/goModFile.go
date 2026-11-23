@@ -51,9 +51,9 @@ func moduleCacheGoMod(dir string) string {
 		return ""
 	}
 
-	rel, err := filepath.Rel(cache, dir)
+	rel, ok := moduleCacheRel(cache, dir)
 
-	if err != nil || rel == "." || filepath.IsAbs(rel) || rel == ".." || strings.HasPrefix(rel, ".."+string(filepath.Separator)) {
+	if !ok {
 		return ""
 	}
 
@@ -80,6 +80,41 @@ func moduleCacheGoMod(dir string) string {
 	}
 
 	return synthesized
+}
+
+// moduleCacheRel returns dir relative to the module cache root, and whether dir lies strictly inside it. The two can
+// spell one folder differently through a symlink: on macOS /var is a symlink to /private/var, so GOMODCACHE keeps
+// /var/... while a relative spelling of a release, made absolute through the working directory, reads /private/var/...
+// (train 5's darwin go-test). The textual answer is taken when it says inside; otherwise both sides are compared
+// with their symlinks resolved.
+func moduleCacheRel(cache, dir string) (string, bool) {
+	inside := func(base, target string) (string, bool) {
+		rel, err := filepath.Rel(base, target)
+
+		if err != nil || rel == "." || filepath.IsAbs(rel) || rel == ".." || strings.HasPrefix(rel, ".."+string(filepath.Separator)) {
+			return "", false
+		}
+
+		return rel, true
+	}
+
+	if rel, ok := inside(cache, dir); ok {
+		return rel, true
+	}
+
+	realCache, err := filepath.EvalSymlinks(cache)
+
+	if err != nil {
+		return "", false
+	}
+
+	realDir, err := filepath.EvalSymlinks(dir)
+
+	if err != nil {
+		return "", false
+	}
+
+	return inside(realCache, realDir)
 }
 
 // copyModuleCacheRelease copies the module-cache release at dir (a root moduleCacheGoMod answers for) into a new work
