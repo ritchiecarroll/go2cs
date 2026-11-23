@@ -6,7 +6,6 @@ using Δio = io_package;
 using strings = strings_package;
 using static DotImportAdapterNameInHolder.a.sinks_package;
 using static DotImportAdapterNameInHolder.b.sinks_package;
-using static main_package;
 
 partial class main_package {
 
@@ -23,32 +22,28 @@ partial struct report {
     internal @string name;
 }
 
-} partial class mainᴛreport {
+internal static @string plain⁔(/*this*/ ref report r) { return r.name + ":method"u8; }
 
-internal static @string plain(this ref report r) { return r.name + ":method"u8; }
-
-internal static @string buffer(this ref report r) {
+internal static @string buffer⁔(/*this*/ ref report r) {
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
-    Δio.Writer w = new main_package.bytes_BufferжWriter(Ꮡbuf);
+    Δio.Writer w = new bytes_BufferжWriter(Ꮡbuf);
     fmt.Fprintf(w, "%s:buffer"u8, r.name);
     return Ꮡbuf.String();
 }
 
-internal static nint count(this ref report r) {
+internal static nint count⁔(/*this*/ ref report r) {
     var s = Ꮡ(new main_package.sink());
     Δio.Writer w = new main_package.sinkжWriter(s);
     fmt.Fprint(w, r.name, "|", "sink");
     return len(s.lines);
 }
 
-internal static @string builder(this ref report r) {
+internal static @string builder⁔(/*this*/ ref report r) {
     ref var sb = ref heap(new strings.Builder(), out var Ꮡsb);
     Δio.Writer w = new strings_BuilderжWriter(Ꮡsb);
     fmt.Fprintf(w, "%s:builder"u8, r.name);
     return sb.String();
 }
-
-} partial class main_package {
 
 internal static @string plain() {
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);

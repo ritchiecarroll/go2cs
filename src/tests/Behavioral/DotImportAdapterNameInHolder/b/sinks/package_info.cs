@@ -14,6 +14,9 @@
 
 using go;
 using static go.DotImportAdapterNameInHolder.b.sinks_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -55,10 +58,12 @@ using static go.DotImportAdapterNameInHolder.b.sinks_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("sinks.go", "sinks.cs", "AA4YgoLGlIKC", "21-21:1")]
+[assembly: GoPositionMap("sinks.go", "sinks.cs", "AAsYgoKmlIKC", "21-21:1")]
 // </GoSourcePositionMaps>
 
 namespace go.DotImportAdapterNameInHolder.b;
+
+using static go.DotImportAdapterNameInHolder.b.sinks_package;
 
 [GoPackage("sinks")]
 public static partial class sinks_package
@@ -92,5 +97,15 @@ public static partial class sinks_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(sinks_package.sink)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class sinksᴛsink;
+[GoMethodHost(typeof(sinks_package.sink)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class sinksᴛsink;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class sinksᴛsink {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint, error) Write(this ref sink s, slice<byte> p) => sinks_package.Write⁔(ref s, p);
+}
+// </MethodForwarders>
