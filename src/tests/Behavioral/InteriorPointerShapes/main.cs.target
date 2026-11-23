@@ -70,10 +70,10 @@ internal static void main() {
     @unsafe.Pointer.StoreFunc(@unsafe.Add(@unsafe.Pointer.FromPinnedBox(Ꮡtbl), 8), (Func<nint, nint, nint>)add);
     fmt.Println("1 func store at +8 landed:", tbl.a != 0);
     fmt.Println("1 slot is add's word:", tbl.a == wordOf(add));
-    func(() => {
+    func([GoFunc("main.func1")] () => {
         GoFrame ᒐ = default;
         try {
-            defer(() => {
+            defer([GoFunc("main.func1.1")] () => {
                 var r = recover(); if (r != nil) {
                     fmt.Println("1 call through slot: PANIC");
                 }

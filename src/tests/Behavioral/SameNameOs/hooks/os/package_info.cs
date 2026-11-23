@@ -10,10 +10,15 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+using fs = go.io.fs_package;
+using time = go.time_package;
 // </ImportedTypeAliases>
 
 using go;
 using static go.SameNameOs.hooks.os_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -49,10 +54,14 @@ using static go.SameNameOs.hooks.os_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("os.go", "os.cs", "AA4etIKCgoKC")]
+[assembly: GoPositionMap("os.go", "os.cs", "AA0elIKCgoKC")]
 // </GoSourcePositionMaps>
 
 namespace go.SameNameOs.hooks;
+
+using static go.SameNameOs.hooks.os_package;
+using fs = go.io.fs_package;
+using time = go.time_package;
 
 [GoPackage("os")]
 public static partial class os_package
@@ -86,5 +95,20 @@ public static partial class os_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(os_package.FileInfo)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class osᴛFileInfo;
+[GoMethodHost(typeof(os_package.FileInfo)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class osᴛFileInfo;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class osᴛFileInfo {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Name(this ref FileInfo f) => os_package.Name⁔(ref f);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static int64 Size(this ref FileInfo f) => os_package.Size⁔(ref f);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static fs.FileMode Mode(this ref FileInfo f) => os_package.Mode⁔(ref f);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static time.Time ModTime(this ref FileInfo f) => os_package.ModTime⁔(ref f);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool IsDir(this ref FileInfo f) => os_package.IsDir⁔(ref f);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static any Sys(this ref FileInfo f) => os_package.Sys⁔(ref f);
+}
+// </MethodForwarders>

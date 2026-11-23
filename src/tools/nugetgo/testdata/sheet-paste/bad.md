@@ -42,3 +42,16 @@ else {
 ```powershell
 Write-Host (1 + )
 ```
+
+## Block 6: a push checked first is clean
+
+```powershell
+pwsh -NoProfile -File src/tools/nugetgo/Assert-NugetgoPushable.ps1 out/nugetgo.example.1.0.0.nupkg
+dotnet nuget push out/nugetgo.example.1.0.0.nupkg --source https://api.nuget.org/v3/index.json
+```
+
+## Block 7: a push with no check before it
+
+```powershell
+dotnet nuget push out/nugetgo.example.1.0.0.nupkg --source https://api.nuget.org/v3/index.json
+```

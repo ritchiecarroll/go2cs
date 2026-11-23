@@ -881,15 +881,7 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt, target LabeledStmtCon
 		case isArrayPointee && rangedThroughPointer && ptrDeref != "":
 			v.writeOutput("foreach (%s%s in range(%s, %d))", decl, iterExpr, rangeExpr, arrayType.Len())
 		default:
-			// A holder that declares its own `len` method shadows golib's using-static builtin (see Phase 7a in
-			// convCallExpr.go), so the length is qualified there, as every other `len(x)` in that holder is.
-			lenName := "len"
-
-			if v.holderDeclares("len") {
-				lenName = "builtin.len"
-			}
-
-			v.writeOutput("foreach (%s%s in range(%s(%s)))", decl, iterExpr, lenName, rangeExpr)
+			v.writeOutput("foreach (%s%s in range(len(%s)))", decl, iterExpr, rangeExpr)
 		}
 	} else {
 		// Handle slice, array, and map types

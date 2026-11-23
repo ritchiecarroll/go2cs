@@ -4,7 +4,6 @@
 namespace go.os;
 
 using sync = sync_package;
-using static user_package;
 
 partial class user_package {
 
@@ -21,7 +20,7 @@ internal static slice<byte> colon = [(byte)':'];
 // Subsequent calls will return the cached value and will not reflect
 // changes to the current user.
 public static (ж<User>, error) Current() {
-    Ꮡcache.of(cacheᴛ1.ᏑOnce).Do(() => {
+    Ꮡcache.of(cacheᴛ1.ᏑOnce).Do([GoFunc("Current.func1")] () => {
         (cache.u, cache.err) = current();
     });
     if (cache.err != nil) {
@@ -70,11 +69,9 @@ public static (ж<Group>, error) LookupGroupId(@string gid) {
     return lookupGroupId(gid);
 }
 
-} partial class userᴛUser {
-
 // GroupIds returns the list of group IDs that the user is a member of.
-public static (slice<@string>, error) GroupIds(this ж<User> Ꮡu) {
+internal static (slice<@string>, error) GroupIds⁔(/*this*/ ж<User> Ꮡu) {
     return listGroups(ref (Ꮡu).DerefOrNull());
 }
 
-}
+} // end user_package

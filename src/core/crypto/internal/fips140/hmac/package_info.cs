@@ -10,10 +10,14 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+using hash = go.hash_package;
 // </ImportedTypeAliases>
 
 using go;
 using static go.crypto.@internal.fips140.hmac_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -63,10 +67,13 @@ using static go.crypto.@internal.fips140.hmac_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("crypto/internal/fips140/hmac/cast.go", "cast.cs", "AA8cgoK43IKCgoKU", "15-33:1")]
-[assembly: GoPositionMap("crypto/internal/fips140/hmac/hmac.go", "hmac.cs", "ADFeuIKU5raClIKCpoKUgqaCpoKUgoKClKaCAA4egoKUgoKmgoKmgoKCgriCggANCoKmgsqigoKClIKClIKCgpSCgpTIsoKCgoKylJSCtJKClIKCgpSClIKCgpSClJSosg==", "173-181:1;174-177:1.1", "", "", "", "200:25,202:17")]
+[assembly: GoPositionMap("crypto/internal/fips140/hmac/hmac.go", "hmac.cs", "AC5euIKU5raClIKCpoKUgqaCpoKUgoKClKaCAA4egoKUgoKmgoKmgoKCgriCggAJCoKmgqqigoKClIKClIKCgpSCgpSosoKCgoKylJSCtJKClIKCgpSClIKCgpSClJSosg==", "173-181:1;174-177:1.1", "", "185=Invoke/1/1/8", "", "189:54,191:17")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140;
+
+using static go.crypto.@internal.fips140.hmac_package;
+using hash = go.hash_package;
 
 [GoPackage("hmac")]
 public static partial class hmac_package
@@ -107,6 +114,25 @@ public static partial class hmac_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(hmac_package.HMAC)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class hmacᴛHMAC;
-[GoMethodHost(typeof(hmac_package.errCloneUnsupported)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class hmacᴛerrCloneUnsupported;
+[GoMethodHost(typeof(hmac_package.HMAC)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class hmacᴛHMAC;
+[GoMethodHost(typeof(hmac_package.errCloneUnsupported)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class hmacᴛerrCloneUnsupported;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class hmacᴛHMAC {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> Sum(this ref HMAC h, slice<byte> @in) => hmac_package.Sum⁔(ref h, @in);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint n, error err) Write(this ref HMAC h, slice<byte> p) => hmac_package.Write⁔(ref h, p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Size(this ref HMAC h) => hmac_package.Size⁔(ref h);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint BlockSize(this ref HMAC h) => hmac_package.BlockSize⁔(ref h);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Reset(this ref HMAC h) => hmac_package.Reset⁔(ref h);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (hash.Cloner, error) Clone(this ref HMAC h) => hmac_package.Clone⁔(ref h);
+}
+partial class hmacᴛerrCloneUnsupported {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string Error(this errCloneUnsupported e) => hmac_package.Error⁔(e);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error Unwrap(this errCloneUnsupported e) => hmac_package.Unwrap⁔(e);
+}
+// </MethodForwarders>

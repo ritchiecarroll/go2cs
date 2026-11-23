@@ -7,7 +7,6 @@ using bytes = bytes_package;
 using fmt = fmt_package;
 using os = os_package;
 using @unsafe = unsafe_package;
-using static fuzz_package;
 
 partial class fuzz_package {
 
@@ -73,7 +72,7 @@ internal static (ж<sharedMem> m, error err) sharedMemTempFile(nint size) {
         }
         var errʗ1 = err;
         var fʗ1 = f;
-        defer(() => {
+        defer([GoFunc("sharedMemTempFile.func1")] () => {
             if (errʗ1 != nil) {
                 fʗ1.Close();
                 os.Remove(fʗ1.Name());
@@ -95,23 +94,21 @@ internal static (ж<sharedMem> m, error err) sharedMemTempFile(nint size) {
     ᒐdone: return (m, err);
 }
 
-} partial class fuzzᴛsharedMem {
-
 // header returns a pointer to metadata within the shared memory region.
-internal static ж<sharedMemHeader> header(this ref sharedMem m) {
+internal static ж<sharedMemHeader> header⁔(/*this*/ ref sharedMem m) {
     return Ꮡ(m.region, 0).Reinterpret<byte, sharedMemHeader>();
 }
 
 // valueRef returns the value currently stored in shared memory. The returned
 // slice points to shared memory; it is not a copy.
-internal static slice<byte> valueRef(this ref sharedMem m) {
+internal static slice<byte> valueRef⁔(/*this*/ ref sharedMem m) {
     nint length = m.header().valueLen;
     nint valueOffset = (nint)/* unsafe.Sizeof(sharedMemHeader{}) */ (uintptr)40;
     return m.region.slice(valueOffset, valueOffset + length);
 }
 
 // valueCopy returns a copy of the value stored in shared memory.
-internal static slice<byte> valueCopy(this ref sharedMem m) {
+internal static slice<byte> valueCopy⁔(/*this*/ ref sharedMem m) {
     var @ref = m.valueRef();
     return bytes.Clone(@ref);
 }
@@ -119,7 +116,7 @@ internal static slice<byte> valueCopy(this ref sharedMem m) {
 // setValue copies the data in b into the shared memory buffer and sets
 // the length. len(b) must be less than or equal to the capacity of the buffer
 // (as returned by cap(m.value())).
-internal static void setValue(this ref sharedMem m, slice<byte> b) {
+internal static void setValue⁔(/*this*/ ref sharedMem m, slice<byte> b) {
     var v = m.valueRef();
     if (len(b) > cap(v)) {
         throw panic(fmt.Sprintf("value length %d larger than shared memory capacity %d"u8, len(b), cap(v)));
@@ -134,7 +131,7 @@ internal static void setValue(this ref sharedMem m, slice<byte> b) {
 // Note that we can only store the length in the shared memory header. The full
 // slice header contains a pointer, which is likely only valid for one process,
 // since each process can map shared memory at a different virtual address.
-internal static void setValueLen(this ref sharedMem m, nint n) {
+internal static void setValueLen⁔(/*this*/ ref sharedMem m, nint n) {
     var v = m.valueRef();
     if (n > cap(v)) {
         throw panic(fmt.Sprintf("length %d larger than shared memory capacity %d"u8, n, cap(v)));
@@ -147,4 +144,4 @@ internal static void setValueLen(this ref sharedMem m, nint n) {
 // do it, since we'll need to send a message to the worker telling it to
 // remap the file.
 
-}
+} // end fuzz_package

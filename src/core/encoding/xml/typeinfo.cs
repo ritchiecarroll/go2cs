@@ -7,7 +7,6 @@ using fmt = fmt_package;
 using reflect = reflect_package;
 using strings = strings_package;
 using sync = sync_package;
-using static xml_package;
 
 partial class xml_package {
 
@@ -47,10 +46,6 @@ internal static readonly ж<sync.Map> ᏑtinfoMap = new StaticBox<sync.Map>(defa
 internal static ref sync.Map tinfoMap => ref ((StaticBox<sync.Map>)ᏑtinfoMap).ValueSlot; // map[reflect.Type]*typeInfo
 
 internal static reflect.Type nameType = reflect.TypeFor<Name>();
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string xmlˢ => ref xmlˢᵇ;
-private static readonly @string xmlˢᵇ = "xml"u8;
 
 // getTypeInfo returns the typeInfo structure with details necessary
 // for marshaling and unmarshaling typ.
@@ -365,25 +360,19 @@ partial struct TagPathError {
     public @string Field2, Tag2;
 }
 
-} partial class xmlᴛTagPathError {
-
-public static @string Error(this ref TagPathError e) {
+internal static @string Error⁔(/*this*/ ref TagPathError e) {
     return fmt.Sprintf("%s field %q with tag %q conflicts with field %q with tag %q"u8, e.Struct, e.Field1, e.Tag1, e.Field2, e.Tag2);
 }
 
-} partial class xml_package {
-
 internal const bool initNilPointers = true;
 internal const bool dontInitNilPointers = false;
-
-} partial class xmlᴛfieldInfo {
 
 // value returns v's field value corresponding to finfo.
 // It's equivalent to v.FieldByIndex(finfo.idx), but when passed
 // initNilPointers, it initializes and dereferences pointers as necessary.
 // When passed dontInitNilPointers and a nil pointer is reached, the function
 // returns a zero reflect.Value.
-internal static reflect.Value value(this ref fieldInfo finfo, reflect.Value v, bool shouldInitNilPointers) {
+internal static reflect.Value value⁔(/*this*/ ref fieldInfo finfo, reflect.Value v, bool shouldInitNilPointers) {
     foreach (var (i, x) in range(finfo.idx)) {
         if (i > 0) {
             var t = v.Type();
@@ -402,4 +391,4 @@ internal static reflect.Value value(this ref fieldInfo finfo, reflect.Value v, b
     return v;
 }
 
-}
+} // end xml_package

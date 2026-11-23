@@ -21,9 +21,7 @@ using sys = @internal.runtime.sys_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
-using static runtime_package;
+using System.Runtime.CompilerServices;
 
 partial class runtime_package {
 
@@ -260,7 +258,7 @@ internal static bool chansend(ж<hchan> Ꮡc, @unsafe.Pointer ep, bool block, ui
         var sg = c.recvq.dequeue(); if (sg != nil) {
             // Found a waiting receiver. We pass the value we want to send
             // directly to the receiver, bypassing the channel buffer (if any).
-            send(Ꮡc, sg, ep, [MethodImpl(MethodImplOptions.NoInlining)] () => {
+            send(Ꮡc, sg, ep, [MethodImpl(MethodImplOptions.NoInlining), GoFunc("chansend.func1")] () => {
                 unlock(Ꮡc.Ꮡlock);
             }, 3);
             return true;
@@ -671,7 +669,7 @@ internal static (bool selected, bool received) chanrecv(ж<hchan> Ꮡc, @unsafe.
                 // directly from sender. Otherwise, receive from head of queue
                 // and add sender's value to the tail of the queue (both map to
                 // the same buffer slot because the queue is full).
-                recv(Ꮡc, sg, ep, [MethodImpl(MethodImplOptions.NoInlining)] () => {
+                recv(Ꮡc, sg, ep, [MethodImpl(MethodImplOptions.NoInlining), GoFunc("chanrecv.func1")] () => {
                     unlock(Ꮡc.Ꮡlock);
                 }, 3);
                 return (true, true);
@@ -948,9 +946,7 @@ internal static void reflect_chanclose(ж<hchan> c) {
     closechan(c);
 }
 
-} partial class runtimeᴛwaitq {
-
-internal static void enqueue(this ref waitq q, ж<sudog> Ꮡsgp) {
+internal static void enqueue⁔(/*this*/ ref waitq q, ж<sudog> Ꮡsgp) {
     ref var sgp = ref Ꮡsgp.DerefOrNull();
 
     sgp.next = default;
@@ -966,7 +962,7 @@ internal static void enqueue(this ref waitq q, ж<sudog> Ꮡsgp) {
     q.last = Ꮡsgp;
 }
 
-internal static ж<sudog> dequeue(this ref waitq q) {
+internal static ж<sudog> dequeue⁔(/*this*/ ref waitq q) {
     for (;;) {
         var sgp = q.first;
         if (sgp == nil) {
@@ -1001,9 +997,7 @@ internal static ж<sudog> dequeue(this ref waitq q) {
     }
 }
 
-} partial class runtimeᴛhchan {
-
-internal static @unsafe.Pointer raceaddr(this ж<hchan> Ꮡc) {
+internal static @unsafe.Pointer raceaddr⁔(/*this*/ ж<hchan> Ꮡc) {
     // Treat read-like and write-like operations on the channel to
     // happen at this address. Avoid using the address of qcount
     // or dataqsiz, because the len() and cap() builtins read
@@ -1011,8 +1005,6 @@ internal static @unsafe.Pointer raceaddr(this ж<hchan> Ꮡc) {
     // operations like close().
     return @unsafe.Pointer.FromBox(Ꮡc.Ꮡbuf);
 }
-
-} partial class runtime_package {
 
 internal static void racesync(ж<hchan> c, ref sudog sg) {
     racerelease(chanbuf(c, 0));

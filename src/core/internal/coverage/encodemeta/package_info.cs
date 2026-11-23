@@ -10,10 +10,15 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+using coverage = go.@internal.coverage_package;
+using io = go.io_package;
 // </ImportedTypeAliases>
 
 using go;
 using static go.@internal.coverage.encodemeta_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -61,11 +66,15 @@ using static go.@internal.coverage.encodemeta_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/coverage/encodemeta/encode.go", "encode.cs", "ACZIgoKUuIKCgoKCgoKCpoKCgoIACBCSgoKCgoKCgoKCgoKUgoKUgoKCgqaCgoKCgpSmgoKCgoKUpoKCuIKCgoKCgoK8xqKCAAgSgpSAgqSmpoK4gIKkpoKCgoLKgoCCpIKClMqigoKCgoKokoKCgoKCgoKUgoKU", "", "", "43=New128a/1/1/2;143=Nentries/1/1/5")]
-[assembly: GoPositionMap("internal/coverage/encodemeta/encodefile.go", "encodefile.cs", "ACI+gsqCgsaygoKClIKCuIKCuAAKFoKCpoK4goKCgoKClIKUgpSCgoKClIKUuIK4goKCgpSClIKmuIKU", "", "", "36=NewWriter/1/1/2")]
+[assembly: GoPositionMap("internal/coverage/encodemeta/encode.go", "encode.cs", "ACVIgoKUuIKCgoKCgoKCpoKCgoIABhCSgoKCgoKCgoKCgoKUgoKUgoKCgqaCgoKCgpSmgoKCgoKUpoKCuIKCgoKCgoK8xqKCAAgSgpSAgqSmpoK4gIKkpoKCgoLKgoCCpIKClKqigoKCgoKokoKCgoKCgoKUgoKU", "", "", "42=New128a/1/1/2;140=Nentries/1/1/5")]
+[assembly: GoPositionMap("internal/coverage/encodemeta/encodefile.go", "encodefile.cs", "ACE+gsqCgqaygoKClIKCuIKCuAAKFoKCpoK4goKCgoKClIKUgpSCgoKClIKUuIK4goKCgpSClIKmuIKU", "", "", "35=NewWriter/1/1/2")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.coverage;
+
+using static go.@internal.coverage.encodemeta_package;
+using coverage = go.@internal.coverage_package;
+using io = go.io_package;
 
 [GoPackage("encodemeta")]
 public static partial class encodemeta_package
@@ -109,6 +118,24 @@ public static partial class encodemeta_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(encodemeta_package.CoverageMetaDataBuilder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class encodemetaᴛCoverageMetaDataBuilder;
-[GoMethodHost(typeof(encodemeta_package.CoverageMetaFileWriter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class encodemetaᴛCoverageMetaFileWriter;
+[GoMethodHost(typeof(encodemeta_package.CoverageMetaDataBuilder)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class encodemetaᴛCoverageMetaDataBuilder;
+[GoMethodHost(typeof(encodemeta_package.CoverageMetaFileWriter)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class encodemetaᴛCoverageMetaFileWriter;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class encodemetaᴛCoverageMetaDataBuilder {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nuint AddFunc(this ref CoverageMetaDataBuilder b, coverage.FuncDesc f) => encodemeta_package.AddFunc⁔(ref b, f);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static int64 emitFuncOffsets(this ref CoverageMetaDataBuilder b, io.WriteSeeker w, int64 off) => encodemeta_package.emitFuncOffsets⁔(ref b, w, off);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (int64, error) emitFunc(this ref CoverageMetaDataBuilder b, io.WriteSeeker w, int64 off, funcDesc f) => encodemeta_package.emitFunc⁔(ref b, w, off, f);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void reportWriteError(this ref CoverageMetaDataBuilder b, error err) => encodemeta_package.reportWriteError⁔(ref b, err);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void wrUint32(this ref CoverageMetaDataBuilder b, io.WriteSeeker w, uint32 v) => encodemeta_package.wrUint32⁔(ref b, w, v);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (array<byte>, error) Emit(this ж<CoverageMetaDataBuilder> Ꮡb, io.WriteSeeker w) => encodemeta_package.Emit⁔(Ꮡb, w);
+}
+partial class encodemetaᴛCoverageMetaFileWriter {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Write(this ж<CoverageMetaFileWriter> Ꮡm, /*[16]*/ array<byte> finalHash, slice<slice<byte>> blobs, coverage.CounterMode mode, coverage.CounterGranularity granularity) => encodemeta_package.Write⁔(Ꮡm, finalHash, blobs, mode, granularity);
+}
+// </MethodForwarders>

@@ -1,7 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
-using static main_package;
+using @unsafe = unsafe_package;
 
 partial class main_package {
 
@@ -12,11 +12,7 @@ partial struct mark {
 partial struct tagger {
 }
 
-} partial class mainᴛtagger {
-
-internal static void mark(this tagger _) { }
-
-} partial class main_package {
+internal static void mark⁔(/*this*/ tagger _) { }
 
 partial struct holder {
     internal nint mark;
@@ -48,7 +44,7 @@ internal static partial nint capturedLocalNamedAfterType() {
     var w = Ꮡ(new w(park: 30, other: 4));
     nint got = 0;
     var wʗ1 = w;
-    run(() => {
+    run([GoFunc("capturedLocalNamedAfterType.func1")] () => {
         var p = wʗ1.Ꮡpark;
         p.Value = p.Value + 3;
         got = p.Value;
@@ -59,7 +55,7 @@ internal static partial nint capturedLocalNamedAfterType() {
 internal static partial nint boxRefCapturedValueNamedAfterType() {
     ref var w = ref heap<w>(new w(park: 100, other: 9), out var Ꮡw);
     nint got = 0;
-    run(() => {
+    run([GoFunc("boxRefCapturedValueNamedAfterType.func1")] () => {
         var p = Ꮡw.Ꮡpark;
         p.Value = p.Value + 5;
         got = p.Value;
@@ -96,20 +92,22 @@ internal static void main() {
 
     fmt.Println(boxRefCapturedValueNamedAfterType());
 
-    var bm = new boxMembers(ReinterpretUnaliased: 4, ΔInlineSlice: 5);
-    nint got = bumpBoxMembers(ref bm);
-    fmt.Println(got, bm.ReinterpretUnaliased, bm.ΔInlineSlice);
+    ref var bm = ref heap<boxMembers>(new boxMembers(ReinterpretUnaliased: 4, IsOrderTokenAt: 5), out var Ꮡbm);
+    nint got = bumpBoxMembers(Ꮡbm);
+    fmt.Println(got, bm.ReinterpretUnaliased, bm.IsOrderTokenAt);
 }
 
 partial struct boxMembers {
     public nint ReinterpretUnaliased;
-    public nint ΔInlineSlice;
+    public nint IsOrderTokenAt;
+    internal @string label;
 }
 
-internal static partial nint bumpBoxMembers(ref boxMembers p) {
-    p.ReinterpretUnaliased += 10;
-    p.ΔInlineSlice *= 3;
-    return p.ReinterpretUnaliased * 100 + p.ΔInlineSlice;
+internal static partial nint bumpBoxMembers(ж<boxMembers> p) {
+    var q = p;
+    q.of(boxMembers.ᏑReinterpretUnaliased).Value += 10;
+    q.of(boxMembers.ᏑIsOrderTokenAt).Value *= 3;
+    return q.of(boxMembers.ᏑReinterpretUnaliased).Value * 100 + q.of(boxMembers.ᏑIsOrderTokenAt).Value;
 }
 
 } // end main_package

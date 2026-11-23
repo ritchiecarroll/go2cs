@@ -10,10 +10,14 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+using hash = go.hash_package;
 // </ImportedTypeAliases>
 
 using go;
 using static go.hash.adler32_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -57,10 +61,13 @@ using static go.hash.adler32_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("hash/adler32/adler32.go", "adler32.cs", "AChMvtKCgsaUAAkOgoKCpoIACAaCgpSClIKmgoLIkoKCgoKUgoKCgoKCgoKClIKClIKClMaCgqaUgoLIgA==")]
+[assembly: GoPositionMap("hash/adler32/adler32.go", "adler32.cs", "ACRMntKCgqaU3oKCgqaCAAgGgoKUgpSCpoKCqJKCgoKClIKCgoKCgoKCgpSCgpSCgpSmgoKmlIKCqIA=")]
 // </GoSourcePositionMaps>
 
 namespace go.hash;
+
+using static go.hash.adler32_package;
+using hash = go.hash_package;
 
 [GoPackage("adler32")]
 public static partial class adler32_package
@@ -94,5 +101,24 @@ public static partial class adler32_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(adler32_package.digest)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class adler32ᴛdigest;
+[GoMethodHost(typeof(adler32_package.digest)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class adler32ᴛdigest;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class adler32ᴛdigest {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void Reset(this ref digest d) => adler32_package.Reset⁔(ref d);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint Size(this ref digest d) => adler32_package.Size⁔(ref d);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint BlockSize(this ref digest d) => adler32_package.BlockSize⁔(ref d);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<byte>, error) AppendBinary(this ref digest d, slice<byte> b) => adler32_package.AppendBinary⁔(ref d, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<byte>, error) MarshalBinary(this ref digest d) => adler32_package.MarshalBinary⁔(ref d);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error UnmarshalBinary(this ref digest d, slice<byte> b) => adler32_package.UnmarshalBinary⁔(ref d, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (hash.Cloner, error) Clone(this ref digest d) => adler32_package.Clone⁔(ref d);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint nn, error err) Write(this ref digest d, slice<byte> p) => adler32_package.Write⁔(ref d, p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static uint32 Sum32(this ref digest d) => adler32_package.Sum32⁔(ref d);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<byte> Sum(this ref digest d, slice<byte> @in) => adler32_package.Sum⁔(ref d, @in);
+}
+// </MethodForwarders>

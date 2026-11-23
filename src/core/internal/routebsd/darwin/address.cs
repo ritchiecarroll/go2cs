@@ -8,7 +8,6 @@ using netip = net.netip_package;
 using Δruntime = runtime_package;
 using syscall = syscall_package;
 using net;
-using static routebsd_package;
 
 partial class routebsd_package {
 
@@ -25,12 +24,8 @@ partial struct LinkAddr {
     public slice<byte> Addr; // link-layer address when attached
 }
 
-} partial class routebsdᴛLinkAddr {
-
 // Family implements the Family method of Addr interface.
-public static nint Family(this ref LinkAddr a) { return syscall.AF_LINK; }
-
-} partial class routebsd_package {
+internal static nint Family⁔(/*this*/ ref LinkAddr a) { return syscall.AF_LINK; }
 
 internal static (Addr, error) parseLinkAddr(slice<byte> b) {
     if (len(b) < 8) {
@@ -97,17 +92,13 @@ partial struct InetAddr {
     public netip.Addr IP;
 }
 
-} partial class routebsdᴛInetAddr {
-
-public static nint Family(this ref InetAddr a) {
+internal static nint Family⁔(/*this*/ ref InetAddr a) {
     if (a.IP.Is4()) {
         return syscall.AF_INET;
     } else {
         return syscall.AF_INET6;
     }
 }
-
-} partial class routebsd_package {
 
 // parseInetAddr parses b as an internet address for IPv4 or IPv6.
 internal static (Addr, error) parseInetAddr(nint af, slice<byte> b) {

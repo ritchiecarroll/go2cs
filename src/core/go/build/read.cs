@@ -19,7 +19,6 @@ using utf8 = global::go.unicode.utf8_package;
 /* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
 using global::go.go;
 using global::go.unicode;
-using static build_package;
 
 partial class build_package {
 
@@ -61,10 +60,8 @@ internal static bool isIdent(byte c) {
 internal static error errSyntax = errors.New("syntax error");
 internal static error errNUL = errors.New("unexpected NUL in input");
 
-} partial class buildᴛimportReader {
-
 // syntaxError records a syntax error, but only if an I/O error has not already been recorded.
-internal static void syntaxError(this ref importReader r) {
+internal static void syntaxError⁔(/*this*/ ref importReader r) {
     if (r.err == nil) {
         r.err = errSyntax;
     }
@@ -72,7 +69,7 @@ internal static void syntaxError(this ref importReader r) {
 
 // readByte reads the next byte from the input, saves it in buf, and returns it.
 // If an error occurs, readByte records the error in r.err and returns 0.
-internal static byte readByte(this ref importReader r) {
+internal static byte readByte⁔(/*this*/ ref importReader r) {
     var (c, err) = r.b.ReadByte();
     if (err == nil) {
         r.buf = append(r.buf, c);
@@ -92,7 +89,7 @@ internal static byte readByte(this ref importReader r) {
 }
 
 // readRest reads the entire rest of the file into r.buf.
-internal static void readRest(this ref importReader r) {
+internal static void readRest⁔(/*this*/ ref importReader r) {
     for (;;) {
         if (len(r.buf) == cap(r.buf)) {
             // Grow the buffer
@@ -113,7 +110,7 @@ internal static void readRest(this ref importReader r) {
 
 // peekByte returns the next byte from the input reader but does not advance beyond it.
 // If skipSpace is set, peekByte skips leading spaces and comments.
-internal static byte peekByte(this ref importReader r, bool skipSpace) {
+internal static byte peekByte⁔(/*this*/ ref importReader r, bool skipSpace) {
     if (r.err != nil) {
         r.nerr++; if (r.nerr > 10000) {
             throw panic("go/build: import reader looping");
@@ -167,7 +164,7 @@ internal static byte peekByte(this ref importReader r, bool skipSpace) {
 }
 
 // nextByte is like peekByte but advances beyond the returned byte.
-internal static byte nextByte(this ref importReader r, bool skipSpace) {
+internal static byte nextByte⁔(/*this*/ ref importReader r, bool skipSpace) {
     var c = r.peekByte(skipSpace);
     r.peek = 0;
     return c;
@@ -175,7 +172,7 @@ internal static byte nextByte(this ref importReader r, bool skipSpace) {
 
 // readKeyword reads the given keyword from the input.
 // If the keyword is not present, readKeyword records a syntax error.
-internal static void readKeyword(this ref importReader r, @string kw) {
+internal static void readKeyword⁔(/*this*/ ref importReader r, @string kw) {
     r.peekByte(true);
     for (nint i = 0; i < len(kw); i++) {
         if (r.nextByte(false) != kw[i]) {
@@ -190,7 +187,7 @@ internal static void readKeyword(this ref importReader r, @string kw) {
 
 // readIdent reads an identifier from the input.
 // If an identifier is not present, readIdent records a syntax error.
-internal static void readIdent(this ref importReader r) {
+internal static void readIdent⁔(/*this*/ ref importReader r) {
     var c = r.peekByte(true);
     if (!isIdent(c)) {
         r.syntaxError();
@@ -203,7 +200,7 @@ internal static void readIdent(this ref importReader r) {
 
 // readString reads a quoted string literal from the input.
 // If an identifier is not present, readString records a syntax error.
-internal static void readString(this ref importReader r) {
+internal static void readString⁔(/*this*/ ref importReader r) {
     switch (r.nextByte(true)) {
     case (byte)'`': {
         while (r.err == nil) {
@@ -239,7 +236,7 @@ internal static void readString(this ref importReader r) {
 
 // readImport reads an import clause - optional identifier followed by quoted string -
 // from the input.
-internal static void readImport(this ref importReader r) {
+internal static void readImport⁔(/*this*/ ref importReader r) {
     var c = r.peekByte(true);
     if (c == '.') {
         r.peek = 0;
@@ -248,8 +245,6 @@ internal static void readImport(this ref importReader r) {
     }
     r.readString();
 }
-
-} partial class build_package {
 
 // readComments is like io.ReadAll, except that it only reads the leading
 // block of comments in the file.

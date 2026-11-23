@@ -47,7 +47,7 @@ public static void MustHaveExec(testing.TB t) {
 }
 
 internal static Func<error> tryExec;
-internal static void initᴛtryExec() { tryExec = sync.OnceValue(error () => {
+internal static void initᴛtryExec() { tryExec = sync.OnceValue([GoFunc("init.func2")] error () => {
     var exprᴛ1 = Δruntime.GOOS;
     switch (ᐧ) {
     case {} when exprᴛ1 == "wasip1"u8 || exprᴛ1 == "js"u8 || exprᴛ1 == "ios"u8: {
@@ -103,7 +103,7 @@ public static @string Executable(testing.TB t) {
     return exe;
 }
 
-internal static Func<(@string, error)> exePath = sync.OnceValues((@string, error) () => os.Executable());
+internal static Func<(@string, error)> exePath = sync.OnceValues([GoFunc("init.func1")] (@string, error) () => os.Executable());
 
 internal static readonly ж<sync.Map> ᏑexecPaths = new StaticBox<sync.Map>(default(sync.Map));
 internal static ref sync.Map execPaths => ref ((StaticBox<sync.Map>)ᏑexecPaths).ValueSlot; // path -> error
@@ -228,7 +228,7 @@ public static ж<exec.Cmd> CommandContext(testing.TB t, context.Context ctx, @st
     var cmd = exec.CommandContext(ctx, name, args.ꓸꓸꓸ);
     var cancelCtxʗ1 = cancelCtx;
     var cmdʗ1 = cmd;
-    cmd.Cancel = () => {
+    cmd.Cancel = [GoFunc("CommandContext.func1")] () => {
         if (cancelCtxʗ1 != nil && AreEqual(ctx.Err(), context.DeadlineExceeded)) {
             // The command timed out due to running too close to the test's deadline.
             // There is no way the test did that intentionally — it's too close to the
@@ -249,7 +249,7 @@ public static ж<exec.Cmd> CommandContext(testing.TB t, context.Context ctx, @st
 
     var cancelCtxʗ2 = cancelCtx;
     var cmdʗ2 = cmd;
-    t.Cleanup(() => {
+    t.Cleanup([GoFunc("CommandContext.func2")] () => {
         if (cancelCtxʗ2 != nil) {
             cancelCtxʗ2();
         }

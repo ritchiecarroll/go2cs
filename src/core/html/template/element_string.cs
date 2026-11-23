@@ -2,7 +2,6 @@
 namespace go.html;
 
 using strconv = strconv_package;
-using static template_package;
 
 partial class template_package {
 
@@ -23,13 +22,11 @@ private static readonly @string _element_nameᵇ = "elementNoneelementScriptelem
 
 internal static array<uint8> _element_index = array<uint8>([0, 11, 24, 36, 51, 63, 74]);
 
-} partial class templateᴛelement {
-
-internal static @string String(this element i) {
+internal static @string String⁔(/*this*/ element i) {
     if (i >= ((element)(uint8)(len(_element_index) - 1))) {
         return "element("u8 + strconv.FormatInt((int64)i, 10) + ")"u8;
     }
     return _element_name.slice(_element_index[i], _element_index[i + 1]);
 }
 
-}
+} // end template_package

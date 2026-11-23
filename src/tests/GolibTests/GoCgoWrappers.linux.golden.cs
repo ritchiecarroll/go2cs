@@ -4,7 +4,7 @@
 
 namespace go;
 
-// The C pseudo-package of Go package cgotest (docs/phase4/DESIGN-cgo-phase2-pinvoke.md §11.17): what cmd/cgo
+// The C pseudo-package of Go package cgotest (docs/Limitations.md#cgo): what cmd/cgo
 // declared for its C names, reached from each converted file that imports "C" through `using C = <this class>;`.
 // The class name cannot collide with a real Go package's: 'ꓸ' is not a Go identifier character, and Go reserves
 // `import "C"` for cgo. Every member is internal: cgo forbids a C type in an exported Go signature.
@@ -544,8 +544,8 @@ static unsafe partial class cgotestꓸC_package
         return (@int)(int32)r;
     }
 
-    // The package's C libraries, as the converter captured them (§6.1, §11.5), registered with golib's resolver for this
-    // assembly's own [LibraryImport] bindings when the module loads (§6.2, §11.11).
+    // The package's C libraries, as the converter captured them, registered with golib's resolver for this
+    // assembly's own [LibraryImport] bindings when the module loads.
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     internal static void registerᴍlibraries() => global::go.golib.GoCgoLibraries.Register(typeof(cgotestꓸC_package).Assembly, "linux/amd64",
         new global::go.golib.GoCgoLibrary("-lc", "libc.so.6"),
@@ -727,7 +727,7 @@ static unsafe partial class cgotestꓸC_package
         private sbyte m_element;
     }
 
-    // _Ctype_div_t's copy-in and copy-out, member by member (§5.2).
+    // _Ctype_div_t's copy-in and copy-out, member by member.
     private static void ᴍin__Ctype_div_tᴍ(ref _Ctype_div_tᴍ m, in div_t v)
     {
         m.quot = (int32)v.quot;
@@ -740,7 +740,7 @@ static unsafe partial class cgotestꓸC_package
         v.rem = (@int)(int32)m.rem;
     }
 
-    // _Ctype_struct_go2cs_probe_hfa's copy-in and copy-out, member by member (§5.2).
+    // _Ctype_struct_go2cs_probe_hfa's copy-in and copy-out, member by member.
     private static void ᴍin__Ctype_struct_go2cs_probe_hfaᴍ(ref _Ctype_struct_go2cs_probe_hfaᴍ m, in struct_go2cs_probe_hfa v)
     {
         m.x = (float64)v.x;
@@ -753,7 +753,7 @@ static unsafe partial class cgotestꓸC_package
         v.y = (@double)(float64)m.y;
     }
 
-    // _Ctype_struct_go2cs_probe_pair's copy-in and copy-out, member by member (§5.2).
+    // _Ctype_struct_go2cs_probe_pair's copy-in and copy-out, member by member.
     private static void ᴍin__Ctype_struct_go2cs_probe_pairᴍ(ref _Ctype_struct_go2cs_probe_pairᴍ m, in struct_go2cs_probe_pair v)
     {
         m.a = (int32)v.a;
@@ -766,7 +766,7 @@ static unsafe partial class cgotestꓸC_package
         v.b = (@int)(int32)m.b;
     }
 
-    // _Ctype_struct_go2cs_probe_tagged's copy-in and copy-out, member by member (§5.2).
+    // _Ctype_struct_go2cs_probe_tagged's copy-in and copy-out, member by member.
     private static void ᴍin__Ctype_struct_go2cs_probe_taggedᴍ(ref _Ctype_struct_go2cs_probe_taggedᴍ m, in struct_go2cs_probe_tagged v)
     {
         m.tag = (int32)v.tag;
@@ -781,7 +781,7 @@ static unsafe partial class cgotestꓸC_package
             v.u[i0] = (byte)(byte)m.u[i0];
     }
 
-    // _Ctype_struct_in_addr's copy-in and copy-out, member by member (§5.2).
+    // _Ctype_struct_in_addr's copy-in and copy-out, member by member.
     private static void ᴍin__Ctype_struct_in_addrᴍ(ref _Ctype_struct_in_addrᴍ m, in struct_in_addr v)
     {
         m.s_addr = (uint32)v.s_addr;
@@ -792,7 +792,7 @@ static unsafe partial class cgotestꓸC_package
         v.s_addr = (@uint)(uint32)m.s_addr;
     }
 
-    // _Ctype_struct_tm's copy-in and copy-out, member by member (§5.2).
+    // _Ctype_struct_tm's copy-in and copy-out, member by member.
     private static void ᴍin__Ctype_struct_tmᴍ(ref _Ctype_struct_tmᴍ m, in struct_tm v)
     {
         m.tm_sec = (int32)v.tm_sec;
@@ -823,7 +823,7 @@ static unsafe partial class cgotestꓸC_package
         v.tm_zone = global::go.golib.GoCgoArgs.PointerMemberBack((nuint)m.tm_zone, v.tm_zone, global::go.golib.GoCgoArgs.PointerMember(v.tm_zone));
     }
 
-    // _Ctype_struct_utsname's copy-in and copy-out, member by member (§5.2).
+    // _Ctype_struct_utsname's copy-in and copy-out, member by member.
     private static void ᴍin__Ctype_struct_utsnameᴍ(ref _Ctype_struct_utsnameᴍ m, in struct_utsname v)
     {
         for (int i0 = 0; i0 < 65; i0++)

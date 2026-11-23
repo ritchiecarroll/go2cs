@@ -566,6 +566,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckDefinedTypeOverPkgType() => CheckTarget("DefinedTypeOverPkgType");
 
     [TestMethod]
+    public void CheckDeltaNameEdgeCases() => CheckTarget("DeltaNameEdgeCases");
+
+    [TestMethod]
     public void CheckDerefPointerToField() => CheckTarget("DerefPointerToField");
 
     [TestMethod]
@@ -579,6 +582,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckDivideByZeroPanic() => CheckTarget("DivideByZeroPanic");
+
+    [TestMethod]
+    public void CheckDotImportAdapterNameInHolder() => CheckTarget("DotImportAdapterNameInHolder");
 
     [TestMethod]
     public void CheckDotImportNameCollision() => CheckTarget("DotImportNameCollision");
@@ -1265,6 +1271,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckLiteralFloatConstFold() => CheckTarget("LiteralFloatConstFold");
 
     [TestMethod]
+    public void CheckLiteralFrameNames() => CheckTarget("LiteralFrameNames");
+
+    [TestMethod]
     public void CheckLocalFunctionEmission() => CheckTarget("LocalFunctionEmission");
 
     [TestMethod]
@@ -1427,10 +1436,40 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckMixedUntypedConstArithmetic() => CheckTarget("MixedUntypedConstArithmetic");
 
     [TestMethod]
+    public void CheckMnAotGeneric() => CheckTarget("MnAotGeneric");
+
+    [TestMethod]
     public void CheckMnBlockedIO() => CheckTarget("MnBlockedIO");
 
     [TestMethod]
+    public void CheckMnBoxAlias() => CheckTarget("MnBoxAlias");
+
+    [TestMethod]
+    public void CheckMnContended() => CheckTarget("MnContended");
+
+    [TestMethod]
     public void CheckMnDeepUnwind() => CheckTarget("MnDeepUnwind");
+
+    [TestMethod]
+    public void CheckMnForeignThread() => CheckTarget("MnForeignThread");
+
+    [TestMethod]
+    public void CheckMnFuncPair() => CheckTarget("MnFuncPair");
+
+    [TestMethod]
+    public void CheckMnGenericContended() => CheckTarget("MnGenericContended");
+
+    [TestMethod]
+    public void CheckMnGoMaxProcs() => CheckTarget("MnGoMaxProcs");
+
+    [TestMethod]
+    public void CheckMnIfaceTwin() => CheckTarget("MnIfaceTwin");
+
+    [TestMethod]
+    public void CheckMnMainExit() => CheckTarget("MnMainExit");
+
+    [TestMethod]
+    public void CheckMnMixedStorm() => CheckTarget("MnMixedStorm");
 
     [TestMethod]
     public void CheckMnParkedCallers() => CheckTarget("MnParkedCallers");
@@ -1442,22 +1481,13 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckMnParkedSameName() => CheckTarget("MnParkedSameName");
 
     [TestMethod]
-    public void CheckMnFuncPair() => CheckTarget("MnFuncPair");
+    public void CheckMnSpinCap() => CheckTarget("MnSpinCap");
 
     [TestMethod]
-    public void CheckMnBoxAlias() => CheckTarget("MnBoxAlias");
+    public void CheckMnGlyphMethodFrames() => CheckTarget("MnGlyphMethodFrames");
 
     [TestMethod]
-    public void CheckMnAotGeneric() => CheckTarget("MnAotGeneric");
-
-    [TestMethod]
-    public void CheckMnIfaceTwin() => CheckTarget("MnIfaceTwin");
-
-    [TestMethod]
-    public void CheckMnMainExit() => CheckTarget("MnMainExit");
-
-    [TestMethod]
-    public void CheckMnMixedStorm() => CheckTarget("MnMixedStorm");
+    public void CheckGlyphLibraryFrameNames() => CheckTarget("GlyphLibraryFrameNames");
 
     [TestMethod]
     public void CheckMultiFileInitOrder() => CheckTarget("MultiFileInitOrder");
@@ -1664,6 +1694,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckNamedSliceGoClone() => CheckTarget("NamedSliceGoClone");
 
     [TestMethod]
+    public void CheckNamedSliceMethodShadow() => CheckTarget("NamedSliceMethodShadow");
+
+    [TestMethod]
     public void CheckNamedSliceNilVsEmpty() => CheckTarget("NamedSliceNilVsEmpty");
 
     [TestMethod]
@@ -1773,6 +1806,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckNestedMapAssign() => CheckTarget("NestedMapAssign");
+
+    [TestMethod]
+    public void CheckNestedNamespaceReach() => CheckTarget("NestedNamespaceReach");
 
     [TestMethod]
     public void CheckNestedPointerConversionReinterpret() => CheckTarget("NestedPointerConversionReinterpret");
@@ -1899,6 +1935,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckPackageAliasRootedTypeArgs() => CheckTarget("PackageAliasRootedTypeArgs");
+
+    [TestMethod]
+    public void CheckPackageInfoUsingsClash() => CheckTarget("PackageInfoUsingsClash");
 
     [TestMethod]
     public void CheckPackageNameNotDirName() => CheckTarget("PackageNameNotDirName");
@@ -2064,6 +2103,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckPointerParamWalk() => CheckTarget("PointerParamWalk");
+
+    [TestMethod]
+    public void CheckPointerPrintIdentity() => CheckTarget("PointerPrintIdentity");
 
     [TestMethod]
     public void CheckPointerReceiverNilCompare() => CheckTarget("PointerReceiverNilCompare");
@@ -2403,6 +2445,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckSameNameImportAlias() => CheckTarget("SameNameImportAlias");
+
+    [TestMethod]
+    public void CheckSameNameOs() => CheckTarget("SameNameOs");
 
     [TestMethod]
     public void CheckSamePackageImplementNoWitness() => CheckTarget("SamePackageImplementNoWitness");

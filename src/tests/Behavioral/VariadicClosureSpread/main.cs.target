@@ -7,14 +7,14 @@ using ꓸꓸꓸnint = Span<nint>;
 partial class main_package {
 
 internal static void main() {
-    @string format(@string f, params ꓸꓸꓸany aʗp) {
+    [GoFunc("main.func1")] @string format(@string f, params ꓸꓸꓸany aʗp) {
         var a = aʗp.sslice();
         return fmt.Sprintf(f, a.ꓸꓸꓸ);
     }
     fmt.Println(format("%s=%d", (@string)"x", (nint)1));
     fmt.Println(format("%s=%d", (@string)"y", (nint)2));
 
-    nint sum(params ꓸꓸꓸnint numsʗp) {
+    [GoFunc("main.func2")] nint sum(params ꓸꓸꓸnint numsʗp) {
         var nums = numsʗp.sslice();
         nint total = 0;
         foreach (var (_, n) in range(nums)) {
@@ -25,18 +25,18 @@ internal static void main() {
     fmt.Println(sum(1, 2, 3, 4));
 
     var sumʗ1 = sum;
-    nint forward(params ꓸꓸꓸnint aʗp) {
+    [GoFunc("main.func3")] nint forward(params ꓸꓸꓸnint aʗp) {
         var a = aʗp.sslice();
         return sumʗ1(a.ꓸꓸꓸ);
     }
     fmt.Println(forward(10, 20, 30));
 
     var values = slice<nint>([1, 2, 3]);
-    void mutate(params ꓸꓸꓸnint numsʗp) {
+    [GoFunc("main.func4")] void mutate(params ꓸꓸꓸnint numsʗp) {
         GoFrame ᒐ = default;
         try {
             var nums = numsʗp.sslice();
-            defer(() => {
+            defer([GoFunc("main.func4.1")] () => {
             }, ref ᒐ);
             nums[0] = 40;
         }

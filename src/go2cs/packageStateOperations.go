@@ -54,6 +54,7 @@ func resetPackageState(pkg *packages.Package) {
 	cgoRouteFunctions = nil
 	cgoCheckClosures = nil
 	currentPackagePath = pkg.PkgPath
+	packageInfoSystemClashes = systemUsingClashes(pkg.Types)
 	currentPackageGorootVendored = false
 	currentPackageOutsideGoroot = pkg.Dir != "" && !isPathUnder(pkg.Dir, filepath.Join(build.Default.GOROOT, "src"))
 	packageHoistsLiterals = false
@@ -150,13 +151,16 @@ func resetPackageState(pkg *packages.Package) {
 	packageDirectBoxReceiverMethods = make(map[*types.Func]bool)
 	packageRefReturnPrimaryMethods = make(map[*types.Func]bool)
 	initFuncCounter = 0
+	packageFuncLitGoNames = map[*ast.FuncLit]string{}
 	usesUnsafeCode = false
 	packageImportForces = hashset.HashSet[string]{}
 	packageImportInits = map[string]string{}
 	packageMethodHolders = map[string]string{}
+	packageMethodForwarders = nil
 	packageRefLoweringResult = nil
 	packageHandOwnedTypes = map[*types.TypeName]bool{}
 	packageHandOwnedVars = map[*types.Var]bool{}
+	packageHandOwnedMethods = map[*types.Func]bool{}
 
 	// Capture the package's own source directory for the README's validation badge, which has to
 	// look at the Go sources the conversion never compiles (the `_test.go` files) to tell a package
@@ -224,6 +228,21 @@ func newFileEntry(file *ast.File, filePath string, manualConversion bool) FileEn
 	}
 }
 
+// entrySourcePath is the Go source a file entry's positions belong to, which its position map names (goSourceIdentity). A
+// tree cmd/cgo rewrote (outputBase, the cgo route) was parsed from its build-cache intermediate, whose //line directive
+// names the import "C" source: the file Go itself reports for that tree's frames, as cgoSourceFiles reads it. Recording
+// the intermediate instead put a hashed build-cache path on every packed cgo assembly (cgo against go.* INC 4, 1c).
+// Every other entry is its own source.
+func entrySourcePath(fset *token.FileSet, entry FileEntry) string {
+	if entry.outputBase != "" && entry.file != nil {
+		if named := fset.PositionFor(entry.file.Package, true).Filename; named != "" {
+			return filepath.Clean(named)
+		}
+	}
+
+	return entry.filePath
+}
+
 // newFileVisitor constructs the per-file Visitor with every eagerly-required field initialized.
 // Fields absent here (e.g. tightenedConsts, untypedConstContexts) are deliberately lazy — their
 // operations nil-check before first write.
@@ -258,7 +277,8 @@ func newFileVisitor(fset *token.FileSet, packageTypes *types.Package, info *type
 		blocks:                    Stack[*strings.Builder]{},
 		manualConversion:          fileEntry.manualConversion,
 		handOwnedTypeNames:        fileEntry.handOwnedTypeNames,
-		sourceFilePath:            fileEntry.filePath,
+		sourceFilePath:            entrySourcePath(fset, fileEntry),
+		cgoBindings:               fileEntry.cgoBindings,
 		identEscapesHeap:          fileEntry.identEscapesHeap,
 		sstringEligible:           fileEntry.sstringEligible,
 		ssliceEligible:            fileEntry.ssliceEligible,

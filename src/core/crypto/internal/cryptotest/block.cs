@@ -35,12 +35,12 @@ public static void TestBlock(ж<testing.T> t, nint keySize, Func<slice<byte>, (c
     nint blockSize = block.BlockSize();
 
     var blockʗ1 = block;
-    t.Run(encryptionˢ, (ж<testing.T> tΔ1) => {
+    t.Run(encryptionˢ, [GoFunc("TestBlock.func1")] (ж<testing.T> tΔ1) => {
         testCipher(tΔ1, blockʗ1.Encrypt, blockSize);
     });
 
     var blockʗ2 = block;
-    t.Run(decryptionˢ, (ж<testing.T> tΔ2) => {
+    t.Run(decryptionˢ, [GoFunc("TestBlock.func2")] (ж<testing.T> tΔ2) => {
         testCipher(tΔ2, blockʗ2.Decrypt, blockSize);
     });
 
@@ -48,7 +48,7 @@ public static void TestBlock(ж<testing.T> t, nint keySize, Func<slice<byte>, (c
     // implementation-specific characterization/golden tests should be done
     // for each block cipher implementation.
     var blockʗ3 = block;
-    t.Run(roundtripˢ, (ж<testing.T> tΔ3) => {
+    t.Run(roundtripˢ, [GoFunc("TestBlock.func3")] (ж<testing.T> tΔ3) => {
         var rng = newRandReader(tΔ3);
 
         // Check Decrypt inverts Encrypt
@@ -98,7 +98,7 @@ private static ref readonly @string outputNotFullBlockˢ => ref outputNotFullBlo
 private static readonly @string outputNotFullBlockˢᵇ = "output not full block"u8;
 
 internal static void testCipher(ж<testing.T> t, Action<slice<byte>, slice<byte>> cipher, nint blockSize) {
-    t.Run(alterInputˢ, (ж<testing.T> tΔ1) => {
+    t.Run(alterInputˢ, [GoFunc("testCipher.func1")] (ж<testing.T> tΔ1) => {
         var rng = newRandReader(tΔ1);
 
         // Make long src that shouldn't be modified at all, within block
@@ -115,7 +115,7 @@ internal static void testCipher(ж<testing.T> t, Action<slice<byte>, slice<byte>
         }
     });
 
-    t.Run(aliasingˢ, (ж<testing.T> tΔ2) => {
+    t.Run(aliasingˢ, [GoFunc("testCipher.func2")] (ж<testing.T> tΔ2) => {
         var rng = newRandReader(tΔ2);
 
         var (buff, expectedOutput) = (new slice<byte>(blockSize), new slice<byte>(blockSize));
@@ -132,7 +132,7 @@ internal static void testCipher(ж<testing.T> t, Action<slice<byte>, slice<byte>
         }
     });
 
-    t.Run(outOfBoundsWriteˢ, (ж<testing.T> tΔ3) => {
+    t.Run(outOfBoundsWriteˢ, [GoFunc("testCipher.func3")] (ж<testing.T> tΔ3) => {
         var rng = newRandReader(tΔ3);
 
         var src = new slice<byte>(blockSize);
@@ -173,7 +173,7 @@ internal static void testCipher(ж<testing.T> t, Action<slice<byte>, slice<byte>
     // Check that output of cipher isn't affected by adjacent data beyond input
     // slice scope
     // For encryption, this assumes block ciphers encrypt deterministically
-    t.Run(outOfBoundsReadˢ, (ж<testing.T> tΔ4) => {
+    t.Run(outOfBoundsReadˢ, [GoFunc("testCipher.func4")] (ж<testing.T> tΔ4) => {
         var rng = newRandReader(tΔ4);
 
         var src = new slice<byte>(blockSize);
@@ -204,7 +204,7 @@ internal static void testCipher(ж<testing.T> t, Action<slice<byte>, slice<byte>
         }
     });
 
-    t.Run(nonZeroDstˢ, (ж<testing.T> tΔ5) => {
+    t.Run(nonZeroDstˢ, [GoFunc("testCipher.func5")] (ж<testing.T> tΔ5) => {
         var rng = newRandReader(tΔ5);
 
         // Record what the cipher writes into a destination of zeroes
@@ -227,7 +227,7 @@ internal static void testCipher(ж<testing.T> t, Action<slice<byte>, slice<byte>
         }
     });
 
-    t.Run(bufferOverlapˢ, (ж<testing.T> tΔ6) => {
+    t.Run(bufferOverlapˢ, [GoFunc("testCipher.func6")] (ж<testing.T> tΔ6) => {
         var rng = newRandReader(tΔ6);
 
         var buff = new slice<byte>(blockSize * 2);
@@ -236,21 +236,21 @@ internal static void testCipher(ж<testing.T> t, Action<slice<byte>, slice<byte>
         // Make src and dst slices point to same array with inexact overlap
         ref var src = ref heap<slice<byte>>(buff.slice(0, blockSize), out var Ꮡsrc);
         ref var dst = ref heap<slice<byte>>(buff.slice(1, blockSize + 1), out var Ꮡdst);
-        mustPanic(tΔ6, invalidBufferOverlapˢ, () => {
+        mustPanic(tΔ6, invalidBufferOverlapˢ, [GoFunc("testCipher.func6.1")] () => {
             cipher(Ꮡdst.ValueSlot, Ꮡsrc.ValueSlot);
         });
 
         // Only overlap on one byte
         Ꮡsrc.ValueSlot = buff.slice(0, blockSize);
         Ꮡdst.ValueSlot = buff.slice(blockSize - 1, 2 * blockSize - 1);
-        mustPanic(tΔ6, invalidBufferOverlapˢ, () => {
+        mustPanic(tΔ6, invalidBufferOverlapˢ, [GoFunc("testCipher.func6.2")] () => {
             cipher(Ꮡdst.ValueSlot, Ꮡsrc.ValueSlot);
         });
 
         // src comes after dst with one byte overlap
         Ꮡsrc.ValueSlot = buff.slice(blockSize - 1, 2 * blockSize - 1);
         Ꮡdst.ValueSlot = buff.slice(0, blockSize);
-        mustPanic(tΔ6, invalidBufferOverlapˢ, () => {
+        mustPanic(tΔ6, invalidBufferOverlapˢ, [GoFunc("testCipher.func6.3")] () => {
             cipher(Ꮡdst.ValueSlot, Ꮡsrc.ValueSlot);
         });
     });
@@ -258,33 +258,33 @@ internal static void testCipher(ж<testing.T> t, Action<slice<byte>, slice<byte>
     // Test short input/output.
     // Assembly used to not notice.
     // See issue 7928.
-    t.Run(shortBlockˢ, (ж<testing.T> tΔ7) => {
+    t.Run(shortBlockˢ, [GoFunc("testCipher.func7")] (ж<testing.T> tΔ7) => {
         // Returns slice of n bytes of an n+1 length array.  Lets us test that a
         // slice is still considered too short even if the underlying array it
         // points to is large enough
-        slice<byte> byteSlice(nint n) => new slice<byte>(n + 1).slice(0, n);
+        [GoFunc("testCipher.func7.1")] slice<byte> byteSlice(nint n) => new slice<byte>(n + 1).slice(0, n);
 
         // Off by one byte
         var byteSliceʗ1 = byteSlice;
-        mustPanic(tΔ7, inputNotFullBlockˢ, () => {
+        mustPanic(tΔ7, inputNotFullBlockˢ, [GoFunc("testCipher.func7.2")] () => {
             cipher(byteSliceʗ1(blockSize), byteSliceʗ1(blockSize - 1));
         });
         var byteSliceʗ2 = byteSlice;
-        mustPanic(tΔ7, outputNotFullBlockˢ, () => {
+        mustPanic(tΔ7, outputNotFullBlockˢ, [GoFunc("testCipher.func7.3")] () => {
             cipher(byteSliceʗ2(blockSize - 1), byteSliceʗ2(blockSize));
         });
 
         // Small slices
         var byteSliceʗ3 = byteSlice;
-        mustPanic(tΔ7, inputNotFullBlockˢ, () => {
+        mustPanic(tΔ7, inputNotFullBlockˢ, [GoFunc("testCipher.func7.4")] () => {
             cipher(byteSliceʗ3(1), byteSliceʗ3(1));
         });
         var byteSliceʗ4 = byteSlice;
-        mustPanic(tΔ7, inputNotFullBlockˢ, () => {
+        mustPanic(tΔ7, inputNotFullBlockˢ, [GoFunc("testCipher.func7.5")] () => {
             cipher(byteSliceʗ4(100), byteSliceʗ4(1));
         });
         var byteSliceʗ5 = byteSlice;
-        mustPanic(tΔ7, outputNotFullBlockˢ, () => {
+        mustPanic(tΔ7, outputNotFullBlockˢ, [GoFunc("testCipher.func7.6")] () => {
             cipher(byteSliceʗ5(1), byteSliceʗ5(100));
         });
     });
@@ -295,7 +295,7 @@ internal static void mustPanic(ж<testing.T> t, @string msg, Action f) {
     try {
         t.Helper();
 
-        defer(() => {
+        defer([GoFunc("mustPanic.func1")] () => {
             t.Helper();
 
             var err = recover();

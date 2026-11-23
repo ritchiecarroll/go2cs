@@ -14,6 +14,9 @@
 
 using go;
 using static go.main_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -49,10 +52,12 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "ABce+rSCgpSCgpSClIKU")]
+[assembly: GoPositionMap("main.go", "main.cs", "ABMeutqUgoKUgoKUgoKUgpQ=")]
 // </GoSourcePositionMaps>
 
 namespace go;
+
+using static go.main_package;
 
 [GoPackage("main")]
 [GoTestMatchingConsoleOutput]
@@ -66,6 +71,7 @@ public static partial class main_package
 
     // <TypeAccessibility>
     internal partial struct field {}
+    internal partial struct 尺 {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import
@@ -86,5 +92,17 @@ public static partial class main_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(main_package.field)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛfield;
+[GoMethodHost(typeof(main_package.field)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class mainᴛfield;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class mainᴛfield {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint Area(this field f) => main_package.Area⁔(f);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint Weight(this field f) => main_package.Weight⁔(f);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint Ruler(this field f, main_package.尺 r) => main_package.Ruler⁔(f, r);
+}
+// </MethodForwarders>

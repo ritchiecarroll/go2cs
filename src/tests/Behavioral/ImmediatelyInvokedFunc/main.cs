@@ -14,19 +14,19 @@ internal static @string drain(@string _Δp0, channel<EmptyStruct> ch) {
 }
 
 internal static void main() {
-    func(() => {
+    func([GoFunc("main.func1")] () => {
         fmt.Println("a");
     })();
 
-    nint x = func(nint () => {
+    nint x = func([GoFunc("main.func2")] nint () => {
         return 6 * 7;
     })();
     fmt.Println(x);
 
-    func(() => {
+    func([GoFunc("main.func3")] () => {
         GoFrame ᒐ = default;
         try {
-            defer(() => {
+            defer([GoFunc("main.func3.1")] () => {
                 var r = recover(); if (r != nil) {
                     fmt.Println("recovered:", r);
                 }
@@ -38,7 +38,7 @@ internal static void main() {
     })();
     fmt.Println("after recover");
 
-    nint total = 10 + func(nint () => {
+    nint total = 10 + func([GoFunc("main.func4")] nint () => {
         nint sum = 0;
         for (nint i = 1; i <= 4; i++) {
             sum += i;
@@ -47,33 +47,33 @@ internal static void main() {
     })();
     fmt.Println(total);
 
-    nint y = func(nint () => {
-        return func(nint () => {
+    nint y = func([GoFunc("main.func5")] nint () => {
+        return func([GoFunc("main.func5.1")] nint () => {
             return 5;
         })() * 2;
     })();
     fmt.Println(y);
 
-    func((nint n) => {
+    func([GoFunc("main.func6")] (nint n) => {
         fmt.Println("n =", n);
     })(7);
 
-    nint tri = func(nint (nint a, nint b, nint c) => {
+    nint tri = func([GoFunc("main.func7")] nint (nint a, nint b, nint c) => {
         return a + b + c;
     })(1, 2, 3);
     fmt.Println(tri);
 
     for (nint k = 0; k < 3; k++) {
-        func((nint xΔ1) => {
+        func([GoFunc("main.func8")] (nint xΔ1) => {
             fmt.Print(xΔ1, " ");
         })(k);
     }
     fmt.Println();
 
-    func((@string label) => {
+    func([GoFunc("main.func9")] (@string label) => {
         GoFrame ᒐ = default;
         try {
-            defer(() => {
+            defer([GoFunc("main.func9.1")] () => {
                 var r = recover(); if (r != nil) {
                     fmt.Println(label, "recovered:", r);
                 }
@@ -86,11 +86,11 @@ internal static void main() {
     fmt.Println("after arg recover");
 
     nint calls = 0;
-    nint bump() {
+    [GoFunc("main.func10")] nint bump() {
         calls++;
         return 99;
     }
-    func((nint _) => {
+    func([GoFunc("main.func11")] (nint _) => {
         fmt.Println("ignored arg; calls =", calls);
     })(bump());
 

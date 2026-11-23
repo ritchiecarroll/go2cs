@@ -62,7 +62,7 @@ internal static void main() {
 
     var m = new sortedMap(0, 4);
     m = append(m, (nint)3, (nint)1, (nint)4, (nint)1);
-    sortSeq(m, (nint x, nint y) => x < y);
+    sortSeq(m, [GoFunc("main.func1")] (nint x, nint y) => x < y);
     fmt.Println(m);
 }
 

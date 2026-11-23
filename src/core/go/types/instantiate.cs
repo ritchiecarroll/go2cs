@@ -12,7 +12,6 @@ using fmt = fmt_package;
 using token = global::go.go.token_package;
 using static global::go.@internal.types.errors_package;
 using global::go.go;
-using static types_package;
 
 partial class types_package {
 
@@ -76,8 +75,6 @@ public static (Type, error) Instantiate(ж<Context> Ꮡctxt, Type orig, slice<Ty
     return (inst, default);
 }
 
-} partial class typesᴛChecker {
-
 // instance instantiates the given original (generic) function or type with the
 // provided type arguments and returns the resulting instance. If an identical
 // instance exists already in the given contexts, it returns that instance,
@@ -92,7 +89,7 @@ public static (Type, error) Instantiate(ж<Context> Ꮡctxt, Type orig, slice<Ty
 // For Named types the resulting instance may be unexpanded.
 //
 // check may be nil (when not type-checking syntax); pos is used only if check is non-nil.
-internal static Type /*res*/ instance(this ж<Checker> Ꮡcheck, token.Pos pos, genericType orig, slice<Type> targs, ж<Named> Ꮡexpanding, ж<Context> Ꮡctxt) {
+internal static Type /*res*/ instance⁔(/*this*/ ж<Checker> Ꮡcheck, token.Pos pos, genericType orig, slice<Type> targs, ж<Named> Ꮡexpanding, ж<Context> Ꮡctxt) {
     Type res = default;
     ref var expanding = ref Ꮡexpanding.DerefOrNull();
     ref var ctxt = ref Ꮡctxt.DerefOrNull();
@@ -125,7 +122,7 @@ internal static Type /*res*/ instance(this ж<Checker> Ꮡcheck, token.Pos pos, 
     var ctxtsʗ1 = ctxts;
     var hashesʗ1 = hashes;
     var targsʗ1 = targs;
-    Type updateContexts(Type resΔ1) {
+    [GoFunc("(*Checker).instance.func1")] Type updateContexts(Type resΔ1) {
         for (nint i = len(ctxtsʗ1) - 1; i >= 0; i--) {
             resΔ1 = ctxtsʗ1[i].update(hashesʗ1[i], orig, targsʗ1, resΔ1);
         }
@@ -201,7 +198,7 @@ internal static Type /*res*/ instance(this ж<Checker> Ꮡcheck, token.Pos pos, 
 // validateTArgLen checks that the number of type arguments (got) matches the
 // number of type parameters (want); if they don't match an error is reported.
 // If validation fails and check is nil, validateTArgLen panics.
-internal static bool validateTArgLen(this ж<Checker> Ꮡcheck, token.Pos pos, @string name, nint want, nint got) {
+internal static bool validateTArgLen⁔(/*this*/ ж<Checker> Ꮡcheck, token.Pos pos, @string name, nint want, nint got) {
     @string qual = default;
     switch (ᐧ) {
     case {} when got < want: {
@@ -226,7 +223,7 @@ internal static bool validateTArgLen(this ж<Checker> Ꮡcheck, token.Pos pos, @
 }
 
 // check may be nil; pos is used only if check is non-nil.
-internal static (nint, error) verify(this ж<Checker> Ꮡcheck, token.Pos pos, slice<ж<TypeParam>> tparams, slice<Type> targs, ж<Context> ctxt) {
+internal static (nint, error) verify⁔(/*this*/ ж<Checker> Ꮡcheck, token.Pos pos, slice<ж<TypeParam>> tparams, slice<Type> targs, ж<Context> ctxt) {
     var smap = makeSubstMap(tparams, targs);
     foreach (var (i, tpar) in range(tparams)) {
         // Ensure that we have a (possibly implicit) interface as type bound (go.dev/issue/51048).
@@ -256,7 +253,7 @@ private static readonly @string satisfyˢᵇ = "satisfy"u8;
 //
 // If the provided cause is non-nil, it may be set to an error string
 // explaining why V does not implement (or satisfy, for constraints) T.
-internal static bool implements(this ж<Checker> Ꮡcheck, Type V, Type T, bool constraint, ж<@string> Ꮡcause) {
+internal static bool implements⁔(/*this*/ ж<Checker> Ꮡcheck, Type V, Type T, bool constraint, ж<@string> Ꮡcause) {
     ref var cause = ref Ꮡcause.DerefOrNull();
 
     var Vu = V.Underlying();
@@ -320,7 +317,7 @@ internal static bool implements(this ж<Checker> Ꮡcheck, Type V, Type T, bool 
 
     // Only check comparability if we don't have a more specific error.
     var Tiʗ1 = Ti;
-    bool checkComparability() {
+    [GoFunc("(*Checker).implements.func1")] bool checkComparability() {
         if (!Tiʗ1.IsComparable()) {
             return true;
         }
@@ -369,7 +366,7 @@ internal static bool implements(this ж<Checker> Ꮡcheck, Type V, Type T, bool 
 
     // Otherwise, V's type must be included in the iface type set.
     ref var alt = ref heap<Type>(out var Ꮡalt);
-    if (Ti.typeSet().@is((ж<term> t) => {
+    if (Ti.typeSet().@is([GoFunc("(*Checker).implements.func2")] (ж<term> t) => {
         if (!t.includes(V)) {
             // If V ∉ t.typ but V ∈ ~t.typ then remember this type
             // so we can suggest it as an alternative in the error
@@ -407,8 +404,6 @@ internal static bool implements(this ж<Checker> Ꮡcheck, Type V, Type T, bool 
 
     return checkComparability();
 }
-
-} partial class types_package {
 
 // mentions reports whether type T "mentions" typ in an (embedded) element or term
 // of T (whether typ is in the type set of T or not). For better error messages.

@@ -1,8 +1,6 @@
 namespace go;
 
 using fmt = fmt_package;
-using main = main_package;
-using static main_package;
 
 partial class main_package {
 
@@ -21,13 +19,11 @@ partial struct Chest {
     internal slice<Tag> tags;
 }
 
-} partial class mainᴛChest {
+internal static Tag Tag⁔(/*this*/ ref Chest c) { return c.tag; }
 
-public static Tag Tag(this ref Chest c) { return c.tag; }
+internal static ж<nint> Seal⁔(/*this*/ ж<Chest> Ꮡc) { return Ꮡc.Ꮡtag.Ꮡinner.Ꮡn; }
 
-public static ж<nint> Seal(this ж<Chest> Ꮡc) { return Ꮡc.Ꮡtag.Ꮡinner.Ꮡn; }
-
-public static @string Forms(this ж<Chest> Ꮡc, any v) {
+internal static @string Forms⁔(/*this*/ ж<Chest> Ꮡc, any v) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     var lit = new Tag(id: 1, Value: 2);
@@ -42,7 +38,7 @@ public static @string Forms(this ж<Chest> Ꮡc, any v) {
     var fresh = @new<Tag>();
     fresh.Value.Value = 9;
 
-    var valueAddr = ptr.of(main_package.Tag.ᏑValue);
+    var valueAddr = ptr.of(Tag.ᏑValue);
     valueAddr.Value += 4;
 
     var idAddr = Ꮡc.Ꮡtag.Ꮡid;
@@ -54,7 +50,7 @@ public static @string Forms(this ж<Chest> Ꮡc, any v) {
     @string kind = "other";
 
     switch (v.type()) {
-    case Tag _: {
+    case Tag: {
         kind = "tag";
         break;
     }
@@ -69,37 +65,27 @@ public static @string Forms(this ж<Chest> Ꮡc, any v) {
     return fmt.Sprint(lit.id, (~ptr).Value, zero.id, count, (~fresh).Value, c.tag.id, isTag, isPtr, kind, Ꮡc.Seal().Value);
 }
 
-} partial class main_package {
-
 internal static T pick<T>(slice<T> s, nint i) { return s[i]; }
 
 partial struct SliceBuilder {
     internal nint n;
 }
 
-} partial class mainᴛSliceBuilder {
-
-public static nint Limit(this ref main_package.SliceBuilder s) {
-    var next = new main_package.SliceBuilder(n: s.n + (nint)main.Limit);
+internal static nint Limit⁔(/*this*/ ref main_package.SliceBuilder s) {
+    var next = new main_package.SliceBuilder(n: s.n + (nint)Limit);
     s = next;
     return s.n;
 }
-
-} partial class main_package {
 
 partial struct math {
     internal nint n;
 }
 
-} partial class mainᴛmath {
-
-internal static nint Limit(this ref main_package.math m) {
-    var next = new main_package.math(n: m.n + (nint)main.Limit);
+internal static nint Limit⁔(/*this*/ ref main_package.math m) {
+    var next = new main_package.math(n: m.n + (nint)Limit);
     m = next;
     return m.n;
 }
-
-} partial class main_package {
 
 internal static void forms() {
     var c = Ꮡ(new Chest(tags: [new(id: 2)]));

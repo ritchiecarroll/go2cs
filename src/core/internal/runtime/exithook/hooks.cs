@@ -16,7 +16,6 @@ namespace go.@internal.runtime;
 using atomic = go.@internal.runtime.atomic_package;
 /* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
 using go.@internal.runtime;
-using static exithook_package;
 
 partial class exithook_package {
 
@@ -77,7 +76,7 @@ public static void Run(nint code) {
         ᏑrunGoid.Store(Goid());
         defer(ᏑrunGoid.Store, (uint64)0, ref ᒐ);
 
-        defer(() => {
+        defer([GoFunc("Run.func1")] () => {
             var e = recover(); if (e != nil) {
                 Throw(exitHookInvokedPanicˢ);
             }
@@ -98,8 +97,6 @@ public static void Run(nint code) {
 
 partial struct exitError /*@string*/;
 
-} partial class exithookᴛexitError {
+internal static @string Error⁔(/*this*/ exitError e) { return (@string)e; }
 
-internal static @string Error(this exitError e) { return (@string)e; }
-
-}
+} // end exithook_package

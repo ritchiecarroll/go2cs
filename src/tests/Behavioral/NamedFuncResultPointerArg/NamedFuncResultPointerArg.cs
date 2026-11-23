@@ -11,7 +11,7 @@ partial struct State {
 // type addFunc is a methodless func type — rendered inline as its base delegate
 
 internal static Action<ж<State>, nint> adder() {
-    return (ж<State> s, nint x) => {
+    return [GoFunc("adder.func1")] (ж<State> s, nint x) => {
         s.sum += x;
     };
 }

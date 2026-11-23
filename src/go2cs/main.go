@@ -270,6 +270,7 @@ func main() {
 	testTimeoutCmd := commandLine.Duration("test-timeout", 2*time.Minute, "Timeout for each converted-test child process (build/run/compare); the test host's dotnet publish gets at least 30m")
 	testDeadlineCmd := commandLine.Duration("test-deadline", defaultTestDeadline, "Per-test deadline for the CONVERTED host under -test-action run/compare/all: a top-level test still running this long after it started is reported failed and ABANDONED (labelled so in the comparison), and the run goes on to the next test. Without it a hung test held the host to -test-timeout and every later test went unmeasured. 0 disables it. The Go side is unbounded, as `go test` is. A row whose own legitimate test outlasts the default takes a per-row floor (run-validated-sweep.ps1 $testDeadlineFloors)")
 	testFilterCmd := commandLine.String("test-filter", "", "Regex handed VERBATIM to BOTH sides of a -test-action compare (go test -run and the converted host --run), so the two runs filter identically. Intended for the block-gated census: exclude a test that BLOCKS the suite by passing an anchored alternation of the parents to keep. A gated census is DIAGNOSTIC ONLY and must never bank a row -- the row banks from an ungated run, after the block is rooted or the divergence disclosed")
+	testOracleVetOffCmd := commandLine.Bool("test-oracle-vet-off", false, "Run the -tests compare's ORACLE (`go test`) with -vet=off, for a package whose own `go test` fails at go test's vet checks rather than at a test (github.com/pmezard/go-difflib v1.0.0: two Example names its vet rejects). Off by default, and set per run, so per module. The run first reads go test's vet subset with `go vet -json`, refuses the option for a package that vet passes, and states every finding, by analyzer, on the package's proof page and in MODULE.md. The converted side is compared test by test against the -vet=off run")
 	testOracleGOARCHCmd := commandLine.String("test-oracle-goarch", "", "The GOARCH the -tests compare's ORACLE (`go test`) runs at, when it must differ from the target's: the arch the converted host process runs at. Empty (the default) is the target's own. The conversion, the converted host and the manifest keep the target. For a host whose native arch differs from the corpus target's, osx-arm64 running the darwin/amd64 corpus, where the default ran the oracle under Rosetta and read Rosetta's own behaviour as the package's. Recorded as oracleGoarch in the comparison record when it differs")
 	testConfigCmd := commandLine.String("test-config", "Release", "Publish/run configuration for the converted test host: Release (default since 2026-09-02 -- the validation configuration of RECORD, with an explicit -p:go2csPath replacing the Debug-conditional csproj-template default, and the CLR's tiered JIT disabled by default, see -test-tiered) or Debug (the pre-2026-09-02 default, still fully supported by flag). Recorded on every proof page and in the comparison record so a verdict carries the level it was measured at. The default moved on the deployment owner's ruling, gated on the Release census (docs/phase4/CENSUS-release-tc0-delta.md), not on this flag's own authority")
 	testTieredCmd := commandLine.Bool("test-tiered", false, "With -test-config Release, opt back IN to the CLR's default tiered JIT (Release's own default is DOTNET_TieredCompilation=0, since a verdict that depends on JIT promotion timing is not reproducible run to run). Meaningless with -test-config Debug. It changes what the C# host's JIT does, not what the converter emits")
@@ -613,6 +614,7 @@ Examples:
 		testDeadline:        *testDeadlineCmd,
 		testFilter:          strings.TrimSpace(*testFilterCmd),
 		testOracleGOARCH:    strings.TrimSpace(*testOracleGOARCHCmd),
+		testOracleVetOff:    *testOracleVetOffCmd,
 		testConfig:          canonicalTestConfig(*testConfigCmd),
 		testTiered:          *testTieredCmd,
 		testPublishBinlog:   *testPublishBinlogCmd,
@@ -1001,6 +1003,12 @@ Examples:
 				// and _test.go reference closures — collect the test half first.
 				if options.convertTests {
 					collectSiblingTestClosure(inputFilePath, options)
+
+					// A marker letter in a test file refuses before the production half is written (markerGlyphRefusal.go).
+					if refusal := refuseMarkerGlyphTestFiles(inputFilePath, options); refusal != nil {
+						refusal.report()
+						log.Fatalf("Refusing to convert: %s\n", refusal)
+					}
 				}
 
 				switch {

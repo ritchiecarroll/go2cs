@@ -837,8 +837,8 @@ func planCgoRoute(pkg *packages.Package, options Options, load cgoLoad) (*cgoRou
 
 		switch strings.ToLower(filepath.Ext(file)) {
 		case ".cc", ".cpp", ".cxx", ".c++":
-			reportDiagnostic(file, diagnosticCgoRefused, fmt.Sprintf("cgo: R3: package %s has C++ source %s, which needs a C++ compiler (CXX) for %s; INC 2 takes a C compiler only", pkg.PkgPath, filepath.Base(file), options.targetPlatform))
-			return nil, fmt.Errorf("cgo: R3: package %s has C++ sources, which need a C++ compiler (CXX); INC 2 takes a C compiler only", pkg.PkgPath)
+			reportDiagnostic(file, diagnosticCgoRefused, fmt.Sprintf("cgo: package %s has C++ source %s, which needs a C++ compiler (CXX) for %s; go2cs's cgo support takes a C compiler only (no C++)", pkg.PkgPath, filepath.Base(file), options.targetPlatform))
+			return nil, fmt.Errorf("cgo: package %s has C++ sources, which need a C++ compiler (CXX); go2cs's cgo support takes a C compiler only (no C++)", pkg.PkgPath)
 		}
 	}
 
@@ -902,7 +902,7 @@ func planCgoRoute(pkg *packages.Package, options Options, load cgoLoad) (*cgoRou
 
 	for _, source := range sources {
 		for _, position := range cgoReceiverAddresses(source.file, info) {
-			refuse(position, "unsafe.Pointer of a pointer of the method's own receiver type, inside that method: go2cs mints that address from a reference, as a bare number it cannot tell from C memory. Hand the pointer to a function that takes it as a parameter and convert it there; Phase 3")
+			refuse(position, "unsafe.Pointer of a pointer of the method's own receiver type, inside that method: go2cs mints that address from a reference, as a bare number it cannot tell from C memory. Hand the pointer to a function that takes it as a parameter and convert it there")
 		}
 
 		ast.Inspect(source.file, func(n ast.Node) bool {
@@ -915,7 +915,7 @@ func planCgoRoute(pkg *packages.Package, options Options, load cgoLoad) (*cgoRou
 
 					if closure == nil {
 						if cgoMentionsPrefix(n, "_cgoIndex") || cgoMentionsPrefix(n, "_cgoSlice") {
-							refuse(n.Pos(), fmt.Sprintf("%s: a pointer to an element of a Go slice or array, checked by cmd/cgo; Phase 3", cgoCalledFunction(n, declarations, info)))
+							refuse(n.Pos(), fmt.Sprintf("%s: a pointer to an element of a Go slice or array, checked by cmd/cgo: go2cs does not hand C a pointer into Go memory yet", cgoCalledFunction(n, declarations, info)))
 						} else {
 							refuse(n.Pos(), fmt.Sprintf("%s: a deferred call through cmd/cgo's pointer-check closure in a shape go2cs does not recognise", cgoCalledFunction(n, declarations, info)))
 						}
@@ -931,7 +931,7 @@ func planCgoRoute(pkg *packages.Package, options Options, load cgoLoad) (*cgoRou
 				// itself, so its arguments are evaluated inside the new goroutine. A goroutine on a Go function that
 				// calls C further in is an ordinary one.
 				if funcLit, ok := ast.Unparen(n.Call.Fun).(*ast.FuncLit); ok && cgoDirectlyChecks(funcLit.Body, info, plumbing) {
-					refuse(n.Pos(), fmt.Sprintf("%s: a goroutine started on a call through cmd/cgo's pointer-check closure, whose arguments cmd/cgo evaluates inside the new goroutine; Phase 2 later", cgoCalledFunction(n, declarations, info)))
+					refuse(n.Pos(), fmt.Sprintf("%s: a goroutine started on a call through cmd/cgo's pointer-check closure, whose arguments cmd/cgo evaluates inside the new goroutine: not supported yet", cgoCalledFunction(n, declarations, info)))
 					consume(n)
 					return false
 				}
@@ -954,7 +954,7 @@ func planCgoRoute(pkg *packages.Package, options Options, load cgoLoad) (*cgoRou
 							}
 						}
 					} else if cgoMentionsPrefix(funcLit, "_cgoIndex") || cgoMentionsPrefix(funcLit, "_cgoSlice") {
-						refuse(n.Pos(), fmt.Sprintf("%s: a pointer to an element of a Go slice or array, checked by cmd/cgo; Phase 3", cgoCalledFunction(funcLit, declarations, info)))
+						refuse(n.Pos(), fmt.Sprintf("%s: a pointer to an element of a Go slice or array, checked by cmd/cgo: go2cs does not hand C a pointer into Go memory yet", cgoCalledFunction(funcLit, declarations, info)))
 						consume(funcLit)
 						return false
 					}
@@ -984,17 +984,17 @@ func planCgoRoute(pkg *packages.Package, options Options, load cgoLoad) (*cgoRou
 				// A C type or constant: 3d's route.
 			case found && (declaration.kind == cgoFunc || declaration.kind == cgoErrnoFunc):
 				if !calledIdents[ident] {
-					refuse(ident.Pos(), fmt.Sprintf("C.%s: a C function used as a value rather than called; Phase 2 later", declaration.cName))
+					refuse(ident.Pos(), fmt.Sprintf("C.%s: a C function used as a value rather than called: not supported yet", declaration.cName))
 				} else if _, seen := usedAt[object]; !seen {
 					usedAt[object] = pkg.Fset.Position(ident.Pos())
 					used = append(used, declaration)
 				}
 			case found && declaration.kind == cgoVar:
-				refuse(ident.Pos(), fmt.Sprintf("C.%s: a C variable (§11.6); Phase 2 later", declaration.cName))
+				refuse(ident.Pos(), fmt.Sprintf("C.%s: a C variable: go2cs does not read or write C variables yet", declaration.cName))
 			case found && declaration.kind == cgoFuncValue:
-				refuse(ident.Pos(), fmt.Sprintf("C.%s: a C function's address used as a value (§11.6); Phase 2 later", declaration.cName))
+				refuse(ident.Pos(), fmt.Sprintf("C.%s: a C function's address used as a value: not supported yet", declaration.cName))
 			case found && declaration.kind == cgoMacro:
-				refuse(ident.Pos(), fmt.Sprintf("C.%s: a C macro that is not a constant, which cmd/cgo evaluates in C; Phase 4", declaration.cName))
+				refuse(ident.Pos(), fmt.Sprintf("C.%s: a C macro that is not a constant, which cmd/cgo evaluates in C: go2cs does not compile C yet", declaration.cName))
 			case ident.Name == "_Cgo_ptr":
 				// The wrapper of a C function's address (_Cfpvar_fp_), refused by name above.
 			case ident.Name == "_cgoCheckPointer":
@@ -1110,7 +1110,7 @@ func planCgoRoute(pkg *packages.Package, options Options, load cgoLoad) (*cgoRou
 	// The capture asks a library for each PLAIN name, with no header in sight, so a name a header renames is found
 	// under the wrong function. Each name is held to what cmd/cgo's own binary imports.
 	if len(symbols) > 0 && imports == nil {
-		return nil, refuseCgoRoute(pkg, []cgoUseRefusal{{position: pkg.Fset.PositionFor(typesFile.Package, false), text: "cgo: cmd/cgo wrote no dynamic imports for this package (its C does not link as go builds it), so nothing shows which symbol each C call reaches, and Phase 2 binds only a name cmd/cgo itself imports"}})
+		return nil, refuseCgoRoute(pkg, []cgoUseRefusal{{position: pkg.Fset.PositionFor(typesFile.Package, false), text: "cgo: cmd/cgo wrote no dynamic imports for this package (its C does not link as go builds it), so nothing shows which symbol each C call reaches, and go2cs binds only a name cmd/cgo itself imports"}})
 	}
 
 	if unverified := cgoImportedByCmdCgo(symbols, imports, symbolUses); len(unverified) > 0 {
@@ -1233,7 +1233,7 @@ func refuseCgoRoute(pkg *packages.Package, refusals []cgoUseRefusal) error {
 
 	// The caller hands this to refusePackage: fatal for a single package, and under -recurse the package is skipped and
 	// named while the rest of the module converts (recurseRefusal.go; COORD's ruling on C2's 193007Z).
-	return fmt.Errorf("package %s uses C in %d way(s) cgo Phase 2 does not bind, each named above with the phase that owns it; nothing was written", pkg.PkgPath, len(refusals))
+	return fmt.Errorf("package %s uses C in %d way(s) go2cs does not convert, each named above (docs/Limitations.md#cgo); nothing was written", pkg.PkgPath, len(refusals))
 }
 
 // cgoBindingsHeader writes the bindings file's header (§4.1, as amended by §11.20, M4): the target, the C toolchain's
@@ -1282,7 +1282,7 @@ func cgoBindingsHeader(pkg *packages.Package, sources []syntaxSourceFile, reduce
 	var header strings.Builder
 
 	fmt.Fprintf(&header, "// %s.cgo.cs - the C bindings of Go package %s, made by go2cs from cmd/cgo's output for its import \"C\"\n", pkg.Name, pkg.PkgPath)
-	header.WriteString("// sources (docs/phase4/DESIGN-cgo-phase2-pinvoke.md §4.1, §11.20). DO NOT EDIT: convert the package again with -cgo.\n")
+	header.WriteString("// sources (docs/Limitations.md#cgo). DO NOT EDIT: convert the package again with -cgo.\n")
 	fmt.Fprintf(&header, "// target: %s\n", targetPlatform)
 	fmt.Fprintf(&header, "// C toolchain: %s\n", cgoToolchainLine(toolchain))
 
@@ -1292,6 +1292,15 @@ func cgoBindingsHeader(pkg *packages.Package, sources []syntaxSourceFile, reduce
 	fmt.Fprintf(&header, "// sha256: %s (the import \"C\" sources and the C declarations cmd/cgo gave them)\n\n", hex.EncodeToString(hash.Sum(nil)))
 
 	return header.String()
+}
+
+// digestHeader is the bindings header GoInputDigest reads for a cgo package, or "" for a package with no cgo route.
+func (route *cgoRoute) digestHeader() string {
+	if route == nil {
+		return ""
+	}
+
+	return route.header
 }
 
 // bindingsText completes the bindings file from its converted declarations: the header first, the assembly's
@@ -1497,13 +1506,13 @@ func cgoHostTarget(load cgoLoad, target string) error {
 
 	for i, name := range []string{"CGO_CFLAGS", "CGO_CPPFLAGS", "CGO_LDFLAGS"} {
 		if strings.Contains(values[2+i], "sysroot") {
-			return fmt.Errorf("cgo: R3: this -cgo conversion for %s sets a sysroot in %s (%q); INC 2 takes no sysroot: narrow v1 links what the target's pinned C compiler carries", target, name, values[2+i])
+			return fmt.Errorf("cgo: this -cgo conversion for %s sets a sysroot in %s (%q); go2cs takes no sysroot: it links what the target's C compiler carries", target, name, values[2+i])
 		}
 
 		// A target-changing flag here reaches cmd/cgo's compile but not the -dumpmachine probe, which runs CC alone.
 		// A -target in CC itself is what the probe answers for (the pinned zig, `zig cc -target <triple>`).
 		if name != "CGO_LDFLAGS" && (strings.Contains(values[2+i], "--target") || strings.Contains(values[2+i], "-target ") || strings.HasSuffix(values[2+i], "-target")) {
-			return fmt.Errorf("cgo: R3: this -cgo conversion for %s sets a target flag in %s (%q), which the C compiler's -dumpmachine cannot answer for: name the target in CC itself (for example the pinned zig: CC=\"zig cc -target <triple>\")", target, name, values[2+i])
+			return fmt.Errorf("cgo: this -cgo conversion for %s sets a target flag in %s (%q), which the C compiler's -dumpmachine cannot answer for: name the target in CC itself (for example the pinned zig: CC=\"zig cc -target <triple>\")", target, name, values[2+i])
 		}
 	}
 
@@ -1518,18 +1527,18 @@ func cgoHostTarget(load cgoLoad, target string) error {
 	}
 
 	if err != nil {
-		return fmt.Errorf("cgo: R3: this -cgo conversion asks for %s (the host is %s), and the C compiler go env CC names in its load did not answer -dumpmachine: %w", target, hostTarget, err)
+		return fmt.Errorf("cgo: this -cgo conversion asks for %s (the host is %s), and the C compiler go env CC names in its load did not answer -dumpmachine: %w", target, hostTarget, err)
 	}
 
 	goos, goarch, abi := cgoTripleTarget(triple)
 
 	if goos+"/"+goarch != target {
-		return fmt.Errorf("cgo: R3: this -cgo conversion asks for %s, and the C compiler go env CC names in its load targets %q (-dumpmachine; the host is %s): name a C compiler for %s in CC (for example the pinned zig: CC=\"zig cc -target <triple>\")", target, triple, hostTarget, target)
+		return fmt.Errorf("cgo: this -cgo conversion asks for %s, and the C compiler go env CC names in its load targets %q (-dumpmachine; the host is %s): name a C compiler for %s in CC (for example the pinned zig: CC=\"zig cc -target <triple>\")", target, triple, hostTarget, target)
 	}
 
 	// The ABI narrow v1 binds against: glibc on linux, the gnu or mingw C runtime on windows (P3's 2a CLEAR, SHOULD 1).
 	if abi == "musl" || abi == "android" || abi == "msvc" {
-		return fmt.Errorf("cgo: R3: this -cgo conversion for %s has a C compiler for the %s ABI (-dumpmachine %q); narrow v1 takes gnu on linux and gnu or mingw on windows", target, abi, triple)
+		return fmt.Errorf("cgo: this -cgo conversion for %s has a C compiler for the %s ABI (-dumpmachine %q); go2cs's cgo support takes the gnu ABI on linux, and gnu or mingw on windows", target, abi, triple)
 	}
 
 	return nil
@@ -1710,7 +1719,7 @@ func cgoCapture(load cgoLoad, goos, goarch string, flags cgoLinkFlags, symbols [
 
 	for _, symbol := range symbols {
 		if unbound[symbol] {
-			refusals = append(refusals, cgoUseRefusal{position: usedAt[symbol], text: fmt.Sprintf("C.%s: no shared library the package links exports it (it resolved statically, or nowhere), and Phase 2 binds only a shared library's export; a function the preamble defines is compiled C, Phase 4's", symbol)})
+			refusals = append(refusals, cgoUseRefusal{position: usedAt[symbol], text: fmt.Sprintf("C.%s: no shared library the package links exports it (it resolved statically, or nowhere), and go2cs binds only a shared library's export; a function the preamble defines is compiled C, and go2cs does not compile C yet", symbol)})
 		}
 	}
 
@@ -1801,7 +1810,7 @@ func cgoImportedByCmdCgo(symbols []string, imports map[string]bool, usedAt map[s
 			instead = " (it imports " + strings.Join(decorated, ", ") + ")"
 		}
 
-		refusals = append(refusals, cgoUseRefusal{position: usedAt[symbol], text: fmt.Sprintf("C.%s: cmd/cgo's own binary does not import a symbol named %s%s, so nothing shows that name is the function C calls here: a header renames it, or the C compiler inlined the call as a builtin. Binding the plain name could call a different function, so it is refused; Phase 2 later", symbol, symbol, instead)})
+		refusals = append(refusals, cgoUseRefusal{position: usedAt[symbol], text: fmt.Sprintf("C.%s: cmd/cgo's own binary does not import a symbol named %s%s, so nothing shows that name is the function C calls here: a header renames it, or the C compiler inlined the call as a builtin. Binding the plain name could call a different function, so it is refused", symbol, symbol, instead)})
 	}
 
 	return refusals

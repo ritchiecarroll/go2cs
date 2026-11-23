@@ -65,7 +65,7 @@ internal static partial void step(@string name, Func<@string> body) {
     Ꮡwritten.Store(0);
     var done = new channel<@string>(1);
     var doneʗ1 = done;
-    goǃ(() => {
+    goǃ([GoFunc("step.func1")] () => {
         doneʗ1.ᐸꟷ(body());
     });
 
@@ -104,7 +104,7 @@ internal static void main() {
     var serverʗ1 = server;
     var stderrʗ1 = stderr;
     var stdoutʗ1 = stdout;
-    step("1 stdout, stderr, stdout", () => {
+    step("1 stdout, stderr, stdout", [GoFunc("main.func1")] () => {
         foreach (var (_, w) in range(slice<main_type>([new(stdoutʗ1, "stdout line\n"), new(stderrʗ1, "stderr line\n"), new(stdoutʗ1, "stdout again\n")]))) {
             var (_, err) = w.f.Write(slice<byte>(w.text)); if (err != nil) {
                 return w.f.Name() + " write: "u8 + err.Error();
@@ -115,7 +115,7 @@ internal static void main() {
 
     var stderrʗ2 = stderr;
     var stdoutʗ2 = stdout;
-    step("2 deadlines", () => {
+    step("2 deadlines", [GoFunc("main.func2")] () => {
         var refused = stderrʗ2.SetDeadline(time.Now().Add(time.Hour));
         var bound = stdoutʗ2.SetDeadline(time.Now().Add(time.Hour));
         stdoutʗ2.SetDeadline(new time.Time());
@@ -124,14 +124,14 @@ internal static void main() {
 
     var serverʗ2 = server;
     var stderrʗ3 = stderr;
-    step("3 read through stderr", () => {
+    step("3 read through stderr", [GoFunc("main.func3")] () => {
         var (_, err) = serverʗ2.Write(slice<byte>("reply\n"u8)); if (err != nil) {
             return "server write: "u8 + err.Error();
         }
         return strconv.Quote(readLines(stderrʗ3, 1));
     });
 
-    step("4 one handle, two files", () => {
+    step("4 one handle, two files", [GoFunc("main.func4")] () => {
         var (server2, client2) = pipe();
         var first = os.NewFile((uintptr)client2, "first");
         var second = os.NewFile((uintptr)client2, "second");
@@ -158,7 +158,7 @@ internal static void main() {
             errors.Is(second.SetDeadline(time.Now().Add(time.Hour)), os.ErrNoDeadline));
     });
 
-    step("5 Fd disassociates", () => {
+    step("5 Fd disassociates", [GoFunc("main.func5")] () => {
         var (server3, client3) = pipe();
         var f = os.NewFile((uintptr)client3, "f");
 
@@ -180,7 +180,7 @@ internal static void main() {
             readLines(server3, 2), before, errors.Is(after, os.ErrNoDeadline));
     });
 
-    step("6 a handle opened after a close", () => {
+    step("6 a handle opened after a close", [GoFunc("main.func6")] () => {
         var (server5, other) = pipe();
 
         @string before = default;
@@ -222,8 +222,8 @@ internal static void main() {
         return fmt.Sprintf("%q %q"u8, before, readLines(server5, 1));
     });
 
-    step("7 consecutive writes on one bound FD", [MethodImpl(MethodImplOptions.NoInlining)] () => consecutiveWrites(false));
-    step("7 the same, with skip-on-success set", [MethodImpl(MethodImplOptions.NoInlining)] () => consecutiveWrites(true));
+    step("7 consecutive writes on one bound FD", [MethodImpl(MethodImplOptions.NoInlining), GoFunc("main.func7")] () => consecutiveWrites(false));
+    step("7 the same, with skip-on-success set", [MethodImpl(MethodImplOptions.NoInlining), GoFunc("main.func8")] () => consecutiveWrites(true));
 }
 
 internal static partial @string consecutiveWrites(bool skipOnSuccess) {
@@ -248,7 +248,7 @@ internal static partial @string consecutiveWrites(bool skipOnSuccess) {
     var drained = new channel<@string>(1);
     var drainedʗ1 = drained;
     var server7ʗ1 = server7;
-    goǃ(() => {
+    goǃ([GoFunc("consecutiveWrites.func1")] () => {
         nint total = 0;
         var buf = new slice<byte>(4096);
         while (total < (nint)(large * chunk)) {

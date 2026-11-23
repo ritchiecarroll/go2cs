@@ -9,8 +9,8 @@ using System;
 namespace go.golib;
 
 // ---------------------------------------------------------------------------------------------
-// M:N PROTOTYPE (stage (b), N3, docs/phase4/DESIGN-mn-func-values.md sections 4, 9.3 and 10.4).
-// Prototype code: nothing from this branch lands on master as it is.
+// M:N, experimental and opt-in (stage (b), N3, docs/phase4/DESIGN-mn-func-values.md sections 4, 9.3 and 10.4).
+// Inert unless the program is built with twins and run with GO2CS_MN=1.
 //
 // A func value created in a twin body whose literal can park is a PAIR: its plain body and its
 // twin, made together. The value handed out is the PLAIN delegate type bound to the pair's

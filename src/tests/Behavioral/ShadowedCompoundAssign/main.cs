@@ -18,7 +18,7 @@ internal static void main() {
     nint i = 50;
     _ = sum;
     _ = i;
-    nint total = func(nint () => {
+    nint total = func([GoFunc("main.func1")] nint () => {
         nint sumΔ1 = 0;
         for (nint iΔ1 = 1; iΔ1 <= 4; iΔ1++) {
             sumΔ1 += iΔ1;

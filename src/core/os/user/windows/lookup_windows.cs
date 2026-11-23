@@ -211,7 +211,7 @@ internal static (ж<User>, error) current() {
     // when calling syscall.OpenCurrentProcessToken if the current thread
     // is impersonating a different user. See https://go.dev/issue/68647.
     ref var usr = ref heap<ж<User>>(out var Ꮡusr);
-    var err = runAsProcessOwner(error () => {
+    var err = runAsProcessOwner([GoFunc("current.func1")] error () => {
         GoFrame ᒐ = default;
         try {
             var (t, e) = syscall.OpenCurrentProcessToken();
@@ -277,7 +277,7 @@ internal static error runAsProcessOwner(Func<error> f) {
     try {
         ref var impersonationRollbackErr = ref heap<error>(out var ᏑimpersonationRollbackErr);
         runtime.LockOSThread();
-        defer(() => {
+        defer([GoFunc("runAsProcessOwner.func1")] () => {
             // If impersonation failed, the thread is running with the wrong token,
             // so it's better to terminate it.
             // This is achieved by not calling runtime.UnlockOSThread.
@@ -297,7 +297,7 @@ internal static error runAsProcessOwner(Func<error> f) {
             err = windows.RevertToSelf(); if (err != nil) {
                 return fmt.Errorf("os/user: failed to revert to self: %w"u8, err);
             }
-            defer(() => {
+            defer([GoFunc("runAsProcessOwner.func2")] () => {
                 ᏑimpersonationRollbackErr.ValueSlot = windows.ImpersonateLoggedOnUser(prevToken);
             }, ref ᒐ);
         }
@@ -423,7 +423,7 @@ internal static (slice<@string>, error) listGroups(ref User user) {
         var (u, err) = Current(); if (err == nil && u.Uid == user.Uid) {
             // It is faster and more reliable to get the groups
             // of the current user from the current process token.
-            var errΔ1 = runAsProcessOwner(error () => {
+            var errΔ1 = runAsProcessOwner([GoFunc("listGroups.func1")] error () => {
                 GoFrame ᒐ = default;
                 try {
                     var (t, errΔ2) = syscall.OpenCurrentProcessToken();

@@ -42,7 +42,6 @@ using go.@internal;
 using go.@internal.coverage;
 using iter = iter_package;
 using text;
-using static cformat_package;
 
 partial class cformat_package {
 
@@ -90,13 +89,11 @@ public static ж<Formatter> NewFormatter(coverage.CounterMode cm) {
     ));
 }
 
-} partial class cformatᴛFormatter {
-
 // SetPackage tells the formatter that we're about to visit the
 // coverage data for the package with the specified import path.
 // Note that it's OK to call SetPackage more than once with the
 // same import path; counter data values will be accumulated.
-public static void SetPackage(this ref Formatter fm, @string importpath) {
+internal static void SetPackage⁔(/*this*/ ref Formatter fm, @string importpath) {
     if (importpath == fm.pkg) {
         return;
     }
@@ -114,7 +111,7 @@ public static void SetPackage(this ref Formatter fm, @string importpath) {
 // AddUnit passes info on a single coverable unit (file, funcname,
 // literal flag, range of lines, and counter value) to the formatter.
 // Counter values will be accumulated where appropriate.
-public static void AddUnit(this ref Formatter fm, @string @file, @string fname, bool isfnlit, coverage.CoverableUnit unit, uint32 count) {
+internal static void AddUnit⁔(/*this*/ ref Formatter fm, @string @file, @string fname, bool isfnlit, coverage.CoverableUnit unit, uint32 count) {
     if (fm.p == nil) {
         throw panic("AddUnit invoked before SetPackage");
     }
@@ -139,14 +136,12 @@ public static void AddUnit(this ref Formatter fm, @string @file, @string fname, 
     fm.p.unitTable[ukey] = result;
 }
 
-} partial class cformatᴛpstate {
-
 // sortUnits sorts a slice of extcu objects in a package according to
 // source position information (e.g. file and line). Note that we don't
 // include function name as part of the sorting criteria, the thinking
 // being that is better to provide things in the original source order.
-internal static void sortUnits(this ж<pstate> Ꮡp, slice<extcu> units) {
-    slices.SortFunc(units, (extcu ui, extcu uj) => {
+internal static void sortUnits⁔(/*this*/ ж<pstate> Ꮡp, slice<extcu> units) {
+    slices.SortFunc(units, [GoFunc("(*pstate).sortUnits.func1")] (extcu ui, extcu uj) => {
         @string ifile = Ꮡp.Value.funcs[ui.fnfid].@file;
         @string jfile = Ꮡp.Value.funcs[uj.fnfid].@file;
         {
@@ -180,15 +175,13 @@ internal static void sortUnits(this ж<pstate> Ꮡp, slice<extcu> units) {
     });
 }
 
-} partial class cformatᴛFormatter {
-
 // EmitTextual writes the accumulated coverage data for 'pkgs' in the legacy
 // cmd/cover text format to the writer 'w'; if pkgs is empty, text output
 // is emitted for all packages recorded.  We sort the data items by
 // importpath, source file, and line number before emitting (this sorting
 // is not explicitly mandated by the format, but seems like a good idea
 // for repeatable/deterministic dumps).
-public static error EmitTextual(this ref Formatter fm, slice<@string> pkgs, io.Writer w) {
+internal static error EmitTextual⁔(/*this*/ ref Formatter fm, slice<@string> pkgs, io.Writer w) {
     var pkgsᴷ = new stackAppend<@string>();
     var unitsᴷ = new stackAppend<extcu>();
 
@@ -233,7 +226,7 @@ public static error EmitTextual(this ref Formatter fm, slice<@string> pkgs, io.W
 // EmitPercent writes out a "percentage covered" string to the writer
 // 'w', selecting the set of packages in 'pkgs' and suffixing the
 // printed string with 'inpkgs'.
-public static error EmitPercent(this ref Formatter fm, io.Writer w, slice<@string> pkgs, @string inpkgs, bool noteEmpty, bool aggregate) {
+internal static error EmitPercent⁔(/*this*/ ref Formatter fm, io.Writer w, slice<@string> pkgs, @string inpkgs, bool noteEmpty, bool aggregate) {
     var pkgsᴷ = new stackAppend<@string>();
 
     if (len(pkgs) == 0) {
@@ -243,7 +236,7 @@ public static error EmitPercent(this ref Formatter fm, io.Writer w, slice<@strin
         }
     }
 
-    error rep(uint64 cov, uint64 tot) {
+    [GoFunc("(*Formatter).EmitPercent.func1")] error rep(uint64 cov, uint64 tot) {
         if (tot != 0) {
             var (_, err) = fmt.Fprintf(w, "coverage: %.1f%% of statements%s\n"u8,
                 100.0D * (float64)cov / (float64)tot, inpkgs); if (err != nil) {
@@ -308,7 +301,7 @@ private static readonly object statementsˢ = (@string)"(statements)"u8;
 // to name them (this is also consistent with the legacy cmd/cover
 // implementation). We do want to include their counts in the overall
 // summary however.
-public static error EmitFuncs(this ж<Formatter> Ꮡfm, io.Writer w) {
+internal static error EmitFuncs⁔(/*this*/ ж<Formatter> Ꮡfm, io.Writer w) {
     GoFrame ᒐ = default;
     try {
         ref var fm = ref Ꮡfm.DerefOrNull();
@@ -317,7 +310,7 @@ public static error EmitFuncs(this ж<Formatter> Ꮡfm, io.Writer w) {
         if (fm.cm == coverage.CtrModeInvalid) {
             throw panic("internal error, counter mode unset");
         }
-        float64 perc(uint64 covered, uint64 total) {
+        [GoFunc("(*Formatter).EmitFuncs.func1")] float64 perc(uint64 covered, uint64 total) {
             if (total == 0) {
                 total = 1;
             }
@@ -352,7 +345,7 @@ public static error EmitFuncs(this ж<Formatter> Ꮡfm, io.Writer w) {
             uint64 cstmts = default;
             uint64 tstmts = default;
             var pʗ1 = p;
-            void captureFuncStart(extcu u) {
+            [GoFunc("(*Formatter).EmitFuncs.func2")] void captureFuncStart(extcu u) {
                 fname = pʗ1.funcs[u.fnfid].fname;
                 ffile = pʗ1.funcs[u.fnfid].@file;
                 flit = pʗ1.funcs[u.fnfid].lit;
@@ -361,7 +354,7 @@ public static error EmitFuncs(this ж<Formatter> Ꮡfm, io.Writer w) {
             var captureFuncStartʗ1 = captureFuncStart;
             var percʗ1 = perc;
             var tabberʗ2 = tabber;
-            error emitFunc(extcu u) {
+            [GoFunc("(*Formatter).EmitFuncs.func3")] error emitFunc(extcu u) {
                 // Don't emit entries for function literals (see discussion
                 // in function header comment above).
                 if (!flit) {
@@ -412,4 +405,4 @@ public static error EmitFuncs(this ж<Formatter> Ꮡfm, io.Writer w) {
     finally { ᒐ.Run(); }
 }
 
-}
+} // end cformat_package

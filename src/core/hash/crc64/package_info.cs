@@ -10,10 +10,14 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+using hash = go.hash_package;
 // </ImportedTypeAliases>
 
 using go;
 using static go.hash.crc64_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -57,10 +61,13 @@ using static go.hash.crc64_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("hash/crc64/crc64.go", "crc64.cs", "ACVKlIKCqqKClKSkuIKCgoKCgpSmlKaCgoKCgoKCpgAIHMC0lJQACQ6CgoKCpoIACgaCgpSClIKUgqaCgsaCgpSCgoKCgpSmlKaCggAAELiClKiSxoKCppSCgsqQlrKCgoKCpg==")]
+[assembly: GoPositionMap("hash/crc64/crc64.go", "crc64.cs", "ACNKlIKCqqKClKSkuIKCgoKCgpSmlKaCgoKCgoKCpgAIHMCUlJTegoKCgqaCAAoGgoKUgpSClIKmgoKmgoKUgoKCgoKUppSmgoIAABC4gpSokqaCgqaUgoKqkJaygoKCgqY=")]
 // </GoSourcePositionMaps>
 
 namespace go.hash;
+
+using static go.hash.crc64_package;
+using hash = go.hash_package;
 
 [GoPackage("crc64")]
 public static partial class crc64_package
@@ -96,5 +103,24 @@ public static partial class crc64_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(crc64_package.digest)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class crc64ᴛdigest;
+[GoMethodHost(typeof(crc64_package.digest)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class crc64ᴛdigest;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class crc64ᴛdigest {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint Size(this ref digest d) => crc64_package.Size⁔(ref d);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint BlockSize(this ref digest d) => crc64_package.BlockSize⁔(ref d);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void Reset(this ref digest d) => crc64_package.Reset⁔(ref d);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<byte>, error) AppendBinary(this ref digest d, slice<byte> b) => crc64_package.AppendBinary⁔(ref d, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<byte>, error) MarshalBinary(this ref digest d) => crc64_package.MarshalBinary⁔(ref d);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error UnmarshalBinary(this ref digest d, slice<byte> b) => crc64_package.UnmarshalBinary⁔(ref d, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (hash.Cloner, error) Clone(this ref digest d) => crc64_package.Clone⁔(ref d);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) Write(this ref digest d, slice<byte> p) => crc64_package.Write⁔(ref d, p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static uint64 Sum64(this ref digest d) => crc64_package.Sum64⁔(ref d);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<byte> Sum(this ref digest d, slice<byte> @in) => crc64_package.Sum⁔(ref d, @in);
+}
+// </MethodForwarders>

@@ -25,7 +25,7 @@ internal static (@string, nint) run() {
     run_rep rep = new(nil);
     rep.label = "start";
 
-    nint build() {
+    [GoFunc("run.func1")] nint build() {
         rep.counter.bump();
         rep.label = "built";
         return rep.n;
@@ -33,8 +33,8 @@ internal static (@string, nint) run() {
 
     fmt.Println("inner:", build(), rep.label);
 
-    nint got = apply(() => {
-        void touch() {
+    nint got = apply([GoFunc("run.func2")] () => {
+        [GoFunc("run.func2.1")] void touch() {
             rep.counter.bump();
             rep.label = "applied";
         }

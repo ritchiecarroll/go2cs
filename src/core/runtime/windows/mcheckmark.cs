@@ -44,7 +44,7 @@ internal static void startCheckmarks() {
     assertWorldStopped();
 
     // Clear all checkmarks.
-    void clearCheckmarks(arenaIdx ai) {
+    [GoFunc("startCheckmarks.func1")] void clearCheckmarks(arenaIdx ai) {
         var arena = mheap_.arenas[ai.l1()].Value[ai.l2()];
         var bitmap = arena.checkmarks;
 
@@ -190,7 +190,7 @@ internal static void checkFinalizersAndCleanups() {
     bool more = default;
     uintptr lastTinyBlock = default;
 
-    forEachSpecial((uintptr p, ж<mspan> s, ж<special> sp) => {
+    forEachSpecial([GoFunc("checkFinalizersAndCleanups.func1")] (uintptr p, ж<mspan> s, ж<special> sp) => {
         // N.B. The tiny block specials are sorted first in the specials list.
         if (sp.kind == _KindSpecialTinyBlock) {
             lastTinyBlock = s.@base() + sp.offset;
@@ -206,7 +206,7 @@ internal static void checkFinalizersAndCleanups() {
         if (debug.checkfinalizers > 1) {
             print((@string)"Scan trace for cleanup/finalizer on ", (hex)(uint64)p, (@string)":\n");
         }
-        runCheckmark((ж<gcWork> gcw) => {
+        runCheckmark([GoFunc("checkFinalizersAndCleanups.func1.1")] (ж<gcWork> gcw) => {
             switch (sp.kind) {
             case var ᴛ when ᴛ == _KindSpecialFinalizer: {
                 gcScanFinalizer(sp.Reinterpret<special, specialfinalizer>(), s, gcw);

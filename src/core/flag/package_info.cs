@@ -10,10 +10,16 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+using encoding = go.encoding_package;
+using time = go.time_package;
+using Δio = go.io_package;
 // </ImportedTypeAliases>
 
 using go;
 using static go.flag_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -67,10 +73,16 @@ using static go.flag_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("flag/flag.go", "flag.cs", "AGbKAbi4lIKCgpSClIKU3KKCxoKCgpSCppSUAA4YooLGgoKClIKmlOqigsaCgoKUgqaU6qKCxoKCgpSCppTqooLGgoKClIKmlOqigsaCgqaU6qKCxoKCgpSCppTqooLGgoKClIKmlAAICoKCgpSCgpSClILGgqaCpoKCgqYACQyUAAgKlJQAQ4gBkoKCgoKUhsqigpSokqiSqqKqooLcosqigtyiyJLKosiSlIKCAAgSgoKClIKUlJSCgpSClILIkqoACwiCgoKUyoKCgpSmABQQAAoEgoKCgoKCgqa4gpSCxrTUtNSkzNKCgoKCgoKCuIK4lLiCgoKUlKbKgoKCAAY+ABoCyLKClJQAESCCgtiAtoC6soKUzLLIgLaAtoC2gLiiyqLKooKCyqLKosqiyqKCgsqiyqLKosqigoLKosqiyqLKooKCyqLKosqiyqKCgsqiyqLKosqigoLKosqiyqLKooKCyqLMssyyzLKCgsyyAAQQ0gAEENLMssyyzLLMsgAEEvSCgoK4goKCgoKUlJSClIKUAAQS4siygoKq0oKCqsKClPqygpSCgpSCgoKCgqaCgriCgoKCgoKCgriCgoKClKaCgoKmgsqUgpSClIKmgpSCruKCgoKCgpSClJSkgpS0tqiSyrSokgAHEJSClO6mgqyyuJLMsoI=", "423-425:1;552-559:1;609-641:1", "", "", "", "636:21,637:13")]
+[assembly: GoPositionMap("flag/flag.go", "flag.cs", "AGXKAbi4lIKCgpSClIKU3KKCpoKCgpSCppSUAAwYooKmgoKClIKmlMqigqaCgoKUgqaUyqKCpoKCgpSCppTKooKmgoKClIKmlMqigqaCgqaUyqKCpoKCgpSCppTKooKmgoKClIKmlOqCgoKUgoKUgpSCpoKmgqaCgoKm3JTKlJQAQYgBkoKCgoKUhqqigpSokqiSqqKqooK8oqqigryiqJKqoqiSlIKCAAgSgoKClIKUlJSCgpSClIKokqoACwiCgoKUyoKCgpSmABQQAAoEgoKCgoKCgqa4gpSCxrTUtNSkrNKCgoKCgoKCuIK4lLiCgoKUlKbKgoKCAAQ+ABoCqLKClJQADyCCgriAloCasoKUrLKogJaAloCWgJiiqqKqooKCqqKqoqqiqqKCgqqiqqKqoqqigoKqoqqiqqKqooKCqqKqoqqiqqKCgqqiqqKqoqqigoKqoqqiqqKqooKCqqKssqyyrLKCgqyyAAIQ0gACENKssqyyrLKssgACEvSCgoK4goKCgoKUlJSClIKUAAIS4qiygoKq0oKCqsKClPqygpSCgpSCgoKCgqaCgriCgoKCgoKCgriCgoKClKaCgoKmgsqUgpSClIKmgpSCruKCgoKCgpSClJSkgpS0tqiSqrSokgAHEJSClO6mgqyyuJKssoI=", "423-425:1;552-559:1;609-641:1", "", "", "", "575:51,576:13")]
 // </GoSourcePositionMaps>
 
 namespace go;
+
+using static go.flag_package;
+using encoding = go.encoding_package;
+using time = go.time_package;
+using Δio = go.io_package;
+using ꓸꓸꓸany = Span<any>;
 
 [GoPackage("flag")]
 public static partial class flag_package
@@ -126,16 +138,122 @@ public static partial class flag_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(flag_package.FlagSet)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class flagᴛFlagSet;
-[GoMethodHost(typeof(flag_package.boolFuncValue)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class flagᴛboolFuncValue;
-[GoMethodHost(typeof(flag_package.boolValue)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class flagᴛboolValue;
-[GoMethodHost(typeof(flag_package.durationValue)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class flagᴛdurationValue;
-[GoMethodHost(typeof(flag_package.float64Value)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class flagᴛfloat64Value;
-[GoMethodHost(typeof(flag_package.funcValue)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class flagᴛfuncValue;
-[GoMethodHost(typeof(flag_package.int64Value)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class flagᴛint64Value;
-[GoMethodHost(typeof(flag_package.intValue)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class flagᴛintValue;
-[GoMethodHost(typeof(flag_package.stringValue)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class flagᴛstringValue;
-[GoMethodHost(typeof(flag_package.textValue)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class flagᴛtextValue;
-[GoMethodHost(typeof(flag_package.uint64Value)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class flagᴛuint64Value;
-[GoMethodHost(typeof(flag_package.uintValue)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class flagᴛuintValue;
+[GoMethodHost(typeof(flag_package.FlagSet)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class flagᴛFlagSet;
+[GoMethodHost(typeof(flag_package.boolFuncValue)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class flagᴛboolFuncValue;
+[GoMethodHost(typeof(flag_package.boolValue)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class flagᴛboolValue;
+[GoMethodHost(typeof(flag_package.durationValue)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class flagᴛdurationValue;
+[GoMethodHost(typeof(flag_package.float64Value)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class flagᴛfloat64Value;
+[GoMethodHost(typeof(flag_package.funcValue)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class flagᴛfuncValue;
+[GoMethodHost(typeof(flag_package.int64Value)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class flagᴛint64Value;
+[GoMethodHost(typeof(flag_package.intValue)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class flagᴛintValue;
+[GoMethodHost(typeof(flag_package.stringValue)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class flagᴛstringValue;
+[GoMethodHost(typeof(flag_package.textValue)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class flagᴛtextValue;
+[GoMethodHost(typeof(flag_package.uint64Value)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class flagᴛuint64Value;
+[GoMethodHost(typeof(flag_package.uintValue)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class flagᴛuintValue;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class flagᴛFlagSet {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static Δio.Writer Output(this ref FlagSet f) => flag_package.Output⁔(ref f);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Name(this ref FlagSet f) => flag_package.Name⁔(ref f);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ErrorHandling ErrorHandling(this ref FlagSet f) => flag_package.ErrorHandling⁔(ref f);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void SetOutput(this ref FlagSet f, Δio.Writer output) => flag_package.SetOutput⁔(ref f, output);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void VisitAll(this ref FlagSet f, Action<ж<Flag>> fn) => flag_package.VisitAll⁔(ref f, fn);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Visit(this ref FlagSet f, Action<ж<Flag>> fn) => flag_package.Visit⁔(ref f, fn);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Flag> Lookup(this ref FlagSet f, @string name) => flag_package.Lookup⁔(ref f, name);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Set(this ref FlagSet f, @string name, @string value) => flag_package.Set⁔(ref f, name, value);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error set(this ref FlagSet f, @string name, @string value) => flag_package.set⁔(ref f, name, value);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void PrintDefaults(this ж<FlagSet> Ꮡf) => flag_package.PrintDefaults⁔(Ꮡf);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void defaultUsage(this ж<FlagSet> Ꮡf) => flag_package.defaultUsage⁔(Ꮡf);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint NFlag(this ref FlagSet f) => flag_package.NFlag⁔(ref f);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Arg(this ref FlagSet f, nint i) => flag_package.Arg⁔(ref f, i);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint NArg(this ref FlagSet f) => flag_package.NArg⁔(ref f);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<@string> Args(this ref FlagSet f) => flag_package.Args⁔(ref f);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void BoolVar(this ref FlagSet f, ж<bool> Ꮡp, @string name, bool value, @string usage) => flag_package.BoolVar⁔(ref f, Ꮡp, name, value, usage);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<bool> Bool(this ref FlagSet f, @string name, bool value, @string usage) => flag_package.Bool⁔(ref f, name, value, usage);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void IntVar(this ref FlagSet f, ж<nint> Ꮡp, @string name, nint value, @string usage) => flag_package.IntVar⁔(ref f, Ꮡp, name, value, usage);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<nint> Int(this ref FlagSet f, @string name, nint value, @string usage) => flag_package.Int⁔(ref f, name, value, usage);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Int64Var(this ref FlagSet f, ж<int64> Ꮡp, @string name, int64 value, @string usage) => flag_package.Int64Var⁔(ref f, Ꮡp, name, value, usage);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<int64> Int64(this ref FlagSet f, @string name, int64 value, @string usage) => flag_package.Int64⁔(ref f, name, value, usage);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void UintVar(this ref FlagSet f, ж<nuint> Ꮡp, @string name, nuint value, @string usage) => flag_package.UintVar⁔(ref f, Ꮡp, name, value, usage);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<nuint> Uint(this ref FlagSet f, @string name, nuint value, @string usage) => flag_package.Uint⁔(ref f, name, value, usage);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Uint64Var(this ref FlagSet f, ж<uint64> Ꮡp, @string name, uint64 value, @string usage) => flag_package.Uint64Var⁔(ref f, Ꮡp, name, value, usage);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<uint64> Uint64(this ref FlagSet f, @string name, uint64 value, @string usage) => flag_package.Uint64⁔(ref f, name, value, usage);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void StringVar(this ref FlagSet f, ж<@string> Ꮡp, @string name, @string value, @string usage) => flag_package.StringVar⁔(ref f, Ꮡp, name, value, usage);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<@string> String(this ref FlagSet f, @string name, @string value, @string usage) => flag_package.String⁔(ref f, name, value, usage);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Float64Var(this ref FlagSet f, ж<float64> Ꮡp, @string name, float64 value, @string usage) => flag_package.Float64Var⁔(ref f, Ꮡp, name, value, usage);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<float64> Float64(this ref FlagSet f, @string name, float64 value, @string usage) => flag_package.Float64⁔(ref f, name, value, usage);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void DurationVar(this ref FlagSet f, ж<time.Duration> Ꮡp, @string name, time.Duration value, @string usage) => flag_package.DurationVar⁔(ref f, Ꮡp, name, value, usage);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<time.Duration> Duration(this ref FlagSet f, @string name, time.Duration value, @string usage) => flag_package.Duration⁔(ref f, name, value, usage);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void TextVar(this ref FlagSet f, encoding.TextUnmarshaler p, @string name, encoding.TextMarshaler value, @string usage) => flag_package.TextVar⁔(ref f, p, name, value, usage);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Func(this ref FlagSet f, @string name, @string usage, Func<@string, error> fn) => flag_package.Func⁔(ref f, name, usage, fn);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void BoolFunc(this ref FlagSet f, @string name, @string usage, Func<@string, error> fn) => flag_package.BoolFunc⁔(ref f, name, usage, fn);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Var(this ref FlagSet f, Value value, @string name, @string usage) => flag_package.Var⁔(ref f, value, name, usage);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string sprintf(this ref FlagSet f, @string format, params ꓸꓸꓸany aʗp) => flag_package.sprintf⁔(ref f, format, aʗp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error failf(this ж<FlagSet> Ꮡf, @string format, params ꓸꓸꓸany aʗp) => flag_package.failf⁔(Ꮡf, format, aʗp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void usage(this ж<FlagSet> Ꮡf) => flag_package.usage⁔(Ꮡf);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (bool, error) parseOne(this ж<FlagSet> Ꮡf) => flag_package.parseOne⁔(Ꮡf);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Parse(this ж<FlagSet> Ꮡf, slice<@string> arguments) => flag_package.Parse⁔(Ꮡf, arguments);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Parsed(this ref FlagSet f) => flag_package.Parsed⁔(ref f);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Init(this ref FlagSet f, @string name, ErrorHandling errorHandling) => flag_package.Init⁔(ref f, name, errorHandling);
+}
+partial class flagᴛboolFuncValue {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error Set(this boolFuncValue f, @string s) => flag_package.Set⁔(f, s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string String(this boolFuncValue f) => flag_package.String⁔(f);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool IsBoolFlag(this boolFuncValue f) => flag_package.IsBoolFlag⁔(f);
+}
+partial class flagᴛboolValue {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error Set(this ref boolValue b, @string s) => flag_package.Set⁔(ref b, s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static any Get(this ref boolValue b) => flag_package.Get⁔(ref b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string String(this ref boolValue b) => flag_package.String⁔(ref b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool IsBoolFlag(this ref boolValue b) => flag_package.IsBoolFlag⁔(ref b);
+}
+partial class flagᴛdurationValue {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error Set(this ref durationValue d, @string s) => flag_package.Set⁔(ref d, s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static any Get(this ref durationValue d) => flag_package.Get⁔(ref d);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string String(this ж<durationValue> Ꮡd) => flag_package.String⁔(Ꮡd);
+}
+partial class flagᴛfloat64Value {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error Set(this ref float64Value f, @string s) => flag_package.Set⁔(ref f, s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static any Get(this ref float64Value f) => flag_package.Get⁔(ref f);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string String(this ref float64Value f) => flag_package.String⁔(ref f);
+}
+partial class flagᴛfuncValue {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error Set(this funcValue f, @string s) => flag_package.Set⁔(f, s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string String(this funcValue f) => flag_package.String⁔(f);
+}
+partial class flagᴛint64Value {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error Set(this ref int64Value i, @string s) => flag_package.Set⁔(ref i, s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static any Get(this ref int64Value i) => flag_package.Get⁔(ref i);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string String(this ref int64Value i) => flag_package.String⁔(ref i);
+}
+partial class flagᴛintValue {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error Set(this ref intValue i, @string s) => flag_package.Set⁔(ref i, s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static any Get(this ref intValue i) => flag_package.Get⁔(ref i);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string String(this ref intValue i) => flag_package.String⁔(ref i);
+}
+partial class flagᴛstringValue {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error Set(this ref stringValue s, @string val) => flag_package.Set⁔(ref s, val);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static any Get(this ref stringValue s) => flag_package.Get⁔(ref s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string String(this ref stringValue s) => flag_package.String⁔(ref s);
+}
+partial class flagᴛtextValue {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error Set(this textValue v, @string s) => flag_package.Set⁔(v, s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static any Get(this textValue v) => flag_package.Get⁔(v);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string String(this textValue v) => flag_package.String⁔(v);
+}
+partial class flagᴛuint64Value {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error Set(this ref uint64Value i, @string s) => flag_package.Set⁔(ref i, s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static any Get(this ref uint64Value i) => flag_package.Get⁔(ref i);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string String(this ref uint64Value i) => flag_package.String⁔(ref i);
+}
+partial class flagᴛuintValue {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error Set(this ref uintValue i, @string s) => flag_package.Set⁔(ref i, s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static any Get(this ref uintValue i) => flag_package.Get⁔(ref i);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string String(this ref uintValue i) => flag_package.String⁔(ref i);
+}
+// </MethodForwarders>

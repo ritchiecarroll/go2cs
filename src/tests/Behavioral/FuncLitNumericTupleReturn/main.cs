@@ -31,7 +31,7 @@ internal static (int64, error) seekEnd(bool ok) {
 }
 
 internal static @string sizeFuncShape(bool ok) {
-    var sizeFunc = (int64, error) () => {
+    var sizeFunc = [GoFunc("sizeFuncShape.func1")] (int64, error) () => {
         var (size, err) = seekEnd(ok);
         if (err != nil) {
             return (0, errSeek);
@@ -42,7 +42,7 @@ internal static @string sizeFuncShape(bool ok) {
 }
 
 internal static @string negatedArm(bool ok) {
-    var probe = (int64, error) () => {
+    var probe = [GoFunc("negatedArm.func1")] (int64, error) () => {
         var (size, err) = seekEnd(ok);
         if (err != nil) {
             return (-1, default);
@@ -53,7 +53,7 @@ internal static @string negatedArm(bool ok) {
 }
 
 internal static @string floatShape(bool ok) {
-    var ratio = (float64, error) () => {
+    var ratio = [GoFunc("floatShape.func1")] (float64, error) () => {
         if (!ok) {
             return (0D, errSeek);
         }
@@ -63,12 +63,12 @@ internal static @string floatShape(bool ok) {
 }
 
 internal static @string floatControl() {
-    var half = () => (1.5D, errSeek);
+    var half = [GoFunc("floatControl.func1")] () => (1.5D, errSeek);
     return takeF64(half);
 }
 
 internal static @string intControl(bool ok) {
-    (nint, error) count() {
+    [GoFunc("intControl.func1")] (nint, error) count() {
         if (!ok) {
             return (0, errSeek);
         }
@@ -90,7 +90,7 @@ internal static @string takeSplit(Func<slice<byte>, bool, (nint, slice<byte>, er
 }
 
 internal static @string mixedIntArms(slice<byte> data, bool atEOF) {
-    var onComma = (nint advance, slice<byte> token, error err) (slice<byte> dataΔ1, bool atEOFΔ1) => {
+    var onComma = [GoFunc("mixedIntArms.func1")] (nint advance, slice<byte> token, error err) (slice<byte> dataΔ1, bool atEOFΔ1) => {
         for (nint i = 0; i < len(dataΔ1); i++) {
             if (dataΔ1[i] == ',') {
                 return (i + 1, dataΔ1.slice(0, i), default);

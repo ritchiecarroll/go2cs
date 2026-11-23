@@ -28,7 +28,7 @@ internal static void arm(@string @class, Func<@string> f) {
             return;
         }
 
-        defer(() => {
+        defer([GoFunc("arm.func1")] () => {
             var r = recover(); if (r != nil) {
                 var (_, isRuntimeError) = r._<runtime.Error>(ᐧ);
                 fmt.Println(@class + ": panic:", r, isRuntimeError);
@@ -42,25 +42,25 @@ internal static void arm(@string @class, Func<@string> f) {
 }
 
 internal static void main() {
-    arm("left int", () => fmt.Sprint(one.Lsh((int64)(neg))));
-    arm("right int64 by int8", () => fmt.Sprint(big.Rsh((int64)(neg8))));
-    arm("left uint32 by int64", () => fmt.Sprint(u32.Lsh((int64)(neg64))));
-    arm("right int8", () => fmt.Sprint(i8.Rsh((int64)(neg))));
-    arm("named count", () => fmt.Sprint(big.Lsh((int64)(c))));
-    arm("compound left", () => {
+    arm("left int", [GoFunc("main.func1")] () => fmt.Sprint(one.Lsh((int64)(neg))));
+    arm("right int64 by int8", [GoFunc("main.func2")] () => fmt.Sprint(big.Rsh((int64)(neg8))));
+    arm("left uint32 by int64", [GoFunc("main.func3")] () => fmt.Sprint(u32.Lsh((int64)(neg64))));
+    arm("right int8", [GoFunc("main.func4")] () => fmt.Sprint(i8.Rsh((int64)(neg))));
+    arm("named count", [GoFunc("main.func5")] () => fmt.Sprint(big.Lsh((int64)(c))));
+    arm("compound left", [GoFunc("main.func6")] () => {
         var x = big;
         x.LshAssign((int64)(neg));
         return fmt.Sprint(x);
     });
-    arm("compound right", () => {
+    arm("compound right", [GoFunc("main.func7")] () => {
         var x = u32;
         x.RshAssign((int64)(neg8));
         return fmt.Sprint(x);
     });
-    arm("modulo count", () => fmt.Sprint(big.Lsh((int64)(y % 8))));
-    arm("non-negative signed", () => fmt.Sprint(one.Lsh((int64)(three)), " ", big.Rsh((int64)(three)), " ", u32.Lsh((int64)(wide)), " ", i8.Rsh((int64)(wide))));
-    arm("unsigned huge", () => fmt.Sprint(big.Lsh(huge), " ", i8.Rsh(huge)));
-    arm("masked signed", () => fmt.Sprint(big << (int)(y & 7)));
+    arm("modulo count", [GoFunc("main.func8")] () => fmt.Sprint(big.Lsh((int64)(y % 8))));
+    arm("non-negative signed", [GoFunc("main.func9")] () => fmt.Sprint(one.Lsh((int64)(three)), " ", big.Rsh((int64)(three)), " ", u32.Lsh((int64)(wide)), " ", i8.Rsh((int64)(wide))));
+    arm("unsigned huge", [GoFunc("main.func10")] () => fmt.Sprint(big.Lsh(huge), " ", i8.Rsh(huge)));
+    arm("masked signed", [GoFunc("main.func11")] () => fmt.Sprint(big << (int)(y & 7)));
 }
 
 } // end main_package

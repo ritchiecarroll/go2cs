@@ -12,7 +12,7 @@ internal static @string stdinName;
 internal static void initᴛstdinName() { stdinName = describe(0); }
 
 internal static nint computed;
-internal static void initᴛcomputed() { computed = func(nint () => {
+internal static void initᴛcomputed() { computed = func([GoFunc("init.func1")] nint () => {
     return @base * 2;
 })(); }
 

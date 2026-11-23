@@ -224,7 +224,7 @@ internal static void paramCopies() {
 
 internal static void funcLitParam() {
     var a = array<nint>([1, 2, 3]);
-    void fl([GoArrayDims(3)] array<nint> x) {
+    [GoFunc("funcLitParam.func1")] void fl([GoArrayDims(3)] array<nint> x) {
         x = x.Clone();
         x[0] = 99;
     }

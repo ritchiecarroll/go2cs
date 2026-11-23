@@ -48,7 +48,7 @@ internal static (ж<ast.File> @file, Func<slice<byte>, nint, slice<byte>> source
     var psrc = appendꓸꓸꓸ(slice<byte>("package p;"u8), src);
     (@file, err) = parser.ParseFile(fset, filename, psrc, parserMode);
     if (err == nil) {
-        sourceAdj = (slice<byte> srcΔ1, nint indent) => {
+        sourceAdj = [GoFunc("parse.func1")] (slice<byte> srcΔ1, nint indent) => {
             // Remove the package clause.
             // Gofmt has turned the ';' into a '\n'.
             srcΔ1 = srcΔ1.slice(indent + len("package p\n"));
@@ -72,7 +72,7 @@ internal static (ж<ast.File> @file, Func<slice<byte>, nint, slice<byte>> source
     var fsrc = append(appendꓸꓸꓸ(slice<byte>("package p; func _() {"u8), src), (byte)'\n', (byte)'\n', (byte)'}');
     (@file, err) = parser.ParseFile(fset, filename, fsrc, parserMode);
     if (err == nil) {
-        sourceAdj = (slice<byte> srcΔ2, nint indent) => {
+        sourceAdj = [GoFunc("parse.func2")] (slice<byte> srcΔ2, nint indent) => {
             // Cap adjusted indent to zero.
             if (indent < 0) {
                 indent = 0;

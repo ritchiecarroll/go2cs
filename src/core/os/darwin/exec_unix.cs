@@ -7,7 +7,6 @@ namespace go;
 using errors = errors_package;
 using syscall = syscall_package;
 using time = time_package;
-using static os_package;
 
 partial class os_package {
 
@@ -15,9 +14,7 @@ partial class os_package {
 internal static UntypedInt pidUnset => 0;
 internal static UntypedInt pidReleased => -1;
 
-} partial class osᴛProcess {
-
-internal static (ж<ProcessState> ps, error err) wait(this ж<Process> Ꮡp) {
+internal static (ж<ProcessState> ps, error err) wait⁔(/*this*/ ж<Process> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     // Which type of Process do we have?
@@ -34,7 +31,7 @@ internal static (ж<ProcessState> ps, error err) wait(this ж<Process> Ꮡp) {
 internal static ref readonly @string waitˢ => ref waitˢᵇ;
 private static readonly @string waitˢᵇ = "wait"u8;
 
-internal static (ж<ProcessState>, error) pidWait(this ж<Process> Ꮡp) {
+internal static (ж<ProcessState>, error) pidWait⁔(/*this*/ ж<Process> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     // TODO(go.dev/issue/67642): When there are concurrent Wait calls, one
@@ -66,7 +63,7 @@ internal static (ж<ProcessState>, error) pidWait(this ж<Process> Ꮡp) {
     ref var status = ref heap(new syscall.WaitStatus(), out var Ꮡstatus);
     ref var rusage = ref heap(new syscall.Rusage(), out var Ꮡrusage);
     ref var pid1 = ref heap<nint>(out var Ꮡpid1);
-    (pid1, err) = ignoringEINTR2((nint, error) () => syscall.Wait4(Ꮡp.Value.Pid, Ꮡstatus, 0, Ꮡrusage));
+    (pid1, err) = ignoringEINTR2([GoFunc("(*Process).pidWait.func1")] (nint, error) () => syscall.Wait4(Ꮡp.Value.Pid, Ꮡstatus, 0, Ꮡrusage));
     if (err != nil) {
         return (default, NewSyscallError(waitˢ, err));
     }
@@ -82,7 +79,7 @@ internal static (ж<ProcessState>, error) pidWait(this ж<Process> Ꮡp) {
 internal static ref readonly @string osUnsupportedSignalTypeˢ => ref osUnsupportedSignalTypeˢᵇ;
 private static readonly @string osUnsupportedSignalTypeˢᵇ = "os: unsupported signal type"u8;
 
-internal static error signal(this ж<Process> Ꮡp, Signal sig) {
+internal static error signal⁔(/*this*/ ж<Process> Ꮡp, Signal sig) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     var (s, ok) = sig._<syscall.Signal>(ᐧ);
@@ -104,7 +101,7 @@ internal static error signal(this ж<Process> Ꮡp, Signal sig) {
 internal static ref readonly @string osProcessNotInitializedˢ => ref osProcessNotInitializedˢᵇ;
 private static readonly @string osProcessNotInitializedˢᵇ = "os: process not initialized"u8;
 
-internal static error pidSignal(this ж<Process> Ꮡp, syscall.Signal s) {
+internal static error pidSignal⁔(/*this*/ ж<Process> Ꮡp, syscall.Signal s) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -134,8 +131,6 @@ internal static error pidSignal(this ж<Process> Ꮡp, syscall.Signal s) {
     finally { if (ᒐd1) Ꮡp.ᏑsigMu.RUnlock(); ᒐ.Run(); }
 }
 
-} partial class os_package {
-
 internal static error convertESRCH(error err) {
     if (AreEqual(err, syscall.ESRCH)) {
         return ErrProcessDone;
@@ -161,14 +156,12 @@ internal static (ж<Process> p, error err) findProcess(nint pid) {
     return (newHandleProcess(pid, h), default);
 }
 
-} partial class osᴛProcessState {
-
-internal static time.Duration userTime(this ref ProcessState p) {
+internal static time.Duration userTime⁔(/*this*/ ref ProcessState p) {
     return ((time.Duration)p.rusage.ᏑUtime.Nano()) * time.Nanosecond;
 }
 
-internal static time.Duration systemTime(this ref ProcessState p) {
+internal static time.Duration systemTime⁔(/*this*/ ref ProcessState p) {
     return ((time.Duration)p.rusage.ᏑStime.Nano()) * time.Nanosecond;
 }
 
-}
+} // end os_package

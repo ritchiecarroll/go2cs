@@ -7,7 +7,6 @@ using bytes = bytes_package;
 using fmt = fmt_package;
 using strings = strings_package;
 using io = io_package;
-using static comment_package;
 
 partial class comment_package {
 
@@ -18,11 +17,9 @@ partial struct mdPrinter {
     internal bytes.Buffer raw;
 }
 
-} partial class commentᴛPrinter {
-
 // Markdown returns a Markdown formatting of the Doc.
 // See the [Printer] documentation for ways to customize the Markdown output.
-public static slice<byte> Markdown(this ж<Printer> Ꮡp, ж<Doc> Ꮡd) {
+internal static slice<byte> Markdown⁔(/*this*/ ж<Printer> Ꮡp, ж<Doc> Ꮡd) {
     ref var p = ref Ꮡp.DerefOrNull();
     ref var d = ref Ꮡd.DerefOrNull();
 
@@ -41,14 +38,12 @@ public static slice<byte> Markdown(this ж<Printer> Ꮡp, ж<Doc> Ꮡd) {
     return @out.Bytes();
 }
 
-} partial class commentᴛmdPrinter {
-
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static ref readonly @string fourSpaceᶜ => ref fourSpaceᶜᵇ;
 private static readonly @string fourSpaceᶜᵇ = "    "u8;
 
 // block prints the block x to out.
-internal static void block(this ж<mdPrinter> Ꮡp, ж<bytes.Buffer> Ꮡout, Block x) {
+internal static void block⁔(/*this*/ ж<mdPrinter> Ꮡp, ж<bytes.Buffer> Ꮡout, Block x) {
     ref var p = ref Ꮡp.DerefOrNull();
     ref var @out = ref Ꮡout.DerefOrNull();
 
@@ -114,7 +109,7 @@ internal static void block(this ж<mdPrinter> Ꮡp, ж<bytes.Buffer> Ꮡout, Blo
 }
 
 // text prints the text sequence x to out.
-internal static void text(this ж<mdPrinter> Ꮡp, ж<bytes.Buffer> Ꮡout, slice<Text> x) {
+internal static void text⁔(/*this*/ ж<mdPrinter> Ꮡp, ж<bytes.Buffer> Ꮡout, slice<Text> x) {
     ref var p = ref Ꮡp.DerefOrNull();
     ref var @out = ref Ꮡout.DerefOrNull();
 
@@ -149,7 +144,7 @@ internal static void text(this ж<mdPrinter> Ꮡp, ж<bytes.Buffer> Ꮡout, slic
 // rawText prints the text sequence x to out,
 // without worrying about escaping characters
 // that have special meaning at the start of a Markdown line.
-internal static void rawText(this ref mdPrinter p, ж<bytes.Buffer> Ꮡout, slice<Text> x) {
+internal static void rawText⁔(/*this*/ ref mdPrinter p, ж<bytes.Buffer> Ꮡout, slice<Text> x) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     foreach (var (_, t) in range(x)) {
@@ -193,7 +188,7 @@ internal static void rawText(this ref mdPrinter p, ж<bytes.Buffer> Ꮡout, slic
 // escape prints s to out as plain text,
 // escaping special characters to avoid being misinterpreted
 // as Markdown markup sequences.
-internal static void escape(this ref mdPrinter p, ж<bytes.Buffer> Ꮡout, @string s) {
+internal static void escape⁔(/*this*/ ref mdPrinter p, ж<bytes.Buffer> Ꮡout, @string s) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     nint start = 0;
@@ -228,4 +223,4 @@ internal static void escape(this ref mdPrinter p, ж<bytes.Buffer> Ꮡout, @stri
     @out.WriteString(s.slice(start));
 }
 
-}
+} // end comment_package

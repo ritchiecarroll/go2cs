@@ -14,9 +14,9 @@ using Δnistec = go.crypto.@internal.fips140.nistec_package;
 partial class ecdh_package {
 
 internal static Action fipsSelfTest;
-internal static void initᴛfipsSelfTest() { fipsSelfTest = sync.OnceFunc(() => {
+internal static void initᴛfipsSelfTest() { fipsSelfTest = sync.OnceFunc([GoFunc("init.func1")] () => {
     // Per IG D.F, Scenario 2, path (1).
-    fips140.CAST("KAS-ECC-SSC P-256", error () => {
+    fips140.CAST("KAS-ECC-SSC P-256", [GoFunc("init.func1.1")] error () => {
         var privateKey = slice<byte>([
             0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
             0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10,

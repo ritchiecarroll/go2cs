@@ -19,7 +19,7 @@ internal static ref readonly @string mlDsaSignAndVerifyPctˢ => ref mlDsaSignAnd
 private static readonly @string mlDsaSignAndVerifyPctˢᵇ = "ML-DSA sign and verify PCT"u8;
 
 internal static void fipsPCT(ж<PrivateKey> priv) {
-    fips140.PCT(mlDsaSignAndVerifyPctˢ, () => {
+    fips140.PCT(mlDsaSignAndVerifyPctˢ, [GoFunc("fipsPCT.func1")] () => {
         var μ = new slice<byte>(64);
         var (sig, err) = SignExternalMuDeterministic(priv, μ);
         if (err != nil) {
@@ -30,7 +30,7 @@ internal static void fipsPCT(ж<PrivateKey> priv) {
 }
 
 internal static Action fipsSelfTest;
-internal static void initᴛfipsSelfTest() { fipsSelfTest = sync.OnceFunc(() => {
+internal static void initᴛfipsSelfTest() { fipsSelfTest = sync.OnceFunc([GoFunc("init.func1")] () => {
     fips140.CAST("ML-DSA-44", fips140CAST);
 }); }
 

@@ -14,6 +14,9 @@
 
 using go;
 using static go.vlib.vlib_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -50,10 +53,12 @@ using static go.vlib.vlib_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("vlib.go", "vlib.cs", "AA4ggsaCgoKCAAgQgsaC")]
+[assembly: GoPositionMap("vlib.go", "vlib.cs", "AAwggqaCgoKCAAYQgqaC")]
 // </GoSourcePositionMaps>
 
 namespace go.vlib;
+
+using static go.vlib.vlib_package;
 
 [GoPackage("vlib", ImportPath = "vlib/v2")]
 public static partial class vlib_package
@@ -87,6 +92,19 @@ public static partial class vlib_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(vlib_package.PCG)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class vlibᴛPCG;
-[GoMethodHost(typeof(vlib_package.Rand)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class vlibᴛRand;
+[GoMethodHost(typeof(vlib_package.PCG)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class vlibᴛPCG;
+[GoMethodHost(typeof(vlib_package.Rand)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class vlibᴛRand;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class vlibᴛPCG {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static uint64 Uint64(this ref PCG p) => vlib_package.Uint64⁔(ref p);
+}
+partial class vlibᴛRand {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint IntN(this ref Rand r, nint n) => vlib_package.IntN⁔(ref r, n);
+}
+// </MethodForwarders>

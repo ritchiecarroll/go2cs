@@ -16,7 +16,7 @@ partial class gcm_package {
     // Counter KDF covers CMAC per IG 10.3.B, and CMAC covers GCM per IG 10.3.A
     // Resolution 1.d(i). AES decryption is covered by the CBC CAST in package
     // crypto/internal/fips140/aes.
-    fips140.CAST("CounterKDF", error () => {
+    fips140.CAST("CounterKDF", [GoFunc("init.0.func1")] error () => {
         var key = slice<byte>([
             0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
             0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10

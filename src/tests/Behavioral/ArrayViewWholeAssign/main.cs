@@ -274,7 +274,7 @@ internal static array<uint64> /*a*/ namedResultIndex() {
         ref var a = ref Ꮡa.Value;
 
         var p = Ꮡa;
-        defer(() => {
+        defer([GoFunc("namedResultIndex.func1")] () => {
             Ꮡa.Value[0] = 0xBBBB;
         }, ref ᒐ);
         p.Value[1] = 202;
@@ -335,7 +335,7 @@ internal static holder /*h*/ namedStructResultIndex() {
         ref var h = ref Ꮡh.Value;
 
         var p = Ꮡh;
-        defer(() => {
+        defer([GoFunc("namedStructResultIndex.func1")] () => {
             Ꮡh.Value.x[0] = 0xDDDD;
         }, ref ᒐ);
         p.x[1] = 404;
@@ -352,7 +352,7 @@ internal static aliasArr /*a*/ aliasedResultIndex() {
         ref var a = ref Ꮡa.Value;
 
         var p = Ꮡa;
-        defer(() => {
+        defer([GoFunc("aliasedResultIndex.func1")] () => {
             Ꮡa.Value[0] = 0xCCCC;
         }, ref ᒐ);
         p.Value[1] = 303;
@@ -368,7 +368,7 @@ internal static array<uint64> /*a*/ retSlice() {
     try {
         var s = a[..];
         var sʗ1 = s;
-        defer(() => {
+        defer([GoFunc("retSlice.func1")] () => {
             sʗ1[0] = 7;
         }, ref ᒐ);
         a.Assign(array<uint64>(8, [1, 2]));
@@ -386,7 +386,7 @@ internal static array<uint64> /*a*/ retElemPtr() {
 
         var p = Ꮡa.at<uint64>(1);
         var pʗ1 = p;
-        defer(() => {
+        defer([GoFunc("retElemPtr.func1")] () => {
             pʗ1.Value = 9;
         }, ref ᒐ);
         a.Assign(array<uint64>(8, [1, 2]));
@@ -404,7 +404,7 @@ internal static array<uint64> /*a*/ retWindow() {
 
         var f = @unsafe.Pointer.ToArray<uint32>(@unsafe.Pointer.FromPinnedBox(Ꮡa), 16);
         var fʗ1 = f;
-        defer(() => {
+        defer([GoFunc("retWindow.func1")] () => {
             fʗ1.ElementRef(2) = 5;
         }, ref ᒐ);
         a.Assign(array<uint64>(8, [1, 2]));
@@ -420,7 +420,7 @@ internal static holder /*h*/ retStruct() {
     try {
         var s = h.x[..];
         var sʗ1 = s;
-        defer(() => {
+        defer([GoFunc("retStruct.func1")] () => {
             sʗ1[0] = 7;
         }, ref ᒐ);
         h.AssignFrom(new holder(n: 3, x: array<uint64>(8, [1, 2])));
@@ -436,7 +436,7 @@ internal static named /*a*/ retNamed() {
     try {
         var s = a[..];
         var sʗ1 = s;
-        defer(() => {
+        defer([GoFunc("retNamed.func1")] () => {
             sʗ1[0] = 7;
         }, ref ᒐ);
         a.Assign(new named(new uint64[]{1, 2}.array(8)));
@@ -453,7 +453,7 @@ internal static (array<uint64> a, error err) retMulti() {
     try {
         var s = a[..];
         var sʗ1 = s;
-        defer(() => {
+        defer([GoFunc("retMulti.func1")] () => {
             sʗ1[0] = 7;
         }, ref ᒐ);
         (var aᴛ1, err) = (mk(), default); a.Assign(aᴛ1);
@@ -470,7 +470,7 @@ internal static (nint n, array<uint64> a) retSecond(bool early) {
     try {
         var s = a[..];
         var sʗ1 = s;
-        defer(() => {
+        defer([GoFunc("retSecond.func1")] () => {
             sʗ1[0] = 7;
         }, ref ᒐ);
         if (early) {
@@ -489,7 +489,7 @@ internal static array<uint64> /*a*/ retRecover() {
     try {
         var s = a[..];
         var sʗ1 = s;
-        defer(() => {
+        defer([GoFunc("retRecover.func1")] () => {
             recover();
             sʗ1[0] = 7;
         }, ref ᒐ);
@@ -507,7 +507,7 @@ internal static array<uint64> /*a*/ retFromVar() {
         ref var v = ref heap<array<uint64>>(array<uint64>(8, [1, 2]), out var Ꮡv);
         var s = a[..];
         var sʗ1 = s;
-        defer(() => {
+        defer([GoFunc("retFromVar.func1")] () => {
             sʗ1[0] = 7;
             Ꮡv.Value[1] = 99;
         }, ref ᒐ);
@@ -518,13 +518,13 @@ internal static array<uint64> /*a*/ retFromVar() {
     return a;
 }
 
-[GoLazy] partial class lazyᴛretLit { internal static Func<array<uint64>> retLit = () => {
+[GoLazy] partial class lazyᴛretLit { internal static Func<array<uint64>> retLit = [GoFunc("init.func1")] () => {
     array<uint64> a = new(8);
     GoFrame ᒐ = default;
     try {
         var s = a[..];
         var sʗ1 = s;
-        defer(() => {
+        defer([GoFunc("init.func1.1")] () => {
             sʗ1[0] = 7;
         }, ref ᒐ);
         a.Assign(array<uint64>(8, [1, 2])); goto ᒐdone;
@@ -535,16 +535,16 @@ internal static array<uint64> /*a*/ retFromVar() {
 }; }
 
 internal static array<uint64> retLitCaptured() {
-    array<uint64> /*a*/ f() {
+    [GoFunc("retLitCaptured.func1")] array<uint64> /*a*/ f() {
         array<uint64> a = new(8);
         GoFrame ᒐ = default;
         try {
-            defer(() => {
+            defer([GoFunc("retLitCaptured.func1.1")] () => {
                 a[0] += 10;
             }, ref ᒐ);
             var s = a[..];
             var sʗ1 = s;
-            defer(() => {
+            defer([GoFunc("retLitCaptured.func1.2")] () => {
                 sʗ1[1] = 8;
             }, ref ᒐ);
             a.Assign(array<uint64>(8, [1, 2])); goto ᒐdone;
@@ -556,13 +556,13 @@ internal static array<uint64> retLitCaptured() {
     return f();
 }
 
-[GoLazy] partial class lazyᴛretLitIndex { internal static Func<array<uint64>> retLitIndex = () => {
+[GoLazy] partial class lazyᴛretLitIndex { internal static Func<array<uint64>> retLitIndex = [GoFunc("init.func2")] () => {
     heap(new array<uint64>(8), out var Ꮡa);
     GoFrame ᒐ = default;
     try {
         ref var a = ref Ꮡa.Value;
         var p = Ꮡa;
-        defer(() => {
+        defer([GoFunc("init.func2.1")] () => {
             Ꮡa.Value[0] = 0xEEEE;
         }, ref ᒐ);
         p.Value[1] = 505;
@@ -573,14 +573,14 @@ internal static array<uint64> retLitCaptured() {
     ᒐdone: return Ꮡa.Value;
 }; }
 
-[GoLazy] partial class lazyᴛretLitAddr { internal static Func<array<uint64>> retLitAddr = () => {
+[GoLazy] partial class lazyᴛretLitAddr { internal static Func<array<uint64>> retLitAddr = [GoFunc("init.func3")] () => {
     heap(new array<uint64>(8), out var Ꮡa);
     GoFrame ᒐ = default;
     try {
         ref var a = ref Ꮡa.Value;
         var p = Ꮡa;
         var pʗ1 = p;
-        defer(() => {
+        defer([GoFunc("init.func3.1")] () => {
             pʗ1.Value[0] = 7;
         }, ref ᒐ);
         Ꮡa.Value.Assign(array<uint64>(8, [1, 2])); goto ᒐdone;
@@ -597,7 +597,7 @@ internal static (array<uint64> a, error err) retForward() {
     try {
         var s = a[..];
         var sʗ1 = s;
-        defer(() => {
+        defer([GoFunc("retForward.func1")] () => {
             sʗ1[0] = 7;
         }, ref ᒐ);
         (var aᴛ1, err) = pair(); a.Assign(aᴛ1);
@@ -615,7 +615,7 @@ internal static (array<uint64> a, array<uint64> b) retCrossed() {
         var (sa, sb) = (a[..], b[..]);
         var saʗ1 = sa;
         var sbʗ1 = sb;
-        defer(() => {
+        defer([GoFunc("retCrossed.func1")] () => {
             saʗ1[0] = 7;
             sbʗ1[0] = 8;
         }, ref ᒐ);
@@ -636,7 +636,7 @@ internal static (array<uint64> a, error err) retPanicAfter() {
     try {
         var s = a[..];
         var sʗ1 = s;
-        defer(() => {
+        defer([GoFunc("retPanicAfter.func1")] () => {
             recover();
             sʗ1[1] = 5;
         }, ref ᒐ);
@@ -654,7 +654,7 @@ internal static (named a, error err) retNamedTuple() {
     try {
         var s = a[..];
         var sʗ1 = s;
-        defer(() => {
+        defer([GoFunc("retNamedTuple.func1")] () => {
             sʗ1[0] = 7;
         }, ref ᒐ);
         (var aᴛ1, err) = (array<uint64>(8, [1, 2]), default); a.Assign(aᴛ1);

@@ -14,6 +14,9 @@
 
 using go;
 using static go.RenamedTypeAliasReexportRecords.tone_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -49,10 +52,12 @@ using static go.RenamedTypeAliasReexportRecords.tone_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("tone.go", "tone.cs", "AAsSlAAJDrSU")]
+[assembly: GoPositionMap("tone.go", "tone.cs", "AAgSlN6UlA==")]
 // </GoSourcePositionMaps>
 
 namespace go.RenamedTypeAliasReexportRecords;
+
+using static go.RenamedTypeAliasReexportRecords.tone_package;
 
 [GoPackage("tone")]
 public static partial class tone_package
@@ -86,6 +91,22 @@ public static partial class tone_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(tone_package.Pitch)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class toneᴛPitch;
-[GoMethodHost(typeof(tone_package.Tone)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class toneᴛTone;
+[GoMethodHost(typeof(tone_package.Pitch)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class toneᴛPitch;
+[GoMethodHost(typeof(tone_package.Tone)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class toneᴛTone;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class toneᴛPitch {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Raise(this ref Pitch p, nint by) => tone_package.Raise⁔(ref p, by);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Label(this ref Pitch p) => tone_package.Label⁔(ref p);
+}
+partial class toneᴛTone {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Tone(this Tone t) => tone_package.Tone⁔(t);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this Tone t) => tone_package.String⁔(t);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static Pitch Pitch(this Tone t) => tone_package.Pitch⁔(t);
+}
+// </MethodForwarders>

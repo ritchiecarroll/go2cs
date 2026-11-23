@@ -94,7 +94,6 @@ using sys = @internal.runtime.sys_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
-using static runtime_package;
 
 partial class runtime_package {
 
@@ -334,8 +333,6 @@ partial struct scavengerState {
     internal Func<int32> gomaxprocs;
 }
 
-} partial class runtimeᴛscavengerState {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string scavengerStateIsAlreadyˢ => ref scavengerStateIsAlreadyˢᵇ;
 private static readonly @string scavengerStateIsAlreadyˢᵇ = "scavenger state is already wired"u8;
@@ -343,7 +340,7 @@ private static readonly @string scavengerStateIsAlreadyˢᵇ = "scavenger state 
 // init initializes a scavenger state and wires to the current G.
 //
 // Must be called from a regular goroutine that can allocate.
-internal static void init(this ж<scavengerState> Ꮡs) {
+internal static void init⁔(/*this*/ ж<scavengerState> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     if (s.g != nil) {
@@ -353,7 +350,7 @@ internal static void init(this ж<scavengerState> Ꮡs) {
     s.g = getg();
 
     s.timer = @new<timer>();
-    var f = (any sΔ1, uintptr _Δp1, int64 _Δp2) => {
+    var f = [GoFunc("(*scavengerState).init.func1")] (any sΔ1, uintptr _Δp1, int64 _Δp2) => {
         sΔ1._<ж<scavengerState>>().wake();
     };
     s.timer.init(f, Ꮡs.OrTypedNil());
@@ -382,7 +379,7 @@ internal static void init(this ж<scavengerState> Ꮡs) {
 
     // Install real functions if stubs aren't present.
     if (s.scavenge == nil) {
-        s.scavenge = (uintptr n) => {
+        s.scavenge = [GoFunc("(*scavengerState).init.func2")] (uintptr n) => {
             var start = nanotime();
             var r = Ꮡmheap_.Ꮡpages.scavenge(n, default, false);
             var end = nanotime();
@@ -394,13 +391,13 @@ internal static void init(this ж<scavengerState> Ꮡs) {
         };
     }
     if (s.shouldStop == nil) {
-        s.shouldStop = () => {
+        s.shouldStop = [GoFunc("(*scavengerState).init.func3")] () => {
             // If background scavenging is disabled or if there's no work to do just stop.
             return heapRetained() <= Ꮡscavenge.of(scavengeᴛ1.ᏑgcPercentGoal).Load() && ᏑgcController.ᏑmappedReady.Load() <= Ꮡscavenge.of(scavengeᴛ1.ᏑmemoryLimitGoal).Load();
         };
     }
     if (s.gomaxprocs == nil) {
-        s.gomaxprocs = () => gomaxprocs;
+        s.gomaxprocs = [GoFunc("(*scavengerState).init.func4")] () => gomaxprocs;
     }
 }
 
@@ -409,7 +406,7 @@ internal static ref readonly @string triedToParkScavengerFromˢ => ref triedToPa
 private static readonly @string triedToParkScavengerFromˢᵇ = "tried to park scavenger from another goroutine"u8;
 
 // park parks the scavenger goroutine.
-internal static void park(this ж<scavengerState> Ꮡs) {
+internal static void park⁔(/*this*/ ж<scavengerState> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     @lock(Ꮡs.Ꮡlock);
@@ -421,14 +418,14 @@ internal static void park(this ж<scavengerState> Ꮡs) {
 }
 
 // ready signals to sysmon that the scavenger should be awoken.
-internal static void ready(this ж<scavengerState> Ꮡs) {
+internal static void ready⁔(/*this*/ ж<scavengerState> Ꮡs) {
     Ꮡs.ᏑsysmonWake.Store(1);
 }
 
 // wake immediately unparks the scavenger if necessary.
 //
 // Safe to run without a P.
-internal static void wake(this ж<scavengerState> Ꮡs) {
+internal static void wake⁔(/*this*/ ж<scavengerState> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     @lock(Ꮡs.Ꮡlock);
@@ -463,7 +460,7 @@ private static readonly @string triedToSleepScavengerˢᵇ = "tried to sleep sca
 //
 // The scavenger may be woken up earlier by a pacing change, and it may not go
 // to sleep at all if there's a pending pacing change.
-internal static void sleep(this ж<scavengerState> Ꮡs, float64 worked) {
+internal static void sleep⁔(/*this*/ ж<scavengerState> Ꮡs, float64 worked) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     @lock(Ꮡs.Ꮡlock);
@@ -564,7 +561,7 @@ internal static void sleep(this ж<scavengerState> Ꮡs, float64 worked) {
 
 // controllerFailed indicates that the scavenger's scheduling
 // controller failed.
-internal static void controllerFailed(this ж<scavengerState> Ꮡs) {
+internal static void controllerFailed⁔(/*this*/ ж<scavengerState> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     @lock(Ꮡs.Ꮡlock);
@@ -584,7 +581,7 @@ private static readonly @string releasedLessThanOneˢᵇ = "released less than o
 // releasing those bytes.
 //
 // Must be run on the scavenger goroutine.
-internal static (uintptr released, float64 worked) run(this ж<scavengerState> Ꮡs) {
+internal static (uintptr released, float64 worked) run⁔(/*this*/ ж<scavengerState> Ꮡs) {
     uintptr released = default;
     float64 worked = default;
     ref var s = ref Ꮡs.DerefOrNull();
@@ -656,8 +653,6 @@ internal static (uintptr released, float64 worked) run(this ж<scavengerState> �
     return (released, worked);
 }
 
-} partial class runtime_package {
-
 // Background scavenger.
 //
 // The background scavenger maintains the RSS of the application below
@@ -680,8 +675,6 @@ internal static void bgscavenge(channel<nint> c) {
     }
 }
 
-} partial class runtimeᴛpageAlloc {
-
 // scavenge scavenges nbytes worth of free pages, starting with the
 // highest address first. Successive calls continue from where it left
 // off until the heap is exhausted. force makes all memory available to
@@ -691,14 +684,14 @@ internal static void bgscavenge(channel<nint> c) {
 //
 // scavenge always tries to scavenge nbytes worth of memory, and will
 // only fail to do so if the heap is exhausted for now.
-internal static uintptr scavenge(this ж<pageAlloc> Ꮡp, uintptr nbytes, Func<bool> shouldStop, bool force) {
+internal static uintptr scavenge⁔(/*this*/ ж<pageAlloc> Ꮡp, uintptr nbytes, Func<bool> shouldStop, bool force) {
     var released = (uintptr)0;
     while (released < nbytes) {
         var (ci, pageIdx) = Ꮡp.Ꮡscav.of(pageAlloc_scav.Ꮡindex).find(force);
         if (ci == 0) {
             break;
         }
-        systemstack(() => {
+        systemstack([GoFunc("(*pageAlloc).scavenge.func1")] () => {
             released += Ꮡp.Value.scavengeOne(ci, pageIdx, nbytes - released);
         });
         if (shouldStop != nil && shouldStop()) {
@@ -707,8 +700,6 @@ internal static uintptr scavenge(this ж<pageAlloc> Ꮡp, uintptr nbytes, Func<b
     }
     return released;
 }
-
-} partial class runtime_package {
 
 // printScavTrace prints a scavenge trace line to standard error.
 //
@@ -736,8 +727,6 @@ internal static void printScavTrace(uintptr releasedBg, uintptr releasedEager, b
     printunlock();
 }
 
-} partial class runtimeᴛpageAlloc {
-
 // scavengeOne walks over the chunk at chunk index ci and searches for
 // a contiguous run of pages to scavenge. It will try to scavenge
 // at most max bytes at once, but may scavenge more to avoid
@@ -751,7 +740,7 @@ internal static void printScavTrace(uintptr releasedBg, uintptr releasedEager, b
 // Must run on the systemstack because it acquires p.mheapLock.
 //
 //go:systemstack
-internal static uintptr scavengeOne(this ref pageAlloc p, chunkIdx ci, nuint searchIdx, uintptr max) {
+internal static uintptr scavengeOne⁔(/*this*/ ref pageAlloc p, chunkIdx ci, nuint searchIdx, uintptr max) {
     // Calculate the maximum number of pages to scavenge.
     //
     // This should be alignUp(max, pageSize) / pageSize but max can and will
@@ -834,8 +823,6 @@ internal static uintptr scavengeOne(this ref pageAlloc p, chunkIdx ci, nuint sea
     return 0;
 }
 
-} partial class runtime_package {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string badMValueˢ => ref badMValueˢᵇ;
 private static readonly @string badMValueˢᵇ = "bad m value"u8;
@@ -849,7 +836,7 @@ private static readonly @string badMValueˢᵇ = "bad m value"u8;
 //
 // m must be a power of 2 <= maxPagesPerPhysPage.
 internal static uint64 fillAligned(uint64 x, nuint m) {
-    uint64 apply(uint64 xΔ1, uint64 c) {
+    [GoFunc("fillAligned.func1")] uint64 apply(uint64 xΔ1, uint64 c) {
         // The technique used it here is derived from
         // https://graphics.stanford.edu/~seander/bithacks.html#ZeroInWord
         // and extended for more than just bytes (like nibbles
@@ -913,8 +900,6 @@ internal static uint64 fillAligned(uint64 x, nuint m) {
     return ~((x - (x.Rsh((m - 1)))) | x);
 }
 
-} partial class runtimeᴛpallocData {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string minMustBeANonZeroPowerOfˢ => ref minMustBeANonZeroPowerOfˢᵇ;
 private static readonly @string minMustBeANonZeroPowerOfˢᵇ = "min must be a non-zero power of 2"u8;
@@ -941,7 +926,7 @@ private static readonly @string minTooLargeˢᵇ = "min too large"u8;
 // will round up). That is, even if max is small, the returned size is not guaranteed
 // to be equal to max. max is allowed to be less than min, in which case it is as if
 // max == min.
-internal static (nuint, nuint) findScavengeCandidate(this ref pallocData m, nuint searchIdx, uintptr minimum, uintptr max) {
+internal static (nuint, nuint) findScavengeCandidate⁔(/*this*/ ref pallocData m, nuint searchIdx, uintptr minimum, uintptr max) {
     if ((uintptr)(minimum & (minimum - 1)) != 0 || minimum == 0) {
         print((@string)"runtime: min = ", minimum, (@string)"\n");
         @throw(minMustBeANonZeroPowerOfˢ);
@@ -1039,8 +1024,6 @@ internal static (nuint, nuint) findScavengeCandidate(this ref pallocData m, nuin
     return (start, size);
 }
 
-} partial class runtime_package {
-
 // scavengeIndex is a structure for efficiently managing which pageAlloc chunks have
 // memory available to scavenge.
 partial struct scavengeIndex {
@@ -1098,12 +1081,10 @@ partial struct scavengeIndex {
     internal bool test;
 }
 
-} partial class runtimeᴛscavengeIndex {
-
 // init initializes the scavengeIndex.
 //
 // Returns the amount added to sysStat.
-internal static uintptr init(this ж<scavengeIndex> Ꮡs, bool test, ж<sysMemStat> sysStat) {
+internal static uintptr init⁔(/*this*/ ж<scavengeIndex> Ꮡs, bool test, ж<sysMemStat> sysStat) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     Ꮡs.ᏑsearchAddrBg.Clear();
@@ -1116,7 +1097,7 @@ internal static uintptr init(this ж<scavengeIndex> Ꮡs, bool test, ж<sysMemSt
 // sysGrow updates the index's backing store in response to a heap growth.
 //
 // Returns the amount of memory added to sysStat.
-internal static uintptr grow(this ж<scavengeIndex> Ꮡs, uintptr @base, uintptr limit, ж<sysMemStat> sysStat) {
+internal static uintptr grow⁔(/*this*/ ж<scavengeIndex> Ꮡs, uintptr @base, uintptr limit, ж<sysMemStat> sysStat) {
     // Update minHeapIdx. Note that even if there's no mapping work to do,
     // we may still have a new, lower minimum heap address.
     var minHeapIdx = Ꮡs.ᏑminHeapIdx.Load();
@@ -1128,7 +1109,7 @@ internal static uintptr grow(this ж<scavengeIndex> Ꮡs, uintptr @base, uintptr
 
 // find returns the highest chunk index that may contain pages available to scavenge.
 // It also returns an offset to start searching in the highest chunk.
-internal static (chunkIdx, nuint) find(this ж<scavengeIndex> Ꮡs, bool force) {
+internal static (chunkIdx, nuint) find⁔(/*this*/ ж<scavengeIndex> Ꮡs, bool force) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     var cursor = Ꮡs.ᏑsearchAddrBg;
@@ -1184,7 +1165,7 @@ internal static (chunkIdx, nuint) find(this ж<scavengeIndex> Ꮡs, bool force) 
 // eagerly collapsing).
 //
 // alloc may only run concurrently with find.
-internal static void alloc(this ref scavengeIndex s, chunkIdx ci, nuint npages) {
+internal static void alloc⁔(/*this*/ ref scavengeIndex s, chunkIdx ci, nuint npages) {
     var sc = Ꮡ(s.chunks, ci).load();
     sc.alloc(npages, s.gen);
     // TODO(mknyszek): Consider eagerly backing memory with huge pages
@@ -1199,7 +1180,7 @@ internal static void alloc(this ref scavengeIndex s, chunkIdx ci, nuint npages) 
 // a free of npages occurred.
 //
 // free may only run concurrently with find.
-internal static void free(this ж<scavengeIndex> Ꮡs, chunkIdx ci, nuint page, nuint npages) {
+internal static void free⁔(/*this*/ ж<scavengeIndex> Ꮡs, chunkIdx ci, nuint page, nuint npages) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     var sc = Ꮡ(s.chunks, ci).load();
@@ -1227,7 +1208,7 @@ internal static void free(this ж<scavengeIndex> Ꮡs, chunkIdx ci, nuint page, 
 // to be released.
 //
 // nextGen may only run concurrently with find.
-internal static void nextGen(this ж<scavengeIndex> Ꮡs) {
+internal static void nextGen⁔(/*this*/ ж<scavengeIndex> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     s.gen++;
@@ -1243,13 +1224,11 @@ internal static void nextGen(this ж<scavengeIndex> Ꮡs) {
 // at the same chunk.
 //
 // setEmpty may only run concurrently with find.
-internal static void setEmpty(this ref scavengeIndex s, chunkIdx ci) {
+internal static void setEmpty⁔(/*this*/ ref scavengeIndex s, chunkIdx ci) {
     var val = Ꮡ(s.chunks, ci).load();
     val.scavChunkFlags.setEmpty();
     Ꮡ(s.chunks, ci).store(val);
 }
-
-} partial class runtime_package {
 
 // atomicScavChunkData is an atomic wrapper around a scavChunkData
 // that stores it in its packed form.
@@ -1257,20 +1236,16 @@ partial struct atomicScavChunkData {
     internal atomic.Uint64 value;
 }
 
-} partial class runtimeᴛatomicScavChunkData {
-
 // load loads and unpacks a scavChunkData.
-internal static scavChunkData load(this ж<atomicScavChunkData> Ꮡsc) {
+internal static scavChunkData load⁔(/*this*/ ж<atomicScavChunkData> Ꮡsc) {
     return unpackScavChunkData(Ꮡsc.Ꮡvalue.Load());
 }
 
 // store packs and writes a new scavChunkData. store must be serialized
 // with other calls to store.
-internal static void store(this ж<atomicScavChunkData> Ꮡsc, scavChunkData ssc) {
+internal static void store⁔(/*this*/ ж<atomicScavChunkData> Ꮡsc, scavChunkData ssc) {
     Ꮡsc.Ꮡvalue.Store(ssc.pack());
 }
-
-} partial class runtime_package {
 
 // scavChunkData tracks information about a palloc chunk for
 // scavenging. It packs well into 64 bits.
@@ -1306,14 +1281,10 @@ internal static scavChunkData unpackScavChunkData(uint64 sc) {
     );
 }
 
-} partial class runtimeᴛscavChunkData {
-
 // pack returns sc packed into a uint64.
-internal static uint64 pack(this scavChunkData sc) {
+internal static uint64 pack⁔(/*this*/ scavChunkData sc) {
     return (uint64)sc.inUse | ((uint64)sc.lastInUse << 16) | ((uint64)sc.scavChunkFlags << (int)(16 + logScavChunkInUseMax)) | ((uint64)sc.gen << 32);
 }
-
-} partial class runtime_package {
 
 // scavChunkHasFree indicates whether the chunk has anything left to
 // scavenge. This is the opposite of "empty," used elsewhere in this
@@ -1336,28 +1307,24 @@ internal static UntypedInt scavChunkInUseMask => /* (1 << logScavChunkInUseMax) 
 // scavChunkFlags is a set of bit-flags for the scavenger for each palloc chunk.
 partial struct scavChunkFlags /*num:uint8*/;
 
-} partial class runtimeᴛscavChunkFlags {
-
 // isEmpty returns true if the hasFree flag is unset.
-internal static bool isEmpty(this ref scavChunkFlags sc) {
+internal static bool isEmpty⁔(/*this*/ ref scavChunkFlags sc) {
     return (scavChunkFlags)((sc) & scavChunkHasFree) == 0;
 }
 
 // setEmpty clears the hasFree flag.
-internal static void setEmpty(this ref scavChunkFlags sc) {
+internal static void setEmpty⁔(/*this*/ ref scavChunkFlags sc) {
     sc &= unchecked((scavChunkFlags)~(scavChunkFlags)(scavChunkHasFree));
 }
 
 // setNonEmpty sets the hasFree flag.
-internal static void setNonEmpty(this ref scavChunkFlags sc) {
+internal static void setNonEmpty⁔(/*this*/ ref scavChunkFlags sc) {
     sc |= (scavChunkFlags)(scavChunkHasFree);
 }
 
-} partial class runtimeᴛscavChunkData {
-
 // shouldScavenge returns true if the corresponding chunk should be interrogated
 // by the scavenger.
-internal static bool shouldScavenge(this scavChunkData sc, uint32 currGen, bool force) {
+internal static bool shouldScavenge⁔(/*this*/ scavChunkData sc, uint32 currGen, bool force) {
     if (sc.scavChunkFlags.isEmpty()) {
         // Nothing to scavenge.
         return false;
@@ -1382,7 +1349,7 @@ internal static ref readonly @string tooManyPagesAllocatedInˢ => ref tooManyPag
 private static readonly @string tooManyPagesAllocatedInˢᵇ = "too many pages allocated in chunk?"u8;
 
 // alloc updates sc given that npages were allocated in the corresponding chunk.
-internal static void alloc(this ref scavChunkData sc, nuint npages, uint32 newGen) {
+internal static void alloc⁔(/*this*/ ref scavChunkData sc, nuint npages, uint32 newGen) {
     if ((nuint)sc.inUse + npages > pallocChunkPages) {
         print((@string)"runtime: inUse=", sc.inUse, (@string)" npages=", npages, (@string)"\n");
         @throw(tooManyPagesAllocatedInˢ);
@@ -1403,7 +1370,7 @@ internal static ref readonly @string allocatedPagesBelowZeroˢ => ref allocatedP
 private static readonly @string allocatedPagesBelowZeroˢᵇ = "allocated pages below zero?"u8;
 
 // free updates sc given that npages was freed in the corresponding chunk.
-internal static void free(this ref scavChunkData sc, nuint npages, uint32 newGen) {
+internal static void free⁔(/*this*/ ref scavChunkData sc, nuint npages, uint32 newGen) {
     if ((nuint)sc.inUse < npages) {
         print((@string)"runtime: inUse=", sc.inUse, (@string)" npages=", npages, (@string)"\n");
         @throw(allocatedPagesBelowZeroˢ);
@@ -1418,8 +1385,6 @@ internal static void free(this ref scavChunkData sc, nuint npages, uint32 newGen
     sc.scavChunkFlags.setNonEmpty();
 }
 
-} partial class runtime_package {
-
 partial struct piController {
     internal float64 kp; // Proportional constant.
     internal float64 ti; // Integral time constant.
@@ -1432,8 +1397,6 @@ partial struct piController {
     internal bool inputOverflow; // Set if an operation with the input overflowed.
 }
 
-} partial class runtimeᴛpiController {
-
 // next provides a new sample to the controller.
 //
 // input is the sample, setpoint is the desired point, and period is how much
@@ -1445,7 +1408,7 @@ partial struct piController {
 //
 // In the specific case of an error overflow occurs, the errOverflow field will be
 // set and the rest of the controller's internal state will be fully reset.
-internal static (float64, bool) next(this ref piController c, float64 input, float64 setpoint, float64 period) {
+internal static (float64, bool) next⁔(/*this*/ ref piController c, float64 input, float64 setpoint, float64 period) {
     // Compute the raw output value.
     var prop = c.kp * (setpoint - input);
     var rawOutput = prop + c.errIntegral;
@@ -1482,8 +1445,8 @@ internal static (float64, bool) next(this ref piController c, float64 input, flo
 }
 
 // reset resets the controller state, except for controller error flags.
-internal static void reset(this ref piController c) {
+internal static void reset⁔(/*this*/ ref piController c) {
     c.errIntegral = 0D;
 }
 
-}
+} // end runtime_package

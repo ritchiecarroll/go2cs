@@ -6,8 +6,6 @@
 // messages with the cryptobyte package.
 namespace go.vendor.golang.org.x.crypto.cryptobyte;
 
-using static asn1_package;
-
 partial class asn1_package {
 
 // Tag represents an ASN.1 identifier octet, consisting of a tag number
@@ -21,15 +19,11 @@ partial struct Tag /*num:uint8*/;
 internal static UntypedInt classConstructed => 0x20;
 internal static UntypedInt classContextSpecific => 0x80;
 
-} partial class asn1ᴛTag {
-
 // Constructed returns t with the constructed class bit set.
-public static Tag Constructed(this Tag t) { return (Tag)(t | (uint8)classConstructed); }
+internal static Tag Constructed⁔(/*this*/ Tag t) { return (Tag)(t | (uint8)classConstructed); }
 
 // ContextSpecific returns t with the context-specific class bit set.
-public static Tag ContextSpecific(this Tag t) { return (Tag)(t | (uint8)classContextSpecific); }
-
-} partial class asn1_package {
+internal static Tag ContextSpecific⁔(/*this*/ Tag t) { return (Tag)(t | (uint8)classContextSpecific); }
 
 // The following is a list of standard tag and class combinations.
 public static Tag BOOLEAN => /* Tag(1) */ 1;

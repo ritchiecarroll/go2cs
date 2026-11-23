@@ -15,15 +15,12 @@ namespace go.crypto.@internal;
 using runtime = runtime_package;
 using sync = sync_package;
 using weak = weak_package;
-using static fips140cache_package;
 
 partial class fips140cache_package {
 
 partial struct Cache<K, V> {
     internal sync.Map m;
 }
-
-} partial class fips140cacheᴛCache {
 
 // Get returns the result of new, for an associated key k.
 //
@@ -32,7 +29,7 @@ partial struct Cache<K, V> {
 // it. If check returns false, Get will call new again and return the result.
 //
 // The cache is evicted some time after k becomes unreachable.
-public static (ж<V>, error) Get<K, V>(this ж<Cache<K, V>> Ꮡc, ж<K> k, Func<(ж<V>, error)> @new, Func<ж<V>, bool> check) {
+internal static (ж<V>, error) Get⁔<K, V>(/*this*/ ж<Cache<K, V>> Ꮡc, ж<K> k, Func<(ж<V>, error)> @new, Func<ж<V>, bool> check) {
     var p = weak.Make<K>(k);
     var (cached, ok) = Ꮡc.Ꮡm.Load(p); if (ok) {
         var vΔ1 = cached._<ж<V>>();
@@ -52,8 +49,8 @@ public static (ж<V>, error) Get<K, V>(this ж<Cache<K, V>> Ꮡc, ж<K> k, Func<
     return (v, default);
 }
 
-internal static void evict<K, V>(this ж<Cache<K, V>> Ꮡc, weak.Pointer<K> p) {
+internal static void evict⁔<K, V>(/*this*/ ж<Cache<K, V>> Ꮡc, weak.Pointer<K> p) {
     Ꮡc.Ꮡm.Delete(p);
 }
 
-}
+} // end fips140cache_package

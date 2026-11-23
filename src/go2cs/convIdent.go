@@ -330,17 +330,6 @@ func (v *Visitor) convIdent(ident *ast.Ident, context IdentContext) string {
 		}
 	}
 
-	// A PACKAGE ident whose using-alias is shadowed by a method of the holder the code is emitted
-	// into (`func (s *byLiteral) sort(…)` vs `import "sort"` — inside byLiteral's holder the member
-	// lookup binds the method group before the alias, CS0119, compress/flate) qualifies through the
-	// _package class. No other class of the package declares the method, so every other reference
-	// keeps the alias.
-	if v.holderDeclares(ident.Name) {
-		if pkgName, ok := v.info.ObjectOf(ident).(*types.PkgName); ok {
-			return v.qualifyPackageReference(convertImportPathToNamespace(pkgName.Imported().Path(), PackageSuffix))
-		}
-	}
-
 	// The arms below each decide the identifier's SPELLING, and the generic-function-VALUE
 	// type-argument append at the end applies to whichever one wins — so a Δ-renamed or
 	// bridge-qualified generic function passed as a method group is spelled out too.
@@ -365,12 +354,6 @@ func (v *Visitor) convIdent(ident *ast.Ident, context IdentContext) string {
 		if renamed, isRenamed := v.dotImportedRenamedMember(ident); isRenamed {
 			return renamed
 		}
-	}
-
-	// A package-level name a method's holder would bind elsewhere is written through the package's
-	// class (methodHolder.go).
-	if name == "" {
-		name = v.holderQualifiedName(ident)
 	}
 
 	if name == "" {

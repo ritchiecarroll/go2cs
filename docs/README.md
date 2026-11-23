@@ -156,12 +156,23 @@ go2cs [options] <input_dir> [output_dir]
 ```
 
 ```shell
-go2cs -recurse=nuget module_dir out      # a module and its dependencies; the standard library comes from NuGet
-go2cs -recurse=module,nuget module_dir out   # only the module's own packages
-go2cs package_dir out                    # one package; it builds against a go2cs clone: dotnet build -p:go2csPath=<go2cs>/src/
-go2cs -platforms linux/amd64 -recurse=nuget module_dir out-linux    # convert for another operating system
-go2cs -tests -recurse -go2cspath <go2cs>/src -test-action all module_dir out   # convert a module, run its tests, compare with go test
-go2cs -version                           # which release this converter belongs to
+# a module and its dependencies; the standard library comes from NuGet:
+go2cs -recurse=nuget module_dir out
+
+# only the module's own packages:
+go2cs -recurse=module,nuget module_dir out
+
+# one package; it builds against a go2cs clone: dotnet build -p:go2csPath=<go2cs>/src/:
+go2cs package_dir out
+
+# convert for another operating system:
+go2cs -platforms linux/amd64 -recurse=nuget module_dir out-linux
+
+# convert a module, run its tests, compare with go test:
+go2cs -tests -recurse -go2cspath <go2cs>/src -test-action all module_dir out
+
+# which release this converter belongs to:
+go2cs -version
 ```
 
 Give the output directory when you convert a package: without it, the C# is written beside the Go input.
@@ -169,7 +180,7 @@ Give the output directory when you convert a package: without it, the C# is writ
 | Option | What it does |
 |:--|:--|
 | `-recurse=nuget` | Convert a module and its third-party dependencies, in dependency order; a dependency already published as a converted NuGet package is referenced instead of converted. The standard library, the runtime and the source generators are NuGet package references, so nothing is staged on your machine. Start here. |
-| `-recurse=module,nuget` | Convert only the module's own packages, and reference the dependencies without converting them. Use it when a dependency does not convert yet; the solution builds once the dependencies are in place. |
+| `-recurse="module, nuget"` | Convert only the module's own packages, and reference the dependencies without converting them. Use it when a dependency does not convert yet; the solution builds once the dependencies are in place. |
 | `-tests` | Also convert the Go test suite. With `-test-action all`, build it, run it, and compare its results with `go test`. For a module it takes plain `-recurse`, not `=nuget` or `=module`, and `-go2cspath` with the absolute path of a go2cs clone's `src` folder, whose converted standard library the tests build against. |
 | `-platforms <os/arch>` | The platform to convert for. It defaults to the machine you are on. |
 | `-tags <list>` | The build tags to select files with, as in `go build -tags`. |

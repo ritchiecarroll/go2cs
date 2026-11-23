@@ -36,7 +36,6 @@ namespace go;
 using hash = hash_package;
 using io = io_package;
 using strconv = strconv_package;
-using static crypto_package;
 
 partial class crypto_package {
 
@@ -44,10 +43,8 @@ partial class crypto_package {
 // package.
 partial struct Hash /*num:nuint*/;
 
-} partial class cryptoᴛHash {
-
 // HashFunc simply returns the value of h so that [Hash] implements [SignerOpts].
-public static Hash HashFunc(this Hash h) {
+internal static Hash HashFunc⁔(/*this*/ Hash h) {
     return h;
 }
 
@@ -91,7 +88,7 @@ private static readonly @string blake2b384ˢᵇ = "BLAKE2b-384"u8;
 private static ref readonly @string blake2b512ˢ => ref blake2b512ˢᵇ;
 private static readonly @string blake2b512ˢᵇ = "BLAKE2b-512"u8;
 
-public static @string String(this Hash h) {
+internal static @string String⁔(/*this*/ Hash h) {
     switch (h) {
     case var ᴛ when ᴛ == MD4: {
         return md4ˢ;
@@ -155,8 +152,6 @@ public static @string String(this Hash h) {
     }}
 }
 
-} partial class crypto_package {
-
 public static Hash MD4 => /* 1 + iota */ 1; // import golang.org/x/crypto/md4
 public static Hash MD5 => 2;                // import crypto/md5
 public static Hash SHA1 => 3;               // import crypto/sha1
@@ -200,27 +195,21 @@ internal static Hash maxHash => 20;
     [(int)((nuint)BLAKE2b_512)] = 64
 }.slice(); }
 
-} partial class cryptoᴛHash {
-
 // Size returns the length, in bytes, of a digest resulting from the given hash
 // function. It doesn't require that the hash function in question be linked
 // into the program.
-public static nint Size(this Hash h) {
+internal static nint Size⁔(/*this*/ Hash h) {
     if (h > 0 && h < maxHash) {
         return (nint)digestSizes[h];
     }
     throw panic("crypto: Size of unknown hash function");
 }
 
-} partial class crypto_package {
-
 internal static slice<Func<hash.Hash>> hashes = new slice<Func<hash.Hash>>((nint)(maxHash));
-
-} partial class cryptoᴛHash {
 
 // New returns a new hash.Hash calculating the given hash function. New panics
 // if the hash function is not linked into the binary.
-public static hash.Hash New(this Hash h) {
+internal static hash.Hash New⁔(/*this*/ Hash h) {
     if (h > 0 && h < maxHash) {
         var f = hashes[h];
         if (f != nil) {
@@ -231,11 +220,9 @@ public static hash.Hash New(this Hash h) {
 }
 
 // Available reports whether the given hash function is linked into the binary.
-public static bool Available(this Hash h) {
+internal static bool Available⁔(/*this*/ Hash h) {
     return h < maxHash && hashes[h] != nil;
 }
-
-} partial class crypto_package {
 
 // RegisterHash registers a function that returns a new instance of the given
 // hash function. This is intended to be called from the init function in

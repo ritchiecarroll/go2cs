@@ -14,6 +14,9 @@
 
 using go;
 using static go.vendor.golang.org.x.crypto.chacha20_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -56,12 +59,14 @@ using static go.vendor.golang.org.x.crypto.chacha20_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("vendor/golang.org/x/crypto/chacha20/chacha_generic.go", "chacha_generic.cs", "ADt6AAEWAAwIggAIBqKClLiCgoKCgqaCAAkUygAKILKCgoKCgoKCgoKCgoIABBYADAqCgu6ClIIAAxwACgKClIKUgoK4goKClIKClIKUgtyCgoKC7oKClJiigoKCgoKCgsqCgoKCuIKCAAIcAB4UgoKCgsqUpoKCgqaUgoKCpoKCgsqCgoKCgoKCgoKCgoKCgoKUlN7oggAIBoKClIKmgoKCgoKCgoKCgoKClJSCgoKmgoKCpoKCgoKCgoKCgg==", "", "", "104=Uint32/1/8/1,Uint32/2/8/2,Uint32/3/8/3,Uint32/4/8/4,Uint32/5/8/5,Uint32/6/8/6,Uint32/7/8/7,Uint32/8/8/8;114=Uint32/1/3/1,Uint32/2/3/2,Uint32/3/3/3")]
-[assembly: GoPositionMap("vendor/golang.org/x/crypto/chacha20/chacha_noasm.go", "chacha_noasm.cs", "AA4Wgg==")]
+[assembly: GoPositionMap("vendor/golang.org/x/crypto/chacha20/chacha_generic.go", "chacha_generic.cs", "ADp6AAEWAAwIggAIBqKClLiCgoKCgqaCAAkUygAKILKCgoKCgoKCgoKCgoIAAhYADAqCgu6ClIIAAxwACgKClIKUgoK4goKClIKClIKUgtyCgoKC7oKClJiigoKCgoKCgsqCgoKCuIKCAAIcAB4UgoKCgsqUpoKCgqaUgoKCpoKCgsqCgoKCgoKCgoKCgoKCgoKUlL7oggAIBoKClIKmgoKCgoKCgoKCgoKClJSCgoKmgoKCpoKCgoKCgoKCgg==", "", "", "103=Uint32/1/8/1,Uint32/2/8/2,Uint32/3/8/3,Uint32/4/8/4,Uint32/5/8/5,Uint32/6/8/6,Uint32/7/8/7,Uint32/8/8/8;113=Uint32/1/3/1,Uint32/2/3/2,Uint32/3/3/3")]
+[assembly: GoPositionMap("vendor/golang.org/x/crypto/chacha20/chacha_noasm.go", "chacha_noasm.cs", "AAoWgg==")]
 [assembly: GoPositionMap("vendor/golang.org/x/crypto/chacha20/xor.go", "xor.cs", "ABAkopLcgoKCgoKCgoKUgoKCgg==")]
 // </GoSourcePositionMaps>
 
 namespace go.vendor.golang.org.x.crypto;
+
+using static go.vendor.golang.org.x.crypto.chacha20_package;
 
 [GoPackage("chacha20", ImportPath = "vendor/golang.org/x/crypto/chacha20")]
 public static partial class chacha20_package
@@ -99,5 +104,18 @@ public static partial class chacha20_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(chacha20_package.Cipher)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class chacha20ᴛCipher;
+[GoMethodHost(typeof(chacha20_package.Cipher)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class chacha20ᴛCipher;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class chacha20ᴛCipher {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void SetCounter(this ref Cipher s, uint32 counter) => chacha20_package.SetCounter⁔(ref s, counter);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void XORKeyStream(this ref Cipher s, slice<byte> dst, slice<byte> src) => chacha20_package.XORKeyStream⁔(ref s, dst, src);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void xorKeyStreamBlocksGeneric(this ref Cipher s, slice<byte> dst, slice<byte> src) => chacha20_package.xorKeyStreamBlocksGeneric⁔(ref s, dst, src);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void xorKeyStreamBlocks(this ref Cipher s, slice<byte> dst, slice<byte> src) => chacha20_package.xorKeyStreamBlocks⁔(ref s, dst, src);
+}
+// </MethodForwarders>

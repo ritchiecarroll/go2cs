@@ -15,7 +15,6 @@ using @internal;
 using @internal.syscall;
 using go.io;
 using go.sync;
-using static os_package;
 
 partial class os_package {
 
@@ -46,7 +45,7 @@ internal static error rename(@string oldname, @string newname) {
             return new LinkErrorжerror(Ꮡ(new LinkError("rename", oldname, newname, syscall.EEXIST)));
         }
     }
-    err = ignoringEINTR(() => syscall.Rename(oldname, newname));
+    err = ignoringEINTR([GoFunc("rename.func1")] () => syscall.Rename(oldname, newname));
     if (err != nil) {
         return new LinkErrorжerror(Ꮡ(new LinkError("rename", oldname, newname, err)));
     }
@@ -67,10 +66,8 @@ partial struct @file {
     internal bool inRoot;                     // whether file is opened in a Root
 }
 
-} partial class osᴛFile {
-
 // fd is the Unix implementation of Fd.
-internal static uintptr fd(this ж<File> Ꮡf) {
+internal static uintptr fd⁔(/*this*/ ж<File> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     if (Ꮡf == nil) {
@@ -88,8 +85,6 @@ internal static uintptr fd(this ж<File> Ꮡf) {
 
     return (uintptr)f.pfd.Sysfd;
 }
-
-} partial class os_package {
 
 // newFileFromNewFile is called by [NewFile].
 internal static ж<File> newFileFromNewFile(uintptr fd, @string name) {
@@ -177,7 +172,7 @@ internal static ж<File> newFile(nint fd, @string name, newFileKind kind, bool n
         switch (ᐧ) {
         case {} when exprᴛ1 == "darwin"u8 || exprᴛ1 == "ios"u8 || exprᴛ1 == "dragonfly"u8 || exprᴛ1 == "freebsd"u8 || exprᴛ1 == "netbsd"u8 || exprᴛ1 == "openbsd"u8: {
             ref var st = ref heap(new syscall.Stat_t(), out var Ꮡst);
-            var err = ignoringEINTR(() => syscall.Fstat(fd, Ꮡst));
+            var err = ignoringEINTR([GoFunc("newFile.func1")] () => syscall.Fstat(fd, Ꮡst));
             var typ = st.Mode & (uint32)syscall.S_IFMT;
             // Don't try to use kqueue with regular files on *BSDs.
             // On FreeBSD a regular file is always
@@ -232,7 +227,7 @@ internal static ж<File> newFile(nint fd, @string name, newFileKind kind, bool n
         }
     }
 
-    runtime.SetFinalizer(f.@file.OrTypedNil(), ((Func<ж<@file>, error>)(osᴛfile.close)));
+    runtime.SetFinalizer(f.@file.OrTypedNil(), ((Func<ж<@file>, error>)(os_package.close⁔)));
     return f;
 }
 
@@ -270,7 +265,7 @@ internal static (ж<File>, error) openFileNolog(@string name, nint flag, FileMod
     ref var s = ref heap(new poll.SysFile(), out var Ꮡs);
     ref var e = ref heap<error>(out var Ꮡe);
     // We have to check EINTR here, per issues 11180 and 39237.
-    ignoringEINTR(() => {
+    ignoringEINTR([GoFunc("openFileNolog.func1")] () => {
         (r, Ꮡs.Value, Ꮡe.ValueSlot) = open(name, flag | (nint)syscall.O_CLOEXEC, syscallMode(perm));
         return Ꮡe.ValueSlot;
     });
@@ -298,7 +293,7 @@ internal static (ж<File>, error) openDirNolog(@string name) {
     nint r = default;
     ref var s = ref heap(new poll.SysFile(), out var Ꮡs);
     ref var e = ref heap<error>(out var Ꮡe);
-    ignoringEINTR(() => {
+    ignoringEINTR([GoFunc("openDirNolog.func1")] () => {
         (r, Ꮡs.Value, Ꮡe.ValueSlot) = open(name, (nint)((nint)(nint)(O_RDONLY | (nint)syscall.O_CLOEXEC) | (nint)syscall.O_DIRECTORY), 0);
         return Ꮡe.ValueSlot;
     });
@@ -315,9 +310,7 @@ internal static (ж<File>, error) openDirNolog(@string name) {
     return (f, default);
 }
 
-} partial class osᴛfile {
-
-internal static error close(this ж<@file> Ꮡfile) {
+internal static error close⁔(/*this*/ ж<@file> Ꮡfile) {
     ref var @file = ref Ꮡfile.DerefOrNull();
 
     if (Ꮡfile == nil) {
@@ -339,13 +332,11 @@ internal static error close(this ж<@file> Ꮡfile) {
     return err;
 }
 
-} partial class osᴛFile {
-
 // seek sets the offset for the next Read or Write on file to offset, interpreted
 // according to whence: 0 means relative to the origin of the file, 1 means
 // relative to the current offset, and 2 means relative to the end.
 // It returns the new offset and an error, if any.
-internal static (int64 ret, error err) seek(this ж<File> Ꮡf, int64 offset, nint whence) {
+internal static (int64 ret, error err) seek⁔(/*this*/ ж<File> Ꮡf, int64 offset, nint whence) {
     int64 ret = default;
     error err = default;
 
@@ -359,13 +350,11 @@ internal static (int64 ret, error err) seek(this ж<File> Ꮡf, int64 offset, ni
     return (ret, err);
 }
 
-} partial class os_package {
-
 // Truncate changes the size of the named file.
 // If the file is a symbolic link, it changes the size of the link's target.
 // If there is an error, it will be of type [*PathError].
 public static error Truncate(@string name, int64 size) {
-    var e = ignoringEINTR(() => syscall.Truncate(name, size));
+    var e = ignoringEINTR([GoFunc("Truncate.func1")] () => syscall.Truncate(name, size));
     if (e != nil) {
         return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "truncate", Path: name, Err: e)));
     }
@@ -379,11 +368,11 @@ public static error Remove(@string name) {
     // whether name is a file or directory.
     // Try both: it is cheaper on average than
     // doing a Stat plus the right one.
-    var e = ignoringEINTR(() => syscall.Unlink(name));
+    var e = ignoringEINTR([GoFunc("Remove.func1")] () => syscall.Unlink(name));
     if (e == nil) {
         return default;
     }
-    var e1 = ignoringEINTR(() => syscall.Rmdir(name));
+    var e1 = ignoringEINTR([GoFunc("Remove.func2")] () => syscall.Rmdir(name));
     if (e1 == nil) {
         return default;
     }
@@ -426,7 +415,7 @@ internal static @string tempDir() {
 // Link creates newname as a hard link to the oldname file.
 // If there is an error, it will be of type *LinkError.
 public static error Link(@string oldname, @string newname) {
-    var e = ignoringEINTR(() => syscall.Link(oldname, newname));
+    var e = ignoringEINTR([GoFunc("Link.func1")] () => syscall.Link(oldname, newname));
     if (e != nil) {
         return new LinkErrorжerror(Ꮡ(new LinkError("link", oldname, newname, e)));
     }
@@ -438,7 +427,7 @@ public static error Link(@string oldname, @string newname) {
 // if oldname is later created as a directory the symlink will not work.
 // If there is an error, it will be of type *LinkError.
 public static error Symlink(@string oldname, @string newname) {
-    var e = ignoringEINTR(() => syscall.Symlink(oldname, newname));
+    var e = ignoringEINTR([GoFunc("Symlink.func1")] () => syscall.Symlink(oldname, newname));
     if (e != nil) {
         return new LinkErrorжerror(Ꮡ(new LinkError("symlink", oldname, newname, e)));
     }
@@ -449,7 +438,7 @@ internal static (@string, error) readlink(@string name) {
     for (nint len = 128; ; len *= 2) {
         var b = new slice<byte>(len);
         var bʗ1 = b;
-        var (n, err) = ignoringEINTR2((nint, error) () => {
+        var (n, err) = ignoringEINTR2([GoFunc("readlink.func1")] (nint, error) () => {
             var (ᴛ1, ᴛ2) = syscall.Readlink(name, bʗ1);
             return fixCount(ᴛ1, ᴛ2);
         });
@@ -473,24 +462,20 @@ partial struct unixDirent {
     internal FileInfo info;
 }
 
-} partial class osᴛunixDirent {
+internal static @string Name⁔(/*this*/ ref unixDirent d) { return d.name; }
+internal static bool IsDir⁔(/*this*/ ref unixDirent d) { return d.typ.IsDir(); }
+internal static FileMode Type⁔(/*this*/ ref unixDirent d) { return d.typ; }
 
-internal static @string Name(this ref unixDirent d) { return d.name; }
-internal static bool IsDir(this ref unixDirent d) { return d.typ.IsDir(); }
-internal static FileMode Type(this ref unixDirent d) { return d.typ; }
-
-internal static (FileInfo, error) Info(this ref unixDirent d) {
+internal static (FileInfo, error) Info⁔(/*this*/ ref unixDirent d) {
     if (d.info != nil) {
         return (d.info, default);
     }
     return Lstat(d.parent + "/"u8 + d.name);
 }
 
-internal static @string String(this ж<unixDirent> Ꮡd) {
+internal static @string String⁔(/*this*/ ж<unixDirent> Ꮡd) {
     return fs.FormatDirEntry(new unixDirentжDirEntry(Ꮡd));
 }
-
-} partial class os_package {
 
 internal static (DirEntry, error) newUnixDirent(ж<File> Ꮡparent, @string name, FileMode typ) {
     ref var parent = ref Ꮡparent.DerefOrNull();

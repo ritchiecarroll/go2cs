@@ -5,8 +5,6 @@
 // license that can be found in the LICENSE file.
 namespace go.go;
 
-using static types_package;
-
 partial class types_package {
 
 // A Pointer represents a pointer type.
@@ -17,12 +15,10 @@ partial struct Pointer {
 // NewPointer returns a new pointer type for the given element (base) type.
 public static ж<Pointer> NewPointer(Type elem) { return Ꮡ(new Pointer(@base: elem)); }
 
-} partial class typesᴛPointer {
-
 // Elem returns the element type for the given pointer p.
-public static Type Elem(this ref Pointer p) { return p.@base; }
+internal static Type Elem⁔(/*this*/ ref Pointer p) { return p.@base; }
 
-public static Type Underlying(this ж<Pointer> Ꮡp) { return new PointerжType(Ꮡp); }
-public static @string String(this ж<Pointer> Ꮡp) { return TypeString(new PointerжType(Ꮡp), default); }
+internal static Type Underlying⁔(/*this*/ ж<Pointer> Ꮡp) { return new PointerжType(Ꮡp); }
+internal static @string String⁔(/*this*/ ж<Pointer> Ꮡp) { return TypeString(new PointerжType(Ꮡp), default); }
 
-}
+} // end types_package

@@ -13,7 +13,6 @@ using errors = errors_package;
 using byteorder = go.@internal.byteorder_package;
 using go.@internal;
 using go.crypto;
-using static hpke_package;
 
 partial class hpke_package {
 
@@ -87,7 +86,7 @@ internal static (ж<context>, error) newContext(slice<byte> sharedSecret, uint16
         }
         var expSecretʗ1 = expSecretΔ1;
         var sidʗ1 = sid;
-        var exportΔ1 = (@string exporterContext, uint16 length) => kdf.labeledDerive(sidʗ1, expSecretʗ1, secˢ, slice<byte>(exporterContext), length);
+        var exportΔ1 = [GoFunc("newContext.func1")] (@string exporterContext, uint16 length) => kdf.labeledDerive(sidʗ1, expSecretʗ1, secˢ, slice<byte>(exporterContext), length);
 
         return (Ꮡ(new context(
             aead: aΔ1,
@@ -130,7 +129,7 @@ internal static (ж<context>, error) newContext(slice<byte> sharedSecret, uint16
     }
     var expSecretʗ2 = expSecret;
     var sidʗ2 = sid;
-    var export = (@string exporterContext, uint16 length) => kdf.labeledExpand(sidʗ2, expSecretʗ2, secˢ, slice<byte>(exporterContext), length);
+    var export = [GoFunc("newContext.func2")] (@string exporterContext, uint16 length) => kdf.labeledExpand(sidʗ2, expSecretʗ2, secˢ, slice<byte>(exporterContext), length);
 
     return (Ꮡ(new context(
         aead: a,
@@ -182,8 +181,6 @@ public static (ж<Recipient>, error) NewRecipient(slice<byte> enc, PrivateKey k,
     return (Ꮡ(new Recipient(context)), default);
 }
 
-} partial class hpkeᴛSender {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string exportOnlyInstantiationˢ => ref exportOnlyInstantiationˢᵇ;
 private static readonly @string exportOnlyInstantiationˢᵇ = "export-only instantiation"u8;
@@ -193,7 +190,7 @@ private static readonly @string exportOnlyInstantiationˢᵇ = "export-only inst
 //
 // Seal uses incrementing counters for each call, and Open on the receiving side
 // must be called in the same order as Seal.
-public static (slice<byte>, error) Seal(this ref Sender s, slice<byte> aad, slice<byte> plaintext) {
+internal static (slice<byte>, error) Seal⁔(/*this*/ ref Sender s, slice<byte> aad, slice<byte> plaintext) {
     if (s.aead == nil) {
         return (default, errors.New(exportOnlyInstantiationˢ));
     }
@@ -201,8 +198,6 @@ public static (slice<byte>, error) Seal(this ref Sender s, slice<byte> aad, slic
     s.seqNum++;
     return (ciphertext, default);
 }
-
-} partial class hpke_package {
 
 // Seal instantiates a single-use HPKE sending HPKE context like [NewSender],
 // and then encrypts the provided plaintext like [Sender.Seal] (with no aad).
@@ -219,33 +214,25 @@ public static (slice<byte>, error) Seal(PublicKey pk, KDF kdf, AEAD aead, slice<
     return (appendꓸꓸꓸ(enc, ct), default);
 }
 
-} partial class hpkeᴛSender {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string invalidLengthˢ => ref invalidLengthˢᵇ;
 private static readonly @string invalidLengthˢᵇ = "invalid length"u8;
 
 // Export produces a secret value derived from the shared key between sender and
 // recipient. length must be at most 65,535.
-public static (slice<byte>, error) Export(this ref Sender s, @string exporterContext, nint length) {
+internal static (slice<byte>, error) Export⁔(/*this*/ ref Sender s, @string exporterContext, nint length) {
     if (length < 0 || length > 0xFFFF) {
         return (default, errors.New(invalidLengthˢ));
     }
     return s.export(exporterContext, (uint16)length);
 }
 
-} partial class hpkeᴛRecipient {
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string exportOnlyInstantiationˢ => ref exportOnlyInstantiationˢᵇ;
-private static readonly @string exportOnlyInstantiationˢᵇ = "export-only instantiation"u8;
-
 // Open decrypts the provided ciphertext, optionally binding to the additional
 // public data aad, or returns an error if decryption fails.
 //
 // Open uses incrementing counters for each successful call, and must be called
 // in the same order as Seal on the sending side.
-public static (slice<byte>, error) Open(this ref Recipient r, slice<byte> aad, slice<byte> ciphertext) {
+internal static (slice<byte>, error) Open⁔(/*this*/ ref Recipient r, slice<byte> aad, slice<byte> ciphertext) {
     if (r.aead == nil) {
         return (default, errors.New(exportOnlyInstantiationˢ));
     }
@@ -256,8 +243,6 @@ public static (slice<byte>, error) Open(this ref Recipient r, slice<byte> aad, s
     r.seqNum++;
     return (plaintext, default);
 }
-
-} partial class hpke_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string ciphertextTooShortˢ => ref ciphertextTooShortˢᵇ;
@@ -280,24 +265,16 @@ public static (slice<byte>, error) Open(PrivateKey k, KDF kdf, AEAD aead, slice<
     return r.Open(default, ciphertext);
 }
 
-} partial class hpkeᴛRecipient {
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string invalidLengthˢ => ref invalidLengthˢᵇ;
-private static readonly @string invalidLengthˢᵇ = "invalid length"u8;
-
 // Export produces a secret value derived from the shared key between sender and
 // recipient. length must be at most 65,535.
-public static (slice<byte>, error) Export(this ref Recipient r, @string exporterContext, nint length) {
+internal static (slice<byte>, error) Export⁔(/*this*/ ref Recipient r, @string exporterContext, nint length) {
     if (length < 0 || length > 0xFFFF) {
         return (default, errors.New(invalidLengthˢ));
     }
     return r.export(exporterContext, (uint16)length);
 }
 
-} partial class hpkeᴛcontext {
-
-internal static slice<byte> nextNonce(this ref context ctx) {
+internal static slice<byte> nextNonce⁔(/*this*/ ref context ctx) {
     var nonce = new slice<byte>(ctx.aead.NonceSize());
     byteorder.BEPutUint64(nonce.slice(len(nonce) - 8), ctx.seqNum);
     foreach (var i in range(len(ctx.baseNonce))) {
@@ -305,8 +282,6 @@ internal static slice<byte> nextNonce(this ref context ctx) {
     }
     return nonce;
 }
-
-} partial class hpke_package {
 
 internal static slice<byte> suiteID(uint16 kemID, uint16 kdfID, uint16 aeadID) {
     var suiteID = new slice<byte>(0, 4 + 2 + 2 + 2);

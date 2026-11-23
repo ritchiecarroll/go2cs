@@ -70,13 +70,13 @@ internal static (nint, nint) unshadowed() {
 internal static void shadowedCalls() {
     ref var a = ref heap<arr>(new arr(new nint[]{1, 2, 3}.array()), out var Ꮡa);
 
-    nint make(nint n) => n * 2;
-    nint @new(nint n) => n * 3;
-    nint panic(nint n) => n * 4;
-    nint print(nint n) => n * 5;
-    nint println(nint n) => n * 6;
-    nint len(ж<arr> p) => p.Value[0] + 100;
-    nint cap(ж<arr> p) => p.Value[1] + 200;
+    [GoFunc("shadowedCalls.func1")] nint make(nint n) => n * 2;
+    [GoFunc("shadowedCalls.func2")] nint @new(nint n) => n * 3;
+    [GoFunc("shadowedCalls.func3")] nint panic(nint n) => n * 4;
+    [GoFunc("shadowedCalls.func4")] nint print(nint n) => n * 5;
+    [GoFunc("shadowedCalls.func5")] nint println(nint n) => n * 6;
+    [GoFunc("shadowedCalls.func6")] nint len(ж<arr> p) => p.Value[0] + 100;
+    [GoFunc("shadowedCalls.func7")] nint cap(ж<arr> p) => p.Value[1] + 200;
 
     fmt.Println("shadowed", make(21), @new(7), panic(5));
     fmt.Println("shadowed", print(4), println(3), len(Ꮡa), cap(Ꮡa));

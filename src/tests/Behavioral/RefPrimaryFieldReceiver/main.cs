@@ -52,7 +52,7 @@ internal static nint nBeforeTouch(this ж<counter> Ꮡc) {
 }
 
 internal static partial void bumpAsync(this ж<counter> Ꮡc, nint times, ж<Δsync.WaitGroup> wg) {
-    goǃ(() => {
+    goǃ([GoFunc("(*counter).bumpAsync.func1")] () => {
         GoFrame ᒐ = default;
         try {
             defer(wg.Done, ref ᒐ);
@@ -88,7 +88,7 @@ internal static partial void main() {
     for (nint i = 0; i < workers; i++) {
         Ꮡwg.Add(1);
         var cʗ1 = c;
-        goǃ(() => {
+        goǃ([GoFunc("main.func1")] () => {
             GoFrame ᒐ = default;
             try {
                 defer(Ꮡwg.Done, ref ᒐ);
@@ -111,7 +111,7 @@ internal static partial void main() {
     var released = new channel<bool>(0);
     var cʗ2 = c;
     var releasedʗ1 = released;
-    goǃ(() => {
+    goǃ([GoFunc("main.func2")] () => {
         cʗ2.Ꮡmu.Unlock();
         releasedʗ1.ᐸꟷ(true);
     });

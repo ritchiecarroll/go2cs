@@ -69,7 +69,7 @@ internal static (int64 written, error err) copyFileRange(ж<FD> dst, ж<FD> src,
             (written, err) = (0, errΔ2); goto ᒐdone;
         }
         defer(src.readUnlock, ref ᒐ);
-        (written, err) = ignoringEINTR2((int64, error) () => {
+        (written, err) = ignoringEINTR2([GoFunc("copyFileRange.func1")] (int64, error) () => {
             var (n, errΔ3) = unix.CopyFileRange(src.Value.Sysfd, nil, dst.Value.Sysfd, nil, max, 0);
             return ((int64)n, errΔ3);
         });

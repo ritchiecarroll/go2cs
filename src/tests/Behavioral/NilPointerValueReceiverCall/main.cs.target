@@ -23,7 +23,7 @@ internal static @string direct(ж<T> p) { return p.Hello(); }
 internal static void @try(@string name, Func<@string> f) {
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("try.func1")] () => {
             var r = recover(); if (r != nil) {
                 fmt.Println(name, "panicked:", r);
             }
@@ -37,15 +37,15 @@ internal static void @try(@string name, Func<@string> f) {
 internal static void main() {
     ж<T> p = default;
     var pʗ1 = p;
-    @try("value receiver, receiver unused", () => pʗ1.Hello());
+    @try("value receiver, receiver unused", [GoFunc("main.func1")] () => pʗ1.Hello());
     var pʗ2 = p;
-    @try("value receiver, reads a field", () => fmt.Sprint(pʗ2.N()));
+    @try("value receiver, reads a field", [GoFunc("main.func2")] () => fmt.Sprint(pʗ2.N()));
     var pʗ3 = p;
-    @try("pointer receiver, receiver unused", () => pʗ3.PtrHello());
+    @try("pointer receiver, receiver unused", [GoFunc("main.func3")] () => pʗ3.PtrHello());
     var pʗ4 = p;
-    @try("direct call in a named func", () => direct(pʗ4));
+    @try("direct call in a named func", [GoFunc("main.func4")] () => direct(pʗ4));
     var pʗ5 = p;
-    @try("method value", () => {
+    @try("method value", [GoFunc("main.func5")] () => {
         var recvʗ1 = ~p;
         
         var pʗ6 = pʗ5;
@@ -53,14 +53,14 @@ internal static void main() {
         return "bound "u8 + f();
     });
     var pʗ7 = p;
-    @try("through an interface", () => {
+    @try("through an interface", [GoFunc("main.func6")] () => {
         Helloer h = new TжHelloer(pʗ7);
         return h.Hello();
     });
 
     var q = Ꮡ(new T(n: 7));
     var qʗ1 = q;
-    @try("value receiver via non-nil pointer", () => fmt.Sprint(qʗ1.Hello(), " ", qʗ1.N()));
+    @try("value receiver via non-nil pointer", [GoFunc("main.func7")] () => fmt.Sprint(qʗ1.Hello(), " ", qʗ1.N()));
 }
 
 } // end main_package

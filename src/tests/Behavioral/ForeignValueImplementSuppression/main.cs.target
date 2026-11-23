@@ -60,7 +60,7 @@ internal static void main() {
 
     fmt.Println("describe:", AreEqual(hue.Describe(want), got));
 
-    hue.Tint f = new hue_TinterᴠTint(new hue.Tinter(() => ((uint32)(11), (uint32)(22))));
+    hue.Tint f = new hue_TinterᴠTint(new hue.Tinter([GoFunc("main.func1")] () => ((uint32)(11), (uint32)(22))));
     var (fl, fa) = f.Shade();
     fmt.Println("func:", fl, fa);
 

@@ -14,6 +14,9 @@
 
 using go;
 using static go.crypto.@internal.fips140.rsa_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -64,10 +67,12 @@ using static go.crypto.@internal.fips140.rsa_package;
 [assembly: GoPositionMap("crypto/internal/fips140/rsa/keygen.go", "keygen.cs", "AB0iooKUgoKCpoKCgpSCgqaCgpSCgqaCpoKClIIADh6ClJSCpoKCAAcQpoIADyCCgqaCktyCgpS4ygAJBsIABxCSgpSmgoKUggAHEIKUgpSCpuqigqaCgoLKgtyClIK4ABEkggAEGPKClLiCooKCABAigoKUtLS0tLS0tLaCgoKCgoKUlIKUgoIADRwAIDqipoKClIKUpoKClLiCgoKmAAsMlIKUgoKUggAIEoKCuIKCgpSUuA==", "115-127:1")]
 [assembly: GoPositionMap("crypto/internal/fips140/rsa/pkcs1v15.go", "pkcs1v15.cs", "ABcyABAqwoKClKaCgoKm5qSSgoKCgsqCgpSCgoKUgoKuwoKClKaigoKC3IKmgoKmgoKUgqamgsg=")]
 [assembly: GoPositionMap("crypto/internal/fips140/rsa/pkcs1v22.go", "pkcs1v22.cs", "ABdMAA4CgpSClIKUqqKClIKCgoKClIKClPimgoIABxCCyoKmgoKCAAwalIKCgpQABxCC3MqmpgAICqaCgoIABxCCuILKgsqCmrKC3LimgoKClMqC7oKCgqaCuAAHEIKCgoKUpoKUqsKCgriClOiygoIABxCCuIKUgoKmgoKCAAkUkoKCpqiSqJKClKaigoKCgoKCpoKmgoKCggAHEIKClKamgubKAAkOgoKCgoCCgoKkgoKmgoKUgoKUgoKUgIK2gpSosoKCgpSChKaCgqaCgpSUgpSClNye8oKUgoKCgoKmgqY=", "", "", "456=Size/1/1/1")]
-[assembly: GoPositionMap("crypto/internal/fips140/rsa/rsa.go", "rsa.cs", "ABYqogAZLILOwoKCgpSCgpSCgpSCgpTmsoKCgpSUgoKClLiUlIKClO6ClKqilIKClIKClIKClIKClIKCpu6ClKyygoKUgoKU3IKUzgANAoKCgoKUgoKCgoIAGAqilIKCgqaUgqaCgqaCuIKClIKClIIAChaCgpSCgpSCgoKCpoKClIKClIKCgriClJSCyoKClIKCAAgSgpSCgqa4uIIACBKCpgAOBqKCgpSCyoKUgpSCuIK4gtyClKiSgoKUpoKCgpSmgoLMkoKqooKssoKmgqSCgqaUgpaClJSUlJSUpoKCgrg=")]
+[assembly: GoPositionMap("crypto/internal/fips140/rsa/rsa.go", "rsa.cs", "ABMqogAVLIKuwoKCgpSCgpSCgpSCgpTmsoKCgpSUgoKClLiUlIKClO6ClKqilIKClIKClIKClIKClIKCpu6ClKyygoKUgoKU3IKUrgANAoKCgoKUgoKCgoIAFgqilIKCgqaUgqaCgqaCuIKClIKClIIAChaCgpSCgpSCgoKCpoKClIKClIKCgriClJSCyoKClIKCAAgSgpSCgqa4uIIACBKCpgAOBqKCgpSCyoKUgpSCuIK4gtyClKiSgoKUpoKCgpSmgoLMkoKqooKssoKmgqSCgqaUgpaClJSUlJSUpoKCgrg=")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140;
+
+using static go.crypto.@internal.fips140.rsa_package;
 
 [GoPackage("rsa")]
 public static partial class rsa_package
@@ -114,6 +119,20 @@ public static partial class rsa_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(rsa_package.PrivateKey)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class rsaᴛPrivateKey;
-[GoMethodHost(typeof(rsa_package.PublicKey)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class rsaᴛPublicKey;
+[GoMethodHost(typeof(rsa_package.PrivateKey)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class rsaᴛPrivateKey;
+[GoMethodHost(typeof(rsa_package.PublicKey)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class rsaᴛPublicKey;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class rsaᴛPrivateKey {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<PublicKey> PublicKey(this ж<PrivateKey> Ꮡpriv) => rsa_package.PublicKey⁔(Ꮡpriv);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<byte> N, nint e, slice<byte> d, slice<byte> P, slice<byte> Q, slice<byte> dP, slice<byte> dQ, slice<byte> qInv) Export(this ref PrivateKey priv) => rsa_package.Export⁔(ref priv);
+}
+partial class rsaᴛPublicKey {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Size(this ref PublicKey pub) => rsa_package.Size⁔(ref pub);
+}
+// </MethodForwarders>

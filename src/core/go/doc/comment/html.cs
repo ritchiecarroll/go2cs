@@ -7,7 +7,6 @@ using bytes = bytes_package;
 using fmt = fmt_package;
 using strconv = strconv_package;
 using io = io_package;
-using static comment_package;
 
 partial class comment_package {
 
@@ -17,11 +16,9 @@ partial struct htmlPrinter {
     internal bool tight;
 }
 
-} partial class commentᴛPrinter {
-
 // HTML returns an HTML formatting of the [Doc].
 // See the [Printer] documentation for ways to customize the HTML output.
-public static slice<byte> HTML(this ж<Printer> Ꮡp, ж<Doc> Ꮡd) {
+internal static slice<byte> HTML⁔(/*this*/ ж<Printer> Ꮡp, ж<Doc> Ꮡd) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     var hp = Ꮡ(new htmlPrinter(Printer: Ꮡp));
@@ -32,8 +29,6 @@ public static slice<byte> HTML(this ж<Printer> Ꮡp, ж<Doc> Ꮡd) {
     return @out.Bytes();
 }
 
-} partial class commentᴛhtmlPrinter {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string preˢ => ref preˢᵇ;
 private static readonly @string preˢᵇ = "<pre>"u8;
@@ -43,7 +38,7 @@ internal static ref readonly @string valueˢ => ref valueˢᵇ;
 private static readonly @string valueˢᵇ = @" value="""u8;
 
 // block prints the block x to out.
-internal static void block(this ref htmlPrinter p, ж<bytes.Buffer> Ꮡout, Block x) {
+internal static void block⁔(/*this*/ ref htmlPrinter p, ж<bytes.Buffer> Ꮡout, Block x) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     switch (x.type()) {
@@ -114,8 +109,6 @@ internal static void block(this ref htmlPrinter p, ж<bytes.Buffer> Ꮡout, Bloc
     }}
 }
 
-} partial class comment_package {
-
 // inc increments the decimal string s.
 // For example, inc("1199") == "1200".
 internal static @string inc(@string s) {
@@ -130,14 +123,12 @@ internal static @string inc(@string s) {
     return "1"u8 + ((sstring)b);
 }
 
-} partial class commentᴛhtmlPrinter {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string aHrefˢ => ref aHrefˢᵇ;
 private static readonly @string aHrefˢᵇ = @"<a href="""u8;
 
 // text prints the text sequence x to out.
-internal static void text(this ref htmlPrinter p, ж<bytes.Buffer> Ꮡout, slice<Text> x) {
+internal static void text⁔(/*this*/ ref htmlPrinter p, ж<bytes.Buffer> Ꮡout, slice<Text> x) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     foreach (var (_, t) in range(x)) {
@@ -187,7 +178,7 @@ private static readonly @string aposˢᵇ = "&apos;"u8;
 // escape prints s to out as plain text,
 // escaping < & " ' and > to avoid being misinterpreted
 // in larger HTML constructs.
-internal static void escape(this ref htmlPrinter p, ж<bytes.Buffer> Ꮡout, @string s) {
+internal static void escape⁔(/*this*/ ref htmlPrinter p, ж<bytes.Buffer> Ꮡout, @string s) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     nint start = 0;
@@ -227,4 +218,4 @@ internal static void escape(this ref htmlPrinter p, ж<bytes.Buffer> Ꮡout, @st
     @out.WriteString(s.slice(start));
 }
 
-}
+} // end comment_package

@@ -9,7 +9,6 @@ using sys = go.@internal.runtime.sys_package;
 using @unsafe = unsafe_package;
 using go.@internal;
 using go.@internal.runtime;
-using static maps_package;
 
 partial class maps_package {
 
@@ -161,9 +160,7 @@ internal static (@unsafe.Pointer, bool) runtime_mapaccess2_fast32(ж<abi.MapType
     }
 }
 
-} partial class mapsᴛMap {
-
-internal static @unsafe.Pointer putSlotSmallFast32(this ref Map m, ж<abi.MapType> typ, uintptr hash, uint32 key) {
+internal static @unsafe.Pointer putSlotSmallFast32⁔(/*this*/ ref Map m, ж<abi.MapType> typ, uintptr hash, uint32 key) {
     var g = new groupReference(
         data: m.dirPtr
     );
@@ -202,8 +199,6 @@ internal static @unsafe.Pointer putSlotSmallFast32(this ref Map m, ж<abi.MapTyp
 
     return slotElem;
 }
-
-} partial class maps_package {
 
 //go:linkname runtime_mapassign_fast32 runtime.mapassign_fast32
 internal static @unsafe.Pointer runtime_mapassign_fast32(ж<abi.MapType> Ꮡtyp, ж<Map> Ꮡm, uint32 key) {

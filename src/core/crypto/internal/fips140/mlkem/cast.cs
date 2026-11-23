@@ -15,7 +15,7 @@ using go.crypto.@internal.fips140;
 partial class mlkem_package {
 
 internal static Action fipsSelfTest;
-internal static void initᴛfipsSelfTest() { fipsSelfTest = sync.OnceFunc(() => {
+internal static void initᴛfipsSelfTest() { fipsSelfTest = sync.OnceFunc([GoFunc("init.func1")] () => {
     fips140.CAST("ML-KEM-768", fips140CAST);
 }); }
 

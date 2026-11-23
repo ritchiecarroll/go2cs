@@ -14,7 +14,6 @@ using @unsafe = unsafe_package;
 using @internal;
 using fs = go.io.fs_package;
 using go.sync;
-using static os_package;
 
 partial class os_package {
 
@@ -30,7 +29,7 @@ partial struct dirInfo {
 internal static UntypedInt blockSize => 8192;
 
 [GoLazy] partial class lazyᴛdirBufPool { internal static readonly ж<Δsync.Pool> ᏑdirBufPool = new StaticBox<Δsync.Pool>(new Δsync.Pool(
-    New: () => {
+    New: [GoFunc("init.func1")] () => {
         // The buffer must be at least a block long.
         var buf = new slice<byte>(blockSize);
         return Ꮡ(buf);
@@ -38,18 +37,14 @@ internal static UntypedInt blockSize => 8192;
 )); }
 internal static ref Δsync.Pool dirBufPool => ref ((StaticBox<Δsync.Pool>)ᏑdirBufPool).ValueSlot;
 
-} partial class osᴛdirInfo {
-
-internal static void close(this ref dirInfo d) {
+internal static void close⁔(/*this*/ ref dirInfo d) {
     if (d.buf != nil) {
         ᏑdirBufPool.Put(d.buf.OrTypedNil());
         d.buf = default;
     }
 }
 
-} partial class osᴛFile {
-
-internal static (slice<@string> names, slice<DirEntry> dirents, slice<FileInfo> infos, error err) readdir(this ж<File> Ꮡf, nint n, readdirMode mode) {
+internal static (slice<@string> names, slice<DirEntry> dirents, slice<FileInfo> infos, error err) readdir⁔(/*this*/ ж<File> Ꮡf, nint n, readdirMode mode) {
     slice<@string> names = default;
     slice<DirEntry> dirents = default;
     slice<FileInfo> infos = default;
@@ -185,8 +180,6 @@ internal static (slice<@string> names, slice<DirEntry> dirents, slice<FileInfo> 
     finally { ᒐ.Run(); }
     ᒐdone: return (names, dirents, infos, err);
 }
-
-} partial class os_package {
 
 // readInt returns the size-bytes unsigned integer in native byte order at offset off.
 internal static (uint64 u, bool ok) readInt(slice<byte> b, uintptr off, uintptr size) {

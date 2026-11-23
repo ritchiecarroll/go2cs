@@ -288,7 +288,7 @@ partial class synctest_package {
 //   - T.Run, T.Parallel, and T.Deadline must not be called.
 public static void Test(ж<testing.T> t, Action<ж<testing.T>> f) {
     bool ok = default;
-    synctest.Run(() => {
+    synctest.Run([GoFunc("Test.func1")] () => {
         ok = testingSynctestTest(t, f);
     });
     if (!ok) {

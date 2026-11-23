@@ -14,6 +14,9 @@
 
 using go;
 using static go.go.kwlib.required_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -49,10 +52,12 @@ using static go.go.kwlib.required_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("required.go", "required.cs", "6tw=")]
+[assembly: GoPositionMap("required.go", "required.cs", "yrw=")]
 // </GoSourcePositionMaps>
 
 namespace go.go.kwlib;
+
+using static global::go.go.kwlib.required_package;
 
 [GoPackage("required")]
 public static partial class required_package
@@ -84,5 +89,15 @@ public static partial class required_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(required_package.Kind)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class requiredᴛKind;
+[GoMethodHost(typeof(required_package.Kind)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class requiredᴛKind;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class requiredᴛKind {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static Kind Double(this Kind k) => required_package.Double⁔(k);
+}
+// </MethodForwarders>

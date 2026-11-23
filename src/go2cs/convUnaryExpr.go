@@ -159,16 +159,11 @@ func (v *Visitor) boxAccessorType(typeName, receiver string, owner types.Type) s
 	//     boundary (`Ꮡmatch.Value` does not qualify type `m`).
 	//   - A variable of that name is declared ANYWHERE in the enclosing function (the general form of
 	//     the receiver cases above — the shadowing local need not participate in this accessor at all).
-	//   - The accessor stands in a method holder that declares a METHOD of that name (`type funcInfo`
-	//     beside `func (f *Func) funcInfo()`): the accessor names the type in expression position, where
-	//     the holder's method group binds first (CS0119). A type position reads only types, so every
-	//     other spelling of the type in the holder stays bare.
 	if strings.HasPrefix(typeName, ShadowVarMarker) || typeName == receiver ||
 		strings.HasPrefix(receiver, typeName+CapturedVarMarker) ||
 		receiver == AddressPrefix+typeName ||
 		strings.HasPrefix(receiver, AddressPrefix+typeName+".") ||
-		v.funcScopeVarNames.Contains(typeName) ||
-		v.holderDeclaresTypeName(typeName) {
+		v.funcScopeVarNames.Contains(typeName) {
 		return v.boxAccessorQualifier(owner) + "." + typeName
 	}
 

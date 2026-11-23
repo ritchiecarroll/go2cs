@@ -18,7 +18,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace GenTests;
 
 /// <summary>
-/// M:N PROTOTYPE, the go statement's ARITY fix and its LOUD fallback (COORD's A3 ruling, 2026-11-12; the owner's severity
+/// M:N (experimental, opt-in), the go statement's ARITY fix and its LOUD fallback (COORD's A3 ruling, 2026-11-12; the owner's severity
 /// ruling, 2026-11-13, FREEZE-SHEET.md): a go statement of up to 16 arguments launches its function's twin, a go literal
 /// WITH arguments launches its twin like one without, and a go statement the generator does NOT launch as a twin, where
 /// its goroutine could park, keeps its plain launch and warns once, GO2CS0015, naming the site and the reason. A go

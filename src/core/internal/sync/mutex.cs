@@ -13,7 +13,6 @@ using atomic = sync.atomic_package;
 using @unsafe = unsafe_package;
 using go.@internal;
 using sync;
-using static sync_package;
 
 partial class sync_package {
 
@@ -56,12 +55,10 @@ internal static UntypedInt mutexWaiterShift => /* iota */ 3;
 // Starvation mode is important to prevent pathological cases of tail latency.
 internal static UntypedFloat starvationThresholdNs => 1e6;
 
-} partial class syncᴛMutex {
-
 // Lock locks m.
 //
 // See package [sync.Mutex] documentation.
-public static void Lock(this ж<Mutex> Ꮡm) {
+internal static void Lock⁔(/*this*/ ж<Mutex> Ꮡm) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     // Fast path: grab unlocked mutex.
@@ -78,7 +75,7 @@ public static void Lock(this ж<Mutex> Ꮡm) {
 // TryLock tries to lock m and reports whether it succeeded.
 //
 // See package [sync.Mutex] documentation.
-public static bool TryLock(this ж<Mutex> Ꮡm) {
+internal static bool TryLock⁔(/*this*/ ж<Mutex> Ꮡm) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     var old = m.state;
@@ -103,7 +100,7 @@ public static bool TryLock(this ж<Mutex> Ꮡm) {
 internal static ref readonly @string syncInconsistentMutexˢ => ref syncInconsistentMutexˢᵇ;
 private static readonly @string syncInconsistentMutexˢᵇ = "sync: inconsistent mutex state"u8;
 
-internal static void lockSlow(this ж<Mutex> Ꮡm) {
+internal static void lockSlow⁔(/*this*/ ж<Mutex> Ꮡm) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     int64 waitStartTime = default;
@@ -196,7 +193,7 @@ internal static void lockSlow(this ж<Mutex> Ꮡm) {
 // Unlock unlocks m.
 //
 // See package [sync.Mutex] documentation.
-public static void Unlock(this ж<Mutex> Ꮡm) {
+internal static void Unlock⁔(/*this*/ ж<Mutex> Ꮡm) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     if (race.Enabled) {
@@ -217,7 +214,7 @@ public static void Unlock(this ж<Mutex> Ꮡm) {
 internal static ref readonly @string syncUnlockOfUnlockedˢ => ref syncUnlockOfUnlockedˢᵇ;
 private static readonly @string syncUnlockOfUnlockedˢᵇ = "sync: unlock of unlocked mutex"u8;
 
-internal static void unlockSlow(this ж<Mutex> Ꮡm, int32 @new) {
+internal static void unlockSlow⁔(/*this*/ ж<Mutex> Ꮡm, int32 @new) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     if (((@new + (int32)mutexLocked) & (int32)mutexLocked) == 0) {
@@ -253,4 +250,4 @@ internal static void unlockSlow(this ж<Mutex> Ꮡm, int32 @new) {
     }
 }
 
-}
+} // end sync_package

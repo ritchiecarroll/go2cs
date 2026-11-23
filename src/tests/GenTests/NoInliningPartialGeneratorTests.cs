@@ -187,13 +187,17 @@ public class NoInliningPartialGeneratorTests
     /// method's implementation flags back out of the image (keyed by method name; a compiler-generated
     /// lambda or local function keeps its mangled name).
     /// </summary>
-    private static Run Generate(ISourceGenerator[] generators, params string[] sources)
+    private static Run Generate(ISourceGenerator[] generators, params string[] sources) =>
+        GenerateAt(generators, [.. sources.Select(source => ("", source))]);
+
+    /// <summary><see cref="Generate"/>, with each source parsed at a file path, as a project's files are.</summary>
+    private static Run GenerateAt(ISourceGenerator[] generators, params (string path, string source)[] files)
     {
         CSharpParseOptions parseOptions = new(LanguageVersion.Preview);
 
         CSharpCompilation compilation = CSharpCompilation.Create(
             "noinline-partial",
-            sources.Select(source => CSharpSyntaxTree.ParseText(source, parseOptions)),
+            files.Select(file => CSharpSyntaxTree.ParseText(file.source, parseOptions, file.path)),
             CoreReferences(),
             new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
 
@@ -502,5 +506,111 @@ public class NoInliningPartialGeneratorTests
         Assert.AreEqual(1, matches.Length, $"exactly one ж-forwarder for{forwarder}; {Describe(run)}");
         Assert.AreEqual(marked, matches[0].Contains("MethodImplOptions.NoInlining"),
             marked ? "a carrier's forwarder must not be inlinable either" : "the mark is inherited, never invented");
+    }
+
+    // A Go test entry point's frame is the one every testing.T report reads (t.Logf's own file:line, testify's
+    // callerInfo). Its line is kept by compiling the whole test assembly without optimization
+    // (go.lib.symbols.targets; COORD 2026-11-22 23:57Z, option 2), not by a per-method mark: a Release frame carries
+    // only its statement's IL offset even with NoOptimization on its method. So a test entry point is a carrier like
+    // any other and its declaring part keeps NoInlining alone; these arms hold the generator to that, with Go's own
+    // predicate for an entry point (a file ending _test.cs, a name Test*/Benchmark*/Fuzz*/Example* whose next rune is
+    // not lower case, and that kind's signature) and its near misses.
+    private const string TestingStubs = """
+        namespace go
+        {
+            public class ж<T> { }
+
+            public static partial class testing_package
+            {
+                public struct T { }
+                public struct B { }
+                public struct F { }
+            }
+        }
+        """;
+
+    private const string TestFile = """
+        namespace go;
+
+        using testing = testing_package;
+
+        partial class m_internal_test_package {
+
+        public static partial void TestChain(ж<testing.T> t) {
+        }
+
+        public static partial void Test(ж<testing.T> t) {
+        }
+
+        public static partial void BenchmarkChain(ж<testing.B> b) {
+        }
+
+        public static partial void FuzzChain(ж<testing.F> f) {
+        }
+
+        public static partial void ExampleChain() {
+        }
+
+        public static partial void Testify(ж<testing.T> t) {
+        }
+
+        public static partial void TestWrongSignature(nint n) {
+        }
+
+        public static partial void ExampleWithParameter(ж<testing.T> t) {
+        }
+
+        public static partial void helperLine(ж<testing.T> t) {
+        }
+
+        } // end m_internal_test_package
+        """;
+
+    private const string NonTestFile = """
+        namespace go;
+
+        using testing = testing_package;
+
+        partial class m_package {
+
+        public static partial void TestInProduction(ж<testing.T> t) {
+        }
+
+        } // end m_package
+        """;
+
+    private static Run TestEntryRun() =>
+        GenerateAt([new NoInliningPartialGenerator()], ("stubs.cs", TestingStubs), ("m_test.cs", TestFile), ("m.cs", NonTestFile));
+
+    [DataTestMethod]
+    [DataRow("TestChain")]
+    [DataRow("Test")]
+    [DataRow("BenchmarkChain")]
+    [DataRow("FuzzChain")]
+    [DataRow("ExampleChain")]
+    public void AGoTestEntryPointKeepsNoInliningAlone(string name)
+    {
+        Run run = TestEntryRun();
+
+        Assert.AreEqual(0, run.Errors.Length, Describe(run));
+        Assert.IsTrue(run.Methods.TryGetValue(name, out MethodImplAttributes flags), $"{name} was not emitted; {Describe(run)}");
+        Assert.IsTrue(flags.HasFlag(MethodImplAttributes.NoInlining), $"{name} lost NoInlining; {Describe(run)}");
+        Assert.IsFalse(flags.HasFlag(MethodImplAttributes.NoOptimization), $"{name}: the test assembly switch, not a per-method mark, keeps a test function's lines; {Describe(run)}");
+    }
+
+    [DataTestMethod]
+    [DataRow("Testify")]
+    [DataRow("TestWrongSignature")]
+    [DataRow("ExampleWithParameter")]
+    [DataRow("helperLine")]
+    [DataRow("TestInProduction")]
+    public void ANearMissKeepsNoInliningAlone(string name)
+    {
+        Run run = TestEntryRun();
+
+        Assert.AreEqual(0, run.Errors.Length, Describe(run));
+        Assert.IsTrue(run.Methods.TryGetValue(name, out MethodImplAttributes flags), $"{name} was not emitted; {Describe(run)}");
+        Assert.IsTrue(flags.HasFlag(MethodImplAttributes.NoInlining), $"{name} lost NoInlining; {Describe(run)}");
+        Assert.IsFalse(flags.HasFlag(MethodImplAttributes.NoOptimization), $"{name} carries no per-method NoOptimization; {Describe(run)}");
     }
 }

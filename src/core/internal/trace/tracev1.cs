@@ -32,7 +32,6 @@ using tracev2 = go.@internal.trace.tracev2_package;
 using io = io_package;
 using go.@internal.trace;
 using go.@internal.trace.@internal;
-using static trace_package;
 
 partial class trace_package {
 
@@ -87,8 +86,6 @@ internal static UntypedInt sSTWPageCachePagesLeaked => 27;
 internal static UntypedInt sSTWResetDebugLog => 28;
 
 internal static UntypedInt sLast => 29;
-
-} partial class traceᴛtraceV1Converter {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string traceContainsTooManyˢ => ref traceContainsTooManyˢᵇ;
@@ -148,7 +145,7 @@ private static readonly @string pageCachePagesLeakedTestˢᵇ = "PageCachePagesL
 internal static ref readonly @string resetDebugLogTestˢ => ref resetDebugLogTestˢᵇ;
 private static readonly @string resetDebugLogTestˢᵇ = "ResetDebugLog (test)"u8;
 
-internal static error init(this ж<traceV1Converter> Ꮡit, tracev1.Trace pr) {
+internal static error init⁔(/*this*/ ж<traceV1Converter> Ꮡit, tracev1.Trace pr) {
     ref var it = ref Ꮡit.DerefOrNull();
 
     it.trace = pr;
@@ -181,7 +178,7 @@ internal static error init(this ж<traceV1Converter> Ꮡit, tracev1.Trace pr) {
     }
     ref var addErr = ref heap<error>(out var ᏑaddErr);
     var evtʗ1 = evt;
-    void add(stringID id, @string s) {
+    [GoFunc("(*traceV1Converter).init.func1")] void add(stringID id, @string s) {
         var err = evtʗ1.Ꮡstrings.insert(id, s); if (err != nil && ᏑaddErr.ValueSlot == nil) {
             ᏑaddErr.ValueSlot = err;
         }
@@ -200,7 +197,7 @@ internal static error init(this ж<traceV1Converter> Ꮡit, tracev1.Trace pr) {
     }
     it.builtinToStringID = new slice<uint64>(sLast);
     var addʗ1 = add;
-    void addBuiltin(nint c, @string s) {
+    [GoFunc("(*traceV1Converter).init.func2")] void addBuiltin(nint c, @string s) {
         var nid = max + 1 + (uint64)c;
         Ꮡit.Value.builtinToStringID[c] = nid;
         addʗ1((stringID)nid, s);
@@ -265,7 +262,7 @@ internal static error init(this ж<traceV1Converter> Ꮡit, tracev1.Trace pr) {
 
 // next returns the next event, io.EOF if there are no more events, or a
 // descriptive error for invalid events.
-internal static (Event, error) next(this ж<traceV1Converter> Ꮡit) {
+internal static (Event, error) next⁔(/*this*/ ж<traceV1Converter> Ꮡit) {
     ref var it = ref Ꮡit.DerefOrNull();
 
     if (len(it.extra) > 0) {
@@ -306,11 +303,7 @@ internal static (Event, error) next(this ж<traceV1Converter> Ꮡit) {
     return (ev.ΔClone(), default);
 }
 
-} partial class trace_package {
-
 internal static error errSkip = errors.New("skip event");
-
-} partial class traceᴛtraceV1Converter {
 
 // convertEvent converts an event from the trace v1 format to zero or more
 // events in the new format. Most events translate 1 to 1. Some events don't
@@ -319,7 +312,7 @@ internal static error errSkip = errors.New("skip event");
 // returns the first event and stores additional events in it.extra. When
 // encountering events that tracev1 shouldn't be able to emit, ocnvertEvent
 // returns a descriptive error.
-internal static (Event OUT, error ERR) convertEvent(this ж<traceV1Converter> Ꮡit, ж<tracev1.Event> Ꮡev) {
+internal static (Event OUT, error ERR) convertEvent⁔(/*this*/ ж<traceV1Converter> Ꮡit, ж<tracev1.Event> Ꮡev) {
     ref var it = ref Ꮡit.DerefOrNull();
     ref var ev = ref Ꮡev.DerefOrNull();
 
@@ -528,7 +521,7 @@ internal static (Event OUT, error ERR) convertEvent(this ж<traceV1Converter> �
         // Look for the next event for the same G to determine if the syscall
         // blocked.
         var blocked = false;
-        Ꮡit.Ꮡevents.All()((ж<tracev1.Event> nev) => {
+        Ꮡit.Ꮡevents.All()([GoFunc("(*traceV1Converter).convertEvent.func1")] (ж<tracev1.Event> nev) => {
             if (nev.G != Ꮡev.Value.G) {
                 return true;
             }
@@ -709,8 +702,6 @@ internal static (Event OUT, error ERR) convertEvent(this ж<traceV1Converter> �
     );
     return (@out.ΔClone(), default);
 }
-
-} partial class trace_package {
 
 // convertV1Trace takes a fully loaded trace in the v1 trace format and
 // returns an iterator over events in the new format.

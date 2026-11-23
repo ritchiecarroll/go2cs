@@ -40,7 +40,7 @@ public static (int64 n, error err, bool handled) SendFile(ж<FD> dstFD, uintptr 
     // Non-Linux sendfile implementations don't use the current position of the source file,
     // so we need to look up the position, pass it explicitly, and adjust it after
     // sendfile returns.
-    (var start, err) = ignoringEINTR2((int64, error) () => Δsyscall.Seek((nint)src, 0, io.SeekCurrent));
+    (var start, err) = ignoringEINTR2([GoFunc("SendFile.func1")] (int64, error) () => Δsyscall.Seek((nint)src, 0, io.SeekCurrent));
     if (err != nil) {
         return (0, err, false);
     }
@@ -48,7 +48,7 @@ public static (int64 n, error err, bool handled) SendFile(ж<FD> dstFD, uintptr 
     ref var pos = ref heap<int64>(start, out var Ꮡpos);
     (n, err, handled) = sendFile(dstFD, (nint)src, Ꮡpos, size);
     if (n > 0) {
-        ignoringEINTR2((int64, error) () => Δsyscall.Seek((nint)src, start + n, io.SeekStart));
+        ignoringEINTR2([GoFunc("SendFile.func2")] (int64, error) () => Δsyscall.Seek((nint)src, start + n, io.SeekStart));
     }
     return (n, err, handled);
 }
@@ -62,7 +62,7 @@ internal static (int64 written, error err, bool handled) sendFile(ж<FD> ᏑdstF
     try {
         ref var dstFD = ref ᏑdstFD.DerefOrNull();
 
-        defer(() => {
+        defer([GoFunc("sendFile.func1")] () => {
             TestHookDidSendFile(ᏑdstFD, (uintptr)src, written, err, handled);
         }, ref ᒐ);
         var errΔ1 = ᏑdstFD.writeLock(); if (errΔ1 != nil) {

@@ -62,7 +62,7 @@ internal static void main() {
     fmt.Println("named recv to param:", reflect.TypeOf((AssignD)default).AssignableTo(ad.Type.In(1)));
 
     Func</*<-*/channel<nint>> h = default;
-    h = reflect.MakeFunc(reflect.TypeOf((h).OrTypedNilFunc()), (slice<reflect.Value> _Δp0) => slice<reflect.Value>([reflect.ValueOf(new channel<nint>(0))])).Interface()._<Func</*<-*/channel<nint>>>();
+    h = reflect.MakeFunc(reflect.TypeOf((h).OrTypedNilFunc()), [GoFunc("main.func1")] (slice<reflect.Value> _Δp0) => slice<reflect.Value>([reflect.ValueOf(new channel<nint>(0))])).Interface()._<Func</*<-*/channel<nint>>>();
     fmt.Println("makefunc:", h() != nil);
     _ = (Action<channel/*<-*/</*<-*/channel<nint>>>)(nestedDir);
 }

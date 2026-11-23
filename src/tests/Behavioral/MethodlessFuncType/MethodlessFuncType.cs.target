@@ -9,7 +9,7 @@ partial class main_package {
 // type lookup is a methodless func type — rendered inline as its base delegate
 
 internal static Action<error> makeReleaser(@string tag, ж<slice<@string>> log) {
-    return (error err) => {
+    return [GoFunc("makeReleaser.func1")] (error err) => {
         if (err != nil) {
             log.ValueSlot = append(log.ValueSlot, tag + ":"u8 + err.Error());
         } else {
@@ -47,7 +47,7 @@ internal static void main() {
     consume(r, fmt.Errorf("late"u8));
 
     Func<@string, (@string, bool)> find = default;
-    find = (@string s) => (s + "!", len(s) > 0);
+    find = [GoFunc("main.func1")] (@string s) => (s + "!", len(s) > 0);
     var (p, okp) = find("q");
     fmt.Println("lookup:", p, okp);
 

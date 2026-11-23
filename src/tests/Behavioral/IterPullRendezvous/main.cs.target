@@ -7,7 +7,7 @@ using runtime = runtime_package;
 partial class main_package {
 
 internal static iter.Seq<nint> count(nint n) {
-    return (Func<nint, bool> yield) => {
+    return [GoFunc("count.func1")] (Func<nint, bool> yield) => {
         for (nint i = 0; i < n; i++) {
             if (!yield(i)) {
                 return;
@@ -17,7 +17,7 @@ internal static iter.Seq<nint> count(nint n) {
 }
 
 internal static iter.Seq2<nint, int64> squares(nint n) {
-    return (Func<nint, int64, bool> yield) => {
+    return [GoFunc("squares.func1")] (Func<nint, int64, bool> yield) => {
         for (nint i = 0; i < n; i++) {
             if (!yield(i, (int64)i * (int64)i)) {
                 return;
@@ -29,7 +29,7 @@ internal static iter.Seq2<nint, int64> squares(nint n) {
 internal static void @catch(@string label, Action f) {
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("catch.func1")] () => {
             var r = recover(); if (r != nil) {
                 fmt.Printf("%s panicked: %v\n"u8, label, r);
                 return;
@@ -47,12 +47,12 @@ internal static partial bool goexits(Action f) {
     var done = new channel<bool>(0);
 
     var doneʗ1 = done;
-    goǃ(() => {
+    goǃ([GoFunc("goexits.func1")] () => {
         GoFrame ᒐ = default;
         try {
             var clean = false;
             var doneʗ2 = doneʗ1;
-            defer(() => {
+            defer([GoFunc("goexits.func1.1")] () => {
                 doneʗ2.ᐸꟷ(recover() == nil && !clean);
             }, ref ᒐ);
             f();
@@ -66,13 +66,13 @@ internal static partial bool goexits(Action f) {
 }
 
 internal static iter.Seq<nint> panicSeq() {
-    return (Func<nint, bool> yield) => {
+    return [GoFunc("panicSeq.func1")] (Func<nint, bool> yield) => {
         throw panic("boom");
     };
 }
 
 internal static iter.Seq<nint> panicCleanupSeq() {
-    return (Func<nint, bool> yield) => {
+    return [GoFunc("panicCleanupSeq.func1")] (Func<nint, bool> yield) => {
         for (;;) {
             if (!yield(55)) {
                 throw panic("cleanup boom");
@@ -82,7 +82,7 @@ internal static iter.Seq<nint> panicCleanupSeq() {
 }
 
 internal static iter.Seq<nint> goexitSeq() {
-    return (Func<nint, bool> yield) => {
+    return [GoFunc("goexitSeq.func1")] (Func<nint, bool> yield) => {
         runtime.Goexit();
     };
 }
@@ -90,10 +90,10 @@ internal static iter.Seq<nint> goexitSeq() {
 internal static Func<(nint, bool)> nextSlot;
 
 internal static iter.Seq<nint> doubleNext() {
-    return (Func<nint, bool> _) => {
+    return [GoFunc("doubleNext.func1")] (Func<nint, bool> _) => {
         GoFrame ᒐ = default;
         try {
-            defer(() => {
+            defer([GoFunc("doubleNext.func1.1")] () => {
                 var r = recover(); if (r != nil) {
                     fmt.Printf("double next panicked: %v\n"u8, r);
                 }
@@ -150,7 +150,7 @@ internal static void main() {
 
     var (nextP, stopP) = iter.Pull(panicSeq());
     var nextPʗ1 = nextP;
-    @catch("first next", () => {
+    @catch("first next", [GoFunc("main.func1")] () => {
         nextPʗ1();
     });
 
@@ -158,7 +158,7 @@ internal static void main() {
     fmt.Println("pull after panic:", pv, pok);
 
     var stopPʗ1 = stopP;
-    @catch("stop after panic", () => {
+    @catch("stop after panic", [GoFunc("main.func2")] () => {
         stopPʗ1();
     });
 
@@ -167,7 +167,7 @@ internal static void main() {
     fmt.Println("cleanup pull:", cv, cvok);
 
     var stopCʗ1 = stopC;
-    @catch("stop into cleanup", () => {
+    @catch("stop into cleanup", [GoFunc("main.func3")] () => {
         stopCʗ1();
     });
 
@@ -177,7 +177,7 @@ internal static void main() {
 
     ref var goexitNext = ref heap<Func<(nint, bool)>>(out var ᏑgoexitNext);
 
-    fmt.Println("goexit crossed:", goexits(() => {
+    fmt.Println("goexit crossed:", goexits([GoFunc("main.func4")] () => {
         var (n, _) = iter.Pull(goexitSeq());
         ᏑgoexitNext.ValueSlot = n;
         n();

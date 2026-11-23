@@ -47,6 +47,10 @@ using static go.main_package;
 // go2cs-gen emits a field property on the pointer for each of their fields.
 [assembly: GoFieldAccess(typeof(countWriter))]
 
+// The go statements whose goroutine the converter proved cannot recurse, by the file, line and column of
+// their goǃ call: go2cs-gen starts each on golib's bounded stack reservation rather than the Go-scale default.
+[assembly: GoBoundedGoroutine("main.cs", 205, 9, 0)]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -55,7 +59,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "AA8mgoKmqIKCpqaClIKmpoKUgoKmgoKmqLKApIKm5oKUgqbqgoKmlIKmgqaU6oKCpoKCpoKClIKmpoKCpoKClIKmqoKUlKaClIKUuIKCgoKClIKmgqaCgpSktLS0tLam", "64-64:1", "", "166=Nanoseconds/1/1/1", "", "62:21,63:13")]
+[assembly: GoPositionMap("go2cs/MnCost@/main.go", "main.cs", "AA8mgoKmqIKCpqaClIKmpoKUgoKmgoKmqLKApIKm5oKUgqbqgoKmlIKmgqaU6oKCpoKCpoKClIKmpoKCpoKClIKmrIKCuIKUgoKmqoKUlKaClIKUuIKCgoKClIKmgqaUgqaCgpSUtLS0tLS2pg==", "64-64:1", "", "183=Nanoseconds/1/1/1", "", "62:21,63:13")]
 // </GoSourcePositionMaps>
 
 namespace go;

@@ -3,8 +3,6 @@
 // license that can be found in the LICENSE file.
 namespace go.@internal.trace;
 
-using static tracev2_package;
-
 partial class tracev2_package {
 
 // Event types in the trace, args are given in square brackets.
@@ -95,13 +93,9 @@ public static EventType EvEndOfGeneration => 52;
 
 public static EventType NumEvents => 53;
 
-} partial class tracev2ᴛEventType {
-
-public static bool Experimental(this EventType ev) {
+internal static bool Experimental⁔(/*this*/ EventType ev) {
     return ev > MaxEvent && ev < MaxExperimentalEvent;
 }
-
-} partial class tracev2_package {
 
 // Experiments.
 // AllocFree is the alloc-free events experiment.
@@ -510,8 +504,6 @@ public static GoStatus GoRunning => 2;
 public static GoStatus GoSyscall => 3;
 public static GoStatus GoWaiting => 4;
 
-} partial class tracev2ᴛGoStatus {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static ref readonly @string runnableˢ => ref runnableˢᵇ;
 private static readonly @string runnableˢᵇ = "Runnable"u8;
@@ -524,7 +516,7 @@ private static readonly @string waitingˢᵇ = "Waiting"u8;
 private static ref readonly @string badˢ => ref badˢᵇ;
 private static readonly @string badˢᵇ = "Bad"u8;
 
-public static @string String(this GoStatus s) {
+internal static @string String⁔(/*this*/ GoStatus s) {
     switch (s) {
     case var ᴛ when ᴛ == GoRunnable: {
         return runnableˢ;
@@ -540,8 +532,6 @@ public static @string String(this GoStatus s) {
     }}
     return badˢ;
 }
-
-} partial class tracev2_package {
 
 // ProcStatus is the status of a P.
 //
@@ -564,19 +554,11 @@ public static ProcStatus ProcSyscall => 3;
 // corresponds with the ProcSteal.
 public static ProcStatus ProcSyscallAbandoned => 4;
 
-} partial class tracev2ᴛProcStatus {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string runningˢ => ref runningˢᵇ;
-private static readonly @string runningˢᵇ = "Running"u8;
 private static ref readonly @string idleˢ => ref idleˢᵇ;
 private static readonly @string idleˢᵇ = "Idle"u8;
-private static ref readonly @string syscallˢ => ref syscallˢᵇ;
-private static readonly @string syscallˢᵇ = "Syscall"u8;
-private static ref readonly @string badˢ => ref badˢᵇ;
-private static readonly @string badˢᵇ = "Bad"u8;
 
-public static @string String(this ProcStatus s) {
+internal static @string String⁔(/*this*/ ProcStatus s) {
     switch (s) {
     case var ᴛ when ᴛ == ProcRunning: {
         return runningˢ;
@@ -589,8 +571,6 @@ public static @string String(this ProcStatus s) {
     }}
     return badˢ;
 }
-
-} partial class tracev2_package {
 
 // MaxBatchSize sets the maximum size that a batch can be.
 //

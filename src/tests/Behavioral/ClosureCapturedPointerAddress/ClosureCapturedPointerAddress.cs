@@ -17,7 +17,7 @@ internal static void main() {
     var head = Ꮡ(new node(v: 1, next: Ꮡ(new node(v: 2, next: Ꮡ(new node(v: 3, next: nil))))));
     ref var mToFlush = ref heap<ж<node>>(head, out var ᏑmToFlush);
 
-    run(() => {
+    run([GoFunc("main.func1")] () => {
         while (ᏑmToFlush.ValueSlot != nil) {
             var prev = ᏑmToFlush;
             ᏑmToFlush.ValueSlot.v += 100;

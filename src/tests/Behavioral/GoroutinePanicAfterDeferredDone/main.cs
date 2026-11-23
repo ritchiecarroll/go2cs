@@ -14,7 +14,7 @@ internal static partial void main() {
     ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
     Ꮡwg.Add(1);
 
-    goǃ(() => {
+    goǃ([GoFunc("main.func1")] () => {
         GoFrame ᒐ = default;
         try {
             defer(Ꮡwg.Done, ref ᒐ);

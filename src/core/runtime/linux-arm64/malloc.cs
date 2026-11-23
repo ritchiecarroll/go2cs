@@ -107,7 +107,6 @@ using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
 using abi = @internal.abi_package;
-using static runtime_package;
 
 partial class runtime_package {
 
@@ -764,13 +763,9 @@ internal static void mallocinit() {
     ᏑgcController.ᏑmemoryLimit.Store(Δmath.MaxInt64);
 }
 
-} partial class runtimeᴛmheap {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string heapˢ => ref heapˢᵇ;
 private static readonly @string heapˢᵇ = "heap"u8;
-internal static ref readonly @string heapReservationˢ => ref heapReservationˢᵇ;
-private static readonly @string heapReservationˢᵇ = "heap reservation"u8;
 internal static ref readonly @string tooManyAddressSpaceˢ => ref tooManyAddressSpaceˢᵇ;
 private static readonly @string tooManyAddressSpaceˢᵇ = "too many address space collisions for -race mode"u8;
 internal static ref readonly @string regionExceedsUintptrˢ => ref regionExceedsUintptrˢᵇ;
@@ -811,7 +806,7 @@ private static readonly @string outOfMemoryAllocatingˢ3ᵇ = "out of memory all
 // arenaList is the list the arena should be added to.
 //
 // h must be locked.
-internal static (@unsafe.Pointer v, uintptr size) sysAlloc(this ж<mheap> Ꮡh, uintptr n, ж<ж<arenaHint>> ᏑhintList, ж<slice<arenaIdx>> ᏑarenaList) {
+internal static (@unsafe.Pointer v, uintptr size) sysAlloc⁔(/*this*/ ж<mheap> Ꮡh, uintptr n, ж<ж<arenaHint>> ᏑhintList, ж<slice<arenaIdx>> ᏑarenaList) {
     @unsafe.Pointer v = default;
     uintptr size = default;
     ref var h = ref Ꮡh.DerefOrNull();
@@ -1013,7 +1008,7 @@ mapped:
 // Must be called on the system stack because it acquires the heap lock.
 //
 //go:systemstack
-internal static void enableMetadataHugePages(this ж<mheap> Ꮡh) {
+internal static void enableMetadataHugePages⁔(/*this*/ ж<mheap> Ꮡh) {
     ref var h = ref Ꮡh.DerefOrNull();
 
     // Enable huge pages for page structure.
@@ -1042,8 +1037,6 @@ internal static void enableMetadataHugePages(this ж<mheap> Ꮡh) {
     }
 }
 
-} partial class runtime_package {
-
 // base address for all 0-byte allocations
 // go2cs generated this placeholder — var zerobase is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
@@ -1069,8 +1062,6 @@ internal static gclinkptr nextFreeFast(ж<mspan> Ꮡs) {
     return 0;
 }
 
-} partial class runtimeᴛmcache {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string sAllocCountSNelemsˢ => ref sAllocCountSNelemsˢᵇ;
 private static readonly @string sAllocCountSNelemsˢᵇ = "s.allocCount != s.nelems && freeIndex == s.nelems"u8;
@@ -1088,7 +1079,7 @@ private static readonly @string sAllocCountSNelemsˢ2ᵇ = "s.allocCount > s.nel
 //
 // Must run in a non-preemptible context since otherwise the owner of
 // c could change.
-internal static (gclinkptr v, ж<mspan> s, bool checkGCTrigger) nextFree(this ref mcache c, spanClass spc) {
+internal static (gclinkptr v, ж<mspan> s, bool checkGCTrigger) nextFree⁔(/*this*/ ref mcache c, spanClass spc) {
     gclinkptr v = default;
     ж<mspan> s = default;
     bool checkGCTrigger = default;
@@ -1121,8 +1112,6 @@ internal static (gclinkptr v, ж<mspan> s, bool checkGCTrigger) nextFree(this re
     }
     return (v, s, checkGCTrigger);
 }
-
-} partial class runtime_package {
 
 // doubleCheckMalloc enables a bunch of extra checks to malloc to double-check
 // that various invariants are upheld.
@@ -2193,15 +2182,13 @@ internal static bool freegc(@unsafe.Pointer ptr, uintptr size, bool noscan) {
     return true;
 }
 
-} partial class runtimeᴛmcache {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string nextReusableNoScanNilˢ => ref nextReusableNoScanNilˢᵇ;
 private static readonly @string nextReusableNoScanNilˢᵇ = "nextReusableNoScan: nil span for pointer in reusable object free list"u8;
 
 // nextReusableNoScan returns the next reusable object for a noscan span,
 // or 0 if no reusable object is found.
-internal static (gclinkptr, ж<mspan>) nextReusableNoScan(this ref mcache c, ж<mspan> Ꮡs, spanClass spc) {
+internal static (gclinkptr, ж<mspan>) nextReusableNoScan⁔(/*this*/ ref mcache c, ж<mspan> Ꮡs, spanClass spc) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     if (!runtimeFreegcEnabled) {
@@ -2242,8 +2229,6 @@ internal static (gclinkptr, ж<mspan>) nextReusableNoScan(this ref mcache c, ж<
 
     return (v, span);
 }
-
-} partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string nextReusableSpanIsNotInˢ2 => ref nextReusableSpanIsNotInˢ2ᵇ;
@@ -2519,7 +2504,7 @@ internal static ref ж<notInHeap> persistentChunks => ref ((StaticBox<ж<notInHe
 //go:nosplit
 internal static @unsafe.Pointer persistentalloc(uintptr size, uintptr align, ж<sysMemStat> sysStat) {
     ref var p = ref heap<ж<notInHeap>>(out var Ꮡp);
-    systemstack(() => {
+    systemstack([GoFunc("persistentalloc.func1")] () => {
         Ꮡp.ValueSlot = persistentalloc1(size, align, sysStat);
     });
     return @unsafe.Pointer.FromPinnedBox(p);
@@ -2541,9 +2526,7 @@ partial struct linearAlloc {
     internal bool mapMemory; // transition memory from Reserved to Ready if true
 }
 
-} partial class runtimeᴛlinearAlloc {
-
-internal static void init(this ref linearAlloc l, uintptr @base, uintptr size, bool mapMemory) {
+internal static void init⁔(/*this*/ ref linearAlloc l, uintptr @base, uintptr size, bool mapMemory) {
     if (@base + size < @base) {
         // Chop off the last byte. The runtime isn't prepared
         // to deal with situations where the bounds could overflow.
@@ -2556,7 +2539,7 @@ internal static void init(this ref linearAlloc l, uintptr @base, uintptr size, b
     l.mapMemory = mapMemory;
 }
 
-internal static @unsafe.Pointer alloc(this ref linearAlloc l, uintptr size, uintptr align, ж<sysMemStat> sysStat, @string vmaName) {
+internal static @unsafe.Pointer alloc⁔(/*this*/ ref linearAlloc l, uintptr size, uintptr align, ж<sysMemStat> sysStat, @string vmaName) {
     var p = alignUp(l.next, align);
     if (p + size > l.end) {
         return default;
@@ -2574,8 +2557,6 @@ internal static @unsafe.Pointer alloc(this ref linearAlloc l, uintptr size, uint
     return (@unsafe.Pointer)p;
 }
 
-} partial class runtime_package {
-
 // notInHeap is off-heap memory allocated by a lower-level allocator
 // like sysAlloc or persistentAlloc.
 //
@@ -2588,13 +2569,9 @@ partial struct notInHeap {
     internal sys.NotInHeap _;
 }
 
-} partial class runtimeᴛnotInHeap {
-
-internal static ж<notInHeap> add(this ж<notInHeap> Ꮡp, uintptr bytes) {
+internal static ж<notInHeap> add⁔(/*this*/ ж<notInHeap> Ꮡp, uintptr bytes) {
     return @unsafe.Pointer.To<notInHeap>(@unsafe.Add(@unsafe.Pointer.FromPinnedBox(Ꮡp), bytes));
 }
-
-} partial class runtime_package {
 
 // redZoneSize computes the size of the redzone for a given allocation.
 // Refer to the implementation of the compiler-rt.

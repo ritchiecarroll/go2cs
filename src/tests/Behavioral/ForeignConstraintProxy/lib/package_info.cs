@@ -14,6 +14,9 @@
 
 using go;
 using static go.ForeignConstraintProxy.lib_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -50,10 +53,12 @@ using static go.ForeignConstraintProxy.lib_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("lib.go", "lib.cs", "ABIWkAAPCpA=")]
+[assembly: GoPositionMap("lib.go", "lib.cs", "AA4WkAALCpA=")]
 // </GoSourcePositionMaps>
 
 namespace go.ForeignConstraintProxy;
+
+using static go.ForeignConstraintProxy.lib_package;
 
 [GoPackage("lib")]
 public static partial class lib_package
@@ -88,6 +93,19 @@ public static partial class lib_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(lib_package.Ord<>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class libᴛOrd;
-[GoMethodHost(typeof(lib_package.Ord2<>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class libᴛOrd2;
+[GoMethodHost(typeof(lib_package.Ord<>)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class libᴛOrd;
+[GoMethodHost(typeof(lib_package.Ord2<>)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class libᴛOrd2;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class libᴛOrd {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Below<T>(this Ord<T> o, T t) where T : Ord_T<T> => lib_package.Below⁔<T>(o, t);
+}
+partial class libᴛOrd2 {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Below<T>(this Ord2<T> o, T t) where T : Lesser<T> => lib_package.Below⁔<T>(o, t);
+}
+// </MethodForwarders>

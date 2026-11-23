@@ -5,25 +5,20 @@ using deep = go.NestedNamespaceReach.a.deep_package;
 using o = go.NestedNamespaceReach.b.outer_package;
 using go.NestedNamespaceReach.a;
 using outer = go.NestedNamespaceReach.b.outer_package;
-using static check_package;
 
 partial class check_package {
 
 partial struct other {
 }
 
-} partial class checkᴛother {
-
-internal static @string Name(this other _) { return "other"; }
-internal static error Close(this other _) { return default; }
-
-} partial class check_package {
+internal static @string Name⁔(/*this*/ other _) { return "other"; }
+internal static error Close⁔(/*this*/ other _) { return default; }
 
 public static @string /*msg*/ Check(o.Wide w) {
     @string msg = default;
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("Check.func1")] () => {
             msg = fmt.Sprint(recover());
         }, ref ᒐ);
         _ = w._<o.Wide, other>();

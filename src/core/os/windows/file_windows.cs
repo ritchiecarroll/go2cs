@@ -18,7 +18,6 @@ using @internal.syscall;
 using fs = go.io.fs_package;
 using go.io;
 using go.sync;
-using static os_package;
 
 partial class os_package {
 
@@ -36,10 +35,8 @@ partial struct @file {
     internal bool appendMode;                 // whether file is opened for appending
 }
 
-} partial class osᴛFile {
-
 // fd is the Windows implementation of Fd.
-internal static uintptr fd(this ж<File> Ꮡfile) {
+internal static uintptr fd⁔(/*this*/ ж<File> Ꮡfile) {
     ref var @file = ref Ꮡfile.DerefOrNull();
 
     if (Ꮡfile == nil) {
@@ -52,8 +49,6 @@ internal static uintptr fd(this ж<File> Ꮡfile) {
     _ = Ꮡfile.of(File.Ꮡpfd).DisassociateIOCP();
     return (uintptr)@file.pfd.Sysfd;
 }
-
-} partial class os_package {
 
 // newFileKind describes the kind of file to newFile.
 partial struct newFileKind /*num:nint*/;
@@ -141,7 +136,7 @@ internal static ж<File> newFile(syscall.Handle h, @string name, newFileKind kin
         name: name
     ))
     ));
-    runtime.SetFinalizer(f.@file.OrTypedNil(), ((Func<ж<@file>, error>)(osᴛfile.close)));
+    runtime.SetFinalizer(f.@file.OrTypedNil(), ((Func<ж<@file>, error>)(os_package.close⁔)));
 
     // Ignore initialization errors.
     // Assume any problems will show up in later I/O.
@@ -201,9 +196,7 @@ internal static (ж<File>, error) openDirNolog(@string name) {
     return openFileNolog(name, (nint)(O_RDONLY | (nint)windows.O_DIRECTORY), 0);
 }
 
-} partial class osᴛfile {
-
-internal static error close(this ж<@file> Ꮡfile) {
+internal static error close⁔(/*this*/ ж<@file> Ꮡfile) {
     ref var @file = ref Ꮡfile.DerefOrNull();
 
     if (Ꮡfile == nil) {
@@ -225,13 +218,11 @@ internal static error close(this ж<@file> Ꮡfile) {
     return err;
 }
 
-} partial class osᴛFile {
-
 // seek sets the offset for the next Read or Write on file to offset, interpreted
 // according to whence: 0 means relative to the origin of the file, 1 means
 // relative to the current offset, and 2 means relative to the end.
 // It returns the new offset and an error, if any.
-internal static (int64 ret, error err) seek(this ж<File> Ꮡf, int64 offset, nint whence) {
+internal static (int64 ret, error err) seek⁔(/*this*/ ж<File> Ꮡf, int64 offset, nint whence) {
     int64 ret = default;
     error err = default;
 
@@ -244,8 +235,6 @@ internal static (int64 ret, error err) seek(this ж<File> Ꮡf, int64 offset, ni
     runtime.KeepAlive(Ꮡf.OrTypedNil());
     return (ret, err);
 }
-
-} partial class os_package {
 
 // Truncate changes the size of the named file.
 // If the file is a symbolic link, it changes the size of the link's target.
@@ -328,7 +317,7 @@ public static (ж<File> r, ж<File> w, error err) Pipe() {
     return (newFile(p[0], "|0", kindPipe, false), newFile(p[1], "|1", kindPipe, false), default);
 }
 
-internal static Func<bool> useGetTempPath2 = Δsync.OnceValue(bool () => windows.ErrorLoadingGetTempPath2() == nil);
+internal static Func<bool> useGetTempPath2 = Δsync.OnceValue([GoFunc("init.func2")] bool () => windows.ErrorLoadingGetTempPath2() == nil);
 
 internal static @string tempDir() {
     var getTempPath = syscall.GetTempPath;

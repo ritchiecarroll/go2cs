@@ -24,8 +24,6 @@ using encoding;
 using go.hash;
 using go.io;
 using go.path;
-using zip = zip_package;
-using static zip_package;
 
 partial class zip_package {
 
@@ -122,9 +120,7 @@ public static (ж<Reader>, error) NewReader(io.ReaderAt r, int64 size) {
     return (zr, err);
 }
 
-} partial class zipᴛReader {
-
-internal static error init(this ж<Reader> Ꮡr, io.ReaderAt rdr, int64 size) {
+internal static error init⁔(/*this*/ ж<Reader> Ꮡr, io.ReaderAt rdr, int64 size) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     var (end, baseOffset, err) = readDirectoryEnd(rdr, size);
@@ -190,36 +186,32 @@ internal static error init(this ж<Reader> Ꮡr, io.ReaderAt rdr, int64 size) {
 // RegisterDecompressor registers or overrides a custom decompressor for a
 // specific method ID. If a decompressor for a given method is not found,
 // [Reader] will default to looking up the decompressor at the package level.
-public static void RegisterDecompressor(this ref Reader r, uint16 method, Func<io.Reader, io.ReadCloser> dcomp) {
+internal static void RegisterDecompressor⁔(/*this*/ ref Reader r, uint16 method, Func<io.Reader, io.ReadCloser> dcomp) {
     if (r.decompressors == nil) {
         r.decompressors = new map<uint16, Func<io.Reader, io.ReadCloser>>();
     }
     r.decompressors[method] = dcomp;
 }
 
-internal static Func<io.Reader, io.ReadCloser> decompressor(this ref Reader r, uint16 method) {
+internal static Func<io.Reader, io.ReadCloser> decompressor⁔(/*this*/ ref Reader r, uint16 method) {
     var dcomp = r.decompressors[method];
     if (dcomp == nil) {
-        dcomp = zip.decompressor(method);
+        dcomp = decompressor(method);
     }
     return dcomp;
 }
 
-} partial class zipᴛReadCloser {
-
 // Close closes the Zip file, rendering it unusable for I/O.
-public static error Close(this ref ReadCloser rc) {
+internal static error Close⁔(/*this*/ ref ReadCloser rc) {
     return rc.f.Close();
 }
-
-} partial class zipᴛFile {
 
 // DataOffset returns the offset of the file's possibly-compressed
 // data, relative to the beginning of the zip file.
 //
 // Most callers should instead use [File.Open], which transparently
 // decompresses data and verifies checksums.
-public static (int64 offset, error err) DataOffset(this ref File f) {
+internal static (int64 offset, error err) DataOffset⁔(/*this*/ ref File f) {
     int64 offset = default;
     error err = default;
 
@@ -232,7 +224,7 @@ public static (int64 offset, error err) DataOffset(this ref File f) {
 
 // Open returns a [ReadCloser] that provides access to the [File]'s contents.
 // Multiple files may be read concurrently.
-public static (io.ReadCloser, error) Open(this ж<File> Ꮡf) {
+internal static (io.ReadCloser, error) Open⁔(/*this*/ ж<File> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     var (bodyOffset, err) = f.findBodyOffset();
@@ -277,7 +269,7 @@ public static (io.ReadCloser, error) Open(this ж<File> Ꮡf) {
 
 // OpenRaw returns a [Reader] that provides access to the [File]'s contents without
 // decompression.
-public static (io.Reader, error) OpenRaw(this ref File f) {
+internal static (io.Reader, error) OpenRaw⁔(/*this*/ ref File f) {
     var (bodyOffset, err) = f.findBodyOffset();
     if (err != nil) {
         return (default, err);
@@ -286,23 +278,17 @@ public static (io.Reader, error) OpenRaw(this ref File f) {
     return (new io.SectionReaderжReader(r), default);
 }
 
-} partial class zip_package {
-
 partial struct dirReader {
     internal error err;
 }
 
-} partial class zipᴛdirReader {
-
-internal static (nint, error) Read(this ref dirReader r, slice<byte> _) {
+internal static (nint, error) Read⁔(/*this*/ ref dirReader r, slice<byte> _) {
     return (0, r.err);
 }
 
-internal static error Close(this ref dirReader r) {
+internal static error Close⁔(/*this*/ ref dirReader r) {
     return default;
 }
-
-} partial class zip_package {
 
 partial struct checksumReader {
     internal io.ReadCloser rc;
@@ -313,13 +299,11 @@ partial struct checksumReader {
     internal error err;      // sticky error
 }
 
-} partial class zipᴛchecksumReader {
-
-internal static (fs.FileInfo, error) Stat(this ref checksumReader r) {
+internal static (fs.FileInfo, error) Stat⁔(/*this*/ ref checksumReader r) {
     return (new headerFileInfo(r.f.ᏑFileHeader), default);
 }
 
-internal static (nint n, error err) Read(this ref checksumReader r, slice<byte> b) {
+internal static (nint n, error err) Read⁔(/*this*/ ref checksumReader r, slice<byte> b) {
     nint n = default;
     error err = default;
 
@@ -362,13 +346,11 @@ internal static (nint n, error err) Read(this ref checksumReader r, slice<byte> 
     return (n, err);
 }
 
-internal static error Close(this ref checksumReader r) { return r.rc.Close(); }
-
-} partial class zipᴛFile {
+internal static error Close⁔(/*this*/ ref checksumReader r) { return r.rc.Close(); }
 
 // findBodyOffset does the minimum work to verify the file has a header
 // and returns the file body offset.
-internal static (int64, error) findBodyOffset(this ref File f) {
+internal static (int64, error) findBodyOffset⁔(/*this*/ ref File f) {
     array<byte> buf = new(30); /* fileHeaderLen */
     var (_, err) = f.zipr.ReadAt(buf[..], f.headerOffset); if (err != nil) {
         return (0, err);
@@ -382,8 +364,6 @@ internal static (int64, error) findBodyOffset(this ref File f) {
     nint extraLen = (nint)b.uint16();
     return ((int64)((nint)fileHeaderLen + filenameLen + extraLen), default);
 }
-
-} partial class zip_package {
 
 // readDirectoryHeader attempts to read a directory header from r.
 // It returns io.ErrUnexpectedEOF if it cannot read a complete header,
@@ -779,39 +759,35 @@ internal static nint findSignatureInBlock(slice<byte> b) {
 
 partial struct readBuf /*[]byte*/;
 
-} partial class zipᴛreadBuf {
-
-internal static uint8 uint8(this ref readBuf b) {
+internal static uint8 uint8⁔(/*this*/ ref readBuf b) {
     var v = (b)[0];
     b = (b)[1..];
     return v;
 }
 
-internal static uint16 uint16(this ref readBuf b) {
+internal static uint16 uint16⁔(/*this*/ ref readBuf b) {
     var v = binary.LittleEndian.Uint16(b);
     b = (b)[2..];
     return v;
 }
 
-internal static uint32 uint32(this ref readBuf b) {
+internal static uint32 uint32⁔(/*this*/ ref readBuf b) {
     var v = binary.LittleEndian.Uint32(b);
     b = (b)[4..];
     return v;
 }
 
-internal static uint64 uint64(this ref readBuf b) {
+internal static uint64 uint64⁔(/*this*/ ref readBuf b) {
     var v = binary.LittleEndian.Uint64(b);
     b = (b)[8..];
     return v;
 }
 
-internal static readBuf sub(this ref readBuf b, nint n) {
+internal static readBuf sub⁔(/*this*/ ref readBuf b, nint n) {
     var b2 = (b).slice(0, n);
     b = (b).slice(n);
     return b2;
 }
-
-} partial class zip_package {
 
 // A fileListEntry is a File and its ename.
 // If file == nil, the fileListEntry describes a directory without metadata.
@@ -832,9 +808,7 @@ partial interface fileInfoDirEntry :
     new @string Name();
 }
 
-} partial class zipᴛfileListEntry {
-
-internal static (fileInfoDirEntry, error) stat(this ж<fileListEntry> Ꮡf) {
+internal static (fileInfoDirEntry, error) stat⁔(/*this*/ ж<fileListEntry> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     if (f.isDup) {
@@ -847,31 +821,29 @@ internal static (fileInfoDirEntry, error) stat(this ж<fileListEntry> Ꮡf) {
 }
 
 // Only used for directories.
-internal static @string Name(this ref fileListEntry f) {
+internal static @string Name⁔(/*this*/ ref fileListEntry f) {
     var (_, elem, _) = split(f.name);
     return elem;
 }
 
-internal static int64 Size(this ref fileListEntry f) { return 0; }
-internal static fs.FileMode Mode(this ref fileListEntry f) { return (fs.FileMode)(fs.ModeDir | 365); }
-internal static fs.FileMode Type(this ref fileListEntry f) { return fs.ModeDir; }
-internal static bool IsDir(this ref fileListEntry f) { return true; }
-internal static any Sys(this ref fileListEntry f) { return default; }
+internal static int64 Size⁔(/*this*/ ref fileListEntry f) { return 0; }
+internal static fs.FileMode Mode⁔(/*this*/ ref fileListEntry f) { return (fs.FileMode)(fs.ModeDir | 365); }
+internal static fs.FileMode Type⁔(/*this*/ ref fileListEntry f) { return fs.ModeDir; }
+internal static bool IsDir⁔(/*this*/ ref fileListEntry f) { return true; }
+internal static any Sys⁔(/*this*/ ref fileListEntry f) { return default; }
 
-internal static time.Time ModTime(this ref fileListEntry f) {
+internal static time.Time ModTime⁔(/*this*/ ref fileListEntry f) {
     if (f.@file == nil) {
         return new time.Time();
     }
     return f.@file.FileHeader.Modified.UTC();
 }
 
-internal static (fs.FileInfo, error) Info(this ж<fileListEntry> Ꮡf) { return (new fileListEntryжFileInfo(Ꮡf), default); }
+internal static (fs.FileInfo, error) Info⁔(/*this*/ ж<fileListEntry> Ꮡf) { return (new fileListEntryжFileInfo(Ꮡf), default); }
 
-internal static @string String(this ж<fileListEntry> Ꮡf) {
+internal static @string String⁔(/*this*/ ж<fileListEntry> Ꮡf) {
     return fs.FormatDirEntry(new fileListEntryжDirEntry(Ꮡf));
 }
-
-} partial class zip_package {
 
 // toValidName coerces name to be a valid name for fs.FS.Open.
 internal static @string toValidName(@string name) {
@@ -887,10 +859,8 @@ internal static @string toValidName(@string name) {
     return p;
 }
 
-} partial class zipᴛReader {
-
-internal static void initFileList(this ж<Reader> Ꮡr) {
-    Ꮡr.ᏑfileListOnce.Do(() => {
+internal static void initFileList⁔(/*this*/ ж<Reader> Ꮡr) {
+    Ꮡr.ᏑfileListOnce.Do([GoFunc("(*Reader).initFileList.func1")] () => {
         // Preallocate the minimum size of the index.
         // We may also synthesize additional directory entries.
         Ꮡr.Value.fileList = new slice<fileListEntry>(0, len(Ꮡr.Value.File));
@@ -961,11 +931,9 @@ internal static void initFileList(this ж<Reader> Ꮡr) {
             }
         }
 
-        slices.SortFunc(Ꮡr.Value.fileList, (fileListEntry a, fileListEntry b) => fileEntryCompare(a.name, b.name));
+        slices.SortFunc(Ꮡr.Value.fileList, [GoFunc("(*Reader).initFileList.func1.1")] (fileListEntry a, fileListEntry b) => fileEntryCompare(a.name, b.name));
     });
 }
-
-} partial class zip_package {
 
 internal static nint fileEntryCompare(@string x, @string y) {
     var (xdir, xelem, _) = split(x);
@@ -976,13 +944,11 @@ internal static nint fileEntryCompare(@string x, @string y) {
     return strings.Compare(xelem, yelem);
 }
 
-} partial class zipᴛReader {
-
 // Open opens the named file in the ZIP archive,
 // using the semantics of fs.FS.Open:
 // paths are always slash separated, with no
 // leading / or ../ elements.
-public static (fs.File, error) Open(this ж<Reader> Ꮡr, @string name) {
+internal static (fs.File, error) Open⁔(/*this*/ ж<Reader> Ꮡr, @string name) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     Ꮡr.initFileList();
@@ -1004,8 +970,6 @@ public static (fs.File, error) Open(this ж<Reader> Ꮡr, @string name) {
     return (rc._<fs.File>(), default);
 }
 
-} partial class zip_package {
-
 internal static (@string dir, @string elem, bool isDir) split(@string name) {
     bool isDir = default;
 
@@ -1019,16 +983,14 @@ internal static (@string dir, @string elem, bool isDir) split(@string name) {
 
 internal static ж<fileListEntry> dotFile = Ꮡ(new fileListEntry(name: "./", isDir: true));
 
-} partial class zipᴛReader {
-
-internal static ж<fileListEntry> openLookup(this ref Reader r, @string name) {
+internal static ж<fileListEntry> openLookup⁔(/*this*/ ref Reader r, @string name) {
     if (name == "."u8) {
         return dotFile;
     }
 
     var (dir, elem, _) = split(name);
     var files = r.fileList;
-    var (i, _) = slices.BinarySearchFunc(files, dir, (fileListEntry a, @string dirΔ1) => {
+    var (i, _) = slices.BinarySearchFunc(files, dir, [GoFunc("(*Reader).openLookup.func1")] (fileListEntry a, @string dirΔ1) => {
         var (idir, ielem, _) = split(a.name);
         if (dirΔ1 != idir) {
             return strings.Compare(idir, dirΔ1);
@@ -1044,9 +1006,9 @@ internal static ж<fileListEntry> openLookup(this ref Reader r, @string name) {
     return default;
 }
 
-internal static slice<fileListEntry> openReadDir(this ref Reader r, @string dir) {
+internal static slice<fileListEntry> openReadDir⁔(/*this*/ ref Reader r, @string dir) {
     var files = r.fileList;
-    var (i, _) = slices.BinarySearchFunc(files, dir, (fileListEntry a, @string dirΔ1) => {
+    var (i, _) = slices.BinarySearchFunc(files, dir, [GoFunc("(*Reader).openReadDir.func1")] (fileListEntry a, @string dirΔ1) => {
         var (idir, _, _) = split(a.name);
         if (dirΔ1 != idir) {
             return strings.Compare(idir, dirΔ1);
@@ -1054,7 +1016,7 @@ internal static slice<fileListEntry> openReadDir(this ref Reader r, @string dir)
         // find the first entry with dir
         return +1;
     });
-    var (j, _) = slices.BinarySearchFunc(files, dir, (fileListEntry a, @string dirΔ2) => {
+    var (j, _) = slices.BinarySearchFunc(files, dir, [GoFunc("(*Reader).openReadDir.func2")] (fileListEntry a, @string dirΔ2) => {
         var (jdir, _, _) = split(a.name);
         if (dirΔ2 != jdir) {
             return strings.Compare(jdir, dirΔ2);
@@ -1065,28 +1027,24 @@ internal static slice<fileListEntry> openReadDir(this ref Reader r, @string dir)
     return files.slice(i, j);
 }
 
-} partial class zip_package {
-
 partial struct openDir {
     internal ж<fileListEntry> e;
     internal slice<fileListEntry> files;
     internal nint offset;
 }
 
-} partial class zipᴛopenDir {
-
-internal static error Close(this ref openDir d) { return default; }
-internal static (fs.FileInfo, error) Stat(this ref openDir d) { return d.e.stat(); }
+internal static error Close⁔(/*this*/ ref openDir d) { return default; }
+internal static (fs.FileInfo, error) Stat⁔(/*this*/ ref openDir d) { return d.e.stat(); }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string isADirectoryˢ => ref isADirectoryˢᵇ;
 private static readonly @string isADirectoryˢᵇ = "is a directory"u8;
 
-internal static (nint, error) Read(this ref openDir d, slice<byte> _) {
+internal static (nint, error) Read⁔(/*this*/ ref openDir d, slice<byte> _) {
     return (0, new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "read", Path: d.e.name, Err: errors.New(isADirectoryˢ)))));
 }
 
-internal static (slice<fs.DirEntry>, error) ReadDir(this ref openDir d, nint count) {
+internal static (slice<fs.DirEntry>, error) ReadDir⁔(/*this*/ ref openDir d, nint count) {
     nint n = len(d.files) - d.offset;
     if (count > 0 && n > count) {
         n = count;
@@ -1115,4 +1073,4 @@ internal static (slice<fs.DirEntry>, error) ReadDir(this ref openDir d, nint cou
     return (list, default);
 }
 
-}
+} // end zip_package

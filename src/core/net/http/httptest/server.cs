@@ -21,7 +21,6 @@ using crypto;
 using go.net;
 using go.net.http.@internal;
 using io = io_package;
-using static httptest_package;
 
 partial class httptest_package {
 
@@ -125,15 +124,13 @@ public static ж<Server> NewUnstartedServer(http.Handler handler) {
     ));
 }
 
-} partial class httptestᴛServer {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string exampleCom80ˢ => ref exampleCom80ˢᵇ;
 private static readonly @string exampleCom80ˢᵇ = ".example.com:80"u8;
 internal static readonly object httptestServingOnˢ = (@string)"httptest: serving on"u8;
 
 // Start starts a server from NewUnstartedServer.
-public static void Start(this ж<Server> Ꮡs) {
+internal static void Start⁔(/*this*/ ж<Server> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     if (s.URL != ""u8) {
@@ -147,7 +144,7 @@ public static void Start(this ж<Server> Ꮡs) {
         // We set DialContext here to preserve any context values that are passed in,
         // but fall back to Dial if the user has set it.
         var trʗ1 = tr;
-        tr.DialContext = (context.Context ctx, @string network, @string addr) => {
+        tr.DialContext = [GoFunc("(*Server).Start.func1")] (context.Context ctx, @string network, @string addr) => {
             if (trʗ1.Dial != nil) {
                 return trʗ1.Dial(network, addr);
             }
@@ -172,7 +169,7 @@ internal static ref readonly @string exampleCom443ˢ => ref exampleCom443ˢᵇ;
 private static readonly @string exampleCom443ˢᵇ = ".example.com:443"u8;
 
 // StartTLS starts TLS on a server from NewUnstartedServer.
-public static void StartTLS(this ж<Server> Ꮡs) {
+internal static void StartTLS⁔(/*this*/ ж<Server> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     if (s.URL != ""u8) {
@@ -216,7 +213,7 @@ public static void StartTLS(this ж<Server> Ꮡs) {
     ));
     ref var dialer = ref heap<net.Dialer>(new net.Dialer(), out var Ꮡdialer);
     var trʗ1 = tr;
-    tr.DialContext = (context.Context ctx, @string network, @string addr) => {
+    tr.DialContext = [GoFunc("(*Server).StartTLS.func1")] (context.Context ctx, @string network, @string addr) => {
         if (trʗ1.Dial != nil) {
             return trʗ1.Dial(network, addr);
         }
@@ -232,8 +229,6 @@ public static void StartTLS(this ж<Server> Ꮡs) {
     Ꮡs.goServe();
 }
 
-} partial class httptest_package {
-
 // NewTLSServer starts and returns a new [Server] using TLS.
 // The caller should call Close when finished, to shut it down.
 public static ж<Server> NewTLSServer(http.Handler handler) {
@@ -246,11 +241,9 @@ partial interface closeIdleTransport {
     void CloseIdleConnections();
 }
 
-} partial class httptestᴛServer {
-
 // Close shuts down the server and blocks until all outstanding
 // requests on this server have completed.
-public static void Close(this ж<Server> Ꮡs) {
+internal static void Close⁔(/*this*/ ж<Server> Ꮡs) {
     GoFrame ᒐ = default;
     try {
         ref var s = ref Ꮡs.DerefOrNull();
@@ -316,7 +309,7 @@ public static void Close(this ж<Server> Ꮡs) {
 internal static ref readonly @string httptestServerBlockedInˢ => ref httptestServerBlockedInˢᵇ;
 private static readonly @string httptestServerBlockedInˢᵇ = "httptest.Server blocked in Close after 5 seconds, waiting for connections:\n"u8;
 
-internal static void logCloseHangDebugInfo(this ж<Server> Ꮡs) {
+internal static void logCloseHangDebugInfo⁔(/*this*/ ж<Server> Ꮡs) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -336,7 +329,7 @@ internal static void logCloseHangDebugInfo(this ж<Server> Ꮡs) {
 }
 
 // CloseClientConnections closes any open HTTP connections to the test Server.
-public static partial void CloseClientConnections(this ж<Server> Ꮡs) {
+internal static partial void CloseClientConnections⁔(/*this*/ ж<Server> Ꮡs) {
     GoFrame ᒐ = default;
     try {
         ref var s = ref Ꮡs.DerefOrNull();
@@ -377,7 +370,7 @@ public static partial void CloseClientConnections(this ж<Server> Ꮡs) {
 
 // Certificate returns the certificate used by the server, or nil if
 // the server doesn't use TLS.
-public static ж<x509.Certificate> Certificate(this ref Server s) {
+internal static ж<x509.Certificate> Certificate⁔(/*this*/ ref Server s) {
     return s.certificate;
 }
 
@@ -387,13 +380,13 @@ public static ж<x509.Certificate> Certificate(this ref Server s) {
 // Use Server.URL as the base URL to send requests to the server.
 // The returned client will also redirect any requests to "example.com"
 // or its subdomains to the server.
-public static ж<http.Client> Client(this ref Server s) {
+internal static ж<http.Client> Client⁔(/*this*/ ref Server s) {
     return s.client;
 }
 
-internal static partial void goServe(this ж<Server> Ꮡs) {
+internal static partial void goServe⁔(/*this*/ ж<Server> Ꮡs) {
     Ꮡs.Ꮡwg.Add(1);
-    goǃ(() => {
+    goǃ([GoFunc("(*Server).goServe.func1")] () => {
         GoFrame ᒐ = default;
         try {
             defer(Ꮡs.Ꮡwg.Done, ref ᒐ);
@@ -406,12 +399,12 @@ internal static partial void goServe(this ж<Server> Ꮡs) {
 
 // wrap installs the connection state-tracking hook to know which
 // connections are idle.
-internal static void wrap(this ж<Server> Ꮡs) {
+internal static void wrap⁔(/*this*/ ж<Server> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     var oldHook = s.Config.ConnState;
     var oldHookʗ1 = oldHook;
-    s.Config.ConnState = (net.Conn c, http.ConnState cs) => {
+    s.Config.ConnState = [GoFunc("(*Server).wrap.func1")] (net.Conn c, http.ConnState cs) => {
         GoFrame ᒐ = default;
         try {
             Ꮡs.Value.mu.Lock();
@@ -487,15 +480,15 @@ internal static void wrap(this ж<Server> Ꮡs) {
 
 // closeConn closes c.
 // s.mu must be held.
-internal static void closeConn(this ref Server s, net.Conn c) { s.closeConnChan(c, default); }
+internal static void closeConn⁔(/*this*/ ref Server s, net.Conn c) { s.closeConnChan(c, default); }
 
 // closeConnChan is like closeConn, but takes an optional channel to receive a value
 // when the goroutine closing c is done.
-internal static void closeConnChan(this ref Server s, net.Conn c, channel/*<-*/<EmptyStruct> done) {
+internal static void closeConnChan⁔(/*this*/ ref Server s, net.Conn c, channel/*<-*/<EmptyStruct> done) {
     c.Close();
     if (done != nil) {
         done.ᐸꟷ(new EmptyStruct());
     }
 }
 
-}
+} // end httptest_package

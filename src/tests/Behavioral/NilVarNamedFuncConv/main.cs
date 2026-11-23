@@ -23,7 +23,7 @@ internal static void main() {
     var (nilGreeter, nilOk) = nilGreetable._<Greeter>(ᐧ);
     fmt.Println(nilOk, nilGreeter == nil);
 
-    var realGreetable = wrap((@string name) => {
+    var realGreetable = wrap([GoFunc("main.func1")] (@string name) => {
         fmt.Println("hello", name);
     });
     var (realGreeter, realOk) = realGreetable._<Greeter>(ᐧ);

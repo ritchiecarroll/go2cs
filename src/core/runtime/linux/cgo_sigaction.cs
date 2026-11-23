@@ -74,7 +74,7 @@ internal static void sigaction(uint32 sigʗp, ж<sigactiont> @new, ж<sigactiont
             // The function literal that we pass to systemstack is not nosplit, but
             // that's ok: we'll be running on a fresh, clean system stack so the stack
             // check will always succeed anyway.
-            systemstack(() => {
+            systemstack([GoFunc("sigaction.func1")] () => {
                 ret = callCgoSigaction((uintptr)Ꮡsig.Value, @new, old);
             });
             break;

@@ -68,7 +68,7 @@ internal static void main() {
 
     var done = new channel<bool>(1);
     var doneʗ1 = done;
-    var g = time.AfterFunc(1 * time.Millisecond, () => {
+    var g = time.AfterFunc(1 * time.Millisecond, [GoFunc("main.func1")] () => {
         doneʗ1.ᐸꟷ(true);
     });
     ᐸꟷ(done);
@@ -87,7 +87,7 @@ internal static void main() {
     const nint batch = 600;
     time.Duration armAt = /* 40 * time.Millisecond */ 40000000;
 
-    (nint, nint) stopRound(bool reset) {
+    [GoFunc("main.func2")] (nint, nint) stopRound(bool reset) {
         var start = time.Now();
         var timers = new slice<ж<time.Timer>>(batch);
         foreach (var n in range(len(timers))) {

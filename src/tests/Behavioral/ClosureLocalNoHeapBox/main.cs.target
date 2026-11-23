@@ -19,7 +19,7 @@ internal static void writeThrough(ref counter p, nint k) { p.n += k; }
 internal static void run(Action f) { f(); }
 
 internal static void n1() {
-    run(() => {
+    run([GoFunc("n1.func1")] () => {
         counter c = default;
         c.add(3);
         c.add(4);
@@ -28,7 +28,7 @@ internal static void n1() {
 }
 
 internal static void n2() {
-    run(() => {
+    run([GoFunc("n2.func1")] () => {
         ref var c = ref heap(new counter(), out var Ꮡc);
         var p = Ꮡc;
         p.n = 10;
@@ -38,9 +38,9 @@ internal static void n2() {
 }
 
 internal static void n3() {
-    run(() => {
+    run([GoFunc("n3.func1")] () => {
         ref var c = ref heap(new counter(), out var Ꮡc);
-        void inner(nint k) {
+        [GoFunc("n3.func1.1")] void inner(nint k) {
             Ꮡc.Value.n += k;
         }
         inner(7);
@@ -51,14 +51,14 @@ internal static void n3() {
 
 internal static void n4() {
     ref var c = ref heap(new counter(), out var Ꮡc);
-    run(() => {
+    run([GoFunc("n4.func1")] () => {
         Ꮡc.Value.n += 9;
     });
     fmt.Println("N4:", c.n);
 }
 
 internal static void n5() {
-    run(() => {
+    run([GoFunc("n5.func1")] () => {
         ref var a = ref heap(new array<nint>(3), out var Ꮡa);
         var q = Ꮡa.at<nint>(1);
         q.Value = 42;
@@ -67,7 +67,7 @@ internal static void n5() {
 }
 
 internal static void n6() {
-    run(() => {
+    run([GoFunc("n6.func1")] () => {
         ref var c = ref heap(new counter(), out var Ꮡc);
         writeThrough(ref (Ꮡc).DerefOrNull(), 11);
         fmt.Println("N6:", c.n);
@@ -75,7 +75,7 @@ internal static void n6() {
 }
 
 internal static void n7() {
-    run(() => {
+    run([GoFunc("n7.func1")] () => {
         counter c = default;
         c.n = 5;
         var d = c;
@@ -85,7 +85,7 @@ internal static void n7() {
 }
 
 internal static void n8() {
-    run(() => {
+    run([GoFunc("n8.func1")] () => {
         ref var c = ref heap(new counter(), out var Ꮡc);
         var bump = Ꮡc.add;
         bump(2);

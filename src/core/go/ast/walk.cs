@@ -5,7 +5,6 @@ namespace go.go;
 
 using fmt = fmt_package;
 using iter = iter_package;
-using static ast_package;
 
 partial class ast_package {
 
@@ -418,16 +417,12 @@ public static void Walk(Visitor v, Node node) {
 
 internal delegate bool inspector(Node _);
 
-} partial class astᴛinspector {
-
-internal static Visitor Visit(this inspector f, Node node) {
+internal static Visitor Visit⁔(/*this*/ inspector f, Node node) {
     if (f(node)) {
         return new inspectorᴠVisitor(f);
     }
     return default;
 }
-
-} partial class ast_package {
 
 // Inspect traverses an AST in depth-first order: It starts by calling
 // f(node); node must not be nil. If f returns true, Inspect invokes f
@@ -449,9 +444,9 @@ public static void Inspect(Node node, Func<Node, bool> f) {
 // For greater control over the traversal of each subtree, use
 // [Inspect] or [PreorderStack].
 public static iter.Seq<Node> Preorder(Node root) {
-    return (Func<Node, bool> yield) => {
+    return [GoFunc("Preorder.func1")] (Func<Node, bool> yield) => {
         var ok = true;
-        Inspect(root, (Node n) => {
+        Inspect(root, [GoFunc("Preorder.func1.1")] (Node n) => {
             if (n != nil) {
                 // yield must not be called once ok is false.
                 ok = ok && yield(n);
@@ -475,7 +470,7 @@ public static iter.Seq<Node> Preorder(Node root) {
 // stack, and it is surprisingly tricky to do this correctly.)
 public static void PreorderStack(Node root, slice<Node> stack, Func<Node, slice<Node>, bool> f) {
     nint before = len(stack);
-    Inspect(root, (Node n) => {
+    Inspect(root, [GoFunc("PreorderStack.func1")] (Node n) => {
         if (n != nil) {
             if (!f(n, stack)) {
                 // Do not push, as there will be no corresponding pop.

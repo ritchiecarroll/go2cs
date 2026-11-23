@@ -5,9 +5,7 @@
 // license that can be found in the LICENSE file.
 namespace go.go;
 
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
-using static types_package;
+using System.Runtime.CompilerServices;
 
 partial class types_package {
 
@@ -16,15 +14,13 @@ partial struct gcSizes {
     public int64 MaxAlign; // maximum alignment in bytes - must be >= 1
 }
 
-} partial class typesᴛgcSizes {
-
-internal static int64 /*result*/ Alignof(this ж<gcSizes> Ꮡs, Type T) {
+internal static int64 /*result*/ Alignof⁔(/*this*/ ж<gcSizes> Ꮡs, Type T) {
     int64 result = default;
     GoFrame ᒐ = default;
     try {
         ref var s = ref Ꮡs.DerefOrNull();
 
-        defer([MethodImpl(MethodImplOptions.NoInlining)] () => {
+        defer([MethodImpl(MethodImplOptions.NoInlining), GoFunc("(*gcSizes).Alignof.func1")] () => {
             assert(result >= 1);
         }, ref ᒐ);
 
@@ -102,7 +98,7 @@ internal static int64 /*result*/ Alignof(this ж<gcSizes> Ꮡs, Type T) {
     ᒐdone: return result;
 }
 
-internal static slice<int64> Offsetsof(this ж<gcSizes> Ꮡs, slice<ж<Var>> fields) {
+internal static slice<int64> Offsetsof⁔(/*this*/ ж<gcSizes> Ꮡs, slice<ж<Var>> fields) {
     var offsets = new slice<int64>(len(fields));
     int64 offs = default;
     foreach (var (i, f) in range(fields)) {
@@ -124,7 +120,7 @@ internal static slice<int64> Offsetsof(this ж<gcSizes> Ꮡs, slice<ж<Var>> fie
     return offsets;
 }
 
-internal static int64 Sizeof(this ж<gcSizes> Ꮡs, Type T) {
+internal static int64 Sizeof⁔(/*this*/ ж<gcSizes> Ꮡs, Type T) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     var switchᴛ8 = T.Underlying();
@@ -199,8 +195,6 @@ internal static int64 Sizeof(this ж<gcSizes> Ꮡs, Type T) {
     }}
     return s.WordSize; // catch-all
 }
-
-} partial class types_package {
 
 // gcSizesFor returns the Sizes used by gc for an architecture.
 // The result is a nil *gcSizes pointer (which is not a valid types.Sizes)

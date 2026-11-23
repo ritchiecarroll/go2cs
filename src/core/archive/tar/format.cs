@@ -4,7 +4,6 @@
 namespace go.archive;
 
 using strings = strings_package;
-using static tar_package;
 
 partial class tar_package {
 
@@ -105,26 +104,20 @@ internal static Format formatSTAR => 16;
 
 internal static Format formatMax => 32;
 
-} partial class tarᴛFormat {
-
-internal static bool has(this Format f, Format f2) { return (Format)(f & f2) != 0; }
-internal static void mayBe(this ref Format f, Format f2) { f |= (Format)(f2); }
-internal static void mayOnlyBe(this ref Format f, Format f2) { f &= (Format)(f2); }
-internal static void mustNotBe(this ref Format f, Format f2) { f &= ~(Format)(f2); }
-
-} partial class tar_package {
+internal static bool has⁔(/*this*/ Format f, Format f2) { return (Format)(f & f2) != 0; }
+internal static void mayBe⁔(/*this*/ ref Format f, Format f2) { f |= (Format)(f2); }
+internal static void mayOnlyBe⁔(/*this*/ ref Format f, Format f2) { f &= (Format)(f2); }
+internal static void mustNotBe⁔(/*this*/ ref Format f, Format f2) { f &= ~(Format)(f2); }
 
 internal static map<Format, @string> formatNames = new map<Format, @string>{
     [formatV7] = "V7", [FormatUSTAR] = "USTAR", [FormatPAX] = "PAX", [FormatGNU] = "GNU", [formatSTAR] = "STAR"
 };
 
-} partial class tarᴛFormat {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string unknownˢ => ref unknownˢᵇ;
 private static readonly @string unknownˢᵇ = "<unknown>"u8;
 
-public static @string String(this Format f) {
+internal static @string String⁔(/*this*/ Format f) {
     var ssᴷ = new stackAppend<@string>();
 
     slice<@string> ss = default;
@@ -144,8 +137,6 @@ public static @string String(this Format f) {
         return "("u8 + strings.Join(ss, " | ") + ")"u8;
     }}
 }
-
-} partial class tar_package {
 
 // Magics used to identify various formats.
 internal static ref readonly @string magicGNU => ref magicGNUᵇ;
@@ -185,39 +176,37 @@ internal static block zeroBlock;
 /* [blockSize]byte */
 partial struct block /*[512]byte*/;
 
-} partial class tarᴛblock {
-
 // Convert block to any number of formats.
-internal static ж<headerV7> toV7(this ж<block> Ꮡb) {
+internal static ж<headerV7> toV7⁔(/*this*/ ж<block> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     return Ꮡ((headerV7)(b.Value));
 }
 
-internal static ж<headerGNU> toGNU(this ж<block> Ꮡb) {
+internal static ж<headerGNU> toGNU⁔(/*this*/ ж<block> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     return Ꮡ((headerGNU)(b.Value));
 }
 
-internal static ж<headerSTAR> toSTAR(this ж<block> Ꮡb) {
+internal static ж<headerSTAR> toSTAR⁔(/*this*/ ж<block> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     return Ꮡ((headerSTAR)(b.Value));
 }
 
-internal static ж<headerUSTAR> toUSTAR(this ж<block> Ꮡb) {
+internal static ж<headerUSTAR> toUSTAR⁔(/*this*/ ж<block> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     return Ꮡ((headerUSTAR)(b.Value));
 }
 
-internal static sparseArray toSparse(this ref block b) { return (sparseArray)(b.Value[..]); }
+internal static sparseArray toSparse⁔(/*this*/ ref block b) { return (sparseArray)(b.Value[..]); }
 
 // getFormat checks that the block is a valid tar header based on the checksum.
 // It then attempts to guess the specific format based on magic values.
 // If the checksum fails, then FormatUnknown is returned.
-internal static Format getFormat(this ж<block> Ꮡb) {
+internal static Format getFormat⁔(/*this*/ ж<block> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     // Verify checksum.
@@ -249,7 +238,7 @@ internal static Format getFormat(this ж<block> Ꮡb) {
 
 // setFormat writes the magic values necessary for specified format
 // and then updates the checksum accordingly.
-internal static void setFormat(this ж<block> Ꮡb, Format format) {
+internal static void setFormat⁔(/*this*/ ж<block> Ꮡb, Format format) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     // Set the magic values.
@@ -292,7 +281,7 @@ internal static void setFormat(this ж<block> Ꮡb, Format format) {
 // POSIX specifies a sum of the unsigned byte values, but the Sun tar used
 // signed byte values.
 // We compute and return both.
-internal static (int64 unsigned, int64 signed) computeChecksum(this ref block b) {
+internal static (int64 unsigned, int64 signed) computeChecksum⁔(/*this*/ ref block b) {
     int64 unsigned = default;
     int64 signed = default;
 
@@ -309,113 +298,89 @@ internal static (int64 unsigned, int64 signed) computeChecksum(this ref block b)
 }
 
 // reset clears the block with all zeros.
-internal static void reset(this ref block b) {
+internal static void reset⁔(/*this*/ ref block b) {
     b.Assign(new block(new byte[512].array()));
 }
-
-} partial class tar_package {
 
 /* [blockSize]byte */
 partial struct headerV7 /*[512]byte*/;
 
-} partial class tarᴛheaderV7 {
-
-internal static slice<byte> name(this ref headerV7 h) { return h.Value[0..][..100]; }
-internal static slice<byte> mode(this ref headerV7 h) { return h.Value[100..][..8]; }
-internal static slice<byte> uid(this ref headerV7 h) { return h.Value[108..][..8]; }
-internal static slice<byte> gid(this ref headerV7 h) { return h.Value[116..][..8]; }
-internal static slice<byte> size(this ref headerV7 h) { return h.Value[124..][..12]; }
-internal static slice<byte> modTime(this ref headerV7 h) { return h.Value[136..][..12]; }
-internal static slice<byte> chksum(this ref headerV7 h) { return h.Value[148..][..8]; }
-internal static slice<byte> typeFlag(this ref headerV7 h) { return h.Value[156..][..1]; }
-internal static slice<byte> linkName(this ref headerV7 h) { return h.Value[157..][..100]; }
-
-} partial class tar_package {
+internal static slice<byte> name⁔(/*this*/ ref headerV7 h) { return h.Value[0..][..100]; }
+internal static slice<byte> mode⁔(/*this*/ ref headerV7 h) { return h.Value[100..][..8]; }
+internal static slice<byte> uid⁔(/*this*/ ref headerV7 h) { return h.Value[108..][..8]; }
+internal static slice<byte> gid⁔(/*this*/ ref headerV7 h) { return h.Value[116..][..8]; }
+internal static slice<byte> size⁔(/*this*/ ref headerV7 h) { return h.Value[124..][..12]; }
+internal static slice<byte> modTime⁔(/*this*/ ref headerV7 h) { return h.Value[136..][..12]; }
+internal static slice<byte> chksum⁔(/*this*/ ref headerV7 h) { return h.Value[148..][..8]; }
+internal static slice<byte> typeFlag⁔(/*this*/ ref headerV7 h) { return h.Value[156..][..1]; }
+internal static slice<byte> linkName⁔(/*this*/ ref headerV7 h) { return h.Value[157..][..100]; }
 
 /* [blockSize]byte */
 partial struct headerGNU /*[512]byte*/;
 
-} partial class tarᴛheaderGNU {
-
-internal static ж<headerV7> v7(this ж<headerGNU> Ꮡh) {
+internal static ж<headerV7> v7⁔(/*this*/ ж<headerGNU> Ꮡh) {
     ref var h = ref Ꮡh.DerefOrNull();
 
     return Ꮡ((headerV7)(h.Value));
 }
 
-internal static slice<byte> magic(this ref headerGNU h) { return h.Value[257..][..6]; }
-internal static slice<byte> version(this ref headerGNU h) { return h.Value[263..][..2]; }
-internal static slice<byte> userName(this ref headerGNU h) { return h.Value[265..][..32]; }
-internal static slice<byte> groupName(this ref headerGNU h) { return h.Value[297..][..32]; }
-internal static slice<byte> devMajor(this ref headerGNU h) { return h.Value[329..][..8]; }
-internal static slice<byte> devMinor(this ref headerGNU h) { return h.Value[337..][..8]; }
-internal static slice<byte> accessTime(this ref headerGNU h) { return h.Value[345..][..12]; }
-internal static slice<byte> changeTime(this ref headerGNU h) { return h.Value[357..][..12]; }
-internal static sparseArray sparse(this ref headerGNU h) { return (sparseArray)(h.Value[386..][..(int)(24 * 4 + 1)]); }
-internal static slice<byte> realSize(this ref headerGNU h) { return h.Value[483..][..12]; }
-
-} partial class tar_package {
+internal static slice<byte> magic⁔(/*this*/ ref headerGNU h) { return h.Value[257..][..6]; }
+internal static slice<byte> version⁔(/*this*/ ref headerGNU h) { return h.Value[263..][..2]; }
+internal static slice<byte> userName⁔(/*this*/ ref headerGNU h) { return h.Value[265..][..32]; }
+internal static slice<byte> groupName⁔(/*this*/ ref headerGNU h) { return h.Value[297..][..32]; }
+internal static slice<byte> devMajor⁔(/*this*/ ref headerGNU h) { return h.Value[329..][..8]; }
+internal static slice<byte> devMinor⁔(/*this*/ ref headerGNU h) { return h.Value[337..][..8]; }
+internal static slice<byte> accessTime⁔(/*this*/ ref headerGNU h) { return h.Value[345..][..12]; }
+internal static slice<byte> changeTime⁔(/*this*/ ref headerGNU h) { return h.Value[357..][..12]; }
+internal static sparseArray sparse⁔(/*this*/ ref headerGNU h) { return (sparseArray)(h.Value[386..][..(int)(24 * 4 + 1)]); }
+internal static slice<byte> realSize⁔(/*this*/ ref headerGNU h) { return h.Value[483..][..12]; }
 
 /* [blockSize]byte */
 partial struct headerSTAR /*[512]byte*/;
 
-} partial class tarᴛheaderSTAR {
-
-internal static ж<headerV7> v7(this ж<headerSTAR> Ꮡh) {
+internal static ж<headerV7> v7⁔(/*this*/ ж<headerSTAR> Ꮡh) {
     ref var h = ref Ꮡh.DerefOrNull();
 
     return Ꮡ((headerV7)(h.Value));
 }
 
-internal static slice<byte> magic(this ref headerSTAR h) { return h.Value[257..][..6]; }
-internal static slice<byte> version(this ref headerSTAR h) { return h.Value[263..][..2]; }
-internal static slice<byte> userName(this ref headerSTAR h) { return h.Value[265..][..32]; }
-internal static slice<byte> groupName(this ref headerSTAR h) { return h.Value[297..][..32]; }
-internal static slice<byte> devMajor(this ref headerSTAR h) { return h.Value[329..][..8]; }
-internal static slice<byte> devMinor(this ref headerSTAR h) { return h.Value[337..][..8]; }
-internal static slice<byte> prefix(this ref headerSTAR h) { return h.Value[345..][..131]; }
-internal static slice<byte> accessTime(this ref headerSTAR h) { return h.Value[476..][..12]; }
-internal static slice<byte> changeTime(this ref headerSTAR h) { return h.Value[488..][..12]; }
-internal static slice<byte> trailer(this ref headerSTAR h) { return h.Value[508..][..4]; }
-
-} partial class tar_package {
+internal static slice<byte> magic⁔(/*this*/ ref headerSTAR h) { return h.Value[257..][..6]; }
+internal static slice<byte> version⁔(/*this*/ ref headerSTAR h) { return h.Value[263..][..2]; }
+internal static slice<byte> userName⁔(/*this*/ ref headerSTAR h) { return h.Value[265..][..32]; }
+internal static slice<byte> groupName⁔(/*this*/ ref headerSTAR h) { return h.Value[297..][..32]; }
+internal static slice<byte> devMajor⁔(/*this*/ ref headerSTAR h) { return h.Value[329..][..8]; }
+internal static slice<byte> devMinor⁔(/*this*/ ref headerSTAR h) { return h.Value[337..][..8]; }
+internal static slice<byte> prefix⁔(/*this*/ ref headerSTAR h) { return h.Value[345..][..131]; }
+internal static slice<byte> accessTime⁔(/*this*/ ref headerSTAR h) { return h.Value[476..][..12]; }
+internal static slice<byte> changeTime⁔(/*this*/ ref headerSTAR h) { return h.Value[488..][..12]; }
+internal static slice<byte> trailer⁔(/*this*/ ref headerSTAR h) { return h.Value[508..][..4]; }
 
 /* [blockSize]byte */
 partial struct headerUSTAR /*[512]byte*/;
 
-} partial class tarᴛheaderUSTAR {
-
-internal static ж<headerV7> v7(this ж<headerUSTAR> Ꮡh) {
+internal static ж<headerV7> v7⁔(/*this*/ ж<headerUSTAR> Ꮡh) {
     ref var h = ref Ꮡh.DerefOrNull();
 
     return Ꮡ((headerV7)(h.Value));
 }
 
-internal static slice<byte> magic(this ref headerUSTAR h) { return h.Value[257..][..6]; }
-internal static slice<byte> version(this ref headerUSTAR h) { return h.Value[263..][..2]; }
-internal static slice<byte> userName(this ref headerUSTAR h) { return h.Value[265..][..32]; }
-internal static slice<byte> groupName(this ref headerUSTAR h) { return h.Value[297..][..32]; }
-internal static slice<byte> devMajor(this ref headerUSTAR h) { return h.Value[329..][..8]; }
-internal static slice<byte> devMinor(this ref headerUSTAR h) { return h.Value[337..][..8]; }
-internal static slice<byte> prefix(this ref headerUSTAR h) { return h.Value[345..][..155]; }
-
-} partial class tar_package {
+internal static slice<byte> magic⁔(/*this*/ ref headerUSTAR h) { return h.Value[257..][..6]; }
+internal static slice<byte> version⁔(/*this*/ ref headerUSTAR h) { return h.Value[263..][..2]; }
+internal static slice<byte> userName⁔(/*this*/ ref headerUSTAR h) { return h.Value[265..][..32]; }
+internal static slice<byte> groupName⁔(/*this*/ ref headerUSTAR h) { return h.Value[297..][..32]; }
+internal static slice<byte> devMajor⁔(/*this*/ ref headerUSTAR h) { return h.Value[329..][..8]; }
+internal static slice<byte> devMinor⁔(/*this*/ ref headerUSTAR h) { return h.Value[337..][..8]; }
+internal static slice<byte> prefix⁔(/*this*/ ref headerUSTAR h) { return h.Value[345..][..155]; }
 
 partial struct sparseArray /*[]byte*/;
 
-} partial class tarᴛsparseArray {
-
-internal static sparseElem entry(this sparseArray s, nint i) { return (sparseElem)(slice<byte>)(s.slice(i * 24)); }
-internal static slice<byte> isExtended(this sparseArray s) { return s.slice(24 * s.maxEntries())[..1]; }
-internal static nint maxEntries(this sparseArray s) { return len(s) / 24; }
-
-} partial class tar_package {
+internal static sparseElem entry⁔(/*this*/ sparseArray s, nint i) { return (sparseElem)(slice<byte>)(s.slice(i * 24)); }
+internal static slice<byte> isExtended⁔(/*this*/ sparseArray s) { return s.slice(24 * s.maxEntries())[..1]; }
+internal static nint maxEntries⁔(/*this*/ sparseArray s) { return len(s) / 24; }
 
 partial struct sparseElem /*[]byte*/;
 
-} partial class tarᴛsparseElem {
+internal static slice<byte> offset⁔(/*this*/ sparseElem s) { return s[0..][..12]; }
+internal static slice<byte> length⁔(/*this*/ sparseElem s) { return s[12..][..12]; }
 
-internal static slice<byte> offset(this sparseElem s) { return s[0..][..12]; }
-internal static slice<byte> length(this sparseElem s) { return s[12..][..12]; }
-
-}
+} // end tar_package

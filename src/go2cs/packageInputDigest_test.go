@@ -70,7 +70,7 @@ func TestPackageInputDigestMovesWithEachInput(t *testing.T) {
 			}
 		}
 
-		got, err := packageInputDigest(paths, output, options, revision)
+		got, err := packageInputDigest(paths, output, "", options, revision)
 
 		if err != nil {
 			t.Fatalf("packageInputDigest: %v", err)
@@ -145,7 +145,7 @@ func TestPackageInputDigestReadsTheTargetsLayoutKeyFolders(t *testing.T) {
 			writeDigestFixture(t, output, map[string]string{companion: "// hand-owned\n"})
 		}
 
-		got, err := packageInputDigest(paths, output, options, "rev-1")
+		got, err := packageInputDigest(paths, output, "", options, "rev-1")
 
 		if err != nil {
 			t.Fatalf("packageInputDigest: %v", err)

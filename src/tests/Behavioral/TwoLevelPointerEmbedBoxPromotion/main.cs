@@ -22,7 +22,7 @@ partial struct deadline {
 
 internal static error set(this ж<deadline> Ꮡd, time.Time t) {
     var tʗ1 = t;
-    void fire() {
+    [GoFunc("(*deadline).set.func1")] void fire() {
         Ꮡd.Value.t = tʗ1;
     }
     fire();

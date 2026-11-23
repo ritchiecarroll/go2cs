@@ -5,7 +5,7 @@ import (
 	"sync"
 )
 
-// M:N PROTOTYPE, N3's D3 core. Prototype code: nothing from this branch lands on master as it is.
+// M:N scheduler, experimental and opt-in (GoTwins=true to build, GO2CS_MN=1 to run); inert otherwise.
 //
 // N goroutines each run `run`, a function that parks on its own (so it is a twin under any caller rule) and then
 // calls through a func value. The func value is a literal main creates, and the literal parks on a gate. Under the

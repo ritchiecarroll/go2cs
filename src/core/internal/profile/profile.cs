@@ -14,7 +14,6 @@ using io = io_package;
 using strings = strings_package;
 using time = time_package;
 using compress;
-using static profile_package;
 
 partial class profile_package {
 
@@ -167,10 +166,8 @@ internal static (ж<Profile>, error) parseUncompressed(slice<byte> data) {
     return (p, default);
 }
 
-} partial class profileᴛProfile {
-
 // Write writes the profile as a gzip-compressed marshaled protobuf.
-public static error Write(this ж<Profile> Ꮡp, io.Writer w) {
+internal static error Write⁔(/*this*/ ж<Profile> Ꮡp, io.Writer w) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -191,7 +188,7 @@ public static error Write(this ж<Profile> Ꮡp, io.Writer w) {
 // not limited to:
 //   - len(Profile.Sample[n].value) == len(Profile.value_unit)
 //   - Sample.id has a corresponding Profile.Location
-public static error CheckValid(this ref Profile p) {
+internal static error CheckValid⁔(/*this*/ ref Profile p) {
     // Check that sample values are consistent
     nint sampleLen = len(p.SampleType);
     if (sampleLen == 0 && len(p.Sample) != 0) {
@@ -253,7 +250,7 @@ public static error CheckValid(this ref Profile p) {
 // Aggregate merges the locations in the profile into equivalence
 // classes preserving the request attributes. It also updates the
 // samples to point to the merged locations.
-public static error Aggregate(this ref Profile p, bool inlineFrame, bool function, bool filename, bool linenumber, bool address) {
+internal static error Aggregate⁔(/*this*/ ref Profile p, bool inlineFrame, bool function, bool filename, bool linenumber, bool address) {
     foreach (var (_, m) in range(p.Mapping)) {
         m.HasInlineFrames = m.HasInlineFrames && inlineFrame;
         m.HasFunctions = m.HasFunctions && function;
@@ -300,7 +297,7 @@ private static readonly @string labelHeaderᶜᵇ = "                "u8;
 
 // Print dumps a text representation of a profile. Intended mainly
 // for debugging purposes.
-public static @string String(this ref Profile p) {
+internal static @string String⁔(/*this*/ ref Profile p) {
     var ssᴷ = new stackAppend<@string>();
 
     var ss = new slice<@string>(0, len(p.Sample) + len(p.Mapping) + len(p.Location));
@@ -405,7 +402,7 @@ public static @string String(this ref Profile p) {
 // must be compatible (same Type and SampleType).
 // TODO(rsilvera): consider normalizing the profiles based on the
 // total samples collected.
-public static error Merge(this ref Profile p, ж<Profile> Ꮡpb, float64 r) {
+internal static error Merge⁔(/*this*/ ref Profile p, ж<Profile> Ꮡpb, float64 r) {
     ref var pb = ref Ꮡpb.DerefOrNull();
 
     var err = p.Compatible(Ꮡpb); if (err != nil) {
@@ -448,7 +445,7 @@ public static error Merge(this ref Profile p, ж<Profile> Ꮡpb, float64 r) {
 // Compatible determines if two profiles can be compared/merged.
 // returns nil if the profiles are compatible; otherwise an error with
 // details on the incompatibility.
-public static error Compatible(this ref Profile p, ж<Profile> Ꮡpb) {
+internal static error Compatible⁔(/*this*/ ref Profile p, ж<Profile> Ꮡpb) {
     ref var pb = ref Ꮡpb.DerefOrNull();
 
     if (!compatibleValueTypes(p.PeriodType, pb.PeriodType)) {
@@ -470,7 +467,7 @@ public static error Compatible(this ref Profile p, ж<Profile> Ꮡpb) {
 
 // HasFunctions determines if all locations in this profile have
 // symbolized function information.
-public static bool HasFunctions(this ref Profile p) {
+internal static bool HasFunctions⁔(/*this*/ ref Profile p) {
     foreach (var (_, l) in range(p.Location)) {
         if (l.Mapping == nil || !l.Mapping.HasFunctions) {
             return false;
@@ -481,7 +478,7 @@ public static bool HasFunctions(this ref Profile p) {
 
 // HasFileLines determines if all locations in this profile have
 // symbolized file and line number information.
-public static bool HasFileLines(this ref Profile p) {
+internal static bool HasFileLines⁔(/*this*/ ref Profile p) {
     foreach (var (_, l) in range(p.Location)) {
         if (l.Mapping == nil || (!l.Mapping.HasFilenames || !l.Mapping.HasLineNumbers)) {
             return false;
@@ -489,8 +486,6 @@ public static bool HasFileLines(this ref Profile p) {
     }
     return true;
 }
-
-} partial class profile_package {
 
 internal static bool compatibleValueTypes(ж<ValueType> Ꮡv1, ж<ValueType> Ꮡv2) {
     ref var v1 = ref Ꮡv1.DerefOrNull();
@@ -502,10 +497,8 @@ internal static bool compatibleValueTypes(ж<ValueType> Ꮡv1, ж<ValueType> Ꮡ
     return v1.Type == v2.Type && v1.Unit == v2.Unit;
 }
 
-} partial class profileᴛProfile {
-
 // Copy makes a fully independent copy of a profile.
-public static ж<Profile> Copy(this ж<Profile> Ꮡp) {
+internal static ж<Profile> Copy⁔(/*this*/ ж<Profile> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     p.preEncode();
@@ -526,19 +519,15 @@ public static ж<Profile> Copy(this ж<Profile> Ꮡp) {
     return pp;
 }
 
-} partial class profile_package {
-
 // Demangler maps symbol names to a human-readable form. This may
 // include C++ demangling and additional simplification. Names that
 // are not demangled may be missing from the resulting map.
 // type Demangler is a methodless func type — rendered inline as its base delegate
 
-} partial class profileᴛProfile {
-
 // Demangle attempts to demangle and optionally simplify any function
 // names referenced in the profile. It works on a best-effort basis:
 // it will silently preserve the original names in case of any errors.
-public static error Demangle(this ref Profile p, Func<slice<@string>, (map<@string, @string>, error)> d) {
+internal static error Demangle⁔(/*this*/ ref Profile p, Func<slice<@string>, (map<@string, @string>, error)> d) {
     // Collect names to demangle.
     slice<@string> names = default;
     foreach (var (_, fn) in range(p.Function)) {
@@ -559,12 +548,12 @@ public static error Demangle(this ref Profile p, Func<slice<@string>, (map<@stri
 }
 
 // Empty reports whether the profile contains no samples.
-public static bool Empty(this ref Profile p) {
+internal static bool Empty⁔(/*this*/ ref Profile p) {
     return len(p.Sample) == 0;
 }
 
 // Scale multiplies all sample values in a profile by a constant.
-public static void Scale(this ref Profile p, float64 ratio) {
+internal static void Scale⁔(/*this*/ ref Profile p, float64 ratio) {
     if (ratio == 1D) {
         return;
     }
@@ -576,7 +565,7 @@ public static void Scale(this ref Profile p, float64 ratio) {
 }
 
 // ScaleN multiplies each sample values in a sample by a different amount.
-public static error ScaleN(this ref Profile p, slice<float64> ratios) {
+internal static error ScaleN⁔(/*this*/ ref Profile p, slice<float64> ratios) {
     if (len(p.SampleType) != len(ratios)) {
         return fmt.Errorf("mismatched scale ratios, got %d, want %d"u8, len(ratios), len(p.SampleType));
     }
@@ -600,4 +589,4 @@ public static error ScaleN(this ref Profile p, slice<float64> ratios) {
     return default;
 }
 
-}
+} // end profile_package
