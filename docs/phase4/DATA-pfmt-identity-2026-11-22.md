@@ -38,3 +38,20 @@ kind is `Pinnable`. So the two numbers agree exactly where `StorageKind` is `Non
 **Falsifiers.** Any `None` row reading false, or any machine-address row reading true. The reference-free field is
 the least certain row: its root holds a string, so its address is taken unpinned. It still answers a machine address,
 never the token.
+
+## 2. The red's score (appended after the run)
+
+**MET, all 13 lines, as predicted.** Converted at `afb01dfb6c`, built Release with 0 warnings and 0 errors, run on
+windows/amd64. Every row whose box answers a machine address reads false; every `None` row reads true; the two
+same-token rows read true.
+
+## 3. The prototype's prediction (committed before the run)
+
+**The change.** reflect's pointer arm answers `ManagedPointerTokens.PointerNumber(p)`, the box's own `uintptr`
+conversion, in place of its order token. The exception is an `Unpinnable` box, which keeps the token. `IGoReflectBox`
+(internal) gains `StorageKind`, which every implementer already declares through `ж<T>`.
+
+**Predicted lines,** with the same program and instrument as section 1, rebuilt over the changed golib and reflect:
+every line reads true, except `reference-free field`, which stays `false false false`. That box is `Unpinnable`, so
+it keeps the token while its `uintptr` is the unpinned address. **Falsifier:** any other line reading false, or that
+row reading true.

@@ -1522,7 +1522,7 @@ internal static uintptr reflectPointerToken(Value v) {
     // what "the same map" means. A slice folds its window offset in, as Go's `&s[0]` does.
     // Anything else (a func delegate) falls back to reference identity.
     uintptr token = cur switch {
-        INilPointer p => ((uintptr)p.PointerOrderToken),
+        INilPointer p => ((uintptr)ManagedPointerTokens.PointerNumber(p)),
         IChannel c => ((uintptr)c.PointerOrderToken),
         IMap => ((uintptr)ManagedPointerTokens.IdentityToken(mapBacking(cur) ?? cur)),
         ISlice => sliceStorageToken(cur),
