@@ -262,5 +262,16 @@ internal static class GeneratorDiagnostics
         category: "go2cs-gen",
         defaultSeverity: DiagnosticSeverity.Warning,
         isEnabledByDefault: true);
+
+    // GO2CS0021, TwinGenerator (M:N, row 7 piece 1: DATA-mn-row7-hosts.md, COORD's ruling (B)): a twin is written into
+    // its host reopened as `partial`, so a member that PARKS in a host that is not partial gets no twin, and every twin
+    // that calls it holds its carrier for the call. The hosts with parkers were made partial; this names any that is not.
+    public static readonly DiagnosticDescriptor ParkingHostNotPartial = new(
+        id: "GO2CS0021",
+        title: "A member that parks sits in a host that is not partial",
+        messageFormat: "'{0}' parks but gets no twin: its host '{1}' is not partial; declare '{1}' partial",
+        category: "go2cs-gen",
+        defaultSeverity: DiagnosticSeverity.Error,
+        isEnabledByDefault: true);
 #pragma warning restore RS2008
 }
