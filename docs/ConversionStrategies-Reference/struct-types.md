@@ -1093,6 +1093,7 @@ not. A field of type `[0]T` is therefore no reason to clone a struct and no memb
 uncomparable, is skipped the same way. A bare `[0]T` value still takes its own `.Clone()` where Go copies it.
 (Guarded by `TestAZeroLengthArrayFieldTakesNoClone` in the converter.)
 
+<a id="a-methodless-named-func-type-renders-as-its-base-delegate"></a>
 ## Every defined func type declares its own delegate
 
 A defined func type, `type F func(string) error`, is a Go type of its own: `%T` prints `main.F`, reflect's
