@@ -51,10 +51,6 @@ func (v *Visitor) importsStaticMembers() bool {
 		return true
 	}
 
-	if v.fileHasMethodHolder {
-		return true
-	}
-
 	imports := v.packageImports.String()
 
 	return strings.HasPrefix(imports, "using static ") || strings.Contains(imports, "\nusing static ")
@@ -174,10 +170,8 @@ func (v *Visitor) visitFile(file *ast.File) {
 	// its nested types occlude — see forcingTargetShadowed. Set before the decl walk below, since
 	// import specs are the first decls of every file and consult it as they are visited.
 	v.emittedClassName = packageClassName
-	v.fileClassName, v.openClassName, v.fileHasMethodHolder = packageClassName, packageClassName, false
+	v.fileClassName, v.openClassName = packageClassName, packageClassName
 	v.astFile, v.fileUsesSelfAlias, v.fileSelfAliasDecided, v.fileSelfAliasIsBlocked = file, false, false, false
-	v.fileDotImportAdapters = nil
-	v.fileSelectorSels = nil
 
 	v.writeOutput(UsingsMarker)
 	v.writeOutputLn("partial class %s {", packageClassName)
@@ -411,10 +405,6 @@ func (v *Visitor) visitFile(file *ast.File) {
 	// to qualify one (selfQualifier).
 	if v.fileUsesSelfAlias {
 		v.packageImports.WriteString(fmt.Sprintf("using %s = %s;%s", getSanitizedImport(importQualifier(packageName)), packageClassName, v.newline))
-	}
-
-	if v.fileHasMethodHolder {
-		v.packageImports.WriteString(fmt.Sprintf("using static %s;%s", packageClassName, v.newline))
 	}
 
 	if v.packageImports.Len() > 0 {

@@ -10,6 +10,11 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+using format = go.@internal.trace.traceviewer.format_package;
+using http = go.net.http_package;
+using template = go.html.template_package;
+using time = go.time_package;
+using trace = go.@internal.trace_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -70,14 +75,21 @@ using static go.@internal.trace.traceviewer_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/trace/traceviewer/emitter.go", "emitter.cs", "ACM2soKCgoKUggALBIKCpoKUlKKClKKClIKUgpSmpqaCggAKCoIACSCU9Ka4gpKClJKClJSCgqaClIKUgqbcgoKC7gAFEIK4goKCgpSCgqaCgsqCgu6CgoKUgoKmggAVKIKCxgAAHgATEJSmgoKmgpSCgriokoKCgpSCAAkcopQAJUaCgriCgpSmgqaCpoKmgoKUpoKmgoKUABswgoKUgpSCgpSCAAoWABgqgoKUgpSCABougoKUpoKmgoKUggAIEgAWJoKmgoKmgqaCgoKClIIACximgoKClIIACximiLKClIKmgoKUgoKUggAHEKiSggAGEKaCqqIADgaClIKUgqaUgoKClIKClJSmpoLuAAgSgtwABxSiqJKClIKClIKCgoKCgpQACRCCAF2IAQAZNIKC", "36-40:1;41-65:2;47-50:2.1;51-54:2.2;66-68:3;69-73:4;97-99:1;100-129:2;106-109:2.1;110-113:2.2;121-123:2.3;124-126:2.4;130-132:3;133-206:4", "", "212=Sprintf/1/1/1;230=Sprintf/1/1/1;403=viewerTime/1/2/3,viewerTime/2/2/4;443=viewerTime/1/1/4;454=viewerTime/1/1/4;487=viewerTime/1/1/5;530=viewerTime/1/1/6;539=viewerTime/1/1/6;582=viewerTime/1/1/3;603=viewerTime/1/1/3;639=viewerTime/1/1/3")]
-[assembly: GoPositionMap("internal/trace/traceviewer/histogram.go", "histogram.cs", "ABgutpKCgpSCgpSCgpSClKiSqLKCppSCgoK4goKUgpSmgpSCqIKC")]
-[assembly: GoPositionMap("internal/trace/traceviewer/http.go", "http.cs", "ABIegpKCggAtVgDLAYoDgoKUAA4WggAIBoKCgoKUggCIAY4Cgg==", "16-21:1;279-286:1")]
-[assembly: GoPositionMap("internal/trace/traceviewer/mmu.go", "mmu.cs", "ADJWgsqSpIKkgpS4AAsQgoKClAASIqKCgoKClJSSgoKUgqbokoKCgqaCgoKCyoKCgpSmlIKCgpSCpoKmgoKCgoKCgpSClLiCgoIA0AGQA7KCgoKmgoKCgpSWkoKmgoKCAAwShJKigqY=", "49-59:1;101-109:1")]
+[assembly: GoPositionMap("internal/trace/traceviewer/emitter.go", "emitter.cs", "ACI2soKCgoKUggALBIKCpoKUlKKClKKClIKUgpSmpqaCggAKCoIACSCU9Ka4gpKClJKClJSCgqaClIKUgqbcgoKC7gAFEIK4goKCgpSCgqaCgsqCgu6CgoKUgoKmggATKIKCpgAAHgATEJSmgoKmgpSCgriokoKCgpSCAAkcopQAI0aCgriCgpSmgqaCpoKmgoKUpoKmgoKUABcwgoKUgpSCgpSCAAoWABQqgoKUgpSCABYugoKUpoKmgoKUggAIEgASJoKmgoKmgqaCgoKClIIACximgoKClIIACximiLKClIKmgoKUgoKUggAHEKiSggAGEKaCqqIADgaClIKUgqaUgoKClIKClJSmpoLuAAgSgtwABxSiqJKClIKClIKCgoKCgpQABxCCAF2IAQAZNIKC", "36-40:1;41-65:2;47-50:2.1;51-54:2.2;66-68:3;69-73:4;97-99:1;100-129:2;106-109:2.1;110-113:2.2;121-123:2.3;124-126:2.4;130-132:3;133-206:4", "", "211=Sprintf/1/1/1;229=Sprintf/1/1/1;396=viewerTime/1/2/3,viewerTime/2/2/4;432=viewerTime/1/1/4;443=viewerTime/1/1/4;472=viewerTime/1/1/5;511=viewerTime/1/1/6;520=viewerTime/1/1/6;559=viewerTime/1/1/3;580=viewerTime/1/1/3;616=viewerTime/1/1/3")]
+[assembly: GoPositionMap("internal/trace/traceviewer/histogram.go", "histogram.cs", "ABculpKCgpSCgpSCgpSClKiSqLKCppSCgoK4goKUgpSmgpSCqIKC")]
+[assembly: GoPositionMap("internal/trace/traceviewer/http.go", "http.cs", "ABEegpKCggAtVgDJAYoDgoKUAAoWguaCgoKClIIAiAGOAoI=", "16-21:1;279-286:1")]
+[assembly: GoPositionMap("internal/trace/traceviewer/mmu.go", "mmu.cs", "ADFWgsqSpIKkgpS4AAsQgoKClAAQIqKCgoKClJSSgoKUgqaokoKCgqaCgoKCyoKCgpSmlIKCgpSCpoKmgoKCgoKCgpSClLiCgoIAzAGQA7KCgoKmgoKCgpSWkoKmgoKCAAgShJKigqY=", "49-59:1;101-109:1")]
 [assembly: GoPositionMap("internal/trace/traceviewer/pprof.go", "pprof.cs", "ADQykqKClJKCgpSCgoKUgoKUpoKCgpSSgpSCgpSCgIKCpICCgqSCgpSCgoKUgoKiAAkSggAHEIKCgoKCgoKCgtyClAAJFIKUlMoACAaCgoKUgoKU", "26-81:1;30-34:1.1;52-55:1.2", "", "", "", "85:25,86:17")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.trace;
+
+using static go.@internal.trace.traceviewer_package;
+using format = go.@internal.trace.traceviewer.format_package;
+using http = go.net.http_package;
+using template = go.html.template_package;
+using time = go.time_package;
+using trace = go.@internal.trace_package;
 
 [GoPackage("traceviewer")]
 public static partial class traceviewer_package
@@ -157,3 +169,60 @@ public static partial class traceviewer_package
 [GoMethodHost(typeof(traceviewer_package.countingWriter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class traceviewerᴛcountingWriter;
 [GoMethodHost(typeof(traceviewer_package.mmu)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class traceviewerᴛmmu;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class traceviewerᴛEmitter {
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Gomaxprocs(this ref Emitter e, uint64 v) => traceviewer_package.Gomaxprocs⁔(ref e, v);
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Resource(this ref Emitter e, uint64 id, @string name) => traceviewer_package.Resource⁔(ref e, id, name);
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SetResourceType(this ref Emitter e, @string name) => traceviewer_package.SetResourceType⁔(ref e, name);
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SetResourceFilter(this ref Emitter e, Func<uint64, bool> filter) => traceviewer_package.SetResourceFilter⁔(ref e, filter);
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Task(this ref Emitter e, uint64 id, @string name, nint sortIndex) => traceviewer_package.Task⁔(ref e, id, name, sortIndex);
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Slice(this ref Emitter e, SliceEvent s) => traceviewer_package.Slice⁔(ref e, s);
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void TaskSlice(this ref Emitter e, SliceEvent s) => traceviewer_package.TaskSlice⁔(ref e, s);
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Δslice(this ref Emitter e, SliceEvent s, uint64 sectionID, @string cname) => traceviewer_package.Δslice⁔(ref e, s, sectionID, cname);
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void AsyncSlice(this ref Emitter e, AsyncSliceEvent s) => traceviewer_package.AsyncSlice⁔(ref e, s);
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Instant(this ref Emitter e, InstantEvent i) => traceviewer_package.Instant⁔(ref e, i);
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Arrow(this ref Emitter e, ArrowEvent a) => traceviewer_package.Arrow⁔(ref e, a);
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void TaskArrow(this ref Emitter e, ArrowEvent a) => traceviewer_package.TaskArrow⁔(ref e, a);
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void arrow(this ref Emitter e, ArrowEvent a, uint64 sectionID) => traceviewer_package.arrow⁔(ref e, a, sectionID);
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Event(this ref Emitter e, ж<format.Event> Ꮡev) => traceviewer_package.Event⁔(ref e, Ꮡev);
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void HeapAlloc(this ref Emitter e, time.Duration ts, uint64 v) => traceviewer_package.HeapAlloc⁔(ref e, ts, v);
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Focus(this ref Emitter e, uint64 id) => traceviewer_package.Focus⁔(ref e, id);
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void GoroutineTransition(this ref Emitter e, time.Duration ts, GState from, GState to) => traceviewer_package.GoroutineTransition⁔(ref e, ts, from, to);
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void IncThreadStateCount(this ref Emitter e, time.Duration ts, ThreadState state, int64 delta) => traceviewer_package.IncThreadStateCount⁔(ref e, ts, state, delta);
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void HeapGoal(this ref Emitter e, time.Duration ts, uint64 v) => traceviewer_package.HeapGoal⁔(ref e, ts, v);
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void emitHeapCounters(this ref Emitter e, time.Duration ts) => traceviewer_package.emitHeapCounters⁔(ref e, ts);
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Err(this ref Emitter e) => traceviewer_package.Err⁔(ref e);
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool tsWithinRange(this ref Emitter e, time.Duration ts) => traceviewer_package.tsWithinRange⁔(ref e, ts);
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void OptionalEvent(this ref Emitter e, ж<format.Event> Ꮡev) => traceviewer_package.OptionalEvent⁔(ref e, Ꮡev);
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Flush(this ref Emitter e) => traceviewer_package.Flush⁔(ref e);
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void threadMeta(this ref Emitter e, uint64 sectionID, uint64 tid, @string name, nint priority) => traceviewer_package.threadMeta⁔(ref e, sectionID, tid, name, priority);
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void processMeta(this ref Emitter e, uint64 sectionID, @string name, nint priority) => traceviewer_package.processMeta⁔(ref e, sectionID, name, priority);
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Stack(this ref Emitter e, slice<trace.StackFrame> stk) => traceviewer_package.Stack⁔(ref e, stk);
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint buildBranch(this ref Emitter e, frameNode parent, slice<trace.StackFrame> stk) => traceviewer_package.buildBranch⁔(ref e, parent, stk);
+}
+partial class traceviewerᴛRange {
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string URL(this Range r, ViewType viewType) => traceviewer_package.URL⁔(r, viewType);
+}
+partial class traceviewerᴛTimeHistogram {
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Add(this ref TimeHistogram h, time.Duration d) => traceviewer_package.Add⁔(ref h, d);
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static time.Duration BucketMin(this ref TimeHistogram h, nint bucket) => traceviewer_package.BucketMin⁔(ref h, bucket);
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static template.HTML ToHTML(this ж<TimeHistogram> Ꮡh, Func<time.Duration, time.Duration, @string> urlmaker) => traceviewer_package.ToHTML⁔(Ꮡh, urlmaker);
+}
+partial class traceviewerᴛView {
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string URL(this View v, nint rangeIdx) => traceviewer_package.URL⁔(v, rangeIdx);
+}
+partial class traceviewerᴛcountingWriter {
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) Write(this ref countingWriter cw, slice<byte> data) => traceviewer_package.Write⁔(ref cw, data);
+}
+partial class traceviewerᴛmmu {
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<slice<trace.MutatorUtil>>, ж<trace.MMUCurve>, error) get(this ж<mmu> Ꮡm, trace.UtilFlags flags) => traceviewer_package.get⁔(Ꮡm, flags);
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void HandlePlot(this ж<mmu> Ꮡm, http.ResponseWriter w, ж<http.Request> Ꮡr) => traceviewer_package.HandlePlot⁔(Ꮡm, w, Ꮡr);
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void HandleDetails(this ж<mmu> Ꮡm, http.ResponseWriter w, ж<http.Request> Ꮡr) => traceviewer_package.HandleDetails⁔(Ꮡm, w, Ꮡr);
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static linkedUtilWindow newLinkedUtilWindow(this ref mmu m, trace.UtilWindow ui, time.Duration window) => traceviewer_package.newLinkedUtilWindow⁔(ref m, ui, window);
+}
+// </MethodForwarders>

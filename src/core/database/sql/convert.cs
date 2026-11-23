@@ -16,7 +16,6 @@ using utf8 = go.unicode.utf8_package;
 /* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
 using go.database.sql;
 using go.unicode;
-using static sql_package;
 
 partial class sql_package {
 
@@ -48,9 +47,7 @@ partial struct ccChecker {
     internal nint want;
 }
 
-} partial class sqlᴛccChecker {
-
-internal static error CheckNamedValue(this ccChecker c, ж<driver.NamedValue> Ꮡnv) {
+internal static error CheckNamedValue⁔(/*this*/ ccChecker c, ж<driver.NamedValue> Ꮡnv) {
     ref var nv = ref Ꮡnv.DerefOrNull();
 
     if (c.cci == nil) {
@@ -96,8 +93,6 @@ internal static error CheckNamedValue(this ccChecker c, ж<driver.NamedValue> �
     }
     return default;
 }
-
-} partial class sql_package {
 
 // defaultCheckNamedValue wraps the default ColumnConverter to have the same
 // function signature as the CheckNamedValue in the driver.NamedValueChecker

@@ -2,8 +2,6 @@ global using Alias = go.SameNameImportAlias.b.foo_package.Other;
 
 namespace go.SameNameImportAlias.b;
 
-using static foo_package;
-
 partial class foo_package {
 
 partial struct Other {
@@ -15,8 +13,6 @@ partial struct Kind /*@string*/;
 partial struct S {
 }
 
-} partial class fooᴛS {
+internal static Kind Kind⁔(/*this*/ S _) { return (@string)"b"; }
 
-public static Kind Kind(this S _) { return (@string)"b"; }
-
-}
+} // end foo_package

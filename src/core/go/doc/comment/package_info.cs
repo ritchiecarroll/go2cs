@@ -10,10 +10,15 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+using bytes = go.bytes_package;
+using strings = go.strings_package;
 // </ImportedTypeAliases>
 
 using go;
 using static go.go.doc.comment_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -80,15 +85,19 @@ using static go.go.doc.comment_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("go/doc/comment/html.go", "html.cs", "ABUqwoKCgpQADAiypLaClIK2goKCgoKClIKCgoK2goK2goKUgoKCgoKCgoKCgpSUgoKClJSC7KKCgoKClJQACAiygpS0goK0goKCgrSCgoKClIKCAA4S0oKClIKCtIKCtIKCtIKCtIKCtg==")]
-[assembly: GoPositionMap("go/doc/comment/markdown.go", "markdown.cs", "ABYs0sqCgoKUlAAICMKktoK2goKCgoKUtoKCgoKCgpTIgoKClIKCgpSUgoKClILuwoKCgoKUprSCgpSUgoK2rNKClLSCgrSCgoKCtIKClIKCgoKCggAGEtKCgu6CgoIACRCCgoK2", "", "", "29=headingLevel/1/1/2,Repeat/1/1/2")]
-[assembly: GoPositionMap("go/doc/comment/parse.go", "parse.cs", "ACpSAB46AAES8gACEuKClILKpgAWKAANFAAOFgAICgAMEgAVJgA8jAEACwKCgpSUlIKmxoKCAAIWAAgCgpTKwoLugqqigoKUtLS0tLSkgpS4gpS0goKC7AAWLqIACBKUgoKClIKUgpSCpoKCgu6CgoKClLiCggAPIIKmgpS4goKUAAoWgtyCgoIACBCCtoKCyoKCgpS4gsa6oq7UgpSClIK4goKCuIKigoKUlIKUgpSokqiSgoKUqJKCgpSqooKmpoKCuIKCuIK4goKClILKgoKClIK4yJLIks6SqLKCgqrEkoKCgpSUkoKCpoKEAAQQ0oKUgoKmgoKCgu7KwoKqgoKCpqaipJSCgpSCgoKClJSCzvKCgriCgoKCgpSClJSmgqassoIABBoADQKCgoKCgriCgoKCgpSUtIKCgoK4goKCgoKmgqSCuIIAAhIACQKCgoKmgoKCpoKigoKUgoKmgqbKzOKCgoKUgpQABBLigoKCgpSSgoKCpoKCgoCS3IKCgqSAgpKCgpSCgpSUgoK2lJSCgpSUgoKCtIKCgrS2ggAEEPiylKS0tLS0lIK4gsqCgpSCgoKClJQACBKCgoKCgpSClJS0tLSClKSC2KyyAAEQlOqqABAYrKoACxDqmgAcMKqSgoKUggACEOSCgoKCgpSUgoKClJTomgAKDKyigpSClIKUgpSClIKCgoKUpqaCgpSCgqbmigAOFA==", "291-291:1;703-710:1;787-792:1;899-902:1;903-909:2", "", "685=TrimSpace/1/1/3;892=parseText/1/1/1")]
-[assembly: GoPositionMap("go/doc/comment/print.go", "print.cs", "ADZ0goKUpqKClKaigpQABCoAEgKCgoKUlJSkpKaClAAIFPaigoKCgpSCgoKClKYAChLCgoKCgpQABxCCgoKCgoKClIKCgoLKyqKClAAICLKktoK2goK2goKCgoKClMiCgoKUgoKUgpSCgoKUgu6ygpS0tIKUgoLGgoLewoKCgoKClA==")]
+[assembly: GoPositionMap("go/doc/comment/html.go", "html.cs", "ABIqwoKCgpQACgiypLaClIK2goKCgoKClIKCgoK2goK2goKUgoKCgoKCgoKCgpSUgoKClJSCzKKCgoKClJTosoKUtIKCtIKCgoK0goKCgpSCggAOEtKCgpSCgrSCgrSCgrSCgrSCgrY=")]
+[assembly: GoPositionMap("go/doc/comment/markdown.go", "markdown.cs", "ABMs0sqCgoKUlOjCpLaCtoKCgoKClLaCgoKCgoKUyIKCgpSCgoKUlIKCgpSC7sKCgoKClKa0goKUlIKCtqzSgpS0goK0goKCgrSCgpSCgoKCgoIABhLSgoLugoKCAAkQgoKCtg==", "", "", "26=headingLevel/1/1/2,Repeat/1/1/2")]
+[assembly: GoPositionMap("go/doc/comment/parse.go", "parse.cs", "ACdSABo6AAES8gACEuKClILKpgASKAAJFAAKFsoACBIAESYAOIwBAAsCgoKUlJSCpqaCggACFgAIAoKUqsKC7oKqooKClLS0tLS0pIKUuIKUtIKCguwAFC6iAAgSlIKCgpSClIKUgqaCgoLugoKCgpS4goIADyCCpoKUuIKClAAKFoLcgoKCAAgQgraCgsqCgoKUuILGuqKu1IKUgpSCuIKCgriCooKClJSClIKUqJKokoKClKiSgoKUqqKCpqaCgriCgriCuIKCgpSCyoKCgpSCuKiSqJKukqiygoKqxJKCgoKUlJKCgqaChAACENKClIKCpoKCgoLuqsKCqoKCgqamoqSUgoKUgoKCgpSUgq7ygoK4goKCgoKUgpSUpoKmrLKCAAIaAA0CgoKCgoK4goKCgoKUlLSCgoKCuIKCgoKCpoKkgriCAAISAAkCgoKCpoKCgqaCooKClIKCpoKmyqzigoKClIKUAAIS4oKCgoKUkoKCgqaCgoKAktyCgoKkgIKSgoKUgoKUlIKCtpSUgoKUlIKCgrSCgoK0toIAAhD4spSktLS0tJSCuILKgoKUgoKCgpSUAAgSgoKCgoKUgpSUtLS0gpSkgtissgABEJTqqgAQGKyqAAsQ6poAHDCqkoKClIIAAhDkgoKCgoKUlIKCgpSU6JoACgysooKUgpSClIKUgpSCgoKClKamgoKUgoKm5ooADhQ=", "291-291:1;703-710:1;787-792:1;899-902:1;903-909:2", "", "640=TrimSpace/1/1/3;837=parseText/1/1/1")]
+[assembly: GoPositionMap("go/doc/comment/print.go", "print.cs", "ADN0goKUpqKClKaigpQAAioAEgKCgoKUlJSkpKaClAAGFPaigoKCgpSCgoKClKYABhLCgoKCgpQABxCCgoKCgoKClIKCgoLKqqKClOiypLaCtoKCtoKCgoKCgpTIgoKClIKClIKUgoKClILusoKUtLSClIKCxoKC3sKCgoKCgpQ=")]
 [assembly: GoPositionMap("go/doc/comment/std.go", "std.cs", "AAkU")]
-[assembly: GoPositionMap("go/doc/comment/text.go", "text.cs", "ABs00tyClIKmgoKCgpSUgoKCgqaCgoKCuMrUgoKClIKUAAgIwqS2graCgraCgoKCgoKUyIKCgoKUgoKClIKUgoKCgoKU7sKCgpSCgpSUgoKClIKClJS+soKUtLS0AA4oAC8+ioKUpKSklMqCgoK4tIKC7oKCgpTcgrSyooKUgpS4goKCgoKCgoKUgpSCuIK4poKClIKCgpSokpSU", "231-231:1;232-244:2;255-272:3;278-278:4;280-289:5;281-284:5.1")]
+[assembly: GoPositionMap("go/doc/comment/text.go", "text.cs", "ABg00tyClIKmgoKCgpSUgoKCgqaCgoKCuKrUgoKClIKU6MKktoK2goK2goKCgoKClMiCgoKClIKCgpSClIKCgoKClO7CgoKUgoKUlIKCgpSCgpSUvrKClLS0tAAMKAAvPoqClKSkpJTKgoKCuLSCgu6CgoKU3IK0sqKClIKUuIKCgoKCgoKClIKUgriCuKaCgpSCgoKUqJKUlA==", "231-231:1;232-244:2;255-272:3;278-278:4;280-289:5;281-284:5.1")]
 // </GoSourcePositionMaps>
 
 namespace go.go.doc;
+
+using static global::go.go.doc.comment_package;
+using bytes = global::go.bytes_package;
+using strings = global::go.strings_package;
 
 [GoPackage("comment")]
 public static partial class comment_package
@@ -150,19 +159,98 @@ public static partial class comment_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(comment_package.Code)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class commentᴛCode;
-[GoMethodHost(typeof(comment_package.DocLink)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class commentᴛDocLink;
-[GoMethodHost(typeof(comment_package.Heading)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class commentᴛHeading;
-[GoMethodHost(typeof(comment_package.Italic)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class commentᴛItalic;
-[GoMethodHost(typeof(comment_package.Link)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class commentᴛLink;
-[GoMethodHost(typeof(comment_package.List)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class commentᴛList;
-[GoMethodHost(typeof(comment_package.Paragraph)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class commentᴛParagraph;
-[GoMethodHost(typeof(comment_package.Parser)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class commentᴛParser;
-[GoMethodHost(typeof(comment_package.Plain)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class commentᴛPlain;
-[GoMethodHost(typeof(comment_package.Printer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class commentᴛPrinter;
-[GoMethodHost(typeof(comment_package.commentPrinter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class commentᴛcommentPrinter;
-[GoMethodHost(typeof(comment_package.htmlPrinter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class commentᴛhtmlPrinter;
-[GoMethodHost(typeof(comment_package.mdPrinter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class commentᴛmdPrinter;
-[GoMethodHost(typeof(comment_package.parseDoc)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class commentᴛparseDoc;
-[GoMethodHost(typeof(comment_package.textPrinter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class commentᴛtextPrinter;
+[GoMethodHost(typeof(comment_package.Code)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class commentᴛCode;
+[GoMethodHost(typeof(comment_package.DocLink)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class commentᴛDocLink;
+[GoMethodHost(typeof(comment_package.Heading)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class commentᴛHeading;
+[GoMethodHost(typeof(comment_package.Italic)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class commentᴛItalic;
+[GoMethodHost(typeof(comment_package.Link)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class commentᴛLink;
+[GoMethodHost(typeof(comment_package.List)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class commentᴛList;
+[GoMethodHost(typeof(comment_package.Paragraph)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class commentᴛParagraph;
+[GoMethodHost(typeof(comment_package.Parser)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class commentᴛParser;
+[GoMethodHost(typeof(comment_package.Plain)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class commentᴛPlain;
+[GoMethodHost(typeof(comment_package.Printer)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class commentᴛPrinter;
+[GoMethodHost(typeof(comment_package.commentPrinter)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class commentᴛcommentPrinter;
+[GoMethodHost(typeof(comment_package.htmlPrinter)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class commentᴛhtmlPrinter;
+[GoMethodHost(typeof(comment_package.mdPrinter)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class commentᴛmdPrinter;
+[GoMethodHost(typeof(comment_package.parseDoc)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class commentᴛparseDoc;
+[GoMethodHost(typeof(comment_package.textPrinter)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class commentᴛtextPrinter;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class commentᴛCode {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void block(this ref Code _) => comment_package.block⁔(ref _);
+}
+partial class commentᴛDocLink {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void text(this ref DocLink _) => comment_package.text⁔(ref _);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string DefaultURL(this ref DocLink l, @string baseURL) => comment_package.DefaultURL⁔(ref l, baseURL);
+}
+partial class commentᴛHeading {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void block(this ref Heading _) => comment_package.block⁔(ref _);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string DefaultID(this ref Heading h) => comment_package.DefaultID⁔(ref h);
+}
+partial class commentᴛItalic {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void text(this Italic _) => comment_package.text⁔(_);
+}
+partial class commentᴛLink {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void text(this ref Link _) => comment_package.text⁔(ref _);
+}
+partial class commentᴛList {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void block(this ref List _) => comment_package.block⁔(ref _);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool BlankBefore(this ref List l) => comment_package.BlankBefore⁔(ref l);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool BlankBetween(this ref List l) => comment_package.BlankBetween⁔(ref l);
+}
+partial class commentᴛParagraph {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void block(this ref Paragraph _) => comment_package.block⁔(ref _);
+}
+partial class commentᴛParser {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Doc> Parse(this ж<Parser> Ꮡp, @string text) => comment_package.Parse⁔(Ꮡp, text);
+}
+partial class commentᴛPlain {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void text(this Plain _) => comment_package.text⁔(_);
+}
+partial class commentᴛPrinter {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> HTML(this ж<Printer> Ꮡp, ж<Doc> Ꮡd) => comment_package.HTML⁔(Ꮡp, Ꮡd);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> Markdown(this ж<Printer> Ꮡp, ж<Doc> Ꮡd) => comment_package.Markdown⁔(Ꮡp, Ꮡd);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint headingLevel(this ref Printer p) => comment_package.headingLevel⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string headingID(this ref Printer p, ж<Heading> Ꮡh) => comment_package.headingID⁔(ref p, Ꮡh);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string docLinkURL(this ref Printer p, ж<DocLink> Ꮡlink) => comment_package.docLinkURL⁔(ref p, Ꮡlink);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> Comment(this ж<Printer> Ꮡp, ж<Doc> Ꮡd) => comment_package.Comment⁔(Ꮡp, Ꮡd);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> Text(this ж<Printer> Ꮡp, ж<Doc> Ꮡd) => comment_package.Text⁔(Ꮡp, Ꮡd);
+}
+partial class commentᴛcommentPrinter {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void block(this ref commentPrinter p, ж<bytes.Buffer> Ꮡout, Block x) => comment_package.block⁔(ref p, Ꮡout, x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void text(this ref commentPrinter p, ж<bytes.Buffer> Ꮡout, @string indent, slice<Text> x) => comment_package.text⁔(ref p, Ꮡout, indent, x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void indent(this ref commentPrinter p, ж<bytes.Buffer> Ꮡout, @string indent, @string s) => comment_package.indent⁔(ref p, Ꮡout, indent, s);
+}
+partial class commentᴛhtmlPrinter {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void block(this ref htmlPrinter p, ж<bytes.Buffer> Ꮡout, Block x) => comment_package.block⁔(ref p, Ꮡout, x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void text(this ref htmlPrinter p, ж<bytes.Buffer> Ꮡout, slice<Text> x) => comment_package.text⁔(ref p, Ꮡout, x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void escape(this ref htmlPrinter p, ж<bytes.Buffer> Ꮡout, @string s) => comment_package.escape⁔(ref p, Ꮡout, s);
+}
+partial class commentᴛmdPrinter {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void block(this ж<mdPrinter> Ꮡp, ж<bytes.Buffer> Ꮡout, Block x) => comment_package.block⁔(Ꮡp, Ꮡout, x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void text(this ж<mdPrinter> Ꮡp, ж<bytes.Buffer> Ꮡout, slice<Text> x) => comment_package.text⁔(Ꮡp, Ꮡout, x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void rawText(this ref mdPrinter p, ж<bytes.Buffer> Ꮡout, slice<Text> x) => comment_package.rawText⁔(ref p, Ꮡout, x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void escape(this ref mdPrinter p, ж<bytes.Buffer> Ꮡout, @string s) => comment_package.escape⁔(ref p, Ꮡout, s);
+}
+partial class commentᴛparseDoc {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (@string importPath, bool ok) lookupPkg(this ref parseDoc d, @string pkg) => comment_package.lookupPkg⁔(ref d, pkg);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static Block oldHeading(this ref parseDoc d, @string line) => comment_package.oldHeading⁔(ref d, line);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static Block heading(this ref parseDoc d, @string line) => comment_package.heading⁔(ref d, line);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<Code> code(this ref parseDoc d, slice<@string> lines) => comment_package.code⁔(ref d, lines);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static Block paragraph(this ref parseDoc d, slice<@string> lines) => comment_package.paragraph⁔(ref d, lines);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<List> list(this ж<parseDoc> Ꮡd, slice<@string> lines, bool forceBlankBefore) => comment_package.list⁔(Ꮡd, lines, forceBlankBefore);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<Text> parseLinkedText(this ж<parseDoc> Ꮡd, @string text) => comment_package.parseLinkedText⁔(Ꮡd, text);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (ж<DocLink> link, bool ok) docLink(this ref parseDoc d, @string text, @string before, @string after) => comment_package.docLink⁔(ref d, text, before, after);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<Text> parseText(this ref parseDoc d, slice<Text> @out, @string s, bool autoLink) => comment_package.parseText⁔(ref d, @out, s, autoLink);
+}
+partial class commentᴛtextPrinter {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void block(this ж<textPrinter> Ꮡp, ж<bytes.Buffer> Ꮡout, Block x) => comment_package.block⁔(Ꮡp, Ꮡout, x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void text(this ж<textPrinter> Ꮡp, ж<bytes.Buffer> Ꮡout, @string indent, slice<Text> x) => comment_package.text⁔(Ꮡp, Ꮡout, indent, x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void oneLongLine(this ref textPrinter p, ж<strings.Builder> Ꮡout, slice<Text> x) => comment_package.oneLongLine⁔(ref p, Ꮡout, x);
+}
+// </MethodForwarders>

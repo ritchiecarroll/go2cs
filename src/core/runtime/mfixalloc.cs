@@ -9,7 +9,6 @@ namespace go;
 using sys = @internal.runtime.sys_package;
 using @unsafe = unsafe_package;
 using @internal.runtime;
-using static runtime_package;
 
 partial class runtime_package {
 
@@ -51,15 +50,13 @@ partial struct mlink {
     internal ж<mlink> next;
 }
 
-} partial class runtimeᴛfixalloc {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string runtimeFixallocSizeTooˢ => ref runtimeFixallocSizeTooˢᵇ;
 private static readonly @string runtimeFixallocSizeTooˢᵇ = "runtime: fixalloc size too large"u8;
 
 // Initialize f to allocate objects of the given size,
 // using the allocator to obtain chunks of memory.
-internal static void init(this ref fixalloc f, uintptr size, Action<@unsafe.Pointer, @unsafe.Pointer> first, @unsafe.Pointer arg, ж<sysMemStat> Ꮡstat) {
+internal static void init⁔(/*this*/ ref fixalloc f, uintptr size, Action<@unsafe.Pointer, @unsafe.Pointer> first, @unsafe.Pointer arg, ж<sysMemStat> Ꮡstat) {
     ref var stat = ref Ꮡstat.DerefOrNull();
 
     if (size > _FixAllocChunk) {
@@ -83,7 +80,7 @@ internal static void init(this ref fixalloc f, uintptr size, Action<@unsafe.Poin
 internal static ref readonly @string runtimeInternalErrorˢ => ref runtimeInternalErrorˢᵇ;
 private static readonly @string runtimeInternalErrorˢᵇ = "runtime: internal error"u8;
 
-internal static @unsafe.Pointer alloc(this ref fixalloc f) {
+internal static @unsafe.Pointer alloc⁔(/*this*/ ref fixalloc f) {
     if (f.size == 0) {
         print((@string)"runtime: use of FixAlloc_Alloc before FixAlloc_Init\n");
         @throw(runtimeInternalErrorˢ);
@@ -113,11 +110,11 @@ internal static @unsafe.Pointer alloc(this ref fixalloc f) {
     return v;
 }
 
-internal static void free(this ref fixalloc f, @unsafe.Pointer p) {
+internal static void free⁔(/*this*/ ref fixalloc f, @unsafe.Pointer p) {
     f.inuse -= f.size;
     var v = @unsafe.Pointer.To<mlink>(p);
     v.next = f.list;
     f.list = v;
 }
 
-}
+} // end runtime_package

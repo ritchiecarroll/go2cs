@@ -5,7 +5,6 @@ namespace go.math;
 
 using math = math_package;
 using sync = sync_package;
-using static big_package;
 
 partial class big_package {
 
@@ -23,8 +22,6 @@ internal static ж<Float> three() {
     return threeOnce.v;
 }
 
-} partial class bigᴛFloat {
-
 // Sqrt sets z to the rounded square root of x, and returns it.
 //
 // If z's precision is 0, it is changed to x's precision before the
@@ -34,7 +31,7 @@ internal static ж<Float> three() {
 //
 // The function panics if z < 0. The value of z is undefined in that
 // case.
-public static ж<Float> Sqrt(this ж<Float> Ꮡz, ж<Float> Ꮡx) {
+internal static ж<Float> Sqrt⁔(/*this*/ ж<Float> Ꮡz, ж<Float> Ꮡx) {
     ref var z = ref Ꮡz.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
 
@@ -98,7 +95,7 @@ public static ж<Float> Sqrt(this ж<Float> Ꮡz, ж<Float> Ꮡx) {
 //	1/t² - x = 0
 //
 // for t (using Newton's method), and then inverting.
-internal static void sqrtInverse(this ж<Float> Ꮡz, ж<Float> x) {
+internal static void sqrtInverse⁔(/*this*/ ж<Float> Ꮡz, ж<Float> x) {
     ref var z = ref Ꮡz.DerefOrNull();
 
     // let
@@ -136,8 +133,6 @@ internal static void sqrtInverse(this ж<Float> Ꮡz, ж<Float> x) {
     // x/√x = √x
     Ꮡz.Mul(x, sqi);
 }
-
-} partial class big_package {
 
 // newFloat returns a new *Float with space for twice the given
 // precision.

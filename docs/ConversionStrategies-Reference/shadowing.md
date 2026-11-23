@@ -324,9 +324,9 @@ output matches Go for every shape and for the rebinding and closure cases.
 
 ## Type-vs-Method Name Collisions
 
-Go keeps types and methods in separate namespaces, so a package may legally declare both a type `foo` and a method `foo` on some receiver. In C# the type is a member of the package class and the method is a member of its receiver type's **method holder**, one static class per receiver type (`mainᴛbuilder` holds the methods of `builder`; see [Functions and Methods](../ConversionStrategies.md#functions-and-methods)). The two never share a class, so neither is renamed. A golib reserved word (`slice`, `array`, `channel`, `map`, …) takes its one reserved spelling, `Δslice`, on the type and on the method alike:
+Go keeps types and methods in separate namespaces, so a package may legally declare both a type `foo` and a method `foo` on some receiver. In C# the type is a member of the package class. A method of a type with a **method holder** (a library type, and a type of `main` with a method named like something the package reads bare) has its body in the package class too, named `foo⁔`, and its Go name belongs to a one-line forwarder in the holder, one static class per receiver type declared in `package_info.cs` (`mainᴛbuilder` holds the forwarders of `builder`; see [Functions and Methods](../ConversionStrategies.md#functions-and-methods)). No Go identifier can spell the body's suffix, and the forwarder never shares a class with the type, so neither is renamed. A golib reserved word (`slice`, `array`, `channel`, `map`, …) takes its one reserved spelling, `Δslice`, on the type and on the method alike:
 
-<!-- source: src/tests/Behavioral/ReservedTypeMethodCollision/main.cs.target:8-10, 14-22 -->
+<!-- source: src/tests/Behavioral/ReservedTypeMethodCollision/main.cs.target:7-9, 13-19 -->
 ```csharp
 partial struct Δslice {
     internal nint lo, hi;
@@ -336,33 +336,30 @@ partial struct builder {
     internal nint @base;
 }
 
-} partial class mainᴛbuilder {
-
-internal static Δslice Δslice(this ref builder b, nint n) {
+internal static Δslice Δslice⁔(/*this*/ ref builder b, nint n) {
     return new Δslice(lo: b.@base, hi: b.@base + n);
 }
 ```
-
-Inside the holder the method `Δslice` stands beside the type `Δslice`. C# reads only types in a type position (the return type, `new Δslice(…)`), so those spellings bind the type with no qualifier. In an expression position the holder's method group binds first, so where the converter must name a package member there it qualifies it, and only inside the holder that declares the method of that name:
-
-- a call of a Go built-in is written `builtin.<name>(…)`;
-- a reference through an import named like the method is written through the import's package class (`math.bits_package.Len64`);
-- a package function or value named like the method is written through the package's own alias (`main.Sort(w)`), or through `<pkg>_package` when a local takes the alias's name;
-- a box accessor names its owner type through the package class (below).
-
-Everywhere else the plain spelling stands. A holder for `words` that declares `cap`, `bits` and `Sort`, and a holder for `gauge` beside it that declares none of them:
-
-<!-- source: src/tests/Behavioral/MethodHolderNames/others.cs.target:14, 20-23, 33 -->
+<!-- source: src/tests/Behavioral/ReservedTypeMethodCollision/package_info.cs:108-110 -->
 ```csharp
-} partial class mainᴛwords {
-…
-internal static nint cap(this words w) { return builtin.cap(w) + 1; }
-internal static nint bits(this words w) { return math.bits_package.Len64(w[0]); }
+partial class mainᴛbuilder {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static Δslice Δslice(this ref builder b, nint n) => main_package.Δslice⁔(ref b, n);
+}
+```
 
-internal static void Sort(this words w) { main.Sort(w); }
+The body `Δslice⁔` stands beside the type `Δslice`, under a different name, so every spelling of `Δslice` in the package class binds the type with no qualifier. Only the forwarder is named `Δslice`, and in its holder C# reads only types in a type position (the return type), so that spelling binds the type too. A body reads every name of its package bare, as Go does: a call of a Go built-in, a reference through an import, a package function or value, and a box accessor's owner type (below) each keep their plain spelling, whatever the type's methods are named. The bodies of `words`'s methods `cap`, `bits` and `Sort`, and a method of `gauge`, which has no holder and stays a plain extension method in the package class:
+
+<!-- source: src/tests/Behavioral/MethodHolderNames/others.cs.target:16-19, 27 -->
+```csharp
+internal static nint cap⁔(/*this*/ words w) { return cap(w) + 1; }
+internal static nint bits⁔(/*this*/ words w) { return bits.Len64(w[0]); }
+
+internal static void Sort⁔(/*this*/ words w) { Sort(w); }
 …
 internal static nint size(this gauge g, words w) { return cap(w) + bits.Len64((uint64)g.n); }
 ```
+<!-- Before the ⁔ form (2026-11-11 to the regen of 2026-11-21) a holder held the method bodies, and in an expression position the holder's method group bound first, so inside the holder that declared a method of the name the converter qualified a package member: a Go built-in as `builtin.<name>(…)`, an import named like the method through the import's package class (`math.bits_package.Len64`), a package function or value through the package's own alias (`main.Sort(w)`) or `<pkg>_package`, and a box accessor's owner type through the package class. MethodHolderNames/others.cs.target read `internal static nint cap(this words w) { return builtin.cap(w) + 1; }` in `} partial class mainᴛwords {` at 14a291591f~1. -->
+
 (Guarded by the `MethodHolderNames` behavioral test, output-compared against `go run`, and by the `GO2CS0013` analyzer, which reports a name in a holder that binds another member than the package's ([Diagnostic Codes](../DiagnosticCodes.md)).)
 
 The package-level rename that remains (`nameCollisions`) covers a type named as the emitter spells one of its own (`any`, `rune`, `nint`, `nuint`) and a type named after a C# 15 reserved type-position keyword (`closed`, `union`), with every package-level declaration that shares such a name. The rules below that speak of a "colliding" or "collision-renamed" name are about those renames.
@@ -370,16 +367,14 @@ The package-level rename that remains (`nameCollisions`) covers a type named as 
 
 A **struct field** named like a renamed package-level identifier is *not* renamed: a field is struct-scoped (a field `any` does not collide with a package type `any` in C#), so the field declaration keeps its core-sanitized name (`trace`). The box-field accessor static the `TypeGenerator` emits for it is therefore `g.Ꮡtrace` (the `Ꮡ`-prefixed declared member name). The converter's `&g.field` address form (`Ꮡg.of(g.Ꮡtrace)`) must use that **declared** field name — it derives the accessor member from `getCoreSanitizedIdentifier` plus the type-colliding rename, *not* from the general identifier path that applies the package-level collision `Δ`-rename. Using the latter would emit `g.ᏑΔtrace`, which has no matching generated static (CS0117). Reserved-word fields keep their `Δ` (the field really is declared `Δarray` for a field named `array`), so the accessor is `Ꮡ`+the declared name in every case. (Guarded by the `CollisionFieldBoxAccessor` behavioral test. Its field `mark` shared its name with a renamed type until 2026-11-11, when the type-vs-method rename ended; the test now pins the plain `mark` accessor beside a type `mark` and a method `mark`. Runtime's `g`/`m`/`p` fields `trace`/`stack`/`p` had the shape for the same reason.) The generated accessor's **accessibility** matches the *field's* (its exportedness), not the field type's name — an exported field `Fun [1]uintptr` (C# `array<nuint> Fun`) yields a **public** `ᏑFun`, so another package's `other.of(ITab.ᏑFun)` can reach it; deriving the scope from the type's simple name (`array` → lowercase → `internal`) would make the cross-package accessor unreachable (CS0117 in runtime's `iface.go` walking `abi.ITab.Fun`).
 
-One case *does* rename the field: when its name equals its **enclosing type's** name. C# forbids a member that shares its type's name (CS0542), so the field takes one `Δ`. internal/trace's `type Label struct{ Label string }` sits alongside `func (e Event) Label() Label`; the method stands in `Event`'s holder, the type keeps its name `Label`, and the field becomes `ΔLabel`. When the enclosing type is itself `Δ`-renamed (a remaining package-level rename, `type union struct{ union int }`, or the keyword family, whose type is `Δ`-renamed too), a single `Δ` would make the field *equal* to the type, so `typeCollidingFieldName` **doubles** the marker (`ΔΔunion`). Deterministic from the name, so the field declaration, the keyed composite-literal key, and every access site all agree:
+One case *does* rename the field: when its name equals its **enclosing type's** name. C# forbids a member that shares its type's name (CS0542), so the field takes one `Δ`. internal/trace's `type Label struct{ Label string }` sits alongside `func (e Event) Label() Label`; the method's body is `Label⁔` and its forwarder stands in `Event`'s holder, the type keeps its name `Label`, and the field becomes `ΔLabel`. When the enclosing type is itself `Δ`-renamed (a remaining package-level rename, `type union struct{ union int }`, or the keyword family, whose type is `Δ`-renamed too), a single `Δ` would make the field *equal* to the type, so `typeCollidingFieldName` **doubles** the marker (`ΔΔunion`). Deterministic from the name, so the field declaration, the keyed composite-literal key, and every access site all agree:
 
 Go's `type Label struct{ Label string }` keeps its field under one marker, which the composite
 literal's key and each access then use:
 
-<!-- source: src/tests/Behavioral/FieldNameTypeMethodCollision/FieldNameTypeMethodCollision.cs.target:13, 15-16, 21-22, 24, 27 -->
+<!-- source: src/tests/Behavioral/FieldNameTypeMethodCollision/FieldNameTypeMethodCollision.cs.target:12-13, 16-17, 19, 22 -->
 ```csharp
-} partial class mainᴛevent {
-…
-internal static Label Label(this @event e) {
+internal static Label Label⁔(/*this*/ @event e) {
     return new Label(ΔLabel: e.label, Resource: e.kind);
 …
 partial struct Label {
@@ -401,18 +396,21 @@ The *type* half of the same accessor (`receiver.of(Type.Ꮡfield)`) needs care t
 
 The same collision fires when the receiver is that variable's **lambda capture**. Inside a closure the captured variable renames to its capture copy (`mʗ1`), so the receiver-equality check alone misses it — but the *enclosing* local `m` is still visible to the C# lambda, so the accessor's bare owning-type reference binds to it all the same: runtime `rwmutex.lockSlow`'s `systemstack(func() { …; notesleep(&m.park) })` would emit `mʗ1.of(m.Ꮡpark)` → CS1061. `boxAccessorType` therefore also qualifies when the receiver is the type name plus the capture marker (`typeName + ʗ…`), yielding `mʗ1.of(runtime_package.m.Ꮡpark)`. (Guarded by a further extension to `CollisionFieldBoxAccessor` — `capturedLocalNamedAfterType`, a type-named local field-addressed inside a capturing closure, write-through verified vs Go.)
 
-The type half also matters **inside a method holder**. When the holder declares a method named like the accessor's owning type — `type Tag` beside `func (c *Chest) Tag() Tag` — the accessor names the type in expression position, where the holder's `Tag` method group binds first (CS0119). `boxAccessorType` qualifies the owner type with its package class there (`holderDeclaresTypeName`); a type position reads only types, so every other spelling of `Tag` in the holder stays bare:
+A **method named like the accessor's owning type** needs no qualifier. With `type Tag` beside `func (c *Chest) Tag() Tag`, the method's body is `Tag⁔`, so in the package class `Tag` names only the type. The accessor in a body of `Chest`'s methods names the type bare in expression position, as every other spelling of `Tag` there does:
 
-<!-- source: src/tests/Behavioral/MethodHolderNames/forms.cs.target:23, 32-33, 44 -->
+<!-- source: src/tests/Behavioral/MethodHolderNames/forms.cs.target:22, 26, 29-30, 41 -->
 ```csharp
-} partial class mainᴛChest {
+internal static Tag Tag⁔(/*this*/ ref Chest c) { return c.tag; }
+…
+internal static @string Forms⁔(/*this*/ ж<Chest> Ꮡc, any v) {
 …
     var lit = new Tag(id: 1, Value: 2);
     var ptr = Ꮡ(new Tag(id: 3));
 …
-    var valueAddr = ptr.of(main_package.Tag.ᏑValue);
+    var valueAddr = ptr.of(Tag.ᏑValue);
 ```
 (Guarded by the `MethodHolderNames` behavioral test, whose `Chest.Forms` writes `Tag` in each position Go allows.)
+<!-- Before the ⁔ form (2026-11-11 to the regen of 2026-11-21) the bodies stood in the holder, where the holder's `Tag` method group bound first in expression position (CS0119), so boxAccessorType qualified the owner type with its package class there (holderDeclaresTypeName): forms.cs.target read `var valueAddr = ptr.of(main_package.Tag.ᏑValue);` at 14a291591f~1. -->
 <!-- Until 2026-11-11 the type itself was renamed (`type funcInfo` versus `func (f *Func) funcInfo()`, declared `ΔfuncInfo`), and boxAccessorType applied the Δ-rename to a bare same-package collision name before its receiver-shadow check, emitting `Ꮡ(f).of(ΔfuncInfo.Ꮡnfuncdata)`; a bare `funcInfo.Ꮡnfuncdata` bound the package's static `funcInfo` method group (CS0119). Guarded then by an extension to CollisionFieldBoxAccessor (a global whose type is the collision type); runtime hit it in symtab's pcdatastart/funcdata. Read at master 4efe149858. -->
 
 A **collision-renamed owning type is qualified unconditionally**, not just when it equals the `.of()` receiver — because a Go local named after its type is renamed to the *same* `Δ`-name, so such a local **anywhere in the function** shadows a bare `Δp.Ꮡfield` (C# locals are function-scoped). Runtime's malloc `persistentalloc1` does `persistent = &mp.p.ptr().palloc` and then declares a local `p` further down (renamed `Δp`); a bare accessor `(~mp).p.ptr().of(Δp.Ꮡpalloc)` would bind its `Δp` to that later local — CS0841 (use-before-declaration), and CS1061 regardless (the local's type has no `Ꮡpalloc`). The receiver (`(~mp).p.ptr()`) is not the colliding local, so the receiver-name check cannot catch it, and `boxAccessorType` qualifies whenever the type name is `Δ`-prefixed (a type is never shadow-renamed — types are package-level — so a `Δ`-prefixed accessor type is always a collision rename), emitting `(~mp).p.ptr().of(runtime_package.Δp.Ꮡpalloc)`. Qualifying is value-identical to the bare form when nothing shadows, so it is safe to apply to every collision-type accessor. (Guarded by a further extension to `CollisionFieldBoxAccessor` — `localShadowsCollisionType`, a local named after the collision type declared after the accessor; runtime's malloc and mheap (`Δp.Ꮡgcw`) had the shape.) Since 2026-11-11 the type-vs-method rename is gone, so runtime's `p` keeps its name and those sites are qualified by the general rule below, a variable of the type's name declared in the function (`p.of(runtime_package.p.Ꮡgcw)` in `mgc.cs`); `localShadowsCollisionType` no longer emits an accessor, and the Δ-prefix arm is reached only by the remaining renames.
@@ -447,18 +445,18 @@ import path has a slash, take the holders `iteratorsᴛIterator` and `iterators�
 its open generic type (`[GoMethodHost(typeof(iterators_package.Iterator<>))]`,
 `typeof(iterators_package.Window<,>)`):
 
-<!-- source: src/tests/Behavioral/GenericHolderForeignConstraint/iterators/iterators.cs:16-19, 56-59 -->
+<!-- source: src/tests/Behavioral/GenericHolderForeignConstraint/iterators/package_info.cs:93-94, 102-103, 107-108 -->
 ```csharp
-} partial class iteratorsᴛIterator {
-
-public static void SetText<T>(this ref Iterator<T> it, T data)
-    where T : /* text.Text */ IByteSeq<T, byte>, new()
+[GoMethodHost(typeof(iterators_package.Iterator<>)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class iteratorsᴛIterator;
+[GoMethodHost(typeof(iterators_package.Window<,>)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class iteratorsᴛWindow;
 …
-} partial class iteratorsᴛWindow {
-
-public static nint Len<K, T>(this Window<K, T> w)
-    where T : /* text.Text */ IByteSeq<T, byte>, new()
+partial class iteratorsᴛIterator {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void SetText<T>(this ref Iterator<T> it, T data) where T : /* text.Text */ IByteSeq<T, byte>, new() => iterators_package.SetText⁔<T>(ref it, data);
+…
+partial class iteratorsᴛWindow {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Len<K, T>(this Window<K, T> w) where T : /* text.Text */ IByteSeq<T, byte>, new() => iterators_package.Len⁔<K, T>(w);
 ```
+The methods' bodies, `SetText⁔<T>` and `Len⁔<K, T>`, stand in `iterators_package` beside their types.
 Package `main` writes a holder only when a method name clashes (see
 [Functions and Methods](../ConversionStrategies.md#functions-and-methods)); otherwise its generic types' methods
 stay in `main_package` and no holder is named at all.
@@ -473,6 +471,73 @@ output-compared against `go run`, and by the converter test `TestGenericHolderIs
      of gojq's cli through go-runewidth, by the 1.26.11.1 nugetgo dry run (P2, COORD 100212Z). The same-package
      instantiated-generic arm of getAliasQualifiedTypeName already spelled the name getSanitizedIdentifier(name);
      src/go2cs/methodHolder.go holderTypeName now takes that spelling for every generic type. -->
+
+### `package_info.cs` names its System attributes through usings, unless the package declares one of their names
+
+A method holder's declaration carries `EditorBrowsable(EditorBrowsableState.Never)`, and each forwarder in the
+`<MethodForwarders>` section carries `MethodImpl(MethodImplOptions.AggressiveInlining)`, `StackTraceHidden` and
+`DebuggerStepThrough`. `package_info.cs` spells them short and reads them through `using` directives it adds to its
+own compilation-unit directives, after `using go;` and `using static <ns>.<pkg>_package;`: `using System.ComponentModel;`
+when the file declares a holder, `using System.Diagnostics;` and `using System.Runtime.CompilerServices;` when it
+writes a forwarder.
+
+<!-- illustration: the short spelling of a package with no clashing name; no committed package_info.cs carries it until the corpus is regenerated -->
+```csharp
+using go;
+using static go.example.com.app_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+…
+[GoMethodHost(typeof(app_package.Box)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class appᴛBox;
+…
+partial class appᴛBox {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Get(this Box b) => app_package.Get⁔(b);
+}
+```
+
+A forwarder repeats its body's spelling (`this Box b`), which in the package class finds the package's nested type
+first. At the compilation unit's level of `package_info.cs` the project's `using System;` would make a package's
+`Buffer` or `Type` ambiguous with System's (CS0104), so the file repeats its `using static <pkg>_package;` right after
+its namespace declaration, as each converted file declares it, where a declaration's own usings are searched before
+the enclosing levels'; the aliases the forwarders name follow it (a variadic parameter's `ꓸꓸꓸT`). The interface
+records above the namespace declaration still read the package's types through the compilation unit's
+`using static`: `[assembly: GoImplement<StackTrace, …>]`. `using static <pkg>_package;` and a namespace `using` are searched at
+the same stage, so a package-scope type named like a type of one of those three namespaces would be ambiguous there,
+and a type named like an attribute's short name counts too, since `[MethodImpl]` looks up `MethodImpl` as well as
+`MethodImplAttribute`. A package that declares such a type keeps
+the `global::` spelling for the whole file and adds none of the usings, and the converter names the clashing names on
+stderr. The two enums the attribute arguments read count even when the package declares them as something other than
+a type, and so does a method of either name, because its forwarder is a member of the holder whose attributes read
+the enum. The names are those of .NET 10's reference assemblies (`src/go2cs/glyphSystemNames.go`, each attribute
+under both of its names); an external test package's file also counts the names of the package it tests, whose
+class it reads through `using static` as well. A merging write (`-tests`) respells every holder and forwarder line in
+whichever direction the decision takes, so a file is never left with both spellings.
+
+<!-- source: src/tests/Behavioral/PackageInfoUsingsClash/clashlib/package_info.cs:94-97 -->
+```csharp
+// <MethodHolders>
+[GoMethodHost(typeof(clashlib_package.MethodImpl)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class clashlibᴛMethodImpl;
+[GoMethodHost(typeof(clashlib_package.StackTrace)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class clashlibᴛStackTrace;
+// </MethodHolders>
+```
+
+<!-- source: src/tests/Behavioral/PackageInfoUsingsClash/clashlib/package_info.cs:103-107 -->
+```csharp
+// <MethodForwarders>
+partial class clashlibᴛMethodImpl {
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Get(this MethodImpl m) => clashlib_package.Get⁔(m);
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Bump(this ref MethodImpl m, nint by) => clashlib_package.Bump⁔(ref m, by);
+}
+```
+
+The library above declares `MethodImpl` and `StackTrace`, so its file keeps `global::`; a package with no such name
+takes the usings. (Guarded by the `PackageInfoUsingsClash` behavioral test, whose `clashlib` sub-package declares
+both types with value and pointer methods, converts `StackTrace` to `fmt.Stringer` (an interface record naming it
+bare), and is called from `main`, output-compared against `go run`, and by the
+converter tests `TestAPackageDeclaringASystemTypeNameKeepsTheGlobalSpelling`,
+`TestSystemUsingClashesCountTheAttributeArgumentsEnumsAsAnyMember` and
+`TestMergingWriteRespellsSystemAttributesInBothDirections`.)
 
 ### A nested closure must not clobber the enclosing closure's capture state
 The per-lambda conversion state — `conversionInLambda` (are we inside a closure body?) plus the capture-name maps (`currentLambdaVars`/`currentLambdaVarObjs`) — is what makes closure-body emission rewrite captured references to their box/copy forms: a captured local `s` reads as `sʗ1`, and the current method's **direct-ж receiver** (`func (s *Stmt) …` emitted `this ж<Stmt> Ꮡs`, whose body alias `ref var s = ref Ꮡs.DerefOrNull()` is a `ref`-local that **cannot** be captured by a C# closure) reads through its box as `Ꮡs.Value`. `enterLambdaConversion`/`exitLambdaConversion` are a **LIFO save/restore stack** (`conversionStack`): entering pushes the current state and installs fresh state; exiting **restores the enclosing closure's** state rather than resetting it. Reset on exit, a closure containing an **inner** closure would lose its state the moment the inner one finished, and every reference in the *outer* body **after** it would fall back to the bare, un-rewritten name: `database/sql (*Stmt).QueryContext`'s `s.db.retry(func(){ …; rows.releaseConn = func(err){…}; if s.cg != nil { … } })`, where `s.cg` sits after the inner `releaseConn` closure, would emit `s.cg` (CS8175, "cannot use ref local `s` inside an anonymous method/lambda"), and a captured local would silently split between its bare form and its `ʗ1` copy. A closure at top level restores to `false`/empty, so the stack matters only where a closure body continues after a nested closure — there the receiver box-read (`Ꮡs.Value.cg`, `Ꮡs.Value.cg.txCtx()`) and the captured-local copy name apply consistently across the whole body. (Guarded by the `NestedLambdaReceiverField` behavioral test — a direct-ж receiver method whose closure holds a nested closure followed by a non-call receiver field read, a field-method call, and another field read, all verified to render `Ꮡs.Value.<field>` and output-compared vs Go; `DeferValueFieldPtrReceiver`'s defer-then-body sequence exercises the same restore.)
@@ -527,25 +592,29 @@ Production conversions have no `_test.go` files in their universe, so none of th
 ## A production free function and a same-named method keep their names
 
 A package that declares `func (t *Type) IsTupleType() bool` and `func IsTupleType(t *Type) bool`.
-Both emit as `IsTupleType(ж<Type>)`, because a method's receiver is the extension method's leading `this`
-parameter, which does not count in C# signature identity. The method stands in `Type`'s holder and the
-function in the package class, so the two never meet in one class and both keep the Go name:
+The method's Go-named forwarder and the function both have the signature `IsTupleType(ж<Type>)`, because a
+method's receiver is the extension method's leading `this` parameter, which does not count in C# signature
+identity. The method's body is `IsTupleType⁔`, beside the function in
+the package class, and its Go-named forwarder stands in `Type`'s holder in `package_info.cs`. The body's
+suffix keeps it apart from the function, and the forwarder never meets the function in one class, so both
+keep the Go name:
 
-<!-- source: src/tests/Behavioral/FuncMethodSameNameCollision/shapes/shapes.cs:13-19 -->
+<!-- source: src/tests/Behavioral/FuncMethodSameNameCollision/shapes/shapes.cs:11-13 -->
 ```csharp
-} partial class shapesᴛType {
-
-public static bool IsTupleType(this ж<Type> Ꮡt) { return isTupleType(ref (Ꮡt).DerefOrNull()); }
-
-} partial class shapes_package {
+internal static bool IsTupleType⁔(/*this*/ ж<Type> Ꮡt) { return isTupleType(ref (Ꮡt).DerefOrNull()); }
 
 public static bool IsTupleType(ж<Type> t) { return isTupleType(ref (t).DerefOrNull()); }
+```
+<!-- source: src/tests/Behavioral/FuncMethodSameNameCollision/shapes/package_info.cs:100-101 -->
+```csharp
+partial class shapesᴛType {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool IsTupleType(this ж<Type> Ꮡt) => shapes_package.IsTupleType⁔(Ꮡt);
 ```
 
 A package that calls either reaches it the way Go does: a method call binds the extension, and a qualified
 call or a function value names the package class's function:
 
-<!-- source: src/tests/Behavioral/FuncMethodSameNameCollision/main.cs.target:34, 38 -->
+<!-- source: src/tests/Behavioral/FuncMethodSameNameCollision/main.cs.target:29, 33 -->
 ```csharp
     fmt.Println("foreign", t.IsTupleType(), shapes.IsTupleType(t), shapes.IsTupleType(Ꮡ(new shapes.Type())));
 …
@@ -935,6 +1004,80 @@ Every non-function predeclared Go identifier, the golib public top-level type su
 
 Census rows verified fine with **no action needed** (each proven by a transpile-run-compare repro): locals named any predeclared identifier (`nil`, `iota`, `error`, `any`, `comparable`, `rune`, the numeric type names — Go-consistent shadowing carries over); user types named `error` or a predeclared type name in the common self-consistent cases; embedded predeclared fields (`struct{ float64; rune; any; int; string }` — the color-color form `internal rune rune;` compiles, with keyword-mapped embeds escaping only the field NAME: `internal nint @int;`); the golib `Defer`/`Recover` delegates (never spelled in emitted code — the defer machinery's lambda parameters are inferred); and a local named `heap` alongside heap-boxing machinery (`heap<nint>(out var Ꮡx)` is a *generic* invocation, which a non-generic local simple name cannot shadow) — but only the generic form is immune: the ARGUMENT-CARRYING form `heap(new T(), out var Ꮡx)` carries no type argument and does collide (see [A declaration named `heap` qualifies the boxing intrinsic](#a-declaration-named-heap-qualifies-the-boxing-intrinsic)).<!-- history: corrected 2026-08-28; the census row's repro never reached the argument-carrying form. --> Known residuals, documented rather than fixed (unreachable under default flags in any constructed repro, or pathological): a user TYPE named a numeric alias name (`float64`, `int32`, `uintptr`, `complex64`, …) in a package where an emission would be *forced* to spell that predeclared name through inference; and `type string struct{}` (the golib `@string` spelling is escape-identical to the keyword-escaped user name).
 
+## A Go name spelled with a go2cs marker letter refuses its package
+
+go2cs and go2cs-gen name what they generate with marker letters: `Ꮡx` (the address of `x`), `ᴛ1` (a temporary),
+`seedˢ` (the hoisted literal `"seed"`), `SжI` (an adapter), `Lockꞏtwin` (an M:N twin), and the rest of the glyph table.
+Every one is a Unicode letter (Lu, Ll, Lm or Lo), and Go's identifier rule accepts any letter, so a Go name can contain
+one and equal a generated name. A package that declares such a name is refused before any file is written, and the
+diagnostic names each identifier and the letter:
+
+```go
+package main
+
+import "fmt"
+
+func main() {
+	seedˢ := "x"
+	var v any = "seed" // go2cs hoists the literal "seed" into a field named seedˢ
+	fmt.Println(v, seedˢ)
+}
+```
+
+```
+main.go(6,2): error GO2CS2015: hoist.seedˢ contains ˢ (U+02E2), a letter go2cs writes into the names it generates (HoistedLiteralMarker); rename it
+```
+
+Without the refusal, that body converts to `@string seedˢ = "x"; any v = seedˢ;`, with the local bound where the
+hoisted literal was meant: Go prints `seed x`, and the C# would print `x x`, with no compile error. A user method `func (S) ΔClone() S` would lose the same way to the
+generated instance member of that name.
+
+`Δ` is the exception, because numeric Go code uses it as a letter. A `Δ` name is refused only where go2cs or golib would
+read it as theirs:
+- **A struct field, method (interface methods included) or named type whose name starts with `Δ`.** golib drops one
+  leading `Δ` when it projects a converted member's Go name, so `type P struct{ Δt float64 }` would reflect and
+  json-encode its field as `t` (unexported, so `{}`) where Go writes `{"Δt":1}`, and `reflect.TypeOf(ΔMatrix{}).Name()`
+  would read `Matrix`. Locals, parameters, package variables, constants and functions are never projected and convert.
+- **A name equal to one go2cs generates in that package:**
+  - the `Δ` rename of any name the package declares, in any scope: a local `slice` is renamed `Δslice`, and C# lets a
+    local shadow a static member silently, so it would capture a package-level `Δslice`;
+  - `ΔMain` beside a func `Main`;
+  - a fixed generated member, such as `ΔCopy` or `ΔAssign`;
+  - the shape witness of one of its types, `TΔshape`;
+  - a generated local or parameter shape: `xΔ1` (a shadowed or repeated `x`, read against the base's sanitized spelling
+    too, so a renamed local `array` gives `ΔarrayΔ1`), the temporary `Δt` a type switch binds `t` through, `ΔpN`, `xΔp`
+    and `ΔeN`;
+  - the `Δ` rename of an import's alias or of the package's own name (`using Δstrings = …`);
+  - a shape-witnessed type parameter, `SΔScript` for a type parameter `S` constrained by `Script`.
+
+A bare `Δ` is refused as a field or a type, whose projections strip it to an empty name, and converts as a method, whose
+projections leave it alone.
+
+`Δt` beside a plain local `t`, `Δx`, a bare `Δ`, a parameter `Δv`, and `Δ`-led package variables, constants and functions
+convert unchanged.
+
+A `-tests` conversion refuses a marker letter declared only in a test file before the production half is written (it
+reads the test files' identifier tokens; a marker needs no types). A `Δ` rule a test-file name breaks needs type
+information, which the test variants get only after the production half is written; the test output is restored on that
+refusal.
+
+The marker set is the union of the converter's markers and the generator's and golib's. Only `‿` and `⁔` (Pc,
+connector punctuation) are names Go cannot spell.
+
+Guarded by: `TestMarkerGlyphIdentifiersAreRefused` (one site per refused letter class and each `Δ` kind, plus the
+must-convert `Δ` names), `TestMarkerGlyphInATestFileRefusesTheTestVariant` (a marker only in a test file: both test
+variants refused, the production package not, and the pre-check naming each name once),
+`TestMarkerGlyphsAreTheUnionOfEverySideThatWritesThem` (a non-ASCII letter in a converter literal or embedded template, a
+go2cs-gen source or a golib identifier that is not listed fails, and a listed letter none of them writes fails),
+`TestDeltaMintedMemberNamesAreEveryFixedDeltaLiteral` (a fixed `Δ` name the converter writes must be listed), and the
+behavioral `DeltaNameEdgeCases`, whose output is compared with Go's: every `Δ` shape the rule lets through runs, each
+beside the generated name one spelling away (`xΔ1`, `Δw`, `Δunicode`, `TΔTexter`, `Δslice`, `Δarray`). The
+projection refusal is temporary: [KnownIssues](../KnownIssues.md#delta-led-field-method-type-refused).
+<!-- src/go2cs/markerGlyphRefusal.go. The i9 name-collision census of 2026-11-21 (inbox/COORD/20261121T160231Z-i9.md)
+     found these classes latent: names containing a marker in its corpora were one, a ts local spelled `Δ` alone. Its
+     probes showed the silent ones: a local beats a same-named field (the seedˢ shape), and an instance member beats an
+     extension (the ΔClone shape). Ruled R1 by COORD 174705Z, with P3's marker-union and Δ changes. -->
+
 ## A Go type named `Value` yields its wrapper's `Value` property to the door `Value‿`
 
 Every named non-struct wrapper (slice, map, chan, array, numeric) exposes its underlying value through a generated
@@ -1275,30 +1418,35 @@ does not move), and `cmd/compile/internal/types2`. Guarded by the behavioral pro
 argument and a generic type.
 <!-- census figures: 6497 files, 292 with a dot-import, 12 whose name another import also binds, 10 of those importing the same path both ways. -->
 
-## A function called inside a holder with a method of its name is written through the package alias
+## A method calls a package function of its own name bare
 
 Go resolves `Sort(x)` to the package function `Sort(data Interface)` even when `x`'s type has a method
-named `Sort`. In C# that method is the extension `Sort(this StringSlice x)`, a member of `StringSlice`'s method
-holder, and the function is a member of the package class. Inside the holder a bare `Sort` names the holder's
-method group first, so the call would bind the method and call itself. sort's own convenience methods are exactly
-this shape:
+named `Sort`. In C# that method's body is `Sort⁔`, a member of the package class beside the function, and the
+Go-named method is the extension `Sort(this StringSlice x)`, a one-line forwarder in `StringSlice`'s method
+holder in `package_info.cs`. In the body a bare `Sort` names only the package function, so the call binds it as
+Go does. sort's own convenience methods are exactly this shape:
 
 ```go
 func (x StringSlice) Sort() { Sort(x) }
 ```
-<!-- source: src/core/sort/sort.cs:183 -->
+<!-- source: src/core/sort/sort.cs:159 -->
 ```csharp
-public static void Sort(this StringSlice x) { sort.Sort(x); }
+internal static void Sort⁔(/*this*/ StringSlice x) { Sort(x); }
+```
+<!-- source: src/core/sort/package_info.cs:147, 152 -->
+```csharp
+partial class sortᴛStringSlice {
+…
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Sort(this StringSlice x) => sort_package.Sort⁔(x);
 ```
 
-Inside a holder that declares a method of the function's name, the converter writes the function through the
-package's own alias (`sort.Sort(x)`; `main.Sort(w)` in the guard). Member lookup on the package class finds only the
-function, so the call binds it as Go does and needs no cast. Everywhere else the call keeps its plain form: a bare
-`sort.Sort(sort.StringSlice(v))` names the package class too. Before methods moved to their holders, every
-`.Sort()` on `IntSlice`, `Float64Slice` or `StringSlice` overflowed the stack, which is how pflag's flag sorting,
-and cobra through it, failed. (Guarded by the `SortMethodSelfCapture` behavioral project: the three methods, the
-bare qualified call, and a user package's own `Sort` function beside a `words.Sort()` method. It overflowed on the
-first arm before the first fix.)
+The body writes the call as Go does (`Sort(x)`; `Sort(w)` in the guard), with no qualifier and no cast. A call
+from another package, `sort.Sort(sort.StringSlice(v))`, names the package class as Go names the package. Before
+methods moved to their holders, every `.Sort()` on `IntSlice`, `Float64Slice` or `StringSlice` overflowed the
+stack, which is how pflag's flag sorting, and cobra through it, failed. (Guarded by the `SortMethodSelfCapture`
+behavioral project: the three methods, the bare qualified call, and a user package's own `Sort` function beside a
+`words.Sort()` method. It overflowed on the first arm before the first fix.)
+<!-- This section was "A function called inside a holder with a method of its name is written through the package alias" until the regen of 2026-11-21 (the ⁔ form). From 2026-11-11 the method's body stood in the holder, where a bare `Sort` named the holder's method group first and the call would have bound the method and called itself, so the converter wrote the function through the package's own alias: src/core/sort/sort.cs read `public static void Sort(this StringSlice x) { sort.Sort(x); }` at 0bf1e9dabf~1, and the guard read `main.Sort(w)` at 14a291591f~1. -->
 <!-- Until 2026-11-11 the method and the function were members of the same package class, and a bare `StringSlice` argument made the extension the better overload (an exact match beats the boxing conversion to `Interface`). The converter then cast the first argument to the function's interface parameter type wherever the argument's type, or a named type in the function's package whose underlying type it is, declared a method of the same name taking one fewer parameter (`Sort((Interface)(x))`); an argument emitted through an interface adapter, and a simple-name call reached through `using static`, were left alone. The cast is no longer written (kind j of the method-holder scout record, three sites, all in sort). Read at master 4efe149858. -->
 
 ---

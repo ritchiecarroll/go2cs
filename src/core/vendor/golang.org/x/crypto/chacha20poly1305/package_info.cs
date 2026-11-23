@@ -14,6 +14,9 @@
 
 using go;
 using static go.vendor.golang.org.x.crypto.chacha20poly1305_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -62,14 +65,16 @@ using static go.vendor.golang.org.x.crypto.chacha20poly1305_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("vendor/golang.org/x/crypto/chacha20poly1305/chacha20poly1305.go", "chacha20poly1305.cs", "ACxQkoKUgpSCgsaCpoKmgoKmgqbGtIKClIKUgqbO8oKUgpSC")]
-[assembly: GoPositionMap("vendor/golang.org/x/crypto/chacha20poly1305/chacha20poly1305_generic.go", "chacha20poly1305_generic.cs", "ABAegoKCgoK4goKCxoKCgoKUgqaCgoKClIKCgoKClKaCgpSCgoKUgoKCgpSCgpSClIKClKaC")]
-[assembly: GoPositionMap("vendor/golang.org/x/crypto/chacha20poly1305/chacha20poly1305_noasm.go", "chacha20poly1305_noasm.cs", "AAwSgqaC")]
+[assembly: GoPositionMap("vendor/golang.org/x/crypto/chacha20poly1305/chacha20poly1305.go", "chacha20poly1305.cs", "ACtQkoKUgpSCgqaCpoKmgoKmgqamlIKClIKUgqau8oKUgpSC")]
+[assembly: GoPositionMap("vendor/golang.org/x/crypto/chacha20poly1305/chacha20poly1305_generic.go", "chacha20poly1305_generic.cs", "AA8egoKCgoK4goKCpoKCgoKUgqaCgoKClIKCgoKClKaCgpSCgoKUgoKCgpSCgpSClIKClKaC")]
+[assembly: GoPositionMap("vendor/golang.org/x/crypto/chacha20poly1305/chacha20poly1305_noasm.go", "chacha20poly1305_noasm.cs", "AAgSgqaC")]
 [assembly: GoPositionMap("vendor/golang.org/x/crypto/chacha20poly1305/fips140only_go1.26.go", "fips140only_go1.26.cs", "AAsW")]
-[assembly: GoPositionMap("vendor/golang.org/x/crypto/chacha20poly1305/xchacha20poly1305.go", "xchacha20poly1305.cs", "ABIw4oKUgpSCgsaCpoKmgoIABxCCpoKCpoKUpoKClIKUgqaCgqaClA==")]
+[assembly: GoPositionMap("vendor/golang.org/x/crypto/chacha20poly1305/xchacha20poly1305.go", "xchacha20poly1305.cs", "ABEw4oKUgpSCgqaCpoKmgoIABxCCpoKCpoKUpoKClIKUgqaCgqaClA==")]
 // </GoSourcePositionMaps>
 
 namespace go.vendor.golang.org.x.crypto;
+
+using static go.vendor.golang.org.x.crypto.chacha20poly1305_package;
 
 [GoPackage("chacha20poly1305", ImportPath = "vendor/golang.org/x/crypto/chacha20poly1305")]
 public static partial class chacha20poly1305_package
@@ -109,6 +114,29 @@ public static partial class chacha20poly1305_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(chacha20poly1305_package.chacha20poly1305)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class chacha20poly1305ᴛchacha20poly1305;
-[GoMethodHost(typeof(chacha20poly1305_package.xchacha20poly1305)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class chacha20poly1305ᴛxchacha20poly1305;
+[GoMethodHost(typeof(chacha20poly1305_package.chacha20poly1305)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class chacha20poly1305ᴛchacha20poly1305;
+[GoMethodHost(typeof(chacha20poly1305_package.xchacha20poly1305)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class chacha20poly1305ᴛxchacha20poly1305;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class chacha20poly1305ᴛchacha20poly1305 {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint NonceSize(this ref chacha20poly1305 c) => chacha20poly1305_package.NonceSize⁔(ref c);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint Overhead(this ref chacha20poly1305 c) => chacha20poly1305_package.Overhead⁔(ref c);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<byte> Seal(this ref chacha20poly1305 c, slice<byte> dst, slice<byte> nonce, slice<byte> plaintext, slice<byte> additionalData) => chacha20poly1305_package.Seal⁔(ref c, dst, nonce, plaintext, additionalData);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<byte>, error) Open(this ref chacha20poly1305 c, slice<byte> dst, slice<byte> nonce, slice<byte> ciphertext, slice<byte> additionalData) => chacha20poly1305_package.Open⁔(ref c, dst, nonce, ciphertext, additionalData);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<byte> sealGeneric(this ref chacha20poly1305 c, slice<byte> dst, slice<byte> nonce, slice<byte> plaintext, slice<byte> additionalData) => chacha20poly1305_package.sealGeneric⁔(ref c, dst, nonce, plaintext, additionalData);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<byte>, error) openGeneric(this ref chacha20poly1305 c, slice<byte> dst, slice<byte> nonce, slice<byte> ciphertext, slice<byte> additionalData) => chacha20poly1305_package.openGeneric⁔(ref c, dst, nonce, ciphertext, additionalData);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<byte> seal(this ref chacha20poly1305 c, slice<byte> dst, slice<byte> nonce, slice<byte> plaintext, slice<byte> additionalData) => chacha20poly1305_package.seal⁔(ref c, dst, nonce, plaintext, additionalData);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<byte>, error) open(this ref chacha20poly1305 c, slice<byte> dst, slice<byte> nonce, slice<byte> ciphertext, slice<byte> additionalData) => chacha20poly1305_package.open⁔(ref c, dst, nonce, ciphertext, additionalData);
+}
+partial class chacha20poly1305ᴛxchacha20poly1305 {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint NonceSize(this ref xchacha20poly1305 _) => chacha20poly1305_package.NonceSize⁔(ref _);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint Overhead(this ref xchacha20poly1305 _) => chacha20poly1305_package.Overhead⁔(ref _);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<byte> Seal(this ref xchacha20poly1305 x, slice<byte> dst, slice<byte> nonce, slice<byte> plaintext, slice<byte> additionalData) => chacha20poly1305_package.Seal⁔(ref x, dst, nonce, plaintext, additionalData);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<byte>, error) Open(this ref xchacha20poly1305 x, slice<byte> dst, slice<byte> nonce, slice<byte> ciphertext, slice<byte> additionalData) => chacha20poly1305_package.Open⁔(ref x, dst, nonce, ciphertext, additionalData);
+}
+// </MethodForwarders>

@@ -14,6 +14,9 @@
 
 using go;
 using static go.CrossPkgLib_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -61,10 +64,12 @@ using static go.CrossPkgLib_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("lib.go", "lib.cs", "AA8wlrYAChSWmgAHFpacAAcUgoLIAAcQAAkQtpYABxKAgM6aAAUWAAksAAcQgIAAGDT8AAEauAAFFKQADiq2AAcw/pSUuAAHEAAKFpS4ggAGHA==")]
+[assembly: GoPositionMap("lib.go", "lib.cs", "AA0wlpYABhSWmgAFFpacAAUUgoKoAAUQAAUQlpYABRKAgK6aAAMWAAcsAAUQgIAAFDS8AAEamAAFFKQADCqWAAcw3pSUmAAFEAAGFpSYggAEHA==")]
 // </GoSourcePositionMaps>
 
 namespace go;
+
+using static go.CrossPkgLib_package;
 
 [GoPackage("CrossPkgLib")]
 public static partial class CrossPkgLib_package
@@ -120,14 +125,62 @@ public static partial class CrossPkgLib_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(CrossPkgLib_package.Alarm)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class CrossPkgLibᴛAlarm;
-[GoMethodHost(typeof(CrossPkgLib_package.Branch)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class CrossPkgLibᴛBranch;
-[GoMethodHost(typeof(CrossPkgLib_package.Cache<>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class CrossPkgLibᴛCache;
-[GoMethodHost(typeof(CrossPkgLib_package.Celsius)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class CrossPkgLibᴛCelsius;
-[GoMethodHost(typeof(CrossPkgLib_package.EmitBase)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class CrossPkgLibᴛEmitBase;
-[GoMethodHost(typeof(CrossPkgLib_package.Leaf)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class CrossPkgLibᴛLeaf;
-[GoMethodHost(typeof(CrossPkgLib_package.Meter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class CrossPkgLibᴛMeter;
-[GoMethodHost(typeof(CrossPkgLib_package.Probe)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class CrossPkgLibᴛProbe;
-[GoMethodHost(typeof(CrossPkgLib_package.Sensor)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class CrossPkgLibᴛSensor;
-[GoMethodHost(typeof(CrossPkgLib_package.Verdict)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class CrossPkgLibᴛVerdict;
+[GoMethodHost(typeof(CrossPkgLib_package.Alarm)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class CrossPkgLibᴛAlarm;
+[GoMethodHost(typeof(CrossPkgLib_package.Branch)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class CrossPkgLibᴛBranch;
+[GoMethodHost(typeof(CrossPkgLib_package.Cache<>)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class CrossPkgLibᴛCache;
+[GoMethodHost(typeof(CrossPkgLib_package.Celsius)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class CrossPkgLibᴛCelsius;
+[GoMethodHost(typeof(CrossPkgLib_package.EmitBase)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class CrossPkgLibᴛEmitBase;
+[GoMethodHost(typeof(CrossPkgLib_package.Leaf)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class CrossPkgLibᴛLeaf;
+[GoMethodHost(typeof(CrossPkgLib_package.Meter)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class CrossPkgLibᴛMeter;
+[GoMethodHost(typeof(CrossPkgLib_package.Probe)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class CrossPkgLibᴛProbe;
+[GoMethodHost(typeof(CrossPkgLib_package.Sensor)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class CrossPkgLibᴛSensor;
+[GoMethodHost(typeof(CrossPkgLib_package.Verdict)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class CrossPkgLibᴛVerdict;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class CrossPkgLibᴛAlarm {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this ref Alarm a) => CrossPkgLib_package.Error⁔(ref a);
+}
+partial class CrossPkgLibᴛBranch {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void emitNode(this ref Branch b) => CrossPkgLib_package.emitNode⁔(ref b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string nodeTag(this ref Branch b) => CrossPkgLib_package.nodeTag⁔(ref b);
+}
+partial class CrossPkgLibᴛCache {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Bump<T>(this ref Cache<T> c) => CrossPkgLib_package.Bump⁔<T>(ref c);
+}
+partial class CrossPkgLibᴛCelsius {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static Celsius Add(this Celsius c, Celsius d) => CrossPkgLib_package.Add⁔(c, d);
+}
+partial class CrossPkgLibᴛEmitBase {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Emit(this ref EmitBase e) => CrossPkgLib_package.Emit⁔(ref e);
+}
+partial class CrossPkgLibᴛLeaf {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Emit(this ref Leaf l) => CrossPkgLib_package.Emit⁔(ref l);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void emitNode(this ref Leaf l) => CrossPkgLib_package.emitNode⁔(ref l);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string nodeTag(this ref Leaf l) => CrossPkgLib_package.nodeTag⁔(ref l);
+}
+partial class CrossPkgLibᴛMeter {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Bump(this ref Meter m) => CrossPkgLib_package.Bump⁔(ref m);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Report(this ref Meter m) => CrossPkgLib_package.Report⁔(ref m);
+}
+partial class CrossPkgLibᴛProbe {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Sample(this ref Probe p) => CrossPkgLib_package.Sample⁔(ref p);
+}
+partial class CrossPkgLibᴛSensor {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Hot(this Sensor s) => CrossPkgLib_package.Hot⁔(s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Label(this Sensor s) => CrossPkgLib_package.Label⁔(s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Calibrate(this ref Sensor s, Celsius d) => CrossPkgLib_package.Calibrate⁔(ref s, d);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Sift(this Sensor s, Func<nint, bool> f) => CrossPkgLib_package.Sift⁔(s, f);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Status(this Sensor s) => CrossPkgLib_package.Status⁔(s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Grade(this Sensor s) => CrossPkgLib_package.Grade⁔(s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Token(this Sensor s) => CrossPkgLib_package.Token⁔(s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Marker(this Sensor s) => CrossPkgLib_package.Marker⁔(s);
+}
+partial class CrossPkgLibᴛVerdict {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Score(this Verdict v) => CrossPkgLib_package.Score⁔(v);
+}
+// </MethodForwarders>

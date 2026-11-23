@@ -214,7 +214,7 @@ is a golib slice-model capability rather than a per-GOOS hand-own (`src/core/gol
      Mprotect(b[:pagesize],
      PROT_NONE) and Munmap(b) answered `invalid argument` (the kernel was handed a managed element address); writes
      landed
-     in the copy. The native-backed arm that retires it: src/core/unsafe/unsafe.cs:1996
+     in the copy. The native-backed arm that retires it: src/core/unsafe/unsafe.cs:2018
      (`A pointer that ALIASES a GENUINELY NATIVE address yields a NATIVE-BACKED slice over that`); the door:
      src/core/golib/slice.cs:306 (`The single creation door for a native-backed slice`). -->
 
@@ -675,13 +675,13 @@ Guards: the behavioral test `ReflectVariadicCall`; GolibTests' `GoReflectBridgeC
      (`if (!golib.TypeExtensions.IsDynamicCodeSupported && System.Array.Exists(typeArguments, static argument => argument.IsValueType))`),
      :100 (`go2cs: reflect cannot call or make the variadic func`). go2cs-gen: src/gen/go2cs-gen/EscapeRegistryGenerator.cs:427
      (`internal static string? VariadicRegistration(Compilation? compilation, INamedTypeSymbol? package, ITypeSymbol type)`),
-     src/gen/go2cs-gen/MethodSet.cs:432 (`private static string? Registration(Compilation compilation, IReadOnlyList<string> parameters, string variadic, string returns)`),
-     :393 (`Registration(compilation, [receiverType, .. shape.Parameters], shape.Variadic, shape.Returns)`), :129-130
+     src/gen/go2cs-gen/MethodSet.cs:437 (`private static string? Registration(Compilation compilation, IReadOnlyList<string> parameters, string variadic, string returns)`),
+     :398 (`Registration(compilation, [receiverType, .. shape.Parameters], shape.Variadic, shape.Returns)`), :129-130
      (`body.Append(register);`). Guards: src/tests/GolibTests/GoReflectBridgeClosureTests.cs:173
      (`public void ARegisteredVariadicSignatureIsServedByItsCompiledTrampolines()`), :209
      (`public void AnUnregisteredValueTypeVariadicIsRefusedByNameWithoutDynamicCode()`);
      src/tests/GenTests/EscapeRegistryGeneratorTests.cs:126 (`public void EveryEscapingVariadicFuncSignatureIsRegistered()`);
-     src/tests/GenTests/GoMethodSetTests.cs:260 (`public void AVariadicArmRegistersItsSignatures()`);
+     src/tests/GenTests/GoMethodSetTests.cs:276 (`public void AVariadicArmRegistersItsSignatures()`);
      src/tests/GolibTests/DeferredRegistrationTests.cs:178 (`public void TheFirstVariadicMissRunsTheQueuedEscapeRegistry()`). -->
 
 **A ZERO test is a descriptor read too, and this one had degraded to a CONSTANT — `Value.IsZero`,
@@ -844,7 +844,7 @@ field is an embed to `reflect`* below).
 <!-- history: Anonymous first waited on field ORDER, because go2cs-gen declared the promoted-embed backing box
      after the declared fields, so struct{X; y; Inner; inner; Ptr} walked as X, y, Ptr, Inner, inner; GoFields'
      reorder by the all-fields constructor and the Anonymous projection landed together. The converter has since
-     declared embeds in place (src/go2cs/visitStructType.go:1034 `// declaration order, marked like every other embed:`). -->
+     declared embeds in place (src/go2cs/visitStructType.go:1038 `// declaration order, marked like every other embed:`). -->
 
 Guard: `tests/Behavioral/ReflectUnexportedFieldFlags`, byte-identical to `go run` — the indexed
 walk's `IsExported`/`PkgPath`/`Tag`, `FieldByName` carrying the same flags (including the blank
@@ -1336,7 +1336,7 @@ FORWARDED — the pushed body is ordinary converted Go, so call it (`crypto/inte
 
 UNHONORABLE — announce the pair, never fabricate a body (`weak/pointer.cs`'s `.cs.auto` review sibling):
 
-<!-- source: src/core/weak/pointer.cs.auto:107-110 -->
+<!-- source: src/core/weak/pointer.cs.auto:102-105 -->
 ```csharp
 //go:linkname runtime_registerWeakPointer
 internal static @unsafe.Pointer runtime_registerWeakPointer(@unsafe.Pointer _) {
@@ -2926,7 +2926,7 @@ MINI-BRIDGE* above; `GoStructLayoutTests.FieldOrder_IsGoDeclarationOrder_NotMeta
      encoding/json's dominance rules are decided by DEPTH and tag, never by declaration order, and its one
      order-sensitive test (TestMarshalEmbeds) declares its single plain field first. The section then named
      declaration-order cargo as the remedy; the constructor reorder landed instead, and the converter later declared
-     embeds in place (src/go2cs/visitStructType.go:1034 `// declaration order, marked like every other embed:`). The
+     embeds in place (src/go2cs/visitStructType.go:1038 `// declaration order, marked like every other embed:`). The
      legacy property shape: src/core/golib/GoReflect.FieldAccess.cs:530 (`An embed is emitted by the converter as a partial PROPERTY`). -->
 
 ## An UNNAMED func type renders STRUCTURALLY, exactly as an unnamed struct does
@@ -3888,7 +3888,7 @@ levels. Anything the IL cannot prove keeps the frames the trace has, and an impl
 nil dereference) inside an inlinee is not covered, since a statement cannot say which instruction faulted. Nothing
 is emitted for this and nothing runs off the panic path. Guarded by GolibTests' `PanicFramesInlinedPanicTests`,
 including the controls where the IL names no single callee.
-<!-- src/core/runtime/managed_impl.cs:5509 (`INLINED PANIC SITES`), :5517 (`NEVER A GUESS. A frame is added only when the IL proves which one`);
+<!-- src/core/runtime/managed_impl.cs:5543 (`INLINED PANIC SITES`), :5551 (`NEVER A GUESS. A frame is added only when the IL proves which one`);
      src/tests/GolibTests/PanicFramesInlinedPanicTests.cs:14 (`AN EXPLICIT PANIC RAISED INSIDE A GO FUNCTION THE JIT INLINED`). -->
 
 ## `runtime.Stack(all: true)` enumerates every goroutine, and each one names the wait it is parked on

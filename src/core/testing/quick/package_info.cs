@@ -10,10 +10,14 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+using rand = go.math.rand_package;
 // </ImportedTypeAliases>
 
 using go;
 using static go.testing.quick_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -58,10 +62,13 @@ using static go.testing.quick_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("testing/quick/quick.go", "quick.cs", "ABUoAAgUsoKClKiygoKUqLIABhSyrNKCpoKktLS0tLS0tLS0tLS0tLS0tIKCgoKCgpTGgpSCgpSCxoKCgoKCgpTGgoKClMaCgoKUtJSCgoKClIKCgpTGpgAbNJKClKrCgoKClLgACg4ACxCCAA0UggAMJAARAoKmgoKmgpSCpoKClIKCgqaCuAAKDuKCpoKClIKCpoKmgoKUgoKCpoKUgriqwoKCpoKCgoKCuKbCgoKClIKmgoKClKaCgoKU")]
+[assembly: GoPositionMap("testing/quick/quick.go", "quick.cs", "ABQoAAgUsoKClKiygoKUqLIABhSyrNKCpoKktLS0tLS0tLS0tLS0tLS0tIKCgoKCgpTGgpSCgpSCxoKCgoKCgpTGgoKClMaCgoKUtJSCgoKClIKCgpTGpgAZNJKClKrCgoKClLjuAAcQggAJFIIACiQAEQKCpoKCpoKUgqaCgpSCgoKmgrgACg7igqaCgpSCgqaCpoKClIKCgqaClIK4qsKCgqaCgoKCgrimwoKCgpSCpoKCgpSmgoKClA==")]
 // </GoSourcePositionMaps>
 
 namespace go.testing;
+
+using static go.testing.quick_package;
+using rand = go.math.rand_package;
 
 [GoPackage("quick")]
 public static partial class quick_package
@@ -104,8 +111,28 @@ public static partial class quick_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(quick_package.CheckEqualError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class quickᴛCheckEqualError;
-[GoMethodHost(typeof(quick_package.CheckError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class quickᴛCheckError;
-[GoMethodHost(typeof(quick_package.Config)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class quickᴛConfig;
-[GoMethodHost(typeof(quick_package.SetupError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class quickᴛSetupError;
+[GoMethodHost(typeof(quick_package.CheckEqualError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class quickᴛCheckEqualError;
+[GoMethodHost(typeof(quick_package.CheckError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class quickᴛCheckError;
+[GoMethodHost(typeof(quick_package.Config)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class quickᴛConfig;
+[GoMethodHost(typeof(quick_package.SetupError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class quickᴛSetupError;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class quickᴛCheckEqualError {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this ref CheckEqualError s) => quick_package.Error⁔(ref s);
+}
+partial class quickᴛCheckError {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this ref CheckError s) => quick_package.Error⁔(ref s);
+}
+partial class quickᴛConfig {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<rand.Rand> getRand(this ref Config c) => quick_package.getRand⁔(ref c);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint /*maxCount*/ getMaxCount(this ref Config c) => quick_package.getMaxCount⁔(ref c);
+}
+partial class quickᴛSetupError {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this SetupError s) => quick_package.Error⁔(s);
+}
+// </MethodForwarders>

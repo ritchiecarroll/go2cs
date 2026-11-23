@@ -14,6 +14,9 @@
 
 using go;
 using static go.slices_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -57,12 +60,14 @@ using static go.slices_package;
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("slices/iter.go", "iter.cs", "AAocwoKCggAFEMKCgoLesoKCggAFEtKClKqirNKCgqyygoIAAhDSgoIAAhDygqaClLiC", "15-21:1;27-33:1;38-44:1;102-113:1")]
 [assembly: GoPositionMap("slices/slices.go", "slices.cs", "AA4oAAgCgpSCgqYAAhAACAKClIKCgqYAAhQACgKCgpSCgqaClAACEAAIAoKClIKCpoKUqsKCgqaqwoKCpqiyqsIAAhYADAKUgoKUgoKUyoKCgpQADyDKAAcQ7u7u7gACEgAIApSCpoKCgq7igoKmgoKCpoIAAhAACQKUgpSCgoKUpoKUgoKCppSUgoKCAA0clIKCAA4elIKCgoKUgoKCggAHEIKCgq70grgAAhIACAKClIKCgoKCgriCpq7igpSCgoKCgoK4gqYAAhDygpSUlKrCAAIS4oKClIIABCiigoKCuKiygrzigoKCgtyCgpQAAhDygqaCgoKmgoKClA==")]
-[assembly: GoPositionMap("slices/sort.go", "sort.cs", "AA0g0oIAAhgACwKCqsKowoKCpqrCgoKmrOKClIKClKzSgpSCgoKmrOKClIKClKzSgpSCgoKmrgAIBKaSgpSClLgAAhQACQKmkoKUgpS4AA0cgoKCgsaCqsI=")]
+[assembly: GoPositionMap("slices/sort.go", "sort.cs", "AAwg0oIAAhgACwKCqsKowoKCpqrCgoKmrOKClIKClKzSgpSCgoKmrOKClIKClKzSgpSCgoKmrgAIBKaSgpSClLgAAhQACQKmkoKUgpS4AAscgoKCgqaCqsI=")]
 [assembly: GoPositionMap("slices/zsortanyfunc.go", "zsortanyfunc.cs", "AAgUkoKCzqKCgoKClIKUgpSCuIKCgqaCuIKCAAMU4pSqgpSCgriCgriCgqaCgriCuIKC3IKCgqaClJKCgoKClIKCAAQSwoKkgpSClIKClIKClIKClIKUgpSCgpSCqqKCpIKClIKUgpSCgpSokpiCgoKmgqaCpqaCgoKUuIKCgpS4qqKCgoKUgoKClAAEFNKqlM6ClIKCpqaUpKS6koKClKiSgoKCqJKmgoKCgoKCuIKCuIKCkoKCgpSUgoKCgoKUgpQAAy4AFgi4goKCgoKUuIKU3LiCgoKCgpS4gpSmgoKSgoKUgpSUgoKClLiCgpSClIIAAxDCgpSCgoKUgrg=")]
 [assembly: GoPositionMap("slices/zsortordered.go", "zsortordered.cs", "AAoYsoKCzsKCgoKClIKUgpSCuKKCgqaCuIKCAAMUAAgClKqClIKCuIKCuIKCpoKCuIK4goLcgoKCpoKUkoKCgoKUgoIABBLigqSClIKUgoKUgoKUgoKUgpSClIKClIKqwoKkgoKUgpSClIKClKiymIKCgqaCpoKmpoKCgpS4goKClLiqwoKCgpSCgoKUAAQU8qqUzoKUgoKmppSkpLqygoKUqLKCgoKosqaigoKCgoK4ooK4ooKSgoKClJSCgoKCgpSClAADLgAYCLiCgoKCgpS4gpTcuIKCgoKClLiClKaCgpKCgpSClJSCgoKUuIKClIKUggADEOKClIKCgpSCuA==")]
 // </GoSourcePositionMaps>
 
 namespace go;
+
+using static go.slices_package;
 
 [GoPackage("slices")]
 public static partial class slices_package
@@ -97,5 +102,15 @@ public static partial class slices_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(slices_package.xorshift)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class slicesᴛxorshift;
+[GoMethodHost(typeof(slices_package.xorshift)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class slicesᴛxorshift;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class slicesᴛxorshift {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static uint64 Next(this ref xorshift r) => slices_package.Next⁔(ref r);
+}
+// </MethodForwarders>

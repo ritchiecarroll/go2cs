@@ -14,7 +14,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace go2cs;
 
-// M:N SPIKE (R5b, B2). Spike code: it stays on the spike branch and never lands.
+// M:N scheduler, experimental and opt-in (GoTwins=true to build, GO2CS_MN=1 to run); inert otherwise.
 // Interface twins, in the two shapes the public-surface plan allows. Hidden: a separate interface beside the Go one
 // holds the twin members and a static call helper, and the Go-named interface gains nothing. Default: the Go-named
 // interface gains a default-bodied twin member. Either way an implementer that has no twin runs its own member.

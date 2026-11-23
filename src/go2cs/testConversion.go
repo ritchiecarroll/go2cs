@@ -842,6 +842,20 @@ func processTestConversion(inputPath, outputPath string, options Options) (err e
 		return writeNoTestsManifest(production, inputPath, outputPath, targetParts, options)
 	}
 
+	// An identifier spelled with a go2cs marker letter refuses the package before either half converts, wherever it is
+	// declared: the internal variant carries the production files too, and the external one its own test files
+	// (markerGlyphRefusal.go). convertTestVariant asks again per variant; this is what keeps the production half unwritten.
+	for _, variant := range []*packages.Package{internal, external} {
+		if variant == nil {
+			continue
+		}
+
+		if refusal := refuseMarkerGlyphIdentifiers(variant); refusal != nil {
+			refusal.report()
+			return refusal
+		}
+	}
+
 	// Phase-4D file exclusion (option-a ruling): drop Example/Benchmark-only test files from the
 	// compile set (both models honor it below). Computed once from both variants — a cross-variant
 	// reference keeps a file compiled — and reused across the reference→recompile fallback.
@@ -3070,6 +3084,11 @@ func convertTestVariant(pkg *packages.Package, testEntries []FileEntry, outputPa
 	}
 
 	if refusal := refuseSliceWideningWrites(pkg); refusal != nil {
+		refusal.report()
+		return nil, nil, refusal
+	}
+
+	if refusal := refuseMarkerGlyphIdentifiers(pkg); refusal != nil {
 		refusal.report()
 		return nil, nil, refusal
 	}

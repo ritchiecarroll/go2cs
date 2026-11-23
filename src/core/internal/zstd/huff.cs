@@ -6,14 +6,11 @@ namespace go.@internal;
 using io = io_package;
 using bits = math.bits_package;
 using math;
-using static zstd_package;
 
 partial class zstd_package {
 
 // maxHuffmanBits is the largest possible Huffman table bits.
 internal static UntypedInt maxHuffmanBits => 11;
-
-} partial class zstdᴛReader {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string huffmanCountOverflowˢ => ref huffmanCountOverflowˢᵇ;
@@ -33,7 +30,7 @@ private static readonly @string huffmanTableTooSmallˢᵇ = "Huffman table too s
 // appear in the table multiple times.
 // This returns the number of bits in the Huffman table and the new offset.
 // RFC 4.2.1.
-internal static (nint tableBits, nint roff, error err) readHuff(this ж<Reader> Ꮡr, block data, nint off, slice<uint16> table) {
+internal static (nint tableBits, nint roff, error err) readHuff⁔(/*this*/ ж<Reader> Ꮡr, block data, nint off, slice<uint16> table) {
     nint tableBits = default;
     ref var r = ref Ꮡr.DerefOrNull();
 
@@ -219,4 +216,4 @@ internal static (nint tableBits, nint roff, error err) readHuff(this ж<Reader> 
     return (tableBits, off, default);
 }
 
-}
+} // end zstd_package

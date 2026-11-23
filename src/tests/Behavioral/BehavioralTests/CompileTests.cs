@@ -589,6 +589,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckDefinedTypeOverPkgType() => CheckTarget("DefinedTypeOverPkgType");
 
     [TestMethod]
+    public void CheckDeltaNameEdgeCases() => CheckTarget("DeltaNameEdgeCases");
+
+    [TestMethod]
     public void CheckDerefPointerToField() => CheckTarget("DerefPointerToField");
 
     [TestMethod]
@@ -1474,10 +1477,40 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckMixedUntypedConstArithmetic() => CheckTarget("MixedUntypedConstArithmetic");
 
     [TestMethod]
+    public void CheckMnAotGeneric() => CheckTarget("MnAotGeneric");
+
+    [TestMethod]
     public void CheckMnBlockedIO() => CheckTarget("MnBlockedIO");
 
     [TestMethod]
+    public void CheckMnBoxAlias() => CheckTarget("MnBoxAlias");
+
+    [TestMethod]
+    public void CheckMnContended() => CheckTarget("MnContended");
+
+    [TestMethod]
     public void CheckMnDeepUnwind() => CheckTarget("MnDeepUnwind");
+
+    [TestMethod]
+    public void CheckMnForeignThread() => CheckTarget("MnForeignThread");
+
+    [TestMethod]
+    public void CheckMnFuncPair() => CheckTarget("MnFuncPair");
+
+    [TestMethod]
+    public void CheckMnGenericContended() => CheckTarget("MnGenericContended");
+
+    [TestMethod]
+    public void CheckMnGoMaxProcs() => CheckTarget("MnGoMaxProcs");
+
+    [TestMethod]
+    public void CheckMnIfaceTwin() => CheckTarget("MnIfaceTwin");
+
+    [TestMethod]
+    public void CheckMnMainExit() => CheckTarget("MnMainExit");
+
+    [TestMethod]
+    public void CheckMnMixedStorm() => CheckTarget("MnMixedStorm");
 
     [TestMethod]
     public void CheckMnParkedCallers() => CheckTarget("MnParkedCallers");
@@ -1489,22 +1522,13 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckMnParkedSameName() => CheckTarget("MnParkedSameName");
 
     [TestMethod]
-    public void CheckMnFuncPair() => CheckTarget("MnFuncPair");
+    public void CheckMnSpinCap() => CheckTarget("MnSpinCap");
 
     [TestMethod]
-    public void CheckMnBoxAlias() => CheckTarget("MnBoxAlias");
+    public void CheckMnGlyphMethodFrames() => CheckTarget("MnGlyphMethodFrames");
 
     [TestMethod]
-    public void CheckMnAotGeneric() => CheckTarget("MnAotGeneric");
-
-    [TestMethod]
-    public void CheckMnIfaceTwin() => CheckTarget("MnIfaceTwin");
-
-    [TestMethod]
-    public void CheckMnMainExit() => CheckTarget("MnMainExit");
-
-    [TestMethod]
-    public void CheckMnMixedStorm() => CheckTarget("MnMixedStorm");
+    public void CheckGlyphLibraryFrameNames() => CheckTarget("GlyphLibraryFrameNames");
 
     [TestMethod]
     public void CheckMultiFileInitOrder() => CheckTarget("MultiFileInitOrder");
@@ -1709,6 +1733,9 @@ public class B2_CompileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckNamedSliceGoClone() => CheckTarget("NamedSliceGoClone");
+
+    [TestMethod]
+    public void CheckNamedSliceMethodShadow() => CheckTarget("NamedSliceMethodShadow");
 
     [TestMethod]
     public void CheckNamedSliceNilVsEmpty() => CheckTarget("NamedSliceNilVsEmpty");
@@ -1949,6 +1976,9 @@ public class B2_CompileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckPackageAliasRootedTypeArgs() => CheckTarget("PackageAliasRootedTypeArgs");
+
+    [TestMethod]
+    public void CheckPackageInfoUsingsClash() => CheckTarget("PackageInfoUsingsClash");
 
     [TestMethod]
     public void CheckPackageNameNotDirName() => CheckTarget("PackageNameNotDirName");

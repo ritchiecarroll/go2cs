@@ -110,7 +110,6 @@ using fs = go.io.fs_package;
 using path;
 using sync;
 using ꓸꓸꓸstring = Span<@string>;
-using static exec_package;
 
 partial class exec_package {
 
@@ -123,15 +122,11 @@ partial struct Error {
     public error Err;
 }
 
-} partial class execᴛError {
-
-public static @string Error(this ref Error e) {
+internal static @string Error⁔(/*this*/ ref Error e) {
     return "exec: "u8 + strconv.Quote(e.Name) + ": "u8 + e.Err.Error();
 }
 
-public static error Unwrap(this ref Error e) { return e.Err; }
-
-} partial class exec_package {
+internal static error Unwrap⁔(/*this*/ ref Error e) { return e.Err; }
 
 // ErrWaitDelay is returned by [Cmd.Wait] if the process exits with a
 // successful status code but its output pipes are not closed before the
@@ -144,17 +139,13 @@ partial struct wrappedError {
     internal error err;
 }
 
-} partial class execᴛwrappedError {
-
-internal static @string Error(this wrappedError w) {
+internal static @string Error⁔(/*this*/ wrappedError w) {
     return w.prefix + ": "u8 + w.err.Error();
 }
 
-internal static error Unwrap(this wrappedError w) {
+internal static error Unwrap⁔(/*this*/ wrappedError w) {
     return w.err;
 }
-
-} partial class exec_package {
 
 partial struct Cmd_cachedLookExtensions /*dyn*/ {
     internal @string @in, @out;
@@ -500,13 +491,11 @@ public static ж<Cmd> CommandContext(context.Context ctx, @string name, params �
     return cmd;
 }
 
-} partial class execᴛCmd {
-
 // String returns a human-readable description of c.
 // It is intended only for debugging.
 // In particular, it is not suitable for use as input to a shell.
 // The output of String may vary across Go releases.
-public static @string String(this ref Cmd c) {
+internal static @string String⁔(/*this*/ ref Cmd c) {
     if (c.Err != nil || c.lookPathErr != nil) {
         // failed to resolve path; report the original requested path (plus args)
         return strings.Join(c.Args, " ");
@@ -520,8 +509,6 @@ public static @string String(this ref Cmd c) {
     }
     return b.String();
 }
-
-} partial class exec_package {
 
 // interfaceEqual protects against panics from doing equality tests on
 // two interfaces with non-comparable underlying types.
@@ -537,16 +524,14 @@ internal static bool interfaceEqual(any a, any b) {
     finally { ᒐ.Run(); }
 }
 
-} partial class execᴛCmd {
-
-internal static slice<@string> argv(this ref Cmd c) {
+internal static slice<@string> argv⁔(/*this*/ ref Cmd c) {
     if (len(c.Args) > 0) {
         return c.Args;
     }
     return [c.Path];
 }
 
-internal static (ж<os.File>, error) childStdin(this ж<Cmd> Ꮡc) {
+internal static (ж<os.File>, error) childStdin⁔(/*this*/ ж<Cmd> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (c.Stdin == nil) {
@@ -585,11 +570,11 @@ internal static (ж<os.File>, error) childStdin(this ж<Cmd> Ꮡc) {
     return (pr, default);
 }
 
-internal static (ж<os.File>, error) childStdout(this ref Cmd c) {
+internal static (ж<os.File>, error) childStdout⁔(/*this*/ ref Cmd c) {
     return c.writerDescriptor(c.Stdout);
 }
 
-internal static (ж<os.File>, error) childStderr(this ref Cmd c, ж<os.File> childStdout) {
+internal static (ж<os.File>, error) childStderr⁔(/*this*/ ref Cmd c, ж<os.File> childStdout) {
     if (c.Stderr != nil && interfaceEqual(c.Stderr, c.Stdout)) {
         return (childStdout, default);
     }
@@ -600,7 +585,7 @@ internal static (ж<os.File>, error) childStderr(this ref Cmd c, ж<os.File> chi
 // can write to send data to w.
 //
 // If w is nil, writerDescriptor returns a File that writes to os.DevNull.
-internal static (ж<os.File>, error) writerDescriptor(this ref Cmd c, io.Writer w) {
+internal static (ж<os.File>, error) writerDescriptor⁔(/*this*/ ref Cmd c, io.Writer w) {
     if (w == nil) {
         var (f, errΔ1) = os.OpenFile(os.DevNull, os.O_WRONLY, 0);
         if (errΔ1 != nil) {
@@ -632,15 +617,11 @@ internal static (ж<os.File>, error) writerDescriptor(this ref Cmd c, io.Writer 
     return (pw, default);
 }
 
-} partial class exec_package {
-
 internal static void closeDescriptors(slice<io.Closer> closers) {
     foreach (var (_, fd) in range(closers)) {
         fd.Close();
     }
 }
-
-} partial class execᴛCmd {
 
 // Run starts the specified command and waits for it to complete.
 //
@@ -655,21 +636,12 @@ internal static void closeDescriptors(slice<io.Closer> closers) {
 // with [runtime.LockOSThread] and modified any inheritable OS-level
 // thread state (for example, Linux or Plan 9 name spaces), the new
 // process will inherit the caller's thread state.
-public static error Run(this ж<Cmd> Ꮡc) {
+internal static error Run⁔(/*this*/ ж<Cmd> Ꮡc) {
     var err = Ꮡc.Start(); if (err != nil) {
         return err;
     }
     return Ꮡc.Wait();
 }
-
-} partial class exec_package {
-
-internal partial struct Start_goroutineStatus /*dyn*/ {
-    internal nint running;
-    internal error firstErr;
-}
-
-} partial class execᴛCmd {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string execAlreadyStartedˢ => ref execAlreadyStartedˢᵇ;
@@ -679,13 +651,18 @@ private static readonly @string execNoCommandˢᵇ = "exec: no command"u8;
 internal static ref readonly @string execCommandWithANonNilˢ => ref execCommandWithANonNilˢᵇ;
 private static readonly @string execCommandWithANonNilˢᵇ = "exec: command with a non-nil Cancel was not created with CommandContext"u8;
 
+internal partial struct Start_goroutineStatus /*dyn*/ {
+    internal nint running;
+    internal error firstErr;
+}
+
 // Start starts the specified command but does not wait for it to complete.
 //
 // If Start returns successfully, the c.Process field will be set.
 //
 // After a successful call to Start the [Cmd.Wait] method must be called in
 // order to release associated system resources.
-public static partial error Start(this ж<Cmd> Ꮡc) {
+internal static partial error Start⁔(/*this*/ ж<Cmd> Ꮡc) {
     GoFrame ᒐ = default;
     try {
         ref var c = ref Ꮡc.DerefOrNull();
@@ -847,7 +824,7 @@ public static partial error Start(this ж<Cmd> Ꮡc) {
 //
 // watchCtx manipulates c.goroutineErr, so its result must be received before
 // c.awaitGoroutines is called.
-internal static void watchCtx(this ref Cmd c, channel/*<-*/<ctxResult> resultc) {
+internal static void watchCtx⁔(/*this*/ ref Cmd c, channel/*<-*/<ctxResult> resultc) {
     var resultcᴛ1 = resultc.ᐸꟷ(new ctxResult(), ꓸꓸꓸ);
     var selᴛ3 = c.ctx.Done();
     switch (select(resultcᴛ1, ᐸꟷ(selᴛ3, ꓸꓸꓸ))) {
@@ -947,8 +924,6 @@ internal static void watchCtx(this ref Cmd c, channel/*<-*/<ctxResult> resultc) 
     resultc.ᐸꟷ(new ctxResult(err: err));
 }
 
-} partial class exec_package {
-
 // An ExitError reports an unsuccessful exit by a command.
 partial struct ExitError {
     /*embed*/ public ж<os_package.ProcessState> ProcessState;
@@ -965,13 +940,9 @@ partial struct ExitError {
     public slice<byte> Stderr;
 }
 
-} partial class execᴛExitError {
-
-public static @string Error(this ref ExitError e) {
+internal static @string Error⁔(/*this*/ ref ExitError e) {
     return e.ProcessState.String();
 }
-
-} partial class execᴛCmd {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string execNotStartedˢ => ref execNotStartedˢᵇ;
@@ -996,7 +967,7 @@ private static readonly @string execWaitWasAlreadyCalledˢᵇ = "exec: Wait was 
 // for the respective I/O loop copying to or from the process to complete.
 //
 // Wait releases any resources associated with the [Cmd].
-public static error Wait(this ж<Cmd> Ꮡc) {
+internal static error Wait⁔(/*this*/ ж<Cmd> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (c.Process == nil) {
@@ -1043,7 +1014,7 @@ public static error Wait(this ж<Cmd> Ꮡc) {
 // forcibly closes their pipes and returns ErrWaitDelay.
 //
 // If timer is non-nil, it must send to timer.C at the end of c.WaitDelay.
-internal static error awaitGoroutines(this ж<Cmd> Ꮡc, ж<time.Timer> Ꮡtimer) {
+internal static error awaitGoroutines⁔(/*this*/ ж<Cmd> Ꮡc, ж<time.Timer> Ꮡtimer) {
     GoFrame ᒐ = default;
     try {
         ref var c = ref Ꮡc.DerefOrNull();
@@ -1108,7 +1079,7 @@ private static readonly @string execStdoutAlreadySetˢᵇ = "exec: Stdout alread
 // If c.Stderr was nil and the returned error is of type
 // [*ExitError], Output populates the Stderr field of the
 // returned error.
-public static (slice<byte>, error) Output(this ж<Cmd> Ꮡc) {
+internal static (slice<byte>, error) Output⁔(/*this*/ ж<Cmd> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (c.Stdout != nil) {
@@ -1137,7 +1108,7 @@ private static readonly @string execStderrAlreadySetˢᵇ = "exec: Stderr alread
 
 // CombinedOutput runs the command and returns its combined standard
 // output and standard error.
-public static (slice<byte>, error) CombinedOutput(this ж<Cmd> Ꮡc) {
+internal static (slice<byte>, error) CombinedOutput⁔(/*this*/ ж<Cmd> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (c.Stdout != nil) {
@@ -1165,7 +1136,7 @@ private static readonly @string execStdinPipeAfterˢᵇ = "exec: StdinPipe after
 // A caller need only call Close to force the pipe to close sooner.
 // For example, if the command being run will not exit until standard input
 // is closed, the caller must close the pipe.
-public static (io.WriteCloser, error) StdinPipe(this ref Cmd c) {
+internal static (io.WriteCloser, error) StdinPipe⁔(/*this*/ ref Cmd c) {
     if (c.Stdin != nil) {
         return (default, errors.New(execStdinAlreadySetˢ));
     }
@@ -1194,7 +1165,7 @@ private static readonly @string execStdoutPipeAfterˢᵇ = "exec: StdoutPipe aft
 // before all reads from the pipe have completed.
 // For the same reason, it is incorrect to call [Cmd.Run] when using StdoutPipe.
 // See the example for idiomatic usage.
-public static (io.ReadCloser, error) StdoutPipe(this ref Cmd c) {
+internal static (io.ReadCloser, error) StdoutPipe⁔(/*this*/ ref Cmd c) {
     if (c.Stdout != nil) {
         return (default, errors.New(execStdoutAlreadySetˢ));
     }
@@ -1223,7 +1194,7 @@ private static readonly @string execStderrPipeAfterˢᵇ = "exec: StderrPipe aft
 // before all reads from the pipe have completed.
 // For the same reason, it is incorrect to use [Cmd.Run] when using StderrPipe.
 // See the StdoutPipe example for idiomatic usage.
-public static (io.ReadCloser, error) StderrPipe(this ref Cmd c) {
+internal static (io.ReadCloser, error) StderrPipe⁔(/*this*/ ref Cmd c) {
     if (c.Stderr != nil) {
         return (default, errors.New(execStderrAlreadySetˢ));
     }
@@ -1240,8 +1211,6 @@ public static (io.ReadCloser, error) StderrPipe(this ref Cmd c) {
     return (new os_FileжReadCloser(pr), default);
 }
 
-} partial class exec_package {
-
 // prefixSuffixSaver is an io.Writer which retains the first N bytes
 // and the last N bytes written to it. The Bytes() methods reconstructs
 // it with a pretty error message.
@@ -1253,14 +1222,12 @@ partial struct prefixSuffixSaver {
     internal int64 skipped;
 }
 
-} partial class execᴛprefixSuffixSaver {
-
 // TODO(bradfitz): we could keep one large []byte and use part of it for
 // the prefix, reserve space for the '... Omitting N bytes ...' message,
 // then the ring buffer suffix, and just rearrange the ring buffer
 // suffix when Bytes() is called, but it doesn't seem worth it for
 // now just for error messages. It's only ~64KB anyway.
-internal static (nint n, error err) Write(this ж<prefixSuffixSaver> Ꮡw, slice<byte> p) {
+internal static (nint n, error err) Write⁔(/*this*/ ж<prefixSuffixSaver> Ꮡw, slice<byte> p) {
     ref var w = ref Ꮡw.DerefOrNull();
 
     nint lenp = len(p);
@@ -1288,7 +1255,7 @@ internal static (nint n, error err) Write(this ж<prefixSuffixSaver> Ꮡw, slice
 
 // fill appends up to len(p) bytes of p to *dst, such that *dst does not
 // grow larger than w.N. It returns the un-appended suffix of p.
-internal static slice<byte> /*pRemain*/ fill(this ref prefixSuffixSaver w, ж<slice<byte>> Ꮡdst, slice<byte> p) {
+internal static slice<byte> /*pRemain*/ fill⁔(/*this*/ ref prefixSuffixSaver w, ж<slice<byte>> Ꮡdst, slice<byte> p) {
     ref var dst = ref Ꮡdst.DerefOrNull();
 
     nint remain = w.N - len(dst); if (remain > 0) {
@@ -1305,7 +1272,7 @@ private static readonly @string omittingˢᵇ = "\n... omitting "u8;
 internal static ref readonly @string bytesˢ => ref bytesˢᵇ;
 private static readonly @string bytesˢᵇ = " bytes ...\n"u8;
 
-internal static slice<byte> Bytes(this ref prefixSuffixSaver w) {
+internal static slice<byte> Bytes⁔(/*this*/ ref prefixSuffixSaver w) {
     if (w.suffix == nil) {
         return w.prefix;
     }
@@ -1323,12 +1290,10 @@ internal static slice<byte> Bytes(this ref prefixSuffixSaver w) {
     return buf.Bytes();
 }
 
-} partial class execᴛCmd {
-
 // environ returns a best-effort copy of the environment in which the command
 // would be run as it is currently configured. If an error occurs in computing
 // the environment, it is returned alongside the best-effort copy.
-internal static (slice<@string>, error) environ(this ref Cmd c) {
+internal static (slice<@string>, error) environ⁔(/*this*/ ref Cmd c) {
     error err = default;
 
     var env = c.Env;
@@ -1375,13 +1340,11 @@ internal static (slice<@string>, error) environ(this ref Cmd c) {
 
 // Environ returns a copy of the environment in which the command would be run
 // as it is currently configured.
-public static slice<@string> Environ(this ref Cmd c) {
+internal static slice<@string> Environ⁔(/*this*/ ref Cmd c) {
     //  Intentionally ignore errors: environ returns a best-effort environment no matter what.
     var (env, _) = c.environ();
     return env;
 }
-
-} partial class exec_package {
 
 // dedupEnv returns a copy of env with any duplicates removed, in favor of
 // later values.

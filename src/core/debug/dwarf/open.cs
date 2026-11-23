@@ -20,7 +20,6 @@ namespace go.debug;
 using binary = encoding.binary_package;
 using errors = errors_package;
 using encoding;
-using static dwarf_package;
 
 partial class dwarf_package {
 
@@ -116,13 +115,11 @@ public static (ж<Data>, error) New(slice<byte> abbrev, slice<byte> aranges, sli
     return (d, default);
 }
 
-} partial class dwarfᴛData {
-
 // AddTypes will add one .debug_types section to the DWARF data. A
 // typical object with DWARF version 4 debug info will have multiple
 // .debug_types sections. The name is used for error reporting only,
 // and serves to distinguish one .debug_types section from another.
-public static error AddTypes(this ж<Data> Ꮡd, @string name, slice<byte> types) {
+internal static error AddTypes⁔(/*this*/ ж<Data> Ꮡd, @string name, slice<byte> types) {
     return Ꮡd.parseTypes(name, types);
 }
 
@@ -130,7 +127,7 @@ public static error AddTypes(this ж<Data> Ꮡd, @string name, slice<byte> types
 // DWARF section name such as ".debug_addr", ".debug_str_offsets", and
 // so forth. This approach is used for new DWARF sections added in
 // DWARF 5 and later.
-public static error AddSection(this ref Data d, @string name, slice<byte> contents) {
+internal static error AddSection⁔(/*this*/ ref Data d, @string name, slice<byte> contents) {
     error err = default;
     switch (ᐧ) {
     case {} when name == ".debug_addr"u8: {
@@ -153,4 +150,4 @@ public static error AddSection(this ref Data d, @string name, slice<byte> conten
     return err;
 }
 
-}
+} // end dwarf_package

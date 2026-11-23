@@ -4,7 +4,6 @@
 namespace go.net;
 
 using sync = sync_package;
-using static textproto_package;
 
 partial class textproto_package {
 
@@ -32,10 +31,8 @@ partial struct Pipeline {
     internal sequencer response;
 }
 
-} partial class textprotoᴛPipeline {
-
 // Next returns the next id for a request/response pair.
-public static nuint Next(this ж<Pipeline> Ꮡp) {
+internal static nuint Next⁔(/*this*/ ж<Pipeline> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     p.mu.Lock();
@@ -47,29 +44,27 @@ public static nuint Next(this ж<Pipeline> Ꮡp) {
 
 // StartRequest blocks until it is time to send (or, if this is a server, receive)
 // the request with the given id.
-public static void StartRequest(this ж<Pipeline> Ꮡp, nuint id) {
+internal static void StartRequest⁔(/*this*/ ж<Pipeline> Ꮡp, nuint id) {
     Ꮡp.Ꮡrequest.Start(id);
 }
 
 // EndRequest notifies p that the request with the given id has been sent
 // (or, if this is a server, received).
-public static void EndRequest(this ж<Pipeline> Ꮡp, nuint id) {
+internal static void EndRequest⁔(/*this*/ ж<Pipeline> Ꮡp, nuint id) {
     Ꮡp.Ꮡrequest.End(id);
 }
 
 // StartResponse blocks until it is time to receive (or, if this is a server, send)
 // the request with the given id.
-public static void StartResponse(this ж<Pipeline> Ꮡp, nuint id) {
+internal static void StartResponse⁔(/*this*/ ж<Pipeline> Ꮡp, nuint id) {
     Ꮡp.Ꮡresponse.Start(id);
 }
 
 // EndResponse notifies p that the response with the given id has been received
 // (or, if this is a server, sent).
-public static void EndResponse(this ж<Pipeline> Ꮡp, nuint id) {
+internal static void EndResponse⁔(/*this*/ ж<Pipeline> Ꮡp, nuint id) {
     Ꮡp.Ꮡresponse.End(id);
 }
-
-} partial class textproto_package {
 
 // A sequencer schedules a sequence of numbered events that must
 // happen in order, one after the other. The event numbering must start
@@ -81,12 +76,10 @@ partial struct sequencer {
     internal map<nuint, channel<EmptyStruct>> wait;
 }
 
-} partial class textprotoᴛsequencer {
-
 // Start waits until it is time for the event numbered id to begin.
 // That is, except for the first event, it waits until End(id-1) has
 // been called.
-internal static void Start(this ж<sequencer> Ꮡs, nuint id) {
+internal static void Start⁔(/*this*/ ж<sequencer> Ꮡs, nuint id) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     s.mu.Lock();
@@ -106,7 +99,7 @@ internal static void Start(this ж<sequencer> Ꮡs, nuint id) {
 // End notifies the sequencer that the event numbered id has completed,
 // allowing it to schedule the event numbered id+1.  It is a run-time error
 // to call End with an id that is not the number of the active event.
-internal static void End(this ж<sequencer> Ꮡs, nuint id) {
+internal static void End⁔(/*this*/ ж<sequencer> Ꮡs, nuint id) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     s.mu.Lock();
@@ -129,4 +122,4 @@ internal static void End(this ж<sequencer> Ꮡs, nuint id) {
     }
 }
 
-}
+} // end textproto_package

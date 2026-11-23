@@ -10,7 +10,6 @@
 namespace go.@internal;
 
 using errors = errors_package;
-using static poll_package;
 
 partial class poll_package {
 
@@ -18,8 +17,6 @@ partial class poll_package {
 // This is used to implement the net.Error interface.
 public partial struct errNetClosing {
 }
-
-} partial class pollᴛerrNetClosing {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string useOfClosedNetworkˢ => ref useOfClosedNetworkˢᵇ;
@@ -29,12 +26,10 @@ private static readonly @string useOfClosedNetworkˢᵇ = "use of closed network
 // Keep this string consistent because of issue #4373:
 // since historically programs have not been able to detect
 // this error, they look for the string.
-public static @string Error(this errNetClosing e) { return useOfClosedNetworkˢ; }
+internal static @string Error⁔(/*this*/ errNetClosing e) { return useOfClosedNetworkˢ; }
 
-public static bool Timeout(this errNetClosing e) { return false; }
-public static bool Temporary(this errNetClosing e) { return false; }
-
-} partial class poll_package {
+internal static bool Timeout⁔(/*this*/ errNetClosing e) { return false; }
+internal static bool Temporary⁔(/*this*/ errNetClosing e) { return false; }
 
 // ErrNetClosing is returned when a network descriptor is used after
 // it has been closed.
@@ -65,8 +60,6 @@ public static error ErrDeadlineExceeded = new DeadlineExceededErrorжerror(Ꮡ(n
 partial struct DeadlineExceededError {
 }
 
-} partial class pollᴛDeadlineExceededError {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string iOTimeoutˢ => ref iOTimeoutˢᵇ;
 private static readonly @string iOTimeoutˢᵇ = "i/o timeout"u8;
@@ -75,11 +68,9 @@ private static readonly @string iOTimeoutˢᵇ = "i/o timeout"u8;
 // The string is "i/o timeout" because that is what was returned
 // by earlier Go versions. Changing it may break programs that
 // match on error strings.
-public static @string Error(this ref DeadlineExceededError e) { return iOTimeoutˢ; }
-public static bool Timeout(this ref DeadlineExceededError e) { return true; }
-public static bool Temporary(this ref DeadlineExceededError e) { return true; }
-
-} partial class poll_package {
+internal static @string Error⁔(/*this*/ ref DeadlineExceededError e) { return iOTimeoutˢ; }
+internal static bool Timeout⁔(/*this*/ ref DeadlineExceededError e) { return true; }
+internal static bool Temporary⁔(/*this*/ ref DeadlineExceededError e) { return true; }
 
 // ErrNotPollable is returned when the file or socket is not suitable
 // for event notification.

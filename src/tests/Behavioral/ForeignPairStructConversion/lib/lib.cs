@@ -1,28 +1,18 @@
 namespace go.ForeignPairStructConversion;
 
-using static lib_package;
-
 partial class lib_package {
 
 partial struct Pitch {
     public nint Hz;
 }
 
-} partial class libᴛPitch {
-
-public static nint Double(this Pitch p) { return p.Hz * 2; }
-
-} partial class lib_package {
+internal static nint Double⁔(/*this*/ Pitch p) { return p.Hz * 2; }
 
 partial struct Twin {
     public nint Hz;
 }
 
-} partial class libᴛTwin {
-
-public static nint Half(this Twin t) { return t.Hz / 2; }
-
-} partial class lib_package {
+internal static nint Half⁔(/*this*/ Twin t) { return t.Hz / 2; }
 
 partial struct Note {
     public @string Name;

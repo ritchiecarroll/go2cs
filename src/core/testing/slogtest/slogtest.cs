@@ -14,7 +14,6 @@ using runtime = runtime_package;
 using testing = testing_package;
 using time = time_package;
 using log;
-using static slogtest_package;
 
 partial class slogtest_package {
 
@@ -379,28 +378,24 @@ partial struct wrapper {
     internal Action<ж<slog.Record>> mod;
 }
 
-} partial class slogtestᴛwrapper {
-
 // Go method set entry for the promoted 'Handler.Enabled()' - provided ONLY by the embedded
 // interface field in *wrapper's method set; see the pointer-only satisfaction record.
-internal static bool Enabled(this wrapper recvᴛ, context.Context arg1ᴛ, slog.Level arg2ᴛ) => recvᴛ.Handler.Enabled(arg1ᴛ, arg2ᴛ);
+internal static bool Enabled⁔(/*this*/ wrapper recvᴛ, context.Context arg1ᴛ, slog.Level arg2ᴛ) => recvᴛ.Handler.Enabled(arg1ᴛ, arg2ᴛ);
 
 // Go method set entry for the promoted 'Handler.WithAttrs()' - provided ONLY by the embedded
 // interface field in *wrapper's method set; see the pointer-only satisfaction record.
-internal static slog.Handler WithAttrs(this wrapper recvᴛ, slice<slog.Attr> attrs) => recvᴛ.Handler.WithAttrs(attrs);
+internal static slog.Handler WithAttrs⁔(/*this*/ wrapper recvᴛ, slice<slog.Attr> attrs) => recvᴛ.Handler.WithAttrs(attrs);
 
 // Go method set entry for the promoted 'Handler.WithGroup()' - provided ONLY by the embedded
 // interface field in *wrapper's method set; see the pointer-only satisfaction record.
-internal static slog.Handler WithGroup(this wrapper recvᴛ, @string name) => recvᴛ.Handler.WithGroup(name);
+internal static slog.Handler WithGroup⁔(/*this*/ wrapper recvᴛ, @string name) => recvᴛ.Handler.WithGroup(name);
 
-internal static error Handle(this ref wrapper h, context.Context ctx, slog.Record rʗp) {
+internal static error Handle⁔(/*this*/ ref wrapper h, context.Context ctx, slog.Record rʗp) {
     ref var r = ref heap(rʗp.ΔClone(), out var Ꮡr);
 
     h.mod(Ꮡr);
     return h.Handler.Handle(ctx, r);
 }
-
-} partial class slogtest_package {
 
 internal static partial @string withSource(@string s) {
     var (_, @file, line, ok) = runtime.Caller(1);
@@ -414,12 +409,10 @@ partial struct replace {
     internal any v;
 }
 
-} partial class slogtestᴛreplace {
+internal static slog.Value LogValue⁔(/*this*/ ref replace r) { return slog.AnyValue(r.v); }
 
-internal static slog.Value LogValue(this ref replace r) { return slog.AnyValue(r.v); }
-
-internal static @string String(this ref replace r) {
+internal static @string String⁔(/*this*/ ref replace r) {
     return fmt.Sprintf("<replace(%v)>"u8, r.v);
 }
 
-}
+} // end slogtest_package

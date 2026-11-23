@@ -14,6 +14,9 @@
 
 using go;
 using static go.ForeignPairStructConversion.other_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -49,10 +52,12 @@ using static go.ForeignPairStructConversion.other_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("other.go", "other.cs", "AA4SABYotA==")]
+[assembly: GoPositionMap("other.go", "other.cs", "AAsSABIolA==")]
 // </GoSourcePositionMaps>
 
 namespace go.ForeignPairStructConversion;
+
+using static go.ForeignPairStructConversion.other_package;
 
 [GoPackage("other")]
 public static partial class other_package
@@ -88,6 +93,19 @@ public static partial class other_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(other_package.Pitch)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class otherᴛPitch;
-[GoMethodHost(typeof(other_package.Tag)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class otherᴛTag;
+[GoMethodHost(typeof(other_package.Pitch)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class otherᴛPitch;
+[GoMethodHost(typeof(other_package.Tag)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class otherᴛTag;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class otherᴛPitch {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Octave(this Pitch p) => other_package.Octave⁔(p);
+}
+partial class otherᴛTag {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Triple(this Tag t) => other_package.Triple⁔(t);
+}
+// </MethodForwarders>

@@ -801,7 +801,7 @@ func (v *Visitor) convertToInterfaceTypeSlot(interfaceType types.Type, checkType
 		bareTarget := closedCarrierBareName(targetTypeName)
 
 		if pointerTarget {
-			return fmt.Sprintf("new %s(%s)", v.holderSafeAdapterTypeRef(v.whiteboxVariantAdapterStructName(bareTarget), interfaceTypeName), exprResult)
+			return fmt.Sprintf("new %s(%s)", adapterTypeRef(v.whiteboxVariantAdapterStructName(bareTarget), interfaceTypeName), exprResult)
 		}
 
 		return fmt.Sprintf("new %s(%s)", v.testOwnedAdapterRef(valueAdapterTypeRef(bareTarget, interfaceTypeName), targetTypeName, interfaceTypeName), exprResult)
@@ -819,7 +819,7 @@ func (v *Visitor) convertToInterfaceTypeSlot(interfaceType types.Type, checkType
 	}
 
 	if pointerTarget && recordable && exprResult != "" {
-		return fmt.Sprintf("new %s(%s)", v.holderSafeAdapterTypeRef(v.whiteboxVariantAdapterStructName(targetTypeName), interfaceTypeName), exprResult)
+		return fmt.Sprintf("new %s(%s)", adapterTypeRef(v.whiteboxVariantAdapterStructName(targetTypeName), interfaceTypeName), exprResult)
 	}
 
 	// A POINTER-sourced cast to an interface implemented by a FOREIGN type routes through the
@@ -871,7 +871,7 @@ func (v *Visitor) convertToInterfaceTypeSlot(interfaceType types.Type, checkType
 
 					adapterBase = wholeTypeAliasAdapterBase(aliasQualified, adapterBase, targetTypeName)
 
-					return fmt.Sprintf("new %s(%s)", v.holderSafeAdapterTypeRef(adapterBase, interfaceTypeName), exprResult)
+					return fmt.Sprintf("new %s(%s)", adapterTypeRef(adapterBase, interfaceTypeName), exprResult)
 				}
 
 				// NO exported adapter — the defining package never converts this pair itself
@@ -929,7 +929,7 @@ func (v *Visitor) convertToInterfaceTypeSlot(interfaceType types.Type, checkType
 						aliasQualified := v.getAliasQualifiedTypeName(named, false)
 						adapterBase := wholeTypeAliasAdapterBase(aliasQualified, convertToCSTypeName(aliasQualified), targetTypeName)
 
-						return fmt.Sprintf("new %s(%s)", v.holderSafeAdapterTypeRef(adapterBase, interfaceTypeName), exprResult)
+						return fmt.Sprintf("new %s(%s)", adapterTypeRef(adapterBase, interfaceTypeName), exprResult)
 					}
 
 					simpleTarget := targetTypeName
@@ -969,7 +969,7 @@ func (v *Visitor) convertToInterfaceTypeSlot(interfaceType types.Type, checkType
 
 					qualifiedTarget := getSanitizedIdentifier(pkg.Name()) + "_" + simpleTarget + typeArgs
 
-					return fmt.Sprintf("new %s(%s)", v.holderSafeAdapterTypeRef(qualifiedTarget, interfaceTypeName), exprResult)
+					return fmt.Sprintf("new %s(%s)", adapterTypeRef(qualifiedTarget, interfaceTypeName), exprResult)
 				}
 			}
 		}
@@ -1260,82 +1260,6 @@ func mentionsTypeParam(t types.Type, seen map[types.Type]bool) bool {
 	}
 
 	return false
-}
-
-// holderSafeAdapterTypeRef is adapterTypeRef for a cast in the file being converted. In a method holder, which is not
-// nested in the package class, a bare adapter name reaches the body through `using static` of the package class AND of
-// every package the file dot-imports; when one of those declares an adapter of the same name, both stand with equal
-// standing and C# refuses the reference (CS0104). gopkg.in/yaml.v3's tests are the instance: `. "gopkg.in/check.v1"`,
-// and both packages adapt *bytes.Buffer to io.Writer, so `bytes_BufferжWriter` is in each class. Such a cast's name is
-// written through the package class. Everywhere else the reference is unchanged.
-func (v *Visitor) holderSafeAdapterTypeRef(structTypeName string, interfaceTypeName string) string {
-	ref := adapterTypeRef(structTypeName, interfaceTypeName)
-
-	if v.currentHolderNamed == nil || v.fileClassName == "" {
-		return ref
-	}
-
-	start := strings.Index(ref, adapterNameMarkerPrefix)
-	end := strings.Index(ref, adapterNameMarkerSuffix)
-
-	if start < 0 || end < start {
-		return ref
-	}
-
-	structBase, interfaceBase, _, ok := adapterNameMarkerParts(ref[start+len(adapterNameMarkerPrefix) : end])
-
-	if !ok || !v.dotImportAdapterNames()[adapterStructKey(structBase)+PointerPrefix+adapterInterfaceSimpleName(stripAdapterInterfaceTypeArgs(interfaceBase))] {
-		return ref
-	}
-
-	return ref[:start] + adapterNameMarkerQualified(structBase, interfaceBase, v.fileClassName) + ref[end+len(adapterNameMarkerSuffix):]
-}
-
-// dotImportAdapterNames returns, read once per file, the adapter class names the packages the file dot-imports
-// compose from their own pointer GoImplement records, as `<struct key>ж<interface simple name>` (adapterStructKey):
-// the names their package classes declare, which `using static` brings into a method holder.
-func (v *Visitor) dotImportAdapterNames() map[string]bool {
-	if v.fileDotImportAdapters != nil {
-		return v.fileDotImportAdapters
-	}
-
-	names := map[string]bool{}
-	v.fileDotImportAdapters = names
-
-	if v.astFile == nil {
-		return names
-	}
-
-	for _, importSpec := range v.astFile.Imports {
-		if importSpec.Name == nil || importSpec.Name.Name != "." {
-			continue
-		}
-
-		pkgName, ok := v.info.ObjectOf(importSpec.Name).(*types.PkgName)
-
-		if !ok {
-			continue
-		}
-
-		path := pkgName.Imported().Path()
-		info, found := getImportPackageInfo([]string{path}, v.options)[path]
-
-		if !found {
-			continue
-		}
-
-		lines, ok := importPackageInfoLines(info, v.options)
-
-		if !ok {
-			continue
-		}
-
-		for _, pair := range pointerAdapterRecordPairs(lines) {
-			names[adapterStructKey(pair[0])+PointerPrefix+adapterInterfaceSimpleName(stripAdapterInterfaceTypeArgs(pair[1]))] = true
-		}
-	}
-
-	return names
 }
 
 func adapterTypeRef(structTypeName string, interfaceTypeName string) string {

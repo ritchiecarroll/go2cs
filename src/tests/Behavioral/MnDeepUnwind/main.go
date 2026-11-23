@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-// M:N PROTOTYPE (A1). Prototype code: nothing from this branch lands on master as it is.
+// M:N scheduler, experimental and opt-in (GoTwins=true to build, GO2CS_MN=1 to run); inert otherwise.
 //
 // A recursion n frames deep parks in its last frame. The value it waited for then returns through every frame, and
 // the goroutine parks twice more. Under generated twins the return through n suspended frames is n completions,

@@ -155,24 +155,6 @@ var testAdapterResolveNames []string
 // set: writePackageInfoFile is called once per emitted info file (production, then each -tests
 // variant), and each variant's cast sites resolve against its OWN records.
 func recordEmittedPointerAdapterPairs(lines []string) {
-	pairs, faceted := parsePointerAdapterRecords(lines)
-
-	packageLock.Lock()
-	emittedPointerAdapterPairs = pairs
-	productionFacetedAdapterPairs = faceted
-	packageLock.Unlock()
-}
-
-// pointerAdapterRecordPairs returns the (struct, interface) spellings of the pointer-form GoImplement records in a
-// package-info file's lines, recording nothing (an imported package's records, dotImportAdapterNames).
-func pointerAdapterRecordPairs(lines []string) [][2]string {
-	pairs, _ := parsePointerAdapterRecords(lines)
-	return pairs
-}
-
-// parsePointerAdapterRecords parses the pointer-form GoImplement records of package-info lines: the pairs, and the
-// facet keys of the production-faceted ones.
-func parsePointerAdapterRecords(lines []string) ([][2]string, map[string]bool) {
 	pairs := [][2]string{}
 	faceted := map[string]bool{}
 
@@ -231,7 +213,10 @@ func parsePointerAdapterRecords(lines []string) ([][2]string, map[string]bool) {
 		}
 	}
 
-	return pairs, faceted
+	packageLock.Lock()
+	emittedPointerAdapterPairs = pairs
+	productionFacetedAdapterPairs = faceted
+	packageLock.Unlock()
 }
 
 // emittedAdapterPairAnchors maps a pair's collision-group key to the metadata anchor CLASS the
@@ -304,38 +289,21 @@ func adapterNameMarker(structBase string, interfaceTypeName string) string {
 	return adapterNameMarkerPrefix + payload + adapterNameMarkerSuffix
 }
 
-// adapterNameMarkerQualified is adapterNameMarker for a cast whose resolved name must be written through
-// qualifierClass when it resolves bare (dotImportAdapterNames): a method holder is not nested in the package class,
-// so there a dot-imported package's adapter of the same name stands beside the package's own (CS0104).
-func adapterNameMarkerQualified(structBase, interfaceTypeName, qualifierClass string) string {
-	payload := hex.EncodeToString([]byte(structBase + adapterNameMarkerSep + interfaceTypeName + adapterNameMarkerSep + qualifierClass))
-	return adapterNameMarkerPrefix + payload + adapterNameMarkerSuffix
-}
-
 // adapterNameMarkerPair decodes a marker payload back to its (structBase, interfaceTypeName) pair.
 func adapterNameMarkerPair(payload string) (string, string, bool) {
-	structBase, interfaceTypeName, _, ok := adapterNameMarkerParts(payload)
-	return structBase, interfaceTypeName, ok
-}
-
-// adapterNameMarkerParts decodes a marker payload to its pair and, for adapterNameMarkerQualified's form, the class a
-// bare resolved name is written through ("" otherwise).
-func adapterNameMarkerParts(payload string) (structBase, interfaceTypeName, qualifierClass string, ok bool) {
 	decoded, err := hex.DecodeString(payload)
 
 	if err != nil {
-		return "", "", "", false
+		return "", "", false
 	}
 
-	structBase, rest, found := strings.Cut(string(decoded), adapterNameMarkerSep)
+	structBase, interfaceTypeName, ok := strings.Cut(string(decoded), adapterNameMarkerSep)
 
-	if !found {
-		return "", "", "", false
+	if !ok {
+		return "", "", false
 	}
 
-	interfaceTypeName, qualifierClass, _ = strings.Cut(rest, adapterNameMarkerSep)
-
-	return structBase, interfaceTypeName, qualifierClass, true
+	return structBase, interfaceTypeName, true
 }
 
 // adapterInterfaceSimpleName reduces an interface reference to the bare last-dot segment the
@@ -832,7 +800,7 @@ func resolveAdapterNameMarkers(outputFileNames []string, metadataAnchor ...strin
 	// (deferredMarkerOperations.go); only the pair resolution below is specific to adapters.
 	rewriteDeferredMarkers(outputFileNames, "adapter-name", adapterNameMarkerPrefix, adapterNameMarkerSuffix,
 		func(fileName string, line int, payload string) (string, bool) {
-			structBase, interfaceTypeName, qualifierClass, ok := adapterNameMarkerParts(payload)
+			structBase, interfaceTypeName, ok := adapterNameMarkerPair(payload)
 
 			if !ok {
 				// A payload that will not decode names no pair, so there is nothing to resolve to. Dropping the
@@ -859,12 +827,6 @@ func resolveAdapterNameMarkers(outputFileNames []string, metadataAnchor ...strin
 					anchorClass = defaultAnchor
 				}
 				resolvedName = anchorClass + "." + anchoredAdapterMemberName(pair, colliding, keepsProductionName)
-			}
-
-			// A cast in a method holder whose name a dot-imported package's adapter shares is written through the
-			// package's own class (adapterNameMarkerQualified), unless it is qualified already.
-			if qualifierClass != "" && !strings.Contains(resolvedName, ".") {
-				resolvedName = qualifierClass + "." + resolvedName
 			}
 
 			// The pair resolves identically wherever it appears, so substitute every occurrence.

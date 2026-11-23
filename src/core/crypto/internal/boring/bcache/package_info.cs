@@ -14,6 +14,7 @@
 
 using go;
 using static go.crypto.@internal.boring.bcache_package;
+using System.ComponentModel;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -89,5 +90,5 @@ public static partial class bcache_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(bcache_package.Cache<,>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class bcacheᴛCache;
+[GoMethodHost(typeof(bcache_package.Cache<,>)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class bcacheᴛCache;
 // </MethodHolders>

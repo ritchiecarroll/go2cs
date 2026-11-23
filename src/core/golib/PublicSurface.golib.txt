@@ -332,8 +332,10 @@ zero
 ᐧᐧ
 ᐸꟷ
 ꓸꓸꓸ
-# M:N PROTOTYPE ONLY (claude/g-mn-proto-b0, which never lands as it is): the twin entry points the prototype adds
-# to builtin, listed here so the public-surface guard master landed in batch 302 reads them as known.
+# M:N scheduler, experimental and opt-in (GoTwins=true to build, GO2CS_MN=1 to run); inert otherwise: the twin entry
+# points builtin adds for code built with twins, listed here so the public-surface guard reads them as known.
+# Goschedꞏtwin: the Gosched-park seat, COORD's ruling of 2026-11-21 (docs/phase4/inbox/G/20261121T231225Z-COORD.md).
+Goschedꞏtwin
 RunMainꞏtwin
 goǃtwin
 selectꞏtwin
@@ -1172,6 +1174,7 @@ go.ж<T> :: method System.String ToString()
 go.ж<T> :: method System.UIntPtr ExchangePointerWord(System.UIntPtr)
 go.ж<T> :: method System.UIntPtr ReadPointerWord()
 go.ж<T> :: method System.Void OnHeaderStore()
+go.ж<T> :: method System.Void cgoPointerField<U>(go.FieldRefFunc<T, go.ж<U>>, go.ж<U>)
 go.ж<T> :: method go.ElementAddress<Telem> Ꮡelem<Telem>(System.Int32)
 go.ж<T> :: method go.ElementAddress<Telem> Ꮡelem<Telem>(System.IntPtr)
 go.ж<T> :: method go.ElementAddress<Telem> Ꮡelem<Telem>(System.UInt64)
@@ -1196,9 +1199,11 @@ go.ж<T> :: method go.ж<TElem> at<TElem>(go.FieldRefFunc<go.slice<TElem>>, Syst
 go.ж<T> :: method go.ж<TElem> of<TElem>(go.FieldPtrFunc<T, TElem>)
 go.ж<T> :: method go.ж<TElem> of<TElem>(go.FieldRefFunc<T, TElem>)
 go.ж<T> :: method go.ж<TElem> of<TElem>(go.FieldRefFunc<TElem>)
+go.ж<T> :: method go.ж<TF> cgoWordField<TF>(go.FieldRefFunc<T, TF>)
 go.ж<T> :: method go.ж<Telem> at<Telem>(System.Int32)
 go.ж<T> :: method go.ж<Telem> at<Telem>(System.IntPtr)
 go.ж<T> :: method go.ж<Telem> at<Telem>(System.UInt64)
+go.ж<T> :: method go.ж<U> cgoPointerField<U>(go.FieldRefFunc<T, go.ж<U>>)
 go.ж<T> :: method ref TF field<TF>(go.FieldRefFunc<T, TF>)
 go.ж<T> :: method static System.Boolean op_Equality(go.NilType, go.ж<T>)
 go.ж<T> :: method static System.Boolean op_Equality(go.ж<T>, go.NilType)
@@ -1228,9 +1233,9 @@ go.ж<T> :: property static go.ж<T> NilBox { get; }
 # [mn-frozen] The M:N surface frozen for L-min (COORD ruling 2026-11-20, on G's 7b ask; the owner ruled L-min the same
 # day): every public or protected member of the six task types, of GoFuncPair, and of the two attributes generated
 # code places or names ([GoParkForwarder], the [GoTwinOf] stamp), hidden or not, with one shape line per type, and
-# the named twin entry points (builtin RunMainꞏtwin, goǃtwin, selectꞏtwin, ᐸꟷꞏtwin; channel`1 ᐸꟷꞏtwin), each
+# the named twin entry points (builtin RunMainꞏtwin, goǃtwin, selectꞏtwin, ᐸꟷꞏtwin, Goschedꞏtwin; channel`1 ᐸꟷꞏtwin), each
 # name's whole overload family. A twin-built assembly binds them, so a line never disappears and changes only where
-# its plain member does (src/tools/mnspike2/TwinRefs/FREEZE-SHEET.md, block 7b). Same spelling as [tier1-members];
+# its plain member does (docs/phase4/FREEZE-mn-surface.md, block 7b). Same spelling as [tier1-members];
 # GolibTests writes the lines with GO2CS_PUBLIC_SURFACE_MN_FROZEN=<path>. A change here needs a COORD ruling, cited
 # beside it. ONE section: train 3 met two [mn-frozen] headers (7a's and 7d's), so a repeated header now throws.
 
@@ -1256,6 +1261,8 @@ go.builtin :: method static System.Void goǃtwin<T>(System.Action<T>, System.Fun
 go.builtin :: method static go.golib.GoTask<System.Int32> selectꞏtwin(params go.SelectOp[])
 go.builtin :: method static go.golib.GoTask<System.ValueTuple<T, System.Boolean>> ᐸꟷꞏtwin<T>(go.channel<T>, System.Boolean)
 go.builtin :: method static go.golib.GoTask<T> ᐸꟷꞏtwin<T>(go.channel<T>)
+# Goschedꞏtwin: the Gosched-park seat, COORD's ruling of 2026-11-21 (docs/phase4/inbox/G/20261121T231225Z-COORD.md).
+go.builtin :: method static go.golib.GoTask Goschedꞏtwin()
 go.channel<T> :: method go.golib.GoTask ᐸꟷꞏtwin(T)
 go.golib.GoFuncPair :: ctor protected ()
 go.golib.GoFuncPair :: method static System.Delegate Underlying(System.Delegate)

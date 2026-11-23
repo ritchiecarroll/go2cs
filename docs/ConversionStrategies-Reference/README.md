@@ -143,7 +143,7 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - [A module hosted under `go.` shadows the root namespace the way a `go/*` import does](shadowing.md#a-module-hosted-under-go-shadows-the-root-namespace-the-way-a-go-import-does)
   - [A file that reaches Go names through `using static` binds .NET types by alias, never by namespace](shadowing.md#a-file-that-reaches-go-names-through-using-static-binds-net-types-by-alias-never-by-namespace)
   - [A dot-imported package's type is qualified by its class when another import has the package's name](shadowing.md#a-dot-imported-packages-type-is-qualified-by-its-class-when-another-import-has-the-packages-name)
-  - [A function called inside a holder with a method of its name is written through the package alias](shadowing.md#a-function-called-inside-a-holder-with-a-method-of-its-name-is-written-through-the-package-alias)
+  - [A method calls a package function of its own name bare](shadowing.md#a-method-calls-a-package-function-of-its-own-name-bare)
 - **[Multi-Result Values and Comma-Ok Forms](multi-result-and-comma-ok.md)**
   - [A grouped var spec with one multi-result call deconstructs](multi-result-and-comma-ok.md#a-grouped-var-spec-with-one-multi-result-call-deconstructs)
 - **[Slices and Arrays](slices-and-arrays.md)**

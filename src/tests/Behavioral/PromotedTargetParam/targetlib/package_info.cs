@@ -14,6 +14,9 @@
 
 using go;
 using static go.PromotedTargetParam.targetlib_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -49,10 +52,12 @@ using static go.PromotedTargetParam.targetlib_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("targetlib.go", "targetlib.cs", "AAwWgqiC")]
+[assembly: GoPositionMap("targetlib.go", "targetlib.cs", "AAgWgqiC")]
 // </GoSourcePositionMaps>
 
 namespace go.PromotedTargetParam;
+
+using static go.PromotedTargetParam.targetlib_package;
 
 [GoPackage("targetlib")]
 public static partial class targetlib_package
@@ -84,5 +89,16 @@ public static partial class targetlib_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(targetlib_package.Finder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class targetlibᴛFinder;
+[GoMethodHost(typeof(targetlib_package.Finder)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class targetlibᴛFinder;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class targetlibᴛFinder {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Match(this Finder f, @string target) => targetlib_package.Match⁔(f, target);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Retarget(this ref Finder f, @string target) => targetlib_package.Retarget⁔(ref f, target);
+}
+// </MethodForwarders>

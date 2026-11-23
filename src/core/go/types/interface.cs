@@ -8,7 +8,6 @@ using token = global::go.go.token_package;
 using static global::go.@internal.types.errors_package;
 using errors = global::go.@internal.types.errors_package;
 using global::go.go;
-using static types_package;
 
 partial class types_package {
 
@@ -26,16 +25,12 @@ partial struct Interface {
     internal ж<_TypeSet> tset; // type set described by this interface, computed lazily
 }
 
-} partial class typesᴛInterface {
-
 // typeSet returns the type set for interface t.
-internal static ж<_TypeSet> typeSet(this ж<Interface> Ꮡt) {
+internal static ж<_TypeSet> typeSet⁔(/*this*/ ж<Interface> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     return computeInterfaceTypeSet(t.check, nopos, Ꮡt);
 }
-
-} partial class types_package {
 
 // emptyInterface represents the empty (completed) interface
 internal static readonly ж<Interface> ᏑemptyInterface = new StaticBox<Interface>(default(Interface));
@@ -84,10 +79,8 @@ public static ж<Interface> NewInterfaceType(slice<ж<Func>> methods, slice<Type
     return typ;
 }
 
-} partial class typesᴛChecker {
-
 // check may be nil
-internal static ж<Interface> newInterface(this ж<Checker> Ꮡcheck) {
+internal static ж<Interface> newInterface⁔(/*this*/ ж<Checker> Ꮡcheck) {
     ref var check = ref Ꮡcheck.DerefOrNull();
 
     var typ = Ꮡ(new Interface(check: Ꮡcheck));
@@ -97,54 +90,52 @@ internal static ж<Interface> newInterface(this ж<Checker> Ꮡcheck) {
     return typ;
 }
 
-} partial class typesᴛInterface {
-
 // MarkImplicit marks the interface t as implicit, meaning this interface
 // corresponds to a constraint literal such as ~T or A|B without explicit
 // interface embedding. MarkImplicit should be called before any concurrent use
 // of implicit interfaces.
-public static void MarkImplicit(this ref Interface t) {
+internal static void MarkImplicit⁔(/*this*/ ref Interface t) {
     t.@implicit = true;
 }
 
 // NumExplicitMethods returns the number of explicitly declared methods of interface t.
-public static nint NumExplicitMethods(this ref Interface t) { return len(t.methods); }
+internal static nint NumExplicitMethods⁔(/*this*/ ref Interface t) { return len(t.methods); }
 
 // ExplicitMethod returns the i'th explicitly declared method of interface t for 0 <= i < t.NumExplicitMethods().
 // The methods are ordered by their unique [Id].
-public static ж<Func> ExplicitMethod(this ref Interface t, nint i) { return t.methods[i]; }
+internal static ж<Func> ExplicitMethod⁔(/*this*/ ref Interface t, nint i) { return t.methods[i]; }
 
 // NumEmbeddeds returns the number of embedded types in interface t.
-public static nint NumEmbeddeds(this ref Interface t) { return len(t.embeddeds); }
+internal static nint NumEmbeddeds⁔(/*this*/ ref Interface t) { return len(t.embeddeds); }
 
 // Embedded returns the i'th embedded defined (*[Named]) type of interface t for 0 <= i < t.NumEmbeddeds().
 // The result is nil if the i'th embedded type is not a defined type.
 //
 // Deprecated: Use [Interface.EmbeddedType] which is not restricted to defined (*[Named]) types.
-public static ж<Named> Embedded(this ref Interface t, nint i) { return asNamed(t.embeddeds[i]); }
+internal static ж<Named> Embedded⁔(/*this*/ ref Interface t, nint i) { return asNamed(t.embeddeds[i]); }
 
 // EmbeddedType returns the i'th embedded type of interface t for 0 <= i < t.NumEmbeddeds().
-public static Type EmbeddedType(this ref Interface t, nint i) { return t.embeddeds[i]; }
+internal static Type EmbeddedType⁔(/*this*/ ref Interface t, nint i) { return t.embeddeds[i]; }
 
 // NumMethods returns the total number of methods of interface t.
-public static nint NumMethods(this ж<Interface> Ꮡt) { return Ꮡt.typeSet().NumMethods(); }
+internal static nint NumMethods⁔(/*this*/ ж<Interface> Ꮡt) { return Ꮡt.typeSet().NumMethods(); }
 
 // Method returns the i'th method of interface t for 0 <= i < t.NumMethods().
 // The methods are ordered by their unique Id.
-public static ж<Func> Method(this ж<Interface> Ꮡt, nint i) { return Ꮡt.typeSet().Method(i); }
+internal static ж<Func> Method⁔(/*this*/ ж<Interface> Ꮡt, nint i) { return Ꮡt.typeSet().Method(i); }
 
 // Empty reports whether t is the empty interface.
-public static bool Empty(this ж<Interface> Ꮡt) { return Ꮡt.typeSet().IsAll(); }
+internal static bool Empty⁔(/*this*/ ж<Interface> Ꮡt) { return Ꮡt.typeSet().IsAll(); }
 
 // IsComparable reports whether each type in interface t's type set is comparable.
-public static bool IsComparable(this ж<Interface> Ꮡt) { return Ꮡt.typeSet().IsComparable(default); }
+internal static bool IsComparable⁔(/*this*/ ж<Interface> Ꮡt) { return Ꮡt.typeSet().IsComparable(default); }
 
 // IsMethodSet reports whether the interface t is fully described by its method
 // set.
-public static bool IsMethodSet(this ж<Interface> Ꮡt) { return Ꮡt.typeSet().IsMethodSet(); }
+internal static bool IsMethodSet⁔(/*this*/ ж<Interface> Ꮡt) { return Ꮡt.typeSet().IsMethodSet(); }
 
 // IsImplicit reports whether the interface t is a wrapper for a type set literal.
-public static bool IsImplicit(this ref Interface t) { return t.@implicit; }
+internal static bool IsImplicit⁔(/*this*/ ref Interface t) { return t.@implicit; }
 
 // Complete computes the interface's type set. It must be called by users of
 // [NewInterfaceType] and [NewInterface] after the interface's embedded types are
@@ -153,7 +144,7 @@ public static bool IsImplicit(this ref Interface t) { return t.@implicit; }
 // panic occurs. Complete returns the receiver.
 //
 // Interface types that have been completed are safe for concurrent use.
-public static ж<Interface> Complete(this ж<Interface> Ꮡt) {
+internal static ж<Interface> Complete⁔(/*this*/ ж<Interface> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (!t.complete) {
@@ -163,12 +154,12 @@ public static ж<Interface> Complete(this ж<Interface> Ꮡt) {
     return Ꮡt;
 }
 
-public static Type Underlying(this ж<Interface> Ꮡt) { return new InterfaceжType(Ꮡt); }
-public static @string String(this ж<Interface> Ꮡt) { return TypeString(new InterfaceжType(Ꮡt), default); }
+internal static Type Underlying⁔(/*this*/ ж<Interface> Ꮡt) { return new InterfaceжType(Ꮡt); }
+internal static @string String⁔(/*this*/ ж<Interface> Ꮡt) { return TypeString(new InterfaceжType(Ꮡt), default); }
 
 // ----------------------------------------------------------------------------
 // Implementation
-internal static void cleanup(this ж<Interface> Ꮡt) {
+internal static void cleanup⁔(/*this*/ ж<Interface> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     Ꮡt.typeSet(); // any interface that escapes type checking must be safe for concurrent use
@@ -176,15 +167,13 @@ internal static void cleanup(this ж<Interface> Ꮡt) {
     t.embedPos = default;
 }
 
-} partial class typesᴛChecker {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string methodsMustHaveAUniqueˢ => ref methodsMustHaveAUniqueˢᵇ;
 private static readonly @string methodsMustHaveAUniqueˢᵇ = "methods must have a unique non-blank name"u8;
 internal static ref readonly @string methodsCannotHaveTypeˢ => ref methodsCannotHaveTypeˢᵇ;
 private static readonly @string methodsCannotHaveTypeˢᵇ = "methods cannot have type parameters"u8;
 
-internal static void interfaceType(this ж<Checker> Ꮡcheck, ж<Interface> Ꮡityp, ж<ast.InterfaceType> Ꮡiface, ж<TypeName> Ꮡdef) {
+internal static void interfaceType⁔(/*this*/ ж<Checker> Ꮡcheck, ж<Interface> Ꮡityp, ж<ast.InterfaceType> Ꮡiface, ж<TypeName> Ꮡdef) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var ityp = ref Ꮡityp.DerefOrNull();
     ref var iface = ref Ꮡiface.DerefOrNull();
@@ -266,4 +255,4 @@ internal static void interfaceType(this ж<Checker> Ꮡcheck, ж<Interface> Ꮡi
     }).describef(new ast_InterfaceTypeжpositioner(Ꮡiface), "compute type set for %s", Ꮡityp.OrTypedNil());
 }
 
-}
+} // end types_package

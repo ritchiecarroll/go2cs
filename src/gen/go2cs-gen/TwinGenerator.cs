@@ -17,7 +17,7 @@ using Microsoft.CodeAnalysis.Diagnostics;
 namespace go2cs;
 
 /// <summary>
-/// M:N SPIKE (R5b, B2). Spike code: it stays on the spike branch and never lands.
+/// M:N scheduler, experimental and opt-in (GoTwins=true to build, GO2CS_MN=1 to run); inert otherwise.
 /// Writes a hidden async twin beside each converted function that can park: the function's own text, with each call
 /// that has a twin awaited. It runs only for a project built with <c>GoTwins=true</c>.
 /// </summary>
@@ -35,9 +35,14 @@ public sealed partial class TwinGenerator : ISourceGenerator
         public GoKind Go;
         public bool Active, Direct, Renameable, Unbound, Delegate, Interface, IfaceCallable;
 
-        // A call through a func value that a twin CAN test for a pair: the callee is a local or parameter whose delegate
-        // type has a canonical twin delegate (the rewriter's own PairShape test, asked here for N3's caller rule).
+        // A call through a func value that a twin CAN test for a pair: the callee is a local, a parameter, a field (t.run) or
+        // an element (fs[i], m[k]) whose delegate type has a canonical twin delegate (the rewriter's own PairShape test,
+        // asked here for N3's caller rule). A field or element is read ONCE, into a temp, before the test (the func-value
+        // seat; P5's S2 arm 3 found a table-driven main never twinned while only a bare identifier qualified).
         public bool PairCallable;
+
+        // A call through a func value the generator cannot test for a pair: the shape, for GO2CS0020 (null when covered).
+        public string? PairUncovered;
         public IMethodSymbol? IfaceTarget;
 
         // A go statement the generator cannot launch as a twin (GoKind.Other): why, and whether its goroutine could park
@@ -109,6 +114,16 @@ public sealed partial class TwinGenerator : ISourceGenerator
     public void Execute(GeneratorExecutionContext context) =>
         Execute(context, typeof(TwinGenerator));
 
+    // Every build property that changes what the twin generator writes, other than GoTwins itself. Outside a prototype
+    // arm (GoTwinsArm=true) each one is refused by name (GO2CS0018); none may reach a package that ships. The guard's
+    // test seam (GoTwinsGuardDrop) is here too, and a twin-refuse.txt additional file is refused the same way.
+    internal static readonly string[] ArmSwitches =
+    [
+        "GoTwinsIface", "GoTwinsIfaceAll", "GoTwinsIfaceUnmark", "GoTwinsGo", "GoTwinsPairs", "GoTwinsCallerRule",
+        "GoTwinsForwarders", "GoTwinsGuardWarn", "GoTwinsGuardDrop",
+        "GoTwinsBoxRecv", "GoTwinsBoxForwarders", "GoTwinsBoxCopy", "GoTwinsBoxParam", "GoTwinsBoxArgCopy"
+    ];
+
     // GoTwinsSiblings=last (B4) hands the work to ZTwinGenerator, which the compiler runs after every sibling.
     internal static void Execute(GeneratorExecutionContext context, Type self)
     {
@@ -122,16 +137,19 @@ public sealed partial class TwinGenerator : ISourceGenerator
 
         bool goSites = !(options.TryGetValue("build_property.GoTwinsGo", out string? go) && string.Equals(go, "false", StringComparison.OrdinalIgnoreCase));
 
-        // O2 (7a, DESIGN-mn-twin-set.md 12.1 and section 10): a package built with twins carries the WHOLE set, so a
-        // switch that selects part of it is refused (GO2CS0018), naming it. A prototype arm sets GoTwinsArm=true, which
-        // admits the switches and keeps their old defaults. A property MSBuild makes visible arrives empty when unset.
+        // O2 (7a, DESIGN-mn-twin-set.md 12.1 and section 10): a package built with twins carries the WHOLE set, built one
+        // way, so every switch that changes what is generated is refused (GO2CS0018), naming it: the ones that select part
+        // of the set, and the measurement arms' A/B controls, two of which (GoTwinsBoxCopy, GoTwinsBoxArgCopy) are wrong on
+        // purpose. A prototype arm sets GoTwinsArm=true, which admits the switches and keeps their old defaults.
+        // GoTwinsSiblings and GoTwinsTiming are not refused: the first picks how the generator reads its siblings' output,
+        // not what it twins; the second only adds a stopwatch to the report. A property MSBuild makes visible arrives
+        // empty when unset.
         bool arm = options.TryGetValue("build_property.GoTwinsArm", out string? armed) && string.Equals(armed, "true", StringComparison.OrdinalIgnoreCase);
         bool Set(string name) => options.TryGetValue("build_property." + name, out string? value) && !string.IsNullOrWhiteSpace(value);
 
         if (!arm)
         {
-            // The 7a arm switches and the guard's seam are refused the same way: none may reach a package that ships.
-            foreach (string name in new[] { "GoTwinsIface", "GoTwinsIfaceAll", "GoTwinsGo", "GoTwinsForwarders", "GoTwinsGuardWarn", "GoTwinsGuardDrop" })
+            foreach (string name in ArmSwitches)
             {
                 if (Set(name))
                     context.ReportDiagnostic(Diagnostic.Create(GeneratorDiagnostics.PartialTwinSet, Location.None, name));
@@ -343,14 +361,29 @@ public sealed partial class TwinGenerator : ISourceGenerator
                 // value warns ONCE, at the function, naming its refusal. Its calls run the plain delegate even when the
                 // value is a pair, so a can-park func value blocks a carrier there; iterators, the yield callers, are the
                 // largest such set. A function with a twin of its own (has-twin) is not a hole.
+                bool refusedCaller = false;
+
                 if (candidate.Refusal is { } refusal && refusal != "has-twin" &&
                     candidate.Sites.Any(site => site.Direct && site.Delegate && CallerRuleTwins(site)))
                 {
+                    refusedCaller = true;
                     Context.ReportDiagnostic(Diagnostic.Create(GeneratorDiagnostics.RefusedFuncValueCaller,
                         candidate.Syntax.Identifier.GetLocation(), candidate.Symbol.ToDisplayString(), refusal));
                 }
 
                 ReportPlainLaunches(candidate);
+
+                // GO2CS0020: a func-value call the pair test cannot reach, once per function (the func-value seat). Not for
+                // a function GO2CS0014 already names (every call of it runs plain), and not with the pair core off
+                // (GoTwinsPairs=false: no call is tested at all, the A/B control).
+                Site[] uncovered = [.. candidate.Sites.Where(site => site is { Active: true, Delegate: true, PairBody: false, PairUncovered: not null })];
+
+                if (uncovered.Length > 0 && Pairs && !refusedCaller)
+                {
+                    UncoveredFuncValueCalls += uncovered.Length;
+                    Context.ReportDiagnostic(Diagnostic.Create(GeneratorDiagnostics.UncoveredFuncValueCall,
+                        candidate.Syntax.Identifier.GetLocation(), candidate.Symbol.ToDisplayString(), uncovered[0].PairUncovered, uncovered.Length));
+                }
             }
 
             m_analysisMs = m_watch.ElapsedMilliseconds - m_siblingMs;
@@ -366,6 +399,9 @@ public sealed partial class TwinGenerator : ISourceGenerator
                 node.Ancestors().TakeWhile(ancestor => ancestor != candidate.Syntax).OfType<LockStatementSyntax>().Any());
 
         internal int GoPlain;
+
+        // GO2CS0020's count: func-value calls the pair test cannot reach (the func-value seat).
+        internal int UncoveredFuncValueCalls;
 
         // The LOUD fallback (COORD's A3 ruling; the owner's severity, FREEZE-SHEET.md 2026-11-13): a go statement the
         // generator does not launch as a twin keeps its plain launch -- a thread, where a goroutine that parks blocks it --
@@ -457,11 +493,11 @@ public sealed partial class TwinGenerator : ISourceGenerator
             m_ordered.Add(candidate);
         }
 
-        // M:N PROTOTYPE (A1): the never-twinned rule for native wrappers (the cgo design's M4). A method that is extern, that
+        // M:N (A1): the never-twinned rule for native wrappers (the cgo design's M4). A method that is extern, that
         // carries DllImport or LibraryImport, or whose body pins with `fixed`, is synchronous: a `fixed` scope cannot span a
         // park. A twin that calls one calls the plain method, and blocks its carrier for the length of the call.
         //
-        // M:N PROTOTYPE (A2): the closed list. A method is refused as "native" when any one of these holds, and for no
+        // M:N (A2): the closed list. A method is refused as "native" when any one of these holds, and for no
         // other reason:
         //   1. it is extern;
         //   2. it carries DllImport or LibraryImport;
@@ -675,13 +711,49 @@ public sealed partial class TwinGenerator : ISourceGenerator
             return m_hasTwin[definition] = has;
         }
 
+        // The func-value seat: the callees a pair test reads. A local or parameter (named once already), a field or property
+        // read (t.run, t.inner.run, Ꮡt.Value.run), and an element of an array, slice or map (fs[i], m[k]). The rewriter reads
+        // a field or element ONCE into a temp, so the test and the call see one value and an index is evaluated once.
+        internal static bool PairableCallee(ExpressionSyntax callee, SemanticModel model) => callee switch
+        {
+            IdentifierNameSyntax => true,
+            MemberAccessExpressionSyntax access => access.IsKind(SyntaxKind.SimpleMemberAccessExpression) &&
+                                                   model.GetSymbolInfo(access).Symbol is IFieldSymbol or IPropertySymbol,
+            ElementAccessExpressionSyntax => true,
+            _ => false
+        };
+
+        // What a func-value call the pair test does not reach is, named for GO2CS0020.
+        internal static string PairUncoveredShape(ExpressionSyntax callee, SemanticModel model) => callee switch
+        {
+            InvocationExpressionSyntax => "a call's result",
+            ParenthesizedExpressionSyntax or CastExpressionSyntax => "a converted or parenthesized value",
+            ConditionalAccessExpressionSyntax => "a conditional access",
+            _ => "a " + callee.Kind().ToString()
+        };
+
         internal bool CanPark(IMethodSymbol? target)
         {
             if (target is null)
                 return false;
 
-            return HasTwinMember(target) || HasBoxTwinMember(target) || m_candidates.TryGetValue(target, out Candidate? candidate) && candidate.Twinned;
+            return HasTwinMember(target) || HasBoxTwinMember(target) || IsGoschedIntrinsic(target) ||
+                   m_candidates.TryGetValue(target, out Candidate? candidate) && candidate.Twinned;
         }
+
+        // The Gosched-park seat (COORD's ruling of 2026-11-21, docs/phase4/inbox/G/20261121T231225Z-COORD.md): in a twin,
+        // runtime.Gosched is a park point that requeues the goroutine, as in Go. runtime is a hand-owned stdlib package
+        // with no public hand twin under L-min, so the twin is golib's builtin.Goschedꞏtwin: CanPark reads the call as a
+        // park, and the rewriter awaits the builtin in its place. Only where that twin binds (golib carries it).
+        private bool? m_goschedTwin;
+
+        internal bool IsGoschedIntrinsic(IMethodSymbol? target) =>
+            target is
+            {
+                Name: "Gosched", IsStatic: true, Parameters.Length: 0, TypeParameters.Length: 0,
+                ContainingType: { Name: "runtime_package", ContainingType: null, ContainingNamespace: { Name: "go", ContainingNamespace.IsGlobalNamespace: true } }
+            } &&
+            (m_goschedTwin ??= Context.Compilation.GetTypeByMetadataName("go.builtin")?.GetMembers("Goschedꞏtwin").OfType<IMethodSymbol>().Any(TwinBinds) == true);
 
         internal bool ShouldAwait(Site site) =>
             site is { Active: true, Go: GoKind.None, Renameable: true, Delegate: false } &&
@@ -877,9 +949,12 @@ public sealed partial class TwinGenerator : ISourceGenerator
             if (method.MethodKind == MethodKind.DelegateInvoke)
             {
                 site.Delegate = true;
-                site.PairCallable = node.Expression is IdentifierNameSyntax &&
+                site.PairCallable = PairableCallee(node.Expression, model) &&
                     model.GetTypeInfo(node.Expression).Type is INamedTypeSymbol { TypeKind: TypeKind.Delegate } delegateType &&
                     TwinDelegateType(delegateType) is not null;
+                site.PairUncovered = site.PairCallable ? null
+                    : !PairableCallee(node.Expression, model) ? PairUncoveredShape(node.Expression, model)
+                    : "a signature with no twin delegate type";
             }
             else if (method.MethodKind != MethodKind.LocalFunction && method.ContainingType?.TypeKind == TypeKind.Interface)
             {

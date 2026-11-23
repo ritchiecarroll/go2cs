@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-// M:N SPIKE (R5b, goroutine 1). Spike code: it stays on the spike branch and never lands.
+// M:N scheduler, experimental and opt-in (GoTwins=true to build, GO2CS_MN=1 to run); inert otherwise.
 //
 // How the main goroutine ends after it has parked. Every arm parks main once, on a value that arrives 20 ms after
 // its receive began, and then ends main one way: a return, a runtime.Goexit, a panic, a wait that never ends. Under

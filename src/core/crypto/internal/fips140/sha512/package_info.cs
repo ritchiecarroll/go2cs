@@ -10,10 +10,14 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+using hash = go.hash_package;
 // </ImportedTypeAliases>
 
 using go;
 using static go.crypto.@internal.fips140.sha512_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -57,12 +61,15 @@ using static go.crypto.@internal.fips140.sha512_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("crypto/internal/fips140/sha512/cast.go", "cast.cs", "AAwagoK4AAkUgoKClA==", "14-35:1")]
-[assembly: GoPositionMap("crypto/internal/fips140/sha512/sha512.go", "sha512.cs", "AFCgAYKUgoKCgoKCgrSCgoKCgoKCtIKCgoKCgoK0goKCgoKCgrSkggAQFoKmgpS0tLS0pIKCgoKCgoKCgoKCAAgGgoKUAA0MlIKUgoKCgoKCgoKCgoKCxoLGgoLIkoKCqJKCgqiSgoKokoKCxoKmlMKCgoKCgoKClJSCgoKUgpSmgpSCgoKmtIKCgoKClLiCuIKUgqaCgoKCgoKCgoKm")]
+[assembly: GoPositionMap("crypto/internal/fips140/sha512/sha512.go", "sha512.cs", "AE2gAYKUgoKCgoKCgrSCgoKCgoKCtIKCgoKCgoK0goKCgoKCgrSkggAMFoKmgpS0tLS0pIKCgoKCgoKCgoKCAAgGgoKUAA0MlIKUgoKCgoKCgoKCgoKCpoKmgoKokoKCqJKCgqiSgoKokoKCpoKmlMKCgoKCgoKClJSCgoKUgpSmgpSCgoKmtIKCgoKClLiCuIKUgqaCgoKCgoKCgoKm")]
 [assembly: GoPositionMap("crypto/internal/fips140/sha512/sha512block.go", "sha512block.cs", "AA0aAFKmAYKCgoKUgoKCloKCgpSmlJSCgoKCgoKCpoKCgoKCgoKUpg==")]
 [assembly: GoPositionMap("crypto/internal/fips140/sha512/sha512block_noasm.go", "sha512block_noasm.cs", "AAgSgg==")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140;
+
+using static go.crypto.@internal.fips140.sha512_package;
+using hash = go.hash_package;
 
 [GoPackage("sha512")]
 public static partial class sha512_package
@@ -99,5 +106,24 @@ public static partial class sha512_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(sha512_package.Digest)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class sha512ᴛDigest;
+[GoMethodHost(typeof(sha512_package.Digest)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class sha512ᴛDigest;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class sha512ᴛDigest {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Reset(this ref Digest d) => sha512_package.Reset⁔(ref d);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<byte>, error) MarshalBinary(this ref Digest d) => sha512_package.MarshalBinary⁔(ref d);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<byte>, error) AppendBinary(this ref Digest d, slice<byte> b) => sha512_package.AppendBinary⁔(ref d, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error UnmarshalBinary(this ref Digest d, slice<byte> b) => sha512_package.UnmarshalBinary⁔(ref d, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (hash.Cloner, error) Clone(this ref Digest d) => sha512_package.Clone⁔(ref d);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Size(this ref Digest d) => sha512_package.Size⁔(ref d);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint BlockSize(this ref Digest d) => sha512_package.BlockSize⁔(ref d);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint nn, error err) Write(this ж<Digest> Ꮡd, slice<byte> p) => sha512_package.Write⁔(Ꮡd, p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> Sum(this ref Digest d, slice<byte> @in) => sha512_package.Sum⁔(ref d, @in);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static array<byte> checkSum(this ж<Digest> Ꮡd) => sha512_package.checkSum⁔(Ꮡd);
+}
+// </MethodForwarders>

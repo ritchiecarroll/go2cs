@@ -7,7 +7,6 @@ using poll = @internal.poll_package;
 using Δio = io_package;
 using syscall = syscall_package;
 using @internal;
-using static os_package;
 
 partial class os_package {
 
@@ -16,13 +15,11 @@ internal static ref Func<ж<poll.FD>, ж<poll.FD>, int64, (int64, bool, error)> 
 internal static readonly ж<Func<ж<poll.FD>, ж<poll.FD>, int64, (int64, bool, error)>> ᏑpollSplice = new StaticBox<Func<ж<poll.FD>, ж<poll.FD>, int64, (int64, bool, error)>>(poll.Splice);
 internal static ref Func<ж<poll.FD>, ж<poll.FD>, int64, (int64, bool, error)> pollSplice => ref ((StaticBox<Func<ж<poll.FD>, ж<poll.FD>, int64, (int64, bool, error)>>)ᏑpollSplice).ValueSlot;
 
-} partial class osᴛFile {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string sendfileˢ => ref sendfileˢᵇ;
 private static readonly @string sendfileˢᵇ = "sendfile"u8;
 
-internal static (int64 written, bool handled, error err) writeTo(this ж<File> Ꮡf, Δio.Writer w) {
+internal static (int64 written, bool handled, error err) writeTo⁔(/*this*/ ж<File> Ꮡf, Δio.Writer w) {
     int64 written = default;
     bool handled = default;
     ref var err = ref heap<error>(out var Ꮡerr);
@@ -51,7 +48,7 @@ internal static (int64 written, bool handled, error err) writeTo(this ж<File> �
     return (written, handled, wrapSyscallError(sendfileˢ, err));
 }
 
-internal static (int64 written, bool handled, error err) readFrom(this ж<File> Ꮡf, Δio.Reader r) {
+internal static (int64 written, bool handled, error err) readFrom⁔(/*this*/ ж<File> Ꮡf, Δio.Reader r) {
     int64 written = default;
     bool handled = default;
     error err = default;
@@ -77,7 +74,7 @@ internal static (int64 written, bool handled, error err) readFrom(this ж<File> 
 internal static ref readonly @string spliceˢ => ref spliceˢᵇ;
 private static readonly @string spliceˢᵇ = "splice"u8;
 
-internal static (int64 written, bool handled, error err) spliceToFile(this ж<File> Ꮡf, Δio.Reader r) {
+internal static (int64 written, bool handled, error err) spliceToFile⁔(/*this*/ ж<File> Ꮡf, Δio.Reader r) {
     int64 written = default;
     bool handled = default;
     error err = default;
@@ -115,7 +112,7 @@ private static readonly @string readFromˢᵇ = "ReadFrom"u8;
 internal static ref readonly @string copyFileRangeˢ => ref copyFileRangeˢᵇ;
 private static readonly @string copyFileRangeˢᵇ = "copy_file_range"u8;
 
-internal static (int64 written, bool handled, error err) copyFileRange(this ж<File> Ꮡf, Δio.Reader r) {
+internal static (int64 written, bool handled, error err) copyFileRange⁔(/*this*/ ж<File> Ꮡf, Δio.Reader r) {
     int64 written = default;
     bool handled = default;
     error err = default;
@@ -153,8 +150,6 @@ internal static (int64 written, bool handled, error err) copyFileRange(this ж<F
     }
     return (written, handled, wrapSyscallError(copyFileRangeˢ, err));
 }
-
-} partial class os_package {
 
 internal partial interface getPollFDAndNetwork_type /*dyn*/ {
     ж<poll.FD> PollFD();

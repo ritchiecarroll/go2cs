@@ -8,8 +8,6 @@
 // TODO: Consider moving this to internal/runtime, see golang.org/issue/65355.
 namespace go.@internal;
 
-using static profilerecord_package;
-
 partial class profilerecord_package {
 
 partial struct StackRecord {
@@ -22,12 +20,8 @@ partial struct MemProfileRecord {
     public slice<uintptr> Stack;
 }
 
-} partial class profilerecordᴛMemProfileRecord {
-
-public static int64 InUseBytes(this ref MemProfileRecord r) { return r.AllocBytes - r.FreeBytes; }
-public static int64 InUseObjects(this ref MemProfileRecord r) { return r.AllocObjects - r.FreeObjects; }
-
-} partial class profilerecord_package {
+internal static int64 InUseBytes⁔(/*this*/ ref MemProfileRecord r) { return r.AllocBytes - r.FreeBytes; }
+internal static int64 InUseObjects⁔(/*this*/ ref MemProfileRecord r) { return r.AllocObjects - r.FreeObjects; }
 
 partial struct BlockProfileRecord {
     public int64 Count;

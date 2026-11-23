@@ -14,6 +14,9 @@
 
 using go;
 using static go.@internal.routebsd_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -71,18 +74,20 @@ using static go.@internal.routebsd_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/routebsd/address.go", "address.cs", "AB06gLSCgpSCgpSCqgARIKKClIKUgpSCgpSCgoKCgpSCgpQACRCCgpTakryUgpSCgqaCgpSUpqSClIKCgoKClILKgoLcpqS8ABUogqaCppSCmLiUpqSCgpSUpqSmpIKClJSmuIKCgoKClIKUgoKUgoKClLSCgoKUgoKClLSCgpSCgoKU2oKClO4=", "", "", "134=AddrFrom4/1/1/1;164=AddrFrom16/1/1/1;215=AddrFrom16/1/1/1;227=AddrFrom16/1/1/1;233=AddrFrom4/1/1/1;245=AddrFrom4/1/1/1")]
-[assembly: GoPositionMap("internal/routebsd/binary.go", "binary.cs", "AB88gqaCpoIACQqCpoKmgg==")]
-[assembly: GoPositionMap("internal/routebsd/interface.go", "interface.cs", "AC1ewrI=")]
-[assembly: GoPositionMap("internal/routebsd/interface_classic.go", "interface_classic.cs", "AA4cgoKUgoKUlAAMGoKCgpSCuIK4poKClIKClNyClJSCgoKU", "", "", "25=Uint32/1/1/4,Uint16/1/1/5;64=Uint32/1/1/3")]
-[assembly: GoPositionMap("internal/routebsd/interface_multicast.go", "interface_multicast.cs", "AAwSgoKUgoKU7oKCgpQ=", "", "", "21=Uint32/1/1/3,Uint16/1/1/4")]
+[assembly: GoPositionMap("internal/routebsd/address.go", "address.cs", "ABo6gJSCgpSCgpSCqgARIKKClIKUgpSCgpSCgoKCgpSCgpQABxCCgpS6kryUgpSCgqaCgpSUpqSClIKCgoKClILKgoLcpqS8ABUogqaCppSCmLiUpqSCgpSUpqSmpIKClJSmuIKCgoKClIKUgoKUgoKClLSCgoKUgoKClLSCgpSCgoKU2oKClO4=", "", "", "125=AddrFrom4/1/1/1;155=AddrFrom16/1/1/1;206=AddrFrom16/1/1/1;218=AddrFrom16/1/1/1;224=AddrFrom4/1/1/1;236=AddrFrom4/1/1/1")]
+[assembly: GoPositionMap("internal/routebsd/binary.go", "binary.cs", "ABw8gqaCpoLagqaCpoI=")]
+[assembly: GoPositionMap("internal/routebsd/interface.go", "interface.cs", "AClekoI=")]
+[assembly: GoPositionMap("internal/routebsd/interface_classic.go", "interface_classic.cs", "AAscgoKUgoKUlAAMGoKCgpSCuIK4poKClIKClNyClJSCgoKU", "", "", "22=Uint32/1/1/4,Uint16/1/1/5;61=Uint32/1/1/3")]
+[assembly: GoPositionMap("internal/routebsd/interface_multicast.go", "interface_multicast.cs", "AAgSgoKUgoKU7oKCgpQ=", "", "", "17=Uint32/1/1/3,Uint16/1/1/4")]
 [assembly: GoPositionMap("internal/routebsd/message.go", "message.cs", "AA0gwoKSgoKCgpSClIKClIKUgoKUgpSmuIKU")]
 [assembly: GoPositionMap("internal/routebsd/route.go", "route.cs", "AA8kgoKCnsKCgoKasoKmvrKCgpSCgpQ=")]
 [assembly: GoPositionMap("internal/routebsd/sys.go", "sys.cs", "ABJEgoKU")]
-[assembly: GoPositionMap("internal/routebsd/sys_darwin.go", "sys_darwin.cs", "AAwUkvyCgpKCkoKSgpKCpA==")]
+[assembly: GoPositionMap("internal/routebsd/sys_darwin.go", "sys_darwin.cs", "AAkUktyCgpKCkoKSgpKCpA==")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;
+
+using static go.@internal.routebsd_package;
 
 [GoPackage("routebsd")]
 public static partial class routebsd_package
@@ -128,12 +133,50 @@ public static partial class routebsd_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(routebsd_package.InetAddr)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class routebsdᴛInetAddr;
-[GoMethodHost(typeof(routebsd_package.InterfaceAddrMessage)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class routebsdᴛInterfaceAddrMessage;
-[GoMethodHost(typeof(routebsd_package.InterfaceMessage)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class routebsdᴛInterfaceMessage;
-[GoMethodHost(typeof(routebsd_package.InterfaceMulticastAddrMessage)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class routebsdᴛInterfaceMulticastAddrMessage;
-[GoMethodHost(typeof(routebsd_package.LinkAddr)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class routebsdᴛLinkAddr;
-[GoMethodHost(typeof(routebsd_package.binaryBigEndian)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class routebsdᴛbinaryBigEndian;
-[GoMethodHost(typeof(routebsd_package.binaryLittleEndian)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class routebsdᴛbinaryLittleEndian;
-[GoMethodHost(typeof(routebsd_package.wireFormat)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class routebsdᴛwireFormat;
+[GoMethodHost(typeof(routebsd_package.InetAddr)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class routebsdᴛInetAddr;
+[GoMethodHost(typeof(routebsd_package.InterfaceAddrMessage)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class routebsdᴛInterfaceAddrMessage;
+[GoMethodHost(typeof(routebsd_package.InterfaceMessage)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class routebsdᴛInterfaceMessage;
+[GoMethodHost(typeof(routebsd_package.InterfaceMulticastAddrMessage)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class routebsdᴛInterfaceMulticastAddrMessage;
+[GoMethodHost(typeof(routebsd_package.LinkAddr)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class routebsdᴛLinkAddr;
+[GoMethodHost(typeof(routebsd_package.binaryBigEndian)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class routebsdᴛbinaryBigEndian;
+[GoMethodHost(typeof(routebsd_package.binaryLittleEndian)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class routebsdᴛbinaryLittleEndian;
+[GoMethodHost(typeof(routebsd_package.wireFormat)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class routebsdᴛwireFormat;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class routebsdᴛInetAddr {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Family(this ref InetAddr a) => routebsd_package.Family⁔(ref a);
+}
+partial class routebsdᴛInterfaceAddrMessage {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void message(this InterfaceAddrMessage _) => routebsd_package.message⁔(_);
+}
+partial class routebsdᴛInterfaceMessage {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void message(this InterfaceMessage _) => routebsd_package.message⁔(_);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint MTU(this ref InterfaceMessage m) => routebsd_package.MTU⁔(ref m);
+}
+partial class routebsdᴛInterfaceMulticastAddrMessage {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void message(this InterfaceMulticastAddrMessage _) => routebsd_package.message⁔(_);
+}
+partial class routebsdᴛLinkAddr {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Family(this ref LinkAddr a) => routebsd_package.Family⁔(ref a);
+}
+partial class routebsdᴛbinaryBigEndian {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static uint16 Uint16(this binaryBigEndian _, slice<byte> b) => routebsd_package.Uint16⁔(_, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static uint32 Uint32(this binaryBigEndian _, slice<byte> b) => routebsd_package.Uint32⁔(_, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static uint64 Uint64(this binaryBigEndian _, slice<byte> b) => routebsd_package.Uint64⁔(_, b);
+}
+partial class routebsdᴛbinaryLittleEndian {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static uint16 Uint16(this binaryLittleEndian _, slice<byte> b) => routebsd_package.Uint16⁔(_, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static uint32 Uint32(this binaryLittleEndian _, slice<byte> b) => routebsd_package.Uint32⁔(_, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static uint64 Uint64(this binaryLittleEndian _, slice<byte> b) => routebsd_package.Uint64⁔(_, b);
+}
+partial class routebsdᴛwireFormat {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (Message, error) parseInterfaceMessage(this ref wireFormat w, slice<byte> b) => routebsd_package.parseInterfaceMessage⁔(ref w, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (Message, error) parseInterfaceAddrMessage(this ref wireFormat w, slice<byte> b) => routebsd_package.parseInterfaceAddrMessage⁔(ref w, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (Message, error) parseInterfaceMulticastAddrMessage(this ref wireFormat w, slice<byte> b) => routebsd_package.parseInterfaceMulticastAddrMessage⁔(ref w, b);
+}
+// </MethodForwarders>

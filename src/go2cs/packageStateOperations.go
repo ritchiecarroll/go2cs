@@ -54,6 +54,7 @@ func resetPackageState(pkg *packages.Package) {
 	cgoRouteFunctions = nil
 	cgoCheckClosures = nil
 	currentPackagePath = pkg.PkgPath
+	packageInfoSystemClashes = systemUsingClashes(pkg.Types)
 	currentPackageGorootVendored = false
 	currentPackageOutsideGoroot = pkg.Dir != "" && !isPathUnder(pkg.Dir, filepath.Join(build.Default.GOROOT, "src"))
 	packageHoistsLiterals = false
@@ -154,9 +155,11 @@ func resetPackageState(pkg *packages.Package) {
 	packageImportForces = hashset.HashSet[string]{}
 	packageImportInits = map[string]string{}
 	packageMethodHolders = map[string]string{}
+	packageMethodForwarders = nil
 	packageRefLoweringResult = nil
 	packageHandOwnedTypes = map[*types.TypeName]bool{}
 	packageHandOwnedVars = map[*types.Var]bool{}
+	packageHandOwnedMethods = map[*types.Func]bool{}
 
 	// Capture the package's own source directory for the README's validation badge, which has to
 	// look at the Go sources the conversion never compiles (the `_test.go` files) to tell a package

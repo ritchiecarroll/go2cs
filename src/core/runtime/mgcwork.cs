@@ -11,7 +11,6 @@ using sys = @internal.runtime.sys_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
-using static runtime_package;
 
 partial class runtime_package {
 
@@ -128,15 +127,13 @@ partial struct gcWork {
     internal array<sizeClassScanStats> stats = new(gc.NumSizeClasses);
 }
 
-} partial class runtimeᴛgcWork {
-
 // Most of the methods of gcWork are go:nowritebarrierrec because the
 // write barrier itself can invoke gcWork methods but the methods are
 // not generally re-entrant. Hence, if a gcWork method invoked the
 // write barrier while the gcWork was in an inconsistent state, and
 // the write barrier in turn invoked a gcWork method, it could
 // permanently corrupt the gcWork.
-internal static void init(this ref gcWork w) {
+internal static void init⁔(/*this*/ ref gcWork w) {
     w.wbuf1 = getempty();
     var wbuf2 = trygetfull();
     if (wbuf2 == nil) {
@@ -149,7 +146,7 @@ internal static void init(this ref gcWork w) {
 // obj must point to the beginning of a heap object or an oblet.
 //
 //go:nowritebarrierrec
-internal static void putObj(this ref gcWork w, uintptr obj) {
+internal static void putObj⁔(/*this*/ ref gcWork w, uintptr obj) {
     var flushed = false;
     var wbuf = w.wbuf1;
     // Record that this may acquire the wbufSpans or heap lock to
@@ -192,7 +189,7 @@ internal static void putObj(this ref gcWork w, uintptr obj) {
 // otherwise it returns false and the caller needs to call put.
 //
 //go:nowritebarrierrec
-internal static bool putObjFast(this ref gcWork w, uintptr obj) {
+internal static bool putObjFast⁔(/*this*/ ref gcWork w, uintptr obj) {
     var wbuf = w.wbuf1;
     if (wbuf == nil || wbuf.nobj == len(wbuf.obj)) {
         return false;
@@ -207,7 +204,7 @@ internal static bool putObjFast(this ref gcWork w, uintptr obj) {
 // constraints on these pointers.
 //
 //go:nowritebarrierrec
-internal static void putObjBatch(this ref gcWork w, slice<uintptr> obj) {
+internal static void putObjBatch⁔(/*this*/ ref gcWork w, slice<uintptr> obj) {
     if (len(obj) == 0) {
         return;
     }
@@ -248,7 +245,7 @@ internal static void putObjBatch(this ref gcWork w, slice<uintptr> obj) {
 // other gcWork instances or other caches.
 //
 //go:nowritebarrierrec
-internal static uintptr tryGetObj(this ref gcWork w) {
+internal static uintptr tryGetObj⁔(/*this*/ ref gcWork w) {
     var wbuf = w.wbuf1;
     if (wbuf == nil) {
         w.init();
@@ -278,7 +275,7 @@ internal static uintptr tryGetObj(this ref gcWork w) {
 // the caller is expected to call tryGet().
 //
 //go:nowritebarrierrec
-internal static uintptr tryGetObjFast(this ref gcWork w) {
+internal static uintptr tryGetObjFast⁔(/*this*/ ref gcWork w) {
     var wbuf = w.wbuf1;
     if (wbuf == nil || wbuf.nobj == 0) {
         return 0;
@@ -295,7 +292,7 @@ internal static uintptr tryGetObjFast(this ref gcWork w) {
 // ability to hide pointers during the concurrent mark phase.
 //
 //go:nowritebarrierrec
-internal static void dispose(this ж<gcWork> Ꮡw) {
+internal static void dispose⁔(/*this*/ ж<gcWork> Ꮡw) {
     ref var w = ref Ꮡw.DerefOrNull();
 
     var wbuf = w.wbuf1; if (wbuf != nil) {
@@ -348,7 +345,7 @@ internal static void dispose(this ж<gcWork> Ꮡw) {
 // global queue.
 //
 //go:nowritebarrierrec
-internal static void balance(this ref gcWork w) {
+internal static void balance⁔(/*this*/ ref gcWork w) {
     if (w.wbuf1 == nil) {
         return;
     }
@@ -375,13 +372,11 @@ internal static void balance(this ref gcWork w) {
 // empty reports whether w has no mark work available.
 //
 //go:nowritebarrierrec
-internal static bool empty(this ж<gcWork> Ꮡw) {
+internal static bool empty⁔(/*this*/ ж<gcWork> Ꮡw) {
     ref var w = ref Ꮡw.DerefOrNull();
 
     return (w.wbuf1 == nil || (w.wbuf1.nobj == 0 && w.wbuf2.nobj == 0)) && Ꮡw.Ꮡspanq.empty();
 }
-
-} partial class runtime_package {
 
 // Internally, the GC work pool is kept in arrays in work buffers.
 // The gcWork interface caches a work buffer until full (or empty) to
@@ -398,8 +393,6 @@ partial struct workbuf {
     internal array<uintptr> obj = new((uintptr)((uintptr)_WorkbufSize - /* unsafe.Sizeof(workbufhdr{}) */ (uintptr)24) / goarch.PtrSize);
 }
 
-} partial class runtimeᴛworkbuf {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string workbufIsEmptyˢ => ref workbufIsEmptyˢᵇ;
 private static readonly @string workbufIsEmptyˢᵇ = "workbuf is empty"u8;
@@ -408,7 +401,7 @@ private static readonly @string workbufIsEmptyˢᵇ = "workbuf is empty"u8;
 // workbufs.
 // If the GC asks for some work these are the only routines that
 // make wbufs available to the GC.
-internal static void checknonempty(this ref workbuf b) {
+internal static void checknonempty⁔(/*this*/ ref workbuf b) {
     if (b.nobj == 0) {
         @throw(workbufIsEmptyˢ);
     }
@@ -418,13 +411,11 @@ internal static void checknonempty(this ref workbuf b) {
 internal static ref readonly @string workbufIsNotEmptyˢ => ref workbufIsNotEmptyˢᵇ;
 private static readonly @string workbufIsNotEmptyˢᵇ = "workbuf is not empty"u8;
 
-internal static void checkempty(this ref workbuf b) {
+internal static void checkempty⁔(/*this*/ ref workbuf b) {
     if (b.nobj != 0) {
         @throw(workbufIsNotEmptyˢ);
     }
 }
-
-} partial class runtime_package {
 
 // getempty pops an empty work buffer off the work.empty list,
 // allocating new buffers if none are available.

@@ -85,6 +85,52 @@ func TestModuleCacheGoModIsTheModulesGoMod(t *testing.T) {
 	}
 }
 
+// The module cache and the release can be spelled through a symlink on one side only: on macOS /var is a symlink to
+// /private/var, so GOMODCACHE keeps /var/... while a relative spelling of the release, made absolute through the
+// working directory, reads /private/var/.... Both name one folder, and the release is still the cache's (train 5's
+// darwin go-test, TestPlainRecurseConvertsAModuleCacheReleaseWithNoGoMod's relative arm). Reproduced on every OS with
+// a symlinked cache root, both ways round.
+func TestModuleCacheGoModReadsThroughASymlinkedSpelling(t *testing.T) {
+	cache, moduleDir := moduleCacheFixture(t)
+	link := filepath.Join(t.TempDir(), "cache-link")
+
+	if err := os.Symlink(cache, link); err != nil {
+		t.Skipf("this host cannot create a symlink: %v", err)
+	}
+
+	// Compared resolved: the test's own temp directory can sit behind a symlink too (macOS's /var).
+	want, err := filepath.EvalSymlinks(filepath.Join(cache, "cache", "download", "example.com", "!old", "@v", "v0.9.1.mod"))
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	viaLink := filepath.Join(link, "example.com", "!old@v0.9.1")
+
+	// GOMODCACHE through the link, the release by its real path (macOS's /var against /private/var).
+	goModCache = link
+
+	if got := moduleCacheGoMod(moduleDir); got == "" {
+		t.Errorf("the cache spelled through a symlink: the release at its real path is not the cache's")
+	} else if resolved, err := filepath.EvalSymlinks(got); err != nil || resolved != want {
+		t.Errorf("the cache spelled through a symlink: want %s, got %s", want, got)
+	}
+
+	// The other way round: GOMODCACHE by its real path, the release through the link.
+	goModCache = cache
+
+	if got := moduleCacheGoMod(viaLink); got == "" {
+		t.Errorf("the release spelled through a symlink: it is not the cache's")
+	} else if resolved, err := filepath.EvalSymlinks(got); err != nil || resolved != want {
+		t.Errorf("the release spelled through a symlink: want %s, got %s", want, got)
+	}
+
+	// Still never anything else: a package below the root, through the link, is not a root.
+	if got := moduleCacheGoMod(filepath.Join(viaLink, "sub")); got != "" {
+		t.Errorf("a package below the module root, through a symlink, took %s", got)
+	}
+}
+
 // PLAIN -recurse over a module-cache release with no go.mod (cgo against go.* INC 4: github.com/mattn/go-pointer
 // v0.0.1 is one, and nugetgo-pack converts each flavor with -recurse=nuget from its cache directory). Only the -tests
 // -recurse driver tried one, through a go.mod overlay that go list and go build both refuse beneath GOMODCACHE, so
@@ -417,8 +463,46 @@ func TestPlainRecurseConvertsAModuleCacheReleaseWithNoGoMod(t *testing.T) {
 			}
 		}
 
-		if !strings.Contains(copyLine, filepath.Join(real, "go2cs-modcopy-")) {
-			t.Errorf("the copy is not named by its resolved path under %s: %s", real, copyLine)
+		// The converter resolves the work directory (filepath.EvalSymlinks), so the expected path is resolved the same
+		// way: t.TempDir() is itself spelled as TMPDIR is, which on a hosted Windows runner is the 8.3 short spelling.
+		resolvedReal, err := filepath.EvalSymlinks(real)
+
+		if err != nil {
+			t.Fatalf("EvalSymlinks(%s): %v", real, err)
+		}
+
+		if !strings.Contains(copyLine, filepath.Join(resolvedReal, "go2cs-modcopy-")) {
+			t.Errorf("the copy is not named by its resolved path under %s: %s", resolvedReal, copyLine)
+		}
+	})
+
+	// COORD's train-5 red (windows go-test, run 45099083885): a TMPDIR spelled another way than its resolved path, as a
+	// hosted Windows runner's TEMP is, with an 8.3 short user segment. The copy is named by its resolved path.
+	t.Run("a TMPDIR spelled another way names the resolved copy", func(t *testing.T) {
+		spelled := secondSpellingOf(t, t.TempDir())
+
+		resolved, err := filepath.EvalSymlinks(spelled)
+
+		if err != nil || resolved == spelled {
+			t.Skipf("no second spelling of a directory here (%s resolves to %s, %v), so this arm measures nothing", spelled, resolved, err)
+		}
+
+		combined, output, err := runWith(cache, "", moduleDir, "TMPDIR="+spelled, "TMP="+spelled, "TEMP="+spelled)
+
+		if err != nil || emitted(t, output)[oldRoot+"old.cs"] == "" {
+			t.Fatalf("the conversion under %s failed (%v):\n%s", spelled, err, lastLines(combined, 12))
+		}
+
+		var copyLine string
+
+		for _, line := range strings.Split(combined, "\n") {
+			if strings.HasPrefix(line, "go.mod: ") {
+				copyLine = line
+			}
+		}
+
+		if !strings.Contains(copyLine, filepath.Join(resolved, "go2cs-modcopy-")) {
+			t.Errorf("the copy is not named by its resolved path under %s (spelled %s): %s", resolved, spelled, copyLine)
 		}
 	})
 

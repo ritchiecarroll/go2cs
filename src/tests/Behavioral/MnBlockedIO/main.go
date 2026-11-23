@@ -1,4 +1,4 @@
-// MnBlockedIO is the M:N spike's blocked-I/O fixture (phase 2, B3). K goroutines sit in a read that cannot
+// MnBlockedIO is the M:N scheduler's blocked-I/O fixture (phase 2, B3). K goroutines sit in a read that cannot
 // finish until main writes: first on OS pipes (the read blocks its thread inside a native call), then on
 // io.Pipe (the read parks in the io package). While they are blocked, channel work must still run to its end;
 // only then does main feed the readers. Sizes come from the environment so one build serves every arm.

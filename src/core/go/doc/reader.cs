@@ -17,7 +17,6 @@ using utf8 = global::go.unicode.utf8_package;
 using global::go.@internal;
 using global::go.go;
 using global::go.unicode;
-using static doc_package;
 
 partial class doc_package {
 
@@ -78,13 +77,11 @@ internal static @string recvParam(ast.Expr p) {
     return badparamˢ;
 }
 
-} partial class docᴛmethodSet {
-
 // set creates the corresponding Func for f and adds it to mset.
 // If there are multiple f's with the same name, set keeps the first
 // one with documentation; conflicts are ignored. The boolean
 // specifies whether to leave the AST untouched.
-internal static void set(this methodSet mset, ж<ast.FuncDecl> Ꮡf, bool preserveAST) {
+internal static void set⁔(/*this*/ methodSet mset, ж<ast.FuncDecl> Ꮡf, bool preserveAST) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     ref var name = ref heap<@string>(f.Name.Name, out var Ꮡname);
@@ -121,7 +118,7 @@ internal static void set(this methodSet mset, ж<ast.FuncDecl> Ꮡf, bool preser
 // add adds method m to the method set; m is ignored if the method set
 // already contains a method with the same name at the same or a higher
 // level than m.
-internal static void add(this methodSet mset, ж<Func> Ꮡm) {
+internal static void add⁔(/*this*/ methodSet mset, ж<Func> Ꮡm) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     var old = mset[m.Name];
@@ -137,8 +134,6 @@ internal static void add(this methodSet mset, ж<Func> Ꮡm) {
         ));
     }
 }
-
-} partial class doc_package {
 
 // ----------------------------------------------------------------------------
 // Named types
@@ -221,9 +216,7 @@ partial struct reader {
     internal map<@string, slice<ж<ast.InterfaceType>>> fixmap;
 }
 
-} partial class docᴛreader {
-
-internal static bool isVisible(this ref reader r, @string name) {
+internal static bool isVisible⁔(/*this*/ ref reader r, @string name) {
     return (Mode)(r.mode & AllDecls) != 0 || token.IsExported(name);
 }
 
@@ -231,7 +224,7 @@ internal static bool isVisible(this ref reader r, @string name) {
 // If the base type has not been encountered yet, a new
 // type with the given name but no associated declaration
 // is added to the type map.
-internal static ж<namedType> lookupType(this ref reader r, @string name) {
+internal static ж<namedType> lookupType⁔(/*this*/ ref reader r, @string name) {
     if (name == ""u8 || name == "_"u8) {
         return default; // no type docs for anonymous types
     }
@@ -253,7 +246,7 @@ internal static ж<namedType> lookupType(this ref reader r, @string name) {
 // anonymous field in the parent type. If the field is imported
 // (qualified name) or the parent is nil, the field is ignored.
 // The function returns the field name.
-internal static @string /*fname*/ recordAnonymousField(this ref reader r, ж<namedType> Ꮡparent, ast.Expr fieldType) {
+internal static @string /*fname*/ recordAnonymousField⁔(/*this*/ ref reader r, ж<namedType> Ꮡparent, ast.Expr fieldType) {
     @string fname = default;
     ref var parent = ref Ꮡparent.DerefOrNull();
 
@@ -269,7 +262,7 @@ internal static @string /*fname*/ recordAnonymousField(this ref reader r, ж<nam
     return fname;
 }
 
-internal static void readDoc(this ref reader r, ж<ast.CommentGroup> comment) {
+internal static void readDoc⁔(/*this*/ ref reader r, ж<ast.CommentGroup> comment) {
     // By convention there should be only one package comment
     // but collect all of them if there are more than one.
     @string text = comment.Text();
@@ -280,14 +273,12 @@ internal static void readDoc(this ref reader r, ж<ast.CommentGroup> comment) {
     r.doc += "\n"u8 + text;
 }
 
-internal static void remember(this ref reader r, @string predecl, ж<ast.InterfaceType> typ) {
+internal static void remember⁔(/*this*/ ref reader r, @string predecl, ж<ast.InterfaceType> typ) {
     if (r.fixmap == nil) {
         r.fixmap = new map<@string, slice<ж<ast.InterfaceType>>>();
     }
     r.fixmap[predecl] = append(r.fixmap[predecl], typ);
 }
-
-} partial class doc_package {
 
 internal static slice<@string> specNames(slice<ast.Spec> specs) {
     var names = new slice<@string>(0, len(specs)); // reasonable estimate
@@ -300,10 +291,8 @@ internal static slice<@string> specNames(slice<ast.Spec> specs) {
     return names;
 }
 
-} partial class docᴛreader {
-
 // readValue processes a const or var declaration.
-internal static void readValue(this ж<reader> Ꮡr, ж<ast.GenDecl> Ꮡdecl) {
+internal static void readValue⁔(/*this*/ ж<reader> Ꮡr, ж<ast.GenDecl> Ꮡdecl) {
     ref var r = ref Ꮡr.DerefOrNull();
     ref var decl = ref Ꮡdecl.DerefOrNull();
 
@@ -381,8 +370,6 @@ internal static void readValue(this ж<reader> Ꮡr, ж<ast.GenDecl> Ꮡdecl) {
     r.order++;
 }
 
-} partial class doc_package {
-
 // fields returns a struct's fields or an interface's methods.
 internal static (slice<ж<ast.Field>> list, bool isStruct) fields(ast.Expr typ) {
     slice<ж<ast.Field>> list = default;
@@ -405,10 +392,8 @@ internal static (slice<ж<ast.Field>> list, bool isStruct) fields(ast.Expr typ) 
     return (list, isStruct);
 }
 
-} partial class docᴛreader {
-
 // readType processes a type declaration.
-internal static void readType(this ref reader r, ж<ast.GenDecl> Ꮡdecl, ж<ast.TypeSpec> Ꮡspec) {
+internal static void readType⁔(/*this*/ ref reader r, ж<ast.GenDecl> Ꮡdecl, ж<ast.TypeSpec> Ꮡspec) {
     ref var decl = ref Ꮡdecl.DerefOrNull();
     ref var spec = ref Ꮡspec.DerefOrNull();
 
@@ -446,12 +431,12 @@ internal static void readType(this ref reader r, ж<ast.GenDecl> Ꮡdecl, ж<ast
 }
 
 // isPredeclared reports whether n denotes a predeclared type.
-internal static bool isPredeclared(this ref reader r, @string n) {
+internal static bool isPredeclared⁔(/*this*/ ref reader r, @string n) {
     return predeclaredTypes[n] && r.types[n] == nil;
 }
 
 // readFunc processes a func or method declaration.
-internal static void readFunc(this ref reader r, ж<ast.FuncDecl> Ꮡfun) {
+internal static void readFunc⁔(/*this*/ ref reader r, ж<ast.FuncDecl> Ꮡfun) {
     ref var fun = ref Ꮡfun.DerefOrNull();
 
     // strip function body if requested.
@@ -525,8 +510,6 @@ internal static void readFunc(this ref reader r, ж<ast.FuncDecl> Ꮡfun) {
     r.funcs.set(Ꮡfun, (Mode)(r.mode & PreserveAST) != 0);
 }
 
-} partial class doc_package {
-
 // lookupTypeParam searches for type parameters named name within the tparams
 // field list, returning the relevant identifier if found, or nil if not.
 internal static ж<ast.Ident> lookupTypeParam(@string name, ж<ast.FieldList> Ꮡtparams) {
@@ -573,10 +556,8 @@ internal static @string clean(@string s) {
     return (@string)b;
 }
 
-} partial class docᴛreader {
-
 // readNote collects a single note from a sequence of comments.
-internal static void readNote(this ref reader r, slice<ж<ast.Comment>> list) {
+internal static void readNote⁔(/*this*/ ref reader r, slice<ж<ast.Comment>> list) {
     @string text = (Ꮡ(new ast.CommentGroup(List: list))).Text();
     var m = noteMarkerRx.FindStringSubmatchIndex(text); if (m != nil) {
         // The note body starts after the marker.
@@ -601,7 +582,7 @@ internal static void readNote(this ref reader r, slice<ж<ast.Comment>> list) {
 // and is followed by the note body (e.g., "// BUG(gri): fix this").
 // The note ends at the end of the comment group or at the start of
 // another note in the same comment group, whichever comes first.
-internal static void readNotes(this ref reader r, slice<ж<ast.CommentGroup>> comments) {
+internal static void readNotes⁔(/*this*/ ref reader r, slice<ж<ast.CommentGroup>> comments) {
     foreach (var (_, group) in range(comments)) {
         nint i = -1; // comment index of most recent note start, valid if >= 0
         var list = group.List;
@@ -620,7 +601,7 @@ internal static void readNotes(this ref reader r, slice<ж<ast.CommentGroup>> co
 }
 
 // readFile adds the AST for a source file to the reader.
-internal static void readFile(this ж<reader> Ꮡr, ж<ast.File> Ꮡsrc) {
+internal static void readFile⁔(/*this*/ ж<reader> Ꮡr, ж<ast.File> Ꮡsrc) {
     ref var r = ref Ꮡr.DerefOrNull();
     ref var src = ref Ꮡsrc.DerefOrNull();
 
@@ -717,7 +698,7 @@ internal static void readFile(this ж<reader> Ꮡr, ж<ast.File> Ꮡsrc) {
     }
 }
 
-internal static void readPackage(this ж<reader> Ꮡr, ж<ast.Package> Ꮡpkg, Mode mode) {
+internal static void readPackage⁔(/*this*/ ж<reader> Ꮡr, ж<ast.Package> Ꮡpkg, Mode mode) {
     ref var r = ref Ꮡr.DerefOrNull();
     ref var pkg = ref Ꮡpkg.DerefOrNull();
 
@@ -764,8 +745,6 @@ internal static void readPackage(this ж<reader> Ꮡr, ж<ast.Package> Ꮡpkg, M
     }
 }
 
-} partial class doc_package {
-
 // ----------------------------------------------------------------------------
 // Types
 internal static ж<Func> customizeRecv(ж<Func> Ꮡf, @string recvTypeName, bool embeddedIsPtr, nint level) {
@@ -805,10 +784,8 @@ internal static ж<Func> customizeRecv(ж<Func> Ꮡf, @string recvTypeName, bool
     return ᏑnewF;
 }
 
-} partial class docᴛreader {
-
 // collectEmbeddedMethods collects the embedded methods of typ in mset.
-internal static void collectEmbeddedMethods(this ref reader r, methodSet mset, ж<namedType> Ꮡtyp, @string recvTypeName, bool embeddedIsPtr, nint level, embeddedSet visited) {
+internal static void collectEmbeddedMethods⁔(/*this*/ ref reader r, methodSet mset, ж<namedType> Ꮡtyp, @string recvTypeName, bool embeddedIsPtr, nint level, embeddedSet visited) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
     visited[Ꮡtyp] = true;
@@ -833,7 +810,7 @@ internal static void collectEmbeddedMethods(this ref reader r, methodSet mset, �
 }
 
 // computeMethodSets determines the actual method sets for each type encountered.
-internal static void computeMethodSets(this ref reader r) {
+internal static void computeMethodSets⁔(/*this*/ ref reader r) {
     foreach (var (_, t) in r.types) {
         // collect embedded methods for t
         if (t.isStruct) {
@@ -858,7 +835,7 @@ internal static void computeMethodSets(this ref reader r) {
 // types that have no declaration. Instead, these functions and methods
 // are shown at the package level. It also removes types with missing
 // declarations or which are not visible.
-internal static void cleanupTypes(this ref reader r) {
+internal static void cleanupTypes⁔(/*this*/ ref reader r) {
     foreach (var (_, t) in r.types) {
         var visible = r.isVisible(t.name);
         var predeclared = predeclaredTypes[t.name];
@@ -893,8 +870,6 @@ internal static void cleanupTypes(this ref reader r) {
         }
     }
 }
-
-} partial class doc_package {
 
 // ----------------------------------------------------------------------------
 // Sorting

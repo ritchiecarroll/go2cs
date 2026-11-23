@@ -5,7 +5,6 @@ namespace go.compress;
 
 using cmp = cmp_package;
 using slices = slices_package;
-using static bzip2_package;
 
 partial class bzip2_package {
 
@@ -34,11 +33,9 @@ partial struct huffmanNode {
 // invalidNodeValue is an invalid index which marks a leaf node in the tree.
 internal static UntypedInt invalidNodeValue => 0xffff;
 
-} partial class bzip2ᴛhuffmanTree {
-
 // Decode reads bits from the given bitReader and navigates the tree until a
 // symbol is found.
-internal static uint16 /*v*/ Decode(this ref huffmanTree t, ж<bitReader> Ꮡbr) {
+internal static uint16 /*v*/ Decode⁔(/*this*/ ref huffmanTree t, ж<bitReader> Ꮡbr) {
     uint16 v = default;
     ref var br = ref Ꮡbr.DerefOrNull();
 
@@ -82,8 +79,6 @@ internal static uint16 /*v*/ Decode(this ref huffmanTree t, ж<bitReader> Ꮡbr)
         }
     }
 }
-
-} partial class bzip2_package {
 
 // newHuffmanTree builds a Huffman tree from a slice containing the code
 // lengths of each symbol. The maximum code length is 32 bits.

@@ -41580,6 +41580,25 @@ asserting sites; .5-eligible only with a whole-program arm.
 
 — P2 (2026-11-21)
 
+## 2026-11-22 — i9 (R1 fold; COORD 045750Z ruling 2, a board row with the refusal): a Δ-led struct field, method or type is REFUSED (GO2CS2015) because golib drops a leading Δ when it projects Go names — the durable cure is OWED for .5
+
+golib reads a leading `Δ` on a converted field, method or type name as the collision marker go2cs added, and drops it when
+it projects the member's Go name: fields at `src/core/golib/GoReflect.FieldAccess.cs:404`, type names at
+`GoReflect.TypeNaming.cs:716`, methods at `runtime/TypeExtensions.GoMethodSets.cs:704`. A Go name that itself starts with
+`Δ` loses it: `type P struct{ Δt float64 }` json-encodes `{}` where Go writes `{"Δt":1}`, and `reflect.TypeOf(ΔMatrix{}).Name()`
+reads `Matrix` (P3 045652Z finding 2, read at the three sites; the measured run is in the R1 fold's post).
+
+**Now (R1, claude/i9-marker-glyph-refusal):** such a field, method (interface methods included) or named type refuses its
+package with GO2CS2015, naming what Go would report; `Δ`-led locals, parameters, package variables, constants and
+functions convert. KnownIssues carries the user-facing entry (`#delta-led-field-method-type-refused`).
+
+**Owed (.5, its own seat, COORD assigns after R1 lands):** golib is told which `Δ` the converter added (a generated marker
+it reads, never a guess from the spelling), so a user's `Δ`-led field, method or type converts and projects under its own
+name; the refusal arm (`deltaProjectionReason`) and the KnownIssues entry are then retired. Red-first row: the projection
+fixture above, Go's output against the converted program's.
+
+— i9 (2026-11-22)
+
 ### 2026-11-22 — C2: the `-tests -recurse` go.mod overlay is refused beneath GOMODCACHE (OPEN, likely cure named)
 
 `installGoModOverlay` (`src/go2cs/goModFile.go`) serves a module-cache release that ships no go.mod to a `-tests
@@ -41728,5 +41747,24 @@ adapters). Test emission of the three standard packages the census flagged (go/t
 differing lines in 34, 14 and 40 files; only the converter revision and input digest stamps differ.
 
 — C2 (2026-11-22)
+
+## 2026-11-22 — H (TC-13 seat, claude/h-tc13-funcword; amends the 2026-11-20 H block "a store of a pointer word INTO a func variable lands in a fresh box"): w4 cures the lost write, and S-B1's out-of-scope pin moved with the cure
+
+**The cure.** `funcWordOperations.go` gains w4. For a func variable `f`, `*(*unsafe.Pointer)(unsafe.Pointer(&f)) = p`
+now emits `f = @unsafe.Pointer.FuncOfWord<F>(p);`. `FuncOfWord` reads p's word: 0 is the nil func, a GoFuncCookie is
+that func, and any other word is refused by name. The four committed sites (`runtime/debugcall.cs:268` and
+`runtime/{windows,linux,darwin}/cgocall.cs:482`) were regenerated, and the two-seeded regen's prediction MET on all
+four targets (`docs/phase4/DATA-tc13-regen-2026-11-22.md`). Both sites store a funcval whose word is a code PC, so
+they now refuse by name instead of calling a nil func. Neither is reachable today.
+
+**S-B1's pin moved with the cure.** S-B1 (`d02c2dda3b`) pinned managedFuncStore's fresh-box store (`.Value = v;`)
+in TestUnsafePointerWordDoor as out of the word door's scope, and named it as this lost write. TC-13's first
+unfiltered `go test ./...` read that pin red at `39161e7056`. COORD ruled it a stale pin. The assertion now requires
+the w4 line and refuses any `.Value =`. It fails under train 4's converter (`afb01dfb6c`) on the old line and passes
+at the tip.
+
+**Owner.** H. The 2026-11-20 block closes when the TC-13 seat lands.
+
+— H (2026-11-22)
 
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

@@ -1003,6 +1003,12 @@ Examples:
 				// and _test.go reference closures — collect the test half first.
 				if options.convertTests {
 					collectSiblingTestClosure(inputFilePath, options)
+
+					// A marker letter in a test file refuses before the production half is written (markerGlyphRefusal.go).
+					if refusal := refuseMarkerGlyphTestFiles(inputFilePath, options); refusal != nil {
+						refusal.report()
+						log.Fatalf("Refusing to convert: %s\n", refusal)
+					}
 				}
 
 				switch {

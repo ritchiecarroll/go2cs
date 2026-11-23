@@ -65,10 +65,6 @@ internal static error setKeepAliveCount(ж<netFD> fd, nint n) {
     return os.NewSyscallError(setsockoptˢ, err);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string wsaioctlˢ => ref wsaioctlˢᵇ;
-private static readonly @string wsaioctlˢᵇ = "wsaioctl"u8;
-
 // setKeepAliveIdleAndInterval serves for kernels prior to Windows 10, version 1709.
 internal static error setKeepAliveIdleAndInterval(ж<netFD> fd, time.Duration idle, time.Duration interval) {
     // WSAIoctl with SIO_KEEPALIVE_VALS control code requires all fields in

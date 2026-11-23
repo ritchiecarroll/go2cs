@@ -186,6 +186,11 @@ const (
 	// file free of markers: the file cannot be read or written back, a marker has no closing sentinel, or a marker's
 	// payload does not decode. A refusal: the file would not compile, and the run used to exit 0 over it.
 	diagnosticDeferredMarkerUnresolved = "GO2CS2014"
+
+	// diagnosticMarkerGlyphIdentifierRefused: a Go identifier spelled with a marker letter go2cs or go2cs-gen writes
+	// into the names it generates (Ꮡ, ᴛ, ˢ, ж, ꞏ...), or a Δ name equal to one go2cs generates in that package. A
+	// refusal: such a name can equal a generated one and bind to it silently (markerGlyphRefusal.go).
+	diagnosticMarkerGlyphIdentifierRefused = "GO2CS2015"
 )
 
 // diagnosticPositionPattern splits "file:line[:col]". The file part is matched lazily up to the LAST

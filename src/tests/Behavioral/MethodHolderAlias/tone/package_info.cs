@@ -14,6 +14,9 @@
 
 using go;
 using static go.MethodHolderAlias.tone_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -49,10 +52,12 @@ using static go.MethodHolderAlias.tone_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("tone.go", "tone.cs", "AAoOltiU")]
+[assembly: GoPositionMap("tone.go", "tone.cs", "7pa4lA==")]
 // </GoSourcePositionMaps>
 
 namespace go.MethodHolderAlias;
+
+using static go.MethodHolderAlias.tone_package;
 
 [GoPackage("tone")]
 public static partial class tone_package
@@ -84,5 +89,16 @@ public static partial class tone_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(tone_package.tone)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class toneᴛtone;
+[GoMethodHost(typeof(tone_package.tone)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class toneᴛtone;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class toneᴛtone {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint Pitch(this tone t) => tone_package.Pitch⁔(t);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint Base(this tone t) => tone_package.Base⁔(t);
+}
+// </MethodForwarders>

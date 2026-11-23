@@ -93,7 +93,6 @@ using time = time_package;
 using go.@internal;
 using go.net;
 using go.runtime;
-using static pprof_package;
 
 partial class pprof_package {
 
@@ -291,29 +290,13 @@ public static http.Handler Handler(@string name) {
 
 partial struct handler /*@string*/;
 
-} partial class pprofᴛhandler {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string xContentTypeOptionsˢ => ref xContentTypeOptionsˢᵇ;
-private static readonly @string xContentTypeOptionsˢᵇ = "X-Content-Type-Options"u8;
-internal static ref readonly @string nosniffˢ => ref nosniffˢᵇ;
-private static readonly @string nosniffˢᵇ = "nosniff"u8;
 internal static ref readonly @string unknownProfileˢ => ref unknownProfileˢᵇ;
 private static readonly @string unknownProfileˢᵇ = "Unknown profile"u8;
-internal static ref readonly @string secondsˢ => ref secondsˢᵇ;
-private static readonly @string secondsˢᵇ = "seconds"u8;
 internal static ref readonly @string debugˢ => ref debugˢᵇ;
 private static readonly @string debugˢᵇ = "debug"u8;
-internal static ref readonly @string contentTypeˢ => ref contentTypeˢᵇ;
-private static readonly @string contentTypeˢᵇ = "Content-Type"u8;
-internal static ref readonly @string textPlainCharsetUtf8ˢ => ref textPlainCharsetUtf8ˢᵇ;
-private static readonly @string textPlainCharsetUtf8ˢᵇ = "text/plain; charset=utf-8"u8;
-internal static ref readonly @string applicationOctetStreamˢ => ref applicationOctetStreamˢᵇ;
-private static readonly @string applicationOctetStreamˢᵇ = "application/octet-stream"u8;
-internal static ref readonly @string contentDispositionˢ => ref contentDispositionˢᵇ;
-private static readonly @string contentDispositionˢᵇ = "Content-Disposition"u8;
 
-internal static void ServeHTTP(this handler name, http.ResponseWriter w, ж<http.Request> r) {
+internal static void ServeHTTP⁔(/*this*/ handler name, http.ResponseWriter w, ж<http.Request> r) {
     w.Header().Set(xContentTypeOptionsˢ, nosniffˢ);
     var p = pprof.Lookup((@string)name);
     if (p == nil) {
@@ -350,7 +333,7 @@ private static readonly @string failedToCollectProfileˢᵇ = "failed to collect
 internal static ref readonly @string failedToComputeDeltaˢ => ref failedToComputeDeltaˢᵇ;
 private static readonly @string failedToComputeDeltaˢᵇ = "failed to compute delta"u8;
 
-internal static void serveDeltaProfile(this handler name, http.ResponseWriter w, ж<http.Request> Ꮡr, ж<pprof.Profile> p, @string secStr) {
+internal static void serveDeltaProfile⁔(/*this*/ handler name, http.ResponseWriter w, ж<http.Request> Ꮡr, ж<pprof.Profile> p, @string secStr) {
     GoFrame ᒐ = default;
     try {
         ref var r = ref Ꮡr.DerefOrNull();
@@ -425,8 +408,6 @@ internal static void serveDeltaProfile(this handler name, http.ResponseWriter w,
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
-
-} partial class pprof_package {
 
 internal static (ж<profile.Profile>, error) collectProfile(ж<pprof.Profile> p) {
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);

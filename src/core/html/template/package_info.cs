@@ -10,10 +10,17 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+using fs = go.io.fs_package;
+using io = go.io_package;
+using parse = go.text.template.parse_package;
+using template = go.text.template_package;
 // </ImportedTypeAliases>
 
 using go;
 using static go.html.template_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -80,25 +87,32 @@ using static go.html.template_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("html/template/attr.go", "attr.cs", "ABEmAIAB8gGiuIKCgqaUgqaCAAoWhpQ=", "", "", "178=Contains/2/3/1,Contains/3/3/2")]
-[assembly: GoPositionMap("html/template/attr_string.go", "attr_string.cs", "AAgOhqKCgoKCgoLatIKClA==")]
+[assembly: GoPositionMap("html/template/attr_string.go", "attr_string.cs", "/oaigoKCgoKC2pSCgpQ=")]
 [assembly: GoPositionMap("html/template/content.go", "content.cs", "AGzmAaKClJSUgoKUqIKcsoKUgoKUqsKClKSkpKSkpKSmgriCpoKU")]
-[assembly: GoPositionMap("html/template/context.go", "context.cs", "ACZIgoKClKiSAAIYtIKUgoKUgpSClIKUgpSClKiSgoIAWbgBopSUqJKUlKzolJQ=", "", "", "49=Equal/1/1/4")]
+[assembly: GoPositionMap("html/template/context.go", "context.cs", "ACNIgoKClKiSAAIYtIKUgoKUgpSClIKUgpSClKiSgoIAV7gBopSUqJKUlKzolJQ=", "", "", "46=Equal/1/1/4")]
 [assembly: GoPositionMap("html/template/css.go", "css.cs", "AA8iooKUlIKClAAHEKjIAAQewoKCyoKCgoKUgoK4poKClIKClLimgqaokqiSgoKClLS0tLaokoKmlNqClJSokpSUqLKCgqKUgoKUtKSClIKCgoKmgpSCpgAXMIKeAAgCgoKUAAwagpTIgsaCyIKClA==")]
-[assembly: GoPositionMap("html/template/delim_string.go", "delim_string.cs", "AAgOhqKCgoLatIKClA==")]
-[assembly: GoPositionMap("html/template/element_string.go", "element_string.cs", "AAgOhqKCgoKCgtq0goKU")]
-[assembly: GoPositionMap("html/template/error.go", "error.cs", "AOsB1AOClIKkpJTKwg==")]
-[assembly: GoPositionMap("html/template/escape.go", "escape.cs", "ABYw8oKCgoKClJSCgoKUlIKAgoKkqtSCgqaClLgAMWaSABsokpSkgoKkpIKCpKSkpKSklMaUtrKUlJSCggAHEJSCgoTugpSkpIKklLTGpNoACAqC3MaUtLS0tLS0+IK0tIKUtti0pIIACAzSlMqCgoKClNyCgriCgoKCpqbcgoKCgoKCpoLKpsruABIokqqigpTKAA8wwoKCgoKmqJIABTAAEgKmxsakrLKClIKUgpSClIKmgoKUgqaCgpSCAAcQgoK4/rKClIKCgpSCgtyCgoKCuIKClIKCgqaCAAgGuIKCgoKCpoKCgoKCpsiygpSCgoKmrsKClIKCgpSCgoKClIKUgqaosoKClKrGgoKUlIKmgsrKpoKCgoKUlKrUgpSCuILKrNKSlJSmptyC2AATKoKWgqaCpraysoKCgoKCgoKCgriCgoKCpoIACBKClMaklJSClIKUlIKUgoKClIKUpoKClJTKooKCpqbKgoKUAAcQgtzKgoKUpqaCppS4yJKClKiSgpSokoKUqqKCuIKCgqaClIKUgriCgoKotoKClKqigpTOwqiSqsKokqiSqsKqwg==", "701-713:1", "", "228=errorf/1/1/2;262=errorf/1/1/2;507=NewIdentifier/1/1/2,SetTree/1/1/2,SetPos/1/1/2;598=errorf/1/1/2;751=errorf/1/1/2;756=errorf/1/1/2;790=Name/1/1/2,errorf/1/1/2;979=errorf/1/1/2")]
+[assembly: GoPositionMap("html/template/delim_string.go", "delim_string.cs", "/oaigoKC2pSCgpQ=")]
+[assembly: GoPositionMap("html/template/element_string.go", "element_string.cs", "/oaigoKCgoLalIKClA==")]
+[assembly: GoPositionMap("html/template/error.go", "error.cs", "AOgB1AOClIKkpJSqwg==")]
+[assembly: GoPositionMap("html/template/escape.go", "escape.cs", "ABUw8oKCgoKClJSCgoKUlIKAgoKkqtSCgqaClLgAMWaSABkokpSkgoKkpIKCpKSkpKSklKaUlrKUlJSCggAHEJSCgoTugpSkpIKklLTGpNoACAqC3MaUtLS0tLS0+IK0tIKUtti0pILs0pTKgoKCgpTcgoK4goKCgqam3IKCgoKCgqaCyqbK7gASKJKqooKUygAPMMKCgoKCpqiSAAUwABICpsbGpKyygpSClIKUgpSCpoKClIKmgoKUggAHEIKCuN6ygpSCgoKUgoLcgoKCgriCgpSCgoKmgqa4goKCgoKmgoKCgoKmqLKClIKCgqauwoKUgoKClIKCgoKUgpSCpqiygoKUqsaCgpSUgqaCysqmgoKCgpSUqtSClIK4gsqs0pKUlKam3IK4ABMqgpaCpoKmlrKygoKCgoKCgoKCuIKCgoKmggAIEoKUxqSUlIKUgpSUgpSCgoKUgpSmgoKUlKqigoKmpsqCgpQABxCC3MqCgpSmpoKmlLiokoKUqJKClKiSgpSqooK4goKCpoKUgpSCuIKCgqi2goKUqqKClK7CqJKqwqiSqJKqwqrC", "701-713:1", "", "221=errorf/1/1/2;255=errorf/1/1/2;498=NewIdentifier/1/1/2,SetTree/1/1/2,SetPos/1/1/2;589=errorf/1/1/2;732=errorf/1/1/2;737=errorf/1/1/2;771=Name/1/1/2,errorf/1/1/2;954=errorf/1/1/2")]
 [assembly: GoPositionMap("html/template/html.go", "html.cs", "AA8esoKClIKUqLKCgpSosoKClKiygoKUygARJAAZNAAWLgATLKKSkriCgoKClIKClKaCgpSCpoKUgqqigtaCgpSClIKClIKCgoKCuJSUgpSCgpSUlJSCgoKUqsKCgpTclIKUlIL4pgACEgAIAg==")]
 [assembly: GoPositionMap("html/template/js.go", "js.cs", "ABhEAA0EgoK42JSClKaUtoKUyMjIyAANGsiCgriE7NwAESSY6oKmgoKUpgALCMKCgoKUtui2gpS4ggAUKoKCgoIABxCmlIKCpoKClKaCgoKCgoKUgoKClJSCgoKUlKzSgoKUpqKCruKCgpSUAAIQ0oKilIKClLS0tLSkgpSCgpSClIKmAA0cABUsABgyABEkAB9IwpSkpKSklKwACQ6CgoIAASyk", "", "", "113=TrimRight/1/1/1,HasSuffix/1/1/1")]
-[assembly: GoPositionMap("html/template/jsctx_string.go", "jsctx_string.cs", "AAgOhqKCgtq0goKU")]
-[assembly: GoPositionMap("html/template/state_string.go", "state_string.cs", "AAgOhqKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoLatIKClA==")]
-[assembly: GoPositionMap("html/template/template.go", "template.cs", "AChEAAsY4oKCpIKClAAFKgAVAoKq4oKUgoKClNjSgoKCgoKUgpSClAAFFAAJAoKUAAIU8oKClKwACQKCgoKCgpSClIKUgpSClNyyAAIcAA8CgqaCgtyCgoKCgoKUgpTeAAgCgqaCgoKClNyCAAUWAAwCgoKClIKClIKC3IKCgoKClIIABxD4koKC3IIABBQACwKCgtiS3IKClIKokgACFPKCAAIQ8oKq4oKCAAcQ0oKUAAIYAAsCAAQWAAoCytKAgraUlIKCgpSO4oKUgpSUgoKmAAIYAAkCAAQaAAoCyJKClIKClIKUrLKu4s7ixoKCgoKClIKUlKbCgoKmgrKCgg==", "525-529:1", "", "355=New/1/1/2;389=New/1/1/2")]
+[assembly: GoPositionMap("html/template/jsctx_string.go", "jsctx_string.cs", "/oaigoLalIKClA==")]
+[assembly: GoPositionMap("html/template/state_string.go", "state_string.cs", "/oaigoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKC2pSCgpQ=")]
+[assembly: GoPositionMap("html/template/template.go", "template.cs", "ACdEAAkY4oKCpIKClAAFKgAVAoKq4oKUgoKClNjSgoKCgoKUgpSClAAFFAAJAoKUAAIU8oKClKwACQKCgoKCgpSClIKUgpSClNyyAAIcAA8CgqaCgtyCgoKCgoKUgpTeAAgCgqaCgoKClNyCAAUWAAwCgoKClIKClIKC3IKCgoKClIIABxDYkoKC3IIAAhQACwKCgtiS3IKClIKokgACFPKCAAIQ8oKq4oKCAAUQ0oKUAAIYAAsCAAIWAAoCqtKAgraUlIKCgpSO4oKUgpSUgoKmAAIYAAkCAAIaAAoCqJKClIKClIKUrLKu4q7ipoKCgoKClIKUlKbCgoKmgrKCgg==", "525-529:1", "", "350=New/1/1/2;382=New/1/1/2")]
 [assembly: GoPositionMap("html/template/transition.go", "transition.cs", "AA8gACBCgpaSgoKCgoKClIKCgoKUlIKCgqaUuAAIFKSCgpSmgpTKgoKUgoLcgoKCgpSUtLS0yIKUlKiSgoKCgpSopIKCgpSClJSmAAkWkoKCpoKUtKSCqJKClMoABxKCmqKmgpSCpqiSgoKUgoKUlIKUgpSUlKiSqJKCgqaUqJKClIKUgpS0tLSUtLS0tAAOGoLGgtiCgriClNiCgpSCtIKC3IKCgpSCtKSmgoKCgoKUlIKC/IKCgtiClKaqooKUtLaSgoKClJSCgvy06oKCgoLYgoK2pqbcppaSgoKUlLS0pKiSgoKUtAAKEraCgpTcqAAcOIKCgoKUpoKCgpS0tKTGgpSCpILYgqSClLqSgpS02LS2goKCgoKUgoKC3IKUgrqSqJKCgoKCuKiSgoKCpq7CgpTa6qYABxKSqJKokoKUgoKCgoKmgoKUlKiSgtim", "", "", "115=errorf/1/1/2;332=errorf/1/1/2;419=errorf/1/1/2;470=errorf/1/1/2;511=errorf/1/1/2;699=errorf/1/1/2")]
 [assembly: GoPositionMap("html/template/url.go", "url.cs", "AAxEABgCgoKUgpQACgqigoKmqsIAAhDyqsKCgpSCgpSqooLugoIABxCCAAkQxoLYgpSClIK2goKUgqrCgpSoooKmpoKCgoKCgqaCAAYQoqaCpoKCgpSCgoKCpqaCgoKCpoKCgoKmgg==")]
-[assembly: GoPositionMap("html/template/urlpart_string.go", "urlpart_string.cs", "AAgOhqKCgoLatIKClA==")]
+[assembly: GoPositionMap("html/template/urlpart_string.go", "urlpart_string.cs", "/oaigoKC2pSCgpQ=")]
 // </GoSourcePositionMaps>
 
 namespace go.html;
+
+using static go.html.template_package;
+using fs = go.io.fs_package;
+using io = go.io_package;
+using parse = go.text.template.parse_package;
+using template = go.text.template_package;
+using ꓸꓸꓸstring = Span<@string>;
 
 [GoPackage("template")]
 public static partial class template_package
@@ -171,14 +185,88 @@ public static partial class template_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(template_package.Error)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class templateᴛError;
-[GoMethodHost(typeof(template_package.Template)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class templateᴛTemplate;
-[GoMethodHost(typeof(template_package.attr)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class templateᴛattr;
-[GoMethodHost(typeof(template_package.context)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class templateᴛcontext;
-[GoMethodHost(typeof(template_package.delim)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class templateᴛdelim;
-[GoMethodHost(typeof(template_package.element)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class templateᴛelement;
-[GoMethodHost(typeof(template_package.escaper)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class templateᴛescaper;
-[GoMethodHost(typeof(template_package.jsCtx)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class templateᴛjsCtx;
-[GoMethodHost(typeof(template_package.state)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class templateᴛstate;
-[GoMethodHost(typeof(template_package.urlPart)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class templateᴛurlPart;
+[GoMethodHost(typeof(template_package.Error)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class templateᴛError;
+[GoMethodHost(typeof(template_package.Template)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class templateᴛTemplate;
+[GoMethodHost(typeof(template_package.attr)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class templateᴛattr;
+[GoMethodHost(typeof(template_package.context)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class templateᴛcontext;
+[GoMethodHost(typeof(template_package.delim)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class templateᴛdelim;
+[GoMethodHost(typeof(template_package.element)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class templateᴛelement;
+[GoMethodHost(typeof(template_package.escaper)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class templateᴛescaper;
+[GoMethodHost(typeof(template_package.jsCtx)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class templateᴛjsCtx;
+[GoMethodHost(typeof(template_package.state)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class templateᴛstate;
+[GoMethodHost(typeof(template_package.urlPart)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class templateᴛurlPart;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class templateᴛError {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this ref Error e) => template_package.Error⁔(ref e);
+}
+partial class templateᴛTemplate {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<ж<Template>> Templates(this ж<Template> Ꮡt) => template_package.Templates⁔(Ꮡt);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Template> Option(this ж<Template> Ꮡt, params ꓸꓸꓸstring optʗp) => template_package.Option⁔(Ꮡt, optʗp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error checkCanParse(this ж<Template> Ꮡt) => template_package.checkCanParse⁔(Ꮡt);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error escape(this ж<Template> Ꮡt) => template_package.escape⁔(Ꮡt);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Execute(this ж<Template> Ꮡt, io.Writer wr, any data) => template_package.Execute⁔(Ꮡt, wr, data);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error ExecuteTemplate(this ж<Template> Ꮡt, io.Writer wr, @string name, any data) => template_package.ExecuteTemplate⁔(Ꮡt, wr, name, data);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (ж<Template> tmpl, error err) lookupAndEscapeTemplate(this ж<Template> Ꮡt, @string name) => template_package.lookupAndEscapeTemplate⁔(Ꮡt, name);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string DefinedTemplates(this ref Template t) => template_package.DefinedTemplates⁔(ref t);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (ж<Template>, error) Parse(this ж<Template> Ꮡt, @string text) => template_package.Parse⁔(Ꮡt, text);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (ж<Template>, error) AddParseTree(this ж<Template> Ꮡt, @string name, ж<parse.Tree> Ꮡtree) => template_package.AddParseTree⁔(Ꮡt, name, Ꮡtree);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (ж<Template>, error) Clone(this ж<Template> Ꮡt) => template_package.Clone⁔(Ꮡt);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Template> New(this ж<Template> Ꮡt, @string name) => template_package.New⁔(Ꮡt, name);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<Template> @new(this ref Template t, @string name) => template_package.new⁔(ref t, name);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Name(this ref Template t) => template_package.Name⁔(ref t);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Template> Funcs(this ж<Template> Ꮡt, FuncMap funcMap) => template_package.Funcs⁔(Ꮡt, funcMap);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Template> Delims(this ж<Template> Ꮡt, @string left, @string right) => template_package.Delims⁔(Ꮡt, left, right);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Template> Lookup(this ж<Template> Ꮡt, @string name) => template_package.Lookup⁔(Ꮡt, name);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (ж<Template>, error) ParseFiles(this ж<Template> Ꮡt, params ꓸꓸꓸstring filenamesʗp) => template_package.ParseFiles⁔(Ꮡt, filenamesʗp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (ж<Template>, error) ParseGlob(this ж<Template> Ꮡt, @string pattern) => template_package.ParseGlob⁔(Ꮡt, pattern);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (ж<Template>, error) ParseFS(this ж<Template> Ꮡt, fs.FS fsΔ1, params ꓸꓸꓸstring patternsʗp) => template_package.ParseFS⁔(Ꮡt, fsΔ1, patternsʗp);
+}
+partial class templateᴛattr {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string String(this attr i) => template_package.String⁔(i);
+}
+partial class templateᴛcontext {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string String(this context c) => template_package.String⁔(c);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool eq(this context c, context d) => template_package.eq⁔(c, d);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string mangle(this context c, @string templateName) => template_package.mangle⁔(c, templateName);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static context clone(this context c) => template_package.clone⁔(c);
+}
+partial class templateᴛdelim {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string String(this delim i) => template_package.String⁔(i);
+}
+partial class templateᴛelement {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string String(this element i) => template_package.String⁔(i);
+}
+partial class templateᴛescaper {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static context escape(this ref escaper e, context c, parse.Node n) => template_package.escape⁔(ref e, c, n);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static context escapeAction(this ref escaper e, context c, ж<parse.ActionNode> Ꮡn) => template_package.escapeAction⁔(ref e, c, Ꮡn);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static context escapeBranch(this ref escaper e, context c, ж<parse.BranchNode> Ꮡn, @string nodeName) => template_package.escapeBranch⁔(ref e, c, Ꮡn, nodeName);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static context escapeList(this ref escaper e, context c, ж<parse.ListNode> Ꮡn) => template_package.escapeList⁔(ref e, c, Ꮡn);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (context, bool) escapeListConditionally(this ref escaper e, context c, ж<parse.ListNode> Ꮡn, Func<ж<escaper>, context, bool> filter) => template_package.escapeListConditionally⁔(ref e, c, Ꮡn, filter);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static context escapeTemplate(this ref escaper e, context c, ж<parse.TemplateNode> Ꮡn) => template_package.escapeTemplate⁔(ref e, c, Ꮡn);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (context, @string) escapeTree(this ref escaper e, context c, parse.Node node, @string name, nint line) => template_package.escapeTree⁔(ref e, c, node, name, line);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static context computeOutCtx(this ref escaper e, context c, ж<template.Template> Ꮡt) => template_package.computeOutCtx⁔(ref e, c, Ꮡt);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (context, bool) escapeTemplateBody(this ref escaper e, context c, ж<template.Template> Ꮡt) => template_package.escapeTemplateBody⁔(ref e, c, Ꮡt);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static context escapeText(this ref escaper e, context c, ж<parse.TextNode> Ꮡn) => template_package.escapeText⁔(ref e, c, Ꮡn);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void editActionNode(this ref escaper e, ж<parse.ActionNode> Ꮡn, slice<@string> cmds) => template_package.editActionNode⁔(ref e, Ꮡn, cmds);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void editTemplateNode(this ref escaper e, ж<parse.TemplateNode> Ꮡn, @string callee) => template_package.editTemplateNode⁔(ref e, Ꮡn, callee);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void editTextNode(this ref escaper e, ж<parse.TextNode> Ꮡn, slice<byte> text) => template_package.editTextNode⁔(ref e, Ꮡn, text);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void commit(this ref escaper e) => template_package.commit⁔(ref e);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<template.Template> template(this ref escaper e, @string name) => template_package.template⁔(ref e, name);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<Template> arbitraryTemplate(this ref escaper e) => template_package.arbitraryTemplate⁔(ref e);
+}
+partial class templateᴛjsCtx {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string String(this jsCtx i) => template_package.String⁔(i);
+}
+partial class templateᴛstate {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string String(this state i) => template_package.String⁔(i);
+}
+partial class templateᴛurlPart {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string String(this urlPart i) => template_package.String⁔(i);
+}
+// </MethodForwarders>

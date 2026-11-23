@@ -14,7 +14,6 @@ using tracev2 = go.@internal.trace.tracev2_package;
 using version = go.@internal.trace.version_package;
 using go.@internal.trace;
 using go.@internal.trace.@internal;
-using static trace_package;
 
 partial class trace_package {
 
@@ -85,12 +84,10 @@ public static (ж<Reader>, error) NewReader(io.Reader r) {
     }}
 }
 
-} partial class traceᴛReader {
-
 // ReadEvent reads a single event from the stream.
 //
 // If the stream has been exhausted, it returns an invalid event and io.EOF.
-public static (Event e, error err) ReadEvent(this ж<Reader> Ꮡr) {
+internal static (Event e, error err) ReadEvent⁔(/*this*/ ж<Reader> Ꮡr) {
     Event e = new();
     error err = default;
     GoFrame ᒐ = default;
@@ -256,7 +253,7 @@ private static readonly @string internalErrorˢ4ᵇ = "internal error: nextGenWi
 
 // nextGenWithSpill reads the generation and calls nextGen while
 // also handling any spilled batches.
-internal static (Event, error) nextGenWithSpill(this ref Reader r) {
+internal static (Event, error) nextGenWithSpill⁔(/*this*/ ref Reader r) {
     if (r.version >= version.Go126) {
         return (new Event(), errors.New(internalErrorˢ4));
     }
@@ -293,7 +290,7 @@ internal static (Event, error) nextGenWithSpill(this ref Reader r) {
 
 // installGen installs the new generation into the Reader and returns
 // a Sync event for the new generation.
-internal static (Event, error) installGen(this ref Reader r, ж<generation> Ꮡgen) {
+internal static (Event, error) installGen⁔(/*this*/ ref Reader r, ж<generation> Ꮡgen) {
     ref var gen = ref Ꮡgen.DerefOrNull();
 
     if (Ꮡgen == nil) {
@@ -330,8 +327,6 @@ internal static (Event, error) installGen(this ref Reader r, ж<generation> Ꮡg
     // Always emit a sync event at the beginning of the generation.
     return (syncEvent(r.gen.evTable, r.gen.freq.mul(r.gen.minTs), r.syncs), default);
 }
-
-} partial class trace_package {
 
 internal static @string dumpFrontier(slice<ж<batchCursor>> frontier) {
     ref var sb = ref heap(new strings.Builder(), out var Ꮡsb);

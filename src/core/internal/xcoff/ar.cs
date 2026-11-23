@@ -11,7 +11,6 @@ using strconv = go.strconv_package;
 using strings = strings_package;
 using encoding;
 using go;
-using static xcoff_package;
 
 partial class xcoff_package {
 
@@ -90,12 +89,10 @@ public static (ж<Archive>, error) OpenArchive(@string name) {
     return (arch, default);
 }
 
-} partial class xcoffᴛArchive {
-
 // Close closes the Archive.
 // If the Archive was created using NewArchive directly instead of OpenArchive,
 // Close has no effect.
-public static error Close(this ref Archive a) {
+internal static error Close⁔(/*this*/ ref Archive a) {
     error err = default;
     if (a.closer != nil) {
         err = a.closer.Close();
@@ -103,8 +100,6 @@ public static error Close(this ref Archive a) {
     }
     return err;
 }
-
-} partial class xcoff_package {
 
 // NewArchive creates a new Archive for accessing an AIX big archive in an underlying reader.
 public static (ж<Archive>, error) NewArchive(io.ReaderAt r) {
@@ -221,12 +216,10 @@ public static (ж<Archive>, error) NewArchive(io.ReaderAt r) {
     return (arch, default);
 }
 
-} partial class xcoffᴛArchive {
-
 // GetFile returns the XCOFF file defined by member name.
 // FIXME: This doesn't work if an archive has two members with the same
 // name which can occur if an archive has both 32-bits and 64-bits files.
-public static (ж<File>, error) GetFile(this ref Archive arch, @string name) {
+internal static (ж<File>, error) GetFile⁔(/*this*/ ref Archive arch, @string name) {
     foreach (var (_, mem) in range(arch.Members)) {
         if (mem.Name == name) {
             return NewFile(new io.SectionReaderжReaderAt(mem.sr));
@@ -235,4 +228,4 @@ public static (ж<File>, error) GetFile(this ref Archive arch, @string name) {
     return (default, fmt.Errorf("unknown member %s in archive"u8, name));
 }
 
-}
+} // end xcoff_package

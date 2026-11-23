@@ -30,7 +30,6 @@ using go.@internal;
 using go.crypto;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140;
-using static ed25519_package;
 
 partial class ed25519_package {
 
@@ -46,13 +45,11 @@ public static UntypedInt SeedSize => 32;
 // PublicKey is the type of Ed25519 public keys.
 partial struct PublicKey /*[]byte*/;
 
-} partial class ed25519ᴛPublicKey {
-
 // Any methods implemented on PublicKey might need to also be implemented on
 // PrivateKey, as the latter embeds the former and will expose its methods.
 
 // Equal reports whether pub and x have the same value.
-public static bool Equal(this PublicKey pub, cryptoꓸPublicKey x) {
+internal static bool Equal⁔(/*this*/ PublicKey pub, cryptoꓸPublicKey x) {
     var (xx, ok) = x._<PublicKey>(ᐧ);
     if (!ok) {
         return false;
@@ -60,22 +57,18 @@ public static bool Equal(this PublicKey pub, cryptoꓸPublicKey x) {
     return subtle.ConstantTimeCompare(pub, xx) == 1;
 }
 
-} partial class ed25519_package {
-
 // PrivateKey is the type of Ed25519 private keys. It implements [crypto.Signer].
 partial struct PrivateKey /*[]byte*/;
 
-} partial class ed25519ᴛPrivateKey {
-
 // Public returns the [PublicKey] corresponding to priv.
-public static cryptoꓸPublicKey Public(this PrivateKey priv) {
+internal static cryptoꓸPublicKey Public⁔(/*this*/ PrivateKey priv) {
     var publicKey = new slice<byte>(PublicKeySize);
     copy(publicKey, priv[32..]);
     return (PublicKey)publicKey;
 }
 
 // Equal reports whether priv and x have the same value.
-public static bool Equal(this PrivateKey priv, cryptoꓸPrivateKey x) {
+internal static bool Equal⁔(/*this*/ PrivateKey priv, cryptoꓸPrivateKey x) {
     var (xx, ok) = x._<PrivateKey>(ᐧ);
     if (!ok) {
         return false;
@@ -86,18 +79,14 @@ public static bool Equal(this PrivateKey priv, cryptoꓸPrivateKey x) {
 // Seed returns the private key seed corresponding to priv. It is provided for
 // interoperability with RFC 8032. RFC 8032's private keys correspond to seeds
 // in this package.
-public static slice<byte> Seed(this PrivateKey priv) {
+internal static slice<byte> Seed⁔(/*this*/ PrivateKey priv) {
     return appendꓸꓸꓸ(new slice<byte>(0, SeedSize), priv[..(int)(SeedSize)]);
 }
-
-} partial class ed25519_package {
 
 // privateKeyCache uses a pointer to the first byte of underlying storage as a
 // key, because [PrivateKey] is a slice header passed around by value.
 internal static readonly ж<fips140cache.Cache<byte, ed25519.PrivateKey>> ᏑprivateKeyCache = new StaticBox<fips140cache.Cache<byte, ed25519.PrivateKey>>(default(fips140cache.Cache<byte, ed25519.PrivateKey>));
 internal static ref fips140cache.Cache<byte, ed25519.PrivateKey> privateKeyCache => ref ((StaticBox<fips140cache.Cache<byte, ed25519.PrivateKey>>)ᏑprivateKeyCache).ValueSlot;
-
-} partial class ed25519ᴛPrivateKey {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string cryptoEd25519UseOfˢ => ref cryptoEd25519UseOfˢᵇ;
@@ -114,7 +103,7 @@ private static readonly @string ed25519ExpectedOptsˢᵇ = "ed25519: expected op
 //
 // A value of type [Options] can be used as opts, or crypto.Hash(0) or
 // crypto.SHA512 directly to select plain Ed25519 or Ed25519ph, respectively.
-public static (slice<byte> signature, error err) Sign(this PrivateKey priv, io.Reader rand, slice<byte> message, crypto.SignerOpts opts) {
+internal static (slice<byte> signature, error err) Sign⁔(/*this*/ PrivateKey priv, io.Reader rand, slice<byte> message, crypto.SignerOpts opts) {
     error err = default;
 
     var privʗ1 = priv;
@@ -147,8 +136,6 @@ public static (slice<byte> signature, error err) Sign(this PrivateKey priv, io.R
     }}
 }
 
-} partial class ed25519_package {
-
 // Options can be used with [PrivateKey.Sign] or [VerifyWithOptions]
 // to select Ed25519 variants.
 partial struct Options {
@@ -159,12 +146,8 @@ partial struct Options {
     public @string Context;
 }
 
-} partial class ed25519ᴛOptions {
-
 // HashFunc returns o.Hash.
-public static crypto.Hash HashFunc(this ref Options o) { return o.Hash; }
-
-} partial class ed25519_package {
+internal static crypto.Hash HashFunc⁔(/*this*/ ref Options o) { return o.Hash; }
 
 internal static ж<godebug.Setting> cryptocustomrand = godebug.New("cryptocustomrand");
 
@@ -251,8 +234,6 @@ public static bool Verify(PublicKey publicKey, slice<byte> message, slice<byte> 
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string cryptoEd25519UseOfˢ => ref cryptoEd25519UseOfˢᵇ;
-private static readonly @string cryptoEd25519UseOfˢᵇ = "crypto/ed25519: use of Ed25519ctx is not allowed in FIPS 140-only mode"u8;
 internal static ref readonly @string ed25519ExpectedOptsHashˢ => ref ed25519ExpectedOptsHashˢᵇ;
 private static readonly @string ed25519ExpectedOptsHashˢᵇ = "ed25519: expected opts.Hash zero (unhashed message, for standard Ed25519) or SHA-512 (for Ed25519ph)"u8;
 

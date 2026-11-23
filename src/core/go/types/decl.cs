@@ -12,13 +12,10 @@ using slices = slices_package;
 using errors = global::go.@internal.types.errors_package;
 using global::go.@internal;
 using global::go.go;
-using static types_package;
 
 partial class types_package {
 
-} partial class typesᴛChecker {
-
-internal static void declare(this ж<Checker> Ꮡcheck, ж<Scope> scope, ж<ast.Ident> id, Object obj, token.Pos pos) {
+internal static void declare⁔(/*this*/ ж<Checker> Ꮡcheck, ж<Scope> scope, ж<ast.Ident> id, Object obj, token.Pos pos) {
     ref var check = ref Ꮡcheck.DerefOrNull();
 
     // spec: "The blank identifier, represented by the underscore
@@ -40,8 +37,6 @@ internal static void declare(this ж<Checker> Ꮡcheck, ж<Scope> scope, ж<ast.
     }
 }
 
-} partial class types_package {
-
 // pathString returns a string of the form a->b-> ... ->g for a path [a, b, ... g].
 internal static @string pathString(slice<Object> path) {
     @string s = default;
@@ -54,14 +49,12 @@ internal static @string pathString(slice<Object> path) {
     return s;
 }
 
-} partial class typesᴛChecker {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string checkingSObjPathSˢ => ref checkingSObjPathSˢᵇ;
 private static readonly @string checkingSObjPathSˢᵇ = "-- checking %s (objPath = %s)"u8;
 
 // objDecl type-checks the declaration of obj in its respective (file) environment.
-internal static void objDecl(this ж<Checker> Ꮡcheck, Object obj) {
+internal static void objDecl⁔(/*this*/ ж<Checker> Ꮡcheck, Object obj) {
     GoFrame ᒐ = default;
     try {
         ref var check = ref Ꮡcheck.DerefOrNull();
@@ -224,7 +217,7 @@ private static readonly @string errorCycleIsInvalidˢᵇ = "=> error: cycle is i
 
 // validCycle checks if the cycle starting with obj is valid and
 // reports an error if it is not.
-internal static bool /*valid*/ validCycle(this ж<Checker> Ꮡcheck, Object obj) {
+internal static bool /*valid*/ validCycle⁔(/*this*/ ж<Checker> Ꮡcheck, Object obj) {
     bool valid = default;
     GoFrame ᒐ = default;
     try {
@@ -347,7 +340,7 @@ break_loop:;
 }
 
 // cycleError reports a declaration cycle starting with the object at cycle[start].
-internal static void cycleError(this ж<Checker> Ꮡcheck, slice<Object> cycle, nint start) {
+internal static void cycleError⁔(/*this*/ ж<Checker> Ꮡcheck, slice<Object> cycle, nint start) {
     ref var check = ref Ꮡcheck.DerefOrNull();
 
     // name returns the (possibly qualified) object name.
@@ -396,8 +389,6 @@ internal static void cycleError(this ж<Checker> Ꮡcheck, slice<Object> cycle, 
     err.report();
 }
 
-} partial class types_package {
-
 // firstInSrc reports the index of the object with the "smallest"
 // source position in path. path must not be empty.
 internal static nint firstInSrc(slice<Object> path) {
@@ -439,35 +430,19 @@ partial struct funcDecl {
     internal ж<ast.FuncDecl> decl;
 }
 
-} partial class typesᴛimportDecl {
+internal static ast.Node node⁔(/*this*/ importDecl d) { return new ast.ImportSpecжNode(d.spec); }
+internal static ast.Node node⁔(/*this*/ constDecl d) { return new ast.ValueSpecжNode(d.spec); }
+internal static ast.Node node⁔(/*this*/ varDecl d) { return new ast.ValueSpecжNode(d.spec); }
+internal static ast.Node node⁔(/*this*/ typeDecl d) { return new ast.TypeSpecжNode(d.spec); }
+internal static ast.Node node⁔(/*this*/ funcDecl d) { return new ast.FuncDeclжNode(d.decl); }
 
-internal static ast.Node node(this importDecl d) { return new ast.ImportSpecжNode(d.spec); }
-
-} partial class typesᴛconstDecl {
-
-internal static ast.Node node(this constDecl d) { return new ast.ValueSpecжNode(d.spec); }
-
-} partial class typesᴛvarDecl {
-
-internal static ast.Node node(this varDecl d) { return new ast.ValueSpecжNode(d.spec); }
-
-} partial class typesᴛtypeDecl {
-
-internal static ast.Node node(this typeDecl d) { return new ast.TypeSpecжNode(d.spec); }
-
-} partial class typesᴛfuncDecl {
-
-internal static ast.Node node(this funcDecl d) { return new ast.FuncDeclжNode(d.decl); }
-
-} partial class typesᴛChecker {
-
-internal static void walkDecls(this ж<Checker> Ꮡcheck, slice<ast.Decl> decls, Action<decl> f) {
+internal static void walkDecls⁔(/*this*/ ж<Checker> Ꮡcheck, slice<ast.Decl> decls, Action<decl> f) {
     foreach (var (_, d) in range(decls)) {
         Ꮡcheck.walkDecl(d, f);
     }
 }
 
-internal static void walkDecl(this ж<Checker> Ꮡcheck, ast.Decl d, Action<decl> f) {
+internal static void walkDecl⁔(/*this*/ ж<Checker> Ꮡcheck, ast.Decl d, Action<decl> f) {
     switch (d.type()) {
     case ж<ast.BadDecl> dΔ1: {
         // ignore
@@ -535,7 +510,7 @@ internal static void walkDecl(this ж<Checker> Ꮡcheck, ast.Decl d, Action<decl
     }}
 }
 
-internal static void constDecl(this ж<Checker> Ꮡcheck, ж<Const> Ꮡobj, ast.Expr typ, ast.Expr init, bool inherited) {
+internal static void constDecl⁔(/*this*/ ж<Checker> Ꮡcheck, ж<Const> Ꮡobj, ast.Expr typ, ast.Expr init, bool inherited) {
     GoFrame ᒐ = default;
     try {
         ref var check = ref Ꮡcheck.DerefOrNull();
@@ -593,7 +568,7 @@ internal static void constDecl(this ж<Checker> Ꮡcheck, ж<Const> Ꮡobj, ast.
 internal static ref readonly @string variableDeclarationˢ => ref variableDeclarationˢᵇ;
 private static readonly @string variableDeclarationˢᵇ = "variable declaration"u8;
 
-internal static void varDecl(this ж<Checker> Ꮡcheck, ж<Var> Ꮡobj, slice<ж<Var>> lhs, ast.Expr typ, ast.Expr init) {
+internal static void varDecl⁔(/*this*/ ж<Checker> Ꮡcheck, ж<Var> Ꮡobj, slice<ж<Var>> lhs, ast.Expr typ, ast.Expr init) {
     ref var obj = ref Ꮡobj.DerefOrNull();
 
     assert(obj.typ == nil);
@@ -649,7 +624,7 @@ internal static void varDecl(this ж<Checker> Ꮡcheck, ж<Var> Ꮡobj, slice<ж
 }
 
 // isImportedConstraint reports whether typ is an imported type constraint.
-internal static bool isImportedConstraint(this ref Checker check, Type typ) {
+internal static bool isImportedConstraint⁔(/*this*/ ref Checker check, Type typ) {
     var named = asNamed(typ);
     if (named == nil || named.obj.pkg == check.pkg || named.obj.pkg == nil) {
         return false;
@@ -668,7 +643,7 @@ private static readonly @string genericTypeAliasRequiresˢᵇ = "generic type al
 internal static ref readonly @string cannotUseATypeParameterˢ => ref cannotUseATypeParameterˢᵇ;
 private static readonly @string cannotUseATypeParameterˢᵇ = "cannot use a type parameter as RHS in type declaration"u8;
 
-internal static void typeDecl(this ж<Checker> Ꮡcheck, ж<TypeName> Ꮡobj, ж<ast.TypeSpec> Ꮡtdecl) {
+internal static void typeDecl⁔(/*this*/ ж<Checker> Ꮡcheck, ж<TypeName> Ꮡobj, ж<ast.TypeSpec> Ꮡtdecl) {
     GoFrame ᒐ = default;
     try {
         ref var check = ref Ꮡcheck.DerefOrNull();
@@ -803,7 +778,7 @@ internal static void typeDecl(this ж<Checker> Ꮡcheck, ж<TypeName> Ꮡobj, ж
 internal static ref readonly @string cannotUseATypeParameterˢ2 => ref cannotUseATypeParameterˢ2ᵇ;
 private static readonly @string cannotUseATypeParameterˢ2ᵇ = "cannot use a type parameter as constraint"u8;
 
-internal static void collectTypeParams(this ж<Checker> Ꮡcheck, ж<ж<TypeParamList>> Ꮡdst, ж<ast.FieldList> Ꮡlist) {
+internal static void collectTypeParams⁔(/*this*/ ж<Checker> Ꮡcheck, ж<ж<TypeParamList>> Ꮡdst, ж<ast.FieldList> Ꮡlist) {
     GoFrame ᒐ = default;
     try {
         ref var check = ref Ꮡcheck.DerefOrNull();
@@ -867,7 +842,7 @@ internal static void collectTypeParams(this ж<Checker> Ꮡcheck, ж<ж<TypePara
     finally { ᒐ.Run(); }
 }
 
-internal static Type bound(this ж<Checker> Ꮡcheck, ast.Expr x) {
+internal static Type bound⁔(/*this*/ ж<Checker> Ꮡcheck, ast.Expr x) {
     // A type set literal of the form ~T and A|B may only appear as constraint;
     // embed it in an implicit interface so that only interface type-checking
     // needs to take care of such type expressions.
@@ -893,7 +868,7 @@ internal static Type bound(this ж<Checker> Ꮡcheck, ast.Expr x) {
     return Ꮡcheck.typ(x);
 }
 
-internal static ж<TypeParam> declareTypeParam(this ж<Checker> Ꮡcheck, ж<ast.Ident> Ꮡname, token.Pos scopePos) {
+internal static ж<TypeParam> declareTypeParam⁔(/*this*/ ж<Checker> Ꮡcheck, ж<ast.Ident> Ꮡname, token.Pos scopePos) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var name = ref Ꮡname.DerefOrNull();
 
@@ -909,7 +884,7 @@ internal static ж<TypeParam> declareTypeParam(this ж<Checker> Ꮡcheck, ж<ast
     return tpar;
 }
 
-internal static void collectMethods(this ж<Checker> Ꮡcheck, ж<TypeName> Ꮡobj) {
+internal static void collectMethods⁔(/*this*/ ж<Checker> Ꮡcheck, ж<TypeName> Ꮡobj) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var obj = ref Ꮡobj.DerefOrNull();
 
@@ -970,7 +945,7 @@ internal static void collectMethods(this ж<Checker> Ꮡcheck, ж<TypeName> Ꮡo
     }
 }
 
-internal static void checkFieldUniqueness(this ж<Checker> Ꮡcheck, ж<Named> @base) {
+internal static void checkFieldUniqueness⁔(/*this*/ ж<Checker> Ꮡcheck, ж<Named> @base) {
     var (t, _) = @base.Underlying()._<ж<Struct>>(ᐧ); if (t != nil) {
         objset mset = default;
         for (nint i = 0; i < @base.NumMethods(); i++) {
@@ -1000,7 +975,7 @@ internal static void checkFieldUniqueness(this ж<Checker> Ꮡcheck, ж<Named> @
     }
 }
 
-internal static void funcDecl(this ж<Checker> Ꮡcheck, ж<Func> Ꮡobj, ж<declInfo> Ꮡdecl) {
+internal static void funcDecl⁔(/*this*/ ж<Checker> Ꮡcheck, ж<Func> Ꮡobj, ж<declInfo> Ꮡdecl) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var obj = ref Ꮡobj.DerefOrNull();
     ref var decl = ref Ꮡdecl.DerefOrNull();
@@ -1036,7 +1011,7 @@ internal static void funcDecl(this ж<Checker> Ꮡcheck, ж<Func> Ꮡobj, ж<dec
     }
 }
 
-internal static void declStmt(this ж<Checker> Ꮡcheck, ast.Decl d) {
+internal static void declStmt⁔(/*this*/ ж<Checker> Ꮡcheck, ast.Decl d) {
     ref var check = ref Ꮡcheck.DerefOrNull();
 
     var pkg = check.pkg;
@@ -1152,4 +1127,4 @@ internal static void declStmt(this ж<Checker> Ꮡcheck, ast.Decl d) {
     });
 }
 
-}
+} // end types_package

@@ -29,7 +29,6 @@ using @internal;
 using compress;
 using encoding;
 using go.debug;
-using static macho_package;
 
 partial class macho_package {
 
@@ -52,11 +51,7 @@ partial interface Load {
 // A LoadBytes is the uninterpreted bytes of a Mach-O load command.
 partial struct LoadBytes /*[]byte*/;
 
-} partial class machoᴛLoadBytes {
-
-public static slice<byte> Raw(this LoadBytes b) { return b; }
-
-} partial class macho_package {
+internal static slice<byte> Raw⁔(/*this*/ LoadBytes b) { return b; }
 
 // A SegmentHeader is the header for a Mach-O 32-bit or 64-bit load segment command.
 partial struct SegmentHeader {
@@ -87,17 +82,13 @@ partial struct Segment {
     internal ж<io.SectionReader> sr;
 }
 
-} partial class machoᴛSegment {
-
 // Data reads and returns the contents of the segment.
-public static (slice<byte>, error) Data(this ref Segment s) {
+internal static (slice<byte>, error) Data⁔(/*this*/ ref Segment s) {
     return saferio.ReadDataAt(new io.SectionReaderжReaderAt(s.sr), s.Filesz, 0);
 }
 
 // Open returns a new ReadSeeker reading the segment.
-public static io.ReadSeeker Open(this ref Segment s) { return new io.SectionReaderжReadSeeker(io.NewSectionReader(new io.SectionReaderжReaderAt(s.sr), 0, 9223372036854775807L)); }
-
-} partial class macho_package {
+internal static io.ReadSeeker Open⁔(/*this*/ ref Segment s) { return new io.SectionReaderжReadSeeker(io.NewSectionReader(new io.SectionReaderжReaderAt(s.sr), 0, 9223372036854775807L)); }
 
 partial struct SectionHeader {
     public @string Name;
@@ -138,17 +129,13 @@ partial struct Section {
     internal ж<io.SectionReader> sr;
 }
 
-} partial class machoᴛSection {
-
 // Data reads and returns the contents of the Mach-O section.
-public static (slice<byte>, error) Data(this ref Section s) {
+internal static (slice<byte>, error) Data⁔(/*this*/ ref Section s) {
     return saferio.ReadDataAt(new io.SectionReaderжReaderAt(s.sr), s.Size, 0);
 }
 
 // Open returns a new ReadSeeker reading the Mach-O section.
-public static io.ReadSeeker Open(this ref Section s) { return new io.SectionReaderжReadSeeker(io.NewSectionReader(new io.SectionReaderжReaderAt(s.sr), 0, 9223372036854775807L)); }
-
-} partial class macho_package {
+internal static io.ReadSeeker Open⁔(/*this*/ ref Section s) { return new io.SectionReaderжReadSeeker(io.NewSectionReader(new io.SectionReaderжReaderAt(s.sr), 0, 9223372036854775807L)); }
 
 // A Dylib represents a Mach-O load dynamic library command.
 partial struct Dylib {
@@ -200,9 +187,7 @@ partial struct FormatError {
     internal any val;
 }
 
-} partial class machoᴛFormatError {
-
-public static @string Error(this ref FormatError e) {
+internal static @string Error⁔(/*this*/ ref FormatError e) {
     @string msg = e.msg;
     if (e.val != nil) {
         msg += fmt.Sprintf(" '%v'"u8, e.val);
@@ -210,8 +195,6 @@ public static @string Error(this ref FormatError e) {
     msg += fmt.Sprintf(" in record at byte %#x"u8, e.off);
     return msg;
 }
-
-} partial class macho_package {
 
 // Open opens the named file using [os.Open] and prepares it for use as a Mach-O binary.
 public static (ж<File>, error) Open(@string name) {
@@ -228,12 +211,10 @@ public static (ж<File>, error) Open(@string name) {
     return (ff, default);
 }
 
-} partial class machoᴛFile {
-
 // Close closes the [File].
 // If the [File] was created using [NewFile] directly instead of [Open],
 // Close has no effect.
-public static error Close(this ref File f) {
+internal static error Close⁔(/*this*/ ref File f) {
     error err = default;
     if (f.closer != nil) {
         err = f.closer.Close();
@@ -241,8 +222,6 @@ public static error Close(this ref File f) {
     }
     return err;
 }
-
-} partial class macho_package {
 
 // NewFile creates a new [File] for accessing a Mach-O binary in an underlying reader.
 // The Mach-O binary is expected to start at position 0 in the ReaderAt.
@@ -501,9 +480,7 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
     return (f, default);
 }
 
-} partial class machoᴛFile {
-
-internal static (ж<Symtab>, error) parseSymtab(this ref File f, slice<byte> symdat, slice<byte> strtab, slice<byte> cmddat, ж<SymtabCmd> Ꮡhdr, int64 offset) {
+internal static (ж<Symtab>, error) parseSymtab⁔(/*this*/ ref File f, slice<byte> symdat, slice<byte> strtab, slice<byte> cmddat, ж<SymtabCmd> Ꮡhdr, int64 offset) {
     ref var hdr = ref Ꮡhdr.DerefOrNull();
 
     var bo = f.ByteOrder;
@@ -552,16 +529,12 @@ internal static (ж<Symtab>, error) parseSymtab(this ref File f, slice<byte> sym
     return (st, default);
 }
 
-} partial class macho_package {
-
 partial struct relocInfo {
     public uint32 Addr;
     public uint32 Symnum;
 }
 
-} partial class machoᴛFile {
-
-internal static error pushSection(this ref File f, ж<Section> Ꮡsh, io.ReaderAt r) {
+internal static error pushSection⁔(/*this*/ ref File f, ж<Section> Ꮡsh, io.ReaderAt r) {
     ref var sh = ref Ꮡsh.DerefOrNull();
 
     f.Sections = append(f.Sections, Ꮡsh);
@@ -624,8 +597,6 @@ internal static error pushSection(this ref File f, ж<Section> Ꮡsh, io.ReaderA
     return default;
 }
 
-} partial class macho_package {
-
 internal static @string cstring(slice<byte> b) {
     nint i = bytes.IndexByte(b, 0);
     if (i == -1) {
@@ -634,10 +605,8 @@ internal static @string cstring(slice<byte> b) {
     return (@string)(b.slice(0, i));
 }
 
-} partial class machoᴛFile {
-
 // Segment returns the first Segment with the given name, or nil if no such segment exists.
-public static ж<Segment> Segment(this ref File f, @string name) {
+internal static ж<Segment> Segment⁔(/*this*/ ref File f, @string name) {
     foreach (var (_, l) in range(f.Loads)) {
         var (s, ok) = l._<ж<Segment>>(ᐧ); if (ok && s.Name == name) {
             return s;
@@ -648,7 +617,7 @@ public static ж<Segment> Segment(this ref File f, @string name) {
 
 // Section returns the first section with the given name, or nil if no such
 // section exists.
-public static ж<Section> Section(this ref File f, @string name) {
+internal static ж<Section> Section⁔(/*this*/ ref File f, @string name) {
     foreach (var (_, s) in range(f.Sections)) {
         if (s.Name == name) {
             return s;
@@ -674,7 +643,7 @@ internal static ref readonly @string strˢ => ref strˢᵇ;
 private static readonly @string strˢᵇ = "str"u8;
 
 // DWARF returns the DWARF debug information for the Mach-O file.
-public static (ж<dwarf.Data>, error) DWARF(this ref File f) {
+internal static (ж<dwarf.Data>, error) DWARF⁔(/*this*/ ref File f) {
     @string dwarfSuffix(ж<Section> s) {
         @string sectname = s.Name;
         nint pfx = default;
@@ -788,7 +757,7 @@ public static (ж<dwarf.Data>, error) DWARF(this ref File f) {
 // ImportedSymbols returns the names of all symbols
 // referred to by the binary f that are expected to be
 // satisfied by other libraries at dynamic load time.
-public static (slice<@string>, error) ImportedSymbols(this ref File f) {
+internal static (slice<@string>, error) ImportedSymbols⁔(/*this*/ ref File f) {
     if (f.Symtab == nil) {
         return (default, new FormatErrorжerror(Ꮡ(new FormatError(0, "missing symbol table", default))));
     }
@@ -817,7 +786,7 @@ public static (slice<@string>, error) ImportedSymbols(this ref File f) {
 // ImportedLibraries returns the paths of all libraries
 // referred to by the binary f that are expected to be
 // linked with the binary at dynamic link time.
-public static (slice<@string>, error) ImportedLibraries(this ref File f) {
+internal static (slice<@string>, error) ImportedLibraries⁔(/*this*/ ref File f) {
     var allᴷ = new stackAppend<@string>(moves: true);
 
     slice<@string> all = default;
@@ -830,4 +799,4 @@ public static (slice<@string>, error) ImportedLibraries(this ref File f) {
     return (all, default);
 }
 
-}
+} // end macho_package

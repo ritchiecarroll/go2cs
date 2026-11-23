@@ -7,7 +7,6 @@ namespace go.go;
 
 using fmt = fmt_package;
 using token = global::go.go.token_package;
-using static types_package;
 
 partial class types_package {
 
@@ -30,28 +29,26 @@ public static ж<Package> NewPackage(@string path, @string name) {
     return Ꮡ(new Package(path: path, name: name, scope: scope));
 }
 
-} partial class typesᴛPackage {
-
 // Path returns the package path.
-public static @string Path(this ref Package pkg) { return pkg.path; }
+internal static @string Path⁔(/*this*/ ref Package pkg) { return pkg.path; }
 
 // Name returns the package name.
-public static @string Name(this ref Package pkg) { return pkg.name; }
+internal static @string Name⁔(/*this*/ ref Package pkg) { return pkg.name; }
 
 // SetName sets the package name.
-public static void SetName(this ref Package pkg, @string name) { pkg.name = name; }
+internal static void SetName⁔(/*this*/ ref Package pkg, @string name) { pkg.name = name; }
 
 // GoVersion returns the minimum Go version required by this package.
 // If the minimum version is unknown, GoVersion returns the empty string.
 // Individual source files may specify a different minimum Go version,
 // as reported in the [go/ast.File.GoVersion] field.
-public static @string GoVersion(this ref Package pkg) { return pkg.goVersion; }
+internal static @string GoVersion⁔(/*this*/ ref Package pkg) { return pkg.goVersion; }
 
 // Scope returns the (complete or incomplete) package scope
 // holding the objects declared at package level (TypeNames,
 // Consts, Vars, and Funcs).
 // For a nil pkg receiver, Scope returns the Universe scope.
-public static ж<Scope> Scope(this ж<Package> Ꮡpkg) {
+internal static ж<Scope> Scope⁔(/*this*/ ж<Package> Ꮡpkg) {
     ref var pkg = ref Ꮡpkg.DerefOrNull();
 
     if (Ꮡpkg != nil) {
@@ -62,10 +59,10 @@ public static ж<Scope> Scope(this ж<Package> Ꮡpkg) {
 
 // A package is complete if its scope contains (at least) all
 // exported objects; otherwise it is incomplete.
-public static bool Complete(this ref Package pkg) { return pkg.complete; }
+internal static bool Complete⁔(/*this*/ ref Package pkg) { return pkg.complete; }
 
 // MarkComplete marks a package as complete.
-public static void MarkComplete(this ref Package pkg) { pkg.complete = true; }
+internal static void MarkComplete⁔(/*this*/ ref Package pkg) { pkg.complete = true; }
 
 // Imports returns the list of packages directly imported by
 // pkg; the list is in source order.
@@ -76,14 +73,14 @@ public static void MarkComplete(this ref Package pkg) { pkg.complete = true; }
 //
 // If pkg uses cgo and the FakeImportC configuration option
 // was enabled, the imports list may contain a fake "C" package.
-public static slice<ж<Package>> Imports(this ref Package pkg) { return pkg.imports; }
+internal static slice<ж<Package>> Imports⁔(/*this*/ ref Package pkg) { return pkg.imports; }
 
 // SetImports sets the list of explicitly imported packages to list.
 // It is the caller's responsibility to make sure list elements are unique.
-public static void SetImports(this ref Package pkg, slice<ж<Package>> list) { pkg.imports = list; }
+internal static void SetImports⁔(/*this*/ ref Package pkg, slice<ж<Package>> list) { pkg.imports = list; }
 
-public static @string String(this ref Package pkg) {
+internal static @string String⁔(/*this*/ ref Package pkg) {
     return fmt.Sprintf("package %s (%q)"u8, pkg.name, pkg.path);
 }
 
-}
+} // end types_package

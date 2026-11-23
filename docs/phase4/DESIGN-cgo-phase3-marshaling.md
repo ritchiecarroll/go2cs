@@ -2284,3 +2284,212 @@ not take the shape.
   panics when `l` holds nil, where Go stores. A store through (b) now emits `(Ꮡl).ValueSlot = v`, the converter's own
   convention for a held reference (`pp.ValueSlot = Ꮡx`). Loads through (b) already read `~Ꮡl`, which is `ValueSlot`.
   Shape (a)'s store keeps its emission: that is the lost write, not this. Corpus sites: none.
+
+### 18.9 Amendment 2026-11-21: seat 1a (S-B2a), the field accessor for a C struct's pointer field (P3: APPROVE WITH CHANGES, folded in before code)
+
+P3 reviewed the first text (COORD inbox `20261121T141854Z-P3.md`): APPROVE WITH CHANGES. COORD ruled every change into
+this text before code: MUSTs 1-3, all SHOULDs, and three more stop lines. Each is marked [P3 Mn] or [P3 S] where it
+lands.
+
+1a is the part of 18.2 (as amended by 18.4) that retires three of the four section-6 pins: s6nextnil, s6nextdirect and
+s6name (claude/h-cgo-s6-pin, train 2). s6next's pin stays: it is the reference floor's refusal, which 18.4 finding 1
+rules for 3.2. The owner placed 1a in .5 (11-21). 1b (the pinned class, shape (i), B-10, B-12) moves to .6, and so does
+1c (the `**C.T` load and store, 18.10). The seat is cut off master after train 2 lands, so the pin is under it.
+
+**1. The marker (converter).** `visitStructType.go` stamps `[GoCgoStruct]` beside `[GoValueClone(…)]`. It is movable,
+so it rides the type's accessibility record, which for a C type is the pseudo-package's
+(`applyCgoPseudoPackageStamp`). The stamp goes on a struct only when ALL THREE hold:
+- [P3 M1] the package is converting on the -cgo route (`cgoRouteActive`, cgoRoute.go:82). The KIND alone is decided from
+  the NAME (cgoDeclarations.go:142-145). So without this condition, a hand-written Go type named `_Ctype_struct_x` in a
+  package that does not import "C" would be stamped. On the route, cmd/cgo reserves the prefix, so the name is cmd/cgo's
+  own declaration.
+- the named type is one cmd/cgo declared as a C struct (`cgoTypeKind` is `cgoStruct`, prefix `_Ctype_struct_`);
+- at least one field's type is a pointer (`*T`) or `unsafe.Pointer`.
+The generator reads only the marker. The corpus converts at CGO_ENABLED=0, off the route, so it moves 0 lines (D-1).
+- [P3 S] Out of 1a, each by name (each keeps today's `ref` property and today's refusal over C memory):
+  - a field whose type is a DEFINED pointer typedef (`type _Ctype_xptr *_Ctype_struct_x`): its C# type is a named
+    pointer wrapper, not `ж<U>`;
+  - a pointer field reached through a NESTED struct value (`l.inner.p`);
+  - an array of pointers (`T *a[4]`);
+  - unions (18.4, 8a).
+
+**2. The accessor (go2cs-gen, `FieldAccessGenerator.Properties`).** [P3 S] The generator's contract is THE MARKER,
+however it was stamped. Darwin's resolver walks a Go-declared mirror struct (cgo_unix_syscall.go), so .6 adds a stamping
+rule, never a second generator path. For a type that carries `[GoCgoStruct]`, a field whose C# type is `ж<U>` gets a
+GET/SET property in place of the `ref` property:
+
+    public ж<U> f { get => ʗp.cgoPointerField(T.Ꮡf); set => ʗp.cgoPointerField(T.Ꮡf, value); }
+
+- A field whose C# type is `unsafe.Pointer` gets the same shape over S-B1's word doors, through a new slot member:
+  `get => global::go.unsafe_package.Pointer.LoadWord(ʗp.cgoWordField(T.Ꮡf))`, and the set is
+  `StoreWord(ʗp.cgoWordField(T.Ꮡf), value)` (unsafe.cs:1397, :1431).
+  - [P3 M2] `cgoWordField` exists for the unknown-offset refusal. A bare `ʗp.Ꮡf` with no Go offset is not a
+    NativeBox: Classify answers NotAWord, and the door would take the CLR slot of a struct in C memory, which is the
+    wrong bytes, silently. `ж<T>.cgoWordField<TF>(FieldRefFunc<T, TF>)` returns:
+    - a managed receiver: `of(f)`, unchanged;
+    - a native receiver: `of(f)` when the field's Go offset is known, else the same by-name refusal as item 3.
+  - The Classify premise holds by reading: `of` over a native receiver is `FieldRefBox.NativeFieldBox()`, and
+    `NativeDerivation.Kept` returns null for a C-memory-alone root (ж.NativeDerivation.cs:77). Arm (5) measures it.
+  - Over C memory, W1/W2 then decide as S-B1 built them. Over PINNED Go memory, the same doors take the per-slot bag
+    table, where a Go pointer is legal (item 4b).
+- Every other field of the type keeps its `ref` property.
+- The field's ADDRESS property (`AddAddress`) is unchanged. So `&l.next` still compiles and still reaches the reference
+  floor: s6next's refusal text is predicted byte-identical.
+- A `ref` to a marked pointer field no longer compiles, by design, as for a header-shaped struct.
+- A type both header-shaped and marked cannot occur in the corpus. Should one occur, the marker decides its pointer
+  fields, since no golib header box views a C struct.
+
+**3. The read (golib, new `ж<T>.cgoPointerField<U>(FieldRefFunc<T, ж<U>>)`).** [P3 M3] There are THREE receivers:
+managed, native over C memory alone, and native over pinned Go memory (a C struct laid over a Go buffer, s6slice's
+shape).
+- A MANAGED receiver reads its slot, `fieldRefFunc(ref Value)`: a C struct value Go allocated. Its behaviour does not
+  change: that is a stop line.
+- A NATIVE receiver over C MEMORY ALONE reads the address word at the field's Go offset
+  (`FieldRefBox<ж<U>>.GoFieldOffsetOf`, the offset s6field already reads):
+  - 0 is nil;
+  - a word that `GoPointerWords.NamesGoMemory` reports (a token, an address the exact registry knows, or one inside a
+    live pin) is REFUSED: "cgo struct field load: a Go pointer read out of C memory is refused (C memory must not hold a
+    Go pointer)". That is 18.4 finding 6, worded as S-B1's W1 refusal is.
+  - [P3 S] A Pinner-pinned Go pointer that C kept in the field is refused by the same text. That is the read half of
+    18.4's named deviation (8b), named in Limitations.
+  - Any other word mints `new NativeBox<U>(word)`, as `GoCgoArgs.PointerMemberBack` mints a pointer C returned.
+- [P3 M3] A NATIVE receiver over PINNED GO MEMORY reads the word at the Go offset:
+  - 0 is nil;
+  - a C-memory number mints `NativeBox<U>`;
+  - a word that names Go memory is REFUSED with its own text: "cgo struct field load: a Go pointer in a C struct laid
+    over Go memory is not read in 3.2 (go2cs keeps no record of the pointer stored there)". Go allows the value; go2cs
+    names it as a deviation and never resolves a box by number over managed storage (18.4 finding 4).
+- Any native receiver whose Go offset is unknown (`GoFieldOffsetOf` < 0) is REFUSED by name. It never falls back to the
+  CLR slot, which would read the wrong bytes.
+
+**4. The write (`ж<T>.cgoPointerField<U>(FieldRefFunc<T, ж<U>>, ж<U>?)`).**
+- A MANAGED receiver stores into its slot, unchanged.
+- (4a) A NATIVE receiver over C MEMORY ALONE stores a word:
+  - nil (or a nil box) writes 0;
+  - a box over C memory alone (`GoPointerWords.IsCMemoryAlone`) writes its `NativeAddress`;
+  - anything else is REFUSED: "cgo struct field store: storing a Go pointer into C memory is refused (C memory must not
+    hold a Go pointer)". That is S-B1's W2(a), and 18.4's named deviation (8b) for a Pinner-pinned pointer stands.
+- (4b) [P3 M3] A NATIVE receiver over PINNED GO MEMORY:
+  - nil writes 0;
+  - a C pointer writes its address;
+  - a Go pointer, which is LEGAL Go there, is REFUSED with its own text: "cgo struct field store: a Go pointer stored
+    into a C struct laid over Go memory is not supported in 3.2". Here the C-memory text would be wrong, since the
+    memory is Go's. It is named in Limitations.
+  - An `unsafe.Pointer` field there needs no refusal: the word doors' per-slot bag table already stores a Go pointer
+    into pinned Go memory (S-B1).
+
+**5. Public surface.** golib gains one attribute type (`GoCgoStructAttribute`, `[EditorBrowsable(Never)]`) and THREE
+members on `ж<T>`: the two `cgoPointerField` overloads, and `cgoWordField` [P3 M2]. PublicSurface.golib.txt gains exactly
+FOUR lines. This text's first version said three, and M2's member is the fourth. Route #7 runs both families.
+
+**Limitations (named deviations).**
+- 8b: go2cs refuses a Go pointer stored into C memory, pinned or not. Go allows a `runtime.Pinner`-pinned one. [P3 S] The
+  read half: a Pinner-pinned Go pointer that C kept in a field is refused on read too.
+- [P3 M3] In a C struct laid over pinned Go memory, a typed pointer field neither reads nor stores a Go pointer, each
+  refused by name, though Go allows both. An `unsafe.Pointer` field there does both, through the word doors.
+- The also-outs of item 1.
+
+**Predictions** (scored as worded, at the cut):
+- D-1: corpus footprint 0 files on four targets, by the two-seeded reconvert.
+- D-2: s6nextnil, s6nextdirect and s6name print what Go prints on 5 RIDs; their pins are removed in the same seat.
+  s6next's text is byte-identical. s6field, s6reinterp and s6slice stay green.
+- D-3: GenTests:
+  - a marked struct's `ж<U>` and `unsafe.Pointer` fields get the GET/SET shape;
+  - its scalar, array and struct fields keep `ref`;
+  - an unmarked struct with the same fields keeps `ref` everywhere (the near-miss arm);
+  - a compile arm asserts that a `ref` to a marked pointer field does not compile.
+- D-3b [P3 M1]: a converter near-miss arm. A hand-written `type _Ctype_struct_x struct{ next *_Ctype_struct_x }` in a
+  package that does not import "C" converts with NO stamp.
+- D-4: a new e2e arm. A C pointer stored into a C struct's pointer field reads back in C, and a Go pointer stored there
+  is refused by name.
+- D-5: go2cs-gen's non-cgo output is byte-identical (GolibTests, GenTests, and the behavioral generated files).
+- D-6: the offline phase1 fixture's `_Ctype_struct_x` (field `next *_Ctype_struct_x`) converts with the stamp, a
+  converter-test arm. `_Ctype_struct___0` in phase2 (no pointer field) converts without it.
+- Finding 6: a new e2e arm. A C struct field holding a pinned Go array's address is refused on read.
+- (5) [P3 S] the Classify-first GolibTests arm (`CgoStructFieldWordSlotTests`) reads FOUR receivers:
+  - a bare C root: CMemory;
+  - a root minted by `cgoPointerField` (`l.next.next`): CMemory;
+  - a root that owns a pin over Go memory: NOT CMemory (GoMemory);
+  - a managed receiver: NotAWord.
+  The bare-root and typed-field halves exist locally; the minted root needs the member.
+- (6) [P3 M2] the unknown-offset arm: an `unsafe.Pointer` field over a native receiver whose Go offset is unknown is
+  refused by name through `cgoWordField`, and C memory is left unchanged.
+- (7) [P3 M3] the pinned-Go-memory rows:
+  - a typed pointer field reads 0 as nil and a C number as a NativeBox;
+  - a Go pointer is refused on read and on store, each with its own text;
+  - an `unsafe.Pointer` field stores and loads a Go pointer through the word doors.
+- (8) [P3 stop line] the managed round trip `var x C.struct_s; x.p = q; r := x.p`, for both field kinds, including a Go
+  pointer: `r` is `q`, identical before and after the seat.
+
+**Stop lines** (18.2's still stand):
+- any unmarked type's accessor changes;
+- a `ref` to a marked pointer field that the converter emits today;
+- s6next's text moves;
+- [P3] the marker appears on any type in a package that does not import "C";
+- [P3] PublicSurface.golib.txt gains more than this text's four lines, or any generated file outside a cgo package
+  changes;
+- [P3] the managed receiver's behaviour changes (arm 8).
+
+— H (2026-11-21)
+
+**Record 2026-11-21: P3's seat read of 1a (CLEAR), and the SHOULDs folded before seating.** P3 read `01ecb22bb9` (COORD
+inbox `20261121T210538Z-P3.md`): CLEAR, with the three MUSTs met. COORD ruled the three SHOULDs and two NITs in, as one
+commit, before seating.
+- SHOULD 1. The store admitted a C pointer only as a `NativeBox<U>`. An element of a native-backed slice that keeps no
+  anchor is C memory alone too (`IsCMemoryAlone`, ж.ElemRefBox.cs), so `e.ip = &s[1]` over
+  `unsafe.Slice((*C.int)(C.malloc(16)), 4)` was refused as a Go pointer. The store now tests `IsCMemoryAlone` on the
+  value and writes the box's native identity.
+  - Row: `AFieldOverCMemoryStoresAnElementOfCMemoryByItsAddress`.
+  - Red at the pre-fix golib (filtered CgoPointerFieldTests, Release: 1 failed of 9, with "storing a Go pointer into C
+    memory is refused"), and green with the fix (9 of 9). Both were predicted before the run.
+- SHOULD 2. M3's `void *` half now has a row: `AnUnsafePointerFieldOverPinnedGoMemoryRoundTripsACWordAndAGoPointer`.
+  Through `cgoWordField` and the word doors, a C word round-trips as a number at the field's Go offset, and a Go pointer
+  is stored and read back as its box.
+  - It is a coverage row of behaviour this section already states. It is green at both arms, and no fold code changes
+    it.
+- SHOULD 3. M1's off-route gate was made to fail once, by safety-floor item 13.
+  - The arm: the `cgoRouteActive` test at cgoDeclarations.go:303 dropped, uncommitted, and one unfiltered CNR at
+    `01ecb22bb9`. The prediction was posted to COORD before the run.
+  - The reading: rc 1, "CHANGED converter output", naming exactly one file,
+    `src/tests/Behavioral/CgoPseudoPackageTypes/package_info.cs`. In it, `_Ctype_struct_point` gains
+    `[global::go.golib.GoCgoStruct]` beside `[GoValueClone("name")]`. NOT MEASURED was 0. MET as predicted.
+  - Restored, and byte-identical (sha256 of cgoDeclarations.go equal before and after), with a clean tree.
+- NIT 4. FieldAccessGenerator.cs names the header-shaped-plus-marked pair in a comment. It is not reached today.
+- NIT 5. The read's mint carries a comment: each read is a fresh box, `==` compares by address, and a ReferenceEquals
+  site would tell two reads apart. The `**C.T` load (1c) mints the same way.
+- Re-cite: NIT 4's three comment lines move FieldAccessGenerator.cs by +3 below :357. ConversionStrategies.md:11576's
+  `:361` becomes `:364`, and `:668-684#f10245` becomes `:671-687#f10245`. The span is byte-identical, so its
+  fingerprint holds.
+
+### 18.10 Record 2026-11-21: the resolver's walk takes the field's ADDRESS (18.2 item 5 and 18.4 finding 1 corrected; no rewrite)
+
+18.2 item 5 and 18.4 finding 1 say getaddrinfo's walk reads "through the field, not its address". The source says
+otherwise:
+- go1.24.13, net/cgo_unix.go:150 and :216: `for r := res; r != nil; r = *_C_ai_next(r)`;
+- cgo_unix_cgo.go:71: `func _C_ai_next(ai *_C_struct_addrinfo) **_C_struct_addrinfo { return &ai.ai_next }`;
+- :68 returns `&ai.ai_addr` the same way;
+- darwin's cgo_unix_syscall.go:53/:56 returns `&ai.Addr` and `&ai.Next`.
+The walk takes the address of a C struct's pointer field and loads through it: s6next's shape, which 18.4 keeps refused
+in 3.2. So the resolver (increment 3.4) needs 1a AND 1c. 1c is the `**C.T` load and store over C memory, 18.4's "later
+increment", which retires s6next's pin. It is placed in .6 beside the resolver. Only the reinterpret AFTER
+`*_C_ai_addr(r)` is s6reinterp's shape. Found while sizing 1a, and posted on its own before any plan used it.
+
+**Deltas found while coding (2026-11-21), marked for P3, as COORD ruled: not a new pre-code read.**
+- (U) A FOURTH field-slot kind. The four-receiver Classify arm first read Unheld where GoMemory was predicted, through
+  `Reinterpret` over a Go `slice<byte>`, which holds no pin. The miss was posted on its own. The settling arm over both
+  mints then read 5 of 5: the converter's own mint for `(*C.struct_x)(unsafe.Pointer(&buf[0]))`,
+  `To<T>(FromPinnedBox(Ꮡ(buf, 0)))`, is GoMemory, and Reinterpret is Unheld. So items 3 and 4 have a fourth row: a
+  native receiver whose field slot is UNHELD refuses a read and a store of either field kind with S-B1's
+  UnheldSlotText, word for word. That adds no text and no public member.
+- (D1) `GoCgoStructAttribute` lives in namespace `go.golib`, not `go`: PublicSurface.golib.txt's own rule refuses a new
+  type in `go` that is not a Go name. An unlisted `go.golib` type adds no line, so the surface gains THREE lines (the
+  three `ж<T>` members), not item 5's four.
+- (D2) The converter spells the stamp `[global::go.golib.GoCgoStruct]`. It rides package_info.cs's accessibility record,
+  which carries no `using go.golib;`, and the generator reads the attribute symbol, never its spelling.
+- (C) `src/go2cs/fieldAccessCollisions.txt` gains `cgoPointerField` and `cgoWordField`. GenTests'
+  TheCollisionListNamesEveryMemberOfTheBox requires every public `ж<T>` member there. The GenTests prediction missed on
+  it and was posted on its own before the fix. A Go field or method spelled like either now takes the converter's
+  explicit form; D-1 and CNR read whether any does.
+- Arm (finding 6) stays a GolibTests arm (`AFieldOverCMemoryHoldingAGoPointerIsRefusedOnRead`), not an e2e one. In Go
+  code, handing C a Go pointer to store is itself refused by 3.1's door ("increment 3.2") before any field read, so no
+  e2e program reaches the read refusal until 1b.

@@ -5,7 +5,6 @@
 namespace go;
 
 using @unsafe = unsafe_package;
-using static main_package;
 
 partial class main_package {
 
@@ -71,16 +70,12 @@ partial struct TypeOff /*num:int32*/;
 
 partial struct TextOff /*num:int32*/;
 
-} partial class mainᴛKind {
-
-public static @string String(this Kind k) {
+internal static @string String⁔(/*this*/ Kind k) {
     if ((nint)k < len(kindNames)) {
         return kindNames[k];
     }
     return kindNames[0];
 }
-
-} partial class main_package {
 
 [GoLazy] partial class lazyᴛkindNames { internal static slice<@string> kindNames = new golib.SparseArray<@string>{
     [Invalid] = "invalid",
@@ -127,29 +122,25 @@ public static ж<Type> TypeFor<T>() {
     return TypeOf((ж<T>)nil).Elem();
 }
 
-} partial class mainᴛType {
+internal static Kind Kind⁔(/*this*/ ref Type t) { return (Kind)(t.Kind_ & KindMask); }
 
-public static Kind Kind(this ref Type t) { return (Kind)(t.Kind_ & KindMask); }
-
-public static bool HasName(this ref Type t) {
+internal static bool HasName⁔(/*this*/ ref Type t) {
     return (TFlag)(t.TFlag & TFlagNamed) != 0;
 }
 
-public static bool Pointers(this ref Type t) { return t.PtrBytes != 0; }
+internal static bool Pointers⁔(/*this*/ ref Type t) { return t.PtrBytes != 0; }
 
-public static bool IfaceIndir(this ref Type t) {
+internal static bool IfaceIndir⁔(/*this*/ ref Type t) {
     return (Kind)(t.Kind_ & KindDirectIface) == 0;
 }
 
-public static bool IsDirectIface(this ref Type t) {
+internal static bool IsDirectIface⁔(/*this*/ ref Type t) {
     return (Kind)(t.Kind_ & KindDirectIface) != 0;
 }
 
-public static slice<byte> GcSlice(this ref Type t, uintptr begin, uintptr end) {
+internal static slice<byte> GcSlice⁔(/*this*/ ref Type t, uintptr begin, uintptr end) {
     return @unsafe.Slice(t.GCData, (nint)end).slice((nint)(begin));
 }
-
-} partial class main_package {
 
 partial struct Method {
     public NameOff Name;
@@ -200,9 +191,7 @@ partial struct ArrayType {
     public uintptr Len;
 }
 
-} partial class mainᴛType {
-
-public static nint Len(this ж<Type> Ꮡt) {
+internal static nint Len⁔(/*this*/ ж<Type> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (t.Kind() == Array) {
@@ -211,11 +200,9 @@ public static nint Len(this ж<Type> Ꮡt) {
     return 0;
 }
 
-public static ж<Type> Common(this ж<Type> Ꮡt) {
+internal static ж<Type> Common⁔(/*this*/ ж<Type> Ꮡt) {
     return Ꮡt;
 }
-
-} partial class main_package {
 
 partial struct ChanDir /*num:nint*/;
 
@@ -235,9 +222,7 @@ partial struct structTypeUncommon {
     internal UncommonType u;
 }
 
-} partial class mainᴛType {
-
-public static ChanDir ChanDir(this ж<Type> Ꮡt) {
+internal static ChanDir ChanDir⁔(/*this*/ ж<Type> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (t.Kind() == Chan) {
@@ -246,8 +231,6 @@ public static ChanDir ChanDir(this ж<Type> Ꮡt) {
     }
     return InvalidDir;
 }
-
-} partial class main_package {
 
 internal partial struct Uncommon_u /*dyn*/ {
     /*embed*/ public PtrType PtrType;
@@ -289,9 +272,7 @@ internal partial struct Uncommon_uᴛ7 /*dyn*/ {
     internal UncommonType u;
 }
 
-} partial class mainᴛType {
-
-public static ж<UncommonType> Uncommon(this ж<Type> Ꮡt) {
+internal static ж<UncommonType> Uncommon⁔(/*this*/ ж<Type> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if ((TFlag)(t.TFlag & TFlagUncommon) == 0) {
@@ -328,13 +309,13 @@ public static ж<UncommonType> Uncommon(this ж<Type> Ꮡt) {
 
 }
 
-public static ж<Type> Elem(this ж<Type> Ꮡt) {
+internal static ж<Type> Elem⁔(/*this*/ ж<Type> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     switch (t.Kind()) {
     case var ᴛ when ᴛ == Array: {
         var tt = Ꮡt.Reinterpret<Type, ArrayType>();
-        return tt.of(main_package.ArrayType.ᏑElem).Value;
+        return tt.of(ArrayType.ᏑElem).Value;
     }
     case var ᴛ when ᴛ == Chan: {
         var tt = Ꮡt.Reinterpret<Type, ChanType>();
@@ -342,7 +323,7 @@ public static ж<Type> Elem(this ж<Type> Ꮡt) {
     }
     case var ᴛ when ᴛ == Map: {
         var tt = Ꮡt.Reinterpret<Type, MapType>();
-        return tt.of(main_package.MapType.ᏑElem).Value;
+        return tt.of(MapType.ᏑElem).Value;
     }
     case var ᴛ when ᴛ == Pointer: {
         var tt = Ꮡt.Reinterpret<Type, PtrType>();
@@ -356,7 +337,7 @@ public static ж<Type> Elem(this ж<Type> Ꮡt) {
     return default;
 }
 
-public static ж<StructType> StructType(this ж<Type> Ꮡt) {
+internal static ж<StructType> StructType⁔(/*this*/ ж<Type> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (t.Kind() != Struct) {
@@ -365,7 +346,7 @@ public static ж<StructType> StructType(this ж<Type> Ꮡt) {
     return Ꮡt.Reinterpret<Type, StructType>();
 }
 
-public static ж<MapType> MapType(this ж<Type> Ꮡt) {
+internal static ж<MapType> MapType⁔(/*this*/ ж<Type> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (t.Kind() != Map) {
@@ -374,7 +355,7 @@ public static ж<MapType> MapType(this ж<Type> Ꮡt) {
     return Ꮡt.Reinterpret<Type, MapType>();
 }
 
-public static ж<ArrayType> ArrayType(this ж<Type> Ꮡt) {
+internal static ж<ArrayType> ArrayType⁔(/*this*/ ж<Type> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (t.Kind() != Array) {
@@ -383,7 +364,7 @@ public static ж<ArrayType> ArrayType(this ж<Type> Ꮡt) {
     return Ꮡt.Reinterpret<Type, ArrayType>();
 }
 
-public static ж<FuncType> FuncType(this ж<Type> Ꮡt) {
+internal static ж<FuncType> FuncType⁔(/*this*/ ж<Type> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (t.Kind() != Func) {
@@ -392,7 +373,7 @@ public static ж<FuncType> FuncType(this ж<Type> Ꮡt) {
     return Ꮡt.Reinterpret<Type, FuncType>();
 }
 
-public static ж<InterfaceType> InterfaceType(this ж<Type> Ꮡt) {
+internal static ж<InterfaceType> InterfaceType⁔(/*this*/ ж<Type> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (t.Kind() != Interface) {
@@ -401,13 +382,11 @@ public static ж<InterfaceType> InterfaceType(this ж<Type> Ꮡt) {
     return Ꮡt.Reinterpret<Type, InterfaceType>();
 }
 
-public static uintptr Size(this ref Type t) { return t.Size_; }
+internal static uintptr Size⁔(/*this*/ ref Type t) { return t.Size_; }
 
-public static nint Align(this ref Type t) { return (nint)t.Align_; }
+internal static nint Align⁔(/*this*/ ref Type t) { return (nint)t.Align_; }
 
-public static nint FieldAlign(this ref Type t) { return (nint)t.FieldAlign_; }
-
-} partial class main_package {
+internal static nint FieldAlign⁔(/*this*/ ref Type t) { return (nint)t.FieldAlign_; }
 
 partial struct InterfaceType {
     /*embed*/ public Type Type;
@@ -415,9 +394,7 @@ partial struct InterfaceType {
     public slice<Imethod> Methods;
 }
 
-} partial class mainᴛType {
-
-public static slice<Method> ExportedMethods(this ж<Type> Ꮡt) {
+internal static slice<Method> ExportedMethods⁔(/*this*/ ж<Type> Ꮡt) {
     var ut = Ꮡt.Uncommon();
     if (ut == nil) {
         return default;
@@ -425,7 +402,7 @@ public static slice<Method> ExportedMethods(this ж<Type> Ꮡt) {
     return ut.ExportedMethods();
 }
 
-public static nint NumMethod(this ж<Type> Ꮡt) {
+internal static nint NumMethod⁔(/*this*/ ж<Type> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (t.Kind() == Interface) {
@@ -434,8 +411,6 @@ public static nint NumMethod(this ж<Type> Ꮡt) {
     }
     return len(Ꮡt.ExportedMethods());
 }
-
-} partial class main_package {
 
 public static nint NumMethod(this ref InterfaceType t) { return len(t.Methods); }
 
@@ -467,9 +442,7 @@ public static bool HashMightPanic(this ref MapType mt) {
     return (mt.Flags & 16) != 0;
 }
 
-} partial class mainᴛType {
-
-public static ж<Type> Key(this ж<Type> Ꮡt) {
+internal static ж<Type> Key⁔(/*this*/ ж<Type> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (t.Kind() == Map) {
@@ -477,8 +450,6 @@ public static ж<Type> Key(this ж<Type> Ꮡt) {
     }
     return default;
 }
-
-} partial class main_package {
 
 partial struct SliceType {
     /*embed*/ public Type Type;
@@ -562,29 +533,27 @@ partial struct Name {
     public ж<byte> Bytes;
 }
 
-} partial class mainᴛName {
-
-public static ж<byte> DataChecked(this Name n, nint off, @string whySafe) {
+internal static ж<byte> DataChecked⁔(/*this*/ Name n, nint off, @string whySafe) {
     return @unsafe.Pointer.To<byte>(addChecked(@unsafe.Pointer.FromPinnedBox(n.Bytes), (uintptr)off, whySafe));
 }
 
-public static ж<byte> Data(this Name n, nint off) {
+internal static ж<byte> Data⁔(/*this*/ Name n, nint off) {
     return @unsafe.Pointer.To<byte>(addChecked(@unsafe.Pointer.FromPinnedBox(n.Bytes), (uintptr)off, "the runtime doesn't need to give you a reason"));
 }
 
-public static bool IsExported(this Name n) {
+internal static bool IsExported⁔(/*this*/ Name n) {
     return (byte)((n.Bytes.Value) & ((byte)(1 << 0))) != 0;
 }
 
-public static bool HasTag(this Name n) {
+internal static bool HasTag⁔(/*this*/ Name n) {
     return (byte)((n.Bytes.Value) & ((byte)(1 << 1))) != 0;
 }
 
-public static bool IsEmbedded(this Name n) {
+internal static bool IsEmbedded⁔(/*this*/ Name n) {
     return (byte)((n.Bytes.Value) & ((byte)(1 << 3))) != 0;
 }
 
-public static (nint, nint) ReadVarint(this Name n, nint off) {
+internal static (nint, nint) ReadVarint⁔(/*this*/ Name n, nint off) {
     nint v = 0;
     for (nint i = 0; ; i++) {
         var x = n.DataChecked(off + i, "read varint").Value;
@@ -595,15 +564,13 @@ public static (nint, nint) ReadVarint(this Name n, nint off) {
     }
 }
 
-public static bool IsBlank(this Name n) {
+internal static bool IsBlank⁔(/*this*/ Name n) {
     if (n.Bytes == nil) {
         return false;
     }
     var (_, l) = n.ReadVarint(1);
     return l == 1 && n.Data(2).Value == '_';
 }
-
-} partial class main_package {
 
 internal static nint writeVarint(slice<byte> buf, nint n) {
     for (nint i = 0; ; i++) {
@@ -617,9 +584,7 @@ internal static nint writeVarint(slice<byte> buf, nint n) {
     }
 }
 
-} partial class mainᴛName {
-
-public static @string Name(this Name n) {
+internal static @string Name⁔(/*this*/ Name n) {
     if (n.Bytes == nil) {
         return "";
     }
@@ -627,7 +592,7 @@ public static @string Name(this Name n) {
     return @unsafe.String(n.DataChecked(1 + i, "non-empty string"), l);
 }
 
-public static @string Tag(this Name n) {
+internal static @string Tag⁔(/*this*/ Name n) {
     if (!n.HasTag()) {
         return "";
     }
@@ -635,8 +600,6 @@ public static @string Tag(this Name n) {
     var (i2, l2) = n.ReadVarint(1 + i + l);
     return @unsafe.String(n.DataChecked(1 + i + l + i2, "non-empty string"), l2);
 }
-
-} partial class main_package {
 
 public static Name NewName(@string n, @string tag, bool exported, bool embedded) {
     if (len(n) >= 1 << 29) {

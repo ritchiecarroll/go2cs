@@ -14,6 +14,9 @@
 
 using go;
 using static go.go.anonifaceembed_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -55,10 +58,12 @@ using static go.go.anonifaceembed_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("lib.go", "lib.cs", "ABQcgoIACQaIAAgIiKiIAAgK+A==")]
+[assembly: GoPositionMap("lib.go", "lib.cs", "ABAcgoL2iAAICIioiOrY")]
 // </GoSourcePositionMaps>
 
 namespace go.go;
+
+using static global::go.go.anonifaceembed_package;
 
 [GoPackage("anonifaceembed")]
 public static partial class anonifaceembed_package
@@ -96,6 +101,21 @@ public static partial class anonifaceembed_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(anonifaceembed_package.both)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class anonifaceembedᴛboth;
-[GoMethodHost(typeof(anonifaceembed_package.runner)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class anonifaceembedᴛrunner;
+[GoMethodHost(typeof(anonifaceembed_package.both)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class anonifaceembedᴛboth;
+[GoMethodHost(typeof(anonifaceembed_package.runner)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class anonifaceembedᴛrunner;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class anonifaceembedᴛboth {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint Apply(this ref both b) => anonifaceembed_package.Apply⁔(ref b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string Name(this ref both b) => anonifaceembed_package.Name⁔(ref b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint Extra(this ref both b) => anonifaceembed_package.Extra⁔(ref b);
+}
+partial class anonifaceembedᴛrunner {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint run(this runner r) => anonifaceembed_package.run⁔(r);
+}
+// </MethodForwarders>

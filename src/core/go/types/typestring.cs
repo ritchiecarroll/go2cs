@@ -14,7 +14,6 @@ using strings = strings_package;
 using utf8 = global::go.unicode.utf8_package;
 using global::go.unicode;
 using token = global::go.go.token_package;
-using static types_package;
 
 partial class types_package {
 
@@ -87,9 +86,7 @@ internal static ж<typeWriter> newTypeHasher(ж<bytes.Buffer> buf, ж<Context> c
     return Ꮡ(new typeWriter(buf, new map<Type, bool>(), default, ctxt, nil, false, false, false));
 }
 
-} partial class typesᴛtypeWriter {
-
-internal static void @byte(this ref typeWriter w, byte b) {
+internal static void byte⁔(/*this*/ ref typeWriter w, byte b) {
     if (w.ctxt != nil) {
         if (b == ' ') {
             b = (byte)'#';
@@ -103,11 +100,11 @@ internal static void @byte(this ref typeWriter w, byte b) {
     }
 }
 
-internal static void @string(this ref typeWriter w, @string s) {
+internal static void string⁔(/*this*/ ref typeWriter w, @string s) {
     w.buf.WriteString(s);
 }
 
-internal static void error(this ref typeWriter w, @string msg) {
+internal static void error⁔(/*this*/ ref typeWriter w, @string msg) {
     if (w.ctxt != nil) {
         throw panic(msg);
     }
@@ -115,14 +112,8 @@ internal static void error(this ref typeWriter w, @string msg) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string nilˢ2 => ref nilˢ2ᵇ;
-private static readonly @string nilˢ2ᵇ = "nil"u8;
-internal static ref readonly @string structˢ => ref structˢᵇ;
-private static readonly @string structˢᵇ = "struct{"u8;
 internal static ref readonly @string packageˢ => ref packageˢᵇ;
 private static readonly @string packageˢᵇ = " /* package "u8;
-internal static ref readonly @string funcˢ => ref funcˢᵇ;
-private static readonly @string funcˢᵇ = "func"u8;
 internal static ref readonly @string emptyUnionˢ => ref emptyUnionˢᵇ;
 private static readonly @string emptyUnionˢᵇ = "empty union"u8;
 internal static ref readonly @string anyˢ => ref anyˢᵇ;
@@ -131,16 +122,6 @@ internal static ref readonly @string interfaceComparableˢ => ref interfaceCompa
 private static readonly @string interfaceComparableˢᵇ = "interface{comparable}"u8;
 internal static ref readonly @string implicitˢ => ref implicitˢᵇ;
 private static readonly @string implicitˢᵇ = "/* implicit */ "u8;
-internal static ref readonly @string interfaceˢ => ref interfaceˢᵇ;
-private static readonly @string interfaceˢᵇ = "interface{"u8;
-internal static ref readonly @string mapˢ => ref mapˢᵇ;
-private static readonly @string mapˢᵇ = "map["u8;
-internal static ref readonly @string chanˢ3 => ref chanˢ3ᵇ;
-private static readonly @string chanˢ3ᵇ = "chan "u8;
-internal static ref readonly @string chanˢ => ref chanˢᵇ;
-private static readonly @string chanˢᵇ = "chan<- "u8;
-internal static ref readonly @string chanˢ2 => ref chanˢ2ᵇ;
-private static readonly @string chanˢ2ᵇ = "<-chan "u8;
 internal static ref readonly @string unknownChannelDirectionˢ => ref unknownChannelDirectionˢᵇ;
 private static readonly @string unknownChannelDirectionˢᵇ = "unknown channel direction"u8;
 internal static ref readonly @string unnamedTypeParameterˢ => ref unnamedTypeParameterˢᵇ;
@@ -148,7 +129,7 @@ private static readonly @string unnamedTypeParameterˢᵇ = "unnamed type parame
 internal static ref readonly @string typeParameterˢ2 => ref typeParameterˢ2ᵇ;
 private static readonly @string typeParameterˢ2ᵇ = "/* type parameter */"u8;
 
-internal static void typ(this ж<typeWriter> Ꮡw, Type typ) {
+internal static void typ⁔(/*this*/ ж<typeWriter> Ꮡw, Type typ) {
     GoFrame ᒐ = default;
     try {
         ref var w = ref Ꮡw.DerefOrNull();
@@ -427,7 +408,7 @@ internal static void typ(this ж<typeWriter> Ꮡw, Type typ) {
 }
 
 // typeSet writes a canonical hash for an interface type set.
-internal static void typeSet(this ж<typeWriter> Ꮡw, ж<_TypeSet> Ꮡs) {
+internal static void typeSet⁔(/*this*/ ж<typeWriter> Ꮡw, ж<_TypeSet> Ꮡs) {
     ref var w = ref Ꮡw.DerefOrNull();
     ref var s = ref Ꮡs.DerefOrNull();
     var termHashesᴷ = new stackAppend<@string>();
@@ -471,7 +452,7 @@ internal static void typeSet(this ж<typeWriter> Ꮡw, ж<_TypeSet> Ꮡs) {
     }}
 }
 
-internal static void typeList(this ж<typeWriter> Ꮡw, slice<Type> list) {
+internal static void typeList⁔(/*this*/ ж<typeWriter> Ꮡw, slice<Type> list) {
     ref var w = ref Ꮡw.DerefOrNull();
 
     w.@byte((byte)'[');
@@ -488,7 +469,7 @@ internal static void typeList(this ж<typeWriter> Ꮡw, slice<Type> list) {
 internal static ref readonly @string nilTypeParameterˢ => ref nilTypeParameterˢᵇ;
 private static readonly @string nilTypeParameterˢᵇ = "nil type parameter"u8;
 
-internal static void tParamList(this ж<typeWriter> Ꮡw, slice<ж<TypeParam>> list) {
+internal static void tParamList⁔(/*this*/ ж<typeWriter> Ꮡw, slice<ж<TypeParam>> list) {
     ref var w = ref Ꮡw.DerefOrNull();
 
     w.@byte((byte)'[');
@@ -519,14 +500,14 @@ internal static void tParamList(this ж<typeWriter> Ꮡw, slice<ж<TypeParam>> l
     w.@byte((byte)']');
 }
 
-internal static void typeName(this ref typeWriter w, ж<TypeName> Ꮡobj) {
+internal static void typeName⁔(/*this*/ ref typeWriter w, ж<TypeName> Ꮡobj) {
     ref var obj = ref Ꮡobj.DerefOrNull();
 
     w.@string(packagePrefix(obj.pkg, w.qf));
     w.@string(obj.name);
 }
 
-internal static void tuple(this ж<typeWriter> Ꮡw, ж<Tuple> Ꮡtup, bool variadic) {
+internal static void tuple⁔(/*this*/ ж<typeWriter> Ꮡw, ж<Tuple> Ꮡtup, bool variadic) {
     ref var w = ref Ꮡw.DerefOrNull();
     ref var tup = ref Ꮡtup.DerefOrNull();
 
@@ -567,7 +548,7 @@ internal static void tuple(this ж<typeWriter> Ꮡw, ж<Tuple> Ꮡtup, bool vari
     w.@byte((byte)')');
 }
 
-internal static void signature(this ж<typeWriter> Ꮡw, ж<Signature> Ꮡsig) {
+internal static void signature⁔(/*this*/ ж<typeWriter> Ꮡw, ж<Signature> Ꮡsig) {
     GoFrame ᒐ = default;
     try {
         ref var w = ref Ꮡw.DerefOrNull();
@@ -605,8 +586,6 @@ internal static void signature(this ж<typeWriter> Ꮡw, ж<Signature> Ꮡsig) {
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
-
-} partial class types_package {
 
 // subscript returns the decimal (utf8) representation of x using subscript digits.
 internal static @string subscript(uint64 x) {

@@ -9,11 +9,8 @@ using static global::go.@internal.types.errors_package;
 using slices = slices_package;
 using errors = global::go.@internal.types.errors_package;
 using global::go.go;
-using static types_package;
 
 partial class types_package {
-
-} partial class typesᴛChecker {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string labelˢ => ref labelˢᵇ;
@@ -24,7 +21,7 @@ internal static ref readonly @string labelSNotDeclaredˢ => ref labelSNotDeclare
 private static readonly @string labelSNotDeclaredˢᵇ = "label %s not declared"u8;
 
 // labels checks correct label use in body.
-internal static void labels(this ж<Checker> Ꮡcheck, ж<ast.BlockStmt> Ꮡbody) {
+internal static void labels⁔(/*this*/ ж<Checker> Ꮡcheck, ж<ast.BlockStmt> Ꮡbody) {
     ref var body = ref Ꮡbody.DerefOrNull();
 
     // set of all labels in this body
@@ -62,8 +59,6 @@ internal static void labels(this ж<Checker> Ꮡcheck, ж<ast.BlockStmt> Ꮡbody
     }
 }
 
-} partial class types_package {
-
 // A block tracks label declarations in a block and its enclosing blocks.
 partial struct block {
     internal ж<block> parent;                         // enclosing block
@@ -71,11 +66,9 @@ partial struct block {
     internal map<@string, ж<ast.LabeledStmt>> labels; // allocated lazily
 }
 
-} partial class typesᴛblock {
-
 // insert records a new label declaration for the current block.
 // The label must not have been declared before in any block.
-internal static void insert(this ж<block> Ꮡb, ж<ast.LabeledStmt> Ꮡs) {
+internal static void insert⁔(/*this*/ ж<block> Ꮡb, ж<ast.LabeledStmt> Ꮡs) {
     ref var b = ref Ꮡb.DerefOrNull();
     ref var s = ref Ꮡs.DerefOrNull();
 
@@ -93,7 +86,7 @@ internal static void insert(this ж<block> Ꮡb, ж<ast.LabeledStmt> Ꮡs) {
 
 // gotoTarget returns the labeled statement in the current
 // or an enclosing block with the given label name, or nil.
-internal static ж<ast.LabeledStmt> gotoTarget(this ж<block> Ꮡb, @string name) {
+internal static ж<ast.LabeledStmt> gotoTarget⁔(/*this*/ ж<block> Ꮡb, @string name) {
     for (var s = Ꮡb; s != nil; s = s.parent) {
         var t = s.labels[name]; if (t != nil) {
             return t;
@@ -104,7 +97,7 @@ internal static ж<ast.LabeledStmt> gotoTarget(this ж<block> Ꮡb, @string name
 
 // enclosingTarget returns the innermost enclosing labeled
 // statement with the given label name, or nil.
-internal static ж<ast.LabeledStmt> enclosingTarget(this ж<block> Ꮡb, @string name) {
+internal static ж<ast.LabeledStmt> enclosingTarget⁔(/*this*/ ж<block> Ꮡb, @string name) {
     for (var s = Ꮡb; s != nil; s = s.parent) {
         var t = s.lstmt; if (t != nil && t.Label.Name == name) {
             return t;
@@ -113,12 +106,10 @@ internal static ж<ast.LabeledStmt> enclosingTarget(this ж<block> Ꮡb, @string
     return default;
 }
 
-} partial class typesᴛChecker {
-
 // blockBranches processes a block's statement list and returns the set of outgoing forward jumps.
 // all is the scope of all declared labels, parent the set of labels declared in the immediately
 // enclosing block, and lstmt is the labeled statement this block is associated with (or nil).
-internal static slice<ж<ast.BranchStmt>> blockBranches(this ж<Checker> Ꮡcheck, ж<Scope> all, ж<block> parent, ж<ast.LabeledStmt> lstmt, slice<ast.Stmt> list) {
+internal static slice<ж<ast.BranchStmt>> blockBranches⁔(/*this*/ ж<Checker> Ꮡcheck, ж<Scope> all, ж<block> parent, ж<ast.LabeledStmt> lstmt, slice<ast.Stmt> list) {
     var b = Ꮡ(new block(parent: parent, lstmt: lstmt));
 
     token.Pos varDeclPos = default;
@@ -325,4 +316,4 @@ internal static slice<ж<ast.BranchStmt>> blockBranches(this ж<Checker> Ꮡchec
     return fwdJumps;
 }
 
-}
+} // end types_package

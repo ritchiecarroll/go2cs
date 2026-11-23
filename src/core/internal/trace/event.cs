@@ -17,7 +17,6 @@ using tracev2 = go.@internal.trace.tracev2_package;
 using version = go.@internal.trace.version_package;
 using go;
 using go.@internal.trace;
-using static trace_package;
 
 partial class trace_package {
 
@@ -89,17 +88,13 @@ public static EventKind EventStateTransition => 13;
 // may always be safely ignored.
 public static EventKind EventExperimental => 14;
 
-} partial class traceᴛEventKind {
-
 // String returns a string form of the EventKind.
-public static @string String(this EventKind e) {
+internal static @string String⁔(/*this*/ EventKind e) {
     if ((nint)e >= len(eventKindStrings)) {
         return eventKindStrings[0];
     }
     return eventKindStrings[e];
 }
-
-} partial class trace_package {
 
 [GoLazy] partial class lazyᴛeventKindStrings { internal static array<@string> eventKindStrings = new golib.SparseArray<@string>{
     [EventBad] = "Bad",
@@ -142,14 +137,10 @@ internal static Time maxTime => /* Time(math.MaxInt64) */ 9223372036854775807;
 // to collect those timestamps.
 partial struct Time /*num:int64*/;
 
-} partial class traceᴛTime {
-
 // Sub subtracts t0 from t, returning the duration in nanoseconds.
-public static time.Duration Sub(this Time t, Time t0) {
+internal static time.Duration Sub⁔(/*this*/ Time t, Time t0) {
     return (time.Duration)((int64)t - (int64)t0);
 }
-
-} partial class trace_package {
 
 // Metric provides details about a Metric event.
 partial struct Metric {
@@ -279,10 +270,8 @@ partial struct Stack {
     internal stackID id;
 }
 
-} partial class traceᴛStack {
-
 // Frames is an iterator over the frames in a Stack.
-public static iter.Seq<StackFrame> Frames(this Stack s) {
+internal static iter.Seq<StackFrame> Frames⁔(/*this*/ Stack s) {
     var sʗ1 = s;
     return (Func<StackFrame, bool> yield) => {
         if (sʗ1.id == 0) {
@@ -307,13 +296,11 @@ public static iter.Seq<StackFrame> Frames(this Stack s) {
 // String returns the stack as a human-readable string.
 //
 // The format of the string is intended for debugging and is subject to change.
-public static @string String(this Stack s) {
+internal static @string String⁔(/*this*/ Stack s) {
     ref var sb = ref heap(new strings.Builder(), out var Ꮡsb);
     printStack(new strings_BuilderжWriter(Ꮡsb), ""u8, s.Frames());
     return sb.String();
 }
-
-} partial class trace_package {
 
 internal static void printStack(io.Writer w, @string prefix, iter.Seq<StackFrame> frames) {
     foreach (var f in range<StackFrame>(frames.Invoke)) {
@@ -355,14 +342,12 @@ partial struct ExperimentalEvent {
     internal slice<uint64> argValues;
 }
 
-} partial class traceᴛExperimentalEvent {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string stringˢ => ref stringˢᵇ;
 private static readonly @string stringˢᵇ = "string"u8;
 
 // ArgValue returns a typed Value for the i'th argument in the experimental event.
-public static Value ArgValue(this ExperimentalEvent e, nint i) {
+internal static Value ArgValue⁔(/*this*/ ExperimentalEvent e, nint i) {
     if (i < 0 || i >= len(e.Args)) {
         throw panic(fmt.Sprintf("experimental event argument index %d out of bounds [0, %d)"u8, i, len(e.Args)));
     }
@@ -372,8 +357,6 @@ public static Value ArgValue(this ExperimentalEvent e, nint i) {
     }
     return Uint64Value(e.argValues[i]);
 }
-
-} partial class trace_package {
 
 // ExperimentalBatch represents a packet of unparsed data along with metadata about that packet.
 partial struct ExperimentalBatch {
@@ -951,17 +934,15 @@ partial struct Event {
     internal baseEvent @base;
 }
 
-} partial class traceᴛEvent {
-
 // Kind returns the kind of event that this is.
-public static EventKind Kind(this Event e) {
+internal static EventKind Kind⁔(/*this*/ Event e) {
     e = e.ΔClone();
 
     return tracev2Type2Kind[e.@base.typ];
 }
 
 // Time returns the timestamp of the event.
-public static Time Time(this Event e) {
+internal static Time Time⁔(/*this*/ Event e) {
     e = e.ΔClone();
 
     return e.@base.time;
@@ -976,7 +957,7 @@ public static Time Time(this Event e) {
 // starting to run on this thread and/or proc, then this will return
 // NoGoroutine. In this case, the goroutine starting to run will be
 // can be found at Event.StateTransition().Resource.
-public static GoID Goroutine(this Event e) {
+internal static GoID Goroutine⁔(/*this*/ Event e) {
     e = e.ΔClone();
 
     return e.ctx.G;
@@ -987,7 +968,7 @@ public static GoID Goroutine(this Event e) {
 // Note that for proc state transitions this always refers to the
 // state before the transition. For example, if a proc is just
 // starting to run on this thread, then this will return NoProc.
-public static ProcID Proc(this Event e) {
+internal static ProcID Proc⁔(/*this*/ Event e) {
     e = e.ΔClone();
 
     return e.ctx.P;
@@ -1003,7 +984,7 @@ public static ProcID Proc(this Event e) {
 // will always return a valid thread ID. However thread state transitions
 // may be tracked in the future, and callers must be robust to this
 // possibility.
-public static ThreadID Thread(this Event e) {
+internal static ThreadID Thread⁔(/*this*/ Event e) {
     e = e.ΔClone();
 
     return e.ctx.M;
@@ -1013,7 +994,7 @@ public static ThreadID Thread(this Event e) {
 //
 // This represents a stack trace at the current moment in time for
 // the current execution context.
-public static Stack Stack(this Event e) {
+internal static Stack Stack⁔(/*this*/ Event e) {
     e = e.ΔClone();
 
     if (e.@base.typ == evSync) {
@@ -1047,7 +1028,7 @@ private static readonly @string gcHeapGoalBytesˢᵇ = "/gc/heap/goal:bytes"u8;
 // Metric returns details about a Metric event.
 //
 // Panics if Kind != EventMetric.
-public static Metric Metric(this Event e) {
+internal static Metric Metric⁔(/*this*/ Event e) {
     e = e.ΔClone();
 
     if (e.Kind() != EventMetric) {
@@ -1080,7 +1061,7 @@ public static Metric Metric(this Event e) {
 // Label returns details about a Label event.
 //
 // Panics if Kind != EventLabel.
-public static Label Label(this Event e) {
+internal static Label Label⁔(/*this*/ Event e) {
     e = e.ΔClone();
 
     if (e.Kind() != EventLabel) {
@@ -1106,7 +1087,7 @@ private static readonly @string gcMarkAssistˢᵇ = "GC mark assist"u8;
 // Range returns details about an EventRangeBegin, EventRangeActive, or EventRangeEnd event.
 //
 // Panics if Kind != EventRangeBegin, Kind != EventRangeActive, and Kind != EventRangeEnd.
-public static Range Range(this Event e) {
+internal static Range Range⁔(/*this*/ Event e) {
     e = e.ΔClone();
 
     var kind = e.Kind(); if (kind != EventRangeBegin && kind != EventRangeActive && kind != EventRangeEnd) {
@@ -1156,7 +1137,7 @@ public static Range Range(this Event e) {
 // RangeAttributes returns attributes for a completed range.
 //
 // Panics if Kind != EventRangeEnd.
-public static slice<RangeAttribute> RangeAttributes(this Event e) {
+internal static slice<RangeAttribute> RangeAttributes⁔(/*this*/ Event e) {
     e = e.ΔClone();
 
     if (e.Kind() != EventRangeEnd) {
@@ -1180,7 +1161,7 @@ public static slice<RangeAttribute> RangeAttributes(this Event e) {
 // Task returns details about a TaskBegin or TaskEnd event.
 //
 // Panics if Kind != EventTaskBegin and Kind != EventTaskEnd.
-public static Task Task(this Event e) {
+internal static Task Task⁔(/*this*/ Event e) {
     e = e.ΔClone();
 
     var kind = e.Kind(); if (kind != EventTaskBegin && kind != EventTaskEnd) {
@@ -1213,7 +1194,7 @@ public static Task Task(this Event e) {
 // Region returns details about a RegionBegin or RegionEnd event.
 //
 // Panics if Kind != EventRegionBegin and Kind != EventRegionEnd.
-public static Region Region(this Event e) {
+internal static Region Region⁔(/*this*/ Event e) {
     e = e.ΔClone();
 
     var kind = e.Kind(); if (kind != EventRegionBegin && kind != EventRegionEnd) {
@@ -1231,7 +1212,7 @@ public static Region Region(this Event e) {
 // Log returns details about a Log event.
 //
 // Panics if Kind != EventLog.
-public static Log Log(this Event e) {
+internal static Log Log⁔(/*this*/ Event e) {
     e = e.ΔClone();
 
     if (e.Kind() != EventLog) {
@@ -1250,7 +1231,7 @@ public static Log Log(this Event e) {
 // StateTransition returns details about a StateTransition event.
 //
 // Panics if Kind != EventStateTransition.
-public static StateTransition StateTransition(this Event e) {
+internal static StateTransition StateTransition⁔(/*this*/ Event e) {
     e = e.ΔClone();
 
     if (e.Kind() != EventStateTransition) {
@@ -1357,7 +1338,7 @@ public static StateTransition StateTransition(this Event e) {
 
 // Sync returns details that are relevant for the following events, up to but excluding the
 // next EventSync event.
-public static Sync Sync(this Event e) {
+internal static Sync Sync⁔(/*this*/ Event e) {
     e = e.ΔClone();
 
     if (e.Kind() != EventSync) {
@@ -1380,8 +1361,6 @@ public static Sync Sync(this Event e) {
     }
     return s;
 }
-
-} partial class trace_package {
 
 // Sync contains details potentially relevant to all the following events, up to but excluding
 // the next EventSync event.
@@ -1411,12 +1390,10 @@ partial struct ClockSnapshot {
     public uint64 Mono;
 }
 
-} partial class traceᴛEvent {
-
 // Experimental returns a view of the raw event for an experimental event.
 //
 // Panics if Kind != EventExperimental.
-public static ExperimentalEvent Experimental(this Event e) {
+internal static ExperimentalEvent Experimental⁔(/*this*/ Event e) {
     e = e.ΔClone();
 
     if (e.Kind() != EventExperimental) {
@@ -1432,8 +1409,6 @@ public static ExperimentalEvent Experimental(this Event e) {
         argValues: e.@base.args.slice(0, len(argNames))
     );
 }
-
-} partial class trace_package {
 
 internal static tracev2.EventType evSync => /* ^tracev2.EventType(0) */ 255;
 
@@ -1518,8 +1493,6 @@ internal static array<tracev2.ProcStatus> procState2Tracev2ProcStatus = new goli
     // TODO(felixge): how to map ProcSyscall and ProcSyscallAbandoned?
 }.array(4);
 
-} partial class traceᴛEvent {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object transitionStackˢ = (@string)"TransitionStack="u8;
 internal static readonly object stackˢ = (@string)"Stack="u8;
@@ -1527,7 +1500,7 @@ internal static readonly object stackˢ = (@string)"Stack="u8;
 // String returns the event as a human-readable string.
 //
 // The format of the string is intended for debugging and is subject to change.
-public static @string String(this Event e) {
+internal static @string String⁔(/*this*/ Event e) {
     e = e.ΔClone();
 
     ref var sb = ref heap(new strings.Builder(), out var Ꮡsb);
@@ -1636,7 +1609,7 @@ public static @string String(this Event e) {
 
 // validateTableIDs checks to make sure lookups in e.table
 // will work.
-internal static error validateTableIDs(this Event e) {
+internal static error validateTableIDs⁔(/*this*/ Event e) {
     e = e.ΔClone();
 
     if (e.@base.typ == evSync) {
@@ -1665,8 +1638,6 @@ internal static error validateTableIDs(this Event e) {
     }
     return default;
 }
-
-} partial class trace_package {
 
 internal static Event syncEvent(ж<evTable> table, Time ts, nint n) {
     var ev = new Event(

@@ -30,7 +30,6 @@ using go.crypto.@internal.fips140;
 using go.crypto.tls.@internal;
 using go.sync;
 using math;
-using static tls_package;
 
 partial class tls_package {
 
@@ -45,8 +44,6 @@ partial struct clientHandshakeState {
     internal ж<SessionState> session; // the session being resumed
     internal slice<byte> ticket;      // a fresh ticket received during this handshake
 }
-
-} partial class tlsᴛConn {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string tlsEitherServerNameOrˢ => ref tlsEitherServerNameOrˢᵇ;
@@ -68,7 +65,7 @@ private static readonly @string tlsMaxVersionMustBeˢᵇ = "tls: MaxVersion must
 internal static ref readonly @string tlsˢ => ref tlsˢᵇ;
 private static readonly @string tlsˢᵇ = "tls: EncryptedClientHelloConfigList contains no valid configs"u8;
 
-internal static (ж<clientHelloMsg>, ж<keySharePrivateKeys>, ж<echClientContext>, error) makeClientHello(this ж<Conn> Ꮡc) {
+internal static (ж<clientHelloMsg>, ж<keySharePrivateKeys>, ж<echClientContext>, error) makeClientHello⁔(/*this*/ ж<Conn> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     var config = c.config;
@@ -234,8 +231,6 @@ internal static (ж<clientHelloMsg>, ж<keySharePrivateKeys>, ж<echClientContex
     return (hello, keyShareKeys, ech, default);
 }
 
-} partial class tls_package {
-
 partial struct echClientContext {
     internal ж<echConfig> config;
     internal ж<hpke.Sender> hpkeContext;
@@ -248,13 +243,11 @@ partial struct echClientContext {
     internal slice<byte> retryConfigs;
 }
 
-} partial class tlsᴛConn {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string tlsDowngradeAttemptˢ => ref tlsDowngradeAttemptˢᵇ;
 private static readonly @string tlsDowngradeAttemptˢᵇ = "tls: downgrade attempt detected, possibly due to a MitM attack or a broken middlebox"u8;
 
-internal static error /*err*/ clientHandshake(this ж<Conn> Ꮡc, context.Context ctx) {
+internal static error /*err*/ clientHandshake⁔(/*this*/ ж<Conn> Ꮡc, context.Context ctx) {
     heap<error>(out var Ꮡerr);
     GoFrame ᒐ = default;
     try {
@@ -394,15 +387,11 @@ internal static error /*err*/ clientHandshake(this ж<Conn> Ꮡc, context.Contex
     ᒐdone: return Ꮡerr.ValueSlot;
 }
 
-} partial class tls_package {
-
 // fips140ems is a GODEBUG variable that can be set to 0 to disable the
 // enforcement of Extended Master Secret in FIPS 140-3 mode.
 internal static ж<godebug.Setting> fips140ems = godebug.New("fips140ems");
 
-} partial class tlsᴛConn {
-
-internal static (ж<SessionState> session, ж<tls13.EarlySecret> earlySecret, slice<byte> binderKey, error err) loadSession(this ж<Conn> Ꮡc, ж<clientHelloMsg> Ꮡhello) {
+internal static (ж<SessionState> session, ж<tls13.EarlySecret> earlySecret, slice<byte> binderKey, error err) loadSession⁔(/*this*/ ж<Conn> Ꮡc, ж<clientHelloMsg> Ꮡhello) {
     ж<SessionState> session = default;
     ж<tls13.EarlySecret> earlySecret = default;
     slice<byte> binderKey = default;
@@ -565,7 +554,7 @@ internal static (ж<SessionState> session, ж<tls13.EarlySecret> earlySecret, sl
     return (session, earlySecret, binderKey, err);
 }
 
-internal static error pickTLSVersion(this ж<Conn> Ꮡc, ж<serverHelloMsg> ᏑserverHello) {
+internal static error pickTLSVersion⁔(/*this*/ ж<Conn> Ꮡc, ж<serverHelloMsg> ᏑserverHello) {
     ref var c = ref Ꮡc.DerefOrNull();
     ref var serverHello = ref ᏑserverHello.DerefOrNull();
 
@@ -588,15 +577,13 @@ internal static error pickTLSVersion(this ж<Conn> Ꮡc, ж<serverHelloMsg> Ꮡs
     return default;
 }
 
-} partial class tlsᴛclientHandshakeState {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string tlsServerEchoedTls13ˢ => ref tlsServerEchoedTls13ˢᵇ;
 private static readonly @string tlsServerEchoedTls13ˢᵇ = "tls: server echoed TLS 1.3 compatibility session ID in TLS 1.2"u8;
 
 // Does the handshake, either a full one or resumes old session. Requires hs.c,
 // hs.hello, hs.serverHello, and, optionally, hs.session to be set.
-internal static error handshake(this ж<clientHandshakeState> Ꮡhs) {
+internal static error handshake⁔(/*this*/ ж<clientHandshakeState> Ꮡhs) {
     ref var hs = ref Ꮡhs.DerefOrNull();
 
     var c = hs.c;
@@ -699,7 +686,7 @@ internal static error handshake(this ж<clientHandshakeState> Ꮡhs) {
 internal static ref readonly @string tlsServerChoseAnˢ => ref tlsServerChoseAnˢᵇ;
 private static readonly @string tlsServerChoseAnˢᵇ = "tls: server chose an unconfigured cipher suite"u8;
 
-internal static error pickCipherSuite(this ref clientHandshakeState hs) {
+internal static error pickCipherSuite⁔(/*this*/ ref clientHandshakeState hs) {
     hs.suite = mutualCipherSuite(hs.hello.cipherSuites, hs.serverHello.cipherSuite); if (hs.suite == nil) {
         hs.c.sendAlert(alertHandshakeFailure);
         return errors.New(tlsServerChoseAnˢ);
@@ -728,7 +715,7 @@ private static readonly @string tlsFips1403RequiresTheˢᵇ = "tls: FIPS 140-3 r
 internal static ref readonly @string tlsInternalErrorDidNotˢ => ref tlsInternalErrorDidNotˢᵇ;
 private static readonly @string tlsInternalErrorDidNotˢᵇ = "tls: internal error: did not keep handshake transcript for TLS 1.2"u8;
 
-internal static error doFullHandshake(this ж<clientHandshakeState> Ꮡhs) {
+internal static error doFullHandshake⁔(/*this*/ ж<clientHandshakeState> Ꮡhs) {
     ref var hs = ref Ꮡhs.DerefOrNull();
 
     var c = hs.c;
@@ -938,7 +925,7 @@ internal static error doFullHandshake(this ж<clientHandshakeState> Ꮡhs) {
     return default;
 }
 
-internal static error establishKeys(this ref clientHandshakeState hs) {
+internal static error establishKeys⁔(/*this*/ ref clientHandshakeState hs) {
     var c = hs.c;
 
     var (clientMAC, serverMAC, clientKey, serverKey, clientIV, serverIV) = keysFromMasterSecret(c.vers, ref (hs.suite).DerefOrNull(), hs.masterSecret, hs.hello.random, hs.serverHello.random, hs.suite.macLen, hs.suite.keyLen, hs.suite.ivLen);
@@ -961,7 +948,7 @@ internal static error establishKeys(this ref clientHandshakeState hs) {
     return default;
 }
 
-internal static bool serverResumedSession(this ref clientHandshakeState hs) {
+internal static bool serverResumedSession⁔(/*this*/ ref clientHandshakeState hs) {
     // If the server responded with the same sessionId then it means the
     // sessionTicket is being used to resume a TLS session.
     return hs.session != nil && hs.hello.sessionId != nil && bytes.Equal(hs.serverHello.sessionId, hs.hello.sessionId);
@@ -983,7 +970,7 @@ private static readonly @string tlsServerResumedASessionˢ2ᵇ = "tls: server re
 internal static ref readonly @string tlsServerResumedASessionˢ3 => ref tlsServerResumedASessionˢ3ᵇ;
 private static readonly @string tlsServerResumedASessionˢ3ᵇ = "tls: server resumed a session with a different EMS extension"u8;
 
-internal static (bool, error) processServerHello(this ref clientHandshakeState hs) {
+internal static (bool, error) processServerHello⁔(/*this*/ ref clientHandshakeState hs) {
     var c = hs.c;
 
     {
@@ -1074,8 +1061,6 @@ internal static (bool, error) processServerHello(this ref clientHandshakeState h
     return (true, default);
 }
 
-} partial class tls_package {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string tlsServerDidNotSelectAnˢ => ref tlsServerDidNotSelectAnˢᵇ;
 private static readonly @string tlsServerDidNotSelectAnˢᵇ = "tls: server did not select an ALPN protocol"u8;
@@ -1105,13 +1090,11 @@ internal static error checkALPN(slice<@string> clientProtos, @string serverProto
     return errors.New(tlsServerSelectedˢ2);
 }
 
-} partial class tlsᴛclientHandshakeState {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string tlsServerSFinishedˢ => ref tlsServerSFinishedˢᵇ;
 private static readonly @string tlsServerSFinishedˢᵇ = "tls: server's Finished message was incorrect"u8;
 
-internal static error readFinished(this ж<clientHandshakeState> Ꮡhs, slice<byte> @out) {
+internal static error readFinished⁔(/*this*/ ж<clientHandshakeState> Ꮡhs, slice<byte> @out) {
     ref var hs = ref Ꮡhs.DerefOrNull();
 
     var c = hs.c;
@@ -1151,7 +1134,7 @@ internal static error readFinished(this ж<clientHandshakeState> Ꮡhs, slice<by
 internal static ref readonly @string tlsServerSentUnrequestedˢ => ref tlsServerSentUnrequestedˢᵇ;
 private static readonly @string tlsServerSentUnrequestedˢᵇ = "tls: server sent unrequested session ticket"u8;
 
-internal static error readSessionTicket(this ж<clientHandshakeState> Ꮡhs) {
+internal static error readSessionTicket⁔(/*this*/ ж<clientHandshakeState> Ꮡhs) {
     ref var hs = ref Ꮡhs.DerefOrNull();
 
     if (!hs.serverHello.ticketSupported) {
@@ -1178,7 +1161,7 @@ internal static error readSessionTicket(this ж<clientHandshakeState> Ꮡhs) {
     return default;
 }
 
-internal static error saveSessionTicket(this ref clientHandshakeState hs) {
+internal static error saveSessionTicket⁔(/*this*/ ref clientHandshakeState hs) {
     if (hs.ticket == nil) {
         return default;
     }
@@ -1198,7 +1181,7 @@ internal static error saveSessionTicket(this ref clientHandshakeState hs) {
     return default;
 }
 
-internal static error sendFinished(this ж<clientHandshakeState> Ꮡhs, slice<byte> @out) {
+internal static error sendFinished⁔(/*this*/ ж<clientHandshakeState> Ꮡhs, slice<byte> @out) {
     ref var hs = ref Ꮡhs.DerefOrNull();
 
     var c = hs.c;
@@ -1220,8 +1203,6 @@ internal static error sendFinished(this ж<clientHandshakeState> Ꮡhs, slice<by
     return default;
 }
 
-} partial class tls_package {
-
 // defaultMaxRSAKeySize is the maximum RSA key size in bits that we are willing
 // to verify the signatures of during a TLS handshake.
 internal static UntypedInt defaultMaxRSAKeySize => 8192;
@@ -1240,11 +1221,9 @@ internal static (nint max, bool ok) checkKeySize(nint n) {
     return (defaultMaxRSAKeySize, n <= defaultMaxRSAKeySize);
 }
 
-} partial class tlsᴛConn {
-
 // verifyServerCertificate parses and verifies the provided chain, setting
 // c.verifiedChains and c.peerCertificates or sending the appropriate alert.
-internal static error verifyServerCertificate(this ж<Conn> Ꮡc, slice<slice<byte>> certificates) {
+internal static error verifyServerCertificate⁔(/*this*/ ж<Conn> Ꮡc, slice<slice<byte>> certificates) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     var certs = new slice<ж<Δx509.Certificate>>(len(certificates));
@@ -1349,8 +1328,6 @@ internal static error verifyServerCertificate(this ж<Conn> Ꮡc, slice<slice<by
     return default;
 }
 
-} partial class tls_package {
-
 // certificateRequestInfoFromMsg generates a CertificateRequestInfo from a TLS
 // <= 1.2 CertificateRequest, making an effort to fill in missing information.
 internal static ж<CertificateRequestInfo> certificateRequestInfoFromMsg(context.Context ctx, uint16 vers, ref certificateRequestMsg certReq) {
@@ -1429,9 +1406,7 @@ internal static ж<CertificateRequestInfo> certificateRequestInfoFromMsg(context
     return cri;
 }
 
-} partial class tlsᴛConn {
-
-internal static (ж<Certificate>, error) getClientCertificate(this ref Conn c, ж<CertificateRequestInfo> Ꮡcri) {
+internal static (ж<Certificate>, error) getClientCertificate⁔(/*this*/ ref Conn c, ж<CertificateRequestInfo> Ꮡcri) {
     ref var cri = ref Ꮡcri.DerefOrNull();
 
     if (c.config.GetClientCertificate != nil) {
@@ -1454,7 +1429,7 @@ internal static (ж<Certificate>, error) getClientCertificate(this ref Conn c, �
 
 // clientSessionCacheKey returns a key used to cache sessionTickets that could
 // be used to resume previously negotiated TLS sessions with a server.
-internal static @string clientSessionCacheKey(this ref Conn c) {
+internal static @string clientSessionCacheKey⁔(/*this*/ ref Conn c) {
     if (len(c.config.ServerName) > 0) {
         return c.config.ServerName;
     }
@@ -1463,8 +1438,6 @@ internal static @string clientSessionCacheKey(this ref Conn c) {
     }
     return ""u8;
 }
-
-} partial class tls_package {
 
 // hostnameInSNI converts name into an appropriate hostname for SNI.
 // Literal IP addresses and absolute FQDNs are not permitted as SNI values.

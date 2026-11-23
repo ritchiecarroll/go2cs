@@ -71,7 +71,7 @@ call-argument path under builtin `new`'s UNNAMED parameter — an EMPTY lift nam
 (mirroring the composite-literal and hpke map-value lifts), so the declaration, the `@new<…>` type
 argument, the `GoImplement` recordings, and the pointer-adapter names all resolve through
 `liftedTypeMap`:
-<!-- source: src/core/go/internal/gccgoimporter/parser.cs:546-549, 571 -->
+<!-- source: src/core/go/internal/gccgoimporter/parser.cs:531-554 -->
 ```csharp
 partial struct reservedᴛ1 /*dyn*/ {
     /*embed*/ public global::go.go.types_package.Type Type;
@@ -961,7 +961,7 @@ declared public, read from the access modifier recorded at its declaration (`lif
 so an exported function's anonymous result and the exported fields that repeat its type share one
 lift, across the package's files. Guarded by `AnonLiftOnePerType`:
 
-<!-- source: src/tests/Behavioral/AnonLiftOnePerType/lib/a.cs:43-45, 50-52 -->
+<!-- source: src/tests/Behavioral/AnonLiftOnePerType/lib/a.cs:37-39, 44-46 -->
 ```csharp
 public partial struct Pair_R0 /*dyn*/ {
     public nint X, Y;
@@ -1418,7 +1418,7 @@ type Config struct {
     Values func([]reflect.Value, *rand.Rand)   // rand is math/rand
 }
 ```
-<!-- source: src/core/testing/quick/quick.cs:248 -->
+<!-- source: src/core/testing/quick/quick.cs:247 -->
 ```csharp
 public Action<slice<reflect.Value>, ж<rand.Rand>> Values;
 ```

@@ -1,4 +1,4 @@
-// MnIfaceTwin is the M:N spike's interface-twin fixture (R5b, B2). One Go interface, Parker, is called
+// MnIfaceTwin is the M:N scheduler's interface-twin fixture (R5b, B2). One Go interface, Parker, is called
 // from many goroutines at once through five implementers: gate (pointer receiver, locks a mutex field, then
 // sleeps), napper (value receiver, sleeps), fixed (value receiver, never parks), relay (pointer receiver,
 // sleeps, receiver address never taken) and late (reaches Parker only through a dynamic assertion). Hand is

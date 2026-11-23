@@ -479,7 +479,7 @@ internal static void cgocallbackg1(@unsafe.Pointer fn, @unsafe.Pointer frame, ui
         // will unpack the argument frame and call the Go function.
         ref var cb = ref heap<Action<@unsafe.Pointer>>(out var Ꮡcb);
         ref var cbFV = ref heap<funcval>(new funcval((uintptr)fn), out var ᏑcbFV);
-        (Ꮡ(@unsafe.Pointer.OfFunc(cb))).Value = noescape(@unsafe.Pointer.FromPinnedBox(ᏑcbFV));
+        cb = @unsafe.Pointer.FuncOfWord<Action<@unsafe.Pointer>>(noescape(@unsafe.Pointer.FromPinnedBox(ᏑcbFV)));
         cb(frame);
 
         if (raceenabled) {

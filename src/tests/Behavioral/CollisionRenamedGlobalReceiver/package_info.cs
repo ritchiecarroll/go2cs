@@ -14,6 +14,9 @@
 
 using go;
 using static go.main_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -50,10 +53,12 @@ using static go.main_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("dotimport.go", "dotimport.cs", "/IKC")]
-[assembly: GoPositionMap("main.go", "main.cs", "ABUqgoKoloKCgoKCAAgKlLSCgoKCloKCloKWgpaCloKCgoI=")]
+[assembly: GoPositionMap("main.go", "main.cs", "ABQqgoKoloKCgoKC6pSUgoKCgpaCgpaCloKWgpaCgoKC")]
 // </GoSourcePositionMaps>
 
 namespace go;
+
+using static go.main_package;
 
 [GoPackage("main")]
 [GoTestMatchingConsoleOutput]
@@ -90,5 +95,16 @@ public static partial class main_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(main_package.TLS)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛTLS;
+[GoMethodHost(typeof(main_package.TLS)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class mainᴛTLS;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class mainᴛTLS {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static int32 tid(this ref TLS tls) => main_package.tid⁔(ref tls);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint count(this ref TLS tls) => main_package.count⁔(ref tls);
+}
+// </MethodForwarders>

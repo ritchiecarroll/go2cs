@@ -521,6 +521,7 @@
     <Project Path="tests/Behavioral/DefinedTypeOverInstantiation/instlib/go.instlib.csproj" />
     <Project Path="tests/Behavioral/DefinedTypeOverInterface/DefinedTypeOverInterface.csproj" />
     <Project Path="tests/Behavioral/DefinedTypeOverPkgType/DefinedTypeOverPkgType.csproj" />
+    <Project Path="tests/Behavioral/DeltaNameEdgeCases/DeltaNameEdgeCases.csproj" />
     <Project Path="tests/Behavioral/DerefPointerToField/DerefPointerToField.csproj" />
     <Project Path="tests/Behavioral/DerivedInterfaceStructuralProbe/DerivedInterfaceStructuralProbe.csproj" />
     <Project Path="tests/Behavioral/DirectBoxReceiverPassedWhole/DirectBoxReceiverPassedWhole.csproj" />
@@ -856,12 +857,21 @@
     <Project Path="tests/Behavioral/MnDeepUnwind/MnDeepUnwind.csproj" />
     <Project Path="tests/Behavioral/MnFuncPair/MnFuncPair.csproj" />
     <Project Path="tests/Behavioral/MnBoxAlias/MnBoxAlias.csproj" />
+    <Project Path="tests/Behavioral/MnContended/MnContended.csproj" />
+    <Project Path="tests/Behavioral/MnForeignThread/MnForeignThread.csproj" />
+    <Project Path="tests/Behavioral/MnGenericContended/MnGenericContended.csproj" />
+    <Project Path="tests/Behavioral/MnGoMaxProcs/MnGoMaxProcs.csproj" />
     <Project Path="tests/Behavioral/MnParkedCallers/MnParkedCallers.csproj" />
     <Project Path="tests/Behavioral/MnParkedMultiLine/MnParkedMultiLine.csproj" />
     <Project Path="tests/Behavioral/MnParkedSameName/MnParkedSameName.csproj" />
+    <Project Path="tests/Behavioral/MnSpinCap/MnSpinCap.csproj" />
     <Project Path="tests/Behavioral/MnAotGeneric/MnAotGeneric.csproj" />
     <Project Path="tests/Behavioral/MnMainExit/MnMainExit.csproj" />
     <Project Path="tests/Behavioral/MnMixedStorm/MnMixedStorm.csproj" />
+    <Project Path="tests/Behavioral/MnGlyphMethodFrames/MnGlyphMethodFrames.csproj" />
+    <Project Path="tests/Behavioral/MnGlyphMethodFrames/glyphlib/MnGlyphMethodFrames.glyphlib.csproj" />
+    <Project Path="tests/Behavioral/GlyphLibraryFrameNames/GlyphLibraryFrameNames.csproj" />
+    <Project Path="tests/Behavioral/GlyphLibraryFrameNames/framelib/GlyphLibraryFrameNames.framelib.csproj" />
     <Project Path="tests/Behavioral/MultiFileInitOrder/MultiFileInitOrder.csproj" />
     <Project Path="tests/Behavioral/MultiPointerEmbedPromotion/MultiPointerEmbedPromotion.csproj" />
     <Project Path="tests/Behavioral/MultiValueFuncLiteralDefine/MultiValueFuncLiteralDefine.csproj" />
@@ -915,6 +925,7 @@
     <Project Path="tests/Behavioral/NamedPointerParamArgument/NamedPointerParamArgument.csproj" />
     <Project Path="tests/Behavioral/NamedPointerReflectElem/NamedPointerReflectElem.csproj" />
     <Project Path="tests/Behavioral/NamedPointerEquality/NamedPointerEquality.csproj" />
+    <Project Path="tests/Behavioral/NamedSliceMethodShadow/NamedSliceMethodShadow.csproj" />
     <Project Path="tests/Behavioral/NamedPointerReinterpret/NamedPointerReinterpret.csproj" />
     <Project Path="tests/Behavioral/NamedPointerValueSlot/NamedPointerValueSlot.csproj" />
     <Project Path="tests/Behavioral/NamedResultAddressEscape/NamedResultAddressEscape.csproj" />
@@ -1019,6 +1030,8 @@
     <Project Path="tests/Behavioral/P384CurveBytes/P384CurveBytes.csproj" />
     <Project Path="tests/Behavioral/P521CurveBytes/P521CurveBytes.csproj" />
     <Project Path="tests/Behavioral/PackageAliasRootedTypeArgs/PackageAliasRootedTypeArgs.csproj" />
+    <Project Path="tests/Behavioral/PackageInfoUsingsClash/PackageInfoUsingsClash.csproj" />
+    <Project Path="tests/Behavioral/PackageInfoUsingsClash/clashlib/PackageInfoUsingsClash.clashlib.csproj" />
     <Project Path="tests/Behavioral/PackageNameShadowing/PackageNameShadowing.csproj" />
     <Project Path="tests/Behavioral/PackageShadowParam/PackageShadowParam.csproj" />
     <Project Path="tests/Behavioral/PackageShadowPointerParam/PackageShadowPointerParam.csproj" />

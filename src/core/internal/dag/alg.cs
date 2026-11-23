@@ -3,14 +3,10 @@
 // license that can be found in the LICENSE file.
 namespace go.@internal;
 
-using static dag_package;
-
 partial class dag_package {
 
-} partial class dagᴛGraph {
-
 // Transpose reverses all edges in g.
-public static void Transpose(this ref Graph g) {
+internal static void Transpose⁔(/*this*/ ref Graph g) {
     var old = g.edges;
 
     g.edges = new map<@string, map<@string, bool>>();
@@ -26,7 +22,7 @@ public static void Transpose(this ref Graph g) {
 }
 
 // Topo returns a topological sort of g. This function is deterministic.
-public static slice<@string> Topo(this ж<Graph> Ꮡg) {
+internal static slice<@string> Topo⁔(/*this*/ ж<Graph> Ꮡg) {
     ref var g = ref Ꮡg.DerefOrNull();
 
     ref var topo = ref heap<slice<@string>>(new slice<@string>(0, len(g.Nodes)), out var Ꮡtopo);
@@ -55,7 +51,7 @@ public static slice<@string> Topo(this ж<Graph> Ꮡg) {
 
 // TransitiveReduction removes edges from g that are transitively
 // reachable. g must be transitively closed.
-public static void TransitiveReduction(this ref Graph g) {
+internal static void TransitiveReduction⁔(/*this*/ ref Graph g) {
     // For i -> j -> k, if i -> k exists, delete it.
     foreach (var (_, i) in range(g.Nodes)) {
         foreach (var (_, j) in range(g.Nodes)) {
@@ -70,4 +66,4 @@ public static void TransitiveReduction(this ref Graph g) {
     }
 }
 
-}
+} // end dag_package

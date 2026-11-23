@@ -10,6 +10,10 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+using raw = go.@internal.trace.raw_package;
+using time = go.time_package;
+using trace = go.@internal.trace_package;
+using tracev2 = go.@internal.trace.tracev2_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -62,10 +66,18 @@ using static go.@internal.trace.@internal.testgen_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/trace/internal/testgen/trace.go", "trace.cs", "ABsutIKClLampoK0ABg0kgAJFKKCqJKs0qyyruLugqiUkoKCuIK4griCgrgABxCigoKCpgAQHgARKNK4goKuwoKUgpSCgq7CgpSClIKCgoKUgoKuwoKUABYg1IKUgoKCgoKCuIK4goKCgriCgqKCgoKUpoKCpqaCgoKmgoKmpoLuooKCAA8e0oKClIKCgoKClJSUgoKUgpSmgoKCgpSClLS0tLS0tLS0tLSkrNKmgoKClIKCuKiyyoK6koKC", "", "", "78=Specs/1/2/1,EventNames/1/1/1,Specs/2/2/2;160=Bytes/1/1/3", "37:21")]
+[assembly: GoPositionMap("internal/trace/internal/testgen/trace.go", "trace.cs", "ABoutIKClLampoK0ABg0kgAHFKKCqJKs0qyyruLugqiUkoKCuIK4griCgrgABxCigoKCpgAOHgAPKNK4goKuwoKUgpSCgq7CgpSClIKCgoKUgoKuwoKUABIg1IKUgoKCgoKCuIK4goKCgriCgqKCgoKUpoKCpqaCgoKmgoKmpoLuooKCAAse0oKClIKCgoKClJSUgoKUgpSmgoKCgpSClLS0tLS0tLS0tLSkrNKmgoKClIKCuKiyyoK6koKC", "", "", "77=Specs/1/2/1,EventNames/1/1/1,Specs/2/2/2;157=Bytes/1/1/3", "36:21")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.trace.@internal;
+
+using static go.@internal.trace.@internal.testgen_package;
+using raw = go.@internal.trace.raw_package;
+using time = go.time_package;
+using trace = go.@internal.trace_package;
+using tracev2 = go.@internal.trace.tracev2_package;
+using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸuint64 = Span<uint64>;
 
 [GoPackage("testgen")]
 public static partial class testgen_package
@@ -119,3 +131,34 @@ public static partial class testgen_package
 [GoMethodHost(typeof(testgen_package.Generation)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class testgenᴛGeneration;
 [GoMethodHost(typeof(testgen_package.Trace)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class testgenᴛTrace;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class testgenᴛBatch {
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Event(this ref Batch b, @string name, params ꓸꓸꓸany argsʗp) => testgen_package.Event⁔(ref b, name, argsʗp);
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint64 uintArgFor(this ref Batch b, any arg, @string argSpec) => testgen_package.uintArgFor⁔(ref b, arg, argSpec);
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void RawEvent(this ref Batch b, tracev2.EventType typ, slice<byte> data, params ꓸꓸꓸuint64 argsʗp) => testgen_package.RawEvent⁔(ref b, typ, data, argsʗp);
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void writeEventsTo(this ref Batch b, ж<raw.TextWriter> Ꮡtw) => testgen_package.writeEventsTo⁔(ref b, Ꮡtw);
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void setTimestamp(this ref Batch b, Time t) => testgen_package.setTimestamp⁔(ref b, t);
+}
+partial class testgenᴛGeneration {
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Batch> Batch(this ж<Generation> Ꮡg, trace.ThreadID thread, Time time) => testgen_package.Batch⁔(Ꮡg, thread, time);
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static uint64 String(this ref Generation g, @string s) => testgen_package.String⁔(ref g, s);
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static uint64 Stack(this ref Generation g, slice<trace.StackFrame> stk) => testgen_package.Stack⁔(ref g, stk);
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Sync(this ref Generation g, uint64 freq, Time timeΔ1, uint64 mono, time.Time wall) => testgen_package.Sync⁔(ref g, freq, timeΔ1, mono, wall);
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void writeEventsTo(this ж<Generation> Ꮡg, ж<raw.TextWriter> Ꮡtw) => testgen_package.writeEventsTo⁔(Ꮡg, Ꮡtw);
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<Batch> newStructuralBatch(this ж<Generation> Ꮡg) => testgen_package.newStructuralBatch⁔(Ꮡg);
+}
+partial class testgenᴛTrace {
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void ExpectFailure(this ref Trace t, @string pattern) => testgen_package.ExpectFailure⁔(ref t, pattern);
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void ExpectSuccess(this ref Trace t) => testgen_package.ExpectSuccess⁔(ref t);
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void RawEvent(this ref Trace t, tracev2.EventType typ, slice<byte> data, params ꓸꓸꓸuint64 argsʗp) => testgen_package.RawEvent⁔(ref t, typ, data, argsʗp);
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void DisableTimestamps(this ref Trace t) => testgen_package.DisableTimestamps⁔(ref t);
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Generation> Generation(this ж<Trace> Ꮡt, uint64 gen) => testgen_package.Generation⁔(Ꮡt, gen);
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> Generate(this ref Trace t) => testgen_package.Generate⁔(ref t);
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static raw.Event createEvent(this ref Trace t, tracev2.EventType ev, slice<byte> data, params ꓸꓸꓸuint64 argsʗp) => testgen_package.createEvent⁔(ref t, ev, data, argsʗp);
+}
+// </MethodForwarders>

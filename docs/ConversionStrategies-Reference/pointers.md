@@ -454,7 +454,7 @@ check = func(pc uint32, m []bool) (ok bool) {
 
 The assignment statement's position is that of `check` on its left, which precedes the literal on its right — yet the RHS is evaluated *first*, so the store to `check` unambiguously happens after the literal exists. Scored as read-only-after-capture, the capture would take the snapshot path (`var checkʗ1 = check;` hoisted **above** the assignment) and every recursive call would invoke the still-**null** delegate: a `NullReferenceException` on the first recursion. In regexp's `makeOnePass` that is the entire ambiguity check, so `^.$` — and most of the package — would fail to compile. So the scan also counts a write whose syntactic extent *contains* a referencing literal (`w.pos < lit.pos < w.end`), which routes the capture to shared storage; `check` escapes, so it takes the by-box form and the recursion resolves against the box the assignment fills:
 
-<!-- source: src/core/regexp/onepass.cs:336-486 -->
+<!-- source: src/core/regexp/onepass.cs:331-481 -->
 ```csharp
 ref var check = ref heap<Func<uint32, slice<bool>, bool>>(out var Ꮡcheck);
 …
@@ -523,7 +523,7 @@ behavioral corpus has 0 besides the new extension. -->
 **A box accessor's qualifier names the class that DECLARES the type, which under `-tests` can be the bridge.** The accessor `Type.Ꮡfield` in `receiver.of(Type.Ꮡfield)` package-qualifies whenever a bare name could be shadowed (see [Field address of a collision-renamed heap-boxed local](#field-address-of-a-collision-renamed-heap-boxed-local-uses-the-raw-box-name)). For a type an internal `_test.go` declares, the production `<pkg>_package` class is the wrong qualifier — the white-box emission unit is the bridge (`<pkg>_internal_test_package`), so the reference resolves to nothing (CS0117). `database/sql`'s `fakedb_test.go` is the corpus instance and it is forced into the qualifying path: `type table struct { mu sync.Mutex; … }` sits beside `func (db *fakeDB) table(string) (*table, bool)`, so the *type* is Δ-renamed, and Δ-renamed always qualifies — every one of the six `t.mu.Lock()`/`Unlock()` sites would emit `sql_package.Δtable.Ꮡmu`. The qualifier resolves through `packageScopeClassName`, the same helper that already draws the production/bridge line for package-level *value* references, so both halves stay addressable from the one bridge file. Production conversions are unaffected by construction — outside `-tests` there is no class override and the helper returns the production class. (Guarded by the `TestTestVariantBoxAccessorNamesBridgeDeclaringClass` converter test, which asserts both directions: the bridge class appears and the production class does not.)
 
 **Reassigning a captured pointer parameter inside a closure.** The repoint-and-re-alias above (`Ꮡp = …; p = ref Ꮡp.DerefOrNull();`) rebinds a `ref`-local. Inside a CLOSURE that captured the parameter that is illegal: the re-aliased value var is an ENCLOSING `ref`-local, and C# forbids referencing an outer `ref` local inside a lambda (CS8175 — crypto/x509 `buildChains`'s `considerCandidate` closure does `if sigChecks == nil { sigChecks = new(int) }` on the captured `*int` parameter). The box reassignment `Ꮡp = …` is legal (it writes the captured box field, hoisted to a closure field), so only the ref-local refresh is dropped inside a lambda:
-<!-- source: src/core/crypto/x509/windows/verify.cs:812-815 -->
+<!-- source: src/core/crypto/x509/windows/verify.cs:785-788 -->
 ```csharp
 if (sigChecks == nil) {
     sigChecks = @new<nint>();
@@ -793,7 +793,7 @@ data := make([]byte, unsafe.Sizeof(hdr))
 // …
 f.Type = Type(bo.Uint16(data[unsafe.Offsetof(hdr.Type):]))
 ```
-<!-- source: src/core/debug/elf/file.cs:379-383 -->
+<!-- source: src/core/debug/elf/file.cs:358-362 -->
 ```csharp
 var data = new slice<byte>((nint)(/* unsafe.Sizeof(hdr) */ (uintptr)52));
 …
@@ -864,7 +864,7 @@ So the run-time form answers through **`GoReflect.TryGoSizeOf`** — the same Go
 reflection bridge already stamps into a descriptor's `Size_`, and the same one `reflect.Type.Size()`
 reads:
 
-<!-- source: src/core/unsafe/unsafe.cs:1677-1685 -->
+<!-- source: src/core/unsafe/unsafe.cs:1699-1707 -->
 ```csharp
 public static uintptr Sizeof<T>(T x) {
     // TryGoSizeOf answers derivability separately from the size, which matters here: the old
@@ -905,9 +905,9 @@ answers Go's size for the derivable shapes.
 ```go
 func (u *UnsafePointer) Load() unsafe.Pointer { return Loadp(unsafe.Pointer(&u.value)) }
 ```
-<!-- source: src/core/internal/runtime/atomic/types.cs:505-507 -->
+<!-- source: src/core/internal/runtime/atomic/types.cs:467-469 -->
 ```csharp
-public static @unsafe.Pointer Load(this ж<UnsafePointer> Ꮡu) {
+internal static @unsafe.Pointer Load⁔(/*this*/ ж<UnsafePointer> Ꮡu) {
     return Loadp(@unsafe.Pointer.FromBox(Ꮡu.Ꮡvalue));
 }
 ```
@@ -1248,9 +1248,9 @@ func (p *nih) add(bytes uintptr) *nih {
 	return (*nih)(unsafe.Pointer(uintptr(unsafe.Pointer(p)) + bytes))
 }
 ```
-<!-- source: src/tests/Behavioral/FuncVsMethodOverload/main.cs.target:19-24 -->
+<!-- source: src/tests/Behavioral/FuncVsMethodOverload/main.cs.target:16-21 -->
 ```csharp
-internal static ж<nih> add(this ж<nih> Ꮡp, uintptr bytes) {
+internal static ж<nih> add⁔(/*this*/ ж<nih> Ꮡp, uintptr bytes) {
     if (bytes == 0) {
         return Ꮡp;
     }
@@ -1458,6 +1458,7 @@ its types in a package pre-pass (`funcWordOperations.go`):
 | w1 | `*(*uintptr)(unsafe.Pointer(&f)) = x` | `f = GoFuncCookie.Func<F>(x);` |
 | w2 | `*(*F)(unsafe.Pointer(&v)) = fn`, `v` a `uintptr` | `v = (uintptr)GoFuncCookie.Of(fn);` |
 | w3 | `*(*F)(e) = fn`, `e` any other `unsafe.Pointer` | `@unsafe.Pointer.StoreFunc(e, fn);` |
+| w4 | `*(*unsafe.Pointer)(unsafe.Pointer(&f)) = p`, `f` a func variable | `f = @unsafe.Pointer.FuncOfWord<F>(p);` |
 
 ```go
 func ccgoFP(f interface{}) uintptr {
@@ -1494,7 +1495,7 @@ method table this way: a func stored at a computed address inside a variable of 
 ```go
 	*(*func(int, int) int)(unsafe.Add(unsafe.Pointer(&gwords), 8)) = add
 ```
-<!-- source: src/tests/Behavioral/FuncWordShapes/main.cs:98 -->
+<!-- source: src/tests/Behavioral/FuncWordShapes/main.cs:107 -->
 ```csharp
     @unsafe.Pointer.StoreFunc(@unsafe.Add(@unsafe.Pointer.FromPinnedBox(Ꮡgwords), 8), (Func<nint, nint, nint>)add);
 ```
@@ -1517,10 +1518,41 @@ store into `f`'s own box. <!-- 2026-11-14, DESIGN-interior-pointer-root.md 4.8 B
 Census at go1.26.10: 0 such stores in the standard library, tests included, on windows/amd64, linux/amd64,
 darwin/amd64 and linux/arm64; 9 in modernc.org/sqlite v1.62.0 (vfs/patches64.go:18-26), all of top-level functions. -->
 
+**A pointer word stored into a func variable (w4)** sets the func. Go stores `p` as `f`'s word. A func value's word
+in go2cs is its `GoFuncCookie` (`unsafe.Pointer.OfFunc`), so `FuncOfWord` reads `p` at run time:
+
+- a func value's word (one func copied into another through their words) is that func;
+- 0 is the nil func;
+- any other word panics by name: Go's `funcval` built by hand, whose word names code by a PC, or C memory.
+
+```go
+	var cp func(int, int) int
+	*(*unsafe.Pointer)(unsafe.Pointer(&cp)) = *(*unsafe.Pointer)(unsafe.Pointer(&stored))
+```
+<!-- source: src/tests/Behavioral/FuncWordShapes/main.cs:93 -->
+```csharp
+    cp = @unsafe.Pointer.FuncOfWord<Func<nint, nint, nint>>(~Ꮡ(@unsafe.Pointer.OfFunc(stored)));
+```
+<!-- 2026-11-22, TC-13 (BOARD 2026-11-20, "a store of a pointer word INTO a func variable lands in a fresh box"; COORD's
+ruling the same day). Before it the store kept the pointer reinterpret, `(Ꮡ(@unsafe.Pointer.OfFunc(f))).Value = p`,
+which wrote p into a fresh box nothing reads: f stayed nil, and the next call through it was a nil func call, the
+one `*unsafe.Pointer` store whose failure was SILENT. The corpus held 4 such stores, all in runtime: debugcall.cs
+(debugCallWrap2's dispatchF) and the per-OS cgocall.cs (cgocallbackg1's cb), each a funcval built over a PC from
+abi.FuncPCABIInternal, which golib's synthetic-PC registry answers. Binding a func to a PC (Delegate.CreateDelegate
+over the resolved method) was ruled out for now: both sites are dormant (debugger call injection; cgo callbacks are
+Phase 5), no user Go code can build that shape, and the binding is unread under Native AOT. So the two sites refuse
+by name instead of calling nil. Red first: the behavioral row and the golib rows were predicted before their
+red runs; the converter's TestFuncWordShapes row was run red with no prediction written first, and its asserts were the claim.
+Census at go1.26.11, the corpus toolchain's GOROOT, all 7714 .go files under src (a first read at go1.24.13, the wrong
+pin, gave the same counts): a w4 store with more than one target, 0; an atomic store or swap through
+`(*unsafe.Pointer)(unsafe.Pointer(&x))`, 4, all over pointer fields, none over a func variable (syscall/dll_windows.go:290
+and :349, and the same two in cmd's vendored x/sys/windows); a single-target w4 store, 2 (runtime/cgocall.go:465,
+runtime/debugcall.go:266), which are the 4 emitted sites. Their regen: docs/phase4/DATA-tc13-regen-2026-11-22.md. -->
+
 **The shapes that keep today's pointer reinterpret, deliberately:**
 - a recovery from a pointer or from memory (runtime's mcleanup and panic);
-- the `*unsafe.Pointer` forms, which already carry the same word through `unsafe.Pointer.OfFunc` (the
-  section above).
+- the `*unsafe.Pointer` READ, which already carries the same word through `unsafe.Pointer.OfFunc` (the section
+  above).
 
 <!-- The design, its census per target and its predictions are docs/phase4/DESIGN-sqlite-cs-funcptr.md. -->
 
@@ -1529,7 +1561,8 @@ darwin/amd64 and linux/arm64; 9 in modernc.org/sqlite v1.62.0 (vfs/patches64.go:
   shape 1 is the w3 store into a package variable, read back and called);
 - the converter's `TestFuncWordShapes`, which also asserts the near misses and the m1 call site's form;
 - GolibTests' `GoFuncCookieTests` and `FuncStoreThroughPointerTests` (each case of w3, the refusals, and a
-  closure's word after the closure is dropped).
+  closure's word after the closure is dropped), and `FuncOfWordTests` (w4: the copy, a closure, nil, and the two
+  refusals).
 
 ## A pointer `reflect` handed out as an `unsafe.Pointer` must convert BACK — the order token is remembered, not redefined
 
@@ -1778,7 +1811,7 @@ Nine coupled rules, each first needed by one of those packages:
   `go.math.bits_package.Mul64(a, b)`. When a test-only declaration is specifically responsible, the
   statement also explains the otherwise surprising spelling:
 
-  <!-- source: src/core/hash/maphash/maphash_purego.cs:105 -->
+  <!-- source: src/core/hash/maphash/maphash_purego.cs:104 -->
   ```csharp
   var (hi, lo) = bits.Mul64(a, b);
   ```
@@ -1924,7 +1957,7 @@ long-standing arms; this is the remaining value-rooted case.) Guarded by
 
 ## Field address of a collision-renamed heap-boxed local uses the raw box name
 A heap box always keeps the RAW Go identifier (`ref var Δslice = ref heap<T>(out var <box>slice)`), so taking the address of a FIELD of a collision-renamed boxed local routes through `boxBaseName` -- the raw-name box, never the Δ-renamed alias (CS0103; reflect `SliceOf`'s `&slice.Type`). This matches the whole-value `&p` form and the renamed receiver/parameter boxes:
-<!-- source: src/tests/Behavioral/CollisionRenamedLocalBox/main.cs.target:60, 63 -->
+<!-- source: src/tests/Behavioral/CollisionRenamedLocalBox/main.cs.target:51, 54 -->
 ```csharp
     ref var p = ref heap<box>(new box(n: 0), out var Ꮡp);
 …
@@ -4080,7 +4113,7 @@ alias; the array element type is `ж<CommentGroup>`, so the alias form was CS002
 `CommentMap.addComment` — the sibling `append(list, Ꮡc)` already took the box through the
 call-argument pointer arm). The routing mirrors the struct-field pointer arm: the element index
 is marked `argTypeIsPtr`, which convExprList turns into the pointer ident context:
-<!-- source: src/core/go/ast/commentmap.cs:33 -->
+<!-- source: src/core/go/ast/commentmap.cs:30 -->
 ```csharp
 list = [c];
 ```

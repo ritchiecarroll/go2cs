@@ -4,11 +4,7 @@
 namespace go.@internal.runtime;
 
 using @unsafe = unsafe_package;
-using FieldOffsetAttribute = global::System.Runtime.InteropServices.FieldOffsetAttribute;
-using LayoutKind = global::System.Runtime.InteropServices.LayoutKind;
-using StructLayoutAttribute = global::System.Runtime.InteropServices.StructLayoutAttribute;
-using atomic = atomic_package;
-using static atomic_package;
+using System.Runtime.InteropServices;
 
 partial class atomic_package {
 
@@ -20,19 +16,17 @@ partial class atomic_package {
     [FieldOffset(0)] internal int32 value;
 }
 
-} partial class atomicᴛInt32 {
-
 // Load accesses and returns the value atomically.
 //
 //go:nosplit
-public static int32 Load(this ж<Int32> Ꮡi) {
+internal static int32 Load⁔(/*this*/ ж<Int32> Ꮡi) {
     return Loadint32(Ꮡi.Ꮡvalue);
 }
 
 // Store updates the value atomically.
 //
 //go:nosplit
-public static void Store(this ж<Int32> Ꮡi, int32 value) {
+internal static void Store⁔(/*this*/ ж<Int32> Ꮡi, int32 value) {
     Storeint32(Ꮡi.Ꮡvalue, value);
 }
 
@@ -41,7 +35,7 @@ public static void Store(this ж<Int32> Ꮡi, int32 value) {
 // It reports whether the swap ran.
 //
 //go:nosplit
-public static bool CompareAndSwap(this ж<Int32> Ꮡi, int32 old, int32 @new) {
+internal static bool CompareAndSwap⁔(/*this*/ ж<Int32> Ꮡi, int32 old, int32 @new) {
     return Casint32(Ꮡi.Ꮡvalue, old, @new);
 }
 
@@ -49,7 +43,7 @@ public static bool CompareAndSwap(this ж<Int32> Ꮡi, int32 old, int32 @new) {
 // i's value before the replacement.
 //
 //go:nosplit
-public static int32 Swap(this ж<Int32> Ꮡi, int32 @new) {
+internal static int32 Swap⁔(/*this*/ ж<Int32> Ꮡi, int32 @new) {
     return Xchgint32(Ꮡi.Ꮡvalue, @new);
 }
 
@@ -60,11 +54,9 @@ public static int32 Swap(this ж<Int32> Ꮡi, int32 @new) {
 // two's-complement way.
 //
 //go:nosplit
-public static int32 Add(this ж<Int32> Ꮡi, int32 delta) {
+internal static int32 Add⁔(/*this*/ ж<Int32> Ꮡi, int32 delta) {
     return Xaddint32(Ꮡi.Ꮡvalue, delta);
 }
-
-} partial class atomic_package {
 
 // Int64 is an atomically accessed int64 value.
 //
@@ -77,19 +69,17 @@ public static int32 Add(this ж<Int32> Ꮡi, int32 delta) {
     [FieldOffset(0)] internal int64 value;
 }
 
-} partial class atomicᴛInt64 {
-
 // Load accesses and returns the value atomically.
 //
 //go:nosplit
-public static int64 Load(this ж<Int64> Ꮡi) {
+internal static int64 Load⁔(/*this*/ ж<Int64> Ꮡi) {
     return Loadint64(Ꮡi.Ꮡvalue);
 }
 
 // Store updates the value atomically.
 //
 //go:nosplit
-public static void Store(this ж<Int64> Ꮡi, int64 value) {
+internal static void Store⁔(/*this*/ ж<Int64> Ꮡi, int64 value) {
     Storeint64(Ꮡi.Ꮡvalue, value);
 }
 
@@ -98,7 +88,7 @@ public static void Store(this ж<Int64> Ꮡi, int64 value) {
 // It reports whether the swap ran.
 //
 //go:nosplit
-public static bool CompareAndSwap(this ж<Int64> Ꮡi, int64 old, int64 @new) {
+internal static bool CompareAndSwap⁔(/*this*/ ж<Int64> Ꮡi, int64 old, int64 @new) {
     return Casint64(Ꮡi.Ꮡvalue, old, @new);
 }
 
@@ -106,7 +96,7 @@ public static bool CompareAndSwap(this ж<Int64> Ꮡi, int64 old, int64 @new) {
 // i's value before the replacement.
 //
 //go:nosplit
-public static int64 Swap(this ж<Int64> Ꮡi, int64 @new) {
+internal static int64 Swap⁔(/*this*/ ж<Int64> Ꮡi, int64 @new) {
     return Xchgint64(Ꮡi.Ꮡvalue, @new);
 }
 
@@ -117,11 +107,9 @@ public static int64 Swap(this ж<Int64> Ꮡi, int64 @new) {
 // two's-complement way.
 //
 //go:nosplit
-public static int64 Add(this ж<Int64> Ꮡi, int64 delta) {
+internal static int64 Add⁔(/*this*/ ж<Int64> Ꮡi, int64 delta) {
     return Xaddint64(Ꮡi.Ꮡvalue, delta);
 }
-
-} partial class atomic_package {
 
 // Uint8 is an atomically accessed uint8 value.
 //
@@ -131,19 +119,17 @@ public static int64 Add(this ж<Int64> Ꮡi, int64 delta) {
     [FieldOffset(0)] internal uint8 value;
 }
 
-} partial class atomicᴛUint8 {
-
 // Load accesses and returns the value atomically.
 //
 //go:nosplit
-public static uint8 Load(this ж<Uint8> Ꮡu) {
+internal static uint8 Load⁔(/*this*/ ж<Uint8> Ꮡu) {
     return Load8(Ꮡu.Ꮡvalue);
 }
 
 // Store updates the value atomically.
 //
 //go:nosplit
-public static void Store(this ж<Uint8> Ꮡu, uint8 value) {
+internal static void Store⁔(/*this*/ ж<Uint8> Ꮡu, uint8 value) {
     Store8(Ꮡu.Ꮡvalue, value);
 }
 
@@ -154,7 +140,7 @@ public static void Store(this ж<Uint8> Ꮡu, uint8 value) {
 // The full process is performed atomically.
 //
 //go:nosplit
-public static void And(this ж<Uint8> Ꮡu, uint8 value) {
+internal static void And⁔(/*this*/ ж<Uint8> Ꮡu, uint8 value) {
     And8(Ꮡu.Ꮡvalue, value);
 }
 
@@ -165,11 +151,9 @@ public static void And(this ж<Uint8> Ꮡu, uint8 value) {
 // The full process is performed atomically.
 //
 //go:nosplit
-public static void Or(this ж<Uint8> Ꮡu, uint8 value) {
+internal static void Or⁔(/*this*/ ж<Uint8> Ꮡu, uint8 value) {
     Or8(Ꮡu.Ꮡvalue, value);
 }
-
-} partial class atomic_package {
 
 // Bool is an atomically accessed bool value.
 //
@@ -179,27 +163,23 @@ partial struct Bool {
     internal Uint8 u;
 }
 
-} partial class atomicᴛBool {
-
 // Load accesses and returns the value atomically.
 //
 //go:nosplit
-public static bool Load(this ж<Bool> Ꮡb) {
+internal static bool Load⁔(/*this*/ ж<Bool> Ꮡb) {
     return Ꮡb.Ꮡu.Load() != 0;
 }
 
 // Store updates the value atomically.
 //
 //go:nosplit
-public static void Store(this ж<Bool> Ꮡb, bool value) {
+internal static void Store⁔(/*this*/ ж<Bool> Ꮡb, bool value) {
     var s = (uint8)0;
     if (value) {
         s = 1;
     }
     Ꮡb.Ꮡu.Store(s);
 }
-
-} partial class atomic_package {
 
 // Uint32 is an atomically accessed uint32 value.
 //
@@ -209,13 +189,11 @@ public static void Store(this ж<Bool> Ꮡb, bool value) {
     [FieldOffset(0)] internal uint32 value;
 }
 
-} partial class atomicᴛUint32 {
-
 // Load accesses and returns the value atomically.
 //
 //go:nosplit
-public static uint32 Load(this ж<Uint32> Ꮡu) {
-    return atomic.Load(Ꮡu.Ꮡvalue);
+internal static uint32 Load⁔(/*this*/ ж<Uint32> Ꮡu) {
+    return Load(Ꮡu.Ꮡvalue);
 }
 
 // LoadAcquire is a partially unsynchronized version
@@ -227,15 +205,15 @@ public static uint32 Load(this ж<Uint32> Ꮡu) {
 // WARNING: Use sparingly and with great care.
 //
 //go:nosplit
-public static uint32 LoadAcquire(this ж<Uint32> Ꮡu) {
+internal static uint32 LoadAcquire⁔(/*this*/ ж<Uint32> Ꮡu) {
     return LoadAcq(Ꮡu.Ꮡvalue);
 }
 
 // Store updates the value atomically.
 //
 //go:nosplit
-public static void Store(this ж<Uint32> Ꮡu, uint32 value) {
-    atomic.Store(Ꮡu.Ꮡvalue, value);
+internal static void Store⁔(/*this*/ ж<Uint32> Ꮡu, uint32 value) {
+    Store(Ꮡu.Ꮡvalue, value);
 }
 
 // StoreRelease is a partially unsynchronized version
@@ -247,7 +225,7 @@ public static void Store(this ж<Uint32> Ꮡu, uint32 value) {
 // WARNING: Use sparingly and with great care.
 //
 //go:nosplit
-public static void StoreRelease(this ж<Uint32> Ꮡu, uint32 value) {
+internal static void StoreRelease⁔(/*this*/ ж<Uint32> Ꮡu, uint32 value) {
     StoreRel(Ꮡu.Ꮡvalue, value);
 }
 
@@ -256,7 +234,7 @@ public static void StoreRelease(this ж<Uint32> Ꮡu, uint32 value) {
 // It reports whether the swap ran.
 //
 //go:nosplit
-public static bool CompareAndSwap(this ж<Uint32> Ꮡu, uint32 old, uint32 @new) {
+internal static bool CompareAndSwap⁔(/*this*/ ж<Uint32> Ꮡu, uint32 old, uint32 @new) {
     return Cas(Ꮡu.Ꮡvalue, old, @new);
 }
 
@@ -270,7 +248,7 @@ public static bool CompareAndSwap(this ж<Uint32> Ꮡu, uint32 old, uint32 @new)
 // WARNING: Use sparingly and with great care.
 //
 //go:nosplit
-public static bool CompareAndSwapRelease(this ж<Uint32> Ꮡu, uint32 old, uint32 @new) {
+internal static bool CompareAndSwapRelease⁔(/*this*/ ж<Uint32> Ꮡu, uint32 old, uint32 @new) {
     return CasRel(Ꮡu.Ꮡvalue, old, @new);
 }
 
@@ -278,7 +256,7 @@ public static bool CompareAndSwapRelease(this ж<Uint32> Ꮡu, uint32 old, uint3
 // u's value before the replacement.
 //
 //go:nosplit
-public static uint32 Swap(this ж<Uint32> Ꮡu, uint32 value) {
+internal static uint32 Swap⁔(/*this*/ ж<Uint32> Ꮡu, uint32 value) {
     return Xchg(Ꮡu.Ꮡvalue, value);
 }
 
@@ -289,8 +267,8 @@ public static uint32 Swap(this ж<Uint32> Ꮡu, uint32 value) {
 // The full process is performed atomically.
 //
 //go:nosplit
-public static void And(this ж<Uint32> Ꮡu, uint32 value) {
-    atomic.And(Ꮡu.Ꮡvalue, value);
+internal static void And⁔(/*this*/ ж<Uint32> Ꮡu, uint32 value) {
+    And(Ꮡu.Ꮡvalue, value);
 }
 
 // Or takes value and performs a bit-wise
@@ -300,8 +278,8 @@ public static void And(this ж<Uint32> Ꮡu, uint32 value) {
 // The full process is performed atomically.
 //
 //go:nosplit
-public static void Or(this ж<Uint32> Ꮡu, uint32 value) {
-    atomic.Or(Ꮡu.Ꮡvalue, value);
+internal static void Or⁔(/*this*/ ж<Uint32> Ꮡu, uint32 value) {
+    Or(Ꮡu.Ꮡvalue, value);
 }
 
 // Add adds delta to u atomically, returning
@@ -311,11 +289,9 @@ public static void Or(this ж<Uint32> Ꮡu, uint32 value) {
 // two's-complement way.
 //
 //go:nosplit
-public static uint32 Add(this ж<Uint32> Ꮡu, int32 delta) {
+internal static uint32 Add⁔(/*this*/ ж<Uint32> Ꮡu, int32 delta) {
     return Xadd(Ꮡu.Ꮡvalue, delta);
 }
-
-} partial class atomic_package {
 
 // Uint64 is an atomically accessed uint64 value.
 //
@@ -328,19 +304,17 @@ public static uint32 Add(this ж<Uint32> Ꮡu, int32 delta) {
     [FieldOffset(0)] internal uint64 value;
 }
 
-} partial class atomicᴛUint64 {
-
 // Load accesses and returns the value atomically.
 //
 //go:nosplit
-public static uint64 Load(this ж<Uint64> Ꮡu) {
+internal static uint64 Load⁔(/*this*/ ж<Uint64> Ꮡu) {
     return Load64(Ꮡu.Ꮡvalue);
 }
 
 // Store updates the value atomically.
 //
 //go:nosplit
-public static void Store(this ж<Uint64> Ꮡu, uint64 value) {
+internal static void Store⁔(/*this*/ ж<Uint64> Ꮡu, uint64 value) {
     Store64(Ꮡu.Ꮡvalue, value);
 }
 
@@ -349,7 +323,7 @@ public static void Store(this ж<Uint64> Ꮡu, uint64 value) {
 // It reports whether the swap ran.
 //
 //go:nosplit
-public static bool CompareAndSwap(this ж<Uint64> Ꮡu, uint64 old, uint64 @new) {
+internal static bool CompareAndSwap⁔(/*this*/ ж<Uint64> Ꮡu, uint64 old, uint64 @new) {
     return Cas64(Ꮡu.Ꮡvalue, old, @new);
 }
 
@@ -357,7 +331,7 @@ public static bool CompareAndSwap(this ж<Uint64> Ꮡu, uint64 old, uint64 @new)
 // u's value before the replacement.
 //
 //go:nosplit
-public static uint64 Swap(this ж<Uint64> Ꮡu, uint64 value) {
+internal static uint64 Swap⁔(/*this*/ ж<Uint64> Ꮡu, uint64 value) {
     return Xchg64(Ꮡu.Ꮡvalue, value);
 }
 
@@ -368,11 +342,9 @@ public static uint64 Swap(this ж<Uint64> Ꮡu, uint64 value) {
 // two's-complement way.
 //
 //go:nosplit
-public static uint64 Add(this ж<Uint64> Ꮡu, int64 delta) {
+internal static uint64 Add⁔(/*this*/ ж<Uint64> Ꮡu, int64 delta) {
     return Xadd64(Ꮡu.Ꮡvalue, delta);
 }
-
-} partial class atomic_package {
 
 // Uintptr is an atomically accessed uintptr value.
 //
@@ -382,12 +354,10 @@ public static uint64 Add(this ж<Uint64> Ꮡu, int64 delta) {
     [FieldOffset(0)] internal uintptr value;
 }
 
-} partial class atomicᴛUintptr {
-
 // Load accesses and returns the value atomically.
 //
 //go:nosplit
-public static uintptr Load(this ж<Uintptr> Ꮡu) {
+internal static uintptr Load⁔(/*this*/ ж<Uintptr> Ꮡu) {
     return Loaduintptr(Ꮡu.Ꮡvalue);
 }
 
@@ -400,14 +370,14 @@ public static uintptr Load(this ж<Uintptr> Ꮡu) {
 // WARNING: Use sparingly and with great care.
 //
 //go:nosplit
-public static uintptr LoadAcquire(this ж<Uintptr> Ꮡu) {
+internal static uintptr LoadAcquire⁔(/*this*/ ж<Uintptr> Ꮡu) {
     return LoadAcquintptr(Ꮡu.Ꮡvalue);
 }
 
 // Store updates the value atomically.
 //
 //go:nosplit
-public static void Store(this ж<Uintptr> Ꮡu, uintptr value) {
+internal static void Store⁔(/*this*/ ж<Uintptr> Ꮡu, uintptr value) {
     Storeuintptr(Ꮡu.Ꮡvalue, value);
 }
 
@@ -420,7 +390,7 @@ public static void Store(this ж<Uintptr> Ꮡu, uintptr value) {
 // WARNING: Use sparingly and with great care.
 //
 //go:nosplit
-public static void StoreRelease(this ж<Uintptr> Ꮡu, uintptr value) {
+internal static void StoreRelease⁔(/*this*/ ж<Uintptr> Ꮡu, uintptr value) {
     StoreReluintptr(Ꮡu.Ꮡvalue, value);
 }
 
@@ -429,7 +399,7 @@ public static void StoreRelease(this ж<Uintptr> Ꮡu, uintptr value) {
 // It reports whether the swap ran.
 //
 //go:nosplit
-public static bool CompareAndSwap(this ж<Uintptr> Ꮡu, uintptr old, uintptr @new) {
+internal static bool CompareAndSwap⁔(/*this*/ ж<Uintptr> Ꮡu, uintptr old, uintptr @new) {
     return Casuintptr(Ꮡu.Ꮡvalue, old, @new);
 }
 
@@ -437,7 +407,7 @@ public static bool CompareAndSwap(this ж<Uintptr> Ꮡu, uintptr old, uintptr @n
 // u's value before the replacement.
 //
 //go:nosplit
-public static uintptr Swap(this ж<Uintptr> Ꮡu, uintptr value) {
+internal static uintptr Swap⁔(/*this*/ ж<Uintptr> Ꮡu, uintptr value) {
     return Xchguintptr(Ꮡu.Ꮡvalue, value);
 }
 
@@ -448,11 +418,9 @@ public static uintptr Swap(this ж<Uintptr> Ꮡu, uintptr value) {
 // two's-complement way.
 //
 //go:nosplit
-public static uintptr Add(this ж<Uintptr> Ꮡu, uintptr delta) {
+internal static uintptr Add⁔(/*this*/ ж<Uintptr> Ꮡu, uintptr delta) {
     return Xadduintptr(Ꮡu.Ꮡvalue, delta);
 }
-
-} partial class atomic_package {
 
 // Float64 is an atomically accessed float64 value.
 //
@@ -464,12 +432,10 @@ partial struct Float64 {
     internal Uint64 u;
 }
 
-} partial class atomicᴛFloat64 {
-
 // Load accesses and returns the value atomically.
 //
 //go:nosplit
-public static float64 Load(this ж<Float64> Ꮡf) {
+internal static float64 Load⁔(/*this*/ ж<Float64> Ꮡf) {
     var r = Ꮡf.Ꮡu.Load();
     return bitcast<uint64, float64>(r);
 }
@@ -477,11 +443,9 @@ public static float64 Load(this ж<Float64> Ꮡf) {
 // Store updates the value atomically.
 //
 //go:nosplit
-public static void Store(this ж<Float64> Ꮡf, float64 value) {
+internal static void Store⁔(/*this*/ ж<Float64> Ꮡf, float64 value) {
     Ꮡf.Ꮡu.Store(bitcast<float64, uint64>(value));
 }
-
-} partial class atomic_package {
 
 // UnsafePointer is an atomically accessed unsafe.Pointer value.
 //
@@ -497,12 +461,10 @@ partial struct UnsafePointer {
     internal @unsafe.Pointer value;
 }
 
-} partial class atomicᴛUnsafePointer {
-
 // Load accesses and returns the value atomically.
 //
 //go:nosplit
-public static @unsafe.Pointer Load(this ж<UnsafePointer> Ꮡu) {
+internal static @unsafe.Pointer Load⁔(/*this*/ ж<UnsafePointer> Ꮡu) {
     return Loadp(@unsafe.Pointer.FromBox(Ꮡu.Ꮡvalue));
 }
 
@@ -515,23 +477,19 @@ public static @unsafe.Pointer Load(this ж<UnsafePointer> Ꮡu) {
 // Prefer Store instead.
 //
 //go:nosplit
-public static void StoreNoWB(this ж<UnsafePointer> Ꮡu, @unsafe.Pointer value) {
+internal static void StoreNoWB⁔(/*this*/ ж<UnsafePointer> Ꮡu, @unsafe.Pointer value) {
     StorepNoWB(@unsafe.Pointer.FromBox(Ꮡu.Ꮡvalue), value);
 }
 
 // Store updates the value atomically.
-public static void Store(this ж<UnsafePointer> Ꮡu, @unsafe.Pointer value) {
+internal static void Store⁔(/*this*/ ж<UnsafePointer> Ꮡu, @unsafe.Pointer value) {
     storePointer(Ꮡu.Ꮡvalue, value);
 }
-
-} partial class atomic_package {
 
 // provided by runtime
 //
 //go:linkname storePointer
 internal static partial void storePointer(ж<@unsafe.Pointer> ptr, @unsafe.Pointer @new);
-
-} partial class atomicᴛUnsafePointer {
 
 // CompareAndSwapNoWB atomically (with respect to other methods)
 // compares u's value with old, and if they're equal,
@@ -545,18 +503,16 @@ internal static partial void storePointer(ж<@unsafe.Pointer> ptr, @unsafe.Point
 // Prefer CompareAndSwap instead.
 //
 //go:nosplit
-public static bool CompareAndSwapNoWB(this ж<UnsafePointer> Ꮡu, @unsafe.Pointer old, @unsafe.Pointer @new) {
+internal static bool CompareAndSwapNoWB⁔(/*this*/ ж<UnsafePointer> Ꮡu, @unsafe.Pointer old, @unsafe.Pointer @new) {
     return Casp1(Ꮡu.Ꮡvalue, old, @new);
 }
 
 // CompareAndSwap atomically compares u's value with old,
 // and if they're equal, swaps u's value with new.
 // It reports whether the swap ran.
-public static bool CompareAndSwap(this ж<UnsafePointer> Ꮡu, @unsafe.Pointer old, @unsafe.Pointer @new) {
+internal static bool CompareAndSwap⁔(/*this*/ ж<UnsafePointer> Ꮡu, @unsafe.Pointer old, @unsafe.Pointer @new) {
     return casPointer(Ꮡu.Ꮡvalue, old, @new);
 }
-
-} partial class atomic_package {
 
 internal static partial bool casPointer(ж<@unsafe.Pointer> ptr, @unsafe.Pointer old, @unsafe.Pointer @new);
 
@@ -565,12 +521,10 @@ partial struct Pointer<T> {
     internal UnsafePointer u;
 }
 
-} partial class atomicᴛPointer {
-
 // Load accesses and returns the value atomically.
 //
 //go:nosplit
-public static ж<T> Load<T>(this ж<Pointer<T>> Ꮡp) {
+internal static ж<T> Load⁔<T>(/*this*/ ж<Pointer<T>> Ꮡp) {
     return @unsafe.Pointer.To<T>(Ꮡp.Ꮡu.Load());
 }
 
@@ -583,14 +537,14 @@ public static ж<T> Load<T>(this ж<Pointer<T>> Ꮡp) {
 // Prefer Store instead.
 //
 //go:nosplit
-public static void StoreNoWB<T>(this ж<Pointer<T>> Ꮡp, ж<T> value) {
+internal static void StoreNoWB⁔<T>(/*this*/ ж<Pointer<T>> Ꮡp, ж<T> value) {
     Ꮡp.Ꮡu.StoreNoWB(@unsafe.Pointer.FromPinnedBox(value));
 }
 
 // Store updates the value atomically.
 //
 //go:nosplit
-public static void Store<T>(this ж<Pointer<T>> Ꮡp, ж<T> value) {
+internal static void Store⁔<T>(/*this*/ ж<Pointer<T>> Ꮡp, ж<T> value) {
     Ꮡp.Ꮡu.Store(@unsafe.Pointer.FromPinnedBox(value));
 }
 
@@ -606,7 +560,7 @@ public static void Store<T>(this ж<Pointer<T>> Ꮡp, ж<T> value) {
 // Prefer CompareAndSwap instead.
 //
 //go:nosplit
-public static bool CompareAndSwapNoWB<T>(this ж<Pointer<T>> Ꮡp, ж<T> old, ж<T> @new) {
+internal static bool CompareAndSwapNoWB⁔<T>(/*this*/ ж<Pointer<T>> Ꮡp, ж<T> old, ж<T> @new) {
     return Ꮡp.Ꮡu.CompareAndSwapNoWB(@unsafe.Pointer.FromPinnedBox(old), @unsafe.Pointer.FromPinnedBox(@new));
 }
 
@@ -614,11 +568,9 @@ public static bool CompareAndSwapNoWB<T>(this ж<Pointer<T>> Ꮡp, ж<T> old, ж
 // compares u's value with old, and if they're equal,
 // swaps u's value with new.
 // It reports whether the swap ran.
-public static bool CompareAndSwap<T>(this ж<Pointer<T>> Ꮡp, ж<T> old, ж<T> @new) {
+internal static bool CompareAndSwap⁔<T>(/*this*/ ж<Pointer<T>> Ꮡp, ж<T> old, ж<T> @new) {
     return Ꮡp.Ꮡu.CompareAndSwap(@unsafe.Pointer.FromPinnedBox(old), @unsafe.Pointer.FromPinnedBox(@new));
 }
-
-} partial class atomic_package {
 
 // noCopy may be embedded into structs which must not be copied
 // after the first use.
@@ -628,13 +580,9 @@ public static bool CompareAndSwap<T>(this ж<Pointer<T>> Ꮡp, ж<T> old, ж<T> 
 partial struct noCopy {
 }
 
-} partial class atomicᴛnoCopy {
-
 // Lock is a no-op used by -copylocks checker from `go vet`.
-internal static void Lock(this ref noCopy _) { }
-internal static void Unlock(this ref noCopy _) { }
-
-} partial class atomic_package {
+internal static void Lock⁔(/*this*/ ref noCopy _) { }
+internal static void Unlock⁔(/*this*/ ref noCopy _) { }
 
 // align64 may be added to structs that must be 64-bit aligned.
 // This struct is recognized by a special case in the compiler

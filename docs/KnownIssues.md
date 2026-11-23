@@ -181,10 +181,41 @@ and the program ends; nothing can catch it. A Go goroutine is not a thread, so t
 **To avoid it**, bound how many goroutines are alive at once, with a worker pool for example. Two settings may raise
 the limit, but neither has been measured: `DOTNET_EnableWriteXorExecute=0` in the environment, which should cut the
 mappings each thread uses, and a larger `vm.max_map_count` on the machine.
+
+**Under the M:N scheduler** (experimental: `GoTwins=true` and `GO2CS_MN=1`), a goroutine parked in a twin holds no
+thread, so the limit counts only the goroutines blocked in calls the twins do not cover: a `sync.WaitGroup` or
+`sync.Cond` wait, a Lock reached through a `sync.Locker` interface, a cgo or system call. About 16,000 of those blocked
+at once end the program the same way (`PAL_SEHException`, then an abort); the same bound avoids it.
+<!-- Source (the M:N sentence): G's s_p convoy row, 2026-11-22, docs/phase4/DESIGN-mn-convoy.md section 7.
+     MnBlockReturn (n goroutines blocked on one sync.WaitGroup), linux flavour, Ubuntu 22.04 under WSL, default
+     vm.max_map_count 65530: n=20,000 aborted (PAL_SEHException, SIGABRT); a live n=10,000 run peaked at 40,427
+     mappings with 9,985 threads (about 4 per thread), so the limit falls near 16,000. -->
 <!-- Source: lane R's M:N R6 run, 2026-11-09, at master 0bbe3ab6e5: ParkStorm (DESIGN-mn-scheduler-sizing.md Appendix A),
      20,000 goroutines, linux flavour, Release, on R-WSL (Ubuntu 22.04, kernel 6.18, vm.max_map_count 65530). All six
      runs (bounded reserve 16 MiB and 1 MiB, three each) aborted at 16,226-16,229 threads. The record is the dated O1
      amendment in docs/phase4/DESIGN-mn-scheduler.md. -->
+
+## Goroutines on a shared pool of threads (M:N) are experimental, and off unless you build and run for them {#goroutines-on-a-shared-pool-of-threads-mn-are-experimental-and-off-unless-you-build-and-run-for-them}
+
+By default each goroutine is an operating-system thread, which is what the two sections above describe. go2cs also has
+an experimental M:N scheduler, in which goroutines take turns on a small pool of threads as Go's do. It is inert
+unless both halves are switched on:
+
+- **The build**: the projects are built with twins, an async copy of each function that can wait without holding a
+  thread. The `GoTwinsFor` property names the projects to build with twins, separated by `;`. Set it in the
+  environment: on the `dotnet build` command line each `;` must be written `%3B`, or MSBuild ends the property there.
+  `GoTwins=true` in one project's own file builds that project with twins. These properties are read by
+  `src/Directory.Build.targets`, so they work only in a project built inside a go2cs repository clone. The published
+  `go.*` packages are not built with twins, and a project that references them gets no twins from them.
+- **The run**: the environment sets `GO2CS_MN=1`. How many goroutines run at once follows `GOMAXPROCS`, as in Go: the
+  `GOMAXPROCS` environment variable at start, and `runtime.GOMAXPROCS(n)` while the program runs. `GO2CS_MN_PROCS=<n>`
+  pins the count instead; it is a measurement switch and goes away in a later release.
+
+Without `GO2CS_MN=1` a program built with twins runs on threads as usual, and `runtime.GOMAXPROCS` reads and sets the
+value Go's does but caps nothing: the operating system decides how many threads run at once. With it, a goroutine that
+waits inside code built without twins keeps its thread while it waits. The other `GO2CS_MN_*` variables the scheduler
+reads are measurement switches, not settings: none is supported, and they may change or go away. The diagnostics
+`GO2CS0014` through `GO2CS0018` ([Diagnostic codes](DiagnosticCodes.md)) come only from a build with twins.
 
 ## With go2cs 1.26.10.2 or earlier, a program converted with local standard-library references runs its standard library built Debug
 
@@ -627,3 +658,26 @@ With no user cache directory (neither `HOME` nor `XDG_CACHE_HOME` set), the cach
 the temporary directory, created with mode 0700. Because that directory is shared, go2cs uses it only while it is a
 directory owned by you that no other user can open; otherwise the run stops before its first probe and asks for
 `-probe-cache`. A run that does not probe, such as `-test-action build`, never needs the directory.
+
+## A Go struct field, method or type whose name starts with `Δ` refuses its package {#delta-led-field-method-type-refused}
+
+**Symptom.** Converting a package that declares a struct field, a method (an interface method included) or a named type
+whose name starts with `Δ`, such as `type P struct{ Δt float64 }`, stops with `error GO2CS2015`, which names the
+identifier and what Go would report for it. A `Δ`-led local, parameter, package variable, constant or function converts.
+
+**Cause.** go2cs renames a Go name that collides with something it generates by adding a leading `Δ`, and the runtime
+library reads a leading `Δ` back as that marker: it drops it when it gives a converted field, method or type its Go name.
+A Go name that itself starts with `Δ` would then lose it: `P.Δt` would reflect and json-encode as `t`, unexported, so
+`json.Marshal(P{1})` would write `{}` where Go writes `{"Δt":1}`, and `reflect.TypeOf(ΔMatrix{}).Name()` would read
+`Matrix`. The refusal turns that silent difference into a stop at conversion.
+
+**Workaround.** Rename the field, method or type so it does not start with `Δ` (`Dt`, `DeltaT`). A struct tag keeps the
+encoded name: `` Dt float64 `json:"Δt"` ``.
+
+**Fix owed.** The runtime library is told which `Δ` go2cs added, so a user's `Δ`-led field, method or type converts and
+reads back under its own name, and this refusal is retired.
+
+<!-- P3 code read of the R1 seat (inbox/COORD/20261122T045652Z-P3.md, finding 2), ruled by COORD 045750Z: refuse now
+     (2a), durable cure as its own .5 seat (2b). The three projection sites: src/core/golib/GoReflect.FieldAccess.cs:404
+     `if (projected.StartsWith(ShadowVarMarker, StringComparison.Ordinal))` (fields), GoReflect.TypeNaming.cs:718 `if (name.StartsWith(ShadowVarMarker, StringComparison.Ordinal))` (type names), runtime/TypeExtensions.GoMethodSets.cs:709 `emittedName.StartsWith(ShadowVarMarker, StringComparison.Ordinal)` (methods). The
+     refusal: src/go2cs/markerGlyphRefusal.go, deltaProjectionReason. -->

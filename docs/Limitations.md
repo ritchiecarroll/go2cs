@@ -159,6 +159,15 @@ standard library, and runs on Windows, Linux or macOS. **A longer evening:** lot
   string, slice, map, interface, pointer or fixed-size array gets a stand-in number, not an address, so
   the older tricks (the `*(*string)(unsafe.Pointer(&b))` pun, a hand-built slice header) don't convert
   mechanically.
+* **A func variable takes a pointer word stored into it only when the word is another func value's word.**
+  `*(*unsafe.Pointer)(unsafe.Pointer(&f)) = p` copies the func when `p` was read the same way from another func,
+  and nil is the nil func. A hand-built `funcval` whose word is a code address panics by name, until cgo callbacks
+  bind functions to code addresses
+  ([func words](ConversionStrategies-Reference/pointers.md#a-func-value-carried-as-a-number--one-word-per-static-function-through-gofunccookie)).
+* **A func value's word does not keep a closure alive.** Held as an `unsafe.Pointer` or a `uintptr`, the word of a
+  closure names it only while something else holds the closure. Once nothing does and a collection runs, storing the
+  word back into a func variable, or calling through it, panics by name ("names no live func"). In Go, the
+  `unsafe.Pointer` keeps the closure alive. A top-level function's word is good for the life of the process.
 * **One array view can end the process.** Go's `(*[N]E)(unsafe.Pointer(&x.f))[:]`, where `f` is an array field
   read as an array of another element type (an `[8]int8` name read as `[8]byte`), works when `x` is a variable or
   a pointer, and through any chain of named fields from one (`&x.a.f`). When the field is promoted from an embedded
@@ -450,8 +459,8 @@ A package's own Go `Test` functions were converted, run, and compared with `go t
 verdict, by full test name. That's a real bar, and narrower than the word sounds:
 
 * **Tests only.** Examples, benchmarks and fuzz targets never run. No race detector either.
-  <!-- src/go2cs/testConversion.go:4243 `entry.Kind, entry.Status, entry.Reason = "fuzz", "unsupported", "fuzz execution is deferred to Phase 4D"`;
-       Example- and Benchmark-only test files are left out of the compile set, :845
+  <!-- src/go2cs/testConversion.go:4262 `entry.Kind, entry.Status, entry.Reason = "fuzz", "unsupported", "fuzz execution is deferred to Phase 4D"`;
+       Example- and Benchmark-only test files are left out of the compile set, :859
        `// Phase-4D file exclusion (option-a ruling): drop Example/Benchmark-only test files from the`. -->
 * **Matched is not passed.** A test that skips on both sides counts as a match and measures nothing.
 * **Disclosed differences are real differences.** Where a Go test asserts something a managed runtime

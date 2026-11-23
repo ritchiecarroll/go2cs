@@ -18,7 +18,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace GenTests;
 
 /// <summary>
-/// M:N PROTOTYPE, stage (c)'s SC-1 (2026-11-15): the closure's first twinned runtime build failed with CS0260. A twin is
+/// M:N (experimental, opt-in), stage (c)'s SC-1 (2026-11-15): the closure's first twinned runtime build failed with CS0260. A twin is
 /// written into its host reopened as `partial`, so a method of a hand-owned NON-partial type (runtime's `Sysmon`) cannot
 /// get one. It is refused by name, "host-not-partial", and its callers call it plain: record 10.8's owed count.
 /// </summary>

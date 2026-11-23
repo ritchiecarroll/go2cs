@@ -3,8 +3,6 @@
 // license that can be found in the LICENSE file.
 namespace go.compress;
 
-using static flate_package;
-
 partial class flate_package {
 
 // 2 bits:   type   0 = literal  1=EOF  2=Match   3=Unused
@@ -76,17 +74,13 @@ internal static token matchToken(uint32 xlength, uint32 xoffset) {
     return (token)((uint32)matchType + (xlength << (int)(lengthShift)) + xoffset);
 }
 
-} partial class flateᴛtoken {
-
 // Returns the literal of a literal token.
-internal static uint32 literal(this token t) { return (uint32)(t - (uint32)literalType); }
+internal static uint32 literal⁔(/*this*/ token t) { return (uint32)(t - (uint32)literalType); }
 
 // Returns the extra offset of a match token.
-internal static uint32 offset(this token t) { return (uint32)t & (uint32)offsetMask; }
+internal static uint32 offset⁔(/*this*/ token t) { return (uint32)t & (uint32)offsetMask; }
 
-internal static uint32 length(this token t) { return (uint32)((t - (uint32)matchType) >> (int)(lengthShift)); }
-
-} partial class flate_package {
+internal static uint32 length⁔(/*this*/ token t) { return (uint32)((t - (uint32)matchType) >> (int)(lengthShift)); }
 
 internal static uint32 lengthCode(uint32 len) { return lengthCodes[len]; }
 

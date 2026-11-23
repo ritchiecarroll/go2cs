@@ -10,10 +10,19 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+using bufio = go.bufio_package;
+using http = go.net.http_package;
+using io = go.io_package;
+using net = go.net_package;
+using time = go.time_package;
+using url = go.net.url_package;
 // </ImportedTypeAliases>
 
 using go;
 using static go.net.http.httputil_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -87,13 +96,22 @@ using static go.net.http.httputil_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("net/http/httputil/dump.go", "dump.cs", "ABQy8pSUgoKUgpQAChKCgoKCgviCgpTKooKUgpQACAzygoKCgoKCpoKCggAHEIKCgoKCggACENKCkpKUytqUsoKmgpT4yJSCgoKClO6CgqYADxaCgoKCpsiSgpSmAA0sABICgoKClIKCuAAHEIKCpqaCgoKClIK4goKmgoKmlIKCgpSCgoK4goKUygAKEILGlrKCgoKUpoKUlIKUgoKmgoKUgoKClA==", "119-121:1;130-144:2", "", "", "136:21,138:21")]
+[assembly: GoPositionMap("net/http/httputil/dump.go", "dump.cs", "ABMy8pSUgoKUgpQACBKCgoKCgriCgpSqooKUgpQACAzygoKCgoKCpoKCggAHEIKCgoKCggACENKCkpKUytqUsoKmgpT4yJSCgoKClO6CgqYADRaCgoKCpqiSgpSmAA0sABICgoKClIKCuAAHEIKCpqaCgoKClIK4goKmgoKmlIKCgpSCgoK4goKUygAIEIKmlrKCgoKUpoKUlIKUgoKmgoKUgoKClA==", "119-121:1;130-144:2", "", "", "127:21,129:21")]
 [assembly: GoPositionMap("net/http/httputil/httputil.go", "httputil.cs", "AA4o4gACHAALAso=")]
-[assembly: GoPositionMap("net/http/httputil/persist.go", "persist.cs", "ABMmpqa6ABEw8oKUzgAJAoKCgoKCgtiSgoKUrgAIAoKmgoKCgoKCpoKCuIKCgpSCgpSCgpSCgoKmuIKCgoKCuIKCgoK4gpSCpoKCgoKU2vKCggAJDAAJBoKCgoKClKaClIKCgpSCgpSCgoKUuJSUgoKCgoKUlAAYNPKClAAHGtKCgs4ACgKCgoKCgoLYkoKClAACEAAKAqaCgoKCgoKmgoK4goKClIKClIKClIKmlJSCgoKCgpSU2vKCgt4ACwSCgoKCgpSmgpSCgoKUgoKUgoKCpriCgoKCgriCgoKCgpSUlIKClNiSgoKU", "95-106:1;305-316:1", "", "", "", "110:21,111:13,361:21,362:13")]
-[assembly: GoPositionMap("net/http/httputil/reverseproxy.go", "reverseproxy.cs", "ADN0AA4CggAOLAATAoKCgoKUlJSCgpQArQHmAoKCgpSklKaygriClIKUlKSUAAI2ABgCgpSmooKCgoKClLiCgoIACRQADRiCgqaigpSq0oKUgoKClAAaBuKCgqaCAAoWgoKCkoKytAAIDIKClAALGO6kgqaCgqaCgoKmlIKCgpTugsqCgqa4goKCppS4gpS4goKClILKyoKClIKUpqammLSCgqaUgoKmgtaUgoKCgoKCuIKClIKmlIKmuIKCgoKUppSCgsiCgpSUlLimgoKmooKCxgAGEvKUlKa46KSCkoLuggAJDMK4griCpqbClILKtoKUpoKCgpSC2qKClIKCgoKUgoKClIKUgqaCgpTKooKUABAc4oKCgoKClIKUgpSUgtbSgoKClIKipNKCgoKCtAAIBIKClMbSgoKCgpSCgqaCgoKmgoKCgqaCxgAICJSUgoKUpJSCgoKClIKClIKCksiCgrTEAA0QgoKCuIKCpqaCgoK4goKmxsqCgoKUlJSUlIKUpIKUtLamgpSkpJQACRCCguaigpQ=", "334-336:1;426-432:1;560-575:2;861-869:1;947-950:1", "", "814=NewResponseController/1/1/2", "484:25,527:25,693:25,1023:21,1030:21,1047:19,1049:19")]
+[assembly: GoPositionMap("net/http/httputil/persist.go", "persist.cs", "ABImpqa6ABEw8oKUrgAJAoKCgoKCgtiSgoKUrgAIAoKmgoKCgoKCpoKCuIKCgpSCgpSCgpSCgoKmuIKCgoKCuIKCgoK4gpSCpoKCgoKU2vKCggAJDAAJBoKCgoKClKaClIKCgpSCgpSCgoKUuJSUgoKCgoKUlAAWNPKClAAHGtKCgq4ACgKCgoKCgoLYkoKClAACEAAKAqaCgoKCgoKmgoK4goKClIKClIKClIKmlJSCgoKCgpSU2vKCgt4ACwSCgoKCgpSmgpSCgoKUgoKUgoKCpriCgoKCgriCgoKCgpSUlIKClNiSgoKU", "95-106:1;305-316:1", "", "", "", "107:21,108:13,354:21,355:13")]
+[assembly: GoPositionMap("net/http/httputil/reverseproxy.go", "reverseproxy.cs", "ADB0AA4CggAMLAATAoKCgoKUlJSCgpQAqwHmAoKCgpSklKaygriClIKUlKSUAAI2ABgCgpSmooKCgoKClLiCgoIACRQACxiCgqaigpSq0oKUgoKClAAUBuKCgqaCAAoWgoKCkoKytAAIDIKClAALGO6kgqaCgqaCgoKmlIKCgpTugsqCgqa4goKCppS4gpS4goKClILKyoKClIKUpqammLSCgqaUgoKmgtaUgoKCgoKCuIKClIKmlIKmuIKCgoKUppSCgsiCgpSUlLimgoKmooKCxgAEEvKUlKa4qKSCkoLugvzCuIK4gqamwpSCyraClKaCgoKUgtqigpSCgoKClIKCgpSClIKmgoKUyqKClAAMHOKCgoKCgpSClIKUlILW0oKCgpSCoqTSgoKCgrSkgoKUptKCgoKClIKCpoKCgqaCgoKCpoLGAAgIlJSCgpSklIKCgoKUgoKUgoKSyIKCtKQACxCCgoK4goKmpoKCgriCgqamyoKCgpSUlJSUgpSkgpS0tqaClKSklAAHEIKC5qKClA==", "334-336:1;426-432:1;560-575:2;861-869:1;947-950:1", "", "791=NewResponseController/1/1/2", "469:25,512:25,678:25,988:21,995:21,1012:19,1014:19")]
 // </GoSourcePositionMaps>
 
 namespace go.net.http;
+
+using static go.net.http.httputil_package;
+using bufio = go.bufio_package;
+using http = go.net.http_package;
+using io = go.io_package;
+using net = go.net_package;
+using time = go.time_package;
+using url = go.net.url_package;
+using ꓸꓸꓸany = Span<any>;
 
 [GoPackage("httputil")]
 public static partial class httputil_package
@@ -158,15 +176,83 @@ public static partial class httputil_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(httputil_package.ClientConn)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class httputilᴛClientConn;
-[GoMethodHost(typeof(httputil_package.ProxyRequest)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class httputilᴛProxyRequest;
-[GoMethodHost(typeof(httputil_package.ReverseProxy)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class httputilᴛReverseProxy;
-[GoMethodHost(typeof(httputil_package.ServerConn)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class httputilᴛServerConn;
-[GoMethodHost(typeof(httputil_package.delegateReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class httputilᴛdelegateReader;
-[GoMethodHost(typeof(httputil_package.dumpConn)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class httputilᴛdumpConn;
-[GoMethodHost(typeof(httputil_package.failureToReadBody)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class httputilᴛfailureToReadBody;
-[GoMethodHost(typeof(httputil_package.maxLatencyWriter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class httputilᴛmaxLatencyWriter;
-[GoMethodHost(typeof(httputil_package.neverEnding)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class httputilᴛneverEnding;
-[GoMethodHost(typeof(httputil_package.noopCloseReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class httputilᴛnoopCloseReader;
-[GoMethodHost(typeof(httputil_package.switchProtocolCopier)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class httputilᴛswitchProtocolCopier;
+[GoMethodHost(typeof(httputil_package.ClientConn)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class httputilᴛClientConn;
+[GoMethodHost(typeof(httputil_package.ProxyRequest)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class httputilᴛProxyRequest;
+[GoMethodHost(typeof(httputil_package.ReverseProxy)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class httputilᴛReverseProxy;
+[GoMethodHost(typeof(httputil_package.ServerConn)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class httputilᴛServerConn;
+[GoMethodHost(typeof(httputil_package.delegateReader)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class httputilᴛdelegateReader;
+[GoMethodHost(typeof(httputil_package.dumpConn)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class httputilᴛdumpConn;
+[GoMethodHost(typeof(httputil_package.failureToReadBody)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class httputilᴛfailureToReadBody;
+[GoMethodHost(typeof(httputil_package.maxLatencyWriter)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class httputilᴛmaxLatencyWriter;
+[GoMethodHost(typeof(httputil_package.neverEnding)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class httputilᴛneverEnding;
+[GoMethodHost(typeof(httputil_package.noopCloseReader)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class httputilᴛnoopCloseReader;
+[GoMethodHost(typeof(httputil_package.switchProtocolCopier)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class httputilᴛswitchProtocolCopier;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class httputilᴛClientConn {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (net.Conn c, ж<bufio.Reader> r) Hijack(this ж<ClientConn> Ꮡcc) => httputil_package.Hijack⁔(Ꮡcc);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Close(this ж<ClientConn> Ꮡcc) => httputil_package.Close⁔(Ꮡcc);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Write(this ж<ClientConn> Ꮡcc, ж<http.Request> Ꮡreq) => httputil_package.Write⁔(Ꮡcc, Ꮡreq);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Pending(this ж<ClientConn> Ꮡcc) => httputil_package.Pending⁔(Ꮡcc);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (ж<http.Response> resp, error err) Read(this ж<ClientConn> Ꮡcc, ж<http.Request> Ꮡreq) => httputil_package.Read⁔(Ꮡcc, Ꮡreq);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (ж<http.Response>, error) Do(this ж<ClientConn> Ꮡcc, ж<http.Request> Ꮡreq) => httputil_package.Do⁔(Ꮡcc, Ꮡreq);
+}
+partial class httputilᴛProxyRequest {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void SetURL(this ref ProxyRequest r, ж<url.URL> Ꮡtarget) => httputil_package.SetURL⁔(ref r, Ꮡtarget);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void SetXForwarded(this ref ProxyRequest r) => httputil_package.SetXForwarded⁔(ref r);
+}
+partial class httputilᴛReverseProxy {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void defaultErrorHandler(this ref ReverseProxy p, http.ResponseWriter rw, ж<http.Request> Ꮡreq, error err) => httputil_package.defaultErrorHandler⁔(ref p, rw, Ꮡreq, err);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static Action<http.ResponseWriter, ж<http.Request>, error> getErrorHandler(this ж<ReverseProxy> Ꮡp) => httputil_package.getErrorHandler⁔(Ꮡp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool modifyResponse(this ж<ReverseProxy> Ꮡp, http.ResponseWriter rw, ж<http.Response> Ꮡres, ж<http.Request> Ꮡreq) => httputil_package.modifyResponse⁔(Ꮡp, rw, Ꮡres, Ꮡreq);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void ServeHTTP(this ж<ReverseProxy> Ꮡp, http.ResponseWriter rw, ж<http.Request> Ꮡreq) => httputil_package.ServeHTTP⁔(Ꮡp, rw, Ꮡreq);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static time.Duration flushInterval(this ref ReverseProxy p, ж<http.Response> Ꮡres) => httputil_package.flushInterval⁔(ref p, Ꮡres);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error copyResponse(this ж<ReverseProxy> Ꮡp, http.ResponseWriter dst, io.Reader src, time.Duration flushInterval) => httputil_package.copyResponse⁔(Ꮡp, dst, src, flushInterval);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (int64, error) copyBuffer(this ref ReverseProxy p, io.Writer dst, io.Reader src, slice<byte> buf) => httputil_package.copyBuffer⁔(ref p, dst, src, buf);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void logf(this ref ReverseProxy p, @string format, params ꓸꓸꓸany argsʗp) => httputil_package.logf⁔(ref p, format, argsʗp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void handleUpgradeResponse(this ж<ReverseProxy> Ꮡp, http.ResponseWriter rw, ж<http.Request> Ꮡreq, ж<http.Response> Ꮡres) => httputil_package.handleUpgradeResponse⁔(Ꮡp, rw, Ꮡreq, Ꮡres);
+}
+partial class httputilᴛServerConn {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (net.Conn, ж<bufio.Reader>) Hijack(this ж<ServerConn> Ꮡsc) => httputil_package.Hijack⁔(Ꮡsc);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Close(this ж<ServerConn> Ꮡsc) => httputil_package.Close⁔(Ꮡsc);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (ж<http.Request>, error) Read(this ж<ServerConn> Ꮡsc) => httputil_package.Read⁔(Ꮡsc);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Pending(this ж<ServerConn> Ꮡsc) => httputil_package.Pending⁔(Ꮡsc);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Write(this ж<ServerConn> Ꮡsc, ж<http.Request> Ꮡreq, ж<http.Response> Ꮡresp) => httputil_package.Write⁔(Ꮡsc, Ꮡreq, Ꮡresp);
+}
+partial class httputilᴛdelegateReader {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint, error) Read(this ref delegateReader r, slice<byte> p) => httputil_package.Read⁔(ref r, p);
+}
+partial class httputilᴛdumpConn {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error Close(this ref dumpConn c) => httputil_package.Close⁔(ref c);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static net.Addr LocalAddr(this ref dumpConn c) => httputil_package.LocalAddr⁔(ref c);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static net.Addr RemoteAddr(this ref dumpConn c) => httputil_package.RemoteAddr⁔(ref c);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error SetDeadline(this ref dumpConn c, time.Time t) => httputil_package.SetDeadline⁔(ref c, t);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error SetReadDeadline(this ref dumpConn c, time.Time t) => httputil_package.SetReadDeadline⁔(ref c, t);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error SetWriteDeadline(this ref dumpConn c, time.Time t) => httputil_package.SetWriteDeadline⁔(ref c, t);
+}
+partial class httputilᴛfailureToReadBody {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint, error) Read(this failureToReadBody _Δp0, slice<byte> _Δp1) => httputil_package.Read⁔(_Δp0, _Δp1);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error Close(this failureToReadBody _) => httputil_package.Close⁔(_);
+}
+partial class httputilᴛmaxLatencyWriter {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) Write(this ж<maxLatencyWriter> Ꮡm, slice<byte> p) => httputil_package.Write⁔(Ꮡm, p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void delayedFlush(this ж<maxLatencyWriter> Ꮡm) => httputil_package.delayedFlush⁔(Ꮡm);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void stop(this ж<maxLatencyWriter> Ꮡm) => httputil_package.stop⁔(Ꮡm);
+}
+partial class httputilᴛneverEnding {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) Read(this neverEnding b, slice<byte> p) => httputil_package.Read⁔(b, p);
+}
+partial class httputilᴛnoopCloseReader {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error Close(this ж<noopCloseReader> Ꮡncr) => httputil_package.Close⁔(Ꮡncr);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint, error) Read(this ж<noopCloseReader> Ꮡncr, slice<byte> p) => httputil_package.Read⁔(Ꮡncr, p);
+}
+partial class httputilᴛswitchProtocolCopier {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void copyFromBackend(this switchProtocolCopier c, channel/*<-*/<error> errc) => httputil_package.copyFromBackend⁔(c, errc);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void copyToBackend(this switchProtocolCopier c, channel/*<-*/<error> errc) => httputil_package.copyToBackend⁔(c, errc);
+}
+// </MethodForwarders>

@@ -136,7 +136,11 @@ try {
     foreach ($c in $switchCases) {
         $out = (& $pwsh @common @($c[1]) 2>&1 | Out-String)
         $code = $LASTEXITCODE
-        Check "the pack: -LocalClosure $($c[0])" ($code -ne 0 -and $out.Contains($c[2]) -and ($c[2] -eq 'no converted module at' -or -not $out.Contains('no converted module at'))) "exit $code`n$out"
+        # Under a console, pwsh's error view wraps a long refusal at the console width and starts each continuation
+        # line with a '| ' gutter, so a phrase can split across lines: on a linux runner the folder refusal read
+        # "... is not a" / "     | folder". The checks read the refusal as one line, colours and gutter removed.
+        $flat = ((($out -replace "\e\[[0-9;]*m", '') -split "`r?`n" | ForEach-Object { $_ -replace '^\s*(?:\d+\s*)?\|\s?', '' }) -join ' ') -replace '\s+', ' '
+        Check "the pack: -LocalClosure $($c[0])" ($code -ne 0 -and $flat.Contains($c[2]) -and ($c[2] -eq 'no converted module at' -or -not $flat.Contains('no converted module at'))) "exit $code`n$out"
     }
 }
 finally { if ($work.StartsWith([System.IO.Path]::GetTempPath())) { Remove-Item -Recurse -Force -LiteralPath $work -ErrorAction SilentlyContinue } }
