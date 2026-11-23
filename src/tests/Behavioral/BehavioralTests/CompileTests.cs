@@ -2146,6 +2146,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckPointerParamWalk() => CheckTarget("PointerParamWalk");
 
     [TestMethod]
+    public void CheckPointerPrintIdentity() => CheckTarget("PointerPrintIdentity");
+
+    [TestMethod]
     public void CheckPointerReceiverNilCompare() => CheckTarget("PointerReceiverNilCompare");
 
     [TestMethod]

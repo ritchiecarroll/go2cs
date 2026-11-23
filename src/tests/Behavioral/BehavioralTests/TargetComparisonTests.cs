@@ -2149,6 +2149,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckPointerParamWalk() => CheckTarget("PointerParamWalk");
 
     [TestMethod]
+    public void CheckPointerPrintIdentity() => CheckTarget("PointerPrintIdentity");
+
+    [TestMethod]
     public void CheckPointerReceiverNilCompare() => CheckTarget("PointerReceiverNilCompare");
 
     [TestMethod]
