@@ -41904,4 +41904,29 @@ No golib change; the converter is untouched, so default-mode emission cannot mov
 
 — P4 (2026-11-23)
 
+**Plain-path operand order: a variable operand read after a later receive or call in the same argument list (gc
+order). OPEN, owner unassigned, candidate .5; COORD places it.** Repro: src/tools/mnspike2/MnLaterArg (`readWith(pp,
+<-kc)`, where a goroutine sets `pp = pc2` before it sends on `kc`). gc reads `pp` after the receive; go2cs reads it
+before, left to right, in BOTH modes. The Go spec leaves the order unspecified, but users see gc's order, so this is a
+converter design question, not an M:N one. Reading on master 97cca467a2, linux/amd64, each binary run 3 times:
+
+| Arm | Output |
+|---|---|
+| go run (1.26.11) | param-later-arg 1405 |
+| plain, GO2CS_MN unset | param-later-arg 1505 (3/3) |
+| plain, GO2CS_MN=1 | param-later-arg 1505 (3/3) |
+| twinned (GoTwinsFor=MnLaterArg), GO2CS_MN unset | param-later-arg 1505 (3/3) |
+| twinned, GO2CS_MN=1 | param-later-arg 1505 (3/3) |
+
+Plain emission (main.cs): `fmt.Println("param-later-arg", readWith(ref (pp).DerefOrNull(), ᐸꟷ(kc)));`
+Twin (generated main.twins.g.cs): `fmt.Println(((global::go.@string)"param-later-arg"), (await readWithꞏtwin(pp, (await
+ᐸꟷꞏtwin(kc))))); pp = ref Ꮡpp.ValueSlot;`
+The twin keeps the plain emission's order, which is row 8's claim (COORD ruling 2026-11-23 21:57Z: accepted as
+disclosed for row 8; the order is its own row).
+
+Prediction record. G's order (2026-11-23 15:43Z) predicted "twinned under GO2CS_MN=1 prints 1405, plain prints 1505".
+2026-11-23 (P4): the twinned 1405 MISSED; all four arms read 1505. The plain 1505 held.
+
+— P4 (2026-11-23)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
