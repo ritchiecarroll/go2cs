@@ -71,3 +71,24 @@ the four `None` rows, which read true before the change. `int, %p first` and `in
 
 The same program and instrument. Every line reads true except `reference-free field`, which stays
 `false false false`. **Falsifier:** any other line reading false, or that row reading true.
+
+## 6. The second prototype's score, and its exploration (appended after the runs)
+
+**MET, all 13 lines.** Every line reads true except `reference-free field`, which reads `false false false`, as
+predicted. That residual is the `Unpinnable` kind: a reference-free field inside a struct that holds a reference.
+Its `uintptr` is an address that nothing holds still, so its projection keeps the token to stay stable.
+
+**Exploration, FILTERED, not a gate.** Neither run below was predicted, and neither is a gate reading.
+- GolibTests, Release, filtered to the nine classes that read reflect's pointer number or the token layout
+  (PointerTokenLayoutTruth, ReflectHashTokenBand, ReflectNewAtResolution, UintptrReinterpretView, ZeroBaseIdentity,
+  NamedPointerAssignability, RuntimePinner, AliasOverlapRace, GoCgoArgs): 115 passed, 0 failed.
+- BehavioralTests OutputComparisonTests, Release, filtered to ten names, 9 of which matched: 7 passed, 2 failed.
+  - `PointerPrintIdentity` fails on its residual row alone, because Go's oracle prints true there.
+  - **`ReflectNewAtField` is a REGRESSION.** go-cmp's `NewAt(f.Type, v.UnsafeAddr() + f.Offset)` over the
+    reference-free struct `Q` reads `4 0 0` where Go reads `4 5 6`, and the write to `b` is lost (`5`, where Go
+    reads `50`).
+  - Cause, by reading: `UnsafeAddr` is `Addr().UnsafePointer()`, so it now answers the pinned machine address.
+    `NewAt` resolves EXACT ONLY, through the token table (`GoReflect.ResolveNewAtPointee`, ruled 2026-10-04). A
+    pinned address plus an offset misses that table and falls to a zero box. The field at offset 0 still resolves.
+  - The direct Go form, `unsafe.Pointer(uintptr(unsafe.Pointer(&q)) + off)`, already reaches `NewAt` as a pinned
+    address. So that route misses today, before any change. Not measured.
