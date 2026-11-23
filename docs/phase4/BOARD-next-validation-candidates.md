@@ -41892,4 +41892,28 @@ program prints frame information for promoted methods, and a twin adds or rename
 
 — G (2026-11-23)
 
+## 2026-11-23 — P4 (N1 seat, claude/p4-mn-n1; COORD ruling 22:50Z): a weak promoted method reached through a method value, a method expression or a hand-written caller lands on the un-twinned `[GoPromoted]` forwarder (OPEN, candidate post-.5)
+
+**How found.** DESIGN-mn-nopark.md 3.3 asked for a promoted forwarder of a weak member to be twinned and marked
+`[GoParkWeak]`, so that `t.Lock()` on `type T struct{ sync.Mutex }` behaves as `t.mu.Lock()` does. Reading the
+converter for that seat: a promoted method CALL is written through the embedded field (`Ꮡt.of(T.ᏑMutex).Lock()`,
+convSelectorExpr.go; same package and cross package; crypto/tls conn.cs carries the shape), so a converted call
+reaches the weak member itself and needs nothing. COORD dropped the item from the seat and asked for this row.
+
+**The shapes that reach the forwarder.** (1) A method value, `f := t.Lock`, then `f()`. (2) A method expression,
+`T.Lock(t)` or `(*T).Lock`. (3) A generated interface adapter whose member forwards to the promoted method (for
+example `T` satisfying `sync.Locker`). (4) Hand-written C# that calls `t.Lock()` on the struct. The forwarder is
+emitted by a sibling generator, so the twin generator never sees it as a candidate: it has no twin, and no
+`GoFuncPair` for a method value to carry.
+
+**What it costs.** A missed weak park, NOT a correctness gap. In a twin caller the call blocks its carrier where
+`Mutex.Lock` would park; the result is Go's, exactly as for any untwinned blocking call (the design's section 6, with N5
+governing it). The one wrong result available is the hang shape of N1-11 at one P, and it is the same hand-off that row
+reads. Shape (3) is also the interface case 3.3's second bullet already names as a park that is never weak. The same
+holds for a promoted method that is NOT weak and parks: its forwarder is plain too, so this row is wider than locks.
+
+**Owner.** Unassigned; COORD routes. Not in the N1 seat.
+
+— P4 (2026-11-23)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
