@@ -675,8 +675,8 @@ Guards: the behavioral test `ReflectVariadicCall`; GolibTests' `GoReflectBridgeC
      (`if (!golib.TypeExtensions.IsDynamicCodeSupported && System.Array.Exists(typeArguments, static argument => argument.IsValueType))`),
      :100 (`go2cs: reflect cannot call or make the variadic func`). go2cs-gen: src/gen/go2cs-gen/EscapeRegistryGenerator.cs:429
      (`internal static string? VariadicRegistration(Compilation? compilation, INamedTypeSymbol? package, ITypeSymbol type)`),
-     src/gen/go2cs-gen/MethodSet.cs:437 (`private static string? Registration(Compilation compilation, IReadOnlyList<string> parameters, string variadic, string returns)`),
-     :398 (`Registration(compilation, [receiverType, .. shape.Parameters], shape.Variadic, shape.Returns)`), :129-130
+     src/gen/go2cs-gen/MethodSet.cs:445 (`private static string? Registration(Compilation compilation, IReadOnlyList<string> parameters, string variadic, string returns)`),
+     :406 (`Registration(compilation, [receiverType, .. shape.Parameters], shape.Variadic, shape.Returns)`), :132-133
      (`body.Append(register);`). Guards: src/tests/GolibTests/GoReflectBridgeClosureTests.cs:173
      (`public void ARegisteredVariadicSignatureIsServedByItsCompiledTrampolines()`), :209
      (`public void AnUnregisteredValueTypeVariadicIsRefusedByNameWithoutDynamicCode()`);
@@ -4614,7 +4614,7 @@ exactly what the descriptor's **dims cargo** already carries for every declared 
 construction is the `(managed type, dims)` pair `abi.TypeOf` reaches from a live `[n]T` value. The hand-own
 `reflect/value_impl.cs` builds it, beside its sibling constructor `PointerTo`:
 
-<!-- source: src/core/reflect/value_impl.cs:3701-3722 -->
+<!-- source: src/core/reflect/value_impl.cs:3694-3715 -->
 ```csharp
 public static Type ArrayOf(nint length, Type elem) {
     if (length < 0) {
