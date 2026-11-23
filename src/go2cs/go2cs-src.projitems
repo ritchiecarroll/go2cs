@@ -618,6 +618,7 @@
     <None Include="$(MSBuildThisFileDirectory)oracleTagFileSets_test.go" />
     <None Include="$(MSBuildThisFileDirectory)oracleArch_test.go" />
     <None Include="$(MSBuildThisFileDirectory)oracleTestArgs_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)oracleVetOffRefusal_integration_test.go" />
     <None Include="$(MSBuildThisFileDirectory)orphanDisclosureCheck_test.go" />
     <None Include="$(MSBuildThisFileDirectory)packageClassNaming_test.go" />
     <None Include="$(MSBuildThisFileDirectory)packageLevelAnonStructLift_test.go" />
@@ -681,6 +682,7 @@
     <None Include="$(MSBuildThisFileDirectory)processGroupUnix.go" />
     <None Include="$(MSBuildThisFileDirectory)processGroup_test.go" />
     <None Include="$(MSBuildThisFileDirectory)processGroupWindows.go" />
+    <None Include="$(MSBuildThisFileDirectory)proofPageLiquidGuard_test.go" />
     <None Include="$(MSBuildThisFileDirectory)publishBinlog_test.go" />
     <None Include="$(MSBuildThisFileDirectory)publishBuildLayout_test.go" />
     <None Include="$(MSBuildThisFileDirectory)publishRebundle_test.go" />
@@ -796,9 +798,11 @@
     <None Include="$(MSBuildThisFileDirectory)symbolsInSync_test.go" />
     <None Include="$(MSBuildThisFileDirectory)syncCopyChecker_test.go" />
     <None Include="$(MSBuildThisFileDirectory)testAliasShadowOperations.go" />
+    <None Include="$(MSBuildThisFileDirectory)testAssemblyOptimize_test.go" />
     <None Include="$(MSBuildThisFileDirectory)testConversion.go" />
     <None Include="$(MSBuildThisFileDirectory)testConversion_test.go" />
     <None Include="$(MSBuildThisFileDirectory)testDeadline_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)testEntryNoOptimization_integration_test.go" />
     <None Include="$(MSBuildThisFileDirectory)testBuildMaxCPU_test.go" />
     <None Include="$(MSBuildThisFileDirectory)testHostGoTargetOS_test.go" />
     <None Include="$(MSBuildThisFileDirectory)testHostLaunchDir_test.go" />

@@ -526,6 +526,9 @@
     <Project Path="tests/Behavioral/DerivedInterfaceStructuralProbe/DerivedInterfaceStructuralProbe.csproj" />
     <Project Path="tests/Behavioral/DirectBoxReceiverPassedWhole/DirectBoxReceiverPassedWhole.csproj" />
     <Project Path="tests/Behavioral/DivideByZeroPanic/DivideByZeroPanic.csproj" />
+    <Project Path="tests/Behavioral/DotImportAdapterNameInHolder/DotImportAdapterNameInHolder.csproj" />
+    <Project Path="tests/Behavioral/DotImportAdapterNameInHolder/a/sinks/DotImportAdapterNameInHolder.a.sinks.csproj" />
+    <Project Path="tests/Behavioral/DotImportAdapterNameInHolder/b/sinks/DotImportAdapterNameInHolder.b.sinks.csproj" />
     <Project Path="tests/Behavioral/DotImportNameCollision/DotImportNameCollision.csproj" />
     <Project Path="tests/Behavioral/DotImportNameCollision/a/keys/DotImportNameCollision.a.keys.csproj" />
     <Project Path="tests/Behavioral/DotImportNameCollision/b/keys/DotImportNameCollision.b.keys.csproj" />

@@ -82,7 +82,9 @@ func NewModuleConverter(options Options) *ModuleConverter {
 // packages in dependency order (least dependencies first). The standard library is not converted —
 // its imports emit $(go2csPath)core references to a pre-converted stdlib (staged by deploy-core).
 func (m *ModuleConverter) ConvertModule(moduleDir string) (result error) {
-	fmt.Printf("Recursively converting module at %s\n", moduleDir)
+	// Under -tests -recurse the directory is already the copy of a go.mod-less release, and the copy is gone when the
+	// user reads this: name the release (remapCopiedPaths is the identity otherwise).
+	fmt.Printf("Recursively converting module at %s\n", remapCopiedPaths(moduleDir))
 
 	// Announce the effective build tags, as -stdlib does: a bare -recurse run reports the module default
 	// (safe,purego,noasm) and that it is the default; an explicit -tags reports exactly what was passed.
@@ -98,12 +100,15 @@ func (m *ModuleConverter) ConvertModule(moduleDir string) (result error) {
 		m.options.mainModuleDir = moduleDir
 	}
 
-	// 0a. A module-cache release that ships no go.mod (github.com/mattn/go-pointer v0.0.1, the cgo against go.* INC 4
-	//     proof; a `+incompatible` release with no requires: the synthesized go.mod names the module and nothing else)
-	//     converts from a COPY carrying the go.mod the cache synthesized for it,
-	//     the one go itself reads (cache/download/<escaped path>/@v/<version>.mod; read, never written). Not the -tests
-	//     driver's go.mod overlay: go list refuses one beneath GOMODCACHE ("Files beneath GOMODCACHE must not be
-	//     replaced"), where go mod download accepts it. The copy keeps the <escaped path>@<version> leaf and lives in a
+	// 0a. EVERY module-cache release converts from a COPY, so no go command runs with a cache directory as its main
+	//     module: the dependency preflight's `go mod download` rewrote a go.mod with no go line in the cache, and wrote a
+	//     go.sum there (COORD's ruling on the 2026-11-22 STOP-LINE; enterModuleCacheReleaseCopy). A release that ships no
+	//     go.mod (github.com/mattn/go-pointer v0.0.1, the cgo against go.* INC 4 proof; a `+incompatible` release with
+	//     no requires: the synthesized go.mod names the module and nothing else) carries the go.mod the cache synthesized for it,
+	//     the one go itself reads (cache/download/<escaped path>/@v/<version>.mod; read, never written). Not a go.mod
+	//     overlay: go list refuses one beneath GOMODCACHE ("Files beneath GOMODCACHE must not be replaced"), where go
+	//     mod download accepts it (enterModuleCacheReleaseCopy). Under -tests -recurse the driver has entered the copy
+	//     already, so the directory here is the copy, outside the cache with a go.mod, and is not copied again. The copy keeps the <escaped path>@<version> leaf and lives in a
 	//     work directory removed at exit, never in the output root nugetgo-pack reads. A directory inside a module (a
 	//     package below its go.mod) converts as it always did: go finds the go.mod above it. Only a directory that NO
 	//     go.mod covers -- none in it or above it, and no synthesized one in the cache -- is refused, by name here rather
@@ -114,37 +119,19 @@ func (m *ModuleConverter) ConvertModule(moduleDir string) (result error) {
 			m.options.mainModuleDir, goModCacheDir())
 	}
 
-	if synthesized := moduleCacheGoMod(m.options.mainModuleDir); synthesized != "" {
-		copyDir, work, err := copyModuleCacheRelease(m.options.mainModuleDir, synthesized)
+	if goModSource := moduleCacheReleaseGoMod(m.options.mainModuleDir); goModSource != "" {
+		copyDir, leave, err := enterModuleCacheReleaseCopy(m.options.mainModuleDir, goModSource)
 
 		if err != nil {
 			return err
 		}
 
-		defer func() { _ = os.RemoveAll(work) }()
-
-		fmt.Printf("go.mod: the module at %s ships none; converting a copy carrying the module cache's %s, as go reads it (%s, removed at exit)\n",
-			m.options.mainModuleDir, synthesized, copyDir)
-		copiedModuleRoot, originalModuleRoot = copyDir, m.options.mainModuleDir
-		defer func() { copiedModuleRoot, originalModuleRoot = "", "" }()
+		defer leave()
 
 		// An error returned from here on names the release, not the copy, which is gone when the user reads it (COORD's
-		// INC 4 review, NIT). It runs before the roots are cleared above, and keeps the error's chain (errors.As).
+		// INC 4 review, NIT). It runs before leave clears the roots, and keeps the error's chain (errors.As).
 		defer func() { result = remapCopiedError(result) }()
 
-		// The copy sits outside the cache, so go loads it as a main module, where a user's GOWORK would apply
-		// ("directory ... does not contain modules listed in go.work"). A load from inside the cache turns it off
-		// (conversionDriver.go); so does the copy, for every go command of the run (P3's read, SHOULD 3).
-		savedGowork, hadGowork := os.LookupEnv("GOWORK")
-		_ = os.Setenv("GOWORK", "off")
-
-		defer func() {
-			if hadGowork {
-				_ = os.Setenv("GOWORK", savedGowork)
-			} else {
-				_ = os.Unsetenv("GOWORK")
-			}
-		}()
 		moduleDir, m.options.mainModuleDir = copyDir, copyDir
 	}
 
@@ -303,6 +290,26 @@ func (m *ModuleConverter) ConvertModule(moduleDir string) (result error) {
 	return m.runError()
 }
 
+// closureLoaderEnv is the environment of every load that discovers the module's closure, the production one
+// (loadClosure) and the test one (addTestOnlyPackages): the converter's loader environment, for the target platform
+// when one is set. Under -recurse -cgo the closure is loaded cgo-ON, as Go builds it: a cgo-only package (every file
+// imports "C") has no cgo-off files, so its importers would not type-check against it otherwise. Each package's own
+// load is cgo-on too (processConversion), and a package whose selected files import "C" takes the cgo route there.
+func (m *ModuleConverter) closureLoaderEnv() []string {
+	env := converterLoaderEnv()
+	targetParts := strings.Split(m.options.targetPlatform, "/")
+
+	if len(targetParts) == 2 {
+		env = converterLoaderEnv("GOOS="+targetParts[0], "GOARCH="+targetParts[1])
+	}
+
+	if m.options.parseCgoTargets {
+		env = append(env, "CGO_ENABLED=1")
+	}
+
+	return env
+}
+
 // loadClosure loads the module at moduleDir and returns its transitive import closure keyed by
 // import path (roots + every reachable import, including the standard library, which is classified
 // out later).
@@ -324,21 +331,8 @@ func (m *ModuleConverter) loadClosure(moduleDir string) (map[string]*packages.Pa
 		Mode:       mode,
 		Dir:        moduleDir,
 		BuildFlags: m.options.loaderBuildFlags(),
-		Env:        converterLoaderEnv(),
+		Env:        m.closureLoaderEnv(),
 		ParseFile:  parseFileUnparenAddressOperands,
-	}
-
-	targetParts := strings.Split(m.options.targetPlatform, "/")
-
-	if len(targetParts) == 2 {
-		cfg.Env = converterLoaderEnv("GOOS="+targetParts[0], "GOARCH="+targetParts[1])
-	}
-
-	// Under -recurse -cgo the closure is loaded cgo-ON, as Go builds it: a cgo-only package (every file imports "C")
-	// has no cgo-off files, so its importers would not type-check against it otherwise. Each package's own load is
-	// cgo-on too (processConversion), and a package whose selected files import "C" takes the cgo route there.
-	if m.options.parseCgoTargets {
-		cfg.Env = append(cfg.Env, "CGO_ENABLED=1")
 	}
 
 	pkgs, err := packages.Load(cfg, "./...")

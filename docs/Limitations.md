@@ -275,7 +275,7 @@ it is. So a package that imports `net` or `os/user` gets their builds without cg
 `CGO_ENABLED=0`: `net` resolves host names with Go's own resolver, not the C library's, and `os/user` reads the user
 database files directly. Converting the `net` resolver with cgo is planned, and is what will change this. A package
 that imports `runtime/cgo` or `plugin` is refused by name: without cgo they are not working builds.
-<!-- src/go2cs/main.go:306 (`Not combinable with -stdlib or -tests. With -recurse, every non-standard-library package of the module loads cgo-on and each cgo package converts this way`); src/go2cs/csproj-template.xml:135 (`<ProjectReference Include="$(go2csPath)gen/go2cs-gen/go2cs-gen.csproj"`) and src/go2cs/csproj-template.xml:187 (`<ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />`). COORD's ruling O2, 2026-11-14 (cgo 3.1's release-path seat). -->
+<!-- src/go2cs/main.go:307 (`Not combinable with -stdlib or -tests. With -recurse, every non-standard-library package of the module loads cgo-on and each cgo package converts this way`); src/go2cs/csproj-template.xml:135 (`<ProjectReference Include="$(go2csPath)gen/go2cs-gen/go2cs-gen.csproj"`) and src/go2cs/csproj-template.xml:187 (`<ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />`). COORD's ruling O2, 2026-11-14 (cgo 3.1's release-path seat). -->
 
 **What is refused, by name.** Each of these is not supported yet; [the Roadmap](Roadmap.md#cgo) says what is planned.
 - a pointer into Go memory handed to C as a `void *`, or to `C.GoBytes`, `C.GoString` or `C.GoStringN`.
@@ -459,8 +459,8 @@ A package's own Go `Test` functions were converted, run, and compared with `go t
 verdict, by full test name. That's a real bar, and narrower than the word sounds:
 
 * **Tests only.** Examples, benchmarks and fuzz targets never run. No race detector either.
-  <!-- src/go2cs/testConversion.go:4261 `entry.Kind, entry.Status, entry.Reason = "fuzz", "unsupported", "fuzz execution is deferred to Phase 4D"`;
-       Example- and Benchmark-only test files are left out of the compile set, :858
+  <!-- src/go2cs/testConversion.go:4262 `entry.Kind, entry.Status, entry.Reason = "fuzz", "unsupported", "fuzz execution is deferred to Phase 4D"`;
+       Example- and Benchmark-only test files are left out of the compile set, :859
        `// Phase-4D file exclusion (option-a ruling): drop Example/Benchmark-only test files from the`. -->
 * **Matched is not passed.** A test that skips on both sides counts as a match and measures nothing.
 * **Disclosed differences are real differences.** Where a Go test asserts something a managed runtime

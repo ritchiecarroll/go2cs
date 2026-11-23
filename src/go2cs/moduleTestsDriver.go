@@ -106,11 +106,14 @@ func checkOutputRootOutsideModule(moduleDir string, outRoot string) error {
 //
 // Only ordinary packages reachable from the variants are added, with their production imports.
 func (m *ModuleConverter) addTestOnlyPackages(moduleDir string, closure map[string]*packages.Package) error {
+	// The run's build tags and environment, as the production load (loadClosure) and each test conversion read the
+	// module: a test file under a -tags tag converts, so the packages only it imports must be discovered too.
 	cfg := &packages.Config{
-		Mode:  packages.NeedName | packages.NeedFiles | packages.NeedImports | packages.NeedDeps | packages.NeedModule | packages.NeedForTest,
-		Dir:   moduleDir,
-		Tests: true,
-		Env:   converterLoaderEnv(),
+		Mode:       packages.NeedName | packages.NeedFiles | packages.NeedImports | packages.NeedDeps | packages.NeedModule | packages.NeedForTest,
+		Dir:        moduleDir,
+		Tests:      true,
+		BuildFlags: m.options.loaderBuildFlags(),
+		Env:        m.closureLoaderEnv(),
 	}
 
 	roots, err := packages.Load(cfg, "./...")
@@ -239,7 +242,7 @@ func (m *ModuleConverter) mainModulePackagesWithTests() []*Package {
 
 // runModuleTests is the -tests -recurse driver. moduleDir and outRoot are absolute; options carries
 // the -tests settings (action, config, timeout) and a resolved go2csPath.
-func runModuleTests(moduleDir string, outRoot string, options Options, corpusRelease string) error {
+func runModuleTests(moduleDir string, outRoot string, options Options, corpusRelease string) (result error) {
 	if err := checkOutputRootOutsideModule(moduleDir, outRoot); err != nil {
 		return err
 	}
@@ -250,10 +253,26 @@ func runModuleTests(moduleDir string, outRoot string, options Options, corpusRel
 		return err
 	}
 
-	// A module-cache release with no go.mod: the go commands of this run read the cache's synthesized
-	// one, as goModFile already does in-process (and say so).
-	if _, err := installGoModOverlay(moduleDir, outRoot); err != nil {
-		return err
+	// A module-cache release converts AND tests from the copy plain -recurse converts it from: both phases run in it, so
+	// phase B's go test runs read the go.mod phase A's load read, and no go command runs in the cache (one with a go.mod
+	// and no go line had it rewritten there: gopkg.in/yaml.v3 v3.0.1). A release with no go.mod
+	// (github.com/pmezard/go-difflib v1.0.0, github.com/davecgh/go-spew v1.1.1) carries the cache's synthesized one; the
+	// go.mod overlay this used to install failed every such run, since go list refuses an overlay beneath GOMODCACHE.
+	if goModSource := moduleCacheReleaseGoMod(moduleDir); goModSource != "" {
+		copyDir, leave, err := enterModuleCacheReleaseCopy(moduleDir, goModSource)
+
+		if err != nil {
+			return err
+		}
+
+		defer leave()
+		defer func() { result = remapCopiedError(result) }()
+
+		moduleDir = copyDir
+
+		if err := fillModuleCopySums(moduleDir); err != nil {
+			return err
+		}
 	}
 
 	if err := checkModuleGoLine(moduleDir, corpusRelease); err != nil {
