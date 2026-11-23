@@ -137,6 +137,60 @@ public class TwinHostTests
         StringAssert.Contains(parking[0].GetMessage(), "'Ticker' is not partial", "names the host");
     }
 
+    // A consumer's hand-written class, as MnIfaceTwin's hand_impl.cs: an INSTANCE method that parks (it calls a Go
+    // function with a public twin), in a class that is not partial. Partial would buy it nothing: an instance method is
+    // refused `instance` and is never twinned. So GO2CS0021 does not name it, and the file compiles unchanged.
+    private const string InstanceParker = """
+        using System;
+        using static go.builtin;
+
+        namespace go;
+
+        public static partial class host_package
+        {
+            internal static channel<nint> ch;
+
+            public sealed class HandParker
+            {
+                public nint Park() { ᐸꟷ(ch); return 5; }
+            }
+
+            // The static parker beside it, the control: it would be twinned in a partial host, so it is still named.
+            private static class Ticker
+            {
+                internal static void Loop() { ᐸꟷ(ch); }
+            }
+
+            public static void run(HandParker hand)
+            {
+                hand.Park();
+                Ticker.Loop();
+            }
+        }
+        """;
+
+    [TestMethod]
+    public void AnInstanceParkerInANonPartialHostIsNotNamed_AStaticOneStillIs()
+    {
+        CSharpParseOptions options = new(LanguageVersion.CSharp13);
+        CSharpCompilation compilation = CSharpCompilation.Create("twinhost2",
+            [CSharpSyntaxTree.ParseText(InstanceParker, options, path: @"C:\twinhost2\hand_impl.cs")],
+            References(), new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, allowUnsafe: true));
+
+        Dictionary<string, string> properties = new() { ["build_property.GoTwins"] = "true" };
+
+        CSharpGeneratorDriver.Create([new TwinGenerator()], parseOptions: options, optionsProvider: new BuildProperties(properties))
+            .RunGeneratorsAndUpdateCompilation(compilation, out Compilation output, out var generated);
+
+        Diagnostic[] errors = output.Emit(Stream.Null).Diagnostics.Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error).ToArray();
+        Diagnostic[] parking = generated.Where(diagnostic => diagnostic.Id == "GO2CS0021").ToArray();
+
+        Assert.AreEqual(0, errors.Length, string.Join("\n", errors.Select(error => error.ToString())));
+        Assert.AreEqual(1, parking.Length, "only the static parker is named: " + string.Join("\n", parking.Select(diagnostic => diagnostic.ToString())));
+        StringAssert.Contains(parking[0].GetMessage(), "Loop", "the static parker in a non-partial host is still named");
+        Assert.IsFalse(parking.Any(diagnostic => diagnostic.GetMessage().Contains("Park", StringComparison.Ordinal)), "the instance parker is not named");
+    }
+
     private static IEnumerable<MetadataReference> References()
     {
         string trusted = (string)AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES")!;
