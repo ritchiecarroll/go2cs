@@ -237,3 +237,36 @@ source, so there is no regen and no D-5.
   - Go's net tests do not run on H, so crypto/tls and net/http are named for a box that can run them. The next two
     non-net reflect importers stand in: encoding/json (550) and crypto/x509 (540).
   - fmt (62) and internal/fmtsort (3) run by name, per COORD's ruling.
+
+## 12. The battery's score (appended after the run)
+
+The battery ran at `e4c542864b`, base `afb01dfb6c`, every gate unfiltered except the canaries, which are
+`-Filter <row> -Exact` by design. Scored as worded in section 11.
+
+- **GenTests: MET.** 764 passed, 0 failed, 0 skipped.
+- **GolibTests: MET.** Release: 3,168 total, 0 failed, 53 skipped. Debug: 3,168 total, 0 failed, 79 skipped.
+- **go test -count=1 ./...: MISSED.** 1 FAIL where 0 was predicted: `TestOutputComparisonListMatchesConsoleOutputAttribute`
+  in package `go2cs` reads "PointerPrintIdentity: listed in OutputComparisonTests.cs, but its package_info.cs has no
+  [GoTestMatchingConsoleOutput]". The other 10 packages are ok, and TestLicensing passes.
+- **repoguard, full, -count=1: MET.** rc 0.
+- **CNR: MET.** NO REGRESSION: 1,177 transpiled = 1,165 byte-identical + 12 platform-exclusive. Solution integrity
+  reads 1,167 registered projects. 0 NOT MEASURED lines.
+- **The full behavioral suite: MISSED.** 0 failures held, and Transpile, Compile and Target pass 1,040 of 1,040. But
+  `PointerPrintIdentity` did not pass every phase: its Output was NOT COMPARED. Output reads 1,013 compared, 0
+  failed, 9 NOT COMPARED. Eight of the nine carry no live attribute at `afb01dfb6c` either (ChannelSendToClosed,
+  FirstClassFunctions, ForVariants, GoCallVariations, RangeStatements, whose attribute is commented out on purpose,
+  SelectStatement, StructWithPointer, TypeConversionReturnType), so they are base state. The ninth is the seat's.
+  The likeliest miss named in section 11, a timing row under load, did not happen.
+- **The canaries: MET.** Every row passes at its banked windows count: crypto/cipher 27,289 (301 s), runtime
+  11,083 (3,844 s), go/types 597 (275 s), encoding/json 550 (218 s), crypto/x509 540 (260 s), fmt 62 (88 s) and
+  internal/fmtsort 3 (40 s).
+
+**One cause for both misses.** The seat registered `PointerPrintIdentity` in the four BehavioralTests lists but never
+gave its `package_info.cs` the attribute. So the runner skipped its Output, and the converter's guard caught the
+mismatch, which is what it exists for. The program's 15 lines were checked by hand against Go's (sections 6 and
+10), never by this runner. The miss went to COORD on its own, with both readings, before the fix. COORD accepted
+reading (a), the registration omission, and ruled the fix on top with the re-gate in section 13.
+
+**Tree after the sweeps.** 100 tracked files modified, 0 deleted, 0 untracked: the canary rows' own re-emission
+under `src/core` (runtime, go/types, encoding/json, fmt, crypto/x509, crypto/cipher, internal/fmtsort) and
+`docs/validation/current`. All 100 were restored by path, and the tree reads clean at `e4c542864b`.
