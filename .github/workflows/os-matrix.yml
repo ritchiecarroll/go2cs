@@ -114,7 +114,7 @@ on:
           - linux
           - darwin
       stage:
-        description: 'What to run: census (compile the corpus flavor), behavioral-smoke (harness proof), behavioral-full (the whole enumeration in slices), sweep-shard (filtered validated sweep), behavioral-stderr (run named projects directly and keep their WHOLE stderr — the runner quotes one line per death), release-smoke (pack every go.* package on windows, then consume that ONE feed on all five shipped RIDs; goos is ignored), aot-smoke (the same pack, then ONE Native AOT publish and run of a hand-written package consumer on all five RIDs; long -- each publish compiles the whole go.* closure), nugetgo-behavior (one sample row per shipped RID for a nugetgo package, each run on its own OS: the sample program run with go, and converted against the package and run with dotnet. A module with no Go tests ships the rows as its proof; a module with Go tests, beside its test proof. goos is ignored), golib-tests (build and run src/tests/GolibTests for this GOOS on each of its runners; filter is an MSTest --filter expression, blank runs the whole suite, and may end ;jit=PATTERN), gen-tests (build and run src/tests/GenTests, the go2cs-gen analyzer suite, for this GOOS on each of its runners; filter is an MSTest --filter expression, blank runs the whole suite. Until this stage no hosted leg ran GenTests off windows, so batch 290 landed a linux-only GenTests red that no gate saw), solution-build (dotnet build src/go2cs.slnx, every member of the converter-dev workspace, for this GOOS on each of its runners; filter is the configuration, Release (blank) or Debug. Nothing else builds the solution whole, so a member broken against it went unseen: a Release build failed in the thousands until the test trees pinned go2csPath), stack-probe (OPT-IN diagnostic: filter is ROW;test=REGEX[;at=S,S] -- one row swept with -TestFilter REGEX while dotnet-stack dumps its converted test host at the at= offsets; proves the instrument on a deliberately hung program first; never banks), converter-cgo (OPT-IN: go test of the converter in src/go2cs on each runner of this GOOS, where a C compiler lets go list run cmd/cgo; filter is a go test -run regex, blank runs ^Test.*Cgo|^TestRealLoad, and may end ;cc=zig|llvm-mingw[;sha=HEX], a pinned C toolchain the leg downloads, refuses unless its sha256 matches, and hands go as CC; the summary names the C compiler go would use. No other hosted stage gives the converter tests one: until this stage, TestRealLoadRefusesOnlyASelectedCgoFile had never run on a hosted runner, and cgo Phase 1 has its exit gate here)'
+        description: 'What to run: census (compile the corpus flavor), behavioral-smoke (harness proof), behavioral-full (the whole enumeration in slices), sweep-shard (filtered validated sweep), behavioral-stderr (run named projects directly and keep their WHOLE stderr — the runner quotes one line per death), release-smoke (pack every go.* package on windows, then consume that ONE feed on all five shipped RIDs; goos is ignored), aot-smoke (the same pack, then ONE Native AOT publish and run of a hand-written package consumer on all five RIDs; long -- each publish compiles the whole go.* closure), nugetgo-behavior (one sample row per shipped RID for a nugetgo package, each run on its own OS: the sample program run with go, and converted against the package and run with dotnet. A module with no Go tests ships the rows as its proof; a module with Go tests, beside its test proof. goos is ignored), golib-tests (build and run src/tests/GolibTests for this GOOS on each of its runners; filter is an MSTest --filter expression, blank runs the whole suite, and may end ;jit=PATTERN), gen-tests (build and run src/tests/GenTests, the go2cs-gen analyzer suite, for this GOOS on each of its runners; filter is an MSTest --filter expression, blank runs the whole suite. Until this stage no hosted leg ran GenTests off windows, so batch 290 landed a linux-only GenTests red that no gate saw), solution-build (dotnet build src/go2cs.slnx, every member of the converter-dev workspace, for this GOOS on each of its runners; filter is the configuration, Release (blank) or Debug. Nothing else builds the solution whole, so a member broken against it went unseen: a Release build failed in the thousands until the test trees pinned go2csPath), stack-probe (OPT-IN diagnostic: filter is ROW;test=REGEX[;at=S,S] -- one row swept with -TestFilter REGEX while dotnet-stack dumps its converted test host at the at= offsets; proves the instrument on a deliberately hung program first; never banks), converter-cgo (OPT-IN: go test of the converter in src/go2cs on each runner of this GOOS, where a C compiler lets go list run cmd/cgo; filter is a go test -run regex, blank runs ^Test.*Cgo|^TestRealLoad, and may end ;cc=zig|llvm-mingw[;sha=HEX], a pinned C toolchain the leg downloads, refuses unless its sha256 matches, and hands go as CC; the summary names the C compiler go would use. No other hosted stage gives the converter tests one: until this stage, TestRealLoadRefusesOnlyASelectedCgoFile had never run on a hosted runner, and cgo Phase 1 has its exit gate here), reconvert-footprint (a converter change''s corpus footprint on this GOOS: two -stdlib reconverts, by the converter at base= and at changed=, both seeded from base, diffed against each other; filter is ;base=SHA;changed=SHA, both 40 hex digits; one leg per GOOS)'
         type: choice
         required: true
         default: census
@@ -134,8 +134,9 @@ on:
           - converter-cgo
           - cgo-e2e
           - go-test
+          - reconvert-footprint
       filter:
-        description: 'Shard filter — comma-separated EXACT roster package names for sweep-shard ("sort" sweeps sort and never internal/fmtsort), project substring for behavioral-smoke. IGNORED by behavioral-full, which runs the whole enumeration in slices. Blank takes the stage default. Comma-separated project NAMES for behavioral-stderr. The configuration for solution-build: Release (blank) or Debug. golib-tests and stack-probe take options after the filter as ;key=value pairs (no ; inside a value): golib-tests ;jit=PATTERN (a DOTNET_JitDisasm pattern, e.g. p256Mul p384Mul; with tiering off, each matching method''s JIT listing is printed to the job log), stack-probe ROW;test=REGEX (required: the -TestFilter regex, both sides of the compare);at=S,S (seconds after the test host starts at which dotnet-stack dumps it; blank takes 120,870, the per-test deadline being 900 s). Options on any other stage are refused.'
+        description: 'Shard filter — comma-separated EXACT roster package names for sweep-shard ("sort" sweeps sort and never internal/fmtsort), project substring for behavioral-smoke. IGNORED by behavioral-full, which runs the whole enumeration in slices. Blank takes the stage default. Comma-separated project NAMES for behavioral-stderr. The configuration for solution-build: Release (blank) or Debug. golib-tests and stack-probe take options after the filter as ;key=value pairs (no ; inside a value): golib-tests ;jit=PATTERN (a DOTNET_JitDisasm pattern, e.g. p256Mul p384Mul; with tiering off, each matching method''s JIT listing is printed to the job log), stack-probe ROW;test=REGEX (required: the -TestFilter regex, both sides of the compare);at=S,S (seconds after the test host starts at which dotnet-stack dumps it; blank takes 120,870, the per-test deadline being 900 s), reconvert-footprint ;base=SHA;changed=SHA (both required, full 40-digit SHAs, with nothing before the first ;). Options on any other stage are refused.'
         type: string
         required: false
         default: ''
@@ -262,6 +263,8 @@ jobs:
       jit-disasm: ${{ steps.derive.outputs.jit-disasm }}
       cgo-cc: ${{ steps.derive.outputs.cgo-cc }}
       cgo-cc-sha: ${{ steps.derive.outputs.cgo-cc-sha }}
+      footprint-base: ${{ steps.derive.outputs.footprint-base }}
+      footprint-changed: ${{ steps.derive.outputs.footprint-changed }}
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -325,8 +328,12 @@ jobs:
           # go as CC (the cgo toolchain scout, H, 2026-11-10); sha=HEX replaces the pin's sha256, and exists so a wrong
           # hash can be shown to refuse before anything runs. An unknown or repeated key, an empty value, or any option on
           # any other stage FAILS the plan by name rather than being ignored.
+          # reconvert-footprint: base=SHA and changed=SHA, both required, both full 40-digit SHAs (C2, 2026-11-23): the two
+          # converters whose emissions the stage diffs. A short SHA is refused rather than resolved, because the reading
+          # names the commits it measured and a prefix can name a different commit tomorrow.
           $probeTest = ''; $probeAt = ''; $jitDisasm = ''; $dnsServers = ''; $cgoCc = ''; $cgoCcSha = ''; $dumpProof = ''; $sweepTimeout = ''
-          $optionKeys = @(switch ($stage) { 'golib-tests' { 'jit' } 'stack-probe' { 'test', 'at' } 'sweep-shard' { 'dns', 'dumpproof', 'timeout' } { $_ -in 'converter-cgo', 'cgo-e2e' } { 'cc', 'sha' } })
+          $footprintBase = ''; $footprintChanged = ''
+          $optionKeys = @(switch ($stage) { 'golib-tests' { 'jit' } 'stack-probe' { 'test', 'at' } 'sweep-shard' { 'dns', 'dumpproof', 'timeout' } { $_ -in 'converter-cgo', 'cgo-e2e' } { 'cc', 'sha' } 'reconvert-footprint' { 'base', 'changed' } })
           if ($optionKeys.Count) {
               $parts = @($filter -split ';')
               $filter = $parts[0].Trim()
@@ -376,8 +383,16 @@ jobs:
                   if ($cgoCc -eq 'llvm-mingw' -and $goos -ne 'windows') { throw "llvm-mingw's compilers target windows only, so cc=llvm-mingw applies to goos windows only; got goos '$goos'." }
                   if ($cgoCc) { Write-Host "converter-cgo: CC is the pinned $cgoCc$(if ($cgoCcSha) { ", its sha256 REPLACED by $cgoCcSha" })" }
               }
+              if ($stage -eq 'reconvert-footprint') {
+                  if ($filter) { throw "reconvert-footprint takes no filter before its options; got '$filter' (write ;base=SHA;changed=SHA)." }
+                  $footprintBase = "$($seen['base'])".ToLowerInvariant(); $footprintChanged = "$($seen['changed'])".ToLowerInvariant()
+                  foreach ($pair in @(@('base', $footprintBase), @('changed', $footprintChanged))) {
+                      if ($pair[1] -notmatch '^[0-9a-f]{40}$') { throw "reconvert-footprint filter option $($pair[0])= must be a full 40-digit commit SHA; got '$($pair[1])'." }
+                  }
+                  Write-Host "reconvert-footprint: base $footprintBase, changed $footprintChanged$(if ($footprintBase -eq $footprintChanged) { ' (the same commit: the determinism control, which must read 0 files)' })"
+              }
           }
-          elseif ($filter -match '(^|;)\s*(jit|test|at|dns|dumpproof|timeout|cc|sha)\s*=') { throw "filter options (;key=value) apply to stages golib-tests, stack-probe, sweep-shard, converter-cgo and cgo-e2e only; got stage '$stage' and filter '$filter'." }
+          elseif ($filter -match '(^|;)\s*(jit|test|at|dns|dumpproof|timeout|cc|sha|base|changed)\s*=') { throw "filter options (;key=value) apply to stages golib-tests, stack-probe, sweep-shard, converter-cgo, cgo-e2e and reconvert-footprint only; got stage '$stage' and filter '$filter'." }
 
           # The behavioral stages' per-program run budget. A schedule has no inputs and keeps 120, as
           # does a blank dispatch. A value that is not a whole number of seconds in 1..1800 FAILS the
@@ -499,6 +514,9 @@ jobs:
           if ($arch -notin 'x64', 'arm64', 'both') { throw "Unknown arch '$arch' (x64, arm64 or both)." }
           if ($arch -ne 'x64') {
               if ($env:INPUT_GOOS -ne 'linux') { throw "arch '$arch' applies to goos linux only; got goos '$($env:INPUT_GOOS)'." }
+              if ($env:INPUT_STAGE -eq 'reconvert-footprint') {
+                  throw "arch '$arch' does not apply to reconvert-footprint, which converts at linux/amd64 on the one linux leg; the corpus's linux/arm64 emission is not yet a -stdlib target of this stage."
+              }
               if ($env:INPUT_STAGE -in 'release-smoke', 'aot-smoke', 'nugetgo-behavior') {
                   throw "arch '$arch' does not apply to $($env:INPUT_STAGE), which runs every SHIPPED RID from one pack, linux-arm64 included (seat S5c): its leg is already in that stage's list."
               }
@@ -546,6 +564,13 @@ jobs:
                   @{ goos = 'darwin';  runner = 'macos-15-intel';  rid = 'osx-x64'   },
                   @{ goos = 'linux';   runner = 'ubuntu-24.04-arm'; rid = 'linux-arm64'; arch = 'arm64' })
               Write-Host "$($env:INPUT_STAGE): all five shipped RIDs (goos '$($env:INPUT_GOOS)' does not narrow it)"
+          }
+
+          # reconvert-footprint measures the converter's EMISSION for one GOOS, which is the same bytes on either mac, so
+          # darwin takes its first leg (osx-arm64) alone: a second leg would be the same footprint read twice.
+          if ($env:INPUT_STAGE -eq 'reconvert-footprint') {
+              $targets = @($targets | Select-Object -First 1)
+              Write-Host "reconvert-footprint: one leg, $($targets[0].rid)"
           }
 
           # aot-smoke dropped osx-arm64 from 2026-10-07 (COORD ruling) to 2026-10-14: on a hosted macos-15 (3-core arm64) runner the
@@ -603,6 +628,9 @@ jobs:
               'go-test'          = 60    # `go test ./...` in src/go2cs with this leg's .NET SDK installed: about 11 min of
                                          # tests on a cloud box without .NET (GO2CS_GUARD_NO_DOTNET=1, 2026-11-22), and the
                                          # dotnet-gated arms run here too. PROVISIONAL until the first run (C1, 2026-11-22).
+              'reconvert-footprint' = 60 # two converter go builds and two full -stdlib conversions, one after the other,
+                                         # each about 3-4 min on a desktop, plus two seeded roots extracted from git and
+                                         # one diff. PROVISIONAL until the first run (C2, 2026-11-23).
               'gen-tests'        = 30    # one Release build of GenTests (go2cs-gen and golib) from cold, then
                                          # `dotnet test` (whole suite, or a --filter): 526 tests in about 2 min on a
                                          # laptop. PROVISIONAL until the first run (R, 2026-11-14).
@@ -695,6 +723,8 @@ jobs:
           Add-Content -Path $env:GITHUB_OUTPUT -Value "sweep-timeout=$(if ($sweepTimeout) { $sweepTimeout } else { '45m' })" -Encoding utf8
           Add-Content -Path $env:GITHUB_OUTPUT -Value "cgo-cc=$cgoCc" -Encoding utf8
           Add-Content -Path $env:GITHUB_OUTPUT -Value "cgo-cc-sha=$cgoCcSha" -Encoding utf8
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "footprint-base=$footprintBase" -Encoding utf8
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "footprint-changed=$footprintChanged" -Encoding utf8
 
   # ---------------------------------------------------------------------------------------------
   # pack — release-smoke only: the release's own pack, as a rehearsal, on a hosted Windows runner.
@@ -1012,7 +1042,7 @@ jobs:
       # where the plan said arm64, and stops before any stage reads it. Stages that build no corpus are not probed.
       # -------------------------------------------------------------------------------------
       - name: Flavour probe — the arch this leg compiles
-        if: ${{ !contains(fromJson('["release-smoke","aot-smoke","nugetgo-behavior"]'), needs.plan.outputs.stage) }}
+        if: ${{ !contains(fromJson('["release-smoke","aot-smoke","nugetgo-behavior","reconvert-footprint"]'), needs.plan.outputs.stage) }}
         shell: pwsh
         env:
           PLANNED_ARCH: ${{ matrix.arch }}
@@ -1720,6 +1750,39 @@ jobs:
 
           Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value $summary
           & ./.github/annotate-summary.ps1 -Title "go-test $goos/$rid" -Lines $summary
+
+          exit $runExit
+
+      # -------------------------------------------------------------------------------------
+      # reconvert-footprint -- a converter change's corpus footprint on this GOOS (COORD's ruling, 2026-11-23). Two
+      # -stdlib reconverts, by the converter at base= and at changed=, each into its own root seeded from base's tree,
+      # run one after the other and diffed against each other; .github/reconvert-footprint.ps1 explains the gates. A
+      # footprint is the reading, not a failure: the step fails only on a converter exit, an unresolved lift marker, a
+      # rewritten hand-owned file, or a diff line it cannot attribute. Controls: base == changed reads 0 files, and TC-13
+      # (afb01dfb6c against 14fe938a7a) reads 2 files, -2/+2.
+      # -------------------------------------------------------------------------------------
+      - name: Reconvert footprint — two seeded -stdlib reconverts, diffed
+        if: needs.plan.outputs.stage == 'reconvert-footprint'
+        shell: pwsh
+        env:
+          GOTOOLCHAIN: local
+          FOOTPRINT_BASE: ${{ needs.plan.outputs.footprint-base }}
+          FOOTPRINT_CHANGED: ${{ needs.plan.outputs.footprint-changed }}
+        run: |
+          $art = Join-Path $PWD 'artifacts'
+          $out = Join-Path $art "reconvert-footprint-$($env:GOOS_TARGET)"
+          $work = Join-Path $env:RUNNER_TEMP 'reconvert-footprint'
+          $runExit = 0
+          try {
+              & ./.github/reconvert-footprint.ps1 -Base $env:FOOTPRINT_BASE -Changed $env:FOOTPRINT_CHANGED -Goos $env:GOOS_TARGET -Work $work -OutDir $out
+              $runExit = $LASTEXITCODE
+          }
+          catch { Write-Host "::error::$($_.Exception.Message)"; $runExit = 1 }
+
+          $summary = @(Get-Content -LiteralPath (Join-Path $out 'summary.md') -ErrorAction SilentlyContinue)
+          if (-not $summary) { $summary = @("## Reconvert footprint -- $($env:GOOS_TARGET)", '', "the script stopped before its summary (exit $runExit); the job log holds why") }
+          Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value $summary
+          & ./.github/annotate-summary.ps1 -Title "reconvert-footprint $($env:GOOS_TARGET)" -Lines @($summary | Select-Object -Last 1)
 
           exit $runExit
 
