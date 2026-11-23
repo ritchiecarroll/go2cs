@@ -1109,11 +1109,11 @@ public class TwinBoxTests
     {
         (string twins, Diagnostic[] errors) = Run(null, MixedRef);
 
-        // RecvGenerator's box overload of such a method does not compile (CS1620, its second `ref` passed bare): a sibling
-        // generator's limit on a shape the converter never emits, so only the twin generator's own output is held here.
-        Diagnostic[] own = errors.Where(error => error.Location.SourceTree?.FilePath.Contains("RecvGenerator", StringComparison.Ordinal) != true).ToArray();
-
-        Assert.AreEqual(0, own.Length, Errors(own));
+        // RecvGenerator's box overload keeps the second parameter's `ref` in its signature and its call (it was CS1620, the
+        // `ref` passed bare), so the whole compilation, sibling generators included, is held to zero errors.
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        StringAssert.Contains(twins, "mx(this ж<global::go.box_package.T> Ꮡt, ref global::go.box_package.T u)", "the box overload takes u by ref");
+        StringAssert.Contains(twins, "t.mx(ref u)", "and passes it by ref");
         Assert.IsFalse(twins.Contains("mxꞏtwin(", StringComparison.Ordinal), "no twin");
         StringAssert.Contains(twins, "|mx|byref-mixed", "refused by name");
     }

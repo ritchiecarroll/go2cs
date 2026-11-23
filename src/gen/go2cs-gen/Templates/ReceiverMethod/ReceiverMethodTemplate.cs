@@ -135,19 +135,11 @@ internal class ReceiverMethodTemplate : TemplateBase
         get
         {
             List<string> result = [];
-            bool first = true;
 
-            foreach ((string type, string name) in Method.Parameters)
+            for (int i = 0; i < Method.Parameters.Length; i++)
             {
-                if (first)
-                {
-                    result.Add($"this {PointerPrefix}<{type}> {ReceiverBoxName}");
-                    first = false;
-                }
-                else
-                {
-                    result.Add($"{type} {name}");
-                }
+                (string type, string name) = Method.Parameters[i];
+                result.Add(i == 0 ? $"this {PointerPrefix}<{type}> {ReceiverBoxName}" : $"{RefKind(i)}{type} {name}");
             }
 
             return string.Join(", ", result);
@@ -157,8 +149,12 @@ internal class ReceiverMethodTemplate : TemplateBase
     private string ReturnStatement =>
         Method.ReturnType == "void" ? "" : "return ";
 
-    private string CallParams => 
-        string.Join(", ", Method.Parameters.Skip(1).Select(item => item.name));
+    // A by-ref parameter is passed on by-ref (`ref u`), as the overload takes it.
+    private string CallParams =>
+        string.Join(", ", Method.Parameters.Select((item, i) => RefKind(i) + item.name).Skip(1));
+
+    private string RefKind(int index) =>
+        index < Method.ParameterRefKinds.Length ? Method.ParameterRefKinds[index] : "";
 
     // The narrowest of {this method's own scope, the receiver type's scope}. The narrowing is
     // load-bearing in BOTH directions: a public overload over a `ж<internalT>` receiver is CS0051,
