@@ -1,7 +1,6 @@
 namespace go;
 
 using fmt = fmt_package;
-using static main_package;
 
 partial class main_package {
 
@@ -175,7 +174,7 @@ internal static void main() {
     inc2.Inc();
     fmt.Println("deconstructed into iface:", inc2.Total(), err == nil);
 
-    Animal makeAnimal(bool feline) {
+    [GoFunc("main.func1")] Animal makeAnimal(bool feline) {
         if (feline) {
             return new CatжAnimal(Ꮡ(new Cat()));
         }
@@ -216,12 +215,8 @@ partial struct badge {
     internal nint num;
 }
 
-} partial class mainᴛbadge {
-
-internal static @string @string(this ref badge b) { return b.text; }
-internal static nint @int(this ref badge b) { return b.num; }
-
-} partial class main_package {
+internal static @string string⁔(/*this*/ ref badge b) { return b.text; }
+internal static nint int⁔(/*this*/ ref badge b) { return b.num; }
 
 internal static void replaceAnimal(ref Animal a) {
     a = new CatжAnimal(Ꮡ(new Cat()));
@@ -260,12 +255,8 @@ partial struct fileRdr {
     internal @string name;
 }
 
-} partial class mainᴛfileRdr {
-
-internal static @string read(this fileRdr f) { return "read:"u8 + f.name; }
-internal static @string close(this fileRdr f) { return "close:"u8 + f.name; }
-
-} partial class main_package {
+internal static @string read⁔(/*this*/ fileRdr f) { return "read:"u8 + f.name; }
+internal static @string close⁔(/*this*/ fileRdr f) { return "close:"u8 + f.name; }
 
 internal static rdCloser open(@string name) { return new fileRdr(name); }
 

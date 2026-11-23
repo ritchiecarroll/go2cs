@@ -1,4 +1,4 @@
-// The M:N spike's mixed storm (docs/phase4/DATA-mn-spike-2.md): n goroutines that are all alive at
+// The M:N scheduler's mixed storm (docs/phase4/DATA-mn-spike-2.md): n goroutines that are all alive at
 // once, and each one parks four ways before it finishes.
 //
 //   - park 1, a select over two channels: a token from main, or the start gate closing
@@ -9,9 +9,12 @@
 // Half the goroutines start from a named method and half from a func literal that calls it, because
 // the two take different routes to a hidden twin.
 //
-// n is 100,000 unless MN_STORM_N names another count. With one OS thread per goroutine that is past
-// the thread cap of both hosted macOS runners (2,048 and 3,072), which is the reason the program
-// exists. MN_STORM_HOLD_MS holds the parked goroutines so a sampler can read the process.
+// n is 1,000 unless MN_STORM_N names another count. The program exists for MN_STORM_N=100,000: with one
+// OS thread per goroutine that is past the thread cap of both hosted macOS runners (2,048 and 3,072),
+// and os-matrix's M:N direct-runs step names it. The default is small because the behavioral suite
+// runs it on the thread path, where 100,000 threads ended a linux runner with OutOfMemoryException
+// (COORD's ruling, 2026-11-22); Go runs the same default, so its output still compares equal.
+// MN_STORM_HOLD_MS holds the parked goroutines so a sampler can read the process.
 //
 // Deterministic by construction: ids and tokens are summed, never printed in arrival order, and every
 // cross-goroutine ordering comes from the WaitGroups and the channel operations. The sleep delays a
@@ -69,7 +72,7 @@ func envInt(name string, fallback int) int {
 }
 
 func main() {
-	n := envInt("MN_STORM_N", 100000)
+	n := envInt("MN_STORM_N", 1000)
 	hold := envInt("MN_STORM_HOLD_MS", 0)
 
 	s := &storm{

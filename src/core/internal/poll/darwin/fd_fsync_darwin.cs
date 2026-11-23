@@ -7,16 +7,13 @@ using errors = errors_package;
 using unix = go.@internal.syscall.unix_package;
 using Δsyscall = syscall_package;
 using go.@internal.syscall;
-using static poll_package;
 
 partial class poll_package {
-
-} partial class pollᴛFD {
 
 // Fsync invokes SYS_FCNTL with SYS_FULLFSYNC because
 // on OS X, SYS_FSYNC doesn't fully flush contents to disk.
 // See Issue #26650 as well as the man page for fsync on OS X.
-public static error Fsync(this ж<FD> Ꮡfd) {
+internal static error Fsync⁔(/*this*/ ж<FD> Ꮡfd) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -26,7 +23,7 @@ public static error Fsync(this ж<FD> Ꮡfd) {
             }
         }
         ᒐd1 = true;
-        return ignoringEINTR(() => {
+        return ignoringEINTR([GoFunc("(*FD).Fsync.func1")] () => {
             var (_, err) = unix.Fcntl(Ꮡfd.Value.Sysfd, Δsyscall.F_FULLFSYNC, 0);
 
             // There are scenarios such as SMB mounts where fcntl will fail
@@ -42,4 +39,4 @@ public static error Fsync(this ж<FD> Ꮡfd) {
     finally { if (ᒐd1) Ꮡfd.decref(); ᒐ.Run(); }
 }
 
-}
+} // end poll_package

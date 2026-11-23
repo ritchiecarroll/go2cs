@@ -9,7 +9,6 @@ using fmt = fmt_package;
 using chacha20poly1305 = vendor.golang.org.x.crypto.chacha20poly1305_package;
 using go.crypto;
 using vendor.golang.org.x.crypto;
-using static hpke_package;
 
 partial class hpke_package {
 
@@ -88,9 +87,7 @@ internal static ж<aead> aes256GCM = Ꮡ(new aead(
     id: 0x0003
 )); }
 
-} partial class hpkeᴛaead {
-
-internal static uint16 ID(this ref aead a) {
+internal static uint16 ID⁔(/*this*/ ref aead a) {
     return a.id;
 }
 
@@ -98,42 +95,38 @@ internal static uint16 ID(this ref aead a) {
 internal static ref readonly @string invalidKeySizeˢ => ref invalidKeySizeˢᵇ;
 private static readonly @string invalidKeySizeˢᵇ = "invalid key size"u8;
 
-internal static (cipher.AEAD, error) aead(this ref aead a, slice<byte> key) {
+internal static (cipher.AEAD, error) aead⁔(/*this*/ ref aead a, slice<byte> key) {
     if (len(key) != a.nK) {
         return (default, errors.New(invalidKeySizeˢ));
     }
     return a.@new(key);
 }
 
-internal static nint keySize(this ref aead a) {
+internal static nint keySize⁔(/*this*/ ref aead a) {
     return a.nK;
 }
 
-internal static nint nonceSize(this ref aead a) {
+internal static nint nonceSize⁔(/*this*/ ref aead a) {
     return a.nN;
 }
-
-} partial class hpke_package {
 
 partial struct exportOnlyAEAD {
 }
 
-} partial class hpkeᴛexportOnlyAEAD {
-
-internal static uint16 ID(this exportOnlyAEAD _) {
+internal static uint16 ID⁔(/*this*/ exportOnlyAEAD _) {
     return 0xFFFF;
 }
 
-internal static (cipher.AEAD, error) aead(this exportOnlyAEAD _, slice<byte> key) {
+internal static (cipher.AEAD, error) aead⁔(/*this*/ exportOnlyAEAD _, slice<byte> key) {
     return (default, default);
 }
 
-internal static nint keySize(this exportOnlyAEAD _) {
+internal static nint keySize⁔(/*this*/ exportOnlyAEAD _) {
     return 0;
 }
 
-internal static nint nonceSize(this exportOnlyAEAD _) {
+internal static nint nonceSize⁔(/*this*/ exportOnlyAEAD _) {
     return 0;
 }
 
-}
+} // end hpke_package

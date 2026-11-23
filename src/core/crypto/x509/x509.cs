@@ -56,7 +56,6 @@ using go.net;
 using hash = hash_package;
 using vendor.golang.org.x.crypto;
 using vendor.golang.org.x.crypto.cryptobyte;
-using static x509_package;
 
 partial class x509_package {
 
@@ -255,9 +254,7 @@ public static SignatureAlgorithm SHA384WithRSAPSS => 14;
 public static SignatureAlgorithm SHA512WithRSAPSS => 15;
 public static SignatureAlgorithm PureEd25519 => 16;
 
-} partial class x509ᴛSignatureAlgorithm {
-
-internal static bool isRSAPSS(this SignatureAlgorithm algo) {
+internal static bool isRSAPSS⁔(/*this*/ SignatureAlgorithm algo) {
     foreach (var (_, details) in range(signatureAlgorithmDetails)) {
         if (details.algo == algo) {
             return details.isRSAPSS;
@@ -266,7 +263,7 @@ internal static bool isRSAPSS(this SignatureAlgorithm algo) {
     return false;
 }
 
-internal static crypto.Hash hashFunc(this SignatureAlgorithm algo) {
+internal static crypto.Hash hashFunc⁔(/*this*/ SignatureAlgorithm algo) {
     foreach (var (_, details) in range(signatureAlgorithmDetails)) {
         if (details.algo == algo) {
             return details.hash;
@@ -275,7 +272,7 @@ internal static crypto.Hash hashFunc(this SignatureAlgorithm algo) {
     return (crypto.Hash)0;
 }
 
-public static @string String(this SignatureAlgorithm algo) {
+internal static @string String⁔(/*this*/ SignatureAlgorithm algo) {
     foreach (var (_, details) in range(signatureAlgorithmDetails)) {
         if (details.algo == algo) {
             return details.name;
@@ -283,8 +280,6 @@ public static @string String(this SignatureAlgorithm algo) {
     }
     return strconv.Itoa((nint)algo);
 }
-
-} partial class x509_package {
 
 partial struct PublicKeyAlgorithm /*num:nint*/;
 
@@ -301,16 +296,12 @@ internal static array<@string> publicKeyAlgoName = new golib.SparseArray<@string
     [(int)Ed25519] = "Ed25519"
 }.array(5);
 
-} partial class x509ᴛPublicKeyAlgorithm {
-
-public static @string String(this PublicKeyAlgorithm algo) {
+internal static @string String⁔(/*this*/ PublicKeyAlgorithm algo) {
     if (0 < algo && (nint)algo < len(publicKeyAlgoName)) {
         return publicKeyAlgoName[algo];
     }
     return strconv.Itoa((nint)algo);
 }
-
-} partial class x509_package {
 
 // OIDs for signature algorithms
 //
@@ -723,10 +714,8 @@ internal static (asn1.ObjectIdentifier oid, bool ok) oidFromExtKeyUsage(ExtKeyUs
     return (oid, ok);
 }
 
-} partial class x509ᴛExtKeyUsage {
-
 // OID returns the ASN.1 object identifier of the EKU.
-public static OID OID(this ExtKeyUsage eku) {
+internal static OID OID⁔(/*this*/ ExtKeyUsage eku) {
     var (asn1OID, ok) = oidFromExtKeyUsage(eku);
     if (!ok) {
         throw panic("x509: internal error: known ExtKeyUsage has no OID");
@@ -737,8 +726,6 @@ public static OID OID(this ExtKeyUsage eku) {
     }
     return oid;
 }
-
-} partial class x509_package {
 
 // A Certificate represents an X.509 certificate.
 partial struct Certificate {
@@ -917,13 +904,9 @@ public static error ErrUnsupportedAlgorithm = errors.New("x509: cannot verify si
 // generate the signature is not secure, and the signature has been rejected.
 partial struct InsecureAlgorithmError /*num:nint*/;
 
-} partial class x509ᴛInsecureAlgorithmError {
-
-public static @string Error(this InsecureAlgorithmError e) {
+internal static @string Error⁔(/*this*/ InsecureAlgorithmError e) {
     return fmt.Sprintf("x509: cannot verify signature: insecure algorithm %v"u8, (SignatureAlgorithm)(nint)e);
 }
-
-} partial class x509_package {
 
 // ConstraintViolationError results when a requested usage is not permitted by
 // a certificate. For example: checking a signature when the public key isn't a
@@ -931,19 +914,15 @@ public static @string Error(this InsecureAlgorithmError e) {
 partial struct ConstraintViolationError {
 }
 
-} partial class x509ᴛConstraintViolationError {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string x509InvalidSignatureˢ => ref x509InvalidSignatureˢᵇ;
 private static readonly @string x509InvalidSignatureˢᵇ = "x509: invalid signature: parent certificate cannot sign this kind of certificate"u8;
 
-public static @string Error(this ConstraintViolationError _) {
+internal static @string Error⁔(/*this*/ ConstraintViolationError _) {
     return x509InvalidSignatureˢ;
 }
 
-} partial class x509ᴛCertificate {
-
-public static bool Equal(this ж<Certificate> Ꮡc, ж<Certificate> Ꮡother) {
+internal static bool Equal⁔(/*this*/ ж<Certificate> Ꮡc, ж<Certificate> Ꮡother) {
     ref var c = ref Ꮡc.DerefOrNull();
     ref var other = ref Ꮡother.DerefOrNull();
 
@@ -953,7 +932,7 @@ public static bool Equal(this ж<Certificate> Ꮡc, ж<Certificate> Ꮡother) {
     return bytes.Equal(c.Raw, other.Raw);
 }
 
-internal static bool hasSANExtension(this ref Certificate c) {
+internal static bool hasSANExtension⁔(/*this*/ ref Certificate c) {
     return oidInExtensions(oidExtensionSubjectAltName, c.Extensions);
 }
 
@@ -961,7 +940,7 @@ internal static bool hasSANExtension(this ref Certificate c) {
 //
 // This is a low-level API that performs very limited checks, and not a full
 // path verifier. Most users should use [Certificate.Verify] instead.
-public static error CheckSignatureFrom(this ref Certificate c, ж<Certificate> Ꮡparent) {
+internal static error CheckSignatureFrom⁔(/*this*/ ref Certificate c, ж<Certificate> Ꮡparent) {
     ref var parent = ref Ꮡparent.DerefOrNull();
 
     // RFC 5280, 4.2.1.9:
@@ -991,15 +970,15 @@ public static error CheckSignatureFrom(this ref Certificate c, ж<Certificate> �
 //
 // [MD5WithRSA] signatures are rejected, while [SHA1WithRSA] and [ECDSAWithSHA1]
 // signatures are currently accepted.
-public static error CheckSignature(this ref Certificate c, SignatureAlgorithm algo, slice<byte> signed, slice<byte> signature) {
+internal static error CheckSignature⁔(/*this*/ ref Certificate c, SignatureAlgorithm algo, slice<byte> signed, slice<byte> signature) {
     return checkSignature(algo, signed, signature, c.PublicKey, true);
 }
 
-internal static bool hasNameConstraints(this ref Certificate c) {
+internal static bool hasNameConstraints⁔(/*this*/ ref Certificate c) {
     return oidInExtensions(oidExtensionNameConstraints, c.Extensions);
 }
 
-internal static slice<byte> getSANExtension(this ref Certificate c) {
+internal static slice<byte> getSANExtension⁔(/*this*/ ref Certificate c) {
     foreach (var (_, e) in range(c.Extensions)) {
         if (e.Id.Equal(oidExtensionSubjectAltName)) {
             return e.Value;
@@ -1007,8 +986,6 @@ internal static slice<byte> getSANExtension(this ref Certificate c) {
     }
     return default;
 }
-
-} partial class x509_package {
 
 internal static error signaturePublicKeyAlgoMismatchError(PublicKeyAlgorithm expectedPubKeyAlgo, any pubKey) {
     return fmt.Errorf("x509: signature algorithm specifies an %s public key, but have public key of type %T"u8, expectedPubKeyAlgo.String(), pubKey);
@@ -1094,34 +1071,26 @@ internal static error /*err*/ checkSignature(SignatureAlgorithm algo, slice<byte
     return ErrUnsupportedAlgorithm;
 }
 
-} partial class x509ᴛCertificate {
-
 // CheckCRLSignature checks that the signature in crl is from c.
 //
 // Deprecated: Use [RevocationList.CheckSignatureFrom] instead.
-public static error CheckCRLSignature(this ref Certificate c, ж<pkix.CertificateList> Ꮡcrl) {
+internal static error CheckCRLSignature⁔(/*this*/ ref Certificate c, ж<pkix.CertificateList> Ꮡcrl) {
     ref var crl = ref Ꮡcrl.DerefOrNull();
 
     SignatureAlgorithm algo = getSignatureAlgorithmFromAI(crl.SignatureAlgorithm);
     return c.CheckSignature(algo, crl.TBSCertList.Raw, crl.SignatureValue.RightAlign());
 }
 
-} partial class x509_package {
-
 partial struct UnhandledCriticalExtension {
 }
-
-} partial class x509ᴛUnhandledCriticalExtension {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string x509UnhandledCriticalˢ => ref x509UnhandledCriticalˢᵇ;
 private static readonly @string x509UnhandledCriticalˢᵇ = "x509: unhandled critical extension"u8;
 
-public static @string Error(this UnhandledCriticalExtension h) {
+internal static @string Error⁔(/*this*/ UnhandledCriticalExtension h) {
     return x509UnhandledCriticalˢ;
 }
-
-} partial class x509_package {
 
 partial struct basicConstraints {
     public bool IsCA; /*`asn1:"optional"`*/
@@ -1356,7 +1325,7 @@ internal static (slice<pkix.Extension> ret, error err) buildCertExtensions(ref C
         ret[n].Id = oidExtensionNameConstraints;
         ret[n].Critical = template.PermittedDNSDomainsCritical;
 
-        slice<byte> ipAndMask(ж<net.IPNet> ipNet) {
+        [GoFunc("buildCertExtensions.func1")] slice<byte> ipAndMask(ж<net.IPNet> ipNet) {
             var maskedIP = ipNet.IP.Mask(ipNet.Mask);
             var ipAndMaskΔ1 = new slice<byte>(0, len(maskedIP) + len(ipNet.Mask));
             ipAndMaskΔ1 = appendꓸꓸꓸ(ipAndMaskΔ1, maskedIP);
@@ -1365,7 +1334,7 @@ internal static (slice<pkix.Extension> ret, error err) buildCertExtensions(ref C
         }
 
         var ipAndMaskʗ1 = ipAndMask;
-        (slice<byte> der, error err) serialiseConstraints(slice<@string> dns, slice<ж<net.IPNet>> ips, slice<@string> emails, slice<@string> uriDomains) {
+        [GoFunc("buildCertExtensions.func2")] (slice<byte> der, error err) serialiseConstraints(slice<@string> dns, slice<ж<net.IPNet>> ips, slice<@string> emails, slice<@string> uriDomains) {
             error errΔ1 = default;
             ref var bΔ1 = ref heap(new cryptobyte.Builder(), out var ᏑbΔ1);
 
@@ -1374,8 +1343,8 @@ internal static (slice<pkix.Extension> ret, error err) buildCertExtensions(ref C
                     return (default, errΔ1);
                 }
 
-                ᏑbΔ1.AddASN1(cryptobyte_asn1.SEQUENCE, (ж<cryptobyte.Builder> bΔ2) => {
-                    bΔ2.AddASN1(((cryptobyte_asn1.Tag)2).ContextSpecific(), (ж<cryptobyte.Builder> bΔ3) => {
+                ᏑbΔ1.AddASN1(cryptobyte_asn1.SEQUENCE, [GoFunc("buildCertExtensions.func2.1")] (ж<cryptobyte.Builder> bΔ2) => {
+                    bΔ2.AddASN1(((cryptobyte_asn1.Tag)2).ContextSpecific(), [GoFunc("buildCertExtensions.func2.1.1")] (ж<cryptobyte.Builder> bΔ3) => {
                         bΔ3.AddBytes(slice<byte>(name));
                     });
                 });
@@ -1384,10 +1353,10 @@ internal static (slice<pkix.Extension> ret, error err) buildCertExtensions(ref C
             foreach (var (_, ipNet) in range(ips)) {
                 var ipAndMaskʗ2 = ipAndMaskʗ1;
                 var ipNetʗ1 = ipNet;
-                ᏑbΔ1.AddASN1(cryptobyte_asn1.SEQUENCE, (ж<cryptobyte.Builder> bΔ4) => {
+                ᏑbΔ1.AddASN1(cryptobyte_asn1.SEQUENCE, [GoFunc("buildCertExtensions.func2.2")] (ж<cryptobyte.Builder> bΔ4) => {
                     var ipAndMaskʗ3 = ipAndMaskʗ2;
                     var ipNetʗ2 = ipNetʗ1;
-                    bΔ4.AddASN1(((cryptobyte_asn1.Tag)7).ContextSpecific(), (ж<cryptobyte.Builder> bΔ5) => {
+                    bΔ4.AddASN1(((cryptobyte_asn1.Tag)7).ContextSpecific(), [GoFunc("buildCertExtensions.func2.2.1")] (ж<cryptobyte.Builder> bΔ5) => {
                         bΔ5.AddBytes(ipAndMaskʗ3(ipNetʗ2));
                     });
                 });
@@ -1398,8 +1367,8 @@ internal static (slice<pkix.Extension> ret, error err) buildCertExtensions(ref C
                     return (default, errΔ1);
                 }
 
-                ᏑbΔ1.AddASN1(cryptobyte_asn1.SEQUENCE, (ж<cryptobyte.Builder> bΔ6) => {
-                    bΔ6.AddASN1(((cryptobyte_asn1.Tag)1).ContextSpecific(), (ж<cryptobyte.Builder> bΔ7) => {
+                ᏑbΔ1.AddASN1(cryptobyte_asn1.SEQUENCE, [GoFunc("buildCertExtensions.func2.3")] (ж<cryptobyte.Builder> bΔ6) => {
+                    bΔ6.AddASN1(((cryptobyte_asn1.Tag)1).ContextSpecific(), [GoFunc("buildCertExtensions.func2.3.1")] (ж<cryptobyte.Builder> bΔ7) => {
                         bΔ7.AddBytes(slice<byte>(email));
                     });
                 });
@@ -1410,8 +1379,8 @@ internal static (slice<pkix.Extension> ret, error err) buildCertExtensions(ref C
                     return (default, errΔ1);
                 }
 
-                ᏑbΔ1.AddASN1(cryptobyte_asn1.SEQUENCE, (ж<cryptobyte.Builder> bΔ8) => {
-                    bΔ8.AddASN1(((cryptobyte_asn1.Tag)6).ContextSpecific(), (ж<cryptobyte.Builder> bΔ9) => {
+                ᏑbΔ1.AddASN1(cryptobyte_asn1.SEQUENCE, [GoFunc("buildCertExtensions.func2.4")] (ж<cryptobyte.Builder> bΔ8) => {
+                    bΔ8.AddASN1(((cryptobyte_asn1.Tag)6).ContextSpecific(), [GoFunc("buildCertExtensions.func2.4.1")] (ж<cryptobyte.Builder> bΔ9) => {
                         bΔ9.AddBytes(slice<byte>(uriDomain));
                     });
                 });
@@ -1433,17 +1402,17 @@ internal static (slice<pkix.Extension> ret, error err) buildCertExtensions(ref C
         ref var b = ref heap(new cryptobyte.Builder(), out var Ꮡb);
         var excludedʗ1 = excluded;
         var permittedʗ1 = permitted;
-        Ꮡb.AddASN1(cryptobyte_asn1.SEQUENCE, (ж<cryptobyte.Builder> bΔ1) => {
+        Ꮡb.AddASN1(cryptobyte_asn1.SEQUENCE, [GoFunc("buildCertExtensions.func3")] (ж<cryptobyte.Builder> bΔ1) => {
             if (len(permittedʗ1) > 0) {
                 var permittedʗ2 = permittedʗ1;
-                bΔ1.AddASN1(((cryptobyte_asn1.Tag)0).ContextSpecific().Constructed(), (ж<cryptobyte.Builder> bΔ2) => {
+                bΔ1.AddASN1(((cryptobyte_asn1.Tag)0).ContextSpecific().Constructed(), [GoFunc("buildCertExtensions.func3.1")] (ж<cryptobyte.Builder> bΔ2) => {
                     bΔ2.AddBytes(permittedʗ2);
                 });
             }
 
             if (len(excludedʗ1) > 0) {
                 var excludedʗ2 = excludedʗ1;
-                bΔ1.AddASN1(((cryptobyte_asn1.Tag)1).ContextSpecific().Constructed(), (ж<cryptobyte.Builder> bΔ3) => {
+                bΔ1.AddASN1(((cryptobyte_asn1.Tag)1).ContextSpecific().Constructed(), [GoFunc("buildCertExtensions.func3.2")] (ж<cryptobyte.Builder> bΔ3) => {
                     bΔ3.AddBytes(excludedʗ2);
                 });
             }
@@ -1549,7 +1518,7 @@ internal static (pkix.Extension, error) marshalCertificatePolicies(slice<OID> po
     var b = cryptobyte.NewBuilder(new slice<byte>(0, 128));
     var policiesʗ1 = policies;
     var policyIdentifiersʗ1 = policyIdentifiers;
-    b.AddASN1(cryptobyte_asn1.SEQUENCE, (ж<cryptobyte.Builder> child) => {
+    b.AddASN1(cryptobyte_asn1.SEQUENCE, [GoFunc("marshalCertificatePolicies.func1")] (ж<cryptobyte.Builder> child) => {
         if (x509usepolicies.Value() != "0"u8) {
             x509usepolicies.IncNonDefault();
             foreach (var (_, vᴛ1) in range(policiesʗ1)) {
@@ -1557,9 +1526,9 @@ internal static (pkix.Extension, error) marshalCertificatePolicies(slice<OID> po
                 v = vᴛ1;
 
                 var vʗ1 = v;
-                child.AddASN1(cryptobyte_asn1.SEQUENCE, (ж<cryptobyte.Builder> childΔ1) => {
+                child.AddASN1(cryptobyte_asn1.SEQUENCE, [GoFunc("marshalCertificatePolicies.func1.1")] (ж<cryptobyte.Builder> childΔ1) => {
                     var vʗ2 = vʗ1;
-                    childΔ1.AddASN1(cryptobyte_asn1.OBJECT_IDENTIFIER, (ж<cryptobyte.Builder> childΔ2) => {
+                    childΔ1.AddASN1(cryptobyte_asn1.OBJECT_IDENTIFIER, [GoFunc("marshalCertificatePolicies.func1.1.1")] (ж<cryptobyte.Builder> childΔ2) => {
                         if (len(vʗ2.der) == 0) {
                             childΔ2.SetError(errors.New(invalidPolicyObjectˢ));
                             return;
@@ -1571,7 +1540,7 @@ internal static (pkix.Extension, error) marshalCertificatePolicies(slice<OID> po
         } else {
             foreach (var (_, v) in range(policyIdentifiersʗ1)) {
                 var vʗ3 = v;
-                child.AddASN1(cryptobyte_asn1.SEQUENCE, (ж<cryptobyte.Builder> childΔ3) => {
+                child.AddASN1(cryptobyte_asn1.SEQUENCE, [GoFunc("marshalCertificatePolicies.func1.2")] (ж<cryptobyte.Builder> childΔ3) => {
                     childΔ3.AddASN1ObjectIdentifier(vʗ3);
                 });
             }
@@ -1965,18 +1934,12 @@ public static (ж<pkix.CertificateList>, error) ParseDERCRL(slice<byte> derBytes
     return (certList, default);
 }
 
-} partial class x509ᴛCertificate {
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string x509CertificatePrivateˢ => ref x509CertificatePrivateˢᵇ;
-private static readonly @string x509CertificatePrivateˢᵇ = "x509: certificate private key does not implement crypto.Signer"u8;
-
 // CreateCRL returns a DER encoded CRL, signed by this Certificate, that
 // contains the given list of revoked certificates.
 //
 // Deprecated: this method does not generate an RFC 5280 conformant X.509 v2 CRL.
 // To generate a standards compliant CRL, use [CreateRevocationList] instead.
-public static (slice<byte> crlBytes, error err) CreateCRL(this ref Certificate c, io.Reader rand, any priv, slice<pkix.RevokedCertificate> revokedCerts, time.Time now, time.Time expiry) {
+internal static (slice<byte> crlBytes, error err) CreateCRL⁔(/*this*/ ref Certificate c, io.Reader rand, any priv, slice<pkix.RevokedCertificate> revokedCerts, time.Time now, time.Time expiry) {
     error err = default;
 
     var (key, ok) = priv._<crypto.Signer>(ᐧ);
@@ -2035,8 +1998,6 @@ public static (slice<byte> crlBytes, error err) CreateCRL(this ref Certificate c
         SignatureValue: new asn1.BitString(Bytes: signature, BitLength: len(signature) * 8)
     ));
 }
-
-} partial class x509_package {
 
 // CertificateRequest represents a PKCS #10, certificate signature request.
 partial struct CertificateRequest {
@@ -2418,14 +2379,10 @@ internal static (ж<CertificateRequest>, error) parseCertificateRequest(ref cert
     return (@out, default);
 }
 
-} partial class x509ᴛCertificateRequest {
-
 // CheckSignature reports whether the signature on c is valid.
-public static error CheckSignature(this ref CertificateRequest c) {
+internal static error CheckSignature⁔(/*this*/ ref CertificateRequest c) {
     return checkSignature(c.SignatureAlgorithm, c.RawTBSCertificateRequest, c.Signature, c.PublicKey, true);
 }
-
-} partial class x509_package {
 
 // RevocationListEntry represents an entry in the revokedCertificates
 // sequence of a CRL.
@@ -2727,11 +2684,9 @@ public static (slice<byte>, error) CreateRevocationList(io.Reader rand, ж<Revoc
     ));
 }
 
-} partial class x509ᴛRevocationList {
-
 // CheckSignatureFrom verifies that the signature on rl is a valid signature
 // from issuer.
-public static error CheckSignatureFrom(this ref RevocationList rl, ж<Certificate> Ꮡparent) {
+internal static error CheckSignatureFrom⁔(/*this*/ ref RevocationList rl, ж<Certificate> Ꮡparent) {
     ref var parent = ref Ꮡparent.DerefOrNull();
 
     if (parent.Version == 3 && !parent.BasicConstraintsValid || parent.BasicConstraintsValid && !parent.IsCA) {
@@ -2749,4 +2704,4 @@ public static error CheckSignatureFrom(this ref RevocationList rl, ж<Certificat
     return parent.CheckSignature(rl.SignatureAlgorithm, rl.RawTBSRevocationList, rl.Signature);
 }
 
-}
+} // end x509_package

@@ -10,10 +10,14 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+using io = go.io_package;
 // </ImportedTypeAliases>
 
 using go;
 using static go.compress.lzw_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -59,11 +63,14 @@ using static go.compress.lzw_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("compress/lzw/reader.go", "reader.cs", "AFO0AZKCgoKUgpSCgoKokoKCgpSClIKCgqiygoKCgpSClP7kgoKCgoKUgpSmgoKUgsaCgoKCtIK0kriCgpSCgqaCgoKUgoKUgsaCpIKCgpSCuJSCpoLYgsa4ooKqooIABB4ADAKmgoKCAAgGgpS0tIKUgoKmgoKUgoKCgoKC")]
-[assembly: GoPositionMap("compress/lzw/writer.go", "writer.cs", "AECCAZKCgoKClIKUqJKCgoKClIKU6rrSgoKClIKCgpSCgoKClJTowoKUgpSCgoKCuIKCAAcQgoK4lIKCgqaCgoKClIK4gpSmgoKUgqaCgoKUxoKqwoKClKaUgoCCpICCyIKCuIKAgraCgpSCpqqiggAEGAAJAqaCgoIACAaClLS0gpSCgpSCgpSCgoKCgoKC")]
+[assembly: GoPositionMap("compress/lzw/reader.go", "reader.cs", "AFC0AZKCgoKUgpSCgoKokoKCgpSClIKCgqiygoKCgpSClP7kgoKCgoKUgpSmgoKUgsaCgoKCtIK0kriCgpSCgqaCgoKUgoKUgsaCpIKCgpSCuJSCpoLYgqaYooKqooIAAh4ADAKmgoKC5oKUtLSClIKCpoKClIKCgoKCgg==")]
+[assembly: GoPositionMap("compress/lzw/writer.go", "writer.cs", "AD2CAZKCgoKClIKUqJKCgoKClIKUyprSgoKClIKCgpSCgoKClJTowoKUgpSCgoKCuIKCAAcQgoK4lIKCgqaCgoKClIK4gpSmgoKUgqaCgoKUxoKqwoKClKaUgoCCpICCyIKCuIKAgraCgpSCpqqiggACGAAJAqaCgoKmgpS0tIKUgoKUgoKUgoKCgoKCgg==")]
 // </GoSourcePositionMaps>
 
 namespace go.compress;
+
+using static go.compress.lzw_package;
+using io = go.io_package;
 
 [GoPackage("lzw")]
 public static partial class lzw_package
@@ -102,6 +109,31 @@ public static partial class lzw_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(lzw_package.Reader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class lzwᴛReader;
-[GoMethodHost(typeof(lzw_package.Writer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class lzwᴛWriter;
+[GoMethodHost(typeof(lzw_package.Reader)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class lzwᴛReader;
+[GoMethodHost(typeof(lzw_package.Writer)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class lzwᴛWriter;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class lzwᴛReader {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (uint16, error) readLSB(this ref Reader r) => lzw_package.readLSB⁔(ref r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (uint16, error) readMSB(this ref Reader r) => lzw_package.readMSB⁔(ref r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint, error) Read(this ж<Reader> Ꮡr, slice<byte> b) => lzw_package.Read⁔(Ꮡr, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void decode(this ж<Reader> Ꮡr) => lzw_package.decode⁔(Ꮡr);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Close(this ref Reader r) => lzw_package.Close⁔(ref r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Reset(this ref Reader r, io.Reader src, Order order, nint litWidth) => lzw_package.Reset⁔(ref r, src, order, litWidth);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void init(this ref Reader r, io.Reader src, Order order, nint litWidth) => lzw_package.init⁔(ref r, src, order, litWidth);
+}
+partial class lzwᴛWriter {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error writeLSB(this ref Writer w, uint32 c) => lzw_package.writeLSB⁔(ref w, c);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error writeMSB(this ref Writer w, uint32 c) => lzw_package.writeMSB⁔(ref w, c);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error incHi(this ж<Writer> Ꮡw) => lzw_package.incHi⁔(Ꮡw);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint n, error err) Write(this ж<Writer> Ꮡw, slice<byte> p) => lzw_package.Write⁔(Ꮡw, p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Close(this ж<Writer> Ꮡw) => lzw_package.Close⁔(Ꮡw);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Reset(this ref Writer w, io.Writer dst, Order order, nint litWidth) => lzw_package.Reset⁔(ref w, dst, order, litWidth);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void init(this ref Writer w, io.Writer dst, Order order, nint litWidth) => lzw_package.init⁔(ref w, dst, order, litWidth);
+}
+// </MethodForwarders>

@@ -13,20 +13,17 @@ using ast = global::go.go.ast_package;
 using errors = global::go.@internal.types.errors_package;
 using global::go.go;
 using ꓸꓸꓸany = variadic<any>;
-using static types_package;
 
 partial class types_package {
 
-} partial class typesᴛChecker {
-
 // conversion type-checks the conversion T(x).
 // The result is in x.
-internal static void conversion(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, Type T) {
+internal static void conversion⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operand> Ꮡx, Type T) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     var constArg = x.mode == constant_;
 
-    bool constConvertibleTo(Type TΔ1, ж<constant.Value> val) {
+    [GoFunc("(*Checker).conversion.func1")] bool constConvertibleTo(Type TΔ1, ж<constant.Value> val) {
         var (t, _) = TΔ1.Underlying()._<ж<Basic>>(ᐧ);
         switch (ᐧ) {
         case {} when t == nil: {
@@ -72,7 +69,7 @@ internal static void conversion(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, Typ
         // have specific types, constant x cannot be
         // converted.
         var constConvertibleToʗ1 = constConvertibleTo;
-        ok = underIs(T, (Type u) => {
+        ok = underIs(T, [GoFunc("(*Checker).conversion.func2")] (Type u) => {
             // u is nil if there are no specific type terms
             if (u == nil) {
                 Ꮡcause.Value = Ꮡcheck.sprintf("%s does not contain specific types", T);
@@ -138,8 +135,6 @@ internal static void conversion(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, Typ
     x.typ = T;
 }
 
-} partial class typesᴛoperand {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string conversionOfSliceToArrayˢ => ref conversionOfSliceToArrayˢᵇ;
 private static readonly @string conversionOfSliceToArrayˢᵇ = "conversion of slice to array requires go1.20 or later"u8;
@@ -160,7 +155,7 @@ private static readonly @string conversionOfSliceToArrayˢ2ᵇ = "conversion of 
 // may be set to the cause for the failure.
 // The check parameter may be nil if convertibleTo is invoked through an
 // exported API call, i.e., when all methods have been type-checked.
-internal static bool convertibleTo(this ж<operand> Ꮡx, ж<Checker> Ꮡcheck, Type T, ж<@string> Ꮡcause) {
+internal static bool convertibleTo⁔(/*this*/ ж<operand> Ꮡx, ж<Checker> Ꮡcheck, Type T, ж<@string> Ꮡcause) {
     ref var x = ref Ꮡx.DerefOrNull();
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var cause = ref Ꮡcause.DerefOrNull();
@@ -265,7 +260,7 @@ internal static bool convertibleTo(this ж<operand> Ꮡx, ж<Checker> Ꮡcheck, 
         return false;
     }
 
-    void errorf(@string format, params ꓸꓸꓸany argsʗp) {
+    [GoFunc("(*operand).convertibleTo.func1")] void errorf(@string format, params ꓸꓸꓸany argsʗp) {
         var args = argsʗp;
         if (Ꮡcheck != nil && Ꮡcause != nil) {
             @string msg = Ꮡcheck.sprintf(format, args.ꓸꓸꓸ);
@@ -284,7 +279,7 @@ internal static bool convertibleTo(this ж<operand> Ꮡx, ж<Checker> Ꮡcheck, 
         var Tpʗ1 = Tp;
         var Vpʗ1 = Vp;
         var errorfʗ1 = errorf;
-        return Vp.@is((ж<term> VΔ4) => {
+        return Vp.@is([GoFunc("(*operand).convertibleTo.func2")] (ж<term> VΔ4) => {
             if (VΔ4 == nil) {
                 return false; // no specific types
             }
@@ -292,7 +287,7 @@ internal static bool convertibleTo(this ж<operand> Ꮡx, ж<Checker> Ꮡcheck, 
             var Tpʗ2 = Tpʗ1;
             var Vpʗ2 = Vpʗ1;
             var errorfʗ2 = errorfʗ1;
-            return Tpʗ1.@is((ж<term> TΔ4) => {
+            return Tpʗ1.@is([GoFunc("(*operand).convertibleTo.func2.1")] (ж<term> TΔ4) => {
                 if (TΔ4 == nil) {
                     return false; // no specific types
                 }
@@ -309,7 +304,7 @@ internal static bool convertibleTo(this ж<operand> Ꮡx, ж<Checker> Ꮡcheck, 
         var Vpʗ3 = Vp;
         var errorfʗ3 = errorf;
         var origTʗ1 = origT;
-        return Vp.@is((ж<term> VΔ5) => {
+        return Vp.@is([GoFunc("(*operand).convertibleTo.func3")] (ж<term> VΔ5) => {
             if (VΔ5 == nil) {
                 return false; // no specific types
             }
@@ -324,7 +319,7 @@ internal static bool convertibleTo(this ж<operand> Ꮡx, ж<Checker> Ꮡcheck, 
     case {} when Tp != nil: {
         var Tpʗ3 = Tp;
         var errorfʗ4 = errorf;
-        return Tp.@is((ж<term> TΔ5) => {
+        return Tp.@is([GoFunc("(*operand).convertibleTo.func4")] (ж<term> TΔ5) => {
             if (TΔ5 == nil) {
                 return false; // no specific types
             }
@@ -338,8 +333,6 @@ internal static bool convertibleTo(this ж<operand> Ꮡx, ж<Checker> Ꮡcheck, 
 
     return false;
 }
-
-} partial class types_package {
 
 internal static bool isUintptr(Type typ) {
     var (t, _) = typ.Underlying()._<ж<Basic>>(ᐧ);

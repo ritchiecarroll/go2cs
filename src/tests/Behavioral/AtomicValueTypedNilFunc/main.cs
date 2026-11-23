@@ -9,7 +9,7 @@ partial class main_package {
 internal static void recovered(@string label, Action fn) {
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("recovered.func1")] () => {
             var r = recover(); if (r != nil) {
                 fmt.Printf("%s: PANIC %v\n"u8, label, r);
                 return;
@@ -24,45 +24,45 @@ internal static void recovered(@string label, Action fn) {
 
 internal static void main() {
     ref var v1 = ref heap(new atomic.Value(), out var Ꮡv1);
-    Ꮡv1.Store((nint fd) => {
+    Ꮡv1.Store([GoFunc("main.func1")] (nint fd) => {
         _ = fd;
     });
-    recovered("live then typed-nil, same type", () => {
+    recovered("live then typed-nil, same type", [GoFunc("main.func2")] () => {
         Ꮡv1.Store(((Action<nint>)(default)).OrTypedNilFunc());
     });
 
     ref var v2 = ref heap(new atomic.Value(), out var Ꮡv2);
     Ꮡv2.Store(((Action<nint>)(default)).OrTypedNilFunc());
-    recovered("typed-nil then live, same type", () => {
-        Ꮡv2.Store((nint fd) => {
+    recovered("typed-nil then live, same type", [GoFunc("main.func3")] () => {
+        Ꮡv2.Store([GoFunc("main.func3.1")] (nint fd) => {
             _ = fd;
         });
     });
 
     ref var v3 = ref heap(new atomic.Value(), out var Ꮡv3);
     Ꮡv3.Store(((Action<nint>)(default)).OrTypedNilFunc());
-    recovered("typed-nil then typed-nil, DIFFERENT type", () => {
+    recovered("typed-nil then typed-nil, DIFFERENT type", [GoFunc("main.func4")] () => {
         Ꮡv3.Store(((Action<@string>)(default)).OrTypedNilFunc());
     });
 
     ref var v4 = ref heap(new atomic.Value(), out var Ꮡv4);
-    Ꮡv4.Store((nint fd) => {
+    Ꮡv4.Store([GoFunc("main.func5")] (nint fd) => {
         _ = fd;
     });
-    recovered("live then live, same type", () => {
-        Ꮡv4.Store((nint fd) => {
+    recovered("live then live, same type", [GoFunc("main.func6")] () => {
+        Ꮡv4.Store([GoFunc("main.func6.1")] (nint fd) => {
             _ = fd;
         });
     });
 
     ref var v5 = ref heap(new atomic.Value(), out var Ꮡv5);
     Ꮡv5.Store((nint)1);
-    recovered("int then string, different type", () => {
+    recovered("int then string, different type", [GoFunc("main.func7")] () => {
         Ꮡv5.Store("x");
     });
 
     ref var v6 = ref heap(new atomic.Value(), out var Ꮡv6);
-    Ꮡv6.Store(nint (nint fd) => fd * 2);
+    Ꮡv6.Store([GoFunc("main.func8")] nint (nint fd) => fd * 2);
     var (f, ok) = Ꮡv6.Load()._<Func<nint, nint>>(ᐧ); if (ok) {
         fmt.Println("loaded and called:", f(21));
     }

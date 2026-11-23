@@ -14,6 +14,9 @@
 
 using go;
 using static go.encoding.base64_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -63,10 +66,12 @@ using static go.encoding.base64_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("encoding/base64/base64.go", "base64.cs", "ACeAAfKCpoKCgpS4lLSklAAEFAAJApS0pIIAAhIACAKC2LjKygADGAAKAoLKlJKClJSCgoKUgqaCgqaCgqaClJSCgsaCgt6igoKCqJKCggAPGLKCuIKCgoKUgoKClIKClLiCgoKClIKClIK4goKCqrSCgoKUAAQQ0sqigpQACBKyAAQQ9JKmlIKClKSUgpSClIKCgqaCgqaCuKbIgpSUlJSmyIKUlJSCuIKClIKCpIKClIKkgoK4rtSCgpSUgoKssoKCABEctIKCgqaC3IKCgpSClIKmgoSSgoKCgoKClIKmgoKUuIKCgoKCgpSUgoIABBIACQKC3JSCgoIACBSCgpSCgoKCyoKCzIKClIKCgoLKgoKCgoKmzNaClAACFNaClAAIHoKCgoKCgoKUpoKmlMiSyqLGgpSm")]
+[assembly: GoPositionMap("encoding/base64/base64.go", "base64.cs", "ACaAAfKCpoKCgpS4lLSklAACFAAJApS0pIIAAhIACAKCuLjKygABGAAKAoLKlJKClJSCgoKUgqaCgqaCgqaClJSCgsaCgt6igoKCqJKCggALGLKCuIKCgoKUgoKClIKClLiCgoKClIKClIK4goKCqrSCgoKUAAIQ0qqigpQABBKyAAIQ9JKmlIKClKSUgpSClIKCgqaCgqaCuKbIgpSUlJSmyIKUlJSCuIKClIKCpIKClIKkgoK4rtSCgpSUgoKssoKCAA0ctIKCgqaC3IKCgpSClIKmgoSSgoKCgoKClIKmgoKUuIKCgoKCgpSUgoIAAhIACQKC3JSCgoIACBSCgpSCgoKCyoKCzIKClIKCgoLKgoKCgoKmrNaClAACFNaClAAGHoKCgoKCgoKUpoKmlKiSqqKmgpSm")]
 // </GoSourcePositionMaps>
 
 namespace go.encoding;
+
+using static go.encoding.base64_package;
 
 [GoPackage("base64")]
 public static partial class base64_package
@@ -105,9 +110,42 @@ public static partial class base64_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(base64_package.CorruptInputError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class base64ᴛCorruptInputError;
-[GoMethodHost(typeof(base64_package.Encoding)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class base64ᴛEncoding;
-[GoMethodHost(typeof(base64_package.decoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class base64ᴛdecoder;
-[GoMethodHost(typeof(base64_package.encoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class base64ᴛencoder;
-[GoMethodHost(typeof(base64_package.newlineFilteringReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class base64ᴛnewlineFilteringReader;
+[GoMethodHost(typeof(base64_package.CorruptInputError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class base64ᴛCorruptInputError;
+[GoMethodHost(typeof(base64_package.Encoding)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class base64ᴛEncoding;
+[GoMethodHost(typeof(base64_package.decoder)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class base64ᴛdecoder;
+[GoMethodHost(typeof(base64_package.encoder)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class base64ᴛencoder;
+[GoMethodHost(typeof(base64_package.newlineFilteringReader)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class base64ᴛnewlineFilteringReader;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class base64ᴛCorruptInputError {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this CorruptInputError e) => base64_package.Error⁔(e);
+}
+partial class base64ᴛEncoding {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Encoding> WithPadding(this Encoding encʗp, rune padding) => base64_package.WithPadding⁔(encʗp, padding);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Encoding> Strict(this Encoding encʗp) => base64_package.Strict⁔(encʗp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Encode(this ref Encoding enc, slice<byte> dst, slice<byte> src) => base64_package.Encode⁔(ref enc, dst, src);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> AppendEncode(this ref Encoding enc, slice<byte> dst, slice<byte> src) => base64_package.AppendEncode⁔(ref enc, dst, src);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string EncodeToString(this ref Encoding enc, slice<byte> src) => base64_package.EncodeToString⁔(ref enc, src);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint EncodedLen(this ref Encoding enc, nint n) => base64_package.EncodedLen⁔(ref enc, n);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint nsi, nint n, error err) decodeQuantum(this ref Encoding enc, slice<byte> dst, slice<byte> src, nint si) => base64_package.decodeQuantum⁔(ref enc, dst, src, si);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<byte>, error) AppendDecode(this ref Encoding enc, slice<byte> dst, slice<byte> src) => base64_package.AppendDecode⁔(ref enc, dst, src);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<byte>, error) DecodeString(this ref Encoding enc, @string s) => base64_package.DecodeString⁔(ref enc, s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint n, error err) Decode(this ref Encoding enc, slice<byte> dst, slice<byte> src) => base64_package.Decode⁔(ref enc, dst, src);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint DecodedLen(this ref Encoding enc, nint n) => base64_package.DecodedLen⁔(ref enc, n);
+}
+partial class base64ᴛdecoder {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) Read(this ref decoder d, slice<byte> p) => base64_package.Read⁔(ref d, p);
+}
+partial class base64ᴛencoder {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) Write(this ref encoder e, slice<byte> p) => base64_package.Write⁔(ref e, p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error Close(this ref encoder e) => base64_package.Close⁔(ref e);
+}
+partial class base64ᴛnewlineFilteringReader {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint, error) Read(this ref newlineFilteringReader r, slice<byte> p) => base64_package.Read⁔(ref r, p);
+}
+// </MethodForwarders>

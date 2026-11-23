@@ -6,7 +6,6 @@ namespace go.crypto;
 using byteorder = go.@internal.byteorder_package;
 using sync = sync_package;
 using go.@internal;
-using static des_package;
 
 partial class des_package {
 
@@ -207,10 +206,8 @@ internal static slice<uint32> /*out*/ ksRotate(uint32 @in) {
     return @out;
 }
 
-} partial class desᴛdesCipher {
-
 // creates 16 56-bit subkeys from the original key.
-internal static void generateSubkeys(this ref desCipher c, slice<byte> keyBytes) {
+internal static void generateSubkeys⁔(/*this*/ ref desCipher c, slice<byte> keyBytes) {
     ᏑfeistelBoxOnce.Do(initFeistelBox);
 
     // apply PC1 permutation to key
@@ -229,8 +226,6 @@ internal static void generateSubkeys(this ref desCipher c, slice<byte> keyBytes)
         c.subkeys[i] = unpack(permuteBlock(pc2Input, permutedChoice2[..]));
     }
 }
-
-} partial class des_package {
 
 // Expand 48-bit input to 64-bit, with each 6-bit block padded by extra two bits at the top.
 // By doing so, we can have the input blocks (four bits each), and the key blocks (six bits each) well-aligned without

@@ -13,10 +13,15 @@
 global using cryptoꓸDecrypterOpts = object;
 global using cryptoꓸPrivateKey = object;
 global using cryptoꓸPublicKey = object;
+using crypto = go.crypto_package;
+using io = go.io_package;
 // </ImportedTypeAliases>
 
 using go;
 using static go.crypto.rsa_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -67,13 +72,17 @@ using static go.crypto.rsa_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("crypto/rsa/fips.go", "fips.cs", "AC5akqaigpQADhgADAKCpoKmgoKClJSUlIKUgpSCpoKCpoKClJSCgsbYgsgAAxgACQKCpoKCgpSClKaUgpSCpoKCpoKClJSkpAADLAASAgACFAAJAoKUpsKCpoKUgoKClIKClJSUgpSClIKClIK4goKUAAYaAAwCgtaigqaCgoSUgoKUgoKUpoKUgpSCgriCgqYABx4ADgKCgoKUpoKmgoKClKaClIKmgoKUAAMWAAgCgoKClKaCpoKCgpSClKaClIKmgoKUpoKUpKSUpoIADgaCgpSClIKUgpSClIKUAAgGgoKUgpSClIKU", "", "", "322=Size/1/1/1")]
+[assembly: GoPositionMap("crypto/rsa/fips.go", "fips.cs", "ACtakqaigpQADBgADAKCpoKmgoKClJSUlIKUgpSCpoKCpoKClJSCgsbYgsgAAxgACQKCpoKCgpSClKaUgpSCpoKCpoKClJSkpAADLAASAgACFAAJAoKUpsKCpoKUgoKClIKClJSUgpSClIKClIK4goKUAAYaAAwCgtaigqaCgoSUgoKUgoKUpoKUgpSCgriCgqYABx4ADgKCgoKUpoKmgoKClKaClIKmgoKUAAMWAAgCgoKClKaCpoKCgpSClKaClIKmgoKUpoKUpKSUpoIADgaCgpSClIKUgpSClIKUAAgGgoKUgpSClIKU", "", "", "317=Size/1/1/1")]
 [assembly: GoPositionMap("crypto/rsa/notboring.go", "notboring.cs", "AAsWgpSC")]
 [assembly: GoPositionMap("crypto/rsa/pkcs1v15.go", "pkcs1v15.cs", "AChkABECgqaCpoKCpoKCgpSUlKaCgoKCgpSClIKCgoKUpoKClAACHAANAoKmgoKClIKClKaCgpSClAACWAArAoKmgoKmgoKmpqaCggACEgALAoKmgoKCpoKCgoKUgoKmgoKUgoK4gtyUgoKCypSCgqiygoKmgoKCgri4")]
-[assembly: GoPositionMap("crypto/rsa/rsa.go", "rsa.cs", "AEV8AAwg0qiSgoKUACFEkqqigoKUgpSClIKCpsrSAAQWAAgCgqbs0oKmlIKUyIKCgpSClJTYACRC+IK4gpSClIKmgoKUgoKUgpQABBLCgpSCypSCgpSCgpTmgoKUAAYaAAoCgqaEgoKUgoKCgoKCgoKCgqYADRymlIKUgpSCpoIAChaCpoKUggARJAAKNAAXAoKUgqaUgpSCpoKUpqaCgriUgoIACxiClIKCgoKUuIKCgsqCgoKCgoKUuKaCgpSCgoLYgoCCtty4uLiigqaCpoKUAAwGgpSClIKUgpSClIK4gqaClIKCgqaUgqaCgoKCgoIACgaClIKClJSCuIKClIK4gpSClIKCpoKCgoKUgpSCgoKmpsaCgoKUpqKClIKClA==", "", "", "298=bigIntEqualToBytes/2/5/1,bigIntEqualToBytes/3/5/2,bigIntEqualToBytes/4/5/3,bigIntEqualToBytes/5/5/4;427=SetBytes/1/7/2,SetBytes/2/7/5,SetBytes/3/7/7,SetBytes/4/7/8,SetBytes/5/7/12,SetBytes/6/7/13,SetBytes/7/7/14;649=Bytes/3/7/1,Bytes/4/7/1,Bytes/5/7/2,Bytes/6/7/2,Bytes/7/7/2;661=Bytes/3/4/1,Bytes/4/4/1")]
+[assembly: GoPositionMap("crypto/rsa/rsa.go", "rsa.cs", "AER8AAog0qiSgoKUAB1EkqqigoKUgpSClIKCpqrSAAIWAAgCgqbs0oKmlIKUyIKCgpSClJTYACBC+IK4gpSClIKmgoKUgoKUgpQAAhLCgpSCypSCgpSCgpTmgoKUAAYaAAoCgqaEgoKUgoKCgoKCgoKCgqYADRymlIKUgpSCpoIAChaCpoKUggARJAAKNAAXAoKUgqaUgpSCpoKUpqaCgriUgoIACxiClIKCgoKUuIKCgsqCgoKCgoKUuKaCgpSCgoLYgoCCtty4uJiigqaCpoKUAAoGgpSClIKUgpSClIK4gqaClIKCgqaUgqaCgoKCgoIACgaClIKClJSCuIKClIK4gpSClIKCpoKCgoKUgpSCgoKmpqaCgoKUpqKClIKClA==", "", "", "283=bigIntEqualToBytes/2/5/1,bigIntEqualToBytes/3/5/2,bigIntEqualToBytes/4/5/3,bigIntEqualToBytes/5/5/4;410=SetBytes/1/7/2,SetBytes/2/7/5,SetBytes/3/7/7,SetBytes/4/7/8,SetBytes/5/7/12,SetBytes/6/7/13,SetBytes/7/7/14;628=Bytes/3/7/1,Bytes/4/7/1,Bytes/5/7/2,Bytes/6/7/2,Bytes/7/7/2;640=Bytes/3/4/1,Bytes/4/4/1")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;
+
+using static go.crypto.rsa_package;
+using crypto = go.crypto_package;
+using io = go.io_package;
 
 [GoPackage("rsa")]
 public static partial class rsa_package
@@ -128,7 +137,33 @@ public static partial class rsa_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(rsa_package.PSSOptions)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class rsaᴛPSSOptions;
-[GoMethodHost(typeof(rsa_package.PrivateKey)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class rsaᴛPrivateKey;
-[GoMethodHost(typeof(rsa_package.PublicKey)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class rsaᴛPublicKey;
+[GoMethodHost(typeof(rsa_package.PSSOptions)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class rsaᴛPSSOptions;
+[GoMethodHost(typeof(rsa_package.PrivateKey)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class rsaᴛPrivateKey;
+[GoMethodHost(typeof(rsa_package.PublicKey)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class rsaᴛPublicKey;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class rsaᴛPSSOptions {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static crypto.Hash HashFunc(this ref PSSOptions opts) => rsa_package.HashFunc⁔(ref opts);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint saltLength(this ж<PSSOptions> Ꮡopts) => rsa_package.saltLength⁔(Ꮡopts);
+}
+partial class rsaᴛPrivateKey {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static cryptoꓸPublicKey Public(this ж<PrivateKey> Ꮡpriv) => rsa_package.Public⁔(Ꮡpriv);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Equal(this ref PrivateKey priv, cryptoꓸPrivateKey x) => rsa_package.Equal⁔(ref priv, x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<byte>, error) Sign(this ж<PrivateKey> Ꮡpriv, io.Reader rand, slice<byte> digest, crypto.SignerOpts opts) => rsa_package.Sign⁔(Ꮡpriv, rand, digest, opts);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<byte> plaintext, error err) Decrypt(this ж<PrivateKey> Ꮡpriv, io.Reader rand, slice<byte> ciphertext, cryptoꓸDecrypterOpts opts) => rsa_package.Decrypt⁔(Ꮡpriv, rand, ciphertext, opts);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Validate(this ref PrivateKey priv) => rsa_package.Validate⁔(ref priv);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool precomputedIsConsistent(this ref PrivateKey priv) => rsa_package.precomputedIsConsistent⁔(ref priv);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Precompute(this ref PrivateKey priv) => rsa_package.Precompute⁔(ref priv);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (PrecomputedValues, error) precompute(this ref PrivateKey priv) => rsa_package.precompute⁔(ref priv);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (PrecomputedValues, error) precomputeLegacy(this ref PrivateKey priv) => rsa_package.precomputeLegacy⁔(ref priv);
+}
+partial class rsaᴛPublicKey {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Size(this ref PublicKey pub) => rsa_package.Size⁔(ref pub);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Equal(this ref PublicKey pub, cryptoꓸPublicKey x) => rsa_package.Equal⁔(ref pub, x);
+}
+// </MethodForwarders>

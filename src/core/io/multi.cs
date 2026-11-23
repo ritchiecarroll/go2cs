@@ -5,28 +5,21 @@ namespace go;
 
 using ꓸꓸꓸReader = variadic<io_package.Reader>;
 using ꓸꓸꓸWriter = variadic<io_package.Writer>;
-using static io_package;
 
 partial class io_package {
 
 partial struct eofReader {
 }
 
-} partial class ioᴛeofReader {
-
-internal static (nint, error) Read(this eofReader _Δp0, slice<byte> _Δp1) {
+internal static (nint, error) Read⁔(/*this*/ eofReader _Δp0, slice<byte> _Δp1) {
     return (0, EOF);
 }
-
-} partial class io_package {
 
 partial struct multiReader {
     internal slice<Reader> readers;
 }
 
-} partial class ioᴛmultiReader {
-
-internal static (nint n, error err) Read(this ref multiReader mr, slice<byte> p) {
+internal static (nint n, error err) Read⁔(/*this*/ ref multiReader mr, slice<byte> p) {
     nint n = default;
     error err = default;
 
@@ -56,11 +49,11 @@ internal static (nint n, error err) Read(this ref multiReader mr, slice<byte> p)
     return (0, EOF);
 }
 
-internal static (int64 sum, error err) WriteTo(this ref multiReader mr, Writer w) {
+internal static (int64 sum, error err) WriteTo⁔(/*this*/ ref multiReader mr, Writer w) {
     return mr.writeToWithBuffer(w, new slice<byte>(1024 * 32));
 }
 
-internal static (int64 sum, error err) writeToWithBuffer(this ref multiReader mr, Writer w, slice<byte> buf) {
+internal static (int64 sum, error err) writeToWithBuffer⁔(/*this*/ ref multiReader mr, Writer w, slice<byte> buf) {
     int64 sum = default;
     error err = default;
 
@@ -82,8 +75,6 @@ internal static (int64 sum, error err) writeToWithBuffer(this ref multiReader mr
     return (sum, default);
 }
 
-} partial class io_package {
-
 internal static WriterTo _ᴛ2ʗ = new multiReaderжWriterTo(((ж<multiReader>)nil));
 
 // MultiReader returns a Reader that's the logical concatenation of
@@ -102,9 +93,7 @@ partial struct multiWriter {
     internal slice<Writer> writers;
 }
 
-} partial class ioᴛmultiWriter {
-
-internal static (nint n, error err) Write(this ref multiWriter t, slice<byte> p) {
+internal static (nint n, error err) Write⁔(/*this*/ ref multiWriter t, slice<byte> p) {
     nint n = default;
     error err = default;
 
@@ -121,13 +110,9 @@ internal static (nint n, error err) Write(this ref multiWriter t, slice<byte> p)
     return (len(p), default);
 }
 
-} partial class io_package {
-
 internal static StringWriter _ᴛ3ʗ = new multiWriterжStringWriter(((ж<multiWriter>)nil));
 
-} partial class ioᴛmultiWriter {
-
-internal static (nint n, error err) WriteString(this ref multiWriter t, @string s) {
+internal static (nint n, error err) WriteString⁔(/*this*/ ref multiWriter t, @string s) {
     nint n = default;
     error err = default;
 
@@ -151,8 +136,6 @@ internal static (nint n, error err) WriteString(this ref multiWriter t, @string 
     }
     return (len(s), default);
 }
-
-} partial class io_package {
 
 // MultiWriter creates a writer that duplicates its writes to all the
 // provided writers, similar to the Unix tee(1) command.

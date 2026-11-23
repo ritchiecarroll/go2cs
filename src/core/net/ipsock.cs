@@ -9,7 +9,6 @@ using runtime = runtime_package;
 using Δsync = sync_package;
 /* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
 using @internal;
-using static net_package;
 
 partial class net_package {
 
@@ -80,12 +79,10 @@ internal static bool isIPv4(Addr addr) {
 // isNotIPv4 reports whether addr does not contain an IPv4 address.
 internal static bool isNotIPv4(Addr addr) { return !isIPv4(addr); }
 
-} partial class netᴛaddrList {
-
 // forResolve returns the most appropriate address in address for
 // a call to ResolveTCPAddr, ResolveUDPAddr, or ResolveIPAddr.
 // IPv4 is preferred, unless addr contains an IPv6 literal.
-internal static Addr forResolve(this addrList addrs, @string network, @string addr) {
+internal static Addr forResolve⁔(/*this*/ addrList addrs, @string network, @string addr) {
     bool want6 = default;
     switch (ᐧ) {
     case {} when network == "ip"u8: {
@@ -106,7 +103,7 @@ internal static Addr forResolve(this addrList addrs, @string network, @string ad
 
 // first returns the first address which satisfies strategy, or if
 // none do, then the first address of any kind.
-internal static Addr first(this addrList addrs, Func<Addr, bool> strategy) {
+internal static Addr first⁔(/*this*/ addrList addrs, Func<Addr, bool> strategy) {
     foreach (var (_, addr) in range<Addr>(addrs)) {
         if (strategy(addr)) {
             return addr;
@@ -121,7 +118,7 @@ internal static Addr first(this addrList addrs, Func<Addr, bool> strategy) {
 // primaries, while addresses with the opposite label are returned
 // as fallbacks. For non-empty inputs, primaries is guaranteed to be
 // non-empty.
-internal static (addrList primaries, addrList fallbacks) partition(this addrList addrs, Func<Addr, bool> strategy) {
+internal static (addrList primaries, addrList fallbacks) partition⁔(/*this*/ addrList addrs, Func<Addr, bool> strategy) {
     addrList primaries = default;
     addrList fallbacks = default;
 
@@ -137,8 +134,6 @@ internal static (addrList primaries, addrList fallbacks) partition(this addrList
     }
     return (primaries, fallbacks);
 }
-
-} partial class net_package {
 
 // filterAddrList applies a filter to a list of IP addresses,
 // yielding a list of Addr objects. Known filters are nil, ipv4only,
@@ -201,7 +196,7 @@ public static (@string host, @string port, error err) SplitHostPort(@string host
 
     @string missingPort = missingPortᶜ;
     @string tooManyColons = tooManyColonsᶜ;
-    (@string host, @string port, error err) addrErr(@string addr, @string why) {
+    [GoFunc("SplitHostPort.func1")] (@string host, @string port, error err) addrErr(@string addr, @string why) {
         return ("", "", new AddrErrorжerror(Ꮡ(new AddrError(Err: why, Addr: addr))));
     }
     nint j = 0;
@@ -283,13 +278,11 @@ public static @string JoinHostPort(@string host, @string port) {
     return host + ":"u8 + port;
 }
 
-} partial class netᴛResolver {
-
 // internetAddrList resolves addr, which may be a literal IP
 // address or a DNS name, and returns a list of internet protocol
 // family addresses. The result contains at least one address when
 // error is nil.
-internal static (addrList, error) internetAddrList(this ж<Resolver> Ꮡr, context.Context ctx, @string net, @string addr) {
+internal static (addrList, error) internetAddrList⁔(/*this*/ ж<Resolver> Ꮡr, context.Context ctx, @string net, @string addr) {
     error err = default;
     @string host = default;
     @string port = default;
@@ -317,7 +310,7 @@ internal static (addrList, error) internetAddrList(this ж<Resolver> Ꮡr, conte
         return (default, ((UnknownNetworkError)net));
     }}
     var portnumʗ1 = portnum;
-    var inetaddr = Addr (IPAddr ip) => {
+    var inetaddr = [GoFunc("(*Resolver).internetAddrList.func1")] Addr (IPAddr ip) => {
         var netᴛ2 = net;
         switch (ᐧ) {
         case {} when netᴛ2 == "tcp"u8 || netᴛ2 == "tcp4"u8 || netᴛ2 == "tcp6"u8: {
@@ -360,8 +353,6 @@ internal static (addrList, error) internetAddrList(this ж<Resolver> Ꮡr, conte
     }
     return filterAddrList(filter, ips, inetaddr, host);
 }
-
-} partial class net_package {
 
 // loopbackIP should be an internal detail,
 // but widely used packages access it using linkname.

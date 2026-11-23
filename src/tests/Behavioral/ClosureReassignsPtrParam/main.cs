@@ -5,7 +5,7 @@ using fmt = fmt_package;
 partial class main_package {
 
 internal static nint accumulate(ж<nint> counter, slice<nint> vals) {
-    void add(nint v) {
+    [GoFunc("accumulate.func1")] void add(nint v) {
         if (counter == nil) {
             counter = @new<nint>();
         }

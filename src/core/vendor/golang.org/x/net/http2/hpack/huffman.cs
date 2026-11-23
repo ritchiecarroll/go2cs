@@ -11,7 +11,7 @@ using sync = sync_package;
 partial class hpack_package {
 
 [GoLazy] partial class lazyᴛbufPool { internal static readonly ж<sync.Pool> ᏑbufPool = new StaticBox<sync.Pool>(new sync.Pool(
-    New: () => @new<bytes.Buffer>()
+    New: [GoFunc("init.func1")] () => @new<bytes.Buffer>()
 )); }
 internal static ref sync.Pool bufPool => ref ((StaticBox<sync.Pool>)ᏑbufPool).ValueSlot;
 

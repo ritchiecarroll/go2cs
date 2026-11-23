@@ -182,7 +182,7 @@ internal static slice<Pod> collectPodsImpl(slice<@string> files, slice<nint> dir
     }
     var pods = new slice<Pod>(0, len(mm));
     foreach (var (_, p) in mm) {
-        slices.SortFunc(p.elements, (fileWithAnnotations a, fileWithAnnotations b) => {
+        slices.SortFunc(p.elements, [GoFunc("collectPodsImpl.func1")] (fileWithAnnotations a, fileWithAnnotations b) => {
             nint r = cmp.Compare(a.origin, b.origin); if (r != 0) {
                 return r;
             }
@@ -201,7 +201,7 @@ internal static slice<Pod> collectPodsImpl(slice<@string> files, slice<nint> dir
         }
         pods = append(pods, pod);
     }
-    slices.SortFunc(pods, (Pod a, Pod b) => strings.Compare(a.MetaFile, b.MetaFile));
+    slices.SortFunc(pods, [GoFunc("collectPodsImpl.func2")] (Pod a, Pod b) => strings.Compare(a.MetaFile, b.MetaFile));
     return pods;
 }
 

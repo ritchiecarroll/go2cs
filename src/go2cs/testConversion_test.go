@@ -4062,10 +4062,10 @@ func readConvertedAssembly(t *testing.T, dir string) string {
 }
 
 // A `_test.go` METHOD named like a production TYPE (strings' export_test.go
-// `func (r *Replacer) Replacer()`) stands in the type's test holder, beside the package class, so
-// the package class holds the type alone and neither name is renamed. While methods stood in the
-// package class the method took a marker (CS0102 on the class otherwise); the holder ends that
-// rename at the declaration, at internal-variant call sites and at EXTERNAL-variant call sites.
+// `func (r *Replacer) Replacer()`) takes the suffix form: its body `Replacer⁔` stands in the package class
+// beside the type, and its Go-named forwarder in the type's test holder, so neither name is renamed. While
+// methods stood in the package class the method took a marker (CS0102 on the class otherwise); the holder
+// ends that rename at the declaration, at internal-variant call sites and at EXTERNAL-variant call sites.
 func TestTestVariantPinsProductionTypeAgainstTestMethodCollision(t *testing.T) {
 	isolateConverterPathGlobals(t)
 	dir := t.TempDir()
@@ -4102,12 +4102,13 @@ func TestTestVariantPinsProductionTypeAgainstTestMethodCollision(t *testing.T) {
 
 	exportCs := readConvertedTestFile(t, outputPath, "export_test.cs")
 
-	if holder := "} partial class pinned" + TempVarMarker + "Replacer" + testHolderMark + " {"; !strings.Contains(exportCs, holder) {
-		t.Fatalf("the test file's method must stand in the type's test holder, want %q:\n%s", holder, exportCs)
+	if body := "internal static nint Replacer⁔(/*this*/ ref Replacer r) { return r.n; }"; !strings.Contains(exportCs, body) {
+		t.Fatalf("the test file's method body must stand in the package class, want %q:\n%s", body, exportCs)
 	}
-	if !strings.Contains(exportCs, " Replacer(this ref Replacer r)") {
-		t.Fatalf("the method declarator must keep its Go name:\n%s", exportCs)
+	if strings.Contains(exportCs, "partial class pinned"+TempVarMarker) {
+		t.Fatalf("no file switches into a holder:\n%s", exportCs)
 	}
+	requireRecordedForwarder(t, "pinned"+TempVarMarker+"Replacer"+testHolderMark, " Replacer(this ref Replacer r) => pinned_package.Replacer⁔(ref r);")
 	if !strings.Contains(exportCs, "r.Replacer()") {
 		t.Fatalf("the internal-variant call site must name the method as Go does:\n%s", exportCs)
 	}
@@ -4127,12 +4128,10 @@ func TestTestVariantPinsProductionTypeAgainstTestMethodCollision(t *testing.T) {
 }
 
 // Dot-import shadowing: a TEST-declared method named like a dot-imported production FUNCTION
-// (sort_test's example_keys_test.go `By.Sort` beside `Sort(data)`) stands in its receiver's holder,
-// so the method group reaches only the holder's own bodies. The method keeps its Go name; inside
-// the holder the dot-imported call is written through the production package class, and outside it
-// the call stays bare (bound through `using static`). Discrimination: a holder whose methods are
-// not named like the function it calls (Stable) writes the call bare. The test keeps the name the
-// records cite; nothing is renamed any more.
+// (sort_test's example_keys_test.go `By.Sort` beside `Sort(data)`) takes the suffix form: its body
+// `Sort⁔` stands in the package class, where no member named Sort hides the dot-imported function, so
+// the call stays bare (bound through `using static`) in the body as everywhere; the Go-named forwarder
+// stands in the receiver's holder. Nothing is renamed.
 func TestTestVariantRenamesTestMethodShadowingDotImportedFunction(t *testing.T) {
 	isolateConverterPathGlobals(t)
 	dir := t.TempDir()
@@ -4170,21 +4169,18 @@ func TestTestVariantRenamesTestMethodShadowingDotImportedFunction(t *testing.T) 
 	if strings.Contains(valueCs, ShadowVarMarker+"Sort") || strings.Contains(valueCs, ShadowVarMarker+"Stable") {
 		t.Fatalf("no method may carry a marker:\n%s", valueCs)
 	}
-	if !strings.Contains(valueCs, " Sort(this By by)") {
-		t.Fatalf("the test method declarator must keep its Go name:\n%s", valueCs)
+	if !strings.Contains(valueCs, "internal static void Sort⁔(/*this*/ By by) { Sort(by); }") {
+		t.Fatalf("the test method's body must call the dot-imported function bare:\n%s", valueCs)
 	}
+	requireRecordedForwarder(t, "value_test"+TempVarMarker+"By", " Sort(this By by) => value_test_package.Sort⁔(by);")
 	if !strings.Contains(valueCs, "by.Sort();") {
 		t.Fatalf("the test method's call site must name the method as Go does:\n%s", valueCs)
 	}
-
-	// Inside the holder that declares `Sort`, the bare name is the holder's method group.
-	if !strings.Contains(valueCs, "example.value_package.Sort(by);") {
-		t.Fatalf("inside the declaring holder the dot-imported call must name the production package class:\n%s", valueCs)
+	if strings.Contains(valueCs, "value_package.Sort(") {
+		t.Fatalf("no body names the dot-imported function through its package class:\n%s", valueCs)
 	}
-
-	// A holder that does not declare `Sort`, and the package class, write the call as Go does.
 	if !strings.Contains(valueCs, "{ Sort(o); }") {
-		t.Fatalf("a holder that does not declare the name must write the dot-imported call bare:\n%s", valueCs)
+		t.Fatalf("another method's body must write the dot-imported call bare:\n%s", valueCs)
 	}
 	if !strings.Contains(valueCs, "    Sort(by);") {
 		t.Fatalf("outside every holder the dot-imported call must stay bare:\n%s", valueCs)
@@ -5168,14 +5164,14 @@ func TestWhiteboxBridgeDeclaredNamesCoverMethodsAndPackageDecls(t *testing.T) {
 // the corpus instance: `type table struct { mu sync.Mutex; … }` sits beside
 // `func (db *fakeDB) table(string)`. While methods stood in the package class the TYPE took a marker
 // and every accessor was qualified (`sql_package.Δtable.Ꮡmu`, a class with no such member, CS0117 ×6).
-// The method now stands in its receiver's holder, so the type keeps its Go name, and the bare name
-// is hidden only inside that holder, where it is the holder's method group.
+// While the method's body stood in its receiver's holder the bare name was hidden there by the holder's method
+// group, and the accessor named the bridge class. The method now takes the suffix form (`table⁔`), its body in
+// the bridge class beside the type, so the type keeps its Go name and nothing hides it.
 //
-// Three places are asserted: inside the holder that declares the method the accessor names the
-// bridge class and never the production class; in the bridge class it is bare; and an ordinary
-// field's address reads its generated property (`p.Ꮡn`), which names no class (parity seat #32), so
-// the accessor form holds for a field the property does not serve, here one named like a member of
-// ж<T> (`&p.Value`).
+// Asserted: no accessor names the bridge or the production class; both read the type bare; and an ordinary
+// field's address reads its generated property (`p.Ꮡn`), which names no class (parity seat #32), so the
+// accessor form holds for a field the property does not serve, here one named like a member of ж<T>
+// (`&p.Value`).
 func TestTestVariantBoxAccessorNamesBridgeDeclaringClass(t *testing.T) {
 	isolateConverterPathGlobals(t)
 	dir := t.TempDir()
@@ -5222,14 +5218,16 @@ func TestTestVariantBoxAccessorNamesBridgeDeclaringClass(t *testing.T) {
 	accessor := "probe." + AddressPrefix + "Value"
 	bridge := "boxacc_internal_test" + PackageSuffix + "." + accessor
 
-	if strings.Count(exportCs, bridge) != 1 {
-		t.Fatalf("inside the holder that declares `probe` the box accessor must name the BRIDGE class, once:\n%s", exportCs)
+	// The method `probe` takes the suffix form (`probe⁔`), so the body of `inside` stands in the bridge class, where no
+	// member hides the type: the box accessor is bare there as in `probeValue`.
+	if strings.Contains(exportCs, bridge) {
+		t.Fatalf("no body stands in a holder, so no box accessor names the BRIDGE class:\n%s", exportCs)
 	}
 	if strings.Contains(exportCs, "boxacc"+PackageSuffix+"."+accessor) {
 		t.Fatalf("the production class does not declare a test-file type, so it must not be the qualifier:\n%s", exportCs)
 	}
-	if strings.Count(exportCs, accessor) != 2 || !strings.Contains(exportCs, "("+accessor+")") {
-		t.Fatalf("in the bridge class no member hides the type, so the box accessor must be bare:\n%s", exportCs)
+	if strings.Count(exportCs, "("+accessor+")") != 2 {
+		t.Fatalf("in the bridge class no member hides the type, so both box accessors must be bare:\n%s", exportCs)
 	}
 }
 
@@ -5927,7 +5925,8 @@ func TestExternalVariantHoldersAreDeclaredOnlyInTheExternalUnit(t *testing.T) {
 	if strings.Contains(testInfo, "value_testᴛbuffer") {
 		t.Fatalf("package_test_info.cs declares the external holder value_testᴛbuffer a second time (CS0579):\n%s", testInfo)
 	}
-	if !strings.Contains(testInfo, productionHolder) {
+	// The merging write respells the seeded holder's System attribute short (applyPackageInfoSystemUsings).
+	if !strings.Contains(testInfo, respellSystemAttributes(productionHolder, true)) {
 		t.Fatalf("package_test_info.cs must keep the production holder valueᴛWriter:\n%s", testInfo)
 	}
 
@@ -5963,7 +5962,7 @@ func TestExternalVariantHoldersAreDeclaredOnlyInTheExternalUnit(t *testing.T) {
 	if n := strings.Count(string(controlData), "public static partial class value_testᴛbuffer;"); n != 1 {
 		t.Fatalf("control: package_test_info.cs declares value_testᴛbuffer %d times, want 1:\n%s", n, controlData)
 	}
-	if !strings.Contains(string(controlData), productionHolder) {
+	if !strings.Contains(string(controlData), respellSystemAttributes(productionHolder, true)) {
 		t.Fatalf("control: package_test_info.cs must keep the production holder valueᴛWriter:\n%s", controlData)
 	}
 
@@ -5972,12 +5971,11 @@ func TestExternalVariantHoldersAreDeclaredOnlyInTheExternalUnit(t *testing.T) {
 
 // Every external test file names the package under test's internal-test class in a `using static`, and
 // that class compiles into the same assembly. In the package class the external variant's own member
-// wins; a method holder is not nested in it, so there a name both classes declare ties (CS0229 for a
-// value, CS0104 for a type: encoding/json's Small, encoding/gob's Point, net/http's dumpConn). The holder
-// writes such a name through the external variant's own class, as Go binds it. Discrimination: a name
-// only production declares (no dot import brings it), a name only the external variant declares, and
-// every name outside a holder stay bare.
-func TestExternalTestHolderQualifiesAnOwnNameTheInternalTestClassAlsoDeclares(t *testing.T) {
+// wins, so a method's body reads every name bare. Outside it a TYPE both classes declare ties (CS0104:
+// encoding/gob's Point, net/http's dumpConn), so a type the method's signature names is written through the
+// external variant's own class, which the forwarder in the holder repeats. Discrimination: a name only
+// production declares (no dot import brings it) and a name only the external variant declares stay bare.
+func TestExternalTestSignatureQualifiesAnOwnTypeTheInternalTestClassAlsoDeclares(t *testing.T) {
 	isolateConverterPathGlobals(t)
 	dir := t.TempDir()
 	files := map[string]string{
@@ -6016,13 +6014,16 @@ func TestExternalTestHolderQualifiesAnOwnNameTheInternalTestClassAlsoDeclares(t 
 	valueCs := readConvertedTestFile(t, outputPath, "value_test.cs")
 
 	requireEmitted(t, "value_test.cs", valueCs, []string{
-		"Sum(this value_test_package.pair p) { return p.x + (nint)value_test.small + (nint)alone + new value_test_package.pair(x: 1).x + (nint)((size)3); }",
+		"internal static nint Sum⁔(/*this*/ value_test_package.pair p) { return p.x + (nint)small + (nint)alone + new value_test_package.pair(x: 1).x + (nint)((size)3); }",
 		"return (nint)(small + alone) + new pair().x;",
-		// The receiver's class qualifier does not decide the method's accessibility: an exported method of
-		// an exported type stays public.
-		"public static nint Norm(this value_test_package.Point p)",
+		"internal static nint Norm⁔(/*this*/ value_test_package.Point p) { return p.X; }",
 	}, []string{
+		"value_test.small",
 		"value_test.alone",
 		"value_test_package.size",
 	})
+
+	// The receiver's class qualifier does not decide the method's accessibility: the forwarder of an exported
+	// method of an exported type stays public.
+	requireRecordedForwarder(t, "value_test"+TempVarMarker+"Point", "public static nint Norm(this value_test_package.Point p) => value_test_package.Norm⁔(p);")
 }

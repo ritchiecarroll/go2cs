@@ -22,12 +22,10 @@ using runtime = runtime_package;
 using Δsync = sync_package;
 using atomic = go.sync.atomic_package;
 using time = time_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
+using System.Runtime.CompilerServices;
 using go.sync;
 using log;
 using ꓸꓸꓸany = variadic<any>;
-using static log_package;
 
 partial class log_package {
 
@@ -79,10 +77,8 @@ public static ж<Logger> New(Δio.Writer @out, @string prefix, nint flag) {
     return l;
 }
 
-} partial class logᴛLogger {
-
 // SetOutput sets the output destination for the logger.
-public static void SetOutput(this ж<Logger> Ꮡl, Δio.Writer w) {
+internal static void SetOutput⁔(/*this*/ ж<Logger> Ꮡl, Δio.Writer w) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -96,8 +92,6 @@ public static void SetOutput(this ж<Logger> Ꮡl, Δio.Writer w) {
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { if (ᒐd1) Ꮡl.DerefOrNull().outMu.Unlock(); ᒐ.Run(); }
 }
-
-} partial class log_package {
 
 internal static ж<Logger> std = New(new os.FileжWriter(os.Stderr), "", LstdFlags);
 
@@ -178,7 +172,7 @@ internal static void formatHeader(ref slice<byte> buf, time.Time t, @string pref
     }
 }
 
-internal static readonly ж<Δsync.Pool> ᏑbufferPool = new StaticBox<Δsync.Pool>(new Δsync.Pool(New: () => @new<slice<byte>>()));
+internal static readonly ж<Δsync.Pool> ᏑbufferPool = new StaticBox<Δsync.Pool>(new Δsync.Pool(New: [GoFunc("init.func1")] () => @new<slice<byte>>()));
 internal static ref Δsync.Pool bufferPool => ref ((StaticBox<Δsync.Pool>)ᏑbufferPool).ValueSlot;
 
 internal static ж<slice<byte>> getBuffer() {
@@ -202,23 +196,21 @@ internal static void putBuffer(ж<slice<byte>> Ꮡp) {
     ᏑbufferPool.Put(Ꮡp.OrTypedNil());
 }
 
-} partial class logᴛLogger {
-
 // Output writes the output for a logging event. The string s contains
 // the text to print after the prefix specified by the flags of the
 // Logger. A newline is appended if the last character of s is not
 // already a newline. Calldepth is used to recover the PC and is
 // provided for generality, although at the moment on all pre-defined
 // paths it will be 2.
-public static partial error Output(this ж<Logger> Ꮡl, nint calldepth, @string s) {
-    return Ꮡl.output(0, calldepth + 1, (slice<byte> b) => { // +1 for this frame.
+internal static partial error Output⁔(/*this*/ ж<Logger> Ꮡl, nint calldepth, @string s) {
+    return Ꮡl.output(0, calldepth + 1, [GoFunc("(*Logger).Output.func1")] (slice<byte> b) => { // +1 for this frame.
         return append(b, s.ꓸꓸꓸ);
     });
 }
 
 // output can take either a calldepth or a pc to get source line information.
 // It uses the pc if it is non-zero.
-internal static partial error output(this ж<Logger> Ꮡl, uintptr pc, nint calldepth, Func<slice<byte>, slice<byte>> appendOutput) {
+internal static partial error output⁔(/*this*/ ж<Logger> Ꮡl, uintptr pc, nint calldepth, Func<slice<byte>, slice<byte>> appendOutput) {
     GoFrame ᒐ = default;
     try {
         ref var l = ref Ꮡl.DerefOrNull();
@@ -272,112 +264,108 @@ internal static partial error output(this ж<Logger> Ꮡl, uintptr pc, nint call
     finally { ᒐ.Run(); }
 }
 
-} partial class log_package {
-
 [GoInit] internal static void init() {
-    Δinternal.DefaultOutput = [MethodImpl(MethodImplOptions.NoInlining)] (uintptr pc, slice<byte> data) => {
+    Δinternal.DefaultOutput = [MethodImpl(MethodImplOptions.NoInlining), GoFunc("init.0.func1")] (uintptr pc, slice<byte> data) => {
         var dataʗ1 = data;
-        return std.output(pc, 0, (slice<byte> buf) => appendꓸꓸꓸ(buf, dataʗ1));
+        return std.output(pc, 0, [GoFunc("init.0.func1.1")] (slice<byte> buf) => appendꓸꓸꓸ(buf, dataʗ1));
     };
 }
 
-} partial class logᴛLogger {
-
 // Print calls l.Output to print to the logger.
 // Arguments are handled in the manner of [fmt.Print].
-public static partial void Print(this ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) {
+internal static partial void Print⁔(/*this*/ ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) {
     var v = vʗp.slice();
 
     var vʗ1 = v;
-    Ꮡl.output(0, 2, (slice<byte> b) => fmt.Append(b, vʗ1.ꓸꓸꓸ));
+    Ꮡl.output(0, 2, [GoFunc("(*Logger).Print.func1")] (slice<byte> b) => fmt.Append(b, vʗ1.ꓸꓸꓸ));
 }
 
 // Printf calls l.Output to print to the logger.
 // Arguments are handled in the manner of [fmt.Printf].
-public static partial void Printf(this ж<Logger> Ꮡl, @string format, params ꓸꓸꓸany vʗp) {
+internal static partial void Printf⁔(/*this*/ ж<Logger> Ꮡl, @string format, params ꓸꓸꓸany vʗp) {
     var v = vʗp.slice();
 
     var vʗ1 = v;
-    Ꮡl.output(0, 2, (slice<byte> b) => fmt.Appendf(b, format, vʗ1.ꓸꓸꓸ));
+    Ꮡl.output(0, 2, [GoFunc("(*Logger).Printf.func1")] (slice<byte> b) => fmt.Appendf(b, format, vʗ1.ꓸꓸꓸ));
 }
 
 // Println calls l.Output to print to the logger.
 // Arguments are handled in the manner of [fmt.Println].
-public static partial void Println(this ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) {
+internal static partial void Println⁔(/*this*/ ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) {
     var v = vʗp.slice();
 
     var vʗ1 = v;
-    Ꮡl.output(0, 2, (slice<byte> b) => fmt.Appendln(b, vʗ1.ꓸꓸꓸ));
+    Ꮡl.output(0, 2, [GoFunc("(*Logger).Println.func1")] (slice<byte> b) => fmt.Appendln(b, vʗ1.ꓸꓸꓸ));
 }
 
 // Fatal is equivalent to l.Print() followed by a call to [os.Exit](1).
-public static partial void Fatal(this ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) {
+internal static partial void Fatal⁔(/*this*/ ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) {
     var v = vʗp.slice();
 
     var vʗ1 = v;
-    Ꮡl.output(0, 2, (slice<byte> b) => fmt.Append(b, vʗ1.ꓸꓸꓸ));
+    Ꮡl.output(0, 2, [GoFunc("(*Logger).Fatal.func1")] (slice<byte> b) => fmt.Append(b, vʗ1.ꓸꓸꓸ));
     os.Exit(1);
 }
 
 // Fatalf is equivalent to l.Printf() followed by a call to [os.Exit](1).
-public static partial void Fatalf(this ж<Logger> Ꮡl, @string format, params ꓸꓸꓸany vʗp) {
+internal static partial void Fatalf⁔(/*this*/ ж<Logger> Ꮡl, @string format, params ꓸꓸꓸany vʗp) {
     var v = vʗp.slice();
 
     var vʗ1 = v;
-    Ꮡl.output(0, 2, (slice<byte> b) => fmt.Appendf(b, format, vʗ1.ꓸꓸꓸ));
+    Ꮡl.output(0, 2, [GoFunc("(*Logger).Fatalf.func1")] (slice<byte> b) => fmt.Appendf(b, format, vʗ1.ꓸꓸꓸ));
     os.Exit(1);
 }
 
 // Fatalln is equivalent to l.Println() followed by a call to [os.Exit](1).
-public static partial void Fatalln(this ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) {
+internal static partial void Fatalln⁔(/*this*/ ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) {
     var v = vʗp.slice();
 
     var vʗ1 = v;
-    Ꮡl.output(0, 2, (slice<byte> b) => fmt.Appendln(b, vʗ1.ꓸꓸꓸ));
+    Ꮡl.output(0, 2, [GoFunc("(*Logger).Fatalln.func1")] (slice<byte> b) => fmt.Appendln(b, vʗ1.ꓸꓸꓸ));
     os.Exit(1);
 }
 
 // Panic is equivalent to l.Print() followed by a call to panic().
-public static partial void Panic(this ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) {
+internal static partial void Panic⁔(/*this*/ ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) {
     var v = vʗp;
 
     @string s = fmt.Sprint(v.ꓸꓸꓸ);
-    Ꮡl.output(0, 2, (slice<byte> b) => append(b, s.ꓸꓸꓸ));
+    Ꮡl.output(0, 2, [GoFunc("(*Logger).Panic.func1")] (slice<byte> b) => append(b, s.ꓸꓸꓸ));
     throw panic(s);
 }
 
 // Panicf is equivalent to l.Printf() followed by a call to panic().
-public static partial void Panicf(this ж<Logger> Ꮡl, @string format, params ꓸꓸꓸany vʗp) {
+internal static partial void Panicf⁔(/*this*/ ж<Logger> Ꮡl, @string format, params ꓸꓸꓸany vʗp) {
     var v = vʗp;
 
     @string s = fmt.Sprintf(format, v.ꓸꓸꓸ);
-    Ꮡl.output(0, 2, (slice<byte> b) => append(b, s.ꓸꓸꓸ));
+    Ꮡl.output(0, 2, [GoFunc("(*Logger).Panicf.func1")] (slice<byte> b) => append(b, s.ꓸꓸꓸ));
     throw panic(s);
 }
 
 // Panicln is equivalent to l.Println() followed by a call to panic().
-public static partial void Panicln(this ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) {
+internal static partial void Panicln⁔(/*this*/ ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) {
     var v = vʗp;
 
     @string s = fmt.Sprintln(v.ꓸꓸꓸ);
-    Ꮡl.output(0, 2, (slice<byte> b) => append(b, s.ꓸꓸꓸ));
+    Ꮡl.output(0, 2, [GoFunc("(*Logger).Panicln.func1")] (slice<byte> b) => append(b, s.ꓸꓸꓸ));
     throw panic(s);
 }
 
 // Flags returns the output flags for the logger.
 // The flag bits are [Ldate], [Ltime], and so on.
-public static nint Flags(this ж<Logger> Ꮡl) {
+internal static nint Flags⁔(/*this*/ ж<Logger> Ꮡl) {
     return (nint)Ꮡl.Ꮡflag.Load();
 }
 
 // SetFlags sets the output flags for the logger.
 // The flag bits are [Ldate], [Ltime], and so on.
-public static void SetFlags(this ж<Logger> Ꮡl, nint flag) {
+internal static void SetFlags⁔(/*this*/ ж<Logger> Ꮡl, nint flag) {
     Ꮡl.Ꮡflag.Store((int32)flag);
 }
 
 // Prefix returns the output prefix for the logger.
-public static @string Prefix(this ж<Logger> Ꮡl) {
+internal static @string Prefix⁔(/*this*/ ж<Logger> Ꮡl) {
     var p = Ꮡl.Ꮡprefix.Load(); if (p != nil) {
         return p.Value;
     }
@@ -385,14 +373,14 @@ public static @string Prefix(this ж<Logger> Ꮡl) {
 }
 
 // SetPrefix sets the output prefix for the logger.
-public static void SetPrefix(this ж<Logger> Ꮡl, @string prefixʗp) {
+internal static void SetPrefix⁔(/*this*/ ж<Logger> Ꮡl, @string prefixʗp) {
     ref var prefix = ref heap(prefixʗp, out var Ꮡprefix);
 
     Ꮡl.Ꮡprefix.Store(Ꮡprefix);
 }
 
 // Writer returns the output destination for the logger.
-public static Δio.Writer Writer(this ж<Logger> Ꮡl) {
+internal static Δio.Writer Writer⁔(/*this*/ ж<Logger> Ꮡl) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -405,8 +393,6 @@ public static Δio.Writer Writer(this ж<Logger> Ꮡl) {
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡl.DerefOrNull().outMu.Unlock(); ᒐ.Run(); }
 }
-
-} partial class log_package {
 
 // SetOutput sets the output destination for the standard logger.
 public static void SetOutput(Δio.Writer w) {
@@ -448,7 +434,7 @@ public static partial void Print(params ꓸꓸꓸany vʗp) {
     var v = vʗp.slice();
 
     var vʗ1 = v;
-    std.output(0, 2, (slice<byte> b) => fmt.Append(b, vʗ1.ꓸꓸꓸ));
+    std.output(0, 2, [GoFunc("Print.func1")] (slice<byte> b) => fmt.Append(b, vʗ1.ꓸꓸꓸ));
 }
 
 // Printf calls Output to print to the standard logger.
@@ -457,7 +443,7 @@ public static partial void Printf(@string format, params ꓸꓸꓸany vʗp) {
     var v = vʗp.slice();
 
     var vʗ1 = v;
-    std.output(0, 2, (slice<byte> b) => fmt.Appendf(b, format, vʗ1.ꓸꓸꓸ));
+    std.output(0, 2, [GoFunc("Printf.func1")] (slice<byte> b) => fmt.Appendf(b, format, vʗ1.ꓸꓸꓸ));
 }
 
 // Println calls Output to print to the standard logger.
@@ -466,7 +452,7 @@ public static partial void Println(params ꓸꓸꓸany vʗp) {
     var v = vʗp.slice();
 
     var vʗ1 = v;
-    std.output(0, 2, (slice<byte> b) => fmt.Appendln(b, vʗ1.ꓸꓸꓸ));
+    std.output(0, 2, [GoFunc("Println.func1")] (slice<byte> b) => fmt.Appendln(b, vʗ1.ꓸꓸꓸ));
 }
 
 // Fatal is equivalent to [Print] followed by a call to [os.Exit](1).
@@ -474,7 +460,7 @@ public static partial void Fatal(params ꓸꓸꓸany vʗp) {
     var v = vʗp.slice();
 
     var vʗ1 = v;
-    std.output(0, 2, (slice<byte> b) => fmt.Append(b, vʗ1.ꓸꓸꓸ));
+    std.output(0, 2, [GoFunc("Fatal.func1")] (slice<byte> b) => fmt.Append(b, vʗ1.ꓸꓸꓸ));
     os.Exit(1);
 }
 
@@ -483,7 +469,7 @@ public static partial void Fatalf(@string format, params ꓸꓸꓸany vʗp) {
     var v = vʗp.slice();
 
     var vʗ1 = v;
-    std.output(0, 2, (slice<byte> b) => fmt.Appendf(b, format, vʗ1.ꓸꓸꓸ));
+    std.output(0, 2, [GoFunc("Fatalf.func1")] (slice<byte> b) => fmt.Appendf(b, format, vʗ1.ꓸꓸꓸ));
     os.Exit(1);
 }
 
@@ -492,7 +478,7 @@ public static partial void Fatalln(params ꓸꓸꓸany vʗp) {
     var v = vʗp.slice();
 
     var vʗ1 = v;
-    std.output(0, 2, (slice<byte> b) => fmt.Appendln(b, vʗ1.ꓸꓸꓸ));
+    std.output(0, 2, [GoFunc("Fatalln.func1")] (slice<byte> b) => fmt.Appendln(b, vʗ1.ꓸꓸꓸ));
     os.Exit(1);
 }
 
@@ -501,7 +487,7 @@ public static partial void Panic(params ꓸꓸꓸany vʗp) {
     var v = vʗp;
 
     @string s = fmt.Sprint(v.ꓸꓸꓸ);
-    std.output(0, 2, (slice<byte> b) => append(b, s.ꓸꓸꓸ));
+    std.output(0, 2, [GoFunc("Panic.func1")] (slice<byte> b) => append(b, s.ꓸꓸꓸ));
     throw panic(s);
 }
 
@@ -510,7 +496,7 @@ public static partial void Panicf(@string format, params ꓸꓸꓸany vʗp) {
     var v = vʗp;
 
     @string s = fmt.Sprintf(format, v.ꓸꓸꓸ);
-    std.output(0, 2, (slice<byte> b) => append(b, s.ꓸꓸꓸ));
+    std.output(0, 2, [GoFunc("Panicf.func1")] (slice<byte> b) => append(b, s.ꓸꓸꓸ));
     throw panic(s);
 }
 
@@ -519,7 +505,7 @@ public static partial void Panicln(params ꓸꓸꓸany vʗp) {
     var v = vʗp;
 
     @string s = fmt.Sprintln(v.ꓸꓸꓸ);
-    std.output(0, 2, (slice<byte> b) => append(b, s.ꓸꓸꓸ));
+    std.output(0, 2, [GoFunc("Panicln.func1")] (slice<byte> b) => append(b, s.ꓸꓸꓸ));
     throw panic(s);
 }
 
@@ -531,7 +517,7 @@ public static partial void Panicln(params ꓸꓸꓸany vʗp) {
 // if [Llongfile] or [Lshortfile] is set; a value of 1 will print the details
 // for the caller of Output.
 public static partial error Output(nint calldepth, @string s) {
-    return std.output(0, calldepth + 1, (slice<byte> b) => { // +1 for this frame.
+    return std.output(0, calldepth + 1, [GoFunc("Output.func1")] (slice<byte> b) => { // +1 for this frame.
         return append(b, s.ꓸꓸꓸ);
     });
 }

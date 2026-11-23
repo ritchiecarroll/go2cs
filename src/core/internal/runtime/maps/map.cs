@@ -12,7 +12,6 @@ using sys = go.@internal.runtime.sys_package;
 using @unsafe = unsafe_package;
 using go.@internal;
 using go.@internal.runtime;
-using static maps_package;
 
 partial class maps_package {
 
@@ -334,24 +333,22 @@ public static ж<Map> NewEmptyMap() {
     return m;
 }
 
-} partial class mapsᴛMap {
-
-internal static uintptr directoryIndex(this ref Map m, uintptr hash) {
+internal static uintptr directoryIndex⁔(/*this*/ ref Map m, uintptr hash) {
     if (m.dirLen == 1) {
         return 0;
     }
     return hash >> (int)((uint8)(m.globalShift & 63));
 }
 
-internal static ж<table> directoryAt(this ref Map m, uintptr i) {
+internal static ж<table> directoryAt⁔(/*this*/ ref Map m, uintptr i) {
     return ~@unsafe.Pointer.To<ж<table>>(@unsafe.Add(m.dirPtr, (uintptr)goarch.PtrSize * i));
 }
 
-internal static void directorySet(this ref Map m, uintptr i, ж<table> nt) {
+internal static void directorySet⁔(/*this*/ ref Map m, uintptr i, ж<table> nt) {
     (@unsafe.Pointer.To<ж<table>>(@unsafe.Add(m.dirPtr, (uintptr)goarch.PtrSize * i))).ValueSlot = nt;
 }
 
-internal static void replaceTable(this ref Map m, ж<table> Ꮡnt) {
+internal static void replaceTable⁔(/*this*/ ref Map m, ж<table> Ꮡnt) {
     ref var nt = ref Ꮡnt.DerefOrNull();
 
     // The number of entries that reference the same table doubles for each
@@ -363,7 +360,7 @@ internal static void replaceTable(this ref Map m, ж<table> Ꮡnt) {
     }
 }
 
-internal static void installTableSplit(this ref Map m, ж<table> Ꮡold, ж<table> Ꮡleft, ж<table> Ꮡright) {
+internal static void installTableSplit⁔(/*this*/ ref Map m, ж<table> Ꮡold, ж<table> Ꮡleft, ж<table> Ꮡright) {
     ref var old = ref Ꮡold.DerefOrNull();
     ref var left = ref Ꮡleft.DerefOrNull();
     ref var right = ref Ꮡright.DerefOrNull();
@@ -401,13 +398,13 @@ internal static void installTableSplit(this ref Map m, ж<table> Ꮡold, ж<tabl
     m.replaceTable(Ꮡright);
 }
 
-public static uint64 Used(this ref Map m) {
+internal static uint64 Used⁔(/*this*/ ref Map m) {
     return m.used;
 }
 
 // Get performs a lookup of the key that key points to. It returns a pointer to
 // the element, or false if the key doesn't exist.
-public static (@unsafe.Pointer, bool) Get(this ref Map m, ж<abi.MapType> typ, @unsafe.Pointer key) {
+internal static (@unsafe.Pointer, bool) Get⁔(/*this*/ ref Map m, ж<abi.MapType> typ, @unsafe.Pointer key) {
     return m.getWithoutKey(typ, key);
 }
 
@@ -415,7 +412,7 @@ public static (@unsafe.Pointer, bool) Get(this ref Map m, ж<abi.MapType> typ, @
 internal static ref readonly @string concurrentMapReadAndMapˢ => ref concurrentMapReadAndMapˢᵇ;
 private static readonly @string concurrentMapReadAndMapˢᵇ = "concurrent map read and map write"u8;
 
-internal static (@unsafe.Pointer, @unsafe.Pointer, bool) getWithKey(this ref Map m, ж<abi.MapType> Ꮡtyp, @unsafe.Pointer key) {
+internal static (@unsafe.Pointer, @unsafe.Pointer, bool) getWithKey⁔(/*this*/ ref Map m, ж<abi.MapType> Ꮡtyp, @unsafe.Pointer key) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
     if (m.Used() == 0) {
@@ -436,7 +433,7 @@ internal static (@unsafe.Pointer, @unsafe.Pointer, bool) getWithKey(this ref Map
     return m.directoryAt(idx).getWithKey(Ꮡtyp, hash, key);
 }
 
-internal static (@unsafe.Pointer, bool) getWithoutKey(this ref Map m, ж<abi.MapType> Ꮡtyp, @unsafe.Pointer key) {
+internal static (@unsafe.Pointer, bool) getWithoutKey⁔(/*this*/ ref Map m, ж<abi.MapType> Ꮡtyp, @unsafe.Pointer key) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
     if (m.Used() == 0) {
@@ -458,7 +455,7 @@ internal static (@unsafe.Pointer, bool) getWithoutKey(this ref Map m, ж<abi.Map
     return m.directoryAt(idx).getWithoutKey(Ꮡtyp, hash, key);
 }
 
-internal static (@unsafe.Pointer, @unsafe.Pointer, bool) getWithKeySmall(this ref Map m, ж<abi.MapType> Ꮡtyp, uintptr hash, @unsafe.Pointer key) {
+internal static (@unsafe.Pointer, @unsafe.Pointer, bool) getWithKeySmall⁔(/*this*/ ref Map m, ж<abi.MapType> Ꮡtyp, uintptr hash, @unsafe.Pointer key) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
     var g = new groupReference(
@@ -491,7 +488,7 @@ internal static (@unsafe.Pointer, @unsafe.Pointer, bool) getWithKeySmall(this re
     return (default, default, false);
 }
 
-public static void Put(this ж<Map> Ꮡm, ж<abi.MapType> Ꮡtyp, @unsafe.Pointer key, @unsafe.Pointer elem) {
+internal static void Put⁔(/*this*/ ж<Map> Ꮡm, ж<abi.MapType> Ꮡtyp, @unsafe.Pointer key, @unsafe.Pointer elem) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
     @unsafe.Pointer slotElem = Ꮡm.PutSlot(Ꮡtyp, key);
@@ -506,7 +503,7 @@ private static readonly @string concurrentMapWritesˢᵇ = "concurrent map write
 // should be written.
 //
 // PutSlot never returns nil.
-public static @unsafe.Pointer PutSlot(this ж<Map> Ꮡm, ж<abi.MapType> Ꮡtyp, @unsafe.Pointer key) {
+internal static @unsafe.Pointer PutSlot⁔(/*this*/ ж<Map> Ꮡm, ж<abi.MapType> Ꮡtyp, @unsafe.Pointer key) {
     ref var m = ref Ꮡm.DerefOrNull();
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
@@ -563,7 +560,7 @@ public static @unsafe.Pointer PutSlot(this ж<Map> Ꮡm, ж<abi.MapType> Ꮡtyp,
 internal static ref readonly @string smallMapWithNoEmptySlotˢ => ref smallMapWithNoEmptySlotˢᵇ;
 private static readonly @string smallMapWithNoEmptySlotˢᵇ = "small map with no empty slot (concurrent map writes?)"u8;
 
-internal static @unsafe.Pointer putSlotSmall(this ref Map m, ж<abi.MapType> Ꮡtyp, uintptr hash, @unsafe.Pointer key) {
+internal static @unsafe.Pointer putSlotSmall⁔(/*this*/ ref Map m, ж<abi.MapType> Ꮡtyp, uintptr hash, @unsafe.Pointer key) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
     var g = new groupReference(
@@ -627,7 +624,7 @@ internal static @unsafe.Pointer putSlotSmall(this ref Map m, ж<abi.MapType> Ꮡ
     return slotElem;
 }
 
-internal static void growToSmall(this ref Map m, ж<abi.MapType> typ) {
+internal static void growToSmall⁔(/*this*/ ref Map m, ж<abi.MapType> typ) {
     var grp = newGroups(ref (typ).DerefOrNull(), 1);
     m.dirPtr = grp.data;
 
@@ -637,7 +634,7 @@ internal static void growToSmall(this ref Map m, ж<abi.MapType> typ) {
     g.ctrls().setEmpty();
 }
 
-internal static void growToTable(this ref Map m, ж<abi.MapType> Ꮡtyp) {
+internal static void growToTable⁔(/*this*/ ref Map m, ж<abi.MapType> Ꮡtyp) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
     var tab = newTable(Ꮡtyp, 2 * abi.MapGroupSlots, 0, 0);
@@ -678,7 +675,7 @@ internal static void growToTable(this ref Map m, ж<abi.MapType> Ꮡtyp) {
     m.globalShift = depthToShift(m.globalDepth);
 }
 
-public static void Delete(this ж<Map> Ꮡm, ж<abi.MapType> Ꮡtyp, @unsafe.Pointer key) {
+internal static void Delete⁔(/*this*/ ж<Map> Ꮡm, ж<abi.MapType> Ꮡtyp, @unsafe.Pointer key) {
     ref var m = ref Ꮡm.DerefOrNull();
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
@@ -721,7 +718,7 @@ public static void Delete(this ж<Map> Ꮡm, ж<abi.MapType> Ꮡtyp, @unsafe.Poi
     m.writing ^= (uint8)(1);
 }
 
-internal static void deleteSmall(this ref Map m, ж<abi.MapType> Ꮡtyp, uintptr hash, @unsafe.Pointer key) {
+internal static void deleteSmall⁔(/*this*/ ref Map m, ж<abi.MapType> Ꮡtyp, uintptr hash, @unsafe.Pointer key) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
     var g = new groupReference(
@@ -771,7 +768,7 @@ internal static void deleteSmall(this ref Map m, ж<abi.MapType> Ꮡtyp, uintptr
 }
 
 // Clear deletes all entries from the map resulting in an empty map.
-public static void Clear(this ж<Map> Ꮡm, ж<abi.MapType> typ) {
+internal static void Clear⁔(/*this*/ ж<Map> Ꮡm, ж<abi.MapType> typ) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     if (Ꮡm == nil || m.Used() == 0 && !m.tombstonePossible) {
@@ -811,7 +808,7 @@ public static void Clear(this ж<Map> Ꮡm, ж<abi.MapType> typ) {
     m.writing ^= (uint8)(1);
 }
 
-internal static void clearSmall(this ref Map m, ж<abi.MapType> Ꮡtyp) {
+internal static void clearSmall⁔(/*this*/ ref Map m, ж<abi.MapType> Ꮡtyp) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
     var g = new groupReference(
@@ -828,7 +825,7 @@ internal static void clearSmall(this ref Map m, ж<abi.MapType> Ꮡtyp) {
 internal static ref readonly @string concurrentMapCloneAndMapˢ => ref concurrentMapCloneAndMapˢᵇ;
 private static readonly @string concurrentMapCloneAndMapˢᵇ = "concurrent map clone and map write"u8;
 
-public static ж<Map> Clone(this ж<Map> Ꮡm, ж<abi.MapType> typ) {
+internal static ж<Map> Clone⁔(/*this*/ ж<Map> Ꮡm, ж<abi.MapType> typ) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     // Note: this should never be called with a nil map.
@@ -866,8 +863,6 @@ public static ж<Map> Clone(this ж<Map> Ꮡm, ж<abi.MapType> typ) {
 
     return Ꮡm;
 }
-
-} partial class maps_package {
 
 internal static error mapKeyError(ж<abi.MapType> Ꮡt, @unsafe.Pointer p) {
     ref var t = ref Ꮡt.DerefOrNull();
@@ -950,13 +945,9 @@ partial struct unhashableTypeError {
     internal ж<abi.Type> typ;
 }
 
-} partial class mapsᴛunhashableTypeError {
+internal static void RuntimeError⁔(/*this*/ unhashableTypeError _) { }
 
-internal static void RuntimeError(this unhashableTypeError _) { }
-
-internal static @string Error(this unhashableTypeError e) { return "hash of unhashable type: "u8 + typeString(e.typ); }
-
-} partial class maps_package {
+internal static @string Error⁔(/*this*/ unhashableTypeError e) { return "hash of unhashable type: "u8 + typeString(e.typ); }
 
 // Pushed from runtime
 //

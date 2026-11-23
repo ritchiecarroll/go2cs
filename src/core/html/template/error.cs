@@ -7,7 +7,6 @@ using fmt = fmt_package;
 using parse = text.template.parse_package;
 using text.template;
 using ꓸꓸꓸany = variadic<any>;
-using static template_package;
 
 partial class template_package {
 
@@ -231,9 +230,7 @@ public static ErrorCode ErrPredefinedEscaper => 11;
 // escaped as expected.
 public static ErrorCode ErrJSTemplate => 12;
 
-} partial class templateᴛError {
-
-public static @string Error(this ref Error e) {
+internal static @string Error⁔(/*this*/ ref Error e) {
     switch (ᐧ) {
     case {} when e.Node != nil: {
         var (loc, _) = (((ж<parse.Tree>)nil)).ErrorContext(e.Node);
@@ -247,8 +244,6 @@ public static @string Error(this ref Error e) {
     }}
     return "html/template: "u8 + e.Description;
 }
-
-} partial class template_package {
 
 // errorf creates an error given a format string f and args.
 // The template Name still needs to be supplied.

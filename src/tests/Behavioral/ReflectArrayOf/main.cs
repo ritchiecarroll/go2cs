@@ -21,7 +21,7 @@ internal static @string /*msg*/ recovered(Action fn) {
     @string msg = default;
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("recovered.func1")] () => {
             var r = recover(); if (r != nil) {
                 msg = fmt.Sprint(r);
             }
@@ -104,7 +104,7 @@ internal static void main() {
         sv.Interface()._<slice<uint8>>());
 
     var byteTʗ1 = byteT;
-    fmt.Println("negative length:", recovered(() => {
+    fmt.Println("negative length:", recovered([GoFunc("main.func1")] () => {
         reflect.ArrayOf(-1, byteTʗ1);
     }));
 }

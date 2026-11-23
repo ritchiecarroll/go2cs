@@ -88,7 +88,6 @@ using sys = @internal.runtime.sys_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
-using static runtime_package;
 
 partial class runtime_package {
 
@@ -214,8 +213,6 @@ partial struct userArena {
 
 // go2cs generated this placeholder — func newUserArena is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-} partial class runtimeᴛuserArena {
-
 // go2cs generated this placeholder — func new is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // go2cs generated this placeholder — func slice is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
@@ -226,7 +223,7 @@ partial struct userArena {
 // in a new chunk. If cap is negative, the type will be taken literally, otherwise
 // it will be considered as an element type for a slice backing store with capacity
 // cap.
-internal static @unsafe.Pointer alloc(this ref userArena a, ж<_type> typ, nint cap) {
+internal static @unsafe.Pointer alloc⁔(/*this*/ ref userArena a, ж<_type> typ, nint cap) {
     var s = a.active;
     @unsafe.Pointer x = default;
     for (;;) {
@@ -247,7 +244,7 @@ private static readonly @string outOfMemoryˢᵇ = "out of memory"u8;
 
 // refill inserts the current arena chunk onto the full list and obtains a new
 // one, either from the partial list or allocating a new one, both from mheap.
-internal static ж<mspan> refill(this ref userArena a) {
+internal static ж<mspan> refill⁔(/*this*/ ref userArena a) {
     // If there's an active chunk, assume it's full.
     var s = a.active;
     if (s != nil) {
@@ -289,8 +286,6 @@ internal static ж<mspan> refill(this ref userArena a) {
     return s;
 }
 
-} partial class runtime_package {
-
 partial struct liveUserArenaChunk {
     /*embed*/ internal ж<mspan> mspan; // Must represent a user arena chunk.
     // Reference to mspan.base() to keep the chunk alive.
@@ -313,11 +308,7 @@ partial struct userArenaStateᴛ1 /*dyn*/ {
 internal static readonly ж<userArenaStateᴛ1> ᏑuserArenaState = new StaticBox<userArenaStateᴛ1>(new userArenaStateᴛ1());
 internal static ref userArenaStateᴛ1 userArenaState => ref ((StaticBox<userArenaStateᴛ1>)ᏑuserArenaState).ValueSlot;
 
-} partial class runtimeᴛmspan {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string outOfMemoryˢ => ref outOfMemoryˢᵇ;
-private static readonly @string outOfMemoryˢᵇ = "out of memory"u8;
 internal static ref readonly @string mallocDeadlockˢ => ref mallocDeadlockˢᵇ;
 private static readonly @string mallocDeadlockˢᵇ = "malloc deadlock"u8;
 internal static ref readonly @string mallocDuringSignalˢ => ref mallocDuringSignalˢᵇ;
@@ -329,7 +320,7 @@ private static readonly @string mallocgcCalledWithoutAPˢᵇ = "mallocgc called 
 
 // userArenaNextFree reserves space in the user arena for an item of the specified
 // type. If cap is not -1, this is for an array of cap elements of type t.
-internal static @unsafe.Pointer userArenaNextFree(this ж<mspan> Ꮡs, ж<_type> Ꮡtyp, nint cap) {
+internal static @unsafe.Pointer userArenaNextFree⁔(/*this*/ ж<mspan> Ꮡs, ж<_type> Ꮡtyp, nint cap) {
     ref var s = ref Ꮡs.DerefOrNull();
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
@@ -419,8 +410,6 @@ internal static @unsafe.Pointer userArenaNextFree(this ж<mspan> Ꮡs, ж<_type>
     return ptr;
 }
 
-} partial class runtime_package {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string runtimeAllocationSizeOutˢ => ref runtimeAllocationSizeOutˢᵇ;
 private static readonly @string runtimeAllocationSizeOutˢᵇ = "runtime: allocation size out of range"u8;
@@ -494,9 +483,7 @@ partial struct writeUserArenaHeapBits {
     internal uintptr low;    // number of low-order bits to not overwrite
 }
 
-} partial class runtimeᴛmspan {
-
-internal static writeUserArenaHeapBits /*h*/ writeUserArenaHeapBits(this ref mspan s, uintptr addr) {
+internal static writeUserArenaHeapBits /*h*/ writeUserArenaHeapBits⁔(/*this*/ ref mspan s, uintptr addr) {
     writeUserArenaHeapBits h = default;
 
     var offset = addr - s.@base();
@@ -516,11 +503,9 @@ internal static writeUserArenaHeapBits /*h*/ writeUserArenaHeapBits(this ref msp
     return h;
 }
 
-} partial class runtimeᴛwriteUserArenaHeapBits {
-
 // write appends the pointerness of the next valid pointer slots
 // using the low valid bits of bits. 1=pointer, 0=scalar.
-internal static writeUserArenaHeapBits write(this writeUserArenaHeapBits h, ж<mspan> Ꮡs, uintptr bits, uintptr valid) {
+internal static writeUserArenaHeapBits write⁔(/*this*/ writeUserArenaHeapBits h, ж<mspan> Ꮡs, uintptr bits, uintptr valid) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     if (h.valid + valid <= ptrBits) {
@@ -553,7 +538,7 @@ internal static writeUserArenaHeapBits write(this writeUserArenaHeapBits h, ж<m
 }
 
 // Add padding of size bytes.
-internal static writeUserArenaHeapBits pad(this writeUserArenaHeapBits h, ж<mspan> s, uintptr size) {
+internal static writeUserArenaHeapBits pad⁔(/*this*/ writeUserArenaHeapBits h, ж<mspan> s, uintptr size) {
     if (size == 0) {
         return h;
     }
@@ -567,7 +552,7 @@ internal static writeUserArenaHeapBits pad(this writeUserArenaHeapBits h, ж<msp
 
 // Flush the bits that have been written, and add zeros as needed
 // to cover the full object [addr, addr+size).
-internal static void flush(this writeUserArenaHeapBits h, ж<mspan> Ꮡs, uintptr addr, uintptr size) {
+internal static void flush⁔(/*this*/ writeUserArenaHeapBits h, ж<mspan> Ꮡs, uintptr addr, uintptr size) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     var offset = addr - s.@base();
@@ -626,8 +611,6 @@ internal static void flush(this writeUserArenaHeapBits h, ж<mspan> Ꮡs, uintpt
     }
 }
 
-} partial class runtime_package {
-
 // bswapIfBigEndian swaps the byte order of the uintptr on goarch.BigEndian platforms,
 // and leaves it alone elsewhere.
 internal static uintptr bswapIfBigEndian(uintptr x) {
@@ -643,12 +626,6 @@ internal static uintptr bswapIfBigEndian(uintptr x) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string newUserArenaChunkCalledˢ => ref newUserArenaChunkCalledˢᵇ;
 private static readonly @string newUserArenaChunkCalledˢᵇ = "newUserArenaChunk called with gcphase == _GCmarktermination"u8;
-internal static ref readonly @string mallocDeadlockˢ => ref mallocDeadlockˢᵇ;
-private static readonly @string mallocDeadlockˢᵇ = "malloc deadlock"u8;
-internal static ref readonly @string mallocDuringSignalˢ => ref mallocDuringSignalˢᵇ;
-private static readonly @string mallocDuringSignalˢᵇ = "malloc during signal"u8;
-internal static ref readonly @string outOfMemoryˢ => ref outOfMemoryˢᵇ;
-private static readonly @string outOfMemoryˢᵇ = "out of memory"u8;
 internal static ref readonly @string newUserArenaChunkCalledˢ2 => ref newUserArenaChunkCalledˢ2ᵇ;
 private static readonly @string newUserArenaChunkCalledˢ2ᵇ = "newUserArenaChunk called without a P or outside bootstrapping"u8;
 internal static ref readonly @string userArenaChunkIsNotˢ => ref userArenaChunkIsNotˢᵇ;
@@ -684,7 +661,7 @@ internal static (@unsafe.Pointer, ж<mspan>) newUserArenaChunk() {
 
     // Allocate a new user arena.
     ref var span = ref heap<ж<mspan>>(out var Ꮡspan);
-    systemstack(() => {
+    systemstack([GoFunc("newUserArenaChunk.func1")] () => {
         Ꮡspan.ValueSlot = Ꮡmheap_.allocUserArenaChunk();
     });
     if (span == nil) {
@@ -756,8 +733,6 @@ internal static (@unsafe.Pointer, ж<mspan>) newUserArenaChunk() {
     return (x, span);
 }
 
-} partial class runtimeᴛmspan {
-
 // isUnusedUserArenaChunk indicates that the arena chunk has been set to fault
 // and doesn't contain any scannable memory anymore. However, it might still be
 // mSpanInUse as it sits on the quarantine list, since it needs to be swept.
@@ -768,7 +743,7 @@ internal static (@unsafe.Pointer, ж<mspan>) newUserArenaChunk() {
 // This is really only meant to be used by accounting tests in the runtime to
 // distinguish when a span shouldn't be counted (since mSpanInUse might not be
 // enough).
-internal static bool isUnusedUserArenaChunk(this ref mspan s) {
+internal static bool isUnusedUserArenaChunk⁔(/*this*/ ref mspan s) {
     return s.isUserArenaChunk && s.spanclass == makeSpanClass(0, true);
 }
 
@@ -783,7 +758,7 @@ private static readonly @string spanOnUserArenaFaultListˢᵇ = "span on userAre
 //
 // Must be in a non-preemptible state to ensure the consistency of statistics
 // exported to MemStats.
-internal static void setUserArenaChunkToFault(this ж<mspan> Ꮡs) {
+internal static void setUserArenaChunkToFault⁔(/*this*/ ж<mspan> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     if (!s.isUserArenaChunk) {
@@ -842,15 +817,13 @@ internal static void setUserArenaChunkToFault(this ж<mspan> Ꮡs) {
         racefree((@unsafe.Pointer)s.@base(), s.elemsize);
     }
 
-    systemstack(() => {
+    systemstack([GoFunc("(*mspan).setUserArenaChunkToFault.func1")] () => {
         // Add the user arena to the quarantine list.
         @lock(Ꮡmheap_.Ꮡlock);
         Ꮡmheap_.ᏑuserArena.of(mheap_userArena.ᏑquarantineList).insert(Ꮡs);
         unlock(Ꮡmheap_.Ꮡlock);
     });
 }
-
-} partial class runtime_package {
 
 // inUserArenaChunk returns true if p points to a user arena chunk.
 internal static bool inUserArenaChunk(uintptr p) {
@@ -928,8 +901,6 @@ internal static void freeUserArenaChunk(ж<mspan> Ꮡs, @unsafe.Pointer x) {
     releasem(ref (mp).DerefOrNull());
 }
 
-} partial class runtimeᴛmheap {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string sysAllocSizeIsNotˢ => ref sysAllocSizeIsNotˢᵇ;
 private static readonly @string sysAllocSizeIsNotˢᵇ = "sysAlloc size is not divisible by userArenaChunkBytes"u8;
@@ -945,7 +916,7 @@ private static readonly @string userArenaChunkˢᵇ = "user arena chunk"u8;
 // Acquires the heap lock. Must run on the system stack for that reason.
 //
 //go:systemstack
-internal static ж<mspan> allocUserArenaChunk(this ж<mheap> Ꮡh) {
+internal static ж<mspan> allocUserArenaChunk⁔(/*this*/ ж<mheap> Ꮡh) {
     ref var h = ref Ꮡh.DerefOrNull();
 
     ж<mspan> s = default;
@@ -1082,4 +1053,4 @@ internal static ж<mspan> allocUserArenaChunk(this ж<mheap> Ꮡh) {
     return s;
 }
 
-}
+} // end runtime_package

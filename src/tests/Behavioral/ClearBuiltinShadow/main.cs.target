@@ -1,7 +1,6 @@
 namespace go;
 
 using fmt = fmt_package;
-using static main_package;
 
 partial class main_package {
 
@@ -16,25 +15,19 @@ partial struct box {
     internal slice<nint> data;
 }
 
-} partial class mainᴛbox {
-
-internal static void clear(this ref box b) { b.data = default; }
-
-} partial class main_package {
+internal static void clear⁔(/*this*/ ref box b) { b.data = default; }
 
 partial struct guard {
     internal error err;
 }
 
-} partial class mainᴛguard {
-
-internal static void recover(this ж<guard> Ꮡg) {
+internal static void recover⁔(/*this*/ ж<guard> Ꮡg) {
     GoFrame ᒐ = default;
     try {
         var calledByDefer = GoFrame.TakeDeferredCall(); // Go: is this call the deferred one?
         ref var g = ref Ꮡg.DerefOrNull();
 
-        var e = builtin.recover(calledByDefer); if (e != nil) {
+        var e = recover(calledByDefer); if (e != nil) {
             g.err = fmt.Errorf("recovered: %v"u8, e);
         }
     }
@@ -42,7 +35,7 @@ internal static void recover(this ж<guard> Ꮡg) {
     finally { ᒐ.Run(); }
 }
 
-internal static void run(this ж<guard> Ꮡg) {
+internal static void run⁔(/*this*/ ж<guard> Ꮡg) {
     GoFrame ᒐ = default;
     try {
         defer(Ꮡg.recover, ref ᒐ, recovers: true);
@@ -51,8 +44,6 @@ internal static void run(this ж<guard> Ꮡg) {
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
-
-} partial class main_package {
 
 internal static void main() {
     var s = slice<nint>([1, 2, 3]);

@@ -8,18 +8,18 @@ using ꓸꓸꓸnint = variadic<nint>;
 partial class main_package {
 
 internal static void main() {
-    AliasImportLibꓸIntFn f = (nint x) => x + 1;
-    AliasImportLibꓸBoxFn g = (AliasImportLib.Box b) => new AliasImportLib.Box(V: b.V * 2);
-    AliasImportLibꓸDurFn d = (time.Duration t) => (nint)(t / time.Second);
-    AliasImportLibꓸAct a = () => {
+    AliasImportLibꓸIntFn f = [GoFunc("main.func1")] (nint x) => x + 1;
+    AliasImportLibꓸBoxFn g = [GoFunc("main.func2")] (AliasImportLib.Box b) => new AliasImportLib.Box(V: b.V * 2);
+    AliasImportLibꓸDurFn d = [GoFunc("main.func3")] (time.Duration t) => (nint)(t / time.Second);
+    AliasImportLibꓸAct a = [GoFunc("main.func4")] () => {
         fmt.Println("act");
     };
-    AliasImportLibꓸMulti m = (nint x) => (x * 10, default);
-    AliasImportLibꓸVar v = (params ꓸꓸꓸnint xsʗp) => {
+    AliasImportLibꓸMulti m = [GoFunc("main.func5")] (nint x) => (x * 10, default);
+    AliasImportLibꓸVar v = [GoFunc("main.func6")] (params ꓸꓸꓸnint xsʗp) => {
         var xs = xsʗp.sslice();
         return len(xs);
     };
-    AliasImportLibꓸNamed nr = (nint x) => {
+    AliasImportLibꓸNamed nr = [GoFunc("main.func7")] (nint x) => {
         return (x + 100, x > 0);
     };
 

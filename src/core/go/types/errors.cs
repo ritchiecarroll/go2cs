@@ -14,7 +14,6 @@ using errors = global::go.@internal.types.errors_package;
 using global::go.go;
 using io = io_package;
 using ꓸꓸꓸany = variadic<any>;
-using static types_package;
 
 partial class types_package {
 
@@ -50,17 +49,13 @@ partial struct error_ {
     internal bool soft; // TODO(gri) eventually determine this from an error code
 }
 
-} partial class typesᴛChecker {
-
 // newError returns a new error_ with the given error code.
-internal static ж<error_> newError(this ж<Checker> Ꮡcheck, errors.Code code) {
+internal static ж<error_> newError⁔(/*this*/ ж<Checker> Ꮡcheck, errors.Code code) {
     if (code == 0) {
         throw panic("error code must not be 0");
     }
     return Ꮡ(new error_(check: Ꮡcheck, code: code));
 }
-
-} partial class typesᴛerror_ {
 
 // addf adds formatted error information to err.
 // It may be called multiple times to provide additional information.
@@ -68,14 +63,14 @@ internal static ж<error_> newError(this ж<Checker> Ꮡcheck, errors.Code code)
 // Subsequent calls to addf provide additional information in the form of additional lines
 // in the error message (types2) or continuation errors identified by a tab-indented error
 // message (go/types).
-internal static void addf(this ref error_ err, positioner at, @string format, params ꓸꓸꓸany argsʗp) {
+internal static void addf⁔(/*this*/ ref error_ err, positioner at, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp;
 
     err.desc = append(err.desc, new errorDesc(at, err.check.sprintf(format, args.ꓸꓸꓸ)));
 }
 
 // addAltDecl is a specialized form of addf reporting another declaration of obj.
-internal static void addAltDecl(this ref error_ err, Object obj) {
+internal static void addAltDecl⁔(/*this*/ ref error_ err, Object obj) {
     token.Pos pos = obj.Pos(); if (pos.IsValid()) {
         // We use "other" rather than "previous" here because
         // the first declaration seen may not be textually
@@ -84,11 +79,11 @@ internal static void addAltDecl(this ref error_ err, Object obj) {
     }
 }
 
-internal static bool empty(this ref error_ err) {
+internal static bool empty⁔(/*this*/ ref error_ err) {
     return err.desc == nil;
 }
 
-internal static positioner posn(this ref error_ err) {
+internal static positioner posn⁔(/*this*/ ref error_ err) {
     if (err.empty()) {
         return noposn;
     }
@@ -100,7 +95,7 @@ internal static ref readonly @string noErrorˢ => ref noErrorˢᵇ;
 private static readonly @string noErrorˢᵇ = "no error"u8;
 
 // msg returns the formatted error message without the primary error position pos().
-internal static @string msg(this ref error_ err) {
+internal static @string msg⁔(/*this*/ ref error_ err) {
     if (err.empty()) {
         return noErrorˢ;
     }
@@ -128,7 +123,7 @@ internal static ref readonly @string errorSCodeDˢ => ref errorSCodeDˢᵇ;
 private static readonly @string errorSCodeDˢᵇ = "ERROR: %s (code = %d)"u8;
 
 // report reports the error err, setting check.firstError if necessary.
-internal static void report(this ref error_ err) {
+internal static void report⁔(/*this*/ ref error_ err) {
     if (err.empty()) {
         throw panic("no error");
     }
@@ -177,10 +172,8 @@ internal static void report(this ref error_ err) {
     err.desc = default;
 }
 
-} partial class typesᴛChecker {
-
 // handleError should only be called by error_.report.
-internal static void handleError(this ref Checker check, nint index, positioner posn, errors.Code code, @string msg, bool soft) {
+internal static void handleError⁔(/*this*/ ref Checker check, nint index, positioner posn, errors.Code code, @string msg, bool soft) {
     assert(code != 0);
 
     if (index == 0) {
@@ -248,8 +241,6 @@ internal static void handleError(this ref Checker check, nint index, positioner 
     f(e);
 }
 
-} partial class types_package {
-
 internal static ref readonly @string invalidArg => ref invalidArgᵇ;
 private static readonly @string invalidArgᵇ = "invalid argument: "u8;
 internal static ref readonly @string invalidOp => ref invalidOpᵇ;
@@ -260,15 +251,13 @@ partial interface positioner {
     token.Pos Pos();
 }
 
-} partial class typesᴛChecker {
-
-internal static void error(this ж<Checker> Ꮡcheck, positioner at, errors.Code code, @string msg) {
+internal static void error⁔(/*this*/ ж<Checker> Ꮡcheck, positioner at, errors.Code code, @string msg) {
     var err = Ꮡcheck.newError(code);
     err.addf(at, "%s", msg);
     err.report();
 }
 
-internal static void errorf(this ж<Checker> Ꮡcheck, positioner at, errors.Code code, @string format, params ꓸꓸꓸany argsʗp) {
+internal static void errorf⁔(/*this*/ ж<Checker> Ꮡcheck, positioner at, errors.Code code, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp;
 
     var err = Ꮡcheck.newError(code);
@@ -276,7 +265,7 @@ internal static void errorf(this ж<Checker> Ꮡcheck, positioner at, errors.Cod
     err.report();
 }
 
-internal static void softErrorf(this ж<Checker> Ꮡcheck, positioner at, errors.Code code, @string format, params ꓸꓸꓸany argsʗp) {
+internal static void softErrorf⁔(/*this*/ ж<Checker> Ꮡcheck, positioner at, errors.Code code, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp;
 
     var err = Ꮡcheck.newError(code);
@@ -285,7 +274,7 @@ internal static void softErrorf(this ж<Checker> Ꮡcheck, positioner at, errors
     err.report();
 }
 
-internal static void versionErrorf(this ж<Checker> Ꮡcheck, positioner at, goVersion v, @string format, params ꓸꓸꓸany argsʗp) {
+internal static void versionErrorf⁔(/*this*/ ж<Checker> Ꮡcheck, positioner at, goVersion v, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp;
 
     @string msg = Ꮡcheck.sprintf(format, args.ꓸꓸꓸ);
@@ -294,18 +283,12 @@ internal static void versionErrorf(this ж<Checker> Ꮡcheck, positioner at, goV
     err.report();
 }
 
-} partial class types_package {
-
 // atPos wraps a token.Pos to implement the positioner interface.
 partial struct atPos /*global::go.go.token_package.Pos*/;
 
-} partial class typesᴛatPos {
-
-internal static token.Pos Pos(this atPos s) {
+internal static token.Pos Pos⁔(/*this*/ atPos s) {
     return (token.Pos)s;
 }
-
-} partial class types_package {
 
 // posSpan holds a position range along with a highlighted position within that
 // range. This is used for positioning errors, with pos by convention being the
@@ -316,13 +299,9 @@ partial struct posSpan {
     internal token.Pos start, pos, end;
 }
 
-} partial class typesᴛposSpan {
-
-internal static token.Pos Pos(this posSpan e) {
+internal static token.Pos Pos⁔(/*this*/ posSpan e) {
     return e.pos;
 }
-
-} partial class types_package {
 
 // inNode creates a posSpan for the given node.
 // Invariant: node.Pos() <= pos < node.End() (node.End() is the position of the

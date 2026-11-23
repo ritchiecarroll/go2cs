@@ -12,7 +12,6 @@ using @internal;
 using @internal.runtime;
 using @internal.trace;
 using atomic = @internal.runtime.atomic_package;
-using static runtime_package;
 
 partial class runtime_package {
 
@@ -154,11 +153,9 @@ partial struct traceStackTable {
     internal traceMap tab;
 }
 
-} partial class runtimeᴛtraceStackTable {
-
 // put returns a unique id for the stack trace pcs and caches it in the table,
 // if it sees the trace for the first time.
-internal static uint64 put(this ж<traceStackTable> Ꮡt, slice<uintptr> pcs) {
+internal static uint64 put⁔(/*this*/ ж<traceStackTable> Ꮡt, slice<uintptr> pcs) {
     // Even though put will handle this for us, taking the address of pcs forces a bounds check
     // that will fail if len(pcs) == 0.
     if (len(pcs) == 0) {
@@ -171,7 +168,7 @@ internal static uint64 put(this ж<traceStackTable> Ꮡt, slice<uintptr> pcs) {
 // dump writes all previously cached stacks to trace buffers,
 // releases all memory and resets state. It must only be called once the caller
 // can guarantee that there are no more writers to the table.
-internal static void dump(this ж<traceStackTable> Ꮡt, uintptr gen) {
+internal static void dump⁔(/*this*/ ж<traceStackTable> Ꮡt, uintptr gen) {
     var stackBuf = new slice<uintptr>(tracev2.MaxFramesPerStack);
     var w = unsafeTraceWriter(gen, nil);
     var root = @unsafe.Pointer.To<traceMapNode>(Ꮡt.Ꮡtab.Ꮡroot.Load()); if (root != nil) {
@@ -180,8 +177,6 @@ internal static void dump(this ж<traceStackTable> Ꮡt, uintptr gen) {
     w.flush().end();
     Ꮡt.Ꮡtab.reset();
 }
-
-} partial class runtime_package {
 
 internal static traceWriter dumpStacksRec(ж<traceMapNode> Ꮡnode, traceWriter w, slice<uintptr> stackBuf) {
     ref var node = ref Ꮡnode.DerefOrNull();
@@ -323,7 +318,7 @@ internal static nint fpunwindExpand(slice<uintptr> dst, slice<uintptr> pcBuf) {
     // pcs can be added.
 
     var dstʗ1 = dst;
-    Func<uintptr, bool> skipOrAdd = (uintptr retPC) => {
+    Func<uintptr, bool> skipOrAdd = [GoFunc("fpunwindExpand.func1")] (uintptr retPC) => {
         if (skip > 0) {
             skip--;
         } else if (n < len(dstʗ1)) {

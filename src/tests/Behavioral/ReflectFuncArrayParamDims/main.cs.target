@@ -36,20 +36,20 @@ internal static nint declared(/*[16]*/ array<byte> @in) {
 }
 
 internal static void main() {
-    var f32 = ([GoArrayDims(32)] array<byte> @in) => {
+    var f32 = [GoFunc("main.func1")] ([GoArrayDims(32)] array<byte> @in) => {
         @in = @in.Clone();
         return len(@in) == 32;
     };
-    var f64 = ([GoArrayDims(64)] array<byte> @in, wrap w) => {
+    var f64 = [GoFunc("main.func2")] ([GoArrayDims(64)] array<byte> @in, wrap w) => {
         @in = @in.Clone();
         w = w.ΔClone();
         return len(@in) + len(w.Buf);
     };
-    var nested = ([GoArrayDims(2, 3)] array<array<nint>> @in) => {
+    var nested = [GoFunc("main.func3")] ([GoArrayDims(2, 3)] array<array<nint>> @in) => {
         @in = @in.Clone();
         return len(@in) * len(@in[0]);
     };
-    var plain = (nint a, slice<byte> s) => a + len(s);
+    var plain = [GoFunc("main.func4")] (nint a, slice<byte> s) => a + len(s);
 
     report("f32", reflect.TypeOf((f32).OrTypedNilFunc()));
     report("f64", reflect.TypeOf((f64).OrTypedNilFunc()));

@@ -40,7 +40,7 @@ internal static slice<Func<nint>> intClosures() {
 
         var p = Ꮡi;
         var pʗ1 = p;
-        fs = append(fsᴷ, fs, () => pʗ1.Value);
+        fs = append(fsᴷ, fs, [GoFunc("intClosures.func1")] () => pʗ1.Value);
     }
     fs = move2heap(fsᴷ, fs);
     return fs;
@@ -59,7 +59,7 @@ internal static slice<Func<@string>> stringClosures(@string s) {
         var (pi, pr) = (Ꮡi, Ꮡr);
         var piʗ1 = pi;
         var prʗ1 = pr;
-        fs = append(fsᴷ, fs, () => fmt.Sprint(piʗ1.Value, ":", (@string)(prʗ1.Value)));
+        fs = append(fsᴷ, fs, [GoFunc("stringClosures.func1")] () => fmt.Sprint(piʗ1.Value, ":", (@string)(prʗ1.Value)));
     }
     fs = move2heap(fsᴷ, fs);
     return fs;
@@ -75,7 +75,7 @@ internal static slice<Func<nint>> chanClosures(channel<nint> ch) {
 
         var p = Ꮡv;
         var pʗ1 = p;
-        fs = append(fsᴷ, fs, () => pʗ1.Value);
+        fs = append(fsᴷ, fs, [GoFunc("chanClosures.func1")] () => pʗ1.Value);
     }
     fs = move2heap(fsᴷ, fs);
     return fs;

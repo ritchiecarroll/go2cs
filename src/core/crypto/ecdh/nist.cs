@@ -13,7 +13,6 @@ using io = io_package;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140;
 using nistec = go.crypto.@internal.fips140.nistec_package;
-using static ecdh_package;
 
 partial class ecdh_package {
 
@@ -25,9 +24,7 @@ partial struct nistCurve {
     internal Func<ж<ecdh.PrivateKey>, ж<ecdh.PublicKey>, (slice<byte> sharedSecret, error err)> sharedSecret;
 }
 
-} partial class ecdhᴛnistCurve {
-
-internal static @string String(this ref nistCurve c) {
+internal static @string String⁔(/*this*/ ref nistCurve c) {
     return c.name;
 }
 
@@ -35,7 +32,7 @@ internal static @string String(this ref nistCurve c) {
 private static ref readonly @string cryptoEcdhOnlyCryptoRandˢ => ref cryptoEcdhOnlyCryptoRandˢᵇ;
 private static readonly @string cryptoEcdhOnlyCryptoRandˢᵇ = "crypto/ecdh: only crypto/rand.Reader is allowed in FIPS 140-only mode"u8;
 
-internal static (ж<PrivateKey>, error) GenerateKey(this ж<nistCurve> Ꮡc, io.Reader r) {
+internal static (ж<PrivateKey>, error) GenerateKey⁔(/*this*/ ж<nistCurve> Ꮡc, io.Reader r) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (boring.Enabled && rand.IsDefaultReader(r)) {
@@ -96,7 +93,7 @@ internal static (ж<PrivateKey>, error) GenerateKey(this ж<nistCurve> Ꮡc, io.
 private static ref readonly @string cryptoEcdhInvalidPrivateˢ => ref cryptoEcdhInvalidPrivateˢᵇ;
 private static readonly @string cryptoEcdhInvalidPrivateˢᵇ = "crypto/ecdh: invalid private key"u8;
 
-internal static (ж<PrivateKey>, error) NewPrivateKey(this ж<nistCurve> Ꮡc, slice<byte> key) {
+internal static (ж<PrivateKey>, error) NewPrivateKey⁔(/*this*/ ж<nistCurve> Ꮡc, slice<byte> key) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (boring.Enabled) {
@@ -138,7 +135,7 @@ internal static (ж<PrivateKey>, error) NewPrivateKey(this ж<nistCurve> Ꮡc, s
 private static ref readonly @string cryptoEcdhInvalidPublicˢ => ref cryptoEcdhInvalidPublicˢᵇ;
 private static readonly @string cryptoEcdhInvalidPublicˢᵇ = "crypto/ecdh: invalid public key"u8;
 
-internal static (ж<PublicKey>, error) NewPublicKey(this ж<nistCurve> Ꮡc, slice<byte> key) {
+internal static (ж<PublicKey>, error) NewPublicKey⁔(/*this*/ ж<nistCurve> Ꮡc, slice<byte> key) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     // Reject the point at infinity and compressed encodings.
@@ -166,7 +163,7 @@ internal static (ж<PublicKey>, error) NewPublicKey(this ж<nistCurve> Ꮡc, sli
     return (k, default);
 }
 
-internal static (slice<byte>, error) ecdh(this ref nistCurve c, ж<PrivateKey> Ꮡlocal, ж<PublicKey> Ꮡremote) {
+internal static (slice<byte>, error) ecdh⁔(/*this*/ ref nistCurve c, ж<PrivateKey> Ꮡlocal, ж<PublicKey> Ꮡremote) {
     ref var local = ref Ꮡlocal.DerefOrNull();
     ref var remote = ref Ꮡremote.DerefOrNull();
 
@@ -183,8 +180,6 @@ internal static (slice<byte>, error) ecdh(this ref nistCurve c, ж<PrivateKey> �
     return c.sharedSecret(local.fips, remote.fips);
 }
 
-} partial class ecdh_package {
-
 // P256 returns a [Curve] which implements NIST P-256 (FIPS 186-3, section D.2.3),
 // also known as secp256r1 or prime256v1.
 //
@@ -194,10 +189,10 @@ public static Curve P256() { return new nistCurveжCurve(p256); }
 
 [GoLazy] partial class lazyᴛp256 { internal static ж<nistCurve> p256 = Ꮡ(new nistCurve(
     name: "P-256",
-    generate: (io.Reader r) => ecdh.GenerateKey<ecdh.P256PointжPoint>(ecdh.P256(), r),
-    newPrivateKey: (slice<byte> b) => ecdh.NewPrivateKey<ecdh.P256PointжPoint>(ecdh.P256(), b),
-    newPublicKey: (slice<byte> publicKey) => ecdh.NewPublicKey<ecdh.P256PointжPoint>(ecdh.P256(), publicKey),
-    sharedSecret: (ж<ecdh.PrivateKey> priv, ж<ecdh.PublicKey> pub) => {
+    generate: [GoFunc("init.func1")] (io.Reader r) => ecdh.GenerateKey<ecdh.P256PointжPoint>(ecdh.P256(), r),
+    newPrivateKey: [GoFunc("init.func2")] (slice<byte> b) => ecdh.NewPrivateKey<ecdh.P256PointжPoint>(ecdh.P256(), b),
+    newPublicKey: [GoFunc("init.func3")] (slice<byte> publicKey) => ecdh.NewPublicKey<ecdh.P256PointжPoint>(ecdh.P256(), publicKey),
+    sharedSecret: [GoFunc("init.func4")] (ж<ecdh.PrivateKey> priv, ж<ecdh.PublicKey> pub) => {
         return ecdh.ECDH<ecdh.P256PointжPoint>(ecdh.P256(), priv, pub);
     }
 )); }
@@ -211,10 +206,10 @@ public static Curve P384() { return new nistCurveжCurve(p384); }
 
 [GoLazy] partial class lazyᴛp384 { internal static ж<nistCurve> p384 = Ꮡ(new nistCurve(
     name: "P-384",
-    generate: (io.Reader r) => ecdh.GenerateKey<ecdh.P384PointжPoint>(ecdh.P384(), r),
-    newPrivateKey: (slice<byte> b) => ecdh.NewPrivateKey<ecdh.P384PointжPoint>(ecdh.P384(), b),
-    newPublicKey: (slice<byte> publicKey) => ecdh.NewPublicKey<ecdh.P384PointжPoint>(ecdh.P384(), publicKey),
-    sharedSecret: (ж<ecdh.PrivateKey> priv, ж<ecdh.PublicKey> pub) => {
+    generate: [GoFunc("init.func5")] (io.Reader r) => ecdh.GenerateKey<ecdh.P384PointжPoint>(ecdh.P384(), r),
+    newPrivateKey: [GoFunc("init.func6")] (slice<byte> b) => ecdh.NewPrivateKey<ecdh.P384PointжPoint>(ecdh.P384(), b),
+    newPublicKey: [GoFunc("init.func7")] (slice<byte> publicKey) => ecdh.NewPublicKey<ecdh.P384PointжPoint>(ecdh.P384(), publicKey),
+    sharedSecret: [GoFunc("init.func8")] (ж<ecdh.PrivateKey> priv, ж<ecdh.PublicKey> pub) => {
         return ecdh.ECDH<ecdh.P384PointжPoint>(ecdh.P384(), priv, pub);
     }
 )); }
@@ -228,10 +223,10 @@ public static Curve P521() { return new nistCurveжCurve(p521); }
 
 [GoLazy] partial class lazyᴛp521 { internal static ж<nistCurve> p521 = Ꮡ(new nistCurve(
     name: "P-521",
-    generate: (io.Reader r) => ecdh.GenerateKey<ecdh.P521PointжPoint>(ecdh.P521(), r),
-    newPrivateKey: (slice<byte> b) => ecdh.NewPrivateKey<ecdh.P521PointжPoint>(ecdh.P521(), b),
-    newPublicKey: (slice<byte> publicKey) => ecdh.NewPublicKey<ecdh.P521PointжPoint>(ecdh.P521(), publicKey),
-    sharedSecret: (ж<ecdh.PrivateKey> priv, ж<ecdh.PublicKey> pub) => {
+    generate: [GoFunc("init.func9")] (io.Reader r) => ecdh.GenerateKey<ecdh.P521PointжPoint>(ecdh.P521(), r),
+    newPrivateKey: [GoFunc("init.func10")] (slice<byte> b) => ecdh.NewPrivateKey<ecdh.P521PointжPoint>(ecdh.P521(), b),
+    newPublicKey: [GoFunc("init.func11")] (slice<byte> publicKey) => ecdh.NewPublicKey<ecdh.P521PointжPoint>(ecdh.P521(), publicKey),
+    sharedSecret: [GoFunc("init.func12")] (ж<ecdh.PrivateKey> priv, ж<ecdh.PublicKey> pub) => {
         return ecdh.ECDH<ecdh.P521PointжPoint>(ecdh.P521(), priv, pub);
     }
 )); }

@@ -206,7 +206,7 @@ internal static void doinit() {
     var (_, _, _, edxExt1) = cpuid(0x80000001U, 0);
     X86.HasRDTSCP = isSet(edxExt1, cpuid_RDTSCP);
 
-    doDerived = () => {
+    doDerived = [GoFunc("doinit.func1")] () => {
         // Rather than carefully gating on fundamental AVX-512 features, we have
         // a virtual "AVX512" feature that captures F+CD+BW+DQ+VL. BW, DQ, and
         // VL have a huge effect on which AVX-512 instructions are available,

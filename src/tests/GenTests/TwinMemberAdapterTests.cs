@@ -17,7 +17,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace GenTests;
 
 /// <summary>
-/// M:N PROTOTYPE, stage (c) (2026-11-15): under the interface twin shape `default`, a twinned interface carries a
+/// M:N (experimental, opt-in), stage (c) (2026-11-15): under the interface twin shape `default`, a twinned interface carries a
 /// default-bodied hidden member beside each marked one (`Readꞏtwin` beside `Read`). An adapter must not forward it: the
 /// implementer's own twin may not exist (refused: by-ref receiver), and then `m_box.Readꞏtwin(p)` binds nothing
 /// (CS1929, encoding/base64's decoder). The interface's default body is the sync fallback; the twin generator adds a

@@ -85,7 +85,7 @@ break_outer:;
     var (ᴛ13, ᴛ14) = next();
     for (nint iᴛ1 = must(ᴛ13, ᴛ14); iᴛ1 < 4; ) {
         var i = iᴛ1;
-        funcs = append(funcsᴷ, funcs, () => i);
+        funcs = append(funcsᴷ, funcs, [GoFunc("main.func1")] () => i);
         var (ᴛ15, ᴛ16) = next();
         iᴛ1 = must(ᴛ15, ᴛ16);
     }

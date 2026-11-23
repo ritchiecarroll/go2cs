@@ -299,7 +299,7 @@ internal static nint /*n*/ deferForeign(lib.Pitch p) {
     nint n = default;
     GoFrame ᒐ = default;
     try {
-        defer((anonBox_V a) => {
+        defer([GoFunc("deferForeign.func1")] (anonBox_V a) => {
             n = a.Hz;
         }, p, ref ᒐ);
         n = 0;
@@ -311,7 +311,7 @@ internal static nint /*n*/ deferForeign(lib.Pitch p) {
 internal static partial nint goLocal(hertz h) {
     var c = new channel<nint>(0);
     var cʗ1 = c;
-    goǃ((anonBox_V a) => {
+    goǃ([GoFunc("goLocal.func1")] (anonBox_V a) => {
         cʗ1.ᐸꟷ(a.Hz);
     }, h);
     return ᐸꟷ(c);
@@ -319,7 +319,7 @@ internal static partial nint goLocal(hertz h) {
 internal static (anonBox_V, error) twoForeign(lib.Pitch p) { return (p, default); }
 internal static nint literalLocal(hertz h) {
     var hʗ1 = h;
-    anonBox_V f() => hʗ1;
+    [GoFunc("literalLocal.func1")] anonBox_V f() => hʗ1;
     return f().Hz;
 }
 
@@ -467,7 +467,7 @@ internal static nint /*n*/ backDeferLocal(anonBox_V a) {
     nint n = default;
     GoFrame ᒐ = default;
     try {
-        defer((hertz h) => {
+        defer([GoFunc("backDeferLocal.func1")] (hertz h) => {
             n = h.half();
         }, a, ref ᒐ);
         n = 0;
@@ -479,7 +479,7 @@ internal static nint /*n*/ backDeferLocal(anonBox_V a) {
 internal static partial nint backGoForeign(anonBox_V a) {
     var c = new channel<nint>(0);
     var cʗ1 = c;
-    goǃ((lib.Pitch p) => {
+    goǃ([GoFunc("backGoForeign.func1")] (lib.Pitch p) => {
         cʗ1.ᐸꟷ(p.Double());
     }, a);
     return ᐸꟷ(c);
@@ -487,7 +487,7 @@ internal static partial nint backGoForeign(anonBox_V a) {
 internal static (hertz, error) backTwoLocal(anonBox_V a) { return (a, default); }
 internal static nint backLiteralForeign(anonBox_V a) {
     var aʗ1 = a;
-    lib.Pitch f() => aʗ1;
+    [GoFunc("backLiteralForeign.func1")] lib.Pitch f() => aʗ1;
     return f().Double();
 }
 

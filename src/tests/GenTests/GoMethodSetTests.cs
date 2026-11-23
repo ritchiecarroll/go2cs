@@ -56,6 +56,9 @@ public class GoMethodSetTests
 
             public static void Set(this ref Plain p, nint v) => p.n = v;
 
+            // sync's shape of a hand-written M:N twin: never a Go method, so the set writes no arm for it.
+            internal static global::go.golib.GoTask Lockꞏtwin(this ref Plain p) => default;
+
             public static nint get(this Plain p) => p.n;
 
             public static nint Sum(this Plain p, params variadic<nint> more) => p.n + more.Length;
@@ -250,6 +253,19 @@ public class GoMethodSetTests
         // tail unbound (1+2) and bound to the box (5+0); 16 parameters unbound (200+1+16) and bound (300+1+16); Outer's
         // promoted Twice through T (10), Bump through *T then Twice through *T (5*2), Inner.i now 5, and no Bump through T.
         Assert.AreEqual("1 3 5 5 z=26 26 7 True True True 3 5 217 317 10 10 5 True", probe.Invoke(null, null));
+    }
+
+    // An M:N twin is never a Go method (COORD's ruling, 2026-11-22; golib's TypeExtensions.IsTwinMember leaves it out of
+    // the method table, so an arm for it would never be asked for): the set writes none (P3's NIT on the twin seat).
+    [TestMethod]
+    public void AHandWrittenTwinGetsNoArm()
+    {
+        (Dictionary<string, string> sources, Diagnostic[] errors, _) = Run();
+
+        Assert.AreEqual(0, errors.Length, string.Join("; ", errors.Take(3)));
+        string plain = sources.Single(source => source.Key.Contains("Plain")).Value;
+        StringAssert.Contains(plain, "case (\"Set\", true):", "the plain pointer method keeps its arm");
+        Assert.IsFalse(plain.Contains("Lockꞏtwin", StringComparison.Ordinal), "no arm names the twin:\n" + plain);
     }
 
     // A variadic arm registers both of its signatures (receiver first, and the method value's) with golib before handing

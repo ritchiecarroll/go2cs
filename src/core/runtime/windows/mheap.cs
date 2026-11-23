@@ -16,10 +16,7 @@ using sys = @internal.runtime.sys_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
-using FieldOffsetAttribute = global::System.Runtime.InteropServices.FieldOffsetAttribute;
-using LayoutKind = global::System.Runtime.InteropServices.LayoutKind;
-using StructLayoutAttribute = global::System.Runtime.InteropServices.StructLayoutAttribute;
-using static runtime_package;
+using System.Runtime.InteropServices;
 
 partial class runtime_package {
 
@@ -376,12 +373,10 @@ partial struct mSpanStateBox {
     internal atomic.Uint8 s;
 }
 
-} partial class runtimeᴛmSpanStateBox {
-
 // It is nosplit to match get, below.
 
 //go:nosplit
-internal static void set(this ж<mSpanStateBox> Ꮡb, mSpanState s) {
+internal static void set⁔(/*this*/ ж<mSpanStateBox> Ꮡb, mSpanState s) {
     Ꮡb.Ꮡs.Store((uint8)s);
 }
 
@@ -389,11 +384,9 @@ internal static void set(this ж<mSpanStateBox> Ꮡb, mSpanState s) {
 // which must not be preempted.
 
 //go:nosplit
-internal static mSpanState get(this ж<mSpanStateBox> Ꮡb) {
+internal static mSpanState get⁔(/*this*/ ж<mSpanStateBox> Ꮡb) {
     return (mSpanState)Ꮡb.Ꮡs.Load();
 }
-
-} partial class runtime_package {
 
 partial struct mspan {
     internal sys.NotInHeap _;
@@ -484,13 +477,11 @@ partial struct mspan {
     internal ж<_type> largeType;           // malloc header for large objects.
 }
 
-} partial class runtimeᴛmspan {
-
-internal static uintptr @base(this ref mspan s) {
+internal static uintptr base⁔(/*this*/ ref mspan s) {
     return s.startAddr;
 }
 
-internal static (uintptr size, uintptr n, uintptr total) layout(this ref mspan s) {
+internal static (uintptr size, uintptr n, uintptr total) layout⁔(/*this*/ ref mspan s) {
     uintptr size = default;
     uintptr n = default;
     uintptr total = default;
@@ -502,8 +493,6 @@ internal static (uintptr size, uintptr n, uintptr total) layout(this ref mspan s
     }
     return (size, n, total);
 }
-
-} partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string allspansArrayˢ => ref allspansArrayˢᵇ;
@@ -571,19 +560,15 @@ internal static spanClass makeSpanClass(uint8 sizeclass, bool noscan) {
     return (spanClass)(((spanClass)((uint8)(sizeclass << 1))) | ((spanClass)(uint8)bool2int(noscan)));
 }
 
-} partial class runtimeᴛspanClass {
-
 //go:nosplit
-internal static int8 sizeclass(this spanClass sc) {
+internal static int8 sizeclass⁔(/*this*/ spanClass sc) {
     return (int8)(sc >> 1);
 }
 
 //go:nosplit
-internal static bool noscan(this spanClass sc) {
+internal static bool noscan⁔(/*this*/ spanClass sc) {
     return (spanClass)(sc & 1) != 0;
 }
-
-} partial class runtime_package {
 
 // arenaIndex returns the index into mheap_.arenas of the arena
 // containing metadata for p. This index combines of an index into the
@@ -609,15 +594,13 @@ internal static uintptr arenaBase(arenaIdx i) {
 
 partial struct arenaIdx /*num:nuint*/;
 
-} partial class runtimeᴛarenaIdx {
-
 // l1 returns the "l1" portion of an arenaIdx.
 //
 // Marked nosplit because it's called by spanOf and other nosplit
 // functions.
 //
 //go:nosplit
-internal static nuint l1(this arenaIdx i) {
+internal static nuint l1⁔(/*this*/ arenaIdx i) {
     if (arenaL1Bits == 0) {
         // Let the compiler optimize this away if there's no
         // L1 map.
@@ -633,15 +616,13 @@ internal static nuint l1(this arenaIdx i) {
 // functions.
 //
 //go:nosplit
-internal static nuint l2(this arenaIdx i) {
+internal static nuint l2⁔(/*this*/ arenaIdx i) {
     if (arenaL1Bits == 0) {
         return (nuint)i;
     } else {
         return (nuint)i & (nuint)((1 << (int)(arenaL2Bits)) - 1);
     }
 }
-
-} partial class runtime_package {
 
 // inheap reports whether b is a pointer into a (potentially dead) heap object.
 // It returns false for pointers into mSpanManual spans.
@@ -739,10 +720,8 @@ internal static ж<heapArena> heapArenaOf(uintptr p) {
     return l2.Value[ri.l2()];
 }
 
-} partial class runtimeᴛmheap {
-
 // Initialize the heap.
-internal static void init(this ж<mheap> Ꮡh) {
+internal static void init⁔(/*this*/ ж<mheap> Ꮡh) {
     ref var h = ref Ꮡh.DerefOrNull();
 
     lockInit(ref nonnil(ref h).@lock, lockRankMheap);
@@ -789,7 +768,7 @@ internal static void init(this ж<mheap> Ꮡh) {
 // reclaim implements the page-reclaimer half of the sweeper.
 //
 // h.lock must NOT be held.
-internal static void reclaim(this ж<mheap> Ꮡh, uintptr npage) {
+internal static void reclaim⁔(/*this*/ ж<mheap> Ꮡh, uintptr npage) {
     ref var h = ref Ꮡh.DerefOrNull();
 
     // TODO(austin): Half of the time spent freeing spans is in
@@ -871,7 +850,7 @@ internal static void reclaim(this ж<mheap> Ꮡh, uintptr npage) {
 // h.lock must be held and the caller must be non-preemptible. Note: h.lock may be
 // temporarily unlocked and re-locked in order to do sweeping or if tracing is
 // enabled.
-internal static uintptr reclaimChunk(this ж<mheap> Ꮡh, slice<arenaIdx> arenas, uintptr pageIdx, uintptr n) {
+internal static uintptr reclaimChunk⁔(/*this*/ ж<mheap> Ꮡh, slice<arenaIdx> arenas, uintptr pageIdx, uintptr n) {
     ref var h = ref Ꮡh.DerefOrNull();
 
     // The heap lock must be held because this accesses the
@@ -946,8 +925,6 @@ internal static uintptr reclaimChunk(this ж<mheap> Ꮡh, slice<arenaIdx> arenas
     return nFreed;
 }
 
-} partial class runtime_package {
-
 // spanAllocType represents the type of allocation to make, or
 // the type of allocation to be freed.
 partial struct spanAllocType /*num:uint8*/;
@@ -956,14 +933,10 @@ internal static spanAllocType spanAllocHeap => /* iota */ 0; // heap span
 internal static spanAllocType spanAllocStack => 1;           // stack span
 internal static spanAllocType spanAllocWorkBuf => 2;         // work buf span
 
-} partial class runtimeᴛspanAllocType {
-
 // manual returns true if the span allocation is manually managed.
-internal static bool manual(this spanAllocType s) {
+internal static bool manual⁔(/*this*/ spanAllocType s) {
     return s != spanAllocHeap;
 }
-
-} partial class runtimeᴛmheap {
 
 // alloc allocates a new span of npage pages from the GC'd heap.
 //
@@ -971,12 +944,12 @@ internal static bool manual(this spanAllocType s) {
 //
 // Returns a span that has been fully initialized. span.needzero indicates
 // whether the span has been zeroed. Note that it may not be.
-internal static ж<mspan> alloc(this ж<mheap> Ꮡh, uintptr npages, spanClass spanclass) {
+internal static ж<mspan> alloc⁔(/*this*/ ж<mheap> Ꮡh, uintptr npages, spanClass spanclass) {
     // Don't do any operations that lock the heap on the G stack.
     // It might trigger stack growth, and the stack growth code needs
     // to be able to allocate heap.
     ref var s = ref heap<ж<mspan>>(out var Ꮡs);
-    systemstack(() => {
+    systemstack([GoFunc("(*mheap).alloc.func1")] () => {
         // To prevent excessive heap growth, before allocating n pages
         // we need to sweep and reclaim at least n pages.
         if (!isSweepDone()) {
@@ -1008,7 +981,7 @@ private static readonly @string manualSpanAllocationˢᵇ = "manual span allocat
 // existing spanAllocType value and instead declare a new one.
 //
 //go:systemstack
-internal static ж<mspan> allocManual(this ж<mheap> Ꮡh, uintptr npages, spanAllocType typ) {
+internal static ж<mspan> allocManual⁔(/*this*/ ж<mheap> Ꮡh, uintptr npages, spanAllocType typ) {
     if (!typ.manual()) {
         @throw(manualSpanAllocationˢ);
     }
@@ -1017,7 +990,7 @@ internal static ж<mspan> allocManual(this ж<mheap> Ꮡh, uintptr npages, spanA
 
 // setSpans modifies the span map so [spanOf(base), spanOf(base+npage*pageSize))
 // is s.
-internal static void setSpans(this ref mheap h, uintptr @base, uintptr npage, ж<mspan> s) {
+internal static void setSpans⁔(/*this*/ ref mheap h, uintptr @base, uintptr npage, ж<mspan> s) {
     var p = @base / (uintptr)pageSize;
     arenaIdx ai = arenaIndex(@base);
     var ha = h.arenas[ai.l1()].Value[ai.l2()];
@@ -1045,7 +1018,7 @@ private static readonly @string potentiallyOverlappingInˢᵇ = "potentially ove
 // critical for future page allocations.
 //
 // There are no locking constraints on this method.
-internal static bool /*needZero*/ allocNeedsZero(this ref mheap h, uintptr @base, uintptr npage) {
+internal static bool /*needZero*/ allocNeedsZero⁔(/*this*/ ref mheap h, uintptr @base, uintptr npage) {
     bool needZero = default;
 
     while (npage > 0) {
@@ -1112,7 +1085,7 @@ internal static bool /*needZero*/ allocNeedsZero(this ref mheap h, uintptr @base
 // may be relaxed if its use is necessary elsewhere.
 //
 //go:systemstack
-internal static ж<mspan> tryAllocMSpan(this ref mheap h) {
+internal static ж<mspan> tryAllocMSpan⁔(/*this*/ ref mheap h) {
     var pp = (~(~getg()).m).p.ptr();
     // If we don't have a p or the cache is empty, we can't do
     // anything here.
@@ -1135,7 +1108,7 @@ internal static ж<mspan> tryAllocMSpan(this ref mheap h) {
 // switch Ps during this function. See tryAllocMSpan for details.
 //
 //go:systemstack
-internal static ж<mspan> allocMSpanLocked(this ж<mheap> Ꮡh) {
+internal static ж<mspan> allocMSpanLocked⁔(/*this*/ ж<mheap> Ꮡh) {
     ref var h = ref Ꮡh.DerefOrNull();
 
     assertLockHeld(Ꮡh.Ꮡlock);
@@ -1169,7 +1142,7 @@ internal static ж<mspan> allocMSpanLocked(this ж<mheap> Ꮡh) {
 // switch Ps during this function. See tryAllocMSpan for details.
 //
 //go:systemstack
-internal static void freeMSpanLocked(this ж<mheap> Ꮡh, ж<mspan> s) {
+internal static void freeMSpanLocked⁔(/*this*/ ж<mheap> Ꮡh, ж<mspan> s) {
     ref var h = ref Ꮡh.DerefOrNull();
 
     assertLockHeld(Ꮡh.Ꮡlock);
@@ -1207,7 +1180,7 @@ private static readonly @string grewHeapButNoAdequateˢᵇ = "grew heap, but no 
 // the heap lock and because it must block GC transitions.
 //
 //go:systemstack
-internal static ж<mspan> /*s*/ allocSpan(this ж<mheap> Ꮡh, uintptr npages, spanAllocType typ, spanClass spanclass) {
+internal static ж<mspan> /*s*/ allocSpan⁔(/*this*/ ж<mheap> Ꮡh, uintptr npages, spanAllocType typ, spanClass spanclass) {
     ж<mspan> s = default;
     ref var h = ref Ꮡh.DerefOrNull();
 
@@ -1364,7 +1337,7 @@ HaveSpan:
         var track = pp.of(p.ᏑlimiterEvent).start(limiterEventScavengeAssist, start);
 
         // Scavenge, but back out if the limiter turns on.
-        var released = Ꮡh.Ꮡpages.scavenge(bytesToScavenge, () => ᏑgcCPULimiter.limiting(), forceScavenge);
+        var released = Ꮡh.Ꮡpages.scavenge(bytesToScavenge, [GoFunc("(*mheap).allocSpan.func1")] () => ᏑgcCPULimiter.limiting(), forceScavenge);
 
         Ꮡmheap_.Ꮡpages.Ꮡscav.of(pageAlloc_scav.ᏑreleasedEager).Add(released);
 
@@ -1428,7 +1401,7 @@ HaveSpan:
 
 // initSpan initializes a blank span s which will represent the range
 // [base, base+npages*pageSize). typ is the type of span being allocated.
-internal static void initSpan(this ж<mheap> Ꮡh, ж<mspan> Ꮡs, spanAllocType typ, spanClass spanclass, uintptr @base, uintptr npages, uintptr scav) {
+internal static void initSpan⁔(/*this*/ ж<mheap> Ꮡh, ж<mspan> Ꮡs, spanAllocType typ, spanClass spanclass, uintptr @base, uintptr npages, uintptr scav) {
     ref var h = ref Ꮡh.DerefOrNull();
     ref var s = ref Ꮡs.DerefOrNull();
 
@@ -1545,7 +1518,7 @@ internal static void initSpan(this ж<mheap> Ꮡh, ж<mspan> Ꮡs, spanAllocType
 // returning how much the heap grew by and whether it worked.
 //
 // h.lock must be held.
-internal static (uintptr, bool) grow(this ж<mheap> Ꮡh, uintptr npage) {
+internal static (uintptr, bool) grow⁔(/*this*/ ж<mheap> Ꮡh, uintptr npage) {
     ref var h = ref Ꮡh.DerefOrNull();
 
     assertLockHeld(Ꮡh.Ꮡlock);
@@ -1660,8 +1633,8 @@ internal static (uintptr, bool) grow(this ж<mheap> Ꮡh, uintptr npage) {
 }
 
 // Free the span back into the heap.
-internal static void freeSpan(this ж<mheap> Ꮡh, ж<mspan> s) {
-    systemstack(() => {
+internal static void freeSpan⁔(/*this*/ ж<mheap> Ꮡh, ж<mspan> s) {
+    systemstack([GoFunc("(*mheap).freeSpan.func1")] () => {
         // Trace the span free.
         if (traceAllocFreeEnabled()) {
             var trace = traceAcquire();
@@ -1704,7 +1677,7 @@ internal static void freeSpan(this ж<mheap> Ꮡh, ж<mspan> s) {
 // the heap lock. See mheap for details.
 //
 //go:systemstack
-internal static void freeManual(this ж<mheap> Ꮡh, ж<mspan> Ꮡs, spanAllocType typ) {
+internal static void freeManual⁔(/*this*/ ж<mheap> Ꮡh, ж<mspan> Ꮡs, spanAllocType typ) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     // Trace the span free.
@@ -1736,7 +1709,7 @@ private static readonly @string mheapFreeSpanLockedˢ3ᵇ = "mheap.freeSpanLocke
 internal static ref readonly @string mheapFreeSpanLockedˢ4 => ref mheapFreeSpanLockedˢ4ᵇ;
 private static readonly @string mheapFreeSpanLockedˢ4ᵇ = "mheap.freeSpanLocked - invalid span state"u8;
 
-internal static void freeSpanLocked(this ж<mheap> Ꮡh, ж<mspan> Ꮡs, spanAllocType typ) {
+internal static void freeSpanLocked⁔(/*this*/ ж<mheap> Ꮡh, ж<mspan> Ꮡs, spanAllocType typ) {
     ref var h = ref Ꮡh.DerefOrNull();
     ref var s = ref Ꮡs.DerefOrNull();
 
@@ -1814,7 +1787,7 @@ internal static void freeSpanLocked(this ж<mheap> Ꮡh, ж<mspan> Ꮡs, spanAll
 // Must run on the system stack because it acquires the heap lock.
 //
 //go:systemstack
-internal static void scavengeAll(this ж<mheap> Ꮡh) {
+internal static void scavengeAll⁔(/*this*/ ж<mheap> Ꮡh) {
     // Disallow malloc or panic while holding the heap lock. We do
     // this here because this is a non-mallocgc entry-point to
     // the mheap API.
@@ -1831,20 +1804,16 @@ internal static void scavengeAll(this ж<mheap> Ꮡh) {
     }
 }
 
-} partial class runtime_package {
-
 //go:linkname runtime_debug_freeOSMemory runtime/debug.freeOSMemory
 internal static void runtime_debug_freeOSMemory() {
     GC();
-    systemstack(() => {
+    systemstack([GoFunc("runtime_debug_freeOSMemory.func1")] () => {
         Ꮡmheap_.scavengeAll();
     });
 }
 
-} partial class runtimeᴛmspan {
-
 // Initialize a new span with the given start and npages.
-internal static void init(this ж<mspan> Ꮡspan, uintptr @base, uintptr npages) {
+internal static void init⁔(/*this*/ ж<mspan> Ꮡspan, uintptr @base, uintptr npages) {
     ref var span = ref Ꮡspan.DerefOrNull();
 
     // span is *not* zeroed.
@@ -1869,11 +1838,9 @@ internal static void init(this ж<mspan> Ꮡspan, uintptr @base, uintptr npages)
     lockInit(ref nonnil(ref span).speciallock, lockRankMspanSpecial);
 }
 
-internal static bool inList(this ref mspan span) {
+internal static bool inList⁔(/*this*/ ref mspan span) {
     return span.list != nil;
 }
-
-} partial class runtime_package {
 
 // mSpanList heads a linked list of spans.
 partial struct mSpanList {
@@ -1882,10 +1849,8 @@ partial struct mSpanList {
     internal ж<mspan> last;  // last span in list, or nil if none
 }
 
-} partial class runtimeᴛmSpanList {
-
 // Initialize an empty doubly-linked list.
-internal static void init(this ref mSpanList list) {
+internal static void init⁔(/*this*/ ref mSpanList list) {
     list.first = default;
     list.last = default;
 }
@@ -1894,7 +1859,7 @@ internal static void init(this ref mSpanList list) {
 internal static ref readonly @string mSpanListRemoveˢ => ref mSpanListRemoveˢᵇ;
 private static readonly @string mSpanListRemoveˢᵇ = "mSpanList.remove"u8;
 
-internal static void remove(this ж<mSpanList> Ꮡlist, ж<mspan> Ꮡspan) {
+internal static void remove⁔(/*this*/ ж<mSpanList> Ꮡlist, ж<mspan> Ꮡspan) {
     ref var list = ref Ꮡlist.DerefOrNull();
     ref var span = ref Ꮡspan.DerefOrNull();
 
@@ -1918,7 +1883,7 @@ internal static void remove(this ж<mSpanList> Ꮡlist, ж<mspan> Ꮡspan) {
     span.list = default;
 }
 
-internal static bool isEmpty(this ref mSpanList list) {
+internal static bool isEmpty⁔(/*this*/ ref mSpanList list) {
     return list.first == nil;
 }
 
@@ -1926,7 +1891,7 @@ internal static bool isEmpty(this ref mSpanList list) {
 internal static ref readonly @string mSpanListInsertˢ => ref mSpanListInsertˢᵇ;
 private static readonly @string mSpanListInsertˢᵇ = "mSpanList.insert"u8;
 
-internal static void insert(this ж<mSpanList> Ꮡlist, ж<mspan> Ꮡspan) {
+internal static void insert⁔(/*this*/ ж<mSpanList> Ꮡlist, ж<mspan> Ꮡspan) {
     ref var list = ref Ꮡlist.DerefOrNull();
     ref var span = ref Ꮡspan.DerefOrNull();
 
@@ -1951,7 +1916,7 @@ internal static void insert(this ж<mSpanList> Ꮡlist, ж<mspan> Ꮡspan) {
 internal static ref readonly @string mSpanListInsertBackˢ => ref mSpanListInsertBackˢᵇ;
 private static readonly @string mSpanListInsertBackˢᵇ = "mSpanList.insertBack"u8;
 
-internal static void insertBack(this ж<mSpanList> Ꮡlist, ж<mspan> Ꮡspan) {
+internal static void insertBack⁔(/*this*/ ж<mSpanList> Ꮡlist, ж<mspan> Ꮡspan) {
     ref var list = ref Ꮡlist.DerefOrNull();
     ref var span = ref Ꮡspan.DerefOrNull();
 
@@ -1973,7 +1938,7 @@ internal static void insertBack(this ж<mSpanList> Ꮡlist, ж<mspan> Ꮡspan) {
 
 // takeAll removes all spans from other and inserts them at the front
 // of list.
-internal static void takeAll(this ж<mSpanList> Ꮡlist, ж<mSpanList> Ꮡother) {
+internal static void takeAll⁔(/*this*/ ж<mSpanList> Ꮡlist, ж<mSpanList> Ꮡother) {
     ref var list = ref Ꮡlist.DerefOrNull();
     ref var other = ref Ꮡother.DerefOrNull();
 
@@ -1998,8 +1963,6 @@ internal static void takeAll(this ж<mSpanList> Ꮡlist, ж<mSpanList> Ꮡother)
 
     (other.first, other.last) = (default, default);
 }
-
-} partial class runtime_package {
 
 // _KindSpecialTinyBlock indicates that a given allocation is a tiny block.
 // Ordered before KindSpecialFinalizer and KindSpecialCleanup so that it
@@ -2141,12 +2104,10 @@ internal static ж<special> removespecial(@unsafe.Pointer p, uint8 kind) {
     return result;
 }
 
-} partial class runtimeᴛmspan {
-
 // Find a splice point in the sorted list and check for an already existing
 // record. Returns a pointer to the next-reference in the list predecessor.
 // Returns true, if the referenced item is an exact match.
-internal static (ж<ж<special>>, bool) specialFindSplicePoint(this ж<mspan> Ꮡspan, uintptr offset, byte kind) {
+internal static (ж<ж<special>>, bool) specialFindSplicePoint⁔(/*this*/ ж<mspan> Ꮡspan, uintptr offset, byte kind) {
     // Find splice point, check for existing record.
     var iter = Ꮡspan.Ꮡspecials;
     var found = false;
@@ -2166,8 +2127,6 @@ internal static (ж<ж<special>>, bool) specialFindSplicePoint(this ж<mspan> �
     }
     return (iter, found);
 }
-
-} partial class runtime_package {
 
 // The described object has a finalizer set for it.
 //
@@ -2739,21 +2698,17 @@ partial struct immortalWeakHandle {
     internal uintptr ptr;                                   // &ptr is the weak handle
 }
 
-} partial class runtimeᴛimmortalWeakHandle {
-
 // handle returns a canonical weak handle.
-internal static ж<atomic.Uintptr> handle(this ж<immortalWeakHandle> Ꮡh) {
+internal static ж<atomic.Uintptr> handle⁔(/*this*/ ж<immortalWeakHandle> Ꮡh) {
     // N.B. Since we just need an *atomic.Uintptr that never changes, we can trivially
     // reference ptr to save on some memory in immortalWeakHandle and avoid extra atomics
     // in getOrAdd.
     return Ꮡh.Ꮡptr.Reinterpret<uintptr, atomic.Uintptr>();
 }
 
-} partial class runtimeᴛimmortalWeakHandleMap {
-
 // getOrAdd introduces p, which must be a pointer to immortal memory (for example, a linker-allocated
 // object) and returns a weak handle. The weak handle will never become nil.
-internal static ж<atomic.Uintptr> getOrAdd(this ж<immortalWeakHandleMap> Ꮡtab, uintptr pʗp) {
+internal static ж<atomic.Uintptr> getOrAdd⁔(/*this*/ ж<immortalWeakHandleMap> Ꮡtab, uintptr pʗp) {
     ref var p = ref heap(pʗp, out var Ꮡp);
 
     ж<immortalWeakHandle> newNode = default;
@@ -2798,8 +2753,6 @@ internal static ж<atomic.Uintptr> getOrAdd(this ж<immortalWeakHandleMap> Ꮡta
         hashIter <<= 1;
     }
 }
-
-} partial class runtime_package {
 
 // The described object is being heap profiled.
 partial struct specialprofile {
@@ -2860,27 +2813,23 @@ internal static specialsIter newSpecialsIter(ж<mspan> Ꮡspan) {
     return new specialsIter(Ꮡspan.Ꮡspecials, span.specials);
 }
 
-} partial class runtimeᴛspecialsIter {
-
-internal static bool valid(this ref specialsIter i) {
+internal static bool valid⁔(/*this*/ ref specialsIter i) {
     return i.s != nil;
 }
 
-internal static void next(this ref specialsIter i) {
+internal static void next⁔(/*this*/ ref specialsIter i) {
     i.pprev = i.s.Ꮡnext;
     i.s = i.pprev.ValueSlot;
 }
 
 // unlinkAndNext removes the current special from the list and moves
 // the iterator to the next special. It returns the unlinked special.
-internal static ж<special> unlinkAndNext(this ref specialsIter i) {
+internal static ж<special> unlinkAndNext⁔(/*this*/ ref specialsIter i) {
     var cur = i.s;
     i.s = cur.next;
     i.pprev.ValueSlot = i.s;
     return cur;
 }
-
-} partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string badSpecialKindˢ => ref badSpecialKindˢᵇ;
@@ -2998,20 +2947,16 @@ internal static void freeSpecial(ж<special> Ꮡs, @unsafe.Pointer p, uintptr si
     [FieldOffset(0)] internal uint8 x;
 }
 
-} partial class runtimeᴛgcBits {
-
 // bytep returns a pointer to the n'th byte of b.
-internal static ж<uint8> bytep(this ж<gcBits> Ꮡb, uintptr n) {
+internal static ж<uint8> bytep⁔(/*this*/ ж<gcBits> Ꮡb, uintptr n) {
     return addb(Ꮡb.Ꮡx, n);
 }
 
 // bitp returns a pointer to the byte containing bit n and a mask for
 // selecting that bit from *bytep.
-internal static (ж<uint8> bytep, uint8 mask) bitp(this ж<gcBits> Ꮡb, uintptr n) {
+internal static (ж<uint8> bytep, uint8 mask) bitp⁔(/*this*/ ж<gcBits> Ꮡb, uintptr n) {
     return (Ꮡb.bytep(n / 8), (uint8)(1 << (int)(n % 8)));
 }
-
-} partial class runtime_package {
 
 internal static uintptr gcBitsChunkBytes => /* uintptr(64 << 10) */ 65536;
 internal static uintptr gcBitsHeaderBytes => /* unsafe.Sizeof(gcBitsHeader{}) */ 16;
@@ -3039,11 +2984,9 @@ partial struct gcBitsArenasᴛ1 /*dyn*/ {
 internal static readonly ж<gcBitsArenasᴛ1> ᏑgcBitsArenas = new StaticBox<gcBitsArenasᴛ1>(new gcBitsArenasᴛ1());
 internal static ref gcBitsArenasᴛ1 gcBitsArenas => ref ((StaticBox<gcBitsArenasᴛ1>)ᏑgcBitsArenas).ValueSlot;
 
-} partial class runtimeᴛgcBitsArena {
-
 // tryAlloc allocates from b or returns nil if b does not have enough room.
 // This is safe to call concurrently.
-internal static ж<gcBits> tryAlloc(this ж<gcBitsArena> Ꮡb, uintptr bytes) {
+internal static ж<gcBits> tryAlloc⁔(/*this*/ ж<gcBitsArena> Ꮡb, uintptr bytes) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     if (Ꮡb == nil || atomic.Loaduintptr(Ꮡb.Ꮡfree) + bytes > (uintptr)len(b.bits)) {
@@ -3058,8 +3001,6 @@ internal static ж<gcBits> tryAlloc(this ж<gcBitsArena> Ꮡb, uintptr bytes) {
     var start = end - bytes;
     return Ꮡ(b.bits, start);
 }
-
-} partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string markBitsOverflowˢ => ref markBitsOverflowˢᵇ;

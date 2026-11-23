@@ -10,7 +10,6 @@ using sys = @internal.runtime.sys_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
-using static runtime_package;
 
 partial class runtime_package {
 
@@ -53,18 +52,16 @@ internal static void dumpregs(ж<sigctxt> Ꮡc) {
     print((@string)"fault   ", (hex)(uint64)c.fault(), (@string)"\n");
 }
 
-} partial class runtimeᴛsigctxt {
-
 //go:nosplit
 //go:nowritebarrierrec
-internal static uintptr sigpc(this ref sigctxt c) { return (uintptr)c.pc(); }
+internal static uintptr sigpc⁔(/*this*/ ref sigctxt c) { return (uintptr)c.pc(); }
 
-internal static void setsigpc(this ref sigctxt c, uint64 x) { c.set_pc(x); }
-internal static uintptr sigsp(this ref sigctxt c) { return (uintptr)c.sp(); }
-internal static uintptr siglr(this ref sigctxt c) { return (uintptr)c.lr(); }
+internal static void setsigpc⁔(/*this*/ ref sigctxt c, uint64 x) { c.set_pc(x); }
+internal static uintptr sigsp⁔(/*this*/ ref sigctxt c) { return (uintptr)c.sp(); }
+internal static uintptr siglr⁔(/*this*/ ref sigctxt c) { return (uintptr)c.lr(); }
 
 // preparePanic sets up the stack to look like a call to sigpanic.
-internal static void preparePanic(this ref sigctxt c, uint32 sig, ж<g> Ꮡgp) {
+internal static void preparePanic⁔(/*this*/ ref sigctxt c, uint32 sig, ж<g> Ꮡgp) {
     ref var gp = ref Ꮡgp.DerefOrNull();
 
     // We arrange lr, and pc to pretend the panicking
@@ -95,7 +92,7 @@ internal static void preparePanic(this ref sigctxt c, uint32 sig, ж<g> Ꮡgp) {
     c.set_pc((uint64)abi.FuncPCABIInternal(sigpanic));
 }
 
-internal static void pushCall(this ref sigctxt c, uintptr targetPC, uintptr resumePC) {
+internal static void pushCall⁔(/*this*/ ref sigctxt c, uintptr targetPC, uintptr resumePC) {
     // Push the LR to stack, as we'll clobber it in order to
     // push the call. The function being pushed is responsible
     // for restoring the LR and setting the SP back.
@@ -113,4 +110,4 @@ internal static void pushCall(this ref sigctxt c, uintptr targetPC, uintptr resu
     c.set_pc((uint64)targetPC);
 }
 
-}
+} // end runtime_package

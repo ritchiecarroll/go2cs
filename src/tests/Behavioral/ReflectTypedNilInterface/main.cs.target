@@ -137,7 +137,7 @@ internal static void main() {
     var pf = reflect.ValueOf(sp).Field(0);
     fmt.Printf("call-into-any: %s\n"u8, reflect.ValueOf(sink).Call([pf])[0].String());
 
-    var concrete = reflect.ValueOf(@string (ж<Blob> b) => fmt.Sprintf("concrete nil=%v"u8, b == nil));
+    var concrete = reflect.ValueOf([GoFunc("main.func1")] @string (ж<Blob> b) => fmt.Sprintf("concrete nil=%v"u8, b == nil));
     fmt.Printf("call-into-concrete: %s\n"u8, concrete.Call([pf])[0].String());
 
     ж<Stamp> stamp = default;

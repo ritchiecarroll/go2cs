@@ -18,7 +18,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace GenTests;
 
 /// <summary>
-/// M:N PROTOTYPE, stage (c)'s one switch (COORD approved the plan, 2026-11-15; record 10.3): under the all-members rule
+/// M:N (experimental, opt-in), stage (c)'s one switch (COORD approved the plan, 2026-11-15; record 10.3): under the all-members rule
 /// (GoTwinsIfaceAll) every admitted interface member carries the park mark, and GoTwinsIfaceUnmark names members that do
 /// not: no twin slot is emitted for them, so a caller in any assembly calls them plain. The census's arm C reads the park
 /// set with a short list unmarked. A wrong or stale mark is a cost, never a wrong answer (10.3).

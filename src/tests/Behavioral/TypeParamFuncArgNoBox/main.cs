@@ -46,7 +46,7 @@ internal static void main() {
     var used = new map<@string, bool>{["x"] = true};
 
     var usedʗ1 = used;
-    var ng = Ꮡ(new NameGenerator(IsUnique: (@string name, bool @private) => !usedʗ1[name]));
+    var ng = Ꮡ(new NameGenerator(IsUnique: [GoFunc("main.func1")] (@string name, bool @private) => !usedʗ1[name]));
     fmt.Println("field:", makeName("x", IfElse(true, ng.IsUnique, (Func<@string, bool, bool>)(default))), makeName("x", IfElse(false, ng.IsUnique, (Func<@string, bool, bool>)(default))));
 
     var g = Ꮡ(new gen(used: used));
@@ -54,11 +54,11 @@ internal static void main() {
     fmt.Println("variable:", makeName("x", IfElse(true, f, (Func<@string, bool, bool>)(default))), makeName("x", IfElse(false, f, (Func<@string, bool, bool>)(default))));
 
     fmt.Println("method value:", makeName("x", IfElse<Func<@string, bool, bool>>(true, g.isUnique, (Func<@string, bool, bool>)(default))));
-    fmt.Println("literal:", makeName("y", IfElse(true, (@string _Δp0, bool _Δp1) => false, (Func<@string, bool, bool>)(default))));
+    fmt.Println("literal:", makeName("y", IfElse(true, [GoFunc("main.func2")] (@string _Δp0, bool _Δp1) => false, (Func<@string, bool, bool>)(default))));
 
     pick(default, true);
-    pick(() => 1, true);
-    pick(() => 1, false);
+    pick([GoFunc("main.func3")] () => 1, true);
+    pick([GoFunc("main.func4")] () => 1, false);
 }
 
 } // end main_package

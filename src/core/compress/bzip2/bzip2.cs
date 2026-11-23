@@ -6,7 +6,6 @@
 namespace go.compress;
 
 using io = io_package;
-using static bzip2_package;
 
 partial class bzip2_package {
 
@@ -19,13 +18,9 @@ partial class bzip2_package {
 // syntactically invalid.
 partial struct StructuralError /*@string*/;
 
-} partial class bzip2ᴛStructuralError {
-
-public static @string Error(this StructuralError s) {
+internal static @string Error⁔(/*this*/ StructuralError s) {
     return "bzip2 data invalid: "u8 + ((@string)s);
 }
-
-} partial class bzip2_package {
 
 // A reader decompresses bzip2 compressed data.
 partial struct reader {
@@ -59,8 +54,6 @@ internal static UntypedInt bzip2FileMagic => 0x425a; // "BZ"
 internal static UntypedInt bzip2BlockMagic => 0x314159265359;
 internal static UntypedInt bzip2FinalMagic => 0x177245385090;
 
-} partial class bzip2ᴛreader {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string badMagicValueˢ => ref badMagicValueˢᵇ;
 private static readonly @string badMagicValueˢᵇ = "bad magic value"u8;
@@ -70,7 +63,7 @@ internal static ref readonly @string invalidCompressionLevelˢ => ref invalidCom
 private static readonly @string invalidCompressionLevelˢᵇ = "invalid compression level"u8;
 
 // setup parses the bzip2 header.
-internal static error setup(this ж<reader> Ꮡbz2, bool needMagic) {
+internal static error setup⁔(/*this*/ ж<reader> Ꮡbz2, bool needMagic) {
     ref var bz2 = ref Ꮡbz2.DerefOrNull();
 
     var br = Ꮡbz2.Ꮡbr;
@@ -100,7 +93,7 @@ internal static error setup(this ж<reader> Ꮡbz2, bool needMagic) {
     return default;
 }
 
-internal static (nint n, error err) Read(this ж<reader> Ꮡbz2, slice<byte> buf) {
+internal static (nint n, error err) Read⁔(/*this*/ ж<reader> Ꮡbz2, slice<byte> buf) {
     nint n = default;
     error err = default;
     ref var bz2 = ref Ꮡbz2.DerefOrNull();
@@ -129,7 +122,7 @@ internal static (nint n, error err) Read(this ж<reader> Ꮡbz2, slice<byte> buf
     return (n, err);
 }
 
-internal static nint readFromBlock(this ref reader bz2, slice<byte> buf) {
+internal static nint readFromBlock⁔(/*this*/ ref reader bz2, slice<byte> buf) {
     // bzip2 is a block based compressor, except that it has a run-length
     // preprocessing step. The block based nature means that we can
     // preallocate fixed-size buffers and reuse them. However, the RLE
@@ -192,7 +185,7 @@ private static readonly @string fileChecksumMismatchˢᵇ = "file checksum misma
 internal static ref readonly @string badMagicValueInˢ => ref badMagicValueInˢᵇ;
 private static readonly @string badMagicValueInˢᵇ = "bad magic value in continuation file"u8;
 
-internal static (nint, error) read(this ж<reader> Ꮡbz2, slice<byte> buf) {
+internal static (nint, error) read⁔(/*this*/ ж<reader> Ꮡbz2, slice<byte> buf) {
     ref var bz2 = ref Ꮡbz2.DerefOrNull();
 
     for (;;) {
@@ -295,7 +288,7 @@ internal static ref readonly @string origPtrOutOfBoundsˢ => ref origPtrOutOfBou
 private static readonly @string origPtrOutOfBoundsˢᵇ = "origPtr out of bounds"u8;
 
 // readBlock reads a bzip2 block. The magic number should already have been consumed.
-internal static error /*err*/ readBlock(this ж<reader> Ꮡbz2) {
+internal static error /*err*/ readBlock⁔(/*this*/ ж<reader> Ꮡbz2) {
     error err = default;
     ref var bz2 = ref Ꮡbz2.DerefOrNull();
 
@@ -507,8 +500,6 @@ internal static error /*err*/ readBlock(this ж<reader> Ꮡbz2) {
 
     return default;
 }
-
-} partial class bzip2_package {
 
 // inverseBWT implements the inverse Burrows-Wheeler transform as described in
 // http://www.hpl.hp.com/techreports/Compaq-DEC/SRC-RR-124.pdf, section 4.2.

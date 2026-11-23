@@ -20,6 +20,7 @@ import (
 	"go/parser"
 	"go/token"
 	"go/types"
+	"io"
 	"io/fs"
 	"os"
 	"os/exec"
@@ -839,6 +840,20 @@ func processTestConversion(inputPath, outputPath string, options Options) (err e
 	internal, external := findTestVariants(loaded, production)
 	if internal == nil && external == nil {
 		return writeNoTestsManifest(production, inputPath, outputPath, targetParts, options)
+	}
+
+	// An identifier spelled with a go2cs marker letter refuses the package before either half converts, wherever it is
+	// declared: the internal variant carries the production files too, and the external one its own test files
+	// (markerGlyphRefusal.go). convertTestVariant asks again per variant; this is what keeps the production half unwritten.
+	for _, variant := range []*packages.Package{internal, external} {
+		if variant == nil {
+			continue
+		}
+
+		if refusal := refuseMarkerGlyphIdentifiers(variant); refusal != nil {
+			refusal.report()
+			return refusal
+		}
 	}
 
 	// Phase-4D file exclusion (option-a ruling): drop Example/Benchmark-only test files from the
@@ -3069,6 +3084,11 @@ func convertTestVariant(pkg *packages.Package, testEntries []FileEntry, outputPa
 	}
 
 	if refusal := refuseSliceWideningWrites(pkg); refusal != nil {
+		refusal.report()
+		return nil, nil, refusal
+	}
+
+	if refusal := refuseMarkerGlyphIdentifiers(pkg); refusal != nil {
 		refusal.report()
 		return nil, nil, refusal
 	}
@@ -8546,6 +8566,11 @@ type testComparison struct {
 	// alone, and on every darwin row with no such file, which leaves those records byte-identical.
 	TargetArchExcluded []string `json:"targetArchExcluded,omitempty"`
 
+	// OracleVetOff lists, as "<analyzer>: <file>:<line>:<col>: <message>", what go test's vet reported for a package
+	// whose oracle ran with -vet=off (-test-oracle-vet-off, oracleVetFindings). Absent on every other row, which
+	// leaves those records byte-identical.
+	OracleVetOff []string `json:"oracleVetOff,omitempty"`
+
 	// Withdrawn is the same honesty for the DOWNWARD disclosure dual (matchTerminalStatuses'
 	// withdrawal rule): the Go-side verdict rows underneath a signature-matched disclosed root,
 	// which the converted host never reached because the disclosed failure precedes its case
@@ -11108,6 +11133,12 @@ func oracleTestArgs(options Options, packagePath, hostFatalSkip string) []string
 	if hostFatalSkip != "" {
 		args = append(args, "-skip", hostFatalSkip)
 	}
+
+	// -test-oracle-vet-off: Go's own vet verdict, not its behaviour, is what stops this package's `go test`, and the
+	// findings are disclosed (oracleVetFindings). Never set otherwise, so every other command line is unchanged.
+	if options.testOracleVetOff {
+		args = append(args, "-vet=off")
+	}
 	args = append(args, ".")
 
 	return args
@@ -11116,6 +11147,101 @@ func oracleTestArgs(options Options, packagePath, hostFatalSkip string) []string
 // mathBigPureGoTag is the corpus tag that selects math/big's pure-Go arithmetic (arith_decl_pure.go)
 // over its assembly (arith_decl.go + arith_$GOARCH.s). See defaultStdLibBuildTags.
 const mathBigPureGoTag = "math_big_pure_go"
+
+// goTestVetAnalyzers is the vet subset `go test` runs before a test binary: "atomic, bool, buildtags, directive,
+// errorsas, ifaceassert, nilfunc, printf, stringintconv, and tests" (`go help test`, go1.26.11).
+var goTestVetAnalyzers = []string{"atomic", "bool", "buildtags", "directive", "errorsas", "ifaceassert", "nilfunc", "printf", "stringintconv", "tests"}
+
+// oracleVetFindings runs go test's vet subset over the package at dir, where and as the oracle runs it (the same
+// environment and build flags), and returns each finding as "<analyzer>: <file>:<line>:<col>: <message>", sorted,
+// the file named relative to dir. `go vet -json` names the analyzer, which go test's own report does not. None means
+// go test's vet passes the package.
+func oracleVetFindings(dir string, options Options, packagePath string) ([]string, error) {
+	args := []string{"vet", "-json"}
+
+	for _, analyzer := range goTestVetAnalyzers {
+		args = append(args, "-"+analyzer)
+	}
+
+	args = append(args, oracleBuildFlags(options, packagePath)...)
+	args = append(args, ".")
+	output, runErr := runCommandWithTimeout(testChildTimeout(options), dir, oracleOptions(options), "go", args...)
+
+	type diagnostic struct {
+		Posn    string `json:"posn"`
+		Message string `json:"message"`
+	}
+
+	var findings []string
+	decoder := json.NewDecoder(strings.NewReader(jsonObjectsOnly(output)))
+
+	// go vet names each file with its symlinks resolved, so a dir spelled through a symlink trims nothing: on macOS
+	// /var is /private/var, and a module-cache release tested from its copy under TMPDIR (/var/folders/...) put a
+	// /private/var/folders/... host path into the proof page and MODULE.md (train 6's darwin go-test). The dir is
+	// resolved once, as moduleCacheRel resolves a cache path, and the textual spelling is still tried first.
+	resolvedDir, resolveErr := filepath.EvalSymlinks(dir)
+
+	if resolveErr != nil {
+		resolvedDir = dir
+	}
+
+	for {
+		var report map[string]map[string]json.RawMessage
+
+		if err := decoder.Decode(&report); err != nil {
+			if errors.Is(err, io.EOF) {
+				break
+			}
+
+			return nil, fmt.Errorf("reading go vet -json for %s: %w\n%s", packagePath, err, output)
+		}
+
+		for _, analyzers := range report {
+			for analyzer, raw := range analyzers {
+				var diagnostics []diagnostic
+
+				// An analyzer that failed to run reports {"error": ...} instead of a list: that is a vet failure
+				// this option does not cover.
+				if err := json.Unmarshal(raw, &diagnostics); err != nil {
+					return nil, fmt.Errorf("go vet's %s analyzer did not run for %s: %s", analyzer, packagePath, raw)
+				}
+
+				for _, d := range diagnostics {
+					posn := d.Posn
+
+					if rel, err := filepath.Rel(dir, posn); err == nil && !strings.HasPrefix(rel, "..") {
+						posn = filepath.ToSlash(rel)
+					} else if rel, err := filepath.Rel(resolvedDir, posn); err == nil && !strings.HasPrefix(rel, "..") {
+						posn = filepath.ToSlash(rel)
+					}
+
+					findings = append(findings, analyzer+": "+posn+": "+d.Message)
+				}
+			}
+		}
+	}
+
+	if len(findings) == 0 && runErr != nil {
+		return nil, fmt.Errorf("go vet failed for %s and reported no finding: %w\n%s", packagePath, runErr, output)
+	}
+
+	sort.Strings(findings)
+
+	return findings, nil
+}
+
+// jsonObjectsOnly drops the lines `go vet -json` writes around its JSON (a "# <package>" header per package).
+func jsonObjectsOnly(output string) string {
+	var kept []string
+
+	for _, line := range strings.Split(output, "\n") {
+		if !strings.HasPrefix(line, "#") {
+			kept = append(kept, line)
+		}
+	}
+
+	return strings.Join(kept, "\n")
+}
 
 // oracleBuildFlags is loaderBuildFlags for the `go test` oracle of the package at packagePath: the
 // conversion's own tags, less math_big_pure_go on every row except math/big's own.
@@ -11253,6 +11379,26 @@ func compareGoAndConvertedTests(inputPath, outputPath, testProject, packagePath 
 		fmt.Fprintln(os.Stderr, "WARNING: "+note)
 	}
 
+	// -test-oracle-vet-off: what go test's vet reports is read first, by analyzer, and the option is refused for a
+	// package it does not stop: the oracle drops vet only where Go's own run fails at it (COORD, 2026-11-22).
+	var vetFindings []string
+
+	if options.testOracleVetOff {
+		findings, err := oracleVetFindings(inputPath, options, packagePath)
+
+		if err != nil {
+			return err
+		}
+
+		if len(findings) == 0 {
+			return fmt.Errorf("-test-oracle-vet-off: go test's vet checks pass for %s, so its go test runs with them; "+
+				"the option is only for a package whose own go test fails at vet", packagePath)
+		}
+
+		fmt.Printf("The oracle runs without vet (-test-oracle-vet-off), which reports for %s:\n  %s\n", packagePath, strings.Join(findings, "\n  "))
+		vetFindings = findings
+	}
+
 	goArgs := oracleTestArgs(options, packagePath, hostFatalSkip)
 	goOutput, goErr := runCommandWithTimeout(testChildTimeout(options), inputPath, oracleOptions(options), "go", goArgs...)
 
@@ -11345,6 +11491,7 @@ func compareGoAndConvertedTests(inputPath, outputPath, testProject, packagePath 
 		Matched: true, Skipped: []string{}, Disclosed: []string{}, Excluded: excludedDeclarations(manifest), Errors: []string{},
 		Gated: gated, Withdrawn: []string{}, RuntimeDeclared: runtimeDeclared, Environment: environment,
 		TargetArchExcluded: targetArchExcludedRecord(archExcluded),
+		OracleVetOff:       vetFindings,
 	}
 	if len(archExcluded) > 0 {
 		fmt.Printf("Withdrew %d test(s) from both sides, their files not built for every architecture %s ships:\n  %s\n",

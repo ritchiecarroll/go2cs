@@ -7,7 +7,6 @@ using bufio = bufio_package;
 using fmt = fmt_package;
 using io = io_package;
 using ꓸꓸꓸany = variadic<any>;
-using static textproto_package;
 
 partial class textproto_package {
 
@@ -26,10 +25,8 @@ public static ж<Writer> NewWriter(ж<bufio.Writer> w) {
 internal static slice<byte> crnl = [(byte)'\r', (byte)'\n'];
 internal static slice<byte> dotcrnl = [(byte)'.', (byte)'\r', (byte)'\n'];
 
-} partial class textprotoᴛWriter {
-
 // PrintfLine writes the formatted output followed by \r\n.
-public static error PrintfLine(this ref Writer w, @string format, params ꓸꓸꓸany argsʗp) {
+internal static error PrintfLine⁔(/*this*/ ref Writer w, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp;
 
     w.closeDot();
@@ -45,7 +42,7 @@ public static error PrintfLine(this ref Writer w, @string format, params ꓸꓸ�
 // DotWriter before the next call to a method on w.
 //
 // See the documentation for the [Reader.DotReader] method for details about dot-encoding.
-public static io.WriteCloser DotWriter(this ж<Writer> Ꮡw) {
+internal static io.WriteCloser DotWriter⁔(/*this*/ ж<Writer> Ꮡw) {
     ref var w = ref Ꮡw.DerefOrNull();
 
     w.closeDot();
@@ -53,13 +50,11 @@ public static io.WriteCloser DotWriter(this ж<Writer> Ꮡw) {
     return new dotWriterжWriteCloser(w.dot);
 }
 
-internal static void closeDot(this ref Writer w) {
+internal static void closeDot⁔(/*this*/ ref Writer w) {
     if (w.dot != nil) {
         w.dot.Close(); // sets w.dot = nil
     }
 }
-
-} partial class textproto_package {
 
 partial struct dotWriter {
     internal ж<Writer> w;
@@ -71,9 +66,7 @@ internal static UntypedInt wstateBeginLine => 1; // beginning of line
 internal static UntypedInt wstateCR => 2;        // wrote \r (possibly at end of line)
 internal static UntypedInt wstateData => 3;      // writing data in middle of line
 
-} partial class textprotoᴛdotWriter {
-
-internal static (nint n, error err) Write(this ref dotWriter d, slice<byte> b) {
+internal static (nint n, error err) Write⁔(/*this*/ ref dotWriter d, slice<byte> b) {
     nint n = default;
     error err = default;
 
@@ -113,7 +106,7 @@ internal static (nint n, error err) Write(this ref dotWriter d, slice<byte> b) {
     return (n, err);
 }
 
-internal static error Close(this ж<dotWriter> Ꮡd) {
+internal static error Close⁔(/*this*/ ж<dotWriter> Ꮡd) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     if (d.w.dot == Ꮡd) {
@@ -137,4 +130,4 @@ internal static error Close(this ж<dotWriter> Ꮡd) {
     return bw.Flush();
 }
 
-}
+} // end textproto_package

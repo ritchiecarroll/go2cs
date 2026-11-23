@@ -29,8 +29,7 @@ using atomic = go.sync.atomic_package;
 using time = time_package;
 /* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
 using httpguts = vendor.golang.org.x.net.http.httpguts_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
+using System.Runtime.CompilerServices;
 using crypto;
 using go.@internal;
 using go.math;
@@ -40,8 +39,6 @@ using go.sync;
 using iter = iter_package;
 using vendor.golang.org.x.net.http;
 using ꓸꓸꓸany = variadic<any>;
-using Δhttp = http_package;
-using static http_package;
 
 partial class http_package {
 
@@ -300,9 +297,7 @@ partial struct conn {
     internal bool hijackedv;
 }
 
-} partial class httpᴛconn {
-
-internal static bool hijacked(this ж<conn> Ꮡc) {
+internal static bool hijacked⁔(/*this*/ ж<conn> Ꮡc) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -317,7 +312,7 @@ internal static bool hijacked(this ж<conn> Ꮡc) {
 }
 
 // c.mu must be held.
-internal static (net.Conn rwc, ж<bufio.ReadWriter> buf, error err) hijackLocked(this ж<conn> Ꮡc) {
+internal static (net.Conn rwc, ж<bufio.ReadWriter> buf, error err) hijackLocked⁔(/*this*/ ж<conn> Ꮡc) {
     net.Conn rwc = default;
     ж<bufio.ReadWriter> buf = default;
     error err = default;
@@ -343,8 +338,6 @@ internal static (net.Conn rwc, ж<bufio.ReadWriter> buf, error err) hijackLocked
     Ꮡc.setState(rwc, StateHijacked, runHooks);
     return (rwc, buf, err);
 }
-
-} partial class http_package {
 
 // This should be >= 512 bytes for DetectContentType,
 // but otherwise it's somewhat arbitrary.
@@ -378,9 +371,7 @@ partial struct chunkWriter {
 internal static slice<byte> crlf = slice<byte>("\r\n"u8);
 internal static slice<byte> colonSpace = slice<byte>(": "u8);
 
-} partial class httpᴛchunkWriter {
-
-internal static (nint n, error err) Write(this ref chunkWriter cw, slice<byte> p) {
+internal static (nint n, error err) Write⁔(/*this*/ ref chunkWriter cw, slice<byte> p) {
     nint n = default;
     error err = default;
 
@@ -408,14 +399,14 @@ internal static (nint n, error err) Write(this ref chunkWriter cw, slice<byte> p
     return (n, err);
 }
 
-internal static error flush(this ref chunkWriter cw) {
+internal static error flush⁔(/*this*/ ref chunkWriter cw) {
     if (!cw.wroteHeader) {
         cw.writeHeader(default);
     }
     return cw.res.conn.bufw.Flush();
 }
 
-internal static void close(this ref chunkWriter cw) {
+internal static void close⁔(/*this*/ ref chunkWriter cw) {
     if (!cw.wroteHeader) {
         cw.writeHeader(default);
     }
@@ -431,8 +422,6 @@ internal static void close(this ref chunkWriter cw) {
         bw.WriteString("\r\n");
     }
 }
-
-} partial class http_package {
 
 // A response represents the server side of an HTTP response.
 partial struct response {
@@ -498,22 +487,18 @@ partial struct response {
     internal bool closeNotifyTriggered;
 }
 
-} partial class httpᴛresponse {
-
-internal static error SetReadDeadline(this ref response c, time.Time deadline) {
+internal static error SetReadDeadline⁔(/*this*/ ref response c, time.Time deadline) {
     return c.conn.rwc.SetReadDeadline(deadline);
 }
 
-internal static error SetWriteDeadline(this ref response c, time.Time deadline) {
+internal static error SetWriteDeadline⁔(/*this*/ ref response c, time.Time deadline) {
     return c.conn.rwc.SetWriteDeadline(deadline);
 }
 
-internal static error EnableFullDuplex(this ref response c) {
+internal static error EnableFullDuplex⁔(/*this*/ ref response c) {
     c.fullDuplex = true;
     return default;
 }
-
-} partial class http_package {
 
 // TrailerPrefix is a magic prefix for [ResponseWriter.Header] map keys
 // that, if present, signals that the map entry is actually for
@@ -531,11 +516,9 @@ internal static error EnableFullDuplex(this ref response c) {
 public static ref readonly @string TrailerPrefix => ref TrailerPrefixᵇ;
 private static readonly @string TrailerPrefixᵇ = "Trailer:"u8;
 
-} partial class httpᴛresponse {
-
 // finalTrailers is called after the Handler exits and returns a non-nil
 // value if the Handler set any trailers.
-internal static Header finalTrailers(this ref response w) {
+internal static Header finalTrailers⁔(/*this*/ ref response w) {
     Header t = default;
     foreach (var (k, vv) in w.handlerHeader) {
         var (kk, found) = strings.CutPrefix(k, TrailerPrefix); if (found) {
@@ -559,7 +542,7 @@ internal static Header finalTrailers(this ref response w) {
 // declareTrailer is called for each Trailer header when the
 // response header is written. It notes that a header will need to be
 // written in the trailers at the end of the response.
-internal static void declareTrailer(this ref response w, @string k) {
+internal static void declareTrailer⁔(/*this*/ ref response w, @string k) {
     k = CanonicalHeaderKey(k);
     if (!httpguts.ValidTrailerHeader(k)) {
         // Forbidden by RFC 7230, section 4.1.2
@@ -570,13 +553,13 @@ internal static void declareTrailer(this ref response w, @string k) {
 
 // requestTooLarge is called by maxBytesReader when too much input has
 // been read from the client.
-internal static void requestTooLarge(this ж<response> Ꮡw) {
+internal static void requestTooLarge⁔(/*this*/ ж<response> Ꮡw) {
     Ꮡw.ᏑrequestBodyLimitHit.Store(true);
 }
 
 // disableWriteContinue stops Request.Body.Read from sending an automatic 100-Continue.
 // If a 100-Continue is being written, it waits for it to complete before continuing.
-internal static void disableWriteContinue(this ж<response> Ꮡw) {
+internal static void disableWriteContinue⁔(/*this*/ ж<response> Ꮡw) {
     ref var w = ref Ꮡw.DerefOrNull();
 
     w.writeContinueMu.Lock();
@@ -584,20 +567,16 @@ internal static void disableWriteContinue(this ж<response> Ꮡw) {
     w.writeContinueMu.Unlock();
 }
 
-} partial class http_package {
-
 // writerOnly hides an io.Writer value's optional ReadFrom method
 // from io.Copy.
 partial struct writerOnly {
     /*embed*/ public io_package.Writer Writer;
 }
 
-} partial class httpᴛresponse {
-
 // ReadFrom is here to optimize copying from an [*os.File] regular file
 // to a [*net.TCPConn] with sendfile, or from a supported src type such
 // as a *net.TCPConn on Linux with splice.
-internal static (int64 n, error err) ReadFrom(this ж<response> Ꮡw, io.Reader src) {
+internal static (int64 n, error err) ReadFrom⁔(/*this*/ ж<response> Ꮡw, io.Reader src) {
     int64 n = default;
     error err = default;
     GoFrame ᒐ = default;
@@ -646,20 +625,16 @@ internal static (int64 n, error err) ReadFrom(this ж<response> Ꮡw, io.Reader 
     ᒐdone: return (n, err);
 }
 
-} partial class http_package {
-
 // debugServerConnections controls whether all server connections are wrapped
 // with a verbose logging wrapper.
 internal const bool debugServerConnections = false;
-
-} partial class httpᴛServer {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string serverˢ => ref serverˢᵇ;
 private static readonly @string serverˢᵇ = "server"u8;
 
 // Create new connection from rwc.
-internal static ж<conn> newConn(this ж<Server> Ꮡs, net.Conn rwc) {
+internal static ж<conn> newConn⁔(/*this*/ ж<Server> Ꮡs, net.Conn rwc) {
     var c = Ꮡ(new conn(
         server: Ꮡs,
         rwc: rwc
@@ -669,8 +644,6 @@ internal static ж<conn> newConn(this ж<Server> Ꮡs, net.Conn rwc) {
     }
     return c;
 }
-
-} partial class http_package {
 
 public partial struct readResult {
     internal incomparable _;
@@ -698,9 +671,7 @@ partial struct connReader {
     internal int64 remain; // bytes remaining
 }
 
-} partial class httpᴛconnReader {
-
-internal static void @lock(this ж<connReader> Ꮡcr) {
+internal static void lock⁔(/*this*/ ж<connReader> Ꮡcr) {
     ref var cr = ref Ꮡcr.DerefOrNull();
 
     cr.mu.Lock();
@@ -709,13 +680,13 @@ internal static void @lock(this ж<connReader> Ꮡcr) {
     }
 }
 
-internal static void unlock(this ж<connReader> Ꮡcr) {
+internal static void unlock⁔(/*this*/ ж<connReader> Ꮡcr) {
     ref var cr = ref Ꮡcr.DerefOrNull();
 
     cr.mu.Unlock();
 }
 
-internal static void releaseConn(this ж<connReader> Ꮡcr) {
+internal static void releaseConn⁔(/*this*/ ж<connReader> Ꮡcr) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -729,7 +700,7 @@ internal static void releaseConn(this ж<connReader> Ꮡcr) {
     finally { if (ᒐd1) Ꮡcr.unlock(); ᒐ.Run(); }
 }
 
-internal static partial void startBackgroundRead(this ж<connReader> Ꮡcr) {
+internal static partial void startBackgroundRead⁔(/*this*/ ж<connReader> Ꮡcr) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -751,7 +722,7 @@ internal static partial void startBackgroundRead(this ж<connReader> Ꮡcr) {
     finally { if (ᒐd1) Ꮡcr.unlock(); ᒐ.Run(); }
 }
 
-internal static void backgroundRead(this ж<connReader> Ꮡcr) {
+internal static void backgroundRead⁔(/*this*/ ж<connReader> Ꮡcr) {
     ref var cr = ref Ꮡcr.DerefOrNull();
 
     var (n, err) = cr.rwc.Read(cr.byteBuf[..]);
@@ -793,7 +764,7 @@ internal static void backgroundRead(this ж<connReader> Ꮡcr) {
     cr.cond.Broadcast();
 }
 
-internal static void abortPendingRead(this ж<connReader> Ꮡcr) {
+internal static void abortPendingRead⁔(/*this*/ ж<connReader> Ꮡcr) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -815,9 +786,9 @@ internal static void abortPendingRead(this ж<connReader> Ꮡcr) {
     finally { if (ᒐd1) Ꮡcr.unlock(); ᒐ.Run(); }
 }
 
-internal static void setReadLimit(this ref connReader cr, int64 remain) { cr.remain = remain; }
-internal static void setInfiniteReadLimit(this ref connReader cr) { cr.remain = maxInt64; }
-internal static bool hitReadLimit(this ref connReader cr) { return cr.remain <= 0; }
+internal static void setReadLimit⁔(/*this*/ ref connReader cr, int64 remain) { cr.remain = remain; }
+internal static void setInfiniteReadLimit⁔(/*this*/ ref connReader cr) { cr.remain = maxInt64; }
+internal static bool hitReadLimit⁔(/*this*/ ref connReader cr) { return cr.remain <= 0; }
 
 // handleReadErrorLocked is called whenever a Read from the client returns a
 // non-nil error.
@@ -829,7 +800,7 @@ internal static bool hitReadLimit(this ref connReader cr) { return cr.remain <= 
 // down its context.
 //
 // The caller must hold connReader.mu.
-internal static void handleReadErrorLocked(this ref connReader cr, error _) {
+internal static void handleReadErrorLocked⁔(/*this*/ ref connReader cr, error _) {
     if (cr.conn == nil) {
         return;
     }
@@ -839,7 +810,7 @@ internal static void handleReadErrorLocked(this ref connReader cr, error _) {
     }
 }
 
-internal static (nint n, error err) Read(this ж<connReader> Ꮡcr, slice<byte> p) {
+internal static (nint n, error err) Read⁔(/*this*/ ж<connReader> Ꮡcr, slice<byte> p) {
     nint n = default;
     error err = default;
     ref var cr = ref Ꮡcr.DerefOrNull();
@@ -890,8 +861,6 @@ internal static (nint n, error err) Read(this ж<connReader> Ꮡcr, slice<byte> 
     return (n, err);
 }
 
-} partial class http_package {
-
 internal static readonly ж<sync.Pool> ᏑbufioReaderPool = new StaticBox<sync.Pool>(default(sync.Pool));
 internal static ref sync.Pool bufioReaderPool => ref ((StaticBox<sync.Pool>)ᏑbufioReaderPool).ValueSlot;
 internal static readonly ж<sync.Pool> ᏑbufioWriter2kPool = new StaticBox<sync.Pool>(default(sync.Pool));
@@ -901,7 +870,7 @@ internal static ref sync.Pool bufioWriter4kPool => ref ((StaticBox<sync.Pool>)�
 
 internal static UntypedInt copyBufPoolSize => /* 32 * 1024 */ 32768;
 
-internal static readonly ж<sync.Pool> ᏑcopyBufPool = new StaticBox<sync.Pool>(new sync.Pool(New: () => Ꮡ(new array<byte>(32768))));
+internal static readonly ж<sync.Pool> ᏑcopyBufPool = new StaticBox<sync.Pool>(new sync.Pool(New: [GoFunc("init.func16")] () => Ꮡ(new array<byte>(32768))));
 internal static ref sync.Pool copyBufPool => ref ((StaticBox<sync.Pool>)ᏑcopyBufPool).ValueSlot;
 
 internal static slice<byte> getCopyBuf() {
@@ -968,16 +937,14 @@ internal static void putBufioWriter(ж<bufio.Writer> Ꮡbw) {
 // This can be overridden by setting [Server.MaxHeaderBytes].
 public static UntypedInt DefaultMaxHeaderBytes => /* 1 << 20 */ 1048576; // 1 MB
 
-} partial class httpᴛServer {
-
-internal static nint maxHeaderBytes(this ref Server s) {
+internal static nint maxHeaderBytes⁔(/*this*/ ref Server s) {
     if (s.MaxHeaderBytes > 0) {
         return s.MaxHeaderBytes;
     }
     return DefaultMaxHeaderBytes;
 }
 
-internal static int64 initialReadLimitSize(this ref Server s) {
+internal static int64 initialReadLimitSize⁔(/*this*/ ref Server s) {
     return (int64)s.maxHeaderBytes() + 4096; // bufio slop
 }
 
@@ -986,7 +953,7 @@ internal static int64 initialReadLimitSize(this ref Server s) {
 //
 // It returns the minimum of any positive ReadHeaderTimeout,
 // ReadTimeout, or WriteTimeout.
-internal static time.Duration tlsHandshakeTimeout(this ref Server s) {
+internal static time.Duration tlsHandshakeTimeout⁔(/*this*/ ref Server s) {
     time.Duration ret = default;
     foreach (var (_, v) in range(array<time.Duration>([
         s.ReadHeaderTimeout,
@@ -1003,8 +970,6 @@ internal static time.Duration tlsHandshakeTimeout(this ref Server s) {
     return ret;
 }
 
-} partial class http_package {
-
 // wrapper around io.ReadCloser which on first read, sends an
 // HTTP/1.1 100 Continue header
 partial struct expectContinueReader {
@@ -1013,13 +978,11 @@ partial struct expectContinueReader {
     internal atomic.Bool closed;
 }
 
-} partial class httpᴛexpectContinueReader {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string http11100Continueˢ => ref http11100Continueˢᵇ;
 private static readonly @string http11100Continueˢᵇ = "HTTP/1.1 100 Continue\r\n\r\n"u8;
 
-internal static (nint n, error err) Read(this ж<expectContinueReader> Ꮡecr, slice<byte> p) {
+internal static (nint n, error err) Read⁔(/*this*/ ж<expectContinueReader> Ꮡecr, slice<byte> p) {
     ref var ecr = ref Ꮡecr.DerefOrNull();
 
     if (Ꮡecr.Ꮡclosed.Load()) {
@@ -1038,14 +1001,12 @@ internal static (nint n, error err) Read(this ж<expectContinueReader> Ꮡecr, s
     return ecr.readCloser.Read(p);
 }
 
-internal static error Close(this ж<expectContinueReader> Ꮡecr) {
+internal static error Close⁔(/*this*/ ж<expectContinueReader> Ꮡecr) {
     ref var ecr = ref Ꮡecr.DerefOrNull();
 
     Ꮡecr.Ꮡclosed.Store(true);
     return ecr.readCloser.Close();
 }
-
-} partial class http_package {
 
 // TimeFormat is the time format to use when generating times in HTTP
 // headers. It is like [time.RFC1123] but hard-codes GMT as the time
@@ -1058,11 +1019,7 @@ private static readonly @string TimeFormatᵇ = "Mon, 02 Jan 2006 15:04:05 GMT"u
 
 internal static error errTooLarge = errors.New("http: request too large");
 
-} partial class httpᴛconn {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string hostˢ => ref hostˢᵇ;
-private static readonly @string hostˢᵇ = "Host"u8;
 internal static ref readonly @string missingRequiredHostˢ => ref missingRequiredHostˢᵇ;
 private static readonly @string missingRequiredHostˢᵇ = "missing required Host header"u8;
 internal static ref readonly @string malformedHostHeaderˢ => ref malformedHostHeaderˢᵇ;
@@ -1073,7 +1030,7 @@ internal static ref readonly @string invalidHeaderValueˢ => ref invalidHeaderVa
 private static readonly @string invalidHeaderValueˢᵇ = "invalid header value"u8;
 
 // Read next request from connection.
-internal static (ж<response> w, error err) readRequest(this ж<conn> Ꮡc, context.Context ctx) {
+internal static (ж<response> w, error err) readRequest⁔(/*this*/ ж<conn> Ꮡc, context.Context ctx) {
     ж<response> w = default;
     error err = default;
     GoFrame ᒐ = default;
@@ -1093,7 +1050,7 @@ internal static (ж<response> w, error err) readRequest(this ж<conn> Ꮡc, cont
         }
         {
             var d = c.server.WriteTimeout; if (d > 0) {
-                defer(() => {
+                defer([GoFunc("(*conn).readRequest.func1")] () => {
                     Ꮡc.Value.rwc.SetWriteDeadline(time.Now().Add(d));
                 }, ref ᒐ);
             }
@@ -1105,7 +1062,7 @@ internal static (ж<response> w, error err) readRequest(this ж<conn> Ꮡc, cont
             var (peek, _) = c.bufr.Peek(4); // ReadRequest will get err below
             c.bufr.Discard(numLeadingCRorLF(peek));
         }
-        (var req, err) = Δhttp.readRequest(c.bufr);
+        (var req, err) = readRequest(c.bufr);
         if (err != nil) {
             if (c.r.hitReadLimit()) {
                 (w, err) = (default, errTooLarge); goto ᒐdone;
@@ -1188,8 +1145,6 @@ internal static (ж<response> w, error err) readRequest(this ж<conn> Ꮡc, cont
     ᒐdone: return (w, err);
 }
 
-} partial class http_package {
-
 // http1ServerSupportsRequest reports whether Go's HTTP/1.x server
 // supports the given request.
 internal static bool http1ServerSupportsRequest(ref Request req) {
@@ -1206,9 +1161,7 @@ internal static bool http1ServerSupportsRequest(ref Request req) {
     return false;
 }
 
-} partial class httpᴛresponse {
-
-internal static Header Header(this ref response w) {
+internal static Header Header⁔(/*this*/ ref response w) {
     if (w.cw.header == nil && w.wroteHeader && !w.cw.wroteHeader) {
         // Accessing the header between logically writing it
         // and physically writing it means we need to allocate
@@ -1218,8 +1171,6 @@ internal static Header Header(this ref response w) {
     w.calledHeader = true;
     return w.handlerHeader;
 }
-
-} partial class http_package {
 
 // maxPostHandlerReadBytes is the max number of Request.Body bytes not
 // consumed by a handler that the server will read from the client
@@ -1271,13 +1222,7 @@ internal static partial runtime.Frame relevantCaller() {
     return frame;
 }
 
-} partial class httpᴛresponse {
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string contentLengthˢ => ref contentLengthˢᵇ;
-private static readonly @string contentLengthˢᵇ = "Content-Length"u8;
-
-internal static void WriteHeader(this ж<response> Ꮡw, nint code) {
+internal static void WriteHeader⁔(/*this*/ ж<response> Ꮡw, nint code) {
     ref var w = ref Ꮡw.DerefOrNull();
 
     if (w.conn.hijacked()) {
@@ -1331,8 +1276,6 @@ internal static void WriteHeader(this ж<response> Ꮡw, nint code) {
     }
 }
 
-} partial class http_package {
-
 // extraHeader is the set of headers sometimes added by chunkWriter.writeHeader.
 // This type is used to avoid extra allocations from cloning and/or populating
 // the response Header map and all its 1-element slices.
@@ -1354,14 +1297,12 @@ internal static slice<slice<byte>> extraHeaderKeys = [
 internal static slice<byte> headerContentLength = slice<byte>("Content-Length: "u8);
 internal static slice<byte> headerDate = slice<byte>("Date: "u8);
 
-} partial class httpᴛextraHeader {
-
 // Write writes the headers described in h to w.
 //
 // This method has a value receiver, despite the somewhat large size
 // of h, because it prevents an allocation. The escape analysis isn't
 // smart enough to realize this function doesn't mutate h.
-internal static void Write(this extraHeader h, ж<bufio.Writer> Ꮡw) {
+internal static void Write⁔(/*this*/ extraHeader h, ж<bufio.Writer> Ꮡw) {
     ref var w = ref Ꮡw.DerefOrNull();
 
     if (h.date != nil) {
@@ -1384,27 +1325,7 @@ internal static void Write(this extraHeader h, ж<bufio.Writer> Ꮡw) {
     }
 }
 
-} partial class httpᴛchunkWriter {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string trailerˢ => ref trailerˢᵇ;
-private static readonly @string trailerˢᵇ = "Trailer"u8;
-internal static ref readonly @string transferEncodingˢ => ref transferEncodingˢᵇ;
-private static readonly @string transferEncodingˢᵇ = "Transfer-Encoding"u8;
-internal static ref readonly @string contentLengthˢ => ref contentLengthˢᵇ;
-private static readonly @string contentLengthˢᵇ = "Content-Length"u8;
-internal static ref readonly @string connectionˢ => ref connectionˢᵇ;
-private static readonly @string connectionˢᵇ = "Connection"u8;
-internal static ref readonly @string keepAliveˢ => ref keepAliveˢᵇ;
-private static readonly @string keepAliveˢᵇ = "keep-alive"u8;
-internal static ref readonly @string closeˢ => ref closeˢᵇ;
-private static readonly @string closeˢᵇ = "close"u8;
-internal static ref readonly @string contentTypeˢ => ref contentTypeˢᵇ;
-private static readonly @string contentTypeˢᵇ = "Content-Type"u8;
-internal static ref readonly @string contentEncodingˢ => ref contentEncodingˢᵇ;
-private static readonly @string contentEncodingˢᵇ = "Content-Encoding"u8;
-internal static ref readonly @string dateˢ => ref dateˢᵇ;
-private static readonly @string dateˢᵇ = "Date"u8;
 internal static ref readonly @string chunkedˢ => ref chunkedˢᵇ;
 private static readonly @string chunkedˢᵇ = "chunked"u8;
 
@@ -1416,7 +1337,7 @@ private static readonly @string chunkedˢᵇ = "chunked"u8;
 // set explicitly. It's also used to set the Content-Length, if the
 // total body size was small and the handler has already finished
 // running.
-internal static void writeHeader(this ref chunkWriter cw, slice<byte> p) {
+internal static void writeHeader⁔(/*this*/ ref chunkWriter cw, slice<byte> p) {
     if (cw.wroteHeader) {
         return;
     }
@@ -1442,7 +1363,7 @@ internal static void writeHeader(this ref chunkWriter cw, slice<byte> p) {
     }
     ref var excludeHeader = ref heap<map<@string, bool>>(out var ᏑexcludeHeader);
     var headerʗ1 = header;
-    void delHeader(@string key) {
+    [GoFunc("(*chunkWriter).writeHeader.func1")] void delHeader(@string key) {
         if (owned) {
             headerʗ1.Del(key);
             return;
@@ -1704,8 +1625,6 @@ internal static void writeHeader(this ref chunkWriter cw, slice<byte> p) {
     w.conn.bufw.Write(crlf);
 }
 
-} partial class http_package {
-
 // foreachHeaderElement splits v according to the "#rule" construction
 // in RFC 7230 section 7 and calls fn for each non-empty element.
 internal static void foreachHeaderElement(@string v, Action<@string> fn) {
@@ -1752,11 +1671,9 @@ internal static void writeStatusLine(ж<bufio.Writer> Ꮡbw, bool is11, nint cod
     }
 }
 
-} partial class httpᴛresponse {
-
 // bodyAllowed reports whether a Write is allowed for this response type.
 // It's illegal to call this before the header has been flushed.
-internal static bool bodyAllowed(this ref response w) {
+internal static bool bodyAllowed⁔(/*this*/ ref response w) {
     if (!w.wroteHeader) {
         throw panic("net/http: bodyAllowed called before the header was written");
     }
@@ -1797,16 +1714,16 @@ internal static bool bodyAllowed(this ref response w) {
 // threshold and nothing is in (2).  The answer might be mostly making
 // bufferBeforeChunkingSize smaller and having bufio's fast-paths deal
 // with this instead.
-internal static (nint n, error err) Write(this ж<response> Ꮡw, slice<byte> data) {
+internal static (nint n, error err) Write⁔(/*this*/ ж<response> Ꮡw, slice<byte> data) {
     return Ꮡw.write(len(data), data, ""u8);
 }
 
-internal static (nint n, error err) WriteString(this ж<response> Ꮡw, @string data) {
+internal static (nint n, error err) WriteString⁔(/*this*/ ж<response> Ꮡw, @string data) {
     return Ꮡw.write(len(data), default, data);
 }
 
 // either dataB or dataS is non-zero.
-internal static (nint n, error err) write(this ж<response> Ꮡw, nint lenData, slice<byte> dataB, @string dataS) {
+internal static (nint n, error err) write⁔(/*this*/ ж<response> Ꮡw, nint lenData, slice<byte> dataB, @string dataS) {
     ref var w = ref Ꮡw.DerefOrNull();
 
     if (w.conn.hijacked()) {
@@ -1843,7 +1760,7 @@ internal static (nint n, error err) write(this ж<response> Ꮡw, nint lenData, 
     }
 }
 
-internal static void finishRequest(this ж<response> Ꮡw) {
+internal static void finishRequest⁔(/*this*/ ж<response> Ꮡw) {
     ref var w = ref Ꮡw.DerefOrNull();
 
     Ꮡw.ᏑhandlerDone.Store(true);
@@ -1873,7 +1790,7 @@ internal static void finishRequest(this ж<response> Ꮡw) {
 
 // shouldReuseConnection reports whether the underlying TCP connection can be reused.
 // It must only be called after the handler is done executing.
-internal static bool shouldReuseConnection(this ж<response> Ꮡw) {
+internal static bool shouldReuseConnection⁔(/*this*/ ж<response> Ꮡw) {
     ref var w = ref Ꮡw.DerefOrNull();
 
     if (w.closeAfterReply || Ꮡw.ᏑrequestBodyLimitHit.Load()) {
@@ -1901,15 +1818,15 @@ internal static bool shouldReuseConnection(this ж<response> Ꮡw) {
     return true;
 }
 
-internal static bool closedRequestBodyEarly(this ref response w) {
+internal static bool closedRequestBodyEarly⁔(/*this*/ ref response w) {
     return w.reqBody != nil && w.reqBody.didEarlyClose();
 }
 
-internal static void Flush(this ж<response> Ꮡw) {
+internal static void Flush⁔(/*this*/ ж<response> Ꮡw) {
     Ꮡw.FlushError();
 }
 
-internal static error FlushError(this ж<response> Ꮡw) {
+internal static error FlushError⁔(/*this*/ ж<response> Ꮡw) {
     ref var w = ref Ꮡw.DerefOrNull();
 
     if (!w.wroteHeader) {
@@ -1923,9 +1840,7 @@ internal static error FlushError(this ж<response> Ꮡw) {
     return err;
 }
 
-} partial class httpᴛconn {
-
-internal static void finalFlush(this ref conn c) {
+internal static void finalFlush⁔(/*this*/ ref conn c) {
     if (c.bufr != nil) {
         // Steal the bufio.Reader (~4KB worth of memory) and its associated
         // reader for a future connection.
@@ -1943,12 +1858,10 @@ internal static void finalFlush(this ref conn c) {
 }
 
 // Close the connection.
-internal static void close(this ref conn c) {
+internal static void close⁔(/*this*/ ref conn c) {
     c.finalFlush();
     c.rwc.Close();
 }
-
-} partial class http_package {
 
 // rstAvoidanceDelay is the amount of time we sleep after closing the
 // write side of a TCP connection before closing the entire socket.
@@ -1969,15 +1882,13 @@ partial interface closeWriter {
 
 internal static closeWriter _ᴛ9ʗ = new net_TCPConnжcloseWriter(((ж<net.TCPConn>)nil));
 
-} partial class httpᴛconn {
-
 // closeWriteAndWait flushes any outstanding data and sends a FIN packet (if
 // client is connected via TCP), signaling that we're done. We then
 // pause for a bit, hoping the client processes it before any
 // subsequent RST.
 //
 // See https://golang.org/issue/3595
-internal static void closeWriteAndWait(this ref conn c) {
+internal static void closeWriteAndWait⁔(/*this*/ ref conn c) {
     c.finalFlush();
     var (tcp, ok) = c.rwc._<closeWriter>(ᐧ); if (ok) {
         tcp.CloseWrite();
@@ -2006,8 +1917,6 @@ internal static void closeWriteAndWait(this ref conn c) {
     time.Sleep(rstAvoidanceDelay);
 }
 
-} partial class http_package {
-
 // validNextProto reports whether the proto is a valid ALPN protocol name.
 // Everything is valid except the empty string and built-in protocol types,
 // so that those can't be overridden with alternate implementations.
@@ -2022,9 +1931,7 @@ internal static bool validNextProto(@string proto) {
 internal const bool runHooks = true;
 internal const bool skipHooks = false;
 
-} partial class httpᴛconn {
-
-internal static void setState(this ж<conn> Ꮡc, net.Conn nc, ConnState state, bool runHook) {
+internal static void setState⁔(/*this*/ ж<conn> Ꮡc, net.Conn nc, ConnState state, bool runHook) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     var srv = c.server;
@@ -2050,12 +1957,10 @@ internal static void setState(this ж<conn> Ꮡc, net.Conn nc, ConnState state, 
     }
 }
 
-internal static (ConnState state, int64 unixSec) getState(this ж<conn> Ꮡc) {
+internal static (ConnState state, int64 unixSec) getState⁔(/*this*/ ж<conn> Ꮡc) {
     var packedState = Ꮡc.ᏑcurState.Load();
     return ((ConnState)(nint)((packedState & 0xff)), (int64)(packedState >> 8));
 }
-
-} partial class http_package {
 
 // badRequestError is a literal string (used by in the server in HTML,
 // unescaped) to tell the user why their request was bad. It should
@@ -2069,11 +1974,7 @@ partial struct statusError {
     internal @string text;
 }
 
-} partial class httpᴛstatusError {
-
-internal static @string Error(this statusError e) { return StatusText(e.code) + ": "u8 + e.text; }
-
-} partial class http_package {
+internal static @string Error⁔(/*this*/ statusError e) { return StatusText(e.code) + ": "u8 + e.text; }
 
 // ErrAbortHandler is a sentinel panic value to abort a handler.
 // While any panic from ServeHTTP aborts the response to the client,
@@ -2106,15 +2007,11 @@ partial interface connectionStater {
     tls.ConnectionState ConnectionState();
 }
 
-} partial class httpᴛconn {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string http10400BadRequestˢ => ref http10400BadRequestˢᵇ;
 private static readonly @string http10400BadRequestˢᵇ = "HTTP/1.0 400 Bad Request\r\n\r\nClient sent an HTTP request to an HTTPS server.\n"u8;
 internal static ref readonly @string clientSentAnHttpRequestˢ => ref clientSentAnHttpRequestˢᵇ;
 private static readonly @string clientSentAnHttpRequestˢᵇ = "client sent an HTTP request to an HTTPS server"u8;
-internal static ref readonly @string expectˢ2 => ref expectˢ2ᵇ;
-private static readonly @string expectˢ2ᵇ = "Expect"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static ref readonly @string errorHeadersᶜ => ref errorHeadersᶜᵇ;
@@ -2129,7 +2026,7 @@ internal static ref readonly @string publicErrᶜ1 => ref publicErrᶜ1ᵇ;
 private static readonly @string publicErrᶜ1ᵇ = "400 Bad Request"u8;
 
 // Serve a new connection.
-internal static void serve(this ж<conn> Ꮡc, context.Context ctx) {
+internal static void serve⁔(/*this*/ ж<conn> Ꮡc, context.Context ctx) {
     GoFrame ᒐ = default;
     try {
         ref var c = ref Ꮡc.DerefOrNull();
@@ -2139,7 +2036,7 @@ internal static void serve(this ж<conn> Ꮡc, context.Context ctx) {
         }
         ctx = context.WithValue(ctx, LocalAddrContextKey.OrTypedNil(), c.rwc.LocalAddr());
         ref var inFlightResponse = ref heap<ж<response>>(out var ᏑinFlightResponse);
-        defer([MethodImpl(MethodImplOptions.NoInlining)] () => {
+        defer([MethodImpl(MethodImplOptions.NoInlining), GoFunc("(*conn).serve.func1")] () => {
             var err = recover(); if (err != nil && !AreEqual(err, ErrAbortHandler)) {
                 const nint size = /* 64 << 10 */ 65536;
                 var buf = new slice<byte>(size);
@@ -2375,8 +2272,6 @@ internal static void serve(this ж<conn> Ꮡc, context.Context ctx) {
     finally { ᒐ.Run(); }
 }
 
-} partial class http_package {
-
 // unencryptedHTTP2Request is an HTTP handler that initializes
 // certain uninitialized fields in its *Request.
 //
@@ -2387,11 +2282,9 @@ partial struct unencryptedHTTP2Request {
     internal serverHandler h;
 }
 
-} partial class httpᴛunencryptedHTTP2Request {
+internal static context.Context BaseContext⁔(/*this*/ unencryptedHTTP2Request h) { return h.ctx; }
 
-internal static context.Context BaseContext(this unencryptedHTTP2Request h) { return h.ctx; }
-
-internal static void ServeHTTP(this unencryptedHTTP2Request h, ResponseWriter rw, ж<Request> Ꮡreq) {
+internal static void ServeHTTP⁔(/*this*/ unencryptedHTTP2Request h, ResponseWriter rw, ж<Request> Ꮡreq) {
     ref var req = ref Ꮡreq.DerefOrNull();
 
     if (req.Body == nil) {
@@ -2403,8 +2296,6 @@ internal static void ServeHTTP(this unencryptedHTTP2Request h, ResponseWriter rw
     h.h.ServeHTTP(rw, Ꮡreq);
 }
 
-} partial class http_package {
-
 // unencryptedNetConnInTLSConn is used to pass an unencrypted net.Conn to
 // functions that only accept a *tls.Conn.
 partial struct unencryptedNetConnInTLSConn {
@@ -2412,13 +2303,9 @@ partial struct unencryptedNetConnInTLSConn {
     internal net.Conn conn;
 }
 
-} partial class httpᴛunencryptedNetConnInTLSConn {
-
-internal static net.Conn UnencryptedNetConn(this unencryptedNetConnInTLSConn c) {
+internal static net.Conn UnencryptedNetConn⁔(/*this*/ unencryptedNetConnInTLSConn c) {
     return c.conn;
 }
-
-} partial class http_package {
 
 internal static ж<tls.Conn> unencryptedTLSConn(net.Conn c) {
     return tls.Client(new unencryptedNetConnInTLSConn(conn: c), nil);
@@ -2429,16 +2316,14 @@ internal static ж<tls.Conn> unencryptedTLSConn(net.Conn c) {
 internal static ref readonly @string nextProtoUnencryptedHTTP2 => ref nextProtoUnencryptedHTTP2ᵇ;
 private static readonly @string nextProtoUnencryptedHTTP2ᵇ = "unencrypted_http2"u8;
 
-} partial class httpᴛconn {
-
-internal static bool maybeServeUnencryptedHTTP2(this ж<conn> Ꮡc, context.Context ctx) {
+internal static bool maybeServeUnencryptedHTTP2⁔(/*this*/ ж<conn> Ꮡc, context.Context ctx) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     var (fn, ok) = c.server.TLSNextProto[nextProtoUnencryptedHTTP2, ꟷ];
     if (!ok) {
         return false;
     }
-    bool hasPreface(ж<conn> cΔ1, slice<byte> preface) {
+    [GoFunc("(*conn).maybeServeUnencryptedHTTP2.func1")] bool hasPreface(ж<conn> cΔ1, slice<byte> preface) {
         cΔ1.r.setReadLimit((int64)len(preface) - (int64)cΔ1.bufr.Buffered());
         var (got, err) = cΔ1.bufr.Peek(len(preface));
         cΔ1.r.setInfiniteReadLimit();
@@ -2458,15 +2343,7 @@ internal static bool maybeServeUnencryptedHTTP2(this ж<conn> Ꮡc, context.Cont
     return true;
 }
 
-} partial class httpᴛresponse {
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string connectionˢ => ref connectionˢᵇ;
-private static readonly @string connectionˢᵇ = "Connection"u8;
-internal static ref readonly @string closeˢ => ref closeˢᵇ;
-private static readonly @string closeˢᵇ = "close"u8;
-
-internal static void sendExpectationFailed(this ж<response> Ꮡw) {
+internal static void sendExpectationFailed⁔(/*this*/ ж<response> Ꮡw) {
     ref var w = ref Ꮡw.DerefOrNull();
 
     // TODO(bradfitz): let ServeHTTP handlers handle
@@ -2488,7 +2365,7 @@ internal static void sendExpectationFailed(this ж<response> Ꮡw) {
 
 // Hijack implements the [Hijacker.Hijack] method. Our response is both a [ResponseWriter]
 // and a [Hijacker].
-internal static (net.Conn rwc, ж<bufio.ReadWriter> buf, error err) Hijack(this ж<response> Ꮡw) {
+internal static (net.Conn rwc, ж<bufio.ReadWriter> buf, error err) Hijack⁔(/*this*/ ж<response> Ꮡw) {
     net.Conn rwc = default;
     ж<bufio.ReadWriter> buf = default;
     error err = default;
@@ -2522,7 +2399,7 @@ internal static (net.Conn rwc, ж<bufio.ReadWriter> buf, error err) Hijack(this 
     return (rwc, buf, err);
 }
 
-internal static /*<-*/channel<bool> CloseNotify(this ж<response> Ꮡw) {
+internal static /*<-*/channel<bool> CloseNotify⁔(/*this*/ ж<response> Ꮡw) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -2545,7 +2422,7 @@ internal static /*<-*/channel<bool> CloseNotify(this ж<response> Ꮡw) {
     finally { if (ᒐd1) Ꮡw.DerefOrNull().lazyCloseNotifyMu.Unlock(); ᒐ.Run(); }
 }
 
-internal static void closeNotify(this ж<response> Ꮡw) {
+internal static void closeNotify⁔(/*this*/ ж<response> Ꮡw) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -2565,22 +2442,16 @@ internal static void closeNotify(this ж<response> Ꮡw) {
     finally { if (ᒐd1) Ꮡw.DerefOrNull().lazyCloseNotifyMu.Unlock(); ᒐ.Run(); }
 }
 
-} partial class http_package {
-
 // The HandlerFunc type is an adapter to allow the use of
 // ordinary functions as HTTP handlers. If f is a function
 // with the appropriate signature, HandlerFunc(f) is a
 // [Handler] that calls f.
 public delegate void HandlerFunc(ResponseWriter _Δp0, ж<Request> _Δp1);
 
-} partial class httpᴛHandlerFunc {
-
 // ServeHTTP calls f(w, r).
-public static partial void ServeHTTP(this HandlerFunc f, ResponseWriter w, ж<Request> r) {
+internal static partial void ServeHTTP⁔(/*this*/ HandlerFunc f, ResponseWriter w, ж<Request> r) {
     f(w, r);
 }
-
-} partial class http_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string textPlainCharsetUtf8ˢ => ref textPlainCharsetUtf8ˢᵇ;
@@ -2639,7 +2510,7 @@ public static Handler StripPrefix(@string prefix, Handler h) {
     if (prefix == ""u8) {
         return h;
     }
-    return new HandlerFuncᴠHandler(new HandlerFunc((ResponseWriter w, ж<Request> r) => {
+    return new HandlerFuncᴠHandler(new HandlerFunc([GoFunc("StripPrefix.func1")] (ResponseWriter w, ж<Request> r) => {
         @string p = strings.TrimPrefix(r.URL.Path, prefix);
         @string rp = strings.TrimPrefix(r.URL.RawPath, prefix);
         if (len(p) < len(r.URL.Path) && (r.URL.RawPath == ""u8 || len(rp) < len(r.URL.RawPath))) {
@@ -2744,13 +2615,9 @@ partial struct redirectHandler {
     internal nint code;
 }
 
-} partial class httpᴛredirectHandler {
-
-internal static void ServeHTTP(this ref redirectHandler rh, ResponseWriter w, ж<Request> r) {
+internal static void ServeHTTP⁔(/*this*/ ref redirectHandler rh, ResponseWriter w, ж<Request> r) {
     Redirect(w, r, rh.url, rh.code);
 }
-
-} partial class http_package {
 
 // RedirectHandler returns a request handler that redirects
 // each request it receives to the given url using the given
@@ -2935,8 +2802,6 @@ internal static @string stripHostPort(@string h) {
     return host;
 }
 
-} partial class httpᴛServeMux {
-
 // Handler returns the handler to use for the given request,
 // consulting r.Method, r.Host, and r.URL.Path. It always returns
 // a non-nil handler. If the path is not in its canonical form, the
@@ -2957,7 +2822,7 @@ internal static @string stripHostPort(@string h) {
 // Handler does not modify its argument. In particular, it does not
 // populate named path wildcards, so r.PathValue will always return
 // the empty string.
-public static (Handler h, @string pattern) Handler(this ж<ServeMux> Ꮡmux, ж<Request> r) {
+internal static (Handler h, @string pattern) Handler⁔(/*this*/ ж<ServeMux> Ꮡmux, ж<Request> r) {
     Handler h = default;
 
     if (use121) {
@@ -2975,7 +2840,7 @@ private static readonly @string allowˢᵇ = "Allow"u8;
 // If there is a matching handler, it returns it and the pattern that matched.
 // Otherwise it returns a Redirect or NotFound handler with the path that would match
 // after the redirect.
-internal static (Handler h, @string patStr, ж<pattern>, slice<@string> matches) findHandler(this ж<ServeMux> Ꮡmux, ж<Request> Ꮡr) {
+internal static (Handler h, @string patStr, ж<pattern>, slice<@string> matches) findHandler⁔(/*this*/ ж<ServeMux> Ꮡmux, ж<Request> Ꮡr) {
     slice<@string> matches = default;
     ref var r = ref Ꮡr.DerefOrNull();
 
@@ -3025,7 +2890,7 @@ internal static (Handler h, @string patStr, ж<pattern>, slice<@string> matches)
         var allowedMethods = Ꮡmux.matchingMethods(host, path);
         if (len(allowedMethods) > 0) {
             var allowedMethodsʗ1 = allowedMethods;
-            return (new HandlerFuncᴠHandler(new HandlerFunc((ResponseWriter w, ж<Request> rΔ1) => {
+            return (new HandlerFuncᴠHandler(new HandlerFunc([GoFunc("(*ServeMux).findHandler.func1")] (ResponseWriter w, ж<Request> rΔ1) => {
                 w.Header().Set(allowˢ, strings.Join(allowedMethodsʗ1, ", "));
                 Error(w, StatusText(StatusMethodNotAllowed), StatusMethodNotAllowed);
             })), "", default, default);
@@ -3041,7 +2906,7 @@ internal static (Handler h, @string patStr, ж<pattern>, slice<@string> matches)
 // redirection: when a path doesn't match exactly, the match is tried again
 // after appending "/" to the path. If that second match succeeds, the last
 // return value is the URL to redirect to.
-internal static (ж<routingNode>, slice<@string> matches, ж<urlpkg.URL> redirectTo) matchOrRedirect(this ж<ServeMux> Ꮡmux, @string host, @string method, @string path, ж<urlpkg.URL> Ꮡu) {
+internal static (ж<routingNode>, slice<@string> matches, ж<urlpkg.URL> redirectTo) matchOrRedirect⁔(/*this*/ ж<ServeMux> Ꮡmux, @string host, @string method, @string path, ж<urlpkg.URL> Ꮡu) {
     ж<routingNode> _ᴛ1 = default;
     slice<@string> matches = default;
     ж<urlpkg.URL> redirectTo = default;
@@ -3076,8 +2941,6 @@ internal static (ж<routingNode>, slice<@string> matches, ж<urlpkg.URL> redirec
     finally { ᒐ.Run(); }
     ᒐdone: return (_ᴛ1, matches, redirectTo);
 }
-
-} partial class http_package {
 
 // exactMatch reports whether the node's pattern exactly matches the path.
 // As a special case, if the node is nil, exactMatch return false.
@@ -3132,10 +2995,8 @@ internal static bool exactMatch(ж<routingNode> Ꮡn, @string path) {
     return len(n.pattern.segments) == strings.Count(path, "/");
 }
 
-} partial class httpᴛServeMux {
-
 // matchingMethods return a sorted list of all methods that would match with the given host and path.
-internal static slice<@string> matchingMethods(this ж<ServeMux> Ꮡmux, @string host, @string path) {
+internal static slice<@string> matchingMethods⁔(/*this*/ ж<ServeMux> Ꮡmux, @string host, @string path) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -3155,15 +3016,9 @@ internal static slice<@string> matchingMethods(this ж<ServeMux> Ꮡmux, @string
     finally { if (ᒐd1) Ꮡmux.Ꮡmu.RUnlock(); ᒐ.Run(); }
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string connectionˢ => ref connectionˢᵇ;
-private static readonly @string connectionˢᵇ = "Connection"u8;
-internal static ref readonly @string closeˢ => ref closeˢᵇ;
-private static readonly @string closeˢᵇ = "close"u8;
-
 // ServeHTTP dispatches the request to the handler whose
 // pattern most closely matches the request URL.
-public static void ServeHTTP(this ж<ServeMux> Ꮡmux, ResponseWriter w, ж<Request> Ꮡr) {
+internal static void ServeHTTP⁔(/*this*/ ж<ServeMux> Ꮡmux, ResponseWriter w, ж<Request> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     if (r.RequestURI == "*"u8) {
@@ -3190,7 +3045,7 @@ public static void ServeHTTP(this ж<ServeMux> Ꮡmux, ResponseWriter w, ж<Requ
 // or if the pattern is invalid, Handle panics.
 //
 // See [ServeMux] for details on valid patterns and conflict rules.
-public static partial void Handle(this ж<ServeMux> Ꮡmux, @string pattern, Handler handler) {
+internal static partial void Handle⁔(/*this*/ ж<ServeMux> Ꮡmux, @string pattern, Handler handler) {
     if (use121) {
         Ꮡmux.Ꮡmux121.handle(pattern, handler);
     } else {
@@ -3203,15 +3058,13 @@ public static partial void Handle(this ж<ServeMux> Ꮡmux, @string pattern, Han
 // or if the pattern is invalid, HandleFunc panics.
 //
 // See [ServeMux] for details on valid patterns and conflict rules.
-public static partial void HandleFunc(this ж<ServeMux> Ꮡmux, @string pattern, Action<ResponseWriter, ж<Request>> handler) {
+internal static partial void HandleFunc⁔(/*this*/ ж<ServeMux> Ꮡmux, @string pattern, Action<ResponseWriter, ж<Request>> handler) {
     if (use121) {
         Ꮡmux.Ꮡmux121.handleFunc(pattern, handler);
     } else {
         Ꮡmux.register(pattern, new HandlerFuncᴠHandler(NilSafeDelegateConversion<HandlerFunc, Action<ResponseWriter, ж<Request>>>(handler)));
     }
 }
-
-} partial class http_package {
 
 // Handle registers the handler for the given pattern in [DefaultServeMux].
 // The documentation for [ServeMux] explains how patterns are matched.
@@ -3233,9 +3086,7 @@ public static partial void HandleFunc(@string pattern, Action<ResponseWriter, ж
     }
 }
 
-} partial class httpᴛServeMux {
-
-internal static partial void register(this ж<ServeMux> Ꮡmux, @string pattern, Handler handler) {
+internal static partial void register⁔(/*this*/ ж<ServeMux> Ꮡmux, @string pattern, Handler handler) {
     var err = Ꮡmux.registerErr(pattern, handler); if (err != nil) {
         throw panic(err);
     }
@@ -3249,7 +3100,7 @@ private static readonly @string httpNilHandlerˢᵇ = "http: nil handler"u8;
 internal static ref readonly @string unknownLocationˢ => ref unknownLocationˢᵇ;
 private static readonly @string unknownLocationˢᵇ = "unknown location"u8;
 
-internal static partial error registerErr(this ж<ServeMux> Ꮡmux, @string patstr, Handler handler) {
+internal static partial error registerErr⁔(/*this*/ ж<ServeMux> Ꮡmux, @string patstr, Handler handler) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -3284,7 +3135,7 @@ internal static partial error registerErr(this ж<ServeMux> Ꮡmux, @string pats
         // Check for conflict.
         {
             var patʗ1 = pat;
-            var errΔ1 = mux.index.possiblyConflictingPatterns(pat, error (ж<pattern> pat2) => {
+            var errΔ1 = mux.index.possiblyConflictingPatterns(pat, [GoFunc("(*ServeMux).registerErr.func1")] error (ж<pattern> pat2) => {
                 if (patʗ1.conflictsWith(pat2)) {
                     @string d = describeConflict(patʗ1, pat2);
                     return fmt.Errorf("pattern %q (registered at %s) conflicts with pattern %q (registered at %s):\n%s"u8,
@@ -3302,8 +3153,6 @@ internal static partial error registerErr(this ж<ServeMux> Ꮡmux, @string pats
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡmux.Ꮡmu.Unlock(); ᒐ.Run(); }
 }
-
-} partial class http_package {
 
 // Serve accepts incoming HTTP connections on the listener l,
 // creating a new service goroutine for each. The service goroutines
@@ -3448,8 +3297,6 @@ partial struct Server {
     internal sync.WaitGroup listenerGroup;
 }
 
-} partial class httpᴛServer {
-
 // Close immediately closes all active net.Listeners and any
 // connections in state [StateNew], [StateActive], or [StateIdle]. For a
 // graceful shutdown, use [Server.Shutdown].
@@ -3459,7 +3306,7 @@ partial struct Server {
 //
 // Close returns any error returned from closing the [Server]'s
 // underlying Listener(s).
-public static error Close(this ж<Server> Ꮡs) {
+internal static error Close⁔(/*this*/ ж<Server> Ꮡs) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -3488,8 +3335,6 @@ public static error Close(this ж<Server> Ꮡs) {
     finally { if (ᒐd1) Ꮡs.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
-} partial class http_package {
-
 // shutdownPollIntervalMax is the max polling interval when checking
 // quiescence during Server.Shutdown. Polling starts with a small
 // interval and backs off to the max.
@@ -3498,8 +3343,6 @@ public static error Close(this ж<Server> Ꮡs) {
 // involve any contentious mutexes), but that is left as an
 // exercise for the reader.
 internal static time.Duration shutdownPollIntervalMax => /* 500 * time.Millisecond */ 500000000;
-
-} partial class httpᴛServer {
 
 // Shutdown gracefully shuts down the server without interrupting any
 // active connections. Shutdown works by first closing all open
@@ -3521,7 +3364,7 @@ internal static time.Duration shutdownPollIntervalMax => /* 500 * time.Milliseco
 //
 // Once Shutdown has been called on a server, it may not be reused;
 // future calls to methods such as Serve will return ErrServerClosed.
-public static partial error Shutdown(this ж<Server> Ꮡs, context.Context ctx) {
+internal static partial error Shutdown⁔(/*this*/ ж<Server> Ꮡs, context.Context ctx) {
     GoFrame ᒐ = default;
     try {
         ref var s = ref Ꮡs.DerefOrNull();
@@ -3538,7 +3381,7 @@ public static partial error Shutdown(this ж<Server> Ꮡs, context.Context ctx) 
         Ꮡs.ᏑlistenerGroup.Wait();
 
         var pollIntervalBase = time.Millisecond;
-        time.Duration nextPollInterval() {
+        [GoFunc("(*Server).Shutdown.func1")] time.Duration nextPollInterval() {
             // Add 10% jitter.
             var interval = pollIntervalBase + ((time.Duration)(int64)rand.Intn((nint)(pollIntervalBase / 10)));
             // Double and clamp for next time.
@@ -3577,7 +3420,7 @@ public static partial error Shutdown(this ж<Server> Ꮡs, context.Context ctx) 
 // undergone ALPN protocol upgrade or that have been hijacked.
 // This function should start protocol-specific graceful shutdown,
 // but should not wait for shutdown to complete.
-public static void RegisterOnShutdown(this ж<Server> Ꮡs, Action f) {
+internal static void RegisterOnShutdown⁔(/*this*/ ж<Server> Ꮡs, Action f) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     s.mu.Lock();
@@ -3587,7 +3430,7 @@ public static void RegisterOnShutdown(this ж<Server> Ꮡs, Action f) {
 
 // closeIdleConns closes all idle connections and reports whether the
 // server is quiescent.
-internal static bool closeIdleConns(this ж<Server> Ꮡs) {
+internal static bool closeIdleConns⁔(/*this*/ ж<Server> Ꮡs) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -3619,7 +3462,7 @@ internal static bool closeIdleConns(this ж<Server> Ꮡs) {
     finally { if (ᒐd1) Ꮡs.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
-internal static error closeListenersLocked(this ref Server s) {
+internal static error closeListenersLocked⁔(/*this*/ ref Server s) {
     error err = default;
     foreach (var (ln, _) in s.listeners) {
         var cerr = (ln.ValueSlot).Close(); if (cerr != nil && err == nil) {
@@ -3628,8 +3471,6 @@ internal static error closeListenersLocked(this ref Server s) {
     }
     return err;
 }
-
-} partial class http_package {
 
 // A ConnState represents the state of a client connection to a server.
 // It's used by the optional [Server.ConnState] hook.
@@ -3677,21 +3518,15 @@ internal static map<ConnState, @string> stateName = new map<ConnState, @string>{
     [StateClosed] = "closed"
 };
 
-} partial class httpᴛConnState {
-
-public static @string String(this ConnState c) {
+internal static @string String⁔(/*this*/ ConnState c) {
     return stateName[c];
 }
-
-} partial class http_package {
 
 // serverHandler delegates to either the server's Handler or
 // DefaultServeMux and also handles "OPTIONS *" requests.
 partial struct serverHandler {
     internal ж<Server> srv;
 }
-
-} partial class httpᴛserverHandler {
 
 // ServeHTTP should be an internal detail,
 // but widely used packages access it using linkname.
@@ -3702,7 +3537,7 @@ partial struct serverHandler {
 // See go.dev/issue/67401.
 //
 //go:linkname badServeHTTP net/http.serverHandler.ServeHTTP
-internal static void ServeHTTP(this serverHandler sh, ResponseWriter rw, ж<Request> Ꮡreq) {
+internal static void ServeHTTP⁔(/*this*/ serverHandler sh, ResponseWriter rw, ж<Request> Ꮡreq) {
     ref var req = ref Ꮡreq.DerefOrNull();
 
     var handler = sh.srv.Handler;
@@ -3716,8 +3551,6 @@ internal static void ServeHTTP(this serverHandler sh, ResponseWriter rw, ж<Requ
     handler.ServeHTTP(rw, Ꮡreq);
 }
 
-} partial class http_package {
-
 internal static partial void badServeHTTP(serverHandler _Δp0, ResponseWriter _Δp1, ж<Request> _Δp2);
 
 // AllowQuerySemicolons returns a handler that serves requests by converting any
@@ -3730,7 +3563,7 @@ internal static partial void badServeHTTP(serverHandler _Δp0, ResponseWriter _�
 //
 // AllowQuerySemicolons should be invoked before [Request.ParseForm] is called.
 public static Handler AllowQuerySemicolons(Handler h) {
-    return new HandlerFuncᴠHandler(new HandlerFunc((ResponseWriter w, ж<Request> r) => {
+    return new HandlerFuncᴠHandler(new HandlerFunc([GoFunc("AllowQuerySemicolons.func1")] (ResponseWriter w, ж<Request> r) => {
         if (strings.Contains(r.URL.RawQuery, ";")) {
             var r2 = @new<Request>();
             r2.Value = r.Value;
@@ -3744,13 +3577,9 @@ public static Handler AllowQuerySemicolons(Handler h) {
     }));
 }
 
-} partial class httpᴛServer {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string httpˢ3 => ref httpˢ3ᵇ;
 private static readonly @string httpˢ3ᵇ = ":http"u8;
-internal static ref readonly @string tcpˢ => ref tcpˢᵇ;
-private static readonly @string tcpˢᵇ = "tcp"u8;
 
 // ListenAndServe listens on the TCP network address s.Addr and then
 // calls [Serve] to handle requests on incoming connections.
@@ -3760,7 +3589,7 @@ private static readonly @string tcpˢᵇ = "tcp"u8;
 //
 // ListenAndServe always returns a non-nil error. After [Server.Shutdown] or [Server.Close],
 // the returned error is [ErrServerClosed].
-public static error ListenAndServe(this ж<Server> Ꮡs) {
+internal static error ListenAndServe⁔(/*this*/ ж<Server> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     if (Ꮡs.shuttingDown()) {
@@ -3777,15 +3606,11 @@ public static error ListenAndServe(this ж<Server> Ꮡs) {
     return Ꮡs.Serve(ln);
 }
 
-} partial class http_package {
-
 internal static Action<ж<Server>, net.Listener> testHookServerServe; // used if non-nil
-
-} partial class httpᴛServer {
 
 // shouldConfigureHTTP2ForServe reports whether Server.Serve should configure
 // automatic HTTP/2. (which sets up the s.TLSNextProto map)
-internal static bool shouldConfigureHTTP2ForServe(this ref Server s) {
+internal static bool shouldConfigureHTTP2ForServe⁔(/*this*/ ref Server s) {
     if (s.TLSConfig == nil) {
         // Compatibility with Go 1.6:
         // If there's no TLSConfig, it's possible that the user just
@@ -3808,13 +3633,9 @@ internal static bool shouldConfigureHTTP2ForServe(this ref Server s) {
     return slices.Contains(s.TLSConfig.NextProtos, http2NextProtoTLS);
 }
 
-} partial class http_package {
-
 // ErrServerClosed is returned by the [Server.Serve], [ServeTLS], [ListenAndServe],
 // and [ListenAndServeTLS] methods after a call to [Server.Shutdown] or [Server.Close].
 public static error ErrServerClosed = errors.New("http: Server closed");
-
-} partial class httpᴛServer {
 
 // Serve accepts incoming connections on the Listener l, creating a
 // new service goroutine for each. The service goroutines read requests and
@@ -3826,7 +3647,7 @@ public static error ErrServerClosed = errors.New("http: Server closed");
 //
 // Serve always returns a non-nil error and closes l.
 // After [Server.Shutdown] or [Server.Close], the returned error is [ErrServerClosed].
-public static partial error Serve(this ж<Server> Ꮡs, net.Listener lʗp) {
+internal static partial error Serve⁔(/*this*/ ж<Server> Ꮡs, net.Listener lʗp) {
     GoFrame ᒐ = default;
     try {
         ref var s = ref Ꮡs.DerefOrNull();
@@ -3915,7 +3736,7 @@ public static partial error Serve(this ж<Server> Ꮡs, net.Listener lʗp) {
 //
 // ServeTLS always returns a non-nil error. After [Server.Shutdown] or [Server.Close], the
 // returned error is [ErrServerClosed].
-public static error ServeTLS(this ж<Server> Ꮡs, net.Listener l, @string certFile, @string keyFile) {
+internal static error ServeTLS⁔(/*this*/ ж<Server> Ꮡs, net.Listener l, @string certFile, @string keyFile) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     // Setup HTTP/2 before s.Serve, to initialize s.TLSConfig
@@ -3943,7 +3764,7 @@ public static error ServeTLS(this ж<Server> Ꮡs, net.Listener l, @string certF
     return Ꮡs.Serve(tlsListener);
 }
 
-internal static Protocols protocols(this ref Server s) {
+internal static Protocols protocols⁔(/*this*/ ref Server s) {
     if (s.Protocols != nil) {
         return s.Protocols.Value; // user-configured set
     }
@@ -3968,8 +3789,6 @@ internal static Protocols protocols(this ref Server s) {
     return p;
 }
 
-} partial class http_package {
-
 // adjustNextProtos adds or removes "http/1.1" and "h2" entries from
 // a tls.Config.NextProtos list, according to the set of protocols in protos.
 internal static slice<@string> adjustNextProtos(slice<@string> nextProtos, Protocols protos) {
@@ -3981,7 +3800,7 @@ internal static slice<@string> adjustNextProtos(slice<@string> nextProtos, Proto
     nextProtos = slices.Clone<slice<@string>, @string>(nextProtos);
     Protocols have = default;
     var protosʗ1 = protos;
-    nextProtos = slices.DeleteFunc(nextProtos, (@string s) => {
+    nextProtos = slices.DeleteFunc(nextProtos, [GoFunc("adjustNextProtos.func1")] (@string s) => {
         switch (ᐧ) {
         case {} when s == "http/1.1"u8: {
             if (!protosʗ1.HTTP1()) {
@@ -4008,8 +3827,6 @@ internal static slice<@string> adjustNextProtos(slice<@string> nextProtos, Proto
     return nextProtos;
 }
 
-} partial class httpᴛServer {
-
 // trackListener adds or removes a net.Listener to the set of tracked
 // listeners.
 //
@@ -4020,7 +3837,7 @@ internal static slice<@string> adjustNextProtos(slice<@string> nextProtos, Proto
 // Listener from another caller.
 //
 // It reports whether the server is still up (not Shutdown or Closed).
-internal static bool trackListener(this ж<Server> Ꮡs, ж<net.Listener> ln, bool add) {
+internal static bool trackListener⁔(/*this*/ ж<Server> Ꮡs, ж<net.Listener> ln, bool add) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -4047,7 +3864,7 @@ internal static bool trackListener(this ж<Server> Ꮡs, ж<net.Listener> ln, bo
     finally { if (ᒐd1) Ꮡs.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
-internal static void trackConn(this ж<Server> Ꮡs, ж<conn> c, bool add) {
+internal static void trackConn⁔(/*this*/ ж<Server> Ꮡs, ж<conn> c, bool add) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -4068,25 +3885,25 @@ internal static void trackConn(this ж<Server> Ꮡs, ж<conn> c, bool add) {
     finally { if (ᒐd1) Ꮡs.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
-internal static time.Duration idleTimeout(this ref Server s) {
+internal static time.Duration idleTimeout⁔(/*this*/ ref Server s) {
     if (s.IdleTimeout != 0) {
         return s.IdleTimeout;
     }
     return s.ReadTimeout;
 }
 
-internal static time.Duration readHeaderTimeout(this ref Server s) {
+internal static time.Duration readHeaderTimeout⁔(/*this*/ ref Server s) {
     if (s.ReadHeaderTimeout != 0) {
         return s.ReadHeaderTimeout;
     }
     return s.ReadTimeout;
 }
 
-internal static bool doKeepAlives(this ж<Server> Ꮡs) {
+internal static bool doKeepAlives⁔(/*this*/ ж<Server> Ꮡs) {
     return !Ꮡs.ᏑdisableKeepAlives.Load() && !Ꮡs.shuttingDown();
 }
 
-internal static bool shuttingDown(this ж<Server> Ꮡs) {
+internal static bool shuttingDown⁔(/*this*/ ж<Server> Ꮡs) {
     return Ꮡs.ᏑinShutdown.Load();
 }
 
@@ -4094,7 +3911,7 @@ internal static bool shuttingDown(this ж<Server> Ꮡs) {
 // By default, keep-alives are always enabled. Only very
 // resource-constrained environments or servers in the process of
 // shutting down should disable them.
-public static void SetKeepAlivesEnabled(this ж<Server> Ꮡs, bool v) {
+internal static void SetKeepAlivesEnabled⁔(/*this*/ ж<Server> Ꮡs, bool v) {
     if (v) {
         Ꮡs.ᏑdisableKeepAlives.Store(false);
         return;
@@ -4107,7 +3924,7 @@ public static void SetKeepAlivesEnabled(this ж<Server> Ꮡs, bool v) {
     // TODO: Issue 26303: close HTTP/2 conns as soon as they become idle.
 }
 
-internal static void logf(this ref Server s, @string format, params ꓸꓸꓸany argsʗp) {
+internal static void logf⁔(/*this*/ ref Server s, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();
 
     if (s.ErrorLog != nil) {
@@ -4116,8 +3933,6 @@ internal static void logf(this ref Server s, @string format, params ꓸꓸꓸany
         log.Printf(format, args.ꓸꓸꓸ);
     }
 }
-
-} partial class http_package {
 
 // logf prints to the ErrorLog of the *Server associated with request r
 // via ServerContextKey. If there's no associated server, or if ErrorLog
@@ -4156,8 +3971,6 @@ public static error ListenAndServeTLS(@string addr, @string certFile, @string ke
     return server.ListenAndServeTLS(certFile, keyFile);
 }
 
-} partial class httpᴛServer {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string httpsˢ2 => ref httpsˢ2ᵇ;
 private static readonly @string httpsˢ2ᵇ = ":https"u8;
@@ -4177,7 +3990,7 @@ private static readonly @string httpsˢ2ᵇ = ":https"u8;
 //
 // ListenAndServeTLS always returns a non-nil error. After [Server.Shutdown] or
 // [Server.Close], the returned error is [ErrServerClosed].
-public static error ListenAndServeTLS(this ж<Server> Ꮡs, @string certFile, @string keyFile) {
+internal static error ListenAndServeTLS⁔(/*this*/ ж<Server> Ꮡs, @string certFile, @string keyFile) {
     GoFrame ᒐ = default;
     try {
         ref var s = ref Ꮡs.DerefOrNull();
@@ -4207,7 +4020,7 @@ public static error ListenAndServeTLS(this ж<Server> Ꮡs, @string certFile, @s
 // setupHTTP2_ServeTLS conditionally configures HTTP/2 on
 // s and reports whether there was an error setting it up. If it is
 // not configured for policy reasons, nil is returned.
-internal static error setupHTTP2_ServeTLS(this ж<Server> Ꮡs) {
+internal static error setupHTTP2_ServeTLS⁔(/*this*/ ж<Server> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     Ꮡs.ᏑnextProtoOnce.Do(Ꮡs.onceSetNextProtoDefaults);
@@ -4222,14 +4035,14 @@ internal static error setupHTTP2_ServeTLS(this ж<Server> Ꮡs) {
 // The tests named TestTransportAutomaticHTTP2* and
 // TestConcurrentServerServe in server_test.go demonstrate some
 // of the supported use cases and motivations.
-internal static error setupHTTP2_Serve(this ж<Server> Ꮡs) {
+internal static error setupHTTP2_Serve⁔(/*this*/ ж<Server> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     Ꮡs.ᏑnextProtoOnce.Do(Ꮡs.onceSetNextProtoDefaults_Serve);
     return s.nextProtoErr;
 }
 
-internal static void onceSetNextProtoDefaults_Serve(this ж<Server> Ꮡs) {
+internal static void onceSetNextProtoDefaults_Serve⁔(/*this*/ ж<Server> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     if (s.shouldConfigureHTTP2ForServe()) {
@@ -4237,16 +4050,12 @@ internal static void onceSetNextProtoDefaults_Serve(this ж<Server> Ꮡs) {
     }
 }
 
-} partial class http_package {
-
 internal static ж<godebug.Setting> http2server = godebug.New("http2server");
-
-} partial class httpᴛServer {
 
 // onceSetNextProtoDefaults configures HTTP/2, if the user hasn't
 // configured otherwise. (by setting s.TLSNextProto non-nil)
 // It must only be called via s.nextProtoOnce (use s.setupHTTP2_*).
-internal static void onceSetNextProtoDefaults(this ж<Server> Ꮡs) {
+internal static void onceSetNextProtoDefaults⁔(/*this*/ ж<Server> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     if (omitBundledHTTP2) {
@@ -4269,8 +4078,6 @@ internal static void onceSetNextProtoDefaults(this ж<Server> Ꮡs) {
     var conf = Ꮡ(new http2Server());
     s.nextProtoErr = http2ConfigureServer(Ꮡs, conf);
 }
-
-} partial class http_package {
 
 // TimeoutHandler returns a [Handler] that runs h with the given time limit.
 //
@@ -4304,20 +4111,18 @@ partial struct timeoutHandler {
     internal context.Context testContext;
 }
 
-} partial class httpᴛtimeoutHandler {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string htmlHeadTitleTimeoutˢ => ref htmlHeadTitleTimeoutˢᵇ;
 private static readonly @string htmlHeadTitleTimeoutˢᵇ = "<html><head><title>Timeout</title></head><body><h1>Timeout</h1></body></html>"u8;
 
-internal static @string errorBody(this ref timeoutHandler h) {
+internal static @string errorBody⁔(/*this*/ ref timeoutHandler h) {
     if (h.body != ""u8) {
         return h.body;
     }
     return htmlHeadTitleTimeoutˢ;
 }
 
-internal static partial void ServeHTTP(this ж<timeoutHandler> Ꮡh, ResponseWriter w, ж<Request> Ꮡr) {
+internal static partial void ServeHTTP⁔(/*this*/ ж<timeoutHandler> Ꮡh, ResponseWriter w, ж<Request> Ꮡr) {
     GoFrame ᒐ = default;
     try {
         ref var h = ref Ꮡh.DerefOrNull();
@@ -4341,11 +4146,11 @@ internal static partial void ServeHTTP(this ж<timeoutHandler> Ꮡh, ResponseWri
         var doneʗ1 = done;
         var panicChanʗ1 = panicChan;
         var twʗ1 = tw;
-        goǃ(() => {
+        goǃ([GoFunc("(*timeoutHandler).ServeHTTP.func1")] () => {
             GoFrame ᒐ = default;
             try {
                 var panicChanʗ2 = panicChanʗ1;
-                defer(() => {
+                defer([GoFunc("(*timeoutHandler).ServeHTTP.func1.1")] () => {
                     var p = recover(); if (p != nil) {
                         panicChanʗ2.ᐸꟷ(p);
                     }
@@ -4401,8 +4206,6 @@ internal static partial void ServeHTTP(this ж<timeoutHandler> Ꮡh, ResponseWri
     finally { ᒐ.Run(); }
 }
 
-} partial class http_package {
-
 partial struct timeoutWriter {
     internal ResponseWriter w;
     internal Header h;
@@ -4416,19 +4219,17 @@ partial struct timeoutWriter {
 
 internal static Pusher _ᴛ10ʗ = new timeoutWriterжPusher(((ж<timeoutWriter>)nil));
 
-} partial class httpᴛtimeoutWriter {
-
 // Push implements the [Pusher] interface.
-internal static error Push(this ref timeoutWriter tw, @string target, ж<PushOptions> opts) {
+internal static error Push⁔(/*this*/ ref timeoutWriter tw, @string target, ж<PushOptions> opts) {
     var (pusher, ok) = tw.w._<Pusher>(ᐧ); if (ok) {
         return pusher.Push(target, opts);
     }
     return new ProtocolErrorжerror(ErrNotSupported);
 }
 
-internal static Header Header(this ref timeoutWriter tw) { return tw.h; }
+internal static Header Header⁔(/*this*/ ref timeoutWriter tw) { return tw.h; }
 
-internal static (nint, error) Write(this ж<timeoutWriter> Ꮡtw, slice<byte> p) {
+internal static (nint, error) Write⁔(/*this*/ ж<timeoutWriter> Ꮡtw, slice<byte> p) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -4448,7 +4249,7 @@ internal static (nint, error) Write(this ж<timeoutWriter> Ꮡtw, slice<byte> p)
     finally { if (ᒐd1) Ꮡtw.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
-internal static void writeHeaderLocked(this ref timeoutWriter tw, nint code) {
+internal static void writeHeaderLocked⁔(/*this*/ ref timeoutWriter tw, nint code) {
     checkWriteHeaderCode(code);
 
     switch (ᐧ) {
@@ -4469,7 +4270,7 @@ internal static void writeHeaderLocked(this ref timeoutWriter tw, nint code) {
     }}
 }
 
-internal static void WriteHeader(this ж<timeoutWriter> Ꮡtw, nint code) {
+internal static void WriteHeader⁔(/*this*/ ж<timeoutWriter> Ꮡtw, nint code) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -4483,8 +4284,6 @@ internal static void WriteHeader(this ж<timeoutWriter> Ꮡtw, nint code) {
     finally { if (ᒐd1) Ꮡtw.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
-} partial class http_package {
-
 // onceCloseListener wraps a net.Listener, protecting it from
 // multiple Close calls.
 partial struct onceCloseListener {
@@ -4493,38 +4292,28 @@ partial struct onceCloseListener {
     internal error closeErr;
 }
 
-} partial class httpᴛonceCloseListener {
-
 // Go method set entry for the promoted 'Listener.Accept()' - provided ONLY by the embedded
 // interface field in *onceCloseListener's method set; see the pointer-only satisfaction record.
-internal static (net.Conn, error) Accept(this onceCloseListener recvᴛ) => recvᴛ.Listener.Accept();
+internal static (net.Conn, error) Accept⁔(/*this*/ onceCloseListener recvᴛ) => recvᴛ.Listener.Accept();
 
 // Go method set entry for the promoted 'Listener.Addr()' - provided ONLY by the embedded
 // interface field in *onceCloseListener's method set; see the pointer-only satisfaction record.
-internal static net.Addr Addr(this onceCloseListener recvᴛ) => recvᴛ.Listener.Addr();
+internal static net.Addr Addr⁔(/*this*/ onceCloseListener recvᴛ) => recvᴛ.Listener.Addr();
 
-internal static error Close(this ж<onceCloseListener> Ꮡoc) {
+internal static error Close⁔(/*this*/ ж<onceCloseListener> Ꮡoc) {
     ref var oc = ref Ꮡoc.DerefOrNull();
 
     Ꮡoc.Ꮡonce.Do(Ꮡoc.close);
     return oc.closeErr;
 }
 
-internal static void close(this ref onceCloseListener oc) { oc.closeErr = oc.Listener.Close(); }
-
-} partial class http_package {
+internal static void close⁔(/*this*/ ref onceCloseListener oc) { oc.closeErr = oc.Listener.Close(); }
 
 // globalOptionsHandler responds to "OPTIONS *" requests.
 partial struct globalOptionsHandler {
 }
 
-} partial class httpᴛglobalOptionsHandler {
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string contentLengthˢ => ref contentLengthˢᵇ;
-private static readonly @string contentLengthˢᵇ = "Content-Length"u8;
-
-internal static void ServeHTTP(this globalOptionsHandler _, ResponseWriter w, ж<Request> Ꮡr) {
+internal static void ServeHTTP⁔(/*this*/ globalOptionsHandler _, ResponseWriter w, ж<Request> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     w.Header().Set(contentLengthˢ, "0");
@@ -4539,8 +4328,6 @@ internal static void ServeHTTP(this globalOptionsHandler _, ResponseWriter w, ж
     }
 }
 
-} partial class http_package {
-
 // initALPNRequest is an HTTP handler that initializes certain
 // uninitialized fields in its *Request. Such partially-initialized
 // Requests come from ALPN protocol handlers.
@@ -4550,15 +4337,13 @@ partial struct initALPNRequest {
     internal serverHandler h;
 }
 
-} partial class httpᴛinitALPNRequest {
-
 // BaseContext is an exported but unadvertised [http.Handler] method
 // recognized by x/net/http2 to pass down a context; the TLSNextProto
 // API predates context support so we shoehorn through the only
 // interface we have available.
-internal static context.Context BaseContext(this initALPNRequest h) { return h.ctx; }
+internal static context.Context BaseContext⁔(/*this*/ initALPNRequest h) { return h.ctx; }
 
-internal static void ServeHTTP(this initALPNRequest h, ResponseWriter rw, ж<Request> Ꮡreq) {
+internal static void ServeHTTP⁔(/*this*/ initALPNRequest h, ResponseWriter rw, ж<Request> Ꮡreq) {
     ref var req = ref Ꮡreq.DerefOrNull();
 
     if (req.TLS == nil) {
@@ -4574,37 +4359,31 @@ internal static void ServeHTTP(this initALPNRequest h, ResponseWriter rw, ж<Req
     h.h.ServeHTTP(rw, Ꮡreq);
 }
 
-} partial class http_package {
-
 // loggingConn is used for debugging.
 partial struct loggingConn {
     internal @string name;
     /*embed*/ public net_package.Conn Conn;
 }
 
-} partial class httpᴛloggingConn {
-
 // Go method set entry for the promoted 'Conn.LocalAddr()' - provided ONLY by the embedded
 // interface field in *loggingConn's method set; see the pointer-only satisfaction record.
-internal static net.Addr LocalAddr(this loggingConn recvᴛ) => recvᴛ.Conn.LocalAddr();
+internal static net.Addr LocalAddr⁔(/*this*/ loggingConn recvᴛ) => recvᴛ.Conn.LocalAddr();
 
 // Go method set entry for the promoted 'Conn.RemoteAddr()' - provided ONLY by the embedded
 // interface field in *loggingConn's method set; see the pointer-only satisfaction record.
-internal static net.Addr RemoteAddr(this loggingConn recvᴛ) => recvᴛ.Conn.RemoteAddr();
+internal static net.Addr RemoteAddr⁔(/*this*/ loggingConn recvᴛ) => recvᴛ.Conn.RemoteAddr();
 
 // Go method set entry for the promoted 'Conn.SetDeadline()' - provided ONLY by the embedded
 // interface field in *loggingConn's method set; see the pointer-only satisfaction record.
-internal static error SetDeadline(this loggingConn recvᴛ, time.Time t) => recvᴛ.Conn.SetDeadline(t);
+internal static error SetDeadline⁔(/*this*/ loggingConn recvᴛ, time.Time t) => recvᴛ.Conn.SetDeadline(t);
 
 // Go method set entry for the promoted 'Conn.SetReadDeadline()' - provided ONLY by the embedded
 // interface field in *loggingConn's method set; see the pointer-only satisfaction record.
-internal static error SetReadDeadline(this loggingConn recvᴛ, time.Time t) => recvᴛ.Conn.SetReadDeadline(t);
+internal static error SetReadDeadline⁔(/*this*/ loggingConn recvᴛ, time.Time t) => recvᴛ.Conn.SetReadDeadline(t);
 
 // Go method set entry for the promoted 'Conn.SetWriteDeadline()' - provided ONLY by the embedded
 // interface field in *loggingConn's method set; see the pointer-only satisfaction record.
-internal static error SetWriteDeadline(this loggingConn recvᴛ, time.Time t) => recvᴛ.Conn.SetWriteDeadline(t);
-
-} partial class http_package {
+internal static error SetWriteDeadline⁔(/*this*/ loggingConn recvᴛ, time.Time t) => recvᴛ.Conn.SetWriteDeadline(t);
 
 internal static readonly ж<sync.Mutex> ᏑuniqNameMu = new StaticBox<sync.Mutex>(default(sync.Mutex));
 internal static ref sync.Mutex uniqNameMu => ref ((StaticBox<sync.Mutex>)ᏑuniqNameMu).ValueSlot;
@@ -4625,9 +4404,7 @@ internal static net.Conn newLoggingConn(@string baseName, net.Conn c) {
     finally { ᒐ.Run(); }
 }
 
-} partial class httpᴛloggingConn {
-
-internal static (nint n, error err) Write(this ref loggingConn c, slice<byte> p) {
+internal static (nint n, error err) Write⁔(/*this*/ ref loggingConn c, slice<byte> p) {
     nint n = default;
     error err = default;
 
@@ -4637,7 +4414,7 @@ internal static (nint n, error err) Write(this ref loggingConn c, slice<byte> p)
     return (n, err);
 }
 
-internal static (nint n, error err) Read(this ref loggingConn c, slice<byte> p) {
+internal static (nint n, error err) Read⁔(/*this*/ ref loggingConn c, slice<byte> p) {
     nint n = default;
     error err = default;
 
@@ -4647,7 +4424,7 @@ internal static (nint n, error err) Read(this ref loggingConn c, slice<byte> p) 
     return (n, err);
 }
 
-internal static error /*err*/ Close(this ref loggingConn c) {
+internal static error /*err*/ Close⁔(/*this*/ ref loggingConn c) {
     error err = default;
 
     log.Printf("%s.Close() = ...", c.name);
@@ -4656,8 +4433,6 @@ internal static error /*err*/ Close(this ref loggingConn c) {
     return err;
 }
 
-} partial class http_package {
-
 // checkConnErrorWriter writes to c.rwc and records any write errors to c.werr.
 // It only contains one field (and a pointer field at that), so it
 // fits in an interface value without an extra allocation.
@@ -4665,9 +4440,7 @@ partial struct checkConnErrorWriter {
     internal ж<conn> c;
 }
 
-} partial class httpᴛcheckConnErrorWriter {
-
-internal static (nint n, error err) Write(this checkConnErrorWriter w, slice<byte> p) {
+internal static (nint n, error err) Write⁔(/*this*/ checkConnErrorWriter w, slice<byte> p) {
     nint n = default;
     error err = default;
 
@@ -4678,8 +4451,6 @@ internal static (nint n, error err) Write(this checkConnErrorWriter w, slice<byt
     }
     return (n, err);
 }
-
-} partial class http_package {
 
 internal static nint /*n*/ numLeadingCRorLF(slice<byte> v) {
     nint n = default;
@@ -4709,7 +4480,7 @@ internal static bool tlsRecordHeaderLooksLikeHTTP(/*[5]*/ array<byte> hdr) {
 
 // MaxBytesHandler returns a [Handler] that runs h with its [ResponseWriter] and [Request.Body] wrapped by a MaxBytesReader.
 public static Handler MaxBytesHandler(Handler h, int64 n) {
-    return new HandlerFuncᴠHandler(new HandlerFunc((ResponseWriter w, ж<Request> r) => {
+    return new HandlerFuncᴠHandler(new HandlerFunc([GoFunc("MaxBytesHandler.func1")] (ResponseWriter w, ж<Request> r) => {
         ref var r2 = ref heap<Request>(r.Value, out var Ꮡr2);
         r2.Body = MaxBytesReader(w, r.Body, n);
         h.ServeHTTP(w, Ꮡr2);

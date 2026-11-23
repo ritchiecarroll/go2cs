@@ -25,7 +25,6 @@ using strings = strings_package;
 using @internal;
 using go.net;
 using ꓸꓸꓸstring = variadic<@string>;
-using static url_package;
 
 partial class url_package {
 
@@ -38,38 +37,26 @@ partial struct Error {
     public error Err;
 }
 
-} partial class urlᴛError {
-
-public static error Unwrap(this ref Error e) { return e.Err; }
-public static @string Error(this ref Error e) { return fmt.Sprintf("%s %q: %s"u8, e.Op, e.URL, e.Err); }
-
-} partial class url_package {
+internal static error Unwrap⁔(/*this*/ ref Error e) { return e.Err; }
+internal static @string Error⁔(/*this*/ ref Error e) { return fmt.Sprintf("%s %q: %s"u8, e.Op, e.URL, e.Err); }
 
 internal partial interface Timeout_type /*dyn*/ {
     bool Timeout();
 }
 
-} partial class urlᴛError {
-
-public static bool Timeout(this ref Error e) {
+internal static bool Timeout⁔(/*this*/ ref Error e) {
     var (t, ok) = e.Err._<Timeout_type>(ᐧ);
     return ok && t.Timeout();
 }
-
-} partial class url_package {
 
 internal partial interface Temporary_type /*dyn*/ {
     bool Temporary();
 }
 
-} partial class urlᴛError {
-
-public static bool Temporary(this ref Error e) {
+internal static bool Temporary⁔(/*this*/ ref Error e) {
     var (t, ok) = e.Err._<Temporary_type>(ᐧ);
     return ok && t.Temporary();
 }
-
-} partial class url_package {
 
 internal static ref readonly @string upperhex => ref upperhexᵇ;
 private static readonly @string upperhexᵇ = "0123456789ABCDEF"u8;
@@ -85,23 +72,15 @@ internal static byte unhex(byte c) {
 
 partial struct EscapeError /*@string*/;
 
-} partial class urlᴛEscapeError {
-
-public static @string Error(this EscapeError e) {
+internal static @string Error⁔(/*this*/ EscapeError e) {
     return "invalid URL escape "u8 + strconv.Quote((@string)e);
 }
 
-} partial class url_package {
-
 partial struct InvalidHostError /*@string*/;
 
-} partial class urlᴛInvalidHostError {
-
-public static @string Error(this InvalidHostError e) {
+internal static @string Error⁔(/*this*/ InvalidHostError e) {
     return "invalid character "u8 + strconv.Quote((@string)e) + " in host name"u8;
 }
-
-} partial class url_package {
 
 // See the reference implementation in gen_encoding_table.go.
 internal static bool shouldEscape(byte c, encoding mode) {
@@ -375,10 +354,8 @@ partial struct Userinfo {
     internal bool passwordSet;
 }
 
-} partial class urlᴛUserinfo {
-
 // Username returns the username.
-public static @string Username(this ж<Userinfo> Ꮡu) {
+internal static @string Username⁔(/*this*/ ж<Userinfo> Ꮡu) {
     ref var u = ref Ꮡu.DerefOrNull();
 
     if (Ꮡu == nil) {
@@ -388,7 +365,7 @@ public static @string Username(this ж<Userinfo> Ꮡu) {
 }
 
 // Password returns the password in case it is set, and whether it is set.
-public static (@string, bool) Password(this ж<Userinfo> Ꮡu) {
+internal static (@string, bool) Password⁔(/*this*/ ж<Userinfo> Ꮡu) {
     ref var u = ref Ꮡu.DerefOrNull();
 
     if (Ꮡu == nil) {
@@ -399,7 +376,7 @@ public static (@string, bool) Password(this ж<Userinfo> Ꮡu) {
 
 // String returns the encoded userinfo information in the standard form
 // of "username[:password]".
-public static @string String(this ж<Userinfo> Ꮡu) {
+internal static @string String⁔(/*this*/ ж<Userinfo> Ꮡu) {
     ref var u = ref Ꮡu.DerefOrNull();
 
     if (Ꮡu == nil) {
@@ -411,8 +388,6 @@ public static @string String(this ж<Userinfo> Ꮡu) {
     }
     return s;
 }
-
-} partial class url_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string missingProtocolSchemeˢ => ref missingProtocolSchemeˢᵇ;
@@ -726,8 +701,6 @@ internal static (@string, error) parseHost(@string scheme, @string host) {
     return (host, default);
 }
 
-} partial class urlᴛURL {
-
 // setPath sets the Path and RawPath fields of the URL based on the provided
 // escaped path p. It maintains the invariant that RawPath is only specified
 // when it differs from the default encoding of the path.
@@ -746,7 +719,7 @@ internal static (@string, error) parseHost(@string scheme, @string host) {
 // See go.dev/issue/67401.
 //
 //go:linkname badSetPath net/url.(*URL).setPath
-internal static error setPath(this ref URL u, @string p) {
+internal static error setPath⁔(/*this*/ ref URL u, @string p) {
     var (path, err) = unescape(p, encodePath);
     if (err != nil) {
         return err;
@@ -761,12 +734,8 @@ internal static error setPath(this ref URL u, @string p) {
     return default;
 }
 
-} partial class url_package {
-
 // for linkname because we cannot linkname methods directly
 internal static partial error badSetPath(ж<URL> _Δp0, @string _Δp1);
-
-} partial class urlᴛURL {
 
 // EscapedPath returns the escaped form of u.Path.
 // In general there are multiple possible escaped forms of any path.
@@ -777,7 +746,7 @@ internal static partial error badSetPath(ж<URL> _Δp0, @string _Δp1);
 // their results.
 // In general, code should call EscapedPath instead of
 // reading u.RawPath directly.
-public static @string EscapedPath(this ref URL u) {
+internal static @string EscapedPath⁔(/*this*/ ref URL u) {
     if (u.RawPath != ""u8 && validEncoded(u.RawPath, encodePath)) {
         var (p, err) = unescape(u.RawPath, encodePath);
         if (err == nil && p == u.Path) {
@@ -789,8 +758,6 @@ public static @string EscapedPath(this ref URL u) {
     }
     return escape(u.Path, encodePath);
 }
-
-} partial class url_package {
 
 // validEncoded reports whether s is a valid encoded path or fragment,
 // according to mode.
@@ -825,10 +792,8 @@ internal static bool validEncoded(@string s, encoding mode) {
     return true;
 }
 
-} partial class urlᴛURL {
-
 // setFragment is like setPath but for Fragment/RawFragment.
-internal static error setFragment(this ref URL u, @string f) {
+internal static error setFragment⁔(/*this*/ ref URL u, @string f) {
     var (frag, err) = unescape(f, encodeFragment);
     if (err != nil) {
         return err;
@@ -851,7 +816,7 @@ internal static error setFragment(this ref URL u, @string f) {
 // The [URL.String] method uses EscapedFragment to construct its result.
 // In general, code should call EscapedFragment instead of
 // reading u.RawFragment directly.
-public static @string EscapedFragment(this ref URL u) {
+internal static @string EscapedFragment⁔(/*this*/ ref URL u) {
     if (u.RawFragment != ""u8 && validEncoded(u.RawFragment, encodeFragment)) {
         var (f, err) = unescape(u.RawFragment, encodeFragment);
         if (err == nil && f == u.Fragment) {
@@ -860,8 +825,6 @@ public static @string EscapedFragment(this ref URL u) {
     }
     return escape(u.Fragment, encodeFragment);
 }
-
-} partial class url_package {
 
 // validOptionalPort reports whether port is either an empty string
 // or matches /^:\d*$/
@@ -879,8 +842,6 @@ internal static bool validOptionalPort(@string port) {
     }
     return true;
 }
-
-} partial class urlᴛURL {
 
 // String reassembles the [URL] into a valid URL string.
 // The general form of the result is one of:
@@ -903,7 +864,7 @@ internal static bool validOptionalPort(@string port) {
 //     the form host/path does not add its own /.
 //   - if u.RawQuery is empty, ?query is omitted.
 //   - if u.Fragment is empty, #fragment is omitted.
-public static @string String(this ref URL u) {
+internal static @string String⁔(/*this*/ ref URL u) {
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
 
     nint n = len(u.Scheme);
@@ -978,7 +939,7 @@ private static readonly @string xxxxxˢᵇ = "xxxxx"u8;
 
 // Redacted is like [URL.String] but replaces any password with "xxxxx".
 // Only the password in u.User is redacted.
-public static @string Redacted(this ж<URL> Ꮡu) {
+internal static @string Redacted⁔(/*this*/ ж<URL> Ꮡu) {
     ref var u = ref Ꮡu.DerefOrNull();
 
     if (Ꮡu == nil) {
@@ -992,21 +953,17 @@ public static @string Redacted(this ж<URL> Ꮡu) {
     return ru.String();
 }
 
-} partial class url_package {
-
 // Values maps a string key to a list of values.
 // It is typically used for query parameters and form values.
 // Unlike in the http.Header map, the keys in a Values map
 // are case-sensitive.
 partial struct Values /*map[@string, slice<@string>]*/;
 
-} partial class urlᴛValues {
-
 // Get gets the first value associated with the given key.
 // If there are no values associated with the key, Get returns
 // the empty string. To access multiple values, use the map
 // directly.
-public static @string Get(this Values v, @string key) {
+internal static @string Get⁔(/*this*/ Values v, @string key) {
     var vs = v[key];
     if (len(vs) == 0) {
         return ""u8;
@@ -1016,28 +973,26 @@ public static @string Get(this Values v, @string key) {
 
 // Set sets the key to value. It replaces any existing
 // values.
-public static void Set(this Values v, @string key, @string value) {
+internal static void Set⁔(/*this*/ Values v, @string key, @string value) {
     v[key] = [value];
 }
 
 // Add adds the value to key. It appends to any existing
 // values associated with key.
-public static void Add(this Values v, @string key, @string value) {
+internal static void Add⁔(/*this*/ Values v, @string key, @string value) {
     v[key] = append(v[key], value);
 }
 
 // Del deletes the values associated with key.
-public static void Del(this Values v, @string key) {
+internal static void Del⁔(/*this*/ Values v, @string key) {
     delete(v, key);
 }
 
 // Has checks whether a given key is set.
-public static bool Has(this Values v, @string key) {
+internal static bool Has⁔(/*this*/ Values v, @string key) {
     var (_, ok) = v[key, ꟷ];
     return ok;
 }
-
-} partial class url_package {
 
 // ParseQuery parses the URL-encoded query string and returns
 // a map listing the values specified for each key.
@@ -1116,11 +1071,9 @@ internal static error /*err*/ parseQuery(Values m, @string query) {
     return err;
 }
 
-} partial class urlᴛValues {
-
 // Encode encodes the values into “URL encoded” form
 // ("bar=baz&foo=quux") sorted by key.
-public static @string Encode(this Values v) {
+internal static @string Encode⁔(/*this*/ Values v) {
     if (len(v) == 0) {
         return ""u8;
     }
@@ -1148,8 +1101,6 @@ public static @string Encode(this Values v) {
     }
     return buf.String();
 }
-
-} partial class url_package {
 
 // resolvePath applies special path segments from refs and applies
 // them to base, per RFC 3986.
@@ -1213,19 +1164,17 @@ internal static @string resolvePath(@string @base, @string @ref) {
     return (@string)dst;
 }
 
-} partial class urlᴛURL {
-
 // IsAbs reports whether the [URL] is absolute.
 // Absolute means that it has a non-empty scheme.
-public static bool IsAbs(this ref URL u) {
+internal static bool IsAbs⁔(/*this*/ ref URL u) {
     return u.Scheme != ""u8;
 }
 
 // Parse parses a [URL] in the context of the receiver. The provided URL
 // may be relative or absolute. Parse returns nil, err on parse
 // failure, otherwise its return value is the same as [URL.ResolveReference].
-public static (ж<URL>, error) Parse(this ref URL u, @string @ref) {
-    var (refURL, err) = url_package.Parse(@ref);
+internal static (ж<URL>, error) Parse⁔(/*this*/ ref URL u, @string @ref) {
+    var (refURL, err) = Parse(@ref);
     if (err != nil) {
         return (default, err);
     }
@@ -1238,7 +1187,7 @@ public static (ж<URL>, error) Parse(this ref URL u, @string @ref) {
 // [URL] instance, even if the returned URL is identical to either the
 // base or reference. If ref is an absolute URL, then ResolveReference
 // ignores base and returns a copy of ref.
-public static ж<URL> ResolveReference(this ref URL u, ж<URL> Ꮡref) {
+internal static ж<URL> ResolveReference⁔(/*this*/ ref URL u, ж<URL> Ꮡref) {
     ref var @ref = ref Ꮡref.DerefOrNull();
 
     ref var url = ref heap<URL>(@ref, out var Ꮡurl);
@@ -1282,14 +1231,14 @@ public static ж<URL> ResolveReference(this ref URL u, ж<URL> Ꮡref) {
 // Query parses RawQuery and returns the corresponding values.
 // It silently discards malformed value pairs.
 // To check errors use [ParseQuery].
-public static Values Query(this ref URL u) {
+internal static Values Query⁔(/*this*/ ref URL u) {
     var (v, _) = ParseQuery(u.RawQuery);
     return v;
 }
 
 // RequestURI returns the encoded path?query or opaque?query
 // string that would be used in an HTTP request for u.
-public static @string RequestURI(this ref URL u) {
+internal static @string RequestURI⁔(/*this*/ ref URL u) {
     @string result = u.Opaque;
     if (result == ""u8) {
         result = u.EscapedPath();
@@ -1311,7 +1260,7 @@ public static @string RequestURI(this ref URL u) {
 //
 // If the result is enclosed in square brackets, as literal IPv6 addresses are,
 // the square brackets are removed from the result.
-public static @string Hostname(this ref URL u) {
+internal static @string Hostname⁔(/*this*/ ref URL u) {
     var (host, _) = splitHostPort(u.Host);
     return host;
 }
@@ -1319,12 +1268,10 @@ public static @string Hostname(this ref URL u) {
 // Port returns the port part of u.Host, without the leading colon.
 //
 // If u.Host doesn't contain a valid numeric port, Port returns an empty string.
-public static @string Port(this ref URL u) {
+internal static @string Port⁔(/*this*/ ref URL u) {
     var (_, port) = splitHostPort(u.Host);
     return port;
 }
-
-} partial class url_package {
 
 // splitHostPort separates host and port. If the port is not valid, it returns
 // the entire input as host, and it doesn't check the validity of the host.
@@ -1347,20 +1294,18 @@ internal static (@string host, @string port) splitHostPort(@string hostPort) {
     return (host, port);
 }
 
-} partial class urlᴛURL {
-
 // Marshaling interface implementations.
 // Would like to implement MarshalText/UnmarshalText but that will change the JSON representation of URLs.
-public static (slice<byte> text, error err) MarshalBinary(this ref URL u) {
+internal static (slice<byte> text, error err) MarshalBinary⁔(/*this*/ ref URL u) {
     return u.AppendBinary(default);
 }
 
-public static (slice<byte>, error) AppendBinary(this ref URL u, slice<byte> b) {
+internal static (slice<byte>, error) AppendBinary⁔(/*this*/ ref URL u, slice<byte> b) {
     return (append(b, u.String().ꓸꓸꓸ), default);
 }
 
-public static error UnmarshalBinary(this ref URL u, slice<byte> text) {
-    var (u1, err) = url_package.Parse((@string)text);
+internal static error UnmarshalBinary⁔(/*this*/ ref URL u, slice<byte> text) {
+    var (u1, err) = Parse((@string)text);
     if (err != nil) {
         return err;
     }
@@ -1372,14 +1317,14 @@ public static error UnmarshalBinary(this ref URL u, slice<byte> text) {
 // any existing path and the resulting path cleaned of any ./ or ../ elements.
 // Any sequences of multiple / characters will be reduced to a single /.
 // Path elements must already be in escaped form, as produced by [PathEscape].
-public static ж<URL> JoinPath(this ref URL u, params ꓸꓸꓸstring elemʗp) {
+internal static ж<URL> JoinPath⁔(/*this*/ ref URL u, params ꓸꓸꓸstring elemʗp) {
     var elem = elemʗp;
 
     var (url, _) = u.joinPath(elem.ꓸꓸꓸ);
     return url;
 }
 
-internal static (ж<URL>, error) joinPath(this ref URL u, params ꓸꓸꓸstring elemʗp) {
+internal static (ж<URL>, error) joinPath⁔(/*this*/ ref URL u, params ꓸꓸꓸstring elemʗp) {
     var elem = elemʗp.slice();
 
     elem = appendꓸꓸꓸ(slice<@string>([u.EscapedPath()]), elem);
@@ -1401,8 +1346,6 @@ internal static (ж<URL>, error) joinPath(this ref URL u, params ꓸꓸꓸstring
     var err = url.setPath(p);
     return (Ꮡurl, err);
 }
-
-} partial class url_package {
 
 // validUserinfo reports whether s is a valid userinfo string per RFC 3986
 // Section 3.2.1:

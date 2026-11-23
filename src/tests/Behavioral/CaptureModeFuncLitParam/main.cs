@@ -15,7 +15,7 @@ public static void Add(this ж<Tally> Ꮡt, nint n) {
     try {
         ref var t = ref Ꮡt.DerefOrNull();
 
-        defer(() => {
+        defer([GoFunc("(*Tally).Add.func1")] () => {
             Ꮡt.Value.log = fmt.Sprintf("%s+%d"u8, Ꮡt.Value.log, n);
         }, ref ᒐ);
         t.total += n;
@@ -27,7 +27,7 @@ public static void Add(this ж<Tally> Ꮡt, nint n) {
 internal static void runDeferred(Tally @base) {
     GoFrame ᒐ = default;
     try {
-        defer((Tally tʗp) => {
+        defer([GoFunc("runDeferred.func1")] (Tally tʗp) => {
             ref var t = ref heap(tʗp, out var Ꮡt);
             Ꮡt.Add(4);
             fmt.Println("deferred:", t.total, t.log);
@@ -38,7 +38,7 @@ internal static void runDeferred(Tally @base) {
 }
 
 internal static void main() {
-    (nint, @string) f(Tally tʗp, nint m) {
+    [GoFunc("main.func1")] (nint, @string) f(Tally tʗp, nint m) {
         ref var t = ref heap(tʗp, out var Ꮡt);
         t.total++;
         Ꮡt.Add(m);
@@ -49,7 +49,7 @@ internal static void main() {
     fmt.Println("assigned:", total, log);
     fmt.Println("caller copy untouched:", seed.total, seed.log);
 
-    var (total2, log2) = func((nint, @string) (Tally tʗp) => {
+    var (total2, log2) = func([GoFunc("main.func2")] (nint, @string) (Tally tʗp) => {
         ref var t = ref heap(tʗp, out var Ꮡt);
         Ꮡt.Add(7);
         return (t.total, t.log);
@@ -60,9 +60,9 @@ internal static void main() {
     runDeferred(@base);
     fmt.Println("deferred source untouched:", @base.total, @base.log);
 
-    (nint, @string) g(Tally tʗp) {
+    [GoFunc("main.func3")] (nint, @string) g(Tally tʗp) {
         ref var t = ref heap(tʗp, out var Ꮡt);
-        void bump() {
+        [GoFunc("main.func3.1")] void bump() {
             Ꮡt.Add(9);
         }
         bump();
@@ -72,7 +72,7 @@ internal static void main() {
     var (total4, log4) = g(new Tally(total: 3, log: "n"));
     fmt.Println("nested:", total4, log4);
 
-    (nint, @string) h(Tally tʗp, params ꓸꓸꓸnint nsʗp) {
+    [GoFunc("main.func4")] (nint, @string) h(Tally tʗp, params ꓸꓸꓸnint nsʗp) {
         var ns = nsʗp.sslice();
         ref var t = ref heap(tʗp, out var Ꮡt);
         foreach (var (_, n) in range(ns)) {

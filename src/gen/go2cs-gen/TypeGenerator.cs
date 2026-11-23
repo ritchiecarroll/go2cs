@@ -523,6 +523,9 @@ public class TypeGenerator : ISourceGenerator
                             UnderlyingArrayElementType = underlyingArrayElem,
                             ValueClone = valueCloneFields.Length > 0,
                             WrappedTypeIsPublic = wrappedTypeIsPublic,
+                            // A type defined over a named array (IArrayViewTypeTemplate) reads the Go method set too: until
+                            // R7 this kind passed none, so even its claimed Assign stayed public (NamedSliceArrayClaimedMemberTests).
+                            GoMethodNames = GoMethodNames(semanticModel, targetSyntax),
                             UsingStatements = usingStatements
                         }
                         .Generate();

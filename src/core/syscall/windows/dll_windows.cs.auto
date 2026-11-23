@@ -16,7 +16,6 @@ using @unsafe = unsafe_package;
 using @internal.syscall.windows;
 using go.sync;
 using ꓸꓸꓸuintptr = variadic<uintptr>;
-using static syscall_package;
 
 partial class syscall_package {
 
@@ -33,13 +32,9 @@ partial struct DLLError {
     public @string Msg;
 }
 
-} partial class syscallᴛDLLError {
+internal static @string Error⁔(/*this*/ ref DLLError e) { return e.Msg; }
 
-public static @string Error(this ref DLLError e) { return e.Msg; }
-
-public static error Unwrap(this ref DLLError e) { return e.Err; }
-
-} partial class syscall_package {
+internal static error Unwrap⁔(/*this*/ ref DLLError e) { return e.Err; }
 
 // N.B. For the Syscall functions below:
 //
@@ -210,11 +205,9 @@ public static ж<DLL> MustLoadDLL(@string name) {
     return d;
 }
 
-} partial class syscallᴛDLL {
-
 // FindProc searches [DLL] d for procedure named name and returns [*Proc]
 // if found. It returns an error if search fails.
-public static (ж<Proc> proc, error err) FindProc(this ж<DLL> Ꮡd, @string name) {
+internal static (ж<Proc> proc, error err) FindProc⁔(/*this*/ ж<DLL> Ꮡd, @string name) {
     error err = default;
     ref var d = ref Ꮡd.DerefOrNull();
 
@@ -241,7 +234,7 @@ public static (ж<Proc> proc, error err) FindProc(this ж<DLL> Ꮡd, @string nam
 }
 
 // MustFindProc is like [DLL.FindProc] but panics if search fails.
-public static ж<Proc> MustFindProc(this ж<DLL> Ꮡd, @string name) {
+internal static ж<Proc> MustFindProc⁔(/*this*/ ж<DLL> Ꮡd, @string name) {
     var (p, e) = Ꮡd.FindProc(name);
     if (e != nil) {
         throw panic(e);
@@ -250,11 +243,9 @@ public static ж<Proc> MustFindProc(this ж<DLL> Ꮡd, @string name) {
 }
 
 // Release unloads [DLL] d from memory.
-public static error /*err*/ Release(this ref DLL d) {
+internal static error /*err*/ Release⁔(/*this*/ ref DLL d) {
     return FreeLibrary(d.Handle);
 }
-
-} partial class syscall_package {
 
 // A Proc implements access to a procedure inside a [DLL].
 partial struct Proc {
@@ -263,11 +254,9 @@ partial struct Proc {
     internal uintptr addr;
 }
 
-} partial class syscallᴛProc {
-
 // Addr returns the address of the procedure represented by p.
 // The return value can be passed to Syscall to run the procedure.
-public static uintptr Addr(this ref Proc p) {
+internal static uintptr Addr⁔(/*this*/ ref Proc p) {
     return p.addr;
 }
 
@@ -287,14 +276,12 @@ public static uintptr Addr(this ref Proc p) {
 // [math.Float64frombits](uint64(r2)).
 //
 //go:uintptrescapes
-public static (uintptr, uintptr, error) Call(this ref Proc p, params ꓸꓸꓸuintptr aʗp) {
+internal static (uintptr, uintptr, error) Call⁔(/*this*/ ref Proc p, params ꓸꓸꓸuintptr aʗp) {
     var a = aʗp;
 
     var (ᴛ1, ᴛ2, ᴛ3) = SyscallN(p.Addr(), a);
     return (ᴛ1, ᴛ2, ᴛ3);
 }
-
-} partial class syscall_package {
 
 // A LazyDLL implements access to a single [DLL].
 // It will delay the load of the DLL until the first
@@ -312,11 +299,9 @@ partial struct LazyDLL {
     public @string Name;
 }
 
-} partial class syscallᴛLazyDLL {
-
 // Load loads DLL file d.Name into memory. It returns an error if fails.
 // Load will not try to load DLL, if it is already loaded into memory.
-public static error Load(this ж<LazyDLL> Ꮡd) {
+internal static error Load⁔(/*this*/ ж<LazyDLL> Ꮡd) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -344,7 +329,7 @@ public static error Load(this ж<LazyDLL> Ꮡd) {
 }
 
 // mustLoad is like Load but panics if search fails.
-internal static void mustLoad(this ж<LazyDLL> Ꮡd) {
+internal static void mustLoad⁔(/*this*/ ж<LazyDLL> Ꮡd) {
     var e = Ꮡd.Load();
     if (e != nil) {
         throw panic(e);
@@ -352,7 +337,7 @@ internal static void mustLoad(this ж<LazyDLL> Ꮡd) {
 }
 
 // Handle returns d's module handle.
-public static uintptr Handle(this ж<LazyDLL> Ꮡd) {
+internal static uintptr Handle⁔(/*this*/ ж<LazyDLL> Ꮡd) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     Ꮡd.mustLoad();
@@ -360,11 +345,9 @@ public static uintptr Handle(this ж<LazyDLL> Ꮡd) {
 }
 
 // NewProc returns a [LazyProc] for accessing the named procedure in the [DLL] d.
-public static ж<LazyProc> NewProc(this ж<LazyDLL> Ꮡd, @string name) {
+internal static ж<LazyProc> NewProc⁔(/*this*/ ж<LazyDLL> Ꮡd, @string name) {
     return Ꮡ(new LazyProc(l: Ꮡd, Name: name));
 }
-
-} partial class syscall_package {
 
 // NewLazyDLL creates new [LazyDLL] associated with [DLL] file.
 public static ж<LazyDLL> NewLazyDLL(@string name) {
@@ -380,12 +363,10 @@ partial struct LazyProc {
     internal ж<Proc> proc;
 }
 
-} partial class syscallᴛLazyProc {
-
 // Find searches [DLL] for procedure named p.Name. It returns
 // an error if search fails. Find will not search procedure,
 // if it is already found and loaded into memory.
-public static error Find(this ж<LazyProc> Ꮡp) {
+internal static error Find⁔(/*this*/ ж<LazyProc> Ꮡp) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -417,7 +398,7 @@ public static error Find(this ж<LazyProc> Ꮡp) {
 }
 
 // mustFind is like Find but panics if search fails.
-internal static void mustFind(this ж<LazyProc> Ꮡp) {
+internal static void mustFind⁔(/*this*/ ж<LazyProc> Ꮡp) {
     var e = Ꮡp.Find();
     if (e != nil) {
         throw panic(e);
@@ -426,7 +407,7 @@ internal static void mustFind(this ж<LazyProc> Ꮡp) {
 
 // Addr returns the address of the procedure represented by p.
 // The return value can be passed to Syscall to run the procedure.
-public static uintptr Addr(this ж<LazyProc> Ꮡp) {
+internal static uintptr Addr⁔(/*this*/ ж<LazyProc> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     Ꮡp.mustFind();
@@ -437,7 +418,7 @@ public static uintptr Addr(this ж<LazyProc> Ꮡp) {
 // Proc.Call for more information.
 //
 //go:uintptrescapes
-public static (uintptr r1, uintptr r2, error lastErr) Call(this ж<LazyProc> Ꮡp, params ꓸꓸꓸuintptr aʗp) {
+internal static (uintptr r1, uintptr r2, error lastErr) Call⁔(/*this*/ ж<LazyProc> Ꮡp, params ꓸꓸꓸuintptr aʗp) {
     var a = aʗp;
     ref var p = ref Ꮡp.DerefOrNull();
 
@@ -445,4 +426,4 @@ public static (uintptr r1, uintptr r2, error lastErr) Call(this ж<LazyProc> Ꮡ
     return p.proc.Call(a.ꓸꓸꓸ);
 }
 
-}
+} // end syscall_package

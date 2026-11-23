@@ -16,7 +16,6 @@ using stringslite = @internal.stringslite_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
-using static runtime_package;
 
 partial class runtime_package {
 
@@ -190,7 +189,7 @@ internal static void main() {
         mainStarted = true;
 
         if (haveSysmon) {
-            systemstack(() => {
+            systemstack([GoFunc("main.func1")] () => {
                 newm(sysmon, nil, -1);
             });
         }
@@ -223,7 +222,7 @@ internal static void main() {
 
         // Defer unlock so that runtime.Goexit during init does the unlock too.
         var needUnlock = true;
-        defer(() => {
+        defer([GoFunc("main.func2")] () => {
             if (needUnlock) {
                 unlockOSThread();
             }
@@ -372,7 +371,7 @@ internal static void os_beforeExit(nint exitCode) {
 
 /* [GoInit] runtime bootstrap init - not run; .NET is the runtime */ internal static void initΔ6() {
     exithook.Gosched = Gosched;
-    exithook.Goid = () => (~getg()).goid;
+    exithook.Goid = [GoFunc("init.6.func1")] () => (~getg()).goid;
     exithook.Throw = @throw;
 }
 
@@ -452,7 +451,7 @@ internal static void goparkunlock(ж<mutex> @lock, waitReason reason, traceBlock
 //
 //go:linkname goready
 internal static void goready(ж<g> gp, nint traceskip) {
-    systemstack(() => {
+    systemstack([GoFunc("goready.func1")] () => {
         ready(gp, traceskip, true);
     });
 }
@@ -609,7 +608,7 @@ internal static void badmorestackg0() {
 
     var g = getg();
     var gʗ1 = g;
-    switchToCrashStack(() => {
+    switchToCrashStack([GoFunc("badmorestackg0.func1")] () => {
         print((@string)"runtime: morestack on g0, stack [", (hex)(uint64)(~gʗ1).stack.lo, (@string)" ", (hex)(uint64)(~gʗ1).stack.hi, (@string)"], sp=", (hex)(uint64)(~gʗ1).sched.sp, (@string)", called from\n");
         gʗ1.Value.m.Value.traceback = 2; // include pc and sp in stack trace
         traceback1((~gʗ1).sched.pc, (~gʗ1).sched.sp, (~gʗ1).sched.lr, gʗ1, 0);
@@ -1137,9 +1136,7 @@ internal static partial slice<uintptr> makeProfStack() { return new slice<uintpt
 //go:linkname pprof_makeProfStack
 public static partial slice<uintptr> pprof_makeProfStack() { return makeProfStack(); }
 
-} partial class runtimeᴛm {
-
-internal static void becomeSpinning(this ref m mp) {
+internal static void becomeSpinning⁔(/*this*/ ref m mp) {
     mp.spinning = true;
     Ꮡsched.of(schedt.Ꮡnmspinning).Add(1);
     Ꮡsched.of(schedt.Ꮡneedspinning).Store(0);
@@ -1152,7 +1149,7 @@ internal static void becomeSpinning(this ref m mp) {
 // alive.
 //
 //go:yeswritebarrierrec
-internal static slice<ж<p>> snapshotAllp(this ref m mp) {
+internal static slice<ж<p>> snapshotAllp⁔(/*this*/ ref m mp) {
     mp.allpSnapshot = allp;
     return mp.allpSnapshot;
 }
@@ -1163,15 +1160,13 @@ internal static slice<ж<p>> snapshotAllp(this ref m mp) {
 // Must be called after reacquiring a P, as it requires a write barrier.
 //
 //go:yeswritebarrierrec
-internal static void clearAllpSnapshot(this ref m mp) {
+internal static void clearAllpSnapshot⁔(/*this*/ ref m mp) {
     mp.allpSnapshot = default;
 }
 
-internal static bool hasCgoOnStack(this ref m mp) {
+internal static bool hasCgoOnStack⁔(/*this*/ ref m mp) {
     return mp.ncgo > 0 || mp.isextra;
 }
-
-} partial class runtime_package {
 
 // osHasLowResTimer indicates that the platform's internal timer system has a low resolution,
 // typically on the order of 1 ms or more.
@@ -1336,7 +1331,7 @@ internal static void casgstatus(ж<g> Ꮡgp, uint32 oldval, uint32 newval) {
     ref var gp = ref Ꮡgp.DerefOrNull();
 
     if (((oldval & (uint32)_Gscan) != 0) || ((newval & (uint32)_Gscan) != 0) || oldval == newval) {
-        systemstack(() => {
+        systemstack([GoFunc("casgstatus.func1")] () => {
             // Call on the systemstack to prevent print and throw from counting
             // against the nosplit stack reservation.
             print((@string)"runtime: casgstatus: oldval=", (hex)(uint64)oldval, (@string)" newval=", (hex)(uint64)newval, (@string)"\n");
@@ -1354,7 +1349,7 @@ internal static void casgstatus(ж<g> Ꮡgp, uint32 oldval, uint32 newval) {
     // GC time to finish and change the state to oldval.
     for (nint i = 0; !Ꮡgp.of(g.Ꮡatomicstatus).CompareAndSwap(oldval, newval); i++) {
         if (oldval == _Gwaiting && Ꮡgp.of(g.Ꮡatomicstatus).Load() == _Grunnable) {
-            systemstack(() => {
+            systemstack([GoFunc("casgstatus.func2")] () => {
                 // Call on the systemstack to prevent throw from counting
                 // against the nosplit stack reservation.
                 @throw(casgstatusWaitingForˢ);
@@ -1374,7 +1369,7 @@ internal static void casgstatus(ж<g> Ꮡgp, uint32 oldval, uint32 newval) {
     }
 
     if (gp.bubble != nil) {
-        systemstack(() => {
+        systemstack([GoFunc("casgstatus.func3")] () => {
             Ꮡgp.Value.bubble.changegstatus(Ꮡgp, oldval, newval);
         });
     }
@@ -1545,17 +1540,13 @@ internal static stwReason stwForTestReadMemStatsSlow => 14;     // "ReadMemStats
 internal static stwReason stwForTestPageCachePagesLeaked => 15; // "PageCachePagesLeaked (test)"
 internal static stwReason stwForTestResetDebugLog => 16;        // "ResetDebugLog (test)"
 
-} partial class runtimeᴛstwReason {
-
-internal static @string String(this stwReason r) {
+internal static @string String⁔(/*this*/ stwReason r) {
     return stwReasonStrings[r];
 }
 
-internal static bool isGC(this stwReason r) {
+internal static bool isGC⁔(/*this*/ stwReason r) {
     return r == stwGCMarkTerm || r == stwGCSweepTerm;
 }
-
-} partial class runtime_package {
 
 // If you add to this list, also add it to src/internal/trace/parser.go.
 // If you change the values of any of the stw* constants, bump the trace
@@ -2169,7 +2160,7 @@ found:
 // The caller must hold worldsema. fn must not refer to any
 // part of the current goroutine's stack, since the GC may move it.
 internal static void forEachP(waitReason reason, Action<ж<p>> fn) {
-    systemstack(() => {
+    systemstack([GoFunc("forEachP.func1")] () => {
         var gp = getg().Value.m.Value.curg;
         // Mark the user stack as preemptible so that it may be scanned
         // by the GC or observed by the execution tracer. Otherwise, our
@@ -2378,7 +2369,7 @@ internal static ж<m> allocm(ж<p> pp, Action fn, int64 id) {
                 // reachable off the system stack transitively from
                 // startm.
                 var freemʗ1 = freem;
-                systemstack(() => {
+                systemstack([GoFunc("allocm.func1")] () => {
                     stackfree((~(~freemʗ1).g0).stack);
                     if (valgrindenabled) {
                         valgrindDeregisterStack((~(~freemʗ1).g0).valgrindStackID);
@@ -5016,7 +5007,7 @@ internal static ж<g> malg(int32 stacksize) {
     if (stacksize >= 0) {
         stacksize = round2((int32)stackSystem + stacksize);
         var newgʗ1 = newg;
-        systemstack(() => {
+        systemstack([GoFunc("malg.func1")] () => {
             newgʗ1.Value.stack = @stackalloc((uint32)stacksize);
             if (valgrindenabled) {
                 newgʗ1.Value.valgrindStackID = valgrindRegisterStack((@unsafe.Pointer)(~newgʗ1).stack.lo, (@unsafe.Pointer)(~newgʗ1).stack.hi);
@@ -5038,7 +5029,7 @@ internal static void newproc(ж<funcval> fn) {
     var gp = getg();
     var pc = sys.GetCallerPC();
     var gpʗ1 = gp;
-    systemstack(() => {
+    systemstack([GoFunc("newproc.func1")] () => {
         var newg = newproc1(fn, gpʗ1, pc, false, waitReasonZero);
 
         var pp = (~(~getg()).m).p.ptr();
@@ -5295,7 +5286,7 @@ retry:
         // right size when the goroutine was put on the free list, but
         // the right size has changed since then.
         var gpʗ1 = gp;
-        systemstack(() => {
+        systemstack([GoFunc("gfget.func1")] () => {
             stackfree((~gpʗ1).stack);
             gpʗ1.Value.stack.lo = 0;
             gpʗ1.Value.stack.hi = 0;
@@ -5309,7 +5300,7 @@ retry:
     if ((~gp).stack.lo == 0) {
         // Stack was deallocated in gfput or just above. Allocate a new one.
         var gpʗ2 = gp;
-        systemstack(() => {
+        systemstack([GoFunc("gfget.func2")] () => {
             gpʗ2.Value.stack = @stackalloc(startingStackSize);
             if (valgrindenabled) {
                 gpʗ2.Value.valgrindStackID = valgrindRegisterStack((@unsafe.Pointer)(~gpʗ2).stack.lo, (@unsafe.Pointer)(~gpʗ2).stack.hi);
@@ -5600,15 +5591,13 @@ internal static void setcpuprofilerate(int32 hz) {
     gp.Value.m.Value.locks--;
 }
 
-} partial class runtimeᴛp {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string missingMcacheˢ => ref missingMcacheˢᵇ;
 private static readonly @string missingMcacheˢᵇ = "missing mcache?"u8;
 
 // init initializes pp, which may be a freshly allocated p or a
 // previously destroyed p, and transitions it to status _Pgcstop.
-internal static void init(this ж<p> Ꮡpp, int32 id) {
+internal static void init⁔(/*this*/ ж<p> Ꮡpp, int32 id) {
     ref var pp = ref Ꮡpp.DerefOrNull();
 
     pp.id = id;
@@ -5655,7 +5644,7 @@ private static readonly @string pDestroyedWhileGcIsˢᵇ = "P destroyed while GC
 // transitions it to status _Pdead.
 //
 // sched.lock must be held and the world must be stopped.
-internal static void destroy(this ж<p> Ꮡpp) {
+internal static void destroy⁔(/*this*/ ж<p> Ꮡpp) {
     ref var pp = ref Ꮡpp.DerefOrNull();
 
     assertLockHeld(Ꮡsched.of(schedt.Ꮡlock));
@@ -5691,7 +5680,7 @@ internal static void destroy(this ж<p> Ꮡpp) {
     pp.pinnerCache = default;
     clear(pp.deferpoolbuf[..]);
     pp.deferpool = pp.deferpoolbuf[..0];
-    systemstack(() => {
+    systemstack([GoFunc("(*p).destroy.func1")] () => {
         for (nint i = 0; i < Ꮡpp.Value.mspancache.len; i++) {
             // Safe to call since the world is stopped.
             Ꮡmheap_.Ꮡspanalloc.free(@unsafe.Pointer.FromPinnedBox(Ꮡpp.Value.mspancache.buf[i]));
@@ -5731,8 +5720,6 @@ internal static void destroy(this ж<p> Ꮡpp) {
     pp.xRegs.free();
     pp.status = _Pdead;
 }
-
-} partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string procresizeInvalidArgˢ => ref procresizeInvalidArgˢᵇ;
@@ -6028,14 +6015,14 @@ internal static void wirep(ж<p> Ꮡpp) {
     if ((~(~gp).m).p != 0) {
         // Call on the systemstack to avoid a nosplit overflow build failure
         // on some platforms when built with -N -l. See #64113.
-        systemstack(() => {
+        systemstack([GoFunc("wirep.func1")] () => {
             @throw(wirepAlreadyInGoˢ);
         });
     }
     if (pp.m != 0 || pp.status != _Pidle) {
         // Call on the systemstack to avoid a nosplit overflow build failure
         // on some platforms when built with -N -l. See #64113.
-        systemstack(() => {
+        systemstack([GoFunc("wirep.func2")] () => {
             var id = (int64)0;
             if (Ꮡpp.Value.m != 0) {
                 id = Ꮡpp.Value.m.ptr().Value.id;
@@ -6153,7 +6140,7 @@ internal static void checkdead() {
     }
 
     nint grunning = 0;
-    forEachG((ж<g> gp) => {
+    forEachG([GoFunc("checkdead.func1")] (ж<g> gp) => {
         if (isSystemGoroutine(gp, false)) {
             return;
         }
@@ -6546,13 +6533,11 @@ internal static (syscallingThread, bool) setBlockOnExitSyscall(ж<p> Ꮡpp) {
     return (new syscallingThread(gp, mp, Ꮡpp, status), true);
 }
 
-} partial class runtimeᴛsyscallingThread {
-
 // gcstopP unwires the P attached to the syscalling thread
 // and moves it into the _Pgcstop state.
 //
 // The caller must be stopping the world.
-internal static void gcstopP(this syscallingThread s) {
+internal static void gcstopP⁔(/*this*/ syscallingThread s) {
     assertLockHeld(Ꮡsched.of(schedt.Ꮡlock));
 
     s.releaseP(_Pgcstop);
@@ -6562,7 +6547,7 @@ internal static void gcstopP(this syscallingThread s) {
 
 // takeP unwires the P attached to the syscalling thread
 // and moves it into the _Pidle state.
-internal static void takeP(this syscallingThread s) {
+internal static void takeP⁔(/*this*/ syscallingThread s) {
     s.releaseP(_Pidle);
 }
 
@@ -6573,7 +6558,7 @@ private static readonly @string attemptedToReleasePIntoAˢᵇ = "attempted to re
 // releaseP unwires the P from the syscalling thread, moving
 // it to the provided state. Callers should prefer to use
 // takeP and gcstopP.
-internal static void releaseP(this syscallingThread s, uint32 state) {
+internal static void releaseP⁔(/*this*/ syscallingThread s, uint32 state) {
     if (state != _Pidle && state != _Pgcstop) {
         @throw(attemptedToReleasePIntoAˢ);
     }
@@ -6590,11 +6575,9 @@ internal static void releaseP(this syscallingThread s, uint32 state) {
 }
 
 // resume allows a syscalling thread to advance beyond exitsyscall.
-internal static void resume(this syscallingThread s) {
+internal static void resume⁔(/*this*/ syscallingThread s) {
     casfrom_Gscanstatus(s.gp, s.status | (uint32)_Gscan, s.status);
 }
-
-} partial class runtime_package {
 
 // Tell all goroutines that they have been preempted and they should stop.
 // This function is purely best-effort. It can fail to inform a goroutine if a
@@ -6735,7 +6718,7 @@ internal static void schedtrace(bool detailed) {
         print((@string)"\n");
     }
 
-    forEachG((ж<g> gp) => {
+    forEachG([GoFunc("schedtrace.func1")] (ж<g> gp) => {
         print((@string)"  G", (~gp).goid, (@string)": status=", readgstatus(gp), (@string)"(", (~gp).waitreason.String(), (@string)") m=");
         if ((~gp).m != nil) {
             print((~(~gp).m).id);
@@ -7081,31 +7064,29 @@ internal static (ж<g> gp, gQueue q) globrunqgetbatch(int32 n) {
 // pMask is an atomic bitstring with one bit per P.
 partial struct pMask /*[]uint32*/;
 
-} partial class runtimeᴛpMask {
-
 // read returns true if P id's bit is set.
-internal static bool read(this pMask p, uint32 id) {
+internal static bool read⁔(/*this*/ pMask p, uint32 id) {
     var word = id / 32;
     var mask = (uint32)1 << (int)(id % 32);
     return (atomic.Load(Ꮡ(p, word)) & mask) != 0;
 }
 
 // set sets P id's bit.
-internal static void set(this pMask p, int32 id) {
+internal static void set⁔(/*this*/ pMask p, int32 id) {
     var word = id / 32;
     var mask = ((uint32)1).Lsh((int64)(id % 32));
     atomic.Or(Ꮡ(p, word), mask);
 }
 
 // clear clears P id's bit.
-internal static void clear(this pMask p, int32 id) {
+internal static void clear⁔(/*this*/ pMask p, int32 id) {
     var word = id / 32;
     var mask = ((uint32)1).Lsh((int64)(id % 32));
     atomic.And(Ꮡ(p, word), ~mask);
 }
 
 // any returns true if any bit in p is set.
-internal static bool any(this pMask p) {
+internal static bool any⁔(/*this*/ pMask p) {
     foreach (var i in range(len(p))) {
         if (atomic.Load(Ꮡ(p, i)) != 0) {
             return true;
@@ -7118,7 +7099,7 @@ internal static bool any(this pMask p) {
 //
 // The result may alias p, so callers are encouraged to
 // discard p. Not safe for concurrent use.
-internal static pMask resize(this pMask p, int32 nprocs) {
+internal static pMask resize⁔(/*this*/ pMask p, int32 nprocs) {
     var maskWords = (nprocs + 31) / 32;
 
     if (maskWords <= (int32)cap(p)) {
@@ -7129,8 +7110,6 @@ internal static pMask resize(this pMask p, int32 nprocs) {
     copy(newMask, p);
     return newMask;
 }
-
-} partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string pidleputPHasNonEmptyRunˢ => ref pidleputPHasNonEmptyRunˢᵇ;
@@ -7355,7 +7334,7 @@ internal static void runqputbatch(ж<p> Ꮡpp, ж<gQueue> Ꮡq) {
     }
 
     if (randomizeScheduler) {
-        uint32 off(uint32 o) => (Ꮡpp.Value.runqtail + o) % (uint32)len(Ꮡpp.Value.runq);
+        [GoFunc("runqputbatch.func1")] uint32 off(uint32 o) => (Ꮡpp.Value.runqtail + o) % (uint32)len(Ꮡpp.Value.runq);
         for (var i = (uint32)1; i < n; i++) {
             var j = cheaprandn(i + 1);
             (pp.runq[off(i)], pp.runq[off(j)]) = (pp.runq[off(j)], pp.runq[off(i)]);
@@ -7544,15 +7523,13 @@ partial struct gQueue {
     internal int32 size;
 }
 
-} partial class runtimeᴛgQueue {
-
 // empty reports whether q is empty.
-internal static bool empty(this ref gQueue q) {
+internal static bool empty⁔(/*this*/ ref gQueue q) {
     return q.head == 0;
 }
 
 // push adds gp to the head of q.
-internal static void push(this ref gQueue q, ж<g> Ꮡgp) {
+internal static void push⁔(/*this*/ ref gQueue q, ж<g> Ꮡgp) {
     ref var gp = ref Ꮡgp.DerefOrNull();
 
     gp.schedlink = q.head;
@@ -7564,7 +7541,7 @@ internal static void push(this ref gQueue q, ж<g> Ꮡgp) {
 }
 
 // pushBack adds gp to the tail of q.
-internal static void pushBack(this ref gQueue q, ж<g> Ꮡgp) {
+internal static void pushBack⁔(/*this*/ ref gQueue q, ж<g> Ꮡgp) {
     ref var gp = ref Ꮡgp.DerefOrNull();
 
     gp.schedlink = 0;
@@ -7579,7 +7556,7 @@ internal static void pushBack(this ref gQueue q, ж<g> Ꮡgp) {
 
 // pushBackAll adds all Gs in q2 to the tail of q. After this q2 must
 // not be used.
-internal static void pushBackAll(this ref gQueue q, gQueue q2) {
+internal static void pushBackAll⁔(/*this*/ ref gQueue q, gQueue q2) {
     if (q2.tail == 0) {
         return;
     }
@@ -7595,7 +7572,7 @@ internal static void pushBackAll(this ref gQueue q, gQueue q2) {
 
 // pop removes and returns the head of queue q. It returns nil if
 // q is empty.
-internal static ж<g> pop(this ref gQueue q) {
+internal static ж<g> pop⁔(/*this*/ ref gQueue q) {
     var gp = q.head.ptr();
     if (gp != nil) {
         q.head = gp.Value.schedlink;
@@ -7608,13 +7585,11 @@ internal static ж<g> pop(this ref gQueue q) {
 }
 
 // popList takes all Gs in q and returns them as a gList.
-internal static gList popList(this ref gQueue q) {
+internal static gList popList⁔(/*this*/ ref gQueue q) {
     var stack = new gList(q.head, q.size);
     q = new gQueue();
     return stack;
 }
-
-} partial class runtime_package {
 
 // A gList is a list of Gs linked through g.schedlink. A G can only be
 // on one gQueue or gList at a time.
@@ -7623,15 +7598,13 @@ partial struct gList {
     internal int32 size;
 }
 
-} partial class runtimeᴛgList {
-
 // empty reports whether l is empty.
-internal static bool empty(this ref gList l) {
+internal static bool empty⁔(/*this*/ ref gList l) {
     return l.head == 0;
 }
 
 // push adds gp to the head of l.
-internal static void push(this ref gList l, ж<g> Ꮡgp) {
+internal static void push⁔(/*this*/ ref gList l, ж<g> Ꮡgp) {
     ref var gp = ref Ꮡgp.DerefOrNull();
 
     gp.schedlink = l.head;
@@ -7640,7 +7613,7 @@ internal static void push(this ref gList l, ж<g> Ꮡgp) {
 }
 
 // pushAll prepends all Gs in q to l. After this q must not be used.
-internal static void pushAll(this ref gList l, gQueue q) {
+internal static void pushAll⁔(/*this*/ ref gList l, gQueue q) {
     if (!q.empty()) {
         q.tail.ptr().Value.schedlink = l.head;
         l.head = q.head;
@@ -7649,7 +7622,7 @@ internal static void pushAll(this ref gList l, gQueue q) {
 }
 
 // pop removes and returns the head of l. If l is empty, it returns nil.
-internal static ж<g> pop(this ref gList l) {
+internal static ж<g> pop⁔(/*this*/ ref gList l) {
     var gp = l.head.ptr();
     if (gp != nil) {
         l.head = gp.Value.schedlink;
@@ -7657,8 +7630,6 @@ internal static ж<g> pop(this ref gList l) {
     }
     return gp;
 }
-
-} partial class runtime_package {
 
 //go:linkname setMaxThreads runtime/debug.setMaxThreads
 internal static nint /*out*/ setMaxThreads(nint @in) {
@@ -7815,9 +7786,7 @@ partial struct randomEnum {
     internal uint32 inc;
 }
 
-} partial class runtimeᴛrandomOrder {
-
-internal static void reset(this ref randomOrder ord, uint32 count) {
+internal static void reset⁔(/*this*/ ref randomOrder ord, uint32 count) {
     ord.count = count;
     ord.coprimes = ord.coprimes[..0];
     for (var i = (uint32)1; i <= count; i++) {
@@ -7827,7 +7796,7 @@ internal static void reset(this ref randomOrder ord, uint32 count) {
     }
 }
 
-internal static randomEnum start(this ref randomOrder ord, uint32 i) {
+internal static randomEnum start⁔(/*this*/ ref randomOrder ord, uint32 i) {
     return new randomEnum(
         count: ord.count,
         pos: i % ord.count,
@@ -7835,22 +7804,18 @@ internal static randomEnum start(this ref randomOrder ord, uint32 i) {
     );
 }
 
-} partial class runtimeᴛrandomEnum {
-
-internal static bool done(this ref randomEnum @enum) {
+internal static bool done⁔(/*this*/ ref randomEnum @enum) {
     return @enum.i == @enum.count;
 }
 
-internal static void next(this ref randomEnum @enum) {
+internal static void next⁔(/*this*/ ref randomEnum @enum) {
     @enum.i++;
     @enum.pos = (@enum.pos + @enum.inc) % @enum.count;
 }
 
-internal static uint32 position(this ref randomEnum @enum) {
+internal static uint32 position⁔(/*this*/ ref randomEnum @enum) {
     return @enum.pos;
 }
-
-} partial class runtime_package {
 
 internal static uint32 gcd(uint32 a, uint32 b) {
     while (b != 0) {

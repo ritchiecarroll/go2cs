@@ -14,6 +14,9 @@
 
 using go;
 using static go.ExportedAliasUnexportedTarget.aliaslib_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -51,10 +54,12 @@ using static go.ExportedAliasUnexportedTarget.aliaslib_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("lib.go", "lib.cs", "ABEYooK4ooK4ggAKJIKUpKY=")]
+[assembly: GoPositionMap("lib.go", "lib.cs", "AA4YooK4ooK4ggAIJIKUpKY=")]
 // </GoSourcePositionMaps>
 
 namespace go.ExportedAliasUnexportedTarget;
+
+using static go.ExportedAliasUnexportedTarget.aliaslib_package;
 
 [GoPackage("aliaslib")]
 public static partial class aliaslib_package
@@ -88,5 +93,17 @@ public static partial class aliaslib_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(aliaslib_package.mutexWrap)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class aliaslibᴛmutexWrap;
+[GoMethodHost(typeof(aliaslib_package.mutexWrap)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class aliaslibᴛmutexWrap;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class aliaslibᴛmutexWrap {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Lock(this ж<mutexWrap> Ꮡmw) => aliaslib_package.Lock⁔(Ꮡmw);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Unlock(this ж<mutexWrap> Ꮡmw) => aliaslib_package.Unlock⁔(Ꮡmw);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Disable(this ref mutexWrap mw) => aliaslib_package.Disable⁔(ref mw);
+}
+// </MethodForwarders>

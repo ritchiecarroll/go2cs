@@ -14,6 +14,7 @@
 
 using go;
 using static go.@internal.syscall.unix_package;
+using System.ComponentModel;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -110,5 +111,5 @@ public static partial class unix_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(unix_package.SiginfoChild)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class unixᴛSiginfoChild;
+[GoMethodHost(typeof(unix_package.SiginfoChild)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class unixᴛSiginfoChild;
 // </MethodHolders>

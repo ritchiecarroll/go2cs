@@ -15,7 +15,6 @@ namespace go.hash;
 using hash = hash_package;
 using abi = @internal.abi_package;
 using @internal;
-using static maphash_package;
 
 partial class maphash_package {
 
@@ -115,14 +114,12 @@ partial struct Hash {
 // by always calling rthash with a full buffer (except for the tail).
 internal static UntypedInt bufSize => 128;
 
-} partial class maphashᴛHash {
-
 // initSeed seeds the hash if necessary.
 // initSeed is called lazily before any operation that actually uses h.seed/h.state.
 // Note that this does not include Write/WriteByte/WriteString in the case
 // where they only add to h.buf. (If they write too much, they call h.flush,
 // which does call h.initSeed.)
-internal static void initSeed(this ref Hash h) {
+internal static void initSeed⁔(/*this*/ ref Hash h) {
     if (h.seed.s == 0) {
         var seed = MakeSeed();
         h.seed = seed;
@@ -132,7 +129,7 @@ internal static void initSeed(this ref Hash h) {
 
 // WriteByte adds b to the sequence of bytes hashed by h.
 // It never fails; the error result is for implementing [io.ByteWriter].
-public static error WriteByte(this ref Hash h, byte b) {
+internal static error WriteByte⁔(/*this*/ ref Hash h, byte b) {
     if (h.n == len(h.buf)) {
         h.flush();
     }
@@ -143,7 +140,7 @@ public static error WriteByte(this ref Hash h, byte b) {
 
 // Write adds b to the sequence of bytes hashed by h.
 // It always writes all of b and never fails; the count and error result are for implementing [io.Writer].
-public static (nint, error) Write(this ref Hash h, slice<byte> b) {
+internal static (nint, error) Write⁔(/*this*/ ref Hash h, slice<byte> b) {
     nint size = len(b);
     // Deal with bytes left over in h.buf.
     // h.n <= bufSize is always true.
@@ -175,7 +172,7 @@ public static (nint, error) Write(this ref Hash h, slice<byte> b) {
 
 // WriteString adds the bytes of s to the sequence of bytes hashed by h.
 // It always writes all of s and never fails; the count and error result are for implementing [io.StringWriter].
-public static (nint, error) WriteString(this ref Hash h, @string s) {
+internal static (nint, error) WriteString⁔(/*this*/ ref Hash h, @string s) {
     // WriteString mirrors Write. See Write for comments.
     nint size = len(s);
     if (h.n > 0 && h.n <= bufSize) {
@@ -200,7 +197,7 @@ public static (nint, error) WriteString(this ref Hash h, @string s) {
 }
 
 // Seed returns h's seed value.
-public static Seed Seed(this ref Hash h) {
+internal static Seed Seed⁔(/*this*/ ref Hash h) {
     h.initSeed();
     return h.seed;
 }
@@ -210,7 +207,7 @@ public static Seed Seed(this ref Hash h) {
 // Two [Hash] objects with the same seed behave identically.
 // Two [Hash] objects with different seeds will very likely behave differently.
 // Any bytes added to h before this call will be discarded.
-public static void SetSeed(this ref Hash h, Seed seed) {
+internal static void SetSeed⁔(/*this*/ ref Hash h, Seed seed) {
     if (seed.s == 0) {
         throw panic("maphash: use of uninitialized Seed");
     }
@@ -221,14 +218,14 @@ public static void SetSeed(this ref Hash h, Seed seed) {
 
 // Reset discards all bytes added to h.
 // (The seed remains the same.)
-public static void Reset(this ref Hash h) {
+internal static void Reset⁔(/*this*/ ref Hash h) {
     h.initSeed();
     h.state = h.seed;
     h.n = 0;
 }
 
 // precondition: buffer is full.
-internal static void flush(this ref Hash h) {
+internal static void flush⁔(/*this*/ ref Hash h) {
     if (h.n != len(h.buf)) {
         throw panic("maphash: flush of partially full buffer");
     }
@@ -244,12 +241,10 @@ internal static void flush(this ref Hash h) {
 // All bits of the Sum64 result are close to uniformly and
 // independently distributed, so it can be safely reduced
 // by using bit masking, shifting, or modular arithmetic.
-public static uint64 Sum64(this ref Hash h) {
+internal static uint64 Sum64⁔(/*this*/ ref Hash h) {
     h.initSeed();
     return rthash(h.buf.slice(0, h.n), h.state.s);
 }
-
-} partial class maphash_package {
 
 // MakeSeed returns a new random seed.
 public static Seed MakeSeed() {
@@ -265,12 +260,10 @@ public static Seed MakeSeed() {
     return new Seed(s: s);
 }
 
-} partial class maphashᴛHash {
-
 // Sum appends the hash's current 64-bit value to b.
 // It exists for implementing [hash.Hash].
 // For direct calls, it is more efficient to use [Hash.Sum64].
-public static slice<byte> Sum(this ref Hash h, slice<byte> b) {
+internal static slice<byte> Sum⁔(/*this*/ ref Hash h, slice<byte> b) {
     var x = h.Sum64();
     return append(b,
         (byte)(x >> 0),
@@ -284,19 +277,17 @@ public static slice<byte> Sum(this ref Hash h, slice<byte> b) {
 }
 
 // Size returns h's hash value size, 8 bytes.
-public static nint Size(this ref Hash h) { return 8; }
+internal static nint Size⁔(/*this*/ ref Hash h) { return 8; }
 
 // BlockSize returns h's block size.
-public static nint BlockSize(this ref Hash h) { return len(h.buf); }
+internal static nint BlockSize⁔(/*this*/ ref Hash h) { return len(h.buf); }
 
 // Clone implements [hash.Cloner].
-public static (hash.Cloner, error) Clone(this ref Hash h) {
+internal static (hash.Cloner, error) Clone⁔(/*this*/ ref Hash h) {
     h.initSeed();
     ref var r = ref heap<Hash>(h.ΔClone(), out var Ꮡr);
     return (new HashжCloner(Ꮡr), default);
 }
-
-} partial class maphash_package {
 
 // Comparable returns the hash of comparable value v with the given seed
 // such that Comparable(s, v1) == Comparable(s, v2) if v1 == v2.

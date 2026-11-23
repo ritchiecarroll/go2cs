@@ -31,7 +31,7 @@ internal static @string alsoField(ж<T> Ꮡp) {
 }
 
 internal static @string inClosure(ж<T> p) {
-    @string f() => p.Hello();
+    [GoFunc("inClosure.func1")] @string f() => p.Hello();
     return f();
 }
 
@@ -58,7 +58,7 @@ internal static @string ptrParam(ж<T> Ꮡp) {
 internal static void @try(@string name, Func<@string> f) {
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("try.func1")] () => {
             var r = recover(); if (r != nil) {
                 fmt.Println(name, "panicked:", r);
             }
@@ -72,33 +72,33 @@ internal static void @try(@string name, Func<@string> f) {
 internal static void main() {
     ж<T> p = default;
     var pʗ1 = p;
-    @try("parameter, call only", () => onlyCall(pʗ1));
+    @try("parameter, call only", [GoFunc("main.func1")] () => onlyCall(pʗ1));
     var pʗ2 = p;
-    @try("parameter, also reads a field", () => alsoField(pʗ2));
+    @try("parameter, also reads a field", [GoFunc("main.func2")] () => alsoField(pʗ2));
     var pʗ3 = p;
-    @try("parameter captured by a closure", () => inClosure(pʗ3));
+    @try("parameter captured by a closure", [GoFunc("main.func3")] () => inClosure(pʗ3));
     var pʗ4 = p;
-    @try("parameter escapes", () => escapes(pʗ4));
+    @try("parameter escapes", [GoFunc("main.func4")] () => escapes(pʗ4));
     var pʗ5 = p;
-    @try("call as the middle argument", () => argOrder(pʗ5));
+    @try("call as the middle argument", [GoFunc("main.func5")] () => argOrder(pʗ5));
     var pʗ6 = p;
-    @try("pointer receiver calls its value method", () => pʗ6.Via());
+    @try("pointer receiver calls its value method", [GoFunc("main.func6")] () => pʗ6.Via());
     var pʗ7 = p;
-    @try("pointer-receiver method on a nil parameter", () => ptrParam(pʗ7));
+    @try("pointer-receiver method on a nil parameter", [GoFunc("main.func7")] () => ptrParam(pʗ7));
 
     var q = Ꮡ(new T(n: 7));
     var qʗ1 = q;
-    @try("non-nil, call only", () => onlyCall(qʗ1));
+    @try("non-nil, call only", [GoFunc("main.func8")] () => onlyCall(qʗ1));
     var qʗ2 = q;
-    @try("non-nil, also reads a field", () => alsoField(qʗ2));
+    @try("non-nil, also reads a field", [GoFunc("main.func9")] () => alsoField(qʗ2));
     var qʗ3 = q;
-    @try("non-nil, closure", () => inClosure(qʗ3));
+    @try("non-nil, closure", [GoFunc("main.func10")] () => inClosure(qʗ3));
     var qʗ4 = q;
-    @try("non-nil, escapes", () => escapes(qʗ4));
+    @try("non-nil, escapes", [GoFunc("main.func11")] () => escapes(qʗ4));
     var qʗ5 = q;
-    @try("non-nil, middle argument", () => argOrder(qʗ5));
+    @try("non-nil, middle argument", [GoFunc("main.func12")] () => argOrder(qʗ5));
     var qʗ6 = q;
-    @try("non-nil, pointer receiver", () => qʗ6.Via());
+    @try("non-nil, pointer receiver", [GoFunc("main.func13")] () => qʗ6.Via());
     fmt.Println("sink is q:", sink == q, "kept is q:", kept == q);
 }
 

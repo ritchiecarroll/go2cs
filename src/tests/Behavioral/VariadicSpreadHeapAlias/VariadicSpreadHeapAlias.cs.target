@@ -50,7 +50,7 @@ internal static Action later(params ꓸꓸꓸnint xsʗp) {
     var xs = xsʗp.slice();
 
     var xsʗ1 = xs;
-    return () => {
+    return [GoFunc("later.func1")] () => {
         xsʗ1[0] = 7;
     };
 }

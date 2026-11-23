@@ -14,6 +14,9 @@
 
 using go;
 using static go.expvar_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -68,10 +71,12 @@ using static go.expvar_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("expvar/expvar.go", "expvar.cs", "AEF0gqaCpoKmgqaCAAsQgqaCpoKokoKCgoKCgsySABMggqaCpoKCgoKCpoKCgoKClIKCgpS0xLaCgoKo4oKCgoLY4oKUgoKUoqSCgoKmuIKCgriokoKCgoKCyoK6koKCgoKCyoK64oKCgoKCtKoACAKCgoKCgrQACw6CgqqipoKmggAKDoKmgoIACxLSgpSCgoKiqKKqkoKCpoKCgqaCgoKmgoKCrLIACAaCgqyypoKmgoKCpoKClJSC6JKCgoKUlLS0tLTWtLaC", "136-136:1;139-139:2;145-160:3")]
+[assembly: GoPositionMap("expvar/expvar.go", "expvar.cs", "AD50gqaCpoKmgqaCAAcQgqaCpoKokoKCgoKCgsySAA8ggqaCpoKCgoKCpoKCgoKClIKCgpS0xLaCgoKo4oKCgoLY4oKUgoKUoqSCgoKmuIKCgriokoKCgoKCyoK6koKCgoKCyoK64oKCgoKCtKoACAKCgoKCgrT+goKqoqaCpoLugqaCggAJEtKClIKCgqKooqqSgoKmgoKCpoKCgqaCgoKssgAIBoKCrLKmgqaCgoKmgoKUlILokoKCgpSUtLS0tNa0toI=", "136-136:1;139-139:2;145-160:3")]
 // </GoSourcePositionMaps>
 
 namespace go;
+
+using static go.expvar_package;
 
 [GoPackage("expvar")]
 public static partial class expvar_package
@@ -121,9 +126,53 @@ public static partial class expvar_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(expvar_package.Float)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class expvarᴛFloat;
-[GoMethodHost(typeof(expvar_package.Func)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class expvarᴛFunc;
-[GoMethodHost(typeof(expvar_package.Int)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class expvarᴛInt;
-[GoMethodHost(typeof(expvar_package.Map)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class expvarᴛMap;
-[GoMethodHost(typeof(expvar_package.String)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class expvarᴛString;
+[GoMethodHost(typeof(expvar_package.Float)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class expvarᴛFloat;
+[GoMethodHost(typeof(expvar_package.Func)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class expvarᴛFunc;
+[GoMethodHost(typeof(expvar_package.Int)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class expvarᴛInt;
+[GoMethodHost(typeof(expvar_package.Map)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class expvarᴛMap;
+[GoMethodHost(typeof(expvar_package.String)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class expvarᴛString;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class expvarᴛFloat {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static float64 Value(this ж<Float> Ꮡv) => expvar_package.Value⁔(Ꮡv);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this ж<Float> Ꮡv) => expvar_package.String⁔(Ꮡv);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<byte> appendJSON(this ж<Float> Ꮡv, slice<byte> b) => expvar_package.appendJSON⁔(Ꮡv, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Add(this ж<Float> Ꮡv, float64 delta) => expvar_package.Add⁔(Ꮡv, delta);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Set(this ж<Float> Ꮡv, float64 value) => expvar_package.Set⁔(Ꮡv, value);
+}
+partial class expvarᴛFunc {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static any Value(this Func f) => expvar_package.Value⁔(f);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this Func f) => expvar_package.String⁔(f);
+}
+partial class expvarᴛInt {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static int64 Value(this ж<Int> Ꮡv) => expvar_package.Value⁔(Ꮡv);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this ж<Int> Ꮡv) => expvar_package.String⁔(Ꮡv);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<byte> appendJSON(this ж<Int> Ꮡv, slice<byte> b) => expvar_package.appendJSON⁔(Ꮡv, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Add(this ж<Int> Ꮡv, int64 delta) => expvar_package.Add⁔(Ꮡv, delta);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Set(this ж<Int> Ꮡv, int64 value) => expvar_package.Set⁔(Ꮡv, value);
+}
+partial class expvarᴛMap {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this ж<Map> Ꮡv) => expvar_package.String⁔(Ꮡv);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<byte> appendJSON(this ж<Map> Ꮡv, slice<byte> b) => expvar_package.appendJSON⁔(Ꮡv, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<byte> appendJSONMayExpand(this ж<Map> Ꮡv, slice<byte> b, bool expand) => expvar_package.appendJSONMayExpand⁔(Ꮡv, b, expand);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Map> Init(this ж<Map> Ꮡv) => expvar_package.Init⁔(Ꮡv);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void addKey(this ж<Map> Ꮡv, @string key) => expvar_package.addKey⁔(Ꮡv, key);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static Var Get(this ж<Map> Ꮡv, @string key) => expvar_package.Get⁔(Ꮡv, key);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Set(this ж<Map> Ꮡv, @string key, Var av) => expvar_package.Set⁔(Ꮡv, key, av);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Add(this ж<Map> Ꮡv, @string key, int64 delta) => expvar_package.Add⁔(Ꮡv, key, delta);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void AddFloat(this ж<Map> Ꮡv, @string key, float64 delta) => expvar_package.AddFloat⁔(Ꮡv, key, delta);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Delete(this ж<Map> Ꮡv, @string key) => expvar_package.Delete⁔(Ꮡv, key);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Do(this ж<Map> Ꮡv, Action<KeyValue> f) => expvar_package.Do⁔(Ꮡv, f);
+}
+partial class expvarᴛString {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Value(this ж<String> Ꮡv) => expvar_package.Value⁔(Ꮡv);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this ж<String> Ꮡv) => expvar_package.String⁔(Ꮡv);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<byte> appendJSON(this ж<String> Ꮡv, slice<byte> b) => expvar_package.appendJSON⁔(Ꮡv, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Set(this ж<String> Ꮡv, @string value) => expvar_package.Set⁔(Ꮡv, value);
+}
+// </MethodForwarders>

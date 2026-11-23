@@ -81,8 +81,8 @@ const cgoLibrariesRegistrationMember = "register" + cgoMirrorSuffix + "libraries
 func cgoLibrariesRegistration(packageName, target string, table []cgoLibraryEntry) string {
 	var text strings.Builder
 
-	text.WriteString("    // The package's C libraries, as the converter captured them (§6.1, §11.5), registered with golib's resolver for this\n")
-	text.WriteString("    // assembly's own [LibraryImport] bindings when the module loads (§6.2, §11.11).\n")
+	text.WriteString("    // The package's C libraries, as the converter captured them, registered with golib's resolver for this\n")
+	text.WriteString("    // assembly's own [LibraryImport] bindings when the module loads.\n")
 	text.WriteString("    [global::System.Runtime.CompilerServices.ModuleInitializer]\n")
 	fmt.Fprintf(&text, "    internal static void %s() => global::go.golib.GoCgoLibraries.Register(typeof(%s).Assembly, %q", cgoLibrariesRegistrationMember, cgoPseudoPackageClass(packageName), target)
 

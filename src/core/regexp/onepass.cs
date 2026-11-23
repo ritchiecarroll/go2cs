@@ -10,7 +10,6 @@ using Δunicode = unicode_package;
 using utf8 = go.unicode.utf8_package;
 using go.unicode;
 using regexp;
-using static regexp_package;
 
 partial class regexp_package {
 
@@ -106,13 +105,11 @@ partial struct queueOnePass {
     internal uint32 size, nextIndex;
 }
 
-} partial class regexpᴛqueueOnePass {
-
-internal static bool empty(this ref queueOnePass q) {
+internal static bool empty⁔(/*this*/ ref queueOnePass q) {
     return q.nextIndex >= q.size;
 }
 
-internal static uint32 /*n*/ next(this ref queueOnePass q) {
+internal static uint32 /*n*/ next⁔(/*this*/ ref queueOnePass q) {
     uint32 n = default;
 
     n = q.dense[q.nextIndex];
@@ -120,25 +117,25 @@ internal static uint32 /*n*/ next(this ref queueOnePass q) {
     return n;
 }
 
-internal static void clear(this ref queueOnePass q) {
+internal static void clear⁔(/*this*/ ref queueOnePass q) {
     q.size = 0;
     q.nextIndex = 0;
 }
 
-internal static bool contains(this ref queueOnePass q, uint32 u) {
+internal static bool contains⁔(/*this*/ ref queueOnePass q, uint32 u) {
     if (u >= (uint32)len(q.sparse)) {
         return false;
     }
     return q.sparse[u] < q.size && q.dense[q.sparse[u]] == u;
 }
 
-internal static void insert(this ref queueOnePass q, uint32 u) {
+internal static void insert⁔(/*this*/ ref queueOnePass q, uint32 u) {
     if (!q.contains(u)) {
         q.insertNew(u);
     }
 }
 
-internal static void insertNew(this ref queueOnePass q, uint32 u) {
+internal static void insertNew⁔(/*this*/ ref queueOnePass q, uint32 u) {
     if (u >= (uint32)len(q.sparse)) {
         return;
     }
@@ -146,8 +143,6 @@ internal static void insertNew(this ref queueOnePass q, uint32 u) {
     q.dense[q.size] = u;
     q.size++;
 }
-
-} partial class regexp_package {
 
 internal static ж<queueOnePass> /*q*/ newQueue(nint size) {
     return Ꮡ(new queueOnePass(
@@ -182,7 +177,7 @@ internal static (slice<rune>, slice<uint32>) mergeRuneSets(ж<slice<rune>> Ꮡle
         ref var merged = ref heap<slice<rune>>(new slice<rune>(0), out var Ꮡmerged);
         ref var next = ref heap<slice<uint32>>(new slice<uint32>(0), out var Ꮡnext);
         var ok = true;
-        defer(() => {
+        defer([GoFunc("mergeRuneSets.func1")] () => {
             if (!ok) {
                 Ꮡmerged.ValueSlot = default;
                 Ꮡnext.ValueSlot = default;
@@ -190,7 +185,7 @@ internal static (slice<rune>, slice<uint32>) mergeRuneSets(ж<slice<rune>> Ꮡle
         }, ref ᒐ);
 
         nint ix = -1;
-        bool extend(ж<nint> newLow, ж<slice<rune>> newArray, uint32 pc) {
+        [GoFunc("mergeRuneSets.func2")] bool extend(ж<nint> newLow, ж<slice<rune>> newArray, uint32 pc) {
             if (ix > 0 && (newArray.ValueSlot)[newLow.Value] <= Ꮡmerged.ValueSlot[ix]) {
                 return false;
             }
@@ -341,7 +336,7 @@ internal static ж<onePassProg> makeOnePass(ж<onePassProg> Ꮡp) {
     var instQueueʗ1 = instQueue;
     var onePassRunesʗ1 = onePassRunes;
     var visitQueueʗ1 = visitQueue;
-    check = (uint32 pc, slice<bool> mΔ1) => {
+    check = [GoFunc("makeOnePass.func1")] (uint32 pc, slice<bool> mΔ1) => {
         bool ok = default;
         ok = true;
         var inst = Ꮡ(Ꮡp.Value.Inst, pc);

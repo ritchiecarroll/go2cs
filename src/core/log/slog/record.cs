@@ -8,7 +8,6 @@ using slices = slices_package;
 using time = time_package;
 using ꓸꓸꓸAttr = variadic<slog_package.Attr>;
 using ꓸꓸꓸany = variadic<any>;
-using static slog_package;
 
 partial class slog_package {
 
@@ -60,12 +59,10 @@ public static Record NewRecord(time.Time t, Level level, @string msg, uintptr pc
     );
 }
 
-} partial class slogᴛRecord {
-
 // Clone returns a copy of the record with no shared state.
 // The original record and the clone can both be modified
 // without interfering with each other.
-public static Record Clone(this Record r) {
+internal static Record Clone⁔(/*this*/ Record r) {
     r = r.ΔClone();
 
     r.back = slices.Clip<slice<Attr>, Attr>(r.back); // prevent append from mutating shared array
@@ -73,7 +70,7 @@ public static Record Clone(this Record r) {
 }
 
 // NumAttrs returns the number of attributes in the [Record].
-public static nint NumAttrs(this Record r) {
+internal static nint NumAttrs⁔(/*this*/ Record r) {
     r = r.ΔClone();
 
     return r.nFront + len(r.back);
@@ -81,7 +78,7 @@ public static nint NumAttrs(this Record r) {
 
 // Attrs calls f on each Attr in the [Record].
 // Iteration stops if f returns false.
-public static void Attrs(this Record r, Func<Attr, bool> f) {
+internal static void Attrs⁔(/*this*/ Record r, Func<Attr, bool> f) {
     r = r.ΔClone();
 
     for (nint i = 0; i < r.nFront; i++) {
@@ -104,7 +101,7 @@ private static readonly @string addAttrsUnsafelyCalledOnˢᵇ = "AddAttrs unsafe
 
 // AddAttrs appends the given Attrs to the [Record]'s list of Attrs.
 // It omits empty groups.
-public static void AddAttrs(this ref Record r, params ꓸꓸꓸAttr attrsʗp) {
+internal static void AddAttrs⁔(/*this*/ ref Record r, params ꓸꓸꓸAttr attrsʗp) {
     var attrs = attrsʗp.slice();
 
     nint i = default;
@@ -138,7 +135,7 @@ public static void AddAttrs(this ref Record r, params ꓸꓸꓸAttr attrsʗp) {
 // Add converts the args to Attrs as described in [Logger.Log],
 // then appends the Attrs to the [Record]'s list of Attrs.
 // It omits empty groups.
-public static void Add(this ref Record r, params ꓸꓸꓸany argsʗp) {
+internal static void Add⁔(/*this*/ ref Record r, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();
 
     Attr a = default;
@@ -158,8 +155,6 @@ public static void Add(this ref Record r, params ꓸꓸꓸany argsʗp) {
         }
     }
 }
-
-} partial class slog_package {
 
 // countAttrs returns the number of Attrs that would be created from args.
 internal static nint countAttrs(slice<any> args) {
@@ -211,8 +206,6 @@ partial struct Source {
     public nint Line; /*`json:"line"`*/
 }
 
-} partial class slogᴛSource {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string functionˢ => ref functionˢᵇ;
 private static readonly @string functionˢᵇ = "function"u8;
@@ -225,7 +218,7 @@ private static readonly @string lineˢᵇ = "line"u8;
 // It is similar to a LogValue method, but we don't want Source
 // to implement LogValuer because it would be resolved before
 // the ReplaceAttr function was called.
-internal static Value group(this ref Source s) {
+internal static Value group⁔(/*this*/ ref Source s) {
     slice<Attr> @as = default;
     if (s.Function != ""u8) {
         @as = append(@as, String(functionˢ, s.Function));
@@ -240,18 +233,16 @@ internal static Value group(this ref Source s) {
 }
 
 // isEmpty returns whether the Source struct is nil or only contains zero fields.
-internal static bool isEmpty(this ж<Source> Ꮡs) {
+internal static bool isEmpty⁔(/*this*/ ж<Source> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     return Ꮡs == nil || s == new Source();
 }
 
-} partial class slogᴛRecord {
-
 // Source returns a new Source for the log event using r's PC.
 // If the PC field is zero, meaning the Record was created without the necessary information
 // or the location is unavailable, then nil is returned.
-public static ж<Source> Source(this Record r) {
+internal static ж<Source> Source⁔(/*this*/ Record r) {
     r = r.ΔClone();
 
     if (r.PC == 0) {
@@ -267,4 +258,4 @@ public static ж<Source> Source(this Record r) {
     ));
 }
 
-}
+} // end slog_package

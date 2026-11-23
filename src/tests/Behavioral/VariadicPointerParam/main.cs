@@ -54,7 +54,7 @@ internal static nint deferredLen(params ꓸꓸꓸжbox bsʗp) {
     try {
         var bs = bsʗp.sslice();
 
-        defer(() => {
+        defer([GoFunc("deferredLen.func1")] () => {
         }, ref ᒐ);
         return len(bs);
     }
@@ -67,7 +67,7 @@ internal static void deferredReplaceFirst(params ꓸꓸꓸжbox bsʗp) {
     try {
         var bs = bsʗp.slice();
 
-        defer(() => {
+        defer([GoFunc("deferredReplaceFirst.func1")] () => {
         }, ref ᒐ);
         bs[0] = Ꮡ(new box(v: 45));
     }
@@ -81,7 +81,7 @@ internal static nint /*n*/ deferredNamedLen(params ꓸꓸꓸжbox bsʗp) {
     try {
         var bs = bsʗp.sslice();
 
-        defer(() => {
+        defer([GoFunc("deferredNamedLen.func1")] () => {
             n++;
         }, ref ᒐ);
         n = len(bs);
@@ -95,7 +95,7 @@ internal static nint capturedLen(params ꓸꓸꓸжbox bsʗp) {
     var bs = bsʗp.slice();
 
     var bsʗ1 = bs;
-    nint count() => len(bsʗ1);
+    [GoFunc("capturedLen.func1")] nint count() => len(bsʗ1);
     return count();
 }
 

@@ -8,11 +8,8 @@ using atomic = @internal.runtime.atomic_package;
 using tracev2 = @internal.trace.tracev2_package;
 using @internal.runtime;
 using @internal.trace;
-using static runtime_package;
 
 partial class runtime_package {
-
-} partial class runtimeᴛtraceWriter {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string attemptedToTraceABadˢ => ref attemptedToTraceABadˢᵇ;
@@ -24,7 +21,7 @@ private static readonly @string attemptedToTraceABadˢᵇ = "attempted to trace 
 // have any stack growth.
 //
 //go:nosplit
-internal static traceWriter writeGoStatus(this traceWriter w, uint64 goid, int64 mid, tracev2.GoStatus status, bool markAssist, uint64 stackID) {
+internal static traceWriter writeGoStatus⁔(/*this*/ traceWriter w, uint64 goid, int64 mid, tracev2.GoStatus status, bool markAssist, uint64 stackID) {
     // The status should never be bad. Some invariant must have been violated.
     if (status == tracev2.GoBad) {
         print((@string)"runtime: goid=", goid, (@string)"\n");
@@ -58,7 +55,7 @@ private static readonly @string attemptToTraceInvalidOrˢᵇ = "attempt to trace
 // have any stack growth.
 //
 //go:nosplit
-internal static traceWriter writeProcStatusForP(this traceWriter w, ж<p> Ꮡpp, bool inSTW) {
+internal static traceWriter writeProcStatusForP⁔(/*this*/ traceWriter w, ж<p> Ꮡpp, bool inSTW) {
     ref var pp = ref Ꮡpp.DerefOrNull();
 
     if (!Ꮡpp.of(p.Ꮡtrace).of(pTraceState.ᏑtraceSchedResourceState).acquireStatus(w.gen)) {
@@ -108,7 +105,7 @@ private static readonly @string attemptedToTraceABadˢ2ᵇ = "attempted to trace
 // have any stack growth.
 //
 //go:nosplit
-internal static traceWriter writeProcStatus(this traceWriter w, uint64 pid, tracev2.ProcStatus status, bool inSweep) {
+internal static traceWriter writeProcStatus⁔(/*this*/ traceWriter w, uint64 pid, tracev2.ProcStatus status, bool inSweep) {
     // The status should never be bad. Some invariant must have been violated.
     if (status == tracev2.ProcBad) {
         print((@string)"runtime: pid=", pid, (@string)"\n");
@@ -124,8 +121,6 @@ internal static traceWriter writeProcStatus(this traceWriter w, uint64 pid, trac
     }
     return w;
 }
-
-} partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string triedToTraceDeadˢ => ref triedToTraceDeadˢᵇ;
@@ -202,15 +197,13 @@ partial struct traceSchedResourceState {
     internal array<uint64> seq = new(2);
 }
 
-} partial class runtimeᴛtraceSchedResourceState {
-
 // acquireStatus acquires the right to emit a Status event for the scheduling resource.
 //
 // nosplit because it's part of writing an event for an M, which must not
 // have any stack growth.
 //
 //go:nosplit
-internal static bool acquireStatus(this ref traceSchedResourceState r, uintptr gen) {
+internal static bool acquireStatus⁔(/*this*/ ref traceSchedResourceState r, uintptr gen) {
     if (!Ꮡ(r.statusTraced, gen % 3).CompareAndSwap(0, 1)) {
         return false;
     }
@@ -219,27 +212,27 @@ internal static bool acquireStatus(this ref traceSchedResourceState r, uintptr g
 }
 
 // readyNextGen readies r for the generation following gen.
-internal static void readyNextGen(this ref traceSchedResourceState r, uintptr gen) {
+internal static void readyNextGen⁔(/*this*/ ref traceSchedResourceState r, uintptr gen) {
     var nextGen = traceNextGen(gen);
     r.seq[nextGen % 2] = 0;
     Ꮡ(r.statusTraced, nextGen % 3).Store(0);
 }
 
 // statusWasTraced returns true if the sched resource's status was already acquired for tracing.
-internal static bool statusWasTraced(this ref traceSchedResourceState r, uintptr gen) {
+internal static bool statusWasTraced⁔(/*this*/ ref traceSchedResourceState r, uintptr gen) {
     return Ꮡ(r.statusTraced, gen % 3).Load() != 0;
 }
 
 // setStatusTraced indicates that the resource's status was already traced, for example
 // when a goroutine is created.
-internal static void setStatusTraced(this ref traceSchedResourceState r, uintptr gen) {
+internal static void setStatusTraced⁔(/*this*/ ref traceSchedResourceState r, uintptr gen) {
     Ꮡ(r.statusTraced, gen % 3).Store(1);
 }
 
 // nextSeq returns the next sequence number for the resource.
-internal static traceArg nextSeq(this ref traceSchedResourceState r, uintptr gen) {
+internal static traceArg nextSeq⁔(/*this*/ ref traceSchedResourceState r, uintptr gen) {
     r.seq[gen % 2]++;
     return (traceArg)r.seq[gen % 2];
 }
 
-}
+} // end runtime_package

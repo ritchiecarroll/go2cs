@@ -15,7 +15,6 @@ using slices = slices_package;
 using go.@internal;
 using io;
 using ꓸꓸꓸbyte = variadic<byte>;
-using static filepathlite_package;
 
 partial class filepathlite_package {
 
@@ -33,16 +32,14 @@ partial struct lazybuf {
     internal nint volLen;
 }
 
-} partial class filepathliteᴛlazybuf {
-
-internal static byte index(this ref lazybuf b, nint i) {
+internal static byte index⁔(/*this*/ ref lazybuf b, nint i) {
     if (b.buf != nil) {
         return b.buf[i];
     }
     return b.path[i];
 }
 
-internal static void append(this ref lazybuf b, byte c) {
+internal static void append⁔(/*this*/ ref lazybuf b, byte c) {
     if (b.buf == nil) {
         if (b.w < len(b.path) && b.path[b.w] == c) {
             b.w++;
@@ -55,21 +52,19 @@ internal static void append(this ref lazybuf b, byte c) {
     b.w++;
 }
 
-internal static void prepend(this ref lazybuf b, params ꓸꓸꓸbyte prefixʗp) {
+internal static void prepend⁔(/*this*/ ref lazybuf b, params ꓸꓸꓸbyte prefixʗp) {
     var prefix = prefixʗp.slice();
 
     b.buf = slices.Insert(b.buf, 0, prefix.ꓸꓸꓸ);
     b.w += len(prefix);
 }
 
-internal static @string @string(this ref lazybuf b) {
+internal static @string string⁔(/*this*/ ref lazybuf b) {
     if (b.buf == nil) {
         return b.volAndPath.slice(0, b.volLen + b.w);
     }
     return b.volAndPath.slice(0, b.volLen) + ((sstring)(b.buf.slice(0, b.w)));
 }
-
-} partial class filepathlite_package {
 
 // Clean is filepath.Clean.
 public static @string Clean(@string path) {

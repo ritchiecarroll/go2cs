@@ -45,7 +45,7 @@ internal static void main() {
     b = a;
     var s = new map<@string, EmptyStruct>{["x"] = new()};
     var l = slice<nint>([1, 2, 3]);
-    Func<nint, nint> f = (nint x) => x * 2;
+    Func<nint, nint> f = [GoFunc("main.func1")] (nint x) => x * 2;
     ж<lib.Box<nint>> ptr = Ꮡb;
     ptr.Set(7);
     var n = new lib.Box<float64>(V: 1.5D);

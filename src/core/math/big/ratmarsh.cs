@@ -9,21 +9,18 @@ using fmt = fmt_package;
 using byteorder = @internal.byteorder_package;
 using math = math_package;
 using @internal;
-using static big_package;
 
 partial class big_package {
 
 // Gob codec version. Permits backward-compatible changes to the encoding.
 internal const byte ratGobVersion = 1;
 
-} partial class bigᴛRat {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string ratGobEncodeNumeratorTooˢ => ref ratGobEncodeNumeratorTooˢᵇ;
 private static readonly @string ratGobEncodeNumeratorTooˢᵇ = "Rat.GobEncode: numerator too large"u8;
 
 // GobEncode implements the [encoding/gob.GobEncoder] interface.
-public static (slice<byte>, error) GobEncode(this ж<Rat> Ꮡx) {
+internal static (slice<byte>, error) GobEncode⁔(/*this*/ ж<Rat> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     if (Ꮡx == nil) {
@@ -54,7 +51,7 @@ internal static ref readonly @string ratGobDecodeInvalidˢ => ref ratGobDecodeIn
 private static readonly @string ratGobDecodeInvalidˢᵇ = "Rat.GobDecode: invalid length"u8;
 
 // GobDecode implements the [encoding/gob.GobDecoder] interface.
-public static error GobDecode(this ref Rat z, slice<byte> buf) {
+internal static error GobDecode⁔(/*this*/ ref Rat z, slice<byte> buf) {
     if (len(buf) == 0) {
         // Other side sent a nil or default value.
         z = new Rat();
@@ -83,7 +80,7 @@ public static error GobDecode(this ref Rat z, slice<byte> buf) {
 }
 
 // AppendText implements the [encoding.TextAppender] interface.
-public static (slice<byte>, error) AppendText(this ж<Rat> Ꮡx, slice<byte> b) {
+internal static (slice<byte>, error) AppendText⁔(/*this*/ ж<Rat> Ꮡx, slice<byte> b) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     if (x.IsInt()) {
@@ -93,12 +90,12 @@ public static (slice<byte>, error) AppendText(this ж<Rat> Ꮡx, slice<byte> b) 
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
-public static (slice<byte> text, error err) MarshalText(this ж<Rat> Ꮡx) {
+internal static (slice<byte> text, error err) MarshalText⁔(/*this*/ ж<Rat> Ꮡx) {
     return Ꮡx.AppendText(default);
 }
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
-public static error UnmarshalText(this ж<Rat> Ꮡz, slice<byte> text) {
+internal static error UnmarshalText⁔(/*this*/ ж<Rat> Ꮡz, slice<byte> text) {
     // TODO(gri): get rid of the []byte/string conversion
     var (_, ok) = Ꮡz.SetString((@string)text); if (!ok) {
         return fmt.Errorf("math/big: cannot unmarshal %q into a *big.Rat"u8, text);
@@ -106,4 +103,4 @@ public static error UnmarshalText(this ж<Rat> Ꮡz, slice<byte> text) {
     return default;
 }
 
-}
+} // end big_package

@@ -10,10 +10,14 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+using big = go.math.big_package;
 // </ImportedTypeAliases>
 
 using go;
 using static go.crypto.elliptic_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -74,11 +78,14 @@ using static go.crypto.elliptic_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("crypto/elliptic/elliptic.go", "elliptic.cs", "AD+IAZ4ACgKCgoKUgoKCuKamgqaUAAISAAkClJSClIKUrOKCgoKCggAMGgABEAAJAoKmgoKUgpSCgoKClIKUrOKCpoKClIKUgoKCpoKCgpSClIKUptaCpoLsgoKCggACFPKCAAIWAAgCggACFPKCAAIU8oI=")]
-[assembly: GoPositionMap("crypto/elliptic/nistec.go", "nistec.cs", "AA4auIIACxi4ggALGLiCAAsiuIIAKF6ipvaClIIACAYACAaCpoKUgqaCgoKCgqbSgqaUgoKCpqKCgpSCgpSmooKClKrCgoKUgoKUgqaigoKUgoKClKaigoKClKbSgqaCgsqCgoKmooKUgoKUxoKCgpSmgoKClA==", "", "", "20=bigFromDecimal/1/2/4,bigFromDecimal/2/2/5,bigFromHex/1/3/6,bigFromHex/2/3/7,bigFromHex/3/3/8;37=bigFromDecimal/1/2/4,bigFromDecimal/2/2/5,bigFromHex/1/3/6,bigFromHex/2/3/7,bigFromHex/3/3/8;54=bigFromDecimal/1/2/4,bigFromDecimal/2/2/6,bigFromHex/1/3/8,bigFromHex/2/3/10,bigFromHex/3/3/12;71=bigFromDecimal/1/2/4,bigFromDecimal/2/2/7,bigFromHex/1/3/10,bigFromHex/2/3/13,bigFromHex/3/3/16")]
-[assembly: GoPositionMap("crypto/elliptic/params.go", "params.cs", "ABwwggACFgAIAoKUgpSCgpQAAhIADAaCpoS4gpTM4oKClMrigqaClIKCgoKCAAISAAoGgpSClIKCuuSCgoKCgpSCgoKCpoKCgpSCgoKCgoKClIKClIKCgoKCgoKClIKClIKUgoKCgoKUgoKCgoKClIKCgoKClAACEgAKBoKUlIK6tIKCgoKCgpSCgoKClJSCgoKCgpSUgoKCgpSCgpSUgoKClJSCgpSCgpSUAAISAAoGgpSUgpSigoKClLgAAhIACgaCpsaCgoKm", "", "", "72=Sign/2/2/1,Cmp/2/2/1")]
+[assembly: GoPositionMap("crypto/elliptic/nistec.go", "nistec.cs", "AA0auIIACxi4ggALGLiCAAsiuIIAJl6ipvaClIIACAYACAaCpoKUgqaCgoKCgqbSgqaUgoKCpqKCgpSCgpSmooKClKrCgoKUgoKUgqaigoKUgoKClKaigoKClKbSgqaCgsqCgoKmooKUgoKUpoKCgpSmgoKClA==", "", "", "19=bigFromDecimal/1/2/4,bigFromDecimal/2/2/5,bigFromHex/1/3/6,bigFromHex/2/3/7,bigFromHex/3/3/8;36=bigFromDecimal/1/2/4,bigFromDecimal/2/2/5,bigFromHex/1/3/6,bigFromHex/2/3/7,bigFromHex/3/3/8;53=bigFromDecimal/1/2/4,bigFromDecimal/2/2/6,bigFromHex/1/3/8,bigFromHex/2/3/10,bigFromHex/3/3/12;70=bigFromDecimal/1/2/4,bigFromDecimal/2/2/7,bigFromHex/1/3/10,bigFromHex/2/3/13,bigFromHex/3/3/16")]
+[assembly: GoPositionMap("crypto/elliptic/params.go", "params.cs", "ABkwggACFgAIAoKUgpSCgpQAAhIADAaCpoS4gpSs4oKClKrigqaClIKCgoKCAAISAAoGgpSClIKCuuSCgoKCgpSCgoKCpoKCgpSCgoKCgoKClIKClIKCgoKCgoKClIKClIKUgoKCgoKUgoKCgoKClIKCgoKClAACEgAKBoKUlIK6tIKCgoKCgpSCgoKClJSCgoKCgpSUgoKCgpSCgpSUgoKClJSCgpSCgpSUAAISAAoGgpSUgpSigoKClLgAAhIACgaCpqaCgoKm", "", "", "69=Sign/2/2/1,Cmp/2/2/1")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;
+
+using static go.crypto.elliptic_package;
+using big = go.math.big_package;
 
 [GoPackage("elliptic")]
 public static partial class elliptic_package
@@ -119,6 +126,38 @@ public static partial class elliptic_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(elliptic_package.CurveParams)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ellipticᴛCurveParams;
-[GoMethodHost(typeof(elliptic_package.nistCurve<>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ellipticᴛnistCurve;
+[GoMethodHost(typeof(elliptic_package.CurveParams)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class ellipticᴛCurveParams;
+[GoMethodHost(typeof(elliptic_package.nistCurve<>)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class ellipticᴛnistCurve;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class ellipticᴛCurveParams {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<CurveParams> Params(this ж<CurveParams> Ꮡcurve) => elliptic_package.Params⁔(Ꮡcurve);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<big.Int> polynomial(this ref CurveParams curve, ж<big.Int> Ꮡx) => elliptic_package.polynomial⁔(ref curve, Ꮡx);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool IsOnCurve(this ж<CurveParams> Ꮡcurve, ж<big.Int> Ꮡx, ж<big.Int> Ꮡy) => elliptic_package.IsOnCurve⁔(Ꮡcurve, Ꮡx, Ꮡy);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (ж<big.Int> xOut, ж<big.Int> yOut) affineFromJacobian(this ref CurveParams curve, ж<big.Int> Ꮡx, ж<big.Int> Ꮡy, ж<big.Int> Ꮡz) => elliptic_package.affineFromJacobian⁔(ref curve, Ꮡx, Ꮡy, Ꮡz);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (ж<big.Int>, ж<big.Int>) Add(this ж<CurveParams> Ꮡcurve, ж<big.Int> Ꮡx1, ж<big.Int> Ꮡy1, ж<big.Int> Ꮡx2, ж<big.Int> Ꮡy2) => elliptic_package.Add⁔(Ꮡcurve, Ꮡx1, Ꮡy1, Ꮡx2, Ꮡy2);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (ж<big.Int>, ж<big.Int>, ж<big.Int>) addJacobian(this ref CurveParams curve, ж<big.Int> Ꮡx1, ж<big.Int> Ꮡy1, ж<big.Int> Ꮡz1, ж<big.Int> Ꮡx2, ж<big.Int> Ꮡy2, ж<big.Int> Ꮡz2) => elliptic_package.addJacobian⁔(ref curve, Ꮡx1, Ꮡy1, Ꮡz1, Ꮡx2, Ꮡy2, Ꮡz2);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (ж<big.Int>, ж<big.Int>) Double(this ж<CurveParams> Ꮡcurve, ж<big.Int> Ꮡx1, ж<big.Int> Ꮡy1) => elliptic_package.Double⁔(Ꮡcurve, Ꮡx1, Ꮡy1);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (ж<big.Int>, ж<big.Int>, ж<big.Int>) doubleJacobian(this ref CurveParams curve, ж<big.Int> Ꮡx, ж<big.Int> Ꮡy, ж<big.Int> Ꮡz) => elliptic_package.doubleJacobian⁔(ref curve, Ꮡx, Ꮡy, Ꮡz);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (ж<big.Int>, ж<big.Int>) ScalarMult(this ж<CurveParams> Ꮡcurve, ж<big.Int> ᏑBx, ж<big.Int> ᏑBy, slice<byte> k) => elliptic_package.ScalarMult⁔(Ꮡcurve, ᏑBx, ᏑBy, k);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (ж<big.Int>, ж<big.Int>) ScalarBaseMult(this ж<CurveParams> Ꮡcurve, slice<byte> k) => elliptic_package.ScalarBaseMult⁔(Ꮡcurve, k);
+}
+partial class ellipticᴛnistCurve {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<CurveParams> Params<Point>(this ref nistCurve<Point> curve) where Point : nistPoint<Point> => elliptic_package.Params⁔<Point>(ref curve);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool IsOnCurve<Point>(this ref nistCurve<Point> curve, ж<big.Int> Ꮡx, ж<big.Int> Ꮡy) where Point : nistPoint<Point> => elliptic_package.IsOnCurve⁔<Point>(ref curve, Ꮡx, Ꮡy);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (Point p, error err) pointFromAffine<Point>(this ref nistCurve<Point> curve, ж<big.Int> Ꮡx, ж<big.Int> Ꮡy) where Point : nistPoint<Point> => elliptic_package.pointFromAffine⁔<Point>(ref curve, Ꮡx, Ꮡy);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (ж<big.Int> x, ж<big.Int> y) pointToAffine<Point>(this ref nistCurve<Point> curve, Point p) where Point : nistPoint<Point> => elliptic_package.pointToAffine⁔<Point>(ref curve, p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (ж<big.Int>, ж<big.Int>) Add<Point>(this ref nistCurve<Point> curve, ж<big.Int> Ꮡx1, ж<big.Int> Ꮡy1, ж<big.Int> Ꮡx2, ж<big.Int> Ꮡy2) where Point : nistPoint<Point> => elliptic_package.Add⁔<Point>(ref curve, Ꮡx1, Ꮡy1, Ꮡx2, Ꮡy2);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (ж<big.Int>, ж<big.Int>) Double<Point>(this ref nistCurve<Point> curve, ж<big.Int> Ꮡx1, ж<big.Int> Ꮡy1) where Point : nistPoint<Point> => elliptic_package.Double⁔<Point>(ref curve, Ꮡx1, Ꮡy1);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<byte> normalizeScalar<Point>(this ref nistCurve<Point> curve, slice<byte> scalar) where Point : nistPoint<Point> => elliptic_package.normalizeScalar⁔<Point>(ref curve, scalar);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (ж<big.Int>, ж<big.Int>) ScalarMult<Point>(this ref nistCurve<Point> curve, ж<big.Int> ᏑBx, ж<big.Int> ᏑBy, slice<byte> scalar) where Point : nistPoint<Point> => elliptic_package.ScalarMult⁔<Point>(ref curve, ᏑBx, ᏑBy, scalar);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (ж<big.Int>, ж<big.Int>) ScalarBaseMult<Point>(this ref nistCurve<Point> curve, slice<byte> scalar) where Point : nistPoint<Point> => elliptic_package.ScalarBaseMult⁔<Point>(ref curve, scalar);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (ж<big.Int> x, ж<big.Int> y) Unmarshal<Point>(this ref nistCurve<Point> curve, slice<byte> data) where Point : nistPoint<Point> => elliptic_package.Unmarshal⁔<Point>(ref curve, data);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (ж<big.Int> x, ж<big.Int> y) UnmarshalCompressed<Point>(this ref nistCurve<Point> curve, slice<byte> data) where Point : nistPoint<Point> => elliptic_package.UnmarshalCompressed⁔<Point>(ref curve, data);
+}
+// </MethodForwarders>

@@ -55,10 +55,10 @@ internal static partial void main() {
     var c = Ꮡ(new counter());
     var b = Ꮡ(new box<nint>(v: 1));
 
-    var lit = [MethodImpl(MethodImplOptions.NoInlining)] @string () => here();
-    @string call(Func<@string> f) => f();
+    var lit = [MethodImpl(MethodImplOptions.NoInlining), GoFunc("main.func1")] @string () => here();
+    [GoFunc("main.func2")] @string call(Func<@string> f) => f();
 
-    [MethodImpl(MethodImplOptions.NoInlining)] @string local() {
+    [MethodImpl(MethodImplOptions.NoInlining), GoFunc("main.func3")] @string local() {
         var (pc, _, _, _) = runtime.Caller(0);
         return runtime.FuncForPC(pc).Name();
     }

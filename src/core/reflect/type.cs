@@ -62,8 +62,6 @@ using @unsafe = unsafe_package;
 using @internal;
 using go.unicode;
 using ꓸꓸꓸbyte = variadic<byte>;
-using reflect = reflect_package;
-using static reflect_package;
 
 partial class reflect_package {
 
@@ -341,17 +339,13 @@ partial struct rtype {
     internal abi.Type t;
 }
 
-} partial class reflectᴛrtype {
-
-internal static ж<abi.Type> common(this ж<rtype> Ꮡt) {
+internal static ж<abi.Type> common⁔(/*this*/ ж<rtype> Ꮡt) {
     return Ꮡt.Ꮡt;
 }
 
-internal static ж<abi.UncommonType> uncommon(this ж<rtype> Ꮡt) {
+internal static ж<abi.UncommonType> uncommon⁔(/*this*/ ж<rtype> Ꮡt) {
     return Ꮡt.Ꮡt.Uncommon();
 }
-
-} partial class reflect_package {
 
 // ChanDir represents a channel type's direction.
 partial struct ChanDir /*num:nint*/;
@@ -365,13 +359,9 @@ partial struct interfaceType {
     /*embed*/ public @internal.abi_package.InterfaceType InterfaceType; // can embed directly because not a public type.
 }
 
-} partial class reflectᴛinterfaceType {
-
-internal static abi.Name nameOff(this ж<interfaceType> Ꮡt, aNameOff off) {
+internal static abi.Name nameOff⁔(/*this*/ ж<interfaceType> Ꮡt, aNameOff off) {
     return toRType(Ꮡt.of(interfaceType.ᏑType)).nameOff(off);
 }
-
-} partial class reflect_package {
 
 internal static abi.Name nameOffFor(ж<abi.Type> t, aNameOff off) {
     return toRType(t).nameOff(off);
@@ -381,21 +371,17 @@ internal static ж<abi.Type> typeOffFor(ж<abi.Type> t, aTypeOff off) {
     return toRType(t).typeOff(off);
 }
 
-} partial class reflectᴛinterfaceType {
-
-internal static ж<abi.Type> typeOff(this ж<interfaceType> Ꮡt, aTypeOff off) {
+internal static ж<abi.Type> typeOff⁔(/*this*/ ж<interfaceType> Ꮡt, aTypeOff off) {
     return toRType(Ꮡt.of(interfaceType.ᏑType)).typeOff(off);
 }
 
-internal static ж<abi.Type> common(this ж<interfaceType> Ꮡt) {
+internal static ж<abi.Type> common⁔(/*this*/ ж<interfaceType> Ꮡt) {
     return Ꮡt.of(interfaceType.ᏑType);
 }
 
-internal static ж<abi.UncommonType> uncommon(this ж<interfaceType> Ꮡt) {
+internal static ж<abi.UncommonType> uncommon⁔(/*this*/ ж<interfaceType> Ꮡt) {
     return Ꮡt.of(interfaceType.ᏑType).Uncommon();
 }
-
-} partial class reflect_package {
 
 // ptrType represents a pointer type.
 partial struct ptrType {
@@ -460,24 +446,18 @@ partial struct Method {
     public nint Index; // index for Type.Method
 }
 
-} partial class reflectᴛMethod {
-
 // IsExported reports whether the method is exported.
-public static bool IsExported(this Method m) {
+internal static bool IsExported⁔(/*this*/ Method m) {
     return m.PkgPath == ""u8;
 }
 
-} partial class reflectᴛKind {
-
 // String returns the name of k.
-public static @string String(this Kind k) {
+internal static @string String⁔(/*this*/ Kind k) {
     if ((nuint)k < (nuint)len(kindNames)) {
         return kindNames[(nuint)k];
     }
     return "kind"u8 + strconv.Itoa((nint)k);
 }
-
-} partial class reflect_package {
 
 [GoLazy] partial class lazyᴛkindNames { internal static slice<@string> kindNames = new golib.SparseArray<@string>{
     [(int)((nuint)Invalid)] = "invalid",
@@ -573,39 +553,33 @@ internal static aTextOff resolveReflectText(@unsafe.Pointer ptr) {
     return (aTextOff)addReflectOff(ptr);
 }
 
-} partial class reflectᴛrtype {
-
-internal static abi.Name nameOff(this ж<rtype> Ꮡt, aNameOff off) {
+internal static abi.Name nameOff⁔(/*this*/ ж<rtype> Ꮡt, aNameOff off) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     return new abi.Name(Bytes: @unsafe.Pointer.To<byte>(resolveNameOff((uintptr)@unsafe.Pointer.FromRef(ref t), (int32)off)));
 }
 
-internal static ж<abi.Type> typeOff(this ж<rtype> Ꮡt, aTypeOff off) {
+internal static ж<abi.Type> typeOff⁔(/*this*/ ж<rtype> Ꮡt, aTypeOff off) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     return @unsafe.Pointer.To<abi.Type>(resolveTypeOff((uintptr)@unsafe.Pointer.FromRef(ref t), (int32)off));
 }
 
-internal static @unsafe.Pointer textOff(this ж<rtype> Ꮡt, aTextOff off) {
+internal static @unsafe.Pointer textOff⁔(/*this*/ ж<rtype> Ꮡt, aTextOff off) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     return resolveTextOff((uintptr)@unsafe.Pointer.FromRef(ref t), (int32)off);
 }
 
-} partial class reflect_package {
-
 internal static @unsafe.Pointer textOffFor(ж<abi.Type> t, aTextOff off) {
     return toRType(t).textOff(off);
 }
 
-} partial class reflectᴛrtype {
-
 // go2cs generated this placeholder — func String is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-internal static uintptr Size(this ref rtype t) { return t.t.Size(); }
+internal static uintptr Size⁔(/*this*/ ref rtype t) { return t.t.Size(); }
 
-internal static nint Bits(this ж<rtype> Ꮡt) {
+internal static nint Bits⁔(/*this*/ ж<rtype> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (Ꮡt == nil) {
@@ -618,13 +592,13 @@ internal static nint Bits(this ж<rtype> Ꮡt) {
     return (nint)t.t.Size_ * 8;
 }
 
-internal static nint Align(this ref rtype t) { return t.t.Align(); }
+internal static nint Align⁔(/*this*/ ref rtype t) { return t.t.Align(); }
 
-internal static nint FieldAlign(this ref rtype t) { return t.t.FieldAlign(); }
+internal static nint FieldAlign⁔(/*this*/ ref rtype t) { return t.t.FieldAlign(); }
 
-internal static Kind Kind(this ref rtype t) { return (Kind)(nuint)t.t.Kind(); }
+internal static Kind Kind⁔(/*this*/ ref rtype t) { return (Kind)(nuint)t.t.Kind(); }
 
-internal static slice<abi.Method> exportedMethods(this ж<rtype> Ꮡt) {
+internal static slice<abi.Method> exportedMethods⁔(/*this*/ ж<rtype> Ꮡt) {
     var ut = Ꮡt.uncommon();
     if (ut == nil) {
         return default;
@@ -640,27 +614,17 @@ internal static slice<abi.Method> exportedMethods(this ж<rtype> Ꮡt) {
 
 // go2cs generated this placeholder — func PkgPath is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-} partial class reflect_package {
-
 internal static @string pkgPathFor(ж<abi.Type> t) {
     return toRType(t).PkgPath();
 }
 
-} partial class reflectᴛrtype {
-
 // go2cs generated this placeholder — func Name is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
-
-} partial class reflect_package {
 
 internal static @string nameFor(ж<abi.Type> t) {
     return toRType(t).Name();
 }
 
-} partial class reflectᴛrtype {
-
 // go2cs generated this placeholder — func ChanDir is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
-
-} partial class reflect_package {
 
 internal static ж<rtype> toRType(ж<abi.Type> t) {
     return t.Reinterpret<abi.Type, rtype>();
@@ -674,8 +638,6 @@ internal static ж<abi.Type> elem(ж<abi.Type> t) {
     throw panic("reflect: Elem of invalid type " + stringFor(t));
 }
 
-} partial class reflectᴛrtype {
-
 // go2cs generated this placeholder — func Elem is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // go2cs generated this placeholder — func Field is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
@@ -684,7 +646,7 @@ internal static ж<abi.Type> elem(ж<abi.Type> t) {
 
 // go2cs generated this placeholder — func FieldByName is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-internal static (StructField, bool) FieldByNameFunc(this ж<rtype> Ꮡt, Func<@string, bool> match) {
+internal static (StructField, bool) FieldByNameFunc⁔(/*this*/ ж<rtype> Ꮡt, Func<@string, bool> match) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (t.Kind() != Struct) {
@@ -708,7 +670,7 @@ internal static (StructField, bool) FieldByNameFunc(this ж<rtype> Ꮡt, Func<@s
 
 // go2cs generated this placeholder — func IsVariadic is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-internal static bool OverflowComplex(this ж<rtype> Ꮡt, complex128 x) {
+internal static bool OverflowComplex⁔(/*this*/ ж<rtype> Ꮡt, complex128 x) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     Kind k = t.Kind();
@@ -722,7 +684,7 @@ internal static bool OverflowComplex(this ж<rtype> Ꮡt, complex128 x) {
     throw panic("reflect: OverflowComplex of non-complex type " + Ꮡt.String());
 }
 
-internal static bool OverflowFloat(this ж<rtype> Ꮡt, float64 x) {
+internal static bool OverflowFloat⁔(/*this*/ ж<rtype> Ꮡt, float64 x) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     Kind k = t.Kind();
@@ -736,7 +698,7 @@ internal static bool OverflowFloat(this ж<rtype> Ꮡt, float64 x) {
     throw panic("reflect: OverflowFloat of non-float type " + Ꮡt.String());
 }
 
-internal static bool OverflowInt(this ж<rtype> Ꮡt, int64 x) {
+internal static bool OverflowInt⁔(/*this*/ ж<rtype> Ꮡt, int64 x) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     Kind k = t.Kind();
@@ -749,7 +711,7 @@ internal static bool OverflowInt(this ж<rtype> Ꮡt, int64 x) {
     throw panic("reflect: OverflowInt of non-int type " + Ꮡt.String());
 }
 
-internal static bool OverflowUint(this ж<rtype> Ꮡt, uint64 x) {
+internal static bool OverflowUint⁔(/*this*/ ж<rtype> Ꮡt, uint64 x) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     Kind k = t.Kind();
@@ -762,11 +724,11 @@ internal static bool OverflowUint(this ж<rtype> Ꮡt, uint64 x) {
     throw panic("reflect: OverflowUint of non-uint type " + Ꮡt.String());
 }
 
-internal static bool CanSeq(this ж<rtype> Ꮡt) {
+internal static bool CanSeq⁔(/*this*/ ж<rtype> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     switch (t.Kind()) {
-    case var ᴛ when ᴛ == Int8 || ᴛ == Int16 || ᴛ == Int32 || ᴛ == Int64 || ᴛ == Int || ᴛ == Uint8 || ᴛ == Uint16 || ᴛ == Uint32 || ᴛ == Uint64 || ᴛ == Uint || ᴛ == Uintptr || ᴛ == Array || ᴛ == Slice || ᴛ == Chan || ᴛ == reflect.String || ᴛ == Map: {
+    case var ᴛ when ᴛ == Int8 || ᴛ == Int16 || ᴛ == Int32 || ᴛ == Int64 || ᴛ == Int || ᴛ == Uint8 || ᴛ == Uint16 || ᴛ == Uint32 || ᴛ == Uint64 || ᴛ == Uint || ᴛ == Uintptr || ᴛ == Array || ᴛ == Slice || ᴛ == Chan || ᴛ == String || ᴛ == Map: {
         return true;
     }
     case var ᴛ when ᴛ == Func: {
@@ -777,8 +739,6 @@ internal static bool CanSeq(this ж<rtype> Ꮡt) {
     }}
     return false;
 }
-
-} partial class reflect_package {
 
 internal static bool canRangeFunc(ж<abi.Type> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
@@ -798,13 +758,11 @@ internal static bool canRangeFunc(ж<abi.Type> Ꮡt) {
     return yield.InCount == 1 && yield.OutCount == 1 && yield.Out(0).Kind() == abi.Bool;
 }
 
-} partial class reflectᴛrtype {
-
-internal static bool CanSeq2(this ж<rtype> Ꮡt) {
+internal static bool CanSeq2⁔(/*this*/ ж<rtype> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     switch (t.Kind()) {
-    case var ᴛ when ᴛ == Array || ᴛ == Slice || ᴛ == reflect.String || ᴛ == Map: {
+    case var ᴛ when ᴛ == Array || ᴛ == Slice || ᴛ == String || ᴛ == Map: {
         return true;
     }
     case var ᴛ when ᴛ == Func: {
@@ -815,8 +773,6 @@ internal static bool CanSeq2(this ж<rtype> Ꮡt) {
     }}
     return false;
 }
-
-} partial class reflect_package {
 
 internal static bool canRangeFunc2(ж<abi.Type> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
@@ -836,15 +792,13 @@ internal static bool canRangeFunc2(ж<abi.Type> Ꮡt) {
     return yield.InCount == 2 && yield.OutCount == 1 && yield.Out(0).Kind() == abi.Bool;
 }
 
-} partial class reflectᴛrtype {
-
-internal static iter.Seq<StructField> Fields(this ж<rtype> Ꮡt) {
+internal static iter.Seq<StructField> Fields⁔(/*this*/ ж<rtype> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (t.Kind() != Struct) {
         throw panic("reflect: Fields of non-struct type " + Ꮡt.String());
     }
-    return (Func<StructField, bool> yield) => {
+    return [GoFunc("(*rtype).Fields.func1")] (Func<StructField, bool> yield) => {
         foreach (var i in range(Ꮡt.NumField())) {
             if (!yield(Ꮡt.Field(i))) {
                 return;
@@ -853,8 +807,8 @@ internal static iter.Seq<StructField> Fields(this ж<rtype> Ꮡt) {
     };
 }
 
-internal static iter.Seq<Method> Methods(this ж<rtype> Ꮡt) {
-    return (Func<Method, bool> yield) => {
+internal static iter.Seq<Method> Methods⁔(/*this*/ ж<rtype> Ꮡt) {
+    return [GoFunc("(*rtype).Methods.func1")] (Func<Method, bool> yield) => {
         foreach (var i in range(Ꮡt.NumMethod())) {
             if (!yield(Ꮡt.Method(i))) {
                 return;
@@ -863,13 +817,13 @@ internal static iter.Seq<Method> Methods(this ж<rtype> Ꮡt) {
     };
 }
 
-internal static iter.Seq<Type> Ins(this ж<rtype> Ꮡt) {
+internal static iter.Seq<Type> Ins⁔(/*this*/ ж<rtype> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (t.Kind() != Func) {
         throw panic("reflect: Ins of non-func type " + Ꮡt.String());
     }
-    return (Func<Type, bool> yield) => {
+    return [GoFunc("(*rtype).Ins.func1")] (Func<Type, bool> yield) => {
         foreach (var i in range(Ꮡt.NumIn())) {
             if (!yield(Ꮡt.In(i))) {
                 return;
@@ -878,13 +832,13 @@ internal static iter.Seq<Type> Ins(this ж<rtype> Ꮡt) {
     };
 }
 
-internal static iter.Seq<Type> Outs(this ж<rtype> Ꮡt) {
+internal static iter.Seq<Type> Outs⁔(/*this*/ ж<rtype> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (t.Kind() != Func) {
         throw panic("reflect: Outs of non-func type " + Ꮡt.String());
     }
-    return (Func<Type, bool> yield) => {
+    return [GoFunc("(*rtype).Outs.func1")] (Func<Type, bool> yield) => {
         foreach (var i in range(Ꮡt.NumOut())) {
             if (!yield(Ꮡt.Out(i))) {
                 return;
@@ -892,8 +846,6 @@ internal static iter.Seq<Type> Outs(this ж<rtype> Ꮡt) {
         }
     };
 }
-
-} partial class reflect_package {
 
 // add returns p+x.
 //
@@ -917,8 +869,6 @@ internal static @unsafe.Pointer add(@unsafe.Pointer p, uintptr x, @string whySaf
     return @unsafe.Add(p, x);
 }
 
-} partial class reflectᴛChanDir {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string chanˢ => ref chanˢᵇ;
 private static readonly @string chanˢᵇ = "chan<-"u8;
@@ -927,7 +877,7 @@ private static readonly @string chanˢ2ᵇ = "<-chan"u8;
 internal static ref readonly @string chanˢ3 => ref chanˢ3ᵇ;
 private static readonly @string chanˢ3ᵇ = "chan"u8;
 
-public static @string String(this ChanDir d) {
+internal static @string String⁔(/*this*/ ChanDir d) {
     switch (d) {
     case var ᴛ when ᴛ == SendDir: {
         return chanˢ;
@@ -941,10 +891,8 @@ public static @string String(this ChanDir d) {
     return "ChanDir"u8 + strconv.Itoa((nint)d);
 }
 
-} partial class reflectᴛinterfaceType {
-
 // Method returns the i'th method in the type's method set.
-internal static Method /*m*/ Method(this ж<interfaceType> Ꮡt, nint i) {
+internal static Method /*m*/ Method⁔(/*this*/ ж<interfaceType> Ꮡt, nint i) {
     Method m = new();
     ref var t = ref Ꮡt.DerefOrNull();
 
@@ -966,10 +914,10 @@ internal static Method /*m*/ Method(this ж<interfaceType> Ꮡt, nint i) {
 }
 
 // NumMethod returns the number of interface methods in the type's method set.
-internal static nint NumMethod(this ref interfaceType t) { return len(t.Methods); }
+internal static nint NumMethod⁔(/*this*/ ref interfaceType t) { return len(t.Methods); }
 
 // MethodByName method with the given name in the type's method set.
-internal static (Method m, bool ok) MethodByName(this ж<interfaceType> Ꮡt, @string name) {
+internal static (Method m, bool ok) MethodByName⁔(/*this*/ ж<interfaceType> Ꮡt, @string name) {
     Method m = new();
     bool ok = default;
     ref var t = ref Ꮡt.DerefOrNull();
@@ -987,8 +935,6 @@ internal static (Method m, bool ok) MethodByName(this ж<interfaceType> Ꮡt, @s
     return (m, ok);
 }
 
-} partial class reflect_package {
-
 // A StructField describes a single field in a struct.
 partial struct StructField {
     // Name is the field name.
@@ -1004,14 +950,10 @@ partial struct StructField {
     public bool Anonymous;    // is an embedded field
 }
 
-} partial class reflectᴛStructField {
-
 // IsExported reports whether the field is exported.
-public static bool IsExported(this StructField f) {
+internal static bool IsExported⁔(/*this*/ StructField f) {
     return f.PkgPath == ""u8;
 }
-
-} partial class reflect_package {
 
 // A StructTag is the tag string in a struct field.
 //
@@ -1023,14 +965,12 @@ public static bool IsExported(this StructField f) {
 // characters and Go string literal syntax.
 partial struct StructTag /*@string*/;
 
-} partial class reflectᴛStructTag {
-
 // Get returns the value associated with key in the tag string.
 // If there is no such key in the tag, Get returns the empty string.
 // If the tag does not have the conventional format, the value
 // returned by Get is unspecified. To determine whether a tag is
 // explicitly set to the empty string, use [StructTag.Lookup].
-public static @string Get(this StructTag tag, @string key) {
+internal static @string Get⁔(/*this*/ StructTag tag, @string key) {
     var (v, _) = tag.Lookup(key);
     return v;
 }
@@ -1041,7 +981,7 @@ public static @string Get(this StructTag tag, @string key) {
 // The ok return value reports whether the value was explicitly set in
 // the tag string. If the tag does not have the conventional format,
 // the value returned by Lookup is unspecified.
-public static (@string value, bool ok) Lookup(this StructTag tag, @string key) {
+internal static (@string value, bool ok) Lookup⁔(/*this*/ StructTag tag, @string key) {
     // When modifying this code, also update the validateStructTag code
     // in cmd/vet/structtag.go.
 
@@ -1095,10 +1035,8 @@ public static (@string value, bool ok) Lookup(this StructTag tag, @string key) {
     return ("", false);
 }
 
-} partial class reflectᴛstructType {
-
 // Field returns the i'th struct field.
-internal static StructField /*f*/ Field(this ref structType t, nint i) {
+internal static StructField /*f*/ Field⁔(/*this*/ ref structType t, nint i) {
     StructField f = default;
 
     if (i < 0 || i >= len(t.Fields)) {
@@ -1138,8 +1076,6 @@ internal static StructField /*f*/ Field(this ref structType t, nint i) {
     return f;
 }
 
-} partial class reflect_package {
-
 // getStaticuint64s returns a pointer to an array of 256 uint64 values,
 // defined in the runtime package in read-only memory.
 // staticuint64s[0] == 0, staticuint64s[1] == 1, and so forth.
@@ -1147,13 +1083,11 @@ internal static StructField /*f*/ Field(this ref structType t, nint i) {
 //go:linkname getStaticuint64s runtime.getStaticuint64s
 internal static partial ж<array<uint64>> getStaticuint64s();
 
-} partial class reflectᴛstructType {
-
 // TODO(gri): Should there be an error/bool indicator if the index
 // is wrong for FieldByIndex?
 
 // FieldByIndex returns the nested field corresponding to index.
-internal static StructField /*f*/ FieldByIndex(this ж<structType> Ꮡt, slice<nint> index) {
+internal static StructField /*f*/ FieldByIndex⁔(/*this*/ ж<structType> Ꮡt, slice<nint> index) {
     StructField f = default;
 
     f.Type = toType(Ꮡt.of(structType.ᏑType));
@@ -1170,19 +1104,15 @@ internal static StructField /*f*/ FieldByIndex(this ж<structType> Ꮡt, slice<n
     return f;
 }
 
-} partial class reflect_package {
-
 // A fieldScan represents an item on the fieldByNameFunc scan work list.
 partial struct fieldScan {
     internal ж<structType> typ;
     internal slice<nint> index;
 }
 
-} partial class reflectᴛstructType {
-
 // FieldByNameFunc returns the struct field with a name that satisfies the
 // match function and a boolean to indicate if the field was found.
-internal static (StructField result, bool ok) FieldByNameFunc(this ж<structType> Ꮡt, Func<@string, bool> match) {
+internal static (StructField result, bool ok) FieldByNameFunc⁔(/*this*/ ж<structType> Ꮡt, Func<@string, bool> match) {
     StructField result = default;
     bool ok = default;
     var nextᴷ = new stackAppend<fieldScan>();
@@ -1292,7 +1222,7 @@ internal static (StructField result, bool ok) FieldByNameFunc(this ж<structType
 
 // FieldByName returns the struct field with the given name
 // and a boolean to indicate if the field was found.
-internal static (StructField f, bool present) FieldByName(this ж<structType> Ꮡt, @string name) {
+internal static (StructField f, bool present) FieldByName⁔(/*this*/ ж<structType> Ꮡt, @string name) {
     StructField f = default;
     bool present = default;
     ref var t = ref Ꮡt.DerefOrNull();
@@ -1313,10 +1243,8 @@ internal static (StructField f, bool present) FieldByName(this ж<structType> �
     if (!hasEmbeds) {
         return (f, present);
     }
-    return Ꮡt.FieldByNameFunc((@string s) => s == name);
+    return Ꮡt.FieldByNameFunc([GoFunc("(*structType).FieldByName.func1")] (@string s) => s == name);
 }
-
-} partial class reflect_package {
 
 // TypeOf returns the reflection [Type] that represents the dynamic type of i.
 // If i is a nil interface value, TypeOf returns nil.
@@ -1348,9 +1276,7 @@ public static Type PtrTo(Type t) { return PointerTo(t); }
 
 // go2cs generated this placeholder — func PointerTo is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-} partial class reflectᴛrtype {
-
-internal static ж<abi.Type> ptrTo(this ж<rtype> Ꮡt) {
+internal static ж<abi.Type> ptrTo⁔(/*this*/ ж<rtype> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     var at = Ꮡt.Ꮡt;
@@ -1398,8 +1324,6 @@ internal static ж<abi.Type> ptrTo(this ж<rtype> Ꮡt) {
     return pi._<ж<ptrType>>().of(ptrType.ᏑType);
 }
 
-} partial class reflect_package {
-
 internal static ж<abi.Type> ptrTo(ж<abi.Type> t) {
     return toRType(t).ptrTo();
 }
@@ -1414,11 +1338,9 @@ internal static uint32 fnv1(uint32 x, params ꓸꓸꓸbyte listʗp) {
     return x;
 }
 
-} partial class reflectᴛrtype {
-
 // go2cs generated this placeholder — func Implements is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-internal static bool AssignableTo(this ж<rtype> Ꮡt, Type u) {
+internal static bool AssignableTo⁔(/*this*/ ж<rtype> Ꮡt, Type u) {
     if (u == nil) {
         throw panic("reflect: nil type passed to Type.AssignableTo");
     }
@@ -1426,18 +1348,16 @@ internal static bool AssignableTo(this ж<rtype> Ꮡt, Type u) {
     return directlyAssignable(uu, Ꮡt.common()) || implements(uu, Ꮡt.common());
 }
 
-internal static bool ConvertibleTo(this ж<rtype> Ꮡt, Type u) {
+internal static bool ConvertibleTo⁔(/*this*/ ж<rtype> Ꮡt, Type u) {
     if (u == nil) {
         throw panic("reflect: nil type passed to Type.ConvertibleTo");
     }
     return convertOp(u.common(), Ꮡt.common()) != nil;
 }
 
-internal static bool Comparable(this ref rtype t) {
+internal static bool Comparable⁔(/*this*/ ref rtype t) {
     return t.t.Equal != nil;
 }
-
-} partial class reflect_package {
 
 // go2cs generated this placeholder — func implements is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
@@ -2012,7 +1932,7 @@ internal static (ж<abi.Type> frametype, ж<Δsync.Pool> framePool, abiDesc abid
 
     // cache result for future callers
     var xʗ1 = x;
-    framePool = Ꮡ(new Δsync.Pool(New: () => @unsafe.Pointer.OrTypedNil(unsafe_New(xʗ1))
+    framePool = Ꮡ(new Δsync.Pool(New: [GoFunc("funcLayout.func1")] () => @unsafe.Pointer.OrTypedNil(unsafe_New(xʗ1))
     ));
     var (lti, _) = ᏑlayoutCache.LoadOrStore(k, new layoutType(
         t: x,
@@ -2029,23 +1949,19 @@ partial struct bitVector {
     internal slice<byte> data;
 }
 
-} partial class reflectᴛbitVector {
-
 // append a bit to the bitmap.
-internal static void append(this ref bitVector bv, uint8 bit) {
+internal static void append⁔(/*this*/ ref bitVector bv, uint8 bit) {
     if (bv.n % (uint32)(8 * goarch.PtrSize) == 0) {
         // Runtime needs pointer masks to be a multiple of uintptr in size.
         // Since reflect passes bv.data directly to the runtime as a pointer mask,
         // we append a full uintptr of zeros at a time.
         for (nint i = 0; i < goarch.PtrSize; i++) {
-            bv.data = builtin.append(bv.data, (byte)0);
+            bv.data = append(bv.data, (byte)0);
         }
     }
     bv.data[bv.n / 8] |= (uint8)((uint8)(bit << (int)(bv.n % 8)));
     bv.n++;
 }
-
-} partial class reflect_package {
 
 // go2cs generated this placeholder — func addTypeBits is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 

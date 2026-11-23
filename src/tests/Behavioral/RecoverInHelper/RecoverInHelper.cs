@@ -39,13 +39,13 @@ internal static (any got, any outer) helperGetsNil() {
     any outer = default;
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("helperGetsNil.func1")] () => {
             outer = recover();
         }, ref ᒐ);
-        func(() => {
+        func([GoFunc("helperGetsNil.func2")] () => {
             GoFrame ᒐ = default;
             try {
-                defer(() => {
+                defer([GoFunc("helperGetsNil.func2.1")] () => {
                     got = helperRecover();
                 }, ref ᒐ);
                 throw panic("one");
@@ -63,7 +63,7 @@ internal static any /*got*/ directWorks() {
     any got = default;
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("directWorks.func1")] () => {
             got = recover();
         }, ref ᒐ);
         throw panic("two");
@@ -180,7 +180,7 @@ internal static ж<guard> /*g*/ deferMethodValue() {
 internal static any deferMethodValueWithArgs() {
     var g = Ꮡ(new guard());
     var gʗ1 = g;
-    func(() => {
+    func([GoFunc("deferMethodValueWithArgs.func1")] () => {
         GoFrame ᒐ = default;
         try {
             var gʗ2 = gʗ1;
@@ -197,10 +197,10 @@ internal static any /*outer*/ deferRecoverItself() {
     any outer = default;
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("deferRecoverItself.func1")] () => {
             outer = recover();
         }, ref ᒐ);
-        func(() => {
+        func([GoFunc("deferRecoverItself.func2")] () => {
             GoFrame ᒐ = default;
             try {
                 defer(() => recover(calledByDefer: false), ref ᒐ);
@@ -222,13 +222,13 @@ internal static (error inner, any outer) namedFunctionCalledNormally() {
     try {
         ref var inner = ref Ꮡinner.ValueSlot;
 
-        defer(() => {
+        defer([GoFunc("namedFunctionCalledNormally.func1")] () => {
             outer = recover();
         }, ref ᒐ);
-        func(() => {
+        func([GoFunc("namedFunctionCalledNormally.func2")] () => {
             GoFrame ᒐ = default;
             try {
-                defer(() => {
+                defer([GoFunc("namedFunctionCalledNormally.func2.1")] () => {
                     catchError(Ꮡinner);
                 }, ref ᒐ);
                 throw panic("six");

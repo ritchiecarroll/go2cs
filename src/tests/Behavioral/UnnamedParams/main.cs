@@ -47,9 +47,9 @@ internal static void main() {
     fmt.Println(new note(9).tally(1, 2));
     fmt.Println(total(1, 2, 3, 4));
 
-    @string litUnnamed(params ꓸꓸꓸnint _ʗp) => "lit-unnamed";
-    @string litBlank(params ꓸꓸꓸstring _ʗp) => "lit-blank";
-    nint litNamed(params ꓸꓸꓸstring partsʗp) {
+    [GoFunc("main.func1")] @string litUnnamed(params ꓸꓸꓸnint _ʗp) => "lit-unnamed";
+    [GoFunc("main.func2")] @string litBlank(params ꓸꓸꓸstring _ʗp) => "lit-blank";
+    [GoFunc("main.func3")] nint litNamed(params ꓸꓸꓸstring partsʗp) {
         var parts = partsʗp.sslice();
         return len(parts);
     }

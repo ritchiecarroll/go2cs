@@ -13,7 +13,6 @@ using strings = strings_package;
 using global::go.go;
 using global::go.go.doc;
 using ꓸꓸꓸany = variadic<any>;
-using static doc_package;
 
 partial class doc_package {
 
@@ -147,9 +146,7 @@ public static ж<Package> New(ж<ast.Package> Ꮡpkg, @string importPath, Mode m
     return p;
 }
 
-} partial class docᴛPackage {
-
-internal static void collectValues(this ref Package p, slice<ж<Value>> values) {
+internal static void collectValues⁔(/*this*/ ref Package p, slice<ж<Value>> values) {
     foreach (var (_, v) in range(values)) {
         foreach (var (_, name) in range(v.Names)) {
             p.syms[name] = true;
@@ -157,7 +154,7 @@ internal static void collectValues(this ref Package p, slice<ж<Value>> values) 
     }
 }
 
-internal static void collectTypes(this ref Package p, slice<ж<Type>> types) {
+internal static void collectTypes⁔(/*this*/ ref Package p, slice<ж<Type>> types) {
     foreach (var (_, t) in range(types)) {
         if (p.syms[t.Name]) {
             // Shouldn't be any cycles but stop just in case.
@@ -173,7 +170,7 @@ internal static void collectTypes(this ref Package p, slice<ж<Type>> types) {
     }
 }
 
-internal static void collectFuncs(this ref Package p, slice<ж<Func>> funcs) {
+internal static void collectFuncs⁔(/*this*/ ref Package p, slice<ж<Func>> funcs) {
     foreach (var (_, f) in range(funcs)) {
         if (f.Recv != ""u8) {
             @string r = strings.TrimPrefix(f.Recv, "*");
@@ -196,7 +193,7 @@ internal static void collectFuncs(this ref Package p, slice<ж<Func>> funcs) {
 //
 // If we do start adding interface methods to t.Methods in the future,
 // collectInterfaceMethods can be dropped as redundant with collectFuncs(t.Methods).
-internal static void collectInterfaceMethods(this ref Package p, ж<Type> Ꮡt) {
+internal static void collectInterfaceMethods⁔(/*this*/ ref Package p, ж<Type> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     foreach (var (_, s) in range(t.Decl.Specs)) {
@@ -216,7 +213,7 @@ internal static void collectInterfaceMethods(this ref Package p, ж<Type> Ꮡt) 
     }
 }
 
-internal static void collectStructFields(this ref Package p, ж<Type> Ꮡt) {
+internal static void collectStructFields⁔(/*this*/ ref Package p, ж<Type> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     foreach (var (_, s) in range(t.Decl.Specs)) {
@@ -235,8 +232,6 @@ internal static void collectStructFields(this ref Package p, ж<Type> Ꮡt) {
         }
     }
 }
-
-} partial class doc_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string testGoˢ => ref testGoˢᵇ;
@@ -329,8 +324,6 @@ public static (ж<Package>, error) NewFromFiles(ж<token.FileSet> fset, slice<ж
     return (p, default);
 }
 
-} partial class docᴛPackage {
-
 // lookupSym reports whether the package has a given symbol or method.
 //
 // If recv == "", HasSym reports whether the package has a top-level
@@ -338,7 +331,7 @@ public static (ж<Package>, error) NewFromFiles(ж<token.FileSet> fset, slice<ж
 //
 // If recv != "", HasSym reports whether the package has a type
 // named recv with a method named name.
-internal static bool lookupSym(this ref Package p, @string recv, @string name) {
+internal static bool lookupSym⁔(/*this*/ ref Package p, @string recv, @string name) {
     if (recv != ""u8) {
         return p.syms[recv + "."u8 + name];
     }
@@ -352,7 +345,7 @@ internal static bool lookupSym(this ref Package p, @string recv, @string name) {
 // Otherwise, if name is the name of p itself, importPath returns "", true,
 // to signal a reference to p.
 // Otherwise, importPath returns "", false.
-internal static (@string importPath, bool ok) lookupPackage(this ref Package p, @string name) {
+internal static (@string importPath, bool ok) lookupPackage⁔(/*this*/ ref Package p, @string name) {
     var (path, okΔ1) = p.importByName[name, ꟷ]; if (okΔ1) {
         if (path == ""u8) {
             return ("", false); // multiple imports used the name
@@ -369,7 +362,7 @@ internal static (@string importPath, bool ok) lookupPackage(this ref Package p, 
 // for parsing doc comments from package p.
 // Each call returns a new parser, so that the caller may
 // customize it before use.
-public static ж<comment.Parser> Parser(this ж<Package> Ꮡp) {
+internal static ж<comment.Parser> Parser⁔(/*this*/ ж<Package> Ꮡp) {
     return Ꮡ(new comment.Parser(
         LookupPackage: Ꮡp.lookupPackage,
         LookupSym: Ꮡp.lookupSym
@@ -380,7 +373,7 @@ public static ж<comment.Parser> Parser(this ж<Package> Ꮡp) {
 // for printing doc comments from package p.
 // Each call returns a new printer, so that the caller may
 // customize it before use.
-public static ж<comment.Printer> Printer(this ref Package p) {
+internal static ж<comment.Printer> Printer⁔(/*this*/ ref Package p) {
     // No customization today, but having p.Printer()
     // gives us flexibility in the future, and it is convenient for callers.
     return Ꮡ(new comment.Printer());
@@ -391,7 +384,7 @@ public static ж<comment.Printer> Printer(this ref Package p) {
 // To customize details of the HTML, use [Package.Printer]
 // to obtain a [comment.Printer], and configure it
 // before calling its HTML method.
-public static slice<byte> HTML(this ж<Package> Ꮡp, @string text) {
+internal static slice<byte> HTML⁔(/*this*/ ж<Package> Ꮡp, @string text) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     return p.Printer().HTML(Ꮡp.Parser().Parse(text));
@@ -402,7 +395,7 @@ public static slice<byte> HTML(this ж<Package> Ꮡp, @string text) {
 // To customize details of the Markdown, use [Package.Printer]
 // to obtain a [comment.Printer], and configure it
 // before calling its Markdown method.
-public static slice<byte> Markdown(this ж<Package> Ꮡp, @string text) {
+internal static slice<byte> Markdown⁔(/*this*/ ж<Package> Ꮡp, @string text) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     return p.Printer().Markdown(Ꮡp.Parser().Parse(text));
@@ -415,10 +408,10 @@ public static slice<byte> Markdown(this ж<Package> Ꮡp, @string text) {
 // To customize details of the formatting, use [Package.Printer]
 // to obtain a [comment.Printer], and configure it
 // before calling its Text method.
-public static slice<byte> Text(this ж<Package> Ꮡp, @string text) {
+internal static slice<byte> Text⁔(/*this*/ ж<Package> Ꮡp, @string text) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     return p.Printer().Text(Ꮡp.Parser().Parse(text));
 }
 
-}
+} // end doc_package

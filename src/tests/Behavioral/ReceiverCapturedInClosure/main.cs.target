@@ -13,7 +13,7 @@ internal static void addInt(ref nint x, nint d) { x += d; }
 internal static nint addInClosure(this ж<counter> Ꮡc, nint d) {
     ref var c = ref Ꮡc.DerefOrNull();
 
-    void apply() {
+    [GoFunc("(*counter).addInClosure.func1")] void apply() {
         Ꮡc.Value.n += d;
     }
     apply();
@@ -23,7 +23,7 @@ internal static nint addInClosure(this ж<counter> Ꮡc, nint d) {
 internal static nint addViaFieldPtr(this ж<counter> Ꮡc, nint d) {
     ref var c = ref Ꮡc.DerefOrNull();
 
-    void apply() {
+    [GoFunc("(*counter).addViaFieldPtr.func1")] void apply() {
         addInt(ref (Ꮡc.Ꮡn).DerefOrNull(), d);
     }
     apply();
@@ -31,7 +31,7 @@ internal static nint addViaFieldPtr(this ж<counter> Ꮡc, nint d) {
 }
 
 internal static Action<nint> makeAdder(this ж<counter> Ꮡc) {
-    return (nint d) => {
+    return [GoFunc("(*counter).makeAdder.func1")] (nint d) => {
         Ꮡc.Value.n += d;
     };
 }

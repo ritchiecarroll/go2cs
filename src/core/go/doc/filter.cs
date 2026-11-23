@@ -5,7 +5,6 @@ namespace go.go;
 
 using ast = global::go.go.ast_package;
 using global::go.go;
-using static doc_package;
 
 partial class doc_package {
 
@@ -106,11 +105,9 @@ internal static slice<ж<Type>> filterTypes(slice<ж<Type>> a, Func<@string, boo
     return a.slice(0, w);
 }
 
-} partial class docᴛPackage {
-
 // Filter eliminates documentation for names that don't pass through the filter f.
 // TODO(gri): Recognize "Type.Method" as a name.
-public static void Filter(this ref Package p, Func<@string, bool> f) {
+internal static void Filter⁔(/*this*/ ref Package p, Func<@string, bool> f) {
     p.Consts = filterValues(p.Consts, f);
     p.Vars = filterValues(p.Vars, f);
     p.Types = filterTypes(p.Types, f);
@@ -118,4 +115,4 @@ public static void Filter(this ref Package p, Func<@string, bool> f) {
     p.Doc = ""u8; // don't show top-level package doc
 }
 
-}
+} // end doc_package

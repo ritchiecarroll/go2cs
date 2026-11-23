@@ -160,6 +160,11 @@ internal static class MethodSet
         if (!method.IsExtensionMethod || method.Parameters.Length == 0 || method.ReturnsByRef || method.ReturnsByRefReadonly)
             return null;
 
+        // An M:N twin (`Mꞏtwin`, sync's hand-written Lockꞏtwin among them) is never a Go method: golib's method table
+        // leaves it out, so an arm for it is never asked for. The suffix test is ImplementGenerator's (IsTwinMember).
+        if (method.Name.EndsWith(TwinGenerator.Suffix, System.StringComparison.Ordinal))
+            return null;
+
         // An unexported method is no member of a method set reflect sees, but one with a variadic tail is forwarded by the
         // object shell of an interface naming it (AdapterBinder), through its bound arm: Go asserts to such an interface
         // inside the method's own package.

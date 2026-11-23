@@ -78,7 +78,7 @@ internal static ref readonly @string devUrandomˢ => ref devUrandomˢᵇ;
 private static readonly @string devUrandomˢᵇ = "/dev/urandom"u8;
 
 internal static error urandomRead(slice<byte> b) {
-    ᏑurandomOnce.Do(() => {
+    ᏑurandomOnce.Do([GoFunc("urandomRead.func1")] () => {
         (urandomFile, urandomErr) = os.Open(devUrandomˢ);
     });
     if (urandomErr != nil) {

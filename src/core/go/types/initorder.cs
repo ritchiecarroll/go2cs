@@ -13,11 +13,8 @@ using slices = slices_package;
 using sort = sort_package;
 using container;
 using errors = global::go.@internal.types.errors_package;
-using static types_package;
 
 partial class types_package {
-
-} partial class typesᴛChecker {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object objectDependencyGraphˢ = (@string)"Object dependency graph:"u8;
@@ -26,7 +23,7 @@ internal static readonly object processingNodesˢ = (@string)"Processing nodes:"
 internal static readonly object initializationOrderˢ = (@string)"Initialization order:"u8;
 
 // initOrder computes the Info.InitOrder for package variables.
-internal static void initOrder(this ж<Checker> Ꮡcheck) {
+internal static void initOrder⁔(/*this*/ ж<Checker> Ꮡcheck) {
     ref var check = ref Ꮡcheck.DerefOrNull();
 
     // An InitOrder may already have been computed if a package is
@@ -145,8 +142,6 @@ internal static void initOrder(this ж<Checker> Ꮡcheck) {
     }
 }
 
-} partial class types_package {
-
 // findPath returns the (reversed) list of objects []Object{to, ... from}
 // such that there is a path of object dependencies from 'from' to 'to'.
 // If there is no such path, the result is nil.
@@ -162,7 +157,7 @@ internal static slice<Object> findPath(map<Object, ж<declInfo>> objMap, Object 
         deps = append(deps, d);
     }
     var depsʗ1 = deps;
-    sort.Slice(deps, (nint i, nint j) => depsʗ1[i].order() < depsʗ1[j].order());
+    sort.Slice(deps, [GoFunc("findPath.func1")] (nint i, nint j) => depsʗ1[i].order() < depsʗ1[j].order());
 
     foreach (var (_, d) in range(deps)) {
         if (AreEqual(d, to)) {
@@ -176,10 +171,8 @@ internal static slice<Object> findPath(map<Object, ж<declInfo>> objMap, Object 
     return default;
 }
 
-} partial class typesᴛChecker {
-
 // reportCycle reports an error for the given cycle.
-internal static void reportCycle(this ж<Checker> Ꮡcheck, slice<Object> cycle) {
+internal static void reportCycle⁔(/*this*/ ж<Checker> Ꮡcheck, slice<Object> cycle) {
     var obj = cycle[0];
 
     // report a more concise error for self references
@@ -198,8 +191,6 @@ internal static void reportCycle(this ж<Checker> Ꮡcheck, slice<Object> cycle)
     }
     err.report();
 }
-
-} partial class types_package {
 
 // ----------------------------------------------------------------------------
 // Object dependency graph
@@ -225,28 +216,20 @@ partial struct graphNode {
     internal nint ndeps;         // number of outstanding dependencies before this object can be initialized
 }
 
-} partial class typesᴛgraphNode {
-
 // cost returns the cost of removing this node, which involves copying each
 // predecessor to each successor (and vice-versa).
-internal static nint cost(this ref graphNode n) {
+internal static nint cost⁔(/*this*/ ref graphNode n) {
     return len(n.pred) * len(n.succ);
 }
 
-} partial class types_package {
-
 partial struct nodeSet /*map[ж<graphNode>, bool]*/;
 
-} partial class typesᴛnodeSet {
-
-internal static void add(this ref nodeSet s, ж<graphNode> p) {
+internal static void add⁔(/*this*/ ref nodeSet s, ж<graphNode> p) {
     if (s == nil) {
         s = new nodeSet(0);
     }
     (s)[p] = true;
 }
-
-} partial class types_package {
 
 // dependencyGraph computes the object dependency graph from the given objMap,
 // with any function nodes removed. The resulting graph contains only constants
@@ -298,7 +281,7 @@ internal static slice<ж<graphNode>> dependencyGraph(map<Object, ж<declInfo>> o
     // throughout the function graph, the cost of removing a function at
     // position X is proportional to cost * (len(funcG)-X). Therefore, we should
     // remove high-cost functions last.
-    slices.SortFunc(funcG, (ж<graphNode> a, ж<graphNode> b) => cmp.Compare(a.cost(), b.cost()));
+    slices.SortFunc(funcG, [GoFunc("dependencyGraph.func1")] (ж<graphNode> a, ж<graphNode> b) => cmp.Compare(a.cost(), b.cost()));
     foreach (var (_, n) in range(funcG)) {
         // connect each predecessor p of n with each successor s
         // and drop the function node (don't collect it in G)
@@ -338,17 +321,15 @@ internal static slice<ж<graphNode>> dependencyGraph(map<Object, ж<declInfo>> o
 // a nodeQueue may be used as a priority queue.
 partial struct nodeQueue /*[]ж<graphNode>*/;
 
-} partial class typesᴛnodeQueue {
+internal static nint Len⁔(/*this*/ nodeQueue a) { return len(a); }
 
-internal static nint Len(this nodeQueue a) { return len(a); }
-
-internal static void Swap(this nodeQueue a, nint i, nint j) {
+internal static void Swap⁔(/*this*/ nodeQueue a, nint i, nint j) {
     var (x, y) = (a[i], a[j]);
     (a[i], a[j]) = (y, x);
     (x.index, y.index) = (j, i);
 }
 
-internal static bool Less(this nodeQueue a, nint i, nint j) {
+internal static bool Less⁔(/*this*/ nodeQueue a, nint i, nint j) {
     var (x, y) = (a[i], a[j]);
 
     // Prioritize all constants before non-constants. See go.dev/issue/66575/.
@@ -363,11 +344,11 @@ internal static bool Less(this nodeQueue a, nint i, nint j) {
     return x.ndeps < y.ndeps || x.ndeps == y.ndeps && x.obj.order() < y.obj.order();
 }
 
-internal static void Push(this ref nodeQueue a, any x) {
+internal static void Push⁔(/*this*/ ref nodeQueue a, any x) {
     throw panic("unreachable");
 }
 
-internal static any Pop(this ref nodeQueue a) {
+internal static any Pop⁔(/*this*/ ref nodeQueue a) {
     nint n = len(a);
     var x = (a)[n - 1];
     x.index = -1; // for safety
@@ -375,4 +356,4 @@ internal static any Pop(this ref nodeQueue a) {
     return x.OrTypedNil();
 }
 
-}
+} // end types_package

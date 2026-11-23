@@ -15,7 +15,7 @@ internal static @string escaper(params ꓸꓸꓸany argsʗp) {
 private static readonly object plainˢ = (@string)"plain"u8;
 
 internal static void main() {
-    Actionꓸꓸꓸ<@string, any> fn = (@string format, params ꓸꓸꓸany argsʗp) => {
+    Actionꓸꓸꓸ<@string, any> fn = [GoFunc("main.func1")] (@string format, params ꓸꓸꓸany argsʗp) => {
         var args = argsʗp;
         fmt.Printf(format + "\n"u8, args.ꓸꓸꓸ);
     };
@@ -34,12 +34,12 @@ internal static void main() {
         fmt.Println("no match for string");
     }
 
-    any plain = @string (@string s) => s + "!"u8;
+    any plain = [GoFunc("main.func2")] @string (@string s) => s + "!"u8;
     if (plain._<Func<@string, @string>>(out var fnΔ2)) {
         fmt.Println(fnΔ2("ok"));
     }
 
-    any direct = ((Funcꓸꓸꓸ<any, @string>)(@string (params ꓸꓸꓸany argsʗp) => {
+    any direct = ((Funcꓸꓸꓸ<any, @string>)([GoFunc("main.func3")] @string (params ꓸꓸꓸany argsʗp) => {
         var args = argsʗp;
         return fmt.Sprint(args.ꓸꓸꓸ);
     }));
@@ -78,7 +78,7 @@ internal static void main() {
         }
     }
 
-    any directPlain = @string (@string s) => s + "?"u8;
+    any directPlain = [GoFunc("main.func4")] @string (@string s) => s + "?"u8;
     {
         var (f, ok) = directPlain._<Func<@string, @string>>(ᐧ); if (ok) {
             fmt.Println("direct plain:", f("z"));

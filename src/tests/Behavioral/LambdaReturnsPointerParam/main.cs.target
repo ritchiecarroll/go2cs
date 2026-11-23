@@ -17,11 +17,11 @@ internal static slice<entry> register(slice<entry> table, Func<(ж<item>, error)
 }
 
 internal static slice<entry> addItem(slice<entry> table, ж<item> it) {
-    return register(table, () => (it, default));
+    return register(table, [GoFunc("addItem.func1")] () => (it, default));
 }
 
 internal static Func<ж<item>> pick(ж<item> it) {
-    return () => it;
+    return [GoFunc("pick.func1")] () => it;
 }
 
 internal static ж<item> passthrough(ж<item> it) {

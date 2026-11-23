@@ -14,6 +14,9 @@
 
 using go;
 using static go.RootedUsingCapture.@internal.sync_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -49,10 +52,12 @@ using static go.RootedUsingCapture.@internal.sync_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("sync.go", "sync.cs", "AAwQgvq0")]
+[assembly: GoPositionMap("sync.go", "sync.cs", "AAgQgtqU")]
 // </GoSourcePositionMaps>
 
 namespace go.RootedUsingCapture.@internal;
+
+using static go.RootedUsingCapture.@internal.sync_package;
 
 [GoPackage("sync")]
 public static partial class sync_package
@@ -85,6 +90,20 @@ public static partial class sync_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(sync_package.Gauge)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syncᴛGauge;
-[GoMethodHost(typeof(sync_package.Mutex)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syncᴛMutex;
+[GoMethodHost(typeof(sync_package.Gauge)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syncᴛGauge;
+[GoMethodHost(typeof(sync_package.Mutex)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syncᴛMutex;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class syncᴛGauge {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Value(this Gauge g) => sync_package.Value⁔(g);
+}
+partial class syncᴛMutex {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Lock(this ref Mutex m) => sync_package.Lock⁔(ref m);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Unlock(this ref Mutex m) => sync_package.Unlock⁔(ref m);
+}
+// </MethodForwarders>

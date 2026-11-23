@@ -1,7 +1,6 @@
 namespace go;
 
 using fmt = fmt_package;
-using static main_package;
 
 partial class main_package {
 
@@ -9,13 +8,9 @@ partial struct slot {
     internal nint n;
 }
 
-} partial class mainᴛslot {
-
-internal static void inc(this ref slot s) { s.n++; }
-internal static void add(this ref slot s, nint d) { s.n += d; }
-internal static nint get(this ref slot s) { return s.n; }
-
-} partial class main_package {
+internal static void inc⁔(/*this*/ ref slot s) { s.n++; }
+internal static void add⁔(/*this*/ ref slot s, nint d) { s.n += d; }
+internal static nint get⁔(/*this*/ ref slot s) { return s.n; }
 
 partial struct holder {
     internal slot s;

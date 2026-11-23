@@ -23,7 +23,7 @@ A single-package `-cgo` conversion builds against a go2cs clone (`dotnet build -
 `-recurse=nuget -cgo`, a module's cgo packages convert with it and reference the `go.*` packages, for the machine's
 own operating system and architecture only. Packing a cgo package for every platform, from the feed, is planned for
 the next release.
-<!-- src/go2cs/main.go:306 (`Not combinable with -stdlib or -tests. With -recurse, every non-standard-library package of the module loads cgo-on and each cgo package converts this way`); src/go2cs/csproj-template.xml:135 (`<ProjectReference Include="$(go2csPath)gen/go2cs-gen/go2cs-gen.csproj"`) and src/go2cs/csproj-template.xml:187 (`<ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />`). COORD's ruling O2, 2026-11-14 (cgo 3.1's release-path seat). -->
+<!-- src/go2cs/main.go:307 (`Not combinable with -stdlib or -tests. With -recurse, every non-standard-library package of the module loads cgo-on and each cgo package converts this way`); src/go2cs/csproj-template.xml:135 (`<ProjectReference Include="$(go2csPath)gen/go2cs-gen/go2cs-gen.csproj"`) and src/go2cs/csproj-template.xml:187 (`<ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />`). COORD's ruling O2, 2026-11-14 (cgo 3.1's release-path seat). -->
 
 Update it with `dotnet tool update -g go2cs`, and remove it with `dotnet tool uninstall -g go2cs`. To run it once
 without installing it, use `dnx go2cs -- <arguments>`.

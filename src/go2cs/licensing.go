@@ -99,8 +99,15 @@ func sourceProvenance(source string, options Options, newline string) string {
 		return ""
 	}
 
-	name, origin := sourceOrigin(source, options)
+	// From a go.mod-less release's copy, the release's own path, whose module-cache directory names its version.
+	name, origin := sourceOrigin(releaseSourcePath(source), options)
 
+	return provenanceNotice(name, origin, newline)
+}
+
+// provenanceNotice is -provenance's two lines for a source named name, with origin's " in ..." clause (empty for none).
+// The cgo route's bindings file, which no Go source wrote, is named by cmd/cgo's own name for it with no origin.
+func provenanceNotice(name, origin, newline string) string {
 	// Quoting escapes newlines and other control characters in unusual filenames.
 	return fmt.Sprintf("// Converted from Go source: %q%s.%s// Modified from the original by conversion to C# with go2cs %s.%s",
 		name, origin, newline, corpusRelease(), newline)

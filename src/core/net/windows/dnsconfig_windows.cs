@@ -19,7 +19,7 @@ internal static ж<dnsConfig> /*conf*/ dnsReadConfig(@string ignoredFilename) {
             timeout: (time.Duration)(5000000000L),
             attempts: 2
         ));
-        defer(() => {
+        defer([GoFunc("dnsReadConfig.func1")] () => {
             if (len(conf.servers) == 0) {
                 conf.servers = defaultNS;
             }

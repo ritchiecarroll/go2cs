@@ -16,7 +16,6 @@ using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
 using go.math;
-using static runtime_package;
 
 partial class runtime_package {
 
@@ -669,18 +668,14 @@ partial struct bitvector {
     internal ж<uint8> bytedata;
 }
 
-} partial class runtimeᴛbitvector {
-
 // ptrbit returns the i'th bit in bv.
 // ptrbit is less efficient than iterating directly over bitvector bits,
 // and should only be used in non-performance-critical code.
 // See adjustpointers for an example of a high-efficiency walk of a bitvector.
-internal static uint8 ptrbit(this ref bitvector bv, uintptr i) {
+internal static uint8 ptrbit⁔(/*this*/ ref bitvector bv, uintptr i) {
     var b = (addb(bv.bytedata, i / 8)).Value;
     return (uint8)((byte)((b >> (int)(i % 8)) & 1));
 }
-
-} partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string invalidPointerFoundOnˢ => ref invalidPointerFoundOnˢᵇ;
@@ -1420,12 +1415,10 @@ partial struct stackObjectRecord {
     internal uint32 gcdataoff; // offset to gcdata from moduledata.rodata
 }
 
-} partial class runtimeᴛstackObjectRecord {
-
 // gcdata returns the number of bytes that contain pointers, and
 // a ptr/nonptr bitmask covering those bytes.
 // Note that this bitmask might be larger than internal/abi.MaxPtrmaskBytes.
-internal static (uintptr, ж<byte>) gcdata(this ж<stackObjectRecord> Ꮡr) {
+internal static (uintptr, ж<byte>) gcdata⁔(/*this*/ ж<stackObjectRecord> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     var ptr = (uintptr)Ꮡr;
@@ -1448,8 +1441,6 @@ internal static (uintptr, ж<byte>) gcdata(this ж<stackObjectRecord> Ꮡr) {
     var res = mod.rodata + (uintptr)r.gcdataoff;
     return ((uintptr)r.ptrBytes, @unsafe.Pointer.To<byte>((@unsafe.Pointer)res));
 }
-
-} partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string attemptToExecuteSystemˢ => ref attemptToExecuteSystemˢᵇ;

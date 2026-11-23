@@ -38,7 +38,6 @@ using sort = sort_package;
 using strings = strings_package;
 using token = global::go.go.token_package;
 using ꓸꓸꓸany = variadic<any>;
-using static types_package;
 
 partial class types_package {
 
@@ -119,8 +118,6 @@ internal static unifyMode assign => /* 1 << iota */ 1;
 // interface.
 internal static unifyMode exact => 2;
 
-} partial class typesᴛunifyMode {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string inexactˢ => ref inexactˢᵇ;
 private static readonly @string inexactˢᵇ = "inexact"u8;
@@ -131,7 +128,7 @@ private static readonly @string exactˢᵇ = "exact"u8;
 internal static ref readonly @string assignExactˢ => ref assignExactˢᵇ;
 private static readonly @string assignExactˢᵇ = "assign, exact"u8;
 
-internal static @string String(this unifyMode m) {
+internal static @string String⁔(/*this*/ unifyMode m) {
     switch (m) {
     case var ᴛ when ᴛ == (unifyMode)(0): {
         return inexactˢ;
@@ -148,16 +145,14 @@ internal static @string String(this unifyMode m) {
     return fmt.Sprintf("mode %d"u8, m);
 }
 
-} partial class typesᴛunifier {
-
 // unify attempts to unify x and y and reports whether it succeeded.
 // As a side-effect, types may be inferred for type parameters.
 // The mode parameter controls how types are compared.
-internal static bool unify(this ж<unifier> Ꮡu, Type x, Type y, unifyMode mode) {
+internal static bool unify⁔(/*this*/ ж<unifier> Ꮡu, Type x, Type y, unifyMode mode) {
     return Ꮡu.nify(x, y, mode, nil);
 }
 
-internal static void tracef(this ref unifier u, @string format, params ꓸꓸꓸany argsʗp) {
+internal static void tracef⁔(/*this*/ ref unifier u, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp;
 
     fmt.Println(strings.Repeat(".  ", u.depth) + sprintf(nil, default, true, format, args.ꓸꓸꓸ));
@@ -165,7 +160,7 @@ internal static void tracef(this ref unifier u, @string format, params ꓸꓸꓸ
 
 // String returns a string representation of the current mapping
 // from type parameters to types.
-internal static @string String(this ref unifier u) {
+internal static @string String⁔(/*this*/ ref unifier u) {
     // sort type parameters for reproducible strings
     var tparams = new typeParamsById(len(u.handles));
     nint i = 0;
@@ -190,22 +185,16 @@ internal static @string String(this ref unifier u) {
     return Ꮡbuf.String();
 }
 
-} partial class types_package {
-
 partial struct typeParamsById /*[]ж<TypeParam>*/;
 
-} partial class typesᴛtypeParamsById {
-
-internal static nint Len(this typeParamsById s) { return len(s); }
-internal static bool Less(this typeParamsById s, nint i, nint j) { return s[i].id < s[j].id; }
-internal static void Swap(this typeParamsById s, nint i, nint j) { (s[i], s[j]) = (s[j], s[i]); }
-
-} partial class typesᴛunifier {
+internal static nint Len⁔(/*this*/ typeParamsById s) { return len(s); }
+internal static bool Less⁔(/*this*/ typeParamsById s, nint i, nint j) { return s[i].id < s[j].id; }
+internal static void Swap⁔(/*this*/ typeParamsById s, nint i, nint j) { (s[i], s[j]) = (s[j], s[i]); }
 
 // join unifies the given type parameters x and y.
 // If both type parameters already have a type associated with them
 // and they are not joined, join fails and returns false.
-internal static bool join(this ref unifier u, ж<TypeParam> x, ж<TypeParam> y) {
+internal static bool join⁔(/*this*/ ref unifier u, ж<TypeParam> x, ж<TypeParam> y) {
     if (traceInference) {
         u.tracef("%s ⇄ %s", x.OrTypedNil(), y.OrTypedNil());
     }
@@ -238,7 +227,7 @@ internal static bool join(this ref unifier u, ж<TypeParam> x, ж<TypeParam> y) 
 
 // asBoundTypeParam returns x.(*TypeParam) if x is a type parameter recorded with u.
 // Otherwise, the result is nil.
-internal static ж<TypeParam> asBoundTypeParam(this ref unifier u, Type x) {
+internal static ж<TypeParam> asBoundTypeParam⁔(/*this*/ ref unifier u, Type x) {
     var (xΔ1, _) = Unalias(x)._<ж<TypeParam>>(ᐧ); if (xΔ1 != nil) {
         var (_, found) = u.handles[xΔ1, ꟷ]; if (found) {
             return xΔ1;
@@ -249,7 +238,7 @@ internal static ж<TypeParam> asBoundTypeParam(this ref unifier u, Type x) {
 
 // setHandle sets the handle for type parameter x
 // (and all its joined type parameters) to h.
-internal static void setHandle(this ref unifier u, ж<TypeParam> x, ж<Type> h) {
+internal static void setHandle⁔(/*this*/ ref unifier u, ж<TypeParam> x, ж<Type> h) {
     var hx = u.handles[x];
     assert(hx != nil);
     foreach (var (y, hy) in u.handles) {
@@ -260,13 +249,13 @@ internal static void setHandle(this ref unifier u, ж<TypeParam> x, ж<Type> h) 
 }
 
 // at returns the (possibly nil) type for type parameter x.
-internal static Type at(this ref unifier u, ж<TypeParam> x) {
+internal static Type at⁔(/*this*/ ref unifier u, ж<TypeParam> x) {
     return u.handles[x].ValueSlot;
 }
 
 // set sets the type t for type parameter x;
 // t must not be nil.
-internal static void set(this ref unifier u, ж<TypeParam> x, Type t) {
+internal static void set⁔(/*this*/ ref unifier u, ж<TypeParam> x, Type t) {
     assert(t != nil);
     if (traceInference) {
         u.tracef("%s ➞ %s", x.OrTypedNil(), t);
@@ -275,7 +264,7 @@ internal static void set(this ref unifier u, ж<TypeParam> x, Type t) {
 }
 
 // unknowns returns the number of type parameters for which no type has been set yet.
-internal static nint unknowns(this ref unifier u) {
+internal static nint unknowns⁔(/*this*/ ref unifier u) {
     nint n = 0;
     foreach (var (_, h) in u.handles) {
         if (h.ValueSlot == nil) {
@@ -289,15 +278,13 @@ internal static nint unknowns(this ref unifier u) {
 // The result is never nil and has the same length as tparams; result types that
 // could not be inferred are nil. Corresponding type parameters and result types
 // have identical indices.
-internal static slice<Type> inferred(this ref unifier u, slice<ж<TypeParam>> tparams) {
+internal static slice<Type> inferred⁔(/*this*/ ref unifier u, slice<ж<TypeParam>> tparams) {
     var list = new slice<Type>(len(tparams));
     foreach (var (i, x) in range(tparams)) {
         list[i] = u.at(x);
     }
     return list;
 }
-
-} partial class types_package {
 
 // asInterface returns the underlying type of x as an interface if
 // it is a non-type parameter interface. Otherwise it returns nil.
@@ -310,13 +297,11 @@ internal static ж<Interface> /*i*/ asInterface(Type x) {
     return i;
 }
 
-} partial class typesᴛunifier {
-
 // nify implements the core unification algorithm which is an
 // adapted version of Checker.identical. For changes to that
 // code the corresponding changes should be made here.
 // Must not be called directly from outside the unifier.
-internal static bool /*result*/ nify(this ж<unifier> Ꮡu, Type xʗp, Type yʗp, unifyMode mode, ж<ifacePair> Ꮡp) {
+internal static bool /*result*/ nify⁔(/*this*/ ж<unifier> Ꮡu, Type xʗp, Type yʗp, unifyMode mode, ж<ifacePair> Ꮡp) {
     bool result = default;
     GoFrame ᒐ = default;
     try {
@@ -329,7 +314,7 @@ internal static bool /*result*/ nify(this ж<unifier> Ꮡu, Type xʗp, Type yʗp
         if (traceInference) {
             u.tracef("%s ≡ %s\t// %s", x, y, mode);
         }
-        defer(() => {
+        defer([GoFunc("(*unifier).nify.func1")] () => {
             if (traceInference && !result) {
                 Ꮡu.Value.tracef("%s ≢ %s", Ꮡx.ValueSlot, Ꮡy.ValueSlot);
             }
@@ -863,4 +848,4 @@ internal static bool /*result*/ nify(this ж<unifier> Ꮡu, Type xʗp, Type yʗp
     ᒐdone: return result;
 }
 
-}
+} // end types_package

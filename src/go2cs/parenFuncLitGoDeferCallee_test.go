@@ -89,12 +89,12 @@ func main() {
 	mainCs := strings.ReplaceAll(readGenerated(t, filepath.Join(options.go2csPath, "src", "example.com", "pfl", "main.cs")), "\r\n", "\n")
 
 	// The capture copy is a statement BEFORE the go statement, and the literal is the delegate itself.
-	if want := "var doneʗ1 = done;\n    goǃ(() => {\n"; !strings.Contains(mainCs, want) {
+	if want := "var doneʗ1 = done;\n    goǃ([GoFunc(\"spawn.func1\")] () => {\n"; !strings.Contains(mainCs, want) {
 		t.Errorf("want %q: the parenthesized literal's capture copy must precede the go statement:\n%s", want, mainCs)
 	}
 
 	// The deferred literal reads `done` by reference, as Go's closure does, with no snapshot at all.
-	if want := "defer(() => {\n            fmt.Println(\"defer\", done == nil);\n        }, ref ᒐ);"; !strings.Contains(mainCs, want) {
+	if want := "defer([GoFunc(\"later.func1\")] () => {\n            fmt.Println(\"defer\", done == nil);\n        }, ref ᒐ);"; !strings.Contains(mainCs, want) {
 		t.Errorf("want %q: the parenthesized deferred literal must emit as the bare one:\n%s", want, mainCs)
 	}
 

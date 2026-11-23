@@ -95,7 +95,7 @@ internal static void refused(@string sʗp) {
         break;
     }}
 
-    @string f() => Ꮡs.Value;
+    [GoFunc("refused.func1")] @string f() => Ꮡs.Value;
 
     var sᴛ2 = s;
     switch (ᐧ) {

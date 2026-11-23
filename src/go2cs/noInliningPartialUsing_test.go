@@ -89,17 +89,14 @@ func TestCompilerServicesUsingOnlyWhereTheAttributeIsWritten(t *testing.T) {
 	isolateConverterPathGlobals(t)
 	carrier, literal := convertNoInliningUsingFixture(t)
 
-	const (
-		compilerServices = "using System.Runtime.CompilerServices;"
-		attribute        = "[MethodImpl(MethodImplOptions.NoInlining)]"
-	)
+	const compilerServices = "using System.Runtime.CompilerServices;"
 
 	// Controls: main is a partial carrier (it executes a go), and the literal writes the attribute itself.
-	if !strings.Contains(carrier, "static partial void main(") || strings.Contains(carrier, attribute) {
+	if !strings.Contains(carrier, "static partial void main(") || strings.Contains(carrier, "MethodImpl(MethodImplOptions.NoInlining)") {
 		t.Fatalf("control: carrier.cs must declare main as a partial carrier with no attribute text, or this test proves nothing:\n%s", carrier)
 	}
 
-	if !strings.Contains(literal, attribute) {
+	if !strings.Contains(literal, `[MethodImpl(MethodImplOptions.NoInlining), GoFunc("launcher.func1")]`) {
 		t.Fatalf("control: literal.cs must write the attribute on its func literal, or this test proves nothing:\n%s", literal)
 	}
 

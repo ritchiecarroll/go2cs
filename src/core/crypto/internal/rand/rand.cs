@@ -12,7 +12,6 @@ using io = io_package;
 using go.@internal;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140;
-using static rand_package;
 
 partial class rand_package {
 
@@ -20,9 +19,7 @@ partial struct reader {
     /*embed*/ public go.crypto.@internal.fips140.drbg_package.DefaultReader DefaultReader;
 }
 
-} partial class randᴛreader {
-
-internal static (nint n, error err) Read(this reader r, slice<byte> b) {
+internal static (nint n, error err) Read⁔(/*this*/ reader r, slice<byte> b) {
     if (Δboring.Enabled) {
         var (_, errΔ1) = Δboring.RandReader.Read(b); if (errΔ1 != nil) {
             throw panic("crypto/rand: boring RandReader failed: " + errΔ1.Error());
@@ -32,8 +29,6 @@ internal static (nint n, error err) Read(this reader r, slice<byte> b) {
     drbg.Read(b);
     return (len(b), default);
 }
-
-} partial class rand_package {
 
 // Reader is an io.Reader that calls [drbg.Read].
 //

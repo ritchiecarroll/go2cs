@@ -347,11 +347,9 @@ func collectHoistedLiterals(files []FileEntry, pkg *types.Package, info *types.I
 			continue
 		}
 
-		// Only a field of the package class seeds a `-tests` conversion: a holder's field is private
-		// to its holder.
-		if hl.owner == nil || hl.owner.Recv == nil {
-			packageHoistNames[hl.token] = hoistSeed{name: hl.name, preBoxed: hl.preBoxed}
-		}
+		// Every field is a member of the package class (a method's body sits there too, hoistClassKey), so
+		// every one seeds a `-tests` conversion.
+		packageHoistNames[hl.token] = hoistSeed{name: hl.name, preBoxed: hl.preBoxed}
 
 		// owner == nil means the field is SEEDED — declared by the production conversion's own
 		// output, which this pass does not re-emit.

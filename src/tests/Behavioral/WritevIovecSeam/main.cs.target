@@ -20,7 +20,7 @@ internal static partial void main() {
         var done = new channel<slice<byte>>(1);
         var doneʗ1 = done;
         var lnʗ2 = ln;
-        goǃ(() => {
+        goǃ([GoFunc("main.func1")] () => {
             GoFrame ᒐ = default;
             try {
                 var (cΔ1, errΔ1) = lnʗ2.Accept();

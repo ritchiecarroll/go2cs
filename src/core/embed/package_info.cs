@@ -10,10 +10,15 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+using fs = go.io.fs_package;
+using time = go.time_package;
 // </ImportedTypeAliases>
 
 using go;
 using static go.embed_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -69,10 +74,14 @@ using static go.embed_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("embed/embed.go", "embed.cs", "AL0B/ALSgoKClKiCAAscgraAgKKCkoCAooKClIKClKaC6raSuJSClILKgoKSgpSClKiSgriCkoKUkoKUrLKCgpSClOiSgoKUgoKUgoKU6JKCgpSCgpQAChSCtoKUgoKUgpSCgqaC2LSkgpSCpoKClIKClAANFILUgqaCgoKClJSClIKClILItpKClIKUuA==", "261-264:1;279-282:1;283-286:2")]
+[assembly: GoPositionMap("embed/embed.go", "embed.cs", "ALwB/ALSgoKClKiCAAscgpaAgKKCkoCAooKClIKClKaCypaSuJSClILKgoKSgpSClKiSgriCkoKUkoKUrLKCgpSClOiSgoKUgoKUgoKU6JKCgpSCgpQACBSCloKUgoKUgpSCgqaC2LSkgpSCpoKClIKClAAJFIKUgqaCgoKClJSClIKClIKotpKClIKUuA==", "261-264:1;279-282:1;283-286:2")]
 // </GoSourcePositionMaps>
 
 namespace go;
+
+using static go.embed_package;
+using fs = go.io.fs_package;
+using time = go.time_package;
 
 [GoPackage("embed")]
 public static partial class embed_package
@@ -113,8 +122,46 @@ public static partial class embed_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(embed_package.FS)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class embedᴛFS;
-[GoMethodHost(typeof(embed_package.@file)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class embedᴛfile;
-[GoMethodHost(typeof(embed_package.openDir)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class embedᴛopenDir;
-[GoMethodHost(typeof(embed_package.openFile)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class embedᴛopenFile;
+[GoMethodHost(typeof(embed_package.FS)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class embedᴛFS;
+[GoMethodHost(typeof(embed_package.@file)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class embedᴛfile;
+[GoMethodHost(typeof(embed_package.openDir)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class embedᴛopenDir;
+[GoMethodHost(typeof(embed_package.openFile)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class embedᴛopenFile;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class embedᴛFS {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<@file> lookup(this FS f, @string name) => embed_package.lookup⁔(f, name);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<@file> readDir(this FS f, @string dir) => embed_package.readDir⁔(f, dir);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (fs.File, error) Open(this FS f, @string name) => embed_package.Open⁔(f, name);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<fs.DirEntry>, error) ReadDir(this FS f, @string name) => embed_package.ReadDir⁔(f, name);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<byte>, error) ReadFile(this FS f, @string name) => embed_package.ReadFile⁔(f, name);
+}
+partial class embedᴛfile {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string Name(this ref @file f) => embed_package.Name⁔(ref f);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static int64 Size(this ref @file f) => embed_package.Size⁔(ref f);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static time.Time ModTime(this ref @file f) => embed_package.ModTime⁔(ref f);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool IsDir(this ref @file f) => embed_package.IsDir⁔(ref f);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static any Sys(this ref @file f) => embed_package.Sys⁔(ref f);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static fs.FileMode Type(this ref @file f) => embed_package.Type⁔(ref f);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (fs.FileInfo, error) Info(this ж<@file> Ꮡf) => embed_package.Info⁔(Ꮡf);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static fs.FileMode Mode(this ref @file f) => embed_package.Mode⁔(ref f);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string String(this ж<@file> Ꮡf) => embed_package.String⁔(Ꮡf);
+}
+partial class embedᴛopenDir {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error Close(this ref openDir d) => embed_package.Close⁔(ref d);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (fs.FileInfo, error) Stat(this ref openDir d) => embed_package.Stat⁔(ref d);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint, error) Read(this ref openDir d, slice<byte> _) => embed_package.Read⁔(ref d, _);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<fs.DirEntry>, error) ReadDir(this ref openDir d, nint count) => embed_package.ReadDir⁔(ref d, count);
+}
+partial class embedᴛopenFile {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error Close(this ref openFile f) => embed_package.Close⁔(ref f);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (fs.FileInfo, error) Stat(this ref openFile f) => embed_package.Stat⁔(ref f);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint, error) Read(this ref openFile f, slice<byte> b) => embed_package.Read⁔(ref f, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (int64, error) Seek(this ref openFile f, int64 offset, nint whence) => embed_package.Seek⁔(ref f, offset, whence);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint, error) ReadAt(this ref openFile f, slice<byte> b, int64 offset) => embed_package.ReadAt⁔(ref f, b, offset);
+}
+// </MethodForwarders>

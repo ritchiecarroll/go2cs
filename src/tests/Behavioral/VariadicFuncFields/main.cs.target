@@ -42,7 +42,7 @@ internal static void main() {
     var ctxt = new Context(
         Name: "demo",
         JoinPath: slashJoin,
-        Log: (@string format, params ꓸꓸꓸany argsʗp) => {
+        Log: [GoFunc("main.func1")] (@string format, params ꓸꓸꓸany argsʗp) => {
             var args = argsʗp;
             fmt.Printf(format + "\n"u8, args.ꓸꓸꓸ);
         }
@@ -55,7 +55,7 @@ internal static void main() {
     var parts = slice<@string>(["x", "y"]);
     fmt.Println(ctxt.join(parts.ꓸꓸꓸ));
 
-    ctxt.JoinPath = @string (params ꓸꓸꓸstring elemʗp) => {
+    ctxt.JoinPath = [GoFunc("main.func2")] @string (params ꓸꓸꓸstring elemʗp) => {
         var elem = elemʗp.sslice();
         return fmt.Sprint(len(elem));
     };

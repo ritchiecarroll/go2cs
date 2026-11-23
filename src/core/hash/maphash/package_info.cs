@@ -10,10 +10,14 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+using hash = go.hash_package;
 // </ImportedTypeAliases>
 
 using go;
 using static go.hash.maphash_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -56,11 +60,14 @@ using static go.hash.maphash_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("hash/maphash/maphash.go", "maphash.cs", "ACRWAAgCgoKmgoKCgqYAAhYACAKCgpSCgpQAKVrSgoKCvKKClIKCqqK4goKClJSCuIKCgoK4goKqtIKCgoKClIKUgoKCgqaCgqiSggACENKClIKCqqKCgqiSgpSCggACFPKCyJKCgqaCpsyyggAKGICWgJaSgoLMsoKossqClA==")]
-[assembly: GoPositionMap("hash/maphash/maphash_purego.go", "maphash_purego.cs", "ABcsgoK4goKUpoKmgoKCAAYQgoKCkpSCgoKCgoKCgpSUgoKmlKS0goKkpoKmgqaCpoKCpoKCgoKmgoKosoKUgoKCpIKCgqSCgqaClKSCpIKCgriClKSCgoKkgqSCpLiCgqSClMaCgoKUgoKCgpSCxoKClA==")]
+[assembly: GoPositionMap("hash/maphash/maphash.go", "maphash.cs", "ACNWAAgCgoKmgoKCgqYAAhYACAKCgpSCgpQAJ1rSgoKCvKKClIKCqqK4goKClJSCuIKCgoK4goKqtIKCgoKClIKUgoKCgqaCgqiSggACENKClIKCqqKCgqiSgpSCggACFPKCqJKCgqaCpqyyggAKGICWgJaSgoKssoKossqClA==")]
+[assembly: GoPositionMap("hash/maphash/maphash_purego.go", "maphash_purego.cs", "ABYsgoK4goKUpoKmgoKCAAYQgoKCkpSCgoKCgoKCgpSUgoKmlKS0goKkpoKmgqaCpoKCpoKCgoKmgoKosoKUgoKCpIKCgqSCgqaClKSCpIKCgriClKSCgoKkgqSCpLiCgqSClKaCgoKUgoKCgpSCpoKClA==")]
 // </GoSourcePositionMaps>
 
 namespace go.hash;
+
+using static go.hash.maphash_package;
+using hash = go.hash_package;
 
 [GoPackage("maphash")]
 public static partial class maphash_package
@@ -100,5 +107,28 @@ public static partial class maphash_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(maphash_package.Hash)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class maphashᴛHash;
+[GoMethodHost(typeof(maphash_package.Hash)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class maphashᴛHash;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class maphashᴛHash {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void initSeed(this ref Hash h) => maphash_package.initSeed⁔(ref h);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error WriteByte(this ref Hash h, byte b) => maphash_package.WriteByte⁔(ref h, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint, error) Write(this ref Hash h, slice<byte> b) => maphash_package.Write⁔(ref h, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint, error) WriteString(this ref Hash h, @string s) => maphash_package.WriteString⁔(ref h, s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static Seed Seed(this ref Hash h) => maphash_package.Seed⁔(ref h);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void SetSeed(this ref Hash h, Seed seed) => maphash_package.SetSeed⁔(ref h, seed);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Reset(this ref Hash h) => maphash_package.Reset⁔(ref h);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void flush(this ref Hash h) => maphash_package.flush⁔(ref h);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static uint64 Sum64(this ref Hash h) => maphash_package.Sum64⁔(ref h);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> Sum(this ref Hash h, slice<byte> b) => maphash_package.Sum⁔(ref h, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Size(this ref Hash h) => maphash_package.Size⁔(ref h);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint BlockSize(this ref Hash h) => maphash_package.BlockSize⁔(ref h);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (hash.Cloner, error) Clone(this ref Hash h) => maphash_package.Clone⁔(ref h);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void float64(this ref Hash h, float64 f) => maphash_package.float64⁔(ref h, f);
+}
+// </MethodForwarders>

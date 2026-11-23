@@ -16,7 +16,7 @@ public static void Add(this ref Tally t, nint n) {
 
 internal static void probeA1() {
     ref var t = ref heap<Tally>(new Tally(5, "s"), out var Ꮡt);
-    void bump() {
+    [GoFunc("probeA1.func1")] void bump() {
         Ꮡt.Value.total += 100;
     }
     bump();
@@ -26,7 +26,7 @@ internal static void probeA1() {
 
 internal static void probeA2() {
     ref var t = ref heap<Tally>(new Tally(5, "s"), out var Ꮡt);
-    nint get() => Ꮡt.Value.total;
+    [GoFunc("probeA2.func1")] nint get() => Ꮡt.Value.total;
     t.total += 10;
     fmt.Println("A2:", get());
 }
@@ -35,12 +35,12 @@ internal static void probeA3() {
     ref var t = ref heap<Tally>(new Tally(5, "s"), out var Ꮡt);
     t.total += 2;
     var tʗ1 = t;
-    nint get() => tʗ1.total;
+    [GoFunc("probeA3.func1")] nint get() => tʗ1.total;
     fmt.Println("A3:", get());
 }
 
 internal static void probeB1(Tally t) {
-    void bump() {
+    [GoFunc("probeB1.func1")] void bump() {
         t.total += 100;
     }
     bump();
@@ -49,14 +49,14 @@ internal static void probeB1(Tally t) {
 }
 
 internal static void probeB2(Tally t) {
-    nint get() => t.total;
+    [GoFunc("probeB2.func1")] nint get() => t.total;
     t.total += 10;
     fmt.Println("B2:", get());
 }
 
 internal static void probeC1() {
     var t = new Tally(5, "s");
-    void bump() {
+    [GoFunc("probeC1.func1")] void bump() {
         t.total += 100;
     }
     bump();
@@ -67,13 +67,13 @@ internal static void probeC1() {
 
 internal static void probeC2() {
     var t = new Tally(5, "s");
-    nint get() => t.total;
+    [GoFunc("probeC2.func1")] nint get() => t.total;
     t.Add(3);
     fmt.Println("C2:", get());
 }
 
 internal static void probeD1(Tally t) {
-    void bump() {
+    [GoFunc("probeD1.func1")] void bump() {
         t.total += 100;
     }
     bump();
@@ -86,7 +86,7 @@ internal static void probeE1() {
     GoFrame ᒐ = default;
     try {
         ref var t = ref heap<Tally>(new Tally(5, "s"), out var Ꮡt);
-        defer(() => {
+        defer([GoFunc("probeE1.func1")] () => {
             fmt.Println("E1:", Ꮡt.Value.total);
         }, ref ᒐ);
         t.total = 42;
@@ -110,7 +110,7 @@ internal static partial void probeF1() {
     ref var t = ref heap<Tally>(new Tally(5, "s"), out var Ꮡt);
     var done = new channel<nint>(0);
     var doneʗ1 = done;
-    goǃ(() => {
+    goǃ([GoFunc("probeF1.func1")] () => {
         Ꮡt.Value.total += 100;
         doneʗ1.ᐸꟷ(1);
     });
@@ -124,7 +124,7 @@ internal static void probeG1() {
     ref var t = ref heap<Tally>(new Tally(5, "s"), out var Ꮡt);
     slice<Action> fs = default;
     for (nint i = 0; i < 2; i++) {
-        fs = append(fsᴷ, fs, () => {
+        fs = append(fsᴷ, fs, [GoFunc("probeG1.func1")] () => {
             Ꮡt.Value.total += 10;
         });
     }
@@ -138,17 +138,17 @@ internal static void probeG3() {
 
     slice<Func<nint>> fs = default;
     foreach (var (_, x) in range(slice<nint>([10, 20, 30]))) {
-        fs = append(fsᴷ, fs, () => x);
+        fs = append(fsᴷ, fs, [GoFunc("probeG3.func1")] () => x);
     }
     fmt.Println("G3:", fs[0](), fs[1](), fs[2]());
 }
 
 internal static void probeH1() {
     ref var t = ref heap<Tally>(new Tally(5, "s"), out var Ꮡt);
-    void inc() {
+    [GoFunc("probeH1.func1")] void inc() {
         Ꮡt.Value.total++;
     }
-    nint get() => Ꮡt.Value.total;
+    [GoFunc("probeH1.func2")] nint get() => Ꮡt.Value.total;
     inc();
     inc();
     fmt.Println("H1:", get());
@@ -156,7 +156,7 @@ internal static void probeH1() {
 
 internal static void probeI1() {
     ref var s = ref heap<slice<nint>>(slice<nint>([1]), out var Ꮡs);
-    void app() {
+    [GoFunc("probeI1.func1")] void app() {
         Ꮡs.ValueSlot = append(Ꮡs.ValueSlot, (nint)2);
     }
     app();
@@ -165,7 +165,7 @@ internal static void probeI1() {
 
 internal static void probeJ1() {
     ref var t = ref heap<Tally>(new Tally(5, "s"), out var Ꮡt);
-    func(() => {
+    func([GoFunc("probeJ1.func1")] () => {
         Ꮡt.Value.total += 100;
     })();
     fmt.Println("J1:", t.total);
@@ -174,14 +174,14 @@ internal static void probeJ1() {
 internal static void probeK1() {
     ref var t = ref heap<Tally>(new Tally(5, "s"), out var Ꮡt);
     var p = Ꮡt;
-    nint get() => Ꮡt.Value.total;
+    [GoFunc("probeK1.func1")] nint get() => Ꮡt.Value.total;
     p.total = 50;
     fmt.Println("K1:", get());
 }
 
 internal static void probeL1() {
     ref var m = ref heap<map<nint, nint>>(new map<nint, nint>{}, out var Ꮡm);
-    void set() {
+    [GoFunc("probeL1.func1")] void set() {
         Ꮡm.ValueSlot = new map<nint, nint>{[1] = 1};
     }
     set();
@@ -190,17 +190,17 @@ internal static void probeL1() {
 
 internal static void probeM1() {
     ref var t = ref heap<Tally>(new Tally(5, "s"), out var Ꮡt);
-    void bump() {
+    [GoFunc("probeM1.func1")] void bump() {
         Ꮡt.Value.total += 100;
     }
-    nint get() => Ꮡt.Value.total;
+    [GoFunc("probeM1.func2")] nint get() => Ꮡt.Value.total;
     bump();
     fmt.Println("M1:", get(), t.total);
 }
 
 internal static void probeN1() {
     nint n = 0;
-    void inc() {
+    [GoFunc("probeN1.func1")] void inc() {
         n++;
     }
     inc();
@@ -210,7 +210,7 @@ internal static void probeN1() {
 internal static void probeN2() {
     ref var n = ref heap<nint>(0, out var Ꮡn);
     var p = Ꮡn;
-    void inc() {
+    [GoFunc("probeN2.func1")] void inc() {
         Ꮡn.Value += 5;
     }
     inc();
@@ -222,7 +222,7 @@ internal static (V, nint) probeP1<V>(slice<V> seq) {
     ref var v = ref heap<V>(out var Ꮡv);
     nint n = 0;
     var p = Ꮡv;
-    void set(V x) {
+    [GoFunc("probeP1[...].func1")] void set(V x) {
         (Ꮡv.ValueSlot, n) = (x, n + 1);
     }
     foreach (var (_, x) in range(seq)) {
@@ -234,7 +234,7 @@ internal static (V, nint) probeP1<V>(slice<V> seq) {
 internal static void probeQ1() {
     ref var walk = ref heap<Func<nint, nint>>(out var Ꮡwalk);
     nint calls = 0;
-    walk = (nint n) => {
+    walk = [GoFunc("probeQ1.func1")] (nint n) => {
         calls++;
         if (n <= 0) {
             return 0;
@@ -247,14 +247,14 @@ internal static void probeQ1() {
 internal static void probeQ2() {
     Func<nint, bool> even = default;
     ref var odd = ref heap<Func<nint, bool>>(out var Ꮡodd);
-    even = (nint n) => {
+    even = [GoFunc("probeQ2.func1")] (nint n) => {
         if (n == 0) {
             return true;
         }
         return Ꮡodd.ValueSlot(n - 1);
     };
     var evenʗ1 = even;
-    odd = (nint n) => {
+    odd = [GoFunc("probeQ2.func2")] (nint n) => {
         if (n == 0) {
             return false;
         }

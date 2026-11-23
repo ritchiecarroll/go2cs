@@ -10,7 +10,6 @@ using strconv = strconv_package;
 using strings = strings_package;
 using syscall = syscall_package;
 using @unsafe = unsafe_package;
-using static user_package;
 
 partial class user_package {
 
@@ -25,7 +24,7 @@ internal static (ж<User>, error) lookupUser(@string username) {
     copy(nameC, username);
 
     var nameCʗ1 = nameC;
-    var err = retryWithBuffer(userBuffer, (slice<byte> buf) => {
+    var err = retryWithBuffer(userBuffer, [GoFunc("lookupUser.func1")] (slice<byte> buf) => {
         syscall.Errno errno = default;
         (pwd, found, errno) = _C_getpwnam_r(Ꮡ(nameCʗ1, 0),
             Ꮡ(buf, 0), (_C_size_t)len(buf));
@@ -52,7 +51,7 @@ internal static (ж<User>, error) lookupUnixUid(nint uid) {
     _C_struct_passwd pwd = default;
     bool found = default;
 
-    var err = retryWithBuffer(userBuffer, (slice<byte> buf) => {
+    var err = retryWithBuffer(userBuffer, [GoFunc("lookupUnixUid.func1")] (slice<byte> buf) => {
         syscall.Errno errno = default;
         (pwd, found, errno) = _C_getpwuid_r((_C_uid_t)uid,
             Ꮡ(buf, 0), (_C_size_t)len(buf));
@@ -91,7 +90,7 @@ internal static (ж<Group>, error) lookupGroup(@string groupname) {
     copy(cname, groupname);
 
     var cnameʗ1 = cname;
-    var err = retryWithBuffer(groupBuffer, (slice<byte> buf) => {
+    var err = retryWithBuffer(groupBuffer, [GoFunc("lookupGroup.func1")] (slice<byte> buf) => {
         syscall.Errno errno = default;
         (grp, found, errno) = _C_getgrnam_r(Ꮡ(cnameʗ1, 0),
             Ꮡ(buf, 0), (_C_size_t)len(buf));
@@ -118,7 +117,7 @@ internal static (ж<Group>, error) lookupUnixGid(nint gid) {
     _C_struct_group grp = default;
     bool found = default;
 
-    var err = retryWithBuffer(groupBuffer, (slice<byte> buf) => {
+    var err = retryWithBuffer(groupBuffer, [GoFunc("lookupUnixGid.func1")] (slice<byte> buf) => {
         syscall.Errno errno = default;
         (grp, found, errno) = _C_getgrgid_r((_C_gid_t)gid,
             Ꮡ(buf, 0), (_C_size_t)len(buf));
@@ -146,9 +145,7 @@ partial struct bufferKind /*num:int32*/;
 internal static bufferKind userBuffer = ((bufferKind)_C__SC_GETPW_R_SIZE_MAX);
 internal static bufferKind groupBuffer = ((bufferKind)_C__SC_GETGR_R_SIZE_MAX);
 
-} partial class userᴛbufferKind {
-
-internal static _C_size_t initialSize(this bufferKind k) {
+internal static _C_size_t initialSize⁔(/*this*/ bufferKind k) {
     var sz = _C_sysconf((_C_int)k);
     if (sz == -1) {
         // DragonFly and FreeBSD do not have _SC_GETPW_R_SIZE_MAX.
@@ -162,8 +159,6 @@ internal static _C_size_t initialSize(this bufferKind k) {
     }
     return (_C_size_t)sz;
 }
-
-} partial class user_package {
 
 // retryWithBuffer repeatedly calls f(), increasing the size of the
 // buffer each time, until f succeeds, fails with a non-ERANGE error,

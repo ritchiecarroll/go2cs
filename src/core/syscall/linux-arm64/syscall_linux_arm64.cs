@@ -4,7 +4,6 @@
 namespace go;
 
 using @unsafe = unsafe_package;
-using static syscall_package;
 
 partial class syscall_package {
 
@@ -135,31 +134,21 @@ internal static error /*err*/ utimes(@string path, /*[2]*/ ж<array<Timeval>> �
     return utimensat(_AT_FDCWD, path, array<Timespec>.AliasPointer(Ꮡ(ts, 0), 2), 0);
 }
 
-} partial class syscallᴛPtraceRegs {
+internal static uint64 PC⁔(/*this*/ ref PtraceRegs r) { return r.Pc; }
 
-public static uint64 PC(this ref PtraceRegs r) { return r.Pc; }
+internal static void SetPC⁔(/*this*/ ref PtraceRegs r, uint64 pc) { r.Pc = pc; }
 
-public static void SetPC(this ref PtraceRegs r, uint64 pc) { r.Pc = pc; }
-
-} partial class syscallᴛIovec {
-
-public static void SetLen(this ref Iovec iov, nint length) {
+internal static void SetLen⁔(/*this*/ ref Iovec iov, nint length) {
     iov.Len = (uint64)length;
 }
 
-} partial class syscallᴛMsghdr {
-
-public static void SetControllen(this ref Msghdr msghdr, nint length) {
+internal static void SetControllen⁔(/*this*/ ref Msghdr msghdr, nint length) {
     msghdr.Controllen = (uint64)length;
 }
 
-} partial class syscallᴛCmsghdr {
-
-public static void SetLen(this ref Cmsghdr cmsg, nint length) {
+internal static void SetLen⁔(/*this*/ ref Cmsghdr cmsg, nint length) {
     cmsg.Len = (uint64)length;
 }
-
-} partial class syscall_package {
 
 public static (nint fd, error err) InotifyInit() {
     return InotifyInit1(0);

@@ -14,6 +14,9 @@
 
 using go;
 using static go.ForeignValueImplementSuppression.hue_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -54,10 +57,12 @@ using static go.ForeignValueImplementSuppression.hue_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("lib.go", "lib.cs", "ABAsggAKEIKCAAgSuIKCmg==")]
+[assembly: GoPositionMap("lib.go", "lib.cs", "AAwsggAGEIKCAAQSmIKCmg==")]
 // </GoSourcePositionMaps>
 
 namespace go.ForeignValueImplementSuppression;
+
+using static go.ForeignValueImplementSuppression.hue_package;
 
 [GoPackage("hue")]
 public static partial class hue_package
@@ -91,7 +96,23 @@ public static partial class hue_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(hue_package.Gray)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class hueᴛGray;
-[GoMethodHost(typeof(hue_package.Shade)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class hueᴛShade;
-[GoMethodHost(typeof(hue_package.Tinter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class hueᴛTinter;
+[GoMethodHost(typeof(hue_package.Gray)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class hueᴛGray;
+[GoMethodHost(typeof(hue_package.Shade)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class hueᴛShade;
+[GoMethodHost(typeof(hue_package.Tinter)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class hueᴛTinter;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class hueᴛGray {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (uint32, uint32) Shade(this Gray g) => hue_package.Shade⁔(g);
+}
+partial class hueᴛShade {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (uint32, uint32) Shade(this Shade s) => hue_package.Shade⁔(s);
+}
+partial class hueᴛTinter {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (uint32, uint32) Shade(this Tinter f) => hue_package.Shade⁔(f);
+}
+// </MethodForwarders>

@@ -1,18 +1,12 @@
 namespace go.ForeignAndUnnamedStructConversion;
 
-using static lib_package;
-
 partial class lib_package {
 
 partial struct Pitch {
     public nint Hz;
 }
 
-} partial class libᴛPitch {
-
-public static nint Double(this Pitch p) { return p.Hz * 2; }
-
-} partial class lib_package {
+internal static nint Double⁔(/*this*/ Pitch p) { return p.Hz * 2; }
 
 partial struct Note {
     public @string Name;

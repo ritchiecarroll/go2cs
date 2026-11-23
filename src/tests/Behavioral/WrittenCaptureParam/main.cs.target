@@ -19,7 +19,7 @@ internal static (fmt.Stringer, nint) swap(fmt.Stringer s) {
 internal static (@string, @string) declRedeclare(fmt.Stringer sʗp) {
     ref var s = ref heap(sʗp, out var Ꮡs);
 
-    @string get() => Ꮡs.ValueSlot.String();
+    [GoFunc("declRedeclare.func1")] @string get() => Ꮡs.ValueSlot.String();
     @string before = get();
     (s, var n) = swap(s);
     _ = n;
@@ -33,7 +33,7 @@ internal static @string /*result*/ declDeferObserver(fmt.Stringer xʗp, fmt.Stri
     try {
         ref var x = ref heap(xʗp, out var Ꮡx);
 
-        defer(() => {
+        defer([GoFunc("declDeferObserver.func1")] () => {
             result = "final:"u8 + Ꮡx.ValueSlot.String() + "/"u8 + y.String();
         }, ref ᒐ);
         (x, y) = (y, x);
@@ -49,7 +49,7 @@ internal static @string /*result*/ declDeferObserver(fmt.Stringer xʗp, fmt.Stri
 internal static @string declClosureWrite(fmt.Stringer sʗp) {
     ref var s = ref heap(sʗp, out var Ꮡs);
 
-    void set() {
+    [GoFunc("declClosureWrite.func1")] void set() {
         Ꮡs.ValueSlot = new label(name: "closure-set");
     }
     (s, var n) = swap(s);
@@ -58,9 +58,9 @@ internal static @string declClosureWrite(fmt.Stringer sʗp) {
 }
 
 internal static (@string, @string) litRedeclare(fmt.Stringer seed) {
-    (@string, @string) f(fmt.Stringer sʗp) {
+    [GoFunc("litRedeclare.func1")] (@string, @string) f(fmt.Stringer sʗp) {
         ref var s = ref heap(sʗp, out var Ꮡs);
-        @string get() => Ꮡs.ValueSlot.String();
+        [GoFunc("litRedeclare.func1.1")] @string get() => Ꮡs.ValueSlot.String();
         @string before = get();
         (s, var n) = swap(s);
         _ = n;
@@ -73,7 +73,7 @@ internal static (@string, @string) litRedeclare(fmt.Stringer seed) {
 internal static (nint, nint) declSliceRedeclare(slice<nint> vʗp) {
     ref var v = ref heap(vʗp, out var Ꮡv);
 
-    nint sum() {
+    [GoFunc("declSliceRedeclare.func1")] nint sum() {
         nint t = 0;
         foreach (var (_, e) in range(Ꮡv.ValueSlot)) {
             t += e;

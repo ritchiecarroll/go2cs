@@ -14,6 +14,9 @@
 
 using go;
 using static go.unicode_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -64,11 +67,13 @@ using static go.unicode_package;
 [assembly: GoPositionMap("unicode/casetables.go", "casetables.cs", "AAsYku4=")]
 [assembly: GoPositionMap("unicode/digit.go", "digit.cs", "AAcQkoKU")]
 [assembly: GoPositionMap("unicode/graphic.go", "graphic.cs", "ABcu7M7WgpQAAhDSgpSqooKCpqiygoKmrLKCpqiSgpSopKiSgpSqooKUAAIWAAkEgpSUlKiSgpQ=")]
-[assembly: GoPositionMap("unicode/letter.go", "letter.cs", "AFm2AZKCgoKClIKmuIKCgoKCgpSClKaokoKCgoKUgqa4goKCgoKClIKUpqiylIKUgoKUpoKUgpSCgpSopIKUqKSClKiSgpSqtIKCgoKCgpSClKaokoIAChaUqqKClIKUqJKCqJKCgpSUqJKCgpSUqJKCgpSUyJKCgpSokoKClKiSgoKUAA08ABICgqaCuIKCgoKClKaC3IKClJQ=")]
+[assembly: GoPositionMap("unicode/letter.go", "letter.cs", "AFa2AZKCgoKClIKmuIKCgoKCgpSClKaokoKCgoKUgqa4goKCgoKClIKUpqiylIKUgoKUpoKUgpSCgpSopIKUqKSClKiSgpSqtIKCgoKCgpSClKaokoIAChaUqqKClIKUqJKCqJKCgpSUqJKCgpSUqJKCgpSUqJKCgpSokoKClKiSgoKUAAs8ABICgqaCuIKCgoKClKaC3IKClJQ=")]
 [assembly: GoPositionMap("unicode/tables.go", "tables.cs", "AAoSACpUAC1aAOgE0gkABxAAGDIA4gTGCQAJFNwA9gTuCQCOAZ4CAKoB1gIAPHoA6wPYBwALGACcAboCALEC5AQApAHKAgAJFAC6AvYEAI4BngIAR5ABABEkAE6eAQCuAd4CAAkUABImABw6AAkUAAoWAKsB2AIAH0AA0AGiAwAWLgAhRAA4cgCtAdwCAAsY3NwACxqCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKoAKYBzAIACBIACBLuADdwAAgSAAcQ7gAIEgAHEO4AEiYACRQABxAACBLc7twACRTuAAcQAAcQAAgSAAcQ7gCrAdgCAAcQAAkUAAoW7gAPIO4ACxgADRzuAAoW7u7uACpWAAwaAAwa7gATKAAmTgASJgALGAAUKgAaNgASJgAHENwACBIADRwADBoABxAAIUQABxAABxAABxAABxAAESQAFCoACBLuAA0cAAcQAAgSAAcQAAcQAA8gACtYAAcQAAkUAAgSAAwaAAgS7gAHEO7uAAsY7gAHEAAIEgAMGu4ABxAABxAACBLuAAgSAAcQAAwaAAgSAAoWAAcQAAcQ7gAIEgAIEgAHEO4ABxAACRTc3AAIEgAHEO7uAAcQ7u7u7gASJgAHEAAHEAAKFu7u3AAHEAAIEu7u7u7u7gAHEAAIEgATKO4ABxDu7twACBLuAAcQ7gAJFO4ABxAAFzAABxAACRQAESTc7gALGAAHEAAHEO4ABxDcAA0cAAcQAAcQAAgS7gAHEoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgqgAJkwACBIACBIAFCoADBoAqgHWAgAdPAALGAALGO7cABo23AAKFgAYMgDsAdoDAA8gABYuAAcQAAcQACBCAHz6AQALGAAdPAAJFAALGAAPIAAHEO4ASJIBACBCAGPIAQAVLAAKFgANHoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoK6kgDJApQFAIIChgQAggGGAgBevgEACRLcAH38AQANHAB+/gHuAAwW3Nzc")]
 // </GoSourcePositionMaps>
 
 namespace go;
+
+using static go.unicode_package;
 
 [GoPackage("unicode")]
 public static partial class unicode_package
@@ -106,5 +111,17 @@ public static partial class unicode_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(unicode_package.SpecialCase)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class unicodeᴛSpecialCase;
+[GoMethodHost(typeof(unicode_package.SpecialCase)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class unicodeᴛSpecialCase;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class unicodeᴛSpecialCase {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static rune ToUpper(this SpecialCase special, rune r) => unicode_package.ToUpper⁔(special, r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static rune ToTitle(this SpecialCase special, rune r) => unicode_package.ToTitle⁔(special, r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static rune ToLower(this SpecialCase special, rune r) => unicode_package.ToLower⁔(special, r);
+}
+// </MethodForwarders>

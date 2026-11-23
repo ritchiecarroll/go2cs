@@ -135,6 +135,7 @@ var decorRe = regexp.MustCompile(`(ʗp|ᴛ\d*|ʗ\d*)$`)
 
 func csIdents(code string) map[string]bool {
 	m := map[string]bool{}
+	code = funcLitNameRe.ReplaceAllString(code, "")
 	for _, w := range identRe.FindAllString(code, -1) {
 		if !keywords[w] {
 			m[w] = true
@@ -237,8 +238,17 @@ var lazyHolderRe = regexp.MustCompile(`^\s*\[GoLazy(\([^)]*\))?\]\s+partial clas
 
 // isAttrLine reports whether a line is an attribute ahead of the code it marks.
 func isAttrLine(line string) bool {
-	return attrRe.MatchString(line) && !lazyHolderRe.MatchString(line)
+	return attrRe.MatchString(line) && !lazyHolderRe.MatchString(line) && !funcLitAttrRe.MatchString(line)
 }
+
+// funcLitNameRe matches the [GoFunc] name the converter writes on every function literal (`[GoFunc("outer.func1")] `,
+// or `, GoFunc("outer.func1")` inside the no-inlining mark's list): it has no Go counterpart, so it never anchors.
+var funcLitNameRe = regexp.MustCompile(`\[GoFunc\("[^"]*"\)\]\s*|, GoFunc\("[^"]*"\)`)
+
+// funcLitAttrRe matches a line that opens with a function literal's own attribute list (`[GoFunc("outer.func1")]`,
+// after the no-inlining mark where there is one) and carries the literal on the same line: the lambda's code line,
+// never an attribute line to step over. GoFunc sits only on literals (src/go2cs/funcLitGoNames.go).
+var funcLitAttrRe = regexp.MustCompile(`^\s*\[(MethodImpl\(MethodImplOptions\.NoInlining\), )?GoFunc\("[^"]*"\)\]\s*\S`)
 
 // scaffoldRe matches the lines the converter writes ahead of a statement's own translation: a func literal's
 // capture copy (`var xʗ1 = x;`), a heap box for an escaping local (`ref var x = ref heap<T>(out var Ꮡx);`), and Go
@@ -576,7 +586,8 @@ func analyze(p pair, r *results, verbose bool) {
 		var re *regexp.Regexp
 		switch kind {
 		case "func":
-			re = regexp.MustCompile(q + `\s*[(<]`)
+			// A Go method with a holder is emitted as its suffix-form body `<Name>⁔(`.
+			re = regexp.MustCompile(q + `⁔?\s*[(<]`)
 		case "type":
 			re = regexp.MustCompile(`(struct|interface|class|record|delegate)\s+Δ?@?` + regexp.QuoteMeta(name) + `([^\pL\pN_]|$)`)
 		default:

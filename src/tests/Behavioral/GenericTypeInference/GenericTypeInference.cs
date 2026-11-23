@@ -115,7 +115,7 @@ public delegate void Seq<V>(Func<V, bool> yield);
 public delegate void KVSeq<K, V>(Func<K, V, bool> yield);
 
 internal static Seq<nint> countdown(nint n) {
-    return (Func<nint, bool> yield) => {
+    return [GoFunc("countdown.func1")] (Func<nint, bool> yield) => {
         for (nint i = n; i > 0; i--) {
             if (!yield(i)) {
                 return;
@@ -125,7 +125,7 @@ internal static Seq<nint> countdown(nint n) {
 }
 
 internal static KVSeq<@string, nint> letters() {
-    return (Func<@string, nint, bool> yield) => {
+    return [GoFunc("letters.func1")] (Func<@string, nint, bool> yield) => {
         _ = yield("a", 1) && yield("b", 2);
     };
 }
@@ -211,7 +211,7 @@ internal static Seq<T> seqOf<T, N>(N n)
     where T : /* ~int64 */ IAdditionOperators<T, T, T>, ISubtractionOperators<T, T, T>, IMultiplyOperators<T, T, T>, IDivisionOperators<T, T, T>, IIncrementOperators<T>, IDecrementOperators<T>, IUnaryNegationOperators<T, T>, IModulusOperators<T, T, T>, IBitwiseOperators<T, T, T>, IShiftOperators<T, int, T>, IEqualityOperators<T, T, bool>, IComparisonOperators<T, T, bool>, new()
     where N : /* ~int32 | ~int64 */ IAdditionOperators<N, N, N>, ISubtractionOperators<N, N, N>, IMultiplyOperators<N, N, N>, IDivisionOperators<N, N, N>, IIncrementOperators<N>, IDecrementOperators<N>, IUnaryNegationOperators<N, N>, IModulusOperators<N, N, N>, IBitwiseOperators<N, N, N>, IShiftOperators<N, int, N>, IEqualityOperators<N, N, bool>, IComparisonOperators<N, N, bool>, new()
 {
-    return (Func<T, bool> yield) => {
+    return [GoFunc("seqOf[...].func1")] (Func<T, bool> yield) => {
         for (var i = ConvertToType<T>(0); i < ConvertToType<T>(ConvertToUInt64<N>(n)); i++) {
             if (!yield(i)) {
                 return;

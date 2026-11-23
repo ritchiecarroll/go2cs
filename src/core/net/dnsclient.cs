@@ -11,7 +11,6 @@ using slices = slices_package;
 using dnsmessage = vendor.golang.org.x.net.dns.dnsmessage_package;
 using @internal;
 using vendor.golang.org.x.net.dns;
-using static net_package;
 
 partial class net_package {
 
@@ -185,11 +184,9 @@ partial struct SRV {
 // byPriorityWeight sorts SRV records by ascending priority and weight.
 partial struct byPriorityWeight /*[]ж<SRV>*/;
 
-} partial class netᴛbyPriorityWeight {
-
 // shuffleByWeight shuffles SRV records by weight using the algorithm
 // described in RFC 2782.
-internal static void shuffleByWeight(this byPriorityWeight addrs) {
+internal static void shuffleByWeight⁔(/*this*/ byPriorityWeight addrs) {
     nint sum = 0;
     foreach (var (_, addr) in range<ж<SRV>>(addrs)) {
         sum += (nint)addr.Weight;
@@ -212,8 +209,8 @@ internal static void shuffleByWeight(this byPriorityWeight addrs) {
 }
 
 // sort reorders SRV records as specified in RFC 2782.
-internal static void sort(this byPriorityWeight addrs) {
-    slices.SortFunc(addrs, (ж<SRV> a, ж<SRV> b) => {
+internal static void sort⁔(/*this*/ byPriorityWeight addrs) {
+    slices.SortFunc(addrs, [GoFunc("byPriorityWeight.sort.func1")] (ж<SRV> a, ж<SRV> b) => {
         nint r = cmp.Compare(a.Priority, b.Priority); if (r != 0) {
             return r;
         }
@@ -229,8 +226,6 @@ internal static void sort(this byPriorityWeight addrs) {
     addrs.slice(i).shuffleByWeight();
 }
 
-} partial class net_package {
-
 // An MX represents a single DNS MX record.
 partial struct MX {
     public @string Host;
@@ -240,18 +235,14 @@ partial struct MX {
 // byPref sorts MX records by preference
 partial struct byPref /*[]ж<MX>*/;
 
-} partial class netᴛbyPref {
-
 // sort reorders MX records as specified in RFC 5321.
-internal static void sort(this byPref s) {
+internal static void sort⁔(/*this*/ byPref s) {
     foreach (var i in range(len(s))) {
         nint j = randIntn(i + 1);
         (s[i], s[j]) = (s[j], s[i]);
     }
-    slices.SortFunc(s, (ж<MX> a, ж<MX> b) => cmp.Compare(a.Pref, b.Pref));
+    slices.SortFunc(s, [GoFunc("byPref.sort.func1")] (ж<MX> a, ж<MX> b) => cmp.Compare(a.Pref, b.Pref));
 }
-
-} partial class net_package {
 
 // An NS represents a single DNS NS record.
 partial struct NS {

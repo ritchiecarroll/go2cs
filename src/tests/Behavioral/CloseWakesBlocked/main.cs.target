@@ -7,7 +7,7 @@ partial class main_package {
 internal static void expectPanic(@string name, Action f) {
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("expectPanic.func1")] () => {
             fmt.Println(name, "->", recover());
         }, ref ᒐ);
         f();
@@ -22,7 +22,7 @@ internal static partial void main() {
     for (nint i = 0; i < 3; i++) {
         var chʗ1 = ch;
         var resʗ1 = res;
-        goǃ(() => {
+        goǃ([GoFunc("main.func1")] () => {
             var (v, ok) = ᐸꟷ(chʗ1, ꟷ);
             resʗ1.ᐸꟷ(fmt.Sprintf("recv %d %t"u8, v, ok));
         });
@@ -36,11 +36,11 @@ internal static partial void main() {
     var res2 = new channel<@string>(1);
     var ch2ʗ1 = ch2;
     var res2ʗ1 = res2;
-    goǃ(() => {
+    goǃ([GoFunc("main.func2")] () => {
         GoFrame ᒐ = default;
         try {
             var res2ʗ2 = res2ʗ1;
-            defer(() => {
+            defer([GoFunc("main.func2.1")] () => {
                 var r = recover(); if (r != nil) {
                     res2ʗ2.ᐸꟷ(fmt.Sprintf("sender panicked: %v"u8, r));
                 }
@@ -60,7 +60,7 @@ internal static partial void main() {
     var ch3ʗ1 = ch3;
     var otherʗ1 = other;
     var res3ʗ1 = res3;
-    goǃ(() => {
+    goǃ([GoFunc("main.func3")] () => {
         var ch3ᴛ1 = ch3ʗ1;
         var otherᴛ1 = otherʗ1;
         switch (select(ᐸꟷ(ch3ᴛ1, ꓸꓸꓸ), ᐸꟷ(otherᴛ1, ꓸꓸꓸ))) {
@@ -82,11 +82,11 @@ internal static partial void main() {
     var ch4ʗ1 = ch4;
     var other2ʗ1 = other2;
     var res4ʗ1 = res4;
-    goǃ(() => {
+    goǃ([GoFunc("main.func4")] () => {
         GoFrame ᒐ = default;
         try {
             var res4ʗ2 = res4ʗ1;
-            defer(() => {
+            defer([GoFunc("main.func4.1")] () => {
                 var r = recover(); if (r != nil) {
                     res4ʗ2.ᐸꟷ(fmt.Sprintf("select send panicked: %v"u8, r));
                 }
@@ -109,21 +109,21 @@ internal static partial void main() {
     close(ch4);
     fmt.Println(ᐸꟷ(res4));
 
-    expectPanic("close of closed", () => {
+    expectPanic("close of closed", [GoFunc("main.func5")] () => {
         var cc = new channel<nint>(0);
         close(cc);
         close(cc);
     });
-    expectPanic("close of nil", () => {
+    expectPanic("close of nil", [GoFunc("main.func6")] () => {
         channel<nint> nc = default;
         close(nc);
     });
-    expectPanic("send on closed", () => {
+    expectPanic("send on closed", [GoFunc("main.func7")] () => {
         var sc = new channel<nint>(1);
         close(sc);
         sc.ᐸꟷ(1);
     });
-    expectPanic("select send on closed with default", () => {
+    expectPanic("select send on closed with default", [GoFunc("main.func8")] () => {
         var sd = new channel<nint>(1);
         close(sd);
         var sdᴛ1 = sd.ᐸꟷ(1, ꓸꓸꓸ);

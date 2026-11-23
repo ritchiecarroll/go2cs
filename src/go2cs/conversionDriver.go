@@ -255,7 +255,7 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 	// than print a bare "Errors:" (issue #33).
 	for _, pkg := range pkgs {
 		if len(pkg.Errors) > 0 {
-			log.Printf("WARNING: %s did not fully type-check; converting best-effort — code depending on the following is emitted untyped: %v", pkg.PkgPath, pkg.Errors)
+			log.Print(remapCopiedPaths(fmt.Sprintf("WARNING: %s did not fully type-check; converting best-effort — code depending on the following is emitted untyped: %v", pkg.PkgPath, pkg.Errors)))
 
 			for _, loadError := range pkg.Errors {
 				reportDiagnostic(loadError.Pos, loadErrorCode(loadError.Kind), loadError.Msg)
@@ -422,6 +422,13 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 			return refusePackage(options, diagnosticAsmForwardSignatureRefused, refusal)
 		}
 
+		// ...and an identifier spelled with a marker letter go2cs writes into generated names, or a Δ name equal to
+		// one it generates here (markerGlyphRefusal.go).
+		if refusal := refuseMarkerGlyphIdentifiers(pkg); refusal != nil {
+			refusal.report()
+			return refusePackage(options, diagnosticMarkerGlyphIdentifierRefused, refusal)
+		}
+
 		// Which structs hold their arrays inline (inlineArrayAdmission.go): decided once, from the package's non-test
 		// files, before any file emits. A reinterpret chain whose sides disagree keeps its admitted side out under the
 		// automatic rule (GO2CS2009) and refuses the package when forced (GO2CS2010).
@@ -575,7 +582,7 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 				// would record against empty global state rather than record nothing. Whether any
 				// of the four packages loses a [GoImplement] record it previously carried is a
 				// question for the two-seeded diff to answer, not for this comment to assume.
-				options.inputDigest = moduleInputDigest(projectFileName, files, packageOutputPath, options)
+				options.inputDigest = moduleInputDigest(projectFileName, fset, files, packageOutputPath, route.digestHeader(), options)
 
 				if err = writeProjectFile(projectFileName, projectFileContents, packageOutputPath, packageTypes, options); err != nil {
 					log.Fatalf("Error while writing project file \"%s\": %s\n", projectFileName, err)
@@ -844,7 +851,7 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		replayDeferredConstraintRecords()
 
 		// Write project file with correct output type and unsafe code settings
-		options.inputDigest = moduleInputDigest(projectFileName, files, packageOutputPath, options)
+		options.inputDigest = moduleInputDigest(projectFileName, fset, files, packageOutputPath, route.digestHeader(), options)
 		err = writeProjectFile(projectFileName, projectFileContents, packageOutputPath, packageTypes, options)
 
 		if err != nil {

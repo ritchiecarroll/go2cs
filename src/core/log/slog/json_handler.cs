@@ -17,7 +17,6 @@ using utf8 = go.unicode.utf8_package;
 using go.encoding;
 using go.log.slog.@internal;
 using go.unicode;
-using static slog_package;
 
 partial class slog_package {
 
@@ -46,21 +45,19 @@ public static ж<JSONHandler> NewJSONHandler(io.Writer w, ж<HandlerOptions> Ꮡ
     ));
 }
 
-} partial class slogᴛJSONHandler {
-
 // Enabled reports whether the handler handles records at the given level.
 // The handler ignores records whose level is lower.
-public static bool Enabled(this ref JSONHandler h, context.Context _, Level level) {
+internal static bool Enabled⁔(/*this*/ ref JSONHandler h, context.Context _, Level level) {
     return h.commonHandler.enabled(level);
 }
 
 // WithAttrs returns a new [JSONHandler] whose attributes consists
 // of h's attributes followed by attrs.
-public static Handler WithAttrs(this ref JSONHandler h, slice<Attr> attrs) {
+internal static Handler WithAttrs⁔(/*this*/ ref JSONHandler h, slice<Attr> attrs) {
     return new JSONHandlerжHandler(Ꮡ(new JSONHandler(commonHandler: h.commonHandler.withAttrs(attrs))));
 }
 
-public static Handler WithGroup(this ref JSONHandler h, @string name) {
+internal static Handler WithGroup⁔(/*this*/ ref JSONHandler h, @string name) {
     return new JSONHandlerжHandler(Ꮡ(new JSONHandler(commonHandler: h.commonHandler.withGroup(name))));
 }
 
@@ -92,13 +89,11 @@ public static Handler WithGroup(this ref JSONHandler h, @string name) {
 // Instead, the error message is formatted as a string.
 //
 // Each call to Handle results in a single serialized call to io.Writer.Write.
-public static error Handle(this ref JSONHandler h, context.Context _, Record r) {
+internal static error Handle⁔(/*this*/ ref JSONHandler h, context.Context _, Record r) {
     r = r.ΔClone();
 
     return h.commonHandler.handle(r);
 }
-
-} partial class slog_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string timeTimeYearOutsideOfˢ => ref timeTimeYearOutsideOfˢᵇ;
@@ -184,7 +179,7 @@ partial struct jsonEncoder {
 }
 
 [GoLazy] partial class lazyᴛjsonEncoderPool { internal static ж<sync.Pool> jsonEncoderPool = Ꮡ(new sync.Pool(
-    New: () => {
+    New: [GoFunc("init.func2")] () => {
         var enc = Ꮡ(new jsonEncoder(
             buf: @new<bytes.Buffer>()
         ));
@@ -201,7 +196,7 @@ internal static error appendJSONMarshal(ж<buffer.Buffer> Ꮡbuf, any v) {
 
         var j = jsonEncoderPool.Get()._<ж<jsonEncoder>>();
         var jʗ1 = j;
-        defer(() => {
+        defer([GoFunc("appendJSONMarshal.func1")] () => {
             // To reduce peak allocation, return only smaller buffers to the pool.
             const nint maxBufferSize = /* 16 << 10 */ 16384;
             if (jʗ1.buf.Cap() > maxBufferSize) {
@@ -237,10 +232,10 @@ private static readonly @string u202ˢᵇ = @"\u202"u8;
 // Modified from encoding/json/encode.go:encodeState.string,
 // with escapeHTML set to false.
 internal static slice<byte> appendEscapedJSONString(slice<byte> buf, @string s) {
-    void @char(byte b) {
+    [GoFunc("appendEscapedJSONString.func1")] void @char(byte b) {
         buf = append(buf, b);
     }
-    void str(@string sΔ1) {
+    [GoFunc("appendEscapedJSONString.func2")] void str(@string sΔ1) {
         buf = append(buf, sΔ1.ꓸꓸꓸ);
     }
 

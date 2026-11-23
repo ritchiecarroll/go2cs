@@ -151,7 +151,7 @@ so a nil `p` ranges N times as in Go, and a deref-aliased pointer parameter or r
 
 **Named-slice pointer reinterpret (`(*[][]byte)(buf)` with `buf *Buffers`).** Go converts a pointer-to-named-slice to a pointer to its underlying slice type freely — net's `fd.pfd.Writev((*[][]byte)(buf))`, where poll's `Writev` *reslices the header through the pointer* (`consume` advances `*v`), and the caller must observe it. The C# boxes `ж<Buffers>` and `ж<slice<slice<byte>>>` are unrelated generic instantiations (CS0030), so the conversion emits a **field view over the wrapper's own backing slice**:
 
-<!-- source: src/core/net/windows/fd_windows.cs:262 -->
+<!-- source: src/core/net/windows/fd_windows.cs:255 -->
 ```csharp
     var (n, err) = Ꮡfd.Ꮡpfd.Writev(buf.of(Buffers.Ꮡm_value));
 ```
@@ -831,7 +831,7 @@ return, channel send, `append` element, range key/value, function/func-literal p
 receiver) clones a struct too. The struct declaration is stamped with the fields that need it, and
 go2cs-gen turns the stamp into the deep copy:
 
-<!-- source: src/core/crypto/internal/fips140/sha256/sha256.cs:52-225 -->
+<!-- source: src/core/crypto/internal/fips140/sha256/sha256.cs:51-57, 210, 213-214 -->
 ```csharp
 partial struct Digest {
     internal array<uint32> h = new(8);
@@ -841,7 +841,7 @@ partial struct Digest {
     internal bool is224; // mark if this digest is SHA-224
 }
 …
-public static slice<byte> Sum(this ref Digest d, slice<byte> @in) {
+internal static slice<byte> Sum⁔(/*this*/ ref Digest d, slice<byte> @in) {
 …
     ref var d0 = ref heap<Digest>(d.ΔClone(), out var Ꮡd0);
     var hash = Ꮡd0.checkSum();
@@ -2007,7 +2007,7 @@ emitted both public; the CS0111 held fmt's (63 verdicts) and archive/tar's (97) 
 
 The non-generic overload is explicit —
 
-<!-- source: src/gen/go2cs-gen/Templates/InheritedType/ISliceTypeTemplate.cs:133 -->
+<!-- source: src/gen/go2cs-gen/Templates/InheritedType/ISliceTypeTemplate.cs:157 -->
 ```csharp
 ISlice? ISlice.Append(object[] elems) => ((ISlice)m_value).Append(elems);
 ```
@@ -2063,7 +2063,7 @@ read/write vs Go.)
 
 ## Appending to an interface-typed slice casts the element
 A value appended to a `[]Iface` slice whose type is not already the interface -- a pointer rendering as the `*T`-to-interface adapter ctor, or a raw struct value -- leaves both golib `append` overloads applicable (`append<T>(ISlice, params T[])` infers the concrete/adapter type; `append<T>(slice<T>, params Span<T>)` infers the interface -- CS0121). The converter casts such elements to the element interface type:
-<!-- source: src/tests/Behavioral/InterfaceCasting/InterfaceCasting.cs.target:160-161 -->
+<!-- source: src/tests/Behavioral/InterfaceCasting/InterfaceCasting.cs.target:159-160 -->
 ```csharp
     pack = append(packᴷ, pack, (Animal)(new CatжAnimal(Ꮡ(new Cat()))));
     pack = append(pack, (Animal)(new Dog()));

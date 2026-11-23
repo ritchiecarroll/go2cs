@@ -18,7 +18,6 @@ using @internal;
 using @internal.runtime.syscall;
 using go.sync;
 using ꓸꓸꓸuintptr = variadic<uintptr>;
-using static syscall_package;
 
 partial class syscall_package {
 
@@ -447,47 +446,43 @@ internal static UntypedInt exited => 0x00;
 internal static UntypedInt stopped => 0x7F;
 internal static UntypedInt shift => 8;
 
-} partial class syscallᴛWaitStatus {
+internal static bool Exited⁔(/*this*/ WaitStatus w) { return (WaitStatus)(w & (uint32)mask) == exited; }
 
-public static bool Exited(this WaitStatus w) { return (WaitStatus)(w & (uint32)mask) == exited; }
+internal static bool Signaled⁔(/*this*/ WaitStatus w) { return (WaitStatus)(w & (uint32)mask) != stopped && (WaitStatus)(w & (uint32)mask) != exited; }
 
-public static bool Signaled(this WaitStatus w) { return (WaitStatus)(w & (uint32)mask) != stopped && (WaitStatus)(w & (uint32)mask) != exited; }
+internal static bool Stopped⁔(/*this*/ WaitStatus w) { return (WaitStatus)(w & 0xFF) == stopped; }
 
-public static bool Stopped(this WaitStatus w) { return (WaitStatus)(w & 0xFF) == stopped; }
+internal static bool Continued⁔(/*this*/ WaitStatus w) { return w == 0xFFFF; }
 
-public static bool Continued(this WaitStatus w) { return w == 0xFFFF; }
+internal static bool CoreDump⁔(/*this*/ WaitStatus w) { return w.Signaled() && (WaitStatus)(w & (uint32)core) != 0; }
 
-public static bool CoreDump(this WaitStatus w) { return w.Signaled() && (WaitStatus)(w & (uint32)core) != 0; }
-
-public static nint ExitStatus(this WaitStatus w) {
+internal static nint ExitStatus⁔(/*this*/ WaitStatus w) {
     if (!w.Exited()) {
         return -1;
     }
     return (nint)(w >> (int)(shift)) & 0xFF;
 }
 
-public static Signal Signal(this WaitStatus w) {
+internal static Signal Signal⁔(/*this*/ WaitStatus w) {
     if (!w.Signaled()) {
         return -1;
     }
     return (Signal)(nint)((WaitStatus)(w & (uint32)mask));
 }
 
-public static Signal StopSignal(this WaitStatus w) {
+internal static Signal StopSignal⁔(/*this*/ WaitStatus w) {
     if (!w.Stopped()) {
         return -1;
     }
     return (Signal)(((Signal)(nint)((w >> (int)(shift)))) & 0xFF);
 }
 
-public static nint TrapCause(this WaitStatus w) {
+internal static nint TrapCause⁔(/*this*/ WaitStatus w) {
     if (w.StopSignal() != SIGTRAP) {
         return -1;
     }
     return (nint)(w >> (int)(shift)) >> 8;
 }
-
-} partial class syscall_package {
 
 //sys	wait4(pid int, wstatus *_C_int, options int, rusage *Rusage) (wpid int, err error)
 public static (nint wpid, error err) Wait4(nint pid, ж<WaitStatus> Ꮡwstatus, nint options, ж<Rusage> rusage) {
@@ -507,17 +502,11 @@ public static error /*err*/ Mkfifo(@string path, uint32 mode) {
     return Mknod(path, mode | (uint32)S_IFIFO, 0);
 }
 
-} partial class syscallᴛSockaddrInet4 {
+// go2cs generated this placeholder — func sockaddr is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // go2cs generated this placeholder — func sockaddr is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-} partial class syscallᴛSockaddrInet6 {
-
-// go2cs generated this placeholder — func sockaddr is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
-
-} partial class syscallᴛSockaddrUnix {
-
-internal static (@unsafe.Pointer, _Socklen, error) sockaddr(this ж<SockaddrUnix> Ꮡsa) {
+internal static (@unsafe.Pointer, _Socklen, error) sockaddr⁔(/*this*/ ж<SockaddrUnix> Ꮡsa) {
     ref var sa = ref Ꮡsa.DerefOrNull();
 
     @string name = sa.Name;
@@ -553,8 +542,6 @@ internal static (@unsafe.Pointer, _Socklen, error) sockaddr(this ж<SockaddrUnix
     return (@unsafe.Pointer.FromPinnedBox(Ꮡsa.Ꮡraw), sl, default);
 }
 
-} partial class syscall_package {
-
 partial struct SockaddrLinklayer {
     public uint16 Protocol;
     public nint Ifindex;
@@ -565,9 +552,7 @@ partial struct SockaddrLinklayer {
     internal RawSockaddrLinklayer raw;
 }
 
-} partial class syscallᴛSockaddrLinklayer {
-
-internal static (@unsafe.Pointer, _Socklen, error) sockaddr(this ж<SockaddrLinklayer> Ꮡsa) {
+internal static (@unsafe.Pointer, _Socklen, error) sockaddr⁔(/*this*/ ж<SockaddrLinklayer> Ꮡsa) {
     ref var sa = ref Ꮡsa.DerefOrNull();
 
     if (sa.Ifindex < 0 || sa.Ifindex > 0x7fffffff) {
@@ -583,8 +568,6 @@ internal static (@unsafe.Pointer, _Socklen, error) sockaddr(this ж<SockaddrLink
     return (@unsafe.Pointer.FromPinnedBox(Ꮡsa.Ꮡraw), SizeofSockaddrLinklayer, default);
 }
 
-} partial class syscall_package {
-
 partial struct SockaddrNetlink {
     public uint16 Family;
     public uint16 Pad;
@@ -593,9 +576,7 @@ partial struct SockaddrNetlink {
     internal RawSockaddrNetlink raw;
 }
 
-} partial class syscallᴛSockaddrNetlink {
-
-internal static (@unsafe.Pointer, _Socklen, error) sockaddr(this ж<SockaddrNetlink> Ꮡsa) {
+internal static (@unsafe.Pointer, _Socklen, error) sockaddr⁔(/*this*/ ж<SockaddrNetlink> Ꮡsa) {
     ref var sa = ref Ꮡsa.DerefOrNull();
 
     sa.raw.Family = AF_NETLINK;
@@ -604,8 +585,6 @@ internal static (@unsafe.Pointer, _Socklen, error) sockaddr(this ж<SockaddrNetl
     sa.raw.Groups = sa.Groups;
     return (@unsafe.Pointer.FromPinnedBox(Ꮡsa.Ꮡraw), SizeofSockaddrNetlink, default);
 }
-
-} partial class syscall_package {
 
 // go2cs generated this placeholder — func anyToSockaddr is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 

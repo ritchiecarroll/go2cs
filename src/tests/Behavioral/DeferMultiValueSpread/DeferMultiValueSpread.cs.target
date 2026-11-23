@@ -220,7 +220,7 @@ internal static void deferFuncLitSpread() {
     GoFrame ᒐ = default;
     try {
         fmt.Println("deferFuncLitSpread: enter");
-        defer(ᴛ1 => ((Action<nint, @string>)((nint n, @string s) => {
+        defer(ᴛ1 => ((Action<nint, @string>)([GoFunc("deferFuncLitSpread.func1")] (nint n, @string s) => {
             fmt.Println("  lit:", n, s);
         }))(ᴛ1.Item1, ᴛ1.Item2), two(), ref ᒐ);
         fmt.Println("deferFuncLitSpread: body");

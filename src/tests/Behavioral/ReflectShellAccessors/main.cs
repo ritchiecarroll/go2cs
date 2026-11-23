@@ -116,12 +116,12 @@ internal static void main() {
     var vaSorted = typelib.NewList();
     namer vaHeld = new typelib_Listᴠnamer(vaSorted);
     var vaSortedʗ1 = vaSorted;
-    sort.Slice(vaHeld, (nint i, nint j) => vaSortedʗ1[i] < vaSortedʗ1[j]);
+    sort.Slice(vaHeld, [GoFunc("main.func1")] (nint i, nint j) => vaSortedʗ1[i] < vaSortedʗ1[j]);
     fmt.Println("va-sort", vaSorted);
 
     var shSorted = typelib.NewList();
     var shSortedʗ1 = shSorted;
-    sort.Slice(viaAny(shSorted), (nint i, nint j) => shSortedʗ1[i] < shSortedʗ1[j]);
+    sort.Slice(viaAny(shSorted), [GoFunc("main.func2")] (nint i, nint j) => shSortedʗ1[i] < shSortedʗ1[j]);
     fmt.Println("sh-sort", shSorted);
 }
 

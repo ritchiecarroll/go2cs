@@ -14,6 +14,9 @@
 
 using go;
 using static go.ForeignPointerImplementSuppression.tone_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -52,10 +55,12 @@ using static go.ForeignPointerImplementSuppression.tone_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("lib.go", "lib.cs", "ABIugoIACQyCggAJFIKCuIKc")]
+[assembly: GoPositionMap("lib.go", "lib.cs", "AA4ugoLcgoIABRSCgpiCnA==")]
 // </GoSourcePositionMaps>
 
 namespace go.ForeignPointerImplementSuppression;
+
+using static go.ForeignPointerImplementSuppression.tone_package;
 
 [GoPackage("tone")]
 public static partial class tone_package
@@ -90,7 +95,29 @@ public static partial class tone_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(tone_package.Lone)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class toneᴛLone;
-[GoMethodHost(typeof(tone_package.Plain)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class toneᴛPlain;
-[GoMethodHost(typeof(tone_package.Tone)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class toneᴛTone;
+[GoMethodHost(typeof(tone_package.Lone)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class toneᴛLone;
+[GoMethodHost(typeof(tone_package.Plain)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class toneᴛPlain;
+[GoMethodHost(typeof(tone_package.Tone)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class toneᴛTone;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class toneᴛLone {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Tone(this ref Lone l) => tone_package.Tone⁔(ref l);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Name(this ref Lone l) => tone_package.Name⁔(ref l);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Set(this ref Lone l, nint d) => tone_package.Set⁔(ref l, d);
+}
+partial class toneᴛPlain {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Tone(this ref Plain p) => tone_package.Tone⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Name(this ref Plain p) => tone_package.Name⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Set(this ref Plain p, nint d) => tone_package.Set⁔(ref p, d);
+}
+partial class toneᴛTone {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Tone(this ref Tone t) => tone_package.Tone⁔(ref t);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Name(this ref Tone t) => tone_package.Name⁔(ref t);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Set(this ref Tone t, nint d) => tone_package.Set⁔(ref t, d);
+}
+// </MethodForwarders>

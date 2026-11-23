@@ -18,7 +18,6 @@ using encoding;
 using go.@internal;
 using go.@internal.coverage;
 using iter = iter_package;
-using static encodecounter_package;
 
 partial class encodecounter_package {
 
@@ -63,12 +62,10 @@ partial interface CounterVisitor {
 // coverage counter data.
 // type CounterVisitorFn is a methodless func type — rendered inline as its base delegate
 
-} partial class encodecounterᴛCoverageDataWriter {
-
 // Write writes the contents of the count-data file to the writer
 // previously supplied to NewCoverageDataWriter. Returns an error
 // if something went wrong somewhere with the write.
-public static error Write(this ж<CoverageDataWriter> Ꮡcfw, /*[16]*/ array<byte> metaFileHash, map<@string, @string> args, CounterVisitor visitor) {
+internal static error Write⁔(/*this*/ ж<CoverageDataWriter> Ꮡcfw, /*[16]*/ array<byte> metaFileHash, map<@string, @string> args, CounterVisitor visitor) {
     metaFileHash = metaFileHash.Clone();
     ref var cfw = ref Ꮡcfw.DerefOrNull();
 
@@ -77,8 +74,6 @@ public static error Write(this ж<CoverageDataWriter> Ꮡcfw, /*[16]*/ array<byt
     }
     return Ꮡcfw.AppendSegment(args, visitor);
 }
-
-} partial class encodecounter_package {
 
 internal static error padToFourByteBoundary(ж<slicewriter.WriteSeeker> Ꮡws) {
     ref var ws = ref Ꮡws.DerefOrNull();
@@ -97,9 +92,7 @@ internal static error padToFourByteBoundary(ж<slicewriter.WriteSeeker> Ꮡws) {
     return default;
 }
 
-} partial class encodecounterᴛCoverageDataWriter {
-
-internal static error patchSegmentHeader(this ref CoverageDataWriter cfw, ж<slicewriter.WriteSeeker> Ꮡws) {
+internal static error patchSegmentHeader⁔(/*this*/ ref CoverageDataWriter cfw, ж<slicewriter.WriteSeeker> Ꮡws) {
     ref var ws = ref Ꮡws.DerefOrNull();
 
     // record position
@@ -124,7 +117,7 @@ internal static error patchSegmentHeader(this ref CoverageDataWriter cfw, ж<sli
     return default;
 }
 
-internal static error writeSegmentPreamble(this ж<CoverageDataWriter> Ꮡcfw, map<@string, @string> args, ж<slicewriter.WriteSeeker> Ꮡws) {
+internal static error writeSegmentPreamble⁔(/*this*/ ж<CoverageDataWriter> Ꮡcfw, map<@string, @string> args, ж<slicewriter.WriteSeeker> Ꮡws) {
     ref var cfw = ref Ꮡcfw.DerefOrNull();
     ref var ws = ref Ꮡws.DerefOrNull();
 
@@ -148,7 +141,7 @@ internal static error writeSegmentPreamble(this ж<CoverageDataWriter> Ꮡcfw, m
 
     var akeys = slices.Sorted(maps.Keys<map<@string, @string>, @string, @string>(args));
 
-    error wrULEB128(nuint v) {
+    [GoFunc("(*CoverageDataWriter).writeSegmentPreamble.func1")] error wrULEB128(nuint v) {
         Ꮡcfw.Value.tmp = Ꮡcfw.Value.tmp[..0];
         Ꮡcfw.Value.tmp = uleb128.AppendUleb128(Ꮡcfw.Value.tmp, v);
         var (_, err) = Ꮡws.Value.Write(Ꮡcfw.Value.tmp); if (err != nil) {
@@ -191,7 +184,7 @@ internal static error writeSegmentPreamble(this ж<CoverageDataWriter> Ꮡcfw, m
 
 // AppendSegment appends a new segment to a counter data, with a new
 // args section followed by a payload of counter data clauses.
-public static error AppendSegment(this ж<CoverageDataWriter> Ꮡcfw, map<@string, @string> args, CounterVisitor visitor) {
+internal static error AppendSegment⁔(/*this*/ ж<CoverageDataWriter> Ꮡcfw, map<@string, @string> args, CounterVisitor visitor) {
     ref var cfw = ref Ꮡcfw.DerefOrNull();
 
     cfw.stab = Ꮡ(new stringtab.Writer());
@@ -227,7 +220,7 @@ public static error AppendSegment(this ж<CoverageDataWriter> Ꮡcfw, map<@strin
     return default;
 }
 
-internal static error writeHeader(this ref CoverageDataWriter cfw, /*[16]*/ array<byte> metaFileHash) {
+internal static error writeHeader⁔(/*this*/ ref CoverageDataWriter cfw, /*[16]*/ array<byte> metaFileHash) {
     metaFileHash = metaFileHash.Clone();
 
     // Emit file header.
@@ -244,7 +237,7 @@ internal static error writeHeader(this ref CoverageDataWriter cfw, /*[16]*/ arra
     return default;
 }
 
-internal static error writeBytes(this ref CoverageDataWriter cfw, slice<byte> b) {
+internal static error writeBytes⁔(/*this*/ ref CoverageDataWriter cfw, slice<byte> b) {
     if (len(b) == 0) {
         return default;
     }
@@ -258,7 +251,7 @@ internal static error writeBytes(this ref CoverageDataWriter cfw, slice<byte> b)
     return default;
 }
 
-internal static error writeCounters(this ж<CoverageDataWriter> Ꮡcfw, CounterVisitor visitor, ж<slicewriter.WriteSeeker> ws) {
+internal static error writeCounters⁔(/*this*/ ж<CoverageDataWriter> Ꮡcfw, CounterVisitor visitor, ж<slicewriter.WriteSeeker> ws) {
     // Notes:
     // - this version writes everything little-endian, which means
     //   a call is needed to encode every value (expensive)
@@ -267,7 +260,7 @@ internal static error writeCounters(this ж<CoverageDataWriter> Ꮡcfw, CounterV
     //   implicitly.
     var ctrb = new slice<byte>(4);
     var ctrbʗ1 = ctrb;
-    error wrval(uint32 val) {
+    [GoFunc("(*CoverageDataWriter).writeCounters.func1")] error wrval(uint32 val) {
         slice<byte> buf = default;
         nint towr = default;
         if (Ꮡcfw.Value.cflavor == coverage.CtrRaw) {
@@ -292,7 +285,7 @@ internal static error writeCounters(this ж<CoverageDataWriter> Ꮡcfw, CounterV
 
     // Write out entries for each live function.
     var wrvalʗ1 = wrval;
-    var emitter = error (uint32 pkid, uint32 funcid, slice<uint32> counters) => {
+    var emitter = [GoFunc("(*CoverageDataWriter).writeCounters.func2")] error (uint32 pkid, uint32 funcid, slice<uint32> counters) => {
         Ꮡcfw.Value.csh.FcnEntries++;
         {
             var err = wrvalʗ1((uint32)len(counters)); if (err != nil) {
@@ -326,7 +319,7 @@ internal static error writeCounters(this ж<CoverageDataWriter> Ꮡcfw, CounterV
     return default;
 }
 
-internal static error writeFooter(this ref CoverageDataWriter cfw) {
+internal static error writeFooter⁔(/*this*/ ref CoverageDataWriter cfw) {
     cfw.segs++;
     var cf = new coverage.CounterFileFooter(
         Magic: coverage.CovCounterMagic.Clone(),
@@ -338,4 +331,4 @@ internal static error writeFooter(this ref CoverageDataWriter cfw) {
     return default;
 }
 
-}
+} // end encodecounter_package

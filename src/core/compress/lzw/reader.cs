@@ -21,7 +21,6 @@ using bufio = bufio_package;
 using errors = errors_package;
 using fmt = fmt_package;
 using io = io_package;
-using static lzw_package;
 
 partial class lzw_package {
 
@@ -79,10 +78,8 @@ partial struct Reader {
     internal slice<byte> toRead; // bytes to return from Read
 }
 
-} partial class lzwᴛReader {
-
 // readLSB returns the next code for "Least Significant Bits first" data.
-internal static (uint16, error) readLSB(this ref Reader r) {
+internal static (uint16, error) readLSB⁔(/*this*/ ref Reader r) {
     while (r.nBits < r.width) {
         var (x, err) = r.r.ReadByte();
         if (err != nil) {
@@ -98,7 +95,7 @@ internal static (uint16, error) readLSB(this ref Reader r) {
 }
 
 // readMSB returns the next code for "Most Significant Bits first" data.
-internal static (uint16, error) readMSB(this ref Reader r) {
+internal static (uint16, error) readMSB⁔(/*this*/ ref Reader r) {
     while (r.nBits < r.width) {
         var (x, err) = r.r.ReadByte();
         if (err != nil) {
@@ -114,7 +111,7 @@ internal static (uint16, error) readMSB(this ref Reader r) {
 }
 
 // Read implements io.Reader, reading uncompressed bytes from its underlying reader.
-public static (nint, error) Read(this ж<Reader> Ꮡr, slice<byte> b) {
+internal static (nint, error) Read⁔(/*this*/ ж<Reader> Ꮡr, slice<byte> b) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     for (;;) {
@@ -137,7 +134,7 @@ private static readonly @string lzwInvalidCodeˢᵇ = "lzw: invalid code"u8;
 // decode decompresses bytes from r and leaves them in d.toRead.
 // read specifies how to decode bytes into codes.
 // litWidth is the width in bits of literal codes.
-internal static void decode(this ж<Reader> Ꮡr) {
+internal static void decode⁔(/*this*/ ж<Reader> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     // Loop over the code stream, converting codes into decompressed bytes.
@@ -238,27 +235,21 @@ break_loop:;
     r.o = 0;
 }
 
-} partial class lzw_package {
-
 internal static error errClosed = errors.New("lzw: reader/writer is closed");
-
-} partial class lzwᴛReader {
 
 // Close closes the [Reader] and returns an error for any future read operation.
 // It does not close the underlying [io.Reader].
-public static error Close(this ref Reader r) {
+internal static error Close⁔(/*this*/ ref Reader r) {
     r.err = errClosed; // in case any Reads come along
     return default;
 }
 
 // Reset clears the [Reader]'s state and allows it to be reused again
 // as a new [Reader].
-public static void Reset(this ref Reader r, io.Reader src, Order order, nint litWidth) {
+internal static void Reset⁔(/*this*/ ref Reader r, io.Reader src, Order order, nint litWidth) {
     r.AssignFrom(new Reader());
     r.init(src, order, litWidth);
 }
-
-} partial class lzw_package {
 
 // NewReader creates a new [io.ReadCloser].
 // Reads from the returned [io.ReadCloser] read and decompress data from r.
@@ -282,13 +273,11 @@ internal static ж<Reader> newReader(io.Reader src, Order order, nint litWidth) 
     return r;
 }
 
-} partial class lzwᴛReader {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string lzwUnknownOrderˢ => ref lzwUnknownOrderˢᵇ;
 private static readonly @string lzwUnknownOrderˢᵇ = "lzw: unknown order"u8;
 
-internal static void init(this ref Reader r, io.Reader src, Order order, nint litWidth) {
+internal static void init⁔(/*this*/ ref Reader r, io.Reader src, Order order, nint litWidth) {
     switch (order) {
     case var ᴛ when ᴛ == LSB: {
         r.read = ((Func<ж<Reader>, (uint16, error)>)(lzwᴛReader.readLSB));
@@ -320,4 +309,4 @@ internal static void init(this ref Reader r, io.Reader src, Order order, nint li
     r.last = decoderInvalidCode;
 }
 
-}
+} // end lzw_package

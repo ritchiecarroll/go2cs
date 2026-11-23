@@ -51,7 +51,7 @@ internal static bool sink;
 internal static void recovered(@string label, Func<bool> f) {
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("recovered.func1")] () => {
             var r = recover(); if (r != nil) {
                 fmt.Println(label, "panic:", r);
             }
@@ -112,27 +112,27 @@ internal static void main() {
     slice<nint> nilSlice = default;
     var nilSliceʗ1 = nilSlice;
     var sʗ1 = s;
-    recovered("nil slice  :", () => Ꮡelem(nilSliceʗ1, 0) == Ꮡelem(sʗ1, 0));
+    recovered("nil slice  :", [GoFunc("main.func1")] () => Ꮡelem(nilSliceʗ1, 0) == Ꮡelem(sʗ1, 0));
     var sʗ2 = s;
-    recovered("past len   :", () => Ꮡelem(sʗ2, 0) == Ꮡelem(sʗ2, 4));
+    recovered("past len   :", [GoFunc("main.func2")] () => Ꮡelem(sʗ2, 0) == Ꮡelem(sʗ2, 4));
     nint idx = 9;
     var sʗ3 = s;
     var tʗ1 = t;
-    recovered("left first :", () => Ꮡelem(sʗ3, idx) == Ꮡelem(tʗ1, idx - 1));
+    recovered("left first :", [GoFunc("main.func3")] () => Ꮡelem(sʗ3, idx) == Ꮡelem(tʗ1, idx - 1));
 
     var sʗ4 = s;
     var tʗ2 = t;
-    fmt.Println("allocs     :", testing.AllocsPerRun(100, () => {
+    fmt.Println("allocs     :", testing.AllocsPerRun(100, [GoFunc("main.func4")] () => {
         sink = Ꮡelem(sʗ4, 0) == Ꮡelem(tʗ2, 0);
     }));
     var mʗ1 = m;
     var nʗ1 = n;
-    fmt.Println("allocs named:", testing.AllocsPerRun(100, () => {
+    fmt.Println("allocs named:", testing.AllocsPerRun(100, [GoFunc("main.func5")] () => {
         sink = Ꮡelem<uint64>(mʗ1, 0) == Ꮡelem<uint64>(nʗ1, 1);
     }));
     var pʗ1 = p;
     var sʗ5 = s;
-    fmt.Println("allocs ptr :", testing.AllocsPerRun(100, () => {
+    fmt.Println("allocs ptr :", testing.AllocsPerRun(100, [GoFunc("main.func6")] () => {
         sink = pʗ1.Ꮡelem<nint>(1) == Ꮡelem(sʗ5, 2);
     }));
 

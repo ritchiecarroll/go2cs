@@ -13,15 +13,12 @@ using strings = strings_package;
 using constant = global::go.go.constant_package;
 using errors = global::go.@internal.types.errors_package;
 using global::go.go;
-using static types_package;
 
 partial class types_package {
 
-} partial class typesᴛChecker {
-
 // langCompat reports an error if the representation of a numeric
 // literal is not compatible with the current language version.
-internal static void langCompat(this ж<Checker> Ꮡcheck, ж<ast.BasicLit> Ꮡlit) {
+internal static void langCompat⁔(/*this*/ ж<Checker> Ꮡcheck, ж<ast.BasicLit> Ꮡlit) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var lit = ref Ꮡlit.DerefOrNull();
 
@@ -51,7 +48,7 @@ internal static void langCompat(this ж<Checker> Ꮡcheck, ж<ast.BasicLit> Ꮡl
     }
 }
 
-internal static void basicLit(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.BasicLit> Ꮡe) {
+internal static void basicLit⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.BasicLit> Ꮡe) {
     ref var x = ref Ꮡx.DerefOrNull();
     ref var e = ref Ꮡe.DerefOrNull();
 
@@ -94,7 +91,7 @@ internal static void basicLit(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<as
 internal static ref readonly @string functionLiteralˢ => ref functionLiteralˢᵇ;
 private static readonly @string functionLiteralˢᵇ = "<function literal>"u8;
 
-internal static void funcLit(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.FuncLit> Ꮡe) {
+internal static void funcLit⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.FuncLit> Ꮡe) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
     ref var e = ref Ꮡe.DerefOrNull();
@@ -118,7 +115,7 @@ internal static void funcLit(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast
                 var declʗ1 = decl;
                 var iotaʗ1 = iota;
                 var sigʗ1 = sig;
-                check.later(() => {
+                check.later([GoFunc("(*Checker).funcLit.func1")] () => {
                     Ꮡcheck.funcBody(declʗ1, functionLiteralˢ, sigʗ1, Ꮡe.Value.Body, iotaʗ1);
                 }).describef(new ast_FuncLitжpositioner(Ꮡe), "func literal");
             }
@@ -147,7 +144,7 @@ private static readonly @string elementˢᵇ = " element"u8;
 internal static ref readonly @string noCommonUnderlyingTypeˢ => ref noCommonUnderlyingTypeˢᵇ;
 private static readonly @string noCommonUnderlyingTypeˢᵇ = " (no common underlying type)"u8;
 
-internal static void compositeLit(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.CompositeLit> Ꮡe, Type hint) {
+internal static void compositeLit⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.CompositeLit> Ꮡe, Type hint) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
     ref var e = ref Ꮡe.DerefOrNull();
@@ -384,7 +381,7 @@ private static readonly @string arrayOrSliceLiteralˢᵇ = "array or slice liter
 // against the literal's element type (typ), and the element indices against
 // the literal length if known (length >= 0). It returns the length of the
 // literal (maximum index value + 1).
-internal static int64 indexedElts(this ж<Checker> Ꮡcheck, slice<ast.Expr> elts, Type typ, int64 length) {
+internal static int64 indexedElts⁔(/*this*/ ж<Checker> Ꮡcheck, slice<ast.Expr> elts, Type typ, int64 length) {
     var visited = new map<int64, bool>(len(elts));
     int64 index = default;
     int64 max = default;
@@ -428,4 +425,4 @@ internal static int64 indexedElts(this ж<Checker> Ꮡcheck, slice<ast.Expr> elt
     return max;
 }
 
-}
+} // end types_package

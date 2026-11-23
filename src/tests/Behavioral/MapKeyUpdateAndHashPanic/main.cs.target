@@ -181,7 +181,7 @@ internal static void rangeUnderOverwrite() {
 internal static void @try(@string label, Action f) {
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("try.func1")] () => {
             var r = recover(); if (r != nil) {
                 var (_, isRuntimeError) = r._<runtime.Error>(ᐧ);
                 fmt.Println(label + ": panic:", r, "runtime.Error:", isRuntimeError);
@@ -202,44 +202,44 @@ internal static void hashPanic() {
 
     var emptyʗ1 = empty;
     var sliceʗ1 = Δslice;
-    @try("empty map lookup []int", () => {
+    @try("empty map lookup []int", [GoFunc("hashPanic.func1")] () => {
         _ = emptyʗ1[sliceʗ1];
     });
     var emptyʗ2 = empty;
-    @try("empty map comma-ok map key", () => {
+    @try("empty map comma-ok map key", [GoFunc("hashPanic.func2")] () => {
         (_, _) = emptyʗ2[new map<@string, nint>{}, ꟷ];
     });
     var emptyʗ3 = empty;
-    @try("empty map delete func key", () => {
-        delete(emptyʗ3, () => {
+    @try("empty map delete func key", [GoFunc("hashPanic.func3")] () => {
+        delete(emptyʗ3, [GoFunc("hashPanic.func3.1")] () => {
         });
     });
     var emptyʗ4 = empty;
     var sliceʗ2 = Δslice;
-    @try("empty map assign []int", () => {
+    @try("empty map assign []int", [GoFunc("hashPanic.func4")] () => {
         emptyʗ4[sliceʗ2] = true;
     });
     var fullʗ1 = full;
     var sliceʗ3 = Δslice;
-    @try("full map lookup []int", () => {
+    @try("full map lookup []int", [GoFunc("hashPanic.func5")] () => {
         _ = fullʗ1[sliceʗ3];
     });
     var fullʗ2 = full;
-    @try("full map assign []int", () => {
+    @try("full map assign []int", [GoFunc("hashPanic.func6")] () => {
         fullʗ2[slice<@string>(["x"])] = true;
     });
     var nilMapʗ1 = nilMap;
     var sliceʗ4 = Δslice;
-    @try("nil map lookup []int", () => {
+    @try("nil map lookup []int", [GoFunc("hashPanic.func7")] () => {
         _ = nilMapʗ1[sliceʗ4];
     });
     var nilMapʗ2 = nilMap;
     var sliceʗ5 = Δslice;
-    @try("nil map delete []int", () => {
+    @try("nil map delete []int", [GoFunc("hashPanic.func8")] () => {
         delete(nilMapʗ2, sliceʗ5);
     });
     var emptyʗ5 = empty;
-    @try("hashable key on empty map", () => {
+    @try("hashable key on empty map", [GoFunc("hashPanic.func9")] () => {
         _ = emptyʗ5[array<nint>([1, 2])];
     });
     fmt.Println("full map len after:", len(full), "empty map len after:", len(empty));
@@ -250,23 +250,23 @@ internal static void reflectSide() {
     slice<nint> Δslice = default;
     var mʗ1 = m;
     var sliceʗ1 = Δslice;
-    @try("reflect MapIndex []int on empty MapOf(any)", () => {
+    @try("reflect MapIndex []int on empty MapOf(any)", [GoFunc("reflectSide.func1")] () => {
         mʗ1.MapIndex(reflect.ValueOf(sliceʗ1));
     });
     var mʗ2 = m;
     var sliceʗ2 = Δslice;
-    @try("reflect SetMapIndex []int", () => {
+    @try("reflect SetMapIndex []int", [GoFunc("reflectSide.func2")] () => {
         mʗ2.SetMapIndex(reflect.ValueOf(sliceʗ2), reflect.ValueOf(true));
     });
     ref var nilm = ref heap<reflect.Value>(reflect.Zero(reflect.TypeFor<map<any, bool>>()), out var Ꮡnilm);
     var nilmʗ1 = nilm;
     var sliceʗ3 = Δslice;
-    @try("reflect MapIndex []int on nil map", () => {
+    @try("reflect MapIndex []int on nil map", [GoFunc("reflectSide.func3")] () => {
         nilmʗ1.MapIndex(reflect.ValueOf(sliceʗ3));
     });
     var nilmʗ2 = nilm;
     var sliceʗ4 = Δslice;
-    @try("reflect delete []int on nil map", () => {
+    @try("reflect delete []int on nil map", [GoFunc("reflectSide.func4")] () => {
         nilmʗ2.SetMapIndex(reflect.ValueOf(sliceʗ4), new reflect.Value());
     });
 

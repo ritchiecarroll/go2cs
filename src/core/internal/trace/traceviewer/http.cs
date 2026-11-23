@@ -12,13 +12,12 @@ using fs = go.io.fs_package;
 using html;
 using io = io_package;
 using net;
-using static traceviewer_package;
 
 partial class traceviewer_package {
 
 public static http.Handler MainHandler(slice<View> views) {
     var viewsʗ1 = views;
-    return new http_HandlerFuncᴠHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> _) => {
+    return new http_HandlerFuncᴠHandler(new http.HandlerFunc([GoFunc("MainHandler.func1")] (http.ResponseWriter w, ж<http.Request> _) => {
         var err = templMain.Execute(new http_ResponseWriterᴠWriter(w), viewsʗ1); if (err != nil) {
             http.Error(w, err.Error(), http.StatusInternalServerError);
             return;
@@ -269,16 +268,12 @@ private static readonly ViewType ViewProcᵇ = "proc"u8;
 public static ref readonly ViewType ViewThread => ref ViewThreadᵇ;
 private static readonly ViewType ViewThreadᵇ = "thread"u8;
 
-} partial class traceviewerᴛView {
-
-public static @string URL(this View v, nint rangeIdx) {
+internal static @string URL⁔(/*this*/ View v, nint rangeIdx) {
     if (rangeIdx < 0) {
         return fmt.Sprintf("/trace?view=%s"u8, v.Type);
     }
     return v.Ranges[rangeIdx].URL(v.Type);
 }
-
-} partial class traceviewer_package {
 
 partial struct Range {
     public @string Name;
@@ -288,20 +283,16 @@ partial struct Range {
     public int64 EndTime;
 }
 
-} partial class traceviewerᴛRange {
-
-public static @string URL(this Range r, ViewType viewType) {
+internal static @string URL⁔(/*this*/ Range r, ViewType viewType) {
     return fmt.Sprintf("/trace?view=%s&start=%d&end=%d"u8, viewType, r.Start, r.End);
 }
-
-} partial class traceviewer_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static ref readonly @string paramsˢ => ref paramsˢᵇ;
 private static readonly @string paramsˢᵇ = "{{PARAMS}}"u8;
 
 public static http.Handler TraceHandler() {
-    return new http_HandlerFuncᴠHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
+    return new http_HandlerFuncᴠHandler(new http.HandlerFunc([GoFunc("TraceHandler.func1")] (http.ResponseWriter w, ж<http.Request> r) => {
         var err = r.ParseForm(); if (err != nil) {
             http.Error(w, err.Error(), http.StatusInternalServerError);
             return;

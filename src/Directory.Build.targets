@@ -28,7 +28,7 @@
           Condition="'$(GoLibPackTargetsImported)' != 'true' and Exists('$(MSBuildThisFileDirectory)core/golib/buildTransitive/go.lib.pack.targets')" />
 
   <!--
-    M:N SPIKE (R5b, B2). Spike code: it stays on the spike branch and never lands.
+    M:N scheduler, experimental and opt-in (GoTwins=true to build, GO2CS_MN=1 to run); inert otherwise.
     GoTwins=true switches go2cs-gen's TwinGenerator on for a project; GoTwinsGo=false stops a go statement from
     making its function a twin; GoTwinsRefuse names a file of path|line|id rows the generator refuses by. An
     executable built with twins starts at the generated go.GoTwinEntry, which runs main's twin. GoTwinsFor is
@@ -41,21 +41,21 @@
     unset runs them a second time in a nested driver, memo reads what they wrote and nests the late ones, last
     does the twin work under ZTwinGenerator, after every sibling, and runs nothing twice. GoTwinsTiming=true
     adds the generator's stopwatch to its report. Both are read from the environment as well. GoTwinsPairs=false
-    (M:N PROTOTYPE, N3) switches off the func-value pairs and the pair test, the A/B control for the D3 core;
+    (M:N, N3) switches off the func-value pairs and the pair test, the A/B control for the D3 core;
     GoTwinsCallerRule=false switches off N3's caller rule alone (the pair core kept), the rule's own A/B control.
-    GoTwinsIfaceUnmark (M:N PROTOTYPE, stage (c)) names interface members, Namespace.Type.Member separated by ',', that
+    GoTwinsIfaceUnmark (M:N, stage (c)) names interface members, Namespace.Type.Member separated by ',', that
     carry no park mark: no twin slot, so every caller calls them plain. Given on the command line it reaches every
     project, which is the point: a mark is read across assemblies.
-    N2 (M:N PROTOTYPE, the box twin): GoTwinsBoxRecv=false keeps every by-ref receiver refused (the cut's A/B control);
+    N2 (M:N, the box twin): GoTwinsBoxRecv=false keeps every by-ref receiver refused (the cut's A/B control);
     GoTwinsBoxForwarders=false keeps interface forwarders to box twins sync (their own arm); GoTwinsBoxCopy=true makes a
     box twin COPY its receiver, wrong on purpose: the aliasing probe's negative control only.
-    byref-param (M:N PROTOTYPE, DESIGN-mn-box-twin.md 12.1): GoTwinsBoxParam=false keeps every ref-lowered pointer
+    byref-param (M:N, DESIGN-mn-box-twin.md 12.1): GoTwinsBoxParam=false keeps every ref-lowered pointer
     parameter refused (its A/B control); GoTwinsBoxArgCopy=true makes each call hand a COPY of its box, wrong on purpose:
     the probe's call-site negative control only.
-    7a (M:N, DESIGN-mn-twin-set.md 12.1, O2): a package built with twins carries the whole twin set. GoTwinsIface,
-    GoTwinsIfaceAll, GoTwinsGo and GoTwinsRefuse select part of it and are refused (GO2CS0018) unless GoTwinsArm=true
-    marks the build as a prototype arm. Unset, the interface shape is hidden for every member. GoTwinsGuardDrop is
-    the guard's test seam (GO2CS0017): it drops the named functions' forwarders.
+    7a (M:N, DESIGN-mn-twin-set.md 12.1, O2): a package built with twins carries the whole twin set, built one way. Every
+    switch above that changes what is generated (all but GoTwins, GoTwinsFor, GoTwinsSiblings and GoTwinsTiming) is refused
+    (GO2CS0018) unless GoTwinsArm=true marks the build as a prototype arm. Unset, the interface shape is hidden for every
+    member. GoTwinsGuardDrop is the guard's test seam (GO2CS0017): it drops the named functions' forwarders.
   -->
   <PropertyGroup Condition="'$(GoAotFor)' != '' and $([System.String]::Copy(';$(GoAotFor);').Contains(';$(MSBuildProjectName);'))">
     <PublishAot>true</PublishAot>

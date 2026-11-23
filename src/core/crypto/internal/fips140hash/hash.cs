@@ -34,7 +34,7 @@ public static hash.Hash Unwrap(hash.Hash h) {
 public static Func<hash.Hash> UnwrapNew<Hash>(Func<Hash> newHash)
     where Hash : hash.Hash
 {
-    return () => Unwrap(newHash());
+    return [GoFunc("UnwrapNew[...].func1")] () => Unwrap(newHash());
 }
 
 } // end fips140hash_package

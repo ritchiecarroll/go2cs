@@ -14,6 +14,9 @@
 
 using go;
 using static go.image.color_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -80,11 +83,13 @@ using static go.image.color_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("image/color/color.go", "color.cs", "ACM80oKCgoKCgoKCAA8YggALENKCgoKCgoKCgoKCgoKCggAMEtKCgoKCgoKCgoKCAAsQooKCAAsQooIACxCCgoIACxCCggAKFOwACA6C2oKCgoKCgoKWgoKUgqaCgpSCpoKClIKClIKmgoKCpoKClIKClIKmgoKCpoKClIKmgoKUgqaCgpQACRSUpoKClO6U/pKClKrGgpKCgoKCgpSmzgAaLoK6kpKS")]
-[assembly: GoPositionMap("image/color/ycbcr.go", "ycbcr.cs", "AAkQ/oKCygAQIoKClLiCgpSmqAA5coKCAA4egoKUpoKClKaCgpSmABMkABEkgoIADBqCgpSmgoKUpoKClKbYlIKClIKCAAsUlIKCAAwagoKUpoKClKaCgpS4guqUgpSklKaCgoKmgqiSgoKCgoKUgpSClIKCgqiSgoKCggAMFriCgoKC2JSCgpSCgg==")]
+[assembly: GoPositionMap("image/color/color.go", "color.cs", "AB880oKCgoKCgoKCAAsYggAHENKCgoKCgoKCgoKCgoKCggAIEtKCgoKCgoKCgoKCAAcQooKCAAcQooIABxCCgoIABxCCggAIFOzugrqCgoKCgoKCloKClIKmgoKUgqaCgpSCgpSCpoKCgqaCgpSCgpSCpoKCgqaCgpSCpoKClIKmgoKUAAkUlKaCgpTulN6SgpSqxoKSgoKCgoKUpq4AGi6CupKSkg==")]
+[assembly: GoPositionMap("image/color/ycbcr.go", "ycbcr.cs", "AAcQ/oKCygAQIoKClLiCgpSmqAA5coKCAA4egoKUpoKClKaCgpSmABEkABEkgoIADBqCgpSmgoKUpoKClKa4lIKClIKCAAkUlIKCAAwagoKUpoKClKaCgpS4gsqUgpSklKaCgoKmgqiSgoKCgoKUgpSClIKCgqiSgoKCggAKFriCgoKCuJSCgpSCgg==")]
 // </GoSourcePositionMaps>
 
 namespace go.image;
+
+using static go.image.color_package;
 
 [GoPackage("color")]
 public static partial class color_package
@@ -130,17 +135,64 @@ public static partial class color_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(color_package.Alpha)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class colorᴛAlpha;
-[GoMethodHost(typeof(color_package.Alpha16)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class colorᴛAlpha16;
-[GoMethodHost(typeof(color_package.CMYK)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class colorᴛCMYK;
-[GoMethodHost(typeof(color_package.Gray)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class colorᴛGray;
-[GoMethodHost(typeof(color_package.Gray16)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class colorᴛGray16;
-[GoMethodHost(typeof(color_package.NRGBA)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class colorᴛNRGBA;
-[GoMethodHost(typeof(color_package.NRGBA64)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class colorᴛNRGBA64;
-[GoMethodHost(typeof(color_package.NYCbCrA)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class colorᴛNYCbCrA;
-[GoMethodHost(typeof(color_package.Palette)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class colorᴛPalette;
-[GoMethodHost(typeof(color_package.RGBA)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class colorᴛRGBA;
-[GoMethodHost(typeof(color_package.RGBA64)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class colorᴛRGBA64;
-[GoMethodHost(typeof(color_package.YCbCr)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class colorᴛYCbCr;
-[GoMethodHost(typeof(color_package.modelFunc)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class colorᴛmodelFunc;
+[GoMethodHost(typeof(color_package.Alpha)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class colorᴛAlpha;
+[GoMethodHost(typeof(color_package.Alpha16)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class colorᴛAlpha16;
+[GoMethodHost(typeof(color_package.CMYK)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class colorᴛCMYK;
+[GoMethodHost(typeof(color_package.Gray)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class colorᴛGray;
+[GoMethodHost(typeof(color_package.Gray16)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class colorᴛGray16;
+[GoMethodHost(typeof(color_package.NRGBA)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class colorᴛNRGBA;
+[GoMethodHost(typeof(color_package.NRGBA64)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class colorᴛNRGBA64;
+[GoMethodHost(typeof(color_package.NYCbCrA)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class colorᴛNYCbCrA;
+[GoMethodHost(typeof(color_package.Palette)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class colorᴛPalette;
+[GoMethodHost(typeof(color_package.RGBA)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class colorᴛRGBA;
+[GoMethodHost(typeof(color_package.RGBA64)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class colorᴛRGBA64;
+[GoMethodHost(typeof(color_package.YCbCr)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class colorᴛYCbCr;
+[GoMethodHost(typeof(color_package.modelFunc)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class colorᴛmodelFunc;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class colorᴛAlpha {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (uint32 r, uint32 g, uint32 b, uint32 a) RGBA(this Alpha c) => color_package.RGBA⁔(c);
+}
+partial class colorᴛAlpha16 {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (uint32 r, uint32 g, uint32 b, uint32 a) RGBA(this Alpha16 c) => color_package.RGBA⁔(c);
+}
+partial class colorᴛCMYK {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (uint32, uint32, uint32, uint32) RGBA(this CMYK c) => color_package.RGBA⁔(c);
+}
+partial class colorᴛGray {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (uint32 r, uint32 g, uint32 b, uint32 a) RGBA(this Gray c) => color_package.RGBA⁔(c);
+}
+partial class colorᴛGray16 {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (uint32 r, uint32 g, uint32 b, uint32 a) RGBA(this Gray16 c) => color_package.RGBA⁔(c);
+}
+partial class colorᴛNRGBA {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (uint32 r, uint32 g, uint32 b, uint32 a) RGBA(this NRGBA c) => color_package.RGBA⁔(c);
+}
+partial class colorᴛNRGBA64 {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (uint32 r, uint32 g, uint32 b, uint32 a) RGBA(this NRGBA64 c) => color_package.RGBA⁔(c);
+}
+partial class colorᴛNYCbCrA {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (uint32, uint32, uint32, uint32) RGBA(this NYCbCrA c) => color_package.RGBA⁔(c);
+}
+partial class colorᴛPalette {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static Color Convert(this Palette p, Color c) => color_package.Convert⁔(p, c);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Index(this Palette p, Color c) => color_package.Index⁔(p, c);
+}
+partial class colorᴛRGBA {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (uint32 r, uint32 g, uint32 b, uint32 a) RGBA(this RGBA c) => color_package.RGBA⁔(c);
+}
+partial class colorᴛRGBA64 {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (uint32 r, uint32 g, uint32 b, uint32 a) RGBA(this RGBA64 c) => color_package.RGBA⁔(c);
+}
+partial class colorᴛYCbCr {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (uint32, uint32, uint32, uint32) RGBA(this YCbCr c) => color_package.RGBA⁔(c);
+}
+partial class colorᴛmodelFunc {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static Color Convert(this ref modelFunc m, Color c) => color_package.Convert⁔(ref m, c);
+}
+// </MethodForwarders>

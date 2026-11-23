@@ -23,8 +23,6 @@ using utf8 = unicode.utf8_package;
 using global::go.go;
 using global::go.math;
 using unicode;
-using constant = constant_package;
-using static constant_package;
 
 partial class constant_package {
 
@@ -114,54 +112,24 @@ partial struct complexVal {
     internal Value re, im;
 }
 
-} partial class constantᴛunknownVal {
-
-internal static Kind Kind(this unknownVal _) { return Unknown; }
-
-} partial class constantᴛboolVal {
-
-internal static Kind Kind(this boolVal _) { return Bool; }
-
-} partial class constantᴛstringVal {
-
-internal static Kind Kind(this ref stringVal _) { return constant.String; }
-
-} partial class constantᴛint64Val {
-
-internal static Kind Kind(this int64Val _) { return Int; }
-
-} partial class constantᴛintVal {
-
-internal static Kind Kind(this intVal _) { return Int; }
-
-} partial class constantᴛratVal {
-
-internal static Kind Kind(this ratVal _) { return Float; }
-
-} partial class constantᴛfloatVal {
-
-internal static Kind Kind(this floatVal _) { return Float; }
-
-} partial class constantᴛcomplexVal {
-
-internal static Kind Kind(this complexVal _) { return Complex; }
-
-} partial class constantᴛunknownVal {
+internal static Kind Kind⁔(/*this*/ unknownVal _) { return Unknown; }
+internal static Kind Kind⁔(/*this*/ boolVal _) { return Bool; }
+internal static Kind Kind⁔(/*this*/ ref stringVal _) { return String; }
+internal static Kind Kind⁔(/*this*/ int64Val _) { return Int; }
+internal static Kind Kind⁔(/*this*/ intVal _) { return Int; }
+internal static Kind Kind⁔(/*this*/ ratVal _) { return Float; }
+internal static Kind Kind⁔(/*this*/ floatVal _) { return Float; }
+internal static Kind Kind⁔(/*this*/ complexVal _) { return Complex; }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string unknownˢ => ref unknownˢᵇ;
 private static readonly @string unknownˢᵇ = "unknown"u8;
 
-internal static @string String(this unknownVal _) { return unknownˢ; }
-
-} partial class constantᴛboolVal {
-
-internal static @string String(this boolVal x) { return strconv.FormatBool((bool)x); }
-
-} partial class constantᴛstringVal {
+internal static @string String⁔(/*this*/ unknownVal _) { return unknownˢ; }
+internal static @string String⁔(/*this*/ boolVal x) { return strconv.FormatBool((bool)x); }
 
 // String returns a possibly shortened quoted form of the String value.
-internal static @string String(this ж<stringVal> Ꮡx) {
+internal static @string String⁔(/*this*/ ж<stringVal> Ꮡx) {
     UntypedInt maxLen = 72; // a reasonable length
     @string s = strconv.Quote(Ꮡx.@string());
     if (utf8.RuneCountInString(s) > maxLen) {
@@ -183,7 +151,7 @@ internal static @string String(this ж<stringVal> Ꮡx) {
 // string, to speed future calls. This lazy construction avoids
 // building different string values for all subpieces of a large
 // concatenation. See golang.org/issue/23348.
-internal static @string @string(this ж<stringVal> Ꮡx) {
+internal static @string string⁔(/*this*/ ж<stringVal> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     x.mu.Lock();
@@ -198,8 +166,6 @@ internal static @string @string(this ж<stringVal> Ꮡx) {
     return s;
 }
 
-} partial class constant_package {
-
 // reverse reverses x in place and returns it.
 internal static slice<@string> reverse(slice<@string> x) {
     nint n = len(x);
@@ -209,15 +175,13 @@ internal static slice<@string> reverse(slice<@string> x) {
     return x;
 }
 
-} partial class constantᴛstringVal {
-
 // appendReverse appends to list all of x's subpieces, but in reverse,
 // and returns the result. Appending the reversal allows processing
 // the right side in a recursive call and the left side in a loop.
 // Because a chain like a + b + c + d + e is actually represented
 // as ((((a + b) + c) + d) + e), the left-side loop avoids deep recursion.
 // x must be locked.
-internal static slice<@string> appendReverse(this ж<stringVal> Ꮡx, slice<@string> list) {
+internal static slice<@string> appendReverse⁔(/*this*/ ж<stringVal> Ꮡx, slice<@string> list) {
     var y = Ꮡx;
     while (y.r != nil) {
         y.r.Ꮡmu.Lock();
@@ -238,22 +202,12 @@ internal static slice<@string> appendReverse(this ж<stringVal> Ꮡx, slice<@str
     return append(list, s);
 }
 
-} partial class constantᴛint64Val {
-
-internal static @string String(this int64Val x) { return strconv.FormatInt((int64)x, 10); }
-
-} partial class constantᴛintVal {
-
-internal static @string String(this intVal x) { return x.val.String(); }
-
-} partial class constantᴛratVal {
-
-internal static @string String(this ratVal x) { return rtof(x).String(); }
-
-} partial class constantᴛfloatVal {
+internal static @string String⁔(/*this*/ int64Val x) { return strconv.FormatInt((int64)x, 10); }
+internal static @string String⁔(/*this*/ intVal x) { return x.val.String(); }
+internal static @string String⁔(/*this*/ ratVal x) { return rtof(x).String(); }
 
 // String returns a decimal approximation of the Float value.
-internal static @string String(this floatVal x) {
+internal static @string String⁔(/*this*/ floatVal x) {
     var f = x.val;
 
     // Don't try to convert infinities (will not terminate).
@@ -309,33 +263,15 @@ internal static @string String(this floatVal x) {
     return fmt.Sprintf("%.6ge%+d"u8, m, e);
 }
 
-} partial class constantᴛcomplexVal {
+internal static @string String⁔(/*this*/ complexVal x) { return fmt.Sprintf("(%s + %si)"u8, x.re, x.im); }
 
-internal static @string String(this complexVal x) { return fmt.Sprintf("(%s + %si)"u8, x.re, x.im); }
+internal static @string ExactString⁔(/*this*/ unknownVal x) { return x.String(); }
+internal static @string ExactString⁔(/*this*/ boolVal x) { return x.String(); }
+internal static @string ExactString⁔(/*this*/ ж<stringVal> Ꮡx) { return strconv.Quote(Ꮡx.@string()); }
+internal static @string ExactString⁔(/*this*/ int64Val x) { return x.String(); }
+internal static @string ExactString⁔(/*this*/ intVal x) { return x.String(); }
 
-} partial class constantᴛunknownVal {
-
-internal static @string ExactString(this unknownVal x) { return x.String(); }
-
-} partial class constantᴛboolVal {
-
-internal static @string ExactString(this boolVal x) { return x.String(); }
-
-} partial class constantᴛstringVal {
-
-internal static @string ExactString(this ж<stringVal> Ꮡx) { return strconv.Quote(Ꮡx.@string()); }
-
-} partial class constantᴛint64Val {
-
-internal static @string ExactString(this int64Val x) { return x.String(); }
-
-} partial class constantᴛintVal {
-
-internal static @string ExactString(this intVal x) { return x.String(); }
-
-} partial class constantᴛratVal {
-
-internal static @string ExactString(this ratVal x) {
+internal static @string ExactString⁔(/*this*/ ratVal x) {
     var r = x.val;
     if (r.IsInt()) {
         return r.Num().String();
@@ -343,49 +279,20 @@ internal static @string ExactString(this ratVal x) {
     return r.String();
 }
 
-} partial class constantᴛfloatVal {
+internal static @string ExactString⁔(/*this*/ floatVal x) { return x.val.Text((byte)'p', 0); }
 
-internal static @string ExactString(this floatVal x) { return x.val.Text((byte)'p', 0); }
-
-} partial class constantᴛcomplexVal {
-
-internal static @string ExactString(this complexVal x) {
+internal static @string ExactString⁔(/*this*/ complexVal x) {
     return fmt.Sprintf("(%s + %si)"u8, x.re.ExactString(), x.im.ExactString());
 }
 
-} partial class constantᴛunknownVal {
-
-internal static void implementsValue(this unknownVal _) { }
-
-} partial class constantᴛboolVal {
-
-internal static void implementsValue(this boolVal _) { }
-
-} partial class constantᴛstringVal {
-
-internal static void implementsValue(this ref stringVal _) { }
-
-} partial class constantᴛint64Val {
-
-internal static void implementsValue(this int64Val _) { }
-
-} partial class constantᴛratVal {
-
-internal static void implementsValue(this ratVal _) { }
-
-} partial class constantᴛintVal {
-
-internal static void implementsValue(this intVal _) { }
-
-} partial class constantᴛfloatVal {
-
-internal static void implementsValue(this floatVal _) { }
-
-} partial class constantᴛcomplexVal {
-
-internal static void implementsValue(this complexVal _) { }
-
-} partial class constant_package {
+internal static void implementsValue⁔(/*this*/ unknownVal _) { }
+internal static void implementsValue⁔(/*this*/ boolVal _) { }
+internal static void implementsValue⁔(/*this*/ ref stringVal _) { }
+internal static void implementsValue⁔(/*this*/ int64Val _) { }
+internal static void implementsValue⁔(/*this*/ ratVal _) { }
+internal static void implementsValue⁔(/*this*/ intVal _) { }
+internal static void implementsValue⁔(/*this*/ floatVal _) { }
+internal static void implementsValue⁔(/*this*/ complexVal _) { }
 
 internal static ж<big.Int> newInt() { return @new<big.Int>(); }
 internal static ж<big.Rat> newRat() { return @new<big.Rat>(); }

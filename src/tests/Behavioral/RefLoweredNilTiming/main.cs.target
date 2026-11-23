@@ -43,7 +43,7 @@ internal static ж<elem> nilElem() {
 internal static void tryEager(@string label, ref elem e) {
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("tryEager.func1")] () => {
             fmt.Println(label, "recovered:", recover());
         }, ref ᒐ);
         eagerFrom(ref e);
@@ -56,7 +56,7 @@ internal static void tryEager(@string label, ref elem e) {
 internal static void deferredFault() {
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("deferredFault.func1")] () => {
             fmt.Println("deferred recovered:", recover());
         }, ref ᒐ);
         ж<uint64> q = default;

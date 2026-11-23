@@ -337,6 +337,17 @@
     <GoBreakFloor>1.26.11.2</GoBreakFloor>
   </PropertyGroup>
 
+  <!--
+    cgo against go.* (INC 3, A6). This go.lib's GoCgoLibraries.Register refuses, in a cgo package's module initializer,
+    C bindings converted for another target than the running process's, or linux bindings in a process that is not
+    glibc's. A nugetgo -Cgo pack refuses to pack against a go.lib that does not declare this, and records that its go.lib
+    does ("a6:" in its go2cs/source-metadata.txt); src/_nugetpush.ps1 refuses a -Cgo pack without that record. The pack's
+    go.lib range starts at the go.lib it was packed against, so every go.lib a consumer of it restores carries the check.
+  -->
+  <PropertyGroup>
+    <GoCgoRunTimeTargetCheck>true</GoCgoRunTimeTargetCheck>
+  </PropertyGroup>
+
   <Target Name="GoCheckBreakFloor" BeforeTargets="CoreCompile" Condition="'$(DesignTimeBuild)' != 'true'">
     <ItemGroup>
       <_GoBreakFloorAsset Include="@(ResolvedCompileFileDefinitions)"

@@ -29,13 +29,14 @@ internal static class ISliceTypeTemplate
     // returning the named type as Go's sub-slice does. The element read and the read-only spread are explicit, as
     // golib's slice<T> declares them: the public indexer returns a ref and the public spread a writable span.
     // TryGetSlice hands out the wrapper's own window, so `[]byte(v)` and `Value(b)` share v's backing, as Go's do.
-    private static string ByteSeqMembers(string targetTypeName) => !IsByteSlice(targetTypeName) ? "" :
+    // A Go method named Length takes the public Length away (ClaimableMembers), so IByteSeq's Length is then explicit too.
+    private static string ByteSeqMembers(string targetTypeName, ICollection<string> goMethods) => !IsByteSlice(targetTypeName) ? "" :
         $$"""
 
 
-                byte IByteSeq<byte>.this[nint index] => m_value[index];
+                byte IByteSeq<byte>.this[nint index] => m_value[index];{{(goMethods.Contains("Length") ? "\r\n\r\n        nint IByteSeq.Length => ((IArray)m_value).Length;" : "")}}
 
-                global::System.ReadOnlySpan<byte> IByteSeq<byte>.{{EllipsisOperator}} => ToSpan();
+                global::System.ReadOnlySpan<byte> IByteSeq<byte>.{{EllipsisOperator}} => m_value.ToSpan();
 
                 bool IByteSeq<byte>.TryGetSlice(out slice<byte> window)
                 {
@@ -50,34 +51,59 @@ internal static class ISliceTypeTemplate
                 }
         """;
 
+    // The members this wrapper declares for its own use under an ASCII name a Go method can also declare (R7). A Go method
+    // of the same name always wins: C# binds an instance member before the extension method Go's method becomes, so a
+    // member whose parameters fit the Go call ran instead, silently (`s.Slice(i, n)` returned the wrapper's
+    // (start, length) window), or bound RecvGenerator's forwarder to the wrong result (Append, GetEnumerator: CS0029),
+    // and a type NAMED like a member could not declare it at all (CS0542; GoMethodNames carries the type's own name).
+    // A claimed member moves to its explicit implementation of the golib interface that already declares it, as the map
+    // and channel templates do; every reader that needs it reads it through that interface (golib's len, cap and range,
+    // make<T>, ISliceWrap, the converter's `.IsNil` on a slice-constrained type parameter). Equals, GetHashCode, ToString
+    // and slice are never claimed: the converter renames a Go method of those names (identifierNaming.go `reserved`).
+    // GenTests' NamedSliceArrayClaimedMemberTests reads the generated wrapper and fails on a public ASCII member that is
+    // neither listed here nor reserved, so a member added later without its claimed form is caught.
+    internal static readonly string[] ClaimableMembers =
+        ["Append", "Available", "Capacity", "Clone", "GetEnumerator", "High", "IsNil", "Length", "Low", "Make", "Slice", "Source", "ToSpan", "Wrap"];
+
+    // The member as the wrapper declares it, or, when the Go type claims its name, its explicit interface form ("" when the
+    // interface's explicit implementation is already emitted beside it).
+    private static string Claimable(ICollection<string> goMethods, string name, string own, string claimed) =>
+        goMethods.Contains(name) ? claimed : own;
+
     // constructorName is structName without a generic type's parameters (a C# constructor never carries them).
-    // goMethods are the Go methods declared on the type (InheritedTypeTemplate.GoMethodNames).
+    // goMethods are the Go methods declared on the type, and its own name (InheritedTypeTemplate.GoMethodNames).
     public static string Generate(string structName, string constructorName, string typeName, string targetTypeName, ICollection<string> goMethods) =>
         $$"""
-        
-                public {{targetTypeName}}[] Source => m_value;
+
+                {{Claimable(goMethods, "Source",
+                    $"public {targetTypeName}[] Source => m_value;",
+                    $"{targetTypeName}[] IArray<{targetTypeName}>.Source => m_value;")}}
 
                 /// <summary>Field-ref accessor for the ж<T>.of() pointer-reinterpret projection —
                 /// `(*[][]byte)(buf)` emits `Ꮡbuf.of({{structName}}.Ꮡm_value)`, a true aliasing view.</summary>
                 internal static ref slice<{{targetTypeName}}> Ꮡm_value(ref {{structName}} instance) => ref instance.m_value;
 
                 /// <summary>ISliceWrap factory — wraps a window in this named slice type, sharing backing.</summary>
-                public static {{structName}} Wrap(in slice<{{targetTypeName}}> source) => new {{structName}}(source);
-                    
-                public ISlice<{{targetTypeName}}> Append({{targetTypeName}}[] elems) => m_value.Append(elems);
-                    
-                public bool IsNil => ((ISlice)m_value).IsNil;
+                {{Claimable(goMethods, "Wrap",
+                    $"public static {structName} Wrap(in slice<{targetTypeName}> source) => new {structName}(source);",
+                    $"static {structName} ISliceWrap<{structName}, {targetTypeName}>.Wrap(in slice<{targetTypeName}> source) => new {structName}(source);")}}
 
-                public nint Low => ((ISlice)m_value).Low;
-                
-                public nint High => ((ISlice)m_value).High;
-                
-                public nint Capacity => ((ISlice)m_value).Capacity;
-                
-                public nint Available => ((ISlice)m_value).Available;
-                
-                public nint Length => ((IArray)m_value).Length;
-                
+                {{Claimable(goMethods, "Append",
+                    $"public ISlice<{targetTypeName}> Append({targetTypeName}[] elems) => m_value.Append(elems);",
+                    $"ISlice<{targetTypeName}> ISlice<{targetTypeName}>.Append(params {targetTypeName}[] elems) => m_value.Append(elems);")}}
+
+                {{Claimable(goMethods, "IsNil", "public bool IsNil => ((ISlice)m_value).IsNil;", "bool ISlice.IsNil => ((ISlice)m_value).IsNil;")}}
+
+                {{Claimable(goMethods, "Low", "public nint Low => ((ISlice)m_value).Low;", "nint ISlice.Low => ((ISlice)m_value).Low;")}}
+
+                {{Claimable(goMethods, "High", "public nint High => ((ISlice)m_value).High;", "nint ISlice.High => ((ISlice)m_value).High;")}}
+
+                {{Claimable(goMethods, "Capacity", "public nint Capacity => ((ISlice)m_value).Capacity;", "nint ISlice.Capacity => ((ISlice)m_value).Capacity;")}}
+
+                {{Claimable(goMethods, "Available", "public nint Available => ((ISlice)m_value).Available;", "nint ISlice.Available => ((ISlice)m_value).Available;")}}
+
+                {{Claimable(goMethods, "Length", "public nint Length => ((IArray)m_value).Length;", "nint IArray.Length => ((IArray)m_value).Length;")}}
+
                 global::System.Array IArray.Source => ((IArray)m_value).Source!;
                 
                 object? IArray.this[nint index]
@@ -106,22 +132,24 @@ internal static class ISliceTypeTemplate
                 public {{structName}} slice(nint low, nint high) => new {{structName}}(m_value.slice(low, high));
 
                 ISlice<{{targetTypeName}}> ISlice<{{targetTypeName}}>.this[global::System.Range range] => m_value[range];
-                
-                public {{structName}} Slice(int start, int length) => new {{structName}}(m_value.Slice(start, length));
-                
+
+                {{Claimable(goMethods, "Slice", $"public {structName} Slice(int start, int length) => new {structName}(m_value.Slice(start, length));", "")}}
+
                 ISlice<{{targetTypeName}}> ISlice<{{targetTypeName}}>.Slice(int start, int length) => m_value.Slice(start, length);
-                
-                public {{structName}} Slice(nint start, nint length) => new {{structName}}(m_value.Slice(start, length));
-                
+
+                {{Claimable(goMethods, "Slice", $"public {structName} Slice(nint start, nint length) => new {structName}(m_value.Slice(start, length));", "")}}
+
                 ISlice<{{targetTypeName}}> ISlice<{{targetTypeName}}>.Slice(nint start, nint length) => m_value.Slice(start, length);
-        
+
                 // The spread is a variadic pack carrying this slice, as golib's slice<T> spread is: Go's `f(s...)`
                 // hands f the slice itself, so a callee's writes reach s.
                 public global::go.variadic<{{targetTypeName}}> {{EllipsisOperator}} => m_value.{{EllipsisOperator}};
 
-                global::System.Span<{{targetTypeName}}> IArray<{{targetTypeName}}>.{{EllipsisOperator}} => ToSpan();
+                global::System.Span<{{targetTypeName}}> IArray<{{targetTypeName}}>.{{EllipsisOperator}} => m_value.ToSpan();
 
-                public global::System.Span<{{targetTypeName}}> ToSpan() => m_value.ToSpan();
+                {{Claimable(goMethods, "ToSpan",
+                    $"public global::System.Span<{targetTypeName}> ToSpan() => m_value.ToSpan();",
+                    $"global::System.Span<{targetTypeName}> IArray<{targetTypeName}>.ToSpan() => m_value.ToSpan();")}}
 
                 // EXPLICIT, exactly as golib's own slice<T> declares it, and for the same reason
                 // the enumerator below is explicit: this is the boxing, interface-typed path, and
@@ -135,7 +163,7 @@ internal static class ISliceTypeTemplate
                 // Forwards the CONCRETE struct enumerator over the VALUES, as slice<T> enumerates them:
                 // `foreach` binds GetEnumerator by pattern, so a named slice type enumerates with zero heap
                 // traffic exactly like the slice<T> it wraps. Go's range pairs are builtin.range(x).
-                public global::go.slice<{{targetTypeName}}>.Enumerator GetEnumerator() => m_value.GetEnumerator();
+                {{Claimable(goMethods, "GetEnumerator", $"public global::go.slice<{targetTypeName}>.Enumerator GetEnumerator() => m_value.GetEnumerator();", "")}}
 
                 global::System.Collections.Generic.IEnumerator<{{targetTypeName}}> global::System.Collections.Generic.IEnumerable<{{targetTypeName}}>.GetEnumerator() => ((global::System.Collections.Generic.IEnumerable<{{targetTypeName}}>)m_value).GetEnumerator();
 
@@ -145,9 +173,11 @@ internal static class ISliceTypeTemplate
 
                 public bool Equals(ISlice<{{targetTypeName}}>? other) => m_value.Equals(other);
 
-                {{CloneMember(goMethods)}}{{ByteSeqMembers(targetTypeName)}}
+                {{CloneMember(goMethods)}}{{ByteSeqMembers(targetTypeName, goMethods)}}
 
-                public static {{structName}} Make(nint p1 = 0, nint p2 = -1) => new {{structName}}(p1, p2);
+                {{Claimable(goMethods, "Make",
+                    $"public static {structName} Make(nint p1 = 0, nint p2 = -1) => new {structName}(p1, p2);",
+                    $"static {structName} ISupportMake<{structName}>.Make(nint p1, nint p2) => new {structName}(p1, p2);")}}
         
                 public {{constructorName}}(nint length, nint capacity = -1, nint low = 0) => m_value = new {{typeName}}(length, capacity, low);
         """;

@@ -10,7 +10,6 @@ using fmt = fmt_package;
 using io = io_package;
 using slices = slices_package;
 using strings = strings_package;
-using static hex_package;
 
 partial class hex_package {
 
@@ -54,13 +53,9 @@ public static error ErrLength = errors.New("encoding/hex: odd length hex string"
 // InvalidByteError values describe errors resulting from an invalid byte in a hex string.
 partial struct InvalidByteError /*num:byte*/;
 
-} partial class hexᴛInvalidByteError {
-
-public static @string Error(this InvalidByteError e) {
+internal static @string Error⁔(/*this*/ InvalidByteError e) {
     return fmt.Sprintf("encoding/hex: invalid byte: %#U"u8, (rune)e);
 }
-
-} partial class hex_package {
 
 // DecodedLen returns the length of a decoding of x source bytes.
 // Specifically, it returns x / 2.
@@ -164,9 +159,7 @@ public static io.Writer NewEncoder(io.Writer w) {
     return new encoderжWriter(Ꮡ(new encoder(w: w)));
 }
 
-} partial class hexᴛencoder {
-
-internal static (nint n, error err) Write(this ref encoder e, slice<byte> p) {
+internal static (nint n, error err) Write⁔(/*this*/ ref encoder e, slice<byte> p) {
     nint n = default;
 
     while (len(p) > 0 && e.err == nil) {
@@ -184,8 +177,6 @@ internal static (nint n, error err) Write(this ref encoder e, slice<byte> p) {
     return (n, e.err);
 }
 
-} partial class hex_package {
-
 partial struct decoder {
     internal io.Reader r;
     internal error err;
@@ -199,9 +190,7 @@ public static io.Reader NewDecoder(io.Reader r) {
     return new decoderжReader(Ꮡ(new decoder(r: r)));
 }
 
-} partial class hexᴛdecoder {
-
-internal static (nint n, error err) Read(this ref decoder d, slice<byte> p) {
+internal static (nint n, error err) Read⁔(/*this*/ ref decoder d, slice<byte> p) {
     error err = default;
 
     // Fill internal buffer with sufficient bytes to decode
@@ -236,8 +225,6 @@ internal static (nint n, error err) Read(this ref decoder d, slice<byte> p) {
     return (numDec, default);
 }
 
-} partial class hex_package {
-
 // Dumper returns a [io.WriteCloser] that writes a hex dump of all written data to
 // w. The format of the dump matches the output of `hexdump -C` on the command
 // line.
@@ -261,13 +248,11 @@ internal static byte toChar(byte b) {
     return b;
 }
 
-} partial class hexᴛdumper {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string encodingHexDumperClosedˢ => ref encodingHexDumperClosedˢᵇ;
 private static readonly @string encodingHexDumperClosedˢᵇ = "encoding/hex: dumper closed"u8;
 
-internal static (nint n, error err) Write(this ref dumper h, slice<byte> data) {
+internal static (nint n, error err) Write⁔(/*this*/ ref dumper h, slice<byte> data) {
     nint n = default;
     error err = default;
 
@@ -329,7 +314,7 @@ internal static (nint n, error err) Write(this ref dumper h, slice<byte> data) {
     return (n, err);
 }
 
-internal static error /*err*/ Close(this ref dumper h) {
+internal static error /*err*/ Close⁔(/*this*/ ref dumper h) {
     error err = default;
 
     // See the comments in Write() for the details of this format.
@@ -365,4 +350,4 @@ internal static error /*err*/ Close(this ref dumper h) {
     return err;
 }
 
-}
+} // end hex_package

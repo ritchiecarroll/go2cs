@@ -8,7 +8,6 @@ using slices = slices_package;
 using strings = strings_package;
 using time = time_package;
 using iter = iter_package;
-using static trace_package;
 
 partial class trace_package {
 
@@ -57,17 +56,15 @@ partial struct UserTaskSummary {
     public map<GoID, ж<GoroutineSummary>> Goroutines;
 }
 
-} partial class traceᴛUserTaskSummary {
-
 // Complete returns true if we have complete information about the task
 // from the trace: both a start and an end.
-public static bool Complete(this ref UserTaskSummary s) {
+internal static bool Complete⁔(/*this*/ ref UserTaskSummary s) {
     return s.Start != nil && s.End != nil;
 }
 
 // Descendents returns a slice consisting of itself (always the first task returned),
 // and the transitive closure of all of its children.
-public static slice<ж<UserTaskSummary>> Descendents(this ж<UserTaskSummary> Ꮡs) {
+internal static slice<ж<UserTaskSummary>> Descendents⁔(/*this*/ ж<UserTaskSummary> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     var descendents = slice<ж<UserTaskSummary>>([Ꮡs]);
@@ -76,8 +73,6 @@ public static slice<ж<UserTaskSummary>> Descendents(this ж<UserTaskSummary> �
     }
     return descendents;
 }
-
-} partial class trace_package {
 
 // UserRegionSummary represents a region and goroutine execution stats
 // while the region was active. (For v2 traces.)
@@ -113,9 +108,7 @@ partial struct GoroutineExecStats {
     public map<@string, time.Duration> RangeTime;
 }
 
-} partial class traceᴛGoroutineExecStats {
-
-public static map<@string, time.Duration> NonOverlappingStats(this GoroutineExecStats s) {
+internal static map<@string, time.Duration> NonOverlappingStats⁔(/*this*/ GoroutineExecStats s) {
     var stats = new map<@string, time.Duration>{
         ["Execution time"] = s.ExecTime,
         ["Sched wait time"] = s.SchedWaitTime,
@@ -132,7 +125,7 @@ public static map<@string, time.Duration> NonOverlappingStats(this GoroutineExec
 }
 
 // UnknownTime returns whatever isn't accounted for in TotalTime.
-public static time.Duration UnknownTime(this GoroutineExecStats s) {
+internal static time.Duration UnknownTime⁔(/*this*/ GoroutineExecStats s) {
     var sum = s.ExecTime + s.SchedWaitTime + s.SyscallTime + s.SyscallBlockTime;
     foreach (var (_, dt) in s.BlockTimeByReason) {
         sum += dt;
@@ -146,7 +139,7 @@ public static time.Duration UnknownTime(this GoroutineExecStats s) {
 }
 
 // sub returns the stats v-s.
-internal static GoroutineExecStats /*r*/ sub(this GoroutineExecStats s, GoroutineExecStats v) {
+internal static GoroutineExecStats /*r*/ sub⁔(/*this*/ GoroutineExecStats s, GoroutineExecStats v) {
     GoroutineExecStats r = default;
 
     r = s.clone();
@@ -164,7 +157,7 @@ internal static GoroutineExecStats /*r*/ sub(this GoroutineExecStats s, Goroutin
     return r;
 }
 
-internal static GoroutineExecStats /*r*/ clone(this GoroutineExecStats s) {
+internal static GoroutineExecStats /*r*/ clone⁔(/*this*/ GoroutineExecStats s) {
     GoroutineExecStats r = default;
 
     r = s;
@@ -179,12 +172,10 @@ internal static GoroutineExecStats /*r*/ clone(this GoroutineExecStats s) {
     return r;
 }
 
-} partial class traceᴛGoroutineSummary {
-
 // snapshotStat returns the snapshot of the goroutine execution statistics.
 // This is called as we process the ordered trace event stream. lastTs is used
 // to process pending statistics if this is called before any goroutine end event.
-internal static GoroutineExecStats /*ret*/ snapshotStat(this ref GoroutineSummary g, Time lastTs) {
+internal static GoroutineExecStats /*ret*/ snapshotStat⁔(/*this*/ ref GoroutineSummary g, Time lastTs) {
     GoroutineExecStats ret = default;
 
     ret = g.GoroutineExecStats.clone();
@@ -223,7 +214,7 @@ internal static GoroutineExecStats /*ret*/ snapshotStat(this ref GoroutineSummar
 // finalize is called when processing a goroutine end event or at
 // the end of trace processing. This finalizes the execution stat
 // and any active regions in the goroutine, in which case trigger is nil.
-internal static void finalize(this ref GoroutineSummary g, Time lastTs, ж<Event> trigger) {
+internal static void finalize⁔(/*this*/ ref GoroutineSummary g, Time lastTs, ж<Event> trigger) {
     if (trigger != nil) {
         g.EndTime = trigger.Time();
     }
@@ -244,8 +235,6 @@ internal static void finalize(this ref GoroutineSummary g, Time lastTs, ж<Event
     }
     (g.goroutineSummary).Value = new goroutineSummary();
 }
-
-} partial class trace_package {
 
 // goroutineSummary is a private part of GoroutineSummary that is required only during analysis.
 partial struct goroutineSummary {
@@ -294,10 +283,8 @@ partial struct rangeP {
     internal @string name;
 }
 
-} partial class traceᴛSummarizer {
-
 // Event feeds a single event into the stats summarizer.
-public static void Event(this ref Summarizer s, ж<Event> ev) {
+internal static void Event⁔(/*this*/ ref Summarizer s, ж<Event> ev) {
     if (s.syncTs == 0) {
         s.syncTs = ev.Time();
     }
@@ -645,7 +632,7 @@ public static void Event(this ref Summarizer s, ж<Event> ev) {
     }}
 }
 
-internal static ж<UserTaskSummary> getOrAddTask(this ref Summarizer s, TaskID id) {
+internal static ж<UserTaskSummary> getOrAddTask⁔(/*this*/ ref Summarizer s, TaskID id) {
     var task = s.tasks[id];
     if (task == nil) {
         task = Ꮡ(new UserTaskSummary(ID: id, Goroutines: new map<GoID, ж<GoroutineSummary>>()));
@@ -656,12 +643,12 @@ internal static ж<UserTaskSummary> getOrAddTask(this ref Summarizer s, TaskID i
 
 // Finalize indicates to the summarizer that we're done processing the trace.
 // It cleans up any remaining state and returns the full summary.
-public static ж<Summary> ΔFinalize(this ref Summarizer s) {
+internal static ж<Summary> ΔFinalize⁔(/*this*/ ref Summarizer s) {
     foreach (var (_, g) in s.gs) {
         g.finalize(s.lastTs, nil);
 
         // Sort based on region start time.
-        slices.SortFunc(g.Regions, (ж<UserRegionSummary> a, ж<UserRegionSummary> b) => {
+        slices.SortFunc(g.Regions, [GoFunc("(*Summarizer).Finalize.func1")] (ж<UserRegionSummary> a, ж<UserRegionSummary> b) => {
             var x = a.Start;
             var y = b.Start;
             if (x == nil) {
@@ -682,8 +669,6 @@ public static ж<Summary> ΔFinalize(this ref Summarizer s) {
         Tasks: s.tasks
     ));
 }
-
-} partial class trace_package {
 
 // Process all the events, looking for transitions of goroutines
 // out of GoWaiting. If there was an active goroutine when this

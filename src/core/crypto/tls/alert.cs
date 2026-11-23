@@ -4,7 +4,6 @@
 namespace go.crypto;
 
 using strconv = strconv_package;
-using static tls_package;
 
 partial class tls_package {
 
@@ -14,13 +13,9 @@ partial class tls_package {
 // which wraps AlertError rather than sending a TLS alert.
 partial struct AlertError /*num:uint8*/;
 
-} partial class tlsᴛAlertError {
-
-public static @string Error(this AlertError e) {
+internal static @string Error⁔(/*this*/ AlertError e) {
     return ((alert)(uint8)e).String();
 }
-
-} partial class tls_package {
 
 partial struct alert /*num:uint8*/;
 
@@ -100,9 +95,7 @@ internal static alert alertECHRequired => 121;
     [alertECHRequired] = "encrypted client hello required"
 }; }
 
-} partial class tlsᴛalert {
-
-internal static @string String(this alert e) {
+internal static @string String⁔(/*this*/ alert e) {
     var (s, ok) = alertText[e, ꟷ];
     if (ok) {
         return "tls: "u8 + s;
@@ -110,8 +103,8 @@ internal static @string String(this alert e) {
     return "tls: alert("u8 + strconv.Itoa((nint)e) + ")"u8;
 }
 
-internal static @string Error(this alert e) {
+internal static @string Error⁔(/*this*/ alert e) {
     return e.String();
 }
 
-}
+} // end tls_package

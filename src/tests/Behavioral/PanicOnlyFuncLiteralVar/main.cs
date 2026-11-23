@@ -9,7 +9,7 @@ internal static (any v, error err) call(Func<(any, error)> fn) {
     error err = default;
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("call.func1")] () => {
             var r = recover(); if (r != nil) {
                 err = fmt.Errorf("recovered: %v"u8, r);
             }
@@ -23,7 +23,7 @@ internal static (any v, error err) call(Func<(any, error)> fn) {
 }
 
 internal static void main() {
-    var fn = (any, error) () => {
+    var fn = [GoFunc("main.func1")] (any, error) () => {
         throw panic("boom");
     };
 

@@ -23,8 +23,7 @@ using reflect = reflect_package;
 using Δruntime = runtime_package;
 using strings = strings_package;
 using time = time_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
+using System.Runtime.CompilerServices;
 using crypto;
 using fs = global::go.io.fs_package;
 using global::go.@internal;
@@ -33,7 +32,6 @@ using global::go.math;
 using path;
 using ꓸꓸꓸCorpusEntry = variadic<CorpusEntry>;
 using ꓸꓸꓸany = variadic<any>;
-using static fuzz_package;
 
 partial class fuzz_package {
 
@@ -130,7 +128,7 @@ public static partial error /*err*/ CoordinateFuzzing(context.Context ctx, Coord
         var cʗ1 = c;
         var cancelWorkersʗ2 = cancelWorkers;
         var fuzzCtxʗ1 = fuzzCtx;
-        [MethodImpl(MethodImplOptions.NoInlining)] void stop(error errΔ2) {
+        [MethodImpl(MethodImplOptions.NoInlining), GoFunc("CoordinateFuzzing.func1")] void stop(error errΔ2) {
             if (shouldPrintDebugInfo()) {
                 var (_, @file, line, ok) = Δruntime.Caller(1);
                 if (ok) {
@@ -162,7 +160,7 @@ public static partial error /*err*/ CoordinateFuzzing(context.Context ctx, Coord
         var crashWritten = false;
         var cʗ2 = c;
         var optsʗ1 = opts;
-        defer(() => {
+        defer([GoFunc("CoordinateFuzzing.func2")] () => {
             if (cʗ2.crashMinimizing == nil || crashWritten) {
                 return;
             }
@@ -200,7 +198,7 @@ public static partial error /*err*/ CoordinateFuzzing(context.Context ctx, Coord
             var errCʗ1 = errC;
             var fuzzCtxʗ2 = fuzzCtx;
             var wʗ1 = w;
-            goǃ(() => {
+            goǃ([GoFunc("CoordinateFuzzing.func3")] () => {
                 var errΔ4 = wʗ1.coordinate(fuzzCtxʗ2);
                 if (fuzzCtxʗ2.Err() != nil || isInterruptError(errΔ4)) {
                     errΔ4 = default;
@@ -437,34 +435,28 @@ partial struct crashError {
     internal error err;
 }
 
-} partial class fuzzᴛcrashError {
-
-internal static @string Error(this ref crashError e) {
+internal static @string Error⁔(/*this*/ ref crashError e) {
     return e.err.Error();
 }
 
-internal static error Unwrap(this ref crashError e) {
+internal static error Unwrap⁔(/*this*/ ref crashError e) {
     return e.err;
 }
 
-internal static @string CrashPath(this ref crashError e) {
+internal static @string CrashPath⁔(/*this*/ ref crashError e) {
     return e.path;
 }
-
-} partial class fuzz_package {
 
 partial struct corpus {
     internal slice<CorpusEntry> entries;
     internal map</*[32]*/ array<byte>, bool> hashes;
 }
 
-} partial class fuzzᴛcoordinator {
-
 // addCorpusEntries adds entries to the corpus, and optionally writes the entries
 // to the cache directory. If an entry is already in the corpus it is skipped. If
 // all of the entries are unique, addCorpusEntries returns true and a nil error,
 // if at least one of the entries was a duplicate, it returns false and a nil error.
-internal static (bool, error) addCorpusEntries(this ref coordinator c, bool addToCache, params ꓸꓸꓸCorpusEntry entriesʗp) {
+internal static (bool, error) addCorpusEntries⁔(/*this*/ ref coordinator c, bool addToCache, params ꓸꓸꓸCorpusEntry entriesʗp) {
     var entries = entriesʗp.sslice();
 
     var noDupes = true;
@@ -495,8 +487,6 @@ internal static (bool, error) addCorpusEntries(this ref coordinator c, bool addT
     }
     return (noDupes, default);
 }
-
-} partial class fuzz_package {
 
 // CorpusEntry represents an individual input for fuzzing.
 //
@@ -723,15 +713,13 @@ internal static (ж<coordinator>, error) newCoordinator(CoordinateFuzzingOpts op
     return (c, default);
 }
 
-} partial class fuzzᴛcoordinator {
-
-internal static void updateStats(this ref coordinator c, fuzzResult result) {
+internal static void updateStats⁔(/*this*/ ref coordinator c, fuzzResult result) {
     c.count += result.count;
     c.countWaiting -= result.limit;
     c.duration += result.totalDuration;
 }
 
-internal static void logStats(this ref coordinator c) {
+internal static void logStats⁔(/*this*/ ref coordinator c) {
     var now = time.Now();
     if (c.warmupRun()) {
         nint runSoFar = c.warmupInputCount - c.warmupInputLeft;
@@ -765,7 +753,7 @@ internal static void logStats(this ref coordinator c) {
 //
 // If the input queue is empty and the coverage/testing-only run has completed,
 // queue refills it from the corpus.
-internal static (fuzzInput, bool) peekInput(this ref coordinator c) {
+internal static (fuzzInput, bool) peekInput⁔(/*this*/ ref coordinator c) {
     if (c.opts.Limit > 0 && c.count + c.countWaiting >= c.opts.Limit) {
         // Already making the maximum number of calls to the fuzz function.
         // Don't send more inputs right now.
@@ -813,14 +801,14 @@ internal static (fuzzInput, bool) peekInput(this ref coordinator c) {
 }
 
 // sentInput updates internal counters after an input is sent to c.inputC.
-internal static void sentInput(this ref coordinator c, fuzzInput input) {
+internal static void sentInput⁔(/*this*/ ref coordinator c, fuzzInput input) {
     c.inputQueue.dequeue();
     c.countWaiting += input.limit;
 }
 
 // refillInputQueue refills the input queue from the corpus after it becomes
 // empty.
-internal static void refillInputQueue(this ref coordinator c) {
+internal static void refillInputQueue⁔(/*this*/ ref coordinator c) {
     foreach (var (_, e) in range(c.corpus.entries)) {
         c.inputQueue.enqueue(e);
     }
@@ -828,7 +816,7 @@ internal static void refillInputQueue(this ref coordinator c) {
 
 // queueForMinimization creates a fuzzMinimizeInput from result and adds it
 // to the minimization queue to be sent to workers.
-internal static void queueForMinimization(this ref coordinator c, fuzzResult result, slice<byte> keepCoverage) {
+internal static void queueForMinimization⁔(/*this*/ ref coordinator c, fuzzResult result, slice<byte> keepCoverage) {
     if (shouldPrintDebugInfo()) {
         c.debugLogf(
             "queueing input for minimization, id: %s, parent: %s, keepCoverage: %t, crasher: %t",
@@ -851,7 +839,7 @@ internal static void queueForMinimization(this ref coordinator c, fuzzResult res
 
 // peekMinimizeInput returns the next input that should be sent to workers for
 // minimization.
-internal static (fuzzMinimizeInput, bool) peekMinimizeInput(this ref coordinator c) {
+internal static (fuzzMinimizeInput, bool) peekMinimizeInput⁔(/*this*/ ref coordinator c) {
     if (!c.canMinimize()) {
         // Already making the maximum number of calls to the fuzz function.
         // Don't send more inputs right now.
@@ -889,7 +877,7 @@ internal static (fuzzMinimizeInput, bool) peekMinimizeInput(this ref coordinator
 
 // sentMinimizeInput removes an input from the minimization queue after it's
 // sent to minimizeC.
-internal static void sentMinimizeInput(this ref coordinator c, fuzzMinimizeInput input) {
+internal static void sentMinimizeInput⁔(/*this*/ ref coordinator c, fuzzMinimizeInput input) {
     c.minimizeQueue.dequeue();
     c.countWaiting += input.limit;
 }
@@ -907,14 +895,14 @@ internal static void sentMinimizeInput(this ref coordinator c, fuzzMinimizeInput
 // gather coverage for that entry only, without fuzzing or minimizing. This
 // phase ends when all workers have finished, and the coordinator has a combined
 // coverage map.
-internal static bool warmupRun(this ref coordinator c) {
+internal static bool warmupRun⁔(/*this*/ ref coordinator c) {
     return c.warmupInputLeft > 0;
 }
 
 // updateCoverage sets bits in c.coverageMask that are set in newCoverage.
 // updateCoverage returns the number of newly set bits. See the comment on
 // coverageMask for the format.
-internal static nint updateCoverage(this ref coordinator c, slice<byte> newCoverage) {
+internal static nint updateCoverage⁔(/*this*/ ref coordinator c, slice<byte> newCoverage) {
     if (len(newCoverage) != len(c.coverageMask)) {
         throw panic(fmt.Sprintf("number of coverage counters changed at runtime: %d, expected %d"u8, len(newCoverage), len(c.coverageMask)));
     }
@@ -929,11 +917,11 @@ internal static nint updateCoverage(this ref coordinator c, slice<byte> newCover
 
 // canMinimize returns whether the coordinator should attempt to find smaller
 // inputs that reproduce a crash or new coverage.
-internal static bool canMinimize(this ref coordinator c) {
+internal static bool canMinimize⁔(/*this*/ ref coordinator c) {
     return c.minimizationAllowed && (c.opts.Limit == 0 || c.count + c.countWaiting < c.opts.Limit);
 }
 
-internal static time.Duration elapsed(this ref coordinator c) {
+internal static time.Duration elapsed⁔(/*this*/ ref coordinator c) {
     return time.Since(c.startTime).Round(1 * time.Second);
 }
 
@@ -942,7 +930,7 @@ internal static time.Duration elapsed(this ref coordinator c) {
 //
 // TODO(fuzzing): need a mechanism that can remove values that
 // aren't useful anymore, for example, because they have the wrong type.
-internal static error readCache(this ref coordinator c) {
+internal static error readCache⁔(/*this*/ ref coordinator c) {
     var (_, errΔ1) = c.addCorpusEntries(false, c.opts.Seed.ꓸꓸꓸ); if (errΔ1 != nil) {
         return errΔ1;
     }
@@ -963,8 +951,6 @@ internal static error readCache(this ref coordinator c) {
     return default;
 }
 
-} partial class fuzz_package {
-
 // MalformedCorpusError is an error found while reading the corpus from the
 // filesystem. All of the errors are stored in the errs list. The testing
 // framework uses this to report malformed files in testdata.
@@ -972,9 +958,7 @@ partial struct MalformedCorpusError {
     internal slice<error> errs;
 }
 
-} partial class fuzzᴛMalformedCorpusError {
-
-public static @string Error(this ref MalformedCorpusError e) {
+internal static @string Error⁔(/*this*/ ref MalformedCorpusError e) {
     var msgsᴷ = new stackAppend<@string>();
 
     slice<@string> msgs = default;
@@ -983,8 +967,6 @@ public static @string Error(this ref MalformedCorpusError e) {
     }
     return strings.Join(msgs, "\n");
 }
-
-} partial class fuzz_package {
 
 // ReadCorpus reads the corpus from the provided dir. The returned corpus
 // entries are guaranteed to match the given types. Any malformed files will
@@ -1114,13 +1096,11 @@ internal static bool shouldPrintDebugInfo() {
     return debugInfo;
 }
 
-} partial class fuzzᴛcoordinator {
-
-internal static void debugLogf(this ref coordinator c, @string format, params ꓸꓸꓸany argsʗp) {
+internal static void debugLogf⁔(/*this*/ ref coordinator c, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp;
 
     @string t = time.Now().Format("2006-01-02 15:04:05.999999999");
     fmt.Fprintf(c.opts.Log, t + " DEBUG "u8 + format + "\n"u8, args.ꓸꓸꓸ);
 }
 
-}
+} // end fuzz_package

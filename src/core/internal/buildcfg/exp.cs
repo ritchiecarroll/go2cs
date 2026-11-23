@@ -9,7 +9,6 @@ using strings = strings_package;
 using goexperiment = go.@internal.goexperiment_package;
 using go.@internal;
 using iter = iter_package;
-using static buildcfg_package;
 
 partial class buildcfg_package {
 
@@ -31,7 +30,7 @@ partial struct ExperimentFlags {
 // configuration and any variation from this is an experiment.
 public static readonly ж<ExperimentFlags> ᏑExperiment = new StaticBox<ExperimentFlags>(default(ExperimentFlags));
 public static ref ExperimentFlags Experiment => ref ((StaticBox<ExperimentFlags>)ᏑExperiment).ValueSlot;
-internal static void initᴛExperiment() { Experiment = func(ExperimentFlags () => {
+internal static void initᴛExperiment() { Experiment = func([GoFunc("init.func1")] ExperimentFlags () => {
     var (flags, err) = ParseGOEXPERIMENT(GOOS, GOARCH, envOr("GOEXPERIMENT", defaultGOEXPERIMENT));
     if (err != nil) {
         Error = err;
@@ -125,7 +124,7 @@ public static (ж<ExperimentFlags>, error) ParseGOEXPERIMENT(@string goos, @stri
         // this as an alias make both "regabi" and "noregabi"
         // do the right thing.
         var flagsʗ1 = flags;
-        names[regabiˢ] = (bool v) => {
+        names[regabiˢ] = [GoFunc("ParseGOEXPERIMENT.func1")] (bool v) => {
             flagsʗ1.RegabiWrappers = v;
             flagsʗ1.RegabiArgs = v;
         };
@@ -171,15 +170,11 @@ public static (ж<ExperimentFlags>, error) ParseGOEXPERIMENT(@string goos, @stri
     return (flags, default);
 }
 
-} partial class buildcfgᴛExperimentFlags {
-
 // String returns the canonical GOEXPERIMENT string to enable this experiment
 // configuration. (Experiments in the same state as in the baseline are elided.)
-public static @string String(this ж<ExperimentFlags> Ꮡexp) {
+internal static @string String⁔(/*this*/ ж<ExperimentFlags> Ꮡexp) {
     return strings.Join(expList(Ꮡexp.ᏑFlags, Ꮡexp.Ꮡbaseline, false), ",");
 }
-
-} partial class buildcfg_package {
 
 // expList returns the list of lower-cased experiment names for
 // experiments that differ from base. base may be nil to indicate no
@@ -211,18 +206,16 @@ internal static slice<@string> expList(ж<goexperiment.Flags> exp, ж<goexperime
     return list;
 }
 
-} partial class buildcfgᴛExperimentFlags {
-
 // Enabled returns a list of enabled experiments, as
 // lower-cased experiment names.
-public static slice<@string> Enabled(this ж<ExperimentFlags> Ꮡexp) {
+internal static slice<@string> Enabled⁔(/*this*/ ж<ExperimentFlags> Ꮡexp) {
     return expList(Ꮡexp.ᏑFlags, nil, false);
 }
 
 // All returns a list of all experiment settings.
 // Disabled experiments appear in the list prefixed by "no".
-public static slice<@string> All(this ж<ExperimentFlags> Ꮡexp) {
+internal static slice<@string> All⁔(/*this*/ ж<ExperimentFlags> Ꮡexp) {
     return expList(Ꮡexp.ᏑFlags, nil, true);
 }
 
-}
+} // end buildcfg_package

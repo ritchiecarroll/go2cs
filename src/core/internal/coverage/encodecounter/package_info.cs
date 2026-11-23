@@ -10,10 +10,14 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+using slicewriter = go.@internal.coverage.slicewriter_package;
 // </ImportedTypeAliases>
 
 using go;
 using static go.@internal.coverage.encodecounter_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -61,10 +65,13 @@ using static go.@internal.coverage.encodecounter_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/coverage/encodecounter/encode.go", "encode.cs", "ACdKgu6CggARJuKClMaigoKCgoKCgoKmxrSCgqaClIKUgqaClKaygIKkyoKAgqSUlIKCgoKUuICCtoKCgIKkgoKAgraAgqSUqsKCgpSCgoKmgoKUgpSClIKUgpSClIKmtO6ClKaCgpSCgpSClKbugpKCgoKCgoKCgoKClJSCgoKUuJKCgIK2gIK2gIKkgoKmlICCpKaCgriClA==", "128-135:1;234-255:1;258-277:2", "", "41=NewWriter/1/1/2")]
+[assembly: GoPositionMap("internal/coverage/encodecounter/encode.go", "encode.cs", "ACZKgu6CggAPJuKClKaigoKCgoKCgoKmprSCgqaClIKUgqaClKaygIKkyoKAgqSUlIKCgoKUuICCtoKCgIKkgoKAgraAgqSUqsKCgpSCgoKmgoKUgpSClIKUgpSClIKmtO6ClKaCgpSCgpSClKbugpKCgoKCgoKCgoKClJSCgoKUuJKCgIK2gIK2gIKkgoKmlICCpKaCgriClA==", "128-135:1;234-255:1;258-277:2", "", "40=NewWriter/1/1/2")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.coverage;
+
+using static go.@internal.coverage.encodecounter_package;
+using slicewriter = go.@internal.coverage.slicewriter_package;
 
 [GoPackage("encodecounter")]
 public static partial class encodecounter_package
@@ -107,5 +114,22 @@ public static partial class encodecounter_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(encodecounter_package.CoverageDataWriter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class encodecounterᴛCoverageDataWriter;
+[GoMethodHost(typeof(encodecounter_package.CoverageDataWriter)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class encodecounterᴛCoverageDataWriter;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class encodecounterᴛCoverageDataWriter {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Write(this ж<CoverageDataWriter> Ꮡcfw, /*[16]*/ array<byte> metaFileHash, map<@string, @string> args, CounterVisitor visitor) => encodecounter_package.Write⁔(Ꮡcfw, metaFileHash, args, visitor);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error patchSegmentHeader(this ref CoverageDataWriter cfw, ж<slicewriter.WriteSeeker> Ꮡws) => encodecounter_package.patchSegmentHeader⁔(ref cfw, Ꮡws);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error writeSegmentPreamble(this ж<CoverageDataWriter> Ꮡcfw, map<@string, @string> args, ж<slicewriter.WriteSeeker> Ꮡws) => encodecounter_package.writeSegmentPreamble⁔(Ꮡcfw, args, Ꮡws);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error AppendSegment(this ж<CoverageDataWriter> Ꮡcfw, map<@string, @string> args, CounterVisitor visitor) => encodecounter_package.AppendSegment⁔(Ꮡcfw, args, visitor);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error writeHeader(this ref CoverageDataWriter cfw, /*[16]*/ array<byte> metaFileHash) => encodecounter_package.writeHeader⁔(ref cfw, metaFileHash);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error writeBytes(this ref CoverageDataWriter cfw, slice<byte> b) => encodecounter_package.writeBytes⁔(ref cfw, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error writeCounters(this ж<CoverageDataWriter> Ꮡcfw, CounterVisitor visitor, ж<slicewriter.WriteSeeker> Ꮡws) => encodecounter_package.writeCounters⁔(Ꮡcfw, visitor, Ꮡws);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error writeFooter(this ref CoverageDataWriter cfw) => encodecounter_package.writeFooter⁔(ref cfw);
+}
+// </MethodForwarders>

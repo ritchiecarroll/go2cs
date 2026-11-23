@@ -14,6 +14,9 @@
 
 using go;
 using static go.CaptureModeValueParamLib_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -49,10 +52,12 @@ using static go.CaptureModeValueParamLib_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("lib.go", "lib.cs", "AA4s4oKCpoLogqqC", "23-27:1", "", "", "", "22:21,23:13")]
+[assembly: GoPositionMap("lib.go", "lib.cs", "AAss4oKCpoLogqqC", "23-27:1", "", "", "", "19:56,20:13")]
 // </GoSourcePositionMaps>
 
 namespace go;
+
+using static go.CaptureModeValueParamLib_package;
 
 [GoPackage("CaptureModeValueParamLib")]
 public static partial class CaptureModeValueParamLib_package
@@ -85,5 +90,17 @@ public static partial class CaptureModeValueParamLib_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(CaptureModeValueParamLib_package.Config)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class CaptureModeValueParamLibᴛConfig;
+[GoMethodHost(typeof(CaptureModeValueParamLib_package.Config)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class CaptureModeValueParamLibᴛConfig;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class CaptureModeValueParamLibᴛConfig {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (@string @out, error err) fprint(this ж<Config> Ꮡcfg, @string label) => CaptureModeValueParamLib_package.fprint⁔(Ꮡcfg, label);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (@string, error) Fprint(this ж<Config> Ꮡcfg, @string label) => CaptureModeValueParamLib_package.Fprint⁔(Ꮡcfg, label);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Trace(this ref Config cfg) => CaptureModeValueParamLib_package.Trace⁔(ref cfg);
+}
+// </MethodForwarders>

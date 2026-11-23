@@ -18,15 +18,15 @@ public partial struct cfg {
 }
 
 [GoLazy] partial class lazyᴛSupportedStates { public static map<uint16, Func<ж<hkdfState>>> SupportedStates = new map<uint16, Func<ж<hkdfState>>>{
-    [0x0001] = () => Ꮡ(new hkdfState("sha256", 32)),
-    [0x0002] = () => Ꮡ(new hkdfState("sha512", 64))
+    [0x0001] = [GoFunc("init.func1")] () => Ꮡ(new hkdfState("sha256", 32)),
+    [0x0002] = [GoFunc("init.func2")] () => Ꮡ(new hkdfState("sha512", 64))
 }; }
 
-[GoLazy] partial class lazyᴛAppliers { public static slice<Action<ж<cfg>>> Appliers = [
-    (ж<cfg> c) => {
+[GoLazy] partial class lazyᴛAppliers { public static slice<Action<ж<cfg>>> Appliers = new Action<ж<cfg>>[]{
+    [GoFunc("init.func3")] (ж<cfg> c) => {
         c.verbose = true;
     }
-]; }
+}.slice(); }
 
 internal static void main() {
     foreach (var (_, id) in range(slice<uint16>([0x0001, 0x0002]))) {

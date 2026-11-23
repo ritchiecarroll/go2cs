@@ -61,7 +61,7 @@ internal static @string /*out*/ panicUnwindText(ж<syscall.LazyProc> enumTimeFor
     @string @out = default;
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("panicUnwindText.func1")] () => {
             var switchᴛ1 = recover();
             switch (switchᴛ1.type()) {
             case null: {
@@ -91,7 +91,7 @@ internal static @string /*out*/ refusalText() {
     @string @out = default;
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("refusalText.func1")] () => {
             var switchᴛ2 = recover();
             switch (switchᴛ2.type()) {
             case null: {

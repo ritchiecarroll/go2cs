@@ -12,16 +12,16 @@ internal static UntypedInt letter => /* 'c' */ 99;
 internal static (rune, bool) pair() { return ('p', true); }
 
 internal static void main() {
-    var noArgs = () => {
+    var noArgs = [GoFunc("main.func1")] () => {
     };
-    var square = (int32 x) => x * x;
-    var parse = (@string s, nint n) => {
+    var square = [GoFunc("main.func2")] (int32 x) => x * x;
+    var parse = [GoFunc("main.func3")] (@string s, nint n) => {
         if (len(s) > n) {
             return (false, errors.New("too long"));
         }
         return (true, default);
     };
-    Funcꓸꓸꓸ<nint, nint> sum = (params ꓸꓸꓸnint xsʗp) => {
+    Funcꓸꓸꓸ<nint, nint> sum = [GoFunc("main.func4")] (params ꓸꓸꓸnint xsʗp) => {
         var xs = xsʗp.sslice();
         nint total = 0;
         foreach (var (_, x) in range(xs)) {
@@ -29,7 +29,7 @@ internal static void main() {
         }
         return total;
     };
-    Funcꓸꓸꓸ<@string, any, @string> format = @string (@string f, params ꓸꓸꓸany argsʗp) => {
+    Funcꓸꓸꓸ<@string, any, @string> format = [GoFunc("main.func5")] @string (@string f, params ꓸꓸꓸany argsʗp) => {
         var args = argsʗp;
         return fmt.Sprintf(f, args.ꓸꓸꓸ);
     };
@@ -46,17 +46,17 @@ internal static void main() {
     any boxed = (none).OrTypedNilFunc();
     fmt.Printf("%T %v %v\n"u8, boxed, boxed, none == nil);
 
-    var shrink = (rune rΔ1) => (rune)'a';
-    var both = () => ((rune)'b', true);
-    var named = rune () => letter;
+    var shrink = [GoFunc("main.func6")] (rune rΔ1) => (rune)'a';
+    var both = [GoFunc("main.func7")] () => ((rune)'b', true);
+    var named = [GoFunc("main.func8")] rune () => letter;
     fmt.Printf("%T %T %T\n"u8, (shrink).OrTypedNilFunc(), (both).OrTypedNilFunc(), (named).OrTypedNilFunc());
     var (r, flag) = both();
     fmt.Printf("%v %v %v %v\n"u8, shrink('x'), r, flag, named());
     fmt.Printf("%T %T\n"u8, shrink('x'), r);
 
     any held = (shrink).OrTypedNilFunc();
-    var fns = slice<Func<rune>>([() => (rune)'f']);
-    var byName = new map<@string, Func<rune>>{["g"] = () => (rune)'g'};
+    var fns = new Func<rune>[]{[GoFunc("main.func9")] () => (rune)'f'}.slice();
+    var byName = new map<@string, Func<rune>>{["g"] = [GoFunc("main.func10")] () => (rune)'g'};
     fmt.Printf("%T %T %T %v %v\n"u8, held, fns, byName, fns[0](), byName["g"]());
     var (p, q) = pair();
     fmt.Println(p, q, (rune)'z', (int32)(letter));
