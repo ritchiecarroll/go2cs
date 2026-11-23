@@ -39,7 +39,7 @@ workarounds.
 
 The packages ship for five platforms: `win-x64`, `linux-x64`, `linux-arm64`, `osx-x64` and `osx-arm64`. The converted standard library
 for macOS is built once, for `darwin/amd64`, and the same packages serve Intel and Apple-silicon Macs. On an
-Apple-silicon Mac a converted program runs as a native Arm64 .NET process:
+Apple-silicon Mac a converted program runs as a native arm64 .NET process:
 - `runtime.GOARCH` reads `arm64`, as Go's own program on the same Mac does. It is read from the process when the
   program starts, and the `GOARCH` setting that `debug.ReadBuildInfo` returns and `go/build`'s default context
   follow it;
@@ -254,7 +254,7 @@ Without `GO2CS_MN=1` a program built with twins runs on threads as usual, and `r
 value Go's does but caps nothing: the operating system decides how many threads run at once. With it, a goroutine that
 waits inside code built without twins keeps its thread while it waits. The other `GO2CS_MN_*` variables the scheduler
 reads are measurement switches, not settings: none is supported, and they may change or go away. The diagnostics
-`GO2CS0014` through `GO2CS0018` ([Diagnostic codes](DiagnosticCodes.md)) come only from a build with twins.
+`GO2CS0014`, `GO2CS0015`, `GO2CS0017`, `GO2CS0018`, `GO2CS0020` and `GO2CS0021` ([Diagnostic codes](DiagnosticCodes.md)) come only from a build with twins.<!-- 2026-11-23 .5 docs pass (P1): the old range "GO2CS0014 through GO2CS0018" took in GO2CS0016, the GoFrame rule, which every build runs (DiagnosticCodes.md rows 0014-0021 at 97cca467a2). -->
 
 **A plain read and a call in the same expression can see different values with and without twins.** In an expression
 such as `fmt.Println(a, f())`, Go orders only the calls: the read of `a` may come before or after `f()`, and the gc
