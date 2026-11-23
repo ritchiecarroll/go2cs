@@ -171,7 +171,8 @@ public class TwinGoLaunchTests
         """;
 
     // A go literal that RETURNS a value, as the converter writes `go func(o chan int) error { ... }(c)`: once with the
-    // return type inferred and a deferred-call frame (the result reached through a label), once with it spelled out.
+    // return type inferred and a deferred-call frame (the result reached through a label), once with it spelled out,
+    // once with a blank parameter (written `nint _`, so `_ =` would assign to it), and once returning a tuple.
     // A goroutine drops its results, so both launch their twins; the value is evaluated and discarded.
     private const string ValueLiteral = """
             public static void launchValueLiteral(channel<nint> c)
@@ -193,6 +194,16 @@ public class TwinGoLaunchTests
                     }
                     return default;
                 }, c, (nint)6);
+
+                goǃ(error (nint _) => {
+                    ᐸꟷ(c);
+                    return default;
+                }, (nint)1);
+
+                goǃ((nint, error) (channel<nint> o) => {
+                    ᐸꟷ(o);
+                    return (1, default);
+                }, c);
             }
 
         """;
@@ -280,8 +291,9 @@ public class TwinGoLaunchTests
 
         Assert.AreEqual(0, errors.Length, string.Join("\n", errors.Select(error => error.ToString())));
         StringAssert.Contains(twins, "launchValueLiteralꞏtwin(", "launchValueLiteral is twinned");
-        Assert.AreEqual(2, twins.Split("goǃtwin(").Length - 1, "both go literals launch their twins: " + twins);
-        Assert.AreEqual(2, twins.Split("await ᐸꟷꞏtwin(o)").Length - 1, "each literal's twin parks on its receive: " + twins);
+        Assert.AreEqual(4, twins.Split("goǃtwin(").Length - 1, "all four go literals launch their twins: " + twins);
+        StringAssert.Contains(twins, "await ᐸꟷꞏtwin(c)", "the blank-parameter literal's twin parks on its receive");
+        Assert.AreEqual(3, twins.Split("await ᐸꟷꞏtwin(o)").Length - 1, "each literal's twin parks on its receive: " + twins);
         Assert.IsFalse(generator.Any(diagnostic => diagnostic.Id == "GO2CS0015"), "no fallback warning: " + string.Join("\n", generator.Select(d => d.ToString())));
     }
 

@@ -805,7 +805,11 @@ public sealed partial class TwinGenerator
 
             // `go func(...) T { ... }(...)`: a goroutine drops its results, and goǃtwin takes no value-returning delegate, so
             // both halves return nothing, each return evaluating its value and discarding it (DiscardResults).
-            ITypeSymbol? result = m_model.GetSymbolInfo(lambda).Symbol is IMethodSymbol { ReturnsVoid: false } literal ? literal.ReturnType : null;
+            // The result type is the literal's own symbol: the goǃ call around it does not bind (no value-returning rung), so
+            // the call's symbol has nothing. A literal whose returns give inference nothing either (`return default;` alone,
+            // no spelled type) reads void here or an error type: void leaves the literal as it was, and the build keeps the
+            // missing-rung error it had before this rewrite; an error type is passed over the same way.
+            ITypeSymbol? result = m_model.GetSymbolInfo(lambda).Symbol is IMethodSymbol { ReturnsVoid: false, ReturnType.TypeKind: not TypeKind.Error } literal ? literal.ReturnType : null;
 
             if (result is not null && original is ParenthesizedLambdaExpressionSyntax visited)
                 original = DiscardResults(visited.WithReturnType(null), result);
@@ -853,10 +857,12 @@ public sealed partial class TwinGenerator
             return node.WithExpression(Launcher(node)).WithArgumentList(node.ArgumentList.WithArguments(SeparatedList<ArgumentSyntax>(list)));
         }
 
-        // A value-returning go literal's half, made to return nothing: `return e;` becomes `{ _ = (T)(e); return; }` and an
-        // expression body `e` becomes `{ _ = (T)(e); }`, on the line the value was on, so the value is still evaluated (its
-        // calls run, its awaits park) and only the result is dropped. The cast gives a target-typed value (`default`, `null`)
-        // its type. Returns of nested lambdas and local functions are their own.
+        // A value-returning go literal's half, made to return nothing: `return e;` becomes `{ T ᴛdrop = e; return; }` and an
+        // expression body `e` becomes `{ T ᴛdrop = e; }`, on the line the value was on, so the value is still evaluated (its
+        // calls run, its awaits park) and only the result is dropped. The declared T converts e as the return did and gives
+        // a target-typed value (`default`, `null`, a tuple literal) its type. Not `_ = e`: the converter writes a blank Go
+        // parameter as a real one named `_` (`(nint _) => ...`), and in its scope `_ =` assigns to it (CS0029). Each local
+        // sits in its own block. Returns of nested lambdas and local functions are their own.
         private static ParenthesizedLambdaExpressionSyntax DiscardResults(ParenthesizedLambdaExpressionSyntax lambda, ITypeSymbol result)
         {
             string type = result.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
@@ -868,7 +874,7 @@ public sealed partial class TwinGenerator
         }
 
         // The value's own text, so a value written over several lines keeps them.
-        private static string Discard(ExpressionSyntax value, string type) => "_ = (" + type + ")(" + value.ToString() + ");";
+        private static string Discard(ExpressionSyntax value, string type) => type + " ᴛdrop = " + value.ToString() + ";";
 
         private sealed class ResultDiscarder(string type) : CSharpSyntaxRewriter
         {
