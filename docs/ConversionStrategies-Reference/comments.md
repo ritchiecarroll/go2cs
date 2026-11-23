@@ -401,8 +401,9 @@ partial struct IntSlice /*[]nint*/;
 ([marker comments](source-generators.md#marker-comments-what-converted-code-carries-instead-of-an-attribute)).
 The comment above it, which Go leaves free, keeps its place and its blank line.
 
-A function type with no methods has no C# declaration: it is written inline as its delegate type wherever it
-is used. Its doc is written directly above the converter's line that says so:
+A function type is a delegate declaration, whether or not it has methods
+([struct-types.md](struct-types.md#every-defined-func-type-declares-its-own-delegate)), and its doc is written
+directly above the delegate:
 
 <!-- source: GOROOT/src/bufio/scan.go:60-67 -->
 ```go

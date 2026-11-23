@@ -545,6 +545,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckDefinedForeignStructConvert() => CheckTarget("DefinedForeignStructConvert");
 
     [TestMethod]
+    public void CheckDefinedFuncTypeIdentity() => CheckTarget("DefinedFuncTypeIdentity");
+
+    [TestMethod]
     public void CheckDefinedOverNamedComposite() => CheckTarget("DefinedOverNamedComposite");
 
     [TestMethod]

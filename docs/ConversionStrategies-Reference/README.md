@@ -316,7 +316,7 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - [A struct value moves between a named type, an unnamed type and a second lift of the unnamed type](struct-types.md#a-struct-value-moves-between-a-named-type-an-unnamed-type-and-a-second-lift-of-the-unnamed-type)
   - [A struct conversion between two types of OTHER packages calls a generated function](struct-types.md#a-struct-conversion-between-two-types-of-other-packages-calls-a-generated-function)
   - [A conversion copies its operand](struct-types.md#a-conversion-copies-its-operand)
-  - [A methodless named func type renders as its base delegate](struct-types.md#a-methodless-named-func-type-renders-as-its-base-delegate)
+  - [Every defined func type declares its own delegate](struct-types.md#every-defined-func-type-declares-its-own-delegate)
   - [Named delegate types wrap mismatched initializers](struct-types.md#named-delegate-types-wrap-mismatched-initializers)
   - [A named delegate value passed to a structural func parameter re-wraps](struct-types.md#a-named-delegate-value-passed-to-a-structural-func-parameter-re-wraps)
   - [A wrapped func value is nil-safe, and a same-delegate value is not wrapped](struct-types.md#a-wrapped-func-value-is-nil-safe-and-a-same-delegate-value-is-not-wrapped)

@@ -236,7 +236,7 @@ means a [golib](#the-golib-runtime-library) type or function implements it at ru
   src/tests/Behavioral/MapCommaOk/main.cs.target:8#440e42 · src/tests/Behavioral/GenericFuncDecl/GenericFuncDecl.cs.target:7#6d8518 +
   src/tests/Behavioral/GenericInterfaceConstraint/GenericInterfaceConstraint.go:53#b41110 + GenericInterfaceConstraint.cs.target:47#b015bf ·
   src/tests/Behavioral/TypeConversionReturnType/TypeConversionReturnType.cs.target:1#b7a909 ·
-  src/tests/Behavioral/PackageVarInitOrder/registry.cs.target:14#8dd9ca · src/tests/Behavioral/LambdaFunctions/LambdaFunctions.cs.target:49#c88900 +
+  src/tests/Behavioral/PackageVarInitOrder/registry.cs.target:14#8dd9ca · src/tests/Behavioral/LambdaFunctions/LambdaFunctions.cs.target:49#5d6ee4 +
   src/tests/Behavioral/LocalFunctionEmission/main.cs.target:15#9ecd18 (local function only from a `name := func…` short declaration
   whose variable is only called; a `var f T = func…` stays a lambda, LambdaFunctions.go:49,52#68e74a) ·
   src/tests/Behavioral/ForVariants/ForVariants.cs.target:55,61#094976 ·
@@ -334,7 +334,7 @@ Overload discriminators: the comma-ok overloads take a `bool _` whose value is u
 Lookalike code points (python unicodedata): ꓸ U+A4F8 LISU LETTER TONE MYA TI; ᐧ U+1427 CANADIAN SYLLABICS FINAL MIDDLE DOT; ꟷ U+A7F7 LATIN EPIGRAPHIC LETTER SIDEWAYS I; ᴛ U+1D1B LATIN LETTER SMALL CAPITAL T. All are letter categories (Lm/Lo/Ll), so C# reads them as identifier characters.
 ᴷ is StackBufferMarker (src/core/go2cs/symbols.json); its declaration and site: src/tests/Behavioral/StackAppendBackingStore/main.cs.target:8 `var xᴷ = new stackAppend<int64>();` and :12 `x = append(xᴷ, x, (int64)i);`, for Go main.go:16 `x = append(x, int64(i))`.
 ᶠ is FuncValueMarker (symbols.json:200-211#c870aa): only an sstring-twinned function has it, because a twinned function has no single method group; an ordinary function value stays a plain method group (GoCallVariations.cs.target:13#ee6601).
-_ΔpN: src/go2cs/visitFuncDecl.go:1458-1472#03b3c7 and :3053-3061#701c82; :60-68#c625cd and :2137#dbca80 (a lone blank parameter stays `_` unless the body uses a `_ =` discard or a select receive-and-discard, `case <-ch:`, because a parameter named `_` captures C#'s discards); in a function declaration, UnnamedParams/main.cs.target:17 `internal static void discard(nint _) {` (Go UnnamedParams/main.go:14 `func discard(int)`) and UnnamedParams/main.cs.target:22 `internal static void bothUnnamed(nint _Δp0, params ꓸꓸꓸstring ʗp) {`; a body-less signature (a function type, or an interface method) takes its discard test from the function being converted or last converted, src/go2cs/visitFuncDecl.go:2138 `dupBlankParams := hasDuplicateBlankParams(parameters) || bodyUsesBlankDiscard(v.currentFuncDecl)`, set at src/go2cs/visitFuncDecl.go:515 `v.currentFuncDecl = funcDecl` and never cleared; a lone `_`: CaptureHoistThroughConversion/main.cs.target:7 `public delegate void Handler(nint _);` (Go CaptureHoistThroughConversion/main.go:23 `type Handler func(int)`, converted before any function); a lone `_Δp0`: BlankIdentifierCollision/main.cs.target:36 `internal delegate stateFn stateFn(nint _Δp0);` (converted after BlankIdentifierCollision/main.go:40 `_, _, _, _ = a, b, c, d`) and AnonymousInterfaces.cs.target:38 `(nint, error) Read(slice<byte> _Δp0);` (lifted from AnonymousInterfaces.go:28 `func takesReader(r interface{ Read([]byte) (int, error) }) {`, whose body has AnonymousInterfaces.go:30 `n, _ := r.Read(buf)`); several: GenericTypeInstantiation.cs.target:45#f1c413.
+_ΔpN: src/go2cs/visitFuncDecl.go:1455-1469#03b3c7 and :3050-3058#701c82; :60-68#c625cd and :2134#dbca80 (a lone blank parameter stays `_` unless the body uses a `_ =` discard or a select receive-and-discard, `case <-ch:`, because a parameter named `_` captures C#'s discards); in a function declaration, UnnamedParams/main.cs.target:17 `internal static void discard(nint _) {` (Go UnnamedParams/main.go:14 `func discard(int)`) and UnnamedParams/main.cs.target:22 `internal static void bothUnnamed(nint _Δp0, params ꓸꓸꓸstring ʗp) {`; a body-less signature (a function type, or an interface method) takes its discard test from the function being converted or last converted, src/go2cs/visitFuncDecl.go:2135 `dupBlankParams := hasDuplicateBlankParams(parameters) || bodyUsesBlankDiscard(v.currentFuncDecl)`, set at src/go2cs/visitFuncDecl.go:512 `v.currentFuncDecl = funcDecl` and never cleared; a lone `_`: CaptureHoistThroughConversion/main.cs.target:7 `public delegate void Handler(nint _);` (Go CaptureHoistThroughConversion/main.go:23 `type Handler func(int)`, converted before any function); a lone `_Δp0`: BlankIdentifierCollision/main.cs.target:36 `internal delegate stateFn stateFn(nint _Δp0);` (converted after BlankIdentifierCollision/main.go:40 `_, _, _, _ = a, b, c, d`) and AnonymousInterfaces.cs.target:38 `(nint, error) Read(slice<byte> _Δp0);` (lifted from AnonymousInterfaces.go:28 `func takesReader(r interface{ Read([]byte) (int, error) }) {`, whose body has AnonymousInterfaces.go:30 `n, _ := r.Read(buf)`); several: GenericTypeInstantiation.cs.target:45#f1c413.
 Δio: the import alias `io` collides with the child namespace `go.io` (from io/fs) inside `namespace go`: src/go2cs/conversionDriver.go:678#df2c73, src/go2cs/perUnitAliasRenames_test.go:57#b26865.
 `main` -> `Main` until C46 (2026-11-11); since then `main` keeps its name and go2cs-gen's MainEntryGenerator writes `Main`. A Go function named `Main` becomes `ΔMain` (src/go2cs/identifierNaming.go:369-377#95eaaa).
 A member golib adds itself: src/core/golib/array.cs:589 `public array<T> ΔClone()`.
@@ -545,7 +545,7 @@ exported type, or an unexported type that an exported signature exposes
 struct such as `accum` shows no modifier, because the [source generator](#source-generators) adds it on the
 generated half of the `partial` type.
 
-<!-- receiver clamp: src/go2cs/visitFuncDecl.go:919-927#d781c1 (receiverAccess from :2137-2154#801a91; getAccess at src/go2cs/identifierNaming.go:382#c6c426); example src/core/errors/package_info.cs:129 `internal static @string Error(this ref joinError e)`, the forwarder of the body src/core/errors/join.cs:47 `internal static @string Error⁔(/*this*/ ref joinError e) {` -->
+<!-- receiver clamp: src/go2cs/visitFuncDecl.go:916-924#d781c1 (receiverAccess from :2134-2151#801a91; getAccess at src/go2cs/identifierNaming.go:382#c6c426); example src/core/errors/package_info.cs:129 `internal static @string Error(this ref joinError e)`, the forwarder of the body src/core/errors/join.cs:47 `internal static @string Error⁔(/*this*/ ref joinError e) {` -->
 <!-- generator adds the modifier: src/gen/go2cs-gen/Templates/StructType/StructTypeTemplate.cs:160 (`{{Scope}} partial struct`), Templates/InterfaceType/InterfaceTypeTemplate.cs:50 (`{{Scope}} partial interface`). "usually": lifted local types carry `internal` (LiftedLocalTypes/main.cs.target:38#24371b) and an unexported type an exported field exposes carries `public` (PublicizedFieldType/main.cs.target:9#6ba0fc); package-level declarations otherwise emit `partial` bare (src/tests/Behavioral/PackageVarInitOrder/registry.cs.target:5 `partial struct reg {`). A named function type becomes a delegate that carries its own modifier: src/tests/Behavioral/CaptureHoistThroughConversion/main.cs.target:7 `public delegate void Handler(nint _);` (Go main.go:23 `type Handler func(int)`); GenericTypeInstantiation.cs.target:45 `public delegate bool Seq2Like<K, V>(K _Δp0, V _Δp1);` -->
 <!-- new accum(): the generated parameterless constructor, src/gen/go2cs-gen/Templates/StructType/StructTypeTemplate.cs:2426#065f38, whose body is the NilType constructor's (:2412#a988bf); "an empty struct literal reads new T()" is the Struct Types section's rule (parity seat #21). Section length (about 200 lines) exceeds the 120-line guide because the owner's review asks each section to stand alone: the worked example defines every glyph it uses before the tables, and the glyph index is split into common and less-common tables so a first read can stop at the first. -->
 
@@ -1387,7 +1387,7 @@ a rule, the conversion would stop and name it.
      :120 `// A test file's own vars stay eager`; the unboxed address (probe at 3e3f18925a: a 21-field struct var whose
      method value `mv.sum` is taken stays `internal static six mv = new six(…);`, read as `Ꮡ(mv).sum`):
      :164 `candidate.reason = "its address is taken where the converter keeps no box for it"`;
-     the refusal of a listed var: src/go2cs/visitValueSpec.go:759 `panic(fmt.Sprintf("@visitValueSpec - lazyPackageVars entry %s cannot be built on its first read: %s", goIDName, refusal))`.
+     the refusal of a listed var: src/go2cs/visitValueSpec.go:760 `panic(fmt.Sprintf("@visitValueSpec - lazyPackageVars entry %s cannot be built on its first read: %s", goIDName, refusal))`.
      A malloc table's holder: src/core/runtime/malloc_tables_generated.cs:9 `[GoLazy] partial class lazyᴛmallocScanTable { internal static array<Func<uintptr, ж<_type>, bool, @unsafe.Pointer>> mallocScanTable = array<Func<uintptr, ж<_type>, bool, @unsafe.Pointer>>([`.
      Why those two are listed: their one reader, mallocgc's size-specialized branch, is gated by a const false
      (goexperiment.SizeSpecializedMalloc is off). Guards: TestLazyPackageVarIsBuiltOnFirstRead,
@@ -1862,10 +1862,10 @@ rules further down this section):
   `static ref readonly @string name => ref nameᵇ;`, over the private field `nameᵇ`. The value is a struct, the JIT
   will not inline a function that copies a struct out of a static field, and a read through the accessor is a
   reference it can inline; every use still spells the constant's name. Other packages keep the one field.
-<!-- forms: src/go2cs/visitValueSpec.go:1480 `else if constExpr == "const"`, :1503 `static %s %s =>%s %s;`,
-     :1298 `structStaticReadAccessorDecl(access, strTypeName, csIDName`; the accessor:
+<!-- forms: src/go2cs/visitValueSpec.go:1481 `else if constExpr == "const"`, :1504 `static %s %s =>%s %s;`,
+     :1299 `structStaticReadAccessorDecl(access, strTypeName, csIDName`; the accessor:
      src/go2cs/hoistedLiteralOperations.go:1755 `func structStaticReadAccessorDecl(`; the GoBigConst field, for an
-     int-kind value that fits neither int64 nor uint64: src/go2cs/visitValueSpec.go:1221-1228 `writeUntypedConst(true)`, e.g.
+     int-kind value that fits neither int64 nor uint64: src/go2cs/visitValueSpec.go:1222-1229 `writeUntypedConst(true)`, e.g.
      src/core/math/big/arith.cs:23-24 `internal static ref readonly GoBigConst _B => ref _Bᵇ;` … `private static readonly GoBigConst _Bᵇ`
      (the accessor over its backing field); the alias: src/go2cs/csproj-template.xml:156 `Alias="GoBigConst"`. -->
 
@@ -2839,7 +2839,7 @@ a golib type that keeps the constant's exact value.
      for main.go:25 `a := 0x1p-2` and :31 `d := 2.`. Typed const:
      src/core/math/asinh.cs:49 `const float64 Ln2 = 6.93147180559945286227e-01;` and
      src/core/runtime/stubs.cs:157 `0.875f;`, from
-     src/go2cs/visitValueSpec.go:1429-1430 `constValExpr += "f"`. -->
+     src/go2cs/visitValueSpec.go:1430-1431 `constValExpr += "f"`. -->
 
 **A float prints as Go prints it.** go2cs converts `fmt` and `strconv` from Go's own source, so `fmt.Println`
 formats a float with Go's own `strconv` code, never with .NET's `ToString`. Go's default form is the shortest
@@ -3131,7 +3131,7 @@ a constructor that takes golib's `nil` and builds the zero value. That construct
 value embed by its own `new T(nil)`, and a pointer embed as a nil `ж<T>` box rather than a C# `null`, so a
 promoted access through it panics as Go does. `new(nil)` calls it. Here `Padded` is a struct of plain fields, so
 it stays `default!`, and `Embedded` embeds it:
-<!-- src/go2cs/visitValueSpec.go:451-456 `structHasPromotedEmbeds … a value embed by its own … new(nil);`; the
+<!-- src/go2cs/visitValueSpec.go:448-453 `structHasPromotedEmbeds … a value embed by its own … new(nil);`; the
      embed is declared as a field: src/go2cs/visitStructType.go:1045#87d05a (commit 814ff707c7). -->
 
 <!-- source: src/tests/Behavioral/UnsafeOperations/UnsafeOperations.go:33-40,44-48,140-141 -->
@@ -5568,7 +5568,7 @@ interface, `<declaration>_<parameter>`: `func Show[T interface{ Name() string }]
 `interface Show_T` and takes `where T : Show_T`. A constraint that names its own parameter,
 `type Ord[T interface{ Less(T) bool }]`, lifts to a generic interface, `where T : Ord_T<T>`
 ([Reference → Generic Constraints](ConversionStrategies-Reference/generic-constraints.md#method-set-interface-constraints-bind-the-interface-directly-pointer-instantiations-project-through-the-adapter)).
-<!-- src/tests/Behavioral/InlineConstraintLift/main.go:22 `func Show[T interface{ Name() string }](t T) string` -> main.cs.target:21 `public partial interface Show_T /*dyn*/ {` and :30 `where T : Show_T`; ord.go:7 `type Ord[T interface{ Less(T) bool }] struct{ v T }` -> ord.cs.target:10 `where T : Ord_T<T>`. Naming: src/go2cs/visitFuncDecl.go:483 `name = owner + "_" + name`. -->
+<!-- src/tests/Behavioral/InlineConstraintLift/main.go:22 `func Show[T interface{ Name() string }](t T) string` -> main.cs.target:21 `public partial interface Show_T /*dyn*/ {` and :30 `where T : Show_T`; ord.go:7 `type Ord[T interface{ Less(T) bool }] struct{ v T }` -> ord.cs.target:10 `where T : Ord_T<T>`. Naming: src/go2cs/visitFuncDecl.go:480 `name = owner + "_" + name`. -->
 
 **A pointer type argument goes in through adapters.** In Go, `totalArea(circles)` with a `[]*Circle`
 simply infers `S = *Circle`. In C#, a Go pointer is golib's heap box `ж<Circle>` ([Pointers](#pointers)),
@@ -6790,9 +6790,11 @@ internal delegate nint reader();
 internal static nint sum(this reader f, nint extra) { return f() + extra; }
 ```
 
-**A named func type without methods usually has no declaration of its own.** Each use is written as the
-underlying `Func<…>` or `Action<…>`, because Go converts freely between a named func type and its
-underlying type. A comment marks where the declaration would be. In this example, `Stringy` as a return type is written `Func<@string>`.
+**A named func type without methods declares a delegate too.** `Stringy` is a Go type of its own, so it is
+a C# delegate of its own, and `%T` prints `main.Stringy`. Go converts freely between a defined func type and
+its unnamed signature; C# converts a value of one delegate type to another through golib's
+`NilSafeDelegateConversion`, which keeps a nil value nil. A func literal converts natively, so
+`returnsAFunction` returns its literal as it is ([Every defined func type declares its own delegate](ConversionStrategies-Reference/struct-types.md#every-defined-func-type-declares-its-own-delegate)).
 
 **A func literal used as a value becomes a lambda.** In the same example, `returnsAFunction` returns a
 literal, so the literal becomes the C# lambda `() => { … }`.
@@ -6810,9 +6812,9 @@ func returnsAFunction() Stringy {
 ```
 <!-- source: src/tests/Behavioral/LambdaFunctions/LambdaFunctions.cs.target:7-22 -->
 ```csharp
-// type Stringy is a methodless func type — rendered inline as its base delegate
+public delegate @string Stringy();
 …
-internal static Func<@string> returnsAFunction() {
+internal static Stringy returnsAFunction() {
     return () => {
         fmt.Printf("Inner stringy function\n"u8);
         return "bar";
@@ -9292,7 +9294,7 @@ holds a nil `ж<T>` box rather than a C# `null`.
 <!-- the predicate: src/go2cs/visitStructType.go:1182 `func (v *Visitor) structHasPromotedEmbeds(t types.Type) bool {`,
      which skips :1228 `// A same-package interface embed renders as a plain interface field — no box.` and a
      builtin or unnamed embed; a cross-package embed always counts. The zero-value emission:
-     src/go2cs/visitValueSpec.go:451 `} else if v.structHasPromotedEmbeds(def.Type()) {`. -->
+     src/go2cs/visitValueSpec.go:448 `} else if v.structHasPromotedEmbeds(def.Type()) {`. -->
 
 **A struct is copied by value, as in Go.** A C# struct assignment copies the fields. But golib's
 `array<T>` is a small struct that points at its element storage, so a plain copy would share the
@@ -11326,7 +11328,7 @@ layout rules and writes the number into the C#. The Go expression stays beside i
 ([Struct Types](#struct-types)), and `default!` is its zero value
 ([Nil and Zero Values](#nil-and-zero-values)). The operand is never evaluated, as in Go. The numbers are
 Go's for the target architecture, here amd64.
-<!-- the fold reads go/types' constant (src/go2cs/convCallExpr.go:4072-4093#015084); packages load with the target platform's GOARCH, src/go2cs/conversionDriver.go:143#c8dfe1, and the emitted layout uses the same sizes, src/go2cs/zeroSizeFieldLayout.go:70-83#03aa04 (types.SizesFor("gc", arch), amd64 by default). UnsafeOperations' golden is converted for amd64. -->
+<!-- the fold reads go/types' constant (src/go2cs/convCallExpr.go:4094-4115#015084); packages load with the target platform's GOARCH, src/go2cs/conversionDriver.go:143#c8dfe1, and the emitted layout uses the same sizes, src/go2cs/zeroSizeFieldLayout.go:70-83#03aa04 (types.SizesFor("gc", arch), amd64 by default). UnsafeOperations' golden is converted for amd64. -->
 
 `Alignof` and `Offsetof` fold the same way: `unsafe.Offsetof(x.c)` becomes
 `/* unsafe.Offsetof(x.c) */ (uintptr)16`.
@@ -12150,8 +12152,8 @@ targets are themselves assembly. So it forwards only to targets on a list, kept 
 functions known to have one. Any other pull keeps the throwing stub described at the end of this section.
 A target on the list can be converted Go, as here, or hand-written C#: `testing/cryptotest` pulls
 `testing.checkParallel`, which the hand-written `testing` package provides, and its forwarder calls that.
-<!-- linknameForwardTargets: src/go2cs/visitFuncDecl.go:2533 (`"time.registerLoadFromEmbeddedTZData": true`),
-     :2541 (`"testing.checkParallel": true`); the forwarder src/core/testing/cryptotest/rand.cs:27-30
+<!-- linknameForwardTargets: src/go2cs/visitFuncDecl.go:2530 (`"time.registerLoadFromEmbeddedTZData": true`),
+     :2538 (`"testing.checkParallel": true`); the forwarder src/core/testing/cryptotest/rand.cs:27-30
      (`testing.checkParallel(t);`); the hand-owned target src/core/testing/testing.cs:1015
      (`public static void checkParallel(ж<T> t)`). -->
 
@@ -12766,26 +12768,8 @@ internal static UntypedInt gamesPerSeries => 10;
 
 The header lands above the `namespace` line. The `using` lines for the imports follow it, then `partial class main_package`, the class that holds the package's members ([Package Conversion](#package-conversion)). `ꓸꓸꓸnint` names the type of a variadic `...int` parameter used later in the file ([Slices and Arrays](#slices-and-arrays)). `UntypedInt` is the type golib, the go2cs runtime library, uses for an untyped Go constant ([Constant Values](#constant-values)).
 
-**The converter's own notes always appear.** They are written with or without `-comments`, because they explain the C# rather than repeat the Go. In the same program, a named func type `action` gets no C# declaration of its own, and a converter note takes its place:
-
-<!-- source: src/tests/Behavioral/FirstClassFunctions/FirstClassFunctions.go:23-44 -->
-```go
-// An action transitions stochastically to a resulting score.
-type action func(current score) (result score, turnIsOver bool)
-…
-// A strategy chooses an action for any given score.
-type strategy func(score) action
-```
-<!-- source: src/tests/Behavioral/FirstClassFunctions/FirstClassFunctions.cs.target:21-35 -->
-```csharp
-// type action is a methodless func type — rendered inline as its base delegate
-…
-internal delegate Func<score, (score, bool)> strategy(score _);
-```
-
-The note means that each use of `action` is written as the C# delegate type of the same shape, `Func<score, (score, bool)>`. You can see it as the result type of `strategy`. `strategy` keeps a `delegate` declaration because its signature names another func type ([Function Values and Closures](#function-values-and-closures)). Go's doc comments on both types are dropped, because this program is converted without `-comments`. A methodless func type declared inside a function body gets the same note, on its own line where Go declares the type, and Go's blank lines before and after the declaration are kept as they are between statements.
-
-Another common note, `// Hoisted @string literals (single allocation; Go keeps these in RODATA)`, heads a group of [hoisted string literals](#strings-string-and-sstring). A hoisted literal is a string literal stored once in a `static readonly` field, whose generated name ends in `ˢ`. The standard library hoists every literal used as a value, and `-hoist-literals` does the same for any package. Elsewhere a literal in a `string` slot is a plain C# literal, as in `joinPair`, and so is one in an `any` slot, where go2cs-gen's `LiteralInterceptorGenerator` passes a boxed Go string in its place ([Source Generators](#source-generators)). Only an `any` slot that generator cannot reach keeps a hoisted, pre-boxed field. Here is `joinPair`:
+**The converter's own notes always appear.** They are written with or without `-comments`, because they explain the C# rather than repeat the Go. <!-- Before 2026-11-23 this paragraph's first example was the note a defined func type with no methods left in place of its declaration (`// type action is a methodless func type — rendered inline as its base delegate`, FirstClassFunctions); every defined func type now declares a delegate, so that note is gone. -->
+One such note, `// Hoisted @string literals (single allocation; Go keeps these in RODATA)`, heads a group of [hoisted string literals](#strings-string-and-sstring). A hoisted literal is a string literal stored once in a `static readonly` field, whose generated name ends in `ˢ`. The standard library hoists every literal used as a value, and `-hoist-literals` does the same for any package. Elsewhere a literal in a `string` slot is a plain C# literal, as in `joinPair`, and so is one in an `any` slot, where go2cs-gen's `LiteralInterceptorGenerator` passes a boxed Go string in its place ([Source Generators](#source-generators)). Only an `any` slot that generator cannot reach keeps a hoisted, pre-boxed field. Here is `joinPair`:
 
 <!-- source: src/tests/Behavioral/FirstClassFunctions/FirstClassFunctions.go:189-194 -->
 ```go

@@ -4,17 +4,17 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-// type Stringy is a methodless func type — rendered inline as its base delegate
+public delegate @string Stringy();
 
 internal static @string foo() {
     return "Stringy function";
 }
 
-internal static void takesAFunction(Func<@string> foo) {
+internal static void takesAFunction(Stringy foo) {
     fmt.Printf("takesAFunction \u0049: %v\n"u8, foo());
 }
 
-internal static Func<@string> returnsAFunction() {
+internal static Stringy returnsAFunction() {
     return () => {
         fmt.Printf("Inner stringy function\n"u8);
         return "bar";
@@ -43,10 +43,10 @@ internal static void main() {
     }
     fmt.Println(probe(8, default), probe(3, default));
 
-    takesAFunction(new Func<@string>(foo));
-    Func<@string> f = returnsAFunction();
+    takesAFunction(new Stringy(foo));
+    Stringy f = returnsAFunction();
     f();
-    Func<@string> baz = () => "anonymous stringy\n";
+    Stringy baz = () => "anonymous stringy\n";
     fmt.Print(baz());
     fmt.Println(cached(), cached());
     loader = (slice<byte>, error) (@string name) => (slice<byte>(name), default);

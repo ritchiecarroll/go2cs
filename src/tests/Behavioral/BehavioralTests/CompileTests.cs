@@ -568,6 +568,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckDefinedForeignStructConvert() => CheckTarget("DefinedForeignStructConvert");
 
     [TestMethod]
+    public void CheckDefinedFuncTypeIdentity() => CheckTarget("DefinedFuncTypeIdentity");
+
+    [TestMethod]
     public void CheckDefinedOverNamedComposite() => CheckTarget("DefinedOverNamedComposite");
 
     [TestMethod]

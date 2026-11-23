@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using ꓸꓸꓸOption = Span<main_package.Option>;
 
 partial class main_package {
 
@@ -8,15 +9,15 @@ public partial struct options {
     internal nint level;
 }
 
-// type Option is a methodless func type — rendered inline as its base delegate
+public delegate void Option(ж<options> _);
 
-internal static Action<ж<options>> withLevel(nint n) {
+internal static Option withLevel(nint n) {
     return (ж<options> o) => {
         o.level = n;
     };
 }
 
-internal static nint apply(params Span<Action<ж<options>>> optsʗp) {
+internal static nint apply(params ꓸꓸꓸOption optsʗp) {
     var opts = optsʗp.sslice();
 
     var o = Ꮡ(new options());

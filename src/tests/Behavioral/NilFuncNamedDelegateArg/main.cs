@@ -9,7 +9,7 @@ partial struct Message {
     internal @string text;
 }
 
-// type ErrorReporter is a methodless func type — rendered inline as its base delegate
+public delegate void ErrorReporter(ж<Message> m, params ꓸꓸꓸany argsʗp);
 
 public delegate @string Handler(nint n);
 
@@ -34,7 +34,7 @@ internal static void reportError(this ref relater r, ж<Message> Ꮡm, params �
     fmt.Println("report", m.text, len(args));
 }
 
-internal static void check(@string label, Actionꓸꓸꓸ<ж<Message>, any> report) {
+internal static void check(@string label, ErrorReporter report) {
     if (report == nil) {
         fmt.Println(label, "nil reporter");
         return;
@@ -61,7 +61,7 @@ internal static void plain(@string label, Func<nint, @string> f) {
 internal static @string @double(nint n) { return fmt.Sprint(n * 2); }
 
 partial struct holder {
-    internal Actionꓸꓸꓸ<ж<Message>, any> report;
+    internal ErrorReporter report;
     internal Handler h;
     internal Func<nint, @string> f;
 }
@@ -73,16 +73,16 @@ internal static void describe(this holder x, @string label) {
 internal static void main() {
     var r = Ꮡ(new relater());
 
-    check("ifelse-nil", IfElse<Actionꓸꓸꓸ<ж<Message>, any>>(false, r.reportError, (Actionꓸꓸꓸ<ж<Message>, any>)(default)));
-    check("ifelse-set", IfElse<Actionꓸꓸꓸ<ж<Message>, any>>(true, r.reportError, (Actionꓸꓸꓸ<ж<Message>, any>)(default)));
-    check("method", new Actionꓸꓸꓸ<ж<Message>, any>(r.reportError));
+    check("ifelse-nil", NilSafeDelegateConversion<ErrorReporter, Actionꓸꓸꓸ<ж<Message>, any>>(IfElse<Actionꓸꓸꓸ<ж<Message>, any>>(false, r.reportError, (Actionꓸꓸꓸ<ж<Message>, any>)(default))));
+    check("ifelse-set", NilSafeDelegateConversion<ErrorReporter, Actionꓸꓸꓸ<ж<Message>, any>>(IfElse<Actionꓸꓸꓸ<ж<Message>, any>>(true, r.reportError, (Actionꓸꓸꓸ<ж<Message>, any>)(default))));
+    check("method", new ErrorReporter(r.reportError));
     check("literal", (ж<Message> m, params ꓸꓸꓸany argsʗp) => {
         var args = argsʗp.sslice();
         fmt.Println("literal", m.text, len(args));
     });
     Actionꓸꓸꓸ<ж<Message>, any> unnamed = default;
-    check("unnamed-nil", unnamed);
-    Actionꓸꓸꓸ<ж<Message>, any> named = default;
+    check("unnamed-nil", NilSafeDelegateConversion<ErrorReporter, Actionꓸꓸꓸ<ж<Message>, any>>(unnamed));
+    ErrorReporter named = default;
     check("named-nil", named);
 
     Func<nint, @string> g = default;
@@ -97,8 +97,8 @@ internal static void main() {
     plain("plain-set", NilSafeDelegateConversion<Func<nint, @string>, Handler>(new Handler(@double)));
 
     Func<nint, @string> nilFunc = default;
-    new holder(report: IfElse<Actionꓸꓸꓸ<ж<Message>, any>>(false, r.reportError, (Actionꓸꓸꓸ<ж<Message>, any>)(default)), h: NilSafeDelegateConversion<Handler, Func<nint, @string>>(nilFunc), f: NilSafeDelegateConversion<Func<nint, @string>, Handler>(nilHandler)).describe("fields-nil");
-    new holder(report: IfElse<Actionꓸꓸꓸ<ж<Message>, any>>(true, r.reportError, (Actionꓸꓸꓸ<ж<Message>, any>)(default)), h: new Handler(@double), f: NilSafeDelegateConversion<Func<nint, @string>, Handler>(new Handler(@double))).describe("fields-set");
+    new holder(report: NilSafeDelegateConversion<ErrorReporter, Actionꓸꓸꓸ<ж<Message>, any>>(IfElse<Actionꓸꓸꓸ<ж<Message>, any>>(false, r.reportError, (Actionꓸꓸꓸ<ж<Message>, any>)(default))), h: NilSafeDelegateConversion<Handler, Func<nint, @string>>(nilFunc), f: NilSafeDelegateConversion<Func<nint, @string>, Handler>(nilHandler)).describe("fields-nil");
+    new holder(report: NilSafeDelegateConversion<ErrorReporter, Actionꓸꓸꓸ<ж<Message>, any>>(IfElse<Actionꓸꓸꓸ<ж<Message>, any>>(true, r.reportError, (Actionꓸꓸꓸ<ж<Message>, any>)(default))), h: new Handler(@double), f: NilSafeDelegateConversion<Func<nint, @string>, Handler>(new Handler(@double))).describe("fields-set");
 
     fmt.Println("reports", r.count);
 }

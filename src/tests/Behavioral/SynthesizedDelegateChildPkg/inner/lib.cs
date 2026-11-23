@@ -7,6 +7,6 @@ partial struct Record {
     public nint Hits;
 }
 
-// type Loader is a methodless func type — rendered inline as its base delegate
+public delegate (ж<Record>, error) Loader(map<@string, ж<Record>> cache, @string name, Func<@string, (@string, error)> lookup);
 
 } // end inner_package

@@ -22,11 +22,11 @@ internal static nint invoke(this runner r, ж<atomic.Int32> v) {
     return r.gen(v);
 }
 
-// type loadFunc is a methodless func type — rendered inline as its base delegate
+internal delegate int32 loadFunc(ж<int32> _);
 
-// type readFunc is a methodless func type — rendered inline as its base delegate
+internal delegate nint readFunc(ж<atomic.Int32> _);
 
-internal static int32 loadTwice(Func<ж<int32>, int32> f, ж<int32> p) {
+internal static int32 loadTwice(loadFunc f, ж<int32> p) {
     return f(p) + f(p);
 }
 
@@ -57,7 +57,7 @@ internal static void main() {
     ref var raw = ref heap(new int32(), out var Ꮡraw);
     raw = 21;
     var ld = atomic.LoadInt32;
-    fmt.Println(ld(Ꮡraw), loadTwice(ld, Ꮡraw));
+    fmt.Println(ld(Ꮡraw), loadTwice(NilSafeDelegateConversion<loadFunc, Func<ж<int32>, int32>>(ld), Ꮡraw));
 
     var rd = readPlusOne;
     fmt.Println(rd(Ꮡv), apply(Ꮡv, rd));

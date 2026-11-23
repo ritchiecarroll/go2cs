@@ -19,7 +19,7 @@ internal static error nilErr() {
     return default;
 }
 
-// type handler is a methodless func type — rendered inline as its base delegate
+internal delegate nint handler(nint _);
 
 partial struct holder {
     internal error err;
@@ -70,7 +70,7 @@ internal static void main() {
     };
     fmt.Println("assigned func != nil:", fn != nil);
 
-    Func<nint, nint> h = default;
+    handler h = default;
     fmt.Println("nil named func == nil:", h == nil);
     h = (nint x) => x * 2;
     fmt.Println("assigned named func != nil:", nil != h, h(21));
