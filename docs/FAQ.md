@@ -84,9 +84,18 @@ Read about the journey: [How AI is used in this project](AIAssistance.md).
 
 ## Which Go and .NET versions does it use?
 
-Exactly one Go release and one .NET release at a time, both named in the README's
+One Go release and one .NET release at a time, both named in the README's
 [Requirements](README.md#requirements). The Go release it tracks is supported upstream. The
 [Roadmap](Roadmap.md#go-releases) says which Go releases come next and in what order.
+
+The packages target .NET 10 and are validated on it. A newer .NET SDK also builds a converted program, and on a
+machine that has no .NET 10 runtime the program runs on the newer runtime, which the packages are not validated
+on. The README's [Requirements](README.md#requirements) says how to require .NET 10 instead.
+<!-- 2026-11-23 .5 docs pass (P1), UX-12, at master 97cca467a2: the FAQ said "exactly one ... .NET release at a
+     time", which the README's Requirements contradicts since go.lib's buildTransitive targets give an executable
+     RollForward=Major when no .NET 10 runtime is present (src/core/golib/buildTransitive/go.lib.targets:442,
+     `<RollForward>Major</RollForward>`;
+     src/tests/PackageTests/RollForward). Owner's release-readiness item UX-12 (COORD 2026-11-22 083506Z). -->
 
 ## Which platforms are supported?
 
