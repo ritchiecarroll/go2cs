@@ -71,7 +71,8 @@ public sealed partial class TwinGenerator
                     break;
                 }
 
-                if (current.Parent is ForEachStatementSyntax each && current == each.Expression)
+                // Row 7 piece 6: the deconstructing form (two-variable range) alike.
+                if (current.Parent is CommonForEachStatementSyntax each && current == each.Expression)
                 {
                     at = current;
                     break;
@@ -388,7 +389,10 @@ public sealed partial class TwinGenerator
                 return IdentifierName(temp).WithLeadingTrivia(node.GetLeadingTrivia()).WithTrailingTrivia(node.GetTrailingTrivia());
             }
 
-            if (node.Parent is not (ExpressionStatementSyntax or ArrowExpressionClauseSyntax or LambdaExpressionSyntax))
+            // Row 7 piece 6: an await that IS a for statement's iterator stays a statement expression (CS0201 when
+            // parenthesized: go/parser's `for (; p.tok != token.EOF; Ꮡp.next())`); VisitForStatement adds the re-derivations.
+            if (node.Parent is not (ExpressionStatementSyntax or ArrowExpressionClauseSyntax or LambdaExpressionSyntax) &&
+                !(node.Parent is ForStatementSyntax loop && loop.Incrementors.Contains(node)))
                 awaited = ParenthesizedExpression(awaited);
 
             m_awaits++;
@@ -564,11 +568,33 @@ public sealed partial class TwinGenerator
 
                 // Only a read evaluated with the statement's own expression: one in a NESTED statement (a switch case,
                 // an if body: MnMixedStorm's worker) comes after Rule R has derived the ref again.
-                if (name.SpanStart >= node.Span.End && ReferenceEquals(name.Ancestors().OfType<StatementSyntax>().FirstOrDefault(), m_current) &&
+                if (name.SpanStart >= node.Span.End && EvaluatedWith(name.Ancestors().OfType<StatementSyntax>().FirstOrDefault(), name, node) &&
                     IsRefLocal(m_model.GetSymbolInfo(name).Symbol))
                 {
                     return true;
                 }
+            }
+
+            return false;
+        }
+
+        // Whether a read owned by `owner` is evaluated with the awaited call, before any statement derives the refs again:
+        // the statement in hand itself, or (row 7 piece 6, DATA-mn-row7-r5.md) an `else if` of its chain whose CONDITION
+        // holds both the call and the read (archive/zip's checksumReader.Read, go/types' conversion). An else-if is a nested
+        // IfStatement, so the read was not counted and the call was awaited in place: CS9217. Its body and any later
+        // else-if are entered with the refs derived again (Rule H), so only its own condition counts.
+        private bool EvaluatedWith(StatementSyntax? owner, SyntaxNode read, SyntaxNode call)
+        {
+            if (ReferenceEquals(owner, m_current))
+                return true;
+
+            if (owner is not IfStatementSyntax nested || !nested.Condition.Span.Contains(read.Span) || !nested.Condition.Span.Contains(call.Span))
+                return false;
+
+            for (SyntaxNode current = nested; current.Parent is ElseClauseSyntax { Parent: IfStatementSyntax outer }; current = outer)
+            {
+                if (ReferenceEquals(outer, m_current))
+                    return true;
             }
 
             return false;
@@ -1279,12 +1305,49 @@ public sealed partial class TwinGenerator
             VariableDeclarationSyntax? declaration = Head(node.Declaration);
             SeparatedSyntaxList<ExpressionSyntax> initializers = SeparatedList(node.Initializers.Select(item => Head(item)!), node.Initializers.GetSeparators());
             ExpressionSyntax? condition = Head(node.Condition);
-            SeparatedSyntaxList<ExpressionSyntax> incrementors = SeparatedList(node.Incrementors.Select(item => Head(item)!), node.Incrementors.GetSeparators());
+
+            // Row 7 piece 6 (DATA-mn-row7-r5.md): an iterator that awaited is followed, IN the iterator list, by the live
+            // ref locals derived again (`await Ꮡp.nextꞏtwin(), p = ref Ꮡp.DerefOrNull()`), so the condition reads them
+            // fresh. The iterator stays the loop's own, so a `continue` and a labeled `goto continue_x` still run it.
+            List<ExpressionSyntax> stepped = [];
+
+            foreach (ExpressionSyntax item in node.Incrementors)
+            {
+                int before = m_awaits;
+                stepped.Add(Head(item)!);
+
+                if (m_awaits > before)
+                {
+                    foreach (string rederive in m_scopes.SelectMany(scope => scope))
+                        stepped.Add(ParseExpression(rederive.TrimEnd().TrimEnd(';')).WithLeadingTrivia(Space));
+                }
+            }
+
+            SeparatedSyntaxList<ExpressionSyntax> incrementors = stepped.Count == node.Incrementors.Count
+                ? SeparatedList(stepped, node.Incrementors.GetSeparators())
+                : SeparatedList(stepped);
             bool stale = HeaderAwaits > 0;
             StatementSyntax statement = (StatementSyntax)Visit(node.Statement)!;
 
             return node.WithDeclaration(declaration).WithInitializers(initializers).WithCondition(condition).WithIncrementors(incrementors)
                 .WithStatement(stale ? Enter(statement) : statement);
+        }
+
+        // Row 7 piece 6: Go's two-variable range is a DECONSTRUCTING foreach (`foreach (var (k, v) in range(…))`), which
+        // Roslyn parses as ForEachVariableStatementSyntax, not ForEachStatementSyntax. Rule H applies to it alike: a body
+        // entered after its header awaited starts with the live ref locals derived again (net/http's send, internal/diff,
+        // archive/zip and text/template read a stale ref there, CS9217, when the whole standard library was twinned).
+        public override SyntaxNode? VisitForEachVariableStatement(ForEachVariableStatementSyntax node)
+        {
+            if (m_passive > 0)
+                return base.VisitForEachVariableStatement(node);
+
+            HeaderAwaits = 0;
+            ExpressionSyntax expression = Head(node.Expression)!;
+            bool stale = HeaderAwaits > 0;
+            StatementSyntax statement = (StatementSyntax)Visit(node.Statement)!;
+
+            return node.WithExpression(expression).WithStatement(stale ? Enter(statement) : statement);
         }
 
         public override SyntaxNode? VisitForEachStatement(ForEachStatementSyntax node)

@@ -59,7 +59,7 @@ public sealed partial class TwinGenerator
                         return true;
 
                     foreach (StatementSyntax loop in awaited.Ancestors().TakeWhile(ancestor => ancestor != scope).OfType<StatementSyntax>()
-                                 .Where(statement => statement is ForStatementSyntax or ForEachStatementSyntax or WhileStatementSyntax or DoStatementSyntax))
+                                 .Where(statement => statement is ForStatementSyntax or CommonForEachStatementSyntax or WhileStatementSyntax or DoStatementSyntax))
                     {
                         if (uses.Any(use => loop.Span.Contains(use.Span)))
                             return true;
