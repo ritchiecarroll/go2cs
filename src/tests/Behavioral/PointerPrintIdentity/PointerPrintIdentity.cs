@@ -23,6 +23,8 @@ internal static void check(@string name, any p, @unsafe.Pointer up) {
     fmt.Println(name, viaP == viaV, viaP == viaX, viaR);
 }
 
+internal partial struct main_count /*num:nint*/;
+
 internal static void main() {
     ref var i = ref heap<nint>(1, out var Ꮡi);
     @string first = fmt.Sprintf("%p"u8, Ꮡi);
@@ -67,6 +69,11 @@ internal static void main() {
     var (pa1, pa2) = (Ꮡa, Ꮡa);
     fmt.Println("one variable, one %p:", fmt.Sprintf("%p"u8, pa1.OrTypedNil()) == fmt.Sprintf("%p"u8, pa2.OrTypedNil()));
     fmt.Println("two variables, two %p:", fmt.Sprintf("%p"u8, Ꮡa) != fmt.Sprintf("%p"u8, Ꮡb));
+    ref var q = ref heap(new plain(), out var Ꮡq);
+    var fv = reflect.ValueOf(Ꮡq).Elem().Field(1);
+    (@unsafe.Pointer.To<nint>(fv.Addr().UnsafePointer())).Value = 5;
+    (@unsafe.Pointer.To<main_count>(fv.Addr().UnsafePointer())).Value += 2;
+    fmt.Println("convert back, reference-free struct:", q.m, q.n);
 }
 
 } // end main_package

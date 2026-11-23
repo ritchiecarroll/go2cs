@@ -202,3 +202,11 @@ then through the layout-identical `(*count)`. Go prints `convert back, reference
   reads and writes the pinned memory of `q` itself.
 
 **Falsifier.** Any value other than `7 0`, or a panic.
+
+**Score: MET.** The fresh Release build (`bin/Release/net10.0`) prints all 15 lines, ending
+`convert back, reference-free struct: 7 0`, with exit code 0.
+
+**Instrument note.** The first run read 14 lines at exit 0. Its `find bin | head -1` had picked a STALE executable:
+`bin/Release/Go`, left by the 18:48 BehavioralTests run of the 14-line source. The reading above names its path.
+Sections 1 to 6 ran before any BehavioralTests run, so their program had only the one output folder. Section 7's run
+followed that test run, which had built the same source.
