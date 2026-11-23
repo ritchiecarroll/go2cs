@@ -1296,12 +1296,15 @@ public class TwinBoxTests
     }
 
     [TestMethod]
-    public void P28_ANamedPlainCallKeepsItsLaterParkingCallPlain()
+    public void P28_ANamedPlainCallsLaterParkingCallMovesAheadOfItsStackRef()
     {
         (string twins, Diagnostic[] errors) = Run(null, LaterParkingCall);
 
         Assert.AreEqual(0, errors.Length, Errors(errors));
-        StringAssert.Contains(twins, "rwv(ref v, parksN())", "no box for a stack local: the ref stays, so the inner call stays plain (CS8178)");
+        // Row 7's Go-order move (DATA-mn-row7-refblock.md): `ref v` to a stack local (no box) was evaluated before the
+        // parking call, so the call stayed plain (CS8178). Taking v's address is not ordered against a call in Go, so
+        // the call now moves ahead of the statement and parks; the plain rwv takes `ref v` after it.
+        StringAssert.Contains(twins, "var ᴛtwin1 = await parksNꞏtwin(); rwv(ref v, ᴛtwin1);", "the inner call moves ahead and awaits");
     }
 
     [TestMethod]

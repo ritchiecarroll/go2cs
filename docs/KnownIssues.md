@@ -217,6 +217,14 @@ waits inside code built without twins keeps its thread while it waits. The other
 reads are measurement switches, not settings: none is supported, and they may change or go away. The diagnostics
 `GO2CS0014` through `GO2CS0018` ([Diagnostic codes](DiagnosticCodes.md)) come only from a build with twins.
 
+**A plain read and a call in the same expression can see different values with and without twins.** In an expression
+such as `fmt.Println(a, f())`, Go orders only the calls: the read of `a` may come before or after `f()`, and the gc
+compiler reads it after. The converted code reads operands left to right, as C# does, so when `f` changes `a` it prints
+the value `a` had before the call. Built with twins and run with `GO2CS_MN=1`, a call that can wait is sometimes
+evaluated ahead of the plain reads in its expression, as gc evaluates it, and then the program prints the value after
+the call. Both orders are allowed by the Go specification; a program whose output depends on the difference relies on
+unspecified behavior.
+
 ## With go2cs 1.26.10.2 or earlier, a program converted with local standard-library references runs its standard library built Debug
 
 **Symptom.** A program converted by go2cs 1.26.10.2 or earlier with plain `-recurse` or `-recurse=module`

@@ -164,12 +164,14 @@ public class TwinLoopTests
     }
 
     [TestMethod]
-    public void AnElseIfWhoseConditionReadsARefAfterAParkingCallKeepsThatCallPlain()
+    public void AnElseIfWhoseConditionReadsARefAfterAParkingCallAwaitsAndReadsThroughTheBox()
     {
         (string twins, Assembly assembly) = Build();
 
-        StringAssert.Contains(twins, "} else if (ready(false) && p.v == 1) {",
-            "the read of p follows the call in the else-if's own condition: the call stays plain (ref-blocked), as in an if's");
+        // Piece 6 counted the read; row 7's inline re-derivation (DATA-mn-row7-refblock.md) then awaits the call in place
+        // and reads p after it through its box, where before the call stayed plain (ref-blocked).
+        StringAssert.Contains(twins, "} else if ((await readyꞏtwin(false)) && (Ꮡp.DerefOrNull()).v == 1) {",
+            "the call awaits in the else-if's condition; the read of p after it goes through the box");
         Assert.AreEqual(Plain(assembly, "elseIf"), Twin(assembly, "elseIf"));
     }
 
