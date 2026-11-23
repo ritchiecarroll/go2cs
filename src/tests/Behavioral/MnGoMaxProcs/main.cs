@@ -31,7 +31,7 @@ internal static partial nint work(nint n) {
     for (nint i = 0; i < n; i++) {
         Ꮡwg.Add(1);
         var resultsʗ1 = results;
-        goǃ((nint iΔ1) => {
+        goǃ([GoFunc("work.func1")] (nint iΔ1) => {
             GoFrame ᒐ = default;
             try {
                 defer(Ꮡwg.Done, ref ᒐ);
@@ -43,7 +43,7 @@ internal static partial nint work(nint n) {
     }
 
     var resultsʗ2 = results;
-    goǃ(() => {
+    goǃ([GoFunc("work.func2")] () => {
         Ꮡwg.Wait();
         close(resultsʗ2);
     });
