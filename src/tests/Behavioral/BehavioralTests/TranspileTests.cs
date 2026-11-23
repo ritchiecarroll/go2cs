@@ -1501,6 +1501,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckMnGenericContended() => CheckTarget("MnGenericContended");
 
     [TestMethod]
+    public void CheckMnGoMaxProcs() => CheckTarget("MnGoMaxProcs");
+
+    [TestMethod]
     public void CheckMnIfaceTwin() => CheckTarget("MnIfaceTwin");
 
     [TestMethod]

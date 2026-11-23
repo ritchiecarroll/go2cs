@@ -87,8 +87,11 @@ public static class twinms_package
         GoTask Lockꞏtwin() { Lock(); return default; }
     }
 
-    // sync's shape: hand-written, no stamp, [GoRecv], an upper-case name.
+    // sync's train-3 shape: hand-written, no stamp, [GoRecv], an upper-case name.
     [GoRecv] internal static GoTask Lockꞏtwin(this ref Mu m) { m.Lock(); return default; }
+
+    // sync's shape from row 7 (pieces 2+3): public, the receiver's BOX, still no stamp.
+    public static GoTask Lockꞏtwin(this ж<Mu> Ꮡm) { Ꮡm.Value.Lock(); return default; }
 
     [GoRecv] public static void Lock(this ref Mu m) => m.state = 1;
 

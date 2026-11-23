@@ -40,6 +40,12 @@ param(
     # A new or empty working directory.
     [Parameter(Mandatory)][string]$Work,
     [string]$SampleDir,
+    # A LOCAL go.* closure, for a package packed against one (nugetgo-pack -LocalClosure; cgo against go.* INC 4's
+    # cgo-nuget-e2e J3): a folder of go.* packages at -ClosureVersion. Every go.* package restores from that folder alone
+    # and the program builds against -ClosureVersion, as release-smoke's consumer does. Both or neither; without them
+    # the row restores go.* from nuget.org, as always.
+    [string]$ClosureFeed,
+    [string]$ClosureVersion,
     # The host's name when it is not a hosted runner (Get-NugetgoRowHost).
     [string]$HostLabel
 )
@@ -57,6 +63,8 @@ function Invoke-Captured([string]$file, [string[]]$arguments, [string]$dir, [str
 }
 
 $src = Split-Path (Split-Path $PSScriptRoot)
+if ([bool]$ClosureFeed -ne [bool]$ClosureVersion) { throw 'REFUSED: -ClosureFeed and -ClosureVersion are given together or not at all' }
+if ($ClosureFeed -and -not (Test-Path -LiteralPath $ClosureFeed -PathType Container)) { throw "REFUSED: -ClosureFeed '$ClosureFeed' is not a folder" }
 if (-not $SampleDir) { $SampleDir = Join-Path $src "tests/ModuleBehavior/$ModulePath@$GoVersion" }
 
 # ---- this host is the RID's own -------------------------------------------------------------------------------------
@@ -108,16 +116,18 @@ Write-Host "converted: $(Split-Path -Leaf $project) references $id [$PackageVers
 
 # ---- 3. build for this RID, against the package -------------------------------------------------------------------------
 $feedValue = if (Test-Path -LiteralPath $Feed -PathType Container) { [System.IO.Path]::GetFullPath($Feed) } else { $Feed }
+$closureSource = if ($ClosureFeed) { "`n    <add key=`"go-closure`" value=`"$([System.Security.SecurityElement]::Escape([System.IO.Path]::GetFullPath($ClosureFeed)))`" />" } else { '' }
+$closureMapping = if ($ClosureFeed) { "`n    <packageSource key=`"go-closure`"><package pattern=`"go.*`" /></packageSource>" } else { '' }
 [System.IO.File]::WriteAllText((Join-Path (Split-Path $project) 'nuget.config'), @"
 <?xml version="1.0" encoding="utf-8"?>
 <configuration>
   <packageSources>
     <clear />
     <add key="nuget.org" value="https://api.nuget.org/v3/index.json" />
-    <add key="nugetgo" value="$([System.Security.SecurityElement]::Escape($feedValue))" />
+    <add key="nugetgo" value="$([System.Security.SecurityElement]::Escape($feedValue))" />$closureSource
   </packageSources>
   <packageSourceMapping>
-    <packageSource key="nugetgo"><package pattern="nugetgo.*" /></packageSource>
+    <packageSource key="nugetgo"><package pattern="nugetgo.*" /></packageSource>$closureMapping
     <packageSource key="nuget.org"><package pattern="*" /></packageSource>
   </packageSourceMapping>
 </configuration>
@@ -129,9 +139,11 @@ try {
     # The program is not a corpus project: a leg-wide GoTargetOS must not reach its build as a global property.
     Remove-Item Env:GoTargetOS -ErrorAction SilentlyContinue
     $ridArgs = @('-c', 'Release', '-r', $Rid, '--no-self-contained', '-p:UseSharedCompilation=false', '--nologo')
+    $closureArgs = @(if ($ClosureVersion) { "-p:GoStdLibVersion=$ClosureVersion" })
+    $ridArgs += $closureArgs
     & dotnet build $project @ridArgs -v q *> (Join-Path $Work 'build.log')
     if ($LASTEXITCODE -ne 0) { Refuse "dotnet build -r $Rid exited $LASTEXITCODE (see $Work/build.log)" }
-    $targetPath = (& dotnet msbuild $project -getProperty:TargetPath -p:Configuration=Release -p:RuntimeIdentifier=$Rid -p:SelfContained=false | Out-String).Trim()
+    $targetPath = (& dotnet msbuild $project -getProperty:TargetPath -p:Configuration=Release -p:RuntimeIdentifier=$Rid -p:SelfContained=false @closureArgs | Out-String).Trim()
     if (-not (Test-Path -LiteralPath $targetPath -PathType Leaf)) { Refuse "the build left no program at '$targetPath'" }
 
     # ---- 4. dotnet run ------------------------------------------------------------------------------------------------

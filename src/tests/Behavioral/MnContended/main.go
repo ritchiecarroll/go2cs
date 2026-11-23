@@ -1,4 +1,4 @@
-// S2 arm 2 of the M:N spike's owed list (docs/phase4/DATA-mn-spike-2.md 9.5 and 8.6): contended paths with
+// S2 arm 2 of the M:N scheduler's owed list (docs/phase4/DATA-mn-spike-2.md 9.5 and 8.6): contended paths with
 // every P busy. Three phases run one after another, each with more goroutines than Ps, and every goroutine's
 // work ends, so no phase depends on preemption (S2 arm 1, MnSpinCap, measures that):
 //

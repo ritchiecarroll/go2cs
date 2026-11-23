@@ -461,10 +461,9 @@ partial class runtime_package
         {
             Volatile.Write(ref s_gomaxprocs, n);
 
-            // procresize's time bookkeeping, verbatim (proc.go): sched.totaltime integrates
-            // gomaxprocs over time, and cpuStats.accumulate reads it and the gomaxprocs global to
-            // compute /cpu/classes/total. There are no Ps to resize, so this is all of procresize
-            // the managed host has.
+            // procresize's time bookkeeping, verbatim (proc.go): sched.totaltime integrates gomaxprocs over time, and
+            // cpuStats.accumulate reads it and the gomaxprocs global to compute /cpu/classes/total. The resize itself is
+            // the M:N scheduler's P count, below (GoScheduler.SetProcs; a remembered value with the scheduler off).
             int64 now = nanotime();
             if (sched.procresizetime != 0)
                 sched.totaltime += (int64)gomaxprocs * (now - sched.procresizetime);
@@ -473,6 +472,7 @@ partial class runtime_package
         }
 
         sched.customGOMAXPROCS = custom;
+        GoScheduler.SetProcs((int)n);
     }
 
     // THE AUTOMATIC UPDATE (W-gmp-e). Go's sysmon, at most once a second, recomputes defaultGOMAXPROCS
@@ -589,8 +589,7 @@ partial class runtime_package
         gomaxprocsUpdateEnable();
     }
 
-    // schedinit's starting value, verbatim: the GOMAXPROCS environment variable when it parses as a
-    // positive number, which marks the setting custom, and Go's default for NumCPU otherwise.
+    // schedinit's starting value, verbatim: GOMAXPROCS when a positive number (custom), else Go's default for NumCPU.
     private static void initialGOMAXPROCS()
     {
         int32 procs;
@@ -612,6 +611,7 @@ partial class runtime_package
             Volatile.Write(ref s_gomaxprocs, procs);
             gomaxprocs = procs;
         }
+        GoScheduler.SetProcs(procs); // the M:N scheduler's P count starts from it, as Go's Ps do
     }
 
     // TEST SEAM (goenvs_impl.cs's pattern): the starting value over a given environment, as a process started
@@ -2454,7 +2454,7 @@ partial class runtime_package
                     recorded = siblingSuffix;
                 }
 
-                // M:N PROTOTYPE (A2). A literal written in a twin is the literal of the function the twin was
+                // M:N (A2). A literal written in a twin is the literal of the function the twin was
                 // generated from: Go has one function there.
                 if (outer.EndsWith(TwinSuffix, StringComparison.Ordinal))
                     outer = outer[..^TwinSuffix.Length];
@@ -4337,7 +4337,7 @@ partial class runtime_package
                     Line = line;
                 }
 
-                // M:N PROTOTYPE (A2). A twin's frame is named, and started, as the function it was generated from.
+                // M:N (A2). A twin's frame is named, and started, as the function it was generated from.
                 string function = goTwinFrameName(Method, ILOffset, out string symbol);
                 Function = function;
                 SymbolName = symbol == function ? null : symbol;
@@ -4537,7 +4537,7 @@ partial class runtime_package
         // carries a creator; a host method standing in for Go's own root (the test host's tRunner)
         // carries GoStackRoot. The main goroutine's runtime.main root is not modeled, and a thread a
         // host entered without a root gets none: nothing on it stands where a Go frame is.
-        // M:N PROTOTYPE (A2). THE CALLERS A PARK TOOK OFF THE STACK. A twin that parked is resumed alone:
+        // M:N (A2). THE CALLERS A PARK TOOK OFF THE STACK. A twin that parked is resumed alone:
         // its awaiting callers are suspended state machines, reached through the parent link, and each is a
         // frame at the call it awaits. Nothing is resumed on a goroutine that never parked, and on a thread
         // that is not a carrier, so the walk above is the whole answer there.
@@ -4982,7 +4982,7 @@ partial class runtime_package
         if (!keepWrapper && method.IsDefined(typeof(GoWrapperAttribute), inherit: false))
             return false;
 
-        // M:N PROTOTYPE (A2). A twin is two methods to the CLR: the stub that starts its state machine and
+        // M:N (A2). A twin is two methods to the CLR: the stub that starts its state machine and
         // the state machine's MoveNext, which holds the body. Go has one function there, so the stub is no
         // frame; MoveNext is the frame (goTwinFrameName). The stub of a literal written in a twin
         // (`<outerꞏtwin>b__X`) is the same case; a literal there that is not async is one method and stays.
@@ -7341,7 +7341,7 @@ partial class runtime_package
     // InternalsVisibleTo grant): the hash Go gives an interface value, as export_test.go's EfaceHash does.
     public static uintptr GoEfaceHashProbe(any i, uintptr seed) => efaceHash(i, seed);
 
-    // M:N spike: a hidden async twin runs as its state machine's MoveNext, on a compiler-generated nested
+    // M:N: a hidden async twin runs as its state machine's MoveNext, on a compiler-generated nested
     // type named `<childꞏtwin>d__N`. A frame there is named for the function the twin was generated from. The
     // state machine's IL offsets say nothing about that function, so the offset is dropped.
     private static string goTwinFrameName(System.Reflection.MethodBase method, int ilOffset, out string symbol) =>
@@ -7387,7 +7387,7 @@ partial class runtime_package
         return null;
     }
 
-    // M:N PROTOTYPE (A2). A function literal written in a twin and started as a goroutine is an async lambda:
+    // M:N (A2). A function literal written in a twin and started as a goroutine is an async lambda:
     // a stub named `<outerꞏtwin>b__X` and a state machine `<<outerꞏtwin>b__X>d` whose MoveNext holds the
     // literal's body. That MoveNext is the literal's frame, so it answers to the stub's name: the name a
     // literal's frame is read from (goFrameName). Null for any other method. The positions stay MoveNext's
@@ -7403,7 +7403,7 @@ partial class runtime_package
         return machine.IndexOf(TwinSuffix + ">", StringComparison.Ordinal) > 2 ? machine[1..^2] : null;
     }
 
-    // M:N PROTOTYPE (A2), item 7d. A SUSPENDED TWIN AS A FRAME: its MoveNext, at the line of the call it awaits, read
+    // M:N (A2), item 7d. A SUSPENDED TWIN AS A FRAME: its MoveNext, at the line of the call it awaits, read
     // from its [GoTwinOf] stamp at the machine's state (twinStamp). The pc is interned per machine and state, so the same
     // twin met parked at the same await is one pc. A twin whose stamp or state cannot be read is a frame with its name
     // and its first line; nothing here throws.

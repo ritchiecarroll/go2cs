@@ -61,7 +61,7 @@ Check 'the pinned zig version is .github/cgo-toolchain.ps1''s' ($pin -and (Get-N
 
 Write-Host 'statement: what the pack says about its RIDs'
 $statement = Get-NugetgoCgoStatement -PackageId 'nugetgo.example.cgo'
-foreach ($rid in @($cgo.Keys) + @($excluded.Keys) + @('NUGETGOCGO001', '-r ', 'reference assemblies', 'linux-musl', 'A6')) {
+foreach ($rid in @($cgo.Keys) + @($excluded.Keys) + @('NUGETGOCGO001', '-r ', 'reference assemblies', 'linux-musl', 'run-time target check')) {
     Check "the statement names $rid" ($statement.Contains($rid)) $statement
 }
 

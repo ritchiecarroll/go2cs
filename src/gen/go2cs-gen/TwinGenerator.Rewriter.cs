@@ -284,11 +284,16 @@ public sealed partial class TwinGenerator
 
                 if (pairMovable)
                 {
-                    (string test, string twin, string plain) = BuildPairCall(node, shape);
+                    (string test, string twin, string plain, string? read) = BuildPairCall(node, shape);
                     string temp = "ᴛtwin" + ++m_temps;
 
                     m_spilled.Add(node);
                     NoteSite(node);
+
+                    // A field or element callee is read once, ahead of the test (the func-value seat).
+                    if (read is not null)
+                        m_spills.Add(ParseStatement(read));
+
                     m_spills.Add(ParseStatement("var " + temp + " = " + test + " ? await " + twin + " : " + plain + ";"));
                     Spills++;
 
@@ -747,9 +752,12 @@ public sealed partial class TwinGenerator
             if (m_passive == 0 && node.Expression is InvocationExpressionSyntax call && m_run.Sites.TryGetValue(call, out Site? site) &&
                 site is { Active: true, Delegate: true, Go: GoKind.None } && PairShape(call) is { } shape)
             {
-                (string test, string twin, string plain) = BuildPairCall(call, shape);
+                (string test, string twin, string plain, string? read) = BuildPairCall(call, shape);
                 NoteSite(call);
-                return ParseStatement("if (" + test + ") await " + twin + "; else " + plain + ";").WithTriviaFrom(node);
+                string pairIf = "if (" + test + ") await " + twin + "; else " + plain + ";";
+
+                // A field or element callee is read once, into a temp the test and the call share (the func-value seat).
+                return ParseStatement(read is null ? pairIf : "{ " + read + " " + pairIf + " }").WithTriviaFrom(node);
             }
 
             return base.VisitExpressionStatement(node);
@@ -785,7 +793,7 @@ public sealed partial class TwinGenerator
         // Whether a call through a func value takes the pair test, and its twin delegate type; no side effects.
         private (string TwinType, bool Void)? PairShape(InvocationExpressionSyntax node)
         {
-            if (!m_run.Pairs || node.Expression is not IdentifierNameSyntax ||
+            if (!m_run.Pairs || !Run.PairableCallee(node.Expression, m_model) ||
                 m_model.GetTypeInfo(node.Expression).Type is not INamedTypeSymbol { TypeKind: TypeKind.Delegate } type ||
                 Run.TwinDelegateType(type) is not { } twinType || RefLikeBefore(node, out _))
             {
@@ -800,13 +808,27 @@ public sealed partial class TwinGenerator
         // parameter never reassigned (HOISTED), else at the call -- and the twin, typed by the Go signature's canonical
         // twin delegate, is awaited; anything else is called as before. Null where the shape is not covered: the call
         // stays plain, as today.
-        private (string Test, string Twin, string Plain) BuildPairCall(InvocationExpressionSyntax node, (string TwinType, bool Void) shape)
+        // The func-value seat: a FIELD or ELEMENT callee (t.run, fs[i], m[k]) is read once into a temp first (Read, a
+        // statement the caller places ahead of the test), so the test and the call see one value and an index expression
+        // runs once, in its own order before the arguments, as C# evaluates a delegate call's target first.
+        private (string Test, string Twin, string Plain, string? Read) BuildPairCall(InvocationExpressionSyntax node, (string TwinType, bool Void) shape)
         {
-            IdentifierNameSyntax callee = (IdentifierNameSyntax)node.Expression;
             string twinType = shape.TwinType;
-            string name = callee.Identifier.Text;
+            string? read = null;
+            string name;
+
+            if (node.Expression is IdentifierNameSyntax identifier)
+            {
+                name = identifier.Identifier.Text;
+            }
+            else
+            {
+                name = "ᴛfv" + ++m_temps;
+                read = "var " + name + " = " + ((ExpressionSyntax)Visit(node.Expression)!).WithoutTrivia().ToFullString() + ";";
+            }
+
             string arguments = ((ArgumentListSyntax)Visit(node.ArgumentList)!).WithoutTrivia().ToFullString();
-            bool hoisted = m_blockBody && m_model.GetSymbolInfo(callee).Symbol is IParameterSymbol parameter &&
+            bool hoisted = read is null && m_blockBody && m_model.GetSymbolInfo(node.Expression).Symbol is IParameterSymbol parameter &&
                            SymbolEqualityComparer.Default.Equals(parameter.ContainingSymbol, m_method) && !m_aliases.Assigned(name);
 
             string pairName;
@@ -831,7 +853,7 @@ public sealed partial class TwinGenerator
             Awaits++;
             m_run.PairTests++;
 
-            return (test, "((" + twinType + ")" + pairName + ".Twin)" + arguments, name + arguments);
+            return (test, "((" + twinType + ")" + pairName + ".Twin)" + arguments, name + arguments, read);
         }
 
         // N3's D3 core, the PAIR: a literal in this twin body whose body can park -- awaits from pair tests do not count,
@@ -948,6 +970,65 @@ public sealed partial class TwinGenerator
                 return null;
             }
 
+            return StaticPair(argument, node, method, type, twinType);
+        }
+
+        public override SyntaxNode? VisitIdentifierName(IdentifierNameSyntax node) =>
+            PairImplicitGroup(node) ?? base.VisitIdentifierName(node);
+
+        public override SyntaxNode? VisitMemberAccessExpression(MemberAccessExpressionSyntax node) =>
+            PairImplicitGroup(node) ?? base.VisitMemberAccessExpression(node);
+
+        // The func-value seat: a method group the converter hands to a delegate-typed slot WITHOUT `new D(F)` (a struct
+        // literal's field, `new("receive", rowReceive)`; a slice literal's element, `[rowReceive, rowWait]`; an argument)
+        // is the same func value as fix 5's `new D(F)`, so it becomes the same pair. Without it, P5's table-driven main
+        // was twinned by the caller rule and still held its carrier: the stored delegates were plain, so the pair test
+        // found none and called them plain (MnTableMain: steps=1 parks=0 thread-blocks=2).
+        private ExpressionSyntax? PairImplicitGroup(ExpressionSyntax node)
+        {
+            // A call's own target, the name half of a member access (the whole access is visited instead), and nameof are
+            // not implicit conversions to pair here.
+            if (!m_run.Pairs || m_passive > 0 || node.SyntaxTree != m_model.SyntaxTree ||
+                node.Parent is InvocationExpressionSyntax invocation && invocation.Expression == node ||
+                node.Parent is MemberAccessExpressionSyntax access && access.Name == node ||
+                node.Parent is ArgumentSyntax { Parent: ArgumentListSyntax { Parent: InvocationExpressionSyntax { Expression: IdentifierNameSyntax { Identifier.ValueText: "nameof" } } } })
+            {
+                return null;
+            }
+
+            if (m_model.GetSymbolInfo(node).Symbol is not IMethodSymbol { IsStatic: true, MethodKind: MethodKind.Ordinary, ReducedFrom: null, IsGenericMethod: false } method ||
+                m_model.GetTypeInfo(node).ConvertedType is not INamedTypeSymbol { TypeKind: TypeKind.Delegate } type ||
+                Run.TwinDelegateType(type) is not { } twinType ||
+                !m_run.CanPark(Run.Normalize(method)))
+            {
+                return null;
+            }
+
+            // Fix 5's own `new D(F)` (the creation IS the delegate: PairGroup's) is not paired twice. Any other one-argument
+            // creation is a struct literal (Go `job{run: work}` -> `new job(work)`), whose argument is an implicit group like
+            // any other: decided by the creation's type, as the literal path decides it, never by the argument count.
+            if (node.Parent is ArgumentSyntax { Parent: ArgumentListSyntax { Arguments.Count: 1, Parent: ObjectCreationExpressionSyntax creation } } &&
+                SymbolEqualityComparer.Default.Equals(m_model.GetTypeInfo(creation).Type, type))
+            {
+                return null;
+            }
+
+            // A func value handed to a golib builtin (`goǃ(F, …)`, a defer) is that builtin's own twin machinery's to
+            // place; the pair is for a value the program stores and calls itself.
+            if (node.Parent is ArgumentSyntax { Parent: ArgumentListSyntax { Parent: InvocationExpressionSyntax call } } &&
+                m_model.GetSymbolInfo(call).Symbol is IMethodSymbol { ContainingType: { Name: "builtin", ContainingNamespace.Name: "go" } })
+            {
+                return null;
+            }
+
+            return StaticPair(node, node, method, type, twinType);
+        }
+
+        // The pair of static function `method` (named by `argument`) and its twin, as a `type` delegate bound to the pair's
+        // Invoke, in place of `replaced`: fix 5's `new D(F)` and the seat's implicit group alike.
+        private ExpressionSyntax StaticPair(ExpressionSyntax argument, SyntaxNode replaced, IMethodSymbol method, INamedTypeSymbol type, string twinType)
+        {
+            ExpressionSyntax node = (ExpressionSyntax)replaced;
             string plainType = type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
             string group = argument.WithoutTrivia().ToFullString();
             string pair = "new " + plainType + "(new " + m_run.PairClass(type, twinType) + "(" + group + ", " + Rename(argument.WithoutTrivia()).ToFullString() + ").Invoke)";

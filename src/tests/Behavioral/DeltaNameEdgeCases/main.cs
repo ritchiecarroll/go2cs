@@ -7,7 +7,6 @@ using strings = strings_package;
 using Δunicode = unicode_package;
 using utf8 = go.unicode.utf8_package;
 using go.unicode;
-using static main_package;
 
 partial class main_package {
 
@@ -109,14 +108,10 @@ internal static (pair<T>, @string) keep<T, TΔTexter>(T v)
 partial struct Q {
 }
 
-} partial class mainᴛQ {
-
-public static partial @string Δ(this Q _Δp0) {
+internal static partial @string Δ⁔(/*this*/ Q _Δp0) {
     var (pc, _, _, _) = runtime.Caller(0);
     return "Q.Δ in "u8 + runtime.FuncForPC(pc).Name();
 }
-
-} partial class main_package {
 
 internal partial interface bareDeltaMethod_type /*dyn*/ {
     @string Δ();

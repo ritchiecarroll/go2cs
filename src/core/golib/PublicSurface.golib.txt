@@ -335,8 +335,8 @@ zero
 ᐧᐧ
 ᐸꟷ
 ꓸꓸꓸ
-# M:N PROTOTYPE ONLY (claude/g-mn-proto-b0, which never lands as it is): the twin entry points the prototype adds
-# to builtin, listed here so the public-surface guard master landed in batch 302 reads them as known.
+# M:N scheduler, experimental and opt-in (GoTwins=true to build, GO2CS_MN=1 to run); inert otherwise: the twin entry
+# points builtin adds for code built with twins, listed here so the public-surface guard reads them as known.
 # Goschedꞏtwin: the Gosched-park seat, COORD's ruling of 2026-11-21 (docs/phase4/inbox/G/20261121T231225Z-COORD.md).
 Goschedꞏtwin
 RunMainꞏtwin
@@ -1238,7 +1238,7 @@ go.ж<T> :: property static go.ж<T> NilBox { get; }
 # code places or names ([GoParkForwarder], the [GoTwinOf] stamp), hidden or not, with one shape line per type, and
 # the named twin entry points (builtin RunMainꞏtwin, goǃtwin, selectꞏtwin, ᐸꟷꞏtwin, Goschedꞏtwin; channel`1 ᐸꟷꞏtwin), each
 # name's whole overload family. A twin-built assembly binds them, so a line never disappears and changes only where
-# its plain member does (src/tools/mnspike2/TwinRefs/FREEZE-SHEET.md, block 7b). Same spelling as [tier1-members];
+# its plain member does (docs/phase4/FREEZE-mn-surface.md, block 7b). Same spelling as [tier1-members];
 # GolibTests writes the lines with GO2CS_PUBLIC_SURFACE_MN_FROZEN=<path>. A change here needs a COORD ruling, cited
 # beside it. ONE section: train 3 met two [mn-frozen] headers (7a's and 7d's), so a repeated header now throws.
 

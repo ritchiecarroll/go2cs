@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-// M:N PROTOTYPE (A4). Prototype code: nothing from this branch lands on master as it is.
+// M:N scheduler, experimental and opt-in (GoTwins=true to build, GO2CS_MN=1 to run); inert otherwise.
 //
 // Every function under test parks on a channel round trip and then returns a value: a scalar, a struct, an
 // array, a tuple, or a value of a type parameter. Under generated twins each result travels through the task

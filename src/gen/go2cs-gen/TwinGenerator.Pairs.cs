@@ -11,10 +11,10 @@ using Microsoft.CodeAnalysis;
 
 namespace go2cs;
 
-// M:N PROTOTYPE, N3's D3 core (docs/phase4/DESIGN-mn-func-values.md sections 4, 9-11): func-value PAIRS. A can-park
+// M:N (experimental), N3's D3 core (docs/phase4/DESIGN-mn-func-values.md sections 4, 9-11): func-value PAIRS. A can-park
 // literal created in a twin body becomes a pair of its plain and twin lambdas, handed out as its own delegate type bound
 // to the pair's Invoke; a call through a func value in an EXISTING twin tests its target for a pair and awaits the
-// twin. Prototype code: nothing from this branch lands on master as it is.
+// twin.
 public sealed partial class TwinGenerator
 {
     internal sealed partial class Run

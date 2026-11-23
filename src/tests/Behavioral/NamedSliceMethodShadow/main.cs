@@ -1,76 +1,67 @@
 namespace go;
 
 using fmt = fmt_package;
-using static main_package;
 
 partial class main_package {
 
 partial struct Stack /*[]nint*/;
 
-} partial class mainᴛStack {
+internal static Stack Slice⁔(/*this*/ Stack s, nint i, nint n) { return s.slice(i, n); }
 
-public static Stack Slice(this Stack s, nint i, nint n) { return s.slice(i, n); }
+internal static @string ToSpan⁔(/*this*/ Stack s) { return fmt.Sprint("span of ", len(s)); }
 
-public static @string ToSpan(this Stack s) { return fmt.Sprint("span of ", len(s)); }
+internal static nint GetEnumerator⁔(/*this*/ Stack s) { return -len(s); }
 
-public static nint GetEnumerator(this Stack s) { return -len(s); }
+internal static nint Append⁔(/*this*/ Stack s, slice<nint> xs) { return len(s) + len(xs); }
 
-public static nint Append(this Stack s, slice<nint> xs) { return len(s) + len(xs); }
+internal static nint Length⁔(/*this*/ Stack s) { return 100 + len(s); }
+internal static nint Capacity⁔(/*this*/ Stack s) { return 200 + cap(s); }
+internal static nint Low⁔(/*this*/ Stack s) { return -1; }
+internal static nint High⁔(/*this*/ Stack s) { return -2; }
+internal static nint Available⁔(/*this*/ Stack s) { return -3; }
+internal static @string IsNil⁔(/*this*/ Stack s) { return "never nil"; }
+internal static @string Source⁔(/*this*/ Stack s) { return "stack source"; }
 
-public static nint Length(this Stack s) { return 100 + len(s); }
-public static nint Capacity(this Stack s) { return 200 + cap(s); }
-public static nint Low(this Stack s) { return -1; }
-public static nint High(this Stack s) { return -2; }
-public static nint Available(this Stack s) { return -3; }
-public static @string IsNil(this Stack s) { return "never nil"; }
-public static @string Source(this Stack s) { return "stack source"; }
-
-public static Stack Make(this Stack s, nint n) { return new Stack(n, n * 2); }
-public static @string Wrap(this Stack s) { return "wrapped"; }
-
-} partial class main_package {
+internal static Stack Make⁔(/*this*/ Stack s, nint n) { return new Stack(n, n * 2); }
+internal static @string Wrap⁔(/*this*/ Stack s) { return "wrapped"; }
 
 partial struct Vec /*[4]nint*/;
 
-} partial class mainᴛVec {
-
-public static slice<nint> Slice(this Vec v, nint i, nint n) {
+internal static slice<nint> Slice⁔(/*this*/ Vec v, nint i, nint n) {
     v = v.Clone();
 
     return v.slice(i, n);
 }
 
-public static @string ToSpan(this Vec v) {
+internal static @string ToSpan⁔(/*this*/ Vec v) {
     v = v.Clone();
 
     return "vec span";
 }
 
-public static @string GetEnumerator(this Vec v) {
+internal static @string GetEnumerator⁔(/*this*/ Vec v) {
     v = v.Clone();
 
     return "vec enumerator";
 }
 
-public static nint Length(this Vec v) {
+internal static nint Length⁔(/*this*/ Vec v) {
     v = v.Clone();
 
     return 40;
 }
 
-public static @string Source(this Vec v) {
+internal static @string Source⁔(/*this*/ Vec v) {
     v = v.Clone();
 
     return "vec source";
 }
 
-public static nint Make(this Vec v) {
+internal static nint Make⁔(/*this*/ Vec v) {
     v = v.Clone();
 
     return 4;
 }
-
-} partial class main_package {
 
 partial struct V /*Vec*/;
 

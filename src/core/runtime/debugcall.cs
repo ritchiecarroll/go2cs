@@ -265,7 +265,7 @@ internal static void debugCallWrap2(uintptr dispatch) {
         // Call the dispatch function and trap panics.
         ref var dispatchF = ref heap<Action>(out var ᏑdispatchF);
         ref var dispatchFV = ref heap<funcval>(new funcval(dispatch), out var ᏑdispatchFV);
-        (Ꮡ(@unsafe.Pointer.OfFunc(dispatchF))).Value = noescape(@unsafe.Pointer.FromPinnedBox(ᏑdispatchFV));
+        dispatchF = @unsafe.Pointer.FuncOfWord<Action>(noescape(@unsafe.Pointer.FromPinnedBox(ᏑdispatchFV)));
 
         bool ok = default;
         defer([GoFunc("debugCallWrap2.func1")] () => {

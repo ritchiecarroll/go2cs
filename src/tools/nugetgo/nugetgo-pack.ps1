@@ -94,8 +94,16 @@
     flavor's REFERENCE assemblies, never an implementation another RID could fall back to; build/<id>.targets fails a
     consumer build for a RID the package does not carry with NUGETGOCGO001, reading the set from the package's own
     runtimes/ folders. VALIDATION.md and the self-description state both. The read-back adds R7: each RID's assembly has
-    exactly the public surface of lib/'s reference assembly (ApiCompat, strict). No -Cgo pack is pushed to any feed
-    until the run-time RID check (A6) lands: src/_nugetpush.ps1 refuses one.
+    exactly the public surface of lib/'s reference assembly (ApiCompat, strict). A -Cgo pack is pushed only when the
+    go.lib it was packed against carries the run-time target check, which its self-description records ("a6: ");
+    src/_nugetpush.ps1 refuses any other.
+
+    LocalClosure (-LocalClosure <folder>; cgo against go.* INC 4, COORD's ruling (1), 2026-11-22): a -Cgo REHEARSAL packed
+    against go.* packages built from the tree, in a local folder feed, before any published go.lib carries A6. It is
+    accepted only with -RehearsalSuffix and -Cgo, never with -Release. Every go.* package restores from that folder alone
+    (package source mapping), the published-closure check is replaced by one that each restored go.* package is
+    -ClosureVersion and byte-equal to the folder's, and the self-description records "local-closure: ", which
+    src/_nugetpush.ps1 refuses: the package is never pushed.
 
     The restore is isolated: a nuget.config with <clear/> and only -Feed as a source, and a private NUGET_PACKAGES.
     The user's global packages folder is censused for nugetgo.* and go.* before and after, and the run fails if it
@@ -142,6 +150,8 @@ param(
     [string]$Zig,
     [string]$RehearsalSuffix,
     [switch]$Release,
+    # A local go.* closure, a folder feed built from the tree (see LocalClosure above).
+    [string]$LocalClosure,
     [string[]]$ExistingIds = @(),
     [string[]]$ThirdPartyPackage = @(),
     # Library packages of the module left out of the pack, by import path (a package holding the module's own test fixtures).
@@ -176,6 +186,14 @@ Add-Type -AssemblyName System.IO.Compression, System.IO.Compression.FileSystem
 function Refuse([string]$why) { throw "REFUSED: $why" }
 
 # ---- identity ----------------------------------------------------------------------------------------------------
+# -LocalClosure first, so each of its refusals names it.
+if ($LocalClosure) {
+    if ($Release) { Refuse '-LocalClosure is never a -Release: a pack against a local go.* closure is a rehearsal, never pushed' }
+    if (-not $RehearsalSuffix) { Refuse '-LocalClosure needs -RehearsalSuffix: a pack against a local go.* closure is a rehearsal' }
+    if (-not $Cgo) { Refuse '-LocalClosure is for a -Cgo pack only: a module without cgo packs against the published go.* release' }
+    if (-not (Test-Path -LiteralPath $LocalClosure -PathType Container)) { Refuse "-LocalClosure '$LocalClosure' is not a folder" }
+    $LocalClosure = [System.IO.Path]::GetFullPath($LocalClosure)
+}
 if (-not $Release -and -not $RehearsalSuffix) { Refuse 'a pack is a rehearsal (-RehearsalSuffix) unless -Release says otherwise: a real version is never minted for rehearsal content' }
 if ($Release -and $RehearsalSuffix) { Refuse '-Release and -RehearsalSuffix are exclusive' }
 if ($RehearsalSuffix -and $RehearsalSuffix -notmatch '^[0-9a-z-]+(\.[0-9a-z-]+)*$') { Refuse "-RehearsalSuffix '$RehearsalSuffix' is not a lowercase NuGet prerelease label" }
@@ -197,6 +215,13 @@ $stdlibRange = "[$ClosureVersion, $goMajor.$($goMinor + 1))"
 $moduleSrc = Join-Path (Join-Path $RecurseRoot 'src') $ModulePath
 if (-not (Test-Path $moduleSrc)) { Refuse "no converted module at $moduleSrc (a -recurse=nuget output root is expected)" }
 $projects = @(Get-ChildItem -Path $moduleSrc -Recurse -Filter '*.csproj' | Where-Object { $_.Name -notlike '*.tests.csproj' } | Sort-Object FullName)
+# No GoPositionMap identity may name a directory of this machine: an absolute source path, or the Go build-cache file the
+# -cgo route recorded for a tree cmd/cgo rewrote until INC 4's increment 1c (COORD's ruling, 2026-11-22). Every
+# package_info.cs is read before anything is built, and every packed assembly again after the pack.
+$identityHits = @(Get-ChildItem -LiteralPath $moduleSrc -Recurse -Filter 'package_info.cs' -File | Sort-Object FullName | ForEach-Object {
+    $file = $_.FullName.Substring($moduleSrc.Length).TrimStart('\', '/')
+    Find-NugetgoPositionMapIdentityHits -Text ([System.IO.File]::ReadAllText($_.FullName)) | ForEach-Object { "$file records $_" } })
+if ($identityHits.Count) { Refuse "a GoPositionMap identity names a machine path -- $($identityHits -join '; ')" }
 $candidates = New-Object System.Collections.Generic.List[object]
 foreach ($p in $projects) {
     [xml]$x = Get-Content -Raw -LiteralPath $p.FullName
@@ -506,15 +531,7 @@ for ($i = 0; $i -lt $libraries.Count; $i++) {
 }
 $flavorProjects[$proofFlavor] = $libraries.ToArray()
 $flavorConfig = Join-Path $flavorDir 'nuget.config'
-[System.IO.File]::WriteAllText($flavorConfig, @"
-<?xml version="1.0" encoding="utf-8"?>
-<configuration>
-  <packageSources>
-    <clear />
-    <add key="nugetgo-closure" value="$([System.Security.SecurityElement]::Escape($Feed))" />
-  </packageSources>
-</configuration>
-"@, (New-Object System.Text.UTF8Encoding($false)))
+[System.IO.File]::WriteAllText($flavorConfig, (Get-NugetgoRestoreConfig -Feed $Feed -LocalClosure $LocalClosure), (New-Object System.Text.UTF8Encoding($false)))
 $flavorAssemblies = @{}
 $flavorRefs = @{}   # -Cgo: each flavor's reference assemblies, by file name; lib/ takes the reference flavor's
 $flavorPdbs = New-Object System.Collections.Generic.List[string]
@@ -608,6 +625,7 @@ $genArgs = @('run', './internal/gensourcemeta', '-src', (Join-Path $RecurseRoot 
 foreach ($p in $packed) { $genArgs += @('-package', "$($p.ImportPath)=$($p.Assembly)") }
 foreach ($r in $requires) { $genArgs += @('-require', "$($r.Module)@$($r.Version)=$($r.NuGetId)") }
 if ($cgoStatement) { $genArgs += @('-note', $cgoStatement, '-note', (Get-NugetgoCgoA6Note -Version $ClosureVersion)) }
+if ($LocalClosure) { $genArgs += @('-note', (Get-NugetgoLocalClosureNote -Version $ClosureVersion)) }
 Push-Location $converterDir
 try { & go @genArgs; if ($LASTEXITCODE -ne 0) { Refuse "gensourcemeta could not write the self-description ($LASTEXITCODE)" } }
 finally { Pop-Location }
@@ -690,15 +708,7 @@ $pageItems
 $packProject = Join-Path $packDir "$($id.Id).csproj"
 [System.IO.File]::WriteAllText($packProject, $csproj, (New-Object System.Text.UTF8Encoding($false)))
 $nugetConfig = Join-Path $packDir 'nuget.config'
-[System.IO.File]::WriteAllText($nugetConfig, @"
-<?xml version="1.0" encoding="utf-8"?>
-<configuration>
-  <packageSources>
-    <clear />
-    <add key="nugetgo-closure" value="$(& $esc $Feed)" />
-  </packageSources>
-</configuration>
-"@, (New-Object System.Text.UTF8Encoding($false)))
+[System.IO.File]::WriteAllText($nugetConfig, (Get-NugetgoRestoreConfig -Feed $Feed -LocalClosure $LocalClosure), (New-Object System.Text.UTF8Encoding($false)))
 
 # ---- pack, isolated, with the global packages folder gated -------------------------------------------------------------
 function Get-GpfPairs { if (-not (Test-Path $Gpf)) { return @() }; Get-ChildItem -Directory $Gpf | Where-Object { $_.Name -like 'go.*' -or $_.Name -like 'nugetgo.*' } | ForEach-Object { $n = $_.Name; Get-ChildItem -Directory $_.FullName | ForEach-Object { "$n/$($_.Name)" } } | Sort-Object }
@@ -725,10 +735,19 @@ try {
     # against, or one nobody can restore.
     & dotnet restore $packProject --configfile $nugetConfig --nologo -v m
     if ($LASTEXITCODE -ne 0) { throw "dotnet restore failed ($LASTEXITCODE)" }
-    $closureReasons = @(Test-NugetgoPublishedClosure -Restored (Get-NugetgoRestoredClosure -PackagesFolder $isolated) -ClosureVersion $ClosureVersion `
-        -PublishedVersions { param($packageId) Get-NugetgoPublishedVersions -Id $packageId })
-    if ($closureReasons.Count) { Refuse "the pack's go.* closure is not the published release ${ClosureVersion}: $($closureReasons -join '; ')" }
-    Write-Host "    closure: every go.* package restored is the published $ClosureVersion"
+    # -LocalClosure: the local folder's packages at -ClosureVersion instead, byte for byte (a rehearsal, never pushed).
+    if ($LocalClosure) {
+        $closureReasons = @(Test-NugetgoLocalClosure -Restored (Get-NugetgoRestoredClosure -PackagesFolder $isolated) -ClosureVersion $ClosureVersion `
+            -PackagesFolder $isolated -LocalClosure $LocalClosure)
+        if ($closureReasons.Count) { Refuse "the pack's go.* closure is not the local closure ${ClosureVersion}: $($closureReasons -join '; ')" }
+        Write-Host "    closure: every go.* package restored is $ClosureVersion from the local closure, byte for byte (a rehearsal, never pushed)"
+    }
+    else {
+        $closureReasons = @(Test-NugetgoPublishedClosure -Restored (Get-NugetgoRestoredClosure -PackagesFolder $isolated) -ClosureVersion $ClosureVersion `
+            -PublishedVersions { param($packageId) Get-NugetgoPublishedVersions -Id $packageId })
+        if ($closureReasons.Count) { Refuse "the pack's go.* closure is not the published release ${ClosureVersion}: $($closureReasons -join '; ')" }
+        Write-Host "    closure: every go.* package restored is the published $ClosureVersion"
+    }
     & dotnet pack $packProject -c Release -o $OutDir --no-restore --nologo -v m
     if ($LASTEXITCODE -ne 0) { throw "dotnet pack failed ($LASTEXITCODE)" }
 }
@@ -762,6 +781,10 @@ try {
         $stream = $entry.Open(); $buffer = New-Object System.IO.MemoryStream
         try { $stream.CopyTo($buffer) } finally { $stream.Dispose() }
         foreach ($root in @(Find-NugetgoHostPaths -Bytes $buffer.ToArray() -Roots $hostRoots)) { $hostPathHits.Add("$($entry.FullName) names $root") }
+        foreach ($marker in @(Find-NugetgoTempMarkers -Bytes $buffer.ToArray())) { $hostPathHits.Add("$($entry.FullName) names the converter's temp $marker") }
+        if ($entry.FullName -like '*.dll') {
+            foreach ($why in @(Find-NugetgoPositionMapIdentityHits -Bytes $buffer.ToArray())) { $identityHits += "$($entry.FullName) records $why" }
+        }
     }
     $nuspecEntry = $zip.Entries | Where-Object { $_.FullName -like '*.nuspec' } | Select-Object -First 1
     $reader = New-Object System.IO.StreamReader($nuspecEntry.Open())
@@ -889,6 +912,10 @@ Write-Host "    host paths: $($hostPathHits.Count) in $($entries.Count) packed e
 if ($hostPathHits.Count) {
     Remove-Item -LiteralPath $nupkg   # a refused package is never left where a push could pick it up
     throw "REFUSED: the package would publish a host path -- $($hostPathHits -join '; ')"
+}
+if ($identityHits.Count) {
+    Remove-Item -LiteralPath $nupkg
+    throw "REFUSED: a packed assembly's GoPositionMap identity names a machine path -- $($identityHits -join '; ')"
 }
 # S2: the self-description is in the package, byte for byte what was written, and the CONVERTER'S OWN parser reads it.
 if (-not $selfEntry) { throw 'the package carries no go2cs/source-metadata.txt' }

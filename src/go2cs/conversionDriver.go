@@ -255,7 +255,7 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 	// than print a bare "Errors:" (issue #33).
 	for _, pkg := range pkgs {
 		if len(pkg.Errors) > 0 {
-			log.Printf("WARNING: %s did not fully type-check; converting best-effort — code depending on the following is emitted untyped: %v", pkg.PkgPath, pkg.Errors)
+			log.Print(remapCopiedPaths(fmt.Sprintf("WARNING: %s did not fully type-check; converting best-effort — code depending on the following is emitted untyped: %v", pkg.PkgPath, pkg.Errors)))
 
 			for _, loadError := range pkg.Errors {
 				reportDiagnostic(loadError.Pos, loadErrorCode(loadError.Kind), loadError.Msg)
@@ -582,7 +582,7 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 				// would record against empty global state rather than record nothing. Whether any
 				// of the four packages loses a [GoImplement] record it previously carried is a
 				// question for the two-seeded diff to answer, not for this comment to assume.
-				options.inputDigest = moduleInputDigest(projectFileName, files, packageOutputPath, options)
+				options.inputDigest = moduleInputDigest(projectFileName, fset, files, packageOutputPath, route.digestHeader(), options)
 
 				if err = writeProjectFile(projectFileName, projectFileContents, packageOutputPath, packageTypes, options); err != nil {
 					log.Fatalf("Error while writing project file \"%s\": %s\n", projectFileName, err)
@@ -851,7 +851,7 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		replayDeferredConstraintRecords()
 
 		// Write project file with correct output type and unsafe code settings
-		options.inputDigest = moduleInputDigest(projectFileName, files, packageOutputPath, options)
+		options.inputDigest = moduleInputDigest(projectFileName, fset, files, packageOutputPath, route.digestHeader(), options)
 		err = writeProjectFile(projectFileName, projectFileContents, packageOutputPath, packageTypes, options)
 
 		if err != nil {

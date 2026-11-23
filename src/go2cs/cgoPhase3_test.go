@@ -334,7 +334,7 @@ func TestCgoNamesCmdCgosOwnBinaryImportsAreRead(t *testing.T) {
 const cgoP3FixtureDir = "testdata/cgo/p3"
 
 // cgoP3GoMemory is in every refusal increment 3.1 makes of a pointer into Go memory: the increment that admits it.
-const cgoP3GoMemory = "increment 3.2"
+const cgoP3GoMemory = "not supported yet, so go2cs refuses the call"
 
 // cgoP3WriteThrough is in the refusal of a typed pointer C would write through (GoCgoArgs.StructPointer, Phase 2's door
 // for every typed pointer parameter): a native box minted over managed storage. Its text names no increment.
