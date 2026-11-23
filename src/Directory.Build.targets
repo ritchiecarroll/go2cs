@@ -56,6 +56,10 @@
     switch above that changes what is generated (all but GoTwins, GoTwinsFor, GoTwinsSiblings and GoTwinsTiming) is refused
     (GO2CS0018) unless GoTwinsArm=true marks the build as a prototype arm. Unset, the interface shape is hidden for every
     member. GoTwinsGuardDrop is the guard's test seam (GO2CS0017): it drops the named functions' forwarders.
+    N1 (M:N, DESIGN-mn-nopark.md): GoTwinsWeak names weak members of THIS assembly, Namespace.Type.Member separated by
+    ';' or ',': each one's twin parks and carries [GoParkWeak], and a call to it never makes its caller a twin.
+    GoTwinsCut names cut sites, Namespace.Type.Caller->Namespace.Type.Callee pairs: that call is never a park. Neither
+    changes the twin set's population, so neither is refused; an entry that does nothing is GO2CS0019.
   -->
   <PropertyGroup Condition="'$(GoAotFor)' != '' and $([System.String]::Copy(';$(GoAotFor);').Contains(';$(MSBuildProjectName);'))">
     <PublishAot>true</PublishAot>
@@ -86,6 +90,8 @@
     <CompilerVisibleProperty Include="GoTwinsGuardDrop" />
     <CompilerVisibleProperty Include="GoTwinsForwarders" />
     <CompilerVisibleProperty Include="GoTwinsGuardWarn" />
+    <CompilerVisibleProperty Include="GoTwinsWeak" />
+    <CompilerVisibleProperty Include="GoTwinsCut" />
   </ItemGroup>
   <ItemGroup Condition="'$(GoTwinsRefuse)' != ''">
     <AdditionalFiles Include="$(GoTwinsRefuse)" />

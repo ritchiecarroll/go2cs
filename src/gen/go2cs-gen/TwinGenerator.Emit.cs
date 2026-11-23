@@ -238,6 +238,7 @@ public sealed partial class TwinGenerator
                 .WithLeadingTrivia();
 
             return indent + "[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]\r\n" +
+                   WeakMark(candidate, indent) +
                    indent + rewriter.Stamp() + "\r\n" +
                    indent + rewriter.KeepOrigin() + "\r\n" +
                    "#line " + (start.Line + 1) + " \"" + tree.FilePath + "\"\r\n" +
@@ -298,8 +299,15 @@ public sealed partial class TwinGenerator
             // lifting the refusal later changes nothing a caller bound.
             return indent + "[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]\r\n" +
                    (candidate.Parks ? "" : indent + "[global::go.golib.GoParkForwarder]\r\n") +
+                   WeakMark(candidate, indent) +
                    indent + declaration + body + "\r\n";
         }
+
+        // N1 (DESIGN-mn-nopark.md 3.2): a weak member's twin, or its forwarder, carries [GoParkWeak], which a caller in any
+        // assembly reads. Only where the member parks: [GoParkForwarder] says it cannot, and a member never carries both (a
+        // weak entry whose member cannot park is a dead entry, GO2CS0019).
+        private static string WeakMark(Candidate candidate, string indent) =>
+            candidate is { Weak: true, Parks: true } ? indent + "[global::go.golib.GoParkWeak]\r\n" : "";
 
         // A program built with twins starts here: main's twin runs multiplexed when the scheduler is on, and
         // main itself runs when it is off. The entry is a sealed class, not a static one: it can hold no
@@ -361,6 +369,9 @@ public sealed partial class TwinGenerator
             report.Append("// await-sites=").Append(m_awaitSites).Append(" go-twinned=").Append(m_goTwinned).Append(" go-literals=").Append(m_goLiterals)
                 .Append(" ref-unrederivable=").Append(m_unrederivable).Append(" ref-spills=").Append(m_spills)
                 .Append(" ref-blocked=").Append(m_refBlocked).Append(" inline-rederived=").Append(m_inlineRederived).Append(" go-plain=").Append(GoPlain).Append("\r\n");
+
+            // N1 (TwinGenerator.ParkCuts.cs): the direct calls that would park but for a weak target or a named cut.
+            report.Append("// weak-sites=").Append(WeakSites).Append(" cut-sites=").Append(CutSites).Append("\r\n");
 
             foreach (string row in m_refBlockedRows)
                 report.Append("// B ").Append(row).Append("\r\n");

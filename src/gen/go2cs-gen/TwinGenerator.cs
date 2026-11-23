@@ -76,6 +76,9 @@ public sealed partial class TwinGenerator : ISourceGenerator
 
         // The call, for the report's named-plain row of a function that parks nowhere else (SN-7).
         public InvocationExpressionSyntax? Node;
+
+        // N1 (DESIGN-mn-nopark.md 4): a named cut of its caller (GoTwinsCut or the stdlib table), never a park.
+        public bool Cut;
     }
 
     // golib's goǃ and goǃtwin ladders take the goroutine's function and at most 16 arguments.
@@ -105,6 +108,10 @@ public sealed partial class TwinGenerator : ISourceGenerator
         // 7a (DESIGN-mn-twin-set.md 12.1, R3): a member of the population with no state-machine twin gets a FORWARDER,
         // `[GoParkForwarder] Mꞏtwin(...)`, which calls the plain member and returns a completed task.
         public bool Forwarded;
+
+        // N1 (DESIGN-mn-nopark.md 4): a weak member (GoTwinsWeak or the stdlib table). Its twin parks as before and carries
+        // [GoParkWeak], so a call to it never makes its caller a twin.
+        public bool Weak;
     }
 
     public void Initialize(GeneratorInitializationContext context)
@@ -223,10 +230,15 @@ public sealed partial class TwinGenerator : ISourceGenerator
         bool boxParam = !(options.TryGetValue("build_property.GoTwinsBoxParam", out string? param) && string.Equals(param, "false", StringComparison.OrdinalIgnoreCase));
         bool boxArgCopy = options.TryGetValue("build_property.GoTwinsBoxArgCopy", out string? argCopy) && string.Equals(argCopy, "true", StringComparison.OrdinalIgnoreCase);
 
+        // N1 (DESIGN-mn-nopark.md 4): GoTwinsWeak names weak members, GoTwinsCut names cut sites (`Caller->Callee`). Neither
+        // changes the twin set's population, so neither is an arm switch and O2 does not refuse them (TwinGenerator.ParkCuts.cs).
+        options.TryGetValue("build_property.GoTwinsWeak", out string? weakMembers);
+        options.TryGetValue("build_property.GoTwinsCut", out string? cutSites);
+
         new Run(context, goSites, ifaceShape, ifaceAll)
         {
             Self = self, Pairs = pairs, CallerRule = callerRule, IfaceUnmark = unmark, GuardDrop = guardDrop, Forwarders = forwarders, GuardWarn = guardWarn, BoxRecv = boxRecv, BoxForwarders = boxForwarders, BoxCopy = boxCopy,
-            BoxParam = boxParam, BoxArgCopy = boxArgCopy
+            BoxParam = boxParam, BoxArgCopy = boxArgCopy, WeakProperty = weakMembers, CutProperty = cutSites
         }.Execute();
     }
 
@@ -285,6 +297,13 @@ public sealed partial class TwinGenerator : ISourceGenerator
             foreach (Candidate candidate in m_ordered)
                 new Collector(this, Model(candidate.Syntax.SyntaxTree), candidate).Visit((SyntaxNode?)candidate.Syntax.Body ?? candidate.Syntax.ExpressionBody);
 
+            // N1 (TwinGenerator.ParkCuts.cs): this build's weak members and cut sites, set before the fixpoint reads them.
+            ReadParkCuts();
+            MarkCuts();
+
+            foreach (Candidate candidate in m_ordered)
+                candidate.Weak = WeakListed(candidate.Symbol);
+
             for (bool changed = true; changed;)
             {
                 changed = false;
@@ -314,6 +333,8 @@ public sealed partial class TwinGenerator : ISourceGenerator
                 else if (candidate.Twinned && BoxRecv && SharedMemberRef(candidate))
                     candidate.Refusal = "ref-shared-member";
             }
+
+            CheckParkCuts();
 
             m_populationAssembly = !Common.IsHandOwnedAssembly(Context.Compilation);
 
@@ -808,7 +829,12 @@ public sealed partial class TwinGenerator : ISourceGenerator
             } &&
             (m_goschedTwin ??= Context.Compilation.GetTypeByMetadataName("go.builtin")?.GetMembers("Goschedꞏtwin").OfType<IMethodSymbol>().Any(TwinBinds) == true);
 
+        // A named cut (N1, TwinGenerator.ParkCuts.cs) is never awaited, even inside a twin.
         internal bool ShouldAwait(Site site) =>
+            !site.Cut && WouldAwait(site);
+
+        // The site parks, N1 aside: ShouldAwait's predicate before a cut, and the input to GO2CS0019's two dead arms.
+        internal bool WouldAwait(Site site) =>
             site is { Active: true, Go: GoKind.None, Renameable: true, Delegate: false } &&
             (site.Interface ? site.IfaceCallable && IfaceCanPark(site.IfaceTarget) :
              site is { ViaBoxOverload: true, BoxOverload: { } overload } && !IsBoxTwinTarget(site.Target) ? CanPark(overload) :
@@ -830,8 +856,9 @@ public sealed partial class TwinGenerator : ISourceGenerator
         {
             foreach (Site site in candidate.Sites)
             {
-                // A call through a func value twins its function only by N3's caller rule (TwinGenerator.Pairs.cs).
-                if (site.Direct && (ShouldAwait(site) || goSites && GoTwinnable(site) || site.Delegate && CallerRuleTwins(site)))
+                // A call through a func value twins its function only by N3's caller rule (TwinGenerator.Pairs.cs). A call to a
+                // weak member (N1) never makes its caller a twin; a caller that is a twin for another reason still awaits it.
+                if (site.Direct && (ShouldAwait(site) && !WeakTarget(site) || goSites && GoTwinnable(site) || site.Delegate && CallerRuleTwins(site)))
                     return true;
             }
 
