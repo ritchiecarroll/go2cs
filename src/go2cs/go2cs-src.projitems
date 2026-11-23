@@ -30,6 +30,8 @@
     <None Include="$(MSBuildThisFileDirectory)cgoG1_test.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoLoadTag_test.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoPhase3_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)cgoPointerDoor.go" />
+    <None Include="$(MSBuildThisFileDirectory)cgoPointerDoor_test.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoResiduals_test.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoTargetCheck_test.go" />
     <None Include="$(MSBuildThisFileDirectory)corpusRelease.go" />

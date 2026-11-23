@@ -343,9 +343,9 @@ const cgoP3WriteThrough = "which C must not write through"
 // cgoP3LayoutEntryPointer is go2cs's refusal of a read of native memory as a Go type whose CLR layout is not its Go
 // layout (golib RuntimeErrorPanic.cs: "cannot read native memory as {0}: its CLR layout is not its Go layout ({1})"),
 // pinned to the TYPE s6next reads; the parenthesised reason is left unpinned. Its text names no increment. It is
-// s6next's designed end state in 3.2, not a pin 3.2 retires: the address of a C struct's pointer field (&l.next over C
-// memory) stays refused by the reference floor (DESIGN-cgo-phase3-marshaling 18.4 finding 1), until a later increment
-// routes **C.T loads. Increment 3.2 seat 1a (18.9) retired its sibling, cgoP3LayoutEntry ("cannot read native memory
+// s6next's end state in 3.2 until seat 1c (18.11) routed **C.T loads and stores through GoCgoArgs.LoadPointer and
+// StorePointer, which retired that pin; it now names the floor's refusal of the two shapes the door does not reach, a
+// ref-lowered out-parameter (s6nextset) and a tuple target (s6nexttuple), each a named deviation. Increment 3.2 seat 1a (18.9) retired its sibling, cgoP3LayoutEntry ("cannot read native memory
 // as main._Ctype_struct_go2cs_probe_entry: its CLR layout is not its Go layout"), the pin of s6nextnil, s6nextdirect
 // and s6name: the field accessor reads each as Go does. Hosted reading before 1a, os-matrix run 44883224786, the same
 // on all five targets: s6nextnil exited 2 with "panic: runtime error: cannot read native memory as
@@ -414,10 +414,10 @@ func cgoP3Arms() []cgoG1Arm {
 		{name: "goviewnamedata", csFails: cgoP3WriteThrough},
 		// Increment 3.2's first reds (section 6). s6field, s6reinterp and s6slice print as Go does, and since seat 1a
 		// (18.9) s6nextnil, s6nextdirect and s6name do too: the field accessor retired their cgoP3LayoutEntry pins (the
-		// readings before it are at cgoP3LayoutEntryPointer). s6next's pin is its refusal as 18.4 finding 1 rules it, and
-		// stays.
+		// readings before it are at cgoP3LayoutEntryPointer). Since seat 1c (18.11) s6next does too: the **C.T door
+		// retired its pin.
 		{name: "s6field"},
-		{name: "s6next", csFails: cgoP3LayoutEntryPointer},
+		{name: "s6next"},
 		{name: "s6nextnil"},
 		{name: "s6nextdirect"},
 		{name: "s6name"},
@@ -427,6 +427,14 @@ func cgoP3Arms() []cgoG1Arm {
 		// is refused by name.
 		{name: "s6store"},
 		{name: "s6storego", csFails: cgoP3StoreGoIntoC},
+		// Seat 1c's arms (18.11, E-3): the load and the store through a pointer to a C pointer, the resolver's walk, a
+		// Go slot that holds nil, and the two shapes the door does not reach, refused by the floor as named deviations.
+		{name: "s6nextstore"},
+		{name: "s6nextstorego", csFails: cgoP3StoreGoIntoC},
+		{name: "s6nextwalk"},
+		{name: "s6nilslot"},
+		{name: "s6nextset", csFails: cgoP3LayoutEntryPointer},
+		{name: "s6nexttuple", csFails: cgoP3LayoutEntryPointer},
 		// Their twins over C memory, which run to their end both ways.
 		{name: "caddtyped"},
 		{name: "cfieldtyped"},

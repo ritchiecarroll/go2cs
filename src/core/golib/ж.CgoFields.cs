@@ -16,15 +16,6 @@ namespace go;
 // word at its Go offset, where the struct's CLR slot holds a managed reference.
 public abstract partial class ж<T>
 {
-    // The refusals, each by name. A load and a store over C memory take S-B1's wording (unsafe.cs: LoadFromCText,
-    // StoreIntoCText); a C struct laid over Go memory has texts of its own, since that memory is Go's; and a slot over Go
-    // storage that no pin holds still is S-B1's UnheldSlotText, word for word.
-    private const string CgoFieldLoadFromCText = "cgo struct field load: a Go pointer read out of C memory is refused (C memory must not hold a Go pointer)";
-    private const string CgoFieldStoreIntoCText = "cgo struct field store: storing a Go pointer into C memory is refused (C memory must not hold a Go pointer)";
-    private const string CgoFieldLoadOverGoText = "cgo struct field load: a Go pointer in a C struct laid over Go memory is not read in 3.2 (go2cs keeps no record of the pointer stored there)";
-    private const string CgoFieldStoreOverGoText = "cgo struct field store: a Go pointer stored into a C struct laid over Go memory is not supported in 3.2";
-    private const string CgoFieldUnheldText = "unsafe.Pointer word: the slot is a native box over Go storage that nothing holds still";
-
     /// <summary>
     /// Reads a pointer field of a C struct (a struct carrying <see cref="GoCgoStructAttribute"/>): Go's <c>p.f</c>
     /// for <c>f</c> a <c>*U</c>, the getter go2cs-gen emits for it.
@@ -83,57 +74,22 @@ public abstract partial class ж<T>
             throw RuntimeErrorPanic.NativeStructLayoutMismatch(typeof(T), $"field {FieldRefBox<TF>.FieldNameOf(fieldRefFunc)} has no known Go offset");
     }
 
-    // The field's word slot over a native receiver, and which memory it is in (GoPointerWords.Classify): C memory alone,
-    // Go memory a pin holds still, or neither. Unheld is refused here, for a read and a store alike.
-    private NativeBox<ж<U>> CgoPointerFieldSlot<U>(FieldRefFunc<T, ж<U>> fieldRefFunc, out GoPointerWords.SlotKind kind)
+    // The field's word slot over a native receiver: a native box at the field's Go offset. CgoPointerWords reads and
+    // writes it, and classifies its memory first.
+    private NativeBox<ж<U>> CgoPointerFieldSlot<U>(FieldRefFunc<T, ж<U>> fieldRefFunc)
     {
         RequireGoFieldOffset(fieldRefFunc);
 
-        ж<ж<U>> slot = of(fieldRefFunc);
-        kind = GoPointerWords.Classify(slot);
-
-        return kind switch
-        {
-            GoPointerWords.SlotKind.CMemory or GoPointerWords.SlotKind.GoMemory => (NativeBox<ж<U>>)slot,
-            GoPointerWords.SlotKind.Unheld => throw RuntimeErrorPanic.RuntimeRaised(CgoFieldUnheldText),
-            _ => throw RuntimeErrorPanic.NativeStructLayoutMismatch(typeof(T), $"field {FieldRefBox<ж<U>>.FieldNameOf(fieldRefFunc)} has no known Go offset")
-        };
+        return of(fieldRefFunc) is NativeBox<ж<U>> slot
+            ? slot
+            : throw RuntimeErrorPanic.NativeStructLayoutMismatch(typeof(T), $"field {FieldRefBox<ж<U>>.FieldNameOf(fieldRefFunc)} has no known Go offset");
     }
 
-    // The read over a native receiver: 0 is nil, a word Go memory names is refused, and any other word is C memory.
-    private unsafe ж<U> CgoPointerFieldRead<U>(FieldRefFunc<T, ж<U>> fieldRefFunc)
-    {
-        NativeBox<ж<U>> slot = CgoPointerFieldSlot(fieldRefFunc, out GoPointerWords.SlotKind kind);
-        nuint word = *(nuint*)slot.NativeAddress;
+    // The read over a native receiver (CgoPointerWords.ReadWord).
+    private ж<U> CgoPointerFieldRead<U>(FieldRefFunc<T, ж<U>> fieldRefFunc) =>
+        CgoPointerWords.ReadWord(CgoPointerFieldSlot(fieldRefFunc));
 
-        if (word == 0)
-            return null!;
-
-        if (GoPointerWords.NamesGoMemory(word))
-            throw RuntimeErrorPanic.RuntimeRaised(kind == GoPointerWords.SlotKind.CMemory ? CgoFieldLoadFromCText : CgoFieldLoadOverGoText);
-
-        // A fresh box per read. Go's == on two reads compares the address (NativeBox's Equals reads the native identity),
-        // so l.next == l.next holds, but the two reads are not one CLR object: a ReferenceEquals site would tell them
-        // apart. The `**C.T` load (seat 1c) mints the same way.
-        return new NativeBox<U>(word);
-    }
-
-    // The store over a native receiver: 0 for nil, the address of a pointer to C memory alone, and a Go pointer refused.
-    // C memory alone is whatever box names it (GoPointerWords.IsCMemoryAlone): a native box over C memory, or an element
-    // of a native-backed slice that keeps no anchor (ж.ElemRefBox.cs, 3.1's C2). Its address is the box's native
-    // identity.
-    private unsafe void CgoPointerFieldWrite<U>(FieldRefFunc<T, ж<U>> fieldRefFunc, ж<U> value)
-    {
-        NativeBox<ж<U>> slot = CgoPointerFieldSlot(fieldRefFunc, out GoPointerWords.SlotKind kind);
-        nuint word;
-
-        if (value is null || value.IsNilPointer)
-            word = 0;
-        else if (GoPointerWords.IsCMemoryAlone(value) && value.NativeIdentity is var address and not 0)
-            word = address;
-        else
-            throw RuntimeErrorPanic.RuntimeRaised(kind == GoPointerWords.SlotKind.CMemory ? CgoFieldStoreIntoCText : CgoFieldStoreOverGoText);
-
-        *(nuint*)slot.NativeAddress = word;
-    }
+    // The store over a native receiver (CgoPointerWords.WriteWord).
+    private void CgoPointerFieldWrite<U>(FieldRefFunc<T, ж<U>> fieldRefFunc, ж<U> value) =>
+        CgoPointerWords.WriteWord(CgoPointerFieldSlot(fieldRefFunc), value);
 }
