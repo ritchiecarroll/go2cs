@@ -40,3 +40,49 @@ The twin generator's report gains one row per ref-blocked call: `// B file|line|
   at least half of the total. The residual, by class: `ref-like-before` (a ref struct value cannot outlive an await
   at all), `store-through-ref` (the target's reference is taken before the await), `ref-read-after:unrederivable`,
   and calls inside lambdas.
+
+## Census reading (2026-11-23, tip a029d9475a, windows)
+
+The whole standard library twinned: rc=0, 0 errors, GO2CS0017/0018/0021 = 0, 358 reports.
+
+Controls: every report's `// B` rows equal its `ref-blocked=` (0 mismatches); the known positive is there,
+`reader.cs|333|Read⁔|…|ref-read-after:rederivable|nested:IfStatement`. The third control (the twins otherwise
+byte-identical) is read with the cure's gates.
+
+**341 ref-blocked calls in 59 packages** (the 295 was read at pieces 4-6's tip, without row 7 pieces 2 and 3; more
+callees park here).
+
+| reason | rows |
+|---|---|
+| ref-like-before | 214 |
+| ref-read-after:rederivable | 60 |
+| store-through-ref | 52 |
+| ref-like-before + store-through-ref | 10 |
+| ref-read-after:unrederivable | 5 |
+
+The first blocker: `earlier:IdentifierName` 129, `earlier:SimpleMemberAccessExpression` 59, `in:AddExpression` 40,
+`earlier:CastExpression` 33, `earlier:ObjectCreationExpression` 19, `earlier:InvocationExpression` 13,
+`stmt:IfStatement` 7, `in:LogicalNotExpression` 6, `in:ParenthesizedLambdaExpression` 5, and 32 more in 17 kinds.
+
+**Scored:** RB-a **met** (341, inside 295-380). RB-b **missed**: `ref-like-before` is the largest reason (214, 63%),
+not `ref-read-after` (65). RB-c **missed**: the inline re-derivation alone can unblock **60 of 341** (18%), not half.
+
+**What the reading shows instead.** The ref-like value is evaluated before the call only because something else is,
+and that something is usually a plain read. Crypto/x509's `s.addCertFunc(sha256.Sum224(cert.Raw), …)` reads the
+receiver `s` before the parking Sum224. Archive/zip's `f.Modified = modified.In(timeZone(…))` reads `modified` before
+the parking timeZone. In both, the parking call cannot move ahead of its statement, because the walk treats a plain
+read before it as an evaluation that must stay first. Go does not order those: "all function calls, method calls,
+receive operations, and binary logical operations are evaluated in lexical left-to-right order", and a variable's read
+is not ordered against a call. (gc itself loads variables after the calls in an expression.) So the call may move
+ahead, Rule S derives the refs again after it, and the ref-like values are then evaluated after the await.
+By first blocker, 267 of the 341 are blocked first by a plain read, a member read, a cast or an arithmetic or logical
+operator. That is the candidate population for that relaxation, an upper bound (a later operand may still block);
+30 more need the inline re-derivation alone. The residual, 44: an object creation evaluated first (16), a call
+evaluated first (10), calls inside lambdas (5), and 13 singles.
+
+Go probe (go1.26.11, scratch `row7/goorder`): `a := 1; f := func() int { a = 2; return 3 }; fmt.Println(a, f())`
+prints `2 3`; a member read before a call prints the member as written by the call (`10 5`); a value receiver read
+before a call in its argument sees the call's write (`107`). So gc evaluates the calls first and reads afterwards, and
+a twin that moves the call ahead matches gc. The plain conversion reads first (C# order), so for code that depends on
+this unspecified order, plain and twin would differ while both stay Go-legal. That is a CNR exposure the gates must
+read.
