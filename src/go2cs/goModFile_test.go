@@ -539,8 +539,46 @@ func TestPlainRecurseConvertsAModuleCacheReleaseWithNoGoMod(t *testing.T) {
 			}
 		}
 
-		if !strings.Contains(copyLine, filepath.Join(real, "go2cs-modcopy-")) {
-			t.Errorf("the copy is not named by its resolved path under %s: %s", real, copyLine)
+		// The converter resolves the work directory (filepath.EvalSymlinks), so the expected path is resolved the same
+		// way: t.TempDir() is itself spelled as TMPDIR is, which on a hosted Windows runner is the 8.3 short spelling.
+		resolvedReal, err := filepath.EvalSymlinks(real)
+
+		if err != nil {
+			t.Fatalf("EvalSymlinks(%s): %v", real, err)
+		}
+
+		if !strings.Contains(copyLine, filepath.Join(resolvedReal, "go2cs-modcopy-")) {
+			t.Errorf("the copy is not named by its resolved path under %s: %s", resolvedReal, copyLine)
+		}
+	})
+
+	// COORD's train-5 red (windows go-test, run 45099083885): a TMPDIR spelled another way than its resolved path, as a
+	// hosted Windows runner's TEMP is, with an 8.3 short user segment. The copy is named by its resolved path.
+	t.Run("a TMPDIR spelled another way names the resolved copy", func(t *testing.T) {
+		spelled := secondSpellingOf(t, t.TempDir())
+
+		resolved, err := filepath.EvalSymlinks(spelled)
+
+		if err != nil || resolved == spelled {
+			t.Skipf("no second spelling of a directory here (%s resolves to %s, %v), so this arm measures nothing", spelled, resolved, err)
+		}
+
+		combined, output, err := runWith(cache, "", moduleDir, "TMPDIR="+spelled, "TMP="+spelled, "TEMP="+spelled)
+
+		if err != nil || emitted(t, output)[oldRoot+"old.cs"] == "" {
+			t.Fatalf("the conversion under %s failed (%v):\n%s", spelled, err, lastLines(combined, 12))
+		}
+
+		var copyLine string
+
+		for _, line := range strings.Split(combined, "\n") {
+			if strings.HasPrefix(line, "go.mod: ") {
+				copyLine = line
+			}
+		}
+
+		if !strings.Contains(copyLine, filepath.Join(resolved, "go2cs-modcopy-")) {
+			t.Errorf("the copy is not named by its resolved path under %s (spelled %s): %s", resolved, spelled, copyLine)
 		}
 	})
 
