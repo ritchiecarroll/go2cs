@@ -86,3 +86,48 @@ before a call in its argument sees the call's write (`107`). So gc evaluates the
 a twin that moves the call ahead matches gc. The plain conversion reads first (C# order), so for code that depends on
 this unspecified order, plain and twin would differ while both stay Go-legal. That is a CNR exposure the gates must
 read.
+
+## COORD's ruling on the scope (2026-11-23): the Go-order move plus inline re-derivation
+
+RB-b and RB-c stand **MISSED**, as scored above. The cure is (1) + (2). Conditions:
+- (a) each operand class admitted to the move gets a go1.26.11 probe showing gc evaluates it AFTER the call, run three
+  ways (Go, plain, twinned); a class whose probe disagrees with gc leaves the move set; a conversion that can panic
+  (slice to array or array pointer) stays out unless its probe says otherwise;
+- (b) every program in the MN CNR set or the full behavioral suite whose output differs plain against twinned must
+  read twinned == Go, each one named; KnownIssues discloses the plain path's C# order; plain-path order parity with
+  gc is a BOARD row of its own;
+- (c) the residual named by class with counts;
+- (d) a prediction for the post-cure census first, then the gates of pieces 4-6.
+
+**Where the probe lives.** `src/tools/mnspike2/MnGoOrder` (Go source and its conversion), not the behavioral suite.
+Its plain run differs from Go BY DESIGN: that is the disclosed plain-path gap, and in the suite its plain output
+comparison would fail. It moves into the suite with the BOARD item that gives the plain path gc's order. Each case is
+written in the census's dominant blocked shape: a `Printf` whose u8 format is ref-like, then the operand class under
+test, then a call that parks and writes that operand. So the twinned run before the cure prints the plain (C#) order,
+and after it gc's.
+
+## The cure (design, stated before code)
+
+1. **The Go-order move.** In RefLikeBefore, an operand evaluated before the call stops blocking the move when it is a
+   pure read: an identifier naming a local, a parameter, a ref local or a field of the receiver; a member access chain
+   over such reads (a field of a value, or a field through a pointer or box); a literal or constant; a cast (a
+   numeric, string or interface conversion) of a pure read; a unary operator (`-`, `!`, `~`, `+`) on a pure read. A
+   binary operator's LEFT operand that is a pure read no longer blocks a call in its right operand. Calls, indexers,
+   element accesses, object creations, slice-to-array conversions and anything else still block. The moved call
+   runs ahead of its statement as a spill already does, and Rule S derives the live refs again after it.
+2. **Inline re-derivation.** Where the call still cannot move (an if, else-if or while header, a case guard), it is
+   awaited in place, and each ref local read after it within the same evaluation is replaced by its re-derivation
+   source (`Ꮡx.DerefOrNull()`, `Ꮡv.ValueSlot`, the box parameter's deref). The ref local itself is not touched
+   there; Rule R derives it again at the next statement as before.
+
+## Predictions (before the cure's code; windows, the whole standard library twinned)
+
+- RB-d: the probe reads gc evaluating each of the 7 admitted classes AFTER the call (local, parameter, field of a
+  value, field through a pointer, unary, binary left operand, cast); in the nil-pointer case, the call's side effect
+  is visible before the panic. The slice-to-array conversion is probed and kept out either way.
+- RB-e: the probe's twinned run equals Go on every admitted class after the cure, and equals the plain run (C#
+  order) before it.
+- RB-f: the post-cure census reads at most 90 ref-blocked calls (from 341), so at least 250 are unblocked. The
+  residual is mostly an object creation evaluated first, a call evaluated first, and calls inside lambdas.
+- RB-g: in the MN CNR set and the behavioral suite run twinned, a plain-vs-twinned output difference appears in at
+  most 2 programs, and each reads twinned == Go.
