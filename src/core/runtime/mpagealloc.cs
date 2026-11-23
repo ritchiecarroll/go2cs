@@ -51,7 +51,6 @@ using gc = @internal.runtime.gc_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
-using static runtime_package;
 
 partial class runtime_package {
 
@@ -124,10 +123,8 @@ internal static nuint chunkPageIndex(uintptr p) {
     return (nuint)(p % (uintptr)pallocChunkBytes / (uintptr)pageSize);
 }
 
-} partial class runtimeᴛchunkIdx {
-
 // l1 returns the index into the first level of (*pageAlloc).chunks.
-internal static nuint l1(this chunkIdx i) {
+internal static nuint l1⁔(/*this*/ chunkIdx i) {
     if (pallocChunksL1Bits == 0) {
         // Let the compiler optimize this away if there's no
         // L1 map.
@@ -138,15 +135,13 @@ internal static nuint l1(this chunkIdx i) {
 }
 
 // l2 returns the index into the second level of (*pageAlloc).chunks.
-internal static nuint l2(this chunkIdx i) {
+internal static nuint l2⁔(/*this*/ chunkIdx i) {
     if (pallocChunksL1Bits == 0) {
         return (nuint)i;
     } else {
         return (nuint)i & (nuint)((1 << (int)(pallocChunksL2Bits)) - 1);
     }
 }
-
-} partial class runtime_package {
 
 // offAddrToLevelIndex converts an address in the offset address space
 // to the index into summary[level] containing addr.
@@ -306,13 +301,11 @@ partial struct pageAlloc {
     internal bool test;
 }
 
-} partial class runtimeᴛpageAlloc {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string rootLevelMaxPagesDoesnTˢ => ref rootLevelMaxPagesDoesnTˢᵇ;
 private static readonly @string rootLevelMaxPagesDoesnTˢᵇ = "root level max pages doesn't fit in summary"u8;
 
-internal static void init(this ж<pageAlloc> Ꮡp, ж<mutex> ᏑmheapLock, ж<sysMemStat> ᏑsysStat, bool test) {
+internal static void init⁔(/*this*/ ж<pageAlloc> Ꮡp, ж<mutex> ᏑmheapLock, ж<sysMemStat> ᏑsysStat, bool test) {
     ref var p = ref Ꮡp.DerefOrNull();
     ref var mheapLock = ref ᏑmheapLock.DerefOrNull();
     ref var sysStat = ref ᏑsysStat.DerefOrNull();
@@ -349,7 +342,7 @@ internal static void init(this ж<pageAlloc> Ꮡp, ж<mutex> ᏑmheapLock, ж<sy
 // tryChunkOf returns the bitmap data for the given chunk.
 //
 // Returns nil if the chunk data has not been mapped.
-internal static ж<pallocData> tryChunkOf(this ref pageAlloc p, chunkIdx ci) {
+internal static ж<pallocData> tryChunkOf⁔(/*this*/ ref pageAlloc p, chunkIdx ci) {
     var l2 = p.chunks[ci.l1()];
     if (l2 == nil) {
         return default;
@@ -360,7 +353,7 @@ internal static ж<pallocData> tryChunkOf(this ref pageAlloc p, chunkIdx ci) {
 // chunkOf returns the chunk at the given chunk index.
 //
 // The chunk index must be valid or this method may throw.
-internal static ж<pallocData> chunkOf(this ref pageAlloc p, chunkIdx ci) {
+internal static ж<pallocData> chunkOf⁔(/*this*/ ref pageAlloc p, chunkIdx ci) {
     return p.chunks[ci.l1()].at<pallocData>((ulong)(ci.l2()));
 }
 
@@ -372,7 +365,7 @@ private static readonly @string pageAllocOutOfMemoryˢᵇ = "pageAlloc: out of m
 // It may allocate metadata, in which case *p.sysStat will be updated.
 //
 // p.mheapLock must be held.
-internal static void grow(this ж<pageAlloc> Ꮡp, uintptr @base, uintptr size) {
+internal static void grow⁔(/*this*/ ж<pageAlloc> Ꮡp, uintptr @base, uintptr size) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     assertLockHeld(p.mheapLock);
@@ -462,7 +455,7 @@ internal static void grow(this ж<pageAlloc> Ꮡp, uintptr @base, uintptr size) 
 // Must be called on the system stack because it acquires the heap lock.
 //
 //go:systemstack
-internal static void enableChunkHugePages(this ref pageAlloc p) {
+internal static void enableChunkHugePages⁔(/*this*/ ref pageAlloc p) {
     // Grab the heap lock to turn on huge pages for new chunks and clone the current
     // heap address space ranges.
     //
@@ -503,7 +496,7 @@ internal static void enableChunkHugePages(this ref pageAlloc p) {
 // whether the operation performed was an allocation or a free.
 //
 // p.mheapLock must be held.
-internal static void update(this ref pageAlloc p, uintptr @base, uintptr npages, bool contig, bool alloc) {
+internal static void update⁔(/*this*/ ref pageAlloc p, uintptr @base, uintptr npages, bool contig, bool alloc) {
     assertLockHeld(p.mheapLock);
 
     // base, limit, start, and end are inclusive.
@@ -589,7 +582,7 @@ internal static void update(this ref pageAlloc p, uintptr @base, uintptr npages,
 // allocated range.
 //
 // p.mheapLock must be held.
-internal static uintptr allocRange(this ref pageAlloc p, uintptr @base, uintptr npages) {
+internal static uintptr allocRange⁔(/*this*/ ref pageAlloc p, uintptr @base, uintptr npages) {
     assertLockHeld(p.mheapLock);
 
     var limit = @base + npages * (uintptr)pageSize - 1;
@@ -632,7 +625,7 @@ internal static uintptr allocRange(this ref pageAlloc p, uintptr @base, uintptr 
 // it returns maxOffAddr.
 //
 // p.mheapLock must be held.
-internal static offAddr findMappedAddr(this ref pageAlloc p, offAddr addr) {
+internal static offAddr findMappedAddr⁔(/*this*/ ref pageAlloc p, offAddr addr) {
     assertLockHeld(p.mheapLock);
 
     // If we're not in a test, validate first by checking mheap_.arenas.
@@ -652,19 +645,15 @@ internal static offAddr findMappedAddr(this ref pageAlloc p, offAddr addr) {
     return addr;
 }
 
-} partial class runtime_package {
-
-internal partial struct find_firstFree /*dyn*/ {
-    internal offAddr @base, bound;
-}
-
-} partial class runtimeᴛpageAlloc {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string rangePartiallyOverlapsˢ => ref rangePartiallyOverlapsˢᵇ;
 private static readonly @string rangePartiallyOverlapsˢᵇ = "range partially overlaps"u8;
 internal static ref readonly @string badSummaryDataˢ => ref badSummaryDataˢᵇ;
 private static readonly @string badSummaryDataˢᵇ = "bad summary data"u8;
+
+internal partial struct find_firstFree /*dyn*/ {
+    internal offAddr @base, bound;
+}
 
 // find searches for the first (address-ordered) contiguous free region of
 // npages in size and returns a base address for that region.
@@ -682,7 +671,7 @@ private static readonly @string badSummaryDataˢᵇ = "bad summary data"u8;
 // searchAddr returned is invalid and must be ignored.
 //
 // p.mheapLock must be held.
-internal static (uintptr, offAddr) find(this ref pageAlloc p, uintptr npages) {
+internal static (uintptr, offAddr) find⁔(/*this*/ ref pageAlloc p, uintptr npages) {
     assertLockHeld(p.mheapLock);
 
     // Search algorithm.
@@ -739,7 +728,7 @@ internal static (uintptr, offAddr) find(this ref pageAlloc p, uintptr npages) {
     // pages on the root level and narrow that down if we descend into
     // that summary. But as soon as we need to iterate beyond that summary
     // in a level to find a large enough range, we'll stop narrowing.
-    void foundFree(offAddr addrΔ1, uintptr size) {
+    [GoFunc("(*pageAlloc).find.func1")] void foundFree(offAddr addrΔ1, uintptr size) {
         if (ᏑfirstFree.Value.@base.lessEqual(addrΔ1) && addrΔ1.add(size - 1).lessEqual(ᏑfirstFree.Value.bound)) {
             // This range fits within the current firstFree window, so narrow
             // down the firstFree window to the base and bound of this range.
@@ -908,7 +897,7 @@ break_nextLevel:;
 // Must run on the system stack because p.mheapLock must be held.
 //
 //go:systemstack
-internal static (uintptr addr, uintptr scav) alloc(this ref pageAlloc p, uintptr npages) {
+internal static (uintptr addr, uintptr scav) alloc⁔(/*this*/ ref pageAlloc p, uintptr npages) {
     uintptr addr = default;
     uintptr scav = default;
 
@@ -972,7 +961,7 @@ Found:
 // Must run on the system stack because p.mheapLock must be held.
 //
 //go:systemstack
-internal static void free(this ж<pageAlloc> Ꮡp, uintptr @base, uintptr npages) {
+internal static void free⁔(/*this*/ ж<pageAlloc> Ꮡp, uintptr @base, uintptr npages) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     assertLockHeld(p.mheapLock);
@@ -1024,7 +1013,7 @@ internal static void free(this ж<pageAlloc> Ꮡp, uintptr @base, uintptr npages
 // newly-updated bitmap.
 //
 // p.mheapLock must be held.
-internal static void markRandomPaddingPages(this ref pageAlloc p, uintptr @base, uintptr npages) {
+internal static void markRandomPaddingPages⁔(/*this*/ ref pageAlloc p, uintptr @base, uintptr npages) {
     assertLockHeld(p.mheapLock);
 
     var limit = @base + npages * (uintptr)pageSize - 1;
@@ -1056,8 +1045,6 @@ internal static void markRandomPaddingPages(this ref pageAlloc p, uintptr @base,
     p.update(@base, npages, true, true);
 }
 
-} partial class runtime_package {
-
 internal static uintptr pallocSumBytes => /* unsafe.Sizeof(pallocSum(0)) */ 8;
 
 // maxPackedValue is the maximum value that any of the three fields in
@@ -1084,10 +1071,8 @@ internal static pallocSum packPallocSum(nuint start, nuint max, nuint end) {
     return (pallocSum)(((uint64)start & (uint64)(maxPackedValue - 1)) | (((uint64)max & (uint64)(maxPackedValue - 1)) << (int)(logMaxPackedValue)) | (((uint64)end & (uint64)(maxPackedValue - 1)) << (int)(2 * logMaxPackedValue)));
 }
 
-} partial class runtimeᴛpallocSum {
-
 // start extracts the start value from a packed sum.
-internal static nuint start(this pallocSum p) {
+internal static nuint start⁔(/*this*/ pallocSum p) {
     if (((uint64)p & (uint64)((uint64)1 << 63)) != 0) {
         return maxPackedValue;
     }
@@ -1095,7 +1080,7 @@ internal static nuint start(this pallocSum p) {
 }
 
 // max extracts the max value from a packed sum.
-internal static nuint max(this pallocSum p) {
+internal static nuint max⁔(/*this*/ pallocSum p) {
     if (((uint64)p & (uint64)((uint64)1 << 63)) != 0) {
         return maxPackedValue;
     }
@@ -1103,7 +1088,7 @@ internal static nuint max(this pallocSum p) {
 }
 
 // end extracts the end value from a packed sum.
-internal static nuint end(this pallocSum p) {
+internal static nuint end⁔(/*this*/ pallocSum p) {
     if (((uint64)p & (uint64)((uint64)1 << 63)) != 0) {
         return maxPackedValue;
     }
@@ -1111,14 +1096,12 @@ internal static nuint end(this pallocSum p) {
 }
 
 // unpack unpacks all three values from the summary.
-internal static (nuint, nuint, nuint) unpack(this pallocSum p) {
+internal static (nuint, nuint, nuint) unpack⁔(/*this*/ pallocSum p) {
     if (((uint64)p & (uint64)((uint64)1 << 63)) != 0) {
         return (maxPackedValue, maxPackedValue, maxPackedValue);
     }
     return ((nuint)((uint64)p & (uint64)(maxPackedValue - 1)), (nuint)(((uint64)p >> (int)(logMaxPackedValue)) & (uint64)(maxPackedValue - 1)), (nuint)(((uint64)p >> (int)(2 * logMaxPackedValue)) & (uint64)(maxPackedValue - 1)));
 }
-
-} partial class runtime_package {
 
 // mergeSummaries merges consecutive summaries which may each represent at
 // most 1 << logMaxPagesPerSum pages each together into one.

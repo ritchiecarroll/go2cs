@@ -97,7 +97,13 @@ func main() {
 	var same func(int) int
 	*(*func(int) int)(unsafe.Pointer(&same)) = inc
 
-	fmt.Println(g(4), wordOf(g) == w, wordOfParam(inc) == w, typeWord(inc) != 0, notAFunc(5) != 0, memory[0] != 0, table[1] != 0, same(6))
+	var h func(int) int
+	*(*unsafe.Pointer)(unsafe.Pointer(&h)) = *(*unsafe.Pointer)(unsafe.Pointer(&g))
+
+	var up unsafe.Pointer
+	*(*unsafe.Pointer)(unsafe.Pointer(&up)) = unsafe.Pointer(&slot)
+
+	fmt.Println(g(4), wordOf(g) == w, wordOfParam(inc) == w, typeWord(inc) != 0, notAFunc(5) != 0, memory[0] != 0, table[1] != 0, same(6), h(7), up != nil)
 }
 `)
 	goRoot := build.Default.GOROOT
@@ -137,6 +143,7 @@ func main() {
 		"@unsafe.Pointer.StoreFunc(@unsafe.Add(@unsafe.Pointer.FromPinnedBox(Ꮡtable), 8), (Func<nint, nint>)inc);", // w3, the arithmetic form
 		"@unsafe.Pointer.StoreFunc(@unsafe.Add(@unsafe.Pointer.FromPinnedBox(Ꮡtable), 16), g);",                    // w3, a func value that is already a delegate
 		"@unsafe.Pointer.StoreFunc(p, (Func<nint, nint>)inc);",                                                     // w3, through a pointer held in a variable
+		"h = @unsafe.Pointer.FuncOfWord<Func<nint, nint>>(~Ꮡ(@unsafe.Pointer.OfFunc(g)));",                         // w4, one func's word copied into another
 	} {
 		if !strings.Contains(mainCs, want) {
 			t.Errorf("func word shape must emit %q: %s", want, mainCs)
@@ -165,6 +172,16 @@ func main() {
 
 	if !strings.Contains(mainCs, "(Ꮡsame).ValueSlot = inc;") {
 		t.Errorf("a func stored through the address of a variable of its own type must stay a store into that variable: %s", mainCs)
+	}
+
+	// w4 is the one `*unsafe.Pointer` store whose target is a FUNC variable; over an unsafe.Pointer variable (`&up`) the
+	// store is no w4. The reinterpret's fresh-box store, which lost the write (BOARD 2026-11-20), is gone.
+	if got := strings.Count(mainCs, "@unsafe.Pointer.FuncOfWord<"); got != 1 {
+		t.Errorf("want 1 FuncOfWord (the one w4 store), got %d: %s", got, mainCs)
+	}
+
+	if strings.Contains(mainCs, "(Ꮡ(@unsafe.Pointer.OfFunc(h))).Value =") {
+		t.Errorf("a pointer word stored into a func variable must not store into the reinterpret's fresh box: %s", mainCs)
 	}
 
 	if strings.Contains(mainCs, typedPointerDoor+"<Func<") {

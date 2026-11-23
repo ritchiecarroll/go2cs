@@ -408,7 +408,7 @@ internal static void dumpgs() {
     assertWorldStopped();
 
     // goroutines & stacks
-    forEachG((ж<g> gp) => {
+    forEachG([GoFunc("dumpgs.func1")] (ж<g> gp) => {
         var status = readgstatus(gp); // The world is stopped so gp will not be in a scan state.
         var matchᴛ2 = status == _Grunning || (status == _Gdead || status == _Gdeadextra) || (status == _Grunnable || status == _Gsyscall || status == _Gwaiting);
         if (status == _Grunning) {

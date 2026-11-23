@@ -19,7 +19,6 @@ using sync = sync_package;
 using time = time_package;
 using go.net;
 using go.net.http.@internal;
-using static cookiejar_package;
 
 partial class cookiejar_package {
 
@@ -114,24 +113,22 @@ partial struct entry {
     internal uint64 seqNum;
 }
 
-} partial class cookiejarᴛentry {
-
 // id returns the domain;path;name triple of e as an id.
-internal static @string id(this ref entry e) {
+internal static @string id⁔(/*this*/ ref entry e) {
     return fmt.Sprintf("%s;%s;%s"u8, e.Domain, e.Path, e.Name);
 }
 
 // shouldSend determines whether e's cookie qualifies to be included in a
 // request to host/path. It is the caller's responsibility to check if the
 // cookie is expired.
-internal static bool shouldSend(this ref entry e, bool https, @string host, @string path) {
+internal static bool shouldSend⁔(/*this*/ ref entry e, bool https, @string host, @string path) {
     return e.domainMatch(host) && e.pathMatch(path) && e.secureMatch(https);
 }
 
 // domainMatch checks whether e's Domain allows sending e back to host.
 // It differs from "domain-match" of RFC 6265 section 5.1.3 because we treat
 // a cookie with an IP address in the Domain always as a host cookie.
-internal static bool domainMatch(this ref entry e, @string host) {
+internal static bool domainMatch⁔(/*this*/ ref entry e, @string host) {
     if (e.Domain == host) {
         return true;
     }
@@ -139,7 +136,7 @@ internal static bool domainMatch(this ref entry e, @string host) {
 }
 
 // pathMatch implements "path-match" according to RFC 6265 section 5.1.4.
-internal static bool pathMatch(this ref entry e, @string requestPath) {
+internal static bool pathMatch⁔(/*this*/ ref entry e, @string requestPath) {
     if (requestPath == e.Path) {
         return true;
     }
@@ -156,7 +153,7 @@ internal static bool pathMatch(this ref entry e, @string requestPath) {
 // secureMatch checks whether a cookie should be sent based on the protocol
 // and the Secure flag. Localhost is considered a secure origin regardless
 // of protocol, matching browser behavior.
-internal static bool secureMatch(this ref entry e, bool https) {
+internal static bool secureMatch⁔(/*this*/ ref entry e, bool https) {
     if (!e.Secure) {
         // Cookies not marked secure are always sent.
         return true;
@@ -177,8 +174,6 @@ internal static bool secureMatch(this ref entry e, bool https) {
     return false;
 }
 
-} partial class cookiejar_package {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string localhostˢ => ref localhostˢᵇ;
 private static readonly @string localhostˢᵇ = "localhost"u8;
@@ -196,17 +191,15 @@ internal static bool hasDotSuffix(@string s, @string suffix) {
     return len(s) > len(suffix) && s[len(s) - len(suffix) - 1] == '.' && s.slice(len(s) - len(suffix)) == suffix;
 }
 
-} partial class cookiejarᴛJar {
-
 // Cookies implements the Cookies method of the [http.CookieJar] interface.
 //
 // It returns an empty slice if the URL's scheme is not HTTP or HTTPS.
-public static slice<ж<http.Cookie>> /*cookies*/ Cookies(this ж<Jar> Ꮡj, ж<url.URL> u) {
+internal static slice<ж<http.Cookie>> /*cookies*/ Cookies⁔(/*this*/ ж<Jar> Ꮡj, ж<url.URL> u) {
     return Ꮡj.cookies(u, time.Now());
 }
 
 // cookies is like Cookies but takes the current time as a parameter.
-internal static slice<ж<http.Cookie>> /*cookies*/ cookies(this ж<Jar> Ꮡj, ж<url.URL> Ꮡu, time.Time now) {
+internal static slice<ж<http.Cookie>> /*cookies*/ cookies⁔(/*this*/ ж<Jar> Ꮡj, ж<url.URL> Ꮡu, time.Time now) {
     slice<ж<http.Cookie>> cookies = default;
     GoFrame ᒐ = default;
     try {
@@ -264,7 +257,7 @@ internal static slice<ж<http.Cookie>> /*cookies*/ cookies(this ж<Jar> Ꮡj, ж
 
         // sort according to RFC 6265 section 5.4 point 2: by longest
         // path and then by earliest creation time.
-        slices.SortFunc(selected, (entry a, entry b) => {
+        slices.SortFunc(selected, [GoFunc("(*Jar).cookies.func1")] (entry a, entry b) => {
             {
                 nint r = cmp.Compare(b.Path, a.Path); if (r != 0) {
                     return r;
@@ -289,12 +282,12 @@ internal static slice<ж<http.Cookie>> /*cookies*/ cookies(this ж<Jar> Ꮡj, ж
 // SetCookies implements the SetCookies method of the [http.CookieJar] interface.
 //
 // It does nothing if the URL's scheme is not HTTP or HTTPS.
-public static void SetCookies(this ж<Jar> Ꮡj, ж<url.URL> u, slice<ж<http.Cookie>> cookies) {
+internal static void SetCookies⁔(/*this*/ ж<Jar> Ꮡj, ж<url.URL> u, slice<ж<http.Cookie>> cookies) {
     Ꮡj.setCookies(u, cookies, time.Now());
 }
 
 // setCookies is like SetCookies but takes the current time as parameter.
-internal static void setCookies(this ж<Jar> Ꮡj, ж<url.URL> Ꮡu, slice<ж<http.Cookie>> cookies, time.Time now) {
+internal static void setCookies⁔(/*this*/ ж<Jar> Ꮡj, ж<url.URL> Ꮡu, slice<ж<http.Cookie>> cookies, time.Time now) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -363,8 +356,6 @@ internal static void setCookies(this ж<Jar> Ꮡj, ж<url.URL> Ꮡu, slice<ж<ht
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { if (ᒐd1) Ꮡj.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
-
-} partial class cookiejar_package {
 
 // canonicalHost strips port from host if present and returns the canonicalized
 // host name.
@@ -457,8 +448,6 @@ internal static @string defaultPath(@string path) {
     return path.slice(0, i); // Path is either of form "/abc/xyz" or "/abc/xyz/".
 }
 
-} partial class cookiejarᴛJar {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string sameSiteˢ => ref sameSiteˢᵇ;
 private static readonly @string sameSiteˢᵇ = "SameSite"u8;
@@ -476,7 +465,7 @@ private static readonly @string sameSiteLaxˢᵇ = "SameSite=Lax"u8;
 // be valid to call e.id (which depends on e's Name, Domain and Path).
 //
 // A malformed c.Domain will result in an error.
-internal static (entry e, bool remove, error err) newEntry(this ref Jar j, ж<http.Cookie> Ꮡc, time.Time now, @string defPath, @string host) {
+internal static (entry e, bool remove, error err) newEntry⁔(/*this*/ ref Jar j, ж<http.Cookie> Ꮡc, time.Time now, @string defPath, @string host) {
     entry e = default;
     error err = default;
     ref var c = ref Ꮡc.DerefOrNull();
@@ -535,8 +524,6 @@ internal static (entry e, bool remove, error err) newEntry(this ref Jar j, ж<ht
     return (e, false, default);
 }
 
-} partial class cookiejar_package {
-
 internal static error errIllegalDomain = errors.New("cookiejar: illegal cookie domain attribute");
 internal static error errMalformedDomain = errors.New("cookiejar: malformed cookie domain attribute");
 
@@ -545,10 +532,8 @@ internal static error errMalformedDomain = errors.New("cookiejar: malformed cook
 // Go's time.Time) and should be far enough in the future.
 internal static time.Time endOfTime = time.Date(9999, 12, 31, 23, 59, 59, 0, time.UTC);
 
-} partial class cookiejarᴛJar {
-
 // domainAndType determines the cookie's domain and hostOnly attribute.
-internal static (@string, bool, error) domainAndType(this ref Jar j, @string host, @string domain) {
+internal static (@string, bool, error) domainAndType⁔(/*this*/ ref Jar j, @string host, @string domain) {
     if (domain == ""u8) {
         // No domain attribute in the SetCookie header indicates a
         // host cookie.
@@ -636,4 +621,4 @@ internal static (@string, bool, error) domainAndType(this ref Jar j, @string hos
     return (domain, false, default);
 }
 
-}
+} // end cookiejar_package

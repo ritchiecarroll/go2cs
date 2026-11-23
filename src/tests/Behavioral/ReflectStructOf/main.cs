@@ -15,7 +15,7 @@ internal static @string /*msg*/ recovered(Action fn) {
     @string msg = default;
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("recovered.func1")] () => {
             var r = recover(); if (r != nil) {
                 msg = fmt.Sprint(r);
             }
@@ -126,26 +126,26 @@ internal static void main() {
     fmt.Println("nested structs:", deep, "| size:", deep.Size());
 
     var intTʗ1 = intT;
-    fmt.Println("no name:", recovered(() => {
+    fmt.Println("no name:", recovered([GoFunc("main.func1")] () => {
         reflect.StructOf(slice<reflect.StructField>([field("", intTʗ1)]));
     }));
     var intTʗ2 = intT;
-    fmt.Println("invalid name:", recovered(() => {
+    fmt.Println("invalid name:", recovered([GoFunc("main.func2")] () => {
         reflect.StructOf(slice<reflect.StructField>([field("1bad", intTʗ2)]));
     }));
-    fmt.Println("no type:", recovered(() => {
+    fmt.Println("no type:", recovered([GoFunc("main.func3")] () => {
         reflect.StructOf([new(Name: "A")]);
     }));
     var intTʗ3 = intT;
     var strTʗ1 = strT;
-    fmt.Println("duplicate:", recovered(() => {
+    fmt.Println("duplicate:", recovered([GoFunc("main.func4")] () => {
         reflect.StructOf(slice<reflect.StructField>([field("A", intTʗ3), field("A", strTʗ1)]));
     }));
     var intTʗ4 = intT;
-    fmt.Println("unexported no pkgpath:", recovered(() => {
+    fmt.Println("unexported no pkgpath:", recovered([GoFunc("main.func5")] () => {
         reflect.StructOf([new(Name: "lower", Type: intTʗ4)]);
     }));
-    fmt.Println("anonymous with pkgpath:", recovered(() => {
+    fmt.Println("anonymous with pkgpath:", recovered([GoFunc("main.func6")] () => {
         reflect.StructOf(slice<reflect.StructField>([new(Name: "Celsius", Type: reflect.TypeOf((Celsius)0D), Anonymous: true, PkgPath: "main")]));
     }));
 }

@@ -12,13 +12,10 @@ using slices = slices_package;
 using errors = global::go.@internal.types.errors_package;
 using global::go.@internal;
 using global::go.go;
-using static types_package;
 
 partial class types_package {
 
-} partial class typesᴛChecker {
-
-internal static void declare(this ж<Checker> Ꮡcheck, ж<Scope> scope, ж<ast.Ident> id, Object obj, token.Pos pos) {
+internal static void declare⁔(/*this*/ ж<Checker> Ꮡcheck, ж<Scope> scope, ж<ast.Ident> id, Object obj, token.Pos pos) {
     ref var check = ref Ꮡcheck.DerefOrNull();
 
     // spec: "The blank identifier, represented by the underscore
@@ -40,8 +37,6 @@ internal static void declare(this ж<Checker> Ꮡcheck, ж<Scope> scope, ж<ast.
     }
 }
 
-} partial class types_package {
-
 // pathString returns a string of the form a->b-> ... ->g for a path [a, b, ... g].
 internal static @string pathString(slice<Object> path) {
     @string s = default;
@@ -54,21 +49,19 @@ internal static @string pathString(slice<Object> path) {
     return s;
 }
 
-} partial class typesᴛChecker {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string checkingSObjPathSˢ => ref checkingSObjPathSˢᵇ;
 private static readonly @string checkingSObjPathSˢᵇ = "-- checking %s (objPath = %s)"u8;
 
 // objDecl type-checks the declaration of obj in its respective (file) environment.
-internal static void objDecl(this ж<Checker> Ꮡcheck, Object obj) {
+internal static void objDecl⁔(/*this*/ ж<Checker> Ꮡcheck, Object obj) {
     GoFrame ᒐ = default;
     try {
         ref var check = ref Ꮡcheck.DerefOrNull();
 
         if (tracePos) {
             check.pushPos((atPos)obj.Pos());
-            defer(() => {
+            defer([GoFunc("(*Checker).objDecl.func1")] () => {
                 // If we're panicking, keep stack of source positions.
                 var p = recover(); if (p != nil) {
                     throw panic(p);
@@ -83,7 +76,7 @@ internal static void objDecl(this ж<Checker> Ꮡcheck, Object obj) {
             }
             Ꮡcheck.trace(obj.Pos(), checkingSObjPathSˢ, obj, pathString(check.objPath));
             check.indent++;
-            defer(() => {
+            defer([GoFunc("(*Checker).objDecl.func2")] () => {
                 Ꮡcheck.Value.indent--;
                 Ꮡcheck.trace(obj.Pos(), "=> %s", obj);
             }, ref ᒐ);
@@ -166,7 +159,7 @@ internal static void objDecl(this ж<Checker> Ꮡcheck, Object obj) {
         assert(ok);
 
         // save/restore current environment and set up object environment
-        defer((environment env) => {
+        defer([GoFunc("(*Checker).objDecl.func3")] (environment env) => {
             Ꮡcheck.Value.environment = env;
         }, Ꮡcheck.Value.environment, ref ᒐ);
         check.environment = new environment(scope: d.@file, version: d.version);
@@ -224,7 +217,7 @@ private static readonly @string errorCycleIsInvalidˢᵇ = "=> error: cycle is i
 
 // validCycle checks if the cycle starting with obj is valid and
 // reports an error if it is not.
-internal static bool /*valid*/ validCycle(this ж<Checker> Ꮡcheck, Object obj) {
+internal static bool /*valid*/ validCycle⁔(/*this*/ ж<Checker> Ꮡcheck, Object obj) {
     bool valid = default;
     GoFrame ᒐ = default;
     try {
@@ -310,7 +303,7 @@ break_loop:;
             } else {
                 Ꮡcheck.trace(obj.Pos(), cycleContainsDValuesDˢ, nval, ndef);
             }
-            defer(() => {
+            defer([GoFunc("(*Checker).validCycle.func1")] () => {
                 if (valid) {
                     Ꮡcheck.trace(obj.Pos(), cycleIsValidˢ);
                 } else {
@@ -347,14 +340,14 @@ break_loop:;
 }
 
 // cycleError reports a declaration cycle starting with the object at cycle[start].
-internal static void cycleError(this ж<Checker> Ꮡcheck, slice<Object> cycle, nint start) {
+internal static void cycleError⁔(/*this*/ ж<Checker> Ꮡcheck, slice<Object> cycle, nint start) {
     ref var check = ref Ꮡcheck.DerefOrNull();
 
     // name returns the (possibly qualified) object name.
     // This is needed because with generic types, cycles
     // may refer to imported types. See go.dev/issue/50788.
     // TODO(gri) This functionality is used elsewhere. Factor it out.
-    @string name(Object objΔ1) => packagePrefix(objΔ1.Pkg(), new Func<ж<Package>, @string>(Ꮡcheck.qualifier)) + objΔ1.Name();
+    [GoFunc("(*Checker).cycleError.func1")] @string name(Object objΔ1) => packagePrefix(objΔ1.Pkg(), new Func<ж<Package>, @string>(Ꮡcheck.qualifier)) + objΔ1.Name();
 
     // If obj is a type alias, mark it as valid (not broken) in order to avoid follow-on errors.
     var obj = cycle[start];
@@ -395,8 +388,6 @@ internal static void cycleError(this ж<Checker> Ꮡcheck, slice<Object> cycle, 
     }
     err.report();
 }
-
-} partial class types_package {
 
 // firstInSrc reports the index of the object with the "smallest"
 // source position in path. path must not be empty.
@@ -439,35 +430,19 @@ partial struct funcDecl {
     internal ж<ast.FuncDecl> decl;
 }
 
-} partial class typesᴛimportDecl {
+internal static ast.Node node⁔(/*this*/ importDecl d) { return new ast.ImportSpecжNode(d.spec); }
+internal static ast.Node node⁔(/*this*/ constDecl d) { return new ast.ValueSpecжNode(d.spec); }
+internal static ast.Node node⁔(/*this*/ varDecl d) { return new ast.ValueSpecжNode(d.spec); }
+internal static ast.Node node⁔(/*this*/ typeDecl d) { return new ast.TypeSpecжNode(d.spec); }
+internal static ast.Node node⁔(/*this*/ funcDecl d) { return new ast.FuncDeclжNode(d.decl); }
 
-internal static ast.Node node(this importDecl d) { return new ast.ImportSpecжNode(d.spec); }
-
-} partial class typesᴛconstDecl {
-
-internal static ast.Node node(this constDecl d) { return new ast.ValueSpecжNode(d.spec); }
-
-} partial class typesᴛvarDecl {
-
-internal static ast.Node node(this varDecl d) { return new ast.ValueSpecжNode(d.spec); }
-
-} partial class typesᴛtypeDecl {
-
-internal static ast.Node node(this typeDecl d) { return new ast.TypeSpecжNode(d.spec); }
-
-} partial class typesᴛfuncDecl {
-
-internal static ast.Node node(this funcDecl d) { return new ast.FuncDeclжNode(d.decl); }
-
-} partial class typesᴛChecker {
-
-internal static void walkDecls(this ж<Checker> Ꮡcheck, slice<ast.Decl> decls, Action<decl> f) {
+internal static void walkDecls⁔(/*this*/ ж<Checker> Ꮡcheck, slice<ast.Decl> decls, Action<decl> f) {
     foreach (var (_, d) in range(decls)) {
         Ꮡcheck.walkDecl(d, f);
     }
 }
 
-internal static void walkDecl(this ж<Checker> Ꮡcheck, ast.Decl d, Action<decl> f) {
+internal static void walkDecl⁔(/*this*/ ж<Checker> Ꮡcheck, ast.Decl d, Action<decl> f) {
     switch (d.type()) {
     case ж<ast.BadDecl> dΔ1: {
         // ignore
@@ -535,7 +510,7 @@ internal static void walkDecl(this ж<Checker> Ꮡcheck, ast.Decl d, Action<decl
     }}
 }
 
-internal static void constDecl(this ж<Checker> Ꮡcheck, ж<Const> Ꮡobj, ast.Expr typ, ast.Expr init, bool inherited) {
+internal static void constDecl⁔(/*this*/ ж<Checker> Ꮡcheck, ж<Const> Ꮡobj, ast.Expr typ, ast.Expr init, bool inherited) {
     GoFrame ᒐ = default;
     try {
         ref var check = ref Ꮡcheck.DerefOrNull();
@@ -544,7 +519,7 @@ internal static void constDecl(this ж<Checker> Ꮡcheck, ж<Const> Ꮡobj, ast.
         assert(obj.typ == nil);
 
         // use the correct value of iota
-        defer((constant.Value iota, positioner errpos) => {
+        defer([GoFunc("(*Checker).constDecl.func1")] (constant.Value iota, positioner errpos) => {
             Ꮡcheck.Value.iota = iota;
             Ꮡcheck.Value.errpos = errpos;
         }, Ꮡcheck.Value.iota, Ꮡcheck.Value.errpos, ref ᒐ);
@@ -593,7 +568,7 @@ internal static void constDecl(this ж<Checker> Ꮡcheck, ж<Const> Ꮡobj, ast.
 internal static ref readonly @string variableDeclarationˢ => ref variableDeclarationˢᵇ;
 private static readonly @string variableDeclarationˢᵇ = "variable declaration"u8;
 
-internal static void varDecl(this ж<Checker> Ꮡcheck, ж<Var> Ꮡobj, slice<ж<Var>> lhs, ast.Expr typ, ast.Expr init) {
+internal static void varDecl⁔(/*this*/ ж<Checker> Ꮡcheck, ж<Var> Ꮡobj, slice<ж<Var>> lhs, ast.Expr typ, ast.Expr init) {
     ref var obj = ref Ꮡobj.DerefOrNull();
 
     assert(obj.typ == nil);
@@ -649,7 +624,7 @@ internal static void varDecl(this ж<Checker> Ꮡcheck, ж<Var> Ꮡobj, slice<ж
 }
 
 // isImportedConstraint reports whether typ is an imported type constraint.
-internal static bool isImportedConstraint(this ref Checker check, Type typ) {
+internal static bool isImportedConstraint⁔(/*this*/ ref Checker check, Type typ) {
     var named = asNamed(typ);
     if (named == nil || named.obj.pkg == check.pkg || named.obj.pkg == nil) {
         return false;
@@ -668,7 +643,7 @@ private static readonly @string genericTypeAliasRequiresˢᵇ = "generic type al
 internal static ref readonly @string cannotUseATypeParameterˢ => ref cannotUseATypeParameterˢᵇ;
 private static readonly @string cannotUseATypeParameterˢᵇ = "cannot use a type parameter as RHS in type declaration"u8;
 
-internal static void typeDecl(this ж<Checker> Ꮡcheck, ж<TypeName> Ꮡobj, ж<ast.TypeSpec> Ꮡtdecl) {
+internal static void typeDecl⁔(/*this*/ ж<Checker> Ꮡcheck, ж<TypeName> Ꮡobj, ж<ast.TypeSpec> Ꮡtdecl) {
     GoFrame ᒐ = default;
     try {
         ref var check = ref Ꮡcheck.DerefOrNull();
@@ -681,7 +656,7 @@ internal static void typeDecl(this ж<Checker> Ꮡcheck, ж<TypeName> Ꮡobj, ж
         var versionErr = false;
 
         ref var rhs = ref heap<Type>(out var Ꮡrhs);
-        check.later(() => {
+        check.later([GoFunc("(*Checker).typeDecl.func1")] () => {
             var t = asNamed(Ꮡobj.Value.typ); if (t != nil) { // type may be invalid
                 Ꮡcheck.validType(t);
             }
@@ -712,7 +687,7 @@ internal static void typeDecl(this ж<Checker> Ꮡcheck, ж<TypeName> Ꮡobj, ж
                 // If we could not type the RHS, set it to invalid. This should
                 // only ever happen if we panic before setting.
                 var aliasʗ1 = alias;
-                defer(() => {
+                defer([GoFunc("(*Checker).typeDecl.func2")] () => {
                     if (aliasʗ1.fromRHS == nil) {
                         aliasʗ1.fromRHS = new BasicжType(Typ[Invalid]);
                         unalias(aliasʗ1);
@@ -774,7 +749,7 @@ internal static void typeDecl(this ж<Checker> Ꮡcheck, ж<TypeName> Ꮡobj, ж
         // Instead, we briefly permit a nil N.fromRHS while type-checking D.
         named.allowNilRHS = true;
         var namedʗ1 = named;
-        defer(() => {
+        defer([GoFunc("(*Checker).typeDecl.func3")] () => {
             namedʗ1.allowNilRHS = false;
         }, ref ᒐ);
 
@@ -803,7 +778,7 @@ internal static void typeDecl(this ж<Checker> Ꮡcheck, ж<TypeName> Ꮡobj, ж
 internal static ref readonly @string cannotUseATypeParameterˢ2 => ref cannotUseATypeParameterˢ2ᵇ;
 private static readonly @string cannotUseATypeParameterˢ2ᵇ = "cannot use a type parameter as constraint"u8;
 
-internal static void collectTypeParams(this ж<Checker> Ꮡcheck, ж<ж<TypeParamList>> Ꮡdst, ж<ast.FieldList> Ꮡlist) {
+internal static void collectTypeParams⁔(/*this*/ ж<Checker> Ꮡcheck, ж<ж<TypeParamList>> Ꮡdst, ж<ast.FieldList> Ꮡlist) {
     GoFrame ᒐ = default;
     try {
         ref var check = ref Ꮡcheck.DerefOrNull();
@@ -835,7 +810,7 @@ internal static void collectTypeParams(this ж<Checker> Ꮡcheck, ж<ж<TypePara
         // true exactly only when we are in a specific type parameter list.
         assert(!check.inTParamList);
         check.inTParamList = true;
-        defer(() => {
+        defer([GoFunc("(*Checker).collectTypeParams.func1")] () => {
             Ꮡcheck.Value.inTParamList = false;
         }, ref ᒐ);
 
@@ -867,7 +842,7 @@ internal static void collectTypeParams(this ж<Checker> Ꮡcheck, ж<ж<TypePara
     finally { ᒐ.Run(); }
 }
 
-internal static Type bound(this ж<Checker> Ꮡcheck, ast.Expr x) {
+internal static Type bound⁔(/*this*/ ж<Checker> Ꮡcheck, ast.Expr x) {
     // A type set literal of the form ~T and A|B may only appear as constraint;
     // embed it in an implicit interface so that only interface type-checking
     // needs to take care of such type expressions.
@@ -893,7 +868,7 @@ internal static Type bound(this ж<Checker> Ꮡcheck, ast.Expr x) {
     return Ꮡcheck.typ(x);
 }
 
-internal static ж<TypeParam> declareTypeParam(this ж<Checker> Ꮡcheck, ж<ast.Ident> Ꮡname, token.Pos scopePos) {
+internal static ж<TypeParam> declareTypeParam⁔(/*this*/ ж<Checker> Ꮡcheck, ж<ast.Ident> Ꮡname, token.Pos scopePos) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var name = ref Ꮡname.DerefOrNull();
 
@@ -909,7 +884,7 @@ internal static ж<TypeParam> declareTypeParam(this ж<Checker> Ꮡcheck, ж<ast
     return tpar;
 }
 
-internal static void collectMethods(this ж<Checker> Ꮡcheck, ж<TypeName> Ꮡobj) {
+internal static void collectMethods⁔(/*this*/ ж<Checker> Ꮡcheck, ж<TypeName> Ꮡobj) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var obj = ref Ꮡobj.DerefOrNull();
 
@@ -936,7 +911,7 @@ internal static void collectMethods(this ж<Checker> Ꮡcheck, ж<TypeName> Ꮡo
         // See go.dev/issue/52529: we must delay the expansion of underlying here, as
         // base may not be fully set-up.
         var baseʗ1 = @base;
-        check.later(() => {
+        check.later([GoFunc("(*Checker).collectMethods.func1")] () => {
             Ꮡcheck.checkFieldUniqueness(baseʗ1);
         }).describef(new TypeNameжpositioner(Ꮡobj), "verifying field uniqueness for %v", @base.OrTypedNil());
 
@@ -970,7 +945,7 @@ internal static void collectMethods(this ж<Checker> Ꮡcheck, ж<TypeName> Ꮡo
     }
 }
 
-internal static void checkFieldUniqueness(this ж<Checker> Ꮡcheck, ж<Named> @base) {
+internal static void checkFieldUniqueness⁔(/*this*/ ж<Checker> Ꮡcheck, ж<Named> @base) {
     var (t, _) = @base.Underlying()._<ж<Struct>>(ᐧ); if (t != nil) {
         objset mset = default;
         for (nint i = 0; i < @base.NumMethods(); i++) {
@@ -1000,7 +975,7 @@ internal static void checkFieldUniqueness(this ж<Checker> Ꮡcheck, ж<Named> @
     }
 }
 
-internal static void funcDecl(this ж<Checker> Ꮡcheck, ж<Func> Ꮡobj, ж<declInfo> Ꮡdecl) {
+internal static void funcDecl⁔(/*this*/ ж<Checker> Ꮡcheck, ж<Func> Ꮡobj, ж<declInfo> Ꮡdecl) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var obj = ref Ꮡobj.DerefOrNull();
     ref var decl = ref Ꮡdecl.DerefOrNull();
@@ -1030,19 +1005,19 @@ internal static void funcDecl(this ж<Checker> Ꮡcheck, ж<Func> Ꮡobj, ж<dec
     if (!check.conf.IgnoreFuncBodies && fdecl.Body != nil) {
         var fdeclʗ1 = fdecl;
         var sigʗ1 = sig;
-        check.later(() => {
+        check.later([GoFunc("(*Checker).funcDecl.func1")] () => {
             Ꮡcheck.funcBody(Ꮡdecl, Ꮡobj.Value.name, sigʗ1, fdeclʗ1.Body, default);
         }).describef(new Funcжpositioner(Ꮡobj), "func %s", obj.name);
     }
 }
 
-internal static void declStmt(this ж<Checker> Ꮡcheck, ast.Decl d) {
+internal static void declStmt⁔(/*this*/ ж<Checker> Ꮡcheck, ast.Decl d) {
     ref var check = ref Ꮡcheck.DerefOrNull();
 
     var pkg = check.pkg;
 
     var pkgʗ1 = pkg;
-    Ꮡcheck.walkDecl(d, (decl dΔ1) => {
+    Ꮡcheck.walkDecl(d, [GoFunc("(*Checker).declStmt.func1")] (decl dΔ1) => {
         switch (dΔ1.type()) {
         case constDecl dΔ2: {
             nint top = len(Ꮡcheck.Value.delayed);
@@ -1152,4 +1127,4 @@ internal static void declStmt(this ж<Checker> Ꮡcheck, ast.Decl d) {
     });
 }
 
-}
+} // end types_package

@@ -14,7 +14,7 @@ public static void Add(this ж<Tally> Ꮡt, nint n) {
     try {
         ref var t = ref Ꮡt.DerefOrNull();
 
-        defer(() => {
+        defer([GoFunc("(*Tally).Add.func1")] () => {
             Ꮡt.Value.log = fmt.Sprintf("%s+%d"u8, Ꮡt.Value.log, n);
         }, ref ᒐ);
         t.total += n;
@@ -26,7 +26,7 @@ public static void Add(this ж<Tally> Ꮡt, nint n) {
 internal static (nint, nint, @string) closureRead(Tally tʗp, nint n) {
     ref var t = ref heap(tʗp, out var Ꮡt);
 
-    nint get() => Ꮡt.Value.total;
+    [GoFunc("closureRead.func1")] nint get() => Ꮡt.Value.total;
     nint before = get();
     Ꮡt.Add(n);
     nint after = get();
@@ -36,7 +36,7 @@ internal static (nint, nint, @string) closureRead(Tally tʗp, nint n) {
 internal static (nint, @string) closureWrite(Tally tʗp, nint n) {
     ref var t = ref heap(tʗp, out var Ꮡt);
 
-    void bump() {
+    [GoFunc("closureWrite.func1")] void bump() {
         Ꮡt.Value.total += 100;
     }
     bump();
@@ -52,7 +52,7 @@ internal static (nint result, @string log) deferClosure(Tally tʗp, nint n) {
     try {
         ref var t = ref heap(tʗp, out var Ꮡt);
 
-        defer(() => {
+        defer([GoFunc("deferClosure.func1")] () => {
             (result, log) = (Ꮡt.Value.total, Ꮡt.Value.log);
         }, ref ᒐ);
         Ꮡt.Add(n);
@@ -71,7 +71,7 @@ internal static (nint total, @string log) deferMethodValue(Tally tʗp, nint n) {
     try {
         ref var t = ref heap(tʗp, out var Ꮡt);
 
-        defer(() => {
+        defer([GoFunc("deferMethodValue.func1")] () => {
             (total, log) = (Ꮡt.Value.total, Ꮡt.Value.log);
         }, ref ᒐ);
         defer(Ꮡt.Add, n, ref ᒐ);

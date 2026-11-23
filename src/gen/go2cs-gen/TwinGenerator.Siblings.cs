@@ -18,7 +18,7 @@ using Microsoft.CodeAnalysis.Text;
 
 namespace go2cs;
 
-// M:N SPIKE (R5b, B4). Spike code: it stays on the spike branch and never lands.
+// M:N scheduler, experimental and opt-in (GoTwins=true to build, GO2CS_MN=1 to run); inert otherwise.
 // How the twin generator gets to see what its sibling generators add, and what each way costs.
 
 /// <summary>

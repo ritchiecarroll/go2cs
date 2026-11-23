@@ -10,7 +10,6 @@ using slices = slices_package;
 using strings = strings_package;
 using cryptobyte = vendor.golang.org.x.crypto.cryptobyte_package;
 using vendor.golang.org.x.crypto;
-using static tls_package;
 
 partial class tls_package {
 
@@ -18,19 +17,15 @@ partial class tls_package {
 // functions as cryptobyte.MarshalingValue.
 internal delegate error marshalingFunction(ж<cryptobyte.Builder> b);
 
-} partial class tlsᴛmarshalingFunction {
-
-internal static error Marshal(this marshalingFunction f, ж<cryptobyte.Builder> b) {
+internal static error Marshal⁔(/*this*/ marshalingFunction f, ж<cryptobyte.Builder> b) {
     return f(b);
 }
-
-} partial class tls_package {
 
 // addBytesWithLength appends a sequence of bytes to the cryptobyte.Builder. If
 // the length of the sequence is not the value specified, it produces an error.
 internal static void addBytesWithLength(ж<cryptobyte.Builder> b, slice<byte> v, nint n) {
     var vʗ1 = v;
-    b.AddValue(new marshalingFunctionᴠMarshalingValue(new marshalingFunction(error (ж<cryptobyte.Builder> bΔ1) => {
+    b.AddValue(new marshalingFunctionᴠMarshalingValue(new marshalingFunction([GoFunc("addBytesWithLength.func1")] error (ж<cryptobyte.Builder> bΔ1) => {
         if (len(vʗ1) != n) {
             return fmt.Errorf("invalid value length: expected %d, got %d"u8, n, len(vʗ1));
         }
@@ -118,9 +113,7 @@ partial struct clientHelloMsg {
     internal slice<uint16> extensions;
 }
 
-} partial class tlsᴛclientHelloMsg {
-
-internal static (slice<byte>, error) marshalMsg(this ж<clientHelloMsg> Ꮡm, bool echInner) {
+internal static (slice<byte>, error) marshalMsg⁔(/*this*/ ж<clientHelloMsg> Ꮡm, bool echInner) {
     ref var m = ref Ꮡm.DerefOrNull();
     var echOuterExtsᴷ = new stackAppend<uint16>();
 
@@ -128,10 +121,10 @@ internal static (slice<byte>, error) marshalMsg(this ж<clientHelloMsg> Ꮡm, bo
     if (len(m.serverName) > 0) {
         // RFC 6066, Section 3
         exts.AddUint16(extensionServerName);
-        Ꮡexts.AddUint16LengthPrefixed((ж<cryptobyte.Builder> extsΔ1) => {
-            extsΔ1.AddUint16LengthPrefixed((ж<cryptobyte.Builder> extsΔ2) => {
+        Ꮡexts.AddUint16LengthPrefixed([GoFunc("(*clientHelloMsg).marshalMsg.func1")] (ж<cryptobyte.Builder> extsΔ1) => {
+            extsΔ1.AddUint16LengthPrefixed([GoFunc("(*clientHelloMsg).marshalMsg.func1.1")] (ж<cryptobyte.Builder> extsΔ2) => {
                 extsΔ2.AddUint8(0); // name_type = host_name
-                extsΔ2.AddUint16LengthPrefixed((ж<cryptobyte.Builder> extsΔ3) => {
+                extsΔ2.AddUint16LengthPrefixed([GoFunc("(*clientHelloMsg).marshalMsg.func1.1.1")] (ж<cryptobyte.Builder> extsΔ3) => {
                     extsΔ3.AddBytes(slice<byte>(Ꮡm.Value.serverName));
                 });
             });
@@ -140,8 +133,8 @@ internal static (slice<byte>, error) marshalMsg(this ж<clientHelloMsg> Ꮡm, bo
     if (len(m.supportedPoints) > 0 && !echInner) {
         // RFC 4492, Section 5.1.2
         exts.AddUint16(extensionSupportedPoints);
-        Ꮡexts.AddUint16LengthPrefixed((ж<cryptobyte.Builder> extsΔ4) => {
-            extsΔ4.AddUint8LengthPrefixed((ж<cryptobyte.Builder> extsΔ5) => {
+        Ꮡexts.AddUint16LengthPrefixed([GoFunc("(*clientHelloMsg).marshalMsg.func2")] (ж<cryptobyte.Builder> extsΔ4) => {
+            extsΔ4.AddUint8LengthPrefixed([GoFunc("(*clientHelloMsg).marshalMsg.func2.1")] (ж<cryptobyte.Builder> extsΔ5) => {
                 extsΔ5.AddBytes(Ꮡm.Value.supportedPoints);
             });
         });
@@ -149,15 +142,15 @@ internal static (slice<byte>, error) marshalMsg(this ж<clientHelloMsg> Ꮡm, bo
     if (m.ticketSupported && !echInner) {
         // RFC 5077, Section 3.2
         exts.AddUint16(extensionSessionTicket);
-        Ꮡexts.AddUint16LengthPrefixed((ж<cryptobyte.Builder> extsΔ6) => {
+        Ꮡexts.AddUint16LengthPrefixed([GoFunc("(*clientHelloMsg).marshalMsg.func3")] (ж<cryptobyte.Builder> extsΔ6) => {
             extsΔ6.AddBytes(Ꮡm.Value.sessionTicket);
         });
     }
     if (m.secureRenegotiationSupported && !echInner) {
         // RFC 5746, Section 3.2
         exts.AddUint16(extensionRenegotiationInfo);
-        Ꮡexts.AddUint16LengthPrefixed((ж<cryptobyte.Builder> extsΔ7) => {
-            extsΔ7.AddUint8LengthPrefixed((ж<cryptobyte.Builder> extsΔ8) => {
+        Ꮡexts.AddUint16LengthPrefixed([GoFunc("(*clientHelloMsg).marshalMsg.func4")] (ж<cryptobyte.Builder> extsΔ7) => {
+            extsΔ7.AddUint8LengthPrefixed([GoFunc("(*clientHelloMsg).marshalMsg.func4.1")] (ж<cryptobyte.Builder> extsΔ8) => {
                 extsΔ8.AddBytes(Ꮡm.Value.secureRenegotiation);
             });
         });
@@ -180,13 +173,13 @@ internal static (slice<byte>, error) marshalMsg(this ж<clientHelloMsg> Ꮡm, bo
     if (m.quicTransportParameters != nil) { // marshal zero-length parameters when present
         // RFC 9001, Section 8.2
         exts.AddUint16(extensionQUICTransportParameters);
-        Ꮡexts.AddUint16LengthPrefixed((ж<cryptobyte.Builder> extsΔ9) => {
+        Ꮡexts.AddUint16LengthPrefixed([GoFunc("(*clientHelloMsg).marshalMsg.func5")] (ж<cryptobyte.Builder> extsΔ9) => {
             extsΔ9.AddBytes(Ꮡm.Value.quicTransportParameters);
         });
     }
     if (len(m.encryptedClientHello) > 0) {
         exts.AddUint16(extensionEncryptedClientHello);
-        Ꮡexts.AddUint16LengthPrefixed((ж<cryptobyte.Builder> extsΔ10) => {
+        Ꮡexts.AddUint16LengthPrefixed([GoFunc("(*clientHelloMsg).marshalMsg.func6")] (ж<cryptobyte.Builder> extsΔ10) => {
             extsΔ10.AddBytes(Ꮡm.Value.encryptedClientHello);
         });
     }
@@ -201,7 +194,7 @@ internal static (slice<byte>, error) marshalMsg(this ж<clientHelloMsg> Ꮡm, bo
             echOuterExts = append(echOuterExtsᴷ, echOuterExts, extensionStatusRequest);
         } else {
             exts.AddUint16(extensionStatusRequest);
-            Ꮡexts.AddUint16LengthPrefixed((ж<cryptobyte.Builder> extsΔ11) => {
+            Ꮡexts.AddUint16LengthPrefixed([GoFunc("(*clientHelloMsg).marshalMsg.func7")] (ж<cryptobyte.Builder> extsΔ11) => {
                 extsΔ11.AddUint8(1);  // status_type = ocsp
                 extsΔ11.AddUint16(0); // empty responder_id_list
                 extsΔ11.AddUint16(0); // empty request_extensions
@@ -214,8 +207,8 @@ internal static (slice<byte>, error) marshalMsg(this ж<clientHelloMsg> Ꮡm, bo
             echOuterExts = append(echOuterExts, extensionSupportedCurves);
         } else {
             exts.AddUint16(extensionSupportedCurves);
-            Ꮡexts.AddUint16LengthPrefixed((ж<cryptobyte.Builder> extsΔ12) => {
-                extsΔ12.AddUint16LengthPrefixed((ж<cryptobyte.Builder> extsΔ13) => {
+            Ꮡexts.AddUint16LengthPrefixed([GoFunc("(*clientHelloMsg).marshalMsg.func8")] (ж<cryptobyte.Builder> extsΔ12) => {
+                extsΔ12.AddUint16LengthPrefixed([GoFunc("(*clientHelloMsg).marshalMsg.func8.1")] (ж<cryptobyte.Builder> extsΔ13) => {
                     foreach (var (_, curve) in range(Ꮡm.Value.supportedCurves)) {
                         extsΔ13.AddUint16((uint16)curve);
                     }
@@ -229,8 +222,8 @@ internal static (slice<byte>, error) marshalMsg(this ж<clientHelloMsg> Ꮡm, bo
             echOuterExts = append(echOuterExts, extensionSignatureAlgorithms);
         } else {
             exts.AddUint16(extensionSignatureAlgorithms);
-            Ꮡexts.AddUint16LengthPrefixed((ж<cryptobyte.Builder> extsΔ14) => {
-                extsΔ14.AddUint16LengthPrefixed((ж<cryptobyte.Builder> extsΔ15) => {
+            Ꮡexts.AddUint16LengthPrefixed([GoFunc("(*clientHelloMsg).marshalMsg.func9")] (ж<cryptobyte.Builder> extsΔ14) => {
+                extsΔ14.AddUint16LengthPrefixed([GoFunc("(*clientHelloMsg).marshalMsg.func9.1")] (ж<cryptobyte.Builder> extsΔ15) => {
                     foreach (var (_, sigAlgo) in range(Ꮡm.Value.supportedSignatureAlgorithms)) {
                         extsΔ15.AddUint16((uint16)sigAlgo);
                     }
@@ -244,8 +237,8 @@ internal static (slice<byte>, error) marshalMsg(this ж<clientHelloMsg> Ꮡm, bo
             echOuterExts = append(echOuterExts, extensionSignatureAlgorithmsCert);
         } else {
             exts.AddUint16(extensionSignatureAlgorithmsCert);
-            Ꮡexts.AddUint16LengthPrefixed((ж<cryptobyte.Builder> extsΔ16) => {
-                extsΔ16.AddUint16LengthPrefixed((ж<cryptobyte.Builder> extsΔ17) => {
+            Ꮡexts.AddUint16LengthPrefixed([GoFunc("(*clientHelloMsg).marshalMsg.func10")] (ж<cryptobyte.Builder> extsΔ16) => {
+                extsΔ16.AddUint16LengthPrefixed([GoFunc("(*clientHelloMsg).marshalMsg.func10.1")] (ж<cryptobyte.Builder> extsΔ17) => {
                     foreach (var (_, sigAlgo) in range(Ꮡm.Value.supportedSignatureAlgorithmsCert)) {
                         extsΔ17.AddUint16((uint16)sigAlgo);
                     }
@@ -259,10 +252,10 @@ internal static (slice<byte>, error) marshalMsg(this ж<clientHelloMsg> Ꮡm, bo
             echOuterExts = append(echOuterExts, extensionALPN);
         } else {
             exts.AddUint16(extensionALPN);
-            Ꮡexts.AddUint16LengthPrefixed((ж<cryptobyte.Builder> extsΔ18) => {
-                extsΔ18.AddUint16LengthPrefixed((ж<cryptobyte.Builder> extsΔ19) => {
+            Ꮡexts.AddUint16LengthPrefixed([GoFunc("(*clientHelloMsg).marshalMsg.func11")] (ж<cryptobyte.Builder> extsΔ18) => {
+                extsΔ18.AddUint16LengthPrefixed([GoFunc("(*clientHelloMsg).marshalMsg.func11.1")] (ж<cryptobyte.Builder> extsΔ19) => {
                     foreach (var (_, proto) in range(Ꮡm.Value.alpnProtocols)) {
-                        extsΔ19.AddUint8LengthPrefixed((ж<cryptobyte.Builder> extsΔ20) => {
+                        extsΔ19.AddUint8LengthPrefixed([GoFunc("(*clientHelloMsg).marshalMsg.func11.1.1")] (ж<cryptobyte.Builder> extsΔ20) => {
                             extsΔ20.AddBytes(slice<byte>(proto));
                         });
                     }
@@ -276,8 +269,8 @@ internal static (slice<byte>, error) marshalMsg(this ж<clientHelloMsg> Ꮡm, bo
             echOuterExts = append(echOuterExts, extensionSupportedVersions);
         } else {
             exts.AddUint16(extensionSupportedVersions);
-            Ꮡexts.AddUint16LengthPrefixed((ж<cryptobyte.Builder> extsΔ21) => {
-                extsΔ21.AddUint8LengthPrefixed((ж<cryptobyte.Builder> extsΔ22) => {
+            Ꮡexts.AddUint16LengthPrefixed([GoFunc("(*clientHelloMsg).marshalMsg.func12")] (ж<cryptobyte.Builder> extsΔ21) => {
+                extsΔ21.AddUint8LengthPrefixed([GoFunc("(*clientHelloMsg).marshalMsg.func12.1")] (ж<cryptobyte.Builder> extsΔ22) => {
                     foreach (var (_, vers) in range(Ꮡm.Value.supportedVersions)) {
                         extsΔ22.AddUint16(vers);
                     }
@@ -291,8 +284,8 @@ internal static (slice<byte>, error) marshalMsg(this ж<clientHelloMsg> Ꮡm, bo
             echOuterExts = append(echOuterExts, extensionCookie);
         } else {
             exts.AddUint16(extensionCookie);
-            Ꮡexts.AddUint16LengthPrefixed((ж<cryptobyte.Builder> extsΔ23) => {
-                extsΔ23.AddUint16LengthPrefixed((ж<cryptobyte.Builder> extsΔ24) => {
+            Ꮡexts.AddUint16LengthPrefixed([GoFunc("(*clientHelloMsg).marshalMsg.func13")] (ж<cryptobyte.Builder> extsΔ23) => {
+                extsΔ23.AddUint16LengthPrefixed([GoFunc("(*clientHelloMsg).marshalMsg.func13.1")] (ж<cryptobyte.Builder> extsΔ24) => {
                     extsΔ24.AddBytes(Ꮡm.Value.cookie);
                 });
             });
@@ -304,15 +297,15 @@ internal static (slice<byte>, error) marshalMsg(this ж<clientHelloMsg> Ꮡm, bo
             echOuterExts = append(echOuterExts, extensionKeyShare);
         } else {
             exts.AddUint16(extensionKeyShare);
-            Ꮡexts.AddUint16LengthPrefixed((ж<cryptobyte.Builder> extsΔ25) => {
-                extsΔ25.AddUint16LengthPrefixed((ж<cryptobyte.Builder> extsΔ26) => {
+            Ꮡexts.AddUint16LengthPrefixed([GoFunc("(*clientHelloMsg).marshalMsg.func14")] (ж<cryptobyte.Builder> extsΔ25) => {
+                extsΔ25.AddUint16LengthPrefixed([GoFunc("(*clientHelloMsg).marshalMsg.func14.1")] (ж<cryptobyte.Builder> extsΔ26) => {
                     foreach (var (_, vᴛ1) in range(Ꮡm.Value.keyShares)) {
                         ref var ks = ref heap(new keyShare(), out var Ꮡks);
                         ks = vᴛ1;
 
                         extsΔ26.AddUint16((uint16)ks.group);
                         var ksʗ1 = ks;
-                        extsΔ26.AddUint16LengthPrefixed((ж<cryptobyte.Builder> extsΔ27) => {
+                        extsΔ26.AddUint16LengthPrefixed([GoFunc("(*clientHelloMsg).marshalMsg.func14.1.1")] (ж<cryptobyte.Builder> extsΔ27) => {
                             extsΔ27.AddBytes(ksʗ1.data);
                         });
                     }
@@ -326,8 +319,8 @@ internal static (slice<byte>, error) marshalMsg(this ж<clientHelloMsg> Ꮡm, bo
             echOuterExts = append(echOuterExts, extensionPSKModes);
         } else {
             exts.AddUint16(extensionPSKModes);
-            Ꮡexts.AddUint16LengthPrefixed((ж<cryptobyte.Builder> extsΔ28) => {
-                extsΔ28.AddUint8LengthPrefixed((ж<cryptobyte.Builder> extsΔ29) => {
+            Ꮡexts.AddUint16LengthPrefixed([GoFunc("(*clientHelloMsg).marshalMsg.func15")] (ж<cryptobyte.Builder> extsΔ28) => {
+                extsΔ28.AddUint8LengthPrefixed([GoFunc("(*clientHelloMsg).marshalMsg.func15.1")] (ж<cryptobyte.Builder> extsΔ29) => {
                     extsΔ29.AddBytes(Ꮡm.Value.pskModes);
                 });
             });
@@ -336,9 +329,9 @@ internal static (slice<byte>, error) marshalMsg(this ж<clientHelloMsg> Ꮡm, bo
     if (len(echOuterExts) > 0 && echInner) {
         exts.AddUint16(extensionECHOuterExtensions);
         var echOuterExtsʗ1 = echOuterExts;
-        Ꮡexts.AddUint16LengthPrefixed((ж<cryptobyte.Builder> extsΔ30) => {
+        Ꮡexts.AddUint16LengthPrefixed([GoFunc("(*clientHelloMsg).marshalMsg.func16")] (ж<cryptobyte.Builder> extsΔ30) => {
             var echOuterExtsʗ2 = echOuterExtsʗ1;
-            extsΔ30.AddUint8LengthPrefixed((ж<cryptobyte.Builder> extsΔ31) => {
+            extsΔ30.AddUint8LengthPrefixed([GoFunc("(*clientHelloMsg).marshalMsg.func16.1")] (ж<cryptobyte.Builder> extsΔ31) => {
                 foreach (var (_, e) in range(echOuterExtsʗ2)) {
                     extsΔ31.AddUint16(e);
                 }
@@ -349,23 +342,23 @@ internal static (slice<byte>, error) marshalMsg(this ж<clientHelloMsg> Ꮡm, bo
     if (len(m.pskIdentities) > 0 && (echInner || len(m.encryptedClientHello) == 0 || bytes.Equal(m.encryptedClientHello, [(byte)innerECHExt]))) {
         // RFC 8446, Section 4.2.11
         exts.AddUint16(extensionPreSharedKey);
-        Ꮡexts.AddUint16LengthPrefixed((ж<cryptobyte.Builder> extsΔ32) => {
-            extsΔ32.AddUint16LengthPrefixed((ж<cryptobyte.Builder> extsΔ33) => {
+        Ꮡexts.AddUint16LengthPrefixed([GoFunc("(*clientHelloMsg).marshalMsg.func17")] (ж<cryptobyte.Builder> extsΔ32) => {
+            extsΔ32.AddUint16LengthPrefixed([GoFunc("(*clientHelloMsg).marshalMsg.func17.1")] (ж<cryptobyte.Builder> extsΔ33) => {
                 foreach (var (_, vᴛ2) in range(Ꮡm.Value.pskIdentities)) {
                     ref var psk = ref heap(new pskIdentity(), out var Ꮡpsk);
                     psk = vᴛ2;
 
                     var pskʗ1 = psk;
-                    extsΔ33.AddUint16LengthPrefixed((ж<cryptobyte.Builder> extsΔ34) => {
+                    extsΔ33.AddUint16LengthPrefixed([GoFunc("(*clientHelloMsg).marshalMsg.func17.1.1")] (ж<cryptobyte.Builder> extsΔ34) => {
                         extsΔ34.AddBytes(pskʗ1.label);
                     });
                     extsΔ33.AddUint32(psk.obfuscatedTicketAge);
                 }
             });
-            extsΔ32.AddUint16LengthPrefixed((ж<cryptobyte.Builder> extsΔ35) => {
+            extsΔ32.AddUint16LengthPrefixed([GoFunc("(*clientHelloMsg).marshalMsg.func17.2")] (ж<cryptobyte.Builder> extsΔ35) => {
                 foreach (var (_, binder) in range(Ꮡm.Value.pskBinders)) {
                     var binderʗ1 = binder;
-                    extsΔ35.AddUint8LengthPrefixed((ж<cryptobyte.Builder> extsΔ36) => {
+                    extsΔ35.AddUint8LengthPrefixed([GoFunc("(*clientHelloMsg).marshalMsg.func17.2.1")] (ж<cryptobyte.Builder> extsΔ36) => {
                         extsΔ36.AddBytes(binderʗ1);
                     });
                 }
@@ -380,26 +373,26 @@ internal static (slice<byte>, error) marshalMsg(this ж<clientHelloMsg> Ꮡm, bo
     ref var b = ref heap(new cryptobyte.Builder(), out var Ꮡb);
     b.AddUint8(typeClientHello);
     var extBytesʗ1 = extBytes;
-    Ꮡb.AddUint24LengthPrefixed((ж<cryptobyte.Builder> bΔ1) => {
+    Ꮡb.AddUint24LengthPrefixed([GoFunc("(*clientHelloMsg).marshalMsg.func18")] (ж<cryptobyte.Builder> bΔ1) => {
         bΔ1.AddUint16(Ꮡm.Value.vers);
         addBytesWithLength(bΔ1, Ꮡm.Value.random, 32);
-        bΔ1.AddUint8LengthPrefixed((ж<cryptobyte.Builder> bΔ2) => {
+        bΔ1.AddUint8LengthPrefixed([GoFunc("(*clientHelloMsg).marshalMsg.func18.1")] (ж<cryptobyte.Builder> bΔ2) => {
             if (!echInner) {
                 bΔ2.AddBytes(Ꮡm.Value.sessionId);
             }
         });
-        bΔ1.AddUint16LengthPrefixed((ж<cryptobyte.Builder> bΔ3) => {
+        bΔ1.AddUint16LengthPrefixed([GoFunc("(*clientHelloMsg).marshalMsg.func18.2")] (ж<cryptobyte.Builder> bΔ3) => {
             foreach (var (_, suite) in range(Ꮡm.Value.cipherSuites)) {
                 bΔ3.AddUint16(suite);
             }
         });
-        bΔ1.AddUint8LengthPrefixed((ж<cryptobyte.Builder> bΔ4) => {
+        bΔ1.AddUint8LengthPrefixed([GoFunc("(*clientHelloMsg).marshalMsg.func18.3")] (ж<cryptobyte.Builder> bΔ4) => {
             bΔ4.AddBytes(Ꮡm.Value.compressionMethods);
         });
 
         if (len(extBytesʗ1) > 0) {
             var extBytesʗ2 = extBytesʗ1;
-            bΔ1.AddUint16LengthPrefixed((ж<cryptobyte.Builder> bΔ5) => {
+            bΔ1.AddUint16LengthPrefixed([GoFunc("(*clientHelloMsg).marshalMsg.func18.4")] (ж<cryptobyte.Builder> bΔ5) => {
                 bΔ5.AddBytes(extBytesʗ2);
             });
         }
@@ -408,14 +401,14 @@ internal static (slice<byte>, error) marshalMsg(this ж<clientHelloMsg> Ꮡm, bo
     return b.Bytes();
 }
 
-internal static (slice<byte>, error) marshal(this ж<clientHelloMsg> Ꮡm) {
+internal static (slice<byte>, error) marshal⁔(/*this*/ ж<clientHelloMsg> Ꮡm) {
     return Ꮡm.marshalMsg(false);
 }
 
 // marshalWithoutBinders returns the ClientHello through the
 // PreSharedKeyExtension.identities field, according to RFC 8446, Section
 // 4.2.11.2. Note that m.pskBinders must be set to slices of the correct length.
-internal static (slice<byte>, error) marshalWithoutBinders(this ж<clientHelloMsg> Ꮡm) {
+internal static (slice<byte>, error) marshalWithoutBinders⁔(/*this*/ ж<clientHelloMsg> Ꮡm) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     nint bindersLen = 2; // uint16 length prefix
@@ -443,7 +436,7 @@ private static readonly @string tlsInternalErrorˢ5ᵇ = "tls: internal error: p
 
 // updateBinders updates the m.pskBinders field. The supplied binders must have
 // the same length as the current m.pskBinders.
-internal static error updateBinders(this ref clientHelloMsg m, slice<slice<byte>> pskBinders) {
+internal static error updateBinders⁔(/*this*/ ref clientHelloMsg m, slice<slice<byte>> pskBinders) {
     if (len(pskBinders) != len(m.pskBinders)) {
         return errors.New(tlsInternalErrorˢ5);
     }
@@ -457,7 +450,7 @@ internal static error updateBinders(this ref clientHelloMsg m, slice<slice<byte>
     return default;
 }
 
-internal static bool unmarshal(this ж<clientHelloMsg> Ꮡm, slice<byte> data) {
+internal static bool unmarshal⁔(/*this*/ ж<clientHelloMsg> Ꮡm, slice<byte> data) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     m = new clientHelloMsg(original: data);
@@ -749,11 +742,11 @@ internal static bool unmarshal(this ж<clientHelloMsg> Ꮡm, slice<byte> data) {
     return true;
 }
 
-internal static slice<byte> originalBytes(this ref clientHelloMsg m) {
+internal static slice<byte> originalBytes⁔(/*this*/ ref clientHelloMsg m) {
     return m.original;
 }
 
-internal static ж<clientHelloMsg> clone(this ref clientHelloMsg m) {
+internal static ж<clientHelloMsg> clone⁔(/*this*/ ref clientHelloMsg m) {
     return Ꮡ(new clientHelloMsg(
         original: slices.Clone<slice<byte>, byte>(m.original),
         vers: m.vers,
@@ -786,8 +779,6 @@ internal static ж<clientHelloMsg> clone(this ref clientHelloMsg m) {
     ));
 }
 
-} partial class tls_package {
-
 partial struct serverHelloMsg {
     internal slice<byte> original;
     internal uint16 vers;
@@ -814,9 +805,7 @@ partial struct serverHelloMsg {
     internal CurveID selectedGroup;
 }
 
-} partial class tlsᴛserverHelloMsg {
-
-internal static (slice<byte>, error) marshal(this ж<serverHelloMsg> Ꮡm) {
+internal static (slice<byte>, error) marshal⁔(/*this*/ ж<serverHelloMsg> Ꮡm) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     ref var exts = ref heap(new cryptobyte.Builder(), out var Ꮡexts);
@@ -830,8 +819,8 @@ internal static (slice<byte>, error) marshal(this ж<serverHelloMsg> Ꮡm) {
     }
     if (m.secureRenegotiationSupported) {
         exts.AddUint16(extensionRenegotiationInfo);
-        Ꮡexts.AddUint16LengthPrefixed((ж<cryptobyte.Builder> extsΔ1) => {
-            extsΔ1.AddUint8LengthPrefixed((ж<cryptobyte.Builder> extsΔ2) => {
+        Ꮡexts.AddUint16LengthPrefixed([GoFunc("(*serverHelloMsg).marshal.func1")] (ж<cryptobyte.Builder> extsΔ1) => {
+            extsΔ1.AddUint8LengthPrefixed([GoFunc("(*serverHelloMsg).marshal.func1.1")] (ж<cryptobyte.Builder> extsΔ2) => {
                 extsΔ2.AddBytes(Ꮡm.Value.secureRenegotiation);
             });
         });
@@ -842,9 +831,9 @@ internal static (slice<byte>, error) marshal(this ж<serverHelloMsg> Ꮡm) {
     }
     if (len(m.alpnProtocol) > 0) {
         exts.AddUint16(extensionALPN);
-        Ꮡexts.AddUint16LengthPrefixed((ж<cryptobyte.Builder> extsΔ3) => {
-            extsΔ3.AddUint16LengthPrefixed((ж<cryptobyte.Builder> extsΔ4) => {
-                extsΔ4.AddUint8LengthPrefixed((ж<cryptobyte.Builder> extsΔ5) => {
+        Ꮡexts.AddUint16LengthPrefixed([GoFunc("(*serverHelloMsg).marshal.func2")] (ж<cryptobyte.Builder> extsΔ3) => {
+            extsΔ3.AddUint16LengthPrefixed([GoFunc("(*serverHelloMsg).marshal.func2.1")] (ж<cryptobyte.Builder> extsΔ4) => {
+                extsΔ4.AddUint8LengthPrefixed([GoFunc("(*serverHelloMsg).marshal.func2.1.1")] (ж<cryptobyte.Builder> extsΔ5) => {
                     extsΔ5.AddBytes(slice<byte>(Ꮡm.Value.alpnProtocol));
                 });
             });
@@ -852,11 +841,11 @@ internal static (slice<byte>, error) marshal(this ж<serverHelloMsg> Ꮡm) {
     }
     if (len(m.scts) > 0) {
         exts.AddUint16(extensionSCT);
-        Ꮡexts.AddUint16LengthPrefixed((ж<cryptobyte.Builder> extsΔ6) => {
-            extsΔ6.AddUint16LengthPrefixed((ж<cryptobyte.Builder> extsΔ7) => {
+        Ꮡexts.AddUint16LengthPrefixed([GoFunc("(*serverHelloMsg).marshal.func3")] (ж<cryptobyte.Builder> extsΔ6) => {
+            extsΔ6.AddUint16LengthPrefixed([GoFunc("(*serverHelloMsg).marshal.func3.1")] (ж<cryptobyte.Builder> extsΔ7) => {
                 foreach (var (_, sct) in range(Ꮡm.Value.scts)) {
                     var sctʗ1 = sct;
-                    extsΔ7.AddUint16LengthPrefixed((ж<cryptobyte.Builder> extsΔ8) => {
+                    extsΔ7.AddUint16LengthPrefixed([GoFunc("(*serverHelloMsg).marshal.func3.1.1")] (ж<cryptobyte.Builder> extsΔ8) => {
                         extsΔ8.AddBytes(sctʗ1);
                     });
                 }
@@ -865,51 +854,51 @@ internal static (slice<byte>, error) marshal(this ж<serverHelloMsg> Ꮡm) {
     }
     if (m.supportedVersion != 0) {
         exts.AddUint16(extensionSupportedVersions);
-        Ꮡexts.AddUint16LengthPrefixed((ж<cryptobyte.Builder> extsΔ9) => {
+        Ꮡexts.AddUint16LengthPrefixed([GoFunc("(*serverHelloMsg).marshal.func4")] (ж<cryptobyte.Builder> extsΔ9) => {
             extsΔ9.AddUint16(Ꮡm.Value.supportedVersion);
         });
     }
     if (m.serverShare.group != 0) {
         exts.AddUint16(extensionKeyShare);
-        Ꮡexts.AddUint16LengthPrefixed((ж<cryptobyte.Builder> extsΔ10) => {
+        Ꮡexts.AddUint16LengthPrefixed([GoFunc("(*serverHelloMsg).marshal.func5")] (ж<cryptobyte.Builder> extsΔ10) => {
             extsΔ10.AddUint16((uint16)Ꮡm.Value.serverShare.group);
-            extsΔ10.AddUint16LengthPrefixed((ж<cryptobyte.Builder> extsΔ11) => {
+            extsΔ10.AddUint16LengthPrefixed([GoFunc("(*serverHelloMsg).marshal.func5.1")] (ж<cryptobyte.Builder> extsΔ11) => {
                 extsΔ11.AddBytes(Ꮡm.Value.serverShare.data);
             });
         });
     }
     if (m.selectedIdentityPresent) {
         exts.AddUint16(extensionPreSharedKey);
-        Ꮡexts.AddUint16LengthPrefixed((ж<cryptobyte.Builder> extsΔ12) => {
+        Ꮡexts.AddUint16LengthPrefixed([GoFunc("(*serverHelloMsg).marshal.func6")] (ж<cryptobyte.Builder> extsΔ12) => {
             extsΔ12.AddUint16(Ꮡm.Value.selectedIdentity);
         });
     }
 
     if (len(m.cookie) > 0) {
         exts.AddUint16(extensionCookie);
-        Ꮡexts.AddUint16LengthPrefixed((ж<cryptobyte.Builder> extsΔ13) => {
-            extsΔ13.AddUint16LengthPrefixed((ж<cryptobyte.Builder> extsΔ14) => {
+        Ꮡexts.AddUint16LengthPrefixed([GoFunc("(*serverHelloMsg).marshal.func7")] (ж<cryptobyte.Builder> extsΔ13) => {
+            extsΔ13.AddUint16LengthPrefixed([GoFunc("(*serverHelloMsg).marshal.func7.1")] (ж<cryptobyte.Builder> extsΔ14) => {
                 extsΔ14.AddBytes(Ꮡm.Value.cookie);
             });
         });
     }
     if (m.selectedGroup != 0) {
         exts.AddUint16(extensionKeyShare);
-        Ꮡexts.AddUint16LengthPrefixed((ж<cryptobyte.Builder> extsΔ15) => {
+        Ꮡexts.AddUint16LengthPrefixed([GoFunc("(*serverHelloMsg).marshal.func8")] (ж<cryptobyte.Builder> extsΔ15) => {
             extsΔ15.AddUint16((uint16)Ꮡm.Value.selectedGroup);
         });
     }
     if (len(m.supportedPoints) > 0) {
         exts.AddUint16(extensionSupportedPoints);
-        Ꮡexts.AddUint16LengthPrefixed((ж<cryptobyte.Builder> extsΔ16) => {
-            extsΔ16.AddUint8LengthPrefixed((ж<cryptobyte.Builder> extsΔ17) => {
+        Ꮡexts.AddUint16LengthPrefixed([GoFunc("(*serverHelloMsg).marshal.func9")] (ж<cryptobyte.Builder> extsΔ16) => {
+            extsΔ16.AddUint8LengthPrefixed([GoFunc("(*serverHelloMsg).marshal.func9.1")] (ж<cryptobyte.Builder> extsΔ17) => {
                 extsΔ17.AddBytes(Ꮡm.Value.supportedPoints);
             });
         });
     }
     if (len(m.encryptedClientHello) > 0) {
         exts.AddUint16(extensionEncryptedClientHello);
-        Ꮡexts.AddUint16LengthPrefixed((ж<cryptobyte.Builder> extsΔ18) => {
+        Ꮡexts.AddUint16LengthPrefixed([GoFunc("(*serverHelloMsg).marshal.func10")] (ж<cryptobyte.Builder> extsΔ18) => {
             extsΔ18.AddBytes(Ꮡm.Value.encryptedClientHello);
         });
     }
@@ -926,10 +915,10 @@ internal static (slice<byte>, error) marshal(this ж<serverHelloMsg> Ꮡm) {
     ref var b = ref heap(new cryptobyte.Builder(), out var Ꮡb);
     b.AddUint8(typeServerHello);
     var extBytesʗ1 = extBytes;
-    Ꮡb.AddUint24LengthPrefixed((ж<cryptobyte.Builder> bΔ1) => {
+    Ꮡb.AddUint24LengthPrefixed([GoFunc("(*serverHelloMsg).marshal.func11")] (ж<cryptobyte.Builder> bΔ1) => {
         bΔ1.AddUint16(Ꮡm.Value.vers);
         addBytesWithLength(bΔ1, Ꮡm.Value.random, 32);
-        bΔ1.AddUint8LengthPrefixed((ж<cryptobyte.Builder> bΔ2) => {
+        bΔ1.AddUint8LengthPrefixed([GoFunc("(*serverHelloMsg).marshal.func11.1")] (ж<cryptobyte.Builder> bΔ2) => {
             bΔ2.AddBytes(Ꮡm.Value.sessionId);
         });
         bΔ1.AddUint16(Ꮡm.Value.cipherSuite);
@@ -937,7 +926,7 @@ internal static (slice<byte>, error) marshal(this ж<serverHelloMsg> Ꮡm) {
 
         if (len(extBytesʗ1) > 0) {
             var extBytesʗ2 = extBytesʗ1;
-            bΔ1.AddUint16LengthPrefixed((ж<cryptobyte.Builder> bΔ3) => {
+            bΔ1.AddUint16LengthPrefixed([GoFunc("(*serverHelloMsg).marshal.func11.2")] (ж<cryptobyte.Builder> bΔ3) => {
                 bΔ3.AddBytes(extBytesʗ2);
             });
         }
@@ -946,7 +935,7 @@ internal static (slice<byte>, error) marshal(this ж<serverHelloMsg> Ꮡm) {
     return b.Bytes();
 }
 
-internal static bool unmarshal(this ж<serverHelloMsg> Ꮡm, slice<byte> data) {
+internal static bool unmarshal⁔(/*this*/ ж<serverHelloMsg> Ꮡm, slice<byte> data) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     m = new serverHelloMsg(original: data);
@@ -1094,11 +1083,9 @@ internal static bool unmarshal(this ж<serverHelloMsg> Ꮡm, slice<byte> data) {
     return true;
 }
 
-internal static slice<byte> originalBytes(this ref serverHelloMsg m) {
+internal static slice<byte> originalBytes⁔(/*this*/ ref serverHelloMsg m) {
     return m.original;
 }
-
-} partial class tls_package {
 
 partial struct encryptedExtensionsMsg {
     internal @string alpnProtocol;
@@ -1108,18 +1095,16 @@ partial struct encryptedExtensionsMsg {
     internal bool serverNameAck;
 }
 
-} partial class tlsᴛencryptedExtensionsMsg {
-
-internal static (slice<byte>, error) marshal(this ж<encryptedExtensionsMsg> Ꮡm) {
+internal static (slice<byte>, error) marshal⁔(/*this*/ ж<encryptedExtensionsMsg> Ꮡm) {
     ref var b = ref heap(new cryptobyte.Builder(), out var Ꮡb);
     b.AddUint8(typeEncryptedExtensions);
-    Ꮡb.AddUint24LengthPrefixed((ж<cryptobyte.Builder> bΔ1) => {
-        bΔ1.AddUint16LengthPrefixed((ж<cryptobyte.Builder> bΔ2) => {
+    Ꮡb.AddUint24LengthPrefixed([GoFunc("(*encryptedExtensionsMsg).marshal.func1")] (ж<cryptobyte.Builder> bΔ1) => {
+        bΔ1.AddUint16LengthPrefixed([GoFunc("(*encryptedExtensionsMsg).marshal.func1.1")] (ж<cryptobyte.Builder> bΔ2) => {
             if (len(Ꮡm.Value.alpnProtocol) > 0) {
                 bΔ2.AddUint16(extensionALPN);
-                bΔ2.AddUint16LengthPrefixed((ж<cryptobyte.Builder> bΔ3) => {
-                    bΔ3.AddUint16LengthPrefixed((ж<cryptobyte.Builder> bΔ4) => {
-                        bΔ4.AddUint8LengthPrefixed((ж<cryptobyte.Builder> bΔ5) => {
+                bΔ2.AddUint16LengthPrefixed([GoFunc("(*encryptedExtensionsMsg).marshal.func1.1.1")] (ж<cryptobyte.Builder> bΔ3) => {
+                    bΔ3.AddUint16LengthPrefixed([GoFunc("(*encryptedExtensionsMsg).marshal.func1.1.1.1")] (ж<cryptobyte.Builder> bΔ4) => {
+                        bΔ4.AddUint8LengthPrefixed([GoFunc("(*encryptedExtensionsMsg).marshal.func1.1.1.1.1")] (ж<cryptobyte.Builder> bΔ5) => {
                             bΔ5.AddBytes(slice<byte>(Ꮡm.Value.alpnProtocol));
                         });
                     });
@@ -1128,7 +1113,7 @@ internal static (slice<byte>, error) marshal(this ж<encryptedExtensionsMsg> Ꮡ
             if (Ꮡm.Value.quicTransportParameters != nil) { // marshal zero-length parameters when present
                 // draft-ietf-quic-tls-32, Section 8.2
                 bΔ2.AddUint16(extensionQUICTransportParameters);
-                bΔ2.AddUint16LengthPrefixed((ж<cryptobyte.Builder> bΔ6) => {
+                bΔ2.AddUint16LengthPrefixed([GoFunc("(*encryptedExtensionsMsg).marshal.func1.1.2")] (ж<cryptobyte.Builder> bΔ6) => {
                     bΔ6.AddBytes(Ꮡm.Value.quicTransportParameters);
                 });
             }
@@ -1139,7 +1124,7 @@ internal static (slice<byte>, error) marshal(this ж<encryptedExtensionsMsg> Ꮡ
             }
             if (len(Ꮡm.Value.echRetryConfigs) > 0) {
                 bΔ2.AddUint16(extensionEncryptedClientHello);
-                bΔ2.AddUint16LengthPrefixed((ж<cryptobyte.Builder> bΔ7) => {
+                bΔ2.AddUint16LengthPrefixed([GoFunc("(*encryptedExtensionsMsg).marshal.func1.1.3")] (ж<cryptobyte.Builder> bΔ7) => {
                     bΔ7.AddBytes(Ꮡm.Value.echRetryConfigs);
                 });
             }
@@ -1153,7 +1138,7 @@ internal static (slice<byte>, error) marshal(this ж<encryptedExtensionsMsg> Ꮡ
     return b.Bytes();
 }
 
-internal static bool unmarshal(this ref encryptedExtensionsMsg m, slice<byte> data) {
+internal static bool unmarshal⁔(/*this*/ ref encryptedExtensionsMsg m, slice<byte> data) {
     m = new encryptedExtensionsMsg();
     var s = (cryptobyte.String)data;
 
@@ -1229,35 +1214,27 @@ internal static bool unmarshal(this ref encryptedExtensionsMsg m, slice<byte> da
     return true;
 }
 
-} partial class tls_package {
-
 partial struct endOfEarlyDataMsg {
 }
 
-} partial class tlsᴛendOfEarlyDataMsg {
-
-internal static (slice<byte>, error) marshal(this ref endOfEarlyDataMsg m) {
+internal static (slice<byte>, error) marshal⁔(/*this*/ ref endOfEarlyDataMsg m) {
     var x = new slice<byte>(4);
     x[0] = typeEndOfEarlyData;
     return (x, default);
 }
 
-internal static bool unmarshal(this ref endOfEarlyDataMsg m, slice<byte> data) {
+internal static bool unmarshal⁔(/*this*/ ref endOfEarlyDataMsg m, slice<byte> data) {
     return len(data) == 4;
 }
-
-} partial class tls_package {
 
 partial struct keyUpdateMsg {
     internal bool updateRequested;
 }
 
-} partial class tlsᴛkeyUpdateMsg {
-
-internal static (slice<byte>, error) marshal(this ж<keyUpdateMsg> Ꮡm) {
+internal static (slice<byte>, error) marshal⁔(/*this*/ ж<keyUpdateMsg> Ꮡm) {
     ref var b = ref heap(new cryptobyte.Builder(), out var Ꮡb);
     b.AddUint8(typeKeyUpdate);
-    Ꮡb.AddUint24LengthPrefixed((ж<cryptobyte.Builder> bΔ1) => {
+    Ꮡb.AddUint24LengthPrefixed([GoFunc("(*keyUpdateMsg).marshal.func1")] (ж<cryptobyte.Builder> bΔ1) => {
         if (Ꮡm.Value.updateRequested) {
             bΔ1.AddUint8(1);
         } else {
@@ -1268,7 +1245,7 @@ internal static (slice<byte>, error) marshal(this ж<keyUpdateMsg> Ꮡm) {
     return b.Bytes();
 }
 
-internal static bool unmarshal(this ref keyUpdateMsg m, slice<byte> data) {
+internal static bool unmarshal⁔(/*this*/ ref keyUpdateMsg m, slice<byte> data) {
     var s = (cryptobyte.String)data;
 
     ref var updateRequested = ref heap(new uint8(), out var ᏑupdateRequested);
@@ -1291,8 +1268,6 @@ internal static bool unmarshal(this ref keyUpdateMsg m, slice<byte> data) {
     return true;
 }
 
-} partial class tls_package {
-
 partial struct newSessionTicketMsgTLS13 {
     internal uint32 lifetime;
     internal uint32 ageAdd;
@@ -1301,25 +1276,23 @@ partial struct newSessionTicketMsgTLS13 {
     internal uint32 maxEarlyData;
 }
 
-} partial class tlsᴛnewSessionTicketMsgTLS13 {
-
-internal static (slice<byte>, error) marshal(this ж<newSessionTicketMsgTLS13> Ꮡm) {
+internal static (slice<byte>, error) marshal⁔(/*this*/ ж<newSessionTicketMsgTLS13> Ꮡm) {
     ref var b = ref heap(new cryptobyte.Builder(), out var Ꮡb);
     b.AddUint8(typeNewSessionTicket);
-    Ꮡb.AddUint24LengthPrefixed((ж<cryptobyte.Builder> bΔ1) => {
+    Ꮡb.AddUint24LengthPrefixed([GoFunc("(*newSessionTicketMsgTLS13).marshal.func1")] (ж<cryptobyte.Builder> bΔ1) => {
         bΔ1.AddUint32(Ꮡm.Value.lifetime);
         bΔ1.AddUint32(Ꮡm.Value.ageAdd);
-        bΔ1.AddUint8LengthPrefixed((ж<cryptobyte.Builder> bΔ2) => {
+        bΔ1.AddUint8LengthPrefixed([GoFunc("(*newSessionTicketMsgTLS13).marshal.func1.1")] (ж<cryptobyte.Builder> bΔ2) => {
             bΔ2.AddBytes(Ꮡm.Value.nonce);
         });
-        bΔ1.AddUint16LengthPrefixed((ж<cryptobyte.Builder> bΔ3) => {
+        bΔ1.AddUint16LengthPrefixed([GoFunc("(*newSessionTicketMsgTLS13).marshal.func1.2")] (ж<cryptobyte.Builder> bΔ3) => {
             bΔ3.AddBytes(Ꮡm.Value.label);
         });
 
-        bΔ1.AddUint16LengthPrefixed((ж<cryptobyte.Builder> bΔ4) => {
+        bΔ1.AddUint16LengthPrefixed([GoFunc("(*newSessionTicketMsgTLS13).marshal.func1.3")] (ж<cryptobyte.Builder> bΔ4) => {
             if (Ꮡm.Value.maxEarlyData > 0) {
                 bΔ4.AddUint16(extensionEarlyData);
-                bΔ4.AddUint16LengthPrefixed((ж<cryptobyte.Builder> bΔ5) => {
+                bΔ4.AddUint16LengthPrefixed([GoFunc("(*newSessionTicketMsgTLS13).marshal.func1.3.1")] (ж<cryptobyte.Builder> bΔ5) => {
                     bΔ5.AddUint32(Ꮡm.Value.maxEarlyData);
                 });
             }
@@ -1329,7 +1302,7 @@ internal static (slice<byte>, error) marshal(this ж<newSessionTicketMsgTLS13> �
     return b.Bytes();
 }
 
-internal static bool unmarshal(this ж<newSessionTicketMsgTLS13> Ꮡm, slice<byte> data) {
+internal static bool unmarshal⁔(/*this*/ ж<newSessionTicketMsgTLS13> Ꮡm, slice<byte> data) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     m = new newSessionTicketMsgTLS13();
@@ -1369,8 +1342,6 @@ internal static bool unmarshal(this ж<newSessionTicketMsgTLS13> Ꮡm, slice<byt
     return true;
 }
 
-} partial class tls_package {
-
 partial struct certificateRequestMsgTLS13 {
     internal bool ocspStapling;
     internal bool scts;
@@ -1379,17 +1350,15 @@ partial struct certificateRequestMsgTLS13 {
     internal slice<slice<byte>> certificateAuthorities;
 }
 
-} partial class tlsᴛcertificateRequestMsgTLS13 {
-
-internal static (slice<byte>, error) marshal(this ж<certificateRequestMsgTLS13> Ꮡm) {
+internal static (slice<byte>, error) marshal⁔(/*this*/ ж<certificateRequestMsgTLS13> Ꮡm) {
     ref var b = ref heap(new cryptobyte.Builder(), out var Ꮡb);
     b.AddUint8(typeCertificateRequest);
-    Ꮡb.AddUint24LengthPrefixed((ж<cryptobyte.Builder> bΔ1) => {
+    Ꮡb.AddUint24LengthPrefixed([GoFunc("(*certificateRequestMsgTLS13).marshal.func1")] (ж<cryptobyte.Builder> bΔ1) => {
         // certificate_request_context (SHALL be zero length unless used for
         // post-handshake authentication)
         bΔ1.AddUint8(0);
 
-        bΔ1.AddUint16LengthPrefixed((ж<cryptobyte.Builder> bΔ2) => {
+        bΔ1.AddUint16LengthPrefixed([GoFunc("(*certificateRequestMsgTLS13).marshal.func1.1")] (ж<cryptobyte.Builder> bΔ2) => {
             if (Ꮡm.Value.ocspStapling) {
                 bΔ2.AddUint16(extensionStatusRequest);
                 bΔ2.AddUint16(0); // empty extension_data
@@ -1405,8 +1374,8 @@ internal static (slice<byte>, error) marshal(this ж<certificateRequestMsgTLS13>
             }
             if (len(Ꮡm.Value.supportedSignatureAlgorithms) > 0) {
                 bΔ2.AddUint16(extensionSignatureAlgorithms);
-                bΔ2.AddUint16LengthPrefixed((ж<cryptobyte.Builder> bΔ3) => {
-                    bΔ3.AddUint16LengthPrefixed((ж<cryptobyte.Builder> bΔ4) => {
+                bΔ2.AddUint16LengthPrefixed([GoFunc("(*certificateRequestMsgTLS13).marshal.func1.1.1")] (ж<cryptobyte.Builder> bΔ3) => {
+                    bΔ3.AddUint16LengthPrefixed([GoFunc("(*certificateRequestMsgTLS13).marshal.func1.1.1.1")] (ж<cryptobyte.Builder> bΔ4) => {
                         foreach (var (_, sigAlgo) in range(Ꮡm.Value.supportedSignatureAlgorithms)) {
                             bΔ4.AddUint16((uint16)sigAlgo);
                         }
@@ -1415,8 +1384,8 @@ internal static (slice<byte>, error) marshal(this ж<certificateRequestMsgTLS13>
             }
             if (len(Ꮡm.Value.supportedSignatureAlgorithmsCert) > 0) {
                 bΔ2.AddUint16(extensionSignatureAlgorithmsCert);
-                bΔ2.AddUint16LengthPrefixed((ж<cryptobyte.Builder> bΔ5) => {
-                    bΔ5.AddUint16LengthPrefixed((ж<cryptobyte.Builder> bΔ6) => {
+                bΔ2.AddUint16LengthPrefixed([GoFunc("(*certificateRequestMsgTLS13).marshal.func1.1.2")] (ж<cryptobyte.Builder> bΔ5) => {
+                    bΔ5.AddUint16LengthPrefixed([GoFunc("(*certificateRequestMsgTLS13).marshal.func1.1.2.1")] (ж<cryptobyte.Builder> bΔ6) => {
                         foreach (var (_, sigAlgo) in range(Ꮡm.Value.supportedSignatureAlgorithmsCert)) {
                             bΔ6.AddUint16((uint16)sigAlgo);
                         }
@@ -1425,11 +1394,11 @@ internal static (slice<byte>, error) marshal(this ж<certificateRequestMsgTLS13>
             }
             if (len(Ꮡm.Value.certificateAuthorities) > 0) {
                 bΔ2.AddUint16(extensionCertificateAuthorities);
-                bΔ2.AddUint16LengthPrefixed((ж<cryptobyte.Builder> bΔ7) => {
-                    bΔ7.AddUint16LengthPrefixed((ж<cryptobyte.Builder> bΔ8) => {
+                bΔ2.AddUint16LengthPrefixed([GoFunc("(*certificateRequestMsgTLS13).marshal.func1.1.3")] (ж<cryptobyte.Builder> bΔ7) => {
+                    bΔ7.AddUint16LengthPrefixed([GoFunc("(*certificateRequestMsgTLS13).marshal.func1.1.3.1")] (ж<cryptobyte.Builder> bΔ8) => {
                         foreach (var (_, ca) in range(Ꮡm.Value.certificateAuthorities)) {
                             var caʗ1 = ca;
-                            bΔ8.AddUint16LengthPrefixed((ж<cryptobyte.Builder> bΔ9) => {
+                            bΔ8.AddUint16LengthPrefixed([GoFunc("(*certificateRequestMsgTLS13).marshal.func1.1.3.1.1")] (ж<cryptobyte.Builder> bΔ9) => {
                                 bΔ9.AddBytes(caʗ1);
                             });
                         }
@@ -1442,7 +1411,7 @@ internal static (slice<byte>, error) marshal(this ж<certificateRequestMsgTLS13>
     return b.Bytes();
 }
 
-internal static bool unmarshal(this ref certificateRequestMsgTLS13 m, slice<byte> data) {
+internal static bool unmarshal⁔(/*this*/ ref certificateRequestMsgTLS13 m, slice<byte> data) {
     m = new certificateRequestMsgTLS13();
     var s = (cryptobyte.String)data;
 
@@ -1527,15 +1496,11 @@ internal static bool unmarshal(this ref certificateRequestMsgTLS13 m, slice<byte
     return true;
 }
 
-} partial class tls_package {
-
 partial struct certificateMsg {
     internal slice<slice<byte>> certificates;
 }
 
-} partial class tlsᴛcertificateMsg {
-
-internal static (slice<byte>, error) marshal(this ref certificateMsg m) {
+internal static (slice<byte>, error) marshal⁔(/*this*/ ref certificateMsg m) {
     nint i = default;
     foreach (var (_, Δslice) in range(m.certificates)) {
         i += len(Δslice);
@@ -1565,7 +1530,7 @@ internal static (slice<byte>, error) marshal(this ref certificateMsg m) {
     return (x, default);
 }
 
-internal static bool unmarshal(this ref certificateMsg m, slice<byte> data) {
+internal static bool unmarshal⁔(/*this*/ ref certificateMsg m, slice<byte> data) {
     if (len(data) < 7) {
         return false;
     }
@@ -1601,20 +1566,16 @@ internal static bool unmarshal(this ref certificateMsg m, slice<byte> data) {
     return true;
 }
 
-} partial class tls_package {
-
 partial struct certificateMsgTLS13 {
     internal Certificate certificate;
     internal bool ocspStapling;
     internal bool scts;
 }
 
-} partial class tlsᴛcertificateMsgTLS13 {
-
-internal static (slice<byte>, error) marshal(this ж<certificateMsgTLS13> Ꮡm) {
+internal static (slice<byte>, error) marshal⁔(/*this*/ ж<certificateMsgTLS13> Ꮡm) {
     ref var b = ref heap(new cryptobyte.Builder(), out var Ꮡb);
     b.AddUint8(typeCertificate);
-    Ꮡb.AddUint24LengthPrefixed((ж<cryptobyte.Builder> bΔ1) => {
+    Ꮡb.AddUint24LengthPrefixed([GoFunc("(*certificateMsgTLS13).marshal.func1")] (ж<cryptobyte.Builder> bΔ1) => {
         bΔ1.AddUint8(0); // certificate_request_context
 
         var certificate = Ꮡm.Value.certificate;
@@ -1630,18 +1591,16 @@ internal static (slice<byte>, error) marshal(this ж<certificateMsgTLS13> Ꮡm) 
     return b.Bytes();
 }
 
-} partial class tls_package {
-
 internal static void marshalCertificate(ж<cryptobyte.Builder> b, Certificate certificate) {
     var certificateʗ1 = certificate;
-    b.AddUint24LengthPrefixed((ж<cryptobyte.Builder> bΔ1) => {
+    b.AddUint24LengthPrefixed([GoFunc("marshalCertificate.func1")] (ж<cryptobyte.Builder> bΔ1) => {
         foreach (var (i, cert) in range(certificateʗ1.ΔCertificate)) {
             var certʗ1 = cert;
-            bΔ1.AddUint24LengthPrefixed((ж<cryptobyte.Builder> bΔ2) => {
+            bΔ1.AddUint24LengthPrefixed([GoFunc("marshalCertificate.func1.1")] (ж<cryptobyte.Builder> bΔ2) => {
                 bΔ2.AddBytes(certʗ1);
             });
             var certificateʗ2 = certificateʗ1;
-            bΔ1.AddUint16LengthPrefixed((ж<cryptobyte.Builder> bΔ3) => {
+            bΔ1.AddUint16LengthPrefixed([GoFunc("marshalCertificate.func1.2")] (ж<cryptobyte.Builder> bΔ3) => {
                 if (i > 0) {
                     // This library only supports OCSP and SCT for leaf certificates.
                     return;
@@ -1649,10 +1608,10 @@ internal static void marshalCertificate(ж<cryptobyte.Builder> b, Certificate ce
                 if (certificateʗ2.OCSPStaple != nil) {
                     bΔ3.AddUint16(extensionStatusRequest);
                     var certificateʗ3 = certificateʗ2;
-                    bΔ3.AddUint16LengthPrefixed((ж<cryptobyte.Builder> bΔ4) => {
+                    bΔ3.AddUint16LengthPrefixed([GoFunc("marshalCertificate.func1.2.1")] (ж<cryptobyte.Builder> bΔ4) => {
                         bΔ4.AddUint8(statusTypeOCSP);
                         var certificateʗ4 = certificateʗ3;
-                        bΔ4.AddUint24LengthPrefixed((ж<cryptobyte.Builder> bΔ5) => {
+                        bΔ4.AddUint24LengthPrefixed([GoFunc("marshalCertificate.func1.2.1.1")] (ж<cryptobyte.Builder> bΔ5) => {
                             bΔ5.AddBytes(certificateʗ4.OCSPStaple);
                         });
                     });
@@ -1660,12 +1619,12 @@ internal static void marshalCertificate(ж<cryptobyte.Builder> b, Certificate ce
                 if (certificateʗ2.SignedCertificateTimestamps != nil) {
                     bΔ3.AddUint16(extensionSCT);
                     var certificateʗ5 = certificateʗ2;
-                    bΔ3.AddUint16LengthPrefixed((ж<cryptobyte.Builder> bΔ6) => {
+                    bΔ3.AddUint16LengthPrefixed([GoFunc("marshalCertificate.func1.2.2")] (ж<cryptobyte.Builder> bΔ6) => {
                         var certificateʗ6 = certificateʗ5;
-                        bΔ6.AddUint16LengthPrefixed((ж<cryptobyte.Builder> bΔ7) => {
+                        bΔ6.AddUint16LengthPrefixed([GoFunc("marshalCertificate.func1.2.2.1")] (ж<cryptobyte.Builder> bΔ7) => {
                             foreach (var (_, sct) in range(certificateʗ6.SignedCertificateTimestamps)) {
                                 var sctʗ1 = sct;
-                                bΔ7.AddUint16LengthPrefixed((ж<cryptobyte.Builder> bΔ8) => {
+                                bΔ7.AddUint16LengthPrefixed([GoFunc("marshalCertificate.func1.2.2.1.1")] (ж<cryptobyte.Builder> bΔ8) => {
                                     bΔ8.AddBytes(sctʗ1);
                                 });
                             }
@@ -1677,9 +1636,7 @@ internal static void marshalCertificate(ж<cryptobyte.Builder> b, Certificate ce
     });
 }
 
-} partial class tlsᴛcertificateMsgTLS13 {
-
-internal static bool unmarshal(this ж<certificateMsgTLS13> Ꮡm, slice<byte> data) {
+internal static bool unmarshal⁔(/*this*/ ж<certificateMsgTLS13> Ꮡm, slice<byte> data) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     m = new certificateMsgTLS13();
@@ -1696,8 +1653,6 @@ internal static bool unmarshal(this ж<certificateMsgTLS13> Ꮡm, slice<byte> da
 
     return true;
 }
-
-} partial class tls_package {
 
 internal static bool unmarshalCertificate(ж<cryptobyte.String> Ꮡs, ж<Certificate> Ꮡcertificate) {
     ref var s = ref Ꮡs.DerefOrNull();
@@ -1766,9 +1721,7 @@ partial struct serverKeyExchangeMsg {
     internal slice<byte> key;
 }
 
-} partial class tlsᴛserverKeyExchangeMsg {
-
-internal static (slice<byte>, error) marshal(this ref serverKeyExchangeMsg m) {
+internal static (slice<byte>, error) marshal⁔(/*this*/ ref serverKeyExchangeMsg m) {
     nint length = len(m.key);
     var x = new slice<byte>(length + 4);
     x[0] = typeServerKeyExchange;
@@ -1780,7 +1733,7 @@ internal static (slice<byte>, error) marshal(this ref serverKeyExchangeMsg m) {
     return (x, default);
 }
 
-internal static bool unmarshal(this ref serverKeyExchangeMsg m, slice<byte> data) {
+internal static bool unmarshal⁔(/*this*/ ref serverKeyExchangeMsg m, slice<byte> data) {
     if (len(data) < 4) {
         return false;
     }
@@ -1788,20 +1741,16 @@ internal static bool unmarshal(this ref serverKeyExchangeMsg m, slice<byte> data
     return true;
 }
 
-} partial class tls_package {
-
 partial struct certificateStatusMsg {
     internal slice<byte> response;
 }
 
-} partial class tlsᴛcertificateStatusMsg {
-
-internal static (slice<byte>, error) marshal(this ж<certificateStatusMsg> Ꮡm) {
+internal static (slice<byte>, error) marshal⁔(/*this*/ ж<certificateStatusMsg> Ꮡm) {
     ref var b = ref heap(new cryptobyte.Builder(), out var Ꮡb);
     b.AddUint8(typeCertificateStatus);
-    Ꮡb.AddUint24LengthPrefixed((ж<cryptobyte.Builder> bΔ1) => {
+    Ꮡb.AddUint24LengthPrefixed([GoFunc("(*certificateStatusMsg).marshal.func1")] (ж<cryptobyte.Builder> bΔ1) => {
         bΔ1.AddUint8(statusTypeOCSP);
-        bΔ1.AddUint24LengthPrefixed((ж<cryptobyte.Builder> bΔ2) => {
+        bΔ1.AddUint24LengthPrefixed([GoFunc("(*certificateStatusMsg).marshal.func1.1")] (ж<cryptobyte.Builder> bΔ2) => {
             bΔ2.AddBytes(Ꮡm.Value.response);
         });
     });
@@ -1809,7 +1758,7 @@ internal static (slice<byte>, error) marshal(this ж<certificateStatusMsg> Ꮡm)
     return b.Bytes();
 }
 
-internal static bool unmarshal(this ж<certificateStatusMsg> Ꮡm, slice<byte> data) {
+internal static bool unmarshal⁔(/*this*/ ж<certificateStatusMsg> Ꮡm, slice<byte> data) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     ref var s = ref heap<cryptobyte.String>((cryptobyte.String)data, out var Ꮡs);
@@ -1822,32 +1771,24 @@ internal static bool unmarshal(this ж<certificateStatusMsg> Ꮡm, slice<byte> d
     return true;
 }
 
-} partial class tls_package {
-
 partial struct serverHelloDoneMsg {
 }
 
-} partial class tlsᴛserverHelloDoneMsg {
-
-internal static (slice<byte>, error) marshal(this ref serverHelloDoneMsg m) {
+internal static (slice<byte>, error) marshal⁔(/*this*/ ref serverHelloDoneMsg m) {
     var x = new slice<byte>(4);
     x[0] = typeServerHelloDone;
     return (x, default);
 }
 
-internal static bool unmarshal(this ref serverHelloDoneMsg m, slice<byte> data) {
+internal static bool unmarshal⁔(/*this*/ ref serverHelloDoneMsg m, slice<byte> data) {
     return len(data) == 4;
 }
-
-} partial class tls_package {
 
 partial struct clientKeyExchangeMsg {
     internal slice<byte> ciphertext;
 }
 
-} partial class tlsᴛclientKeyExchangeMsg {
-
-internal static (slice<byte>, error) marshal(this ref clientKeyExchangeMsg m) {
+internal static (slice<byte>, error) marshal⁔(/*this*/ ref clientKeyExchangeMsg m) {
     nint length = len(m.ciphertext);
     var x = new slice<byte>(length + 4);
     x[0] = typeClientKeyExchange;
@@ -1859,7 +1800,7 @@ internal static (slice<byte>, error) marshal(this ref clientKeyExchangeMsg m) {
     return (x, default);
 }
 
-internal static bool unmarshal(this ref clientKeyExchangeMsg m, slice<byte> data) {
+internal static bool unmarshal⁔(/*this*/ ref clientKeyExchangeMsg m, slice<byte> data) {
     if (len(data) < 4) {
         return false;
     }
@@ -1871,30 +1812,24 @@ internal static bool unmarshal(this ref clientKeyExchangeMsg m, slice<byte> data
     return true;
 }
 
-} partial class tls_package {
-
 partial struct finishedMsg {
     internal slice<byte> verifyData;
 }
 
-} partial class tlsᴛfinishedMsg {
-
-internal static (slice<byte>, error) marshal(this ж<finishedMsg> Ꮡm) {
+internal static (slice<byte>, error) marshal⁔(/*this*/ ж<finishedMsg> Ꮡm) {
     ref var b = ref heap(new cryptobyte.Builder(), out var Ꮡb);
     b.AddUint8(typeFinished);
-    Ꮡb.AddUint24LengthPrefixed((ж<cryptobyte.Builder> bΔ1) => {
+    Ꮡb.AddUint24LengthPrefixed([GoFunc("(*finishedMsg).marshal.func1")] (ж<cryptobyte.Builder> bΔ1) => {
         bΔ1.AddBytes(Ꮡm.Value.verifyData);
     });
 
     return b.Bytes();
 }
 
-internal static bool unmarshal(this ж<finishedMsg> Ꮡm, slice<byte> data) {
+internal static bool unmarshal⁔(/*this*/ ж<finishedMsg> Ꮡm, slice<byte> data) {
     ref var s = ref heap<cryptobyte.String>((cryptobyte.String)data, out var Ꮡs);
     return s.Skip(1) && readUint24LengthPrefixed(Ꮡs, Ꮡm.ᏑverifyData) && s.Empty();
 }
-
-} partial class tls_package {
 
 partial struct certificateRequestMsg {
     // hasSignatureAlgorithm indicates whether this message includes a list of
@@ -1905,9 +1840,7 @@ partial struct certificateRequestMsg {
     internal slice<slice<byte>> certificateAuthorities;
 }
 
-} partial class tlsᴛcertificateRequestMsg {
-
-internal static (slice<byte>, error) marshal(this ref certificateRequestMsg m) {
+internal static (slice<byte>, error) marshal⁔(/*this*/ ref certificateRequestMsg m) {
     // See RFC 4346, Section 7.4.4.
     nint length = 1 + len(m.certificateTypes) + 2;
     nint casLength = 0;
@@ -1957,7 +1890,7 @@ internal static (slice<byte>, error) marshal(this ref certificateRequestMsg m) {
     return (x, default);
 }
 
-internal static bool unmarshal(this ref certificateRequestMsg m, slice<byte> data) {
+internal static bool unmarshal⁔(/*this*/ ref certificateRequestMsg m, slice<byte> data) {
     if (len(data) < 5) {
         return false;
     }
@@ -2031,24 +1964,20 @@ internal static bool unmarshal(this ref certificateRequestMsg m, slice<byte> dat
     return len(data) == 0;
 }
 
-} partial class tls_package {
-
 partial struct certificateVerifyMsg {
     internal bool hasSignatureAlgorithm; // format change introduced in TLS 1.2
     internal SignatureScheme signatureAlgorithm;
     internal slice<byte> signature;
 }
 
-} partial class tlsᴛcertificateVerifyMsg {
-
-internal static (slice<byte>, error) marshal(this ж<certificateVerifyMsg> Ꮡm) {
+internal static (slice<byte>, error) marshal⁔(/*this*/ ж<certificateVerifyMsg> Ꮡm) {
     ref var b = ref heap(new cryptobyte.Builder(), out var Ꮡb);
     b.AddUint8(typeCertificateVerify);
-    Ꮡb.AddUint24LengthPrefixed((ж<cryptobyte.Builder> bΔ1) => {
+    Ꮡb.AddUint24LengthPrefixed([GoFunc("(*certificateVerifyMsg).marshal.func1")] (ж<cryptobyte.Builder> bΔ1) => {
         if (Ꮡm.Value.hasSignatureAlgorithm) {
             bΔ1.AddUint16((uint16)Ꮡm.Value.signatureAlgorithm);
         }
-        bΔ1.AddUint16LengthPrefixed((ж<cryptobyte.Builder> bΔ2) => {
+        bΔ1.AddUint16LengthPrefixed([GoFunc("(*certificateVerifyMsg).marshal.func1.1")] (ж<cryptobyte.Builder> bΔ2) => {
             bΔ2.AddBytes(Ꮡm.Value.signature);
         });
     });
@@ -2056,7 +1985,7 @@ internal static (slice<byte>, error) marshal(this ж<certificateVerifyMsg> Ꮡm)
     return b.Bytes();
 }
 
-internal static bool unmarshal(this ж<certificateVerifyMsg> Ꮡm, slice<byte> data) {
+internal static bool unmarshal⁔(/*this*/ ж<certificateVerifyMsg> Ꮡm, slice<byte> data) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     ref var s = ref heap<cryptobyte.String>((cryptobyte.String)data, out var Ꮡs);
@@ -2072,15 +2001,11 @@ internal static bool unmarshal(this ж<certificateVerifyMsg> Ꮡm, slice<byte> d
     return readUint16LengthPrefixed(Ꮡs, Ꮡm.Ꮡsignature) && s.Empty();
 }
 
-} partial class tls_package {
-
 partial struct newSessionTicketMsg {
     internal slice<byte> ticket;
 }
 
-} partial class tlsᴛnewSessionTicketMsg {
-
-internal static (slice<byte>, error) marshal(this ref newSessionTicketMsg m) {
+internal static (slice<byte>, error) marshal⁔(/*this*/ ref newSessionTicketMsg m) {
     // See RFC 5077, Section 3.3.
     nint ticketLen = len(m.ticket);
     nint length = 2 + 4 + ticketLen;
@@ -2096,7 +2021,7 @@ internal static (slice<byte>, error) marshal(this ref newSessionTicketMsg m) {
     return (x, default);
 }
 
-internal static bool unmarshal(this ref newSessionTicketMsg m, slice<byte> data) {
+internal static bool unmarshal⁔(/*this*/ ref newSessionTicketMsg m, slice<byte> data) {
     if (len(data) < 10) {
         return false;
     }
@@ -2116,22 +2041,16 @@ internal static bool unmarshal(this ref newSessionTicketMsg m, slice<byte> data)
     return true;
 }
 
-} partial class tls_package {
-
 partial struct helloRequestMsg {
 }
 
-} partial class tlsᴛhelloRequestMsg {
-
-internal static (slice<byte>, error) marshal(this ref helloRequestMsg _) {
+internal static (slice<byte>, error) marshal⁔(/*this*/ ref helloRequestMsg _) {
     return (slice<byte>([typeHelloRequest, 0, 0, 0]), default);
 }
 
-internal static bool unmarshal(this ref helloRequestMsg _, slice<byte> data) {
+internal static bool unmarshal⁔(/*this*/ ref helloRequestMsg _, slice<byte> data) {
     return len(data) == 4;
 }
-
-} partial class tls_package {
 
 partial interface transcriptHash {
     (nint, error) Write(slice<byte> _);

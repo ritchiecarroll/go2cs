@@ -12,7 +12,6 @@ using syscall = syscall_package;
 /* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
 using @internal;
 using net;
-using static net_package;
 
 partial class net_package {
 
@@ -20,8 +19,6 @@ internal partial struct probe_type /*dyn*/ {
     internal TCPAddr laddr;
     internal nint value;
 }
-
-} partial class netᴛipStackCapabilities {
 
 // probe probes IPv4, IPv6 and IPv4-mapped IPv6 communication
 // capabilities which are controlled by the IPV6_V6ONLY socket option
@@ -33,7 +30,7 @@ internal partial struct probe_type /*dyn*/ {
 // the IPv6 interface. That simplifies our code and is most
 // general. Unfortunately, we need to run on kernels built without
 // IPv6 support too. So probe the kernel to figure it out.
-internal static void probe(this ж<ipStackCapabilities> Ꮡp) {
+internal static void probe⁔(/*this*/ ж<ipStackCapabilities> Ꮡp) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -97,8 +94,6 @@ internal static void probe(this ж<ipStackCapabilities> Ꮡp) {
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
-
-} partial class net_package {
 
 // favoriteAddrFamily returns the appropriate address family for the
 // given network, laddr, raddr and mode.

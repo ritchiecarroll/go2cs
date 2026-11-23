@@ -9,7 +9,6 @@ using fmt = fmt_package;
 using tracev2 = go.@internal.trace.tracev2_package;
 using encoding;
 using go.@internal.trace;
-using static trace_package;
 
 partial class trace_package {
 
@@ -21,9 +20,7 @@ partial struct batchCursor {
     internal baseEvent ev; // last read event
 }
 
-} partial class traceᴛbatchCursor {
-
-internal static (bool ok, error err) nextEvent(this ж<batchCursor> Ꮡb, slice<batch> batches, frequency freq) {
+internal static (bool ok, error err) nextEvent⁔(/*this*/ ж<batchCursor> Ꮡb, slice<batch> batches, frequency freq) {
     error err = default;
     ref var b = ref Ꮡb.DerefOrNull();
 
@@ -58,13 +55,11 @@ internal static (bool ok, error err) nextEvent(this ж<batchCursor> Ꮡb, slice<
     return (true, default);
 }
 
-internal static nint compare(this ref batchCursor b, ж<batchCursor> Ꮡa) {
+internal static nint compare⁔(/*this*/ ref batchCursor b, ж<batchCursor> Ꮡa) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     return cmp.Compare(b.ev.time, a.ev.time);
 }
-
-} partial class trace_package {
 
 // readTimedBaseEvent reads out the raw event data from b
 // into e. It does not try to interpret the arguments

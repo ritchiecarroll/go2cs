@@ -70,7 +70,7 @@ internal static Func<nint> capture(params ꓸꓸꓸnint xsʗp) {
     var xs = xsʗp.slice();
 
     var xsʗ1 = xs;
-    return () => sum(xsʗ1.ꓸꓸꓸ);
+    return [GoFunc("capture.func1")] () => sum(xsʗ1.ꓸꓸꓸ);
 }
 
 internal static void deferred(ж<nint> @out, params ꓸꓸꓸnint xsʗp) {
@@ -79,7 +79,7 @@ internal static void deferred(ж<nint> @out, params ꓸꓸꓸnint xsʗp) {
         var xs = xsʗp.slice();
 
         var xsʗ1 = xs;
-        defer(() => {
+        defer([GoFunc("deferred.func1")] () => {
             @out.Value = sum(xsʗ1.ꓸꓸꓸ);
         }, ref ᒐ);
     }

@@ -9,7 +9,6 @@ namespace go.go;
 using slices = slices_package;
 using unicode = unicode_package;
 using token = global::go.go.token_package;
-using static types_package;
 
 partial class types_package {
 
@@ -54,7 +53,7 @@ internal static bool allNumericOrString(Type t) { return allBasic(t, (BasicInfo)
 internal static bool allBasic(Type t, BasicInfo info) {
     {
         var (tpar, _) = Unalias(t)._<ж<TypeParam>>(ᐧ); if (tpar != nil) {
-            return tpar.@is((ж<term> tΔ1) => tΔ1 != nil && isBasic(tΔ1.typ, info));
+            return tpar.@is([GoFunc("allBasic.func1")] (ж<term> tΔ1) => tΔ1 != nil && isBasic(tΔ1.typ, info));
         }
     }
     return isBasic(t, info);
@@ -239,7 +238,7 @@ internal static bool hasNil(Type t) {
         return true;
     }
     case ж<Interface> u: {
-        return !isTypeParam(t) || underIs(t, (Type uΔ1) => uΔ1 != nil && hasNil(uΔ1));
+        return !isTypeParam(t) || underIs(t, [GoFunc("hasNil.func1")] (Type uΔ1) => uΔ1 != nil && hasNil(uΔ1));
     }}
     return false;
 }
@@ -263,15 +262,11 @@ partial struct ifacePair {
     internal ж<ifacePair> prev;
 }
 
-} partial class typesᴛifacePair {
-
-internal static bool identical(this ref ifacePair p, ж<ifacePair> Ꮡq) {
+internal static bool identical⁔(/*this*/ ref ifacePair p, ж<ifacePair> Ꮡq) {
     ref var q = ref Ꮡq.DerefOrNull();
 
     return p.x == q.x && p.y == q.y || p.x == q.y && p.y == q.x;
 }
-
-} partial class types_package {
 
 // A comparer is used to compare types.
 partial struct comparer {
@@ -279,10 +274,8 @@ partial struct comparer {
     internal bool ignoreInvalids; // if set, identical treats an invalid type as identical to any type
 }
 
-} partial class typesᴛcomparer {
-
 // For changes to this code the corresponding changes should be made to unifier.nify.
-internal static bool identical(this ref comparer c, Type x, Type y, ж<ifacePair> Ꮡp) {
+internal static bool identical⁔(/*this*/ ref comparer c, Type x, Type y, ж<ifacePair> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
     var targsᴷ = new stackAppend<Type>();
 
@@ -545,8 +538,6 @@ internal static bool identical(this ref comparer c, Type x, Type y, ж<ifacePair
 
     return false;
 }
-
-} partial class types_package {
 
 // identicalOrigin reports whether x and y originated in the same declaration.
 internal static bool identicalOrigin(ж<Named> x, ж<Named> y) {

@@ -72,7 +72,7 @@ internal static error writeHeapProto(io.Writer w, slice<profilerecord.MemProfile
             blockSize = quo(r.AllocBytes, r.AllocObjects);
         }
         var bʗ1 = b;
-        b.pbSample(values, locs, () => {
+        b.pbSample(values, locs, [GoFunc("writeHeapProto.func1")] () => {
             if (blockSize != 0) {
                 bʗ1.pbLabel(tagSample_Label, bytesˢ, ""u8, blockSize);
             }

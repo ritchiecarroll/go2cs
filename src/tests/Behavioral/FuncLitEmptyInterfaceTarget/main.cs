@@ -12,7 +12,7 @@ partial struct holder {
 }
 
 internal static Func<nint, (any, error)> scaled(nint n) {
-    return (nint x) => {
+    return [GoFunc("scaled.func1")] (nint x) => {
         if (x < 0) {
             return (default, errors.New("negative"));
         }
@@ -21,7 +21,7 @@ internal static Func<nint, (any, error)> scaled(nint n) {
 }
 
 internal static any retMulti() {
-    return (any, error) (nint x) => {
+    return [GoFunc("retMulti.func1")] (any, error) (nint x) => {
         if (x < 0) {
             return (default, errors.New("negative"));
         }
@@ -30,7 +30,7 @@ internal static any retMulti() {
 }
 
 internal static Hook retNamed() {
-    return (any, error) (nint x) => {
+    return [GoFunc("retNamed.func1")] (any, error) (nint x) => {
         if (x < 0) {
             return (default, errors.New("negative"));
         }
@@ -38,7 +38,7 @@ internal static Hook retNamed() {
     };
 }
 
-internal static any retConst() { return int64 () => 1; }
+internal static any retConst() { return [GoFunc("retConst.func1")] int64 () => 1; }
 
 internal static any take(any h) { return h; }
 
@@ -56,63 +56,63 @@ internal static @string call(any h) {
 }
 
 internal static void main() {
-    any declared = (any, error) (nint x) => {
+    any declared = [GoFunc("main.func1")] (any, error) (nint x) => {
         if (x < 0) {
             return (default, errors.New("negative"));
         }
         return (x * 4, default);
     };
     any assigned = default;
-    assigned = (any, error) (nint x) => {
+    assigned = [GoFunc("main.func2")] (any, error) (nint x) => {
         if (x < 0) {
             return (default, errors.New("negative"));
         }
         return (x * 5, default);
     };
-    var argument = take((any, error) (nint x) => {
+    var argument = take([GoFunc("main.func3")] (any, error) (nint x) => {
         if (x < 0) {
             return (default, errors.New("negative"));
         }
         return (x * 6, default);
     });
-    var keyed = new holder(h: (any, error) (nint x) => {
+    var keyed = new holder(h: [GoFunc("main.func4")] (any, error) (nint x) => {
         if (x < 0) {
             return (default, errors.New("negative"));
         }
         return (x * 7, default);
     }
     );
-    var elements = slice<any>([(any, error) (nint x) => {
+    var elements = new any[]{[GoFunc("main.func5")] (any, error) (nint x) => {
         if (x < 0) {
             return (default, errors.New("negative"));
         }
         return (x * 8, default);
-    }, int64 () => 2]);
-    var converted = (any)((any, error) (nint x) => {
+    }, [GoFunc("main.func6")] int64 () => 2}.slice();
+    var converted = (any)([GoFunc("main.func7")] (any, error) (nint x) => {
         if (x < 0) {
             return (default, errors.New("negative"));
         }
         return (x * 9, default);
     });
-    var namedConverted = (Hook)(int64 () => 3);
+    var namedConverted = (Hook)([GoFunc("main.func8")] int64 () => 3);
     var ch = new channel<any>(1);
-    ch.ᐸꟷ((any, error) (nint x) => {
+    ch.ᐸꟷ([GoFunc("main.func9")] (any, error) (nint x) => {
         if (x < 0) {
             return (default, errors.New("negative"));
         }
         return (x * 10, default);
     });
     var sent = ᐸꟷ(ch);
-    var positional = new holder(int64 () => 4);
-    any first = int64 () => 5;
-    any second = (any, error) (nint x) => {
+    var positional = new holder([GoFunc("main.func10")] int64 () => 4);
+    any first = [GoFunc("main.func11")] int64 () => 5;
+    any second = [GoFunc("main.func12")] (any, error) (nint x) => {
         if (x < 0) {
             return (default, errors.New("negative"));
         }
         return (x * 11, default);
     };
-    any declaredConst = int64 () => 6;
-    var byName = new map<@string, any>{["seven"] = int64 () => 7};
+    any declaredConst = [GoFunc("main.func13")] int64 () => 6;
+    var byName = new map<@string, any>{["seven"] = [GoFunc("main.func14")] int64 () => 7};
     any named = (scaled(12)).OrTypedNilFunc();
 
     var all = slice<any>([retMulti(), retNamed(), retConst(), declared, assigned, argument, keyed.h,

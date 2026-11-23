@@ -27,7 +27,7 @@ internal static ref atomic.Pointer<Counter> drbgInstance => ref ((StaticBox<atom
 internal static readonly ж<sync.Pool> ᏑdrbgPool = new StaticBox<sync.Pool>(default(sync.Pool));
 internal static ref sync.Pool drbgPool => ref ((StaticBox<sync.Pool>)ᏑdrbgPool).ValueSlot;
 internal static void initᴛdrbgPool() { drbgPool = new sync.Pool(
-    New: () => NewCounter(getEntropy()).OrTypedNil()
+    New: [GoFunc("init.func1")] () => NewCounter(getEntropy()).OrTypedNil()
 ); }
 
 // Read fills b with cryptographically secure random bytes. In FIPS mode, it
@@ -63,7 +63,7 @@ public static void Read(slice<byte> b) {
             drbg = ᏑdrbgPool.Get()._<ж<Counter>>();
         }
         var drbgʗ1 = drbg;
-        defer(() => {
+        defer([GoFunc("Read.func1")] () => {
             if (!ᏑdrbgInstance.CompareAndSwap(nil, drbgʗ1)) {
                 ᏑdrbgPool.Put(drbgʗ1.OrTypedNil());
             }

@@ -14,6 +14,9 @@
 
 using go;
 using static go.mime.quotedprintable_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -55,11 +58,13 @@ using static go.mime.quotedprintable_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("mime/quotedprintable/reader.go", "reader.cs", "ABcwksqClKS2lKaigpSSgpSClKaClJSogoLKAA0UgoKClKaCgoKCgoKChJSCgpSmlJSUgoKUgpSUtNi0lIKCgpQ=", "", "", "26=NewReader/1/1/1")]
-[assembly: GoPositionMap("mime/quotedprintable/writer.go", "writer.cs", "ABcwkszSgqa0toKClKaClKaCpoKmqqKCpqiSgpSCgqaCpoCCpICCpKaCgriCgqamgoKCuIKCgpQACQySgqaCgoKCuKaCgpSmgoKClKaCgqaCxoI=")]
+[assembly: GoPositionMap("mime/quotedprintable/reader.go", "reader.cs", "ABYwksqClKS2lKaigpSSgpSClKaClJSogoKqAA0UgoKClKaCgoKCgoKChJSCgpSmlJSUgoKUgpSUtNi0lIKCgpQ=", "", "", "25=NewReader/1/1/1")]
+[assembly: GoPositionMap("mime/quotedprintable/writer.go", "writer.cs", "ABYwkqzSgqa0toKClKaClKaCpoKmqqKCpqiSgpSCgqaCpoCCpICCpKaCgriCgqamgoKCuIKCgpTckoKmgoKCgrimgoKUpoKCgpSmgoKmgqaC")]
 // </GoSourcePositionMaps>
 
 namespace go.mime;
+
+using static go.mime.quotedprintable_package;
 
 [GoPackage("quotedprintable")]
 public static partial class quotedprintable_package
@@ -96,6 +101,26 @@ public static partial class quotedprintable_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(quotedprintable_package.Reader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class quotedprintableᴛReader;
-[GoMethodHost(typeof(quotedprintable_package.Writer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class quotedprintableᴛWriter;
+[GoMethodHost(typeof(quotedprintable_package.Reader)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class quotedprintableᴛReader;
+[GoMethodHost(typeof(quotedprintable_package.Writer)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class quotedprintableᴛWriter;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class quotedprintableᴛReader {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint n, error err) Read(this ref Reader r, slice<byte> p) => quotedprintable_package.Read⁔(ref r, p);
+}
+partial class quotedprintableᴛWriter {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint n, error err) Write(this ref Writer w, slice<byte> p) => quotedprintable_package.Write⁔(ref w, p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Close(this ref Writer w) => quotedprintable_package.Close⁔(ref w);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error write(this ref Writer w, slice<byte> p) => quotedprintable_package.write⁔(ref w, p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error encode(this ref Writer w, byte b) => quotedprintable_package.encode⁔(ref w, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error checkLastByte(this ref Writer w) => quotedprintable_package.checkLastByte⁔(ref w);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error insertSoftLineBreak(this ref Writer w) => quotedprintable_package.insertSoftLineBreak⁔(ref w);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error insertCRLF(this ref Writer w) => quotedprintable_package.insertCRLF⁔(ref w);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error flush(this ref Writer w) => quotedprintable_package.flush⁔(ref w);
+}
+// </MethodForwarders>

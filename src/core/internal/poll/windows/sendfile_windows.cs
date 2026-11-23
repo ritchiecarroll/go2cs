@@ -18,7 +18,7 @@ public static (int64 written, error err, bool handled) SendFile(ж<FD> Ꮡfd, ui
         ref var fd = ref Ꮡfd.DerefOrNull();
         ref var err = ref Ꮡerr.ValueSlot;
 
-        defer(() => {
+        defer([GoFunc("SendFile.func1")] () => {
             TestHookDidSendFile(Ꮡfd, 0, written, Ꮡerr.ValueSlot, written > 0);
         }, ref ᒐ);
         if (fd.kind == kindPipe) {
@@ -52,7 +52,7 @@ public static (int64 written, error err, bool handled) SendFile(ж<FD> Ꮡfd, ui
             size = min(size, maxSize);
         }
 
-        defer(() => {
+        defer([GoFunc("SendFile.func2")] () => {
             if (written > 0) {
                 // Some versions of Windows (Windows 10 1803) do not set
                 // file position after TransmitFile completes.
@@ -75,7 +75,7 @@ public static (int64 written, error err, bool handled) SendFile(ж<FD> Ꮡfd, ui
                 chunkSize = size;
             }
 
-            var (n, errΔ3) = Ꮡfd.execIO('w', (ж<operation> o) => {
+            var (n, errΔ3) = Ꮡfd.execIO('w', [GoFunc("SendFile.func3")] (ж<operation> o) => {
                 var off = startpos + written;
                 o.o.OffsetHigh = (uint32)(off >> 32);
                 o.o.Offset = (uint32)off;

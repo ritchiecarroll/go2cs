@@ -14,6 +14,9 @@
 
 using go;
 using static go.ValueAdapterDynamicType.colorlike_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -53,10 +56,12 @@ using static go.ValueAdapterDynamicType.colorlike_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("lib.go", "lib.cs", "ABAoggAKEIKC")]
+[assembly: GoPositionMap("lib.go", "lib.cs", "AAwoggAGEIKC")]
 // </GoSourcePositionMaps>
 
 namespace go.ValueAdapterDynamicType;
+
+using static go.ValueAdapterDynamicType.colorlike_package;
 
 [GoPackage("colorlike")]
 public static partial class colorlike_package
@@ -90,6 +95,19 @@ public static partial class colorlike_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(colorlike_package.Gray)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class colorlikeᴛGray;
-[GoMethodHost(typeof(colorlike_package.NRGBA)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class colorlikeᴛNRGBA;
+[GoMethodHost(typeof(colorlike_package.Gray)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class colorlikeᴛGray;
+[GoMethodHost(typeof(colorlike_package.NRGBA)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class colorlikeᴛNRGBA;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class colorlikeᴛGray {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (uint32, uint32, uint32, uint32) RGBA(this Gray c) => colorlike_package.RGBA⁔(c);
+}
+partial class colorlikeᴛNRGBA {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (uint32, uint32, uint32, uint32) RGBA(this NRGBA c) => colorlike_package.RGBA⁔(c);
+}
+// </MethodForwarders>

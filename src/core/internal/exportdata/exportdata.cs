@@ -382,8 +382,8 @@ internal static (@string, error) lookupGorootExport(@string pkgDir) {
         ref var listOnce = ref heap(new sync.Once(), out var ᏑlistOnce);
         @string exportPath = default;
         ref var err = ref heap<error>(out var Ꮡerr);
-        (f, _) = ᏑexportMap.LoadOrStore(pkgDir, (@string, error) () => {
-            ᏑlistOnce.Do(() => {
+        (f, _) = ᏑexportMap.LoadOrStore(pkgDir, [GoFunc("lookupGorootExport.func1")] (@string, error) () => {
+            ᏑlistOnce.Do([GoFunc("lookupGorootExport.func1.1")] () => {
                 var cmd = exec.Command(filepath.Join(build.Default.GOROOT, binˢ, "go"), listˢ, exportˢ, "-f", exportˢ2, pkgDir);
                 cmd.Dir = build.Default.GOROOT;
                 cmd.Env = append(os.Environ(), "PWD="u8 + cmd.Dir, "GOROOT=" + build.Default.GOROOT);

@@ -45,7 +45,7 @@ namespace go.testing_runtime;
 /// than .NET's, for the same reason.
 /// </para>
 /// </remarks>
-internal sealed class TestOptions
+internal sealed partial class TestOptions
 {
     public bool Json { get; private set; }
     public bool Verbose { get; private set; }

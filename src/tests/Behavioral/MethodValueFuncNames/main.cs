@@ -26,17 +26,17 @@ internal static @string nameOf(any fn) {
 }
 
 internal static partial Func<nint> makeLiteral() {
-    return () => 1;
+    return [GoFunc("makeLiteral.func1")] () => 1;
 }
 
 internal static partial (Func<nint>, Func<nint>) twoLiterals() {
-    var first = nint () => 1;
-    var second = nint () => 2;
+    var first = [GoFunc("twoLiterals.func1")] nint () => 1;
+    var second = [GoFunc("twoLiterals.func2")] nint () => 2;
     return (first, second);
 }
 
 internal static partial @string boundInsideLiteral(ж<T> t) {
-    return func(@string () => {
+    return func([GoFunc("boundInsideLiteral.func1")] @string () => {
         return nameOf(t.pointerMethod);
     })();
 }
@@ -61,7 +61,7 @@ internal static partial void main() {
 
     fmt.Println("package function:                    ", nameOf(nameOf));
 
-    var inMain = nint () => 3;
+    var inMain = [GoFunc("main.func1")] nint () => 3;
     fmt.Println("literal inside main:                 ", nameOf((inMain).OrTypedNilFunc()));
 
     var (pc, _, _, _) = runtime.Caller(0);

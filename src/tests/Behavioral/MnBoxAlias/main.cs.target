@@ -130,7 +130,7 @@ internal static @string /*out*/ nilChain(ref nest n) {
     @string @out = default;
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("nilChain.func1")] () => {
             var r = recover(); if (r != nil) {
                 @out = fmt.Sprint("panic: ", r);
             }
@@ -147,7 +147,7 @@ internal static @string /*out*/ nilParam(ref holder nh) {
     @string @out = default;
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("nilParam.func1")] () => {
             var r = recover(); if (r != nil) {
                 @out = fmt.Sprint("panic: ", r);
             }
@@ -199,7 +199,7 @@ internal static @string /*out*/ nilRoot(ж<acct> Ꮡnp) {
     try {
         ref var np = ref Ꮡnp.DerefOrNull();
 
-        defer(() => {
+        defer([GoFunc("nilRoot.func1")] () => {
             var r = recover(); if (r != nil) {
                 @out = fmt.Sprint("panic: ", r);
             }
@@ -218,7 +218,7 @@ internal static @string /*out*/ nilField(ж<holder> Ꮡnh) {
     try {
         ref var nh = ref Ꮡnh.DerefOrNull();
 
-        defer(() => {
+        defer([GoFunc("nilField.func1")] () => {
             var r = recover(); if (r != nil) {
                 @out = fmt.Sprint("panic: ", r);
             }
@@ -235,14 +235,14 @@ internal static partial void main() {
     var a = Ꮡ(new acct(bal: 1, sub: new inner(n: 1)));
 
     var aʗ1 = a;
-    goǃ(writer, () => {
+    goǃ(writer, [GoFunc("main.func1")] () => {
         aʗ1.bal = 2;
     });
     nint root = a.waitAndRead();
     fmt.Println("root", root);
 
     var aʗ2 = a;
-    goǃ(writer, () => {
+    goǃ(writer, [GoFunc("main.func2")] () => {
         aʗ2.sub.n = 7;
     });
     nint field = a.Ꮡsub.waitAndRead();
@@ -252,7 +252,7 @@ internal static partial void main() {
     var old = cells;
     cells = append(cells, new cell(v: 9));
     var oldʗ1 = old;
-    goǃ(writer, () => {
+    goǃ(writer, [GoFunc("main.func3")] () => {
         oldʗ1[0].v = 4;
     });
     nint element = old[0].waitAndRead();
@@ -261,7 +261,7 @@ internal static partial void main() {
 
     var b = Ꮡ(new bag(s: [new(v: 1), new(v: 1)]));
     var bʗ1 = b;
-    goǃ(writer, () => {
+    goǃ(writer, [GoFunc("main.func4")] () => {
         bʗ1.s[1].v = 3;
     });
     nint ownElement = b.waitAt(1);
@@ -269,14 +269,14 @@ internal static partial void main() {
 
     var pc = Ꮡ(new cell(v: 1));
     var pcʗ1 = pc;
-    goǃ(writer, () => {
+    goǃ(writer, [GoFunc("main.func5")] () => {
         pcʗ1.v = 5;
     });
     nint param = readCell(ref (pc).DerefOrNull());
     fmt.Println("param", param);
 
     var pcʗ2 = pc;
-    goǃ(writer, () => {
+    goǃ(writer, [GoFunc("main.func6")] () => {
         pcʗ2.v = 6;
     });
     nint forwarded = forward(ref (pc).DerefOrNull());
@@ -286,35 +286,35 @@ internal static partial void main() {
     hc.v = 1;
     var hp = Ꮡhc;
     var hpʗ1 = hp;
-    goǃ(writer, () => {
+    goǃ(writer, [GoFunc("main.func7")] () => {
         hpʗ1.v = 8;
     });
     fmt.Println("param-heap", readCell(ref hc));
 
     var cs = slice<cell>([new(v: 1), new(v: 1)]);
     var csʗ1 = cs;
-    goǃ(writer, () => {
+    goǃ(writer, [GoFunc("main.func8")] () => {
         csʗ1[1].v = 9;
     });
     fmt.Println("param-element", readCell(ref cs[1]));
 
     var h = Ꮡ(new holder(c: new cell(v: 1)));
     var hʗ1 = h;
-    goǃ(writer, () => {
+    goǃ(writer, [GoFunc("main.func9")] () => {
         hʗ1.c.v = 10;
     });
     fmt.Println("param-field", readCell(ref (h.Ꮡc).DerefOrNull()));
 
     var e = Ꮡ(new ptrs(p: Ꮡ(new cell(v: 1))));
     var eʗ1 = e;
-    goǃ(writer, () => {
+    goǃ(writer, [GoFunc("main.func10")] () => {
         eʗ1.p.v = 11;
     });
     fmt.Println("param-ptr-field", readCell(ref (e.p).DerefOrNull()));
 
     var hh = Ꮡ(new holder(c: new cell(v: 1)));
     var hhʗ1 = hh;
-    goǃ(writer, () => {
+    goǃ(writer, [GoFunc("main.func11")] () => {
         hhʗ1.c.v = 12;
     });
     fmt.Println("param-two", readBoth(ref (hh).DerefOrNull(), ref (hh.Ꮡc).DerefOrNull()));
@@ -322,7 +322,7 @@ internal static partial void main() {
     ref var arr = ref heap(new array<cell>(2), out var Ꮡarr);
     var ap = Ꮡarr;
     var apʗ1 = ap;
-    goǃ(writer, () => {
+    goǃ(writer, [GoFunc("main.func12")] () => {
         apʗ1.Value[1].v = 13;
     });
     fmt.Println("param-array", readArr(ref arr, ref arr[1]));
@@ -331,32 +331,32 @@ internal static partial void main() {
     var done = new channel<nint>(0);
     goǃ((ᴛ1, ᴛ2) => thunkRead(ᴛ1, ref ᴛ2.DerefOrNull()), done, tp);
     var tpʗ1 = tp;
-    goǃ(writer, () => {
+    goǃ(writer, [GoFunc("main.func13")] () => {
         tpʗ1.v = 14;
     });
     fmt.Println("param-thunk", ᐸꟷ(done));
 
-    goǃ(writer, () => {
+    goǃ(writer, [GoFunc("main.func14")] () => {
         pkgCell.v = 15;
     });
     fmt.Println("param-package", readCell(ref pkgCell));
 
     var nc = Ꮡ(new nest(h: new holder(c: new cell(v: 1))));
     var ncʗ1 = nc;
-    goǃ(writer, () => {
+    goǃ(writer, [GoFunc("main.func15")] () => {
         ncʗ1.h.c.v = 16;
     });
     fmt.Println("param-chain", readCell(ref (nc.Ꮡh.Ꮡc).DerefOrNull()));
 
     var ncʗ2 = nc;
-    goǃ(writer, () => {
+    goǃ(writer, [GoFunc("main.func16")] () => {
         ncʗ2.h.c.v = 17;
     });
     fmt.Println("param-chain-param", chainRead(ref (nc).DerefOrNull()));
 
     var rn = Ꮡ(new rnest(p: [1], h: new rholder(s: [2], c: new rcell(name: "r", v: 1))));
     var rnʗ1 = rn;
-    goǃ(writer, () => {
+    goǃ(writer, [GoFunc("main.func17")] () => {
         rnʗ1.h.c.v = 18;
     });
     fmt.Println("param-chain-ref", chainRef(ref (rn).DerefOrNull()));
@@ -364,35 +364,35 @@ internal static partial void main() {
     var pk = Ꮡ(new cell(v: 1));
 
     var pkʗ1 = pk;
-    goǃ(writer2, () => {
-    }, () => {
+    goǃ(writer2, [GoFunc("main.func18")] () => {
+    }, [GoFunc("main.func19")] () => {
         pkʗ1.v = 19;
     });
     fmt.Println("param-later-call", readCellK(ref (pk).DerefOrNull(), parkK()));
 
     cell sv = default;
     sv.v = 1;
-    goǃ(writer, () => {
+    goǃ(writer, [GoFunc("main.func20")] () => {
     });
     bumpCell(ref sv);
     fmt.Println("param-stack", sv.v);
 
-    goǃ(writer2, () => {
-    }, () => {
+    goǃ(writer2, [GoFunc("main.func21")] () => {
+    }, [GoFunc("main.func22")] () => {
     });
     var si = new cell(v: parkK());
     bumpCell(ref si);
     fmt.Println("param-stack-init", si.v);
 
     var aʗ3 = a;
-    goǃ(writer, () => {
+    goǃ(writer, [GoFunc("main.func23")] () => {
         aʗ3.bal = 50;
     });
     nint value = a.valueRead();
     fmt.Println("value", value);
     fmt.Println("value after", a.bal);
 
-    goǃ(writer, () => {
+    goǃ(writer, [GoFunc("main.func24")] () => {
     });
     fmt.Println("nil", nilRoot(nil));
 

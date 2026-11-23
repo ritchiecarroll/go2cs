@@ -9,7 +9,6 @@ using tracev2 = @internal.trace.tracev2_package;
 /* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for go:linkname
 using @internal.runtime;
 using @internal.trace;
-using static runtime_package;
 
 partial class runtime_package {
 
@@ -18,15 +17,11 @@ partial struct gTraceState {
     /*embed*/ internal traceSchedResourceState traceSchedResourceState;
 }
 
-} partial class runtimeᴛgTraceState {
-
 // reset resets the gTraceState for a new goroutine.
-internal static void reset(this ref gTraceState s) {
+internal static void reset⁔(/*this*/ ref gTraceState s) {
     s.seq.Assign(new uint64[]{}.array(2));
     // N.B. s.statusTraced is managed and cleared separately.
 }
-
-} partial class runtime_package {
 
 // mTraceState is per-M state for the tracer.
 partial struct mTraceState {
@@ -239,18 +234,14 @@ internal static traceLocker traceAcquireEnabled() {
     return new traceLocker(mp, gen);
 }
 
-} partial class runtimeᴛtraceLocker {
-
 // ok returns true if the traceLocker is valid (i.e. tracing is enabled).
 //
 // nosplit because it's called on the syscall path when stack movement is forbidden.
 //
 //go:nosplit
-internal static bool ok(this traceLocker tl) {
+internal static bool ok⁔(/*this*/ traceLocker tl) {
     return tl.gen != 0;
 }
-
-} partial class runtime_package {
 
 // traceRelease indicates that this M is done writing trace events.
 //
@@ -278,17 +269,15 @@ internal static void traceExitedSyscall() {
     Ꮡtrace.of(traceᴛ1.ᏑexitingSyscall).Add(-1);
 }
 
-} partial class runtimeᴛtraceLocker {
-
 // Gomaxprocs emits a ProcsChange event.
-internal static void Gomaxprocs(this traceLocker tl, int32 procs) {
+internal static void Gomaxprocs⁔(/*this*/ traceLocker tl, int32 procs) {
     tl.eventWriter(tracev2.GoRunning, tracev2.ProcRunning).@event(tracev2.EvProcsChange, (traceArg)(uint64)procs, tl.stack(1));
 }
 
 // ProcStart traces a ProcStart event.
 //
 // Must be called with a valid P.
-internal static void ProcStart(this traceLocker tl) {
+internal static void ProcStart⁔(/*this*/ traceLocker tl) {
     var pp = (~tl.mp).p.ptr();
     // Procs are typically started within the scheduler when there is no user goroutine. If there is a user goroutine,
     // it must be in _Gsyscall because the only time a goroutine is allowed to have its Proc moved around from under it
@@ -297,7 +286,7 @@ internal static void ProcStart(this traceLocker tl) {
 }
 
 // ProcStop traces a ProcStop event.
-internal static void ProcStop(this traceLocker tl, ж<p> pp) {
+internal static void ProcStop⁔(/*this*/ traceLocker tl, ж<p> pp) {
     // The only time a goroutine is allowed to have its Proc moved around
     // from under it is during a syscall.
     tl.eventWriter(tracev2.GoSyscall, tracev2.ProcRunning).@event(tracev2.EvProcStop);
@@ -307,7 +296,7 @@ internal static void ProcStop(this traceLocker tl, ж<p> pp) {
 //
 // Must be emitted by an actively running goroutine on an active P. This restriction can be changed
 // easily and only depends on where it's currently called.
-internal static void GCActive(this traceLocker tl) {
+internal static void GCActive⁔(/*this*/ traceLocker tl) {
     tl.eventWriter(tracev2.GoRunning, tracev2.ProcRunning).@event(tracev2.EvGCActive, (traceArg)trace.seqGC);
     // N.B. Only one GC can be running at a time, so this is naturally
     // serialized by the caller.
@@ -318,7 +307,7 @@ internal static void GCActive(this traceLocker tl) {
 //
 // Must be emitted by an actively running goroutine on an active P. This restriction can be changed
 // easily and only depends on where it's currently called.
-internal static void GCStart(this traceLocker tl) {
+internal static void GCStart⁔(/*this*/ traceLocker tl) {
     tl.eventWriter(tracev2.GoRunning, tracev2.ProcRunning).@event(tracev2.EvGCBegin, (traceArg)trace.seqGC, tl.stack(3));
     // N.B. Only one GC can be running at a time, so this is naturally
     // serialized by the caller.
@@ -329,7 +318,7 @@ internal static void GCStart(this traceLocker tl) {
 //
 // Must be emitted by an actively running goroutine on an active P. This restriction can be changed
 // easily and only depends on where it's currently called.
-internal static void GCDone(this traceLocker tl) {
+internal static void GCDone⁔(/*this*/ traceLocker tl) {
     tl.eventWriter(tracev2.GoRunning, tracev2.ProcRunning).@event(tracev2.EvGCEnd, (traceArg)trace.seqGC);
     // N.B. Only one GC can be running at a time, so this is naturally
     // serialized by the caller.
@@ -337,14 +326,14 @@ internal static void GCDone(this traceLocker tl) {
 }
 
 // STWStart traces a STWBegin event.
-internal static void STWStart(this traceLocker tl, stwReason reason) {
+internal static void STWStart⁔(/*this*/ traceLocker tl, stwReason reason) {
     // Although the current P may be in _Pgcstop here, we model the P as running during the STW. This deviates from the
     // runtime's state tracking, but it's more accurate and doesn't result in any loss of information.
     tl.eventWriter(tracev2.GoRunning, tracev2.ProcRunning).@event(tracev2.EvSTWBegin, tl.@string(reason.String()), tl.stack(2));
 }
 
 // STWDone traces a STWEnd event.
-internal static void STWDone(this traceLocker tl) {
+internal static void STWDone⁔(/*this*/ traceLocker tl) {
     // Although the current P may be in _Pgcstop here, we model the P as running during the STW. This deviates from the
     // runtime's state tracking, but it's more accurate and doesn't result in any loss of information.
     tl.eventWriter(tracev2.GoRunning, tracev2.ProcRunning).@event(tracev2.EvSTWEnd);
@@ -361,7 +350,7 @@ private static readonly @string doubleTraceGCSweepStartˢᵇ = "double traceGCSw
 // must be no preemption points between these two calls.
 //
 // Must be called with a valid P.
-internal static void GCSweepStart(this traceLocker tl) {
+internal static void GCSweepStart⁔(/*this*/ traceLocker tl) {
     // Delay the actual GCSweepBegin event until the first span
     // sweep. If we don't sweep anything, don't emit any events.
     var pp = (~tl.mp).p.ptr();
@@ -379,7 +368,7 @@ internal static void GCSweepStart(this traceLocker tl) {
 // pair; however, it will not emit any trace events in this case.
 //
 // Must be called with a valid P.
-internal static void GCSweepSpan(this traceLocker tl, uintptr bytesSwept) {
+internal static void GCSweepSpan⁔(/*this*/ traceLocker tl, uintptr bytesSwept) {
     var pp = (~tl.mp).p.ptr();
     if ((~pp).trace.maySweep) {
         if ((~pp).trace.swept == 0) {
@@ -399,7 +388,7 @@ private static readonly @string missingTraceGCSweepStartˢᵇ = "missing traceGC
 // a GCSweepEnd event.
 //
 // Must be called with a valid P.
-internal static void GCSweepDone(this traceLocker tl) {
+internal static void GCSweepDone⁔(/*this*/ traceLocker tl) {
     var pp = (~tl.mp).p.ptr();
     if (!(~pp).trace.maySweep) {
         @throw(missingTraceGCSweepStartˢ);
@@ -412,17 +401,17 @@ internal static void GCSweepDone(this traceLocker tl) {
 }
 
 // GCMarkAssistStart emits a MarkAssistBegin event.
-internal static void GCMarkAssistStart(this traceLocker tl) {
+internal static void GCMarkAssistStart⁔(/*this*/ traceLocker tl) {
     tl.eventWriter(tracev2.GoRunning, tracev2.ProcRunning).@event(tracev2.EvGCMarkAssistBegin, tl.stack(1));
 }
 
 // GCMarkAssistDone emits a MarkAssistEnd event.
-internal static void GCMarkAssistDone(this traceLocker tl) {
+internal static void GCMarkAssistDone⁔(/*this*/ traceLocker tl) {
     tl.eventWriter(tracev2.GoRunning, tracev2.ProcRunning).@event(tracev2.EvGCMarkAssistEnd);
 }
 
 // GoCreate emits a GoCreate event.
-internal static void GoCreate(this traceLocker tl, ж<g> Ꮡnewg, uintptr pc, bool blocked) {
+internal static void GoCreate⁔(/*this*/ traceLocker tl, ж<g> Ꮡnewg, uintptr pc, bool blocked) {
     ref var newg = ref Ꮡnewg.DerefOrNull();
 
     Ꮡnewg.of(g.Ꮡtrace).of(gTraceState.ᏑtraceSchedResourceState).setStatusTraced(tl.gen);
@@ -436,7 +425,7 @@ internal static void GoCreate(this traceLocker tl, ж<g> Ꮡnewg, uintptr pc, bo
 // GoStart emits a GoStart event.
 //
 // Must be called with a valid P.
-internal static void GoStart(this traceLocker tl) {
+internal static void GoStart⁔(/*this*/ traceLocker tl) {
     var gp = getg().Value.m.Value.curg;
     var pp = gp.Value.m.Value.p;
     var w = tl.eventWriter(tracev2.GoRunnable, tracev2.ProcRunning);
@@ -449,22 +438,22 @@ internal static void GoStart(this traceLocker tl) {
 // GoEnd emits a GoDestroy event.
 //
 // TODO(mknyszek): Rename this to GoDestroy.
-internal static void GoEnd(this traceLocker tl) {
+internal static void GoEnd⁔(/*this*/ traceLocker tl) {
     tl.eventWriter(tracev2.GoRunning, tracev2.ProcRunning).@event(tracev2.EvGoDestroy);
 }
 
 // GoSched emits a GoStop event with a GoSched reason.
-internal static void GoSched(this traceLocker tl) {
+internal static void GoSched⁔(/*this*/ traceLocker tl) {
     tl.GoStop(traceGoStopGoSched);
 }
 
 // GoPreempt emits a GoStop event with a GoPreempted reason.
-internal static void GoPreempt(this traceLocker tl) {
+internal static void GoPreempt⁔(/*this*/ traceLocker tl) {
     tl.GoStop(traceGoStopPreempted);
 }
 
 // GoStop emits a GoStop event with the provided reason.
-internal static void GoStop(this traceLocker tl, traceGoStopReason reason) {
+internal static void GoStop⁔(/*this*/ traceLocker tl, traceGoStopReason reason) {
     tl.eventWriter(tracev2.GoRunning, tracev2.ProcRunning).@event(tracev2.EvGoStop, trace.goStopReasons[tl.gen % 2][reason], tl.stack(0));
 }
 
@@ -472,12 +461,12 @@ internal static void GoStop(this traceLocker tl, traceGoStopReason reason) {
 //
 // TODO(mknyszek): Replace traceBlockReason with waitReason. It's silly
 // that we have both, and waitReason is way more descriptive.
-internal static void GoPark(this traceLocker tl, traceBlockReason reason, nint skip) {
+internal static void GoPark⁔(/*this*/ traceLocker tl, traceBlockReason reason, nint skip) {
     tl.eventWriter(tracev2.GoRunning, tracev2.ProcRunning).@event(tracev2.EvGoBlock, trace.goBlockReasons[tl.gen % 2][reason], tl.stack(skip));
 }
 
 // GoUnpark emits a GoUnblock event.
-internal static void GoUnpark(this traceLocker tl, ж<g> Ꮡgp, nint skip) {
+internal static void GoUnpark⁔(/*this*/ traceLocker tl, ж<g> Ꮡgp, nint skip) {
     ref var gp = ref Ꮡgp.DerefOrNull();
 
     // Emit a GoWaiting status if necessary for the unblocked goroutine.
@@ -487,7 +476,7 @@ internal static void GoUnpark(this traceLocker tl, ж<g> Ꮡgp, nint skip) {
 
 // GoSwitch emits a GoSwitch event. If destroy is true, the calling goroutine
 // is simultaneously being destroyed.
-internal static void GoSwitch(this traceLocker tl, ж<g> Ꮡnextg, bool destroy) {
+internal static void GoSwitch⁔(/*this*/ traceLocker tl, ж<g> Ꮡnextg, bool destroy) {
     ref var nextg = ref Ꮡnextg.DerefOrNull();
 
     // Emit a GoWaiting status if necessary for the unblocked goroutine.
@@ -502,7 +491,7 @@ internal static void GoSwitch(this traceLocker tl, ж<g> Ꮡnextg, bool destroy)
 
 // emitUnblockStatus emits a GoStatus GoWaiting event for a goroutine about to be
 // unblocked to the trace writer.
-internal static void emitUnblockStatus(this traceLocker tl, ж<g> Ꮡgp, uintptr gen) {
+internal static void emitUnblockStatus⁔(/*this*/ traceLocker tl, ж<g> Ꮡgp, uintptr gen) {
     ref var gp = ref Ꮡgp.DerefOrNull();
 
     if (!Ꮡgp.of(g.Ꮡtrace).of(gTraceState.ᏑtraceSchedResourceState).statusWasTraced(gen) && Ꮡgp.of(g.Ꮡtrace).of(gTraceState.ᏑtraceSchedResourceState).acquireStatus(gen)) {
@@ -516,7 +505,7 @@ internal static void emitUnblockStatus(this traceLocker tl, ж<g> Ꮡgp, uintptr
 // GoSysCall emits a GoSyscallBegin event.
 //
 // Must be called with a valid P.
-internal static void GoSysCall(this traceLocker tl) {
+internal static void GoSysCall⁔(/*this*/ traceLocker tl) {
     // Scribble down the M that the P is currently attached to.
     var pp = (~tl.mp).p.ptr();
     pp.Value.trace.mSyscallID = (int64)(~tl.mp).procid;
@@ -532,7 +521,7 @@ internal static void GoSysCall(this traceLocker tl) {
 // - The goroutine lost its P, it ran some other code, and then got it back. It's now running with that P.
 // - The goroutine lost its P and was unable to reacquire it, and is now running without a P.
 // - The goroutine lost its P and acquired a different one, and is now running with that P.
-internal static void GoSysExit(this traceLocker tl, bool lostP) {
+internal static void GoSysExit⁔(/*this*/ traceLocker tl, bool lostP) {
     var ev = tracev2.EvGoSyscallEnd;
     var procStatus = tracev2.ProcSyscall; // Procs implicitly enter tracev2.ProcSyscall on GoSyscallBegin.
     if (lostP) {
@@ -547,7 +536,7 @@ internal static void GoSysExit(this traceLocker tl, bool lostP) {
 // ProcSteal indicates that our current M stole a P from another M.
 //
 // The caller must have ownership of pp.
-internal static void ProcSteal(this traceLocker tl, ж<p> Ꮡpp) {
+internal static void ProcSteal⁔(/*this*/ traceLocker tl, ж<p> Ꮡpp) {
     ref var pp = ref Ꮡpp.DerefOrNull();
 
     // Grab the M ID we stole from.
@@ -581,12 +570,12 @@ internal static void ProcSteal(this traceLocker tl, ж<p> Ꮡpp) {
 }
 
 // HeapAlloc emits a HeapAlloc event.
-internal static void HeapAlloc(this traceLocker tl, uint64 live) {
+internal static void HeapAlloc⁔(/*this*/ traceLocker tl, uint64 live) {
     tl.eventWriter(tracev2.GoRunning, tracev2.ProcRunning).@event(tracev2.EvHeapAlloc, (traceArg)live);
 }
 
 // HeapGoal reads the current heap goal and emits a HeapGoal event.
-internal static void HeapGoal(this traceLocker tl) {
+internal static void HeapGoal⁔(/*this*/ traceLocker tl) {
     var heapGoal = ᏑgcController.heapGoal();
     // The heapGoal calculations will result in strange numbers if the GC if off. See go.dev/issue/63864.
     // Check gcPercent before using the heapGoal in the trace.
@@ -603,7 +592,7 @@ internal static void HeapGoal(this traceLocker tl) {
 //
 // This occurs when C code calls into Go. On pthread platforms it occurs only when
 // a C thread calls into Go code for the first time.
-internal static void GoCreateSyscall(this traceLocker tl, ж<g> Ꮡgp) {
+internal static void GoCreateSyscall⁔(/*this*/ traceLocker tl, ж<g> Ꮡgp) {
     ref var gp = ref Ꮡgp.DerefOrNull();
 
     // N.B. We should never trace a status for this goroutine (which we're currently running on),
@@ -620,7 +609,7 @@ internal static void GoCreateSyscall(this traceLocker tl, ж<g> Ꮡgp) {
 //
 // This occurs when Go code returns back to C. On pthread platforms it occurs only when
 // the C thread is destroyed.
-internal static void GoDestroySyscall(this traceLocker tl) {
+internal static void GoDestroySyscall⁔(/*this*/ traceLocker tl) {
     // Write the status for the goroutine if necessary.
     var gp = tl.mp.Value.curg; if (gp != nil && !gp.of(g.Ꮡtrace).of(gTraceState.ᏑtraceSchedResourceState).statusWasTraced(tl.gen) && gp.of(g.Ꮡtrace).of(gTraceState.ᏑtraceSchedResourceState).acquireStatus(tl.gen)) {
         tl.writer().writeGoStatus((~gp).goid, (int64)(~tl.mp).procid, tracev2.GoSyscall, false, 0 /* no stack */).end();
@@ -631,8 +620,6 @@ internal static void GoDestroySyscall(this traceLocker tl) {
     // and don't record a status.
     tl.rawEventWriter().@event(tracev2.EvGoDestroySyscall);
 }
-
-} partial class runtime_package {
 
 // To access runtime functions from runtime/trace.
 // See runtime/trace/annotation.go
@@ -729,7 +716,7 @@ internal static void traceThreadDestroy(ж<m> mp) {
         @throw(badUseOfTraceWritingˢ);
     }
     mp.of(m.Ꮡtrace).Ꮡwriting.Store(true);
-    systemstack(() => {
+    systemstack([GoFunc("traceThreadDestroy.func1")] () => {
         @lock(Ꮡtrace.of(traceᴛ1.Ꮡlock));
         foreach (var i in range(len(mp.Value.trace.buf))) {
             foreach (var (exp, buf) in range(mp.Value.trace.buf[i].ΔRangeSnapshot())) {

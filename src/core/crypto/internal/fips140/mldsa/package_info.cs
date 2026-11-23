@@ -14,6 +14,9 @@
 
 using go;
 using static go.crypto.@internal.fips140.mldsa_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -62,11 +65,13 @@ using static go.crypto.@internal.fips140.mldsa_package;
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("crypto/internal/fips140/mldsa/cast.go", "cast.cs", "ABQggoKCgoKUyIIACBT07AAJFNzcgoKCgpSCgoKCgpQ=", "17-24:1")]
 [assembly: GoPositionMap("crypto/internal/fips140/mldsa/field.go", "field.cs", "ABo2mKKCpqqigqq0qqKUqqKmqJKCqJKCqJKCqJKCqJKCgqqigqqigoIACBLSgpSo0oKUAAgQmtKUgoKCpoKCgoKmgoLcgoKUgoKUgoKUgoKUgoKUgoKUgoKUgoKUgoKUgoKmrNKmgoKUgoKUgoKUgoKUgoKUgoKUgoKUgoKUgoKUgoKmgoKCpoKCgpSmgoLKgpSo0oKUrLKCgpSCgoKCgoKClIKCgoKUgpSssoKClIKCgoKCgoKUgoKCgoKClIKUgoKClIKmqqKCgoKUgoKCgoKUpoKCgpS4rLKClAANHIKYooKCggAKFIKUpAAEEMKmgqaCqLKClILGgsakrOKClILGgsakqPKUgoLGgoLGpKjagoKCrOKCpoKUqJKCgoKCuKaopIKUlKikgoKCrOKCpoKUqJKCgoKUgpS4gpS4qKSCgoIAAhDylKSkAAQS8oKClIKCgoKCgoKCgoKCgoKCgoKUAAIQ8oKClIKCgoKCgoKClKqilKSkzKKClIKCgoKCgoKCgoKCgpSqooKUgoKCgoKCgoKUrvKClIKUgqiSqJKokg==")]
-[assembly: GoPositionMap("crypto/internal/fips140/mldsa/mldsa.go", "mldsa.cs", "AB04goKWlKaUAB02oqaCgqamAA4WooKmgoIACgaClKSkpOiCgoKCgoKCpoKCgoKCgoKmgoKCgoKCgqaUgoKCgpSmgoKCgpSmgoKCgpSmoqSClIKCgoKCgpSClIKClIKCuIKCgoK4goK4goKCgpTugoKUpoKSgoLKgoKCgoKmgoKCpoKUuIKCtIKCgoKCgoKCgoKmpqKClIKUgoKCgoKCpqaUgqaCpoKmgqSCgoKmgoKCgpSogoKWooKCgoKSgpSmooKCgpKClKaigoKSgpSClKaCgoKCgoKUpoKCgoKClKaCgoKClIKUpoKClIKCgoKCgoKC5rKilIKCgoKUgoKCgoKUgoIABxCCgoKClIKCgoKUuIKClIKCgoKUpoKCgpSCuJSCgpSCgqaCgqaCgpS4gqaCgpS4goKmgoKUuIKCgoKipoKClKYAChSypoKCgoKUxoKCgoKCgoKClLTI2IKCpqailIKCgtiCgoLYpKiCgoKCgpaigoKSgpSmgoKCgpSmoqKUgoKUgoKCgqamgoKUgoKCgpSCuIKCpoKCgpSClIKCuIKmpoKCgoKUgqaigpSCgoKClIKUpoKSgoKCgoKCppTmgpKClIKCgoKUgoKClIKmgoKm")]
+[assembly: GoPositionMap("crypto/internal/fips140/mldsa/mldsa.go", "mldsa.cs", "ABw4goKWlKaUABs2oqaCgqamAAoWooKmgoIACgaClKSkpMiCgoKCgoKCpoKCgoKCgoKmgoKCgoKCgqaUgoKCgpSmgoKCgpSmgoKCgpSmoqSClIKCgoKCgpSClIKClIKCuIKCgoK4goK4goKCgpTugoKUpoKSgoLKgoKCgoKmgoKCpoKUuIKCtIKCgoKCgoKCgoKmpqKClIKUgoKCgoKCpqaUgqaCpoKmgqSCgoKmgoKCgpSogoKWooKCgoKSgpSmooKCgpKClKaigoKSgpSClKaCgoKCgoKUpoKCgoKClKaCgoKClIKUpoKClIKCgoKCgoKC5rKilIKCgoKUgoKCgoKUgoIABxCCgoKClIKCgoKUuIKClIKCgoKUpoKCgpSCuJSCgpSCgqaCgqaCgpS4gqaCgpS4goKmgoKUuIKCgoKipoKClKYAChSypoKCgoKUxoKCgoKCgoKClLTI2IKCpqailIKCgtiCgoLYpKiCgoKCgpaigoKSgpSmgoKCgpSmoqKUgoKUgoKCgqamgoKUgoKCgpSCuIKCpoKCgpSClIKCuIKmpoKCgoKUgqaigpSCgoKClIKUpoKSgoKCgoKCppTmgpKClIKCgoKUgoKClIKmgoKm")]
 [assembly: GoPositionMap("crypto/internal/fips140/mldsa/semiexpanded.go", "semiexpanded.cs", "AA0wAAoCkqYAChLigpS0tLSUpIKCpoKCgoKCgpSClILKABImgoKCgpSCgoKCgsqCgpSUpqKigoKCgoKUgpSCgpSmAAgCooKClIKCgoKClIKCgqKClKaCgoKigpSmgoKCgqKClKamooKClIKCgoKCgoKCgoKCpoKUAAgGgoKClIKmgpSCgoKUgoKCgoKmgoKUgoKm")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140;
+
+using static go.crypto.@internal.fips140.mldsa_package;
 
 [GoPackage("mldsa")]
 public static partial class mldsa_package
@@ -113,6 +118,23 @@ public static partial class mldsa_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(mldsa_package.PrivateKey)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mldsaᴛPrivateKey;
-[GoMethodHost(typeof(mldsa_package.PublicKey)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mldsaᴛPublicKey;
+[GoMethodHost(typeof(mldsa_package.PrivateKey)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class mldsaᴛPrivateKey;
+[GoMethodHost(typeof(mldsa_package.PublicKey)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class mldsaᴛPublicKey;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class mldsaᴛPrivateKey {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Equal(this ref PrivateKey priv, ж<PrivateKey> Ꮡx) => mldsa_package.Equal⁔(ref priv, Ꮡx);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> Bytes(this ref PrivateKey priv) => mldsa_package.Bytes⁔(ref priv);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<PublicKey> PublicKey(this ж<PrivateKey> Ꮡpriv) => mldsa_package.PublicKey⁔(Ꮡpriv);
+}
+partial class mldsaᴛPublicKey {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Equal(this ref PublicKey pub, ж<PublicKey> Ꮡx) => mldsa_package.Equal⁔(ref pub, Ꮡx);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> Bytes(this ref PublicKey pub) => mldsa_package.Bytes⁔(ref pub);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Parameters(this ref PublicKey pub) => mldsa_package.Parameters⁔(ref pub);
+}
+// </MethodForwarders>

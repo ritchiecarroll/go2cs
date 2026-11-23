@@ -11,15 +11,14 @@ using sha3 = go.crypto.@internal.fips140.sha3_package;
 using hash = hash_package;
 // blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
 using go.crypto.@internal.fips140;
-using static sha3_package;
 
 partial class sha3_package {
 
 [GoInit] internal static void init() {
-    crypto.RegisterHash(crypto.SHA3_224, () => new SHA3жHash(New224()));
-    crypto.RegisterHash(crypto.SHA3_256, () => new SHA3жHash(New256()));
-    crypto.RegisterHash(crypto.SHA3_384, () => new SHA3жHash(New384()));
-    crypto.RegisterHash(crypto.SHA3_512, () => new SHA3жHash(New512()));
+    crypto.RegisterHash(crypto.SHA3_224, [GoFunc("init.0.func1")] () => new SHA3жHash(New224()));
+    crypto.RegisterHash(crypto.SHA3_256, [GoFunc("init.0.func2")] () => new SHA3жHash(New256()));
+    crypto.RegisterHash(crypto.SHA3_384, [GoFunc("init.0.func3")] () => new SHA3жHash(New384()));
+    crypto.RegisterHash(crypto.SHA3_512, [GoFunc("init.0.func4")] () => new SHA3жHash(New512()));
 }
 
 // Sum224 returns the SHA3-224 hash of data.
@@ -129,16 +128,14 @@ public static ж<SHA3> New512() {
     return Ꮡ(new SHA3(sha3.New512().Value.ΔClone()));
 }
 
-} partial class sha3ᴛSHA3 {
-
-internal static void init(this ref SHA3 s) {
+internal static void init⁔(/*this*/ ref SHA3 s) {
     if (s.s.Size() == 0) {
         s.AssignFrom(New256().Value);
     }
 }
 
 // Write absorbs more data into the hash's state.
-public static (nint n, error err) Write(this ж<SHA3> Ꮡs, slice<byte> p) {
+internal static (nint n, error err) Write⁔(/*this*/ ж<SHA3> Ꮡs, slice<byte> p) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     s.init();
@@ -146,54 +143,52 @@ public static (nint n, error err) Write(this ж<SHA3> Ꮡs, slice<byte> p) {
 }
 
 // Sum appends the current hash to b and returns the resulting slice.
-public static slice<byte> Sum(this ref SHA3 s, slice<byte> b) {
+internal static slice<byte> Sum⁔(/*this*/ ref SHA3 s, slice<byte> b) {
     s.init();
     return s.s.Sum(b);
 }
 
 // Reset resets the hash to its initial state.
-public static void Reset(this ref SHA3 s) {
+internal static void Reset⁔(/*this*/ ref SHA3 s) {
     s.init();
     s.s.Reset();
 }
 
 // Size returns the number of bytes Sum will produce.
-public static nint Size(this ref SHA3 s) {
+internal static nint Size⁔(/*this*/ ref SHA3 s) {
     s.init();
     return s.s.Size();
 }
 
 // BlockSize returns the hash's rate.
-public static nint BlockSize(this ref SHA3 s) {
+internal static nint BlockSize⁔(/*this*/ ref SHA3 s) {
     s.init();
     return s.s.BlockSize();
 }
 
 // MarshalBinary implements [encoding.BinaryMarshaler].
-public static (slice<byte>, error) MarshalBinary(this ref SHA3 s) {
+internal static (slice<byte>, error) MarshalBinary⁔(/*this*/ ref SHA3 s) {
     s.init();
     return s.s.MarshalBinary();
 }
 
 // AppendBinary implements [encoding.BinaryAppender].
-public static (slice<byte>, error) AppendBinary(this ref SHA3 s, slice<byte> p) {
+internal static (slice<byte>, error) AppendBinary⁔(/*this*/ ref SHA3 s, slice<byte> p) {
     s.init();
     return s.s.AppendBinary(p);
 }
 
 // UnmarshalBinary implements [encoding.BinaryUnmarshaler].
-public static error UnmarshalBinary(this ref SHA3 s, slice<byte> data) {
+internal static error UnmarshalBinary⁔(/*this*/ ref SHA3 s, slice<byte> data) {
     s.init();
     return s.s.UnmarshalBinary(data);
 }
 
 // Clone implements [hash.Cloner].
-public static (hash.Cloner, error) Clone(this ref SHA3 d) {
+internal static (hash.Cloner, error) Clone⁔(/*this*/ ref SHA3 d) {
     ref var r = ref heap<SHA3>(d.ΔClone(), out var Ꮡr);
     return (new SHA3жCloner(Ꮡr), default);
 }
-
-} partial class sha3_package {
 
 // SHAKE is an instance of a SHAKE extendable output function.
 // The zero value is a usable SHAKE256 hash.
@@ -201,15 +196,11 @@ partial struct SHAKE {
     internal sha3.SHAKE s;
 }
 
-} partial class sha3ᴛSHAKE {
-
-internal static void init(this ref SHAKE s) {
+internal static void init⁔(/*this*/ ref SHAKE s) {
     if (s.s.Size() == 0) {
         s.AssignFrom(NewSHAKE256().Value);
     }
 }
-
-} partial class sha3_package {
 
 // NewSHAKE128 creates a new SHAKE128 XOF.
 public static ж<SHAKE> NewSHAKE128() {
@@ -239,12 +230,10 @@ public static ж<SHAKE> NewCSHAKE256(slice<byte> N, slice<byte> S) {
     return Ꮡ(new SHAKE(sha3.NewCShake256(N, S).Value.ΔClone()));
 }
 
-} partial class sha3ᴛSHAKE {
-
 // Write absorbs more data into the XOF's state.
 //
 // It panics if any output has already been read.
-public static (nint n, error err) Write(this ж<SHAKE> Ꮡs, slice<byte> p) {
+internal static (nint n, error err) Write⁔(/*this*/ ж<SHAKE> Ꮡs, slice<byte> p) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     s.init();
@@ -254,7 +243,7 @@ public static (nint n, error err) Write(this ж<SHAKE> Ꮡs, slice<byte> p) {
 // Read squeezes more output from the XOF.
 //
 // Any call to Write after a call to Read will panic.
-public static (nint n, error err) Read(this ж<SHAKE> Ꮡs, slice<byte> p) {
+internal static (nint n, error err) Read⁔(/*this*/ ж<SHAKE> Ꮡs, slice<byte> p) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     s.init();
@@ -262,7 +251,7 @@ public static (nint n, error err) Read(this ж<SHAKE> Ꮡs, slice<byte> p) {
 }
 
 // Reset resets the XOF to its initial state.
-public static void Reset(this ж<SHAKE> Ꮡs) {
+internal static void Reset⁔(/*this*/ ж<SHAKE> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     s.init();
@@ -270,27 +259,27 @@ public static void Reset(this ж<SHAKE> Ꮡs) {
 }
 
 // BlockSize returns the rate of the XOF.
-public static nint BlockSize(this ref SHAKE s) {
+internal static nint BlockSize⁔(/*this*/ ref SHAKE s) {
     s.init();
     return s.s.BlockSize();
 }
 
 // MarshalBinary implements [encoding.BinaryMarshaler].
-public static (slice<byte>, error) MarshalBinary(this ref SHAKE s) {
+internal static (slice<byte>, error) MarshalBinary⁔(/*this*/ ref SHAKE s) {
     s.init();
     return s.s.MarshalBinary();
 }
 
 // AppendBinary implements [encoding.BinaryAppender].
-public static (slice<byte>, error) AppendBinary(this ref SHAKE s, slice<byte> p) {
+internal static (slice<byte>, error) AppendBinary⁔(/*this*/ ref SHAKE s, slice<byte> p) {
     s.init();
     return s.s.AppendBinary(p);
 }
 
 // UnmarshalBinary implements [encoding.BinaryUnmarshaler].
-public static error UnmarshalBinary(this ref SHAKE s, slice<byte> data) {
+internal static error UnmarshalBinary⁔(/*this*/ ref SHAKE s, slice<byte> data) {
     s.init();
     return s.s.UnmarshalBinary(data);
 }
 
-}
+} // end sha3_package

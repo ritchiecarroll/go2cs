@@ -34,7 +34,7 @@ internal static void main() {
 
     fmt.Println("method:", nameOf(((Action<receiver>)(main_package.method))));
 
-    var literal = () => {
+    var literal = [GoFunc("main.func1")] () => {
     };
     fmt.Println("literal present:", nameOf((literal).OrTypedNilFunc()) != "<empty name>"u8 && nameOf((literal).OrTypedNilFunc()) != "<nil Func>"u8);
 }

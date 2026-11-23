@@ -36,6 +36,7 @@ struct go2cs_probe_entry
 
 struct go2cs_probe_entry *go2cs_probe_list(void);
 void go2cs_probe_list_release(struct go2cs_probe_entry *node);
+int go2cs_probe_next_family(struct go2cs_probe_entry *node);
 void *go2cs_probe_address(void);
 */
 import "C"
@@ -65,6 +66,13 @@ type goHeader struct {
 //
 //go:noinline
 func same(p unsafe.Pointer) unsafe.Pointer { return p }
+
+// entryNext returns the address of an entry's next field: net's _C_ai_next shape (go1.24.13 net/cgo_unix_cgo.go:71),
+// which the resolver's walk loads through (DESIGN-cgo-phase3-marshaling 18.10, 18.11).
+func entryNext(e *C.struct_go2cs_probe_entry) **C.struct_go2cs_probe_entry { return &e.next }
+
+// setNext stores through a pointer to a C pointer: the out-parameter idiom inside Go code (18.11, [P3 S2]).
+func setNext(pp **C.struct_go2cs_probe_entry, v *C.struct_go2cs_probe_entry) { *pp = v }
 
 // roundTrip copies a Go string into C memory and reads it back up to its first NUL.
 func roundTrip(s string) string {
@@ -373,6 +381,87 @@ func main() {
 		mem := unsafe.Slice((*byte)(buf), 64)
 		r := (*C.struct_go2cs_probe_entry)(unsafe.Pointer(&mem[0]))
 		fmt.Println("s6slice", C.go2cs_probe_same(unsafe.Pointer(r)) == buf)
+	// Increment 3.2's stores into a pointer field of C memory (DESIGN-cgo-phase3-marshaling 18.9, D-4), each read back
+	// in C.
+	case "s6store":
+		// nil, then a pointer to C memory: C reads each back.
+		l := C.go2cs_probe_list()
+		defer C.go2cs_probe_list_release(l)
+		second := l.next
+		l.next = second.next
+		none := int(C.go2cs_probe_next_family(l))
+		l.next = second
+		fmt.Println("s6store", none, int(C.go2cs_probe_next_family(l)))
+	case "s6storego":
+		// A pointer to Go memory. Go stores it, and C reads it back; g's last use keeps it alive until then. go2cs
+		// refuses the store by name: C memory must not hold a Go pointer.
+		l := C.go2cs_probe_list()
+		defer C.go2cs_probe_list_release(l)
+		second := l.next
+		g := &C.struct_go2cs_probe_entry{family: 7}
+		l.next = g
+		fmt.Println("s6storego", int(C.go2cs_probe_next_family(l)), int(g.family))
+		l.next = second
+	// Increment 3.2 seat 1c (DESIGN-cgo-phase3-marshaling 18.11, E-3): the load and the store through a pointer to a C
+	// pointer.
+	case "s6nextstore":
+		// Through pp := &l.next: nil, then the C pointer back. C reads each.
+		l := C.go2cs_probe_list()
+		defer C.go2cs_probe_list_release(l)
+		pp := &l.next
+		second := *pp
+		*pp = nil
+		none := int(C.go2cs_probe_next_family(l))
+		*pp = second
+		fmt.Println("s6nextstore", none, int(C.go2cs_probe_next_family(l)))
+	case "s6nextstorego":
+		// A Go pointer stored through pp. Go keeps it and C reads it back; go2cs refuses the store by name.
+		l := C.go2cs_probe_list()
+		defer C.go2cs_probe_list_release(l)
+		pp := &l.next
+		second := *pp
+		g := &C.struct_go2cs_probe_entry{family: 7}
+		*pp = g
+		fmt.Println("s6nextstorego", int(C.go2cs_probe_next_family(l)), int(g.family))
+		*pp = second
+	case "s6nextwalk":
+		// The resolver's own walk: for r := res; r != nil; r = *_C_ai_next(r).
+		l := C.go2cs_probe_list()
+		defer C.go2cs_probe_list_release(l)
+		n, sum := 0, 0
+		for r := l; r != nil; r = *entryNext(r) {
+			n++
+			sum += int(r.family)
+		}
+		fmt.Println("s6nextwalk", n, sum)
+	case "s6nextset":
+		// The out-parameter idiom: set(&l.next, v). Go stores through it; go2cs's ref-lowered call reaches the floor.
+		l := C.go2cs_probe_list()
+		defer C.go2cs_probe_list_release(l)
+		second := l.next
+		setNext(&l.next, nil)
+		none := int(C.go2cs_probe_next_family(l))
+		setNext(&l.next, second)
+		fmt.Println("s6nextset", none, int(C.go2cs_probe_next_family(l)))
+	case "s6nexttuple":
+		// A tuple target through pp keeps `.val`; over C memory the floor refuses it.
+		l := C.go2cs_probe_list()
+		defer C.go2cs_probe_list_release(l)
+		pp := &l.next
+		second := *pp
+		var n int
+		*pp, n = nil, 1
+		fmt.Println("s6nexttuple", n, int(C.go2cs_probe_next_family(l)))
+		*pp = second
+	case "s6nilslot":
+		// A Go slot that holds a nil C pointer: *pp reads nil, and a C pointer stored there reads back.
+		var p *C.struct_go2cs_probe_entry
+		pp := &p
+		isNil := *pp == nil
+		l := C.go2cs_probe_list()
+		defer C.go2cs_probe_list_release(l)
+		*pp = l
+		fmt.Println("s6nilslot", isNil, int((*pp).family))
 	case "caddtyped":
 		p := C.malloc(16)
 		defer C.free(p)

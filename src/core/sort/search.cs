@@ -4,8 +4,6 @@
 // This file implements binary search.
 namespace go;
 
-using static sort_package;
-
 partial class sort_package {
 
 // Search uses binary search to find and return the smallest index i
@@ -128,7 +126,7 @@ public static (nint i, bool found) Find(nint n, Func<nint, nint> cmp) {
 // The slice must be sorted in ascending order.
 public static nint SearchInts(slice<nint> a, nint x) {
     var aʗ1 = a;
-    return Search(len(a), (nint i) => aʗ1[i] >= x);
+    return Search(len(a), [GoFunc("SearchInts.func1")] (nint i) => aʗ1[i] >= x);
 }
 
 // SearchFloat64s searches for x in a sorted slice of float64s and returns the index
@@ -137,7 +135,7 @@ public static nint SearchInts(slice<nint> a, nint x) {
 // The slice must be sorted in ascending order.
 public static nint SearchFloat64s(slice<float64> a, float64 x) {
     var aʗ1 = a;
-    return Search(len(a), (nint i) => aʗ1[i] >= x);
+    return Search(len(a), [GoFunc("SearchFloat64s.func1")] (nint i) => aʗ1[i] >= x);
 }
 
 // SearchStrings searches for x in a sorted slice of strings and returns the index
@@ -146,22 +144,16 @@ public static nint SearchFloat64s(slice<float64> a, float64 x) {
 // The slice must be sorted in ascending order.
 public static nint SearchStrings(slice<@string> a, @string x) {
     var aʗ1 = a;
-    return Search(len(a), (nint i) => aʗ1[i] >= x);
+    return Search(len(a), [GoFunc("SearchStrings.func1")] (nint i) => aʗ1[i] >= x);
 }
-
-} partial class sortᴛIntSlice {
 
 // Search returns the result of applying [SearchInts] to the receiver and x.
-public static nint Search(this IntSlice p, nint x) { return SearchInts(p, x); }
-
-} partial class sortᴛFloat64Slice {
+internal static nint Search⁔(/*this*/ IntSlice p, nint x) { return SearchInts(p, x); }
 
 // Search returns the result of applying [SearchFloat64s] to the receiver and x.
-public static nint Search(this Float64Slice p, float64 x) { return SearchFloat64s(p, x); }
-
-} partial class sortᴛStringSlice {
+internal static nint Search⁔(/*this*/ Float64Slice p, float64 x) { return SearchFloat64s(p, x); }
 
 // Search returns the result of applying [SearchStrings] to the receiver and x.
-public static nint Search(this StringSlice p, @string x) { return SearchStrings(p, x); }
+internal static nint Search⁔(/*this*/ StringSlice p, @string x) { return SearchStrings(p, x); }
 
-}
+} // end sort_package

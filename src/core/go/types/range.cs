@@ -12,11 +12,8 @@ using static global::go.@internal.types.errors_package;
 using errors = global::go.@internal.types.errors_package;
 using global::go.go;
 using token = global::go.go.token_package;
-using static types_package;
 
 partial class types_package {
-
-} partial class typesᴛChecker {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string rangeˢ => ref rangeˢᵇ;
@@ -34,7 +31,7 @@ private static readonly @string noNewVariablesOnLeftSideˢᵇ = "no new variable
 // variables are assigned to only (=) or whether there is a short variable
 // declaration (:=). If the latter and there are no variables, an error is
 // reported at noNewVarPos.
-internal static void rangeStmt(this ж<Checker> Ꮡcheck, stmtContext inner, ж<ast.RangeStmt> ᏑrangeStmt, positioner noNewVarPos, ast.Expr sKey, ast.Expr sValue, ast.Expr sExtra, ast.Expr rangeVar, bool isDef) {
+internal static void rangeStmt⁔(/*this*/ ж<Checker> Ꮡcheck, stmtContext inner, ж<ast.RangeStmt> ᏑrangeStmt, positioner noNewVarPos, ast.Expr sKey, ast.Expr sValue, ast.Expr sExtra, ast.Expr rangeVar, bool isDef) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -84,7 +81,7 @@ internal static void rangeStmt(this ж<Checker> Ꮡcheck, stmtContext inner, ж<
         Type key = default;
         Type val = default;
         if (x.mode != invalid) {
-            var (k, v, cause, ok) = rangeKeyVal(Ꮡcheck, x.typ, (goVersion vΔ1) => Ꮡcheck.Value.allowVersion(vΔ1));
+            var (k, v, cause, ok) = rangeKeyVal(Ꮡcheck, x.typ, [GoFunc("(*Checker).rangeStmt.func1")] (goVersion vΔ1) => Ꮡcheck.Value.allowVersion(vΔ1));
             switch (ᐧ) {
             case {} when !ok && cause != ""u8: {
                 Ꮡcheck.softErrorf(new operandжpositioner(Ꮡx), InvalidRangeExpr, "cannot range over %s: %s", Ꮡx, cause);
@@ -227,8 +224,6 @@ internal static void rangeStmt(this ж<Checker> Ꮡcheck, stmtContext inner, ж<
     finally { if (ᒐd1) Ꮡcheck.DerefOrNull().closeScope(); ᒐ.Run(); }
 }
 
-} partial class types_package {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string requiresGo122OrLaterˢ => ref requiresGo122OrLaterˢᵇ;
 private static readonly @string requiresGo122OrLaterˢᵇ = "requires go1.22 or later"u8;
@@ -259,9 +254,9 @@ internal static (Type key, Type val, @string cause, bool ok) rangeKeyVal(ж<Chec
     @string cause = default;
     bool ok = default;
 
-    (Type, Type, @string, bool) bad(@string causeΔ1) => (new BasicжType(Typ[Invalid]), new BasicжType(Typ[Invalid]), causeΔ1, false);
+    [GoFunc("rangeKeyVal.func1")] (Type, Type, @string, bool) bad(@string causeΔ1) => (new BasicжType(Typ[Invalid]), new BasicжType(Typ[Invalid]), causeΔ1, false);
 
-    var (rtyp, err) = commonUnder(orig, (Type t, Type u) => {
+    var (rtyp, err) = commonUnder(orig, [GoFunc("rangeKeyVal.func2")] (Type t, Type u) => {
         // A channel must permit receive operations.
         var (ch, _) = u._<ж<Chan>>(ᐧ); if (ch != nil && ch.dir == SendOnly) {
             return typeErrorf("receive from send-only channel %s", t);

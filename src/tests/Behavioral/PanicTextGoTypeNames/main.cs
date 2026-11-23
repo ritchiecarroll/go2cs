@@ -8,7 +8,7 @@ partial class main_package {
 internal static void pin(@string label, any v) {
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("pin.func1")] () => {
             fmt.Println(label + ":", recover());
         }, ref ᒐ);
 
@@ -22,7 +22,7 @@ internal static void pin(@string label, any v) {
 internal static void assertString(@string label, any v) {
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("assertString.func1")] () => {
             fmt.Println(label + ":", recover());
         }, ref ᒐ);
 
@@ -35,7 +35,7 @@ internal static void assertString(@string label, any v) {
 internal static void hashKey(@string label, any k) {
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("hashKey.func1")] () => {
             fmt.Println(label + ":", recover());
         }, ref ᒐ);
 

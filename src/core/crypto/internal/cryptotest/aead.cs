@@ -52,12 +52,12 @@ public static void TestAEAD(ж<testing.T> t, Func<(cipher.AEAD, error)> mAEAD) {
     }
 
     var aeadʗ1 = aead;
-    t.Run(roundtripˢ, (ж<testing.T> tΔ1) => {
+    t.Run(roundtripˢ, [GoFunc("TestAEAD.func1")] (ж<testing.T> tΔ1) => {
         // Test all combinations of plaintext and additional data lengths.
         foreach (var (_, ptLen) in range(lengths)) {
             foreach (var (_, adLen) in range(lengths)) {
                 var aeadʗ2 = aeadʗ1;
-                tΔ1.Run(fmt.Sprintf("Plaintext-Length=%d,AddData-Length=%d"u8, ptLen, adLen), (ж<testing.T> tΔ2) => {
+                tΔ1.Run(fmt.Sprintf("Plaintext-Length=%d,AddData-Length=%d"u8, ptLen, adLen), [GoFunc("TestAEAD.func1.1")] (ж<testing.T> tΔ2) => {
                     var rng = newRandReader(tΔ2);
 
                     var nonce = new slice<byte>(aeadʗ2.NonceSize());
@@ -79,14 +79,14 @@ public static void TestAEAD(ж<testing.T> t, Func<(cipher.AEAD, error)> mAEAD) {
     });
 
     var aeadʗ3 = aead;
-    t.Run(inputNotModifiedˢ, (ж<testing.T> tΔ3) => {
+    t.Run(inputNotModifiedˢ, [GoFunc("TestAEAD.func2")] (ж<testing.T> tΔ3) => {
         // Test all combinations of plaintext and additional data lengths.
         foreach (var (_, ptLen) in range(lengths)) {
             foreach (var (_, adLen) in range(lengths)) {
                 var aeadʗ4 = aeadʗ3;
-                tΔ3.Run(fmt.Sprintf("Plaintext-Length=%d,AddData-Length=%d"u8, ptLen, adLen), (ж<testing.T> tΔ4) => {
+                tΔ3.Run(fmt.Sprintf("Plaintext-Length=%d,AddData-Length=%d"u8, ptLen, adLen), [GoFunc("TestAEAD.func2.1")] (ж<testing.T> tΔ4) => {
                     var aeadʗ5 = aeadʗ4;
-                    tΔ4.Run(sealˢ, (ж<testing.T> tΔ5) => {
+                    tΔ4.Run(sealˢ, [GoFunc("TestAEAD.func2.1.1")] (ж<testing.T> tΔ5) => {
                         var rng = newRandReader(tΔ5);
 
                         var nonce = new slice<byte>(aeadʗ5.NonceSize());
@@ -106,7 +106,7 @@ public static void TestAEAD(ж<testing.T> t, Func<(cipher.AEAD, error)> mAEAD) {
                     });
 
                     var aeadʗ6 = aeadʗ4;
-                    tΔ4.Run(openˢ, (ж<testing.T> tΔ6) => {
+                    tΔ4.Run(openˢ, [GoFunc("TestAEAD.func2.1.2")] (ж<testing.T> tΔ6) => {
                         var rng = newRandReader(tΔ6);
 
                         var nonce = new slice<byte>(aeadʗ6.NonceSize());
@@ -133,7 +133,7 @@ public static void TestAEAD(ж<testing.T> t, Func<(cipher.AEAD, error)> mAEAD) {
     });
 
     var aeadʗ7 = aead;
-    t.Run(bufferOverlapˢ, (ж<testing.T> tΔ7) => {
+    t.Run(bufferOverlapˢ, [GoFunc("TestAEAD.func3")] (ж<testing.T> tΔ7) => {
         // Test all combinations of plaintext and additional data lengths.
         foreach (var (_, ptLen) in range(lengths)) {
             if (ptLen <= 1) { // We need enough room for an inexact overlap to occur.
@@ -141,9 +141,9 @@ public static void TestAEAD(ж<testing.T> t, Func<(cipher.AEAD, error)> mAEAD) {
             }
             foreach (var (_, adLen) in range(lengths)) {
                 var aeadʗ8 = aeadʗ7;
-                tΔ7.Run(fmt.Sprintf("Plaintext-Length=%d,AddData-Length=%d"u8, ptLen, adLen), (ж<testing.T> tΔ8) => {
+                tΔ7.Run(fmt.Sprintf("Plaintext-Length=%d,AddData-Length=%d"u8, ptLen, adLen), [GoFunc("TestAEAD.func3.1")] (ж<testing.T> tΔ8) => {
                     var aeadʗ9 = aeadʗ8;
-                    tΔ8.Run(sealˢ, (ж<testing.T> tΔ9) => {
+                    tΔ8.Run(sealˢ, [GoFunc("TestAEAD.func3.1.1")] (ж<testing.T> tΔ9) => {
                         var rng = newRandReader(tΔ9);
 
                         var nonce = new slice<byte>(aeadʗ9.NonceSize());
@@ -164,7 +164,7 @@ public static void TestAEAD(ж<testing.T> t, Func<(cipher.AEAD, error)> mAEAD) {
                         var addDataʗ1 = addData;
                         var aeadʗ10 = aeadʗ9;
                         var nonceʗ1 = nonce;
-                        mustPanic(tΔ9, invalidBufferOverlapˢ, () => {
+                        mustPanic(tΔ9, invalidBufferOverlapˢ, [GoFunc("TestAEAD.func3.1.1.1")] () => {
                             sealMsg(tΔ9, aeadʗ10, Ꮡdst.ValueSlot, nonceʗ1, Ꮡplaintext.ValueSlot, addDataʗ1);
                         });
 
@@ -174,13 +174,13 @@ public static void TestAEAD(ж<testing.T> t, Func<(cipher.AEAD, error)> mAEAD) {
                         var addDataʗ2 = addData;
                         var aeadʗ11 = aeadʗ9;
                         var nonceʗ2 = nonce;
-                        mustPanic(tΔ9, invalidBufferOverlapˢ, () => {
+                        mustPanic(tΔ9, invalidBufferOverlapˢ, [GoFunc("TestAEAD.func3.1.1.2")] () => {
                             sealMsg(tΔ9, aeadʗ11, Ꮡdst.ValueSlot, nonceʗ2, Ꮡplaintext.ValueSlot, addDataʗ2);
                         });
                     });
 
                     var aeadʗ12 = aeadʗ8;
-                    tΔ8.Run(openˢ, (ж<testing.T> tΔ10) => {
+                    tΔ8.Run(openˢ, [GoFunc("TestAEAD.func3.1.2")] (ж<testing.T> tΔ10) => {
                         var rng = newRandReader(tΔ10);
 
                         var nonce = new slice<byte>(aeadʗ12.NonceSize());
@@ -204,7 +204,7 @@ public static void TestAEAD(ж<testing.T> t, Func<(cipher.AEAD, error)> mAEAD) {
                         var addDataʗ3 = addData;
                         var aeadʗ13 = aeadʗ12;
                         var nonceʗ3 = nonce;
-                        mustPanic(tΔ10, invalidBufferOverlapˢ, () => {
+                        mustPanic(tΔ10, invalidBufferOverlapˢ, [GoFunc("TestAEAD.func3.1.2.1")] () => {
                             aeadʗ13.Open(Ꮡdst.ValueSlot, nonceʗ3, Ꮡciphertext.ValueSlot, addDataʗ3);
                         });
 
@@ -220,7 +220,7 @@ public static void TestAEAD(ж<testing.T> t, Func<(cipher.AEAD, error)> mAEAD) {
                         var addDataʗ4 = addData;
                         var aeadʗ14 = aeadʗ12;
                         var nonceʗ4 = nonce;
-                        mustPanic(tΔ10, invalidBufferOverlapˢ, () => {
+                        mustPanic(tΔ10, invalidBufferOverlapˢ, [GoFunc("TestAEAD.func3.1.2.2")] () => {
                             aeadʗ14.Open(Ꮡdst.ValueSlot, nonceʗ4, Ꮡciphertext.ValueSlot, addDataʗ4);
                         });
                     });
@@ -230,14 +230,14 @@ public static void TestAEAD(ж<testing.T> t, Func<(cipher.AEAD, error)> mAEAD) {
     });
 
     var aeadʗ15 = aead;
-    t.Run(appendDstˢ, (ж<testing.T> tΔ11) => {
+    t.Run(appendDstˢ, [GoFunc("TestAEAD.func4")] (ж<testing.T> tΔ11) => {
         // Test all combinations of plaintext and additional data lengths.
         foreach (var (_, ptLen) in range(lengths)) {
             foreach (var (_, adLen) in range(lengths)) {
                 var aeadʗ16 = aeadʗ15;
-                tΔ11.Run(fmt.Sprintf("Plaintext-Length=%d,AddData-Length=%d"u8, ptLen, adLen), (ж<testing.T> tΔ12) => {
+                tΔ11.Run(fmt.Sprintf("Plaintext-Length=%d,AddData-Length=%d"u8, ptLen, adLen), [GoFunc("TestAEAD.func4.1")] (ж<testing.T> tΔ12) => {
                     var aeadʗ17 = aeadʗ16;
-                    tΔ12.Run(sealˢ, (ж<testing.T> tΔ13) => {
+                    tΔ12.Run(sealˢ, [GoFunc("TestAEAD.func4.1.1")] (ж<testing.T> tΔ13) => {
                         var rng = newRandReader(tΔ13);
 
                         var nonce = new slice<byte>(aeadʗ17.NonceSize());
@@ -271,7 +271,7 @@ public static void TestAEAD(ж<testing.T> t, Func<(cipher.AEAD, error)> mAEAD) {
                     });
 
                     var aeadʗ18 = aeadʗ16;
-                    tΔ12.Run(openˢ, (ж<testing.T> tΔ14) => {
+                    tΔ12.Run(openˢ, [GoFunc("TestAEAD.func4.1.2")] (ж<testing.T> tΔ14) => {
                         var rng = newRandReader(tΔ14);
 
                         var nonce = new slice<byte>(aeadʗ18.NonceSize());
@@ -309,7 +309,7 @@ public static void TestAEAD(ж<testing.T> t, Func<(cipher.AEAD, error)> mAEAD) {
     });
 
     var aeadʗ19 = aead;
-    t.Run(wrongNonceˢ, (ж<testing.T> tΔ15) => {
+    t.Run(wrongNonceˢ, [GoFunc("TestAEAD.func5")] (ж<testing.T> tΔ15) => {
         if (aeadʗ19.NonceSize() == 0) {
             tΔ15.Skip(aeadDoesNotUseANonceˢ);
         }
@@ -317,7 +317,7 @@ public static void TestAEAD(ж<testing.T> t, Func<(cipher.AEAD, error)> mAEAD) {
         foreach (var (_, ptLen) in range(lengths)) {
             foreach (var (_, adLen) in range(lengths)) {
                 var aeadʗ20 = aeadʗ19;
-                tΔ15.Run(fmt.Sprintf("Plaintext-Length=%d,AddData-Length=%d"u8, ptLen, adLen), (ж<testing.T> tΔ16) => {
+                tΔ15.Run(fmt.Sprintf("Plaintext-Length=%d,AddData-Length=%d"u8, ptLen, adLen), [GoFunc("TestAEAD.func5.1")] (ж<testing.T> tΔ16) => {
                     var rng = newRandReader(tΔ16);
 
                     var nonce = new slice<byte>(aeadʗ20.NonceSize());
@@ -344,7 +344,7 @@ public static void TestAEAD(ж<testing.T> t, Func<(cipher.AEAD, error)> mAEAD) {
     });
 
     var aeadʗ21 = aead;
-    t.Run(wrongAddDataˢ, (ж<testing.T> tΔ17) => {
+    t.Run(wrongAddDataˢ, [GoFunc("TestAEAD.func6")] (ж<testing.T> tΔ17) => {
         // Test all combinations of plaintext and additional data lengths.
         foreach (var (_, ptLen) in range(lengths)) {
             foreach (var (_, adLen) in range(lengths)) {
@@ -353,7 +353,7 @@ public static void TestAEAD(ж<testing.T> t, Func<(cipher.AEAD, error)> mAEAD) {
                 }
 
                 var aeadʗ22 = aeadʗ21;
-                tΔ17.Run(fmt.Sprintf("Plaintext-Length=%d,AddData-Length=%d"u8, ptLen, adLen), (ж<testing.T> tΔ18) => {
+                tΔ17.Run(fmt.Sprintf("Plaintext-Length=%d,AddData-Length=%d"u8, ptLen, adLen), [GoFunc("TestAEAD.func6.1")] (ж<testing.T> tΔ18) => {
                     var rng = newRandReader(tΔ18);
 
                     var nonce = new slice<byte>(aeadʗ22.NonceSize());
@@ -380,12 +380,12 @@ public static void TestAEAD(ж<testing.T> t, Func<(cipher.AEAD, error)> mAEAD) {
     });
 
     var aeadʗ23 = aead;
-    t.Run(wrongCiphertextˢ, (ж<testing.T> tΔ19) => {
+    t.Run(wrongCiphertextˢ, [GoFunc("TestAEAD.func7")] (ж<testing.T> tΔ19) => {
         // Test all combinations of plaintext and additional data lengths.
         foreach (var (_, ptLen) in range(lengths)) {
             foreach (var (_, adLen) in range(lengths)) {
                 var aeadʗ24 = aeadʗ23;
-                tΔ19.Run(fmt.Sprintf("Plaintext-Length=%d,AddData-Length=%d"u8, ptLen, adLen), (ж<testing.T> tΔ20) => {
+                tΔ19.Run(fmt.Sprintf("Plaintext-Length=%d,AddData-Length=%d"u8, ptLen, adLen), [GoFunc("TestAEAD.func7.1")] (ж<testing.T> tΔ20) => {
                     var rng = newRandReader(tΔ20);
 
                     var nonce = new slice<byte>(aeadʗ24.NonceSize());

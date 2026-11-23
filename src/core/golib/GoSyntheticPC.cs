@@ -169,6 +169,14 @@ namespace go;
 
         string name = method.Name;
 
+        // A suffix-form method's BODY `<name>⁔` is the Go method `<name>` (the converter's GlyphMethodSuffix): U+2054 is
+        // connector punctuation, which no Go identifier can spell, so the trailing suffix alone marks a body.
+        if (method.IsStatic && name.Length > 1 && name.EndsWith('\u2054'))
+            name = name[..^1];
+        // A literal inside a body is named for it by Roslyn (`<name⁔>b__N_M`); its outer is the Go method.
+        else if (name.StartsWith('<') && name.IndexOf("\u2054>", StringComparison.Ordinal) is var glyph and > 1)
+            name = name.Remove(glyph, 1);
+
         // An sstring twin's canonical value delegate (`Sprintfᶠ`) is a lambda. Its method is a
         // compiler-generated `<.cctor>b__X_Y` on the nested `<>c` class, so the function's Go name is
         // RECORDED on it, and its package is the enclosing package class, not the closure class

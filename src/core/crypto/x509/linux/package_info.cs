@@ -11,10 +11,20 @@
 
 // <ImportedTypeAliases>
 global using cryptoꓸPublicKey = object;
+using asn1 = go.encoding.asn1_package;
+using crypto = go.crypto_package;
+using io = go.io_package;
+using iter = go.iter_package;
+using net = go.net_package;
+using pkix = go.crypto.x509.pkix_package;
+using time = go.time_package;
 // </ImportedTypeAliases>
 
 using go;
 using static go.crypto.x509_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -101,23 +111,32 @@ using static go.crypto.x509_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("crypto/x509/cert_pool.go", "cert_pool.cs", "ADyAAZIABxDCgpSokoKoktyCgoKUopSCAAQcAAsCgqYACRQACAKCAAISAAgCgoKClIKUtrTIgoKUgoKCgqaygpSosoKUAAIU8oK4gqaCygALEgAIAoKCgoKUgqaCgoKUiIKUgpSUpgACEPKCgpSowoKUgpSigqYAAhDygpQ=", "184-186:1;239-246:1;240-244:1.1;291-293:1")]
-[assembly: GoPositionMap("crypto/x509/constraints.go", "constraints.cs", "AEqUAdKCppSClIKCgoKmAAIQAAkCgqaUgqaCpoKClJSClMaigpSCgpSmsoKClKaipoIAEByGgpSSgoKUppKCppSCppTGgoKClJSClAAEHAALAoKCgpSCgoKCgpSClIKUpoKm7riCgpSUAAwaAAIWAAgCgpSCgoKCgoKUgoKUpoKCgoKUABUqgoKUgoKmlO6UgoKigoKClJSCuMaCgqaCgqaCgoKCpgAUHqaClIKCgoKClILKlIKUpoKUxoKCgqaClIIAEhKigoKmgoKmAA0agoKCpoKClIKmgoKUgqaCgpSCpsaCgoKygpTugoKCgoKmgqaCgpSCgoKUuIKClIKCpoKCygAJEILGgoKCgoKUgoKCgu6AgraUpoKCgoKClIKUpoKClJQ=", "", "", "574=newIPNetConstraints/1/2/1,newIPNetConstraints/2/2/1,newDNSConstraints/1/4/2,newDNSConstraints/2/4/2,newDNSConstraints/3/4/3,newDNSConstraints/4/4/3,newEmailConstraints/1/2/4,newEmailConstraints/2/2/4")]
-[assembly: GoPositionMap("crypto/x509/oid.go", "oid.cs", "ABMmAAYSkoK2goKmgriClIK4qJKCpoKCpoKCgpSmgoKUpoKCgoKClJSmooKUpoKCpoKCgoKUlMiSqJKokqa4goKCuKqCgoKUlKqAgqSAgraCpoKUlIKCgoKClKaCqJKokqiSgoKUgqi2xsKCgqaCgpSCpoKClIKCgpSClKaCzLKClIKmlIKSgqaSgriCgoKmlIK4qJKCgqrOgoKCgoKmgoKUgpSCgoKCgpSCgoKCgpSUgoKCgoKCgpSCppSCpqaClLyUgoKmgpSCgoKClIKUgpSCuAAICLKCgoKUlA==")]
+[assembly: GoPositionMap("crypto/x509/cert_pool.go", "cert_pool.cs", "ADuAAZIABRDCgpSokoKoktyCgoKUopSCAAIcAAsCgqYABxQACAKCAAISAAgCgoKClIKUtrTIgoKUgoKCgqaygpSosoKUAAIU8oK4gqaCygAHEgAIAoKCgoKUgqaCgoKUiIKUgpSUpgACEPKCgpSowoKUgpSigqYAAhDygpQ=", "184-186:1;239-246:1;240-244:1.1;291-293:1")]
+[assembly: GoPositionMap("crypto/x509/constraints.go", "constraints.cs", "AEeUAdKCppSClIKCgoKmAAIQAAkCgqaUgqaCpoKClJSClKaigpSCgpSmsoKClKaipoIAEByGgpSSgoKUppKCppSCppSmgoKClJSClAACHAALAoKCgpSCgoKCgpSClIKUpoKm7riCgpSUAAwaAAIWAAgCgpSCgoKCgoKUgoKUpoKCgoKUABUqgoKUgoKmlO6UgoKigoKClJSCuKaCgqaCgqaCgoKCpgASHqaClIKCgoKClILKlIKUpoKUpoKCgqaClIIAEBKigoKmgoKmAAsagoKCpoKClIKmgoKUgqaCgpSCpqaCgoKygpTugoKCgoKmgqaCgpSCgoKUuIKClIKCpoKCygAHEIKmgoKCgoKUgoKCgu6AgraUpoKCgoKClIKUpoKClJQ=", "", "", "553=newIPNetConstraints/1/2/1,newIPNetConstraints/2/2/1,newDNSConstraints/1/4/2,newDNSConstraints/2/4/2,newDNSConstraints/3/4/3,newDNSConstraints/4/4/3,newEmailConstraints/1/2/4,newEmailConstraints/2/2/4")]
+[assembly: GoPositionMap("crypto/x509/oid.go", "oid.cs", "ABImAAYSkoK2goKmgriClIK4qJKCpoKCpoKCgpSmgoKUpoKCgoKClJSmooKUpoKCpoKCgoKUlKiSqJKokqa4goKCuKqCgoKUlKqAgqSAgraCpoKUlIKCgoKClKaCqJKokqiSgoKUgqi2psKCgqaCgpSCpoKClIKCgpSClKaCrLKClIKmlIKSgqaSgriCgoKmlIK4qJKCgqrOgoKCgoKmgoKUgpSCgoKCgpSCgoKCgpSUgoKCgoKCgpSCppSCpqaClLyUgoKmgpSCgoKClIKUgpSCuOiygoKClJQ=")]
 [assembly: GoPositionMap("crypto/x509/parser.go", "parser.cs", "AChGogAXMOIAChaClJSkgoKmpIKUAAoUgriCpoKCuIaUgqakgoKUpIKCppQADArCgqaCgoKCgpSCgoKUgoKUgoKClIKCgpSmpgAIBoKCgpSClIKCgpSCggAKBqKClILGgsaUpqKCgpSCgqYACgaCgoKUgoKmgoKUggAiBoKCgoK4gqaCgoKUgpSCpoKUgqa4pIKCgpSCgpTYgpSClMiClLSCgoKUAAcQgoiUhJSk+IKCgqaCgoKm5qKCgpSCgriCgoKClKYACAaigpSCgoKClIK4AAoG4oKUgoKUtIKClLSCgpSCgpSClLSUtMimAAgGlJSUgoKClIKClJTmwoKCgpSCgoKUgpSmAAgGsoKCgpSCgoKClIKUgoKClJS4kpSCgoKmppTmuAAIBgASIIKikoqmyqYACAKCkoKEps6UgoKmgpS2gqSUgraCtqaCpraCgsqCgqaCpraCgqaCpoKUtsjmgpSClJQAGgaigoKUgpSCgsaCgpSCtIKCppTIgoIAECCCgpSCgoKUgoKClIKUgpSCgpSCgpTagoLGgoKUgoKClJSClJSCgoKUlIKUxoKCxpSUgoKClLSCgpSCgoLYgoKUgoKShpTGgoKUxqSUlJSCgpSCgoKUgoKUgpSClJS02qaCuKYAKQSClLiClIKCpqaClIKCpoKUgriCgqaCgpSCgpSmlIKCmrKClIKUgoKUlIKClIKCgpSUgoKUgoKmgoKUgoKClJSCgpSCgpSCgpSSgpSCgoKUgsiCuIKClIKUgoKCgpSCgoKUgoKClIKClIKClIKUgoLcgoKUlAAGENKCgpSClKrCgoKCgpSClAAREqKUuIKUgoKmpoKUgoKmgoKUgpSCpoKCmrKClIKUgoKUlIKClJSCgpSCgoKUlIKClIKCgriCgoKUgpSCgpSCgqaCgpSCgpSCgoKUgoKCgpSCgpSCgoKmuILKuIKCgpSCgpSCgoKUgoKUgoKClIKCgoKmuKoADRiCyoIACBKCgqaClJSCgoKUgty4", "401-438:1;568-659:1", "", "425=ReadASN1Integer/1/3/1,ReadASN1Integer/2/3/2,ReadASN1Integer/3/3/3;428=Sign/3/4/1,Sign/4/4/1;727=Empty/1/2/1,ContextSpecific/1/2/2,Constructed/1/2/2,ReadOptionalASN1/1/2/2,ContextSpecific/2/2/3,Constructed/2/2/3,ReadOptionalASN1/2/2/3,Empty/2/2/4;752=ReadAnyASN1/1/1/1;1055=ReadASN1/2/3/1,ReadASN1/3/3/2")]
-[assembly: GoPositionMap("crypto/x509/pem_decrypt.go", "pem_decrypt.cs", "AC1cACNIsoKClIKCgoKCgpQACBIACAKCuAAPHAAOAoKCpoKCpoKClIKClILKgoKCpoKmgoIABxCCgpSCgpSClIKCpgACFPKCgpSCgriCgoKUgoK4lIKUlAAJFIKCgoKmpoKCgoKm", "", "", "251=EncodeToString/1/1/4")]
+[assembly: GoPositionMap("crypto/x509/pem_decrypt.go", "pem_decrypt.cs", "ACxcACFIsoKClIKCgoKCgpQABhIACAKCuAAPHAAOAoKCpoKCpoKClIKClILKgoKCpoKmgoIABxCCgpSCgpSClIKCpgACFPKCgpSCgriCgoKUgoK4lIKUlAAJFIKCgoKmpoKCgoKm", "", "", "246=EncodeToString/1/1/4")]
 [assembly: GoPositionMap("crypto/x509/pkcs1.go", "pkcs1.cs", "AC5cAA0Q4oKCgpSCgpSClKaCpoimgsqCgoKCgoKCgoKUyoKmgoKCgoKCgrimAAIYAAsClIKCpgALGIKCgoKmggAKDLKCgoKClJSCpoKUgqYABRLSuA==", "", "", "87=Sign/5/7/1,Sign/6/7/2,Sign/7/7/3")]
 [assembly: GoPositionMap("crypto/x509/pkcs8.go", "pkcs8.cs", "ACZMAA8CgoKClIKUlJSCgpSmgoKClIKClKaAgqSCgpSAgqSmgIKkgoKUtgAHGgAJApSUuIKAgqS2goKUgoKU3ILIpoKClLaCpoKCpoKClIKClNyC6qY=")]
 [assembly: GoPositionMap("crypto/x509/root.go", "root.cs", "AB4+ooKCgtaigpSCgoKmgqaUgqaCpqKkAAEeAA8CgqaClIKU3IKCgqaApIKUgqaCpqI=", "103-103:1")]
 [assembly: GoPositionMap("crypto/x509/root_linux.go", "root_linux.cs", "AAsUAAkUyoKC")]
-[assembly: GoPositionMap("crypto/x509/root_unix.go", "root_unix.cs", "AB44gsaClIKCpoKCgoKClIK4gsqmgoKCgpSUgoKCyoKmqqKCgpSCgoKmqqKClII=")]
+[assembly: GoPositionMap("crypto/x509/root_unix.go", "root_unix.cs", "ABs4gqaClIKCpoKCgoKClIK4gsqmgoKCgpSUgoKCyoKmqqKCgpSCgoKmqqKClII=")]
 [assembly: GoPositionMap("crypto/x509/sec1.go", "sec1.cs", "ACNIsgAGEPKCgqaqooKClIKClAAHFMIAChbigoKClIKUlIKmgoKUlIKmgriCgpTclA==", "", "", "87=Bytes/1/2/2,PublicKey/1/1/3,Bytes/2/2/3")]
-[assembly: GoPositionMap("crypto/x509/verify.go", "verify.cs", "AF+UAYKUpKSkpKSkpKSkgoKUlAARFIKClIKmgpSClIKUgoKUpoKUpoKUABUcgoKCgoKClKaUAA8QgoKClKbYADqGAYLO8oKmlAAKFoKCgoKUgpSUyIKUiIKUAAsktuqClJTugoKUAAIUgqbYgu6ChriClMqCpoKCqsKCgoKClIKCpsqUpoKUpoKUygAICtKCpoKCgriCgpSCyoLugoIAFCqCpoKCgrgAAkYAJgaClIKCgpSCyqaCgpSCuILKgoKCuIKCpoKCgriCgpSCgriCgpSCuIKmgoKCgoKCuIKClIKClJSClKaCgpSCgoKUlIKUgqbGgoKCggAGENKKsoKCuIKCyoKUgrKCgqaCgoKUgqYACBIACATCqpKClIKCgqaCpoKCgpSmgoKCgpSmgoKCgpS4lLSCgsiCvoKCguqClIKmxoKasoKUgpSmpoKUlLiUgoKUgpSClIKUppS4poKClKaClIKmlIKmgoKUgrisxIKCpoKUgoK4gqaCgoKmAAQYAAwEgoKUpoKCpqaCgpTcgoKmgsrGgqaCgpSCptyCgoKUpoKUuJSCgoKmgoK4goKCAAgKpoKCgpQAChiC3IKClAAKFJSC3PyipoKClKaCgpSmgoKUpoKmgqaCgoKUgpSClKaigoKCgqaCgoLctoKCgoKClNyCgoKCuILGAAwWgriUgqKClIKUgqaCgriCpoKUpoK4gqaClKaClIK4gpSCpoIACBKCgoKCgoLKgsqUlJSUgoKUlKbKlJSCgpSCgu6UgoKUgpSCyoKUgqaC3IK4gqikgpSCyoKCppSUgoK4goLKgqbcAAoaooKCgqY=", "624-645:1;736-785:1", "", "422=Contains/1/1/2;515=Format/1/2/3,Format/2/2/3,Sprintf/1/1/3;521=Format/1/2/3,Format/2/2/3,Sprintf/1/1/3")]
-[assembly: GoPositionMap("crypto/x509/x509.go", "x509.cs", "AEuQAQAIAoKCgpSCgpSmwpS4gpSmtIKClIKClIKCgoKUtIK0goKUgoKUgoKCgpTWpgACGAAJAoKClIKmAAcQggBBhgGCgoKmpoKCgqamgoKCpgAMGgAIDoKClAA0aIKCgoKCgoKCgoKCgpSCgpTKAAsGABI2AAgUgoIADR6CpoK4goKCptyCgIK2goCCAAgQiqaUpKSmAAsagsrKgpyylKSkpJQAEiiCgoKWgpSkpKSUpoKUpKSkpqaClKSkpKYAH0iCgoKCgoKCgoKCgoKCABkyABAosoKCpqaygoKmyJKCgpSCgpQArwGEA/yCABAQgsaygpSmgq4ACwyEpoKmgqYAAhTypoKmgoKCpsaCAAgKwoKUgoKCgriUgra2gpSkgpSCgqaUgpSClMaClIKUpIKUgpSUzNKCAA0KggAmToKCgoKsspSClIKClLiogoKCgoKCgoKCgoKYgpqigoKmqqKCgoKUlIKClJSUgoKUlIKCgpSUpoKUgrimlLKSlISCgpSmhIKClKaCgoKUpoKCgoKUpoKCgoKUpoSCgoLKgsqCgpSmhLiCgoKUpoKEgoKUpoqClIKCgoKCpqKUgoKmgoLKgqKiyoKCpoKCyoKCpoKCyqaCgqaCgqaCooKSuIKSyoKClKaElIKC7qaCgpTupoKUgoKUgoKmgoKC5oKUgoKClLiUgoKmgriClIKC5oKUgqKCgrKSkoKClMqCktyCgqaClISCgqbcpoKCpgAMDLKCgpSkgraClLS0tMiCxqaCpoKCgpSCpu6mgpSCgtyCgriCpsoAD4IBAEICgoKmgriCgtyCAAcQgqaCpoKmgoKmgoKUgqaCgqaCgqaCgqaCgoLKgtyCqoiCgqaCgqaCAAoWgoKUlIKCpu64AAQW4oKCgqbssoKCgoKUAAgQ8oKCpoKCuIKigqYACRSCgoKCgpSmgoKUlIKCpgBAjgHYooKCgpSCgpSClKiSgoKCpoKmAAwKpIyCgoKAlLaCpoKAgqSCgoKUlKYABywAFgKCgqaCgqaCgoKCpoKCuIKCgoLcgpSCgsqUgoK4gpSCpqYABxCCgriCgsqCAAQQgoKmgoKmpoKCgoK4AAwagoKUlIKCpgAGEqKUgoKCgqbmggAOHoKCgoK4goKCgqaUgqaClIKC2siSAIoBlAIAEAKClIKUgpSClIKUgqaCgqamlIKigsqCgoKUgqbugoKClMqCgoKm3IKUuIKCpoKUgoK4goKmABAigqaCpoKCypSCgqYACBLChKaCpoKm", "1302-1308:1;1310-1358:2;1318-1322:2.1;1319-1321:2.1.1;1326-1330:2.2;1327-1329:2.2.1;1338-1342:2.3;1339-1341:2.3.1;1350-1354:2.4;1351-1353:2.4.1;1371-1383:3;1373-1375:3.1;1379-1381:3.2;1476-1497:1;1480-1488:1.1;1481-1487:1.1.1;1492-1494:1.2", "", "482=Equal/2/4/1,Equal/3/4/2,Equal/4/4/3;1269=oidInExtensions/1/1/1;1277=oidInExtensions/1/1/1;1311=oidInExtensions/1/1/1;1333=oidInExtensions/1/1/1;1347=oidInExtensions/1/1/1;1355=oidInExtensions/1/1/4;1459=oidInExtensions/1/1/1;1589=oidInExtensions/1/1/1;1897=UTC/1/2/5,UTC/2/2/5;2001=ToRDNSequence/1/1/3,UTC/1/2/4,UTC/2/2/5;2371=RightAlign/1/1/6,getSignatureAlgorithmFromAI/1/1/7,getPublicKeyAlgorithmFromOID/1/1/9,parseRawAttributes/1/1/12;2629=UTC/1/1/2;2684=UTC/1/2/4,UTC/2/2/5")]
-[assembly: GoPositionMap("crypto/x509/x509_string.go", "x509_string.cs", "AAgOhqKCgoKCgoKCggATHraClIKkpKSkpKSkpNaGooKCgoKCgoKCgoKCgoLatIKCgpQ=")]
+[assembly: GoPositionMap("crypto/x509/verify.go", "verify.cs", "AFyUAYKUpKSkpKSkpKSkgoKUlAANFIKClIKmgpSClIKUgoKUpoKUpoKUABEcgoKCgoKClKaUAAsQgoKClKa4ADiGAYKu8oKmlAAKFoKCgoKUgpSUyIKUiIKUAAsktuqClJTugoKUAAIUgqbYgu6ChriClMqCpoKCqsKCgoKClIKCpsqUpoKUpoKUyurSgqaCgoK4goKUgsqC7oKCABQqgqaCgoK4AAJGACYGgpSCgoKUgsqmgoKUgriCyoKCgriCgqaCgoK4goKUgoK4goKUgriCpoKCgoKCgriCgpSCgpSUgpSmgoKUgoKClJSClIKmpoKCgoIABhDSirKCgriCgsqClIKygoKmgoKClIKmAAgS5MKqkoKUgoKCpoKmgoKClKaCgoKClKaCgoKClLiUtIKCyIK+goKC6oKUgqamgpqygpSClKamgpSUuJSCgpSClIKUgpSmlLimgoKUpoKUgqaUgqaCgpSCuKzEgoKmgpSCgriCpoKCgqYAAhgADASCgpSmgoKmpoKClNyCgqaCyqaCpoKClIKm3IKCgpSmgpS4lIKCgqaCgriCgoIACAqmgoKClAAKGILcgoKUAAoUlILc3KKmgoKUpoKClKaCgpSmgqaCpoKCgpSClIKUpqKCgoKCpoKCgty2goKCgoKU3IKCgoK4gqYADBaCuJSCooKUgpSCpoKCuIKmgpSmgriCpoKUpoKUgriClIKmggAIEoKCgoKCgsqCypSUlJSCgpSUpsqUlIKClIKC7pSCgpSClILKgpSCpoLcgriCqKSClILKgoKmlJSCgriCgsqCptwAChqigoKCpg==", "624-645:1;736-785:1", "", "401=Contains/1/1/2;492=Format/1/2/3,Format/2/2/3,Sprintf/1/1/3;498=Format/1/2/3,Format/2/2/3,Sprintf/1/1/3")]
+[assembly: GoPositionMap("crypto/x509/x509.go", "x509.cs", "AEqQAQAIAoKCgpSCgpSmwpS4gpSmtIKClIKClIKCgoKUtIK0goKUgoKUgoKCgpTWpgACGAAJAoKClIKmAAcQggA/hgGCgoKmpoKCgqamgoKCpgAKGu6CgpQAMmiCgoKCgoKCgoKCgoKUgoKUygALBgASNgAIFIKCAA0egqaCuIKCgqbcgoCCtoKAggAIEIqmlKSkpgALGoLKyoKcspSkpKSUABIogoKCloKUpKSklKaClKSkpKamgpSkpKSmAB9IgoKCgoKCgoKCgoKCggAZMgAQKLKCgqamsoKCpqiSgoKUgoKUAK0BhAPcggAMEIKmsoKUpoKuAAsMhKaCpoKmAAIU8qaCpoKCgqamggAICsKClIKCgoK4lIK2toKUpIKUgoKmlIKUgpTGgpSClKSClIKUlKzSggAJCoIAJE6CgoKCrLKUgpSCgpS4qIKCgoKCgoKCgoKCmIKaooKCpqqigoKClJSCgpSUlIKClJSCgoKUlKaClIK4ppSykpSEgoKUpoSCgpSmgoKClKaCgoKClKaCgoKClKaEgoKCyoLKgoKUpoS4goKClKaChIKClKaKgpSCgoKCgqailIKCpoKCyoKiosqCgqaCgsqCgqaCgsqmgoKmgoKmgqKCkriCksqCgpSmhJSCgu6mgoKU7qaClIKClIKCpoKCguaClIKCgpS4lIKCpoK4gpSCguaClIKigoKykpKCgpTKgpLcgoKmgpSEgoKm3KaCgqYADAyygoKUpIK2gpS0tLTIgsamgqaCgoKUgqbupoKUgoLcgoK4gqbKAA+CAQBCAoKCpoK4goLcggAHEIKmgqaCpoKCpoKClIKmgoKmgoKmgoKmgoKCyoLcgqqIgoKmgoKmggAKFoKClJSCgqbuuAAEFuKCgoKm7LKCgoKClAACEPKCgqaCgriCooKmAAkUgoKCgoKUpoKClJSCgqYAPo4B2KKCgoKUgoKUgpSokoKCgqaCpgAMCqSMgoKCgJS2gqaCgIKkgoKClJSmAAcsABYCgoKmgoKmgoKCgqaCgriCgoKC3IKUgoLKlIKCuIKUgqamAAcQgoK4goLKggAEEIKCpoKCpqaCgoKCuAAMGoKClJSCgqYABhKilIKCgoKm5oIADh6CgoKCuIKCgoKmlIKmgpSCgtqokgCIAZQCABACgpSClIKUgpSClIKmgoKmppSCooLKgoKClIKm7oKCgpTKgoKCptyClLiCgqaClIKCuIKCpgAQIoKmgqaCgsqUgoKmAAYSwoSmgqaCpg==", "1302-1308:1;1310-1358:2;1318-1322:2.1;1319-1321:2.1.1;1326-1330:2.2;1327-1329:2.2.1;1338-1342:2.3;1339-1341:2.3.1;1350-1354:2.4;1351-1353:2.4.1;1371-1383:3;1373-1375:3.1;1379-1381:3.2;1476-1497:1;1480-1488:1.1;1481-1487:1.1.1;1492-1494:1.2", "", "473=Equal/2/4/1,Equal/3/4/2,Equal/4/4/3;1238=oidInExtensions/1/1/1;1246=oidInExtensions/1/1/1;1280=oidInExtensions/1/1/1;1302=oidInExtensions/1/1/1;1316=oidInExtensions/1/1/1;1324=oidInExtensions/1/1/4;1428=oidInExtensions/1/1/1;1558=oidInExtensions/1/1/1;1866=UTC/1/2/5,UTC/2/2/5;1964=ToRDNSequence/1/1/3,UTC/1/2/4,UTC/2/2/5;2332=RightAlign/1/1/6,getSignatureAlgorithmFromAI/1/1/7,getPublicKeyAlgorithmFromOID/1/1/9,parseRawAttributes/1/1/12;2586=UTC/1/1/2;2641=UTC/1/2/4,UTC/2/2/5")]
+[assembly: GoPositionMap("crypto/x509/x509_string.go", "x509_string.cs", "/oaigoKCgoKCgoIAEx6WgpSCpKSkpKSkpKSmhqKCgoKCgoKCgoKCgoKC2pSCgoKU")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;
+
+using static go.crypto.x509_package;
+using asn1 = go.encoding.asn1_package;
+using crypto = go.crypto_package;
+using io = go.io_package;
+using iter = go.iter_package;
+using net = go.net_package;
+using pkix = go.crypto.x509.pkix_package;
+using time = go.time_package;
 
 [GoPackage("x509")]
 public static partial class x509_package
@@ -259,29 +278,157 @@ public static partial class x509_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(x509_package.CertPool)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class x509ᴛCertPool;
-[GoMethodHost(typeof(x509_package.Certificate)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class x509ᴛCertificate;
-[GoMethodHost(typeof(x509_package.CertificateInvalidError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class x509ᴛCertificateInvalidError;
-[GoMethodHost(typeof(x509_package.CertificateRequest)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class x509ᴛCertificateRequest;
-[GoMethodHost(typeof(x509_package.ConstraintViolationError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class x509ᴛConstraintViolationError;
-[GoMethodHost(typeof(x509_package.ExtKeyUsage)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class x509ᴛExtKeyUsage;
-[GoMethodHost(typeof(x509_package.HostnameError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class x509ᴛHostnameError;
-[GoMethodHost(typeof(x509_package.InsecureAlgorithmError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class x509ᴛInsecureAlgorithmError;
-[GoMethodHost(typeof(x509_package.KeyUsage)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class x509ᴛKeyUsage;
-[GoMethodHost(typeof(x509_package.OID)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class x509ᴛOID;
-[GoMethodHost(typeof(x509_package.PublicKeyAlgorithm)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class x509ᴛPublicKeyAlgorithm;
-[GoMethodHost(typeof(x509_package.RevocationList)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class x509ᴛRevocationList;
-[GoMethodHost(typeof(x509_package.SignatureAlgorithm)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class x509ᴛSignatureAlgorithm;
-[GoMethodHost(typeof(x509_package.SystemRootsError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class x509ᴛSystemRootsError;
-[GoMethodHost(typeof(x509_package.UnhandledCriticalExtension)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class x509ᴛUnhandledCriticalExtension;
-[GoMethodHost(typeof(x509_package.UnknownAuthorityError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class x509ᴛUnknownAuthorityError;
-[GoMethodHost(typeof(x509_package.chainConstraints)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class x509ᴛchainConstraints;
-[GoMethodHost(typeof(x509_package.dnsConstraints)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class x509ᴛdnsConstraints;
-[GoMethodHost(typeof(x509_package.emailConstraints)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class x509ᴛemailConstraints;
-[GoMethodHost(typeof(x509_package.ipConstraints)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class x509ᴛipConstraints;
-[GoMethodHost(typeof(x509_package.nameConstraintsSet<,>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class x509ᴛnameConstraintsSet;
-[GoMethodHost(typeof(x509_package.parsedURI)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class x509ᴛparsedURI;
-[GoMethodHost(typeof(x509_package.policyGraph)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class x509ᴛpolicyGraph;
-[GoMethodHost(typeof(x509_package.rfc1423Algo)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class x509ᴛrfc1423Algo;
-[GoMethodHost(typeof(x509_package.rfc2821Mailbox)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class x509ᴛrfc2821Mailbox;
+[GoMethodHost(typeof(x509_package.CertPool)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class x509ᴛCertPool;
+[GoMethodHost(typeof(x509_package.Certificate)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class x509ᴛCertificate;
+[GoMethodHost(typeof(x509_package.CertificateInvalidError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class x509ᴛCertificateInvalidError;
+[GoMethodHost(typeof(x509_package.CertificateRequest)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class x509ᴛCertificateRequest;
+[GoMethodHost(typeof(x509_package.ConstraintViolationError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class x509ᴛConstraintViolationError;
+[GoMethodHost(typeof(x509_package.ExtKeyUsage)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class x509ᴛExtKeyUsage;
+[GoMethodHost(typeof(x509_package.HostnameError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class x509ᴛHostnameError;
+[GoMethodHost(typeof(x509_package.InsecureAlgorithmError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class x509ᴛInsecureAlgorithmError;
+[GoMethodHost(typeof(x509_package.KeyUsage)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class x509ᴛKeyUsage;
+[GoMethodHost(typeof(x509_package.OID)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class x509ᴛOID;
+[GoMethodHost(typeof(x509_package.PublicKeyAlgorithm)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class x509ᴛPublicKeyAlgorithm;
+[GoMethodHost(typeof(x509_package.RevocationList)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class x509ᴛRevocationList;
+[GoMethodHost(typeof(x509_package.SignatureAlgorithm)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class x509ᴛSignatureAlgorithm;
+[GoMethodHost(typeof(x509_package.SystemRootsError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class x509ᴛSystemRootsError;
+[GoMethodHost(typeof(x509_package.UnhandledCriticalExtension)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class x509ᴛUnhandledCriticalExtension;
+[GoMethodHost(typeof(x509_package.UnknownAuthorityError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class x509ᴛUnknownAuthorityError;
+[GoMethodHost(typeof(x509_package.chainConstraints)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class x509ᴛchainConstraints;
+[GoMethodHost(typeof(x509_package.dnsConstraints)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class x509ᴛdnsConstraints;
+[GoMethodHost(typeof(x509_package.emailConstraints)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class x509ᴛemailConstraints;
+[GoMethodHost(typeof(x509_package.ipConstraints)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class x509ᴛipConstraints;
+[GoMethodHost(typeof(x509_package.nameConstraintsSet<,>)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class x509ᴛnameConstraintsSet;
+[GoMethodHost(typeof(x509_package.parsedURI)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class x509ᴛparsedURI;
+[GoMethodHost(typeof(x509_package.policyGraph)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class x509ᴛpolicyGraph;
+[GoMethodHost(typeof(x509_package.rfc1423Algo)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class x509ᴛrfc1423Algo;
+[GoMethodHost(typeof(x509_package.rfc2821Mailbox)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class x509ᴛrfc2821Mailbox;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class x509ᴛCertPool {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint len(this ж<CertPool> Ꮡs) => x509_package.len⁔(Ꮡs);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (ж<Certificate>, Func<slice<ж<Certificate>>, error>, error) cert(this ref CertPool s, nint n) => x509_package.cert⁔(ref s, n);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<CertPool> Clone(this ref CertPool s) => x509_package.Clone⁔(ref s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<potentialParent> findPotentialParents(this ж<CertPool> Ꮡs, ж<Certificate> Ꮡcert) => x509_package.findPotentialParents⁔(Ꮡs, Ꮡcert);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool contains(this ж<CertPool> Ꮡs, ж<Certificate> Ꮡcert) => x509_package.contains⁔(Ꮡs, Ꮡcert);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void AddCert(this ref CertPool s, ж<Certificate> Ꮡcert) => x509_package.AddCert⁔(ref s, Ꮡcert);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void addCertFunc(this ref CertPool s, sum224 rawSum224, @string rawSubject, Func<(ж<Certificate>, error)> getCert, Func<slice<ж<Certificate>>, error> constraint) => x509_package.addCertFunc⁔(ref s, rawSum224, rawSubject, getCert, constraint);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool /*ok*/ AppendCertsFromPEM(this ref CertPool s, slice<byte> pemCerts) => x509_package.AppendCertsFromPEM⁔(ref s, pemCerts);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<slice<byte>> Subjects(this ж<CertPool> Ꮡs) => x509_package.Subjects⁔(Ꮡs);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Equal(this ж<CertPool> Ꮡs, ж<CertPool> Ꮡother) => x509_package.Equal⁔(Ꮡs, Ꮡother);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void AddCertWithConstraint(this ref CertPool s, ж<Certificate> Ꮡcert, Func<slice<ж<Certificate>>, error> constraint) => x509_package.AddCertWithConstraint⁔(ref s, Ꮡcert, constraint);
+}
+partial class x509ᴛCertificate {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<slice<ж<Certificate>>> chains, error err) systemVerify(this ref Certificate c, ж<VerifyOptions> Ꮡopts) => x509_package.systemVerify⁔(ref c, Ꮡopts);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error isValid(this ж<Certificate> Ꮡc, nint certType, slice<ж<Certificate>> currentChain, ж<VerifyOptions> Ꮡopts) => x509_package.isValid⁔(Ꮡc, certType, currentChain, Ꮡopts);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<slice<ж<Certificate>>>, error) Verify(this ж<Certificate> Ꮡc, VerifyOptions optsʗp) => x509_package.Verify⁔(Ꮡc, optsʗp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<slice<ж<Certificate>>> chains, error err) buildChains(this ж<Certificate> Ꮡc, slice<ж<Certificate>> currentChain, ж<nint> ᏑsigChecks, ж<VerifyOptions> Ꮡopts) => x509_package.buildChains⁔(Ꮡc, currentChain, ᏑsigChecks, Ꮡopts);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error VerifyHostname(this ж<Certificate> Ꮡc, @string h) => x509_package.VerifyHostname⁔(Ꮡc, h);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Equal(this ж<Certificate> Ꮡc, ж<Certificate> Ꮡother) => x509_package.Equal⁔(Ꮡc, Ꮡother);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool hasSANExtension(this ref Certificate c) => x509_package.hasSANExtension⁔(ref c);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error CheckSignatureFrom(this ref Certificate c, ж<Certificate> Ꮡparent) => x509_package.CheckSignatureFrom⁔(ref c, Ꮡparent);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error CheckSignature(this ref Certificate c, SignatureAlgorithm algo, slice<byte> signed, slice<byte> signature) => x509_package.CheckSignature⁔(ref c, algo, signed, signature);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool hasNameConstraints(this ref Certificate c) => x509_package.hasNameConstraints⁔(ref c);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<byte> getSANExtension(this ref Certificate c) => x509_package.getSANExtension⁔(ref c);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error CheckCRLSignature(this ref Certificate c, ж<pkix.CertificateList> Ꮡcrl) => x509_package.CheckCRLSignature⁔(ref c, Ꮡcrl);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<byte> crlBytes, error err) CreateCRL(this ref Certificate c, io.Reader rand, any priv, slice<pkix.RevokedCertificate> revokedCerts, time.Time now, time.Time expiry) => x509_package.CreateCRL⁔(ref c, rand, priv, revokedCerts, now, expiry);
+}
+partial class x509ᴛCertificateInvalidError {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this CertificateInvalidError e) => x509_package.Error⁔(e);
+}
+partial class x509ᴛCertificateRequest {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error CheckSignature(this ref CertificateRequest c) => x509_package.CheckSignature⁔(ref c);
+}
+partial class x509ᴛConstraintViolationError {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this ConstraintViolationError _) => x509_package.Error⁔(_);
+}
+partial class x509ᴛExtKeyUsage {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static OID OID(this ExtKeyUsage eku) => x509_package.OID⁔(eku);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this ExtKeyUsage i) => x509_package.String⁔(i);
+}
+partial class x509ᴛHostnameError {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this HostnameError h) => x509_package.Error⁔(h);
+}
+partial class x509ᴛInsecureAlgorithmError {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this InsecureAlgorithmError e) => x509_package.Error⁔(e);
+}
+partial class x509ᴛKeyUsage {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this KeyUsage i) => x509_package.String⁔(i);
+}
+partial class x509ᴛOID {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<byte>, error) AppendText(this OID o, slice<byte> b) => x509_package.AppendText⁔(o, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<byte>, error) MarshalText(this OID o) => x509_package.MarshalText⁔(o);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error UnmarshalText(this ref OID o, slice<byte> text) => x509_package.UnmarshalText⁔(ref o, text);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error unmarshalOIDText(this ref OID o, @string oid) => x509_package.unmarshalOIDText⁔(ref o, oid);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<byte>, error) AppendBinary(this OID o, slice<byte> b) => x509_package.AppendBinary⁔(o, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<byte>, error) MarshalBinary(this OID o) => x509_package.MarshalBinary⁔(o);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error UnmarshalBinary(this ref OID o, slice<byte> b) => x509_package.UnmarshalBinary⁔(ref o, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Equal(this OID oid, OID other) => x509_package.Equal⁔(oid, other);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool EqualASN1OID(this OID oid, asn1.ObjectIdentifier other) => x509_package.EqualASN1OID⁔(oid, other);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this OID oid) => x509_package.String⁔(oid);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (asn1.ObjectIdentifier, bool) toASN1OID(this OID oid) => x509_package.toASN1OID⁔(oid);
+}
+partial class x509ᴛPublicKeyAlgorithm {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this PublicKeyAlgorithm algo) => x509_package.String⁔(algo);
+}
+partial class x509ᴛRevocationList {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error CheckSignatureFrom(this ref RevocationList rl, ж<Certificate> Ꮡparent) => x509_package.CheckSignatureFrom⁔(ref rl, Ꮡparent);
+}
+partial class x509ᴛSignatureAlgorithm {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool isRSAPSS(this SignatureAlgorithm algo) => x509_package.isRSAPSS⁔(algo);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static crypto.Hash hashFunc(this SignatureAlgorithm algo) => x509_package.hashFunc⁔(algo);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this SignatureAlgorithm algo) => x509_package.String⁔(algo);
+}
+partial class x509ᴛSystemRootsError {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this SystemRootsError se) => x509_package.Error⁔(se);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Unwrap(this SystemRootsError se) => x509_package.Unwrap⁔(se);
+}
+partial class x509ᴛUnhandledCriticalExtension {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this UnhandledCriticalExtension h) => x509_package.Error⁔(h);
+}
+partial class x509ᴛUnknownAuthorityError {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this UnknownAuthorityError e) => x509_package.Error⁔(e);
+}
+partial class x509ᴛchainConstraints {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error check(this ref chainConstraints cc, slice<@string> dns, slice<parsedURI> uris, slice<rfc2821Mailbox> emails, slice<net.IP> ips) => x509_package.check⁔(ref cc, dns, uris, emails, ips);
+}
+partial class x509ᴛdnsConstraints {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (@string, bool) query(this ref dnsConstraints dnc, @string s) => x509_package.query⁔(ref dnc, s);
+}
+partial class x509ᴛemailConstraints {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (@string, bool) query(this ref emailConstraints ec, rfc2821Mailbox s) => x509_package.query⁔(ref ec, s);
+}
+partial class x509ᴛipConstraints {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (ж<net.IPNet>, bool) query(this ref ipConstraints ipc, net.IP ip) => x509_package.query⁔(ref ipc, ip);
+}
+partial class x509ᴛnameConstraintsSet {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void sortAndPrune<T, V>(this ref nameConstraintsSet<T, V> nc, Func<T, T, nint> cmp, Func<T, T, bool> subset) where V : /* net.IP | string */ new() => x509_package.sortAndPrune⁔<T, V>(ref nc, cmp, subset);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (T lowerBound, bool exactMatch) search<T, V>(this ref nameConstraintsSet<T, V> nc, V s, Func<T, V, nint> cmp, Func<T, V, bool> match) where V : /* net.IP | string */ new() => x509_package.search⁔<T, V>(ref nc, s, cmp, match);
+}
+partial class x509ᴛparsedURI {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string String(this parsedURI u) => x509_package.String⁔(u);
+}
+partial class x509ᴛpolicyGraph {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void insert(this ref policyGraph pg, ж<policyGraphNode> Ꮡn) => x509_package.insert⁔(ref pg, Ꮡn);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<ж<policyGraphNode>> parentsWithExpected(this ref policyGraph pg, OID expected) => x509_package.parentsWithExpected⁔(ref pg, expected);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<policyGraphNode> parentWithAnyPolicy(this ref policyGraph pg) => x509_package.parentWithAnyPolicy⁔(ref pg);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static iter.Seq<ж<policyGraphNode>> parents(this ref policyGraph pg) => x509_package.parents⁔(ref pg);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static map<@string, ж<policyGraphNode>> leaves(this ref policyGraph pg) => x509_package.leaves⁔(ref pg);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<policyGraphNode> leafWithPolicy(this ref policyGraph pg, OID policy) => x509_package.leafWithPolicy⁔(ref pg, policy);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void deleteLeaf(this ref policyGraph pg, OID policy) => x509_package.deleteLeaf⁔(ref pg, policy);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<ж<policyGraphNode>> validPolicyNodes(this ref policyGraph pg) => x509_package.validPolicyNodes⁔(ref pg);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void prune(this ref policyGraph pg) => x509_package.prune⁔(ref pg);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void incrDepth(this ref policyGraph pg) => x509_package.incrDepth⁔(ref pg);
+}
+partial class x509ᴛrfc1423Algo {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<byte> deriveKey(this rfc1423Algo c, slice<byte> password, slice<byte> salt) => x509_package.deriveKey⁔(c, password, salt);
+}
+partial class x509ᴛrfc2821Mailbox {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string String(this rfc2821Mailbox s) => x509_package.String⁔(s);
+}
+// </MethodForwarders>

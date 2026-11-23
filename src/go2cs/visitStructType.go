@@ -382,6 +382,10 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 		valueCloneAttr = fmt.Sprintf("[GoValueClone(%s)] ", strings.Join(quotedFields, ", "))
 	}
 
+	// A struct cmd/cgo declared for a C struct with a pointer field carries the cgo marker (cgoStructMarker): go2cs-gen
+	// gives those fields GET/SET properties over the C word. Movable like the clone stamp, so it joins it below.
+	valueCloneAttr += cgoStructMarker(declaredStructType)
+
 	// Both stamps are MOVABLE: their consumers read them off the TYPE (go2cs-gen resolves the
 	// symbol's declarations, golib's reflection bridge reads the runtime Type), and C# unions the
 	// attributes of every partial declaration — so they belong on the package_info.cs accessibility
@@ -1326,19 +1330,16 @@ func (v *Visitor) structZeroValueNeedsConstructionRec(t types.Type, seen map[*ty
 // the struct's own indent, so a function-local lift rides currentFuncPrefix to member level with
 // its type. A variadic method takes its tail as the interface declares it: a params span, passed on.
 //
-// A forwarder of receiver, a package-level struct, is one of the struct's methods and is written into the
-// struct's method holder (methodHolder.go), where go2cs-gen writes its pointer-receiver overload too. In the
-// package class it would share a class with the package's types, and a type of the method's name (Go's
-// database/sql/driver Connector.Driver beside a type Driver) would be CS0102. The holder is left open:
-// the declaration after it switches back (visitFile, and visitGenDecl for a grouped type spec).
+// A forwarder of receiver, a package-level struct with a method holder (methodHolder.go), is one of the struct's
+// methods and takes the suffix form as a Go method does: its body `<Name>⁔` stands here in the package class, and
+// its Go-named extension method is a forwarder in the holder (package_info.cs), where go2cs-gen writes its
+// pointer-receiver overload too. The Go name in the package class would share a class with the package's types,
+// and a type of the method's name (Go's database/sql/driver Connector.Driver beside a type Driver) would be CS0102.
 func (v *Visitor) emitPromotedInterfaceForwarders(target *strings.Builder, mark int, receiver *types.Named) {
+	var holder string
+
 	if len(v.promotedInterfaceForwarders) > mark && receiver != nil {
-		if holder := v.useMethodHolder(receiver, nil); holder != "" {
-			if switched := v.switchClass(holder); switched != "" {
-				target.WriteString(v.newline)
-				target.WriteString(strings.TrimSuffix(switched, v.newline))
-			}
-		}
+		holder = v.suffixHolderOf(receiver)
 	}
 
 	for _, fwd := range v.promotedInterfaceForwarders[mark:] {
@@ -1422,14 +1423,20 @@ func (v *Visitor) emitPromotedInterfaceForwarders(target *strings.Builder, mark 
 		v.writeStringLn(target, "// Go method set entry for the promoted '%s.%s()' - provided ONLY by the embedded", fwd.embedName, methodName)
 		v.writeStringLn(target, "// interface field in *%s's method set; see the pointer-only satisfaction record.", fwd.structName)
 
-		if fwd.valueReceiver {
-			// The method survives in Go's VALUE method set (nothing shadows it), so the forwarder
-			// is a value method — the generator's own Promoted-path extension form.
-			v.writeStringLn(target, "%s static %s %s(this %s recvᴛ%s) => recvᴛ.%s.%s(%s);", access, resultType, methodName, fwd.structName, params.String(), fwd.embedName, methodName, args.String())
+		// The method survives in Go's VALUE method set (nothing shadows it), so the forwarder is a value method — the
+		// generator's own Promoted-path extension form. Otherwise `this ref` is the pointer-receiver shape: golib reads
+		// an unmarked by-ref receiver as a POINTER-set method (docs/PLAN-marker-comment-parity.md, 5.1).
+		receiverParameter := fwd.structName + " recvᴛ"
+
+		if !fwd.valueReceiver {
+			receiverParameter = "ref " + receiverParameter
+		}
+
+		if holder != "" {
+			v.writeStringLn(target, "internal static %s %s(/*this*/ %s%s) => recvᴛ.%s.%s(%s);", resultType, suffixBodyName(methodName), receiverParameter, params.String(), fwd.embedName, methodName, args.String())
+			v.recordForwarder(receiver.Obj().Pos(), holder, access, false, resultType, methodName, "", "this "+receiverParameter+params.String(), "", fwd.method.Type().(*types.Signature))
 		} else {
-			// `this ref` is the pointer-receiver shape: golib reads an unmarked by-ref receiver as a
-			// POINTER-set method (docs/PLAN-marker-comment-parity.md, 5.1).
-			v.writeStringLn(target, "%s static %s %s(this ref %s recvᴛ%s) => recvᴛ.%s.%s(%s);", access, resultType, methodName, fwd.structName, params.String(), fwd.embedName, methodName, args.String())
+			v.writeStringLn(target, "%s static %s %s(this %s%s) => recvᴛ.%s.%s(%s);", access, resultType, methodName, receiverParameter, params.String(), fwd.embedName, methodName, args.String())
 		}
 	}
 

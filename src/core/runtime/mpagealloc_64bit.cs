@@ -6,7 +6,6 @@ namespace go;
 
 using @unsafe = unsafe_package;
 using @internal.runtime;
-using static runtime_package;
 
 partial class runtime_package {
 
@@ -63,8 +62,6 @@ internal static array<nuint> levelBits = array<nuint>([
     logPallocChunkPages
 ]); }
 
-} partial class runtimeᴛpageAlloc {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string pageSummaryˢ => ref pageSummaryˢᵇ;
 private static readonly @string pageSummaryˢᵇ = "page summary"u8;
@@ -74,7 +71,7 @@ private static readonly @string failedToReservePageˢᵇ = "failed to reserve pa
 // sysInit performs architecture-dependent initialization of fields
 // in pageAlloc. pageAlloc should be uninitialized except for sysStat
 // if any runtime statistic should be updated.
-internal static void sysInit(this ref pageAlloc p, bool test) {
+internal static void sysInit⁔(/*this*/ ref pageAlloc p, bool test) {
     // Reserve memory for each level. This will get mapped in
     // as R/W by setArenas.
     foreach (var (l, shift) in range(levelShift.ΔRangeSnapshot())) {
@@ -109,7 +106,7 @@ private static readonly @string pageAllocˢᵇ = "page alloc"u8;
 // Both must be aligned to pallocChunkBytes.
 //
 // The caller must update p.start and p.end after calling sysGrow.
-internal static void sysGrow(this ж<pageAlloc> Ꮡp, uintptr @base, uintptr limit) {
+internal static void sysGrow⁔(/*this*/ ж<pageAlloc> Ꮡp, uintptr @base, uintptr limit) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     if (@base % (uintptr)pallocChunkBytes != 0 || limit % (uintptr)pallocChunkBytes != 0) {
@@ -120,7 +117,7 @@ internal static void sysGrow(this ж<pageAlloc> Ꮡp, uintptr @base, uintptr lim
     // addrRangeToSummaryRange converts a range of addresses into a range
     // of summary indices which must be mapped to support those addresses
     // in the summary range.
-    (nint, nint) addrRangeToSummaryRange(nint level, addrRange r) {
+    [GoFunc("(*pageAlloc).sysGrow.func1")] (nint, nint) addrRangeToSummaryRange(nint level, addrRange r) {
         var (sumIdxBase, sumIdxLimit) = addrsToSummaryRange(level, r.@base.addr(), r.limit.addr());
         return blockAlignSummaryRange(level, sumIdxBase, sumIdxLimit);
     }
@@ -128,7 +125,7 @@ internal static void sysGrow(this ж<pageAlloc> Ꮡp, uintptr @base, uintptr lim
     // summaryRangeToSumAddrRange converts a range of indices in any
     // level of p.summary into page-aligned addresses which cover that
     // range of indices.
-    addrRange summaryRangeToSumAddrRange(nint level, nint sumIdxBase, nint sumIdxLimit) {
+    [GoFunc("(*pageAlloc).sysGrow.func2")] addrRange summaryRangeToSumAddrRange(nint level, nint sumIdxBase, nint sumIdxLimit) {
         var baseOffset = alignDown((uintptr)sumIdxBase * pallocSumBytes, physPageSize);
         var limitOffset = alignUp((uintptr)sumIdxLimit * pallocSumBytes, physPageSize);
         @unsafe.Pointer baseΔ1 = @unsafe.Pointer.FromPinnedBox(Ꮡ(Ꮡp.Value.summary[level], 0));
@@ -143,7 +140,7 @@ internal static void sysGrow(this ж<pageAlloc> Ꮡp, uintptr @base, uintptr lim
     // that stores the summaries for r.
     var addrRangeToSummaryRangeʗ1 = addrRangeToSummaryRange;
     var summaryRangeToSumAddrRangeʗ1 = summaryRangeToSumAddrRange;
-    addrRange addrRangeToSumAddrRange(nint level, addrRange r) {
+    [GoFunc("(*pageAlloc).sysGrow.func3")] addrRange addrRangeToSumAddrRange(nint level, addrRange r) {
         var (sumIdxBase, sumIdxLimit) = addrRangeToSummaryRangeʗ1(level, r);
         return summaryRangeToSumAddrRangeʗ1(level, sumIdxBase, sumIdxLimit);
     }
@@ -198,18 +195,14 @@ internal static void sysGrow(this ж<pageAlloc> Ꮡp, uintptr @base, uintptr lim
     }
 }
 
-} partial class runtimeᴛscavengeIndex {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string sysGrowBoundsNotAlignedˢ => ref sysGrowBoundsNotAlignedˢᵇ;
-private static readonly @string sysGrowBoundsNotAlignedˢᵇ = "sysGrow bounds not aligned to pallocChunkBytes"u8;
 internal static ref readonly @string scavengeIndexˢ => ref scavengeIndexˢᵇ;
 private static readonly @string scavengeIndexˢᵇ = "scavenge index"u8;
 
 // sysGrow increases the index's backing store in response to a heap growth.
 //
 // Returns the amount of memory added to sysStat.
-internal static uintptr sysGrow(this ж<scavengeIndex> Ꮡs, uintptr @base, uintptr limit, ж<sysMemStat> sysStat) {
+internal static uintptr sysGrow⁔(/*this*/ ж<scavengeIndex> Ꮡs, uintptr @base, uintptr limit, ж<sysMemStat> sysStat) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     if (@base % (uintptr)pallocChunkBytes != 0 || limit % (uintptr)pallocChunkBytes != 0) {
@@ -268,7 +261,7 @@ internal static uintptr sysGrow(this ж<scavengeIndex> Ꮡs, uintptr @base, uint
 // sysInit initializes the scavengeIndex' chunks array.
 //
 // Returns the amount of memory added to sysStat.
-internal static uintptr sysInit(this ref scavengeIndex s, bool test, ж<sysMemStat> sysStat) {
+internal static uintptr sysInit⁔(/*this*/ ref scavengeIndex s, bool test, ж<sysMemStat> sysStat) {
     var n = (uintptr)((uintptr)1 << (int)(heapAddrBits)) / (uintptr)pallocChunkBytes;
     var nbytes = n * /* unsafe.Sizeof(atomicScavChunkData{}) */ (uintptr)8;
     @unsafe.Pointer r = sysReserve(nil, nbytes, scavengeIndexˢ);
@@ -277,4 +270,4 @@ internal static uintptr sysInit(this ref scavengeIndex s, bool test, ж<sysMemSt
     return 0; // All memory above is mapped Reserved.
 }
 
-}
+} // end runtime_package

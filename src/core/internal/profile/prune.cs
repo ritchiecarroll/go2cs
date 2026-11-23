@@ -6,16 +6,13 @@ namespace go.@internal;
 
 using fmt = fmt_package;
 using regexp = regexp_package;
-using static profile_package;
 
 partial class profile_package {
-
-} partial class profileᴛProfile {
 
 // Prune removes all nodes beneath a node matching dropRx, and not
 // matching keepRx. If the root node of a Sample matches, the sample
 // will have an empty stack.
-public static void Prune(this ref Profile p, ж<regexp.Regexp> dropRx, ж<regexp.Regexp> keepRx) {
+internal static void Prune⁔(/*this*/ ref Profile p, ж<regexp.Regexp> dropRx, ж<regexp.Regexp> keepRx) {
     var prune = new map<uint64, bool>();
     var pruneBeneath = new map<uint64, bool>();
 
@@ -79,7 +76,7 @@ public static void Prune(this ref Profile p, ж<regexp.Regexp> dropRx, ж<regexp
 
 // RemoveUninteresting prunes and elides profiles using built-in
 // tables of uninteresting function names.
-public static error RemoveUninteresting(this ref Profile p) {
+internal static error RemoveUninteresting⁔(/*this*/ ref Profile p) {
     ж<regexp.Regexp> keep = default;
     ж<regexp.Regexp> drop = default;
     error err = default;
@@ -98,4 +95,4 @@ public static error RemoveUninteresting(this ref Profile p) {
     return default;
 }
 
-}
+} // end profile_package

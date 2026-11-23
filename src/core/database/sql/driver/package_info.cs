@@ -14,6 +14,9 @@
 
 using go;
 using static go.database.sql.driver_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -67,11 +70,13 @@ using static go.database.sql.driver_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("database/sql/driver/driver.go", "driver.cs", "AJMBqgIADRwA2AG+AwCXAaACgqaCAA0U9ILmgg==")]
-[assembly: GoPositionMap("database/sql/driver/types.go", "types.cs", "AEB+9JSClKSCgpSkgoKUpoKUgoKUpIKClKYADBK0goKUgoKUpIKClKSCgpSUABAWgqSUAAwSgoKUAAwSgoKUyJKClOSklKqiABYqlAABGgALAoaUxoKCppSCgpSClLimgqaClMakpIKClKSkpIKClKSU")]
+[assembly: GoPositionMap("database/sql/driver/driver.go", "driver.cs", "AJIBqgIADRwA2AG+AwCVAaACgqaCAAsU1ILmgg==")]
+[assembly: GoPositionMap("database/sql/driver/types.go", "types.cs", "AD9+1JSClKSCgpSkgoKUpoKUgoKUpIKClKYAChKUgoKUgoKUpIKClKSCgpSUAAwWgqSUAAgSgoKUAAgSgoKUqJKClOSklKqiABYqlAABGgALAoaUpoKCppSCgpSClLimgqaClMakpIKClKSkpIKClKSU")]
 // </GoSourcePositionMaps>
 
 namespace go.database.sql;
+
+using static go.database.sql.driver_package;
 
 [GoPackage("driver")]
 public static partial class driver_package
@@ -150,12 +155,46 @@ public static partial class driver_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(driver_package.NotNull)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class driverᴛNotNull;
-[GoMethodHost(typeof(driver_package.Null)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class driverᴛNull;
-[GoMethodHost(typeof(driver_package.RowsAffected)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class driverᴛRowsAffected;
-[GoMethodHost(typeof(driver_package.boolType)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class driverᴛboolType;
-[GoMethodHost(typeof(driver_package.defaultConverter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class driverᴛdefaultConverter;
-[GoMethodHost(typeof(driver_package.int32Type)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class driverᴛint32Type;
-[GoMethodHost(typeof(driver_package.noRows)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class driverᴛnoRows;
-[GoMethodHost(typeof(driver_package.stringType)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class driverᴛstringType;
+[GoMethodHost(typeof(driver_package.NotNull)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class driverᴛNotNull;
+[GoMethodHost(typeof(driver_package.Null)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class driverᴛNull;
+[GoMethodHost(typeof(driver_package.RowsAffected)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class driverᴛRowsAffected;
+[GoMethodHost(typeof(driver_package.boolType)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class driverᴛboolType;
+[GoMethodHost(typeof(driver_package.defaultConverter)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class driverᴛdefaultConverter;
+[GoMethodHost(typeof(driver_package.int32Type)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class driverᴛint32Type;
+[GoMethodHost(typeof(driver_package.noRows)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class driverᴛnoRows;
+[GoMethodHost(typeof(driver_package.stringType)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class driverᴛstringType;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class driverᴛNotNull {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (Value, error) ConvertValue(this NotNull n, any v) => driver_package.ConvertValue⁔(n, v);
+}
+partial class driverᴛNull {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (Value, error) ConvertValue(this Null n, any v) => driver_package.ConvertValue⁔(n, v);
+}
+partial class driverᴛRowsAffected {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (int64, error) LastInsertId(this RowsAffected _) => driver_package.LastInsertId⁔(_);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (int64, error) RowsAffected(this RowsAffected v) => driver_package.RowsAffected⁔(v);
+}
+partial class driverᴛboolType {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this boolType _) => driver_package.String⁔(_);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (Value, error) ConvertValue(this boolType _, any src) => driver_package.ConvertValue⁔(_, src);
+}
+partial class driverᴛdefaultConverter {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (Value, error) ConvertValue(this defaultConverter _, any v) => driver_package.ConvertValue⁔(_, v);
+}
+partial class driverᴛint32Type {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (Value, error) ConvertValue(this int32Type _, any v) => driver_package.ConvertValue⁔(_, v);
+}
+partial class driverᴛnoRows {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (int64, error) LastInsertId(this noRows _) => driver_package.LastInsertId⁔(_);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (int64, error) RowsAffected(this noRows _) => driver_package.RowsAffected⁔(_);
+}
+partial class driverᴛstringType {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (Value, error) ConvertValue(this stringType _, any v) => driver_package.ConvertValue⁔(_, v);
+}
+// </MethodForwarders>

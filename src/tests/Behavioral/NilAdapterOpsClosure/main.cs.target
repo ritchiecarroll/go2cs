@@ -22,7 +22,7 @@ internal static Greetable wrap(Action<@string> handler) {
 internal static void @try(@string label, Action f) {
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("try.func1")] () => {
             var r = recover(); if (r != nil) {
                 fmt.Println(label, "panicked:", r);
             }
@@ -34,18 +34,18 @@ internal static void @try(@string label, Action f) {
 }
 
 internal static void main() {
-    @try("equality", () => {
+    @try("equality", [GoFunc("main.func1")] () => {
         var (a, b) = (wrap(default), wrap(default));
         fmt.Println("a == b:", AreEqual(a, b));
     });
 
-    @try("map-hash", () => {
+    @try("map-hash", [GoFunc("main.func2")] () => {
         var m = new map<Greetable, nint>{};
         m[wrap(default)] = 1;
         fmt.Println("stored ok");
     });
 
-    @try("reflect-set", () => {
+    @try("reflect-set", [GoFunc("main.func3")] () => {
         ref var dest = ref heap<Greetable>(out var Ꮡdest);
         var rv = reflect.ValueOf(Ꮡdest).Elem();
         ref var src = ref heap<Greetable>(wrap(default), out var Ꮡsrc);
@@ -53,7 +53,7 @@ internal static void main() {
         fmt.Println("set ok, dest == nil:", Ꮡdest.ValueSlot == nil);
     });
 
-    @try("method-value-call", () => {
+    @try("method-value-call", [GoFunc("main.func4")] () => {
         var g = wrap(default);
         var v = reflect.ValueOf(g);
         var mv = v.Method(0);

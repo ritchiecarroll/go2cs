@@ -57,7 +57,7 @@ internal static void main() {
     var sc = ((ledger.Metric)((ledger.Gauge)9));
     fmt.Println("explicit:", sc.Value());
 
-    ledger.Metric f = new ledger_MeterᴠMetric(new ledger.Meter(() => 11));
+    ledger.Metric f = new ledger_MeterᴠMetric(new ledger.Meter([GoFunc("main.func1")] () => 11));
     fmt.Println("func:", f.Value());
 
     ledger.Metric p = new ledger.TallyжMetric(Ꮡ(new ledger.Tally(N: 5)));

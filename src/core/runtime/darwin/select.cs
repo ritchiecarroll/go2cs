@@ -9,7 +9,6 @@ using sys = @internal.runtime.sys_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
-using static runtime_package;
 
 partial class runtime_package {
 
@@ -158,7 +157,7 @@ internal static (nint, bool) selectgo(ж<scase> cas0, ж<uint16> order0, ж<uint
         pcs = pc1.slice(0, ncases, ncases);
     }
     var pcsʗ1 = pcs;
-    uintptr casePC(nint casiΔ1) {
+    [GoFunc("selectgo.func1")] uintptr casePC(nint casiΔ1) {
         if (pcsʗ1 == nil) {
             return (uintptr)(0);
         }
@@ -507,7 +506,7 @@ bufsend:
 recv:
     var lockorderʗ1 = lockorder;
     var scasesʗ1 = scases;
-    recv(c, sg, cas.elem, () => {
+    recv(c, sg, cas.elem, [GoFunc("selectgo.func2")] () => {
         // can receive from sleeping sender (sg)
         selunlock(scasesʗ1, lockorderʗ1);
     }, 2);
@@ -542,7 +541,7 @@ send:
     }
     var lockorderʗ2 = lockorder;
     var scasesʗ2 = scases;
-    send(c, sg, cas.elem, () => {
+    send(c, sg, cas.elem, [GoFunc("selectgo.func3")] () => {
         selunlock(scasesʗ2, lockorderʗ2);
     }, 2);
     if (debugSelect) {
@@ -562,13 +561,9 @@ sclose:
     throw panic(((plainError)(@string)sendOnClosedChannelˢ));
 }
 
-} partial class runtimeᴛhchan {
-
-internal static uintptr sortkey(this ж<hchan> Ꮡc) {
+internal static uintptr sortkey⁔(/*this*/ ж<hchan> Ꮡc) {
     return (uintptr)Ꮡc;
 }
-
-} partial class runtime_package {
 
 // A runtimeSelect is a single case passed to rselect.
 // This must match ../reflect/value.go:/runtimeSelect
@@ -652,9 +647,7 @@ internal static (nint, bool) reflect_rselect(slice<runtimeSelect> cases) {
     return (chosen, recvOK);
 }
 
-} partial class runtimeᴛwaitq {
-
-internal static void dequeueSudoG(this ref waitq q, ж<sudog> Ꮡsgp) {
+internal static void dequeueSudoG⁔(/*this*/ ref waitq q, ж<sudog> Ꮡsgp) {
     ref var sgp = ref Ꮡsgp.DerefOrNull();
 
     var x = sgp.prev;
@@ -690,4 +683,4 @@ internal static void dequeueSudoG(this ref waitq q, ж<sudog> Ꮡsgp) {
     }
 }
 
-}
+} // end runtime_package

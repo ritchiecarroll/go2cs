@@ -1,7 +1,6 @@
 namespace go;
 
 using fmt = fmt_package;
-using static CaptureModeValueParamLib_package;
 
 partial class CaptureModeValueParamLib_package {
 
@@ -10,16 +9,14 @@ partial struct Config {
     internal @string trace;
 }
 
-} partial class CaptureModeValueParamLibᴛConfig {
-
-internal static (@string @out, error err) fprint(this ж<Config> Ꮡcfg, @string label) {
+internal static (@string @out, error err) fprint⁔(/*this*/ ж<Config> Ꮡcfg, @string label) {
     @string @out = default;
     error err = default;
     GoFrame ᒐ = default;
     try {
         ref var cfg = ref Ꮡcfg.DerefOrNull();
 
-        defer(() => {
+        defer([GoFunc("(*Config).fprint.func1")] () => {
             var e = recover(); if (e != nil) {
                 err = fmt.Errorf("panic: %v"u8, e);
             }
@@ -32,12 +29,12 @@ internal static (@string @out, error err) fprint(this ж<Config> Ꮡcfg, @string
     return (@out, err);
 }
 
-public static (@string, error) Fprint(this ж<Config> Ꮡcfg, @string label) {
+internal static (@string, error) Fprint⁔(/*this*/ ж<Config> Ꮡcfg, @string label) {
     return Ꮡcfg.fprint(label);
 }
 
-public static @string Trace(this ref Config cfg) {
+internal static @string Trace⁔(/*this*/ ref Config cfg) {
     return cfg.trace;
 }
 
-}
+} // end CaptureModeValueParamLib_package

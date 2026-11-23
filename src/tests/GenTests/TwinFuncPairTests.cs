@@ -18,7 +18,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace GenTests;
 
 /// <summary>
-/// M:N PROTOTYPE, N3's D3 core (docs/phase4/DESIGN-mn-func-values.md section 4; COORD's condition 2026-11-14): in an
+/// M:N (experimental, opt-in), N3's D3 core (docs/phase4/DESIGN-mn-func-values.md section 4; COORD's condition 2026-11-14): in an
 /// EXISTING twin, a call through a func value tests for a pair and awaits the pair's twin; a can-park literal created
 /// in a twin body becomes a pair. Which functions get twins for calling a func value is the caller rule's one predicate:
 /// the owner ruled it PROPAGATING (2026-11-14), so such a function is twinned, and so is every function that reaches it.

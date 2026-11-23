@@ -131,7 +131,6 @@ using gc = @internal.runtime.gc_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
-using static runtime_package;
 
 partial class runtime_package {
 
@@ -612,12 +611,10 @@ internal static gcTriggerKind gcTriggerTime => 1;
 // to work.cycles).
 internal static gcTriggerKind gcTriggerCycle => 2;
 
-} partial class runtimeᴛgcTrigger {
-
 // test reports whether the trigger condition is satisfied, meaning
 // that the exit condition for the _GCoff phase has been met. The exit
 // condition should be tested when allocating.
-internal static bool test(this gcTrigger t) {
+internal static bool test⁔(/*this*/ gcTrigger t) {
     if (!memstats.enablegc || Ꮡpanicking.Load() != 0 || gcphase != _GCoff) {
         return false;
     }
@@ -639,8 +636,6 @@ internal static bool test(this gcTrigger t) {
     }}
     return true;
 }
-
-} partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string pMcacheNotFlushedˢ => ref pMcacheNotFlushedˢᵇ;
@@ -678,7 +673,7 @@ internal static void gcStart(gcTrigger trigger) {
                 gp.Value.bubble = default;
                 var bubbleʗ1 = bubble;
                 var gpʗ1 = gp;
-                defer(() => {
+                defer([GoFunc("gcStart.func1")] () => {
                     gpʗ1.Value.bubble = bubbleʗ1;
                 }, ref ᒐ);
             }
@@ -761,7 +756,7 @@ internal static void gcStart(gcTrigger trigger) {
         var now = nanotime();
         work.tSweepTerm = now;
         ref var stw = ref heap(new worldStop(), out var Ꮡstw);
-        systemstack(() => {
+        systemstack([GoFunc("gcStart.func2")] () => {
             Ꮡstw.Value = stopTheWorldWithSema(stwGCSweepTerm);
         });
 
@@ -796,7 +791,7 @@ internal static void gcStart(gcTrigger trigger) {
         }
 
         // Finish sweep before we start concurrent scan.
-        systemstack(() => {
+        systemstack([GoFunc("gcStart.func3")] () => {
             finishsweep_m();
         });
 
@@ -874,7 +869,7 @@ internal static void gcStart(gcTrigger trigger) {
         Ꮡwork.ᏑcpuStats.accumulateGCPauseTime(nanotime() - stw.finishedStopping, work.maxprocs);
 
         // Concurrent mark.
-        systemstack(() => {
+        systemstack([GoFunc("gcStart.func4")] () => {
             now = startTheWorldWithSema(0, Ꮡstw.Value);
             work.pauseNS += now - Ꮡstw.Value.startedStopping;
             work.tMark = now;
@@ -978,7 +973,7 @@ top:
 
     // Flush all local buffers and collect flushedWork flags.
     gcMarkDoneFlushed = 0;
-    forEachP(waitReasonGCMarkTermination, (ж<p> pp) => {
+    forEachP(waitReasonGCMarkTermination, [GoFunc("gcMarkDone.func1")] (ж<p> pp) => {
         // Flush the write barrier buffer, since this may add
         // work to the gcWork.
         wbBufFlush1(pp);
@@ -1019,7 +1014,7 @@ top:
     work.tMarkTerm = now;
     getg().Value.m.Value.preemptoff = gcingˢ;
     ref var stw = ref heap(new worldStop(), out var Ꮡstw);
-    systemstack(() => {
+    systemstack([GoFunc("gcMarkDone.func2")] () => {
         Ꮡstw.Value = stopTheWorldWithSema(stwGCMarkTerm);
     });
     // The gcphase is _GCmark, it will transition to _GCmarktermination
@@ -1039,7 +1034,7 @@ top:
     // Switch to the system stack to call wbBufFlush1, though in this case
     // it doesn't matter because we're non-preemptible anyway.
     var restart = false;
-    systemstack(() => {
+    systemstack([GoFunc("gcMarkDone.func3")] () => {
         foreach (var (_, p) in range(allp)) {
             wbBufFlush1(p);
             if (!p.of(runtime_package.p.Ꮡgcw).empty()) {
@@ -1064,7 +1059,7 @@ top:
         }
 
         getg().Value.m.Value.preemptoff = ""u8;
-        systemstack(() => {
+        systemstack([GoFunc("gcMarkDone.func4")] () => {
             // Accumulate the time we were stopped before we had to start again.
             Ꮡwork.ᏑcpuStats.accumulateGCPauseTime(nanotime() - Ꮡstw.Value.finishedStopping, work.maxprocs);
 
@@ -1112,13 +1107,11 @@ top:
     gcMarkTermination(stw);
 }
 
-} partial class runtimeᴛg {
-
 // isMaybeRunnable checks whether a goroutine may still be semantically runnable.
 // For goroutines which are semantically runnable, this will eventually return true
 // as the GC marking phase progresses. It returns false for leaked goroutines, or for
 // goroutines which are not yet computed as possibly runnable by the GC.
-internal static bool isMaybeRunnable(this ж<g> Ꮡgp) {
+internal static bool isMaybeRunnable⁔(/*this*/ ж<g> Ꮡgp) {
     ref var gp = ref Ꮡgp.DerefOrNull();
 
     // Check whether the goroutine is actually in a waiting state first.
@@ -1153,8 +1146,6 @@ internal static bool isMaybeRunnable(this ж<g> Ꮡgp) {
     }}
     return true;
 }
-
-} partial class runtime_package {
 
 // findMaybeRunnableGoroutines checks to see if more blocked but maybe-runnable goroutines exist.
 // If so, it adds them into root set and increments work.markrootJobs accordingly.
@@ -1198,7 +1189,7 @@ internal static bool /*moreWork*/ findMaybeRunnableGoroutines() {
 internal static void setSyncObjectsUntraceable() {
     assertWorldStopped();
 
-    forEachGRace((ж<g> gp) => {
+    forEachGRace([GoFunc("setSyncObjectsUntraceable.func1")] (ж<g> gp) => {
         // Set as untraceable all synchronization objects of goroutines
         // blocked at concurrency operations that could leak.
         switch (ᐧ) {
@@ -1225,7 +1216,7 @@ internal static void setSyncObjectsUntraceable() {
 internal static void gcRestoreSyncObjects() {
     assertWorldStopped();
 
-    forEachGRace((ж<g> gp) => {
+    forEachGRace([GoFunc("gcRestoreSyncObjects.func1")] (ж<g> gp) => {
         for (var sg = gp.Value.waiting; sg != nil; sg = sg.Value.waitlink) {
             sg.of(sudog.Ꮡelem).setTraceable();
             sg.of(sudog.Ꮡc).of(maybeTraceableChan.ᏑmaybeTraceablePtr).setTraceable();
@@ -1317,7 +1308,7 @@ internal static void gcMarkTermination(worldStop stw) {
     // the root set down a bit (g0 stacks are not scanned, and
     // we don't need to scan gc's internal state).  We also
     // need to switch to g0 so we can shrink the stack.
-    systemstack(() => {
+    systemstack([GoFunc("gcMarkTermination.func1")] () => {
         gcMark(startTime);
         // Must return immediately.
         // The outer function's stack may have moved
@@ -1329,10 +1320,10 @@ internal static void gcMarkTermination(worldStop stw) {
     });
 
     bool stwSwept = default;
-    systemstack(() => {
+    systemstack([GoFunc("gcMarkTermination.func2")] () => {
         work.heap2 = work.bytesMarked;
         if (debug.gccheckmark > 0) {
-            runCheckmark((ж<gcWork> _Δp0) => {
+            runCheckmark([GoFunc("gcMarkTermination.func2.1")] (ж<gcWork> _Δp0) => {
                 gcPrepareMarkRoots();
             });
         }
@@ -1455,7 +1446,7 @@ internal static void gcMarkTermination(worldStop stw) {
 
     bool goroutineLeakDone = default;
     var stwʗ1 = stw;
-    systemstack(() => {
+    systemstack([GoFunc("gcMarkTermination.func3")] () => {
         // Pull the GC out of goroutine leak detection mode.
         work.goroutineLeak.enabled = false;
         goroutineLeakDone = work.goroutineLeak.done;
@@ -1500,10 +1491,10 @@ internal static void gcMarkTermination(worldStop stw) {
     if (debug.gctrace > 1) {
         clear(memstats.lastScanStats[..]);
     }
-    forEachP(waitReasonFlushProcCaches, (ж<p> pp) => {
+    forEachP(waitReasonFlushProcCaches, [GoFunc("gcMarkTermination.func4")] (ж<p> pp) => {
         (~pp).mcache.prepareForSweep();
         if ((~pp).status == _Pidle) {
-            systemstack(() => {
+            systemstack([GoFunc("gcMarkTermination.func4.1")] () => {
                 @lock(Ꮡmheap_.Ꮡlock);
                 pp.of(p.Ꮡpcache).flush(Ꮡmheap_.Ꮡpages);
                 unlock(Ꮡmheap_.Ꮡlock);
@@ -1604,7 +1595,7 @@ internal static void gcMarkTermination(worldStop stw) {
 
     // Enable huge pages on some metadata if we cross a heap threshold.
     if (ᏑgcController.heapGoal() > minHeapForMetadataHugePages) {
-        systemstack(() => {
+        systemstack([GoFunc("gcMarkTermination.func5")] () => {
             Ꮡmheap_.enableMetadataHugePages();
         });
     }
@@ -1754,7 +1745,7 @@ internal static void gcBgMarkWorker(channel<EmptyStruct> ready) {
     for (;;) {
         // Go to sleep until woken by
         // gcController.findRunnableGCWorker.
-        gopark((ж<g> g, @unsafe.Pointer nodep) => {
+        gopark([GoFunc("gcBgMarkWorker.func1")] (ж<g> g, @unsafe.Pointer nodep) => {
             var nodeΔ1 = @unsafe.Pointer.To<gcBgMarkWorkerNode>(nodep);
 
             var mp = nodeΔ1.m.ptr(); if (mp != nil) {
@@ -1812,7 +1803,7 @@ internal static void gcBgMarkWorker(channel<EmptyStruct> ready) {
 
         var gpʗ1 = gp;
         var ppʗ1 = pp;
-        systemstack(() => {
+        systemstack([GoFunc("gcBgMarkWorker.func2")] () => {
             // Mark our goroutine preemptible so its stack can be scanned or observed
             // by the execution tracer. This, for example, lets two mark workers scan
             // each other (otherwise, they would deadlock).
@@ -2108,7 +2099,7 @@ internal static bool gcSweep(gcMode mode) {
 internal static void gcResetMarkState() {
     // This may be called during a concurrent phase, so lock to make sure
     // allgs doesn't change.
-    forEachG((ж<g> gp) => {
+    forEachG([GoFunc("gcResetMarkState.func1")] (ж<g> gp) => {
         gp.Value.gcscandone = false; // set to true in gcphasework
         gp.Value.gcAssistBytes = 0;
     });
@@ -2249,8 +2240,6 @@ internal static void gcTestMoveStackOnNextCall() {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string stackˢ => ref stackˢᵇ;
 private static readonly @string stackˢᵇ = "stack"u8;
-internal static ref readonly @string heapˢ => ref heapˢᵇ;
-private static readonly @string heapˢᵇ = "heap"u8;
 internal static ref readonly @string dataˢ => ref dataˢᵇ;
 private static readonly @string dataˢᵇ = "data"u8;
 internal static ref readonly @string bssˢ => ref bssˢᵇ;

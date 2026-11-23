@@ -14,7 +14,6 @@ using atomic = @internal.runtime.atomic_package;
 using gc = @internal.runtime.gc_package;
 using sys = @internal.runtime.sys_package;
 using @internal.runtime;
-using static runtime_package;
 
 partial class runtime_package {
 
@@ -44,10 +43,8 @@ partial struct mcentral {
     internal array<spanSet> full = new(2, () => new());    // list of spans with no free objects
 }
 
-} partial class runtimeᴛmcentral {
-
 // Initialize a single central free list.
-internal static void init(this ref mcentral c, spanClass spc) {
+internal static void init⁔(/*this*/ ref mcentral c, spanClass spc) {
     c.spanclass = spc;
     lockInit(ref nonnil(ref c).partial[0].spineLock, lockRankSpanSetSpine);
     lockInit(ref nonnil(ref c).partial[1].spineLock, lockRankSpanSetSpine);
@@ -57,25 +54,25 @@ internal static void init(this ref mcentral c, spanClass spc) {
 
 // partialUnswept returns the spanSet which holds partially-filled
 // unswept spans for this sweepgen.
-internal static ж<spanSet> partialUnswept(this ref mcentral c, uint32 sweepgen) {
+internal static ж<spanSet> partialUnswept⁔(/*this*/ ref mcentral c, uint32 sweepgen) {
     return Ꮡ(c.partial, 1 - sweepgen / 2 % 2);
 }
 
 // partialSwept returns the spanSet which holds partially-filled
 // swept spans for this sweepgen.
-internal static ж<spanSet> partialSwept(this ref mcentral c, uint32 sweepgen) {
+internal static ж<spanSet> partialSwept⁔(/*this*/ ref mcentral c, uint32 sweepgen) {
     return Ꮡ(c.partial, sweepgen / 2 % 2);
 }
 
 // fullUnswept returns the spanSet which holds unswept spans without any
 // free slots for this sweepgen.
-internal static ж<spanSet> fullUnswept(this ref mcentral c, uint32 sweepgen) {
+internal static ж<spanSet> fullUnswept⁔(/*this*/ ref mcentral c, uint32 sweepgen) {
     return Ꮡ(c.full, 1 - sweepgen / 2 % 2);
 }
 
 // fullSwept returns the spanSet which holds swept spans without any
 // free slots for this sweepgen.
-internal static ж<spanSet> fullSwept(this ref mcentral c, uint32 sweepgen) {
+internal static ж<spanSet> fullSwept⁔(/*this*/ ref mcentral c, uint32 sweepgen) {
     return Ꮡ(c.full, sweepgen / 2 % 2);
 }
 
@@ -84,7 +81,7 @@ internal static ref readonly @string spanHasNoFreeObjectsˢ => ref spanHasNoFree
 private static readonly @string spanHasNoFreeObjectsˢᵇ = "span has no free objects"u8;
 
 // Allocate a span to use in an mcache.
-internal static ж<mspan> cacheSpan(this ref mcentral c) {
+internal static ж<mspan> cacheSpan⁔(/*this*/ ref mcentral c) {
     // Deduct credit for this span allocation and sweep if necessary.
     var spanBytes = (uintptr)gc.SizeClassToNPages[c.spanclass.sizeclass()] * (uintptr)pageSize;
     deductSweepCredit(spanBytes, 0);
@@ -211,7 +208,7 @@ private static readonly @string uncachingSpanButSˢᵇ = "uncaching span but s.a
 //
 // s must have a span class corresponding to this
 // mcentral and it must not be empty.
-internal static void uncacheSpan(this ref mcentral c, ж<mspan> Ꮡs) {
+internal static void uncacheSpan⁔(/*this*/ ref mcentral c, ж<mspan> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     if (s.allocCount == 0) {
@@ -259,7 +256,7 @@ internal static void uncacheSpan(this ref mcentral c, ж<mspan> Ꮡs) {
 }
 
 // grow allocates a new empty span from the heap and initializes it for c's size class.
-internal static ж<mspan> grow(this ref mcentral c) {
+internal static ж<mspan> grow⁔(/*this*/ ref mcentral c) {
     var npages = (uintptr)gc.SizeClassToNPages[c.spanclass.sizeclass()];
     var s = Ꮡmheap_.alloc(npages, c.spanclass);
     if (s == nil) {
@@ -269,4 +266,4 @@ internal static ж<mspan> grow(this ref mcentral c) {
     return s;
 }
 
-}
+} // end runtime_package

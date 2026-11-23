@@ -9,7 +9,6 @@ using sys = go.@internal.runtime.sys_package;
 using @unsafe = unsafe_package;
 using go.@internal;
 using go.@internal.runtime;
-using static scan_package;
 
 partial class scan_package {
 
@@ -79,14 +78,12 @@ internal static unsafeBuf<T> newUnsafeBuf<T>(ж<T> @base) {
     return new unsafeBuf<T>(@base, 0);
 }
 
-} partial class scanᴛunsafeBuf {
-
 // addIf appends a value to the buffer if the predicate is true.
 //
 // addIf speculatively writes to the next index of the buffer, so the caller
 // must be certain that such a write will still be in-bounds with respect
 // to the buffer's true capacity.
-internal static void addIf<T>(this ref unsafeBuf<T> b, T val, bool pred) {
+internal static void addIf⁔<T>(/*this*/ ref unsafeBuf<T> b, T val, bool pred) {
     (@unsafe.Pointer.To<T>(@unsafe.Add(@unsafe.Pointer.FromPinnedBox(b.@base), b.n * (nint)@unsafe.Sizeof(val)))).ValueSlot = val;
     b.n += bool2int(pred);
 }
@@ -96,14 +93,12 @@ internal static void addIf<T>(this ref unsafeBuf<T> b, T val, bool pred) {
 // catch any misuse as fast as possible. Separating the bounds check from
 // the append is more efficient, but one check to cover several appends is
 // still efficient and much more memory safe.
-internal static void check<T>(this unsafeBuf<T> b, nint cap) {
+internal static void check⁔<T>(/*this*/ unsafeBuf<T> b, nint cap) {
     // We fail even if b.n == cap because addIf speculatively writes one past b.n.
     if (b.n >= cap) {
         throw panic("unsafeBuf overflow");
     }
 }
-
-} partial class scan_package {
 
 internal static nint bool2int(bool x) {
     // This particular pattern gets optimized by the compiler.

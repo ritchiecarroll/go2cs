@@ -11,7 +11,7 @@ using go.@internal.syscall;
 
 partial class poll_package {
 
-internal static Func<bool> supportCopyFileRange = sync.OnceValue(bool () => {
+internal static Func<bool> supportCopyFileRange = sync.OnceValue([GoFunc("init.func1")] bool () => {
     // copy_file_range(2) is broken in various ways on kernels older than 5.3,
     // see https://go.dev/issue/42400 and
     // https://man7.org/linux/man-pages/man2/copy_file_range.2.html#VERSIONS

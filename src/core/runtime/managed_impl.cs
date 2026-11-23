@@ -461,10 +461,9 @@ partial class runtime_package
         {
             Volatile.Write(ref s_gomaxprocs, n);
 
-            // procresize's time bookkeeping, verbatim (proc.go): sched.totaltime integrates
-            // gomaxprocs over time, and cpuStats.accumulate reads it and the gomaxprocs global to
-            // compute /cpu/classes/total. There are no Ps to resize, so this is all of procresize
-            // the managed host has.
+            // procresize's time bookkeeping, verbatim (proc.go): sched.totaltime integrates gomaxprocs over time, and
+            // cpuStats.accumulate reads it and the gomaxprocs global to compute /cpu/classes/total. The resize itself is
+            // the M:N scheduler's P count, below (GoScheduler.SetProcs; a remembered value with the scheduler off).
             int64 now = nanotime();
             if (sched.procresizetime != 0)
                 sched.totaltime += (int64)gomaxprocs * (now - sched.procresizetime);
@@ -473,6 +472,7 @@ partial class runtime_package
         }
 
         sched.customGOMAXPROCS = custom;
+        GoScheduler.SetProcs((int)n);
     }
 
     // THE AUTOMATIC UPDATE (W-gmp-e). Go's sysmon, at most once a second, recomputes defaultGOMAXPROCS
@@ -589,8 +589,7 @@ partial class runtime_package
         gomaxprocsUpdateEnable();
     }
 
-    // schedinit's starting value, verbatim: the GOMAXPROCS environment variable when it parses as a
-    // positive number, which marks the setting custom, and Go's default for NumCPU otherwise.
+    // schedinit's starting value, verbatim: GOMAXPROCS when a positive number (custom), else Go's default for NumCPU.
     private static void initialGOMAXPROCS()
     {
         int32 procs;
@@ -612,6 +611,7 @@ partial class runtime_package
             Volatile.Write(ref s_gomaxprocs, procs);
             gomaxprocs = procs;
         }
+        GoScheduler.SetProcs(procs); // the M:N scheduler's P count starts from it, as Go's Ps do
     }
 
     // TEST SEAM (goenvs_impl.cs's pattern): the starting value over a given environment, as a process started
@@ -783,7 +783,7 @@ partial class runtime_package
     // takes sync's allPoolsMu and walks the pools that held a shard array in the last two cycles
     // (oldPools then allPools): O(pools used in two cycles), with no per-item work, since aging swaps
     // whole shard arrays.
-    private static class PoolCleanupCadence
+    private static partial class PoolCleanupCadence
     {
         private static int s_armed;
         private static long s_servedThrough;
@@ -1199,7 +1199,7 @@ partial class runtime_package
 
     // The tick's own state, in its own class so that starting it at module load touches none of the
     // runtime package's statics; the first tick does that, on the sysmon thread.
-    private static class Sysmon
+    private static partial class Sysmon
     {
         private const int TickMs = 100;
 
@@ -2411,25 +2411,25 @@ partial class runtime_package
         if (method.GetCustomAttributes(typeof(GoTwinForwarderAttribute), inherit: false) is [GoTwinForwarderAttribute { GoName: { } goName }])
             name = goName;
 
-        // A function literal is emitted as a compiler-generated method — `<Outer>b__X_Y` for a
-        // lambda on a `<>c__DisplayClassX_Y` nested in the package class, `<Outer>g__name|X_Y`
-        // for a local function; Go renders the same literal as `Outer.funcN` (a nested one as
-        // `Outer.funcN.M`). The counter is Go's per-enclosing-function, source-order counter
-        // starting at 1, which the conversion RECORDS in the file's GoPositionMap funcLits map:
-        // the frame's C# line maps through the record's line table to its Go line, and the
-        // innermost recorded literal span containing that line names the frame. Roslyn's own
-        // X_Y numbering is a closure-GROUP index plus a per-group index that matches Go's
-        // counter only by coincidence (measured: two sibling literals answered func0/func1 for
-        // Go's func1/func2, and a nested literal cannot be represented at all), so the derived
-        // ordinal below is kept ONLY as the fallback for frames no conversion recorded — an
-        // older artifact, a hand-written lambda, a frame with no PDB, or a literal outside a
-        // function declaration.
+        // A function literal is emitted as a compiler-generated method (`<Outer>b__X_Y` for a lambda, `<Outer>g__name|X_Y`
+        // for a local function), and Go names it `Outer.funcN`, a nested one `Outer.funcN.M`, one in a method
+        // `(*T).M.funcN`, one in the second `func init` `init.1.funcN`, one in a package var's initializer `init.funcN`.
+        // The converter writes that name on every literal it emits (GoFuncAttribute, without the package), so it is read
+        // FIRST: no PDB, no `<Outer>` parse, the same under Native AOT. A twin's literal reads its stub's (goFuncLiteral).
+        if (name.Length > 0 && name[0] == '<' && goFuncLiteral(method) is string goFunc)
+            return symbol = $"{importPath}.{goFunc}";
+
+        // FALLBACK, for a literal frame without the attribute: an older artifact, a hand-written lambda. The counter is
+        // Go's per-enclosing-function, source-order one starting at 1, which the conversion also RECORDS in the file's
+        // GoPositionMap funcLits map: the frame's C# line maps through the record's line table to its Go line, and the
+        // innermost recorded literal span containing that line names the frame. That path needs the PDB, and its
+        // `<Outer>` text cannot say which receiver type an outer method belongs to. Roslyn's own X_Y numbering is a
+        // closure-GROUP index plus a per-group index that matches Go's counter only by coincidence (measured: two sibling
+        // literals answered func0/func1 for Go's func1/func2, and a nested literal cannot be represented at all), so the
+        // derived ordinal below is kept only for a frame no record names either.
         //
-        // A literal in a package-level var initializer is one of those: it is a lambda in the
-        // package class's static constructor, which Go names `init.funcN` with a 1-based counter.
-        // Its N is Roslyn's 0-based ordinal + 1, exact for a package whose var initializers sit in one
-        // file. Where they span files, Roslyn's order within the merged static constructor and Go's
-        // package-wide counter may differ -- stated, not guarded.
+        // A literal in a package-level var initializer is a lambda in the package class's static constructor; its N below
+        // is Roslyn's 0-based ordinal + 1, where Go numbers those literals in initialization order, as the attribute does.
         if (name.Length > 0 && name[0] == '<')
         {
             int close = name.IndexOf('>');
@@ -2454,14 +2454,16 @@ partial class runtime_package
                     recorded = siblingSuffix;
                 }
 
-                // M:N PROTOTYPE (A2). A literal written in a twin is the literal of the function the twin was
+                // M:N (A2). A literal written in a twin is the literal of the function the twin was
                 // generated from: Go has one function there.
                 if (outer.EndsWith(TwinSuffix, StringComparison.Ordinal))
                     outer = outer[..^TwinSuffix.Length];
 
                 // The outer function's Go name: package initialization's (goInitFrameName) or, for the
-                // entry point, Go's `main` (goLiteralOuterName); any other outer keeps its own name.
-                string goOuter = goInitFrameName(goEnclosingMethod(method, outer), goLiteralOuterName(method, outer));
+                // entry point, Go's `main` (goLiteralOuterName); any other outer keeps its own name. A literal
+                // inside a suffix-form body is named for the body (`<Walk⁔>b__N_M`), so its outer is the Go
+                // method without the suffix; the lookups above keep the raw spelling.
+                string goOuter = goInitFrameName(goEnclosingMethod(method, outer), glyphGoName(goLiteralOuterName(method, outer)));
 
                 if (recorded is not null)
                 {
@@ -2517,7 +2519,26 @@ partial class runtime_package
         method.Name == "Main" && method.IsStatic && method.GetParameters().Length == 0 &&
         !method.IsDefined(typeof(System.Runtime.CompilerServices.ExtensionAttribute), inherit: false)
             ? "main"
-            : method.Name;
+            : glyphMethodGoName(method) ?? method.Name;
+
+    // A Go method in the suffix form (the converter's GlyphMethodSuffix, owner ruling 2026-11-21) has its BODY as a plain
+    // static `<name>⁔` in the package class, its receiver the first parameter, and the Go-named extension method in its
+    // holder is a [StackTraceHidden] forwarder to it. The body's frame is the method's: its name is the spelling without
+    // the trailing ⁔, and its receiver is read from parameter 0 (goReceiverName). U+2054 is connector punctuation, which a
+    // Go identifier cannot spell (Go's letter is a Unicode L* code point or `_`), so the suffix alone is the discriminator.
+    private const string GlyphMethodSuffix = "\u2054";
+
+    private static string? glyphMethodGoName(System.Reflection.MethodBase method) =>
+        method.IsStatic && method.Name.Length > GlyphMethodSuffix.Length && method.Name.EndsWith(GlyphMethodSuffix, StringComparison.Ordinal)
+            ? method.Name[..^GlyphMethodSuffix.Length]
+            : null;
+
+    // A name with a suffix-form body's trailing ⁔ removed: the Go name a literal's outer body reads as.
+    private static string glyphGoName(string name) =>
+        name.Length > GlyphMethodSuffix.Length && name.EndsWith(GlyphMethodSuffix, StringComparison.Ordinal) ? name[..^GlyphMethodSuffix.Length] : name;
+
+    private static bool isGlyphMethodBody(System.Reflection.MethodBase method) =>
+        glyphMethodGoName(method) is not null && method.GetParameters().Length > 0;
 
     private static readonly System.Collections.Concurrent.ConcurrentDictionary<System.Reflection.MethodBase, (string? Suffix, string? MethodValue)?> s_statementSiblingNames = new();
 
@@ -3143,7 +3164,7 @@ partial class runtime_package
     // static method and keeps its bare `<pkg>.<name>`, exactly as Go renders one.
     private static string? goReceiverName(System.Reflection.MethodBase method)
     {
-        if (!method.IsDefined(typeof(System.Runtime.CompilerServices.ExtensionAttribute), inherit: false))
+        if (!method.IsDefined(typeof(System.Runtime.CompilerServices.ExtensionAttribute), inherit: false) && !isGlyphMethodBody(method))
             return null;
 
         System.Reflection.ParameterInfo[] parameters = method.GetParameters();
@@ -4316,7 +4337,7 @@ partial class runtime_package
                     Line = line;
                 }
 
-                // M:N PROTOTYPE (A2). A twin's frame is named, and started, as the function it was generated from.
+                // M:N (A2). A twin's frame is named, and started, as the function it was generated from.
                 string function = goTwinFrameName(Method, ILOffset, out string symbol);
                 Function = function;
                 SymbolName = symbol == function ? null : symbol;
@@ -4516,7 +4537,7 @@ partial class runtime_package
         // carries a creator; a host method standing in for Go's own root (the test host's tRunner)
         // carries GoStackRoot. The main goroutine's runtime.main root is not modeled, and a thread a
         // host entered without a root gets none: nothing on it stands where a Go frame is.
-        // M:N PROTOTYPE (A2). THE CALLERS A PARK TOOK OFF THE STACK. A twin that parked is resumed alone:
+        // M:N (A2). THE CALLERS A PARK TOOK OFF THE STACK. A twin that parked is resumed alone:
         // its awaiting callers are suspended state machines, reached through the parent link, and each is a
         // frame at the call it awaits. Nothing is resumed on a goroutine that never parked, and on a thread
         // that is not a carrier, so the walk above is the whole answer there.
@@ -4933,6 +4954,14 @@ partial class runtime_package
         if (method.IsDefined(typeof(System.Diagnostics.StackTraceHiddenAttribute), inherit: false))
             return false;
 
+        // An async twin (M:N) is a Go frame exactly when the function it was generated from is. A suffix-form method's
+        // Go-named forwarder is [StackTraceHidden], and the twin generator gives it a twin of its own (`Nameꞏtwin`, awaiting
+        // the body's `Name⁔ꞏtwin`), which runs as its state machine's MoveNext. That MoveNext carries none of the marks
+        // above, so the twin is judged by its stamp's origin: Go has one frame for the method, its body's. A twin of other
+        // machinery (a go2cs-gen ж-overload forwarder) is dropped by the same rule. An origin is never itself a MoveNext.
+        if (goTwinOrigin(method) is { } twinOrigin && !isGoSourceFrame(twinOrigin, keepWrapper))
+            return false;
+
         foreach (object attribute in method.GetCustomAttributes(typeof(System.CodeDom.Compiler.GeneratedCodeAttribute), inherit: false))
         {
             if (attribute is System.CodeDom.Compiler.GeneratedCodeAttribute generated && generated.Tool == "go2cs-gen")
@@ -4953,7 +4982,7 @@ partial class runtime_package
         if (!keepWrapper && method.IsDefined(typeof(GoWrapperAttribute), inherit: false))
             return false;
 
-        // M:N PROTOTYPE (A2). A twin is two methods to the CLR: the stub that starts its state machine and
+        // M:N (A2). A twin is two methods to the CLR: the stub that starts its state machine and
         // the state machine's MoveNext, which holds the body. Go has one function there, so the stub is no
         // frame; MoveNext is the frame (goTwinFrameName). The stub of a literal written in a twin
         // (`<outerꞏtwin>b__X`) is the same case; a literal there that is not async is one method and stays.
@@ -5225,6 +5254,11 @@ partial class runtime_package
     private static bool targetsCallee(System.Reflection.MethodBase target, System.Reflection.MethodBase callee)
     {
         if (target.Module == callee.Module && target.MetadataToken == callee.MetadataToken)
+            return true;
+
+        // A call names a Go-named forwarder; where the JIT inlines it, the frame is its suffix-form body.
+        if (target is System.Reflection.MethodInfo forwarder && glyphBodyOf(forwarder) is { } body &&
+            body.Module == callee.Module && body.MetadataToken == callee.MetadataToken)
             return true;
 
         // A virtual or interface call names the slot; the frame is the override or the implementation.
@@ -6081,8 +6115,10 @@ partial class runtime_package
     private static CallerFrameRecord newMethodFrameRecord(System.Reflection.MethodBase method, bool methodValue)
     {
         // A pointer-receiver func value binds RecvGenerator's `this ж<T>` forwarder, which is go2cs-gen
-        // output and so never a Go frame; it is named and positioned as the Go method it forwards to.
-        method = goRecvForwardee(method) ?? method;
+        // output and so never a Go frame; it is named and positioned as the Go method it forwards to. A
+        // value-receiver one binds the holder's Go-named forwarder itself (another package's method expression,
+        // or one the converter does not bind to the body), named and positioned as its suffix-form body.
+        method = goRecvForwardee(method) ?? (method is System.Reflection.MethodInfo forwarder ? glyphBodyOf(forwarder) : null) ?? method;
 
         // A METHOD VALUE is Go's autogenerated `-fm` wrapper (`main.T.M-fm`, at <autogenerated>:1), and
         // one taken through an INTERFACE is named by the interface (`fmt.Stringer.String-fm`).
@@ -6162,10 +6198,77 @@ partial class runtime_package
                 (receiver.IsGenericType && referent.IsGenericType && receiver.GetGenericTypeDefinition() == referent.GetGenericTypeDefinition());
 
             if (sameReceiver)
+                return glyphBodyOf(candidate) ?? candidate;
+        }
+
+        return null;
+    }
+
+    // The suffix-form BODY a Go-named forwarder forwards to, or null when the method is no such forwarder. The forwarder
+    // is a [StackTraceHidden] extension method of a holder; its body `<name>⁔` sits in the holder's package class with the
+    // forwarder's parameter list, so the body is matched by name and parameter shape (glyphSameShape: each method
+    // declares its own type parameters).
+    private static System.Reflection.MethodBase? glyphBodyOf(System.Reflection.MethodInfo forwarder)
+    {
+        if (!forwarder.IsDefined(typeof(System.Diagnostics.StackTraceHiddenAttribute), inherit: false) || forwarder.DeclaringType is not { } holder)
+            return null;
+
+        Type? package = GoMethodHostAttribute.PackageClassOf(holder);
+
+        if (package is null || package == holder)
+            return null;
+
+        Type[] parameterTypes = Array.ConvertAll(forwarder.GetParameters(), parameter => parameter.ParameterType);
+        const System.Reflection.BindingFlags anyStatic = System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.DeclaredOnly;
+
+        foreach (System.Reflection.MethodInfo candidate in package.GetMethods(anyStatic))
+        {
+            if (glyphMethodGoName(candidate) != forwarder.Name)
+                continue;
+
+            System.Reflection.ParameterInfo[] parameters = candidate.GetParameters();
+
+            if (parameters.Length != parameterTypes.Length)
+                continue;
+
+            bool same = true;
+
+            for (int i = 0; i < parameters.Length && same; i++)
+                same = glyphSameShape(parameters[i].ParameterType, parameterTypes[i]);
+
+            if (same)
                 return candidate;
         }
 
         return null;
+    }
+
+    // Two parameter types of two methods that declare their own type parameters: the same type, or the same shape with a
+    // method type parameter in the same position (`ref cell<T>` against `ref cell<T>`, each T the declaring method's own).
+    private static bool glyphSameShape(Type a, Type b)
+    {
+        if (a == b)
+            return true;
+
+        if (a.IsGenericParameter || b.IsGenericParameter)
+            return a.IsGenericParameter && b.IsGenericParameter && a.GenericParameterPosition == b.GenericParameterPosition;
+
+        if (a.HasElementType || b.HasElementType)
+            return a.HasElementType && b.HasElementType && a.IsByRef == b.IsByRef && a.IsArray == b.IsArray && a.IsPointer == b.IsPointer &&
+                   glyphSameShape(a.GetElementType()!, b.GetElementType()!);
+
+        if (!a.IsGenericType || !b.IsGenericType || a.GetGenericTypeDefinition() != b.GetGenericTypeDefinition())
+            return false;
+
+        Type[] left = a.GetGenericArguments(), right = b.GetGenericArguments();
+
+        for (int i = 0; i < left.Length; i++)
+        {
+            if (!glyphSameShape(left[i], right[i]))
+                return false;
+        }
+
+        return true;
     }
 
     // `<pkg>.<Interface>.<Method>` when the method implements an interface method on its declaring Go
@@ -7238,7 +7341,7 @@ partial class runtime_package
     // InternalsVisibleTo grant): the hash Go gives an interface value, as export_test.go's EfaceHash does.
     public static uintptr GoEfaceHashProbe(any i, uintptr seed) => efaceHash(i, seed);
 
-    // M:N spike: a hidden async twin runs as its state machine's MoveNext, on a compiler-generated nested
+    // M:N: a hidden async twin runs as its state machine's MoveNext, on a compiler-generated nested
     // type named `<childꞏtwin>d__N`. A frame there is named for the function the twin was generated from. The
     // state machine's IL offsets say nothing about that function, so the offset is dropped.
     private static string goTwinFrameName(System.Reflection.MethodBase method, int ilOffset, out string symbol) =>
@@ -7261,7 +7364,30 @@ partial class runtime_package
         return twinStamp(type).Origin;
     }
 
-    // M:N PROTOTYPE (A2). A function literal written in a twin and started as a goroutine is an async lambda:
+    // A function literal's Go name without its package, from the GoFuncAttribute the converter writes on the lambda or
+    // local function it emits, or null. A twin's literal frame is the MoveNext of its state machine (goTwinLiteralName);
+    // the attribute is on the stub the machine was generated for, which TwinGenerator writes beside its [GoTwinOf] stamp.
+    private static string? goFuncLiteral(System.Reflection.MethodBase method)
+    {
+        if (method.GetCustomAttributes(typeof(GoFuncAttribute), inherit: false) is [GoFuncAttribute literal])
+            return literal.Name;
+
+        if (goTwinLiteralName(method) is not string stub || method.DeclaringType?.DeclaringType is not Type closure)
+            return null;
+
+        const System.Reflection.BindingFlags all = System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Instance |
+            System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.DeclaredOnly;
+
+        foreach (System.Reflection.MethodInfo candidate in closure.GetMethods(all))
+        {
+            if (candidate.Name == stub && candidate.GetCustomAttributes(typeof(GoFuncAttribute), inherit: false) is [GoFuncAttribute twin])
+                return twin.Name;
+        }
+
+        return null;
+    }
+
+    // M:N (A2). A function literal written in a twin and started as a goroutine is an async lambda:
     // a stub named `<outerꞏtwin>b__X` and a state machine `<<outerꞏtwin>b__X>d` whose MoveNext holds the
     // literal's body. That MoveNext is the literal's frame, so it answers to the stub's name: the name a
     // literal's frame is read from (goFrameName). Null for any other method. The positions stay MoveNext's
@@ -7277,7 +7403,7 @@ partial class runtime_package
         return machine.IndexOf(TwinSuffix + ">", StringComparison.Ordinal) > 2 ? machine[1..^2] : null;
     }
 
-    // M:N PROTOTYPE (A2), item 7d. A SUSPENDED TWIN AS A FRAME: its MoveNext, at the line of the call it awaits, read
+    // M:N (A2), item 7d. A SUSPENDED TWIN AS A FRAME: its MoveNext, at the line of the call it awaits, read
     // from its [GoTwinOf] stamp at the machine's state (twinStamp). The pc is interned per machine and state, so the same
     // twin met parked at the same await is one pc. A twin whose stamp or state cannot be read is a frame with its name
     // and its first line; nothing here throws.

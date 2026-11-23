@@ -31,9 +31,9 @@ internal static void runWith(this ref stmt s, Action fn) { fn(); }
 internal static void exec(this ж<stmt> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
-    s.runWith(() => {
+    s.runWith([GoFunc("(*stmt).exec.func1")] () => {
         Ꮡs.Value.d.note(Ꮡs.OrTypedNil());
-        Ꮡs.Value.runWith(() => {
+        Ꮡs.Value.runWith([GoFunc("(*stmt).exec.func1.1")] () => {
             Ꮡs.Value.d.note(Ꮡs.OrTypedNil());
         });
         if (Ꮡs.Value.cg != nil) {

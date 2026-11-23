@@ -15,9 +15,9 @@ internal static int32 run(Func<ж<atomic.Int32>, int32> f, ж<atomic.Int32> c) {
 internal static void main() {
     ref var c = ref heap(new atomic.Int32(), out var Ꮡc);
     Ꮡc.Store(5);
-    fmt.Println(run((ж<atomic.Int32> cΔ1) => cΔ1.Load(), Ꮡc));
+    fmt.Println(run([GoFunc("main.func1")] (ж<atomic.Int32> cΔ1) => cΔ1.Load(), Ꮡc));
     Ꮡc.Add(10);
-    fmt.Println(run((ж<atomic.Int32> cΔ2) => cΔ2.Load(), Ꮡc));
+    fmt.Println(run([GoFunc("main.func2")] (ж<atomic.Int32> cΔ2) => cΔ2.Load(), Ꮡc));
 }
 
 } // end main_package

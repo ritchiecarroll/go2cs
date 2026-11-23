@@ -8,15 +8,12 @@ namespace go.go;
 using ast = global::go.go.ast_package;
 using global::go.go;
 using token = global::go.go.token_package;
-using static types_package;
 
 partial class types_package {
 
-} partial class typesᴛChecker {
-
 // directCycles searches for direct cycles among package level type declarations.
 // See directCycle for details.
-internal static void directCycles(this ж<Checker> Ꮡcheck) {
+internal static void directCycles⁔(/*this*/ ж<Checker> Ꮡcheck) {
     ref var check = ref Ꮡcheck.DerefOrNull();
 
     var pathIdx = new map<ж<TypeName>, nint>();
@@ -50,7 +47,7 @@ private static readonly @string checkDirectCycleForSˢᵇ = "-- check direct cyc
 // When directCycle returns, the pathIdx entries for all type names on the path
 // that starts at tname are marked black, regardless of whether there was a cycle.
 // This ensures that a type name is traversed only once.
-internal static void directCycle(this ж<Checker> Ꮡcheck, ж<TypeName> Ꮡtname, map<ж<TypeName>, nint> pathIdx) {
+internal static void directCycle⁔(/*this*/ ж<Checker> Ꮡcheck, ж<TypeName> Ꮡtname, map<ж<TypeName>, nint> pathIdx) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var tname = ref Ꮡtname.DerefOrNull();
     var cycleᴷ = new stackAppend<Object>();
@@ -125,7 +122,7 @@ internal static void directCycle(this ж<Checker> Ꮡcheck, ж<TypeName> Ꮡtnam
 // TODO(markfreeman): Can the value cached on Named be used in validType / hasVarSize?
 
 // finiteSize returns whether a type has finite size.
-internal static bool finiteSize(this ж<Checker> Ꮡcheck, Type t) {
+internal static bool finiteSize⁔(/*this*/ ж<Checker> Ꮡcheck, Type t) {
     GoFrame ᒐ = default;
     try {
         ref var check = ref Ꮡcheck.DerefOrNull();
@@ -178,4 +175,4 @@ internal static bool finiteSize(this ж<Checker> Ꮡcheck, Type t) {
     finally { ᒐ.Run(); }
 }
 
-}
+} // end types_package

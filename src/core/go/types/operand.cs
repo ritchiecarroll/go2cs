@@ -15,7 +15,6 @@ using static global::go.@internal.types.errors_package;
 using errors = global::go.@internal.types.errors_package;
 using global::go.go;
 using ꓸꓸꓸany = Span<any>;
-using static types_package;
 
 partial class types_package {
 
@@ -63,19 +62,15 @@ partial struct operand {
     internal builtinId id;
 }
 
-} partial class typesᴛoperand {
-
 // Pos returns the position of the expression corresponding to x.
 // If x is invalid the position is nopos.
-internal static token.Pos Pos(this ref operand x) {
+internal static token.Pos Pos⁔(/*this*/ ref operand x) {
     // x.expr may not be set if x is invalid
     if (x.expr == nil) {
         return nopos;
     }
     return x.expr.Pos();
 }
-
-} partial class types_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string nilWithInvalidTypeˢ => ref nilWithInvalidTypeˢᵇ;
@@ -318,14 +313,12 @@ internal static @string compositeKind(Type typ) {
     }}
 }
 
-} partial class typesᴛoperand {
-
-internal static @string String(this ж<operand> Ꮡx) {
+internal static @string String⁔(/*this*/ ж<operand> Ꮡx) {
     return operandString(ref (Ꮡx).DerefOrNull(), default);
 }
 
 // setConst sets x to the untyped constant for literal lit.
-internal static void setConst(this ref operand x, token.Token k, @string lit) {
+internal static void setConst⁔(/*this*/ ref operand x, token.Token k, @string lit) {
     BasicKind kind = default;
     switch (k) {
     case var ᴛ when ᴛ == token.INT: {
@@ -365,7 +358,7 @@ internal static void setConst(this ref operand x, token.Token k, @string lit) {
 }
 
 // isNil reports whether x is the (untyped) nil value.
-internal static bool isNil(this ref operand x) {
+internal static bool isNil⁔(/*this*/ ref operand x) {
     if (isTypes2) {
         return x.mode == nilvalue;
     } else { // go/types
@@ -383,7 +376,7 @@ private static readonly @string needTypeAssertionˢᵇ = "need type assertion"u8
 // is only valid if the (first) result is false. The check parameter may be nil
 // if assignableTo is invoked through an exported API call, i.e., when all
 // methods have been type-checked.
-internal static (bool, errors.Code) assignableTo(this ж<operand> Ꮡx, ж<Checker> check, Type T, ж<@string> Ꮡcause) {
+internal static (bool, errors.Code) assignableTo⁔(/*this*/ ж<operand> Ꮡx, ж<Checker> check, Type T, ж<@string> Ꮡcause) {
     ref var x = ref Ꮡx.DerefOrNull();
     ref var cause = ref Ꮡcause.DerefOrNull();
 
@@ -411,7 +404,7 @@ internal static (bool, errors.Code) assignableTo(this ж<operand> Ꮡx, ж<Check
         if (Tp != nil) {
             // T is a type parameter: x is assignable to T if it is
             // representable by each specific type in the type set of T.
-            return (Tp.@is((ж<term> t) => {
+            return (Tp.@is([GoFunc("(*operand).assignableTo.func1")] (ж<term> t) => {
                 if (t == nil) {
                     return false;
                 }
@@ -480,7 +473,7 @@ internal static (bool, errors.Code) assignableTo(this ж<operand> Ꮡx, ж<Check
         return (false, IncompatibleAssign);
     }
 
-    void errorf(@string format, params ꓸꓸꓸany argsʗp) {
+    [GoFunc("(*operand).assignableTo.func2")] void errorf(@string format, params ꓸꓸꓸany argsʗp) {
         var args = argsʗp.sslice();
         if (check != nil && Ꮡcause != nil) {
             @string msg = check.sprintf(format, args.ꓸꓸꓸ);
@@ -498,7 +491,7 @@ internal static (bool, errors.Code) assignableTo(this ж<operand> Ꮡx, ж<Check
         errors.Code code = IncompatibleAssign;
         var Tpʗ1 = Tp;
         var errorfʗ1 = errorf;
-        Tp.@is((ж<term> TΔ1) => {
+        Tp.@is([GoFunc("(*operand).assignableTo.func3")] (ж<term> TΔ1) => {
             if (TΔ1 == nil) {
                 return false; // no specific types
             }
@@ -522,7 +515,7 @@ internal static (bool, errors.Code) assignableTo(this ж<operand> Ꮡx, ж<Check
         var Vpʗ1 = Vp;
         var errorfʗ2 = errorf;
         var origTʗ1 = origT;
-        Vp.@is((ж<term> VΔ1) => {
+        Vp.@is([GoFunc("(*operand).assignableTo.func4")] (ж<term> VΔ1) => {
             if (VΔ1 == nil) {
                 return false; // no specific types
             }
@@ -540,4 +533,4 @@ internal static (bool, errors.Code) assignableTo(this ж<operand> Ꮡx, ж<Check
     return (false, IncompatibleAssign);
 }
 
-}
+} // end types_package

@@ -36,7 +36,7 @@ internal static void main() {
 
     var got = (uintptr)0;
     var ppʗ1 = pp;
-    func(() => {
+    func([GoFunc("main.func1")] () => {
         bump(ref (ppʗ1.ᏑwbBuf.at(wbBuf.Ꮡbuf, 1)).DerefOrNull());
         got = ppʗ1.wbBuf.buf[1];
     })();

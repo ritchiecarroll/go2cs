@@ -1,76 +1,105 @@
 namespace go;
 
 using fmt = fmt_package;
-using static main_package;
 
 partial class main_package {
 
 partial struct Stack /*[]nint*/;
 
-} partial class mainᴛStack {
+internal static Stack Slice⁔(/*this*/ Stack s, nint i, nint n) { return s.slice(i, n); }
 
-public static Stack Slice(this Stack s, nint i, nint n) { return s.slice(i, n); }
+internal static @string ToSpan⁔(/*this*/ Stack s) { return fmt.Sprint("span of ", len(s)); }
 
-public static @string ToSpan(this Stack s) { return fmt.Sprint("span of ", len(s)); }
+internal static nint GetEnumerator⁔(/*this*/ Stack s) { return -len(s); }
 
-public static nint GetEnumerator(this Stack s) { return -len(s); }
+internal static nint Append⁔(/*this*/ Stack s, slice<nint> xs) { return len(s) + len(xs); }
 
-public static nint Append(this Stack s, slice<nint> xs) { return len(s) + len(xs); }
+internal static nint Length⁔(/*this*/ Stack s) { return 100 + len(s); }
+internal static nint Capacity⁔(/*this*/ Stack s) { return 200 + cap(s); }
+internal static nint Low⁔(/*this*/ Stack s) { return -1; }
+internal static nint High⁔(/*this*/ Stack s) { return -2; }
+internal static nint Available⁔(/*this*/ Stack s) { return -3; }
+internal static @string IsNil⁔(/*this*/ Stack s) { return "never nil"; }
+internal static @string Source⁔(/*this*/ Stack s) { return "stack source"; }
 
-public static nint Length(this Stack s) { return 100 + len(s); }
-public static nint Capacity(this Stack s) { return 200 + cap(s); }
-public static nint Low(this Stack s) { return -1; }
-public static nint High(this Stack s) { return -2; }
-public static nint Available(this Stack s) { return -3; }
-public static @string IsNil(this Stack s) { return "never nil"; }
-public static @string Source(this Stack s) { return "stack source"; }
-
-public static Stack Make(this Stack s, nint n) { return new Stack(n, n * 2); }
-public static @string Wrap(this Stack s) { return "wrapped"; }
-
-} partial class main_package {
+internal static Stack Make⁔(/*this*/ Stack s, nint n) { return new Stack(n, n * 2); }
+internal static @string Wrap⁔(/*this*/ Stack s) { return "wrapped"; }
 
 partial struct Vec /*[4]nint*/;
 
-} partial class mainᴛVec {
-
-public static slice<nint> Slice(this Vec v, nint i, nint n) {
+internal static slice<nint> Slice⁔(/*this*/ Vec v, nint i, nint n) {
     v = v.Clone();
 
     return v.slice(i, n);
 }
 
-public static @string ToSpan(this Vec v) {
+internal static @string ToSpan⁔(/*this*/ Vec v) {
     v = v.Clone();
 
     return "vec span";
 }
 
-public static @string GetEnumerator(this Vec v) {
+internal static @string GetEnumerator⁔(/*this*/ Vec v) {
     v = v.Clone();
 
     return "vec enumerator";
 }
 
-public static nint Length(this Vec v) {
+internal static nint Length⁔(/*this*/ Vec v) {
     v = v.Clone();
 
     return 40;
 }
 
-public static @string Source(this Vec v) {
+internal static @string Source⁔(/*this*/ Vec v) {
     v = v.Clone();
 
     return "vec source";
 }
 
-public static nint Make(this Vec v) {
+internal static nint Make⁔(/*this*/ Vec v) {
     v = v.Clone();
 
     return 4;
 }
 
-} partial class main_package {
+partial struct V /*Vec*/;
+
+public static V Clone(this V v) {
+    v = v.ΔClone();
+
+    v[0] = -1;
+    return v.ΔClone();
+}
+
+public static slice<nint> Slice(this V v, nint i, nint n) {
+    v = v.ΔClone();
+
+    return v.slice(i, n);
+}
+
+partial struct Near /*[]nint*/;
+
+public static nint Lengths(this Near n) { return 1000 + len(n); }
+public static nint Slices(this Near n) { return 2000; }
+public static nint Sourced(this Near n) { return 3000; }
+public static nint Appends(this Near n) { return 4000; }
+public static nint Capacitys(this Near n) { return 5000; }
+public static nint ToSpans(this Near n) { return 6000; }
+
+partial struct NearArr /*[3]nint*/;
+
+public static nint Slicer(this NearArr a) {
+    a = a.Clone();
+
+    return 7000;
+}
+
+public static nint Len(this NearArr a) {
+    a = a.Clone();
+
+    return 8000;
+}
 
 partial struct Capacity /*[]@string*/;
 partial struct Length /*[2]nint*/;
@@ -112,6 +141,22 @@ internal static void main() {
     var vʗ1 = v;
     var vl = () => vʗ1.Length();
     fmt.Println("Vec method value:", vl(), len(v));
+
+    var w = new V(new nint[]{5, 6, 7, 8}.array());
+    var w2 = w.ΔClone();
+    w2[0] = 50;
+    fmt.Println("V value copy:", w[0], w2[0]);
+    fmt.Println("V Slice:", w.Slice(1, 3), "V Clone:", w.Clone()[0], w[0]);
+
+    var nr = new Near(new nint[]{1, 2, 3}.slice());
+    nr = append(nr, (nint)4);
+    fmt.Println("near-miss methods:", nr.Lengths(), nr.Slices(), nr.Sourced(), nr.Appends(), nr.Capacitys(), nr.ToSpans());
+    fmt.Println("near-miss wrapper:", len(nr), cap(nr) >= 4, nr[1..3], nr[len(nr) - 1]);
+    foreach (var (i, x) in range<nint>(nr[2..])) {
+        fmt.Println("near-miss range:", i, x);
+    }
+    var na = new NearArr(new nint[]{9, 8, 7}.array());
+    fmt.Println("near-miss array:", na.Slicer(), na.Len(), len(na), na[1..]);
 
     var c = new Capacity(new @string[]{"a", "b"}.slice());
     c = append(c, (@string)"c");

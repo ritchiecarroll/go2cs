@@ -59,7 +59,7 @@ public static SortedMap Sort(reflect.Value mapValue) {
     while (iter.Next()) {
         sorted = append(sorted, new KeyValue(iter.Key(), iter.Value()));
     }
-    slices.SortStableFunc(sorted, (KeyValue a, KeyValue b) => compare(a.Key, b.Key));
+    slices.SortStableFunc(sorted, [GoFunc("Sort.func1")] (KeyValue a, KeyValue b) => compare(a.Key, b.Key));
     return sorted;
 }
 

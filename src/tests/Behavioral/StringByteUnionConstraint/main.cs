@@ -55,7 +55,7 @@ internal static void main() {
 internal static nint digitSum<T>(T s)
     where T : /* []byte | string */ IByteSeq<T, byte>, new()
 {
-    nint parse(T part) {
+    [GoFunc("digitSum[...].func1")] nint parse(T part) {
         nint n = 0;
         foreach (var (_, c) in range(part.ToSlice())) {
             n = n * 10 + (nint)((byte)(c - '0'));

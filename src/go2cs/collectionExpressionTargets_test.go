@@ -213,10 +213,11 @@ func ranges() {
 	}
 }
 
-// A type that declares its own `len` method (index/suffixarray's `func (a *ints) len() int`) shadows golib's
-// using-static builtin inside its method holder, so an index-only range in one of its methods qualifies the
-// length it ranges. A range anywhere else in the package reads the built-in bare.
-func TestAnIndexOnlyRangeQualifiesAShadowedLen(t *testing.T) {
+// A type that declares its own `len` method (index/suffixarray's `func (a *ints) len() int`) shadowed golib's
+// using-static builtin while its methods' bodies stood in its method holder, and an index-only range in one of them
+// qualified the length it ranges. The bodies stand in the package class under the suffixed name, so every range
+// reads the built-in bare.
+func TestAnIndexOnlyRangeInAMethodOfATypeWithALenMethodReadsTheBuiltinBare(t *testing.T) {
 	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: runs the real converter over a module fixture")
@@ -277,11 +278,19 @@ func main() {
 
 	mainCs := readGenerated(t, filepath.Join(options.go2csPath, "src", "example.com", "b3len", "main.cs"))
 
-	if want := "foreach (var i in range(builtin.len(s)))"; !strings.Contains(mainCs, want) {
-		t.Errorf("want %q: a shadowed len is qualified in an index-only range:\n%s", want, mainCs)
+	// The method len takes the suffix form (`len⁔`), so its body and each's stand in the package class, where no
+	// method named len hides the built-in: an index-only range reads it bare there as everywhere.
+	for _, want := range []string{
+		"internal static nint len⁔(/*this*/ ref ints a) { return len(a.v); }",
+		"foreach (var i in range(len(s)))",
+		"foreach (var i in range(len(t)))",
+	} {
+		if !strings.Contains(mainCs, want) {
+			t.Errorf("want %q: no method hides the built-in len in the package class:\n%s", want, mainCs)
+		}
 	}
 
-	if want := "foreach (var i in range(len(t)))"; !strings.Contains(mainCs, want) {
-		t.Errorf("want %q: outside the holder that declares len, the built-in is read bare:\n%s", want, mainCs)
+	if strings.Contains(mainCs, "builtin.len(") {
+		t.Errorf("the built-in len is qualified where nothing hides it:\n%s", mainCs)
 	}
 }

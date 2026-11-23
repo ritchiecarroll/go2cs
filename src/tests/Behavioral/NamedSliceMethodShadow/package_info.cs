@@ -14,6 +14,9 @@
 
 using go;
 using static go.main_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -49,10 +52,12 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "AAsclpSWloKCgoKCgpaC+qCioKKgoqCioKKg/IKCgoKCgoKCgoKCgoYACAKWgoKmgoKCgqKUgoKCgoI=", "", "66=main.Stack.Capacity;66=main.Stack.Length;66=main.Stack.Source;79=main.Vec.Length")]
+[assembly: GoPositionMap("main.go", "main.cs", "AAgclpSWloKCgoKCgpaCuqCioKKgoqCioKKgzKCAoqDOgoKCgoK6oKKg3IKCgoKCgoKCgoKCgoYACAKWgoKmgoKCgqKUgoKCgpSCgoKCgpSClIKCgoKC", "", "91=main.Stack.Capacity;91=main.Stack.Length;91=main.Stack.Source;104=main.Vec.Length")]
 // </GoSourcePositionMaps>
 
 namespace go;
+
+using static go.main_package;
 
 [GoTestMatchingConsoleOutput]
 [GoPackage("main")]
@@ -67,7 +72,10 @@ public static partial class main_package
     // <TypeAccessibility>
     public partial struct Capacity {}
     public partial struct Length {}
+    public partial struct Near {}
+    public partial struct NearArr {}
     public partial struct Stack {}
+    public partial struct V {}
     public partial struct Vec {}
     // </TypeAccessibility>
 
@@ -89,6 +97,36 @@ public static partial class main_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(main_package.Stack)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛStack;
-[GoMethodHost(typeof(main_package.Vec)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛVec;
+[GoMethodHost(typeof(main_package.Stack)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class mainᴛStack;
+[GoMethodHost(typeof(main_package.Vec)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class mainᴛVec;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class mainᴛStack {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static Stack Slice(this Stack s, nint i, nint n) => main_package.Slice⁔(s, i, n);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string ToSpan(this Stack s) => main_package.ToSpan⁔(s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint GetEnumerator(this Stack s) => main_package.GetEnumerator⁔(s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Append(this Stack s, slice<nint> xs) => main_package.Append⁔(s, xs);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Length(this Stack s) => main_package.Length⁔(s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Capacity(this Stack s) => main_package.Capacity⁔(s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Low(this Stack s) => main_package.Low⁔(s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint High(this Stack s) => main_package.High⁔(s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Available(this Stack s) => main_package.Available⁔(s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string IsNil(this Stack s) => main_package.IsNil⁔(s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Source(this Stack s) => main_package.Source⁔(s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static Stack Make(this Stack s, nint n) => main_package.Make⁔(s, n);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Wrap(this Stack s) => main_package.Wrap⁔(s);
+}
+partial class mainᴛVec {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<nint> Slice(this Vec v, nint i, nint n) => main_package.Slice⁔(v, i, n);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string ToSpan(this Vec v) => main_package.ToSpan⁔(v);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string GetEnumerator(this Vec v) => main_package.GetEnumerator⁔(v);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Length(this Vec v) => main_package.Length⁔(v);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Source(this Vec v) => main_package.Source⁔(v);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Make(this Vec v) => main_package.Make⁔(v);
+}
+// </MethodForwarders>

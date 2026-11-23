@@ -524,7 +524,7 @@ internal static (slice<@string> dnsNames, slice<@string> emailAddresses, slice<n
     slice<ж<url.URL>> uris = default;
     error err = default;
 
-    err = forEachSAN(der, error (nint tag, slice<byte> data) => {
+    err = forEachSAN(der, [GoFunc("parseSANExtension.func1")] error (nint tag, slice<byte> data) => {
         switch (tag) {
         case var ᴛ when ᴛ == nameTypeEmail: {
             @string email = (@string)data;
@@ -736,7 +736,7 @@ internal static (bool unhandled, error err) parseNameConstraintsExtension(ref Ce
         return (false, errors.New(x509EmptyNameConstraintsˢ));
     }
 
-    (slice<@string> dnsNames, slice<ж<net.IPNet>> ips, slice<@string> emails, slice<@string> uriDomains, error err) getValues(cryptobyte.String subtrees) {
+    [GoFunc("parseNameConstraintsExtension.func1")] (slice<@string> dnsNames, slice<ж<net.IPNet>> ips, slice<@string> emails, slice<@string> uriDomains, error err) getValues(cryptobyte.String subtrees) {
         slice<@string> dnsNames = default;
         slice<ж<net.IPNet>> ips = default;
         slice<@string> emails = default;

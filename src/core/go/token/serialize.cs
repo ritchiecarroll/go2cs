@@ -6,7 +6,6 @@ namespace go.go;
 using slices = slices_package;
 using global::go.sync;
 using iter = iter_package;
-using static token_package;
 
 partial class token_package {
 
@@ -24,10 +23,8 @@ partial struct serializedFileSet {
     public slice<serializedFile> Files;
 }
 
-} partial class tokenᴛFileSet {
-
 // Read calls decode to deserialize a file set into s; s must not be nil.
-public static error Read(this ж<FileSet> Ꮡs, Func<any, error> decode) {
+internal static error Read⁔(/*this*/ ж<FileSet> Ꮡs, Func<any, error> decode) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     ref var ss = ref heap(new serializedFileSet(), out var Ꮡss);
@@ -53,7 +50,7 @@ public static error Read(this ж<FileSet> Ꮡs, Func<any, error> decode) {
 }
 
 // Write calls encode to serialize the file set s.
-public static error Write(this ж<FileSet> Ꮡs, Func<any, error> encode) {
+internal static error Write⁔(/*this*/ ж<FileSet> Ꮡs, Func<any, error> encode) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     serializedFileSet ss = default;
@@ -78,4 +75,4 @@ public static error Write(this ж<FileSet> Ꮡs, Func<any, error> encode) {
     return encode(ss);
 }
 
-}
+} // end token_package

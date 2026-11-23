@@ -27,7 +27,7 @@ internal static void withLock(Action fn) {
 }
 
 internal static void release() {
-    withLock(() => {
+    withLock([GoFunc("release.func1")] () => {
         note("release");
     });
     open = false;
@@ -38,7 +38,7 @@ internal static void raw(Action f) {
     GoFrame ᒐ = default;
     try {
         note("acquire");
-        defer(() => {
+        defer([GoFunc("raw.func1")] () => {
             note("cleanup begin");
             release();
             note("cleanup end");
@@ -84,7 +84,7 @@ internal static void deep1() {
 internal static void deepCleanup() {
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("deepCleanup.func1")] () => {
             note("deep cleanup begin");
             deep1();
             note("deep cleanup end");
@@ -98,7 +98,7 @@ internal static void deepCleanup() {
 internal static void calleeDeferPanics() {
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("calleeDeferPanics.func1")] () => {
             note("callee defer");
             throw panic("callee boom");
         }, ref ᒐ);
@@ -111,7 +111,7 @@ internal static void calleeDeferPanics() {
 internal static void calleeDeferPanicsDuringPanic() {
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("calleeDeferPanicsDuringPanic.func1")] () => {
             note("outer cleanup");
             calleeDeferPanics();
             note("unreachable");
@@ -124,19 +124,19 @@ internal static void calleeDeferPanicsDuringPanic() {
 
 internal static void main() {
     open = true;
-    raw(() => {
+    raw([GoFunc("main.func1")] () => {
         note("callback ok");
     });
     show("normal:", open);
 
     open = true;
-    func(() => {
+    func([GoFunc("main.func2")] () => {
         GoFrame ᒐ = default;
         try {
-            defer(() => {
+            defer([GoFunc("main.func2.1")] () => {
                 fmt.Println("recovered:", recover());
             }, ref ᒐ);
-            raw(() => {
+            raw([GoFunc("main.func2.2")] () => {
                 throw panic("callback boom");
             });
             note("unreachable");
@@ -146,10 +146,10 @@ internal static void main() {
     })();
     show("panicked:", open);
 
-    func(() => {
+    func([GoFunc("main.func3")] () => {
         GoFrame ᒐ = default;
         try {
-            defer(() => {
+            defer([GoFunc("main.func3.1")] () => {
                 fmt.Println("recovered:", recover());
             }, ref ᒐ);
             deepCleanup();
@@ -159,10 +159,10 @@ internal static void main() {
     })();
     show("deep:", open);
 
-    func(() => {
+    func([GoFunc("main.func4")] () => {
         GoFrame ᒐ = default;
         try {
-            defer(() => {
+            defer([GoFunc("main.func4.1")] () => {
                 fmt.Println("recovered:", recover());
             }, ref ᒐ);
             calleeDeferPanics();
@@ -173,10 +173,10 @@ internal static void main() {
     })();
     show("callee panic:", open);
 
-    func(() => {
+    func([GoFunc("main.func5")] () => {
         GoFrame ᒐ = default;
         try {
-            defer(() => {
+            defer([GoFunc("main.func5.1")] () => {
                 fmt.Println("recovered:", recover());
             }, ref ᒐ);
             calleeDeferPanicsDuringPanic();

@@ -19,7 +19,6 @@ using compress;
 using encoding;
 using go.hash;
 using go.image;
-using static png_package;
 
 partial class png_package {
 
@@ -122,22 +121,14 @@ partial struct decoder {
 // A FormatError reports that the input is not a valid PNG.
 partial struct FormatError /*@string*/;
 
-} partial class pngᴛFormatError {
-
-public static @string Error(this FormatError e) { return "png: invalid format: "u8 + ((@string)e); }
-
-} partial class png_package {
+internal static @string Error⁔(/*this*/ FormatError e) { return "png: invalid format: "u8 + ((@string)e); }
 
 internal static FormatError chunkOrderError = ((FormatError)(@string)"chunk out of order");
 
 // An UnsupportedError reports that the input uses a valid but unimplemented PNG feature.
 partial struct UnsupportedError /*@string*/;
 
-} partial class pngᴛUnsupportedError {
-
-public static @string Error(this UnsupportedError e) { return "png: unsupported feature: "u8 + ((@string)e); }
-
-} partial class pngᴛdecoder {
+internal static @string Error⁔(/*this*/ UnsupportedError e) { return "png: unsupported feature: "u8 + ((@string)e); }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string badIhdrLengthˢ => ref badIhdrLengthˢᵇ;
@@ -153,7 +144,7 @@ private static readonly @string nonPositiveDimensionˢᵇ = "non-positive dimens
 internal static ref readonly @string dimensionOverflowˢ => ref dimensionOverflowˢᵇ;
 private static readonly @string dimensionOverflowˢᵇ = "dimension overflow"u8;
 
-internal static error parseIHDR(this ref decoder d, uint32 length) {
+internal static error parseIHDR⁔(/*this*/ ref decoder d, uint32 length) {
     if (length != 13) {
         return ((FormatError)(@string)badIhdrLengthˢ);
     }
@@ -283,7 +274,7 @@ private static readonly @string badPlteLengthˢᵇ = "bad PLTE length"u8;
 internal static ref readonly @string plteColorTypeMismatchˢ => ref plteColorTypeMismatchˢᵇ;
 private static readonly @string plteColorTypeMismatchˢᵇ = "PLTE, color type mismatch"u8;
 
-internal static error parsePLTE(this ref decoder d, uint32 length) {
+internal static error parsePLTE⁔(/*this*/ ref decoder d, uint32 length) {
     nint np = (nint)(length / 3); // The number of palette entries.
     if (length % 3 != 0 || np <= 0 || np > 256 || np > ((nint)1).Lsh((nuint)d.depth)) {
         return ((FormatError)(@string)badPlteLengthˢ);
@@ -327,7 +318,7 @@ private static readonly @string badTRNSLengthˢᵇ = "bad tRNS length"u8;
 internal static ref readonly @string tRNSColorTypeMismatchˢ => ref tRNSColorTypeMismatchˢᵇ;
 private static readonly @string tRNSColorTypeMismatchˢᵇ = "tRNS, color type mismatch"u8;
 
-internal static error parsetRNS(this ref decoder d, uint32 length) {
+internal static error parsetRNS⁔(/*this*/ ref decoder d, uint32 length) {
     switch (d.cb) {
     case var ᴛ when ᴛ == cbG1 || ᴛ == cbG2 || ᴛ == cbG4 || ᴛ == cbG8 || ᴛ == cbG16: {
         if (length != 2) {
@@ -410,7 +401,7 @@ private static readonly @string idatChunkLengthOverflowˢᵇ = "IDAT chunk lengt
 // immediately before the first Read call is that d.r is positioned between the
 // first IDAT and xxx, and the decoder state immediately after the last Read
 // call is that d.r is positioned between yy and crc1.
-internal static (nint, error) Read(this ref decoder d, slice<byte> p) {
+internal static (nint, error) Read⁔(/*this*/ ref decoder d, slice<byte> p) {
     if (len(p) == 0) {
         return (0, default);
     }
@@ -445,7 +436,7 @@ internal static ref readonly @string tooMuchPixelDataˢ => ref tooMuchPixelData�
 private static readonly @string tooMuchPixelDataˢᵇ = "too much pixel data"u8;
 
 // decode decodes the IDAT data into an image.
-internal static (image.Image, error) decode(this ж<decoder> Ꮡd) {
+internal static (image.Image, error) decode⁔(/*this*/ ж<decoder> Ꮡd) {
     GoFrame ᒐ = default;
     try {
         ref var d = ref Ꮡd.DerefOrNull();
@@ -505,7 +496,7 @@ internal static ref readonly @string badFilterTypeˢ => ref badFilterTypeˢᵇ;
 private static readonly @string badFilterTypeˢᵇ = "bad filter type"u8;
 
 // readImagePass reads a single image pass, sized according to the pass number.
-internal static (image.Image, error) readImagePass(this ref decoder d, io.Reader r, nint pass, bool allocateOnly) {
+internal static (image.Image, error) readImagePass⁔(/*this*/ ref decoder d, io.Reader r, nint pass, bool allocateOnly) {
     nint bitsPerPixel = 0;
     nint pixOffset = 0;
     ж<image.Gray> gray = default;
@@ -941,7 +932,7 @@ internal static (image.Image, error) readImagePass(this ref decoder d, io.Reader
 }
 
 // mergePassInto merges a single pass into a full sized image.
-internal static void mergePassInto(this ref decoder d, image.Image dst, image.Image src, nint pass) {
+internal static void mergePassInto⁔(/*this*/ ref decoder d, image.Image dst, image.Image src, nint pass) {
     var p = interlacing[pass];
     slice<uint8> srcPix = default;
     slice<uint8> dstPix = default;
@@ -1023,7 +1014,7 @@ internal static void mergePassInto(this ref decoder d, image.Image dst, image.Im
     }
 }
 
-internal static error /*err*/ parseIDAT(this ж<decoder> Ꮡd, uint32 length) {
+internal static error /*err*/ parseIDAT⁔(/*this*/ ж<decoder> Ꮡd, uint32 length) {
     error err = default;
     ref var d = ref Ꮡd.DerefOrNull();
 
@@ -1039,14 +1030,14 @@ internal static error /*err*/ parseIDAT(this ж<decoder> Ꮡd, uint32 length) {
 internal static ref readonly @string badIendLengthˢ => ref badIendLengthˢᵇ;
 private static readonly @string badIendLengthˢᵇ = "bad IEND length"u8;
 
-internal static error parseIEND(this ref decoder d, uint32 length) {
+internal static error parseIEND⁔(/*this*/ ref decoder d, uint32 length) {
     if (length != 0) {
         return ((FormatError)(@string)badIendLengthˢ);
     }
     return d.verifyChecksum();
 }
 
-internal static error parseChunk(this ж<decoder> Ꮡd, bool configOnly) {
+internal static error parseChunk⁔(/*this*/ ж<decoder> Ꮡd, bool configOnly) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     // Read the length and chunk type.
@@ -1135,7 +1126,7 @@ internal static error parseChunk(this ж<decoder> Ꮡd, bool configOnly) {
 internal static ref readonly @string invalidChecksumˢ => ref invalidChecksumˢᵇ;
 private static readonly @string invalidChecksumˢᵇ = "invalid checksum"u8;
 
-internal static error verifyChecksum(this ref decoder d) {
+internal static error verifyChecksum⁔(/*this*/ ref decoder d) {
     var (_, err) = io.ReadFull(d.r, d.tmp[..4]); if (err != nil) {
         return err;
     }
@@ -1149,7 +1140,7 @@ internal static error verifyChecksum(this ref decoder d) {
 internal static ref readonly @string notAPngFileˢ => ref notAPngFileˢᵇ;
 private static readonly @string notAPngFileˢᵇ = "not a PNG file"u8;
 
-internal static error checkHeader(this ref decoder d) {
+internal static error checkHeader⁔(/*this*/ ref decoder d) {
     var (_, err) = io.ReadFull(d.r, d.tmp[..(int)(len(pngHeader))]);
     if (err != nil) {
         return err;
@@ -1159,8 +1150,6 @@ internal static error checkHeader(this ref decoder d) {
     }
     return default;
 }
-
-} partial class png_package {
 
 // Decode reads a PNG image from r and returns it as an [image.Image].
 // The type of Image returned depends on the PNG contents.

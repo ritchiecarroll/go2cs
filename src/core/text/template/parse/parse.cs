@@ -14,7 +14,6 @@ using runtime = runtime_package;
 using strconv = strconv_package;
 using strings = strings_package;
 using ꓸꓸꓸany = Span<any>;
-using static parse_package;
 
 partial class parse_package {
 
@@ -54,10 +53,8 @@ internal static nint maxStackDepth = 10000;
     }
 }
 
-} partial class parseᴛTree {
-
 // Copy returns a copy of the [Tree]. Any parsing state is discarded.
-public static ж<Tree> Copy(this ж<Tree> Ꮡt) {
+internal static ж<Tree> Copy⁔(/*this*/ ж<Tree> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (Ꮡt == nil) {
@@ -70,8 +67,6 @@ public static ж<Tree> Copy(this ж<Tree> Ꮡt) {
         text: t.text
     ));
 }
-
-} partial class parse_package {
 
 // Parse returns a map from template name to [Tree], created by parsing the
 // templates described in the argument string. The top-level template will be
@@ -87,10 +82,8 @@ public static (map<@string, ж<Tree>>, error) Parse(@string name, @string text, 
     return (treeSet, err);
 }
 
-} partial class parseᴛTree {
-
 // next returns the next token.
-internal static item next(this ref Tree t) {
+internal static item next⁔(/*this*/ ref Tree t) {
     if (t.peekCount > 0) {
         t.peekCount--;
     } else {
@@ -100,20 +93,20 @@ internal static item next(this ref Tree t) {
 }
 
 // backup backs the input stream up one token.
-internal static void backup(this ref Tree t) {
+internal static void backup⁔(/*this*/ ref Tree t) {
     t.peekCount++;
 }
 
 // backup2 backs the input stream up two tokens.
 // The zeroth token is already there.
-internal static void backup2(this ref Tree t, item t1) {
+internal static void backup2⁔(/*this*/ ref Tree t, item t1) {
     t.token[1] = t1;
     t.peekCount = 2;
 }
 
 // backup3 backs the input stream up three tokens
 // The zeroth token is already there.
-internal static void backup3(this ref Tree t, item t2, item t1) {
+internal static void backup3⁔(/*this*/ ref Tree t, item t2, item t1) {
     // Reverse order: we're pushing back.
     t.token[1] = t1;
     t.token[2] = t2;
@@ -121,7 +114,7 @@ internal static void backup3(this ref Tree t, item t2, item t1) {
 }
 
 // peek returns but does not consume the next token.
-internal static item peek(this ref Tree t) {
+internal static item peek⁔(/*this*/ ref Tree t) {
     if (t.peekCount > 0) {
         return t.token[t.peekCount - 1];
     }
@@ -131,7 +124,7 @@ internal static item peek(this ref Tree t) {
 }
 
 // nextNonSpace returns the next non-space token.
-internal static item /*token*/ nextNonSpace(this ref Tree t) {
+internal static item /*token*/ nextNonSpace⁔(/*this*/ ref Tree t) {
     item token = default;
 
     for (;;) {
@@ -144,13 +137,11 @@ internal static item /*token*/ nextNonSpace(this ref Tree t) {
 }
 
 // peekNonSpace returns but does not consume the next non-space token.
-internal static item peekNonSpace(this ref Tree t) {
+internal static item peekNonSpace⁔(/*this*/ ref Tree t) {
     var token = t.nextNonSpace();
     t.backup();
     return token;
 }
-
-} partial class parse_package {
 
 // Parsing.
 
@@ -164,12 +155,10 @@ public static ж<Tree> New(@string name, params Span<map<@string, any>> funcsʗp
     ));
 }
 
-} partial class parseᴛTree {
-
 // ErrorContext returns a textual representation of the location of the node in the input text.
 // The receiver is only used when the node does not have a pointer to the tree inside,
 // which can occur in old code.
-public static (@string location, @string context) ErrorContext(this ж<Tree> Ꮡt, Node n) {
+internal static (@string location, @string context) ErrorContext⁔(/*this*/ ж<Tree> Ꮡt, Node n) {
     @string context = default;
 
     nint pos = (nint)n.Position();
@@ -191,7 +180,7 @@ public static (@string location, @string context) ErrorContext(this ж<Tree> Ꮡ
 }
 
 // errorf formats the error and terminates processing.
-internal static void errorf(this ref Tree t, @string format, params ꓸꓸꓸany argsʗp) {
+internal static void errorf⁔(/*this*/ ref Tree t, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     t.Root = default;
@@ -200,12 +189,12 @@ internal static void errorf(this ref Tree t, @string format, params ꓸꓸꓸany
 }
 
 // error terminates processing.
-internal static void error(this ref Tree t, error err) {
+internal static void error⁔(/*this*/ ref Tree t, error err) {
     t.errorf("%s", err);
 }
 
 // expect consumes the next token and guarantees it has the required type.
-internal static item expect(this ref Tree t, itemType expected, @string context) {
+internal static item expect⁔(/*this*/ ref Tree t, itemType expected, @string context) {
     var token = t.nextNonSpace();
     if (token.typ != expected) {
         t.unexpected(token, context);
@@ -214,7 +203,7 @@ internal static item expect(this ref Tree t, itemType expected, @string context)
 }
 
 // expectOneOf consumes the next token and guarantees it has one of the required types.
-internal static item expectOneOf(this ref Tree t, itemType expected1, itemType expected2, @string context) {
+internal static item expectOneOf⁔(/*this*/ ref Tree t, itemType expected1, itemType expected2, @string context) {
     var token = t.nextNonSpace();
     if (token.typ != expected1 && token.typ != expected2) {
         t.unexpected(token, context);
@@ -227,7 +216,7 @@ internal static ref readonly @string actionˢ => ref actionˢᵇ;
 private static readonly @string actionˢᵇ = " action"u8;
 
 // unexpected complains about the token and terminates processing.
-internal static void unexpected(this ref Tree t, item token, @string context) {
+internal static void unexpected⁔(/*this*/ ref Tree t, item token, @string context) {
     if (token.typ == itemError) {
         @string extra = ""u8;
         if (t.actionLine != 0 && t.actionLine != token.line) {
@@ -242,14 +231,14 @@ internal static void unexpected(this ref Tree t, item token, @string context) {
 }
 
 // recover is the handler that turns panics into returns from the top level of Parse.
-internal static void recover(this ж<Tree> Ꮡt, ж<error> Ꮡerrp) {
+internal static void recover⁔(/*this*/ ж<Tree> Ꮡt, ж<error> Ꮡerrp) {
     GoFrame ᒐ = default;
     try {
         var calledByDefer = GoFrame.TakeDeferredCall(); // Go: is this call the deferred one?
         ref var t = ref Ꮡt.DerefOrNull();
         ref var errp = ref Ꮡerrp.DerefOrNull();
 
-        var e = builtin.recover(calledByDefer);
+        var e = recover(calledByDefer);
         if (e != nil) {
             var (_, ok) = e._<runtime.Error>(ᐧ); if (ok) {
                 throw panic(e);
@@ -271,7 +260,7 @@ internal static ref readonly @string continueˢ2 => ref continueˢ2ᵇ;
 private static readonly @string continueˢ2ᵇ = "continue"u8;
 
 // startParse initializes the parser, using the lexer.
-internal static void startParse(this ref Tree t, slice<map<@string, any>> funcs, ж<lexer> Ꮡlex, map<@string, ж<Tree>> treeSet) {
+internal static void startParse⁔(/*this*/ ref Tree t, slice<map<@string, any>> funcs, ж<lexer> Ꮡlex, map<@string, ж<Tree>> treeSet) {
     ref var lex = ref Ꮡlex.DerefOrNull();
 
     t.Root = default;
@@ -288,7 +277,7 @@ internal static void startParse(this ref Tree t, slice<map<@string, any>> funcs,
 }
 
 // stopParse terminates parsing.
-internal static void stopParse(this ref Tree t) {
+internal static void stopParse⁔(/*this*/ ref Tree t) {
     t.lex = default;
     t.vars = default;
     t.funcs = default;
@@ -299,7 +288,7 @@ internal static void stopParse(this ref Tree t) {
 // the template for execution. If either action delimiter string is empty, the
 // default ("{{" or "}}") is used. Embedded template definitions are added to
 // the treeSet map.
-public static (ж<Tree> tree, error err) Parse(this ж<Tree> Ꮡt, @string text, @string leftDelim, @string rightDelim, map<@string, ж<Tree>> treeSet, params Span<map<@string, any>> funcsʗp) {
+internal static (ж<Tree> tree, error err) Parse⁔(/*this*/ ж<Tree> Ꮡt, @string text, @string leftDelim, @string rightDelim, map<@string, ж<Tree>> treeSet, params Span<map<@string, any>> funcsʗp) {
     ж<Tree> tree = default;
     heap<error>(out var Ꮡerr);
     GoFrame ᒐ = default;
@@ -324,7 +313,7 @@ public static (ж<Tree> tree, error err) Parse(this ж<Tree> Ꮡt, @string text,
 }
 
 // add adds tree to t.treeSet.
-internal static void add(this ж<Tree> Ꮡt) {
+internal static void add⁔(/*this*/ ж<Tree> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     var tree = t.treeSet[t.Name];
@@ -336,8 +325,6 @@ internal static void add(this ж<Tree> Ꮡt) {
         t.errorf("template: multiple definition of template %q", t.Name);
     }
 }
-
-} partial class parse_package {
 
 // IsEmptyTree reports whether this tree (node) is empty of everything but space or comments.
 public static bool IsEmptyTree(Node n) {
@@ -382,8 +369,6 @@ public static bool IsEmptyTree(Node n) {
     return false;
 }
 
-} partial class parseᴛTree {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string definitionˢ => ref definitionˢᵇ;
 private static readonly @string definitionˢᵇ = "definition"u8;
@@ -391,7 +376,7 @@ private static readonly @string definitionˢᵇ = "definition"u8;
 // parse is the top-level parser for a template, essentially the same
 // as itemList except it also parses {{define}} actions.
 // It runs to EOF.
-internal static void parse(this ж<Tree> Ꮡt) {
+internal static void parse⁔(/*this*/ ж<Tree> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     t.Root = Ꮡt.newList(t.peek().pos);
@@ -429,7 +414,7 @@ private static readonly @string contextᶜᵇ = "define clause"u8;
 // parseDefinition parses a {{define}} ...  {{end}} template definition and
 // installs the definition in t.treeSet. The "define" keyword has already
 // been scanned.
-internal static void parseDefinition(this ж<Tree> Ꮡt) {
+internal static void parseDefinition⁔(/*this*/ ж<Tree> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     @string context = contextᶜ;
@@ -454,7 +439,7 @@ internal static void parseDefinition(this ж<Tree> Ꮡt) {
 //	textOrAction*
 //
 // Terminates at {{end}} or {{else}}, returned separately.
-internal static (ж<ListNode> list, Node next) itemList(this ж<Tree> Ꮡt) {
+internal static (ж<ListNode> list, Node next) itemList⁔(/*this*/ ж<Tree> Ꮡt) {
     ж<ListNode> list = default;
     Node next = default;
     ref var t = ref Ꮡt.DerefOrNull();
@@ -479,7 +464,7 @@ private static readonly @string inputˢᵇ = "input"u8;
 // textOrAction:
 //
 //	text | comment | action
-internal static Node textOrAction(this ж<Tree> Ꮡt) {
+internal static Node textOrAction⁔(/*this*/ ж<Tree> Ꮡt) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -510,7 +495,7 @@ internal static Node textOrAction(this ж<Tree> Ꮡt) {
     finally { if (ᒐd1) Ꮡt.DerefOrNull().clearActionLine(); ᒐ.Run(); }
 }
 
-internal static void clearActionLine(this ref Tree t) {
+internal static void clearActionLine⁔(/*this*/ ref Tree t) {
     t.actionLine = 0;
 }
 
@@ -525,7 +510,7 @@ private static readonly @string commandˢᵇ = "command"u8;
 //
 // Left delim is past. Now get actions.
 // First word could be a keyword such as range.
-internal static Node /*n*/ action(this ж<Tree> Ꮡt) {
+internal static Node /*n*/ action⁔(/*this*/ ж<Tree> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     var tokenΔ1 = t.nextNonSpace();
@@ -563,16 +548,12 @@ internal static Node /*n*/ action(this ж<Tree> Ꮡt) {
     return new ActionNodeжNode(Ꮡt.newAction(token.pos, token.line, Ꮡt.pipeline(commandˢ, itemRightDelim)));
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string breakˢ => ref breakˢᵇ;
-private static readonly @string breakˢᵇ = "{{break}}"u8;
-
 // Break:
 //
 //	{{break}}
 //
 // Break keyword is past.
-internal static Node breakControl(this ж<Tree> Ꮡt, Pos pos, nint line) {
+internal static Node breakControl⁔(/*this*/ ж<Tree> Ꮡt, Pos pos, nint line) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     var token = t.nextNonSpace(); if (token.typ != itemRightDelim) {
@@ -584,16 +565,12 @@ internal static Node breakControl(this ж<Tree> Ꮡt, Pos pos, nint line) {
     return new BreakNodeжNode(Ꮡt.newBreak(pos, line));
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string continueˢ => ref continueˢᵇ;
-private static readonly @string continueˢᵇ = "{{continue}}"u8;
-
 // Continue:
 //
 //	{{continue}}
 //
 // Continue keyword is past.
-internal static Node continueControl(this ж<Tree> Ꮡt, Pos pos, nint line) {
+internal static Node continueControl⁔(/*this*/ ж<Tree> Ꮡt, Pos pos, nint line) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     var token = t.nextNonSpace(); if (token.typ != itemRightDelim) {
@@ -608,7 +585,7 @@ internal static Node continueControl(this ж<Tree> Ꮡt, Pos pos, nint line) {
 // Pipeline:
 //
 //	declarations? command ('|' command)*
-internal static ж<PipeNode> /*pipe*/ pipeline(this ж<Tree> Ꮡt, @string context, itemType end) {
+internal static ж<PipeNode> /*pipe*/ pipeline⁔(/*this*/ ж<Tree> Ꮡt, @string context, itemType end) {
     ж<PipeNode> pipe = default;
     ref var t = ref Ꮡt.DerefOrNull();
 
@@ -680,7 +657,7 @@ decls:
     }
 }
 
-internal static void checkPipeline(this ref Tree t, ж<PipeNode> Ꮡpipe, @string context) {
+internal static void checkPipeline⁔(/*this*/ ref Tree t, ж<PipeNode> Ꮡpipe, @string context) {
     ref var pipe = ref Ꮡpipe.DerefOrNull();
 
     // Reject empty pipelines
@@ -698,7 +675,7 @@ internal static void checkPipeline(this ref Tree t, ж<PipeNode> Ꮡpipe, @strin
     }
 }
 
-internal static (Pos pos, nint line, ж<PipeNode> pipe, ж<ListNode> list, ж<ListNode> elseList) parseControl(this ж<Tree> Ꮡt, @string context) {
+internal static (Pos pos, nint line, ж<PipeNode> pipe, ж<ListNode> list, ж<ListNode> elseList) parseControl⁔(/*this*/ ж<Tree> Ꮡt, @string context) {
     Pos pos = default;
     nint line = default;
     ж<PipeNode> pipe = default;
@@ -762,14 +739,10 @@ internal static (Pos pos, nint line, ж<PipeNode> pipe, ж<ListNode> list, ж<Li
 //	{{if pipeline}} itemList {{else}} itemList {{end}}
 //
 // If keyword is past.
-internal static Node ifControl(this ж<Tree> Ꮡt) {
+internal static Node ifControl⁔(/*this*/ ж<Tree> Ꮡt) {
     var (ᴛ1, ᴛ2, ᴛ3, ᴛ4, ᴛ5) = Ꮡt.parseControl("if");
     return new IfNodeжNode(Ꮡt.newIf(ᴛ1, ᴛ2, ᴛ3, ᴛ4, ᴛ5));
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string rangeˢ => ref rangeˢᵇ;
-private static readonly @string rangeˢᵇ = "range"u8;
 
 // Range:
 //
@@ -777,15 +750,11 @@ private static readonly @string rangeˢᵇ = "range"u8;
 //	{{range pipeline}} itemList {{else}} itemList {{end}}
 //
 // Range keyword is past.
-internal static Node rangeControl(this ж<Tree> Ꮡt) {
+internal static Node rangeControl⁔(/*this*/ ж<Tree> Ꮡt) {
     var (ᴛ6, ᴛ7, ᴛ8, ᴛ9, ᴛ10) = Ꮡt.parseControl(rangeˢ);
     var r = Ꮡt.newRange(ᴛ6, ᴛ7, ᴛ8, ᴛ9, ᴛ10);
     return new RangeNodeжNode(r);
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string withˢ => ref withˢᵇ;
-private static readonly @string withˢᵇ = "with"u8;
 
 // With:
 //
@@ -793,7 +762,7 @@ private static readonly @string withˢᵇ = "with"u8;
 //	{{with pipeline}} itemList {{else}} itemList {{end}}
 //
 // If keyword is past.
-internal static Node withControl(this ж<Tree> Ꮡt) {
+internal static Node withControl⁔(/*this*/ ж<Tree> Ꮡt) {
     var (ᴛ11, ᴛ12, ᴛ13, ᴛ14, ᴛ15) = Ꮡt.parseControl(withˢ);
     return new WithNodeжNode(Ꮡt.newWith(ᴛ11, ᴛ12, ᴛ13, ᴛ14, ᴛ15));
 }
@@ -807,7 +776,7 @@ private static readonly @string endˢ2ᵇ = "end"u8;
 //	{{end}}
 //
 // End keyword is past.
-internal static Node endControl(this ж<Tree> Ꮡt) {
+internal static Node endControl⁔(/*this*/ ж<Tree> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     return new endNodeжNode(Ꮡt.newEnd(t.expect(itemRightDelim, endˢ2).pos));
@@ -822,7 +791,7 @@ private static readonly @string elseˢ2ᵇ = "else"u8;
 //	{{else}}
 //
 // Else keyword is past.
-internal static Node elseControl(this ж<Tree> Ꮡt) {
+internal static Node elseControl⁔(/*this*/ ж<Tree> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     var peek = t.peekNonSpace();
@@ -847,7 +816,7 @@ private static readonly @string contextᶜ1ᵇ = "block clause"u8;
 // Block keyword is past.
 // The name must be something that can evaluate to a string.
 // The pipeline is mandatory.
-internal static Node blockControl(this ж<Tree> Ꮡt) {
+internal static Node blockControl⁔(/*this*/ ж<Tree> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     @string context = contextᶜ1;
@@ -882,7 +851,7 @@ private static readonly @string contextᶜ2ᵇ = "template clause"u8;
 //
 // Template keyword is past. The name must be something that can evaluate
 // to a string.
-internal static Node templateControl(this ж<Tree> Ꮡt) {
+internal static Node templateControl⁔(/*this*/ ж<Tree> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     @string context = contextᶜ2;
@@ -897,7 +866,7 @@ internal static Node templateControl(this ж<Tree> Ꮡt) {
     return new TemplateNodeжNode(Ꮡt.newTemplate(token.pos, token.line, name, pipe));
 }
 
-internal static @string /*name*/ parseTemplateName(this ref Tree t, item token, @string context) {
+internal static @string /*name*/ parseTemplateName⁔(/*this*/ ref Tree t, item token, @string context) {
     @string name = default;
 
     switch (token.typ) {
@@ -926,7 +895,7 @@ private static readonly @string operandˢᵇ = "operand"u8;
 //
 // space-separated arguments up to a pipeline character or right delimiter.
 // we consume the pipe character but leave the right delim to terminate the action.
-internal static ж<CommandNode> command(this ж<Tree> Ꮡt) {
+internal static ж<CommandNode> command⁔(/*this*/ ж<Tree> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     var cmd = Ꮡt.newCommand(t.peekNonSpace().pos);
@@ -969,7 +938,7 @@ internal static ж<CommandNode> command(this ж<Tree> Ꮡt) {
 // An operand is a space-separated component of a command,
 // a term possibly followed by field accesses.
 // A nil return means the next item is not an operand.
-internal static Node operand(this ж<Tree> Ꮡt) {
+internal static Node operand⁔(/*this*/ ж<Tree> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     var node = Ꮡt.term();
@@ -1022,7 +991,7 @@ private static readonly @string parenthesizedPipelineˢᵇ = "parenthesized pipe
 //
 // A term is a simple "expression".
 // A nil return means the next item is not a term.
-internal static Node term(this ж<Tree> Ꮡt) {
+internal static Node term⁔(/*this*/ ж<Tree> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();
@@ -1064,7 +1033,7 @@ internal static Node term(this ж<Tree> Ꮡt) {
                     t.errorf("max expression depth exceeded");
                 }
                 t.stackDepth++;
-                defer(() => {
+                defer([GoFunc("(*Tree).term.func1")] () => {
                     Ꮡt.Value.stackDepth--;
                 }, ref ᒐ);
                 return new PipeNodeжNode(Ꮡt.pipeline(parenthesizedPipelineˢ, itemRightParen));
@@ -1085,7 +1054,7 @@ internal static Node term(this ж<Tree> Ꮡt) {
 }
 
 // hasFunction reports if a function name exists in the Tree's maps.
-internal static bool hasFunction(this ref Tree t, @string name) {
+internal static bool hasFunction⁔(/*this*/ ref Tree t, @string name) {
     foreach (var (_, funcMap) in range(t.funcs)) {
         if (funcMap == nil) {
             continue;
@@ -1098,13 +1067,13 @@ internal static bool hasFunction(this ref Tree t, @string name) {
 }
 
 // popVars trims the variable list to the specified length
-internal static void popVars(this ref Tree t, nint n) {
+internal static void popVars⁔(/*this*/ ref Tree t, nint n) {
     t.vars = t.vars.slice(0, n);
 }
 
 // useVar returns a node for a variable reference. It errors if the
 // variable is not defined.
-internal static Node useVar(this ж<Tree> Ꮡt, Pos pos, @string name) {
+internal static Node useVar⁔(/*this*/ ж<Tree> Ꮡt, Pos pos, @string name) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     var v = Ꮡt.newVariable(pos, name);
@@ -1117,4 +1086,4 @@ internal static Node useVar(this ж<Tree> Ꮡt, Pos pos, @string name) {
     return default;
 }
 
-}
+} // end parse_package

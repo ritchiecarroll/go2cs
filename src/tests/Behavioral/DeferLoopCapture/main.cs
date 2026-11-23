@@ -179,7 +179,7 @@ internal static void closureCapture3Clause() {
         fmt.Println("-- control: closure capture (3-clause) --");
         for (nint iᴛ1 = 0; iᴛ1 < 3; iᴛ1++) {
             var i = iᴛ1;
-            defer(() => {
+            defer([GoFunc("closureCapture3Clause.func1")] () => {
                 fmt.Println("closure", i);
             }, ref ᒐ);
         }
@@ -193,7 +193,7 @@ internal static void closureCaptureRange() {
     try {
         fmt.Println("-- control: closure capture (range) --");
         foreach (var (_, v) in range(slice<@string>(["x", "y", "z"]))) {
-            defer(() => {
+            defer([GoFunc("closureCaptureRange.func1")] () => {
                 fmt.Println("range", v);
             }, ref ᒐ);
         }

@@ -9,7 +9,7 @@ internal static nint run(Func<nint, nint> f) { return f(10); }
 internal static void main() {
     nint n = 100;
 
-    nint r = run((nint nΔ1) => {
+    nint r = run([GoFunc("main.func1")] (nint nΔ1) => {
         nΔ1 = nΔ1 * 2;
         return nΔ1 + 1;
     });
@@ -17,7 +17,7 @@ internal static void main() {
     fmt.Println(r, n);
 
     nint add = 7;
-    nint g(nint nΔ2) => nΔ2 + add;
+    [GoFunc("main.func2")] nint g(nint nΔ2) => nΔ2 + add;
     fmt.Println(g(n), n);
 }
 

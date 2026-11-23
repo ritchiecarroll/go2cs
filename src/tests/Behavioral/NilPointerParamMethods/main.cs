@@ -88,7 +88,7 @@ internal static ж<node> orDefault(ж<node> p) {
 internal static void @try(@string label, Action fn) {
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("try.func1")] () => {
             var r = recover(); if (r != nil) {
                 fmt.Printf("%s -> panic: %v\n"u8, label, r);
                 return;
@@ -106,31 +106,31 @@ internal static void main() {
 
     fmt.Println("== 1. nil argument, DELEGATED guard: must not panic ==");
     var nilNodeʗ1 = nilNode;
-    @try("checkArg(nil)", () => {
+    @try("checkArg(nil)", [GoFunc("main.func1")] () => {
         var err = checkArg(nilNodeʗ1, "x");
         fmt.Printf("  checkArg -> %v (is errNilArg: %v)\n"u8, err, AreEqual(err, errNilArg));
     });
     var nilNodeʗ2 = nilNode;
-    @try("store(nil)", () => {
+    @try("store(nil)", [GoFunc("main.func2")] () => {
         var h = store(nilNodeʗ2);
         fmt.Printf("  store -> %s, next nil: %v\n"u8, h.name, h.next == nil);
     });
     var nilNodeʗ3 = nilNode;
-    @try("guarded(nil)", () => {
+    @try("guarded(nil)", [GoFunc("main.func3")] () => {
         fmt.Printf("  %s\n"u8, guarded(nilNodeʗ3));
     });
 
     fmt.Println();
     fmt.Println("== 2. nil argument, UNCONDITIONAL deref: must panic ==");
     var nilNodeʗ4 = nilNode;
-    @try("readName(nil)", () => {
+    @try("readName(nil)", [GoFunc("main.func4")] () => {
         _ = readName(nilNodeʗ4);
     });
 
     fmt.Println();
     fmt.Println("== 3. nil argument, side effect BEFORE the deref: effect then panic ==");
     var nilNodeʗ5 = nilNode;
-    @try("announce(nil)", () => {
+    @try("announce(nil)", [GoFunc("main.func5")] () => {
         _ = announce(nilNodeʗ5);
     });
 
@@ -138,55 +138,55 @@ internal static void main() {
     fmt.Println("== 4. nil-terminated walk: repointing to the terminator must not panic ==");
     var chain = Ꮡ(new node(name: "a", n: 1, next: Ꮡ(new node(name: "b", n: 2, next: Ꮡ(new node(name: "c", n: 3))))));
     var chainʗ1 = chain;
-    @try("walkLen(chain)", () => {
+    @try("walkLen(chain)", [GoFunc("main.func6")] () => {
         fmt.Printf("  walkLen -> %d\n"u8, walkLen(chainʗ1));
     });
     var nilNodeʗ6 = nilNode;
-    @try("walkLen(nil)", () => {
+    @try("walkLen(nil)", [GoFunc("main.func7")] () => {
         fmt.Printf("  walkLen -> %d\n"u8, walkLen(nilNodeʗ6));
     });
 
     fmt.Println();
     fmt.Println("== 5. *error parameter: holding nil is not a dereference ==");
     ref var held = ref heap<error>(out var Ꮡheld);
-    @try("setErr(&held)", () => {
+    @try("setErr(&held)", [GoFunc("main.func8")] () => {
         fmt.Printf("  %s\n"u8, setErr(Ꮡheld, errNilArg));
     });
-    @try("setErr(nil)", () => {
+    @try("setErr(nil)", [GoFunc("main.func9")] () => {
         fmt.Printf("  %s\n"u8, setErr(nil, errNilArg));
     });
 
     fmt.Println();
     fmt.Println("== 6. normalization: repointed before any read ==");
     var nilNodeʗ7 = nilNode;
-    @try("normalize(nil)", () => {
+    @try("normalize(nil)", [GoFunc("main.func10")] () => {
         fmt.Printf("  normalize -> %s\n"u8, normalize(nilNodeʗ7));
     });
     var chainʗ2 = chain;
-    @try("normalize(chain)", () => {
+    @try("normalize(chain)", [GoFunc("main.func11")] () => {
         fmt.Printf("  normalize -> %s\n"u8, normalize(chainʗ2));
     });
 
     fmt.Println();
     fmt.Println("== 7. non-nil arguments: everything unchanged ==");
     var chainʗ3 = chain;
-    @try("checkArg(chain)", () => {
+    @try("checkArg(chain)", [GoFunc("main.func12")] () => {
         fmt.Printf("  checkArg -> %v\n"u8, checkArg(chainʗ3, "x"));
     });
     var chainʗ4 = chain;
-    @try("guarded(chain)", () => {
+    @try("guarded(chain)", [GoFunc("main.func13")] () => {
         fmt.Printf("  %s\n"u8, guarded(chainʗ4));
     });
     var chainʗ5 = chain;
-    @try("readName(chain)", () => {
+    @try("readName(chain)", [GoFunc("main.func14")] () => {
         fmt.Printf("  readName -> %s\n"u8, readName(chainʗ5));
     });
     var chainʗ6 = chain;
-    @try("announce(chain)", () => {
+    @try("announce(chain)", [GoFunc("main.func15")] () => {
         fmt.Printf("  announce -> %s\n"u8, announce(chainʗ6));
     });
     var chainʗ7 = chain;
-    @try("store(chain)", () => {
+    @try("store(chain)", [GoFunc("main.func16")] () => {
         var h = store(chainʗ7);
         fmt.Printf("  store -> %s, next: %s\n"u8, h.name, h.next.name);
     });

@@ -138,7 +138,7 @@ internal static slice<@string> envSorted(slice<@string> envv) {
 
     var lowerKeyCache = new map<@string, slice<byte>>{}; // lowercased keys to avoid recomputing them in sort
     var lowerKeyCacheʗ1 = lowerKeyCache;
-    slice<byte> lowerKey(@string kv) {
+    [GoFunc("envSorted.func1")] slice<byte> lowerKey(@string kv) {
         nint eq = bytealg.IndexByteString(kv, (byte)'=');
         if (eq < 0) {
             return default;
@@ -165,7 +165,7 @@ internal static slice<@string> envSorted(slice<@string> envv) {
     }
 
     var lowerKeyʗ1 = lowerKey;
-    var cmpEnv = (@string a, @string b) => bytealg.Compare(lowerKeyʗ1(a), lowerKeyʗ1(b));
+    var cmpEnv = [GoFunc("envSorted.func2")] (@string a, @string b) => bytealg.Compare(lowerKeyʗ1(a), lowerKeyʗ1(b));
 
     if (!slices.IsSortedFunc(envv, cmpEnv)) {
         envv = slices.Clone<slice<@string>, @string>(envv);

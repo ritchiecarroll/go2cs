@@ -10,10 +10,14 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+using XpkgPromotedInnerLib = go.XpkgPromotedInnerLib_package;
 // </ImportedTypeAliases>
 
 using go;
 using static go.XpkgPromotedMidLib_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -49,10 +53,13 @@ using static go.XpkgPromotedMidLib_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("lib.go", "lib.cs", "ABMcAA4WgIAACw4AFyQ=")]
+[assembly: GoPositionMap("lib.go", "lib.cs", "AA4cAAoWgIAACQ4AFSQ=")]
 // </GoSourcePositionMaps>
 
 namespace go;
+
+using static go.XpkgPromotedMidLib_package;
+using XpkgPromotedInnerLib = go.XpkgPromotedInnerLib_package;
 
 [GoPackage("XpkgPromotedMidLib")]
 public static partial class XpkgPromotedMidLib_package
@@ -96,7 +103,23 @@ public static partial class XpkgPromotedMidLib_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(XpkgPromotedMidLib_package.inner3)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class XpkgPromotedMidLibᴛinner3;
-[GoMethodHost(typeof(XpkgPromotedMidLib_package.loc2)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class XpkgPromotedMidLibᴛloc2;
-[GoMethodHost(typeof(XpkgPromotedMidLib_package.r1)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class XpkgPromotedMidLibᴛr1;
+[GoMethodHost(typeof(XpkgPromotedMidLib_package.inner3)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class XpkgPromotedMidLibᴛinner3;
+[GoMethodHost(typeof(XpkgPromotedMidLib_package.loc2)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class XpkgPromotedMidLibᴛloc2;
+[GoMethodHost(typeof(XpkgPromotedMidLib_package.r1)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class XpkgPromotedMidLibᴛr1;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class XpkgPromotedMidLibᴛinner3 {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static XpkgPromotedInnerLib.Token Tok(this inner3 _) => XpkgPromotedMidLib_package.Tok⁔(_);
+}
+partial class XpkgPromotedMidLibᴛloc2 {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static XpkgPromotedInnerLib.Token Tok(this loc2 _) => XpkgPromotedMidLib_package.Tok⁔(_);
+}
+partial class XpkgPromotedMidLibᴛr1 {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint Ping(this ref r1 r) => XpkgPromotedMidLib_package.Ping⁔(ref r);
+}
+// </MethodForwarders>

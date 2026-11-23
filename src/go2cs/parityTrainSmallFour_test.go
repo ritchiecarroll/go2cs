@@ -137,12 +137,12 @@ func TestSmallFourEmission(t *testing.T) {
 
 	wants := map[string][]string{
 		"F1": {
-			`nint v = func(nint () => `,
-			`func(() => `,
-			`nint w = func(nint (nint a) => `,
-			`func((@string, error) () => `,
-			`func(T () => `,
-			`func(int32 () => `,
+			`nint v = func([GoFunc("main.func1")] nint () => `,
+			`func([GoFunc("main.func2")] () => `,
+			`nint w = func([GoFunc("main.func3")] nint (nint a) => `,
+			`func([GoFunc("main.func4")] (@string, error) () => `,
+			`func([GoFunc("pick[...].func1")] T () => `,
+			`func([GoFunc("main.func5")] int32 () => `,
 		},
 		"direction": {`ch.AsRecvOnly()`, `ch.AsSendOnly()`},
 		"loops":     {`for (;;) {`, `for (nint j = 0; ; j++) {`},

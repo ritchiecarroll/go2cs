@@ -147,10 +147,10 @@ internal static void main() {
     fmt.Println("native bytes:", buf[..12]);
     fmt.Println("native fields:", h.w.Tag, h.w.Size, h.w.Flag);
 
-    func(() => {
+    func([GoFunc("main.func1")] () => {
         GoFrame ᒐ = default;
         try {
-            defer(() => {
+            defer([GoFunc("main.func1.1")] () => {
                 fmt.Println("nil read:", recover(), goFrames());
             }, ref ᒐ);
 
@@ -161,10 +161,10 @@ internal static void main() {
         finally { ᒐ.Run(); }
     })();
 
-    func(() => {
+    func([GoFunc("main.func2")] () => {
         GoFrame ᒐ = default;
         try {
-            defer(() => {
+            defer([GoFunc("main.func2.1")] () => {
                 fmt.Println("nil write:", recover());
             }, ref ᒐ);
 

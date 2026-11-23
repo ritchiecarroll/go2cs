@@ -24,7 +24,7 @@ internal static void main() {
     }
 
     uint64 state = 0x9E3779B97F4A7C15UL;
-    uint64 next() {
+    [GoFunc("main.func1")] uint64 next() {
         state ^= (uint64)((state << 13));
         state ^= (uint64)((state >> 7));
         state ^= (uint64)((state << 17));

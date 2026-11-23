@@ -45,7 +45,7 @@ func main() {
 
 	// The comment ends its own line inside the kept block, and the call's remaining argument follows the block.
 	for _, want := range []string{
-		"var f = wrap((nint n) => {\n",
+		"var f = wrap([GoFunc(\"main.func1\")] (nint n) => {\n",
 		"        return n < limit; // below the limit\n",
 		"    }, \"x\");", // a plain literal (the string slot): see hoistedLiteralOperations.go
 	} {
@@ -55,7 +55,7 @@ func main() {
 	}
 
 	// CONTROL: a literal with no comment still collapses to an expression body.
-	if want := `var h = wrap((nint n) => n == limit, "z");`; !strings.Contains(emitted, want) {
+	if want := `var h = wrap([GoFunc("main.func2")] (nint n) => n == limit, "z");`; !strings.Contains(emitted, want) {
 		t.Errorf("control: want %q unchanged:\n%s", want, emitted)
 	}
 }

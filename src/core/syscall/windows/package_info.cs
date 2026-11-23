@@ -14,6 +14,9 @@
 
 using go;
 using static go.syscall_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -73,16 +76,18 @@ using static go.syscall_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("syscall/env_windows.go", "env_windows.cs", "AAoagoKClIKCgoKClILKgoKClIKClIKClIKmgoKClIKClIKmgriCgoLcooKClJSCgpSCgqaCgpQ=")]
-[assembly: GoPositionMap("syscall/syscall.go", "syscall.cs", "ACFK8oKClKyygpSCggACEMCasoKClAAIEJLIksiSyJLKkpaSmA==")]
-[assembly: GoPositionMap("syscall/syscall_windows.go", "syscall_windows.cs", "ABg80oKClK7CggAHEIKCrLKCgoKClJS0AAkQtoKqooKUgoKCgpQAAhLQnMKCgpQACxicwvqUgoKmgpSClLaCgpSmhJKCgoKCgriUAAsUgpSorKqepoKmgsgAAhDiAAIS4gAC4AEAagKCgoKmooKUgoKUgoKUtLSkgpS4gqaUgoKClIKC3IKUpgALFKSCntKUgrS0pIKClIKCppSEkoKClIKCuISCuIKmgoKmpoKCgoKUlJSmgoKCgpSmooKCgpSUgpSClKaigpSCgpSClIKU6ryigoLGtIKUprKClLS0pIKmgsiiopaCgsqC3IKCgpSClLiigoKUpqKCgpSmooKClKaigoKUpqKCgpSCgpSmgpKCgoKU5oKIgoKmooKCgqaCgpSSgoKUgoKmsoKUgoKUpoKUgoKCgpSClAAJDLKClIKClKaClIKCgoKUgpTmgqaCgoKUgoKUgpSUpoKmggBt8gGigoKCuLiClIKCuIKmgpSmAAhigoKUpoKCAApKgqaCAAQuooKClAAKAoKClKamooKClAAKAoKClKamggAMOqIACAKCgpSmABI2lJSUlJSUlJQAChKUooKCqoCCgpSCABo6goKCgqaigqaiAAQSlAADEgAIAoKClKaigoKClKaigoKUgoKCgpSCgpSCgvqCgoKUpoKYgoKCgpSClJSmooKCggAKFoKUqICClIKCgpSCgoKC2JSCgoKCpsaCqNKCgpSUgpSUgoKCgqaCgpSCgoKCgoLYAA0SgoKCggAIDpSU6JKosoKCgoKUgoKCgqaokuiSgoKCgpSUgoKCpoKCgpSCyJKCqJKCgoKokgAENgAYAqaCgqaygqaU")]
+[assembly: GoPositionMap("syscall/syscall.go", "syscall.cs", "ACBK8oKClKyygpSCggACEMCasoKClAAGEJKokqiSqJKqkpaSmA==")]
+[assembly: GoPositionMap("syscall/syscall_windows.go", "syscall_windows.cs", "ABc80oKClK7CggAHEIKCrLKCgoKClJS0AAkQtoKqooKUgoKCgpQAAhLQnMKCgpQACxicwtqUgoKmgpSClLaCgpSmhJKCgoKCgriUAAcUgpSorKqepoKmgqgAAhDiAAIS4gAC4AEAagKCgoKmooKUgoKUgoKUtLSkgpS4gqaUgoKClIKC3IKUpgALFKSCntKUgrS0pIKClIKCppSEkoKClIKCuISCuIKmgoKmpoKCgoKUlJSmgoKCgpSmooKCgpSUgpSClKaigpSCgpSClIKU6ryigoLGtIKUprKClLS0pIKmgsiiopaCgsqC3IKCgpSClLiigoKUpqKCgpSmooKClKaigoKUpqKCgpSCgpSmgpKCgoKU5oKIgoKmooKCgqaCgpSSgoKUgoKmsoKUgoKUpoKUgoKCgpSClAAJDLKClIKClKaClIKCgoKUgpTmgqaCgoKUgoKUgpSUpoKmggBj8gGigoKCuLiClIKCuIKmgpSmAARigoKUpoKCAApKgqaCAAQuooKClAAKAoKClKamooKClAAKAoKClKamggAMOqIACAKCgpSmABA2lJSUlJSUlJQACBKUooKCqoCCgpSCABo6goKCgqaigqaiAAQSlAADEgAIAoKClKaigoKClKaigoKUgoKCgpSCgpSCgvqCgoKUpoKYgoKCgpSClJSmooKCggAKFoKUqICClIKCgpSCgoKCuJSCgoKCpqaCqNKCgpSUgpSUgoKCgqaCgpSCgoKCgoLYAA0SgoKCggAIDpSU6JKosoKCgoKUgoKCgqaokuiSgoKCgpSUgoKCpoKCgpSCqJKCqJKCgoKokgACNgAYAqaCgqaygqaU")]
 [assembly: GoPositionMap("syscall/time_nofake.go", "time_nofake.cs", "AAoWlA==")]
-[assembly: GoPositionMap("syscall/types_windows.go", "types_windows.cs", "AEaaAQDzAf4DkpIAEiKCxqKCggAePrSUlILGtJSUgoIAHk7ygoKCgoKCgqaCAOEEgAo=")]
+[assembly: GoPositionMap("syscall/types_windows.go", "types_windows.cs", "AEWaAQDzAf4DkpIAECKCpqKCggAcPrSUlIKmtJSUgoIAHk7ygoKCgoKCgqaCAOEEgAo=")]
 [assembly: GoPositionMap("syscall/wtf8_windows.go", "wtf8_windows.cs", "ACZYoqaClIKCgoKmgpSqooKCtsiC6oKClIKklA==")]
 [assembly: GoPositionMap("syscall/zerrors_windows.go", "zerrors_windows.cs", "AJMBrgI=")]
 [assembly: GoPositionMap("syscall/zsyscall_windows.go", "zsyscall_windows.cs", "ABIyopSkyqiCgoKCgoKCgoKClIKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoIABSaiwoKUpqKCgpQAEAKClKai4oKUpqKigpSmooKClKaiooKmosKClKaiAA4CgpSmogAOAoKUpqKigpSmooKClKaiAAwCgpSmosKClKaiABYCgpSmogAKAoKUAAQWooKClKayooKClKayooKClAAIMLKCgoKUprKigoKUAAQWosKCpqKCgoKUAAYgosKClKaiooKUpqKCgpQABBaigoKUpqLCgpSmssKCgpSmssKCgpSmosKClKaygoKClKai4oKUpqKCgpQAEAKClKaiwoKUprKCgoKUpqKigpSmgqKmogAIAoKUpqKCgpSigpSmgoKmooKClAAGKKKCgpSmooKClKaygoKUwoKClKaiooKUpqKCgpQABBKiwoKUpqKigpSmsqKCgpSmsoKCgpSmooKCprKCgoKUprLCgoKUpqKigpSmosKClKayooKClKaiooKUprKCgoKUprKigoKUprLigoKUpqKCgpSmssKCgpSmsoKCgpSmsqKCgpSmogAIAoKUpqLigpSmssKCgpQABBCygoKClKaCoqayooKClAAEGLKCgoKUpqLCgpSmsoKCgpSmsqKCgpSmsoKCgpSmsoKCgpSmsoKCgpSmosKClKaygoKUgoKClKaiooKUAAYmouKClKaigoKU4oKUAAQeoqKClKaiooKUpqKCgpSmosKClKaiooKUpqKCgpSmoqKClKayooKClKai4oKUpqKCgpSmooKClKaigoKUpqIACAKClKaigoKUpqKCgpSmsoKCgpSmouKClAAKSKKigpQABiaiwoKUpqLigpSmssKCgpSmosKClAAGIKKCgpQABBiiAAgCgpQACDaiAAoCgpQABBaiooKUpqKCgpSmoqKClKaygoKClAAEGKLCgpSmsoKCgpQABBiygoKClIKCgpQABBiiwoKUpqLCgpSmooKClKaigoKmoqKClKaigoKUprKCgoKU")]
 // </GoSourcePositionMaps>
 
 namespace go;
+
+using static go.syscall_package;
 
 [GoPackage("syscall")]
 public static partial class syscall_package
@@ -206,22 +211,71 @@ public static partial class syscall_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(syscall_package.DLL)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syscallᴛDLL;
-[GoMethodHost(typeof(syscall_package.DLLError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syscallᴛDLLError;
-[GoMethodHost(typeof(syscall_package.Errno)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syscallᴛErrno;
-[GoMethodHost(typeof(syscall_package.Filetime)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syscallᴛFiletime;
-[GoMethodHost(typeof(syscall_package.LazyDLL)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syscallᴛLazyDLL;
-[GoMethodHost(typeof(syscall_package.LazyProc)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syscallᴛLazyProc;
-[GoMethodHost(typeof(syscall_package.Proc)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syscallᴛProc;
-[GoMethodHost(typeof(syscall_package.RawSockaddrAny)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syscallᴛRawSockaddrAny;
-[GoMethodHost(typeof(syscall_package.SID)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syscallᴛSID;
-[GoMethodHost(typeof(syscall_package.Signal)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syscallᴛSignal;
-[GoMethodHost(typeof(syscall_package.SockaddrInet4)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syscallᴛSockaddrInet4;
-[GoMethodHost(typeof(syscall_package.SockaddrInet6)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syscallᴛSockaddrInet6;
-[GoMethodHost(typeof(syscall_package.SockaddrUnix)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syscallᴛSockaddrUnix;
-[GoMethodHost(typeof(syscall_package.Timespec)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syscallᴛTimespec;
-[GoMethodHost(typeof(syscall_package.Timeval)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syscallᴛTimeval;
-[GoMethodHost(typeof(syscall_package.Token)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syscallᴛToken;
-[GoMethodHost(typeof(syscall_package.WaitStatus)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syscallᴛWaitStatus;
-[GoMethodHost(typeof(syscall_package.procThreadAttributeListContainer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syscallᴛprocThreadAttributeListContainer;
+[GoMethodHost(typeof(syscall_package.DLL)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syscallᴛDLL;
+[GoMethodHost(typeof(syscall_package.DLLError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syscallᴛDLLError;
+[GoMethodHost(typeof(syscall_package.Errno)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syscallᴛErrno;
+[GoMethodHost(typeof(syscall_package.Filetime)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syscallᴛFiletime;
+[GoMethodHost(typeof(syscall_package.LazyDLL)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syscallᴛLazyDLL;
+[GoMethodHost(typeof(syscall_package.LazyProc)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syscallᴛLazyProc;
+[GoMethodHost(typeof(syscall_package.Proc)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syscallᴛProc;
+[GoMethodHost(typeof(syscall_package.RawSockaddrAny)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syscallᴛRawSockaddrAny;
+[GoMethodHost(typeof(syscall_package.SID)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syscallᴛSID;
+[GoMethodHost(typeof(syscall_package.Signal)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syscallᴛSignal;
+[GoMethodHost(typeof(syscall_package.SockaddrInet4)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syscallᴛSockaddrInet4;
+[GoMethodHost(typeof(syscall_package.SockaddrInet6)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syscallᴛSockaddrInet6;
+[GoMethodHost(typeof(syscall_package.SockaddrUnix)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syscallᴛSockaddrUnix;
+[GoMethodHost(typeof(syscall_package.Timespec)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syscallᴛTimespec;
+[GoMethodHost(typeof(syscall_package.Timeval)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syscallᴛTimeval;
+[GoMethodHost(typeof(syscall_package.Token)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syscallᴛToken;
+[GoMethodHost(typeof(syscall_package.WaitStatus)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syscallᴛWaitStatus;
+[GoMethodHost(typeof(syscall_package.procThreadAttributeListContainer)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syscallᴛprocThreadAttributeListContainer;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class syscallᴛErrno {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this Errno e) => syscall_package.Error⁔(e);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string error(this Errno e) => syscall_package.error⁔(e);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Is(this Errno e, error target) => syscall_package.Is⁔(e, target);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Temporary(this Errno e) => syscall_package.Temporary⁔(e);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Timeout(this Errno e) => syscall_package.Timeout⁔(e);
+}
+partial class syscallᴛFiletime {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static int64 Nanoseconds(this ref Filetime ft) => syscall_package.Nanoseconds⁔(ref ft);
+}
+partial class syscallᴛSignal {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Signal(this Signal s) => syscall_package.Signal⁔(s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this Signal s) => syscall_package.String⁔(s);
+}
+partial class syscallᴛSockaddrUnix {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (unsafe_package.Pointer, int32, error) sockaddr(this ж<SockaddrUnix> Ꮡsa) => syscall_package.sockaddr⁔(Ꮡsa);
+}
+partial class syscallᴛTimespec {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (int64 sec, int64 nsec) Unix(this ref Timespec ts) => syscall_package.Unix⁔(ref ts);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static int64 Nano(this ref Timespec ts) => syscall_package.Nano⁔(ref ts);
+}
+partial class syscallᴛTimeval {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (int64 sec, int64 nsec) Unix(this ref Timeval tv) => syscall_package.Unix⁔(ref tv);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static int64 Nano(this ref Timeval tv) => syscall_package.Nano⁔(ref tv);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static int64 Nanoseconds(this ref Timeval tv) => syscall_package.Nanoseconds⁔(ref tv);
+}
+partial class syscallᴛWaitStatus {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Exited(this WaitStatus w) => syscall_package.Exited⁔(w);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint ExitStatus(this WaitStatus w) => syscall_package.ExitStatus⁔(w);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static Signal Signal(this WaitStatus w) => syscall_package.Signal⁔(w);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool CoreDump(this WaitStatus w) => syscall_package.CoreDump⁔(w);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Stopped(this WaitStatus w) => syscall_package.Stopped⁔(w);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Continued(this WaitStatus w) => syscall_package.Continued⁔(w);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static Signal StopSignal(this WaitStatus w) => syscall_package.StopSignal⁔(w);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Signaled(this WaitStatus w) => syscall_package.Signaled⁔(w);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint TrapCause(this WaitStatus w) => syscall_package.TrapCause⁔(w);
+}
+partial class syscallᴛprocThreadAttributeListContainer {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error update(this ref procThreadAttributeListContainer al, uintptr attribute, unsafe_package.Pointer value, uintptr size) => syscall_package.update⁔(ref al, attribute, value, size);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void delete(this ref procThreadAttributeListContainer al) => syscall_package.delete⁔(ref al);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<_PROC_THREAD_ATTRIBUTE_LIST> list(this ref procThreadAttributeListContainer al) => syscall_package.list⁔(ref al);
+}
+// </MethodForwarders>

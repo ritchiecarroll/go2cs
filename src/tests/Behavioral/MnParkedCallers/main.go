@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-// M:N PROTOTYPE (A2). Prototype code: nothing from this branch lands on master as it is.
+// M:N scheduler, experimental and opt-in (GoTwins=true to build, GO2CS_MN=1 to run); inert otherwise.
 //
 // A goroutine parks three calls below its `go` statement and then reads its own stack: runtime.Callers,
 // runtime.Caller, and runtime.Callers from a deferred function while a panic raised after a park is running.

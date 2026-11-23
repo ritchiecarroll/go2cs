@@ -15,7 +15,7 @@ public static void Add(this ж<Tally> Ꮡt, nint n) {
     try {
         ref var t = ref Ꮡt.DerefOrNull();
 
-        defer(() => {
+        defer([GoFunc("(*Tally).Add.func1")] () => {
             Ꮡt.Value.log = fmt.Sprintf("%s+%d"u8, Ꮡt.Value.log, n);
         }, ref ᒐ);
         t.total += n;
@@ -35,10 +35,10 @@ internal static void main() {
     ref var @base = ref heap<Tally>(new Tally(total: 2, log: "d"), out var Ꮡbase);
 
     var baseʗ1 = @base;
-    func(() => {
+    func([GoFunc("main.func1")] () => {
         GoFrame ᒐ = default;
         try {
-            defer((Tally t) => {
+            defer([GoFunc("main.func1.1")] (Tally t) => {
                 report("deferred:", t, 4);
             }, baseʗ1, ref ᒐ);
         }
@@ -47,7 +47,7 @@ internal static void main() {
     })();
 
     var baseʗ2 = @base;
-    func(() => {
+    func([GoFunc("main.func2")] () => {
         GoFrame ᒐ = default;
         try {
             defer(ᴛ1 => report("named:", ᴛ1, 5), baseʗ2, ref ᒐ);
@@ -60,9 +60,9 @@ internal static void main() {
 
     var baseʗ3 = @base;
     var doneʗ1 = done;
-    func([MethodImpl(MethodImplOptions.NoInlining)] () => {
+    func([MethodImpl(MethodImplOptions.NoInlining), GoFunc("main.func3")] () => {
         var doneʗ2 = doneʗ1;
-        goǃ((Tally t) => {
+        goǃ([GoFunc("main.func3.1")] (Tally t) => {
             report("goroutine:", t, 7);
             doneʗ2.ᐸꟷ(true);
         }, baseʗ3);

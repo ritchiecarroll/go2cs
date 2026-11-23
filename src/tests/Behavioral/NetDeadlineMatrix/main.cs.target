@@ -14,14 +14,14 @@ internal static partial (Δnet.Conn client, Δnet.Conn server, Action cleanup, b
 
     var (listener, err) = Δnet.Listen("tcp", "127.0.0.1:0");
     if (err != nil) {
-        return (default, default, () => {
+        return (default, default, [GoFunc("pair.func1")] () => {
         }, false);
     }
 
     var accepts = new channel<Δnet.Conn>(1);
     var acceptsʗ1 = accepts;
     var listenerʗ1 = listener;
-    goǃ(() => {
+    goǃ([GoFunc("pair.func2")] () => {
         var (conn, errΔ1) = listenerʗ1.Accept();
         if (errΔ1 != nil) {
             acceptsʗ1.ᐸꟷ(default);
@@ -33,7 +33,7 @@ internal static partial (Δnet.Conn client, Δnet.Conn server, Action cleanup, b
     (client, err) = Δnet.Dial("tcp", listener.Addr().String());
     if (err != nil) {
         listener.Close();
-        return (default, default, () => {
+        return (default, default, [GoFunc("pair.func3")] () => {
         }, false);
     }
 
@@ -41,12 +41,12 @@ internal static partial (Δnet.Conn client, Δnet.Conn server, Action cleanup, b
     if (server == nil) {
         client.Close();
         listener.Close();
-        return (default, default, () => {
+        return (default, default, [GoFunc("pair.func4")] () => {
         }, false);
     }
 
     var listenerʗ2 = listener;
-    return (client, server, () => {
+    return (client, server, [GoFunc("pair.func5")] () => {
         server.Close();
         client.Close();
         listenerʗ2.Close();
@@ -83,7 +83,7 @@ internal static partial void deadlineLifecycle() {
 
         client.SetReadDeadline(new time.Time());
         var serverʗ1 = server;
-        goǃ(() => {
+        goǃ([GoFunc("deadlineLifecycle.func1")] () => {
             time.Sleep(50 * time.Millisecond);
             serverʗ1.Write(slice<byte>("clear"u8));
         });
@@ -131,7 +131,7 @@ internal static partial void replacedWhileBlocked() {
 
         var clientʗ1 = client;
         var serverʗ1 = server;
-        goǃ(() => {
+        goǃ([GoFunc("replacedWhileBlocked.func1")] () => {
             time.Sleep(100 * time.Millisecond);
             clientʗ1.SetReadDeadline(time.Now().Add((time.Duration)(30000000000L)));
             time.Sleep(400 * time.Millisecond);
@@ -158,7 +158,7 @@ internal static partial void modeIndependence() {
         defer(cleanupʗ1, ref ᒐ);
 
         var serverʗ1 = server;
-        goǃ(() => {
+        goǃ([GoFunc("modeIndependence.func1")] () => {
             var drain = new slice<byte>(64);
             for (;;) {
                 var (_, err) = serverʗ1.Read(drain); if (err != nil) {
@@ -231,7 +231,7 @@ internal static partial void deadlineVersusData() {
 
         client.SetReadDeadline(new time.Time());
         var serverʗ1 = server;
-        goǃ(() => {
+        goǃ([GoFunc("deadlineVersusData.func1")] () => {
             time.Sleep(50 * time.Millisecond);
             serverʗ1.Write(slice<byte>("after"u8));
         });

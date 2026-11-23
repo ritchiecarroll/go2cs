@@ -21,38 +21,38 @@ internal static Func<nint, nint> applyFunc(Func<Func<nint, nint>> f) { return f(
 internal static error applyErr(Func<nint, error> f) { return f(1); }
 
 internal static void main() {
-    var g = slice<Value> (slice<Value> @in) => default;
+    var g = [GoFunc("main.func1")] slice<Value> (slice<Value> @in) => default;
     fmt.Println("A1 slice result:", g(default) == nil, len(g(default)));
 
-    var m = map<@string, nint> (@string k) => default;
+    var m = [GoFunc("main.func2")] map<@string, nint> (@string k) => default;
     fmt.Println("A2 map result:", applyMap(m) == nil, len(m("x")));
 
-    var p = ж<Value> () => default;
+    var p = [GoFunc("main.func3")] ж<Value> () => default;
     fmt.Println("A3 pointer result:", p() == nil);
 
-    var c = channel<nint> () => default;
+    var c = [GoFunc("main.func4")] channel<nint> () => default;
     fmt.Println("A4 chan result:", applyChan(c) == nil);
 
-    var fn = Func<nint, nint> () => default;
+    var fn = [GoFunc("main.func5")] Func<nint, nint> () => default;
     fmt.Println("A5 func result:", applyFunc(fn) == nil);
 
     fmt.Println("A6 slice-result lambda passed to a consumer:", apply(g) == nil);
     fmt.Println("A7 pointer-result lambda passed to a consumer:", applyPtr(p) == nil);
 
-    var e = error (nint x) => default;
+    var e = [GoFunc("main.func6")] error (nint x) => default;
     fmt.Println("B1 error result:", applyErr(e) == nil);
 
-    void v(@string a, @string b) {
+    [GoFunc("main.func7")] void v(@string a, @string b) {
         _ = a;
         _ = b;
     }
     v("x", "y");
     fmt.Println("B2 void lambda ran");
 
-    slice<Value> r() => slice<Value>([new(N: 7)]);
+    [GoFunc("main.func8")] slice<Value> r() => slice<Value>([new(N: 7)]);
     fmt.Println("B3 slice result non-nil:", r()[0].N);
 
-    slice<Value> mix(bool b) {
+    [GoFunc("main.func9")] slice<Value> mix(bool b) {
         if (b) {
             return default;
         }
@@ -60,7 +60,7 @@ internal static void main() {
     }
     fmt.Println("B4 mixed arms:", mix(true) == nil, mix(false)[0].N);
 
-    nint num(nint x) => x * 2;
+    [GoFunc("main.func10")] nint num(nint x) => x * 2;
     fmt.Println("B5 int result:", num(21));
 }
 

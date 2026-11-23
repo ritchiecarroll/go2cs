@@ -62,7 +62,7 @@ internal static void cgoCheckPtrWrite(ж<@unsafe.Pointer> dst, @unsafe.Pointer s
         return;
     }
 
-    systemstack(() => {
+    systemstack([GoFunc("cgoCheckPtrWrite.func1")] () => {
         println((@string)"write of unpinned Go pointer", (hex)(uint64)(uintptr)src, (@string)"to non-Go memory", (hex)(uint64)(uintptr)dst);
         @throw(cgoWriteBarrierFail);
     });

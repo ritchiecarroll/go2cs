@@ -8,7 +8,6 @@ using context = context_package;
 using errors = errors_package;
 using os = os_package;
 using syscall = syscall_package;
-using static net_package;
 
 partial class net_package {
 
@@ -104,13 +103,11 @@ internal static @string sotypeToNet(nint sotype) {
     }}
 }
 
-} partial class netᴛUnixAddr {
-
-internal static nint family(this ref UnixAddr a) {
+internal static nint family⁔(/*this*/ ref UnixAddr a) {
     return syscall.AF_UNIX;
 }
 
-internal static (syscall.Sockaddr, error) sockaddr(this ж<UnixAddr> Ꮡa, nint family) {
+internal static (syscall.Sockaddr, error) sockaddr⁔(/*this*/ ж<UnixAddr> Ꮡa, nint family) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (Ꮡa == nil) {
@@ -119,13 +116,11 @@ internal static (syscall.Sockaddr, error) sockaddr(this ж<UnixAddr> Ꮡa, nint 
     return (new syscall.SockaddrUnixжSockaddr(Ꮡ(new syscall.SockaddrUnix(Name: a.Name))), default);
 }
 
-internal static sockaddr toLocal(this ж<UnixAddr> Ꮡa, @string net) {
+internal static sockaddr toLocal⁔(/*this*/ ж<UnixAddr> Ꮡa, @string net) {
     return new UnixAddrжsockaddr(Ꮡa);
 }
 
-} partial class netᴛUnixConn {
-
-internal static (nint, ж<UnixAddr>, error) readFrom(this ref UnixConn c, slice<byte> b) {
+internal static (nint, ж<UnixAddr>, error) readFrom⁔(/*this*/ ref UnixConn c, slice<byte> b) {
     ж<UnixAddr> addr = default;
     var (n, sa, err) = c.fd.readFrom(b);
     switch (sa.type()) {
@@ -138,7 +133,7 @@ internal static (nint, ж<UnixAddr>, error) readFrom(this ref UnixConn c, slice<
     return (n, addr, err);
 }
 
-internal static (nint n, nint oobn, nint flags, ж<UnixAddr> addr, error err) readMsg(this ref UnixConn c, slice<byte> b, slice<byte> oob) {
+internal static (nint n, nint oobn, nint flags, ж<UnixAddr> addr, error err) readMsg⁔(/*this*/ ref UnixConn c, slice<byte> b, slice<byte> oob) {
     nint n = default;
     nint oobn = default;
     nint flags = default;
@@ -161,7 +156,7 @@ internal static (nint n, nint oobn, nint flags, ж<UnixAddr> addr, error err) re
     return (n, oobn, flags, addr, err);
 }
 
-internal static (nint, error) writeTo(this ref UnixConn c, slice<byte> b, ж<UnixAddr> Ꮡaddr) {
+internal static (nint, error) writeTo⁔(/*this*/ ref UnixConn c, slice<byte> b, ж<UnixAddr> Ꮡaddr) {
     ref var addr = ref Ꮡaddr.DerefOrNull();
 
     if (c.fd.isConnected) {
@@ -177,7 +172,7 @@ internal static (nint, error) writeTo(this ref UnixConn c, slice<byte> b, ж<Uni
     return c.fd.writeTo(b, new syscall.SockaddrUnixжSockaddr(sa));
 }
 
-internal static (nint n, nint oobn, error err) writeMsg(this ref UnixConn c, slice<byte> b, slice<byte> oob, ж<UnixAddr> Ꮡaddr) {
+internal static (nint n, nint oobn, error err) writeMsg⁔(/*this*/ ref UnixConn c, slice<byte> b, slice<byte> oob, ж<UnixAddr> Ꮡaddr) {
     ref var addr = ref Ꮡaddr.DerefOrNull();
 
     if (c.fd.sotype == syscall.SOCK_DGRAM && c.fd.isConnected) {
@@ -193,14 +188,12 @@ internal static (nint n, nint oobn, error err) writeMsg(this ref UnixConn c, sli
     return c.fd.writeMsg(b, oob, sa);
 }
 
-} partial class netᴛsysDialer {
-
-internal static (ж<UnixConn>, error) dialUnix(this ж<sysDialer> Ꮡsd, context.Context ctx, ж<UnixAddr> laddr, ж<UnixAddr> raddr) {
+internal static (ж<UnixConn>, error) dialUnix⁔(/*this*/ ж<sysDialer> Ꮡsd, context.Context ctx, ж<UnixAddr> laddr, ж<UnixAddr> raddr) {
     ref var sd = ref Ꮡsd.DerefOrNull();
 
     var ctrlCtxFn = sd.Dialer.ControlContext;
     if (ctrlCtxFn == nil && sd.Dialer.Control != nil) {
-        ctrlCtxFn = (context.Context ctxΔ1, @string network, @string address, syscall.RawConn c) => Ꮡsd.Value.Dialer.Control(network, address, c);
+        ctrlCtxFn = [GoFunc("(*sysDialer).dialUnix.func1")] (context.Context ctxΔ1, @string network, @string address, syscall.RawConn c) => Ꮡsd.Value.Dialer.Control(network, address, c);
     }
     var (fd, err) = unixSocket(ctx, sd.network, new UnixAddrжsockaddr(laddr), new UnixAddrжsockaddr(raddr), dialˢ, ctrlCtxFn);
     if (err != nil) {
@@ -209,9 +202,7 @@ internal static (ж<UnixConn>, error) dialUnix(this ж<sysDialer> Ꮡsd, context
     return (newUnixConn(fd), default);
 }
 
-} partial class netᴛUnixListener {
-
-internal static (ж<UnixConn>, error) accept(this ref UnixListener ln) {
+internal static (ж<UnixConn>, error) accept⁔(/*this*/ ref UnixListener ln) {
     var (fd, err) = ln.fd.accept();
     if (err != nil) {
         return (default, err);
@@ -219,7 +210,7 @@ internal static (ж<UnixConn>, error) accept(this ref UnixListener ln) {
     return (newUnixConn(fd), default);
 }
 
-internal static error close(this ж<UnixListener> Ꮡln) {
+internal static error close⁔(/*this*/ ж<UnixListener> Ꮡln) {
     ref var ln = ref Ꮡln.DerefOrNull();
 
     // The operating system doesn't clean up
@@ -233,7 +224,7 @@ internal static error close(this ж<UnixListener> Ꮡln) {
     // sequence in ListenUnix. It's only non-Go
     // programs that can mess us up.
     // Even if there are racy calls to Close, we want to unlink only for the first one.
-    Ꮡln.ᏑunlinkOnce.Do(() => {
+    Ꮡln.ᏑunlinkOnce.Do([GoFunc("(*UnixListener).close.func1")] () => {
         if (Ꮡln.Value.path[0] != '@' && Ꮡln.Value.unlink) {
             syscall.Unlink(Ꮡln.Value.path);
         }
@@ -241,7 +232,7 @@ internal static error close(this ж<UnixListener> Ꮡln) {
     return ln.fd.Close();
 }
 
-internal static (ж<os.File>, error) @file(this ref UnixListener ln) {
+internal static (ж<os.File>, error) file⁔(/*this*/ ref UnixListener ln) {
     var (f, err) = ln.fd.dup();
     if (err != nil) {
         return (default, err);
@@ -257,19 +248,17 @@ internal static (ж<os.File>, error) @file(this ref UnixListener ln) {
 // Listen or ListenUnix, then by default closing the listener will remove the socket file.
 // but if the listener was created by a call to FileListener to use an already existing
 // socket file, then by default closing the listener will not remove the socket file.
-public static void SetUnlinkOnClose(this ref UnixListener l, bool unlink) {
+internal static void SetUnlinkOnClose⁔(/*this*/ ref UnixListener l, bool unlink) {
     l.unlink = unlink;
 }
 
-} partial class netᴛsysListener {
-
-internal static (ж<UnixListener>, error) listenUnix(this ж<sysListener> Ꮡsl, context.Context ctx, ж<UnixAddr> Ꮡladdr) {
+internal static (ж<UnixListener>, error) listenUnix⁔(/*this*/ ж<sysListener> Ꮡsl, context.Context ctx, ж<UnixAddr> Ꮡladdr) {
     ref var sl = ref Ꮡsl.DerefOrNull();
     ref var laddr = ref Ꮡladdr.DerefOrNull();
 
     Func<context.Context, @string, @string, syscall.RawConn, error> ctrlCtxFn = default;
     if (sl.ListenConfig.Control != nil) {
-        ctrlCtxFn = (context.Context ctxΔ1, @string network, @string address, syscall.RawConn c) => Ꮡsl.Value.ListenConfig.Control(network, address, c);
+        ctrlCtxFn = [GoFunc("(*sysListener).listenUnix.func1")] (context.Context ctxΔ1, @string network, @string address, syscall.RawConn c) => Ꮡsl.Value.ListenConfig.Control(network, address, c);
     }
     var (fd, err) = unixSocket(ctx, sl.network, new UnixAddrжsockaddr(Ꮡladdr), default, listenˢ, ctrlCtxFn);
     if (err != nil) {
@@ -278,12 +267,12 @@ internal static (ж<UnixListener>, error) listenUnix(this ж<sysListener> Ꮡsl,
     return (Ꮡ(new UnixListener(fd: fd, path: fd.laddr.String(), unlink: true)), default);
 }
 
-internal static (ж<UnixConn>, error) listenUnixgram(this ж<sysListener> Ꮡsl, context.Context ctx, ж<UnixAddr> laddr) {
+internal static (ж<UnixConn>, error) listenUnixgram⁔(/*this*/ ж<sysListener> Ꮡsl, context.Context ctx, ж<UnixAddr> laddr) {
     ref var sl = ref Ꮡsl.DerefOrNull();
 
     Func<context.Context, @string, @string, syscall.RawConn, error> ctrlCtxFn = default;
     if (sl.ListenConfig.Control != nil) {
-        ctrlCtxFn = (context.Context ctxΔ1, @string network, @string address, syscall.RawConn c) => Ꮡsl.Value.ListenConfig.Control(network, address, c);
+        ctrlCtxFn = [GoFunc("(*sysListener).listenUnixgram.func1")] (context.Context ctxΔ1, @string network, @string address, syscall.RawConn c) => Ꮡsl.Value.ListenConfig.Control(network, address, c);
     }
     var (fd, err) = unixSocket(ctx, sl.network, new UnixAddrжsockaddr(laddr), default, listenˢ, ctrlCtxFn);
     if (err != nil) {
@@ -292,4 +281,4 @@ internal static (ж<UnixConn>, error) listenUnixgram(this ж<sysListener> Ꮡsl,
     return (newUnixConn(fd), default);
 }
 
-}
+} // end net_package

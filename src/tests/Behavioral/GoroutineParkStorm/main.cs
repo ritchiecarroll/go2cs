@@ -21,7 +21,7 @@ internal static partial void main() {
     for (nint i = 0; i < n; i++) {
         var arrivedʗ1 = arrived;
         var resultsʗ1 = results;
-        goǃ((nint id) => {
+        goǃ([GoFunc("main.func1")] (nint id) => {
             GoFrame ᒐ = default;
             try {
                 defer(Ꮡdone.Done, ref ᒐ);

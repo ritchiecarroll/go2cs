@@ -72,7 +72,7 @@ internal static void main() {
     fmt.Println("r1 mul(2,3):", callR1(wMul, 2, 3));
     fmt.Println("r1 named add(4,5):", callR1Named(wAdd, 4, 5));
     fmt.Println("r2 mul(4,5):", callR2(wMul, 4, 5));
-    var stored = recoverR1(wMul);
+    ref var stored = ref heap<Func<nint, nint, nint>>(recoverR1(wMul), out var Ꮡstored);
     fmt.Println("r1 stored mul(6,7):", stored(6, 7));
 
     ref var slot = ref heap(new uintptr(), out var Ꮡslot);
@@ -88,6 +88,15 @@ internal static void main() {
     z = add;
     z = GoFuncCookie.Func<Func<nint, nint, nint>>(0);
     fmt.Println("w1 zero is nil:", z == nil);
+
+    ref var cp = ref heap<Func<nint, nint, nint>>(out var Ꮡcp);
+    cp = @unsafe.Pointer.FuncOfWord<Func<nint, nint, nint>>(~Ꮡ(@unsafe.Pointer.OfFunc(stored)));
+    fmt.Println("w4 copied cp(2,9):", cp(2, 9));
+    ref var cz = ref heap<Func<nint, nint, nint>>(out var Ꮡcz);
+
+    cz = add;
+    cz = @unsafe.Pointer.FuncOfWord<Func<nint, nint, nint>>(default);
+    fmt.Println("w4 nil is nil:", cz == nil);
 
     ref var h = ref heap<Func<nint, nint, nint>>(out var Ꮡh);
     storeFunc(@unsafe.Pointer.FromPinnedBox(Ꮡh), mul);
@@ -123,8 +132,8 @@ internal static void main() {
     fmt.Println("m2 nil word is 0:", wordOf(nf) == 0);
 
     nint @base = 10;
-    var c1 = (nint a, nint b) => a + b + @base;
-    var c2 = (nint a, nint b) => a + b + @base;
+    var c1 = [GoFunc("main.func1")] (nint a, nint b) => a + b + @base;
+    var c2 = [GoFunc("main.func2")] (nint a, nint b) => a + b + @base;
     var w1c = wordOf(c1);
     fmt.Println("closure same value twice equal:", w1c == wordOf(c1));
     fmt.Println("closure two values differ:", w1c != wordOf(c2));

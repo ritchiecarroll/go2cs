@@ -35,7 +35,7 @@ internal static void secret_eraseSecrets() {
     // to ensure that we can return from memclr. gp.sched will
     // act as a pigeonhole for our actual return.
     var lo = getg().Value.stack.lo;
-    systemstack(() => {
+    systemstack([GoFunc("secret_eraseSecrets.func1")] () => {
         // Note, this systemstack call happens within the secret mode,
         // so we don't have to call out to erase our registers, the systemstack
         // code will do that.

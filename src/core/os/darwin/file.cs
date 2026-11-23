@@ -57,19 +57,13 @@ using @unsafe = unsafe_package;
 using @internal;
 using go.io;
 using go.sync;
-using os = os_package;
-using static os_package;
 
 partial class os_package {
-
-} partial class osᴛFile {
 
 // Name returns the name of the file as presented to Open.
 //
 // It is safe to call Name after [Close].
-public static @string Name(this ref File f) { return f.name; }
-
-} partial class os_package {
+internal static @string Name⁔(/*this*/ ref File f) { return f.name; }
 
 // Stdin, Stdout, and Stderr are open Files pointing to the standard input,
 // standard output, and standard error file descriptors.
@@ -113,17 +107,13 @@ partial struct LinkError {
     public error Err;
 }
 
-} partial class osᴛLinkError {
-
-public static @string Error(this ref LinkError e) {
+internal static @string Error⁔(/*this*/ ref LinkError e) {
     return e.Op + " "u8 + e.Old + " "u8 + e.New + ": "u8 + e.Err.Error();
 }
 
-public static error Unwrap(this ref LinkError e) {
+internal static error Unwrap⁔(/*this*/ ref LinkError e) {
     return e.Err;
 }
-
-} partial class os_package {
 
 // NewFile returns a new [File] with the given file descriptor and name.
 // The returned value will be nil if fd is not a valid file descriptor.
@@ -144,8 +134,6 @@ public static ж<File> NewFile(uintptr fd, @string name) {
     return newFileFromNewFile(fd, name);
 }
 
-} partial class osᴛFile {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string readˢ => ref readˢᵇ;
 private static readonly @string readˢᵇ = "read"u8;
@@ -153,7 +141,7 @@ private static readonly @string readˢᵇ = "read"u8;
 // Read reads up to len(b) bytes from the File and stores them in b.
 // It returns the number of bytes read and any error encountered.
 // At end of file, Read returns 0, io.EOF.
-public static (nint n, error err) Read(this ж<File> Ꮡf, slice<byte> b) {
+internal static (nint n, error err) Read⁔(/*this*/ ж<File> Ꮡf, slice<byte> b) {
     nint n = default;
     ref var f = ref Ꮡf.DerefOrNull();
 
@@ -172,7 +160,7 @@ private static readonly @string negativeOffsetˢᵇ = "negative offset"u8;
 // It returns the number of bytes read and the error, if any.
 // ReadAt always returns a non-nil error when n < len(b).
 // At end of file, that error is io.EOF.
-public static (nint n, error err) ReadAt(this ж<File> Ꮡf, slice<byte> b, int64 off) {
+internal static (nint n, error err) ReadAt⁔(/*this*/ ж<File> Ꮡf, slice<byte> b, int64 off) {
     nint n = default;
     error err = default;
     ref var f = ref Ꮡf.DerefOrNull();
@@ -203,7 +191,7 @@ internal static ref readonly @string writeˢ => ref writeˢᵇ;
 private static readonly @string writeˢᵇ = "write"u8;
 
 // ReadFrom implements io.ReaderFrom.
-public static (int64 n, error err) ReadFrom(this ж<File> Ꮡf, Δio.Reader r) {
+internal static (int64 n, error err) ReadFrom⁔(/*this*/ ж<File> Ꮡf, Δio.Reader r) {
     int64 n = default;
     ref var f = ref Ꮡf.DerefOrNull();
 
@@ -217,22 +205,16 @@ public static (int64 n, error err) ReadFrom(this ж<File> Ꮡf, Δio.Reader r) {
     return (n, f.wrapErr(writeˢ, e));
 }
 
-} partial class os_package {
-
 // noReadFrom can be embedded alongside another type to
 // hide the ReadFrom method of that other type.
 partial struct noReadFrom {
 }
 
-} partial class osᴛnoReadFrom {
-
 // ReadFrom hides another ReadFrom method.
 // It should never be called.
-internal static (int64, error) ReadFrom(this noReadFrom _Δp0, Δio.Reader _Δp1) {
+internal static (int64, error) ReadFrom⁔(/*this*/ noReadFrom _Δp0, Δio.Reader _Δp1) {
     throw panic("can't happen");
 }
-
-} partial class os_package {
 
 // fileWithoutReadFrom implements all the methods of *File other
 // than ReadFrom. This is used to permit ReadFrom to call io.Copy
@@ -246,12 +228,10 @@ internal static (int64, error) genericReadFrom(ж<File> f, Δio.Reader r) {
     return Δio.Copy(new fileWithoutReadFrom(File: f), r);
 }
 
-} partial class osᴛFile {
-
 // Write writes len(b) bytes from b to the File.
 // It returns the number of bytes written and an error, if any.
 // Write returns a non-nil error when n != len(b).
-public static (nint n, error err) Write(this ж<File> Ꮡf, slice<byte> b) {
+internal static (nint n, error err) Write⁔(/*this*/ ж<File> Ꮡf, slice<byte> b) {
     nint n = default;
     error err = default;
     ref var f = ref Ꮡf.DerefOrNull();
@@ -276,18 +256,14 @@ public static (nint n, error err) Write(this ж<File> Ꮡf, slice<byte> b) {
     return (n, err);
 }
 
-} partial class os_package {
-
 internal static error errWriteAtInAppendMode = errors.New("os: invalid use of WriteAt on file opened with O_APPEND");
-
-} partial class osᴛFile {
 
 // WriteAt writes len(b) bytes to the File starting at byte offset off.
 // It returns the number of bytes written and an error, if any.
 // WriteAt returns a non-nil error when n != len(b).
 //
 // If file was opened with the [O_APPEND] flag, WriteAt returns an error.
-public static (nint n, error err) WriteAt(this ж<File> Ꮡf, slice<byte> b, int64 off) {
+internal static (nint n, error err) WriteAt⁔(/*this*/ ж<File> Ꮡf, slice<byte> b, int64 off) {
     nint n = default;
     error err = default;
     ref var f = ref Ꮡf.DerefOrNull();
@@ -317,7 +293,7 @@ public static (nint n, error err) WriteAt(this ж<File> Ꮡf, slice<byte> b, int
 }
 
 // WriteTo implements io.WriterTo.
-public static (int64 n, error err) WriteTo(this ж<File> Ꮡf, Δio.Writer w) {
+internal static (int64 n, error err) WriteTo⁔(/*this*/ ж<File> Ꮡf, Δio.Writer w) {
     int64 n = default;
     ref var f = ref Ꮡf.DerefOrNull();
 
@@ -331,22 +307,16 @@ public static (int64 n, error err) WriteTo(this ж<File> Ꮡf, Δio.Writer w) {
     return genericWriteTo(Ꮡf, w); // without wrapping
 }
 
-} partial class os_package {
-
 // noWriteTo can be embedded alongside another type to
 // hide the WriteTo method of that other type.
 partial struct noWriteTo {
 }
 
-} partial class osᴛnoWriteTo {
-
 // WriteTo hides another WriteTo method.
 // It should never be called.
-internal static (int64, error) WriteTo(this noWriteTo _Δp0, Δio.Writer _Δp1) {
+internal static (int64, error) WriteTo⁔(/*this*/ noWriteTo _Δp0, Δio.Writer _Δp1) {
     throw panic("can't happen");
 }
-
-} partial class os_package {
 
 // fileWithoutWriteTo implements all the methods of *File other
 // than WriteTo. This is used to permit WriteTo to call io.Copy
@@ -360,8 +330,6 @@ internal static (int64, error) genericWriteTo(ж<File> f, Δio.Writer w) {
     return Δio.Copy(w, new fileWithoutWriteTo(File: f));
 }
 
-} partial class osᴛFile {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string seekˢ => ref seekˢᵇ;
 private static readonly @string seekˢᵇ = "seek"u8;
@@ -371,7 +339,7 @@ private static readonly @string seekˢᵇ = "seek"u8;
 // relative to the current offset, and 2 means relative to the end.
 // It returns the new offset and an error, if any.
 // The behavior of Seek on a file opened with [O_APPEND] is not specified.
-public static (int64 ret, error err) Seek(this ж<File> Ꮡf, int64 offset, nint whence) {
+internal static (int64 ret, error err) Seek⁔(/*this*/ ж<File> Ꮡf, int64 offset, nint whence) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     var errΔ1 = Ꮡf.checkValid(seekˢ); if (errΔ1 != nil) {
@@ -389,19 +357,17 @@ public static (int64 ret, error err) Seek(this ж<File> Ꮡf, int64 offset, nint
 
 // WriteString is like Write, but writes the contents of string s rather than
 // a slice of bytes.
-public static (nint n, error err) WriteString(this ж<File> Ꮡf, @string s) {
+internal static (nint n, error err) WriteString⁔(/*this*/ ж<File> Ꮡf, @string s) {
     var b = @unsafe.Slice(@unsafe.StringData(s), len(s));
     return Ꮡf.Write(b);
 }
-
-} partial class os_package {
 
 // Mkdir creates a new directory with the specified name and permission
 // bits (before umask).
 // If there is an error, it will be of type [*PathError].
 public static error Mkdir(@string name, FileMode perm) {
     @string longName = fixLongPath(name);
-    var e = ignoringEINTR(() => syscall.Mkdir(longName, syscallMode(perm)));
+    var e = ignoringEINTR([GoFunc("Mkdir.func1")] () => syscall.Mkdir(longName, syscallMode(perm)));
 
     if (e != nil) {
         return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "mkdir", Path: name, Err: e)));
@@ -533,12 +499,10 @@ internal static (nint, error) fixCount(nint n, error err) {
 // It is set to true in the export_test.go for tests (including fuzz tests).
 internal static bool checkWrapErr = false;
 
-} partial class osᴛFile {
-
 // wrapErr wraps an error that occurred during an operation on an open file.
 // It passes io.EOF through unchanged, otherwise converts
 // poll.ErrFileClosing to ErrClosed and wraps the error in a PathError.
-internal static error wrapErr(this ref File f, @string op, error err) {
+internal static error wrapErr⁔(/*this*/ ref File f, @string op, error err) {
     if (err == nil || AreEqual(err, Δio.EOF)) {
         return err;
     }
@@ -549,8 +513,6 @@ internal static error wrapErr(this ref File f, @string op, error err) {
     }
     return new fs.PathErrorжerror(Ꮡ(new PathError(Op: op, Path: f.name, Err: err)));
 }
-
-} partial class os_package {
 
 // TempDir returns the default directory to use for temporary files.
 //
@@ -781,11 +743,9 @@ public static (@string, error) UserHomeDir() {
 // and [ModeTemporary] are used.
 public static error Chmod(@string name, FileMode mode) { return chmod(name, mode); }
 
-} partial class osᴛFile {
-
 // Chmod changes the mode of the file to mode.
 // If there is an error, it will be of type [*PathError].
-public static error Chmod(this ж<File> Ꮡf, FileMode mode) { return Ꮡf.chmod(mode); }
+internal static error Chmod⁔(/*this*/ ж<File> Ꮡf, FileMode mode) { return Ꮡf.chmod(mode); }
 
 // SetDeadline sets the read and write deadlines for a File.
 // It is equivalent to calling both SetReadDeadline and SetWriteDeadline.
@@ -811,7 +771,7 @@ public static error Chmod(this ж<File> Ꮡf, FileMode mode) { return Ꮡf.chmod
 // the deadline after successful Read or Write calls.
 //
 // A zero value for t means I/O operations will not time out.
-public static error SetDeadline(this ж<File> Ꮡf, time.Time t) {
+internal static error SetDeadline⁔(/*this*/ ж<File> Ꮡf, time.Time t) {
     return Ꮡf.setDeadline(t);
 }
 
@@ -819,7 +779,7 @@ public static error SetDeadline(this ж<File> Ꮡf, time.Time t) {
 // currently-blocked Read call.
 // A zero value for t means Read will not time out.
 // Not all files support setting deadlines; see SetDeadline.
-public static error SetReadDeadline(this ж<File> Ꮡf, time.Time t) {
+internal static error SetReadDeadline⁔(/*this*/ ж<File> Ꮡf, time.Time t) {
     return Ꮡf.setReadDeadline(t);
 }
 
@@ -829,7 +789,7 @@ public static error SetReadDeadline(this ж<File> Ꮡf, time.Time t) {
 // some of the data was successfully written.
 // A zero value for t means Write will not time out.
 // Not all files support setting deadlines; see SetDeadline.
-public static error SetWriteDeadline(this ж<File> Ꮡf, time.Time t) {
+internal static error SetWriteDeadline⁔(/*this*/ ж<File> Ꮡf, time.Time t) {
     return Ꮡf.setWriteDeadline(t);
 }
 
@@ -839,7 +799,7 @@ private static readonly @string syscallConnˢᵇ = "SyscallConn"u8;
 
 // SyscallConn returns a raw file.
 // This implements the syscall.Conn interface.
-public static (syscall.RawConn, error) SyscallConn(this ж<File> Ꮡf) {
+internal static (syscall.RawConn, error) SyscallConn⁔(/*this*/ ж<File> Ꮡf) {
     var err = Ꮡf.checkValid(syscallConnˢ); if (err != nil) {
         return (default, err);
     }
@@ -864,11 +824,9 @@ public static (syscall.RawConn, error) SyscallConn(this ж<File> Ꮡf) {
 //     operations on the file.
 //
 // For most uses prefer the f.SyscallConn method.
-public static uintptr Fd(this ж<File> Ꮡf) {
+internal static uintptr Fd⁔(/*this*/ ж<File> Ꮡf) {
     return Ꮡf.fd();
 }
-
-} partial class os_package {
 
 // DirFS returns a file system (an fs.FS) for the tree of files rooted at the directory dir.
 //
@@ -898,14 +856,12 @@ internal static fs.ReadLinkFS _ᴛ4ʗ = ((dirFS)(@string)""u8);
 
 partial struct dirFS /*@string*/;
 
-} partial class osᴛdirFS {
-
-internal static (fs.File, error) Open(this dirFS dir, @string name) {
+internal static (fs.File, error) Open⁔(/*this*/ dirFS dir, @string name) {
     var (fullname, err) = dir.join(name);
     if (err != nil) {
         return (default, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "open", Path: name, Err: err))));
     }
-    (var f, err) = os.Open(fullname);
+    (var f, err) = Open(fullname);
     if (err != nil) {
         // DirFS takes a string appropriate for GOOS,
         // while the name argument here is always slash separated.
@@ -921,12 +877,12 @@ internal static (fs.File, error) Open(this dirFS dir, @string name) {
 // with the given name in the directory. The function provides
 // robust handling for small files and special file systems.
 // Through this method, dirFS implements [io/fs.ReadFileFS].
-internal static (slice<byte>, error) ReadFile(this dirFS dir, @string name) {
+internal static (slice<byte>, error) ReadFile⁔(/*this*/ dirFS dir, @string name) {
     var (fullname, err) = dir.join(name);
     if (err != nil) {
         return (default, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "readfile", Path: name, Err: err))));
     }
-    (var b, err) = os.ReadFile(fullname);
+    (var b, err) = ReadFile(fullname);
     if (err != nil) {
         var (e, ok) = err._<ж<PathError>>(ᐧ); if (ok) {
             // See comment in dirFS.Open.
@@ -939,12 +895,12 @@ internal static (slice<byte>, error) ReadFile(this dirFS dir, @string name) {
 
 // ReadDir reads the named directory, returning all its directory entries sorted
 // by filename. Through this method, dirFS implements [io/fs.ReadDirFS].
-internal static (slice<DirEntry>, error) ReadDir(this dirFS dir, @string name) {
+internal static (slice<DirEntry>, error) ReadDir⁔(/*this*/ dirFS dir, @string name) {
     var (fullname, err) = dir.join(name);
     if (err != nil) {
         return (default, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "readdir", Path: name, Err: err))));
     }
-    (var entries, err) = os.ReadDir(fullname);
+    (var entries, err) = ReadDir(fullname);
     if (err != nil) {
         var (e, ok) = err._<ж<PathError>>(ᐧ); if (ok) {
             // See comment in dirFS.Open.
@@ -955,12 +911,12 @@ internal static (slice<DirEntry>, error) ReadDir(this dirFS dir, @string name) {
     return (entries, default);
 }
 
-internal static (fs.FileInfo, error) Stat(this dirFS dir, @string name) {
+internal static (fs.FileInfo, error) Stat⁔(/*this*/ dirFS dir, @string name) {
     var (fullname, err) = dir.join(name);
     if (err != nil) {
         return (default, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "stat", Path: name, Err: err))));
     }
-    (var f, err) = os.Stat(fullname);
+    (var f, err) = Stat(fullname);
     if (err != nil) {
         // See comment in dirFS.Open.
         err._<ж<PathError>>().Path = name;
@@ -969,12 +925,12 @@ internal static (fs.FileInfo, error) Stat(this dirFS dir, @string name) {
     return (f, default);
 }
 
-internal static (fs.FileInfo, error) Lstat(this dirFS dir, @string name) {
+internal static (fs.FileInfo, error) Lstat⁔(/*this*/ dirFS dir, @string name) {
     var (fullname, err) = dir.join(name);
     if (err != nil) {
         return (default, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "lstat", Path: name, Err: err))));
     }
-    (var f, err) = os.Lstat(fullname);
+    (var f, err) = Lstat(fullname);
     if (err != nil) {
         // See comment in dirFS.Open.
         err._<ж<PathError>>().Path = name;
@@ -983,7 +939,7 @@ internal static (fs.FileInfo, error) Lstat(this dirFS dir, @string name) {
     return (f, default);
 }
 
-internal static (@string, error) ReadLink(this dirFS dir, @string name) {
+internal static (@string, error) ReadLink⁔(/*this*/ dirFS dir, @string name) {
     var (fullname, err) = dir.join(name);
     if (err != nil) {
         return ("", new fs.PathErrorжerror(Ꮡ(new PathError(Op: "readlink", Path: name, Err: err))));
@@ -996,7 +952,7 @@ internal static ref readonly @string osDirFSWithEmptyRootˢ => ref osDirFSWithEm
 private static readonly @string osDirFSWithEmptyRootˢᵇ = "os: DirFS with empty root"u8;
 
 // join returns the path for name in dir.
-internal static (@string, error) join(this dirFS dir, @string name) {
+internal static (@string, error) join⁔(/*this*/ dirFS dir, @string name) {
     if (dir == ""u8) {
         return ("", errors.New(osDirFSWithEmptyRootˢ));
     }
@@ -1009,8 +965,6 @@ internal static (@string, error) join(this dirFS dir, @string name) {
     }
     return (((@string)dir) + ((@string)(rune)PathSeparator) + name, default);
 }
-
-} partial class os_package {
 
 // ReadFile reads the named file and returns the contents.
 // A successful call returns err == nil, not err == EOF.

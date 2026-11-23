@@ -35,7 +35,7 @@ internal static void main() {
     fmt.Println((@string)b);
     fmt.Println(len(b));
 
-    ж<Buf> makeBuf() {
+    [GoFunc("main.func1")] ж<Buf> makeBuf() {
         ref var s = ref heap<slice<byte>>(new slice<byte>(0, 4), out var Ꮡs);
         return Ꮡs.Reinterpret<slice<byte>, Buf>();
     }

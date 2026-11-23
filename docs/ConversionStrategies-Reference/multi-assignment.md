@@ -75,7 +75,7 @@ A subtler case: a newly-declared tuple element can be flagged *escaping* by anal
 
 **A tuple deconstruction into INTERFACE variables hoists the call when a component needs converting.** Reassigning a multi-value call into pre-declared interface locals (`c, err = sd.dialTCP(…)` with `var c Conn`) can require a per-component interface conversion C#'s tuple assignment cannot perform implicitly — a `ж<TCPConn>` component satisfies `Conn` only through its generated pointer adapter, an *explicit* conversion (CS0266 ×11 in net's dial.go). Mirroring the return-statement tuple arm, the call is hoisted into temp markers and each component converts in a tuple literal:
 
-<!-- source: src/core/net/darwin/dial.cs:960-961 -->
+<!-- source: src/core/net/darwin/dial.cs:927-928 -->
 ```csharp
 var (ᴛ1, ᴛ2) = Ꮡsd.dialTCP(ctx, laΔ1, raΔ1);
 (c, err) = (new TCPConnжConn(ᴛ1), ᴛ2);
@@ -98,8 +98,8 @@ d, t := double, triple
 
 <!-- source: src/tests/Behavioral/MultiValueFuncLiteralDefine/MultiValueFuncLiteralDefine.cs:25-26, 29-30 -->
 ```csharp
-var small = (nint v) => v < n;
-var even = (nint v) => v % 2 == 0;
+var small = [GoFunc("main.func1")] (nint v) => v < n;
+var even = [GoFunc("main.func2")] (nint v) => v % 2 == 0;
 …
 var d = @double;
 var t = triple;
@@ -125,7 +125,7 @@ func ParseOID(oid string) (OID, error) {
     return o, o.unmarshalOIDText(oid)   // gc: the call runs, THEN o is read
 }
 ```
-<!-- source: src/core/crypto/x509/oid.cs:28-32 -->
+<!-- source: src/core/crypto/x509/oid.cs:27-31 -->
 ```csharp
 public static (OID, error) ParseOID(@string oid) {
     OID o = default;
@@ -258,7 +258,7 @@ capturing closure (the pre-existing box-ref-var case) or anywhere in the current
 var swapped Animal = Dog{}
 replaceAnimal(&swapped)      // callee: *a = &Cat{}
 ```
-<!-- source: src/tests/Behavioral/InterfaceCasting/InterfaceCasting.cs.target:166-169 -->
+<!-- source: src/tests/Behavioral/InterfaceCasting/InterfaceCasting.cs.target:165-168 -->
 ```csharp
 ref var swapped = ref heap<Animal>(out var Ꮡswapped);
 
@@ -770,7 +770,7 @@ case StartElement:
     d.translate(&t1.Name, true)    // write must land in t1
     t = t1                          // …because Go reads it back out
 ```
-<!-- source: src/core/encoding/xml/xml.cs:333-358 -->
+<!-- source: src/core/encoding/xml/xml.cs:306-331 -->
 ```csharp
 case StartElement t1ᴛ1: {
     ref var t1 = ref heap(t1ᴛ1, out var Ꮡt1);

@@ -59,7 +59,7 @@ internal static @string /*msg*/ namedNegativeShift(halfword x, nint n) {
     @string msg = default;
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("namedNegativeShift.func1")] () => {
             var e = recover(); if (e != nil) {
                 msg = fmt.Sprint(e);
             }

@@ -31,7 +31,7 @@ internal static partial nint boxedLocal() {
 internal static void main() {
     keep(Ꮡmheap);
     nint got = default;
-    run(() => {
+    run([GoFunc("main.func1")] () => {
         got = mheap.alloc();
         var p = Ꮡmheap.Ꮡcount;
         p.Value += 10;

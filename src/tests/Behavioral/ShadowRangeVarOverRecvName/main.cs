@@ -9,7 +9,7 @@ partial struct node {
 }
 
 internal static slice<ж<node>> collect(this ж<node> Ꮡc, slice<ж<node>> chain) {
-    @string describe() => Ꮡc.Value.name;
+    [GoFunc("(*node).collect.func1")] @string describe() => Ꮡc.Value.name;
 
     slice<ж<node>> toCheck = default;
     toCheck = append(toCheck, Ꮡc);

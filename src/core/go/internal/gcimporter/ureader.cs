@@ -12,7 +12,6 @@ using strings = strings_package;
 using constant = global::go.go.constant_package;
 using global::go.@internal;
 using global::go.go;
-using static gcimporter_package;
 
 partial class gcimporter_package {
 
@@ -36,14 +35,10 @@ partial struct pkgReader {
     internal slice<ж<types.Interface>> ifaces;
 }
 
-} partial class gcimporterᴛpkgReader {
-
 // later adds a function to be invoked at the end of import reading.
-internal static void later(this ref pkgReader pr, Action fn) {
+internal static void later⁔(/*this*/ ref pkgReader pr, Action fn) {
     pr.laterFns = append(pr.laterFns, fn);
 }
-
-} partial class gcimporter_package {
 
 // readUnifiedPackage reads a package description from the given
 // unified IR export data decoder.
@@ -103,7 +98,7 @@ internal static ж<types.Package> readUnifiedPackage(ж<token.FileSet> fset, ж<
                 imps = append(imps, imp);
             }
         }
-        slices.SortFunc(imps, (ж<types.Package> a, ж<types.Package> b) => strings.Compare(a.Path(), b.Path()));
+        slices.SortFunc(imps, [GoFunc("readUnifiedPackage.func1")] (ж<types.Package> a, ж<types.Package> b) => strings.Compare(a.Path(), b.Path()));
         pkg.SetImports(imps);
 
         pkg.MarkComplete();
@@ -135,30 +130,26 @@ partial struct readerDict {
     internal slice<types.Type> derivedTypes; // lazily instantiated from derived
 }
 
-} partial class gcimporterᴛpkgReader {
-
-internal static ж<reader> newReader(this ж<pkgReader> Ꮡpr, pkgbits.SectionKind k, pkgbits.Index idx, pkgbits.SyncMarker marker) {
+internal static ж<reader> newReader⁔(/*this*/ ж<pkgReader> Ꮡpr, pkgbits.SectionKind k, pkgbits.Index idx, pkgbits.SyncMarker marker) {
     return Ꮡ(new reader(
         Decoder: Ꮡpr.of(pkgReader.ᏑPkgDecoder).NewDecoder(k, idx, marker),
         p: Ꮡpr
     ));
 }
 
-internal static ж<reader> tempReader(this ж<pkgReader> Ꮡpr, pkgbits.SectionKind k, pkgbits.Index idx, pkgbits.SyncMarker marker) {
+internal static ж<reader> tempReader⁔(/*this*/ ж<pkgReader> Ꮡpr, pkgbits.SectionKind k, pkgbits.Index idx, pkgbits.SyncMarker marker) {
     return Ꮡ(new reader(
         Decoder: Ꮡpr.of(pkgReader.ᏑPkgDecoder).TempDecoder(k, idx, marker),
         p: Ꮡpr
     ));
 }
 
-internal static void retireReader(this ref pkgReader pr, ж<reader> r) {
+internal static void retireReader⁔(/*this*/ ref pkgReader pr, ж<reader> r) {
     pr.PkgDecoder.RetireDecoder(r.ᏑDecoder);
 }
 
-} partial class gcimporterᴛreader {
-
 // @@@ Positions
-internal static token.Pos pos(this ж<reader> Ꮡr) {
+internal static token.Pos pos⁔(/*this*/ ж<reader> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     Ꮡr.of(reader.ᏑDecoder).Sync(pkgbits.SyncPos);
@@ -173,15 +164,13 @@ internal static token.Pos pos(this ж<reader> Ꮡr) {
     return r.p.Ꮡfake.pos(posBase, (nint)line, (nint)col);
 }
 
-internal static @string posBase(this ж<reader> Ꮡr) {
+internal static @string posBase⁔(/*this*/ ж<reader> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     return r.p.posBaseIdx(Ꮡr.of(reader.ᏑDecoder).Reloc(pkgbits.SectionPosBase));
 }
 
-} partial class gcimporterᴛpkgReader {
-
-internal static @string posBaseIdx(this ж<pkgReader> Ꮡpr, pkgbits.Index idx) {
+internal static @string posBaseIdx⁔(/*this*/ ж<pkgReader> Ꮡpr, pkgbits.Index idx) {
     ref var pr = ref Ꮡpr.DerefOrNull();
 
     @string bΔ1 = pr.posBases[idx]; if (bΔ1 != ""u8) {
@@ -218,19 +207,15 @@ internal static @string posBaseIdx(this ж<pkgReader> Ꮡpr, pkgbits.Index idx) 
     return b;
 }
 
-} partial class gcimporterᴛreader {
-
 // @@@ Packages
-internal static ж<types.Package> pkg(this ж<reader> Ꮡr) {
+internal static ж<types.Package> pkg⁔(/*this*/ ж<reader> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     Ꮡr.of(reader.ᏑDecoder).Sync(pkgbits.SyncPkg);
     return r.p.pkgIdx(Ꮡr.of(reader.ᏑDecoder).Reloc(pkgbits.SectionPkg));
 }
 
-} partial class gcimporterᴛpkgReader {
-
-internal static ж<types.Package> pkgIdx(this ж<pkgReader> Ꮡpr, pkgbits.Index idx) {
+internal static ж<types.Package> pkgIdx⁔(/*this*/ ж<pkgReader> Ꮡpr, pkgbits.Index idx) {
     ref var pr = ref Ꮡpr.DerefOrNull();
 
     // TODO(mdempsky): Consider using some non-nil pointer to indicate
@@ -244,9 +229,7 @@ internal static ж<types.Package> pkgIdx(this ж<pkgReader> Ꮡpr, pkgbits.Index
     return pkg;
 }
 
-} partial class gcimporterᴛreader {
-
-internal static ж<types.Package> doPkg(this ж<reader> Ꮡr) {
+internal static ж<types.Package> doPkg⁔(/*this*/ ж<reader> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     @string path = Ꮡr.of(reader.ᏑDecoder).String();
@@ -275,13 +258,13 @@ internal static ж<types.Package> doPkg(this ж<reader> Ꮡr) {
 }
 
 // @@@ Types
-internal static types.Type typ(this ж<reader> Ꮡr) {
+internal static types.Type typ⁔(/*this*/ ж<reader> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     return r.p.typIdx(Ꮡr.typInfo(), r.dict);
 }
 
-internal static typeInfo typInfo(this ж<reader> Ꮡr) {
+internal static typeInfo typInfo⁔(/*this*/ ж<reader> Ꮡr) {
     Ꮡr.of(reader.ᏑDecoder).Sync(pkgbits.SyncType);
     if (Ꮡr.of(reader.ᏑDecoder).Bool()) {
         return new typeInfo(idx: ((pkgbits.Index)(int32)Ꮡr.of(reader.ᏑDecoder).Len()), derived: true);
@@ -289,9 +272,7 @@ internal static typeInfo typInfo(this ж<reader> Ꮡr) {
     return new typeInfo(idx: Ꮡr.of(reader.ᏑDecoder).Reloc(pkgbits.SectionType), derived: false);
 }
 
-} partial class gcimporterᴛpkgReader {
-
-internal static types.Type typIdx(this ж<pkgReader> Ꮡpr, typeInfo info, ж<readerDict> Ꮡdict) {
+internal static types.Type typIdx⁔(/*this*/ ж<pkgReader> Ꮡpr, typeInfo info, ж<readerDict> Ꮡdict) {
     ref var pr = ref Ꮡpr.DerefOrNull();
     ref var dict = ref Ꮡdict.DerefOrNull();
 
@@ -326,9 +307,7 @@ internal static types.Type typIdx(this ж<pkgReader> Ꮡpr, typeInfo info, ж<re
     return typ;
 }
 
-} partial class gcimporterᴛreader {
-
-internal static types.Type /*res*/ doTyp(this ж<reader> Ꮡr) {
+internal static types.Type /*res*/ doTyp⁔(/*this*/ ж<reader> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     pkgbits.CodeType tag = (pkgbits.CodeType)Ꮡr.of(reader.ᏑDecoder).Code(pkgbits.SyncType);
@@ -384,7 +363,7 @@ internal static types.Type /*res*/ doTyp(this ж<reader> Ꮡr) {
     }}
 }
 
-internal static ж<types.Struct> structType(this ж<reader> Ꮡr) {
+internal static ж<types.Struct> structType⁔(/*this*/ ж<reader> Ꮡr) {
     var fields = new slice<ж<types.Var>>(Ꮡr.of(reader.ᏑDecoder).Len());
     slice<@string> tags = default;
     foreach (var i in range(len(fields))) {
@@ -405,7 +384,7 @@ internal static ж<types.Struct> structType(this ж<reader> Ꮡr) {
     return types.NewStruct(fields, tags);
 }
 
-internal static ж<types.Union> unionType(this ж<reader> Ꮡr) {
+internal static ж<types.Union> unionType⁔(/*this*/ ж<reader> Ꮡr) {
     var terms = new slice<ж<types.Term>>(Ꮡr.of(reader.ᏑDecoder).Len());
     foreach (var i in range(len(terms))) {
         terms[i] = types.NewTerm(Ꮡr.of(reader.ᏑDecoder).Bool(), Ꮡr.typ());
@@ -413,7 +392,7 @@ internal static ж<types.Union> unionType(this ж<reader> Ꮡr) {
     return types.NewUnion(terms);
 }
 
-internal static ж<types.Interface> interfaceType(this ж<reader> Ꮡr) {
+internal static ж<types.Interface> interfaceType⁔(/*this*/ ж<reader> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     var methods = new slice<ж<types.Func>>(Ꮡr.of(reader.ᏑDecoder).Len());
@@ -448,7 +427,7 @@ internal static ж<types.Interface> interfaceType(this ж<reader> Ꮡr) {
     return iface;
 }
 
-internal static ж<types.Signature> signature(this ж<reader> Ꮡr, ж<types.Var> recv, slice<ж<types.TypeParam>> rtparams, slice<ж<types.TypeParam>> tparams) {
+internal static ж<types.Signature> signature⁔(/*this*/ ж<reader> Ꮡr, ж<types.Var> recv, slice<ж<types.TypeParam>> rtparams, slice<ж<types.TypeParam>> tparams) {
     Ꮡr.of(reader.ᏑDecoder).Sync(pkgbits.SyncSignature);
 
     var @params = Ꮡr.@params(types.ParamVar);
@@ -458,7 +437,7 @@ internal static ж<types.Signature> signature(this ж<reader> Ꮡr, ж<types.Var
     return types.NewSignatureType(recv, rtparams, tparams, @params, results, variadic);
 }
 
-internal static ж<types.Tuple> @params(this ж<reader> Ꮡr, types.VarKind kind) {
+internal static ж<types.Tuple> params⁔(/*this*/ ж<reader> Ꮡr, types.VarKind kind) {
     Ꮡr.of(reader.ᏑDecoder).Sync(pkgbits.SyncParams);
 
     var @params = new slice<ж<types.Var>>(Ꮡr.of(reader.ᏑDecoder).Len());
@@ -469,7 +448,7 @@ internal static ж<types.Tuple> @params(this ж<reader> Ꮡr, types.VarKind kind
     return types.NewTuple(@params.ꓸꓸꓸ);
 }
 
-internal static ж<types.Var> param(this ж<reader> Ꮡr, types.VarKind kind) {
+internal static ж<types.Var> param⁔(/*this*/ ж<reader> Ꮡr, types.VarKind kind) {
     Ꮡr.of(reader.ᏑDecoder).Sync(pkgbits.SyncParam);
 
     token.Pos pos = Ꮡr.pos();
@@ -482,7 +461,7 @@ internal static ж<types.Var> param(this ж<reader> Ꮡr, types.VarKind kind) {
 }
 
 // @@@ Objects
-internal static (types.Object, slice<types.Type>) obj(this ж<reader> Ꮡr) {
+internal static (types.Object, slice<types.Type>) obj⁔(/*this*/ ж<reader> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     Ꮡr.of(reader.ᏑDecoder).Sync(pkgbits.SyncObject);
@@ -502,9 +481,7 @@ internal static (types.Object, slice<types.Type>) obj(this ж<reader> Ꮡr) {
     return (obj, targs);
 }
 
-} partial class gcimporterᴛpkgReader {
-
-internal static (ж<types.Package>, @string) objIdx(this ж<pkgReader> Ꮡpr, pkgbits.Index idx) {
+internal static (ж<types.Package>, @string) objIdx⁔(/*this*/ ж<pkgReader> Ꮡpr, pkgbits.Index idx) {
     ref var pr = ref Ꮡpr.DerefOrNull();
 
     ж<types.Package> objPkg = default;
@@ -537,7 +514,7 @@ internal static (ж<types.Package>, @string) objIdx(this ж<pkgReader> Ꮡpr, pk
         r.dict = dict;
 
         var objPkgʗ1 = objPkg;
-        void declare(types.Object obj) {
+        [GoFunc("(*pkgReader).objIdx.func1")] void declare(types.Object obj) {
             objPkgʗ1.Scope().Insert(obj);
         }
 
@@ -623,7 +600,7 @@ internal static (ж<types.Package>, @string) objIdx(this ж<pkgReader> Ꮡpr, pk
     return (objPkg, objName);
 }
 
-internal static ж<readerDict> objDictIdx(this ж<pkgReader> Ꮡpr, pkgbits.Index idx) {
+internal static ж<readerDict> objDictIdx⁔(/*this*/ ж<pkgReader> Ꮡpr, pkgbits.Index idx) {
     ref var pr = ref Ꮡpr.DerefOrNull();
 
     ref var dict = ref heap(new readerDict(), out var Ꮡdict);
@@ -655,9 +632,7 @@ internal static ж<readerDict> objDictIdx(this ж<pkgReader> Ꮡpr, pkgbits.Inde
     return Ꮡdict;
 }
 
-} partial class gcimporterᴛreader {
-
-internal static slice<ж<types.TypeParam>> typeParamNames(this ж<reader> Ꮡr) {
+internal static slice<ж<types.TypeParam>> typeParamNames⁔(/*this*/ ж<reader> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     Ꮡr.of(reader.ᏑDecoder).Sync(pkgbits.SyncTypeParamNames);
@@ -705,7 +680,7 @@ internal static slice<ж<types.TypeParam>> typeParamNames(this ж<reader> Ꮡr) 
     var tparams = r.dict.tparams;
     var tparamsʗ1 = tparams;
     var typsʗ1 = typs;
-    r.p.later(() => {
+    r.p.later([GoFunc("(*reader).typeParamNames.func1")] () => {
         foreach (var (i, typ) in range(typsʗ1)) {
             tparamsʗ1[i].SetConstraint(typ);
         }
@@ -714,7 +689,7 @@ internal static slice<ж<types.TypeParam>> typeParamNames(this ж<reader> Ꮡr) 
     return r.dict.tparams;
 }
 
-internal static ж<types.Func> method(this ж<reader> Ꮡr) {
+internal static ж<types.Func> method⁔(/*this*/ ж<reader> Ꮡr) {
     Ꮡr.of(reader.ᏑDecoder).Sync(pkgbits.SyncMethod);
     token.Pos pos = Ꮡr.pos();
     var (pkg, name) = Ꮡr.selector();
@@ -726,16 +701,14 @@ internal static ж<types.Func> method(this ж<reader> Ꮡr) {
     return types.NewFunc(pos, pkg, name, sig);
 }
 
-internal static (ж<types.Package>, @string) qualifiedIdent(this ж<reader> Ꮡr) { return Ꮡr.ident(pkgbits.SyncSym); }
-internal static (ж<types.Package>, @string) localIdent(this ж<reader> Ꮡr) { return Ꮡr.ident(pkgbits.SyncLocalIdent); }
-internal static (ж<types.Package>, @string) selector(this ж<reader> Ꮡr) { return Ꮡr.ident(pkgbits.SyncSelector); }
+internal static (ж<types.Package>, @string) qualifiedIdent⁔(/*this*/ ж<reader> Ꮡr) { return Ꮡr.ident(pkgbits.SyncSym); }
+internal static (ж<types.Package>, @string) localIdent⁔(/*this*/ ж<reader> Ꮡr) { return Ꮡr.ident(pkgbits.SyncLocalIdent); }
+internal static (ж<types.Package>, @string) selector⁔(/*this*/ ж<reader> Ꮡr) { return Ꮡr.ident(pkgbits.SyncSelector); }
 
-internal static (ж<types.Package>, @string) ident(this ж<reader> Ꮡr, pkgbits.SyncMarker marker) {
+internal static (ж<types.Package>, @string) ident⁔(/*this*/ ж<reader> Ꮡr, pkgbits.SyncMarker marker) {
     Ꮡr.of(reader.ᏑDecoder).Sync(marker);
     return (Ꮡr.pkg(), Ꮡr.of(reader.ᏑDecoder).String());
 }
-
-} partial class gcimporter_package {
 
 // pkgScope returns pkg.Scope().
 // If pkg is nil, it returns types.Universe instead.

@@ -14,7 +14,6 @@ using runtime = runtime_package;
 using testing = testing_package;
 using time = time_package;
 using log;
-using static slogtest_package;
 
 partial class slogtest_package {
 
@@ -35,11 +34,11 @@ partial struct testCase {
     internal slice<Func<map<@string, any>, @string>> checks;
 }
 
-internal static slice<testCase> cases = slice<testCase>([
+internal static slice<testCase> cases = new testCase[]{
     new(
         name: "built-ins",
         explanation: withSource("this test expects slog.TimeKey, slog.LevelKey and slog.MessageKey"),
-        f: (ж<slog.Logger> l) => {
+        f: [GoFunc("init.func1")] (ж<slog.Logger> l) => {
             l.Info("message");
         },
         checks: slice<Func<map<@string, any>, @string>>([
@@ -51,7 +50,7 @@ internal static slice<testCase> cases = slice<testCase>([
     new(
         name: "attrs",
         explanation: withSource("a Handler should output attributes passed to the logging function"),
-        f: (ж<slog.Logger> l) => {
+        f: [GoFunc("init.func2")] (ж<slog.Logger> l) => {
             l.Info("message", "k", "v");
         },
         checks: slice<Func<map<@string, any>, @string>>([
@@ -61,7 +60,7 @@ internal static slice<testCase> cases = slice<testCase>([
     new(
         name: "empty-attr",
         explanation: withSource("a Handler should ignore an empty Attr"),
-        f: (ж<slog.Logger> l) => {
+        f: [GoFunc("init.func3")] (ж<slog.Logger> l) => {
             l.Info("msg", "a", "b", "", (any)(default), "c", "d");
         },
         checks: slice<Func<map<@string, any>, @string>>([
@@ -73,10 +72,10 @@ internal static slice<testCase> cases = slice<testCase>([
     new(
         name: "zero-time",
         explanation: withSource("a Handler should ignore a zero Record.Time"),
-        f: (ж<slog.Logger> l) => {
+        f: [GoFunc("init.func4")] (ж<slog.Logger> l) => {
             l.Info("msg", "k", "v");
         },
-        mod: (ж<slog.Record> r) => {
+        mod: [GoFunc("init.func5")] (ж<slog.Record> r) => {
             r.Time = new time.Time();
         },
         checks: slice<Func<map<@string, any>, @string>>([
@@ -86,7 +85,7 @@ internal static slice<testCase> cases = slice<testCase>([
     new(
         name: "WithAttrs",
         explanation: withSource("a Handler should include the attributes from the WithAttrs method"),
-        f: (ж<slog.Logger> l) => {
+        f: [GoFunc("init.func6")] (ж<slog.Logger> l) => {
             l.With("a", "b").Info("msg", (@string)"k", (@string)"v");
         },
         checks: slice<Func<map<@string, any>, @string>>([
@@ -97,7 +96,7 @@ internal static slice<testCase> cases = slice<testCase>([
     new(
         name: "groups",
         explanation: withSource("a Handler should handle Group attributes"),
-        f: (ж<slog.Logger> l) => {
+        f: [GoFunc("init.func7")] (ж<slog.Logger> l) => {
             l.Info("msg", "a", "b", slog.Group("G", slog.String("c", "d")), "e", "f");
         },
         checks: slice<Func<map<@string, any>, @string>>([
@@ -109,7 +108,7 @@ internal static slice<testCase> cases = slice<testCase>([
     new(
         name: "empty-group",
         explanation: withSource("a Handler should ignore an empty group"),
-        f: (ж<slog.Logger> l) => {
+        f: [GoFunc("init.func8")] (ж<slog.Logger> l) => {
             l.Info("msg", "a", "b", slog.Group("G"), "e", "f");
         },
         checks: slice<Func<map<@string, any>, @string>>([
@@ -121,7 +120,7 @@ internal static slice<testCase> cases = slice<testCase>([
     new(
         name: "inline-group",
         explanation: withSource("a Handler should inline the Attrs of a group with an empty key"),
-        f: (ж<slog.Logger> l) => {
+        f: [GoFunc("init.func9")] (ж<slog.Logger> l) => {
             l.Info("msg", "a", "b", slog.Group("", slog.String("c", "d")), "e", "f");
         },
         checks: slice<Func<map<@string, any>, @string>>([
@@ -133,7 +132,7 @@ internal static slice<testCase> cases = slice<testCase>([
     new(
         name: "WithGroup",
         explanation: withSource("a Handler should handle the WithGroup method"),
-        f: (ж<slog.Logger> l) => {
+        f: [GoFunc("init.func10")] (ж<slog.Logger> l) => {
             l.WithGroup("G").Info("msg", (@string)"a", (@string)"b");
         },
         checks: slice<Func<map<@string, any>, @string>>([
@@ -147,7 +146,7 @@ internal static slice<testCase> cases = slice<testCase>([
     new(
         name: "multi-With",
         explanation: withSource("a Handler should handle multiple WithGroup and WithAttr calls"),
-        f: (ж<slog.Logger> l) => {
+        f: [GoFunc("init.func11")] (ж<slog.Logger> l) => {
             l.With("a", "b").WithGroup("G").With((@string)"c", (@string)"d").WithGroup("H").Info("msg", (@string)"e", (@string)"f");
         },
         checks: slice<Func<map<@string, any>, @string>>([
@@ -162,7 +161,7 @@ internal static slice<testCase> cases = slice<testCase>([
     new(
         name: "empty-group-record",
         explanation: withSource("a Handler should not output groups if there are no attributes"),
-        f: (ж<slog.Logger> l) => {
+        f: [GoFunc("init.func12")] (ж<slog.Logger> l) => {
             l.With("a", "b").WithGroup("G").With((@string)"c", (@string)"d").WithGroup("H").Info("msg");
         },
         checks: slice<Func<map<@string, any>, @string>>([
@@ -177,7 +176,7 @@ internal static slice<testCase> cases = slice<testCase>([
     new(
         name: "nested-empty-group-record",
         explanation: withSource("a Handler should not output nested groups if there are no attributes"),
-        f: (ж<slog.Logger> l) => {
+        f: [GoFunc("init.func13")] (ж<slog.Logger> l) => {
             l.With("a", "b").WithGroup("G").With((@string)"c", (@string)"d").WithGroup("H").WithGroup("I").Info("msg");
         },
         checks: slice<Func<map<@string, any>, @string>>([
@@ -193,7 +192,7 @@ internal static slice<testCase> cases = slice<testCase>([
     new(
         name: "resolve",
         explanation: withSource("a Handler should call Resolve on attribute values"),
-        f: (ж<slog.Logger> l) => {
+        f: [GoFunc("init.func14")] (ж<slog.Logger> l) => {
             l.Info("msg", "k", Ꮡ(new replace((@string)"replaced")));
         },
         checks: slice<Func<map<@string, any>, @string>>([hasAttr("k", "replaced")])
@@ -201,7 +200,7 @@ internal static slice<testCase> cases = slice<testCase>([
     new(
         name: "resolve-groups",
         explanation: withSource("a Handler should call Resolve on attribute values in groups"),
-        f: (ж<slog.Logger> l) => {
+        f: [GoFunc("init.func15")] (ж<slog.Logger> l) => {
             l.Info("msg",
                 slog.Group("G",
                     slog.String("a", "v1"),
@@ -215,7 +214,7 @@ internal static slice<testCase> cases = slice<testCase>([
     new(
         name: "resolve-WithAttrs",
         explanation: withSource("a Handler should call Resolve on attribute values from WithAttrs"),
-        f: (ж<slog.Logger> l) => {
+        f: [GoFunc("init.func16")] (ж<slog.Logger> l) => {
             l = l.With("k", Ꮡ(new replace((@string)"replaced")));
             l.Info("msg");
         },
@@ -224,7 +223,7 @@ internal static slice<testCase> cases = slice<testCase>([
     new(
         name: "resolve-WithAttrs-groups",
         explanation: withSource("a Handler should call Resolve on attribute values in groups from WithAttrs"),
-        f: (ж<slog.Logger> l) => {
+        f: [GoFunc("init.func17")] (ж<slog.Logger> l) => {
             l = l.With(slog.Group("G",
                 slog.String("a", "v1"),
                 slog.Any("b", Ꮡ(new replace((@string)"v2")))));
@@ -238,17 +237,17 @@ internal static slice<testCase> cases = slice<testCase>([
     new(
         name: "empty-PC",
         explanation: withSource("a Handler should not output SourceKey if the PC is zero"),
-        f: (ж<slog.Logger> l) => {
+        f: [GoFunc("init.func18")] (ж<slog.Logger> l) => {
             l.Info("message");
         },
-        mod: (ж<slog.Record> r) => {
+        mod: [GoFunc("init.func19")] (ж<slog.Record> r) => {
             r.PC = 0;
         },
         checks: slice<Func<map<@string, any>, @string>>([
             missingKey(slog.SourceKey)
         ])
     )
-]);
+}.slice();
 
 // TestHandler tests a [slog.Handler].
 // If TestHandler finds any misbehaviors, it returns an error for each,
@@ -310,7 +309,7 @@ public static void Run(ж<testing.T> t, Func<ж<testing.T>, slog.Handler> newHan
         c = vᴛ1;
 
         var cʗ1 = c;
-        t.Run(c.name, (ж<testing.T> tΔ1) => {
+        t.Run(c.name, [GoFunc("Run.func1")] (ж<testing.T> tΔ1) => {
             var h = newHandler(tΔ1);
             if (cʗ1.mod != nil) {
                 h = new wrapperжHandler(Ꮡ(new wrapper(h, cʗ1.mod)));
@@ -330,7 +329,7 @@ public static void Run(ж<testing.T> t, Func<ж<testing.T>, slog.Handler> newHan
 // type check is a methodless func type — rendered inline as its base delegate
 
 internal static Func<map<@string, any>, @string> hasKey(@string key) {
-    return (map<@string, any> m) => {
+    return [GoFunc("hasKey.func1")] (map<@string, any> m) => {
         var (_, ok) = m[key, ꟷ]; if (!ok) {
             return fmt.Sprintf("missing key %q"u8, key);
         }
@@ -339,7 +338,7 @@ internal static Func<map<@string, any>, @string> hasKey(@string key) {
 }
 
 internal static Func<map<@string, any>, @string> missingKey(@string key) {
-    return (map<@string, any> m) => {
+    return [GoFunc("missingKey.func1")] (map<@string, any> m) => {
         var (_, ok) = m[key, ꟷ]; if (ok) {
             return fmt.Sprintf("unexpected key %q"u8, key);
         }
@@ -348,7 +347,7 @@ internal static Func<map<@string, any>, @string> missingKey(@string key) {
 }
 
 internal static Func<map<@string, any>, @string> hasAttr(@string key, any wantVal) {
-    return (map<@string, any> m) => {
+    return [GoFunc("hasAttr.func1")] (map<@string, any> m) => {
         @string s = hasKey(key)(m); if (s != ""u8) {
             return s;
         }
@@ -361,7 +360,7 @@ internal static Func<map<@string, any>, @string> hasAttr(@string key, any wantVa
 }
 
 internal static Func<map<@string, any>, @string> inGroup(@string name, Func<map<@string, any>, @string> c) {
-    return (map<@string, any> m) => {
+    return [GoFunc("inGroup.func1")] (map<@string, any> m) => {
         var (v, ok) = m[name, ꟷ];
         if (!ok) {
             return fmt.Sprintf("missing group %q"u8, name);
@@ -379,28 +378,24 @@ partial struct wrapper {
     internal Action<ж<slog.Record>> mod;
 }
 
-} partial class slogtestᴛwrapper {
-
 // Go method set entry for the promoted 'Handler.Enabled()' - provided ONLY by the embedded
 // interface field in *wrapper's method set; see the pointer-only satisfaction record.
-internal static bool Enabled(this wrapper recvᴛ, context.Context arg1ᴛ, slog.Level arg2ᴛ) => recvᴛ.Handler.Enabled(arg1ᴛ, arg2ᴛ);
+internal static bool Enabled⁔(/*this*/ wrapper recvᴛ, context.Context arg1ᴛ, slog.Level arg2ᴛ) => recvᴛ.Handler.Enabled(arg1ᴛ, arg2ᴛ);
 
 // Go method set entry for the promoted 'Handler.WithAttrs()' - provided ONLY by the embedded
 // interface field in *wrapper's method set; see the pointer-only satisfaction record.
-internal static slog.Handler WithAttrs(this wrapper recvᴛ, slice<slog.Attr> attrs) => recvᴛ.Handler.WithAttrs(attrs);
+internal static slog.Handler WithAttrs⁔(/*this*/ wrapper recvᴛ, slice<slog.Attr> attrs) => recvᴛ.Handler.WithAttrs(attrs);
 
 // Go method set entry for the promoted 'Handler.WithGroup()' - provided ONLY by the embedded
 // interface field in *wrapper's method set; see the pointer-only satisfaction record.
-internal static slog.Handler WithGroup(this wrapper recvᴛ, @string name) => recvᴛ.Handler.WithGroup(name);
+internal static slog.Handler WithGroup⁔(/*this*/ wrapper recvᴛ, @string name) => recvᴛ.Handler.WithGroup(name);
 
-internal static error Handle(this ref wrapper h, context.Context ctx, slog.Record rʗp) {
+internal static error Handle⁔(/*this*/ ref wrapper h, context.Context ctx, slog.Record rʗp) {
     ref var r = ref heap(rʗp.ΔClone(), out var Ꮡr);
 
     h.mod(Ꮡr);
     return h.Handler.Handle(ctx, r);
 }
-
-} partial class slogtest_package {
 
 internal static partial @string withSource(@string s) {
     var (_, @file, line, ok) = runtime.Caller(1);
@@ -414,12 +409,10 @@ partial struct replace {
     internal any v;
 }
 
-} partial class slogtestᴛreplace {
+internal static slog.Value LogValue⁔(/*this*/ ref replace r) { return slog.AnyValue(r.v); }
 
-internal static slog.Value LogValue(this ref replace r) { return slog.AnyValue(r.v); }
-
-internal static @string String(this ref replace r) {
+internal static @string String⁔(/*this*/ ref replace r) {
     return fmt.Sprintf("<replace(%v)>"u8, r.v);
 }
 
-}
+} // end slogtest_package

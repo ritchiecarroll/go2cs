@@ -42,13 +42,13 @@ internal static (uint64, count, uint64) shifts(uint64 x, nuint n, count c, ref h
 }
 
 internal static T pick<T>(T v) {
-    return func(T () => {
+    return func([GoFunc("pick[...].func1")] T () => {
         return v;
     })();
 }
 
 internal static nint plusOne() {
-    return func(nint () => {
+    return func([GoFunc("plusOne.func1")] nint () => {
         return 1;
     })() + 1;
 }
@@ -57,27 +57,27 @@ internal static nint plusOne() {
 private static readonly @string sevenˢ = "seven"u8;
 
 internal static void main() {
-    nint v = func(nint () => {
+    nint v = func([GoFunc("main.func1")] nint () => {
         return 42;
     })();
-    func(() => {
+    func([GoFunc("main.func2")] () => {
         fmt.Println("void IIFE");
     })();
-    nint w = func(nint (nint a) => {
+    nint w = func([GoFunc("main.func3")] nint (nint a) => {
         return a * 2;
     })(5);
-    var (s, err) = func((@string, error) () => {
+    var (s, err) = func([GoFunc("main.func4")] (@string, error) () => {
         return ("s", default);
     })();
-    nint sum = func(nint (nint a, nint b, nint c) => {
+    nint sum = func([GoFunc("main.func5")] nint (nint a, nint b, nint c) => {
         return a + b + c;
     })(1, 2, 3);
     fmt.Println(v, w, s, err, sum, pick<nint>(7), pick(sevenˢ), plusOne(), loops());
-    fmt.Printf("%T %T %T\n"u8, func(int32 () => {
+    fmt.Printf("%T %T %T\n"u8, func([GoFunc("main.func6")] int32 () => {
         return 1;
-    })(), func(nint () => {
+    })(), func([GoFunc("main.func7")] nint () => {
         return 1;
-    })(), func(uint8 () => {
+    })(), func([GoFunc("main.func8")] uint8 () => {
         return 1;
     })());
 

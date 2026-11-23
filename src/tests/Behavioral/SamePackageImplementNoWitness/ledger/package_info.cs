@@ -14,6 +14,9 @@
 
 using go;
 using static go.SamePackageImplementNoWitness.ledger_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -54,10 +57,12 @@ using static go.SamePackageImplementNoWitness.ledger_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("lib.go", "lib.cs", "ABA4/AAHFAAJHAAJGLYABxAADRy2")]
+[assembly: GoPositionMap("lib.go", "lib.cs", "AAw4vAADFAAFHAAFGJYABRAACRyW")]
 // </GoSourcePositionMaps>
 
 namespace go.SamePackageImplementNoWitness;
+
+using static go.SamePackageImplementNoWitness.ledger_package;
 
 [GoPackage("ledger")]
 public static partial class ledger_package
@@ -96,11 +101,39 @@ public static partial class ledger_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(ledger_package.Box<>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ledgerᴛBox;
-[GoMethodHost(typeof(ledger_package.Counter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ledgerᴛCounter;
-[GoMethodHost(typeof(ledger_package.Gauge)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ledgerᴛGauge;
-[GoMethodHost(typeof(ledger_package.Meter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ledgerᴛMeter;
-[GoMethodHost(typeof(ledger_package.Tally)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ledgerᴛTally;
-[GoMethodHost(typeof(ledger_package.tick)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ledgerᴛtick;
-[GoMethodHost(typeof(ledger_package.well)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ledgerᴛwell;
+[GoMethodHost(typeof(ledger_package.Box<>)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class ledgerᴛBox;
+[GoMethodHost(typeof(ledger_package.Counter)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class ledgerᴛCounter;
+[GoMethodHost(typeof(ledger_package.Gauge)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class ledgerᴛGauge;
+[GoMethodHost(typeof(ledger_package.Meter)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class ledgerᴛMeter;
+[GoMethodHost(typeof(ledger_package.Tally)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class ledgerᴛTally;
+[GoMethodHost(typeof(ledger_package.tick)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class ledgerᴛtick;
+[GoMethodHost(typeof(ledger_package.well)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class ledgerᴛwell;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class ledgerᴛBox {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Value<T>(this Box<T> b) => ledger_package.Value⁔<T>(b);
+}
+partial class ledgerᴛCounter {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Value(this Counter c) => ledger_package.Value⁔(c);
+}
+partial class ledgerᴛGauge {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Value(this Gauge g) => ledger_package.Value⁔(g);
+}
+partial class ledgerᴛMeter {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Value(this Meter m) => ledger_package.Value⁔(m);
+}
+partial class ledgerᴛTally {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Value(this ref Tally t) => ledger_package.Value⁔(ref t);
+}
+partial class ledgerᴛtick {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint Value(this ref tick t) => ledger_package.Value⁔(ref t);
+}
+partial class ledgerᴛwell {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint depth(this well w) => ledger_package.depth⁔(w);
+}
+// </MethodForwarders>

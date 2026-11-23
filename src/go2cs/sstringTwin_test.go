@@ -171,7 +171,8 @@ func TestSStringTwinEmission(t *testing.T) {
 		"\npublic static @string Format(sstring format, params ꓸꓸꓸany aʗp) {",
 		"\npublic static nint Count(sstring s) {",
 		"\npublic static @string Mixed(@string prefix, sstring s) {",
-		"\ninternal static void write(this ref buf b, sstring s) {",
+		// a method takes the suffix form: its body keeps the sstring parameter, and its forwarder (below) too
+		"\ninternal static void write⁔(/*this*/ ref buf b, sstring s) {",
 
 		// the sstring gaps the pilot closes: range and spread over the view
 		"foreach ((_, _) in s) {",
@@ -180,6 +181,12 @@ func TestSStringTwinEmission(t *testing.T) {
 		if !strings.Contains(emitted, want) {
 			t.Errorf("want %q in:\n%s", want, emitted)
 		}
+	}
+
+	// the method's forwarder in its holder keeps the twin's parameter list, so StrGenerator mints the @string
+	// companion beside it in the holder, as it did beside the method
+	if want := "internal static void write(this ref buf b, sstring s) => twin_package.write⁔(ref b, s);"; !strings.Contains(packageInfo, want) {
+		t.Errorf("want the forwarder %q in package_info.cs:\n%s", want, packageInfo)
 	}
 
 	// the companions are go2cs-gen's (StrGenerator): the converter emits neither the @string

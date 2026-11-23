@@ -8,7 +8,6 @@ namespace go.debug;
 
 using strconv = strconv_package;
 using fmt = fmt_package;
-using static dwarf_package;
 
 partial class dwarf_package {
 
@@ -29,13 +28,9 @@ partial struct CommonType {
     public @string Name;   // name that can be used to refer to type
 }
 
-} partial class dwarfᴛCommonType {
+internal static ж<CommonType> Common⁔(/*this*/ ж<CommonType> Ꮡc) { return Ꮡc; }
 
-public static ж<CommonType> Common(this ж<CommonType> Ꮡc) { return Ꮡc; }
-
-public static int64 Size(this ref CommonType c) { return c.ByteSize; }
-
-} partial class dwarf_package {
+internal static int64 Size⁔(/*this*/ ref CommonType c) { return c.ByteSize; }
 
 // Basic types
 
@@ -50,18 +45,14 @@ partial struct BasicType {
     public int64 DataBitOffset;
 }
 
-} partial class dwarfᴛBasicType {
+internal static ж<BasicType> Basic⁔(/*this*/ ж<BasicType> Ꮡb) { return Ꮡb; }
 
-public static ж<BasicType> Basic(this ж<BasicType> Ꮡb) { return Ꮡb; }
-
-public static @string String(this ref BasicType t) {
+internal static @string String⁔(/*this*/ ref BasicType t) {
     if (t.Name != ""u8) {
         return t.Name;
     }
     return "?";
 }
-
-} partial class dwarf_package {
 
 // A CharType represents a signed character type.
 partial struct CharType {
@@ -117,13 +108,9 @@ partial struct QualType {
     public Type Type;
 }
 
-} partial class dwarfᴛQualType {
+internal static @string String⁔(/*this*/ ref QualType t) { return t.Qual + " "u8 + t.Type.String(); }
 
-public static @string String(this ref QualType t) { return t.Qual + " "u8 + t.Type.String(); }
-
-public static int64 Size(this ref QualType t) { return t.Type.Size(); }
-
-} partial class dwarf_package {
+internal static int64 Size⁔(/*this*/ ref QualType t) { return t.Type.Size(); }
 
 // An ArrayType represents a fixed size array type.
 partial struct ArrayType {
@@ -133,35 +120,27 @@ partial struct ArrayType {
     public int64 Count;         // if == -1, an incomplete array, like char x[].
 }
 
-} partial class dwarfᴛArrayType {
-
-public static @string String(this ref ArrayType t) {
+internal static @string String⁔(/*this*/ ref ArrayType t) {
     return "["u8 + strconv.FormatInt(t.Count, 10) + "]"u8 + t.Type.String();
 }
 
-public static int64 Size(this ref ArrayType t) {
+internal static int64 Size⁔(/*this*/ ref ArrayType t) {
     if (t.Count == -1) {
         return 0;
     }
     return t.Count * t.Type.Size();
 }
 
-} partial class dwarf_package {
-
 // A VoidType represents the C void type.
 partial struct VoidType {
     /*embed*/ public CommonType CommonType;
 }
 
-} partial class dwarfᴛVoidType {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string voidˢ => ref voidˢᵇ;
 private static readonly @string voidˢᵇ = "void"u8;
 
-public static @string String(this ref VoidType t) { return voidˢ; }
-
-} partial class dwarf_package {
+internal static @string String⁔(/*this*/ ref VoidType t) { return voidˢ; }
 
 // A PtrType represents a pointer type.
 partial struct PtrType {
@@ -169,11 +148,7 @@ partial struct PtrType {
     public Type Type;
 }
 
-} partial class dwarfᴛPtrType {
-
-public static @string String(this ref PtrType t) { return "*"u8 + t.Type.String(); }
-
-} partial class dwarf_package {
+internal static @string String⁔(/*this*/ ref PtrType t) { return "*"u8 + t.Type.String(); }
 
 // A StructType represents a struct, union, or C++ class type.
 partial struct StructType {
@@ -267,27 +242,21 @@ partial struct StructField {
     public int64 BitSize; // zero if not a bit field
 }
 
-} partial class dwarfᴛStructType {
-
-public static @string String(this ref StructType t) {
+internal static @string String⁔(/*this*/ ref StructType t) {
     if (t.StructName != ""u8) {
         return t.Kind + " "u8 + t.StructName;
     }
     return t.Defn();
 }
 
-} partial class dwarfᴛStructField {
-
-internal static int64 bitOffset(this ref StructField f) {
+internal static int64 bitOffset⁔(/*this*/ ref StructField f) {
     if (f.BitOffset != 0) {
         return f.BitOffset;
     }
     return f.DataBitOffset;
 }
 
-} partial class dwarfᴛStructType {
-
-public static @string Defn(this ref StructType t) {
+internal static @string Defn⁔(/*this*/ ref StructType t) {
     @string s = t.Kind;
     if (t.StructName != ""u8) {
         s += " "u8 + t.StructName;
@@ -312,8 +281,6 @@ public static @string Defn(this ref StructType t) {
     return s;
 }
 
-} partial class dwarf_package {
-
 // An EnumType represents an enumerated type.
 // The only indication of its native integer type is its ByteSize
 // (inside [CommonType]).
@@ -329,13 +296,11 @@ partial struct EnumValue {
     public int64 Val;
 }
 
-} partial class dwarfᴛEnumType {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string enumˢ => ref enumˢᵇ;
 private static readonly @string enumˢᵇ = "enum"u8;
 
-public static @string String(this ref EnumType t) {
+internal static @string String⁔(/*this*/ ref EnumType t) {
     @string s = enumˢ;
     if (t.EnumName != ""u8) {
         s += " "u8 + t.EnumName;
@@ -351,8 +316,6 @@ public static @string String(this ref EnumType t) {
     return s;
 }
 
-} partial class dwarf_package {
-
 // A FuncType represents a function type.
 partial struct FuncType {
     /*embed*/ public CommonType CommonType;
@@ -360,13 +323,11 @@ partial struct FuncType {
     public slice<Type> ParamType;
 }
 
-} partial class dwarfᴛFuncType {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string funcˢ => ref funcˢᵇ;
 private static readonly @string funcˢᵇ = "func("u8;
 
-public static @string String(this ref FuncType t) {
+internal static @string String⁔(/*this*/ ref FuncType t) {
     @string s = funcˢ;
     foreach (var (i, tΔ1) in range(t.ParamType)) {
         if (i > 0) {
@@ -381,18 +342,12 @@ public static @string String(this ref FuncType t) {
     return s;
 }
 
-} partial class dwarf_package {
-
 // A DotDotDotType represents the variadic ... function parameter.
 partial struct DotDotDotType {
     /*embed*/ public CommonType CommonType;
 }
 
-} partial class dwarfᴛDotDotDotType {
-
-public static @string String(this ref DotDotDotType t) { return "..."; }
-
-} partial class dwarf_package {
+internal static @string String⁔(/*this*/ ref DotDotDotType t) { return "..."; }
 
 // A TypedefType represents a named type.
 partial struct TypedefType {
@@ -400,13 +355,9 @@ partial struct TypedefType {
     public Type Type;
 }
 
-} partial class dwarfᴛTypedefType {
+internal static @string String⁔(/*this*/ ref TypedefType t) { return t.Name; }
 
-public static @string String(this ref TypedefType t) { return t.Name; }
-
-public static int64 Size(this ref TypedefType t) { return t.Type.Size(); }
-
-} partial class dwarf_package {
+internal static int64 Size⁔(/*this*/ ref TypedefType t) { return t.Type.Size(); }
 
 // An UnsupportedType is a placeholder returned in situations where we
 // encounter a type that isn't supported.
@@ -415,16 +366,12 @@ partial struct UnsupportedType {
     public Tag Tag;
 }
 
-} partial class dwarfᴛUnsupportedType {
-
-public static @string String(this ref UnsupportedType t) {
+internal static @string String⁔(/*this*/ ref UnsupportedType t) {
     if (t.Name != ""u8) {
         return t.Name;
     }
     return t.Name + "(unsupported type "u8 + t.Tag.String() + ")"u8;
 }
-
-} partial class dwarf_package {
 
 // typeReader is used to read from either the info section or the
 // types section.
@@ -438,25 +385,19 @@ partial interface typeReader {
     nint AddressSize();
 }
 
-} partial class dwarfᴛData {
-
 // Type reads the type at off in the DWARF “info” section.
-public static (Type, error) Type(this ж<Data> Ꮡd, Offset off) {
+internal static (Type, error) Type⁔(/*this*/ ж<Data> Ꮡd, Offset off) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     return Ꮡd.readType(infoˢ, new ReaderжtypeReader(Ꮡd.Reader()), off, d.typeCache, nil);
 }
-
-} partial class dwarf_package {
 
 partial struct typeFixer {
     internal slice<ж<TypedefType>> typedefs;
     internal slice<ж<Type>> arraytypes;
 }
 
-} partial class dwarfᴛtypeFixer {
-
-internal static void recordArrayType(this ref typeFixer tf, ж<Type> Ꮡt) {
+internal static void recordArrayType⁔(/*this*/ ref typeFixer tf, ж<Type> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (Ꮡt == nil) {
@@ -468,7 +409,7 @@ internal static void recordArrayType(this ref typeFixer tf, ж<Type> Ꮡt) {
     }
 }
 
-internal static void apply(this ref typeFixer tf) {
+internal static void apply⁔(/*this*/ ref typeFixer tf) {
     foreach (var (_, t) in range(tf.typedefs)) {
         t.of(TypedefType.ᏑCommonType).Common().ByteSize = t.Type.Size();
     }
@@ -476,14 +417,6 @@ internal static void apply(this ref typeFixer tf) {
         zeroArray(ref (t).DerefOrNull());
     }
 }
-
-} partial class dwarf_package {
-
-internal partial interface readType_type /*dyn*/ {
-    ж<BasicType> Basic();
-}
-
-} partial class dwarfᴛData {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string complexFloatˢ => ref complexFloatˢᵇ;
@@ -505,11 +438,15 @@ private static readonly @string restrictˢᵇ = "restrict"u8;
 internal static ref readonly @string volatileˢ => ref volatileˢᵇ;
 private static readonly @string volatileˢᵇ = "volatile"u8;
 
+internal partial interface readType_type /*dyn*/ {
+    ж<BasicType> Basic();
+}
+
 // readType reads a type from r at off of name. It adds types to the
 // type cache, appends new typedef types to typedefs, and computes the
 // sizes of types. Callers should pass nil for typedefs; this is used
 // for internal recursion.
-internal static (Type, error) readType(this ж<Data> Ꮡd, @string name, typeReader r, Offset off, map<Offset, Type> typeCache, ж<typeFixer> Ꮡfixups) {
+internal static (Type, error) readType⁔(/*this*/ ж<Data> Ꮡd, @string name, typeReader r, Offset off, map<Offset, Type> typeCache, ж<typeFixer> Ꮡfixups) {
     GoFrame ᒐ = default;
     try {
         ref var fixups = ref Ꮡfixups.DerefOrNull();
@@ -538,7 +475,7 @@ internal static (Type, error) readType(this ж<Data> Ꮡd, @string name, typeRea
         // readType encounters them.
         if (Ꮡfixups == nil) {
             ref var fixer = ref heap(new typeFixer(), out var Ꮡfixer);
-            defer(() => {
+            defer([GoFunc("(*Data).readType.func1")] () => {
                 Ꮡfixer.Value.apply();
             }, ref ᒐ);
             Ꮡfixups = Ꮡfixer; fixups = ref Ꮡfixups.DerefOrNull();
@@ -553,7 +490,7 @@ internal static (Type, error) readType(this ж<Data> Ꮡd, @string name, typeRea
 
         // Get next child; set err if error happens.
         var eʗ1 = e;
-        ж<Entry> next() {
+        [GoFunc("(*Data).readType.func2")] ж<Entry> next() {
             if (!eʗ1.Children) {
                 return default;
             }
@@ -592,7 +529,7 @@ internal static (Type, error) readType(this ж<Data> Ꮡd, @string name, typeRea
         // Get Type referred to by Entry's AttrType field.
         // Set err if error happens. Not having a type is an error.
         var typeCacheʗ1 = typeCache;
-        Type typeOf(ж<Entry> eΔ1) {
+        [GoFunc("(*Data).readType.func3")] Type typeOf(ж<Entry> eΔ1) {
             var tval = eΔ1.Val(AttrType);
             Type t = default;
             switch (tval.type()) {
@@ -1032,8 +969,6 @@ Error:
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
-
-} partial class dwarf_package {
 
 internal static void zeroArray(ref Type t) {
     var at = (t)._<ж<ArrayType>>();

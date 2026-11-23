@@ -212,7 +212,7 @@ internal sealed class SelectState
     /// <summary>The park shared by all of the select's waiters — released once, by the claimant.</summary>
     internal readonly SemaphoreSlim Park;
 
-    // M:N SPIKE: a twin's select parks on a slot instead, and allocates no semaphore.
+    // M:N: a twin's select parks on a slot instead, and allocates no semaphore.
     internal readonly GoParkSlot? Slot;
 
     internal SelectState(GoParkSlot? slot = null)
@@ -247,7 +247,7 @@ internal sealed class Waiter(bool isSend, SelectState? sel = null, int opIndex =
     /// <summary>Park for a PLAIN waiter; a select waiter parks on <see cref="SelectState.Park"/> instead.</summary>
     internal readonly SemaphoreSlim Park = slot is null && sel?.Slot is null ? new SemaphoreSlim(0, 1) : null!;
 
-    // M:N SPIKE: a twin's plain waiter parks on a slot instead, and allocates no semaphore.
+    // M:N: a twin's plain waiter parks on a slot instead, and allocates no semaphore.
     internal readonly GoParkSlot? Slot = slot;
 
     internal readonly SelectState? Sel = sel;
@@ -986,7 +986,7 @@ internal sealed class ChanCore<T> : ChanCore
         return awaitSend(parked, token);
     }
 
-    // M:N SPIKE: Go's chansend for a hidden TWIN. The ready path is Send's own, with no allocation; a send
+    // M:N: Go's chansend for a hidden TWIN. The ready path is Send's own, with no allocation; a send
     // that must wait parks a waiter whose wake is a GoParkSlot, and the twin awaits the slot, which gives
     // its carrier back instead of blocking it.
     internal GoTask SendTwin(T value)
@@ -1026,7 +1026,7 @@ internal sealed class ChanCore<T> : ChanCore
             throw RuntimeErrorPanic.PlainError("send on closed channel");
     }
 
-    // M:N SPIKE: Go's chanrecv for a hidden TWIN; see SendTwin.
+    // M:N: Go's chanrecv for a hidden TWIN; see SendTwin.
     internal GoTask<(T value, bool ok)> RecvTwin()
     {
         if (Recv(out T value, out bool ok, block: false))
@@ -1124,7 +1124,7 @@ internal static class SelectPending
     /// <summary>Drops this thread's pending frames before a pooled thread runs its next goroutine.</summary>
     internal static void ResetThread() => t_frames = null;
 
-    // M:N SPIKE: exchanges this thread's pending frames with a goroutine's saved ones (Goroutine.Mount / Unmount).
+    // M:N: exchanges this thread's pending frames with a goroutine's saved ones (Goroutine.Mount / Unmount).
     internal static void SwapMounted(ref object? saved)
     {
         object? mine = t_frames;
@@ -1294,7 +1294,7 @@ internal static class SelectRuntime
         return winner;
     }
 
-    // M:N SPIKE: Run for a hidden TWIN. Everything up to the park is Run's own and synchronous, so the
+    // M:N: Run for a hidden TWIN. Everything up to the park is Run's own and synchronous, so the
     // channel locks are never held across an await; a select that must wait parks its waiters on one
     // GoParkSlot and the twin awaits it, which gives its carrier back instead of blocking it.
     internal static GoTask<int> RunTwin(SelectOp[] ops)
@@ -1945,7 +1945,7 @@ public struct channel<T> : IChannel<T>, IEnumerable<T>, ISupportMake<channel<T>>
         Send(value);
     }
 
-    // M:N SPIKE: the hidden twins of Send and Receive, which a twin awaits. A send or receive that must
+    // M:N: the hidden twins of Send and Receive, which a twin awaits. A send or receive that must
     // wait gives its carrier back instead of blocking it. A nil channel blocks forever, so it takes the
     // thread path.
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]

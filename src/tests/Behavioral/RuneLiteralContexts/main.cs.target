@@ -86,18 +86,18 @@ internal static partial void main() {
     ch.ᐸꟷ('s');
     fmt.Println(ᐸꟷ(ch));
 
-    var shrink = (rune rΔ1) => (rune)'a';
-    var pair = () => ((rune)'b', true);
-    var wide = () => (uint16)'u';
-    var widest = () => (nint)'w';
-    var small = () => (byte)'z';
+    var shrink = [GoFunc("main.func1")] (rune rΔ1) => (rune)'a';
+    var pair = [GoFunc("main.func2")] () => ((rune)'b', true);
+    var wide = [GoFunc("main.func3")] () => (uint16)'u';
+    var widest = [GoFunc("main.func4")] () => (nint)'w';
+    var small = [GoFunc("main.func5")] () => (byte)'z';
     fmt.Printf("%T %v\n"u8, (shrink).OrTypedNilFunc(), shrink(1));
     var (pr, pok) = pair();
     fmt.Printf("%T %v %v\n"u8, (pair).OrTypedNilFunc(), pr, pok);
     fmt.Printf("%T %v %T %v %T %v\n"u8, (wide).OrTypedNilFunc(), wide(), (widest).OrTypedNilFunc(), widest(), (small).OrTypedNilFunc(), small());
     rune inferred = (rune)'v';
     fmt.Printf("%T %v %T %v\n"u8, inferred, inferred, ident((rune)'i'), ident((rune)'i'));
-    var got = apply(rune () => (rune)'g');
+    var got = apply([GoFunc("main.func6")] rune () => (rune)'g');
     fmt.Printf("%T %v\n"u8, got, got);
     uint16 tx = default;
     uint16 ty = default;
@@ -119,7 +119,7 @@ internal static partial void main() {
     }}
     var done = new channel<rune>(0);
     var doneʗ1 = done;
-    goǃ((rune rΔ2) => {
+    goǃ([GoFunc("main.func7")] (rune rΔ2) => {
         doneʗ1.ᐸꟷ(rΔ2);
     }, (rune)'g');
     fmt.Println(tm["a"], tm["b"], tw, ᐸꟷ(sel), ᐸꟷ(done));

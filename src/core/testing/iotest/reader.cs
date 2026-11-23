@@ -9,7 +9,6 @@ using bytes = bytes_package;
 using errors = errors_package;
 using fmt = fmt_package;
 using io = io_package;
-using static iotest_package;
 
 partial class iotest_package {
 
@@ -21,16 +20,12 @@ partial struct oneByteReader {
     internal io.Reader r;
 }
 
-} partial class iotestᴛoneByteReader {
-
-internal static (nint, error) Read(this ref oneByteReader r, slice<byte> p) {
+internal static (nint, error) Read⁔(/*this*/ ref oneByteReader r, slice<byte> p) {
     if (len(p) == 0) {
         return (0, default);
     }
     return r.r.Read(p[0..1]);
 }
-
-} partial class iotest_package {
 
 // HalfReader returns a Reader that implements Read
 // by reading half as many requested bytes from r.
@@ -40,13 +35,9 @@ partial struct halfReader {
     internal io.Reader r;
 }
 
-} partial class iotestᴛhalfReader {
-
-internal static (nint, error) Read(this ref halfReader r, slice<byte> p) {
+internal static (nint, error) Read⁔(/*this*/ ref halfReader r, slice<byte> p) {
     return r.r.Read(p.slice(0, (len(p) + 1) / 2));
 }
-
-} partial class iotest_package {
 
 // DataErrReader changes the way errors are handled by a Reader. Normally, a
 // Reader returns an error (typically EOF) from the first Read call after the
@@ -61,9 +52,7 @@ partial struct dataErrReader {
     internal slice<byte> data;
 }
 
-} partial class iotestᴛdataErrReader {
-
-internal static (nint n, error err) Read(this ref dataErrReader r, slice<byte> p) {
+internal static (nint n, error err) Read⁔(/*this*/ ref dataErrReader r, slice<byte> p) {
     nint n = default;
     error err = default;
 
@@ -84,8 +73,6 @@ internal static (nint n, error err) Read(this ref dataErrReader r, slice<byte> p
     return (n, err);
 }
 
-} partial class iotest_package {
-
 // ErrTimeout is a fake timeout error.
 public static error ErrTimeout = errors.New("timeout");
 
@@ -98,17 +85,13 @@ partial struct timeoutReader {
     internal nint count;
 }
 
-} partial class iotestᴛtimeoutReader {
-
-internal static (nint, error) Read(this ref timeoutReader r, slice<byte> p) {
+internal static (nint, error) Read⁔(/*this*/ ref timeoutReader r, slice<byte> p) {
     r.count++;
     if (r.count == 2) {
         return (0, ErrTimeout);
     }
     return r.r.Read(p);
 }
-
-} partial class iotest_package {
 
 // ErrReader returns an [io.Reader] that returns 0, err from all Read calls.
 public static io.Reader ErrReader(error err) {
@@ -119,13 +102,9 @@ partial struct errReader {
     internal error err;
 }
 
-} partial class iotestᴛerrReader {
-
-internal static (nint, error) Read(this ref errReader r, slice<byte> p) {
+internal static (nint, error) Read⁔(/*this*/ ref errReader r, slice<byte> p) {
     return (0, r.err);
 }
-
-} partial class iotest_package {
 
 partial struct smallByteReader {
     internal io.Reader r;
@@ -133,9 +112,7 @@ partial struct smallByteReader {
     internal nint n;
 }
 
-} partial class iotestᴛsmallByteReader {
-
-internal static (nint, error) Read(this ref smallByteReader r, slice<byte> p) {
+internal static (nint, error) Read⁔(/*this*/ ref smallByteReader r, slice<byte> p) {
     if (len(p) == 0) {
         return (0, default);
     }
@@ -151,8 +128,6 @@ internal static (nint, error) Read(this ref smallByteReader r, slice<byte> p) {
     r.off += n;
     return (n, err);
 }
-
-} partial class iotest_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string nilˢ => ref nilˢᵇ;

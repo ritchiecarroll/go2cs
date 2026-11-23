@@ -14,6 +14,9 @@
 
 using go;
 using static go.@internal.runtime.cgroup_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -57,12 +60,14 @@ using static go.@internal.runtime.cgroup_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("internal/runtime/cgroup/cgroup.go", "cgroup.cs", "ADFwlIKClJSCgqamgoKCpoKUppSCgpSUgoKmgoKmrgAVJKaUgoLcgoKCgqYABxCCgqaClIKCpoKUgpSUpqaUyqbKlLiokoKClKaClIKmpgAIDgAoSpSCgu6CgoKmpoKCgpS4goKUgpSUpoKClIKmgoKClIKUgoKClLiCgpSClJSCpoKCpqaCxoLGguyCgpSCgriClJQACRTKgoKUgoKClIKUuKaCgoKUgpQABRCCAAIeAAwCkoK4lIKCgoKC7oKmgoKCgqaCpoKUgpSm")]
-[assembly: GoPositionMap("internal/runtime/cgroup/cgroup_linux.go", "cgroup_linux.cs", "ACQ+gpSCtLQACgiCgoIAAxDClIKUgoKmlIKCgrimgoKCuKbKpIKCgrimyqSCzKKUgoKmlKaCgqa2pILKAAESAAgCgoKUgqaCqAABJAARAoKClIKmggACFgAIAoLKgoKmggACFgAIAoKCgoKCyoKCgqaCAAIaAAoCgpSCgoKCgqaCgoKUlA==")]
-[assembly: GoPositionMap("internal/runtime/cgroup/line_reader.go", "line_reader.cs", "ABEeggAeWAALAgAKKgAUEoKUgpSClIKU3LimgoKUlNymgqamuMqUlJTcAAQaAAgClKY=")]
+[assembly: GoPositionMap("internal/runtime/cgroup/cgroup_linux.go", "cgroup_linux.cs", "AB0+gpSCtLQACAiCgoIAAxDClIKUgoKmlIKCgrimgoKCuKbKpIKCgrimyqSCzKKUgoKmlKaCgqa2pILKAAESAAgCgoKUgqaCqAABJAARAoKClIKmggACFgAIAoLKgoKmggACFgAIAoKCgoKCyoKCgqaCAAIaAAoCgpSCgoKCgqaCgoKUlA==")]
+[assembly: GoPositionMap("internal/runtime/cgroup/line_reader.go", "line_reader.cs", "AA4eggAcWAALAgAIKgAUEoKUgpSClIKU3LimgoKUlNymgqamuMqUlJTcAAQaAAgClKY=")]
 [assembly: GoPositionMap("internal/runtime/cgroup/runtime.go", "runtime.cs", "AAkc")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.runtime;
+
+using static go.@internal.runtime.cgroup_package;
 
 [GoPackage("cgroup")]
 public static partial class cgroup_package
@@ -99,7 +104,24 @@ public static partial class cgroup_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(cgroup_package.CPU)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class cgroupᴛCPU;
-[GoMethodHost(typeof(cgroup_package.lineReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class cgroupᴛlineReader;
-[GoMethodHost(typeof(cgroup_package.stringError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class cgroupᴛstringError;
+[GoMethodHost(typeof(cgroup_package.CPU)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class cgroupᴛCPU;
+[GoMethodHost(typeof(cgroup_package.lineReader)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class cgroupᴛlineReader;
+[GoMethodHost(typeof(cgroup_package.stringError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class cgroupᴛstringError;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class cgroupᴛCPU {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Close(this CPU c) => cgroup_package.Close⁔(c);
+}
+partial class cgroupᴛlineReader {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error next(this ref lineReader r) => cgroup_package.next⁔(ref r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<byte> line(this ref lineReader r) => cgroup_package.line⁔(ref r);
+}
+partial class cgroupᴛstringError {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string Error(this stringError e) => cgroup_package.Error⁔(e);
+}
+// </MethodForwarders>

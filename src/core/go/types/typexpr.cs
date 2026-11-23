@@ -12,12 +12,8 @@ using strings = strings_package;
 using errors = global::go.@internal.types.errors_package;
 using global::go.go;
 using token = global::go.go.token_package;
-using types = types_package;
-using static types_package;
 
 partial class types_package {
-
-} partial class typesᴛChecker {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string cannotUseAsValueOrTypeˢ => ref cannotUseAsValueOrTypeˢᵇ;
@@ -28,7 +24,7 @@ private static readonly @string cannotUseIotaOutsideˢᵇ = "cannot use iota out
 // ident type-checks identifier e and initializes x with the value or type of e.
 // If an error occurred, x.mode is set to invalid.
 // If wantType is set, the identifier e is expected to denote a type.
-internal static void ident(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.Ident> Ꮡe, bool wantType) {
+internal static void ident⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.Ident> Ꮡe, bool wantType) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
     ref var e = ref Ꮡe.DerefOrNull();
@@ -155,7 +151,7 @@ internal static void ident(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.I
     }
     case ж<Builtin> objΔ1: {
         x.id = objΔ1.id;
-        x.mode = types.Δbuiltin;
+        x.mode = Δbuiltin;
         break;
     }
     case ж<Nil> objΔ1: {
@@ -173,14 +169,14 @@ internal static void ident(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.I
 
 // typ type-checks the type expression e and returns its type, or Typ[Invalid].
 // The type must not be an (uninstantiated) generic type.
-internal static Type typ(this ж<Checker> Ꮡcheck, ast.Expr e) {
+internal static Type typ⁔(/*this*/ ж<Checker> Ꮡcheck, ast.Expr e) {
     return Ꮡcheck.declaredType(e, nil);
 }
 
 // varType type-checks the type expression e and returns its type, or Typ[Invalid].
 // The type must not be an (uninstantiated) generic type and it must not be a
 // constraint interface.
-internal static Type varType(this ж<Checker> Ꮡcheck, ast.Expr e) {
+internal static Type varType⁔(/*this*/ ж<Checker> Ꮡcheck, ast.Expr e) {
     var typ = Ꮡcheck.declaredType(e, nil);
     Ꮡcheck.validVarType(e, typ);
     return typ;
@@ -188,7 +184,7 @@ internal static Type varType(this ж<Checker> Ꮡcheck, ast.Expr e) {
 
 // validVarType reports an error if typ is a constraint interface.
 // The expression e is used for error reporting, if any.
-internal static void validVarType(this ж<Checker> Ꮡcheck, ast.Expr e, Type typ) {
+internal static void validVarType⁔(/*this*/ ж<Checker> Ꮡcheck, ast.Expr e, Type typ) {
     ref var check = ref Ꮡcheck.DerefOrNull();
 
     // If we have a type parameter there's nothing to do.
@@ -199,7 +195,7 @@ internal static void validVarType(this ж<Checker> Ꮡcheck, ast.Expr e, Type ty
     // We don't want to call typ.Underlying() or complete interfaces while we are in
     // the middle of type-checking parameter declarations that might belong
     // to interface methods. Delay this check to the end of type-checking.
-    check.later(() => {
+    check.later([GoFunc("(*Checker).validVarType.func1")] () => {
         var (t, _) = typ.Underlying()._<ж<Interface>>(ᐧ); if (t != nil) {
             var tset = computeInterfaceTypeSet(Ꮡcheck, e.Pos(), t); // TODO(gri) is this the correct position?
             if (!tset.IsMethodSet()) {
@@ -217,7 +213,7 @@ internal static void validVarType(this ж<Checker> Ꮡcheck, ast.Expr e, Type ty
 // If def != nil, e is the type specification for the [Alias] or [Named] type
 // named def, and def.typ.fromRHS will be set to the [Type] of e immediately
 // after its creation.
-internal static Type declaredType(this ж<Checker> Ꮡcheck, ast.Expr e, ж<TypeName> def) {
+internal static Type declaredType⁔(/*this*/ ж<Checker> Ꮡcheck, ast.Expr e, ж<TypeName> def) {
     ref var check = ref Ꮡcheck.DerefOrNull();
 
     var typ = Ꮡcheck.typInternal(e, def);
@@ -237,7 +233,7 @@ internal static Type declaredType(this ж<Checker> Ꮡcheck, ast.Expr e, ж<Type
 // Note: If the type expression was invalid and an error was reported before,
 // cause will not be populated; thus cause alone cannot be used to determine
 // if an error occurred.
-internal static Type genericType(this ж<Checker> Ꮡcheck, ast.Expr e, ж<@string> Ꮡcause) {
+internal static Type genericType⁔(/*this*/ ж<Checker> Ꮡcheck, ast.Expr e, ж<@string> Ꮡcause) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var cause = ref Ꮡcause.DerefOrNull();
 
@@ -254,8 +250,6 @@ internal static Type genericType(this ж<Checker> Ꮡcheck, ast.Expr e, ж<@stri
     return typ;
 }
 
-} partial class types_package {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string typesˢ => ref typesˢᵇ;
 private static readonly @string typesˢᵇ = "types."u8;
@@ -265,8 +259,6 @@ private static readonly @string typesˢᵇ = "types."u8;
 internal static @string goTypeName(Type typ) {
     return strings.ReplaceAll(fmt.Sprintf("%T"u8, typ), typesˢ, ""u8);
 }
-
-} partial class typesᴛChecker {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string typeSˢ => ref typeSˢᵇ;
@@ -280,7 +272,7 @@ private static readonly @string missingComparableˢᵇ = " (missing comparable c
 
 // typInternal drives type checking of types.
 // Must only be called by declaredType or genericType.
-internal static Type /*T*/ typInternal(this ж<Checker> Ꮡcheck, ast.Expr e0, ж<TypeName> def) {
+internal static Type /*T*/ typInternal⁔(/*this*/ ж<Checker> Ꮡcheck, ast.Expr e0, ж<TypeName> def) {
     Type T = default;
     GoFrame ᒐ = default;
     try {
@@ -289,7 +281,7 @@ internal static Type /*T*/ typInternal(this ж<Checker> Ꮡcheck, ast.Expr e0, �
         if (check.conf._Trace) {
             Ꮡcheck.trace(e0.Pos(), typeSˢ, e0);
             check.indent++;
-            defer(() => {
+            defer([GoFunc("(*Checker).typInternal.func1")] () => {
                 Ꮡcheck.Value.indent--;
                 Type under = default;
                 if (T != nil) {
@@ -434,7 +426,7 @@ internal static Type /*T*/ typInternal(this ж<Checker> Ꮡcheck, ast.Expr e0, �
             // Delay this check because it requires fully setup types;
             // it is safe to continue in any case (was go.dev/issue/6667).
             var typʗ1 = typΔ7;
-            check.later(() => {
+            check.later([GoFunc("(*Checker).typInternal.func2")] () => {
                 if (!Comparable(typʗ1.key)) {
                     @string why = default;
                     if (isTypeParam(typʗ1.key)) {
@@ -488,19 +480,15 @@ internal static Type /*T*/ typInternal(this ж<Checker> Ꮡcheck, ast.Expr e0, �
     ᒐdone: return T;
 }
 
-} partial class types_package {
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string instantiatingTypeSWithSˢ => ref instantiatingTypeSWithSˢᵇ;
+private static readonly @string instantiatingTypeSWithSˢᵇ = "-- instantiating type %s with %s"u8;
 
 internal partial interface instantiatedType_type /*dyn*/ {
     ж<TypeName> Obj();
 }
 
-} partial class typesᴛChecker {
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string instantiatingTypeSWithSˢ => ref instantiatingTypeSWithSˢᵇ;
-private static readonly @string instantiatingTypeSWithSˢᵇ = "-- instantiating type %s with %s"u8;
-
-internal static Type /*res*/ instantiatedType(this ж<Checker> Ꮡcheck, ж<indexedExpr> Ꮡix) {
+internal static Type /*res*/ instantiatedType⁔(/*this*/ ж<Checker> Ꮡcheck, ж<indexedExpr> Ꮡix) {
     Type res = default;
     GoFrame ᒐ = default;
     try {
@@ -510,7 +498,7 @@ internal static Type /*res*/ instantiatedType(this ж<Checker> Ꮡcheck, ж<inde
         if (check.conf._Trace) {
             Ꮡcheck.trace(ix.Pos(), instantiatingTypeSWithSˢ, ix.x, ix.indices);
             check.indent++;
-            defer(() => {
+            defer([GoFunc("(*Checker).instantiatedType.func1")] () => {
                 Ꮡcheck.Value.indent--;
                 // Don't format the underlying here. It will always be nil.
                 Ꮡcheck.trace(Ꮡix.Value.Pos(), "=> %s", res);
@@ -550,7 +538,7 @@ internal static Type /*res*/ instantiatedType(this ж<Checker> Ꮡcheck, ж<inde
         // For Named types, orig.tparams may not be set up, so we need to do expansion later.
         var instʗ1 = inst;
         var targsʗ1 = targs;
-        check.later(() => {
+        check.later([GoFunc("(*Checker).instantiatedType.func2")] () => {
             // This is an instance from the source, not from recursive substitution,
             // and so it must be resolved during type-checking so that we can report
             // errors.
@@ -589,7 +577,7 @@ private static readonly @string arrayLengthSMustBeˢᵇ = "array length %s must 
 // arrayLength type-checks the array length expression e
 // and returns the constant length >= 0, or a value < 0
 // to indicate an error (and thus an unknown length).
-internal static int64 arrayLength(this ж<Checker> Ꮡcheck, ast.Expr e) {
+internal static int64 arrayLength⁔(/*this*/ ж<Checker> Ꮡcheck, ast.Expr e) {
     // If e is an identifier, the array declaration might be an
     // attempt at a parameterized type declaration with missing
     // constraint. Provide an error message that mentions array
@@ -637,7 +625,7 @@ internal static int64 arrayLength(this ж<Checker> Ꮡcheck, ast.Expr e) {
 
 // typeList provides the list of types corresponding to the incoming expression list.
 // If an error occurred, the result is nil, but all list elements were type-checked.
-internal static slice<Type> typeList(this ж<Checker> Ꮡcheck, slice<ast.Expr> list) {
+internal static slice<Type> typeList⁔(/*this*/ ж<Checker> Ꮡcheck, slice<ast.Expr> list) {
     var res = new slice<Type>(len(list)); // res != nil even if len(list) == 0
     foreach (var (i, x) in range(list)) {
         var t = Ꮡcheck.varType(x);
@@ -651,4 +639,4 @@ internal static slice<Type> typeList(this ж<Checker> Ꮡcheck, slice<ast.Expr> 
     return res;
 }
 
-}
+} // end types_package

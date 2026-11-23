@@ -16,7 +16,6 @@ using strings = strings_package;
 using time = time_package;
 using go.net;
 using go.net.http;
-using static fcgi_package;
 
 partial class fcgi_package {
 
@@ -46,10 +45,8 @@ internal static ж<request> newRequest(uint16 reqId, uint8 flags) {
     return r;
 }
 
-} partial class fcgiᴛrequest {
-
 // parseParams reads an encoded []byte into Params.
-internal static void parseParams(this ref request r) {
+internal static void parseParams⁔(/*this*/ ref request r) {
     var text = r.rawParams;
     r.rawParams = default;
     while (len(text) > 0) {
@@ -74,8 +71,6 @@ internal static void parseParams(this ref request r) {
     }
 }
 
-} partial class fcgi_package {
-
 // response implements http.ResponseWriter.
 partial struct response {
     internal ж<request> req;
@@ -96,13 +91,11 @@ internal static ж<response> newResponse(ref child c, ж<request> Ꮡreq) {
     ));
 }
 
-} partial class fcgiᴛresponse {
-
-internal static http.Header Header(this ref response r) {
+internal static http.Header Header⁔(/*this*/ ref response r) {
     return r.header;
 }
 
-internal static (nint n, error err) Write(this ref response r, slice<byte> p) {
+internal static (nint n, error err) Write⁔(/*this*/ ref response r, slice<byte> p) {
     if (!r.wroteHeader) {
         r.WriteHeader(http.StatusOK);
     }
@@ -122,7 +115,7 @@ private static readonly @string transferEncodingˢᵇ = "Transfer-Encoding"u8;
 internal static ref readonly @string dateˢ => ref dateˢᵇ;
 private static readonly @string dateˢᵇ = "Date"u8;
 
-internal static void WriteHeader(this ref response r, nint code) {
+internal static void WriteHeader⁔(/*this*/ ref response r, nint code) {
     if (r.wroteHeader) {
         return;
     }
@@ -143,7 +136,7 @@ internal static void WriteHeader(this ref response r, nint code) {
 // p is not written by writeHeader, but is the first chunk of the body
 // that will be written. It is sniffed for a Content-Type if none is
 // set explicitly.
-internal static void writeCGIHeader(this ref response r, slice<byte> p) {
+internal static void writeCGIHeader⁔(/*this*/ ref response r, slice<byte> p) {
     if (r.wroteCGIHeader) {
         return;
     }
@@ -157,19 +150,17 @@ internal static void writeCGIHeader(this ref response r, slice<byte> p) {
     r.w.Value.Writer.Value.Flush();
 }
 
-internal static void Flush(this ref response r) {
+internal static void Flush⁔(/*this*/ ref response r) {
     if (!r.wroteHeader) {
         r.WriteHeader(http.StatusOK);
     }
     r.w.Value.Writer.Value.Flush();
 }
 
-internal static error Close(this ref response r) {
+internal static error Close⁔(/*this*/ ref response r) {
     r.Flush();
     return r.w.Close();
 }
-
-} partial class fcgi_package {
 
 partial struct child {
     internal ж<conn> conn;
@@ -185,9 +176,7 @@ internal static ж<child> newChild(io.ReadWriteCloser rwc, http.Handler handler)
     ));
 }
 
-} partial class fcgiᴛchild {
-
-internal static void serve(this ж<child> Ꮡc) {
+internal static void serve⁔(/*this*/ ж<child> Ꮡc) {
     GoFrame ᒐ = default;
     try {
         ref var c = ref Ꮡc.DerefOrNull();
@@ -212,8 +201,6 @@ internal static void serve(this ж<child> Ꮡc) {
     finally { ᒐ.Run(); }
 }
 
-} partial class fcgi_package {
-
 internal static error errCloseConn = errors.New("fcgi: connection should be closed");
 
 internal static io.ReadCloser emptyBody = io.NopCloser(new strings_ReaderжReader(strings.NewReader("")));
@@ -226,13 +213,11 @@ public static error ErrRequestAborted = errors.New("fcgi: request aborted by web
 // a request after the connection to the web server has been closed.
 public static error ErrConnClosed = errors.New("fcgi: connection to web server closed");
 
-} partial class fcgiᴛchild {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string fcgiReceivedIdThatIsˢ => ref fcgiReceivedIdThatIsˢᵇ;
 private static readonly @string fcgiReceivedIdThatIsˢᵇ = "fcgi: received ID that is already in-flight"u8;
 
-internal static partial error handleRecord(this ж<child> Ꮡc, ж<record> Ꮡrec) {
+internal static partial error handleRecord⁔(/*this*/ ж<child> Ꮡc, ж<record> Ꮡrec) {
     ref var c = ref Ꮡc.DerefOrNull();
     ref var rec = ref Ꮡrec.DerefOrNull();
 
@@ -327,8 +312,6 @@ internal static partial error handleRecord(this ж<child> Ꮡc, ж<record> Ꮡre
     }}
 }
 
-} partial class fcgi_package {
-
 // filterOutUsedEnvVars returns a new map of env vars without the
 // variables in the given envVars map that are read for creating each http.Request
 internal static map<@string, @string> filterOutUsedEnvVars(map<@string, @string> envVars) {
@@ -341,9 +324,7 @@ internal static map<@string, @string> filterOutUsedEnvVars(map<@string, @string>
     return withoutUsedEnvVars;
 }
 
-} partial class fcgiᴛchild {
-
-internal static void serveRequest(this ж<child> Ꮡc, ж<request> Ꮡreq, io.ReadCloser body) {
+internal static void serveRequest⁔(/*this*/ ж<child> Ꮡc, ж<request> Ꮡreq, io.ReadCloser body) {
     ref var c = ref Ꮡc.DerefOrNull();
     ref var req = ref Ꮡreq.DerefOrNull();
 
@@ -380,7 +361,7 @@ internal static void serveRequest(this ж<child> Ꮡc, ж<request> Ꮡreq, io.Re
     }
 }
 
-internal static void cleanUp(this ref child c) {
+internal static void cleanUp⁔(/*this*/ ref child c) {
     foreach (var (_, req) in c.requests) {
         if (req.pw != nil) {
             // race with call to Close in c.serveRequest doesn't matter because
@@ -389,8 +370,6 @@ internal static void cleanUp(this ref child c) {
         }
     }
 }
-
-} partial class fcgi_package {
 
 // Serve accepts incoming FastCGI connections on the listener l, creating a new
 // goroutine for each. The goroutine reads requests and then calls handler

@@ -19,16 +19,16 @@ internal static (any, nint) pairConstParen() { return ((@string)("t3" + "t4"), 2
 internal static void main() {
     @string a = "v";
 
-    @catch(() => {
+    @catch([GoFunc("main.func1")] () => {
         throw panic("pn1" + "pn2");
     });
-    @catch(() => {
+    @catch([GoFunc("main.func2")] () => {
         throw panic(("pn3" + "pn4"));
     });
-    @catch(() => {
+    @catch([GoFunc("main.func3")] () => {
         throw panic(a + "-pn");
     });
-    @catch(() => {
+    @catch([GoFunc("main.func4")] () => {
         throw panic((a + "-pn"));
     });
 
@@ -60,7 +60,7 @@ internal static void main() {
 internal static void @catch(Action f) {
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("catch.func1")] () => {
             fmt.Println("recovered:", recover());
         }, ref ᒐ);
         f();

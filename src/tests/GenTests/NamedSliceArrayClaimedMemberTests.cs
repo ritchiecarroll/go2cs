@@ -100,15 +100,15 @@ public class NamedSliceArrayClaimedMemberTests
         return (type, errors);
     }
 
-    // The generated wrapper's public members a Go method could be named like: ASCII identifiers, no constructors, operators,
-    // conversions, accessors or indexers.
-    private static SortedSet<string> PublicAsciiMembers(INamedTypeSymbol type)
+    // The generated wrapper's non-private members a Go method could be named like (an internal member binds a same-package
+    // Go call just as a public one does): ASCII identifiers, no constructors, operators, conversions, accessors or indexers.
+    private static SortedSet<string> VisibleAsciiMembers(INamedTypeSymbol type)
     {
         SortedSet<string> names = new(StringComparer.Ordinal);
 
         foreach (ISymbol member in type.GetMembers())
         {
-            if (member.DeclaredAccessibility != Accessibility.Public || member.IsImplicitlyDeclared)
+            if (member.DeclaredAccessibility is Accessibility.Private or Accessibility.NotApplicable || member.IsImplicitlyDeclared)
                 continue;
 
             if (member is IMethodSymbol { MethodKind: not MethodKind.Ordinary })
@@ -145,7 +145,7 @@ public class NamedSliceArrayClaimedMemberTests
 
             Assert.AreEqual(0, errors.Length, $"{kind}: the plain wrapper does not compile:\n{string.Join("\n", errors)}");
 
-            SortedSet<string> members = PublicAsciiMembers(type);
+            SortedSet<string> members = VisibleAsciiMembers(type);
 
             // the guard must see the template's own members, or it reads nothing
             Assert.IsTrue(members.Contains("Length") && members.Contains("Source"), $"{kind}: the guard did not see the wrapper's members: {string.Join(", ", members)}");
@@ -173,10 +173,26 @@ public class NamedSliceArrayClaimedMemberTests
 
             Assert.AreEqual(0, errors.Length, $"{kind}: the claimed forms do not compile:\n{string.Join("\n", errors)}");
 
-            string[] stillPublic = PublicAsciiMembers(type).Where(claimable.Contains).ToArray();
+            string[] stillPublic = VisibleAsciiMembers(type).Where(claimable.Contains).ToArray();
 
-            Assert.AreEqual(0, stillPublic.Length, $"{kind}: claimed by a Go method, still a public wrapper member: {string.Join(", ", stillPublic)}");
+            Assert.AreEqual(0, stillPublic.Length, $"{kind}: claimed by a Go method, still a visible wrapper member: {string.Join(", ", stillPublic)}");
         }
+    }
+
+    [TestMethod]
+    public void AViewOverAnArrayThatClaimsEveryNameCompiles()
+    {
+        // The array view reads its underlying wrapper's backing, never a member by name: when the UNDERLYING named array's
+        // Go methods claim Source, Length, Slice, ToSpan, GetEnumerator, Clone, Assign or Make, `view.Source` would bind
+        // the extension method Go's Source became (CS0428; NamedSliceMethodShadow's `type V Vec`).
+        string underlyingClaims = string.Join("\n", ClaimableWrapperMembers.Array.Select(name => $"    internal static nint {name}(this A r, nint a, nint b) => a + b;"));
+
+        (INamedTypeSymbol view, string[] errors) = Generated(
+            """    [GoType("[4]nint")] partial struct A;""" + "\n" + """    [GoType("A")] partial struct V;""" + "\n" + underlyingClaims, "V");
+
+        Assert.AreEqual(0, errors.Length, $"a view over a claiming array does not compile:\n{string.Join("\n", errors)}");
+        Assert.IsTrue(VisibleAsciiMembers(view).IsSupersetOf(["Source", "Length", "Slice", "ToSpan", "GetEnumerator", "Clone"]),
+            "the view's own members, which nothing claims on V, must stay");
     }
 
     [TestMethod]
@@ -194,7 +210,7 @@ public class NamedSliceArrayClaimedMemberTests
             (INamedTypeSymbol type, string[] errors) = Generated(declaration, name);
 
             Assert.AreEqual(0, errors.Length, $"type {name}: the wrapper does not compile:\n{string.Join("\n", errors)}");
-            Assert.IsFalse(PublicAsciiMembers(type).Contains(name), $"type {name} still declares a member {name}");
+            Assert.IsFalse(VisibleAsciiMembers(type).Contains(name), $"type {name} still declares a member {name}");
         }
     }
 }

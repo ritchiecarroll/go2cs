@@ -84,10 +84,10 @@ internal static void main() {
     view.Flags = 0x0d0c0b0a;
     fmt.Println("view bytes:", blob[16..20]);
 
-    func(() => {
+    func([GoFunc("main.func1")] () => {
         GoFrame ᒐ = default;
         try {
-            defer(() => {
+            defer([GoFunc("main.func1.1")] () => {
                 fmt.Println("nil record:", recover());
             }, ref ᒐ);
 

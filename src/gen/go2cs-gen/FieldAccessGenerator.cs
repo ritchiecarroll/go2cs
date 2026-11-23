@@ -50,13 +50,22 @@ namespace go2cs;
 /// metadata, any <c>ref</c> property the type pairs with a <c>Ꮡ</c> accessor (a promoted field's too).
 /// </para>
 /// <para>
-/// A HEADER-SHAPED struct is the one exception to <c>ref</c>: an <c>unsafe.Pointer</c> field and then one or two
+/// A HEADER-SHAPED struct is one exception to <c>ref</c>: an <c>unsafe.Pointer</c> field and then one or two
 /// <c>int</c> fields, Go's slice and string headers (<see cref="IsHeaderShaped"/>). Its fields get GET/SET properties,
 /// and the setter calls <c>ж&lt;T&gt;.OnHeaderStore()</c> after the store. golib's header boxes view a slice or string
 /// variable as such a header and must commit each store to the variable, which a <c>ref</c> cannot be intercepted to
 /// do: the header's last store is followed by no access of the box at all. A read, a store and a compound assignment
 /// bind the property as before; a <c>ref</c> to such a field does not compile, by design, since its stores would bypass
 /// the commit.
+/// </para>
+/// <para>
+/// A C STRUCT is the other (<see cref="IsCgoStruct"/>, docs/phase4/DESIGN-cgo-phase3-marshaling.md 18.9): a struct
+/// carrying golib's <c>GoCgoStructAttribute</c>, which the converter stamps on a struct cmd/cgo declared for a C struct
+/// with a pointer field. The contract is the marker, however it was stamped. Its <c>ж&lt;U&gt;</c> fields get GET/SET
+/// properties through <c>ж&lt;T&gt;.cgoPointerField</c>, and its <c>unsafe.Pointer</c> fields through the word doors over
+/// <c>ж&lt;T&gt;.cgoWordField</c>: in C memory such a field is a word at its Go offset, where the CLR slot a <c>ref</c>
+/// names holds a managed reference. Its other fields keep <c>ref</c>, every field keeps its address property, and a
+/// <c>ref</c> to a marked pointer field does not compile, by design.
 /// </para>
 /// </remarks>
 [Generator]
@@ -310,6 +319,7 @@ public class FieldAccessGenerator : ISourceGenerator
         string typeName = type.ToDisplayString(s_typeFormat);
         bool foreign = !type.Locations.Any(location => location.IsInSource);
         bool header = IsHeaderShaped(type);
+        bool cgo = IsCgoStruct(type);
 
         foreach (IFieldSymbol field in type.GetMembers().OfType<IFieldSymbol>())
         {
@@ -345,9 +355,14 @@ public class FieldAccessGenerator : ISourceGenerator
             // shared one, which only the accessor reaches.
             if (!declared.Contains(name))
             {
-                properties.Add(header
+                // A marked struct that is also header-shaped (an unsafe.Pointer field, then nint fields) would take the cgo
+                // property on its pointer field and the header GET/SET on the others. cmd/cgo declares no nint field, so the
+                // pair is not reached today.
+                string? cgoProperty = cgo && !field.IsReadOnly ? CgoPointerProperty(field, fieldType, name, receiver, $"{typeName}.{accessor}") : null;
+
+                properties.Add(cgoProperty ?? (header
                     ? $"public {fieldType} {PropertyName(name)} {{ [{GetterAttributes}] get => {slot}; [{GetterAttributes}] set {{ {slot} = value; {receiver}.OnHeaderStore(); }} }}"
-                    : $"public ref {fieldType} {PropertyName(name)} {{ [{GetterAttributes}] get => ref {(field.IsReadOnly ? slot : Specialized(receiver, typeName, accessor, name))}; }}");
+                    : $"public ref {fieldType} {PropertyName(name)} {{ [{GetterAttributes}] get => ref {(field.IsReadOnly ? slot : Specialized(receiver, typeName, accessor, name))}; }}"));
             }
 
             AddAddress(properties, receiver, type, typeName, fieldType, accessor, foreign, declared);
@@ -669,6 +684,36 @@ public class FieldAccessGenerator : ISourceGenerator
         }
 
         return fields.Skip(1).All(field => field.Type.SpecialType == SpecialType.System_IntPtr);
+    }
+
+    /// <summary>
+    /// Whether <paramref name="type"/> carries golib's <c>GoCgoStructAttribute</c>: a struct cmd/cgo declared for a C
+    /// struct with a pointer field (docs/phase4/DESIGN-cgo-phase3-marshaling.md 18.9). The contract is the MARKER, however
+    /// it was stamped, never the type's name.
+    /// </summary>
+    internal static bool IsCgoStruct(INamedTypeSymbol type) =>
+        type.GetAttributes().Any(attribute => attribute.AttributeClass is { Name: "GoCgoStructAttribute" } marker &&
+                                              marker.ContainingNamespace.ToDisplayString() == "go.golib");
+
+    // A marked struct's pointer field: a GET/SET property over the C word at the field's Go offset, null for any other
+    // field. A `ж<U>` field reads and writes through ж<T>.cgoPointerField; an unsafe.Pointer field through the word
+    // doors over ж<T>.cgoWordField, which refuses a native receiver with no known Go offset. A ref to either does not
+    // compile, by design: in C memory the field is a word, not a CLR slot.
+    private static string? CgoPointerProperty(IFieldSymbol field, string fieldType, string name, string receiver, string accessor)
+    {
+        if (field.Type is INamedTypeSymbol { Name: "ж", TypeArguments.Length: 1 } pointer && pointer.ContainingNamespace.ToDisplayString() == "go")
+        {
+            return $"public {fieldType} {PropertyName(name)} {{ [{GetterAttributes}] get => {receiver}.cgoPointerField({accessor}); " +
+                   $"[{GetterAttributes}] set => {receiver}.cgoPointerField({accessor}, value); }}";
+        }
+
+        if (field.Type is INamedTypeSymbol { TypeKind: TypeKind.Class } word && word.AllInterfaces.Any(face => face.ToDisplayString() == "go.IUnsafePointer"))
+        {
+            return $"public {fieldType} {PropertyName(name)} {{ [{GetterAttributes}] get => global::go.unsafe_package.Pointer.LoadWord({receiver}.cgoWordField({accessor})); " +
+                   $"[{GetterAttributes}] set => global::go.unsafe_package.Pointer.StoreWord({receiver}.cgoWordField({accessor}), value); }}";
+        }
+
+        return null;
     }
 
     // A reserved word takes its `@`, and so do the two contextual words that mean something inside an extension

@@ -11,7 +11,7 @@ partial struct S {
 internal static void @try(@string name, Func<ж<nint>> f) {
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("try.func1")] () => {
             var r = recover(); if (r != nil) {
                 fmt.Printf("%s: %v\n"u8, name, r);
             }
@@ -35,21 +35,21 @@ internal static void main() {
     uint64 ok = 2;
 
     var pʗ1 = p;
-    @try("pointer-to-array uint64 max", () => pʗ1.at<nint>((ulong)(u64)));
+    @try("pointer-to-array uint64 max", [GoFunc("main.func1")] () => pʗ1.at<nint>((ulong)(u64)));
     var pʗ2 = p;
-    @try("pointer-to-array uint past 2^63", () => pʗ2.at<nint>((ulong)(u)));
+    @try("pointer-to-array uint past 2^63", [GoFunc("main.func2")] () => pʗ2.at<nint>((ulong)(u)));
     var pʗ3 = p;
-    @try("pointer-to-array uintptr past 2^63", () => pʗ3.at<nint>((ulong)(up)));
+    @try("pointer-to-array uintptr past 2^63", [GoFunc("main.func3")] () => pʗ3.at<nint>((ulong)(up)));
     var pʗ4 = p;
-    @try("pointer-to-array uint32 max", () => pʗ4.at<nint>((ulong)(u32)));
+    @try("pointer-to-array uint32 max", [GoFunc("main.func4")] () => pʗ4.at<nint>((ulong)(u32)));
     var pʗ5 = p;
-    @try("pointer-to-array in range", () => pʗ5.at<nint>((ulong)(ok)));
+    @try("pointer-to-array in range", [GoFunc("main.func5")] () => pʗ5.at<nint>((ulong)(ok)));
     var psʗ1 = ps;
-    @try("field array uint64 max", () => psʗ1.at(S.Ꮡa, (ulong)(u64)));
+    @try("field array uint64 max", [GoFunc("main.func6")] () => psʗ1.at(S.Ꮡa, (ulong)(u64)));
     var psʗ2 = ps;
-    @try("field array uint past 2^63", () => psʗ2.at(S.Ꮡa, (ulong)(u)));
+    @try("field array uint past 2^63", [GoFunc("main.func7")] () => psʗ2.at(S.Ꮡa, (ulong)(u)));
     var psʗ3 = ps;
-    @try("field array in range", () => psʗ3.at(S.Ꮡa, (ulong)(ok)));
+    @try("field array in range", [GoFunc("main.func8")] () => psʗ3.at(S.Ꮡa, (ulong)(ok)));
 
     fmt.Println(arr, ps.a);
 }

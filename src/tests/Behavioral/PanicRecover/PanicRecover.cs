@@ -13,7 +13,7 @@ internal static void main() {
 internal static void f() {
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("f.func1")] () => {
             var r = recover(); if (r != nil) {
                 fmt.Println("Recovered in f", r);
             }
@@ -43,10 +43,10 @@ internal static void g(nint i) {
 
 internal static @string panicValueKind(Action f) {
     @string @out = default;
-    func(() => {
+    func([GoFunc("panicValueKind.func1")] () => {
         GoFrame ᒐ = default;
         try {
-            defer(() => {
+            defer([GoFunc("panicValueKind.func1.1")] () => {
                 var p = recover();
                 switch (p.type()) {
                 case null: {
@@ -82,23 +82,23 @@ internal static @string panicValueKind(Action f) {
 internal partial struct panicValues_label /*@string*/;
 
 internal static void panicValues() {
-    fmt.Println(panicValueKind(() => {
+    fmt.Println(panicValueKind([GoFunc("panicValues.func1")] () => {
         throw panic("x");
     }));
-    fmt.Println(panicValueKind(() => {
+    fmt.Println(panicValueKind([GoFunc("panicValues.func2")] () => {
         throw panic(fmt.Sprintf("%s"u8, "x"));
     }));
-    fmt.Println(panicValueKind(() => {
+    fmt.Println(panicValueKind([GoFunc("panicValues.func3")] () => {
         @string s = "x";
         throw panic(s);
     }));
-    fmt.Println(panicValueKind(() => {
+    fmt.Println(panicValueKind([GoFunc("panicValues.func4")] () => {
         throw panic(((panicValues_label)(@string)"x"));
     }));
-    fmt.Println(panicValueKind(() => {
+    fmt.Println(panicValueKind([GoFunc("panicValues.func5")] () => {
         throw panic((nint)42);
     }));
-    fmt.Println(panicValueKind(() => {
+    fmt.Println(panicValueKind([GoFunc("panicValues.func6")] () => {
     }));
 }
 

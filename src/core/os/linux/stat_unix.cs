@@ -7,11 +7,8 @@ namespace go;
 using syscall = syscall_package;
 using @internal;
 using fs = go.io.fs_package;
-using static os_package;
 
 partial class os_package {
-
-} partial class osᴛFile {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string statˢ => ref statˢᵇ;
@@ -19,7 +16,7 @@ private static readonly @string statˢᵇ = "stat"u8;
 
 // Stat returns the [FileInfo] structure describing file.
 // If there is an error, it will be of type [*PathError].
-public static (FileInfo, error) Stat(this ж<File> Ꮡf) {
+internal static (FileInfo, error) Stat⁔(/*this*/ ж<File> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     if (Ꮡf == nil) {
@@ -34,12 +31,10 @@ public static (FileInfo, error) Stat(this ж<File> Ꮡf) {
     return (new fileStatжFileInfo(Ꮡfs), default);
 }
 
-} partial class os_package {
-
 // statNolog stats a file with no test logging.
 internal static (FileInfo, error) statNolog(@string name) {
     ref var fs = ref heap(new fileStat(), out var Ꮡfs);
-    var err = ignoringEINTR(() => syscall.Stat(name, Ꮡfs.Ꮡsys));
+    var err = ignoringEINTR([GoFunc("statNolog.func1")] () => syscall.Stat(name, Ꮡfs.Ꮡsys));
     if (err != nil) {
         return (default, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "stat", Path: name, Err: err))));
     }
@@ -50,7 +45,7 @@ internal static (FileInfo, error) statNolog(@string name) {
 // lstatNolog lstats a file with no test logging.
 internal static (FileInfo, error) lstatNolog(@string name) {
     ref var fs = ref heap(new fileStat(), out var Ꮡfs);
-    var err = ignoringEINTR(() => syscall.Lstat(name, Ꮡfs.Ꮡsys));
+    var err = ignoringEINTR([GoFunc("lstatNolog.func1")] () => syscall.Lstat(name, Ꮡfs.Ꮡsys));
     if (err != nil) {
         return (default, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "lstat", Path: name, Err: err))));
     }

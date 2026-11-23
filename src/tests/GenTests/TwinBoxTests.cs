@@ -18,7 +18,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace GenTests;
 
 /// <summary>
-/// M:N PROTOTYPE, N2, the BOX TWIN (docs/phase4/DESIGN-mn-box-twin.md, revision 1; COORD's GO after the re-review): a
+/// M:N (experimental, opt-in), N2, the BOX TWIN (docs/phase4/DESIGN-mn-box-twin.md, revision 1; COORD's GO after the re-review): a
 /// `this ref T` method's twin takes the receiver's box, `Mꞏtwin(this ж<T> Ꮡt)`, and each call names a box without a
 /// copy (9.1's rows) or stays plain. The two must-fixes of the re-review are pinned: a ref local crossing a ж-typed
 /// member refuses the twin by name; a VALUE receiver's box overload (which copies) is never followed.
@@ -1296,12 +1296,15 @@ public class TwinBoxTests
     }
 
     [TestMethod]
-    public void P28_ANamedPlainCallKeepsItsLaterParkingCallPlain()
+    public void P28_ANamedPlainCallsLaterParkingCallMovesAheadOfItsStackRef()
     {
         (string twins, Diagnostic[] errors) = Run(null, LaterParkingCall);
 
         Assert.AreEqual(0, errors.Length, Errors(errors));
-        StringAssert.Contains(twins, "rwv(ref v, parksN())", "no box for a stack local: the ref stays, so the inner call stays plain (CS8178)");
+        // Row 7's Go-order move (DATA-mn-row7-refblock.md): `ref v` to a stack local (no box) was evaluated before the
+        // parking call, so the call stayed plain (CS8178). Taking v's address is not ordered against a call in Go, so
+        // the call now moves ahead of the statement and parks; the plain rwv takes `ref v` after it.
+        StringAssert.Contains(twins, "var ᴛtwin1 = await parksNꞏtwin(); rwv(ref v, ᴛtwin1);", "the inner call moves ahead and awaits");
     }
 
     [TestMethod]

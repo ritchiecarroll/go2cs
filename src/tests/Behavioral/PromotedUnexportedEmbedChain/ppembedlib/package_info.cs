@@ -14,6 +14,9 @@
 
 using go;
 using static go.go.ppembedlib_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -53,10 +56,12 @@ using static go.go.ppembedlib_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("lib.go", "lib.cs", "AAwQgoIALjyAgAAICICAgA==")]
+[assembly: GoPositionMap("lib.go", "lib.cs", "AAgQgoIAKjyAgOiAgIA=")]
 // </GoSourcePositionMaps>
 
 namespace go.go;
+
+using static global::go.go.ppembedlib_package;
 
 [GoPackage("ppembedlib")]
 public static partial class ppembedlib_package
@@ -99,6 +104,21 @@ public static partial class ppembedlib_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(ppembedlib_package.BaseNode)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ppembedlibᴛBaseNode;
-[GoMethodHost(typeof(ppembedlib_package.tagBase)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ppembedlibᴛtagBase;
+[GoMethodHost(typeof(ppembedlib_package.BaseNode)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class ppembedlibᴛBaseNode;
+[GoMethodHost(typeof(ppembedlib_package.tagBase)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class ppembedlibᴛtagBase;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class ppembedlibᴛBaseNode {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Add(this ref BaseNode n, @string s) => ppembedlib_package.Add⁔(ref n, s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Count(this ref BaseNode n) => ppembedlib_package.Count⁔(ref n);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Last(this ref BaseNode n) => ppembedlib_package.Last⁔(ref n);
+}
+partial class ppembedlibᴛtagBase {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint Bump(this ref tagBase t) => ppembedlib_package.Bump⁔(ref t);
+}
+// </MethodForwarders>

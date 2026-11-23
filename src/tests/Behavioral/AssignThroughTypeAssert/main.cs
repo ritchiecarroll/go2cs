@@ -27,7 +27,7 @@ internal static void walk(Node root, Func<Node, bool> f) {
 }
 
 internal static void fixSpec(Node root) {
-    walk(root, (Node n) => {
+    walk(root, [GoFunc("fixSpec.func1")] (Node n) => {
         switch (n.type()) {
         case ж<ValueSpec> nΔ1: {
             if (len(nΔ1.Names) == 1 && nΔ1.Names[0] == "Typ" && len(nΔ1.Values) == 1) {
@@ -41,7 +41,7 @@ internal static void fixSpec(Node root) {
 }
 
 internal static nint renumber(Node root, nint i) {
-    walk(root, (Node n) => {
+    walk(root, [GoFunc("renumber.func1")] (Node n) => {
         switch (n.type()) {
         case ж<ValueSpec> nΔ1: {
             foreach (var iΔ1 in range(len(nΔ1.Values))) {
@@ -56,7 +56,7 @@ internal static nint renumber(Node root, nint i) {
 }
 
 internal static void bump(Node root) {
-    walk(root, (Node n) => {
+    walk(root, [GoFunc("bump.func1")] (Node n) => {
         switch (n.type()) {
         case ж<ValueSpec> nΔ1: {
             nΔ1.Values[0]._<ж<Lit>>().Len += 5;
@@ -67,7 +67,7 @@ internal static void bump(Node root) {
 }
 
 internal static void tag(Node root) {
-    walk(root, (Node n) => {
+    walk(root, [GoFunc("tag.func1")] (Node n) => {
         switch (n.type()) {
         case ж<ValueSpec> nΔ1: {
             nΔ1.Values[0]._<ж<Lit>>().Name = "spec";
@@ -85,7 +85,7 @@ internal static void tag(Node root) {
 internal static @string read(Node root) {
     @string got = "";
 
-    walk(root, (Node n) => {
+    walk(root, [GoFunc("read.func1")] (Node n) => {
         switch (n.type()) {
         case ж<ValueSpec> nΔ1: {
             got = nΔ1.Values[0]._<ж<Lit>>().Name;

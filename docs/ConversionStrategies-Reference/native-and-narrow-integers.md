@@ -33,7 +33,7 @@ at run time and panics with the `runtime.Error` "negative shift amount" (`runtim
 below zero. Widened to `uint64` as the guard above widens a count, a negative count would read as a huge one
 and the shift would quietly give 0, or -1 for a signed right shift of a negative value. So the converter widens
 a SIGNED count to `int64` (`one.Lsh((int64)(neg))`, `x.LshAssign((int64)(neg))`, and `(int64)(c)`
-for a named count, through the wrapper's explicit operator to `int64`).<!-- src/tests/Behavioral/NegativeShiftCount/main.cs.target:49 (`arm("named count", () => fmt.Sprint(big.Lsh((int64)(c))));`) --> That binds `GoShift`'s signed-count overloads, which raise the panic through golib's
+for a named count, through the wrapper's explicit operator to `int64`).<!-- src/tests/Behavioral/NegativeShiftCount/main.cs.target:49 (`arm("named count", [GoFunc("main.func5")] () => fmt.Sprint(big.Lsh((int64)(c))));`) --> That binds `GoShift`'s signed-count overloads, which raise the panic through golib's
 `RuntimeErrorPanic.NegativeShiftAmount`. The runtime registers its own `shiftError` as the value, so
 `recover()` sees a `runtime.Error` whose text is Go's. A count of zero or more defers to the unsigned
 guard.
@@ -114,7 +114,7 @@ internal static array<int64> rngCooked = new int64[]{
 
 The table is pure data, so its declaration sits in a `[GoLazy]` holder class and is
 [built on its first read](variable-initialization-order.md#a-pure-data-var-is-built-on-its-first-read-never-in-the-static-constructor).
-<!-- src/core/math/rand/rng.cs:23 (`[GoLazy] partial class lazyᴛrngCooked { internal static array<int64> rngCooked = array<int64>([`) and :24 (`-4181792142133755926L, -4576982950128230565L, 1395769623340756751L,`). -->
+<!-- src/core/math/rand/rng.cs:21 (`[GoLazy] partial class lazyᴛrngCooked { internal static array<int64> rngCooked = array<int64>([`) and :22 (`-4181792142133755926L, -4576982950128230565L, 1395769623340756751L,`). -->
 
 The cause is a deliberate go/types behavior that stays invisible until you look for it: `updateExprType0` short-circuits with *"if x is a constant, the operands were constants"* and does **not** descend into the operands of a constant expression, because in Go they never materialize at runtime. So in `[...]int64{-4181792142133755926, 1395769623340756751}` the NEGATED element records `untyped int` while its positive sibling records `int64` — purely because one is wrapped in a unary minus. Every element of `rngCooked` is negative, which is why that whole table lost its element type while positive-only tables elsewhere kept theirs. `convBasicLit` therefore resolves the literal's integer type from **two** routes, exactly as it already does for the float `F`/`D` suffix: the type go/types recorded directly, and failing that the contextual type `markUntypedConstContexts` propagated (which already pushes an integer context through unary `+`/`-`/`^` and arithmetic operands). An `int64` resolution emits the bare `…L`; everything else keeps `nint` — it must, because an `any` slot has to box a Go `int` as `nint` so a later `x.(int)` succeeds — but as `unchecked((nint)…L)`, which is what makes a beyond-int32 **constant** conversion legal without the warning (`nint` is 64-bit on every platform go2cs targets, so the value is exact). The same `unchecked` covers the other two emitters of a native-width constant: `convBinaryExpr`'s constant FOLD (`unchecked((nint)(4611686018427387903L))` — `bufio`'s `maxInt/2`) and `csNintLiteral`'s array LENGTH (`unchecked((nint)140737488355327)` — runtime's `(*[maxAlloc/2 - 1]byte)` casts). The fold keeps its parenthesized `(T)(…)` body: `wholeExprIsCastOfType`, the redundancy guard the cast paths share, peels an `unchecked(` wrapper first, so enclosing paths still recognize the cast and do not re-wrap it into `(nint)(unchecked((nint)(…)))`. (Guarded by `nativeIntConstWidth_test.go` — the negated `int64` element and its positive sibling, the `int` var and the `any` slot both taking `unchecked`, the fold NOT double-wrapped, an in-range constant untouched, plus a unit test pinning the recognizer's peel.)
 
@@ -239,7 +239,7 @@ arm("int64", func() string { return fmt.Sprint(i64/int64(m1), " ", i64%int64(m1)
 ```
 <!-- source: src/tests/Behavioral/MinIntDivide/main.cs.target:118 -->
 ```csharp
-arm("int64", () => fmt.Sprint(quo(i64, (int64)m1), " ", rem(i64, (int64)m1)));
+arm("int64", [GoFunc("main.func3")] () => fmt.Sprint(quo(i64, (int64)m1), " ", rem(i64, (int64)m1)));
 ```
 
 Here `i64` holds `math.MinInt64`, `m1` is an `int` holding -1, `arm` runs the function under `recover` and

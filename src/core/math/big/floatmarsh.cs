@@ -8,19 +8,16 @@ using errors = errors_package;
 using fmt = fmt_package;
 using byteorder = @internal.byteorder_package;
 using @internal;
-using static big_package;
 
 partial class big_package {
 
 // Gob codec version. Permits backward-compatible changes to the encoding.
 internal const byte floatGobVersion = 1;
 
-} partial class bigᴛFloat {
-
 // GobEncode implements the [encoding/gob.GobEncoder] interface.
 // The [Float] value and all its attributes (precision,
 // rounding mode, accuracy) are marshaled.
-public static (slice<byte>, error) GobEncode(this ж<Float> Ꮡx) {
+internal static (slice<byte>, error) GobEncode⁔(/*this*/ ж<Float> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     if (Ꮡx == nil) {
@@ -72,7 +69,7 @@ private static readonly @string floatGobDecodeBufferTooˢ2ᵇ = "Float.GobDecode
 // The result is rounded per the precision and rounding mode of
 // z unless z's precision is 0, in which case z is set exactly
 // to the decoded value.
-public static error GobDecode(this ж<Float> Ꮡz, slice<byte> buf) {
+internal static error GobDecode⁔(/*this*/ ж<Float> Ꮡz, slice<byte> buf) {
     ref var z = ref Ꮡz.DerefOrNull();
 
     if (len(buf) == 0) {
@@ -121,7 +118,7 @@ public static error GobDecode(this ж<Float> Ꮡz, slice<byte> buf) {
 // AppendText implements the [encoding.TextAppender] interface.
 // Only the [Float] value is marshaled (in full precision), other
 // attributes such as precision or accuracy are ignored.
-public static (slice<byte>, error) AppendText(this ж<Float> Ꮡx, slice<byte> b) {
+internal static (slice<byte>, error) AppendText⁔(/*this*/ ж<Float> Ꮡx, slice<byte> b) {
     if (Ꮡx == nil) {
         return (append(b, ((@string)"<nil>").ꓸꓸꓸ), default);
     }
@@ -131,7 +128,7 @@ public static (slice<byte>, error) AppendText(this ж<Float> Ꮡx, slice<byte> b
 // MarshalText implements the [encoding.TextMarshaler] interface.
 // Only the [Float] value is marshaled (in full precision), other
 // attributes such as precision or accuracy are ignored.
-public static (slice<byte> text, error err) MarshalText(this ж<Float> Ꮡx) {
+internal static (slice<byte> text, error err) MarshalText⁔(/*this*/ ж<Float> Ꮡx) {
     return Ꮡx.AppendText(default);
 }
 
@@ -139,7 +136,7 @@ public static (slice<byte> text, error err) MarshalText(this ж<Float> Ꮡx) {
 // The result is rounded per the precision and rounding mode of z.
 // If z's precision is 0, it is changed to 64 before rounding takes
 // effect.
-public static error UnmarshalText(this ж<Float> Ꮡz, slice<byte> text) {
+internal static error UnmarshalText⁔(/*this*/ ж<Float> Ꮡz, slice<byte> text) {
     // TODO(gri): get rid of the []byte/string conversion
     var (_, _, err) = Ꮡz.Parse((@string)text, 0);
     if (err != nil) {
@@ -148,4 +145,4 @@ public static error UnmarshalText(this ж<Float> Ꮡz, slice<byte> text) {
     return err;
 }
 
-}
+} // end big_package

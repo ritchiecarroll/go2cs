@@ -30,8 +30,6 @@ using container;
 using go.@internal;
 using go.crypto;
 using go.crypto.tls.@internal;
-using Δtls = tls_package;
-using static tls_package;
 
 partial class tls_package {
 
@@ -311,8 +309,6 @@ partial struct ConnectionState {
     internal SignatureScheme testingOnlyPeerSignatureAlgorithm;
 }
 
-} partial class tlsᴛConnectionState {
-
 // ExportKeyingMaterial returns length bytes of exported key material in a new
 // slice as defined in RFC 5705. If context is nil, it is not used as part of
 // the seed. If the connection was set to allow renegotiation via
@@ -323,11 +319,9 @@ partial struct ConnectionState {
 // in Go 1.22 due to security issues (see the Security Considerations sections
 // of RFC 5705 and RFC 7627), but can be re-enabled with the GODEBUG setting
 // tlsunsafeekm=1.
-public static (slice<byte>, error) ExportKeyingMaterial(this ref ConnectionState cs, @string label, slice<byte> context, nint length) {
+internal static (slice<byte>, error) ExportKeyingMaterial⁔(/*this*/ ref ConnectionState cs, @string label, slice<byte> context, nint length) {
     return cs.ekm(label, context, length);
 }
-
-} partial class tls_package {
 
 // ClientAuthType declares the policy the server will follow for
 // TLS Client Authentication.
@@ -466,16 +460,12 @@ partial struct ClientHelloInfo {
     internal context.Context ctx;
 }
 
-} partial class tlsᴛClientHelloInfo {
-
 // Context returns the context of the handshake that is in progress.
 // This context is a child of the context passed to HandshakeContext,
 // if any, and is canceled when the handshake concludes.
-public static context.Context Context(this ref ClientHelloInfo c) {
+internal static context.Context Context⁔(/*this*/ ref ClientHelloInfo c) {
     return c.ctx;
 }
-
-} partial class tls_package {
 
 // CertificateRequestInfo contains information from a server's
 // CertificateRequest message, which is used to demand a certificate and proof
@@ -495,16 +485,12 @@ partial struct CertificateRequestInfo {
     internal context.Context ctx;
 }
 
-} partial class tlsᴛCertificateRequestInfo {
-
 // Context returns the context of the handshake that is in progress.
 // This context is a child of the context passed to HandshakeContext,
 // if any, and is canceled when the handshake concludes.
-public static context.Context Context(this ref CertificateRequestInfo c) {
+internal static context.Context Context⁔(/*this*/ ref CertificateRequestInfo c) {
     return c.ctx;
 }
-
-} partial class tls_package {
 
 // RenegotiationSupport enumerates the different levels of support for TLS
 // renegotiation. TLS renegotiation is the act of performing subsequent
@@ -905,12 +891,10 @@ partial struct ticketKey {
     internal time.Time created;
 }
 
-} partial class tlsᴛConfig {
-
 // ticketKeyFromBytes converts from the external representation of a session
 // ticket key to a ticketKey. Externally, session ticket keys are 32 random
 // bytes and this function expands that into sufficient name and key material.
-internal static ticketKey /*key*/ ticketKeyFromBytes(this ref Config c, /*[32]*/ array<byte> b) {
+internal static ticketKey /*key*/ ticketKeyFromBytes⁔(/*this*/ ref Config c, /*[32]*/ array<byte> b) {
     ticketKey key = new();
     b = b.Clone();
 
@@ -925,13 +909,9 @@ internal static ticketKey /*key*/ ticketKeyFromBytes(this ref Config c, /*[32]*/
     return key.ΔClone();
 }
 
-} partial class tls_package {
-
 // maxSessionTicketLifetime is the maximum allowed lifetime of a TLS 1.3 session
 // ticket, and the lifetime we set for all tickets we send.
 internal static time.Duration maxSessionTicketLifetime => /* 7 * 24 * time.Hour */ 604800000000000;
-
-} partial class tlsᴛConfig {
 
 // Clone returns a shallow clone of c or nil if c is nil. It is safe to clone a
 // [Config] that is being used concurrently by a TLS client or server.
@@ -942,7 +922,7 @@ internal static time.Duration maxSessionTicketLifetime => /* 7 * 24 * time.Hour 
 // including connections that were originally established on the parent Config.
 // If that is not intended, use [Config.VerifyConnection] instead, or set
 // [Config.SessionTicketsDisabled].
-public static ж<Config> Clone(this ж<Config> Ꮡc) {
+internal static ж<Config> Clone⁔(/*this*/ ж<Config> Ꮡc) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -994,17 +974,13 @@ public static ж<Config> Clone(this ж<Config> Ꮡc) {
     finally { if (ᒐd1) Ꮡc.Ꮡmutex.RUnlock(); ᒐ.Run(); }
 }
 
-} partial class tls_package {
-
 // deprecatedSessionTicketKey is set as the prefix of SessionTicketKey if it was
 // randomized for backwards compatibility but is not in use.
 internal static slice<byte> deprecatedSessionTicketKey = slice<byte>("DEPRECATED"u8);
 
-} partial class tlsᴛConfig {
-
 // initLegacySessionTicketKeyRLocked ensures the legacy SessionTicketKey field is
 // randomized if empty, and that sessionTicketKeys is populated from it otherwise.
-internal static void initLegacySessionTicketKeyRLocked(this ж<Config> Ꮡc) {
+internal static void initLegacySessionTicketKeyRLocked⁔(/*this*/ ж<Config> Ꮡc) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     bool ᒐd2 = false;
@@ -1048,7 +1024,7 @@ internal static void initLegacySessionTicketKeyRLocked(this ж<Config> Ꮡc) {
 // encrypting tickets (ie. the first ticketKey in c.sessionTicketKeys)
 // is not fresh, then a new session ticket key will be
 // created and prepended to c.sessionTicketKeys.
-internal static slice<ticketKey> ticketKeys(this ж<Config> Ꮡc, ж<Config> ᏑconfigForClient) {
+internal static slice<ticketKey> ticketKeys⁔(/*this*/ ж<Config> Ꮡc, ж<Config> ᏑconfigForClient) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     bool ᒐd2 = false;
@@ -1130,7 +1106,7 @@ internal static slice<ticketKey> ticketKeys(this ж<Config> Ꮡc, ж<Config> Ꮡ
 // all have the same session ticket keys. If the session ticket keys leaks,
 // previously recorded and future TLS connections using those keys might be
 // compromised.
-public static void SetSessionTicketKeys(this ж<Config> Ꮡc, slice<array<byte>> keys) {
+internal static void SetSessionTicketKeys⁔(/*this*/ ж<Config> Ꮡc, slice<array<byte>> keys) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (len(keys) == 0) {
@@ -1149,45 +1125,43 @@ public static void SetSessionTicketKeys(this ж<Config> Ꮡc, slice<array<byte>>
     Ꮡc.Ꮡmutex.Unlock();
 }
 
-internal static io.Reader rand(this ref Config c) {
+internal static io.Reader rand⁔(/*this*/ ref Config c) {
     var r = c.Rand;
     if (r == nil) {
-        return go.crypto.rand_package.Reader;
+        return rand.Reader;
     }
     return r;
 }
 
-internal static time.Time time(this ref Config c) {
+internal static time.Time time⁔(/*this*/ ref Config c) {
     var t = c.Time;
     if (t == nil) {
-        t = time_package.Now;
+        t = time.Now;
     }
     return t();
 }
 
-internal static slice<uint16> cipherSuites(this ж<Config> Ꮡc, bool aesGCMPreferred) {
+internal static slice<uint16> cipherSuites⁔(/*this*/ ж<Config> Ꮡc, bool aesGCMPreferred) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     slice<uint16> cipherSuites = default;
     if (c.CipherSuites == nil) {
         cipherSuites = defaultCipherSuites(aesGCMPreferred);
     } else {
-        cipherSuites = Δtls.supportedCipherSuites(aesGCMPreferred);
-        cipherSuites = slices.DeleteFunc(cipherSuites, (uint16 id) => !slices.Contains(Ꮡc.Value.CipherSuites, id));
+        cipherSuites = supportedCipherSuites(aesGCMPreferred);
+        cipherSuites = slices.DeleteFunc(cipherSuites, [GoFunc("(*Config).cipherSuites.func1")] (uint16 id) => !slices.Contains(Ꮡc.Value.CipherSuites, id));
     }
     if (fips140tls.Required()) {
-        cipherSuites = slices.DeleteFunc(cipherSuites, (uint16 id) => !slices.Contains(allowedCipherSuitesFIPS, id));
+        cipherSuites = slices.DeleteFunc(cipherSuites, [GoFunc("(*Config).cipherSuites.func2")] (uint16 id) => !slices.Contains(allowedCipherSuitesFIPS, id));
     }
     return cipherSuites;
 }
 
 // supportedCipherSuites returns the supported TLS 1.0–1.2 cipher suites in an
 // undefined order. For preference ordering, use [Config.cipherSuites].
-internal static slice<uint16> supportedCipherSuites(this ж<Config> Ꮡc) {
+internal static slice<uint16> supportedCipherSuites⁔(/*this*/ ж<Config> Ꮡc) {
     return Ꮡc.cipherSuites(false);
 }
-
-} partial class tls_package {
 
 internal static slice<uint16> supportedVersions = [
     VersionTLS13,
@@ -1203,15 +1177,13 @@ internal const bool roleServer = false;
 
 internal static ж<godebug.Setting> tls10server = godebug.New("tls10server");
 
-} partial class tlsᴛConfig {
-
 // supportedVersions returns the list of supported TLS versions, sorted from
 // highest to lowest (and hence also in preference order).
-internal static slice<uint16> supportedVersions(this ж<Config> Ꮡc, bool isClient) {
+internal static slice<uint16> supportedVersions⁔(/*this*/ ж<Config> Ꮡc, bool isClient) {
     ref var c = ref Ꮡc.DerefOrNull();
 
-    var versions = new slice<uint16>(0, len(Δtls.supportedVersions));
-    foreach (var (_, v) in range(Δtls.supportedVersions)) {
+    var versions = new slice<uint16>(0, len(supportedVersions));
+    foreach (var (_, v) in range(supportedVersions)) {
         if (fips140tls.Required() && !slices.Contains(allowedSupportedVersionsFIPS, v)) {
             continue;
         }
@@ -1234,15 +1206,13 @@ internal static slice<uint16> supportedVersions(this ж<Config> Ꮡc, bool isCli
     return versions;
 }
 
-internal static uint16 maxSupportedVersion(this ж<Config> Ꮡc, bool isClient) {
+internal static uint16 maxSupportedVersion⁔(/*this*/ ж<Config> Ꮡc, bool isClient) {
     var supportedVersions = Ꮡc.supportedVersions(isClient);
     if (len(supportedVersions) == 0) {
         return 0;
     }
     return supportedVersions[0];
 }
-
-} partial class tls_package {
 
 // supportedVersionsFromMax returns a list of supported versions derived from a
 // legacy maximum version value. Note that only versions supported by this
@@ -1258,17 +1228,15 @@ internal static slice<uint16> supportedVersionsFromMax(uint16 maxVersion) {
     return versions;
 }
 
-} partial class tlsᴛConfig {
-
-internal static slice<CurveID> curvePreferences(this ж<Config> Ꮡc, uint16 version) {
+internal static slice<CurveID> curvePreferences⁔(/*this*/ ж<Config> Ꮡc, uint16 version) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     var curvePreferences = defaultCurvePreferences();
     if (fips140tls.Required()) {
-        curvePreferences = slices.DeleteFunc(curvePreferences, (CurveID x) => !slices.Contains(allowedCurvePreferencesFIPS, x));
+        curvePreferences = slices.DeleteFunc(curvePreferences, [GoFunc("(*Config).curvePreferences.func1")] (CurveID x) => !slices.Contains(allowedCurvePreferencesFIPS, x));
     }
     if (Ꮡc != nil && len(c.CurvePreferences) != 0) {
-        curvePreferences = slices.DeleteFunc(curvePreferences, (CurveID x) => !slices.Contains(Ꮡc.Value.CurvePreferences, x));
+        curvePreferences = slices.DeleteFunc(curvePreferences, [GoFunc("(*Config).curvePreferences.func2")] (CurveID x) => !slices.Contains(Ꮡc.Value.CurvePreferences, x));
     }
     if (version < VersionTLS13) {
         curvePreferences = slices.DeleteFunc<slice<CurveID>, CurveID>(curvePreferences, isTLS13OnlyKeyExchange);
@@ -1276,13 +1244,13 @@ internal static slice<CurveID> curvePreferences(this ж<Config> Ꮡc, uint16 ver
     return curvePreferences;
 }
 
-internal static bool supportsCurve(this ж<Config> Ꮡc, uint16 version, CurveID curve) {
+internal static bool supportsCurve⁔(/*this*/ ж<Config> Ꮡc, uint16 version, CurveID curve) {
     return slices.Contains(Ꮡc.curvePreferences(version), curve);
 }
 
 // mutualVersion returns the protocol version to use given the advertised
 // versions of the peer. The highest supported version is preferred.
-internal static (uint16, bool) mutualVersion(this ж<Config> Ꮡc, bool isClient, slice<uint16> peerVersions) {
+internal static (uint16, bool) mutualVersion⁔(/*this*/ ж<Config> Ꮡc, bool isClient, slice<uint16> peerVersions) {
     var supportedVersions = Ꮡc.supportedVersions(isClient);
     foreach (var (_, v) in range(supportedVersions)) {
         if (slices.Contains(peerVersions, v)) {
@@ -1291,8 +1259,6 @@ internal static (uint16, bool) mutualVersion(this ж<Config> Ꮡc, bool isClient
     }
     return (0, false);
 }
-
-} partial class tls_package {
 
 // errNoCertificates should be an internal detail,
 // but widely used packages access it using linkname.
@@ -1305,11 +1271,9 @@ internal static (uint16, bool) mutualVersion(this ж<Config> Ꮡc, bool isClient
 //go:linkname errNoCertificates
 public static error errNoCertificates = errors.New("tls: no certificates configured");
 
-} partial class tlsᴛConfig {
-
 // getCertificate returns the best certificate for the given ClientHelloInfo,
 // defaulting to the first element of c.Certificates.
-internal static (ж<Certificate>, error) getCertificate(this ref Config c, ж<ClientHelloInfo> ᏑclientHello) {
+internal static (ж<Certificate>, error) getCertificate⁔(/*this*/ ref Config c, ж<ClientHelloInfo> ᏑclientHello) {
     ref var clientHello = ref ᏑclientHello.DerefOrNull();
 
     if (c.GetCertificate != nil && (len(c.Certificates) == 0 || len(clientHello.ServerName) > 0)) {
@@ -1358,8 +1322,6 @@ internal static (ж<Certificate>, error) getCertificate(this ref Config c, ж<Cl
     return (Ꮡ(c.Certificates, 0), default);
 }
 
-} partial class tlsᴛClientHelloInfo {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string noMutuallySupportedˢ => ref noMutuallySupportedˢᵇ;
 private static readonly @string noMutuallySupportedˢᵇ = "no mutually supported protocol versions"u8;
@@ -1383,7 +1345,7 @@ private static readonly @string clientDoesnTSupportAnyˢᵇ = "client doesn't su
 //
 // This function will call x509.ParseCertificate unless c.Leaf is set, which can
 // incur a significant performance cost.
-public static error SupportsCertificate(this ж<ClientHelloInfo> Ꮡchi, ж<Certificate> Ꮡc) {
+internal static error SupportsCertificate⁔(/*this*/ ж<ClientHelloInfo> Ꮡchi, ж<Certificate> Ꮡc) {
     ref var chi = ref Ꮡchi.DerefOrNull();
     ref var c = ref Ꮡc.DerefOrNull();
 
@@ -1418,7 +1380,7 @@ public static error SupportsCertificate(this ж<ClientHelloInfo> Ꮡchi, ж<Cert
     // supporting static RSA is completely disjoint from the logic for
     // supporting signed key exchanges, so we just check it as a fallback.
     var configʗ1 = config;
-    error supportsRSAFallback(error unsupported) {
+    [GoFunc("(*ClientHelloInfo).SupportsCertificate.func1")] error supportsRSAFallback(error unsupported) {
         // TLS 1.3 dropped support for the static RSA key exchange.
         if (vers == VersionTLS13) {
             return unsupported;
@@ -1435,7 +1397,7 @@ public static error SupportsCertificate(this ж<ClientHelloInfo> Ꮡchi, ж<Cert
         }
         // Finally, there needs to be a mutual cipher suite that uses the static
         // RSA key exchange instead of ECDHE.
-        var rsaCipherSuite = selectCipherSuite(Ꮡchi.Value.CipherSuites, configʗ1.supportedCipherSuites(), (ж<cipherSuite> cΔ1) => {
+        var rsaCipherSuite = selectCipherSuite(Ꮡchi.Value.CipherSuites, configʗ1.supportedCipherSuites(), [GoFunc("(*ClientHelloInfo).SupportsCertificate.func1.1")] (ж<cipherSuite> cΔ1) => {
             if ((cΔ1.flags & (nint)suiteECDHE) != 0) {
                 return false;
             }
@@ -1532,7 +1494,7 @@ public static error SupportsCertificate(this ж<ClientHelloInfo> Ꮡchi, ж<Cert
     // Make sure that there is a mutually supported cipher suite that works with
     // this certificate. Cipher suite selection will then apply the logic in
     // reverse to pick it. See also serverHandshakeState.cipherSuiteOk.
-    var cipherSuite = selectCipherSuite(chi.CipherSuites, config.supportedCipherSuites(), (ж<cipherSuite> cΔ3) => {
+    var cipherSuite = selectCipherSuite(chi.CipherSuites, config.supportedCipherSuites(), [GoFunc("(*ClientHelloInfo).SupportsCertificate.func2")] (ж<cipherSuite> cΔ3) => {
         if ((cΔ3.flags & (nint)suiteECDHE) == 0) {
             return false;
         }
@@ -1557,8 +1519,6 @@ public static error SupportsCertificate(this ж<ClientHelloInfo> Ꮡchi, ж<Cert
     return default;
 }
 
-} partial class tlsᴛCertificateRequestInfo {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string chainIsNotSignedByAnˢ => ref chainIsNotSignedByAnˢᵇ;
 private static readonly @string chainIsNotSignedByAnˢᵇ = "chain is not signed by an acceptable CA"u8;
@@ -1566,7 +1526,7 @@ private static readonly @string chainIsNotSignedByAnˢᵇ = "chain is not signed
 // SupportsCertificate returns nil if the provided certificate is supported by
 // the server that sent the CertificateRequest. Otherwise, it returns an error
 // describing the reason for the incompatibility.
-public static error SupportsCertificate(this ref CertificateRequestInfo cri, ж<Certificate> Ꮡc) {
+internal static error SupportsCertificate⁔(/*this*/ ref CertificateRequestInfo cri, ж<Certificate> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     {
@@ -1599,8 +1559,6 @@ public static error SupportsCertificate(this ref CertificateRequestInfo cri, ж<
     return errors.New(chainIsNotSignedByAnˢ);
 }
 
-} partial class tlsᴛConfig {
-
 // BuildNameToCertificate parses c.Certificates and builds c.NameToCertificate
 // from the CommonName and SubjectAlternateName fields of each of the leaf
 // certificates.
@@ -1608,7 +1566,7 @@ public static error SupportsCertificate(this ref CertificateRequestInfo cri, ж<
 // Deprecated: NameToCertificate only allows associating a single certificate
 // with a given name. Leave that field nil to let the library select the first
 // compatible chain from Certificates.
-public static void BuildNameToCertificate(this ref Config c) {
+internal static void BuildNameToCertificate⁔(/*this*/ ref Config c) {
     c.NameToCertificate = new map<@string, ж<Certificate>>();
     foreach (var i in range(len(c.Certificates))) {
         var cert = Ꮡ(c.Certificates, i);
@@ -1627,8 +1585,6 @@ public static void BuildNameToCertificate(this ref Config c) {
     }
 }
 
-} partial class tls_package {
-
 internal static ref readonly @string keyLogLabelTLS12 => ref keyLogLabelTLS12ᵇ;
 private static readonly @string keyLogLabelTLS12ᵇ = "CLIENT_RANDOM"u8;
 internal static ref readonly @string keyLogLabelClientHandshake => ref keyLogLabelClientHandshakeᵇ;
@@ -1640,9 +1596,7 @@ private static readonly @string keyLogLabelClientTrafficᵇ = "CLIENT_TRAFFIC_SE
 internal static ref readonly @string keyLogLabelServerTraffic => ref keyLogLabelServerTrafficᵇ;
 private static readonly @string keyLogLabelServerTrafficᵇ = "SERVER_TRAFFIC_SECRET_0"u8;
 
-} partial class tlsᴛConfig {
-
-internal static error writeKeyLog(this ref Config c, @string label, slice<byte> clientRandom, slice<byte> secret) {
+internal static error writeKeyLog⁔(/*this*/ ref Config c, @string label, slice<byte> clientRandom, slice<byte> secret) {
     if (c.KeyLogWriter == nil) {
         return default;
     }
@@ -1655,8 +1609,6 @@ internal static error writeKeyLog(this ref Config c, @string label, slice<byte> 
 
     return err;
 }
-
-} partial class tls_package {
 
 // writerMutex protects all KeyLogWriters globally. It is rarely enabled,
 // and is only for debugging, so a global mutex saves space.
@@ -1691,18 +1643,14 @@ partial struct Certificate {
     public ж<Δx509.Certificate> Leaf;
 }
 
-} partial class tlsᴛCertificate {
-
 // leaf returns the parsed leaf certificate, either from c.Leaf or by parsing
 // the corresponding c.Certificate[0].
-internal static (ж<Δx509.Certificate>, error) leaf(this ref Certificate c) {
+internal static (ж<Δx509.Certificate>, error) leaf⁔(/*this*/ ref Certificate c) {
     if (c.Leaf != nil) {
         return (c.Leaf, default);
     }
     return Δx509.ParseCertificate(c.ΔCertificate[0]);
 }
-
-} partial class tls_package {
 
 partial interface handshakeMessage {
     (slice<byte>, error) marshal();
@@ -1748,11 +1696,9 @@ public static ClientSessionCache NewLRUClientSessionCache(nint capacity) {
     )));
 }
 
-} partial class tlsᴛlruSessionCache {
-
 // Put adds the provided (sessionKey, cs) pair to the cache. If cs is nil, the entry
 // corresponding to sessionKey is removed from the cache instead.
-internal static void Put(this ж<lruSessionCache> Ꮡc, @string sessionKey, ж<ClientSessionState> cs) {
+internal static void Put⁔(/*this*/ ж<lruSessionCache> Ꮡc, @string sessionKey, ж<ClientSessionState> cs) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -1793,7 +1739,7 @@ internal static void Put(this ж<lruSessionCache> Ꮡc, @string sessionKey, ж<C
 
 // Get returns the [ClientSessionState] value associated with a given key. It
 // returns (nil, false) if no value is found.
-internal static (ж<ClientSessionState>, bool) Get(this ж<lruSessionCache> Ꮡc, @string sessionKey) {
+internal static (ж<ClientSessionState>, bool) Get⁔(/*this*/ ж<lruSessionCache> Ꮡc, @string sessionKey) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -1811,8 +1757,6 @@ internal static (ж<ClientSessionState>, bool) Get(this ж<lruSessionCache> Ꮡc
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡc.of(lruSessionCache.ᏑMutex).Unlock(); ᒐ.Run(); }
 }
-
-} partial class tls_package {
 
 internal static readonly ж<Config> ᏑemptyConfig = new StaticBox<Config>(new Config());
 internal static ref Config emptyConfig => ref ((StaticBox<Config>)ᏑemptyConfig).ValueSlot;
@@ -1835,7 +1779,7 @@ internal static slice<SignatureScheme> supportedSignatureAlgorithms(uint16 minVe
     if (testingOnlySupportedSignatureAlgorithms != nil) {
         sigAlgs = slices.Clone<slice<SignatureScheme>, SignatureScheme>(testingOnlySupportedSignatureAlgorithms);
     }
-    return slices.DeleteFunc(sigAlgs, (SignatureScheme s) => isDisabledSignatureAlgorithm(minVers, s, false));
+    return slices.DeleteFunc(sigAlgs, [GoFunc("supportedSignatureAlgorithms.func1")] (SignatureScheme s) => isDisabledSignatureAlgorithm(minVers, s, false));
 }
 
 internal static ж<godebug.Setting> tlssha1 = godebug.New("tlssha1");
@@ -1876,7 +1820,7 @@ internal static bool isDisabledSignatureAlgorithm(uint16 version, SignatureSchem
 // signatures in certificates.
 internal static slice<SignatureScheme> supportedSignatureAlgorithmsCert() {
     var sigAlgs = defaultSupportedSignatureAlgorithms();
-    return slices.DeleteFunc(sigAlgs, (SignatureScheme s) => isDisabledSignatureAlgorithm(0, s, true));
+    return slices.DeleteFunc(sigAlgs, [GoFunc("supportedSignatureAlgorithmsCert.func1")] (SignatureScheme s) => isDisabledSignatureAlgorithm(0, s, true));
 }
 
 internal static bool isSupportedSignatureAlgorithm(SignatureScheme sigAlg, slice<SignatureScheme> supportedSignatureAlgorithms) {
@@ -1890,17 +1834,13 @@ partial struct CertificateVerificationError {
     public error Err;
 }
 
-} partial class tlsᴛCertificateVerificationError {
-
-public static @string Error(this ref CertificateVerificationError e) {
+internal static @string Error⁔(/*this*/ ref CertificateVerificationError e) {
     return fmt.Sprintf("tls: failed to verify certificate: %s"u8, e.Err);
 }
 
-public static error Unwrap(this ref CertificateVerificationError e) {
+internal static error Unwrap⁔(/*this*/ ref CertificateVerificationError e) {
     return e.Err;
 }
-
-} partial class tls_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string tlsNoFipsCompatibleˢ => ref tlsNoFipsCompatibleˢᵇ;
@@ -1954,7 +1894,7 @@ internal static bool anyValidVerifiedChain(slice<slice<ж<Δx509.Certificate>>> 
         if (len(chain) == 0) {
             continue;
         }
-        if (slices.ContainsFunc(chain, (ж<Δx509.Certificate> cert) => opts.CurrentTime.Before(cert.NotBefore) || opts.CurrentTime.After(cert.NotAfter))) {
+        if (slices.ContainsFunc(chain, [GoFunc("anyValidVerifiedChain.func1")] (ж<Δx509.Certificate> cert) => opts.CurrentTime.Before(cert.NotBefore) || opts.CurrentTime.After(cert.NotAfter))) {
             continue;
         }
         // Since we already validated the chain, we only care that it is rooted

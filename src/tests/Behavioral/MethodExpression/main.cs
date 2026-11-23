@@ -26,7 +26,7 @@ internal static void main() {
     var g = ((Func<counter, nint>)(main_package.get));
     fmt.Println(g(c.Value));
 
-    nint apply(Func<ж<counter>, nint, nint> fn, ж<counter> @base, nint dΔ1) => fn(@base, dΔ1);
+    [GoFunc("main.func1")] nint apply(Func<ж<counter>, nint, nint> fn, ж<counter> @base, nint dΔ1) => fn(@base, dΔ1);
     fmt.Println(apply(((Func<ж<counter>, nint, nint>)(main_package.add)), c, 3));
     fmt.Println(g(c.Value));
 

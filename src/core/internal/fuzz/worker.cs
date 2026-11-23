@@ -20,7 +20,6 @@ using crypto;
 using encoding;
 using global::go;
 using global::go.os;
-using static fuzz_package;
 
 partial class fuzz_package {
 
@@ -76,10 +75,8 @@ internal static (ж<worker>, error) newWorker(ж<coordinator> c, @string dir, @s
     )), default);
 }
 
-} partial class fuzzᴛworker {
-
 // cleanup releases persistent resources associated with the worker.
-internal static error cleanup(this ref worker w) {
+internal static error cleanup⁔(/*this*/ ref worker w) {
     var mem = ᐸꟷ(w.memMu);
     if (mem == nil) {
         return default;
@@ -98,7 +95,7 @@ internal static error cleanup(this ref worker w) {
 // While looping, coordinate receives inputs from the coordinator, passes
 // those inputs to the worker process, then passes the results back to
 // the coordinator.
-internal static error coordinate(this ж<worker> Ꮡw, context.Context ctx) {
+internal static error coordinate⁔(/*this*/ ж<worker> Ꮡw, context.Context ctx) {
     ref var w = ref Ꮡw.DerefOrNull();
 
     // Main event loop.
@@ -245,7 +242,7 @@ internal static error coordinate(this ж<worker> Ꮡw, context.Context ctx) {
 // either causes an error (if we started minimizing because we found an input
 // that causes an error) or preserves new coverage (if we started minimizing
 // because we found an input that expands coverage).
-internal static (fuzzResult min, error err) minimize(this ж<worker> Ꮡw, context.Context ctx, fuzzMinimizeInput input) {
+internal static (fuzzResult min, error err) minimize⁔(/*this*/ ж<worker> Ꮡw, context.Context ctx, fuzzMinimizeInput input) {
     fuzzResult min = default;
     error err = default;
     GoFrame ᒐ = default;
@@ -311,7 +308,7 @@ internal static (fuzzResult min, error err) minimize(this ж<worker> Ꮡw, conte
     ᒐdone: return (min, err);
 }
 
-internal static bool isRunning(this ref worker w) {
+internal static bool isRunning⁔(/*this*/ ref worker w) {
     return w.cmd != nil;
 }
 
@@ -323,7 +320,7 @@ internal static bool isRunning(this ref worker w) {
 // responded. Errors that happen after start but before the ping response
 // likely indicate that the worker did not call F.Fuzz or called F.Fail first.
 // We don't record crashers for these errors.
-internal static error startAndPing(this ж<worker> Ꮡw, context.Context ctx) {
+internal static error startAndPing⁔(/*this*/ ж<worker> Ꮡw, context.Context ctx) {
     ref var w = ref Ꮡw.DerefOrNull();
 
     if (ctx.Err() != nil) {
@@ -361,7 +358,7 @@ internal static error startAndPing(this ж<worker> Ꮡw, context.Context ctx) {
 //
 // When the process terminates, w.waitErr is set to the error (if any), and
 // w.termC is closed.
-internal static partial error /*err*/ start(this ж<worker> Ꮡw) {
+internal static partial error /*err*/ start⁔(/*this*/ ж<worker> Ꮡw) {
     error err = default;
     GoFrame ᒐ = default;
     try {
@@ -417,7 +414,7 @@ internal static partial error /*err*/ start(this ж<worker> Ꮡw) {
         var m = newMutator();
         w.client = newWorkerClient(comm, m);
 
-        goǃ(() => {
+        goǃ([GoFunc("(*worker).start.func1")] () => {
             Ꮡw.Value.waitErr = Ꮡw.Value.cmd.Wait();
             close(Ꮡw.Value.termC);
         });
@@ -438,7 +435,7 @@ internal static partial error /*err*/ start(this ж<worker> Ꮡw) {
 //
 // stop must be called at least once after start returns successfully, even if
 // the worker process terminates unexpectedly.
-internal static partial error stop(this ж<worker> Ꮡw) {
+internal static partial error stop⁔(/*this*/ ж<worker> Ꮡw) {
     ref var w = ref Ꮡw.DerefOrNull();
 
     if (w.termC == nil) {
@@ -467,7 +464,7 @@ internal static partial error stop(this ж<worker> Ꮡw) {
     // finishes with earlier calls.
     var closeC = new channel<EmptyStruct>(0);
     var closeCʗ1 = closeC;
-    goǃ(() => {
+    goǃ([GoFunc("(*worker).stop.func1")] () => {
         Ꮡw.Value.client.Close();
         close(closeCʗ1);
     });
@@ -521,8 +518,6 @@ internal static partial error stop(this ж<worker> Ꮡw) {
     }
 }
 
-} partial class fuzz_package {
-
 // RunFuzzWorker is called in a worker process to communicate with the
 // coordinator process in order to fuzz random inputs. RunFuzzWorker loops
 // until the coordinator tells it to stop.
@@ -541,10 +536,10 @@ public static error RunFuzzWorker(context.Context ctx, Func<CorpusEntry, error> 
     }
     var srv = Ꮡ(new workerServer(
         workerComm: comm,
-        fuzzFn: (CorpusEntry e) => {
+        fuzzFn: [GoFunc("RunFuzzWorker.func1")] (CorpusEntry e) => {
             GoFrame ᒐ = default;
             try {
-                var timer = time.AfterFunc((time.Duration)(10000000000L), () => {
+                var timer = time.AfterFunc((time.Duration)(10000000000L), [GoFunc("RunFuzzWorker.func1.1")] () => {
                     throw panic("deadlocked!"); // this error message won't be printed
                 });
                 var timerʗ1 = timer;
@@ -685,8 +680,6 @@ partial struct workerServer {
     internal Func<CorpusEntry, (time.Duration, error)> fuzzFn;
 }
 
-} partial class fuzzᴛworkerServer {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string noArgumentsProvidedForˢ => ref noArgumentsProvidedForˢᵇ;
 private static readonly @string noArgumentsProvidedForˢᵇ = "no arguments provided for any call"u8;
@@ -701,7 +694,7 @@ private static readonly @string noArgumentsProvidedForˢᵇ = "no arguments prov
 // serve returns errors that occurred when communicating over pipes. serve
 // does not return errors from method calls; those are passed through serialized
 // responses.
-internal static error serve(this ж<workerServer> Ꮡws, context.Context ctx) {
+internal static error serve⁔(/*this*/ ж<workerServer> Ꮡws, context.Context ctx) {
     ref var ws = ref Ꮡws.DerefOrNull();
 
     var enc = json.NewEncoder(new os.FileжWriter(ws.fuzzOut));
@@ -744,8 +737,6 @@ internal static error serve(this ж<workerServer> Ꮡws, context.Context ctx) {
     }
 }
 
-} partial class fuzz_package {
-
 // chainedMutations is how many mutations are applied before the worker
 // resets the input to its original state.
 // NOTE: this number was picked without much thought. It is low enough that
@@ -756,8 +747,6 @@ internal static error serve(this ж<workerServer> Ꮡws, context.Context ctx) {
 // be what libFuzzer does, although there seems to be no documentation which
 // explains why this choice was made.)
 internal static UntypedInt chainedMutations => 5;
-
-} partial class fuzzᴛworkerServer {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string fuzzFunctionFailedWithNoˢ => ref fuzzFunctionFailedWithNoˢᵇ;
@@ -774,7 +763,7 @@ private static readonly @string fuzzFunctionFailedWithNoˢᵇ = "fuzz function f
 // initial PRNG state in shared memory and increments a counter in shared
 // memory before each call to the test function. The caller may reconstruct
 // the crashing input with this information, since the PRNG is deterministic.
-internal static fuzzResponse /*resp*/ fuzz(this ж<workerServer> Ꮡws, context.Context ctx, fuzzArgs args) {
+internal static fuzzResponse /*resp*/ fuzz⁔(/*this*/ ж<workerServer> Ꮡws, context.Context ctx, fuzzArgs args) {
     fuzzResponse resp = default;
     GoFrame ᒐ = default;
     try {
@@ -789,7 +778,7 @@ internal static fuzzResponse /*resp*/ fuzz(this ж<workerServer> Ꮡws, context.
         }
         ref var start = ref heap<time.Time>(time.Now(), out var Ꮡstart);
         var startʗ1 = start;
-        defer(() => {
+        defer([GoFunc("(*workerServer).fuzz.func1")] () => {
             resp.TotalDuration = time.Since(startʗ1);
         }, ref ᒐ);
 
@@ -802,7 +791,7 @@ internal static fuzzResponse /*resp*/ fuzz(this ж<workerServer> Ꮡws, context.
         var mem = ᐸꟷ(ws.memMu);
         ws.m.r.save(mem.header().ᏑrandState, mem.header().ᏑrandInc);
         var memʗ1 = mem;
-        defer(() => {
+        defer([GoFunc("(*workerServer).fuzz.func2")] () => {
             resp.Count = memʗ1.header().count;
             Ꮡws.Value.memMu.ᐸꟷ(memʗ1);
         }, ref ᒐ);
@@ -821,9 +810,9 @@ internal static fuzzResponse /*resp*/ fuzz(this ж<workerServer> Ꮡws, context.
 
         var argsʗ1 = args;
         var memʗ2 = mem;
-        bool shouldStop() => argsʗ1.Limit > 0 && memʗ2.header().count >= argsʗ1.Limit;
+        [GoFunc("(*workerServer).fuzz.func3")] bool shouldStop() => argsʗ1.Limit > 0 && memʗ2.header().count >= argsʗ1.Limit;
         var memʗ3 = mem;
-        (time.Duration dur, slice<byte> cov, @string errMsg) fuzzOnce(CorpusEntry entry) {
+        [GoFunc("(*workerServer).fuzz.func4")] (time.Duration dur, slice<byte> cov, @string errMsg) fuzzOnce(CorpusEntry entry) {
             time.Duration dur = default;
             @string errMsg = default;
             memʗ3.header().count++;
@@ -891,7 +880,7 @@ internal static fuzzResponse /*resp*/ fuzz(this ж<workerServer> Ꮡws, context.
     ᒐdone: return resp;
 }
 
-internal static minimizeResponse /*resp*/ minimize(this ж<workerServer> Ꮡws, context.Context ctx, minimizeArgs args) {
+internal static minimizeResponse /*resp*/ minimize⁔(/*this*/ ж<workerServer> Ꮡws, context.Context ctx, minimizeArgs args) {
     minimizeResponse resp = default;
     GoFrame ᒐ = default;
     try {
@@ -899,12 +888,12 @@ internal static minimizeResponse /*resp*/ minimize(this ж<workerServer> Ꮡws, 
 
         ref var start = ref heap<time.Time>(time.Now(), out var Ꮡstart);
         var startʗ1 = start;
-        defer(() => {
+        defer([GoFunc("(*workerServer).minimize.func1")] () => {
             resp.Duration = time.Since(startʗ1);
         }, ref ᒐ);
         var mem = ᐸꟷ(ws.memMu);
         var memʗ1 = mem;
-        defer(() => {
+        defer([GoFunc("(*workerServer).minimize.func2")] () => {
             Ꮡws.Value.memMu.ᐸꟷ(memʗ1);
         }, ref ᒐ);
         var (vals, err) = unmarshalCorpusFile(mem.valueCopy());
@@ -953,7 +942,7 @@ internal static minimizeResponse /*resp*/ minimize(this ж<workerServer> Ꮡws, 
 // coverage, in fuzzFn. It uses the context to determine how long to run,
 // stopping once closed. It returns a bool indicating whether minimization was
 // successful and an error if one was found.
-internal static (bool success, error retErr) minimizeInput(this ж<workerServer> Ꮡws, context.Context ctx, slice<any> vals, ж<sharedMem> Ꮡmem, minimizeArgs args) {
+internal static (bool success, error retErr) minimizeInput⁔(/*this*/ ж<workerServer> Ꮡws, context.Context ctx, slice<any> vals, ж<sharedMem> Ꮡmem, minimizeArgs args) {
     error retErr = default;
     ref var ws = ref Ꮡws.DerefOrNull();
     ref var mem = ref Ꮡmem.DerefOrNull();
@@ -964,7 +953,7 @@ internal static (bool success, error retErr) minimizeInput(this ж<workerServer>
     var count = mem.header().Ꮡcount;
     var argsʗ1 = args;
     var countʗ1 = count;
-    var shouldStop = () => ctx.Err() != nil || (argsʗ1.Limit > 0 && countʗ1.Value >= argsʗ1.Limit);
+    var shouldStop = [GoFunc("(*workerServer).minimizeInput.func1")] () => ctx.Err() != nil || (argsʗ1.Limit > 0 && countʗ1.Value >= argsʗ1.Limit);
     if (shouldStop()) {
         return (false, default);
     }
@@ -991,7 +980,7 @@ internal static (bool success, error retErr) minimizeInput(this ж<workerServer>
     var bPtrʗ1 = bPtr;
     var countʗ2 = count;
     var valsʗ1 = vals;
-    var tryMinimized = (slice<byte> candidate) => {
+    var tryMinimized = [GoFunc("(*workerServer).minimizeInput.func2")] (slice<byte> candidate) => {
         var prev = valsʗ1[argsʗ2.Index];
         switch (prev.type()) {
         case slice<byte>: {
@@ -1045,8 +1034,6 @@ internal static (bool success, error retErr) minimizeInput(this ж<workerServer>
     return (true, retErr);
 }
 
-} partial class fuzz_package {
-
 internal static void writeToMem(slice<any> vals, ж<sharedMem> Ꮡmem) {
     ref var mem = ref Ꮡmem.DerefOrNull();
 
@@ -1054,15 +1041,11 @@ internal static void writeToMem(slice<any> vals, ж<sharedMem> Ꮡmem) {
     mem.setValue(b);
 }
 
-} partial class fuzzᴛworkerServer {
-
 // ping does nothing. The coordinator calls this method to ensure the worker
 // has called F.Fuzz and can communicate.
-internal static pingResponse ping(this ref workerServer ws, context.Context ctx, pingArgs args) {
+internal static pingResponse ping⁔(/*this*/ ref workerServer ws, context.Context ctx, pingArgs args) {
     return new pingResponse();
 }
-
-} partial class fuzz_package {
 
 // workerClient is a minimalist RPC client. The coordinator process uses a
 // workerClient to call methods in each worker process (handled by
@@ -1082,12 +1065,10 @@ internal static ж<workerClient> newWorkerClient(workerComm comm, ж<mutator> m)
     return Ꮡ(new workerClient(workerComm: comm, m: m));
 }
 
-} partial class fuzzᴛworkerClient {
-
 // Close shuts down the connection to the RPC server (the worker process) by
 // closing fuzz_in. Close drains fuzz_out (avoiding a SIGPIPE in the worker),
 // and closes it after the worker process closes the other end.
-internal static error Close(this ж<workerClient> Ꮡwc) {
+internal static error Close⁔(/*this*/ ж<workerClient> Ꮡwc) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -1119,8 +1100,6 @@ internal static error Close(this ж<workerClient> Ꮡwc) {
     finally { if (ᒐd1) Ꮡwc.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
-} partial class fuzz_package {
-
 // errSharedMemClosed is returned by workerClient methods that cannot access
 // shared memory because it was closed and unmapped by another goroutine. That
 // can happen when worker.cleanup is called in the worker goroutine while a
@@ -1130,11 +1109,9 @@ internal static error Close(this ж<workerClient> Ꮡwc) {
 // interrupted.
 internal static error errSharedMemClosed = errors.New("internal error: shared memory was closed and unmapped");
 
-} partial class fuzzᴛworkerClient {
-
 // minimize tells the worker to call the minimize method. See
 // workerServer.minimize.
-internal static (CorpusEntry entryOut, minimizeResponse resp, error retErr) minimize(this ж<workerClient> Ꮡwc, context.Context ctx, CorpusEntry entryIn, minimizeArgs argsʗp) {
+internal static (CorpusEntry entryOut, minimizeResponse resp, error retErr) minimize⁔(/*this*/ ж<workerClient> Ꮡwc, context.Context ctx, CorpusEntry entryIn, minimizeArgs argsʗp) {
     CorpusEntry entryOut = default;
     heap<minimizeResponse>(out var Ꮡresp);
     error retErr = default;
@@ -1152,7 +1129,7 @@ internal static (CorpusEntry entryOut, minimizeResponse resp, error retErr) mini
         if (!ok) {
             (entryOut, resp, retErr) = (new CorpusEntry(), new minimizeResponse(), errSharedMemClosed); goto ᒐdone;
         }
-        defer(() => {
+        defer([GoFunc("(*workerClient).minimize.func1")] () => {
             Ꮡwc.Value.memMu.ᐸꟷ(Ꮡmem.ValueSlot);
         }, ref ᒐ);
         mem.header().count = 0;
@@ -1244,7 +1221,7 @@ internal static ref readonly @string workerServerFuzzModifiedˢ => ref workerSer
 private static readonly @string workerServerFuzzModifiedˢᵇ = "workerServer.fuzz modified input"u8;
 
 // fuzz tells the worker to call the fuzz method. See workerServer.fuzz.
-internal static (CorpusEntry entryOut, fuzzResponse resp, bool isInternalError, error err) fuzz(this ж<workerClient> Ꮡwc, context.Context ctx, CorpusEntry entryIn, fuzzArgs argsʗp) {
+internal static (CorpusEntry entryOut, fuzzResponse resp, bool isInternalError, error err) fuzz⁔(/*this*/ ж<workerClient> Ꮡwc, context.Context ctx, CorpusEntry entryIn, fuzzArgs argsʗp) {
     CorpusEntry entryOut = default;
     heap<fuzzResponse>(out var Ꮡresp);
     bool isInternalError = default;
@@ -1281,7 +1258,7 @@ internal static (CorpusEntry entryOut, fuzzResponse resp, bool isInternalError, 
             (entryOut, resp, isInternalError, err) = (new CorpusEntry(), new fuzzResponse(), true, errSharedMemClosed); goto ᒐdone;
         }
         var memʗ1 = mem;
-        defer(() => {
+        defer([GoFunc("(*workerClient).fuzz.func1")] () => {
             Ꮡwc.Value.memMu.ᐸꟷ(memʗ1);
         }, ref ᒐ);
         resp.Count = mem.header().count;
@@ -1328,7 +1305,7 @@ internal static (CorpusEntry entryOut, fuzzResponse resp, bool isInternalError, 
 }
 
 // ping tells the worker to call the ping method. See workerServer.ping.
-internal static error ping(this ж<workerClient> Ꮡwc, context.Context ctx) {
+internal static error ping⁔(/*this*/ ж<workerClient> Ꮡwc, context.Context ctx) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -1346,7 +1323,7 @@ internal static error ping(this ж<workerClient> Ꮡwc, context.Context ctx) {
 
 // callLocked sends an RPC from the coordinator to the worker process and waits
 // for the response. The callLocked may be canceled with ctx.
-internal static error /*err*/ callLocked(this ref workerClient wc, context.Context ctx, call c, any resp) {
+internal static error /*err*/ callLocked⁔(/*this*/ ref workerClient wc, context.Context ctx, call c, any resp) {
     var enc = json.NewEncoder(new os.FileжWriter(wc.fuzzIn));
     var dec = json.NewDecoder(new contextReaderжReader(Ꮡ(new contextReader(ctx: ctx, r: new os_FileжReader(wc.fuzzOut)))));
     var errΔ1 = enc.Encode(c); if (errΔ1 != nil) {
@@ -1354,8 +1331,6 @@ internal static error /*err*/ callLocked(this ref workerClient wc, context.Conte
     }
     return dec.Decode(resp);
 }
-
-} partial class fuzz_package {
 
 // contextReader wraps a Reader with a Context. If the context is canceled
 // while the underlying reader is blocked, Read returns immediately.
@@ -1370,9 +1345,7 @@ partial struct contextReader {
     internal io.Reader r;
 }
 
-} partial class fuzzᴛcontextReader {
-
-internal static partial (nint, error) Read(this ж<contextReader> Ꮡcr, slice<byte> b) {
+internal static partial (nint, error) Read⁔(/*this*/ ж<contextReader> Ꮡcr, slice<byte> b) {
     ref var cr = ref Ꮡcr.DerefOrNull();
 
     var ctxErr = cr.ctx.Err(); if (ctxErr != nil) {
@@ -1386,7 +1359,7 @@ internal static partial (nint, error) Read(this ж<contextReader> Ꮡcr, slice<b
     ref var err = ref heap<error>(out var Ꮡerr);
     var bʗ1 = b;
     var doneʗ1 = done;
-    goǃ(() => {
+    goǃ([GoFunc("(*contextReader).Read.func1")] () => {
         (n, Ꮡerr.ValueSlot) = Ꮡcr.Value.r.Read(bʗ1);
         close(doneʗ1);
     });
@@ -1403,4 +1376,4 @@ internal static partial (nint, error) Read(this ж<contextReader> Ꮡcr, slice<b
     return default;
 }
 
-}
+} // end fuzz_package

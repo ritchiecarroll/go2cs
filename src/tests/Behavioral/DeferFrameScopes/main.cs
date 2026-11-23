@@ -33,7 +33,7 @@ internal static (@string label, nint score) classify(nint n) {
     nint score = default;
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("classify.func1")] () => {
             score += 100;
             label = "<"u8 + label + ">"u8;
         }, ref ᒐ);
@@ -71,7 +71,7 @@ internal static void nestedDeferScopes() {
     GoFrame ᒐ = default;
     try {
         defer(() => fmt.Println("outer defer 1"), ref ᒐ);
-        defer(() => {
+        defer([GoFunc("nestedDeferScopes.func1")] () => {
             GoFrame ᒐ = default;
             try {
                 defer(() => fmt.Println("  inner defer"), ref ᒐ);
@@ -94,19 +94,19 @@ internal static nint mixedScopes() {
 
         defer(ᴛ1 => fmt.Println("mixed defer, total =", ᴛ1), total, ref ᒐ);
 
-        nint add(nint n) => n * 2;
+        [GoFunc("mixedScopes.func1")] nint add(nint n) => n * 2;
         var addʗ1 = add;
-        void bump() {
+        [GoFunc("mixedScopes.func2")] void bump() {
             total += addʗ1(3);
         }
 
         bump();
         bump();
 
-        func(() => {
+        func([GoFunc("mixedScopes.func3")] () => {
             GoFrame ᒐ = default;
             try {
-                defer(() => {
+                defer([GoFunc("mixedScopes.func3.1")] () => {
                     total += 1;
                 }, ref ᒐ);
                 total += 10;
@@ -127,7 +127,7 @@ internal static @string /*msg*/ guarded(bool boom) {
     GoFrame ᒐ = default;
     try {
         defer(() => fmt.Println("guarded cleanup"), ref ᒐ);
-        defer(() => {
+        defer([GoFunc("guarded.func1")] () => {
             var r = recover(); if (r != nil) {
                 msg = fmt.Sprint("recovered ", r);
             }
