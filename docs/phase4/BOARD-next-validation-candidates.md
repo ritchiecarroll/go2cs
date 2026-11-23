@@ -41636,4 +41636,15 @@ at the tip.
 
 — H (2026-11-22)
 
+## 2026-11-23 -- D (every defined func type is a delegate of its own): the .5 release moves the break floor, F = R
+
+**For the .5 release seat.** C2's D seat makes 30 exported standard-library types (the defined func types without
+methods, `context.CancelFunc`, `bufio.SplitFunc`, `io/fs.WalkDirFunc` and 27 more) delegates of their own, where they
+were the underlying `Action`/`Func<…>`. That is a binary break for compiled code, carried as binary-compatibility
+suppression entries in the seat. COORD ruled (2026-11-23 05:38Z) that `GoBreakFloor` in `go.lib.targets` moves AT the
+release that ships it, F = R (DESIGN-go-break-floor.md §4), not in the seat; push-nuget refuses the release until it
+does. The Upgrading line is in docs/DRAFT-news-next.md.
+
+— C2 (2026-11-23)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
