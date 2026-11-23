@@ -81,6 +81,52 @@ func TestModuleCacheGoModIsTheModulesGoMod(t *testing.T) {
 	}
 }
 
+// The module cache and the release can be spelled through a symlink on one side only: on macOS /var is a symlink to
+// /private/var, so GOMODCACHE keeps /var/... while a relative spelling of the release, made absolute through the
+// working directory, reads /private/var/.... Both name one folder, and the release is still the cache's (train 5's
+// darwin go-test, TestPlainRecurseConvertsAModuleCacheReleaseWithNoGoMod's relative arm). Reproduced on every OS with
+// a symlinked cache root, both ways round.
+func TestModuleCacheGoModReadsThroughASymlinkedSpelling(t *testing.T) {
+	cache, moduleDir := moduleCacheFixture(t)
+	link := filepath.Join(t.TempDir(), "cache-link")
+
+	if err := os.Symlink(cache, link); err != nil {
+		t.Skipf("this host cannot create a symlink: %v", err)
+	}
+
+	// Compared resolved: the test's own temp directory can sit behind a symlink too (macOS's /var).
+	want, err := filepath.EvalSymlinks(filepath.Join(cache, "cache", "download", "example.com", "!old", "@v", "v0.9.1.mod"))
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	viaLink := filepath.Join(link, "example.com", "!old@v0.9.1")
+
+	// GOMODCACHE through the link, the release by its real path (macOS's /var against /private/var).
+	goModCache = link
+
+	if got := moduleCacheGoMod(moduleDir); got == "" {
+		t.Errorf("the cache spelled through a symlink: the release at its real path is not the cache's")
+	} else if resolved, err := filepath.EvalSymlinks(got); err != nil || resolved != want {
+		t.Errorf("the cache spelled through a symlink: want %s, got %s", want, got)
+	}
+
+	// The other way round: GOMODCACHE by its real path, the release through the link.
+	goModCache = cache
+
+	if got := moduleCacheGoMod(viaLink); got == "" {
+		t.Errorf("the release spelled through a symlink: it is not the cache's")
+	} else if resolved, err := filepath.EvalSymlinks(got); err != nil || resolved != want {
+		t.Errorf("the release spelled through a symlink: want %s, got %s", want, got)
+	}
+
+	// Still never anything else: a package below the root, through the link, is not a root.
+	if got := moduleCacheGoMod(filepath.Join(viaLink, "sub")); got != "" {
+		t.Errorf("a package below the module root, through a symlink, took %s", got)
+	}
+}
+
 // The driver hands the go commands the same answer through GOFLAGS -overlay, says so, and writes
 // nothing into the cache.
 func TestInstallGoModOverlayForAModuleWithoutGoMod(t *testing.T) {
