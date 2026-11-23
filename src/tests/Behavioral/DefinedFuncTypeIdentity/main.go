@@ -38,6 +38,23 @@ func generic[T any](v T) string { return fmt.Sprintf("%T", v) }
 
 type stringer struct{ s string }
 
+// A tuple result deconstructed into existing variables, as context.WithCancel's is into `var cancel func()`.
+func pairF() (int, F) { return 1, func(string) error { return nil } }
+
+// A deferred call through a value of a defined func type, as database/sql's `defer release(err)`.
+func deferF(f F) (out string) {
+	defer f("deferred")
+	return "deferred call"
+}
+
+// Keyed elements given method expressions, as internal/trace's dispatch table.
+type node struct{ v int }
+
+func (n *node) add(x int) int { return n.v + x }
+func (n *node) mul(x int) int { return n.v * x }
+
+type handler func(*node, int) int
+
 func (s stringer) check(string) error { return nil }
 
 func main() {
@@ -87,6 +104,16 @@ func main() {
 	var none F
 	fmt.Println("nil", none == nil, f != nil)
 	fmt.Println("conversion", F(plain)("") == nil, (func(string) error)(f)("") == nil)
+
+	// A tuple deconstructed into existing variables of the unnamed type.
+	var n int
+	var cancel func(string) error
+	n, cancel = pairF()
+	fmt.Println("tuple", n, cancel("") == nil)
+	fmt.Println("defer", deferF(f))
+	table := [3]handler{1: (*node).add, 2: (*node).mul}
+	byName := map[string]F{"plain": plain, "f": f}
+	fmt.Println("keyed", table[1](&node{2}, 3), table[2](&node{2}, 3), table[0] == nil, byName["plain"]("") == nil, len(byName))
 
 	// Another package's named type, both ways.
 	fmt.Println("hooks", hooks.Apply(func(x int) int { return x * 3 }, 2), hooks.Raw(hooks.Make(5), 1), hooks.Apply(hooks.Make(1), 1))

@@ -137,26 +137,46 @@ func (v *Visitor) funcValueForTarget(targetExpr ast.Expr, target types.Type, exp
 
 	source := v.info.TypeOf(expr)
 
-	if source == nil || types.Identical(source, target) {
+	if source == nil {
 		return rendered
+	}
+
+	// A method expression, `(*node).add`, renders as a cast of the method group to its unnamed signature's
+	// delegate: a delegate VALUE, never nil, which reaches a defined func type through that type's constructor.
+	if v.isMethodExpression(expr) {
+		if targetName, ok := v.funcSlotDelegateName(targetExpr, target, source); ok {
+			return fmt.Sprintf("new %s(%s)", targetName, rendered)
+		}
+
+		return rendered
+	}
+
+	targetName, sourceName, ok := v.funcConversion(targetExpr, target, expr, source)
+
+	if !ok {
+		return rendered
+	}
+
+	return fmt.Sprintf("NilSafeDelegateConversion<%s, %s>(%s)", targetName, sourceName, rendered)
+}
+
+// funcSlotDelegateName is the delegate a slot of Go type target renders as, when a func value of Go type source
+// reaching it needs a conversion at all: both func types, distinct, neither generic, and rendered differently.
+func (v *Visitor) funcSlotDelegateName(targetExpr ast.Expr, target types.Type, source types.Type) (string, bool) {
+	if types.Identical(source, target) {
+		return "", false
 	}
 
 	if _, ok := target.Underlying().(*types.Signature); !ok {
-		return rendered
+		return "", false
 	}
 
 	if _, ok := source.Underlying().(*types.Signature); !ok {
-		return rendered
+		return "", false
 	}
 
 	if typeContainsTypeParams(target) || typeContainsTypeParams(source) || signatureMentionsTypeParams(target) || signatureMentionsTypeParams(source) {
-		return rendered
-	}
-
-	kind, sourceName := v.delegateWrap(target, expr, source)
-
-	if kind != delegateWrapNilSafe {
-		return rendered
+		return "", false
 	}
 
 	targetName := v.getCSharpTypeName(target)
@@ -165,9 +185,52 @@ func (v *Visitor) funcValueForTarget(targetExpr ast.Expr, target types.Type, exp
 		targetName = v.funcValueDelegateType(targetExpr, target)
 	}
 
-	if targetName == sourceName {
-		return rendered
+	if targetName == v.getCSharpTypeName(source) {
+		return "", false
 	}
 
-	return fmt.Sprintf("NilSafeDelegateConversion<%s, %s>(%s)", targetName, sourceName, rendered)
+	return targetName, true
+}
+
+// funcConversion decides funcValueForTarget's nil-safe conversion of a func value of Go type source to a slot of Go
+// type target: the slot's and the value's delegate names, when they differ. expr is the value's expression, or nil
+// for a value with none of its own (a tuple element), which is never a func literal or a method group.
+func (v *Visitor) funcConversion(targetExpr ast.Expr, target types.Type, expr ast.Expr, source types.Type) (string, string, bool) {
+	targetName, ok := v.funcSlotDelegateName(targetExpr, target, source)
+
+	if !ok {
+		return "", "", false
+	}
+
+	if expr == nil {
+		if targetSig, ok := v.rendersAsStructuralDelegate(target, nil); ok {
+			if sourceSig, ok := v.rendersAsStructuralDelegate(source, nil); ok && types.Identical(targetSig, sourceSig) {
+				return "", "", false
+			}
+		}
+
+		return targetName, v.getCSharpTypeName(source), true
+	}
+
+	kind, sourceName := v.delegateWrap(target, expr, source)
+
+	if kind != delegateWrapNilSafe || targetName == sourceName {
+		return "", "", false
+	}
+
+	return targetName, sourceName, true
+}
+
+// isMethodExpression reports whether expr is a Go method expression, `T.m` or `(*T).m`: a selector whose operand is
+// a type.
+func (v *Visitor) isMethodExpression(expr ast.Expr) bool {
+	sel, ok := ast.Unparen(expr).(*ast.SelectorExpr)
+
+	if !ok {
+		return false
+	}
+
+	tv, ok := v.info.Types[sel.X]
+
+	return ok && tv.IsType()
 }

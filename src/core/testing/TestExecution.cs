@@ -143,7 +143,8 @@ public sealed class TestExecution
     // difference laziness could introduce: a Context() asked for DURING the cleanup phase must come
     // back already canceled, exactly as Go's would, rather than freshly live.
     private go.context_package.Context? m_ctx;
-    private Action? m_cancelCtx;
+    // context.CancelFunc is a delegate of its own (every defined func type is), not Action.
+    private go.context_package.CancelFunc? m_cancelCtx;
     private bool m_ctxCanceled;
     private bool m_parallel;
     private bool m_denyParallel;
@@ -2094,7 +2095,7 @@ public sealed class TestExecution
     /// </summary>
     private void CancelContext()
     {
-        Action? cancel;
+        go.context_package.CancelFunc? cancel;
 
         lock (m_syncRoot)
         {

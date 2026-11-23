@@ -1114,15 +1114,27 @@ Go assigns a defined func type and its unnamed signature to each other implicitl
 between two delegate types, so the value is converted through golib's `NilSafeDelegateConversion<TTarget,
 TSource>`, which returns null for a nil value as Go's assignment does. Every assignment site takes it: an
 assignment (`a = plain`), a declaration with a type (`var a F = plain`), a result (`return plain`), a call
-argument, a struct-literal field, a slice or array literal element (`[]F{plain}`), an `append` element, a channel
-send (`ch <- plain`), and a conversion either way (`F(plain)`, `(func(string) error)(f)`). A func literal and a
-method group convert to the delegate natively and are left as they are:
+argument, a struct-literal field, a slice or array literal element (`[]F{plain}`), a keyed map, array or slice
+element (`map[string]F{"a": plain}`), an `append` element, a channel send (`ch <- plain`), and a conversion either
+way (`F(plain)`, `(func(string) error)(f)`). A func literal and a method group convert to the delegate natively and
+are left as they are; a method expression, `(*node).add`, is a cast of its method group to the unnamed delegate, so
+it reaches a defined func type through that type's constructor, `new handler((Func<ж<node>, nint, nint>)(…))`.
+
+Two sites need more than a wrap. A multi-value call deconstructed into existing variables, `ctx, cancel =
+context.WithTimeout(ctx, d)` with `var cancel func()`, cannot convert inside a C# tuple deconstruction, so that
+element deconstructs into a temporary and is assigned, converted, after the statement. A deferred call through a
+defined-func-type value, `defer release(err)`, hands the value to golib's `defer`, whose overloads take `Action<…>`
+and `Func<…>`, so the value converts to its underlying signature's delegate:
 
 <!-- illustration: not converter output -->
 ```csharp
 F a = NilSafeDelegateConversion<F, Func<@string, error>>(plain);
 Func<@string, error> b = NilSafeDelegateConversion<Func<@string, error>, F>(f);
 ch.ᐸꟷ(NilSafeDelegateConversion<F, Func<@string, error>>(plain));
+
+(n, var cancelᴛ1) = pairF();
+cancel = NilSafeDelegateConversion<Func<@string, error>, F>(cancelᴛ1);
+defer(NilSafeDelegateConversion<Func<@string, error>, F>(f), (@string)"deferred", ref ᒐ);
 ```
 
 At a generic callee's func parameter (`count[T any](p func(T) bool, v T)`) the value converts to the parameter
@@ -1144,7 +1156,8 @@ so reflection prints `main.aFunc`:
 (Guarded by the `DefinedFuncTypeIdentity` behavioral test: `%T`, `Name()`, `String()` and `Kind()` of a
 defined func type, a typed nil, another package's defined func type, a type with methods, an alias and the
 unnamed signature; the assertion and the type switch; and every assignment site above, both ways, against a
-second package's type too, output-compared with Go. The converter tests `TestTypeSwitchNamedFuncCase`,
+second package's type too, including the tuple, the deferred call and the keyed method expressions the converted
+standard library first showed (database/sql, net/http, internal/fuzz, internal/trace), output-compared with Go. The converter tests `TestTypeSwitchNamedFuncCase`,
 `TestLocalFuncTypeLiftedUnderComments` and `TestMethodlessFuncTypeNameNeverTypesALocal` pin the case labels, the
 lift and the method-group local.)
 

@@ -1521,6 +1521,29 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 				}
 			}
 
+			// A tuple element a call delivers as one func type, assigned to an existing variable of another
+			// (`ctx, cancel = context.WithTimeout(…)` with `var cancel func()`): C# tuple deconstruction converts
+			// no delegate, so the element deconstructs into a temporary and is assigned, converted, after the
+			// statement, as an in-place element is (funcConversion).
+			if tupleTemp == "" && lhsLen > 1 && rhsLen == 1 && tupleInPlaceOK {
+				if tuple, ok := v.info.TypeOf(assignStmt.Rhs[0]).(*types.Tuple); ok && i < tuple.Len() {
+					if lhsType := v.info.TypeOf(lhs); lhsType != nil {
+						if targetName, sourceName, ok := v.funcConversion(lhs, lhsType, nil, tuple.At(i).Type()); ok {
+							tupleTemp = v.getTempVarName(valueAssignTempRoot(lhs))
+							tupleInPlaceAssigns = append(tupleInPlaceAssigns, fmt.Sprintf("%s = NilSafeDelegateConversion<%s, %s>(%s)", lhsExpr, targetName, sourceName, tupleTemp))
+
+							if tupleInForPost {
+								if v.hoistedDecls.Len() == 0 {
+									v.hoistedDecls.WriteString(v.newline)
+								}
+
+								v.hoistedDecls.WriteString(fmt.Sprintf("%s%s %s;%s", v.indent(v.indentLevel), sourceName, tupleTemp, v.newline))
+							}
+						}
+					}
+				}
+			}
+
 			// Per-element `var` for the newly-declared members of a mixed redeclaration tuple. An
 			// escaping element is already declared by its heap decl above, so it takes no `var`.
 			// Only a DIRECT ident element can declare — an index/selector/star element assigns

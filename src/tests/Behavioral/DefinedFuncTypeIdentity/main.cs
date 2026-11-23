@@ -43,6 +43,29 @@ partial struct stringer {
     internal @string s;
 }
 
+internal static (nint, F) pairF() { return (1, (@string _) => default); }
+
+internal static @string /*out*/ deferF(F f) {
+    @string @out = default;
+    GoFrame ᒐ = default;
+    try {
+        defer(NilSafeDelegateConversion<Func<@string, error>, F>(f), (@string)"deferred", ref ᒐ);
+        @out = "deferred call";
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+    finally { ᒐ.Run(); }
+    return @out;
+}
+
+partial struct node {
+    internal nint v;
+}
+
+internal static nint add(this ref node n, nint x) { return n.v + x; }
+internal static nint mul(this ref node n, nint x) { return n.v * x; }
+
+internal delegate nint handler(ж<node> _Δp0, nint _Δp1);
+
 internal static error check(this stringer s, @string _) { return default; }
 
 internal static void main() {
@@ -96,6 +119,16 @@ internal static void main() {
     F none = default;
     fmt.Println("nil", none == nil, f != nil);
     fmt.Println("conversion", NilSafeDelegateConversion<F, Func<@string, error>>(plain)("") == nil, NilSafeDelegateConversion<Func<@string, error>, F>(f)("") == nil);
+
+    nint n = default;
+    Func<@string, error> cancel = default;
+    (n, var cancelᴛ1) = pairF();
+    cancel = NilSafeDelegateConversion<Func<@string, error>, F>(cancelᴛ1);
+    fmt.Println("tuple", n, cancel("") == nil);
+    fmt.Println("defer", deferF(f));
+    var table = new array<handler>(3){[1] = new handler(((Func<ж<node>, nint, nint>)(main_package.add))), [2] = new handler(((Func<ж<node>, nint, nint>)(main_package.mul)))};
+    var byName = new map<@string, F>{["plain"] = NilSafeDelegateConversion<F, Func<@string, error>>(plain), ["f"] = f};
+    fmt.Println("keyed", table[1](Ꮡ(new node(2)), 3), table[2](Ꮡ(new node(2)), 3), table[0] == nil, byName["plain"]("") == nil, len(byName));
 
     fmt.Println("hooks", hooks.Apply((nint x) => x * 3, 2), hooks.Raw(NilSafeDelegateConversion<Func<nint, nint>, hooks.Handler>(hooks.Make(5)), 1), hooks.Apply(hooks.Make(1), 1));
 
