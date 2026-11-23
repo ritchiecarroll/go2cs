@@ -148,6 +148,39 @@ public class ParkCutTests
         Assert.AreEqual(0, Stale().Length, StaleText());
     }
 
+    // N1-3b, the converter's method-holder form (methodHolder.go, GlyphMethodSuffix): a library method's body is a plain
+    // static `<Name>⁔(/*this*/ recv, …)` and the Go-named extension method is a one-line forwarder to it. A key names
+    // the Go method, so it binds the BODY, whose receiver is its first parameter: fmt's stdlib rows are written that
+    // way (`go.fmt_package.pp.handleMethods`), and each read "names no such call site" in the real fmt build before.
+    private const string SuffixCuts = """
+            public partial struct P { public nint v; }
+
+            public static void parker() { ᐸꟷ(ch); }
+
+            internal static void sfx⁔(/*this*/ ж<P> Ꮡp) { parker(); }
+
+            internal static void sfx(this ж<P> Ꮡp) => sfx⁔(Ꮡp);
+
+            internal static void sfxBoth⁔(/*this*/ ref P p) { parker(); ᐸꟷ(ch); }
+
+            internal static void sfxBoth(this ref P p) => sfxBoth⁔(ref p);
+
+        """;
+
+    [TestMethod]
+    public void N1_3b_AKeyNamesTheGoMethodSoItBindsTheSuffixBody()
+    {
+        (string twins, Diagnostic[] errors) = RunWith(null, Props(cut: "go.box_package.P.sfx->go.box_package.parker;go.box_package.P.sfxBoth->go.box_package.parker"), SuffixCuts);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        Assert.AreEqual(0, Stale().Length, "both keys bind their body: " + StaleText());
+        Assert.IsFalse(twins.Contains("sfx⁔ꞏtwin(", StringComparison.Ordinal), "the body's only park was the cut site");
+        string body = TwinOf(twins, "sfxBoth⁔");
+        Assert.IsFalse(body.Contains("parkerꞏtwin", StringComparison.Ordinal), "inside the body's twin, the cut site is a plain call");
+        StringAssert.Contains(body, "parker();", "the plain call");
+        StringAssert.Contains(twins, "// weak-sites=0 cut-sites=2", "the report counts both cut sites");
+    }
+
     // A library's member that parks, with its twin, marked weak or not; compiled first and referenced by image.
     private static string Library(bool weak) => $$"""
         using System;
@@ -285,7 +318,7 @@ public class ParkCutTests
         (_, Diagnostic[] errors) = RunWith(null, null, Callers, FakeFmt);
 
         Assert.AreEqual(0, errors.Length, Errors(errors));
-        Assert.AreEqual(6, Stale().Length, "the table's six rows: " + StaleText());
+        Assert.AreEqual(5, Stale().Length, "the table's five rows: " + StaleText());
         StringAssert.Contains(StaleText(), "'go.fmt_package.pp.handleMethods->go.fmt_package.Stringer.String' (stdlib) is a stale N1 entry: names no member", "a row by name");
     }
 

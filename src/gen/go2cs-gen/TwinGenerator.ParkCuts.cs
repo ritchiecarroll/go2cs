@@ -35,10 +35,11 @@ public sealed partial class TwinGenerator
     internal static readonly (string Package, string Caller, string Callee)[] StdlibCuts =
     [
         // (*pp).handleMethods calls the operand's methods through an interface; a String somewhere that prints to an
-        // *os.File would otherwise mark every formatter.
+        // *os.File would otherwise mark every formatter. NOT listed: its call to error.Error, which never parks, because
+        // golib's `error` has no interface twin (golib is not twinned). GO2CS0019 read that row dead in fmt's own build;
+        // it returns with a row here if golib ever gives `error` a twin.
         ("go.fmt_package", "go.fmt_package.pp.handleMethods", "go.fmt_package.Formatter.Format"),
         ("go.fmt_package", "go.fmt_package.pp.handleMethods", "go.fmt_package.GoStringer.GoString"),
-        ("go.fmt_package", "go.fmt_package.pp.handleMethods", "go.error.Error"),
         ("go.fmt_package", "go.fmt_package.pp.handleMethods", "go.fmt_package.Stringer.String"),
 
         // The rune reader: (*ss).ReadRune reads its io.RuneScanner, and (*readRune).readByte calls io.ReadFull. NOT cut:
@@ -64,20 +65,31 @@ public sealed partial class TwinGenerator
 
         internal int WeakSites, CutSites;
 
+        // The suffix that ends a Go method's BODY in its package class (the converter's GlyphMethodSuffix, U+2054): the
+        // body is a plain static `<Name>⁔(/*this*/ recv, …)` and the Go-named extension method is a forwarder to it.
+        private const string MethodBodySuffix = "\u2054";
+
         // `<receiver type>.<member>` for a Go method (an extension method's receiver, through a box), else
-        // `<containing type>.<member>`: the key GoTwinsWeak, GoTwinsCut and the stdlib table are written in.
+        // `<containing type>.<member>`: the key GoTwinsWeak, GoTwinsCut and the stdlib table are written in. A method
+        // body in the suffix form keys as its Go method does: its receiver is its first parameter, and its name drops the
+        // suffix. So a key binds the body, where the calls are, and the forwarder too, whose one call is the body.
         internal static string MemberKey(IMethodSymbol method)
         {
             IMethodSymbol definition = Normalize(method);
             ITypeSymbol owner = definition.ContainingType;
+            string name = definition.Name;
+            bool body = name.Length > MethodBodySuffix.Length && name.EndsWith(MethodBodySuffix, StringComparison.Ordinal);
 
-            if (definition.IsExtensionMethod && definition.Parameters.Length > 0)
+            if (body)
+                name = name.Substring(0, name.Length - MethodBodySuffix.Length);
+
+            if ((definition.IsExtensionMethod || body) && definition.Parameters.Length > 0)
             {
                 ITypeSymbol receiver = definition.Parameters[0].Type;
                 owner = receiver is INamedTypeSymbol { Name: "ж", TypeArguments.Length: 1 } box ? box.TypeArguments[0] : receiver;
             }
 
-            return owner.OriginalDefinition.ToDisplayString() + "." + definition.Name;
+            return owner.OriginalDefinition.ToDisplayString() + "." + name;
         }
 
         private static IEnumerable<string> Entries(string? property) =>

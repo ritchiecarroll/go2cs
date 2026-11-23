@@ -61,6 +61,16 @@ sites that do not exist (readRune.ReadRune never calls a reader directly; ss.Rea
 it unmarked with no entry of its own. NOT cut: `io.ReadAtLeast -> Reader.Read`. That would make every `io.ReadFull`
 in every program plain, not only fmt's.
 
+**Amended 2026-11-23 (P4, implementing): five rows, not six, and the table's keys bind the method body.** The first
+whole-stdlib build with twins (`-p:GoStdlibTwins=true`) read GO2CS0019 on all six rows, "names no such call site".
+The converter writes a library method's body as a plain static `<Name>⁔(/*this*/ recv, …)` (methodHolder.go,
+GlyphMethodSuffix) beside a Go-named forwarder, so the keys matched only the forwarder, whose one call is the body. The
+generator now keys a suffix-form body as its Go method (receiver from its first parameter, suffix dropped); GenTests
+N1-3b holds that shape. The rebuilt fmt then bound five cuts and read the `error.Error` row DEAD: golib's `error` has no
+interface twin (golib is not twinned), so `v.Error()` never parks and the cut does nothing. That row is removed from
+the table, with a comment saying when it returns. The GenTests stdlib row binds a fake fmt and could not see either
+fact; the twinned stdlib build's GO2CS0019 = 0 is the gate that does. The table above stays as written.
+
 **The stdlib's entries** are a table in go2cs-gen (`ParkCuts.cs`), keyed by Go package path and Go declaration, read
 when the generator builds that package. One table, reviewed like code, versioned with the generator that reads it.
 
