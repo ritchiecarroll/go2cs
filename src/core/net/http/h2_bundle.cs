@@ -4663,7 +4663,8 @@ internal static (context.Context ctx, Action cancel) http2serverConnBaseContext(
     context.Context ctx = default;
     Action cancel = default;
 
-    (ctx, cancel) = context.WithCancel(opts.context());
+    (ctx, var cancelᴛ1) = context.WithCancel(opts.context());
+    cancel = NilSafeDelegateConversion<Action, context.CancelFunc>(cancelᴛ1);
     ctx = context.WithValue(ctx, LocalAddrContextKey.OrTypedNil(), c.LocalAddr());
     var hs = opts.baseConfig(); if (hs != nil) {
         ctx = context.WithValue(ctx, ServerContextKey.OrTypedNil(), hs.OrTypedNil());

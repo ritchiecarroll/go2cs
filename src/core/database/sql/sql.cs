@@ -2744,7 +2744,7 @@ internal static ж<Stmt> StmtContext⁔(/*this*/ ж<Tx> Ꮡtx, context.Context c
             return Ꮡ(new Stmt(stickyErr: err));
         }
         var releaseʗ1 = release;
-        defer(releaseʗ1, (error)(default), ref ᒐ);
+        defer(NilSafeDelegateConversion<Action<error>, releaseConn>(releaseʗ1), (error)(default), ref ᒐ);
 
         if (tx.db != stmt.db) {
             return Ꮡ(new Stmt(stickyErr: errors.New(sqlTxStmtStatementFromˢ)));
@@ -3095,7 +3095,8 @@ internal static (ж<driverConn> dc, Action<error> releaseConn, ж<driverStmt> ds
     // stmt was created on.
     if (s.cg != nil) {
         s.mu.Unlock();
-        (dc, releaseConn, err) = s.cg.grabConn(ctx); // blocks, waiting for the connection.
+        (dc, var releaseConnᴛ1, err) = s.cg.grabConn(ctx);
+        releaseConn = NilSafeDelegateConversion<Action<error>, releaseConn>(releaseConnᴛ1); // blocks, waiting for the connection.
         if (err != nil) {
             return (dc, releaseConn, ds, err);
         }

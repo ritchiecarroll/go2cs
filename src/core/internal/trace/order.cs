@@ -102,75 +102,75 @@ internal delegate (schedCtx, bool, error) orderingHandleFunc(ж<ordering> o, ж<
 internal static array<orderingHandleFunc> orderingDispatch;
 internal static void initᴛorderingDispatch() { orderingDispatch = new golib.SparseArray<orderingHandleFunc>{
     // Procs.
-    [tracev2.EvProcsChange] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceAnnotation)),
-    [tracev2.EvProcStart] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceProcStart)),
-    [tracev2.EvProcStop] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceProcStop)),
-    [tracev2.EvProcSteal] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceProcSteal)),
-    [tracev2.EvProcStatus] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceProcStatus)),
+    [tracev2.EvProcsChange] = new orderingHandleFunc(((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceAnnotation))),
+    [tracev2.EvProcStart] = new orderingHandleFunc(((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceProcStart))),
+    [tracev2.EvProcStop] = new orderingHandleFunc(((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceProcStop))),
+    [tracev2.EvProcSteal] = new orderingHandleFunc(((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceProcSteal))),
+    [tracev2.EvProcStatus] = new orderingHandleFunc(((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceProcStatus))),
 
     // Goroutines.
-    [tracev2.EvGoCreate] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceGoCreate)),
-    [tracev2.EvGoCreateSyscall] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceGoCreateSyscall)),
-    [tracev2.EvGoStart] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceGoStart)),
-    [tracev2.EvGoDestroy] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceGoStopExec)),
-    [tracev2.EvGoDestroySyscall] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceGoDestroySyscall)),
-    [tracev2.EvGoStop] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceGoStopExec)),
-    [tracev2.EvGoBlock] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceGoStopExec)),
-    [tracev2.EvGoUnblock] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceGoUnblock)),
-    [tracev2.EvGoSyscallBegin] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceGoSyscallBegin)),
-    [tracev2.EvGoSyscallEnd] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceGoSyscallEnd)),
-    [tracev2.EvGoSyscallEndBlocked] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceGoSyscallEndBlocked)),
-    [tracev2.EvGoStatus] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceGoStatus)),
+    [tracev2.EvGoCreate] = new orderingHandleFunc(((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceGoCreate))),
+    [tracev2.EvGoCreateSyscall] = new orderingHandleFunc(((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceGoCreateSyscall))),
+    [tracev2.EvGoStart] = new orderingHandleFunc(((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceGoStart))),
+    [tracev2.EvGoDestroy] = new orderingHandleFunc(((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceGoStopExec))),
+    [tracev2.EvGoDestroySyscall] = new orderingHandleFunc(((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceGoDestroySyscall))),
+    [tracev2.EvGoStop] = new orderingHandleFunc(((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceGoStopExec))),
+    [tracev2.EvGoBlock] = new orderingHandleFunc(((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceGoStopExec))),
+    [tracev2.EvGoUnblock] = new orderingHandleFunc(((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceGoUnblock))),
+    [tracev2.EvGoSyscallBegin] = new orderingHandleFunc(((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceGoSyscallBegin))),
+    [tracev2.EvGoSyscallEnd] = new orderingHandleFunc(((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceGoSyscallEnd))),
+    [tracev2.EvGoSyscallEndBlocked] = new orderingHandleFunc(((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceGoSyscallEndBlocked))),
+    [tracev2.EvGoStatus] = new orderingHandleFunc(((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceGoStatus))),
 
     // STW.
-    [tracev2.EvSTWBegin] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceGoRangeBegin)),
-    [tracev2.EvSTWEnd] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceGoRangeEnd)),
+    [tracev2.EvSTWBegin] = new orderingHandleFunc(((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceGoRangeBegin))),
+    [tracev2.EvSTWEnd] = new orderingHandleFunc(((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceGoRangeEnd))),
 
     // GC events.
-    [tracev2.EvGCActive] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceGCActive)),
-    [tracev2.EvGCBegin] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceGCBegin)),
-    [tracev2.EvGCEnd] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceGCEnd)),
-    [tracev2.EvGCSweepActive] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceGCSweepActive)),
-    [tracev2.EvGCSweepBegin] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceGCSweepBegin)),
-    [tracev2.EvGCSweepEnd] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceGCSweepEnd)),
-    [tracev2.EvGCMarkAssistActive] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceGoRangeActive)),
-    [tracev2.EvGCMarkAssistBegin] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceGoRangeBegin)),
-    [tracev2.EvGCMarkAssistEnd] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceGoRangeEnd)),
-    [tracev2.EvHeapAlloc] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceHeapMetric)),
-    [tracev2.EvHeapGoal] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceHeapMetric)),
+    [tracev2.EvGCActive] = new orderingHandleFunc(((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceGCActive))),
+    [tracev2.EvGCBegin] = new orderingHandleFunc(((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceGCBegin))),
+    [tracev2.EvGCEnd] = new orderingHandleFunc(((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceGCEnd))),
+    [tracev2.EvGCSweepActive] = new orderingHandleFunc(((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceGCSweepActive))),
+    [tracev2.EvGCSweepBegin] = new orderingHandleFunc(((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceGCSweepBegin))),
+    [tracev2.EvGCSweepEnd] = new orderingHandleFunc(((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceGCSweepEnd))),
+    [tracev2.EvGCMarkAssistActive] = new orderingHandleFunc(((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceGoRangeActive))),
+    [tracev2.EvGCMarkAssistBegin] = new orderingHandleFunc(((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceGoRangeBegin))),
+    [tracev2.EvGCMarkAssistEnd] = new orderingHandleFunc(((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceGoRangeEnd))),
+    [tracev2.EvHeapAlloc] = new orderingHandleFunc(((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceHeapMetric))),
+    [tracev2.EvHeapGoal] = new orderingHandleFunc(((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceHeapMetric))),
 
     // Annotations.
-    [tracev2.EvGoLabel] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceAnnotation)),
-    [tracev2.EvUserTaskBegin] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceUserTaskBegin)),
-    [tracev2.EvUserTaskEnd] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceUserTaskEnd)),
-    [tracev2.EvUserRegionBegin] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceUserRegionBegin)),
-    [tracev2.EvUserRegionEnd] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceUserRegionEnd)),
-    [tracev2.EvUserLog] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceAnnotation)),
+    [tracev2.EvGoLabel] = new orderingHandleFunc(((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceAnnotation))),
+    [tracev2.EvUserTaskBegin] = new orderingHandleFunc(((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceUserTaskBegin))),
+    [tracev2.EvUserTaskEnd] = new orderingHandleFunc(((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceUserTaskEnd))),
+    [tracev2.EvUserRegionBegin] = new orderingHandleFunc(((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceUserRegionBegin))),
+    [tracev2.EvUserRegionEnd] = new orderingHandleFunc(((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceUserRegionEnd))),
+    [tracev2.EvUserLog] = new orderingHandleFunc(((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceAnnotation))),
 
     // Coroutines. Added in Go 1.23.
-    [tracev2.EvGoSwitch] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceGoSwitch)),
-    [tracev2.EvGoSwitchDestroy] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceGoSwitch)),
-    [tracev2.EvGoCreateBlocked] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceGoCreate)),
+    [tracev2.EvGoSwitch] = new orderingHandleFunc(((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceGoSwitch))),
+    [tracev2.EvGoSwitchDestroy] = new orderingHandleFunc(((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceGoSwitch))),
+    [tracev2.EvGoCreateBlocked] = new orderingHandleFunc(((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceGoCreate))),
 
     // GoStatus event with a stack. Added in Go 1.23.
-    [tracev2.EvGoStatusStack] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceGoStatus)),
+    [tracev2.EvGoStatusStack] = new orderingHandleFunc(((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceGoStatus))),
 
     // Experimental events.
 
     // Experimental heap span events. Added in Go 1.23.
-    [tracev2.EvSpan] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceAllocFree)),
-    [tracev2.EvSpanAlloc] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceAllocFree)),
-    [tracev2.EvSpanFree] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceAllocFree)),
+    [tracev2.EvSpan] = new orderingHandleFunc(((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceAllocFree))),
+    [tracev2.EvSpanAlloc] = new orderingHandleFunc(((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceAllocFree))),
+    [tracev2.EvSpanFree] = new orderingHandleFunc(((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceAllocFree))),
 
     // Experimental heap object events. Added in Go 1.23.
-    [tracev2.EvHeapObject] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceAllocFree)),
-    [tracev2.EvHeapObjectAlloc] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceAllocFree)),
-    [tracev2.EvHeapObjectFree] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceAllocFree)),
+    [tracev2.EvHeapObject] = new orderingHandleFunc(((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceAllocFree))),
+    [tracev2.EvHeapObjectAlloc] = new orderingHandleFunc(((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceAllocFree))),
+    [tracev2.EvHeapObjectFree] = new orderingHandleFunc(((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceAllocFree))),
 
     // Experimental goroutine stack events. Added in Go 1.23.
-    [tracev2.EvGoroutineStack] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceAllocFree)),
-    [tracev2.EvGoroutineStackAlloc] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceAllocFree)),
-    [tracev2.EvGoroutineStackFree] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceAllocFree))
+    [tracev2.EvGoroutineStack] = new orderingHandleFunc(((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceAllocFree))),
+    [tracev2.EvGoroutineStackAlloc] = new orderingHandleFunc(((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceAllocFree))),
+    [tracev2.EvGoroutineStackFree] = new orderingHandleFunc(((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceAllocFree)))
 }.array(256); }
 
 internal static (schedCtx, bool, error) advanceProcStatus⁔(/*this*/ ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
