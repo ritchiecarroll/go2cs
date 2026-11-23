@@ -3095,8 +3095,8 @@ internal static (ж<driverConn> dc, Action<error> releaseConn, ж<driverStmt> ds
     // stmt was created on.
     if (s.cg != nil) {
         s.mu.Unlock();
-        (dc, var releaseConnᴛ1, err) = s.cg.grabConn(ctx);
-        releaseConn = NilSafeDelegateConversion<Action<error>, releaseConn>(releaseConnᴛ1); // blocks, waiting for the connection.
+        (dc, var releaseConnᴛ1, err) = s.cg.grabConn(ctx); // blocks, waiting for the connection.
+        releaseConn = NilSafeDelegateConversion<Action<error>, releaseConn>(releaseConnᴛ1);
         if (err != nil) {
             return (dc, releaseConn, ds, err);
         }
