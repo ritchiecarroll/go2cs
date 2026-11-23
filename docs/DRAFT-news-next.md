@@ -158,8 +158,8 @@
   `io/fs.WalkDirFunc`, `path/filepath.WalkFunc`, `go/types.Qualifier` and `archive/zip`'s `Compressor` and
   `Decompressor`. Compiled C# code that passed or received `Action` or `Func<…>` there must be rebuilt; C# source
   that assigns a lambda to one of these types compiles unchanged, and source that assigns an `Action` or `Func<…>`
-  value wraps it, as in `new CancelFunc(action)`. See [Every defined func type declares its own
-  delegate](ConversionStrategies-Reference/struct-types.md#every-defined-func-type-declares-its-own-delegate).
+  value wraps it, as in `new CancelFunc(action)`. See
+  [Every defined func type declares its own delegate](ConversionStrategies-Reference/struct-types.md#every-defined-func-type-declares-its-own-delegate).
   <!-- C2's D seat, COORD rulings 2026-11-23 02:36Z (cure 1) and 05:38Z (the break floor moves at the .5 release,
        F = R; this line and the binary-compatibility suppressions are owed by the seat). The thirty types are the
        exported collapse markers of the corpus at 1079ca371f, the same on windows, linux and darwin. -->

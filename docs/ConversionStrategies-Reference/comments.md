@@ -426,7 +426,7 @@ type SplitFunc func(data []byte, atEOF bool) (advance int, token []byte, err err
 // The function is never called with an empty data slice unless atEOF
 // is true. If atEOF is true, however, data may be non-empty and,
 // as always, holds unprocessed text.
-// type SplitFunc is a methodless func type — rendered inline as its base delegate
+public delegate (nint advance, slice<byte> token, error err) SplitFunc(slice<byte> data, bool atEOF);
 ```
 
 ### A type alias's doc, above its `global using`
