@@ -60,6 +60,7 @@ using static go.main_package;
 namespace go;
 
 [GoPackage("main")]
+[GoTestMatchingConsoleOutput]
 public static partial class main_package
 {
     // C# nested types declared with no access modifier are always private, and the

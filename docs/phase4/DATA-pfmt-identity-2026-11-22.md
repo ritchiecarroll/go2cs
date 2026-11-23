@@ -270,3 +270,23 @@ reading (a), the registration omission, and ruled the fix on top with the re-gat
 **Tree after the sweeps.** 100 tracked files modified, 0 deleted, 0 untracked: the canary rows' own re-emission
 under `src/core` (runtime, go/types, encoding/json, fmt, crypto/x509, crypto/cipher, internal/fmtsort) and
 `docs/validation/current`. All 100 were restored by path, and the tree reads clean at `e4c542864b`.
+
+## 13. The fix and the re-gate's prediction (committed before the re-gate)
+
+**Fix.** `PointerPrintIdentity/package_info.cs` gains one line, `[GoTestMatchingConsoleOutput]`, under
+`[GoPackage("main")]`, as its registered siblings carry it. No other file moves. The red is already measured: section
+12's go test names exactly this site.
+
+**Re-gate, as COORD ruled.** It runs at this section's own commit, base `afb01dfb6c`, every gate unfiltered and alone
+on the box. GenTests, GolibTests and the canaries carry over from section 12: the fix touches one behavioral
+`package_info.cs`, which none of them reads.
+- **go test -count=1 ./...:** 0 FAIL across 11 packages, TestLicensing passing, and repoguard ok inside it.
+- **CNR:** NO REGRESSION at section 12's counts: 1,177 transpiled = 1,165 byte-identical + 12 platform-exclusive,
+  solution integrity 1,167. A regen keeps the attribute, as it does for every sibling that carries one.
+- **The full behavioral suite** (`run-behavioral.ps1 --run-timeout 120`): 0 failures. Transpile, Compile and Target
+  pass 1,040 of 1,040. Output reads 1,014 compared, 0 failed, 8 NOT COMPARED, the eight base-state names in section
+  12, so Output passes 1,014 and skips 26. `PointerPrintIdentity` is compared, and it passes against Go's output.
+
+**Falsifiers.** Any go test FAIL. A CNR diff in `PointerPrintIdentity/package_info.cs`, which would mean the regen
+drops the attribute. Any Output count other than 1,014 compared and 8 NOT COMPARED, or `PointerPrintIdentity`
+failing its comparison.
