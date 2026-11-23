@@ -186,3 +186,19 @@ nothing else running.
   prints inside a frame that has returned, and it reads exactly its own baseline after 100,000 pins. So the extra
   objects are the most recent box or two, still reachable from the probe's own `Main` frame. Main holds its warm-up
   box and its loop variable, which tier-0 code keeps alive. That attribution is by reading and not measured.
+
+## 10. The convert-back over a reference-free root (predicted before the run)
+
+`Addr().UnsafePointer()` now answers the pinned address wherever the root is reference-free. Before, it answered a
+token. go/types' `boolFieldAddr` idiom converts that number back and writes through it. Its own test struct holds
+references, so it is an `Unpinnable` box that keeps the token. `ReflectFieldAddrWrite` covers only a struct that
+holds a string. So the program gains one line: a field of the reference-free `plain`, written through `(*int)` and
+then through the layout-identical `(*count)`. Go prints `convert back, reference-free struct: 7 0`.
+
+**Prediction.** The converted program prints the same line, `7 0`. The other 14 lines stay true.
+- `(*int)`: the number is the field box's own pinned address. Its conversion registered that address, so `To<T>`
+  resolves the field box exactly.
+- `(*count)`: a pinned real address is not the box's token, so the convert-back takes the native route. That route
+  reads and writes the pinned memory of `q` itself.
+
+**Falsifier.** Any value other than `7 0`, or a panic.

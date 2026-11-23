@@ -71,4 +71,13 @@ func main() {
 	pa1, pa2 := &a, &a
 	fmt.Println("one variable, one %p:", fmt.Sprintf("%p", pa1) == fmt.Sprintf("%p", pa2))
 	fmt.Println("two variables, two %p:", fmt.Sprintf("%p", &a) != fmt.Sprintf("%p", &b))
+
+	// reflect's pointer converts back and aliases the field (go/types' boolFieldAddr idiom), over a reference-free
+	// struct: through the field's own type, and through another layout-identical type.
+	type count int
+	var q plain
+	fv := reflect.ValueOf(&q).Elem().Field(1)
+	*(*int)(fv.Addr().UnsafePointer()) = 5
+	*(*count)(fv.Addr().UnsafePointer()) += 2
+	fmt.Println("convert back, reference-free struct:", q.m, q.n)
 }
