@@ -92,7 +92,9 @@ $seedPaths = @('src/core', 'src/version.props', 'docs/validation', 'docs/Validat
     $LASTEXITCODE -eq 0
 }
 if ('src/core' -notin $seedPaths) { Deny "$Base has no src/core." }
-$expectedCs = @(& git -C $repo ls-tree -r --name-only $Base -- src/core | Where-Object { $_.EndsWith('.cs') }).Count
+# core.quotepath=false: git otherwise QUOTES a non-ASCII path (golib's ж.*.cs files), and a quoted name ends in `.cs"`,
+# so the count read 21 short and refused a correct seed (run 45104579032).
+$expectedCs = @(& git -C $repo -c core.quotepath=false ls-tree -r --name-only $Base -- src/core | Where-Object { $_.EndsWith('.cs') }).Count
 
 $arms = [ordered]@{ base = $Base; changed = $Changed }
 $seedStamp = [DateTime]::new(2000, 1, 1, 0, 0, 0, [DateTimeKind]::Utc)
