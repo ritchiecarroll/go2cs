@@ -310,13 +310,14 @@ namespace go;
     /// a reference-free box its pinned address, and a reference-bearing box its order token, registered.
     /// </summary>
     /// <remarks>
-    /// One kind keeps its order token: an interior reference into an allocation with no pinnable slot
-    /// (<see cref="PointerStorage.Unpinnable"/>). Its conversion answers an address that nothing holds still, so two
-    /// reads of one pointer could differ after a collection, and identity (fmtsort, encoding/json's cycle detection,
-    /// a map keyed on <c>Pointer()</c>) needs one answer for as long as the pointer lives.
+    /// Two kinds keep their order token. An <c>unsafe.Pointer</c> value IS a number, and its token is that number: its own
+    /// conversion would pin and answer the slot that holds it. And an interior reference into an allocation with no
+    /// pinnable slot (<see cref="PointerStorage.Unpinnable"/>): its conversion answers an address that nothing holds
+    /// still, so two reads of one pointer could differ after a collection, and identity (fmtsort, encoding/json's cycle
+    /// detection, a map keyed on <c>Pointer()</c>) needs one answer for as long as the pointer lives.
     /// </remarks>
     public static nuint PointerNumber(INilPointer pointer) =>
-        pointer is IGoReflectBox { StorageKind: PointerStorage.Unpinnable } ? pointer.PointerOrderToken : pointer.StableAddress();
+        pointer is IUnsafePointer or IGoReflectBox { StorageKind: PointerStorage.Unpinnable } ? pointer.PointerOrderToken : pointer.StableAddress();
 
     /// <summary>
     /// Whether <paramref name="number"/> lies in the identity band: bits 63 and 62 set, bit 47 clear.

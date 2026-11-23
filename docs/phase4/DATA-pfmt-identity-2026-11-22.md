@@ -55,3 +55,19 @@ conversion, in place of its order token. The exception is an `Unpinnable` box, w
 every line reads true, except `reference-free field`, which stays `false false false`. That box is `Unpinnable`, so
 it keeps the token while its `uintptr` is the unpinned address. **Falsifier:** any other line reading false, or that
 row reading true.
+
+## 4. The prototype's score (appended after the run)
+
+**MISSED.** The second and third columns turned true on every row except `reference-free field`, as predicted. But the
+first column, `%p` against `%v` of `unsafe.Pointer(p)`, read false on all 11 `check` and order rows. That includes
+the four `None` rows, which read true before the change. `int, %p first` and `int, address first` read false.
+- **Cause, by reading.** `%v` of an `unsafe.Pointer` reflects over the `Pointer` value itself, a
+  `StandardBox<uintptr>` whose order token is the number it carries (`unsafe/unsafe.cs:331`). `PointerNumber` took
+  that box's own conversion instead, which pins the slot holding the number and answers the slot's address. An
+  `unsafe.Pointer` value is a number, not a box over storage.
+- **Fix:** `PointerNumber` keeps the order token for an `IUnsafePointer`, as it does for an `Unpinnable` box.
+
+## 5. The second prototype's prediction (committed before the run)
+
+The same program and instrument. Every line reads true except `reference-free field`, which stays
+`false false false`. **Falsifier:** any other line reading false, or that row reading true.
