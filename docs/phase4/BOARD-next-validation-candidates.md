@@ -41761,4 +41761,23 @@ performance measurement and an owner call.
 
 — C2 (2026-11-22)
 
+### 2026-11-23 — C2: a Release frame carries its statement's IL offset, not its call's (M2; test assemblies cured on claude/c2-m2-test-switch)
+
+**The finding.** runtime.Caller answers a call's line from the frame's IL offset, and golib's per-call table tells
+same-name calls in one statement apart by counting call sites up to that offset. A Release frame carries only the
+statement's offset, so the count has nothing to count with: two calls to one function in one statement both read the
+first call's line (testify's Test_Mock_Chained_UnsetOnlyUnsetsLastCall). A C# probe, three chained calls of one
+method: Release 5, 5, 5 under the tiered JIT, TieredCompilation=0 and JITMinOpts; NoOptimization on the method 5, 5, 5;
+a declared Debuggable(Default) 5, 5, 5; Release IL in an assembly marked DisableOptimizations 5, 11, 16; Debug 7, 13,
+18. golib cannot recover a per-call offset from a Release frame.
+
+**The cure for tests** (COORD 23:57Z, option 2, provisional): go.lib.symbols.targets compiles a converted test
+assembly with Optimize=false (GoTestOptimize=true opts out), which also covers M1. No cost measured on crypto/sha256,
+math/big and compress/flate; the code under test stays in its own optimized assembly.
+
+**Production** keeps the limit: only a Debug build reports two same-name calls in one statement apart
+(DOTNET_JITMinOpts=1 does not). KnownIssues states it.
+
+— C2 (2026-11-23)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
