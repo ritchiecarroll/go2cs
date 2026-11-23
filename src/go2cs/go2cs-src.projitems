@@ -326,6 +326,8 @@
     <None Include="$(MSBuildThisFileDirectory)godebugDefault_test.go" />
     <None Include="$(MSBuildThisFileDirectory)golibNamespaceNames.go" />
     <None Include="$(MSBuildThisFileDirectory)goModFile.go" />
+    <None Include="$(MSBuildThisFileDirectory)goModFileSpelling_other_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)goModFileSpelling_windows_test.go" />
     <None Include="$(MSBuildThisFileDirectory)goModFile_test.go" />
     <None Include="$(MSBuildThisFileDirectory)handOwnAddress_test.go" />
     <None Include="$(MSBuildThisFileDirectory)handOwnReferences_test.go" />
