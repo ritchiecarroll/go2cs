@@ -838,6 +838,7 @@
     <None Include="$(MSBuildThisFileDirectory)trailingCommentAlignment_test.go" />
     <None Include="$(MSBuildThisFileDirectory)trailingComments_test.go" />
     <None Include="$(MSBuildThisFileDirectory)transitiveAliasRename_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)tupleFollowUpTrailingComment_test.go" />
     <None Include="$(MSBuildThisFileDirectory)typeAccessibilityInterface_test.go" />
     <None Include="$(MSBuildThisFileDirectory)typeAccessibilityOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)typeAccessibilityProse_test.go" />

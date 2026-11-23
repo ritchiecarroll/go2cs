@@ -598,6 +598,9 @@ func mapSetMethod(mapType types.Type) string {
 func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingContext) {
 	result := &strings.Builder{}
 
+	// Where in result the statement's first line ends, when follow-up lines come after it; -1 otherwise.
+	firstLineEnd := -1
+
 	// A store to a readonly zero-size layout field is lowered through its accessor (A17).
 	v.markZeroSizeFieldStores(assignStmt)
 
@@ -1942,6 +1945,10 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 			result.WriteRune(';')
 		}
 
+		if tupleStatementPos && len(tupleInPlaceAssigns) > 0 {
+			firstLineEnd = result.Len()
+		}
+
 		for _, tupleAssign := range tupleInPlaceAssigns {
 			switch {
 			case tupleStatementPos:
@@ -2551,6 +2558,10 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 
 	if format.useIndent {
 		v.outputBuilder.WriteString(v.indent(v.indentLevel))
+	}
+
+	if firstLineEnd >= 0 {
+		v.trailingCommentAnchor = commentAnchor{builder: v.outputBuilder, stmtEnd: assignStmt.End(), offset: v.outputBuilder.Len() + firstLineEnd}
 	}
 
 	v.outputBuilder.WriteString(result.String())
