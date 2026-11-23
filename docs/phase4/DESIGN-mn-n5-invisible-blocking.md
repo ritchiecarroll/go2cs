@@ -224,3 +224,7 @@ COORD ruled on the design as posted (87a2754a16). Sections 1-8 above are kept as
 
 Section 7's size grows by the debug.SetMaxThreads binding, the doc paragraph and the I10 project: about +0.5 day,
 2.75-4.25 lane-days in all.
+
+**I0, read (2026-11-23):** **MET.** os-matrix run 45214659319, `golib-tests` on darwin, filter
+`FullyQualifiedName~WaitSenseTests`, at e70fd17104: osx-arm64 10/10 and osx-x64 10/10. Windows read 10/10 locally,
+and linux read the probe in WSL. The policy keeps its shape on every OS the scheduler runs on.
