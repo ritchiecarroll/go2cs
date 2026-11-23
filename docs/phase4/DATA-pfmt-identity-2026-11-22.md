@@ -290,3 +290,25 @@ on the box. GenTests, GolibTests and the canaries carry over from section 12: th
 **Falsifiers.** Any go test FAIL. A CNR diff in `PointerPrintIdentity/package_info.cs`, which would mean the regen
 drops the attribute. Any Output count other than 1,014 compared and 8 NOT COMPARED, or `PointerPrintIdentity`
 failing its comparison.
+
+## 14. The re-gate's score (appended after the run)
+
+The re-gate ran at `60e2ca48b0`, base `afb01dfb6c`, every gate unfiltered and alone on the box. Scored as worded in
+section 13. **All MET.**
+
+- **go test -count=1 ./...: MET.** rc 0: 11 packages ok, 0 FAIL, 0 cached, TestLicensing passing. A separate full
+  repoguard run (-count=1) is also rc 0.
+- **CNR: MET.** NO REGRESSION: 1,177 transpiled = 1,165 byte-identical + 12 platform-exclusive, solution integrity
+  1,167, 0 NOT MEASURED lines, a clean tree afterwards. So the regen keeps the attribute.
+- **The full behavioral suite: MET.** 0 failures. Transpile, Compile and Target pass 1,040 of 1,040. Output reads
+  1,014 compared, 0 failed, 8 NOT COMPARED, which are exactly section 12's eight base-state names. Output passes
+  1,014 and skips 26.
+  - **`PointerPrintIdentity` is compared and passes.** The runner's log names only failures and uncompared
+    programs, so this reading is by count: the program left the NOT COMPARED list, Output passes rose from 1,013 to
+    1,014, and 0 failed.
+
+**Tree.** It read clean after every purge, and clean at the end.
+
+**The seat's gate set, complete.**
+- From section 12, carried over: GenTests, GolibTests Release and Debug, and the seven canaries.
+- From this section: go test, CNR and the full behavioral suite.
