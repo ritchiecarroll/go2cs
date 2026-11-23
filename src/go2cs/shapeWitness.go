@@ -6,7 +6,8 @@
 // version 3 only, which can be found in the LICENSE file.
 // Additional permission for emitted output: see LICENSE-EXCEPTION (AGPL section 7).
 
-// The NARROW SHAPE WITNESS (docs/phase4/DESIGN-shape-witness-scout.md, sections 2, 7-9; P3 CLEAR 05e789558d).
+// The NARROW SHAPE WITNESS. Design record: DESIGN-shape-witness-scout.md, sections 2 and 7-9, at commit 05e789558d
+// (reviewed there; the record is not on master). The user-facing rule is GO2CS2013's row in docs/DiagnosticCodes.md.
 //
 // A generic declaration whose type parameter is under a NON-self method-set constraint, and whose own signature puts
 // that parameter where the constraint proxies refuse it -- a generic NAMED type (ruling 1), or T inside a result, a

@@ -258,17 +258,6 @@ func inlineArrayStampOf(a *inlineArrayAdmission, mode string) inlineArrayStamp {
 	return stamp
 }
 
-// setOf returns names as a set.
-func setOf(names []string) map[string]bool {
-	set := make(map[string]bool, len(names))
-
-	for _, name := range names {
-		set[name] = true
-	}
-
-	return set
-}
-
 // traceImporterSeed writes one line per derived seed to stderr when GO2CS_TRACE_LIFT_REUSE=1 (liftReuseTraceVariable):
 // the pass that found it, the importer that demanded it, and the seed. The census reads the seeds and the pass count.
 func traceImporterSeed(pass int, importer string, demand importerSeedDemand) {

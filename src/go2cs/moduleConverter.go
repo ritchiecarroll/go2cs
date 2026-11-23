@@ -661,7 +661,7 @@ func (m *ModuleConverter) convertAll() {
 			packageOptions := m.options
 			packageOptions.packageImportPath = pkgPath
 			packageOptions.programDependencies = m.sortedThirdPartyModules()
-			packageOptions.inlineArrays = withImporterSeeds(m.options.inlineArrays, pkgPath, setOf(m.importerSeeds[pkgPath]))
+			packageOptions.inlineArrays = withImporterSeeds(m.options.inlineArrays, pkgPath, nameSet(m.importerSeeds[pkgPath]...))
 
 			// A refused package is skipped and the run goes on (recurseRefusal.go), under -tests -recurse too: its
 			// phase B then names each tested package the refusal reaches (moduleTestsDriver.go).
