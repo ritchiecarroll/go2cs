@@ -11,6 +11,10 @@ namespace go2cs.Templates.InheritedType;
 
 internal static class IChannelTypeTemplate
 {
+    // The members this wrapper declares for its own use under an ASCII name a Go method can also declare (R7; see
+    // ISliceTypeTemplate.ClaimableMembers). GenTests' NamedChanMapNumericClaimedMemberTests.
+    internal static readonly string[] ClaimableMembers = ["Capacity", "GetEnumerator", "IsClosed", "IsUnbuffered", "Length", "Make", "Receive", "Received", "Receiving", "Send", "Sending", "Sent"];
+
     // constructorName is structName without a generic type's parameters (a C# constructor never carries them).
     //
     // goMethods are the Go methods declared on the type, and its own name (InheritedTypeTemplate.

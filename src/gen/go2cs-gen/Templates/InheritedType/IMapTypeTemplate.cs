@@ -12,6 +12,10 @@ namespace go2cs.Templates.InheritedType;
 
 internal static class IMapTypeTemplate
 {
+    // The members this wrapper declares for its own use under an ASCII name a Go method can also declare (R7; see
+    // ISliceTypeTemplate.ClaimableMembers). GenTests' NamedChanMapNumericClaimedMemberTests.
+    internal static readonly string[] ClaimableMembers = ["Add", "Clear", "ContainsKey", "Count", "GetEnumerator", "IsNil", "Length", "Make", "Remove", "Set", "TryGetValue"];
+
     // constructorName is structName without a generic type's parameters (a C# constructor never carries them).
     //
     // mapValue is the expression that reads the wrapper's map, and storeMap(made) the value the

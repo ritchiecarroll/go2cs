@@ -8,6 +8,10 @@ namespace go2cs.Templates.InheritedType;
 
 internal static class NumericTypeTemplate
 {
+    // The members this wrapper declares for its own use under an ASCII name a Go method can also declare (R7; see
+    // ISliceTypeTemplate.ClaimableMembers). GenTests' NamedChanMapNumericClaimedMemberTests.
+    internal static readonly string[] ClaimableMembers = ["CompareTo"];
+
     private static bool IsUnsignedType(string typeName) =>
         typeName is "uint8" or "uint16" or "uint32" or "uint64" or "byte" or "rune" or "uintptr" or "nuint" or "uint";
 

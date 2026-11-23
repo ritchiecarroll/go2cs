@@ -11,6 +11,11 @@ namespace go2cs.Templates.InheritedType;
 
 internal static class PointerTypeTemplate
 {
+    // The members this wrapper declares for its own use under an ASCII name (R7; see ISliceTypeTemplate.ClaimableMembers).
+    // Go declares no method on a named pointer type (an invalid receiver), so only the type's own NAME claims one (CS0542).
+    // GenTests' NamedChanMapNumericClaimedMemberTests.
+    internal static readonly string[] ClaimableMembers = ["IsNilPointer", "IsNull", "NilInstance", "ValueSlot", "at", "of"];
+
     // The box's deref alias (PointerExtensions.DerefOrNull) for a NAMED pointer, as an extension method of the package
     // class beside the wrapper: a ref to the pointee, or a null ref for a nil pointer, which faults where Go's
     // dereference panics. A *T parameter the converter lowers to `ref T` takes `ref p.DerefOrNull()` at the call

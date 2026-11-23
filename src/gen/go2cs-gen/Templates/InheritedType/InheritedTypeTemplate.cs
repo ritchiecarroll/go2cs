@@ -569,6 +569,11 @@ internal class InheritedTypeTemplate : TemplateBase
     // WRAPPER (a Go sub-slice of a named string keeps the named type), Length for len(), and
     // the u8-literal bridge so span comparisons/assignments bind (census F5, CS0021 x14 +
     // CS0019 x2).
+    //
+    // The members of that surface under an ASCII name a Go method can also declare (R7; see
+    // ISliceTypeTemplate.ClaimableMembers). GenTests' NamedChanMapNumericClaimedMemberTests.
+    internal static readonly string[] StringClaimableMembers = ["CompareTo", "GetEnumerator", "Length"];
+
     private string StringSurfaceMembers => TypeName != "@string" ? "" :
         $$"""
 
