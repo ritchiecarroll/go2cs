@@ -159,3 +159,30 @@ times per round. Then the map is dropped, and pinned objects are read after the 
 - Pinned objects return to baseline after the drop.
 - **COORD's threshold:** more than 2x wall time, or a pinned count that does not return to baseline, is posted
   before seating.
+
+## 9. The arms' score (appended after two readings)
+
+The probes were built at TIP `28b8d4423d` and BASE `afb01dfb6c`. Their `golib`, `go.reflect` and `go.fmt` assemblies
+differ by hash. There were two readings, the second in reversed arm order, one process per arm, on one box, with
+nothing else running.
+
+| Arm | Reading 1, BASE / TIP | Reading 2, BASE / TIP | TIP/BASE | Predicted | Score |
+|---|---|---|---|---|---|
+| L pinned: baseline, held, after the drop | 2, 2, 2 / 3, 100,003, 3 | 2, 2, 2 / 3, 100,003, 3 | +100,000 held, back to baseline | the same | **MET** |
+| L live entries: baseline, held, after the drop | 5, 100,005, 5 / 5, 100,005, 5 | the same | unchanged | within 16 of baseline | **MET** |
+| C1, 200k distinct boxes, ms | 302.6 / 289.1 | 249.8 / 277.3 | 0.96x, 1.11x | 1.5x to 6x | **MISSED, cheaper** |
+| C2, one box 1M times, ms | 967.9 / 913.4 | 937.9 / 934.5 | 0.94x, 1.00x | 0.8x to 1.4x | **MET** |
+| C3 floor, 10k-key map, 20 prints, ms | 437.2 / 421.6 | 426.3 / 405.9 | 0.96x, 0.95x | 0.8x to 1.5x | **MET** |
+| C3 first round, ms | 1,357.4 / 1,324.8 | 1,401.6 / 1,273.1 | 0.98x, 0.91x | under 2x | **MET** |
+| C3 pinned after the drop | 2 / 3 (baseline 2 / 3) | 2 / 3 (baseline 2 / 4) | at or under baseline | back to baseline | **MET** |
+
+- **The stop-line held.** A `%p` pin dies with its box. 100,000 pins come and go with their boxes, and the table
+  keeps no live entry for a dead box.
+- **COORD's map threshold is not reached:** 0.91x to 0.98x, against a 2x limit.
+- **C1's miss.** The prediction priced a pin as extra work on top of the token path. But BASE already pays a
+  dictionary write and a `WeakReference` per distinct box (`Register` of the token). TIP pays `RegisterPinned` and
+  one `PinnedBuffer` instead, and `Sprintf` itself dominates both.
+- **One residual, bounded and not proportional to N.** TIP rests at 1 or 2 more pinned objects than BASE. Arm L
+  prints inside a frame that has returned, and it reads exactly its own baseline after 100,000 pins. So the extra
+  objects are the most recent box or two, still reachable from the probe's own `Main` frame. Main holds its warm-up
+  box and its loop variable, which tier-0 code keeps alive. That attribution is by reading and not measured.
