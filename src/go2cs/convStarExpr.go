@@ -58,11 +58,16 @@ func (v *Visitor) convStarExpr(starExpr *ast.StarExpr, context StarExprContext) 
 	// panics on a null held value, so these derefs read through `ValueSlot` (identical real
 	// slot, no nil check — reads and writes both persist); a deref producing a VALUE keeps the
 	// strict `val` (a nil `*node` deref must panic, as in Go).
-	derefAccessor := ".Value"
+	//
+	// A NAMED pointer operand whose type is itself named Value or ValueSlot declares that member under another name
+	// (pointerWrapperMember; R7 seat 2).
+	derefMember := "Value"
 
 	if resultType := v.info.TypeOf(starExpr); resultType != nil && isInherentlyHeapAllocatedType(resultType) {
-		derefAccessor = ".ValueSlot"
+		derefMember = "ValueSlot"
 	}
+
+	derefAccessor := "." + v.pointerWrapperMember(v.info.TypeOf(starExpr.X), derefMember)
 
 	// The parameter-deref shortcut below applies to `*p` (the whole parameter) and `**p` — where the
 	// operand denotes the parameter itself. It must NOT fire for `*p.field` (a deref of a pointer FIELD

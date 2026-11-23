@@ -15,7 +15,9 @@ internal static class NumericTypeTemplate
     private static bool IsUnsignedType(string typeName) =>
         typeName is "uint8" or "uint16" or "uint32" or "uint64" or "byte" or "rune" or "uintptr" or "nuint" or "uint";
 
-    public static string Generate(string typeName, string targetTypeName) =>
+    // goMethods are the Go methods declared on the type, and its own name (InheritedTypeTemplate.GoMethodNames): a claimed
+    // CompareTo moves to its explicit IComparable<T> implementation, which golib's min/max and cmp's ordered helpers bind.
+    public static string Generate(string typeName, string targetTypeName, System.Collections.Generic.ICollection<string> goMethods) =>
         $$"""
         
                 public bool Equals({{targetTypeName}} other) => m_value == other.m_value;
@@ -30,7 +32,7 @@ internal static class NumericTypeTemplate
                     };
                 }
                 
-                public override int GetHashCode() => m_value.GetHashCode();{{GetComparisonOperators(typeName, targetTypeName)}}
+                public override int GetHashCode() => m_value.GetHashCode();{{GetComparisonOperators(typeName, targetTypeName, goMethods)}}
 
                 public static {{targetTypeName}} operator +({{targetTypeName}} left, {{targetTypeName}} right) => ({{targetTypeName}})(left.m_value + right.m_value);
                 
@@ -58,11 +60,11 @@ internal static class NumericTypeTemplate
     // underlying a `[GoType num:]` wrapper can name is IComparable<itself>: the aliases are BCL
     // primitives, `uintptr` is a golib struct that declares it, and a wrapper over another
     // wrapper picks up the member this very template gives it.
-    private static string GetComparisonOperators(string typeName, string targetTypeName) => typeName.StartsWith("complex") ? "" :
+    private static string GetComparisonOperators(string typeName, string targetTypeName, System.Collections.Generic.ICollection<string> goMethods) => typeName.StartsWith("complex") ? "" :
        $"""
 
 
-                public int CompareTo({targetTypeName} other) => m_value.CompareTo(other.m_value);
+                {(goMethods.Contains("CompareTo") ? $"int global::System.IComparable<{targetTypeName}>.CompareTo({targetTypeName} other)" : $"public int CompareTo({targetTypeName} other)")} => m_value.CompareTo(other.m_value);
 
                 public static bool operator <({targetTypeName} left, {targetTypeName} right) => left.m_value < right.m_value;
 

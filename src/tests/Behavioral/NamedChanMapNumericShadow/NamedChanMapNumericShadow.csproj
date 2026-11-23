@@ -187,6 +187,7 @@
     <ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />
 
     <ProjectReference Include="$(go2csPath)core/fmt/fmt.csproj" />
+    <ProjectReference Include="$(go2csPath)core/slices/slices.csproj" />
   </ItemGroup>
 
   <ItemGroup>

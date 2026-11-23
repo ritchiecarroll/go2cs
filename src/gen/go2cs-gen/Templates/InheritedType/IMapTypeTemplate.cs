@@ -38,12 +38,18 @@ internal static class IMapTypeTemplate
     {
         string dictionary = $"global::System.Collections.Generic.IDictionary<{keyTypeName}, {valueTypeName}>";
         string collection = $"global::System.Collections.Generic.ICollection<global::System.Collections.Generic.KeyValuePair<{keyTypeName}, {valueTypeName}>>";
+        string pairEnumerable = $"global::System.Collections.Generic.IEnumerable<global::System.Collections.Generic.KeyValuePair<{keyTypeName}, {valueTypeName}>>";
+        string pairEnumerator = $"global::System.Collections.Generic.IEnumerator<global::System.Collections.Generic.KeyValuePair<{keyTypeName}, {valueTypeName}>>";
 
         // The public form, or -- when a Go method claims the name -- the same member implemented explicitly.
         string Member(string name, string returnType, string interfaceName, string signature, string body) =>
             goMethods.Contains(name) ?
                 $"{returnType} {interfaceName}.{name}({signature}) => {body};" :
                 $"public {returnType} {name}({signature}) => {body};";
+
+        // A member no ICollection/IDictionary member covers but a golib interface does (IMap's Length and IsNil, ISupportMake's
+        // Make), and the collection's own Count and enumerator: public, or that interface's explicit form when claimed.
+        string Claimed(string name, string own, string claimed) => goMethods.Contains(name) ? claimed : own;
 
         string set = goMethods.Contains("Set") ? "" :
             $$"""
@@ -54,9 +60,9 @@ internal static class IMapTypeTemplate
 
         return $$"""
         
-                public nint Length => ((IMap){{mapValue}}).Length;
+                {{Claimed("Length", $"public nint Length => ((IMap){mapValue}).Length;", $"nint IMap.Length => ((IMap){mapValue}).Length;")}}
                 
-                public bool IsNil => ((IMap){{mapValue}}).IsNil;
+                {{Claimed("IsNil", $"public bool IsNil => ((IMap){mapValue}).IsNil;", $"bool IMap.IsNil => ((IMap){mapValue}).IsNil;")}}
 
                 /// <summary>
                 /// maps.Clone of a NAMED map is that named type (Go: `func Clone[M ~map[K]V](m M) M`, whose
@@ -64,7 +70,7 @@ internal static class IMapTypeTemplate
                 /// assertion failed (logrus' `maps.Clone(entry.Data)` panicked "is map, not logrus.Fields").
                 /// The copy reads this wrapper's map through the same expression every other member does.
                 /// </summary>
-                IMap IMap.CloneMap() => IsNil ? default({{structName}}) : new {{structName}}(new map<{{keyTypeName}}, {{valueTypeName}}>({{mapValue}}));
+                IMap IMap.CloneMap() => ((IMap){{mapValue}}).IsNil ? default({{structName}}) : new {{structName}}(new map<{{keyTypeName}}, {{valueTypeName}}>({{mapValue}}));
 
                 /// <summary>
                 /// The map this wrapper holds, SHARED: a map-cored type parameter assigned to its core type
@@ -74,12 +80,14 @@ internal static class IMapTypeTemplate
                 map<{{keyTypeName}}, {{valueTypeName}}> IMap<{{keyTypeName}}, {{valueTypeName}}>.AsMap() => {{mapValue}};
 
                 /// <summary>ISupportMake factory — a made named map wraps a made concrete map.</summary>
-                public static {{structName}} Make(nint p1, nint p2) => new {{structName}}(map<{{keyTypeName}}, {{valueTypeName}}>.Make(p1, p2));
+                {{Claimed("Make",
+                    $"public static {structName} Make(nint p1, nint p2) => new {structName}(map<{keyTypeName}, {valueTypeName}>.Make(p1, p2));",
+                    $"static {structName} ISupportMake<{structName}>.Make(nint p1, nint p2) => new {structName}(map<{keyTypeName}, {valueTypeName}>.Make(p1, p2));")}}
 
                 /// <summary>Capacity form — `make(NamedMap, n)` emits `new NamedMap(n)` (socktest's Sockets).</summary>
                 public {{constructorName}}(nint size) => m_value = {{sizedMap}};
 
-                public int Count => {{mapValue}}.Count;
+                {{Claimed("Count", $"public int Count => {mapValue}.Count;", $"int {collection}.Count => {mapValue}.Count;")}}
                 
                 /// <summary>
                 /// READONLY, and that is what makes `f()[k] = v` legal — Go's own rule for a named
@@ -143,9 +151,11 @@ internal static class IMapTypeTemplate
                 
                 bool global::System.Collections.Generic.ICollection<global::System.Collections.Generic.KeyValuePair<{{keyTypeName}}, {{valueTypeName}}>>.IsReadOnly => false;
                 
-                public global::System.Collections.Generic.IEnumerator<global::System.Collections.Generic.KeyValuePair<{{keyTypeName}}, {{valueTypeName}}>> GetEnumerator() => ((global::System.Collections.Generic.IEnumerable<global::System.Collections.Generic.KeyValuePair<{{keyTypeName}}, {{valueTypeName}}>>){{mapValue}}).GetEnumerator();
+                // A claimed GetEnumerator leaves `foreach` (Go's range over the map) to IEnumerable<KeyValuePair<K, V>>, which C#
+                // binds before an extension GetEnumerator.
+                {{Claimed("GetEnumerator", $"public {pairEnumerator} GetEnumerator() => (({pairEnumerable}){mapValue}).GetEnumerator();", $"{pairEnumerator} {pairEnumerable}.GetEnumerator() => (({pairEnumerable}){mapValue}).GetEnumerator();")}}
                 
-                global::System.Collections.IEnumerator global::System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
+                global::System.Collections.IEnumerator global::System.Collections.IEnumerable.GetEnumerator() => (({{pairEnumerable}}){{mapValue}}).GetEnumerator();
         """;
     }
 }

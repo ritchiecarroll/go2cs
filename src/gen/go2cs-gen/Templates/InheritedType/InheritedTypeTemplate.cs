@@ -126,7 +126,9 @@ internal class InheritedTypeTemplate : TemplateBase
         "Slice" => $" : ISlice<{TargetTypeName}>, ISupportMake<{ObjectName}>, ISliceWrap<{ObjectName}, {TargetTypeName}>" +
             (ISliceTypeTemplate.IsByteSlice(TargetTypeName) ? $", IByteSeq<{ObjectName}, byte>" : ""),
         "Map" => $" : IMap<{TargetTypeName}, {TargetValueTypeName}>, ISupportMake<{ObjectName}>",
-        "Channel" => $" : IChannel<{TargetTypeName}>, ISupportMake<{ObjectName}>",
+        // A Go method named GetEnumerator takes the public enumerator, so `foreach` reads IEnumerable<T> (IChannelTypeTemplate).
+        "Channel" => $" : IChannel<{TargetTypeName}>, ISupportMake<{ObjectName}>" +
+            (GoMethodNames.Contains("GetEnumerator") ? $", global::System.Collections.Generic.IEnumerable<{TargetTypeName}>" : ""),
         "Array" => $" : IArray<{TargetTypeName}>, ISupportMake<{ObjectName}>, global::go.golib.IGoValueAssign<{ObjectName}>",
         "Pointer" => $" : IPointer<{TargetTypeName}>, INilPointer",
         // Generic-math declarations so a [GoType num:] wrapper satisfies converter-emitted
@@ -151,8 +153,12 @@ internal class InheritedTypeTemplate : TemplateBase
     // It is also a member of Go's `~[]byte | ~string` union, which the converter emits as IByteSeq<TSelf, byte>:
     // jsontext passes its named strings and named []byte to the same `~[]byte | ~string` functions (TS readiness
     // C16). The surface below implements it, @string's own way: the sub-slices return the wrapper.
+    //
+    // A Go method named GetEnumerator takes the public rune enumerator, so `foreach` (Go's range over the string) reads
+    // IEnumerable<(nint, int)>, which C# binds before an extension GetEnumerator (R7; StringSurfaceMembers).
     private string StringInterfaces =>
-        $" : global::System.IComparable<{ObjectName}>, global::System.Numerics.IComparisonOperators<{ObjectName}, {ObjectName}, bool>, global::System.Numerics.IAdditionOperators<{ObjectName}, {ObjectName}, {ObjectName}>, IByteSeq<{ObjectName}, byte>";
+        $" : global::System.IComparable<{ObjectName}>, global::System.Numerics.IComparisonOperators<{ObjectName}, {ObjectName}, bool>, global::System.Numerics.IAdditionOperators<{ObjectName}, {ObjectName}, {ObjectName}>, IByteSeq<{ObjectName}, byte>" +
+        (GoMethodNames.Contains("GetEnumerator") ? ", global::System.Collections.Generic.IEnumerable<(nint, int)>" : "");
 
     // A numeric wrapper over an INTEGER underlying (not float/complex) — the modulus, bitwise and
     // shift operators exist for it (NumericTypeTemplate.GetComplementOperator, same kind-gate), so
@@ -198,7 +204,7 @@ internal class InheritedTypeTemplate : TemplateBase
             IMapTypeTemplate.Generate(ObjectName, ConstructorName, TargetTypeName, TargetValueTypeName!, GoMethodNames),
         "Channel" => IChannelTypeTemplate.Generate(ObjectName, ConstructorName, TypeName, TargetTypeName, GoMethodNames),
         "Array" => IArrayTypeTemplate.Generate(ObjectName, TypeName, TargetTypeName, TargetTypeSize, GoMethodNames),
-        "Numeric" => NumericTypeTemplate.Generate(TypeName, TargetTypeName),
+        "Numeric" => NumericTypeTemplate.Generate(TypeName, TargetTypeName, GoMethodNames),
         "Pointer" => PointerTypeTemplate.Generate(ObjectName, TargetTypeName),
         _ => UnderlyingArrayElementType is null ? "" : IArrayViewTypeTemplate.Generate(ObjectName, TypeName, UnderlyingArrayElementType, GoMethodNames)
     };
@@ -291,7 +297,7 @@ internal class InheritedTypeTemplate : TemplateBase
         // STRUCTURAL nil for pointers (null-safe): a null reference and the canonical typed nil
         // instance are the same Go nil pointer; the old `value.Equals(default)` NRE'd on a null
         // reference and reported the canonical instance non-nil.
-        "Pointer" => "value is null || value.IsNilPointer",
+        "Pointer" => PointerWrapperMember(ObjectName, "IsNilPointer") == "IsNilPointer" ? "value is null || value.IsNilPointer" : "value is null || ((INilPointer)value).IsNilPointer",
         _ => $"value.Equals(default({ObjectName}))"
     };
 
@@ -301,7 +307,7 @@ internal class InheritedTypeTemplate : TemplateBase
     // keeps its plain zero value.
     private string NilConversionExpression => TypeClass switch
     {
-        "Pointer" => "NilInstance",
+        "Pointer" => PointerWrapperMember(ObjectName, "NilInstance"),
         _ => $"default({ObjectName})!"
     };
 
@@ -574,6 +580,9 @@ internal class InheritedTypeTemplate : TemplateBase
     // ISliceTypeTemplate.ClaimableMembers). GenTests' NamedChanMapNumericClaimedMemberTests.
     internal static readonly string[] StringClaimableMembers = ["CompareTo", "GetEnumerator", "Length"];
 
+    // A claimed member of the string surface moves to its explicit IByteSeq / IComparable<T> / IEnumerable<(nint, int)> form.
+    private string StringClaimed(string name, string own, string claimed) => GoMethodNames.Contains(name) ? claimed : own;
+
     private string StringSurfaceMembers => TypeName != "@string" ? "" :
         $$"""
 
@@ -591,7 +600,7 @@ internal class InheritedTypeTemplate : TemplateBase
 
                 public {{ObjectName}} slice(nint low, nint high) => new {{ObjectName}}({{Value}}.slice(low, high));
 
-                public nint Length => {{Value}}.Length;
+                {{StringClaimed("Length", $"public nint Length => {Value}.Length;", $"nint IByteSeq.Length => {Value}.Length;")}}
 
                 // The read-only spread of Go's `~[]byte | ~string` union (IByteSeq; see StringInterfaces). Length, the
                 // nint indexer, the Range indexer and the slice pair above implement the rest implicitly.
@@ -671,7 +680,9 @@ internal class InheritedTypeTemplate : TemplateBase
 
                 public static bool operator >=({{ObjectName}} left, {{ObjectName}} right) => left.{{Value}} >= right.{{Value}};
 
-                public int CompareTo({{ObjectName}} other) => {{Value}}.CompareTo(other.{{Value}});
+                {{StringClaimed("CompareTo",
+                    $"public int CompareTo({ObjectName} other) => {Value}.CompareTo(other.{Value});",
+                    $"int global::System.IComparable<{ObjectName}>.CompareTo({ObjectName} other) => {Value}.CompareTo(other.{Value});")}}
 
                 // Go converts a []byte or a []rune straight to a named string (`Pointer(b)`, jsontext's `type Pointer
                 // string`). The converter writes that as a cast from the slice, and C# will not chain the slice ->
@@ -685,8 +696,11 @@ internal class InheritedTypeTemplate : TemplateBase
                 // `for i, r := range s` over a named string: Go decodes it rune by rune exactly as it does a string
                 // (index of each rune's first byte, U+FFFD for an invalid byte). The converter emits
                 // `foreach (var (i, r) in s)`, which binds this pattern member; it forwards @string's decoding enumerator.
-                // Before it the loop had no GetEnumerator to bind (CS1579; TS readiness C12).
-                public global::System.Collections.Generic.IEnumerator<(nint, int)> GetEnumerator() => {{Value}}.GetEnumerator();
+                // Before it the loop had no GetEnumerator to bind (CS1579; TS readiness C12). A Go method GetEnumerator takes it
+                // (R7): the loop then reads IEnumerable<(nint, int)>, which StringInterfaces declares for exactly that case.
+                {{StringClaimed("GetEnumerator",
+                    $"public global::System.Collections.Generic.IEnumerator<(nint, int)> GetEnumerator() => {Value}.GetEnumerator();",
+                    $"global::System.Collections.Generic.IEnumerator<(nint, int)> global::System.Collections.Generic.IEnumerable<(nint, int)>.GetEnumerator() => {Value}.GetEnumerator();\r\n\r\n        global::System.Collections.IEnumerator global::System.Collections.IEnumerable.GetEnumerator() => {Value}.GetEnumerator();")}}
 
         """;
 

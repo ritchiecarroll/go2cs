@@ -14,6 +14,9 @@
 
 using go;
 using static go.main_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -41,6 +44,10 @@ using static go.main_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(of))]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -49,10 +56,12 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "AAsagoKCgoKCgoKC+oKCgoLa3oKCgoKCgpaCpLSkpLSkpLSklIKUkpSCgoKCgoKC")]
+[assembly: GoPositionMap("main.go", "main.cs", "AAkigoKCgoKCgoKCgoK6goKCgoKCurq6goK8gri4uAAULoKC9oKCgoKCgoKGAAgCloKktKSCpLSkpLSkloKCgoKCgqaCgoLSgoKClIKCgpSSgpKCgoKUgpKUkoKSgoKUgoKUgoKCgoKSgoKCgqaCgoKCgoKCgoKCgoKYgoKCgoKCgpSCgoKCgoKCiIKCgoKCgoKCgoKCgoKCgoKCgoI=", "", "113=main.Pipe.Capacity;113=main.Pipe.IsClosed;113=main.Pipe.Length;152=main.Counts.IsNil;152=main.Counts.Length;165=main.Level.CompareTo;172=main.Gauge.Value;177=main.Name.Length")]
 // </GoSourcePositionMaps>
 
 namespace go;
+
+using static go.main_package;
 
 [GoTestMatchingConsoleOutput]
 [GoPackage("main")]
@@ -65,12 +74,28 @@ public static partial class main_package
     // via declarations below.
 
     // <TypeAccessibility>
+    internal partial class at {}
+    internal partial class of {}
+    internal partial class strPtr {}
+    internal partial struct point {}
+    public partial class IsNilPointer {}
     public partial class IsNull {}
+    public partial class NilInstance {}
+    public partial class Value {}
+    public partial class ValueSlot {}
     public partial struct Capacity {}
+    public partial struct CompareTo {}
     public partial struct Count {}
     public partial struct Counts {}
+    public partial struct Gauge {}
+    public partial struct Label {}
+    public partial struct Length {}
     public partial struct Level {}
+    public partial struct Name {}
     public partial struct Pipe {}
+    public partial struct Rank {}
+    public partial struct Tally {}
+    public partial struct Wire {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import
@@ -81,6 +106,7 @@ public static partial class main_package
 
     // <ImportInitializers>
     [GoInit] internal static void initᴛᴛimportꓸfmt() => builtin.initPackage(typeof(fmt_package));
+    [GoInit] internal static void initᴛᴛimportꓸslices() => builtin.initPackage(typeof(slices_package));
     // </ImportInitializers>
 }
 
@@ -91,6 +117,54 @@ public static partial class main_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(main_package.Counts)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛCounts;
-[GoMethodHost(typeof(main_package.Pipe)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛPipe;
+[GoMethodHost(typeof(main_package.Counts)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class mainᴛCounts;
+[GoMethodHost(typeof(main_package.Gauge)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class mainᴛGauge;
+[GoMethodHost(typeof(main_package.Level)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class mainᴛLevel;
+[GoMethodHost(typeof(main_package.Name)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class mainᴛName;
+[GoMethodHost(typeof(main_package.Pipe)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class mainᴛPipe;
+[GoMethodHost(typeof(main_package.Tally)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class mainᴛTally;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class mainᴛCounts {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Length(this Counts c) => main_package.Length⁔(c);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string IsNil(this Counts c) => main_package.IsNil⁔(c);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Count(this Counts c) => main_package.Count⁔(c);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Make(this Counts c) => main_package.Make⁔(c);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string GetEnumerator(this Counts c) => main_package.GetEnumerator⁔(c);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Add(this Counts c, @string k) => main_package.Add⁔(c, k);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Remove(this Counts c, @string k) => main_package.Remove⁔(c, k);
+}
+partial class mainᴛGauge {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static float64 Value(this Gauge g) => main_package.Value⁔(g);
+}
+partial class mainᴛLevel {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint CompareTo(this Level l, Level o) => main_package.CompareTo⁔(l, o);
+}
+partial class mainᴛName {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Length(this Name n) => main_package.Length⁔(n);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint CompareTo(this Name n, Name o) => main_package.CompareTo⁔(n, o);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string GetEnumerator(this Name n) => main_package.GetEnumerator⁔(n);
+}
+partial class mainᴛPipe {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Capacity(this Pipe p) => main_package.Capacity⁔(p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Length(this Pipe p) => main_package.Length⁔(p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string IsClosed(this Pipe p) => main_package.IsClosed⁔(p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string IsUnbuffered(this Pipe p) => main_package.IsUnbuffered⁔(p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Receive(this Pipe p) => main_package.Receive⁔(p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Receiving(this Pipe p) => main_package.Receiving⁔(p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Sending(this Pipe p, nint v) => main_package.Sending⁔(p, v);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Received(this Pipe p, nint v) => main_package.Received⁔(p, v);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Send(this Pipe p, nint v) => main_package.Send⁔(p, v);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Sent(this Pipe p, nint v) => main_package.Sent⁔(p, v);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static Pipe Make(this Pipe p, nint n) => main_package.Make⁔(p, n);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint GetEnumerator(this Pipe p) => main_package.GetEnumerator⁔(p);
+}
+partial class mainᴛTally {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Counts(this Tally t) => main_package.Counts⁔(t);
+}
+// </MethodForwarders>
