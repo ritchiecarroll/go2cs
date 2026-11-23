@@ -731,7 +731,7 @@ After the last element, above the closing bracket:
 			}
 ```
 
-<!-- source: src/core/database/sql/sql.cs:3176-3180 -->
+<!-- source: src/core/database/sql/sql.cs:3177-3181 -->
 ```csharp
                 Ꮡrows.ValueSlot = Ꮡ(new Rows(
                     dc: dc,
