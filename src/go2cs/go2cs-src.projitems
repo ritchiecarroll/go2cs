@@ -480,6 +480,7 @@
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\moduleDisclosureWording_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\stdLibAssemblyIdentity_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\stdlibDisclosureWording_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\repoguard\stdlibTwinsDefaultOff_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\suppressGCTransitionSeam_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\testInfoPositionMapCopies_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\generatorLoadGuard_test.go" />

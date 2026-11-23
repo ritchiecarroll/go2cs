@@ -19,7 +19,7 @@ public static io.Writer Wrap(ж<bytes.Buffer> buf) { return new bytes_BufferжWr
 public static (io.Writer, Func<nint>) Doubled() {
     var s = Ꮡ(new sink());
     var sʗ1 = s;
-    return (new sinkжWriter(s), () => sʗ1.total);
+    return (new sinkжWriter(s), [GoFunc("Doubled.func1")] () => sʗ1.total);
 }
 
 } // end sinks_package

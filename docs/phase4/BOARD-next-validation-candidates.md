@@ -41850,4 +41850,20 @@ math/big and compress/flate; the code under test stays in its own optimized asse
 
 — C2 (2026-11-23)
 
+## 2026-11-23 -- CURED: a vet-off finding named its file by a host path on macOS (moduleCacheRel's class)
+
+**OPEN -> CURED in one commit (claude/c2-t6-union-fix).** `oracleVetFindings` (`src/go2cs/testConversion.go`) names
+each `-test-oracle-vet-off` finding's file relative to the package directory with `filepath.Rel(dir, posn)`. `go vet
+-json` reports `posn` with symlinks resolved, so a directory spelled through a symlink trims nothing. On macOS `/var` is
+`/private/var`: a module-cache release tests from its copy under TMPDIR (`/var/folders/...`), and its finding would have
+carried `/private/var/folders/<host>/...` into the proof page and MODULE.md. Train 6's hosted darwin go-test read it on
+TestOracleVetFindingsNameTheAnalyzerAndTheSite (45156271038, x64 and arm64), which stays unchanged as the guard.
+
+**Cure.** The directory is resolved once with `filepath.EvalSymlinks` (falling back to it as given) and tried after the
+textual spelling, so linux and windows keep their answer. Same class as train 5's `moduleCacheRel` cure for the module
+cache root. A linux control through a symlinked directory read the absolute path without the cure and the relative one
+with it. Emission footprint 0: the oracle's disclosure text is the only output it touches.
+
+— C2 (2026-11-23)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

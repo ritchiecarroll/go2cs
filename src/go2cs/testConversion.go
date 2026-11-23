@@ -11175,6 +11175,16 @@ func oracleVetFindings(dir string, options Options, packagePath string) ([]strin
 	var findings []string
 	decoder := json.NewDecoder(strings.NewReader(jsonObjectsOnly(output)))
 
+	// go vet names each file with its symlinks resolved, so a dir spelled through a symlink trims nothing: on macOS
+	// /var is /private/var, and a module-cache release tested from its copy under TMPDIR (/var/folders/...) put a
+	// /private/var/folders/... host path into the proof page and MODULE.md (train 6's darwin go-test). The dir is
+	// resolved once, as moduleCacheRel resolves a cache path, and the textual spelling is still tried first.
+	resolvedDir, resolveErr := filepath.EvalSymlinks(dir)
+
+	if resolveErr != nil {
+		resolvedDir = dir
+	}
+
 	for {
 		var report map[string]map[string]json.RawMessage
 
@@ -11200,6 +11210,8 @@ func oracleVetFindings(dir string, options Options, packagePath string) ([]strin
 					posn := d.Posn
 
 					if rel, err := filepath.Rel(dir, posn); err == nil && !strings.HasPrefix(rel, "..") {
+						posn = filepath.ToSlash(rel)
+					} else if rel, err := filepath.Rel(resolvedDir, posn); err == nil && !strings.HasPrefix(rel, "..") {
 						posn = filepath.ToSlash(rel)
 					}
 
