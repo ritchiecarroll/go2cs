@@ -126,8 +126,11 @@ foreach ($arm in $arms.Keys) {
     if ($seededCs -ne $expectedCs) { Deny "the $arm seed holds $seededCs .cs files where $Base tracks $expectedCs." }
     $stray = @(Get-ChildItem -LiteralPath $core -Recurse -Directory | Where-Object { $_.Name -in 'bin', 'obj', 'Generated' })
     if ($stray.Count) { Deny "the $arm seed holds build output ($($stray[0].FullName)); the seed must be tracked sources only." }
+    # A hand-own carries the attribute on a line of its own. A generated file can MENTION it (a placeholder's
+    # comment names the *_impl.cs that holds the body), so a substring match read runtime/alg.cs as a hand-own
+    # (run 45104975959).
     $handOwns = @(Get-ChildItem -LiteralPath $core -Recurse -File -Filter '*.cs' | Where-Object {
-        [System.IO.File]::ReadAllText($_.FullName).Contains('[module: GoManualConversion]')
+        [regex]::IsMatch([System.IO.File]::ReadAllText($_.FullName), '(?m)^\s*\[module:\s*GoManualConversion\]')
     })
 
     # The conversion. Under 'Stop' a stderr warning would end this script and leave the converter running.
@@ -148,18 +151,24 @@ foreach ($arm in $arms.Keys) {
     $clobbered = @($handOwns | Where-Object { (Get-Item -LiteralPath $_.FullName).LastWriteTimeUtc -gt $seedStamp } |
         ForEach-Object { [System.IO.Path]::GetRelativePath($root, $_.FullName).Replace('\', '/') })
 
+    # Files the conversion writes beside the corpus (its progress text and HTML report) carry timings, so they differ
+    # between any two runs; they are listed, never diffed.
+    $coreFull = [System.IO.Path]::GetFullPath($core) + [System.IO.Path]::DirectorySeparatorChar
+    $outside = @($written | Where-Object { -not $_.FullName.StartsWith($coreFull) } |
+        ForEach-Object { [System.IO.Path]::GetRelativePath($root, $_.FullName).Replace('\', '/') } | Sort-Object)
+
     $report[$arm] = [pscustomobject]@{
         Sha = $sha; Exit = $convertExit; Seconds = $seconds; Seeded = $seededCs; HandOwns = $handOwns.Count
-        Written = $written.Count; Markers = $markers; Clobbered = $clobbered
+        Written = $written.Count - $outside.Count; Outside = $outside; Markers = $markers; Clobbered = $clobbered
     }
     Write-Host ("   exit {0}, {1} s, {2} files written, {3} marker file(s), {4} hand-own(s) rewritten" -f $convertExit, $seconds, $written.Count, $markers.Count, $clobbered.Count)
 }
 
-# The footprint: the two roots against each other, whole (a write outside src/core shows up too).
+# The footprint: the two corpora against each other.
 $diffFile = Join-Path $OutDir 'footprint.diff'
-& git -C $Work -c core.autocrlf=false -c core.quotepath=false diff --no-index --no-renames --no-color --no-ext-diff "--output=$diffFile" -- base changed
+& git -C $Work -c core.autocrlf=false -c core.quotepath=false diff --no-index --no-renames --no-color --no-ext-diff "--output=$diffFile" -- base/src/core changed/src/core
 if ($LASTEXITCODE -gt 1) { Deny "git diff --no-index failed with exit $LASTEXITCODE." }
-$numstatLines = @(& git -C $Work -c core.autocrlf=false -c core.quotepath=false diff --no-index --no-renames --numstat -- base changed)
+$numstatLines = @(& git -C $Work -c core.autocrlf=false -c core.quotepath=false diff --no-index --no-renames --numstat -- base/src/core changed/src/core)
 if ($LASTEXITCODE -gt 1) { Deny "git diff --no-index --numstat failed with exit $LASTEXITCODE." }
 
 $rows = @(foreach ($line in $numstatLines) {
@@ -216,10 +225,12 @@ $summary = @(
     ''
     "base ``$Base`` -> changed ``$Changed``; both seeded from base ($($b.Seeded) .cs, $($b.HandOwns) hand-owned files); $goVersion, GOROOT ``$goroot``"
     ''
-    '| arm | converter exit | seconds | files written | lift-marker files | hand-owns rewritten |'
+    '| arm | converter exit | seconds | corpus files written | lift-marker files | hand-owns rewritten |'
     '|---|---|---|---|---|---|'
     "| base | $($b.Exit) | $($b.Seconds) | $($b.Written) | $($b.Markers.Count) | $($b.Clobbered.Count) |"
     "| changed | $($c.Exit) | $($c.Seconds) | $($c.Written) | $($c.Markers.Count) | $($c.Clobbered.Count) |"
+    ''
+    "written outside src/core, not diffed: $(@($b.Outside + $c.Outside | Sort-Object -Unique) -join ', ')"
     ''
     "**$files file(s), -$removed/+$added**; GoPositionMap lines -$posRemoved/+$posAdded"
     ''
