@@ -159,3 +159,9 @@ assertion now requires the w4 line and refuses any `.Value =`.
 0 FAIL across the same 11 packages, with TestLicensing, TestFuncWordShapes and TestUnsafePointerWordDoor passing.
 From `39161e7056` to the fix commit, only this test file, this record and the BOARD change. So the CNR, D-5,
 GenTests and GolibTests readings above carry over.
+
+## 5. Rerun score (appended after the rerun)
+
+**MET.** An unfiltered `go test -count=1 ./...` at `429d33cb09` read 0 FAIL, with all 11 packages ok: `go2cs` in
+1,574 s and `go2cs/internal/repoguard` in 432 s. The run is not verbose, so the three named tests are scored through
+their package: `go2cs` holds all three and read ok.
