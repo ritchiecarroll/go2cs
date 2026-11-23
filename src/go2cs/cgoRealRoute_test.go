@@ -158,7 +158,7 @@ func TestTheCgoRouteConvertsTheFixtureOnARealHost(t *testing.T) {
 		requireNothingWritten(t, output, err, stderr)
 
 		lines := cgoRefusalLines(stderr)
-		requireCgoUseRefused(t, lines, "fixture.go(113,", "C.go2cs_probe_node_touch", "goroutine", "Phase 2 later")
+		requireCgoUseRefused(t, lines, "fixture.go(113,", "C.go2cs_probe_node_touch", "goroutine", "not supported yet")
 
 		if len(lines) != 1 {
 			t.Errorf("%d refusal lines, want 1:\n%s", len(lines), stderr)
@@ -282,8 +282,8 @@ func TestTheCgoRouteConvertsTheFixtureOnARealHost(t *testing.T) {
 			t.Errorf("the refusal does not name the library that did not link\n%s", stderr)
 		}
 
-		if strings.Contains(stderr, "Phase 4") {
-			t.Errorf("a link failure is blamed on the package's C functions as Phase 4's\n%s", stderr)
+		if strings.Contains(stderr, "does not compile C yet") {
+			t.Errorf("a link failure is blamed on the package's C functions as compiled C\n%s", stderr)
 		}
 	})
 
@@ -392,12 +392,12 @@ func TestTheCgoRouteConvertsTheFixtureOnARealHost(t *testing.T) {
 		t.Logf("READING %s: go list handed back cmd/cgo's _cgo_import.go with the probe linked: %t", target, dynamic)
 	})
 
-	t.Run("a function the preamble defines is Phase 4's", func(t *testing.T) {
+	t.Run("a function the preamble defines is refused as compiled C", func(t *testing.T) {
 		stderr, _, output, err := convertCgoReal(t, probeDir, map[string]string{"add.go": "package cgoreal\n\n/*\nstatic int add(int a, int b) { return a + b; }\n*/\nimport \"C\"\n\nfunc Add() int { return int(C.add(1, 2)) }\n"})
 		requireNothingWritten(t, output, err, stderr)
 
-		if !strings.Contains(stderr, "C.add") || !strings.Contains(stderr, "Phase 4") {
-			t.Errorf("the refusal does not name C.add as Phase 4's\n%s", stderr)
+		if !strings.Contains(stderr, "C.add") || !strings.Contains(stderr, "does not compile C yet") {
+			t.Errorf("the refusal does not name C.add as compiled C go2cs does not compile\n%s", stderr)
 		}
 	})
 

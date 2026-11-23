@@ -83,7 +83,7 @@ namespace go.golib;
         if (string.Equals(target, running, StringComparison.Ordinal))
             return null;
 
-        return $"cgo: these C bindings were converted for {target}, and this process runs as {running}: their C structs cross with {target}'s layouts and C library, which {running} does not share, so they are refused rather than called (docs/phase4/DESIGN-cgo-phase2-pinvoke.md §5.3, §11.20)";
+        return $"cgo: these C bindings were converted for {target}, and this process runs as {running}: their C structs cross with {target}'s layouts and C library, which {running} does not share, so they are refused rather than called (docs/Limitations.md#cgo)";
     }
 
     /// <summary>
@@ -142,7 +142,7 @@ namespace go.golib;
             null;
 
         return why is null ? null :
-            $"cgo: these C bindings were converted for {target} against glibc, and {why}: their C calls and layouts are glibc's, so they are refused rather than called (cgo against go.*, A6)";
+            $"cgo: these C bindings were converted for {target} against glibc, and {why}: their C calls and layouts are glibc's, so they are refused rather than called (docs/Limitations.md#cgo)";
     }
 
     // Where a library the table owns may load from: where a Go binary's own loader would look for it, and never the
@@ -176,7 +176,7 @@ namespace go.golib;
                 continue;
 
             if (OperatingSystem.IsMacOS() && !name.StartsWith('/'))
-                throw new DllNotFoundException($"cgo: {library.Flag} binds {name}, which is not an absolute install name: darwin loads a captured library only by its absolute path, since dyld's search for a bare name reaches the current directory; the current directory is never searched (docs/phase4/DESIGN-cgo-phase2-pinvoke.md §11.12)");
+                throw new DllNotFoundException($"cgo: {library.Flag} binds {name}, which is not an absolute install name: darwin loads a captured library only by its absolute path, since dyld's search for a bare name reaches the current directory; the current directory is never searched (docs/Limitations.md#cgo)");
 
             nint handle;
 
@@ -187,7 +187,7 @@ namespace go.golib;
             if (loaded)
                 return handle;
 
-            throw new DllNotFoundException($"cgo: {library.Flag} binds {name}, which was not found in {Places}; the current directory is never searched (docs/phase4/DESIGN-cgo-phase2-pinvoke.md §6.2)");
+            throw new DllNotFoundException($"cgo: {library.Flag} binds {name}, which was not found in {Places}; the current directory is never searched (docs/Limitations.md#cgo)");
         }
 
         return 0;

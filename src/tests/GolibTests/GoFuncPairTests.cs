@@ -8,7 +8,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace GolibTests;
 
 /// <summary>
-/// M:N PROTOTYPE, N3 (docs/phase4/DESIGN-mn-func-values.md, section 4 and fix 3 of 9.3): a pair-bound func value
+/// M:N (experimental, opt-in), N3 (docs/phase4/DESIGN-mn-func-values.md, section 4 and fix 3 of 9.3): a pair-bound func value
 /// stands for its PLAIN delegate at every golib reader of <c>Delegate.Method</c> or <c>Delegate.Target</c>, through
 /// one unwrap rule, <see cref="GoFuncPair.Underlying"/>. A pair is made by hand here, as the generator will make it.
 /// </summary>

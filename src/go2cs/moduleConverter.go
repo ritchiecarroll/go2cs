@@ -81,7 +81,7 @@ func NewModuleConverter(options Options) *ModuleConverter {
 // standard library (referenced), third-party, and app packages, then converts the app + third-party
 // packages in dependency order (least dependencies first). The standard library is not converted —
 // its imports emit $(go2csPath)core references to a pre-converted stdlib (staged by deploy-core).
-func (m *ModuleConverter) ConvertModule(moduleDir string) error {
+func (m *ModuleConverter) ConvertModule(moduleDir string) (result error) {
 	fmt.Printf("Recursively converting module at %s\n", moduleDir)
 
 	// Announce the effective build tags, as -stdlib does: a bare -recurse run reports the module default
@@ -96,6 +96,56 @@ func (m *ModuleConverter) ConvertModule(moduleDir string) error {
 		m.options.mainModuleDir = absModuleDir
 	} else {
 		m.options.mainModuleDir = moduleDir
+	}
+
+	// 0a. A module-cache release that ships no go.mod (github.com/mattn/go-pointer v0.0.1, the cgo against go.* INC 4
+	//     proof; a `+incompatible` release with no requires: the synthesized go.mod names the module and nothing else)
+	//     converts from a COPY carrying the go.mod the cache synthesized for it,
+	//     the one go itself reads (cache/download/<escaped path>/@v/<version>.mod; read, never written). Not the -tests
+	//     driver's go.mod overlay: go list refuses one beneath GOMODCACHE ("Files beneath GOMODCACHE must not be
+	//     replaced"), where go mod download accepts it. The copy keeps the <escaped path>@<version> leaf and lives in a
+	//     work directory removed at exit, never in the output root nugetgo-pack reads. A directory inside a module (a
+	//     package below its go.mod) converts as it always did: go finds the go.mod above it. Only a directory that NO
+	//     go.mod covers -- none in it or above it, and no synthesized one in the cache -- is refused, by name here rather
+	//     than by the preflight's "no modules specified" (COORD's INC 4 review, fold 1). All on the ABSOLUTE directory,
+	//     which moduleCacheGoMod relates to GOMODCACHE (P3's read of INC 4, MUST 1).
+	if _, ok := goModFile(moduleRootDir(m.options.mainModuleDir)); !ok {
+		return fmt.Errorf("-recurse needs a module: no go.mod covers %s (none in it or above it), and it is not a module-cache release whose synthesized go.mod the cache holds (%s/cache/download)",
+			m.options.mainModuleDir, goModCacheDir())
+	}
+
+	if synthesized := moduleCacheGoMod(m.options.mainModuleDir); synthesized != "" {
+		copyDir, work, err := copyModuleCacheRelease(m.options.mainModuleDir, synthesized)
+
+		if err != nil {
+			return err
+		}
+
+		defer func() { _ = os.RemoveAll(work) }()
+
+		fmt.Printf("go.mod: the module at %s ships none; converting a copy carrying the module cache's %s, as go reads it (%s, removed at exit)\n",
+			m.options.mainModuleDir, synthesized, copyDir)
+		copiedModuleRoot, originalModuleRoot = copyDir, m.options.mainModuleDir
+		defer func() { copiedModuleRoot, originalModuleRoot = "", "" }()
+
+		// An error returned from here on names the release, not the copy, which is gone when the user reads it (COORD's
+		// INC 4 review, NIT). It runs before the roots are cleared above, and keeps the error's chain (errors.As).
+		defer func() { result = remapCopiedError(result) }()
+
+		// The copy sits outside the cache, so go loads it as a main module, where a user's GOWORK would apply
+		// ("directory ... does not contain modules listed in go.work"). A load from inside the cache turns it off
+		// (conversionDriver.go); so does the copy, for every go command of the run (P3's read, SHOULD 3).
+		savedGowork, hadGowork := os.LookupEnv("GOWORK")
+		_ = os.Setenv("GOWORK", "off")
+
+		defer func() {
+			if hadGowork {
+				_ = os.Setenv("GOWORK", savedGowork)
+			} else {
+				_ = os.Unsetenv("GOWORK")
+			}
+		}()
+		moduleDir, m.options.mainModuleDir = copyDir, copyDir
 	}
 
 	// 0. Every dependency must already be in the module cache and verify against the module's own
@@ -306,7 +356,7 @@ func (m *ModuleConverter) loadClosure(moduleDir string) (map[string]*packages.Pa
 	// is acceptable at this stage).
 	for _, pkg := range pkgs {
 		for _, e := range pkg.Errors {
-			log.Printf("WARNING: load error in %s: %v", pkg.PkgPath, e)
+			log.Print(remapCopiedPaths(fmt.Sprintf("WARNING: load error in %s: %v", pkg.PkgPath, e)))
 		}
 	}
 

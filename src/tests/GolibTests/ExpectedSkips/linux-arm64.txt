@@ -1,0 +1,47 @@
+# GolibTests expected skips on linux-arm64: every test this leg reports NotExecuted (an Assert.Inconclusive), one name
+# per line, sorted, with its reason after #. The golib-tests leg fails on ANY difference: a test newly skipped is a
+# silent loss of coverage, and a listed test that now runs is a stale manifest (release review TC-5). Taken from
+# run 45021459235, GOROOT exported. A whole-suite run only: a filtered run is not compared.
+ABoxDerivedFromStorageThatCannotBePinnedIsItsOwnClassWhateverThePointee  # NOT MEASURED: the native-box dereference census is off. Set GO2CS_NATIVEBOX_CENSUS to run this control.
+ABoxedReferenceRvalueIsCollectedOnceTheBoxIsCleared  # measures the caller-spill condition, Ꮡ NOT inlined at full optimization: run GolibTests -c Release with DOTNET_JitNoInline=1 (in a small frame Ꮡ inlines, and...
+ACensusPathWithoutPidIsMadePerProcess_BecauseASharedPathDESTROYSBlocks  # NOT MEASURED: the Q44 census is off. Set GO2CS_Q44_CENSUS to run this control; a green here with the instrument off would be a lie about a counter nothing dr...
+AFoldedReferenceInitIsCollectedOnceTheLocalIsCleared  # measures fips140cache's condition, heap NOT inlined at full optimization: run GolibTests -c Release with DOTNET_JitNoInline=1 (in a small frame heap inlines,...
+AFoldedStructInitDropsAFieldOnceTheFieldIsCleared  # measures fips140cache's condition, heap NOT inlined at full optimization: run GolibTests -c Release with DOTNET_JitNoInline=1 (in a small frame heap inlines,...
+AHangingChildProbe  # runs only as ChildTimeoutDiagnosticsTests' child
+APairCrossesByValueBothWays  # the cgo probe library is built only on the hosted golib-tests legs (GO2CS_CGO_PROBE_DIR is not set): NOT MEASURED
+APointeeThatHoldsNoReferenceIsCountedInTheTotalAndInNoClass  # NOT MEASURED: the native-box dereference census is off. Set GO2CS_NATIVEBOX_CENSUS to run this control.
+APointeeThatIsItselfAReferenceIsRefusedAndNotCounted  # NOT MEASURED: the native-box dereference census is off. Set GO2CS_NATIVEBOX_CENSUS to run this control.
+APollCloseSnapshotWaitsForTheRetirement  # the overlapped records bind a socket to the CLR's completion port, a windows facility
+ARearmOnARetiredRecordPanicsByName  # the overlapped records bind a socket to the CLR's completion port, a windows facility
+ARefusedDereferenceIsNotCounted  # NOT MEASURED: the native-box dereference census is off. Set GO2CS_NATIVEBOX_CENSUS to run this control.
+ARowSaysWhetherTheBoxKeepsASource  # NOT MEASURED: the native-box dereference census is off. Set GO2CS_NATIVEBOX_CENSUS to run this control.
+AStructThatHoldsAReferenceAndWasNotRefusedIsB2b  # NOT MEASURED: the native-box dereference census is off. Set GO2CS_NATIVEBOX_CENSUS to run this control.
+AToolchainChildThatSetsItsOwnGodebugKeepsTheJunctionSetting  # the junction fallback exists only on Windows
+AUnionInAStructCrossesAsItsBytes  # the cgo probe library is built only on the hosted golib-tests legs (GO2CS_CGO_PROBE_DIR is not set): NOT MEASURED
+AValueKindPointeeThatHoldsAReferenceIsB2a  # NOT MEASURED: the native-box dereference census is off. Set GO2CS_NATIVEBOX_CENSUS to run this control.
+AnAssemblyFirstBoundUnderAnAnonymousTokenLoadsOnceTheClosureIsPreloaded  # anonymous-token impersonation is a Windows capability
+AnEscalationSleepsAboutAMillisecondNotATimerTick  # the escalation's sleep is measured on Windows and macOS; linux keeps Sleep(1), ~1 ms there
+AnUnsafePointerOverManagedStorageIsRefusedByNameAndNotCountedAsB2a  # NOT MEASURED: the native-box dereference census is off. Set GO2CS_NATIVEBOX_CENSUS to run this control.
+AppleSiliconTakesAlginitsArm64Branch  # not an arm64 process on macOS
+Arm1_SamePointeeType_IsCounted  # NOT MEASURED: the Q44 census is off. Set GO2CS_Q44_CENSUS to run this control; a green here with the instrument off would be a lie about a counter nothing dr...
+Arm2_DifferentPointeeTypeAtOffsetZero_IsCounted  # NOT MEASURED: the Q44 census is off. Set GO2CS_Q44_CENSUS to run this control; a green here with the instrument off would be a lie about a counter nothing dr...
+Arm3_InsideALiveBlockButNotTheToken_IsCounted  # NOT MEASURED: the Q44 census is off. Set GO2CS_Q44_CENSUS to run this control; a green here with the instrument off would be a lie about a counter nothing dr...
+Arm4_ARealAddress_IsCounted  # NOT MEASURED: the Q44 census is off. Set GO2CS_Q44_CENSUS to run this control; a green here with the instrument off would be a lie about a counter nothing dr...
+EachCandidateOneMillisecondWaitIsMeasured  # the candidates are darwin's; this probe measures them on macOS only
+ForegroundPlacesTheChildsGroupInTheTerminalsForeground  # no controlling terminal: run under a pty (util-linux `script -qfc`) to measure the transfer
+GotracebackWerAtStartReachesEnableWerAndClearsTheFaultBox  # enableWER acts only on Windows; elsewhere it is Go's own empty stub
+OnWindowsTheSameLibraryInTheApplicationDirectoryLoads  # only windows searches the application directory, as a Go binary's loader does: NOT MEASURED here
+RuntimeX86FlagsMatchInternalCpu  # not an x86 host: Go copies other flags there
+RuntimeX86HasAVXIsTrueOnAnAVXHost  # not an x86 host: Go copies other flags there
+StrtolsErrnoReachesTheErrnoForm  # the cgo probe library is built only on the hosted golib-tests legs (GO2CS_CGO_PROBE_DIR is not set): NOT MEASURED
+The2a2bDiscriminatorUsesTheRegistrysOwnProjection_NotACopyOfIt  # NOT MEASURED: the Q44 census is off. Set GO2CS_Q44_CENSUS to run this control; a green here with the instrument off would be a lie about a counter nothing dr...
+TheArmsAreExhaustive_TheSumReconcilesWithTheConversionCount  # NOT MEASURED: the Q44 census is off. Set GO2CS_Q44_CENSUS to run this control; a green here with the instrument off would be a lie about a counter nothing dr...
+TheCensusCanActuallyREPORT_TheFileAppears  # NOT MEASURED: the Q44 census is off. Set GO2CS_Q44_CENSUS to run this control; a green here with the instrument off would be a lie about a counter nothing dr...
+TheCensusReportsToAFileAndItsRowsReconcile  # NOT MEASURED: the native-box dereference census is off. Set GO2CS_NATIVEBOX_CENSUS to run this control.
+TheCensusWroteAStartBlockAtModuleInit_SoAZeroIsAMeasurement  # NOT MEASURED: the Q44 census is off. Set GO2CS_Q44_CENSUS to run this control; a green here with the instrument off would be a lie about a counter nothing dr...
+TheCriticalWaitersPathsAreMeasured  # GoCriticalTimer.Waiter is macOS's
+TheMintCounterMoves  # NOT MEASURED: the Q44 census is off. Set GO2CS_Q44_CENSUS to run this control; a green here with the instrument off would be a lie about a counter nothing dr...
+TheSeamsCostOverARealKernelTransitionIsMeasured  # opt-in: set GO2CS_NATIVE_SEAM_PROBE to a file the READING lines are appended to
+TwoDoublesCrossByPointer  # the cgo probe library is built only on the hosted golib-tests legs (GO2CS_CGO_PROBE_DIR is not set): NOT MEASURED
+TwoPointersToOneStructAreOneObjectToC  # the cgo probe library is built only on the hosted golib-tests legs (GO2CS_CGO_PROBE_DIR is not set): NOT MEASURED
+TwoRetirementsAtOnceFreeTheBlockOnce  # the overlapped records bind a socket to the CLR's completion port, a windows facility

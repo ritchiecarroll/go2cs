@@ -1,5 +1,5 @@
 //******************************************************************************************************
-//  GoTask.cs - M:N PROTOTYPE (A1). Prototype code: nothing from this branch lands on master as it is.
+//  GoTask.cs - M:N scheduler, experimental and opt-in (GoTwins=true + GO2CS_MN=1); inert otherwise.
 //
 //  The task a hidden async twin returns, with its builders and its awaiters: the shape every twin's
 //  state machine binds to. A twin awaits only another twin's GoTask or a GoParkSlot, so a continuation
@@ -297,7 +297,7 @@ internal class GoTaskCore
     {
     }
 
-    // The step as the scheduler and a foreign awaiter take it. One delegate for each twin that parks itself.
+    // The step a foreign awaiter resumes (one that is neither a twin nor a park slot, off a locked carrier), made once.
     internal Action ResumeAction => m_resume ??= ResumeAsStep;
 
     private void ResumeAsStep()
@@ -306,7 +306,7 @@ internal class GoTaskCore
         Resume();
     }
 
-    // M:N PROTOTYPE (A2). A copy of the twin's state machine as it stands, for a stack walk to read which
+    // M:N (A2). A copy of the twin's state machine as it stands, for a stack walk to read which
     // await a suspended caller sits at (runtime.Callers). Null for a twin that never suspended. A cold path:
     // a struct state machine is boxed by the read.
     internal virtual object? MachineSnapshot => null;
@@ -346,7 +346,7 @@ internal class GoTaskCore
         {
             GoScheduler.ParkPending(Unsafe.As<TAwaiter, GoParkAwaiter>(ref awaiter).Slot, box);
         }
-        else if (awaiter is not GoParkAwaiter && Goroutine.LockedOnCarrier)
+        else if (Goroutine.LockedOnCarrier)
         {
             GoParkSlot slot = PinnedForeignAwait();
             awaiter.UnsafeOnCompleted(slot.Wake);
@@ -368,7 +368,7 @@ internal class GoTaskCore
         {
             GoScheduler.ParkPending(Unsafe.As<TAwaiter, GoParkAwaiter>(ref awaiter).Slot, box);
         }
-        else if (awaiter is not GoParkAwaiter && Goroutine.LockedOnCarrier)
+        else if (Goroutine.LockedOnCarrier)
         {
             GoParkSlot slot = PinnedForeignAwait();
             awaiter.OnCompleted(slot.Wake);

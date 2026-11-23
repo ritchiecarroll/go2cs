@@ -114,7 +114,7 @@ on:
           - linux
           - darwin
       stage:
-        description: 'What to run: census (compile the corpus flavor), behavioral-smoke (harness proof), behavioral-full (the whole enumeration in slices), sweep-shard (filtered validated sweep), behavioral-stderr (run named projects directly and keep their WHOLE stderr — the runner quotes one line per death), release-smoke (pack every go.* package on windows, then consume that ONE feed on all five shipped RIDs; goos is ignored), aot-smoke (the same pack, then ONE Native AOT publish and run of a hand-written package consumer on all five RIDs; long -- each publish compiles the whole go.* closure), nugetgo-behavior (one sample row per shipped RID for a nugetgo package, each run on its own OS: the sample program run with go, and converted against the package and run with dotnet. A module with no Go tests ships the rows as its proof; a module with Go tests, beside its test proof. goos is ignored), golib-tests (build and run src/tests/GolibTests for this GOOS on each of its runners; filter is an MSTest --filter expression, blank runs the whole suite, and may end ;jit=PATTERN), gen-tests (build and run src/tests/GenTests, the go2cs-gen analyzer suite, for this GOOS on each of its runners; filter is an MSTest --filter expression, blank runs the whole suite. Until this stage no hosted leg ran GenTests off windows, so batch 290 landed a linux-only GenTests red that no gate saw), solution-build (dotnet build src/go2cs.slnx, every member of the converter-dev workspace, for this GOOS on each of its runners; filter is the configuration, Release (blank) or Debug. Nothing else builds the solution whole, so a member broken against it went unseen: a Release build failed in the thousands until the test trees pinned go2csPath), stack-probe (OPT-IN diagnostic: filter is ROW;test=REGEX[;at=S,S] -- one row swept with -TestFilter REGEX while dotnet-stack dumps its converted test host at the at= offsets; proves the instrument on a deliberately hung program first; never banks), converter-cgo (OPT-IN: go test of the converter in src/go2cs on each runner of this GOOS, where a C compiler lets go list run cmd/cgo; filter is a go test -run regex, blank runs ^Test.*Cgo|^TestRealLoad, and may end ;cc=zig|llvm-mingw[;sha=HEX], a pinned C toolchain the leg downloads, refuses unless its sha256 matches, and hands go as CC; the summary names the C compiler go would use. No other hosted stage gives the converter tests one: until this stage, TestRealLoadRefusesOnlyASelectedCgoFile had never run on a hosted runner, and cgo Phase 1 has its exit gate here), reconvert-footprint (a converter change''s corpus footprint on this GOOS: two -stdlib reconverts, by the converter at base= and at changed=, both seeded from base, diffed against each other; filter is ;base=SHA;changed=SHA, both 40 hex digits; one leg per GOOS)'
+        description: 'What to run: census (compile the corpus flavor), behavioral-smoke (harness proof), behavioral-full (the whole enumeration in slices), sweep-shard (filtered validated sweep), behavioral-stderr (run named projects directly and keep their WHOLE stderr — the runner quotes one line per death), release-smoke (pack every go.* package on windows, then consume that ONE feed on all five shipped RIDs; goos is ignored), aot-smoke (the same pack, then ONE Native AOT publish and run of a hand-written package consumer on all five RIDs; long -- each publish compiles the whole go.* closure), nugetgo-behavior (one sample row per shipped RID for a nugetgo package, each run on its own OS: the sample program run with go, and converted against the package and run with dotnet. A module with no Go tests ships the rows as its proof; a module with Go tests, beside its test proof. goos is ignored), golib-tests (build and run src/tests/GolibTests for this GOOS on each of its runners; filter is an MSTest --filter expression, blank runs the whole suite, and may end ;jit=PATTERN), gen-tests (build and run src/tests/GenTests, the go2cs-gen analyzer suite, for this GOOS on each of its runners; filter is an MSTest --filter expression, blank runs the whole suite. Until this stage no hosted leg ran GenTests off windows, so batch 290 landed a linux-only GenTests red that no gate saw), solution-build (dotnet build src/go2cs.slnx, every member of the converter-dev workspace, for this GOOS on each of its runners; filter is the configuration, Release (blank) or Debug. Nothing else builds the solution whole, so a member broken against it went unseen: a Release build failed in the thousands until the test trees pinned go2csPath), stack-probe (OPT-IN diagnostic: filter is ROW;test=REGEX[;at=S,S] -- one row swept with -TestFilter REGEX while dotnet-stack dumps its converted test host at the at= offsets; proves the instrument on a deliberately hung program first; never banks), converter-cgo (OPT-IN: go test of the converter in src/go2cs on each runner of this GOOS, where a C compiler lets go list run cmd/cgo; filter is a go test -run regex, blank runs ^Test.*Cgo|^TestRealLoad, and may end ;cc=zig|llvm-mingw[;sha=HEX], a pinned C toolchain the leg downloads, refuses unless its sha256 matches, and hands go as CC; the summary names the C compiler go would use. No other hosted stage gives the converter tests one: until this stage, TestRealLoadRefusesOnlyASelectedCgoFile had never run on a hosted runner, and cgo Phase 1 has its exit gate here), cgo-nuget-e2e (OPT-IN: cgo against go.* INC 4''s hosted proof, never scheduled -- J1 is release-smoke''s own windows pack of every go.* package; J2 packs github.com/mattn/go-pointer v0.0.1 with nugetgo-pack -Cgo -LocalClosure against that pack on linux and reads R-c, master refusing it; J3 consumes it on all five shipped RIDs, each against go run on its own OS, with R-b (osx-arm64 refused NUGETGOCGO001) and R-a (win-x64 refusing a doctored runtime at load, A6). Nothing leaves the run''s artifacts, each named with the run''s rehearsal suffix. goos and filter are ignored), reconvert-footprint (a converter change''s corpus footprint on this GOOS: two -stdlib reconverts, by the converter at base= and at changed=, both seeded from base, diffed against each other; filter is ;base=SHA;changed=SHA, both 40 hex digits; one leg per GOOS)'
         type: choice
         required: true
         default: census
@@ -134,6 +134,7 @@ on:
           - converter-cgo
           - cgo-e2e
           - go-test
+          - cgo-nuget-e2e
           - reconvert-footprint
       filter:
         description: 'Shard filter — comma-separated EXACT roster package names for sweep-shard ("sort" sweeps sort and never internal/fmtsort), project substring for behavioral-smoke. IGNORED by behavioral-full, which runs the whole enumeration in slices. Blank takes the stage default. Comma-separated project NAMES for behavioral-stderr. The configuration for solution-build: Release (blank) or Debug. golib-tests and stack-probe take options after the filter as ;key=value pairs (no ; inside a value): golib-tests ;jit=PATTERN (a DOTNET_JitDisasm pattern, e.g. p256Mul p384Mul; with tiering off, each matching method''s JIT listing is printed to the job log), stack-probe ROW;test=REGEX (required: the -TestFilter regex, both sides of the compare);at=S,S (seconds after the test host starts at which dotnet-stack dumps it; blank takes 120,870, the per-test deadline being 900 s), reconvert-footprint ;base=SHA;changed=SHA (both required, full 40-digit SHAs, with nothing before the first ;). Options on any other stage are refused.'
@@ -204,6 +205,8 @@ on:
 
 permissions:
   contents: read
+  # cgo-nuget-e2e's feedrun= option downloads a NAMED prior run's J1 feed artifact (download-artifact run-id).
+  actions: read
 
 # Different flavors and different stages may run at once; two dispatches of the SAME pair queue
 # rather than cancel, because a half-measured census is worth nothing and a killed sweep leaves
@@ -261,8 +264,11 @@ jobs:
       sweep-timeout: ${{ steps.derive.outputs.sweep-timeout }}
       probe-at: ${{ steps.derive.outputs.probe-at }}
       jit-disasm: ${{ steps.derive.outputs.jit-disasm }}
+      mn: ${{ steps.derive.outputs.mn }}
       cgo-cc: ${{ steps.derive.outputs.cgo-cc }}
       cgo-cc-sha: ${{ steps.derive.outputs.cgo-cc-sha }}
+      # cgo-nuget-e2e: the prior run whose J1 feed is reused, or empty (J1 packs).
+      feed-run: ${{ steps.derive.outputs.feed-run }}
       footprint-base: ${{ steps.derive.outputs.footprint-base }}
       footprint-changed: ${{ steps.derive.outputs.footprint-changed }}
     steps:
@@ -287,6 +293,7 @@ jobs:
           INPUT_NUGETGO_FEED: ${{ inputs.nugetgo_feed }}
           INPUT_NUGETGO_FEED_SHA256: ${{ inputs.nugetgo_feed_sha256 }}
           INPUT_ARCH: ${{ inputs.arch }}
+          GH_TOKEN: ${{ github.token }}
           # A called run carries its caller's event; ci-master.yml's nightly is a `schedule` WITH a stage, which is not
           # this workflow's own darwin-census schedule.
           EVENT_NAME: ${{ (github.event_name == 'schedule' && inputs.stage != '') && 'workflow_call' || github.event_name }}
@@ -331,9 +338,9 @@ jobs:
           # reconvert-footprint: base=SHA and changed=SHA, both required, both full 40-digit SHAs (C2, 2026-11-23): the two
           # converters whose emissions the stage diffs. A short SHA is refused rather than resolved, because the reading
           # names the commits it measured and a prefix can name a different commit tomorrow.
-          $probeTest = ''; $probeAt = ''; $jitDisasm = ''; $dnsServers = ''; $cgoCc = ''; $cgoCcSha = ''; $dumpProof = ''; $sweepTimeout = ''
+          $probeTest = ''; $probeAt = ''; $jitDisasm = ''; $dnsServers = ''; $cgoCc = ''; $cgoCcSha = ''; $dumpProof = ''; $sweepTimeout = ''; $mnMode = '0'; $feedRun = ''
           $footprintBase = ''; $footprintChanged = ''
-          $optionKeys = @(switch ($stage) { 'golib-tests' { 'jit' } 'stack-probe' { 'test', 'at' } 'sweep-shard' { 'dns', 'dumpproof', 'timeout' } { $_ -in 'converter-cgo', 'cgo-e2e' } { 'cc', 'sha' } 'reconvert-footprint' { 'base', 'changed' } })
+          $optionKeys = @(switch ($stage) { 'behavioral-smoke' { 'mn' } 'golib-tests' { 'jit' } 'stack-probe' { 'test', 'at' } 'sweep-shard' { 'dns', 'dumpproof', 'timeout' } { $_ -in 'converter-cgo', 'cgo-e2e' } { 'cc', 'sha' } 'cgo-nuget-e2e' { 'feedrun' } 'reconvert-footprint' { 'base', 'changed' } })
           if ($optionKeys.Count) {
               $parts = @($filter -split ';')
               $filter = $parts[0].Trim()
@@ -347,6 +354,13 @@ jobs:
                   $seen[$key] = $value
               }
               $jitDisasm = "$($seen['jit'])"
+              # behavioral-smoke ;mn=1 runs the filtered programs in M:N mode (BehavioralRunner --mn: GO2CS_MN=1 and
+              # generated twins for every selected project); blank or 0 is default mode (release review TC-3/TC-4).
+              if ($seen.ContainsKey('mn')) {
+                  if ($seen['mn'] -notin '0', '1') { throw "behavioral-smoke filter option mn= is 0 (default mode) or 1 (M:N mode); got '$($seen['mn'])'." }
+                  $mnMode = $seen['mn']
+              }
+              if ($stage -eq 'behavioral-smoke') { Write-Host "behavioral-smoke: $(if ($mnMode -eq '1') { 'M:N mode (BehavioralRunner --mn)' } else { 'default mode' })" }
               if ($stage -eq 'stack-probe') {
                   if (-not $filter -or $filter.Contains(',')) { throw "stack-probe takes exactly ONE roster row before its options in filter; got '$filter'." }
                   $probeTest = "$($seen['test'])"
@@ -383,6 +397,45 @@ jobs:
                   if ($cgoCc -eq 'llvm-mingw' -and $goos -ne 'windows') { throw "llvm-mingw's compilers target windows only, so cc=llvm-mingw applies to goos windows only; got goos '$goos'." }
                   if ($cgoCc) { Write-Host "converter-cgo: CC is the pinned $cgoCc$(if ($cgoCcSha) { ", its sha256 REPLACED by $cgoCcSha" })" }
               }
+              # cgo-nuget-e2e: ;feedrun=RUN reuses that run's J1 feed instead of packing (COORD, 2026-11-22), but ONLY when
+              # what J1 packs is provably the same at both commits: the git tree of every entry under src/ (core, gen, tools,
+              # and the scripts and props at its root) except src/go2cs, src/tests and src/archived, plus global.json,
+              # .github/pack-flavour-guard.ps1 and the text of the pack job itself. The converter is not a packed input:
+              # push-nuget.ps1 packs the committed src/core and src/gen, and only runs src/go2cs's go test preflights, which
+              # decide whether J1 passes, not what it packs. On any difference the reuse is refused by name and J1 runs. A
+              # reused feed is never a release reading: INC 4's final reading runs J1 fresh.
+              if ($stage -eq 'cgo-nuget-e2e' -and $seen.ContainsKey('feedrun')) {
+                  if ($filter) { throw "cgo-nuget-e2e takes no filter before its option; got '$filter'." }
+                  $wanted = $seen['feedrun']
+                  if ($wanted -notmatch '^[0-9]+$') { throw "cgo-nuget-e2e filter option feedrun= is a run id; got '$wanted'." }
+                  $prior = gh api "repos/$($env:GITHUB_REPOSITORY)/actions/runs/$wanted" | ConvertFrom-Json
+                  if (-not $prior.head_sha) { throw "cgo-nuget-e2e feedrun=${wanted}: no such run in this repository." }
+                  $artifact = "cgo-nuget-e2e-go-feed-ci.$wanted"
+                  $held = @((gh api "repos/$($env:GITHUB_REPOSITORY)/actions/runs/$wanted/artifacts" | ConvertFrom-Json).artifacts | Where-Object { $_.name -eq $artifact -and -not $_.expired })
+                  if (-not $held.Count) { throw "cgo-nuget-e2e feedrun=${wanted}: run $wanted holds no unexpired $artifact." }
+                  & git fetch --no-tags --depth=1 origin $prior.head_sha 2>&1 | Out-Null
+                  if ($LASTEXITCODE -ne 0) { throw "cgo-nuget-e2e feedrun=${wanted}: its commit $($prior.head_sha) cannot be fetched." }
+                  function Get-PackInputs([string]$sha) {
+                      $rows = @(& git ls-tree $sha -- src/ | Where-Object { ($_ -split "`t")[1] -notin 'src/go2cs', 'src/tests', 'src/archived' })
+                      $rows += @(& git ls-tree $sha -- global.json .github/pack-flavour-guard.ps1)
+                      $yaml = (& git show "${sha}:.github/workflows/os-matrix.yml") -join "`n"
+                      # The job's steps: what J1 runs. Its if:, which only decides whether J1 runs, is left out, so the
+                      # condition this option itself adds there never refuses it (run 45012806147 refused on exactly that).
+                      $job = [regex]::Match($yaml, '(?ms)^  pack:\n.*?(?=^  [a-z][a-z0-9-]*:\n)').Value
+                      $job = $job.Substring([Math]::Max(0, $job.IndexOf("`n    steps:`n")))
+                      $hash = [Convert]::ToHexString([Security.Cryptography.SHA256]::HashData([Text.Encoding]::UTF8.GetBytes($job))).ToLowerInvariant()
+                      $rows + @("job`t.github/workflows/os-matrix.yml#pack-steps $hash")
+                  }
+                  $here = @(Get-PackInputs $env:GITHUB_SHA); $there = @(Get-PackInputs $prior.head_sha)
+                  $differ = @(Compare-Object $here $there | ForEach-Object { ($_.InputObject -split "`t")[-1] -replace ' .*$', '' } | Sort-Object -Unique)
+                  if ($differ.Count) {
+                      Write-Host "::warning::cgo-nuget-e2e feedrun=$wanted REFUSED: run $wanted packed at $($prior.head_sha), and what J1 packs differs here: $($differ -join ', '). J1 runs."
+                  }
+                  else {
+                      $feedRun = $wanted
+                      Write-Host "cgo-nuget-e2e: J1's feed REUSED from run $wanted (packed at $($prior.head_sha)): its $($here.Count) pack inputs are identical here. Not a release reading."
+                  }
+              }
               if ($stage -eq 'reconvert-footprint') {
                   if ($filter) { throw "reconvert-footprint takes no filter before its options; got '$filter' (write ;base=SHA;changed=SHA)." }
                   $footprintBase = "$($seen['base'])".ToLowerInvariant(); $footprintChanged = "$($seen['changed'])".ToLowerInvariant()
@@ -392,7 +445,7 @@ jobs:
                   Write-Host "reconvert-footprint: base $footprintBase, changed $footprintChanged$(if ($footprintBase -eq $footprintChanged) { ' (the same commit: the determinism control, which must read 0 files)' })"
               }
           }
-          elseif ($filter -match '(^|;)\s*(jit|test|at|dns|dumpproof|timeout|cc|sha|base|changed)\s*=') { throw "filter options (;key=value) apply to stages golib-tests, stack-probe, sweep-shard, converter-cgo, cgo-e2e and reconvert-footprint only; got stage '$stage' and filter '$filter'." }
+          elseif ($filter -match '(^|;)\s*(mn|jit|test|at|dns|dumpproof|timeout|cc|sha|feedrun|base|changed)\s*=') { throw "filter options (;key=value) apply to stages behavioral-smoke, golib-tests, stack-probe, sweep-shard, converter-cgo, cgo-e2e, cgo-nuget-e2e and reconvert-footprint only; got stage '$stage' and filter '$filter'." }
 
           # The behavioral stages' per-program run budget. A schedule has no inputs and keeps 120, as
           # does a blank dispatch. A value that is not a whole number of seconds in 1..1800 FAILS the
@@ -517,7 +570,7 @@ jobs:
               if ($env:INPUT_STAGE -eq 'reconvert-footprint') {
                   throw "arch '$arch' does not apply to reconvert-footprint, which converts at linux/amd64 on the one linux leg; the corpus's linux/arm64 emission is not yet a -stdlib target of this stage."
               }
-              if ($env:INPUT_STAGE -in 'release-smoke', 'aot-smoke', 'nugetgo-behavior') {
+              if ($env:INPUT_STAGE -in 'release-smoke', 'aot-smoke', 'nugetgo-behavior', 'cgo-nuget-e2e') {
                   throw "arch '$arch' does not apply to $($env:INPUT_STAGE), which runs every SHIPPED RID from one pack, linux-arm64 included (seat S5c): its leg is already in that stage's list."
               }
               $armFlavour = @(Get-ChildItem -Path 'src/core' -Directory -Recurse -Filter 'linux-arm64' -ErrorAction SilentlyContinue).Count -gt 0
@@ -556,7 +609,8 @@ jobs:
           # two equal: S6 shipped linux-arm64 while this list kept four legs, so no hosted leg consumed that flavour until
           # seat S5c added its leg (DESIGN-linux-arm64-flavour.md section 6). The arm leg carries arch = arm64, which the run
           # job binds as GoTargetArch beside GoTargetOS, as the arch input's arm leg does above.
-          if ($env:INPUT_STAGE -in 'release-smoke', 'aot-smoke', 'nugetgo-behavior') {
+          # cgo-nuget-e2e's J3 reads every shipped RID too: four consume the -Cgo package, and osx-arm64 reads R-b, its refusal.
+          if ($env:INPUT_STAGE -in 'release-smoke', 'aot-smoke', 'nugetgo-behavior', 'cgo-nuget-e2e') {
               $targets = @(
                   @{ goos = 'windows'; runner = 'windows-latest';  rid = 'win-x64'   },
                   @{ goos = 'linux';   runner = 'ubuntu-latest';   rid = 'linux-x64' },
@@ -650,6 +704,10 @@ jobs:
                                          # and after golib's generic-cycle fix, are in docs/CIMatrix.md's
                                          # aot-smoke row. The pack's order, as ruled; the mac
                                          # multiplier takes it to 360, GitHub's ceiling.
+              'cgo-nuget-e2e'    = 90    # J3's leg: the nugetgo-behavior row's shape (converter go build, go run, one
+                                         # conversion, one cold restore and build of the sample with its go.* closure),
+                                         # plus the pinned C toolchain's download, and on win-x64 a second row for R-a.
+                                         # PROVISIONAL until the first run (C2, 2026-11-22).
               'nugetgo-behavior' = 90    # release-smoke's leg is the closest shape (C1, 2026-10-12): converter go build,
                                          # one `go run`, one conversion against the feed, and one restore, build and
                                          # run of the sample with its go.* closure restored cold. PROVISIONAL until
@@ -718,11 +776,13 @@ jobs:
           Add-Content -Path $env:GITHUB_OUTPUT -Value "probe-test=$probeTest" -Encoding utf8
           Add-Content -Path $env:GITHUB_OUTPUT -Value "probe-at=$probeAt" -Encoding utf8
           Add-Content -Path $env:GITHUB_OUTPUT -Value "jit-disasm=$jitDisasm" -Encoding utf8
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "mn=$mnMode" -Encoding utf8
           Add-Content -Path $env:GITHUB_OUTPUT -Value "dns-servers=$dnsServers" -Encoding utf8
           Add-Content -Path $env:GITHUB_OUTPUT -Value "dump-proof=$dumpProof" -Encoding utf8
           Add-Content -Path $env:GITHUB_OUTPUT -Value "sweep-timeout=$(if ($sweepTimeout) { $sweepTimeout } else { '45m' })" -Encoding utf8
           Add-Content -Path $env:GITHUB_OUTPUT -Value "cgo-cc=$cgoCc" -Encoding utf8
           Add-Content -Path $env:GITHUB_OUTPUT -Value "cgo-cc-sha=$cgoCcSha" -Encoding utf8
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "feed-run=$feedRun" -Encoding utf8
           Add-Content -Path $env:GITHUB_OUTPUT -Value "footprint-base=$footprintBase" -Encoding utf8
           Add-Content -Path $env:GITHUB_OUTPUT -Value "footprint-changed=$footprintChanged" -Encoding utf8
 
@@ -741,7 +801,8 @@ jobs:
     # tree's pack: the plan refuses published_version on any stage but release-smoke.
     #   release-smoke, no published_version -> pack    release-smoke, published_version -> no pack (nuget.org)
     #   aot-smoke                           -> pack    every other stage                -> no pack
-    if: (needs.plan.outputs.stage == 'release-smoke' || needs.plan.outputs.stage == 'aot-smoke') && needs.plan.outputs.published-version == ''
+    # cgo-nuget-e2e's J1 is this job unchanged (D4): the stage only renames the artifacts with the run's rehearsal suffix.
+    if: (needs.plan.outputs.stage == 'release-smoke' || needs.plan.outputs.stage == 'aot-smoke' || needs.plan.outputs.stage == 'cgo-nuget-e2e') && needs.plan.outputs.published-version == '' && needs.plan.outputs.feed-run == ''
     runs-on: windows-latest
     # PROVISIONAL: three Release build+pack passes of the whole stdlib solution on a 4-core runner
     # (the i7 measures ~17 min per pass); never yet run on a hosted runner.
@@ -827,7 +888,7 @@ jobs:
         if: always() && hashFiles('feed/*.nupkg') != ''
         uses: actions/upload-artifact@v6
         with:
-          name: release-smoke-feed
+          name: ${{ needs.plan.outputs.stage == 'cgo-nuget-e2e' && format('cgo-nuget-e2e-go-feed-ci.{0}', github.run_id) || 'release-smoke-feed' }}
           # The merged packages only; the per-flavor _flavors/ packs are inspection copies.
           path: feed/*.nupkg
           retention-days: 3
@@ -837,7 +898,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v6
         with:
-          name: release-smoke-pack-log
+          name: ${{ needs.plan.outputs.stage == 'cgo-nuget-e2e' && format('cgo-nuget-e2e-go-pack-log-ci.{0}', github.run_id) || 'release-smoke-pack-log' }}
           path: artifacts/
           retention-days: 7
           if-no-files-found: warn
@@ -924,13 +985,89 @@ jobs:
           if-no-files-found: warn
 
   # ---------------------------------------------------------------------------------------------
+  # cgo-nuget-pack -- cgo-nuget-e2e's J2 (cgo against go.* INC 4, COORD's ruling (1), 2026-11-22). OPT-IN: no schedule or
+  # other stage starts it. On linux, with the pinned zig: R-c (master's converter refuses go-pointer by name), then
+  # github.com/mattn/go-pointer v0.0.1 packed with nugetgo-pack -Cgo -LocalClosure against J1's feed, and R-a's doctored
+  # copy. .github/cgo-nuget-pack.ps1 holds every step and its readings. The package records "local-closure:", which
+  # src/_nugetpush.ps1 refuses, and it leaves the run only as this run's artifact.
+  # ---------------------------------------------------------------------------------------------
+  cgo-nuget-pack:
+    needs: [plan, pack]
+    if: ${{ !cancelled() && needs.plan.outputs.stage == 'cgo-nuget-e2e' && (needs.pack.result == 'success' || (needs.pack.result == 'skipped' && needs.plan.outputs.feed-run != '')) }}
+    name: cgo-nuget-e2e J2 (linux / go-pointer -Cgo pack)
+    runs-on: ubuntu-latest
+    # The pack converts four flavors with zig and builds each against the go.* closure from cold. PROVISIONAL until the
+    # first run (C2, 2026-11-22).
+    timeout-minutes: 90
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set up Go (pinned to the corpus release)
+        uses: actions/setup-go@v6
+        with:
+          go-version: ${{ needs.plan.outputs.go-version }}
+          check-latest: false
+          cache-dependency-path: src/go2cs/go.sum
+
+      - name: Set up .NET SDK
+        uses: actions/setup-dotnet@v5
+        env:
+          DOTNET_INSTALL_DIR: ${{ runner.temp }}/dotnet
+        with:
+          dotnet-version: ${{ needs.plan.outputs.dotnet }}
+
+      - name: The .NET SDK is the requested channel
+        shell: pwsh
+        env:
+          DOTNET_CHANNEL: ${{ needs.plan.outputs.dotnet }}
+        run: |
+          $got = "$(dotnet --version)".Trim()
+          $want = $env:DOTNET_CHANNEL
+          $ok = if ($want.EndsWith('.x')) { $got.StartsWith($want.Substring(0, $want.Length - 1)) } else { $got -ceq $want }
+          if (-not $ok) { Write-Host "::error::dotnet --version is $got, not the requested channel ${want}: global.json's latestMajor takes the highest SDK installed"; exit 1 }
+          Write-Host "dotnet --version $got is channel $want"
+
+      - name: J2 -- download J1's go.* feed
+        uses: actions/download-artifact@v5
+        with:
+          # feedrun= names a prior run whose J1 inputs the plan proved identical; otherwise this run's own J1.
+          name: cgo-nuget-e2e-go-feed-ci.${{ needs.plan.outputs.feed-run || github.run_id }}
+          run-id: ${{ needs.plan.outputs.feed-run || github.run_id }}
+          github-token: ${{ github.token }}
+          path: go-feed
+
+      - name: J2 -- R-c, then the -Cgo pack against the local closure
+        shell: pwsh
+        env:
+          FEED_RUN: ${{ needs.plan.outputs.feed-run }}
+        run: |
+          if ($env:FEED_RUN) {
+              $line = "J1's go.* feed REUSED from run $($env:FEED_RUN): the plan proved its pack inputs identical at both commits. Not a release reading."
+              Write-Host $line; Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value "> $line`n"
+          }
+          $zig = & ./.github/cgo-toolchain.ps1 -Cc zig -Rid linux-x64 -Label 'cgo-nuget-e2e J2 zig'
+          & ./.github/cgo-nuget-pack.ps1 -Feed (Join-Path $PWD 'go-feed') -Zig $zig.Exe -Suffix "ci.${{ github.run_id }}" -OutDir (Join-Path $PWD 'artifacts/cgo-nuget-pack')
+          exit $LASTEXITCODE
+
+      - name: Upload J2's package and readings
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: cgo-nuget-e2e-gopointer-ci.${{ github.run_id }}
+          path: artifacts/cgo-nuget-pack/
+          retention-days: 3
+          if-no-files-found: warn
+
+  # ---------------------------------------------------------------------------------------------
   # run — one leg per (goos, runner, rid).
   # ---------------------------------------------------------------------------------------------
   run:
-    needs: [plan, pack]
+    needs: [plan, pack, cgo-nuget-pack]
     # pack runs for release-smoke only; every other stage sees it SKIPPED and must still run. A failed
-    # pack leaves the smoke legs nothing to consume, so they do not start.
-    if: ${{ !cancelled() && needs.plan.result == 'success' && (needs.pack.result == 'success' || needs.pack.result == 'skipped') }}
+    # pack leaves the smoke legs nothing to consume, so they do not start. cgo-nuget-pack runs for cgo-nuget-e2e only,
+    # and the same holds for it.
+    if: ${{ !cancelled() && needs.plan.result == 'success' && (needs.pack.result == 'success' || needs.pack.result == 'skipped') && (needs.cgo-nuget-pack.result == 'success' || needs.cgo-nuget-pack.result == 'skipped') }}
     name: ${{ needs.plan.outputs.stage }} (${{ matrix.goos }} / ${{ matrix.rid }})
     runs-on: ${{ matrix.runner }}
     timeout-minutes: ${{ matrix.timeout }}
@@ -1042,7 +1179,7 @@ jobs:
       # where the plan said arm64, and stops before any stage reads it. Stages that build no corpus are not probed.
       # -------------------------------------------------------------------------------------
       - name: Flavour probe — the arch this leg compiles
-        if: ${{ !contains(fromJson('["release-smoke","aot-smoke","nugetgo-behavior","reconvert-footprint"]'), needs.plan.outputs.stage) }}
+        if: ${{ !contains(fromJson('["release-smoke","aot-smoke","nugetgo-behavior","cgo-nuget-e2e","reconvert-footprint"]'), needs.plan.outputs.stage) }}
         shell: pwsh
         env:
           PLANNED_ARCH: ${{ matrix.arch }}
@@ -1457,16 +1594,84 @@ jobs:
               if ($readings.Count) { $outcomes += @('', 'Readings:') + $readings }
           }
 
+          # The expected skips (release review TC-5): on a whole-suite run, the tests this leg reports NotExecuted must
+          # be EXACTLY the ones src/tests/GolibTests/ExpectedSkips/<rid>.txt lists by name. A test newly skipped is a
+          # silent loss of coverage; a listed test that now runs is a stale manifest. Either fails the leg by name. A leg
+          # with no manifest for its RID fails too, rather than reading as checked.
+          $skipCheck = @()
+          if ([string]::IsNullOrWhiteSpace($env:GOLIB_FILTER) -and (Test-Path -LiteralPath $trx)) {
+              $manifest = "src/tests/GolibTests/ExpectedSkips/$rid.txt"
+              $skipped = @($doc.TestRun.Results.UnitTestResult | Where-Object { $_.outcome -eq 'NotExecuted' } | ForEach-Object { "$($_.testName)" } | Sort-Object)
+              if (-not (Test-Path -LiteralPath $manifest)) {
+                  $skipCheck = @("expected skips: NO MANIFEST at $manifest for $rid ($($skipped.Count) skipped)")
+                  Write-Host "::error::GolibTests expected skips: no manifest at $manifest for $rid"
+                  $runExit = 1
+              }
+              else {
+                  $expected = @(Get-Content -LiteralPath $manifest | ForEach-Object { ($_ -replace '#.*$', '').Trim() } | Where-Object { $_ } | Sort-Object)
+                  # Plain membership, not Compare-Object, which refuses an empty side.
+                  $newly = @($skipped | Where-Object { $expected -notcontains $_ } | Sort-Object -Unique)
+                  $nowRun = @($expected | Where-Object { $skipped -notcontains $_ } | Sort-Object -Unique)
+                  $skipCheck = @("expected skips: $($skipped.Count) skipped, $($expected.Count) listed in $manifest; newly skipped $($newly.Count), listed but ran $($nowRun.Count)")
+                  foreach ($t in $newly) { $skipCheck += "  NEWLY SKIPPED $t"; Write-Host "::error::GolibTests on ${rid}: $t is skipped and $manifest does not list it" }
+                  foreach ($t in $nowRun) { $skipCheck += "  LISTED BUT RAN $t"; Write-Host "::error::GolibTests on ${rid}: $manifest lists $t as skipped, and it ran" }
+                  if ($newly.Count -or $nowRun.Count) { $runExit = 1 }
+              }
+          }
+
           $summary = @(
               "## GolibTests -- GOOS=$goos ($rid)"
               ''
               "Filter ``$($env:GOLIB_FILTER)`` -- exit ``$runExit``"
               ''
               '```'
-          ) + @(Get-Content -LiteralPath $log -ErrorAction SilentlyContinue | Where-Object { $_ -match '^(Passed!|Failed!|Total tests|\s+(Passed|Failed|Skipped):)' } | Select-Object -Last 8) + $outcomes + @('```')
+          ) + $skipCheck + @(Get-Content -LiteralPath $log -ErrorAction SilentlyContinue | Where-Object { $_ -match '^(Passed!|Failed!|Total tests|\s+(Passed|Failed|Skipped):)' } | Select-Object -Last 8) + $outcomes + @('```')
 
           Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value $summary
           & ./.github/annotate-summary.ps1 -Title "golib-tests $goos/$rid" -Lines $summary
+
+          exit $runExit
+
+      # -------------------------------------------------------------------------------------
+      # ChannelTests -- src/tests/ChannelTests, golib's own channel suite (buffered and unbuffered send, receive, close
+      # and select), which ran nowhere until 2026-11-22 (release review TC-9). It rides the golib-tests stage, in its own
+      # step so either suite's red names itself, and only when the stage has no filter: a filtered run is a targeted
+      # GolibTests probe.
+      # -------------------------------------------------------------------------------------
+      - name: ChannelTests — build and run for this GOOS
+        if: always() && needs.plan.outputs.stage == 'golib-tests' && needs.plan.outputs.filter == ''
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Continue'
+
+          $goos = $env:GOOS_TARGET
+          $rid = $env:RID
+          $art = Join-Path $PWD 'artifacts'
+          New-Item -ItemType Directory -Force -Path $art | Out-Null
+          $log = Join-Path $art "channel-tests-$goos-$rid.log"
+          $trx = Join-Path $art "channel-tests-$goos-$rid.trx"
+
+          $archArgs = @(if ($env:GoTargetArch) { "-p:GoTargetArch=$($env:GoTargetArch)" })
+          & dotnet test src/tests/ChannelTests -c Release "-p:GoTargetOS=$goos" @archArgs --blame-hang-timeout 10m `
+              --logger "trx;LogFileName=$trx" --logger 'console;verbosity=normal' -nologo *>&1 | Tee-Object -FilePath $log
+          $runExit = $LASTEXITCODE
+
+          $outcomes = @()
+          if (Test-Path -LiteralPath $trx) {
+              [xml]$doc = Get-Content -LiteralPath $trx -Raw
+              $outcomes = @($doc.TestRun.Results.UnitTestResult | Sort-Object testName | ForEach-Object { "  $($_.outcome) $($_.testName)" })
+          }
+
+          $summary = @(
+              "## ChannelTests -- GOOS=$goos ($rid)"
+              ''
+              "exit ``$runExit``"
+              ''
+              '```'
+          ) + @(Get-Content -LiteralPath $log -ErrorAction SilentlyContinue | Where-Object { $_ -match '^(Passed!|Failed!|Total tests|\s+(Passed|Failed|Skipped):)' } | Select-Object -Last 8) + $outcomes + @('```')
+
+          Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value $summary
+          & ./.github/annotate-summary.ps1 -Title "channel-tests $goos/$rid" -Lines $summary
 
           exit $runExit
 
@@ -1571,9 +1776,32 @@ jobs:
               exit 1
           }
 
+          # Off windows, a behavioral project marked exclusive to other platforms ([GoPlatformExclusive(...)] in its
+          # package_info.cs, without this leg's GOOS) is not built: the windows-native projects compile Win32 syscall
+          # surface that linux's syscall does not have (82 errors in 10 projects on linux, master 1f8d62ddb3; release
+          # review TC-6). The leg builds a copy of go2cs.slnx without their entries (sub-libraries included) and names
+          # each one it left out. The windows leg builds the whole solution, as before.
+          $solution = 'src/go2cs.slnx'
+          if ($goos -ne 'windows') {
+              $excluded = @(Get-ChildItem -Directory 'src/tests/Behavioral' | Where-Object {
+                  $info = Join-Path $_.FullName 'package_info.cs'
+                  if (-not (Test-Path -LiteralPath $info)) { return $false }
+                  $m = Select-String -LiteralPath $info -Pattern '^\s*\[GoPlatformExclusive\((?<list>[^)]*)\)\]' | Select-Object -First 1
+                  if (-not $m) { return $false }
+                  $platforms = @([regex]::Matches($m.Matches[0].Groups['list'].Value, '"(?<p>[^"]+)"') | ForEach-Object { $_.Groups['p'].Value })
+                  $platforms -notcontains $goos
+              } | ForEach-Object Name | Sort-Object)
+              Write-Host "==> not built on ${goos}: $($excluded.Count) platform-exclusive behavioral project(s): $($excluded -join ', ')"
+              $lines = Get-Content -LiteralPath $solution
+              $kept = @($lines | Where-Object { $line = $_; -not ($excluded | Where-Object { $line -match ('Path="tests/Behavioral/' + [regex]::Escape($_) + '/') }) })
+              $solution = 'src/go2cs.ci-filtered.slnx'
+              Set-Content -LiteralPath $solution -Value $kept -Encoding utf8
+              Write-Host "==> building ${solution}: $($lines.Count - $kept.Count) project entr(ies) removed"
+          }
+
           $archArgs = @(if ($env:GoTargetArch) { "-p:GoTargetArch=$($env:GoTargetArch)" })
           $sw = [System.Diagnostics.Stopwatch]::StartNew()
-          & dotnet build src/go2cs.slnx -c $config "-p:GoTargetOS=$goos" @archArgs -nologo -clp:ErrorsOnly *>&1 | Tee-Object -FilePath $log
+          & dotnet build $solution -c $config "-p:GoTargetOS=$goos" @archArgs -nologo -clp:ErrorsOnly *>&1 | Tee-Object -FilePath $log
           $runExit = $LASTEXITCODE
           $sw.Stop()
 
@@ -1917,11 +2145,9 @@ jobs:
         shell: pwsh
         env:
           SMOKE_FILTER: ${{ needs.plan.outputs.filter }}
-          # M:N: every program the smoke runs is on the scheduler (GO2CS_MN), and each project the filter selects is
-          # built with generated twins. The step sets GoTwinsFor itself, below, to the EXACT project list: MSBuild
-          # matches GoTwinsFor by whole project name (src/Directory.Build.targets), and a substring filter passed
-          # straight through twinned nothing once it selected more than one project.
-          GO2CS_MN: '1'
+          # The run's mode is the runner's: ;mn=1 passes BehavioralRunner --mn (GO2CS_MN=1 and generated twins for every
+          # selected project, by exact name), and blank or ;mn=0 is default mode (release review TC-3/TC-4).
+          SMOKE_MN: ${{ needs.plan.outputs.mn }}
           # BehavioralRunner's OWN budgets, in seconds: no timeout the caller sets can influence
           # them, so a generous job budget alone would be worthless if the runner killed its child
           # first. Sized for a cold 4-core hosted runner, where the shared core closure is built
@@ -1948,23 +2174,19 @@ jobs:
 
           Write-Host "==> behavioral smoke: filter '$filter', GoTargetOS=$($env:GoTargetOS)"
 
-          # GoTwinsFor is the exact ';'-separated list of the projects the runner's --filter (a case-insensitive
-          # substring) selects, with each sub-library project beside them (`<Project>.<lib>.csproj`, whose methods the
-          # program calls). A filter that selects no project refuses by name: it would twin nothing and read nothing.
-          $twinNames = @(Get-ChildItem -Directory 'src/tests/Behavioral' |
-              Where-Object { $_.Name.IndexOf($filter, [StringComparison]::OrdinalIgnoreCase) -ge 0 -and
-                  (Test-Path (Join-Path $_.FullName "$($_.Name).csproj")) } |
-              ForEach-Object { Get-ChildItem -Path $_.FullName -Filter '*.csproj' -Recurse -File } |
-              Where-Object { $_.Extension -eq '.csproj' } |
-              ForEach-Object BaseName | Sort-Object -Unique)
-
-          if ($twinNames.Count -eq 0) {
-              Write-Host "::error::behavioral-smoke filter '$filter' selects no behavioral project, so GoTwinsFor would twin nothing; name a project or a substring of one"
+          # The runner's --filter is a case-insensitive substring, or a|b|c alternatives. A filter that selects no project
+          # refuses by name: it would run nothing and read nothing.
+          $parts = @($filter -split '\|' | Where-Object { $_ })
+          $selected = @(Get-ChildItem -Directory 'src/tests/Behavioral' | Where-Object {
+              $name = $_.Name
+              (Test-Path (Join-Path $_.FullName "$name.csproj")) -and @($parts | Where-Object { $name.IndexOf($_, [StringComparison]::OrdinalIgnoreCase) -ge 0 }).Count -gt 0
+          })
+          if ($selected.Count -eq 0) {
+              Write-Host "::error::behavioral-smoke filter '$filter' selects no behavioral project; name a project or a substring of one"
               exit 1
           }
-
-          $env:GoTwinsFor = $twinNames -join ';'
-          Write-Host "==> GoTwinsFor ($($twinNames.Count)): $env:GoTwinsFor"
+          $mnArgs = @(if ($env:SMOKE_MN -eq '1') { '--mn' })
+          Write-Host "==> $($selected.Count) project(s), $(if ($mnArgs) { 'M:N mode (--mn)' } else { 'default mode' })"
 
           # Build the converter explicitly. A hosted runner has no go2cs binary at all, and every
           # harness rebuild predicate keys on a converter *.go being NEWER than the binary -- which
@@ -1993,7 +2215,7 @@ jobs:
           # disk-exhaustion failure can still be recognized rather than guessed at.
           $log = Join-Path $art "behavioral-smoke-$goos-$rid.log"
 
-          & ./src/tests/Behavioral/run-behavioral.ps1 -IgnoreDiskPreflight --filter $filter *>&1 |
+          & ./src/tests/Behavioral/run-behavioral.ps1 -IgnoreDiskPreflight --filter $filter @mnArgs *>&1 |
               Tee-Object -FilePath $log
 
           $runExit = $LASTEXITCODE
@@ -2022,16 +2244,16 @@ jobs:
           exit $runExit
 
       # -------------------------------------------------------------------------------------
-      # M:N spike (this branch never lands). After the smoke has built MnMixedStorm with generated twins, run the
+      # M:N (experimental, opt-in). After the smoke has built MnMixedStorm with generated twins, run the
       # program directly: Go's build for the reference output, then the C# build on the thread path (the sampler's
       # control) and on the scheduler at three sizes. A sampler outside the process counts its OS threads, and the
-      # scheduler prints its own reading. Then MnGoschedFair's chain check, the one part that FAILS the step: the
+      # scheduler prints its own reading. Then MnGoschedFair's chain check, which joins the direct runs' failures that FAIL the step: the
       # fairness row tests GoScheduler.MaxRunNextChain only while its ping-pong pair chains through run-next, so the
       # script asserts the chain formed (run-next steps >= 100 x Gosched yields) and reads CHAIN-FAIL by name when a
       # later change makes the row vacuous (P3's SHOULD 1 on the Gosched-park seat).
       # -------------------------------------------------------------------------------------
-      - name: M:N spike — direct runs of the twinned storm
-        if: always() && needs.plan.outputs.stage == 'behavioral-smoke' && needs.plan.outputs.filter == 'MnMixedStorm'
+      - name: M:N — direct runs of the twinned storm
+        if: always() && needs.plan.outputs.stage == 'behavioral-smoke' && needs.plan.outputs.filter == 'MnMixedStorm' && needs.plan.outputs.mn == '1'
         timeout-minutes: 30
         shell: bash
         run: |
@@ -2044,6 +2266,14 @@ jobs:
           grep -E '^// (candidates|await-sites|T )' "$dir/Generated/go2cs-gen/go2cs.TwinGenerator/go2cs.twins.report.g.cs" 2>/dev/null | tr -d '\r' | sed 's/^/READING mn-direct report: /'
           (cd "$dir" && go build -o "$RUNNER_TEMP/mnstorm-go" .) || echo "READING mn-direct go build failed"
           now() { python3 -c 'import time; print(time.time())'; }
+          # Every arm is a verdict, not only a reading (COORD, 2026-11-22: the twinned storm at 100,000 hangs about one run
+          # in 5-10, and an exit-0 step hid it). A run past its deadline is killed and named HANG; a non-zero exit, or an
+          # output that differs from Go's at the same n, is named too. Every arm still runs and prints its READING, and the
+          # step fails at the end, one ::error:: line per failure. 180 s is six times the slowest storm recorded (29.6 s,
+          # osx-arm64, 3 P, at 100,000), and seven arms at 180 s fit the step's 30 minutes.
+          deadline=${MN_DIRECT_DEADLINE_S:-180}
+          failures=()
+          declare -A goOut
           one() {
             label=$1; n=$2; mn=$3; shift 3
             export MN_STORM_N=$n MN_STORM_HOLD_MS=3000 GO2CS_MN_READING=1
@@ -2052,10 +2282,16 @@ jobs:
             "$@" > "$RUNNER_TEMP/mn-out.txt" 2> "$RUNNER_TEMP/mn-err.txt" &
             pid=$!
             peak=0
+            hung=0
             while kill -0 $pid 2>/dev/null; do
               if [ -d /proc/$pid/task ]; then t=$(ls /proc/$pid/task 2>/dev/null | wc -l); else t=$(ps -M -p $pid 2>/dev/null | tail -n +2 | wc -l); fi
               t=$(echo $t)
               if [ -n "$t" ] && [ "$t" -gt "$peak" ]; then peak=$t; fi
+              if python3 -c "import sys; sys.exit(0 if $(now) - $start > $deadline else 1)"; then
+                hung=1
+                kill -9 $pid 2>/dev/null
+                break
+              fi
               sleep 0.25
             done
             wait $pid
@@ -2064,9 +2300,23 @@ jobs:
             out=$(tr -d '\r' < "$RUNNER_TEMP/mn-out.txt" | tr '\n' ';')
             reading=$(grep -a 'READING go-scheduler' "$RUNNER_TEMP/mn-err.txt" | tail -n 1 | tr -d '\r')
             errs=$(grep -a -c -i 'exception\|panic\|fatal' "$RUNNER_TEMP/mn-err.txt")
-            echo "READING mn-direct arm=$label n=$n exit=$code wall=${wall}s sampled-peak-threads=$peak err-lines=$errs out=[$out] | $reading"
-            if [ "$code" != "0" ]; then head -n 5 "$RUNNER_TEMP/mn-err.txt" | cut -c1-300 | sed 's/^/READING mn-direct stderr: /'; fi
+            verdict=ok
+            if [ "$hung" = "1" ]; then
+              verdict=HANG
+              failures+=("arm=$label n=$n HANG: no completion within ${deadline}s (killed; sampled-peak-threads=$peak)")
+            elif [ "$code" != "0" ]; then
+              verdict=EXIT
+              failures+=("arm=$label n=$n exit=$code: $(head -n 1 "$RUNNER_TEMP/mn-err.txt" | tr -d '\r' | cut -c1-200)")
+            elif [ "$label" = "go" ]; then
+              goOut[$n]=$out
+            elif [ -n "${goOut[$n]+set}" ] && [ "$out" != "${goOut[$n]}" ]; then
+              verdict=OUTPUT
+              failures+=("arm=$label n=$n output differs from Go's: [$out] vs [${goOut[$n]}]")
+            fi
+            echo "READING mn-direct arm=$label n=$n verdict=$verdict exit=$code wall=${wall}s sampled-peak-threads=$peak err-lines=$errs out=[$out] | $reading"
+            if [ "$verdict" != "ok" ]; then head -n 5 "$RUNNER_TEMP/mn-err.txt" | cut -c1-300 | sed 's/^/READING mn-direct stderr: /'; fi
           }
+          if [ ! -x "$RUNNER_TEMP/mnstorm-go" ]; then failures+=("go build of MnMixedStorm failed: no reference output to compare"); fi
           for n in 1000 10000 100000; do
             if [ -x "$RUNNER_TEMP/mnstorm-go" ]; then one go $n 0 "$RUNNER_TEMP/mnstorm-go"; fi
           done
@@ -2075,8 +2325,14 @@ jobs:
             one cs-twins $n 1 dotnet "$dll"
           done
           unset GO2CS_MN MN_STORM_N MN_STORM_HOLD_MS GO2CS_MN_READING
-          bash src/tools/mnspike2/MnGoschedFair/chain-check.sh
-          exit $?
+          chain=0
+          bash src/tools/mnspike2/MnGoschedFair/chain-check.sh || chain=$?
+          if [ "$chain" -ne 0 ]; then failures+=("MnGoschedFair chain-check exited $chain"); fi
+          if [ ${#failures[@]} -gt 0 ]; then
+            for f in "${failures[@]}"; do echo "::error::M:N direct run: $f"; done
+            exit 1
+          fi
+          exit 0
 
       - name: Behavioral stderr — run named projects directly and keep the WHOLE stderr
         if: needs.plan.outputs.stage == 'behavioral-stderr'
@@ -3002,13 +3258,58 @@ jobs:
           & ./.github/annotate-summary.ps1 -Title "nugetgo-row $($env:RID)" -Lines @(ConvertTo-NugetgoRowAnnotationText -Text $text)
 
       # -------------------------------------------------------------------------------------
+      # cgo-nuget-e2e's J3 -- the go-pointer sample against J2's -Cgo package and J1's go.* closure on this RID, compared
+      # with go run on this RID (.github/cgo-nuget-consume.ps1). osx-arm64 reads R-b, win-x64 also R-a. The OS's default
+      # pinned C toolchain serves go run and the sample's cgo-on conversion; the built program needs none.
+      # -------------------------------------------------------------------------------------
+      - name: cgo-nuget-e2e J3 -- download J1's go.* feed
+        if: needs.plan.outputs.stage == 'cgo-nuget-e2e'
+        uses: actions/download-artifact@v5
+        with:
+          # feedrun= names a prior run whose J1 inputs the plan proved identical; otherwise this run's own J1.
+          name: cgo-nuget-e2e-go-feed-ci.${{ needs.plan.outputs.feed-run || github.run_id }}
+          run-id: ${{ needs.plan.outputs.feed-run || github.run_id }}
+          github-token: ${{ github.token }}
+          path: go-feed
+
+      - name: cgo-nuget-e2e J3 -- download J2's package
+        if: needs.plan.outputs.stage == 'cgo-nuget-e2e'
+        uses: actions/download-artifact@v5
+        with:
+          name: cgo-nuget-e2e-gopointer-ci.${{ github.run_id }}
+          path: gopointer
+
+      - name: cgo-nuget-e2e J3 -- the sample against the package, and the reds
+        if: needs.plan.outputs.stage == 'cgo-nuget-e2e'
+        shell: pwsh
+        env:
+          # The row names its host by the matrix label beside ImageOS and ImageVersion, as the nugetgo-behavior step's does;
+          # without it Invoke-NugetgoBehaviorRow.ps1 refuses "not a hosted runner" (run 45001845693, every J3 leg).
+          NUGETGO_RUNNER: ${{ matrix.runner }}
+          FEED_RUN: ${{ needs.plan.outputs.feed-run }}
+        run: |
+          if ($env:FEED_RUN) {
+              $line = "J1's go.* feed REUSED from run $($env:FEED_RUN): the plan proved its pack inputs identical at both commits. Not a release reading."
+              Write-Host $line; Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value "> $line`n"
+          }
+          # The sample is not a corpus project; the leg-wide GoTargetOS binding must not reach its build.
+          Remove-Item Env:GoTargetOS -ErrorAction SilentlyContinue
+          $cc = if ($IsWindows) { 'llvm-mingw' } else { 'zig' }
+          $toolchain = & ./.github/cgo-toolchain.ps1 -Cc $cc -Rid $env:RID -Label "cgo-nuget-e2e J3 $cc" -ExportEnv
+          $env:CC = $toolchain.Cc
+          $env:CGO_ENABLED = '1'
+          & ./.github/cgo-nuget-consume.ps1 -Feed (Join-Path $PWD 'gopointer/feed') -DoctoredFeed (Join-Path $PWD 'gopointer/feed-doctored') `
+              -ClosureFeed (Join-Path $PWD 'go-feed') -Suffix "ci.${{ github.run_id }}" -Rid $env:RID -OutDir (Join-Path $PWD 'artifacts/cgo-nuget-e2e')
+          exit $LASTEXITCODE
+
+      # -------------------------------------------------------------------------------------
       # Artifacts — always, because a failed leg is the reading this workflow exists to produce.
       # -------------------------------------------------------------------------------------
       - name: Upload artifacts
         if: always()
         uses: actions/upload-artifact@v6
         with:
-          name: os-matrix-${{ needs.plan.outputs.stage }}-${{ matrix.goos }}-${{ matrix.rid }}
+          name: os-matrix-${{ needs.plan.outputs.stage }}-${{ matrix.goos }}-${{ matrix.rid }}${{ needs.plan.outputs.stage == 'cgo-nuget-e2e' && format('-ci.{0}', github.run_id) || '' }}
           path: artifacts/
           retention-days: 7
           if-no-files-found: warn

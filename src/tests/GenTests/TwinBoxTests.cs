@@ -18,7 +18,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace GenTests;
 
 /// <summary>
-/// M:N PROTOTYPE, N2, the BOX TWIN (docs/phase4/DESIGN-mn-box-twin.md, revision 1; COORD's GO after the re-review): a
+/// M:N (experimental, opt-in), N2, the BOX TWIN (docs/phase4/DESIGN-mn-box-twin.md, revision 1; COORD's GO after the re-review): a
 /// `this ref T` method's twin takes the receiver's box, `Mꞏtwin(this ж<T> Ꮡt)`, and each call names a box without a
 /// copy (9.1's rows) or stays plain. The two must-fixes of the re-review are pinned: a ref local crossing a ж-typed
 /// member refuses the twin by name; a VALUE receiver's box overload (which copies) is never followed.
