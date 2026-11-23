@@ -102,3 +102,117 @@ permanent, so nothing twinned ships before the window passes. Option (b), on by 
 owes a guard that fails when the property's default reads anything but off, and one DESIGN line naming the flip as
 row 10's ruling. That line goes into DESIGN-mn-stdlib-twins.md with the pointer once train 5 has merged it onto this
 seat's base.
+
+## Piece 6: the twinned standard library did not compile (2026-11-22)
+
+The whole standard library built with `-p:GoStdlibTwins=true` (go2cs-stdlib.slnx, Release) failed on windows, linux
+and darwin alike, with GO2CS0017 = 0, GO2CS0018 = 0 and GO2CS0021 = 0: 5 compile errors in twins, the same 5 on every
+target. None of those packages was in stage (c)'s closure. They surface only when every package is twinned, because
+only then do their callees park.
+
+**MISDIAGNOSIS, as first posted (kept, so the correction reads against it).** I posted the four CS9217 errors as "a
+foreach over `range(...)` (ref iteration) whose body now parks, so the twin awaits inside a ref-bound loop", and
+proposed iterating by value. That was wrong. Nothing iterates by ref; the range value is already a copy.
+
+**Correction, from the emitted twins.** Three distinct shapes, each a twin-rewriter gap:
+
+1. **Go's two-variable range is a DECONSTRUCTING foreach** (`foreach (var (k, v) in range(…))`), which Roslyn parses
+   as `ForEachVariableStatementSyntax`, not `ForEachStatementSyntax`. Rule H (a body entered after its header
+   awaited starts with the live ref locals derived again) existed for the one-variable form only, so the
+   deconstructing body read a stale ref: internal/diff `Diff` (`@out`), net/http `send` (`req`), text/template
+   `walkRange`'s Seq2 loop (`r`; its one-variable loop beside it was served). CS9217 x3.
+2. **An await in a for statement's iterator** was parenthesized, `(await Ꮡp.nextꞏtwin())`, which is not a statement
+   expression (go/parser, CS0201), and the condition read the ref local `p` after it.
+3. **An `else if` whose condition awaits and then reads a ref local in the same condition**: archive/zip
+   `checksumReader.Read` (`(await …Sum32ꞏcall(r.hash)) != r.f.CRC32`), and go/types' conversion
+   (`… || !isTypes2 && x.isNil()`), which compiled only once go/parser did. RefReadAfter counted only reads whose
+   nearest statement is the statement in hand, and an `else if` is a nested IfStatement. So the read was missed and
+   the call was awaited in place: CS9217. My first post grouped archive/zip under shape 1; it is shape 3.
+
+**Cures (COORD accepted 1 and 2; 3 found on the re-build):**
+
+1. `CommonForEachStatementSyntax` is treated alike in the three places that named only the one-variable form: a
+   `VisitForEachVariableStatement` with Rule H, RefAliases' loop list (liveness), and the sequence-point mapping.
+2. An await that IS a for statement's iterator stays bare, and the iterator list continues with the live ref locals
+   derived again: `for (; p.tok != token.EOF; await Ꮡp.nextꞏtwin(), p = ref Ꮡp.DerefOrNull())`. The iterator stays
+   the loop's own, so `continue` and a labeled `goto continue_x` run it as in the plain method. Nothing is lowered.
+3. RefReadAfter also counts a read in an `else if` of the chain when that else-if's own condition holds both the
+   call and the read. The call then takes the existing path for a statement that cannot spill: it stays a plain,
+   blocking call (`ref-blocked`, stage (c)'s stated cost; that path hands its P off as a thread park does). The
+   standard library already carries 295 ref-blocked call sites in 55 packages (windows). A non-blocking form, the
+   read re-derived inline through its box, would unblock all of them. It is a behavior change of its own, so it is
+   proposed as a follow-up, not folded in.
+
+GenTests `TwinLoopTests`, 5 rows, red first (the base compiled none of them: CS9217 x5, CS0201 x2). Each EXECUTES the
+twin and compares it with the plain method. (1) A two-variable range whose header awaits writes through the
+re-derived ref, and the write is read back after the loop, with a one-variable control beside it. (2a) A parking
+iterator whose condition reads the ref after the park, with a `continue`. (2b) A labeled continue from an inner loop,
+as the converter spells it. (3) An else-if whose condition reads the ref after a parking call. A stale ref cannot
+"lose a write silently" in C#: the compiler refuses a ref local held across an await (CS9217). The compile is that
+guard, and the executed rows show the semantics equal the plain method's.
+
+## Piece 6 gates, after the cures (2026-11-22, tree 4959435e78 plus the seat's edits)
+
+Kit `C:\go2cs\scratch\mn2\proto\row7`: p6-gates.sh, p6-census.sh, p6-supp.sh, p6-supp2.sh, p6-supp3.sh.
+
+**The whole standard library twinned** (go2cs-stdlib.slnx, Release, `-p:GoStdlibTwins=true`): rc=0 with 0 errors and
+GO2CS0017 = 0, GO2CS0018 = 0, GO2CS0021 = 0 on windows (506 s), linux (554 s) and darwin (548 s). Every project
+compiled, net/http's dependents included, so the zeros are a reading, not a floor. 358 twins reports from 364
+projects; the 6 without one are named: go2cs-gen itself, golib, go.arrays and go2cs.CpuProfiler (no twin generator),
+and testing and unsafe (hand-owned, skipped).
+
+**The parker census as a fixed point** (COORD's (3)). A full build compiles every package against its dependencies'
+final twinned assemblies, in dependency order with no cycles, so one build is the fixed point. A second windows build
+read 0 of 358 reports differing, so nothing new appears. Against piece 1 and piece 4:
+- host-not-partial refusals that park, in packages that are not hand-owned: **0** on all three targets.
+- piece 1's hosts: runtime's parkers in managed_impl.cs are the same set as the piece 1 seat read (PoolCleanupCadence,
+  Sysmon and the rest twinned; gcCycle refused await-in-lock); internal/sync's hookedHash.GetHashCode still refused
+  `instance`.
+- R5: windows 108 forwarders + 1 author-twin (109), linux 117 + 1 (118), darwin 120 + 1 (121). **0 changed** against
+  piece 4's read over plain dependencies.
+- The one delta is hand-owned. Under the twinned standard library, testing's `TestLogBridge` (a non-partial static
+  class) parks in 5 methods: Open, Close, WriteLocked, FlushLocked and ExitIfFailed. Its callees are twinned now.
+  Read with the hand-owned skip removed, over testing's whole twinned closure: GO2CS0021 names exactly those 5; with
+  the skip, testing builds clean. **Disclosed (COORD's (4)):** testing is excluded from twinned standard-library
+  builds by the skip, and a test host enters plain (TestHost.Run), so these methods run plain and block their
+  carrier wherever a twin reaches them. Today nothing does. Making TestLogBridge partial is **not owed now**: its
+  twins could not be reached. It becomes owed if testing is ever built with twins, and GO2CS0021 then names it
+  without anyone having to remember. (Two earlier reads of this were void, and are recorded as such. One used a stale
+  analyzer, through --no-dependencies. The other ran over dependencies that the plain-identity step had rebuilt plain.)
+
+**The windows LockOSThread users.** Under the twinned standard library three of the four are state-machine twins:
+internal/syscall/windows `withPrivilege` (7 sites), net `lookupProtocol` (8) and os/user `runAsProcessOwner` (2).
+internal/syscall/windows/registry `ReadSubKeyNames` does not park and stays plain. A scratch probe (ResolveIPAddr
+over "ip4:ggp", which takes lookupProtocol's locked goroutine, and user.Current), twinned against the twinned
+standard library, runs EQUAL to Go under GO2CS_MN=1 with off-carrier-locks=0 and pins=0. That goroutine never parks
+while locked: its getprotobyname is a plain syscall, and its send is buffered. So the pin is not stressed by the
+standard library's own users. MnLockPin is, twinned against the twinned standard library: output identical to its
+baseline, pins=10, off-carrier-locks=0, over 206,037 parks.
+
+**CNR both ways.** Seven programs, each in three builds: plain against the plain standard library (the baseline);
+plain against the twinned standard library; and twinned (GoTwinsFor) against it, run with GO2CS_MN unset and set.
+Every run is identical to its baseline, and EQUAL to Go where a Go source exists. The programs: MnSpinCap, MnContended,
+MnForeignThread, MnMixedStorm (n=1,000), MnLockPin (no Go source: compared with its baseline), MnMutexTwin and
+MnBlockedIO. MnLockSleep and MnLockFair are not on this base (they came with row 7's train-5 branch); their first rows
+were void and are not counted.
+
+**Plain build unchanged** (P4-d **met**): the 13 windows R5 packages built plain with the seat's generator and props,
+and with those files at 80d31623ae. Every type, flag, attribute, field and method IL hash is identical; only the module
+identity moves.
+
+**Made to fail**, each restored byte-identical:
+- piece 4: N4a, N4b and N4c each red their TwinR5Tests rows;
+- piece 5: N5a (default true) and N5b (a tracked script turns it on) red TestStdlibTwinsDefaultOff; N5c is the
+  TestLogBridge read above;
+- piece 6, each with its own error code: N6a (no Rule H for the deconstructing form) CS9217; N6b (the iterator await
+  parenthesized) CS0201; N6c (no re-derivation in the iterator list) CS9217; N6d (no else-if chain) CS9217.
+
+**Suites:** GenTests 774/774; GolibTests Release 3,111 passed (53 skipped), Debug 3,085 passed (79 skipped); the Q1
+kit 22 builds, 14 twin runs, 0 differing; repoguard rc=0.
+
+**Scored:** P4-a met (0 twins among R5: every hand body that is not author-twinned forwards); P4-b met, and over the
+whole standard library on all three targets; P4-c met; P4-d met.
+
+**Proposed follow-up (not in this seat):** re-derive a ref read inline through its box where a statement cannot spill.
+That would unblock the 295 ref-blocked call sites in 55 packages (windows) that today stay plain, shape 3's two among
+them.

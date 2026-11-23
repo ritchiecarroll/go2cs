@@ -120,6 +120,12 @@ public sealed partial class TwinGenerator : ISourceGenerator
         if (SiblingMemo.Last(options) != (self == typeof(ZTwinGenerator)))
             return;
 
+        // Row 7 piece 5: GoStdlibTwins (src/core/Directory.Build.props) twins every converted package of the standard
+        // library, but not a hand-owned one: the attribute says which, as everywhere else in the generator.
+        if (options.TryGetValue("build_property.GoStdlibTwins", out string? stdlib) && string.Equals(stdlib, "true", StringComparison.OrdinalIgnoreCase) &&
+            Common.IsHandOwnedAssembly(context.Compilation))
+            return;
+
         bool goSites = !(options.TryGetValue("build_property.GoTwinsGo", out string? go) && string.Equals(go, "false", StringComparison.OrdinalIgnoreCase));
 
         // O2 (7a, DESIGN-mn-twin-set.md 12.1 and section 10): a package built with twins carries the WHOLE set, so a
@@ -446,11 +452,22 @@ public sealed partial class TwinGenerator : ISourceGenerator
             // companion: assembly, linkname or runtime-provided). That is R5, the hand-owned population, which moves
             // with row 7 (DESIGN-mn-twin-set.md 12.1 and 12.6, P3's finding 6: 127 distinct public functions in 15
             // packages, sync/atomic and internal/runtime/atomic the bulk).
-            if (method.Body is null && method.ExpressionBody is null && !method.Modifiers.Any(SyntaxKind.ExternKeyword) || method.Parent is not TypeDeclarationSyntax ||
+            //
+            // Row 7 piece 4 (DATA-mn-row7-r5.md): R5 joins the population by its DECLARATION's file (InPopulation). The
+            // implementing part is the candidate where this compilation holds it, since its symbol normalizes to the
+            // declaration. A declaration whose implementing part is NOT in this compilation's own trees (a sibling
+            // generator's stub, PartialStubGenerator's for an assembly-only body: "stub-bodied") is the candidate itself,
+            // refused `bodyless` (PreRefusal), so it gets a forwarder and never a twin.
+            bool bodyless = method.Body is null && method.ExpressionBody is null;
+
+            if (bodyless && !method.Modifiers.Any(SyntaxKind.ExternKeyword) && !method.Modifiers.Any(SyntaxKind.PartialKeyword) || method.Parent is not TypeDeclarationSyntax ||
                 method.Modifiers.Any(SyntaxKind.AsyncKeyword) || method.Identifier.Text.EndsWith(Suffix, StringComparison.Ordinal))
                 return;
 
             if (Model(method.SyntaxTree).GetDeclaredSymbol(method, Context.CancellationToken) is not { } declared)
+                return;
+
+            if (bodyless && !method.Modifiers.Any(SyntaxKind.ExternKeyword) && !IsStubBodied(declared))
                 return;
 
             IMethodSymbol symbol = Normalize(declared);
@@ -490,11 +507,22 @@ public sealed partial class TwinGenerator : ISourceGenerator
             method.DescendantNodes().OfType<FixedStatementSyntax>().Any() ||
             method.DescendantNodes().OfType<UnsafeStatementSyntax>().Any();
 
+        // A partial DEFINITION whose implementing part is not in this compilation's own syntax trees: its body is a sibling
+        // generator's output (PartialStubGenerator), which this generator never rewrites.
+        private bool IsStubBodied(IMethodSymbol declared) =>
+            declared is { IsPartialDefinition: true } &&
+            (declared.PartialImplementationPart is not { } implementation ||
+             !implementation.DeclaringSyntaxReferences.Any(reference => Context.Compilation.ContainsSyntaxTree(reference.SyntaxTree)));
+
         private string? PreRefusal(MethodDeclarationSyntax method, IMethodSymbol symbol)
         {
             // First, so that relaxing a row below it can never admit a native wrapper.
             if (IsNative(method, symbol))
                 return "native";
+
+            // Row 7 piece 4: a stub-bodied declaration (AddCandidate) has no body to rewrite: a forwarder, never a twin.
+            if (method.Body is null && method.ExpressionBody is null)
+                return "bodyless";
 
             if (HasTwinMember(symbol))
                 return "has-twin";
@@ -567,10 +595,16 @@ public sealed partial class TwinGenerator : ISourceGenerator
                 attribute.AttributeClass is { Name: "GoParkForwarderAttribute", ContainingNamespace: { Name: "golib", ContainingNamespace.Name: "go" } });
 
         // 7a (12.1, R1): the population is every PUBLIC method, its every containing type public, declared in a converted
-        // file (Common's predicate) of an assembly that is not hand-owned (the caller checks that).
+        // file (Common's predicate) of an assembly that is not hand-owned (the caller checks that). Row 7 piece 4 (R5): for a
+        // partial method the file is the DECLARATION's, so a Go function whose body is hand-written in an `_impl.cs`
+        // companion (its candidate is that implementing part) is in the population by the converted file that declares it.
         private static bool InPopulation(Candidate candidate)
         {
-            if (!Common.IsConvertedSourceFile(candidate.Syntax.SyntaxTree))
+            SyntaxTree declaring = candidate.Symbol is { IsPartialDefinition: true } && candidate.Symbol.DeclaringSyntaxReferences.FirstOrDefault() is { } reference
+                ? reference.SyntaxTree
+                : candidate.Syntax.SyntaxTree;
+
+            if (!Common.IsConvertedSourceFile(declaring))
                 return false;
 
             for (ISymbol? member = candidate.Symbol; member is not null and not INamespaceSymbol; member = member.ContainingType)
@@ -635,6 +669,8 @@ public sealed partial class TwinGenerator : ISourceGenerator
             candidate.Twinned ? "twin" :
             candidate.Forwarded ? (candidate.Parks ? "forwarder-unmarked:" : "forwarder:") + (candidate.Refusal ?? "no-park") :
             IsE1(candidate.Symbol) ? "E1" :
+            // R5 (row 7 piece 4): an author-written twin replaces the forwarder; the generator emits nothing for it.
+            candidate.Refusal == "has-twin" ? "author-twin" :
             "GUARD:" + (NotForwardable(candidate) ?? (GuardDrop.Contains(candidate.Symbol.Name) ? "forwarder-dropped" : null) ?? (Forwarders ? null : "forwarders-off") ?? candidate.Refusal ?? "unknown");
 
         // Async-shaped keys on the SYMBOLS (12.1, F7): a Go type that happens to be named Task is none.
