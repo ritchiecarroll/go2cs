@@ -191,9 +191,12 @@ func nativeStarredLocal(k uintptr) unsafe.Pointer {
 		t.Errorf("managedParamRead: a load through &param reads ~Ꮡu:\n%s", body)
 	}
 
-	// Shape (a)'s store keeps its emission: its fresh box is the BOARD's (ff) lost write, not this.
-	if body := bodyOf("managedFuncStore"); !strings.Contains(body, ".Value = v;") {
-		t.Errorf("managedFuncStore: a store through the carrying arm keeps its emission:\n%s", body)
+	// Shape (a)'s store through the carrying arm wrote into a fresh Ꮡ(OfFunc(f)) box that nothing reads: the BOARD's
+	// 2026-11-20 LOST WRITE ("a store of a pointer word INTO a func variable lands in a fresh box"). S-B1 (d02c2dda3b)
+	// pinned that store here as out of the word door's scope. TC-13's w4 (funcWordOperations.go) cures it, so the pin
+	// moved with the cure: the store is f's own, through FuncOfWord, and never a fresh box's .Value.
+	if body := bodyOf("managedFuncStore"); !strings.Contains(body, "f = @unsafe.Pointer.FuncOfWord<Action>(v);") || strings.Contains(body, ".Value =") {
+		t.Errorf("managedFuncStore: a pointer word stored into a func variable is w4's (TC-13), never a fresh box's:\n%s", body)
 	}
 
 	for name, door := range map[string]string{

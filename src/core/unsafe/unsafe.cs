@@ -1238,6 +1238,28 @@ public class Pointer : StandardBox<uintptr>, IUnsafePointer {
         return fn is null ? Nil : new Pointer(GoFuncCookie.Of(fn));
     }
 
+    // Go's `*(*unsafe.Pointer)(unsafe.Pointer(&f)) = p` for a func variable f of type F (funcWordOperations.go, w4;
+    // BOARD 2026-11-20, TC-13): f's word becomes p. A managed func value is a delegate, and the word it answers is its
+    // GoFuncCookie (OfFunc above), so a p that IS a func word -- one func value's word copied into another -- is that
+    // func, and 0 is the nil func. Any other word is Go's funcval pointer, whose fn names code by a PC, or C memory.
+    // go2cs has no func a PC names before cgo callbacks (Phase 5), so that store is refused by name. It is never stored
+    // as a nil func: the emission this replaces wrote p into a fresh box and left f nil, silently.
+    [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+    public static F FuncOfWord<F>(Pointer? p) where F : Delegate
+    {
+        nuint word = p is null ? 0 : (nuint)(uintptr)p;
+
+        if (word == 0)
+            return null!;
+
+        if (GoFuncCookie.IsCookie(word))
+            return GoFuncCookie.Func<F>(word);
+
+        throw RuntimeErrorPanic.RuntimeRaised(FuncOfWordText);
+    }
+
+    private const string FuncOfWordText = "func word store: the pointer stored as a func value's word is not a func value's word (a funcval whose fn is a code PC, or C memory), and go2cs binds no func to such a word before cgo callbacks, so the store is refused";
+
     // Go's `*(*F)(e) = fn` for a func type F and an unsafe.Pointer VALUE e (docs/phase4/DESIGN-interior-pointer-root.md
     // 4.8 B1 and 10.4). The store's own type says the VALUE is a func. It does not say what e names, and a managed
     // func is a reference while Go's is one word, so what is stored is decided here, at run time, by what e names:
