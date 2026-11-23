@@ -123,3 +123,39 @@ not return to baseline once the map is dropped, it is posted before seating.
 - The converted program, Release, windows/amd64, at this commit: all 14 lines true.
 - The filtered output tests `PointerPrintIdentity` and `ReflectNewAtField` both pass.
 - **Falsifier:** any false line, or either test failing.
+
+## 8. Section 7's score, and the leak and cost arms (named and predicted before they run)
+
+**Section 7: MET.** The converted program reads true on all 14 lines. The filtered output tests `PointerPrintIdentity`
+and `ReflectNewAtField` both pass, 2 of 2.
+
+**Instrument.** A C# console probe, kept in H's scratch and not in the tree. It references `src/core/fmt` and is
+built Release at two trees on this box (windows/amd64): BASE is `git archive afb01dfb6c` of src/core, src/gen and
+src's props, and TIP is this branch's src/core. Each arm runs in its own process, and every wall reading is the floor
+over 5 rounds. Pinned objects are the GC's own `PinnedObjectsCount` after a forced, blocking, compacting full
+collection, followed by `WaitForPendingFinalizers` and a second collection. Live registry entries are the
+`ManagedPointerTokens` table entries whose weak target is alive, read by reflection.
+
+**Arm L, the leak (the stop-line).** 100,000 distinct transient `ж<long>` boxes. Each is printed once with
+`fmt.Sprintf("%p", box)`, and all are held. Read pinned objects and live entries, then drop the boxes, collect, and
+read both again.
+- Predicted at TIP: while the boxes are held, pinned objects rise by about 100,000 over baseline. After the drop
+  and the collections, both readings are back at baseline (pinned exactly; live entries within 16).
+- Predicted at BASE: no rise at any point.
+- **Stop-line:** a TIP count that stays above baseline after the drop.
+
+**Arm C1, a %p-heavy wall, distinct boxes.** 200,000 fresh boxes, each printed once.
+- Predicted: TIP/BASE between 1.5x and 6x, because each box pays one pin, one `PinnedBuffer` and one registry
+  record.
+
+**Arm C2, a %p-heavy wall, one box.** One box printed 1,000,000 times.
+- Predicted: TIP/BASE between 0.8x and 1.4x. A repeat print takes the idempotent pinned-registry early return,
+  where BASE takes the token registry's.
+
+**Arm C3, a pointer-keyed map (COORD's threshold).** A `map[*int]int` of 10,000 keys, printed with `fmt.Sprint` 20
+times per round. Then the map is dropped, and pinned objects are read after the collections.
+- Predicted: TIP/BASE floor between 0.8x and 1.5x. Only the first print of each key pins, and the floor round is a
+  repeat. TIP's first round is reported separately, predicted under 2x BASE's first round.
+- Pinned objects return to baseline after the drop.
+- **COORD's threshold:** more than 2x wall time, or a pinned count that does not return to baseline, is posted
+  before seating.
