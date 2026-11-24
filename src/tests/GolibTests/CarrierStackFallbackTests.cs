@@ -10,7 +10,8 @@ namespace GolibTests;
 
 /// <summary>
 /// M:N row 4: a carrier reserves main's 1 GiB (MainThread.StackReserve, or the goroutine reserve when that is larger),
-/// because any carrier may run a step of main's twin; a platform that refuses that size gets the largest it grants,
+/// because any carrier may run a step of main's twin, unless GO2CS_GOROUTINE_STACK is set, which then governs it in both
+/// directions; a platform that cannot reserve that size gets the largest it grants,
 /// halving a local size down to 1 MB; only a start that succeeds publishes the smaller size and says it on stderr by name,
 /// and a refusal at every size is a counted start failure that leaves the shared size alone. No platform here refuses
 /// 1 GiB, so these rows force the refusal through the test-only GoScheduler.RefuseCarrierStackAboveForTest and make the
@@ -86,9 +87,10 @@ public class CarrierStackFallbackTests
         string[] lines = Lines(stderr);
 
         Assert.AreEqual(1, lines.Length, $"one line, from the start that published; the later carrier says nothing:\n{stderr}");
-        StringAssert.Contains(lines[0], "refused a 256 MB carrier stack");
-        StringAssert.Contains(lines[0], "carriers reserve 128 MB");
+        StringAssert.Contains(lines[0], "could not reserve a 256 MB carrier stack");
+        StringAssert.Contains(lines[0], "carriers started from now reserve 128 MB");
         StringAssert.Contains(lines[0], "main included", "the line says what the size bounds");
+        StringAssert.Contains(lines[0], Goroutine.StackReserveVariable, "the line names the knob that lowers it");
     }
 
     [TestMethod]
@@ -111,7 +113,7 @@ public class CarrierStackFallbackTests
         Assert.IsTrue(started.All(ok => ok));
         Assert.AreEqual(64 * MB, size);
         Assert.AreEqual(1, Lines(stderr).Length, $"two halvings, one line:\n{stderr}");
-        StringAssert.Contains(stderr, "carriers reserve 64 MB");
+        StringAssert.Contains(stderr, "carriers started from now reserve 64 MB");
     }
 
     [TestMethod]
@@ -140,12 +142,23 @@ public class CarrierStackFallbackTests
     [TestMethod]
     public void ACarrierReservesTheMainGoroutinesStack()
     {
-        // Main's twin parks and resumes on whichever carrier is free, so every carrier reserves what main's own thread
-        // does without the scheduler: Go's main may recurse that deep (behavioral MainDeepRecursion, under --mn).
-        Assert.IsTrue(GoScheduler.DefaultCarrierStackSize >= MainThread.StackReserve,
-            $"a carrier reserves {GoScheduler.DefaultCarrierStackSize / MB} MB, short of main's {MainThread.StackReserve / MB} MB");
-        Assert.IsTrue(GoScheduler.DefaultCarrierStackSize >= Goroutine.StackReserve, "and never less than a goroutine's thread");
+        // Main's twin parks and resumes on whichever carrier is free, so with GO2CS_GOROUTINE_STACK unset every carrier
+        // reserves what main's own thread does without the scheduler: Go's main may recurse that deep (behavioral
+        // MainDeepRecursion, under --mn).
+        int unset = GoScheduler.CarrierStackSizeFor(goroutineStackSet: false, Goroutine.StackReserve);
+
+        Assert.IsTrue(unset >= MainThread.StackReserve, $"a carrier reserves {unset / MB} MB, short of main's {MainThread.StackReserve / MB} MB");
+        Assert.IsTrue(unset >= Goroutine.StackReserve, "and never less than a goroutine's thread");
     }
+
+    [TestMethod]
+    [DataRow(false, 256, 1024, DisplayName = "unset: main's 1 GiB")]
+    [DataRow(false, 1536, 1536, DisplayName = "unset, a larger goroutine reserve: that")]
+    [DataRow(true, 64, 64, DisplayName = "set lower: lowers the carrier")]
+    [DataRow(true, 1536, 1536, DisplayName = "set higher: raises the carrier")]
+    [DataRow(true, 0, 1, DisplayName = "set to 0: the 1 MB floor")]
+    public void ASetGoroutineStackGovernsTheCarrierInBothDirections(bool set, int goroutineMB, int carrierMB) =>
+        Assert.AreEqual(carrierMB * MB, GoScheduler.CarrierStackSizeFor(set, goroutineMB * MB));
 
     [TestMethod]
     public void AfterANonSizeRefusalTheNextCarrierStartsAt256MB()
