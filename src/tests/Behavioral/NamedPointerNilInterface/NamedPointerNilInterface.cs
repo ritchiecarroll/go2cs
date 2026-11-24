@@ -76,6 +76,9 @@ internal static void main() {
 
     report("conv P(nil)", (any)((P)nil));
 
+    report("conv P(*T nil)", new P(up));
+    report("conv P(P nil)", ((P)p) ?? (P)nil);
+
     report("arg P", (p ?? (P)nil));
     report("arg *T", up.OrTypedNil());
 

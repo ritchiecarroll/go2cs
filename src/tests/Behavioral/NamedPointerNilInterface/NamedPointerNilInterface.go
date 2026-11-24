@@ -76,6 +76,11 @@ func main() {
 	// a typed nil conversion, the form that already holds its type
 	report("conv P(nil)", any(P(nil)))
 
+	// a conversion of a nil operand: from *T it builds the wrapper, from a P it carries the
+	// operand's nil through, and either way the result is a typed nil of P
+	report("conv P(*T nil)", P(up))
+	report("conv P(P nil)", P(p))
+
 	// argument passing
 	report("arg P", p)
 	report("arg *T", up)

@@ -53,7 +53,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("NamedPointerNilInterface.go", "NamedPointerNilInterface.cs", "ABMwlKKCgqaCgqiUgpSkpKS0uIKCgoKmhIKClIKClIKClpaCloKCloKClIKWgoKUgpaCgqiCgpaClKiCloKCgoI=")]
+[assembly: GoPositionMap("NamedPointerNilInterface.go", "NamedPointerNilInterface.cs", "ABMwlKKCgqaCgqiUgpSkpKS0uIKCgoKmhIKClIKClIKClpiCloKWgoKWgoKUgpaCgpSCloKCqIKCloKUqIKWgoKCgg==")]
 // </GoSourcePositionMaps>
 
 namespace go;
