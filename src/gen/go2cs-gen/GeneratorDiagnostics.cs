@@ -248,6 +248,18 @@ internal static class GeneratorDiagnostics
         defaultSeverity: DiagnosticSeverity.Error,
         isEnabledByDefault: true);
 
+    // GO2CS0019, TwinGenerator (M:N, N1: DESIGN-mn-nopark.md 3.1 and 4.7): an entry of GoTwinsWeak,
+    // GoTwinsCut or go2cs-gen's stdlib table that does nothing in this build, on one of four arms: it names no member, it
+    // names no such call site, or it is dead (a cut whose callee no longer parks, a weak member whose own twin cannot
+    // park). A warning; the stdlib table's GenTests row reads it as an error, so the table cannot rot.
+    public static readonly DiagnosticDescriptor StaleParkEntry = new(
+        id: "GO2CS0019",
+        title: "A weak-member or cut-site entry does nothing",
+        messageFormat: "'{0}' ({1}) is a stale N1 entry: {2}",
+        category: "go2cs-gen",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true);
+
     // GO2CS0020, TwinGenerator (the func-value fix: a design decision of 2026-11-21,
     // commit b8de4a762c): in a package built with twins, a call through a func value whose
     // shape the pair test cannot reach (a call's result, a conditional access, a parenthesized or converted value, a

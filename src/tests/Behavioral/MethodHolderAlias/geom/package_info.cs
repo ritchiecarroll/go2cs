@@ -69,6 +69,7 @@ public static partial class geom_package
     // via declarations below.
 
     // <TypeAccessibility>
+    internal partial struct 尺 {}
     public partial struct Shape {}
     // </TypeAccessibility>
 

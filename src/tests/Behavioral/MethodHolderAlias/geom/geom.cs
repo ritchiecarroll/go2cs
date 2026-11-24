@@ -17,4 +17,10 @@ internal static nint Unit⁔(/*this*/ ref Shape s) { return (nint)Unit + s.W.Dou
 
 public static nint Area(nint w, nint h) { return w * h; }
 
+public static nint 量 = 1000;
+
+partial struct 尺 {
+    internal nint n;
+}
+
 } // end geom_package

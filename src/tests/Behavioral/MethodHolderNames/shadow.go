@@ -17,7 +17,11 @@ func (m meter) Scale(main int) int { return Scale(main) + m.main }
 // Count reads the package's variable; nothing here is named like the package.
 func (m meter) Count() int { return Count + m.main }
 
+// limitPlus follows a method of meter in file order and stands in the package class.
+var limitPlus = func() int { return Limit + Scale(1) }
+
 func shadows() {
 	m := meter{main: 2}
 	fmt.Println("shadows", m.Limit(), m.Scale(3), m.Count())
+	fmt.Println("after a method", limitPlus())
 }
