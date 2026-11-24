@@ -1054,7 +1054,7 @@ Linux and macOS on amd64, and for Linux on arm64. Files whose C# differs between
 `linux/` and `darwin/` subfolders, and a package whose C# also differs by architecture adds folders such as
 `amd64/`, `linux-amd64/` and `linux-arm64/`. For example, `os` keeps `dir_windows.cs` in `os/windows/` and `dirent_linux.cs` in
 `os/linux/`.
-<!-- the multi-target run: docs/ConversionStrategies-Reference/package-conversion.md:601 (`-platforms windows/amd64,linux/amd64,darwin/amd64,linux/arm64`) -->
+<!-- the multi-target run: docs/ConversionStrategies-Reference/package-conversion.md:602 (`-platforms windows/amd64,linux/amd64,darwin/amd64,linux/arm64`) -->
 
 The project compiles its flat files plus the one folder named by the `GoTargetOS` build property. It
 defaults to `windows`; a build sets another target with, for example, `-p:GoTargetOS=linux`. A package

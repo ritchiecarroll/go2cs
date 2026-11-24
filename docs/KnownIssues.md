@@ -264,6 +264,15 @@ evaluated ahead of the plain reads in its expression, as gc evaluates it, and th
 the call. Both orders are allowed by the Go specification; a program whose output depends on the difference relies on
 unspecified behavior.
 
+**After a carrier stack could not be reserved, goroutines recurse to two depths.** Under the M:N scheduler each carrier
+thread reserves 1 GiB, or what a set `GO2CS_GOROUTINE_STACK` says ([Tuning](Tuning.md#goroutine-stacks)). A carrier
+that cannot reserve its size, for instance because the carriers already running used up a commit or address-space
+limit, starts at the largest size it gets, halving down to 1 MiB, and says so once on stderr; carriers started after it
+take that size. Carriers started before it keep theirs, so a goroutine, `main` included, can recurse to the full depth
+on one carrier and run out of stack at half of it on another, depending on which carrier resumes it.
+<!-- Source: src/core/golib/runtime/GoScheduler.cs, CarrierThread (a halved size is published for later carriers only);
+     P3's row 4 read, 2026-11-24, NIT 4. -->
+
 ## A nugetgo package built on 1.26.10.3 beside the go.* 1.26.11.1 packages fails at restore {#a-nugetgo-package-built-on-126103-beside-the-go-126111-packages-fails-at-restore}
 
 **Symptom.** `dotnet restore`, or the restore a `dotnet build` starts with, stops with `NU1107`, a version conflict
