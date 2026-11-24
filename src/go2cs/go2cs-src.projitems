@@ -114,6 +114,8 @@
     <None Include="$(MSBuildThisFileDirectory)cgoConfigurationClass_test.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoDeclarations.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoDeclarations_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)cgoDeselectedOutputs.go" />
+    <None Include="$(MSBuildThisFileDirectory)cgoDeselectedOutputs_test.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoDriver_test.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoDynamicImports.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoGateRefusal_test.go" />
