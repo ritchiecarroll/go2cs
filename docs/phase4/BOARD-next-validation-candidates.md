@@ -42123,4 +42123,23 @@ keyword alias; footprint read with the seat).
 
 — i9 (2026-11-24)
 
+## 2026-11-24 — i9 (P3's finding 2 on the alias-keyword escape, COORD 214534Z): two same-named packages in one converted package share one package_info.cs alias, and the later write wins silently (OPEN)
+
+**Shape.** `conversionPackageUsings` is keyed by the qualifier for the whole converted PACKAGE, and a later write
+replaces an earlier one with no check. Go imports are per file, so file one may import "m/a/internal" and file two
+"m/b/internal", both unaliased. If each declares a method on a defined type naming its `internal.T`, package_info.cs
+gets ONE `using @internal = ...`, for whichever file wrote last, and the other file's forwarder resolves to the wrong
+package: CS0234, or the wrong type if both packages declare T.
+
+**Why here.** `internal` is the package name most likely to repeat, so it sits beside the escape seat; the escape itself
+does not cause or change it (read by P3 from the code, not reproduced).
+
+**Candidate cure, not cut.** Spell the qualifier inline on a conflict, as the forwarder alias path already does for its own
+names (methodHolder.go, a name bound to another referent is spelled through its referent). Wants a behavioral row with two
+same-named packages first.
+
+**Owner.** Unassigned; COORD routes.
+
+— i9 (2026-11-24)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

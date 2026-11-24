@@ -9,6 +9,10 @@ import (
 	"AliasKeywordPackage/checked"
 	"AliasKeywordPackage/flags"
 	"AliasKeywordPackage/internal"
+	"AliasKeywordPackage/opts"
+	"AliasKeywordPackage/record"
+	"AliasKeywordPackage/tokens"
+	"AliasKeywordPackage/union"
 )
 
 func main() {
@@ -16,4 +20,6 @@ func main() {
 	fmt.Println("options:", b.Options(internal.NotForPublicUse{}))
 	fmt.Println("check:", b.Check(checked.Token(3)))
 	fmt.Println("has 0:", b.Has(flags.Flag(0)), "has 1:", b.Has(1), "has 2:", b.Has(internal.Flag(2)))
+	fmt.Println("lock:", b.Lock(tokens.Kind(7)), "union:", b.Union(union.Set(2)), "record:", b.Record(record.Entry(4)))
+	fmt.Println("pick 2:", opts.Mode(1).Pick(b, 2), "pick 1:", opts.Mode(1).Pick(b, 1))
 }

@@ -6,6 +6,10 @@ package flags
 import (
 	"AliasKeywordPackage/checked"
 	"AliasKeywordPackage/internal"
+	"AliasKeywordPackage/record"
+	"AliasKeywordPackage/union"
+
+	lock "AliasKeywordPackage/tokens"
 )
 
 // Bools is a set of option bits, a defined integer type as jsonflags.Bools is.
@@ -22,3 +26,12 @@ func (b Bools) Check(t checked.Token) checked.Token { return t.Twice() + checked
 
 // Has reports whether bit f is set.
 func (b Bools) Has(f Flag) bool { return b&(1<<f) != 0 }
+
+// Lock names a plainly named package through the explicit keyword alias lock.
+func (b Bools) Lock(k lock.Kind) lock.Kind { return k + lock.Kind(b&1) }
+
+// Union names a type of the package named union.
+func (b Bools) Union(s union.Set) union.Set { return s | union.Set(b) }
+
+// Record names a type of the package named record, whose alias stays bare.
+func (b Bools) Record(e record.Entry) record.Entry { return e * record.Entry(b) }
