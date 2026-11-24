@@ -8,9 +8,9 @@ using global::go.go;
 
 partial class doc_package {
 
-// type Filter is a methodless func type — rendered inline as its base delegate
+public delegate bool Filter(@string _);
 
-internal static bool matchFields(ж<ast.FieldList> Ꮡfields, Func<@string, bool> f) {
+internal static bool matchFields(ж<ast.FieldList> Ꮡfields, Filter f) {
     ref var fields = ref Ꮡfields.DerefOrNull();
 
     if (Ꮡfields != nil) {
@@ -25,7 +25,7 @@ internal static bool matchFields(ж<ast.FieldList> Ꮡfields, Func<@string, bool
     return false;
 }
 
-internal static bool matchDecl(ref ast.GenDecl d, Func<@string, bool> f) {
+internal static bool matchDecl(ref ast.GenDecl d, Filter f) {
     foreach (var (_, dΔ1) in range(d.Specs)) {
         switch (dΔ1.type()) {
         case ж<ast.ValueSpec> v: {
@@ -61,7 +61,7 @@ internal static bool matchDecl(ref ast.GenDecl d, Func<@string, bool> f) {
     return false;
 }
 
-internal static slice<ж<Value>> filterValues(slice<ж<Value>> a, Func<@string, bool> f) {
+internal static slice<ж<Value>> filterValues(slice<ж<Value>> a, Filter f) {
     nint w = 0;
     foreach (var (_, vd) in range(a)) {
         if (matchDecl(ref (vd.Decl).DerefOrNull(), f)) {
@@ -72,7 +72,7 @@ internal static slice<ж<Value>> filterValues(slice<ж<Value>> a, Func<@string, 
     return a.slice(0, w);
 }
 
-internal static slice<ж<Func>> filterFuncs(slice<ж<Func>> a, Func<@string, bool> f) {
+internal static slice<ж<Func>> filterFuncs(slice<ж<Func>> a, Filter f) {
     nint w = 0;
     foreach (var (_, fd) in range(a)) {
         if (f(fd.Name)) {
@@ -83,7 +83,7 @@ internal static slice<ж<Func>> filterFuncs(slice<ж<Func>> a, Func<@string, boo
     return a.slice(0, w);
 }
 
-internal static slice<ж<Type>> filterTypes(slice<ж<Type>> a, Func<@string, bool> f) {
+internal static slice<ж<Type>> filterTypes(slice<ж<Type>> a, Filter f) {
     nint w = 0;
     foreach (var (_, td) in range(a)) {
         nint n = 0; // number of matches
@@ -107,7 +107,7 @@ internal static slice<ж<Type>> filterTypes(slice<ж<Type>> a, Func<@string, boo
 
 // Filter eliminates documentation for names that don't pass through the filter f.
 // TODO(gri): Recognize "Type.Method" as a name.
-internal static void Filter⁔(/*this*/ ref Package p, Func<@string, bool> f) {
+internal static void Filter⁔(/*this*/ ref Package p, Filter f) {
     p.Consts = filterValues(p.Consts, f);
     p.Vars = filterValues(p.Vars, f);
     p.Types = filterTypes(p.Types, f);

@@ -2163,7 +2163,7 @@ mergeCancel := func(ctx, cancelCtx Context) (Context, CancelFunc) {
 lambda conversion, which is what the gate tests.) Without the cast the tuple has no natural type, so
 neither does the enclosing conversion — CS8917 on the declaration and CS8130 at every deconstruction
 of its result. Naming the type is also the more faithful rendering: Go's declared result there *is*
-`CancelFunc`, a methodless func type, which renders inline as its base delegate `Action`. An UNNAMED `func() bool` result would need the synthesized
+`CancelFunc`, a defined func type, which is its own delegate. An UNNAMED `func() bool` result would need the synthesized
 `Func<…>`/`Action` spelling and has no corpus site today, so it is deliberately left.
 
 ## Publicization decides WHAT a type's modifier is; the test-bridge arm only decides WHERE

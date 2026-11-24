@@ -8,7 +8,7 @@ partial class main_package {
 
 partial struct registry {
     internal map<@string, ж<inner.Record>> cache;
-    internal Func<map<@string, ж<inner.Record>>, @string, Func<@string, (@string, error)>, (ж<inner.Record>, error)> load;
+    internal inner.Loader load;
     internal map<@string, Action<ж<inner.Record>, @string>> notify;
 }
 

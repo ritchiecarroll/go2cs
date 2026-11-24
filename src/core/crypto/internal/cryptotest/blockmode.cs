@@ -13,11 +13,11 @@ partial class cryptotest_package {
 
 // MakeBlockMode returns a cipher.BlockMode instance.
 // It expects len(iv) == b.BlockSize().
-// type MakeBlockMode is a methodless func type — rendered inline as its base delegate
+public delegate cipher.BlockMode MakeBlockMode(cipher.Block b, slice<byte> iv);
 
 // TestBlockMode performs a set of tests on cipher.BlockMode implementations,
 // checking the documented requirements of CryptBlocks.
-public static void TestBlockMode(ж<testing.T> t, cipher.Block block, Func<cipher.Block, slice<byte>, cipher.BlockMode> makeEncrypter, Func<cipher.Block, slice<byte>, cipher.BlockMode> makeDecrypter) {
+public static void TestBlockMode(ж<testing.T> t, cipher.Block block, MakeBlockMode makeEncrypter, MakeBlockMode makeDecrypter) {
     var rng = newRandReader(t);
     var iv = new slice<byte>(block.BlockSize());
     rng.Read(iv);
@@ -25,7 +25,7 @@ public static void TestBlockMode(ж<testing.T> t, cipher.Block block, Func<ciphe
     testBlockModePair(t, block, makeEncrypter, makeDecrypter, iv);
 }
 
-internal static void testBlockModePair(ж<testing.T> t, cipher.Block b, Func<cipher.Block, slice<byte>, cipher.BlockMode> enc, Func<cipher.Block, slice<byte>, cipher.BlockMode> dec, slice<byte> iv) {
+internal static void testBlockModePair(ж<testing.T> t, cipher.Block b, MakeBlockMode enc, MakeBlockMode dec, slice<byte> iv) {
     var ivʗ1 = iv;
     t.Run(encryptionˢ, [GoFunc("testBlockModePair.func1")] (ж<testing.T> tΔ1) => {
         testBlockMode(tΔ1, enc, b, ivʗ1);
@@ -72,7 +72,7 @@ private static readonly @string inputNotFullBlocksˢᵇ = "input not full blocks
 private static ref readonly @string keepStateˢ => ref keepStateˢᵇ;
 private static readonly @string keepStateˢᵇ = "KeepState"u8;
 
-internal static void testBlockMode(ж<testing.T> t, Func<cipher.Block, slice<byte>, cipher.BlockMode> bm, cipher.Block b, slice<byte> iv) {
+internal static void testBlockMode(ж<testing.T> t, MakeBlockMode bm, cipher.Block b, slice<byte> iv) {
     nint blockSize = bm(b, iv).BlockSize();
 
     t.Run(wrongIVLenˢ, [GoFunc("testBlockMode.func1")] (ж<testing.T> tΔ1) => {

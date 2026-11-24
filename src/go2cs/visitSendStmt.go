@@ -171,6 +171,10 @@ func (v *Visitor) convSendValueExpr(sendStmt *ast.SendStmt) string {
 		sendExpr = v.convertToInterfaceType(elemType, v.getExprType(sendStmt.Value), sendExpr)
 	}
 
+	// A func value sent on a channel of a different func type (`ch <- plain`, ch a `chan F`): a defined func type
+	// and its unnamed signature convert implicitly in Go (see funcValueForSlot).
+	sendExpr = v.funcValueForSlot(elemType, sendStmt.Value, sendExpr)
+
 	// An untyped CONSTANT sent into an EMPTY-interface element boxes at Go's default type for its
 	// kind (the numeric twin of the @string boxing above), so a later `x.(int)` / `case int:` on the
 	// received value matches Go's boxed dynamic type rather than a stray System.Int32. The POINTER

@@ -259,6 +259,20 @@ and match Go's test results. C# written by hand against converted code may need 
        paragraph, and ConversionStrategies-Reference/package-conversion.md. -->
   <!-- 2026-11-23 (P1): landed by train 1, merge c869fc13a7 (claude/p4-blank-import-note 7de4e2e267); the three
        endings read again at 97cca467a2 in visitImportSpec.go. -->
+- **[QUEUED claude/c2-d-named-functype (tip in its READY post)]** **A defined func type is a delegate of its own.**
+  On every converted platform, a Go func type declared with `type`, such as `context.CancelFunc` or
+  `bufio.SplitFunc`, is now a C# delegate named for it, whether or not it has methods; one without methods was
+  written as its underlying `Action` or `Func<…>` delegate wherever it was used. So `%T`, reflect's `Name()` and a
+  type switch now tell `type F func(string) error` from `func(string) error`, as Go does. Thirty exported types of the
+  standard library change this way, among them `context.CancelFunc` and `CancelCauseFunc`, `bufio.SplitFunc`,
+  `io/fs.WalkDirFunc`, `path/filepath.WalkFunc`, `go/types.Qualifier` and `archive/zip`'s `Compressor` and
+  `Decompressor`. Compiled C# code that passed or received `Action` or `Func<…>` there must be rebuilt; C# source
+  that assigns a lambda to one of these types compiles unchanged, and source that assigns an `Action` or `Func<…>`
+  value wraps it, as in `new CancelFunc(action)`. See
+  [Every defined func type declares its own delegate](ConversionStrategies-Reference/struct-types.md#every-defined-func-type-declares-its-own-delegate).
+  <!-- C2's D seat, COORD rulings 2026-11-23 02:36Z (cure 1) and 05:38Z (the break floor moves at the .5 release,
+       F = R; this line and the binary-compatibility suppressions are owed by the seat). The thirty types are the
+       exported collapse markers of the corpus at 1079ca371f, the same on windows, linux and darwin. -->
 - **[LANDED 00b0dc37dd]** **Converting a module: two packages that spell one
   anonymous struct now agree on its layout by themselves.** When code such as ccgo's output declares the same
   anonymous struct in two packages (modernc.org/sqlite's `TLARGE_INTEGER` and modernc.org/libc's `largeInteger`),

@@ -41799,6 +41799,46 @@ re-run here: go-spew is not on this box, and its row stays C2's to re-measure.
 
 — H (2026-11-22)
 
+## 2026-11-23 -- D (every defined func type is a delegate of its own): the .5 release moves the break floor, F = R
+
+**For the .5 release seat.** C2's D seat makes 30 exported standard-library types (the defined func types without
+methods, `context.CancelFunc`, `bufio.SplitFunc`, `io/fs.WalkDirFunc` and 27 more) delegates of their own, where they
+were the underlying `Action`/`Func<…>`. That is a binary break for compiled code, carried as binary-compatibility
+suppression entries in the seat. COORD ruled (2026-11-23 05:38Z) that `GoBreakFloor` in `go.lib.targets` moves AT the
+release that ships it, F = R (DESIGN-go-break-floor.md §4), not in the seat; push-nuget refuses the release until it
+does. The Upgrading line is in docs/DRAFT-news-next.md.
+
+— C2 (2026-11-23)
+
+## 2026-11-23 -- the comment census cannot match a Go local to its shadow-renamed C# local (`xΔ1`)
+
+**Finding.** The census matches a Go line to its C# translation by identifiers (`csIdents`, `internal/commentcensus/census.go`).
+It strips the converter's capture and temporary suffixes (`ʗ1`, `ᴛ1`), but not a trailing shadow rename, `Δ1`. So Go's
+`var cancelCtx func()` cannot match its own translation, `Action cancelCtxΔ1 = default;`. It matches the next line that
+names `cancelCtx` through another suffix, and every later line of that body reads one off.
+
+**How D met it.** D's tuple deconstruction declares a temporary named after its Go target,
+`(req.ctx, var cancelCtxᴛ1) = context.WithDeadline(...)`. In `net/http/client.cs` (setRequestCancel) the census
+anchored `var cancelCtx func()` on that line, which raised `body:extra:unexplained` and `body:go-blank-cs-none` by one
+each. The C# blank lines are where Go's are. COORD ruled (2026-11-23 07:37Z) to fix the matcher if it costs under half
+a lane-day, and otherwise to raise the baseline with a BOARD row owning the fix. The D seat raises the baseline by those
+two.
+
+**Why it was not fixed in D.** Two matcher changes were measured over the whole corpus at `59e5e5701e`:
+- Excluding a deconstruction's `var xᴛN` from the Go name cleared one client.cs finding but not the other: Go line 370
+  then matched the follow-up `cancelCtxΔ1 = NilSafeDelegateConversion<…>(cancelCtxᴛ1)`. It also added one in
+  `net/http/h2_bundle.cs:4665`, where the deconstruction IS the translation of `ctx, cancel = context.WithCancel(...)`.
+- Stripping `Δ\d+` in `decorRe` is the root fix and moves the whole census. 1,493 finding lines change:
+  `body:go-blank-unmapped` 2055 -> 992, `body:extra:unexplained` 2430 -> 1691, `misplaced:free-stmt` 356 -> 72,
+  `misplaced:trailing-stmt` 60 -> 13, `misplaced:decl-doc` 55 -> 41, and `body:go-blank-cs-none` 1834 -> 2181 (+347).
+  Each of those 347 needs checking before the baseline is believed. They are blanks the census can now place, and some
+  may be real gaps. Examples: `compress/flate/huffman_bit_writer.go:375`, `crypto/internal/cryptotest/aead.go:188`.
+
+**Owner.** C2, as a follow-up seat after D lands: strip `Δ\d+`, classify the +347 (real gap or matcher), add a guard that
+is red on today's matcher at client.cs, and re-baseline. Then D's two-line raise comes back out.
+
+— C2 (2026-11-23)
+
 ### 2026-11-22 — C2: optimized code can report the function's first statement as a caller line (OPEN, low; test functions cured on claude/c2-m1-test-noopt)
 
 **The finding.** When a function keeps `runtime.Caller`'s result in a local across a method chain written over

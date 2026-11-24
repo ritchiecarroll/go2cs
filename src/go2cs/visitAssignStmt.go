@@ -598,6 +598,9 @@ func mapSetMethod(mapType types.Type) string {
 func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingContext) {
 	result := &strings.Builder{}
 
+	// Where in result the statement's first line ends, when follow-up lines come after it; -1 otherwise.
+	firstLineEnd := -1
+
 	// A store to a readonly zero-size layout field is lowered through its accessor (A17).
 	v.markZeroSizeFieldStores(assignStmt)
 
@@ -1521,6 +1524,29 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 				}
 			}
 
+			// A tuple element a call delivers as one func type, assigned to an existing variable of another
+			// (`ctx, cancel = context.WithTimeout(…)` with `var cancel func()`): C# tuple deconstruction converts
+			// no delegate, so the element deconstructs into a temporary and is assigned, converted, after the
+			// statement, as an in-place element is (funcConversion).
+			if tupleTemp == "" && lhsLen > 1 && rhsLen == 1 && tupleInPlaceOK {
+				if tuple, ok := v.info.TypeOf(assignStmt.Rhs[0]).(*types.Tuple); ok && i < tuple.Len() {
+					if lhsType := v.info.TypeOf(lhs); lhsType != nil {
+						if targetName, sourceName, ok := v.funcConversion(lhs, lhsType, nil, tuple.At(i).Type()); ok {
+							tupleTemp = v.getTempVarName(valueAssignTempRoot(lhs))
+							tupleInPlaceAssigns = append(tupleInPlaceAssigns, fmt.Sprintf("%s = NilSafeDelegateConversion<%s, %s>(%s)", lhsExpr, targetName, sourceName, tupleTemp))
+
+							if tupleInForPost {
+								if v.hoistedDecls.Len() == 0 {
+									v.hoistedDecls.WriteString(v.newline)
+								}
+
+								v.hoistedDecls.WriteString(fmt.Sprintf("%s%s %s;%s", v.indent(v.indentLevel), sourceName, tupleTemp, v.newline))
+							}
+						}
+					}
+				}
+			}
+
 			// Per-element `var` for the newly-declared members of a mixed redeclaration tuple. An
 			// escaping element is already declared by its heap decl above, so it takes no `var`.
 			// Only a DIRECT ident element can declare — an index/selector/star element assigns
@@ -1825,6 +1851,10 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 				rhsExpr = narrowedChan
 			}
 
+			// A func value reaching a slot of a different func type: a defined func type and its unnamed
+			// signature convert implicitly in Go (see funcValueForSlot).
+			rhsExpr = v.funcValueForTarget(lhs, v.info.TypeOf(lhs), rhs, rhsExpr)
+
 			// A slice- or map-cored type parameter assigned to its core type (see coreTypeParamValue).
 			if materialized := v.coreTypeParamValue(v.info.TypeOf(lhs), v.info.TypeOf(rhs), rhsExpr); materialized != "" {
 				rhsExpr = materialized
@@ -1913,6 +1943,10 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 
 		if format.includeSemiColon {
 			result.WriteRune(';')
+		}
+
+		if tupleStatementPos && len(tupleInPlaceAssigns) > 0 {
+			firstLineEnd = result.Len()
 		}
 
 		for _, tupleAssign := range tupleInPlaceAssigns {
@@ -2475,6 +2509,10 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 						rhsExpr = narrowedChan
 					}
 
+					// A func value reaching a slot of a different func type: a defined func type and its unnamed
+					// signature convert implicitly in Go (see funcValueForSlot).
+					rhsExpr = v.funcValueForTarget(lhs, v.info.TypeOf(lhs), rhs, rhsExpr)
+
 					// A slice- or map-cored type parameter assigned to its core type (see coreTypeParamValue).
 					if materialized := v.coreTypeParamValue(v.info.TypeOf(lhs), v.info.TypeOf(rhs), rhsExpr); materialized != "" {
 						rhsExpr = materialized
@@ -2520,6 +2558,10 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 
 	if format.useIndent {
 		v.outputBuilder.WriteString(v.indent(v.indentLevel))
+	}
+
+	if firstLineEnd >= 0 {
+		v.trailingCommentAnchor = commentAnchor{builder: v.outputBuilder, stmtEnd: assignStmt.End(), offset: v.outputBuilder.Len() + firstLineEnd}
 	}
 
 	v.outputBuilder.WriteString(result.String())

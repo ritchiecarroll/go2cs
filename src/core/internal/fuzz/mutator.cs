@@ -273,9 +273,9 @@ internal static float64 mutateFloat⁔(/*this*/ ref mutator m, float64 v, float6
     }
 }
 
-// type byteSliceMutator is a methodless func type — rendered inline as its base delegate
+internal delegate slice<byte> byteSliceMutator(ж<mutator> _Δp0, slice<byte> _Δp1);
 
-[GoLazy] partial class lazyᴛbyteSliceMutators { internal static slice<Func<ж<mutator>, slice<byte>, slice<byte>>> byteSliceMutators = [
+[GoLazy] partial class lazyᴛbyteSliceMutators { internal static slice<byteSliceMutator> byteSliceMutators = [
     byteSliceRemoveBytes,
     byteSliceInsertRandomBytes,
     byteSliceDuplicateBytes,

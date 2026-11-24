@@ -522,12 +522,12 @@ internal static ж<Profile> Copy⁔(/*this*/ ж<Profile> Ꮡp) {
 // Demangler maps symbol names to a human-readable form. This may
 // include C++ demangling and additional simplification. Names that
 // are not demangled may be missing from the resulting map.
-// type Demangler is a methodless func type — rendered inline as its base delegate
+public delegate (map<@string, @string>, error) Demangler(slice<@string> name);
 
 // Demangle attempts to demangle and optionally simplify any function
 // names referenced in the profile. It works on a best-effort basis:
 // it will silently preserve the original names in case of any errors.
-internal static error Demangle⁔(/*this*/ ref Profile p, Func<slice<@string>, (map<@string, @string>, error)> d) {
+internal static error Demangle⁔(/*this*/ ref Profile p, Demangler d) {
     // Collect names to demangle.
     slice<@string> names = default;
     foreach (var (_, fn) in range(p.Function)) {

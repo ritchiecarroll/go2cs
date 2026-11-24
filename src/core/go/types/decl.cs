@@ -347,7 +347,7 @@ internal static void cycleError⁔(/*this*/ ж<Checker> Ꮡcheck, slice<Object> 
     // This is needed because with generic types, cycles
     // may refer to imported types. See go.dev/issue/50788.
     // TODO(gri) This functionality is used elsewhere. Factor it out.
-    [GoFunc("(*Checker).cycleError.func1")] @string name(Object objΔ1) => packagePrefix(objΔ1.Pkg(), new Func<ж<Package>, @string>(Ꮡcheck.qualifier)) + objΔ1.Name();
+    [GoFunc("(*Checker).cycleError.func1")] @string name(Object objΔ1) => packagePrefix(objΔ1.Pkg(), new Qualifier(Ꮡcheck.qualifier)) + objΔ1.Name();
 
     // If obj is a type alias, mark it as valid (not broken) in order to avoid follow-on errors.
     var obj = cycle[start];

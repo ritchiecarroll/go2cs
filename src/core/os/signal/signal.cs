@@ -312,7 +312,7 @@ internal static void process(os.Signal sig) {
 // The stop function releases resources associated with it, so code should
 // call stop as soon as the operations running in this Context complete and
 // signals no longer need to be diverted to the context.
-public static partial (context.Context ctx, Action stop) NotifyContext(context.Context parent, params ꓸꓸꓸosꓸSignal signalsʗp) {
+public static partial (context.Context ctx, context.CancelFunc stop) NotifyContext(context.Context parent, params ꓸꓸꓸosꓸSignal signalsʗp) {
     context.Context ctx = default;
     var signals = signalsʗp.slice();
 
@@ -344,7 +344,7 @@ public static partial (context.Context ctx, Action stop) NotifyContext(context.C
 
 partial struct signalCtx {
     /*embed*/ public context_package.Context Context;
-    internal Action<error> cancel;
+    internal context.CancelCauseFunc cancel;
     internal slice<os.Signal> signals;
     internal channel<os.Signal> ch;
 }

@@ -396,19 +396,8 @@ func writePackageInfoFile(packageInfoFileName string, mergeExisting bool) {
 			}
 		}
 
-		// Add new type aliases to package info file (hashset ensures uniqueness). A NON-GENERIC
-		// METHODLESS named func type is rendered inline as its base delegate with no named
-		// declaration (visitFuncType), so it has no `<pkg>_package.<Δname>` type — skip its alias,
-		// or a consumer's generated `global using` names a nonexistent type (go/doc's `ast.Filter`
-		// → `go.go.ast_package.ΔFilter`, CS0426).
+		// Add new type aliases to package info file (hashset ensures uniqueness).
 		for alias, typeName := range exportedTypeAliases {
-			// visitFuncType records the RENAMED name (a collision-renamed `Filter` is stored as
-			// `ΔFilter`, which is the alias VALUE), while a non-collision methodless func type is
-			// stored under its plain name (the alias KEY) — check both.
-			if packageInlineFuncTypeNames[alias] || packageInlineFuncTypeNames[typeName] {
-				continue
-			}
-
 			lines.Add(exportedTypeAliasRecord(alias, typeName, packageInfoFileName))
 		}
 

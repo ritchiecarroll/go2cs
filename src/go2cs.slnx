@@ -512,6 +512,8 @@
     <Project Path="tests/Behavioral/DefinedElemStringConversion/DefinedElemStringConversion.csproj" />
     <Project Path="tests/Behavioral/DefinedForeignStructConvert/DefinedForeignStructConvert.csproj" />
     <Project Path="tests/Behavioral/DefinedForeignStructConvert/rec/DefinedForeignStructConvert.rec.csproj" />
+    <Project Path="tests/Behavioral/DefinedFuncTypeIdentity/DefinedFuncTypeIdentity.csproj" />
+    <Project Path="tests/Behavioral/DefinedFuncTypeIdentity/hooks/DefinedFuncTypeIdentity.hooks.csproj" />
     <Project Path="tests/Behavioral/DefinedOverNamedComposite/DefinedOverNamedComposite.csproj" />
     <Project Path="tests/Behavioral/DefinedOverNamedComposite/fslike/DefinedOverNamedComposite.fslike.csproj" />
     <Project Path="tests/Behavioral/DefinedStructArrayFields/DefinedStructArrayFields.csproj" />

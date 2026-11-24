@@ -33,10 +33,10 @@ partial struct buffer {
     internal array<byte> tmp = new(16);
 }
 
-// type decoder is a methodless func type — rendered inline as its base delegate
+internal delegate error decoder(ж<buffer> _Δp0, message _Δp1);
 
 partial interface message {
-    slice<Func<ж<buffer>, message, error>> decoder();
+    slice<decoder> decoder();
     void encode(ж<buffer> _);
 }
 

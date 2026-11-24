@@ -97,11 +97,11 @@ Three shapes are reproduced, matching what the dependency's conversion publishes
 | `type Month int` + `func (Time) Month() Month` | `("Month", "ΔMonth")` | `timeꓸMonth` |
 | `type Token any` + `func (*Decoder) Token() Token` | `("Token", "ΔToken")`, `("ΔToken", "object")` | `object` |
 
-Two shapes are deliberately **not** derived, because publishing a wrong target is worse than publishing
-none: a methodless named func type (rendered inline as its base delegate, so no `<pkg>_package.Δname` type
-exists to alias — `go/doc`'s `ast.Filter`, the same skip `writePackageInfoFile` applies), and a defined type
-over a **non-empty named interface**, whose alias target is a `visitTypeSpec`-only rendering of the RHS (no
-instance exists in the corpus<!-- the 302-package corpus at the time -->). Both keep the unrenamed emission.
+One shape is deliberately **not** derived, because publishing a wrong target is worse than publishing
+none: a defined type over a **non-empty named interface**, whose alias target is a `visitTypeSpec`-only
+rendering of the RHS (no instance exists in the corpus<!-- the 302-package corpus at the time -->). It keeps
+the unrenamed emission. A defined func type, which until 2026-11-23 was a second such shape when it had no
+methods (it declared no delegate), is derived like any other type.
 
 An imported alias's `global using` is emitted into the consumer's `package_info.cs` **only when an emitted
 reference resolved through it**, whether the alias was derived or parsed from the dependency's
@@ -129,7 +129,7 @@ collision renames, so this derivation does not cover them: a dependency's re-exp
 subsection).
 
 (Guarded by `foreignNameCollisions_test.go`: a two-package fixture whose `dep` carries one of every shape —
-colliding const, colliding type, colliding empty-interface type, methodless func type, and a non-colliding
+colliding const, colliding type, colliding empty-interface type, a defined func type, and a non-colliding
 control — asserting the derivation, its independence from run-accumulated `nameCollisions` state, and the
 end-to-end render (`dep.ΔSecond`, `depꓸMonth`) with no `package_info.cs` present.)
 
@@ -180,8 +180,7 @@ unrenamed, a wrong one names a type that does not exist): a composite or basic R
 (`type Table = map[string]int`, whose rendering runs the whole `convertToCSFullTypeName` lowering) and an
 alias-to-an-alias chain; an **anonymous** struct/interface RHS, which is *lifted* under a generated name
 only a conversion assigns (`internal/fuzz`'s `type CorpusEntry = struct{…}` → `CorpusEntryᴛ1`); a generic
-target; a methodless named **func** type, rendered inline as its base delegate with no named type to point at
-(the same omission `typeCollisionAliases` and `writePackageInfoFile` make); and a target that is **itself**
+target; and a target that is **itself**
 emitted as a using alias by its own package, which would need a second hop this derivation does not follow.
 Each declines by shape, from the dependency's own declarations, so the decision is stable across runs.
 

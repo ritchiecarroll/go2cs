@@ -151,7 +151,7 @@ partial class bufioᴛScanner {
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool advance(this ref Scanner s, nint n) => bufio_package.advance⁔(ref s, n);
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void setErr(this ref Scanner s, error err) => bufio_package.setErr⁔(ref s, err);
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Buffer(this ref Scanner s, slice<byte> buf, nint max) => bufio_package.Buffer⁔(ref s, buf, max);
-    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Split(this ref Scanner s, Func<slice<byte>, bool, (nint, slice<byte>, error)> split) => bufio_package.Split⁔(ref s, split);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Split(this ref Scanner s, SplitFunc split) => bufio_package.Split⁔(ref s, split);
 }
 partial class bufioᴛWriter {
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Size(this ref Writer b) => bufio_package.Size⁔(ref b);

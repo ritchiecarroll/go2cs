@@ -11,7 +11,7 @@ using io = io_package;
 
 partial class cryptotest_package {
 
-// type MakeBlock is a methodless func type — rendered inline as its base delegate
+public delegate (cipher.Block, error) MakeBlock(slice<byte> key);
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static ref readonly @string encryptionˢ => ref encryptionˢᵇ;
@@ -21,7 +21,7 @@ private static readonly @string decryptionˢᵇ = "Decryption"u8;
 
 // TestBlock performs a set of tests on cipher.Block implementations, checking
 // the documented requirements of BlockSize, Encrypt, and Decrypt.
-public static void TestBlock(ж<testing.T> t, nint keySize, Func<slice<byte>, (cipher.Block, error)> mb) {
+public static void TestBlock(ж<testing.T> t, nint keySize, MakeBlock mb) {
     // Generate random key
     var key = new slice<byte>(keySize);
     newRandReader(t).Read(key);

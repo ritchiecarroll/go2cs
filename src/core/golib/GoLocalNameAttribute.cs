@@ -17,7 +17,7 @@ namespace go;
 /// C# identifier. Deliberately a SEPARATE attribute — the <c>[GoType]</c> definition slot is
 /// parsed by exact match in the TypeGenerator and must not carry extra tokens (I2.R R-8).
 /// </summary>
-[AttributeUsage(AttributeTargets.Struct | AttributeTargets.Class | AttributeTargets.Interface)]
+[AttributeUsage(AttributeTargets.Struct | AttributeTargets.Class | AttributeTargets.Interface | AttributeTargets.Delegate)]
 [EditorBrowsable(EditorBrowsableState.Never)] public sealed class GoLocalNameAttribute(string name) : Attribute
 {
     /// <summary>The original Go source-local type name.</summary>

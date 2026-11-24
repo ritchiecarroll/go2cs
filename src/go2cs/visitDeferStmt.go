@@ -393,6 +393,17 @@ func (v *Visitor) visitDeferStmt(deferStmt *ast.DeferStmt) {
 			if boxGroup := v.pointerReceiverBoxMethodGroup(deferStmt.Call.Fun); boxGroup != "" {
 				callExpr = boxGroup
 			}
+
+			// The callee VALUE itself is handed to golib's `defer`, whose overloads take the structural
+			// Action/Func delegates; a defined func type is a delegate of its own (database/sql's
+			// `defer release(err)` through a releaseConn), so it converts to its underlying signature's.
+			if funType := v.getType(deferStmt.Call.Fun, false); funType != nil {
+				if named, ok := types.Unalias(funType).(*types.Named); ok && named.TypeParams() == nil {
+					if sig, isSig := named.Underlying().(*types.Signature); isSig && !signatureMentionsTypeParams(sig) {
+						callExpr = fmt.Sprintf("NilSafeDelegateConversion<%s, %s>(%s)", v.getCSharpTypeName(sig), v.getCSharpTypeName(funType), callExpr)
+					}
+				}
+			}
 		}
 
 		result.WriteString(callExpr)
