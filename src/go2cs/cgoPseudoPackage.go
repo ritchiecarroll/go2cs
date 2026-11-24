@@ -87,6 +87,13 @@ func cgoPseudoPackageKind(kind cgoDeclKind) bool {
 // package state like the rest.
 var cgoEmittingPseudoPackage bool
 
+// cgoPseudoPackageReferenced records that the file being visited wrote a pseudo-package member through `C.`, which
+// needs the file's `using C` alias. A file can do so without naming any cmd/cgo declaration in its syntax: net's
+// cgo_unix.go converts to _C_socklen_t, an alias another file declares as C.socklen_t, and the cast renders the alias's
+// target, C.@uint (cgo Phase 3, increment 3.4, DESIGN-cgo-phase3-marshaling 19.6). visitFile resets it per file and
+// reads it beside namesCgoPseudoPackageMember.
+var cgoPseudoPackageReferenced bool
+
 // cgoPseudoPackageReference is how a Go name is written when it names a pseudo-package member: `C.@int` outside the
 // pseudo-package and `@int` inside it, or a typedef's `Cꓸdiv_t` anywhere.
 func cgoPseudoPackageReference(goName string) (string, bool) {
@@ -99,6 +106,8 @@ func cgoPseudoPackageReference(goName string) (string, bool) {
 	if cgoEmittingPseudoPackage || strings.HasPrefix(member, cgoPseudoPackageAlias+TypeAliasDot) {
 		return member, true
 	}
+
+	cgoPseudoPackageReferenced = true
 
 	return cgoPseudoPackageAlias + "." + member, true
 }
