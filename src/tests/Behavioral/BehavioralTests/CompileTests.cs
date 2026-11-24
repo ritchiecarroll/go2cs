@@ -1513,6 +1513,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckMnIfaceTwin() => CheckTarget("MnIfaceTwin");
 
     [TestMethod]
+    public void CheckMnInvisible() => CheckTarget("MnInvisible");
+
+    [TestMethod]
     public void CheckMnMainExit() => CheckTarget("MnMainExit");
 
     [TestMethod]
