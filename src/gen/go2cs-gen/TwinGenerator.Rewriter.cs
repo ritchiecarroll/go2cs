@@ -419,8 +419,9 @@ public sealed partial class TwinGenerator
 
             // Row 7 piece 6: an await that IS a for statement's iterator stays a statement expression (CS0201 when
             // parenthesized: go/parser's `for (; p.tok != token.EOF; Ꮡp.next())`); VisitForStatement adds the re-derivations.
+            // The closure cure: an awaited for INITIALIZER is a statement expression too (runtime's unwinder, `for (Ꮡu.initAt(…);`).
             if (node.Parent is not (ExpressionStatementSyntax or ArrowExpressionClauseSyntax or LambdaExpressionSyntax) &&
-                !(node.Parent is ForStatementSyntax loop && loop.Incrementors.Contains(node)))
+                !(node.Parent is ForStatementSyntax loop && (loop.Incrementors.Contains(node) || loop.Initializers.Contains(node))))
                 awaited = ParenthesizedExpression(awaited);
 
             m_awaits++;
@@ -719,7 +720,14 @@ public sealed partial class TwinGenerator
         // else-if are entered with the refs derived again (Rule H), so only its own condition counts.
         private bool EvaluatedWith(StatementSyntax? owner, SyntaxNode read, SyntaxNode call)
         {
-            if (ReferenceEquals(owner, m_current))
+            // The closure cure: a label is not a statement of its own (crypto/x509's `candidateLoop: foreach (…)`, whose
+            // header reads `opts` after an await): the statement being visited is the one the labels wrap.
+            StatementSyntax? visited = m_current;
+
+            while (visited is LabeledStatementSyntax labeled)
+                visited = labeled.Statement;
+
+            if (ReferenceEquals(owner, m_current) || ReferenceEquals(owner, visited))
                 return true;
 
             if (owner is not IfStatementSyntax nested || !nested.Condition.Span.Contains(read.Span) || !nested.Condition.Span.Contains(call.Span))
@@ -1439,7 +1447,23 @@ public sealed partial class TwinGenerator
 
             HeaderAwaits = 0;
             VariableDeclarationSyntax? declaration = Head(node.Declaration);
-            SeparatedSyntaxList<ExpressionSyntax> initializers = SeparatedList(node.Initializers.Select(item => Head(item)!), node.Initializers.GetSeparators());
+            // The closure cure: an awaited initializer cannot stay in the header (C# parses `for (await f(), …` as a declaration
+            // of a type named `await`), so when one awaits, EVERY initializer moves, in order, into the statement prelude
+            // (Rule S's spills): they run once, before the loop, as the header ran them, and the live ref locals are
+            // derived again after each. runtime's unwinder loops, `for (Ꮡu.initAt(…); u.valid(); Ꮡu.next())`. A DECLARING
+            // initializer (go/internal/gcimporter's `for ((nint i, nint n) = (0, r.Len()); …)`) stays in the header: its
+            // await is nested, so it parses, and moved before the loop its variables would leave the loop's scope (CS0136).
+            int initialAwaits = m_awaits;
+            List<ExpressionSyntax> started = [.. node.Initializers.Select(item => Head(item)!)];
+            SeparatedSyntaxList<ExpressionSyntax> initializers = SeparatedList(started, node.Initializers.GetSeparators());
+            bool declaring = node.Initializers.Any(item => item.DescendantNodesAndSelf().OfType<DeclarationExpressionSyntax>().Any());
+
+            if (m_awaits > initialAwaits && !declaring)
+            {
+                m_spills.AddRange(started.Select(item => (StatementSyntax)ExpressionStatement(item.WithoutTrivia())));
+                initializers = default;
+            }
+
             ExpressionSyntax? condition = Head(node.Condition);
 
             // Row 7 piece 6 (DATA-mn-row7-r5.md): an iterator that awaited is followed, IN the iterator list, by the live

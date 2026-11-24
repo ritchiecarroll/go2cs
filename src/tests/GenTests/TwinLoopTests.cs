@@ -87,6 +87,58 @@ public class TwinLoopTests
                 return sum * 100 + p.v;
             }
 
+            // (2c) The closure cure: the INITIALIZER parks (runtime's unwinder, `for (Ꮡu.initAt(…); u.valid(); …)`); the
+            // condition reads the ref local right after it.
+            public static nint forInit(ж<N> Ꮡp)
+            {
+                ref var p = ref Ꮡp.DerefOrNull();
+                nint sum = 0;
+
+                for (advance(Ꮡp, false); p.v < 10; p.v += 2) {
+                    sum += p.v;
+                }
+
+                return sum * 100 + p.v;
+            }
+
+            // (2d) The closure cure: a LABELED loop whose header awaits a call and then reads a ref local (crypto/x509's
+            // `candidateLoop: foreach (… in range(slice([new(…, opts.Roots.find(…)), new(…, opts.Intermediates.find(…))]))`).
+            internal static nint pick(ж<N> Ꮡq, bool block) { if (block) { ᐸꟷ(ch); } return 10; }
+
+            public static nint labeledHeader(ж<N> Ꮡp)
+            {
+                ref var p = ref Ꮡp.DerefOrNull();
+                nint sum = 0;
+
+        outer:
+                foreach (var (_, v) in range(new slice<nint>(new nint[] { pick(Ꮡp, false), p.v }))) {
+                    sum += v;
+                    if (sum > 100) {
+                        goto outer;
+                    }
+                }
+
+                return sum * 100 + p.v;
+            }
+
+            // (2e) The closure cure: a DECLARING initializer that awaits stays in the header (go/internal/gcimporter's
+            // `for ((nint i, nint n) = (0, r.Len()); i < n; i++)`): moved before the loop, its variables would clash with a
+            // sibling loop's (CS0136).
+            public static nint forDeclaring(ж<N> Ꮡp)
+            {
+                nint sum = 0;
+
+                for (nint i = 0; i < 2; i++) {
+                    sum += i;
+                }
+
+                for ((nint i, nint n) = (0, pick(Ꮡp, false)); i < n; i++) {
+                    sum += i;
+                }
+
+                return sum;
+            }
+
             // (2b) A labeled continue from an inner loop, spelled as the converter spells it.
             public static nint forLabeled(ж<N> Ꮡp)
             {
@@ -153,6 +205,35 @@ public class TwinLoopTests
         StringAssert.Contains(twins, "for (; p.v < 10; await advanceꞏtwin(Ꮡp, false), p = ref Ꮡp.DerefOrNull())",
             "the await is a statement expression of the iterator, followed by p derived again");
         Assert.AreEqual(Plain(assembly, "forContinue"), Twin(assembly, "forContinue"), "continue runs the iterator; the condition reads p after the park");
+    }
+
+    [TestMethod]
+    public void AParkingInitializerMovesBeforeTheLoopAndTheConditionReadsAfterIt()
+    {
+        (string twins, Assembly assembly) = Build();
+
+        StringAssert.Contains(twins, "await advanceꞏtwin(Ꮡp, false); p = ref Ꮡp.DerefOrNull();",
+            "the parking initializer runs once, before the loop, followed by p derived again");
+        StringAssert.Contains(twins, "p = ref Ꮡp.DerefOrNull(); for (; (Ꮡp.DerefOrNull()).v < 10;", "the header keeps no initializer");
+        Assert.AreEqual(Plain(assembly, "forInit"), Twin(assembly, "forInit"), "the condition reads p after the park");
+    }
+
+    [TestMethod]
+    public void ALabeledLoopsHeaderReadsItsRefLocalAfterAnAwaitThroughTheBox()
+    {
+        (string twins, Assembly assembly) = Build();
+
+        Assert.AreEqual(Plain(assembly, "labeledHeader"), Twin(assembly, "labeledHeader"), "the header's read after the park sees the write");
+        StringAssert.Contains(twins, "labeledHeaderꞏtwin", "the method is twinned");
+    }
+
+    [TestMethod]
+    public void ADeclaringInitializerThatParksStaysInTheHeader()
+    {
+        (string twins, Assembly assembly) = Build();
+
+        StringAssert.Contains(twins, "for ((nint i, nint n) = (0, (await pickꞏtwin(Ꮡp, false))); i < n; i++)", "the declaration keeps its scope");
+        Assert.AreEqual(Plain(assembly, "forDeclaring"), Twin(assembly, "forDeclaring"));
     }
 
     [TestMethod]

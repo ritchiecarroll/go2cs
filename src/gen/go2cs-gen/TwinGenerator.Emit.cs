@@ -145,6 +145,17 @@ public sealed partial class TwinGenerator
             // byref-param (12.1): each boxed parameter takes the same prologue, in parameter order.
             List<string> boxedNames = [.. candidate.BoxReceiver is { } boxedReceiver ? [boxedReceiver] : Array.Empty<string>(), .. candidate.BoxParams ?? []];
 
+            // An expression-bodied box twin (a glyph forwarder, `=> M⁔(ref t, …)`) needs a statement for its prologue: the
+            // expression becomes a one-line block, `{ return …; }` (or `{ …; }` for void), so the line mapping holds.
+            if (body is null && arrow is not null && boxedNames.Count > 0)
+            {
+                bool returnsVoid = method.ReturnType is PredefinedTypeSyntax returned && returned.Keyword.IsKind(SyntaxKind.VoidKeyword);
+                string statement = (returnsVoid ? "" : "return ") + arrow.Expression.WithoutTrivia().ToFullString() + ";";
+
+                body = (BlockSyntax)SyntaxFactory.ParseStatement("{ " + statement + " }");
+                arrow = null;
+            }
+
             if (body is not null && boxedNames.Count > 0)
             {
                 List<StatementSyntax> entry = [];
@@ -235,6 +246,7 @@ public sealed partial class TwinGenerator
                 .WithIdentifier(SyntaxFactory.ParseToken(method.Identifier.Text + Suffix).WithLeadingTrivia(method.Identifier.LeadingTrivia).WithTrailingTrivia(method.Identifier.TrailingTrivia))
                 .WithBody(body)
                 .WithExpressionBody(arrow)
+                .WithSemicolonToken(arrow is null && body is not null ? default : method.SemicolonToken)
                 .WithLeadingTrivia();
 
             return indent + "[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]\r\n" +
