@@ -3,12 +3,13 @@ Usage: go2cs [options] <input> [output_dir]
 Common options:
   -recurse[=module,nuget]  Convert a module and its third-party dependencies (=module: the module
                            only; =nuget: standard library from NuGet)
-  -go2cspath <dir>         Where the go2cs standard library and runtime are, when they are not from
-                           NuGet (env GO2CSPATH)
+  -go2cspath <dir>         Where the go2cs standard library and runtime are when not from NuGet, and
+                           where -stdlib writes
   -platforms <os/arch>     The target platform, os/arch (default: this machine's)
   -tags <list>             Build tags applied when loading packages, comma-separated
   -comments                Carry the Go source comments into the C#
-  -stdlib                  Convert the Go standard library itself, or the packages named after it
+  -stdlib                  For go2cs development: convert the Go standard library into the
+                           -go2cspath root
   -cgo                     Convert a cgo package whose C use go2cs can bind (needs a C compiler)
   -tests                   Also convert the package's Go tests and emit a runnable C# test host
   -test-action <action>    With -tests: convert, build, run, compare (with go test) or all

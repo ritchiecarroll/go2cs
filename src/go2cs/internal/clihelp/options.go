@@ -28,8 +28,8 @@ var options = []Option{
 			"<gopath>/src/go2cs` with it; most conversions want `-recurse=nuget`, which needs nothing staged. An " +
 			"optional second positional sets the output root for the generated `src\\` (app) and `pkg\\` (dependency) " +
 			"trees. A package that fails to convert (it does not load, or the converter panics) is reported and " +
-			"skipped, and so is a package the converter **refuses** (a `GO2CS2001`, `GO2CS2002`, `GO2CS2003`, " +
-			"`GO2CS2005`, `GO2CS2006`, `GO2CS2010` or `GO2CS2011` error): its diagnostics print as errors, it gets " +
+			"skipped, and so is a package the converter **refuses** (any refusal error, listed in [Diagnostic " +
+			"codes](DiagnosticCodes.md)): its diagnostics print as errors, it gets " +
 			"no project, every other package still converts, and the run ends with exit 1, naming each failed and " +
 			"refused package and each converted package that imports a refused one (which will not build until the " +
 			"refused package converts). A code downgraded by `-warn` is not a refusal. A single-package conversion " +
@@ -59,7 +59,7 @@ var options = []Option{
 		// The flag's usage text before this table (main.go, master cb6def82a2), kept as history:
 		//   Path to C# converted code
 		Name: "go2cspath", Value: "<dir>", Class: Common, Group: "Converting",
-		Summary: "Where the go2cs standard library and runtime are, when they are not from NuGet (env GO2CSPATH)",
+		Summary: "Where the go2cs standard library and runtime are when not from NuGet, and where -stdlib writes",
 		Details: "" +
 			"Runtime/stdlib root (env `GO2CSPATH`; default `~/go2cs`) used by generated `$(go2csPath)…` references, " +
 			"and the output root for `-stdlib`. `deploy-core.ps1` stages at `<gopath>/src/go2cs`, not at the " +
@@ -111,9 +111,13 @@ var options = []Option{
 		//   Convert Go standard library (implies -tags "+defaultStdLibTagList+" by default; pass an explicit -tags to
 		//   override)
 		Name: "stdlib", Value: "", Class: Common, Group: "Converting",
-		Summary: "Convert the Go standard library itself, or the packages named after it",
+		Summary: "For go2cs development: convert the Go standard library into the -go2cspath root",
 		Details: "" +
-			"Convert the Go standard library, or only the packages named after it (`go2cs -stdlib fmt strings`). With " +
+			"For go2cs development: convert the Go standard library, or only the packages named after it (`go2cs " +
+			"-stdlib fmt strings`), into the `-go2cspath` root, as `core/<package>`. Converting a program does not need " +
+			"it: `-recurse=nuget` takes the standard library from NuGet. Convert into a root copied from a go2cs " +
+			"clone's `src/core`: in any other root the hand-written files are replaced by automatic conversions that " +
+			"compile and do not work. With " +
 			"no `-tags` it applies the build tags `purego,math_big_pure_go`, which select the portable Go " +
 			"implementations over the assembly ones; an explicit `-tags` replaces them, and `-tags=` applies none.",
 	},
@@ -458,7 +462,7 @@ var options = []Option{
 		Name: "module-disclosures", Value: "<dir>", Class: Advanced, Group: "Testing",
 		Summary: "With -tests on a module: the tree of committed disclosure manifests",
 		Details: "" +
-			"With `-tests` on a third-party module: the committed tree of module rows' disclosure manifests, laid " +
+			"With `-tests` on a third-party module: the committed tree of disclosure manifests (the tests a module's own validation excludes, each with its reason), laid " +
 			"out like the module cache (`<dir>/<module path>@<version>/<package dir>/go2cs_test_disclosures.json`; " +
 			"the repository keeps it at `src/tests/ModuleDisclosures`). A manifest there is read only when the " +
 			"package's output directory holds none, and only for the module version this run resolved; a manifest " +
@@ -548,7 +552,7 @@ var options = []Option{
 		Summary: "With -recurse=nuget: read mapped package versions from this feed, not nuget.org",
 		Details: "" +
 			"With `-recurse=nuget`: read mapped packages' versions from this feed **instead of** nuget.org: an " +
-			"`https://` NuGet v3 service index (a rehearsal gallery such as int.nugettest.org) or a local folder of " +
+			"`https://` NuGet v3 service index (a test gallery such as int.nugettest.org, for trying packages before they are published) or a local folder of " +
 			"`.nupkg` files. A rehearsal version (`nugetgo-pack.ps1 -RehearsalSuffix`) is admitted only from it. The " +
 			"restore reads your own package sources, so add the feed there too.",
 	},
@@ -704,9 +708,8 @@ var options = []Option{
 			"constraint proxy method that cannot forward its storage-sharing value). Each downgraded site is printed " +
 			"as `warning GO2CS2002: ...` (exit 0) and recorded in package_info.cs, and every C# build of the project " +
 			"then reports it as `GO2CS0011`, so a project nobody converts again still shows it carries a " +
-			"known-broken path. An unknown code, or a known code that cannot fail loud (`GO2CS2001`, `GO2CS2003`, " +
-			"`GO2CS2004`, `GO2CS2005`, `GO2CS2006`, `GO2CS2008`, `GO2CS2010`, `GO2CS2011`), is an error that names " +
-			"it and the reason. See [diagnostic codes](DiagnosticCodes.md).",
+			"known-broken path. Any other code, an unknown one or a refusal that cannot fail loud, is an error " +
+			"that names it and the reason. See [diagnostic codes](DiagnosticCodes.md).",
 	},
 	{
 		// The flag's usage text before this table (main.go, master cb6def82a2), kept as history:
