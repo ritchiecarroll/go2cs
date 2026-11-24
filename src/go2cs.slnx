@@ -931,6 +931,7 @@
     <Project Path="tests/Behavioral/NamedSliceMethodShadow/NamedSliceMethodShadow.csproj" />
     <Project Path="tests/Behavioral/NamedPointerReinterpret/NamedPointerReinterpret.csproj" />
     <Project Path="tests/Behavioral/NamedPointerValueSlot/NamedPointerValueSlot.csproj" />
+    <Project Path="tests/Behavioral/NamedPointerValueStruct/NamedPointerValueStruct.csproj" />
     <Project Path="tests/Behavioral/NamedResultAddressEscape/NamedResultAddressEscape.csproj" />
     <Project Path="tests/Behavioral/NamedResultCaptureModeReceiver/NamedResultCaptureModeReceiver.csproj" />
     <Project Path="tests/Behavioral/NamedResultLambdaInfer/NamedResultLambdaInfer.csproj" />

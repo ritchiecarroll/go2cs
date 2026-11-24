@@ -1714,6 +1714,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckNamedPointerValueSlot() => CheckTarget("NamedPointerValueSlot");
 
     [TestMethod]
+    public void CheckNamedPointerValueStruct() => CheckTarget("NamedPointerValueStruct");
+
+    [TestMethod]
     public void CheckNamedResultAddressEscape() => CheckTarget("NamedResultAddressEscape");
 
     [TestMethod]

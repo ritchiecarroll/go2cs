@@ -81,6 +81,10 @@ type Count map[int]bool
 type CompareTo int
 type Length string
 
+// Channel types named like the members -uco=false spells (Receive: a Δ member; Send: explicit only).
+type Receive chan int
+type Send chan int
+
 // Pointer types named like the pointer wrapper's members.
 type point struct{ X, Y int }
 
@@ -99,6 +103,9 @@ func bump(p Value) {
 	p[2]++
 	*p = [3]int{p[0], p[1], p[2] * 10}
 }
+
+// through returns its Value unchanged, so len and cap see an operand that calls.
+func through(p Value) Value { return p }
 
 func main() {
 	p := make(Pipe, 2)
@@ -209,6 +216,18 @@ func main() {
 	fmt.Println("type CompareTo:", ct < 5, min(ct, 2))
 	var ln Length = "four"
 	fmt.Println("type Length:", len(ln), ln < "z", ln[1:])
+	rc := make(Receive, 1)
+	rc <- 5
+	select {
+	case v := <-rc:
+		fmt.Println("type Receive selected:", v)
+	default:
+		fmt.Println("type Receive: none")
+	}
+	rc <- 6
+	sc := make(Send, 1)
+	sc <- <-rc
+	fmt.Println("type Receive/Send:", len(rc), <-sc)
 
 	// The pointer wrappers whose type names are their own member names: dereference, write through, compare with nil,
 	// a typed nil in an interface, a field through the pointer and its address, an element and its address.
@@ -222,6 +241,7 @@ func main() {
 		sum3 += i * e
 	}
 	fmt.Println("type Value:", *pv, v1, pv[:2], len(pv), sum3, pv != nil)
+	fmt.Println("type Value len/cap through a call:", len(through(pv)), cap(through(pv)))
 	sl := []int{1, 2}
 	var ps ValueSlot = &sl
 	*ps = append(*ps, 3)

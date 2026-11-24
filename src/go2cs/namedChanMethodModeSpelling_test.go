@@ -95,6 +95,21 @@ func TestNamedChanMethodModeSpelling(t *testing.T) {
 		t.Errorf("named-method mode: %d occurrences of p.Receive(), want 1 (the Go method call; `<-p` takes the glyph)", got)
 	}
 
+	// A channel type NAMED like one of those members claims it too (go2cs-gen's GoMethodNames carries the type's own name):
+	// `type Receive chan int` declares ΔReceive and `type Send chan int` declares Send explicitly only, so both take the
+	// glyphs (P3's SHOULD 3).
+	for _, want := range []string{"rc." + ChannelLeftOp + "(5);", "sc." + ChannelLeftOp + "(", ChannelLeftOp + "<nint>(rc)"} {
+		if !strings.Contains(named, want) {
+			t.Errorf("named-method mode: a member-named channel's emission lacks %q", want)
+		}
+	}
+
+	for _, refuse := range []string{"rc.Send(", "rc.Receive()", "sc.Send(", "rcᴛ1.Receiving"} {
+		if strings.Contains(named, refuse) {
+			t.Errorf("named-method mode: the emission holds %q, a member the member-named channel has moved", refuse)
+		}
+	}
+
 	// The near-miss channel Wire and the member-named Capacity declare none of those names: they keep the named
 	// members, so the mode is still read, and the guard above is not vacuous.
 	for _, want := range []string{"w.Send(1);", "w.Receive()", "cc.Send(\"c\");", "cc.Receive()"} {

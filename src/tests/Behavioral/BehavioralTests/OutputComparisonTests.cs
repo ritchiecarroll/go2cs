@@ -1670,6 +1670,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckNamedPointerValueSlot() => CheckTarget("NamedPointerValueSlot");
 
     [TestMethod]
+    public void CheckNamedPointerValueStruct() => CheckTarget("NamedPointerValueStruct");
+
+    [TestMethod]
     public void CheckNamedResultAddressEscape() => CheckTarget("NamedResultAddressEscape");
 
     [TestMethod]
