@@ -20,7 +20,7 @@ import (
 	"golang.org/x/tools/go/packages"
 )
 
-// THE -recurse IMPORTER SEED (W18 ruling C, item 3; COORD 2026-11-17 19:02Z, scope b)
+// THE -recurse IMPORTER SEED (W18 ruling C, item 3, scope b; e190d6da30)
 //
 // An importer that admits an anonymous struct identical to an alias a direct import declares, while the import does not
 // admit it, keeps its own lift (W18 ruling A), and a value of that Go type cannot cross between the two packages by value.
@@ -70,7 +70,7 @@ func importerInlineArraySeeds(queue []string, closure map[string]*packages.Packa
 	}
 
 	// The cap ended the loop while a pass was still adding seeds: these are not the fixed point, and any demand a
-	// further pass would make is dropped (P3 review 2.2). Said by name rather than used silently.
+	// further pass would make is dropped (review 2.2). Said by name rather than used silently.
 	if !converged && len(lastAdded) > 0 {
 		showWarning("@importerSeeds - the -recurse importer-seed derivation stopped at its cap of %d passes while pass %d was still adding seeds (%s); the seeds are not the fixed point, and any demand a further pass would make is dropped",
 			importerSeedMaxPasses, importerSeedMaxPasses, strings.Join(lastAdded, ", "))
@@ -88,7 +88,7 @@ func importerInlineArraySeeds(queue []string, closure map[string]*packages.Packa
 // importerSeedPass computes every convert-set package's admission once, in dependency order, against this pass's
 // in-memory stamps of the convert-set (and the conversion's own reader for any other import), adds each new demand to
 // derived, and returns the seeds it added as path#name. The stamp lookup is swapped for the pass and restored by a
-// deferred call, so a panic inside an admission cannot leave the pass's closure in the global (P3 review 2.3).
+// deferred call, so a panic inside an admission cannot leave the pass's closure in the global (review 2.3).
 func importerSeedPass(pass int, queue []string, closure map[string]*packages.Package, options Options, inSet map[string]bool, derived map[string]map[string]bool) []string {
 	stamps := map[string]inlineArrayStamp{}
 	var added []string
@@ -256,17 +256,6 @@ func inlineArrayStampOf(a *inlineArrayAdmission, mode string) inlineArrayStamp {
 	}
 
 	return stamp
-}
-
-// setOf returns names as a set.
-func setOf(names []string) map[string]bool {
-	set := make(map[string]bool, len(names))
-
-	for _, name := range names {
-		set[name] = true
-	}
-
-	return set
 }
 
 // traceImporterSeed writes one line per derived seed to stderr when GO2CS_TRACE_LIFT_REUSE=1 (liftReuseTraceVariable):

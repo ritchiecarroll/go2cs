@@ -10,9 +10,9 @@ partial class main_package {
 
 internal static void header(Actionꓸꓸꓸ<@string, any> w, nint n) { w("n=%d %s", n, (@string)"x"); }
 
-// type logFunc is a methodless func type — rendered inline as its base delegate
+internal delegate void logFunc(@string format, params ꓸꓸꓸany argsʗp);
 
-internal static void headerNamed(Actionꓸꓸꓸ<@string, any> w, nint n) { w("named n=%d", n); }
+internal static void headerNamed(logFunc w, nint n) { w("named n=%d", n); }
 
 partial struct sink {
     internal Actionꓸꓸꓸ<@string, any> write;
@@ -27,7 +27,7 @@ internal static void main() {
         @out += fmt.Sprintf(format, args.ꓸꓸꓸ) + ";"u8;
     };
     header(writeFormat, 2);
-    headerNamed(writeFormat, 3);
+    headerNamed(NilSafeDelegateConversion<logFunc, Actionꓸꓸꓸ<@string, any>>(writeFormat), 3);
     var s = new sink(write: writeFormat);
     s.write("field %s", (@string)"ok");
     writeFormat("direct %d %d", (nint)4, (nint)5);

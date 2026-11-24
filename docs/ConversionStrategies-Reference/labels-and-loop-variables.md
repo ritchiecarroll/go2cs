@@ -322,9 +322,9 @@ at landing: 570 behavioral packages, and exactly one non-`int` range operand in 
 is re-measured by a guard. -->
 
 ## An index-only range over a slice or array reads no element
-<!-- src/go2cs/visitRangeStmt.go:812 `} else if (isSlice || isArray) && valExpr == "_" {` and :884
-`foreach (%s%s in range(len(%s)))`; src/core/golib/builtin.cs:2212 `public static nint len<T>(in slice<T> slice)`,
-:2222 `public static nint len<T>(in sslice<T> slice)`, :2172 `public static nint len<T>(in array<T> array)`. -->
+<!-- src/go2cs/visitRangeStmt.go:813 `} else if (isSlice || isArray) && valExpr == "_" {` and :885
+`foreach (%s%s in range(len(%s)))`; src/core/golib/builtin.cs:2194 `public static nint len<T>(in slice<T> slice)`,
+:2204 `public static nint len<T>(in sslice<T> slice)`, :2154 `public static nint len<T>(in array<T> array)`. -->
 Go's index-only range (`for i := range s`, `for i, _ := range s`, or `for range s`) reads the length once and
 loads no element. The converter ranges the length, `foreach (var i in range(len(s)))`, when the operand is a
 slice, an array, a named slice or array type, a type parameter whose core type is one, or a variadic parameter
@@ -371,8 +371,8 @@ A pointer receiver is the value it addresses (`this ref T b`). Either would rang
 pointer and faults where Go ranges `N` times. Neither needs evaluating, because with at most one iteration variable and
 a constant length Go does not evaluate the range operand at all. So each ranges the count itself, `range(N)`, a
 pointer to a named array type included; the box overload, which cannot bind a `ref` (CS0411), is never asked to.
-<!-- src/go2cs/visitRangeStmt.go:869-870 `case isArrayPointee && rangedThroughPointer && derefdValue:` then
-`foreach (%s%s in range(%d))`, and :882 `foreach (%s%s in range(%s, %d))` for the box form; Go spec, For statements
+<!-- src/go2cs/visitRangeStmt.go:870-871 `case isArrayPointee && rangedThroughPointer && derefdValue:` then
+`foreach (%s%s in range(%d))`, and :883 `foreach (%s%s in range(%s, %d))` for the box form; Go spec, For statements
 with range clause: "if at most one iteration variable is present and len(x) is constant, the range expression is
 not evaluated". Ruled 2026-10-25 (COORD, H's diagnosis of C2's H12 finding): before it a nil pointer parameter or
 receiver faulted at `range(p)`; runtime's pageBits.setAll and image/jpeg's differ are the corpus sites. src/core/golib/RangePairs.cs:87

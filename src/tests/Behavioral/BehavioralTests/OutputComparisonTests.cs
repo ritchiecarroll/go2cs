@@ -545,6 +545,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckDefinedForeignStructConvert() => CheckTarget("DefinedForeignStructConvert");
 
     [TestMethod]
+    public void CheckDefinedFuncTypeIdentity() => CheckTarget("DefinedFuncTypeIdentity");
+
+    [TestMethod]
     public void CheckDefinedOverNamedComposite() => CheckTarget("DefinedOverNamedComposite");
 
     [TestMethod]
@@ -1490,6 +1493,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckGlyphLibraryFrameNames() => CheckTarget("GlyphLibraryFrameNames");
 
     [TestMethod]
+    public void CheckMnNoParkHang() => CheckTarget("MnNoParkHang");
+
+    [TestMethod]
     public void CheckMultiFileInitOrder() => CheckTarget("MultiFileInitOrder");
 
     [TestMethod]
@@ -1551,6 +1557,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckNamedBytesConstConversion() => CheckTarget("NamedBytesConstConversion");
+
+    [TestMethod]
+    public void CheckNamedChanMapNumericShadow() => CheckTarget("NamedChanMapNumericShadow");
 
     [TestMethod]
     public void CheckNamedChannelType() => CheckTarget("NamedChannelType");
@@ -1665,6 +1674,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckNamedPointerValueSlot() => CheckTarget("NamedPointerValueSlot");
+
+    [TestMethod]
+    public void CheckNamedPointerValueStruct() => CheckTarget("NamedPointerValueStruct");
 
     [TestMethod]
     public void CheckNamedResultAddressEscape() => CheckTarget("NamedResultAddressEscape");
@@ -1806,6 +1818,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckNestedMapAssign() => CheckTarget("NestedMapAssign");
+
+    [TestMethod]
+    public void CheckNestedNamespaceReach() => CheckTarget("NestedNamespaceReach");
 
     [TestMethod]
     public void CheckNestedPointerConversionReinterpret() => CheckTarget("NestedPointerConversionReinterpret");
@@ -2444,6 +2459,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckSameNameImportAlias() => CheckTarget("SameNameImportAlias");
 
     [TestMethod]
+    public void CheckSameNameOs() => CheckTarget("SameNameOs");
+
+    [TestMethod]
     public void CheckSamePackageImplementNoWitness() => CheckTarget("SamePackageImplementNoWitness");
 
     [TestMethod]
@@ -2907,6 +2925,12 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckUnsafeBuiltinIntegerLen() => CheckTarget("UnsafeBuiltinIntegerLen");
+
+    [TestMethod]
+    public void CheckUnsafeHeaderViewFamily() => CheckTarget("UnsafeHeaderViewFamily");
+
+    [TestMethod]
+    public void CheckUnsafeHeaderViewRefusals() => CheckTarget("UnsafeHeaderViewRefusals");
 
     [TestMethod]
     public void CheckUnsafeOperations() => CheckTarget("UnsafeOperations");

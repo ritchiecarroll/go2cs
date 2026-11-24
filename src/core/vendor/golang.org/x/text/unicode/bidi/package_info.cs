@@ -65,7 +65,7 @@ using System.Runtime.CompilerServices;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("vendor/golang.org/x/text/unicode/bidi/bidi.go", "bidi.cs", "ADaKAQALAoIADzIACQKClIKClIKCgoKClIKCgoKmgpSCpgACEPKCggACEPKCgqyyrLIAAhDSgoKCgoKmpoKUgpSmgoKUlIKCgoKUgqaCgoKosoKmgpSCgpSCgqaUgqqigoKClIKCAAsesqiSqJLKABAkkqiSAAIS4qqirLKCgpSCgoK4gpSUrLKCgoKCgoKUpg==", "70-72:1")]
+[assembly: GoPositionMap("vendor/golang.org/x/text/unicode/bidi/bidi.go", "bidi.cs", "ADeKAQALAoIADzIACQKClIKClIKCgoKClIKCgoKmgpSCpgACEPKCggACEPKCgqyyrLIAAhDSgoKCgoKmpoKUgpSmgoKUlIKCgoKUgqaCgoKosoKmgpSCgpSCgqaUgqqigoKClIKCAAsesqiSqJLKABAkkqiSAAIS4qqirLKCgpSCgoK4gpSUrLKCgoKCgoKUpg==", "70-72:1")]
 [assembly: GoPositionMap("vendor/golang.org/x/text/unicode/bidi/bracket.go", "bracket.cs", "ADVwgtyCggABFAAIAtyCgpSCABxKogAEFPaWlJSmgoKmyIKCgoKUlIKUpgAHfAA3AqakpAADFvKCgoKClIKUpqqigoK4qKTcgqaUgpQABxCmgoKUgoKClKaCgoKUupKC", "", "", "74=New/1/1/2")]
 [assembly: GoPositionMap("vendor/golang.org/x/text/unicode/bidi/core.go", "core.cs", "ADt6soKCpgAXSPKCgpSClIKUgqYACBKCppjC3IK4grgACRSmuLi4ptwAAiQADwKClIKmgpSCgoKCgoKCgoK4ggAIFtKmgoKCgoKCgsqmpKQADh6CgpSCgoKCpoKmgqaCqJKCxpSUlIKmgpSCgoK4gpSmpoKC3JS0tLaCyoKUgv6CgqaCgpSClNqUlIKCggAIEIKCgoK2goIADyKYwoKCgriCgpSCgqaCgoKmgpaCgqaCAAkc1riCgoLK3IKCgoKClO6CggAQIoKCgoKCgoKC3KKUgqaCgpSCgoKmgqbKgoLKopSCgoKCgqaC3qaUoqaCltiClIKCpoKUgoK4gpTKpqbagoK4goK6ppSClIKUlIKUuJSmAAUQooKCvtKCgoKCgqa0qsKCgoKCpgAFFOKCgpSCgpSCgqaUuIKUqMKmgoKCuJSUooKClJSUgoKClKamvsKCgoLugpSCggAGIgAVGJTKgpSmgoKU7oKCgoKUpqYAAiQADwKUqqKUgoKClIKUlKyylILcgoKCgpSCuIKClIKCgqaCpsqqopSUqJKUlKiSgpSmgoKUgoKmpoKGlKaCgoKClJSClKaCgpSCxqamgoKUgpQ=", "", "", "480=typeForLevel/1/2/5,typeForLevel/2/2/6")]
 [assembly: GoPositionMap("vendor/golang.org/x/text/unicode/bidi/prop.go", "prop.cs", "ABAeAAEaAAsCgoKUqICYkJaSpgALGpKCggACKgASAoKUpKSClIKCgpSkgpSCgoKUgoKCgpSkgpSCgoKUgoKCgpSCgoKClKassoKUpKSClIKCgpSkgpSCgoKUgoKCgpSkgpSCgoKUgoKCgpSCgoKClKY=")]
@@ -75,7 +75,8 @@ using System.Runtime.CompilerServices;
 namespace go.vendor.golang.org.x.text.unicode;
 
 using static go.vendor.golang.org.x.text.unicode.bidi_package;
-using ꓸꓸꓸClass = variadic<bidi_package.Class>;
+using ꓸꓸꓸClass = Span<bidi_package.Class>;
+using ꓸꓸꓸOption = Span<bidi_package.Option>;
 
 [GoPackage("bidi", ImportPath = "vendor/golang.org/x/text/unicode/bidi")]
 public static partial class bidi_package
@@ -156,8 +157,8 @@ partial class bidiᴛOrdering {
 }
 partial class bidiᴛParagraph {
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) prepareInput(this ref Paragraph p) => bidi_package.prepareInput⁔(ref p);
-    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint n, error err) SetBytes(this ref Paragraph p, slice<byte> b, params variadic<Action<ж<options>>> optsʗp) => bidi_package.SetBytes⁔(ref p, b, optsʗp);
-    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint n, error err) SetString(this ref Paragraph p, @string s, params variadic<Action<ж<options>>> optsʗp) => bidi_package.SetString⁔(ref p, s, optsʗp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint n, error err) SetBytes(this ref Paragraph p, slice<byte> b, params ꓸꓸꓸOption optsʗp) => bidi_package.SetBytes⁔(ref p, b, optsʗp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint n, error err) SetString(this ref Paragraph p, @string s, params ꓸꓸꓸOption optsʗp) => bidi_package.SetString⁔(ref p, s, optsʗp);
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool IsLeftToRight(this ref Paragraph p) => bidi_package.IsLeftToRight⁔(ref p);
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static Direction Direction(this ref Paragraph p) => bidi_package.Direction⁔(ref p);
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static Run RunAt(this ref Paragraph p, nint pos) => bidi_package.RunAt⁔(ref p, pos);

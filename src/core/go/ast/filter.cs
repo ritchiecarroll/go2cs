@@ -25,7 +25,7 @@ internal static bool exportFilter(@string name) {
 //
 // FileExports reports whether there are exported declarations.
 public static bool FileExports(ж<File> src) {
-    return filterFile(ref (src).DerefOrNull(), new Func<@string, bool>(exportFilter), true);
+    return filterFile(ref (src).DerefOrNull(), new Filter(exportFilter), true);
 }
 
 // PackageExports trims the AST for a Go package in place such that
@@ -38,14 +38,14 @@ public static bool FileExports(ж<File> src) {
 // Deprecated: use the type checker [go/types] instead of [Package];
 // see [Object]. Alternatively, use [FileExports].
 public static bool PackageExports(ж<Package> pkg) {
-    return filterPackage(ref (pkg).DerefOrNull(), new Func<@string, bool>(exportFilter), true);
+    return filterPackage(ref (pkg).DerefOrNull(), new Filter(exportFilter), true);
 }
 
-// type Filter is a methodless func type — rendered inline as its base delegate
+public delegate bool Filter(@string _);
 
 // ----------------------------------------------------------------------------
 // General filtering
-internal static slice<ж<Ident>> filterIdentList(slice<ж<Ident>> list, Func<@string, bool> f) {
+internal static slice<ж<Ident>> filterIdentList(slice<ж<Ident>> list, Filter f) {
     nint j = 0;
     foreach (var (_, x) in range(list)) {
         if (f(x.Name)) {
@@ -76,7 +76,7 @@ internal static ж<Ident> fieldName(Expr x) {
     return default;
 }
 
-internal static bool /*removedFields*/ filterFieldList(ж<FieldList> Ꮡfields, Func<@string, bool> filter, bool export) {
+internal static bool /*removedFields*/ filterFieldList(ж<FieldList> Ꮡfields, Filter filter, bool export) {
     bool removedFields = default;
     ref var fields = ref Ꮡfields.DerefOrNull();
 
@@ -114,7 +114,7 @@ internal static bool /*removedFields*/ filterFieldList(ж<FieldList> Ꮡfields, 
     return removedFields;
 }
 
-internal static void filterCompositeLit(ref CompositeLit lit, Func<@string, bool> filter, bool export) {
+internal static void filterCompositeLit(ref CompositeLit lit, Filter filter, bool export) {
     nint n = len(lit.Elts);
     lit.Elts = filterExprList(lit.Elts, filter, export);
     if (len(lit.Elts) < n) {
@@ -122,7 +122,7 @@ internal static void filterCompositeLit(ref CompositeLit lit, Func<@string, bool
     }
 }
 
-internal static slice<Expr> filterExprList(slice<Expr> list, Func<@string, bool> filter, bool export) {
+internal static slice<Expr> filterExprList(slice<Expr> list, Filter filter, bool export) {
     nint j = 0;
     foreach (var (_, exp) in range(list)) {
         switch (exp.type()) {
@@ -145,7 +145,7 @@ internal static slice<Expr> filterExprList(slice<Expr> list, Func<@string, bool>
     return list.slice(0, j);
 }
 
-internal static bool filterParamList(ж<FieldList> Ꮡfields, Func<@string, bool> filter, bool export) {
+internal static bool filterParamList(ж<FieldList> Ꮡfields, Filter filter, bool export) {
     ref var fields = ref Ꮡfields.DerefOrNull();
 
     if (Ꮡfields == nil) {
@@ -160,7 +160,7 @@ internal static bool filterParamList(ж<FieldList> Ꮡfields, Func<@string, bool
     return b;
 }
 
-internal static bool filterType(Expr typ, Func<@string, bool> f, bool export) {
+internal static bool filterType(Expr typ, Filter f, bool export) {
     switch (typ.type()) {
     case ж<Ident> t: {
         return f(t.Name);
@@ -199,7 +199,7 @@ internal static bool filterType(Expr typ, Func<@string, bool> f, bool export) {
     return false;
 }
 
-internal static bool filterSpec(Spec spec, Func<@string, bool> f, bool export) {
+internal static bool filterSpec(Spec spec, Filter f, bool export) {
     switch (spec.type()) {
     case ж<ValueSpec> s: {
         s.Names = filterIdentList(s.Names, f);
@@ -232,7 +232,7 @@ internal static bool filterSpec(Spec spec, Func<@string, bool> f, bool export) {
     return false;
 }
 
-internal static slice<Spec> filterSpecList(slice<Spec> list, Func<@string, bool> f, bool export) {
+internal static slice<Spec> filterSpecList(slice<Spec> list, Filter f, bool export) {
     nint j = 0;
     foreach (var (_, s) in range(list)) {
         if (filterSpec(s, f, export)) {
@@ -249,11 +249,11 @@ internal static slice<Spec> filterSpecList(slice<Spec> list, Func<@string, bool>
 //
 // FilterDecl reports whether there are any declared names left after
 // filtering.
-public static bool FilterDecl(Decl decl, Func<@string, bool> f) {
+public static bool FilterDecl(Decl decl, Filter f) {
     return filterDecl(decl, f, false);
 }
 
-internal static bool filterDecl(Decl decl, Func<@string, bool> f, bool export) {
+internal static bool filterDecl(Decl decl, Filter f, bool export) {
     switch (decl.type()) {
     case ж<GenDecl> d: {
         d.Specs = filterSpecList(d.Specs, f, export);
@@ -274,11 +274,11 @@ internal static bool filterDecl(Decl decl, Func<@string, bool> f, bool export) {
 //
 // FilterFile reports whether there are any top-level declarations
 // left after filtering.
-public static bool FilterFile(ж<File> src, Func<@string, bool> f) {
+public static bool FilterFile(ж<File> src, Filter f) {
     return filterFile(ref (src).DerefOrNull(), f, false);
 }
 
-internal static bool filterFile(ref File src, Func<@string, bool> f, bool export) {
+internal static bool filterFile(ref File src, Filter f, bool export) {
     nint j = 0;
     foreach (var (_, d) in range(src.Decls)) {
         if (filterDecl(d, f, export)) {
@@ -303,11 +303,11 @@ internal static bool filterFile(ref File src, Func<@string, bool> f, bool export
 //
 // Deprecated: use the type checker [go/types] instead of [Package];
 // see [Object]. Alternatively, use [FilterFile].
-public static bool FilterPackage(ж<Package> pkg, Func<@string, bool> f) {
+public static bool FilterPackage(ж<Package> pkg, Filter f) {
     return filterPackage(ref (pkg).DerefOrNull(), f, false);
 }
 
-internal static bool filterPackage(ref Package pkg, Func<@string, bool> f, bool export) {
+internal static bool filterPackage(ref Package pkg, Filter f, bool export) {
     var hasDecls = false;
     foreach (var (_, src) in pkg.Files) {
         if (filterFile(ref (src).DerefOrNull(), f, export)) {

@@ -2365,10 +2365,12 @@ Go field name IS its type name).
 Two residuals are stated rather than hidden. The **interface** arm proves "methodless" only for
 `object` (Go's `any`), so a DEFINED empty interface with a managed type of its own is answered *not
 identical* — the conservative direction, since a false negative degrades a caller to "this needs a
-conversion" while a false positive hands it a silent wrong assignment. And a **defined methodless
-func type has no managed identity at all**: the converter renders it inline as its base delegate, so
-`type myFunc func(int) bool` and `func(int) bool` are one managed type, and the named/unnamed pairs
-every other kind can assert cannot be produced for funcs.
+conversion" while a false positive hands it a silent wrong assignment. And the **func** pairs are
+new: until 2026-11-23 a defined methodless func type was rendered inline as its base delegate, so
+`type myFunc func(int) bool` and `func(int) bool` were one managed type and no named/unnamed func pair
+could be produced. Every defined func type now declares a delegate of its own
+([struct-types.md](struct-types.md#every-defined-func-type-declares-its-own-delegate)), so the pair exists,
+and what this walk answers for it has not been measured.
 
 <!-- history: 2026-08-20 -->
 <a id="the-chan-direction-is-carried-by-the-value--descriptor-cargo-exactly-like-an-arrays-length-2026-08-20"></a>
@@ -2957,11 +2959,11 @@ arise any other way in converted code (Go has no such type, and the converter em
 variadic tail), so testing for it subsumes the name test rather than widening it.
 <!-- the shape test: src/core/golib/GoReflect.TypeLayout.cs:1567 `tail.GetGenericTypeDefinition() == typeof(variadic<>);` (wall E moved it from Span<>). -->
 
-Residual, stated rather than hidden: a defined **methodless** func type has no managed identity — the
-converter renders it inline as its base delegate family — so it is indistinguishable from an unnamed
-one here and reports the unnamed answer. That is the same "describe the type the bridge can actually
-build a descriptor for" rule `ChanDir` settles on. A defined func type carrying a method does get its
-own delegate and keeps its name. Guarded by `ReflectBridgeClosure` (six unnamed shapes and one named,
+Every defined func type, with or without methods, is its own delegate and keeps its name: `%T`,
+`Name()` and `String()` answer `main.F`, `"F"` and `"main.F"` for `type F func(string) error`. Until
+2026-11-23 a defined methodless func type was rendered inline as its base delegate family, so it
+reported the unnamed answer here ([struct-types.md](struct-types.md#every-defined-func-type-declares-its-own-delegate);
+the `DefinedFuncTypeIdentity` behavioral test reads these answers against `go run`). Guarded by `ReflectBridgeClosure` (six unnamed shapes and one named,
 against `go run`) and `GolibTests.GoReflectBridgeClosureTests`.
 
 ## `reflect.Value.Bytes`/`SetBytes` are defined over the element KIND, and they ALIAS
@@ -3604,7 +3606,7 @@ work here: a copy of a locked mutex is locked, and a copy of an idle mutex is a 
 queue. One copy differs from Go. A mutex copied WHILE a goroutine waits on it carries the queue's
 handle, and until that queue empties a waiter of the copy can take a wakeup meant for the original.
 In Go the two wait on different addresses. That copy also reads two words other goroutines are
-writing; it is recorded on the BOARD.
+writing, a known gap.<!-- 2026-11-23 .5 docs pass (P1), UX-7: process term moved out of visible text: "it is recorded on the BOARD" (docs/phase4/BOARD-next-validation-candidates.md). -->
 
 **Where this differs from Go.** Wakeups follow the semaphore's order and a woken waiter competes with
 newcomers, as in Go's normal mode; Go's starvation mode is not reproduced. A waiter blocks its OS

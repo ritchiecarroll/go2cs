@@ -9,9 +9,14 @@ failure, as something the converted code does not do.
 
 Each module's pages are written by the converter beside its conversion and copied here unedited:
 the module summary sums the per-package proof pages, and each proof page lists every verdict. Every
-module's summary is the `VALIDATION.md` its NuGet package carries, below the package's notices.
-One row of the `timefmt-go` proof page differs from the converter's text: its test name holds a pipe, and the row
-writes it as an HTML code element so that GitHub and this site show the same name.
+module that go2cs publishes as a NuGet package has, as its summary, the `VALIDATION.md` that package carries, below
+the package's notices.
+<!-- 2026-11-23 .5 docs pass (P1), at master 97cca467a2: the timefmt-go exception sentence ("One row of the
+`timefmt-go` proof page differs from the converter's text: its test name holds a pipe, and the row writes it as an
+HTML code element so that GitHub and this site show the same name.") is removed, because the 1.26.11.1 kit's proof
+page (claude/c2-nugetgo-1261004-timefmt 17df3a68b1, conversion/index.md) already writes that row in the HTML form
+and the page is now byte-equal to the kit's file. "Every module's summary is the VALIDATION.md its NuGet package
+carries" now names only the modules with a NuGet package: go-difflib, objx and yaml v3 have none. -->
 
 <!-- Provenance (2026-11-15, P4): pages copied from the go.* 1.26.10.3 wave kits (claude/c2-nugetgo-* and the
 1261003 kits), each per-package page sha256-equal to its kit's file and each MODULE.md equal to its kit's
@@ -21,10 +26,25 @@ which TestDocsTableCodeSpanHasNoEscapedPipe refuses; the row is rewritten in the
 sha256 90f63ae649aa9c003c90d38d29f8a91d3907ef8e89edfa2c10492b90b6c7ea56, page as committed 4341668c19ea71646bfac76087b35876262b72f53b5cfb8e872ee7607b829a69. A converter fix makes the page byte-equal again
 at the next regeneration. -->
 
-The rows are readings with Go 1.26.10, built on the go.* 1.26.10.3 standard-library packages, on `linux/amd64`,
-at `Release` with the tiered JIT off, the test host's default. Each summary gives the module's counts of matched
-and disclosed verdicts. `mousetrap` has no Go tests, so its row is a behavioral proof instead: one hosted row per
-RID it ships.
+<!-- 2026-11-23 .5 docs pass (P1), at master 97cca467a2: the nine NuGet-packaged modules' pages are replaced from
+the go.* 1.26.11.1 wave kits, each per-package page sha256-equal to its kit's conversion/<page>.md and each MODULE.md
+equal to its kit's conversion/VALIDATION.md below the leading notice lines (no exception now: the timefmt-go page is
+byte-equal too). Kit branches and SHAs: claude/c2-nugetgo-1261004-hashset 826962acb3,
+claude/c2-nugetgo-1261004-uuid 4bfd807acb, claude/c2-nugetgo-1261004-jwt afdc62b4f1,
+claude/c2-nugetgo-1261004-xsync 80fe00e531, claude/c2-nugetgo-1261004-pflag d354622401,
+claude/c2-nugetgo-1261004-mousetrap 46133ede3d (rows read from claude/c2-nugetgo-1261004-mousetrap-int1 553f43acec),
+claude/c2-nugetgo-1261004-cobra 2b1362efd7, claude/c2-nugetgo-1261004-timefmt 17df3a68b1,
+claude/c2-nugetgo-1261004-gojq 504d06ff00. Every version is unchanged and so is every count (sync 27 + 1, uuid 54,
+jwt 189, hashset 37, pflag 177, cobra 405, timefmt-go 417, gojq 164); the pages now read Go 1.26.11, built with
+-tags purego,math_big_pure_go,safe,noasm. mousetrap gains a linux-arm64 row (five hosted rows, os-matrix run
+44643331991). The earlier sentence read: "The rows are readings with Go 1.26.10, built on the go.* 1.26.10.3
+standard-library packages, on `linux/amd64`, ..." -->
+The first nine rows, the modules go2cs publishes as NuGet packages, are readings with Go 1.26.11, built on the
+go.* 1.26.11.1 standard-library packages, on `linux/amd64`, at `Release` with the tiered JIT off, the test host's
+default. The last four rows (`go-difflib`, both `objx` versions and `yaml/v3`) are also Go 1.26.11 readings on
+`linux/amd64`, built instead on the standard library as converted in this repository; their notes below say so.
+Each summary gives the module's counts of matched and disclosed verdicts. `mousetrap` has no Go tests, so its row
+is a behavioral proof instead: one hosted row per RID it ships.
 
 | Module | Version | Packages | Platform | Proof |
 |:--|:--|--:|:--|:--|
@@ -33,7 +53,7 @@ RID it ships.
 | `github.com/golang-jwt/jwt/v5` | v5.3.1 | 2 | `linux/amd64` | [summary](validation/modules/github.com/golang-jwt/jwt/v5@v5.3.1/MODULE.md) |
 | `github.com/ritchiecarroll/hashset` | v1.0.0 | 1 | `linux/amd64` | [summary](validation/modules/github.com/ritchiecarroll/hashset@v1.0.0/MODULE.md) |
 | `github.com/spf13/pflag` | v1.0.9 | 1 | `linux/amd64` | [summary](validation/modules/github.com/spf13/pflag@v1.0.9/MODULE.md) |
-| `github.com/inconshreveable/mousetrap` | v1.1.0 | 1 | `win-x64`, `linux-x64`, `osx-x64`, `osx-arm64` | [behavior rows](validation/modules/github.com/inconshreveable/mousetrap@v1.1.0/MODULE.md) |
+| `github.com/inconshreveable/mousetrap` | v1.1.0 | 1 | `win-x64`, `linux-x64`, `osx-x64`, `osx-arm64`, `linux-arm64` | [behavior rows](validation/modules/github.com/inconshreveable/mousetrap@v1.1.0/MODULE.md) |
 | `github.com/spf13/cobra` | v1.10.2 | 1 | `linux/amd64` | [summary](validation/modules/github.com/spf13/cobra@v1.10.2/MODULE.md) |
 | `github.com/itchyny/timefmt-go` | v0.1.8 | 1 | `linux/amd64` | [summary](validation/modules/github.com/itchyny/timefmt-go@v0.1.8/MODULE.md) |
 | `github.com/itchyny/gojq` | v0.12.19 | 1 | `linux/amd64` | [summary](validation/modules/github.com/itchyny/gojq@v0.12.19/MODULE.md) |
@@ -66,8 +86,13 @@ are not go2cs NuGet packages, and gojq's `cli`, whose closure is deferred. gojq'
 **`github.com/pmezard/go-difflib`:** the release ships no go.mod, so the run converts and tests a copy that carries
 the go.mod the module cache made for it. Its own `go test` fails at the vet checks `go test` runs first: two `Example`
 functions name identifiers that do not exist. Go's baseline therefore ran with `-vet=off` (`-test-oracle-vet-off`),
-and both vet findings are stated in its summary. Unlike the rows above, this reading is Go 1.26.11, built on the
-standard library as converted in this repository at the reading's commit, not on published go.* packages.
+and both vet findings are stated in its summary. Unlike the nine NuGet-packaged modules' rows, this reading is
+built on the standard library as converted in this repository at the reading's commit, not on published go.*
+packages; like them, it is a Go 1.26.11 reading.
+<!-- 2026-11-23 .5 docs pass (P1), at master 97cca467a2: was "Unlike the rows above, this reading is Go 1.26.11,
+built on the standard library as converted in this repository at the reading's commit, not on published go.*
+packages." The rows above now read Go 1.26.11 too (go.* 1.26.11.1 kits), so only the standard-library source
+differs. -->
 <!-- Provenance (2026-11-22, C2): go2cs -tests -recurse -test-action all -test-oracle-vet-off over the module cache's
 github.com/pmezard/go-difflib@v1.0.0, converter built at claude/c2-tests-vetoff 3f94b4818a, -go2cspath at that tree,
 linux/amd64, go1.26.11; both pages copied unedited (sha256-equal to the run's). -->

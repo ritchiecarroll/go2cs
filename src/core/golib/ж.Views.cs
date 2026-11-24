@@ -241,17 +241,17 @@ public abstract partial class ж<T>
         return publishView(fieldRefFunc, new FieldRefBox<TElem>(this, FieldRefWrappers<TElem>.For(fieldRefFunc), fieldRefFunc));
     }
 
-    // A field of a struct in NATIVE memory, answered before the view cache is consulted (Change A; P3's MUSTs): a native
+    // A field of a struct in NATIVE memory, answered before the view cache is consulted (Change A, with its review's MUSTs): a native
     // box at the field's Go offset, or the native window over an array field, exactly what of()'s nativeFieldView
     // made of the view this path used to mint and publish first. That view was never returned for a native root, so
-    // the root's weak-table entry and the view in it were pure cost (C1's view census: weak-new and weak-live rows per
+    // the root's weak-table entry and the view in it were pure cost (the view census: weak-new and weak-live rows per
     // native root). Null keeps today's route: a box that is not a native root, the nil box (address 0), and a field
     // whose Go layout cannot be known, which still gets its cached view. The first field asked of any ж<T> marks T a
     // view consumer here too, as tryFindView does, so the boxes of T minted afterwards are shaped as before.
     //
     // A field whose Go layout cannot be known asks GoFieldOffsetOf twice, here and again in nativeFieldView's
     // FieldRefBox.NativeFieldBox on the view route, with the same original accessor; both lookups are memoized per
-    // accessor (GoBoxTables.GoOffsetsByAccessor, the -1 cached too), so the second costs one table read (P3's NIT 2).
+    // accessor (GoBoxTables.GoOffsetsByAccessor, the -1 cached too), so the second costs one table read (review NIT 2).
     private ж<TElem>? nativeRootField<TElem>(Delegate token)
     {
         if (this is not NativeBox<T>)

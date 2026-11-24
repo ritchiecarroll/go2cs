@@ -49,7 +49,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "AAYahIKogpSWooKCpsSWgoKClJSWgoCkloKogpSWgoKmlqKCgqbEloKAgJKC", "15-17:1;20-22:2;26-33:3;27-31:3.1;37-43:4;47-49:5;48-48:5.1;53-55:6;58-60:7;65-67:8;72-79:9;73-77:9.1;84-84:10;85-87:11", "", "8=Invoke/1/1/2;12=Invoke/1/1/2;17=Invoke/1/1/7;32=Invoke/1/1/6;41=Invoke/1/1/2;48=Invoke/1/1/2;52=Invoke/1/1/2;58=Invoke/1/1/2;64=Invoke/1/1/7;84=Invoke/1/2/2,Invoke/2/2/2", "", "20:50,21:17,67:50,68:17")]
+[assembly: GoPositionMap("main.go", "main.cs", "AAYegqTIhIKogpSWooKCpsSWgoKClJSWgoCkloKogpSWgoKmlqKCgqbEloKAgJKCpoKC", "24-26:1;29-31:2;35-42:3;36-40:3.1;46-52:4;56-58:5;57-57:5.1;62-64:6;67-69:7;74-76:8;81-88:9;82-86:9.1;93-93:10;94-96:11", "", "17=Invoke/1/1/2;21=Invoke/1/1/2;26=Invoke/1/1/7;41=Invoke/1/1/6;50=Invoke/1/1/2;57=Invoke/1/1/2;61=Invoke/1/1/2;67=Invoke/1/1/2;73=Invoke/1/1/7;93=Invoke/1/2/2,Invoke/2/2/2", "", "29:50,30:17,76:50,77:17")]
 // </GoSourcePositionMaps>
 
 namespace go;

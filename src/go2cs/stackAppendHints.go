@@ -997,19 +997,6 @@ const probeCacheEnv = "GO2CS_PROBE_CACHE"
 // probeCacheFlag is -probe-cache, set by main; empty when the flag was not passed.
 var probeCacheFlag string
 
-// probeCacheDir is the probe cache (resolveProbeCacheDir), or "off" when it cannot be resolved: go refuses "off"
-// outright, where an empty GOCACHE would mean the user's own cache. A run never reaches that fallback, because every
-// harvest command takes its GOCACHE from probeCacheDirOrExit.
-func probeCacheDir() string {
-	dir, err := resolveProbeCacheDir()
-
-	if err != nil {
-		return "off"
-	}
-
-	return dir
-}
-
 // resolveProbeCacheDir resolves the probe cache: -probe-cache, else GO2CS_PROBE_CACHE, else go2cs/probe-cache under the
 // user cache directory, else a per-user directory under the temporary directory (probeCacheTempFallback). The harvest
 // builds the standard library once per target under its own flags (-trimpath, CGO_ENABLED=0, four targets), which no

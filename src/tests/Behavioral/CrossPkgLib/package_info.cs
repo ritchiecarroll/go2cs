@@ -174,7 +174,7 @@ partial class CrossPkgLibᴛSensor {
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Hot(this Sensor s) => CrossPkgLib_package.Hot⁔(s);
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Label(this Sensor s) => CrossPkgLib_package.Label⁔(s);
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Calibrate(this ref Sensor s, Celsius d) => CrossPkgLib_package.Calibrate⁔(ref s, d);
-    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Sift(this Sensor s, Func<nint, bool> f) => CrossPkgLib_package.Sift⁔(s, f);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Sift(this Sensor s, Sift f) => CrossPkgLib_package.Sift⁔(s, f);
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Status(this Sensor s) => CrossPkgLib_package.Status⁔(s);
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Grade(this Sensor s) => CrossPkgLib_package.Grade⁔(s);
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Token(this Sensor s) => CrossPkgLib_package.Token⁔(s);

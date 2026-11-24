@@ -67,9 +67,37 @@ internal static @string Forms⁔(/*this*/ ж<Chest> Ꮡc, any v) {
 
 internal static T pick<T>(slice<T> s, nint i) { return s[i]; }
 
+partial struct SliceBuilder {
+    internal nint n;
+}
+
+internal static nint Limit⁔(/*this*/ ref main_package.SliceBuilder s) {
+    var next = new main_package.SliceBuilder(n: s.n + (nint)Limit);
+    s = next;
+    return s.n;
+}
+
+partial struct math {
+    internal nint n;
+}
+
+internal static nint Limit⁔(/*this*/ ref main_package.math m) {
+    var next = new main_package.math(n: m.n + (nint)Limit);
+    m = next;
+    return m.n;
+}
+
 internal static void forms() {
     var c = Ꮡ(new Chest(tags: [new(id: 2)]));
     fmt.Println("forms", c.Forms(new Tag()), c.Forms(Ꮡ(new Tag())), c.Forms((nint)1), c.Tag().id, len(c.tags));
+
+    var sb = new SliceBuilder(n: 2);
+    nint sbGot = sb.Limit();
+    fmt.Println("golib-named type", sbGot, sb.n);
+
+    var mt = new math(n: 1);
+    nint mtGot = mt.Limit();
+    fmt.Println("namespace-named type", mtGot, mt.n);
 }
 
 } // end main_package

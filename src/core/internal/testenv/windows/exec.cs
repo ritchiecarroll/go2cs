@@ -182,7 +182,7 @@ public static ж<exec.Cmd> CommandContext(testing.TB t, context.Context ctx, @st
     t.Helper();
     MustHaveExec(t);
 
-    Action cancelCtx = default;
+    context.CancelFunc cancelCtx = default;
     time.Duration gracePeriod = default; // unlimited unless the test has a deadline (to allow for interactive debugging)
 
     var (tΔ1, ok) = t._<CommandContext_type>(ᐧ); if (ok) {

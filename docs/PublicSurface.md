@@ -51,8 +51,23 @@ not name them, and IntelliSense hides them: each carries `[EditorBrowsable(Edito
 - **golib's emitted-code API**: the `Go…` attributes (`GoImplement`, `GoRecv`, `GoPromoted`, `GoType` and the rest),
   the adapter and type registries, `StandardBox<T>` and the other box classes, `GoFrame`, `sstring`, `UntypedInt`,
   and the runtime classes in namespace `go.golib`. Those that live in namespace `go` are listed in the baseline's
-  `[go-tier2]` section. Adding one there needs a COORD ruling, cited beside it; any other new golib name goes in
-  `go.golib`.
+  `[go-tier2]` section. Adding one there is a reviewed decision, cited beside it; any other new golib name goes in
+  `go.golib`.<!-- 2026-11-23 .5 docs pass (P1), UX-7: "needs a COORD ruling" reworded without the process term. -->
+- **`GoFrame` is a plain struct, not a `ref struct`.** It holds the deferred calls of one call of a converted function.
+  Through go.* 1.26.11.1 it was a `ref struct`, so the C# compiler refused to copy, store, box or capture it. Now the
+  source generator go2cs-gen refuses those uses with error [`GO2CS0016`](DiagnosticCodes.md), which names the site: a
+  frame may only be a local initialized to `default`, a `ref` parameter or argument, or the receiver of its own
+  members. Hand-written C# that follows the converted `defer` pattern keeps the frame a local and passes it only by
+  `ref`. The rule runs even where `RunAnalyzers` is `false`, and no severity setting, `NoWarn` or pragma turns it off.
+  With `RunAnalyzers` set to `false`, one part is not checked: a use that binds only with code another source
+  generator writes, such as a `defer(…, ref ᒐ)` whose lambda names a generated member. go2cs-gen's analyzer
+  `GoFrameRuleAnalyzer` checks those uses, and analyzers do not run in such a build. F# and Visual Basic get no check.
+  <!-- 2026-11-23 .5 docs pass (P1), at master 97cca467a2: the GoFrame disclosure (CQ-6). The ref-struct drop is
+       1b8cc2658c (with 95165eb212, partial struct), landed by the train 3 merge 1c9c6a224e (claude/g-mn-proto-b1
+       1cfee4a63e); GO2CS0016 and the analyzer net landed by the train 3 merge da3273f975 (claude/h-mn-origin-table
+       1fc98cd07c). The RunAnalyzers caveat is read from GoFrameRuleAnalyzer's remarks (src/gen/go2cs-gen), the
+       GO2CS0016 row in DiagnosticCodes.md and PLAN-public-surface-stability.md ("The GoFrame rule is reported from the
+       source generator", item 8, 2026-11-20). GoBreakFloor is still 1.26.11.1 at 97cca467a2. -->
 - **`GoexitException`**: `runtime.Goexit` unwinds with it. Catching it is not supported.
 
 A type in a generated host is plumbing, but its methods are not. The promoted methods a host carries are part of the

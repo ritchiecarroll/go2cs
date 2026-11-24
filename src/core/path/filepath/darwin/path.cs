@@ -309,13 +309,13 @@ public static error SkipAll = fs.SkipAll;
 // function with path set to the directory's path, info, set to an
 // [fs.FileInfo] describing the directory, and err set to the error from
 // Readdirnames.
-// type WalkFunc is a methodless func type — rendered inline as its base delegate
+public delegate error WalkFunc(@string path, fs.FileInfo info, error err);
 
 internal static readonly ж<Func<@string, (fs.FileInfo, error)>> Ꮡlstat = new StaticBox<Func<@string, (fs.FileInfo, error)>>(os.Lstat);
 internal static ref Func<@string, (fs.FileInfo, error)> lstat => ref ((StaticBox<Func<@string, (fs.FileInfo, error)>>)Ꮡlstat).ValueSlot; // for testing
 
 // walkDir recursively descends path, calling walkDirFn.
-internal static error walkDir(@string path, fs.DirEntry d, Func<@string, fs.DirEntry, error, error> walkDirFn) {
+internal static error walkDir(@string path, fs.DirEntry d, fs.WalkDirFunc walkDirFn) {
     var errΔ1 = walkDirFn(path, d, default); if (errΔ1 != nil || !d.IsDir()) {
         if (AreEqual(errΔ1, SkipDir) && d.IsDir()) {
             // Successfully skipped directory.
@@ -349,7 +349,7 @@ internal static error walkDir(@string path, fs.DirEntry d, Func<@string, fs.DirE
 }
 
 // walk recursively descends path, calling walkFn.
-internal static error walk(@string path, fs.FileInfo info, Func<@string, fs.FileInfo, error, error> walkFn) {
+internal static error walk(@string path, fs.FileInfo info, WalkFunc walkFn) {
     if (!info.IsDir()) {
         return walkFn(path, info, default);
     }
@@ -401,7 +401,7 @@ internal static error walk(@string path, fs.FileInfo info, Func<@string, fs.File
 // WalkDir calls fn with paths that use the separator character appropriate
 // for the operating system. This is unlike [io/fs.WalkDir], which always
 // uses slash separated paths.
-public static error WalkDir(@string root, Func<@string, fs.DirEntry, error, error> fn) {
+public static error WalkDir(@string root, fs.WalkDirFunc fn) {
     var (info, err) = os.Lstat(root);
     if (err != nil) {
         err = fn(root, default, err);
@@ -428,7 +428,7 @@ public static error WalkDir(@string root, Func<@string, fs.DirEntry, error, erro
 //
 // Walk is less efficient than [WalkDir], introduced in Go 1.16,
 // which avoids calling os.Lstat on every visited file or directory.
-public static error Walk(@string root, Func<@string, fs.FileInfo, error, error> fn) {
+public static error Walk(@string root, WalkFunc fn) {
     var (info, err) = os.Lstat(root);
     if (err != nil) {
         err = fn(root, default, err);

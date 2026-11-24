@@ -402,7 +402,8 @@ internal static partial (Action stopTimer, Func<bool> didTimeout) setRequestCanc
         }
 
         Action cancelCtxΔ1 = default;
-        (req.ctx, cancelCtxΔ1) = context.WithDeadline(oldCtx, deadline);
+        (req.ctx, var cancelCtxᴛ1) = context.WithDeadline(oldCtx, deadline);
+        cancelCtxΔ1 = NilSafeDelegateConversion<Action, context.CancelFunc>(cancelCtxᴛ1);
         var deadlineʗ1 = deadline;
         return (cancelCtxΔ1, [GoFunc("setRequestCancel.func1")] () => time.Now().After(deadlineʗ1));
     }
@@ -410,7 +411,8 @@ internal static partial (Action stopTimer, Func<bool> didTimeout) setRequestCanc
 
     Action cancelCtx = default;
     if (timeBeforeContextDeadline(deadline, oldCtx)) {
-        (req.ctx, cancelCtx) = context.WithDeadline(oldCtx, deadline);
+        (req.ctx, var cancelCtxᴛ2) = context.WithDeadline(oldCtx, deadline);
+        cancelCtx = NilSafeDelegateConversion<Action, context.CancelFunc>(cancelCtxᴛ2);
     }
 
     var cancel = new channel<EmptyStruct>(0);

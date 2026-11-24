@@ -291,10 +291,10 @@ internal static void main() {
         fmt.Println(len(wrapped), wrapped[0]);
         fmt.Println(CrossPkgLib.Pair<@string, nint>((@string)"k", 8));
 
-        Func<nint, bool> isHot = [GoFunc("main.func1")] (nint tΔ1) => tΔ1 > 50;
+        CrossPkgLib.Sift isHot = [GoFunc("main.func1")] (nint tΔ1) => tΔ1 > 50;
         fmt.Println(isHot(60), isHot(40));
 
-        var (nd, nerr) = CrossPkgLib.Resolve(new Func<map<@string, ж<CrossPkgLib.Node>>, @string, (ж<CrossPkgLib.Node>, error)>(simpleResolve), "abcde");
+        var (nd, nerr) = CrossPkgLib.Resolve(new CrossPkgLib.Resolver(simpleResolve), "abcde");
         fmt.Println(nd.ID, nerr == nil);
 
         sensorHolder.item = Ꮡ(new CrossPkgLib.Sensor(Name: "garage", Temp: 30D));

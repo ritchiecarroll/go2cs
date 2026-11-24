@@ -109,7 +109,7 @@ partial struct Transport {
     internal map<connectMethodKey, wantConnQueue> idleConnWait;     // waiting getConns
     internal connLRU idleLRU;
     internal sync.Mutex reqMu;
-    internal map<ж<Request>, Action<error>> reqCanceler;
+    internal map<ж<Request>, context.CancelCauseFunc> reqCanceler;
     internal sync.Mutex altMu;      // guards changing altProto only
     internal atomic.Value altProto; // of nil or map[string]RoundTripper, key is URI scheme
     internal sync.Mutex connsPerHostMu;
@@ -514,7 +514,7 @@ partial struct transportRequest {
     internal Header extra;                   // extra headers to write, or nil
     internal ж<httptrace.ClientTrace> trace; // optional
     internal context.Context ctx; // canceled when we are done with the request
-    internal Action<error> cancel;
+    internal context.CancelCauseFunc cancel;
     internal sync.Mutex mu; // guards err
     internal error err;     // first setError value for mapRoundTripError to consider
 }
@@ -768,7 +768,7 @@ internal static partial (ж<Response>, error err) roundTrip⁔(/*this*/ ж<Trans
     ᒐdone: return (_ᴛ1, err);
 }
 
-internal static void awaitLegacyCancel(context.Context ctx, Action<error> cancel, ref Request req) {
+internal static void awaitLegacyCancel(context.Context ctx, context.CancelCauseFunc cancel, ref Request req) {
     var selᴛ99 = req.Cancel;
     var selᴛ100 = ctx.Done();
     switch (select(ᐸꟷ(selᴛ99, ꓸꓸꓸ), ᐸꟷ(selᴛ100, ꓸꓸꓸ))) {
@@ -964,7 +964,7 @@ internal static void CloseIdleConnections⁔(/*this*/ ж<Transport> Ꮡt) {
 }
 
 // prepareTransportCancel sets up state to convert Transport.CancelRequest into context cancelation.
-internal static Action<error> prepareTransportCancel⁔(/*this*/ ж<Transport> Ꮡt, ж<Request> req, Action<error> origCancel) {
+internal static context.CancelCauseFunc prepareTransportCancel⁔(/*this*/ ж<Transport> Ꮡt, ж<Request> req, context.CancelCauseFunc origCancel) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     // Historically, RoundTrip has not modified the Request in any way.
@@ -981,11 +981,11 @@ internal static Action<error> prepareTransportCancel⁔(/*this*/ ж<Transport> �
     };
     t.reqMu.Lock();
     if (t.reqCanceler == nil) {
-        t.reqCanceler = new map<ж<Request>, Action<error>>();
+        t.reqCanceler = new map<ж<Request>, context.CancelCauseFunc>();
     }
-    t.reqCanceler[req] = cancel;
+    t.reqCanceler[req] = NilSafeDelegateConversion<context.CancelCauseFunc, Action<error>>(cancel);
     t.reqMu.Unlock();
-    return cancel;
+    return NilSafeDelegateConversion<context.CancelCauseFunc, Action<error>>(cancel);
 }
 
 // CancelRequest cancels an in-flight request by closing its connection.
@@ -1432,7 +1432,7 @@ partial struct wantConn {
     internal Action afterDial;
     internal sync.Mutex mu;       // protects ctx, done and sending of the result
     internal context.Context ctx; // context for dial, cleared after delivered or canceled
-    internal Action cancelCtx;
+    internal context.CancelFunc cancelCtx;
     internal bool done;                   // true after delivered or canceled
     internal channel<connOrError> result; // channel to deliver connection or error
 }
@@ -1951,7 +1951,7 @@ partial interface erringRoundTripper {
     error RoundTripErr();
 }
 
-internal static Func<context.Context, time.Duration, (context.Context, Action)> testHookProxyConnectTimeout = context.WithTimeout;
+internal static Func<context.Context, time.Duration, (context.Context, context.CancelFunc)> testHookProxyConnectTimeout = context.WithTimeout;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string proxyAuthorizationˢ => ref proxyAuthorizationˢᵇ;

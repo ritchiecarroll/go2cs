@@ -16,7 +16,7 @@ import (
 )
 
 // promotedOneHopView renders the receiver view of a pointer-receiver method promoted through two or more VALUE embeds in
-// ONE hop (TS perf item 1b, COORD 2026-11-21 06:58Z). The chain form takes a view per level, `x.of(A.ᏑB).of(B.ᏑC).of(C.ᏑD)`,
+// ONE hop (TS perf item 1b, c23219e1c0). The chain form takes a view per level, `x.of(A.ᏑB).of(B.ᏑC).of(C.ᏑD)`,
 // and golib mints and keeps each one per box: TypeScript's checkdemo kept six per AST node in
 // LeftHandSideExpressionBase.AsNode. Go reaches the method's receiver in one step, and so can C#: go2cs-gen declares the
 // OUTER type's accessor for every promoted embed it can name (`A.ᏑD`, a ref to `x.B.C.D`), and golib resolves that
@@ -71,7 +71,7 @@ func (v *Visitor) promotedOneHopView(selectorExpr *ast.SelectorExpr, fieldAddr s
 	// go2cs-gen counts a promoted field's depth by its own walk, which reads a FOREIGN embed through metadata: that
 	// type's promoted fields appear as its own ref properties, one level above their Go depth. Where the name occurs
 	// more than once across the outer type's embeds, its count can then disagree with Go's, and it declares no accessor
-	// Go's selector would name (P3's 1b review, finding 2: Outer{ lib.X; W } reaches lib.Z at Go depth 2 through lib.X
+	// Go's selector would name (1b review, finding 2: Outer{ lib.X; W } reaches lib.Z at Go depth 2 through lib.X
 	// and 1 through W; the generator reads both at depth 1, ambiguous, and Outer.ᏑZ is CS1929). The chain is kept there.
 	// The decline is deliberately COARSER than needed: a foreign embed ANYWHERE among the outer type's embeds counts, not
 	// only one on the selected path, and every path's occurrence of the name counts. It costs a one-view call only where

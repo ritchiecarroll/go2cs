@@ -19,6 +19,15 @@ type message interface{ describe() string }
 
 func show(m message) { fmt.Println(m.describe()) }
 
+// Int32 is named like System.Int32 (internal/runtime/atomic's shape). Its method takes a field's address, so
+// package_info.cs records a field-access attribute naming the type at file scope, beside `using System;`.
+type Int32 struct{ v int32 }
+
+func (x *Int32) Add(d int32) *int32 {
+	x.v += d
+	return &x.v
+}
+
 func main() {
 	// Value used as the interface — emits GoImplement<ValueType, message>.
 	var m message = ValueType{unit: "cpu in nanoseconds"}
@@ -32,4 +41,10 @@ func main() {
 	fmt.Println(mp.describe())
 
 	show(ValueType{unit: "v1.4"})
+
+	var counter Int32
+	p := counter.Add(5)
+	*p += 1
+	fmt.Println(counter.v)
+	fmt.Println(*counter.Add(36))
 }

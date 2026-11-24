@@ -52,7 +52,7 @@ using System.Runtime.CompilerServices;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "ABMelIKClIKClJSClA==")]
+[assembly: GoPositionMap("main.go", "main.cs", "ABMeutqUgoKUgoKUgoKUgpQ=")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -71,6 +71,7 @@ public static partial class main_package
 
     // <TypeAccessibility>
     internal partial struct field {}
+    internal partial struct 尺 {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import
@@ -101,5 +102,7 @@ public static partial class main_package
 // <MethodForwarders>
 partial class mainᴛfield {
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint Area(this field f) => main_package.Area⁔(f);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint Weight(this field f) => main_package.Weight⁔(f);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint Ruler(this field f, main_package.尺 r) => main_package.Ruler⁔(f, r);
 }
 // </MethodForwarders>

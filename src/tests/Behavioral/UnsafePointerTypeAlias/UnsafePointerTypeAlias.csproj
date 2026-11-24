@@ -187,7 +187,10 @@
     <ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />
 
     <ProjectReference Include="$(go2csPath)core/fmt/fmt.csproj" />
+    <ProjectReference Include="$(go2csPath)core/reflect/reflect.csproj" />
+    <ProjectReference Include="$(go2csPath)core/runtime/runtime.csproj" />
     <ProjectReference Include="$(go2csPath)core/unsafe/unsafe.csproj" />
+    <ProjectReference Include="ualias/go.ualias.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -2218,7 +2218,8 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 							return result
 						}
 
-						return fmt.Sprintf("%s.Value.%s", v.convExpr(selectorExpr.X, xContexts), v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr)))
+						// A named pointer type itself named Value declares the member as NamedWrapperValue (pointerWrapperMember).
+						return fmt.Sprintf("%s.%s.%s", v.convExpr(selectorExpr.X, xContexts), v.pointerWrapperMember(wrapper, "Value"), v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr)))
 					}
 				}
 			}
@@ -2535,7 +2536,7 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 								if isPtrRecv, recvName := v.isPointerReceiver(); isPtrRecv && v.identResolvesToReceiver(recvIdent, recvName) &&
 									v.getIdentName(recvIdent) == recvIdent.Name && !isDirectBoxReceiverMethod(v.currentFuncDecl, v.info) {
 									// Through a FOREIGN UNEXPORTED hop the spelled path names that hop's internal
-									// accessor (`w.Link.baseLink…Add(s)`, CS0122; P3 132359Z, SHOULD 1): call the
+									// accessor (`w.Link.baseLink…Add(s)`, CS0122; review SHOULD 1, 7dc112e959): call the
 									// promoted method on the `ref` receiver itself, which binds the outer type's
 									// generated `ref` forwarder, as the arm below does for any other base.
 									if foreignUnexportedHop {

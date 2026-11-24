@@ -25,7 +25,7 @@ internal static slice<ж<ast.Ident>> filterIdentList(slice<ж<ast.Ident>> list) 
 
 internal static ж<ast.Ident> underscore = ast.NewIdent("_");
 
-internal static void filterCompositeLit(ref ast.CompositeLit lit, Func<@string, bool> filter, bool export) {
+internal static void filterCompositeLit(ref ast.CompositeLit lit, Filter filter, bool export) {
     nint n = len(lit.Elts);
     lit.Elts = filterExprList(lit.Elts, filter, export);
     if (len(lit.Elts) < n) {
@@ -33,7 +33,7 @@ internal static void filterCompositeLit(ref ast.CompositeLit lit, Func<@string, 
     }
 }
 
-internal static slice<ast.Expr> filterExprList(slice<ast.Expr> list, Func<@string, bool> filter, bool export) {
+internal static slice<ast.Expr> filterExprList(slice<ast.Expr> list, Filter filter, bool export) {
     nint j = 0;
     foreach (var (_, exp) in range(list)) {
         switch (exp.type()) {
@@ -243,7 +243,7 @@ internal static bool filterSpec⁔(/*this*/ ref reader r, ast.Spec spec) {
         return true;
     }
     case ж<ast.ValueSpec> s: {
-        s.Values = filterExprList(s.Values, new Func<@string, bool>(token.IsExported), true);
+        s.Values = filterExprList(s.Values, new Filter(token.IsExported), true);
         if (len(s.Values) > 0 || s.Type == nil && len(s.Values) == 0) {
             // If there are values declared on RHS, just replace the unexported
             // identifiers on the LHS with underscore, so that it matches

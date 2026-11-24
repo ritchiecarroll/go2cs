@@ -490,8 +490,8 @@ queued after a run is run by the next miss.
 <!-- The queueing initializer: src/gen/go2cs-gen/DeferredRegistration.cs:22
      (`public static string Initializer(string registry, string name)`). Its callers:
      src/gen/go2cs-gen/ImplementGenerator.cs:1613 (`DeferredRegistration.Initializer("Adapters", "Adapters")`),
-     src/gen/go2cs-gen/TypeGenerator.cs:731 (`DeferredRegistration.Initializer("ZeroFactories", "GoZeroFactories")`),
-     src/gen/go2cs-gen/EscapeRegistryGenerator.cs:408 (`DeferredRegistration.Initializer("EscapeRegistry", "EscapingContainers")`),
+     src/gen/go2cs-gen/TypeGenerator.cs:733 (`DeferredRegistration.Initializer("ZeroFactories", "GoZeroFactories")`),
+     src/gen/go2cs-gen/EscapeRegistryGenerator.cs:406 (`DeferredRegistration.Initializer("EscapeRegistry", "EscapingContainers")`),
      src/gen/go2cs-gen/NativeArrayOpenerGenerator.cs:221
      (`DeferredRegistration.Initializer("NativeArrayOpeners", "NativeArrayOpeners")`).
      The four queues: src/core/golib/GoDeferredRegistrations.cs:41 (`NativeArrayOpeners = new()`), :44

@@ -685,9 +685,10 @@ func (v *Visitor) convUnaryExprCore(unaryExpr *ast.UnaryExpr, context UnaryExprC
 
 						typeName := convertToCSTypeName(v.getAliasQualifiedTypeName(ptrType.Elem(), false))
 						fieldRef := fmt.Sprintf("%s.%s%s", v.boxAccessorType(typeName, structExpr, ptrType.Elem()), AddressPrefix, v.structFieldBoxName(selectorExpr.Sel, selectorExpr.X))
-						// The address property is ж<T>'s: a named pointer type's wrapper declares `of`, not it.
+						// The address property is ж<T>'s: a named pointer type's wrapper declares `of`, not it (Δof when the
+						// type itself is named `of`; pointerWrapperMember).
 						if _, plain := types.Unalias(v.getType(base, false)).(*types.Pointer); !plain {
-							return fmt.Sprintf("%s.of(%s)", structExpr, fieldRef)
+							return fmt.Sprintf("%s.%s(%s)", structExpr, v.pointerWrapperMember(v.getType(base, false), "of"), fieldRef)
 						}
 
 						return structExpr + v.fieldAddressStep(ptrType.Elem(), selectorExpr, fieldRef)
@@ -882,7 +883,8 @@ func (v *Visitor) convUnaryExprCore(unaryExpr *ast.UnaryExpr, context UnaryExprC
 					boxIdentContext := DefaultIdentContext()
 					boxIdentContext.isPointer = true
 
-					return fmt.Sprintf("%s.at<%s>(%s)", v.parenthesizeConversionBase(indexExpr.X, v.convExpr(indexExpr.X, []ExprContext{boxIdentContext})), elemCSType, v.convArrayIndex(indexExpr.Index))
+					// A NAMED pointer-to-array type itself named `at` declares the member as Δat (pointerWrapperMember).
+					return fmt.Sprintf("%s.%s<%s>(%s)", v.parenthesizeConversionBase(indexExpr.X, v.convExpr(indexExpr.X, []ExprContext{boxIdentContext})), v.pointerWrapperMember(v.getType(indexExpr.X, false), "at"), elemCSType, v.convArrayIndex(indexExpr.Index))
 				}
 			}
 
@@ -1256,7 +1258,7 @@ func (v *Visitor) convUnaryExprCore(unaryExpr *ast.UnaryExpr, context UnaryExprC
 		if _, ok := v.getType(unaryExpr.X, true).(*types.Chan); ok {
 			var tupleResult string
 
-			if v.options.useChannelOperators {
+			if v.chanOperatorSpelling(unaryExpr.X) {
 				if context.isTupleResult {
 					tupleResult = ", " + OverloadDiscriminator
 				}

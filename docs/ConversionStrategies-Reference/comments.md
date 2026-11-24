@@ -401,8 +401,9 @@ partial struct IntSlice /*[]nint*/;
 ([marker comments](source-generators.md#marker-comments-what-converted-code-carries-instead-of-an-attribute)).
 The comment above it, which Go leaves free, keeps its place and its blank line.
 
-A function type with no methods has no C# declaration: it is written inline as its delegate type wherever it
-is used. Its doc is written directly above the converter's line that says so:
+A function type is a delegate declaration, whether or not it has methods
+([struct-types.md](struct-types.md#every-defined-func-type-declares-its-own-delegate)), and its doc is written
+directly above the delegate:
 
 <!-- source: GOROOT/src/bufio/scan.go:60-67 -->
 ```go
@@ -425,7 +426,7 @@ type SplitFunc func(data []byte, atEOF bool) (advance int, token []byte, err err
 // The function is never called with an empty data slice unless atEOF
 // is true. If atEOF is true, however, data may be non-empty and,
 // as always, holds unprocessed text.
-// type SplitFunc is a methodless func type — rendered inline as its base delegate
+public delegate (nint advance, slice<byte> token, error err) SplitFunc(slice<byte> data, bool atEOF);
 ```
 
 ### A type alias's doc, above its `global using`
@@ -730,7 +731,7 @@ After the last element, above the closing bracket:
 			}
 ```
 
-<!-- source: src/core/database/sql/sql.cs:3176-3180 -->
+<!-- source: src/core/database/sql/sql.cs:3177-3181 -->
 ```csharp
                 Ꮡrows.ValueSlot = Ꮡ(new Rows(
                     dc: dc,

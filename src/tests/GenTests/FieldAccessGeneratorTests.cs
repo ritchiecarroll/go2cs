@@ -615,9 +615,31 @@ public class FieldAccessGeneratorTests
         StringAssert.Contains(generated, Header("nint", "Len", String));
     }
 
+    // A Go uint length is a native unsigned int: github.com/zeebo/xxh3 declares its string header as
+    // struct { p unsafe.Pointer; l uint } (C45). Its setter commits like the int-length header's.
+    private const string UintHeader = """
+        namespace go;
+
+        [GoFieldAccess(typeof(str))]
+        partial class xxh3_package
+        {
+            public partial struct str { public unsafe_package.Pointer p; public nuint l; }
+        }
+        """;
+
+    [TestMethod]
+    public void AHeaderWithAUintLengthGetsTheCommittingSetter()
+    {
+        string generated = Generate(UintHeader);
+        const string Str = "global::go.xxh3_package.str";
+
+        StringAssert.Contains(generated, Header("global::go.unsafe_package.Pointer", "p", Str));
+        StringAssert.Contains(generated, Header("nuint", "l", Str));
+    }
+
     // The predicate's arity and order checks (G, review of 94ec9ea487): a header is exactly two or three fields, the
-    // pointer FIRST, and every later field a native int. golib's uintptr is a struct, not nint, so a Go uintptr word
-    // does not make a header either.
+    // pointer FIRST, and every later field a native int or native unsigned int (C45). golib's uintptr is a struct, not
+    // nint, so a Go uintptr word does not make a header either, and a 32-bit uint (notHeader's Cap) does not.
     private const string NearMisses = """
         namespace go;
 

@@ -4,11 +4,11 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-// type applyFunc is a methodless func type — rendered inline as its base delegate
+internal delegate (nint, error) applyFunc(nint seed, Func<nint, (nint, error)> op);
 
 partial struct machine {
     internal Func<nint, Func<nint, (nint, error)>, (nint, error)> apply;
-    internal Func<nint, Func<nint, (nint, error)>, (nint, error)> named;
+    internal applyFunc named;
     internal Func<@string, (@string val, bool ok)> lookup;
 }
 

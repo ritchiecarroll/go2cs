@@ -331,8 +331,8 @@
     code, and the build goes on.
   -->
   <!-- 1.26.11.2, the .5 release: it moves the floor ONCE for every .5 break together, among them Tour 4's array
-       literals and wall E's go.variadic<T> (COORD 2026-11-20T13:50:29Z). A Go patch hop before .5 ships moves it with
-       the release's version. -->
+       literals, the named-func-type break and wall E's go.variadic<T> (COORD 2026-11-20T13:50:29Z). A Go patch release
+       before .5 ships moves it with that release's version. -->
   <PropertyGroup>
     <GoBreakFloor>1.26.11.2</GoBreakFloor>
   </PropertyGroup>
@@ -433,10 +433,10 @@
     would write rollForward twice). A self-contained publish carries its own runtime and is unaffected. A project
     reference to golib never imports buildTransitive, so the corpus and its goldens are untouched.
   -->
-  <!-- 2026-11-20, i9 (the .5 SDK-usability seat, COORD ruling 07:24Z): measured with an isolated .NET 11.0.100 SDK as
+  <!-- 2026-11-20 (c6a1b0761e, SDK usability): measured with an isolated .NET 11.0.100 SDK as
        the only .NET on the box. A -recurse=nuget hello program built 0/0 and its apphost exited 150 with the missing
        framework 10.0.0; built against this file it ran on 11.0.0, and the same exe on a box with 10.0.15 installed
-       bound 10.0.15 (host trace). P3's review (12:51Z): WinExe added; with a runtimeconfig.template.json that set
+       bound 10.0.15 (host trace). After review (9b672cc964): WinExe added; with a runtimeconfig.template.json that set
        rollForward LatestPatch, the first cut produced a runtimeconfig.json carrying "rollForward" TWICE (Major, then
        LatestPatch), so a template now turns the default off. UserRuntimeConfig is defined in Microsoft.NET.Sdk.targets
        and may be unset when this file is read, so the default template path is checked too. The red/green arms are

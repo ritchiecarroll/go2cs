@@ -577,13 +577,13 @@ internal static (Conn, error) DialContext⁔(/*this*/ ж<Dialer> Ꮡd, context.C
     finally { ᒐ.Run(); }
 }
 
-internal static partial (context.Context, Action) dialCtx⁔(/*this*/ ref Dialer d, context.Context ctx) {
+internal static partial (context.Context, context.CancelFunc) dialCtx⁔(/*this*/ ref Dialer d, context.Context ctx) {
     if (ctx == nil) {
         throw panic("nil context");
     }
     var deadline = d.deadline(ctx, time.Now());
-    Action cancel1 = default;
-    Action cancel2 = default;
+    context.CancelFunc cancel1 = default;
+    context.CancelFunc cancel2 = default;
     if (!deadline.IsZero()) {
         testHookStepTime();
         var (dΔ1, ok) = ctx.Deadline(); if (!ok || deadline.Before(dΔ1)) {
@@ -868,7 +868,7 @@ internal static (Conn, error) dialSerial⁔(/*this*/ ж<sysDialer> Ꮡsd, contex
                         break;
                     }
                     if (partialDeadlineΔ1.Before(deadline)) {
-                        Action cancel = default;
+                        context.CancelFunc cancel = default;
                         (dialCtx, cancel) = context.WithDeadline(ctx, partialDeadlineΔ1);
                         var cancelʗ1 = cancel;
                         defer(() => cancelʗ1(), ref ᒐ);

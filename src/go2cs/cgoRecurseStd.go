@@ -26,7 +26,7 @@ import (
 // is derived per target from the toolchain: at go1.26.11 net, os/user, plugin and runtime/cgo on linux, plugin and
 // runtime/cgo on darwin, runtime/cgo on windows (cgo against go.* INC 1, C2 e95260f9fa).
 //
-// For most of that set it is a DISCLOSED divergence and converts (COORD's ruling on P3's INC 1 review, option b): net's
+// For most of that set it is a DISCLOSED divergence and converts (decision on the INC 1 review, option b; 4e98cf5fab): net's
 // and os/user's cgo-off builds are working Go builds of the same API, the ones Go itself uses under CGO_ENABLED=0 or
 // the netgo / osusergo tags (net's pure-Go resolver; docs/Limitations.md). Refused by name (R5) are only the packages
 // of that set whose cgo-off build is NOT a working build of the same API: runtime/cgo (R5c) and plugin.

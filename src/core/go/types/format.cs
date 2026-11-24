@@ -11,7 +11,7 @@ using token = global::go.go.token_package;
 using strconv = strconv_package;
 using strings = strings_package;
 using global::go.go;
-using ꓸꓸꓸany = variadic<any>;
+using ꓸꓸꓸany = Span<any>;
 
 partial class types_package {
 
@@ -19,8 +19,8 @@ partial class types_package {
 internal static ref readonly @string nilˢ => ref nilˢᵇ;
 private static readonly @string nilˢᵇ = "<nil>"u8;
 
-internal static @string sprintf(ж<token.FileSet> fset, Func<ж<Package>, @string> qf, bool tpSubscripts, @string format, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.slice();
+internal static @string sprintf(ж<token.FileSet> fset, Qualifier qf, bool tpSubscripts, @string format, params ꓸꓸꓸany argsʗp) {
+    var args = argsʗp.sslice();
 
     foreach (var (i, vᴛ1) in range(args)) {
         var arg = vᴛ1;
@@ -118,11 +118,11 @@ internal static @string sprintf(ж<token.FileSet> fset, Func<ж<Package>, @strin
 
 // check may be nil.
 internal static @string sprintf⁔(/*this*/ ж<Checker> Ꮡcheck, @string format, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp;
+    var args = argsʗp.sslice();
     ref var check = ref Ꮡcheck.DerefOrNull();
 
     ж<token.FileSet> fset = default;
-    Func<ж<Package>, @string> qf = default;
+    Qualifier qf = default;
     if (Ꮡcheck != nil) {
         fset = check.fset;
         qf = (ж<Package> p1) => Ꮡcheck.qualifier(p1);
@@ -131,7 +131,7 @@ internal static @string sprintf⁔(/*this*/ ж<Checker> Ꮡcheck, @string format
 }
 
 internal static void trace⁔(/*this*/ ж<Checker> Ꮡcheck, token.Pos pos, @string format, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp;
+    var args = argsʗp.sslice();
     ref var check = ref Ꮡcheck.DerefOrNull();
 
     var pos1 = check.fset.Position(pos);
@@ -144,7 +144,7 @@ internal static void trace⁔(/*this*/ ж<Checker> Ꮡcheck, token.Pos pos, @str
         pos1,
         pad,
         strings.Repeat(".  ", check.indent),
-        sprintf(check.fset, new Func<ж<Package>, @string>(Ꮡcheck.qualifier), true, format, args.ꓸꓸꓸ));
+        sprintf(check.fset, new Qualifier(Ꮡcheck.qualifier), true, format, args.ꓸꓸꓸ));
 }
 
 // ndigits returns the number of decimal digits in x.
@@ -165,10 +165,10 @@ internal static nint ndigits(nint x) {
 
 // dump is only needed for debugging
 internal static void dump⁔(/*this*/ ж<Checker> Ꮡcheck, @string format, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp;
+    var args = argsʗp.sslice();
     ref var check = ref Ꮡcheck.DerefOrNull();
 
-    fmt.Println(sprintf(check.fset, new Func<ж<Package>, @string>(Ꮡcheck.qualifier), true, format, args.ꓸꓸꓸ));
+    fmt.Println(sprintf(check.fset, new Qualifier(Ꮡcheck.qualifier), true, format, args.ꓸꓸꓸ));
 }
 
 internal static @string qualifier⁔(/*this*/ ref Checker check, ж<Package> Ꮡpkg) {

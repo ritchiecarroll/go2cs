@@ -399,20 +399,47 @@ try {
     $capTotal = 0
     foreach ($cap in $variadicCaps.Values) { $capTotal += $cap }
     Check 'the caps are the generator''s 355 entries in 56 files' ($capTotal -eq 355 -and $variadicCaps.Count -eq 56) "$capTotal in $($variadicCaps.Count)"
-    $known = @('go.lib') + @($variadicCaps.Keys)
+    # D (docs/ConversionStrategies-Reference/struct-types.md, "Every defined func type declares its own delegate")
+    # announces the next break: every defined func type is a delegate of its own, where it was its underlying Action or
+    # Func, so each exported member whose signature names one changes its signature. Release-smoke's pack of the D seat
+    # (54af90e94e, run 45137204259) read 94 failures in 21 packages against 1.26.11.1, all CP0002 but one CP0006; the
+    # entries were generated asset by asset by apicompat's generate-suppression-file option over that feed, one per failure.
+    # The bound is those counts and no other file. Each header says when its file goes: once the release that ships D
+    # is published, the release after it compares with that release and the entries match nothing.
+    Write-Host 'the tree carries at most D''s generated entries outside golib'
+    $retypeCaps = [ordered]@{
+        'go.archive.zip' = 10; 'go.bufio' = 2; 'go.context' = 6; 'go.crypto.internal.cryptotest' = 5; 'go.go.ast' = 5;
+        'go.go.doc' = 2; 'go.go.importer' = 2; 'go.go.internal.gccgoimporter' = 3; 'go.go.scanner' = 2;
+        'go.go.types' = 6; 'go.internal.coverage.encodecounter' = 2; 'go.internal.profile' = 4;
+        'go.internal.testhash' = 2; 'go.internal.trace.traceviewer' = 2; 'go.io.fs' = 1; 'go.os.signal' = 1;
+        'go.path.filepath' = 12; 'go.vendor.golang.org.x.crypto.cryptobyte' = 5;
+        'go.vendor.golang.org.x.net.idna' = 11; 'go.vendor.golang.org.x.net.nettest' = 6;
+        'go.vendor.golang.org.x.text.unicode.bidi' = 5
+    }
+    $capTotal = 0
+    foreach ($cap in $retypeCaps.Values) { $capTotal += $cap }
+    Check 'the caps are D''s 94 entries in 21 files' ($capTotal -eq 94 -and $retypeCaps.Count -eq 21) "$capTotal in $($retypeCaps.Count)"
+    # Both breaks ship in .5 against 1.26.11.1, so a package both reach carries one file holding both generators'
+    # entries, de-duplicated (a member both change is removed from the baseline once, and both name it alike): its
+    # cap is the two counts added, and it cites both rulings.
+    $known = @('go.lib') + @($variadicCaps.Keys) + @($retypeCaps.Keys | Where-Object { -not $variadicCaps.Contains($_) })
     $other = @($real.Keys | Where-Object { $known -cnotcontains $_ } | Sort-Object)
     Check 'no other package carries a suppression file' ($other.Count -eq 0) ($other -join ', ')
     $kinds = @('CP0002', 'CP0006')
     $over = New-Object System.Collections.Generic.List[string]
-    foreach ($id in @($real.Keys | Where-Object { $variadicCaps.Contains($_) } | Sort-Object)) {
+    foreach ($id in @($real.Keys | Where-Object { $variadicCaps.Contains($_) -or $retypeCaps.Contains($_) } | Sort-Object)) {
+        $cap = 0
+        if ($variadicCaps.Contains($id)) { $cap += $variadicCaps[$id] }
+        if ($retypeCaps.Contains($id)) { $cap += $retypeCaps[$id] }
         $read = @(Read-GoApiCompatSuppressions $real[$id])
-        if ($read.Count -gt $variadicCaps[$id]) { $over.Add("$id has $($read.Count) entries, over its $($variadicCaps[$id])") }
+        if ($read.Count -gt $cap) { $over.Add("$id has $($read.Count) entries, over its $cap") }
         $foreign = @($read | Where-Object { $kinds -cnotcontains $_.DiagnosticId } | ForEach-Object { $_.DiagnosticId } | Sort-Object -Unique)
-        if ($foreign.Count) { $over.Add("$id has an entry the variadic tail kind does not write: $($foreign -join ', ')") }
+        if ($foreign.Count) { $over.Add("$id has an entry neither generator writes: $($foreign -join ', ')") }
         $text = [System.IO.File]::ReadAllText($real[$id])
-        if (-not ($text.Contains('2026-11-20T13:50:29Z') -and $text.Contains('New-GoApiCompatMoveSuppressions.ps1'))) { $over.Add("$id does not cite the wall E ruling and its generator") }
+        if ($variadicCaps.Contains($id) -and -not ($text.Contains('2026-11-20T13:50:29Z') -and $text.Contains('New-GoApiCompatMoveSuppressions.ps1'))) { $over.Add("$id does not cite the wall E ruling and its generator") }
+        if ($retypeCaps.Contains($id) -and -not ($text.Contains('struct-types.md') -and $text.Contains('generate-suppression-file option'))) { $over.Add("$id does not cite D's section and how it was generated") }
     }
-    Check 'each file holds at most its generated count, only the variadic tail kind''s diagnostics, and cites the ruling and the generator' ($over.Count -eq 0) ($over -join '; ')
+    Check 'each file holds at most its generated count (both counts where both breaks reach it), only CP0002 and CP0006, and cites each break that reaches it' ($over.Count -eq 0) ($over -join '; ')
 
     # The break floor (DESIGN-go-break-floor.md section 4): go.lib's targets fail a consumer's build for a package built
     # below $(GoBreakFloor), and push-nuget refuses a release whose floor disagrees with its suppression files. Once the

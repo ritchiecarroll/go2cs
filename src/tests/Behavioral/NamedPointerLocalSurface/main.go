@@ -4,7 +4,10 @@
 // used to name a member the wrapper lacks, or (range) was not converted at all.
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"time"
+)
 
 type flagSet [2]uint8
 
@@ -18,6 +21,12 @@ type holder struct{ f Features }
 
 // first's *flagSet parameter is only read, so the converter lowers it to a ref parameter.
 func first(o *flagSet) uint8 { return o[0] }
+
+// timeLocation is a defined pointer over ANOTHER package's type (log/slog's shape). Its pointee is spelled through
+// the file's `time` alias, which go2cs-gen's generated part must qualify.
+type timeLocation *time.Location
+
+func zoneName(l *time.Location) string { return l.String() }
 
 func main() {
 	p := PP(&point{x: 4})
@@ -36,4 +45,7 @@ func main() {
 
 	h := holder{f: g}
 	fmt.Println(first(g), first(h.f), h.f[1])
+
+	tl := timeLocation(time.UTC)
+	fmt.Println(zoneName(tl))
 }

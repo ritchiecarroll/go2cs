@@ -182,10 +182,10 @@ namespace go;
         // NOT a map, a channel, a string, a slice or an array value: golib's forms of those are value types that hold a
         // reference, so this test does not reach them. They stay the census's B2a value kinds below.
         //
-        // NO EXEMPTION (W4, seat S-B1, docs/phase4/DESIGN-cgo-phase3-marshaling.md 18.3-18.7). Until the word doors landed,
+        // NO EXEMPTION (W4, cure S-B1, docs/phase4/DESIGN-cgo-phase3-marshaling.md 18.3-18.7). Until the word doors landed,
         // unsafe.Pointer over MANAGED Go storage was exempt, because the converted runtime reaches `(*unsafe.Pointer)(p)`
         // over a Go word (map.go's indirect key, atomic_pointer.go's atomicwb); the exempt read stored a CLR reference in a
-        // word the collector does not scan (the .5 BOARD row of 2026-11-16). The converter now emits `*p` and `*p = v` for a
+        // word the collector does not scan (found 2026-11-16; df230c8d43). The converter now emits `*p` and `*p = v` for a
         // *unsafe.Pointer p as unsafe.Pointer.LoadWord / StoreWord, and the hand-owned atomic doors take the word doors, so
         // a `.Value` read of such a box is reached only by code those doors did not rewrite, and it is refused by name.
         //
