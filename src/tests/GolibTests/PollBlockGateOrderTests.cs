@@ -28,28 +28,38 @@ namespace GolibTests;
 // that sets a past read deadline (the wake), holds its P while the reader wakes and takes the gate back, then sets the
 // deadline again. With the park disposed under the gate the second set never returns; with it disposed after the gate
 // is released, both finish and the read reports the deadline.
+//
+// The child sets no deadline until the reader is PARKED in the poller (its wait reason reads IO wait), and fails by name
+// if it never gets there: a read that returned before parking would pass without exercising the loop. The same wake
+// sequence runs in default mode too (GO2CS_MN unset), where no P is waited for: the loop's release-and-retake of the gate
+// changed in both modes, and the default row is what names a later break of the recheck that only that mode would show.
 [TestClass]
 public class PollBlockGateOrderTests
 {
+    // "mn" or "default": which scheduler the parent started the child under.
     private const string ChildVariable = "GO2CS_TEST_POLLBLOCK_CHILD";
 
     // The CHILD. Run on its own (no variable) it does nothing.
     [TestMethod]
     public void ChildReaderWokenUnderTheGateWhileItsPIsHeld()
     {
-        if (Environment.GetEnvironmentVariable(ChildVariable) != "1")
+        string? mode = Environment.GetEnvironmentVariable(ChildVariable);
+
+        if (mode is not ("mn" or "default"))
             return;
 
-        Assert.IsTrue(GoScheduler.Enabled, "the child runs with GO2CS_MN=1");
+        Assert.AreEqual(mode == "mn", GoScheduler.Enabled, $"the child runs in {mode} mode");
 
         (ж<os_package.File> r, ж<os_package.File> w, error err) = os_package.Pipe();
         Assert.IsNull(err, "os.Pipe");
 
         using ManualResetEventSlim reading = new(), readerDone = new(), setterDone = new();
         error? readErr = null;
+        Goroutine? readerGoroutine = null;
 
         Action reader = () =>
         {
+            readerGoroutine = Goroutine.Current;
             reading.Set();
             (_, readErr) = r.Read(new slice<byte>(1));
             readerDone.Set();
@@ -59,8 +69,20 @@ public class PollBlockGateOrderTests
 
         Assert.IsTrue(reading.Wait(TimeSpan.FromSeconds(30)), "the reader goroutine started");
 
-        // The reader is about to park in pollBlock; give it time to get there (this thread is no carrier and holds no P).
-        Thread.Sleep(500);
+        // Wait until the reader is parked in pollBlock (this thread is no carrier and holds no P). Until then a deadline
+        // would make Read return without waiting, and the row would pass without running the loop it guards.
+        Stopwatch parking = Stopwatch.StartNew();
+
+        while (readerGoroutine?.Reason != WaitReason.IOWait && parking.Elapsed < TimeSpan.FromSeconds(30))
+            Thread.Sleep(10);
+
+        if (readerGoroutine?.Reason != WaitReason.IOWait)
+        {
+            Console.WriteLine($"POLLBLOCK NOT PARKED reason={readerGoroutine?.Reason.ToString() ?? "no goroutine"}");
+            Assert.Fail($"the reader never parked in the poller (wait reason {readerGoroutine?.Reason.ToString() ?? "unknown: no goroutine"}), so the row would not exercise pollBlock");
+        }
+
+        Console.WriteLine($"POLLBLOCK PARKED mode={mode} after {parking.ElapsedMilliseconds} ms");
 
         Action setter = () =>
         {
@@ -93,19 +115,40 @@ public class PollBlockGateOrderTests
     [TestMethod]
     public void AReaderWokenInThePollerDoesNotWaitForAPUnderTheGate()
     {
+        RunChild("mn");
+    }
+
+    [TestMethod]
+    public void AReaderWokenInThePollerFinishesInDefaultMode()
+    {
+        RunChild("default");
+    }
+
+    private static void RunChild(string mode)
+    {
         string filter = $"FullyQualifiedName={typeof(PollBlockGateOrderTests).FullName}.{nameof(ChildReaderWokenUnderTheGateWhileItsPIsHeld)}";
 
-        ProcessStartInfo start = new("dotnet", ["test", typeof(PollBlockGateOrderTests).Assembly.Location, "--filter", filter])
+        ProcessStartInfo start = new("dotnet", ["test", typeof(PollBlockGateOrderTests).Assembly.Location, "--filter", filter, "--logger", "console;verbosity=detailed"])
         {
             RedirectStandardOutput = true,
             RedirectStandardError = true,
             UseShellExecute = false
         };
 
-        start.Environment[ChildVariable] = "1";
-        start.Environment["GO2CS_MN"] = "1";
-        start.Environment["GO2CS_MN_PROCS"] = "1";
-        start.Environment["GO2CS_MN_PREEMPT_MS"] = "0";
+        // Detailed console logging, so the child's own lines (POLLBLOCK PARKED) reach this test on a pass, not only on a failure.
+        start.Environment[ChildVariable] = mode;
+
+        if (mode == "mn")
+        {
+            start.Environment["GO2CS_MN"] = "1";
+            start.Environment["GO2CS_MN_PROCS"] = "1";
+            start.Environment["GO2CS_MN_PREEMPT_MS"] = "0";
+        }
+        else
+        {
+            // Default mode: GO2CS_MN cleared, whatever the host process inherited.
+            start.Environment.Remove("GO2CS_MN");
+        }
 
         using Process process = Process.Start(start)!;
         Task<string> stdout = process.StandardOutput.ReadToEndAsync();
@@ -120,6 +163,13 @@ public class PollBlockGateOrderTests
         string child = stdout.Result + stderr.Result;
 
         Assert.IsFalse(child.Contains("POLLBLOCK DEADLOCK", StringComparison.Ordinal), $"the reader and the setter deadlocked:\n{child}");
+        Assert.IsTrue(child.Contains("POLLBLOCK PARKED mode=" + mode, StringComparison.Ordinal), $"the reader parked in the poller before the first deadline:\n{child}");
+
+        foreach (string line in child.Split('\n'))
+        {
+            if (line.Contains("POLLBLOCK PARKED", StringComparison.Ordinal))
+                Console.WriteLine("child: " + line.Trim());
+        }
         Assert.AreEqual(0, process.ExitCode, $"the child failed:\n{child}");
         Assert.IsTrue(child.Contains("Passed!", StringComparison.Ordinal) || child.Contains("Passed:", StringComparison.Ordinal), $"the child test ran and passed:\n{child}");
     }
