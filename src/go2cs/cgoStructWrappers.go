@@ -832,7 +832,8 @@ func (set *cgoWrapperSet) helper(declaration cgoDeclaration) (string, error) {
 
 		text.WriteString("    // C.GoString, cmd/cgo's own helper: the bytes of a C string, up to its NUL, as a Go string.\n")
 		fmt.Fprintf(&text, "    internal static @string GoString(%s p0)\n    {\n", pointerType)
-		fmt.Fprintf(&text, "        return %sGoString(%sHelperPointer(p0, %q));\n    }\n", args, args, function)
+		// Go memory is read from its pinned storage, as a Go function reads it (3.2 seat 1b, design 18.12 item 3).
+		fmt.Fprintf(&text, "        return %sGoStringOf(p0, %q);\n    }\n", args, function)
 
 	case "GoStringN":
 		length, counted := count()
@@ -848,7 +849,7 @@ func (set *cgoWrapperSet) helper(declaration cgoDeclaration) (string, error) {
 
 		text.WriteString("    // C.GoStringN, cmd/cgo's own helper: a counted run of C memory as a Go string.\n")
 		fmt.Fprintf(&text, "    internal static @string GoStringN(%s p0, %s p1)\n    {\n", pointerType, length.goSide)
-		fmt.Fprintf(&text, "        return %sGoStringN(%sHelperPointer(p0, %q), (int)%s);\n    }\n", args, args, function, length.toPrimitive("p1"))
+		fmt.Fprintf(&text, "        return %sGoStringNOf(p0, (int)%s, %q);\n    }\n", args, length.toPrimitive("p1"), function)
 
 	case "GoBytes":
 		length, counted := count()
@@ -859,7 +860,7 @@ func (set *cgoWrapperSet) helper(declaration cgoDeclaration) (string, error) {
 
 		text.WriteString("    // C.GoBytes, cmd/cgo's own helper: a counted run of C memory as a new Go byte slice.\n")
 		fmt.Fprintf(&text, "    internal static slice<byte> GoBytes(%s p0, %s p1)\n    {\n", cgoVoidPointerType, length.goSide)
-		fmt.Fprintf(&text, "        return %sGoBytes(%sHelperVoidPointer(p0, %q), (int)%s);\n    }\n", args, args, function, length.toPrimitive("p1"))
+		fmt.Fprintf(&text, "        return %sGoBytesOf(p0, (int)%s, %q);\n    }\n", args, length.toPrimitive("p1"), function)
 
 	default:
 		return "", unknown

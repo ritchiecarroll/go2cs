@@ -342,6 +342,22 @@ func main() {
 		s := h.name[:]
 		n := C.go2cs_probe_text_fill((*C.char)(unsafe.Pointer(unsafe.SliceData(s))), 8)
 		fmt.Printf("goviewnamedata %d %q\n", int(n), string(s[:n]))
+	// Increment 3.2 seat 1b (DESIGN-cgo-phase3-marshaling 18.12 item 5): cmd/cgo's element and slice check closures,
+	// written as Go code writes them, so cmd/cgo itself makes the closures (checkIndex, checkSlice).
+	case "goindex":
+		// &b[2] straight into a void pointer: cmd/cgo's index form.
+		b := make([]byte, 16)
+		fmt.Println("goindex", C.go2cs_probe_same(unsafe.Pointer(&b[2])) != nil, len(b))
+	case "goindexfill":
+		// &b[4] as a typed pointer C writes through: the index form under conversions.
+		b := make([]byte, 16)
+		n := C.go2cs_probe_text_fill((*C.char)(unsafe.Pointer(&b[4])), 8)
+		fmt.Printf("goindexfill %d %q\n", int(n), string(b[4:4+int(n)]))
+	case "goslicefill":
+		// unsafe.SliceData(b[4:]) as a typed pointer C writes through: cmd/cgo's slice form.
+		b := make([]byte, 16)
+		n := C.go2cs_probe_text_fill((*C.char)(unsafe.Pointer(unsafe.SliceData(b[4:]))), 8)
+		fmt.Printf("goslicefill %d %q\n", int(n), string(b[4:4+int(n)]))
 	// Increment 3.2's first reds (DESIGN-cgo-phase3-marshaling section 6): C memory that Go reads. Go runs each to its
 	// end; what go2cs does with each is READ before 3.2 changes anything.
 	case "s6field":

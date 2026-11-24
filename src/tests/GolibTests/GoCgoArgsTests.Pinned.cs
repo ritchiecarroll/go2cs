@@ -277,6 +277,51 @@ public unsafe partial class GoCgoArgsTests
         GC.KeepAlive(wide);
     }
 
+    // cmd/cgo's helpers over Go memory (18.12 item 3, P3's confirm (A)): Go functions, so they read Go memory as Go does.
+    // C.GoString reads to the NUL, C.GoStringN and C.GoBytes read their length. A read Go would make past the end of
+    // the object, and a C string with no NUL inside the storage, are refused by name: the managed object is all there is.
+    [TestMethod]
+    public void PinnedTheHelpersReadGoMemoryAsGoDoes()
+    {
+        array<byte> bytes = new array<byte>(16);
+        ReadOnlySpan<byte> content = "go2cs\0tail"u8;
+
+        for (int i = 0; i < content.Length; i++)
+            bytes[2 + i] = content[i];
+        ж<byte> text = new ElemRefBox<byte>(bytes, 2);
+
+        Assert.AreEqual("go2cs", GoCgoArgs.GoStringOf(text, "GoString").ToString(), "GoString, the element's box");
+        Assert.AreEqual("go2cs", GoCgoArgs.GoStringOf(@unsafe.Pointer.To<byte>(@unsafe.Pointer.FromPinnedBox(text)), "GoString").ToString(), "GoString, through a view");
+        Assert.AreEqual("go2", GoCgoArgs.GoStringNOf(text, 3, "GoStringN").ToString(), "GoStringN");
+        Assert.AreEqual("cs\0ta", System.Text.Encoding.ASCII.GetString(GoCgoArgs.GoBytesOf(@unsafe.Pointer.FromPinnedBox(new ElemRefBox<byte>(bytes, 5)), 5, "GoBytes").ToSpan()), "GoBytes, the retaining mint");
+
+        StringAssert.Contains(RefusalOf(() => GoCgoArgs.GoBytesOf(@unsafe.Pointer.FromPinnedBox(text), 15, "GoBytes")), "past the end", "a read past the object");
+        array<byte> unterminated = new array<byte>(4);
+
+        for (int i = 0; i < 4; i++)
+            unterminated[i] = (byte)'x';
+
+        StringAssert.Contains(RefusalOf(() => GoCgoArgs.GoStringOf(new ElemRefBox<byte>(unterminated, 1), "GoString")), "no NUL", "no NUL before the end");
+
+        uintptr number = (uintptr)text;
+        StringAssert.Contains(RefusalOf(() => GoCgoArgs.GoBytesOf(new @unsafe.Pointer(number), 3, "GoBytes")), GoMemoryOwner, "a number stays refused");
+
+        void* memory = NativeMemory.AllocZeroed(8);
+
+        try
+        {
+            "abc"u8.CopyTo(new Span<byte>(memory, 3));
+            Assert.AreEqual("abc", GoCgoArgs.GoStringOf(new NativeBox<byte>((nuint)memory), "GoString").ToString(), "C memory, as before");
+            Assert.AreEqual(3, GoCgoArgs.GoBytesOf(new @unsafe.Pointer((uintptr)(nuint)memory), 3, "GoBytes").ToSpan().Length, "C memory, GoBytes");
+        }
+        finally
+        {
+            NativeMemory.Free(memory);
+        }
+
+        GC.KeepAlive(bytes);
+    }
+
     private static void AssertOutcomes((string form, Func<@unsafe.Pointer> mint, Pinned expected)[] forms)
     {
         var wrong = new List<string>();

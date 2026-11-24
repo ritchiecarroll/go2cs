@@ -82,9 +82,9 @@ func TestCgoPhase3FixtureConvertsItsHelpersVoidPointersAndDeferredCalls(t *testi
 	for declaration, calls := range map[string][]string{
 		"internal static ж<@char> CString(@string p0)":                     {"ᴍallocate(", "GoCgoArgs.StringSize(p0)", "GoCgoArgs.CopyString(p0, address)"},
 		"internal static @unsafe.Pointer CBytes(slice<byte> p0)":           {"ᴍallocate(", "GoCgoArgs.BytesSize(p0)", "GoCgoArgs.CopyBytes(p0, address)"},
-		"internal static @string GoString(ж<@char> p0)":                    {`GoCgoArgs.GoString(global::go.golib.GoCgoArgs.HelperPointer(p0, "GoString"))`},
-		"internal static @string GoStringN(ж<@char> p0, @int p1)":          {`GoCgoArgs.HelperPointer(p0, "GoStringN")`, "(int)(int32)p1"},
-		"internal static slice<byte> GoBytes(@unsafe.Pointer p0, @int p1)": {`GoCgoArgs.HelperVoidPointer(p0, "GoBytes")`, "(int)(int32)p1"},
+		"internal static @string GoString(ж<@char> p0)":                    {`GoCgoArgs.GoStringOf(p0, "GoString")`},
+		"internal static @string GoStringN(ж<@char> p0, @int p1)":          {`GoCgoArgs.GoStringNOf(p0, (int)(int32)p1, "GoStringN")`},
+		"internal static slice<byte> GoBytes(@unsafe.Pointer p0, @int p1)": {`GoCgoArgs.GoBytesOf(p0, (int)(int32)p1, "GoBytes")`},
 		"internal static @unsafe.Pointer malloc(@ulong p0)":                {"ᴍallocate((nuint)(uint64)p0)"},
 	} {
 		member := cgoBindingsMember(t, bindings, declaration)
@@ -363,8 +363,9 @@ const cgoP3LayoutEntryPointer = "cannot read native memory as *main._Ctype_struc
 const cgoP3StoreGoIntoC = "storing a Go pointer into C memory is refused"
 
 // cgoP3Arms are the end-to-end program's arms. An arm with neither goFails nor csFails prints the same lines and exits
-// 0 both ways. The arms with csFails hand C or a helper a pointer into Go memory: Go runs each to its end, and go2cs
-// refuses each by name, naming the increment that admits it. innerdefer and innergo are the controls of goinnerdefer
+// 0 both ways. Since increment 3.2 seat 1b (18.12, P-2) an arm that hands C or a helper a pointer into Go memory whose
+// box names its storage prints as Go does: the wrapper pins the storage for the call. govoidnumber and govoidexpr hand
+// over a NUMBER, which stays refused by name (M3), and the arms with other csFails are refused as their own text says. innerdefer and innergo are the controls of goinnerdefer
 // and goinnergo: the same deferred or started Go function over C memory runs to its end both ways.
 func cgoP3Arms() []cgoG1Arm {
 	return []cgoG1Arm{
@@ -385,36 +386,41 @@ func cgoP3Arms() []cgoG1Arm {
 		{name: "deferred"},
 		{name: "innerdefer"},
 		{name: "innergo"},
-		{name: "goinnerdefer", csFails: cgoP3GoMemory},
-		{name: "goinnergo", csFails: cgoP3GoMemory},
-		{name: "govoid", csFails: cgoP3GoMemory},
+		{name: "goinnerdefer"},
+		{name: "goinnergo"},
+		{name: "govoid"},
 		{name: "govoidnumber", csFails: cgoP3GoMemory},
 		{name: "govoidexpr", csFails: cgoP3GoMemory},
-		{name: "gobytes", csFails: cgoP3GoMemory},
-		{name: "gostring", csFails: cgoP3GoMemory},
+		{name: "gobytes"},
+		{name: "gostring"},
 		// Pointers DERIVED from a view of Go memory (the review of increment 3.1, §16.11).
-		{name: "goviewfield", csFails: cgoP3GoMemory},
-		{name: "goviewfieldarray", csFails: cgoP3GoMemory},
-		{name: "goviewagain", csFails: cgoP3GoMemory},
-		{name: "goviewelem", csFails: cgoP3GoMemory},
-		{name: "goviewelemstring", csFails: cgoP3GoMemory},
-		{name: "goslice", csFails: cgoP3GoMemory},
-		{name: "goslicedata", csFails: cgoP3GoMemory},
-		{name: "goadd", csFails: cgoP3GoMemory},
-		{name: "goaddlocal", csFails: cgoP3GoMemory},
+		{name: "goviewfield"},
+		{name: "goviewfieldarray"},
+		{name: "goviewagain"},
+		{name: "goviewelem"},
+		{name: "goviewelemstring"},
+		{name: "goslice"},
+		{name: "goslicedata"},
+		{name: "goadd"},
+		{name: "goaddlocal"},
 		// A pointer that reaches C as the result of a call, through a variable and through a user function.
-		{name: "goaddvar", csFails: cgoP3GoMemory},
-		{name: "goaddfunc", csFails: cgoP3GoMemory},
-		{name: "goviewfieldfunc", csFails: cgoP3GoMemory},
-		{name: "goviewfieldvar", csFails: cgoP3GoMemory},
+		{name: "goaddvar"},
+		{name: "goaddfunc"},
+		{name: "goviewfieldfunc"},
+		{name: "goviewfieldvar"},
 		// The second review (§16.12): a typed pointer from an interior unsafe.Pointer value, and an array field of a view.
-		{name: "goaddtyped", csFails: cgoP3GoMemory},
-		{name: "goaddfill", csFails: cgoP3WriteThrough},
-		{name: "gofieldtyped", csFails: cgoP3WriteThrough},
-		{name: "goviewnamestring", csFails: cgoP3GoMemory},
-		{name: "goviewnameadd", csFails: cgoP3GoMemory},
-		{name: "goviewnameslice", csFails: cgoP3GoMemory},
-		{name: "goviewnamedata", csFails: cgoP3WriteThrough},
+		{name: "goaddtyped"},
+		{name: "goaddfill"},
+		{name: "gofieldtyped"},
+		{name: "goviewnamestring"},
+		{name: "goviewnameadd"},
+		{name: "goviewnameslice"},
+		{name: "goviewnamedata"},
+		// Seat 1b's arms (18.12 item 5): cmd/cgo's element and slice check closures, made by cmd/cgo itself from the Go
+		// code each arm writes, through the void door and the scalar door.
+		{name: "goindex"},
+		{name: "goindexfill"},
+		{name: "goslicefill"},
 		// Increment 3.2's first reds (section 6). s6field, s6reinterp and s6slice print as Go does, and since seat 1a
 		// (18.9) s6nextnil, s6nextdirect and s6name do too: the field accessor retired their cgoP3LayoutEntry pins (the
 		// readings before it are at cgoP3LayoutEntryPointer). Since seat 1c (18.11) s6next does too: the **C.T door

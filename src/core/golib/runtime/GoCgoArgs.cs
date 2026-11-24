@@ -335,6 +335,112 @@ namespace go.golib;
         throw HelperRefused(helper, "a pointer into Go memory");
     }
 
+    // ---- cmd/cgo's helpers over Go memory (seat 1b, design 18.12 item 3 with P3's confirm (A)): the helpers are Go
+    // functions, so they read Go memory as Go does, byte by byte, with no word-table lookup. The storage the box names is
+    // held still by a `fixed` here for the copy. A number of Go memory stays refused, as everywhere (M3).
+
+    /// <summary><c>C.GoString</c> over a typed C pointer: C memory as before, and Go memory read from its pinned storage.</summary>
+    public static unsafe @string GoStringOf<T>(ж<T>? pointer, string helper)
+    {
+        if (!TryHelperPin(pointer, helper, out Array? root, out nint offset, out nuint address))
+            return GoString(address);
+
+        fixed (byte* data = &MemoryMarshal.GetArrayDataReference(root))
+        {
+            ReadOnlySpan<byte> rest = new(data + offset, checked((int)(HelperExtent(root, data) - offset)));
+            int length = rest.IndexOf((byte)0);
+
+            if (length < 0)
+                throw HelperReadRefused(helper, "Go memory with no NUL before the end of its storage, which Go would read past");
+
+            return new @string(rest[..length]);
+        }
+    }
+
+    /// <summary><c>C.GoStringN</c> over a typed C pointer: C memory as before, and Go memory read from its pinned storage.</summary>
+    public static unsafe @string GoStringNOf<T>(ж<T>? pointer, int length, string helper)
+    {
+        if (length <= 0)
+            return GoStringN(0, length);
+
+        if (!TryHelperPin(pointer, helper, out Array? root, out nint offset, out nuint address))
+            return GoStringN(address, length);
+
+        fixed (byte* data = &MemoryMarshal.GetArrayDataReference(root))
+            return new @string(HelperBytes(root, data, offset, length, helper));
+    }
+
+    /// <summary><c>C.GoBytes</c> over a void pointer: C memory as before, and Go memory read from its pinned storage.</summary>
+    public static unsafe slice<byte> GoBytesOf(ж<uintptr>? pointer, int length, string helper)
+    {
+        if (length <= 0)
+            return GoBytes(0, length);
+
+        if (!TryHelperPin(pointer, helper, out Array? root, out nint offset, out nuint address))
+            return GoBytes(address, length);
+
+        fixed (byte* data = &MemoryMarshal.GetArrayDataReference(root))
+            return new slice<byte>(HelperBytes(root, data, offset, length, helper));
+    }
+
+    // Whether a helper's pointer is Go memory whose box names its storage (then the root and the offset), or nil and C
+    // memory (then false and its address). Refused: a number of Go memory, a token, and storage that holds references,
+    // whose bytes are not the value Go would read.
+    private static bool TryHelperPin<T>(ж<T>? pointer, string helper, [NotNullWhen(true)] out Array? root, out nint offset, out nuint address)
+    {
+        root = null;
+        offset = 0;
+        address = 0;
+
+        if (pointer is null || pointer.IsNilPointer)
+            return false;
+
+        object? carried;
+        nuint number;
+
+        if (pointer is IUnsafePointer unsafePointer)
+        {
+            carried = unsafePointer.RetainedSource;
+            number = ((ж<uintptr>)(object)pointer).Value.Value;
+        }
+        else
+        {
+            carried = pointer;
+            number = pointer is NativeBox<T> native ? native.NativeAddress : 0;
+        }
+
+        if (carried is null || carried is INativeRooted { IsGenuinelyNativeRoot: true })
+        {
+            address = pointer is IUnsafePointer ? HelperVoidPointer((ж<uintptr>)(object)pointer, helper) : HelperPointer(pointer, helper);
+            return false;
+        }
+
+        if (ManagedPointerTokens.IsTaggedToken(number))
+            throw HelperRefused(helper, "a token for a Go value that has no address (it holds Go references)");
+
+        if (!TryPinTarget(carried, number, out root, out offset))
+            throw HelperReadRefused(helper, "a pointer into Go memory whose storage go2cs cannot hold still for the read");
+
+        if (root.GetType().GetElementType() is not { } element || NativeStructMarshal.ContainsReferences(element))
+            throw HelperReadRefused(helper, "Go memory that holds Go references, whose bytes are not the value Go would read");
+
+        return true;
+    }
+
+    // The end of a pinned root's bytes, as an offset from its first byte.
+    private static unsafe nint HelperExtent(Array root, byte* data) =>
+        (nint)Marshal.UnsafeAddrOfPinnedArrayElement(root, root.Length) - (nint)data;
+
+    // `length` bytes at `offset` in a pinned root. Go would read past the end of the object; the managed object is all the
+    // storage there is, so a read past its end is refused by name.
+    private static unsafe ReadOnlySpan<byte> HelperBytes(Array root, byte* data, nint offset, int length, string helper)
+    {
+        if (offset + length > HelperExtent(root, data))
+            throw HelperReadRefused(helper, $"a read of {length} bytes past the end of the Go storage it points into");
+
+        return new ReadOnlySpan<byte>(data + offset, length);
+    }
+
     /// <summary>
     /// Go's <c>*p</c> for <c>p</c> a <c>**C.T</c>, the load go2cs emits on the cgo route (cgo Phase 3, increment 3.2,
     /// seat 1c: docs/phase4/DESIGN-cgo-phase3-marshaling.md 18.11).
@@ -517,6 +623,10 @@ namespace go.golib;
     // live pin's extent holds it (runtime/PinExtents.cs).
     private static bool IsKnownGoAddress(nuint address) =>
         ManagedPointerTokens.IsTaggedToken(address) || ManagedPointerTokens.Resolve(address) is not null || PinExtents.Find(address) is not null;
+
+    // A helper's read of Go memory that go2cs refuses for what the memory is, not because the read is unsupported.
+    private static PanicException HelperReadRefused(string helper, string what) =>
+        RuntimeErrorPanic.ErrorString($"cgo: C.{helper} over Go memory: the pointer it was handed is {what}, so go2cs refuses the read (docs/Limitations.md#cgo)");
 
     private static PanicException HelperRefused(string helper, string what) =>
         RuntimeErrorPanic.ErrorString($"cgo: C.{helper} over Go memory: the pointer it was handed is {what}. Reading Go memory through cmd/cgo's helpers is not supported yet, so go2cs refuses the call (docs/Limitations.md#cgo)");
