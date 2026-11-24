@@ -461,6 +461,14 @@ and match Go's test results. C# written by hand against converted code may need 
   ([Converting a module](ConvertingAModule.md)).
   <!-- 2026-11-23 (P1): train 1, merge cfec06486f (claude/p2-nugetgo-tools-12611 ffaebde09e; readmeValidationBadge.go
        go2csBadge). -->
+- **[QUEUED claude/p4-cli-help (tip in its READY post)]** **`go2cs -help` lists the ten options a first conversion
+  needs.** `go2cs -help all` lists every option, sorted into common, advanced and experimental, and
+  `go2cs -help <option>` explains one, for example `go2cs -help tests`. Help prints to standard output and exits 0. A
+  mistyped option names the nearest ones (`there is no option -test-actoin. Did you mean -test-action?`) instead of
+  printing every option. [Command line](CommandLine.md) is written from the same table: its common options link to
+  an option reference that explains every option.
+  <!-- 2026-11-24 (P4): the owner's CLI-help item, train 12; rulings: -stdlib and -cgo are common, the reference
+       covers all options sorted common, advanced, experimental. -->
 
 **Known issues.**
 
