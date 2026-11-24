@@ -63,6 +63,7 @@ type Options struct {
 	useChannelOperators bool
 	includeComments     bool
 	parseCgoTargets     bool
+	cgoRemovalsDryRun   bool // -cgo-removals-dry-run: under -cgo -tests, list the cgo-off files the cgo-on load deselects, removing none (cgoDeselectedOutputs.go)
 	showParseTree       bool
 	debugMode           bool
 

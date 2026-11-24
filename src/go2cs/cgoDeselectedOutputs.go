@@ -16,23 +16,80 @@ package main
 //
 // The cure removes, from the OUTPUT, the C# of each production file the converter's own cgo-off load selects and its
 // cgo-on load does not. The converter is the authority on what it selected: the set comes from its two loads, never
-// from a second reading of build tags. A hand-owned file is never removed; one in that set is refused by name. The
-// output is never the repository's corpus (checkCgoTestsOutput), so no corpus byte moves.
+// from a second reading of build tags. It is bounded by COORD's GO (inbox H 20261124T231602Z):
+//   - it runs only on the -cgo -tests path, whose output checkCgoTestsOutput keeps out of the repository's corpus;
+//   - it removes only a file that carries the converter's own emission header for THAT source file (the source's
+//     leading comment lines, its //go:build line among them, which the converter copies verbatim with -comments, and
+//     -tests forces -comments). A hand-owned file, or any other file in the set, is refused by name;
+//   - every removal is printed with its reason, and -cgo-removals-dry-run lists the set without removing anything.
 
 import (
+	"bufio"
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 
 	"golang.org/x/tools/go/packages"
 )
 
-// cgoDeselectedOutputs removes from packageOutputPath the C# file of each Go file in cgoOffFiles that cgoOnFiles does
-// not hold, wherever the layout routes it for target (flat or a key folder), and returns the paths it removed. Names are
-// compared by base name: both lists are one package directory's files. A file that does not exist is skipped. A
-// hand-owned file (the manual-conversion marker) is refused by name, and nothing is removed after it.
-func cgoDeselectedOutputs(packageOutputPath, target string, cgoOffFiles, cgoOnFiles []string) ([]string, error) {
+// leadingCommentLines returns a file's leading // lines, blank lines skipped, up to the first line that is neither: the
+// Go source's `package` clause, or the emitted C#'s `namespace` (or `using`) line.
+func leadingCommentLines(path string) ([]string, error) {
+	file, err := os.Open(path)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer file.Close()
+
+	var lines []string
+	scanner := bufio.NewScanner(file)
+	scanner.Buffer(make([]byte, 0, 64*1024), 16*1024*1024)
+
+	for scanner.Scan() {
+		line := strings.TrimSpace(strings.TrimPrefix(scanner.Text(), "\ufeff"))
+
+		if line == "" {
+			continue
+		}
+
+		if !strings.HasPrefix(line, "//") {
+			break
+		}
+
+		lines = append(lines, line)
+	}
+
+	return lines, scanner.Err()
+}
+
+// isConverterEmissionOf reports whether csPath carries the converter's own emission header for goPath: the same leading
+// comment lines, in order, and at least one of them (a source with none gives nothing to match, so it is never claimed).
+func isConverterEmissionOf(csPath, goPath string) (bool, error) {
+	source, err := leadingCommentLines(goPath)
+
+	if err != nil || len(source) == 0 {
+		return false, err
+	}
+
+	emitted, err := leadingCommentLines(csPath)
+
+	if err != nil {
+		return false, err
+	}
+
+	return slices.Equal(source, emitted), nil
+}
+
+// cgoDeselectedOutputs finds in packageOutputPath the C# file of each Go file in cgoOffFiles that cgoOnFiles does not
+// hold, wherever the layout routes it for target (flat or a key folder), and removes it unless dryRun. It returns the
+// paths it removed (or would remove). Names are compared by base name: both lists are one package directory's files. A
+// file that does not exist is skipped. A hand-owned file, or a file without the converter's emission header for its
+// source, is refused by name, and then nothing is removed at all.
+func cgoDeselectedOutputs(packageOutputPath, target string, cgoOffFiles, cgoOnFiles []string, dryRun bool) ([]string, error) {
 	selected := map[string]bool{}
 
 	for _, file := range cgoOnFiles {
@@ -64,24 +121,41 @@ func cgoDeselectedOutputs(packageOutputPath, target string, cgoOffFiles, cgoOnFi
 			return nil, fmt.Errorf("cgo: %s is hand-owned, and the cgo-on load deselects %s, which it stands for: go2cs never removes a hand-owned file, so convert into a root that does not hold it", path, base)
 		}
 
+		emitted, err := isConverterEmissionOf(path, file)
+
+		if err != nil {
+			return nil, err
+		}
+
+		if !emitted {
+			return nil, fmt.Errorf("cgo: %s does not carry go2cs's emission header for %s, which the cgo-on load deselects: go2cs removes only its own emission, so remove it by hand or convert into a root that does not hold it", path, base)
+		}
+
 		stale = append(stale, path)
 	}
 
 	for _, path := range stale {
+		if dryRun {
+			fmt.Printf("cgo: would remove %s: go2cs's emission of %s, which the cgo-on load deselects (-cgo-removals-dry-run)\n", path, strings.TrimSuffix(filepath.Base(path), ".cs")+".go")
+			continue
+		}
+
 		if err := os.Remove(path); err != nil {
 			return nil, err
 		}
+
+		fmt.Printf("cgo: removed %s: go2cs's emission of %s, which the cgo-on load deselects\n", path, strings.TrimSuffix(filepath.Base(path), ".cs")+".go")
 	}
 
 	return stale, nil
 }
 
-// removeCgoDeselectedOutputs is cgoDeselectedOutputs for a package the -cgo route converted: its cgo-on selection is
-// the load's own (pkg.GoFiles, which go/packages fills with the cgo files too), and its cgo-off selection is one more
-// load of the same directory at CGO_ENABLED=0, last so it wins over the -cgo environment. Without -cgo, and on the
-// offline test seam (whose loads are cgo-off already), it does nothing.
+// removeCgoDeselectedOutputs is cgoDeselectedOutputs for a package the -cgo -tests path converted: its cgo-on selection
+// is the load's own (pkg.GoFiles, which go/packages fills with the cgo files too), and its cgo-off selection is one more
+// load of the same directory at CGO_ENABLED=0, last so it wins over the -cgo environment. Anywhere else (plain -cgo,
+// no -cgo, the offline test seam whose loads are cgo-off already) it does nothing.
 func removeCgoDeselectedOutputs(pkg *packages.Package, packageOutputPath string, options Options) error {
-	if !options.parseCgoTargets || cgoOfflineTrees || pkg == nil || len(pkg.GoFiles) == 0 {
+	if !options.parseCgoTargets || !options.convertTests || cgoOfflineTrees || pkg == nil || len(pkg.GoFiles) == 0 {
 		return nil
 	}
 
@@ -102,11 +176,7 @@ func removeCgoDeselectedOutputs(pkg *packages.Package, packageOutputPath string,
 		return fmt.Errorf("cgo: load %s at CGO_ENABLED=0, to find the files the cgo-on load deselects: %v", pkg.PkgPath, err)
 	}
 
-	removed, err := cgoDeselectedOutputs(packageOutputPath, options.targetPlatform, loaded[0].GoFiles, pkg.GoFiles)
-
-	for _, path := range removed {
-		fmt.Printf("cgo: removed %s, the cgo-off file the cgo-on load deselects\n", path)
-	}
+	_, err = cgoDeselectedOutputs(packageOutputPath, options.targetPlatform, loaded[0].GoFiles, pkg.GoFiles, options.cgoRemovalsDryRun)
 
 	return err
 }

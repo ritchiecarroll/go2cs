@@ -13,12 +13,17 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"golang.org/x/tools/go/packages"
 )
 
+const cgoStubSourceHeader = "// Copyright 2011 The Go Authors. All rights reserved.\n// Use of this source code is governed by a BSD-style\n// license that can be found in the LICENSE file.\n\n// This file holds stub versions of the cgo functions.\n\n//go:build unix && !cgo\n\n"
+
 // The first build of net's cgo-on test host (19.6): the seeded root holds the corpus's linux/cgo_stub.cs, the cgo-on
-// selection swaps cgo_stub.go for cgo_unix.go, and both compile. The cure removes the stale file wherever the layout put
-// it, keeps every file the cgo-on load selected, skips a file that is not there, and refuses a hand-owned one by name
-// with nothing removed.
+// selection swaps cgo_stub.go for cgo_unix.go, and both compile. Within COORD's bounds (inbox H 20261124T231602Z), the
+// cure removes the stale file wherever the layout put it, only when it carries go2cs's emission header for that source,
+// keeps every file the cgo-on load selected, skips a file that is not there, refuses a hand-owned file and a file
+// without the header by name with nothing removed, and in a dry run lists the set without removing it.
 func TestACgoOnConversionRemovesTheCgoOffFileItDeselects(t *testing.T) {
 	write := func(t *testing.T, path, body string) {
 		t.Helper()
@@ -37,17 +42,25 @@ func TestACgoOnConversionRemovesTheCgoOffFileItDeselects(t *testing.T) {
 		return err == nil
 	}
 
-	cgoOff := []string{"/goroot/src/net/cgo_stub.go", "/goroot/src/net/dial.go", "/goroot/src/net/netgo_off.go"}
-	cgoOn := []string{"/goroot/src/net/cgo_unix.go", "/goroot/src/net/dial.go", "/goroot/src/net/netgo_off.go", "/goroot/src/net/cgo_unix_cgo.go"}
+	// The emission: the source's leading comments as the converter copies them (blank lines dropped, CRLF).
+	emitted := strings.ReplaceAll(strings.ReplaceAll(cgoStubSourceHeader, "\n\n", "\n"), "\n", "\r\n") + "namespace go;\r\n"
+
+	source := t.TempDir()
+	stubGo := filepath.Join(source, "cgo_stub.go")
+	write(t, stubGo, cgoStubSourceHeader+"package net\n")
+	write(t, filepath.Join(source, "dial.go"), "package net\n")
+
+	cgoOff := []string{stubGo, filepath.Join(source, "dial.go")}
+	cgoOn := []string{filepath.Join(source, "cgo_unix.go"), filepath.Join(source, "dial.go"), filepath.Join(source, "cgo_unix_cgo.go")}
 
 	t.Run("in a key folder", func(t *testing.T) {
 		out := filepath.Join(t.TempDir(), "net")
 		stub := filepath.Join(out, "linux", "cgo_stub.cs")
-		write(t, stub, "// converted\n")
-		write(t, filepath.Join(out, "linux", "dial.cs"), "// converted\n")
-		write(t, filepath.Join(out, "dial.cs"), "// converted\n")
+		write(t, stub, emitted)
+		write(t, filepath.Join(out, "linux", "dial.cs"), "namespace go;\n")
+		write(t, filepath.Join(out, "dial.cs"), "namespace go;\n")
 
-		removed, err := cgoDeselectedOutputs(out, "linux/amd64", cgoOff, cgoOn)
+		removed, err := cgoDeselectedOutputs(out, "linux/amd64", cgoOff, cgoOn, false)
 
 		if err != nil || len(removed) != 1 || removed[0] != stub || exists(stub) {
 			t.Fatalf("want exactly %s removed, got %v (err %v, still there %v)", stub, removed, err, exists(stub))
@@ -61,17 +74,27 @@ func TestACgoOnConversionRemovesTheCgoOffFileItDeselects(t *testing.T) {
 	t.Run("flat", func(t *testing.T) {
 		out := filepath.Join(t.TempDir(), "net")
 		stub := filepath.Join(out, "cgo_stub.cs")
-		write(t, stub, "// converted\n")
+		write(t, stub, emitted)
 
-		if removed, err := cgoDeselectedOutputs(out, "linux/amd64", cgoOff, cgoOn); err != nil || len(removed) != 1 || exists(stub) {
+		if removed, err := cgoDeselectedOutputs(out, "linux/amd64", cgoOff, cgoOn, false); err != nil || len(removed) != 1 || exists(stub) {
 			t.Fatalf("want the flat stub removed, got %v (err %v)", removed, err)
+		}
+	})
+
+	t.Run("dry run lists and keeps", func(t *testing.T) {
+		out := filepath.Join(t.TempDir(), "net")
+		stub := filepath.Join(out, "linux", "cgo_stub.cs")
+		write(t, stub, emitted)
+
+		if removed, err := cgoDeselectedOutputs(out, "linux/amd64", cgoOff, cgoOn, true); err != nil || len(removed) != 1 || !exists(stub) {
+			t.Fatalf("a dry run lists the stub and keeps it, got %v (err %v, kept %v)", removed, err, exists(stub))
 		}
 	})
 
 	t.Run("nothing to remove", func(t *testing.T) {
 		out := filepath.Join(t.TempDir(), "net")
 
-		if removed, err := cgoDeselectedOutputs(out, "linux/amd64", cgoOff, cgoOn); err != nil || len(removed) != 0 {
+		if removed, err := cgoDeselectedOutputs(out, "linux/amd64", cgoOff, cgoOn, false); err != nil || len(removed) != 0 {
 			t.Fatalf("an empty output removes nothing, got %v (err %v)", removed, err)
 		}
 	})
@@ -79,12 +102,44 @@ func TestACgoOnConversionRemovesTheCgoOffFileItDeselects(t *testing.T) {
 	t.Run("hand-owned is refused", func(t *testing.T) {
 		out := filepath.Join(t.TempDir(), "net")
 		stub := filepath.Join(out, "linux", "cgo_stub.cs")
-		write(t, stub, "using go;\n\n[module: GoManualConversion]\n\nnamespace go;\n")
+		write(t, stub, strings.TrimSuffix(emitted, "namespace go;\r\n")+"using go;\r\n\r\n[module: GoManualConversion]\r\n\r\nnamespace go;\r\n")
 
-		removed, err := cgoDeselectedOutputs(out, "linux/amd64", cgoOff, cgoOn)
+		removed, err := cgoDeselectedOutputs(out, "linux/amd64", cgoOff, cgoOn, false)
 
 		if err == nil || !strings.Contains(err.Error(), "hand-owned") || len(removed) != 0 || !exists(stub) {
 			t.Fatalf("want a refusal naming the hand-own and the file kept, got %v (err %v, kept %v)", removed, err, exists(stub))
 		}
 	})
+
+	t.Run("a file without the emission header is refused", func(t *testing.T) {
+		out := filepath.Join(t.TempDir(), "net")
+		stub := filepath.Join(out, "linux", "cgo_stub.cs")
+		write(t, stub, "// Someone else's file of the same name.\r\nnamespace go;\r\n")
+
+		removed, err := cgoDeselectedOutputs(out, "linux/amd64", cgoOff, cgoOn, false)
+
+		if err == nil || !strings.Contains(err.Error(), "emission header") || len(removed) != 0 || !exists(stub) {
+			t.Fatalf("want a refusal naming the header and the file kept, got %v (err %v, kept %v)", removed, err, exists(stub))
+		}
+	})
+}
+
+// COORD's first bound: the removal runs only on the -cgo -tests path. A plain -cgo conversion, a -tests conversion
+// without -cgo and the offline seam return before any load (here, a load of a directory with no Go files would fail).
+func TestTheCgoRemovalRunsOnlyOnTheCgoTestsPath(t *testing.T) {
+	empty := t.TempDir()
+	pkg := &packages.Package{PkgPath: "example.com/none", GoFiles: []string{filepath.Join(empty, "none.go")}}
+
+	for _, options := range []Options{
+		{parseCgoTargets: true, targetPlatform: "linux/amd64"},
+		{convertTests: true, targetPlatform: "linux/amd64"},
+	} {
+		if err := removeCgoDeselectedOutputs(pkg, filepath.Join(empty, "out"), options); err != nil {
+			t.Errorf("cgo %v, tests %v: the removal ran (%v); it belongs to -cgo -tests only", options.parseCgoTargets, options.convertTests, err)
+		}
+	}
+
+	if err := removeCgoDeselectedOutputs(pkg, filepath.Join(empty, "out"), Options{parseCgoTargets: true, convertTests: true, targetPlatform: "linux/amd64"}); err == nil {
+		t.Error("the control: on the -cgo -tests path the removal loads the directory, and a directory with no Go files fails that load")
+	}
 }
