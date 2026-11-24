@@ -120,6 +120,14 @@ namespace go.golib;
                 address = 0;
                 return GoCgoStructPointer.Pinned;
 
+            // A REINTERPRET view, `(*C.char)(unsafe.Pointer(&b[4]))`: the address is its root's, and C may write past one
+            // T into the root's storage (a char * C fills). A one-T stack mirror would take those bytes into the stack
+            // and copy one back (3.2's first hosted run: goindexfill read "g" and six zeros). The root's storage is
+            // pinned instead, when its box names it; a root no door can name keeps the mirror, as before.
+            case IReinterpretView { ReinterpretRoot: { } viewRoot } when TryPinReinterpretRoot(viewRoot, out pin):
+                address = 0;
+                return GoCgoStructPointer.Pinned;
+
             default:
                 return StructPointer(pointer, function, out address);
         }
@@ -331,13 +339,41 @@ namespace go.golib;
         return false;
     }
 
-    // The box a derived box was cut from (one hop of NativeDerivation.HeldSource's walk), or null at a root.
-    private static object? DerivedFrom(object box) => box switch
+    // The pin for a reinterpret view's root, as the element door pins an element: its storage and the root's offset in it.
+    // False when no door can name the storage (the caller keeps its mirror); a token and storage holding Go pointers are
+    // refused with cgo's text.
+    private static bool TryPinReinterpretRoot(object root, out GoCgoPin pin)
     {
-        INativeRooted { NativeRootAddress: not 0 } native => native.NativeDerivedFrom,
-        INativeViewAnchor { AnchoredRoot: { } root } => root,
-        _ => null
-    };
+        pin = default;
+
+        if (root is INativeRooted { IsGenuinelyNativeRoot: true })
+            return false;
+
+        nuint number = RootNumber(root);
+
+        if (ManagedPointerTokens.IsTaggedToken(number))
+            throw GoPointerToUnpinnedGoPointer();
+
+        if (!TryPinTarget(root, number, out Array? storage, out nint offset))
+            return false;
+
+        RequireCrossable(storage);
+        pin = new GoCgoPin(storage, offset);
+        return true;
+    }
+
+    // The address a reinterpret view's root names: a native box's own, an element of a native array window's (which has no
+    // native box of its own: `&h.name[0]` over a view), else 0 for a managed box, which TryPinTarget reads from its slot.
+    private static nuint RootNumber(object root) =>
+        root is IGoReflectBox { NativeAddress: not 0 and var native } ? native :
+        root is INativeIdentity { NativeIdentityOrZero: var identity } ? identity : 0;
+
+    // The box a derived box was cut from (one hop of NativeDerivation.HeldSource's walk), or null at a root.
+    // An element of a native array window (`&h.name[0]` over a view) derives from nothing itself and is anchored to the
+    // window, which derives from the view: both hops are taken.
+    private static object? DerivedFrom(object box) =>
+        (box is INativeRooted { NativeRootAddress: not 0 } native ? native.NativeDerivedFrom : null) ??
+        (box is INativeViewAnchor { AnchoredRoot: { } root } ? root : null);
 
     // What makes pinned Go storage unfit to hand C: Go pointers in it. A value that holds references (the element type
     // of its storage), and a published unsafe.Pointer word (B-10: GoPointerWords holds an entry over it), are both
@@ -452,6 +488,13 @@ namespace go.golib;
         {
             carried = unsafePointer.RetainedSource;
             number = ((ж<uintptr>)(object)pointer).Value.Value;
+        }
+        else if (pointer is IReinterpretView { ReinterpretRoot: { } viewRoot })
+        {
+            // `(*C.char)(unsafe.Pointer(&h.name[0]))`: a reinterpret view is its root's address, so the root names the
+            // storage, as it does for the typed door.
+            carried = viewRoot;
+            number = RootNumber(viewRoot);
         }
         else
         {

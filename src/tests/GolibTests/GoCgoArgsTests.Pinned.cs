@@ -392,6 +392,47 @@ public unsafe partial class GoCgoArgsTests
         GC.KeepAlive(bytes);
     }
 
+    // A typed pointer that is a REINTERPRET view of Go storage, `(*C.char)(unsafe.Pointer(&b[4]))` and
+    // `(*C.char)(unsafe.Pointer(unsafe.SliceData(b[4:])))` (the hosted arms goindexfill and goslicefill), is pinned at
+    // its root's storage: C may write past one char into the slice. It took the one-scalar stack mirror before, so C
+    // wrote its bytes into the stack and one came back ("g" and six zeros on all three hosted OSes). The write lands at
+    // the root's own offset, and C.GoString reads through the same root.
+    [TestMethod]
+    public void PinnedAReinterpretViewOfGoStoragePinsItsRootSoCWritesLand()
+    {
+        slice<byte> bytes = new slice<byte>(new byte[16]);
+
+        (string form, Func<ж<sbyte>> make)[] forms =
+        [
+            ("a reinterpret of an element", () => Ꮡ(bytes, 4).Reinterpret<byte, sbyte>()),
+            ("a reinterpret of unsafe.SliceData of a reslice", () => @unsafe.SliceData(bytes[4..]).Reinterpret<byte, sbyte>()),
+        ];
+
+        foreach ((string form, Func<ж<sbyte>> make) in forms)
+        {
+            for (int i = 0; i < 16; i++)
+                bytes[i] = 0;
+
+            GoCgoStructPointer kind = GoCgoArgs.ScalarPointer(make(), "fill", out _, out GoCgoPin pin);
+            Assert.AreEqual(GoCgoStructPointer.Pinned, kind, $"{form}: pinned at its root, never a one-char mirror");
+
+            fixed (byte* pinned = pin)
+            {
+                byte* at = (byte*)pin.Address(pinned);
+
+                for (int i = 0; i < 4; i++)
+                    at[i] = (byte)('A' + i);
+            }
+
+            for (int i = 0; i < 16; i++)
+                Assert.AreEqual(i is >= 4 and < 8 ? (byte)('A' + i - 4) : (byte)0, (byte)bytes[i], $"{form}: byte {i} after C writes four");
+
+            Assert.AreEqual("ABCD", GoCgoArgs.GoStringOf(make(), "GoString").ToString(), $"{form}: C.GoString reads through the root");
+        }
+
+        GC.KeepAlive(bytes);
+    }
+
     private static void AssertOutcomes((string form, Func<@unsafe.Pointer> mint, Pinned expected)[] forms)
     {
         var wrong = new List<string>();
