@@ -150,15 +150,42 @@ public class GoNameStampTests
         Assert.IsFalse(methodSet.Contains("\"Δlower\""), "a renamed lower is unexported: the projection reads lower");
     }
 
+    // A struct field the Go source spells Δt (stamped, exported in Go) beside a field the converter renamed (Δb, Go's b,
+    // unexported): the public constructor takes Δt and leaves Δb to the internal one, as Go's export rule reads the two.
+    private const string CtorPackage =
+        """
+        namespace go;
+
+        [GoPackage("dtest")]
+        public static partial class dtest_package
+        {
+            [GoType] public partial struct Rec { [GoName("Δt")] public nint Δt; internal nint Δb; }
+        }
+        """;
+
+    [TestMethod]
+    public void AStampedExportedFieldIsAPublicConstructorParameter()
+    {
+        Dictionary<string, string> parts = Run(CtorPackage, out Compilation output, new TypeGenerator());
+        string rec = parts.Single(part => part.Value.Contains("partial struct Rec")).Value;
+        string publicCtor = rec.Split('\n').Single(line => line.Contains("public Rec(") && !line.Contains("NilType") && line.Contains("nint"));
+
+        StringAssert.Contains(publicCtor, "Δt", "Go exports Δt, so the public constructor takes it");
+        Assert.IsFalse(publicCtor.Contains("Δb"), "Go's b is unexported: only the internal constructor takes it");
+        Assert.IsTrue(rec.Contains("internal Rec("), "the internal constructor takes every field");
+    }
+
     // An interface whose Go name is ΔFooer (stamped), embedded in Wrap under that name, and H, whose fields one Δ away
     // from embeds are named Matrix (of type *ΔMatrix, a stamped struct) and Fooer (of type ΔFooer): Go embeds neither.
     // ΔRenamed2 is a struct the converter renamed (Go's Renamed2), embedded by pointer in Holder under its Go name.
     private const string EmbedPackage =
         """
-        namespace go;
+        using go;
 
         [assembly: GoImplement<global::go.dtest_package.Wrap, global::go.dtest_package.ΔFooer>(Pointer = true)]
         [assembly: GoImplement<global::go.dtest_package.Wrap, global::go.dtest_package.ΔFooer>(Promoted = true)]
+
+        namespace go;
 
         [GoPackage("dtest")]
         public static partial class dtest_package

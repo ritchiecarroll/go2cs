@@ -89,8 +89,9 @@ func (v *Visitor) checkForDynamicStructs(argType types.Type, targetType types.Ty
 			// instead of relying on implicit conversions
 			argScope := getAccess(argTypeName)
 
-			// A named argument type is judged by its Go name (getGoAccess): a Δ-led Go name is exported.
-			if named, ok := argType.(*types.Named); ok {
+			// A named argument type whose Go name starts with Δ is judged by that Go name (getGoAccess), which Go
+			// exports; the emitted spelling reads its Δ as the rename marker.
+			if named, ok := argType.(*types.Named); ok && strings.HasPrefix(named.Obj().Name(), ShadowVarMarker) {
 				argScope = getGoAccess(named.Obj().Name())
 			}
 			targetScope := getAccess(targetTypeName)

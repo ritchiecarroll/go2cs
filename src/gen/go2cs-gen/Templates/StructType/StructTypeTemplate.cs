@@ -155,7 +155,11 @@ internal class StructTypeTemplate : TemplateBase
             // Blank/underscore fields (e.g. an embedded unexported marker like `_ noCopy`)
             // are not exported and must not drive a public constructor — their type can be
             // less accessible than the struct, which makes a public ctor invalid (CS0051).
-            return !simpleName.StartsWith("_") && GetScope(simpleName) == "public";
+            // A field whose Go name starts with Δ carries it in a [GoName] stamp: Go exports `Δt`, while the name rule
+            // reads the emitted Δ as the collision marker and would drop the field from the public constructor.
+            string scope = GoNameMembers.TryGetValue(item.memberName.TrimStart('@'), out string? goName) ? GetGoScope(goName) : GetScope(simpleName);
+
+            return !simpleName.StartsWith("_") && scope == "public";
         }).ToList();
 
     public override string TemplateBody =>
@@ -1409,7 +1413,7 @@ internal class StructTypeTemplate : TemplateBase
                         string shimReceiver = ReceiverName(method.Parameters);
 
                         m_promotedForwarders++;
-                        result.Append($"\r\n    {shimScope} static {returnType} {method.Name}(this {PointerPrefix}<{QualifiedStructName}> {AddressPrefix}{shimReceiver}");
+                        result.Append($"\r\n    {GoNameStamp(method)}{shimScope} static {returnType} {method.Name}(this {PointerPrefix}<{QualifiedStructName}> {AddressPrefix}{shimReceiver}");
 
                         if (method.Parameters.Length > 1)
                         {
@@ -1451,7 +1455,7 @@ internal class StructTypeTemplate : TemplateBase
                 string receiver = ReceiverName(method.Parameters);
 
                 m_promotedForwarders++;
-                result.Append($"\r\n    {PromotedMark}{goRecv}{methodScope} static {returnType} {method.Name}{methodTypeParams}(this {recvMod}{QualifiedStructName} {receiver}");
+                result.Append($"\r\n    {GoNameStamp(method)}{PromotedMark}{goRecv}{methodScope} static {returnType} {method.Name}{methodTypeParams}(this {recvMod}{QualifiedStructName} {receiver}");
 
                 if (method.Parameters.Length > 1)
                 {
@@ -1464,7 +1468,7 @@ internal class StructTypeTemplate : TemplateBase
                 result.Append(");");
 
                 // Add pointer extension method
-                result.Append($"\r\n    {methodScope} static {returnType} {method.Name}{methodTypeParams}(this {PointerPrefix}<{QualifiedStructName}> {AddressPrefix}{receiver}");
+                result.Append($"\r\n    {GoNameStamp(method)}{methodScope} static {returnType} {method.Name}{methodTypeParams}(this {PointerPrefix}<{QualifiedStructName}> {AddressPrefix}{receiver}");
 
                 if (method.Parameters.Length > 1)
                 {
@@ -1803,6 +1807,11 @@ internal class StructTypeTemplate : TemplateBase
     // ---------------------------------------------------------------------------------------------
 
     // The Go name of an emitted member: the Δ collision marker and an `@` keyword escape stripped.
+    // A promoted method's forwarder carries the promoted method's [GoName] stamp, so the enclosing type's method set
+    // reports the Go name (ΔFoo) where the marker rule would drop the leading Δ.
+    private static string GoNameStamp(MethodInfo method) =>
+        method.GoName is { } goName ? $"[global::go.GoName(\"{goName}\")] " : "";
+
     private static string GoName(string emitted)
     {
         string name = emitted.StartsWith("@", StringComparison.Ordinal) ? emitted[1..] : emitted;
@@ -2088,7 +2097,7 @@ internal class StructTypeTemplate : TemplateBase
             // A box primary through a DIRECT value embed: the pointer-set shim alone, descending
             // through the embed's box-field accessor exactly as the same-package path emits it.
             string embedBox = GetUnsanitizedIdentifier(promotedMemberName);
-            m_xpkg.Append($"\r\n    {scope} static {method.ReturnType} {method.Name}(this {PointerPrefix}<{qualified}> {AddressPrefix}{receiver}{sep}{typedParams}) => {AddressPrefix}{receiver}.of({qualified}.{AddressPrefix}{embedBox}).{method.Name}({args});");
+            m_xpkg.Append($"\r\n    {GoNameStamp(method)}{scope} static {method.ReturnType} {method.Name}(this {PointerPrefix}<{qualified}> {AddressPrefix}{receiver}{sep}{typedParams}) => {AddressPrefix}{receiver}.of({qualified}.{AddressPrefix}{embedBox}).{method.Name}({args});");
             return;
         }
 
@@ -2110,8 +2119,8 @@ internal class StructTypeTemplate : TemplateBase
         string recvMod = pointerSetOnly ? "ref " : "";
         string goRecv = pointerSetOnly ? "[global::go.GoRecv] " : "";
 
-        m_xpkg.Append($"\r\n    {PromotedMark}{goRecv}{scope} static {method.ReturnType} {method.Name}(this {recvMod}{qualified} {receiver}{sep}{typedParams}) => {receiver}.{embedAccess}.{method.Name}({args});");
-        m_xpkg.Append($"\r\n    {scope} static {method.ReturnType} {method.Name}(this {PointerPrefix}<{qualified}> {AddressPrefix}{receiver}{sep}{typedParams})");
+        m_xpkg.Append($"\r\n    {GoNameStamp(method)}{PromotedMark}{goRecv}{scope} static {method.ReturnType} {method.Name}(this {recvMod}{qualified} {receiver}{sep}{typedParams}) => {receiver}.{embedAccess}.{method.Name}({args});");
+        m_xpkg.Append($"\r\n    {GoNameStamp(method)}{scope} static {method.ReturnType} {method.Name}(this {PointerPrefix}<{qualified}> {AddressPrefix}{receiver}{sep}{typedParams})");
         m_xpkg.Append($"\r\n    {{\r\n        ref var {receiver} = ref {AddressPrefix}{receiver}.Value;\r\n        {ret}{receiver}.{embedAccess}.{method.Name}({args});\r\n    }}");
     }
 

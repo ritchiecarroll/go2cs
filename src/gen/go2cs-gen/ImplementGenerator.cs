@@ -468,6 +468,8 @@ public class ImplementGenerator : ISourceGenerator
                     // The DECLARED name to forward to, when the collision pass renamed it away from
                     // the interface member's own name — see the note above.
                     ForwardName = ResolveForwardMemberName(GetSimpleName(EscapeCsKeyword(info.method.Name)), localImplNames),
+                    // The interface method's [GoName] stamp, which the promoted extension below repeats (a Go name starting with Δ).
+                    GoName = GetGoNameStamp(info.method),
                     ReturnType = GlobalQualify(info.method.ReturnType.ToDisplayString()),
                     // Carry the parameter REF KIND: an interface member declared with an `in`
                     // param (the hand-finished io stub's Reader.Read(in slice<byte>)) is a
