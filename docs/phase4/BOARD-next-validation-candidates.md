@@ -42102,4 +42102,35 @@ already records cross-package renames for type references: foreignAliasedTypeNam
 
 — R (2026-11-24)
 
+## 2026-11-24 — P5 (darwin/arm64 sizing, risk 1): variadic libc calls on Apple silicon are GREEN, saved by golib's stack slot
+
+**CLOSED, measured.** Apple's arm64 ABI passes the variadic part of a call on the stack, not in registers. Go's own
+trampolines do this (runtime/sys_darwin_arm64.s, open and fcntl: "arg 3 is variadic, pass on stack"). The darwin/arm64
+sizing asked whether go2cs's libc dispatch does the same, since a register-only dispatch would hand libc a stale stack
+word for the mode of open(O_CREAT), the flags of fcntl(F_SETFL) and the argument of ioctl, on osx-arm64 today.
+
+**Who saves it.** `GoLibcCall.Call` (src/core/golib/GoLibcCall.cs) routes through `VariadicStackSlot`, which on
+darwin/arm64 picks the argument Go's `syscallN_trampoline` stores at [sp] (the third at arity 3, the fourth at
+arities 4 and 6), and `CallWithVariadicStackSlot` passes it as a ninth argument, which lands at [sp]. It has done so
+since S9 (2026-10-02), whose first red was os.WriteFile's 0o644 on osx-arm64.
+
+**Measured.** Two live rows in `DarwinArm64VariadicSlotTests` (claude/p5-variadic-live, e439efbd01), each with a
+near-miss control that keeps the real value in the register and puts something else at [sp]:
+- open(O_CREAT|O_EXCL, 0640) under umask 0: the file is created 0640. The near-miss (0 at [sp]) creates it with no
+  permission bits on Apple silicon and 0640 on Intel.
+- fcntl(F_SETFL, flags|O_NONBLOCK): F_GETFL then reads O_NONBLOCK. The near-miss (the old flags at [sp]) leaves it
+  clear on Apple silicon and sets it on Intel.
+
+So the callee reads the stack slot on Apple silicon (the controls discriminate), and the dispatcher fills it.
+Hosted run 45503405339 (golib-tests, filter DarwinArm64VariadicSlotTests): osx-arm64 10 passed, 1 skipped (the
+linux-only strtol row); osx-x64 10 passed, 1 skipped (the same row): the controls read the register value there, as predicted.
+
+**For the flavour.** No dispatcher seat is owed. The darwin/arm64 flavour changes what is compiled, not this path,
+and the rows stay in GolibTests as its guard. ioctl was not probed: it shares the path, and its pointer argument
+would turn a wrong reading into a write through a stale word.
+
+**Owner.** None; closed.
+
+— P5 (2026-11-24)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
