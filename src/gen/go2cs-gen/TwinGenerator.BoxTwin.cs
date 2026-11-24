@@ -44,11 +44,16 @@ public sealed partial class TwinGenerator
 
         // The receiver's name when this method gets a box twin (9.3): an extension whose FIRST parameter, and only it, is a
         // plain `ref` (never `in`, `out` or `ref readonly`, which copy in Go), not [GoCopyBound] (a value-method-set
-        // forwarder, bound through a copy), with a block body, and whose body names no `Ꮡ<receiver>` already.
+        // forwarder, bound through a copy), with a body, and whose body names no `Ꮡ<receiver>` already. The body may be an
+        // EXPRESSION: since the glyph seat (C1, train 4) a method is a `M(this ref T t, …) => M⁔(ref t, …)` forwarder whose
+        // body is `M⁔`. Refused for want of a block, those forwarders had no box twin, so a twinned caller holding the box
+        // called the plain forwarder and everything under it ran plain (DATA-mn-closure-cure.md: parks 36 -> 0).
         private string? BoxReceiverOf(MethodDeclarationSyntax method, IMethodSymbol symbol)
         {
+            SyntaxNode? body = (SyntaxNode?)method.Body ?? method.ExpressionBody;
+
             if (!BoxRecv || !symbol.IsExtensionMethod || symbol.Parameters.Length == 0 || symbol.Parameters[0].RefKind != RefKind.Ref ||
-                symbol.Parameters.Skip(1).Any(parameter => parameter.RefKind != RefKind.None) || CopyBound(symbol) || method.Body is null)
+                symbol.Parameters.Skip(1).Any(parameter => parameter.RefKind != RefKind.None) || CopyBound(symbol) || body is null)
             {
                 return null;
             }
@@ -56,7 +61,7 @@ public sealed partial class TwinGenerator
             string name = symbol.Parameters[0].Name;
             string box = "Ꮡ" + name;
 
-            return method.Body.DescendantTokens().Any(token => token.IsKind(SyntaxKind.IdentifierToken) && token.ValueText == box) ? null : name;
+            return body.DescendantTokens().Any(token => token.IsKind(SyntaxKind.IdentifierToken) && token.ValueText == box) ? null : name;
         }
 
         // byref-param (12.1): the names of every plain `ref` parameter of a NON-extension function when its twin takes

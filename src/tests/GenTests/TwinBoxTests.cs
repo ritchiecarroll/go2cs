@@ -1521,4 +1521,47 @@ public class TwinBoxTests
             public override bool TryGetValue(string key, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out string? value) => values.TryGetValue(key, out value);
         }
     }
+
+    // The glyph seat's shape (C1, train 4): the body is `M⁔`, a plain function over `ref T`, and the method is an
+    // expression-bodied `this ref T` forwarder to it. The forwarder must get a box twin, or a twinned caller holding the box
+    // calls it plain and everything under it runs plain (DATA-mn-closure-cure.md: the closure's parks fell 36 -> 0).
+    private const string GlyphForwarder = """
+            internal static void g⁔(ref T t) { ᐸꟷ(ch); t.x = 3; }
+
+            internal static void g(this ref T t) => g⁔(ref t);
+
+            internal static nint h⁔(ref T t, nint k) { ᐸꟷ(ch); return t.x + k; }
+
+            internal static nint h(this ref T t, nint k) => h⁔(ref t, k);
+
+            internal static (nint, bool) q⁔(ref T t) { ᐸꟷ(ch); return (t.x, true); }
+
+            internal static (nint, bool) q(this ref T t) => box_package.q⁔(ref t);
+
+            public static nint runGlyph(ж<T> Ꮡx)
+            {
+                ref var x = ref Ꮡx.DerefOrNull();
+                x.g();
+                var (qa, _) = x.q();
+                return x.h(1) + qa;
+            }
+
+        """;
+
+    [TestMethod]
+    public void AGlyphForwarderOverARefReceiverGetsABoxTwinAndItsCallerAwaitsIt()
+    {
+        (string twins, Diagnostic[] errors) = Run(null, GlyphForwarder);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        StringAssert.Contains(twins, "gꞏtwin(this global::go.ж<T> Ꮡt)", "the void forwarder's twin takes the box");
+        StringAssert.Contains(twins, "hꞏtwin(this global::go.ж<T> Ꮡt, nint k)", "the valued forwarder's twin takes the box");
+        StringAssert.Contains(twins, "await Ꮡx.gꞏtwin()", "the caller hands the void forwarder its box");
+        StringAssert.Contains(twins, "await Ꮡx.hꞏtwin(1)", "the caller hands the valued forwarder its box");
+        StringAssert.Contains(twins, "await g⁔ꞏtwin(Ꮡt);", "the void forwarder's twin awaits the body's twin with its box");
+        StringAssert.Contains(twins, "return await h⁔ꞏtwin(Ꮡt, k);", "the valued forwarder's twin returns the body's twin, with its box");
+        StringAssert.Contains(twins, "qꞏtwin(this global::go.ж<T> Ꮡt)", "a tuple-returning forwarder's twin takes the box");
+        StringAssert.Contains(twins, "await box_package.q⁔ꞏtwin(Ꮡt)", "the qualified spelling `pkg.M⁔(ref t)` reaches the box twin");
+        StringAssert.Contains(twins, "await Ꮡx.qꞏtwin()", "the caller hands the tuple forwarder its box");
+    }
 }
