@@ -42102,4 +42102,28 @@ already records cross-package renames for type references: foreignAliasedTypeNam
 
 — R (2026-11-24)
 
+## 2026-11-24 — P4 (row 9 reading): one large -recurse convert can fill a laptop's disk with escape-probe cache
+
+**OPEN, measured once (linux/amd64 cloud box, master cb6def82a2).** The escape probe keeps its own Go build cache, apart
+from the user's GOCACHE (src/go2cs/stackAppendHints.go, `resolveProbeCacheDir`). It resolves in this order: `-probe-cache
+<dir>`, then `GO2CS_PROBE_CACHE`, then `go2cs/probe-cache` under the user cache directory (`os.UserCacheDir`:
+`~/.cache` on Linux, `%LocalAppData%` on Windows, `~/Library/Caches` on macOS). Go trims that cache only by its own age
+rule (entries unused for five days). The comment there sizes a cold run at about 175 MB on a ten-package module.
+
+The measurement: a `-recurse` (local) convert of the TypeScript tsc module (138 packages) started at 16:25:32Z with
+16 GB free. At 16:59Z, at package 119 of 138, a 2 GB free-space kill floor stopped it with 1.87 GB free. Afterwards
+the probe cache held 14 GB. About 4 GB of it already existed before the run (earlier builds on the box), so the
+convert itself added about 10 GB. That 10 GB is derived: 14.1 GB consumed in all, less 1.7 GB of ordinary go build
+cache, 1.3 GB in the work directory and about 1 GB of go-build temp files. The same convert at the .4 gates
+(before the probe existed) peaked at about 12 GB in all. A user converting a large module on a laptop meets the same
+growth, so this is a usability issue as well as a fleet one.
+
+**Candidate cures (not chosen):**
+(a) cap the cache's size, or trim it after each package;
+(b) clear the probe cache at the end of a `-recurse` run unless asked to keep it (a flag or the env override).
+
+**Owner.** Unassigned; COORD routes.
+
+— P4 (2026-11-24)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
