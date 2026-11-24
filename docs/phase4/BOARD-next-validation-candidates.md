@@ -41892,4 +41892,28 @@ program prints frame information for promoted methods, and a twin adds or rename
 
 — G (2026-11-23)
 
+## 2026-11-24 — P5 (C45; COORD ruling 20261124T022736Z, D5 split out): a write through a string's data pointer reaches the string's shared backing (OPEN, candidate .5, owner P5)
+
+**OPEN.** A Go string's bytes are immutable, and Go programs that read them through `unsafe.StringData`, a string
+header's Data or `*(*unsafe.Pointer)(unsafe.Pointer(&s))` never write through that pointer. go2cs hands out a WRITABLE
+alias: `unsafe.StringData(s)` is `Ꮡ(window, 0)`, an element reference into the string's own backing array
+(`src/core/unsafe/unsafe.cs`), and the string header box's Data is the same element box. A store through it, or through
+a view built from it, changes the backing, and every string sharing that backing changes with it. Three paths reach it:
+the scalar store `*(*byte)(p) = 'x'`, the array view `(*[N]byte)(p)` (`Pointer.ToArray`, a window on the string's own
+backing) and `unsafe.Slice(unsafe.StringData(s), n)`. All three are on master today; C45 adds no new path to it.
+
+**Scenario (P3's read of the C45 delta, 2026-11-24).** `(*[1]byte)(h.p)[0] = 'x'` with `s` a one-byte string: a
+one-byte string's backing is golib's process-wide table (`src/core/golib/string.cs`), so every equal one-byte string in
+the process changes.
+
+**What a cure owes (COORD's ruling).** It covers EVERY path (scalar, `Pointer.ToArray` views and `unsafe.Slice`); the
+owner's rule is never to narrow a correctness rule by reachability. A write through a `ref` is not seen at the store
+(`ж<T>.Value` is a `ref T`), so the design names the mechanism that sees it instead (P3's MUST): a check on the next
+access, as the header boxes' limit L1 does, or another. A cost read on the `ElementRef` hot path comes first, and the
+gate includes a one-byte string.
+
+**Owner.** P5, its own seat after C45.
+
+— P5 (2026-11-24)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
