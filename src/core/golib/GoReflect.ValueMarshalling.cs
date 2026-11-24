@@ -95,8 +95,9 @@ public static partial class GoReflect
             // A generated NAMED pointer wrapper exposes its canonical typed nil as NilInstance
             // (declared internal by the template — probe both visibilities), or as ΔNilInstance
             // when the type itself is named NilInstance (go2cs-gen's Common.PointerWrapperMember; R7).
-            string nilInstance = t.Name == "NilInstance" ? "ΔNilInstance" : "NilInstance";
-            return t.GetProperty(nilInstance, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)?.GetValue(null);
+            // Probed by both names rather than from the CLR name, which carries a generic type's arity (NilInstance`1).
+            const BindingFlags nilInstanceFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static;
+            return (t.GetProperty("NilInstance", nilInstanceFlags) ?? t.GetProperty("ΔNilInstance", nilInstanceFlags))?.GetValue(null);
         });
     }
 

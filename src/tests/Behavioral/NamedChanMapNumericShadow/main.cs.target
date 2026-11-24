@@ -67,6 +67,9 @@ partial struct Count /*map[nint, bool]*/;
 partial struct CompareTo /*num:nint*/;
 partial struct Length /*@string*/;
 
+partial struct Receive /*chan nint*/;
+partial struct Send /*chan nint*/;
+
 partial struct point {
     public nint X, Y;
 }
@@ -84,6 +87,8 @@ internal static void bump(Value p) {
     p.Value‿[2]++;
     p.Value‿.Assign(array<nint>([p.Value‿[0], p.Value‿[1], p.Value‿[2] * 10]));
 }
+
+internal static Value through(Value p) { return p; }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string bobˢ = "bob"u8;
@@ -226,6 +231,22 @@ internal static void main() {
     fmt.Println("type CompareTo:", ct < 5, min(ct, (CompareTo)2));
     Length ln = fourˢ;
     fmt.Println("type Length:", len(ln), ln < "z"u8, ln[1..]);
+    var rc = new Receive(1);
+    rc.ᐸꟷ(5);
+    var rcᴛ1 = rc;
+    switch (trySelect(ᐸꟷ<nint>(rcᴛ1, ꓸꓸꓸ))) {
+    case 0 when rcᴛ1.ꟷᐳ(out var v): {
+        fmt.Println("type Receive selected:", v);
+        break;
+    }
+    default: {
+        fmt.Println("type Receive: none");
+        break;
+    }}
+    rc.ᐸꟷ(6);
+    var sc = new Send(1);
+    sc.ᐸꟷ(ᐸꟷ<nint>(rc));
+    fmt.Println("type Receive/Send:", len(rc), ᐸꟷ<nint>(sc));
 
     ref var v1 = ref heap<array<nint>>(array<nint>([7, 8, 9]), out var Ꮡv1);
     Value pv = Ꮡv1;
@@ -237,6 +258,7 @@ internal static void main() {
         sum3 += i * e;
     }
     fmt.Println("type Value:", pv.Value‿, v1, pv.Value‿[..2], 3, sum3, pv != nil);
+    fmt.Println("type Value len/cap through a call:", len(through(pv).Value‿), cap(through(pv).Value‿));
     ref var sl = ref heap<slice<nint>>(slice<nint>([1, 2]), out var Ꮡsl);
     ValueSlot ps = Ꮡsl;
     ps.ΔValueSlot = append(ps.ΔValueSlot, (nint)3);

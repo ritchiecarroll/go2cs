@@ -138,8 +138,11 @@ func (v *Visitor) chanOperatorSpelling(expr ast.Expr) bool {
 		return true
 	}
 
+	// The type's own NAME claims the member too (go2cs-gen's GoMethodNames carries it; `type Receive chan int`).
+	named, _ := types.Unalias(v.getExprType(expr)).(*types.Named)
+
 	for _, member := range namedMethodModeChanMembers {
-		if declaresGoMethod(v.getExprType(expr), member) {
+		if declaresGoMethod(v.getExprType(expr), member) || named != nil && named.Obj().Name() == member {
 			return true
 		}
 	}

@@ -56,7 +56,7 @@ using System.Runtime.CompilerServices;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "AAkigoKCgoKCgoKCgoK6goKCgoKCurq6goK8gri4uAAULoKC9oKCgoKCgoKGAAgCloKktKSCpLSkpLSkloKCgoKCgqaCgoLSgoKClIKCgpSSgpKCgoKUgpKUkoKSgoKUgoKUgoKCgoKSgoKCgqaCgoKCgoKCgoKCgoKYgoKCgoKCgpSCgoKCgoKCiIKCgoKCgoKCgoKCgoKCgoKCgoI=", "", "113=main.Pipe.Capacity;113=main.Pipe.IsClosed;113=main.Pipe.Length;152=main.Counts.IsNil;152=main.Counts.Length;165=main.Level.CompareTo;172=main.Gauge.Value;177=main.Name.Length")]
+[assembly: GoPositionMap("main.go", "main.cs", "AAkigoKCgoKCgoKCgoK6goKCgoKCurq6goK8gri4uAAXNoKCqOSCgoKCgoKChgAIApaCpLSkgqS0pKS0pJaCgoKCgoKmgoKC0oKCgpSCgoKUkoKSgoKClIKSlJKCkoKClIKClIKCgoKCkoKCgoKmgoKCgoKCgoKCgoKCgoKCpLSkgoKCmIKCgoKCgoKUgoKCgoKCgoKIgoKCgoKCgoKCgoKCgoKCgoKCgg==", "", "120=main.Pipe.Capacity;120=main.Pipe.IsClosed;120=main.Pipe.Length;159=main.Counts.IsNil;159=main.Counts.Length;172=main.Level.CompareTo;179=main.Gauge.Value;184=main.Name.Length")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -94,6 +94,8 @@ public static partial class main_package
     public partial struct Name {}
     public partial struct Pipe {}
     public partial struct Rank {}
+    public partial struct Receive {}
+    public partial struct Send {}
     public partial struct Tally {}
     public partial struct Wire {}
     // </TypeAccessibility>
