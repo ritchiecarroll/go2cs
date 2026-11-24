@@ -41965,8 +41965,16 @@ capacity: after `c := []byte("xyz"); *(*string)(unsafe.Pointer(&c)) = "q"`, Go p
 through read-only views (`SliceAsStringBox`, `SliceStringHeaderBox`), which can refuse a store only on their next access,
 and the temporary box such a statement writes through has none, so the store was lost with no word (the conversion
 printed 3). C45 makes the statement panic by name (`go2cs: store through a read-only view`; the converter's
-`readOnlySliceViewStore`, Behavioral UnsafeHeaderViewRefusals, docs/Limitations.md). A field store through the header is
-refused by its generated setter already.
+`readOnlySliceViewStore`, Behavioral UnsafeHeaderViewRefusals, docs/Limitations.md) when the conversion is written in
+the assignment target, and stops the file by name (`GO2CS2008`) when that assignment is a `for` statement's init or post
+clause, where no throw statement can stand. A field store through the header is refused by its generated setter already.
+
+**Where it is still silent.** A store through a pointer VARIABLE that holds the view, `p := (*string)(unsafe.Pointer(&c));
+*p = "q"`, or through a function that stores through such a pointer, is not refused at the statement: it lands in the
+view, which panics by name on the next access through `p`, and is lost with no word when there is none (`len(c)` reads
+3 where Go reads 1). UnsafeHeaderViewRefusals pins both: "store through a variable, then read" (the panic) and "store
+through a variable, last access" (the wrong 3, until this row's cure). Found by P3's delta read of C45 r2 e87b097396
+(COORD 20261124T063422Z).
 
 **What a cure owes.** The store itself: set the slice's data and length from the stored string or header and keep its
 capacity, through the slice's own box, for `=`, the compound assignments and a tuple assignment alike, with the

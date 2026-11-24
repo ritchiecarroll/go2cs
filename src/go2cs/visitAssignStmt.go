@@ -621,10 +621,18 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 	lhsLen := len(lhsExprs)
 	rhsLen := len(rhsExprs)
 
-	// A store through a read-only slice view panics by name, in place of the store (readOnlySliceViewStore).
-	if format.useNewLine && assignStmt.Tok != token.DEFINE {
+	// A store through a read-only slice view panics by name, in place of the store (readOnlySliceViewStore). A for
+	// statement's init or post clause is emitted inside the C# `for (…; …; …)` header, where a throw statement cannot
+	// stand, so there the conversion of the file stops by name instead (a dropped file, GO2CS2008), as
+	// rejectForClauseKeepAlive does: left alone, the store would be lost with no word.
+	if assignStmt.Tok != token.DEFINE {
 		for _, lhs := range lhsExprs {
 			if message, refused := v.readOnlySliceViewStore(lhs); refused {
+				if !format.useNewLine {
+					panic(fmt.Sprintf("@visitAssignStmt - %s, in a for clause at %s, where no statement can carry the panic: write the store as a statement in the loop body",
+						strings.TrimSuffix(message, " (see docs/Limitations.md)"), v.fset.Position(lhs.Pos())))
+				}
+
 				v.outputBuilder.WriteString(v.newline)
 
 				if format.useIndent {

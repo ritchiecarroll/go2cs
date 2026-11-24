@@ -215,3 +215,93 @@ func TestHeaderDataPointerEmitsFromHeaderData(t *testing.T) {
 		}
 	}
 }
+
+// A store through a slice read as a string panics by name in place of the statement (readOnlySliceViewStore), in a
+// block and in a function literal's body alike. A for statement's init or post clause sits inside the C# `for (…)`
+// header, where a throw statement cannot stand, so there the file's conversion stops by name (GO2CS2008). P3 2026-11-24
+// (COORD 20261124T063422Z): the clause store was converted, and lost with no word. Red before the clause arm: both
+// clause files converted and no file was dropped.
+func TestSliceViewStoreInAForClauseStopsTheFile(t *testing.T) {
+	isolateConverterPathGlobals(t)
+	if testing.Short() {
+		t.Skip("integration test: runs the real converter over a module fixture")
+	}
+
+	takeDroppedFiles()
+	t.Cleanup(func() { takeDroppedFiles() })
+
+	root := t.TempDir()
+	appDir := filepath.Join(root, "app")
+	header := "package main\n\nimport \"unsafe\"\n\n"
+
+	writeModuleFile(t, filepath.Join(appDir, "go.mod"), "module example.com/viewstore\n\ngo 1.23\n")
+	writeModuleFile(t, filepath.Join(appDir, "main.go"), header+`func main() {
+	c := []byte("xyz")
+	*(*string)(unsafe.Pointer(&c)) = "q"
+	f := func() { *(*string)(unsafe.Pointer(&c)) = "r" }
+	f()
+	println(len(c))
+}
+`)
+	writeModuleFile(t, filepath.Join(appDir, "forpost.go"), header+`func forPost() {
+	c := []byte("xyz")
+	for i := 0; i < 1; *(*string)(unsafe.Pointer(&c)) = "q" {
+		i++
+	}
+}
+`)
+	writeModuleFile(t, filepath.Join(appDir, "forinit.go"), header+`func forInit() {
+	c := []byte("xyz")
+	for *(*string)(unsafe.Pointer(&c)) = "q"; len(c) > 5; {
+	}
+}
+`)
+
+	goRoot := build.Default.GOROOT
+
+	if goRoot == "" {
+		goRoot = runtime.GOROOT()
+	}
+
+	options := Options{
+		goRoot:              goRoot,
+		goPath:              build.Default.GOPATH,
+		go2csPath:           filepath.Join(root, "out"),
+		recurse:             true,
+		targetPlatform:      runtime.GOOS + "/" + runtime.GOARCH,
+		indentSpaces:        4,
+		preferVarDecl:       true,
+		useChannelOperators: true,
+	}
+
+	build.Default.GOROOT = options.goRoot
+	build.Default.GOPATH = options.goPath
+
+	if err := NewModuleConverter(options).ConvertModule(appDir); err != nil {
+		t.Fatalf("ConvertModule: %v", err)
+	}
+
+	mainCs := readGenerated(t, filepath.Join(options.go2csPath, "src", "example.com", "viewstore", "main.cs"))
+
+	if got := strings.Count(mainCs, `throw panic("go2cs: store through a read-only view: a string read over a []byte`); got != 2 {
+		t.Errorf("the statement store and the literal's store each panic by name: %d of 2 in\n%s", got, mainCs)
+	}
+
+	err := droppedFileError()
+
+	if err == nil {
+		t.Fatal("a store through a view in a for clause stops the file's conversion; no file was dropped")
+	}
+
+	message := err.Error()
+
+	for _, want := range []string{"2 files", "forpost.go (.cs): @visitAssignStmt - go2cs: store through a read-only view", "forinit.go (.cs): @visitAssignStmt", "in a for clause at "} {
+		if !strings.Contains(message, want) {
+			t.Errorf("the error names %q:\n%s", want, message)
+		}
+	}
+
+	if strings.Contains(message, "main.go") {
+		t.Errorf("only the two clause files are dropped:\n%s", message)
+	}
+}

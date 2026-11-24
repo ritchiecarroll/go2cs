@@ -6815,7 +6815,9 @@ func (v *Visitor) getFunctionSignature(callExpr *ast.CallExpr) *types.Signature 
 
 	resultType := v.info.TypeOf(callExpr)
 
-	if resultType != nil && strings.Contains(resultType.String(), "unsafe.Pointer") {
+	// An alias of unsafe.Pointer does not print that name, so the type is tested too. The string test stays beside it:
+	// it also admits a type that only spells unsafe.Pointer inside (a *unsafe.Pointer), which this does not re-scope.
+	if resultType != nil && (isUnsafePointerBasic(resultType) || strings.Contains(resultType.String(), "unsafe.Pointer")) {
 		pkg := types.NewPackage("unsafe", "unsafe")
 
 		// Only concerned with making the parameter a "pointer like" type

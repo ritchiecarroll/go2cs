@@ -73,6 +73,19 @@ internal static void main() {
         return fmt.Sprint(h.l);
     });
 
+    @try("store through a variable, then read", [GoFunc("main.func8")] () => {
+        ref var cΔ5 = ref heap<slice<byte>>(slice<byte>("xyz"u8), out var ᏑcΔ5);
+        var p = ᏑcΔ5.Reinterpret<slice<byte>, @string>();
+        p.Value = "q";
+        return p.Value;
+    });
+    @try("store through a variable, last access", [GoFunc("main.func9")] () => {
+        ref var cΔ6 = ref heap<slice<byte>>(slice<byte>("xyz"u8), out var ᏑcΔ6);
+        var p = ᏑcΔ6.Reinterpret<slice<byte>, @string>();
+        p.Value = "q";
+        return fmt.Sprint(len(cΔ6));
+    });
+
     ref var c = ref heap<slice<byte>>(slice<byte>("end"u8), out var Ꮡc);
     throw panic("go2cs: store through a read-only view: a string read over a []byte cannot be assigned; Go would replace the slice's data pointer and length (see docs/Limitations.md)");
     fmt.Println("not reached in the conversion:", len(c));

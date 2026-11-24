@@ -539,13 +539,21 @@ The [validated modules](ValidatedModules.md) page lists the modules validated so
        Go layout", "unsafe pointer arithmetic on a managed pointer with no address", and "cannot view native memory as
        array<Byte>: the address has no managed element storage behind it" (Behavioral UnsafeHeaderViewFamily, parked
        on that branch). -->
-* **A store through a `[]byte` read as a string panics.** `*(*string)(unsafe.Pointer(&b)) = s`, and the same store
-  through a two-word string header (`*(*struct{ p unsafe.Pointer; n uint })(unsafe.Pointer(&b)) = h`), replaces the
-  slice's data pointer and length in Go and keeps its capacity. Converted, the statement panics with
-  `go2cs: store through a read-only view`, because the views go2cs reads these through are read-only.
+* **A store through a `[]byte` read as a string panics, or is lost.** `*(*string)(unsafe.Pointer(&b)) = s`, and the
+  same store through a two-word string header (`*(*struct{ p unsafe.Pointer; n uint })(unsafe.Pointer(&b)) = h`),
+  replaces the slice's data pointer and length in Go and keeps its capacity. The views go2cs reads these through are
+  read-only. When the conversion is written in the assignment itself, as above, the converted statement panics with
+  `go2cs: store through a read-only view`; in a `for` statement's init or post clause, the converter stops on the file
+  and names it (`GO2CS2008`). When the view is held in a variable first (`p := (*string)(unsafe.Pointer(&b)); *p = s`),
+  or passed to a function that stores through it, the store goes into the view, which panics by name on the next
+  access through `p`. If there is none, the store is lost with no word: `len(b)` still reads the old length.
   <!-- C45, P3's read 2026-11-24 (finding 2): the store used to land in a temporary view box and be lost silently. The
        converter's readOnlySliceViewStore emits the panic; Behavioral UnsafeHeaderViewRefusals; matching Go's store is
-       the BOARD row of 2026-11-24 "a store through a slice read as a string or string header" (OPEN, post-.5). -->
+       the BOARD row of 2026-11-24 "a store through a slice read as a string or string header" (OPEN, post-.5).
+       P3's delta read of e87b097396 (COORD 20261124T063422Z): the variable form is not refused at the statement
+       (readOnlySliceViewStore needs the conversion under the star) and the view's own check runs on its next access
+       (golib ж.SliceStringViewBox.cs); the for-clause form stops the file, since a throw cannot stand in a C# for
+       header. UnsafeHeaderViewRefusals has both variable arms; the "last access" arm prints the wrong 3 on purpose. -->
 * **One bad dependency blocks everything above it.** A package that fails to convert, or that the
   converter refuses, is reported and skipped: the rest of the module still converts, and every project
   that imports it fails to build. The run ends with exit 1, and its summary names each such package

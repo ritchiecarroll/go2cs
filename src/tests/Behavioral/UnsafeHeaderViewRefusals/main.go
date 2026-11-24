@@ -4,8 +4,11 @@ package main
 // moves the slice's data pointer and length in Go and keeps its capacity; the views are read-only, and the converter
 // panics at the statement, where the store used to be lost with no word (Go prints 1 for len(c) after the first arm's
 // store, the conversion printed 3). The near misses, a slice whose element is not a byte read as a string and a NAMED
-// byte slice through either view, are served by neither view, and their reads panic by name too. Each arm recovers and
-// prints its panic up to the first parenthesis, and the last store is not recovered: the program ends on it.
+// byte slice through either view, are served by neither view, and their reads panic by name too. A store through a
+// pointer VARIABLE that holds the view is not refused at the statement: it panics by name on the next access through
+// the variable, and is lost with no word when there is none (the "last access" arm prints the conversion's wrong 3).
+// Each arm recovers and prints its panic up to the first parenthesis, and the last store is not recovered: the program
+// ends on it.
 
 import (
 	"fmt"
@@ -74,6 +77,21 @@ func main() {
 		nb := bytes("named")
 		h := *(*str)(ptr(&nb))
 		return fmt.Sprint(h.l)
+	})
+
+	try("store through a variable, then read", func() string {
+		c := []byte("xyz")
+		p := (*string)(ptr(&c))
+		*p = "q"
+		return *p
+	})
+	// Silent today, and wrong: Go prints 1. The store lands in the view p holds, whose refusal runs on its next access,
+	// and p is not read again. This arm pins the conversion's value until the BOARD row's cure.
+	try("store through a variable, last access", func() string {
+		c := []byte("xyz")
+		p := (*string)(ptr(&c))
+		*p = "q"
+		return fmt.Sprint(len(c))
 	})
 
 	c := []byte("end")
