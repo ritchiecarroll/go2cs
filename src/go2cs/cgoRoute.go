@@ -441,7 +441,7 @@ func cgoClosureVariable(ident *ast.Ident, prefix string) int {
 // that needs no check), then one check of each checked argument, then the call itself, of exactly _cgo0 … _cgoN-1 in
 // order, returned or as a statement. Anything else is not recognised, and the census refuses it.
 //
-// cgo Phase 3, increment 3.2, seat 1b (design 18.12 item 5) adds cmd/cgo's element and slice forms (checkIndex,
+// cgo Phase 3, the pinned class (DESIGN-cgo-phase3-marshaling 18.12 item 5) adds cmd/cgo's element and slice forms (checkIndex,
 // checkSlice): `_cgoIndexN := &a` (or `a` when it is not a variable) with `_cgoN := &(*_cgoIndexN)[i]` under conversions
 // and the check `_cgoCheckPointer(_cgoN, *_cgoIndexN)`; and `_cgoSliceN := s[lo:hi]` with `_cgoN := …_cgoSliceN…` and the
 // check `_cgoCheckPointer(_cgoSliceN, 0 == 0)`. Each variable stands for its definition, as `_cgoBaseN` does, and the
