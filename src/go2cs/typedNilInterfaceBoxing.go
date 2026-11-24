@@ -342,7 +342,7 @@ func (v *Visitor) pointerExprNeverRendersNull(expr ast.Expr) bool {
 		// unsafe.Pointer, of a call result — stays conservative and takes the accessor.
 		if len(expr.Args) == 1 {
 			if isConversion, _ := v.isTypeConversion(expr); isConversion {
-				if tv, ok := v.info.Types[expr.Args[0]]; ok && tv.IsNil() {
+				if tv, ok := v.info.Types[expr.Args[0]]; ok && tv.IsNil() && v.isPointerConversionTarget(expr.Fun) {
 					return true
 				}
 
@@ -352,6 +352,24 @@ func (v *Visitor) pointerExprNeverRendersNull(expr ast.Expr) bool {
 	}
 
 	return false
+}
+
+// isPointerConversionTarget reports whether a conversion's Fun names a pointer type, unnamed (`*T`) or named
+// (`type P *T`): only those render a nil operand as their canonical instance. Any other hop -- `unsafe.Pointer(nil)`,
+// `uintptr(0)` -- renders a null reference, so an outer conversion that recurses into it must not take the inner nil
+// as proof that the outer one cannot be null (`(*T)(unsafe.Pointer(nil))`; P3's reading, 2026-11-24).
+func (v *Visitor) isPointerConversionTarget(fun ast.Expr) bool {
+	tv, ok := v.info.Types[fun]
+
+	if !ok || !tv.IsType() {
+		return false
+	}
+
+	if _, isPointer := types.Unalias(tv.Type).(*types.Pointer); isPointer {
+		return true
+	}
+
+	return isNamedPointerType(tv.Type)
 }
 
 // isNamedPointerType reports whether t is a DEFINED type whose underlying type is a pointer (`type P
@@ -386,25 +404,26 @@ func (v *Visitor) applyTypedNilNamedPointerBox(valueType types.Type, neverNull b
 
 // namedPointerExprNeverRendersNull is pointerExprNeverRendersNull for a NAMED pointer value. A conversion to a named
 // pointer type is recognized here from go/types (the call's Fun is a type), since the named target takes a different
-// conversion route from `(*T)(&x)`. `P(nil)` renders the canonical nil and an operand of UNNAMED pointer type renders
-// the wrapper's constructor (`new P(t)`, even when `t` is nil), so neither is ever a null reference. Any other
-// operand (another named pointer, an unsafe.Pointer) renders a cast that carries a null through, and is judged by
-// its operand. Everything else defers to the pointer predicate.
+// conversion route from `(*T)(&x)`. go2cs-gen's wrapper declares its inbound conversions as constructors -- from the
+// box (`new P(t)`, which is how an operand of unnamed pointer type and an unsafe.Pointer operand, rendered through
+// `unsafe.Pointer.To<T>`, both arrive) and from nil (the canonical NilInstance) -- so such a conversion is never a
+// null reference, however nil its operand. Only an operand that is itself of a named pointer type renders a cast that
+// carries a null through (`(P)p`), and that is judged by its operand. Everything else defers to the pointer predicate.
 func (v *Visitor) namedPointerExprNeverRendersNull(expr ast.Expr) bool {
 	if paren, ok := expr.(*ast.ParenExpr); ok {
 		return v.namedPointerExprNeverRendersNull(paren.X)
 	}
 
 	if call, ok := expr.(*ast.CallExpr); ok && len(call.Args) == 1 {
-		if fun, ok := v.info.Types[call.Fun]; ok && fun.IsType() {
-			if arg, ok := v.info.Types[call.Args[0]]; ok {
-				if arg.IsNil() {
-					return true
-				}
+		if fun, ok := v.info.Types[call.Fun]; ok && fun.IsType() && isNamedPointerType(fun.Type) {
+			arg, ok := v.info.Types[call.Args[0]]
 
-				if _, isPointer := arg.Type.(*types.Pointer); isPointer && isNamedPointerType(fun.Type) {
-					return true
-				}
+			if !ok {
+				return false
+			}
+
+			if arg.IsNil() || !isNamedPointerType(arg.Type) {
+				return true
 			}
 
 			return v.namedPointerExprNeverRendersNull(call.Args[0])
