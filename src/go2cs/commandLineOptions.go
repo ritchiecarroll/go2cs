@@ -461,7 +461,7 @@ func isSingleFileInput(path string, options Options) bool {
 func resolveGo2CSPath(options *Options, outputAnchor string, selfLocate bool) {
 	// -recurse=nuget describes the standard library from its embedded record and reads no package_info.cs under the
 	// runtime root (publishedStdLibRecord). Say so once when the root holds a core\ tree, the thing that used to be read:
-	// such a root is often an old deploy-core staging (i9's had no core\golib\golib.csproj, so it was not even a go2cs
+	// such a root is often an old deploy-core staging (the one measured had no core\golib\golib.csproj, so it was not even a go2cs
 	// root by isGo2CSRoot), and until 2026-11-20 its stale metadata silently won over the record.
 	if options.nugetRefs && !go2csRootWarned {
 		if stat, err := os.Stat(filepath.Join(options.go2csPath, "core")); err == nil && stat.IsDir() {

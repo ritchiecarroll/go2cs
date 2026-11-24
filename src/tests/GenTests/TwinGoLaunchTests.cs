@@ -170,6 +170,44 @@ public class TwinGoLaunchTests
 
         """;
 
+    // A go literal that RETURNS a value, as the converter writes `go func(o chan int) error { ... }(c)`: once with the
+    // return type inferred and a deferred-call frame (the result reached through a label), once with it spelled out,
+    // once with a blank parameter (written `nint _`, so `_ =` would assign to it), and once returning a tuple.
+    // A goroutine drops its results, so both launch their twins; the value is evaluated and discarded.
+    private const string ValueLiteral = """
+            public static void launchValueLiteral(channel<nint> c)
+            {
+                goǃ((channel<nint> o) => {
+                    error retErr = default;
+                    try {
+                        ᐸꟷ(o);
+                        retErr = default; goto done;
+                    }
+                    finally { }
+                    done: return retErr;
+                }, c);
+
+                goǃ(error (channel<nint> o, nint n) => {
+                    ᐸꟷ(o);
+                    if (n < 0) {
+                        return (error)default!;
+                    }
+                    return default;
+                }, c, (nint)6);
+
+                goǃ(error (nint _) => {
+                    ᐸꟷ(c);
+                    return default;
+                }, (nint)1);
+
+                goǃ((nint, error) (channel<nint> o) => {
+                    ᐸꟷ(o);
+                    return (1, default);
+                }, c);
+            }
+
+        """;
+
     // Plain launches: a function that returns a value (goǃ's Func rungs) and parks; a go statement in a function refused
     // a twin (by-ref parameter); and, as the control, a go statement of a function that never parks.
     private const string Plain = """
@@ -245,6 +283,19 @@ public class TwinGoLaunchTests
     [TestMethod]
     public void AGoLiteralWithArgumentsLaunchesItsTwin() =>
         AssertLaunchesTwin(LiteralArgs, "launchLiteral", "async (nint iΔ1, @string sΔ1) =>");
+
+    [TestMethod]
+    public void AGoLiteralThatReturnsAValueLaunchesItsTwin()
+    {
+        (string twins, Diagnostic[] errors, Diagnostic[] generator) = Run(ValueLiteral);
+
+        Assert.AreEqual(0, errors.Length, string.Join("\n", errors.Select(error => error.ToString())));
+        StringAssert.Contains(twins, "launchValueLiteralꞏtwin(", "launchValueLiteral is twinned");
+        Assert.AreEqual(4, twins.Split("goǃtwin(").Length - 1, "all four go literals launch their twins: " + twins);
+        StringAssert.Contains(twins, "await ᐸꟷꞏtwin(c)", "the blank-parameter literal's twin parks on its receive");
+        Assert.AreEqual(3, twins.Split("await ᐸꟷꞏtwin(o)").Length - 1, "each literal's twin parks on its receive: " + twins);
+        Assert.IsFalse(generator.Any(diagnostic => diagnostic.Id == "GO2CS0015"), "no fallback warning: " + string.Join("\n", generator.Select(d => d.ToString())));
+    }
 
     [TestMethod]
     public void AnImplicitlyTypedWrapperLaunchesItsTwin() =>

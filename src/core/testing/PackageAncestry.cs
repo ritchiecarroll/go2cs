@@ -161,7 +161,7 @@ internal static class PackageAncestry
     /// null when it can: the package must be a package of the module, and the root must be a module (its own
     /// go.mod, or the one go reads for a module that ships none). These are <see cref="TryStageModule"/>'s
     /// "nothing to stage" answers, which for a module host are a sandbox that is silently not the module, so the
-    /// host refuses with this text instead (P3 110324Z, MUST 1.1).
+    /// host refuses with this text instead (review MUST 1.1, 3e6c2b75ae).
     /// </summary>
     public static string? ModuleStagingRefusal(string moduleRoot, string modulePath, string importPath, string? goMod = null)
     {
