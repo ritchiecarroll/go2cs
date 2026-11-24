@@ -99,6 +99,17 @@ partial class debug_package
 
     private static readonly bool s_panicOnFaultReset = GoroutineThreadState.Register(static () => t_panicOnFault = false);
 
+    // M:N (row 11, N10): the flag moves with a multiplexed goroutine from carrier to carrier. A set flag is the one shared
+    // boxed true and a clear one is null, so a park allocates nothing.
+    private static readonly object s_panicOnFaultSet = true;
+
+    private static readonly bool s_panicOnFaultMounted = GoroutineThreadState.RegisterMounted(static (ref object? saved) =>
+    {
+        bool held = saved is not null;
+        saved = t_panicOnFault ? s_panicOnFaultSet : null;
+        t_panicOnFault = held;
+    });
+
     internal static partial int32 setGCPercent(int32 @in)
     {
         int32 old = global::go.runtime_package.SetGCPercentManaged(@in);

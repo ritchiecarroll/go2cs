@@ -62,7 +62,7 @@ architecture-specific path in the standard library.
      windows' and darwin's extern.cs at the same line;
      src/core/internal/goarch/amd64/zgoarch_amd64.cs (GOARCH "amd64", IsAmd64 1, IsArm64 0) is the only zgoarch file; and no
      *_arm64.cs file exists anywhere under src/core. debug.ReadBuildInfo's GOARCH setting is composed from runtime.GOARCH
-     (src/core/runtime/debug/stubs_impl.cs:199 (`GoModInfoAttribute.Compose(…runtime_package.GOARCH.ToString()`)). The run-time feature read is batch 216
+     (src/core/runtime/debug/stubs_impl.cs:210 (`GoModInfoAttribute.Compose(…runtime_package.GOARCH.ToString()`)). The run-time feature read is batch 216
      (C1, claude/c1-aes-arm64): internal/cpu's ARM64 flags are filled on an arm64 process, so crypto/tls's
      hasGCMAsmARM64 holds. Open and owned after 1.26.10.3: the BOARD row's fix shapes (a run-time GOARCH for the shared
      darwin flavour, with its census of compile-time GOARCH branches, or a per-architecture darwin build). -->
