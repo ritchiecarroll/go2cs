@@ -549,6 +549,37 @@ the process with no panic and no deferred calls ([Limitations](Limitations.md)).
      6.4 s (16 MiB); N=20,000 stops at about 16,200 threads at both reserves (vm.max_map_count 65,530). The variables
      and their syntax: src/core/golib/runtime/Goroutine.cs, ResolveStackReserve and BoundedReserve. -->
 
+### Checking writes through string data
+
+`GO2CS_CHECK_STRING_WRITES=1` turns on a diagnostic for converted code that writes through `unsafe.StringData`'s
+pointer into a string literal or a one-byte string. Go faults on that write; by default go2cs lets it change every
+string sharing those bytes ([Limitations](Limitations.md)). With the check on, the write lands in a private copy and
+the program panics by name at the next read through the pointer or the next `unsafe.StringData` over that string.
+
+The switch is read once, at start-up. Off, the default, it costs nothing: no literal is recorded and
+`unsafe.StringData` makes no lookup. On, each string literal is recorded the first time the program uses it, and
+each `unsafe.StringData` looks its string up. On `linux-x64`, a program using 50,000 distinct literals read these
+medians over seven runs:
+
+| | Off (the default) | On |
+|:--|--:|--:|
+| First use of the 50,000 literals | 32 ms | 43 ms |
+| Gen-2 garbage collection pause | 3.4 ms | 6.0 ms |
+| Gen-0 garbage collection pause | 0.65 ms | 1.9 ms |
+| `unsafe.StringData` of a literal | 19 ns | 38 ns |
+| `unsafe.StringData` of a heap string | 20 ns | 26 ns |
+
+Turn it on to debug, not in production.
+
+<!-- Source: P5's D5 seat, 2026-11-24 (owner ruling via COORD 20261124T133212Z: an opt-in diagnostic, zero work when
+     off). Bench: 50,000 distinct C# literals converted through StringLiteralCache, then 30 forced blocking gen-2
+     collections and 20 M small allocations; 20 M StringData calls each on a heap string and on one literal; Release,
+     linux box, seven interleaved runs per arm. Medians [min-max], master golib b2c9435159 / the seat with the switch
+     off / on: first use 34.1 [25.8-39.8] / 31.8 [26.0-34.2] / 42.6 [34.3-47.4] ms; gen-2 pause 3.50 [2.76-3.66] /
+     3.44 [2.69-3.77] / 6.04 [5.02-6.45] ms; gen-0 pause 708 [643-746] / 646 [555-740] / 1,929 [1,804-2,646] us;
+     StringData literal 18.5 [16.0-21.4] / 18.6 [15.4-20.1] / 38.3 [33.7-41.5] ns; heap 20.0 [18.2-22.6] / 19.9
+     [16.2-20.7] / 26.3 [23.5-31.5] ns. The switch: src/core/golib/ReadOnlyStringBacking.cs, Enabled. -->
+
 ### Options that do not change run-time cost
 
 | Option | Why it is not a tuning option |

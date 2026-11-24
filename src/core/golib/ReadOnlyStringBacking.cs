@@ -17,9 +17,17 @@ namespace go;
 
 /// <summary>
 /// The private copy that <c>unsafe.StringData</c> hands out for a string whose bytes are STATIC data: a string
-/// literal (<see cref="StringLiteralCache"/>) or a one-byte string from <see cref="@string"/>'s table.
+/// literal (<see cref="StringLiteralCache"/>) or a one-byte string from <see cref="@string"/>'s table, when the
+/// opt-in diagnostic <c>GO2CS_CHECK_STRING_WRITES=1</c> is set.
 /// </summary>
 /// <remarks>
+/// <para>
+/// OFF BY DEFAULT. Go's compiler and vet already keep ordinary code from writing through a string's bytes; this check
+/// is for debugging converted code that does it anyway through <c>unsafe</c>. With the switch unset, <see cref="Enabled"/>
+/// is false, read once at start-up, so the JIT folds every test of it: no literal is registered, <c>StringData</c> makes
+/// no lookup and no record exists. <c>StringData</c> then aliases the backing, and a write through it changes every
+/// string sharing those bytes (docs/Limitations.md).
+/// </para>
 /// <para>
 /// WHY A COPY. Go keeps a literal's bytes, and the one-byte strings of <c>runtime.staticuint64s</c>, in read-only
 /// memory, so a write through <c>unsafe.StringData</c> FAULTS (SIGSEGV) and nothing else ever sees the new byte. Here
@@ -56,9 +64,18 @@ namespace go;
 /// </remarks>
 internal sealed class ReadOnlyStringBacking : IArray<byte>
 {
-    // Weak on the origin: a literal's origin lives as long as the literal cache holds it (the process), and a
-    // one-byte backing as long as the table (the process). A shadow never outlives its origin's entry.
-    private static readonly ConditionalWeakTable<byte[], ReadOnlyStringBacking> s_registered = new();
+    /// <summary>
+    /// True when <c>GO2CS_CHECK_STRING_WRITES=1</c> was set at start-up.
+    /// </summary>
+    internal static readonly bool Enabled = Environment.GetEnvironmentVariable("GO2CS_CHECK_STRING_WRITES") == "1";
+
+    // In its own class so the table is created only when the diagnostic is on: the default path never touches it.
+    private static class Registry
+    {
+        // Weak on the origin: a literal's origin lives as long as the literal cache holds it (the process), and a
+        // one-byte backing as long as the table (the process). A shadow never outlives its origin's entry.
+        internal static readonly ConditionalWeakTable<byte[], ReadOnlyStringBacking> Records = new();
+    }
 
     private readonly byte[] m_origin;
     private byte[]? m_shadow;
@@ -69,12 +86,14 @@ internal sealed class ReadOnlyStringBacking : IArray<byte>
     }
 
     /// <summary>
-    /// Records <paramref name="origin"/> as static data: the backing of a cached string literal.
+    /// Records <paramref name="origin"/> as static data, the backing of a cached string literal, when the diagnostic
+    /// is on; otherwise nothing.
     /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static void Register(byte[] origin)
     {
-        if (origin.Length != 0)
-            s_registered.TryAdd(origin, new ReadOnlyStringBacking(origin));
+        if (Enabled && origin.Length != 0)
+            Registry.Records.TryAdd(origin, new ReadOnlyStringBacking(origin));
     }
 
     /// <summary>
@@ -82,21 +101,30 @@ internal sealed class ReadOnlyStringBacking : IArray<byte>
     /// </summary>
     internal static ReadOnlyStringBacking? Of(byte[] backing)
     {
-        if (s_registered.TryGetValue(backing, out ReadOnlyStringBacking? found))
+        if (!Enabled)
+            return null;
+
+        if (Registry.Records.TryGetValue(backing, out ReadOnlyStringBacking? found))
             return found;
 
         // The 256 one-byte backings are known by reference, so they are recorded on first use rather than at start.
         if (@string.IsOneByteTableBacking(backing))
-            return s_registered.GetValue(backing, static origin => new ReadOnlyStringBacking(origin));
+            return Registry.Records.GetValue(backing, static origin => new ReadOnlyStringBacking(origin));
 
         return null;
     }
 
     /// <summary>
     /// <c>unsafe.StringData</c>'s pointer for a non-empty string window: an element box over the shadow when the
-    /// window's backing is static data, otherwise null.
+    /// diagnostic is on and the window's backing is static data, otherwise null.
     /// </summary>
-    internal static ж<byte>? TryDataBox(in slice<byte> window)
+    /// <remarks>
+    /// Inlined so that, with the diagnostic off, a caller's <c>TryDataBox(w) ?? Ꮡ(w, 0)</c> folds to <c>Ꮡ(w, 0)</c>.
+    /// </remarks>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static ж<byte>? TryDataBox(in slice<byte> window) => Enabled ? CheckedDataBox(window) : null;
+
+    private static ж<byte>? CheckedDataBox(in slice<byte> window)
     {
         if (Of(window.m_array) is not { } readOnly)
             return null;

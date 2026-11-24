@@ -41958,38 +41958,88 @@ holds for a promoted method that is NOT weak and parks: its forwarder is plain t
 
 — P4 (2026-11-23)
 
-### 2026-11-24 — unsafe.StringData over static string bytes: a write is isolated, and reported only where a hook sees the next access
+### 2026-11-24 — unsafe.StringData over static string bytes: an opt-in diagnostic isolates a write and reports it where a hook sees the next access
 
-**What changed (D5 option A, COORD 20261124T103731Z).** `unsafe.StringData` over a string whose bytes are static data
-(a cached string literal, or a one-byte string from `@string`'s table) used to return a pointer into storage the whole
-process shares, so a write through it changed every later equal literal and one-byte string. Go faults on that write.
-It now returns a pointer into one private copy per backing (golib `ReadOnlyStringBacking`), and the next access through
-a hook panics by name: a dereference of the box (`*p`, and every box `unsafe.Add` derives from it), or a later
-`unsafe.StringData` over the same backing. A heap string is unchanged: Go mutates its sharers and so does go2cs.
+**The default (owner ruling, COORD 20261124T133212Z).** `unsafe.StringData` over a string whose bytes are static data
+(a cached string literal, or a one-byte string from `@string`'s table) returns a pointer into storage the whole process
+shares, so a write through it changes every later equal literal and one-byte string. Go faults on that write. The owner
+ruled the protection an OPT-IN DIAGNOSTIC: "no need for normal runtime work where Go already protects converted code.
+This diagnostic covers other ways converted code might fail, for debugging, etc." The default is documented in
+`docs/Limitations.md` and pinned by a GolibTests row.
 
-**The named limit.** A view that reads the storage directly takes no hook: a slice from `unsafe.Slice(p, n)`, and an
-array pointer `(*[N]byte)(unsafe.Pointer(p))` (`ElemRefBox.TryGetElementStorage`). A write through one still lands in
-the copy and reaches nothing else, but it is reported only if a later access goes through one of the two hooks. Go
-faults at the write itself; a managed box cannot observe a write through a ref or span it has already handed out.
+**The diagnostic (`GO2CS_CHECK_STRING_WRITES=1`, COORD option A 20261124T103731Z).** golib
+`ReadOnlyStringBacking.Enabled` reads the variable once at start-up into a `static readonly bool`. On, `StringData`
+over static bytes returns a pointer into one private copy per backing, and the next access through a hook panics by
+name: a dereference of the box (`*p`, and every box `unsafe.Add` derives from it), or a later `unsafe.StringData` over
+the same backing. Off, nothing is registered: `StringLiteralCache.Insert`'s `Register` and `TryDataBox` are inlined
+tests of the flag, so `TryDataBox(w) ?? Ꮡ(w, 0)` folds to master's `Ꮡ(w, 0)`, and the record table sits in a nested
+class that is never initialized. A heap string is the same either way: Go mutates its sharers and so does go2cs.
 
-**`reflect.StringHeader` goes through the same door.** `ж.StringHeaderBox` minted its `Data` (the number shape's (H)
-and the pointer shape) with `builtin.Ꮡ(window, 0)`. With `StringData` routed and the header not, GolibTests
-`StringHeaderNumberTests` W4 went red (Data != StringData, which Go holds equal), so both mints now take
-`ReadOnlyStringBacking.TryDataBox` first. `ElemRefBox`'s foreign arm answers `IElementRun.RunBacking` with the shadow
-for this one collection, so a header store of that Data (`HeaderWriteThroughTests`, Go's `TestWriteThroughHeader`)
-rebuilds the string over the shadow instead of refusing, and the native marshals see the shadow run.
+**The named limit (switch on).** A view that reads the storage directly takes no hook: a slice from
+`unsafe.Slice(p, n)`, and an array pointer `(*[N]byte)(unsafe.Pointer(p))` (`ElemRefBox.TryGetElementStorage`). A write
+through one still lands in the copy and reaches nothing else, but it is reported only if a later access goes through
+one of the two hooks. Go faults at the write itself; a managed box cannot observe a write through a ref or span it has
+already handed out.
 
-**The route the cut does not cover.** A literal the standard library hoists into a field,
-`private static readonly @string xˢᵇ = "..."u8;` (1,282 files under `src/core` at b2c9435159): its backing is not a
-cached literal, so `StringData` over it still aliases the shared bytes. It is in `docs/Limitations.md`. Closing it
-means registering the hoisted fields' backings (a converter or golib change to the `u8` hoist).
+**`reflect.StringHeader` goes through the same door.** `ж.StringHeaderBox` mints its `Data` (the number shape's (H)
+and the pointer shape) through `ReadOnlyStringBacking.TryDataBox` first, so header Data equals `StringData` in both
+modes: off, both are `builtin.Ꮡ(window, 0)` as at master; on, both name the copy, which GolibTests
+`StringHeaderNumberTests` W4 caught as Data != StringData when only `StringData` was routed. `ElemRefBox`'s foreign arm
+answers `IElementRun.RunBacking` with the shadow for this one collection, so a header store of that Data
+(`HeaderWriteThroughTests`, Go's `TestWriteThroughHeader`) rebuilds the string over the shadow instead of refusing.
 
-**Guards.** GolibTests `ReadOnlyStringDataTests` (6 arms): red at master on the literal, one-byte and `unsafe.Slice`
-arms (the write changed the literal or the one-byte string), green with the cut; with the next-access check neutered
-the same three arms fail by name ("did not report the write"). Behavioral `StringDataIdentity` compares the identity,
-heap and near-miss arms against `go run`.
+**What the diagnostic does not cover: three cases, none of which panics** (counted by P3 at cf7e3b212b,
+COORD/20261124T130505Z-P3.md).
+(a) Hoisted literals: `private static readonly @string xˢᵇ = "..."u8;`, 10,799 declarations in 1,284 files under
+`src/core` (test files included), plus any user package converted with `-hoist-literals`
+(`hoistedLiteralOperations.go`). The backing is not a cached literal, so `StringData` over it aliases the shared bytes.
+P3's scenario: `_, err := strconv.ParseBool("x")`, then a write of 'p' through `StringData` of
+`err.(*strconv.NumError).Func`; Go faults, go2cs writes `strconv/number.cs` `parseBoolˢᵇ` and every later error reads
+"parseBool". (b) A non-hoisted `"..."u8` operand converts through `implicit operator @string(ReadOnlySpan<byte>)` into a
+fresh array per evaluation: a write is private to that value and unreported. (c) `unsafe.String(unsafe.StringData(lit),
+n)` builds a string over the shadow, which is not registered: it reads any later write to the shadow, and `StringData`
+over it returns an unchecked box. All three are in `docs/Limitations.md`.
 
-**Owner.** P5 (the cut). The hoisted-field route and the hook-free views are unassigned; COORD routes.
+**What it costs.** Bench: 50,000 distinct C# literals converted through the cache, then 30 forced blocking gen-2
+collections and 20 M small allocations (gen-0 churn), plus 20 M `StringData` calls each on a heap string and on one
+literal; linux box, Release, 7 interleaved runs per arm, medians [min-max]:
+
+| arm | first use, 50k literals | gen-2 pause | gen-0 pause | StringData, literal | StringData, heap |
+|---|---|---|---|---|---|
+| master golib b2c9435159 | 34.1 ms [25.8-39.8] | 3.50 ms [2.76-3.66] | 708 us [643-746] | 18.5 ns [16.0-21.4] | 20.0 ns [18.2-22.6] |
+| the seat, switch off | 31.8 ms [26.0-34.2] | 3.44 ms [2.69-3.77] | 646 us [555-740] | 18.6 ns [15.4-20.1] | 19.9 ns [16.2-20.7] |
+| the seat, switch on | 42.6 ms [34.3-47.4] | 6.04 ms [5.02-6.45] | 1,929 us [1,804-2,646] | 38.3 ns [33.7-41.5] | 26.3 ns [23.5-31.5] |
+
+Off equals master within noise on every column; whole-process wall for the literal mode read 781 / 812 ms in that set
+and 811 / 787 ms in a second 15-run set of master and switch-off alone. On is cf7e3b212b's always-on cost (the weak
+table, a dependent handle per literal). P3's lower-cost layout (a dense literal array under the cache lock, records
+made at the first `StringData`) brought gen-2 to 3.96 ms and gen-0 to 756 us in an earlier set; the ruling lets a
+diagnostic keep the simpler layout, so the seat does. Kit: a scratch console app referencing golib and unsafe, built
+once at master golib and once at the seat; the switch-on arm is the seat binary with the variable set.
+
+**Guards.** GolibTests `ReadOnlyStringDataTests`: `WithTheSwitchOffAWriteThroughALiteralReachesEveryEqualLiteral` pins
+the default (red when run with the protection on: the write panics instead of reaching the equal literal), and
+`WithTheSwitchOnTheRowsInAChildPass` runs `ReadOnlyStringDataSwitchOnRows` (7 rows) in a child `dotnet test` with the
+variable set and asserts exactly 7 passed; each child row asserts the switch reached it (without the variable all 7
+fail by name). Those 7 rows were red at master on the literal, one-byte and `unsafe.Slice` arms, and with the
+next-access check neutered the same three fail by name ("did not report the write"); the 7th takes `StringData` of one
+literal on two threads at once and asserts equal pointers. Behavioral `StringDataIdentity` compares the identity,
+heap and near-miss arms against `go run` with the switch off.
+
+**Owner.** P5 (the seat). (b), (c) and the hook-free views are unassigned; COORD routes. (a) is the next row.
+
+— P5 (2026-11-24)
+
+### 2026-11-24 — OPEN: hoisted literal fields under GO2CS_CHECK_STRING_WRITES (after .5, diagnostic only)
+
+`GO2CS_CHECK_STRING_WRITES=1` does not cover a literal hoisted into a `static readonly` field (`xˢᵇ = "..."u8`; 10,799
+declarations in 1,284 files under `src/core`, plus any package converted with `-hoist-literals`): `StringData` over one
+still aliases the shared bytes, and a write changes that literal wherever it is used (P3's `strconv.ParseBool` scenario,
+row above). The cure considered was to register each hoisted field's backing at initialization. The owner dropped it
+from .5 (COORD 20261124T133212Z); if it is ever wanted, it is diagnostic-mode only, so the default path keeps doing no
+work. Not started; nothing is owed.
+
+**Owner.** Unassigned (P5 sized it). Post-.5.
 
 — P5 (2026-11-24)
 
