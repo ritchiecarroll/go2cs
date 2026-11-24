@@ -83,6 +83,20 @@ func Δf(p Pair) (string, int) {
 	return runtime.FuncForPC(pc).Name(), line + p.a - p.b
 }
 
+// S2 satisfies lib.Lower: Δfoo is Δ then a lower-case letter, exported in Go.
+type S2 struct{ s string }
+
+func (s S2) Δfoo() string { return "Δfoo of " + s.s }
+
+// OuterL embeds another package's ΔEmbL and promotes its Δm.
+type OuterL struct{ lib.ΔEmbL }
+
+// HasRec holds another package's Δ-led lower-case type.
+type HasRec struct{ R lib.Δrec }
+
+// A bare Δ type with a bare Δ field, declared here.
+type Δ struct{ Δ int }
+
 func main() {
 	b, _ := json.Marshal(P{1})
 	fmt.Println("json:", string(b))
@@ -159,6 +173,21 @@ func main() {
 	fmt.Println("doubled marker:", reflect.TypeOf(file{}).Name(), reflect.TypeOf(file{}).Field(0).Name, file{file: 16}.file,
 		reflect.TypeOf(union{}).Name(), reflect.TypeOf(union{}).Field(0).Name, union{union: 17}.union, string(fb))
 	fmt.Printf("%%+v: %+v %+v\n", file{18}, union{19})
+
+	fmt.Println("lower after Δ, direct:", lib.CallLower(S2{"S2"}))
+	var lo interface{ Δfoo() string } = S2{"iface"}
+	fmt.Println("lower after Δ, through an interface:", lib.CallLower(lo), methodNames(reflect.TypeOf(S2{})))
+	ol := OuterL{lib.ΔEmbL{N: 40}}
+	_, olOK := any(ol).(interface{ Δm() string })
+	fmt.Println("promoted foreign Δm:", ol.Δm(), olOK, methodNames(reflect.TypeOf(ol)))
+	rp := &r.Δt
+	*rp = 41
+	fmt.Println("address of a foreign Δ field:", r.Δt)
+	dr := lib.Δrec{Δt: 42}
+	hr := HasRec{dr}
+	fmt.Printf("foreign Δ type: %T %+v %v %s\n", dr, hr, hr.R.Δt, reflect.TypeOf(hr).Field(0).Type.Name())
+	fmt.Printf("bare Δ: %T %+v %s %T %+v %s\n", Δ{43}, Δ{Δ: 44}, reflect.TypeOf(Δ{}).Field(0).Name,
+		lib.Δ{Δ: 45}, lib.Δ{Δ: 46}, reflect.TypeOf(lib.Δ{}).Field(0).Name)
 }
 
 func methodNames(t reflect.Type) []string {

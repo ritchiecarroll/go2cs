@@ -102,6 +102,24 @@ public static void Bump(this ref ΔMatrix m) { m.n++; }
     return (runtime.FuncForPC(pc).Name(), line + p.a - p.b);
 }
 
+partial struct S2 {
+    internal @string s;
+}
+
+[GoName("Δfoo")] public static @string Δfoo(this S2 s) { return "Δfoo of "u8 + s.s; }
+
+partial struct OuterL {
+    [GoName("ΔEmbL")] /*embed*/ public DeltaNameProjection.lib_package.ΔEmbL ΔEmbL;
+}
+
+partial struct HasRec {
+    public lib.Δrec R;
+}
+
+public partial struct Δ {
+    [GoName("Δ")] public nint ΔΔ;
+}
+
 internal partial struct main_Δx /*dyn*/ {
     internal nint q;
 }
@@ -112,6 +130,14 @@ internal partial interface main_h /*dyn*/ {
 
 internal partial struct main_v /*dyn*/ {
     public @file F;
+}
+
+internal partial interface main_lo /*dyn*/ {
+    [GoName("Δfoo")] @string Δfoo();
+}
+
+internal partial interface main_type /*dyn*/ {
+    [GoName("Δm")] @string Δm();
 }
 
 internal static void main() {
@@ -144,7 +170,7 @@ internal static void main() {
     nint Δlocal = 8;
     fmt.Println("local and param:", Δlocal, twice(Δlocal));
 
-    var r = new lib.Rec(Δt: 9);
+    ref var r = ref heap<lib.Rec>(new lib.Rec(Δt: 9), out var Ꮡr);
     var (rb, _) = json.Marshal(r);
     fmt.Println("other package:", r.Δt, lib.ΔF(5), (nint)(lib.ΔK), lib.ΔV, (@string)rb);
 
@@ -188,6 +214,21 @@ internal static void main() {
     fmt.Println("doubled marker:", reflect.TypeOf(new @file()).Name(), reflect.TypeOf(new @file()).Field(0).Name, new @file(ΔΔfile: 16).ΔΔfile,
         reflect.TypeOf(new Δunion()).Name(), reflect.TypeOf(new Δunion()).Field(0).Name, new Δunion(ΔΔunion: 17).ΔΔunion, (@string)fb);
     fmt.Printf("%%+v: %+v %+v\n"u8, new @file(18), new Δunion(19));
+
+    fmt.Println("lower after Δ, direct:", lib.CallLower(new S2("S2")));
+    main_lo lo = new S2("iface");
+    fmt.Println("lower after Δ, through an interface:", lib.CallLower(new main_loᴠLower(lo)), methodNames(reflect.TypeOf(new S2())));
+    var ol = new OuterL(new lib.ΔEmbL(N: 40));
+    var (_, olOK) = ((any)ol)._<main_type>(ᐧ);
+    fmt.Println("promoted foreign Δm:", ol.ΔEmbL.Δm(), olOK, methodNames(reflect.TypeOf(ol)));
+    var rp = Ꮡr.ᏑΔt;
+    rp.Value = 41;
+    fmt.Println("address of a foreign Δ field:", r.Δt);
+    var dr = new lib.Δrec(Δt: 42);
+    var hr = new HasRec(dr);
+    fmt.Printf("foreign Δ type: %T %+v %v %s\n"u8, dr, hr, hr.R.Δt, reflect.TypeOf(hr).Field(0).Type.Name());
+    fmt.Printf("bare Δ: %T %+v %s %T %+v %s\n"u8, new Δ(43), new Δ(ΔΔ: 44), reflect.TypeOf(new Δ()).Field(0).Name,
+        new lib.Δ(ΔΔ: 45), new lib.Δ(ΔΔ: 46), reflect.TypeOf(new lib.Δ()).Field(0).Name);
 }
 
 internal static slice<@string> methodNames(reflect.Type t) {

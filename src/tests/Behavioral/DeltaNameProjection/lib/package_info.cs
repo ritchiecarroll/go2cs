@@ -14,6 +14,7 @@
 
 using go;
 using static go.DeltaNameProjection.lib_package;
+using System.ComponentModel;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -49,10 +50,12 @@ using static go.DeltaNameProjection.lib_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("lib.go", "lib.cs", "AA0e3A==")]
+[assembly: GoPositionMap("lib.go", "lib.cs", "AA0e3Nzc")]
 // </GoSourcePositionMaps>
 
 namespace go.DeltaNameProjection;
+
+using static go.DeltaNameProjection.lib_package;
 
 [GoPackage("lib")]
 public static partial class lib_package
@@ -65,7 +68,11 @@ public static partial class lib_package
 
     // <TypeAccessibility>
     public partial interface Fooer {}
+    public partial interface Lower {}
     public partial struct Rec {}
+    [GoName("Δ")] public partial struct Δ {}
+    [GoName("ΔEmbL")] public partial struct ΔEmbL {}
+    [GoName("Δrec")] public partial struct Δrec {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import
@@ -77,3 +84,23 @@ public static partial class lib_package
     // <ImportInitializers>
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(lib_package.ΔEmbL)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class libᴛΔEmbL;
+// </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class libᴛΔEmbL {
+    [GoName("Δm")] [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Δm(this ΔEmbL e) => lib_package.Δm⁔(e);
+}
+// </MethodForwarders>

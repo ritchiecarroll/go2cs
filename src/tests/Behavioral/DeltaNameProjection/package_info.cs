@@ -28,6 +28,8 @@ using static go.main_package;
 
 // <ExportedTypeAliases>
 [assembly: GoDynamicTypeLift("696e746572666163657bce9448656c6c6f282920737472696e677d", "main_h")]
+[assembly: GoDynamicTypeLift("696e746572666163657bce94666f6f282920737472696e677d", "main_lo")]
+[assembly: GoDynamicTypeLift("696e746572666163657bce946d282920737472696e677d", "main_type")]
 [assembly: GoDynamicTypeLift("7374727563747b462044656c74614e616d6550726f6a656374696f6e2e66696c657d", "main_v")]
 // </ExportedTypeAliases>
 
@@ -44,11 +46,14 @@ using static go.main_package;
 [assembly: GoImplement<S, go.DeltaNameProjection.lib_package.Fooer>]
 [assembly: GoImplement<S, ΔFooer>(Pointer = true)]
 [assembly: GoImplement<S, ΔFooer>]
+[assembly: GoImplement<S2, go.DeltaNameProjection.lib_package.Lower>]
+[assembly: GoImplement<S2, main_lo>]
 [assembly: GoImplement<Wrap, go.DeltaNameProjection.lib_package.Fooer>(Pointer = true)]
 [assembly: GoImplement<Wrap, go.DeltaNameProjection.lib_package.Fooer>]
 [assembly: GoImplement<Wrap, ΔFooer>(Pointer = true)]
 [assembly: GoImplement<Wrap, ΔFooer>(Promoted = true)]
 [assembly: GoImplement<Wrap, ΔFooer>]
+[assembly: GoImplement<main_lo, go.DeltaNameProjection.lib_package.Lower>]
 [assembly: GoImplement<ΔMatrix, Namer>(Pointer = true)]
 [assembly: GoImplement<ΔMatrix, Namer>]
 // </InterfaceImplementations>
@@ -59,6 +64,7 @@ using static go.main_package;
 // The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
 // go2cs-gen emits a field property on the pointer for each of their fields.
 [assembly: GoFieldAccess(typeof(P))]
+[assembly: GoFieldAccess(typeof(go.DeltaNameProjection.lib_package.Rec))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -68,7 +74,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "ABwulMgAN1aWlJSUgoIADgaCgoKCgoKClIKCgoKUgpSCgoKCgoKEloKUgoKUgoKClIKClJSCgoKClIKClIKUgoKClIKCgoKClIKUpqKCgpS2", "", "", "188=TypeOf/3/4/1,Name/2/2/1,TypeOf/4/4/1,Field/2/2/1")]
+[assembly: GoPositionMap("main.go", "main.cs", "ABwulMgAN1aWlJSUgoLsACEWgoKCgoKCgpSCgoKClIKUgoKCgoKChJaClIKClIKCgpSCgpSUgoKCgpSCgpSClIKCgpSCgoKCgpSClJSCgoKCgoKCgoKCgoK4ooKClLY=", "", "", "214=TypeOf/3/4/1,Name/2/2/1,TypeOf/4/4/1,Field/2/2/1;230=TypeOf/2/2/1,Field/2/2/1")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -85,6 +91,8 @@ public static partial class main_package
 
     // <TypeAccessibility>
     internal partial interface main_h {}
+    internal partial interface main_lo {}
+    internal partial interface main_type {}
     internal partial struct @file {}
     internal partial struct main_v {}
     [GoLocalName("Δx")] internal partial struct main_Δx {}
@@ -94,16 +102,20 @@ public static partial class main_package
     public partial interface Namer {}
     [GoName("ΔFooer")] public partial interface ΔFooer {}
     public partial struct H {}
+    public partial struct HasRec {}
     public partial struct L {}
     public partial struct Matrix {}
     public partial struct Node {}
     public partial struct Outer {}
+    public partial struct OuterL {}
     public partial struct P {}
     public partial struct Pair {}
     public partial struct R {}
     public partial struct S {}
+    public partial struct S2 {}
     public partial struct T {}
     public partial struct Wrap {}
+    [GoName("Δ")] public partial struct Δ {}
     [GoName("ΔEmb")] public partial struct ΔEmb {}
     [GoName("ΔMatrix")] public partial struct ΔMatrix {}
     [GoName("Δu")] public partial struct Δu {}

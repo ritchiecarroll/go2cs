@@ -19,4 +19,24 @@ partial interface Fooer {
 
 public static @string Call(Fooer f) { return f.ΔFoo(); }
 
+partial interface Lower {
+    [GoName("Δfoo")] @string Δfoo();
+}
+
+public static @string CallLower(Lower f) { return f.Δfoo(); }
+
+public partial struct ΔEmbL {
+    public nint N;
+}
+
+[GoName("Δm")] internal static @string Δm⁔(/*this*/ ΔEmbL e) { return "Δm of ΔEmbL"; }
+
+public partial struct Δrec {
+    [GoName("Δt")] public nint Δt;
+}
+
+public partial struct Δ {
+    [GoName("Δ")] public nint ΔΔ;
+}
+
 } // end lib_package

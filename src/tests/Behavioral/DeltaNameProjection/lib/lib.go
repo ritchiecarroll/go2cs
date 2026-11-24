@@ -19,3 +19,21 @@ type Fooer interface{ ΔFoo() string }
 
 // Call calls ΔFoo through the interface.
 func Call(f Fooer) string { return f.ΔFoo() }
+
+// Lower's method is Δ followed by a lower-case letter: exported in Go, since Δ itself is upper-case.
+type Lower interface{ Δfoo() string }
+
+// CallLower calls Δfoo through the interface.
+func CallLower(f Lower) string { return f.Δfoo() }
+
+// ΔEmbL has a method Δm that another package's struct promotes through an embed.
+type ΔEmbL struct{ N int }
+
+// Δm is exported.
+func (e ΔEmbL) Δm() string { return "Δm of ΔEmbL" }
+
+// Δrec is an exported type whose name is Δ followed by a lower-case letter.
+type Δrec struct{ Δt int }
+
+// Δ is an exported type, a bare Δ, with a bare Δ field.
+type Δ struct{ Δ int }

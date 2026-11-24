@@ -874,6 +874,15 @@ public static class Common
     public static string GetGoScope(string goName) =>
         goName.StartsWith(ShadowVarMarker, StringComparison.Ordinal) ? "public" : GetScope(goName);
 
+    // The scope of an emitted declaration: its [GoName] stamp's Go name where it carries one (Δfoo is exported in Go,
+    // though GetScope, dropping the Δ, reads the lower-case f), else the export rule over the emitted name.
+    public static string GetStampedScope(string? goName, string emittedName) =>
+        goName is { } name ? GetGoScope(name) : GetScope(emittedName);
+
+    // The same, reading the stamp from the symbol.
+    public static string GetStampedScope(ISymbol symbol) =>
+        GetStampedScope(GetGoNameStamp(symbol), symbol.Name);
+
     public static string GetScope(string identifier)
     {
         // The collision marker is an EMISSION artifact, not part of the Go identifier, so it comes
@@ -1034,7 +1043,7 @@ public static class Common
     {
         Accessibility.Public => true,
         Accessibility.Internal or Accessibility.ProtectedOrInternal => false,
-        _ => GetScope(simpleName) == "public"
+        _ => GetStampedScope(GetGoNameStamp(type), simpleName) == "public"
     };
 
     // Returns the explicit C# access modifier on a member declaration (e.g. the converter-emitted

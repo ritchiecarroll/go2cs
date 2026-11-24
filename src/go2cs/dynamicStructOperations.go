@@ -96,6 +96,10 @@ func (v *Visitor) checkForDynamicStructs(argType types.Type, targetType types.Ty
 			}
 			targetScope := getAccess(targetTypeName)
 
+			if named, ok := targetType.(*types.Named); ok && strings.HasPrefix(named.Obj().Name(), ShadowVarMarker) {
+				targetScope = getGoAccess(named.Obj().Name())
+			}
+
 			if argScope == "public" && targetScope == "internal" {
 				return v.dynamicCast(argType, targetType, targetTypeName)
 			} else {

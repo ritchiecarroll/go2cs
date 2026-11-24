@@ -53,6 +53,11 @@ internal class StructTypeTemplate : TemplateBase
     // The fields carrying a [GoName] stamp, by unescaped C# name: the Go name, which starts with the Δ rename marker
     // (StructDeclarationSyntaxExtensions.GetGoNameMembers).
     public Dictionary<string, string> GoNameMembers = new(StringComparer.Ordinal);
+
+    // A member's scope by its Go name: the [GoName] stamp where the field carries one (Δt and Δfoo are exported in Go),
+    // else the export rule over the emitted name.
+    private string MemberScope(string memberName) =>
+        GetStampedScope(GoNameMembers.TryGetValue(memberName.TrimStart('@'), out string? goName) ? goName : null, GetSimpleName(memberName));
     // The instance fields of a [GoInlineLayout] struct, in declaration order; null for every other struct. Non-null
     // emits the IGoManagedLayout part golib's inline-layout gate reads (7.6.3).
     public List<(string spelling, string name)>? InlineLayoutFields;
@@ -495,7 +500,7 @@ internal class StructTypeTemplate : TemplateBase
                 if (DeclaredEmbedFields.Contains(memberName))
                     continue;
 
-                string memberScope = GetScope(GetSimpleName(memberName));
+                string memberScope = MemberScope(memberName);
                 result.Append($"\r\n{TypeElemIndent}[global::System.Diagnostics.CodeAnalysis.UnscopedRef] {memberScope} partial ref {typeName} {memberName} => ref {CapturedVarMarker}{GetUnsanitizedIdentifier(memberName)};");
             }
 
@@ -1299,7 +1304,7 @@ internal class StructTypeTemplate : TemplateBase
                 // public, while the forwarder is written over the embed's type ARGUMENTS, held here as text.
                 // The rescue is taken only when each argument's name reads exported, so a forwarder over
                 // `Base<hidden>` is not made public over `hidden` (CS0050).
-                bool exportedMethod = GetScope(GetSimpleName(method.Name)) == "public" &&
+                bool exportedMethod = GetStampedScope(method.GoName, GetSimpleName(method.Name)) == "public" &&
                     typeArgMap.Values.All(argument => GetScope(GetSimpleName(argument)) == "public");
 
                 if (method.ReturnType != "void")
@@ -1409,7 +1414,7 @@ internal class StructTypeTemplate : TemplateBase
                         string embedBox = method.PromotedDepth > 1 && method.ViaField is { } deepField && EmitsPromotedFieldReference(promotedStructType, promotedMemberName, deepField, method.PromotedDepth - 1)
                             ? GetUnsanitizedIdentifier(deepField)
                             : GetUnsanitizedIdentifier(promotedMemberName);
-                        string shimScope = GetScope(GetSimpleName(method.Name)) == "public" ? methodScope : "internal";
+                        string shimScope = GetStampedScope(method.GoName, GetSimpleName(method.Name)) == "public" ? methodScope : "internal";
                         string shimReceiver = ReceiverName(method.Parameters);
 
                         m_promotedForwarders++;
@@ -1682,8 +1687,8 @@ internal class StructTypeTemplate : TemplateBase
             // an unexported method across packages too, but nothing outside its own package can
             // name it, and an interface carrying one is satisfiable only from that package
             // (UnexportedMethodPackageMatches), so it is unobservable here. The Go name is read
-            // with the Δ marker and an `@` escape stripped.
-            if (isCross && (method.DeclaredAccessibility != Accessibility.Public || !IsGoExportedName(method.Name)))
+            // from its [GoName] stamp where it carries one (Δm is exported), else with the Δ marker and an `@` escape stripped.
+            if (isCross && (method.DeclaredAccessibility != Accessibility.Public || !(GetGoNameStamp(method) is { } goName ? GetGoScope(goName) == "public" : IsGoExportedName(method.Name))))
                 continue;
 
             IParameterSymbol receiver = method.Parameters[0];
@@ -2380,7 +2385,7 @@ internal class StructTypeTemplate : TemplateBase
                 // even when its type's simple name is lowercase (`array<nuint>` → GetScope would give
                 // `internal`, making `other.of(ITab.ᏑFun)` unreachable, CS0117). Derive the scope from
                 // the member name (its exportedness), as the field declaration itself does.
-                string fieldScope = GetScope(GetSimpleName(memberName));
+                string fieldScope = MemberScope(memberName);
 
                 // A readonly zero-size field answers the shared per-type slot (see ReadOnlyZeroSizeMembers).
                 string target = ReadOnlyZeroSizeMembers.Contains(memberName) ? ZeroSizeSlotRef(typeName) : $"ref instance.{memberName}";

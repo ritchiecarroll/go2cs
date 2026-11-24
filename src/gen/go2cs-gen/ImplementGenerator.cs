@@ -334,7 +334,7 @@ public class ImplementGenerator : ISourceGenerator
                         Parameters = info.method.Parameters.ToParameterInfos(withRefKind: true),
                         GenericTypes = string.Join(", ", info.method.TypeParameters.Select(type => type.ToDisplayString())),
                         TypeConstraints = info.method.TypeParameters.ToDictionary(type => type.Name, type => type.ConstraintTypes.Select(constraint => constraint.ToDisplayString()).ToArray()),
-                        IsInaccessibleMarker = GetScope(info.method.Name) == "internal" &&
+                        IsInaccessibleMarker = GetStampedScope(info.method) == "internal" &&
                             !SymbolEqualityComparer.Default.Equals(info.method.ContainingAssembly, context.Compilation.Assembly)
                     })
                     .Distinct()
@@ -495,7 +495,7 @@ public class ImplementGenerator : ISourceGenerator
                     // marshal(source) returned an empty buffer with no diagnostic anywhere. Require the
                     // absence of a local implementation as well, which leaves the genuine markers (a
                     // FOREIGN struct never declares the sealing method) stubbed exactly as before.
-                    IsInaccessibleMarker = GetScope(info.method.Name) == "internal" &&
+                    IsInaccessibleMarker = GetStampedScope(info.method) == "internal" &&
                         !SymbolEqualityComparer.Default.Equals(info.method.ContainingAssembly, context.Compilation.Assembly) &&
                         !localImplNames.Contains(GetSimpleName(EscapeCsKeyword(info.method.Name)))
                 })
