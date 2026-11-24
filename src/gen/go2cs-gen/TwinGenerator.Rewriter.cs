@@ -735,7 +735,7 @@ public sealed partial class TwinGenerator
 
             for (SyntaxNode current = nested; current.Parent is ElseClauseSyntax { Parent: IfStatementSyntax outer }; current = outer)
             {
-                if (ReferenceEquals(outer, m_current))
+                if (ReferenceEquals(outer, m_current) || ReferenceEquals(outer, visited))
                     return true;
             }
 
@@ -1312,7 +1312,25 @@ public sealed partial class TwinGenerator
                 // `encryptOAEP(opts.Hash.New(), opts.Hash.New(), …)` moves two, and the second reads `opts`).
                 if (spills.Count > 0)
                 {
-                    spills[0] = spills[0].WithLeadingTrivia(visited.GetLeadingTrivia());
+                    SyntaxTriviaList leading = visited.GetLeadingTrivia();
+
+                    // P3's MUST on the closure cure: a LABELED statement's labels move onto its first moved call, so a
+                    // `goto L` runs the moved calls again, as it ran them in the statement (`retry: for u.init(); …` with
+                    // a parking init: `retry: await …initꞏtwin(…); … for (; …)`, never `await …; retry: for (; …)`).
+                    List<LabeledStatementSyntax> labels = [];
+
+                    while (visited is LabeledStatementSyntax labeled)
+                    {
+                        labels.Add(labeled);
+                        visited = labeled.Statement;
+                    }
+
+                    spills[0] = spills[0].WithLeadingTrivia(labels.Count > 0 ? visited.GetLeadingTrivia() : leading);
+
+                    for (int i = labels.Count - 1; i >= 0; i--)
+                        spills[0] = labels[i].WithStatement(spills[0]);
+
+                    spills[0] = spills[0].WithLeadingTrivia(leading);
 
                     for (int i = 1; i < spills.Count; i++)
                         spills[i] = spills[i].WithLeadingTrivia(Space);
@@ -1453,6 +1471,8 @@ public sealed partial class TwinGenerator
             // derived again after each. runtime's unwinder loops, `for (Ꮡu.initAt(…); u.valid(); Ꮡu.next())`. A DECLARING
             // initializer (go/internal/gcimporter's `for ((nint i, nint n) = (0, r.Len()); …)`) stays in the header: its
             // await is nested, so it parses, and moved before the loop its variables would leave the loop's scope (CS0136).
+            // The converter writes at most ONE initializer (Go's for has one init statement); the list form is C#'s. Under a
+            // label, the statement list moves the labels onto the first moved initializer (P3's MUST), so a goto re-runs it.
             int initialAwaits = m_awaits;
             List<ExpressionSyntax> started = [.. node.Initializers.Select(item => Head(item)!)];
             SeparatedSyntaxList<ExpressionSyntax> initializers = SeparatedList(started, node.Initializers.GetSeparators());

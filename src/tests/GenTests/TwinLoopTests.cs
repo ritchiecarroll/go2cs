@@ -139,6 +139,46 @@ public class TwinLoopTests
                 return sum;
             }
 
+            // (2f) P3's MUST on the closure cure: a LABELED for whose initializer parks, re-entered by a goto. Go's
+            // `retry: for u.init(); u.valid(); u.next() { if again { again = false; goto retry } }` runs init twice.
+            public static nint labeledRetry(ж<N> Ꮡp)
+            {
+                ref var p = ref Ꮡp.DerefOrNull();
+                nint sum = 0;
+                bool again = true;
+
+        retry:
+                for (advance(Ꮡp, false); p.v < 6; p.v++) {
+                    sum += p.v;
+                    if (again) {
+                        again = false;
+                        goto retry;
+                    }
+                }
+
+                return sum * 100 + p.v;
+            }
+
+            // (2g) P3's NIT 2: a LABELED if whose else-if awaits and then reads a ref local in the same condition.
+            public static nint labeledElseIf(ж<N> Ꮡp)
+            {
+                ref var p = ref Ꮡp.DerefOrNull();
+                nint r = 0;
+
+        check:
+                if (p.v > 100) {
+                    r = 1;
+                } else if (pick(Ꮡp, false) > 0 && p.v >= 0) {
+                    r = 2 + p.v;
+                }
+
+                if (r > 1000) {
+                    goto check;
+                }
+
+                return r;
+            }
+
             // (2b) A labeled continue from an inner loop, spelled as the converter spells it.
             public static nint forLabeled(ж<N> Ꮡp)
             {
@@ -234,6 +274,24 @@ public class TwinLoopTests
 
         StringAssert.Contains(twins, "for ((nint i, nint n) = (0, (await pickꞏtwin(Ꮡp, false))); i < n; i++)", "the declaration keeps its scope");
         Assert.AreEqual(Plain(assembly, "forDeclaring"), Twin(assembly, "forDeclaring"));
+    }
+
+    [TestMethod]
+    public void AGotoToALabeledLoopRunsItsMovedInitializerAgain()
+    {
+        (string twins, Assembly assembly) = Build();
+
+        Assert.AreEqual(Plain(assembly, "labeledRetry"), Twin(assembly, "labeledRetry"), "the goto runs the initializer again, as Go does");
+        StringAssert.Matches(twins, new System.Text.RegularExpressions.Regex(@"retry:\s+await advanceꞏtwin\(Ꮡp, false\);"), "the label stands on the moved initializer");
+    }
+
+    [TestMethod]
+    public void ALabeledIfsElseIfReadsItsRefLocalAfterAnAwaitThroughTheBox()
+    {
+        (string twins, Assembly assembly) = Build();
+
+        Assert.AreEqual(Plain(assembly, "labeledElseIf"), Twin(assembly, "labeledElseIf"));
+        StringAssert.Contains(twins, "labeledElseIfꞏtwin", "the method is twinned");
     }
 
     [TestMethod]

@@ -106,3 +106,20 @@ GO2CS0017, GO2CS0018 and GO2CS0021 are all 0.
 - **Left to the train**, by the change-class rule (owner, 2026-11-24): CNR, the full `go test` and the `--mn`
   battery. One closure-shaped reading (R7-3, T4's input) is owed separately: the closure's peak threads, about 40,
   are still above R7-3's 30.
+
+## P3's read folded (2026-11-24): CHANGES, 1 MUST + 3 NITs (mailbox COORD/20261124T030048Z-P3.md)
+
+- **MUST: a label moves onto its statement's first moved call.** Under a label, the moved initializers went into the
+  label's prelude, so `L: for (init; …)` became `await init; L: for (; …)`, and a `goto L` skipped the re-init: a
+  silent wrong result. The statement list now moves the labels onto the first moved call: `retry: await …; … for (; …)`.
+  That is right for every spill under a label, not only a for initializer, because the spill is part of the labeled
+  statement. Row `AGotoToALabeledLoopRunsItsMovedInitializerAgain` (Go's `retry: for u.init(); …` shape, a goto taken
+  once). Red with only this hunk removed: plain 1406, twin 1606.
+- **NIT 2: the else-if walk looks through labels too** (`EvaluatedWith`'s chain compared with the visited statement
+  only by identity). Row `ALabeledIfsElseIfReadsItsRefLocalAfterAnAwaitThroughTheBox`: red without it (CS9217; it
+  failed the loop source's compile, so every loop row went red).
+- **NIT 3, the forwarder's twin asserted:** it awaits `g⁔ꞏtwin(Ꮡt)` and returns `await h⁔ꞏtwin(Ꮡt, k)` with its box. A
+  tuple-returning forwarder in the qualified spelling `box_package.q⁔(ref t)` reaches the box twin as well.
+- **NIT 4:** a comment that the converter writes at most one initializer (Go's for has one init statement).
+- **Gates at the fold:** GenTests 820/820. MnHttpClosure arm S, 3 runs: EQUAL to Go, thread-blocks 0, parks
+  60-61, peak OS threads 39, 41 and 40, so nothing moved. The rest is left to the train, by the class rule.

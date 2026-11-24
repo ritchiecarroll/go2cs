@@ -1522,11 +1522,16 @@ public class TwinBoxTests
 
             internal static nint h(this ref T t, nint k) => h⁔(ref t, k);
 
+            internal static (nint, bool) q⁔(ref T t) { ᐸꟷ(ch); return (t.x, true); }
+
+            internal static (nint, bool) q(this ref T t) => box_package.q⁔(ref t);
+
             public static nint runGlyph(ж<T> Ꮡx)
             {
                 ref var x = ref Ꮡx.DerefOrNull();
                 x.g();
-                return x.h(1);
+                var (qa, _) = x.q();
+                return x.h(1) + qa;
             }
 
         """;
@@ -1541,5 +1546,10 @@ public class TwinBoxTests
         StringAssert.Contains(twins, "hꞏtwin(this global::go.ж<T> Ꮡt, nint k)", "the valued forwarder's twin takes the box");
         StringAssert.Contains(twins, "await Ꮡx.gꞏtwin()", "the caller hands the void forwarder its box");
         StringAssert.Contains(twins, "await Ꮡx.hꞏtwin(1)", "the caller hands the valued forwarder its box");
+        StringAssert.Contains(twins, "await g⁔ꞏtwin(Ꮡt);", "the void forwarder's twin awaits the body's twin with its box");
+        StringAssert.Contains(twins, "return await h⁔ꞏtwin(Ꮡt, k);", "the valued forwarder's twin returns the body's twin, with its box");
+        StringAssert.Contains(twins, "qꞏtwin(this global::go.ж<T> Ꮡt)", "a tuple-returning forwarder's twin takes the box");
+        StringAssert.Contains(twins, "await box_package.q⁔ꞏtwin(Ꮡt)", "the qualified spelling `pkg.M⁔(ref t)` reaches the box twin");
+        StringAssert.Contains(twins, "await Ꮡx.qꞏtwin()", "the caller hands the tuple forwarder its box");
     }
 }
