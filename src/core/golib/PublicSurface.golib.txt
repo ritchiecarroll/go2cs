@@ -113,7 +113,7 @@ go.GoExternalStubAttribute
 go.GoFieldAccessAttribute
 go.GoForeignMemory
 go.GoFrame
-# go.GoFuncAttribute: the literal-name seat, COORD ruling 2026-11-22 (docs/phase4/inbox/C1/20261122T171256Z-COORD.md, option a).
+# go.GoFuncAttribute: a function literal's Go name, the owner's option (a) of 2026-11-22 (commit 832b50c1e8).
 # A converter-emitted attribute on every function literal; it stays in namespace go, so emission does not move.
 go.GoFuncAttribute
 go.GoFuncCookie
@@ -340,7 +340,7 @@ zero
 ꓸꓸꓸ
 # M:N scheduler, experimental and opt-in (GoTwins=true to build, GO2CS_MN=1 to run); inert otherwise: the twin entry
 # points builtin adds for code built with twins, listed here so the public-surface guard reads them as known.
-# Goschedꞏtwin: the Gosched-park seat, COORD's ruling of 2026-11-21 (docs/phase4/inbox/G/20261121T231225Z-COORD.md).
+# Goschedꞏtwin: the Gosched park, a design decision of 2026-11-21 (commit ed6fc23e74).
 Goschedꞏtwin
 RunMainꞏtwin
 goǃtwin
@@ -1236,14 +1236,14 @@ go.ж<T> :: property T& ValueSlot { get; }
 go.ж<T> :: property go.PointerStorage StorageKind { get; }
 go.ж<T> :: property static go.ж<T> NilBox { get; }
 
-# [mn-frozen] The M:N surface frozen for L-min (COORD ruling 2026-11-20, on G's 7b ask; the owner ruled L-min the same
+# [mn-frozen] The M:N surface frozen for L-min (decision of 2026-11-20 on M:N item 7b; the owner ruled L-min the same
 # day): every public or protected member of the six task types, of GoFuncPair, and of the two attributes generated
 # code places or names ([GoParkForwarder], the [GoTwinOf] stamp), hidden or not, with one shape line per type, and
 # the named twin entry points (builtin RunMainꞏtwin, goǃtwin, selectꞏtwin, ᐸꟷꞏtwin, Goschedꞏtwin; channel`1 ᐸꟷꞏtwin), each
 # name's whole overload family. A twin-built assembly binds them, so a line never disappears and changes only where
 # its plain member does (docs/phase4/FREEZE-mn-surface.md, block 7b). Same spelling as [tier1-members];
-# GolibTests writes the lines with GO2CS_PUBLIC_SURFACE_MN_FROZEN=<path>. A change here needs a COORD ruling, cited
-# beside it. ONE section: train 3 met two [mn-frozen] headers (7a's and 7d's), so a repeated header now throws.
+# GolibTests writes the lines with GO2CS_PUBLIC_SURFACE_MN_FROZEN=<path>. A change here needs a recorded decision, cited
+# beside it. ONE section: a merge met two [mn-frozen] headers (7a's and 7d's; 1a08056d31), so a repeated header now throws.
 
 [mn-frozen]
 go.builtin :: method static System.Void RunMainꞏtwin(System.Action, System.Func<go.golib.GoTask>)
@@ -1267,7 +1267,7 @@ go.builtin :: method static System.Void goǃtwin<T>(System.Action<T>, System.Fun
 go.builtin :: method static go.golib.GoTask<System.Int32> selectꞏtwin(params go.SelectOp[])
 go.builtin :: method static go.golib.GoTask<System.ValueTuple<T, System.Boolean>> ᐸꟷꞏtwin<T>(go.channel<T>, System.Boolean)
 go.builtin :: method static go.golib.GoTask<T> ᐸꟷꞏtwin<T>(go.channel<T>)
-# Goschedꞏtwin: the Gosched-park seat, COORD's ruling of 2026-11-21 (docs/phase4/inbox/G/20261121T231225Z-COORD.md).
+# Goschedꞏtwin: the Gosched park, a design decision of 2026-11-21 (commit ed6fc23e74).
 go.builtin :: method static go.golib.GoTask Goschedꞏtwin()
 go.channel<T> :: method go.golib.GoTask ᐸꟷꞏtwin(T)
 go.golib.GoFuncPair :: ctor protected ()
@@ -1277,6 +1277,9 @@ go.golib.GoFuncPair :: property abstract System.Delegate Twin { get; }
 go.golib.GoFuncPair :: shape abstract class; abstract-members get_Plain(), get_Twin()
 go.golib.GoParkForwarderAttribute :: ctor public ()
 go.golib.GoParkForwarderAttribute :: shape sealed class; base System.Attribute; usage Method, multiple False, inherited False
+# GoParkWeakAttribute: N1, DESIGN-mn-nopark.md 3.2.
+go.golib.GoParkWeakAttribute :: ctor public ()
+go.golib.GoParkWeakAttribute :: shape sealed class; base System.Attribute; usage Method, multiple False, inherited False
 go.golib.GoTask :: method go.golib.GoTaskAwaiter GetAwaiter()
 go.golib.GoTask :: shape readonly struct; builder go.golib.GoTaskBuilder
 go.golib.GoTask<T> :: ctor public (T)
@@ -1306,10 +1309,10 @@ go.golib.GoTaskBuilder<T> :: method System.Void Start<TStateMachine>(ref TStateM
 go.golib.GoTaskBuilder<T> :: method static go.golib.GoTaskBuilder<T> Create()
 go.golib.GoTaskBuilder<T> :: property go.golib.GoTask<T> Task { get; }
 go.golib.GoTaskBuilder<T> :: shape struct
-# G's ruling on M:N item 7d (2026-11-20): the [GoTwinOf] stamp, docs/phase4/DATA-mn-origin-table.md
-# G 2026-11-21: a second int[], the call ordinals, before it shipped (one array, one meaning)
-# Generated code in every converted assembly names its ctor, so these lines hold across a break floor; train 3 folded
-# 7d's own [mn-frozen] block into this one section (G's ruling 2026-11-21), the lines taken from the writer.
+# M:N item 7d (decided 2026-11-20): the [GoTwinOf] stamp, docs/phase4/DATA-mn-origin-table.md
+# 2026-11-21: a second int[], the call ordinals, before it shipped (one array, one meaning)
+# Generated code in every converted assembly names its ctor, so these lines hold across a break floor; 1a08056d31 folded
+# 7d's own [mn-frozen] block into this one section (decided 2026-11-21), the lines taken from the writer.
 go.golib.GoTwinOfAttribute :: ctor public (System.Type, System.String, System.Type[], System.Int32[], System.Int32[])
 go.golib.GoTwinOfAttribute :: property System.Int32[] AwaitSites { get; }
 go.golib.GoTwinOfAttribute :: property System.Int32[] CallOrdinals { get; }

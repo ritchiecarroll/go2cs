@@ -14,8 +14,8 @@ namespace go.golib;
 /// </summary>
 /// <remarks>
 /// cgo Phase 3, increment 3.2 (docs/phase4/DESIGN-cgo-phase3-marshaling.md 18.9 and 18.11). One protocol, two callers:
-/// the pointer-field accessor of a C struct (seat 1a, <see cref="ж{T}.cgoPointerField{U}(FieldRefFunc{T, ж{U}})"/>)
-/// and the <c>**C.T</c> load and store (seat 1c, <see cref="GoCgoArgs.LoadPointer{U}"/> and
+/// the pointer-field accessor of a C struct (part 1a, <see cref="ж{T}.cgoPointerField{U}(FieldRefFunc{T, ж{U}})"/>)
+/// and the <c>**C.T</c> load and store (part 1c, <see cref="GoCgoArgs.LoadPointer{U}"/> and
 /// <see cref="GoCgoArgs.StorePointer{U}"/>).
 /// </remarks>
 internal static class CgoPointerWords
@@ -60,7 +60,7 @@ internal static class CgoPointerWords
 
         // A fresh box per read. Go's == on two reads compares the address (NativeBox's Equals reads the native identity),
         // so l.next == l.next holds, but the two reads are not one CLR object: a ReferenceEquals site would tell them
-        // apart. The `**C.T` load (seat 1c) is this read.
+        // apart. The `**C.T` load (part 1c) is this read.
         return new NativeBox<U>(word);
     }
 

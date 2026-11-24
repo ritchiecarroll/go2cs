@@ -1107,7 +1107,7 @@ goroutine waits on a nil channel or an empty `select {}`; any other deadlock han
 goroutine, nor for the deadlock report: those went to stderr alone. They now reach the crash file too.
 <!-- Deadlock: merge 01986cdd81 (4078bdc81b): red first at master 3da19d0e2e (the line alone; the three-goroutine case
      twice); behavioral DeadlockGoroutineBlocks; golib + hand-owned runtime only, 0 corpus lines; no platform named.
-     Limitations.md:113-116#ab9ea8 and GoFeatureSupport.md:110#21160f already state it. Crash output: merge 456b550a46 (b60eef7b07):
+     Limitations.md:132-135#ab9ea8 and GoFeatureSupport.md:117#21160f already state it. Crash output: merge 456b550a46 (b60eef7b07):
      builtin.WriteFatalReport; GolibTests BackstopCrashOutputTests red with the crash file empty, green, linux. -->
 
 **A profiled program no longer hangs.** With the block or mutex profiler on, the first event on a stack the profiler
@@ -1174,7 +1174,7 @@ reported it abandoned instead of its own result. `t.Deadline()` now reports the 
      time"; GolibTests ProfilerOwnAllocationTests, child-process bound; found as an 84-minute hang of GolibTests Debug in
      batch 283's battery; no platform named). GOARCH: merge 26186c1739 (28cfcf657e darwin, 030725e30e windows: Windows on
      Arm UNMEASURED, no package ships for it; osx-arm64 debug/buildinfo 211, net/http/pprof 15, go/build 57, gcimporter
-     634 validate per the merge subject); KnownIssues.md:15-33#b91ee1 already describes the behaviour; NEWS 1.26.10.3 (line
+     634 validate per the merge subject); KnownIssues.md:38-56#b91ee1 already describes the behaviour; NEWS 1.26.10.3 (line
      229) called it planned work. FuncForPC: merge 40b021f8c4 (b20b20c5db; rows read as master on linux, darwin both
      RIDs and windows). os.Args: merge 813f55b5e8 (6a87a161f4: GolibTests WindowsCommandLineTests, windows/amd64; the
      self-re-exec limitation is disclosed in the hand-own's header). recvfrom: merge 872df69010 (9d31496d45:

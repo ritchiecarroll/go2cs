@@ -1020,7 +1020,7 @@ func loadImportedTypeAliases(info PackageInfo, options Options) {
 // 2026-07-11 deploy-core staging emitted `reflect_package.ΔKind` and `reflect.ΔInt` from it, names the 1.26.11.1
 // assemblies no longer declare (OQ2 dropped those renames), and libc's windows files failed CS0426 ×10 against the
 // published packages. Reading the file first made the output a function of an ambient directory, silently and rc 0,
-// while a clean machine converted correctly (sqlite-cs, i9 2026-11-20 07:37Z).
+// while a clean machine converted correctly (sqlite-cs, 2026-11-20; 954b184a3d).
 func publishedStdLibRecord(info PackageInfo, options Options) ([]string, bool) {
 	if !info.PublishedStdLib {
 		return nil, false

@@ -815,8 +815,8 @@ func resolveAdapterNameMarkers(outputFileNames []string, metadataAnchor ...strin
 
 			if !ok {
 				// A payload that will not decode names no pair, so there is nothing to resolve to. Dropping the
-				// marker leaves `new (x)`, which cannot compile, so the pass refuses (GO2CS2014; P3's review of the
-				// godebug seat, 2026-11-19) instead of warning under an exit code of 0. The marker is still replaced,
+				// marker leaves `new (x)`, which cannot compile, so the pass refuses (GO2CS2014; review of the
+				// godebug change, 2026-11-19) instead of warning under an exit code of 0. The marker is still replaced,
 				// THIS occurrence only, so the rewrite loop ends and a test observing the refusal sees each bad one.
 				refuseMarkerPass(fmt.Sprintf("%s:%d", fileName, line), "an adapter-name marker's payload does not decode, so the cast it stands for names no adapter")
 				return "", false

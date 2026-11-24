@@ -46,10 +46,12 @@ using static go.main_package;
 // same rule and seeds rather than deciding again, and refuses a production set that admits differently.
 // The section exists only while there is a record to hold.
 // <InlineArrays>
-[assembly: go.golib.GoInlineArrayKeys(5, "83ed99abf471563e")]
+[assembly: go.golib.GoInlineArrayKeys(7, "09f0b7c4507fa444")]
 [assembly: go.golib.GoInlineArrayType("Grid")]
 [assembly: go.golib.GoInlineArrayType("Holder")]
 [assembly: go.golib.GoInlineArrayType("Named")]
+[assembly: go.golib.GoInlineArrayType("Pair")]
+[assembly: go.golib.GoInlineArrayType("PairHolder")]
 [assembly: go.golib.GoInlineArrayType("Plain")]
 [assembly: go.golib.GoInlineArrayType("S22")]
 // </InlineArrays>
@@ -60,6 +62,7 @@ using static go.main_package;
 // The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
 // go2cs-gen emits a field property on the pointer for each of their fields.
 [assembly: GoFieldAccess(typeof(Holder))]
+[assembly: GoFieldAccess(typeof(PairHolder))]
 [assembly: GoFieldAccess(typeof(S22))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
@@ -70,7 +73,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "ACVOlJSUlJSCgoKUgoKClIKUgoKClIKClIKClIKCgoKkxKSCgoI=")]
+[assembly: GoPositionMap("main.go", "main.cs", "ACVOlJSUlAAGEJSCgoKUgoKClIKUgoKClIKClIKClIKCgoKkxKSCgoKUgoI=")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -89,6 +92,8 @@ public static partial class main_package
     public partial struct Grid {}
     public partial struct Holder {}
     public partial struct Named {}
+    public partial struct Pair {}
+    public partial struct PairHolder {}
     public partial struct Plain {}
     public partial struct S22 {}
     // </TypeAccessibility>

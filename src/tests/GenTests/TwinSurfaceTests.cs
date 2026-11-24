@@ -334,7 +334,9 @@ public class TwinSurfaceTests
     [TestMethod]
     public void F10_EveryTwinSwitchTheGeneratorReadsIsRefusedOrNamedAsAdmitted()
     {
-        string[] admitted = ["GoTwins", "GoTwinsArm", "GoTwinsSiblings", "GoTwinsTiming"];
+        // N1's two lists (DESIGN-mn-nopark.md 3.1) are admitted: they change which calls park, never the twin set's
+        // population (R1), so O2 does not refuse them (ParkCutTests N1-6).
+        string[] admitted = ["GoTwins", "GoTwinsArm", "GoTwinsSiblings", "GoTwinsTiming", "GoTwinsWeak", "GoTwinsCut"];
         string root = GeneratorRoot();
         string[] read = System.IO.Directory.GetFiles(root, "*.cs", System.IO.SearchOption.AllDirectories)
             .Where(path => !path.Contains($"{System.IO.Path.DirectorySeparatorChar}obj{System.IO.Path.DirectorySeparatorChar}") &&

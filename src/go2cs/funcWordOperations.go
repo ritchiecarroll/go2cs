@@ -45,7 +45,7 @@ import (
 // store into f's own box. Anything else keeps it too: a recovery from a pointer or from memory (runtime's
 // mcleanup and panic), and the `*unsafe.Pointer` READ, which already reads through unsafe.Pointer.OfFunc.
 // w4 is that form's STORE, which the reinterpret wrote into a fresh `Ꮡ(OfFunc(f))` box that nothing reads, so
-// f stayed nil (BOARD 2026-11-20, TC-13); golib decides at run time what the stored word names.
+// f stayed nil (TC-13, 2026-11-20); golib decides at run time what the stored word names.
 
 type funcWordShape struct {
 	class    string     // m1, m2, r1, r2, w1, w2, w3 or w4

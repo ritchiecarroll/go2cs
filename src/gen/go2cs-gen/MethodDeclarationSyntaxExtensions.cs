@@ -38,6 +38,11 @@ public record MethodInfo
 
     public bool IsRefRecv { get; init; }
 
+    // Each parameter's by-ref modifier as source spells it ("ref ", "out ", "in " or ""), parallel to Parameters, so a
+    // forwarder that passes the parameters on keeps them by reference (RecvGenerator's box overload of a `this ref`
+    // method with another `ref` parameter was CS1620). Filled by the syntax harvest; empty where a builder leaves it.
+    public string[] ParameterRefKinds { get; init; } = [];
+
     // True when the return type is a PUBLIC C# type transitively (see IsEffectivelyPublicType). The
     // name-based GetScope heuristic reads every Go-lowercase-named type as unexported, but golib
     // builtins (@string, error, bool, nint, slice<T>, …) are PUBLIC C# types despite their lowercase
@@ -520,6 +525,11 @@ public static class MethodSyntaxExtensions
 
                 return (type: fullyQualifiedTypeName, name: parameterName);
             }).ToArray(),
+
+            ParameterRefKinds = methodDeclaration.ParameterList.Parameters.Select(param =>
+                param.Modifiers.Any(SyntaxKind.RefKeyword) ? "ref " :
+                param.Modifiers.Any(SyntaxKind.OutKeyword) ? "out " :
+                param.Modifiers.Any(SyntaxKind.InKeyword) ? "in " : "").ToArray(),
 
             IsRefRecv = methodDeclaration.ParameterList.Parameters.Any(param =>
                 param.Modifiers.Any(SyntaxKind.ThisKeyword) &&

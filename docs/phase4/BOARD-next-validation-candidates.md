@@ -41892,6 +41892,72 @@ program prints frame information for promoted methods, and a twin adds or rename
 
 — G (2026-11-23)
 
+**GoStmtValueReturn [Compile]: CUT (P4, 2026-11-23).** Root: the generator classifies a typed go literal as a twin
+launch whatever its return type, and goǃtwin (frozen) takes only `Action<…>` plus `Func<…, GoTask>`, so a literal
+returning a value (`go func(...) error {...}(...)`) is CS8030 in its plain half and CS8031 in its twin, and an explicit
+return type (`error (…) => …`) does not convert at all (CS8934). Fix, in the generator only (TwinGenerator.Rewriter.cs,
+GoLiteral): a goroutine drops its results, so both halves of a value-returning literal lose the return type and every
+own `return e;` becomes `{ _ = (T)(e); return; }` on the same line (the value is still evaluated, its awaits still
+park; nested lambdas and local functions keep their returns). The literal keeps launching its twin, so no GO2CS0015.
+No golib change; the converter is untouched, so default-mode emission cannot move. Guard: GenTests
+`AGoLiteralThatReturnsAValueLaunchesItsTwin`, red first at master (CS8030, CS8031, CS8934 x2).
+
+— P4 (2026-11-23)
+
+**Plain-path operand order: a variable operand read after a later receive or call in the same argument list (gc
+order). OPEN, owner unassigned, candidate .5; COORD places it.** Repro: src/tools/mnspike2/MnLaterArg (`readWith(pp,
+<-kc)`, where a goroutine sets `pp = pc2` before it sends on `kc`). gc reads `pp` after the receive; go2cs reads it
+before, left to right, in BOTH modes. The Go spec leaves the order unspecified, but users see gc's order, so this is a
+converter design question, not an M:N one. Reading on master 97cca467a2, linux/amd64, each binary run 3 times:
+
+| Arm | Output |
+|---|---|
+| go run (1.26.11) | param-later-arg 1405 |
+| plain, GO2CS_MN unset | param-later-arg 1505 (3/3) |
+| plain, GO2CS_MN=1 | param-later-arg 1505 (3/3) |
+| twinned (GoTwinsFor=MnLaterArg), GO2CS_MN unset | param-later-arg 1505 (3/3) |
+| twinned, GO2CS_MN=1 | param-later-arg 1505 (3/3) |
+
+Plain emission (main.cs): `fmt.Println("param-later-arg", readWith(ref (pp).DerefOrNull(), ᐸꟷ(kc)));`
+Twin (generated main.twins.g.cs): `fmt.Println(((global::go.@string)"param-later-arg"), (await readWithꞏtwin(pp, (await
+ᐸꟷꞏtwin(kc))))); pp = ref Ꮡpp.ValueSlot;`
+The twin keeps the plain emission's order, which is row 8's claim (COORD ruling 2026-11-23 21:57Z: accepted as
+disclosed for row 8; the order is its own row).
+
+Prediction record. G's order (2026-11-23 15:43Z) predicted "twinned under GO2CS_MN=1 prints 1405, plain prints 1505".
+2026-11-23 (P4): the twinned 1405 MISSED; all four arms read 1505. The plain 1505 held.
+
+— P4 (2026-11-23)
+
+**Correction (COORD, 2026-11-23), to the GoStmtValueReturn row above:** after P3's seat-read fold (bb1a2c2979) the emission is `{ T ᴛdrop = e; return; }` (and `{ T ᴛdrop = e; }` for an expression body), not `{ _ = (T)(e); return; }`: the converter writes a lone blank parameter as a real parameter named `_`, which a `_ =` discard would bind (CS0029). An error-typed result is skipped like void. The plain-path operand-order row also moved: the owner ruled it into .5 (2026-11-23, "Rather get it done now, better .5 release behavior match"), owner G, after the closure cure.
+
+— COORD (2026-11-23)
+
+
+## 2026-11-23 — P4 (N1 seat, claude/p4-mn-n1; COORD ruling 22:50Z): a weak promoted method reached through a method value, a method expression or a hand-written caller lands on the un-twinned `[GoPromoted]` forwarder (OPEN, candidate post-.5)
+
+**How found.** DESIGN-mn-nopark.md 3.3 asked for a promoted forwarder of a weak member to be twinned and marked
+`[GoParkWeak]`, so that `t.Lock()` on `type T struct{ sync.Mutex }` behaves as `t.mu.Lock()` does. Reading the
+converter for that seat: a promoted method CALL is written through the embedded field (`Ꮡt.of(T.ᏑMutex).Lock()`,
+convSelectorExpr.go; same package and cross package; crypto/tls conn.cs carries the shape), so a converted call
+reaches the weak member itself and needs nothing. COORD dropped the item from the seat and asked for this row.
+
+**The shapes that reach the forwarder.** (1) A method value, `f := t.Lock`, then `f()`. (2) A method expression,
+`T.Lock(t)` or `(*T).Lock`. (3) A generated interface adapter whose member forwards to the promoted method (for
+example `T` satisfying `sync.Locker`). (4) Hand-written C# that calls `t.Lock()` on the struct. The forwarder is
+emitted by a sibling generator, so the twin generator never sees it as a candidate: it has no twin, and no
+`GoFuncPair` for a method value to carry.
+
+**What it costs.** A missed weak park, NOT a correctness gap. In a twin caller the call blocks its carrier where
+`Mutex.Lock` would park; the result is Go's, exactly as for any untwinned blocking call (the design's section 6, with N5
+governing it). The one wrong result available is the hang shape of N1-11 at one P, and it is the same hand-off that row
+reads. Shape (3) is also the interface case 3.3's second bullet already names as a park that is never weak. The same
+holds for a promoted method that is NOT weak and parks: its forwarder is plain too, so this row is wider than locks.
+
+**Owner.** Unassigned; COORD routes. Not in the N1 seat.
+
+— P4 (2026-11-23)
+
 ## 2026-11-23 — P2 (.5 Δ cure, COORD 045750Z ruling 2b): the Δ-led field, method and type refusal is retired
 
 The i9 row of 2026-11-22 above (a Δ-led struct field, method or type refused with GO2CS2015) is closed by the durable

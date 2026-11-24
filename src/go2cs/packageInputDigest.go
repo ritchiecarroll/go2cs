@@ -56,7 +56,7 @@ func recordsInputDigest(projectFileName string, options Options) bool {
 // (cgo-nuget-e2e's first J2, run 44995089337: the pack's own linux flavor did not reproduce -RecurseRoot). cmd/cgo's
 // types file is not read either; in its place the digest takes the bindings file's header (cgoBindingsHeader): the
 // target, the C toolchain's version line and target triple, and the sha256 of the import "C" sources and the C
-// declarations cmd/cgo gave them -- no path. So a new zig pin or a changed C layout moves the digest (COORD's INC 4
+// declarations cmd/cgo gave them -- no path. So a new zig pin or a changed C layout moves the digest (the INC 4
 // review, fold 3), where leaving the types file out with nothing in its place would not.
 func moduleInputDigest(projectFileName string, fset *token.FileSet, files []FileEntry, outputPath, cgoHeader string, options Options) string {
 	if !recordsInputDigest(projectFileName, options) {
