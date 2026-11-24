@@ -111,6 +111,15 @@ nothing from twins.
   differently with them than without them.
 - **Repository clones only.** The build properties work only for a project built inside a go2cs repository clone.
   A project that references the published `go.*` packages from NuGet cannot build with twins.
+- **Stack depth.** With the scheduler on, a goroutine started on a twin runs on one of the pool's threads, and those
+  threads reserve a 1 MiB stack, where a default goroutine thread reserves 256 MiB and `main`'s reserves 1 GiB
+  ([Limitations](Limitations.md#what-converts-but-doesnt-behave-exactly-like-go)). This includes `main` itself,
+  unless an `init` function locked it to its thread. Deep recursion that works without the scheduler can overflow
+  with it, and a stack overflow ends the process.
+  <!-- src/core/golib/runtime/GoScheduler.cs:108 `private const int CarrierStackSize = 1024 * 1024;` and :700
+       `new(carrier.Loop, CarrierStackSize)`; Goroutine.cs:85 `DefaultStackReserve = 256 * 1024 * 1024`;
+       Goroutine.Multiplexed.cs RunMainTwin: with the scheduler on, goroutine 1 runs main's twin multiplexed, except
+       when an init locked the main goroutine to the startup thread. Read at cb6def82a2, not measured. -->
 - **`runtime.LockOSThread`.** A goroutine that locks its thread keeps that thread to itself until it unlocks it, as in
   Go; the thread leaves the shared pool while it is locked.
 - **Profiling.** With the block or mutex profile switched on, a `sync.Mutex.Lock` that has to wait takes the plain path
