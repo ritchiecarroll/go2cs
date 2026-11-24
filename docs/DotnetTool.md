@@ -21,8 +21,16 @@ SDK picks the build for your machine when it installs the tool. Building the con
 NuGet.
 A single-package `-cgo` conversion builds against a go2cs clone (`dotnet build -p:go2csPath=<go2cs>/src/`). Under
 `-recurse=nuget -cgo`, a module's cgo packages convert with it and reference the `go.*` packages, for the machine's
-own operating system and architecture only. Packing a cgo package for every platform, from the feed, is planned for
-the next release.
+own operating system and architecture, or for another target when `CC` names that target's C compiler (see `-cgo` in
+[Command line](CommandLine.md)). A module's cgo package is packed for publishing for `win-x64`,
+`linux-x64`, `osx-x64` and `linux-arm64`; `osx-arm64` is left out until the `go.*` packages ship a true `osx-arm64`
+build.
+<!-- 2026-11-23 .5 docs pass (P1), UX-8, at master 97cca467a2 (owner: resolve each "next release" in present tense, as
+     true at .5): "planned for the next release" described the pack before it landed. It landed in train 3
+     (claude/c2-cgo-nuget-pack, claude/c2-cgo-pack-2b, merge ef9be9bd32) and its push gate, the run-time target check
+     A6, in train 4 (claude/c2-cgo-a6, merge c9143ae615): docs/NugetgoPublish.md "Cgo" states the four RIDs, the
+     osx-arm64 exclusion, and that a pack is pushed only against a go.lib that carries A6, which the .5 go.lib does.
+     The other-target sentence: commit 07378119f9 (merge 640d45c9eb, train 3), CommandLine.md's -cgo row. -->
 <!-- src/go2cs/main.go:307 (`Not combinable with -stdlib or -tests. With -recurse, every non-standard-library package of the module loads cgo-on and each cgo package converts this way`); src/go2cs/csproj-template.xml:135 (`<ProjectReference Include="$(go2csPath)gen/go2cs-gen/go2cs-gen.csproj"`) and src/go2cs/csproj-template.xml:187 (`<ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />`). COORD's ruling O2, 2026-11-14 (cgo 3.1's release-path seat). -->
 
 Update it with `dotnet tool update -g go2cs`, and remove it with `dotnet tool uninstall -g go2cs`. To run it once

@@ -16,7 +16,14 @@ An *example* link opens a behavioral test: a Go program, its converted C#, and t
 print. [Limitations](Limitations.md) and [Known issues](KnownIssues.md) have the detail behind every
 entry that is supported with limits or not supported yet.
 
-<!-- Assumed release state: the linux/arm64 and windows/arm64 rows describe the state planned for the
+<!-- 2026-11-23 .5 docs pass (P1), UX-17, at master 97cca467a2: the final accuracy pass the note below asked for.
+     1.26.11.1 shipped both rows as written, so they no longer describe an assumed state. Re-read at 97cca467a2:
+     linux/arm64 ships and is validated, and its throwing members are still those KnownIssues.md lists (no change
+     since nuget-1.26.11.1 touches internal/cpu, vendor/golang.org/x/sys/cpu or the runtime's arm64 stubs beyond
+     regenerations); windows/arm64 still builds with GO2CS3004 and runs the Windows build
+     (src/core/golib/buildTransitive/go.lib.targets, GoRefuseUnshippedRid); darwin/arm64 still uses the amd64
+     build of the standard library (KnownIssues.md, "On Apple silicon"). No row text changed.
+     Superseded note, kept: Assumed release state: the linux/arm64 and windows/arm64 rows describe the state planned for the
      next release and get a final accuracy pass before it ships. Grounding: linux/arm64,
      docs/phase4/DESIGN-linux-arm64-flavour.md; windows/arm64, docs/KnownIssues.md (GO2CS3004). Internal records stay
      unlinked from published pages.

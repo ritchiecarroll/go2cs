@@ -1248,7 +1248,7 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 	if tupleResult || lhsLen == reassignedCount || parallelHazard || lhsLen == declaredCount && !anyTypeIsString && !anyTypeIsInt && !anyTypeIsUnsafePointer && !anyRhsIsFunctionValue {
 		leftExprs := hashset.HashSet[string]{}
 
-		// The tuple in-place copy (P5's C5) appends its Assign calls after this statement and takes its left locations in
+		// The tuple in-place copy (C5, bb687e3e32) appends its Assign calls after this statement and takes its left locations in
 		// the statement's hoist buffer. In statement position the calls follow as statements. A for-loop clause holds no
 		// `;`, so there they follow the way a clause's pointer re-alias does: in the INIT clause as a C# expression list,
 		// `(var aᴛ1, n) = (b.Clone(), 0), a.Assign(aᴛ1)`; in the POST clause, where C# allows no declaration, the

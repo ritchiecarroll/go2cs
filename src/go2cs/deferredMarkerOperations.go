@@ -35,7 +35,7 @@ import (
 
 // refuseMarkerPass ends the conversion when a deferred-marker pass cannot leave a file free of markers, reporting
 // GO2CS2014 at position ("file" or "file:line") first. A file that still holds one is uncompilable, and a pass that only
-// warned let the run exit 0 over it: a harness gating on the exit code read the row green (i9, F1: encoding/json's
+// warned let the run exit 0 over it: a harness gating on the exit code read the row green (F1: encoding/json's
 // encode_test.cs kept five adapter markers when a write hit "user-mapped section open"). A variable so a test can
 // observe the refusal without ending the process.
 var refuseMarkerPass = func(position, text string) {

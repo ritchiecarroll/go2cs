@@ -21,6 +21,18 @@ import (
 // The probe's go commands build the standard library once per target under their own flag set, which no ordinary
 // build shares, so their entries go to a cache of their own and the user's GOCACHE grows nothing from them.
 
+// probeCacheDir is the probe cache resolveProbeCacheDir names, or "" when it cannot be resolved. Production takes its
+// GOCACHE from probeCacheDirOrExit; this test-only helper lets the resolution be read without ending the process.
+func probeCacheDir() string {
+	dir, err := resolveProbeCacheDir()
+
+	if err != nil {
+		return ""
+	}
+
+	return dir
+}
+
 func TestStackAppendProbeCacheResolution(t *testing.T) {
 	flagDir, envDir := t.TempDir(), t.TempDir()
 

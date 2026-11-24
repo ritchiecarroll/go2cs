@@ -111,7 +111,7 @@ func moduleCacheGoMod(dir string) string {
 // moduleCacheRel returns dir relative to the module cache root, and whether dir lies strictly inside it. The two can
 // spell one folder differently through a symlink: on macOS /var is a symlink to /private/var, so GOMODCACHE keeps
 // /var/... while a relative spelling of a release, made absolute through the working directory, reads /private/var/...
-// (train 5's darwin go-test). The textual answer is taken when it says inside; otherwise both sides are compared
+// (a darwin go-test, 17f79e9ba9). The textual answer is taken when it says inside; otherwise both sides are compared
 // with their symlinks resolved.
 func moduleCacheRel(cache, dir string) (string, bool) {
 	inside := func(base, target string) (string, bool) {
@@ -161,8 +161,8 @@ func copyModuleCacheRelease(dir, goModSource string) (string, string, error) {
 		return "", "", err
 	}
 
-	// The temp root's real path: go reports a source under it resolved (macOS's /var is /private/var; C1 met it on the
-	// hosted Macs), and every map from the copy back to the release compares that spelling (COORD's INC 4 review, NIT).
+	// The temp root's real path: go reports a source under it resolved (macOS's /var is /private/var; it was met on the
+	// hosted Macs), and every map from the copy back to the release compares that spelling (INC 4 review, NIT).
 	if real, realErr := filepath.EvalSymlinks(work); realErr == nil {
 		work = real
 	}
@@ -213,7 +213,7 @@ func copyModuleCacheRelease(dir, goModSource string) (string, string, error) {
 
 // copiedModuleRoot and originalModuleRoot are set while a go.mod-less module-cache release converts from its copy:
 // remapCopiedPaths writes the release's own path for the copy's in every diagnostic and load warning, so a user reads
-// paths that exist on their machine (COORD's ruling on INC 4 increment 1).
+// paths that exist on their machine (decision on INC 4 increment 1, 75eb0f85ce).
 var copiedModuleRoot, originalModuleRoot string
 
 func remapCopiedPaths(s string) string {
@@ -224,7 +224,7 @@ func remapCopiedPaths(s string) string {
 	s = strings.ReplaceAll(s, copiedModuleRoot, originalModuleRoot)
 
 	// A message may quote the copy forward-slashed (on Windows the native spelling has backslashes), and the copy is
-	// gone when the user reads it (P3's delta read, NIT 2).
+	// gone when the user reads it (delta review, NIT 2).
 	return strings.ReplaceAll(s, filepath.ToSlash(copiedModuleRoot), filepath.ToSlash(originalModuleRoot))
 }
 
@@ -252,12 +252,12 @@ func (e remappedCopyError) Unwrap() error { return e.err }
 
 // originalSourcePath is the release's own path for a source under the copy, else path unchanged: the same map, for the
 // Go file identity a package records (goSourceIdentity), which reads the module and its VERSION from the cache path
-// (P3's read of INC 4 increment 1, MUST 1: from the copy it recorded `<module>@/<file>`, with no version).
+// (review of INC 4 increment 1, MUST 1: from the copy it recorded `<module>@/<file>`, with no version).
 //
 // In a copy run, a source that lies under a go2cs-modcopy-* directory but not under this run's copy is an error naming
 // both spellings: the loader reported the copy under another spelling (a TMPDIR reached through a symlink, a Windows
 // 8.3 name), and passing it through would record the main-module `<module>@/<file>` form again, which the pack guard
-// accepts (P3's delta read, SHOULD 1). No route to it is known; it fails loud rather than silently.
+// accepts (delta review, SHOULD 1). No route to it is known; it fails loud rather than silently.
 func originalSourcePath(path string) (string, error) {
 	if copiedModuleRoot == "" {
 		return path, nil
@@ -301,7 +301,7 @@ func underModuleCopy(path string) bool {
 
 // sweepStaleModuleCopies removes go2cs-modcopy-* directories under dir older than maxAge: a run that ended by os.Exit or a
 // signal leaves its copy, since the deferred removal never runs. Whether another live run holds a younger one cannot be
-// told reliably on every OS, so only a copy older than any conversion runs is removed (P3's read, SHOULD 4).
+// told reliably on every OS, so only a copy older than any conversion runs is removed (review SHOULD 4).
 func sweepStaleModuleCopies(dir string, maxAge time.Duration) {
 	entries, err := os.ReadDir(dir)
 
@@ -331,7 +331,7 @@ func sweepStaleModuleCopies(dir string, maxAge time.Duration) {
 // Plain -recurse enters it in ConvertModule; -tests -recurse in runModuleTests, around both of its phases, so its go
 // test runs see the same copy its conversion read.
 //
-// EVERY module-cache release enters it, not only a go.mod-less one (COORD's ruling on the 2026-11-22 STOP-LINE): with a
+// EVERY module-cache release enters it, not only a go.mod-less one (decided 2026-11-22 at a stop line; 85efd7b257): with a
 // cache directory as its main module, the dependency preflight's `go mod download` rewrites a go.mod that has no `go`
 // directive and writes a go.sum, even under -mod=readonly, and a root process is not stopped by the cache's read-only
 // modes (gopkg.in/yaml.v3 v3.0.1 and github.com/google/uuid v1.6.0, measured). In the copy those writes are harmless.

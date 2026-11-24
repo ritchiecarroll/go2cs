@@ -15,8 +15,8 @@ namespace go.golib;
 /// </summary>
 /// <remarks>
 /// <para>
-/// The s_p convoy row (COORD's ruling, docs/phase4/inbox/G/20261122T110220Z-COORD.md item 2; docs/phase4/DESIGN-mn-convoy.md):
-/// s_p was a SemaphoreSlim, and every wait and every release went through its one monitor. The train-4 storm capture
+/// The s_p convoy row (design decision item 2, commit c11cb99971; docs/phase4/DESIGN-mn-convoy.md):
+/// s_p was a SemaphoreSlim, and every wait and every release went through its one monitor. The recorded storm capture
 /// read 19,228 threads back from a blocking call queued on it, 7,201 of them spinning on that monitor. Here no lock is
 /// shared: the free tokens are one int taken by compare-and-swap; a waiter first SPINS on that count (the spin tier,
 /// uncapped), then sleeps on its OWN event in a lock-free FIFO queue, so a release hands a token to a spinner hot or wakes
@@ -56,7 +56,7 @@ internal sealed class PTokens
     private int m_waiting;   // nodes still Waiting (counted before they queue)
     private int m_spinning;  // waiters in the spin tier
 
-    // The spin tier has NO cap (COORD's ruling on R6, docs/phase4/DESIGN-mn-convoy.md section 8). Go keeps at most
+    // The spin tier has NO cap (the R6 decision, docs/phase4/DESIGN-mn-convoy.md section 8). Go keeps at most
     // GOMAXPROCS/2 Ms spinning, and a cap of max(1, P/2) was folded in to bound the spinners and to keep releases from
     // being left to spinners while sleepers wait. Measured, it cost the P=2 hand-back its gain (p99 2,437 us against 335
     // uncapped), and a floor of max(2, P/2) still read 2,027 against 125; the guard's one justification, starvation,

@@ -13,7 +13,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace go2cs;
 
-// M:N (experimental), N2 (docs/phase4/DESIGN-mn-box-twin.md, revision 1, section 9; COORD's GO after the re-review): the BOX
+// M:N (experimental), N2 (docs/phase4/DESIGN-mn-box-twin.md, revision 1, section 9; approved after the re-review): the BOX
 // TWIN. A Go method with a pointer receiver converts to `M(this ref T t, …)`, which no async method can take. Its twin
 // takes the receiver's box instead, `Mꞏtwin(this ж<T> Ꮡt, …)`, under the prologue `ref var t = ref Ꮡt.DerefOrNull();`
 // -- the shape a Go pointer parameter already has, which Rule R derives again after each await (C1). A call names the
@@ -177,7 +177,7 @@ public sealed partial class TwinGenerator
 
         // 12.1's enumerated aliasing forms for an ARGUMENT, beside the receiver rows BoxOf already knows: (a) `(E).DerefOrNull()`
         // or `E.DerefOrNull()` with E a side-effect-free ж expression or an element pointer `Ꮡ(x, i)`: E itself, read once at
-        // the call as Go reads it (P3's finding 5: never `ref E.Value`, which faults at the call when E is nil where a handed
+        // the call as Go reads it (review finding 5: never `ref E.Value`, which faults at the call when E is nil where a handed
         // box would fault at the callee's first dereference, possibly after a park; the converter emits `(p).DerefOrNull()`
         // for a pointer argument, and `.Value` comes from hand-owned code); (c) ruling 10.4's nil-checked field `nonnil(ref e).f`: the field pointer
         // from e's box, which faults as Go does when e is nil. Never `builtin.Ꮡ(v)` (it COPIES v into a new box).
@@ -200,7 +200,7 @@ public sealed partial class TwinGenerator
                 return BoxSideEffectFree(boxed, model) ? boxed.WithoutTrivia().ToFullString() : null;
             }
 
-            // (c), and G's next step 1: a field CHAIN `nonnil(ref e).f.g…` (Go's `&e.f.g`), each level an instance field of the
+            // (c), and next step 1 (5bd877cfb6): a field CHAIN `nonnil(ref e).f.g…` (Go's `&e.f.g`), each level an instance field of the
             // one before and every level but the last of struct type, so each is a field of e's own object: FieldBox once per
             // level, outermost first. The nil check stays on the first level only (the first token faults at a nil e, as Go
             // panics at the outer nil); a deeper level cannot be nil, since it is not a pointer.
@@ -493,7 +493,7 @@ public sealed partial class TwinGenerator
 
                     // byref-param (12.1 (b)): a HEAP local, `ref var v = ref heap(…, out var Ꮡv)`, hands its own box, never
                     // re-pointed. Gated on GoTwinsBoxParam, so the switch-off arm equals arm N.
-                    // P3's finding 7: refused only where v is RE-POINTED (`v = ref …`) or its box reassigned (`Ꮡv = …`); a
+                    // Review finding 7: refused only where v is RE-POINTED (`v = ref …`) or its box reassigned (`Ꮡv = …`); a
                     // whole-value store `v = …` writes through the box, which still names v.
                     if (BoxParam && HeapBox(source) is { } heapBox && Builtin(model.GetSymbolInfo(source).Symbol, "heap"))
                     {
@@ -557,7 +557,7 @@ public sealed partial class TwinGenerator
                     return r.Identifier.ValueText;
 
                 // A package variable: a ref property over its static box `Ꮡname`, which must bind at the call to that static
-                // of the property's own type (P3's finding 6: by symbol, never a local of that name).
+                // of the property's own type (review finding 6: by symbol, never a local of that name).
                 case IdentifierNameSyntax name when symbol is IPropertySymbol { IsStatic: true, ReturnsByRef: true } property &&
                                                     model.GetSpeculativeSymbolInfo(position, SyntaxFactory.IdentifierName("Ꮡ" + name.Identifier.ValueText), SpeculativeBindingOption.BindAsExpression).Symbol
                                                         is { IsStatic: true, Kind: SymbolKind.Field or SymbolKind.Property } staticBox &&
@@ -638,7 +638,7 @@ public sealed partial class TwinGenerator
                 ? designation.Identifier.ValueText
                 : null;
 
-        // A golib builtin, by symbol (P3's finding 6): `go.builtin.<name>`.
+        // A golib builtin, by symbol (review finding 6): `go.builtin.<name>`.
         private static bool Builtin(ISymbol? symbol, string name) =>
             symbol is IMethodSymbol { Name: var method, ContainingType: { Name: "builtin", ContainingNamespace.Name: "go" } } && method == name;
 

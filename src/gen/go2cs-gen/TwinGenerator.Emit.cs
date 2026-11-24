@@ -293,7 +293,7 @@ public sealed partial class TwinGenerator
 
             string body = isVoid ? " { " + call + "; return default; }" : " => new global::go.golib.GoTask<" + returnType + ">(" + call + ");";
 
-            // COORD's ruling on P8 (iii): the mark says the member CANNOT park, by the park analysis, a property of the Go
+            // The decision on P8 (iii) (fed6431802): the mark says the member CANNOT park, by the park analysis, a property of the Go
             // code. A refused member that parks gets an unmarked forwarder, which a caller in another assembly awaits, so
             // lifting the refusal later changes nothing a caller bound.
             return indent + "[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]\r\n" +

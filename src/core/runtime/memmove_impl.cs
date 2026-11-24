@@ -99,7 +99,7 @@ partial class runtime_package
                 Buffer.MemoryCopy((void*)src, (void*)dst, n.Value, n.Value);
             }
 
-            // THE COPY DOOR for unsafe.Pointer words (docs/phase4/DESIGN-cgo-phase3-marshaling.md 18.5 finding 4, seat
+            // THE COPY DOOR for unsafe.Pointer words (docs/phase4/DESIGN-cgo-phase3-marshaling.md 18.5 finding 4, cure
             // S-B1): a copied word of Go memory takes the source slot's entry, so the destination reads the same referent and
             // the source keeps its own. Both arms take it, after the bytes moved. No table anywhere: one flag read.
             GoPointerWords.CopyEntries(to!.RetainedSource, dst, from!.RetainedSource, src, n.Value);

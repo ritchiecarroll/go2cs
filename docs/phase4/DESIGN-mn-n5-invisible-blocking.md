@@ -197,3 +197,34 @@ S2 arm 2's second re-read (P5, PLAN row 10) follows row 13.
   3c for consumer native blocks?
 - **Q3, the census's brackets.** Each invisible stdlib call the census names gets a bracket seat. Owners are routed
   by COORD when the table posts. None is in this design's size.
+
+## 9. COORD's rulings, and what they change (dated block, 2026-11-23, G)
+
+COORD ruled on the design as posted (87a2754a16). Sections 1-8 above are kept as written; this block amends them.
+
+- **Q1, the ceiling: FATAL, as Go.** At `GO2CS_MN_MAXTHREADS` carriers the runtime dies with Go's own text,
+  `runtime: program exceeds N-thread limit` and then `fatal error: thread exhaustion`. `runtime/debug.SetMaxThreads`
+  sets the same ceiling and returns the old value. Parity outranks graceful degradation (the owner's standing
+  preference): a silent stop is a hang the user cannot see, which is what N5 exists to remove. KnownIssues discloses
+  the ceiling beside its default. This replaces 3c's "stops injecting and counts `ceiling-hits`".
+  **I9 is restated:** `GO2CS_MN_MAXTHREADS=16` on V2 with K = 64 dies with Go's two lines on stderr and Go's fatal exit
+  code (2). A second row sets the ceiling through `debug.SetMaxThreads(16)`, and its return reads the old value
+  (10,000). Stop line: a hang, a different text, or a crash with no text.
+- **Q2, `GoNativeCall.Enter`/`Exit`: YES.** It becomes a documented consumer contract, in the ADVANCED tier of the
+  public-surface doctrine, marked and warned like the other advanced members, and it joins the [mn-frozen] set.
+  Row 13 owes one user-doc paragraph and one behavioral project that calls it from consumer C#. That project is a
+  new prediction, **I10**: its blocked native call is handed off or retaken (`retakes` or `handoffs` moves,
+  `injections` does not), under GO2CS_MN=1, with output equal to Go's.
+- **Q3, bracket owners: routed when the census table posts.** By default a stdlib site goes to the lane on row 13,
+  and a disclosure goes to P4's docs row (PLAN row 18).
+- **I0 runs before row 13 starts,** on the hosted mac. If WaitSleepJoin does not read there, stop and post: the
+  policy changes shape. The instrument is GolibTests `WaitSenseTests` (this block's seat), so every OS's golib-tests
+  leg keeps the premise checked after row 13 lands.
+- **Row 13 is R's,** after N10 (serial, the same files). H stays stood down for account A's runway.
+
+Section 7's size grows by the debug.SetMaxThreads binding, the doc paragraph and the I10 project: about +0.5 day,
+2.75-4.25 lane-days in all.
+
+**I0, read (2026-11-23):** **MET.** os-matrix run 45214659319, `golib-tests` on darwin, filter
+`FullyQualifiedName~WaitSenseTests`, at e70fd17104: osx-arm64 10/10 and osx-x64 10/10. Windows read 10/10 locally,
+and linux read the probe in WSL. The policy keeps its shape on every OS the scheduler runs on.

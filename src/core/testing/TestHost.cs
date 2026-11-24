@@ -681,7 +681,7 @@ public static class TestHost
     // The module root a fresh (not re-exec'd) host stages its module copy from. A host whose registry names a module
     // and that has no GO2CS_MODULE_ROOT REFUSES: `go test` runs a module's package inside the module tree, and the
     // plain sandbox holds only the package's own files, its fixtures and empty named directories, so a test that reads
-    // a package-root data file or a sibling package's content fails here where Go's passes (P5's by-hand sqlite run,
+    // a package-root data file or a sibling package's content fails here where Go's passes (a by-hand sqlite run,
     // 2026-11-20: TestVendorStamp). The pipeline always hands the root over (the converter's testHostModuleEnv); a
     // by-hand run sets it, or sets it to `none` (any case) to run unstaged on purpose, which is said on stderr; the
     // pipeline never passes `none`, since that stderr line is part of what the comparison reads. With a root set, a
