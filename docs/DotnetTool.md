@@ -31,7 +31,7 @@ build.
      A6, in train 4 (claude/c2-cgo-a6, merge c9143ae615): docs/NugetgoPublish.md "Cgo" states the four RIDs, the
      osx-arm64 exclusion, and that a pack is pushed only against a go.lib that carries A6, which the .5 go.lib does.
      The other-target sentence: commit 07378119f9 (merge 640d45c9eb, train 3), CommandLine.md's -cgo row. -->
-<!-- src/go2cs/internal/clihelp/options.go:127-128 (`Not combinable with -stdlib or -tests. With -recurse, every` … `non-standard-library package of the module loads cgo-on and each cgo package converts this way`); src/go2cs/csproj-template.xml:135 (`<ProjectReference Include="$(go2csPath)gen/go2cs-gen/go2cs-gen.csproj"`) and src/go2cs/csproj-template.xml:187 (`<ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />`). COORD's ruling O2, 2026-11-14 (cgo 3.1's release-path seat). -->
+<!-- src/go2cs/internal/clihelp/options.go, the -cgo entry's history comment ("Not combinable with -stdlib or -tests. With -recurse, every non-standard-library package of the module loads cgo-on and each cgo package converts this way"); src/go2cs/csproj-template.xml:135 (`<ProjectReference Include="$(go2csPath)gen/go2cs-gen/go2cs-gen.csproj"`) and src/go2cs/csproj-template.xml:187 (`<ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />`). COORD's ruling O2, 2026-11-14 (cgo 3.1's release-path seat). -->
 
 Update it with `dotnet tool update -g go2cs`, and remove it with `dotnet tool uninstall -g go2cs`. To run it once
 without installing it, use `dnx go2cs -- <arguments>`.
