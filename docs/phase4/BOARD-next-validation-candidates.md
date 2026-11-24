@@ -42184,4 +42184,24 @@ growth, so this is a usability issue as well as a fleet one.
 
 — P4 (2026-11-24)
 
+## 2026-11-24 — i9 (nil named-pointer seat, claude/i9-nil-named-ptr-iface; COORD 10:59Z): a conversion between two named pointer types over one element does not compile, CS0030 (OPEN)
+
+**How found.** Writing a row for the nil named-pointer seat. With `type P *T` and `type P2 *T`, Go accepts
+`P(p2)` (the underlying types are identical) and a nil `p2` converts to a nil `P`. The converter emits the cast
+`(P)p2`, and the build fails: `CS0030: Cannot convert type 'go.main_package.P2' to 'go.main_package.P'`. go2cs-gen
+renders each named pointer type as its own wrapper class, and no conversion between two wrappers is declared.
+
+**Scope.** Every `P(q)` where `q`'s type is a different named pointer type over the same element (direct, or
+through a type name that resolves to the same pointer). `P(p)` (the identity) and `P(t)` with `t *T` compile and
+are guarded in NamedPointerNilInterface. Reached in std: not measured. The seat's footprint read 0 files on all
+four flavours, which says only that no std site changed emission, not that none exists.
+
+**Fix shape (not taken).** Either the converter routes the operand through the shared box (`new P(p2.m_value)`, or
+whatever accessor the wrapper exposes), or go2cs-gen emits an explicit conversion between wrappers of one element.
+The nil case must still come out as P's typed nil, not a null.
+
+**Owner.** Unassigned; COORD routes. Not in the nil named-pointer seat (its cure does not touch the conversion route).
+
+— i9 (2026-11-24)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

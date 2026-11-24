@@ -32,9 +32,17 @@
 // finite — the same set of slots boxUntypedConstAsDefaultType already serves, for the same reason
 // (a value's Go dynamic type must survive being boxed).
 //
-// The scope is a genuine `*T` (a `types.Pointer`), plus `unsafe.Pointer` as its own arm. A NAMED
-// pointer type renders as its generated wrapper struct, cannot be a null reference, and has nothing
-// to carry.
+// The scope is a genuine `*T` (a `types.Pointer`), plus `unsafe.Pointer` and a NAMED pointer type
+// (`type P *T`) as arms of their own.
+//
+// ⚠ CORRECTED 2026-11-24 (i9, R's board row of 2026-11-23): this paragraph said a named pointer type
+// "renders as its generated wrapper struct, cannot be a null reference, and has nothing to carry", and
+// excluded it on that premise. The wrapper is go2cs-gen's CLASS (PointerTypeTemplate), whose zero value
+// is a null reference by design, so `var p P; var x any = p` boxed nothing: `x == nil` read true and
+// `x.(P)` failed, where Go holds a typed nil of dynamic type P. It is now the boundary's fourth arm
+// (applyTypedNilNamedPointerBox). The ж<T> accessor cannot serve it -- the wrapper is not a ж<T> -- so a
+// null wrapper becomes the type's own canonical typed nil through its public nil conversion, the
+// instance `P(nil)` already yields.
 //
 // ⚠ CORRECTED 2026-09-26 (R, seat (c2)): this paragraph said `unsafe.Pointer` "is a Basic and renders
 // as a struct" and so could not be null either, and excluded it on that premise. The premise had gone
@@ -123,6 +131,10 @@ func (v *Visitor) applyTypedNilPointerBox(value ast.Expr, rendered string) strin
 
 	if isExactUnsafePointer(valueType) {
 		return v.applyTypedNilUnsafePointerBox(valueType, v.unsafePointerExprNeverRendersNull(value), rendered)
+	}
+
+	if isNamedPointerType(valueType) {
+		return v.applyTypedNilNamedPointerBox(valueType, v.namedPointerExprNeverRendersNull(value), rendered)
 	}
 
 	if _, isPointer := valueType.(*types.Pointer); !isPointer {
@@ -222,6 +234,10 @@ func (v *Visitor) applyTypedNilPointerBoxToType(valueType types.Type, rendered s
 
 	if isExactUnsafePointer(valueType) {
 		return v.applyTypedNilUnsafePointerBox(valueType, false, rendered)
+	}
+
+	if isNamedPointerType(valueType) {
+		return v.applyTypedNilNamedPointerBox(valueType, false, rendered)
 	}
 
 	if _, isPointer := valueType.(*types.Pointer); !isPointer {
@@ -326,7 +342,7 @@ func (v *Visitor) pointerExprNeverRendersNull(expr ast.Expr) bool {
 		// unsafe.Pointer, of a call result — stays conservative and takes the accessor.
 		if len(expr.Args) == 1 {
 			if isConversion, _ := v.isTypeConversion(expr); isConversion {
-				if tv, ok := v.info.Types[expr.Args[0]]; ok && tv.IsNil() {
+				if tv, ok := v.info.Types[expr.Args[0]]; ok && tv.IsNil() && v.isPointerConversionTarget(expr.Fun) {
 					return true
 				}
 
@@ -336,6 +352,85 @@ func (v *Visitor) pointerExprNeverRendersNull(expr ast.Expr) bool {
 	}
 
 	return false
+}
+
+// isPointerConversionTarget reports whether a conversion's Fun names a pointer type, unnamed (`*T`) or named
+// (`type P *T`): only those render a nil operand as their canonical instance. Any other hop -- `unsafe.Pointer(nil)`,
+// `uintptr(0)` -- renders a null reference, so an outer conversion that recurses into it must not take the inner nil
+// as proof that the outer one cannot be null (`(*T)(unsafe.Pointer(nil))`; P3's reading, 2026-11-24).
+func (v *Visitor) isPointerConversionTarget(fun ast.Expr) bool {
+	tv, ok := v.info.Types[fun]
+
+	if !ok || !tv.IsType() {
+		return false
+	}
+
+	if _, isPointer := types.Unalias(tv.Type).(*types.Pointer); isPointer {
+		return true
+	}
+
+	return isNamedPointerType(tv.Type)
+}
+
+// isNamedPointerType reports whether t is a DEFINED type whose underlying type is a pointer (`type P
+// *T`), the type go2cs-gen renders as a wrapper class whose zero value is a null reference. An alias of
+// `*T` is the pointer itself and takes the pointer arm.
+func isNamedPointerType(t types.Type) bool {
+	named, ok := types.Unalias(t).(*types.Named)
+
+	if !ok {
+		return false
+	}
+
+	_, isPointer := named.Underlying().(*types.Pointer)
+
+	return isPointer
+}
+
+// applyTypedNilNamedPointerBox carries a NAMED pointer type's Go type across the empty-interface
+// boundary when the value can be null -- the FOURTH arm, beside the pointer, unsafe.Pointer and func
+// ones. A null wrapper becomes the type's canonical typed nil through the wrapper's own public nil
+// conversion, `(P)nil` (go2cs-gen's NilInstance, the instance a `P(nil)` conversion renders), so the
+// box keeps dynamic type P and two typed nils of one type compare equal. The conversion is public, so
+// the form holds for a named pointer type of another package too. A rendering that cannot be null --
+// a conversion of an address or of nil -- passes through unchanged.
+func (v *Visitor) applyTypedNilNamedPointerBox(valueType types.Type, neverNull bool, rendered string) string {
+	if neverNull {
+		return rendered
+	}
+
+	return fmt.Sprintf("(%s ?? (%s)nil)", rendered, v.getCSharpTypeName(valueType))
+}
+
+// namedPointerExprNeverRendersNull is pointerExprNeverRendersNull for a NAMED pointer value. A conversion to a named
+// pointer type is recognized here from go/types (the call's Fun is a type), since the named target takes a different
+// conversion route from `(*T)(&x)`. go2cs-gen's wrapper declares its inbound conversions as constructors -- from the
+// box (`new P(t)`, which is how an operand of unnamed pointer type and an unsafe.Pointer operand, rendered through
+// `unsafe.Pointer.To<T>`, both arrive) and from nil (the canonical NilInstance) -- so such a conversion is never a
+// null reference, however nil its operand. Only an operand that is itself of a named pointer type renders a cast that
+// carries a null through (`(P)p`), and that is judged by its operand. Everything else defers to the pointer predicate.
+func (v *Visitor) namedPointerExprNeverRendersNull(expr ast.Expr) bool {
+	if paren, ok := expr.(*ast.ParenExpr); ok {
+		return v.namedPointerExprNeverRendersNull(paren.X)
+	}
+
+	if call, ok := expr.(*ast.CallExpr); ok && len(call.Args) == 1 {
+		if fun, ok := v.info.Types[call.Fun]; ok && fun.IsType() && isNamedPointerType(fun.Type) {
+			arg, ok := v.info.Types[call.Args[0]]
+
+			if !ok {
+				return false
+			}
+
+			if arg.IsNil() || !isNamedPointerType(arg.Type) {
+				return true
+			}
+
+			return v.namedPointerExprNeverRendersNull(call.Args[0])
+		}
+	}
+
+	return v.pointerExprNeverRendersNull(expr)
 }
 
 // isExactUnsafePointer reports whether t IS unsafe.Pointer (through an alias), never a NAMED type over
