@@ -162,6 +162,24 @@ partial class runtime_package
     private static readonly bool s_getgReset = GoroutineThreadState.Register(static () => t_getg = null);
     private static readonly bool s_getgOwnerReset = GoroutineThreadState.Register(static () => t_getgOwner = null);
 
+    // M:N (row 11, N10): a MULTIPLEXED goroutine is not one thread's for its life, so the cache and its owner move with it
+    // from carrier to carrier, and a goroutine resumed on another carrier reads its own g, not that carrier's.
+    private sealed class GetgMountedState
+    {
+        internal ж<g>? g;
+        internal Goroutine? owner;
+    }
+
+    private static readonly bool s_getgMounted = GoroutineThreadState.RegisterMounted(static (ref object? saved) =>
+    {
+        if (saved is null && t_getg is null && t_getgOwner is null)
+            return;
+
+        GetgMountedState held = (GetgMountedState)(saved ??= new GetgMountedState());
+        (held.g, t_getg) = (t_getg, held.g);
+        (held.owner, t_getgOwner) = (t_getgOwner, held.owner);
+    });
+
     // Go's goexit0: a goroutine that exits still locked to its thread (LockOSThread, or the runtime's own
     // lockOSThread, without the matching unlock) takes the thread with it -- "If the calling goroutine exits
     // without unlocking the thread, the thread will be terminated." golib reuses a finished goroutine's

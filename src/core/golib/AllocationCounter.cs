@@ -111,6 +111,12 @@ namespace go;
     internal static void ResetThread() => t_count = 0;
 
     /// <summary>
+    /// Exchanges this thread's tally with a multiplexed goroutine's saved one at its mount and unmount, so a goroutine
+    /// that parks on one carrier and resumes on another keeps counting its own (M:N row 11, N10).
+    /// </summary>
+    internal static void SwapMounted(ref long saved) => (saved, t_count) = (t_count, saved);
+
+    /// <summary>
     /// Sets the calling thread's tally back to <paramref name="count"/>, a value this thread read from
     /// <see cref="CurrentThreadCount"/>: the objects allocated since were the runtime's own bookkeeping, which
     /// Go makes outside mallocgc and never counts in MemStats.Mallocs (a memory-profile sample's records,

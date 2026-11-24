@@ -624,6 +624,15 @@ partial class time_package
     [ThreadStatic]
     private static sleepTimer? t_sleepTimer;
 
+    // M:N (row 11, N10): Go's gp.timer is the goroutine's, so a multiplexed goroutine takes its sleep timer from carrier to
+    // carrier; a thread-bound goroutine keeps the per-thread one as before.
+    private static readonly bool s_sleepTimerMounted = global::go.golib.GoroutineThreadState.RegisterMounted(static (ref object? saved) =>
+    {
+        sleepTimer? held = (sleepTimer?)saved;
+        saved = t_sleepTimer;
+        t_sleepTimer = held;
+    });
+
     // newTimer allocates a Timer (or, through the hand-owned tick.cs, a Ticker — same runtime
     // state) and arms it. Mirrors runtime.newTimer: build the state, modify(when, period, f, arg),
     // then mark it initialized.
