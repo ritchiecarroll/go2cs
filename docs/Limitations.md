@@ -144,10 +144,13 @@ standard library, and runs on Windows, Linux or macOS. **A longer evening:** lot
   with .NET's `Stack overflow.`, with no panic and no deferred calls, where Go prints `fatal error: stack overflow`
   and exits 2. Your main package's `init` functions run on the startup thread's smaller stack, and so does `main`
   when an `init` called `runtime.LockOSThread`, as in Go. With the scheduler of [async twins](AsyncTwins.md) on, every pool thread
-  reserves 1 GiB, so `main`'s twin and every goroutine the scheduler runs keep `main`'s 1 GiB. `GO2CS_GOROUTINE_STACK`
-  can raise a pool thread's reserve above 1 GiB but not lower it; goroutines on threads of their own keep 256 MB.
-  <!-- 2026-11-24 (P4, row 18 sweep): the post-row-4 truth, R's M:N row 4 (claude/r-mn-row4-stack), train 11:
-       GoScheduler's carrier stack is Goroutine.StackReserve, never under 1 MiB. -->
+  reserves 1 GiB, or the goroutine reserve when that is larger, so `main`'s twin and every goroutine the scheduler runs
+  keep at least `main`'s 1 GiB. A set `GO2CS_GOROUTINE_STACK` sizes the pool threads instead, lower or higher, never
+  below 1 MiB, and then bounds `main`'s recursion too; goroutines on threads of their own keep 256 MB (16 MB bounded).
+  <!-- 2026-11-24 (P4, row 18 sweep): the post-row-4 truth, R's M:N row 4 (claude/r-mn-row4-stack), train 11.
+       Final rule at R's fold 2 37fede0ea6 (COORD 224341Z): GoScheduler.CarrierStackSizeFor = goroutineStackSet ?
+       Math.Max(goroutineReserve, MinCarrierStackSize 1 MiB) : Math.Max(MainThread.StackReserve 1 GiB, goroutineReserve).
+       Earlier reading: the carrier stack was Goroutine.StackReserve, never under 1 MiB. -->
   <!-- C46 (COORD ruling 2026-11-11, option A): src/core/golib/runtime/MainThread.cs `public const int StackReserve =
        1024 * 1024 * 1024;` and its LockOSThread rule; go2cs-gen MainEntryGenerator writes the entry point. The init
        residual: the main package's init is a module initializer of the entry assembly, which the CLR runs before
