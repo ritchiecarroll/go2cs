@@ -887,6 +887,7 @@
     <Project Path="tests/Behavioral/NamedArrayWrapper/NamedArrayWrapper.csproj" />
     <Project Path="tests/Behavioral/NamedBasicConversion/NamedBasicConversion.csproj" />
     <Project Path="tests/Behavioral/NamedBooleanLogic/NamedBooleanLogic.csproj" />
+    <Project Path="tests/Behavioral/NamedChanMapNumericShadow/NamedChanMapNumericShadow.csproj" />
     <Project Path="tests/Behavioral/NamedChannelType/NamedChannelType.csproj" />
     <Project Path="tests/Behavioral/NamedBytesByteSeq/NamedBytesByteSeq.csproj" />
     <Project Path="tests/Behavioral/NamedBytesConstConversion/NamedBytesConstConversion.csproj" />

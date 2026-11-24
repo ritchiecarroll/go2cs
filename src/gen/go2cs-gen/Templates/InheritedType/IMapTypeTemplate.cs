@@ -70,7 +70,7 @@ internal static class IMapTypeTemplate
                 /// assertion failed (logrus' `maps.Clone(entry.Data)` panicked "is map, not logrus.Fields").
                 /// The copy reads this wrapper's map through the same expression every other member does.
                 /// </summary>
-                IMap IMap.CloneMap() => ((IMap){{mapValue}}).IsNil ? default({{structName}}) : new {{structName}}(new map<{{keyTypeName}}, {{valueTypeName}}>({{mapValue}}));
+                IMap IMap.CloneMap() => {{Claimed("IsNil", "IsNil", $"((IMap){mapValue}).IsNil")}} ? default({{structName}}) : new {{structName}}(new map<{{keyTypeName}}, {{valueTypeName}}>({{mapValue}}));
 
                 /// <summary>
                 /// The map this wrapper holds, SHARED: a map-cored type parameter assigned to its core type
@@ -155,7 +155,7 @@ internal static class IMapTypeTemplate
                 // binds before an extension GetEnumerator.
                 {{Claimed("GetEnumerator", $"public {pairEnumerator} GetEnumerator() => (({pairEnumerable}){mapValue}).GetEnumerator();", $"{pairEnumerator} {pairEnumerable}.GetEnumerator() => (({pairEnumerable}){mapValue}).GetEnumerator();")}}
                 
-                global::System.Collections.IEnumerator global::System.Collections.IEnumerable.GetEnumerator() => (({{pairEnumerable}}){{mapValue}}).GetEnumerator();
+                global::System.Collections.IEnumerator global::System.Collections.IEnumerable.GetEnumerator() => {{Claimed("GetEnumerator", "GetEnumerator()", $"(({pairEnumerable}){mapValue}).GetEnumerator()")}};
         """;
     }
 }
