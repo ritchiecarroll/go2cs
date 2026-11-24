@@ -19,6 +19,16 @@ partial struct field {
 
 internal static nint Area⁔(/*this*/ field f) { return Area(f.s.W.Len, f.s.H.Len) + (nint)Unit; }
 
+public static nint 量 = 5;
+
+internal static nint Weight⁔(/*this*/ field f) { return 量 * 2; }
+
+partial struct 尺 {
+    internal nint n;
+}
+
+internal static nint Ruler⁔(/*this*/ field f, main_package.尺 r) { return r.n + 量; }
+
 internal static void main() {
     ref var s = ref heap<geom.Shape>(new Shape(W: new part.Side(Len: 4), H: new part.Side(Len: 5)), out var Ꮡs);
     fmt.Println("child namespace", s.Area(), s.Unit(), Area(2, 3), (nint)(Unit));
@@ -28,6 +38,8 @@ internal static void main() {
     fmt.Println("expressions", area(s), unit(Ꮡs), ((Func<part.Side, nint>)(global::go.MethodHolderAlias.geom.partᴛSide.Double))(new part.Side(Len: 7)));
 
     fmt.Println("dot import", new field(s).Area());
+    fmt.Println("caseless name", new field(s).Weight());
+    fmt.Println("caseless type", new field(s).Ruler(new 尺(n: 2)));
 
     var (pitch, @base) = tone.Play(2);
     fmt.Println("type named like its package", pitch, @base, tone.Pitch(1), (nint)(tone.Base));

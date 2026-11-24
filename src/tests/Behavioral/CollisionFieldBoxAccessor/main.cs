@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using @unsafe = unsafe_package;
 
 partial class main_package {
 
@@ -90,6 +91,23 @@ internal static void main() {
     fmt.Println(capturedLocalNamedAfterType());
 
     fmt.Println(boxRefCapturedValueNamedAfterType());
+
+    ref var bm = ref heap<boxMembers>(new boxMembers(ReinterpretUnaliased: 4, IsOrderTokenAt: 5), out var Ꮡbm);
+    nint got = bumpBoxMembers(Ꮡbm);
+    fmt.Println(got, bm.ReinterpretUnaliased, bm.IsOrderTokenAt);
+}
+
+partial struct boxMembers {
+    public nint ReinterpretUnaliased;
+    public nint IsOrderTokenAt;
+    internal @string label;
+}
+
+internal static partial nint bumpBoxMembers(ж<boxMembers> p) {
+    var q = p;
+    q.of(boxMembers.ᏑReinterpretUnaliased).Value += 10;
+    q.of(boxMembers.ᏑIsOrderTokenAt).Value *= 3;
+    return q.of(boxMembers.ᏑReinterpretUnaliased).Value * 100 + q.of(boxMembers.ᏑIsOrderTokenAt).Value;
 }
 
 } // end main_package

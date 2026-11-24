@@ -1808,6 +1808,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckNestedMapAssign() => CheckTarget("NestedMapAssign");
 
     [TestMethod]
+    public void CheckNestedNamespaceReach() => CheckTarget("NestedNamespaceReach");
+
+    [TestMethod]
     public void CheckNestedPointerConversionReinterpret() => CheckTarget("NestedPointerConversionReinterpret");
 
     [TestMethod]
@@ -2442,6 +2445,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckSameNameImportAlias() => CheckTarget("SameNameImportAlias");
+
+    [TestMethod]
+    public void CheckSameNameOs() => CheckTarget("SameNameOs");
 
     [TestMethod]
     public void CheckSamePackageImplementNoWitness() => CheckTarget("SamePackageImplementNoWitness");

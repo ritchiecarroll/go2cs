@@ -1852,6 +1852,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckNestedMapAssign() => CheckTarget("NestedMapAssign");
 
     [TestMethod]
+    public void CheckNestedNamespaceReach() => CheckTarget("NestedNamespaceReach");
+
+    [TestMethod]
     public void CheckNestedPointerConversionReinterpret() => CheckTarget("NestedPointerConversionReinterpret");
 
     [TestMethod]
@@ -2498,6 +2501,9 @@ public class A1_TranspileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckSameNameImportAlias() => CheckTarget("SameNameImportAlias");
+
+    [TestMethod]
+    public void CheckSameNameOs() => CheckTarget("SameNameOs");
 
     [TestMethod]
     public void CheckSamePackageImplementNoWitness() => CheckTarget("SamePackageImplementNoWitness");
