@@ -64,6 +64,21 @@ built into the converter before it uses it: go.dev's SHA-256 for the release arc
 A module whose `go` line names a newer Go than the tool converts with is refused with a message that says so:
 use the go2cs release built for that Go, or lower the module's `go` line.
 
+Go is needed only to convert. Building, running and deploying the converted C# need .NET alone: the `go.*`
+packages are already C#, so neither the build machine nor the machine the program runs on needs Go. Two
+conversion steps need more than Go. A `-tests` run also runs `go test`, to compare its results with the
+converted tests. A `-cgo` conversion needs a C compiler, but only while it converts: the converted package
+calls the C library's functions directly, so building it needs no C compiler, and running it needs the C
+library itself.
+<!-- Measured 2026-11-24 (P1), linux-x64, master cb6def82a2, .NET SDK 10.0.115. A program using fmt, strings, sort, a
+     map, a goroutine and a channel was converted, then built (`dotnet build -c Release -p:GoTargetOS=linux`) and run
+     in `env -i` with PATH=/usr/lib/dotnet:/usr/bin:/bin: no go on PATH, GOROOT and GO2CS_GOROOT unset. Traced with
+     `strace -f -e trace=execve,openat`: the build executed only dotnet (4) and csc (66), the run only the program;
+     neither opened any path under a Go install, the module cache or go2cs's toolchain cache (0 matches). The program
+     printed what `go run` prints. A cgo program calling `add` from a shared library libadd.so was converted with
+     `-cgo` (gcc as CC), then built the same way: dotnet (4) and csc (50) only, no C compiler executed, and it ran
+     with only libadd.so on LD_LIBRARY_PATH, printing what `go run` prints ("add: 42"). -->
+
 ## `go2cs toolchain`
 
 ```shell

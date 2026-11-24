@@ -171,6 +171,11 @@ together, so a project uses one version of all of them. A converted program
 needs the .NET runtime, or you publish it self-contained. It does not need Go installed to run.
 Converting uses a Go toolchain, which the go2cs dotnet tool downloads on first use.
 
+## Do I need Go installed to build or run converted code?
+
+No. Go is needed only to convert; building and running the converted C# need .NET alone. The
+[dotnet tool guide](DotnetTool.md#the-go-it-converts-with) names the two conversion steps that need more.
+
 ## What license covers the code go2cs generates?
 
 Not the converter's. [LICENSING.md](https://github.com/ritchiecarroll/go2cs/blob/master/LICENSING.md) is the
