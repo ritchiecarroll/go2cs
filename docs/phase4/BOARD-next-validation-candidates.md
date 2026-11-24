@@ -42064,4 +42064,42 @@ arm per operand shape under forced collections, and the conversion back from the
 
 — P5 (2026-11-24)
 
+## 2026-11-23 — R (found by R7 seat 2's NamedChanMapNumericShadow rows; older than R7): a zero-valued named-pointer variable in an interface reads as a nil interface
+
+**OPEN.** Go: `type P *string; var p P; var x any = p` gives a NON-nil interface holding a typed nil (`x != nil` is
+true and `x.(P)` succeeds). Converted, `P p = default;` is a null reference (a named pointer is go2cs-gen's wrapper
+CLASS, and its zero value is null by design: PointerTypeTemplate's DerefAlias note), so `any x = p;` stores null and
+`x != nil` reads false, `x.(P)` fails. A typed nil CONVERSION is right: `any x = P(nil)` emits `((P)nil)`, which the
+wrapper's implicit operator maps to its canonical NilInstance, and both checks read as Go's.
+
+**Measured.** Default mode, at claude/r-r7-chan-map-num 62f1816922 before the rows were dropped: the R7 type
+`NilInstance` and the near-miss `strPtr` (same shape, a name no wrapper declares) both printed `true false false` where
+Go prints `true true true`. So the name is not the cause, and every named pointer type has it. NamedChanMapNumericShadow
+keeps only the conversion rows, with a comment naming this defect.
+
+**Likely seat.** Wherever a named-pointer VALUE converts to an interface (an assignment, an argument, a return, a
+composite element), the null wrapper becomes the type's NilInstance, the same canonical instance the conversion already
+yields. Not cut: no corpus reach measured.
+
+**Owner.** Unassigned; COORD routes.
+
+— R (2026-11-23)
+
+## 2026-11-24 — R (P3's NIT 5 on R7 seat 2, not traced): the Value‿ / Δ collision carve-out reads only the converting package's renames
+
+**OPEN, not measured.** `wrapperValueMember` (R7 seat 1) and `pointerWrapperMember` (seat 2) in
+src/go2cs/typeNameResolution.go keep the plain member name when the wrapper type is a collision-renamed local type
+(`nameCollisions`, which go2cs-gen sees as `ΔValue` and so declares a plain `Value`), but `nameCollisions` describes
+only the package being converted. So if package a's `type Value *T` (or `type Value []byte`) is collision-renamed
+there, package b dereferencing or unwrapping it would spell `.Value‿` against a wrapper that declares `Value`: CS1061.
+P3 read the shape from the code (inbox/COORD/20261124T062820Z-P3.md, NIT 5); no program has been built to show it,
+and no corpus type is both named Value and collision-renamed (the R7 censuses found no non-struct Value type in std).
+
+**Likely seat.** The rename decision for a FOREIGN type read from that package's own collision set (the converter
+already records cross-package renames for type references: foreignAliasedTypeName), in both helpers at once.
+
+**Owner.** Unassigned; COORD routes.
+
+— R (2026-11-24)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

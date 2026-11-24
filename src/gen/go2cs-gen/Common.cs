@@ -141,6 +141,27 @@ public static class Common
         return simpleName == "Value" ? NamedWrapperValue : "Value";
     }
 
+    /// <summary>
+    /// Gets the name a named POINTER wrapper declares one of its own members under (PointerTypeTemplate.ClaimableMembers
+    /// and Value): the member itself, or, when the wrapper's own type is named like it (CS0542; R7), <see
+    /// cref="WrapperValueMember"/>'s name for <c>Value</c> and <c>Δ</c> + the member for the rest.
+    /// </summary>
+    /// <remarks>
+    /// Go declares no method on a named pointer type (an invalid receiver), so its NAME is the only claim. Every reader
+    /// of such a member by name spells it through this rule: the pointer template, InheritedTypeTemplate's nil members,
+    /// the converter's dereference, address and typed-nil sites (<c>pointerWrapperMember</c> in typeNameResolution.go)
+    /// and golib's NilInstance probe.
+    /// </remarks>
+    public static string PointerWrapperMember(string typeName, string member)
+    {
+        if (member == "Value")
+            return WrapperValueMember(typeName);
+
+        string simpleName = StripGenericTypeArguments(typeName);
+        simpleName = simpleName[(simpleName.LastIndexOf('.') + 1)..].TrimStart('@');
+        return simpleName == member ? $"Δ{member}" : member;
+    }
+
     public static string GetSimpleName(string typeName, bool dropGeneric = false, bool dropCollisionPrefix = false)
     {
         // Check if type name is a pointer, i.e., ж<T>. Match the prefix as `ж<` specifically — a bare

@@ -891,6 +891,7 @@
     <Project Path="tests/Behavioral/NamedArrayWrapper/NamedArrayWrapper.csproj" />
     <Project Path="tests/Behavioral/NamedBasicConversion/NamedBasicConversion.csproj" />
     <Project Path="tests/Behavioral/NamedBooleanLogic/NamedBooleanLogic.csproj" />
+    <Project Path="tests/Behavioral/NamedChanMapNumericShadow/NamedChanMapNumericShadow.csproj" />
     <Project Path="tests/Behavioral/NamedChannelType/NamedChannelType.csproj" />
     <Project Path="tests/Behavioral/NamedBytesByteSeq/NamedBytesByteSeq.csproj" />
     <Project Path="tests/Behavioral/NamedBytesConstConversion/NamedBytesConstConversion.csproj" />
@@ -934,6 +935,7 @@
     <Project Path="tests/Behavioral/NamedSliceMethodShadow/NamedSliceMethodShadow.csproj" />
     <Project Path="tests/Behavioral/NamedPointerReinterpret/NamedPointerReinterpret.csproj" />
     <Project Path="tests/Behavioral/NamedPointerValueSlot/NamedPointerValueSlot.csproj" />
+    <Project Path="tests/Behavioral/NamedPointerValueStruct/NamedPointerValueStruct.csproj" />
     <Project Path="tests/Behavioral/NamedResultAddressEscape/NamedResultAddressEscape.csproj" />
     <Project Path="tests/Behavioral/NamedResultCaptureModeReceiver/NamedResultCaptureModeReceiver.csproj" />
     <Project Path="tests/Behavioral/NamedResultLambdaInfer/NamedResultLambdaInfer.csproj" />

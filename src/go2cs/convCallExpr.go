@@ -3065,7 +3065,8 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 						return fmt.Sprintf("%d", arr.Len())
 					}
 
-					return fmt.Sprintf("%s(%s.Value)", ident.Name, v.convExpr(callExpr.Args[0], nil))
+					// A named pointer type itself named Value declares the member as NamedWrapperValue (pointerWrapperMember).
+					return fmt.Sprintf("%s(%s.%s)", ident.Name, v.convExpr(callExpr.Args[0], nil), v.pointerWrapperMember(v.info.TypeOf(callExpr.Args[0]), "Value"))
 				}
 			}
 		}

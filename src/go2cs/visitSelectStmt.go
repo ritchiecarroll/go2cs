@@ -140,7 +140,7 @@ func (v *Visitor) visitSelectStmt(selectStmt *ast.SelectStmt) {
 				flushHoist(hoistBuf)
 			}
 
-			hoisted = v.sendRegistration(chanOperand, sendValue)
+			hoisted = v.sendRegistration(chanOperand, sendValue, v.chanOperatorSpelling(sendStmt.Chan))
 		} else {
 			var chanExpr ast.Expr
 
@@ -224,7 +224,7 @@ func (v *Visitor) visitSelectStmt(selectStmt *ast.SelectStmt) {
 					if unaryExpr, ok := rhs.(*ast.UnaryExpr); ok {
 						if unaryExpr.Op == token.ARROW {
 
-							if v.options.useChannelOperators {
+							if v.chanOperatorSpelling(unaryExpr.X) {
 								v.outputBuilder.WriteString(ChannelLeftOp)
 								// A NAMED channel operand names the element type explicitly —
 								// generic inference cannot see through the wrapper
@@ -255,7 +255,7 @@ func (v *Visitor) visitSelectStmt(selectStmt *ast.SelectStmt) {
 			} else if exprStmt, ok := comClause.Comm.(*ast.ExprStmt); ok {
 				if unaryExpr, ok := exprStmt.X.(*ast.UnaryExpr); ok {
 					if unaryExpr.Op == token.ARROW {
-						if v.options.useChannelOperators {
+						if v.chanOperatorSpelling(unaryExpr.X) {
 							v.outputBuilder.WriteString(ChannelLeftOp)
 							// A NAMED channel operand names the element type explicitly —
 							// generic inference cannot see through the wrapper
@@ -324,7 +324,7 @@ func (v *Visitor) visitSelectStmt(selectStmt *ast.SelectStmt) {
 								v.outputBuilder.WriteString(caseTemps[i])
 								v.outputBuilder.WriteRune('.')
 
-								if v.options.useChannelOperators {
+								if v.chanOperatorSpelling(unaryExpr.X) {
 									v.outputBuilder.WriteString(ChannelRightOp)
 								} else {
 									v.outputBuilder.WriteString("Received")
@@ -402,7 +402,7 @@ func (v *Visitor) visitSelectStmt(selectStmt *ast.SelectStmt) {
 							v.outputBuilder.WriteString(caseTemps[i])
 							v.outputBuilder.WriteRune('.')
 
-							if v.options.useChannelOperators {
+							if v.chanOperatorSpelling(unaryExpr.X) {
 								v.outputBuilder.WriteString(ChannelRightOp)
 							} else {
 								v.outputBuilder.WriteString("Received")
@@ -470,13 +470,13 @@ func (v *Visitor) visitSelectStmt(selectStmt *ast.SelectStmt) {
 // order, and the value expression keeps its original argument position so every implicit conversion
 // convSendValueExpr relies on the `in T` parameter to apply survives untouched. The caller converts
 // both operands (channel first) so any pre-statement they spill is placed before the registration.
-func (v *Visitor) sendRegistration(chanOperand string, sendValue string) string {
+func (v *Visitor) sendRegistration(chanOperand string, sendValue string, operators bool) string {
 	var reg strings.Builder
 
 	reg.WriteString(chanOperand)
 	reg.WriteRune('.')
 
-	if v.options.useChannelOperators {
+	if operators {
 		reg.WriteString(ChannelLeftOp)
 	} else {
 		reg.WriteString("Sending")
@@ -485,7 +485,7 @@ func (v *Visitor) sendRegistration(chanOperand string, sendValue string) string 
 	reg.WriteRune('(')
 	reg.WriteString(sendValue)
 
-	if v.options.useChannelOperators {
+	if operators {
 		reg.WriteString(", ")
 		reg.WriteString(EllipsisOperator)
 	}

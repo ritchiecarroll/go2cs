@@ -105,6 +105,23 @@ and match Go's test results. C# written by hand against converted code may need 
   <!-- 2026-11-23 (P1): landed by train 4, merge 0f93005fbd (claude/r-r7-slice-array 59c61e4734). The member list read
        again at 97cca467a2 from ISliceTypeTemplate.ClaimableMembers (it also lists Clone, claimed before this
        change). -->
+- **[QUEUED claude/r-r7-chan-map-num (tip in its READY post)]** **The same holds for named channel, map, numeric,
+  string and pointer types.** A Go method named `Capacity`, `Length`, `IsClosed`, `IsUnbuffered`, `Receive`,
+  `Received`, `Receiving`, `Sending`, `Make` or `GetEnumerator` on a named channel; `Length`, `IsNil`, `Count`, `Make`
+  or `GetEnumerator` on a named map; `CompareTo` on a named number; or `Length`, `CompareTo` or `GetEnumerator` on a
+  named string now runs when Go code calls it, and the type still ranges, selects, sorts and measures as Go's does. A
+  type named like one of its own wrapper's members converts as well, a named pointer type included: `type Value
+  *[3]int`, `type of *point`. The member stays reachable through its golib interface where one declares it, e.g.
+  `((IChannel)ch).Capacity`, and becomes `Δ<name>` otherwise (`ΔIsClosed`); a pointer type named `Value` reads its
+  pointee through `Value‿`. With `-uco=false`, a channel whose type declares one of those methods is sent to and
+  received from with the default mode's operators. Slicing a named pointer to an unnamed array (`type P *[3]int`,
+  `p[1:]`) also converts now. C# source written by hand that called such a member on such a type calls it through
+  the interface instead.
+  <!-- R7 seat 2: GenTests NamedChanMapNumericClaimedMemberTests (red b6733d8a1a); behavioral NamedChanMapNumericShadow;
+       go2cs TestNamedChanMethodModeSpelling; the fix 62f1816922. Census over std at go1.26.11 through go/types, four
+       targets (windows, linux, darwin amd64; linux arm64), 966-968 packages each: the only claiming types are net/http
+       Header, net/textproto MIMEHeader and net/url Values (Add, Set: claimed before this seat), no named pointer or
+       channel carries a listed name, and no site slices a named pointer to an array. -->
 - **[LANDED 1c9c6a224e, da3273f975]** **golib's `GoFrame` is a plain struct, not a `ref struct`.** `GoFrame` holds
   the deferred calls of one call of a converted function. The C# compiler no longer refuses a copy, a store, boxing or
   a capture of it; the source generator does, with error `GO2CS0016`, which names the site. A frame may only be a

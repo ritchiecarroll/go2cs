@@ -1603,6 +1603,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckNamedBytesConstConversion() => CheckTarget("NamedBytesConstConversion");
 
     [TestMethod]
+    public void CheckNamedChanMapNumericShadow() => CheckTarget("NamedChanMapNumericShadow");
+
+    [TestMethod]
     public void CheckNamedChannelType() => CheckTarget("NamedChannelType");
 
     [TestMethod]
@@ -1715,6 +1718,9 @@ public class B2_CompileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckNamedPointerValueSlot() => CheckTarget("NamedPointerValueSlot");
+
+    [TestMethod]
+    public void CheckNamedPointerValueStruct() => CheckTarget("NamedPointerValueStruct");
 
     [TestMethod]
     public void CheckNamedResultAddressEscape() => CheckTarget("NamedResultAddressEscape");

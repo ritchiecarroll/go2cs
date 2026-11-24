@@ -39,7 +39,7 @@ func (v *Visitor) visitSendStmt(sendStmt *ast.SendStmt, format FormattingContext
 
 	var channelOperation string
 
-	if v.options.useChannelOperators {
+	if v.chanOperatorSpelling(sendStmt.Chan) {
 		channelOperation = ChannelLeftOp
 	} else {
 		channelOperation = "Send"

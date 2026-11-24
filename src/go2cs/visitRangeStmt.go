@@ -230,8 +230,9 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt, target LabeledStmtCon
 	// A NAMED pointer type (`type Features *flagSet`) ranges through its wrapper's Value the same way.
 	if ptrType, ok := rangeType.Underlying().(*types.Pointer); ok {
 		rangedThroughPointer = true
+		// A named pointer type itself named Value declares the member as NamedWrapperValue (pointerWrapperMember).
+		ptrDeref = "." + v.pointerWrapperMember(rangeType, "Value")
 		rangeType = types.Unalias(ptrType.Elem())
-		ptrDeref = ".Value"
 
 		// A deref-aliased pointer RECEIVER is the named wrapper itself, not a box, so this `.Value` is the
 		// wrapper's underlying-value property, which a type named Value spells NamedWrapperValue.

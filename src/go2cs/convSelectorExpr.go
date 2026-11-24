@@ -2218,7 +2218,8 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 							return result
 						}
 
-						return fmt.Sprintf("%s.Value.%s", v.convExpr(selectorExpr.X, xContexts), v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr)))
+						// A named pointer type itself named Value declares the member as NamedWrapperValue (pointerWrapperMember).
+						return fmt.Sprintf("%s.%s.%s", v.convExpr(selectorExpr.X, xContexts), v.pointerWrapperMember(wrapper, "Value"), v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr)))
 					}
 				}
 			}

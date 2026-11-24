@@ -285,8 +285,14 @@ func (v *Visitor) convSliceExpr(sliceExpr *ast.SliceExpr) string {
 					// backing lazily, so `(~p).Value[..][i] = x` materialized the backing in a COPY and the
 					// write was lost (runtime's mpallocbits_test.go `want[:][2] = 0x3e` read back 0). An
 					// ANONYMOUS array (`*[N]T`) has no lazy backing, and its dereference shares the T[].
-					if _, isNamed := ptr.Elem().(*types.Named); isNamed {
-						ident += ".Value"
+					//
+					// A NAMED pointer type (`type P *[3]int`) is go2cs-gen's wrapper class, not the box, so golib's
+					// box slice methods do not bind on it (CS1929): it is sliced through its own deref, `p.Value`, as
+					// the named array is, its member spelled through pointerWrapperMember (a type named Value; R7).
+					_, isNamedPointer := types.Unalias(xType).(*types.Named)
+
+					if _, isNamed := ptr.Elem().(*types.Named); isNamed || isNamedPointer {
+						ident += "." + v.pointerWrapperMember(xType, "Value")
 					} else {
 						return v.anonymousArrayBoxSlice(ident, sliceExpr)
 					}
