@@ -69,6 +69,10 @@ partial struct Pair {
     internal nint a, b;
 }
 
+partial struct Δslice {
+    [GoName("Δslice")] public nint ΔΔslice;
+}
+
 partial struct Node {
     public nint ΔNode;
 }
@@ -144,6 +148,9 @@ internal static void main() {
     var (rb, _) = json.Marshal(r);
     fmt.Println("other package:", r.Δt, lib.ΔF(5), (nint)(lib.ΔK), lib.ΔV, (@string)rb);
 
+    var sl = new Δslice(ΔΔslice: 10);
+    sl.ΔΔslice++;
+    fmt.Println("emitted-equal field:", reflect.TypeOf(sl).Name(), reflect.TypeOf(sl).Field(0).Name, sl.ΔΔslice);
     fmt.Println("plain field like struct:", reflect.TypeOf(new Node()).Field(0).Name, new Node(ΔNode: 12).ΔNode);
 
     ref var w = ref heap<Wrap>(new Wrap(new S()), out var Ꮡw);

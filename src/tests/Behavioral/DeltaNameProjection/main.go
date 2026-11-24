@@ -54,6 +54,10 @@ type Outer struct {
 
 type Pair struct{ a, b int }
 
+// A struct the converter emits as Δslice (slice is a golib name) with a field the Go source spells Δslice: the
+// emitted names are equal, so the field is renamed, and its Go name is still Δslice.
+type slice struct{ Δslice int }
+
 // A field named like its struct, with no Δ anywhere: the converter's own rename, reported as Go's name.
 type Node struct{ Node int }
 
@@ -115,6 +119,9 @@ func main() {
 	rb, _ := json.Marshal(r)
 	fmt.Println("other package:", r.Δt, lib.ΔF(5), lib.ΔK, lib.ΔV, string(rb))
 
+	sl := slice{Δslice: 10}
+	sl.Δslice++
+	fmt.Println("emitted-equal field:", reflect.TypeOf(sl).Name(), reflect.TypeOf(sl).Field(0).Name, sl.Δslice)
 	fmt.Println("plain field like struct:", reflect.TypeOf(Node{}).Field(0).Name, Node{Node: 12}.Node)
 
 	w := Wrap{S{}}

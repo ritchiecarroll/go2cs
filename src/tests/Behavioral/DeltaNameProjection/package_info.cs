@@ -68,7 +68,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "ABwulMgAM06WlJSUgoIADgaCgoKCgoKClIKCgoKUgpSCgoKCgoKEloKUgoKUlIKClJSCgoKClIKClIKUgoKClIKCgoKClIKUpqKCgpS2", "", "", "181=TypeOf/3/4/1,Name/2/2/1,TypeOf/4/4/1,Field/2/2/1")]
+[assembly: GoPositionMap("main.go", "main.cs", "ABwulMgAN1aWlJSUgoIADgaCgoKCgoKClIKCgoKUgpSCgoKCgoKEloKUgoKUgoKClIKClJSCgoKClIKClIKUgoKClIKCgoKClIKUpqKCgpS2", "", "", "188=TypeOf/3/4/1,Name/2/2/1,TypeOf/4/4/1,Field/2/2/1")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -88,6 +88,7 @@ public static partial class main_package
     internal partial struct @file {}
     internal partial struct main_v {}
     [GoLocalName("Δx")] internal partial struct main_Δx {}
+    internal partial struct Δslice {}
     internal partial struct Δunion {}
     public partial interface Fooer {}
     public partial interface Namer {}

@@ -708,3 +708,11 @@ To get Go's lines in a program, use one of these, at a large cost in speed:
 - `DOTNET_JITMinOpts=1` in the program's environment, which keeps a `Release` build but turns off JIT optimization: it
   reports the call's line instead of the function's first statement, but not two calls of one function in one
   statement apart; about 33 times slower on the same workload.
+
+<!-- Measured 2026-11-24 on linux-x64 (.NET 10), go1.26.11, P2's Δ cure seat at 27691240dc: Native AOT publishes of
+     DeltaNameProjection (Go `frame: main.Δf 78`, AOT `frame: main.Δf 0`) and CallerLineCallSite (9 of 9 rows false
+     against Go's true) under PublishAot=true. COORD 2026-11-24T05:20:52Z: same class as the 11-22 ruling; BOARD row
+     "caller line under Native AOT reads 0". -->
+Under Native AOT, `runtime.Caller` reports line 0 instead of the call's line, measured on `linux-x64`; the function
+name it reports matches Go. Neither route above applies to a Native AOT program, so for Go's lines run the program
+under the JIT with one of them.

@@ -267,6 +267,9 @@ func f() string {
 	return Δslice
 }
 
+// A field of that spelling converts: it lives in its struct's scope.
+type S struct{ Δslice int }
+
 // A shadowed local array is renamed ΔarrayΔ1: its base is array's SANITIZED spelling, which the package never declares.
 var ΔarrayΔ1 int
 
@@ -404,6 +407,19 @@ func TestMarkerGlyphIdentifiersAreRefused(t *testing.T) {
 		"Δm":            "is the name go2cs gives the import or package alias m when it renames it",
 		"SΔScript":      "is the witness type parameter go2cs generates for a type parameter S constrained by Script",
 		"ΔT":            "is the name go2cs generates for the interface type parameter",
+	}
+
+	// The package variable Δslice is refused; the field Δslice of S, the same spelling one scope in, converts.
+	var deltaSliceSites []string
+
+	for _, site := range refusal.sites {
+		if strings.HasPrefix(site.text, "example.com/m.Δslice ") {
+			deltaSliceSites = append(deltaSliceSites, site.text)
+		}
+	}
+
+	if len(deltaSliceSites) != 1 {
+		t.Errorf("want Δslice refused once, as the package variable; got %q", deltaSliceSites)
 	}
 
 	// The package variable Δt is refused for the type switch's temporary; the Δ-led field Δt converts.

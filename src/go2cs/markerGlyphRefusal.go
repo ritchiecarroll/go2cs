@@ -219,7 +219,10 @@ func markerGlyphReason(name string, obj types.Object, sets *deltaNameSets) strin
 		return "is the name go2cs generates for " + what
 	}
 
-	if what, isMinted := sets.minted[name]; isMinted {
+	// A FIELD spelled like a name go2cs generates at package scope converts: the field lives in its struct's scope, and
+	// where its emitted spelling meets its own struct's (the field Δslice of a type slice emitted as Δslice) the converter
+	// renames the field and stamps its Go name ([GoName]), so reflection and fmt still read Δslice.
+	if what, isMinted := sets.minted[name]; isMinted && !isStructField(obj) {
 		return "is " + what
 	}
 
@@ -486,6 +489,12 @@ func refuseMarkerGlyphTestFiles(inputPath string, options Options) *markerGlyphR
 	}
 
 	return refusal
+}
+
+// isStructField reports whether obj is a struct field.
+func isStructField(obj types.Object) bool {
+	field, isVar := obj.(*types.Var)
+	return isVar && field.IsField()
 }
 
 func isTypeParam(obj types.Object) bool {
