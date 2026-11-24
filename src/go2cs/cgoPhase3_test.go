@@ -82,9 +82,9 @@ func TestCgoPhase3FixtureConvertsItsHelpersVoidPointersAndDeferredCalls(t *testi
 	for declaration, calls := range map[string][]string{
 		"internal static ж<@char> CString(@string p0)":                     {"ᴍallocate(", "GoCgoArgs.StringSize(p0)", "GoCgoArgs.CopyString(p0, address)"},
 		"internal static @unsafe.Pointer CBytes(slice<byte> p0)":           {"ᴍallocate(", "GoCgoArgs.BytesSize(p0)", "GoCgoArgs.CopyBytes(p0, address)"},
-		"internal static @string GoString(ж<@char> p0)":                    {`GoCgoArgs.GoString(global::go.golib.GoCgoArgs.HelperPointer(p0, "GoString"))`},
-		"internal static @string GoStringN(ж<@char> p0, @int p1)":          {`GoCgoArgs.HelperPointer(p0, "GoStringN")`, "(int)(int32)p1"},
-		"internal static slice<byte> GoBytes(@unsafe.Pointer p0, @int p1)": {`GoCgoArgs.HelperVoidPointer(p0, "GoBytes")`, "(int)(int32)p1"},
+		"internal static @string GoString(ж<@char> p0)":                    {`GoCgoArgs.GoStringOf(p0, "GoString")`},
+		"internal static @string GoStringN(ж<@char> p0, @int p1)":          {`GoCgoArgs.GoStringNOf(p0, (int)(int32)p1, "GoStringN")`},
+		"internal static slice<byte> GoBytes(@unsafe.Pointer p0, @int p1)": {`GoCgoArgs.GoBytesOf(p0, (int)(int32)p1, "GoBytes")`},
 		"internal static @unsafe.Pointer malloc(@ulong p0)":                {"ᴍallocate((nuint)(uint64)p0)"},
 	} {
 		member := cgoBindingsMember(t, bindings, declaration)
@@ -108,14 +108,17 @@ func TestCgoPhase3FixtureConvertsItsHelpersVoidPointersAndDeferredCalls(t *testi
 		}
 	}
 
-	// B. A void pointer is classified before the transition, and a void pointer result is its number.
+	// B. A void pointer is classified, then pinned by a `fixed` whose block holds the transition and the call (18.12
+	// item 2), and a void pointer result is its number.
 	for _, function := range []string{"free", "go2cs_probe_release", "go2cs_probe_same", "go2cs_probe_sum"} {
 		member := cgoBindingsMember(t, bindings, " "+function+"(@unsafe.Pointer p0")
-		classified := strings.Index(member, `GoCgoArgs.VoidPointer(p0, "`+function+`")`)
+		classified := strings.Index(member, `GoCgoArgs.PinVoidPointer(p0, "`+function+`")`)
+		pinned := strings.Index(member, "fixed (byte* f0 = g0)")
+		addressed := strings.Index(member, "nint a0 = g0.Address(f0);")
 		entered := strings.Index(member, "syscallEntersyscall()")
 
-		if classified < 0 || entered < 0 || classified > entered {
-			t.Errorf("C.%s does not classify its void pointer before the transition:\n%s", function, member)
+		if classified < 0 || pinned < 0 || addressed < 0 || entered < 0 || classified > pinned || pinned > addressed || addressed > entered {
+			t.Errorf("C.%s does not classify, then pin, its void pointer before the transition:\n%s", function, member)
 		}
 	}
 
@@ -359,9 +362,22 @@ const cgoP3LayoutEntryPointer = "cannot read native memory as *main._Ctype_struc
 // ж.CgoFields.cs, CgoFieldStoreIntoCText). Go stores it; C memory must not hold one, so go2cs refuses it by name.
 const cgoP3StoreGoIntoC = "storing a Go pointer into C memory is refused"
 
+// cgoP3OutParameterElement is in the refusal of an out-parameter that is an element of a Go array of C pointers
+// (GoCgoArgs.OutParameter; P3's review of 1b, item 1).
+const cgoP3OutParameterElement = "an element of a Go array of C pointers"
+
+// cgoP3ReturnedIntoGoMemory is in the refusal of a word C returned inside a pinned argument's Go storage
+// (GoCgoArgs.RequireWordOutsidePin; P3's review of 1b, item 4).
+const cgoP3ReturnedIntoGoMemory = "returned an address inside the Go memory it was handed"
+
+// cgoP3WideReinterpret is in the refusal of a reinterpret view no door can pin over a value wider than its pointee
+// (GoCgoArgs.ScalarPointer; P3's review of 1b, item 3).
+const cgoP3WideReinterpret = "C may write past one"
+
 // cgoP3Arms are the end-to-end program's arms. An arm with neither goFails nor csFails prints the same lines and exits
-// 0 both ways. The arms with csFails hand C or a helper a pointer into Go memory: Go runs each to its end, and go2cs
-// refuses each by name, naming the increment that admits it. innerdefer and innergo are the controls of goinnerdefer
+// 0 both ways. Since increment 3.2 seat 1b (18.12, P-2) an arm that hands C or a helper a pointer into Go memory whose
+// box names its storage prints as Go does: the wrapper pins the storage for the call. govoidnumber and govoidexpr hand
+// over a NUMBER, which stays refused by name (M3), and the arms with other csFails are refused as their own text says. innerdefer and innergo are the controls of goinnerdefer
 // and goinnergo: the same deferred or started Go function over C memory runs to its end both ways.
 func cgoP3Arms() []cgoG1Arm {
 	return []cgoG1Arm{
@@ -382,36 +398,55 @@ func cgoP3Arms() []cgoG1Arm {
 		{name: "deferred"},
 		{name: "innerdefer"},
 		{name: "innergo"},
-		{name: "goinnerdefer", csFails: cgoP3GoMemory},
-		{name: "goinnergo", csFails: cgoP3GoMemory},
-		{name: "govoid", csFails: cgoP3GoMemory},
+		{name: "goinnerdefer"},
+		{name: "goinnergo"},
+		{name: "govoid"},
 		{name: "govoidnumber", csFails: cgoP3GoMemory},
 		{name: "govoidexpr", csFails: cgoP3GoMemory},
-		{name: "gobytes", csFails: cgoP3GoMemory},
-		{name: "gostring", csFails: cgoP3GoMemory},
+		{name: "gobytes"},
+		{name: "gostring"},
 		// Pointers DERIVED from a view of Go memory (the review of increment 3.1, §16.11).
-		{name: "goviewfield", csFails: cgoP3GoMemory},
-		{name: "goviewfieldarray", csFails: cgoP3GoMemory},
-		{name: "goviewagain", csFails: cgoP3GoMemory},
-		{name: "goviewelem", csFails: cgoP3GoMemory},
-		{name: "goviewelemstring", csFails: cgoP3GoMemory},
-		{name: "goslice", csFails: cgoP3GoMemory},
-		{name: "goslicedata", csFails: cgoP3GoMemory},
-		{name: "goadd", csFails: cgoP3GoMemory},
-		{name: "goaddlocal", csFails: cgoP3GoMemory},
+		{name: "goviewfield"},
+		{name: "goviewfieldarray"},
+		{name: "goviewagain"},
+		{name: "goviewelem"},
+		{name: "goviewelemstring"},
+		{name: "goslice"},
+		{name: "goslicedata"},
+		{name: "goadd"},
+		{name: "goaddlocal"},
 		// A pointer that reaches C as the result of a call, through a variable and through a user function.
-		{name: "goaddvar", csFails: cgoP3GoMemory},
-		{name: "goaddfunc", csFails: cgoP3GoMemory},
-		{name: "goviewfieldfunc", csFails: cgoP3GoMemory},
-		{name: "goviewfieldvar", csFails: cgoP3GoMemory},
+		{name: "goaddvar"},
+		{name: "goaddfunc"},
+		{name: "goviewfieldfunc"},
+		{name: "goviewfieldvar"},
 		// The second review (§16.12): a typed pointer from an interior unsafe.Pointer value, and an array field of a view.
-		{name: "goaddtyped", csFails: cgoP3GoMemory},
-		{name: "goaddfill", csFails: cgoP3WriteThrough},
-		{name: "gofieldtyped", csFails: cgoP3WriteThrough},
-		{name: "goviewnamestring", csFails: cgoP3GoMemory},
-		{name: "goviewnameadd", csFails: cgoP3GoMemory},
-		{name: "goviewnameslice", csFails: cgoP3GoMemory},
-		{name: "goviewnamedata", csFails: cgoP3WriteThrough},
+		{name: "goaddtyped"},
+		{name: "goaddfill"},
+		{name: "gofieldtyped"},
+		{name: "goviewnamestring"},
+		{name: "goviewnameadd"},
+		{name: "goviewnameslice"},
+		{name: "goviewnamedata"},
+		// Seat 1b's arms (18.12 item 5): cmd/cgo's element and slice check closures, made by cmd/cgo itself from the Go
+		// code each arm writes, through the void door and the scalar door.
+		{name: "goindex"},
+		{name: "goindexfill"},
+		{name: "goslicefill"},
+		// Seat 1b's out-parameter (18.12 item 4, shape (i)): strtod's char ** endptr, &end over a Go variable.
+		{name: "outstrtod"},
+		// P3's review of 1b (COORD inbox 20261124T173809Z): an element of a native window over a view, typed (item 2), and
+		// the two out-parameter shapes refused by name (items 1 and 4).
+		{name: "goviewcelemstring"},
+		{name: "goviewcelemfill"},
+		{name: "outstrtodelem", csFails: cgoP3OutParameterElement},
+		{name: "outstrtodgo", csFails: cgoP3ReturnedIntoGoMemory},
+		// P3's read of the fold (COORD inbox 20261124T204626Z): the pointer result inside a pin and its identity
+		// near-miss, and the wide reinterpret view and its same-size near-miss.
+		{name: "resultstrtokgo", csFails: cgoP3ReturnedIntoGoMemory},
+		{name: "resultstrcpyself"},
+		{name: "goviewwide", csFails: cgoP3WideReinterpret},
+		{name: "goviewsame"},
 		// Increment 3.2's first reds (section 6). s6field, s6reinterp and s6slice print as Go does, and since seat 1a
 		// (18.9) s6nextnil, s6nextdirect and s6name do too: the field accessor retired their cgoP3LayoutEntry pins (the
 		// readings before it are at cgoP3LayoutEntryPointer). Since seat 1c (18.11) s6next does too: the **C.T door
@@ -595,4 +630,53 @@ func cgoP3FirstLine(stderr string) string {
 	}
 
 	return ""
+}
+
+// A pointer argument cmd/cgo declares at its own type, `var _cgo0 *_Ctype_char = cs` (seat 1b's hosted reading, CS0119 on
+// strtod's call): the argument renders the box itself, never a Go-shaped `(*C.@char)(cs)`, which C# reads as a type in
+// an expression. The closure is cmd/cgo's for `C.strtol(cs, &end, 10)` with `var end *C.char`.
+func TestCgoAPointerArgumentDeclaredAtItsOwnTypeRendersItsBox(t *testing.T) {
+	files := cgoFixtureFiles(t, cgoPhase3FixtureDir)
+
+	// The capture names strtol's library, for this test alone (the package's tests run serially).
+	cgoPhase2Libraries["strtol"] = "libc.so.6"
+	defer delete(cgoPhase2Libraries, "strtol")
+	files["cgo_import.go"] = strings.Replace(cgoOfflineImportFile(cgoPhase2Libraries), "package cgophase2", "package cgophase3", 1)
+	files["fixture.cgo1.go"] += `
+func strtolEnd(cs *_Ctype_char) (int, string) {
+	var end *_Ctype_char
+	n := func() _Ctype_long{ var _cgo0 *_Ctype_char = cs; _cgoBase1 := &end; _cgo1 := _cgoBase1; var _cgo2 _Ctype_int = 10; _cgoCheckPointer(_cgoBase1, 0 == 0); return _Cfunc_strtol(_cgo0, _cgo1, _cgo2); }()
+	return int(n), ( _Cfunc_GoString)(end)
+}
+`
+	files["cgo_gotypes.go"] += `
+//go:cgo_import_static _cgo_55dd9c1e1280_Cfunc_strtol
+//go:linkname __cgofn__cgo_55dd9c1e1280_Cfunc_strtol _cgo_55dd9c1e1280_Cfunc_strtol
+var __cgofn__cgo_55dd9c1e1280_Cfunc_strtol byte
+var _cgo_55dd9c1e1280_Cfunc_strtol = unsafe.Pointer(&__cgofn__cgo_55dd9c1e1280_Cfunc_strtol)
+
+//go:cgo_unsafe_args
+func _Cfunc_strtol(p0 *_Ctype_char, p1 **_Ctype_char, p2 _Ctype_int) (r1 _Ctype_long) {
+	_cgo_runtime_cgocall(_cgo_55dd9c1e1280_Cfunc_strtol, uintptr(unsafe.Pointer(&p0)))
+	if _Cgo_always_false {
+		_Cgo_use(p0)
+		_Cgo_use(p1)
+		_Cgo_use(p2)
+	}
+	return
+}
+`
+	stderr, output, err := convertCgoOffline(t, files)
+	if err != nil {
+		t.Fatalf("%v\n%s", err, stderr)
+	}
+	converted := readConverted(t, output, "fixture.cs")
+
+	if want := "var n = C.strtol(cs, Ꮡend, (C.@int)(10));"; !strings.Contains(converted, want) {
+		t.Errorf("the call does not read %q", want)
+	}
+
+	if strings.Contains(converted, "(*C.@char)(") {
+		t.Errorf("a Go-shaped pointer conversion reached the C#")
+	}
 }

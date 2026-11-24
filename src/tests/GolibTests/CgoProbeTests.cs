@@ -132,6 +132,65 @@ public unsafe class CgoProbeTests
         Assert.IsNull(none, "a zero errno is a nil error, as cgo makes it");
     }
 
+    // cgo Phase 3, increment 3.2, seat 1b: the pressure arm (docs/phase4/DESIGN-cgo-phase3-marshaling.md 18 item 4, 18.1
+    // COORD (b); prediction P-5). C fills a pinned Go array one byte at a time, pausing between bytes, while another
+    // thread forces compacting collections and churns the heap. Go reads every byte C wrote, in every round. The
+    // control: an unpinned twin array, allocated beside each round's array, must be shown to MOVE under the same
+    // collections, or the arm proves nothing about the pin and reads Inconclusive.
+    [TestMethod]
+    public void ThePinnedArmHoldsWhileCompactingCollectionsRunMidCall()
+    {
+        CgoProbe.Require();
+
+        const int rounds = 12;
+        const int size = 48;
+        const int micros = 500;
+        int twinMoved = 0;
+
+        for (int round = 0; round < rounds; round++)
+        {
+            array<C.@char> buffer = new(size);
+            byte[] twin = new byte[size];
+            nint twinBefore = AddressOf(twin);
+
+            using var stop = new System.Threading.CancellationTokenSource();
+            System.Threading.Thread collector = new(() =>
+            {
+                while (!stop.IsCancellationRequested)
+                {
+                    _ = new byte[4096];
+                    GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, blocking: true, compacting: true);
+                }
+            });
+
+            collector.Start();
+            int32 filled = OnAGoroutine(() => (int32)C.go2cs_probe_slow_fill(new ElemRefBox<C.@char>(buffer, 0), size, micros));
+            stop.Cancel();
+            collector.Join();
+
+            Assert.AreEqual(size, filled, $"round {round}: C filled the whole buffer");
+
+            for (int i = 0; i < size; i++)
+                Assert.AreEqual((int8)('a' + i % 26), (int8)buffer[i], $"round {round}: byte {i} is what C wrote");
+
+            if (AddressOf(twin) != twinBefore)
+                twinMoved++;
+
+            GC.KeepAlive(twin);
+        }
+
+        Console.WriteLine($"READING the pressure arm: {rounds} rounds, every byte read back; the unpinned twin moved in {twinMoved} of them");
+
+        if (twinMoved == 0)
+            Assert.Inconclusive("the unpinned twin never moved under the same collections, so the arm says nothing about the pin");
+    }
+
+    private static nint AddressOf(byte[] array)
+    {
+        fixed (byte* first = array)
+            return (nint)first;
+    }
+
     private static (int64, error?) Strtol(string text)
     {
         byte[] bytes = Encoding.ASCII.GetBytes(text + "\0");
