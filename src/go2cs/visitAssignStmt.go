@@ -2667,8 +2667,8 @@ func (v *Visitor) lhsReusedInLaterRhs(lhsExprs, rhsExprs []ast.Expr) bool {
 // string or as a two-word string header, `*(*string)(unsafe.Pointer(&b)) = s` or `*(*str)(unsafe.Pointer(&b)) = h`.
 // golib serves those reads with views that are read-only (SliceAsStringBox, SliceStringHeaderBox; C45), and a view
 // box can refuse a store only on its NEXT access, which the temporary box such a statement writes through never has:
-// the store was lost with no word (Go prints 1 for `len(c)` after `*(*string)(ptr(&c)) = "q"`, the conversion 3; P3's
-// read of C45). So the statement panics by name instead. Go's store, which moves the slice's data pointer and length
+// the store was lost with no word (Go prints 1 for `len(c)` after `*(*string)(ptr(&c)) = "q"`, the conversion 3).
+// So the statement panics by name instead. Go's store, which moves the slice's data pointer and length
 // and keeps its capacity, is not modeled (docs/Limitations.md).
 //
 // The shape is the managed reinterpret's own (pointerReinterpretManagedSource), with a source whose element is a slice

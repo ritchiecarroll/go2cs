@@ -60,7 +60,7 @@ func (v *Visitor) convStarExpr(starExpr *ast.StarExpr, context StarExprContext) 
 	// strict `val` (a nil `*node` deref must panic, as in Go).
 	//
 	// A NAMED pointer operand whose type is itself named Value or ValueSlot declares that member under another name
-	// (pointerWrapperMember; R7 seat 2).
+	// (pointerWrapperMember).
 	derefMember := "Value"
 
 	if resultType := v.info.TypeOf(starExpr); resultType != nil && isInherentlyHeapAllocatedType(resultType) {

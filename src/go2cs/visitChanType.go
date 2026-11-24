@@ -130,7 +130,7 @@ var namedMethodModeChanMembers = []string{"Send", "Sent", "Receive", "Received",
 // chanOperatorSpelling reports whether a channel operation on expr spells golib's operator glyphs (ChannelLeftOp,
 // ChannelRightOp) rather than the named members: always in the default operator mode, and in named-method mode for a
 // named channel whose Go type declares a method named like one of the members that mode spells. go2cs-gen's wrapper
-// moves such a member out of the way (an explicit IChannel<T> implementation or a Δ name; R7 seat 2), since C# would
+// moves such a member out of the way (an explicit IChannel<T> implementation or a Δ name), since C# would
 // otherwise bind the Go method's extension in its place, while the glyph members are the wrapper's own whatever its
 // method set. Decided per channel, so a select case's registration and its `when` test always agree.
 func (v *Visitor) chanOperatorSpelling(expr ast.Expr) bool {
