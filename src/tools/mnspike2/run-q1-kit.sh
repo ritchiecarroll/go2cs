@@ -21,7 +21,10 @@
 # (the twin switch did not reach the compile).
 #
 # Environment: Q1_CONFIG (default Release), Q1_TIMEOUT seconds per run (default 300), Q1_GOOS passed as GoTargetOS
-# (default: none). dotnet must be on PATH.
+# (default: none), Q1_STACK (a dotnet-stack executable; default the one on PATH). dotnet must be on PATH.
+#
+# A run still alive at Q1_TIMEOUT is HUNG (run-deadline.sh): its managed stacks go to <tag>.stack, it is killed, it
+# takes no compare, and the kit fails.
 set -u
 
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -57,9 +60,10 @@ goos_arg=()
 
 # Portable to the bash 3.2 macOS ships: no associative arrays, and no bare expansion of an empty array under set -u.
 if command -v sha256sum >/dev/null 2>&1; then sha() { sha256sum "$1" | cut -d' ' -f1; }; else sha() { shasum -a 256 "$1" | cut -d' ' -f1; }; fi
-if command -v timeout >/dev/null 2>&1; then tmo=(timeout "$timeout_s"); elif command -v gtimeout >/dev/null 2>&1; then tmo=(gtimeout "$timeout_s"); else tmo=(); fi
+# shellcheck source=run-deadline.sh
+. "$here/run-deadline.sh"
 
-builds=0; green=0; runs=0; compares=0; differs=0; stale=0
+builds=0; green=0; runs=0; compares=0; differs=0; stale=0; hung=0
 failed=(); differing=(); summary="$out/summary.txt"
 : > "$summary"
 
@@ -113,13 +117,19 @@ for entry in "${kit[@]}"; do
         mn=""; [ "$arm" != "plain" ] && mn=1
         runs=$((runs + 1))
         if [ -n "$mn" ]; then
-            GO2CS_MN=1 ${tmo[@]+"${tmo[@]}"} dotnet "$dll" > "$out/$tag.stdout" 2> "$out/$tag.stderr"
+            run_deadline "$timeout_s" "$out/$tag.stack" env GO2CS_MN=1 dotnet "$dll" > "$out/$tag.stdout" 2> "$out/$tag.stderr"
         else
-            env -u GO2CS_MN ${tmo[@]+"${tmo[@]}"} dotnet "$dll" > "$out/$tag.stdout" 2> "$out/$tag.stderr"
+            run_deadline "$timeout_s" "$out/$tag.stack" env -u GO2CS_MN dotnet "$dll" > "$out/$tag.stdout" 2> "$out/$tag.stderr"
         fi
         c=$?
+        if [ $c -eq 124 ]; then
+            # A hung run is never read: it takes no compare, and the kit fails.
+            hung=$((hung + 1)); failed+=("$tag:hung"); c=HUNG
+            note "BUILD $tag GREEN sha=${h:0:12} ${gd:+[$gd]} RUN HUNG at ${timeout_s}s, killed | stacks: $tag.stack ($(wc -l < "$out/$tag.stack" | tr -d ' ') lines)"
+        else
+            note "BUILD $tag GREEN sha=${h:0:12} ${gd:+[$gd]} RUN exit=$c lines=$(wc -l < "$out/$tag.stdout" | tr -d ' ')"
+        fi
         eval "s_$arm=\$h; c_$arm=\$c"
-        note "BUILD $tag GREEN sha=${h:0:12} ${gd:+[$gd]} RUN exit=$c lines=$(wc -l < "$out/$tag.stdout" | tr -d ' ')"
     done
 
     # Compares: each twin-side run against the plain run of the same program.
@@ -127,6 +137,9 @@ for entry in "${kit[@]}"; do
         for arm in twins ifhall; do
             eval "ca=\$c_$arm; sa=\$s_$arm"
             [ -z "$ca" ] && continue
+            if [ "$ca" = HUNG ] || [ "$c_plain" = HUNG ]; then
+                note "UNREAD $prog.$arm vs $prog.plain: a run HUNG"; continue
+            fi
             compares=$((compares + 1))
             if [ "$sa" = "$s_plain" ]; then
                 note "STALE $prog.$arm: assembly equals the plain build's"; stale=$((stale + 1))
@@ -150,6 +163,7 @@ verdict=PASS
 [ $compares -lt "$min_compares" ] && verdict=FAILURE
 [ $differs -ne 0 ] && verdict=FAILURE
 [ $stale -ne 0 ] && verdict=FAILURE
+[ $hung -ne 0 ] && verdict=FAILURE
 
-note "READING Q1 $verdict builds=$green/$builds runs=$runs compares=$compares differ=$differs stale=$stale (guard: >=$min_builds builds, >=$min_compares compares) failed=[${failed[*]+${failed[*]}}] differing=[${differing[*]+${differing[*]}}]"
+note "READING Q1 $verdict builds=$green/$builds runs=$runs compares=$compares differ=$differs stale=$stale hung=$hung (guard: >=$min_builds builds, >=$min_compares compares) failed=[${failed[*]+${failed[*]}}] differing=[${differing[*]+${differing[*]}}]"
 [ "$verdict" = PASS ]
