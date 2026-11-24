@@ -5336,12 +5336,17 @@ func (v *Visitor) recordConversionPackageUsing(t types.Type) {
 				// rendered through THIS FILE's alias (getCSharpTypeName prefers
 				// importPathAliases), so the using must declare that alias too: go-cmp's test
 				// imports `ts "…/internal/teststructs"`, records `ts.AssignB`, and the
-				// package-name using left `ts` undeclared (CS0246).
+				// package-name using left `ts` undeclared (CS0246). The alias is spelled as every
+				// other import alias is (getSanitizedImport): a package named by a C# keyword
+				// (go-json-experiment's `internal`) declares `using @internal = …;`, where the bare
+				// keyword fails CS1041 and every following directive in the file cascades.
 				qualifier := importQualifier(pkg.Name())
 
 				if fileAlias, ok := v.importPathAliases[pkg.Path()]; ok && fileAlias != "" {
 					qualifier = fileAlias
 				}
+
+				qualifier = getSanitizedImport(qualifier)
 
 				packageLock.Lock()
 				conversionPackageUsings[qualifier] = convertImportPathToNamespace(pkg.Path(), PackageSuffix)
