@@ -38,6 +38,17 @@ struct go2cs_probe_entry *go2cs_probe_list(void);
 void go2cs_probe_list_release(struct go2cs_probe_entry *node);
 int go2cs_probe_next_family(struct go2cs_probe_entry *node);
 void *go2cs_probe_address(void);
+
+struct go2cs_probe_gauge
+{
+	int count;
+	long long total;
+};
+
+extern int go2cs_probe_counter;
+extern struct go2cs_probe_gauge go2cs_probe_gauge_now;
+extern int go2cs_probe_last_error;
+int go2cs_probe_bump(int step);
 */
 import "C"
 
@@ -496,6 +507,32 @@ func main() {
 		s := h.name[:]
 		n := C.go2cs_probe_text_fill((*C.char)(unsafe.Pointer(unsafe.SliceData(s))), 8)
 		fmt.Printf("cviewnamedata %d %q\n", int(n), string(s[:n]))
+	case "cvar":
+		// A C int global: read, written from Go, then changed by C and read again.
+		before := int(C.go2cs_probe_counter)
+		C.go2cs_probe_counter = 10
+		after := int(C.go2cs_probe_bump(5))
+		fmt.Println("cvar", before, after, int(C.go2cs_probe_counter))
+	case "cvarstruct":
+		// A C struct global: whole-value read, field write from Go, a write by C, and a whole-value write from Go.
+		g := C.go2cs_probe_gauge_now
+		C.go2cs_probe_gauge_now.total = 1000
+		C.go2cs_probe_bump(2)
+		h := C.go2cs_probe_gauge_now
+		C.go2cs_probe_gauge_now = C.struct_go2cs_probe_gauge{count: 40, total: 41}
+		fmt.Println("cvarstruct", int(g.count), int64(g.total), int(h.count), int64(h.total),
+			int(C.go2cs_probe_gauge_now.count), int64(C.go2cs_probe_gauge_now.total))
+	case "cvarerrno":
+		// An errno-style global: C sets it on a refused call and clears it on the next good one.
+		r := int(C.go2cs_probe_bump(-1))
+		bad := int(C.go2cs_probe_last_error)
+		C.go2cs_probe_bump(1)
+		fmt.Println("cvarerrno", r, bad, int(C.go2cs_probe_last_error))
+	case "cvaraddr":
+		// The global's address: a Go pointer to C memory, the same address on each use, written through.
+		p := &C.go2cs_probe_counter
+		*p = 77
+		fmt.Println("cvaraddr", p == &C.go2cs_probe_counter, int(C.go2cs_probe_counter))
 	default:
 		fmt.Println("unknown arm", arm)
 		os.Exit(64)
