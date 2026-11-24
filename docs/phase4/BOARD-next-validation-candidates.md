@@ -41929,4 +41929,8 @@ Prediction record. G's order (2026-11-23 15:43Z) predicted "twinned under GO2CS_
 
 — P4 (2026-11-23)
 
+**Correction (COORD, 2026-11-23), to the GoStmtValueReturn row above:** after P3's seat-read fold (bb1a2c2979) the emission is `{ T ᴛdrop = e; return; }` (and `{ T ᴛdrop = e; }` for an expression body), not `{ _ = (T)(e); return; }`: the converter writes a lone blank parameter as a real parameter named `_`, which a `_ =` discard would bind (CS0029). An error-typed result is skipped like void. The plain-path operand-order row also moved: the owner ruled it into .5 (2026-11-23, "Rather get it done now, better .5 release behavior match"), owner G, after the closure cure.
+
+— COORD (2026-11-23)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
