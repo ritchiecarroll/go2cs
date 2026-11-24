@@ -2095,8 +2095,8 @@ partial class runtime_package
     //
     // Three of Go's header decorations are omitted rather than invented: ` (scan)` (no GC of ours to
     // be scanned by), `, N minutes` (nothing records when a park began), and `, locked to thread`
-    // (LockOSThread is a no-op here because every goroutine already owns its thread, so the note
-    // would be true of every goroutine and therefore say nothing).
+    // (not printed: LockOSThread keeps Go's lock count, but the header does not read it; the docs say
+    // the same, ConversionStrategies-Reference/manual-conversions.md, runtime.Stack).
     //
     // A goroutine with no identity — Stack called on a host thread that never ran Go code — has no
     // goid to print, and Go has no such state at all. It reports id 0, which is not a goid Go's

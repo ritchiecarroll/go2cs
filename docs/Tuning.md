@@ -533,7 +533,8 @@ describes both forms.
 By default, each goroutine other than `main` runs on its own thread, and the thread reserves a fixed stack, because a .NET stack
 cannot grow the way a Go stack does. The reserve is 256 MiB, or 16 MiB for a goroutine the converter proves cannot
 recurse ([how](ConversionStrategies.md#goroutines)). `main` runs on a thread that reserves 1 GiB, Go's own limit,
-and the settings below do not change it. It is address space, not memory, but it is what a thread start pays for:
+and the settings below do not change it. `GO2CS_GOROUTINE_STACK` sets the pool threads' reserve under
+[async twins](AsyncTwins.md) as well. It is address space, not memory, but it is what a thread start pays for:
 on `win-x64`, parking 100,000 goroutines at once took roughly five times as long with the 256 MiB reserve as with
 16 MiB. On `linux-x64`, at 10,000 goroutines, the reserve made no measurable difference, and a kernel limit on
 memory mappings, not the reserve, stopped thread creation at around 16,000.

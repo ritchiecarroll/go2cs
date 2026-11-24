@@ -199,7 +199,8 @@ the limit was about 2,000 goroutines on Apple silicon and about 3,000 on Intel; 
 
 **To avoid it**, bound how many goroutines are alive at once, with a worker pool for example.
 [Limitations](Limitations.md#what-converts-but-doesnt-behave-exactly-like-go) has the details, under
-*Goroutines are operating-system threads*.
+*Goroutines are operating-system threads*. [Async twins](AsyncTwins.md), experimental and opt-in, lift the limit
+for goroutines that wait in twinned code.
 <!-- Source: C1's run 42497561630 (claude/c1-darwin-threadcap a85e0cf11), on GitHub-hosted macOS runners: osx-arm64
      (macOS 15.8.2, kern.num_taskthreads 2048, first failure at 2,027 live goroutines) and osx-x64 (macOS 15.7.9, 3072,
      first failure at 3,051). The figures and their provenance sit beside the Limitations bullet. -->
@@ -215,7 +216,7 @@ and the program ends; nothing can catch it. A Go goroutine is not a thread, so t
 the limit, but neither has been measured: `DOTNET_EnableWriteXorExecute=0` in the environment, which should cut the
 mappings each thread uses, and a larger `vm.max_map_count` on the machine.
 
-**Under the M:N scheduler** (experimental, on the master branch only: `GoTwins=true` and `GO2CS_MN=1`), a goroutine parked in a twin holds no
+**Under [async twins](AsyncTwins.md)** (experimental, on the master branch only: build with twins and run with `GO2CS_MN=1`), a goroutine parked in a twin holds no
 thread, so the limit counts only the goroutines blocked in calls the twins do not cover: a `sync.WaitGroup` or
 `sync.Cond` wait, a Lock reached through a `sync.Locker` interface, a cgo or system call. About 16,000 of those blocked
 at once end the program the same way (`PAL_SEHException`, then an abort); the same bound avoids it.
@@ -231,17 +232,20 @@ at once end the program the same way (`PAL_SEHException`, then an abort); the sa
 ## Goroutines on a shared pool of threads (M:N) are experimental, and off unless you build and run for them {#goroutines-on-a-shared-pool-of-threads-mn-are-experimental-and-off-unless-you-build-and-run-for-them}
 
 By default each goroutine is an operating-system thread, which is what the two sections above describe. go2cs also has
-an experimental M:N scheduler, in which goroutines take turns on a small pool of threads as Go's do. The scheduler is
+an experimental M:N scheduler, in which goroutines take turns on a small pool of threads as Go's do
+([Async twins](AsyncTwins.md) explains it and how to opt in). The scheduler is
 on the master branch only; go2cs 1.26.11.1 does not have it. It is inert unless both halves are switched on:
 <!-- 2026-11-23 .5 docs pass (P1), at master 97cca467a2: `git grep GO2CS_MN nuget-1.26.11.1 -- src/core/golib` finds
      nothing, and src/Directory.Build.targets has no GoTwinsFor at the tag; the M:N work landed in trains 1 to 7. -->
 
 
-- **The build**: the projects are built with twins, an async copy of each function that can wait without holding a
-  thread. The `GoTwinsFor` property names the projects to build with twins, separated by `;`. Set it in the
+- **The build**: the projects are built with twins (async twins), an async copy of each function that can wait
+  without holding a thread. The `GoTwinsFor` property names the projects to build with twins, by project file name
+  without `.csproj`, separated by `;`. Set it in the
   environment: on the `dotnet build` command line each `;` must be written `%3B`, or MSBuild ends the property there.
-  `GoTwins=true` in one project's own file builds that project with twins. These properties are read by
-  `src/Directory.Build.targets`, so they work only in a project built inside a go2cs repository clone. The published
+  `GoTwins=true` in one project's own file builds that project with twins, but a new conversion writes the file
+  again and drops it. These properties are read by `src/Directory.Build.targets`, so they work only for a project
+  under the `src` directory of a go2cs repository clone. The published
   `go.*` packages are not built with twins, and a project that references them gets no twins from them.
 - **The run**: the environment sets `GO2CS_MN=1`. How many goroutines run at once follows `GOMAXPROCS`, as in Go: the
   `GOMAXPROCS` environment variable at start, and `runtime.GOMAXPROCS(n)` while the program runs. `GO2CS_MN_PROCS=<n>`
