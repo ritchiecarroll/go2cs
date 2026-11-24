@@ -251,7 +251,8 @@ internal static (fuzzResult min, error err) minimize⁔(/*this*/ ж<worker> Ꮡw
 
         if (w.coordinator.opts.MinimizeTimeout != 0) {
             Action cancel = default;
-            (ctx, cancel) = context.WithTimeout(ctx, w.coordinator.opts.MinimizeTimeout);
+            (ctx, var cancelᴛ1) = context.WithTimeout(ctx, w.coordinator.opts.MinimizeTimeout);
+            cancel = NilSafeDelegateConversion<Action, context.CancelFunc>(cancelᴛ1);
             var cancelʗ1 = cancel;
             defer(cancelʗ1, ref ᒐ);
         }
@@ -784,7 +785,8 @@ internal static fuzzResponse /*resp*/ fuzz⁔(/*this*/ ж<workerServer> Ꮡws, c
 
         if (args.Timeout != 0) {
             Action cancel = default;
-            (ctx, cancel) = context.WithTimeout(ctx, args.Timeout);
+            (ctx, var cancelᴛ1) = context.WithTimeout(ctx, args.Timeout);
+            cancel = NilSafeDelegateConversion<Action, context.CancelFunc>(cancelᴛ1);
             var cancelʗ1 = cancel;
             defer(cancelʗ1, ref ᒐ);
         }
@@ -903,7 +905,8 @@ internal static minimizeResponse /*resp*/ minimize⁔(/*this*/ ж<workerServer> 
         var inpHash = sha256.Sum256(mem.valueCopy());
         if (args.Timeout != 0) {
             Action cancel = default;
-            (ctx, cancel) = context.WithTimeout(ctx, args.Timeout);
+            (ctx, var cancelᴛ1) = context.WithTimeout(ctx, args.Timeout);
+            cancel = NilSafeDelegateConversion<Action, context.CancelFunc>(cancelᴛ1);
             var cancelʗ1 = cancel;
             defer(cancelʗ1, ref ᒐ);
         }

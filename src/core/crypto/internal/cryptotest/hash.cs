@@ -17,16 +17,16 @@ using math;
 
 partial class cryptotest_package {
 
-// type MakeHash is a methodless func type — rendered inline as its base delegate
+public delegate hash.Hash MakeHash();
 
 // TestHash performs a set of tests on hash.Hash implementations, checking the
 // documented requirements of Write, Sum, Reset, Size, and BlockSize.
-public static void TestHash(ж<testing.T> t, Func<hash.Hash> mh) {
+public static void TestHash(ж<testing.T> t, MakeHash mh) {
     if (Δboring.Enabled || Δfips140.Version() == "v1.0.0"u8) {
-        testhash.TestHashWithoutClone(t, NilSafeDelegateConversion<Func<hash.Hash>, Func<hash.Hash>>(mh));
+        testhash.TestHashWithoutClone(t, NilSafeDelegateConversion<testhash.MakeHash, MakeHash>(mh));
         return;
     }
-    testhash.TestHash(t, NilSafeDelegateConversion<Func<hash.Hash>, Func<hash.Hash>>(mh));
+    testhash.TestHash(t, NilSafeDelegateConversion<testhash.MakeHash, MakeHash>(mh));
 }
 
 internal static partial io.Reader newRandReader(ж<testing.T> t) {

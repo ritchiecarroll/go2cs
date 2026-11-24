@@ -46,14 +46,14 @@ partial struct Properties {
 }
 
 // functions dispatchable per form
-// type lookupFunc is a methodless func type — rendered inline as its base delegate
+internal delegate Properties lookupFunc(input b, nint i);
 
 // formInfo holds Form-specific functions and tables.
 partial struct formInfo {
     internal Form form;
     internal bool composing, compatibility; // form type
-    internal Func<input, nint, Properties> info;
-    internal Func<ж<Iter>, slice<byte>> nextMain;
+    internal lookupFunc info;
+    internal iterFunc nextMain;
 }
 
 [GoLazy] partial class lazyᴛformTable { internal static slice<ж<formInfo>> formTable = [Ꮡ(new formInfo(

@@ -55,12 +55,12 @@ public static ж<CoverageDataWriter> NewCoverageDataWriter(io.Writer w, coverage
 // that the VisitFuncs method will then invoke the callback "f" with
 // data for each function to emit to the file.
 partial interface CounterVisitor {
-    error VisitFuncs(Func<uint32, uint32, slice<uint32>, error> f);
+    error VisitFuncs(CounterVisitorFn f);
 }
 
 // CounterVisitorFn describes a callback function invoked when writing
 // coverage counter data.
-// type CounterVisitorFn is a methodless func type — rendered inline as its base delegate
+public delegate error CounterVisitorFn(uint32 pkid, uint32 funcid, slice<uint32> counters);
 
 // Write writes the contents of the count-data file to the writer
 // previously supplied to NewCoverageDataWriter. Returns an error
@@ -312,7 +312,7 @@ internal static error writeCounters⁔(/*this*/ ж<CoverageDataWriter> Ꮡcfw, C
         return default;
     };
     {
-        var err = visitor.VisitFuncs(emitter); if (err != nil) {
+        var err = visitor.VisitFuncs(NilSafeDelegateConversion<CounterVisitorFn, Func<uint32, uint32, slice<uint32>, error>>(emitter)); if (err != nil) {
             return err;
         }
     }

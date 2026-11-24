@@ -303,6 +303,15 @@ namespace go;
         if (typeof(T) == typeof(@string) && StringHeaderBox<TDst>.Applies)
             return StringHeaderBox<TDst>.Mint((ж<@string>)(object)box);
 
+        // A SLICE read through the string header's two words, `*(*str)(unsafe.Pointer(&b))` (zeebo/xxh3), and a []byte read AS
+        // a string, `*(*string)(unsafe.Pointer(&b))`: Go's slice header begins with the string header, so both read the
+        // slice's (data, len). Read-only views; see SliceStringHeaderBox and SliceAsStringBox (C45).
+        if (SliceStringHeaderBox<T, TDst>.Applies)
+            return SliceStringHeaderBox<T, TDst>.Mint(box);
+
+        if (typeof(TDst) == typeof(@string) && SliceAsStringBox<T>.Applies)
+            return (ж<TDst>)(object)SliceAsStringBox<T>.Mint(box);
+
         // The MIRROR: a Go slice built FROM a header — `*(*[]T)(unsafe.Pointer(&sl))` over a
         // notInHeapSlice the runtime has just filled with a NATIVE base and (len, cap), emitted as
         // Reinterpret<notInHeapSlice, slice<X>>(). The address route below would read a golib slice<X>

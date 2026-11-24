@@ -164,14 +164,11 @@ func (v *Visitor) variadicElementParts(elem types.Type) (typeName string, identB
 	typeName, selfQualified := v.qualifyLiftedVariadicElement(elem, typeName)
 
 	if named, ok := elem.(*types.Named); ok {
-		// A methodless named func type has already been rendered AS its base delegate
-		// (`Action<…>`/`Func<…>`) by getCSharpTypeName — it is not a package-class member, so the
-		// `<pkg>_package.` qualifier below would mangle it (`main_package.Action`, CS0426). Nor is a
-		// DEFINED type over an interface that visitTypeSpec emits as a `global using` alias -- the
+		// A DEFINED type over an interface that visitTypeSpec emits as a `global using` alias -- the
 		// types that get a descriptor carrier, by the same predicate (`type DecodeHookFunc
 		// interface{}` -> `global using DecodeHookFunc = object;`): the bare alias name is the referent
 		// (mapstructure's `Span<mapstructure_package.DecodeHookFunc>` was CS0426).
-		if _, isCollapsed := methodlessNamedFuncSignature(elem); !isCollapsed && v.descriptorCarrierFor(elem) == "" {
+		if v.descriptorCarrierFor(elem) == "" {
 			if obj := named.Obj(); obj != nil && obj.Pkg() == v.pkg && !strings.Contains(typeName, ".") {
 				// packageScopeClassName (W3b), not a bare packageName+PackageSuffix concatenation:
 				// Go sees ONE package for obj.Pkg() == v.pkg regardless of which file declares elem,

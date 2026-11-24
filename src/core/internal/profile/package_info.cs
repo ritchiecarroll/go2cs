@@ -207,7 +207,7 @@ partial class profileᴛEdgeMap {
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static int64 Sum(this EdgeMap em) => profile_package.Sum⁔(em);
 }
 partial class profileᴛFunction {
-    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<Func<ж<buffer>, message, error>> decoder(this ref Function p) => profile_package.decoder⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<decoder> decoder(this ref Function p) => profile_package.decoder⁔(ref p);
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void encode(this ref Function p, ж<buffer> Ꮡb) => profile_package.encode⁔(ref p, Ꮡb);
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static functionKey key(this ref Function f) => profile_package.key⁔(ref f);
 }
@@ -215,20 +215,20 @@ partial class profileᴛGraph {
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this ref Graph g) => profile_package.String⁔(ref g);
 }
 partial class profileᴛLabel {
-    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<Func<ж<buffer>, message, error>> decoder(this Label p) => profile_package.decoder⁔(p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<decoder> decoder(this Label p) => profile_package.decoder⁔(p);
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void encode(this Label p, ж<buffer> Ꮡb) => profile_package.encode⁔(p, Ꮡb);
 }
 partial class profileᴛLine {
-    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<Func<ж<buffer>, message, error>> decoder(this ref Line p) => profile_package.decoder⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<decoder> decoder(this ref Line p) => profile_package.decoder⁔(ref p);
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void encode(this ref Line p, ж<buffer> Ꮡb) => profile_package.encode⁔(ref p, Ꮡb);
 }
 partial class profileᴛLocation {
-    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<Func<ж<buffer>, message, error>> decoder(this ref Location p) => profile_package.decoder⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<decoder> decoder(this ref Location p) => profile_package.decoder⁔(ref p);
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void encode(this ref Location p, ж<buffer> Ꮡb) => profile_package.encode⁔(ref p, Ꮡb);
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static locationKey key(this ref Location l) => profile_package.key⁔(ref l);
 }
 partial class profileᴛMapping {
-    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<Func<ж<buffer>, message, error>> decoder(this ref Mapping p) => profile_package.decoder⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<decoder> decoder(this ref Mapping p) => profile_package.decoder⁔(ref p);
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void encode(this ref Mapping p, ж<buffer> Ꮡb) => profile_package.encode⁔(ref p, Ꮡb);
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static mappingKey key(this ref Mapping m) => profile_package.key⁔(ref m);
 }
@@ -252,11 +252,11 @@ partial class profileᴛNodes {
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (int64 flat, int64 cum) Sum(this Nodes ns) => profile_package.Sum⁔(ns);
 }
 partial class profileᴛProfile {
-    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<Func<ж<buffer>, message, error>> decoder(this ref Profile p) => profile_package.decoder⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<decoder> decoder(this ref Profile p) => profile_package.decoder⁔(ref p);
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void preEncode(this ref Profile p) => profile_package.preEncode⁔(ref p);
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void encode(this ref Profile p, ж<buffer> Ꮡb) => profile_package.encode⁔(ref p, Ꮡb);
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error postDecode(this ж<Profile> Ꮡp) => profile_package.postDecode⁔(Ꮡp);
-    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (bool fm, bool im) FilterSamplesByTag(this ref Profile p, Func<@string, @string, int64, bool> focus, Func<@string, @string, int64, bool> ignore) => profile_package.FilterSamplesByTag⁔(ref p, focus, ignore);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (bool fm, bool im) FilterSamplesByTag(this ref Profile p, TagMatch focus, TagMatch ignore) => profile_package.FilterSamplesByTag⁔(ref p, focus, ignore);
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Normalize(this ref Profile p, ж<Profile> Ꮡpb) => profile_package.Normalize⁔(ref p, Ꮡpb);
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error compatible(this ref Profile p, ж<Profile> Ꮡpb) => profile_package.compatible⁔(ref p, Ꮡpb);
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Write(this ж<Profile> Ꮡp, io.Writer w) => profile_package.Write⁔(Ꮡp, w);
@@ -268,7 +268,7 @@ partial class profileᴛProfile {
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool HasFunctions(this ref Profile p) => profile_package.HasFunctions⁔(ref p);
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool HasFileLines(this ref Profile p) => profile_package.HasFileLines⁔(ref p);
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Profile> Copy(this ж<Profile> Ꮡp) => profile_package.Copy⁔(Ꮡp);
-    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Demangle(this ref Profile p, Func<slice<@string>, (map<@string, @string>, error)> d) => profile_package.Demangle⁔(ref p, d);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Demangle(this ref Profile p, Demangler d) => profile_package.Demangle⁔(ref p, d);
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Empty(this ref Profile p) => profile_package.Empty⁔(ref p);
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Scale(this ref Profile p, float64 ratio) => profile_package.Scale⁔(ref p, ratio);
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error ScaleN(this ref Profile p, slice<float64> ratios) => profile_package.ScaleN⁔(ref p, ratios);
@@ -276,12 +276,12 @@ partial class profileᴛProfile {
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error RemoveUninteresting(this ref Profile p) => profile_package.RemoveUninteresting⁔(ref p);
 }
 partial class profileᴛSample {
-    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<Func<ж<buffer>, message, error>> decoder(this ref Sample p) => profile_package.decoder⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<decoder> decoder(this ref Sample p) => profile_package.decoder⁔(ref p);
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void encode(this ref Sample p, ж<buffer> Ꮡb) => profile_package.encode⁔(ref p, Ꮡb);
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static sampleKey key(this ref Sample sample) => profile_package.key⁔(ref sample);
 }
 partial class profileᴛValueType {
-    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<Func<ж<buffer>, message, error>> decoder(this ref ValueType p) => profile_package.decoder⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<decoder> decoder(this ref ValueType p) => profile_package.decoder⁔(ref p);
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void encode(this ref ValueType p, ж<buffer> Ꮡb) => profile_package.encode⁔(ref p, Ꮡb);
 }
 partial class profileᴛedgeList {

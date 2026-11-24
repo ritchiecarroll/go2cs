@@ -27,17 +27,17 @@ partial class bufio_package {
 // control over error handling or large tokens, or must run sequential scans
 // on a reader, should use [bufio.Reader] instead.
 partial struct Scanner {
-    internal io.Reader r;                                                                 // The reader provided by the client.
-    internal Func<slice<byte>, bool, (nint advance, slice<byte> token, error err)> split; // The function to split the tokens.
-    internal nint maxTokenSize;                                                           // Maximum size of a token; modified by tests.
-    internal slice<byte> token;                                                           // Last token returned by split.
-    internal slice<byte> buf;                                                             // Buffer used as argument to split.
-    internal nint start;                                                                  // First non-processed byte in buf.
-    internal nint end;                                                                    // End of data in buf.
-    internal error err;                                                                   // Sticky error.
-    internal nint empties;                                                                // Count of successive empty tokens.
-    internal bool scanCalled;                                                             // Scan has been called; buffer is in use.
-    internal bool done;                                                                   // Scan has finished.
+    internal io.Reader r;       // The reader provided by the client.
+    internal SplitFunc split;   // The function to split the tokens.
+    internal nint maxTokenSize; // Maximum size of a token; modified by tests.
+    internal slice<byte> token; // Last token returned by split.
+    internal slice<byte> buf;   // Buffer used as argument to split.
+    internal nint start;        // First non-processed byte in buf.
+    internal nint end;          // End of data in buf.
+    internal error err;         // Sticky error.
+    internal nint empties;      // Count of successive empty tokens.
+    internal bool scanCalled;   // Scan has been called; buffer is in use.
+    internal bool done;         // Scan has finished.
 }
 
 // SplitFunc is the signature of the split function used to tokenize the
@@ -64,7 +64,7 @@ partial struct Scanner {
 // The function is never called with an empty data slice unless atEOF
 // is true. If atEOF is true, however, data may be non-empty and,
 // as always, holds unprocessed text.
-// type SplitFunc is a methodless func type — rendered inline as its base delegate
+public delegate (nint advance, slice<byte> token, error err) SplitFunc(slice<byte> data, bool atEOF);
 
 // Errors returned by Scanner.
 public static error ErrTooLong = errors.New("bufio.Scanner: token too long");
@@ -85,7 +85,7 @@ internal static UntypedInt startBufSize => 4096; // Size of initial allocation f
 public static ж<Scanner> NewScanner(io.Reader r) {
     return Ꮡ(new Scanner(
         r: r,
-        split: new Func<slice<byte>, bool, (nint, slice<byte>, error)>(ScanLines),
+        split: new SplitFunc(ScanLines),
         maxTokenSize: MaxScanTokenSize
     ));
 }
@@ -280,7 +280,7 @@ internal static void Buffer⁔(/*this*/ ref Scanner s, slice<byte> buf, nint max
 // The default split function is [ScanLines].
 //
 // Split panics if it is called after scanning has started.
-internal static void Split⁔(/*this*/ ref Scanner s, Func<slice<byte>, bool, (nint, slice<byte>, error)> split) {
+internal static void Split⁔(/*this*/ ref Scanner s, SplitFunc split) {
     if (s.scanCalled) {
         throw panic("Split called after Scan");
     }

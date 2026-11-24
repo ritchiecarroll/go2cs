@@ -21,11 +21,11 @@ internal static @string Name(this localStepE s) { return "locale"; }
 
 internal static @string Error(this localStepE s) { return "locale error"; }
 
-// type hook is a methodless func type — rendered inline as its base delegate
+internal delegate nint hook(@string _);
 
-// type left is a methodless func type — rendered inline as its base delegate
+internal delegate bool left(bool _);
 
-// type right is a methodless func type — rendered inline as its base delegate
+internal delegate bool right(bool _);
 
 partial struct probe {
     internal @string name;
@@ -75,13 +75,13 @@ internal static any concrete(@string kind) {
         return ((Func<nint, nint>)(default)).OrTypedNilFunc();
     }
     case {} when kind == "hook"u8: {
-        return (default(Func<@string, nint>)!).OrTypedNilFunc();
+        return (default(hook)!).OrTypedNilFunc();
     }
     case {} when kind == "left"u8: {
-        return (default(Func<bool, bool>)!).OrTypedNilFunc();
+        return (default(left)!).OrTypedNilFunc();
     }
     case {} when kind == "right"u8: {
-        return (default(Func<bool, bool>)!).OrTypedNilFunc();
+        return (default(right)!).OrTypedNilFunc();
     }
     case {} when kind == "livestep"u8: {
         return (typelib.NewStep()).OrTypedNilFunc();
@@ -93,7 +93,7 @@ internal static any concrete(@string kind) {
         return [GoFunc("concrete.func2")] nint (nint x) => x + 3;
     }
     case {} when kind == "livehook"u8: {
-        return new Func<@string, nint>([GoFunc("concrete.func3")] (@string s) => len(s));
+        return new hook([GoFunc("concrete.func3")] (@string s) => len(s));
     }
     case {} when kind == "nilptr"u8: {
         return (ж<typelib.Box>)nil;
@@ -212,7 +212,7 @@ internal static @string which(any a) {
         }
         return "func nil";
     }
-    case {} Δv when Δv._<Func<@string, nint>>(out var v): {
+    case {} Δv when Δv._<hook>(out var v): {
         if (v != nil) {
             return "hook live "u8 + fmt.Sprint(v("abc"));
         }
@@ -244,7 +244,7 @@ internal static @string unbound(any a) {
     case {} ᴛ0 when ᴛ0._<Func<nint, nint>>(out var _): {
         return "func";
     }
-    case {} ᴛ0 when ᴛ0._<Func<@string, nint>>(out var _): {
+    case {} ᴛ0 when ᴛ0._<hook>(out var _): {
         return "hook";
     }
     case ж<typelib.Box>: {
@@ -270,7 +270,7 @@ internal static @string multi(any a) {
         return "local "u8 + fmt.Sprint(v == nil);
     }
     case {} ᴛ0 when ᴛ0._<Func<nint, nint>>(out var _):
-    case {} ᴛ1 when ᴛ1._<Func<@string, nint>>(out var _): {
+    case {} ᴛ1 when ᴛ1._<hook>(out var _): {
         var v = a;
         return "plain "u8 + fmt.Sprint(v == nil);
     }
@@ -294,7 +294,7 @@ internal static @string mixed(any a) {
     case {} Δv when Δv._<namer>(out var v): {
         return "namer "u8 + v.Name();
     }
-    case {} Δv when Δv._<Func<@string, nint>>(out var v): {
+    case {} Δv when Δv._<hook>(out var v): {
         return "hook "u8 + fmt.Sprint(v == nil);
     }}
     return "other";
@@ -308,7 +308,7 @@ internal static bool bareIsNil(ref Func<nint, nint> p) {
     return p == nil;
 }
 
-internal static bool hookIsNil(ref Func<@string, nint> p) {
+internal static bool hookIsNil(ref hook p) {
     return p == nil;
 }
 
@@ -320,7 +320,7 @@ internal static @string escape(any a) {
     case {} Δv when Δv._<Func<nint, nint>>(out var v): {
         return "func "u8 + fmt.Sprint(bareIsNil(ref v));
     }
-    case {} Δv when Δv._<Func<@string, nint>>(out var v): {
+    case {} Δv when Δv._<hook>(out var v): {
         return "hook "u8 + fmt.Sprint(hookIsNil(ref v));
     }}
     return "other";
@@ -328,10 +328,12 @@ internal static @string escape(any a) {
 
 internal static @string merged(any a) {
     switch (a.type()) {
-    case {} ᴛ0 when ᴛ0._<Func<bool, bool>>(out var _): {
+    case {} ᴛ0 when ᴛ0._<left>(out var _): {
         return "pred";
     }
-    /* case Func<bool, bool>: merged with an earlier case mapping to the same C# type (identical body) */}
+    case {} ᴛ0 when ᴛ0._<right>(out var _): {
+        return "pred";
+    }}
 
     return "other";
 }

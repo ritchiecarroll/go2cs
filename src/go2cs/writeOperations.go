@@ -232,6 +232,14 @@ func (v *Visitor) discardStandAloneComments(fromPos, toPos token.Pos) {
 // statement's text is known to end its line.
 //
 // Returns whether anything was written.
+// commentAnchor marks the end of a statement's first emitted line in one output builder (see
+// Visitor.trailingCommentAnchor).
+type commentAnchor struct {
+	builder *strings.Builder
+	stmtEnd token.Pos
+	offset  int
+}
+
 func (v *Visitor) writeTrailingComment(stmtEnd token.Pos) bool {
 	if !v.options.includeComments || stmtEnd == token.NoPos || len(v.sortedCommentPos) == 0 {
 		return false
@@ -289,6 +297,20 @@ func (v *Visitor) writeTrailingComment(stmtEnd token.Pos) bool {
 	// statement.
 	current := v.outputBuilder.String()
 	lineTerminator := ""
+
+	if anchor := v.trailingCommentAnchor; anchor.builder == v.outputBuilder && anchor.stmtEnd == stmtEnd && anchor.offset <= len(current) {
+		v.outputBuilder.Reset()
+		v.outputBuilder.WriteString(current[:anchor.offset])
+		v.outputBuilder.WriteString(trailing.String())
+		v.outputBuilder.WriteString(current[anchor.offset:])
+
+		for _, pos := range handledPos {
+			delete(v.standAloneComments, pos)
+			v.sortedCommentPos = removeCommentPos(v.sortedCommentPos, pos)
+		}
+
+		return true
+	}
 
 	if strings.HasSuffix(current, v.newline) {
 		lineTerminator = v.newline

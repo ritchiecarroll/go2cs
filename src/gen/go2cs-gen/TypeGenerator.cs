@@ -315,6 +315,8 @@ public class TypeGenerator : ISourceGenerator
                             TypeName = typeName,
                             TargetTypeName = identifier,
                             TypeClass = "Numeric",
+                            // A Go method named CompareTo takes IComparable<T>'s member explicit (NumericTypeTemplate).
+                            GoMethodNames = GoMethodNames(semanticModel, targetSyntax),
                             UsingStatements = usingStatements
                         }
                         .Generate();

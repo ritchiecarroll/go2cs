@@ -50,7 +50,7 @@ using System.ComponentModel;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("lib.go", "lib.cs", "AA0e3Nzc")]
+[assembly: GoPositionMap("lib.go", "lib.cs", "AA0e3NzcAA8e")]
 // </GoSourcePositionMaps>
 
 namespace go.DeltaNameProjection;

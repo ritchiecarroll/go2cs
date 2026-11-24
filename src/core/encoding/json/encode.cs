@@ -391,21 +391,21 @@ partial struct encOpts {
     internal bool escapeHTML;
 }
 
-// type encoderFunc is a methodless func type — rendered inline as its base delegate
+internal delegate void encoderFunc(ж<encodeState> e, reflect.Value v, encOpts opts);
 
 internal static readonly ж<sync.Map> ᏑencoderCache = new StaticBox<sync.Map>(default(sync.Map));
 internal static ref sync.Map encoderCache => ref ((StaticBox<sync.Map>)ᏑencoderCache).ValueSlot; // map[reflect.Type]encoderFunc
 
-internal static Action<ж<encodeState>, reflect.Value, encOpts> valueEncoder(reflect.Value v) {
+internal static encoderFunc valueEncoder(reflect.Value v) {
     if (!v.IsValid()) {
         return invalidValueEncoder;
     }
     return typeEncoder(v.Type());
 }
 
-internal static Action<ж<encodeState>, reflect.Value, encOpts> typeEncoder(reflect.Type t) {
+internal static encoderFunc typeEncoder(reflect.Type t) {
     var (fiΔ1, ok) = ᏑencoderCache.Load(t); if (ok) {
-        return fiΔ1._<Action<ж<encodeState>, reflect.Value, encOpts>>();
+        return fiΔ1._<encoderFunc>();
     }
 
     // To deal with recursive types, populate the map with an
@@ -414,13 +414,13 @@ internal static Action<ж<encodeState>, reflect.Value, encOpts> typeEncoder(refl
     //
     // This indirect func is only used for recursive types,
     // and briefly during racing calls to typeEncoder.
-    var indirect = sync.OnceValue([GoFunc("typeEncoder.func1")] Action<ж<encodeState>, reflect.Value, encOpts> () => newTypeEncoder(t, true));
+    var indirect = sync.OnceValue([GoFunc("typeEncoder.func1")] encoderFunc () => newTypeEncoder(t, true));
     var indirectʗ1 = indirect;
-    var (fi, loaded) = ᏑencoderCache.LoadOrStore(t, new Action<ж<encodeState>, reflect.Value, encOpts>([GoFunc("typeEncoder.func2")] (ж<encodeState> e, reflect.Value v, encOpts opts) => {
+    var (fi, loaded) = ᏑencoderCache.LoadOrStore(t, new encoderFunc([GoFunc("typeEncoder.func2")] (ж<encodeState> e, reflect.Value v, encOpts opts) => {
         indirectʗ1()(e, v, opts);
     }));
     if (loaded) {
-        return fi._<Action<ж<encodeState>, reflect.Value, encOpts>>();
+        return fi._<encoderFunc>();
     }
 
     var f = indirect();
@@ -433,19 +433,19 @@ internal static reflect.Type textMarshalerType = reflect.TypeFor<encoding.TextMa
 
 // newTypeEncoder constructs an encoderFunc for a type.
 // The returned encoder only checks CanAddr when allowAddr is true.
-internal static Action<ж<encodeState>, reflect.Value, encOpts> newTypeEncoder(reflect.Type t, bool allowAddr) {
+internal static encoderFunc newTypeEncoder(reflect.Type t, bool allowAddr) {
     // If we have a non-pointer value whose type implements
     // Marshaler with a value receiver, then we're better off taking
     // the address of the value - otherwise we end up with an
     // allocation as we cast the value to an interface.
     if (t.Kind() != reflect.Pointer && allowAddr && reflect.PointerTo(t).Implements(marshalerType)) {
-        return newCondAddrEncoder(new Action<ж<encodeState>, reflect.Value, encOpts>(addrMarshalerEncoder), newTypeEncoder(t, false));
+        return newCondAddrEncoder(new encoderFunc(addrMarshalerEncoder), newTypeEncoder(t, false));
     }
     if (t.Implements(marshalerType)) {
         return marshalerEncoder;
     }
     if (t.Kind() != reflect.Pointer && allowAddr && reflect.PointerTo(t).Implements(textMarshalerType)) {
-        return newCondAddrEncoder(new Action<ж<encodeState>, reflect.Value, encOpts>(addrTextMarshalerEncoder), newTypeEncoder(t, false));
+        return newCondAddrEncoder(new encoderFunc(addrTextMarshalerEncoder), newTypeEncoder(t, false));
     }
     if (t.Implements(textMarshalerType)) {
         return textMarshalerEncoder;
@@ -462,10 +462,10 @@ internal static Action<ж<encodeState>, reflect.Value, encOpts> newTypeEncoder(r
         return uintEncoder;
     }
     case var ᴛ when ᴛ == reflect.Float32: {
-        return float32Encoder;
+        return NilSafeDelegateConversion<encoderFunc, Action<ж<encodeState>, reflect.Value, encOpts>>(float32Encoder);
     }
     case var ᴛ when ᴛ == reflect.Float64: {
-        return float64Encoder;
+        return NilSafeDelegateConversion<encoderFunc, Action<ж<encodeState>, reflect.Value, encOpts>>(float64Encoder);
     }
     case var ᴛ when ᴛ == reflect.String: {
         return stringEncoder;
@@ -795,14 +795,14 @@ break_FieldLoop:;
     }
 }
 
-internal static Action<ж<encodeState>, reflect.Value, encOpts> newStructEncoder(reflect.Type t) {
+internal static encoderFunc newStructEncoder(reflect.Type t) {
     var se = new structEncoder(fields: cachedTypeFields(t));
     var seʗ1 = se;
     return (ж<encodeState> p1, reflect.Value p2, encOpts p3) => seʗ1.encode(p1, p2, p3);
 }
 
 partial struct mapEncoder {
-    internal Action<ж<encodeState>, reflect.Value, encOpts> elemEnc;
+    internal encoderFunc elemEnc;
 }
 
 internal static void encode⁔(/*this*/ mapEncoder me, ж<encodeState> Ꮡe, reflect.Value v, encOpts opts) {
@@ -855,7 +855,7 @@ internal static void encode⁔(/*this*/ mapEncoder me, ж<encodeState> Ꮡe, ref
     finally { ᒐ.Run(); }
 }
 
-internal static Action<ж<encodeState>, reflect.Value, encOpts> newMapEncoder(reflect.Type t) {
+internal static encoderFunc newMapEncoder(reflect.Type t) {
     switch (t.Key().Kind()) {
     case var ᴛ when ᴛ == reflect.String || ᴛ == reflect.Int || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64 || ᴛ == reflect.Uint || ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32 || ᴛ == reflect.Uint64 || ᴛ == reflect.Uintptr: {
         break;
@@ -889,7 +889,7 @@ internal static void encodeByteSlice(ж<encodeState> e, reflect.Value v, encOpts
 
 // sliceEncoder just wraps an arrayEncoder, checking to make sure the value isn't nil.
 partial struct sliceEncoder {
-    internal Action<ж<encodeState>, reflect.Value, encOpts> arrayEnc;
+    internal encoderFunc arrayEnc;
 }
 
 internal partial struct encode_ptr /*dyn*/ {
@@ -927,7 +927,7 @@ internal static void encode⁔(/*this*/ sliceEncoder se, ж<encodeState> Ꮡe, r
     finally { ᒐ.Run(); }
 }
 
-internal static Action<ж<encodeState>, reflect.Value, encOpts> newSliceEncoder(reflect.Type t) {
+internal static encoderFunc newSliceEncoder(reflect.Type t) {
     // Byte slices get special treatment; arrays don't.
     if (t.Elem().Kind() == reflect.Uint8) {
         var p = reflect.PointerTo(t.Elem());
@@ -941,7 +941,7 @@ internal static Action<ж<encodeState>, reflect.Value, encOpts> newSliceEncoder(
 }
 
 partial struct arrayEncoder {
-    internal Action<ж<encodeState>, reflect.Value, encOpts> elemEnc;
+    internal encoderFunc elemEnc;
 }
 
 internal static void encode⁔(/*this*/ arrayEncoder ae, ж<encodeState> e, reflect.Value v, encOpts opts) {
@@ -956,14 +956,14 @@ internal static void encode⁔(/*this*/ arrayEncoder ae, ж<encodeState> e, refl
     e.of(encodeState.ᏑBuffer).WriteByte((byte)']');
 }
 
-internal static Action<ж<encodeState>, reflect.Value, encOpts> newArrayEncoder(reflect.Type t) {
+internal static encoderFunc newArrayEncoder(reflect.Type t) {
     var enc = new arrayEncoder(typeEncoder(t.Elem()));
     var encʗ1 = enc;
     return (ж<encodeState> p1, reflect.Value p2, encOpts p3) => encʗ1.encode(p1, p2, p3);
 }
 
 partial struct ptrEncoder {
-    internal Action<ж<encodeState>, reflect.Value, encOpts> elemEnc;
+    internal encoderFunc elemEnc;
 }
 
 internal static void encode⁔(/*this*/ ptrEncoder pe, ж<encodeState> Ꮡe, reflect.Value v, encOpts opts) {
@@ -994,14 +994,14 @@ internal static void encode⁔(/*this*/ ptrEncoder pe, ж<encodeState> Ꮡe, ref
     finally { ᒐ.Run(); }
 }
 
-internal static Action<ж<encodeState>, reflect.Value, encOpts> newPtrEncoder(reflect.Type t) {
+internal static encoderFunc newPtrEncoder(reflect.Type t) {
     var enc = new ptrEncoder(typeEncoder(t.Elem()));
     var encʗ1 = enc;
     return (ж<encodeState> p1, reflect.Value p2, encOpts p3) => encʗ1.encode(p1, p2, p3);
 }
 
 partial struct condAddrEncoder {
-    internal Action<ж<encodeState>, reflect.Value, encOpts> canAddrEnc, elseEnc;
+    internal encoderFunc canAddrEnc, elseEnc;
 }
 
 internal static void encode⁔(/*this*/ condAddrEncoder ce, ж<encodeState> e, reflect.Value v, encOpts opts) {
@@ -1014,7 +1014,7 @@ internal static void encode⁔(/*this*/ condAddrEncoder ce, ж<encodeState> e, r
 
 // newCondAddrEncoder returns an encoder that checks whether its value
 // CanAddr and delegates to canAddrEnc if so, else to elseEnc.
-internal static Action<ж<encodeState>, reflect.Value, encOpts> newCondAddrEncoder(Action<ж<encodeState>, reflect.Value, encOpts> canAddrEnc, Action<ж<encodeState>, reflect.Value, encOpts> elseEnc) {
+internal static encoderFunc newCondAddrEncoder(encoderFunc canAddrEnc, encoderFunc elseEnc) {
     var enc = new condAddrEncoder(canAddrEnc: canAddrEnc, elseEnc: elseEnc);
     var encʗ1 = enc;
     return (ж<encodeState> p1, reflect.Value p2, encOpts p3) => encʗ1.encode(p1, p2, p3);
@@ -1172,7 +1172,7 @@ partial struct field {
     internal bool omitZero;
     internal Func<reflect.Value, bool> isZero;
     internal bool quoted;
-    internal Action<ж<encodeState>, reflect.Value, encOpts> encoder;
+    internal encoderFunc encoder;
 }
 
 public partial interface isZeroer {

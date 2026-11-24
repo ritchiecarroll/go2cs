@@ -97,6 +97,9 @@ type HasRec struct{ R lib.Δrec }
 // A bare Δ type with a bare Δ field, declared here.
 type Δ struct{ Δ int }
 
+// A package-level Δ-led named func type.
+type Δg func() string
+
 // An embed whose emitted name is Δslice, promoting slice's field Δslice, beside an own field one letter away. (An own
 // field spelled Δslice here would share the embed's C# name, and GO2CS2015 refuses it.)
 type X struct {
@@ -208,6 +211,13 @@ func main() {
 	xf := reflect.TypeOf(x)
 	fmt.Println("embed named Δslice in C#:", x.Δslice, x.slice.Δslice, x.Δslicex, xf.Field(0).Name, xf.Field(0).Anonymous,
 		xf.Field(1).Name, fmt.Sprintf("%+v", x))
+	var dbl lib.ΔFn = func(n int) int { return n * 2 }
+	var g Δg = func() string { return "Δg called" }
+	var lf lib.Δfn = func() string { return "lib.Δfn called" }
+	type Δh func(int) int
+	var hf Δh = func(n int) int { return n + 1 }
+	fmt.Printf("Δ func types: %d %d %s %s %d %T %T %T %T %s %s\n", lib.ApplyΔ(dbl, 50), lib.ApplyΔ(lib.ΔFn(hf), 51), g(), lf(), hf(52),
+		dbl, g, lf, hf, reflect.TypeOf(g).Name(), reflect.TypeOf(hf).Name())
 }
 
 func methodNames(t reflect.Type) []string {

@@ -198,6 +198,13 @@ func (v *Visitor) convKeyValueExpr(keyValueExpr *ast.KeyValueExpr, context KeyVa
 	valueExpr = v.boxUntypedConstAsDefaultType(valueSlotType, keyValueExpr.Value, valueExpr)
 	valueExpr = v.boxPointerIntoEmptyInterface(valueSlotType, keyValueExpr.Value, valueExpr)
 
+	// A func value keyed into a map, array or slice element of a different func type (`[...]handler{k: (*node).add}`,
+	// internal/trace's dispatch table) converts as an assignment does (funcValueForSlot). A struct field converts
+	// through the composite literal's own wrap (recordDelegateArgWrap).
+	if context.source == MapSource {
+		valueExpr = v.funcValueForSlot(valueSlotType, keyValueExpr.Value, valueExpr)
+	}
+
 	// A NARROW-integer arithmetic value in a struct-FIELD initializer needs the same
 	// cast-back as the assignment forms — Go wraps the arithmetic at the operand width,
 	// C# promotes it to int (image/draw's RGBA64 literal `R: uint16(…)+srgba.R`,

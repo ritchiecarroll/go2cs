@@ -10,7 +10,7 @@ internal static @string tag(this Handler h) {
     return "handler";
 }
 
-// type Plain is a methodless func type — rendered inline as its base delegate
+public delegate @string Plain(nint _Δp0, @string _Δp1);
 
 internal static @string invoke(Func<nint, @string, @string> f, nint n, @string s) {
     return f(n, s);
@@ -25,8 +25,8 @@ internal static void main() {
     fmt.Println(invoke(NilSafeDelegateConversion<Func<nint, @string, @string>, Handler>(h), 1, "a"));
     fmt.Println(h.tag());
 
-    Func<nint, @string, @string> p = describe;
-    fmt.Println(invoke(p, 2, "b"));
+    Plain p = describe;
+    fmt.Println(invoke(NilSafeDelegateConversion<Func<nint, @string, @string>, Plain>(p), 2, "b"));
 
     fmt.Println(invoke(describe, 3, "c"));
     fmt.Println(invoke([GoFunc("main.func1")] (nint n, @string s) => s + "!"u8, 4, "d"));

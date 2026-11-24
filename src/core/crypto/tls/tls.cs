@@ -162,14 +162,14 @@ internal static (ж<Conn>, error) dial(context.Context ctx, ж<net.Dialer> Ꮡne
         ref var config = ref Ꮡconfig.DerefOrNull();
 
         if (netDialer.Timeout != 0) {
-            Action cancel = default;
+            context.CancelFunc cancel = default;
             (ctx, cancel) = context.WithTimeout(ctx, netDialer.Timeout);
             var cancelʗ1 = cancel;
             defer(() => cancelʗ1(), ref ᒐ);
         }
 
         if (!netDialer.Deadline.IsZero()) {
-            Action cancel = default;
+            context.CancelFunc cancel = default;
             (ctx, cancel) = context.WithDeadline(ctx, netDialer.Deadline);
             var cancelʗ2 = cancel;
             defer(() => cancelʗ2(), ref ᒐ);

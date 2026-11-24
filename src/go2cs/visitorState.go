@@ -535,6 +535,11 @@ type Visitor struct {
 	// funcLitRbrace is the closing brace of the func literal whose body is being visited; a comment past it
 	// on a statement's line labels the literal, not the statement (writeTrailingComment).
 	funcLitRbrace token.Pos
+	// trailingCommentAnchor is where, in outputBuilder, the first line of the statement just written ends,
+	// when that statement emitted more lines after it: a tuple assignment's follow-up lines (`lhs =
+	// NilSafeDelegateConversion<…>(tmp);`). The statement's Go end-of-line comment belongs on that first
+	// line, beside the call it describes (writeTrailingComment); visitListStmt clears it.
+	trailingCommentAnchor commentAnchor
 	// manualConversion mirrors the file entry's flag: this file's destination `.cs` is a hand-owned
 	// manual conversion, so the visit still feeds package-wide state but the emitted text lands in
 	// the non-compiled `.cs.auto` review sibling. Consulted by recordTypeAccessibility, which must

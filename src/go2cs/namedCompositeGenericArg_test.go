@@ -93,9 +93,14 @@ func main() {
 		}
 	}
 
-	// CONTROLS: an unnamed argument, a named argument at a bare type-parameter position, and a named func
-	// argument keep their bare form.
-	for _, want := range []string{"keys(new map<", "ident(scores)", "count(even, 2)"} {
+	// A defined func type's value at a generic func parameter converts to the parameter as this call
+	// instantiates it: Pred is a delegate of its own, and C# infers T from the structural Func<nint, bool>.
+	if want := "count(NilSafeDelegateConversion<Func<nint, bool>, Pred>(even), 2)"; !strings.Contains(mainCs, want) {
+		t.Errorf("want %q: the parameter is func(T) bool instantiated at int:\n%s", want, mainCs)
+	}
+
+	// CONTROLS: an unnamed argument and a named argument at a bare type-parameter position keep their bare form.
+	for _, want := range []string{"keys(new map<", "ident(scores)"} {
 		if !strings.Contains(mainCs, want) {
 			t.Errorf("control: want %q unchanged:\n%s", want, mainCs)
 		}

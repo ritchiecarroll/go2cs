@@ -279,10 +279,6 @@ func foreignAliasTargetName(pkg *packages.Package, target types.Type) (string, b
 		return "", false
 	}
 
-	if _, isInlineFuncType := methodlessNamedFuncSignature(named); isInlineFuncType {
-		return "", false
-	}
-
 	// A named INTERFACE target is a nested C# interface only when its own declaration defines the
 	// interface INLINE (io/fs's `type FileInfo interface{…}`, go/ast's `Expr`). A defined type over
 	// a NAMED interface is a using alias in its own package, so naming it as a package member would

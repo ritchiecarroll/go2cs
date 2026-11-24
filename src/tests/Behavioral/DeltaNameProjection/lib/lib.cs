@@ -43,4 +43,10 @@ partial struct WrapRec {
     /*embed*/ public Rec Rec;
 }
 
+[GoName("ΔFn")] public delegate nint ΔFn(nint _);
+
+public static nint ApplyΔ(ΔFn f, nint n) { return f(n); }
+
+[GoName("Δfn")] internal delegate @string Δfn();
+
 } // end lib_package

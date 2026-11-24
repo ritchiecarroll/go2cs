@@ -16,31 +16,6 @@ import (
 
 // Handles function types in context of a TypeSpec
 func (v *Visitor) visitFuncType(funcType *ast.FuncType, identType types.Type, name string) {
-	// A non-generic methodless named func type is rendered AS its base C# delegate everywhere it
-	// is referenced (see methodlessNamedFuncSignature), matching Go's free named↔underlying func
-	// interconversion — so it emits NO distinct delegate declaration here. Only a marker comment,
-	// mirroring the hand-converted-type case; every reference resolves to `Action`/`Func<…>`.
-	if _, ok := methodlessNamedFuncSignature(identType); ok {
-		// Record the name so its exported-type-alias is NOT emitted — there is no named
-		// `<pkg>_package.<Δname>` type to alias to (a consumer's `[GoTypeAlias]` global-using would
-		// name a nonexistent type; go/doc's `ast.Filter` → `go.go.ast_package.ΔFilter`, CS0426).
-		packageLock.Lock()
-		packageInlineFuncTypeNames[name] = true
-		packageInlineFuncTypeNames[getCoreSanitizedIdentifier(name)] = true
-		packageLock.Unlock()
-
-		// In a function body the marker is laid out as a statement: it starts its own line, and the
-		// blank line Go has before or after the declaration is the block's (writeStatementGap).
-		v.outputBuilder.WriteString(v.newline)
-		v.writePendingTypeDoc(v.outputBuilder)
-		v.writeOutput("// type %s is a methodless func type — rendered inline as its base delegate", name)
-
-		if !v.inFunction {
-			v.outputBuilder.WriteString(v.newline)
-		}
-
-		return
-	}
 
 	var resultsSignature, parameterSignature string
 
@@ -53,18 +28,30 @@ func (v *Visitor) visitFuncType(funcType *ast.FuncType, identType types.Type, na
 	// whose V was undefined (CS0246) while uses correctly said `Seq<V>` (CS0308).
 	typeParams, constraints := v.getGenericDefinition(identType)
 
-	if len(constraints) > 0 {
-		constraints = fmt.Sprintf("%s%s%s", constraints, v.newline, v.indent(v.indentLevel))
-	}
+	// A func type declared inside a function body is lifted to member level, as every other local type kind is
+	// (liftLocalTypeDecl): C# declares no delegate in a method body. Its Go name rides [GoLocalName], so reflection
+	// prints `main.aFunc`, not the lifted `main.grouped_aFunc`. A package-level declaration is unchanged.
+	localName := v.localNameAttrFor(identType)
+	name, target, finish := v.liftLocalTypeDecl(name, identType)
 
-	v.outputBuilder.WriteString(v.newline)
-	v.writePendingTypeDoc(v.outputBuilder)
-	// The delegate's access and [GoName] stamp follow its Go name when it has one (getGoAccess, localNameAttrFor).
+	// The delegate's access follows its Go name at package level (getGoAccess: a Δ-led name is exported), as its
+	// [GoName] stamp does (localNameAttrFor); a lifted local delegate keeps its emitted name's.
 	access := getAccess(name)
 
 	if named, ok := identType.(*types.Named); ok && !v.inFunction {
 		access = getGoAccess(named.Obj().Name())
 	}
 
-	v.writeOutputLn("%s%s delegate %s %s%s(%s)%s;", v.localNameAttrFor(identType), access, resultsSignature, name, typeParams, parameterSignature, constraints)
+	if len(constraints) > 0 {
+		constraints = fmt.Sprintf("%s%s%s", constraints, v.newline, v.indent(v.indentLevel))
+	}
+
+	if !v.inFunction {
+		target.WriteString(v.newline)
+	}
+
+	v.writePendingTypeDoc(target)
+	v.writeString(target, "%s%s delegate %s %s%s(%s)%s;", localName, access, resultsSignature, name, typeParams, parameterSignature, constraints)
+	target.WriteString(v.newline)
+	finish()
 }

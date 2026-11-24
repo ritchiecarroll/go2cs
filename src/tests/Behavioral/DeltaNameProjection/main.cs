@@ -120,6 +120,8 @@ public partial struct Δ {
     [GoName("Δ")] public nint ΔΔ;
 }
 
+[GoName("Δg")] internal delegate @string Δg();
+
 partial struct X {
     /*embed*/ internal Δslice Δslice;
     [GoName("Δslicex")] public nint Δslicex;
@@ -144,6 +146,8 @@ internal partial interface main_lo /*dyn*/ {
 internal partial interface main_type /*dyn*/ {
     [GoName("Δm")] @string Δm();
 }
+
+[GoLocalName("Δh")] internal delegate nint main_Δh(nint _Δp0);
 
 internal static void main() {
     var (b, _) = json.Marshal(new P(1D));
@@ -247,6 +251,12 @@ internal static void main() {
     var xf = reflect.TypeOf(x);
     fmt.Println("embed named Δslice in C#:", x.ΔΔslice, x.Δslice.ΔΔslice, x.Δslicex, xf.Field(0).Name, xf.Field(0).Anonymous,
         xf.Field(1).Name, fmt.Sprintf("%+v"u8, x));
+    lib.ΔFn dbl = [GoFunc("main.func1")] (nint n) => n * 2;
+    Δg g = [GoFunc("main.func2")] () => "Δg called";
+    lib.Δfn lf = [GoFunc("main.func3")] () => "lib.Δfn called";
+    main_Δh hf = [GoFunc("main.func4")] (nint n) => n + 1;
+    fmt.Printf("Δ func types: %d %d %s %s %d %T %T %T %T %s %s\n"u8, lib.ApplyΔ(dbl, 50), lib.ApplyΔ(NilSafeDelegateConversion<lib.ΔFn, main_Δh>(hf), 51), g(), lf(), hf(52),
+        (dbl).OrTypedNilFunc(), (g).OrTypedNilFunc(), (lf).OrTypedNilFunc(), (hf).OrTypedNilFunc(), reflect.TypeOf((g).OrTypedNilFunc()).Name(), reflect.TypeOf((hf).OrTypedNilFunc()).Name());
 }
 
 internal static slice<@string> methodNames(reflect.Type t) {

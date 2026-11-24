@@ -571,6 +571,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckDefinedForeignStructConvert() => CheckTarget("DefinedForeignStructConvert");
 
     [TestMethod]
+    public void CheckDefinedFuncTypeIdentity() => CheckTarget("DefinedFuncTypeIdentity");
+
+    [TestMethod]
     public void CheckDefinedOverNamedComposite() => CheckTarget("DefinedOverNamedComposite");
 
     [TestMethod]
@@ -1603,6 +1606,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckNamedBytesConstConversion() => CheckTarget("NamedBytesConstConversion");
 
     [TestMethod]
+    public void CheckNamedChanMapNumericShadow() => CheckTarget("NamedChanMapNumericShadow");
+
+    [TestMethod]
     public void CheckNamedChannelType() => CheckTarget("NamedChannelType");
 
     [TestMethod]
@@ -1715,6 +1721,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckNamedPointerValueSlot() => CheckTarget("NamedPointerValueSlot");
+
+    [TestMethod]
+    public void CheckNamedPointerValueStruct() => CheckTarget("NamedPointerValueStruct");
 
     [TestMethod]
     public void CheckNamedResultAddressEscape() => CheckTarget("NamedResultAddressEscape");
@@ -2987,6 +2996,12 @@ public class C3_TargetComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckUnsafeBuiltinIntegerLen() => CheckTarget("UnsafeBuiltinIntegerLen");
+
+    [TestMethod]
+    public void CheckUnsafeHeaderViewFamily() => CheckTarget("UnsafeHeaderViewFamily");
+
+    [TestMethod]
+    public void CheckUnsafeHeaderViewRefusals() => CheckTarget("UnsafeHeaderViewRefusals");
 
     [TestMethod]
     public void CheckUnsafeOperations() => CheckTarget("UnsafeOperations");

@@ -512,6 +512,8 @@
     <Project Path="tests/Behavioral/DefinedElemStringConversion/DefinedElemStringConversion.csproj" />
     <Project Path="tests/Behavioral/DefinedForeignStructConvert/DefinedForeignStructConvert.csproj" />
     <Project Path="tests/Behavioral/DefinedForeignStructConvert/rec/DefinedForeignStructConvert.rec.csproj" />
+    <Project Path="tests/Behavioral/DefinedFuncTypeIdentity/DefinedFuncTypeIdentity.csproj" />
+    <Project Path="tests/Behavioral/DefinedFuncTypeIdentity/hooks/DefinedFuncTypeIdentity.hooks.csproj" />
     <Project Path="tests/Behavioral/DefinedOverNamedComposite/DefinedOverNamedComposite.csproj" />
     <Project Path="tests/Behavioral/DefinedOverNamedComposite/fslike/DefinedOverNamedComposite.fslike.csproj" />
     <Project Path="tests/Behavioral/DefinedStructArrayFields/DefinedStructArrayFields.csproj" />
@@ -891,6 +893,7 @@
     <Project Path="tests/Behavioral/NamedArrayWrapper/NamedArrayWrapper.csproj" />
     <Project Path="tests/Behavioral/NamedBasicConversion/NamedBasicConversion.csproj" />
     <Project Path="tests/Behavioral/NamedBooleanLogic/NamedBooleanLogic.csproj" />
+    <Project Path="tests/Behavioral/NamedChanMapNumericShadow/NamedChanMapNumericShadow.csproj" />
     <Project Path="tests/Behavioral/NamedChannelType/NamedChannelType.csproj" />
     <Project Path="tests/Behavioral/NamedBytesByteSeq/NamedBytesByteSeq.csproj" />
     <Project Path="tests/Behavioral/NamedBytesConstConversion/NamedBytesConstConversion.csproj" />
@@ -934,6 +937,7 @@
     <Project Path="tests/Behavioral/NamedSliceMethodShadow/NamedSliceMethodShadow.csproj" />
     <Project Path="tests/Behavioral/NamedPointerReinterpret/NamedPointerReinterpret.csproj" />
     <Project Path="tests/Behavioral/NamedPointerValueSlot/NamedPointerValueSlot.csproj" />
+    <Project Path="tests/Behavioral/NamedPointerValueStruct/NamedPointerValueStruct.csproj" />
     <Project Path="tests/Behavioral/NamedResultAddressEscape/NamedResultAddressEscape.csproj" />
     <Project Path="tests/Behavioral/NamedResultCaptureModeReceiver/NamedResultCaptureModeReceiver.csproj" />
     <Project Path="tests/Behavioral/NamedResultLambdaInfer/NamedResultLambdaInfer.csproj" />
@@ -1401,6 +1405,8 @@
     <Project Path="tests/Behavioral/UnnamedParams/UnnamedParams.csproj" />
     <Project Path="tests/Behavioral/UnsafeOperations/UnsafeOperations.csproj" />
     <Project Path="tests/Behavioral/UnsafeBuiltinIntegerLen/UnsafeBuiltinIntegerLen.csproj" />
+    <Project Path="tests/Behavioral/UnsafeHeaderViewFamily/UnsafeHeaderViewFamily.csproj" />
+    <Project Path="tests/Behavioral/UnsafeHeaderViewRefusals/UnsafeHeaderViewRefusals.csproj" />
     <Project Path="tests/Behavioral/UnsafePointerArgPassing/UnsafePointerArgPassing.csproj" />
     <Project Path="tests/Behavioral/UnsafePointerCallResultLifetime/UnsafePointerCallResultLifetime.csproj" />
     <Project Path="tests/Behavioral/UnsafePointerInferredNoImport/UnsafePointerInferredNoImport.csproj" />
@@ -1411,6 +1417,7 @@
     <Project Path="tests/Behavioral/UnsafePointerReceiverCopy/UnsafePointerReceiverCopy.csproj" />
     <Project Path="tests/Behavioral/UnsafePointerReinterpret/UnsafePointerReinterpret.csproj" />
     <Project Path="tests/Behavioral/UnsafePointerTypeAlias/UnsafePointerTypeAlias.csproj" />
+    <Project Path="tests/Behavioral/UnsafePointerTypeAlias/ualias/go.ualias.csproj" />
     <Project Path="tests/Behavioral/UnsafePointerWordNilSlot/UnsafePointerWordNilSlot.csproj" />
     <Project Path="tests/Behavioral/UnsafeStringEmpty/UnsafeStringEmpty.csproj" />
     <Project Path="tests/Behavioral/UnsafeSliceDataAliasing/UnsafeSliceDataAliasing.csproj" />

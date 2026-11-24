@@ -40,3 +40,12 @@ type Δ struct{ Δ int }
 
 // WrapRec promotes Rec's Δ-led field to another package.
 type WrapRec struct{ Rec }
+
+// ΔFn is an exported named func type whose name starts with Δ.
+type ΔFn func(int) int
+
+// ApplyΔ calls f, typed by another package.
+func ApplyΔ(f ΔFn, n int) int { return f(n) }
+
+// Δfn is a Δ-led named func type, Δ then a lower-case letter: exported.
+type Δfn func() string
