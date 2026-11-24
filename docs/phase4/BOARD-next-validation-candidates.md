@@ -42112,6 +42112,8 @@ for as long as the process lives, dropped only by the next sweep after a collect
 RegisterPinned and Sweep on linux while rooting the darwin token-table failure (the "21 registrations the test never
 made"). The cost per check is one pin and one table entry; nothing here says it matters, only that it never stops.
 The token registry's own count is exact since the token-table seat, so the churn is visible in `RegisteredCount`.
+One reading moved with that seat: an overwrite of a key no longer counts, and so no longer calls
+`Q44RegistryCensus.Mint` either, so a Q44 mint count taken across the seat reads lower by the overwrites.
 
 **Likely seat.** Read the affinity mask without minting a token (a stack or reused native buffer for the syscall),
 if a measurement shows the per-second pin or the swept entries cost anything on a long-lived host.
