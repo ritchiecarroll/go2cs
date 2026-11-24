@@ -1111,7 +1111,7 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 					identContext := DefaultIdentContext()
 					identContext.isPointer = true
 
-					return v.unsafePointerBoxEmission(callExpr, arg, v.convExpr(arg, []ExprContext{identContext}))
+					return v.unsafePointerBoxEmission(callExpr, arg, v.convExpr(arg, []ExprContext{identContext}), "@unsafe.Pointer")
 				}
 
 				// A deref-aliased pointer RECEIVER renders as the pointed-to VALUE alias
@@ -4207,8 +4207,13 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		// The `unsafe.Pointer(x)` constructor form of the dead-wrapper peephole (see
 		// markDeadUnsafePointerBox): the enclosing `uintptr(…)` reads the address straight back
 		// out, so the wrapper object is never built and the operand stands alone.
-		if constructType == "new " && funcName == "@unsafe.Pointer" && len(callExpr.Args) == 1 {
-			result = v.unsafePointerBoxEmission(callExpr, callExpr.Args[0], expr)
+		//
+		// An ALIAS of unsafe.Pointer (`type ptr = unsafe.Pointer`, github.com/zeebo/xxh3's utils.go) is the same type and
+		// takes the same door: spelled `new ptr(Ꮡ(…))` it bound the bare mint, which retains nothing, so a pointer to a
+		// composite literal (`ptr(&[secretSize]byte{})`, the package's `key`) lost its storage to the collector while
+		// the pointer was still in use (C45 D6, the converted xxh3 identity program).
+		if constructType == "new " && (funcName == "@unsafe.Pointer" || v.isUnsafePointerAlias(callExpr.Fun)) && len(callExpr.Args) == 1 {
+			result = v.unsafePointerBoxEmission(callExpr, callExpr.Args[0], expr, funcName)
 		} else {
 			// Go's stack backing store: a variable's first qualifying append passes the buffer its function declared
 			// at entry (stackAppendHints.go).
@@ -7676,10 +7681,11 @@ func (v *Visitor) markDeadUnsafePointerBox(callExpr *ast.CallExpr, arg ast.Expr)
 
 // unsafePointerBoxEmission renders an `unsafe.Pointer(x)` conversion whose operand has already been
 // converted to operandExpr — as the wrapper construction, or as the bare operand when the wrapper is
-// dead (see markDeadUnsafePointerBox). The operand keeps the file's usual parenthesization rule: a
+// dead (see markDeadUnsafePointerBox). typeName is the name the conversion spells: `@unsafe.Pointer`, or an alias of it
+// (`ptr`), which a file that does not import unsafe can still name. The operand keeps the file's usual parenthesization rule: a
 // primary expression stands alone under the enclosing `(uintptr)` cast, while one that binds looser
 // than a cast (`unsafe.Pointer(uintptr(p) + off)`) is wrapped so the cast still applies to all of it.
-func (v *Visitor) unsafePointerBoxEmission(callExpr *ast.CallExpr, arg ast.Expr, operandExpr string) string {
+func (v *Visitor) unsafePointerBoxEmission(callExpr *ast.CallExpr, arg ast.Expr, operandExpr, typeName string) string {
 	if !v.deadUnsafePointerBoxes[callExpr] {
 		// A POINTER operand renders as the managed box `ж<T>`, and `new @unsafe.Pointer(box)` binds
 		// the implicit `ж<T> → uintptr` conversion into `Pointer(uintptr)` — which PINS the storage (the
@@ -7696,10 +7702,10 @@ func (v *Visitor) unsafePointerBoxEmission(callExpr *ast.CallExpr, arg ast.Expr,
 		// Only a genuine POINTER operand takes this door: a `uintptr` or `unsafe.Pointer` operand is a
 		// number rather than a box, and `Pointer(uintptr)` is the right and only mint for it.
 		if _, isPtr := types.Unalias(v.info.TypeOf(arg)).(*types.Pointer); isPtr {
-			return fmt.Sprintf("@unsafe.Pointer.FromPinnedBox(%s)", operandExpr)
+			return fmt.Sprintf("%s.FromPinnedBox(%s)", typeName, operandExpr)
 		}
 
-		return fmt.Sprintf("new @unsafe.Pointer(%s)", operandExpr)
+		return fmt.Sprintf("new %s(%s)", typeName, operandExpr)
 	}
 
 	// An ADDRESS-OF operand is the exception among the shapes needsParentheses rejects: `&x` renders
@@ -7810,6 +7816,20 @@ func (v *Visitor) isUnsafePointerType(expr ast.Expr) bool {
 	}
 
 	basic, isBasic := t.Underlying().(*types.Basic)
+
+	return isBasic && basic.Kind() == types.UnsafePointer
+}
+
+// isUnsafePointerAlias reports whether expr denotes an ALIAS of unsafe.Pointer (`type ptr = unsafe.Pointer`): the same
+// type under another name, unlike a defined type over it (`type P unsafe.Pointer`), which keeps its own name.
+func (v *Visitor) isUnsafePointerAlias(expr ast.Expr) bool {
+	t := v.info.TypeOf(expr)
+
+	if _, isAlias := t.(*types.Alias); !isAlias {
+		return false
+	}
+
+	basic, isBasic := types.Unalias(t).(*types.Basic)
 
 	return isBasic && basic.Kind() == types.UnsafePointer
 }

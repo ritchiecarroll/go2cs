@@ -32,7 +32,7 @@ internal static void main() {
     fmt.Println(~@unsafe.Pointer.To<uint64>(p));
 
     ref var buf = ref heap<array<byte>>(array<byte>([1, 2, 3, 4, 5, 6, 7, 8]), out var Ꮡbuf);
-    ref var q = ref heap<ptr>(new ptr(Ꮡbuf.at<byte>(0)), out var Ꮡq);
+    ref var q = ref heap<ptr>(ptr.FromPinnedBox(Ꮡbuf.at<byte>(0)), out var Ꮡq);
     fmt.Println(readU8(q, 3), readU32(q, 4) == (uint32)((uint32)((uint32)((uint32)5 | (uint32)6 << 8) | (uint32)7 << 16) | (uint32)8 << 24));
 
     var c = Ꮡ(new cursor(@base: q));

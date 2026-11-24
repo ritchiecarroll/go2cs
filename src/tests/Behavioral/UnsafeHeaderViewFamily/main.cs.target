@@ -17,7 +17,7 @@ partial struct str {
 
 partial struct bytes /*[]byte*/;
 
-[GoLazy] partial class lazyᴛkey { internal static ptr key = new ptr(Ꮡ(array<uint8>([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]))); }
+[GoLazy] partial class lazyᴛkey { internal static ptr key = ptr.FromPinnedBox(Ꮡ(array<uint8>([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]))); }
 
 partial struct hasher {
     internal uint64 acc;
@@ -107,14 +107,14 @@ internal static void main() {
     @try("package array reads", [GoFunc("main.func11")] () => fmt.Sprint(readU8(key, 0), readU8(key, 15), readU64(key, 8)));
     @try("package array view length", [GoFunc("main.func12")] () => fmt.Sprint(4, @unsafe.Pointer.ElementRef<byte>(key, 3, 4)));
     @try("fresh array writes", [GoFunc("main.func13")] () => {
-        ptr secret = new ptr(Ꮡ(new byte[]{}.array(16)));
+        ptr secret = ptr.FromPinnedBox(Ꮡ(new byte[]{}.array(16)));
         writeU64(secret, 0, 0x0102030405060708UL);
         writeU64(secret, 8, 0x1112131415161718UL);
         return fmt.Sprint(readU8(secret, 0), readU8(secret, 8), readU64(secret, 8));
     });
     @try("struct field array", [GoFunc("main.func14")] () => {
         ref var h = ref heap(new hasher(), out var Ꮡh);
-        writeU64(new ptr(Ꮡh.Ꮡbuf), 8, 42);
+        writeU64(ptr.FromPinnedBox(Ꮡh.Ꮡbuf), 8, 42);
         return fmt.Sprint(h.buf[8], 8);
     });
 }
