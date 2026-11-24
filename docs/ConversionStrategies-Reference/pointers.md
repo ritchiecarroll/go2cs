@@ -297,7 +297,7 @@ internal static void setT<T>(ref T p, T val) { p = val; }
 public static void Set<T>(this ж<Box<T>> Ꮡb, T val) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    setT(ref nonnil(ref b).v, val);
+    setT(ref builtin.nonnil(ref b).v, val);
 }
 ```
 
@@ -1300,7 +1300,7 @@ func Float64bits(f float64) uint64 { return *(*uint64)(unsafe.Pointer(&f)) }
 <!-- source: src/tests/Behavioral/UnsafeOperations/UnsafeOperations.cs:50-52 -->
 ```csharp
 public static uint64 Float64bits(float64 f) {
-    return bitcast<float64, uint64>(f);
+    return builtin.bitcast<float64, uint64>(f);
 }
 ```
 

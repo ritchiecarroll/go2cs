@@ -294,7 +294,7 @@ loop:
     foreach (var (_, f) in range(fns)) {
         @out = append(outᴷ, @out, f());
     }
-    @out = move2heap(outᴷ, @out);
+    @out = builtin.move2heap(outᴷ, @out);
     return @out;
 }
 
