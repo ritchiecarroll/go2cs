@@ -173,6 +173,73 @@ public class ManagedPointerTokenRegistryGrowthTests
         GC.KeepAlive(live);
     }
 
+    // THE COUNT NEVER READS BELOW THE TABLE. The `== 0` fast paths in Resolve and IsTokenArithmetic answer "no
+    // registration" from the running count alone, and a round trip registers and resolves on one thread, so the
+    // count must already hold every key a reader could find: a registration counts BEFORE its key is visible, and
+    // a removal uncounts AFTER the key is gone. Two registrars keep their boxes alive, so no sweep has anything to
+    // remove, and each sample holds the sweep lock, so no sweep runs inside it: then the table only grows, and the
+    // count read after the table can never be the smaller.
+    [TestMethod]
+    public void TheCountNeverReadsBelowTheTable()
+    {
+        object gate = SweepGate();
+        bool stop = false;
+        Thread[] registrars = new Thread[2];
+        System.Collections.Generic.List<object>[] kept = new System.Collections.Generic.List<object>[registrars.Length];
+
+        for (int r = 0; r < registrars.Length; r++)
+        {
+            System.Collections.Generic.List<object> mine = kept[r] = new System.Collections.Generic.List<object>();
+
+            registrars[r] = new Thread(() =>
+            {
+                while (!Volatile.Read(ref stop))
+                {
+                    heap(new ReferenceBearingShape { Held = new slice<byte>(1) }, out ж<ReferenceBearingShape> box);
+                    _ = (nuint)(uintptr)box;
+                    mine.Add(box);
+                }
+            })
+            { IsBackground = true };
+
+            registrars[r].Start();
+        }
+
+        int samples = 0, below = 0, worstTable = 0, worstCount = 0;
+        long until = Environment.TickCount64 + 300;
+
+        while (Environment.TickCount64 < until)
+        {
+            int table, count;
+
+            lock (gate)
+            {
+                table = TableCount();
+                count = ManagedPointerTokens.RegisteredCount;
+            }
+
+            samples++;
+
+            if (count < table)
+            {
+                below++;
+                worstTable = table;
+                worstCount = count;
+            }
+        }
+
+        Volatile.Write(ref stop, true);
+
+        foreach (Thread registrar in registrars)
+            registrar.Join();
+
+        Assert.AreEqual(0, below,
+            $"the running count read below the table in {below} of {samples} samples (last: count {worstCount}, " +
+            $"table {worstTable}); the `== 0` fast paths can then skip a live registration");
+
+        GC.KeepAlive(kept);
+    }
+
     // The registry keeps its table and its sweep lock private; the row reads them by reflection so it also runs
     // against a registry that predates it.
     private static int TableCount()
@@ -196,9 +263,11 @@ public class ManagedPointerTokenRegistryGrowthTests
             $"{when}, the running count must be the table's size: count {count}, table {table} (allowed in flight {InFlight})");
     }
 
+    private static object SweepGate() =>
+        typeof(ManagedPointerTokens).GetField("s_sweepLock", BindingFlags.NonPublic | BindingFlags.Static)!.GetValue(null)!;
+
     private static void WaitForAnySweep()
     {
-        object gate = typeof(ManagedPointerTokens).GetField("s_sweepLock", BindingFlags.NonPublic | BindingFlags.Static)!.GetValue(null)!;
-        lock (gate) { }
+        lock (SweepGate()) { }
     }
 }
