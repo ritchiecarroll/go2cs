@@ -621,6 +621,22 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 	lhsLen := len(lhsExprs)
 	rhsLen := len(rhsExprs)
 
+	// A store through a read-only slice view panics by name, in place of the store (readOnlySliceViewStore).
+	if format.useNewLine && assignStmt.Tok != token.DEFINE {
+		for _, lhs := range lhsExprs {
+			if message, refused := v.readOnlySliceViewStore(lhs); refused {
+				v.outputBuilder.WriteString(v.newline)
+
+				if format.useIndent {
+					v.outputBuilder.WriteString(v.indent(v.indentLevel))
+				}
+
+				v.outputBuilder.WriteString(fmt.Sprintf("throw panic(%q);", message))
+				return
+			}
+		}
+	}
+
 	// A NESTED map assignment `m[k1][k2] = v` — the outer index `m[k1]` returns a map VALUE
 	// (golib map is a readonly struct), so a C# indexer SETTER on that rvalue is CS1612
 	// (internal/dag's `g.edges[from][to] = true`). Emit `m[k1].Set(k2, v)`: a method call runs
@@ -2595,4 +2611,78 @@ func (v *Visitor) lhsReusedInLaterRhs(lhsExprs, rhsExprs []ast.Expr) bool {
 	}
 
 	return false
+}
+
+// readOnlySliceViewStore reports the refusal for an assignment target that is a whole store through a SLICE read as a
+// string or as a two-word string header, `*(*string)(unsafe.Pointer(&b)) = s` or `*(*str)(unsafe.Pointer(&b)) = h`.
+// golib serves those reads with views that are read-only (SliceAsStringBox, SliceStringHeaderBox; C45), and a view
+// box can refuse a store only on its NEXT access, which the temporary box such a statement writes through never has:
+// the store was lost with no word (Go prints 1 for `len(c)` after `*(*string)(ptr(&c)) = "q"`, the conversion 3; P3's
+// read of C45). So the statement panics by name instead. Go's store, which moves the slice's data pointer and length
+// and keeps its capacity, is not modeled (docs/Limitations.md).
+//
+// The shape is the managed reinterpret's own (pointerReinterpretManagedSource), with a source whose element is a slice
+// and a target that is a string, or a struct of exactly two fields, a pointer word (unsafe.Pointer or uintptr) and an
+// int or uint length: the header shapes golib's StringHeaderBox serves. A field store through the header,
+// `(*str)(unsafe.Pointer(&b)).l = n`, is refused by the generated setter already and is not this shape.
+func (v *Visitor) readOnlySliceViewStore(lhs ast.Expr) (string, bool) {
+	star, isStar := ast.Unparen(lhs).(*ast.StarExpr)
+
+	if !isStar {
+		return "", false
+	}
+
+	call, isCall := ast.Unparen(star.X).(*ast.CallExpr)
+
+	if !isCall || len(call.Args) != 1 {
+		return "", false
+	}
+
+	src, _, _ := v.pointerReinterpretManagedSource(call, call.Args[0])
+
+	if src == nil {
+		return "", false
+	}
+
+	srcPtr, srcIsPtr := types.Unalias(v.info.TypeOf(src)).(*types.Pointer)
+	targetPtr, targetIsPtr := types.Unalias(v.info.TypeOf(call)).(*types.Pointer)
+
+	if !srcIsPtr || !targetIsPtr {
+		return "", false
+	}
+
+	if _, srcIsSlice := srcPtr.Elem().Underlying().(*types.Slice); !srcIsSlice {
+		return "", false
+	}
+
+	target := targetPtr.Elem()
+
+	if !isStringType(target) && !isTwoWordStringHeader(target) {
+		return "", false
+	}
+
+	qualifier := func(pkg *types.Package) string { return pkg.Name() }
+
+	return fmt.Sprintf("go2cs: store through a read-only view: a %s read over a %s cannot be assigned; Go would replace the slice's data pointer and length (see docs/Limitations.md)",
+		types.TypeString(target, qualifier), types.TypeString(srcPtr.Elem(), qualifier)), true
+}
+
+// isTwoWordStringHeader reports whether t is a struct of exactly two fields, a pointer word (unsafe.Pointer, an alias of
+// it, or uintptr) and an int or uint length: the string header shapes golib's StringHeaderBox serves.
+func isTwoWordStringHeader(t types.Type) bool {
+	st, isStruct := t.Underlying().(*types.Struct)
+
+	if !isStruct || st.NumFields() != 2 {
+		return false
+	}
+
+	word, isBasic := types.Unalias(st.Field(0).Type()).(*types.Basic)
+
+	if !isBasic || (word.Kind() != types.UnsafePointer && word.Kind() != types.Uintptr) {
+		return false
+	}
+
+	length, isBasic := types.Unalias(st.Field(1).Type()).(*types.Basic)
+
+	return isBasic && (length.Kind() == types.Int || length.Kind() == types.Uint)
 }

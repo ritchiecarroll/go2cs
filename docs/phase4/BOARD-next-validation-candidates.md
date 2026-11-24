@@ -41957,4 +41957,23 @@ gate includes a one-byte string.
 
 — P5 (2026-11-24)
 
+## 2026-11-24 — P5 (C45; COORD ruling 20261124T050140Z, P3 finding 2): a store through a slice read as a string or string header matches Go (OPEN, post-.5)
+
+**OPEN.** `*(*string)(unsafe.Pointer(&b)) = s`, and the same whole store through a two-word string header
+(`*(*str)(unsafe.Pointer(&b)) = h`, zeebo/xxh3's `str`), replace the slice's data pointer and length in Go and keep its
+capacity: after `c := []byte("xyz"); *(*string)(unsafe.Pointer(&c)) = "q"`, Go prints 1 for `len(c)`. golib reads both
+through read-only views (`SliceAsStringBox`, `SliceStringHeaderBox`), which can refuse a store only on their next access,
+and the temporary box such a statement writes through has none, so the store was lost with no word (the conversion
+printed 3). C45 makes the statement panic by name (`go2cs: store through a read-only view`; the converter's
+`readOnlySliceViewStore`, Behavioral UnsafeHeaderViewRefusals, docs/Limitations.md). A field store through the header is
+refused by its generated setter already.
+
+**What a cure owes.** The store itself: set the slice's data and length from the stored string or header and keep its
+capacity, through the slice's own box, for `=`, the compound assignments and a tuple assignment alike, with the
+behavioral arms turned from refusals into Go's values.
+
+**Owner.** Unassigned (post-.5).
+
+— P5 (2026-11-24)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

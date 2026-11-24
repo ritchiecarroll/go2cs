@@ -69,6 +69,28 @@ func sliceData(b []byte) byte {
 	return *(*byte)(unsafe.Pointer(h.Data))
 }
 
+// An ALIAS of unsafe.Pointer (zeebo/xxh3's spelling) takes the same door, through the alias name (C45, P3's read).
+type ptr = unsafe.Pointer
+
+func aliasData(b []byte) byte {
+	h := (*reflect.SliceHeader)(ptr(&b))
+	return *(*byte)(ptr(h.Data))
+}
+
+// The alias through a pointer RECEIVER: the plain spelling's FromRef arm, never a mint over the dereferenced value.
+type cell struct{ v uint64 }
+
+func (c *cell) addr() ptr {
+	return ptr(c)
+}
+
+// The alias over a NAMED uintptr: the plain spelling's hop through the underlying.
+type word uintptr
+
+func aliasWord(w word) ptr {
+	return ptr(w)
+}
+
 // A header built field by field is a plain struct box; the call still goes through FromHeaderData, which answers
 // today's number pointer for it at run time.
 func plain(n uintptr) uintptr {
@@ -101,6 +123,7 @@ func other(x *notHeader) unsafe.Pointer {
 func main() {
 	dst := make([]byte, 8)
 	fmt.Println(hostname("host", dst), string(dst[:4]), inline("x"), deref("y"), sliceData([]byte{7}), plain(0) == 0, number(0) == nil, other(&notHeader{}) == nil, param(&reflect.StringHeader{}) == nil, value("v") == nil)
+	fmt.Println(aliasData([]byte{9}), (&cell{v: 1}).addr() != nil, aliasWord(0) == nil)
 }
 `)
 
@@ -149,6 +172,7 @@ func TestHeaderDataPointerEmitsFromHeaderData(t *testing.T) {
 		{"sliceData", "@unsafe.Pointer.FromHeaderData(h)"},
 		{"plain", "@unsafe.Pointer.FromHeaderData(p)"},
 		{"param", "@unsafe.Pointer.FromHeaderData(sh)"},
+		{"aliasData", "ptr.FromHeaderData(h)"},
 	} {
 		body := emittedFunctionBody(t, mainCs, arm.function)
 
@@ -161,6 +185,19 @@ func TestHeaderDataPointerEmitsFromHeaderData(t *testing.T) {
 	// hand over and the function compiles. A ref-lowered parameter (`ref reflect.StringHeader sh`) would have none.
 	if body := emittedFunctionBody(t, mainCs, "param"); !strings.Contains(body, "param(ж<reflect.StringHeader> sh)") {
 		t.Errorf("param: the header pointer parameter must keep its box, got:\n%s", body)
+	}
+
+	// The alias takes the plain spelling's other arms too, spelled through the alias: a pointer receiver mints from the
+	// receiver's own reference, and a named uintptr hops through its underlying (C45, P3's read).
+	for _, arm := range []struct {
+		function, want string
+	}{
+		{"addr", "ptr.FromRef(ref c)"},
+		{"aliasWord", "(ptr)(uintptr)w"},
+	} {
+		if body := emittedFunctionBody(t, mainCs, arm.function); !strings.Contains(body, arm.want) {
+			t.Errorf("%s: an alias of unsafe.Pointer must take the plain spelling's arm (%q), got:\n%s", arm.function, arm.want, body)
+		}
 	}
 
 	// The controls: each stays a pointer made from a number, and takes no FromHeaderData.

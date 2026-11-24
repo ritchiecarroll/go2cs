@@ -539,6 +539,13 @@ The [validated modules](ValidatedModules.md) page lists the modules validated so
        Go layout", "unsafe pointer arithmetic on a managed pointer with no address", and "cannot view native memory as
        array<Byte>: the address has no managed element storage behind it" (Behavioral UnsafeHeaderViewFamily, parked
        on that branch). -->
+* **A store through a `[]byte` read as a string panics.** `*(*string)(unsafe.Pointer(&b)) = s`, and the same store
+  through a two-word string header (`*(*struct{ p unsafe.Pointer; n uint })(unsafe.Pointer(&b)) = h`), replaces the
+  slice's data pointer and length in Go and keeps its capacity. Converted, the statement panics with
+  `go2cs: store through a read-only view`, because the views go2cs reads these through are read-only.
+  <!-- C45, P3's read 2026-11-24 (finding 2): the store used to land in a temporary view box and be lost silently. The
+       converter's readOnlySliceViewStore emits the panic; Behavioral UnsafeHeaderViewRefusals; matching Go's store is
+       the BOARD row of 2026-11-24 "a store through a slice read as a string or string header" (OPEN, post-.5). -->
 * **One bad dependency blocks everything above it.** A package that fails to convert, or that the
   converter refuses, is reported and skipped: the rest of the module still converts, and every project
   that imports it fails to build. The run ends with exit 1, and its summary names each such package
