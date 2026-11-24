@@ -421,8 +421,8 @@ func cgoP3Arms() []cgoG1Arm {
 		{name: "goindex"},
 		{name: "goindexfill"},
 		{name: "goslicefill"},
-		// Seat 1b's out-parameter (18.12 item 4, shape (i)): strtol's char ** endptr, &end over a Go variable.
-		{name: "outstrtol"},
+		// Seat 1b's out-parameter (18.12 item 4, shape (i)): strtod's char ** endptr, &end over a Go variable.
+		{name: "outstrtod"},
 		// Increment 3.2's first reds (section 6). s6field, s6reinterp and s6slice print as Go does, and since seat 1a
 		// (18.9) s6nextnil, s6nextdirect and s6name do too: the field accessor retired their cgoP3LayoutEntry pins (the
 		// readings before it are at cgoP3LayoutEntryPointer). Since seat 1c (18.11) s6next does too: the **C.T door
@@ -606,4 +606,53 @@ func cgoP3FirstLine(stderr string) string {
 	}
 
 	return ""
+}
+
+// A pointer argument cmd/cgo declares at its own type, `var _cgo0 *_Ctype_char = cs` (seat 1b's hosted reading, CS0119 on
+// strtod's call): the argument renders the box itself, never a Go-shaped `(*C.@char)(cs)`, which C# reads as a type in
+// an expression. The closure is cmd/cgo's for `C.strtol(cs, &end, 10)` with `var end *C.char`.
+func TestCgoAPointerArgumentDeclaredAtItsOwnTypeRendersItsBox(t *testing.T) {
+	files := cgoFixtureFiles(t, cgoPhase3FixtureDir)
+
+	// The capture names strtol's library, for this test alone (the package's tests run serially).
+	cgoPhase2Libraries["strtol"] = "libc.so.6"
+	defer delete(cgoPhase2Libraries, "strtol")
+	files["cgo_import.go"] = strings.Replace(cgoOfflineImportFile(cgoPhase2Libraries), "package cgophase2", "package cgophase3", 1)
+	files["fixture.cgo1.go"] += `
+func strtolEnd(cs *_Ctype_char) (int, string) {
+	var end *_Ctype_char
+	n := func() _Ctype_long{ var _cgo0 *_Ctype_char = cs; _cgoBase1 := &end; _cgo1 := _cgoBase1; var _cgo2 _Ctype_int = 10; _cgoCheckPointer(_cgoBase1, 0 == 0); return _Cfunc_strtol(_cgo0, _cgo1, _cgo2); }()
+	return int(n), ( _Cfunc_GoString)(end)
+}
+`
+	files["cgo_gotypes.go"] += `
+//go:cgo_import_static _cgo_55dd9c1e1280_Cfunc_strtol
+//go:linkname __cgofn__cgo_55dd9c1e1280_Cfunc_strtol _cgo_55dd9c1e1280_Cfunc_strtol
+var __cgofn__cgo_55dd9c1e1280_Cfunc_strtol byte
+var _cgo_55dd9c1e1280_Cfunc_strtol = unsafe.Pointer(&__cgofn__cgo_55dd9c1e1280_Cfunc_strtol)
+
+//go:cgo_unsafe_args
+func _Cfunc_strtol(p0 *_Ctype_char, p1 **_Ctype_char, p2 _Ctype_int) (r1 _Ctype_long) {
+	_cgo_runtime_cgocall(_cgo_55dd9c1e1280_Cfunc_strtol, uintptr(unsafe.Pointer(&p0)))
+	if _Cgo_always_false {
+		_Cgo_use(p0)
+		_Cgo_use(p1)
+		_Cgo_use(p2)
+	}
+	return
+}
+`
+	stderr, output, err := convertCgoOffline(t, files)
+	if err != nil {
+		t.Fatalf("%v\n%s", err, stderr)
+	}
+	converted := readConverted(t, output, "fixture.cs")
+
+	if want := "var n = C.strtol(cs, Ꮡend, (C.@int)(10));"; !strings.Contains(converted, want) {
+		t.Errorf("the call does not read %q", want)
+	}
+
+	if strings.Contains(converted, "(*C.@char)(") {
+		t.Errorf("a Go-shaped pointer conversion reached the C#")
+	}
 }

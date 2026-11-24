@@ -1436,6 +1436,14 @@ func (v *Visitor) convCgoClosureArgument(argument cgoClosureArgument, context Id
 		return value
 	}
 
+	// A pointer is declared at its own type (`var _cgoN *T = p`): the value is already the box the parameter takes, and a
+	// Go-shaped `(*T)(p)` is not C#.
+	if declaredType := v.info.TypeOf(argument.declared); declaredType != nil {
+		if _, isPointer := declaredType.Underlying().(*types.Pointer); isPointer {
+			return value
+		}
+	}
+
 	return fmt.Sprintf("(%s)(%s)", v.getExpressionTypeName(argument.declared, false), value)
 }
 

@@ -353,13 +353,14 @@ func main() {
 		b := make([]byte, 16)
 		n := C.go2cs_probe_text_fill((*C.char)(unsafe.Pointer(&b[4])), 8)
 		fmt.Printf("goindexfill %d %q\n", int(n), string(b[4:4+int(n)]))
-	case "outstrtol":
-		// The out-parameter, shape (i) (18.12 item 4): strtol's char ** endptr is &end, a Go variable C writes.
-		cs := C.CString("123abc")
+	case "outstrtod":
+		// The out-parameter, shape (i) (18.12 item 4): strtod's char ** endptr is &end, a Go variable C writes. strtod,
+		// not strtol: glibc's C23 headers rename strtol to __isoc23_strtol, which go2cs refuses by name (GO2CS2001).
+		cs := C.CString("1.5abc")
 		defer C.free(unsafe.Pointer(cs))
 		var end *C.char
-		n := C.strtol(cs, &end, 10)
-		fmt.Println("outstrtol", int(n), C.GoString(end))
+		n := C.strtod(cs, &end)
+		fmt.Println("outstrtod", float64(n), C.GoString(end))
 	case "goslicefill":
 		// unsafe.SliceData(b[4:]) as a typed pointer C writes through: cmd/cgo's slice form.
 		b := make([]byte, 16)
