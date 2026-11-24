@@ -81,9 +81,10 @@ Stop at the first one that fails.
    `Input digest`, and its disclosed and excluded declarations are read. COORD reads MODULE.md: it is what the
    package ships as VALIDATION.md.
 4. Convert the pack's input into another fresh root `PR`:
-   `G -recurse=nuget -stack-append=on -platforms P -go2cspath <T>/src <SRC> <PR>`. `-stack-append=on` packs the
-   emission step 2 validated: `-tests` turns the stack-append buffer on by default and `-recurse=nuget` turns it off,
-   and `GoInputDigest` records the mode, so a pack converted without it fails step 5. The go.* standard-library
+   `G -recurse=nuget -stack-append=on -platforms P -go2cspath <T>/src <SRC> <PR>`. For a module with a proof,
+   `-stack-append=on` packs the emission step 2 validated: `-tests` turns the stack-append buffer on by default
+   and `-recurse=nuget` turns it off, and `GoInputDigest` records the mode, so a pack converted without it fails
+   step 5. The go.* standard-library
    packages carry the buffer too. `Invoke-NugetgoRepack.ps1` and `nugetgo-pack.ps1` pass it.
    For a module whose `-LicenseSpdx` names Apache-2.0, add `-provenance`: its section 4(b) asks every modified file
    to carry a notice that it was changed, and the pack refuses a `PR` whose converted files lack go2cs's.
