@@ -269,7 +269,9 @@ var options = []Option{
 			"(`var xᴷ = new stackAppend<T>();` and `x = append(xᴷ, x, v);`), reading which append sites qualify " +
 			"from `go build -gcflags=-m` once per package and target (see `-probe-cache`). `off` emits plain " +
 			"`x = append(x, v)` and runs no probe build. `auto`, the default, is `on` for `-stdlib` and `-tests`, " +
-			"whose converted tests compare against Go's own, and `off` for a plain or `-recurse` conversion. The " +
+			"whose converted tests compare against Go's own, and `off` for a plain or `-recurse` conversion, a " +
+			"single standard-library package converted without `-stdlib` included (use `-stdlib <package>` for the " +
+			"standard library's emission). The " +
 			"buffer is a heap array in golib, so `on` changes what a program can observe, not its speed or its " +
 			"allocations. See [the stack-append buffer]" +
 			"(ConversionStrategies-Reference/slices-and-arrays.md#a-non-escaping-append-can-take-gos-32-byte-stack-buffer).",

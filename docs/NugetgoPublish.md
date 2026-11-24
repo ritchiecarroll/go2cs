@@ -80,10 +80,16 @@ Stop at the first one that fails.
    Then `VR/validation/M/MODULE.md` exists, every package row carries an
    `Input digest`, and its disclosed and excluded declarations are read. COORD reads MODULE.md: it is what the
    package ships as VALIDATION.md.
-4. Convert the pack's input into another fresh root `PR`: `G -recurse=nuget -platforms P -go2cspath <T>/src <SRC> <PR>`.
+4. Convert the pack's input into another fresh root `PR`:
+   `G -recurse=nuget -stack-append=on -platforms P -go2cspath <T>/src <SRC> <PR>`. `-stack-append=on` packs the
+   emission step 2 validated: `-tests` turns the stack-append buffer on by default and `-recurse=nuget` turns it off,
+   and `GoInputDigest` records the mode, so a pack converted without it fails step 5. The go.* standard-library
+   packages carry the buffer too. `Invoke-NugetgoRepack.ps1` and `nugetgo-pack.ps1` pass it.
    For a module whose `-LicenseSpdx` names Apache-2.0, add `-provenance`: its section 4(b) asks every modified file
    to carry a notice that it was changed, and the pack refuses a `PR` whose converted files lack go2cs's.
    `Invoke-NugetgoRepack.ps1` adds it from the module's row.
+   <!-- 2026-11-24 (P5, train 12): the owner ruled that a published module is packed with the stack-append hint on,
+        the emission its proof validated (COORD 2026-11-24 20:07Z, on P3's review of the -stack-append seat). -->
 5. **Gate: the binding.** Each library project under `PR/src/M` records a `GoInputDigest` equal to its MODULE.md row.
    The pack checks this again; reading it here catches a wrong binary before a pack runs.
 
@@ -502,7 +508,8 @@ PLAN section 6, step 5: the launch demo and the standing integration test.
     compiles the package once per corpus target (four) with `go build -trimpath -gcflags=-m ...`, and under `-tests`
     once more per target with `go test -c`, to read the compiler's escape decisions (`src/go2cs/stackAppendHints.go`).
     It does so when `-stack-append` resolves on, which it does by default under `-tests`; a plain or `-recurse`
-    conversion runs none of these builds unless it passes `-stack-append=on`.
+    conversion runs none of these builds unless it passes `-stack-append=on`, which the pack's conversions do
+    (section 1, step 4).
     Those builds go into the probe cache, not `GOCACHE`: `-probe-cache <dir>`, else `GO2CS_PROBE_CACHE`, else
     `go2cs/probe-cache` under the user cache directory ([Known issues](KnownIssues.md#a-conversion-keeps-a-go-build-cache-of-its-own)).
     Each target caches its own dependency closure there, and Go removes an entry only after five days unused, so
