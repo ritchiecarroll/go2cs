@@ -248,21 +248,32 @@ public class ManagedPointerTokenRegistryGrowthTests
         return (int)table.GetType().GetProperty("Count")!.GetValue(table)!;
     }
 
-    // The running count against the table, read as a pair. The host is never quiet: the runtime's sysmon thread
-    // registers a pinned box on every GOMAXPROCS check (getCPUCount's sched_getaffinity buffer), so the two reads can
-    // straddle a few of its registrations, and one of them can sit between its table store and its increment. The
-    // fault this guards left thousands between the two (4,957 against 259); a handful is the host, not the count.
-    private const int InFlight = 8;
-
+    // The running count against the table, EXACTLY. The host is never quiet: the runtime's sysmon thread registers a
+    // pinned box on every GOMAXPROCS check (getCPUCount's sched_getaffinity buffer), once a second. So read table,
+    // count, table: when the two table reads agree, nothing landed in between and the count must equal them; when
+    // they differ, or the count is one registration in flight above them, read again. A count that is wrong stays
+    // wrong across every attempt.
     private static void AssertCountIsTable(string when)
     {
-        int table = TableCount();
-        int count = ManagedPointerTokens.RegisteredCount;
+        int before = 0, count = 0, after = 0;
 
-        Assert.IsTrue(Math.Abs(table - count) <= InFlight,
-            $"{when}, the running count must be the table's size: count {count}, table {table} (allowed in flight {InFlight})");
+        for (int attempt = 0; attempt < 50; attempt++)
+        {
+            before = TableCount();
+            count = ManagedPointerTokens.RegisteredCount;
+            after = TableCount();
+
+            if (before == after && count == before)
+                return;
+
+            Thread.Sleep(1);
+        }
+
+        Assert.Fail($"{when}, the running count must be the table's size: count {count}, table {before} then {after}");
     }
 
+    // Waiting on the sweep lock orders a TEST's read after a walk in progress and hides nothing in the product:
+    // RegisteredCount has no production reader.
     private static object SweepGate() =>
         typeof(ManagedPointerTokens).GetField("s_sweepLock", BindingFlags.NonPublic | BindingFlags.Static)!.GetValue(null)!;
 
