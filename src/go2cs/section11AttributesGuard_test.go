@@ -89,14 +89,8 @@ func TestSection11AttributesLeftConvertedCode(t *testing.T) {
 			for index, line := range strings.Split(string(data), "\n") {
 				code, _, _ := strings.Cut(line, "//")
 
-				// A delegate cannot be partial, so no accessibility record can carry its attributes: a lifted
-				// function-local func type keeps [GoLocalName] on its declaration (visitFuncType.go).
-				if strings.Contains(code, " delegate ") {
-					continue
-				}
-
 				for _, moved := range section11Attributes {
-					if strings.Contains(code, moved.attribute) {
+					if strings.Contains(code, moved.attribute) && !(moved.attribute == "[GoLocalName(" && isLocalNameDelegateLine(code)) {
 						sites = append(sites, rel+":"+strconv.Itoa(index+1)+": "+moved.attribute+" ("+moved.row+")")
 					}
 				}
@@ -123,4 +117,19 @@ func TestSection11AttributesLeftConvertedCode(t *testing.T) {
 	}
 
 	t.Logf("read %d files: %d site(s) of %d moved attribute(s)", scanned, len(sites), len(section11Attributes))
+}
+
+// isLocalNameDelegateLine reports whether code is a delegate declaration that opens with its [GoLocalName] stamp: a
+// lifted function-local func type (visitFuncType.go). A delegate cannot be partial, so no accessibility record can
+// carry the stamp, and it stays on the declaration. Any other attribute on that line is still guarded.
+func isLocalNameDelegateLine(code string) bool {
+	trimmed := strings.TrimSpace(code)
+
+	if !strings.HasPrefix(trimmed, "[GoLocalName(") {
+		return false
+	}
+
+	_, rest, found := strings.Cut(trimmed, ")] ")
+
+	return found && (strings.HasPrefix(rest, "public delegate ") || strings.HasPrefix(rest, "internal delegate "))
 }
