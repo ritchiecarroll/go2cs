@@ -422,7 +422,7 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 		// The NAMED-pointer sibling (`type P *T`): its wrapper class's zero value is a null reference, so a nil one
 		// crosses as the type's canonical typed nil.
 		if callContext != nil && callContext.anyBoxedNamedPointerArgs[i] && !spreadArg && !totalReplacement {
-			resultExpr = v.applyTypedNilNamedPointerBox(v.getType(expr, false), v.pointerExprNeverRendersNull(expr), resultExpr)
+			resultExpr = v.applyTypedNilNamedPointerBox(v.getType(expr, false), v.namedPointerExprNeverRendersNull(expr), resultExpr)
 		}
 
 		// The TYPE-PARAMETER sibling: `fmt.Sprintf("%T", e)` and `[]any{e}` inside a generic body, where E may be a nil

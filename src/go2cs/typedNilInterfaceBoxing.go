@@ -134,7 +134,7 @@ func (v *Visitor) applyTypedNilPointerBox(value ast.Expr, rendered string) strin
 	}
 
 	if isNamedPointerType(valueType) {
-		return v.applyTypedNilNamedPointerBox(valueType, v.pointerExprNeverRendersNull(value), rendered)
+		return v.applyTypedNilNamedPointerBox(valueType, v.namedPointerExprNeverRendersNull(value), rendered)
 	}
 
 	if _, isPointer := valueType.(*types.Pointer); !isPointer {
@@ -382,6 +382,29 @@ func (v *Visitor) applyTypedNilNamedPointerBox(valueType types.Type, neverNull b
 	}
 
 	return fmt.Sprintf("(%s ?? (%s)nil)", rendered, v.getCSharpTypeName(valueType))
+}
+
+// namedPointerExprNeverRendersNull is pointerExprNeverRendersNull for a NAMED pointer value. A conversion to a named
+// pointer type (`intPtr(&arr[0])`, `P(nil)`) renders the wrapper's constructor or its canonical nil, never a null
+// reference, whenever its operand cannot be nil; it is recognized here from go/types (the call's Fun is a type),
+// since the named target takes a different conversion route from `(*T)(&x)`. Everything else defers to the pointer
+// predicate.
+func (v *Visitor) namedPointerExprNeverRendersNull(expr ast.Expr) bool {
+	if paren, ok := expr.(*ast.ParenExpr); ok {
+		return v.namedPointerExprNeverRendersNull(paren.X)
+	}
+
+	if call, ok := expr.(*ast.CallExpr); ok && len(call.Args) == 1 {
+		if fun, ok := v.info.Types[call.Fun]; ok && fun.IsType() {
+			if arg, ok := v.info.Types[call.Args[0]]; ok && arg.IsNil() {
+				return true
+			}
+
+			return v.namedPointerExprNeverRendersNull(call.Args[0])
+		}
+	}
+
+	return v.pointerExprNeverRendersNull(expr)
 }
 
 // isExactUnsafePointer reports whether t IS unsafe.Pointer (through an alias), never a NAMED type over
