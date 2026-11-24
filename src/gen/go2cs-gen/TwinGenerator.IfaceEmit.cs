@@ -96,12 +96,18 @@ public sealed partial class TwinGenerator
                     string result = Result(method), parameters = Parameters(method), arguments = Arguments(method), inner = indent + "    ";
                     string call = Escaped(method.Name) + "(" + PlainArguments(method) + ")", twin = method.Name + Suffix + "(" + arguments + ")";
 
+                    // The slot's default body and the static call helper are real frames between a twin's Go caller and the
+                    // plain member they run, and Go has neither: each carries go2cs-gen's [GeneratedCode], which the Go
+                    // traceback skips (runtime's classifyGoSourceFrame). Without it runtime.Caller(1) inside the member read
+                    // `Mꞏcall` where Go reads the caller (M:N row 3, behavioral PromotedMethodFrames under GO2CS_MN=1).
+                    string generated = inner + "[" + Common.GeneratedCodeAttribute + "]\r\n";
+
                     if (IfaceHidden)
                     {
                         string self = "((" + name + ")this)." + call;
-                        source.Append(inner).Append(result).Append(' ').Append(method.Name).Append(Suffix).Append('(').Append(parameters).Append(')')
+                        source.Append(generated).Append(inner).Append(result).Append(' ').Append(method.Name).Append(Suffix).Append('(').Append(parameters).Append(')')
                             .Append(method.ReturnsVoid ? " { " + self + "; return default; }\r\n" : " => new " + result + "(" + self + ");\r\n");
-                        source.Append(inner).Append("static ").Append(result).Append(' ').Append(method.Name).Append("ꞏcall(").Append(name).Append(" ᴛrecv")
+                        source.Append(generated).Append(inner).Append("static ").Append(result).Append(' ').Append(method.Name).Append("ꞏcall(").Append(name).Append(" ᴛrecv")
                             .Append(parameters.Length > 0 ? ", " : "").Append(parameters).Append(')');
 
                         if (method.ReturnsVoid)
@@ -111,7 +117,7 @@ public sealed partial class TwinGenerator
                     }
                     else
                     {
-                        source.Append(inner).Append(Hidden).Append("\r\n").Append(inner).Append(result).Append(' ').Append(method.Name).Append(Suffix).Append('(').Append(parameters).Append(')');
+                        source.Append(inner).Append(Hidden).Append("\r\n").Append(generated).Append(inner).Append(result).Append(' ').Append(method.Name).Append(Suffix).Append('(').Append(parameters).Append(')');
 
                         if (method.ReturnsVoid)
                             source.Append(" { ").Append(call).Append("; return default; }\r\n");
@@ -137,6 +143,8 @@ public sealed partial class TwinGenerator
 
                 source.Append(indent).Append("partial ").Append(Keyword(host)).Append(' ').Append(Escaped(host.Name)).Append(IfaceHidden ? " : " + iface : "")
                     .Append("\r\n").Append(indent).Append("{\r\n");
+                // The slot forwarder is the third frame of the class the members above guard (P3, row 3): go2cs-gen's mark.
+                source.Append(indent).Append("    [").Append(Common.GeneratedCodeAttribute).Append("]\r\n");
                 source.Append(indent).Append("    ").Append(Result(forwarder.Symbol)).Append(' ').Append(iface).Append('.').Append(forwarder.Member.Name).Append(Suffix)
                     .Append('(').Append(Parameters(forwarder.Symbol)).Append(") => ").Append(target.ContainingType.ToDisplayString(s_full)).Append('.')
                     .Append(target.Name).Append(Suffix).Append('(').Append(forwarder.Receiver).Append(arguments.Length > 0 ? ", " : "").Append(arguments).Append(");\r\n");
