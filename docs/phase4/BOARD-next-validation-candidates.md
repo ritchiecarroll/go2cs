@@ -41984,4 +41984,19 @@ behavioral arms turned from refusals into Go's values.
 
 — P5 (2026-11-24)
 
+## 2026-11-24 — P5 (C45; COORD 20261124T062025Z): a conversion to a defined type over unsafe.Pointer does not compile (OPEN, post-.5)
+
+**OPEN.** `type P unsafe.Pointer; x := 1; p := P(&x)` is spelled `new P(Ꮡx)`, which fails CS1503: the defined type's
+constructor takes no box. It is loud, so no program runs on a wrong value, but a module that writes it does not build.
+An ALIAS (`type P = unsafe.Pointer`) is the same type as unsafe.Pointer and takes its retaining door (C45); a defined
+type is a distinct type and keeps its own route. Read by a probe at C45 r2 (e87b097396), outside the C45 fix.
+
+**What a cure owes.** The defined type's conversion takes the same box-carrying door as unsafe.Pointer (FromPinnedBox
+for a pointer operand, FromHeaderData for rule 6, the uintptr hop), spelled through the defined type, with a behavioral
+arm per operand shape under forced collections, and the conversion back from the defined type to unsafe.Pointer.
+
+**Owner.** Unassigned (post-.5).
+
+— P5 (2026-11-24)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
