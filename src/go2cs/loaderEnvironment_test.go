@@ -11,6 +11,7 @@ package main
 import (
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -137,6 +138,11 @@ func hostTarget(t *testing.T) (string, string) {
 // RE-CITED for the cgo-against-go.* item (INC 1, C2 ca1fd3a4e): -cgo beside -recurse was refused here ("the module
 // driver's loads stay at CGO_ENABLED=0"). The module driver now loads cgo-on under -cgo (moduleConverter.go), so the row
 // reads accepted; TestARecurseNugetConversionTakesACgoPackageThroughTheCgoRoute holds what it then converts.
+//
+// RE-CITED for cgo Phase 3 increment 3.4 seat 4a (DESIGN-cgo-phase3-marshaling section 19): -cgo beside -tests was
+// refused here ("the test drivers' loads stay at CGO_ENABLED=0"). The package's own test loads and the oracle now run
+// cgo-on under -cgo (packageTestLoaderEnv, cgoOracleEnv), so the row reads accepted; the corpus is still protected, by
+// checkCgoTestsOutput (TestACgoTestsConversionNeverWritesTheRepositorysCorpus).
 func TestCheckCgoFlagRefusesWhatItCannotHonour(t *testing.T) {
 	cases := []struct {
 		name               string
@@ -150,7 +156,7 @@ func TestCheckCgoFlagRefusesWhatItCannotHonour(t *testing.T) {
 		{name: "on, 1", cgo: true, env: "1"},
 		{name: "on, 0", cgo: true, env: "0", refused: "CGO_ENABLED=0"},
 		{name: "stdlib", cgo: true, stdlib: true, env: "-", refused: "-stdlib"},
-		{name: "tests", cgo: true, tests: true, env: "-", refused: "-tests"},
+		{name: "tests is accepted", cgo: true, tests: true, env: "-"},
 		{name: "recurse is accepted", cgo: true, env: "-"},
 	}
 
@@ -169,6 +175,95 @@ func TestCheckCgoFlagRefusesWhatItCannotHonour(t *testing.T) {
 				t.Errorf("refused: %v", err)
 			case c.refused != "" && (err == nil || !strings.Contains(err.Error(), c.refused)):
 				t.Errorf("want a refusal naming %q, got %v", c.refused, err)
+			}
+		})
+	}
+}
+
+// -cgo -tests loads the CONVERTED package's own test variants cgo-on and runs the oracle cgo-on, as its production load
+// is; every other load keeps the loader pin (stop line S-G). Without -cgo nothing changes (seat 4a, section 19).
+func TestOnlyTheConvertedPackagesTestLoadsAndTheOracleTurnCgoOn(t *testing.T) {
+	unsetCgoEnabled(t)
+
+	last := func(env []string) string {
+		value := ""
+
+		for _, entry := range env {
+			if v, found := strings.CutPrefix(entry, "CGO_ENABLED="); found {
+				value = v
+			}
+		}
+
+		return value
+	}
+
+	if got := last(packageTestLoaderEnv(Options{parseCgoTargets: true}, "GOOS=linux")); got != "1" {
+		t.Errorf("-cgo: the package's test load runs at CGO_ENABLED=%q, want 1", got)
+	}
+
+	if got := last(packageTestLoaderEnv(Options{}, "GOOS=linux")); got != "0" {
+		t.Errorf("no -cgo: the package's test load runs at CGO_ENABLED=%q, want the loader pin 0", got)
+	}
+
+	if got := last(converterLoaderEnv("GOOS=linux")); got != "0" {
+		t.Errorf("another package's load runs at CGO_ENABLED=%q, want the loader pin 0 (S-G)", got)
+	}
+
+	if got := cgoOracleEnv(Options{parseCgoTargets: true}); len(got) != 1 || got[0] != "CGO_ENABLED=1" {
+		t.Errorf("-cgo: the oracle's extra environment is %q, want [CGO_ENABLED=1]", got)
+	}
+
+	if got := cgoOracleEnv(Options{}); got != nil {
+		t.Errorf("no -cgo: the oracle's extra environment is %q, want none", got)
+	}
+}
+
+// -cgo -tests never writes into the repository's corpus (stop line S-D): an output under the core directory of a go2cs
+// root whose parent holds git metadata is refused by name. A scratch root seeded by copying src/core holds no git
+// metadata and is accepted, as is any output outside the corpus. Without -cgo, or without -tests, nothing is checked.
+func TestACgoTestsConversionNeverWritesTheRepositorysCorpus(t *testing.T) {
+	repository := t.TempDir()
+	root := filepath.Join(repository, "src")
+	scratch := filepath.Join(t.TempDir(), "src")
+
+	for _, dir := range []string{filepath.Join(root, "core", "net"), filepath.Join(scratch, "core", "net")} {
+		if err := os.MkdirAll(dir, 0o755); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	// A worktree's .git is a FILE; the check reads either.
+	if err := os.WriteFile(filepath.Join(repository, ".git"), []byte("gitdir: elsewhere\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	cgoTests := Options{parseCgoTargets: true, convertTests: true}
+
+	cases := []struct {
+		name    string
+		options Options
+		root    string
+		output  string
+		refused bool
+	}{
+		{name: "the repository's corpus", options: cgoTests, root: root, output: filepath.Join(root, "core", "net"), refused: true},
+		{name: "a scratch root seeded from it", options: cgoTests, root: scratch, output: filepath.Join(scratch, "core", "net")},
+		{name: "outside the corpus", options: cgoTests, root: root, output: filepath.Join(repository, "out", "net")},
+		{name: "no -cgo", options: Options{convertTests: true}, root: root, output: filepath.Join(root, "core", "net")},
+		{name: "no -tests", options: Options{parseCgoTargets: true}, root: root, output: filepath.Join(root, "core", "net")},
+	}
+
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			options := c.options
+			options.go2csPath = c.root
+			err := checkCgoTestsOutput(options, c.output)
+
+			switch {
+			case c.refused && (err == nil || !strings.Contains(err.Error(), "CGO_ENABLED=0 by ruling")):
+				t.Errorf("want a refusal naming the ruling, got %v", err)
+			case !c.refused && err != nil:
+				t.Errorf("refused: %v", err)
 			}
 		})
 	}

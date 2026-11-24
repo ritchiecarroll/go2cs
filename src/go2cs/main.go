@@ -958,6 +958,11 @@ Examples:
 			// setup. An explicitly configured WORKING root wins.
 			resolveGo2CSPath(&options, outputFilePath, true)
 
+			// -cgo -tests writes a cgo-on package: never into the repository's corpus (section 19, stop line S-D).
+			if err := checkCgoTestsOutput(options, outputFilePath); err != nil {
+				log.Fatalln(err)
+			}
+
 			// The toolchain pin, checked once the root above is final — it is the tree version.props is
 			// read from. Every -test-action is covered, not just the converting ones: build/run/compare
 			// act on artifacts whose Go counterpart is re-run from THIS toolchain's sources, so a

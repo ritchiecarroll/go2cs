@@ -804,7 +804,7 @@ func processTestConversion(inputPath, outputPath string, options Options) (err e
 		Dir:        inputPath,
 		Tests:      true,
 		BuildFlags: options.loaderBuildFlags(),
-		Env: converterLoaderEnv(
+		Env: packageTestLoaderEnv(options,
 			fmt.Sprintf("GOOS=%s", targetParts[0]),
 			fmt.Sprintf("GOARCH=%s", targetParts[1])),
 		ParseFile: parseFileUnparenAddressOperands,
@@ -2012,7 +2012,7 @@ func collectSiblingTestClosure(inputPath string, options Options) {
 		Dir:        absolute,
 		Tests:      true,
 		BuildFlags: options.loaderBuildFlags(),
-		Env: converterLoaderEnv(
+		Env: packageTestLoaderEnv(options,
 			fmt.Sprintf("GOOS=%s", targetParts[0]),
 			fmt.Sprintf("GOARCH=%s", targetParts[1])),
 	}, ".")
@@ -11438,7 +11438,7 @@ func compareGoAndConvertedTests(inputPath, outputPath, testProject, packagePath 
 	}
 
 	goArgs := oracleTestArgs(options, packagePath, hostFatalSkip)
-	goOutput, goErr := runCommandWithTimeout(testChildTimeout(options), inputPath, oracleOptions(options), "go", goArgs...)
+	goOutput, goErr := runCommandWithTimeoutEnv(testChildTimeout(options), inputPath, oracleOptions(options), cgoOracleEnv(options), "go", goArgs...)
 
 	// Captured immediately after the real oracle run, same directory, same options — see
 	// oracleGoVersion's own doc comment for why this is not `go env GOROOT`.
