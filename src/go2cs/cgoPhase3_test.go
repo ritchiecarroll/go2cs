@@ -108,14 +108,17 @@ func TestCgoPhase3FixtureConvertsItsHelpersVoidPointersAndDeferredCalls(t *testi
 		}
 	}
 
-	// B. A void pointer is classified before the transition, and a void pointer result is its number.
+	// B. A void pointer is classified, then pinned by a `fixed` whose block holds the transition and the call (18.12
+	// item 2), and a void pointer result is its number.
 	for _, function := range []string{"free", "go2cs_probe_release", "go2cs_probe_same", "go2cs_probe_sum"} {
 		member := cgoBindingsMember(t, bindings, " "+function+"(@unsafe.Pointer p0")
-		classified := strings.Index(member, `GoCgoArgs.VoidPointer(p0, "`+function+`")`)
+		classified := strings.Index(member, `GoCgoArgs.PinVoidPointer(p0, "`+function+`")`)
+		pinned := strings.Index(member, "fixed (byte* f0 = g0)")
+		addressed := strings.Index(member, "nint a0 = g0.Address(f0);")
 		entered := strings.Index(member, "syscallEntersyscall()")
 
-		if classified < 0 || entered < 0 || classified > entered {
-			t.Errorf("C.%s does not classify its void pointer before the transition:\n%s", function, member)
+		if classified < 0 || pinned < 0 || addressed < 0 || entered < 0 || classified > pinned || pinned > addressed || addressed > entered {
+			t.Errorf("C.%s does not classify, then pin, its void pointer before the transition:\n%s", function, member)
 		}
 	}
 

@@ -406,6 +406,9 @@ func (set *cgoWrapperSet) wrapper(declaration cgoDeclaration) (string, error) {
 	var externParams, wrapperParams, arguments []string
 	var before, after strings.Builder
 
+	// The void parameters, each pinned by its own `fixed` around the call (18.12 item 2).
+	var pinned []int
+
 	checked := map[string]bool{}
 
 	for i, param := range params {
@@ -444,9 +447,11 @@ func (set *cgoWrapperSet) wrapper(declaration cgoDeclaration) (string, error) {
 	for i, param := range params {
 		switch {
 		case param.void:
-			// What a void pointer carries is GoCgoArgs' to decide (Phase 3 §13.4, §16.1 B): nil and C memory cross, and
-			// a pointer into Go memory is refused here, before the transition and before anything is handed over.
-			fmt.Fprintf(&before, "\n        nint a%d = (nint)%sVoidPointer(p%d, %q);\n", i, args, i, function)
+			// What a void pointer carries is GoCgoArgs' to decide (Phase 3 §13.4, §16.1 B, 18.12): nil and C memory cross as
+			// their number, Go memory whose box names its storage crosses held still by the `fixed` around the call, and
+			// everything else is refused here, before anything is pinned or handed over (13.5: classify, pin, call).
+			fmt.Fprintf(&before, "\n        global::go.golib.GoCgoPin g%d = %sPinVoidPointer(p%d, %q);\n", i, args, i, function)
+			pinned = append(pinned, i)
 
 		case param.pointer:
 			copyType := param.scalar.primitive
@@ -577,8 +582,39 @@ func (set *cgoWrapperSet) wrapper(declaration cgoDeclaration) (string, error) {
 		text.WriteString("        int errno;\n")
 	}
 
-	fmt.Fprintf(&text, "        %ssyscallEntersyscall();\n\n        try\n        {\n%s        }\n", runtime, cgoErrnoCall(call, errnoForm, set.target.goos))
-	fmt.Fprintf(&text, "        finally\n        {\n            %ssyscallExitsyscall();\n        }\n", runtime)
+	var bracket strings.Builder
+
+	fmt.Fprintf(&bracket, "        %ssyscallEntersyscall();\n\n        try\n        {\n%s        }\n", runtime, cgoErrnoCall(call, errnoForm, set.target.goos))
+	fmt.Fprintf(&bracket, "        finally\n        {\n            %ssyscallExitsyscall();\n        }\n", runtime)
+
+	if len(pinned) == 0 {
+		text.WriteString(bracket.String())
+	} else {
+		// Every argument is classified above; here each void one is pinned, nested in parameter order, and the innermost
+		// block holds the transition bracket and the call (13.5). A number pins nothing: its pinnable reference is null.
+		for _, i := range pinned {
+			fmt.Fprintf(&text, "        fixed (byte* f%d = g%d)\n", i, i)
+		}
+
+		text.WriteString("        {\n")
+
+		for _, i := range pinned {
+			fmt.Fprintf(&text, "            nint a%d = g%d.Address(f%d);\n", i, i, i)
+		}
+
+		text.WriteString("\n")
+
+		for _, line := range strings.SplitAfter(bracket.String(), "\n") {
+			if strings.TrimSpace(line) != "" {
+				text.WriteString("    ")
+			}
+
+			text.WriteString(line)
+		}
+
+		text.WriteString("        }\n")
+	}
+
 	text.WriteString(after.String())
 	text.WriteString(returned)
 	text.WriteString("    }\n")
