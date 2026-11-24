@@ -2904,3 +2904,50 @@ Not measured on H, owed to the hosted legs: the pressure arm (P-5), the probe ar
 goindex, goindexfill, goslicefill and outstrtol, converter-cgo on linux and darwin, and release-smoke.
 
 — H (2026-11-24, after the battery)
+
+#### 18.12.2 Record 2026-11-24: the hosted rounds after the battery, and P3's review folded (r2 to r6)
+
+**Hosted rounds (os-matrix, each on a new `claude/h-cgo-1b-rN` ref; no posted SHA replaced).**
+- r3 to r4: 15 view arms refused, then 3. Fixed by the derivation walk (`ae2ef3b20f`: TryPinTarget walks
+  `NativeDerivedFrom` to the first box holding a pin) and by `85cdef62df`: a reinterpret view of Go storage pins its ROOT
+  (goindexfill and goslicefill had taken the one-scalar stack mirror, so C wrote 8 bytes into a 1-byte copy), and the
+  helper and the walk take a window's anchor and an element's identity (goviewelemstring).
+- r5 at `85cdef62df`: cgo-e2e green on linux, darwin and windows (69/69 TestCgoPhase3ProgramRunsAsGoDoes arms each),
+  golib-tests green on linux and windows, release-smoke green. darwin golib-tests passed every test (3121/0/57) and was
+  red only on its expected-skip gate (a sampling-profiler threshold test ran where it is listed as skipped); r4's darwin
+  red was a different threshold test (the token-table bound). Posted to COORD as a FINDING, not a 1b defect.
+
+**P3's review of `85cdef62df`: CHANGES (COORD inbox H 20261124T173809Z), folded at `958a5124d0`.** The walk, the offsets
+and the pin lifetime read sound. Each item is folded red-first with a row:
+1. MUST: OutParameter refuses an element of a Go array of C pointers by name (its one-word mirror is not the array C may
+   read or fill); `&end` still crosses. Rows: GolibTests PinnedAnOutParameterOverAnArrayElementIsRefusedByName, e2e
+   outstrtodelem (C# refuses with the text, Go prints).
+2. ScalarPointer and TryHelperPin name an element by its identity (RootNumber), so `&h.name[0]` with `name [8]C.char`
+   over a view crosses. Read on H against a converted program first: refused at the old number for the char * C fills
+   and for C.GoString; after, ABCD lands at offset 8 and C.GoString reads it. Rows: e2e goviewcelemstring,
+   goviewcelemfill (GolibTests cannot build the inline-array struct).
+3. A reinterpret view whose root no door can pin, over a value wider than T, is refused by name instead of mirrored.
+   Row: PinnedAWideReinterpretViewNoDoorCanPinIsRefusedNotMirrored.
+4. Residual 1 (endptr) is CLOSED: inside the wrapper's `fixed`, after the call, each word C returned (an out-parameter's
+   word; a pointer result other than the pointer it was handed) is checked against each pinned argument, and a word in
+   that storage is refused by name (GoCgoArgs.RequireWordOutsidePin over GoCgoPin.Holds). The wrapper goldens move at
+   exactly strtol (five targets) and gmtime_r (four). Rows: PinnedAWordCReturnsInsidePinnedGoMemoryIsRefusedByName, e2e
+   outstrtodgo.
+5. Residual 2 (C.CString B-10) has its row, PinnedB10_CStringAsksTheStringsOwnWindow: green at the old code as P3 read it,
+   red with StringSize's check removed, restored byte-identical.
+6. HoldsAnyEntry tests a word's overlap with the range, not its first byte. Row: PinnedB10_ARangeStartingInsideAWordHoldsIt.
+
+**Readings at `958a5124d0`.** Hosted cgo-e2e r6 (45456514538 linux, 45456535113 darwin, 45456563570 windows): 73/73 arms
+pass on each OS and on both darwin RIDs (the 69 plus the four new; the two refusal arms refuse with their text). On H:
+GenTests 814/0/0; GolibTests Release 3168/0/54 and Debug 3142/0/80 (total 3222 = the r5 tip's 3217 + 5), failed sets
+empty, Release-only skips empty, Debug-only skips the JIT-gated set already on master.
+On H, the rest of the battery from a copy at `958a5124d0` (base `85cdef62df`), every leg unfiltered, tree clean after each
+purge: converter `go test ./...` 11 ok, 0 FAIL, 0 cached; repoguard ok; `GO2CS_CGO_BUILD=1 -run TestCgo` ok; CNR NO
+REGRESSION, 1171 packages byte-identical, 12 platform-exclusive skipped by name, 0 NOT MEASURED; `go2cs.slnx` Debug 0
+errors.
+
+Residuals still standing: the endptr class is closed for out-parameter words and pointer results; a void pointer C
+returns into pinned Go memory still crosses as its number (a number names no box, M3). Handing C a whole Go array of C
+pointers, pinned, is a later seat. The full behavioral suite is the train's (route #7, twin 4).
+
+— H (2026-11-24)
