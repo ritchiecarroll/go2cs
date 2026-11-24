@@ -501,6 +501,8 @@ PLAN section 6, step 5: the launch demo and the standing integration test.
 13. **The conversion fills its probe cache.** For each package with an `append` the converter may lower, it
     compiles the package once per corpus target (four) with `go build -trimpath -gcflags=-m ...`, and under `-tests`
     once more per target with `go test -c`, to read the compiler's escape decisions (`src/go2cs/stackAppendHints.go`).
+    It does so when `-stack-append` resolves on, which it does by default under `-tests`; a plain or `-recurse`
+    conversion runs none of these builds unless it passes `-stack-append=on`.
     Those builds go into the probe cache, not `GOCACHE`: `-probe-cache <dir>`, else `GO2CS_PROBE_CACHE`, else
     `go2cs/probe-cache` under the user cache directory ([Known issues](KnownIssues.md#a-conversion-keeps-a-go-build-cache-of-its-own)).
     Each target caches its own dependency closure there, and Go removes an entry only after five days unused, so

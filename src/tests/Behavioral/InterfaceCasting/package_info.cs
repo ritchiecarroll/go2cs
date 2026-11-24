@@ -75,7 +75,7 @@ using System.Runtime.CompilerServices;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("InterfaceCasting.go", "InterfaceCasting.cs", "AAoSgqiCAAkUgtyC3ILcggAGGIKmooKmgqaCAAsigq6CgoKUgoK0goK0goK0qpSilJSUgoKmgoKCgpSClIKClIKUgoKmgoKCgoKCnIKCgoKCnKKCnoKSgpqCgpSUlJyCnIKcgoLYgoKUAAwcgpSCAAsYABEi2IKUAAkWAAgSgoKCgoI=", "195-200:1")]
+[assembly: GoPositionMap("InterfaceCasting.go", "InterfaceCasting.cs", "AAoSgqiCAAkUgtyC3ILcggAGGIKmooKmgqaCAAsigq6CgoKUgoK0goK0goK0qpSClJSUgoKmgoKCgpSClIKClIKUgoKmgoKCgoKCnIKCgoKCnKKCnoKSgpqCgpSUlJyCnIKcgoLYgoKUAAwcgpSCAAsYABEi2IKUAAkWAAgSgoKCgoI=", "195-200:1")]
 // </GoSourcePositionMaps>
 
 namespace go;

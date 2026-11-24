@@ -588,8 +588,11 @@ A publish that is not a single file never makes a composite image, so it is not 
      from GOCACHE.
      Measured the same day on one very large package of another module: its probe entries took about 2,273 MB
      (about 200 MB of compiled object per target). Plain-statement ask from COORD 10:19Z. -->
-For each package it converts, go2cs runs `go build` (and `go test -c` for test files) with `-gcflags=-m` for four
-targets, so it emits the same escape decisions Go makes. Those builds go into their own cache, not your `GOCACHE`:
+When `-stack-append` is on, go2cs runs `go build` (and `go test -c` for test files) with `-gcflags=-m` for four
+targets for each package it converts, so it emits the same stack-append buffers Go makes. The option is on by
+default only for `-stdlib` and `-tests`; a plain or `-recurse` conversion runs none of these builds and never
+creates the cache unless you pass `-stack-append=on`
+([`-stack-append`](CommandLine.md#options)). Those builds go into their own cache, not your `GOCACHE`:
 `go2cs/probe-cache` under the user cache directory, or the directory named by `-probe-cache` or `GO2CS_PROBE_CACHE`.
 The first conversion builds the standard library there for each target, about 60 MB each, and later conversions of
 any module reuse it. Each converted package adds its own entries, which grow with the size of its compiled code: about 5 MB
@@ -613,9 +616,14 @@ directory owned by you that no other user can open; otherwise the run stops befo
 
 The separate cache is on the master branch. go2cs 1.26.11.1 runs the same builds in your own `GOCACHE`, so they take
 the same space there, and it has neither `-probe-cache` nor `GO2CS_PROBE_CACHE`.
+`-stack-append` is on the master branch too: go2cs 1.26.11.1 runs these builds for every conversion.
 <!-- 2026-11-23 .5 docs pass (P1), at master 97cca467a2: the probe cache landed in train 1 (claude/p4-probe-cache,
      merge dcfc9c99a1). At nuget-1.26.11.1, src/go2cs has no probe-cache flag or GO2CS_PROBE_CACHE, and the escape
      probe's go build runs with the caller's environment, so its entries go to the default GOCACHE. -->
+<!-- 2026-11-24 (P5, train 12): the owner ruled the stack-append hint on by default only for -stdlib and -tests and off
+     for plain and -recurse conversions, with -stack-append=on|off|auto (COORD 2026-11-24 17:50Z, on P5's scout). With
+     the hint off, collectStackAppendHints returns before any harvest, so no probe build runs and the cache directory is
+     never created (TestStackAppendOffRunsNoProbe, with the gate removed it reads 4 harvests and the cache created). -->
 
 
 ## A Go struct field, method or type whose name starts with `Δ` refuses its package {#delta-led-field-method-type-refused}

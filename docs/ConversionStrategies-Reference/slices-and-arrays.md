@@ -1085,6 +1085,21 @@ buffer is taken, so a function takes it at most once per call: a slice reset to 
 growslice does. An element of zero size or over 32 bytes, a spread `append(x, s...)`, a slice that is not
 empty, and a variable whose address is taken never take it.
 
+**When the converter emits the buffer.** Only when `-stack-append` is on. It is on by default for `-stdlib` and
+`-tests` conversions, whose converted tests are compared with Go's own and can observe `cap()` and
+`testing.AllocsPerRun`. A plain or `-recurse` conversion emits plain `append(x, v)` unless it passes
+`-stack-append=on`, and `-stack-append=off` turns the buffer off for `-stdlib` and `-tests` too. golib's buffer
+is a heap array, so the buffer changes what a program can observe, never how many allocations it makes: with
+it off, a converted program differs from Go only where it reads a capacity the buffer sets, and no
+`go build -gcflags=-m` runs. A behavioral project that tests the buffer turns it on in its own `go2cs.options`
+file, as `StackAppendBackingStore` does
+([`-stack-append`](../CommandLine.md#options)).
+<!-- Ruled by the owner 2026-11-24 on P5's scout (COORD 2026-11-24 17:50Z): hint off, 41 of the 42 behavioral projects
+     that carried a buffer printed what go run prints; StackAppendBackingStore differed in 11 of its 19 lines, all cap().
+     golib's buffer is `new T[K]` (src/core/golib/stackAppend.cs), uncharged to AllocationCounter. -->
+
+Guarded by: `TestStackAppendModeResolves`, `TestStackAppendOffRunsNoProbe` (`src/go2cs/stackAppendOption_test.go`).
+
 Which appends qualify is the compiler's decision, made after inlining and escape analysis, so the converter
 reads it from the compiler instead of re-deriving it (`src/go2cs/stackAppendHints.go`). For each package
 it runs `go build`, or `go test -c` for test files, with `-gcflags='-m -d=variablemakehash=vy'` for
@@ -2061,16 +2076,13 @@ read/write vs Go.)
 
 ## Appending to an interface-typed slice casts the element
 A value appended to a `[]Iface` slice whose type is not already the interface -- a pointer rendering as the `*T`-to-interface adapter ctor, or a raw struct value -- leaves both golib `append` overloads applicable (`append<T>(ISlice, params T[])` infers the concrete/adapter type; `append<T>(slice<T>, params Span<T>)` infers the interface -- CS0121). The converter casts such elements to the element interface type:
-<!-- source: src/tests/Behavioral/InterfaceCasting/InterfaceCasting.cs.target:159-160 -->
+<!-- source: src/tests/Behavioral/InterfaceCasting/InterfaceCasting.cs.target:157-158 -->
 ```csharp
-    pack = append(packᴷ, pack, (Animal)(new CatжAnimal(Ꮡ(new Cat()))));
+    pack = append(pack, (Animal)(new CatжAnimal(Ꮡ(new Cat()))));
     pack = append(pack, (Animal)(new Dog()));
 ```
-(`packᴷ` is the variable's Go stack buffer, which its first append passes —
-see
-[A non-escaping append can take Go's 32-byte stack buffer](#a-non-escaping-append-can-take-gos-32-byte-stack-buffer).)
 An already-interface-typed element stays bare. The **empty interface** (`any`) element type is affected identically and takes the same cast — `append(args[:len(args):len(args)], c.output)` with `args []any` and `c.output []byte` infers `T=[]byte` on the `ISlice` overload but `T=any` on the `slice<T>` overload (testing's `flushToParent`, CS0121), and appending a scalar (`append(anys, 5)`) is the same shape; the differing element is cast to `any` so both overloads agree, as in the `AppendUntypedConst` golden:
-<!-- source: src/tests/Behavioral/AppendUntypedConst/main.cs.target:36 -->
+<!-- source: src/tests/Behavioral/AppendUntypedConst/main.cs.target:31 -->
 ```csharp
 anys = append(anys.slice(0, len(anys), len(anys)), (any)(data));
 ```
@@ -2084,18 +2096,15 @@ call), appending **ZERO** elements rather than one nil element. That would silen
 index `[-1]`. The converter therefore casts any untyped-nil element to the slice's element type, forcing single-element
 binding — the interface (`error`) and named-composite branches above for their own reasons, and an **unnamed** nillable
 element type (slice/map/pointer/chan/func) for this one:
-<!-- source: src/tests/Behavioral/AppendNilSliceElement/main.cs.target:14, 19, 23 -->
+<!-- source: src/tests/Behavioral/AppendNilSliceElement/main.cs.target:10, 15, 19 -->
 ```csharp
     lines = append(lines, (slice<nint>)(default));
     …
-    maps = append(mapsᴷ, maps, (map<@string, nint>)(default));
+    maps = append(maps, (map<@string, nint>)(default));
     …
-    ptrs = append(ptrsᴷ, ptrs, (ж<nint>)(nil));
+    ptrs = append(ptrs, (ж<nint>)(nil));
 ```
-(The pointer element's `nil` renders in pointer context. `mapsᴷ` and `ptrsᴷ` are the variables' Go stack
-buffers, passed by a variable's first append that may take one —
-see
-[A non-escaping append can take Go's 32-byte stack buffer](#a-non-escaping-append-can-take-gos-32-byte-stack-buffer).)
+(The pointer element's `nil` renders in pointer context.)
 A nil element is only ever valid when the element type is nillable, so the cast target always exists. Spread appends (`append(dst, src...)`) are excluded (the existing `Ellipsis.IsValid()` guard). Guarded by the `AppendNilSliceElement` behavioral test (slice/map/pointer element types, output-compared vs Go).
 
 ---

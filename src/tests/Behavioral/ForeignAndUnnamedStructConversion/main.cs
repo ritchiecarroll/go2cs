@@ -347,10 +347,8 @@ internal static nint deleteForeign(lib.Pitch p) {
     return len(m);
 }
 internal static nint appendLocal(hertz h) {
-    var sᴷ = new stackAppend<anonBox_V>();
-
     slice<anonBox_V> s = default;
-    s = append(sᴷ, s, h, h);
+    s = append(s, h, h);
     return len(s) + s[1].Hz;
 }
 internal static nint selectForeign(lib.Pitch p) {
@@ -515,10 +513,8 @@ internal static nint backDeleteLocal(anonBox_V a) {
     return len(m);
 }
 internal static nint backAppendForeign(anonBox_V a) {
-    var sᴷ = new stackAppend<lib.Pitch>();
-
     slice<lib.Pitch> s = default;
-    s = append(sᴷ, s, (lib.Pitch)(a), (lib.Pitch)(a));
+    s = append(s, (lib.Pitch)(a), (lib.Pitch)(a));
     return len(s) + s[1].Double();
 }
 internal static nint backSelectLocal(anonBox_V a) {
@@ -727,11 +723,9 @@ internal partial struct liftElements_s /*dyn*/ {
 }
 
 internal static nint liftElements() {
-    var sᴷ = new stackAppend<liftElements_s>();
-
     var s = slice<liftElements_s>([laterTempo()]);
     var m = new map<liftElements_s, nint>{[laterTempo()] = 1};
-    s = append(sᴷ, s, new liftElements_s(laterTempo().Bpm));
+    s = append(s, new liftElements_s(laterTempo().Bpm));
     return s[0].Bpm + m[laterTempo()] + len(s);
 }
 

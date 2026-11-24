@@ -333,7 +333,7 @@ The same row, dereferenced per call rather than bound once, is what keeps a **re
 
 **Row 5 — two boxes become one temp** (`NamedArrayWrapper`; the wrapper's `Value` yields an `array<T>` header whose `T[]` backing is SHARED, so element writes flow through and whole-header writes are lost in *both* emissions equally — byte-parity, not a new behavior. Type-gated by `refConvPairingSupported` to the identical-underlying-array family; a string or numeric wrapper's value is a plain copy and keeps its identity box end to end):
 
-<!-- source: src/tests/Behavioral/NamedArrayWrapper/main.cs:116-120 -->
+<!-- source: src/tests/Behavioral/NamedArrayWrapper/main.cs:114-118 -->
 ```csharp
 scal sm = new();
 var ᴛ1 = sm.s.Value;

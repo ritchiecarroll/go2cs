@@ -778,6 +778,8 @@
     <None Include="$(MSBuildThisFileDirectory)stackAppendHints.go" />
     <None Include="$(MSBuildThisFileDirectory)stackAppendHints_test.go" />
     <None Include="$(MSBuildThisFileDirectory)stackAppendMove2heap_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)stackAppendOption.go" />
+    <None Include="$(MSBuildThisFileDirectory)stackAppendOption_test.go" />
     <None Include="$(MSBuildThisFileDirectory)stackAppendProbeCache_test.go" />
     <None Include="$(MSBuildThisFileDirectory)stackAppendProbeCacheLazy_unix_test.go" />
     <None Include="$(MSBuildThisFileDirectory)stackAppendProbeCacheOwner_notunix.go" />
