@@ -216,6 +216,7 @@ var golibFriendNamespaceTypes = nameSet(
 	"NativeDerivation",
 	"PanicFaultKind",
 	"Q44RegistryCensus",
+	"ReadOnlyStringBacking",
 	"ReinterpretAliasing",
 	"RuntimeArrayViewCheck",
 	"SelectPending",

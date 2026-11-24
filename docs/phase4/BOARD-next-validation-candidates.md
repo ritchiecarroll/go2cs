@@ -41958,4 +41958,39 @@ holds for a promoted method that is NOT weak and parks: its forwarder is plain t
 
 — P4 (2026-11-23)
 
+### 2026-11-24 — unsafe.StringData over static string bytes: a write is isolated, and reported only where a hook sees the next access
+
+**What changed (D5 option A, COORD 20261124T103731Z).** `unsafe.StringData` over a string whose bytes are static data
+(a cached string literal, or a one-byte string from `@string`'s table) used to return a pointer into storage the whole
+process shares, so a write through it changed every later equal literal and one-byte string. Go faults on that write.
+It now returns a pointer into one private copy per backing (golib `ReadOnlyStringBacking`), and the next access through
+a hook panics by name: a dereference of the box (`*p`, and every box `unsafe.Add` derives from it), or a later
+`unsafe.StringData` over the same backing. A heap string is unchanged: Go mutates its sharers and so does go2cs.
+
+**The named limit.** A view that reads the storage directly takes no hook: a slice from `unsafe.Slice(p, n)`, and an
+array pointer `(*[N]byte)(unsafe.Pointer(p))` (`ElemRefBox.TryGetElementStorage`). A write through one still lands in
+the copy and reaches nothing else, but it is reported only if a later access goes through one of the two hooks. Go
+faults at the write itself; a managed box cannot observe a write through a ref or span it has already handed out.
+
+**`reflect.StringHeader` goes through the same door.** `ж.StringHeaderBox` minted its `Data` (the number shape's (H)
+and the pointer shape) with `builtin.Ꮡ(window, 0)`. With `StringData` routed and the header not, GolibTests
+`StringHeaderNumberTests` W4 went red (Data != StringData, which Go holds equal), so both mints now take
+`ReadOnlyStringBacking.TryDataBox` first. `ElemRefBox`'s foreign arm answers `IElementRun.RunBacking` with the shadow
+for this one collection, so a header store of that Data (`HeaderWriteThroughTests`, Go's `TestWriteThroughHeader`)
+rebuilds the string over the shadow instead of refusing, and the native marshals see the shadow run.
+
+**The route the cut does not cover.** A literal the standard library hoists into a field,
+`private static readonly @string xˢᵇ = "..."u8;` (1,282 files under `src/core` at b2c9435159): its backing is not a
+cached literal, so `StringData` over it still aliases the shared bytes. It is in `docs/Limitations.md`. Closing it
+means registering the hoisted fields' backings (a converter or golib change to the `u8` hoist).
+
+**Guards.** GolibTests `ReadOnlyStringDataTests` (6 arms): red at master on the literal, one-byte and `unsafe.Slice`
+arms (the write changed the literal or the one-byte string), green with the cut; with the next-access check neutered
+the same three arms fail by name ("did not report the write"). Behavioral `StringDataIdentity` compares the identity,
+heap and near-miss arms against `go run`.
+
+**Owner.** P5 (the cut). The hoisted-field route and the hook-free views are unassigned; COORD routes.
+
+— P5 (2026-11-24)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

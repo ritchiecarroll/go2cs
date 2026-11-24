@@ -36,6 +36,18 @@ namespace go.golib;
         return new PanicException(PlainErrorValue?.Invoke(message) ?? (@string)message) { FaultKind = PanicFaultKind.Panicwrap, RaisedByWrapper = true };
     }
 
+    private const string ReadOnlyStringDataText =
+        "write through a string's data pointer: the bytes of a string literal or of a one-byte string are read-only "
+        + "data (Go faults at the write; go2cs gave unsafe.StringData a private copy and reports the write at its next access)";
+    /// <summary>
+    /// A write through <c>unsafe.StringData</c> into static string data, reported at the next access that goes through
+    /// a hook (ReadOnlyStringBacking). Go faults at the write itself, so this is a fault.
+    /// </summary>
+    internal static PanicException WriteThroughReadOnlyStringData()
+    {
+        return new PanicException(ErrorStringState(ReadOnlyStringDataText)) { FaultKind = PanicFaultKind.Memory };
+    }
+
     public static PanicException NilPointerDereference()
     {
         // A fault: Go reaches gopanic through sigpanic and panicmem (runtime's captureCallers splices both).

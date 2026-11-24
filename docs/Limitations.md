@@ -257,6 +257,24 @@ standard library, and runs on Windows, Linux or macOS. **A longer evening:** lot
   * Copying a struct by value shares any fixed-size array inside an embedded struct.
   * A slice of one number type laid over another's storage
     (`unsafe.Slice((*uint64)(unsafe.Pointer(&b[0])), n)`) is a copy: writes through it never reach `b`.
+  * A write through `unsafe.StringData`'s pointer into a string literal or a one-byte string faults in Go, because
+    those bytes are read-only. go2cs gives the pointer a private copy of the bytes, so the write reaches no other
+    string, and panics at the next read through that pointer (`*p`, or a pointer `unsafe.Add` made from it) or at
+    the next `unsafe.StringData` over the same string. A write through a view that reads the bytes directly, a slice
+    from `unsafe.Slice(p, n)` or a `(*[N]byte)(unsafe.Pointer(p))` array pointer, also lands in the copy, and is
+    reported only if a later access goes through one of those two checks. The `Data` of a `reflect.StringHeader`
+    laid over such a string names the same copy. One route is not covered: a literal the standard library hoists
+    into a `static readonly` field (`"..."u8`), where a write through `unsafe.StringData` changes that literal
+    wherever it is used. A heap string (one built at run time) behaves as in Go: the write changes it and every
+    string sharing its bytes.
+  <!-- 2026-11-24 (P5, D5 option A, COORD ruling 20261124T103731Z): golib ReadOnlyStringBacking. Guarded by GolibTests
+       ReadOnlyStringDataTests (red at master b2c9435159 on the literal, one-byte and unsafe.Slice arms; the next-access
+       check neutered fails the three panic arms by name) and Behavioral StringDataIdentity (identity, heap and near-miss
+       arms compared against go run). The header's Data goes through the same door (ж.StringHeaderBox.cs (H) and the
+       pointer shape), guarded by GolibTests StringHeaderNumberTests W4, which read Data != StringData with StringData
+       routed and the header not. The uncovered route: the hoisted-literal fields are 1,282 files of
+       `private static readonly @string xˢᵇ = "..."u8;` under src/core at that base, whose backing is not a cached
+       literal. -->
   * A pointer's number kept in a `uintptr` and turned back into a pointer in a later statement
     (`n := uintptr(unsafe.Pointer(p))`, then `(*T)(unsafe.Pointer(n))`) can name memory that has since moved, and
     the number does not keep the value alive. Go calls this invalid too, but it often works there. Do the

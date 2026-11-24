@@ -344,7 +344,9 @@ internal sealed class StringHeaderBox<TDst> : ж<TDst>, IHeaderDataCarrier
             return m_mintNumber;
         }
 
-        ж<byte> element = builtin.Ꮡ(window, 0);
+        // A static backing (a literal, a one-byte string) reads unsafe.StringData's private copy, so Data equals
+        // StringData(s) as in Go (ReadOnlyStringBacking).
+        ж<byte> element = ReadOnlyStringBacking.TryDataBox(window) ?? builtin.Ꮡ(window, 0);
         elementBox = element;
         return ((INilPointer)element).StableAddress();
     }
@@ -395,7 +397,8 @@ internal sealed class StringHeaderBox<TDst> : ж<TDst>, IHeaderDataCarrier
         {
             if (m_pointer is null || !SameWindow(source, m_pointerFor))
             {
-                object? elementZero = source.Length == 0 ? null : builtin.Ꮡ(source.UnsafeBackingWindow(), 0);
+                slice<byte> window = source.UnsafeBackingWindow();
+                object? elementZero = source.Length == 0 ? null : ReadOnlyStringBacking.TryDataBox(window) ?? builtin.Ꮡ(window, 0);
                 m_pointer = s_fromBox!.Invoke(null, [elementZero]);
                 m_pointerFor = source;
             }
