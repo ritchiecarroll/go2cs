@@ -6,6 +6,7 @@ package flags
 import (
 	"AliasKeywordPackage/checked"
 	"AliasKeywordPackage/internal"
+	"AliasKeywordPackage/partial"
 	"AliasKeywordPackage/record"
 	"AliasKeywordPackage/union"
 
@@ -33,5 +34,8 @@ func (b Bools) Lock(k lock.Kind) lock.Kind { return k + lock.Kind(b&1) }
 // Union names a type of the package named union.
 func (b Bools) Union(s union.Set) union.Set { return s | union.Set(b) }
 
-// Record names a type of the package named record, whose alias stays bare.
+// Record names a type of the package named record, as a return type too (its alias is @record).
 func (b Bools) Record(e record.Entry) record.Entry { return e * record.Entry(b) }
+
+// Partial names a type of the package named partial, as a return type too (its alias stays bare).
+func (b Bools) Partial(p partial.Part) partial.Part { return p - partial.Part(b) }
