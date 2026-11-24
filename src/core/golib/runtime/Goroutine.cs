@@ -1500,6 +1500,14 @@ namespace go.golib;
         return goroutine;
     }
 
+    // TEST-ONLY: a multiplexed goroutine that is in no registry, for GolibTests rows that Mount it on one thread and then
+    // another (MountedThreadStateTests). It counts toward nothing and no scheduler runs it.
+    internal static Goroutine NewMultiplexedForTest() =>
+        new(Interlocked.Increment(ref s_nextId), isMain: false, creator: null, System.Diagnostics.StackFrame.OFFSET_UNKNOWN, parentId: 0, entry: null, systemBasis: null)
+        {
+            m_multiplexed = true
+        };
+
     private static void Unregister(Goroutine goroutine)
     {
         if (s_live.TryRemove(goroutine.Id, out _))
