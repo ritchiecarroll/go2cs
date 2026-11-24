@@ -42128,4 +42128,36 @@ including one past its end, is refused by name. P3 names two more routes that ar
 
 — H (2026-11-24)
 
+
+## 2026-11-24 — P5 (pollBlock deadlock seat, claude/p5-pollblock-deadlock; P3 review 11:24Z, COORD 11:26Z): a goroutine that owns a Go-level lock and then waits for a P is safe only while every contender for that lock gives its P away when it blocks (OPEN rule, no defect today)
+
+**How found.** The darwin M:N closure hang (run 45358621509) was pollBlock disposing its park scope while it held
+`desc.Gate`: Dispose under M:N waits for a P (`GoScheduler.ExitBlocked`), and a carrier holding a P waited for that gate.
+The fix disposes after the gate is released. P3's read of it named three more sites with the same order, under a GO-level
+lock instead of a CLR one.
+
+**The sites.** `sync/mutex.cs` (contended `Lock`, both arms: the scope ends after the loop has taken `m.state`, so
+`ExitBlocked` runs while the goroutine owns the Mutex), and `internal/poll/fd_mutex_impl.cs` `rwlock` (the scope ends
+after the signaller handed the lock over). Each owns its lock, then waits for a P.
+
+**Why it holds today.** Every contender for those locks that waits parks first: a contended `Lock` parks with the
+hand-off (`Goroutine.Park`), the `Lockꞏtwin` path parks without holding a P (`ParkTwin`), and `rwlock` contenders take
+the same Park. `TryLock` never waits. So no contender holds a P while it waits for the lock, and the owner finds a P.
+
+**What would break it.** A contender that spins, or blocks a carrier without Park, while it holds a P. With one P (or
+every P held that way) the owner waits for a P and the contender waits for the lock: the pollBlock shape again, and it
+would read as a hang with no deadlock report. A new wait path on these locks, or a spin-then-park Mutex change, takes
+this row's check first.
+
+**Census (complete, P5 + P3).** Disposed under a CLR lock: only pollBlock (three flavours), fixed. Lock released inside
+the scope before the wait: `channel.cs` 620, 719, 1257; `RuntimeSemaphore` 229; `sync/runtime_impl.cs` 146;
+`sync/waitgroup.cs` 229. Lock taken and released inside the scope: `SyncTestBubble` 330, 426. No lock held at Dispose:
+`Coro.cs` 188, 202, 226; `runtime/park_impl.cs` 79; `time/time_impl.cs` 541, 555; `channel.cs` 2521, 2532. ParkTwin
+(no P-wait): `sync/mutex` 558, `time_impl` 595, `channel` 1019, 1055, 1344. Go-level lock owned at Dispose: the three
+sites above. Line numbers at master b2c9435159.
+
+**Owner.** None needed now; a seat that adds a contender to either lock owns the check.
+
+— P5 (2026-11-24)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

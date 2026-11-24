@@ -159,6 +159,9 @@
   <ItemGroup Condition="'$(GoTargetOS)' != 'linux' and '$(GoTargetOS)' != 'darwin'">
     <Compile Remove="InheritedIgnoredSignalTests.cs" />
     <Compile Remove="RecvfromUnspecifiedSourceTests.cs" />
+    <!-- The poller wait-loop arm parks a reader on an os.Pipe, which only the linux and darwin pollers serve
+         (a windows pipe is not pollable). The windows flavour's pollBlock takes the same edit. -->
+    <Compile Remove="PollBlockGateOrderTests.cs" />
   </ItemGroup>
 
   <!-- S-b2's darwin rows drive seams the darwin flavour alone declares (syscall's GoPosixSpawnCall and
