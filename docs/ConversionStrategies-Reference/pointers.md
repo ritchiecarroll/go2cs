@@ -1210,13 +1210,13 @@ Guarded by: the behavioral program `UnsafePointerCallResultLifetime`; `TestDisca
 
 Go's `(*T)(p)` turns an `unsafe.Pointer` into a typed pointer to the same memory, and the typed pointer keeps that memory alive. The converter emits golib's typed conversion, `@unsafe.Pointer.To<T>(p)`, which receives the pointer itself: its number and [the box it carries](#converting-a-go-pointer-to-unsafepointer).
 
-<!-- source: src/tests/Behavioral/UnsafePointerTypeAlias/main.go:20-22 -->
+<!-- source: src/tests/Behavioral/UnsafePointerTypeAlias/main.go:24-26 -->
 ```go
 func readU32(p ptr, o uintptr) uint32 {
 	return *(*uint32)(unsafe.Add(p, o))
 }
 ```
-<!-- source: src/tests/Behavioral/UnsafePointerTypeAlias/main.cs.target:19-21 -->
+<!-- source: src/tests/Behavioral/UnsafePointerTypeAlias/main.cs.target:23-25 -->
 ```csharp
 internal static uint32 readU32(ptr p, uintptr o) {
     return ~@unsafe.Pointer.To<uint32>(@unsafe.Add(p, o));

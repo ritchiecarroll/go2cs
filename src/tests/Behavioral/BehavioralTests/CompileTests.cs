@@ -2989,6 +2989,12 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckUnsafeBuiltinIntegerLen() => CheckTarget("UnsafeBuiltinIntegerLen");
 
     [TestMethod]
+    public void CheckUnsafeHeaderViewFamily() => CheckTarget("UnsafeHeaderViewFamily");
+
+    [TestMethod]
+    public void CheckUnsafeHeaderViewRefusals() => CheckTarget("UnsafeHeaderViewRefusals");
+
+    [TestMethod]
     public void CheckUnsafeOperations() => CheckTarget("UnsafeOperations");
 
     [TestMethod]

@@ -41998,4 +41998,70 @@ holds for a promoted method that is NOT weak and parks: its forwarder is plain t
 
 — P4 (2026-11-23)
 
+## 2026-11-24 — P5 (C45; COORD ruling 20261124T022736Z, D5 split out): a write through a string's data pointer reaches the string's shared backing (OPEN, candidate .5, owner P5)
+
+**OPEN.** A Go string's bytes are immutable, and Go programs that read them through `unsafe.StringData`, a string
+header's Data or `*(*unsafe.Pointer)(unsafe.Pointer(&s))` never write through that pointer. go2cs hands out a WRITABLE
+alias: `unsafe.StringData(s)` is `Ꮡ(window, 0)`, an element reference into the string's own backing array
+(`src/core/unsafe/unsafe.cs`), and the string header box's Data is the same element box. A store through it, or through
+a view built from it, changes the backing, and every string sharing that backing changes with it. Three paths reach it:
+the scalar store `*(*byte)(p) = 'x'`, the array view `(*[N]byte)(p)` (`Pointer.ToArray`, a window on the string's own
+backing) and `unsafe.Slice(unsafe.StringData(s), n)`. All three are on master today; C45 adds no new path to it.
+
+**Scenario (P3's read of the C45 delta, 2026-11-24).** `(*[1]byte)(h.p)[0] = 'x'` with `s` a one-byte string: a
+one-byte string's backing is golib's process-wide table (`src/core/golib/string.cs`), so every equal one-byte string in
+the process changes.
+
+**What a cure owes (COORD's ruling).** It covers EVERY path (scalar, `Pointer.ToArray` views and `unsafe.Slice`); the
+owner's rule is never to narrow a correctness rule by reachability. A write through a `ref` is not seen at the store
+(`ж<T>.Value` is a `ref T`), so the design names the mechanism that sees it instead (P3's MUST): a check on the next
+access, as the header boxes' limit L1 does, or another. A cost read on the `ElementRef` hot path comes first, and the
+gate includes a one-byte string.
+
+**Owner.** P5, its own seat after C45.
+
+— P5 (2026-11-24)
+
+## 2026-11-24 — P5 (C45; COORD ruling 20261124T050140Z, P3 finding 2): a store through a slice read as a string or string header matches Go (OPEN, post-.5)
+
+**OPEN.** `*(*string)(unsafe.Pointer(&b)) = s`, and the same whole store through a two-word string header
+(`*(*str)(unsafe.Pointer(&b)) = h`, zeebo/xxh3's `str`), replace the slice's data pointer and length in Go and keep its
+capacity: after `c := []byte("xyz"); *(*string)(unsafe.Pointer(&c)) = "q"`, Go prints 1 for `len(c)`. golib reads both
+through read-only views (`SliceAsStringBox`, `SliceStringHeaderBox`), which can refuse a store only on their next access,
+and the temporary box such a statement writes through has none, so the store was lost with no word (the conversion
+printed 3). C45 makes the statement panic by name (`go2cs: store through a read-only view`; the converter's
+`readOnlySliceViewStore`, Behavioral UnsafeHeaderViewRefusals, docs/Limitations.md) when the conversion is written in
+the assignment target, and stops the file by name (`GO2CS2008`) when that assignment is a `for` statement's init or post
+clause, where no throw statement can stand. A field store through the header is refused by its generated setter already.
+
+**Where it is still silent.** A store through a pointer VARIABLE that holds the view, `p := (*string)(unsafe.Pointer(&c));
+*p = "q"`, or through a function that stores through such a pointer, is not refused at the statement: it lands in the
+view, which panics by name on the next access through `p`, and is lost with no word when there is none (`len(c)` reads
+3 where Go reads 1). UnsafeHeaderViewRefusals pins both: "store through a variable, then read" (the panic) and "store
+through a variable, last access" (the wrong 3, until this row's cure). Found by P3's delta read of C45 r2 e87b097396
+(COORD 20261124T063422Z).
+
+**What a cure owes.** The store itself: set the slice's data and length from the stored string or header and keep its
+capacity, through the slice's own box, for `=`, the compound assignments and a tuple assignment alike, with the
+behavioral arms turned from refusals into Go's values.
+
+**Owner.** Unassigned (post-.5).
+
+— P5 (2026-11-24)
+
+## 2026-11-24 — P5 (C45; COORD 20261124T062025Z): a conversion to a defined type over unsafe.Pointer does not compile (OPEN, post-.5)
+
+**OPEN.** `type P unsafe.Pointer; x := 1; p := P(&x)` is spelled `new P(Ꮡx)`, which fails CS1503: the defined type's
+constructor takes no box. It is loud, so no program runs on a wrong value, but a module that writes it does not build.
+An ALIAS (`type P = unsafe.Pointer`) is the same type as unsafe.Pointer and takes its retaining door (C45); a defined
+type is a distinct type and keeps its own route. Read by a probe at C45 r2 (e87b097396), outside the C45 fix.
+
+**What a cure owes.** The defined type's conversion takes the same box-carrying door as unsafe.Pointer (FromPinnedBox
+for a pointer operand, FromHeaderData for rule 6, the uintptr hop), spelled through the defined type, with a behavioral
+arm per operand shape under forced collections, and the conversion back from the defined type to unsafe.Pointer.
+
+**Owner.** Unassigned (post-.5).
+
+— P5 (2026-11-24)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
