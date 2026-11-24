@@ -19,9 +19,14 @@
 # With the standard library twinned, the build twins every converted package IN PLACE under src/core: a later plain
 # build of the same tree rebuilds them. Run it after the Q1 kit, not before.
 #
-# FAILURE (rc 1) when the converter build, the conversion or the dotnet build fails, or when any run exits non-zero or
-# differs from Go. Environment: Q1_GOOS (passed as GoTargetOS), Q1_CONFIG (default Release), Q1_TIMEOUT seconds per
-# run (default 300), Q1_CLOSURE_RUNS. go and dotnet must be on PATH.
+# FAILURE (rc 1) when the converter build, the conversion or the dotnet build fails, or when any run exits non-zero,
+# differs from Go or is HUNG. Environment: Q1_GOOS (passed as GoTargetOS), Q1_CONFIG (default Release), Q1_TIMEOUT
+# seconds per run (default 300), Q1_CLOSURE_RUNS, Q1_STACK (a dotnet-stack executable; default the one on PATH). go and
+# dotnet must be on PATH.
+#
+# The deadline is the script's own, on every OS (run-deadline.sh). A run still alive at Q1_TIMEOUT has its managed
+# stacks dumped with dotnet-stack to run<N>.stack, then gets TERM and, 10 s later, KILL; its READING line says HUNG and
+# it counts as bad. go run takes the same deadline, with no stacks.
 set -u
 
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -47,9 +52,11 @@ for prop in ${Q1_CLOSURE_PROPS:-}; do
         *) echo "Q1_CLOSURE_PROPS: '$prop' is not -p:Name=value"; exit 1 ;;
     esac
 done
-if command -v timeout >/dev/null 2>&1; then tmo=(timeout "$timeout_s"); elif command -v gtimeout >/dev/null 2>&1; then tmo=(gtimeout "$timeout_s"); else tmo=(); fi
+# shellcheck source=run-deadline.sh
+. "$here/run-deadline.sh"
+stack_tool="${Q1_STACK:-$(command -v dotnet-stack 2>/dev/null || true)}"
 
-note "closure: src=$src config=$config GOMAXPROCS=${GOMAXPROCS:-unset} GoTargetOS=${Q1_GOOS:-default} props=[${extra[*]+${extra[*]}}]"
+note "closure: src=$src config=$config GOMAXPROCS=${GOMAXPROCS:-unset} GoTargetOS=${Q1_GOOS:-default} props=[${extra[*]+${extra[*]}}] deadline=${timeout_s}s stacks=${stack_tool:-none}"
 
 (cd "$src/go2cs" && go build -o "$out/go2cs" .) > "$out/converter.log" 2>&1 || fail "converter build (converter.log)"
 
@@ -76,7 +83,7 @@ dll=$(dotnet msbuild "$proj" -nologo -p:Configuration="$config" -p:go2csPath="$s
 [ -f "$dll" ] || fail "no assembly at '$dll'"
 
 ref="$out/go.stdout"
-if (cd "$prog" && ${tmo[@]+"${tmo[@]}"} go run .) > "$ref" 2> "$out/go.stderr"; then
+if run_deadline "$timeout_s" "" sh -c 'cd "$1" && exec go run .' sh "$prog" > "$ref" 2> "$out/go.stderr"; then
     note "reference: go run on this machine$(cmp -s "$ref" "$prog/go-output.txt" && echo ', equal to go-output.txt' || echo ', DIFFERS from go-output.txt')"
 else
     cp "$prog/go-output.txt" "$ref"; note "reference: go run failed (go.stderr); go-output.txt"
@@ -84,8 +91,14 @@ fi
 
 bad=0
 for r in $(seq 1 "$runs"); do
-    (cd "$(dirname "$dll")" && GO2CS_MN=1 GO2CS_MN_READING=1 ${tmo[@]+"${tmo[@]}"} dotnet "$dll") > "$out/run$r.stdout" 2> "$out/run$r.stderr"
+    run_deadline "$timeout_s" "$out/run$r.stack" sh -c 'cd "$1" && exec env GO2CS_MN=1 GO2CS_MN_READING=1 dotnet "$2"' sh "$(dirname "$dll")" "$dll" \
+        > "$out/run$r.stdout" 2> "$out/run$r.stderr"
     c=$?
+    if [ $c -eq 124 ]; then
+        bad=$((bad + 1))
+        note "READING closure run$r HUNG at ${timeout_s}s, killed | stacks: run$r.stack ($(wc -l < "$out/run$r.stack" | tr -d ' ') lines) | stdout $(wc -c < "$out/run$r.stdout" | tr -d ' ') bytes"
+        continue
+    fi
     grep -v 'READING' "$out/run$r.stdout" | tr -d '\r' > "$out/run$r.cmp"
     if cmp -s "$out/run$r.cmp" "$ref"; then eq=EQUAL; else eq=DIFFER; diff "$ref" "$out/run$r.cmp" > "$out/run$r.diff"; fi
     [ $c -eq 0 ] && [ $eq = EQUAL ] || bad=$((bad + 1))

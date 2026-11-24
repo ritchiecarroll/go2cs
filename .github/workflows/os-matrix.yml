@@ -2033,7 +2033,10 @@ jobs:
       # scheduler's peak OS threads). The dispatch's filter is handed to the closure build as extra MSBuild properties
       # (Q1_CLOSURE_PROPS): that is where a run twins the standard library, since repoguard TestStdlibTwinsDefaultOff
       # keeps the switch out of every tracked file until row 10's ruling. The closure runs second: a twinned standard
-      # library is built in place.
+      # library is built in place. Every run in both scripts has a deadline of their own (Q1_TIMEOUT, 300 s): a run still
+      # alive there has its managed stacks dumped (dotnet-stack, pinned) and is killed, and reads HUNG, a FAILURE. Until
+      # 2026-11-24 the deadline was coreutils timeout when present, which macOS lacks: the dry run's darwin closure run 3
+      # held the leg 3h17m with no output.
       # -------------------------------------------------------------------------------------
       - name: M:N platform read -- the Q1 kit, then the closure
         if: needs.plan.outputs.stage == 'mn-platform'
@@ -2045,6 +2048,11 @@ jobs:
           art="$PWD/artifacts/mn-platform-$RID"
           mkdir -p "$art"
           export Q1_GOOS="$GOOS_TARGET"
+          # Each run has a deadline (run-deadline.sh); a run still alive there has its managed stacks taken with this
+          # pinned dotnet-stack before it is killed, and reads HUNG. The stack-probe stage pins the same version.
+          tools="$RUNNER_TEMP/mn-stack-tools"
+          dotnet tool install dotnet-stack --version 10.0.731102 --tool-path "$tools" || echo "::warning title=mn-platform $RID::dotnet-stack install failed: a HUNG run will carry no stacks"
+          [ -x "$tools/dotnet-stack" ] && export Q1_STACK="$tools/dotnet-stack"
           kit=0; bash src/tools/mnspike2/run-q1-kit.sh "$art/kit" || kit=$?
           closure=0; bash src/tools/mnspike2/run-mn-closure.sh "$art/closure" || closure=$?
           {
