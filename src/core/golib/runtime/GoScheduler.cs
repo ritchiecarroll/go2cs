@@ -123,6 +123,17 @@ public static class GoScheduler
     // TEST-ONLY: the carrier start failures counted so far.
     internal static long CarrierStartFailures => Interlocked.Read(ref s_carrierStartFailures);
 
+    // TEST-ONLY: the carriers started so far.
+    internal static long CarriersStarted => Interlocked.Read(ref s_carriersStarted);
+
+    // TEST-ONLY: puts both carrier-start counters back after a row that started carriers of its own, so a row reading
+    // them process-wide (SchedulerOffTests: no carrier starts with the scheduler off) reads only the scheduler's.
+    internal static void RestoreCarrierCountersForTest(long started, long failures)
+    {
+        Interlocked.Exchange(ref s_carriersStarted, started);
+        Interlocked.Exchange(ref s_carrierStartFailures, failures);
+    }
+
     // TEST-ONLY: puts the carrier stack size and the said-once flag back to a row's starting state.
     internal static void ResetCarrierStackForTest(int size)
     {

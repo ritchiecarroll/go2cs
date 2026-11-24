@@ -22,11 +22,15 @@ public class CarrierStackFallbackTests
     // A carrier loop that ends at once: the rows read how the thread STARTED, not what it runs.
     private static void Idle() { }
 
-    private static (bool[] Started, string Stderr) StartCarriers(int refuseAbove, int count)
+    // Starts count carriers under the refusal threshold and returns whether each started, what stderr said, and how many
+    // start failures were counted. The process-wide carrier counters are put back after: SchedulerOffTests reads them
+    // and must see only the scheduler's own (none with it off).
+    private static (bool[] Started, string Stderr, long FailuresCounted) StartCarriers(int refuseAbove, int count)
     {
         TextWriter saved = Console.Error;
         StringWriter captured = new();
         int savedRefuse = GoScheduler.RefuseCarrierStackAboveForTest;
+        long startedBefore = GoScheduler.CarriersStarted, failuresBefore = GoScheduler.CarrierStartFailures;
 
         try
         {
@@ -36,11 +40,12 @@ public class CarrierStackFallbackTests
 
             bool[] started = Enumerable.Range(0, count).Select(_ => GoScheduler.StartCarrierThread(Idle)).ToArray();
 
-            return (started, captured.ToString());
+            return (started, captured.ToString(), GoScheduler.CarrierStartFailures - failuresBefore);
         }
         finally
         {
             GoScheduler.RefuseCarrierStackAboveForTest = savedRefuse;
+            GoScheduler.RestoreCarrierCountersForTest(startedBefore, failuresBefore);
             Console.SetError(saved);
         }
     }
@@ -50,7 +55,7 @@ public class CarrierStackFallbackTests
     {
         try
         {
-            (bool[] started, string stderr) = StartCarriers(refuseAbove: 128 * MB, count: 2);
+            (bool[] started, string stderr, _) = StartCarriers(refuseAbove: 128 * MB, count: 2);
 
             Assert.IsTrue(started.All(ok => ok), "both carriers start, at the size the platform grants");
             Assert.AreEqual(128 * MB, GoScheduler.CarrierStackSize, "the carrier stack falls back to 128 MB and stays there");
@@ -74,7 +79,7 @@ public class CarrierStackFallbackTests
         try
         {
             // 256 and 128 MB are both refused: the first carrier halves twice and starts at 64 MB, with one line.
-            (bool[] started, string stderr) = StartCarriers(refuseAbove: 64 * MB, count: 2);
+            (bool[] started, string stderr, _) = StartCarriers(refuseAbove: 64 * MB, count: 2);
 
             Assert.IsTrue(started.All(ok => ok));
             Assert.AreEqual(64 * MB, GoScheduler.CarrierStackSize);
@@ -91,12 +96,10 @@ public class CarrierStackFallbackTests
     {
         try
         {
-            long before = GoScheduler.CarrierStartFailures;
-
-            (bool[] started, _) = StartCarriers(refuseAbove: 0, count: 1);
+            (bool[] started, _, long failures) = StartCarriers(refuseAbove: 0, count: 1);
 
             Assert.IsFalse(started[0], "no size the halving reaches is granted: the carrier does not start");
-            Assert.AreEqual(before + 1, GoScheduler.CarrierStartFailures, "the refusal at 1 MB is counted as a start failure");
+            Assert.AreEqual(1, failures, "the refusal at 1 MB is counted as a start failure");
             Assert.AreEqual(GoScheduler.MinCarrierStackSize, GoScheduler.CarrierStackSize, "the halving stops at 1 MB");
         }
         finally
