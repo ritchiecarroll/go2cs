@@ -362,6 +362,14 @@ const cgoP3LayoutEntryPointer = "cannot read native memory as *main._Ctype_struc
 // ж.CgoFields.cs, CgoFieldStoreIntoCText). Go stores it; C memory must not hold one, so go2cs refuses it by name.
 const cgoP3StoreGoIntoC = "storing a Go pointer into C memory is refused"
 
+// cgoP3OutParameterElement is in the refusal of an out-parameter that is an element of a Go array of C pointers
+// (GoCgoArgs.OutParameter; P3's review of 1b, item 1).
+const cgoP3OutParameterElement = "an element of a Go array of C pointers"
+
+// cgoP3ReturnedIntoGoMemory is in the refusal of a word C returned inside a pinned argument's Go storage
+// (GoCgoArgs.RequireWordOutsidePin; P3's review of 1b, item 4).
+const cgoP3ReturnedIntoGoMemory = "returned an address inside the Go memory it was handed"
+
 // cgoP3Arms are the end-to-end program's arms. An arm with neither goFails nor csFails prints the same lines and exits
 // 0 both ways. Since increment 3.2 seat 1b (18.12, P-2) an arm that hands C or a helper a pointer into Go memory whose
 // box names its storage prints as Go does: the wrapper pins the storage for the call. govoidnumber and govoidexpr hand
@@ -423,6 +431,12 @@ func cgoP3Arms() []cgoG1Arm {
 		{name: "goslicefill"},
 		// Seat 1b's out-parameter (18.12 item 4, shape (i)): strtod's char ** endptr, &end over a Go variable.
 		{name: "outstrtod"},
+		// P3's review of 1b (COORD inbox 20261124T173809Z): an element of a native window over a view, typed (item 2), and
+		// the two out-parameter shapes refused by name (items 1 and 4).
+		{name: "goviewcelemstring"},
+		{name: "goviewcelemfill"},
+		{name: "outstrtodelem", csFails: cgoP3OutParameterElement},
+		{name: "outstrtodgo", csFails: cgoP3ReturnedIntoGoMemory},
 		// Increment 3.2's first reds (section 6). s6field, s6reinterp and s6slice print as Go does, and since seat 1a
 		// (18.9) s6nextnil, s6nextdirect and s6name do too: the field accessor retired their cgoP3LayoutEntry pins (the
 		// readings before it are at cgoP3LayoutEntryPointer). Since seat 1c (18.11) s6next does too: the **C.T door

@@ -101,7 +101,9 @@ namespace go.golib;
         {
             case ElemRefBox<T>:
             case NativeBox<T> native when !IsGenuinelyNative(native):
-                nuint number = pointer is NativeBox<T> view ? view.NativeAddress : 0;
+                // The element's own number: an element of a native window over a view (`&h.name[0]`) is named by its
+                // identity, and a managed element by 0 (P3's review of 1b, item 2).
+                nuint number = RootNumber(pointer);
 
                 if (ManagedPointerTokens.IsTaggedToken(number))
                     throw GoPointerToUnpinnedGoPointer();
@@ -127,6 +129,13 @@ namespace go.golib;
             case IReinterpretView { ReinterpretRoot: { } viewRoot } when TryPinReinterpretRoot(viewRoot, out pin):
                 address = 0;
                 return GoCgoStructPointer.Pinned;
+
+            // A root no door can pin, WIDER than one T (`(*C.char)(unsafe.Pointer(&s.n))`, s holding a Go reference): a
+            // one-T mirror would take C's bytes past the first into the stack, silently (P3's review of 1b, item 3). Refused
+            // by name. A root of one T's size keeps the mirror: there is nothing past it for C to reach.
+            case IReinterpretView { ReinterpretRoot: IReinterpretSource { PointeeSize: var rootSize } and not INativeRooted { IsGenuinelyNativeRoot: true } }
+                when rootSize > Unsafe.SizeOf<T>():
+                throw Refused(function, typeof(T), $"a reinterpret view of a {rootSize}-byte Go value whose storage go2cs cannot hold still, and C may write past one {typeof(T).Name} into it");
 
             default:
                 return StructPointer(pointer, function, out address);
@@ -159,6 +168,12 @@ namespace go.golib;
             return GoCgoStructPointer.Native;
         }
 
+        // An element of a Go array of C pointers (`C.count(&argv[0])`): the mirror is ONE stack word, and C may read or fill
+        // the array past it, silently (P3's review of 1b, item 1). Refused by name, as StructPointer refuses a struct
+        // element; handing C the whole array, pinned, is a later seat.
+        if (slot is ElemRefBox<ж<U>>)
+            throw Refused(function, typeof(ж<U>), "an element of a Go array of C pointers, which C may read or fill past the one word go2cs would hand it (handing C the whole array is not supported yet)");
+
         RequireManagedSlot(slot);
         original = slot.ValueSlot;
         word = PointerMember(original);
@@ -179,6 +194,18 @@ namespace go.golib;
             return native.NativeAddress;
 
         throw RuntimeErrorPanic.ErrorString("argument of cgo function has Go pointer to unpinned Go pointer");
+    }
+
+    /// <summary>
+    /// Called inside the wrapper's <c>fixed</c>, after the call, for each word C returned (a pointer result, an
+    /// out-parameter's word) against each pinned argument: a word that lies in that argument's Go storage is refused by
+    /// name (P3's review of 1b, item 4). Minted as a native box, it would name Go memory that moves once the <c>fixed</c>
+    /// ends; cgo's rule that C keeps no Go pointer makes the refusal right. A number argument pins nothing.
+    /// </summary>
+    public static unsafe void RequireWordOutsidePin(nuint word, in GoCgoPin pin, byte* pinned, string function)
+    {
+        if (word != 0 && pin.Holds(pinned, word))
+            throw RuntimeErrorPanic.ErrorString($"cgo: C.{function} returned an address inside the Go memory it was handed; go2cs cannot hold that memory still after the call, so it refuses the result (C must not keep a Go pointer)");
     }
 
     /// <summary>
@@ -499,7 +526,7 @@ namespace go.golib;
         else
         {
             carried = pointer;
-            number = pointer is NativeBox<T> native ? native.NativeAddress : 0;
+            number = RootNumber(pointer);
         }
 
         if (carried is null || carried is INativeRooted { IsGenuinelyNativeRoot: true })

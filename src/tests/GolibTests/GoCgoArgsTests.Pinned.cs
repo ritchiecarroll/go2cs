@@ -433,6 +433,112 @@ public unsafe partial class GoCgoArgsTests
         GC.KeepAlive(bytes);
     }
 
+    // P3's review of 1b at 85cdef62df (COORD inbox 20261124T173809Z), item 1 (MUST): the out-parameter mirrors its slot
+    // as ONE stack word. An element of a Go array of C pointers, `C.count(&argv[0])`, would hand C a stack copy it reads or
+    // fills past, silently. Refused by name; the near-miss, a plain variable (`&end`), still crosses as the word.
+    [TestMethod]
+    public void PinnedAnOutParameterOverAnArrayElementIsRefusedByName()
+    {
+        array<ж<sbyte>> argv = new array<ж<sbyte>>(3);
+
+        StringAssert.Contains(RefusalOf(() => GoCgoArgs.OutParameter(new ElemRefBox<ж<sbyte>>(argv, 0), "count", out _, out _)),
+            "an element of a Go array", "&argv[0]: C would read or fill past one stack word");
+
+        ж<ж<sbyte>> end = new StandardBox<ж<sbyte>>((ж<sbyte>)null!);
+        Assert.AreEqual(GoCgoStructPointer.Mirror, GoCgoArgs.OutParameter(end, "strtod", out _, out _), "the near-miss: &end crosses as one word");
+    }
+
+    private struct refHost
+    {
+        public object? P;
+        public int32 N;
+        public sbyte C;
+    }
+
+    // Item 3: a reinterpret view whose root no door can pin, over a value WIDER than the pointee, would take the one-T
+    // stack mirror, and C's bytes past the first would land on the stack (the r4 class). Refused by name. The near-miss, a
+    // same-size reinterpret of a one-byte field, keeps the mirror: there is nothing past the one byte for C to write.
+    [TestMethod]
+    public void PinnedAWideReinterpretViewNoDoorCanPinIsRefusedNotMirrored()
+    {
+        ж<refHost> host = new StandardBox<refHost>(default(refHost));
+
+        ж<sbyte> wide = new FieldRefBox<int32>(host, static p => ref ((ж<refHost>)p).Value.N).Reinterpret<int32, sbyte>();
+        StringAssert.Contains(RefusalOf(() => GoCgoArgs.ScalarPointer(wide, "fill", out _, out _)),
+            "C may write past one", "(*C.char)(unsafe.Pointer(&s.n)), s holding a Go reference");
+
+        ж<byte> same = new FieldRefBox<sbyte>(host, static p => ref ((ж<refHost>)p).Value.C).Reinterpret<sbyte, byte>();
+        Assert.AreEqual(GoCgoStructPointer.Mirror, GoCgoArgs.ScalarPointer(same, "fill", out _, out _), "the near-miss: a same-size view keeps the mirror");
+    }
+
+    // Item 4 (residual 1, endptr): inside the wrapper's `fixed`, a word C returned that lies in a pinned argument's
+    // storage is refused by name. Minted as a native box, it would name Go memory that moves once the `fixed` ends.
+    // Controls: the array's end (one past it), a C address, and a number argument (nothing pinned).
+    [TestMethod]
+    public void PinnedAWordCReturnsInsidePinnedGoMemoryIsRefusedByName()
+    {
+        slice<byte> bytes = new slice<byte>(new byte[16]);
+        Assert.AreEqual(GoCgoStructPointer.Pinned, GoCgoArgs.ScalarPointer(Ꮡ(bytes, 0).Reinterpret<byte, sbyte>(), "strtod", out _, out GoCgoPin pin));
+
+        string inside = "";
+
+        fixed (byte* pinned = pin)
+        {
+            nuint first = (nuint)pin.Address(pinned);
+            nint held = (nint)pinned;
+            inside = RefusalOf(() => GoCgoArgs.RequireWordOutsidePin(first + 3, pin, (byte*)held, "strtod"));
+
+            // The controls cross: one past the array's end is not inside it, and a C address is C memory.
+            GoCgoArgs.RequireWordOutsidePin(first + 16, pin, pinned, "strtod");
+            GoCgoArgs.RequireWordOutsidePin(0x1000, pin, pinned, "strtod");
+        }
+
+        StringAssert.Contains(inside, "inside the Go memory it was handed", "endptr into the pinned buffer");
+
+        // A number argument pins nothing: its fixed is a null reference.
+        GoCgoArgs.RequireWordOutsidePin(0x1000, default(GoCgoPin), null, "strtod");
+
+        GC.KeepAlive(bytes);
+    }
+
+    // Item 5 (residual 2): C.CString asks the string's own window for a published word, the CBytes row's storage viewed
+    // as a string. Over the word it refuses; over the bytes before it, it crosses.
+    [TestMethod]
+    public void PinnedB10_CStringAsksTheStringsOwnWindow()
+    {
+        ж<cgoPoint> referent = new StandardBox<cgoPoint>(default(cgoPoint));
+        byte[] storage = new byte[32];
+        slice<byte> whole = new slice<byte>(storage);
+        @string text = @string.AliasOf(whole);
+        Assert.AreSame(storage, text.Backing.array, "premise: the string is a window over the same storage");
+        Assert.AreEqual((nuint)33, GoCgoArgs.StringSize(text), "the control: C.CString, before any store");
+
+        PublishInto(new ElemRefBox<byte>(new array<byte>(storage), 16), referent);
+        StringAssert.Contains(RefusalOf(() => GoCgoArgs.StringSize(text)), "storing a Go pointer into C memory is refused", "C.CString over the word");
+        Assert.AreEqual((nuint)9, GoCgoArgs.StringSize(@string.AliasOf(whole[..8])), "C.CString over bytes before the word: crosses");
+
+        GC.KeepAlive(referent);
+        GC.KeepAlive(storage);
+    }
+
+    // Item 6 (NIT): a word is pointer-sized, so a range that starts inside a word holds it. HoldsAnyEntry tested the
+    // word's first byte only.
+    [TestMethod]
+    public void PinnedB10_ARangeStartingInsideAWordHoldsIt()
+    {
+        ж<cgoPoint> referent = new StandardBox<cgoPoint>(default(cgoPoint));
+        byte[] storage = new byte[32];
+        PublishInto(new ElemRefBox<byte>(new array<byte>(storage), 16), referent);
+
+        Assert.IsTrue(GoPointerWords.HoldsAnyEntry(storage, 16, 24), "the control: the word's own range");
+        Assert.IsTrue(GoPointerWords.HoldsAnyEntry(storage, 20, 28), "a range that starts inside the word");
+        Assert.IsFalse(GoPointerWords.HoldsAnyEntry(storage, 24, 32), "the range after the word");
+        Assert.IsFalse(GoPointerWords.HoldsAnyEntry(storage, 8, 16), "the range before the word");
+
+        GC.KeepAlive(referent);
+        GC.KeepAlive(storage);
+    }
+
     private static void AssertOutcomes((string form, Func<@unsafe.Pointer> mint, Pinned expected)[] forms)
     {
         var wrong = new List<string>();

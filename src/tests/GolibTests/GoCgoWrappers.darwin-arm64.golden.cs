@@ -181,6 +181,11 @@ static unsafe partial class cgotestꓸC_package
             {
                 global::go.runtime_package.syscallExitsyscall();
             }
+
+            if (r != a1)
+            {
+                global::go.golib.GoCgoArgs.RequireWordOutsidePin((nuint)r, g0, f0, "gmtime_r");
+            }
         }
 
         if (k0 == global::go.golib.GoCgoStructPointer.Mirror)
@@ -614,6 +619,8 @@ static unsafe partial class cgotestꓸC_package
             {
                 global::go.runtime_package.syscallExitsyscall();
             }
+
+            global::go.golib.GoCgoArgs.RequireWordOutsidePin((nuint)m1, g0, f0, "strtol");
         }
 
         if (k0 == global::go.golib.GoCgoStructPointer.Mirror)

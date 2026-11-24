@@ -475,9 +475,11 @@ public static class GoPointerWords
 
         lock (table)
         {
+            // A slot key is a word's first byte, and a word is pointer-sized: it is in the range when the two overlap, so a
+            // range that starts inside a word holds it (P3's review of 1b, item 6).
             foreach (nuint slot in table.Slots.Keys)
             {
-                if (slot >= from && slot < to)
+                if (slot < to && slot + (nuint)IntPtr.Size > from)
                     return true;
             }
 

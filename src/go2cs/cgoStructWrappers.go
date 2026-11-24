@@ -438,6 +438,12 @@ func (set *cgoWrapperSet) wrapper(declaration cgoDeclaration) (string, error) {
 	// 2). A scalar pointer's pin holds something only when its kind is Pinned.
 	var pinned, pinnedScalars []int
 
+	// The words C returns (an out-parameter's word, a pointer result), each checked against each pinned argument inside
+	// the `fixed`: a word inside pinned Go storage is refused by name, never minted as a native box over memory that moves
+	// once the `fixed` ends (P3's review of 1b, item 4). Each entry is a guard condition (empty for none) and the word.
+	type returnedWord struct{ guard, word string }
+	var returnedWords []returnedWord
+
 	checked := map[string]bool{}
 
 	for i, param := range params {
@@ -496,6 +502,7 @@ func (set *cgoWrapperSet) wrapper(declaration cgoDeclaration) (string, error) {
 			fmt.Fprintf(&before, "        nint a%d = (nint)n%d;\n", i, i)
 			fmt.Fprintf(&before, "\n        if (k%d == %s)\n        {\n            m%d = (nint)n%d;\n            a%d = (nint)(&m%d);\n        }\n", i, mirrorKind, i, i, i, i)
 			fmt.Fprintf(&after, "\n        if (k%d == %s)\n            p%d.ValueSlot = %sPointerMemberBack<%s>((nuint)m%d, q%d, n%d);\n", i, mirrorKind, i, args, param.goSide, i, i, i)
+			returnedWords = append(returnedWords, returnedWord{word: fmt.Sprintf("(nuint)m%d", i)})
 
 		case param.pointer:
 			copyType := param.scalar.primitive
@@ -578,11 +585,18 @@ func (set *cgoWrapperSet) wrapper(declaration cgoDeclaration) (string, error) {
 		var identity strings.Builder
 		pointee := strings.TrimSuffix(strings.TrimPrefix(wrapperResult, "ж<"), ">")
 
+		var notIdentity []string
+
 		for i, param := range params {
 			if param.pointer && param.goSide == pointee {
 				fmt.Fprintf(&identity, "\n        if (r != 0 && r == a%d)\n            return p%d;\n", i, i)
+				notIdentity = append(notIdentity, fmt.Sprintf("r != a%d", i))
 			}
 		}
+
+		// The pointer C was handed, returned, maps back to its box above; any other address inside pinned storage is
+		// refused inside the `fixed`.
+		returnedWords = append(returnedWords, returnedWord{guard: strings.Join(notIdentity, " && "), word: "(nuint)r"})
 
 		returned = fmt.Sprintf("%s\n        return %sPointerMemberBack<%s>((nuint)r, null, 0);\n", identity.String(), args, pointee)
 	case voidResult:
@@ -673,6 +687,27 @@ func (set *cgoWrapperSet) wrapper(declaration cgoDeclaration) (string, error) {
 			}
 
 			text.WriteString(line)
+		}
+
+		if len(returnedWords) > 0 {
+			text.WriteString("\n")
+
+			for _, returned := range returnedWords {
+				indent := "            "
+
+				if returned.guard != "" {
+					fmt.Fprintf(&text, "            if (%s)\n            {\n", returned.guard)
+					indent = "                "
+				}
+
+				for _, i := range all {
+					fmt.Fprintf(&text, "%s%sRequireWordOutsidePin(%s, g%d, f%d, %q);\n", indent, args, returned.word, i, i, function)
+				}
+
+				if returned.guard != "" {
+					text.WriteString("            }\n")
+				}
+			}
 		}
 
 		text.WriteString("        }\n")

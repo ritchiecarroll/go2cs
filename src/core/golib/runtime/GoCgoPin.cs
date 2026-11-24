@@ -49,6 +49,19 @@ namespace go.golib;
 
     /// <summary>What C receives, given the address the wrapper's <c>fixed</c> pinned this argument at.</summary>
     public unsafe nint Address(byte* pinned) => m_root is null ? (nint)m_number : (nint)(pinned + m_offset);
+
+    // Whether an address C returned lies in this argument's storage, asked while the wrapper's `fixed` still pins it at
+    // `pinned`: [first byte, end of the storage).
+    internal unsafe bool Holds(byte* pinned, nuint address)
+    {
+        if (m_root is null || pinned == null)
+            return false;
+
+        nuint first = (nuint)pinned;
+        nuint end = (nuint)(nint)Marshal.UnsafeAddrOfPinnedArrayElement(m_root, m_root.Length);
+
+        return address >= first && address < end;
+    }
 }
 
 // The pin a box owns, read without the pointee type (the cgo door sees the box as an object). Implemented by ж<T>

@@ -62,6 +62,14 @@ type goHeader struct {
 	name [8]byte
 }
 
+// goCHeader is goHeader with a C-typed array field, so &h.name[0] is a *C.char with no conversion: an element of a native
+// window over a view of Go memory (P3's review of 1b, item 2).
+type goCHeader struct {
+	pad  int32
+	n    int32
+	name [8]C.char
+}
+
 // same returns the pointer it was handed: a user function whose result is an unsafe.Pointer.
 //
 //go:noinline
@@ -353,6 +361,36 @@ func main() {
 		b := make([]byte, 16)
 		n := C.go2cs_probe_text_fill((*C.char)(unsafe.Pointer(&b[4])), 8)
 		fmt.Printf("goindexfill %d %q\n", int(n), string(b[4:4+int(n)]))
+	case "goviewcelemstring":
+		// P3's review of 1b, item 2: C.GoString(&h.name[0]) with name [8]C.char, h a view over a Go slice, read by the
+		// helper with no conversion. Refused before the fold (the helper asked the element with number 0).
+		b := make([]byte, 16)
+		copy(b[8:], "hi")
+		h := (*goCHeader)(unsafe.Pointer(&b[0]))
+		fmt.Printf("goviewcelemstring %q %d\n", C.GoString(&h.name[0]), len(b))
+	case "goviewcelemfill":
+		// The same element as a char * C fills, through a variable (written in the call, cmd/cgo checks the element).
+		b := make([]byte, 16)
+		h := (*goCHeader)(unsafe.Pointer(&b[0]))
+		p := &h.name[0]
+		n := C.go2cs_probe_text_fill(p, 8)
+		fmt.Printf("goviewcelemfill %d %q\n", int(n), string(b[8:8+int(n)]))
+	case "outstrtodelem":
+		// P3's review of 1b, item 1: endptr is an element of a Go slice of C pointers, through a variable. Go writes it;
+		// go2cs refuses by name, since the out-parameter's one-word mirror is not the array C may read or fill.
+		cs := C.CString("1.5abc")
+		defer C.free(unsafe.Pointer(cs))
+		ends := make([]*C.char, 2)
+		p := &ends[0]
+		n := C.strtod(cs, p)
+		fmt.Println("outstrtodelem", float64(n), C.GoString(ends[0]))
+	case "outstrtodgo":
+		// P3's review of 1b, item 4: strtod over a Go buffer leaves endptr INSIDE that buffer, which is Go memory. Go reads
+		// it; go2cs refuses by name inside the call's pin, never minting a native box over Go memory that can move.
+		b := []byte("2.5xyz\x00")
+		var end *C.char
+		n := C.strtod((*C.char)(unsafe.Pointer(&b[0])), &end)
+		fmt.Println("outstrtodgo", float64(n), C.GoString(end))
 	case "outstrtod":
 		// The out-parameter, shape (i) (18.12 item 4): strtod's char ** endptr is &end, a Go variable C writes. strtod,
 		// not strtol: glibc's C23 headers rename strtol to __isoc23_strtol, which go2cs refuses by name (GO2CS2001).
