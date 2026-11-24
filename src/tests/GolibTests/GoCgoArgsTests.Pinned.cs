@@ -1,0 +1,256 @@
+using System;
+using System.Collections.Generic;
+using System.Runtime.InteropServices;
+using go;
+using go.golib;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using static go.builtin;
+using @unsafe = go.unsafe_package;
+
+namespace GolibTests;
+
+// cgo Phase 3, increment 3.2, seat 1b (docs/phase4/DESIGN-cgo-phase3-marshaling.md 18 and 18.12): the PINNED class.
+//
+// GoCgoArgs.PinVoidPointer hands C Go memory when the BOX a pointer carries names its storage (M2), and never on a
+// number (M3). Its answer is a pin the wrapper holds with a `fixed` for the call. These arms score prediction P-2 (the
+// flip set is 18.1's I-2 list, exactly) and P-3 (B-10) as worded. VoidPointer, the classify-only door an earlier
+// wrapper calls, is unchanged and keeps refusing Go memory (GoCgoArgsTests.Phase3).
+public unsafe partial class GoCgoArgsTests
+{
+    private const string GoPointerToUnpinned = "argument of cgo function has Go pointer to unpinned Go pointer";
+
+    private enum Pinned { Crosses, CgoRefusal, NumberRefusal }
+
+    // What the door made of one hand-over: crossed (with the address, read under the wrapper's own `fixed`), or refused
+    // with cgo's text, or refused as Go memory with go2cs's text.
+    private static (Pinned outcome, nint address, string message) PinOf(Func<@unsafe.Pointer> make)
+    {
+        try
+        {
+            GoCgoPin pin = GoCgoArgs.PinVoidPointer(make(), "fill");
+
+            fixed (byte* pinned = pin)
+                return (pin.IsGoMemory ? Pinned.Crosses : Pinned.NumberRefusal, pin.Address(pinned), pin.IsGoMemory ? "" : "crossed as a number");
+        }
+        catch (PanicException refused)
+        {
+            if (refused.Message.Contains(GoPointerToUnpinned))
+                return (Pinned.CgoRefusal, 0, refused.Message);
+
+            StringAssert.Contains(refused.Message, GoMemoryOwner);
+            return (Pinned.NumberRefusal, 0, refused.Message);
+        }
+    }
+
+    [TestMethod]
+    public void PinnedNilAndCMemoryPinNothingAndCrossAsTheirNumber()
+    {
+        void* memory = NativeMemory.AllocZeroed(16);
+
+        try
+        {
+            nuint address = (nuint)memory;
+            ж<int32> native = new NativeBox<int32>(address);
+
+            foreach ((string form, @unsafe.Pointer? pointer, nuint expected) in new (string, @unsafe.Pointer?, nuint)[]
+            {
+                ("null", null, 0),
+                ("nil", @unsafe.Pointer.Nil, 0),
+                ("a number", new @unsafe.Pointer((uintptr)address), address),
+                ("the pinning mint over C memory", @unsafe.Pointer.FromPinnedBox(native), address),
+                ("the retaining mint over C memory", @unsafe.Pointer.FromBox(native), address),
+            })
+            {
+                GoCgoPin pin = GoCgoArgs.PinVoidPointer(pointer, "f");
+                Assert.IsFalse(pin.IsGoMemory, form);
+                Assert.IsTrue(System.Runtime.CompilerServices.Unsafe.IsNullRef(ref pin.GetPinnableReference()), $"{form}: pins nothing");
+
+                fixed (byte* pinned = pin)
+                    Assert.AreEqual((nint)expected, pin.Address(pinned), form);
+            }
+        }
+        finally
+        {
+            NativeMemory.Free(memory);
+        }
+    }
+
+    // 18.1's I-2, AVoidPointerIntoGoMemoryIsRefusedBeforeTheCallInEveryFormItArrivesIn's nine forms: the pinning and
+    // retaining mints of a scalar cross (2 of 9). A box that holds references is a token (cgo's text). Every bare mint
+    // and every number stays refused.
+    [TestMethod]
+    public void PinnedTheNineFormsOfAGoScalarCrossOnlyThroughTheMintsThatCarryTheBox()
+    {
+        ж<int32> scalar = new StandardBox<int32>(7);
+        ж<cgoPoint> whole = new StandardBox<cgoPoint>(default(cgoPoint));
+        ж<cgoHolder> references = new StandardBox<cgoHolder>(default(cgoHolder));
+        array<int32> elements = new array<int32>(4);
+        ж<int32> element = new ElemRefBox<int32>(elements, 2);
+        uintptr scalarNumber = (uintptr)scalar;
+        uintptr elementNumber = (uintptr)element;
+
+        (string form, Func<@unsafe.Pointer> mint, Pinned expected)[] forms =
+        [
+            ("a pointer minted from a box of one scalar", () => new @unsafe.Pointer(scalar), Pinned.NumberRefusal),
+            ("the retaining mint", () => @unsafe.Pointer.FromBox(scalar), Pinned.Crosses),
+            ("the pinning mint", () => @unsafe.Pointer.FromPinnedBox(scalar), Pinned.Crosses),
+            ("a pointer minted from a box of a struct", () => new @unsafe.Pointer(whole), Pinned.NumberRefusal),
+            ("a pointer minted from a box that holds Go references", () => new @unsafe.Pointer(references), Pinned.CgoRefusal),
+            ("a pointer minted from an element", () => new @unsafe.Pointer(element), Pinned.NumberRefusal),
+            ("a scalar box's number from a variable", () => new @unsafe.Pointer(scalarNumber), Pinned.NumberRefusal),
+            ("an element's number from a variable", () => new @unsafe.Pointer(elementNumber), Pinned.NumberRefusal),
+            ("a number minted and converted back in one expression", () => new @unsafe.Pointer((uintptr)new @unsafe.Pointer(whole)), Pinned.NumberRefusal),
+        ];
+
+        AssertOutcomes(forms);
+
+        GC.KeepAlive(scalar);
+        GC.KeepAlive(whole);
+        GC.KeepAlive(references);
+        GC.KeepAlive(elements);
+    }
+
+    // 18.1's I-2 over APointerOverManagedStorageNeverCrossesAVoidPointer's nine boxes and four mints: the pinning and
+    // retaining mints of seven boxes cross (14 of 36). A view over a struct that holds references, and a native box that
+    // aliases an order token, are tokens in every mint (cgo's text, 8). The bare mint and the number of every other box,
+    // stay refused (14).
+    [TestMethod]
+    public void PinnedAPointerOverManagedStorageCrossesOnlyWhenItsBoxNamesTheStorage()
+    {
+        array<int32> wide = new array<int32>(4);
+        ж<array<int32>> wideBox = new StandardBox<array<int32>>(wide);
+        array<byte> bytes = new array<byte>(16);
+        ж<byte> element = new ElemRefBox<byte>(bytes, 4);
+        ж<cgoPoint> standard = new StandardBox<cgoPoint>(default(cgoPoint));
+        ж<cgoHolder> holder = new StandardBox<cgoHolder>(default(cgoHolder));
+        byte[] pinnedBytes = new byte[32];
+        PinnedBuffer pinned = PinnedBuffer.Of(pinnedBytes);
+        @string text = new @string("go2cs"u8);
+        slice<byte> sliced = new slice<byte>(new byte[8]);
+
+        (string form, object box, Pinned carried, Pinned bare)[] boxes =
+        [
+            ("a wider view pinned over an element", element.Reinterpret<byte, int32>(), Pinned.Crosses, Pinned.NumberRefusal),
+            ("a view aliasing a struct", standard.Reinterpret<cgoPoint, int32>(), Pinned.Crosses, Pinned.NumberRefusal),
+            ("a view over a struct that holds references", holder.Reinterpret<cgoHolder, int32>(), Pinned.CgoRefusal, Pinned.CgoRefusal),
+            ("a native box with a retained source", new NativeBox<int32>(((uintptr)standard).Value, retainedSource: standard), Pinned.Crosses, Pinned.NumberRefusal),
+            ("a native box that aliases an order token", new NativeBox<int32>(((uintptr)holder).Value, aliasesAnOrderToken: true), Pinned.CgoRefusal, Pinned.CgoRefusal),
+            ("a native box over a pinned managed buffer", new NativeBox<byte>((nuint)pinned.Pointer, pin: pinned), Pinned.Crosses, Pinned.NumberRefusal),
+            ("unsafe.StringData", @unsafe.StringData(text), Pinned.Crosses, Pinned.NumberRefusal),
+            ("unsafe.SliceData", @unsafe.SliceData(sliced), Pinned.Crosses, Pinned.NumberRefusal),
+            // 18.1 scored this form as a number ("its native box has no source"). It is not: the number-to-pointer
+            // conversion resolved to the live array box and the native box KEEPS it (NativeDerivation.KeptResolved,
+            // d87e1dd863, before 18.1), so its box names the storage and it crosses (18.12 record, P-2's two misses).
+            ("a pointer rebuilt from a Go array's number", (ж<byte>)(uintptr)wideBox, Pinned.Crosses, Pinned.NumberRefusal),
+        ];
+
+        var forms = new List<(string, Func<@unsafe.Pointer>, Pinned)>();
+
+        foreach ((string form, object box, Pinned carried, Pinned bare) in boxes)
+        {
+            switch (box)
+            {
+                case ж<int32> typed:
+                    forms.Add(($"{form}, the pinning mint", () => @unsafe.Pointer.FromPinnedBox(typed), carried));
+                    forms.Add(($"{form}, the retaining mint", () => @unsafe.Pointer.FromBox(typed), carried));
+                    forms.Add(($"{form}, the bare mint", () => new @unsafe.Pointer(typed), bare));
+                    forms.Add(($"{form}, its number in a variable", () => { uintptr number = (uintptr)typed; return new @unsafe.Pointer(number); }, bare));
+                    break;
+
+                case ж<byte> typed:
+                    forms.Add(($"{form}, the pinning mint", () => @unsafe.Pointer.FromPinnedBox(typed), carried));
+                    forms.Add(($"{form}, the retaining mint", () => @unsafe.Pointer.FromBox(typed), carried));
+                    forms.Add(($"{form}, the bare mint", () => new @unsafe.Pointer(typed), bare));
+                    forms.Add(($"{form}, its number in a variable", () => { uintptr number = (uintptr)typed; return new @unsafe.Pointer(number); }, bare));
+                    break;
+
+                default:
+                    Assert.Fail($"{form}: a {box.GetType().Name} is not a box this arm hands over");
+                    break;
+            }
+        }
+
+        AssertOutcomes(forms.ToArray());
+
+        GC.KeepAlive(bytes);
+        GC.KeepAlive(standard);
+        GC.KeepAlive(holder);
+        GC.KeepAlive(pinned);
+        GC.KeepAlive(pinnedBytes);
+        GC.KeepAlive(boxes);
+        GC.KeepAlive(wideBox);
+    }
+
+    // What C receives is the address of the very bytes the box names, under the wrapper's pin, and a write through it
+    // is what Go then reads: an element of a Go array, a whole scalar, and an element reached by unsafe.Add.
+    [TestMethod]
+    public void PinnedTheAddressCReceivesIsTheBoxsOwnBytes()
+    {
+        array<byte> bytes = new array<byte>(16);
+        ж<byte> element = new ElemRefBox<byte>(bytes, 4);
+        ж<int32> scalar = new StandardBox<int32>(7);
+
+        foreach ((string form, Func<@unsafe.Pointer> make, Func<byte> read) in new (string, Func<@unsafe.Pointer>, Func<byte>)[]
+        {
+            ("an element, the pinning mint", () => @unsafe.Pointer.FromPinnedBox(element), () => bytes[4]),
+            ("an element, the retaining mint", () => @unsafe.Pointer.FromBox(element), () => bytes[4]),
+            ("an element reached by unsafe.Add", () => @unsafe.Add(@unsafe.Pointer.FromPinnedBox(new ElemRefBox<byte>(bytes, 1)), 5), () => bytes[6]),
+            ("a scalar, the pinning mint", () => @unsafe.Pointer.FromPinnedBox(scalar), () => (byte)scalar.Value),
+            ("a scalar, the retaining mint", () => @unsafe.Pointer.FromBox(scalar), () => (byte)scalar.Value),
+        })
+        {
+            GoCgoPin pin = GoCgoArgs.PinVoidPointer(make(), "fill");
+            Assert.IsTrue(pin.IsGoMemory, form);
+
+            fixed (byte* pinned = pin)
+            {
+                byte* c = (byte*)pin.Address(pinned);
+                *c = 0x5A;
+            }
+
+            Assert.AreEqual((byte)0x5A, read(), $"{form}: C's write is what Go reads");
+        }
+
+        GC.KeepAlive(bytes);
+        GC.KeepAlive(scalar);
+    }
+
+    // B-10 (18.6 finding 3, 18.7 finding 2): Go storage that holds a published unsafe.Pointer word is a Go pointer to an
+    // unpinned Go pointer, refused with cgocheck's text. The control is the same storage before the store: it crosses.
+    // After the word is overwritten with nil, the storage crosses again.
+    [TestMethod]
+    public void PinnedB10_StorageHoldingAPublishedWordIsRefusedWithCgochecksText()
+    {
+        ж<uintptr> word = new StandardBox<uintptr>(0);
+        ж<@unsafe.Pointer> slot = @unsafe.Pointer.To<@unsafe.Pointer>(@unsafe.Pointer.FromBox(word));
+        ж<cgoPoint> referent = new StandardBox<cgoPoint>(default(cgoPoint));
+
+        Assert.AreEqual(Pinned.Crosses, PinOf(() => @unsafe.Pointer.FromBox(word)).outcome, "the control: the word's storage, before any store");
+
+        @unsafe.Pointer.StoreWord(slot, @unsafe.Pointer.FromBox(referent));
+
+        (Pinned stored, _, string message) = PinOf(() => @unsafe.Pointer.FromPinnedBox(word));
+        Assert.AreEqual(Pinned.CgoRefusal, stored, $"a storage holding a published word: {message}");
+        Assert.AreEqual(Pinned.CgoRefusal, PinOf(() => @unsafe.Pointer.FromBox(word)).outcome, "the retaining mint too");
+
+        @unsafe.Pointer.StoreWord(slot, @unsafe.Pointer.Nil);
+        Assert.AreEqual(Pinned.Crosses, PinOf(() => @unsafe.Pointer.FromBox(word)).outcome, "after the word is overwritten with nil");
+
+        GC.KeepAlive(referent);
+    }
+
+    private static void AssertOutcomes((string form, Func<@unsafe.Pointer> mint, Pinned expected)[] forms)
+    {
+        var wrong = new List<string>();
+
+        foreach ((string form, Func<@unsafe.Pointer> mint, Pinned expected) in forms)
+        {
+            (Pinned outcome, _, string message) = PinOf(mint);
+
+            if (outcome != expected)
+                wrong.Add($"{form}: expected {expected}, read {outcome} ({message})");
+        }
+
+        Assert.AreEqual(0, wrong.Count, $"{wrong.Count} of {forms.Length} hand-overs read otherwise:\n" + string.Join("\n", wrong));
+    }
+}

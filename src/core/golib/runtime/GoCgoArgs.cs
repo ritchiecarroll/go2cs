@@ -5,6 +5,9 @@
 // that can be found in the LICENSE file.
 
 using System;
+using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace go.golib;
 
@@ -128,6 +131,130 @@ namespace go.golib;
 
         return address;
     }
+
+    // ---- cgo Phase 3, increment 3.2, seat 1b (docs/phase4/DESIGN-cgo-phase3-marshaling.md 18 and 18.12): the PINNED
+    // class. Go memory crosses when the BOX it was handed in names its storage (M2), never on a number (M3). The door
+    // answers the storage and the byte offset, and the wrapper pins that storage with a call-scoped `fixed` around the
+    // call: no GCHandle, no finalizer, no index entry (18's pin path).
+
+    /// <summary>
+    /// What C receives for a <c>void *</c> argument, as a pin the wrapper holds for the call (design 18.12): nil and C
+    /// memory pin nothing and cross as their number; Go memory whose box names its storage crosses as an address inside
+    /// that storage, held still by the wrapper's <c>fixed</c>. Refused before the call: a Go value that holds Go
+    /// pointers, and a token for one (cgo's own panic); storage that holds a published <c>unsafe.Pointer</c> word
+    /// (cgocheck's text, B-10); and every NUMBER of Go memory, as <see cref="VoidPointer"/> refuses it.
+    /// </summary>
+    public static GoCgoPin PinVoidPointer(ж<uintptr>? pointer, string function)
+    {
+        if (pointer is null || pointer.IsNilPointer)
+            return default;
+
+        nuint number = pointer.Value.Value;
+
+        if (pointer is IUnsafePointer { RetainedSource: { } carried } && carried is not INativeRooted { IsGenuinelyNativeRoot: true })
+            return PinCarried(carried, number, function);
+
+        // A token names a Go value that holds Go references (the pointer-to-unpinned-pointer class, cgo's own panic).
+        if (ManagedPointerTokens.IsTaggedToken(number))
+            throw GoPointerToUnpinnedGoPointer();
+
+        string? what = GoMemory(pointer, out nuint address);
+
+        if (what is not null)
+            throw VoidRefused(function, what);
+
+        return new GoCgoPin(address);
+    }
+
+    // The pin for a pointer that carries its box. The box decides (M2): its storage, found through the derivations it
+    // was minted by, and the offset inside it.
+    private static unsafe GoCgoPin PinCarried(object carried, nuint number, string function)
+    {
+        // A field or view over a struct in C memory, reached through a Go pointer: as 3.1 refused it.
+        if (carried is INativeRooted { IsNativeRooted: true } && carried is IGoReflectBox { NativeAddress: 0 })
+            throw VoidRefused(function, "a pointer reached through a Go pointer into C memory (a field, or a view over managed storage)");
+
+        // An order token, carried or aliased: a Go value that holds Go references, which has no address to hand over.
+        if (ManagedPointerTokens.IsTaggedToken(number))
+            throw GoPointerToUnpinnedGoPointer();
+
+        if (!TryPinTarget(carried, number, out Array? root, out nint offset))
+            throw VoidRefused(function, "a pointer into Go memory whose storage go2cs cannot hold still for the call");
+
+        RequireCrossable(root);
+        return new GoCgoPin(root, offset);
+    }
+
+    // The storage a carried box's address is in, and the byte offset inside it.
+    //   1. A box that already holds its storage still (an address-take's pin, a derivation's source, a reinterpret
+    //      view's root): the pinned array, and the number's distance from its first byte. The pin holds the array where
+    //      the number says it is, so the distance is the one the wrapper's `fixed` will see.
+    //   2. A native box over a pinned managed buffer: the buffer's array, the same way.
+    //   3. A managed box that holds nothing still (a FromBox mint): its own pinnable storage, and its slot's distance
+    //      from the storage's first byte, read under a `fixed` here, since its number was read under one that ended.
+    private static unsafe bool TryPinTarget(object carried, nuint number, [NotNullWhen(true)] out Array? root, out nint offset)
+    {
+        root = null;
+        offset = 0;
+
+        if (NativeDerivation.HeldSource(carried) is { } held && held.TryHeldTarget(out object target, out nuint start, out nuint end) &&
+            target is Array heldArray && number >= start && number < end)
+        {
+            root = heldArray;
+            offset = (nint)(number - start);
+            return true;
+        }
+
+        if (carried is IGoReflectBox { NativeAddress: not 0 } && carried is IManagedPinHolder { ManagedPin: { } pin } &&
+            pin.PinnedTarget is Array pinnedArray && pinnedArray.Length > 0)
+        {
+            nuint first = (nuint)pin.Pointer;
+            nuint last = (nuint)(nint)Marshal.UnsafeAddrOfPinnedArrayElement(pinnedArray, pinnedArray.Length);
+
+            if (number >= first && number < last)
+            {
+                root = pinnedArray;
+                offset = (nint)(number - first);
+                return true;
+            }
+
+            return false;
+        }
+
+        if (carried is IGoReflectBox { NativeAddress: 0, IsNilPointer: false, NamesZeroBase: false } box &&
+            carried is INilPointer { PinnableStorage: Array storage } && storage.Length > 0)
+        {
+            fixed (byte* data = &MemoryMarshal.GetArrayDataReference(storage))
+            {
+                nuint slot = box.TransientSlotAddress();
+                nuint last = (nuint)(nint)Marshal.UnsafeAddrOfPinnedArrayElement(storage, storage.Length);
+
+                if (slot < (nuint)data || slot >= last)
+                    return false;
+
+                root = storage;
+                offset = (nint)(slot - (nuint)data);
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    // What makes pinned Go storage unfit to hand C: Go pointers in it. A value that holds references (the element type
+    // of its storage), and a published unsafe.Pointer word (B-10: GoPointerWords holds an entry over it), are both
+    // cgocheck's "Go pointer to unpinned Go pointer". The whole storage is asked, since cgo lets C touch the whole object.
+    private static void RequireCrossable(Array root)
+    {
+        if (root.GetType().GetElementType() is not { } element || NativeStructMarshal.ContainsReferences(element) || GoPointerWords.HoldsAnyEntry(root))
+            throw GoPointerToUnpinnedGoPointer();
+    }
+
+    private static PanicException GoPointerToUnpinnedGoPointer() =>
+        RuntimeErrorPanic.ErrorString("argument of cgo function has Go pointer to unpinned Go pointer");
+
+    private static PanicException VoidRefused(string function, string what) =>
+        RuntimeErrorPanic.ErrorString($"cgo: the void pointer handed to C.{function} is {what}, and handing C a pointer into Go memory is not supported yet, so go2cs refuses the call (docs/Limitations.md#cgo)");
 
     /// <summary>
     /// The address one of cmd/cgo's helpers reads, for a helper that takes a <c>void *</c> (<c>C.GoBytes</c>): 0 for

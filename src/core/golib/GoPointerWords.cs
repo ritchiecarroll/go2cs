@@ -447,6 +447,41 @@ public static class GoPointerWords
     public static bool NamesGoMemory(nuint word) =>
         word != 0 && (ManagedPointerTokens.IsTaggedToken(word) || ManagedPointerTokens.Resolve(word) is not null || PinExtents.Find(word) is not null);
 
+    /// <summary>
+    /// Whether any slot of a storage object holds a published word: what the cgo doors ask before they hand C Go memory
+    /// (B-10, docs/phase4/DESIGN-cgo-phase3-marshaling.md 18.6 finding 3 and 18.12). A word in Go memory handed to C is
+    /// a Go pointer to an unpinned Go pointer, which cgocheck refuses.
+    /// </summary>
+    public static bool HoldsAnyEntry(object storage)
+    {
+        if (!s_anyTable || !s_tables.TryGetValue(storage, out Table? table))
+            return false;
+
+        lock (table)
+            return table.Slots.Count > 0;
+    }
+
+    /// <summary>
+    /// Whether any slot of a storage object holds a published word in the byte range [<paramref name="from"/>,
+    /// <paramref name="to"/>): the B-10 lookup over the bytes a door copies (a struct's mirror, <c>C.CBytes</c>).
+    /// </summary>
+    public static bool HoldsAnyEntry(object storage, nuint from, nuint to)
+    {
+        if (!s_anyTable || !s_tables.TryGetValue(storage, out Table? table))
+            return false;
+
+        lock (table)
+        {
+            foreach (nuint slot in table.Slots.Keys)
+            {
+                if (slot >= from && slot < to)
+                    return true;
+            }
+
+            return false;
+        }
+    }
+
     /// <summary>TEST SEAM: the number of live entries over a storage object's slots (counts summed).</summary>
     internal static int EntryCount(object storage)
     {
