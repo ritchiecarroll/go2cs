@@ -361,6 +361,37 @@ public unsafe partial class GoCgoArgsTests
         GC.KeepAlive(storage);
     }
 
+    // The hosted Phase 3 arms (goviewfield, goviewagain, goslice, gofieldtyped, goviewname*, goindexfill, goslicefill):
+    // a box DERIVED from a pinned view over a Go slice's bytes, which the view's pin holds as well. A field of the view,
+    // a view of the view, an element of unsafe.Slice over it and unsafe.Add over a field each retain the view they were
+    // cut from (NativeDerivation.Kept), and the door walks to it. 3.2's first hosted run read each refused, with the
+    // view itself crossing; H's probe reproduced every one before the walk and none after it.
+    private static ref int32 ᏑY(ref cgoPoint v) => ref v.Y;
+
+    [TestMethod]
+    public void PinnedABoxDerivedFromAPinnedViewCrossesThroughTheViewsPin()
+    {
+        slice<byte> bytes = new slice<byte>(new byte[16]);
+
+        (string, Func<@unsafe.Pointer>, Pinned)[] forms =
+        [
+            ("the view itself", () => @unsafe.Pointer.FromPinnedBox(Ꮡ(bytes, 0).Reinterpret<byte, cgoPoint>()), Pinned.Crosses),
+            ("a field of the view", () => @unsafe.Pointer.FromPinnedBox(Ꮡ(bytes, 0).Reinterpret<byte, cgoPoint>().of(ᏑY)), Pinned.Crosses),
+            ("a view of the view", () => @unsafe.Pointer.FromPinnedBox(Ꮡ(bytes, 0).Reinterpret<byte, cgoPoint>().Reinterpret<cgoPoint, byte>()), Pinned.Crosses),
+            ("an element of unsafe.Slice over the view", () => { slice<int32> s = @unsafe.Slice(Ꮡ(bytes, 0).Reinterpret<byte, int32>(), 4); return @unsafe.Pointer.FromPinnedBox(Ꮡ(s, 1)); }, Pinned.Crosses),
+            ("unsafe.Add over a field of the view", () => @unsafe.Add(@unsafe.Pointer.FromPinnedBox(Ꮡ(bytes, 0).Reinterpret<byte, cgoPoint>().of(ᏑY)), 1), Pinned.Crosses),
+        ];
+
+        AssertOutcomes(forms);
+
+        // The read door (C.GoString) and the typed door (a char * C writes) take the same boxes.
+        Assert.AreEqual(0, GoCgoArgs.GoStringOf(Ꮡ(bytes, 0).Reinterpret<byte, cgoPoint>().Reinterpret<cgoPoint, byte>(), "GoString").Length);
+        GoCgoArgs.ScalarPointer(Ꮡ(bytes, 0).Reinterpret<byte, cgoPoint>().of(ᏑY).Reinterpret<int32, byte>(), "fill", out _, out GoCgoPin typed);
+        Assert.IsTrue(typed.IsGoMemory, "a typed pointer over a field of the view is pinned Go memory");
+
+        GC.KeepAlive(bytes);
+    }
+
     private static void AssertOutcomes((string form, Func<@unsafe.Pointer> mint, Pinned expected)[] forms)
     {
         var wrong = new List<string>();

@@ -287,9 +287,17 @@ namespace go.golib;
             return true;
         }
 
-        if (carried is IGoReflectBox { NativeAddress: not 0 } && carried is IManagedPinHolder { ManagedPin: { } pin } &&
-            pin.PinnedTarget is Array pinnedArray && pinnedArray.Length > 0)
+        // The pinned native box is the carried box itself, or the first one up its derivations: a field of a view, a view
+        // of a view, an element of unsafe.Slice over a view and unsafe.Add over any of them each retain the box they
+        // were cut from (NativeDerivation.Kept), and the view's pin holds every byte they name.
+        for (object? hop = carried; hop is not null && hop is not INativeRooted { IsGenuinelyNativeRoot: true }; hop = DerivedFrom(hop))
         {
+            if (hop is not IGoReflectBox { NativeAddress: not 0 } || hop is not IManagedPinHolder { ManagedPin: { } pin })
+                continue;
+
+            if (pin.PinnedTarget is not Array pinnedArray || pinnedArray.Length == 0)
+                return false;
+
             nuint first = (nuint)pin.Pointer;
             nuint last = (nuint)(nint)Marshal.UnsafeAddrOfPinnedArrayElement(pinnedArray, pinnedArray.Length);
 
@@ -322,6 +330,14 @@ namespace go.golib;
 
         return false;
     }
+
+    // The box a derived box was cut from (one hop of NativeDerivation.HeldSource's walk), or null at a root.
+    private static object? DerivedFrom(object box) => box switch
+    {
+        INativeRooted { NativeRootAddress: not 0 } native => native.NativeDerivedFrom,
+        INativeViewAnchor { AnchoredRoot: { } root } => root,
+        _ => null
+    };
 
     // What makes pinned Go storage unfit to hand C: Go pointers in it. A value that holds references (the element type
     // of its storage), and a published unsafe.Pointer word (B-10: GoPointerWords holds an entry over it), are both
