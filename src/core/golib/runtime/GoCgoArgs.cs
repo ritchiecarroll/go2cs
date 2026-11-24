@@ -67,12 +67,14 @@ namespace go.golib;
                 return GoCgoStructPointer.Native;
 
             case StandardBox<T>:
+                RequireNoPublishedWord(pointer);
                 return GoCgoStructPointer.Mirror;
 
             case FieldRefBox<T> field:
                 if (((INativeRooted)field).IsNativeRooted)
                     throw Refused(function, typeof(T), "a field of a struct in native memory, which Phase 2 does not yet pass");
 
+                RequireNoPublishedWord(pointer);
                 return GoCgoStructPointer.Mirror;
 
             case ElemRefBox<T>:
@@ -525,11 +527,61 @@ namespace go.golib;
         }
     }
 
-    /// <summary>The number of bytes <c>C.CString</c> allocates: the string's bytes and a NUL.</summary>
-    public static nuint StringSize(@string s) => (nuint)s.Length + 1;
+    /// <summary>
+    /// The number of bytes <c>C.CString</c> allocates: the string's bytes and a NUL. It runs before the allocation, so a
+    /// string whose bytes hold a published <c>unsafe.Pointer</c> word is refused here, with nothing allocated (B-10).
+    /// </summary>
+    public static nuint StringSize(@string s)
+    {
+        (byte[]? array, int offset) = s.Backing;
 
-    /// <summary>The number of bytes <c>C.CBytes</c> allocates: the slice's length.</summary>
-    public static nuint BytesSize(slice<byte> b) => (nuint)b.ToSpan().Length;
+        if (array is not null && GoPointerWords.HoldsAnyEntry(array, (nuint)offset, (nuint)(offset + s.Length)))
+            throw RuntimeErrorPanic.ErrorString(CopyIntoCText("CString"));
+
+        return (nuint)s.Length + 1;
+    }
+
+    /// <summary>
+    /// The number of bytes <c>C.CBytes</c> allocates: the slice's length. It runs before the allocation, so a slice whose
+    /// bytes hold a published <c>unsafe.Pointer</c> word is refused here, with nothing allocated (B-10).
+    /// </summary>
+    public static nuint BytesSize(slice<byte> b)
+    {
+        nint length = b.ToSpan().Length;
+
+        if (b.m_array is { } array && GoPointerWords.HoldsAnyEntry(array, (nuint)b.Low, (nuint)(b.Low + length)))
+            throw RuntimeErrorPanic.ErrorString(CopyIntoCText("CBytes"));
+
+        return (nuint)length;
+    }
+
+    /// <summary>
+    /// B-10 for an inline array member a struct's mirror copies (design 18.7 finding 2): go2cs keeps an array's elements
+    /// in the array's own storage, not in the struct's, so the copy-in asks that storage before it copies the elements
+    /// RAW into the mirror. A published <c>unsafe.Pointer</c> word among them is cgo's panic.
+    /// </summary>
+    public static void RequireNoPublishedWordIn<E>(in array<E> elements)
+    {
+        if (GoPointerWords.AnyTable && elements.m_array is { } storage && GoPointerWords.HoldsAnyEntry(storage))
+            throw GoPointerToUnpinnedGoPointer();
+    }
+
+    // C.CString and C.CBytes copy Go bytes into C memory, where no word-table entry follows: a published Go pointer among
+    // them would be a Go pointer stored into C memory, which W2(a) refuses (design 18.7 finding 2).
+    private static string CopyIntoCText(string helper) =>
+        $"cgo: C.{helper} copies Go memory that holds a Go pointer: storing a Go pointer into C memory is refused (C memory must not hold a Go pointer)";
+
+    // B-10 for a struct the wrapper mirrors (design 18.7 finding 2): a by-value array or uintptr field is copied RAW into
+    // the mirror, so a published unsafe.Pointer word over the struct's bytes would reach C. The struct's own range of
+    // its storage is asked; storage that cannot hold words (it holds references, or nothing pins it) has no entry.
+    private static void RequireNoPublishedWord<T>(ж<T> pointer)
+    {
+        if (GoPointerWords.AnyTable && TryPinTarget(pointer, 0, out Array? root, out nint offset) &&
+            GoPointerWords.HoldsAnyEntry(root, (nuint)offset, (nuint)(offset + Unsafe.SizeOf<T>())))
+        {
+            throw GoPointerToUnpinnedGoPointer();
+        }
+    }
 
     /// <summary>
     /// The address the package's own <c>malloc</c> returned, or the end of the program for a nil one, with the text

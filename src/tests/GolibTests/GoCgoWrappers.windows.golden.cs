@@ -1016,6 +1016,7 @@ static unsafe partial class cgotestꓸC_package
     private static void ᴍin__Ctype_struct_go2cs_probe_taggedᴍ(ref _Ctype_struct_go2cs_probe_taggedᴍ m, in struct_go2cs_probe_tagged v)
     {
         m.tag = (int32)v.tag;
+        global::go.golib.GoCgoArgs.RequireNoPublishedWordIn(v.u);
         for (int i0 = 0; i0 < 8; i0++)
             m.u[i0] = (byte)v.u[i0];
     }

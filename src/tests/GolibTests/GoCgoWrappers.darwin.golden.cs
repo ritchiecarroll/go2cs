@@ -843,6 +843,7 @@ static unsafe partial class cgotestꓸC_package
     private static void ᴍin__Ctype_struct_go2cs_probe_taggedᴍ(ref _Ctype_struct_go2cs_probe_taggedᴍ m, in struct_go2cs_probe_tagged v)
     {
         m.tag = (int32)v.tag;
+        global::go.golib.GoCgoArgs.RequireNoPublishedWordIn(v.u);
         for (int i0 = 0; i0 < 8; i0++)
             m.u[i0] = (byte)v.u[i0];
     }
@@ -899,14 +900,19 @@ static unsafe partial class cgotestꓸC_package
     // _Ctype_struct_utsname's copy-in and copy-out, member by member.
     private static void ᴍin__Ctype_struct_utsnameᴍ(ref _Ctype_struct_utsnameᴍ m, in struct_utsname v)
     {
+        global::go.golib.GoCgoArgs.RequireNoPublishedWordIn(v.sysname);
         for (int i0 = 0; i0 < 256; i0++)
             m.sysname[i0] = (int8)v.sysname[i0];
+        global::go.golib.GoCgoArgs.RequireNoPublishedWordIn(v.nodename);
         for (int i0 = 0; i0 < 256; i0++)
             m.nodename[i0] = (int8)v.nodename[i0];
+        global::go.golib.GoCgoArgs.RequireNoPublishedWordIn(v.release);
         for (int i0 = 0; i0 < 256; i0++)
             m.release[i0] = (int8)v.release[i0];
+        global::go.golib.GoCgoArgs.RequireNoPublishedWordIn(v.version);
         for (int i0 = 0; i0 < 256; i0++)
             m.version[i0] = (int8)v.version[i0];
+        global::go.golib.GoCgoArgs.RequireNoPublishedWordIn(v.machine);
         for (int i0 = 0; i0 < 256; i0++)
             m.machine[i0] = (int8)v.machine[i0];
     }

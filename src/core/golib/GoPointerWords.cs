@@ -447,6 +447,9 @@ public static class GoPointerWords
     public static bool NamesGoMemory(nuint word) =>
         word != 0 && (ManagedPointerTokens.IsTaggedToken(word) || ManagedPointerTokens.Resolve(word) is not null || PinExtents.Find(word) is not null);
 
+    /// <summary>Whether any word table exists yet: until one does, no storage holds a published word (one read).</summary>
+    internal static bool AnyTable => s_anyTable;
+
     /// <summary>
     /// Whether any slot of a storage object holds a published word: what the cgo doors ask before they hand C Go memory
     /// (B-10, docs/phase4/DESIGN-cgo-phase3-marshaling.md 18.6 finding 3 and 18.12). A word in Go memory handed to C is

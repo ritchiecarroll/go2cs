@@ -165,7 +165,15 @@ func (set *cgoWrapperSet) copyMember(function, member string, depth int, m, g st
 			return "", err
 		}
 
-		return fmt.Sprintf("%sfor (int %s = 0; %s < %d; %s++)\n%s", indent, index, index, underlying.Len(), index, element), nil
+		loop := fmt.Sprintf("%sfor (int %s = 0; %s < %d; %s++)\n%s", indent, index, index, underlying.Len(), index, element)
+
+		// go2cs keeps an array's elements in the array's own storage, so B-10 asks that storage for a published
+		// unsafe.Pointer word before the elements are copied raw into the mirror (3.2 seat 1b, design 18.7 finding 2).
+		if in {
+			return fmt.Sprintf("%sglobal::go.golib.GoCgoArgs.RequireNoPublishedWordIn(%s);\n%s", indent, g, loop), nil
+		}
+
+		return loop, nil
 
 	case *types.Pointer:
 		if pointee, ok := types.Unalias(underlying.Elem()).(*types.Named); !ok || !strings.HasPrefix(pointee.Obj().Name(), "_Ctype_") {

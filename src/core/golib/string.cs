@@ -76,6 +76,10 @@ public readonly struct @string :
     // print, range) instead of throwing NRE. Mirrors the nil-map / nil-slice null-safe approach.
     internal ReadOnlySpan<byte> Bytes => m_value is null ? default : new ReadOnlySpan<byte>(m_value, m_offset, m_length);
 
+    // The array the string's bytes live in and where they start: the storage the cgo doors ask the unsafe.Pointer word
+    // table about before C.CString copies the bytes into C memory (cgo Phase 3, increment 3.2, seat 1b, B-10).
+    internal (byte[]? array, int offset) Backing => (m_value, m_offset);
+
     // The canonical window constructor — every other constructor funnels here or assigns the three
     // fields directly. Not public: a caller handing in a backing array it can still write through
     // would break the immutability the sharing depends on.

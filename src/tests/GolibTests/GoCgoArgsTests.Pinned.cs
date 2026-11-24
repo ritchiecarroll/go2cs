@@ -322,6 +322,45 @@ public unsafe partial class GoCgoArgsTests
         GC.KeepAlive(bytes);
     }
 
+    private struct wordHost
+    {
+        public uintptr W;
+        public int32 X;
+    }
+
+    // Publishes a Go pointer into the word a box names, as `*(*unsafe.Pointer)(unsafe.Pointer(p)) = unsafe.Pointer(r)`.
+    private static void PublishInto<T>(ж<T> word, object referent) =>
+        @unsafe.Pointer.StoreWord(@unsafe.Pointer.To<@unsafe.Pointer>(@unsafe.Pointer.FromBox(word)), @unsafe.Pointer.FromBoxObject(referent));
+
+    // B-10's other doors (18.7 finding 2): a struct the wrapper mirrors, whose uintptr field or inline array member would
+    // be copied raw into the mirror, and C.CBytes, whose bytes are copied into C memory. Each is asked before it copies;
+    // each control is the same storage before the store, and C.CBytes asks only the bytes it copies.
+    [TestMethod]
+    public void PinnedB10_TheMirrorAndCBytesAskTheBytesTheyCopy()
+    {
+        ж<cgoPoint> referent = new StandardBox<cgoPoint>(default(cgoPoint));
+
+        ж<wordHost> host = new StandardBox<wordHost>(default(wordHost));
+        Assert.AreEqual(GoCgoStructPointer.Mirror, GoCgoArgs.StructPointer(host, "f", out _), "the control: the struct, before any store");
+        PublishInto(new FieldRefBox<uintptr>(host, static p => ref ((ж<wordHost>)p).Value.W), referent);
+        StringAssert.Contains(RefusalOf(() => GoCgoArgs.StructPointer(host, "f", out _)), GoPointerToUnpinned, "a struct whose uintptr field holds a published word");
+
+        array<uintptr> elements = new array<uintptr>(4);
+        GoCgoArgs.RequireNoPublishedWordIn(elements);
+        PublishInto(new ElemRefBox<uintptr>(elements, 1), referent);
+        StringAssert.Contains(RefusalOf(() => GoCgoArgs.RequireNoPublishedWordIn(elements)), GoPointerToUnpinned, "an inline array member holding a published word");
+
+        byte[] storage = new byte[32];
+        slice<byte> whole = new slice<byte>(storage);
+        Assert.AreEqual((nuint)32, GoCgoArgs.BytesSize(whole), "the control: C.CBytes, before any store");
+        PublishInto(new ElemRefBox<byte>(new array<byte>(storage), 16), referent);
+        StringAssert.Contains(RefusalOf(() => GoCgoArgs.BytesSize(whole)), "storing a Go pointer into C memory is refused", "C.CBytes over the word");
+        Assert.AreEqual((nuint)8, GoCgoArgs.BytesSize(whole[..8]), "C.CBytes over bytes before the word: crosses");
+
+        GC.KeepAlive(referent);
+        GC.KeepAlive(storage);
+    }
+
     private static void AssertOutcomes((string form, Func<@unsafe.Pointer> mint, Pinned expected)[] forms)
     {
         var wrong = new List<string>();
