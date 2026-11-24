@@ -344,7 +344,7 @@ and match Go's test results. C# written by hand against converted code may need 
   on a small pool of threads, as Go does, instead of one operating-system thread each. The technique is **async
   twins**: a second copy of each function that waits by giving its thread back to the scheduler. It is opt-in: a
   program gets it only when its projects are built with twins, which works only inside a go2cs repository clone, and
-  it runs with `GO2CS_MN=1`. The published `go.*` packages are not built with twins, and a program that does not opt
+  it runs with `GO2CS_MN=1`. <!-- (b)-dependent --> The published `go.*` packages are not built with twins, and a program that does not opt
   in runs each goroutine on its own thread, as before. The diagnostics `GO2CS0014`, `GO2CS0015`, `GO2CS0017`,
   `GO2CS0018`, `GO2CS0019`, `GO2CS0020` and `GO2CS0021` come only from a build with twins
   ([Async twins](AsyncTwins.md), [Known issues](KnownIssues.md#goroutines-on-a-shared-pool-of-threads-mn-are-experimental-and-off-unless-you-build-and-run-for-them)).

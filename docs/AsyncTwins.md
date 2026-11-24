@@ -21,10 +21,11 @@ goroutine resumes, on whichever thread is free, when what it waited for arrives.
 
 The twin of a function returns a task, a `GoTask` (or a `GoTask<T>` for a result), and its body awaits the twins of
 the functions it calls. So a goroutine started on a twin runs as a chain of twins, each awaiting the next, down to the
-operation that actually waits: a channel send or receive, a `select`, a `sync.Mutex.Lock` that has to wait, or a
-`time.Sleep`.
+operation that actually waits: a channel send or receive, a `select`, or a `time.Sleep`. A `sync.Mutex.Lock` that has
+to wait parks as well, but only inside a function that can also wait on one of those
+([Which code gets twins](#which-code-gets-twins)).
 
-A function that can never wait still gets a twin, so every caller can await it the same way. That twin is a
+A public function that can never wait still gets a twin, so every caller can await it the same way. That twin is a
 **forwarder**: it calls the plain function and returns a task that has already completed.
 
 You do not call twins, and you do not see them in your converted code. The generator writes them into the build, and
@@ -33,11 +34,15 @@ the converted program's entry point starts `main`'s twin when the program is bui
 ## Which code gets twins
 
 - **Your projects, when you build them with twins.** Every public member of the converted code gets a twin:
-  functions, methods, promoted methods of embedded structs and interface members. Unexported members get one where
-  the analysis needs it.
-- **Two operations in the standard library, always.** `sync.Mutex.Lock` and `time.Sleep` have twins written by hand,
-  so that a lock that has to wait, or a sleep, parks in a twinned program. Channel operations and `select` park in
-  the runtime library itself.
+  functions, methods, promoted methods of embedded structs and interface members. Members that are not public get one
+  where the analysis needs it.
+- **Two operations in the standard library, always.** <!-- (b)-dependent --> `sync.Mutex.Lock` and `time.Sleep` have
+  twins written by hand. A `time.Sleep` parks in any twinned function. A `sync.Mutex.Lock` that has to wait parks only
+  inside a function that can also wait on something else: a channel operation, a `select`, a `time.Sleep`, or a call
+  that parks. A function whose only wait is `Lock` keeps its plain form, and a contended `Lock` there blocks its thread.
+  Channel operations and `select` park in the runtime library itself.
+  <!-- src/core/sync/mutex.cs, Lockꞏtwin: [GoParkWeak], "a call to Lock never makes its caller a twin"
+       (P3's read, 2026-11-24). src/core/time/time_impl.cs, Sleepꞏtwin: no weak mark. -->
 - **The rest of the standard library.** <!-- (b)-dependent --> The published `go.*` packages are built without twins.
   A standard-library call from a twinned program, such as a file read or a `sync.WaitGroup.Wait`, is a plain call,
   and the goroutine keeps its thread until the call returns.
@@ -56,22 +61,22 @@ the converted program's entry point starts `main`'s twin when the program is bui
 
 Opting in takes two switches: one when you build, one when you run.
 
-**The build.** Build the projects with twins. Two properties do this; both are read by go2cs's build files, so they
-work only in a project built inside a go2cs repository clone.
+**The build.** Build the projects with twins. The properties that do this are read by go2cs's build files, so they
+work only for a project that sits under the `src` directory of a go2cs repository clone. A project anywhere else,
+such as a `-recurse` output root outside the clone, builds without twins and says nothing.
 
-- `GoTwinsFor` names the projects to build with twins, separated by `;`. Set it in the environment, or on the
-  `dotnet build` command line with each `;` written as `%3B` (MSBuild otherwise ends the property at the `;`). Name
-  every converted project of your program that should park, the executable included.
-- `GoTwins=true` in one project's own file builds that project with twins:
-
-```xml
-<PropertyGroup>
-  <GoTwins>true</GoTwins>
-</PropertyGroup>
-```
+- `GoTwinsFor` names the projects to build with twins: their project file names without `.csproj`, separated by `;`.
+  Set it in the environment, or on the `dotnet build` command line with each `;` written as `%3B` (MSBuild otherwise
+  ends the property at the `;`). Name every converted project of your program that should park, the executable
+  included.
+- `GoTwins=true` in one project's own file also builds that project with twins, but go2cs writes the project file
+  again on each conversion, and the property is lost then, with no error. Use `GoTwinsFor`.
 
 Setting `GoTwins` on the command line is not the same thing: a command-line property reaches every project the build
 references, standard-library packages included. Use `GoTwinsFor` on the command line instead.
+<!-- src/go2cs/projectFileWriter.go (needToWriteFile): the converter rewrites the project file and carries over only
+     the GoHandOwnReferences block (P3's read, 2026-11-24; read from the code, not run). GoTwinsFor compares
+     $(MSBuildProjectName) in src/Directory.Build.targets. -->
 
 **The run.** Set the environment variable `GO2CS_MN=1` when you start the program. How many goroutines run at once
 follows `GOMAXPROCS`, as in Go: the `GOMAXPROCS` environment variable at start, and `runtime.GOMAXPROCS(n)` while
@@ -79,9 +84,21 @@ the program runs.
 
 Without `GO2CS_MN=1`, a program built with twins runs each goroutine on its own thread, as it would without them.
 
-**How to tell it is on.** Run with `GO2CS_MN_READING=1` as well. The scheduler then prints one `READING` line when
-the program exits, with what it counted: how many goroutines parked, how many threads it used, and so on. No line
-means the scheduler was off.
+**How to tell it is on.** Run with `GO2CS_MN_READING=1` as well. The scheduler then writes one line to standard error
+when the program exits, starting `READING go-scheduler`, with what it counted: `parks=` is how many times a goroutine
+parked, and `peak-os-threads=` is the most threads the program ran at once. No line means the scheduler never
+started: `GO2CS_MN` was not `1`, or no goroutine started on a twin, for example because the executable was not named
+in `GoTwinsFor`. The line is for reading, and its fields may change between releases.
+<!-- src/core/golib/runtime/GoScheduler.cs: GO2CS_MN is read as exactly "1"; the line is registered in Start(), which
+     runs at the first Ready; Reading() writes parks= and peak-os-threads=. -->
+
+**An example.** A program whose executable project is `App.csproj` and whose library project is `Lib.csproj`, both
+under the clone's `src` directory:
+
+```shell
+dotnet build -c Release -p:GoTwinsFor=App%3BLib App.csproj
+GO2CS_MN=1 GO2CS_MN_READING=1 dotnet run -c Release --no-build --project App.csproj
+```
 
 ## What you get, and what it costs
 
@@ -90,7 +107,7 @@ each of them. Goroutines that wait in twinned code park and give their thread ba
 threads near `GOMAXPROCS` in size instead of one per waiting goroutine.
 
 **What stays on a thread.** A goroutine still holds its thread while it is inside a plain call that waits: a call into
-code built without twins, a hand-written body, a native call, or a call the generator could not make awaitable (the
+code built without twins <!-- (b)-dependent -->, a function whose only wait is a `sync.Mutex.Lock`, a hand-written body, a native call, or a call the generator could not make awaitable (the
 diagnostics below name each such site). The scheduler adds a thread when all of its threads are held this way, so
 the program keeps running, but those goroutines cost a thread each, as they do by default.
 
@@ -109,17 +126,20 @@ nothing from twins.
 
 - **Experimental.** The scheduler and the twins are new, and are off unless you opt in. Report anything that behaves
   differently with them than without them.
-- **Repository clones only.** The build properties work only for a project built inside a go2cs repository clone.
-  A project that references the published `go.*` packages from NuGet cannot build with twins.
-- **Stack depth.** With the scheduler on, a goroutine started on a twin runs on one of the pool's threads, and those
-  threads reserve a 1 MiB stack, where a default goroutine thread reserves 256 MiB and `main`'s reserves 1 GiB
-  ([Limitations](Limitations.md#what-converts-but-doesnt-behave-exactly-like-go)). This includes `main` itself,
-  unless an `init` function locked it to its thread. Deep recursion that works without the scheduler can overflow
-  with it, and a stack overflow ends the process.
-  <!-- src/core/golib/runtime/GoScheduler.cs:108 `private const int CarrierStackSize = 1024 * 1024;` and :700
-       `new(carrier.Loop, CarrierStackSize)`; Goroutine.cs:85 `DefaultStackReserve = 256 * 1024 * 1024`;
-       Goroutine.Multiplexed.cs RunMainTwin: with the scheduler on, goroutine 1 runs main's twin multiplexed, except
-       when an init locked the main goroutine to the startup thread. Read at cb6def82a2, not measured. -->
+- **Repository clones only.** The build properties work only for a project under the `src` directory of a go2cs
+  repository clone. <!-- (b)-dependent --> A project that references the published `go.*` packages from NuGet cannot
+  build with twins.
+- **Stack depth.** With the scheduler on, a goroutine started on a twin runs on one of the pool's threads. Those
+  threads reserve the same stack as a goroutine's own thread: 256 MiB, which `GO2CS_GOROUTINE_STACK` changes
+  ([Limitations](Limitations.md#what-converts-but-doesnt-behave-exactly-like-go)). `main` runs there too, unless an
+  `init` function locked it to its thread, so with the scheduler on `main` has that reserve rather than its usual
+  1 GiB. If the system refuses the size, the scheduler halves it until a thread starts, and says so once on standard
+  error.
+  <!-- Post-row-4 truth (R's M:N row 4, claude/r-mn-row4-stack c1639909fc, train 11 with this page; COORD 2026-11-24
+       17:32Z): GoScheduler s_carrierStackSize = Math.Max(Goroutine.StackReserve, MinCarrierStackSize = 1 MiB), halving
+       on refusal with one named stderr line. Before it, carriers reserved a fixed 1 MiB (GoScheduler's
+       CarrierStackSize at cb6def82a2). Goroutine.Multiplexed.cs RunMainTwin: goroutine 1 runs main's twin multiplexed, except when an init
+       locked the main goroutine to the startup thread. -->
 - **`runtime.LockOSThread`.** A goroutine that locks its thread keeps that thread to itself until it unlocks it, as in
   Go; the thread leaves the shared pool while it is locked.
 - **Profiling.** With the block or mutex profile switched on, a `sync.Mutex.Lock` that has to wait takes the plain path
@@ -141,7 +161,8 @@ These come only from a build with twins. Each has a row in [Diagnostic codes](Di
   with the message.
 - `GO2CS0018` (error): a build property that changes what the twin generator writes was set in a build with twins.
   Remove it.
-- `GO2CS0019` (warning): an entry that marks a call as not parking does nothing in this build.
+- `GO2CS0019` (warning): an entry that marks a call as not parking, in the `GoTwinsWeak` or `GoTwinsCut` property or
+  in go2cs's own table for the standard library, does nothing in this build.
 - `GO2CS0020` (warning): a call through a func value whose shape the generator cannot test. If the function stored
   there parks, the call holds its thread.
 - `GO2CS0021` (error): a method that can park is in a type not declared `partial`, so it cannot get a twin.

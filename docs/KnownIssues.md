@@ -254,7 +254,7 @@ Without `GO2CS_MN=1` a program built with twins runs on threads as usual, and `r
 value Go's does but caps nothing: the operating system decides how many threads run at once. With it, a goroutine that
 waits inside code built without twins keeps its thread while it waits. The other `GO2CS_MN_*` variables the scheduler
 reads are measurement switches, not settings: none is supported, and they may change or go away. The diagnostics
-`GO2CS0014`, `GO2CS0015`, `GO2CS0017`, `GO2CS0018`, `GO2CS0020` and `GO2CS0021` ([Diagnostic codes](DiagnosticCodes.md)) come only from a build with twins.<!-- 2026-11-23 .5 docs pass (P1): the old range "GO2CS0014 through GO2CS0018" took in GO2CS0016, the GoFrame rule, which every build runs (DiagnosticCodes.md rows 0014-0021 at 97cca467a2). -->
+`GO2CS0014`, `GO2CS0015`, `GO2CS0017`, `GO2CS0018`, `GO2CS0019`, `GO2CS0020` and `GO2CS0021` ([Diagnostic codes](DiagnosticCodes.md)) come only from a build with twins.<!-- 2026-11-24 (P4, row 18, P3's NIT 8): GO2CS0019 added; it landed with row 7's N1 in train 9 and is reported only in a build with twins (DiagnosticCodes.md row 0019). --><!-- 2026-11-23 .5 docs pass (P1): the old range "GO2CS0014 through GO2CS0018" took in GO2CS0016, the GoFrame rule, which every build runs (DiagnosticCodes.md rows 0014-0021 at 97cca467a2). -->
 
 **A plain read and a call in the same expression can see different values with and without twins.** In an expression
 such as `fmt.Println(a, f())`, Go orders only the calls: the read of `a` may come before or after `f()`, and the gc
