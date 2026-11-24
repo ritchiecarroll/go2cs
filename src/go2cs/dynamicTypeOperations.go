@@ -439,8 +439,8 @@ func (v *Visitor) importedStructLiftSource(st *types.Struct) (*types.Package, st
 // and array elements) resolves here to the lift that pkg's lift of st holds for it (liftUsedBy, asked of pkg). A reused
 // lift fixes its fields' C# types to pkg's choices, while this package types its own values of those fields by ITS
 // choices: libc's Titimerval reused libc/uuid/uuid's Itimervalᴛ1 (neither admits it) while its field type Ttimeval kept
-// libc's own admitted lift, and libc's literal `new Titimerval(Fit_value: new Ttimeval(...))` was CS1503 (G's linux-x64
-// build, COORD 2026-11-17 10:32Z). The match is transitive: each nested struct is resolved by importedStructLiftSource,
+// libc's own admitted lift, and libc's literal `new Titimerval(Fit_value: new Ttimeval(...))` was CS1503 (a linux-x64
+// build, 2026-11-17; a76c8bf2eb). The match is transitive: each nested struct is resolved by importedStructLiftSource,
 // which checks that struct's own nested structs. pkg's lift of a nested struct may itself be named from a third package
 // (libc's Tstat holds libc/uuid/uuid's Timespecᴛ1 once libc reuses it), so the two are compared as lifts, package and
 // name. A struct held through a NAMED type is that type's declaration, the same C# type on both sides, and an empty
@@ -799,7 +799,7 @@ func resolveDynamicTypeMarkers(outputFileNames []string) {
 				// corrupted marker gets its own report rather than being collapsed into this one.
 				// Same gate class as the unresolved case below: the payload replacing the marker is not valid C#
 				// either, so the file is just as certainly unbuildable. A corrupt payload is a converter defect,
-				// not an unlifted type, so it refuses at once (GO2CS2014; P3's review of the godebug seat,
+				// not an unlifted type, so it refuses at once (GO2CS2014; review of the godebug change,
 				// 2026-11-19) rather than waiting for unresolvedDynamicTypeError at the end of the run.
 				recordUnresolvedDynamicType("«undecodable marker payload: "+payload+"»", fileName, line)
 				refuseMarkerPass(fmt.Sprintf("%s:%d", fileName, line), fmt.Sprintf("a dynamic-type marker's payload %q does not decode", payload))

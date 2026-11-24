@@ -590,7 +590,7 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 
 				if err := collectPublishedRefVerdicts(pkg, packageOutputPath); err != nil {
 					// The siblings' remembered record is process-wide and first-wins, so clear it on this return too
-					// (P3's review, 2026-11-19). Not a defer: this branch runs once per package inside the package loop.
+					// (review, 2026-11-19). Not a defer: this branch runs once per package inside the package loop.
 					restoreUnchangedMarkedSources(autoFileNames)
 					return err
 				}

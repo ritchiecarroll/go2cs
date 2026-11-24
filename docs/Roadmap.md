@@ -121,13 +121,57 @@
      (6) History dropped from the visible text (the 1.24 and 1.25 support dates, "from release N on"); it is in
          RoadmapHistory.md, NEWS.md and the records cited. -->
 
+<!-- 2026-11-23 .5 docs pass (P1), at master 97cca467a2 (owner items UX-1, UX-4, UX-8; owner rule 2026-11-22: the page
+     leads with the current state, and text about older versions moves to a section at the bottom). Every change is
+     read from a committed record at that master:
+     (1) UX-1: 1.26.11.1 shipped on 2026-11-19 with both of its gates met (NEWS.md, the November 19 entry; tag
+         nuget-1.26.11.1, ec3e170e4b). "The next two releases" becomes "1.26.11.1, and the release after it" (the old id
+         is kept on the heading for any outside bookmark; no page in docs/, README.md or src/ links it): what 1.26.11.1
+         shipped in two sentences, what master carries since (git log --first-parent nuget-1.26.11.1..97cca467a2, trains
+         1 to 7), and what is not on master yet. The release after 1.26.11.1 has no version number or date, and none is
+         given. Each item of the old "release after 1.26.11.1" list, checked at this master:
+         - goroutine scheduling: ON MASTER as an experimental, opt-in M:N scheduler, off by default (KnownIssues.md, the
+           M:N entry; docs/phase4/DESIGN-mn-n5-invisible-blocking.md section 4 "stays OFF by default"); the work goes on
+           (trains 3 to 7, the g-mn-* merges);
+         - the next cgo steps: PARTLY ON MASTER. -recurse -cgo and -recurse=nuget -cgo (8de0f7ece2, f74b4d7385, train 3;
+           Limitations.md and CommandLine.md -cgo), a -cgo pack for four RIDs that is not pushed until a published go.lib
+           carries the run-time target check (ef9be9bd32 pack-2b, c9143ae615 a6, 54b02b555d gopointer; NugetgoPublish.md
+           "Cgo"; docs/phase4/REHEARSAL-cgo-nuget-e2e-go-pointer.md), and reading C memory through a C struct's pointer
+           field and through `**C.T` (1f2a9afdfc sb2a, 5f2f2d0aa3 1c; DESIGN-cgo-phase3-marshaling.md 18.9 and 18.11).
+           NOT ON MASTER: Go memory handed to C without a copy (1b) and the net resolver, which the owner placed after
+           the next release (DESIGN-cgo-phase3-marshaling.md 18.9, 18.10);
+         - the kept array pointer (door C): ON MASTER for an unnamed array type (52d3547def, train 1;
+           src/go2cs/keptArrayDoor.go; DESIGN-array-pointer-doors.md section 20). It did not move into 1.26.11.1. The
+           named form is not taken;
+         - start-up method sets: arm A1 ON MASTER, a gain under the JIT only (2506d6d48f; the BOARD row of 2026-11-18;
+           DATA-startup-method-sets-a1.md); the Native AOT half and arm A3 are not;
+         - lever E (the Native AOT option): ON MASTER (61b23a9888, train 1; its BOARD row).
+         The Timeline's Now and Next rows are rewritten to match.
+     (2) UX-4: the cgo section now agrees with Limitations.md's cgo section and with NugetgoPublish.md at this master
+         (-recurse -cgo, cross-target -platforms with a target C compiler, the pack and its push gate). Limitations.md's
+         "Packing a cgo package against the go.* packages for every platform is still to come" is stale on one point
+         (packing exists; publishing waits); reported to the docs pass, not edited here.
+     (3) UX-8: every "the release after 1.26.11.1" (old lines 163, 279, 385, 471, 474) is restated in present tense
+         (what is on master) or names 1.26.11.1 as the release it follows.
+     (4) Go releases: the published packages are 1.26.11.1. The Go 1.24 and 1.25 sentence moves to "Older versions"
+         at the bottom.
+     (5) .NET: .NET 11 shipped (SDK 11.0.100 on the hosted runners, ccca03abea); the repository builds with any SDK
+         from 10.0.400 up (global.json latestMajor, 013992ccbb); a converted executable rolls forward to a newer runtime
+         when no .NET 10 runtime is installed (69feb33d6b; docs/README.md Requirements; DATA-net11-sdk-usability.md).
+     (6) Native AOT: lever E and the `error` assertion fix (a9ee17b1eb, KnownIssues.md's entry) as on master.
+     (7) Platforms: macOS's standard library is the darwin/amd64 build on both chips (KnownIssues.md, "On Apple silicon,
+         the standard library is the amd64 build").
+     (8) Real-world modules: the two gate programs shipped; four newer rows are Go 1.26.11 readings (ValidatedModules.md),
+         and modules whose tests use testify validate. -->
+
 This page is the plan for what comes next in go2cs: the Go and .NET releases the converted standard
 library moves to, the platforms it runs on, the real-world Go code it converts beyond the standard
 library, and the runtime and converter work still ahead. The completed phases are in
 [Roadmap history](RoadmapHistory.md). Dates are month or quarter targets.
 
-**Where things stand.** Every implementable package of the converted standard library validates
-against Go's own tests on Windows, on Linux (x64 and arm64) and on macOS (Intel and Apple silicon).
+**Where things stand.** The published release is 1.26.11.1, built from Go 1.26.11
+([News](NEWS.md)). Every implementable package of the converted standard library validates
+against Go's own tests on Windows, on Linux (x64 and Arm64) and on macOS (Intel and Apple silicon).
 `go2cs -tests -recurse` validates third-party modules against their own tests the same way,
 and converted modules are published as NuGet packages, listed on [nugetgo.net](https://nugetgo.net).
 [Validated Test Packages](ValidatedTestPackages.md) carries the current state of the standard library, and
@@ -146,31 +190,41 @@ Compiling is not the same as running correctly, which is what Phase 4 is for.
      c2591d5b95, read from the Phase 4 progress header of docs/ValidatedTestPackages.md, which carries
      the current figures. -->
 
-## The next two releases
+## 1.26.11.1, and the release after it {#the-next-two-releases}
+<!-- 2026-11-23 .5 docs pass (P1), at master 97cca467a2: rewritten from "The next two releases" (see the provenance
+     block at the top). The old section planned 1.26.11.1 and listed the release after it; the 2026-11-14 owner
+     rulings it cited are in the 2026-11-15 block above. -->
 
-**In short.** 1.26.11.1, built from Go 1.26.11, ships when two real programs convert and run exactly as Go
-runs them. The release after it adds the rest of the cgo work, goroutine scheduling and Native AOT work that
-did not fit. Neither has a date: completeness comes first.
+**In short.** 1.26.11.1, built from Go 1.26.11, is the published release. The main line of development carries
+the work for the next release, 1.26.11.2, which has no date yet: goroutine scheduling, more of cgo,
+and Native AOT and start-up work.
 
-**1.26.11.1** ships when both of these hold:
-- **SQLite.** The converted `modernc.org/sqlite` opens a database, creates a table, inserts and selects, with
-  output byte-identical to Go's, on Windows and on Linux.
-- **The TypeScript compiler.** The converted TypeScript compiler (written in Go) emits JavaScript byte-identical to
-  what the Go build emits, at least under the JIT.
+**1.26.11.1** shipped on November 19, 2026, with both of the programs that gated it converting and running as Go
+runs them: a `modernc.org/sqlite` program prints exactly what native Go prints, on Windows and on Linux, and the
+converted TypeScript compiler (written in Go) emits what the Go build emits. It also brought `go2cs -cgo` and
+linux-arm64 packages. [News](NEWS.md) has the full list.
 
-It also carries the cgo work under [cgo](#cgo) as "What converts".
+**On the main line now**, for 1.26.11.2:
+- goroutine scheduling, many goroutines over a few threads, as an experimental mode that is off unless you build
+  and run for it ([Known issues](KnownIssues.md#goroutines-on-a-shared-pool-of-threads-mn-are-experimental-and-off-unless-you-build-and-run-for-them));
+  work on it continues ([Performance](#performance));
+- cgo packages converted with their module, against the `go.*` packages, and C memory read through a C struct's
+  pointer fields ([cgo](#cgo));
+- a pointer to an unnamed array type made from an `unsafe.Pointer` and kept in a variable, which now reaches C
+  memory, as SQLite's page cache needs;
+- faster start-up under the JIT for programs that ask many method-set questions ([Performance](#performance));
+- a smaller Native AOT publish of a large program, and a type assertion to `error` that answers under Native AOT as
+  it does under the JIT ([Native AOT and trimming](#native-aot-and-trimming));
+- among other changes: `GOMAXPROCS` follows Go's rule, `sync.RWMutex` is Go's own code, and more generics under
+  a method-set constraint convert.
+  <!-- trains 1 to 7, git log --first-parent nuget-1.26.11.1..97cca467a2: M:N g-mn-* (trains 3-7); cgo 8de0f7ece2,
+       f74b4d7385, ef9be9bd32, 1f2a9afdfc, 5f2f2d0aa3; door C 52d3547def; A1 2506d6d48f; lever E 61b23a9888; the AOT
+       error shell a9ee17b1eb; GOMAXPROCS ebbb1c850f and 0f96e28773; RWMutex bfdb234ea5; the shape witness 5cd4536a09.
+       Breaking changes for hand-written C# (array literals, package main's methods, named slice and array methods)
+       are listed in docs/DRAFT-news-next.md for the release notes. -->
 
-**The release after 1.26.11.1** is planned to carry:
-- goroutine scheduling, many goroutines over a few threads ([Performance](#performance)), which lands on the Go 1.26
-  line, before the corpus moves to the next Go minor release;
-  <!-- Owner ruling 2026-11-12, given in session to COORD (relayed 20261115T083540Z): M:N lands on the Go 1.26 line,
-       then one Go minor hop; 1.26 patch hops continue meanwhile. -->
-- the next cgo steps ([cgo](#cgo));
-- viewing a Go array through a pointer to an array of another type, when that pointer is kept, unless the SQLite
-  program needs it first, in which case it moves into 1.26.11.1;
-- start-up work on how converted types find their methods ([Performance](#performance));
-- as an option, a runtime-library change that cuts the memory and image size of a Native AOT publish of a large
-  program ([Native AOT and trimming](#native-aot-and-trimming)).
+**Not on the main line yet:** handing Go memory to C without a copy, and converting the `net` resolver with cgo,
+are planned for a release after 1.26.11.2 ([cgo](#cgo)).
 
 ## Phase 4: validation against Go's own tests
 
@@ -179,7 +233,7 @@ so that "it works" is measured and not claimed. It is done on Windows, Linux and
 planned extension.
 
 - **Phases 4A to 4C are complete.** The test pipeline, subtests and parallelism, and the package-by-package
-  validation are done: every implementable package validates on Windows and on Linux, x64 and arm64
+  validation are done: every implementable package validates on Windows and on Linux, x64 and Arm64
   ([Roadmap history](RoadmapHistory.md#phase-4--convert-and-run-go-package-tests)).
 - **macOS parity is reached.** Every package that applies to macOS validates on Apple silicon and on Intel, each
   chip compared with Go built for that chip; where the two chips' counts differ, the
@@ -205,12 +259,13 @@ Go hop re-validates every package against that release's own tests.
 **In short.** The converted standard library is on Go 1.26.11, a release Go supports. The next move is
 Go 1.27, before the 1.26 series leaves support.
 
-The published packages are 1.26.10.3, from Go 1.26.10, and 1.26.11.1 is next
-([The next two releases](#the-next-two-releases)). The main line of development carries the current Go line,
-and the next Go minor is prepared separately until its packages ship. Go 1.24 and 1.25 have no further
-releases: packages built from either carry none of the Go security fixes issued since.
-<!-- Go 1.24 left upstream support in February 2026 and 1.25 in August 2026; 1.24.13.7 is the last 1.24 release, and
-     there is no Go 1.25 release (docs/PLAN-version-lines.md). -->
+The published packages are 1.26.11.1, from Go 1.26.11
+([1.26.11.1, and the release after it](#the-next-two-releases)). The main line of development carries the current
+Go line, and the next Go minor is prepared separately until its packages ship. Older Go lines are under
+[Older versions](#older-versions).
+<!-- 2026-11-23 .5 docs pass (P1), at master 97cca467a2: 1.26.10.3 -> 1.26.11.1 as the published packages (NEWS.md,
+     November 19); the Go 1.24 and 1.25 sentence and its comment moved to "Older versions" at the bottom (owner rule
+     2026-11-22). -->
 
 | Hop | When | What it involves |
 |:--|:--|:--|
@@ -220,19 +275,27 @@ How often later hops run is decided ahead of the Go 1.27 hop.
 
 ## .NET
 
-**In short.** Converted code targets .NET 10, a long-term-support release, until .NET 12. You need the
-.NET 10 SDK, and a newer SDK on your machine does not change what you get.
+**In short.** Converted code targets .NET 10, a long-term-support release, until .NET 12. The .NET 10 SDK
+builds it, a newer SDK builds it too, and neither changes the C# it compiles under.
 
 **The published target stays `net10.0`** until `net12.0`, the next long-term-support release. .NET 10 is
 supported until November 2028.
 
-**The SDK and the C# language version are pinned.** A repository `global.json` pins the SDK, and every
-project, the converter's template included, fixes `LangVersion`, so a newer default SDK does not compile
-converted code under a newer C#. The converter also escapes Go identifiers that newer C# gives new meaning,
+**The C# language version is pinned.** Every project, the converter's template included, fixes
+`LangVersion`, so a newer SDK does not compile converted code under a newer C#. The repository's own
+`global.json` takes any .NET SDK from 10.0.400 up, newer majors included. On the main line, a converted program
+also runs on a newer .NET runtime when no .NET 10 runtime is installed; the `go.*` packages are validated on
+.NET 10.
+<!-- 2026-11-23 .5 docs pass (P1), at master 97cca467a2: "A repository global.json pins the SDK" was stale since
+     013992ccbb (rollForward latestMajor, floor 10.0.400; owner ruling 2026-11-20). The roll-forward is go.lib's
+     buildTransitive RollForward=Major for an executable (69feb33d6b, train 1; docs/README.md Requirements;
+     docs/phase4/DATA-net11-sdk-usability.md); go.lib 1.26.11.1 does not carry it. --> The converter also escapes Go identifiers that newer C# gives new meaning,
 such as `closed`, `union` and `safe` when they name a type.
 
-**A .NET 11 measurement stage follows the Go 1.26 hop**, once .NET 11 has shipped (November 2026), and
-never overlaps a Go hop. It compares JIT and allocation behavior on .NET 11 over identical code and reviews
+**A .NET 11 measurement stage is planned.** .NET 11 shipped in November 2026; the stage never overlaps a Go
+hop.
+<!-- 2026-11-23 .5 docs pass (P1): .NET 11 has shipped (SDK 11.0.100 on GitHub's runner images, ccca03abea), and the
+     Go 1.26 hop it was to follow is done (October 26, NEWS.md). --> It compares JIT and allocation behavior on .NET 11 over identical code and reviews
 the deployment shape, the full-trim publish included ([Native AOT and trimming](#native-aot-and-trimming)).
 Its findings inform the move to `net12.0`.
 <!-- plan: [`PLAN-bflat-perf-exploration.md`](PLAN-bflat-perf-exploration.md) (internal record, unlinked
@@ -275,9 +338,16 @@ AOT. Done so far:
   the SDK's compressed composite image (`win-x64`).
   <!-- About 0.47 s against about 3.5 s for a small converted program, win-x64, one development machine
        (DATA-hop126-perf.md §11.8, batch 214). -->
+- On the main line since 1.26.11.1: the runtime library's pointer types share their per-type tables, so a Native
+  AOT publish of a large program is smaller and the compiler needs less memory for it (`win-x64`). A type
+  assertion to `error` that the method set decides answers as it does under the JIT
+  ([Known issues](KnownIssues.md#under-native-aot-a-type-assertion-to-error-that-the-method-set-decides-can-answer-false)).
+  <!-- 2026-11-23 .5 docs pass (P1), at master 97cca467a2: lever E, 61b23a9888 (train 1), its BOARD row: the converted
+       TypeScript parser demo, win-x64, about 29% fewer symbol names, a 13% smaller image, about 25% lower ILC peak
+       memory. The error shell: a9ee17b1eb (train 3), claude/p2-aot-structural-hit 05728981b3. Replaces "as an option
+       for the release after 1.26.11.1" (UX-8). -->
 
-**Later stages** cover method sets and stack frames, and, as an option for the release after 1.26.11.1, a
-runtime-library change that cuts the memory and image size of the publish of a large program.
+**Later stages** cover method sets and stack frames.
 
 Converted packages are built for the default x64 instruction set: `x86-64-v3` gives no gain across the
 benchmark suite on `win-x64`, and an image built that way does not start without AVX2.
@@ -295,7 +365,7 @@ A build, `dotnet run` and a publish without Native AOT are not affected.
 
 ## Platforms
 
-**In short.** go2cs is validated on x64 Windows, on Linux, x64 and arm64, and on macOS, Intel and Apple
+**In short.** go2cs is validated on x64 Windows, on Linux, x64 and Arm64, and on macOS, Intel and Apple
 silicon. Other platforms are not supported yet.
 
 **Windows and Linux.** The converter runs on both, and the standard library is multi-target on disk:
@@ -308,7 +378,12 @@ Windows record. A few Linux operational items remain open.
 
 **macOS (Intel and Apple silicon):** packages ship for both chips, the behavioral suite passes on both,
 and the standard library validates on both: each chip is compared with Go built for that chip, and where
-the two chips' counts differ the roster row shows both. The two Windows-only packages are the only rows
+the two chips' counts differ the roster row shows both. The standard library for macOS is one build, for
+`darwin/amd64`, that serves both chips; on Apple silicon it runs as a native arm64 process
+([Known issues](KnownIssues.md#on-apple-silicon-runtimegoarch-reports-amd64)).
+<!-- 2026-11-23 .5 docs pass (P1), at master 97cca467a2: "packages ship for both chips" read as two builds; KnownIssues.md
+     ("On Apple silicon, the standard library is the amd64 build") and NugetgoPublish.md ("Cgo": osx-arm64 waits for
+     true darwin/arm64 go.* assets) say there is one. --> The two Windows-only packages are the only rows
 without a macOS reading. The compile is checked daily in CI on macOS arm64 and x64 runners
 ([`CIMatrix.md`](CIMatrix.md)).
 
@@ -319,7 +394,8 @@ about ([Known issues](KnownIssues.md#platforms-the-packages-do-not-ship)).
 
 **In short.** Beyond the standard library, go2cs converts third-party Go modules and holds each to the
 same bar: its own tests must match Go's. The modules on [Validated Modules](ValidatedModules.md) pass,
-measured with Go 1.26.10, and two large programs gate the next release.
+among them modules whose tests use testify. Two large programs, SQLite and the TypeScript compiler, convert and
+run as Go runs them.
 
 Each module is converted, validated against its own test suite exactly as a standard-library package is, and
 given a proof page beside the conversion. `go2cs -tests -recurse` runs a module's tests across all of its
@@ -332,8 +408,13 @@ dependencies `pflag` and `mousetrap`; and [`itchyny/gojq`](https://github.com/it
 [`itchyny/timefmt-go`](https://github.com/itchyny/timefmt-go), an in-process, fully managed jq. gojq's
 command-line package and its conformance suite come later, once that package's own dependencies convert.
 
-`modernc.org/sqlite` and the TypeScript compiler gate 1.26.11.1
-([The next two releases](#the-next-two-releases)). Further modules follow, libraries first: a converted module
+`modernc.org/sqlite` and the TypeScript compiler, the two programs that gated 1.26.11.1, are published with their
+recipes in [sqlite-cs](https://github.com/ritchiecarroll/sqlite-cs) and
+[typescript-go-cs](https://github.com/ritchiecarroll/typescript-go-cs).
+<!-- 2026-11-23 .5 docs pass (P1), at master 97cca467a2: the gate is met (NEWS.md, November 19, which links both
+     repositories). The In short's "measured with Go 1.26.10" is dropped: four newer rows (go-difflib, objx v0.5.2 and
+     v0.5.3, go.yaml.in/yaml/v3) are Go 1.26.11 readings on the tree's standard library, and objx's tests use testify
+     (ValidatedModules.md, bb6267d0e4, train 6). --> Further modules follow, libraries first: a converted module
 is most useful as Go code a .NET program calls. The [go2cs Target Atlas](https://go2cs.net/TargetAtlas.html) is
 one input to their selection.
 
@@ -360,18 +441,23 @@ on by default.
 ## cgo
 
 **In short.** `go2cs -cgo` converts a Go package that calls C library functions, on a machine with a C
-compiler. Next come Go memory handed to C, cgo packages built against the `go.*` packages, and a real
-standard-library cgo package; C code written inline in the Go file and callbacks from C into Go follow.
-[Limitations](Limitations.md#cgo) has the detail of what converts and what is refused.
+compiler, alone or with the module it belongs to. Next come publishing cgo packages as NuGet packages, Go memory
+handed to C without a copy, and a real standard-library cgo package; C code written inline in the Go file and
+callbacks from C into Go follow. [Limitations](Limitations.md#cgo) has the detail of what converts and what is
+refused.
 
 The standard library is converted with `CGO_ENABLED=0`.
 <!-- The plan is [`PLAN-cgo-interop.md`](PLAN-cgo-interop.md) (internal record, unlinked 2026-10-26, OQ-1). -->
+<!-- 2026-11-23 .5 docs pass (P1), at master 97cca467a2 (UX-4): rewritten to agree with Limitations.md's cgo section,
+     CommandLine.md's -cgo row, DotnetTool.md and NugetgoPublish.md "Cgo" at this master. Sources per item in the
+     provenance block at the top of the page. The old "Next, in the release after 1.26.11.1" list is restated as what
+     is on the main line and what is not (UX-8). -->
 
-**What converts** (cgo Phases 1 and 2 and the first step of Phase 3, in 1.26.11.1):
+**What converts:**
 - One package, when every C use it makes is a call of a C function a shared library defines. Integers,
   floating-point numbers, pointers, and structs of integers and pointers cross, as do a `void *` that is nil or
-  points at C memory, the `C.CString` family, `C.malloc`, `C.free` and `defer C.f(…)`. It converts for the
-  machine's own operating system and architecture, and a program that uses it needs only the C library.
+  points at C memory, the `C.CString` family, `C.malloc`, `C.free` and `defer C.f(…)`. A program that uses it needs
+  only the C library. This shipped in 1.26.11.1.
 - A converted cgo program printed what the Go build printed on linux/amd64, darwin/amd64, darwin/arm64 and
   windows/amd64, apart from the differences [Limitations](Limitations.md#cgo) lists.
 - Without `-cgo`, a file the build selects that imports `"C"` stops the conversion with error `GO2CS2001`, which
@@ -382,13 +468,33 @@ The standard library is converted with `CGO_ENABLED=0`.
      43638338397 win-x64, 43638346986 osx-arm64 and osx-x64, each 50 of 50 arms as Go does or refused as the arm's table
      says). The owner's scope ruling 4 (2026-11-14): 1.26.11.1 = Phases 1-2 + 3.1 + H's pin-extent fix. -->
 
-**Next, in the release after 1.26.11.1:**
-- Go memory handed to C without a copy, and a slice viewed over C memory (the rest of Phase 3).
-- A cgo package built against the `go.*` packages, so a `-recurse=nuget` conversion can include one.
-- A real standard-library cgo package, the `net` resolver, converted and validated as the proof.
+**On the main line since 1.26.11.1:**
+- With `-recurse -cgo`, a module's cgo packages convert with the module, and with `-recurse=nuget -cgo` they build
+  against the `go.*` packages. A conversion is for the machine's own operating system and architecture, or for
+  another `-platforms` target when `CC` names that target's C compiler.
+- A cgo module packs as one NuGet package for `win-x64`, `linux-x64`, `osx-x64` and `linux-arm64`, each with its own
+  C binding, and a build or a run on any other platform is refused by name. A real third-party cgo module was packed
+  this way, printed what Go printed on each of those four, and was refused by name on `osx-arm64`.
+  <!-- docs/phase4/REHEARSAL-cgo-nuget-e2e-go-pointer.md: github.com/mattn/go-pointer v0.0.1, final reading run
+       45016867041 and the re-read 45033824268, J3 PASS on win-x64, linux-x64, osx-x64, linux-arm64; R-b NUGETGOCGO001 on
+       osx-arm64; R-a, the load-time target check on win-x64. Publishing it is after the release that follows
+       1.26.11.1, "by construction" (its appendix).
+     2026-11-23 (P1, P3 nit 3 relayed by COORD 224946Z): the next release's number is ruled, 1.26.11.2; the page names it
+     and keeps "no date yet". --> Such a package is published only against a `go.lib` that checks, when
+  the package loads, that its C binding is for the platform it runs on: `go.lib` 1.26.11.1 does not, and
+  1.26.11.2 does. `osx-arm64` waits for a standard-library build of its own for Apple silicon.
+- C memory can be read and written through a C struct's pointer field and through a pointer to a C pointer
+  (`**C.T`), as code that walks a list C allocated does.
+
+**Next, not on the main line yet:**
+- Go memory handed to C without a copy, and a pointer to a pointer that C fills in (`&db`), the rest of Phase 3.
+- A real standard-library cgo package, the `net` resolver, converted and validated against its own tests as the
+  proof.
+
+Both are planned for a release after 1.26.11.2.
 
 **Later:** C code written inline in the Go file (Phase 4), then `//export` and callbacks from C into Go
-(Phase 5). Until each lands, it is refused by name, with the phase that covers it.
+(Phase 5). Until each lands, it is refused by name.
 
 ## Phase 4D: examples, fuzz seed corpora and benchmarks
 
@@ -467,14 +573,24 @@ runtime settings to choose. It is the before picture for the .NET 11 measurement
 
 - **Start-up cost of a converted process** (in progress). A converted process pays .NET's process start
   and loads its converted packages each time; a converted `crypto/tls` helper takes many times Go's time to
-  start and run one handshake (`linux-x64`), most of it loading packages. How converted types find their
-  methods at start-up is planned for the release after 1.26.11.1. This cost also keeps the `crypto/tls`
+  start and run one handshake (`linux-x64`), most of it loading packages. On the main line, a method-set question
+  at start-up reads only the classes that can answer it, under the JIT; the same gain under Native AOT, and further
+  steps in how converted types find their methods, are planned. This cost also keeps the `crypto/tls`
   [host-limit entry](#declared-host-limits-and-their-retirement-path) open.
   <!-- DATA-bogo-startup.md; the B3 items A1/A3 (start-up method sets) are .5 by the owner's ruling 6 of 2026-11-14. -->
-- **Goroutine scheduling** (planned for the release after 1.26.11.1): each live goroutine runs on its own
-  OS thread today, so a program can hold only as many goroutines alive at once as the system allows threads,
-  a limit macOS reaches first ([Limitations](Limitations.md#what-converts-but-doesnt-behave-exactly-like-go)).
-  The work moves toward Go's model of many goroutines over a few threads.
+  <!-- 2026-11-23 .5 docs pass (P1), at master 97cca467a2 (UX-8): arm A1 landed, 2506d6d48f (train 1); its BOARD row
+       of 2026-11-18 says AOT answers do not change and AOT gets none of A1's gain; DATA-startup-method-sets-a1.md K1
+       BigAst about -0.3 s, K2 wide about -35 ms (paired medians). A3 and the AOT keys are not on master. -->
+- **Goroutine scheduling** (in progress): by default each live goroutine runs on its own OS thread, so a
+  program can hold only as many goroutines alive at once as the system allows threads, a limit macOS reaches first
+  ([Limitations](Limitations.md#what-converts-but-doesnt-behave-exactly-like-go)). The main line has an
+  experimental scheduler that runs many goroutines over a few threads, as Go does. It is off unless you build and
+  run for it
+  ([Known issues](KnownIssues.md#goroutines-on-a-shared-pool-of-threads-mn-are-experimental-and-off-unless-you-build-and-run-for-them)),
+  and the work continues on the kinds of blocking it can see.
+  <!-- 2026-11-23 .5 docs pass (P1), at master 97cca467a2 (UX-8): restated from "planned for the release after
+       1.26.11.1". The scheduler: the g-mn-* merges of trains 3 to 7; KnownIssues.md's M:N entry; "the scheduler stays
+       OFF by default", docs/phase4/DESIGN-mn-n5-invisible-blocking.md (row 12 of the M:N plan). -->
   <!-- Owner ruling 2026-11-08, relayed by COORD, verbatim: "In addition to the TypeScript issues, M:N scheduling
        right after .3 sounds appropriate." The trigger is C1's macOS thread-cap measurement (run 42497561630; see the
        Limitations bullet's comment). The design starts from docs/DESIGN-mn-scheduler-sizing.md and
@@ -566,8 +682,8 @@ something else finishing first.
 
 | When | Planned |
 |:--|:--|
-| Now | 1.26.11.1: the SQLite and TypeScript programs that gate it. The trimming work for Native AOT. The start-up cost of a converted process. |
-| Next | The release after 1.26.11.1: goroutine scheduling and the next cgo steps ([The next two releases](#the-next-two-releases)). The .NET 11 measurement stage (.NET 11 ships in November 2026). The generic-methods design for Go 1.27. The decision on how often later hops run. |
+| Now | On the main line, for 1.26.11.2: goroutine scheduling, cgo packages built with their module and against the `go.*` packages, the trimming work for Native AOT, and the start-up cost of a converted process ([1.26.11.1, and the release after it](#the-next-two-releases)). |
+| Next | Publishing cgo packages, once a `go.lib` with the load-time platform check is published. Go memory handed to C without a copy, and the `net` resolver converted with cgo. The .NET 11 measurement stage. The generic-methods design for Go 1.27. The decision on how often later hops run. |
 | Q1 2027 | Go 1.27 hop, by about February. The Phase 4D design kickoff. The allocation work, whose design is written. |
 | Unscheduled | Inline C and callbacks from C (cgo Phases 4 and 5). The Phase 5 stubs that no exported call reaches, each closed when a real use needs it. Interface-conversion performance work. The remaining stack-string increments. Open converter items. |
 
@@ -588,3 +704,12 @@ Every converter change runs the same loop: edit `src/go2cs/*.go` → `go build` 
 `src/go2cs/go.mod` names) →
 re-transpile → `dotnet build`, and a whole-corpus reconvert shows no unintended drift before the change
 lands.
+
+## Older versions
+
+**Go 1.24 and Go 1.25.** Go 1.24 and 1.25 have no further releases: packages built from either carry none of the
+Go security fixes issued since.
+<!-- Go 1.24 left upstream support in February 2026 and 1.25 in August 2026; 1.24.13.7 is the last 1.24 release, and
+     there is no Go 1.25 release (docs/PLAN-version-lines.md). -->
+<!-- 2026-11-23 .5 docs pass (P1), at master 97cca467a2: moved here from "Go releases", text unchanged (owner rule
+     2026-11-22: text about older versions sits at the bottom of the page). -->

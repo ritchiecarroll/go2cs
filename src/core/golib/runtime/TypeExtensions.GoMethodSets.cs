@@ -714,7 +714,7 @@ public static partial class TypeExtensions
     /// <summary>
     /// Whether <paramref name="method"/> is an M:N twin: a member that returns <see cref="GoTask"/> or
     /// <see cref="GoTask{T}"/>. A twin is never part of a Go method set as reflect, fmt or the interface checks see it
-    /// (COORD's ruling, 2026-11-22, on train 3's default-mode regression: RootedUsingCapture counted sync's hand-written
+    /// (design decision, 2026-11-22, on a default-mode regression, 374fa1961b: RootedUsingCapture counted sync's hand-written
     /// <c>Lockꞏtwin</c> in <c>(*Mutex).NumMethod</c>).
     /// </summary>
     /// <remarks>

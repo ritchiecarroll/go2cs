@@ -16,7 +16,7 @@ import (
 )
 
 // refuseCgoSplitSubstitutions refuses, under -recurse -cgo, a module SUBSTITUTED by a published package when Go builds
-// any of its packages from different files with cgo on (P3's INC 1 review, finding 1; COORD's ruling).
+// any of its packages from different files with cgo on (INC 1 review, finding 1; 4e98cf5fab).
 //
 // A substituted module's packages leave the convert-set (nugetSubstitution.go), so no per-package rule reads them,
 // while the closure type-checks cgo-ON and the published package was converted cgo-OFF. A //go:build cgo / !cgo pair
@@ -52,7 +52,7 @@ func (m *ModuleConverter) refuseCgoSplitSubstitutions(moduleDir string, substitu
 
 	for i, setting := range []string{"CGO_ENABLED=0", "CGO_ENABLED=1"} {
 		// The run's own build flags (-tags), as the closure load passes them: a split under the run's tag is invisible
-		// to a listing without it (P3's INC 1 CLEAR, one SHOULD).
+		// to a listing without it (INC 1 review, one SHOULD).
 		args := append([]string{"list", "-e"}, m.options.loaderBuildFlags()...)
 		args = append(append(args, "-f", "{{.ImportPath}} {{join .GoFiles \",\"}} {{join .CgoFiles \",\"}}"), pkgPaths...)
 		cmd := exec.Command("go", args...)

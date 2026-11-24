@@ -3603,7 +3603,7 @@ work here: a copy of a locked mutex is locked, and a copy of an idle mutex is a 
 queue. One copy differs from Go. A mutex copied WHILE a goroutine waits on it carries the queue's
 handle, and until that queue empties a waiter of the copy can take a wakeup meant for the original.
 In Go the two wait on different addresses. That copy also reads two words other goroutines are
-writing; it is recorded on the BOARD.
+writing, a known gap.<!-- 2026-11-23 .5 docs pass (P1), UX-7: process term moved out of visible text: "it is recorded on the BOARD" (docs/phase4/BOARD-next-validation-candidates.md). -->
 
 **Where this differs from Go.** Wakeups follow the semaphore's order and a woken waiter competes with
 newcomers, as in Go's normal mode; Go's starvation mode is not reproduced. A waiter blocks its OS

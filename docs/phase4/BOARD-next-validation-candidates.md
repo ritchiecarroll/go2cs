@@ -41892,6 +41892,47 @@ program prints frame information for promoted methods, and a twin adds or rename
 
 — G (2026-11-23)
 
+**GoStmtValueReturn [Compile]: CUT (P4, 2026-11-23).** Root: the generator classifies a typed go literal as a twin
+launch whatever its return type, and goǃtwin (frozen) takes only `Action<…>` plus `Func<…, GoTask>`, so a literal
+returning a value (`go func(...) error {...}(...)`) is CS8030 in its plain half and CS8031 in its twin, and an explicit
+return type (`error (…) => …`) does not convert at all (CS8934). Fix, in the generator only (TwinGenerator.Rewriter.cs,
+GoLiteral): a goroutine drops its results, so both halves of a value-returning literal lose the return type and every
+own `return e;` becomes `{ _ = (T)(e); return; }` on the same line (the value is still evaluated, its awaits still
+park; nested lambdas and local functions keep their returns). The literal keeps launching its twin, so no GO2CS0015.
+No golib change; the converter is untouched, so default-mode emission cannot move. Guard: GenTests
+`AGoLiteralThatReturnsAValueLaunchesItsTwin`, red first at master (CS8030, CS8031, CS8934 x2).
+
+— P4 (2026-11-23)
+
+**Plain-path operand order: a variable operand read after a later receive or call in the same argument list (gc
+order). OPEN, owner unassigned, candidate .5; COORD places it.** Repro: src/tools/mnspike2/MnLaterArg (`readWith(pp,
+<-kc)`, where a goroutine sets `pp = pc2` before it sends on `kc`). gc reads `pp` after the receive; go2cs reads it
+before, left to right, in BOTH modes. The Go spec leaves the order unspecified, but users see gc's order, so this is a
+converter design question, not an M:N one. Reading on master 97cca467a2, linux/amd64, each binary run 3 times:
+
+| Arm | Output |
+|---|---|
+| go run (1.26.11) | param-later-arg 1405 |
+| plain, GO2CS_MN unset | param-later-arg 1505 (3/3) |
+| plain, GO2CS_MN=1 | param-later-arg 1505 (3/3) |
+| twinned (GoTwinsFor=MnLaterArg), GO2CS_MN unset | param-later-arg 1505 (3/3) |
+| twinned, GO2CS_MN=1 | param-later-arg 1505 (3/3) |
+
+Plain emission (main.cs): `fmt.Println("param-later-arg", readWith(ref (pp).DerefOrNull(), ᐸꟷ(kc)));`
+Twin (generated main.twins.g.cs): `fmt.Println(((global::go.@string)"param-later-arg"), (await readWithꞏtwin(pp, (await
+ᐸꟷꞏtwin(kc))))); pp = ref Ꮡpp.ValueSlot;`
+The twin keeps the plain emission's order, which is row 8's claim (COORD ruling 2026-11-23 21:57Z: accepted as
+disclosed for row 8; the order is its own row).
+
+Prediction record. G's order (2026-11-23 15:43Z) predicted "twinned under GO2CS_MN=1 prints 1405, plain prints 1505".
+2026-11-23 (P4): the twinned 1405 MISSED; all four arms read 1505. The plain 1505 held.
+
+— P4 (2026-11-23)
+
+**Correction (COORD, 2026-11-23), to the GoStmtValueReturn row above:** after P3's seat-read fold (bb1a2c2979) the emission is `{ T ᴛdrop = e; return; }` (and `{ T ᴛdrop = e; }` for an expression body), not `{ _ = (T)(e); return; }`: the converter writes a lone blank parameter as a real parameter named `_`, which a `_ =` discard would bind (CS0029). An error-typed result is skipped like void. The plain-path operand-order row also moved: the owner ruled it into .5 (2026-11-23, "Rather get it done now, better .5 release behavior match"), owner G, after the closure cure.
+
+— COORD (2026-11-23)
+
 ## 2026-11-24 — P5 (C45; COORD ruling 20261124T022736Z, D5 split out): a write through a string's data pointer reaches the string's shared backing (OPEN, candidate .5, owner P5)
 
 **OPEN.** A Go string's bytes are immutable, and Go programs that read them through `unsafe.StringData`, a string

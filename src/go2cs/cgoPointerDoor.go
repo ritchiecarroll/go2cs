@@ -15,7 +15,7 @@ import (
 	"go/types"
 )
 
-// THE **C.T DOOR (cgo Phase 3, increment 3.2, seat 1c; docs/phase4/DESIGN-cgo-phase3-marshaling.md 18.11).
+// THE **C.T DOOR (cgo Phase 3, increment 3.2, part 1c; docs/phase4/DESIGN-cgo-phase3-marshaling.md 18.11).
 //
 // On the cgo route, `*x` and `*x = v`, where x's static type is `**U` and U is a type cmd/cgo declares, are emitted as
 // calls:

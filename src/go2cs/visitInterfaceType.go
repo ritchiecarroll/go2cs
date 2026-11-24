@@ -179,7 +179,7 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType
 		// one before. Removed rather than repaired: a truthful check needs the candidate's REAL
 		// recorded accessibility, which means seeing past this file's own visit (cross-file,
 		// concurrent, no barrier here the way deferredDynamicTypeName's marker path has), and the
-		// fallback is unconditionally safe regardless. Measured before removing it (i9's
+		// fallback is unconditionally safe regardless. Measured before removing it (the
 		// cross-tier census, 2026-09-01): 0 hits in the whole `-stdlib` corpus, 2 in reflect's own
 		// `-tests` (both false — guess public, actual internal), 0 in the five reflect-importer
 		// canaries' `-tests` — this removal costs no currently-safe dedup anywhere measured.
@@ -191,7 +191,7 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType
 		// exported field whose type repeats an exported signature's anonymous interface minted a
 		// second, identical lift (AnonLiftOnePerType guards it).
 		// (The pointer this paragraph replaced read: "the struct twin's comment (visitStructType.go)
-		// has the full account", with i9's census, 2026-09-01: 0 hits `-stdlib`-wide, 2 in reflect's
+		// has the full account", with the census of 2026-09-01: 0 hits `-stdlib`-wide, 2 in reflect's
 		// own `-tests`, both false, 0 in the five reflect-importer canaries' `-tests`.)
 		// A lift that closes over type parameters is never reused or registered by signature: its
 		// signature text names `T`/`V`, which mean something different in every generic declaration.
