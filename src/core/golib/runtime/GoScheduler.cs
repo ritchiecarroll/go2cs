@@ -108,10 +108,11 @@ public static class GoScheduler
     // knob GO2CS_GOROUTINE_STACK governs both). A fixed 1 MB overflowed a 200,000-level recursion that Go and the
     // thread path both run (M:N row 4, behavioral GoroutineStackReserve). On the shipped 64-bit platforms the reserve
     // is address space, committed only as deep as a step recurses. A platform that refuses the size gets the largest it
-    // grants, halving down to MinCarrierStackSize, said once on stderr by name (CarrierThread); never a silent 1 MB.
+    // grants, halving down to MinCarrierStackSize, published and said on stderr by name only once a start at it
+    // succeeds (CarrierThread); never a silent 1 MB. A carrier never reserves less than MinCarrierStackSize, whatever
+    // GO2CS_GOROUTINE_STACK says (0 included, which a plain goroutine's thread passes to Thread as "the default").
     private static int s_carrierStackSize = Math.Max(Goroutine.StackReserve, MinCarrierStackSize);
     internal const int MinCarrierStackSize = 1024 * 1024;
-    private static int s_carrierStackFallbackSaid;
 
     // TEST-ONLY, not a user knob: GolibTests' CarrierStackFallbackTests sets it to make a carrier stack above this many
     // bytes refused, as a platform would refuse it, so the fallback below is made to fail (safety floor 13).
@@ -134,12 +135,8 @@ public static class GoScheduler
         Interlocked.Exchange(ref s_carrierStartFailures, failures);
     }
 
-    // TEST-ONLY: puts the carrier stack size and the said-once flag back to a row's starting state.
-    internal static void ResetCarrierStackForTest(int size)
-    {
-        Volatile.Write(ref s_carrierStackSize, size);
-        Volatile.Write(ref s_carrierStackFallbackSaid, 0);
-    }
+    // TEST-ONLY: puts the carrier stack size back to a row's starting state.
+    internal static void ResetCarrierStackForTest(int size) => Volatile.Write(ref s_carrierStackSize, size);
 
     // GO2CS_MN_PREEMPT_MS: how long a step may run before the monitor injects a P beside it (default 10 ms,
     // Go's forcePreemptNS). 0 turns injection off: a measurement arm, not a mode.
@@ -755,14 +752,17 @@ public static class GoScheduler
     }
 
     // Starts a carrier thread at the carrier stack size (s_carrierStackSize). A refused start above MinCarrierStackSize
-    // halves the size for this carrier and every later one, and the first fallback is said once on stderr, by name; a
-    // refusal at MinCarrierStackSize throws on to StartCarrierThread, which counts it as a start failure as before.
+    // retries at half a LOCAL size; only a start that SUCCEEDS publishes its smaller size for every later carrier, and
+    // the publisher says it on stderr, naming the size that worked. A refusal for a reason that is not the size (a thread
+    // or process limit) refuses every size, so it throws on at MinCarrierStackSize to StartCarrierThread, which counts a
+    // start failure, and the shared size is left alone: the deep-recursion overflow cannot come back that way (P3, row 4).
     private static void CarrierThread(ThreadStart loop)
     {
+        int shared = Volatile.Read(ref s_carrierStackSize);
+        int size = shared;
+
         while (true)
         {
-            int size = Volatile.Read(ref s_carrierStackSize);
-
             try
             {
                 if (size > RefuseCarrierStackAboveForTest)
@@ -777,14 +777,16 @@ public static class GoScheduler
                 else
                     thread.Start();
 
+                // Publish a size that worked, once: of two carriers that halved at the same time, one wins the exchange
+                // and says it, and a later carrier starts at the published size with nothing to say.
+                if (size < shared && Interlocked.CompareExchange(ref s_carrierStackSize, size, shared) == shared)
+                    Console.Error.WriteLine($"go2cs: this platform refused a {shared / (1024 * 1024)} MB carrier stack; carriers reserve {size / (1024 * 1024)} MB ({Goroutine.StackReserveVariable})");
+
                 return;
             }
             catch (OutOfMemoryException) when (size > MinCarrierStackSize)
             {
-                int smaller = Math.Max(size / 2, MinCarrierStackSize);
-
-                if (Interlocked.CompareExchange(ref s_carrierStackSize, smaller, size) == size && Interlocked.Exchange(ref s_carrierStackFallbackSaid, 1) == 0)
-                    Console.Error.WriteLine($"go2cs: this platform refused a {size / (1024 * 1024)} MB carrier stack; carriers reserve {smaller / (1024 * 1024)} MB or less ({Goroutine.StackReserveVariable})");
+                size = Math.Max(size / 2, MinCarrierStackSize);
             }
         }
     }
