@@ -71,6 +71,10 @@ internal class InheritedTypeTemplate : TemplateBase
     // (mutable) `m_value`. Null/empty for every other inherited kind (slice/map/array/numeric/…).
     public List<(string typeName, string memberName, bool isReferenceType, bool isProperty, bool isPublic)>? ForwardedStructMembers = null;
 
+    // The forwarded fields carrying a [GoName] stamp on the underlying struct, by unescaped C# name: the Go name
+    // (StructDeclarationSyntaxExtensions.GetGoNameMembers), which keys the field-box table.
+    public Dictionary<string, string> GoNameMembers = new(StringComparer.Ordinal);
+
     // For a defined type whose underlying is ITSELF an array-backed [GoType] wrapper
     // (`type pallocBits pageBits`, `type pageBits [8]uint64`), the element type of that underlying
     // array — set to implement IArray<elem> on this wrapper as a view over `m_value` (golib `len()`
@@ -886,7 +890,8 @@ internal class InheritedTypeTemplate : TemplateBase
 
             foreach (string csName in FieldBoxNames)
             {
-                string goName = csName.StartsWith(ShadowVarMarker, StringComparison.Ordinal) ? csName.Substring(ShadowVarMarker.Length) : csName;
+                string goName = GoNameMembers.TryGetValue(csName, out string? stamped) ? stamped :
+                    csName.StartsWith(ShadowVarMarker, StringComparison.Ordinal) ? csName.Substring(ShadowVarMarker.Length) : csName;
 
                 if (keys.Add(goName))
                     arms.Append($"\r\n            {Microsoft.CodeAnalysis.CSharp.SymbolDisplay.FormatLiteral(goName, true)} => ((global::go.{PointerPrefix}<{ObjectName}>)parentBox).of({AddressPrefix}{csName}),");

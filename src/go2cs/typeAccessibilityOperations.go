@@ -1133,6 +1133,21 @@ func collectPublicizedWrapperRHS(tn *types.TypeName, pkg *types.Package) {
 	collectUnexportedNamedTypes(types.Unalias(rhs), pkg)
 }
 
+// receiverTypeAccess is the access a method's receiver type allows: Go's rule over the receiver type's Go
+// name (getGoAccess), so a receiver type whose Go name starts with Δ is exported, as Go makes it. A
+// receiver type without a named type behind it is judged by its emitted spelling, recvTypeName.
+func receiverTypeAccess(t types.Type, recvTypeName string) string {
+	if ptr, ok := t.(*types.Pointer); ok {
+		t = ptr.Elem()
+	}
+
+	if named, ok := types.Unalias(t).(*types.Named); ok {
+		return getGoAccess(named.Obj().Name())
+	}
+
+	return getAccess(holderUnqualifiedTypeName(recvTypeName))
+}
+
 // receiverTypeIsPublicized reports whether the (possibly pointer-wrapped) receiver type is an
 // unexported named type that is nonetheless emitted `public` (see packagePublicizedTypes). Its
 // exported methods must then be public too, or a cross-assembly caller holding the value through

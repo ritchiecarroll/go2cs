@@ -712,11 +712,21 @@ public static partial class GoReflect
     {
         string name = t.Name;
 
+        // A lifted function-local type's [GoLocalName] IS its Go name, so no marker is removed from it.
+        // Any other type takes its [GoName] stamp when the Go name starts with Δ, or loses the
+        // converter's leading rename marker. The stamp carries no CLR arity suffix: keep the emitted one
+        // so an instantiated generic still renders its type arguments below.
         if (goLocalNameOf(t) is { } localName)
+        {
             name = localName.Name;
+        }
+        else if (name.StartsWith(ShadowVarMarker, StringComparison.Ordinal))
+        {
+            int arity = name.IndexOf('`');
+            string suffix = arity >= 0 ? name[arity..] : "";
 
-        if (name.StartsWith(ShadowVarMarker, StringComparison.Ordinal))
-            name = name[ShadowVarMarker.Length..];
+            name = GoNameAttribute.GoNameOf(t, arity >= 0 ? name[..arity] : name) + suffix;
+        }
 
         if (t.IsGenericType && !t.IsGenericTypeDefinition)
         {

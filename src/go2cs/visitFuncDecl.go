@@ -1346,7 +1346,7 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 					// (internal) -- otherwise a public method returning that method's own unexported
 					// types is CS0050 (inconsistent accessibility). A PUBLICIZED unexported receiver
 					// type is emitted `public`, so its exported methods count as public here.
-					if (getAccess(holderUnqualifiedTypeName(recvTypeName)) == "public" || receiverTypeIsPublicized(param.Type())) && getAccess(goFunctionName) == "public" {
+					if (receiverTypeAccess(param.Type(), recvTypeName) == "public" || receiverTypeIsPublicized(param.Type())) && getGoAccess(goFunctionName) == "public" {
 						functionAccess = "public"
 					} else {
 						functionAccess = "internal"
@@ -1658,7 +1658,8 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 		// mark: golib's method-set readers, RecvGenerator and TypeGenerator all read an unmarked
 		// by-ref receiver as a POINTER-set method (docs/PLAN-marker-comment-parity.md, 5.1). Only a
 		// generated forwarder that is VALUE-set while by-ref is marked, [GoCopyBound].
-		v.replaceMarker(functionAttributeMarker, forwarderPrefix+noInliningAttribute)
+		// A function or method whose Go name starts with Δ keeps it for golib in a [GoName] stamp.
+		v.replaceMarker(functionAttributeMarker, forwarderPrefix+goNameAttr(goFunctionName, csFunctionName)+noInliningAttribute)
 	}
 
 	var funcExecutionContext string
@@ -2145,7 +2146,7 @@ func (v *Visitor) generateParametersSignature(signature *types.Signature, addRec
 
 			// Update function access to match receiver type. A PUBLICIZED unexported receiver
 			// type is emitted `public`, so it does not restrict the method's access.
-			receiverAccess = getAccess(holderUnqualifiedTypeName(recvTypeName))
+			receiverAccess = receiverTypeAccess(param.Type(), recvTypeName)
 
 			if receiverAccess != "public" && receiverTypeIsPublicized(param.Type()) {
 				receiverAccess = "public"

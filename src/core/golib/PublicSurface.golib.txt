@@ -141,6 +141,9 @@ go.GoMemberRecordAttribute
 go.GoMethodHostAttribute
 go.GoMethodText
 go.GoModInfoAttribute
+# go.GoNameAttribute: added 2026-11-22 with the Δ projection cure, on each declaration whose Go name starts with Δ.
+# COORD 2026-11-22 (065204Z, the cure's design cleared): a converter-emitted attribute, as GoLocalNameAttribute; [go-tier2] by ruling
+go.GoNameAttribute
 go.GoPackageAttribute
 go.GoParamDimsAttribute
 go.GoPlatformExclusiveAttribute

@@ -41998,6 +41998,34 @@ holds for a promoted method that is NOT weak and parks: its forwarder is plain t
 
 — P4 (2026-11-23)
 
+## 2026-11-23 — P2 (.5 Δ cure, COORD 045750Z ruling 2b): the Δ-led field, method and type refusal is retired
+
+The i9 row of 2026-11-22 above (a Δ-led struct field, method or type refused with GO2CS2015) is closed by the durable
+cure it named. go2cs stamps `[GoName("<Go name>")]` on a field, method, forwarder or type whose Go name starts with Δ,
+or whose emitted name does not give the Go name back when one Δ is dropped (`ΔΔfile`, `ΔΔunion`). golib's three
+projection sites, the runtime's method-set reader and go2cs-gen read the stamp first and drop one Δ only without it.
+The `deltaProjectionReason` arm of the refusal is removed; the other GO2CS2015 arms stand. The KnownIssues entry
+`#delta-led-field-method-type-refused` is removed. Behavioral guard: `DeltaNameProjection`, compared with Go.
+
+— P2 (2026-11-23)
+
+## 2026-11-24 — P2 (.5 Δ cure seat; COORD 2026-11-24T05:20:52Z ruling): caller line under Native AOT reads 0
+
+**OPEN, candidate post-.5.** Under Native AOT, `runtime.Caller`'s line reads 0 where Go reads the call's line. The
+function name it reports matches Go. Measured on linux-x64 (.NET 10, go1.26.11) at the Δ cure tip 27691240dc with
+`dotnet publish -p:PublishAot=true -r linux-x64`:
+- `DeltaNameProjection`: every line equals Go except `frame: main.Δf 78` (Go) against `frame: main.Δf 0` (AOT).
+- Control, no Δ anywhere: `CallerLineCallSite` reads 9 of 9 rows false under AOT, where Go reads all 9 true.
+
+Same class as the owner's 2026-11-22 ruling on optimized frames (C2's M1): the JIT route has a documented opt-in (a
+`Debug` build or `DOTNET_JITMinOpts=1`); Native AOT has none, so this arm was unrecorded. KnownIssues carries one
+present-tense line under "In optimized code, `runtime.Caller` can report an earlier line". Not read further: where
+the runtime's frame reader gets its C# line under AOT, and whether a line table can reach it there.
+
+**Owner.** Unassigned; COORD routes. Not a wall now.
+
+— P2 (2026-11-24)
+
 ## 2026-11-24 — P5 (C45; COORD ruling 20261124T022736Z, D5 split out): a write through a string's data pointer reaches the string's shared backing (OPEN, candidate .5, owner P5)
 
 **OPEN.** A Go string's bytes are immutable, and Go programs that read them through `unsafe.StringData`, a string

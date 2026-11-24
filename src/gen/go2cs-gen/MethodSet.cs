@@ -166,7 +166,7 @@ internal static class MethodSet
         // An unexported method is no member of a method set reflect sees, but one with a variadic tail is forwarded by the
         // object shell of an interface naming it (AdapterBinder), through its bound arm: Go asserts to such an interface
         // inside the method's own package.
-        if (!IsExported(method.Name) && (method.Parameters.Length < 2 || SpanElement(method.Parameters[method.Parameters.Length - 1].Type) is null))
+        if (!IsExported(method.Name, Common.GetGoNameStamp(method)) && (method.Parameters.Length < 2 || SpanElement(method.Parameters[method.Parameters.Length - 1].Type) is null))
             return null;
 
         IParameterSymbol receiver = method.Parameters[0];
@@ -269,7 +269,7 @@ internal static class MethodSet
             }
 
             // Unexported only with a variadic tail, as Declared reads it.
-            if (!IsExported(method.Identifier.ValueText) && !method.ParameterList.Parameters.Last().Modifiers.Any(SyntaxKind.ParamsKeyword))
+            if (!IsExported(method.Identifier.ValueText, Common.GetGoNameStamp(method.AttributeLists)) && !method.ParameterList.Parameters.Last().Modifiers.Any(SyntaxKind.ParamsKeyword))
                 continue;
 
             string receiverText = Unqualified(receiver.Type.ToString(), out bool boxed);
@@ -491,9 +491,13 @@ internal static class MethodSet
         return compilation.GetTypeByMetadataName($"go.{rung}`{arguments.Count}") is null ? null : $"global::go.{rung}<{string.Join(", ", arguments)}>";
     }
 
-    // Exported as Go judges it: the emitted name's first letter, after the collision marker's strip.
-    private static bool IsExported(string emittedName)
+    // Exported as Go judges it: the emitted name's first letter, after the collision marker's strip. A method whose Go
+    // name starts with Δ carries it in a [GoName] stamp, and Go exports it (Δ is an upper-case letter).
+    private static bool IsExported(string emittedName, string? goNameStamp)
     {
+        if (goNameStamp is not null)
+            return Common.GetGoScope(goNameStamp) == "public";
+
         string projected = emittedName.Length > ShadowVarMarker.Length && emittedName.StartsWith(ShadowVarMarker) ? emittedName.Substring(ShadowVarMarker.Length) : emittedName;
 
         return projected.Length > 0 && char.IsUpper(projected.TrimStart('@')[0]);

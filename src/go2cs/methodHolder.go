@@ -1026,13 +1026,13 @@ func (v *Visitor) recordMethodForwarder(funcDecl *ast.FuncDecl, holder string, a
 		signature, _ = fn.Type().(*types.Signature)
 	}
 
-	v.recordForwarder(funcDecl.Pos(), holder, access, isUnsafe, result, name, typeParams, params, constraints, signature)
+	v.recordForwarder(funcDecl.Pos(), holder, access, isUnsafe, result, name, funcDecl.Name.Name, typeParams, params, constraints, signature)
 }
 
 // recordForwarder records a forwarder for the holder from the pieces of its body's declaration; pos orders it among
 // the package's forwarders (its declaration's position), and signature, when known, is walked for the imported types
 // it spells (recordForwarderTypeQualifiers).
-func (v *Visitor) recordForwarder(pos token.Pos, holder string, access string, isUnsafe bool, result string, name string, typeParams string, params string, constraints string, signature *types.Signature) {
+func (v *Visitor) recordForwarder(pos token.Pos, holder string, access string, isUnsafe bool, result string, name string, goName string, typeParams string, params string, constraints string, signature *types.Signature) {
 	modifiers := access + " static"
 
 	if isUnsafe {
@@ -1051,7 +1051,7 @@ func (v *Visitor) recordForwarder(pos token.Pos, holder string, access string, i
 	params = respellForwarderUnsafe(params)
 	constraints = respellForwarderUnsafe(flattenConstraints(constraints))
 
-	line := fmt.Sprintf("[%s] %s %s %s%s(%s)%s => %s;", methodForwarderAttributes, modifiers, result, name, typeParams, params, constraints, call)
+	line := fmt.Sprintf("%s[%s] %s %s %s%s(%s)%s => %s;", goNameAttr(goName, name), methodForwarderAttributes, modifiers, result, name, typeParams, params, constraints, call)
 
 	position := v.fset.Position(pos)
 	key := fmt.Sprintf("%s\x00%010d\x00%s", filepath.Base(position.Filename), position.Offset, name)

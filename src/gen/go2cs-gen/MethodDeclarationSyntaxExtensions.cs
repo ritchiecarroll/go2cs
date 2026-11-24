@@ -21,6 +21,13 @@ public record MethodInfo
 {
     public required string Name { get; init; }
 
+    // The method's [GoName] stamp (Common.GetGoNameStamp): its Go name where that starts with the Δ rename marker,
+    // else null. A forwarder minted for the method carries the same stamp, and Go-name comparisons read it.
+    public string? GoName { get; init; }
+
+    // The method's Go name as golib projects it: the stamp, else the emitted name with one leading Δ removed.
+    public string ProjectedGoName => GoName ?? (Name.StartsWith(ShadowVarMarker, System.StringComparison.Ordinal) && Name.Length > ShadowVarMarker.Length ? Name[ShadowVarMarker.Length..] : Name);
+
     public required string ReturnType { get; init; }
 
     public required (string type, string name)[] Parameters { get; init; }
@@ -449,6 +456,7 @@ public static class MethodSyntaxExtensions
         return new MethodInfo()
         {
             Name = methodDeclaration.Identifier.Text,
+            GoName = GetGoNameStamp(methodDeclaration.AttributeLists),
             VariadicDelegate = variadicDelegate,
             ReturnType = methodDeclaration.GetReturnType(semanticModel),
             ReturnTypeIsPublic = IsEffectivelyPublicType(semanticModel.GetTypeInfo(methodDeclaration.ReturnType).Type),
@@ -614,6 +622,7 @@ public static class MethodSyntaxExtensions
         return new MethodInfo
         {
             Name = methodSymbol.Name,
+            GoName = GetGoNameStamp(methodSymbol),
             VariadicDelegate = compilation is not null && !invokerForwardable && !methodSymbol.IsExtensionMethod ? VariadicDelegateType(methodSymbol, compilation) : null,
             ReturnType = GlobalQualify(methodSymbol.ReturnType.ToDisplayString()),
             ReturnTypeIsPublic = IsEffectivelyPublicType(methodSymbol.ReturnType),

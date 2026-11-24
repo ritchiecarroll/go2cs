@@ -844,7 +844,7 @@ field is an embed to `reflect`* below).
 <!-- history: Anonymous first waited on field ORDER, because go2cs-gen declared the promoted-embed backing box
      after the declared fields, so struct{X; y; Inner; inner; Ptr} walked as X, y, Ptr, Inner, inner; GoFields'
      reorder by the all-fields constructor and the Anonymous projection landed together. The converter has since
-     declared embeds in place (src/go2cs/visitStructType.go:1038 `// declaration order, marked like every other embed:`). -->
+     declared embeds in place (src/go2cs/visitStructType.go:1048 `// declaration order, marked like every other embed:`). -->
 
 Guard: `tests/Behavioral/ReflectUnexportedFieldFlags`, byte-identical to `go run` — the indexed
 walk's `IsExported`/`PkgPath`/`Tag`, `FieldByName` carrying the same flags (including the blank
@@ -2928,8 +2928,8 @@ MINI-BRIDGE* above; `GoStructLayoutTests.FieldOrder_IsGoDeclarationOrder_NotMeta
      encoding/json's dominance rules are decided by DEPTH and tag, never by declaration order, and its one
      order-sensitive test (TestMarshalEmbeds) declares its single plain field first. The section then named
      declaration-order cargo as the remedy; the constructor reorder landed instead, and the converter later declared
-     embeds in place (src/go2cs/visitStructType.go:1038 `// declaration order, marked like every other embed:`). The
-     legacy property shape: src/core/golib/GoReflect.FieldAccess.cs:530 (`An embed is emitted by the converter as a partial PROPERTY`). -->
+     embeds in place (src/go2cs/visitStructType.go:1048 `// declaration order, marked like every other embed:`). The
+     legacy property shape: src/core/golib/GoReflect.FieldAccess.cs:529 (`An embed is emitted by the converter as a partial PROPERTY`). -->
 
 ## An UNNAMED func type renders STRUCTURALLY, exactly as an unnamed struct does
 
@@ -3890,7 +3890,7 @@ levels. Anything the IL cannot prove keeps the frames the trace has, and an impl
 nil dereference) inside an inlinee is not covered, since a statement cannot say which instruction faulted. Nothing
 is emitted for this and nothing runs off the panic path. Guarded by GolibTests' `PanicFramesInlinedPanicTests`,
 including the controls where the IL names no single callee.
-<!-- src/core/runtime/managed_impl.cs:5543 (`INLINED PANIC SITES`), :5551 (`NEVER A GUESS. A frame is added only when the IL proves which one`);
+<!-- src/core/runtime/managed_impl.cs:5546 (`INLINED PANIC SITES`), :5554 (`NEVER A GUESS. A frame is added only when the IL proves which one`);
      src/tests/GolibTests/PanicFramesInlinedPanicTests.cs:14 (`AN EXPLICIT PANIC RAISED INSIDE A GO FUNCTION THE JIT INLINED`). -->
 
 ## `runtime.Stack(all: true)` enumerates every goroutine, and each one names the wait it is parked on
