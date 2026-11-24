@@ -3046,3 +3046,41 @@ S-A to S-F (section 10) stand. Added:
 - **Q-H. Review.** Lean: P3 reads 19.2 and 19.4 before code, as for 1b and 1c.
 
 — H (2026-11-24)
+
+### 19.6 Record 2026-11-24: seat 4a as built, and 4b's first readings (Q2 and Q3 scored)
+
+**4a, as built** (`bb16815729`, then `533034372b`; COORD's GO, inbox H 20261124T204626Z). checkCgoFlag admits -tests.
+Under -cgo, three loads of the converted package run cgo-on (packageTestLoaderEnv): the variants load and the sibling
+closure (testConversion.go), and the marker-glyph scan. The oracle runs cgo-on too (cgoOracleEnv). linknameOperations'
+load of another package's closure keeps the loader pin (S-G). checkCgoTestsOutput refuses an output under the core of a
+go2cs root whose parent holds git metadata (S-D).
+- Rows: the flag table's tests row now reads accepted.
+- TestOnlyTheConvertedPackagesTestLoadsAndTheOracleTurnCgoOn and TestACgoTestsConversionNeverWritesTheRepositorysCorpus
+  each read red with their arm neutered, restored byte-identical.
+- TestACgoPackageConvertsWithItsTestsAndMatchesGo is hosted only (a C compiler). Its first run (45488939174) read -cgo
+  -tests ACCEPTED, then refused the fixture's C.abs by name: gcc compiles abs as a builtin, so cmd/cgo's binary imports
+  no abs symbol. That is the fixture, not the seat. With strtod (45491374366): status validated, 2/2 tests pass on both
+  sides, matched.
+
+**4b's first readings** (throwaway probe refs, never landed: a test that seeds a scratch root from src/core, src/gen,
+the two props and gen's one outside input, then runs `-cgo -tests -test-action all -test-filter '^TestCgoLookup'` over
+GOROOT's net, linux, cgo-e2e stage).
+- Probe 1 (45493678255): the conversion of net cgo-on WITH its tests completed and reached the host's publish. The
+  publish failed on the probe's own seed: go2cs-gen embeds src/go2cs/fieldAccessCollisions.txt. Seeded from then on.
+- **Q2 MET**: net converts cgo-on with its tests, 0 refusals.
+- **Q3 MET as worded**: the host's first build has one red that 19.2 does not name, six times. It is CS0102 and CS0111
+  in core/net/linux/cgo_stub.cs: cgoAvailable, cgoLookupHost, cgoLookupPort, cgoLookupIP, cgoLookupCNAME, cgoLookupPTR.
+  The seeded root holds the corpus's cgo-off selection, in which cgo_stub.go stands for the resolver. The cgo-on
+  selection swaps it for cgo_unix.go (R1), and a single-package conversion writes only what it selects. So both files
+  compile. This is corpus.md's MIXED-state class ("declarations MIGRATE while the stale other-selection file remains"),
+  met in a scratch root by construction.
+- **The cure proposed for 4c**, posted before code:
+  - Under -cgo -tests, the converter removes from the OUTPUT the C# of each production file that the corpus's cgo-off
+    selection holds and the cgo-on load deselected. The converter's own two loads decide that set (its selection, never
+    a second tag engine), wherever the layout put the file (flat or a key folder).
+  - Today the set is cgo_stub.go alone (R1).
+  - A hand-owned file is never removed: one in that set is refused by name instead.
+  - Corpus bytes 0: the output is a scratch root by checkCgoTestsOutput.
+- Q4 and Q5 are not reached yet.
+
+— H (2026-11-24)
