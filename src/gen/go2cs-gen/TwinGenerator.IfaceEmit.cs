@@ -143,6 +143,8 @@ public sealed partial class TwinGenerator
 
                 source.Append(indent).Append("partial ").Append(Keyword(host)).Append(' ').Append(Escaped(host.Name)).Append(IfaceHidden ? " : " + iface : "")
                     .Append("\r\n").Append(indent).Append("{\r\n");
+                // The slot forwarder is the third frame of the class the members above guard (P3, row 3): go2cs-gen's mark.
+                source.Append(indent).Append("    [").Append(Common.GeneratedCodeAttribute).Append("]\r\n");
                 source.Append(indent).Append("    ").Append(Result(forwarder.Symbol)).Append(' ').Append(iface).Append('.').Append(forwarder.Member.Name).Append(Suffix)
                     .Append('(').Append(Parameters(forwarder.Symbol)).Append(") => ").Append(target.ContainingType.ToDisplayString(s_full)).Append('.')
                     .Append(target.Name).Append(Suffix).Append('(').Append(forwarder.Receiver).Append(arguments.Length > 0 ? ", " : "").Append(arguments).Append(");\r\n");
