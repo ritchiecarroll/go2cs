@@ -2823,3 +2823,65 @@ unpinned twin must be shown to move, or the arm is Inconclusive.
 - Any corpus line moved.
 
 — H (2026-11-24)
+
+#### 18.12.1 Record 2026-11-24: seat 1b as built, the readings so far, and the battery's predictions (before the battery)
+
+**As built** (branch `claude/h-cgo-1b`, off `97cca467a2`):
+- **The pinned door.** `GoCgoArgs.PinVoidPointer` returns a `GoCgoPin`, and the wrapper holds it with a pattern-based
+  `fixed` around the call. The root is found ON THE BOX in one of three ways: `NativeDerivation.HeldSource` with
+  `TryHeldTarget` (a box that holds its storage still), a native box's own `PinnedBuffer`, or a managed box's pinnable
+  storage with its slot's offset read under a `fixed`. A token or a reference-bearing root is refused with cgo's text.
+  A word-table entry over the root is refused too (B-10). Every number stays refused with today's text. `VoidPointer`
+  is unchanged: it is the classify-only door an earlier wrapper calls.
+- **The scalar door (item 2, narrowed).** `GoCgoArgs.ScalarPointer` pins an element of a Go array, or a typed view over Go
+  storage, when the pointee is ONE C SCALAR (`GoCgoStructPointer.Pinned`). A scalar's layout is the same in C and in
+  the CLR. A struct ELEMENT stays refused, because its CLR layout is not C's, and a whole struct keeps its mirror.
+  The struct element is a named residual.
+- **The helpers (item 3).** `GoStringOf`, `GoStringNOf` and `GoBytesOf` read Go memory under a `fixed`, as Go functions,
+  with no word-table lookup (P3's confirm (A)). A read past the object's end, and a C string with no NUL inside the
+  storage, are refused by name.
+- **B-10 on the other doors.** The mirror asks the struct's own range of its storage. An inline array member's copy-in
+  asks the array's own storage (`RequireNoPublishedWordIn`): go2cs keeps an array's elements apart from the struct.
+  `C.CBytes` and `C.CString` ask the bytes they copy, before the allocation. Every lookup sits behind
+  `GoPointerWords.AnyTable`.
+- **Shape (i), the out-parameter (item 4).** `GoCgoArgs.OutParameter`, with `**C.T` classified as `ж<ж<T>>`. One stack
+  word is copied in by `PointerMember` and back by `PointerMemberBack`. A slot in C memory crosses by its own address;
+  a nil slot is NULL.
+- **cmd/cgo's index and slice closures (item 5)** are recognised, and both refusals retire.
+- **The pressure arm (item 6).** `probe.c` gains `go2cs_probe_slow_fill`, and the CgoProbeTests arm drives it.
+- **13.5's stop line** (no async, iterator or resumable twin) holds by construction. G's `TwinGenerator` never twins a
+  method that is extern, carries `LibraryImport`, holds a `fixed`, or sits in an unsafe class (`TwinGenerator.cs`, the
+  native-wrapper rule). The bindings class is `static unsafe partial`.
+
+**Readings so far, on H (GolibTests at Debug, filtered to cgo and the word table: 154/0/7):**
+- **P-2, MISSED as worded: 2 of 36 GolibTests hand-overs (34 MET).** The rebuilt-from-number form keeps its resolved
+  source, so its pinning and retaining mints cross. COORD ruled (a) (inbox H `20261124T021216Z`), and 18.1 carries the
+  dated amendment. The nine-form set read as predicted. The 25 end-to-end flips (22 + 3) are written into
+  `cgoP3Arms`, and the hosted cgo-e2e leg scores them.
+- **One more flip, outside 18.1's list:** Phase 2's `AnElementOfAGoScalarArrayIsRefusedBeforeTheCall` is the scalar door's
+  case. It becomes `AnElementOfAGoScalarArrayIsPinnedAndCWritesIt`: a real ucrtbase `frexp` writes the element in place,
+  and its neighbours are untouched.
+- **P-3, B-10: MET on the arms that can be built.** The void door, the mirror's `uintptr` field, an inline array member
+  and `C.CBytes` each cross before the store and refuse after it, and `C.CBytes` over bytes before the word still
+  crosses. The helpers read their bytes. `C.CString`'s lookup has no arm, since no test can publish a word into a
+  string's storage: code-read only.
+- **P-4, shape (i): MET on H with the real ucrtbase `strtol`.** The Go slot comes back pointing past the digits, a nil
+  slot is NULL, a Go pointer in the slot is refused, and a slot in C memory is written there. The hosted `outstrtol` arm
+  covers `&end` as Go writes it. `s6nextset` keeps its named deviation: its slot is a ref-lowered helper parameter,
+  never a wrapper argument, so 1b's out-parameter does not reach it.
+- **P-5, the pressure arm: NOT MEASURED on H** (no probe library). The hosted golib-tests legs require the probe.
+- **Named residuals:** a struct element (above); an `endptr` that C points into PINNED GO memory comes back as a raw
+  native box, not as the Go element it is.
+
+**The battery's predictions** (H, at the tip that commits this record, base `97cca467a2`; all gates unfiltered):
+- **B-1 corpus footprint: 0 files on all four targets** (the two-seeded `-stdlib`, converter A = base against B = tip).
+  Every converter change is on the `-cgo` route, and the corpus converts with `CGO_ENABLED=0`.
+- **B-2 GolibTests Release and Debug: empty failed sets.** The Debug-only skip set is the gated set plus the probe
+  arms, by name.
+- **B-3 GenTests: all pass.** go2cs-gen is untouched.
+- **B-4 go test ./... ok; repoguard ok; `GO2CS_CGO_BUILD=1 -run TestCgo` ok** (the e2e program is hosted, so it is NOT MEASURED here).
+- **B-5 CNR byte-identical.** No behavioral project is on the `-cgo` route.
+- **B-6 full behavioral: the same PASS set as master.** golib changed, so the full suite runs.
+- **B-7 `go2cs.slnx` builds**, 0 errors, since golib's API changed.
+
+— H (2026-11-24)
