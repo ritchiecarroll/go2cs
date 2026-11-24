@@ -143,9 +143,9 @@ standard library, and runs on Windows, Linux or macOS. **A longer evening:** lot
   cannot recurse ([how](ConversionStrategies.md#goroutines)). Recursion past a thread's reserve ends the process
   with .NET's `Stack overflow.`, with no panic and no deferred calls, where Go prints `fatal error: stack overflow`
   and exits 2. Your main package's `init` functions run on the startup thread's smaller stack, and so does `main`
-  when an `init` called `runtime.LockOSThread`, as in Go. With the scheduler of [async twins](AsyncTwins.md) on, pool threads reserve
-  what a goroutine's thread does (256 MB; `GO2CS_GOROUTINE_STACK` changes it), and `main`'s twin runs on one, so
-  `main` has that reserve, not 1 GiB, unless an `init` locked it to its thread.
+  when an `init` called `runtime.LockOSThread`, as in Go. With the scheduler of [async twins](AsyncTwins.md) on, every pool thread
+  reserves 1 GiB, so `main`'s twin and every goroutine the scheduler runs keep `main`'s 1 GiB. `GO2CS_GOROUTINE_STACK`
+  can raise a pool thread's reserve above 1 GiB but not lower it; goroutines on threads of their own keep 256 MB.
   <!-- 2026-11-24 (P4, row 18 sweep): the post-row-4 truth, R's M:N row 4 (claude/r-mn-row4-stack), train 11:
        GoScheduler's carrier stack is Goroutine.StackReserve, never under 1 MiB. -->
   <!-- C46 (COORD ruling 2026-11-11, option A): src/core/golib/runtime/MainThread.cs `public const int StackReserve =

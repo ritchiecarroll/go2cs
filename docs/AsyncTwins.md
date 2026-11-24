@@ -129,14 +129,16 @@ nothing from twins.
 - **Repository clones only.** The build properties work only for a project under the `src` directory of a go2cs
   repository clone. <!-- (b)-dependent --> A project that references the published `go.*` packages from NuGet cannot
   build with twins.
-- **Stack depth.** With the scheduler on, a goroutine started on a twin runs on one of the pool's threads. Those
-  threads reserve the same stack as a goroutine's own thread: 256 MiB, which `GO2CS_GOROUTINE_STACK` changes
-  ([Limitations](Limitations.md#what-converts-but-doesnt-behave-exactly-like-go)). `main` runs there too, unless an
-  `init` function locked it to its thread, so with the scheduler on `main` has that reserve rather than its usual
-  1 GiB. If the system refuses the size, the scheduler halves it until a thread starts, and says so once on standard
-  error.
+- **Stack depth.** With the scheduler on, a goroutine started on a twin runs on one of the pool's threads, and so
+  does `main`, unless an `init` function locked it to its thread. Every pool thread reserves 1 GiB, `main`'s usual
+  reserve, so `main` and every goroutine the scheduler runs keep it. `GO2CS_GOROUTINE_STACK` can raise a pool
+  thread's reserve above 1 GiB but not lower it; a goroutine on a thread of its own keeps 256 MiB
+  ([Limitations](Limitations.md#what-converts-but-doesnt-behave-exactly-like-go)). If the system refuses the size,
+  the scheduler halves it until a thread starts, and says so once on standard error.
   <!-- Post-row-4 truth (R's M:N row 4, claude/r-mn-row4-stack c1639909fc, train 11 with this page; COORD 2026-11-24
-       17:32Z): GoScheduler s_carrierStackSize = Math.Max(Goroutine.StackReserve, MinCarrierStackSize = 1 MiB), halving
+       17:32Z; amended 2026-11-24 21:33Z for R's row 4 fold 1dd3dc9ced, COORD 213330Z: DefaultCarrierStackSize =
+       Math.Max(MainThread.StackReserve 1 GiB, Goroutine.StackReserve), so a carrier never reserves less than main's
+       1 GiB and GO2CS_GOROUTINE_STACK can only raise it). Earlier reading: GoScheduler s_carrierStackSize = Math.Max(Goroutine.StackReserve, MinCarrierStackSize = 1 MiB), halving
        on refusal with one named stderr line. Before it, carriers reserved a fixed 1 MiB (GoScheduler's
        CarrierStackSize at cb6def82a2). Goroutine.Multiplexed.cs RunMainTwin: goroutine 1 runs main's twin multiplexed, except when an init
        locked the main goroutine to the startup thread. -->
