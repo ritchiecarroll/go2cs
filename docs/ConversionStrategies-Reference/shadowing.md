@@ -1190,10 +1190,17 @@ ref var sb = ref heap(new strings.Builder(), out var Ꮡsb);   // CS0149: Method
 The remedy is the **opposite** of the shadow-renames elsewhere in this section: `heap` is the name the
 Go program chose and nothing about it is ambiguous in Go, so the identifier is preserved and the
 INTRINSIC is qualified instead — `builtin.heap(…)` — and only where a `heap` declaration is actually in
-scope, so the corpus stays byte-identical everywhere else. `heapIntrinsicName` supplies the spelling at
-every emission site; `declaresHeapIntrinsicIdent` answers per function declaration (walking
-nested function literals, and OR-ed with a literal's own declarations in `convFuncLit`), and
-`packageDeclaresHeapIntrinsicIdent` covers the one package-level shape that can also collide.
+scope, so the corpus stays byte-identical everywhere else. `heap` is one case of a general rule now
+(`golibCall.go`): the Go builtins golib supplies (`len`, `append`, `make`, `copy`, `panic`, `recover`)
+and `heap`, `quo` and `rem` keep the bare spelling and are qualified by one predicate,
+`golibNameShadowed`, wherever a Go declaration of the name would bind first; it answers per function
+declaration (every object the declaration defines, nested function literals and type-switch
+bindings included) or per package-level function literal, plus the package scope and any name a
+dot-import or the internal test class brings in through a second `using static`. The plumbing
+intrinsics no Go program writes (`tmpstring`, `nonnil`, `trySelect`, `ConvertToType`, …) are spelled
+`builtin.<name>` at every emission site instead, so no declaration can capture them; a package func
+named `tmpstring` used to run in place of golib's (guarded by `GolibIntrinsicShadow`, and by a scan in
+`golibCall_test.go` that fails on any of those names written bare in the converter or in `go2cs-gen`).
 
 **What does and does not shadow is decided by C#'s invocable-member rule, and every boundary below was
 measured rather than reasoned into place.** A simple name used as the target of an invocation ignores
@@ -1208,12 +1215,13 @@ space — can displace the `using static` import:
   simple name followed by a type-argument list considers only generic methods — a local is never a
   candidate. This is why the reserved-name census clears the case, and why a guard built on a *scalar*
   local (which takes exactly this form) proves nothing.
-* **A package-level TYPE or VAR named `heap` does NOT shadow**, because neither emits an invocable
-  member. A broader "any non-`PkgName` object" check would only over-qualify: `GlobalCapturedInClosure`
-  declares `type heap` at package level and compiles without the qualifier.
-  The check is narrowed to `*types.Func`, the one package-level shape that is a real method group.
-  Nothing in the corpus declares that, so the positive case is reasoned from the lookup rule rather
-  than reproduced; the negative side is guarded.
+* **A package-level TYPE named `heap` does NOT shadow**, because it emits no invocable member:
+  `GlobalCapturedInClosure` declares `type heap` at package level and compiles without the qualifier.
+  The package-scope check therefore takes a func, a variable or a constant and never a type. A variable
+  is kept because a func-typed one is an invocable delegate field and because `quo` and `rem` are also
+  written in value forms (`MinIntDivideShadow` declares a variable `rem`); for a variable of another
+  type the qualifier is redundant but harmless. The package-func case is reproduced in
+  `golibCall_test.go`'s integration table.
 * **An import ALIAS named `heap` does NOT shadow.** `import "container/heap"` renders as
   `using heap = go.container.heap_package;`, and a using-alias does not displace a `using static`
   method group in an invocation — proven by `container/heap`'s own validated `example_pq_test.cs`, which
