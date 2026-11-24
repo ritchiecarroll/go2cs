@@ -35,7 +35,7 @@
 // The scope is a genuine `*T` (a `types.Pointer`), plus `unsafe.Pointer` and a NAMED pointer type
 // (`type P *T`) as arms of their own.
 //
-// ⚠ CORRECTED 2026-11-24 (i9, R's board row of 2026-11-23): this paragraph said a named pointer type
+// ⚠ CORRECTED 2026-11-24 (the BOARD row of 2026-11-23): this paragraph said a named pointer type
 // "renders as its generated wrapper struct, cannot be a null reference, and has nothing to carry", and
 // excluded it on that premise. The wrapper is go2cs-gen's CLASS (PointerTypeTemplate), whose zero value
 // is a null reference by design, so `var p P; var x any = p` boxed nothing: `x == nil` read true and
@@ -357,7 +357,7 @@ func (v *Visitor) pointerExprNeverRendersNull(expr ast.Expr) bool {
 // isPointerConversionTarget reports whether a conversion's Fun names a pointer type, unnamed (`*T`) or named
 // (`type P *T`): only those render a nil operand as their canonical instance. Any other hop -- `unsafe.Pointer(nil)`,
 // `uintptr(0)` -- renders a null reference, so an outer conversion that recurses into it must not take the inner nil
-// as proof that the outer one cannot be null (`(*T)(unsafe.Pointer(nil))`; P3's reading, 2026-11-24).
+// as proof that the outer one cannot be null (`(*T)(unsafe.Pointer(nil))`).
 func (v *Visitor) isPointerConversionTarget(fun ast.Expr) bool {
 	tv, ok := v.info.Types[fun]
 

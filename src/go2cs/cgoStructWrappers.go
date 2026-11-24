@@ -168,7 +168,7 @@ func (set *cgoWrapperSet) copyMember(function, member string, depth int, m, g st
 		loop := fmt.Sprintf("%sfor (int %s = 0; %s < %d; %s++)\n%s", indent, index, index, underlying.Len(), index, element)
 
 		// go2cs keeps an array's elements in the array's own storage, so B-10 asks that storage for a published
-		// unsafe.Pointer word before the elements are copied raw into the mirror (3.2 seat 1b, design 18.7 finding 2).
+		// unsafe.Pointer word before the elements are copied raw into the mirror (DESIGN-cgo-phase3-marshaling 18.7 finding 2).
 		if in {
 			return fmt.Sprintf("%sglobal::go.golib.GoCgoArgs.RequireNoPublishedWordIn(%s);\n%s", indent, g, loop), nil
 		}
@@ -212,7 +212,7 @@ type cgoStructParam struct {
 	pointer bool
 	void    bool
 
-	// out is a pointer to one C pointer, the out-parameter (`&db`, `char **`; Phase 3 shape (i), 3.2 seat 1b), and
+	// out is a pointer to one C pointer, the out-parameter (`&db`, `char **`; Phase 3 shape (i)), and
 	// goSide is then the C pointer's pointee: the slot is a ж<ж<goSide>>.
 	out bool
 }
@@ -440,7 +440,7 @@ func (set *cgoWrapperSet) wrapper(declaration cgoDeclaration) (string, error) {
 
 	// The words C returns (an out-parameter's word, a pointer result), each checked against each pinned argument inside
 	// the `fixed`: a word inside pinned Go storage is refused by name, never minted as a native box over memory that moves
-	// once the `fixed` ends (P3's review of 1b, item 4). Each entry is a guard condition (empty for none) and the word.
+	// once the `fixed` ends (DESIGN-cgo-phase3-marshaling 18.12.2). Each entry is a guard condition (empty for none) and the word.
 	type returnedWord struct{ guard, word string }
 	var returnedWords []returnedWord
 
@@ -910,7 +910,7 @@ func (set *cgoWrapperSet) helper(declaration cgoDeclaration) (string, error) {
 
 		text.WriteString("    // C.GoString, cmd/cgo's own helper: the bytes of a C string, up to its NUL, as a Go string.\n")
 		fmt.Fprintf(&text, "    internal static @string GoString(%s p0)\n    {\n", pointerType)
-		// Go memory is read from its pinned storage, as a Go function reads it (3.2 seat 1b, design 18.12 item 3).
+		// Go memory is read from its pinned storage, as a Go function reads it (DESIGN-cgo-phase3-marshaling 18.12 item 3).
 		fmt.Fprintf(&text, "        return %sGoStringOf(p0, %q);\n    }\n", args, function)
 
 	case "GoStringN":
