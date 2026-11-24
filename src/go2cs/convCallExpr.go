@@ -1052,7 +1052,7 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		// An ALIAS of unsafe.Pointer (`type ptr = unsafe.Pointer`) is the same type, so it takes every arm of this door,
 		// spelled through the alias name (pointerName), which a file that does not import unsafe can still name.
 		// Gated on the name alone, an alias skipped the block: rule 6 below became `(ptr)h.Data`, a number that keeps
-		// nothing, and the named-uintptr and receiver arms failed to compile (C45, P3's read).
+		// nothing, and the named-uintptr and receiver arms failed to compile.
 		if targetTypeName == "@unsafe.Pointer" || v.isUnsafePointerAlias(callExpr.Fun) {
 			pointerName := v.unsafePointerConversionName(callExpr.Fun)
 			targetTypeName = pointerName

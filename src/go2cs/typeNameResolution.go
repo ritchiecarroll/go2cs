@@ -1204,7 +1204,7 @@ func (v *Visitor) wrapperValueMember(t types.Type) string {
 // pointerWrapperMember names a box member the emitter spells on a pointer operand of type t -- Value, ValueSlot, of or
 // at -- as t declares it. A named POINTER type is go2cs-gen's wrapper class rather than the box, and when the type's own
 // name is that member, the wrapper declares it as NamedWrapperValue (Value) or Δ + the member (the rest), since a C#
-// member may not share its type's name (CS0542; R7 seat 2, behavioral NamedChanMapNumericShadow). go2cs-gen's
+// member may not share its type's name (CS0542; behavioral NamedChanMapNumericShadow). go2cs-gen's
 // Common.PointerWrapperMember decides the same from the declared C# name, and the collision-renamed carve-out matches
 // wrapperValueMember's; keep the two in sync. Every other operand -- a ж<T> box, a named pointer named otherwise --
 // keeps the member's own name, so their emission is unchanged by construction.
