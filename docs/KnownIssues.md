@@ -592,7 +592,7 @@ When `-stack-append` is on, go2cs runs `go build` (and `go test -c` for test fil
 targets for each package it converts, so it emits the same stack-append buffers Go makes. The option is on by
 default only for `-stdlib` and `-tests`; a plain or `-recurse` conversion runs none of these builds and never
 creates the cache unless you pass `-stack-append=on`
-([`-stack-append`](CommandLine.md#options)). Those builds go into their own cache, not your `GOCACHE`:
+([`-stack-append`](CommandLine.md#option-stack-append)). Those builds go into their own cache, not your `GOCACHE`:
 `go2cs/probe-cache` under the user cache directory, or the directory named by `-probe-cache` or `GO2CS_PROBE_CACHE`.
 The first conversion builds the standard library there for each target, about 60 MB each, and later conversions of
 any module reuse it. Each converted package adds its own entries, which grow with the size of its compiled code: about 5 MB

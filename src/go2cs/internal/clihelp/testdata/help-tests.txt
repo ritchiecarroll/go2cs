@@ -1,0 +1,14 @@
+-tests
+
+  Also convert the package's Go tests and emit a runnable C# test host
+  Common option, testing.
+
+  Also convert the package's _test.go suite and emit a runnable C# test-host project (default off).
+  Forces -comments on. Like -stdlib, with no -tags it applies the build tags
+  purego,math_big_pure_go. For one package it finds the go2cs tree above its output directory, so it
+  works from a bare clone with no flags or environment setup. With plain -recurse it validates a
+  whole module against its own tests: go2cs -tests -recurse -go2cspath <go2cs_clone>/src module_dir
+  out_root, with the output root outside the module's source tree. The module form does not look for
+  the go2cs tree, so name it with -go2cspath, as an absolute path (or GO2CSPATH). It takes plain
+  -recurse only: -tests with =module or =nuget is refused; a module that needs a newer Go than the
+  converted standard library is refused. See Validate a converted test suite.

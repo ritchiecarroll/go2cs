@@ -1093,7 +1093,7 @@ is a heap array, so the buffer changes what a program can observe, never how man
 it off, a converted program differs from Go only where it reads a capacity the buffer sets, and no
 `go build -gcflags=-m` runs. A behavioral project that tests the buffer turns it on in its own `go2cs.options`
 file, as `StackAppendBackingStore` does
-([`-stack-append`](../CommandLine.md#options)).
+([`-stack-append`](../CommandLine.md#option-stack-append)).
 <!-- Ruled by the owner 2026-11-24 on P5's scout (COORD 2026-11-24 17:50Z): hint off, 41 of the 42 behavioral projects
      that carried a buffer printed what go run prints; StackAppendBackingStore differed in 11 of its 19 lines, all cap().
      golib's buffer is `new T[K]` (src/core/golib/stackAppend.cs), uncharged to AllocationCounter. -->

@@ -306,7 +306,7 @@ linux/amd64, darwin/amd64, darwin/arm64 and windows/amd64. Every arm printed wha
 memory, was refused by name. A `-cgo` conversion is one package, and it builds against a go2cs clone
 (`dotnet build -p:go2csPath=<go2cs>/src/`); it does not use the `go.*` packages yet. Building a cgo package against
 the `go.*` packages from the feed is planned for the next release.
-<!-- src/go2cs/main.go:307 (`Convert a single cgo package`; this entry describes the November 19 release, when -cgo did not combine with -recurse); src/go2cs/csproj-template.xml:135 (`<ProjectReference Include="$(go2csPath)gen/go2cs-gen/go2cs-gen.csproj"`) and src/go2cs/csproj-template.xml:187 (`<ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />`). COORD's ruling O2, 2026-11-14 (cgo 3.1's release-path seat). -->
+<!-- src/go2cs/internal/clihelp/options.go:122 (`Convert a single cgo package`; this entry describes the November 19 release, when -cgo did not combine with -recurse); src/go2cs/csproj-template.xml:135 (`<ProjectReference Include="$(go2csPath)gen/go2cs-gen/go2cs-gen.csproj"`) and src/go2cs/csproj-template.xml:187 (`<ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />`). COORD's ruling O2, 2026-11-14 (cgo 3.1's release-path seat). -->
 
 **A pointer rebuilt from a number is refused too, with a narrow memory-safety gap left.** go2cs refuses, by name,
 any address inside Go memory that it is holding still, even after the address has been through a `uintptr`:
