@@ -96,12 +96,18 @@ public sealed partial class TwinGenerator
                     string result = Result(method), parameters = Parameters(method), arguments = Arguments(method), inner = indent + "    ";
                     string call = Escaped(method.Name) + "(" + PlainArguments(method) + ")", twin = method.Name + Suffix + "(" + arguments + ")";
 
+                    // The slot's default body and the static call helper are real frames between a twin's Go caller and the
+                    // plain member they run, and Go has neither: each carries go2cs-gen's [GeneratedCode], which the Go
+                    // traceback skips (runtime's classifyGoSourceFrame). Without it runtime.Caller(1) inside the member read
+                    // `Mꞏcall` where Go reads the caller (M:N row 3, behavioral PromotedMethodFrames under GO2CS_MN=1).
+                    string generated = inner + "[" + Common.GeneratedCodeAttribute + "]\r\n";
+
                     if (IfaceHidden)
                     {
                         string self = "((" + name + ")this)." + call;
-                        source.Append(inner).Append(result).Append(' ').Append(method.Name).Append(Suffix).Append('(').Append(parameters).Append(')')
+                        source.Append(generated).Append(inner).Append(result).Append(' ').Append(method.Name).Append(Suffix).Append('(').Append(parameters).Append(')')
                             .Append(method.ReturnsVoid ? " { " + self + "; return default; }\r\n" : " => new " + result + "(" + self + ");\r\n");
-                        source.Append(inner).Append("static ").Append(result).Append(' ').Append(method.Name).Append("ꞏcall(").Append(name).Append(" ᴛrecv")
+                        source.Append(generated).Append(inner).Append("static ").Append(result).Append(' ').Append(method.Name).Append("ꞏcall(").Append(name).Append(" ᴛrecv")
                             .Append(parameters.Length > 0 ? ", " : "").Append(parameters).Append(')');
 
                         if (method.ReturnsVoid)
@@ -111,7 +117,7 @@ public sealed partial class TwinGenerator
                     }
                     else
                     {
-                        source.Append(inner).Append(Hidden).Append("\r\n").Append(inner).Append(result).Append(' ').Append(method.Name).Append(Suffix).Append('(').Append(parameters).Append(')');
+                        source.Append(inner).Append(Hidden).Append("\r\n").Append(generated).Append(inner).Append(result).Append(' ').Append(method.Name).Append(Suffix).Append('(').Append(parameters).Append(')');
 
                         if (method.ReturnsVoid)
                             source.Append(" { ").Append(call).Append("; return default; }\r\n");
