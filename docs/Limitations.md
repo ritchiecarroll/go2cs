@@ -257,6 +257,44 @@ standard library, and runs on Windows, Linux or macOS. **A longer evening:** lot
   * Copying a struct by value shares any fixed-size array inside an embedded struct.
   * A slice of one number type laid over another's storage
     (`unsafe.Slice((*uint64)(unsafe.Pointer(&b[0])), n)`) is a copy: writes through it never reach `b`.
+  * A write through `unsafe.StringData`'s pointer into a string literal or a one-byte string faults in Go, because
+    those bytes are read-only. In go2cs those bytes are shared by every equal string, so the write changes every
+    later evaluation of that literal, in every package, or every one-byte string of that byte. Set
+    `GO2CS_CHECK_STRING_WRITES=1` ([Tuning](Tuning.md#checking-writes-through-string-data)) to have it caught by
+    name: `unsafe.StringData` then gives the pointer a private copy of the bytes, so the write reaches no other
+    string, and the program panics at the next read through that pointer (`*p`, or a pointer `unsafe.Add` made from
+    it) or at the next `unsafe.StringData` over the same string. A write through a view that reads the bytes
+    directly, a slice from `unsafe.Slice(p, n)` or a `(*[N]byte)(unsafe.Pointer(p))` array pointer, also lands in
+    the copy, and is reported only if a later access goes through one of those two checks. The `Data` of a
+    `reflect.StringHeader` laid over such a string names the same copy. With the check on, three cases are still
+    not covered, and none of them panics:
+    - A literal hoisted into a `static readonly` field (`"..."u8`), which the standard library does throughout and
+      a package converted with `-hoist-literals` does too. A write through `unsafe.StringData` changes that literal
+      wherever it is used: after a write through the pointer to `err.(*strconv.NumError).Func` from
+      `strconv.ParseBool("x")`, every later such error names the changed function.
+    - A literal written in place as `"..."u8` (format strings and other string arguments in converted code). It
+      becomes a new array at each evaluation, so a write through `unsafe.StringData` is private to that one value.
+    - A string `unsafe.String` builds from `unsafe.StringData`'s pointer. It shares the private copy, so it reads
+      any byte later written there, and `unsafe.StringData` over it hands out a pointer with no check.
+
+    A heap string (one built at run time) behaves as in Go: the write changes it and every string sharing its bytes.
+  <!-- 2026-11-24 (P5, D5). COORD ruled option A 20261124T103731Z (a private copy and a next-access panic, always on,
+       cut f4318664d4 + cf7e3b212b); the owner then ruled it an OPT-IN DIAGNOSTIC, off by default (COORD
+       20261124T133212Z: "no need for normal runtime work where Go already protects converted code"), after the 50,000-
+       literal bench read the always-on registry at about twice master's gen-2 pause and three times its gen-0 pause.
+       golib ReadOnlyStringBacking.Enabled reads GO2CS_CHECK_STRING_WRITES once at start-up; off, no literal is
+       registered and StringData makes no lookup. Guarded by GolibTests ReadOnlyStringDataTests: the switch-off row pins
+       this default (the write reaches the equal literal), and the switch-on rows run in a child host (red at master
+       b2c9435159 on the literal, one-byte and unsafe.Slice arms; the next-access check neutered fails the three panic
+       arms by name). Behavioral StringDataIdentity compares identity, heap and near-miss arms against go run with the
+       switch off. The header's Data goes through the same door (ж.StringHeaderBox.cs (H) and the pointer shape),
+       guarded by GolibTests StringHeaderNumberTests W4. The uncovered cases, counted by P3 at cf7e3b212b
+       (COORD/20261124T130505Z-P3.md): (a) 10,799 hoisted `xˢᵇ = "..."u8` declarations in 1,284 files under src/core,
+       test files included, plus any user package converted with -hoist-literals (hoistedLiteralOperations.go); P3's
+       scenario is strconv/number.cs `parseBoolˢᵇ`. (b) A non-hoisted "..."u8 operand converts through implicit
+       operator @string(ReadOnlySpan<byte>) into a fresh array per evaluation. (c) unsafe.String over the shadow (P3
+       NIT 4). Registering hoisted field backings is dropped from .5; if ever wanted it is diagnostic-only, an OPEN
+       BOARD row (2026-11-24). -->
   * A pointer's number kept in a `uintptr` and turned back into a pointer in a later statement
     (`n := uintptr(unsafe.Pointer(p))`, then `(*T)(unsafe.Pointer(n))`) can name memory that has since moved, and
     the number does not keep the value alive. Go calls this invalid too, but it often works there. Do the
