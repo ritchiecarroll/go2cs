@@ -360,6 +360,7 @@
     <Project Path="tests/Behavioral/OpenSliceUnnamedArray/OpenSliceUnnamedArray.csproj" />
     <Project Path="tests/Behavioral/PackageNameNotDirName/PackageNameNotDirName.csproj" />
     <Project Path="tests/Behavioral/PackageNameNotDirName/lib/PackageNameNotDirName.lib.csproj" />
+    <Project Path="tests/Behavioral/PackageNameNotDirName/user/PackageNameNotDirName.user.csproj" />
     <Project Path="tests/Behavioral/PromotedUnexportedEmbedChain/PromotedUnexportedEmbedChain.csproj" />
     <Project Path="tests/Behavioral/PromotedUnexportedEmbedChain/ppembedlib/go.ppembedlib.csproj" />
     <Project Path="tests/Behavioral/ReceiverShadowsImport/ReceiverShadowsImport.csproj" />
@@ -863,6 +864,7 @@
     <Project Path="tests/Behavioral/MnForeignThread/MnForeignThread.csproj" />
     <Project Path="tests/Behavioral/MnGenericContended/MnGenericContended.csproj" />
     <Project Path="tests/Behavioral/MnGoMaxProcs/MnGoMaxProcs.csproj" />
+    <Project Path="tests/Behavioral/MnNoParkHang/MnNoParkHang.csproj" />
     <Project Path="tests/Behavioral/MnParkedCallers/MnParkedCallers.csproj" />
     <Project Path="tests/Behavioral/MnParkedMultiLine/MnParkedMultiLine.csproj" />
     <Project Path="tests/Behavioral/MnParkedSameName/MnParkedSameName.csproj" />
@@ -991,6 +993,15 @@
     <Project Path="tests/Behavioral/NestedGenericTypes/NestedGenericTypes.csproj" />
     <Project Path="tests/Behavioral/NestedLambdaReceiverField/NestedLambdaReceiverField.csproj" />
     <Project Path="tests/Behavioral/NestedMapAssign/NestedMapAssign.csproj" />
+    <Project Path="tests/Behavioral/NestedNamespaceReach/NestedNamespaceReach.csproj" />
+    <Project Path="tests/Behavioral/NestedNamespaceReach/a/deep/NestedNamespaceReach.a.deep.csproj" />
+    <Project Path="tests/Behavioral/NestedNamespaceReach/b/outer/NestedNamespaceReach.b.outer.csproj" />
+    <Project Path="tests/Behavioral/NestedNamespaceReach/b/x/check/NestedNamespaceReach.b.x.check.csproj" />
+    <Project Path="tests/Behavioral/NestedNamespaceReach/child/NestedNamespaceReach.child.csproj" />
+    <Project Path="tests/Behavioral/NestedNamespaceReach/child/x/NestedNamespaceReach.child.x.csproj" />
+    <Project Path="tests/Behavioral/NestedNamespaceReach/lib/NestedNamespaceReach.lib.csproj" />
+    <Project Path="tests/Behavioral/NestedNamespaceReach/user/NestedNamespaceReach.user.csproj" />
+    <Project Path="tests/Behavioral/NestedNamespaceReach/x/sync/NestedNamespaceReach.x.sync.csproj" />
     <Project Path="tests/Behavioral/NestedPromotedEmbedInit/NestedPromotedEmbedInit.csproj" />
     <Project Path="tests/Behavioral/NestedSelectRecvTarget/NestedSelectRecvTarget.csproj" />
     <Project Path="tests/Behavioral/NestedVarShadow/NestedVarShadow.csproj" />
@@ -1217,6 +1228,8 @@
     <Project Path="tests/Behavioral/SelfRefGenerics/SelfRefGenerics.csproj" />
     <Project Path="tests/Behavioral/SStringElision/SStringElision.csproj" />
     <Project Path="tests/Behavioral/SStringTwinPilot/SStringTwinPilot.csproj" />
+    <Project Path="tests/Behavioral/SameNameOs/SameNameOs.csproj" />
+    <Project Path="tests/Behavioral/SameNameOs/hooks/os/SameNameOs.hooks.os.csproj" />
     <Project Path="tests/Behavioral/SamePackageImplementNoWitness/SamePackageImplementNoWitness.csproj" />
     <Project Path="tests/Behavioral/SamePackageImplementNoWitness/ledger/SamePackageImplementNoWitness.ledger.csproj" />
     <Project Path="tests/Behavioral/SameUnderlyingNamedConv/SameUnderlyingNamedConv.csproj" />

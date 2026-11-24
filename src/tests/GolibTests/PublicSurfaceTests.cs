@@ -280,7 +280,7 @@ public class PublicSurfaceTests
     // ---- [mn-frozen]: the M:N surface frozen for L-min (docs/phase4/FREEZE-mn-surface.md, block 7b) -------
     //
     // Every public or protected member of the six task types, of GoFuncPair, and of the two attributes generated code
-    // places or names (GoParkForwarder; GoTwinOf, M:N item 7d's stamp, folded in at train 3), hidden or not, and the
+    // places or names (GoParkForwarder; GoParkWeak, N1's mark; GoTwinOf, M:N item 7d's stamp, folded in at train 3), hidden or not, and the
     // named twin entry points (each name's whole overload family). They are tier 2 by their EditorBrowsable marks, so
     // [tier1-members] does not see them; a twin-built assembly binds them, so they never disappear and change shape only
     // where their plain member does. Same spelling as [tier1-members].
@@ -288,7 +288,7 @@ public class PublicSurfaceTests
     [
         "go.golib.GoTask", "go.golib.GoTask`1", "go.golib.GoTaskAwaiter", "go.golib.GoTaskAwaiter`1",
         "go.golib.GoTaskBuilder", "go.golib.GoTaskBuilder`1", "go.golib.GoFuncPair",
-        "go.golib.GoParkForwarderAttribute", "go.golib.GoTwinOfAttribute"
+        "go.golib.GoParkForwarderAttribute", "go.golib.GoParkWeakAttribute", "go.golib.GoTwinOfAttribute"
     ];
 
     private static readonly (string Type, string[] Names)[] s_mnFrozenMembers =

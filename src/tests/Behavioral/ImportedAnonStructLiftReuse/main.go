@@ -11,6 +11,15 @@ type TLARGE_INTEGER = struct {
 	QuadPart int64
 }
 
+// TRECT is identical to lib's rect, though its fields are spelled through TLONG, an alias of int32: Go reads one
+// type, so the converted value is lib's lifted type and passes to lib.Area as it is.
+type TLONG = int32
+
+type TRECT = struct {
+	W TLONG
+	H TLONG
+}
+
 func main() {
 	var distance TLARGE_INTEGER
 	distance.QuadPart = 20
@@ -23,4 +32,5 @@ func main() {
 	var seek func(TLARGE_INTEGER, *TLARGE_INTEGER) int64 = lib.SetFilePointerEx
 	fmt.Println(seek(TLARGE_INTEGER{QuadPart: 5}, &moved), moved.QuadPart)
 	fmt.Printf("%T\n", distance)
+	fmt.Println(lib.Area(TRECT{W: 6, H: 7}))
 }

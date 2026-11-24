@@ -236,6 +236,24 @@ description: Assemble, rehearse, gate or land a train. Seats and seating mechani
      amendment. -->
 
 ## 6. The union is the gate of record
+- **A SEAT'S LANE GATES MATCH ITS CHANGE CLASS; the union battery runs EVERYTHING.** Always: the red-first arm, `go test -count=1 ./internal/repoguard` and the census. Then by class, as the table says. A seat spanning classes runs the union of its rows. A fold re-runs only what it touched, plus the red-first arm and repoguard. SEAT READY names the class and what ran, and "not run (train covers)" is a complete answer. Nothing here relaxes a union leg, and a converter footprint is still measured at the lane, because only the lane can attribute it.
+
+| The seat changes… | The lane also runs | The lane skips (the union covers it) |
+|---|---|---|
+| docs only | nothing more | everything else |
+| tests or `src/tools` only | the touched projects | CNR, the full `go test ./...`, golib, solution builds |
+| generator (`src/gen`) | GenTests + the affected behavioral/`--mn` subset | CNR (converter untouched), the full `go test ./...`, golib Debug |
+| golib | GolibTests Release + PublicSurface + the affected behavioral subset | CNR, the full `go test ./...`, golib Debug |
+| converter (`src/go2cs`) | CNR + `go test .` + the two-seeded stdlib footprint when the corpus can move | full behavioral, golib, solution builds |
+
+<!-- Owner yes 2026-11-24 ~01:55Z ("Yes, post it"), on the owner's own observation that lanes spent much of each turn on
+     gates the union battery repeats. Posted as FLEET/20261124T015615Z-COORD.md. WHY repoguard is in ALWAYS: train 8
+     (7c0bd79461) went red on TestDocsProvenanceNotesResolve because a generator seat (P4 row 8, 934ccd87c5) rewrote
+     ReceiverMethodTemplate.cs:144, which docs/ConversionStrategies.md's box-forwarder note fingerprints, and the lane
+     ran GenTests only. The cure was a union fix branch (claude/coord-t8-union-fix 4b2e228171) and a re-gate. Repoguard
+     costs about 8 minutes; one union red costs a fix cycle on the coordinator's budget and holds every other seat.
+     WHAT the lane still owes that the union cannot give: the red-first proof (a union only ever sees the green half),
+     and a converter footprint's ATTRIBUTION (a union CNR mixes every seat's footprint). -->
 - A lane's own CNR is evidence for a seat REQUEST; **the union CNR at assembly is the gate of record.** A lane-side freeze slip that cannot reach a transpile verdict is REPORTED — that is the remedy — and does not re-owe the lane's run. **A branch-alone GREEN and a branch-alone RED are EQUALLY SILENT about the union**, and neither instrument can see the other's finding.
 - **Tell — a finality table's CNR row reading "(read the log)":** the union CNR ended WITHOUT a verdict line and finalize's placeholder fill had a FALLBACK printing a string where the verdict belonged (route #6 inside a lane's own finalize — an absence MASKED instead of stopping). Retract FINAL, hold on a stated window, preflight the branch **from its MERGE BASE**.
 - **A pass→fail on a BANKED row at a train head is a BROKEN SET that holds the landing until an arm names the seat** — master plus one seat at a time, the three-run standard, the attributed seat unseated at the tip.
