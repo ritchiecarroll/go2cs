@@ -175,6 +175,7 @@ func refuseMarkerGlyphIdentifiers(pkg *packages.Package) *markerGlyphRefusal {
 	sort.Slice(idents, func(i, j int) bool { return idents[i].Pos() < idents[j].Pos() })
 
 	sets := deltaMintedNames(pkg, declared, clauses)
+	sets.siblingSpelled = siblingSpelledFields(pkg)
 	var refusal *markerGlyphRefusal
 
 	for _, ident := range idents {
@@ -222,7 +223,13 @@ func markerGlyphReason(name string, obj types.Object, sets *deltaNameSets) strin
 	// A FIELD spelled like a name go2cs generates at package scope converts: the field lives in its struct's scope, and
 	// where its emitted spelling meets its own struct's (the field Δslice of a type slice emitted as Δslice) the converter
 	// renames the field and stamps its Go name ([GoName]), so reflection and fmt still read Δslice.
-	if what, isMinted := sets.minted[name]; isMinted && !isStructField(obj) {
+	// The exemption ends where the field meets a SIBLING spelled the same in C#: `type X struct{ slice; Δslice int }`
+	// embeds slice as the field Δslice, so the two members would share one name (CS0102).
+	if what, isMinted := sets.minted[name]; isMinted && (!isStructField(obj) || sets.siblingSpelled[obj]) {
+		if isStructField(obj) {
+			return "is " + what + ", the C# name of another field of its struct"
+		}
+
 		return "is " + what
 	}
 
@@ -285,6 +292,7 @@ type deltaNameSets struct {
 	typeParams          map[string]bool
 	interfaceTypeParams map[string]bool
 	importedTypeNames   map[string]bool
+	siblingSpelled      map[types.Object]bool
 }
 
 // deltaMintedNames answers the Δ names go2cs generates from what pkg declares, in ANY scope, through the converter's
@@ -492,6 +500,79 @@ func refuseMarkerGlyphTestFiles(inputPath string, options Options) *markerGlyphR
 }
 
 // isStructField reports whether obj is a struct field.
+// siblingSpelledFields answers the Δ-named struct fields whose name equals the C# spelling of another field of the same
+// struct: an embedded field is named by its type, so `type X struct{ slice; Δslice int }` emits the embed as Δslice.
+func siblingSpelledFields(pkg *packages.Package) map[types.Object]bool {
+	result := map[types.Object]bool{}
+
+	for _, file := range pkg.Syntax {
+		ast.Inspect(file, func(node ast.Node) bool {
+			structType, isStruct := node.(*ast.StructType)
+
+			if !isStruct || structType.Fields == nil {
+				return true
+			}
+
+			var idents []*ast.Ident
+
+			for _, field := range structType.Fields.List {
+				if len(field.Names) == 0 {
+					if ident := embeddedFieldIdent(field.Type); ident != nil {
+						idents = append(idents, ident)
+					}
+
+					continue
+				}
+
+				idents = append(idents, field.Names...)
+			}
+
+			for _, ident := range idents {
+				if !strings.Contains(ident.Name, ShadowVarMarker) {
+					continue
+				}
+
+				for _, sibling := range idents {
+					if sibling.Name == ident.Name || sibling.Name == "_" {
+						continue
+					}
+
+					if getCoreSanitizedIdentifier(sibling.Name) == ident.Name || getCollisionAvoidanceIdentifier(sibling.Name) == ident.Name {
+						if obj := pkg.TypesInfo.Defs[ident]; obj != nil {
+							result[obj] = true
+						}
+					}
+				}
+			}
+
+			return true
+		})
+	}
+
+	return result
+}
+
+// embeddedFieldIdent is the identifier that names an embedded field: the type's name, through a pointer, a package
+// qualifier or type arguments.
+func embeddedFieldIdent(expr ast.Expr) *ast.Ident {
+	switch typed := expr.(type) {
+	case *ast.Ident:
+		return typed
+	case *ast.StarExpr:
+		return embeddedFieldIdent(typed.X)
+	case *ast.SelectorExpr:
+		return typed.Sel
+	case *ast.IndexExpr:
+		return embeddedFieldIdent(typed.X)
+	case *ast.IndexListExpr:
+		return embeddedFieldIdent(typed.X)
+	case *ast.ParenExpr:
+		return embeddedFieldIdent(typed.X)
+	}
+
+	return nil
+}
+
 func isStructField(obj types.Object) bool {
 	field, isVar := obj.(*types.Var)
 	return isVar && field.IsField()

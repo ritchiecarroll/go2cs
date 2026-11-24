@@ -74,8 +74,52 @@ func typeCollidingFieldName(name string) string {
 
 // fieldCollidesWithType reports whether a field selector's name equals the C# type name of the
 // struct it belongs to (`type Node struct{ Node *Node }` → field `Node` in struct `Node`).
+//
+// A PROMOTED field is also renamed where it collides with the struct that DECLARES it: the declaration carries the
+// rename, and the generator promotes the member under it. Go names the two differently where C# does not, so the
+// promotion is legal Go: `type slice struct{ Δslice int }` declares ΔΔslice, and `type X struct{ slice }` reaches it
+// as x.Δslice, emitted x.ΔΔslice (X's own Δslice is the embed).
 func (v *Visitor) fieldCollidesWithType(sel *ast.Ident, x ast.Expr) bool {
-	return fieldCollidesWithOwnerType(sel.Name, v.info.TypeOf(x))
+	xType := v.info.TypeOf(x)
+
+	if fieldCollidesWithOwnerType(sel.Name, xType) {
+		return true
+	}
+
+	if xType == nil {
+		return false
+	}
+
+	field, path, _ := types.LookupFieldOrMethod(xType, true, v.pkg, sel.Name)
+
+	if _, isField := field.(*types.Var); !isField || len(path) < 2 {
+		return false
+	}
+
+	owner := xType
+
+	for _, index := range path[:len(path)-1] {
+		structType, isStruct := derefStructUnderlying(owner)
+
+		if !isStruct || index >= structType.NumFields() {
+			return false
+		}
+
+		owner = structType.Field(index).Type()
+	}
+
+	return fieldCollidesWithOwnerType(sel.Name, owner)
+}
+
+// derefStructUnderlying is the struct under t, through one pointer.
+func derefStructUnderlying(t types.Type) (*types.Struct, bool) {
+	if ptr, isPtr := t.Underlying().(*types.Pointer); isPtr {
+		t = ptr.Elem()
+	}
+
+	structType, isStruct := t.Underlying().(*types.Struct)
+
+	return structType, isStruct
 }
 
 // fieldCollidesWithOwnerType is fieldCollidesWithType's answer from the owning struct's TYPE, for a field reached

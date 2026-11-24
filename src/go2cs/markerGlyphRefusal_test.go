@@ -270,6 +270,27 @@ func f() string {
 // A field of that spelling converts: it lives in its struct's scope.
 type S struct{ Δslice int }
 
+// Unless a sibling field is spelled Δslice in C#: a field named slice, or an embedded slice.
+type X struct {
+	slice  int
+	Δslice int
+}
+
+type slice struct{}
+
+type Y struct {
+	slice
+	Δslice int
+}
+
+// An embed one letter away converts.
+type Z struct {
+	slicex
+	Δslice int
+}
+
+type slicex struct{}
+
 // A shadowed local array is renamed ΔarrayΔ1: its base is array's SANITIZED spelling, which the package never declares.
 var ΔarrayΔ1 int
 
@@ -418,8 +439,19 @@ func TestMarkerGlyphIdentifiersAreRefused(t *testing.T) {
 		}
 	}
 
-	if len(deltaSliceSites) != 1 {
-		t.Errorf("want Δslice refused once, as the package variable; got %q", deltaSliceSites)
+	// The fields of X and Y are refused as well, each beside a sibling spelled Δslice; those of S and Z convert.
+	var packageSites, siblingSites int
+
+	for _, text := range deltaSliceSites {
+		if strings.HasSuffix(text, ", the C# name of another field of its struct; rename it") {
+			siblingSites++
+		} else {
+			packageSites++
+		}
+	}
+
+	if packageSites != 1 || siblingSites != 2 {
+		t.Errorf("want Δslice refused once as the package variable and twice beside a sibling; got %q", deltaSliceSites)
 	}
 
 	// The package variable Δt is refused for the type switch's temporary; the Δ-led field Δt converts.

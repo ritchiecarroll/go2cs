@@ -120,6 +120,11 @@ public partial struct Δ {
     [GoName("Δ")] public nint ΔΔ;
 }
 
+partial struct X {
+    /*embed*/ internal Δslice Δslice;
+    [GoName("Δslicex")] public nint Δslicex;
+}
+
 internal partial struct main_Δx /*dyn*/ {
     internal nint q;
 }
@@ -229,6 +234,19 @@ internal static void main() {
     fmt.Printf("foreign Δ type: %T %+v %v %s\n"u8, dr, hr, hr.R.Δt, reflect.TypeOf(hr).Field(0).Type.Name());
     fmt.Printf("bare Δ: %T %+v %s %T %+v %s\n"u8, new Δ(43), new Δ(ΔΔ: 44), reflect.TypeOf(new Δ()).Field(0).Name,
         new lib.Δ(ΔΔ: 45), new lib.Δ(ΔΔ: 46), reflect.TypeOf(new lib.Δ()).Field(0).Name);
+    ref var wr = ref heap<lib.WrapRec>(new lib.WrapRec(), out var Ꮡwr);
+    wr.Δt = 47;
+    var wp = Ꮡwr.of(lib.WrapRec.ᏑΔt);
+    wp.Value++;
+    fmt.Println("promoted foreign Δ field:", wr.Δt, wr.Rec.Δt);
+    ref var x = ref heap<X>(new X(new Δslice(48), 49), out var Ꮡx);
+    x.ΔΔslice++;
+    var xp = Ꮡx.of(X.ᏑΔΔslice);
+    xp.Value++;
+    x.Δslicex++;
+    var xf = reflect.TypeOf(x);
+    fmt.Println("embed named Δslice in C#:", x.ΔΔslice, x.Δslice.ΔΔslice, x.Δslicex, xf.Field(0).Name, xf.Field(0).Anonymous,
+        xf.Field(1).Name, fmt.Sprintf("%+v"u8, x));
 }
 
 internal static slice<@string> methodNames(reflect.Type t) {

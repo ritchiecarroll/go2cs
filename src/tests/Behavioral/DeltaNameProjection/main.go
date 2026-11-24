@@ -97,6 +97,13 @@ type HasRec struct{ R lib.Δrec }
 // A bare Δ type with a bare Δ field, declared here.
 type Δ struct{ Δ int }
 
+// An embed whose emitted name is Δslice, promoting slice's field Δslice, beside an own field one letter away. (An own
+// field spelled Δslice here would share the embed's C# name, and GO2CS2015 refuses it.)
+type X struct {
+	slice
+	Δslicex int
+}
+
 func main() {
 	b, _ := json.Marshal(P{1})
 	fmt.Println("json:", string(b))
@@ -188,6 +195,19 @@ func main() {
 	fmt.Printf("foreign Δ type: %T %+v %v %s\n", dr, hr, hr.R.Δt, reflect.TypeOf(hr).Field(0).Type.Name())
 	fmt.Printf("bare Δ: %T %+v %s %T %+v %s\n", Δ{43}, Δ{Δ: 44}, reflect.TypeOf(Δ{}).Field(0).Name,
 		lib.Δ{Δ: 45}, lib.Δ{Δ: 46}, reflect.TypeOf(lib.Δ{}).Field(0).Name)
+	wr := lib.WrapRec{}
+	wr.Δt = 47
+	wp := &wr.Δt
+	*wp++
+	fmt.Println("promoted foreign Δ field:", wr.Δt, wr.Rec.Δt)
+	x := X{slice{48}, 49}
+	x.Δslice++
+	xp := &x.Δslice
+	*xp++
+	x.Δslicex++
+	xf := reflect.TypeOf(x)
+	fmt.Println("embed named Δslice in C#:", x.Δslice, x.slice.Δslice, x.Δslicex, xf.Field(0).Name, xf.Field(0).Anonymous,
+		xf.Field(1).Name, fmt.Sprintf("%+v", x))
 }
 
 func methodNames(t reflect.Type) []string {

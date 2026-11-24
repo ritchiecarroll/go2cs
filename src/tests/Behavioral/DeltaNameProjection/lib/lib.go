@@ -37,3 +37,6 @@ type Δrec struct{ Δt int }
 
 // Δ is an exported type, a bare Δ, with a bare Δ field.
 type Δ struct{ Δ int }
+
+// WrapRec promotes Rec's Δ-led field to another package.
+type WrapRec struct{ Rec }

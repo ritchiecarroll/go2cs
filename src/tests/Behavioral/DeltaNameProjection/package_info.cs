@@ -74,7 +74,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "ABwulMgAN1aWlJSUgoLsACEWgoKCgoKCgpSCgoKClIKUgoKCgoKChJaClIKClIKCgpSCgpSUgoKCgpSCgpSClIKCgpSCgoKCgpSClJSCgoKCgoKCgoKCgoK4ooKClLY=", "", "", "214=TypeOf/3/4/1,Name/2/2/1,TypeOf/4/4/1,Field/2/2/1;230=TypeOf/2/2/1,Field/2/2/1")]
+[assembly: GoPositionMap("main.go", "main.cs", "ABwulMgAN1aWlJSUgoLsACYkgoKCgoKCgpSCgoKClIKUgoKCgoKChJaClIKClIKCgpSCgpSUgoKCgpSCgpSClIKCgpSCgoKCgpSClJSCgoKCgoKCgoKCgoKUgoKCgoKCgoKCgoK4ooKClLY=", "", "", "219=TypeOf/3/4/1,Name/2/2/1,TypeOf/4/4/1,Field/2/2/1;235=TypeOf/2/2/1,Field/2/2/1;248=Field/3/3/1,Sprintf/1/1/1")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -115,6 +115,7 @@ public static partial class main_package
     public partial struct S2 {}
     public partial struct T {}
     public partial struct Wrap {}
+    public partial struct X {}
     [GoName("Δ")] public partial struct Δ {}
     [GoName("ΔEmb")] public partial struct ΔEmb {}
     [GoName("ΔMatrix")] public partial struct ΔMatrix {}

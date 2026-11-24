@@ -39,4 +39,8 @@ public partial struct Δ {
     [GoName("Δ")] public nint ΔΔ;
 }
 
+partial struct WrapRec {
+    /*embed*/ public Rec Rec;
+}
+
 } // end lib_package

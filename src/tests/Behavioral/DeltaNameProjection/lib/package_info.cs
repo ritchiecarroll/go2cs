@@ -70,6 +70,7 @@ public static partial class lib_package
     public partial interface Fooer {}
     public partial interface Lower {}
     public partial struct Rec {}
+    public partial struct WrapRec {}
     [GoName("Δ")] public partial struct Δ {}
     [GoName("ΔEmbL")] public partial struct ΔEmbL {}
     [GoName("Δrec")] public partial struct Δrec {}

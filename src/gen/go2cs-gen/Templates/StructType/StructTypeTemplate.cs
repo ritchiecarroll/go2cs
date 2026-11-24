@@ -521,7 +521,7 @@ internal class StructTypeTemplate : TemplateBase
                 // promoted member TYPE (a generic embed's field carries `Point`, out of scope here).
                 Dictionary<string, string> typeArgMap = GetEmbedTypeArgumentMap(promotedStructType);
 
-                foreach ((string typeName, string memberName, int depth) in GetPromotedStructMembers(promotedStructType))
+                foreach ((string typeName, string memberName, int depth, string? goName) in GetPromotedStructMembers(promotedStructType))
                 {
                     // A blank `_` field (padding / embedded unexported marker) is never promoted or
                     // selectable in Go; emitting an accessor for it collides with the enclosing
@@ -538,7 +538,8 @@ internal class StructTypeTemplate : TemplateBase
                     // Scope derives from the MEMBER name (its exportedness), matching the box-field
                     // accessors: a lowercase field TYPE (uintptr Size_) made an EXPORTED promoted
                     // member internal - invisible cross-assembly (reflect via abi, CS1061 x22).
-                    string typeScope = GetScope(GetSimpleName(memberName));
+                    // A Δ-led Go name reads from its stamp, as the declared field's own scope does.
+                    string typeScope = GetStampedScope(goName, GetSimpleName(memberName));
 
                     // A promoted-field accessor whose name equals the ENCLOSING type name is CS0542
                     // (a member cannot share its type's name) — debug/gosym's `type Func struct{ *Sym }`
@@ -574,7 +575,7 @@ internal class StructTypeTemplate : TemplateBase
             {
                 Dictionary<string, string> typeArgMap = GetEmbedTypeArgumentMap(promotedStructType);
 
-                foreach ((string typeName, string memberName, int depth) in GetPromotedStructMembers(promotedStructType))
+                foreach ((string typeName, string memberName, int depth, string? goName) in GetPromotedStructMembers(promotedStructType))
                 {
                     // Blank `_` field — unaddressable in Go, and its `Ꮡ_` would collide with the
                     // enclosing struct's own `Ꮡ_` (CS0111). Every uniquified spelling counts; see
@@ -596,7 +597,8 @@ internal class StructTypeTemplate : TemplateBase
                     // Scope derives from the MEMBER name (its exportedness), matching the box-field
                     // accessors: a lowercase field TYPE (uintptr Size_) made an EXPORTED promoted
                     // member internal - invisible cross-assembly (reflect via abi, CS1061 x22).
-                    string typeScope = GetScope(GetSimpleName(memberName));
+                    // A Δ-led Go name reads from its stamp, as the declared field's own scope does.
+                    string typeScope = GetStampedScope(goName, GetSimpleName(memberName));
                     // StructName (with type parameters), not NonGenericStructName — a GENERIC
                     // struct's instance param must carry them (Δentry<K, V>, CS0305); the
                     // promoted-struct MEMBER access strips its type arguments (the property is
@@ -655,7 +657,7 @@ internal class StructTypeTemplate : TemplateBase
 
             foreach ((string promotedStructType, _, _, _, _) in StructMembers.Where(item => item.isPromotedStruct))
             {
-                foreach ((_, string memberName, int memberDepth) in GetPromotedStructMembers(promotedStructType))
+                foreach ((_, string memberName, int memberDepth, _) in GetPromotedStructMembers(promotedStructType))
                 {
                     string name = GetSimpleName(memberName);
 
@@ -688,7 +690,9 @@ internal class StructTypeTemplate : TemplateBase
         return !(memberDepth == 1 && IsReadOnlyZeroSizeMemberOf(promotedStructType, memberName) || ReadOnlyZeroSizeMembers.Contains(promotedMemberName));
     }
 
-    private IEnumerable<(string typeName, string memberName, int depth)> GetPromotedStructMembers(string structTypeName)
+    // goName is the member's [GoName] stamp where it has one: a Go name that starts with Δ, which the emitted name cannot
+    // tell from the converter's own Δ rename, so the promoted accessor's scope reads it (GetStampedScope).
+    private IEnumerable<(string typeName, string memberName, int depth, string? goName)> GetPromotedStructMembers(string structTypeName)
     {
         // Collect the embedded struct's members TRANSITIVELY: a member promoted into the
         // enclosing struct may itself come from a NESTED embedded struct (Go promotes through
@@ -710,7 +714,7 @@ internal class StructTypeTemplate : TemplateBase
         // Feeding the counter every occurrence does not re-open the case it was written for
         // (macho's `FatArch`, Cpu at depth 1 and depth 2): minDepth 1 with count 1 still
         // emits the depth-1 accessor and skips the depth-2 one.
-        List<(string typeName, string memberName, int depth)> collected = [];
+        List<(string typeName, string memberName, int depth, string? goName)> collected = [];
 
         collect(structTypeName, [], 1);
 
@@ -760,15 +764,17 @@ internal class StructTypeTemplate : TemplateBase
                 // metadata type's own embeds is not chased (none of the runtime's cross-package
                 // embeds need it); the emitted single-hop accessor resolves through the embedded
                 // type's own generated promotion when it exists.
-                foreach ((string fieldTypeName, string fieldName) in getMetadataStructFields(typeName))
-                    collected.Add((fieldTypeName, fieldName, depth));
+                foreach ((string fieldTypeName, string fieldName, string? fieldGoName) in getMetadataStructFields(typeName))
+                    collected.Add((fieldTypeName, fieldName, depth, fieldGoName));
 
                 return;
             }
 
+            Dictionary<string, string> goNames = structDecl.GetGoNameMembers();
+
             foreach ((string memberType, string memberName, _, bool isEmbedded, _) in structDecl.GetStructMembers(compilation!, true))
             {
-                collected.Add((memberType, memberName, depth));
+                collected.Add((memberType, memberName, depth, goNames.TryGetValue(memberName.TrimStart('@'), out string? memberGoName) ? memberGoName : null));
 
                 // An embedded struct field contributes its own members transitively. The
                 // converter emits every embed - value or POINTER - as a `partial ref`
@@ -781,7 +787,7 @@ internal class StructTypeTemplate : TemplateBase
             }
         }
 
-        IEnumerable<(string typeName, string fieldName)> getMetadataStructFields(string typeName)
+        IEnumerable<(string typeName, string fieldName, string? goName)> getMetadataStructFields(string typeName)
         {
             // Normalize the source-form type reference to a CLR metadata name: strip the ж<>
             // pointer wrapper, the `global::` prefix and `@` identifier escapes, root it in the
@@ -837,7 +843,7 @@ internal class StructTypeTemplate : TemplateBase
                 // Identifier.Text, which GetStructMembers's source-based sibling reads) —
                 // escape it before it reaches emitted C# (runtime's white-box AddrRange
                 // promoting addrRange.base: CS1519/CS1001/CS1002 in the generated accessor).
-                yield return (fieldSymbol.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat), EscapeCsKeyword(fieldSymbol.Name));
+                yield return (fieldSymbol.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat), EscapeCsKeyword(fieldSymbol.Name), GetGoNameStamp(fieldSymbol));
             }
 
             // A REFERENCED assembly's generated wrapper exposes its embedded member and its
@@ -855,7 +861,7 @@ internal class StructTypeTemplate : TemplateBase
                 if (property.IsIndexer || GetSimpleName(property.Name) == "_")
                     continue;
 
-                yield return (property.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat), EscapeCsKeyword(property.Name));
+                yield return (property.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat), EscapeCsKeyword(property.Name), null);
             }
         }
     }
