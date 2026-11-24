@@ -22,6 +22,9 @@ type str struct {
 	l uint
 }
 
+// A named byte slice: its data word reaches slice<T> through the named type's conversion.
+type bytes []byte
+
 var key = ptr(&[...]uint8{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16})
 
 type hasher struct {
@@ -71,6 +74,36 @@ func main() {
 		q := ptr(ui(h.p) + 4)
 		q = ptr(ui(q) + 4)
 		return fmt.Sprint(readU8(q, 0))
+	})
+	try("uint length store", func() string {
+		s2 := "abcdefgh"
+		hp := (*str)(ptr(&s2))
+		hp.l = 3
+		return s2
+	})
+	try("slice header after reslice", func() string {
+		b2 := b[2:6]
+		h := *(*str)(ptr(&b2))
+		return fmt.Sprint(h.l, readU8(h.p, 0), readU8(h.p, 3))
+	})
+	try("wide slice header", func() string {
+		w := []uint32{0x04030201, 0x08070605, 0x0c0b0a09}
+		h := *(*str)(ptr(&w))
+		return fmt.Sprint(h.l, readU8(h.p, 4), readU64(h.p, 4))
+	})
+	try("slice as string sees writes", func() string {
+		c := []byte("xyz")
+		v := (*string)(ptr(&c))
+		c[0] = 'X'
+		c = c[:2]
+		return *v
+	})
+	try("data words equal header words", func() string {
+		h := *(*str)(ptr(&s))
+		hb := *(*str)(ptr(&b))
+		e := ""
+		var nb bytes = []byte("wxyz")
+		return fmt.Sprint(h.p == *(*ptr)(ptr(&s)), hb.p == *(*ptr)(ptr(&b)), readU8(*(*ptr)(ptr(&b)), 3), *(*ptr)(ptr(&e)) == nil, readU8(*(*ptr)(ptr(&nb)), 1))
 	})
 	try("package array reads", func() string { return fmt.Sprint(readU8(key, 0), readU8(key, 15), readU64(key, 8)) })
 	try("package array view length", func() string { return fmt.Sprint(len((*[4]byte)(key)), (*[4]byte)(key)[3]) })
