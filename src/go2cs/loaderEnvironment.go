@@ -11,6 +11,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -57,6 +58,65 @@ func cgoOnLoad(options Options, env []string) bool {
 	return enabled == "1"
 }
 
+// packageTestLoaderEnv is converterLoaderEnv for a load of the CONVERTED package's own test variants: cgo-on under -cgo,
+// as its production load is (conversionDriver.go), so the variants select the files the production load selected
+// (cgo Phase 3, increment 3.4 seat 4a: DESIGN-cgo-phase3-marshaling section 19). Only the package being converted
+// loads this way. A load of any OTHER package (linknameOperations' target closure) keeps converterLoaderEnv: no other
+// package loads cgo-on (stop line S-G).
+func packageTestLoaderEnv(options Options, settings ...string) []string {
+	env := converterLoaderEnv(settings...)
+
+	if options.parseCgoTargets {
+		env = append(env, "CGO_ENABLED=1")
+	}
+
+	return env
+}
+
+// cgoOracleEnv is the extra environment of the -tests oracle (`go test -json`) under -cgo: cgo-on, so Go's own run
+// selects the cgo files the conversion selected, whatever the host's implicit default is. Empty otherwise: the oracle
+// keeps the environment it always had.
+func cgoOracleEnv(options Options) []string {
+	if options.parseCgoTargets {
+		return []string{"CGO_ENABLED=1"}
+	}
+
+	return nil
+}
+
+// checkCgoTestsOutput refuses a -cgo -tests conversion whose output lies in the REPOSITORY's corpus: the corpus is
+// emitted at CGO_ENABLED=0 by ruling, so a cgo-on package goes to a scratch root seeded from it, never into src/core
+// (stop line S-D). The corpus is the core directory of the go2cs root in use; it is the repository's when the root's
+// parent holds git metadata (a .git directory, or a worktree's .git file). A scratch root seeded by copying src/core
+// holds none.
+func checkCgoTestsOutput(options Options, outputPath string) error {
+	if !options.parseCgoTargets || !options.convertTests || options.go2csPath == "" {
+		return nil
+	}
+
+	root, err := filepath.Abs(options.go2csPath)
+
+	if err != nil {
+		return nil
+	}
+
+	output, err := filepath.Abs(outputPath)
+
+	if err != nil {
+		return nil
+	}
+
+	if _, statErr := os.Stat(filepath.Join(root, "..", ".git")); statErr != nil {
+		return nil
+	}
+
+	if !isPathUnder(output, filepath.Join(root, "core")) {
+		return nil
+	}
+
+	return fmt.Errorf("-cgo -tests writes a cgo-on conversion, and %s is in the repository's corpus (%s), which is emitted at CGO_ENABLED=0 by ruling: convert into a scratch root seeded from src/core instead", output, filepath.Join(root, "core"))
+}
+
 // checkCgoFlag refuses a -cgo the converter cannot honour. -cgo makes the conversion's loads cgo-on: the
 // single-package driver's own (processConversion), and under -recurse the module driver's closure load and each
 // package's own (a cgo package against the go.* packages, INC 1). It is refused beside -stdlib (the standard library
@@ -71,8 +131,6 @@ func checkCgoFlag(cgo, stdlib, tests bool) error {
 	switch {
 	case stdlib:
 		return fmt.Errorf("-cgo cannot be combined with -stdlib: the standard library converts at CGO_ENABLED=0 by ruling")
-	case tests:
-		return fmt.Errorf("-cgo cannot be combined with -tests: the test drivers' loads stay at CGO_ENABLED=0")
 	}
 
 	if value, set := os.LookupEnv("CGO_ENABLED"); set && value != "" && value != "1" {
