@@ -120,7 +120,7 @@ public partial struct Δ {
     [GoName("Δ")] public nint ΔΔ;
 }
 
-[GoName("Δg")] internal delegate @string Δg();
+[GoName("Δg")] public delegate @string Δg();
 
 partial struct X {
     /*embed*/ internal Δslice Δslice;

@@ -47,6 +47,6 @@ partial struct WrapRec {
 
 public static nint ApplyΔ(ΔFn f, nint n) { return f(n); }
 
-[GoName("Δfn")] internal delegate @string Δfn();
+[GoName("Δfn")] public delegate @string Δfn();
 
 } // end lib_package
