@@ -370,6 +370,10 @@ const cgoP3OutParameterElement = "an element of a Go array of C pointers"
 // (GoCgoArgs.RequireWordOutsidePin; P3's review of 1b, item 4).
 const cgoP3ReturnedIntoGoMemory = "returned an address inside the Go memory it was handed"
 
+// cgoP3WideReinterpret is in the refusal of a reinterpret view no door can pin over a value wider than its pointee
+// (GoCgoArgs.ScalarPointer; P3's review of 1b, item 3).
+const cgoP3WideReinterpret = "C may write past one"
+
 // cgoP3Arms are the end-to-end program's arms. An arm with neither goFails nor csFails prints the same lines and exits
 // 0 both ways. Since increment 3.2 seat 1b (18.12, P-2) an arm that hands C or a helper a pointer into Go memory whose
 // box names its storage prints as Go does: the wrapper pins the storage for the call. govoidnumber and govoidexpr hand
@@ -437,6 +441,12 @@ func cgoP3Arms() []cgoG1Arm {
 		{name: "goviewcelemfill"},
 		{name: "outstrtodelem", csFails: cgoP3OutParameterElement},
 		{name: "outstrtodgo", csFails: cgoP3ReturnedIntoGoMemory},
+		// P3's read of the fold (COORD inbox 20261124T204626Z): the pointer result inside a pin and its identity
+		// near-miss, and the wide reinterpret view and its same-size near-miss.
+		{name: "resultstrtokgo", csFails: cgoP3ReturnedIntoGoMemory},
+		{name: "resultstrcpyself"},
+		{name: "goviewwide", csFails: cgoP3WideReinterpret},
+		{name: "goviewsame"},
 		// Increment 3.2's first reds (section 6). s6field, s6reinterp and s6slice print as Go does, and since seat 1a
 		// (18.9) s6nextnil, s6nextdirect and s6name do too: the field accessor retired their cgoP3LayoutEntry pins (the
 		// readings before it are at cgoP3LayoutEntryPointer). Since seat 1c (18.11) s6next does too: the **C.T door

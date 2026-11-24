@@ -41892,4 +41892,30 @@ program prints frame information for promoted methods, and a twin adds or rename
 
 — G (2026-11-23)
 
+## 2026-11-24 — H (cgo 3.2 seat 1b, claude/h-cgo-1b-r7 and its NIT fold; P3's read of the fold, COORD ruling: a board row each, cured later): two routes return a word from C unchecked
+
+Seat 1b checks two kinds of word C returns, inside the wrapper's `fixed`, against every pinned argument: an
+out-parameter's word, and a pointer result other than the pointer the call was handed. A word in pinned Go storage,
+including one past its end, is refused by name. P3 names two more routes that are NOT checked:
+
+**A pointer MEMBER C writes into a mirrored struct: OPEN.**
+- cgoStructWrappers.go copies the member back with PointerMemberBack after the `fixed` ends.
+- Scenario: `parse(&st, (*C.char)(unsafe.Pointer(&b[0])))` sets `st.cur = buf + 3`.
+- `st.cur` then becomes a native box over Go memory that can move.
+
+**An out-parameter word that is a stack MIRROR's address: OPEN.**
+- Scenario: `void pick(int *a, int **out)` stores `a` in `*out`, where `a` is one Go int that crosses as a stack copy.
+- The out word is that copy's address, minted as C memory (GoCgoArgs.PointerMemberBack). It names a dead stack slot
+  after the call returns.
+- The pointer result has an identity return for this case; the out-parameter has none. No `fixed` is involved, so the
+  check inside the `fixed` cannot reach it.
+
+**Also open, from the same seat:**
+- A void pointer C returns into pinned Go memory crosses as its number (M3: a number names no box).
+- Handing C a whole Go array of C pointers, pinned, is a later seat. Today such an element is refused by name.
+
+**Owner.** H, a later cgo seat; COORD routes. None gates train 11.
+
+— H (2026-11-24)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

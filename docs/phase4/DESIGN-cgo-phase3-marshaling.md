@@ -2951,3 +2951,25 @@ returns into pinned Go memory still crosses as its number (a number names no box
 pointers, pinned, is a later seat. The full behavioral suite is the train's (route #7, twin 4).
 
 — H (2026-11-24)
+
+#### 18.12.3 Record 2026-11-24: P3's read of the fold, CLEAR WITH NITS, and the NITs folded
+
+P3 read the fold at `8d0c6c9de5`: CLEAR WITH NITS (COORD inbox H 20261124T204626Z). Each NIT is folded:
+- **One past the end does not cross.** GoCgoPin.Holds now includes the storage's end, so C's write cursor `buf + n`
+  is refused by name, not minted as a native box over the managed heap. The unit row's one-past-end control is now a
+  refusal. It read red with the old comparison and green after.
+- **Behavioral rows for the two refusals, each with its near-miss** (owner rule 2026-11-22):
+  - resultstrtokgo: strtok over a Go buffer returns `&b[2]`. csFails, with the refusal's text.
+  - resultstrcpyself: strcpy returns the destination it was handed, the identity return under a pin. Prints as Go does.
+  - goviewwide: a char * over a 4-byte field of a struct holding a Go reference. csFails, with item 3's text.
+  - goviewsame: the same struct's one-byte field keeps the one-char copy.
+  The wide shape was read on H first, through a converted program. The converter emits
+  `Ꮡs.Ꮡn.Reinterpret<int32, int8>()`, and the door refuses it with item 3's text. The same-size field takes the copy.
+- **The two other unchecked return routes are on the BOARD** (2026-11-24, H), to be cured later:
+  - a pointer member C writes into a mirrored struct;
+  - an out-parameter word that is a stack mirror's address.
+  18.12.2's residual paragraph covers only the void result. Read it with this block.
+- **The refusal reads** "... and go2cs cannot represent a pointer into Go memory that C returned, so it refuses the
+  result". Its old text ("C must not keep a Go pointer") was wrong for strtod's endptr, which C does not keep.
+
+— H (2026-11-24)

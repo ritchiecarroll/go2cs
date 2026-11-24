@@ -472,28 +472,30 @@ public unsafe partial class GoCgoArgsTests
     }
 
     // Item 4 (residual 1, endptr): inside the wrapper's `fixed`, a word C returned that lies in a pinned argument's
-    // storage is refused by name. Minted as a native box, it would name Go memory that moves once the `fixed` ends.
-    // Controls: the array's end (one past it), a C address, and a number argument (nothing pinned).
+    // storage is refused by name. Minted as a native box, it would name Go memory that moves once the `fixed` ends. One
+    // past the end is refused too: C's write cursor `buf + n` (P3's read of the fold, item 1). Controls: a C address,
+    // and a number argument (nothing pinned).
     [TestMethod]
     public void PinnedAWordCReturnsInsidePinnedGoMemoryIsRefusedByName()
     {
         slice<byte> bytes = new slice<byte>(new byte[16]);
         Assert.AreEqual(GoCgoStructPointer.Pinned, GoCgoArgs.ScalarPointer(Ꮡ(bytes, 0).Reinterpret<byte, sbyte>(), "strtod", out _, out GoCgoPin pin));
 
-        string inside = "";
+        string inside = "", onePast = "";
 
         fixed (byte* pinned = pin)
         {
             nuint first = (nuint)pin.Address(pinned);
             nint held = (nint)pinned;
             inside = RefusalOf(() => GoCgoArgs.RequireWordOutsidePin(first + 3, pin, (byte*)held, "strtod"));
+            onePast = RefusalOf(() => GoCgoArgs.RequireWordOutsidePin(first + 16, pin, (byte*)held, "fill"));
 
-            // The controls cross: one past the array's end is not inside it, and a C address is C memory.
-            GoCgoArgs.RequireWordOutsidePin(first + 16, pin, pinned, "strtod");
+            // The control crosses: a C address is C memory.
             GoCgoArgs.RequireWordOutsidePin(0x1000, pin, pinned, "strtod");
         }
 
         StringAssert.Contains(inside, "inside the Go memory it was handed", "endptr into the pinned buffer");
+        StringAssert.Contains(onePast, "cannot represent a pointer into Go memory that C returned", "C's write cursor, one past the end");
 
         // A number argument pins nothing: its fixed is a null reference.
         GoCgoArgs.RequireWordOutsidePin(0x1000, default(GoCgoPin), null, "strtod");

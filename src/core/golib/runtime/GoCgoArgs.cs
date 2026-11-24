@@ -205,7 +205,7 @@ namespace go.golib;
     public static unsafe void RequireWordOutsidePin(nuint word, in GoCgoPin pin, byte* pinned, string function)
     {
         if (word != 0 && pin.Holds(pinned, word))
-            throw RuntimeErrorPanic.ErrorString($"cgo: C.{function} returned an address inside the Go memory it was handed; go2cs cannot hold that memory still after the call, so it refuses the result (C must not keep a Go pointer)");
+            throw RuntimeErrorPanic.ErrorString($"cgo: C.{function} returned an address inside the Go memory it was handed, and go2cs cannot represent a pointer into Go memory that C returned, so it refuses the result");
     }
 
     /// <summary>

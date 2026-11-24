@@ -51,7 +51,8 @@ namespace go.golib;
     public unsafe nint Address(byte* pinned) => m_root is null ? (nint)m_number : (nint)(pinned + m_offset);
 
     // Whether an address C returned lies in this argument's storage, asked while the wrapper's `fixed` still pins it at
-    // `pinned`: [first byte, end of the storage).
+    // `pinned`: [first byte, end of the storage]. One past the end is included: C's write cursor `buf + n` is an address
+    // in the managed heap, not C memory, and it goes stale once the `fixed` ends (P3's read of the fold, item 1).
     internal unsafe bool Holds(byte* pinned, nuint address)
     {
         if (m_root is null || pinned == null)
@@ -60,7 +61,7 @@ namespace go.golib;
         nuint first = (nuint)pinned;
         nuint end = (nuint)(nint)Marshal.UnsafeAddrOfPinnedArrayElement(m_root, m_root.Length);
 
-        return address >= first && address < end;
+        return address >= first && address <= end;
     }
 }
 

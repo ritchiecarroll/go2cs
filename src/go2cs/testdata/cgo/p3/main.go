@@ -17,6 +17,7 @@ package main
 
 /*
 #include <stdlib.h>
+#include <string.h>
 
 const char *go2cs_probe_text(void);
 char *go2cs_probe_text_copy(const char *text);
@@ -68,6 +69,14 @@ type goCHeader struct {
 	pad  int32
 	n    int32
 	name [8]C.char
+}
+
+// goRefHost holds a Go reference, so no door can pin a view of one of its fields: its storage is a managed object
+// (P3's review of 1b, item 3).
+type goRefHost struct {
+	p *int
+	n int32
+	c int8
 }
 
 // same returns the pointer it was handed: a user function whose result is an unsafe.Pointer.
@@ -391,6 +400,35 @@ func main() {
 		var end *C.char
 		n := C.strtod((*C.char)(unsafe.Pointer(&b[0])), &end)
 		fmt.Println("outstrtodgo", float64(n), C.GoString(end))
+	case "resultstrtokgo":
+		// P3's read of the fold, 2a: a pointer RESULT inside the Go buffer C was handed. strtok skips the leading spaces
+		// and returns &b[2]. Go prints the word; go2cs refuses by name inside the call's pin. strtok, not strchr: glibc's
+		// C23 headers make strchr a const-preserving macro.
+		b := []byte("  xy\x00")
+		delim := C.CString(" ")
+		defer C.free(unsafe.Pointer(delim))
+		p := C.strtok((*C.char)(unsafe.Pointer(&b[0])), delim)
+		fmt.Println("resultstrtokgo", C.GoString(p))
+	case "resultstrcpyself":
+		// Its near-miss: strcpy returns the destination it was handed, a pinned Go buffer. That is the identity return,
+		// which maps back to the caller's own pointer and prints as Go does.
+		b := make([]byte, 8)
+		src := C.CString("abc")
+		defer C.free(unsafe.Pointer(src))
+		p := C.strcpy((*C.char)(unsafe.Pointer(&b[0])), src)
+		fmt.Println("resultstrcpyself", C.GoString(p), string(b[:3]))
+	case "goviewwide":
+		// P3's read of the fold, 2b (item 3's shape): a char * over a 4-byte field of a struct that holds a Go reference.
+		// Go lets C fill the field; go2cs refuses by name, since no door can pin it and a one-char copy would put C's
+		// other bytes on the stack.
+		s := goRefHost{p: new(int)}
+		n := C.go2cs_probe_text_fill((*C.char)(unsafe.Pointer(&s.n)), 4)
+		fmt.Println("goviewwide", int(n), s.n, s.p != nil)
+	case "goviewsame":
+		// Its near-miss: a char * over a one-byte field of the same struct keeps the one-char copy.
+		s := goRefHost{p: new(int)}
+		n := C.go2cs_probe_text_fill((*C.char)(unsafe.Pointer(&s.c)), 1)
+		fmt.Println("goviewsame", int(n), s.c, s.p != nil)
 	case "outstrtod":
 		// The out-parameter, shape (i) (18.12 item 4): strtod's char ** endptr is &end, a Go variable C writes. strtod,
 		// not strtol: glibc's C23 headers rename strtol to __isoc23_strtol, which go2cs refuses by name (GO2CS2001).
