@@ -510,9 +510,9 @@ func _C2func_find(p0 *_Ctype_struct_x) (r1 *_Ctype_int, r2 error) { return }
 				t.Fatalf("%s C.%s: %v", goos, declaration.cName, err)
 			}
 
-			// The pointer crosses as 3b2b's scalar pointer does, and errno is read inside the transition: by the binding
+			// The pointer crosses as a scalar pointer does (3b2b; the pinned class since 3.2 seat 1b), and errno is read inside the transition: by the binding
 			// on linux, through the C runtime's slot on windows.
-			for _, line := range []string{"internal static (@int, error) countꓸerrno(ж<@int> p0)", "StructPointer(p0, \"count\"", "return ((@int)(int32)r, err);"} {
+			for _, line := range []string{"internal static (@int, error) countꓸerrno(ж<@int> p0)", "ScalarPointer(p0, \"count\"", "return ((@int)(int32)r, err);"} {
 				if !strings.Contains(text, line) {
 					t.Errorf("%s C.count's errno form lacks %q:\n%s", goos, line, text)
 				}

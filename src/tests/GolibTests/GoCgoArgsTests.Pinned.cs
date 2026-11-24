@@ -239,6 +239,44 @@ public unsafe partial class GoCgoArgsTests
         GC.KeepAlive(referent);
     }
 
+    // A pointer to one C scalar (18.12 item 2): an element of a Go array, and a typed view over Go storage, take the
+    // pinned class, and C's write through the address is what Go reads. A whole scalar in a box keeps its mirror, C
+    // memory its address. A view over storage that holds references is cgo's refusal.
+    [TestMethod]
+    public void PinnedAScalarPointerPinsAnElementAndAViewAndKeepsTheMirrorForAWholeBox()
+    {
+        array<byte> bytes = new array<byte>(16);
+        ж<byte> element = new ElemRefBox<byte>(bytes, 3);
+        array<byte> wide = new array<byte>(16);
+        ж<int32> view = new ElemRefBox<byte>(wide, 4).Reinterpret<byte, int32>();
+
+        foreach ((string form, Func<GoCgoPin, nint> write, Func<long> read, Func<(GoCgoStructPointer, GoCgoPin)> hand) in new (string, Func<GoCgoPin, nint>, Func<long>, Func<(GoCgoStructPointer, GoCgoPin)>)[]
+        {
+            ("an element of a Go array", _ => 0, () => bytes[3], () => { GoCgoStructPointer k = GoCgoArgs.ScalarPointer(element, "fill", out _, out GoCgoPin g); return (k, g); }),
+            ("a wider view pinned over an element", _ => 0, () => wide[4], () => { GoCgoStructPointer k = GoCgoArgs.ScalarPointer(view, "fill", out _, out GoCgoPin g); return (k, g); }),
+        })
+        {
+            (GoCgoStructPointer kind, GoCgoPin pin) = hand();
+            Assert.AreEqual(GoCgoStructPointer.Pinned, kind, form);
+
+            fixed (byte* pinned = pin)
+                *(byte*)pin.Address(pinned) = 0x2A;
+
+            Assert.AreEqual(0x2AL, read(), $"{form}: C's write is what Go reads");
+        }
+
+        ж<int32> whole = new StandardBox<int32>(5);
+        Assert.AreEqual(GoCgoStructPointer.Mirror, GoCgoArgs.ScalarPointer(whole, "fill", out _, out GoCgoPin none), "a whole scalar keeps its mirror");
+        Assert.IsFalse(none.IsGoMemory, "and pins nothing");
+
+        ж<cgoHolder> holder = new StandardBox<cgoHolder>(default(cgoHolder));
+        string refusal = RefusalOf(() => GoCgoArgs.ScalarPointer(holder.Reinterpret<cgoHolder, int32>(), "fill", out _, out _));
+        StringAssert.Contains(refusal, GoPointerToUnpinned, "a view over a struct that holds references");
+
+        GC.KeepAlive(bytes);
+        GC.KeepAlive(wide);
+    }
+
     private static void AssertOutcomes((string form, Func<@unsafe.Pointer> mint, Pinned expected)[] forms)
     {
         var wrong = new List<string>();

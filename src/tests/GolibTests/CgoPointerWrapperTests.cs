@@ -100,16 +100,22 @@ public unsafe class CgoPointerWrapperTests
         }
     }
 
-    // §7, amended: element pointers remain Phase 3, for scalars as for structs. &xs[1] is refused before the call.
+    // §7, amended, then cgo Phase 3, increment 3.2, seat 1b (design 18.12 item 2): an element of a Go scalar array is
+    // the pinned class. &xs[1] is handed to C by its own address inside the array, which the wrapper's fixed holds
+    // still, so frexp writes the element itself and its neighbours are untouched. (Phase 2 refused it before the call.)
     [TestMethod]
-    public void AnElementOfAGoScalarArrayIsRefusedBeforeTheCall()
+    public void AnElementOfAGoScalarArrayIsPinnedAndCWritesIt()
     {
         array<C.@int> exponents = new(3);
-        string message = RefusalOf(() => C.frexp(8.0, new ElemRefBox<C.@int>(exponents, 1)));
+        exponents[0] = 7;
+        exponents[2] = 9;
 
-        StringAssert.Contains(message, "C.frexp");
-        StringAssert.Contains(message, "an element of a Go array or slice");
-        Assert.AreEqual(0, (int32)exponents[1], "C never ran: the element is unwritten");
+        float64 fraction = OnAGoroutine(() => (float64)C.frexp(8.0, new ElemRefBox<C.@int>(exponents, 1)));
+
+        Assert.AreEqual(0.5, fraction, "frexp(8) is 0.5 x 2^4");
+        Assert.AreEqual(4, (int32)exponents[1], "C wrote the element itself");
+        Assert.AreEqual(7, (int32)exponents[0], "the element before is untouched");
+        Assert.AreEqual(9, (int32)exponents[2], "the element after is untouched");
     }
 
     [TestMethod]

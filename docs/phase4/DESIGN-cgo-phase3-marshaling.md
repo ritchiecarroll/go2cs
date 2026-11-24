@@ -1495,6 +1495,12 @@ own element type, so it scored a view over a reference-bearing struct as crossin
   `ANumberStaysRefusedWhileAnyPointerThatPinsItsStorageIsAlive`, and the pin-extent arms' numbers.
   - Also the pinning and retaining mints of a pointer REBUILT from a Go array's number. Their native box has no
     source, so 3.2 has no storage to fix and refuses them as numbers.
+  - **Amended 2026-11-24 (seat 1b; COORD ruling (a), inbox H 20261124T021216Z):** the premise "their native box has
+    no source" has been false since `d87e1dd863` (2026-11-13). The number-to-pointer conversion keeps the live Go box
+    the number resolved to (`NativeDerivation.KeptResolved`), so the box chain names the array's pinned storage and
+    13.4 (M3) classes it as that box. The pinning and retaining mints of this form CROSS. In Go,
+    `(*byte)(unsafe.Pointer(&array))` is a valid pointer into Go memory that holds no Go pointers, and cgo accepts it.
+    The bare mint and the number held in a variable stay refused. The sentence above stays as written.
 - **The end-to-end arms** (`cgoP3Arms`; the converter mints `unsafe.Pointer(&x)` as `FromPinnedBox`, so the arms
   whose pointer is written in the call carry their box). **22 flip to Go's output:**
   - `goinnerdefer`, `goinnergo`, `govoid`;

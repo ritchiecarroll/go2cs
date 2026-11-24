@@ -25,7 +25,15 @@ namespace go.golib;
     Mirror,
 
     /// <summary>A struct in native memory: its own address is handed over, uncopied, and C may keep it.</summary>
-    Native
+    Native,
+
+    /// <summary>
+    /// A C scalar in Go memory (an element of a Go array, or a typed view over Go storage): handed over by its own
+    /// address inside storage the wrapper's <c>fixed</c> holds still for the call (cgo Phase 3, increment 3.2, seat 1b,
+    /// design 18.12), uncopied, so what C writes is what Go reads. Only a scalar pointee takes it: its layout is one
+    /// value, the same in C and in the CLR.
+    /// </summary>
+    Pinned
 }
 
 /// <summary>
@@ -72,6 +80,46 @@ namespace go.golib;
 
             default:
                 throw Refused(function, typeof(T), $"a {pointer.GetType().Name}, a pointer kind Phase 2 does not classify");
+        }
+    }
+
+    /// <summary>
+    /// How to hand C a pointer to one C SCALAR (cgo Phase 3, increment 3.2, seat 1b: design 18.12 item 2). As
+    /// <see cref="StructPointer{T}"/> for nil, C memory and one whole scalar in a box or a field (a stack mirror). An
+    /// element of a Go array, and a typed view over Go storage, are <see cref="GoCgoStructPointer.Pinned"/>: the box
+    /// names its storage, and <paramref name="pin"/> is the pin the wrapper holds with a <c>fixed</c> for the call. Storage
+    /// that holds Go pointers, a token for it, and a published <c>unsafe.Pointer</c> word over it are refused with cgo's
+    /// text, as the void door refuses them.
+    /// </summary>
+    public static GoCgoStructPointer ScalarPointer<T>(ж<T>? pointer, string function, out nuint address, out GoCgoPin pin)
+    {
+        pin = default;
+
+        switch (pointer)
+        {
+            case ElemRefBox<T>:
+            case NativeBox<T> native when !IsGenuinelyNative(native):
+                nuint number = pointer is NativeBox<T> view ? view.NativeAddress : 0;
+
+                if (ManagedPointerTokens.IsTaggedToken(number))
+                    throw GoPointerToUnpinnedGoPointer();
+
+                // Storage the box cannot name keeps Phase 2's refusal, word for word: a native box minted from managed
+                // storage, or an element of a Go array.
+                if (!TryPinTarget(pointer, number, out Array? root, out nint offset))
+                {
+                    throw pointer is NativeBox<T>
+                        ? Refused(function, typeof(T), "a native pointer minted from managed storage (a reinterpret view, an order token or a pinned managed address), which C must not write through")
+                        : Refused(function, typeof(T), "an element of a Go array or slice whose storage go2cs cannot hold still for the call");
+                }
+
+                RequireCrossable(root);
+                pin = new GoCgoPin(root, offset);
+                address = 0;
+                return GoCgoStructPointer.Pinned;
+
+            default:
+                return StructPointer(pointer, function, out address);
         }
     }
 

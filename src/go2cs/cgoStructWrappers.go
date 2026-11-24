@@ -406,8 +406,9 @@ func (set *cgoWrapperSet) wrapper(declaration cgoDeclaration) (string, error) {
 	var externParams, wrapperParams, arguments []string
 	var before, after strings.Builder
 
-	// The void parameters, each pinned by its own `fixed` around the call (18.12 item 2).
-	var pinned []int
+	// The void parameters and the scalar pointer parameters, each pinned by its own `fixed` around the call (18.12 item
+	// 2). A scalar pointer's pin holds something only when its kind is Pinned.
+	var pinned, pinnedScalars []int
 
 	checked := map[string]bool{}
 
@@ -462,9 +463,17 @@ func (set *cgoWrapperSet) wrapper(declaration cgoDeclaration) (string, error) {
 
 			fmt.Fprintf(&before, "\n        %s m%d = default;\n", copyType, i)
 
-			// The pointer's kind is GoCgoArgs' to decide (§11.1): it refuses, before any native code runs, an element of a Go
-			// array (C may touch the whole array) and a native box minted from managed storage (C must not write through it).
-			fmt.Fprintf(&before, "        global::go.golib.GoCgoStructPointer k%d = %sStructPointer(p%d, %q, out nuint n%d);\n", i, args, i, function, i)
+			// The pointer's kind is GoCgoArgs' to decide (§11.1): for a struct it refuses, before any native code runs, an
+			// element of a Go array (C may touch the whole array) and a native box minted from managed storage (C must not
+			// write through it). A pointer to one C scalar takes the pinned class there instead (18.12 item 2): its address
+			// inside Go storage, held still by the `fixed` around the call, since a scalar's layout is the same in C.
+			if param.mirror == nil {
+				fmt.Fprintf(&before, "        global::go.golib.GoCgoStructPointer k%d = %sScalarPointer(p%d, %q, out nuint n%d, out global::go.golib.GoCgoPin g%d);\n", i, args, i, function, i, i)
+				pinnedScalars = append(pinnedScalars, i)
+			} else {
+				fmt.Fprintf(&before, "        global::go.golib.GoCgoStructPointer k%d = %sStructPointer(p%d, %q, out nuint n%d);\n", i, args, i, function, i)
+			}
+
 			fmt.Fprintf(&before, "        nint a%d = (nint)n%d;\n", i, i)
 
 			// Two pointers to the same Go struct are one object to C, as they are under Go: the later one shares the
@@ -587,19 +596,30 @@ func (set *cgoWrapperSet) wrapper(declaration cgoDeclaration) (string, error) {
 	fmt.Fprintf(&bracket, "        %ssyscallEntersyscall();\n\n        try\n        {\n%s        }\n", runtime, cgoErrnoCall(call, errnoForm, set.target.goos))
 	fmt.Fprintf(&bracket, "        finally\n        {\n            %ssyscallExitsyscall();\n        }\n", runtime)
 
-	if len(pinned) == 0 {
+	if len(pinned) == 0 && len(pinnedScalars) == 0 {
 		text.WriteString(bracket.String())
 	} else {
-		// Every argument is classified above; here each void one is pinned, nested in parameter order, and the innermost
+		// Every argument is classified above; here each pinned one is pinned, nested in parameter order, and the innermost
 		// block holds the transition bracket and the call (13.5). A number pins nothing: its pinnable reference is null.
-		for _, i := range pinned {
+		all := append(append([]int(nil), pinned...), pinnedScalars...)
+		sort.Ints(all)
+
+		if !strings.HasSuffix(text.String(), "\n\n") {
+			text.WriteString("\n")
+		}
+
+		for _, i := range all {
 			fmt.Fprintf(&text, "        fixed (byte* f%d = g%d)\n", i, i)
 		}
 
 		text.WriteString("        {\n")
 
-		for _, i := range pinned {
-			fmt.Fprintf(&text, "            nint a%d = g%d.Address(f%d);\n", i, i, i)
+		for _, i := range all {
+			if params[i].void {
+				fmt.Fprintf(&text, "            nint a%d = g%d.Address(f%d);\n", i, i, i)
+			} else {
+				fmt.Fprintf(&text, "            if (k%d == global::go.golib.GoCgoStructPointer.Pinned)\n                a%d = g%d.Address(f%d);\n", i, i, i, i)
+			}
 		}
 
 		text.WriteString("\n")

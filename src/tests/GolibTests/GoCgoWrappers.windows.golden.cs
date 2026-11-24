@@ -198,7 +198,7 @@ static unsafe partial class cgotestꓸC_package
         }
 
         long m1 = default;
-        global::go.golib.GoCgoStructPointer k1 = global::go.golib.GoCgoArgs.StructPointer(p1, "_gmtime64_s", out nuint n1);
+        global::go.golib.GoCgoStructPointer k1 = global::go.golib.GoCgoArgs.ScalarPointer(p1, "_gmtime64_s", out nuint n1, out global::go.golib.GoCgoPin g1);
         nint a1 = (nint)n1;
 
         if (k1 == global::go.golib.GoCgoStructPointer.Mirror)
@@ -208,15 +208,22 @@ static unsafe partial class cgotestꓸC_package
         }
 
         int r;
-        global::go.runtime_package.syscallEntersyscall();
 
-        try
+        fixed (byte* f1 = g1)
         {
-            r = _gmtime64_sᴍnative(a0, a1);
-        }
-        finally
-        {
-            global::go.runtime_package.syscallExitsyscall();
+            if (k1 == global::go.golib.GoCgoStructPointer.Pinned)
+                a1 = g1.Address(f1);
+
+            global::go.runtime_package.syscallEntersyscall();
+
+            try
+            {
+                r = _gmtime64_sᴍnative(a0, a1);
+            }
+            finally
+            {
+                global::go.runtime_package.syscallExitsyscall();
+            }
         }
 
         if (k0 == global::go.golib.GoCgoStructPointer.Mirror)
@@ -316,7 +323,7 @@ static unsafe partial class cgotestꓸC_package
     internal static @double frexp(@double p0, ж<@int> p1)
     {
         int m1 = default;
-        global::go.golib.GoCgoStructPointer k1 = global::go.golib.GoCgoArgs.StructPointer(p1, "frexp", out nuint n1);
+        global::go.golib.GoCgoStructPointer k1 = global::go.golib.GoCgoArgs.ScalarPointer(p1, "frexp", out nuint n1, out global::go.golib.GoCgoPin g1);
         nint a1 = (nint)n1;
 
         if (k1 == global::go.golib.GoCgoStructPointer.Mirror)
@@ -326,15 +333,22 @@ static unsafe partial class cgotestꓸC_package
         }
 
         double r;
-        global::go.runtime_package.syscallEntersyscall();
 
-        try
+        fixed (byte* f1 = g1)
         {
-            r = frexpᴍnative((float64)p0, a1);
-        }
-        finally
-        {
-            global::go.runtime_package.syscallExitsyscall();
+            if (k1 == global::go.golib.GoCgoStructPointer.Pinned)
+                a1 = g1.Address(f1);
+
+            global::go.runtime_package.syscallEntersyscall();
+
+            try
+            {
+                r = frexpᴍnative((float64)p0, a1);
+            }
+            finally
+            {
+                global::go.runtime_package.syscallExitsyscall();
+            }
         }
 
         if (k1 == global::go.golib.GoCgoStructPointer.Mirror)
@@ -528,7 +542,7 @@ static unsafe partial class cgotestꓸC_package
     internal static (@long, error) go2cs_probe_strtolꓸerrno(ж<@char> p0, @int p1)
     {
         sbyte m0 = default;
-        global::go.golib.GoCgoStructPointer k0 = global::go.golib.GoCgoArgs.StructPointer(p0, "go2cs_probe_strtol", out nuint n0);
+        global::go.golib.GoCgoStructPointer k0 = global::go.golib.GoCgoArgs.ScalarPointer(p0, "go2cs_probe_strtol", out nuint n0, out global::go.golib.GoCgoPin g0);
         nint a0 = (nint)n0;
 
         if (k0 == global::go.golib.GoCgoStructPointer.Mirror)
@@ -539,18 +553,25 @@ static unsafe partial class cgotestꓸC_package
 
         int r;
         int errno;
-        global::go.runtime_package.syscallEntersyscall();
 
-        try
+        fixed (byte* f0 = g0)
         {
-            nint errnoAddress = errnoᴍlocation();
-            global::System.Runtime.InteropServices.Marshal.WriteInt32(errnoAddress, 0);
-            r = go2cs_probe_strtolᴍnativeerrno(a0, (int32)p1);
-            errno = global::System.Runtime.InteropServices.Marshal.ReadInt32(errnoAddress);
-        }
-        finally
-        {
-            global::go.runtime_package.syscallExitsyscall();
+            if (k0 == global::go.golib.GoCgoStructPointer.Pinned)
+                a0 = g0.Address(f0);
+
+            global::go.runtime_package.syscallEntersyscall();
+
+            try
+            {
+                nint errnoAddress = errnoᴍlocation();
+                global::System.Runtime.InteropServices.Marshal.WriteInt32(errnoAddress, 0);
+                r = go2cs_probe_strtolᴍnativeerrno(a0, (int32)p1);
+                errno = global::System.Runtime.InteropServices.Marshal.ReadInt32(errnoAddress);
+            }
+            finally
+            {
+                global::go.runtime_package.syscallExitsyscall();
+            }
         }
 
         if (k0 == global::go.golib.GoCgoStructPointer.Mirror)
