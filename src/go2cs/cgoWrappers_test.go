@@ -263,6 +263,9 @@ func _Cfunc_go2cs_probe_add_into(p0 *_Ctype_struct_go2cs_probe_pair, p1 *_Ctype_
 func _Cfunc_go2cs_probe_tagged_double(p0 *_Ctype_struct_go2cs_probe_tagged) (r1 _Ctype_int) { return }
 func _Cfunc_go2cs_probe_hfa_scale(p0 *_Ctype_struct_go2cs_probe_hfa, p1 _Ctype_double) (r1 _Ctype_double) { return }
 func _C2func_go2cs_probe_strtol(p0 *_Ctype_char, p1 _Ctype_int) (r1 _Ctype_long, r2 error) { return }
+
+// The pressure arm (3.2 seat 1b, design 18.1 COORD (b)): a slow fill of a pinned Go buffer while collections compact.
+func _Cfunc_go2cs_probe_slow_fill(p0 *_Ctype_char, p1 _Ctype_int, p2 _Ctype_int) (r1 _Ctype_int) { return }
 `
 
 // cgoProbeLibrary is the probe library's load-time name on goos, as the hosted leg builds it (its SONAME on linux, its
@@ -325,7 +328,7 @@ func cgoWrapperGolden(t *testing.T, target cgoWrapperTarget) string {
 		set.libraries = map[string]string{}
 	}
 
-	for _, symbol := range []string{"go2cs_probe_pair", "go2cs_probe_pair_sum", "go2cs_probe_add_into", "go2cs_probe_tagged_double", "go2cs_probe_hfa_scale", "go2cs_probe_strtol"} {
+	for _, symbol := range []string{"go2cs_probe_pair", "go2cs_probe_pair_sum", "go2cs_probe_add_into", "go2cs_probe_tagged_double", "go2cs_probe_hfa_scale", "go2cs_probe_strtol", "go2cs_probe_slow_fill"} {
 		set.libraries[symbol] = cgoProbeLibrary(target.goos)
 	}
 
