@@ -73,7 +73,14 @@ public class ManagedPointerTokenRegistryGrowthTests
         for (int i = 0; i < ManagedPointerTokens.SweepThreshold + 1; i++)
             sink += TakeAndDrop();
 
+        // The crossing's own sweep is skipped while another thread of the host (the runtime's sysmon) is already
+        // sweeping, and that sweep can still be walking when the crossing ends (measured on linux: the gate held,
+        // the table at 759 and falling, then 261; 1 run in 48). Read after it finishes, as the race row below does.
+        WaitForAnySweep();
+
         int size = ManagedPointerTokens.RegisteredCount;
+
+        AssertCountIsTable("after the crossing");
 
         Assert.IsTrue(size <= 2 * ManagedPointerTokens.SweepThreshold + 1,
             $"the token table holds {size} entries after {dead} dead registrations and a collection — " +
