@@ -33,6 +33,10 @@ import "C"
 
 import "unsafe"
 
+// cdouble is net's shape (_C_socklen_t = C.socklen_t): an alias of a C type, declared in the file that imports C and
+// named from a plain file of the same package (cgot4_plain.go).
+type cdouble = C.double
+
 // Parse is C's strtod over a C copy of s, through the cgo route.
 func Parse(s string) float64 {
 	cs := C.CString(s)
@@ -42,9 +46,24 @@ func Parse(s string) float64 {
 }
 `
 
+// cgoTestsFixturePlain converts to that alias in a file with no import "C". net's cgo_unix.go does the same
+// (_C_socklen_t(syscall.SizeofSockaddrInet4)), and its emission spelled the cast C.@uint in a file with no using C:
+// CS0246 at the first build of net's cgo-on test host (19.6, probe 45510185924).
+const cgoTestsFixturePlain = `package cgot4
+
+// Half halves x through the C type, from a file that does not import C.
+func Half(x float64) float64 { return float64(cdouble(x) / 2) }
+`
+
 const cgoTestsFixtureTest = `package cgot4
 
 import "testing"
+
+func TestHalfThroughTheAlias(t *testing.T) {
+	if got := Half(3); got != 1.5 {
+		t.Errorf("Half(3) = %v, want 1.5", got)
+	}
+}
 
 func TestParseCrossesToC(t *testing.T) {
 	if got := Parse("1.5abc"); got != 1.5 {
@@ -80,6 +99,7 @@ func TestACgoPackageConvertsWithItsTestsAndMatchesGo(t *testing.T) {
 	module := t.TempDir()
 	writeCgoFixture(t, module, "go.mod", "module example.com/cgot4\n\ngo 1.26\n")
 	writeCgoFixture(t, module, "cgot4.go", cgoTestsFixture)
+	writeCgoFixture(t, module, "cgot4_plain.go", cgoTestsFixturePlain)
 	writeCgoFixture(t, module, "cgot4_test.go", cgoTestsFixtureTest)
 
 	output := filepath.Join(t.TempDir(), "cgot4")
@@ -107,7 +127,7 @@ func TestACgoPackageConvertsWithItsTestsAndMatchesGo(t *testing.T) {
 
 	t.Logf("READING: status %q matched %v go %v csharp %v errors %v", record.Status, record.Matched, record.Go, record.CSharp, record.Errors)
 
-	for _, name := range []string{"TestParseCrossesToC", "TestParseOfNothing"} {
+	for _, name := range []string{"TestParseCrossesToC", "TestParseOfNothing", "TestHalfThroughTheAlias"} {
 		if record.Go[name] != "pass" || record.CSharp[name] != "pass" {
 			t.Errorf("%s: go %q, go2cs %q, want pass on both sides", name, record.Go[name], record.CSharp[name])
 		}
