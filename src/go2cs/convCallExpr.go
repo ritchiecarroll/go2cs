@@ -5747,6 +5747,22 @@ func (v *Visitor) reinterpretManagedEmission(callExpr *ast.CallExpr, arg ast.Exp
 				case *types.Basic:
 					if srcUnder.Kind() == types.UnsafePointer {
 						carried = storedValue(false)
+					} else if srcUnder.Info()&types.IsString != 0 {
+						// A STRING's first word is its data pointer: `unsafe.Pointer(unsafe.StringData(s))`'s own
+						// emission, which carries the element box and takes no pin. An empty string reads nil, as
+						// in Go. zeebo/xxh3 reads it this way (hasher.go, `*(*ptr)(ptr(&buf))`; C45 D4).
+						carried = fmt.Sprintf("@unsafe.Pointer.FromBox(@unsafe.StringData(%s))", storedValue(false))
+					}
+				case *types.Slice:
+					// A SLICE's first word is its data pointer too: `unsafe.Pointer(unsafe.SliceData(b))`. A named
+					// slice type reaches slice<T> only through its implicit conversion, which C# type inference
+					// does not apply, so the element type is spelled for it.
+					slice := storedValue(false)
+
+					if _, named := srcElem.(*types.Named); named {
+						carried = fmt.Sprintf("@unsafe.Pointer.FromBox(@unsafe.SliceData<%s>(%s))", v.getCSharpTypeName(srcUnder.Elem()), slice)
+					} else {
+						carried = fmt.Sprintf("@unsafe.Pointer.FromBox(@unsafe.SliceData(%s))", slice)
 					}
 				}
 			}
