@@ -70,7 +70,7 @@ namespace go;
 
 using static go.log_package;
 using Δio = go.io_package;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸany = variadic<any>;
 
 [GoPackage("log")]
 public static partial class log_package

@@ -75,7 +75,7 @@ using System.Runtime.CompilerServices;
 namespace go.vendor.golang.org.x.text.unicode;
 
 using static go.vendor.golang.org.x.text.unicode.bidi_package;
-using ꓸꓸꓸClass = Span<bidi_package.Class>;
+using ꓸꓸꓸClass = variadic<bidi_package.Class>;
 
 [GoPackage("bidi", ImportPath = "vendor/golang.org/x/text/unicode/bidi")]
 public static partial class bidi_package
@@ -156,8 +156,8 @@ partial class bidiᴛOrdering {
 }
 partial class bidiᴛParagraph {
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) prepareInput(this ref Paragraph p) => bidi_package.prepareInput⁔(ref p);
-    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint n, error err) SetBytes(this ref Paragraph p, slice<byte> b, params Span<Action<ж<options>>> optsʗp) => bidi_package.SetBytes⁔(ref p, b, optsʗp);
-    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint n, error err) SetString(this ref Paragraph p, @string s, params Span<Action<ж<options>>> optsʗp) => bidi_package.SetString⁔(ref p, s, optsʗp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint n, error err) SetBytes(this ref Paragraph p, slice<byte> b, params variadic<Action<ж<options>>> optsʗp) => bidi_package.SetBytes⁔(ref p, b, optsʗp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint n, error err) SetString(this ref Paragraph p, @string s, params variadic<Action<ж<options>>> optsʗp) => bidi_package.SetString⁔(ref p, s, optsʗp);
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool IsLeftToRight(this ref Paragraph p) => bidi_package.IsLeftToRight⁔(ref p);
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static Direction Direction(this ref Paragraph p) => bidi_package.Direction⁔(ref p);
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static Run RunAt(this ref Paragraph p, nint pos) => bidi_package.RunAt⁔(ref p, pos);

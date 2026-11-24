@@ -76,7 +76,7 @@ namespace go.go;
 
 using static global::go.go.scanner_package;
 using token = global::go.go.token_package;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸany = variadic<any>;
 
 [GoPackage("scanner")]
 public static partial class scanner_package

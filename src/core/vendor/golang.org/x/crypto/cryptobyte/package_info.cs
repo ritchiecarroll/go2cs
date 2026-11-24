@@ -78,7 +78,7 @@ using asn1 = go.vendor.golang.org.x.crypto.cryptobyte.asn1_package;
 using big = go.math.big_package;
 using encoding_asn1 = go.encoding.asn1_package;
 using time = go.time_package;
-using ꓸꓸꓸbyte = Span<byte>;
+using ꓸꓸꓸbyte = variadic<byte>;
 
 [GoPackage("cryptobyte", ImportPath = "vendor/golang.org/x/crypto/cryptobyte")]
 public static partial class cryptobyte_package
