@@ -39,6 +39,31 @@ struct go2cs_probe_entry *go2cs_probe_list(void);
 void go2cs_probe_list_release(struct go2cs_probe_entry *node);
 int go2cs_probe_next_family(struct go2cs_probe_entry *node);
 void *go2cs_probe_address(void);
+
+struct go2cs_probe_pair
+{
+    int a;
+    int b;
+};
+
+struct go2cs_probe_cursor
+{
+    int n;
+    char *cur;
+};
+
+struct go2cs_probe_node
+{
+    int value;
+    struct go2cs_probe_node *next;
+};
+
+int go2cs_probe_cursor_set(struct go2cs_probe_cursor *cursor, char *buffer, int k);
+struct go2cs_probe_cursor go2cs_probe_cursor_at(char *buffer, int k);
+int go2cs_probe_pick(int *a, int **out);
+int go2cs_probe_pick_b(struct go2cs_probe_pair *pair, int **out);
+void go2cs_probe_node_ring(struct go2cs_probe_node *node);
+int go2cs_probe_pick_as_char(int *a, char **out);
 */
 import "C"
 
@@ -596,6 +621,67 @@ func main() {
 		s := h.name[:]
 		n := C.go2cs_probe_text_fill((*C.char)(unsafe.Pointer(unsafe.SliceData(s))), 8)
 		fmt.Printf("cviewnamedata %d %q\n", int(n), string(s[:n]))
+	// The .5 cgo items 1(a) and 1(b) (DESIGN-cgo-phase3-marshaling 18.12.3): pointers C hands BACK, inside a struct it
+	// was handed, inside a struct it returns, and through an out-parameter. Go prints each; go2cs maps a stack copy's
+	// own address to the argument and refuses an address inside Go memory or inside a copy, by name.
+	case "membergo":
+		// C writes &b[3] into a member of a Go struct: a pointer into the Go memory the call pinned.
+		b := make([]byte, 8)
+		var c C.struct_go2cs_probe_cursor
+		k := C.go2cs_probe_cursor_set(&c, (*C.char)(unsafe.Pointer(&b[0])), 3)
+		fmt.Println("membergo", int(k), int(c.n), c.cur == (*C.char)(unsafe.Pointer(&b[3])))
+	case "memberc":
+		// Its near-miss over C memory: the member is a C pointer.
+		buf := (*C.char)(C.malloc(8))
+		defer C.free(unsafe.Pointer(buf))
+		var c C.struct_go2cs_probe_cursor
+		k := C.go2cs_probe_cursor_set(&c, buf, 3)
+		fmt.Println("memberc", int(k), int(c.n), c.cur == (*C.char)(unsafe.Add(unsafe.Pointer(buf), 3)))
+	case "resultmembergo":
+		// The same cursor returned by value, its member pointing into the Go buffer.
+		b := make([]byte, 8)
+		c := C.go2cs_probe_cursor_at((*C.char)(unsafe.Pointer(&b[0])), 5)
+		fmt.Println("resultmembergo", int(c.n), c.cur == (*C.char)(unsafe.Pointer(&b[5])))
+	case "resultmemberc":
+		buf := (*C.char)(C.malloc(8))
+		defer C.free(unsafe.Pointer(buf))
+		c := C.go2cs_probe_cursor_at(buf, 5)
+		fmt.Println("resultmemberc", int(c.n), c.cur == (*C.char)(unsafe.Add(unsafe.Pointer(buf), 5)))
+	case "outself":
+		// *out = a: out == &a, and a write through out is a write to a.
+		a := C.int(41)
+		var out *C.int
+		r := C.go2cs_probe_pick(&a, &out)
+		same := out == &a
+		*out = 42
+		fmt.Println("outself", int(r), same, int(a))
+	case "outc":
+		// Its near-miss: a in C memory, so out is that C pointer.
+		ca := (*C.int)(C.malloc(4))
+		defer C.free(unsafe.Pointer(ca))
+		*ca = 7
+		var out *C.int
+		r := C.go2cs_probe_pick(ca, &out)
+		fmt.Println("outc", int(r), out == ca)
+	case "outothertype":
+		// H's near-miss: *out is a's own address, through char * rather than int *. Go's answer is that address; go2cs has
+		// no box of a's that names a char there, so it refuses by name rather than mapping.
+		a := C.int(41)
+		var out *C.char
+		r := C.go2cs_probe_pick_as_char(&a, &out)
+		fmt.Println("outothertype", int(r), unsafe.Pointer(out) == unsafe.Pointer(&a))
+	case "outinterior":
+		// *out = &pair.b, inside the struct C was handed: Go's answer is &pair.b, which go2cs refuses by name.
+		pair := C.struct_go2cs_probe_pair{a: 1, b: 2}
+		var out *C.int
+		r := C.go2cs_probe_pick_b(&pair, &out)
+		fmt.Println("outinterior", int(r), out == &pair.b)
+	case "ringself":
+		// node->next = node: the member is the node's own address.
+		var n C.struct_go2cs_probe_node
+		n.value = 9
+		C.go2cs_probe_node_ring(&n)
+		fmt.Println("ringself", int(n.value), n.next == &n)
 	default:
 		fmt.Println("unknown arm", arm)
 		os.Exit(64)

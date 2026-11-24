@@ -319,3 +319,55 @@ GO2CS_PROBE_EXPORT int go2cs_probe_slow_fill(char *buffer, int size, int micros)
 
     return size;
 }
+
+// cgo Phase 3, increment 3.2 seat 2 (H's sizing item 1): words C RETURNS to Go through a stack copy the wrapper made.
+// Each stores a pointer where Go reads it back: a member of a struct (a parser's cursor), an out-parameter's word, and a
+// node's own next (a one-node ring, as a list's init leaves it).
+struct go2cs_probe_cursor
+{
+    int n;
+    char *cur;
+};
+
+// Item 1(a): a pointer MEMBER C writes into a struct it was handed. cursor->cur = buffer + k; returns k.
+GO2CS_PROBE_EXPORT int go2cs_probe_cursor_set(struct go2cs_probe_cursor *cursor, char *buffer, int k)
+{
+    cursor->n = k;
+    cursor->cur = buffer + k;
+    return k;
+}
+
+// Item 1(a), the result's side: the same cursor, returned BY VALUE.
+GO2CS_PROBE_EXPORT struct go2cs_probe_cursor go2cs_probe_cursor_at(char *buffer, int k)
+{
+    struct go2cs_probe_cursor cursor = { k, buffer + k };
+    return cursor;
+}
+
+// Item 1(b): an out-parameter's word that is the pointer C was handed. *out = a; returns *a.
+GO2CS_PROBE_EXPORT int go2cs_probe_pick(int *a, int **out)
+{
+    *out = a;
+    return *a;
+}
+
+// Item 1(b), interior: the address of the second int of the pair C was handed. *out = &pair->b; returns pair->b.
+GO2CS_PROBE_EXPORT int go2cs_probe_pick_b(struct go2cs_probe_pair *pair, int **out)
+{
+    *out = &pair->b;
+    return pair->b;
+}
+
+// A member that is the struct's own address: node->next = node, as a ring's init leaves it.
+GO2CS_PROBE_EXPORT void go2cs_probe_node_ring(struct go2cs_probe_node *node)
+{
+    node->next = node;
+}
+
+// Item 1(b)'s near-miss (H, 2026-11-24): the same address as an argument C was handed, through another pointee type.
+// *out = (char *)a; returns *a.
+GO2CS_PROBE_EXPORT int go2cs_probe_pick_as_char(int *a, char **out)
+{
+    *out = (char *)a;
+    return *a;
+}

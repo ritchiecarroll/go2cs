@@ -370,6 +370,10 @@ const cgoP3OutParameterElement = "an element of a Go array of C pointers"
 // (GoCgoArgs.RequireWordOutsidePin; P3's review of 1b, item 4).
 const cgoP3ReturnedIntoGoMemory = "returned an address inside the Go memory it was handed"
 
+// cgoP3InsideStackCopy is in the refusal of a word C returned inside the stack copy of a Go argument that is not the copy
+// itself (GoCgoArgs.PointerMemberBack; .5 cgo item 1(b)).
+const cgoP3InsideStackCopy = "inside the stack copy of a Go argument"
+
 // cgoP3WideReinterpret is in the refusal of a reinterpret view no door can pin over a value wider than its pointee
 // (GoCgoArgs.ScalarPointer; P3's review of 1b, item 3).
 const cgoP3WideReinterpret = "C may write past one"
@@ -477,6 +481,19 @@ func cgoP3Arms() []cgoG1Arm {
 		{name: "cviewnameadd"},
 		{name: "cviewnameslice"},
 		{name: "cviewnamedata"},
+		// The .5 cgo items 1(a) and 1(b) (18.12.3): a pointer member C writes into Go memory it was handed, refused by
+		// name, and its C-memory near-miss; the same for a struct result; an out-word that is the argument's stack copy
+		// (out == &a) and its C-memory near-miss; the copy's address through another pointee, and an out-word inside a
+		// copy, each refused by name; a member that is its struct's own copy (node->next == node).
+		{name: "membergo", csFails: cgoP3ReturnedIntoGoMemory},
+		{name: "memberc"},
+		{name: "resultmembergo", csFails: cgoP3ReturnedIntoGoMemory},
+		{name: "resultmemberc"},
+		{name: "outself"},
+		{name: "outc"},
+		{name: "outothertype", csFails: cgoP3InsideStackCopy},
+		{name: "outinterior", csFails: cgoP3InsideStackCopy},
+		{name: "ringself"},
 	}
 }
 

@@ -266,6 +266,28 @@ func _C2func_go2cs_probe_strtol(p0 *_Ctype_char, p1 _Ctype_int) (r1 _Ctype_long,
 
 // The pressure arm (3.2 seat 1b, design 18.1 COORD (b)): a slow fill of a pinned Go buffer while collections compact.
 func _Cfunc_go2cs_probe_slow_fill(p0 *_Ctype_char, p1 _Ctype_int, p2 _Ctype_int) (r1 _Ctype_int) { return }
+
+// The words C returns through a stack copy (3.2 seat 2, H's sizing item 1): a cursor member C sets, by pointer and in a
+// result by value; an out-parameter's word that is the pointer C was handed, or the address of a member inside it; and a
+// node's own next.
+type _Ctype_struct_go2cs_probe_cursor struct {
+	n   _Ctype_int
+	_   [4]byte
+	cur *_Ctype_char
+}
+
+type _Ctype_struct_go2cs_probe_node struct {
+	value _Ctype_int
+	_     [4]byte
+	next  *_Ctype_struct_go2cs_probe_node
+}
+
+func _Cfunc_go2cs_probe_cursor_set(p0 *_Ctype_struct_go2cs_probe_cursor, p1 *_Ctype_char, p2 _Ctype_int) (r1 _Ctype_int) { return }
+func _Cfunc_go2cs_probe_cursor_at(p0 *_Ctype_char, p1 _Ctype_int) (r1 _Ctype_struct_go2cs_probe_cursor) { return }
+func _Cfunc_go2cs_probe_pick(p0 *_Ctype_int, p1 **_Ctype_int) (r1 _Ctype_int) { return }
+func _Cfunc_go2cs_probe_pick_b(p0 *_Ctype_struct_go2cs_probe_pair, p1 **_Ctype_int) (r1 _Ctype_int) { return }
+func _Cfunc_go2cs_probe_node_ring(p0 *_Ctype_struct_go2cs_probe_node) (r1 _Ctype_void) { return }
+func _Cfunc_go2cs_probe_pick_as_char(p0 *_Ctype_int, p1 **_Ctype_char) (r1 _Ctype_int) { return }
 `
 
 // cgoProbeLibrary is the probe library's load-time name on goos, as the hosted leg builds it (its SONAME on linux, its
@@ -328,7 +350,9 @@ func cgoWrapperGolden(t *testing.T, target cgoWrapperTarget) string {
 		set.libraries = map[string]string{}
 	}
 
-	for _, symbol := range []string{"go2cs_probe_pair", "go2cs_probe_pair_sum", "go2cs_probe_add_into", "go2cs_probe_tagged_double", "go2cs_probe_hfa_scale", "go2cs_probe_strtol", "go2cs_probe_slow_fill"} {
+	for _, symbol := range []string{"go2cs_probe_pair", "go2cs_probe_pair_sum", "go2cs_probe_add_into", "go2cs_probe_tagged_double", "go2cs_probe_hfa_scale", "go2cs_probe_strtol", "go2cs_probe_slow_fill",
+		"go2cs_probe_cursor_set", "go2cs_probe_cursor_at", "go2cs_probe_pick", "go2cs_probe_pick_b", "go2cs_probe_node_ring",
+		"go2cs_probe_pick_as_char"} {
 		set.libraries[symbol] = cgoProbeLibrary(target.goos)
 	}
 
