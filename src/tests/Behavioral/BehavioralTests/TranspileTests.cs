@@ -1534,6 +1534,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckGlyphLibraryFrameNames() => CheckTarget("GlyphLibraryFrameNames");
 
     [TestMethod]
+    public void CheckMnNoParkHang() => CheckTarget("MnNoParkHang");
+
+    [TestMethod]
     public void CheckMultiFileInitOrder() => CheckTarget("MultiFileInitOrder");
 
     [TestMethod]
