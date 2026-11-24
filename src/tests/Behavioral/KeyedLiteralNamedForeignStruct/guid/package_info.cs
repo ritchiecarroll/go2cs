@@ -14,6 +14,9 @@
 
 using go;
 using static go.KeyedLiteralNamedForeignStruct.guid_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -49,10 +52,12 @@ using static go.KeyedLiteralNamedForeignStruct.guid_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("guid.go", "guid.cs", "AAwSoAANFKDIgqqC")]
+[assembly: GoPositionMap("guid.go", "guid.cs", "AAkSoAAJFKCogqqC")]
 // </GoSourcePositionMaps>
 
 namespace go.KeyedLiteralNamedForeignStruct;
+
+using static go.KeyedLiteralNamedForeignStruct.guid_package;
 
 [GoPackage("guid")]
 public static partial class guid_package
@@ -86,6 +91,19 @@ public static partial class guid_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(guid_package.GUID)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class guidᴛGUID;
-[GoMethodHost(typeof(guid_package.Outer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class guidᴛOuter;
+[GoMethodHost(typeof(guid_package.GUID)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class guidᴛGUID;
+[GoMethodHost(typeof(guid_package.Outer)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class guidᴛOuter;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class guidᴛGUID {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static uint32 First(this GUID g) => guid_package.First⁔(g);
+}
+partial class guidᴛOuter {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static uint32 Sum(this Outer o) => guid_package.Sum⁔(o);
+}
+// </MethodForwarders>

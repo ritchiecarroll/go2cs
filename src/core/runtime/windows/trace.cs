@@ -184,7 +184,6 @@ using tracev2 = @internal.trace.tracev2_package;
 using @unsafe = unsafe_package;
 using @internal.runtime;
 using @internal.trace;
-using static runtime_package;
 
 partial class runtime_package {
 
@@ -342,7 +341,7 @@ internal static void traceAdvance(bool stopTrace) {
         return;
     }
     ref var untracedGs = ref heap<slice<traceAdvance_untracedG>>(out var ᏑuntracedGs);
-    forEachGRace((ж<g> gp) => {
+    forEachGRace([GoFunc("traceAdvance.func1")] (ж<g> gp) => {
         // Make absolutely sure all Gs are ready for the next
         // generation. We need to do this even for dead Gs because
         // they may come alive with a new identity, and its status
@@ -356,7 +355,7 @@ internal static void traceAdvance(bool stopTrace) {
         }
         // Scribble down information about this goroutine.
         ref var ug = ref heap<traceAdvance_untracedG>(new traceAdvance_untracedG(gp: gp, mid: -1), out var Ꮡug);
-        systemstack(() => {
+        systemstack([GoFunc("traceAdvance.func1.1")] () => {
             var me = getg().Value.m.Value.curg;
             // We don't have to handle this G status transition because we
             // already eliminated ourselves from consideration above.
@@ -412,7 +411,7 @@ internal static void traceAdvance(bool stopTrace) {
     //
     // TODO(mknyszek): forEachP is very heavyweight. We could do better by integrating
     // the statusWasTraced check into it, to avoid preempting unnecessarily.
-    forEachP(waitReasonTraceProcStatus, (ж<p> pp) => {
+    forEachP(waitReasonTraceProcStatus, [GoFunc("traceAdvance.func2")] (ж<p> pp) => {
         var tl = traceAcquire();
         if (!pp.of(p.Ꮡtrace).of(pTraceState.ᏑtraceSchedResourceState).statusWasTraced(tl.gen)) {
             tl.writer().writeProcStatusForP(pp, false).end();
@@ -439,7 +438,7 @@ internal static void traceAdvance(bool stopTrace) {
     // Advance the generation or stop the trace.
     trace.lastNonZeroGen = gen;
     if (stopTrace) {
-        systemstack(() => {
+        systemstack([GoFunc("traceAdvance.func3")] () => {
             // Ordering is important here. Set shutdown first, then disable tracing,
             // so that conditions like (traceEnabled() || traceShuttingDown()) have
             // no opportunity to be false. Hold the trace lock so this update appears
@@ -523,7 +522,7 @@ internal static void traceAdvance(bool stopTrace) {
     // also no stale generation values left. Therefore, it's safe to flush
     // any buffers that remain in that generation's slot.
     const bool debugDeadlock = false;
-    systemstack(() => {
+    systemstack([GoFunc("traceAdvance.func4")] () => {
         // Track iterations for some rudimentary deadlock detection.
         nint i = 0;
         var detectedDeadlock = false;
@@ -609,7 +608,7 @@ internal static void traceAdvance(bool stopTrace) {
     Ꮡtrace.at(traceᴛ1.ᏑstringTab, (ulong)(gen % 2)).reset(gen);
 
     // That's it. This generation is done producing buffers.
-    systemstack(() => {
+    systemstack([GoFunc("traceAdvance.func5")] () => {
         @lock(Ꮡtrace.of(traceᴛ1.Ꮡlock));
         Ꮡtrace.of(traceᴛ1.ᏑflushedGen).Store(gen);
         unlock(Ꮡtrace.of(traceᴛ1.Ꮡlock));
@@ -641,7 +640,7 @@ internal static void traceAdvance(bool stopTrace) {
 
     // Double-check that things look as we expect after advancing and perform some
     // final cleanup if the trace has fully stopped.
-    systemstack(() => {
+    systemstack([GoFunc("traceAdvance.func6")] () => {
         @lock(Ꮡtrace.of(traceᴛ1.Ꮡlock));
         if (!trace.full[gen % 2].empty()) {
             @throw(traceNonEmptyFullTraceˢ);
@@ -752,7 +751,7 @@ internal static (slice<byte> buf, bool park) readTrace0() {
             getg().Value.racectx = getg().Value.m.Value.curg.Value.racectx;
             // (This defer should get open-coded, which is safe on
             // the system stack.)
-            defer(() => {
+            defer([GoFunc("readTrace0.func1")] () => {
                 getg().Value.racectx = 0;
             }, ref ᒐ);
         }
@@ -925,16 +924,14 @@ partial struct traceAdvancerState {
     internal channel<EmptyStruct> done;
 }
 
-} partial class runtimeᴛtraceAdvancerState {
-
 // start starts a new traceAdvancer.
-internal static partial void start(this ж<traceAdvancerState> Ꮡs) {
+internal static partial void start⁔(/*this*/ ж<traceAdvancerState> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     // Start a goroutine to periodically advance the trace generation.
     s.done = new channel<EmptyStruct>(0);
     s.timer = newWakeableSleep();
-    goǃ(() => {
+    goǃ([GoFunc("(*traceAdvancerState).start.func1")] () => {
         while (traceEnabled()) {
             // Set a timer to wake us up
             Ꮡs.Value.timer.sleep((int64)debug.traceadvanceperiod);
@@ -947,14 +944,12 @@ internal static partial void start(this ж<traceAdvancerState> Ꮡs) {
 }
 
 // stop stops a traceAdvancer and blocks until it exits.
-internal static void stop(this ref traceAdvancerState s) {
+internal static void stop⁔(/*this*/ ref traceAdvancerState s) {
     s.timer.wake();
     ᐸꟷ(s.done);
     close(s.done);
     s.timer.close();
 }
-
-} partial class runtime_package {
 
 // traceAdvancePeriod is the approximate period between
 // new generations.
@@ -978,21 +973,19 @@ internal static ж<wakeableSleep> newWakeableSleep() {
     lockInit(ref (s.Ꮡlock).DerefOrNull(), lockRankWakeableSleep);
     s.wakeup = new channel<EmptyStruct>(1);
     s.timer = @new<timer>();
-    var f = (any sΔ1, uintptr _Δp1, int64 _Δp2) => {
+    var f = [GoFunc("newWakeableSleep.func1")] (any sΔ1, uintptr _Δp1, int64 _Δp2) => {
         sΔ1._<ж<wakeableSleep>>().wake();
     };
     s.timer.init(f, s.OrTypedNil());
     return s;
 }
 
-} partial class runtimeᴛwakeableSleep {
-
 // sleep sleeps for the provided duration in nanoseconds or until
 // another goroutine calls wake.
 //
 // Must not be called by more than one goroutine at a time and
 // must not be called concurrently with close.
-internal static void sleep(this ж<wakeableSleep> Ꮡs, int64 ns) {
+internal static void sleep⁔(/*this*/ ж<wakeableSleep> Ꮡs, int64 ns) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     s.timer.reset(nanotime() + ns, 0);
@@ -1012,7 +1005,7 @@ internal static void sleep(this ж<wakeableSleep> Ꮡs, int64 ns) {
 // wake awakens any goroutine sleeping on the timer.
 //
 // Safe for concurrent use with all other methods.
-internal static void wake(this ж<wakeableSleep> Ꮡs) {
+internal static void wake⁔(/*this*/ ж<wakeableSleep> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     // Grab the wakeup channel, which may be nil if we're
@@ -1049,7 +1042,7 @@ internal static void wake(this ж<wakeableSleep> Ꮡs) {
 //
 // It must only be called once no goroutine is sleeping on the
 // timer *and* nothing else will call wake concurrently.
-internal static void close(this ж<wakeableSleep> Ꮡs) {
+internal static void close⁔(/*this*/ ж<wakeableSleep> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     // Set wakeup to nil so that a late timer ends up being a no-op.
@@ -1061,7 +1054,7 @@ internal static void close(this ж<wakeableSleep> Ꮡs) {
     s.wakeup = default;
 
     // Close the channel.
-    builtin.close(wakeup);
+    close(wakeup);
 
     if (raceenabled) {
         racerelease(@unsafe.Pointer.FromPinnedBox(Ꮡs.Ꮡlock));
@@ -1070,4 +1063,4 @@ internal static void close(this ж<wakeableSleep> Ꮡs) {
     return;
 }
 
-}
+} // end runtime_package

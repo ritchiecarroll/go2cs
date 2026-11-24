@@ -14,7 +14,6 @@ namespace go.encoding;
 // before diving into the scanner itself.
 using strconv = strconv_package;
 using sync = sync_package;
-using static json_package;
 
 partial class json_package {
 
@@ -56,11 +55,7 @@ partial struct SyntaxError {
     public int64 Offset;  // error occurred after reading Offset bytes
 }
 
-} partial class jsonᴛSyntaxError {
-
-public static @string Error(this ref SyntaxError e) { return e.msg; }
-
-} partial class json_package {
+internal static @string Error⁔(/*this*/ ref SyntaxError e) { return e.msg; }
 
 // A scanner is a JSON scanning state machine.
 // Callers call scan.reset and then pass bytes in one at a time
@@ -92,7 +87,7 @@ partial struct scanner {
 }
 
 internal static readonly ж<sync.Pool> ᏑscannerPool = new StaticBox<sync.Pool>(new sync.Pool(
-    New: () => Ꮡ(new scanner())
+    New: [GoFunc("init.func1")] () => Ꮡ(new scanner())
 ));
 internal static ref sync.Pool scannerPool => ref ((StaticBox<sync.Pool>)ᏑscannerPool).ValueSlot;
 
@@ -149,11 +144,9 @@ internal static UntypedInt parseArrayValue => 2;   // parsing array value
 // This is permitted by https://tools.ietf.org/html/rfc7159#section-9
 internal static UntypedInt maxNestingDepth => 10000;
 
-} partial class jsonᴛscanner {
-
 // reset prepares the scanner for use.
 // It must be called before calling s.step.
-internal static void reset(this ref scanner s) {
+internal static void reset⁔(/*this*/ ref scanner s) {
     s.step = stateBeginValue;
     s.parseState = s.parseState[0..0];
     s.err = default;
@@ -162,7 +155,7 @@ internal static void reset(this ref scanner s) {
 
 // eof tells the scanner that the end of input has been reached.
 // It returns a scan status just as s.step does.
-internal static nint eof(this ж<scanner> Ꮡs) {
+internal static nint eof⁔(/*this*/ ж<scanner> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     if (s.err != nil) {
@@ -187,7 +180,7 @@ private static readonly @string exceededMaxDepthˢᵇ = "exceeded max depth"u8;
 
 // pushParseState pushes a new parse state newParseState onto the parse stack.
 // an error state is returned if maxNestingDepth was exceeded, otherwise successState is returned.
-internal static nint pushParseState(this ref scanner s, byte c, nint newParseState, nint successState) {
+internal static nint pushParseState⁔(/*this*/ ref scanner s, byte c, nint newParseState, nint successState) {
     s.parseState = append(s.parseState, newParseState);
     if (len(s.parseState) <= maxNestingDepth) {
         return successState;
@@ -197,7 +190,7 @@ internal static nint pushParseState(this ref scanner s, byte c, nint newParseSta
 
 // popParseState pops a parse state (already obtained) off the stack
 // and updates s.step accordingly.
-internal static void popParseState(this ref scanner s) {
+internal static void popParseState⁔(/*this*/ ref scanner s) {
     nint n = len(s.parseState) - 1;
     s.parseState = s.parseState.slice(0, n);
     if (n == 0) {
@@ -207,8 +200,6 @@ internal static void popParseState(this ref scanner s) {
         s.step = stateEndValue;
     }
 }
-
-} partial class json_package {
 
 internal static bool isSpace(byte c) {
     return c <= ' ' && (c == ' ' || c == '\t' || c == '\r' || c == '\n');
@@ -747,16 +738,12 @@ internal static nint stateError(ж<scanner> s, byte c) {
     return scanError;
 }
 
-} partial class jsonᴛscanner {
-
 // error records an error and switches to the error state.
-internal static nint error(this ref scanner s, byte c, @string context) {
+internal static nint error⁔(/*this*/ ref scanner s, byte c, @string context) {
     s.step = stateError;
     s.err = new SyntaxErrorжerror(Ꮡ(new SyntaxError("invalid character "u8 + quoteChar(c) + " "u8 + context, s.bytes)));
     return scanError;
 }
-
-} partial class json_package {
 
 // quoteChar formats c as a quoted character literal.
 internal static @string quoteChar(byte c) {

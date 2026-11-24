@@ -286,3 +286,55 @@ func cgoRecognitionSummary(pkg *types.Package, fset *token.FileSet, files []*ast
 
 	return fmt.Sprintf("recognized %d C declarations (%s); %s", len(declarations), strings.Join(kinds, ", "), strings.Join(roles, "; "))
 }
+
+// cgoStructMarker is the `[GoCgoStruct] ` stamp (docs/phase4/DESIGN-cgo-phase3-marshaling.md 18.9, item 1) for a struct
+// cmd/cgo declared for a C struct that has a pointer or unsafe.Pointer field, and "" for any other type. go2cs-gen reads
+// the marker, never the name, and gives each such field a GET/SET property that reads and writes the C word at the
+// field's Go offset (ж<T>.cgoPointerField, ж<T>.cgoWordField).
+//
+// Only a package converting on the -cgo route is stamped (cgoRouteActive). The KIND is decided from the name
+// (classifyCgoName), so off the route a hand-written type named _Ctype_struct_x would otherwise be stamped; on the route
+// cmd/cgo reserves the prefix, and the name is its own declaration. The corpus converts off the route and is unstamped.
+//
+// A field counts when its type, after aliases, is a pointer or unsafe.Pointer. A DEFINED pointer typedef
+// (`type _Ctype_xptr *_Ctype_struct_x`) is a named type, not a pointer, and does not count: its C# type is a pointer
+// wrapper, which 1a leaves out by name, with a nested struct value's field and an array of pointers.
+func cgoStructMarker(declared types.Type) string {
+	if !cgoRouteActive || declared == nil {
+		return ""
+	}
+
+	named, ok := types.Unalias(declared).(*types.Named)
+
+	if !ok {
+		return ""
+	}
+
+	if declaration, ok := classifyCgoName(named.Obj().Name()); !ok || declaration.kind != cgoStruct {
+		return ""
+	}
+
+	structType, ok := named.Underlying().(*types.Struct)
+
+	if !ok {
+		return ""
+	}
+
+	for i := 0; i < structType.NumFields(); i++ {
+		switch fieldType := types.Unalias(structType.Field(i).Type()).(type) {
+		case *types.Pointer:
+			return cgoStructMarkerAttr
+		case *types.Basic:
+			if fieldType.Kind() == types.UnsafePointer {
+				return cgoStructMarkerAttr
+			}
+		}
+	}
+
+	return ""
+}
+
+// cgoStructMarkerAttr is the marker's spelling, golib's GoCgoStructAttribute. It is qualified because the stamp
+// rides package_info.cs's accessibility record, which takes no `using go.golib;`, and golib's PublicSurface keeps a
+// new type that is not a Go name out of namespace go.
+const cgoStructMarkerAttr = "[global::go.golib.GoCgoStruct] "

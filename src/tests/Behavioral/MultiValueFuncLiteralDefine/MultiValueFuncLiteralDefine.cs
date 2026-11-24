@@ -22,8 +22,8 @@ internal static T square<T>(T v)
 internal static void main() {
     nint n = 3;
 
-    var small = (nint v) => v < n;
-    var even = (nint v) => v % 2 == 0;
+    var small = [GoFunc("main.func1")] (nint v) => v < n;
+    var even = [GoFunc("main.func2")] (nint v) => v % 2 == 0;
     fmt.Println("func literals:", small(2), even(2), small(5), even(5));
 
     var d = @double;
@@ -41,7 +41,7 @@ internal static void main() {
     bump(3);
     fmt.Println("method values:", get(), b.n);
 
-    var show = nint () => 1;
+    var show = [GoFunc("main.func3")] nint () => 1;
     var p = b;
     fmt.Println("func literal beside a pointer:", show(), p.n);
 

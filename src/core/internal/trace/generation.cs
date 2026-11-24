@@ -311,7 +311,7 @@ internal static error validateStackStrings(ж<dataTable<stackID, stack>> Ꮡstac
 
     ref var err = ref heap<error>(out var Ꮡerr);
     var framesʗ1 = frames;
-    stacks.forEach((stackID id, stack stk) => {
+    stacks.forEach([GoFunc("validateStackStrings.func1")] (stackID id, stack stk) => {
         foreach (var (_, pc) in range(stk.pcs)) {
             var (frame, ok) = framesʗ1[pc, ꟷ];
             if (!ok) {
@@ -648,7 +648,7 @@ internal static void fixUpCPUSamples(slice<cpuSample> samples, frequency freq) {
         s.time = freq.mul((timestamp)(uint64)s.time);
     }
     // Sort the CPU samples.
-    slices.SortFunc(samples, (cpuSample a, cpuSample b) => cmp.Compare(a.time, b.time));
+    slices.SortFunc(samples, [GoFunc("fixUpCPUSamples.func1")] (cpuSample a, cpuSample b) => cmp.Compare(a.time, b.time));
 }
 
 } // end trace_package

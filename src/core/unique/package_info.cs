@@ -10,10 +10,14 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+using weak = go.weak_package;
 // </ImportedTypeAliases>
 
 using go;
 using static go.unique_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -66,11 +70,14 @@ using static go.unique_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("unique/canonmap.go", "canonmap.cs", "ABs0goKUgoKCgsaypIKCgpSCgpSCgpSUptKkgoKCgpSCgoKClIKClIKUuIKUgpSUgriCgpSm7qSCgoKUpsiClNyUkpTc5IKmgqaCgoKClIKCgoKCgpSCgpSuwoKCgoKUgoKCgpSCgpSUgpSUgpSUgriCgsqCgpQABxCCgpSmgoKCgoKUgqYADRSigpSmooKUABUsgsaCgoKmAAwWgoKCggAIFNKCgoKUlKiygoKUlKzkgoKUlIK4goKCgoKUlJTO", "136-138:1")]
-[assembly: GoPositionMap("unique/handle.go", "handle.cs", "ABw0oszEgoKUgoKClKaClJQ=")]
+[assembly: GoPositionMap("unique/canonmap.go", "canonmap.cs", "ABo0goKUgoKCgqaypIKCgpSCgpSCgpSUptKkgoKCgpSCgoKClIKClIKUuIKUgpSUgriCgpSm7qSCgoKUpsiClNyUkpTc5IKmgqaCgoKClIKCgoKCgpSCgpSuwoKCgoKUgoKCgpSCgpSUgpSUgpSUgriCgsqCgpQABxCCgpSmgoKCgoKUgqYACRSigpSmooKUABMsgqaCgoKmAAoWgoKCggAGFNKCgoKUlKiygoKUlKzkgoKUlIK4goKCgoKUlJSu", "136-138:1")]
+[assembly: GoPositionMap("unique/handle.go", "handle.cs", "ABk0oqzEgoKUgoKClKaClJQ=")]
 // </GoSourcePositionMaps>
 
 namespace go;
+
+using static go.unique_package;
+using weak = go.weak_package;
 
 [GoPackage("unique")]
 public static partial class unique_package
@@ -114,9 +121,37 @@ public static partial class unique_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(unique_package.Handle<>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class uniqueᴛHandle;
-[GoMethodHost(typeof(unique_package.canonMap<>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class uniqueᴛcanonMap;
-[GoMethodHost(typeof(unique_package.entry<>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class uniqueᴛentry;
-[GoMethodHost(typeof(unique_package.indirect<>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class uniqueᴛindirect;
-[GoMethodHost(typeof(unique_package.node<>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class uniqueᴛnode;
+[GoMethodHost(typeof(unique_package.Handle<>)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class uniqueᴛHandle;
+[GoMethodHost(typeof(unique_package.canonMap<>)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class uniqueᴛcanonMap;
+[GoMethodHost(typeof(unique_package.entry<>)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class uniqueᴛentry;
+[GoMethodHost(typeof(unique_package.indirect<>)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class uniqueᴛindirect;
+[GoMethodHost(typeof(unique_package.node<>)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class uniqueᴛnode;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class uniqueᴛHandle {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static T Value<T>(this Handle<T> h) => unique_package.Value⁔<T>(h);
+}
+partial class uniqueᴛcanonMap {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<T> Load<T>(this ж<canonMap<T>> Ꮡm, T keyʗp) => unique_package.Load⁔<T>(Ꮡm, keyʗp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<T> LoadOrStore<T>(this ж<canonMap<T>> Ꮡm, T keyʗp) => unique_package.LoadOrStore⁔<T>(Ꮡm, keyʗp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<node<T>> expand<T>(this ref canonMap<T> m, ж<entry<T>> ᏑoldEntry, ж<entry<T>> ᏑnewEntry, uintptr newHash, nuint hashShift, ж<indirect<T>> Ꮡparent) => unique_package.expand⁔<T>(ref m, ᏑoldEntry, ᏑnewEntry, newHash, hashShift, Ꮡparent);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void cleanup<T>(this ж<canonMap<T>> Ꮡm, uintptr hash, weak.Pointer<T> wp) => unique_package.cleanup⁔<T>(Ꮡm, hash, wp);
+}
+partial class uniqueᴛentry {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (ж<T>, weak.Pointer<T>) lookup<T>(this ж<entry<T>> Ꮡe, T key) => unique_package.lookup⁔<T>(Ꮡe, key);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool hasWeakPointer<T>(this ж<entry<T>> Ꮡe, weak.Pointer<T> wp) => unique_package.hasWeakPointer⁔<T>(Ꮡe, wp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<entry<T>> prune<T>(this ж<entry<T>> Ꮡe) => unique_package.prune⁔<T>(Ꮡe);
+}
+partial class uniqueᴛindirect {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool empty<T>(this ref indirect<T> i) => unique_package.empty⁔<T>(ref i);
+}
+partial class uniqueᴛnode {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<entry<T>> entry<T>(this ж<node<T>> Ꮡn) => unique_package.entry⁔<T>(Ꮡn);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<indirect<T>> indirect<T>(this ж<node<T>> Ꮡn) => unique_package.indirect⁔<T>(Ꮡn);
+}
+// </MethodForwarders>

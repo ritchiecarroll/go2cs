@@ -1,7 +1,6 @@
 namespace go;
 
 using fmt = fmt_package;
-using static main_package;
 
 partial class main_package {
 
@@ -22,12 +21,8 @@ internal static partial void viaParam(ж<outer> o) { o.of(outer.Ꮡinner).bump(1
 
 partial struct flags /*num:uint8*/;
 
-} partial class mainᴛflags {
-
-internal static void set(this ref flags f, flags bit) { f |= (flags)(bit); }
-internal static void clear(this ref flags f, flags bit) { f &= unchecked((flags)~(flags)(bit)); }
-
-} partial class main_package {
+internal static void set⁔(/*this*/ ref flags f, flags bit) { f |= (flags)(bit); }
+internal static void clear⁔(/*this*/ ref flags f, flags bit) { f &= unchecked((flags)~(flags)(bit)); }
 
 partial struct chunk {
     internal uint16 inUse;

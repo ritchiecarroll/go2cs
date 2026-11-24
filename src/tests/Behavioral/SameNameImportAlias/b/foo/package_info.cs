@@ -14,6 +14,9 @@
 
 using go;
 using static go.SameNameImportAlias.b.foo_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -50,10 +53,12 @@ using static go.SameNameImportAlias.b.foo_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("foo.go", "foo.cs", "ABMW")]
+[assembly: GoPositionMap("foo.go", "foo.cs", "AA8W")]
 // </GoSourcePositionMaps>
 
 namespace go.SameNameImportAlias.b;
+
+using static go.SameNameImportAlias.b.foo_package;
 
 [GoPackage("foo")]
 public static partial class foo_package
@@ -87,5 +92,15 @@ public static partial class foo_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(foo_package.S)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fooᴛS;
+[GoMethodHost(typeof(foo_package.S)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class fooᴛS;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class fooᴛS {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static Kind Kind(this S _) => foo_package.Kind⁔(_);
+}
+// </MethodForwarders>

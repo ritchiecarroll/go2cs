@@ -5,7 +5,6 @@ namespace go.@internal;
 
 using atomic = go.sync.atomic_package;
 using go.sync;
-using static poll_package;
 
 partial class poll_package {
 
@@ -38,8 +37,6 @@ internal static UntypedInt mutexWMask => /* (1<<20 - 1) << 43 */ 922336324076175
 internal static ref readonly @string overflowMsg => ref overflowMsgᵇ;
 private static readonly @string overflowMsgᵇ = "too many concurrent operations on a single file or socket (max 1048575)"u8;
 
-} partial class pollᴛfdMutex {
-
 // Read operations must do rwlock(true)/rwunlock(true).
 //
 // Write operations must do rwlock(false)/rwunlock(false).
@@ -54,7 +51,7 @@ private static readonly @string overflowMsgᵇ = "too many concurrent operations
 
 // incref adds a reference to mu.
 // It reports whether mu is available for reading or writing.
-internal static bool incref(this ж<fdMutex> Ꮡmu) {
+internal static bool incref⁔(/*this*/ ж<fdMutex> Ꮡmu) {
     for (;;) {
         var old = atomic.LoadUint64(Ꮡmu.Ꮡstate);
         if ((old & (uint64)mutexClosed) != 0) {
@@ -74,7 +71,7 @@ internal static bool incref(this ж<fdMutex> Ꮡmu) {
 
 // decref removes a reference from mu.
 // It reports whether there is no remaining reference.
-internal static bool decref(this ж<fdMutex> Ꮡmu) {
+internal static bool decref⁔(/*this*/ ж<fdMutex> Ꮡmu) {
     for (;;) {
         var old = atomic.LoadUint64(Ꮡmu.Ꮡstate);
         if ((old & (uint64)mutexRefMask) == 0) {
@@ -91,17 +88,13 @@ internal static bool decref(this ж<fdMutex> Ꮡmu) {
 
 // go2cs generated this placeholder — func rwunlock is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-} partial class poll_package {
-
 // Implemented in runtime package.
 internal static partial void runtime_Semacquire(ж<uint32> sema);
 internal static partial void runtime_Semrelease(ж<uint32> sema);
 
-} partial class pollᴛFD {
-
 // incref adds a reference to fd.
 // It returns an error when fd cannot be used.
-internal static error incref(this ж<FD> Ꮡfd) {
+internal static error incref⁔(/*this*/ ж<FD> Ꮡfd) {
     ref var fd = ref Ꮡfd.DerefOrNull();
 
     if (!Ꮡfd.Ꮡfdmu.incref()) {
@@ -113,7 +106,7 @@ internal static error incref(this ж<FD> Ꮡfd) {
 // decref removes a reference from fd.
 // It also closes fd when the state of fd is set to closed and there
 // is no remaining reference.
-internal static error decref(this ж<FD> Ꮡfd) {
+internal static error decref⁔(/*this*/ ж<FD> Ꮡfd) {
     if (Ꮡfd.Ꮡfdmu.decref()) {
         return Ꮡfd.destroy();
     }
@@ -122,7 +115,7 @@ internal static error decref(this ж<FD> Ꮡfd) {
 
 // readLock adds a reference to fd and locks fd for reading.
 // It returns an error when fd cannot be used for reading.
-internal static error readLock(this ж<FD> Ꮡfd) {
+internal static error readLock⁔(/*this*/ ж<FD> Ꮡfd) {
     ref var fd = ref Ꮡfd.DerefOrNull();
 
     if (!fd.fdmu.rwlock(true)) {
@@ -134,7 +127,7 @@ internal static error readLock(this ж<FD> Ꮡfd) {
 // readUnlock removes a reference from fd and unlocks fd for reading.
 // It also closes fd when the state of fd is set to closed and there
 // is no remaining reference.
-internal static void readUnlock(this ж<FD> Ꮡfd) {
+internal static void readUnlock⁔(/*this*/ ж<FD> Ꮡfd) {
     ref var fd = ref Ꮡfd.DerefOrNull();
 
     if (fd.fdmu.rwunlock(true)) {
@@ -144,7 +137,7 @@ internal static void readUnlock(this ж<FD> Ꮡfd) {
 
 // writeLock adds a reference to fd and locks fd for writing.
 // It returns an error when fd cannot be used for writing.
-internal static error writeLock(this ж<FD> Ꮡfd) {
+internal static error writeLock⁔(/*this*/ ж<FD> Ꮡfd) {
     ref var fd = ref Ꮡfd.DerefOrNull();
 
     if (!fd.fdmu.rwlock(false)) {
@@ -156,7 +149,7 @@ internal static error writeLock(this ж<FD> Ꮡfd) {
 // writeUnlock removes a reference from fd and unlocks fd for writing.
 // It also closes fd when the state of fd is set to closed and there
 // is no remaining reference.
-internal static void writeUnlock(this ж<FD> Ꮡfd) {
+internal static void writeUnlock⁔(/*this*/ ж<FD> Ꮡfd) {
     ref var fd = ref Ꮡfd.DerefOrNull();
 
     if (fd.fdmu.rwunlock(false)) {
@@ -166,7 +159,7 @@ internal static void writeUnlock(this ж<FD> Ꮡfd) {
 
 // readWriteLock adds a reference to fd and locks fd for reading and writing.
 // It returns an error when fd cannot be used for reading and writing.
-internal static error readWriteLock(this ж<FD> Ꮡfd) {
+internal static error readWriteLock⁔(/*this*/ ж<FD> Ꮡfd) {
     ref var fd = ref Ꮡfd.DerefOrNull();
 
     if (!fd.fdmu.rwlock(true) || !fd.fdmu.rwlock(false)) {
@@ -178,7 +171,7 @@ internal static error readWriteLock(this ж<FD> Ꮡfd) {
 // readWriteUnlock removes a reference from fd and unlocks fd for reading and writing.
 // It also closes fd when the state of fd is set to closed and there
 // is no remaining reference.
-internal static void readWriteUnlock(this ж<FD> Ꮡfd) {
+internal static void readWriteUnlock⁔(/*this*/ ж<FD> Ꮡfd) {
     ref var fd = ref Ꮡfd.DerefOrNull();
 
     fd.fdmu.rwunlock(true);
@@ -188,8 +181,8 @@ internal static void readWriteUnlock(this ж<FD> Ꮡfd) {
 }
 
 // closing returns true if fd is closing.
-internal static bool closing(this ж<FD> Ꮡfd) {
+internal static bool closing⁔(/*this*/ ж<FD> Ꮡfd) {
     return (atomic.LoadUint64(Ꮡfd.Ꮡfdmu.Ꮡstate) & (uint64)mutexClosed) != 0;
 }
 
-}
+} // end poll_package

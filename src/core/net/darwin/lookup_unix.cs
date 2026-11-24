@@ -9,14 +9,13 @@ using bytealg = @internal.bytealg_package;
 using Δsync = sync_package;
 using @internal;
 using dnsmessage = vendor.golang.org.x.net.dns.dnsmessage_package;
-using static net_package;
 
 partial class net_package {
 
 // readProtocolsOnce loads contents of /etc/protocols into protocols map
 // for quick access.
 internal static Action readProtocolsOnce;
-internal static void initᴛreadProtocolsOnce() { readProtocolsOnce = Δsync.OnceFunc(() => {
+internal static void initᴛreadProtocolsOnce() { readProtocolsOnce = Δsync.OnceFunc([GoFunc("init.func6")] () => {
     GoFrame ᒐ = default;
     try {
         var (@file, err) = open("/etc/protocols");
@@ -58,9 +57,7 @@ internal static (nint, error) lookupProtocol(context.Context _, @string name) {
     return lookupProtocolMap(name);
 }
 
-} partial class netᴛResolver {
-
-internal static (slice<@string> addrs, error err) lookupHost(this ж<Resolver> Ꮡr, context.Context ctx, @string host) {
+internal static (slice<@string> addrs, error err) lookupHost⁔(/*this*/ ж<Resolver> Ꮡr, context.Context ctx, @string host) {
     var (order, conf) = systemConf().hostLookupOrder(Ꮡr, host);
     if (order == hostLookupCgo) {
         return cgoLookupHost(ctx, host);
@@ -68,7 +65,7 @@ internal static (slice<@string> addrs, error err) lookupHost(this ж<Resolver> �
     return Ꮡr.goLookupHostOrder(ctx, host, order, conf);
 }
 
-internal static (slice<IPAddr> addrs, error err) lookupIP(this ж<Resolver> Ꮡr, context.Context ctx, @string network, @string host) {
+internal static (slice<IPAddr> addrs, error err) lookupIP⁔(/*this*/ ж<Resolver> Ꮡr, context.Context ctx, @string network, @string host) {
     error err = default;
 
     var (order, conf) = systemConf().hostLookupOrder(Ꮡr, host);
@@ -79,7 +76,7 @@ internal static (slice<IPAddr> addrs, error err) lookupIP(this ж<Resolver> Ꮡr
     return (ips, err);
 }
 
-internal static (nint, error) lookupPort(this ж<Resolver> Ꮡr, context.Context ctx, @string network, @string service) {
+internal static (nint, error) lookupPort⁔(/*this*/ ж<Resolver> Ꮡr, context.Context ctx, @string network, @string service) {
     // Port lookup is not a DNS operation.
     // Prefer the cgo resolver if possible.
     if (!systemConf().mustUseGoResolver(Ꮡr)) {
@@ -96,7 +93,7 @@ internal static (nint, error) lookupPort(this ж<Resolver> Ꮡr, context.Context
     return goLookupPort(network, service);
 }
 
-internal static (@string, error) lookupCNAME(this ж<Resolver> Ꮡr, context.Context ctx, @string name) {
+internal static (@string, error) lookupCNAME⁔(/*this*/ ж<Resolver> Ꮡr, context.Context ctx, @string name) {
     var (order, conf) = systemConf().hostLookupOrder(Ꮡr, name);
     if (order == hostLookupCgo) {
         var (cname, err) = cgoLookupCNAME(ctx, name); if (err == nil) {
@@ -106,23 +103,23 @@ internal static (@string, error) lookupCNAME(this ж<Resolver> Ꮡr, context.Con
     return Ꮡr.goLookupCNAME(ctx, name, order, conf);
 }
 
-internal static (@string, slice<ж<SRV>>, error) lookupSRV(this ж<Resolver> Ꮡr, context.Context ctx, @string service, @string proto, @string name) {
+internal static (@string, slice<ж<SRV>>, error) lookupSRV⁔(/*this*/ ж<Resolver> Ꮡr, context.Context ctx, @string service, @string proto, @string name) {
     return Ꮡr.goLookupSRV(ctx, service, proto, name);
 }
 
-internal static (slice<ж<MX>>, error) lookupMX(this ж<Resolver> Ꮡr, context.Context ctx, @string name) {
+internal static (slice<ж<MX>>, error) lookupMX⁔(/*this*/ ж<Resolver> Ꮡr, context.Context ctx, @string name) {
     return Ꮡr.goLookupMX(ctx, name);
 }
 
-internal static (slice<ж<NS>>, error) lookupNS(this ж<Resolver> Ꮡr, context.Context ctx, @string name) {
+internal static (slice<ж<NS>>, error) lookupNS⁔(/*this*/ ж<Resolver> Ꮡr, context.Context ctx, @string name) {
     return Ꮡr.goLookupNS(ctx, name);
 }
 
-internal static (slice<@string>, error) lookupTXT(this ж<Resolver> Ꮡr, context.Context ctx, @string name) {
+internal static (slice<@string>, error) lookupTXT⁔(/*this*/ ж<Resolver> Ꮡr, context.Context ctx, @string name) {
     return Ꮡr.goLookupTXT(ctx, name);
 }
 
-internal static (slice<@string>, error) lookupAddr(this ж<Resolver> Ꮡr, context.Context ctx, @string addr) {
+internal static (slice<@string>, error) lookupAddr⁔(/*this*/ ж<Resolver> Ꮡr, context.Context ctx, @string addr) {
     var (order, conf) = systemConf().addrLookupOrder(Ꮡr, addr);
     if (order == hostLookupCgo) {
         return cgoLookupPTR(ctx, addr);
@@ -130,4 +127,4 @@ internal static (slice<@string>, error) lookupAddr(this ж<Resolver> Ꮡr, conte
     return Ꮡr.goLookupPTR(ctx, addr, order, conf);
 }
 
-}
+} // end net_package

@@ -13,7 +13,7 @@ internal static handler wrap(handler h) { return h; }
 internal static (handler, @string, error) makeHandlers(@string prefix) {
     var allowed = slice<@string>([prefix + "-a"u8, prefix + "-b"u8]);
     var allowedʗ1 = allowed;
-    return (new handler((@string msg) => {
+    return (new handler([GoFunc("makeHandlers.func1")] (@string msg) => {
         fmt.Println(allowedʗ1[0] + ":" + msg, len(allowedʗ1));
     }), "label", default);
 }
@@ -21,7 +21,7 @@ internal static (handler, @string, error) makeHandlers(@string prefix) {
 internal static handler makeSingle(@string tag) {
     var counts = new map<@string, nint>{["x"] = len(tag)};
     var countsʗ1 = counts;
-    return new handler((@string msg) => {
+    return new handler([GoFunc("makeSingle.func1")] (@string msg) => {
         fmt.Println(countsʗ1["x"], msg);
     });
 }
@@ -29,7 +29,7 @@ internal static handler makeSingle(@string tag) {
 internal static handler makePlain(nint n) {
     var limits = slice<nint>([n, n * 2]);
     var limitsʗ1 = limits;
-    return wrap((@string msg) => {
+    return wrap([GoFunc("makePlain.func1")] (@string msg) => {
         fmt.Println(limitsʗ1[1], msg);
     });
 }

@@ -5,15 +5,11 @@
 //go:build go1.16
 namespace go.vendor.golang.org.x.net;
 
-using static idna_package;
-
 partial class idna_package {
-
-} partial class idnaᴛinfo {
 
 // appendMapping appends the mapping for the respective rune. isMapped must be
 // true. A mapping is a categorization of a rune as defined in UTS #46.
-internal static slice<byte> appendMapping(this info c, slice<byte> b, @string s) {
+internal static slice<byte> appendMapping⁔(/*this*/ info c, slice<byte> b, @string s) {
     nint index = (nint)(c >> (int)(indexShift));
     if ((info)(c & (uint16)xorBit) == 0) {
         nint p = index;
@@ -32,4 +28,4 @@ internal static slice<byte> appendMapping(this info c, slice<byte> b, @string s)
     return b;
 }
 
-}
+} // end idna_package

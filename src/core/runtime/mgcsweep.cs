@@ -24,7 +24,6 @@ namespace go;
 using atomic = @internal.runtime.atomic_package;
 using @unsafe = unsafe_package;
 using @internal.runtime;
-using static runtime_package;
 
 partial class runtime_package {
 
@@ -56,13 +55,11 @@ partial struct sweepClass /*num:uint32*/;
 internal static UntypedInt numSweepClasses => /* numSpanClasses * 2 */ 272;
 internal static sweepClass sweepClassDone => /* sweepClass(^uint32(0)) */ 4294967295;
 
-} partial class runtimeᴛsweepClass {
-
-internal static sweepClass load(this ж<sweepClass> Ꮡs) {
+internal static sweepClass load⁔(/*this*/ ж<sweepClass> Ꮡs) {
     return (sweepClass)atomic.Load(Ꮡs.Reinterpret<sweepClass, uint32>());
 }
 
-internal static void update(this ж<sweepClass> Ꮡs, sweepClass sNew) {
+internal static void update⁔(/*this*/ ж<sweepClass> Ꮡs, sweepClass sNew) {
     // Only update *s if its current value is less than sNew,
     // since *s increases monotonically.
     var sOld = Ꮡs.load();
@@ -76,7 +73,7 @@ internal static void update(this ж<sweepClass> Ꮡs, sweepClass sNew) {
     // like RISC-V however have native support for an atomic max.
 }
 
-internal static void clear(this ж<sweepClass> Ꮡs) {
+internal static void clear⁔(/*this*/ ж<sweepClass> Ꮡs) {
     atomic.Store(Ꮡs.Reinterpret<sweepClass, uint32>(), 0);
 }
 
@@ -84,16 +81,14 @@ internal static void clear(this ж<sweepClass> Ꮡs) {
 // whether we're interested in the full or partial
 // unswept lists for that class, indicated as a boolean
 // (true means "full").
-internal static (spanClass spc, bool full) split(this sweepClass s) {
+internal static (spanClass spc, bool full) split⁔(/*this*/ sweepClass s) {
     return ((spanClass)(uint8)((s >> 1)), (sweepClass)(s & 1) == 0);
 }
-
-} partial class runtimeᴛmheap {
 
 // nextSpanForSweep finds and pops the next span for sweeping from the
 // central sweep buffers. It returns ownership of the span to the caller.
 // Returns nil if no such span exists.
-internal static ж<mspan> nextSpanForSweep(this ref mheap h) {
+internal static ж<mspan> nextSpanForSweep⁔(/*this*/ ref mheap h) {
     var sg = h.sweepgen;
     for (var sc = Ꮡsweep.ᏑcentralIndex.load(); sc < numSweepClasses; sc++) {
         var (spc, full) = sc.split();
@@ -116,8 +111,6 @@ internal static ж<mspan> nextSpanForSweep(this ref mheap h) {
     return default;
 }
 
-} partial class runtime_package {
-
 internal static UntypedInt sweepDrainedMask => /* 1 << 31 */ 2147483648;
 
 // activeSweep is a type that captures whether sweeping
@@ -137,8 +130,6 @@ partial struct activeSweep {
     internal atomic.Uint32 state;
 }
 
-} partial class runtimeᴛactiveSweep {
-
 // begin registers a new sweeper. Returns a sweepLocker
 // for acquiring spans for sweeping. Any outstanding sweeper blocks
 // sweep termination.
@@ -149,7 +140,7 @@ partial struct activeSweep {
 // this does not indicate that all sweeping has completed.
 //
 // Even if the sweepLocker is invalid, its sweepGen is always valid.
-internal static sweepLocker begin(this ж<activeSweep> Ꮡa) {
+internal static sweepLocker begin⁔(/*this*/ ж<activeSweep> Ꮡa) {
     for (;;) {
         var state = Ꮡa.Ꮡstate.Load();
         if ((state & (uint32)sweepDrainedMask) != 0) {
@@ -169,7 +160,7 @@ private static readonly @string mismatchedBeginEndOfˢᵇ = "mismatched begin/en
 
 // end deregisters a sweeper. Must be called once for each time
 // begin is called if the sweepLocker is valid.
-internal static void end(this ж<activeSweep> Ꮡa, sweepLocker sl) {
+internal static void end⁔(/*this*/ ж<activeSweep> Ꮡa, sweepLocker sl) {
     if (sl.sweepGen != mheap_.sweepgen) {
         @throw(sweeperLeftOutstandingˢ);
     }
@@ -200,7 +191,7 @@ internal static void end(this ж<activeSweep> Ꮡa, sweepLocker sl) {
 //
 // Returns true if this call was the one that actually performed
 // the mark.
-internal static bool markDrained(this ж<activeSweep> Ꮡa) {
+internal static bool markDrained⁔(/*this*/ ж<activeSweep> Ꮡa) {
     for (;;) {
         var state = Ꮡa.Ꮡstate.Load();
         if ((state & (uint32)sweepDrainedMask) != 0) {
@@ -213,26 +204,24 @@ internal static bool markDrained(this ж<activeSweep> Ꮡa) {
 }
 
 // sweepers returns the current number of active sweepers.
-internal static uint32 sweepers(this ж<activeSweep> Ꮡa) {
+internal static uint32 sweepers⁔(/*this*/ ж<activeSweep> Ꮡa) {
     return Ꮡa.Ꮡstate.Load() & ~(uint32)sweepDrainedMask;
 }
 
 // isDone returns true if all sweep work has been drained and no more
 // outstanding sweepers exist. That is, when the sweep phase is
 // completely done.
-internal static bool isDone(this ж<activeSweep> Ꮡa) {
+internal static bool isDone⁔(/*this*/ ж<activeSweep> Ꮡa) {
     return Ꮡa.Ꮡstate.Load() == sweepDrainedMask;
 }
 
 // reset sets up the activeSweep for the next sweep cycle.
 //
 // The world must be stopped.
-internal static void reset(this ж<activeSweep> Ꮡa) {
+internal static void reset⁔(/*this*/ ж<activeSweep> Ꮡa) {
     assertWorldStopped();
     Ꮡa.Ꮡstate.Store(0);
 }
-
-} partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string activeSweepersFoundAtˢ => ref activeSweepersFoundAtˢᵇ;
@@ -353,15 +342,13 @@ partial struct sweepLocked {
     /*embed*/ internal ж<mspan> mspan;
 }
 
-} partial class runtimeᴛsweepLocker {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string useOfInvalidSweepLockerˢ => ref useOfInvalidSweepLockerˢᵇ;
 private static readonly @string useOfInvalidSweepLockerˢᵇ = "use of invalid sweepLocker"u8;
 
 // tryAcquire attempts to acquire sweep ownership of span s. If it
 // successfully acquires ownership, it blocks sweep completion.
-internal static (sweepLocked, bool) tryAcquire(this ref sweepLocker l, ж<mspan> s) {
+internal static (sweepLocked, bool) tryAcquire⁔(/*this*/ ref sweepLocker l, ж<mspan> s) {
     if (!l.valid) {
         @throw(useOfInvalidSweepLockerˢ);
     }
@@ -375,8 +362,6 @@ internal static (sweepLocked, bool) tryAcquire(this ref sweepLocker l, ж<mspan>
     }
     return (new sweepLocked(s), true);
 }
-
-} partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string nonInUseSpanInUnsweptˢ => ref nonInUseSpanInUnsweptˢᵇ;
@@ -454,7 +439,7 @@ internal static uintptr sweepone() {
         // allocations to trigger a GC) which would be nice to fill in
         // with scavenging work.
         if (debug.scavtrace > 0) {
-            systemstack(() => {
+            systemstack([GoFunc("sweepone.func1")] () => {
                 @lock(Ꮡmheap_.Ꮡlock);
 
                 // Get released stats.
@@ -487,8 +472,6 @@ internal static bool isSweepDone() {
     return Ꮡsweep.Ꮡactive.isDone();
 }
 
-} partial class runtimeᴛmspan {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string mspanEnsureSweptMIsNotˢ => ref mspanEnsureSweptMIsNotˢᵇ;
 private static readonly @string mspanEnsureSweptMIsNotˢᵇ = "mspan.ensureSwept: m is not locked"u8;
@@ -496,7 +479,7 @@ private static readonly @string mspanEnsureSweptMIsNotˢᵇ = "mspan.ensureSwept
 // Returns only when span s has been swept.
 //
 //go:nowritebarrier
-internal static void ensureSwept(this ж<mspan> Ꮡs) {
+internal static void ensureSwept⁔(/*this*/ ж<mspan> Ꮡs) {
     // Caller must disable preemption.
     // Otherwise when this function returns the span can become unswept again
     // (if GC is triggered on another goroutine).
@@ -531,8 +514,6 @@ internal static void ensureSwept(this ж<mspan> Ꮡs) {
     }
 }
 
-} partial class runtimeᴛsweepLocked {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string mspanSweepMIsNotLockedˢ => ref mspanSweepMIsNotLockedˢᵇ;
 private static readonly @string mspanSweepMIsNotLockedˢᵇ = "mspan.sweep: m is not locked"u8;
@@ -554,7 +535,7 @@ private static readonly @string userArenaSpanIsOnTheˢᵇ = "user arena span is 
 // Returns true if the span was returned to heap.
 // If preserve=true, don't return it to heap nor relink in mcentral lists;
 // caller takes care of it.
-internal static bool sweep(this ref sweepLocked sl, bool preserve) {
+internal static bool sweep⁔(/*this*/ ref sweepLocked sl, bool preserve) {
     // It's critical that we enter this function with preemption disabled,
     // GC must not start while we are in the middle of this function.
     var gp = getg();
@@ -805,7 +786,7 @@ internal static bool sweep(this ref sweepLocked sl, bool preserve) {
         // The arena is ready to be recycled. Remove it from the quarantine list
         // and place it on the ready list. Don't add it back to any sweep lists.
         var sʗ1 = s;
-        systemstack(() => {
+        systemstack([GoFunc("(*sweepLocked).sweep.func1")] () => {
             // It's the arena code's responsibility to get the chunk on the quarantine
             // list by the time all references to the chunk are gone.
             if (sʗ1.list != Ꮡmheap_.ᏑuserArena.of(mheap_userArena.ᏑquarantineList)) {
@@ -899,8 +880,6 @@ internal static bool sweep(this ref sweepLocked sl, bool preserve) {
     return false;
 }
 
-} partial class runtimeᴛmspan {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string foundPointerToFreeObjectˢ => ref foundPointerToFreeObjectˢᵇ;
 private static readonly @string foundPointerToFreeObjectˢᵇ = "found pointer to free object"u8;
@@ -919,7 +898,7 @@ private static readonly @string foundPointerToFreeObjectˢᵇ = "found pointer t
 // 3. The GC two cycles ago missed a pointer and freed a live object,
 // but it was still live in the last cycle, so this GC cycle found a
 // pointer to that object and marked it.
-internal static void reportZombies(this ж<mspan> Ꮡs) {
+internal static void reportZombies⁔(/*this*/ ж<mspan> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     printlock();
@@ -957,8 +936,6 @@ internal static void reportZombies(this ж<mspan> Ꮡs) {
     }
     @throw(foundPointerToFreeObjectˢ);
 }
-
-} partial class runtime_package {
 
 // deductSweepCredit deducts sweep credit for allocating a span of
 // size spanBytes. This must be performed *before* the span is

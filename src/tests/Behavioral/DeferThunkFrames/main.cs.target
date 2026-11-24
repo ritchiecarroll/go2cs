@@ -96,7 +96,7 @@ internal static nint endsInReturn() {
 internal static void funcLit() {
     GoFrame ᒐ = default;
     try {
-        defer([MethodImpl(MethodImplOptions.NoInlining)] () => {
+        defer([MethodImpl(MethodImplOptions.NoInlining), GoFunc("funcLit.func1")] () => {
             where("defer, func literal (control)");
         }, ref ᒐ);
     }
@@ -107,7 +107,7 @@ internal static void funcLit() {
 internal static void oneLiner() {
     GoFrame ᒐ = default;
     try {
-        defer([MethodImpl(MethodImplOptions.NoInlining)] () => {
+        defer([MethodImpl(MethodImplOptions.NoInlining), GoFunc("oneLiner.func1")] () => {
             where("defer, one-line func literal (control)");
         }, ref ᒐ);
     }
@@ -119,7 +119,7 @@ internal static void shared() {
     GoFrame ᒐ = default;
     try {
         defer(() => where("defer, thunk sharing a line with a literal"), ref ᒐ);
-        defer([MethodImpl(MethodImplOptions.NoInlining)] () => {
+        defer([MethodImpl(MethodImplOptions.NoInlining), GoFunc("shared.func1")] () => {
             where("defer, literal sharing a line with a thunk (control)");
         }, ref ᒐ);
     }
@@ -155,7 +155,7 @@ internal static partial void main() {
     Ꮡwg.Wait();
 
     Ꮡwg.Add(1);
-    goǃ(() => {
+    goǃ([GoFunc("main.func1")] () => {
         GoFrame ᒐ = default;
         try {
             defer(Ꮡwg.Done, ref ᒐ);

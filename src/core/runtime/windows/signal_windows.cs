@@ -195,7 +195,7 @@ internal static int32 sigtrampgo(ж<windows.ExceptionPointers> Ꮡep, nint kind)
     if (gp != (~(~gp).m).g0) {
         var fnʗ1 = fn;
         var gpʗ1 = gp;
-        systemstack(() => {
+        systemstack([GoFunc("sigtrampgo.func1")] () => {
             ret = fnʗ1(Ꮡep.Value.Record, Ꮡep.Value.Context, gpʗ1);
         });
     } else {

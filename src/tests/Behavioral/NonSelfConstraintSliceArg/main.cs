@@ -91,7 +91,7 @@ internal static void main() {
 
     fmt.Println("join:", join<itemжNamedᴾ>(widen<ж<item>, itemжNamedᴾ>(items, elemᴛ0 => new itemжNamedᴾ(elemᴛ0)), (Δp0, Δp1) => compareItems(Δp0, Δp1)), len(items), items[0].n);
 
-    fmt.Println("literal:", join<itemжNamedᴾ>(widen<ж<item>, itemжNamedᴾ>(items, elemᴛ0 => new itemжNamedᴾ(elemᴛ0)), (itemжNamedᴾ aΔp, itemжNamedᴾ bΔp) => {
+    fmt.Println("literal:", join<itemжNamedᴾ>(widen<ж<item>, itemжNamedᴾ>(items, elemᴛ0 => new itemжNamedᴾ(elemᴛ0)), [GoFunc("main.func1")] (itemжNamedᴾ aΔp, itemжNamedᴾ bΔp) => {
         var a = (ж<item>)aΔp;
         var b = (ж<item>)bΔp;
         return strings.Compare(b.n, a.n);
@@ -108,7 +108,7 @@ internal static void main() {
     var spareʗ1 = spare;
 
     var spareʗ2 = spare;
-    fmt.Println("firstOr:", firstOr(items, ж<item> () => spareʗ1) == items[0], firstOr(default, ж<item> () => spareʗ2) == spare);
+    fmt.Println("firstOr:", firstOr(items, [GoFunc("main.func2")] ж<item> () => spareʗ1) == items[0], firstOr(default, [GoFunc("main.func3")] ж<item> () => spareʗ2) == spare);
 
     fmt.Println("countLike:", countLike<itemжNamedᴾ>(widen<ж<item>, itemжNamedᴾ>(items, elemᴛ0 => new itemжNamedᴾ(elemᴛ0)), Ꮡ(new item("b"))), countLike<itemжNamedᴾ>(widen<ж<item>, itemжNamedᴾ>(wrap("b", "c", "b"), elemᴛ0 => new itemжNamedᴾ(elemᴛ0)), items[0]));
 }

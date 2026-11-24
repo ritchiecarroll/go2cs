@@ -25,7 +25,7 @@ internal static nint idxDefault(nint i) {
 internal static partial nint idxBlocking(nint i) {
     var ready = new channel<nint>(0);
     var readyʗ1 = ready;
-    goǃ(() => {
+    goǃ([GoFunc("idxBlocking.func1")] () => {
         readyʗ1.ᐸꟷ(100 + i);
     });
     var readyᴛ1 = ready;

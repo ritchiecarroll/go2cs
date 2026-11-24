@@ -119,7 +119,7 @@ internal static void putRaw(ref syscall.RawSockaddrAny rsa, nint off, byte v) {
 internal static void decodeRawAny(@string label, uint16 family, Action<Action<nint, byte>> fill) {
     ref var rsa = ref heap(new syscall.RawSockaddrAny(), out var Ꮡrsa);
     rsa.Addr.Family = family;
-    fill((nint off, byte v) => {
+    fill([GoFunc("decodeRawAny.func1")] (nint off, byte v) => {
         putRaw(ref (Ꮡrsa).DerefOrNull(), off, v);
     });
 
@@ -163,7 +163,7 @@ internal static void main() {
         roundTrip("tcp4", syscall.AF_INET, new syscall.SockaddrInet4жSockaddr(Ꮡ(new syscall.SockaddrInet4(Addr: array<byte>([127, 0, 0, 1])))));
         roundTrip("tcp6", syscall.AF_INET6, new syscall.SockaddrInet6жSockaddr(Ꮡ(new syscall.SockaddrInet6(Addr: new array<byte>(16){[15] = 1}))));
 
-        decodeRawAny("raw4", syscall.AF_INET, (Action<nint, byte> put) => {
+        decodeRawAny("raw4", syscall.AF_INET, [GoFunc("main.func1")] (Action<nint, byte> put) => {
             put(2, 0x1F);
             put(3, 0x90);
             put(4, 203);
@@ -172,7 +172,7 @@ internal static void main() {
             put(7, 42);
         });
 
-        decodeRawAny("raw6", syscall.AF_INET6, (Action<nint, byte> put) => {
+        decodeRawAny("raw6", syscall.AF_INET6, [GoFunc("main.func2")] (Action<nint, byte> put) => {
             put(2, 0x01);
             put(3, 0xF4);
             for (nint i = 0; i < 16; i++) {
@@ -181,13 +181,13 @@ internal static void main() {
             put(24, 7);
         });
 
-        decodeRawAny("rawunix", syscall.AF_UNIX, (Action<nint, byte> put) => {
+        decodeRawAny("rawunix", syscall.AF_UNIX, [GoFunc("main.func3")] (Action<nint, byte> put) => {
             foreach (var (i, c) in range(slice<byte>("go2cs.sock"u8))) {
                 put(2 + i, c);
             }
         });
 
-        decodeRawAny("rawbad", 0xFEED, (Action<nint, byte> put) => {
+        decodeRawAny("rawbad", 0xFEED, [GoFunc("main.func4")] (Action<nint, byte> put) => {
         });
 
         fmt.Println("done");

@@ -22,7 +22,6 @@ namespace go.go;
 // The implementation is simplified from Russ Cox's github.com/rsc/omap.
 using fmt = fmt_package;
 using iter = iter_package;
-using static token_package;
 
 partial class token_package {
 
@@ -51,13 +50,9 @@ partial struct key {
     internal nint start, end;
 }
 
-} partial class tokenᴛFile {
-
-internal static key key(this ref File f) {
+internal static key key⁔(/*this*/ ref File f) {
     return new key(f.@base, f.@base + f.size);
 }
-
-} partial class token_package {
 
 // compareKey reports whether x is before y (-1),
 // after y (+1), or overlapping y (0).
@@ -79,11 +74,9 @@ internal static nint compareKey(key x, key y) {
     return 0;
 }
 
-} partial class tokenᴛnode {
-
 // check asserts that each node's height, subtree, and parent link is
 // correct.
-internal static void check(this ж<node> Ꮡn, ж<node> Ꮡparent) {
+internal static void check⁔(/*this*/ ж<node> Ꮡn, ж<node> Ꮡparent) {
     ref var n = ref Ꮡn.DerefOrNull();
     ref var parent = ref Ꮡparent.DerefOrNull();
 
@@ -101,7 +94,7 @@ internal static void check(this ж<node> Ꮡn, ж<node> Ꮡparent) {
     }
 }
 
-internal static void checkBalance(this ref node n) {
+internal static void checkBalance⁔(/*this*/ ref node n) {
     var (lheight, rheight) = (n.left.safeHeight(), n.right.safeHeight());
     var balance = rheight - lheight;
     if (balance != n.balance) {
@@ -116,13 +109,11 @@ internal static void checkBalance(this ref node n) {
     }
 }
 
-} partial class tokenᴛtree {
-
 // locate returns a pointer to the variable that holds the node
 // identified by k, along with its parent, if any. If the key is not
 // present, it returns a pointer to the node where the key should be
 // inserted by a subsequent call to [tree.set].
-internal static (ж<ж<node>> pos, ж<node> parent) locate(this ж<tree> Ꮡt, key k) {
+internal static (ж<ж<node>> pos, ж<node> parent) locate⁔(/*this*/ ж<tree> Ꮡt, key k) {
     ж<ж<node>> pos = default;
     ж<node> parent = default;
     ref var t = ref Ꮡt.DerefOrNull();
@@ -146,8 +137,8 @@ internal static (ж<ж<node>> pos, ж<node> parent) locate(this ж<tree> Ꮡt, k
 // If t is modified during the iteration,
 // some files may not be visited.
 // No file will be visited multiple times.
-internal static iter.Seq<ж<File>> all(this ж<tree> Ꮡt) {
-    return (Func<ж<File>, bool> yield) => {
+internal static iter.Seq<ж<File>> all⁔(/*this*/ ж<tree> Ꮡt) {
+    return [GoFunc("(*tree).all.func1")] (Func<ж<File>, bool> yield) => {
         if (Ꮡt == nil) {
             return;
         }
@@ -172,7 +163,7 @@ internal static iter.Seq<ж<File>> all(this ж<tree> Ꮡt) {
 
 // nextAfter returns the node in the key sequence following
 // (pos, parent), a result pair from [tree.locate].
-internal static ж<node> nextAfter(this ref tree t, ж<ж<node>> Ꮡpos, ж<node> parent) {
+internal static ж<node> nextAfter⁔(/*this*/ ref tree t, ж<ж<node>> Ꮡpos, ж<node> parent) {
     ref var pos = ref Ꮡpos.DerefOrNull();
 
     switch (ᐧ) {
@@ -190,9 +181,7 @@ internal static ж<node> nextAfter(this ref tree t, ж<ж<node>> Ꮡpos, ж<node
     }}
 }
 
-} partial class tokenᴛnode {
-
-internal static ж<node> next(this ж<node> Ꮡx) {
+internal static ж<node> next⁔(/*this*/ ж<node> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     if (x.right == nil) {
@@ -208,9 +197,7 @@ internal static ж<node> next(this ж<node> Ꮡx) {
     return Ꮡx;
 }
 
-} partial class tokenᴛtree {
-
-internal static void setRoot(this ref tree t, ж<node> Ꮡx) {
+internal static void setRoot⁔(/*this*/ ref tree t, ж<node> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     t.root = Ꮡx;
@@ -219,9 +206,7 @@ internal static void setRoot(this ref tree t, ж<node> Ꮡx) {
     }
 }
 
-} partial class tokenᴛnode {
-
-internal static void setLeft(this ж<node> Ꮡx, ж<node> Ꮡy) {
+internal static void setLeft⁔(/*this*/ ж<node> Ꮡx, ж<node> Ꮡy) {
     ref var x = ref Ꮡx.DerefOrNull();
     ref var y = ref Ꮡy.DerefOrNull();
 
@@ -231,7 +216,7 @@ internal static void setLeft(this ж<node> Ꮡx, ж<node> Ꮡy) {
     }
 }
 
-internal static void setRight(this ж<node> Ꮡx, ж<node> Ꮡy) {
+internal static void setRight⁔(/*this*/ ж<node> Ꮡx, ж<node> Ꮡy) {
     ref var x = ref Ꮡx.DerefOrNull();
     ref var y = ref Ꮡy.DerefOrNull();
 
@@ -241,7 +226,7 @@ internal static void setRight(this ж<node> Ꮡx, ж<node> Ꮡy) {
     }
 }
 
-internal static int32 safeHeight(this ж<node> Ꮡn) {
+internal static int32 safeHeight⁔(/*this*/ ж<node> Ꮡn) {
     ref var n = ref Ꮡn.DerefOrNull();
 
     if (Ꮡn == nil) {
@@ -250,15 +235,13 @@ internal static int32 safeHeight(this ж<node> Ꮡn) {
     return n.height;
 }
 
-internal static void update(this ref node n) {
+internal static void update⁔(/*this*/ ref node n) {
     var (lheight, rheight) = (n.left.safeHeight(), n.right.safeHeight());
     n.height = max(lheight, rheight) + 1;
     n.balance = rheight - lheight;
 }
 
-} partial class tokenᴛtree {
-
-internal static void replaceChild(this ref tree t, ж<node> Ꮡparent, ж<node> old, ж<node> @new) {
+internal static void replaceChild⁔(/*this*/ ref tree t, ж<node> Ꮡparent, ж<node> old, ж<node> @new) {
     ref var parent = ref Ꮡparent.DerefOrNull();
 
     switch (ᐧ) {
@@ -289,7 +272,7 @@ internal static void replaceChild(this ref tree t, ж<node> Ꮡparent, ж<node> 
 // x is a node that has just been mutated, and so the height and
 // balance of x and its ancestors may be stale, but the children of x
 // must be in a valid state.
-internal static void rebalanceUp(this ref tree t, ж<node> Ꮡx) {
+internal static void rebalanceUp⁔(/*this*/ ref tree t, ж<node> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     while (Ꮡx != nil) {
@@ -322,7 +305,7 @@ internal static void rebalanceUp(this ref tree t, ж<node> Ꮡx) {
 
 // rotateRight rotates the subtree rooted at node y.
 // turning (y (x a b) c) into (x a (y b c)).
-internal static ж<node> rotateRight(this ref tree t, ж<node> Ꮡy) {
+internal static ж<node> rotateRight⁔(/*this*/ ref tree t, ж<node> Ꮡy) {
     ref var y = ref Ꮡy.DerefOrNull();
 
     // p -> (y (x a b) c)
@@ -344,7 +327,7 @@ internal static ж<node> rotateRight(this ref tree t, ж<node> Ꮡy) {
 
 // rotateLeft rotates the subtree rooted at node x.
 // turning (x a (y b c)) into (y (x a b) c).
-internal static ж<node> rotateLeft(this ref tree t, ж<node> Ꮡx) {
+internal static ж<node> rotateLeft⁔(/*this*/ ref tree t, ж<node> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     // p -> (x a (y b c))
@@ -366,7 +349,7 @@ internal static ж<node> rotateLeft(this ref tree t, ж<node> Ꮡx) {
 
 // add inserts file into the tree, if not present.
 // It panics if file overlaps with another.
-internal static void add(this ж<tree> Ꮡt, ж<File> Ꮡfile) {
+internal static void add⁔(/*this*/ ж<tree> Ꮡt, ж<File> Ꮡfile) {
     ref var t = ref Ꮡt.DerefOrNull();
     ref var @file = ref Ꮡfile.DerefOrNull();
 
@@ -384,7 +367,7 @@ internal static void add(this ж<tree> Ꮡt, ж<File> Ꮡfile) {
 
 // set updates the existing node at (pos, parent) if present, or
 // inserts a new node if not, so that it refers to file.
-internal static void set(this ref tree t, ж<File> Ꮡfile, ж<ж<node>> Ꮡpos, ж<node> parent) {
+internal static void set⁔(/*this*/ ref tree t, ж<File> Ꮡfile, ж<ж<node>> Ꮡpos, ж<node> parent) {
     ref var @file = ref Ꮡfile.DerefOrNull();
     ref var pos = ref Ꮡpos.DerefOrNull();
 
@@ -404,7 +387,7 @@ internal static void set(this ref tree t, ж<File> Ꮡfile, ж<ж<node>> Ꮡpos,
 }
 
 // delete deletes the node at pos.
-internal static void delete(this ref tree t, ж<ж<node>> Ꮡpos) {
+internal static void delete⁔(/*this*/ ref tree t, ж<ж<node>> Ꮡpos) {
     ref var pos = ref Ꮡpos.DerefOrNull();
 
     t.root.check(nil);
@@ -448,7 +431,7 @@ internal static void delete(this ref tree t, ж<ж<node>> Ꮡpos) {
 
 // deleteSwap deletes a node that has two children by replacing
 // it by its in-order successor, then triggers a rebalance.
-internal static void deleteSwap(this ref tree t, ж<ж<node>> Ꮡpos) {
+internal static void deleteSwap⁔(/*this*/ ref tree t, ж<ж<node>> Ꮡpos) {
     ref var pos = ref Ꮡpos.DerefOrNull();
 
     var x = pos;
@@ -471,7 +454,7 @@ internal static void deleteSwap(this ref tree t, ж<ж<node>> Ꮡpos) {
 // deleteMin updates the subtree rooted at *zpos to delete its minimum
 // (leftmost) element, which may be *zpos itself. It returns the
 // deleted node.
-internal static ж<node> /*z*/ deleteMin(this ref tree t, ж<ж<node>> Ꮡzpos) {
+internal static ж<node> /*z*/ deleteMin⁔(/*this*/ ref tree t, ж<ж<node>> Ꮡzpos) {
     ж<node> z = default;
     ref var zpos = ref Ꮡzpos.DerefOrNull();
 
@@ -486,4 +469,4 @@ internal static ж<node> /*z*/ deleteMin(this ref tree t, ж<ж<node>> Ꮡzpos) 
     return z;
 }
 
-}
+} // end token_package

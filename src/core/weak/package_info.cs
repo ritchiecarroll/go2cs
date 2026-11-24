@@ -14,6 +14,7 @@
 
 using go;
 using static go.weak_package;
+using System.ComponentModel;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -90,5 +91,5 @@ public static partial class weak_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(weak_package.Pointer<>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class weakᴛPointer;
+[GoMethodHost(typeof(weak_package.Pointer<>)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class weakᴛPointer;
 // </MethodHolders>

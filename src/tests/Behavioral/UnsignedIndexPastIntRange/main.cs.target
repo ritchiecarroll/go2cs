@@ -11,7 +11,7 @@ partial struct block /*[4]byte*/;
 internal static void @try(@string name, Func<byte> f) {
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("try.func1")] () => {
             var r = recover(); if (r != nil) {
                 fmt.Printf("%s: %v\n"u8, name, r);
             }
@@ -41,44 +41,44 @@ internal static void main() {
     uint64 in64 = 2;
     uint8 b8 = 250;
 
-    @try("string uint64", () => s[u64]);
-    @try("string uint", () => s[u]);
-    @try("string uintptr", () => s[up]);
-    @try("string int64", () => s[(nint)(i64)]);
-    @try("string uint32", () => s[u32]);
-    @try("named string uint64", () => np[u64]);
+    @try("string uint64", [GoFunc("main.func1")] () => s[u64]);
+    @try("string uint", [GoFunc("main.func2")] () => s[u]);
+    @try("string uintptr", [GoFunc("main.func3")] () => s[up]);
+    @try("string int64", [GoFunc("main.func4")] () => s[(nint)(i64)]);
+    @try("string uint32", [GoFunc("main.func5")] () => s[u32]);
+    @try("named string uint64", [GoFunc("main.func6")] () => np[u64]);
 
     var bʗ1 = b;
-    @try("slice uint", () => bʗ1[u]);
+    @try("slice uint", [GoFunc("main.func7")] () => bʗ1[u]);
     var bʗ2 = b;
-    @try("slice uintptr", () => bʗ2[up]);
+    @try("slice uintptr", [GoFunc("main.func8")] () => bʗ2[up]);
     var bʗ3 = b;
-    @try("slice uint32", () => bʗ3[u32]);
-    @try("array uint", () => Ꮡa.Value[u]);
-    @try("array uintptr", () => Ꮡa.Value[up]);
+    @try("slice uint32", [GoFunc("main.func9")] () => bʗ3[u32]);
+    @try("array uint", [GoFunc("main.func10")] () => Ꮡa.Value[u]);
+    @try("array uintptr", [GoFunc("main.func11")] () => Ꮡa.Value[up]);
     var nbʗ1 = nb;
-    @try("named slice uint", () => nbʗ1[u]);
+    @try("named slice uint", [GoFunc("main.func12")] () => nbʗ1[u]);
     var nkʗ1 = nk;
-    @try("named array uint", () => nkʗ1[u]);
+    @try("named array uint", [GoFunc("main.func13")] () => nkʗ1[u]);
     var bʗ4 = b;
-    @try("slice write uint", () => {
+    @try("slice write uint", [GoFunc("main.func14")] () => {
         bʗ4[u] = 1;
         return 0;
     });
     var paʗ1 = pa;
-    @try("pointer to array uint", () => paʗ1.Value[u]);
+    @try("pointer to array uint", [GoFunc("main.func15")] () => paʗ1.Value[u]);
 
-    @try("string in range", () => s[in32]);
+    @try("string in range", [GoFunc("main.func16")] () => s[in32]);
     var bʗ5 = b;
-    @try("slice in range", () => bʗ5[in64]);
-    @try("array in range", () => Ꮡa.Value[in32]);
+    @try("slice in range", [GoFunc("main.func17")] () => bʗ5[in64]);
+    @try("array in range", [GoFunc("main.func18")] () => Ꮡa.Value[in32]);
     var nbʗ2 = nb;
-    @try("named slice in range", () => nbʗ2[in64]);
-    @try("named string in range", () => np[in64]);
+    @try("named slice in range", [GoFunc("main.func19")] () => nbʗ2[in64]);
+    @try("named string in range", [GoFunc("main.func20")] () => np[in64]);
     var nkʗ2 = nk;
-    @try("named array in range", () => nkʗ2[in64]);
+    @try("named array in range", [GoFunc("main.func21")] () => nkʗ2[in64]);
     var bʗ6 = b;
-    @try("slice byte index", () => bʗ6[b8]);
+    @try("slice byte index", [GoFunc("main.func22")] () => bʗ6[b8]);
 }
 
 } // end main_package

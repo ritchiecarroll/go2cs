@@ -47,7 +47,7 @@ function Get-SheetPasteFindings([string]$File) {
     for ($i = 0; $i -lt $lines.Count; $i++) {
         $line = $lines[$i]
         if (-not $inBlock) {
-            if ($line -match '^```(powershell|pwsh|ps1)\s*$') { $inBlock = $true; $block++; $buffer.Clear() }
+            if ($line -match '^```(powershell|pwsh|ps1)\s*$') { $inBlock = $true; $block++; $buffer.Clear(); $pushChecked = $false }
             continue
         }
         if ($line -match '^```\s*$') {
@@ -61,6 +61,13 @@ function Get-SheetPasteFindings([string]$File) {
         # sits on its closing brace's line, at any depth, so no edit can move one to the top level unnoticed.
         if ($line -match '^\s*(else|elseif|catch|finally)\b') {
             Add-Finding ($i + 1) 'house-rule' "a line starts with '$($Matches[1])'; keep it on the closing brace's line ('} $($Matches[1])')"
+        }
+        # A package push from an owner sheet goes up by hand, past src/_nugetpush.ps1's refusals, so the same block runs
+        # Assert-NugetgoPushable.ps1 on it first: a package packed against a local go.* closure, or a -Cgo pack without
+        # the run-time target check, is refused there by name (COORD's INC 4 review, fold 2).
+        if ($line -match 'Assert-NugetgoPushable\.ps1') { $pushChecked = $true }
+        elseif ($line -match '\bnuget\s+push\b' -and -not $pushChecked) {
+            Add-Finding ($i + 1) 'unchecked-push' 'a package push with no Assert-NugetgoPushable.ps1 before it in the same block'
         }
         if (-not $buffer.Count) { $bufferStart = $i }
         $buffer.Add($line)
@@ -128,19 +135,20 @@ $want = @{
     'an else inside a dot-sourced block breaks the house rule only'                            = '3:27:house-rule'
     'a block that ends inside an open brace'                                                   = '4:36:unfinished'
     'a statement that does not parse'                                                          = '5:43:parse'
+    'a push with no Assert-NugetgoPushable.ps1 before it'                                      = '7:56:unchecked-push'
 }
 foreach ($case in $want.GetEnumerator() | Sort-Object Value) {
     $block = $case.Value.Split(':')[0]
     $got = @($result.Findings | Where-Object { "$($_.Block)" -eq $block } | ForEach-Object { "$($_.Block):$($_.Line):$($_.Kind)" }) -join ', '
     Check "block ${block}: $($case.Key)" ($got -ceq $case.Value) "want [$($case.Value)], read [$got]"
 }
-Check 'block 1 is clean and nothing else is found' ($result.Findings.Count -eq 5 -and $result.Blocks -eq 5) "read $($result.Blocks) block(s): [$read]"
+Check 'blocks 1 and 6 are clean and nothing else is found' ($result.Findings.Count -eq 6 -and $result.Blocks -eq 7) "read $($result.Blocks) block(s): [$read]"
 
 Write-Host 'the check as an owner-sheet tool (-Path): exit code = findings'
 # A failed case quotes the run's summary line only: its own FAIL lines would read as this suite's.
 $out = @(& $PSCommandPath -Path $bad 6>&1 | ForEach-Object { "$_" })
 $rc = $LASTEXITCODE
-Check 'bad.md exits 5 and names its blocks' ($rc -eq 5 -and ($out -join "`n").Contains('bad.md:15 (block 2)') -and $out[-1] -ceq '1 file(s), 5 submission(s), findings 5') "rc $rc, $($out[-1])"
+Check 'bad.md exits 6 and names its blocks' ($rc -eq 6 -and ($out -join "`n").Contains('bad.md:15 (block 2)') -and $out[-1] -ceq '1 file(s), 8 submission(s), findings 6') "rc $rc, $($out[-1])"
 $out = @(& $PSCommandPath -Path $good 6>&1 | ForEach-Object { "$_" })
 $rc = $LASTEXITCODE
 Check 'good.md exits 0' ($rc -eq 0 -and $out[-1] -ceq '1 file(s), 7 submission(s), findings 0') "rc $rc, $($out[-1])"
@@ -149,7 +157,7 @@ foreach ($form in @(@($good, $bad), @('-Path', "$good,$bad"))) {
     $out = @(& $pwsh -NoProfile -NonInteractive -File $PSCommandPath @form 6>&1 | ForEach-Object { "$_" })
     $rc = $LASTEXITCODE
     $shown = if ($form[0] -eq '-Path') { '-Path good.md,bad.md' } else { 'good.md bad.md' }
-    Check "under pwsh -File, $shown reads both sheets" ($rc -eq 5 -and $out[-1] -ceq '2 file(s), 12 submission(s), findings 5') "rc $rc, $($out[-1])"
+    Check "under pwsh -File, $shown reads both sheets" ($rc -eq 6 -and $out[-1] -ceq '2 file(s), 15 submission(s), findings 6') "rc $rc, $($out[-1])"
 }
 
 Write-Host "ran $ran, failed $failed"

@@ -8,11 +8,8 @@ using errors = errors_package;
 using fmt = fmt_package;
 using go.crypto.x509.@internal;
 using time = time_package;
-using static x509_package;
 
 partial class x509_package {
-
-} partial class x509ᴛCertificate {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string invalidLeafCertificateˢ => ref invalidLeafCertificateˢᵇ;
@@ -20,7 +17,7 @@ private static readonly @string invalidLeafCertificateˢᵇ = "invalid leaf cert
 internal static ref readonly @string x509MacosCertificateˢ => ref x509MacosCertificateˢᵇ;
 private static readonly @string x509MacosCertificateˢᵇ = "x509: macos certificate verification internal error"u8;
 
-internal static (slice<slice<ж<Certificate>>> chains, error err) systemVerify(this ж<Certificate> Ꮡc, ж<VerifyOptions> Ꮡopts) {
+internal static (slice<slice<ж<Certificate>>> chains, error err) systemVerify⁔(/*this*/ ж<Certificate> Ꮡc, ж<VerifyOptions> Ꮡopts) {
     slice<slice<ж<Certificate>>> chains = default;
     error err = default;
     GoFrame ᒐ = default;
@@ -145,8 +142,6 @@ internal static (slice<slice<ж<Certificate>>> chains, error err) systemVerify(t
     finally { ᒐ.Run(); }
     ᒐdone: return (chains, err);
 }
-
-} partial class x509_package {
 
 // exportCertificate returns a *Certificate for a SecCertificateRef.
 internal static (ж<Certificate>, error) exportCertificate(macos.CFRef cert) {

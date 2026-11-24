@@ -10,10 +10,14 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+using hash = go.hash_package;
 // </ImportedTypeAliases>
 
 using go;
 using static go.hash.crc32_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -57,11 +61,14 @@ using static go.hash.crc32_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("hash/crc32/crc32.go", "crc32.cs", "AFamAYKUgoKmgqq47IKCgqaCAAMQopSCpIKkAAke0oKUAAIQwLSUlAAJDoKCgoKmggAKCIKClIKUgpSCpoKCxoKUpIKUpLq2xqaCppSCgsqQmKKCqLKCgoKCpg==")]
+[assembly: GoPositionMap("hash/crc32/crc32.go", "crc32.cs", "AFSmAYKUgoKmgqq47IKCgqaCAAMQopSCpIKkAAke0oKUAAIQwJSUlN6CgoKCpoIACgiCgpSClIKUgqaCgqaClKSClKS6tqamgqaUgoKqkJiigqiygoKCgqY=")]
 [assembly: GoPositionMap("hash/crc32/crc32_generic.go", "crc32_generic.cs", "ABEosoKCqqKCgoKClKa8ooKClAAIFqKCgoKCgoKmqsKCgoKChpSUgpQ=")]
 // </GoSourcePositionMaps>
 
 namespace go.hash;
+
+using static go.hash.crc32_package;
+using hash = go.hash_package;
 
 [GoPackage("crc32")]
 public static partial class crc32_package
@@ -99,5 +106,24 @@ public static partial class crc32_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(crc32_package.digest)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class crc32ᴛdigest;
+[GoMethodHost(typeof(crc32_package.digest)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class crc32ᴛdigest;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class crc32ᴛdigest {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint Size(this ref digest d) => crc32_package.Size⁔(ref d);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint BlockSize(this ref digest d) => crc32_package.BlockSize⁔(ref d);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void Reset(this ref digest d) => crc32_package.Reset⁔(ref d);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<byte>, error) AppendBinary(this ref digest d, slice<byte> b) => crc32_package.AppendBinary⁔(ref d, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<byte>, error) MarshalBinary(this ref digest d) => crc32_package.MarshalBinary⁔(ref d);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error UnmarshalBinary(this ref digest d, slice<byte> b) => crc32_package.UnmarshalBinary⁔(ref d, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (hash.Cloner, error) Clone(this ref digest d) => crc32_package.Clone⁔(ref d);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) Write(this ref digest d, slice<byte> p) => crc32_package.Write⁔(ref d, p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static uint32 Sum32(this ref digest d) => crc32_package.Sum32⁔(ref d);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<byte> Sum(this ref digest d, slice<byte> @in) => crc32_package.Sum⁔(ref d, @in);
+}
+// </MethodForwarders>

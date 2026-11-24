@@ -149,14 +149,14 @@ func TestFuncLitStatesItsResultAtANamedNumericLiteralArm(t *testing.T) {
 	// SUBJECT - the declared result tuple is stated, so each arm converts to it in place.
 	subject := emittedFuncBody(t, mainCs, "subject")
 
-	if !strings.Contains(subject, "var openDir = (handle, error) (handle parent, @string name) =>") {
+	if !strings.Contains(subject, `var openDir = [GoFunc("subject.func1")] (handle, error) (handle parent, @string name) =>`) {
 		t.Errorf("subject: expected the literal to state its declared result `(handle, error)` (CS8917 without it):\n%s", subject)
 	}
 
 	// CONTROL - a named int position keeps the bare, inferred literal.
 	control := emittedFuncBody(t, mainCs, "control")
 
-	if !strings.Contains(control, "var openDir = (slot parent, @string name) =>") {
+	if !strings.Contains(control, `var openDir = [GoFunc("control.func1")] (slot parent, @string name) =>`) {
 		t.Errorf("control: a named int result position must keep natural inference:\n%s", control)
 	}
 }

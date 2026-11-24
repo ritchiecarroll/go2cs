@@ -72,7 +72,7 @@ internal static partial int64 count(uintptr m, nint n) {
     for (nint g = 1; g <= n; g++) {
         Ꮡwg.Add(1);
         var totalʗ1 = total;
-        goǃ((int32 id) => {
+        goǃ([GoFunc("count.func1")] (int32 id) => {
             GoFrame ᒐ = default;
             try {
                 defer(Ꮡwg.Done, ref ᒐ);

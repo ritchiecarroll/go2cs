@@ -15,7 +15,6 @@ using io = io_package;
 using go.crypto;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140;
-using static ecdh_package;
 
 partial class ecdh_package {
 
@@ -65,10 +64,8 @@ partial struct PublicKey {
     internal ж<ecdh.PublicKey> fips;
 }
 
-} partial class ecdhᴛPublicKey {
-
 // Bytes returns a copy of the encoding of the public key.
-public static slice<byte> Bytes(this ref PublicKey k) {
+internal static slice<byte> Bytes⁔(/*this*/ ref PublicKey k) {
     // Copy the public key to a fixed size buffer that can get allocated on the
     // caller's stack after inlining.
     array<byte> buf = new(133);
@@ -82,7 +79,7 @@ public static slice<byte> Bytes(this ref PublicKey k) {
 //
 // This check is performed in constant time as long as the key types and their
 // curve match.
-public static bool Equal(this ref PublicKey k, cryptoꓸPublicKey x) {
+internal static bool Equal⁔(/*this*/ ref PublicKey k, cryptoꓸPublicKey x) {
     var (xx, ok) = x._<ж<PublicKey>>(ᐧ);
     if (!ok) {
         return false;
@@ -90,11 +87,9 @@ public static bool Equal(this ref PublicKey k, cryptoꓸPublicKey x) {
     return AreEqual(k.curve, xx.curve) && subtle.ConstantTimeCompare(k.publicKey, xx.publicKey) == 1;
 }
 
-public static Curve Curve(this ref PublicKey k) {
+internal static Curve Curve⁔(/*this*/ ref PublicKey k) {
     return k.curve;
 }
-
-} partial class ecdh_package {
 
 // KeyExchanger is an interface for an opaque private key that can be used for
 // key exchange operations. For example, an ECDH key kept in a hardware module.
@@ -121,8 +116,6 @@ partial struct PrivateKey {
     internal ж<ecdh.PrivateKey> fips;
 }
 
-} partial class ecdhᴛPrivateKey {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static ref readonly @string cryptoEcdhPrivateKeyAndˢ => ref cryptoEcdhPrivateKeyAndˢᵇ;
 private static readonly @string cryptoEcdhPrivateKeyAndˢᵇ = "crypto/ecdh: private key and public key curves do not match"u8;
@@ -138,7 +131,7 @@ private static readonly @string cryptoEcdhPrivateKeyAndˢᵇ = "crypto/ecdh: pri
 //
 // For [X25519], this performs ECDH as specified in RFC 7748, Section 6.1. If
 // the result is the all-zero value, ECDH returns an error.
-public static (slice<byte>, error) ECDH(this ж<PrivateKey> Ꮡk, ж<PublicKey> Ꮡremote) {
+internal static (slice<byte>, error) ECDH⁔(/*this*/ ж<PrivateKey> Ꮡk, ж<PublicKey> Ꮡremote) {
     ref var k = ref Ꮡk.DerefOrNull();
     ref var remote = ref Ꮡremote.DerefOrNull();
 
@@ -149,7 +142,7 @@ public static (slice<byte>, error) ECDH(this ж<PrivateKey> Ꮡk, ж<PublicKey> 
 }
 
 // Bytes returns a copy of the encoding of the private key.
-public static slice<byte> Bytes(this ref PrivateKey k) {
+internal static slice<byte> Bytes⁔(/*this*/ ref PrivateKey k) {
     // Copy the private key to a fixed size buffer that can get allocated on the
     // caller's stack after inlining.
     array<byte> buf = new(66);
@@ -163,7 +156,7 @@ public static slice<byte> Bytes(this ref PrivateKey k) {
 //
 // This check is performed in constant time as long as the key types and their
 // curve match.
-public static bool Equal(this ref PrivateKey k, cryptoꓸPrivateKey x) {
+internal static bool Equal⁔(/*this*/ ref PrivateKey k, cryptoꓸPrivateKey x) {
     var (xx, ok) = x._<ж<PrivateKey>>(ᐧ);
     if (!ok) {
         return false;
@@ -171,18 +164,18 @@ public static bool Equal(this ref PrivateKey k, cryptoꓸPrivateKey x) {
     return AreEqual(k.curve, xx.curve) && subtle.ConstantTimeCompare(k.privateKey, xx.privateKey) == 1;
 }
 
-public static Curve Curve(this ref PrivateKey k) {
+internal static Curve Curve⁔(/*this*/ ref PrivateKey k) {
     return k.curve;
 }
 
-public static ж<PublicKey> PublicKey(this ref PrivateKey k) {
+internal static ж<PublicKey> PublicKey⁔(/*this*/ ref PrivateKey k) {
     return k.publicKey;
 }
 
 // Public implements the implicit interface of all standard library private
 // keys. See the docs of [crypto.PrivateKey].
-public static cryptoꓸPublicKey Public(this ref PrivateKey k) {
+internal static cryptoꓸPublicKey Public⁔(/*this*/ ref PrivateKey k) {
     return k.PublicKey().OrTypedNil();
 }
 
-}
+} // end ecdh_package

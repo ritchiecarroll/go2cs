@@ -1,7 +1,6 @@
 namespace go;
 
 using fmt = fmt_package;
-using static main_package;
 
 partial class main_package {
 
@@ -10,13 +9,9 @@ partial struct @event {
     internal @string label;
 }
 
-} partial class mainᴛevent {
-
-internal static Label Label(this @event e) {
+internal static Label Label⁔(/*this*/ @event e) {
     return new Label(ΔLabel: e.label, Resource: e.kind);
 }
-
-} partial class main_package {
 
 partial struct Label {
     public @string ΔLabel;

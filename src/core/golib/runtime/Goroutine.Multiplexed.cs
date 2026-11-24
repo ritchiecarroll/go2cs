@@ -1,5 +1,5 @@
 //******************************************************************************************************
-//  Goroutine.Multiplexed.cs - M:N SPIKE (R5b, B1). Spike code: it stays on the spike branch and never lands.
+//  Goroutine.Multiplexed.cs - M:N scheduler, experimental and opt-in (GoTwins=true + GO2CS_MN=1); inert otherwise.
 //
 //  The goroutine half of the spike's scheduler (GoScheduler.cs): a goroutine started with a hidden async
 //  twin is not bound to a thread. A carrier MOUNTS it for one step (from its start, or from a wake, to its
@@ -35,12 +35,13 @@ public sealed partial class Goroutine
     private bool m_savedGoexitStarted;
     private bool m_savedSplicesRefused;
 
-    // The step this goroutine runs next, while it waits in a carrier's run-next slot (GoScheduler.Ready).
-    internal Action? m_readyStep;
+    // The step this goroutine runs next, while it waits in a carrier's run-next slot (GoScheduler.Ready): an Action, or
+    // the box of the twin that parked (row 6).
+    internal object? m_readyStep;
 
-    internal Action TakeReadyStep()
+    internal object TakeReadyStep()
     {
-        Action step = m_readyStep!;
+        object step = m_readyStep!;
         m_readyStep = null;
         return step;
     }
@@ -77,13 +78,13 @@ public sealed partial class Goroutine
         goroutine.m_context = ExecutionContext.Capture();
         TwinStart start = new(goroutine, twin, bubble);
 
-        GoScheduler.Ready(goroutine, start.Run);
+        GoScheduler.Ready(goroutine, (Action)start.Run);
     }
 
-    // M:N PROTOTYPE (A1). The ExecutionContext of a multiplexed goroutine while no carrier has it mounted.
+    // M:N (A1). The ExecutionContext of a multiplexed goroutine while no carrier has it mounted.
     internal ExecutionContext? m_context;
 
-    // M:N PROTOTYPE (A4). The carrier that ran this goroutine's last step, and whether a step ever ran on another:
+    // M:N (A4). The carrier that ran this goroutine's last step, and whether a step ever ran on another:
     // read only by the scheduler's reading.
     internal object? m_lastCarrier;
     internal bool m_migrated;
@@ -129,7 +130,7 @@ public sealed partial class Goroutine
         main.m_context = ExecutionContext.Capture();
         MainTwin run = new(twin, main);
 
-        GoScheduler.Ready(main, run.Run);
+        GoScheduler.Ready(main, (Action)run.Run);
 
         run.Done.Wait();
 
@@ -337,10 +338,12 @@ public sealed partial class Goroutine
     public static ParkScope Park(WaitReason reason) => ParkCore(reason, handoff: true);
 
     // A multiplexed goroutine about to block its carrier's thread gives the P away first. An outermost plain park with
-    // no carrier to give away blocks its own thread: counted apart (`thread-blocks`), the other half of `handoffs`.
+    // no carrier to give away blocks its own thread: counted apart (`thread-blocks`), the other half of `handoffs`. With
+    // the scheduler off (GO2CS_MN unset) there is nothing to hand off and nothing is counted, so a default-mode park pays
+    // no interlocked add on the scheduler's shared counter (TC-8; GolibTests SchedulerOffTests).
     private static bool HandOffBeforeBlocking(Goroutine goroutine, int previous)
     {
-        if (previous != (int)WaitReason.Zero)
+        if (previous != (int)WaitReason.Zero || !GoScheduler.Enabled)
             return false;
 
         if (goroutine.m_multiplexed && GoScheduler.EnterBlocked())

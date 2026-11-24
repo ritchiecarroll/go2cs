@@ -16,7 +16,6 @@ using time = time_package;
 using @internal;
 using crypto;
 using go.net;
-using static httptrace_package;
 
 partial class httptrace_package {
 
@@ -52,12 +51,12 @@ public static context.Context WithClientTrace(context.Context ctx, ж<ClientTrac
             ConnectDone: trace.ConnectDone
         ));
         if (trace.DNSStart != nil) {
-            nt.DNSStart = (@string name) => {
+            nt.DNSStart = [GoFunc("WithClientTrace.func1")] (@string name) => {
                 Ꮡtrace.Value.DNSStart(new DNSStartInfo(Host: name));
             };
         }
         if (trace.DNSDone != nil) {
-            nt.DNSDone = (slice<any> netIPs, bool coalesced, error err) => {
+            nt.DNSDone = [GoFunc("WithClientTrace.func2")] (slice<any> netIPs, bool coalesced, error err) => {
                 var addrs = new slice<net.IPAddr>(len(netIPs));
                 foreach (var (i, ip) in range(netIPs)) {
                     addrs[i] = ip._<net.IPAddr>();
@@ -162,11 +161,9 @@ partial struct WroteRequestInfo {
     public error Err;
 }
 
-} partial class httptraceᴛClientTrace {
-
 // compose modifies t such that it respects the previously-registered hooks in old,
 // subject to the composition policy requested in t.Compose.
-internal static void compose(this ж<ClientTrace> Ꮡt, ж<ClientTrace> old) {
+internal static void compose⁔(/*this*/ ж<ClientTrace> Ꮡt, ж<ClientTrace> old) {
     if (old == nil) {
         return;
     }
@@ -195,15 +192,13 @@ internal static void compose(this ж<ClientTrace> Ꮡt, ж<ClientTrace> old) {
         // We need to call both tf and of in some order.
         var ofʗ1 = of;
         var tfCopyʗ1 = tfCopy;
-        var newFunc = reflect.MakeFunc(hookType, (slice<reflect.Value> args) => {
+        var newFunc = reflect.MakeFunc(hookType, [GoFunc("(*ClientTrace).compose.func1")] (slice<reflect.Value> args) => {
             tfCopyʗ1.Call(args);
             return ofʗ1.Call(args);
         });
         tv.Field(i).Set(newFunc);
     }
 }
-
-} partial class httptrace_package {
 
 // DNSStartInfo contains information about a DNS request.
 partial struct DNSStartInfo {
@@ -222,9 +217,7 @@ partial struct DNSDoneInfo {
     public bool Coalesced;
 }
 
-} partial class httptraceᴛClientTrace {
-
-internal static bool hasNetHooks(this ж<ClientTrace> Ꮡt) {
+internal static bool hasNetHooks⁔(/*this*/ ж<ClientTrace> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (Ꮡt == nil) {
@@ -232,8 +225,6 @@ internal static bool hasNetHooks(this ж<ClientTrace> Ꮡt) {
     }
     return t.DNSStart != nil || t.DNSDone != nil || t.ConnectStart != nil || t.ConnectDone != nil;
 }
-
-} partial class httptrace_package {
 
 // GotConnInfo is the argument to the [ClientTrace.GotConn] function and
 // contains information about the obtained connection.

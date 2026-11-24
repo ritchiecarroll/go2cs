@@ -7,7 +7,6 @@ namespace go;
 using netip = net.netip_package;
 using slices = slices_package;
 using net;
-using static net_package;
 
 partial class net_package {
 
@@ -282,12 +281,10 @@ internal static policyTable rfc6724policyTable = new policyTable(new policyTable
     )
 }.slice());
 
-} partial class netᴛpolicyTable {
-
 // Classify returns the policyTableEntry of the entry with the longest
 // matching prefix that contains ip.
 // The table t must be sorted from largest mask size to smallest.
-internal static policyTableEntry Classify(this policyTable t, netip.Addr ip) {
+internal static policyTableEntry Classify⁔(/*this*/ policyTable t, netip.Addr ip) {
     // Prefix.Contains() will not match an IPv6 prefix for an IPv4 address.
     if (ip.Is4()) {
         ip = netip.AddrFrom16(ip.As16());
@@ -299,8 +296,6 @@ internal static policyTableEntry Classify(this policyTable t, netip.Addr ip) {
     }
     return new policyTableEntry();
 }
-
-} partial class net_package {
 
 // RFC 6724 section 3.1.
 public partial struct scope /*num:uint8*/;

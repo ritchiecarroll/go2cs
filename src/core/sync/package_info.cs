@@ -14,6 +14,9 @@
 
 using go;
 using static go.sync_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -74,13 +77,15 @@ using static go.sync_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("sync/cond.go", "cond.cs", "AC1gkgAEJAARAoKCgoIAAhTygq7CggAZOJI=")]
-[assembly: GoPositionMap("sync/map.go", "map.cs", "AC5esqiSqJKssqqiqqKqoqyyAAIQ0gACHAALAg==")]
+[assembly: GoPositionMap("sync/cond.go", "cond.cs", "ACxgkgACJAARAoKCgoIAAhTygq7CggAROJI=")]
+[assembly: GoPositionMap("sync/map.go", "map.cs", "ACtesqiSqJKssqqiqqKqoqyyAAIQ0gACHAALAg==")]
 [assembly: GoPositionMap("sync/runtime.go", "runtime.cs", "AAkc5gACFAAIAgABEgAIBqampqaSgoKmgg==")]
-[assembly: GoPositionMap("sync/rwmutex.go", "rwmutex.cs", "ADSGAQASAoKClJSUgoIAAxLSgoKUgoKCgpSUgoKClAAEEsKCgoKUlJSC+IKCgqaUvtKCgqaUlIKUgoKCAAMS8oKClIKClJSCgoKUlIKCgpQABhIACAKCgoK4goKCpoKmgoIABRgACAKCyqIACAqC")]
+[assembly: GoPositionMap("sync/rwmutex.go", "rwmutex.cs", "ADGGAQASAoKClJSUgoIAAxLSgoKUgoKCgpSUgoKClAAEEsKCgoKUlJSC+IKCgqaUvtKCgqaUlIKUgoKCAAMS8oKClIKClJSCgoKUlIKCgpQABhIACAKCgoK4goKCpoKmgoIAAxgACAKCqqLKgg==")]
 // </GoSourcePositionMaps>
 
 namespace go;
+
+using static go.sync_package;
 
 [GoPackage("sync")]
 public static partial class sync_package
@@ -123,16 +128,58 @@ public static partial class sync_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(sync_package.Cond)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syncᴛCond;
-[GoMethodHost(typeof(sync_package.Map)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syncᴛMap;
-[GoMethodHost(typeof(sync_package.Mutex)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syncᴛMutex;
-[GoMethodHost(typeof(sync_package.Once)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syncᴛOnce;
-[GoMethodHost(typeof(sync_package.Pool)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syncᴛPool;
-[GoMethodHost(typeof(sync_package.RWMutex)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syncᴛRWMutex;
-[GoMethodHost(typeof(sync_package.WaitGroup)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syncᴛWaitGroup;
-[GoMethodHost(typeof(sync_package.copyChecker)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syncᴛcopyChecker;
-[GoMethodHost(typeof(sync_package.noCopy)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syncᴛnoCopy;
-[GoMethodHost(typeof(sync_package.poolChain)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syncᴛpoolChain;
-[GoMethodHost(typeof(sync_package.poolDequeue)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syncᴛpoolDequeue;
-[GoMethodHost(typeof(sync_package.rlocker)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syncᴛrlocker;
+[GoMethodHost(typeof(sync_package.Cond)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syncᴛCond;
+[GoMethodHost(typeof(sync_package.Map)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syncᴛMap;
+[GoMethodHost(typeof(sync_package.Mutex)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syncᴛMutex;
+[GoMethodHost(typeof(sync_package.Once)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syncᴛOnce;
+[GoMethodHost(typeof(sync_package.Pool)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syncᴛPool;
+[GoMethodHost(typeof(sync_package.RWMutex)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syncᴛRWMutex;
+[GoMethodHost(typeof(sync_package.WaitGroup)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syncᴛWaitGroup;
+[GoMethodHost(typeof(sync_package.copyChecker)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syncᴛcopyChecker;
+[GoMethodHost(typeof(sync_package.noCopy)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syncᴛnoCopy;
+[GoMethodHost(typeof(sync_package.poolChain)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syncᴛpoolChain;
+[GoMethodHost(typeof(sync_package.poolDequeue)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syncᴛpoolDequeue;
+[GoMethodHost(typeof(sync_package.rlocker)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syncᴛrlocker;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class syncᴛCond {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Wait(this ж<Cond> Ꮡc) => sync_package.Wait⁔(Ꮡc);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Signal(this ж<Cond> Ꮡc) => sync_package.Signal⁔(Ꮡc);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Broadcast(this ж<Cond> Ꮡc) => sync_package.Broadcast⁔(Ꮡc);
+}
+partial class syncᴛMap {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (any value, bool ok) Load(this ж<Map> Ꮡm, any key) => sync_package.Load⁔(Ꮡm, key);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Store(this ж<Map> Ꮡm, any key, any value) => sync_package.Store⁔(Ꮡm, key, value);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Clear(this ж<Map> Ꮡm) => sync_package.Clear⁔(Ꮡm);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (any actual, bool loaded) LoadOrStore(this ж<Map> Ꮡm, any key, any value) => sync_package.LoadOrStore⁔(Ꮡm, key, value);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (any value, bool loaded) LoadAndDelete(this ж<Map> Ꮡm, any key) => sync_package.LoadAndDelete⁔(Ꮡm, key);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Delete(this ж<Map> Ꮡm, any key) => sync_package.Delete⁔(Ꮡm, key);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (any previous, bool loaded) Swap(this ж<Map> Ꮡm, any key, any value) => sync_package.Swap⁔(Ꮡm, key, value);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool /*swapped*/ CompareAndSwap(this ж<Map> Ꮡm, any key, any old, any @new) => sync_package.CompareAndSwap⁔(Ꮡm, key, old, @new);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool /*deleted*/ CompareAndDelete(this ж<Map> Ꮡm, any key, any old) => sync_package.CompareAndDelete⁔(Ꮡm, key, old);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Range(this ж<Map> Ꮡm, Func<any, any, bool> f) => sync_package.Range⁔(Ꮡm, f);
+}
+partial class syncᴛRWMutex {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void RLock(this ж<RWMutex> Ꮡrw) => sync_package.RLock⁔(Ꮡrw);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool TryRLock(this ж<RWMutex> Ꮡrw) => sync_package.TryRLock⁔(Ꮡrw);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void RUnlock(this ж<RWMutex> Ꮡrw) => sync_package.RUnlock⁔(Ꮡrw);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void rUnlockSlow(this ж<RWMutex> Ꮡrw, int32 r) => sync_package.rUnlockSlow⁔(Ꮡrw, r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Lock(this ж<RWMutex> Ꮡrw) => sync_package.Lock⁔(Ꮡrw);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool TryLock(this ж<RWMutex> Ꮡrw) => sync_package.TryLock⁔(Ꮡrw);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Unlock(this ж<RWMutex> Ꮡrw) => sync_package.Unlock⁔(Ꮡrw);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static Locker RLocker(this ж<RWMutex> Ꮡrw) => sync_package.RLocker⁔(Ꮡrw);
+}
+partial class syncᴛnoCopy {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void Lock(this ref noCopy _) => sync_package.Lock⁔(ref _);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void Unlock(this ref noCopy _) => sync_package.Unlock⁔(ref _);
+}
+partial class syncᴛrlocker {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void Lock(this ж<rlocker> Ꮡr) => sync_package.Lock⁔(Ꮡr);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void Unlock(this ж<rlocker> Ꮡr) => sync_package.Unlock⁔(Ꮡr);
+}
+// </MethodForwarders>

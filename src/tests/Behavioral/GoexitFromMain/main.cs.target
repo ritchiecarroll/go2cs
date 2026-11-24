@@ -50,12 +50,12 @@ internal static partial void armA() {
         defer(ᴛ1 => close(ᴛ1), ready, ref ᒐ);
 
         var readyʗ1 = ready;
-        goǃ(() => {
+        goǃ([GoFunc("armA.func1")] () => {
             ᐸꟷ(readyʗ1);
             fmt.Println("goroutine finished its work");
         });
 
-        defer(() => {
+        defer([GoFunc("armA.func2")] () => {
             fmt.Println("main's deferred call ran; recover() =", recover());
         }, ref ᒐ);
 
@@ -73,7 +73,7 @@ internal static partial void armB() {
         defer(ᴛ1 => close(ᴛ1), ready, ref ᒐ);
 
         var readyʗ1 = ready;
-        goǃ(() => {
+        goǃ([GoFunc("armB.func1")] () => {
             ᐸꟷ(readyʗ1);
             fmt.Println("goroutine calls os.Exit(0)");
             Δos.Exit(0);
@@ -93,7 +93,7 @@ internal static partial void armC() {
         defer(ᴛ1 => close(ᴛ1), ready, ref ᒐ);
 
         var readyʗ1 = ready;
-        goǃ(() => {
+        goǃ([GoFunc("armC.func1")] () => {
             ᐸꟷ(readyʗ1);
             throw panic("a goroutine panics after main's Goexit");
         });
@@ -111,7 +111,7 @@ internal static partial void armD() {
         var started = new channel<EmptyStruct>(0);
 
         var startedʗ1 = started;
-        goǃ(() => {
+        goǃ([GoFunc("armD.func1")] () => {
             fmt.Println("goroutine blocks forever");
             close(startedʗ1);
             select();
@@ -151,7 +151,7 @@ internal static void outer() {
 internal static void inner() {
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("inner.func1")] () => {
             fmt.Println("inner's deferred call ran; recover() =", recover());
         }, ref ᒐ);
         runtime.Goexit();
@@ -165,7 +165,7 @@ internal static void armF() {
     try {
         defer(() => fmt.Println("main's deferred call ran"), ref ᒐ);
 
-        var seq = (Func<nint, bool> yield) => {
+        var seq = [GoFunc("armF.func1")] (Func<nint, bool> yield) => {
             if (!yield(1)) {
                 return;
             }

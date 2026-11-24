@@ -92,7 +92,6 @@ using time = time_package;
 using @unsafe = unsafe_package;
 using @internal;
 using text;
-using static pprof_package;
 
 partial class pprof_package {
 
@@ -343,22 +342,20 @@ public static slice<ж<Profile>> Profiles() {
             all = append(all, p);
         }
 
-        slices.SortFunc(all, (ж<Profile> a, ж<Profile> b) => strings.Compare(a.name, b.name));
+        slices.SortFunc(all, [GoFunc("Profiles.func1")] (ж<Profile> a, ж<Profile> b) => strings.Compare(a.name, b.name));
         return all;
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
-} partial class pprofᴛProfile {
-
 // Name returns this profile's name, which can be passed to [Lookup] to reobtain the profile.
-public static @string Name(this ref Profile p) {
+internal static @string Name⁔(/*this*/ ref Profile p) {
     return p.name;
 }
 
 // Count returns the number of execution stacks currently in the profile.
-public static nint Count(this ж<Profile> Ꮡp) {
+internal static nint Count⁔(/*this*/ ж<Profile> Ꮡp) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -392,7 +389,7 @@ public static nint Count(this ж<Profile> Ꮡp) {
 //
 // Passing skip=0 begins the stack trace at the call to Add inside rpc.NewClient.
 // Passing skip=1 begins the stack trace at the call to NewClient inside mypkg.Run.
-public static partial void Add(this ж<Profile> Ꮡp, any value, nint skip) {
+internal static partial void Add⁔(/*this*/ ж<Profile> Ꮡp, any value, nint skip) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -426,7 +423,7 @@ public static partial void Add(this ж<Profile> Ꮡp, any value, nint skip) {
 
 // Remove removes the execution stack associated with value from the profile.
 // It is a no-op if the value is not in the profile.
-public static void Remove(this ж<Profile> Ꮡp, any value) {
+internal static void Remove⁔(/*this*/ ж<Profile> Ꮡp, any value) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -455,7 +452,7 @@ public static void Remove(this ж<Profile> Ꮡp, any value) {
 // for example, when printing the "goroutine" profile, debug=2 means to
 // print the goroutine stacks in the same form that a Go program uses
 // when dying due to an unrecovered panic.
-public static error WriteTo(this ж<Profile> Ꮡp, io.Writer w, nint debug) {
+internal static error WriteTo⁔(/*this*/ ж<Profile> Ꮡp, io.Writer w, nint debug) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     if (p.name == ""u8) {
@@ -479,17 +476,11 @@ public static error WriteTo(this ж<Profile> Ꮡp, io.Writer w, nint debug) {
     return printCountProfile(w, debug, p.name, (stackProfile)all);
 }
 
-} partial class pprof_package {
-
 partial struct stackProfile /*[]slice<uintptr>*/;
 
-} partial class pprofᴛstackProfile {
-
-internal static nint Len(this stackProfile x) { return len(x); }
-internal static slice<uintptr> Stack(this stackProfile x, nint i) { return x[i]; }
-internal static ж<labelMap> Label(this stackProfile x, nint i) { return default; }
-
-} partial class pprof_package {
+internal static nint Len⁔(/*this*/ stackProfile x) { return len(x); }
+internal static slice<uintptr> Stack⁔(/*this*/ stackProfile x, nint i) { return x[i]; }
+internal static ж<labelMap> Label⁔(/*this*/ stackProfile x, nint i) { return default; }
 
 // A countProfile is a set of stack traces to be printed as counts
 // grouped by stack trace. There are multiple implementations:
@@ -564,7 +555,7 @@ private static readonly @string labelsˢᵇ = "\n# labels: "u8;
 internal static error printCountProfile(io.Writer w, nint debug, @string name, countProfile p) {
     // Build count of each stack.
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
-    @string key(slice<uintptr> stk, ж<labelMap> lbls) {
+    [GoFunc("printCountProfile.func1")] @string key(slice<uintptr> stk, ж<labelMap> lbls) {
         Ꮡbuf.Value.Reset();
         fmt.Fprintf(new strings_BuilderжWriter(Ꮡbuf), "@"u8);
         foreach (var (_, pc) in range(stk)) {
@@ -619,7 +610,7 @@ internal static error printCountProfile(io.Writer w, nint debug, @string name, c
         Action labels = default;
         if (p.Label(idx) != nil) {
             var bʗ1 = b;
-            labels = () => {
+            labels = [GoFunc("printCountProfile.func2")] () => {
                 foreach (var (_, lbl) in range(p.Label(idx).Set.List)) {
                     bʗ1.pbLabel(tagSample_Label, lbl.Key, lbl.Value, 0);
                 }
@@ -636,11 +627,9 @@ partial struct keysByCount {
     internal map<@string, nint> count;
 }
 
-} partial class pprofᴛkeysByCount {
-
-internal static nint Len(this ref keysByCount x) { return len(x.keys); }
-internal static void Swap(this ref keysByCount x, nint i, nint j) { (x.keys[i], x.keys[j]) = (x.keys[j], x.keys[i]); }
-internal static bool Less(this ref keysByCount x, nint i, nint j) {
+internal static nint Len⁔(/*this*/ ref keysByCount x) { return len(x.keys); }
+internal static void Swap⁔(/*this*/ ref keysByCount x, nint i, nint j) { (x.keys[i], x.keys[j]) = (x.keys[j], x.keys[i]); }
+internal static bool Less⁔(/*this*/ ref keysByCount x, nint i, nint j) {
     @string ki = x.keys[i];
     @string kj = x.keys[j];
     nint ci = x.count[ki];
@@ -650,8 +639,6 @@ internal static bool Less(this ref keysByCount x, nint i, nint j) {
     }
     return ki < kj;
 }
-
-} partial class pprof_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string runtimeˢ => ref runtimeˢᵇ;
@@ -753,7 +740,7 @@ internal static error writeHeapInternal(io.Writer w, nint debug, @string default
         return writeHeapProto(w, p, (int64)runtime.MemProfileRate, defaultSampleType);
     }
 
-    slices.SortFunc(p, (profilerecord.MemProfileRecord a, profilerecord.MemProfileRecord bΔ1) => cmp.Compare(a.InUseBytes(), bΔ1.InUseBytes()));
+    slices.SortFunc(p, [GoFunc("writeHeapInternal.func1")] (profilerecord.MemProfileRecord a, profilerecord.MemProfileRecord bΔ1) => cmp.Compare(a.InUseBytes(), bΔ1.InUseBytes()));
 
     var b = bufio.NewWriter(w);
     var tw = tabwriter.NewWriter(new bufio_WriterжWriter(b), 1, 8, 1, (byte)'\t', 0);
@@ -858,7 +845,7 @@ internal static error writeThreadCreate(io.Writer w, nint debug) {
     // Until https://golang.org/issues/6104 is addressed, wrap
     // ThreadCreateProfile because there's no point in tracking labels when we
     // don't get any stack-traces.
-    return writeRuntimeProfile(w, debug, threadcreateˢ, (slice<profilerecord.StackRecord> p, slice<@unsafe.Pointer> _) => {
+    return writeRuntimeProfile(w, debug, threadcreateˢ, [GoFunc("writeThreadCreate.func1")] (slice<profilerecord.StackRecord> p, slice<@unsafe.Pointer> _) => {
         return pprof_threadCreateInternal(p);
     });
 }
@@ -965,13 +952,9 @@ partial struct runtimeProfile {
     internal slice<@unsafe.Pointer> labels;
 }
 
-} partial class pprofᴛruntimeProfile {
-
-internal static nint Len(this ref runtimeProfile p) { return len(p.stk); }
-internal static slice<uintptr> Stack(this ref runtimeProfile p, nint i) { return p.stk[i].Stack; }
-internal static ж<labelMap> Label(this ref runtimeProfile p, nint i) { return @unsafe.Pointer.To<labelMap>(p.labels[i]); }
-
-} partial class pprof_package {
+internal static nint Len⁔(/*this*/ ref runtimeProfile p) { return len(p.stk); }
+internal static slice<uintptr> Stack⁔(/*this*/ ref runtimeProfile p, nint i) { return p.stk[i].Stack; }
+internal static ж<labelMap> Label⁔(/*this*/ ref runtimeProfile p, nint i) { return @unsafe.Pointer.To<labelMap>(p.labels[i]); }
 
 partial struct cpuᴛ1 /*dyn*/ {
     /*embed*/ public go.sync_package.Mutex Mutex;
@@ -1128,7 +1111,7 @@ internal static error writeProfileInternal(io.Writer w, nint debug, @string name
         }
     }
 
-    slices.SortFunc(p, (profilerecord.BlockProfileRecord a, profilerecord.BlockProfileRecord bΔ1) => cmp.Compare(bΔ1.Cycles, a.Cycles));
+    slices.SortFunc(p, [GoFunc("writeProfileInternal.func1")] (profilerecord.BlockProfileRecord a, profilerecord.BlockProfileRecord bΔ1) => cmp.Compare(bΔ1.Cycles, a.Cycles));
 
     if (debug <= 0) {
         return printCountCycleProfile(w, contentionsˢ, delayˢ, p);

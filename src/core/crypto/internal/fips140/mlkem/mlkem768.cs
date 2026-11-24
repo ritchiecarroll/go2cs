@@ -30,7 +30,6 @@ using subtle = go.crypto.@internal.fips140.subtle_package;
 using errors = errors_package;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140;
-using static mlkem_package;
 
 partial class mlkem_package {
 
@@ -77,19 +76,15 @@ partial struct DecapsulationKey768 {
     /*embed*/ internal decryptionKey decryptionKey;
 }
 
-} partial class mlkemᴛDecapsulationKey768 {
-
 // Bytes returns the decapsulation key as a 64-byte seed in the "d || z" form.
 //
 // The decapsulation key must be kept secret.
-public static slice<byte> Bytes(this ref DecapsulationKey768 dk) {
+internal static slice<byte> Bytes⁔(/*this*/ ref DecapsulationKey768 dk) {
     array<byte> b = new(64); /* SeedSize */
     copy(b[..], dk.d[..]);
     copy(b[32..], dk.z[..]);
     return b[..];
 }
-
-} partial class mlkem_package {
 
 // TestingOnlyExpandedBytes768 returns the decapsulation key as a byte slice
 // using the full expanded NIST encoding.
@@ -119,19 +114,15 @@ public static slice<byte> TestingOnlyExpandedBytes768(ж<DecapsulationKey768> �
     return b;
 }
 
-} partial class mlkemᴛDecapsulationKey768 {
-
 // EncapsulationKey returns the public encapsulation key necessary to produce
 // ciphertexts.
-public static ж<EncapsulationKey768> EncapsulationKey(this ref DecapsulationKey768 dk) {
+internal static ж<EncapsulationKey768> EncapsulationKey⁔(/*this*/ ref DecapsulationKey768 dk) {
     return Ꮡ(new EncapsulationKey768(
         ρ: dk.ρ.Clone(),
         h: dk.h.Clone(),
         encryptionKey: dk.encryptionKey.ΔClone()
     ));
 }
-
-} partial class mlkem_package {
 
 // An EncapsulationKey768 is the public key used to produce ciphertexts to be
 // decapsulated by the corresponding [DecapsulationKey768].
@@ -141,24 +132,20 @@ partial struct EncapsulationKey768 {
     /*embed*/ internal encryptionKey encryptionKey;
 }
 
-} partial class mlkemᴛEncapsulationKey768 {
-
 // Bytes returns the encapsulation key as a byte slice.
-public static slice<byte> Bytes(this ref EncapsulationKey768 ek) {
+internal static slice<byte> Bytes⁔(/*this*/ ref EncapsulationKey768 ek) {
     // The actual logic is in a separate function to outline this allocation.
     var b = new slice<byte>(0, EncapsulationKeySize768);
     return ek.bytes(b);
 }
 
-internal static slice<byte> bytes(this ref EncapsulationKey768 ek, slice<byte> b) {
+internal static slice<byte> bytes⁔(/*this*/ ref EncapsulationKey768 ek, slice<byte> b) {
     foreach (var i in range(len(ek.t))) {
         b = polyByteEncode(b, ek.t[i]);
     }
     b = appendꓸꓸꓸ(b, ek.ρ[..]);
     return b;
 }
-
-} partial class mlkem_package {
 
 // encryptionKey is the parsed and expanded form of a PKE encryption key.
 partial struct encryptionKey {
@@ -186,7 +173,7 @@ internal static (ж<DecapsulationKey768>, error) generateKey(ж<DecapsulationKey
     ref var z = ref heap(new array<byte>(32), out var Ꮡz);
     drbg.Read(z[..]);
     kemKeyGen(dk, Ꮡd, ref z);
-    fips140.PCT(mlKemPctˢ, () => kemPCT(dk));
+    fips140.PCT(mlKemPctˢ, [GoFunc("generateKey.func1")] () => kemPCT(dk));
     fips140.RecordApproved();
     return (dk, default);
 }
@@ -344,19 +331,17 @@ internal static error kemPCT(ж<DecapsulationKey768> Ꮡdk) {
     return default;
 }
 
-} partial class mlkemᴛEncapsulationKey768 {
-
 // Encapsulate generates a shared key and an associated ciphertext from an
 // encapsulation key, drawing random bytes from a DRBG.
 //
 // The shared key must be kept secret.
-public static (slice<byte> sharedKey, slice<byte> ciphertext) Encapsulate(this ж<EncapsulationKey768> Ꮡek) {
+internal static (slice<byte> sharedKey, slice<byte> ciphertext) Encapsulate⁔(/*this*/ ж<EncapsulationKey768> Ꮡek) {
     // The actual logic is in a separate function to outline this allocation.
     ref var cc = ref heap(new array<byte>(1088), out var Ꮡcc);
     return Ꮡek.encapsulate(Ꮡcc);
 }
 
-internal static (slice<byte> sharedKey, slice<byte> ciphertext) encapsulate(this ж<EncapsulationKey768> Ꮡek, /*[1088]*/ ж<array<byte>> cc) {
+internal static (slice<byte> sharedKey, slice<byte> ciphertext) encapsulate⁔(/*this*/ ж<EncapsulationKey768> Ꮡek, /*[1088]*/ ж<array<byte>> cc) {
     fipsSelfTest();
     ref var m = ref heap(new array<byte>(32), out var Ꮡm);
     drbg.Read(m[..]);
@@ -368,13 +353,11 @@ internal static (slice<byte> sharedKey, slice<byte> ciphertext) encapsulate(this
 
 // EncapsulateInternal is a derandomized version of Encapsulate, exclusively for
 // use in tests.
-public static (slice<byte> sharedKey, slice<byte> ciphertext) EncapsulateInternal(this ж<EncapsulationKey768> Ꮡek, /*[32]*/ ж<array<byte>> m) {
+internal static (slice<byte> sharedKey, slice<byte> ciphertext) EncapsulateInternal⁔(/*this*/ ж<EncapsulationKey768> Ꮡek, /*[32]*/ ж<array<byte>> m) {
     fipsSelfTest();
     var cc = Ꮡ(new byte[]{}.array(1088));
     return kemEncaps(cc, ref (Ꮡek).DerefOrNull(), m);
 }
-
-} partial class mlkem_package {
 
 // kemEncaps generates a shared key and an associated ciphertext.
 //
@@ -486,17 +469,11 @@ internal static slice<byte> pkeEncrypt(/*[1088]*/ ж<array<byte>> Ꮡcc, ref enc
     return c;
 }
 
-} partial class mlkemᴛDecapsulationKey768 {
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string mlkemInvalidCiphertextˢ => ref mlkemInvalidCiphertextˢᵇ;
-private static readonly @string mlkemInvalidCiphertextˢᵇ = "mlkem: invalid ciphertext length"u8;
-
 // Decapsulate generates a shared key from a ciphertext and a decapsulation key.
 // If the ciphertext is not valid, Decapsulate returns an error.
 //
 // The shared key must be kept secret.
-public static (slice<byte> sharedKey, error err) Decapsulate(this ж<DecapsulationKey768> Ꮡdk, slice<byte> ciphertext) {
+internal static (slice<byte> sharedKey, error err) Decapsulate⁔(/*this*/ ж<DecapsulationKey768> Ꮡdk, slice<byte> ciphertext) {
     fipsSelfTest();
     if (len(ciphertext) != CiphertextSize768) {
         return (default, errors.New(mlkemInvalidCiphertextˢ));
@@ -507,8 +484,6 @@ public static (slice<byte> sharedKey, error err) Decapsulate(this ж<Decapsulati
     // validly generated by ML-KEM.KeyGen_internal.
     return (kemDecaps(ref (Ꮡdk).DerefOrNull(), c), default);
 }
-
-} partial class mlkem_package {
 
 internal static Action<nint> testingOnlyRejectionOutcome;
 

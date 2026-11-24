@@ -16,7 +16,7 @@ partial class bytes_package {
 // If s does not end in a newline, the final yielded line will not end in a newline.
 // It returns a single-use iterator.
 public static iter.Seq<slice<byte>> Lines(slice<byte> s) {
-    return (Func<slice<byte>, bool> yield) => {
+    return [GoFunc("Lines.func1")] (Func<slice<byte>, bool> yield) => {
         while (len(s) > 0) {
             slice<byte> line = default;
             nint i = IndexByte(s, (byte)'\n'); if (i >= 0) {
@@ -35,7 +35,7 @@ public static iter.Seq<slice<byte>> Lines(slice<byte> s) {
 // bytes of sep to include in the results (none or all).
 internal static iter.Seq<slice<byte>> splitSeq(slice<byte> s, slice<byte> sep, nint sepSave) {
     var sepʗ1 = sep;
-    return (Func<slice<byte>, bool> yield) => {
+    return [GoFunc("splitSeq.func1")] (Func<slice<byte>, bool> yield) => {
         if (len(sepʗ1) == 0) {
             while (len(s) > 0) {
                 var (_, size) = utf8.DecodeRune(s);
@@ -83,7 +83,7 @@ public static iter.Seq<slice<byte>> SplitAfterSeq(slice<byte> s, slice<byte> sep
 // but without constructing a new slice containing the subslices.
 public static iter.Seq<slice<byte>> FieldsSeq(slice<byte> s) {
     var sʗ1 = s;
-    return (Func<slice<byte>, bool> yield) => {
+    return [GoFunc("FieldsSeq.func1")] (Func<slice<byte>, bool> yield) => {
         nint start = -1;
         for (nint i = 0; i < len(sʗ1); ) {
             nint size = 1;
@@ -117,7 +117,7 @@ public static iter.Seq<slice<byte>> FieldsSeq(slice<byte> s) {
 // but without constructing a new slice containing the subslices.
 public static iter.Seq<slice<byte>> FieldsFuncSeq(slice<byte> s, Func<rune, bool> f) {
     var sʗ1 = s;
-    return (Func<slice<byte>, bool> yield) => {
+    return [GoFunc("FieldsFuncSeq.func1")] (Func<slice<byte>, bool> yield) => {
         nint start = -1;
         for (nint i = 0; i < len(sʗ1); ) {
             var (r, size) = utf8.DecodeRune(sʗ1.slice(i));

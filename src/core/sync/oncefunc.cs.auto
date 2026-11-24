@@ -27,11 +27,11 @@ public static Action OnceFunc(Action f) {
     ref var d = ref heap<OnceFunc_d>(new OnceFunc_d(
         f: f
     ), out var Ꮡd);
-    return () => {
-        Ꮡd.of(OnceFunc_d.Ꮡonce).Do(() => {
+    return [GoFunc("OnceFunc.func1")] () => {
+        Ꮡd.of(OnceFunc_d.Ꮡonce).Do([GoFunc("OnceFunc.func1.1")] () => {
             GoFrame ᒐ = default;
             try {
-                defer(() => {
+                defer([GoFunc("OnceFunc.func1.1.1")] () => {
                     Ꮡd.Value.f = default; // Do not keep f alive after invoking it.
                     Ꮡd.Value.p = recover();
                     if (!Ꮡd.Value.valid) {
@@ -70,11 +70,11 @@ public static Func<T> OnceValue<T>(Func<T> f) {
     ref var d = ref heap<OnceValue_d<T>>(new OnceValue_d<T>(
         f: f
     ), out var Ꮡd);
-    return () => {
-        Ꮡd.of(OnceValue_d<T>.Ꮡonce).Do(() => {
+    return [GoFunc("OnceValue[...].func1")] () => {
+        Ꮡd.of(OnceValue_d<T>.Ꮡonce).Do([GoFunc("OnceValue[...].func1.1")] () => {
             GoFrame ᒐ = default;
             try {
-                defer(() => {
+                defer([GoFunc("OnceValue[...].func1.1.1")] () => {
                     Ꮡd.Value.f = default;
                     Ꮡd.Value.p = recover();
                     if (!Ꮡd.Value.valid) {
@@ -112,11 +112,11 @@ public static Func<(T1, T2)> OnceValues<T1, T2>(Func<(T1, T2)> f) {
     ref var d = ref heap<OnceValues_d<T1, T2>>(new OnceValues_d<T1, T2>(
         f: f
     ), out var Ꮡd);
-    return () => {
-        Ꮡd.of(OnceValues_d<T1, T2>.Ꮡonce).Do(() => {
+    return [GoFunc("OnceValues[...].func1")] () => {
+        Ꮡd.of(OnceValues_d<T1, T2>.Ꮡonce).Do([GoFunc("OnceValues[...].func1.1")] () => {
             GoFrame ᒐ = default;
             try {
-                defer(() => {
+                defer([GoFunc("OnceValues[...].func1.1.1")] () => {
                     Ꮡd.Value.f = default;
                     Ꮡd.Value.p = recover();
                     if (!Ꮡd.Value.valid) {

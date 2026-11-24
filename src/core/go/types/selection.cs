@@ -9,7 +9,6 @@ namespace go.go;
 using bytes = bytes_package;
 using fmt = fmt_package;
 using io = io_package;
-using static types_package;
 
 partial class types_package {
 
@@ -77,21 +76,19 @@ partial struct Selection {
     internal bool indirect;     // set if there was any pointer indirection on the path
 }
 
-} partial class typesᴛSelection {
-
 // Kind returns the selection kind.
-public static SelectionKind Kind(this ref Selection s) { return s.kind; }
+internal static SelectionKind Kind⁔(/*this*/ ref Selection s) { return s.kind; }
 
 // Recv returns the type of x in x.f.
-public static Type Recv(this ref Selection s) { return s.recv; }
+internal static Type Recv⁔(/*this*/ ref Selection s) { return s.recv; }
 
 // Obj returns the object denoted by x.f; a *Var for
 // a field selection, and a *Func in all other cases.
-public static Object Obj(this ref Selection s) { return s.obj; }
+internal static Object Obj⁔(/*this*/ ref Selection s) { return s.obj; }
 
 // Type returns the type of x.f, which may be different from the type of f.
 // See Selection for more information.
-public static Type Type(this ref Selection s) {
+internal static Type Type⁔(/*this*/ ref Selection s) {
     switch (s.kind) {
     case var ᴛ when ᴛ == MethodVal: {
         // The type of x.f is a method with its receiver type set
@@ -133,7 +130,7 @@ public static Type Type(this ref Selection s) {
 //
 // The earlier index entries are the indices of the embedded fields implicitly
 // traversed to get from (the type of) x to f, starting at embedding depth 0.
-public static slice<nint> Index(this ref Selection s) { return s.index; }
+internal static slice<nint> Index⁔(/*this*/ ref Selection s) { return s.index; }
 
 // Indirect reports whether any pointer indirection was required to get from
 // x to f in x.f.
@@ -142,11 +139,9 @@ public static slice<nint> Index(this ref Selection s) { return s.index; }
 // MethodVal selection in which the receiver argument and parameter
 // both have type *T so there is no indirection.
 // Unfortunately, a fix is too risky.
-public static bool Indirect(this ref Selection s) { return s.indirect; }
+internal static bool Indirect⁔(/*this*/ ref Selection s) { return s.indirect; }
 
-public static @string String(this ж<Selection> Ꮡs) { return SelectionString(Ꮡs, default); }
-
-} partial class types_package {
+internal static @string String⁔(/*this*/ ж<Selection> Ꮡs) { return SelectionString(Ꮡs, default); }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string fieldˢ2 => ref fieldˢ2ᵇ;

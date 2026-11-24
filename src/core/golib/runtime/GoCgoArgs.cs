@@ -124,7 +124,7 @@ namespace go.golib;
         string? what = GoMemory(pointer, out nuint address);
 
         if (what is not null)
-            throw RuntimeErrorPanic.ErrorString($"cgo: the void pointer handed to C.{function} is {what}, which go2cs does not hand to C until cgo Phase 3's increment 3.2, so it refuses the call");
+            throw RuntimeErrorPanic.ErrorString($"cgo: the void pointer handed to C.{function} is {what}, and handing C a pointer into Go memory is not supported yet, so go2cs refuses the call (docs/Limitations.md#cgo)");
 
         return address;
     }
@@ -158,6 +158,58 @@ namespace go.golib;
             return native.NativeAddress;
 
         throw HelperRefused(helper, "a pointer into Go memory");
+    }
+
+    /// <summary>
+    /// Go's <c>*p</c> for <c>p</c> a <c>**C.T</c>, the load go2cs emits on the cgo route (cgo Phase 3, increment 3.2,
+    /// seat 1c: docs/phase4/DESIGN-cgo-phase3-marshaling.md 18.11).
+    /// </summary>
+    /// <remarks>
+    /// A native box (<c>&amp;l.next</c> over a C struct in C memory, at the field's Go offset) names a WORD, which the
+    /// reference floor refuses to read as a managed reference: the word is read as 1a's field read reads it
+    /// (CgoPointerWords). A field view whose source is native had no known Go offset and is refused by name. Any other
+    /// box is a managed slot, read as the converter reads one today: a nil box is Go's nil dereference, and the slot
+    /// itself is <c>ValueSlot</c>, so a slot that holds a nil pointer loads nil (<c>.Value</c> would read that as a nil
+    /// box and panic).
+    /// </remarks>
+    public static ж<U> LoadPointer<U>(ж<ж<U>> p)
+    {
+        if (p is NativeBox<ж<U>> native)
+            return CgoPointerWords.ReadWord(native);
+
+        RequireManagedSlot(p);
+        return p.ValueSlot;
+    }
+
+    /// <summary>
+    /// Go's <c>*p = v</c> for <c>p</c> a <c>**C.T</c>, the store beside <see cref="LoadPointer{U}"/>: a word of C memory
+    /// takes 0 for nil and the address of C memory alone, and a Go pointer is refused by name.
+    /// </summary>
+    public static void StorePointer<U>(ж<ж<U>> p, ж<U> value)
+    {
+        if (p is NativeBox<ж<U>> native)
+        {
+            CgoPointerWords.WriteWord(native, value);
+            return;
+        }
+
+        RequireManagedSlot(p);
+        p.ValueSlot = value;
+    }
+
+    // A nil p (IsNilPointer: the box itself, never a box that holds nil) is Go's nil dereference. A field view over a native source (no known Go offset; ж.cs's nativeFieldView kept
+    // the view) is refused before any read or write: its CLR slot is not where the field's bytes are (18.11 [P3 M1]).
+    private static void RequireManagedSlot<U>(ж<ж<U>>? p)
+    {
+        if (p is null || p.IsNilPointer)
+            throw RuntimeErrorPanic.NilPointerDereference();
+
+        if (p is INativeRooted { IsNativeRooted: true })
+        {
+            throw p is FieldRefBox<ж<U>> view
+                ? view.NoKnownGoOffset()
+                : RuntimeErrorPanic.NativeStructLayoutMismatch(typeof(ж<U>), "a view of native memory with no known Go offset");
+        }
     }
 
     /// <summary>The number of bytes <c>C.CString</c> allocates: the string's bytes and a NUL.</summary>
@@ -292,7 +344,7 @@ namespace go.golib;
         ManagedPointerTokens.IsTaggedToken(address) || ManagedPointerTokens.Resolve(address) is not null || PinExtents.Find(address) is not null;
 
     private static PanicException HelperRefused(string helper, string what) =>
-        RuntimeErrorPanic.ErrorString($"cgo: C.{helper} over Go memory: the pointer it was handed is {what}. Reading Go memory through cmd/cgo's helpers is cgo Phase 3's increment 3.2; until then go2cs refuses the call");
+        RuntimeErrorPanic.ErrorString($"cgo: C.{helper} over Go memory: the pointer it was handed is {what}. Reading Go memory through cmd/cgo's helpers is not supported yet, so go2cs refuses the call (docs/Limitations.md#cgo)");
 
     // A native box says what it was minted WITH, and a native box minted from a bare NUMBER was minted with nothing:
     // (*T)(unsafe.Pointer(&array)) over a Go array of another element type goes through the number, and comes back as a

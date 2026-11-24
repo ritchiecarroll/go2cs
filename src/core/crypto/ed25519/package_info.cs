@@ -12,10 +12,15 @@
 // <ImportedTypeAliases>
 global using cryptoꓸPrivateKey = object;
 global using cryptoꓸPublicKey = object;
+using crypto = go.crypto_package;
+using io = go.io_package;
 // </ImportedTypeAliases>
 
 using go;
 using static go.crypto.ed25519_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -61,10 +66,14 @@ using static go.crypto.ed25519_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("crypto/ed25519/ed25519.go", "ed25519.cs", "ADJkwoKClAAJDpKCgqiSgoKUrLIAESAACwK6gpSCgoKUlKSClKSkABEggLQAARYACQKCgoKCpriCgqaCgq7UgoKmgoKUlKrGgoKmgrqClIIAAhDSAAgcAA0CgpSCgpSUpIKUpKQ=", "98-100:1;100-102:2;204-206:1;206-208:2")]
+[assembly: GoPositionMap("crypto/ed25519/ed25519.go", "ed25519.cs", "AC9kwoKClN6SgoKokoKClKyyAA0gAAsCuoKUgoKClJSkgpSkpAANIICUAAEWAAkCgoKCgqa4goKmgoKu1IKCpoKClJSqxoKCpoK6gpSCAAIQ0gAGHAANAoKUgoKUlKSClKSk", "98-100:1;100-102:2;204-206:1;206-208:2")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;
+
+using static go.crypto.ed25519_package;
+using crypto = go.crypto_package;
+using io = go.io_package;
 
 [GoPackage("ed25519")]
 public static partial class ed25519_package
@@ -109,7 +118,26 @@ public static partial class ed25519_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(ed25519_package.Options)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ed25519ᴛOptions;
-[GoMethodHost(typeof(ed25519_package.PrivateKey)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ed25519ᴛPrivateKey;
-[GoMethodHost(typeof(ed25519_package.PublicKey)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ed25519ᴛPublicKey;
+[GoMethodHost(typeof(ed25519_package.Options)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class ed25519ᴛOptions;
+[GoMethodHost(typeof(ed25519_package.PrivateKey)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class ed25519ᴛPrivateKey;
+[GoMethodHost(typeof(ed25519_package.PublicKey)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class ed25519ᴛPublicKey;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class ed25519ᴛOptions {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static crypto.Hash HashFunc(this ref Options o) => ed25519_package.HashFunc⁔(ref o);
+}
+partial class ed25519ᴛPrivateKey {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static cryptoꓸPublicKey Public(this PrivateKey priv) => ed25519_package.Public⁔(priv);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Equal(this PrivateKey priv, cryptoꓸPrivateKey x) => ed25519_package.Equal⁔(priv, x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> Seed(this PrivateKey priv) => ed25519_package.Seed⁔(priv);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<byte> signature, error err) Sign(this PrivateKey priv, io.Reader rand, slice<byte> message, crypto.SignerOpts opts) => ed25519_package.Sign⁔(priv, rand, message, opts);
+}
+partial class ed25519ᴛPublicKey {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Equal(this PublicKey pub, cryptoꓸPublicKey x) => ed25519_package.Equal⁔(pub, x);
+}
+// </MethodForwarders>

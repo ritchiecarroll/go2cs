@@ -32,7 +32,7 @@ internal static @string /*result*/ recovered(any v) {
     @string result = default;
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("recovered.func1")] () => {
             var switchᴛ2 = recover();
             switch (switchᴛ2.type()) {
             case @string _:

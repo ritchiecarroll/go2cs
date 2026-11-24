@@ -6,7 +6,7 @@ using reflect = reflect_package;
 partial class main_package {
 
 internal static void makeSwap(any fptr) {
-    var swap = (slice<reflect.Value> @in) => slice<reflect.Value>([@in[1], @in[0]]);
+    var swap = [GoFunc("makeSwap.func1")] (slice<reflect.Value> @in) => slice<reflect.Value>([@in[1], @in[0]]);
     var fn = reflect.ValueOf(fptr).Elem();
     var v = reflect.MakeFunc(fn.Type(), swap);
     fn.Set(v);
@@ -29,10 +29,10 @@ internal static void main() {
     fmt.Println("stringSwap:", s1, s2);
 
     ref var events = ref heap<slice<@string>>(out var Ꮡevents);
-    ref var t1 = ref heap<traceHooks>(new traceHooks(OnEvent: (@string s) => {
+    ref var t1 = ref heap<traceHooks>(new traceHooks(OnEvent: [GoFunc("main.func1")] (@string s) => {
         Ꮡevents.ValueSlot = append(Ꮡevents.ValueSlot, "new:"u8 + s);
     }), out var Ꮡt1);
-    ref var t2 = ref heap<traceHooks>(new traceHooks(OnEvent: (@string s) => {
+    ref var t2 = ref heap<traceHooks>(new traceHooks(OnEvent: [GoFunc("main.func2")] (@string s) => {
         Ꮡevents.ValueSlot = append(Ꮡevents.ValueSlot, "old:"u8 + s);
     }), out var Ꮡt2);
     var tv = reflect.ValueOf(Ꮡt1).Elem();
@@ -42,7 +42,7 @@ internal static void main() {
     ref var tfCopy = ref heap<reflect.Value>(reflect.ValueOf(tf.Interface()), out var ᏑtfCopy);
     var ofʗ1 = of;
     var tfCopyʗ1 = tfCopy;
-    var newFunc = reflect.MakeFunc(tf.Type(), (slice<reflect.Value> args) => {
+    var newFunc = reflect.MakeFunc(tf.Type(), [GoFunc("main.func3")] (slice<reflect.Value> args) => {
         tfCopyʗ1.Call(args);
         return ofʗ1.Call(args);
     });
@@ -54,7 +54,7 @@ internal static void main() {
     ref var h = ref heap<traceHooks>(new traceHooks(), out var Ꮡh);
     var hv = reflect.ValueOf(Ꮡh).Elem();
     var sumField = hv.Field(1);
-    var made = reflect.MakeFunc(sumField.Type(), (slice<reflect.Value> args) => {
+    var made = reflect.MakeFunc(sumField.Type(), [GoFunc("main.func4")] (slice<reflect.Value> args) => {
         var total = args[0].Int() + args[1].Int();
         return slice<reflect.Value>([reflect.ValueOf((nint)total), reflect.ValueOf(fmt.Sprintf("sum=%d"u8, total))]);
     });
@@ -69,7 +69,7 @@ internal static void main() {
 
     ref var describe = ref heap<Func<any, @string>>(out var Ꮡdescribe);
     var dv = reflect.ValueOf(Ꮡdescribe).Elem();
-    dv.Set(reflect.MakeFunc(dv.Type(), (slice<reflect.Value> args) => {
+    dv.Set(reflect.MakeFunc(dv.Type(), [GoFunc("main.func5")] (slice<reflect.Value> args) => {
         var arg = args[0];
         return slice<reflect.Value>([reflect.ValueOf(fmt.Sprintf("%v/%v"u8, arg.Kind(), arg.Elem().Kind()))]);
     }));
@@ -77,13 +77,13 @@ internal static void main() {
 
     ref var isNil = ref heap<Func<ж<nint>, bool>>(out var ᏑisNil);
     var nv = reflect.ValueOf(ᏑisNil).Elem();
-    nv.Set(reflect.MakeFunc(nv.Type(), (slice<reflect.Value> args) => slice<reflect.Value>([reflect.ValueOf(args[0].IsNil())])));
+    nv.Set(reflect.MakeFunc(nv.Type(), [GoFunc("main.func6")] (slice<reflect.Value> args) => slice<reflect.Value>([reflect.ValueOf(args[0].IsNil())])));
     ref var x = ref heap<nint>(5, out var Ꮡx);
     fmt.Println("isNil:", isNil(nil), isNil(Ꮡx));
 
     ref var sum4 = ref heap<Func<array<byte>, nint>>(out var Ꮡsum4);
     var sv = reflect.ValueOf(Ꮡsum4).Elem();
-    sv.Set(reflect.MakeFunc(sv.Type(), (slice<reflect.Value> args) => {
+    sv.Set(reflect.MakeFunc(sv.Type(), [GoFunc("main.func7")] (slice<reflect.Value> args) => {
         nint total = 0;
         for (nint i = 0; i < args[0].Len(); i++) {
             total += (nint)args[0].Index(i).Uint();

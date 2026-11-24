@@ -20,7 +20,6 @@ using iter = iter_package;
 using time = time_package;
 using ꓸꓸꓸany = Span<any>;
 using ꓸꓸꓸstring = Span<@string>;
-using static fstest_package;
 
 partial class fstest_package {
 
@@ -115,16 +114,14 @@ partial struct fsTester {
     internal slice<@string> files;
 }
 
-} partial class fstestᴛfsTester {
-
 // errorf adds an error to the list of errors.
-internal static void errorf(this ref fsTester t, @string format, params ꓸꓸꓸany argsʗp) {
+internal static void errorf⁔(/*this*/ ref fsTester t, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     t.errors = append(t.errors, fmt.Errorf(format, args.ꓸꓸꓸ));
 }
 
-internal static fs.ReadDirFile openDir(this ref fsTester t, @string dir) {
+internal static fs.ReadDirFile openDir⁔(/*this*/ ref fsTester t, @string dir) {
     var (f, err) = t.fsys.Open(dir);
     if (err != nil) {
         t.errorf("%s: Open: %w", dir, err);
@@ -151,7 +148,7 @@ private static readonly @string firstOpenReadDir1VsFsˢᵇ = "first Open+ReadDir
 
 // checkDir checks the directory dir, which is expected to exist
 // (it is either the root or was found in a directory listing with IsDir true).
-internal static void checkDir(this ж<fsTester> Ꮡt, @string dir) {
+internal static void checkDir⁔(/*this*/ ж<fsTester> Ꮡt, @string dir) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();
@@ -320,8 +317,6 @@ internal static void checkDir(this ж<fsTester> Ꮡt, @string dir) {
     finally { ᒐ.Run(); }
 }
 
-} partial class fstest_package {
-
 // formatEntry formats an fs.DirEntry into a string for error messages and comparison.
 internal static @string formatEntry(fs.DirEntry entry) {
     return fmt.Sprintf("%s IsDir=%v Type=%v"u8, entry.Name(), entry.IsDir(), entry.Type());
@@ -337,10 +332,8 @@ internal static @string formatInfo(fs.FileInfo info) {
     return fmt.Sprintf("%s IsDir=%v Mode=%v Size=%d ModTime=%v"u8, info.Name(), info.IsDir(), info.Mode(), info.Size(), info.ModTime());
 }
 
-} partial class fstestᴛfsTester {
-
 // checkGlob checks that various glob patterns work if the file system implements GlobFS.
-internal static void checkGlob(this ref fsTester t, @string dir, slice<fs.DirEntry> list) {
+internal static void checkGlob⁔(/*this*/ ref fsTester t, @string dir, slice<fs.DirEntry> list) {
     var patternᴷ = new stackAppend<rune>();
     var wantᴷ = new stackAppend<@string>();
     var problemsᴷ = new stackAppend<@string>();
@@ -457,7 +450,7 @@ internal static void checkGlob(this ref fsTester t, @string dir, slice<fs.DirEnt
 
 // checkStat checks that a direct stat of path matches entry,
 // which was found in the parent's directory listing.
-internal static void checkStat(this ref fsTester t, @string path, fs.DirEntry entry) {
+internal static void checkStat⁔(/*this*/ ref fsTester t, @string path, fs.DirEntry entry) {
     var (@file, err) = t.fsys.Open(path);
     if (err != nil) {
         t.errorf("%s: Open: %w", path, err);
@@ -543,12 +536,12 @@ internal static void checkStat(this ref fsTester t, @string path, fs.DirEntry en
 
 // checkDirList checks that two directory lists contain the same files and file info.
 // The order of the lists need not match.
-internal static void checkDirList(this ж<fsTester> Ꮡt, @string dir, @string desc, slice<fs.DirEntry> list1, slice<fs.DirEntry> list2) {
+internal static void checkDirList⁔(/*this*/ ж<fsTester> Ꮡt, @string dir, @string desc, slice<fs.DirEntry> list1, slice<fs.DirEntry> list2) {
     ref var t = ref Ꮡt.DerefOrNull();
     var diffsᴷ = new stackAppend<@string>();
 
     var old = new map<@string, fs.DirEntry>();
-    void checkMode(fs.DirEntry entry) {
+    [GoFunc("(*fsTester).checkDirList.func1")] void checkMode(fs.DirEntry entry) {
         if (entry.IsDir() != ((fs.FileMode)(entry.Type() & fs.ModeDir) != 0)) {
             if (entry.IsDir()) {
                 Ꮡt.Value.errorf("%s: ReadDir returned %s with IsDir() = true, Type() & ModeDir = 0", dir, entry.Name());
@@ -584,7 +577,7 @@ internal static void checkDirList(this ж<fsTester> Ꮡt, @string dir, @string d
         return;
     }
 
-    slices.SortFunc(diffs, (@string a, @string b) => {
+    slices.SortFunc(diffs, [GoFunc("(*fsTester).checkDirList.func2")] (@string a, @string b) => {
         var fa = strings.Fields(a);
         var fb = strings.Fields(b);
         // sort by name (i < j) and then +/- (j < i, because + < -)
@@ -605,7 +598,7 @@ internal static ref readonly @string readAllVsFsReadFileˢ => ref readAllVsFsRea
 private static readonly @string readAllVsFsReadFileˢᵇ = "ReadAll vs fs.ReadFile"u8;
 
 // checkFile checks that basic file reading works correctly.
-internal static void checkFile(this ж<fsTester> Ꮡt, @string @file) {
+internal static void checkFile⁔(/*this*/ ж<fsTester> Ꮡt, @string @file) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();
@@ -658,7 +651,7 @@ internal static void checkFile(this ж<fsTester> Ꮡt, @string @file) {
 
                     var fsysʗ1 = fsys;
                 t.checkBadPath(@file, readFileˢ,
-                    (@string name) => {
+                    [GoFunc("(*fsTester).checkFile.func1")] (@string name) => {
                         var (_, errΔ3) = fsysʗ1.ReadFile(name);
                         return errΔ3;
                     });
@@ -689,7 +682,7 @@ internal static void checkFile(this ж<fsTester> Ꮡt, @string @file) {
     finally { ᒐ.Run(); }
 }
 
-internal static void checkFileRead(this ref fsTester t, @string @file, @string desc, slice<byte> data1, slice<byte> data2) {
+internal static void checkFileRead⁔(/*this*/ ref fsTester t, @string @file, @string desc, slice<byte> data1, slice<byte> data2) {
     if (((sstring)data1) != ((sstring)data2)) {
         t.errorf("%s: %s: different data returned\n\t%q\n\t%q", @file, desc, data1, data2);
         return;
@@ -701,10 +694,10 @@ internal static ref readonly @string openˢ => ref openˢᵇ;
 private static readonly @string openˢᵇ = "Open"u8;
 
 // checkOpen validates file opening behavior by attempting to open and then close the given file path.
-internal static void checkOpen(this ж<fsTester> Ꮡt, @string @file) {
+internal static void checkOpen⁔(/*this*/ ж<fsTester> Ꮡt, @string @file) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-    t.checkBadPath(@file, openˢ, (@string fileΔ1) => {
+    t.checkBadPath(@file, openˢ, [GoFunc("(*fsTester).checkOpen.func1")] (@string fileΔ1) => {
         var (f, err) = Ꮡt.Value.fsys.Open(fileΔ1);
         if (err == nil) {
             f.Close();
@@ -714,7 +707,7 @@ internal static void checkOpen(this ж<fsTester> Ꮡt, @string @file) {
 }
 
 // checkBadPath checks that various invalid forms of file's name cannot be opened using open.
-internal static void checkBadPath(this ref fsTester t, @string @file, @string desc, Func<@string, error> open) {
+internal static void checkBadPath⁔(/*this*/ ref fsTester t, @string @file, @string desc, Func<@string, error> open) {
     var badᴷ = new stackAppend<@string>();
 
     var bad = slice<@string>([
@@ -750,4 +743,4 @@ internal static void checkBadPath(this ref fsTester t, @string @file, @string de
     }
 }
 
-}
+} // end fstest_package

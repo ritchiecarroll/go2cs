@@ -87,7 +87,7 @@ internal static void report(@string shape) {
             line = "\t"u8 + position;
         }
         var idsʗ1 = ids;
-        line = goroutineID.ReplaceAllStringFunc(line, (@string m) => {
+        line = goroutineID.ReplaceAllStringFunc(line, [GoFunc("report.func1")] (@string m) => {
             @string id = goroutineID.FindStringSubmatch(m)[1];
             var (_, seen) = idsʗ1[id, ꟷ]; if (!seen) {
                 idsʗ1[id] = len(idsʗ1) + 1;

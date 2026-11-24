@@ -1,15 +1,11 @@
 namespace go.go.kwlib;
 
-using static required_package;
-
 partial class required_package {
 
 public static @string Name() { return "required"; }
 
 partial struct Kind /*num:nint*/;
 
-} partial class requiredᴛKind {
+internal static Kind Double⁔(/*this*/ Kind k) { return k * 2; }
 
-public static Kind Double(this Kind k) { return k * 2; }
-
-}
+} // end required_package

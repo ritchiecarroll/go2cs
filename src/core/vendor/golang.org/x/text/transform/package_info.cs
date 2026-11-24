@@ -14,6 +14,9 @@
 
 using go;
 using static go.vendor.golang.org.x.text.transform_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -64,10 +67,12 @@ using static go.vendor.golang.org.x.text.transform_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("vendor/golang.org/x/text/transform/transform.go", "transform.cs", "ABcquLi4uABFjAEAGDaiggAJEpKSlIKCgoKUgoLugoKClJSCuILG+KaClOyClIIAEyqiggAJFtKCpoKClIKCgpSCgoKmgoKCgqamgsaCpoKUgoLuxoK2upKCgoKClIKUAAsMooKClKaCAAoKguymABIkgoKCAA8YgqaCyLKClIKCpoKClMiSgoKUvuSCgoKC/oKCgoKCgpSCuIKUgsqCuLSUgsq4gqaC6oKCtriC3IKClJTIkuqW0oSClJSUgoLcgoKClJSCuIKCgpSUlMqigoKCgpSUgoLOwoKmgtyCgsqSAAgQgqaCgoK4gpSClIKClKaCAAkUgoKClIKCyoS4goKCgoK4goKUgoKUgpSCzqKqooKCgpSmgoKCgoKCgoLKgg==")]
+[assembly: GoPositionMap("vendor/golang.org/x/text/transform/transform.go", "transform.cs", "ABYquLi4uABDjAEAFjaiggAHEpKSlIKCgoKUgoLugoKClJSCuILG+KaClOyClIIAESqiggAHFtKCpoKClIKCgpSCgoKmgoKCgqamgsaCpoKUgoLuxoK2upKCgoKClIKU/KKCgpSmguqCzKYAECSCgoIACxiCpoKosoKUgoKmgoKUqJKCgpS+5IKCgoL+goKCgoKClIK4gpSCyoK4tJSCyriCpoLqgoK2uILcgoKUlKiSypbShIKUlJSCgtyCgoKUlIK4goKClJSUqqKCgoKClJSCgs7CgqaC3IKCypIACBCCpoKCgriClIKUgoKUpoIACRSCgoKUgoLKhLiCgoKCgriCgpSCgpSClILOoqqigoKClKaCgoKCgoKCgsqC")]
 // </GoSourcePositionMaps>
 
 namespace go.vendor.golang.org.x.text;
+
+using static go.vendor.golang.org.x.text.transform_package;
 
 [GoPackage("transform", ImportPath = "vendor/golang.org/x/text/transform")]
 public static partial class transform_package
@@ -111,12 +116,49 @@ public static partial class transform_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(transform_package.NopResetter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class transformᴛNopResetter;
-[GoMethodHost(typeof(transform_package.Reader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class transformᴛReader;
-[GoMethodHost(typeof(transform_package.Writer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class transformᴛWriter;
-[GoMethodHost(typeof(transform_package.chain)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class transformᴛchain;
-[GoMethodHost(typeof(transform_package.discard)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class transformᴛdiscard;
-[GoMethodHost(typeof(transform_package.link)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class transformᴛlink;
-[GoMethodHost(typeof(transform_package.nop)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class transformᴛnop;
-[GoMethodHost(typeof(transform_package.removeF)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class transformᴛremoveF;
+[GoMethodHost(typeof(transform_package.NopResetter)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class transformᴛNopResetter;
+[GoMethodHost(typeof(transform_package.Reader)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class transformᴛReader;
+[GoMethodHost(typeof(transform_package.Writer)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class transformᴛWriter;
+[GoMethodHost(typeof(transform_package.chain)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class transformᴛchain;
+[GoMethodHost(typeof(transform_package.discard)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class transformᴛdiscard;
+[GoMethodHost(typeof(transform_package.link)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class transformᴛlink;
+[GoMethodHost(typeof(transform_package.nop)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class transformᴛnop;
+[GoMethodHost(typeof(transform_package.removeF)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class transformᴛremoveF;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class transformᴛNopResetter {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Reset(this NopResetter _) => transform_package.Reset⁔(_);
+}
+partial class transformᴛReader {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint, error) Read(this ref Reader r, slice<byte> p) => transform_package.Read⁔(ref r, p);
+}
+partial class transformᴛWriter {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint n, error err) Write(this ref Writer w, slice<byte> data) => transform_package.Write⁔(ref w, data);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Close(this ref Writer w) => transform_package.Close⁔(ref w);
+}
+partial class transformᴛchain {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void fatalError(this ref chain c, nint errIndex, error err) => transform_package.fatalError⁔(ref c, errIndex, err);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void Reset(this ref chain c) => transform_package.Reset⁔(ref c);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint nDst, nint nSrc, error err) Transform(this ref chain c, slice<byte> dst, slice<byte> src, bool atEOF) => transform_package.Transform⁔(ref c, dst, src, atEOF);
+}
+partial class transformᴛdiscard {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint nDst, nint nSrc, error err) Transform(this discard _, slice<byte> dst, slice<byte> src, bool atEOF) => transform_package.Transform⁔(_, dst, src, atEOF);
+}
+partial class transformᴛlink {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<byte> src(this ref link l) => transform_package.src⁔(ref l);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<byte> dst(this ref link l) => transform_package.dst⁔(ref l);
+}
+partial class transformᴛnop {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint nDst, nint nSrc, error err) Transform(this nop _, slice<byte> dst, slice<byte> src, bool atEOF) => transform_package.Transform⁔(_, dst, src, atEOF);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) Span(this nop _, slice<byte> src, bool atEOF) => transform_package.Span⁔(_, src, atEOF);
+}
+partial class transformᴛremoveF {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void Reset(this removeF _) => transform_package.Reset⁔(_);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint nDst, nint nSrc, error err) Transform(this removeF t, slice<byte> dst, slice<byte> src, bool atEOF) => transform_package.Transform⁔(t, dst, src, atEOF);
+}
+// </MethodForwarders>

@@ -9,7 +9,6 @@ using static global::go.@internal.types.errors_package;
 using strconv = strconv_package;
 using errors = global::go.@internal.types.errors_package;
 using global::go.go;
-using static types_package;
 
 partial class types_package {
 
@@ -41,34 +40,30 @@ public static ж<Struct> NewStruct(slice<ж<Var>> fields, slice<@string> tags) {
     return s;
 }
 
-} partial class typesᴛStruct {
-
 // NumFields returns the number of fields in the struct (including blank and embedded fields).
-public static nint NumFields(this ref Struct s) { return len(s.fields); }
+internal static nint NumFields⁔(/*this*/ ref Struct s) { return len(s.fields); }
 
 // Field returns the i'th field for 0 <= i < NumFields().
-public static ж<Var> Field(this ref Struct s, nint i) { return s.fields[i]; }
+internal static ж<Var> Field⁔(/*this*/ ref Struct s, nint i) { return s.fields[i]; }
 
 // Tag returns the i'th field tag for 0 <= i < NumFields().
-public static @string Tag(this ref Struct s, nint i) {
+internal static @string Tag⁔(/*this*/ ref Struct s, nint i) {
     if (i < len(s.tags)) {
         return s.tags[i];
     }
     return ""u8;
 }
 
-public static Type Underlying(this ж<Struct> Ꮡt) { return new StructжType(Ꮡt); }
-public static @string String(this ж<Struct> Ꮡt) { return TypeString(new StructжType(Ꮡt), default); }
+internal static Type Underlying⁔(/*this*/ ж<Struct> Ꮡt) { return new StructжType(Ꮡt); }
+internal static @string String⁔(/*this*/ ж<Struct> Ꮡt) { return TypeString(new StructжType(Ꮡt), default); }
 
 // ----------------------------------------------------------------------------
 // Implementation
-internal static void markComplete(this ref Struct s) {
+internal static void markComplete⁔(/*this*/ ref Struct s) {
     if (s.fields == nil) {
         s.fields = new slice<ж<Var>>(0);
     }
 }
-
-} partial class typesᴛChecker {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string embeddedFieldTypeCannotˢ => ref embeddedFieldTypeCannotˢᵇ;
@@ -80,7 +75,7 @@ private static readonly @string embeddedFieldTypeCannotˢ3ᵇ = "embedded field 
 internal static ref readonly @string embeddedFieldTypeCannotˢ4 => ref embeddedFieldTypeCannotˢ4ᵇ;
 private static readonly @string embeddedFieldTypeCannotˢ4ᵇ = "embedded field type cannot be a pointer to an interface"u8;
 
-internal static void structType(this ж<Checker> Ꮡcheck, ж<Struct> Ꮡstyp, ж<ast.StructType> Ꮡe) {
+internal static void structType⁔(/*this*/ ж<Checker> Ꮡcheck, ж<Struct> Ꮡstyp, ж<ast.StructType> Ꮡe) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var styp = ref Ꮡstyp.DerefOrNull();
     ref var e = ref Ꮡe.DerefOrNull();
@@ -101,7 +96,7 @@ internal static void structType(this ж<Checker> Ꮡcheck, ж<Struct> Ꮡstyp, �
     // current field typ and tag
     ref var typ = ref heap<Type>(out var Ꮡtyp);
     @string tag = default;
-    void add(ж<ast.Ident> ident, bool embedded) {
+    [GoFunc("(*Checker).structType.func1")] void add(ж<ast.Ident> ident, bool embedded) {
         if (tag != ""u8 && Ꮡtags.ValueSlot == nil) {
             Ꮡtags.ValueSlot = new slice<@string>(len(Ꮡfields.ValueSlot));
         }
@@ -124,7 +119,7 @@ internal static void structType(this ж<Checker> Ꮡcheck, ж<Struct> Ꮡstyp, �
     // with the source as long as the fields are _ or have different names
     // (go.dev/issue/25627).
     var addʗ1 = add;
-    void addInvalid(ж<ast.Ident> ident) {
+    [GoFunc("(*Checker).structType.func2")] void addInvalid(ж<ast.Ident> ident) {
         Ꮡtyp.ValueSlot = new BasicжType(Typ[Invalid]);
         tag = ""u8;
         addʗ1(ident, true);
@@ -165,7 +160,7 @@ internal static void structType(this ж<Checker> Ꮡcheck, ж<Struct> Ꮡstyp, �
 
             var embeddedPosʗ1 = embeddedPos;
             var embeddedTypʗ1 = embeddedTyp;
-            check.later(() => {
+            check.later([GoFunc("(*Checker).structType.func3")] () => {
                 var (t, isPtr) = deref(embeddedTypʗ1);
                 switch (t.Underlying().type()) {
                 case ж<Basic> u: {
@@ -205,8 +200,6 @@ internal static void structType(this ж<Checker> Ꮡcheck, ж<Struct> Ꮡstyp, �
     styp.markComplete();
 }
 
-} partial class types_package {
-
 internal static ж<ast.Ident> embeddedFieldIdent(ast.Expr e) {
     switch (e.type()) {
     case ж<ast.Ident> eΔ1: {
@@ -231,9 +224,7 @@ internal static ж<ast.Ident> embeddedFieldIdent(ast.Expr e) {
     return default; // invalid embedded field
 }
 
-} partial class typesᴛChecker {
-
-internal static bool declareInSet(this ж<Checker> Ꮡcheck, ж<objset> Ꮡoset, token.Pos pos, Object obj) {
+internal static bool declareInSet⁔(/*this*/ ж<Checker> Ꮡcheck, ж<objset> Ꮡoset, token.Pos pos, Object obj) {
     ref var oset = ref Ꮡoset.DerefOrNull();
 
     var alt = oset.insert(obj); if (alt != nil) {
@@ -246,7 +237,7 @@ internal static bool declareInSet(this ж<Checker> Ꮡcheck, ж<objset> Ꮡoset,
     return true;
 }
 
-internal static @string tag(this ж<Checker> Ꮡcheck, ж<ast.BasicLit> Ꮡt) {
+internal static @string tag⁔(/*this*/ ж<Checker> Ꮡcheck, ж<ast.BasicLit> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (Ꮡt != nil) {
@@ -260,4 +251,4 @@ internal static @string tag(this ж<Checker> Ꮡcheck, ж<ast.BasicLit> Ꮡt) {
     return ""u8;
 }
 
-}
+} // end types_package

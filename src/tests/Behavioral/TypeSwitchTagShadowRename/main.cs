@@ -32,7 +32,7 @@ internal static @string inspect(any n) {
 }
 
 internal static (@string, @string) classifyVia(any v) {
-    any unwrap(any vΔ1) {
+    [GoFunc("classifyVia.func1")] any unwrap(any vΔ1) {
         var (p, ok) = vΔ1._<ж<node>>(ᐧ); if (ok) {
             return p.inner;
         }
@@ -40,7 +40,7 @@ internal static (@string, @string) classifyVia(any v) {
     }
 
     var unwrapʗ1 = unwrap;
-    @string pick(any vΔ2) {
+    [GoFunc("classifyVia.func2")] @string pick(any vΔ2) {
         var switchᴛ1 = unwrapʗ1(vΔ2);
         switch (switchᴛ1.type()) {
         case nint vΔ3: {

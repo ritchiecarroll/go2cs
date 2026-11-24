@@ -14,6 +14,9 @@
 
 using go;
 using static go.main_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -57,13 +60,15 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("forms.go", "forms.cs", "ABgolpaigpSUgoKUgpSClIKUgpSUlMS2lMaUgoI=")]
-[assembly: GoPositionMap("main.go", "main.cs", "ABAclPiUgoKmlIKCpoKUpKaCpqiClLSmAAoMlLoAChDkgoKCgoKCgoKClIKUlIKWgoKilIKC", "", "103=main.Box.Scale")]
-[assembly: GoPositionMap("others.go", "others.cs", "AA8cgoKUgpaU+pSUlIKClIKClA==")]
-[assembly: GoPositionMap("shadow.go", "shadow.cs", "AA4SgoKolrSCgg==")]
+[assembly: GoPositionMap("forms.go", "forms.cs", "ABUolpaigpSUgoKUgpSClIKUgpSUlMS2lKaUgoI=")]
+[assembly: GoPositionMap("main.go", "main.cs", "AA4clNiUgoKmlIKCpoKUpKaCpqiClLSm7JSaAAYQxIKCgoKCgoKCgpSClJSCloKCopSCgg==", "", "103=main.Box.Scale")]
+[assembly: GoPositionMap("others.go", "others.cs", "AAscgoKUgpaU2pSUlIKClIKClA==")]
+[assembly: GoPositionMap("shadow.go", "shadow.cs", "AAoSgoKolpSCgg==")]
 // </GoSourcePositionMaps>
 
 namespace go;
+
+using static go.main_package;
 
 [GoPackage("main")]
 [GoTestMatchingConsoleOutput]
@@ -108,10 +113,52 @@ public static partial class main_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(main_package.Box)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛBox;
-[GoMethodHost(typeof(main_package.Chest)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛChest;
-[GoMethodHost(typeof(main_package.Pair<>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛPair;
-[GoMethodHost(typeof(main_package.Shelf)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛShelf;
-[GoMethodHost(typeof(main_package.meter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛmeter;
-[GoMethodHost(typeof(main_package.words)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛwords;
+[GoMethodHost(typeof(main_package.Box)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class mainᴛBox;
+[GoMethodHost(typeof(main_package.Chest)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class mainᴛChest;
+[GoMethodHost(typeof(main_package.Pair<>)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class mainᴛPair;
+[GoMethodHost(typeof(main_package.Shelf)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class mainᴛShelf;
+[GoMethodHost(typeof(main_package.meter)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class mainᴛmeter;
+[GoMethodHost(typeof(main_package.words)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class mainᴛwords;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class mainᴛBox {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Limit(this Box b) => main_package.Limit⁔(b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Count(this ref Box b) => main_package.Count⁔(ref b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static Kind Kind(this Box b) => main_package.Kind⁔(b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Scale(this Box b) => main_package.Scale⁔(b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Describe(this Box b, any v) => main_package.Describe⁔(b, v);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Class(this Box b, any v) => main_package.Class⁔(b, v);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Total(this Crate c) => main_package.Total⁔(c);
+}
+partial class mainᴛChest {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static Tag Tag(this ref Chest c) => main_package.Tag⁔(ref c);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<nint> Seal(this ж<Chest> Ꮡc) => main_package.Seal⁔(Ꮡc);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Forms(this ж<Chest> Ꮡc, any v) => main_package.Forms⁔(Ꮡc, v);
+}
+partial class mainᴛPair {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Scale<T>(this Pair<T> p) => main_package.Scale⁔<T>(p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Limit<T>(this ref Pair<T> p) => main_package.Limit⁔<T>(ref p);
+}
+partial class mainᴛShelf {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Limit(this Shelf s) => main_package.Limit⁔(s);
+}
+partial class mainᴛmeter {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint Limit(this meter m) => main_package.Limit⁔(m);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint Scale(this meter m, nint main) => main_package.Scale⁔(m, main);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint Count(this meter m) => main_package.Count⁔(m);
+}
+partial class mainᴛwords {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint Len(this words w) => main_package.Len⁔(w);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool Less(this words w, nint i, nint j) => main_package.Less⁔(w, i, j);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void Swap(this words w, nint i, nint j) => main_package.Swap⁔(w, i, j);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint cap(this words w) => main_package.cap⁔(w);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint bits(this words w) => main_package.bits⁔(w);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void Sort(this words w) => main_package.Sort⁔(w);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint Run(this words w) => main_package.Run⁔(w);
+}
+// </MethodForwarders>

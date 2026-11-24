@@ -22,7 +22,7 @@ partial class pbkdf2_package {
     //   "The Iteration Count parameter does not need to be among those
     //   supported by the module in the approved mode but shall be at least
     //   two."
-    fips140.CAST("PBKDF2", error () => {
+    fips140.CAST("PBKDF2", [GoFunc("init.0.func1")] error () => {
         var salt = slice<byte>([
             0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10, 0x11,
             0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19

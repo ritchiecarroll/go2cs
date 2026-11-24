@@ -51,7 +51,7 @@ internal static @string /*text*/ panicText(any a, any b) {
     @string text = default;
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("panicText.func1")] () => {
             text = fmt.Sprint(recover());
         }, ref ᒐ);
         _ = AreEqual(a, b);
@@ -66,7 +66,7 @@ internal static @string /*text*/ lenText(lener a, lener b) {
     @string text = default;
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("lenText.func1")] () => {
             text = fmt.Sprint(recover());
         }, ref ᒐ);
         _ = AreEqual(a, b);
@@ -120,7 +120,7 @@ internal static void main() {
     fmt.Println("uncomparable in struct:", panicText(new main_a(slice<nint>([1])), new main_a(slice<nint>([1]))));
 
     thunk none = default;
-    var seven = new thunk(() => 7);
+    var seven = new thunk([GoFunc("main.func1")] () => 7);
     Action unnamed = default;
     fmt.Println("func nil==nil:", panicText((none).OrTypedNilFunc(), (none).OrTypedNilFunc()));
     fmt.Println("func nil==func:", panicText((none).OrTypedNilFunc(), (seven).OrTypedNilFunc()), "|", panicText((seven).OrTypedNilFunc(), (none).OrTypedNilFunc()));

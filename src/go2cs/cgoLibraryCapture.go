@@ -61,7 +61,7 @@ func parseCgoLinkFlags(goos string, args []string, packageDir string) (cgoLinkFl
 			continue
 
 		case strings.HasPrefix(arg, "-l:"):
-			return cgoLinkFlags{}, fmt.Errorf("cgo: the linker flag %q names a library FILE, which Phase 2 refuses: name it -l<name>", arg)
+			return cgoLinkFlags{}, fmt.Errorf("cgo: the linker flag %q names a library file, which go2cs does not bind: name the library as -l<name>", arg)
 
 		case strings.HasPrefix(arg, "-l"):
 			name := arg[2:]
@@ -76,7 +76,7 @@ func parseCgoLinkFlags(goos string, args []string, packageDir string) (cgoLinkFl
 			dir := arg[2:]
 
 			if dir == "" {
-				return cgoLinkFlags{}, fmt.Errorf("cgo: the linker flag -L names no directory; Phase 2 reads -L<dir> as one token")
+				return cgoLinkFlags{}, fmt.Errorf("cgo: the linker flag -L names no directory: go2cs reads -L<dir> as one token, so write the directory right after -L")
 			}
 
 			if !filepath.IsAbs(dir) {
@@ -102,7 +102,7 @@ func parseCgoLinkFlags(goos string, args []string, packageDir string) (cgoLinkFl
 			flags.frameworks = append(flags.frameworks, args[i])
 
 		default:
-			return cgoLinkFlags{}, fmt.Errorf("cgo: the linker flag %q is not one Phase 2 passes to a tool (-l<name>, -L<dir>, -framework <name> on darwin)", arg)
+			return cgoLinkFlags{}, fmt.Errorf("cgo: the linker flag %q is not one go2cs reads (it reads -l<name>, -L<dir>, and -framework <name> on darwin)", arg)
 		}
 	}
 
@@ -153,7 +153,7 @@ type cgoSymbolLibrary struct {
 func cgoProbeSource(symbols []string) string {
 	var source strings.Builder
 
-	source.WriteString("/* go2cs cgo load-name probe: references every bound symbol (docs/phase4/DESIGN-cgo-phase2-pinvoke.md §11.5). */\n")
+	source.WriteString("/* go2cs cgo load-name probe: references every bound symbol, so the link names the library that defines each. */\n")
 
 	for _, symbol := range symbols {
 		fmt.Fprintf(&source, "extern void %s(void);\n", symbol)
@@ -284,7 +284,7 @@ type cgoUnboundSymbols struct {
 }
 
 func (unbound *cgoUnboundSymbols) Error() string {
-	return fmt.Sprintf("cgo: %s resolved to no shared library (statically, or not at all), and Phase 2 binds only a symbol a shared library exports", strings.Join(unbound.symbols, ", "))
+	return fmt.Sprintf("cgo: %s resolved to no shared library (statically, or not at all), and go2cs binds only a symbol a shared library exports (docs/Limitations.md#cgo)", strings.Join(unbound.symbols, ", "))
 }
 
 // cgoSymbolLibraries orders the answer by symbol and refuses each symbol with no library.
@@ -426,9 +426,9 @@ func machoImportedLibraries(path string) (map[string]string, error) {
 func cgoDarwinInstallName(symbol, library string) error {
 	switch {
 	case strings.HasPrefix(library, "@"):
-		return fmt.Errorf("cgo: %s resolves to %s, an install name the CLR's loader cannot resolve as dyld does (§11.12)", symbol, library)
+		return fmt.Errorf("cgo: %s resolves to %s, an install name the .NET loader cannot resolve as dyld does", symbol, library)
 	case !strings.HasPrefix(library, "/"):
-		return fmt.Errorf("cgo: %s resolves to %s, which is not an absolute install name, and dyld's search for a bare name reaches the current directory (§11.12)", symbol, library)
+		return fmt.Errorf("cgo: %s resolves to %s, which is not an absolute install name, and dyld's search for a bare name reaches the current directory", symbol, library)
 	}
 
 	return nil

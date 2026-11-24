@@ -15,7 +15,7 @@ internal static partial nint run() {
     var s = Ꮡ(new span(largeType: 5, val: 100));
     nint total = 0;
     var sʗ1 = s;
-    onstack(() => {
+    onstack([GoFunc("run.func1")] () => {
         var sΔ1 = Ꮡ(new span(largeType: sʗ1.largeType * 2, val: sʗ1.val + 1));
         total += sΔ1.largeType + sΔ1.val;
     });

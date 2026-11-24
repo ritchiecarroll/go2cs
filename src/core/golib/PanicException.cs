@@ -404,7 +404,7 @@ public class PanicException(object? state, Exception? innerException = null) :
 
     internal static void ResetThread() => t_lastAdopted = null;
 
-    // M:N SPIKE: exchanges this thread's last adopted panic with a goroutine's saved one (Goroutine.Mount / Unmount).
+    // M:N: exchanges this thread's last adopted panic with a goroutine's saved one (Goroutine.Mount / Unmount).
     internal static void SwapMounted(ref PanicException? saved) => (saved, t_lastAdopted) = (t_lastAdopted, saved);
 
     // Snapshot the throw site the first time this panic is caught. `thrown` is the exception that

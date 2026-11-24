@@ -8,7 +8,6 @@ namespace go.go;
 using atomic = global::go.sync.atomic_package;
 using global::go.sync;
 using token = global::go.go.token_package;
-using static types_package;
 
 partial class types_package {
 
@@ -44,10 +43,8 @@ public static ж<TypeParam> NewTypeParam(ж<TypeName> obj, Type constraint) {
     return (((ж<Checker>)nil)).newTypeParam(obj, constraint);
 }
 
-} partial class typesᴛChecker {
-
 // check may be nil
-internal static ж<TypeParam> newTypeParam(this ж<Checker> Ꮡcheck, ж<TypeName> Ꮡobj, Type constraint) {
+internal static ж<TypeParam> newTypeParam⁔(/*this*/ ж<Checker> Ꮡcheck, ж<TypeName> Ꮡobj, Type constraint) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var obj = ref Ꮡobj.DerefOrNull();
 
@@ -71,19 +68,17 @@ internal static ж<TypeParam> newTypeParam(this ж<Checker> Ꮡcheck, ж<TypeNam
     return typ;
 }
 
-} partial class typesᴛTypeParam {
-
 // Obj returns the type name for the type parameter t.
-public static ж<TypeName> Obj(this ref TypeParam t) { return t.obj; }
+internal static ж<TypeName> Obj⁔(/*this*/ ref TypeParam t) { return t.obj; }
 
 // Index returns the index of the type param within its param list, or -1 if
 // the type parameter has not yet been bound to a type.
-public static nint Index(this ref TypeParam t) {
+internal static nint Index⁔(/*this*/ ref TypeParam t) {
     return t.index;
 }
 
 // Constraint returns the type constraint specified for t.
-public static Type Constraint(this ref TypeParam t) {
+internal static Type Constraint⁔(/*this*/ ref TypeParam t) {
     return t.bound;
 }
 
@@ -93,7 +88,7 @@ public static Type Constraint(this ref TypeParam t) {
 // fully defined, and before using the type parameter in any way other than to
 // form other types. Once SetConstraint returns the receiver, t is safe for
 // concurrent use.
-public static void SetConstraint(this ref TypeParam t, Type bound) {
+internal static void SetConstraint⁔(/*this*/ ref TypeParam t, Type bound) {
     if (bound == nil) {
         throw panic("nil constraint");
     }
@@ -107,21 +102,21 @@ public static void SetConstraint(this ref TypeParam t, Type bound) {
 // the underlying type of its constraint. This type is always an interface.
 //
 // [underlying type]: https://go.dev/ref/spec#Underlying_types.
-public static Type Underlying(this ref TypeParam t) {
+internal static Type Underlying⁔(/*this*/ ref TypeParam t) {
     return new InterfaceжType(t.iface());
 }
 
-public static @string String(this ж<TypeParam> Ꮡt) { return TypeString(new TypeParamжType(Ꮡt), default); }
+internal static @string String⁔(/*this*/ ж<TypeParam> Ꮡt) { return TypeString(new TypeParamжType(Ꮡt), default); }
 
 // ----------------------------------------------------------------------------
 // Implementation
-internal static void cleanup(this ref TypeParam t) {
+internal static void cleanup⁔(/*this*/ ref TypeParam t) {
     t.iface();
     t.check = default;
 }
 
 // iface returns the constraint interface of t.
-internal static ж<Interface> iface(this ref TypeParam t) {
+internal static ж<Interface> iface⁔(/*this*/ ref TypeParam t) {
     var bound = t.bound;
 
     // determine constraint interface
@@ -167,7 +162,7 @@ internal static ж<Interface> iface(this ref TypeParam t) {
 // is calls f with the specific type terms of t's constraint and reports whether
 // all calls to f returned true. If there are no specific terms, is
 // returns the result of f(nil).
-internal static bool @is(this ref TypeParam t, Func<ж<term>, bool> f) {
+internal static bool is⁔(/*this*/ ref TypeParam t, Func<ж<term>, bool> f) {
     return t.iface().typeSet().@is(f);
 }
 
@@ -175,8 +170,8 @@ internal static bool @is(this ref TypeParam t, Func<ж<term>, bool> f) {
 // specific type terms of t's constraint.
 // If there are no specific terms, typeset returns f(nil, nil).
 // In any case, typeset is guaranteed to call f at least once.
-internal static bool typeset(this ref TypeParam t, Func<Type, Type, bool> f) {
+internal static bool typeset⁔(/*this*/ ref TypeParam t, Func<Type, Type, bool> f) {
     return t.iface().typeSet().all(f);
 }
 
-}
+} // end types_package

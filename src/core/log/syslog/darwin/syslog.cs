@@ -13,7 +13,6 @@ using strings = strings_package;
 using sync = sync_package;
 using time = time_package;
 using io = io_package;
-using static syslog_package;
 
 partial class syslog_package {
 
@@ -149,15 +148,13 @@ public static (ж<Writer>, error) Dial(@string network, @string raddr, Priority 
     finally { ᒐ.Run(); }
 }
 
-} partial class syslogᴛWriter {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string localhostˢ => ref localhostˢᵇ;
 private static readonly @string localhostˢᵇ = "localhost"u8;
 
 // connect makes a connection to the syslog server.
 // It must be called with w.mu held.
-internal static error /*err*/ connect(this ref Writer w) {
+internal static error /*err*/ connect⁔(/*this*/ ref Writer w) {
     error err = default;
 
     if (w.conn != nil) {
@@ -188,14 +185,14 @@ internal static error /*err*/ connect(this ref Writer w) {
 }
 
 // Write sends a log message to the syslog daemon.
-public static (nint, error) Write(this ж<Writer> Ꮡw, slice<byte> b) {
+internal static (nint, error) Write⁔(/*this*/ ж<Writer> Ꮡw, slice<byte> b) {
     ref var w = ref Ꮡw.DerefOrNull();
 
     return Ꮡw.writeAndRetry(w.priority, (@string)b);
 }
 
 // Close closes a connection to the syslog daemon.
-public static error Close(this ж<Writer> Ꮡw) {
+internal static error Close⁔(/*this*/ ж<Writer> Ꮡw) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -217,61 +214,61 @@ public static error Close(this ж<Writer> Ꮡw) {
 
 // Emerg logs a message with severity [LOG_EMERG], ignoring the severity
 // passed to New.
-public static error Emerg(this ж<Writer> Ꮡw, @string m) {
+internal static error Emerg⁔(/*this*/ ж<Writer> Ꮡw, @string m) {
     var (_, err) = Ꮡw.writeAndRetry(LOG_EMERG, m);
     return err;
 }
 
 // Alert logs a message with severity [LOG_ALERT], ignoring the severity
 // passed to New.
-public static error Alert(this ж<Writer> Ꮡw, @string m) {
+internal static error Alert⁔(/*this*/ ж<Writer> Ꮡw, @string m) {
     var (_, err) = Ꮡw.writeAndRetry(LOG_ALERT, m);
     return err;
 }
 
 // Crit logs a message with severity [LOG_CRIT], ignoring the severity
 // passed to New.
-public static error Crit(this ж<Writer> Ꮡw, @string m) {
+internal static error Crit⁔(/*this*/ ж<Writer> Ꮡw, @string m) {
     var (_, err) = Ꮡw.writeAndRetry(LOG_CRIT, m);
     return err;
 }
 
 // Err logs a message with severity [LOG_ERR], ignoring the severity
 // passed to New.
-public static error Err(this ж<Writer> Ꮡw, @string m) {
+internal static error Err⁔(/*this*/ ж<Writer> Ꮡw, @string m) {
     var (_, err) = Ꮡw.writeAndRetry(LOG_ERR, m);
     return err;
 }
 
 // Warning logs a message with severity [LOG_WARNING], ignoring the
 // severity passed to New.
-public static error Warning(this ж<Writer> Ꮡw, @string m) {
+internal static error Warning⁔(/*this*/ ж<Writer> Ꮡw, @string m) {
     var (_, err) = Ꮡw.writeAndRetry(LOG_WARNING, m);
     return err;
 }
 
 // Notice logs a message with severity [LOG_NOTICE], ignoring the
 // severity passed to New.
-public static error Notice(this ж<Writer> Ꮡw, @string m) {
+internal static error Notice⁔(/*this*/ ж<Writer> Ꮡw, @string m) {
     var (_, err) = Ꮡw.writeAndRetry(LOG_NOTICE, m);
     return err;
 }
 
 // Info logs a message with severity [LOG_INFO], ignoring the severity
 // passed to New.
-public static error Info(this ж<Writer> Ꮡw, @string m) {
+internal static error Info⁔(/*this*/ ж<Writer> Ꮡw, @string m) {
     var (_, err) = Ꮡw.writeAndRetry(LOG_INFO, m);
     return err;
 }
 
 // Debug logs a message with severity [LOG_DEBUG], ignoring the severity
 // passed to New.
-public static error Debug(this ж<Writer> Ꮡw, @string m) {
+internal static error Debug⁔(/*this*/ ж<Writer> Ꮡw, @string m) {
     var (_, err) = Ꮡw.writeAndRetry(LOG_DEBUG, m);
     return err;
 }
 
-internal static (nint, error) writeAndRetry(this ж<Writer> Ꮡw, Priority p, @string s) {
+internal static (nint, error) writeAndRetry⁔(/*this*/ ж<Writer> Ꮡw, Priority p, @string s) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -300,7 +297,7 @@ internal static (nint, error) writeAndRetry(this ж<Writer> Ꮡw, Priority p, @s
 
 // write generates and writes a syslog formatted string. The
 // format is as follows: <PRI>TIMESTAMP HOSTNAME TAG[PID]: MSG
-internal static (nint, error) write(this ref Writer w, Priority p, @string msg) {
+internal static (nint, error) write⁔(/*this*/ ref Writer w, Priority p, @string msg) {
     // ensure it ends in a \n
     @string nl = ""u8;
     if (!strings.HasSuffix(msg, "\n")) {
@@ -317,9 +314,7 @@ internal static (nint, error) write(this ref Writer w, Priority p, @string msg) 
     return (len(msg), default);
 }
 
-} partial class syslogᴛnetConn {
-
-internal static error writeString(this ref netConn n, Priority p, @string hostname, @string tag, @string msg, @string nl) {
+internal static error writeString⁔(/*this*/ ref netConn n, Priority p, @string hostname, @string tag, @string msg, @string nl) {
     if (n.local) {
         // Compared to the network form below, the changes are:
         //	1. Use time.Stamp instead of time.RFC3339.
@@ -337,11 +332,9 @@ internal static error writeString(this ref netConn n, Priority p, @string hostna
     return err;
 }
 
-internal static error close(this ref netConn n) {
+internal static error close⁔(/*this*/ ref netConn n) {
     return n.conn.Close();
 }
-
-} partial class syslog_package {
 
 // NewLogger creates a [log.Logger] whose output is written to the
 // system log service with the specified priority, a combination of

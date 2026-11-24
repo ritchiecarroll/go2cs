@@ -14,7 +14,6 @@ using io = io_package;
 using sync = sync_package;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140;
-using static ecdsa_package;
 
 partial class ecdsa_package {
 
@@ -26,30 +25,22 @@ partial struct PrivateKey {
     internal slice<byte> d; // bigmod.(*Nat).Bytes output (same length as the curve order)
 }
 
-} partial class ecdsaᴛPrivateKey {
-
-public static slice<byte> Bytes(this ref PrivateKey priv) {
+internal static slice<byte> Bytes⁔(/*this*/ ref PrivateKey priv) {
     return priv.d;
 }
 
-public static ж<PublicKey> PublicKey(this ж<PrivateKey> Ꮡpriv) {
+internal static ж<PublicKey> PublicKey⁔(/*this*/ ж<PrivateKey> Ꮡpriv) {
     return Ꮡpriv.Ꮡpub;
 }
-
-} partial class ecdsa_package {
 
 partial struct PublicKey {
     internal curveID curve;
     internal slice<byte> q; // uncompressed nistec Point.Bytes output
 }
 
-} partial class ecdsaᴛPublicKey {
-
-public static slice<byte> Bytes(this ref PublicKey pub) {
+internal static slice<byte> Bytes⁔(/*this*/ ref PublicKey pub) {
     return pub.q;
 }
-
-} partial class ecdsa_package {
 
 partial struct curveID /*@string*/;
 
@@ -99,7 +90,7 @@ internal static void precomputeParams<P>(ref Curve<P> c, slice<byte> order)
 public static ж<Curve<P224PointжPoint>> P224() { return _P224(); }
 
 internal static Func<ж<Curve<P224PointжPoint>>> _P224;
-internal static void initᴛ_P224() { _P224 = sync.OnceValue(ж<Curve<P224PointжPoint>> () => {
+internal static void initᴛ_P224() { _P224 = sync.OnceValue([GoFunc("init.func1")] ж<Curve<P224PointжPoint>> () => {
     var c = Ꮡ(new Curve<P224PointжPoint>(
         curve: p224,
         newPoint: () => Δnistec.NewP224Point()
@@ -118,7 +109,7 @@ internal static void initᴛ_P224() { _P224 = sync.OnceValue(ж<Curve<P224Point�
 public static ж<Curve<P256PointжPoint>> P256() { return _P256(); }
 
 internal static Func<ж<Curve<P256PointжPoint>>> _P256;
-internal static void initᴛ_P256() { _P256 = sync.OnceValue(ж<Curve<P256PointжPoint>> () => {
+internal static void initᴛ_P256() { _P256 = sync.OnceValue([GoFunc("init.func2")] ж<Curve<P256PointжPoint>> () => {
     var c = Ꮡ(new Curve<P256PointжPoint>(
         curve: p256,
         newPoint: () => Δnistec.NewP256Point(),
@@ -137,7 +128,7 @@ internal static void initᴛ_P256() { _P256 = sync.OnceValue(ж<Curve<P256Point�
 public static ж<Curve<P384PointжPoint>> P384() { return _P384(); }
 
 internal static Func<ж<Curve<P384PointжPoint>>> _P384;
-internal static void initᴛ_P384() { _P384 = sync.OnceValue(ж<Curve<P384PointжPoint>> () => {
+internal static void initᴛ_P384() { _P384 = sync.OnceValue([GoFunc("init.func3")] ж<Curve<P384PointжPoint>> () => {
     var c = Ꮡ(new Curve<P384PointжPoint>(
         curve: p384,
         newPoint: () => Δnistec.NewP384Point()
@@ -157,7 +148,7 @@ internal static void initᴛ_P384() { _P384 = sync.OnceValue(ж<Curve<P384Point�
 public static ж<Curve<P521PointжPoint>> P521() { return _P521(); }
 
 internal static Func<ж<Curve<P521PointжPoint>>> _P521;
-internal static void initᴛ_P521() { _P521 = sync.OnceValue(ж<Curve<P521PointжPoint>> () => {
+internal static void initᴛ_P521() { _P521 = sync.OnceValue([GoFunc("init.func4")] ж<Curve<P521PointжPoint>> () => {
     var c = Ꮡ(new Curve<P521PointжPoint>(
         curve: p521,
         newPoint: () => Δnistec.NewP521Point()
@@ -243,7 +234,7 @@ public static (ж<PrivateKey>, error) GenerateKey<P>(ж<Curve<P>> Ꮡc, io.Reade
     fipsSelfTest();
     fips140.RecordApproved();
 
-    var (k, Q, err) = randomPoint(ref (Ꮡc).DerefOrNull(), (slice<byte> b) => drbg.ReadWithReader(rand, b));
+    var (k, Q, err) = randomPoint(ref (Ꮡc).DerefOrNull(), [GoFunc("GenerateKey[...].func1")] (slice<byte> b) => drbg.ReadWithReader(rand, b));
     if (err != nil) {
         return (default, err);
     }
@@ -402,7 +393,7 @@ internal static (ж<Signature>, error) signGeneric<P>(ref Curve<P> c, ref Privat
 {
     // FIPS 186-5, Section 6.4.1
 
-    var (k, R, err) = randomPoint(ref c, (slice<byte> b) => {
+    var (k, R, err) = randomPoint(ref c, [GoFunc("signGeneric[...].func1")] (slice<byte> b) => {
         drbg.Value.Generate(b);
         return default;
     });

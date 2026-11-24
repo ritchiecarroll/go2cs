@@ -8,7 +8,7 @@ partial class main_package {
 internal static void arm(@string name, Action f) {
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("arm.func1")] () => {
             var r = recover(); if (r != nil) {
                 fmt.Println(name, "panic:", r);
             }
@@ -33,7 +33,7 @@ internal partial struct main__ᴛ1 /*dyn*/ {
 }
 
 internal static void main() {
-    arm("A", () => {
+    arm("A", [GoFunc("main.func1")] () => {
         array<main__ᴛ1> _ᴛ1 = new(3);
         ref var buf = ref heap(new array<uint64>(3), out var Ꮡbuf);
         @unsafe.Pointer bp = @unsafe.Pointer.FromPinnedBox(Ꮡbuf);
@@ -42,14 +42,14 @@ internal static void main() {
         fmt.Println("A", len(tail), cap(tail), buf[1] >> 32);
     });
 
-    arm("B", () => {
+    arm("B", [GoFunc("main.func2")] () => {
         ref var arr = ref heap(new array<uint32>(4), out var Ꮡarr);
         var w = @unsafe.Pointer.View<byte>(@unsafe.Pointer.FromPinnedBox(Ꮡarr), 0, 16);
         w[4] = 1;
         fmt.Println("B", len(w), arr);
     });
 
-    arm("C", () => {
+    arm("C", [GoFunc("main.func3")] () => {
         ref var nameOff = ref heap(new int32(), out var ᏑnameOff);
         ref var src = ref heap<array<byte>>(array<byte>([0, 1, 2, 3, 4, 5, 6, 7]), out var Ꮡsrc);
         @unsafe.Pointer off = @unsafe.Pointer.FromPinnedBox(Ꮡsrc.at<byte>(2));
@@ -57,19 +57,19 @@ internal static void main() {
         fmt.Println("C", n, nameOff);
     });
 
-    arm("D", () => {
+    arm("D", [GoFunc("main.func4")] () => {
         ref var u = ref heap<uint32>((uint32)0x01020304, out var Ꮡu);
         fmt.Println("D", takes(@unsafe.Pointer.View<byte>(@unsafe.Pointer.FromPinnedBox(Ꮡu), 0, 4)));
     });
 
-    arm("E", () => {
+    arm("E", [GoFunc("main.func5")] () => {
         ref var a = ref heap(new array<byte>(4), out var Ꮡa);
         var s = Ꮡa.slice(1);
         s[0] = 9;
         fmt.Println("E", len(s), cap(s), a);
     });
 
-    arm("F", () => {
+    arm("F", [GoFunc("main.func6")] () => {
         ref var u = ref heap<uint64>((uint64)0x0807060504030201UL, out var Ꮡu);
         nint sum = 0;
         foreach (var (_, b) in range(@unsafe.Pointer.View<byte>(@unsafe.Pointer.FromPinnedBox(Ꮡu), 2, 8))) {
@@ -78,7 +78,7 @@ internal static void main() {
         fmt.Println("F", sum);
     });
 
-    arm("G", () => {
+    arm("G", [GoFunc("main.func7")] () => {
         ref var words = ref heap(new array<uint16>(2), out var Ꮡwords);
         var b = @unsafe.Pointer.View<byte>(@unsafe.Pointer.FromPinnedBox(Ꮡwords), 2, 4);
         (b[0], b[1]) = (0x34, 0x12);

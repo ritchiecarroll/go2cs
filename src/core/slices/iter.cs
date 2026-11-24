@@ -13,7 +13,7 @@ partial class slices_package {
 public static iter.Seq2<nint, E> All<Slice, E>(Slice s)
     where Slice : /* ~[]E */ ISlice<E>, ISupportMake<Slice>, ISliceWrap<Slice, E>, new()
 {
-    return (Func<nint, E, bool> yield) => {
+    return [GoFunc("All[...].func1")] (Func<nint, E, bool> yield) => {
         foreach (var (i, v) in range(s)) {
             if (!yield(i, v)) {
                 return;
@@ -27,7 +27,7 @@ public static iter.Seq2<nint, E> All<Slice, E>(Slice s)
 public static iter.Seq2<nint, E> Backward<Slice, E>(Slice s)
     where Slice : /* ~[]E */ ISlice<E>, ISupportMake<Slice>, ISliceWrap<Slice, E>, new()
 {
-    return (Func<nint, E, bool> yield) => {
+    return [GoFunc("Backward[...].func1")] (Func<nint, E, bool> yield) => {
         for (nint i = len(s) - 1; i >= 0; i--) {
             if (!yield(i, s[i])) {
                 return;
@@ -40,7 +40,7 @@ public static iter.Seq2<nint, E> Backward<Slice, E>(Slice s)
 public static iter.Seq<E> Values<Slice, E>(Slice s)
     where Slice : /* ~[]E */ ISlice<E>, ISupportMake<Slice>, ISliceWrap<Slice, E>, new()
 {
-    return (Func<E, bool> yield) => {
+    return [GoFunc("Values[...].func1")] (Func<E, bool> yield) => {
         foreach (var (_, v) in range(s)) {
             if (!yield(v)) {
                 return;
@@ -110,7 +110,7 @@ public static iter.Seq<Slice> Chunk<Slice, E>(Slice s, nint n)
         throw panic("cannot be less than 1");
     }
 
-    return (Func<Slice, bool> yield) => {
+    return [GoFunc("Chunk[...].func1")] (Func<Slice, bool> yield) => {
         for (nint i = 0; i < len(s); i += n) {
             // Clamp the last chunk to the slice bound as necessary.
             nint end = min(n, len(subslice<Slice, E>(s, i)));

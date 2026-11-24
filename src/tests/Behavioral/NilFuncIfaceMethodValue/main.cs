@@ -24,7 +24,7 @@ partial interface Greetable {
 internal static void call(@string label, Func<@string> f) {
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("call.func1")] () => {
             var r = recover(); if (r != nil) {
                 fmt.Println(label, "panic:", r);
             }
@@ -49,14 +49,14 @@ internal static void main() {
     ref var m = ref heap<reflect.Value>(v.Method(0), out var Ꮡm);
     fmt.Println("method kind:", m.Kind(), "type:", m.Type());
     var mʗ1 = m;
-    call("Method(0).Call", () => mʗ1.Call(default)[0].String());
-    call("MethodByName(Shout).Call", () => Ꮡv.Value.MethodByName("Shout").Call(default)[0].String());
+    call("Method(0).Call", [GoFunc("main.func1")] () => mʗ1.Call(default)[0].String());
+    call("MethodByName(Shout).Call", [GoFunc("main.func2")] () => Ꮡv.Value.MethodByName("Shout").Call(default)[0].String());
 
-    var h = new Greeter(() => "hello");
+    var h = new Greeter([GoFunc("main.func3")] () => "hello");
     i = new GreeterᴠGreetable(h);
     v = reflect.ValueOf(Ꮡi).Elem();
-    call("non-nil Method(0).Call", () => Ꮡv.Value.Method(0).Call(default)[0].String());
-    call("non-nil Method(1).Call", () => Ꮡv.Value.Method(1).Call(default)[0].String());
+    call("non-nil Method(0).Call", [GoFunc("main.func4")] () => Ꮡv.Value.Method(0).Call(default)[0].String());
+    call("non-nil Method(1).Call", [GoFunc("main.func5")] () => Ꮡv.Value.Method(1).Call(default)[0].String());
 }
 
 } // end main_package

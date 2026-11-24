@@ -43,7 +43,7 @@ partial class main_package {
 internal static void arm(@string name, Action f) {
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("arm.func1")] () => {
             var r = recover(); if (r != nil) {
                 fmt.Println(name, "panic:", r);
             }
@@ -71,45 +71,45 @@ internal static void setJoin(@unsafe.Pointer p, nint i, int32 j) {
 }
 
 internal static void main() {
-    arm("A", () => {
+    arm("A", [GoFunc("main.func1")] () => {
         ref var raw = ref heap(new array<uint64>(2), out var Ꮡraw);
         @unsafe.Pointer p = @unsafe.Pointer.FromPinnedBox(Ꮡraw);
         writeCoord(p, 3, 2.25F);
         fmt.Printf("A %v %#x\n"u8, readCoord(p, 3), raw[1] >> 32);
     });
 
-    arm("B", () => {
+    arm("B", [GoFunc("main.func2")] () => {
         ref var raw = ref heap(new array<uint64>(2), out var Ꮡraw);
         raw[0] = 0x3fc00000;
         fmt.Println("B", readCoord(@unsafe.Pointer.FromPinnedBox(Ꮡraw), 0));
     });
 
-    arm("C", () => {
+    arm("C", [GoFunc("main.func3")] () => {
         ref var words = ref heap(new array<uint64>(9), out var Ꮡwords);
         @unsafe.Pointer q = @unsafe.Pointer.FromPinnedBox(Ꮡwords);
         setJoin(q, 2, 9);
         fmt.Println("C", joinOf(q, 2), words[8] & 0xffffffffU);
     });
 
-    arm("D", () => {
+    arm("D", [GoFunc("main.func4")] () => {
         ref var words = ref heap(new array<uint64>(9), out var Ꮡwords);
         words[5] = 7;
         fmt.Println("D", joinOf(@unsafe.Pointer.FromPinnedBox(Ꮡwords), 1), /* unsafe.Sizeof(TExpr{}) */ (uintptr)24);
     });
 
-    arm("E", () => {
+    arm("E", [GoFunc("main.func5")] () => {
         ref var words = ref heap(new array<uint64>(4), out var Ꮡwords);
         @unsafe.Pointer.ElementRef<TAddr>(@unsafe.Pointer.FromPinnedBox(Ꮡwords), 1, 2).Fb[3] = 0x5a;
         fmt.Printf("E %#x %d\n"u8, words[2], /* unsafe.Sizeof(TAddr{}) */ (uintptr)16);
     });
 
-    arm("F", () => {
+    arm("F", [GoFunc("main.func6")] () => {
         ref var arr = ref heap(new array<TRtreeCoord>(4, () => new()), out var Ꮡarr);
         writeCoord(@unsafe.Pointer.FromPinnedBox(Ꮡarr), 1, 4.5F);
         fmt.Println("F", arr[1].Ff, readCoord(@unsafe.Pointer.FromPinnedBox(Ꮡarr), 1));
     });
 
-    arm("G", () => {
+    arm("G", [GoFunc("main.func7")] () => {
         ref var raw = ref heap(new array<uint64>(2), out var Ꮡraw);
         var s = @unsafe.Pointer.View<TRtreeCoord>(@unsafe.Pointer.FromPinnedBox(Ꮡraw), 1, 4);
         s[1].Ff = 3.5F;

@@ -1,5 +1,5 @@
 //******************************************************************************************************
-//  builtin.Twins.cs - M:N SPIKE (R5b, B1 and B2). Spike code: it stays on the spike branch and never lands.
+//  builtin.Twins.cs - M:N scheduler, experimental and opt-in (GoTwins=true + GO2CS_MN=1); inert otherwise.
 //
 //  The hidden twins of builtin's parking members, and the launchers a generated twin calls. They sit in
 //  their own file so that no line of builtin.cs moves under the documents that cite it.
@@ -21,6 +21,12 @@ public static partial class builtin
     {
         return SelectRuntime.RunTwin(ops);
     }
+
+    // The twin of runtime.Gosched, which a twin awaits where its body calls runtime.Gosched (the Gosched-park seat;
+    // COORD's ruling of 2026-11-21, docs/phase4/inbox/G/20261121T231225Z-COORD.md). The generator maps the call here:
+    // runtime is a hand-owned stdlib package, and under L-min no stdlib hand twin is public.
+    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+    public static GoTask Goschedꞏtwin() => GoScheduler.GoschedTwin();
 
     // The hidden twins of the receive operator methods (B2).
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]

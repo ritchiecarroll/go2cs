@@ -61,7 +61,7 @@ internal static nint envInt(@string name, nint fallback) {
 }
 
 internal static partial void main() {
-    nint n = envInt("MN_STORM_N", 100000);
+    nint n = envInt("MN_STORM_N", 1000);
     nint hold = envInt("MN_STORM_HOLD_MS", 0);
 
     var s = Ꮡ(new storm(
@@ -80,7 +80,7 @@ internal static partial void main() {
             goǃ(sʗ1.worker, i);
         } else {
             var sʗ2 = s;
-            goǃ(() => {
+            goǃ([GoFunc("main.func1")] () => {
                 sʗ2.worker(i);
             });
         }

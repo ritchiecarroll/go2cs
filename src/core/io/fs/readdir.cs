@@ -7,7 +7,6 @@ using errors = errors_package;
 using bytealg = @internal.bytealg_package;
 using slices = slices_package;
 using @internal;
-using static fs_package;
 
 partial class fs_package {
 
@@ -51,7 +50,7 @@ public static (slice<DirEntry>, error) ReadDir(FS fsys, @string name) {
         }
 
         (var list, err) = dir.ReadDir(-1);
-        slices.SortFunc(list, (DirEntry a, DirEntry b) => bytealg.CompareString(a.Name(), b.Name()));
+        slices.SortFunc(list, [GoFunc("ReadDir.func1")] (DirEntry a, DirEntry b) => bytealg.CompareString(a.Name(), b.Name()));
         return (list, err);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
@@ -63,29 +62,25 @@ partial struct dirInfo {
     internal FileInfo fileInfo;
 }
 
-} partial class fsᴛdirInfo {
-
-internal static bool IsDir(this dirInfo di) {
+internal static bool IsDir⁔(/*this*/ dirInfo di) {
     return di.fileInfo.IsDir();
 }
 
-internal static FileMode Type(this dirInfo di) {
+internal static FileMode Type⁔(/*this*/ dirInfo di) {
     return di.fileInfo.Mode().Type();
 }
 
-internal static (FileInfo, error) Info(this dirInfo di) {
+internal static (FileInfo, error) Info⁔(/*this*/ dirInfo di) {
     return (di.fileInfo, default);
 }
 
-internal static @string Name(this dirInfo di) {
+internal static @string Name⁔(/*this*/ dirInfo di) {
     return di.fileInfo.Name();
 }
 
-internal static @string String(this dirInfo di) {
+internal static @string String⁔(/*this*/ dirInfo di) {
     return FormatDirEntry(di);
 }
-
-} partial class fs_package {
 
 // FileInfoToDirEntry returns a [DirEntry] that returns information from info.
 // If info is nil, FileInfoToDirEntry returns nil.

@@ -5,7 +5,6 @@ namespace go.vendor.golang.org.x.text.unicode;
 
 using utf8 = go.unicode.utf8_package;
 using go.unicode;
-using static bidi_package;
 
 partial class bidi_package {
 
@@ -16,8 +15,6 @@ partial struct Properties {
 }
 
 internal static ж<bidiTrie> trie = newBidiTrie(0);
-
-} partial class bidiᴛProperties {
 
 // TODO: using this for bidirule reduces the running time by about 5%. Consider
 // if this is worth exposing or if we can find a way to speed up the Class
@@ -30,7 +27,7 @@ internal static ж<bidiTrie> trie = newBidiTrie(0);
 // }
 
 // Class returns the Bidi class for p.
-public static Class Class(this Properties p) {
+internal static Class Class⁔(/*this*/ Properties p) {
     Class c = (Class)(nuint)((uint8)(p.entry & 0x0F));
     if (c == Control) {
         c = controlByteToClass[(uint8)(p.last & 0xF)];
@@ -39,18 +36,16 @@ public static Class Class(this Properties p) {
 }
 
 // IsBracket reports whether the rune is a bracket.
-public static bool IsBracket(this Properties p) { return (uint8)(p.entry & 0xF0) != 0; }
+internal static bool IsBracket⁔(/*this*/ Properties p) { return (uint8)(p.entry & 0xF0) != 0; }
 
 // IsOpeningBracket reports whether the rune is an opening bracket.
 // IsBracket must return true.
-public static bool IsOpeningBracket(this Properties p) { return (uint8)(p.entry & (uint8)openMask) != 0; }
+internal static bool IsOpeningBracket⁔(/*this*/ Properties p) { return (uint8)(p.entry & (uint8)openMask) != 0; }
 
 // TODO: find a better API and expose.
-internal static rune reverseBracket(this Properties p, rune r) {
+internal static rune reverseBracket⁔(/*this*/ Properties p, rune r) {
     return xorMasks[(p.entry >> (int)(xorMaskShift))] ^ r;
 }
-
-} partial class bidi_package {
 
 [GoLazy] partial class lazyᴛcontrolByteToClass { internal static array<Class> controlByteToClass = new array<Class>(16){
     [0xD] = LRO, // U+202D LeftToRightOverride,

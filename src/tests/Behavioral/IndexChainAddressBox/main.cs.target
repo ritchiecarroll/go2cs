@@ -24,7 +24,7 @@ partial struct wrap {
 }
 
 internal static uint64 closureLocal() {
-    uint64 record(slice<nint> samples) {
+    [GoFunc("closureLocal.func1")] uint64 record(slice<nint> samples) {
         ref var h = ref heap(new hist(), out var Ꮡh);
         foreach (var (_, s) in range(samples)) {
             Ꮡh.at(hist.Ꮡcounts, s % 4).Add(1);

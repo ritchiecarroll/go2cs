@@ -6,15 +6,12 @@ namespace go.@internal.runtime;
 using abi = go.@internal.abi_package;
 using @unsafe = unsafe_package;
 using go.@internal;
-using static maps_package;
 
 partial class maps_package {
 
 internal const bool debugLog = false;
 
-} partial class mapsᴛtable {
-
-internal static void checkInvariants(this ref table t, ж<abi.MapType> Ꮡtyp, ж<Map> Ꮡm) {
+internal static void checkInvariants⁔(/*this*/ ref table t, ж<abi.MapType> Ꮡtyp, ж<Map> Ꮡm) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
     ref var m = ref Ꮡm.DerefOrNull();
 
@@ -91,7 +88,7 @@ internal static void checkInvariants(this ref table t, ж<abi.MapType> Ꮡtyp, �
         throw panic("invariant failed: found no empty slots (violates probe invariant)");
     }
 }
-public static void Print(this ref table t, ж<abi.MapType> Ꮡtyp, ж<Map> m) {
+internal static void Print⁔(/*this*/ ref table t, ж<abi.MapType> Ꮡtyp, ж<Map> m) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
     print((@string)"""
@@ -148,8 +145,6 @@ table{
         }
     }
 }
-
-} partial class maps_package {
 
 // TODO(prattmic): not in hex because print doesn't have a way to print in hex
 // outside the runtime.

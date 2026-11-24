@@ -60,7 +60,7 @@ internal static partial (nint r, bool ok) namedDefer(nint n) {
     bool ok = default;
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("namedDefer.func1")] () => {
             if (recover() != nil) {
                 (r, ok) = (-1, false);
             }

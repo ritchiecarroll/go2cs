@@ -15,7 +15,7 @@ using path;
 
 partial class testenv_package {
 
-internal static Func<(bool, @string)> hasSymlink = sync.OnceValues((bool ok, @string reason) () => {
+internal static Func<(bool, @string)> hasSymlink = sync.OnceValues([GoFunc("init.func7")] (bool ok, @string reason) () => {
     bool ok = default;
     @string reason = default;
     GoFrame ᒐ = default;
@@ -35,7 +35,7 @@ internal static Func<(bool, @string)> hasSymlink = sync.OnceValues((bool ok, @st
             if (err != nil) {
                 (ok, reason) = (false, ""); goto ᒐdone;
             }
-            defer(() => {
+            defer([GoFunc("init.func7.1")] () => {
                 _ = os.RemoveAll(dir);
             }, ref ᒐ);
             @string fpath = filepath.Join(dir, "testfile.txt");

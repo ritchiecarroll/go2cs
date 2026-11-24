@@ -14,6 +14,9 @@
 
 using go;
 using static go.@internal.strconv_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -63,11 +66,11 @@ using static go.@internal.strconv_package;
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("internal/strconv/atob.go", "atob.cs", "AAcUspSklAAICJKClKqigpQ=")]
 [assembly: GoPositionMap("internal/strconv/atoc.go", "atoc.cs", "AAc2ABQCgoK4gqamgoKClJSmgrjIgvyClKS4goKClJSCgpQ=")]
-[assembly: GoPositionMap("internal/strconv/atof.go", "atof.cs", "ABAksoKCgoKUgqYACBDSgpSCgqSClIKCpKaClIK2gqbGooKCpoKUlLSCyIKCgqa0gpSCgraCgoKUgoKCgpSklIKUggAHEIKCgpSClLSCpIKUgoKUlIKmpoKmgs4ADAKmgpSUtILIgoKCgoKCgoKUgoKCgoKCgqSCtoKUgoK2goKClIKCgoKCgpS2goKCgoKUlKS0gpSCpoKCAAcQgoKClIKUtIKkgpSCgoKClIKmgpSmgqaCpoK4tMKCpoKCgtyClJSCgriCgoKClJSClIKCgpSUgrjKgoKCpoK4gqaCgoKCyoKUlISSgpSEkoKClNjKAAEWAAwCgpSCgpSm7IKClJSUpJSq0oKUgoKUlOyCgpSUlKSUAAIQ8oKCAAcQgoKUgpSCgtyCgriCgoKCgoKCgriClIKCgoKmgoKClIKU2sKCpoKCpoKCpqaCgqaCgoLKgoLMkoKUgoKClKbCgqaCgqaCgqamgoKmgoKCyoKCzJKClIKCgpQAAjwAGwKCgpSmgoKClA==")]
+[assembly: GoPositionMap("internal/strconv/atof.go", "atof.cs", "AA4ksoKCgoKUgqYACBDSgpSCgqSClIKCpKaClIK2gqamooKCpoKUlLSCyIKCgqa0gpSCgraCgoKUgoKCgpSklIKUggAHEIKCgpSClLSCpIKUgoKUlIKmpoKmgq4ADAKmgpSUtILIgoKCgoKCgoKUgoKCgoKCgqSCtoKUgoK2goKClIKCgoKCgpS2goKCgoKUlKS0gpSCpoKCAAcQgoKClIKUtIKkgpSCgoKClIKmgpSmgqaCpoK4lMKCpoKCgtyClJSCgriCgoKClJSClIKCgpSUgrjKgoKCpoK4gqaCgoKCyoKUlISSgpSEkoKClLjKAAEWAAwCgpSCgpSm7IKClJSUpJSq0oKUgoKUlOyCgpSUlKSUAAIQ8oKCAAcQgoKUgpSCgtyCgriCgoKCgoKCgriClIKCgoKmgoKClIKU2sKCpoKCpoKCpqaCgqaCgoLKgoLMkoKUgoKClKbCgqaCgqaCgqamgoKmgoKCyoKCzJKClIKCgpQAAjwAGwKCgpSmgoKClA==")]
 [assembly: GoPositionMap("internal/strconv/atofeisel.go", "atofeisel.cs", "ABYw+oKClJSCgriCgqamgoKCgpSClLiCgqaCuIKCgoLugpSCgpSmAA0WgoKUlIKCuIKCpqaCgoKClIKUuIKCpoK4goKCgu6ClIKClA==")]
-[assembly: GoPositionMap("internal/strconv/atoi.go", "atoi.cs", "AAkWwgAYGoKUpKSklAANFrKUgqaUguyCgpSCtIK0grSC6qaCgoKqopS0tLaUgoKCgpSCtLS0poKmlJSUgpSUpoKmAAY4ABsClIK4gpS0griSgoKmgqaCgpSClIKClOiSlIKWgoKCgriCooKClJSClLiCrAAIDIKmgriCgoKCuJSCgqaCgpSCpoKmlA==")]
+[assembly: GoPositionMap("internal/strconv/atoi.go", "atoi.cs", "AAcWwgAWGoKUpKSklAALFrKUgqaUguyCgpSCtIK0grSC6qaCgoKqopS0tLaUgoKCgpSCtLS0poKmlJSUgpSUpoKmAAY4ABsClIK4gpS0griSgoKmgqaCgpSClIKClOiSlIKWgoKCgriCooKClJSClLiCrAAIDIKmgriCgoKCuJSCgqaCgpSCpoKmlA==")]
 [assembly: GoPositionMap("internal/strconv/ctoa.go", "ctoa.cs", "AAcc8oKssoKUlIKCgpSCgoKUgg==")]
-[assembly: GoPositionMap("internal/strconv/decimal.go", "decimal.cs", "ABksgoKClIKmgoKUuIKCgoKCyIKCgsiCpMaCgpSssoKUgtqypoKCgoKCgriCgoKUggAJEpKClpKCgpSClIKClJSClJSmgoKCgoKCuIKCgoKCgoKUpoIAECQATJwBkoKClIKmqJKCgqaClpKCgoKCgoKCgpS4goKCgoKCgpSmgoKUgsiy2IKClLSCgpTqkoKUlIKUps7igpSClLqygpSCqJKCuIKCgoKC3IKCqsKClIKCgpSClIKU")]
+[assembly: GoPositionMap("internal/strconv/decimal.go", "decimal.cs", "ABUsgoKClIKmgoKUuIKCgoKCyIKCgsiCpKaCgpSssoKUgrqypoKCgoKCgriCgoKUggAHEpKClpKCgpSClIKClJSClJSmgoKCgoKCuIKCgoKCgoKUpoIAECQATJwBkoKClIKmqJKCgqaClpKCgoKCgoKCgpS4goKCgoKCgpSmgoKUgqiy2IKClLSCgpTKkoKUlIKUpq7igpSClLqygpSCqJKCuIKCgoKC3IKCqsKClIKCgpSClIKU")]
 [assembly: GoPositionMap("internal/strconv/deps.go", "deps.cs", "AAkakIKCgpSCgoKUlKaU")]
 [assembly: GoPositionMap("internal/strconv/ftoa.go", "ftoa.cs", "AB5EkgACNgAYAqqiAAoGgoKClIK0grS2goKClJaSlLS0pLiCyKSmgpSCpoK4goKClISSgpSUtLSkuILKgpTGtIKUxqSmgoKClKaokoKCgoKCgoKUlLS0yJS0tIKUpJSmgpSktoKCyoKUgoKClJSClLiq1IKCABAigpTcgoIAARDigoKClIKUgoLKAAEaAA4IuIKClIKCgpSCgpSCgtyUyurqyLiUgqSCpIIACRakgriCgpSmgoKCgoKClILKgoKClIKClJSmlLS0tqikgriCgoKCpriCgoKCgpS4qKSCuKamgoKUlKiSgriCgoK4goKCgoKUgpSCuIKCuIKUpoKCgoKClIKCgoLKgoKUgoKClJSmlLS0tg==")]
 [assembly: GoPositionMap("internal/strconv/ftoadbox.go", "ftoadbox.cs", "AAcyABICgoKUpoKUgoKCgpSCgoKClIKCgoKUgqjegoKCgpSCgoKClIKCgoKCgoLKgoKCgoKCpqqilIKCgoKUgoKCgpSCgoKClIKo3oKCgoKUgoKCgpSCgoKCgoKCyoKCgoKCgqaqooKCgqiSlIKUgqiSqJKClIKUqJKokoKCgpSCgoKUlKiSgoKokoKCrOKCgoKs4oKCgqzigoKCrOKCgoKokqiSqrQABRLCgoKowoKCqJKokqjCgoKUgqiygoKUgg==")]
@@ -78,6 +81,8 @@ using static go.@internal.strconv_package;
 // </GoSourcePositionMaps>
 
 namespace go.@internal;
+
+using static go.@internal.strconv_package;
 
 [GoPackage("strconv")]
 public static partial class strconv_package
@@ -115,6 +120,27 @@ public static partial class strconv_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(strconv_package.Error)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class strconvᴛError;
-[GoMethodHost(typeof(strconv_package.@decimal)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class strconvᴛdecimal;
+[GoMethodHost(typeof(strconv_package.Error)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class strconvᴛError;
+[GoMethodHost(typeof(strconv_package.@decimal)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class strconvᴛdecimal;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class strconvᴛError {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this Error e) => strconv_package.Error⁔(e);
+}
+partial class strconvᴛdecimal {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool /*ok*/ set(this ref @decimal b, @string s) => strconv_package.set⁔(ref b, s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (uint64 b, bool overflow) floatBits(this ж<@decimal> Ꮡd, ж<floatInfo> Ꮡflt) => strconv_package.floatBits⁔(Ꮡd, Ꮡflt);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this ref @decimal a) => strconv_package.String⁔(ref a);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Assign(this ж<@decimal> Ꮡa, uint64 v) => strconv_package.Assign⁔(Ꮡa, v);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Shift(this ж<@decimal> Ꮡa, nint k) => strconv_package.Shift⁔(Ꮡa, k);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Round(this ж<@decimal> Ꮡa, nint nd) => strconv_package.Round⁔(Ꮡa, nd);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void RoundDown(this ж<@decimal> Ꮡa, nint nd) => strconv_package.RoundDown⁔(Ꮡa, nd);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void RoundUp(this ref @decimal a, nint nd) => strconv_package.RoundUp⁔(ref a, nd);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static uint64 RoundedInteger(this ж<@decimal> Ꮡa) => strconv_package.RoundedInteger⁔(Ꮡa);
+}
+// </MethodForwarders>

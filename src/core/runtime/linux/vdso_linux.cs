@@ -224,7 +224,7 @@ internal static void vdsoParseSymbols(ж<vdsoInfo> Ꮡinfo, int32 version) {
         return;
     }
 
-    bool apply(uint32 symIndex, vdsoSymbolKey k) {
+    [GoFunc("vdsoParseSymbols.func1")] bool apply(uint32 symIndex, vdsoSymbolKey k) {
         var sym = Ꮡinfo.Value.symtab.at<elfSym>((ulong)(symIndex));
         var typ = _ELF_ST_TYPE(sym.st_info);
         var bind = _ELF_ST_BIND(sym.st_info);

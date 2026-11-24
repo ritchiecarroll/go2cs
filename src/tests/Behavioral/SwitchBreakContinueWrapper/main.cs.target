@@ -113,7 +113,7 @@ break_outer:;
     slice<nint> got = default;
     for (nint iᴛ1 = 0; iᴛ1 < 6; iᴛ1++) {
         var i = iᴛ1;
-        nint f() => i;
+        [GoFunc("main.func1")] nint f() => i;
         var exprᴛ7 = fmt.Sprint(i % 2);
         switch (ᐧ) {
         case {} when exprᴛ7 == "1"u8: {
@@ -161,7 +161,7 @@ continueᴛ9:;
     slice<nint> gotFt = default;
     for (nint iᴛ2 = 0; iᴛ2 < 6; iᴛ2++) {
         var i = iᴛ2;
-        nint f() => i;
+        [GoFunc("main.func2")] nint f() => i;
         var exprᴛ9 = fmt.Sprint(i % 3);
         var matchᴛ2 = false;
         if (exprᴛ9 == "1"u8) { matchᴛ2 = true;

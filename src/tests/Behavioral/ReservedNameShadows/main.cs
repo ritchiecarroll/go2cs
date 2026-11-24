@@ -1,7 +1,6 @@
 namespace go;
 
 using fmt = fmt_package;
-using static main_package;
 
 partial class main_package {
 
@@ -45,7 +44,7 @@ internal static nint deferInShadowedPackage() {
     GoFrame ᒐ = default;
     try {
         ref var f = ref heap<ΔGoFrame>(new ΔGoFrame(k: 1), out var Ꮡf);
-        defer(() => {
+        defer([GoFunc("deferInShadowedPackage.func1")] () => {
             Ꮡf.Value.k++;
         }, ref ᒐ);
         return f.k;
@@ -58,11 +57,7 @@ partial struct box {
     internal slice<nint> items;
 }
 
-} partial class mainᴛbox {
-
-internal static nint len(this ref box b) { return builtin.len(b.items) + 1; }
-
-} partial class main_package {
+internal static nint len⁔(/*this*/ ref box b) { return len(b.items) + 1; }
 
 internal static nint freeLen() {
     var s = slice<nint>([1, 2, 3]);

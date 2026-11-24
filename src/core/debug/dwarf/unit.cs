@@ -5,7 +5,6 @@ namespace go.debug;
 
 using sort = sort_package;
 using strconv = strconv_package;
-using static dwarf_package;
 
 partial class dwarf_package {
 
@@ -30,56 +29,52 @@ partial struct unit5 {
     internal uint64 locListsBase;
 }
 
-} partial class dwarfᴛunit {
-
 // Implement the dataFormat interface.
-internal static nint version(this ref unit u) {
+internal static nint version⁔(/*this*/ ref unit u) {
     return u.vers;
 }
 
-internal static (bool, bool) dwarf64(this ref unit u) {
+internal static (bool, bool) dwarf64⁔(/*this*/ ref unit u) {
     return (u.is64, true);
 }
 
-internal static nint addrsize(this ref unit u) {
+internal static nint addrsize⁔(/*this*/ ref unit u) {
     return u.asize;
 }
 
-internal static uint64 addrBase(this ref unit u) {
+internal static uint64 addrBase⁔(/*this*/ ref unit u) {
     if (u.unit5 != nil) {
         return u.unit5.addrBase;
     }
     return 0;
 }
 
-internal static uint64 strOffsetsBase(this ref unit u) {
+internal static uint64 strOffsetsBase⁔(/*this*/ ref unit u) {
     if (u.unit5 != nil) {
         return u.unit5.strOffsetsBase;
     }
     return 0;
 }
 
-internal static uint64 rngListsBase(this ref unit u) {
+internal static uint64 rngListsBase⁔(/*this*/ ref unit u) {
     if (u.unit5 != nil) {
         return u.unit5.rngListsBase;
     }
     return 0;
 }
 
-internal static uint64 locListsBase(this ref unit u) {
+internal static uint64 locListsBase⁔(/*this*/ ref unit u) {
     if (u.unit5 != nil) {
         return u.unit5.locListsBase;
     }
     return 0;
 }
 
-} partial class dwarfᴛData {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string unitLengthOverflowˢ => ref unitLengthOverflowˢᵇ;
 private static readonly @string unitLengthOverflowˢᵇ = "unit length overflow"u8;
 
-internal static (slice<unit>, error) parseUnits(this ж<Data> Ꮡd) {
+internal static (slice<unit>, error) parseUnits⁔(/*this*/ ж<Data> Ꮡd) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     // Count units.
@@ -168,11 +163,11 @@ internal static (slice<unit>, error) parseUnits(this ж<Data> Ꮡd) {
 
 // offsetToUnit returns the index of the unit containing offset off.
 // It returns -1 if no unit contains this offset.
-internal static nint offsetToUnit(this ж<Data> Ꮡd, Offset off) {
+internal static nint offsetToUnit⁔(/*this*/ ж<Data> Ꮡd, Offset off) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     // Find the unit after off
-    nint next = sort.Search(len(d.unit), (nint i) => Ꮡd.Value.unit[i].off > off);
+    nint next = sort.Search(len(d.unit), [GoFunc("(*Data).offsetToUnit.func1")] (nint i) => Ꮡd.Value.unit[i].off > off);
     if (next == 0) {
         return -1;
     }
@@ -183,7 +178,7 @@ internal static nint offsetToUnit(this ж<Data> Ꮡd, Offset off) {
     return -1;
 }
 
-internal static error collectDwarf5BaseOffsets(this ж<Data> Ꮡd, ж<unit> Ꮡu) {
+internal static error collectDwarf5BaseOffsets⁔(/*this*/ ж<Data> Ꮡd, ж<unit> Ꮡu) {
     ref var u = ref Ꮡu.DerefOrNull();
 
     if (u.unit5 == nil) {
@@ -212,4 +207,4 @@ internal static error collectDwarf5BaseOffsets(this ж<Data> Ꮡd, ж<unit> Ꮡu
     return default;
 }
 
-}
+} // end dwarf_package

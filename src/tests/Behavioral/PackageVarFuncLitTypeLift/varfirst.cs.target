@@ -6,7 +6,7 @@ partial class main_package {
 internal partial struct varFirst_type /*dyn*/ {
     /*embed*/ public Greeter Greeter;
 }
-internal static Greeter varFirst = func(Greeter (@string s) => {
+internal static Greeter varFirst = func([GoFunc("init.func3")] Greeter (@string s) => {
     return new varFirst_type(new namedGreeter(s));
 })("package-scope");
 

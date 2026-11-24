@@ -77,7 +77,7 @@ internal static partial void goLocal() {
 internal static void nilDefer() {
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("nilDefer.func1")] () => {
             fmt.Println("recovered:", recover() != nil);
         }, ref ᒐ);
         ж<path> p = default;

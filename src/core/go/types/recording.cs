@@ -11,14 +11,10 @@ using ast = global::go.go.ast_package;
 using constant = global::go.go.constant_package;
 using global::go.go;
 using token = global::go.go.token_package;
-using types = types_package;
-using static types_package;
 
 partial class types_package {
 
-} partial class typesᴛChecker {
-
-internal static void record(this ref Checker check, ж<operand> Ꮡx) {
+internal static void record⁔(/*this*/ ref Checker check, ж<operand> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     // convert x into a user-friendly set of values
@@ -58,7 +54,7 @@ internal static void record(this ref Checker check, ж<operand> Ꮡx) {
 internal static ref readonly @string vSTypeSIsTypedˢ => ref vSTypeSIsTypedˢᵇ;
 private static readonly @string vSTypeSIsTypedˢᵇ = "%v: %s (type %s) is typed"u8;
 
-internal static void recordUntyped(this ж<Checker> Ꮡcheck) {
+internal static void recordUntyped⁔(/*this*/ ж<Checker> Ꮡcheck) {
     ref var check = ref Ꮡcheck.DerefOrNull();
 
     if (!debug && !check.recordTypes()) {
@@ -74,7 +70,7 @@ internal static void recordUntyped(this ж<Checker> Ꮡcheck) {
     }
 }
 
-internal static void recordTypeAndValue(this ref Checker check, ast.Expr x, operandMode mode, Type typ, constant.Value val) {
+internal static void recordTypeAndValue⁔(/*this*/ ref Checker check, ast.Expr x, operandMode mode, Type typ, constant.Value val) {
     assert(x != nil);
     assert(typ != nil);
     if (mode == invalid) {
@@ -92,13 +88,13 @@ internal static void recordTypeAndValue(this ref Checker check, ast.Expr x, oper
     check.recordTypeAndValueInSyntax(x, mode, typ, val);
 }
 
-internal static void recordBuiltinType(this ref Checker check, ast.Expr f, ж<Signature> sig) {
+internal static void recordBuiltinType⁔(/*this*/ ref Checker check, ast.Expr f, ж<Signature> sig) {
     // f must be a (possibly parenthesized, possibly qualified)
     // identifier denoting a built-in (including unsafe's non-constant
     // functions Add and Slice): record the signature for f and possible
     // children.
     for (;;) {
-        check.recordTypeAndValue(f, types.Δbuiltin, new SignatureжType(sig), default);
+        check.recordTypeAndValue(f, Δbuiltin, new SignatureжType(sig), default);
         switch (f.type()) {
         case ж<ast.Ident> _:
         case ж<ast.SelectorExpr> _: {
@@ -119,7 +115,7 @@ internal static void recordBuiltinType(this ref Checker check, ast.Expr f, ж<Si
 
 // recordCommaOkTypes updates recorded types to reflect that x is used in a commaOk context
 // (and therefore has tuple type).
-internal static void recordCommaOkTypes(this ref Checker check, ast.Expr x, slice<ж<operand>> a) {
+internal static void recordCommaOkTypes⁔(/*this*/ ref Checker check, ast.Expr x, slice<ж<operand>> a) {
     assert(x != nil);
     assert(len(a) == 2);
     if (a[0].mode == invalid) {
@@ -153,7 +149,7 @@ internal static void recordCommaOkTypes(this ref Checker check, ast.Expr x, slic
 //
 // TODO(rfindley): the expr parameter is fragile. See if we can access the
 // instantiated identifier in some other way.
-internal static void recordInstance(this ref Checker check, ast.Expr expr, slice<Type> targs, Type typ) {
+internal static void recordInstance⁔(/*this*/ ref Checker check, ast.Expr expr, slice<Type> targs, Type typ) {
     var ident = instantiatedIdent(expr);
     assert(ident != nil);
     assert(typ != nil);
@@ -162,14 +158,14 @@ internal static void recordInstance(this ref Checker check, ast.Expr expr, slice
     }
 }
 
-internal static void recordDef(this ref Checker check, ж<ast.Ident> id, Object obj) {
+internal static void recordDef⁔(/*this*/ ref Checker check, ж<ast.Ident> id, Object obj) {
     assert(id != nil);
     var m = check.Defs; if (m != nil) {
         m[id] = obj;
     }
 }
 
-internal static void recordUse(this ref Checker check, ж<ast.Ident> id, Object obj) {
+internal static void recordUse⁔(/*this*/ ref Checker check, ж<ast.Ident> id, Object obj) {
     assert(id != nil);
     assert(obj != nil);
     var m = check.Uses; if (m != nil) {
@@ -177,7 +173,7 @@ internal static void recordUse(this ref Checker check, ж<ast.Ident> id, Object 
     }
 }
 
-internal static void recordImplicit(this ref Checker check, ast.Node node, Object obj) {
+internal static void recordImplicit⁔(/*this*/ ref Checker check, ast.Node node, Object obj) {
     assert(node != nil);
     assert(obj != nil);
     var m = check.Implicits; if (m != nil) {
@@ -185,7 +181,7 @@ internal static void recordImplicit(this ref Checker check, ast.Node node, Objec
     }
 }
 
-internal static void recordSelection(this ref Checker check, ж<ast.SelectorExpr> Ꮡx, SelectionKind kind, Type recv, Object obj, slice<nint> index, bool indirect) {
+internal static void recordSelection⁔(/*this*/ ref Checker check, ж<ast.SelectorExpr> Ꮡx, SelectionKind kind, Type recv, Object obj, slice<nint> index, bool indirect) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     assert(obj != nil && (recv == nil || len(index) > 0));
@@ -195,7 +191,7 @@ internal static void recordSelection(this ref Checker check, ж<ast.SelectorExpr
     }
 }
 
-internal static void recordScope(this ref Checker check, ast.Node node, ж<Scope> scope) {
+internal static void recordScope⁔(/*this*/ ref Checker check, ast.Node node, ж<Scope> scope) {
     assert(node != nil);
     assert(scope != nil);
     var m = check.Scopes; if (m != nil) {
@@ -203,4 +199,4 @@ internal static void recordScope(this ref Checker check, ast.Node node, ж<Scope
     }
 }
 
-}
+} // end types_package

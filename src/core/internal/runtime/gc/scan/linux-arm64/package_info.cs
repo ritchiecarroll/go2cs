@@ -14,6 +14,9 @@
 
 using go;
 using static go.@internal.runtime.gc.scan_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -58,11 +61,13 @@ using static go.@internal.runtime.gc.scan_package;
 [assembly: GoPositionMap("internal/runtime/gc/scan/expand_reference.go", "expand_reference.cs", "AAweAAoKgsqClIK4goI=")]
 [assembly: GoPositionMap("internal/runtime/gc/scan/filter.go", "filter.cs", "AAkYsoKCgoKClIKUgpSClIKU")]
 [assembly: GoPositionMap("internal/runtime/gc/scan/scan_generic.go", "scan_generic.cs", "AAwcuKaC")]
-[assembly: GoPositionMap("internal/runtime/gc/scan/scan_go.go", "scan_go.cs", "AA8ewoKUooKClMqC3IIADRyCgoLuggAIEoIABBDSggACEOSC2ISSgpQ=")]
+[assembly: GoPositionMap("internal/runtime/gc/scan/scan_go.go", "scan_go.cs", "AA4ewoKUooKClMqC3IIADRyCgoLuggAIEoIAAhDSggACEOSCuISSgpQ=")]
 [assembly: GoPositionMap("internal/runtime/gc/scan/scan_reference.go", "scan_reference.cs", "AA0qAAwCgoKCgoKUgpSCgpSClA==")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.runtime.gc;
+
+using static go.@internal.runtime.gc.scan_package;
 
 [GoPackage("scan")]
 public static partial class scan_package
@@ -96,5 +101,16 @@ public static partial class scan_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(scan_package.unsafeBuf<>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class scanᴛunsafeBuf;
+[GoMethodHost(typeof(scan_package.unsafeBuf<>)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class scanᴛunsafeBuf;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class scanᴛunsafeBuf {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void addIf<T>(this ref unsafeBuf<T> b, T val, bool pred) => scan_package.addIf⁔<T>(ref b, val, pred);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void check<T>(this unsafeBuf<T> b, nint cap) => scan_package.check⁔<T>(b, cap);
+}
+// </MethodForwarders>

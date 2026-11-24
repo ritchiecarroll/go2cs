@@ -36,7 +36,7 @@ internal static (syscall.Handle, error) dupFileSocket(ж<os.File> f) {
 
     syscall.Handle h = default;
     ref var syserr = ref heap<error>(out var Ꮡsyserr);
-    err = sc.Control((uintptr fd) => {
+    err = sc.Control([GoFunc("dupFileSocket.func1")] (uintptr fd) => {
         (h, Ꮡsyserr.ValueSlot) = dupSocket((syscall.Handle)fd);
     });
     if (err == nil) {

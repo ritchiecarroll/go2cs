@@ -9,6 +9,8 @@
 # GenTests' FieldAccessCollisionGuardTests, which FAILS when ж<T> gains a public member this list lacks.
 # One name per line; '#' starts a comment.
 at
+cgoPointerField
+cgoWordField
 CompareExchangePointerWord
 DerefOrNil
 DerefOrNull

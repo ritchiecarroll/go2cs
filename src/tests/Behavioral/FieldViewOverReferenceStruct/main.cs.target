@@ -203,7 +203,7 @@ internal static @string /*text*/ outOfRange(ж<rawInet4> raw, nint i) {
     @string text = default;
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("outOfRange.func1")] () => {
             text = fmt.Sprint(recover());
         }, ref ᒐ);
 

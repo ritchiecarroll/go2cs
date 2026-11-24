@@ -10,10 +10,10 @@ internal static void main() {
     fmt.Println(fmt.Errorf("name %s = %d"u8, "x", (nint)7));
     fmt.Println(fmt.Errorf("%v and %v"u8, true, "y"));
 
-    func(() => {
+    func([GoFunc("main.func1")] () => {
         GoFrame ᒐ = default;
         try {
-            defer(() => {
+            defer([GoFunc("main.func1.1")] () => {
                 var r = recover(); if (r != nil) {
                     fmt.Println(fmt.Errorf("recovered: %v"u8, r));
                 }

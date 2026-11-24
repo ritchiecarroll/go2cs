@@ -7,7 +7,7 @@ partial class main_package {
 internal static void setViaDefer(ж<nint> p) {
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("setViaDefer.func1")] () => {
             p.Value = 42;
         }, ref ᒐ);
     }
@@ -16,7 +16,7 @@ internal static void setViaDefer(ж<nint> p) {
 }
 
 internal static void bumpInClosure(ж<nint> p) {
-    void add() {
+    [GoFunc("bumpInClosure.func1")] void add() {
         p.Value = p.Value + 1;
     }
     add();
@@ -29,7 +29,7 @@ internal static void mixed(ж<nint> Ꮡp) {
         ref var p = ref Ꮡp.DerefOrNull();
 
         p = 5;
-        defer(() => {
+        defer([GoFunc("mixed.func1")] () => {
             Ꮡp.Value = Ꮡp.Value * 10;
         }, ref ᒐ);
     }

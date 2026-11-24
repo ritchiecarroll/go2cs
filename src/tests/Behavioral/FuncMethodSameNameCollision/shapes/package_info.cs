@@ -14,6 +14,9 @@
 
 using go;
 using static go.FuncMethodSameNameCollision.shapes_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -49,10 +52,12 @@ using static go.FuncMethodSameNameCollision.shapes_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("shapes.go", "shapes.cs", "AAoUtLi2tKDItKA=")]
+[assembly: GoPositionMap("shapes.go", "shapes.cs", "AAgUlJiWlKColKA=")]
 // </GoSourcePositionMaps>
 
 namespace go.FuncMethodSameNameCollision;
+
+using static go.FuncMethodSameNameCollision.shapes_package;
 
 [GoPackage("shapes")]
 public static partial class shapes_package
@@ -84,5 +89,17 @@ public static partial class shapes_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(shapes_package.Type)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class shapesᴛType;
+[GoMethodHost(typeof(shapes_package.Type)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class shapesᴛType;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class shapesᴛType {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool IsTupleType(this ж<Type> Ꮡt) => shapes_package.IsTupleType⁔(Ꮡt);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Combine(this ref Type t, nint other) => shapes_package.Combine⁔(ref t, other);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Size(this ref Type t) => shapes_package.Size⁔(ref t);
+}
+// </MethodForwarders>

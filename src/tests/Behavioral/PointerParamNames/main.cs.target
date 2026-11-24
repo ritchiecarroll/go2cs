@@ -35,7 +35,7 @@ internal static nint shadow(ж<counter> c) {
 }
 
 internal static Func<bool> capture(ж<counter> c) {
-    return () => c == nil;
+    return [GoFunc("capture.func1")] () => c == nil;
 }
 
 internal static void write(ж<strings.Builder> b, @string s) {

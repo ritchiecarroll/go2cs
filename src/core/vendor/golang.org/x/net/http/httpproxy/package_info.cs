@@ -10,10 +10,15 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+using net = go.net_package;
+using url = go.net.url_package;
 // </ImportedTypeAliases>
 
 using go;
 using static go.vendor.golang.org.x.net.http.httpproxy_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -63,10 +68,14 @@ using static go.vendor.golang.org.x.net.http.httpproxy_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("vendor/golang.org/x/net/http/httpproxy/proxy.go", "proxy.cs", "AF+0AfIABxCigoKmAAQaAAsEpoIACAaigoKCgoKCpoKUgqbGgoKmgriCpoKUzLKClIKClIKUgoKCgoK4lIKCgriCgqamgoCCpICCtqKCgqaCgoK4gIKCyIKClJSCpqaCgqaU7oKUgoKClICCpNjesoKClIKClKqQlAAJFIKUpoKCgqYADxqCAAoOggALEIKClAAMFIKClIKU", "", "", "104=getEnvAny/1/3/1,getEnvAny/2/3/2,getEnvAny/3/3/3,Getenv/1/1/4")]
+[assembly: GoPositionMap("vendor/golang.org/x/net/http/httpproxy/proxy.go", "proxy.cs", "AF60AfIABxCigoKmAAIaAAsEpoLmooKCgoKCgqaClIKmpoKCpoK4gqaClKyygpSCgpSClIKCgoKCuJSCgoK4goKmpoKAgqSAgraigoKmgoKCuICCgsiCgpSUgqamgoKmlO6ClIKCgpSAgqS43rKCgpSCgpSqkJQACRSClKaCgoKmAA0agu6CAAcQgoKUAAgUgoKUgpQ=", "", "", "103=getEnvAny/1/3/1,getEnvAny/2/3/2,getEnvAny/3/3/3,Getenv/1/1/4")]
 // </GoSourcePositionMaps>
 
 namespace go.vendor.golang.org.x.net.http;
+
+using static go.vendor.golang.org.x.net.http.httpproxy_package;
+using net = go.net_package;
+using url = go.net.url_package;
 
 [GoPackage("httpproxy", ImportPath = "vendor/golang.org/x/net/http/httpproxy")]
 public static partial class httpproxy_package
@@ -113,10 +122,37 @@ public static partial class httpproxy_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(httpproxy_package.Config)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class httpproxyᴛConfig;
-[GoMethodHost(typeof(httpproxy_package.allMatch)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class httpproxyᴛallMatch;
-[GoMethodHost(typeof(httpproxy_package.cidrMatch)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class httpproxyᴛcidrMatch;
-[GoMethodHost(typeof(httpproxy_package.config)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class httpproxyᴛconfig;
-[GoMethodHost(typeof(httpproxy_package.domainMatch)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class httpproxyᴛdomainMatch;
-[GoMethodHost(typeof(httpproxy_package.ipMatch)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class httpproxyᴛipMatch;
+[GoMethodHost(typeof(httpproxy_package.Config)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class httpproxyᴛConfig;
+[GoMethodHost(typeof(httpproxy_package.allMatch)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class httpproxyᴛallMatch;
+[GoMethodHost(typeof(httpproxy_package.cidrMatch)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class httpproxyᴛcidrMatch;
+[GoMethodHost(typeof(httpproxy_package.config)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class httpproxyᴛconfig;
+[GoMethodHost(typeof(httpproxy_package.domainMatch)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class httpproxyᴛdomainMatch;
+[GoMethodHost(typeof(httpproxy_package.ipMatch)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class httpproxyᴛipMatch;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class httpproxyᴛConfig {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static Func<ж<url.URL>, (ж<url.URL>, error)> ProxyFunc(this ref Config cfg) => httpproxy_package.ProxyFunc⁔(ref cfg);
+}
+partial class httpproxyᴛallMatch {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool match(this allMatch a, @string host, @string port, net.IP ip) => httpproxy_package.match⁔(a, host, port, ip);
+}
+partial class httpproxyᴛcidrMatch {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool match(this cidrMatch m, @string host, @string port, net.IP ip) => httpproxy_package.match⁔(m, host, port, ip);
+}
+partial class httpproxyᴛconfig {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (ж<url.URL>, error) proxyForURL(this ref config cfg, ж<url.URL> ᏑreqURL) => httpproxy_package.proxyForURL⁔(ref cfg, ᏑreqURL);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool useProxy(this ref config cfg, @string addr) => httpproxy_package.useProxy⁔(ref cfg, addr);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void init(this ref config c) => httpproxy_package.init⁔(ref c);
+}
+partial class httpproxyᴛdomainMatch {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool match(this domainMatch m, @string host, @string port, net.IP ip) => httpproxy_package.match⁔(m, host, port, ip);
+}
+partial class httpproxyᴛipMatch {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool match(this ipMatch m, @string host, @string port, net.IP ip) => httpproxy_package.match⁔(m, host, port, ip);
+}
+// </MethodForwarders>

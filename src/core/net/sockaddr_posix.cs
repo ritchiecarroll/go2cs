@@ -5,7 +5,6 @@
 namespace go;
 
 using syscall = syscall_package;
-using static net_package;
 
 partial class net_package {
 
@@ -29,9 +28,7 @@ partial interface sockaddr :
     sockaddr toLocal(@string net);
 }
 
-} partial class netᴛnetFD {
-
-internal static Func<syscall.Sockaddr, Addr> addrFunc(this ref netFD fd) {
+internal static Func<syscall.Sockaddr, Addr> addrFunc⁔(/*this*/ ref netFD fd) {
     switch (fd.family) {
     case var ᴛ when ᴛ == syscall.AF_INET || ᴛ == syscall.AF_INET6: {
         switch (fd.sotype) {
@@ -59,7 +56,7 @@ internal static Func<syscall.Sockaddr, Addr> addrFunc(this ref netFD fd) {
         }}
         break;
     }}
-    return (syscall.Sockaddr _) => default;
+    return [GoFunc("(*netFD).addrFunc.func1")] (syscall.Sockaddr _) => default;
 }
 
-}
+} // end net_package

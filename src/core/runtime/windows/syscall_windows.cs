@@ -10,7 +10,6 @@ using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime.syscall;
 using ꓸꓸꓸuintptr = Span<uintptr>;
-using static runtime_package;
 
 partial class runtime_package {
 
@@ -65,9 +64,7 @@ partial struct abiPart {
     internal uintptr len;
 }
 
-} partial class runtimeᴛabiPart {
-
-internal static bool tryMerge(this ref abiPart a, abiPart b) {
+internal static bool tryMerge⁔(/*this*/ ref abiPart a, abiPart b) {
     if (a.kind != abiPartStack || b.kind != abiPartStack) {
         return false;
     }
@@ -77,8 +74,6 @@ internal static bool tryMerge(this ref abiPart a, abiPart b) {
     }
     return false;
 }
-
-} partial class runtime_package {
 
 // abiDesc specifies how to translate from a C frame to a Go
 // frame. This does not specify how to translate back because
@@ -96,9 +91,7 @@ partial struct abiDesc {
     internal uintptr retOffset;
 }
 
-} partial class runtimeᴛabiDesc {
-
-internal static void assignArg(this ref abiDesc p, ж<_type> Ꮡt) {
+internal static void assignArg⁔(/*this*/ ref abiDesc p, ж<_type> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (t.Size_ > goarch.PtrSize) {
@@ -178,7 +171,7 @@ internal static void assignArg(this ref abiDesc p, ж<_type> Ꮡt) {
 // Assumes t.size <= goarch.PtrSize and t.size != 0.
 //
 // Returns whether the assignment succeeded.
-internal static bool tryRegAssignArg(this ref abiDesc p, ж<_type> Ꮡt, uintptr offset) {
+internal static bool tryRegAssignArg⁔(/*this*/ ref abiDesc p, ж<_type> Ꮡt, uintptr offset) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     var k = t.Kind();
@@ -221,7 +214,7 @@ internal static bool tryRegAssignArg(this ref abiDesc p, ж<_type> Ꮡt, uintptr
 // value in the C ABI space.
 //
 // Returns whether the assignment was successful.
-internal static bool assignReg(this ref abiDesc p, uintptr size, uintptr offset) {
+internal static bool assignReg⁔(/*this*/ ref abiDesc p, uintptr size, uintptr offset) {
     if (p.dstRegisters >= intArgRegs) {
         return false;
     }
@@ -234,8 +227,6 @@ internal static bool assignReg(this ref abiDesc p, uintptr size, uintptr offset)
     p.dstRegisters++;
     return true;
 }
-
-} partial class runtime_package {
 
 partial struct winCallbackKey {
     internal ж<funcval> fn;

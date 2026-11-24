@@ -25,7 +25,7 @@ internal static void arm(@string @class, Func<@string> f) {
             return;
         }
 
-        defer(() => {
+        defer([GoFunc("arm.func1")] () => {
             var r = recover(); if (r != nil) {
                 var (_, isRuntimeError) = r._<runtime.Error>(ᐧ);
                 fmt.Println(@class + ": panic:", r, isRuntimeError);
@@ -59,69 +59,69 @@ internal static T shrIndex<T>(map<nint, T> m, nuint n)
 }
 
 internal static void main() {
-    arm("uint32 const right", () => {
+    arm("uint32 const right", [GoFunc("main.func1")] () => {
         var m = new map<nint, uint32>{[1] = 0xFFFFFFFFU};
         m[1] = m[1].Rsh((uint64)40);
         return fmt.Sprint(m[1]);
     });
-    arm("uint32 const left", () => {
+    arm("uint32 const left", [GoFunc("main.func2")] () => {
         var m = new map<nint, uint32>{[1] = 0xFF};
         m[1] = m[1].Lsh((uint64)40);
         return fmt.Sprint(m[1]);
     });
-    arm("uint32 const in range", () => {
+    arm("uint32 const in range", [GoFunc("main.func3")] () => {
         var m = new map<nint, uint32>{[1] = 0xFF00};
         m[1] >>= 8;
         return fmt.Sprint(m[1]);
     });
-    arm("uint32 unbounded right", () => {
+    arm("uint32 unbounded right", [GoFunc("main.func4")] () => {
         var m = new map<nint, uint32>{[1] = 0xFFFFFFFFU};
         m[1] = m[1].Rsh(wide);
         return fmt.Sprint(m[1]);
     });
-    arm("uint8 const left", () => {
+    arm("uint8 const left", [GoFunc("main.func5")] () => {
         var m = new map<nint, uint8>{[1] = 0xFF};
         m[1] = m[1].Lsh((uint64)33);
         return fmt.Sprint(m[1]);
     });
-    arm("uint8 unbounded right", () => {
+    arm("uint8 unbounded right", [GoFunc("main.func6")] () => {
         var m = new map<nint, uint8>{[1] = 0xFF};
         m[1] = m[1].Rsh(wide);
         return fmt.Sprint(m[1]);
     });
-    arm("uint8 unbounded in range", () => {
+    arm("uint8 unbounded in range", [GoFunc("main.func7")] () => {
         var m = new map<nint, uint8>{[1] = 0xFF};
         m[1] >>= 4;
         m[1] = m[1].Lsh(nine - 6);
         return fmt.Sprint(m[1]);
     });
-    arm("int64 unbounded right", () => {
+    arm("int64 unbounded right", [GoFunc("main.func8")] () => {
         var m = new map<@string, int64>{["a"] = big, ["b"] = minus};
         m["a"] = m["a"].Rsh(wide + 30);
         m["b"] = m["b"].Rsh(wide + 30);
         return fmt.Sprint(m["a"], " ", m["b"]);
     });
-    arm("missing key", () => {
+    arm("missing key", [GoFunc("main.func9")] () => {
         var m = new map<nint, uint32>{};
         m[7] = m[7].Lsh(wide);
         var (v, ok) = m[7, ꟷ];
         return fmt.Sprint(v, " ", ok);
     });
-    arm("key evaluated once", () => {
+    arm("key evaluated once", [GoFunc("main.func10")] () => {
         var m = new map<nint, uint32>{[1] = 0xFFFFFFFFU};
         calls = 0;
         m.RshAssign(key(), wide);
         return fmt.Sprint(m[1], " ", calls);
     });
-    arm("negative count", () => {
+    arm("negative count", [GoFunc("main.func11")] () => {
         var m = new map<nint, uint32>{[1] = 0xFF};
         m[1] = m[1].Lsh((int64)(neg));
         return fmt.Sprint(m[1]);
     });
-    arm("type parameter", () => fmt.Sprint(shl((uint8)0xFF, nine), " ", shl((uint32)0xFF, wide), " ", shl((uint8)1, 3)));
-    arm("type parameter signed", () => fmt.Sprint(shrSigned((int8)(-8), (nint)nine), " ", shrSigned((int64)big, (nint)wide + 30), " ", shrSigned((int8)64, 3)));
-    arm("type parameter negative count", () => fmt.Sprint(shrSigned((int8)1, neg)));
-    arm("type parameter map", () => fmt.Sprint(shrIndex(new map<nint, uint8>{[1] = 0xFF}, nine), " ", shrIndex(new map<nint, uint32>{[1] = 0xFFFFFFFFU}, wide)));
+    arm("type parameter", [GoFunc("main.func12")] () => fmt.Sprint(shl((uint8)0xFF, nine), " ", shl((uint32)0xFF, wide), " ", shl((uint8)1, 3)));
+    arm("type parameter signed", [GoFunc("main.func13")] () => fmt.Sprint(shrSigned((int8)(-8), (nint)nine), " ", shrSigned((int64)big, (nint)wide + 30), " ", shrSigned((int8)64, 3)));
+    arm("type parameter negative count", [GoFunc("main.func14")] () => fmt.Sprint(shrSigned((int8)1, neg)));
+    arm("type parameter map", [GoFunc("main.func15")] () => fmt.Sprint(shrIndex(new map<nint, uint8>{[1] = 0xFF}, nine), " ", shrIndex(new map<nint, uint32>{[1] = 0xFFFFFFFFU}, wide)));
 }
 
 } // end main_package

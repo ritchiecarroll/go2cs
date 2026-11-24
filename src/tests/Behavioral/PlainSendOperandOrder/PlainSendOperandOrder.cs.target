@@ -32,7 +32,7 @@ internal static void deferredSend(channel<nint> ch) {
     GoFrame ᒐ = default;
     try {
         var chʗ1 = ch;
-        defer(() => {
+        defer([GoFunc("deferredSend.func1")] () => {
             var chanᴛ1 = chanFor(chʗ1);
             var (ᴛ1, ᴛ2) = pair();
             chanᴛ1.ᐸꟷ(must(ᴛ1, ᴛ2));
@@ -62,7 +62,7 @@ internal static partial void main() {
     var done = new channel<bool>(0);
     var chʗ1 = ch;
     var doneʗ1 = done;
-    goǃ(() => {
+    goǃ([GoFunc("main.func1")] () => {
         var chanᴛ4 = chanFor(chʗ1);
         var (ᴛ7, ᴛ8) = pair();
         chanᴛ4.ᐸꟷ(must(ᴛ7, ᴛ8));

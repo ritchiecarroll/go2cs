@@ -8,7 +8,6 @@ using atomic = @internal.runtime.atomic_package;
 using gc = @internal.runtime.gc_package;
 using @unsafe = unsafe_package;
 using @internal.runtime;
-using static runtime_package;
 
 partial class runtime_package {
 
@@ -520,7 +519,7 @@ internal static void readmemstats_m(ref MemStats stats) {
 
 //go:linkname readGCStats runtime/debug.readGCStats
 internal static void readGCStats(ж<slice<uint64>> pauses) {
-    systemstack(() => {
+    systemstack([GoFunc("readGCStats.func1")] () => {
         readGCStats_m(ref (pauses).DerefOrNull());
     });
 }
@@ -590,14 +589,12 @@ internal static void flushmcache(nint i) {
 // This type must structurally be a uint64 so that mstats aligns with MemStats.
 partial struct sysMemStat /*num:uint64*/;
 
-} partial class runtimeᴛsysMemStat {
-
 // load atomically reads the value of the stat.
 //
 // Must be nosplit as it is called in runtime initialization, e.g. newosproc0.
 //
 //go:nosplit
-internal static uint64 load(this ж<sysMemStat> Ꮡs) {
+internal static uint64 load⁔(/*this*/ ж<sysMemStat> Ꮡs) {
     return atomic.Load64(Ꮡs.Reinterpret<sysMemStat, uint64>());
 }
 
@@ -610,15 +607,13 @@ private static readonly @string sysMemStatOverflowˢᵇ = "sysMemStat overflow"u
 // Must be nosplit as it is called in runtime initialization, e.g. newosproc0.
 //
 //go:nosplit
-internal static void add(this ж<sysMemStat> Ꮡs, int64 n) {
+internal static void add⁔(/*this*/ ж<sysMemStat> Ꮡs, int64 n) {
     var val = atomic.Xadd64(Ꮡs.Reinterpret<sysMemStat, uint64>(), n);
     if ((n > 0 && (int64)val < n) || (n < 0 && (int64)val + n < n)) {
         print((@string)"runtime: val=", val, (@string)" n=", n, (@string)"\n");
         @throw(sysMemStatOverflowˢ);
     }
 }
-
-} partial class runtime_package {
 
 // heapStatsDelta contains deltas of various runtime memory statistics
 // that need to be updated together in order for them to be kept
@@ -643,14 +638,12 @@ partial struct heapStatsDelta {
     internal array<uint64> smallFreeCount = new(gc.NumSizeClasses);  // number of frees for small objects (<=maxSmallSize)
 }
 
-} partial class runtimeᴛheapStatsDelta {
-
 // NOTE: This struct must be a multiple of 8 bytes in size because it
 // is stored in an array. If it's not, atomic accesses to the above
 // fields may be unaligned and fail on 32-bit platforms.
 
 // merge adds in the deltas from b into a.
-internal static void merge(this ref heapStatsDelta a, ж<heapStatsDelta> Ꮡb) {
+internal static void merge⁔(/*this*/ ref heapStatsDelta a, ж<heapStatsDelta> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     a.committed += b.committed;
@@ -671,8 +664,6 @@ internal static void merge(this ref heapStatsDelta a, ж<heapStatsDelta> Ꮡb) {
         a.smallFreeCount[i] += b.smallFreeCount[i];
     }
 }
-
-} partial class runtime_package {
 
 // consistentHeapStats represents a set of various memory statistics
 // whose updates must be viewed completely to get a consistent
@@ -715,8 +706,6 @@ partial struct consistentHeapStats {
     internal mutex noPLock;
 }
 
-} partial class runtimeᴛconsistentHeapStats {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string badSequenceNumberˢ => ref badSequenceNumberˢᵇ;
 private static readonly @string badSequenceNumberˢᵇ = "bad sequence number"u8;
@@ -738,7 +727,7 @@ private static readonly @string badSequenceNumberˢᵇ = "bad sequence number"u8
 // function.
 //
 //go:nosplit
-internal static ж<heapStatsDelta> acquire(this ж<consistentHeapStats> Ꮡm) {
+internal static ж<heapStatsDelta> acquire⁔(/*this*/ ж<consistentHeapStats> Ꮡm) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     var pp = (~(~getg()).m).p.ptr(); if (pp != nil) {
@@ -769,7 +758,7 @@ internal static ж<heapStatsDelta> acquire(this ж<consistentHeapStats> Ꮡm) {
 // before this operation has completed.
 //
 //go:nosplit
-internal static void release(this ж<consistentHeapStats> Ꮡm) {
+internal static void release⁔(/*this*/ ж<consistentHeapStats> Ꮡm) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     var pp = (~(~getg()).m).p.ptr(); if (pp != nil) {
@@ -788,7 +777,7 @@ internal static void release(this ж<consistentHeapStats> Ꮡm) {
 //
 // Unsafe because it does so without any synchronization. The
 // world must be stopped.
-internal static void unsafeRead(this ref consistentHeapStats m, ж<heapStatsDelta> Ꮡout) {
+internal static void unsafeRead⁔(/*this*/ ref consistentHeapStats m, ж<heapStatsDelta> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     assertWorldStopped();
@@ -802,15 +791,13 @@ internal static void unsafeRead(this ref consistentHeapStats m, ж<heapStatsDelt
 //
 // Unsafe because the world must be stopped and values should
 // be donated elsewhere before clearing.
-internal static void unsafeClear(this ref consistentHeapStats m) {
+internal static void unsafeClear⁔(/*this*/ ref consistentHeapStats m) {
     assertWorldStopped();
 
     clear(m.stats[..]);
 }
 
 // go2cs generated this placeholder — func read is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
-
-} partial class runtime_package {
 
 partial struct cpuStats {
 // All fields are CPU time in nanoseconds computed by comparing
@@ -830,13 +817,11 @@ partial struct cpuStats {
     public int64 TotalTime; // GOMAXPROCS * (monotonic wall clock time elapsed)
 }
 
-} partial class runtimeᴛcpuStats {
-
 // accumulateGCPauseTime add dt*stwProcs to the GC CPU pause time stats. dt should be
 // the actual time spent paused, for orthogonality. maxProcs should be GOMAXPROCS,
 // not work.stwprocs, since this number must be comparable to a total time computed
 // from GOMAXPROCS.
-internal static void accumulateGCPauseTime(this ref cpuStats s, int64 dt, int32 maxProcs) {
+internal static void accumulateGCPauseTime⁔(/*this*/ ref cpuStats s, int64 dt, int32 maxProcs) {
     var cpu = dt * (int64)maxProcs;
     s.GCPauseTime += cpu;
     s.GCTotalTime += cpu;
@@ -847,7 +832,7 @@ internal static void accumulateGCPauseTime(this ref cpuStats s, int64 dt, int32 
 //
 // gcMarkPhase indicates that we're in the mark phase and that certain counter
 // values should be used.
-internal static void accumulate(this ref cpuStats s, int64 now, bool gcMarkPhase) {
+internal static void accumulate⁔(/*this*/ ref cpuStats s, int64 now, bool gcMarkPhase) {
     // N.B. Mark termination and sweep termination pauses are
     // accumulated in work.cpuStats at the end of their respective pauses.
     int64 markAssistCpu = default;
@@ -895,4 +880,4 @@ internal static void accumulate(this ref cpuStats s, int64 now, bool gcMarkPhase
     s.UserTime = s.TotalTime - (s.GCTotalTime + s.ScavengeTotalTime + s.IdleTime);
 }
 
-}
+} // end runtime_package

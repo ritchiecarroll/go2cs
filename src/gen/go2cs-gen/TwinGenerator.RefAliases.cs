@@ -12,7 +12,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace go2cs;
 
-// M:N PROTOTYPE, N3's CS9217 cut (C1, COORD's approval 2026-11-15): which ref locals a twin can derive again after an
+// M:N (experimental), N3's CS9217 cut (C1, COORD's approval 2026-11-15): which ref locals a twin can derive again after an
 // await. A ref local does not live across an await, so the twin re-points each one after it (Rule R) at the source it
 // was declared from. That is sound only while the source still names the same storage the Go variable does. The
 // converter spells a Go pointer variable `p` as its box `Ꮡp` plus a ref alias `ref var p = ref Ꮡp.DerefOrNull()`, and
@@ -59,7 +59,7 @@ public sealed partial class TwinGenerator
                         return true;
 
                     foreach (StatementSyntax loop in awaited.Ancestors().TakeWhile(ancestor => ancestor != scope).OfType<StatementSyntax>()
-                                 .Where(statement => statement is ForStatementSyntax or ForEachStatementSyntax or WhileStatementSyntax or DoStatementSyntax))
+                                 .Where(statement => statement is ForStatementSyntax or CommonForEachStatementSyntax or WhileStatementSyntax or DoStatementSyntax))
                     {
                         if (uses.Any(use => loop.Span.Contains(use.Span)))
                             return true;

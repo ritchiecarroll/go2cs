@@ -101,7 +101,7 @@ The deeper remedy — the converter stating the access modifier in source itself
 
 The blind spot above is closed at the root without touching a converted `.cs`:<!-- 2026-07-25 --> `package_info.cs` carries a **`TypeAccessibility`** section, emitted **inside the package class body** (its entries are type declarations, and the types they name are nested in that class), carrying one condensed single-line partial declaration per converter-emitted converted type:
 
-<!-- source: src/core/io/package_info.cs:103-105, 112-113, 117, 125, 132, 144, 149, 161 (an excerpt of the section) -->
+<!-- source: src/core/io/package_info.cs:108-166 (an excerpt of the section) -->
 ```csharp
 [GoPackage("io")]
 public static partial class io_package
@@ -204,15 +204,22 @@ stays the code a person reads; the attributes live where nobody has to.
 ### What each one carries, and why a Go reader does not need it
 
 **A pointer receiver is `this ref T`.** Go's `func (b *Reader)` becomes an extension method whose receiver is
-passed by reference, and a value receiver `func (d Duration)` becomes `this Duration d`. The `ref` is the whole
-fact: it is what lets the method change the caller's value, as Go's pointer receiver does. From it the
-generator writes the overload that takes a pointer (`ж<Reader>`), and the runtime decides which methods belong
-to `Reader` and which to `*Reader`. A Go reader sees a receiver and whether it is a pointer, which is what the
-Go line showed.
+passed by reference, and a value receiver `func (d Duration)` becomes `this Duration d`. In a library the
+method's body is `Read⁔`, in the package class, with the receiver as its first parameter (`/*this*/ ref Reader b`),
+and the extension method is its one-line forwarder in `package_info.cs`
+([Functions and Methods](../ConversionStrategies.md#functions-and-methods)). The `ref` is the whole
+fact: it is what lets the method change the caller's value, as Go's pointer receiver does. From the forwarder's
+`this ref` the generator writes the overload that takes a pointer (`ж<Reader>`), and the runtime decides which
+methods belong to `Reader` and which to `*Reader`. A Go reader sees a receiver and whether it is a pointer, which
+is what the Go line showed.
 
-<!-- source: src/core/bufio/bufio.cs:225 -->
+<!-- source: src/core/bufio/bufio.cs:218 -->
 ```csharp
-public static (nint n, error err) Read(this ref Reader b, slice<byte> p) {
+internal static (nint n, error err) Read⁔(/*this*/ ref Reader b, slice<byte> p) {
+```
+<!-- source: src/core/bufio/package_info.cs:132 -->
+```csharp
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint n, error err) Read(this ref Reader b, slice<byte> p) => bufio_package.Read⁔(ref b, p);
 ```
 
 **A Go type needs no mark.** Every struct and interface the converter declares inside a package class is a Go
@@ -224,7 +231,7 @@ generator builds one from the comment. `num:int64` says "a number over `int64`",
 slice, a map, a channel, a pointer or another named type the same way. If the comment is deleted the type loses
 its arithmetic and conversions, and the build fails rather than running wrong.
 
-<!-- source: src/core/time/time.cs:976 -->
+<!-- source: src/core/time/time.cs:936 -->
 ```csharp
 partial struct Duration /*num:int64*/;
 ```
@@ -235,7 +242,7 @@ on an embedded interface, an embedded predeclared type, and a pointer to one. Pr
 type's methods, and `reflect`'s `Anonymous`, follow from it. An embedded struct value needs no comment: it is
 a `partial ref` property (`public partial ref Inner Inner { get; }`).
 
-<!-- source: src/go2cs/testdata/markercomments/main.cs:42-43 -->
+<!-- source: src/go2cs/testdata/markercomments/main.cs:41-42 -->
 ```csharp
     /*embed*/ public Reader Reader;
     /*embed*/ internal nint @int;
@@ -248,7 +255,7 @@ that contains a backquote, a `*/`, or any character Go does not count as printab
 is not valid UTF-8. Inside the quoted spelling a `*/` is written `*\x2f`, so the tag cannot end the comment
 early. A grouped declaration carries the tag once, as Go does.
 
-<!-- source: src/go2cs/testdata/markercomments/main.cs:47-51 -->
+<!-- source: src/go2cs/testdata/markercomments/main.cs:46-50 -->
 ```csharp
     public @string Plain; /*`json:"plain"`*/
     public nint Grouped, Pair; /*`json:"g"`*/
@@ -261,7 +268,7 @@ becomes `array<byte>` and the length would be lost. The comment `/*[32]*/` keeps
 prefix, on a parameter, on a field, on a map's key type argument, and on a defined type whose inner lengths
 its definition does not spell. Nested arrays list each length in order.
 
-<!-- source: src/go2cs/testdata/markercomments/main.cs:69-84 -->
+<!-- source: src/go2cs/testdata/markercomments/main.cs:68-83 -->
 ```csharp
     internal /*[3]*/ ж<array<nint>> p;
 …
@@ -483,7 +490,7 @@ queued after a run is run by the next miss.
 <!-- The queueing initializer: src/gen/go2cs-gen/DeferredRegistration.cs:22
      (`public static string Initializer(string registry, string name)`). Its callers:
      src/gen/go2cs-gen/ImplementGenerator.cs:1613 (`DeferredRegistration.Initializer("Adapters", "Adapters")`),
-     src/gen/go2cs-gen/TypeGenerator.cs:728 (`DeferredRegistration.Initializer("ZeroFactories", "GoZeroFactories")`),
+     src/gen/go2cs-gen/TypeGenerator.cs:731 (`DeferredRegistration.Initializer("ZeroFactories", "GoZeroFactories")`),
      src/gen/go2cs-gen/EscapeRegistryGenerator.cs:406 (`DeferredRegistration.Initializer("EscapeRegistry", "EscapingContainers")`),
      src/gen/go2cs-gen/NativeArrayOpenerGenerator.cs:221
      (`DeferredRegistration.Initializer("NativeArrayOpeners", "NativeArrayOpeners")`).

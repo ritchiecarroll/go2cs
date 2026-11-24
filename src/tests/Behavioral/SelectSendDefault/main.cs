@@ -59,7 +59,7 @@ internal static partial void unbufferedWithReceiver() {
 
     var chʗ1 = ch;
     var gotʗ1 = got;
-    goǃ(() => {
+    goǃ([GoFunc("unbufferedWithReceiver.func1")] () => {
         gotʗ1.ᐸꟷ(ᐸꟷ(chʗ1));
     });
 
@@ -98,7 +98,7 @@ internal static void nilChannel() {
 internal static void closedChannel() {
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("closedChannel.func1")] () => {
             var r = recover(); if (r != nil) {
                 fmt.Println("closed channel: recovered:", r);
             }
@@ -197,7 +197,7 @@ internal static partial void blockingSendStillBlocks() {
 
     var chʗ1 = ch;
     var gotʗ1 = got;
-    goǃ(() => {
+    goǃ([GoFunc("blockingSendStillBlocks.func1")] () => {
         time.Sleep(20 * time.Millisecond);
         gotʗ1.ᐸꟷ(ᐸꟷ(chʗ1));
     });

@@ -11,11 +11,8 @@ using static global::go.@internal.types.errors_package;
 using errors = global::go.@internal.types.errors_package;
 using global::go.go;
 using iter = iter_package;
-using static types_package;
 
 partial class types_package {
-
-} partial class typesᴛChecker {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string mapIndexˢ => ref mapIndexˢᵇ;
@@ -24,7 +21,7 @@ private static readonly @string mapIndexˢᵇ = "map index"u8;
 // If e is a valid function instantiation, indexExpr returns true.
 // In that case x represents the uninstantiated function value and
 // it is the caller's responsibility to instantiate the function.
-internal static bool /*isFuncInst*/ indexExpr(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<indexedExpr> Ꮡe) {
+internal static bool /*isFuncInst*/ indexExpr⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<indexedExpr> Ꮡe) {
     ref var x = ref Ꮡx.DerefOrNull();
     ref var e = ref Ꮡe.DerefOrNull();
 
@@ -126,7 +123,7 @@ internal static bool /*isFuncInst*/ indexExpr(this ж<Checker> Ꮡcheck, ж<oper
         ref var elem = ref heap<Type>(out var Ꮡelem);
         var mode = variable;                        // non-maps result mode
         // TODO(gri) factor out closure and use it for non-typeparam cases as well
-        if (underIs(x.typ, (Type u) => {
+        if (underIs(x.typ, [GoFunc("(*Checker).indexExpr.func1")] (Type u) => {
             var l = (int64)(-1); // valid if >= 0
             Type k = default;    // k is only set for maps
             Type eΔ1 = default;
@@ -240,7 +237,7 @@ internal static bool /*isFuncInst*/ indexExpr(this ж<Checker> Ꮡcheck, ж<oper
 internal static ref readonly @string and3rdIndexRequiredIn3ˢ => ref and3rdIndexRequiredIn3ˢᵇ;
 private static readonly @string and3rdIndexRequiredIn3ˢᵇ = "2nd and 3rd index required in 3-index slice"u8;
 
-internal static void sliceExpr(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.SliceExpr> Ꮡe) {
+internal static void sliceExpr⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.SliceExpr> Ꮡe) {
     ref var x = ref Ꮡx.DerefOrNull();
     ref var e = ref Ꮡe.DerefOrNull();
 
@@ -255,7 +252,7 @@ internal static void sliceExpr(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<a
     ref var cu = ref heap<Type>(out var Ꮡcu);
     bool hasString = default;
     // TODO(adonovan): use go1.23 "range typeset()".
-    typeset(x.typ)((Type t, Type u) => {
+    typeset(x.typ)([GoFunc("(*Checker).sliceExpr.func1")] (Type t, Type u) => {
         if (u == nil) {
             Ꮡcheck.errorf(new operandжpositioner(Ꮡx), NonSliceableOperand, "cannot slice %s: no specific type in %s", Ꮡx.OrTypedNil(), Ꮡx.Value.typ);
             Ꮡcu.ValueSlot = default;
@@ -418,7 +415,7 @@ break_L:;
 // singleIndex returns the (single) index from the index expression e.
 // If the index is missing, or if there are multiple indices, an error
 // is reported and the result is nil.
-internal static ast.Expr singleIndex(this ж<Checker> Ꮡcheck, ж<indexedExpr> Ꮡexpr) {
+internal static ast.Expr singleIndex⁔(/*this*/ ж<Checker> Ꮡcheck, ж<indexedExpr> Ꮡexpr) {
     ref var expr = ref Ꮡexpr.DerefOrNull();
 
     if (len(expr.indices) == 0) {
@@ -440,7 +437,7 @@ private static readonly @string indexˢᵇ = "index"u8;
 // If max >= 0, it is the upper bound for index.
 // If the result typ is != Typ[Invalid], index is valid and typ is its (possibly named) integer type.
 // If the result val >= 0, index is valid and val is its constant int value.
-internal static (Type typ, int64 val) index(this ж<Checker> Ꮡcheck, ast.Expr index, int64 max) {
+internal static (Type typ, int64 val) index⁔(/*this*/ ж<Checker> Ꮡcheck, ast.Expr index, int64 max) {
     Type typ = default;
     int64 val = default;
 
@@ -472,7 +469,7 @@ internal static (Type typ, int64 val) index(this ж<Checker> Ꮡcheck, ast.Expr 
     return (x.typ, v);
 }
 
-internal static bool isValidIndex(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, errors.Code code, @string what, bool allowNegative) {
+internal static bool isValidIndex⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operand> Ꮡx, errors.Code code, @string what, bool allowNegative) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     if (x.mode == invalid) {
@@ -508,8 +505,6 @@ internal static bool isValidIndex(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, e
     return true;
 }
 
-} partial class types_package {
-
 // indexedExpr wraps an ast.IndexExpr or ast.IndexListExpr.
 //
 // Orig holds the original ast.Expr from which this indexedExpr was derived.
@@ -527,13 +522,9 @@ partial struct indexedExpr {
     internal token.Pos rbrack;        // position of "]"
 }
 
-} partial class typesᴛindexedExpr {
-
-internal static token.Pos Pos(this ref indexedExpr x) {
+internal static token.Pos Pos⁔(/*this*/ ref indexedExpr x) {
     return x.orig.Pos();
 }
-
-} partial class types_package {
 
 internal static ж<indexedExpr> unpackIndexedExpr(ast.Node n) {
     switch (n.type()) {

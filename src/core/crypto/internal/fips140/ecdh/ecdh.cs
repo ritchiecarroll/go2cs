@@ -15,7 +15,6 @@ using go.crypto.@internal;
 using go.crypto.@internal.fips140;
 using go.crypto.@internal.fips140deps;
 using math;
-using static ecdh_package;
 
 partial class ecdh_package {
 
@@ -29,30 +28,22 @@ partial struct PrivateKey {
     internal slice<byte> d; // bigmod.(*Nat).Bytes output (fixed length)
 }
 
-} partial class ecdhᴛPrivateKey {
-
-public static slice<byte> Bytes(this ref PrivateKey priv) {
+internal static slice<byte> Bytes⁔(/*this*/ ref PrivateKey priv) {
     return priv.d;
 }
 
-public static ж<PublicKey> PublicKey(this ж<PrivateKey> Ꮡpriv) {
+internal static ж<PublicKey> PublicKey⁔(/*this*/ ж<PrivateKey> Ꮡpriv) {
     return Ꮡpriv.Ꮡpub;
 }
-
-} partial class ecdh_package {
 
 partial struct PublicKey {
     internal curveID curve;
     internal slice<byte> q; // uncompressed nistec Point.Bytes output
 }
 
-} partial class ecdhᴛPublicKey {
-
-public static slice<byte> Bytes(this ref PublicKey pub) {
+internal static slice<byte> Bytes⁔(/*this*/ ref PublicKey pub) {
     return pub.q;
 }
-
-} partial class ecdh_package {
 
 partial struct curveID /*@string*/;
 
@@ -200,7 +191,7 @@ public static (ж<PrivateKey>, error) GenerateKey<P>(ж<Curve<P>> Ꮡc, io.Reade
         // consistent [...], even if the underlying standard does not require a
         // PCT". So we do it. And make ECDH nearly 50% slower (only) in FIPS mode.
         var privateKeyʗ1 = privateKey;
-        fips140.PCT(ecdhPctˢ, error () => {
+        fips140.PCT(ecdhPctˢ, [GoFunc("GenerateKey[...].func1")] error () => {
             var (p1, errΔ1) = Ꮡc.Value.newPoint().ScalarBaseMult(privateKeyʗ1.d);
             if (errΔ1 != nil) {
                 return errΔ1;

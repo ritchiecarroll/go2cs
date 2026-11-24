@@ -6,7 +6,6 @@ namespace go.@internal;
 
 using byteorder = go.@internal.byteorder_package;
 using go.@internal;
-using static routebsd_package;
 
 partial class routebsd_package {
 
@@ -27,37 +26,31 @@ partial interface binaryByteOrder {
 partial struct binaryLittleEndian {
 }
 
-} partial class routebsdᴛbinaryLittleEndian {
-
-internal static uint16 Uint16(this binaryLittleEndian _, slice<byte> b) {
+internal static uint16 Uint16⁔(/*this*/ binaryLittleEndian _, slice<byte> b) {
     return byteorder.LEUint16(b);
 }
 
-internal static uint32 Uint32(this binaryLittleEndian _, slice<byte> b) {
+internal static uint32 Uint32⁔(/*this*/ binaryLittleEndian _, slice<byte> b) {
     return byteorder.LEUint32(b);
 }
 
-internal static uint64 Uint64(this binaryLittleEndian _, slice<byte> b) {
+internal static uint64 Uint64⁔(/*this*/ binaryLittleEndian _, slice<byte> b) {
     return byteorder.LEUint64(b);
 }
-
-} partial class routebsd_package {
 
 partial struct binaryBigEndian {
 }
 
-} partial class routebsdᴛbinaryBigEndian {
-
-internal static uint16 Uint16(this binaryBigEndian _, slice<byte> b) {
+internal static uint16 Uint16⁔(/*this*/ binaryBigEndian _, slice<byte> b) {
     return byteorder.BEUint16(b);
 }
 
-internal static uint32 Uint32(this binaryBigEndian _, slice<byte> b) {
+internal static uint32 Uint32⁔(/*this*/ binaryBigEndian _, slice<byte> b) {
     return byteorder.BEUint32(b);
 }
 
-internal static uint64 Uint64(this binaryBigEndian _, slice<byte> b) {
+internal static uint64 Uint64⁔(/*this*/ binaryBigEndian _, slice<byte> b) {
     return byteorder.BEUint64(b);
 }
 
-}
+} // end routebsd_package

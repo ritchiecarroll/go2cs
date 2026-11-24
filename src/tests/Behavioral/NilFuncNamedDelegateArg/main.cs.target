@@ -76,7 +76,7 @@ internal static void main() {
     check("ifelse-nil", IfElse<Actionꓸꓸꓸ<ж<Message>, any>>(false, r.reportError, (Actionꓸꓸꓸ<ж<Message>, any>)(default)));
     check("ifelse-set", IfElse<Actionꓸꓸꓸ<ж<Message>, any>>(true, r.reportError, (Actionꓸꓸꓸ<ж<Message>, any>)(default)));
     check("method", new Actionꓸꓸꓸ<ж<Message>, any>(r.reportError));
-    check("literal", (ж<Message> m, params ꓸꓸꓸany argsʗp) => {
+    check("literal", [GoFunc("main.func1")] (ж<Message> m, params ꓸꓸꓸany argsʗp) => {
         var args = argsʗp.sslice();
         fmt.Println("literal", m.text, len(args));
     });
@@ -88,7 +88,7 @@ internal static void main() {
     Func<nint, @string> g = default;
     serve("handler-nil", NilSafeDelegateConversion<Handler, Func<nint, @string>>(g));
     serve("handler-func", new Handler(@double));
-    serve("handler-literal", (nint n) => fmt.Sprint(n + 1));
+    serve("handler-literal", [GoFunc("main.func2")] (nint n) => fmt.Sprint(n + 1));
     g = @double;
     serve("handler-set", NilSafeDelegateConversion<Handler, Func<nint, @string>>(g));
 

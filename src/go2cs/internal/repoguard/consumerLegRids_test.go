@@ -17,12 +17,13 @@ import (
 // EVERY RID THE PACK SHIPS IS A RID A CONSUMER LEG READS (seat S5c, DESIGN-linux-arm64-flavour.md section 6).
 //
 // push-nuget.ps1's $ridFlavors decides which runtimes/<rid>/ assets every go.* package carries. os-matrix.yml decides
-// which RIDs the consumer stages (release-smoke, aot-smoke, nugetgo-behavior) restore, build and run those packages on.
+// which RIDs the consumer stages (release-smoke, aot-smoke, nugetgo-behavior, cgo-nuget-e2e) restore, build and run those
+// packages on.
 // The two are written in two languages and moved apart once: S6 shipped linux-arm64 in every package while the consumer
 // stages kept four hard-coded legs, so no hosted leg ever consumed the flavour a release would publish for it. This test
 // holds the consumer legs EQUAL to the shipped set, so a RID the pack gains is read on its own OS the day it ships, and a
 // leg the matrix keeps for a RID the pack dropped fails here too.
-var consumerLegBlock = regexp.MustCompile(`(?s)if \(\$env:INPUT_STAGE -in 'release-smoke', 'aot-smoke', 'nugetgo-behavior'\) \{\s*\$targets = @\((.*?)\)\s*Write-Host`)
+var consumerLegBlock = regexp.MustCompile(`(?s)if \(\$env:INPUT_STAGE -in 'release-smoke', 'aot-smoke', 'nugetgo-behavior', 'cgo-nuget-e2e'\) \{\s*\$targets = @\((.*?)\)\s*Write-Host`)
 
 // consumerLegRid is one target's RID in that block.
 var consumerLegRid = regexp.MustCompile(`rid = '([^']+)'`)

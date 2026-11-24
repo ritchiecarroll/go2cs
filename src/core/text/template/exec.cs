@@ -15,7 +15,6 @@ using @internal;
 using go.text.template;
 using iter = iter_package;
 using ꓸꓸꓸany = Span<any>;
-using static template_package;
 
 partial class template_package {
 
@@ -49,26 +48,24 @@ partial struct variable {
     internal reflect.Value value;
 }
 
-} partial class templateᴛstate {
-
 // push pushes a new variable on the stack.
-internal static void push(this ref state s, @string name, reflect.Value value) {
+internal static void push⁔(/*this*/ ref state s, @string name, reflect.Value value) {
     s.vars = append(s.vars, new variable(name, value));
 }
 
 // mark returns the length of the variable stack.
-internal static nint mark(this ref state s) {
+internal static nint mark⁔(/*this*/ ref state s) {
     return len(s.vars);
 }
 
 // pop pops the variable stack up to the mark.
-internal static void pop(this ref state s, nint mark) {
+internal static void pop⁔(/*this*/ ref state s, nint mark) {
     s.vars = s.vars.slice(0, mark);
 }
 
 // setVar overwrites the last declared variable with the given name.
 // Used by variable assignments.
-internal static void setVar(this ref state s, @string name, reflect.Value value) {
+internal static void setVar⁔(/*this*/ ref state s, @string name, reflect.Value value) {
     for (nint i = s.mark() - 1; i >= 0; i--) {
         if (s.vars[i].name == name) {
             s.vars[i].value = value;
@@ -79,12 +76,12 @@ internal static void setVar(this ref state s, @string name, reflect.Value value)
 }
 
 // setTopVar overwrites the top-nth variable on the stack. Used by range iterations.
-internal static void setTopVar(this ref state s, nint n, reflect.Value value) {
+internal static void setTopVar⁔(/*this*/ ref state s, nint n, reflect.Value value) {
     s.vars[len(s.vars) - n].value = value;
 }
 
 // varValue returns the value of the named variable.
-internal static reflect.Value varValue(this ref state s, @string name) {
+internal static reflect.Value varValue⁔(/*this*/ ref state s, @string name) {
     for (nint i = s.mark() - 1; i >= 0; i--) {
         if (s.vars[i].name == name) {
             return s.vars[i].value;
@@ -93,8 +90,6 @@ internal static reflect.Value varValue(this ref state s, @string name) {
     s.errorf("undefined variable: %s", name);
     return zero;
 }
-
-} partial class template_package {
 
 internal static reflect.Value zero = new(nil);
 
@@ -109,14 +104,10 @@ internal static bool isMissing(reflect.Value v) {
     return v.IsValid() && AreEqual(v.Type(), missingValReflectType);
 }
 
-} partial class templateᴛstate {
-
 // at marks the state to be on node n, for error reporting.
-internal static void at(this ref state s, parse.Node node) {
+internal static void at⁔(/*this*/ ref state s, parse.Node node) {
     s.node = node;
 }
-
-} partial class template_package {
 
 // doublePercent returns the string with %'s replaced by %%, if necessary,
 // so it can be used safely inside a Printf format string.
@@ -136,20 +127,16 @@ partial struct ExecError {
     public error Err;    // Pre-formatted error.
 }
 
-} partial class templateᴛExecError {
-
-public static @string Error(this ExecError e) {
+internal static @string Error⁔(/*this*/ ExecError e) {
     return e.Err.Error();
 }
 
-public static error Unwrap(this ExecError e) {
+internal static error Unwrap⁔(/*this*/ ExecError e) {
     return e.Err;
 }
 
-} partial class templateᴛstate {
-
 // errorf records an ExecError and terminates processing.
-internal static void errorf(this ref state s, @string format, params ꓸꓸꓸany argsʗp) {
+internal static void errorf⁔(/*this*/ ref state s, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     @string name = doublePercent(s.tmpl.Name());
@@ -165,8 +152,6 @@ internal static void errorf(this ref state s, @string format, params ꓸꓸꓸan
     ));
 }
 
-} partial class template_package {
-
 // writeError is the wrapper type used internally when Execute has an
 // error writing to its output. We strip the wrapper in errRecover.
 // Note that this is not an implementation of error, so it cannot escape
@@ -175,15 +160,11 @@ partial struct writeError {
     public error Err; // Original error.
 }
 
-} partial class templateᴛstate {
-
-internal static void writeError(this ref state s, error err) {
+internal static void writeError⁔(/*this*/ ref state s, error err) {
     throw panic(new writeError(
         Err: err
     ));
 }
-
-} partial class template_package {
 
 // errRecover is the handler that turns panics into returns from the top
 // level of Parse.
@@ -218,8 +199,6 @@ internal static void errRecover(ref error errp) {
     finally { ᒐ.Run(); }
 }
 
-} partial class templateᴛTemplate {
-
 // ExecuteTemplate applies the template associated with t that has the given name
 // to the specified data object and writes the output to wr.
 // If an error occurs executing the template or writing its output,
@@ -227,7 +206,7 @@ internal static void errRecover(ref error errp) {
 // the output writer.
 // A template may be executed safely in parallel, although if parallel
 // executions share a Writer the output may be interleaved.
-public static error ExecuteTemplate(this ж<Template> Ꮡt, io.Writer wr, @string name, any data) {
+internal static error ExecuteTemplate⁔(/*this*/ ж<Template> Ꮡt, io.Writer wr, @string name, any data) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     var tmpl = Ꮡt.Lookup(name);
@@ -247,11 +226,11 @@ public static error ExecuteTemplate(this ж<Template> Ꮡt, io.Writer wr, @strin
 //
 // If data is a [reflect.Value], the template applies to the concrete
 // value that the reflect.Value holds, as in [fmt.Print].
-public static error Execute(this ж<Template> Ꮡt, io.Writer wr, any data) {
+internal static error Execute⁔(/*this*/ ж<Template> Ꮡt, io.Writer wr, any data) {
     return Ꮡt.execute(wr, data);
 }
 
-internal static error /*err*/ execute(this ж<Template> Ꮡt, io.Writer wr, any data) {
+internal static error /*err*/ execute⁔(/*this*/ ж<Template> Ꮡt, io.Writer wr, any data) {
     heap<error>(out var Ꮡerr);
     GoFrame ᒐ = default;
     try {
@@ -286,7 +265,7 @@ private static readonly @string definedTemplatesAreˢᵇ = "; defined templates 
 // prefixed by the string "; defined templates are: ". If there are none,
 // it returns the empty string. For generating an error message here
 // and in [html/template].
-public static @string DefinedTemplates(this ж<Template> Ꮡt) {
+internal static @string DefinedTemplates⁔(/*this*/ ж<Template> Ꮡt) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -315,17 +294,13 @@ public static @string DefinedTemplates(this ж<Template> Ꮡt) {
     finally { if (ᒐd1) Ꮡt.of(Template.ᏑmuTmpl).RUnlock(); ᒐ.Run(); }
 }
 
-} partial class template_package {
-
 // Sentinel errors for use with panic to signal early exits from range loops.
 internal static error walkBreak = errors.New("break");
 internal static error walkContinue = errors.New("continue");
 
-} partial class templateᴛstate {
-
 // Walk functions step through the major pieces of the template structure,
 // generating output as they go.
-internal static void walk(this ж<state> Ꮡs, reflect.Value dot, parse.Node node) {
+internal static void walk⁔(/*this*/ ж<state> Ꮡs, reflect.Value dot, parse.Node node) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     s.at(node);
@@ -387,7 +362,7 @@ internal static void walk(this ж<state> Ꮡs, reflect.Value dot, parse.Node nod
 
 // walkIfOrWith walks an 'if' or 'with' node. The two control structures
 // are identical in behavior except that 'with' sets dot.
-internal static void walkIfOrWith(this ж<state> Ꮡs, parse.NodeType typ, reflect.Value dot, ж<parse.PipeNode> pipe, ж<parse.ListNode> list, ж<parse.ListNode> elseList) {
+internal static void walkIfOrWith⁔(/*this*/ ж<state> Ꮡs, parse.NodeType typ, reflect.Value dot, ж<parse.PipeNode> pipe, ж<parse.ListNode> list, ж<parse.ListNode> elseList) {
     GoFrame ᒐ = default;
     try {
         ref var s = ref Ꮡs.DerefOrNull();
@@ -411,8 +386,6 @@ internal static void walkIfOrWith(this ж<state> Ꮡs, parse.NodeType typ, refle
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
-
-} partial class template_package {
 
 // IsTrue reports whether the value is 'true', in the sense of not the zero of its type,
 // and whether the value has a meaningful truth value. This is the definition of
@@ -468,16 +441,14 @@ internal static (bool truth, bool ok) isTrue(reflect.Value val) {
     return (truth, true);
 }
 
-} partial class templateᴛstate {
-
-internal static void walkRange(this ж<state> Ꮡs, reflect.Value dot, ж<parse.RangeNode> Ꮡr) {
+internal static void walkRange⁔(/*this*/ ж<state> Ꮡs, reflect.Value dot, ж<parse.RangeNode> Ꮡr) {
     GoFrame ᒐ = default;
     try {
         ref var s = ref Ꮡs.DerefOrNull();
         ref var r = ref Ꮡr.DerefOrNull();
 
         s.at(new parse.RangeNodeжNode(Ꮡr));
-        defer(() => {
+        defer([GoFunc("(*state).walkRange.func1")] () => {
             var rΔ1 = recover(); if (rΔ1 != nil && !AreEqual(rΔ1, walkBreak)) {
                 throw panic(rΔ1);
             }
@@ -486,7 +457,7 @@ internal static void walkRange(this ж<state> Ꮡs, reflect.Value dot, ж<parse.
         var (val, _) = indirect(s.evalPipeline(dot, r.Pipe));
         // mark top of stack before any variables in the body are pushed.
         nint mark = s.mark();
-        void oneIteration(reflect.Value index, reflect.Value elem) {
+        [GoFunc("(*state).walkRange.func2")] void oneIteration(reflect.Value index, reflect.Value elem) {
             GoFrame ᒐ = default;
             try {
                 if (len(Ꮡr.Value.Pipe.Decl) > 0) {
@@ -514,7 +485,7 @@ internal static void walkRange(this ж<state> Ꮡs, reflect.Value dot, ж<parse.
                     }
                 }
                 defer(Ꮡs.pop, mark, ref ᒐ);
-                defer(() => {
+                defer([GoFunc("(*state).walkRange.func2.1")] () => {
                     // Consume panic(walkContinue)
                     var rΔ2 = recover(); if (rΔ2 != nil && !AreEqual(rΔ2, walkContinue)) {
                         throw panic(rΔ2);
@@ -647,7 +618,7 @@ internal static void walkRange(this ж<state> Ꮡs, reflect.Value dot, ж<parse.
     finally { ᒐ.Run(); }
 }
 
-internal static void walkTemplate(this ref state s, reflect.Value dot, ж<parse.TemplateNode> Ꮡt) {
+internal static void walkTemplate⁔(/*this*/ ref state s, reflect.Value dot, ж<parse.TemplateNode> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     s.at(new parse.TemplateNodeжNode(Ꮡt));
@@ -676,7 +647,7 @@ internal static void walkTemplate(this ref state s, reflect.Value dot, ж<parse.
 // pipeline has a variable declaration, the variable will be pushed on the
 // stack. Callers should therefore pop the stack after they are finished
 // executing commands depending on the pipeline value.
-internal static reflect.Value /*value*/ evalPipeline(this ref state s, reflect.Value dot, ж<parse.PipeNode> Ꮡpipe) {
+internal static reflect.Value /*value*/ evalPipeline⁔(/*this*/ ref state s, reflect.Value dot, ж<parse.PipeNode> Ꮡpipe) {
     reflect.Value value = new(nil);
     ref var pipe = ref Ꮡpipe.DerefOrNull();
 
@@ -702,13 +673,13 @@ internal static reflect.Value /*value*/ evalPipeline(this ref state s, reflect.V
     return value;
 }
 
-internal static void notAFunction(this ref state s, slice<parse.Node> args, reflect.Value final) {
+internal static void notAFunction⁔(/*this*/ ref state s, slice<parse.Node> args, reflect.Value final) {
     if (len(args) > 1 || !isMissing(final)) {
         s.errorf("can't give argument to non-function %s", args[0]);
     }
 }
 
-internal static reflect.Value evalCommand(this ref state s, reflect.Value dot, ж<parse.CommandNode> Ꮡcmd, reflect.Value final) {
+internal static reflect.Value evalCommand⁔(/*this*/ ref state s, reflect.Value dot, ж<parse.CommandNode> Ꮡcmd, reflect.Value final) {
     ref var cmd = ref Ꮡcmd.DerefOrNull();
 
     var firstWord = cmd.Args[0];
@@ -762,7 +733,7 @@ private static readonly @string eEpPˢᵇ = ".eEpP"u8;
 // we don't know the type. In that case, the syntax of the number tells us
 // its type, and we use Go rules to resolve. Note there is no such thing as
 // a uint ideal constant in this situation - the value must be of int type.
-internal static reflect.Value idealConstant(this ref state s, ж<parse.NumberNode> Ꮡconstant) {
+internal static reflect.Value idealConstant⁔(/*this*/ ref state s, ж<parse.NumberNode> Ꮡconstant) {
     ref var constant = ref Ꮡconstant.DerefOrNull();
 
     // These are ideal constants but we don't know the type
@@ -790,8 +761,6 @@ internal static reflect.Value idealConstant(this ref state s, ж<parse.NumberNod
     return zero;
 }
 
-} partial class template_package {
-
 internal static bool isRuneInt(@string s) {
     return len(s) > 0 && s[0] == '\'';
 }
@@ -800,16 +769,14 @@ internal static bool isHexInt(@string s) {
     return len(s) > 2 && s[0] == '0' && (s[1] == 'x' || s[1] == 'X') && !strings.ContainsAny(s, "pP");
 }
 
-} partial class templateᴛstate {
-
-internal static reflect.Value evalFieldNode(this ref state s, reflect.Value dot, ж<parse.FieldNode> Ꮡfield, slice<parse.Node> args, reflect.Value final) {
+internal static reflect.Value evalFieldNode⁔(/*this*/ ref state s, reflect.Value dot, ж<parse.FieldNode> Ꮡfield, slice<parse.Node> args, reflect.Value final) {
     ref var field = ref Ꮡfield.DerefOrNull();
 
     s.at(new parse.FieldNodeжNode(Ꮡfield));
     return s.evalFieldChain(dot, dot, new parse.FieldNodeжNode(Ꮡfield), field.Ident, args, final);
 }
 
-internal static reflect.Value evalChainNode(this ref state s, reflect.Value dot, ж<parse.ChainNode> Ꮡchain, slice<parse.Node> args, reflect.Value final) {
+internal static reflect.Value evalChainNode⁔(/*this*/ ref state s, reflect.Value dot, ж<parse.ChainNode> Ꮡchain, slice<parse.Node> args, reflect.Value final) {
     ref var chain = ref Ꮡchain.DerefOrNull();
 
     s.at(new parse.ChainNodeжNode(Ꮡchain));
@@ -824,7 +791,7 @@ internal static reflect.Value evalChainNode(this ref state s, reflect.Value dot,
     return s.evalFieldChain(dot, pipe, new parse.ChainNodeжNode(Ꮡchain), chain.Field, args, final);
 }
 
-internal static reflect.Value evalVariableNode(this ref state s, reflect.Value dot, ж<parse.VariableNode> Ꮡvariable, slice<parse.Node> args, reflect.Value final) {
+internal static reflect.Value evalVariableNode⁔(/*this*/ ref state s, reflect.Value dot, ж<parse.VariableNode> Ꮡvariable, slice<parse.Node> args, reflect.Value final) {
     ref var variable = ref Ꮡvariable.DerefOrNull();
 
     // $x.Field has $x as the first ident, Field as the second. Eval the var, then the fields.
@@ -840,7 +807,7 @@ internal static reflect.Value evalVariableNode(this ref state s, reflect.Value d
 // evalFieldChain evaluates .X.Y.Z possibly followed by arguments.
 // dot is the environment in which to evaluate arguments, while
 // receiver is the value being walked along the chain.
-internal static reflect.Value evalFieldChain(this ref state s, reflect.Value dot, reflect.Value receiver, parse.Node node, slice<@string> ident, slice<parse.Node> args, reflect.Value final) {
+internal static reflect.Value evalFieldChain⁔(/*this*/ ref state s, reflect.Value dot, reflect.Value receiver, parse.Node node, slice<@string> ident, slice<parse.Node> args, reflect.Value final) {
     nint n = len(ident);
     for (nint i = 0; i < n - 1; i++) {
         receiver = s.evalField(dot, ident[i], node, default, missingVal, receiver);
@@ -849,7 +816,7 @@ internal static reflect.Value evalFieldChain(this ref state s, reflect.Value dot
     return s.evalField(dot, ident[n - 1], node, args, final, receiver);
 }
 
-internal static reflect.Value evalFunction(this ref state s, reflect.Value dot, ж<parse.IdentifierNode> Ꮡnode, parse.Node cmd, slice<parse.Node> args, reflect.Value final) {
+internal static reflect.Value evalFunction⁔(/*this*/ ref state s, reflect.Value dot, ж<parse.IdentifierNode> Ꮡnode, parse.Node cmd, slice<parse.Node> args, reflect.Value final) {
     ref var node = ref Ꮡnode.DerefOrNull();
 
     s.at(new parse.IdentifierNodeжNode(Ꮡnode));
@@ -864,7 +831,7 @@ internal static reflect.Value evalFunction(this ref state s, reflect.Value dot, 
 // evalField evaluates an expression like (.Field) or (.Field arg1 arg2).
 // The 'final' argument represents the return value from the preceding
 // value of the pipeline, if any.
-internal static reflect.Value evalField(this ref state s, reflect.Value dot, @string fieldName, parse.Node node, slice<parse.Node> args, reflect.Value final, reflect.Value receiver) {
+internal static reflect.Value evalField⁔(/*this*/ ref state s, reflect.Value dot, @string fieldName, parse.Node node, slice<parse.Node> args, reflect.Value final, reflect.Value receiver) {
     if (!receiver.IsValid()) {
         if (s.tmpl.option.missingKey == mapError) { // Treat invalid value as missing map key.
             s.errorf("nil data; no entry for key %q", fieldName);
@@ -955,18 +922,14 @@ internal static reflect.Value evalField(this ref state s, reflect.Value dot, @st
     throw panic("not reached");
 }
 
-} partial class template_package {
-
 internal static reflect.Type errorType = reflect.TypeFor<error>();
 internal static reflect.Type fmtStringerType = reflect.TypeFor<fmt.Stringer>();
 internal static reflect.Type reflectValueType = reflect.TypeFor<reflect.Value>();
 
-} partial class templateᴛstate {
-
 // evalCall executes a function or method call. If it's a method, fun already has the receiver bound, so
 // it looks just like a function call. The arg list, if non-nil, includes (in the manner of the shell), arg[0]
 // as the function itself.
-internal static reflect.Value evalCall(this ref state s, reflect.Value dot, reflect.Value fun, bool isBuiltin, parse.Node node, @string name, slice<parse.Node> args, reflect.Value final) {
+internal static reflect.Value evalCall⁔(/*this*/ ref state s, reflect.Value dot, reflect.Value fun, bool isBuiltin, parse.Node node, @string name, slice<parse.Node> args, reflect.Value final) {
     if (args != nil) {
         args = args[1..]; // Zeroth arg is function name/node; not passed to function.
     }
@@ -988,7 +951,7 @@ internal static reflect.Value evalCall(this ref state s, reflect.Value dot, refl
         s.errorf("%v", errΔ1);
     }
 
-    reflect.Value unwrap(reflect.Value vΔ1) {
+    [GoFunc("(*state).evalCall.func1")] reflect.Value unwrap(reflect.Value vΔ1) {
         if (AreEqual(vΔ1.Type(), reflectValueType)) {
             vΔ1 = vΔ1.Interface()._<reflect.Value>();
         }
@@ -1074,8 +1037,6 @@ internal static reflect.Value evalCall(this ref state s, reflect.Value dot, refl
     return unwrap(v);
 }
 
-} partial class template_package {
-
 // canBeNil reports whether an untyped nil can be assigned to the type. See reflect.Zero.
 internal static bool canBeNil(reflect.Type typ) {
     switch (typ.Kind()) {
@@ -1088,10 +1049,8 @@ internal static bool canBeNil(reflect.Type typ) {
     return false;
 }
 
-} partial class templateᴛstate {
-
 // validateType guarantees that the value is valid and assignable to the type.
-internal static reflect.Value validateType(this ref state s, reflect.Value value, reflect.Type typ) {
+internal static reflect.Value validateType⁔(/*this*/ ref state s, reflect.Value value, reflect.Type typ) {
     if (!value.IsValid()) {
         if (typ == nil) {
             // An untyped nil interface{}. Accept as a proper nil value.
@@ -1138,7 +1097,7 @@ internal static reflect.Value validateType(this ref state s, reflect.Value value
     return value;
 }
 
-internal static reflect.Value evalArg(this ref state s, reflect.Value dot, reflect.Type typ, parse.Node n) {
+internal static reflect.Value evalArg⁔(/*this*/ ref state s, reflect.Value dot, reflect.Type typ, parse.Node n) {
     s.at(n);
     switch (n.type()) {
     case ж<parse.DotNode> arg: {
@@ -1201,7 +1160,7 @@ internal static reflect.Value evalArg(this ref state s, reflect.Value dot, refle
     throw panic("not reached");
 }
 
-internal static reflect.Value evalBool(this ref state s, reflect.Type typ, parse.Node n) {
+internal static reflect.Value evalBool⁔(/*this*/ ref state s, reflect.Type typ, parse.Node n) {
     s.at(n);
     var (nΔ1, ok) = n._<ж<parse.BoolNode>>(ᐧ); if (ok) {
         var value = reflect.New(typ).Elem();
@@ -1212,7 +1171,7 @@ internal static reflect.Value evalBool(this ref state s, reflect.Type typ, parse
     throw panic("not reached");
 }
 
-internal static reflect.Value evalString(this ref state s, reflect.Type typ, parse.Node n) {
+internal static reflect.Value evalString⁔(/*this*/ ref state s, reflect.Type typ, parse.Node n) {
     s.at(n);
     var (nΔ1, ok) = n._<ж<parse.StringNode>>(ᐧ); if (ok) {
         var value = reflect.New(typ).Elem();
@@ -1223,7 +1182,7 @@ internal static reflect.Value evalString(this ref state s, reflect.Type typ, par
     throw panic("not reached");
 }
 
-internal static reflect.Value evalInteger(this ref state s, reflect.Type typ, parse.Node n) {
+internal static reflect.Value evalInteger⁔(/*this*/ ref state s, reflect.Type typ, parse.Node n) {
     s.at(n);
     var (nΔ1, ok) = n._<ж<parse.NumberNode>>(ᐧ); if (ok && nΔ1.IsInt) {
         var value = reflect.New(typ).Elem();
@@ -1234,7 +1193,7 @@ internal static reflect.Value evalInteger(this ref state s, reflect.Type typ, pa
     throw panic("not reached");
 }
 
-internal static reflect.Value evalUnsignedInteger(this ref state s, reflect.Type typ, parse.Node n) {
+internal static reflect.Value evalUnsignedInteger⁔(/*this*/ ref state s, reflect.Type typ, parse.Node n) {
     s.at(n);
     var (nΔ1, ok) = n._<ж<parse.NumberNode>>(ᐧ); if (ok && nΔ1.IsUint) {
         var value = reflect.New(typ).Elem();
@@ -1245,7 +1204,7 @@ internal static reflect.Value evalUnsignedInteger(this ref state s, reflect.Type
     throw panic("not reached");
 }
 
-internal static reflect.Value evalFloat(this ref state s, reflect.Type typ, parse.Node n) {
+internal static reflect.Value evalFloat⁔(/*this*/ ref state s, reflect.Type typ, parse.Node n) {
     s.at(n);
     var (nΔ1, ok) = n._<ж<parse.NumberNode>>(ᐧ); if (ok && nΔ1.IsFloat) {
         var value = reflect.New(typ).Elem();
@@ -1256,7 +1215,7 @@ internal static reflect.Value evalFloat(this ref state s, reflect.Type typ, pars
     throw panic("not reached");
 }
 
-internal static reflect.Value evalComplex(this ref state s, reflect.Type typ, parse.Node n) {
+internal static reflect.Value evalComplex⁔(/*this*/ ref state s, reflect.Type typ, parse.Node n) {
     var (nΔ1, ok) = n._<ж<parse.NumberNode>>(ᐧ); if (ok && nΔ1.IsComplex) {
         var value = reflect.New(typ).Elem();
         value.SetComplex(nΔ1.Complex128);
@@ -1266,7 +1225,7 @@ internal static reflect.Value evalComplex(this ref state s, reflect.Type typ, pa
     throw panic("not reached");
 }
 
-internal static reflect.Value evalEmptyInterface(this ref state s, reflect.Value dot, parse.Node n) {
+internal static reflect.Value evalEmptyInterface⁔(/*this*/ ref state s, reflect.Value dot, parse.Node n) {
     s.at(n);
     switch (n.type()) {
     case ж<parse.BoolNode> nΔ1: {
@@ -1302,8 +1261,6 @@ internal static reflect.Value evalEmptyInterface(this ref state s, reflect.Value
     throw panic("not reached");
 }
 
-} partial class template_package {
-
 // indirect returns the item at the end of indirection, and a bool to indicate
 // if it's nil. If the returned bool is true, the returned value's kind will be
 // either a pointer or interface.
@@ -1330,11 +1287,9 @@ internal static reflect.Value indirectInterface(reflect.Value v) {
     return v.Elem();
 }
 
-} partial class templateᴛstate {
-
 // printValue writes the textual representation of the value to the output of
 // the template.
-internal static void printValue(this ref state s, parse.Node n, reflect.Value v) {
+internal static void printValue⁔(/*this*/ ref state s, parse.Node n, reflect.Value v) {
     s.at(n);
     var (iface, ok) = printableValue(v);
     if (!ok) {
@@ -1345,8 +1300,6 @@ internal static void printValue(this ref state s, parse.Node n, reflect.Value v)
         s.writeError(err);
     }
 }
-
-} partial class template_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object noValueˢ = (@string)"<no value>"u8;

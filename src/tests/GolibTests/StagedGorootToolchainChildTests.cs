@@ -143,9 +143,32 @@ public class StagedGorootToolchainChildTests
     }
 
     private static void AssertSamePath(string expected, string actual, string message) =>
-        Assert.AreEqual(Path.TrimEndingDirectorySeparator(Path.GetFullPath(expected)),
-            Path.TrimEndingDirectorySeparator(Path.GetFullPath(actual)),
-            OperatingSystem.IsWindows(), message);
+        Assert.AreEqual(Canonical(expected), Canonical(actual), OperatingSystem.IsWindows(), message);
+
+    // A directory's one spelling: its full path with every symbolic link along it resolved. The two sides can name one
+    // directory two ways. On macOS the temp directory is under /var, a link to /private/var, and the go child reports the
+    // resolved spelling (osx-arm64 and osx-x64, run 45021456943, the first hosted run to export GOROOT to this test). A
+    // link in an ANCESTOR is resolved too, which resolving the last component alone would miss.
+    private static string Canonical(string path)
+    {
+        string full = Path.TrimEndingDirectorySeparator(Path.GetFullPath(path));
+        string root = Path.GetPathRoot(full) ?? "";
+        string current = root;
+
+        foreach (string part in full[root.Length..].Split(Path.DirectorySeparatorChar, StringSplitOptions.RemoveEmptyEntries))
+        {
+            current = Path.Combine(current, part);
+
+            System.IO.FileSystemInfo? target = Directory.Exists(current)
+                ? new System.IO.DirectoryInfo(current).ResolveLinkTarget(returnFinalTarget: true)
+                : File.Exists(current) ? new System.IO.FileInfo(current).ResolveLinkTarget(returnFinalTarget: true) : null;
+
+            if (target is not null)
+                current = Path.TrimEndingDirectorySeparator(Path.GetFullPath(target.FullName));
+        }
+
+        return current;
+    }
 
     // Through the CONVERTED os/exec, with os.Environ() as the child's environment, exactly as Go's tests start go.
     private static (string Output, bool Ok) Run(string name, string? directory, params string[] args)

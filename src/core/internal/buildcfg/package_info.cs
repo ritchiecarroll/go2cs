@@ -14,6 +14,9 @@
 
 using go;
 using static go.@internal.buildcfg_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -59,11 +62,13 @@ using static go.@internal.buildcfg_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/buildcfg/cfg.go", "cfg.cs", "ABousqKioqKioqKioqKi1AAHEJKCgriCgpTmgqSkpKSUguaCgpSUgpSCqqKCgpSClIKUgpSClIKClIKUqqKCgpQACRCCgoKUlAAQBqKYgpSUlIKCgoKUgoKmlLS0tILIgpQAEB6CgoKUgpQADAayqoKUgoKCgqaCgoKmppS2lLSUtuaigsq0gqaCpoamgpSCgpSUAAkIgqSUguaCpJSC5oKkpKSUguaCpKSklIKChoIABxKyggAIBqKCAA0QtuaCpoKCgqai3IKU+qKkpKSkpKSkpKSUpsKkpIKClLSCgpS0goKCgqaCgqakpKSCgpS0goKUgpSklJSClA==", "326-328:1")]
-[assembly: GoPositionMap("internal/buildcfg/exp.go", "exp.cs", "ACE+goKCgpQAEBze2tKUgrQADBiU7gAHEJSCgoKCgv6SgriSgpS4gpSCgpSCgpS4goKmgoKmgpTKos7CgoKCgpSCgoKCgoKUgoKUuMqiqqI=", "112-115:1", "105=reflect.Value.SetBool")]
+[assembly: GoPositionMap("internal/buildcfg/cfg.go", "cfg.cs", "ABkusqKioqKioqKioqKi1AAHEJKCgriCgpTmgqSkpKSUguaCgpSUgpSCqqKCgpSClIKUgpSClIKClIKUqqKCgpQABxCCgoKUlAAOBqKYgpSUlIKCgoKUgoKmlLS0tILIgpQADh6CgoKUgpQACgayqoKUgoKCgqaCgoKmppS2lLSUtuaigqq0gqaCpoamgpSCgpSU+IKklILmgqSUguaCpKSklILmgqSkpJSCgoaCAAUSsoLmooIADRC25oKmgoKCpqLcgpT6oqSkpKSkpKSkpJSmwqSkgoKUtIKClLSCgoKCpoKCpqSkpIKClLSCgpSClKSUlIKU", "326-328:1")]
+[assembly: GoPositionMap("internal/buildcfg/exp.go", "exp.cs", "ACA+goKCgpQAEBze2tKUgrQADBiU7gAHEJSCgoKCgv6SgriSgpS4gpSCgpSCgpS4goKmgoKmgpSqoq7CgoKCgpSCgoKCgoKUgoKUuKqiqqI=", "112-115:1", "105=reflect.Value.SetBool", "33=Invoke/1/1/7")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;
+
+using static go.@internal.buildcfg_package;
 
 [GoPackage("buildcfg")]
 public static partial class buildcfg_package
@@ -105,8 +110,30 @@ public static partial class buildcfg_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(buildcfg_package.ExperimentFlags)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class buildcfgᴛExperimentFlags;
-[GoMethodHost(typeof(buildcfg_package.Goarm64Features)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class buildcfgᴛGoarm64Features;
-[GoMethodHost(typeof(buildcfg_package.GoarmFeatures)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class buildcfgᴛGoarmFeatures;
-[GoMethodHost(typeof(buildcfg_package.gowasmFeatures)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class buildcfgᴛgowasmFeatures;
+[GoMethodHost(typeof(buildcfg_package.ExperimentFlags)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class buildcfgᴛExperimentFlags;
+[GoMethodHost(typeof(buildcfg_package.Goarm64Features)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class buildcfgᴛGoarm64Features;
+[GoMethodHost(typeof(buildcfg_package.GoarmFeatures)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class buildcfgᴛGoarmFeatures;
+[GoMethodHost(typeof(buildcfg_package.gowasmFeatures)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class buildcfgᴛgowasmFeatures;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class buildcfgᴛExperimentFlags {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this ж<ExperimentFlags> Ꮡexp) => buildcfg_package.String⁔(Ꮡexp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<@string> Enabled(this ж<ExperimentFlags> Ꮡexp) => buildcfg_package.Enabled⁔(Ꮡexp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<@string> All(this ж<ExperimentFlags> Ꮡexp) => buildcfg_package.All⁔(Ꮡexp);
+}
+partial class buildcfgᴛGoarm64Features {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this Goarm64Features g) => buildcfg_package.String⁔(g);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Supports(this Goarm64Features g, @string s) => buildcfg_package.Supports⁔(g, s);
+}
+partial class buildcfgᴛGoarmFeatures {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this GoarmFeatures g) => buildcfg_package.String⁔(g);
+}
+partial class buildcfgᴛgowasmFeatures {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this gowasmFeatures f) => buildcfg_package.String⁔(f);
+}
+// </MethodForwarders>

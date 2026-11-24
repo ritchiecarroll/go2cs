@@ -68,7 +68,7 @@ internal static void main() {
     fmt.Println("local-iface:", li.G());
     fmt.Println("local-iface-eq:", AreEqual(li, ((LocalIface)new localImpl(N: 2))), AreEqual(li, ((LocalIface)new localImpl(N: 3))));
 
-    var mv = ((valued)new meterᴠvalued(new meter(() => 11)));
+    var mv = ((valued)new meterᴠvalued(new meter([GoFunc("main.func1")] () => 11)));
     var gv = ((valued)((gauge)4));
     fmt.Println("func-source:", mv.Value(), "numeric-source:", gv.Value());
 

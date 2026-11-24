@@ -19,7 +19,7 @@ internal static partial channel<nint> after() {
     afterCalls++;
     var ch = new channel<nint>(0);
     var chʗ1 = ch;
-    goǃ(() => {
+    goǃ([GoFunc("after.func1")] () => {
         chʗ1.ᐸꟷ(99);
     });
     return ch;

@@ -10,8 +10,6 @@ using sys = @internal.runtime.sys_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
-using runtime = runtime_package;
-using static runtime_package;
 
 partial class runtime_package {
 
@@ -114,11 +112,9 @@ finish:
     throw panic(Ꮡ(new TypeAssertionError(concrete: Ꮡtyp, asserted: Ꮡinter.ᏑType, missingMethod: itabInit(m, false))));
 }
 
-} partial class runtimeᴛitabTableType {
-
 // find finds the given interface/type pair in t.
 // Returns nil if the given interface/type pair isn't present.
-internal static ж<itab> find(this ж<itabTableType> Ꮡt, ж<interfacetype> inter, ж<_type> typ) {
+internal static ж<itab> find⁔(/*this*/ ж<itabTableType> Ꮡt, ж<interfacetype> inter, ж<_type> typ) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     // Implemented using quadratic probing.
@@ -127,7 +123,7 @@ internal static ж<itab> find(this ж<itabTableType> Ꮡt, ж<interfacetype> int
     var mask = t.size - 1;
     var h = (uintptr)(itabHashFunc(ref (inter).DerefOrNull(), ref (typ).DerefOrNull()) & mask);
     for (var i = (uintptr)1; ; i++) {
-        var p = @unsafe.Pointer.To<ж<itab>>(runtime.add(@unsafe.Pointer.FromPinnedBox(Ꮡt.Ꮡentries), h * (uintptr)goarch.PtrSize));
+        var p = @unsafe.Pointer.To<ж<itab>>(add(@unsafe.Pointer.FromPinnedBox(Ꮡt.Ꮡentries), h * (uintptr)goarch.PtrSize));
         // Use atomic read here so if we see m != nil, we also see
         // the initializations of the fields of m.
         // m := *p
@@ -142,8 +138,6 @@ internal static ж<itab> find(this ж<itabTableType> Ꮡt, ж<interfacetype> int
         h &= (uintptr)(mask);
     }
 }
-
-} partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string mismatchedCountDuringˢ => ref mismatchedCountDuringˢᵇ;
@@ -188,11 +182,9 @@ internal static void itabAdd(ж<itab> Ꮡm) {
     t.add(Ꮡm);
 }
 
-} partial class runtimeᴛitabTableType {
-
 // add adds the given itab to itab table t.
 // itabLock must be held.
-internal static void add(this ж<itabTableType> Ꮡt, ж<itab> Ꮡm) {
+internal static void add⁔(/*this*/ ж<itabTableType> Ꮡt, ж<itab> Ꮡm) {
     ref var t = ref Ꮡt.DerefOrNull();
     ref var m = ref Ꮡm.DerefOrNull();
 
@@ -201,7 +193,7 @@ internal static void add(this ж<itabTableType> Ꮡt, ж<itab> Ꮡm) {
     var mask = t.size - 1;
     var h = (uintptr)(itabHashFunc(ref (m.Inter).DerefOrNull(), ref (m.Type).DerefOrNull()) & mask);
     for (var i = (uintptr)1; ; i++) {
-        var p = @unsafe.Pointer.To<ж<itab>>(runtime.add(@unsafe.Pointer.FromPinnedBox(Ꮡt.Ꮡentries), h * (uintptr)goarch.PtrSize));
+        var p = @unsafe.Pointer.To<ж<itab>>(add(@unsafe.Pointer.FromPinnedBox(Ꮡt.Ꮡentries), h * (uintptr)goarch.PtrSize));
         var m2 = p.ValueSlot;
         if (m2 == Ꮡm) {
             // A given itab may be used in more than one module
@@ -223,8 +215,6 @@ internal static void add(this ж<itabTableType> Ꮡt, ж<itab> Ꮡm) {
         h &= (uintptr)(mask);
     }
 }
-
-} partial class runtime_package {
 
 // itabInit fills in the m.Fun array with all the code pointers for
 // the m.Inter/m.Type pair. If the type does not implement the interface,
@@ -598,7 +588,7 @@ internal static ж<abi.TypeAssertCache> buildTypeAssertCache(ж<abi.TypeAssertCa
 
     // Fill the new table.
     var newEntriesʗ1 = newEntries;
-    void addEntry(ж<_type> typΔ1, ж<itab> tabΔ1) {
+    [GoFunc("buildTypeAssertCache.func1")] void addEntry(ж<_type> typΔ1, ж<itab> tabΔ1) {
         nint h = (nint)typΔ1.Hash & (newN - 1);
         for (;;) {
             if (newEntriesʗ1[h].Typ == 0) {
@@ -709,7 +699,7 @@ internal static ж<abi.InterfaceSwitchCache> buildInterfaceSwitchCache(ж<abi.In
 
     // Fill the new table.
     var newEntriesʗ1 = newEntries;
-    void addEntry(ж<_type> typΔ1, nint case_Δ1, ж<itab> tabΔ1) {
+    [GoFunc("buildInterfaceSwitchCache.func1")] void addEntry(ж<_type> typΔ1, nint case_Δ1, ж<itab> tabΔ1) {
         nint h = (nint)typΔ1.Hash & (newN - 1);
         for (;;) {
             if (newEntriesʗ1[h].Typ == 0) {

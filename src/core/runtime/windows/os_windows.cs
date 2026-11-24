@@ -305,7 +305,7 @@ internal static void monitorSuspendResume() {
     }
     ref var fn = ref heap<any>(out var Ꮡfn);
 
-    fn = uintptr (uintptr context, uint32 changeType, uintptr setting) => {
+    fn = [GoFunc("monitorSuspendResume.func1")] uintptr (uintptr context, uint32 changeType, uintptr setting) => {
         for (var mp = @unsafe.Pointer.To<m>(atomic.Loadp(@unsafe.Pointer.FromBox(Ꮡallm))); mp != nil; mp = mp.Value.alllink) {
             if ((~mp).resumesema != 0) {
                 stdcall(_SetEvent, (~mp).resumesema);
@@ -687,20 +687,20 @@ internal static int32 semasleep(int64 ns) {
         return -1;
     }
     case var ᴛ when ᴛ == _WAIT_ABANDONED: {
-        systemstack(() => {
+        systemstack([GoFunc("semasleep.func1")] () => {
             @throw(runtimeSemasleepWaitˢ);
         });
         break;
     }
     case var ᴛ when ᴛ == _WAIT_FAILED: {
-        systemstack(() => {
+        systemstack([GoFunc("semasleep.func2")] () => {
             print((@string)"runtime: waitforsingleobject wait_failed; errno=", getlasterror(), (@string)"\n");
             @throw(runtimeSemasleepWaitˢ2);
         });
         break;
     }
     default: {
-        systemstack(() => {
+        systemstack([GoFunc("semasleep.func3")] () => {
             print((@string)"runtime: waitforsingleobject unexpected; result=", result, (@string)"\n");
             @throw(runtimeSemasleepˢ);
         });
@@ -719,7 +719,7 @@ internal static void semawakeup(ж<m> Ꮡmp) {
     ref var mp = ref Ꮡmp.DerefOrNull();
 
     if (stdcall(_SetEvent, mp.waitsema) == 0) {
-        systemstack(() => {
+        systemstack([GoFunc("semawakeup.func1")] () => {
             print((@string)"runtime: setevent failed; errno=", getlasterror(), (@string)"\n");
             @throw(runtimeSemawakeupˢ);
         });
@@ -737,14 +737,14 @@ internal static void semacreate(ref m mp) {
     }
     mp.waitsema = stdcall(_CreateEventA, 0, 0, 0, 0);
     if (mp.waitsema == 0) {
-        systemstack(() => {
+        systemstack([GoFunc("semacreate.func1")] () => {
             print((@string)"runtime: createevent failed; errno=", getlasterror(), (@string)"\n");
             @throw(runtimeSemacreateˢ);
         });
     }
     mp.resumesema = stdcall(_CreateEventA, 0, 0, 0, 0);
     if (mp.resumesema == 0) {
-        systemstack(() => {
+        systemstack([GoFunc("semacreate.func2")] () => {
             print((@string)"runtime: createevent failed; errno=", getlasterror(), (@string)"\n");
             @throw(runtimeSemacreateˢ);
         });
@@ -1018,7 +1018,7 @@ internal static void osyield_no_g() {
 
 //go:nosplit
 internal static void osyield() {
-    systemstack(() => {
+    systemstack([GoFunc("osyield.func1")] () => {
         stdcall(_SwitchToThread);
     });
 }

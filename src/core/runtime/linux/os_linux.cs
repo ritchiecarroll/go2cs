@@ -12,7 +12,6 @@ using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
 using @internal.runtime.syscall;
-using static runtime_package;
 
 partial class runtime_package {
 
@@ -88,7 +87,7 @@ internal static void futexwakeup(ж<uint32> addr, uint32 cnt) {
     // I don't know that futex wakeup can return
     // EAGAIN or EINTR, but if it does, it would be
     // safe to loop and call futex again.
-    systemstack(() => {
+    systemstack([GoFunc("futexwakeup.func1")] () => {
         print((@string)"futexwakeup addr=", addr.OrTypedNil(), (@string)" returned ", ret, (@string)"\n");
     });
 
@@ -187,7 +186,7 @@ internal static void newosproc(ж<m> Ꮡmp) {
     // with signals disabled. It will enable them in minit.
     ref var oset = ref heap(new sigset(), out var Ꮡoset);
     sigprocmask(_SIG_SETMASK, Ꮡsigset_all, Ꮡoset);
-    var ret = retryOnEAGAIN(() => {
+    var ret = retryOnEAGAIN([GoFunc("newosproc.func1")] () => {
         var r = clone(cloneFlags, stk, @unsafe.Pointer.FromPinnedBox(Ꮡmp), @unsafe.Pointer.FromPinnedBox(Ꮡmp.Value.g0), (@unsafe.Pointer)abi.FuncPCABI0(mstart));
         // clone returns positive TID, negative errno.
         // We don't care about the TID.
@@ -541,13 +540,9 @@ internal static void setSignalstackSP(ж<stackt> s, uintptr sp) {
     (s.Ꮡss_sp.Reinterpret<ж<byte>, uintptr>()).Value = sp;
 }
 
-} partial class runtimeᴛsigctxt {
-
 //go:nosplit
-internal static void fixsigcode(this ref sigctxt c, uint32 sig) {
+internal static void fixsigcode⁔(/*this*/ ref sigctxt c, uint32 sig) {
 }
-
-} partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string sigactionFailedˢ => ref sigactionFailedˢᵇ;
@@ -571,7 +566,7 @@ internal static void sysSigaction(uint32 sig, ж<sigactiont> @new, ж<sigactiont
         // anything we can do about it anyhow.
         if (sig != 32 && sig != 33 && sig != 64) {
             // Use system stack to avoid split stack overflow on ppc64/ppc64le.
-            systemstack(() => {
+            systemstack([GoFunc("sysSigaction.func1")] () => {
                 @throw(sigactionFailedˢ);
             });
         }
@@ -722,13 +717,11 @@ internal static UntypedInt _SI_USER => 0;
 internal static UntypedInt _SI_TKILL => -6;
 internal static UntypedInt _SYS_SECCOMP => 1;
 
-} partial class runtimeᴛsigctxt {
-
 // sigFromUser reports whether the signal was sent because of a call
 // to kill or tgkill.
 //
 //go:nosplit
-internal static bool sigFromUser(this ref sigctxt c) {
+internal static bool sigFromUser⁔(/*this*/ ref sigctxt c) {
     var code = (int32)c.sigcode();
     return code == _SI_USER || code == _SI_TKILL;
 }
@@ -736,12 +729,10 @@ internal static bool sigFromUser(this ref sigctxt c) {
 // sigFromSeccomp reports whether the signal was sent from seccomp.
 //
 //go:nosplit
-internal static bool sigFromSeccomp(this ref sigctxt c) {
+internal static bool sigFromSeccomp⁔(/*this*/ ref sigctxt c) {
     var code = (int32)c.sigcode();
     return code == _SYS_SECCOMP;
 }
-
-} partial class runtime_package {
 
 //go:nosplit
 internal static (int32 ret, int32 errno) mprotect(@unsafe.Pointer addr, uintptr n, int32 prot) {
@@ -792,7 +783,7 @@ internal static (nint major, nint minor, nint patch, bool ok) parseRelease(@stri
     // '.', it is consumed and more is set so the caller knows to
     // parse another component; otherwise scanning terminates and
     // the rest of rel is discarded.
-    (nint n, bool more, bool ok) next() {
+    [GoFunc("parseRelease.func1")] (nint n, bool more, bool ok) next() {
         nint n = default;
         nint i = 0;
         while (i < len(rel) && rel[i] >= '0' && rel[i] <= '9') {
@@ -827,12 +818,10 @@ internal static (nint major, nint minor, nint patch, bool ok) parseRelease(@stri
     return (major, minor, patch, true);
 }
 
-} partial class runtimeᴛkernelVersion {
-
 // GE checks if the running kernel version
 // is greater than or equal to the provided version.
-internal static bool GE(this kernelVersion kv, nint x, nint y) {
+internal static bool GE⁔(/*this*/ kernelVersion kv, nint x, nint y) {
     return kv.major > x || (kv.major == x && kv.minor >= y);
 }
 
-}
+} // end runtime_package

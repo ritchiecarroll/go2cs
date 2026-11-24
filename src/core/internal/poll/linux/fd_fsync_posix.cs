@@ -5,14 +5,11 @@
 namespace go.@internal;
 
 using Δsyscall = syscall_package;
-using static poll_package;
 
 partial class poll_package {
 
-} partial class pollᴛFD {
-
 // Fsync wraps syscall.Fsync.
-public static error Fsync(this ж<FD> Ꮡfd) {
+internal static error Fsync⁔(/*this*/ ж<FD> Ꮡfd) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -20,10 +17,10 @@ public static error Fsync(this ж<FD> Ꮡfd) {
             return err;
         }
         ᒐd1 = true;
-        return ignoringEINTR(() => Δsyscall.Fsync(Ꮡfd.Value.Sysfd));
+        return ignoringEINTR([GoFunc("(*FD).Fsync.func1")] () => Δsyscall.Fsync(Ꮡfd.Value.Sysfd));
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡfd.decref(); ᒐ.Run(); }
 }
 
-}
+} // end poll_package

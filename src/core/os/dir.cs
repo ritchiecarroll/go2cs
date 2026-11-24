@@ -15,7 +15,6 @@ using fs = go.io.fs_package;
 using slices = slices_package;
 using @internal;
 using go.io;
-using static os_package;
 
 partial class os_package {
 
@@ -24,8 +23,6 @@ partial struct readdirMode /*num:nint*/;
 internal static readdirMode readdirName => /* iota */ 0;
 internal static readdirMode readdirDirEntry => 1;
 internal static readdirMode readdirFileInfo => 2;
-
-} partial class osᴛFile {
 
 // Readdir reads the contents of the directory associated with file and
 // returns a slice of up to n [FileInfo] values, as would be returned
@@ -44,7 +41,7 @@ internal static readdirMode readdirFileInfo => 2;
 // and a non-nil error.
 //
 // Most clients are better served by the more efficient ReadDir method.
-public static (slice<FileInfo>, error) Readdir(this ж<File> Ꮡf, nint n) {
+internal static (slice<FileInfo>, error) Readdir⁔(/*this*/ ж<File> Ꮡf, nint n) {
     if (Ꮡf == nil) {
         return (default, ErrInvalid);
     }
@@ -73,7 +70,7 @@ public static (slice<FileInfo>, error) Readdir(this ж<File> Ꮡf, nint n) {
 // nil error. If it encounters an error before the end of the
 // directory, Readdirnames returns the names read until that point and
 // a non-nil error.
-public static (slice<@string> names, error err) Readdirnames(this ж<File> Ꮡf, nint n) {
+internal static (slice<@string> names, error err) Readdirnames⁔(/*this*/ ж<File> Ꮡf, nint n) {
     slice<@string> names = default;
     error err = default;
 
@@ -100,7 +97,7 @@ public static (slice<@string> names, error err) Readdirnames(this ж<File> Ꮡf,
 //
 // If n <= 0, ReadDir returns all the DirEntry records remaining in the directory.
 // When it succeeds, it returns a nil error (not io.EOF).
-public static (slice<DirEntry>, error) ReadDir(this ж<File> Ꮡf, nint n) {
+internal static (slice<DirEntry>, error) ReadDir⁔(/*this*/ ж<File> Ꮡf, nint n) {
     if (Ꮡf == nil) {
         return (default, ErrInvalid);
     }
@@ -111,8 +108,6 @@ public static (slice<DirEntry>, error) ReadDir(this ж<File> Ꮡf, nint n) {
     }
     return (dirents, err);
 }
-
-} partial class os_package {
 
 // ReadDir reads the named directory,
 // returning all its directory entries sorted by filename.
@@ -130,7 +125,7 @@ public static (slice<DirEntry>, error) ReadDir(@string name) {
         defer(() => fʗ1.Close(), ref ᒐ);
 
         (var dirs, err) = f.ReadDir(-1);
-        slices.SortFunc(dirs, (DirEntry a, DirEntry b) => bytealg.CompareString(a.Name(), b.Name()));
+        slices.SortFunc(dirs, [GoFunc("ReadDir.func1")] (DirEntry a, DirEntry b) => bytealg.CompareString(a.Name(), b.Name()));
         return (dirs, err);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
@@ -155,7 +150,7 @@ public static (slice<DirEntry>, error) ReadDir(@string name) {
 //
 // Copying stops at and returns the first error encountered.
 public static error CopyFS(@string dir, fs.FS fsys) {
-    return fs.WalkDir(fsys, ".", error (@string path, fs.DirEntry d, error err) => {
+    return fs.WalkDir(fsys, ".", [GoFunc("CopyFS.func1")] error (@string path, fs.DirEntry d, error err) => {
         GoFrame ᒐ = default;
         try {
             if (err != nil) {

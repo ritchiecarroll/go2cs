@@ -108,7 +108,7 @@ internal static void main() {
 
     fmt.Println(makeShape<Shape>(widen<ж<Circle>, Shape>(newUnitCircle, elemᴛ0 => new CircleжShape(elemᴛ0))));
     var sharedʗ1 = shared;
-    fmt.Println(makeShape(widen<ж<Circle>, Shape>(ж<Circle> () => {
+    fmt.Println(makeShape(widen<ж<Circle>, Shape>([GoFunc("main.func1")] ж<Circle> () => {
         sharedʗ1.R++;
         return sharedʗ1;
     }, elemᴛ0 => new CircleжShape(elemᴛ0))));
@@ -118,8 +118,8 @@ internal static void main() {
 
     fmt.Println(makeShape<Shape>(widen<Figure, Shape>(newFigure, elemᴛ0 => new FigureᴠShape(elemᴛ0))));
     var figʗ1 = fig;
-    fmt.Println(makeShape(widen<Figure, Shape>(Figure () => figʗ1, elemᴛ0 => new FigureᴠShape(elemᴛ0))));
-    fmt.Println(makeShape(Round () => new CircleжRound(Ꮡ(new Circle(R: 1D)))));
+    fmt.Println(makeShape(widen<Figure, Shape>([GoFunc("main.func2")] Figure () => figʗ1, elemᴛ0 => new FigureᴠShape(elemᴛ0))));
+    fmt.Println(makeShape([GoFunc("main.func3")] Round () => new CircleжRound(Ꮡ(new Circle(R: 1D)))));
 }
 
 } // end main_package

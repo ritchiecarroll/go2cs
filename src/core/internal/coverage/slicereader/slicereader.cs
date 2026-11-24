@@ -8,7 +8,6 @@ using fmt = fmt_package;
 using io = io_package;
 using @unsafe = unsafe_package;
 using encoding;
-using static slicereader_package;
 
 partial class slicereader_package {
 
@@ -29,9 +28,7 @@ public static ж<Reader> NewReader(slice<byte> b, bool @readonly) {
     return Ꮡr;
 }
 
-} partial class slicereaderᴛReader {
-
-public static (nint, error) Read(this ref Reader r, slice<byte> b) {
+internal static (nint, error) Read⁔(/*this*/ ref Reader r, slice<byte> b) {
     nint amt = len(b);
     var toread = r.b.slice((nint)(r.off));
     if (len(toread) < amt) {
@@ -42,7 +39,7 @@ public static (nint, error) Read(this ref Reader r, slice<byte> b) {
     return (amt, default);
 }
 
-public static (int64 ret, error err) Seek(this ref Reader r, int64 offset, nint whence) {
+internal static (int64 ret, error err) Seek⁔(/*this*/ ref Reader r, int64 offset, nint whence) {
     switch (whence) {
     case var ᴛ when ᴛ == io.SeekStart: {
         if (offset < 0 || offset > (int64)len(r.b)) {
@@ -71,31 +68,31 @@ public static (int64 ret, error err) Seek(this ref Reader r, int64 offset, nint 
     return (0, fmt.Errorf("unsupported seek mode %d"u8, whence));
 }
 
-public static int64 Offset(this ref Reader r) {
+internal static int64 Offset⁔(/*this*/ ref Reader r) {
     return r.off;
 }
 
-public static uint8 ReadUint8(this ref Reader r) {
+internal static uint8 ReadUint8⁔(/*this*/ ref Reader r) {
     var rv = (uint8)r.b[(nint)r.off];
     r.off += 1;
     return rv;
 }
 
-public static uint32 ReadUint32(this ref Reader r) {
+internal static uint32 ReadUint32⁔(/*this*/ ref Reader r) {
     nint end = (nint)r.off + 4;
     var rv = binary.LittleEndian.Uint32(r.b.slice((nint)r.off, end, end));
     r.off += 4;
     return rv;
 }
 
-public static uint64 ReadUint64(this ref Reader r) {
+internal static uint64 ReadUint64⁔(/*this*/ ref Reader r) {
     nint end = (nint)r.off + 8;
     var rv = binary.LittleEndian.Uint64(r.b.slice((nint)r.off, end, end));
     r.off += 8;
     return rv;
 }
 
-public static uint64 /*value*/ ReadULEB128(this ref Reader r) {
+internal static uint64 /*value*/ ReadULEB128⁔(/*this*/ ref Reader r) {
     uint64 value = default;
 
     nuint shift = default;
@@ -112,7 +109,7 @@ public static uint64 /*value*/ ReadULEB128(this ref Reader r) {
     return value;
 }
 
-public static @string ReadString(this ref Reader r, int64 len) {
+internal static @string ReadString⁔(/*this*/ ref Reader r, int64 len) {
     var b = r.b.slice((nint)(r.off), (nint)(r.off + len));
     r.off += len;
     if (r.@readonly) {
@@ -120,8 +117,6 @@ public static @string ReadString(this ref Reader r, int64 len) {
     }
     return (@string)b;
 }
-
-} partial class slicereader_package {
 
 internal static @string toString(slice<byte> b) {
     if (len(b) == 0) {

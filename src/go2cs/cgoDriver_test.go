@@ -339,8 +339,8 @@ func requireCgoPhase1UsesRefused(t *testing.T, stderr string) {
 	t.Helper()
 
 	lines := cgoRefusalLines(stderr)
-	requireCgoUseRefused(t, lines, "C.twice", "§11.6")
-	requireCgoUseRefused(t, lines, "C.NEXT", "Phase 4")
+	requireCgoUseRefused(t, lines, "C.twice", "used as a value")
+	requireCgoUseRefused(t, lines, "C.NEXT", "does not compile C yet")
 
 	for _, name := range []string{"C.CString", "C.GoString", "C.free"} {
 		for _, line := range lines {
@@ -544,6 +544,51 @@ func TestCgoPhase2FixtureConvertsAsTheSourceReads(t *testing.T) {
 
 	if !regexp.MustCompile(`(?m)^// sha256: [0-9a-f]{64} `).MatchString(bindings) {
 		t.Errorf("the bindings file's header carries no sha256 of its inputs")
+	}
+}
+
+// cgo Phase 3, seat 1a (docs/phase4/DESIGN-cgo-phase3-marshaling.md 18.9, D-6): on the -cgo route, a struct cmd/cgo
+// declared for a C struct with a pointer field carries [GoCgoStruct], and one with no pointer field does not. The Phase 2
+// fixture holds both: go2cs_probe_node (next *node) and go2cs_probe_link (node *node), and div_t's struct___0 (two ints).
+// The off-route half (P3's M1) is the behavioral project CgoPseudoPackageTypes, whose _Ctype_struct_point holds a
+// pointer and whose golden carries no marker: check-no-regression reads it.
+func TestCgoStructWithAPointerFieldCarriesTheCgoMarker(t *testing.T) {
+	stderr, output, err := convertCgoOffline(t, cgoPhase2Admitted(t))
+
+	if err != nil {
+		t.Fatalf("the conversion failed: %v\n%s", err, stderr)
+	}
+
+	marked := map[string]bool{}
+
+	for _, file := range emittedProjectFiles(t, output) {
+		if !strings.HasSuffix(file, ".cs") {
+			continue
+		}
+
+		for _, line := range strings.Split(readConverted(t, output, file), "\n") {
+			if !strings.Contains(line, "GoCgoStruct]") {
+				continue
+			}
+
+			t.Logf("%s: %s", file, strings.TrimSpace(line))
+
+			for _, name := range []string{"struct_go2cs_probe_node", "struct_go2cs_probe_link", "struct___0"} {
+				if regexp.MustCompile(`\b` + name + `\b`).MatchString(line) {
+					marked[name] = true
+				}
+			}
+		}
+	}
+
+	for _, name := range []string{"struct_go2cs_probe_node", "struct_go2cs_probe_link"} {
+		if !marked[name] {
+			t.Errorf("%s holds a pointer field and carries no [GoCgoStruct]", name)
+		}
+	}
+
+	if marked["struct___0"] {
+		t.Errorf("struct___0 (div_t: two ints) carries [GoCgoStruct], and it has no pointer field")
 	}
 }
 

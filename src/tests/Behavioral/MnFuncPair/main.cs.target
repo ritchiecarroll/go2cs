@@ -28,7 +28,7 @@ internal static void run(Func<nint> f, nint i) {
 
 internal static partial void main() {
     nint k = 1;
-    var wait = () => {
+    var wait = [GoFunc("main.func1")] () => {
         entered.ᐸꟷ(new EmptyStruct());
         ᐸꟷ(gate);
         return k;

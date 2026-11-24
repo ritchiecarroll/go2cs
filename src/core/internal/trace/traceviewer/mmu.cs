@@ -38,7 +38,6 @@ using go.@internal;
 using io = io_package;
 using iter = iter_package;
 using net;
-using static traceviewer_package;
 
 partial class traceviewer_package {
 
@@ -55,7 +54,7 @@ public static http.HandlerFunc MMUHandlerFunc(slice<Range> ranges, Func<trace.Ut
         ranges: ranges
     ));
     var mmuʗ1 = mmu;
-    return (http.ResponseWriter w, ж<http.Request> r) => {
+    return [GoFunc("MMUHandlerFunc.func1")] (http.ResponseWriter w, ж<http.Request> r) => {
         var exprᴛ1 = r.FormValue(modeˢ);
         switch (ᐧ) {
         case {} when exprᴛ1 == "plot"u8: {
@@ -104,9 +103,7 @@ partial struct mmu {
     internal slice<Range> ranges;
 }
 
-} partial class traceviewerᴛmmu {
-
-internal static (slice<slice<trace.MutatorUtil>>, ж<trace.MMUCurve>, error) get(this ж<mmu> Ꮡm, trace.UtilFlags flags) {
+internal static (slice<slice<trace.MutatorUtil>>, ж<trace.MMUCurve>, error) get⁔(/*this*/ ж<mmu> Ꮡm, trace.UtilFlags flags) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     m.mu.Lock();
@@ -118,7 +115,7 @@ internal static (slice<slice<trace.MutatorUtil>>, ж<trace.MMUCurve>, error) get
     m.mu.Unlock();
 
     var entryʗ1 = entry;
-    entry.Ꮡinit.Do(() => {
+    entry.Ꮡinit.Do([GoFunc("(*mmu).get.func1")] () => {
         var (util, err) = Ꮡm.Value.f(flags);
         if (err != nil) {
             entryʗ1.err = err;
@@ -130,12 +127,8 @@ internal static (slice<slice<trace.MutatorUtil>>, ж<trace.MMUCurve>, error) get
     return (entry.util, entry.mmuCurve, entry.err);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string flagsˢ => ref flagsˢᵇ;
-private static readonly @string flagsˢᵇ = "flags"u8;
-
 // HandlePlot serves the JSON data for the MMU plot.
-internal static void HandlePlot(this ж<mmu> Ꮡm, http.ResponseWriter w, ж<http.Request> r) {
+internal static void HandlePlot⁔(/*this*/ ж<mmu> Ꮡm, http.ResponseWriter w, ж<http.Request> r) {
     var (mu, mmuCurve, err) = Ꮡm.get(requestUtilFlags(r));
     if (err != nil) {
         http.Error(w, fmt.Sprintf("failed to produce MMU data: %v"u8, err), http.StatusInternalServerError);
@@ -196,8 +189,6 @@ internal static void HandlePlot(this ж<mmu> Ꮡm, http.ResponseWriter w, ж<htt
         return;
     }
 }
-
-} partial class traceviewer_package {
 
 internal static @string templMMU = """
 <!doctype html>
@@ -396,14 +387,12 @@ internal static @string templMMU = """
 
 """u8.Raw();
 
-} partial class traceviewerᴛmmu {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static ref readonly @string windowˢ => ref windowˢᵇ;
 private static readonly @string windowˢᵇ = "window"u8;
 
 // HandleDetails serves details of an MMU graph at a particular window.
-internal static void HandleDetails(this ж<mmu> Ꮡm, http.ResponseWriter w, ж<http.Request> r) {
+internal static void HandleDetails⁔(/*this*/ ж<mmu> Ꮡm, http.ResponseWriter w, ж<http.Request> r) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     var (_, mmuCurve, err) = Ꮡm.get(requestUtilFlags(r));
@@ -433,16 +422,12 @@ internal static void HandleDetails(this ж<mmu> Ꮡm, http.ResponseWriter w, ж<
     }
 }
 
-} partial class traceviewer_package {
-
 partial struct linkedUtilWindow {
     /*embed*/ public go.@internal.trace_package.UtilWindow UtilWindow;
     public @string URL;
 }
 
-} partial class traceviewerᴛmmu {
-
-internal static linkedUtilWindow newLinkedUtilWindow(this ref mmu m, trace.UtilWindow ui, time.Duration window) {
+internal static linkedUtilWindow newLinkedUtilWindow⁔(/*this*/ ref mmu m, trace.UtilWindow ui, time.Duration window) {
     // Find the range containing this window.
     Range r = default;
     foreach (var (_, vᴛ1) in range(m.ranges)) {
@@ -455,4 +440,4 @@ internal static linkedUtilWindow newLinkedUtilWindow(this ref mmu m, trace.UtilW
     return new linkedUtilWindow(ui, fmt.Sprintf("%s#%v:%v"u8, r.URL(ViewProc), (float64)ui.Time / 1e6D, (float64)(ui.Time + (int64)window) / 1e6D));
 }
 
-}
+} // end traceviewer_package

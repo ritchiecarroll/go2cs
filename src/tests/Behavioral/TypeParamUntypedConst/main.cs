@@ -25,7 +25,7 @@ internal static void arm(@string @class, Func<@string> f) {
             return;
         }
 
-        defer(() => {
+        defer([GoFunc("arm.func1")] () => {
             var r = recover(); if (r != nil) {
                 var (_, isRuntimeError) = r._<runtime.Error>(ᐧ);
                 fmt.Println(@class + ": panic:", r, isRuntimeError);
@@ -113,21 +113,21 @@ internal static T convert<T>()
 { return ConvertToType<T>(4); }
 
 internal static void main() {
-    arm("return constant", () => fmt.Sprint(one<uint8>(), " ", one<int64>()));
-    arm("named constant", () => fmt.Sprint(named<uint32>(), " ", named<int8>()));
-    arm("constant shift", () => fmt.Sprint(constShift<uint8>(), " ", constShift<int64>()));
-    arm("shift in range", () => fmt.Sprint(bit<uint8>(three), " ", bit<uint32>(three), " ", bit<int8>(three)));
-    arm("shift past width", () => fmt.Sprint(bit<uint8>(nine), " ", bit<uint32>(forty), " ", bit<int8>(nine)));
-    arm("shift wide type", () => fmt.Sprint(bit<int64>(forty), " ", bit<uint32>(nine)));
-    arm("negative count", () => fmt.Sprint(bitSigned<uint8>(neg)));
-    arm("mask", () => fmt.Sprint(mask<uint8>(three), " ", mask<uint8>(nine), " ", mask<uint32>(forty)));
-    arm("var init", () => fmt.Sprint(varBit<uint8>(three), " ", varBit<uint8>(nine)));
-    arm("compound or", () => fmt.Sprint(orBit<uint8>(1, three), " ", orBit<uint8>(1, nine)));
-    arm("assign", () => fmt.Sprint(assign<uint8>(), " ", assign<int64>()));
-    arm("call argument", () => fmt.Sprint(passConst<uint8>(40), " ", passConst<int8>((int8)(-3))));
-    arm("composite elements", () => fmt.Sprint(sum<uint8>(), " ", sum<int64>()));
-    arm("comparison", () => fmt.Sprint(isZero<uint8>(0), " ", isZero<int64>(5)));
-    arm("conversion", () => fmt.Sprint(convert<uint32>(), " ", convert<int8>()));
+    arm("return constant", [GoFunc("main.func1")] () => fmt.Sprint(one<uint8>(), " ", one<int64>()));
+    arm("named constant", [GoFunc("main.func2")] () => fmt.Sprint(named<uint32>(), " ", named<int8>()));
+    arm("constant shift", [GoFunc("main.func3")] () => fmt.Sprint(constShift<uint8>(), " ", constShift<int64>()));
+    arm("shift in range", [GoFunc("main.func4")] () => fmt.Sprint(bit<uint8>(three), " ", bit<uint32>(three), " ", bit<int8>(three)));
+    arm("shift past width", [GoFunc("main.func5")] () => fmt.Sprint(bit<uint8>(nine), " ", bit<uint32>(forty), " ", bit<int8>(nine)));
+    arm("shift wide type", [GoFunc("main.func6")] () => fmt.Sprint(bit<int64>(forty), " ", bit<uint32>(nine)));
+    arm("negative count", [GoFunc("main.func7")] () => fmt.Sprint(bitSigned<uint8>(neg)));
+    arm("mask", [GoFunc("main.func8")] () => fmt.Sprint(mask<uint8>(three), " ", mask<uint8>(nine), " ", mask<uint32>(forty)));
+    arm("var init", [GoFunc("main.func9")] () => fmt.Sprint(varBit<uint8>(three), " ", varBit<uint8>(nine)));
+    arm("compound or", [GoFunc("main.func10")] () => fmt.Sprint(orBit<uint8>(1, three), " ", orBit<uint8>(1, nine)));
+    arm("assign", [GoFunc("main.func11")] () => fmt.Sprint(assign<uint8>(), " ", assign<int64>()));
+    arm("call argument", [GoFunc("main.func12")] () => fmt.Sprint(passConst<uint8>(40), " ", passConst<int8>((int8)(-3))));
+    arm("composite elements", [GoFunc("main.func13")] () => fmt.Sprint(sum<uint8>(), " ", sum<int64>()));
+    arm("comparison", [GoFunc("main.func14")] () => fmt.Sprint(isZero<uint8>(0), " ", isZero<int64>(5)));
+    arm("conversion", [GoFunc("main.func15")] () => fmt.Sprint(convert<uint32>(), " ", convert<int8>()));
 }
 
 } // end main_package

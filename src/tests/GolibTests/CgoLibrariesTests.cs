@@ -126,7 +126,8 @@ public class CgoLibrariesTests
     {
         (string flag, string name) = SystemLibrary;
 
-        Assert.ThrowsException<PlatformNotSupportedException>(() => GoCgoLibraries.Resolve(name, s_assembly, Table((flag, "someotherlibrary")), "plan9/mips"),
+        // ThrowsException matches the EXACT type: A6's refusal is GoCgoTargetMismatchException, a PlatformNotSupportedException.
+        Assert.ThrowsException<GoCgoTargetMismatchException>(() => GoCgoLibraries.Resolve(name, s_assembly, Table((flag, "someotherlibrary")), "plan9/mips"),
             "an import of an assembly whose bindings were converted for another target must not load here");
     }
 
@@ -157,6 +158,102 @@ public class CgoLibrariesTests
             StringAssert.Contains(message, target);
             StringAssert.Contains(message, hostGOOS + "/" + (architecture == Architecture.X64 ? "amd64" : "arm64"));
         }
+    }
+
+    // cgo against go.* INC 3, A6: Register itself refuses bindings converted for another target, in the package's module
+    // initializer, before ANY of its code runs (its managed code carries C layouts folded for the target). This row is A6's
+    // guard (P3's read): with the eager check removed, Register reaches SetDllImportResolver, which refuses a second
+    // resolver for this assembly with an InvalidOperationException, and the row fails naming it.
+    [TestMethod]
+    public void RegisterRefusesBindingsForAnotherTargetBeforeAnythingElse()
+    {
+        Exception? thrown = null;
+
+        try
+        {
+            GoCgoLibraries.Register(s_assembly, "plan9/mips", new GoCgoLibrary("-lm", "libm.so.6"));
+        }
+        catch (Exception ex)
+        {
+            thrown = ex;
+        }
+
+        Assert.IsInstanceOfType(thrown, typeof(GoCgoTargetMismatchException), $"Register for plan9/mips must refuse at registration; it threw {thrown?.GetType().Name ?? "nothing"}: {thrown?.Message}");
+        Assert.IsInstanceOfType(thrown, typeof(PlatformNotSupportedException), "the refusal is a PlatformNotSupportedException, so existing catches read it");
+        StringAssert.Contains(thrown!.Message, "plan9/mips");
+        StringAssert.Contains(thrown.Message, GoCgoLibraries.RunningTarget);
+    }
+
+    // The controls (P3's read, SHOULD): the two-argument Register (no target: older emissions) and the running target are
+    // NOT checked or refused. Both reach SetDllImportResolver, which refuses only because this assembly's own generated
+    // bindings registered first (TheGeneratedBindingsRegisterTheirLibrariesWhenTheModuleLoads).
+    [TestMethod]
+    public void RegisterWithNoTargetOrTheRunningTargetIsNotRefused()
+    {
+        Assert.ThrowsException<InvalidOperationException>(() => GoCgoLibraries.Register(s_assembly, new GoCgoLibrary("-lm", "libm.so.6")),
+            "the two-argument Register is not checked: it reaches the resolver registration");
+
+        if (GoCgoLibraries.Refusal(GoCgoLibraries.RunningTarget) is { } refusal)
+            Assert.Inconclusive($"this process refuses its own target's bindings: {refusal}");
+
+        Assert.ThrowsException<InvalidOperationException>(() => GoCgoLibraries.Register(s_assembly, GoCgoLibraries.RunningTarget, new GoCgoLibrary("-lm", "libm.so.6")),
+            "the running target is accepted: it reaches the resolver registration");
+    }
+
+    // P3's read, item 4: the reverse of Rosetta. An arm64 process on osx-arm64 with darwin/amd64 bindings is refused; an x64
+    // process (Rosetta) with them is accepted, since it runs amd64 code with amd64's layouts.
+    [TestMethod]
+    [DataRow("darwin/amd64", Architecture.Arm64, true)]
+    [DataRow("darwin/amd64", Architecture.X64, false)]
+    public void DarwinAmd64BindingsRunOnlyInAnAmd64Process(string target, Architecture architecture, bool refused) =>
+        Assert.AreEqual(refused, GoCgoLibraries.TargetMismatch(target, "darwin", architecture) is not null, $"{target} with a {architecture} process");
+
+    // A6b (P3's read, MUST 2, as COORD ruled): linux bindings are glibc's (the converter's R3 binds gnu only), so a linux
+    // target runs only where EVERY libc reading says glibc: gnu_get_libc_version resolves (positive), the RID is not a musl
+    // form, and musl's loader is not mapped (gcompat exports glibc's symbol on musl, and cannot hide ld-musl).
+    [TestMethod]
+    [DataRow(true, "linux-x64", false, false, "glibc, the portable RID")]
+    [DataRow(true, "ubuntu.24.04-x64", false, false, "glibc, a distribution-built runtime's RID")]
+    [DataRow(false, "linux-x64", false, true, "no glibc signal, whatever the RID says")]
+    [DataRow(true, "linux-musl-x64", false, true, "a musl RID")]
+    [DataRow(true, "alpine.3.22-x64", true, true, "musl's loader mapped, with gcompat exporting glibc's symbol")]
+    [DataRow(true, "alpine.3.22-x64", false, true, "an Alpine RID with gcompat exporting glibc's symbol and the maps unreadable")]
+    [DataRow(false, "alpine.3.22-x64", true, true, "Alpine's packaged runtime")]
+    public void LinuxBindingsRunOnlyWhereEveryLibcReadingSaysGlibc(bool glibcExport, string rid, bool ldMusl, bool refused, string why)
+    {
+        string? message = GoCgoLibraries.LinuxLibcMismatch("linux/amd64", glibcExport, rid, ldMusl);
+
+        Assert.AreEqual(refused, message is not null, $"{why}: {message}");
+
+        if (refused)
+            StringAssert.Contains(message, "glibc");
+    }
+
+    // P3's read of INC 3, MUST 1: the type-assertion binder counts PlatformNotSupportedException and TypeInitializationException
+    // as a binding MISS, so a wrong-target program whose first touch of a cgo package is a type assertion would read "does
+    // not implement" and carry on. A6's refusal, anywhere in the chain, is NOT a miss: the filter rethrows it. Every other
+    // shape keeps today's reading.
+    [TestMethod]
+    public void TheBinderRethrowsA6sRefusalAndStillMissesEverythingElse()
+    {
+        GoCgoTargetMismatchException refusal = new("cgo: refused");
+
+        Assert.IsFalse(go.AdapterBinder.IsBindingFailure(refusal), "A6's refusal itself");
+        Assert.IsFalse(go.AdapterBinder.IsBindingFailure(new TypeInitializationException("pkg", refusal)), "A6's refusal from a module initializer");
+        Assert.IsFalse(go.AdapterBinder.IsBindingFailure(new TargetInvocationException(new TypeInitializationException("pkg", refusal))), "nested twice");
+        Assert.IsFalse(go.AdapterBinder.IsBindingFailure(new AggregateException(new InvalidOperationException(), new TypeInitializationException("pkg", refusal))), "inside an AggregateException");
+        Assert.IsTrue(go.AdapterBinder.IsBindingFailure(new PlatformNotSupportedException("aot")), "an ordinary PlatformNotSupportedException is still a miss");
+        Assert.IsTrue(go.AdapterBinder.IsBindingFailure(new TypeInitializationException("pkg", new InvalidOperationException())), "an ordinary static-initializer failure is still a miss");
+    }
+
+    // On a glibc linux host (every hosted linux runner), the readings of THIS process say glibc: the positive signal is real.
+    [TestMethod]
+    public void ThisLinuxProcessReadsAsGlibc()
+    {
+        if (!OperatingSystem.IsLinux())
+            Assert.Inconclusive("not linux");
+
+        Assert.IsNull(GoCgoLibraries.Refusal(GoCgoLibraries.RunningTarget), "a glibc linux test host must read its own target as runnable");
     }
 
     // §11.11's red: a deleted library throws, naming the -l, the captured name and the places tried. Returning 0 would

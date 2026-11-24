@@ -14,7 +14,6 @@
 namespace go.example.com;
 
 using fmt = fmt_package;
-using static main_package;
 
 partial class main_package {
 
@@ -100,18 +99,14 @@ internal static nint noted(/*[4]*/ array<byte> a, nint b) {
 // put, a package-level name, keeps holder's method put in its method holder in package main.
 internal static UntypedInt put => 3;
 
-} partial class mainᴛholder {
-
-internal static void put(this ref holder h, /*[3]*/ array<nint> v) { v = v.Clone(); }
-
-} partial class main_package {
+internal static void put⁔(/*this*/ ref holder h, /*[3]*/ array<nint> v) { v = v.Clone(); }
 
 internal static void main() {
-    var lambda = ([GoArrayDims(32)] array<byte> x) => {
+    var lambda = [GoFunc("main.func1")] ([GoArrayDims(32)] array<byte> x) => {
         x = x.Clone();
         return len(x);
     };
-    nint local([GoArrayDims(3)] array<nint> x) {
+    [GoFunc("main.func2")] nint local([GoArrayDims(3)] array<nint> x) {
         x = x.Clone();
         return len(x);
     }

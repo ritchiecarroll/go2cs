@@ -46,7 +46,7 @@ public static (syscall.Handle, error e1) Openat(syscall.Handle dirfd, @string na
     if ((fileFlags & (uint32)O_FILE_FLAG_DELETE_ON_CLOSE) != 0) {
         access |= (uint32)(DELETE);
     }
-    void setOptionFlag(uint32 ntFlag, uint32 win32Flag) {
+    [GoFunc("Openat.func1")] void setOptionFlag(uint32 ntFlag, uint32 win32Flag) {
         if ((fileFlags & win32Flag) != 0) {
             options |= (uint32)(ntFlag);
         }
@@ -597,7 +597,7 @@ public static error Symlinkat(@string oldname, syscall.Handle newdirfd, @string 
     //
     // (When passed the SYMBOLIC_LINK_FLAG_ALLOW_UNPRIVILEGED_CREATE flag,
     // CreateSymbolicLinkW ignores errors in acquiring privileges, as we do here.)
-    return withPrivilege("SeCreateSymbolicLinkPrivilege", () => symlinkat(oldname, newdirfd, newname, flags));
+    return withPrivilege("SeCreateSymbolicLinkPrivilege", [GoFunc("Symlinkat.func1")] () => symlinkat(oldname, newdirfd, newname, flags));
 }
 
 // https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/ntifs/ns-ntifs-_reparse_data_buffer

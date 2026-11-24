@@ -290,6 +290,70 @@ public class TwinSurfaceTests
                       named.Any(message => message.Contains("GoTwinsGuardDrop")), string.Join("\n", named));
     }
 
+    // Every switch that changes what the generator writes is refused alone, by name, and the message says how to fix the
+    // build. The box arms' copies (GoTwinsBoxCopy, GoTwinsBoxArgCopy) are wrong on purpose, so they matter most.
+    [TestMethod]
+    [DataRow("GoTwinsIface", "hidden")]
+    [DataRow("GoTwinsIfaceAll", "true")]
+    [DataRow("GoTwinsIfaceUnmark", "go.box_package.IShape.Area")]
+    [DataRow("GoTwinsGo", "false")]
+    [DataRow("GoTwinsPairs", "false")]
+    [DataRow("GoTwinsCallerRule", "false")]
+    [DataRow("GoTwinsForwarders", "false")]
+    [DataRow("GoTwinsGuardWarn", "true")]
+    [DataRow("GoTwinsGuardDrop", "add")]
+    [DataRow("GoTwinsBoxRecv", "false")]
+    [DataRow("GoTwinsBoxForwarders", "false")]
+    [DataRow("GoTwinsBoxCopy", "true")]
+    [DataRow("GoTwinsBoxParam", "false")]
+    [DataRow("GoTwinsBoxArgCopy", "true")]
+    public void F10_EveryArmSwitchIsRefusedAloneWithItsFix(string name, string value)
+    {
+        RunWith(null, new() { ["build_property." + name] = value }, CannotPark);
+        Diagnostic[] refused = Guard("GO2CS0018");
+
+        Assert.AreEqual(1, refused.Length, name + ": " + string.Join("\n", refused.Select(diagnostic => diagnostic.ToString())));
+        Assert.AreEqual(DiagnosticSeverity.Error, refused[0].Severity);
+        StringAssert.Contains(refused[0].GetMessage(), "'" + name + "'", "it names the property");
+        StringAssert.Contains(refused[0].GetMessage(), "GoTwinsArm=true", "and the fix");
+
+        RunWith(null, new() { ["build_property." + name] = value, ["build_property.GoTwinsArm"] = "true" }, CannotPark);
+        Assert.AreEqual(0, Guard("GO2CS0018").Length, name + ": a prototype arm admits it");
+    }
+
+    [TestMethod]
+    public void F10_TheTwoSwitchesThatChangeNothingGeneratedAreAdmitted()
+    {
+        RunWith(null, new() { ["build_property.GoTwinsSiblings"] = "memo", ["build_property.GoTwinsTiming"] = "true" }, CannotPark);
+
+        Assert.AreEqual(0, Guard("GO2CS0018").Length, "GoTwinsSiblings picks how siblings are read, GoTwinsTiming adds a stopwatch");
+    }
+
+    // A switch added to the generator later is refused unless it is named here as one that changes nothing generated:
+    // every GoTwins* build property the generator's source reads is in the refused list or in the admitted four.
+    [TestMethod]
+    public void F10_EveryTwinSwitchTheGeneratorReadsIsRefusedOrNamedAsAdmitted()
+    {
+        string[] admitted = ["GoTwins", "GoTwinsArm", "GoTwinsSiblings", "GoTwinsTiming"];
+        string root = GeneratorRoot();
+        string[] read = System.IO.Directory.GetFiles(root, "*.cs", System.IO.SearchOption.AllDirectories)
+            .Where(path => !path.Contains($"{System.IO.Path.DirectorySeparatorChar}obj{System.IO.Path.DirectorySeparatorChar}") &&
+                           !path.Contains($"{System.IO.Path.DirectorySeparatorChar}bin{System.IO.Path.DirectorySeparatorChar}"))
+            .SelectMany(path => System.Text.RegularExpressions.Regex.Matches(System.IO.File.ReadAllText(path), @"build_property\.(GoTwins\w*)")
+                .Select(match => match.Groups[1].Value))
+            .Distinct().OrderBy(name => name, StringComparer.Ordinal).ToArray();
+
+        Assert.IsTrue(read.Length > admitted.Length, "the scan reads the generator's source: " + root);
+        string[] unaccounted = read.Except(go2cs.TwinGenerator.ArmSwitches).Except(admitted).ToArray();
+        string[] stale = go2cs.TwinGenerator.ArmSwitches.Except(read).ToArray();
+
+        Assert.AreEqual(0, unaccounted.Length, "read by the generator, neither refused nor admitted: " + string.Join(", ", unaccounted));
+        Assert.AreEqual(0, stale.Length, "refused, but the generator no longer reads it: " + string.Join(", ", stale));
+    }
+
+    private static string GeneratorRoot([System.Runtime.CompilerServices.CallerFilePath] string thisFile = "") =>
+        System.IO.Path.GetFullPath(System.IO.Path.Combine(System.IO.Path.GetDirectoryName(thisFile)!, "..", "..", "gen", "go2cs-gen"));
+
     [TestMethod]
     public void F10_TheClosureArmSwitchesDoWhatTheySay()
     {

@@ -10,10 +10,15 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+using context = go.context_package;
+using driver = go.database.sql.driver_package;
 // </ImportedTypeAliases>
 
 using go;
 using static go.main_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -59,10 +64,14 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "AA8qAAwSggAOEoKCAAkOggAODoKCxpSCgoKEopSClIKCgpSCpqaCgoKCgg==")]
+[assembly: GoPositionMap("main.go", "main.cs", "AA4qAAoSggAKEoKC3oIACg6CgqaUgoKChKKUgpSCgoKUgqamgoKCgoI=")]
 // </GoSourcePositionMaps>
 
 namespace go;
+
+using static go.main_package;
+using context = go.context_package;
+using driver = go.database.sql.driver_package;
 
 [GoPackage("main")]
 [GoTestMatchingConsoleOutput]
@@ -104,8 +113,31 @@ public static partial class main_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(main_package.@base)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛbase;
-[GoMethodHost(typeof(main_package.counting)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛcounting;
-[GoMethodHost(typeof(main_package.fbase)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛfbase;
-[GoMethodHost(typeof(main_package.fcounting)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛfcounting;
+[GoMethodHost(typeof(main_package.@base)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class mainᴛbase;
+[GoMethodHost(typeof(main_package.counting)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class mainᴛcounting;
+[GoMethodHost(typeof(main_package.fbase)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class mainᴛfbase;
+[GoMethodHost(typeof(main_package.fcounting)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class mainᴛfcounting;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class mainᴛbase {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static Driver Driver(this ref @base b) => main_package.Driver⁔(ref b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string Name(this ref @base b) => main_package.Name⁔(ref b);
+}
+partial class mainᴛcounting {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static Driver Driver(this counting recvᴛ) => main_package.Driver⁔(recvᴛ);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string Name(this ref counting c) => main_package.Name⁔(ref c);
+}
+partial class mainᴛfbase {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (driver.Conn, error) Connect(this fbase _Δp0, context.Context _Δp1) => main_package.Connect⁔(_Δp0, _Δp1);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static driver.Driver Driver(this fbase _) => main_package.Driver⁔(_);
+}
+partial class mainᴛfcounting {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static driver.Driver Driver(this fcounting recvᴛ) => main_package.Driver⁔(recvᴛ);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (driver.Conn, error) Connect(this ref fcounting c, context.Context ctx) => main_package.Connect⁔(ref c, ctx);
+}
+// </MethodForwarders>

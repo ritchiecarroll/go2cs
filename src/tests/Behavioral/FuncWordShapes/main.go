@@ -1,6 +1,7 @@
 // FuncWordShapes: a func value carried as a number, in the six structural shapes ccgo writes (sqlite-cs S1).
 // m1/m2 read a func as a word, w2 writes a func into a word slot, r1/r2 read a word as a func, w1 writes a word
-// into a func variable, w3 writes a func through a pointer whose target is known only at run time.
+// into a func variable, w3 writes a func through a pointer whose target is known only at run time, and w4 writes a
+// pointer word into a func variable.
 // Nothing prints a raw word: only equalities, nil tests and call results.
 package main
 
@@ -89,6 +90,15 @@ func main() {
 	var z func(int, int) int = add
 	*(*uintptr)(unsafe.Pointer(&z)) = 0
 	fmt.Println("w1 zero is nil:", z == nil)
+
+	// w4: a pointer word written into a func variable. One func value's word copied into another, then called; and
+	// nil, which is the nil func.
+	var cp func(int, int) int
+	*(*unsafe.Pointer)(unsafe.Pointer(&cp)) = *(*unsafe.Pointer)(unsafe.Pointer(&stored))
+	fmt.Println("w4 copied cp(2,9):", cp(2, 9))
+	var cz func(int, int) int = add
+	*(*unsafe.Pointer)(unsafe.Pointer(&cz)) = nil
+	fmt.Println("w4 nil is nil:", cz == nil)
 
 	// w3: a func stored through a pointer that is not `&v` at the store. What the pointer names is known at run time.
 	// A func variable: the variable is then called.
