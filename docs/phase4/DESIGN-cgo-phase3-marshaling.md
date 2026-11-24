@@ -2973,3 +2973,76 @@ P3 read the fold at `8d0c6c9de5`: CLEAR WITH NITS (COORD inbox H 20261124T204626
   result". Its old text ("C must not keep a Go pointer") was wrong for strtod's endptr, which C does not keep.
 
 — H (2026-11-24)
+
+## 19. Amendment 2026-11-24: increment 3.4, the harness and net's resolver (plan, posted before code; .6)
+
+Section 7 is the harness's first text, and section 9's P8 its first prediction. This block reads what section 7 left
+NOT READ, scores P8, and plans the increment. It stacks on seat 1b (`claude/h-cgo-1b-r7`, `8d0c6c9de5`), the converter
+the readings below were taken with. Code waits for COORD's GO and a review.
+
+### 19.1 Read before this plan (go1.26.11; linux/amd64 unless named)
+
+- **R1. The mix is sound by file selection.** `go list -deps net` with cgo off and on: of net's 65 dependencies, 64
+  select identical files. net itself swaps cgo_stub.go for cgo_unix.go and adds cgo_linux.go, cgo_resnew.go,
+  cgo_socknew.go, cgo_unix_cgo.go and cgo_unix_cgo_res.go. runtime/cgo joins the closure, and the cgo route already drops
+  that import (cgoRoute.go, the `"runtime/cgo"` filter). The test side adds one file, cgo_unix_test.go, which holds the
+  seven tests. So section 7's "sound only if no package net imports changes its API with cgo on" is READ: none does.
+- **R2. P8, scored as worded: MET, at the BASE.** The first hosted reading (45456887239, master's converter) refused one
+  use: getaddrinfo's parameter 4, `res **C.struct_addrinfo`. Master has no out-parameter shape at all; seat 1b adds it.
+  The candidate the prediction named (res_search) was wrong.
+- **R3. P8', on 1b's tip: the conversion is clean.** Hosted 45482558650 (probe `629d1b9bff`, never landed): exit 0,
+  0 refusals, 70 files written. getaddrinfo's `res` takes 1b's OutParameter. Bound: free, freeaddrinfo, gai_strerror,
+  getaddrinfo, getnameinfo and res_search, each to libc.so.6 (malloc was past the probe's window, not missing).
+- **R4. `-cgo` refuses `-tests`** (loaderEnvironment.go, checkCgoFlag: "the test drivers' loads stay at
+  CGO_ENABLED=0"). That is the increment's main converter work.
+- **R5. darwin needs no cgo for these seven.** cgo_unix_test.go builds under `!netgo && ((cgo && unix) || darwin)`.
+  darwin's resolver, cgo_unix_syscall.go, reaches libSystem through syscall, and the cgo-off corpus already carries it
+  (net/darwin/cgo_unix.cs, cgo_unix_syscall.cs). NOT READ: whether the seven pass there. net is banked on windows only.
+
+### 19.2 The plan: three seats, each behind `-cgo` except the workflow's
+
+- **4a. `-cgo` with `-tests`, for ONE package into a scratch root.** checkCgoFlag admits the pair when the conversion
+  is a single package whose output root is not under the repository's `src/core`.
+  - The production variant loads cgo-on, as `-cgo` does today.
+  - The test variants load cgo-on too, so cgo_unix_test.go is selected.
+  - Every other package stays the corpus's cgo-off build, referenced from the seeded root, as R1 shows is sound.
+  - The bindings file, its library set and its link line are the production package's.
+  - Red: a converter test whose fixture package has a cgo production file and a `_test.go` calling it. It is refused
+    today with R4's text, and after the change it converts and builds the test host.
+- **4b. The hosted leg.** A linux leg on os-matrix (the existing cgo-e2e job's toolchain):
+  - Seed a scratch root from `src/core`.
+  - Run `go2cs -cgo -tests -test-action all -test-filter '^TestCgoLookup' <GOROOT>/src/net <root>/core/net`.
+  - Compare against `go test -json`.
+  - Red: before 4a the conversion refuses (R4). After it, the seven compare.
+- **4c. The first run-time reds, if any.** Each is read on the leg before any fix, and named. The candidates read so far:
+  - res_search bound by its plain name to libc.so.6. Section 7's `-lresolv` line, and glibc's `__res_search`, are
+    NOT READ.
+  - The test host's build against a cgo-on net in a cgo-off closure.
+
+The darwin reading (R5) needs no code: one sweep-shard dispatch of net on darwin with `-test-filter '^TestCgoLookup'`.
+
+### 19.3 Predictions, scored as worded
+
+- **Q1.** 4a, 4b and 4c move 0 corpus bytes on every target. CNR is byte-identical, and GolibTests rises by new rows only.
+- **Q2.** After 4a, the linux leg converts net cgo-on with its tests, with 0 refusals (R3 plus the test file, which uses
+  no C).
+- **Q3.** The first build of that test host has at least one red not named in 19.2 (P8's successor: one new layer, one
+  new red).
+- **Q4.** Once it builds, the seven pass on linux against Go. Most likely red first: the two `...WithCancel` tests,
+  where a cancelled context races a blocking C call (section 9's "most likely red").
+- **Q5.** darwin's cgo-off run of the seven passes 7 of 7 with no code.
+
+### 19.4 Stop lines
+
+S-A to S-F (section 10) stand. Added:
+- **S-G.** `-cgo -tests` needs any package OTHER than the one converted to load cgo-on: stop and post.
+- **S-H.** A fix in 4c would change a corpus file or golib's cgo-off behaviour: stop, post the design (S-D's twin).
+
+### 19.5 Questions for COORD
+
+- **Q-F. Base.** 4a stacks on 1b, whose out-parameter R3 needs. Lean: cut on 1b's tip now, and rebase once train 11
+  lands it.
+- **Q-G. The darwin reading.** Lean: dispatch it now, since it needs no code.
+- **Q-H. Review.** Lean: P3 reads 19.2 and 19.4 before code, as for 1b and 1c.
+
+— H (2026-11-24)
