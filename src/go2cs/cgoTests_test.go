@@ -117,3 +117,123 @@ func TestACgoPackageConvertsWithItsTestsAndMatchesGo(t *testing.T) {
 		t.Errorf("the comparison did not match: %s", strings.Join(record.Errors, "; "))
 	}
 }
+
+const cgoSwapStub = `// The fixture's stub, selected when cgo is off.
+
+//go:build !cgo
+
+package cgot5
+
+// Name names the build that selected this file.
+func Name() string { return "stub" }
+`
+
+const cgoSwapCgo = `// The fixture's cgo file, selected when cgo is on.
+
+//go:build cgo
+
+package cgot5
+
+/*
+#include <stdlib.h>
+*/
+import "C"
+
+import "unsafe"
+
+// Name names the build that selected this file, through C.
+func Name() string {
+	cs := C.CString("2")
+	defer C.free(unsafe.Pointer(cs))
+
+	return "cgo" + string(rune('0'+int(C.strtod(cs, nil))))
+}
+`
+
+const cgoSwapTest = `package cgot5
+
+import "testing"
+
+func TestNameIsTheCgoFile(t *testing.T) {
+	if got := Name(); got != "cgo2" {
+		t.Errorf("Name() = %q, want %q", got, "cgo2")
+	}
+}
+`
+
+// Seat 4c's build row (COORD's condition 4, inbox H 20261124T231602Z): an output that already holds the package's
+// cgo-OFF emission, as a root seeded from the corpus does, then -cgo -tests into it. The cgo-on load swaps the stub for
+// the cgo file, and both define Name. Without the removal, the test host's build fails CS0111 on Name (net's first
+// build read the same class six times); with it, the stub's C# goes, the host builds, and the test matches Go.
+func TestACgoTestsConversionOverACgoOffEmissionRemovesTheStub(t *testing.T) {
+	if os.Getenv(cgoBuildEnv) != "1" {
+		t.Skipf("NOT RUN: set %s=1 to convert, build and compare (Inconclusive, not a pass)", cgoBuildEnv)
+	}
+
+	if _, err := exec.LookPath("dotnet"); err != nil {
+		t.Skip("NOT RUN: no dotnet on PATH (Inconclusive, not a pass)")
+	}
+
+	treeSrc, err := filepath.Abs("..")
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	module := t.TempDir()
+	writeCgoFixture(t, module, "go.mod", "module example.com/cgot5\n\ngo 1.26\n")
+	writeCgoFixture(t, module, "name_stub.go", cgoSwapStub)
+	writeCgoFixture(t, module, "name_cgo.go", cgoSwapCgo)
+	writeCgoFixture(t, module, "name_test.go", cgoSwapTest)
+
+	output := filepath.Join(t.TempDir(), "cgot5")
+	stub := filepath.Join(output, "name_stub.cs")
+
+	// The seed: the package's cgo-off emission, with -comments as the corpus is emitted.
+	seed := exec.Command(driverBinary(t), "-go2cspath", treeSrc, "-comments", module, output)
+	seed.Env = append(os.Environ(), "GOWORK=off", "GOFLAGS=", "CGO_ENABLED=0")
+
+	if out, err := seed.CombinedOutput(); err != nil {
+		t.Fatalf("the cgo-off seed conversion failed: %v\n%s", err, lastLines(string(out), 30))
+	}
+
+	if _, err := os.Stat(stub); err != nil {
+		t.Fatalf("premise: the cgo-off emission holds %s: %v", stub, err)
+	}
+
+	cmd := exec.Command(driverBinary(t), "-go2cspath", treeSrc, "-cgo", "-tests", "-test-action", "all", "-test-timeout", "10m", module, output)
+	cmd.Env = append(os.Environ(), "GOWORK=off", "GOFLAGS=", "CGO_ENABLED=1")
+	combined, err := cmd.CombinedOutput()
+
+	for _, line := range strings.Split(string(combined), "\n") {
+		if strings.HasPrefix(line, "cgo: removed ") || strings.Contains(line, "error CS") {
+			t.Logf("READING: %s", strings.TrimSpace(line))
+		}
+	}
+
+	if err != nil {
+		t.Fatalf("go2cs -cgo -tests over the cgo-off emission failed: %v\n%s", err, lastLines(string(combined), 40))
+	}
+
+	if _, err := os.Stat(stub); err == nil {
+		t.Errorf("%s is still there: the cgo-on conversion did not remove the stub it deselects", stub)
+	}
+
+	data, err := os.ReadFile(filepath.Join(output, "go2cs_test_comparison.json"))
+
+	if err != nil {
+		t.Fatalf("no comparison record: %v", err)
+	}
+
+	var record testComparison
+
+	if err := json.Unmarshal(data, &record); err != nil {
+		t.Fatalf("comparison record: %v", err)
+	}
+
+	t.Logf("READING: status %q matched %v go %v csharp %v", record.Status, record.Matched, record.Go, record.CSharp)
+
+	if record.Go["TestNameIsTheCgoFile"] != "pass" || record.CSharp["TestNameIsTheCgoFile"] != "pass" || !record.Matched {
+		t.Errorf("want TestNameIsTheCgoFile passing on both sides, matched; got go %q, go2cs %q, matched %v", record.Go["TestNameIsTheCgoFile"], record.CSharp["TestNameIsTheCgoFile"], record.Matched)
+	}
+}

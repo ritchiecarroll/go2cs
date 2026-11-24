@@ -304,6 +304,7 @@ func main() {
 	inlineArraysCmd := commandLine.String("inline-arrays", "", "Override inline-array admission per package (comma-separated import-path patterns, each an exact path or a /... prefix). A pattern forces its packages ON with the declaration-local population: every struct the package declares or spells that holds an array and passes the caps holds its arrays inline (go.arrays). A -<pattern> turns admission OFF. With no override, a struct is admitted when its own package converts it whole through unsafe.Pointer (the auto rule); the standard library is never admitted")
 	warnCmd := commandLine.String("warn", "", "Downgrade the listed converter refusal codes to warnings (comma-separated), so a package holding a refused site still converts; each downgraded site fails loud, a panic carrying the refusal text, when reached, and the build reports it (GO2CS0011). Opt-in per code, never a default; only GO2CS2002 is allowed (an unknown or disallowed code is an error that names it)")
 	includeCommentsCmd := commandLine.Bool("comments", false, "Include comments in output")
+	cgoRemovalsDryRunCmd := commandLine.Bool("cgo-removals-dry-run", false, "With -cgo -tests, list the C# files of the cgo-off selection that the cgo-on load deselects, and remove none. Without it, each one that carries go2cs's emission header for its source is removed, and printed with its reason (a file in an output seeded from the corpus, which would otherwise compile beside its cgo-on replacement); any other file in that set is refused by name")
 	parseCgoTargetsCmd := commandLine.Bool("cgo", false, "Convert a single cgo package: load it cgo-on (CGO_ENABLED=1; needs a C compiler) and convert it when every C use it makes is one cgo support binds (calls of C functions a shared library defines; docs/Limitations.md). Any other use is refused by name, with the phase that owns it, before anything is written. Converts for the host's own target, or for another -platforms target when CC names that target's C compiler (for example the pinned zig, CC=\"zig cc -target <triple>\"); without one another target is refused, for a package with no C in it too. Not combinable with -stdlib or -tests. With -recurse, every non-standard-library package of the module loads cgo-on and each cgo package converts this way; a package that imports runtime/cgo or plugin, whose cgo-off builds are not working builds of their cgo API, is refused by name, and one that imports net or os/user binds their cgo-off builds, as Go does with CGO_ENABLED=0")
 	showParseTreeCmd := commandLine.Bool("tree", false, "Show parse tree")
 	csprojFileCmd := commandLine.String("csproj", "", "Path to custom .csproj template file")
@@ -639,6 +640,7 @@ Examples:
 		provenance:          *provenanceCmd,
 		licenseExpression:   strings.TrimSpace(*licenseCmd),
 		parseCgoTargets:     *parseCgoTargetsCmd,
+		cgoRemovalsDryRun:   *cgoRemovalsDryRunCmd,
 		showParseTree:       *showParseTreeCmd,
 		debugMode:           *debugModeCmd,
 		dualRecv:            *dualRecvCmd,
