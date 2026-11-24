@@ -115,9 +115,9 @@ namespace go.golib;
     // once per process.
     private static Goroutine? s_main;
 
-    // The identity of the goroutine running on this thread — getg(), in Go's terms — or null on a
-    // thread that is not running Go code at all (BCL callbacks, the timer service thread, the
-    // finalizer). Goroutine state is thread-affine everywhere in golib, so this is the natural root.
+    // The identity of the goroutine running on this thread (getg(), in Go's terms), or null on a thread running no Go code
+    // (BCL callbacks, the timer service thread, the finalizer). A thread-bound goroutine is thread-affine, so this is the
+    // natural root; a multiplexed one (M:N) sets it at Mount and takes it, with its other state, at Unmount (SwapLogicalState).
     [ThreadStatic]
     private static Goroutine? t_current;
 

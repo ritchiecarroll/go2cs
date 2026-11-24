@@ -145,9 +145,10 @@ partial class runtime_package
 
     // ---- getg: the calling goroutine's g and its m, minted once per thread ----
 
-    // A goroutine runs start-to-finish on one thread (golib's executor), so a thread-static is the
-    // exact cache for its life: the same fact golib's own Goroutine.Current (`t_current`) rests on. A
-    // pooled coro thread runs one goroutine after another, so the cache is dropped between them.
+    // A goroutine bound to a thread runs start-to-finish on it (golib's executor), so a thread-static is
+    // the exact cache for its life: the same fact golib's own Goroutine.Current (`t_current`) rests on. A
+    // pooled coro thread runs one goroutine after another, so the cache is dropped between them. A
+    // multiplexed goroutine (M:N) is not one thread's, so the cache moves with it (s_getgMounted, below).
     [ThreadStatic]
     private static ж<g>? t_getg;
 

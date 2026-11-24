@@ -14,7 +14,9 @@ namespace GolibTests;
 /// M:N row 11 (N10): a multiplexed goroutine that parks on one carrier and resumes on another must read its OWN
 /// goroutine-scoped thread-statics there, not the second carrier's. DATA-mn-spike-2.md N10 names them: outside golib,
 /// getg's cache and its owner, the held runtime locks and their count, the pending lock-profile flag,
-/// debug.SetPanicOnFault and the sleep timer; in golib, the allocation tally and the Gosched backoff streak (6.6).
+/// and debug.SetPanicOnFault; in golib, the allocation tally and the Gosched backoff streak (6.6). N10 also named the
+/// sleep timer; it stays a carrier's resource, because only the blocking Sleep path uses it and a goroutine blocked there
+/// stays mounted (Sleepꞏtwin makes its own timer), so it is classed KeptThreadResource in ThreadStateCensusTests.
 /// </summary>
 /// <remarks>
 /// Each row mounts ONE goroutine on thread 1, writes the class's fields there, unmounts it, then mounts it on thread 2
@@ -33,7 +35,6 @@ public class MountedThreadStateTests
         ["held runtime locks"] = (typeof(runtime_package), ["t_heldLocks", "t_heldCount"]),
         ["lock-profile pending"] = (typeof(runtime_package), ["t_runtimeLockProfilePending"]),
         ["panic on fault"] = (typeof(go.runtime.debug_package), ["t_panicOnFault"]),
-        ["sleep timer"] = (typeof(time_package), ["t_sleepTimer"]),
         ["allocation tally"] = (typeof(AllocationCounter), ["t_count"]),
         ["Gosched streak"] = (typeof(GoschedBackoff), ["t_consecutiveInertYields"]),
     };
@@ -74,7 +75,6 @@ public class MountedThreadStateTests
     [DataRow("held runtime locks")]
     [DataRow("lock-profile pending")]
     [DataRow("panic on fault")]
-    [DataRow("sleep timer")]
     [DataRow("allocation tally")]
     [DataRow("Gosched streak")]
     public void AGoroutineReadsItsOwnValuesOnTheNextCarrier(string fieldClass)
@@ -141,5 +141,90 @@ public class MountedThreadStateTests
         }
 
         Assert.AreEqual(0, wrong.Count, $"{fieldClass}:\n{string.Join("\n", wrong)}");
+    }
+
+    // The packages' swaps register from their types' static initialization; these rows need them registered.
+    private static void EnsurePackageSwapsRegistered()
+    {
+        RuntimeHelpers.RunClassConstructor(typeof(runtime_package).TypeHandle);
+        RuntimeHelpers.RunClassConstructor(typeof(go.runtime.debug_package).TypeHandle);
+        Assert.IsTrue(GoroutineThreadState.MountedSwapCountForTest >= 3, "the runtime and debug swaps are registered");
+    }
+
+    private static readonly FieldInfo s_panicOnFault = typeof(go.runtime.debug_package).GetField("t_panicOnFault", BindingFlags.NonPublic | BindingFlags.Static)!;
+
+    [TestMethod]
+    public void AnAllDefaultGoroutineAllocatesNoSavedSlots()
+    {
+        // P3: "all defaults allocates nothing" had no row; a swap that stored a holder eagerly would make every
+        // multiplexed goroutine allocate the array at its first park, and nothing would read red.
+        EnsurePackageSwapsRegistered();
+        Goroutine goroutine = Goroutine.NewMultiplexedForTest();
+
+        OnThread(() =>
+        {
+            goroutine.Mount();
+            goroutine.Unmount();
+        });
+
+        Assert.IsNull(goroutine.SavedRegisteredForTest, "a goroutine whose goroutine-scoped state is all defaults keeps no saved slots");
+    }
+
+    // A thread-static of this test's own, moved by a swap the growth row registers once, between a mount and its unmount.
+    [ThreadStatic] private static int t_probe;
+
+    private static readonly Lazy<bool> s_probeRegistered = new(() => GoroutineThreadState.RegisterMounted(static (ref object? saved) =>
+    {
+        int held = saved is int value ? value : 0;
+        saved = t_probe == 0 ? null : t_probe;
+        t_probe = held;
+    }));
+
+    [TestMethod]
+    public void ARegistrationBetweenAMountAndItsUnmountGetsASlotAtTheUnmount()
+    {
+        // P3: the growth branch of GoroutineThreadState.SwapMounted (a package that initializes during a step registers
+        // after the goroutine's mount, so its slot exists only from the unmount on).
+        EnsurePackageSwapsRegistered();
+        Goroutine goroutine = Goroutine.NewMultiplexedForTest();
+
+        // First park, with a value set, so the goroutine HAS saved slots before the late registration.
+        OnThread(() =>
+        {
+            goroutine.Mount();
+            s_panicOnFault.SetValue(null, true);
+            goroutine.Unmount();
+        });
+
+        object?[] before = goroutine.SavedRegisteredForTest ?? throw new AssertFailedException("the first park stored the flag, so the slots exist");
+        int beforeLength = before.Length;
+
+        // Second step: the package registers WHILE the goroutine is mounted, and the step sets its field.
+        OnThread(() =>
+        {
+            goroutine.Mount();
+            _ = s_probeRegistered.Value;
+            t_probe = 41;
+            goroutine.Unmount();
+            Assert.AreEqual(0, t_probe, "the carrier is left with the default");
+        });
+
+        object?[] after = goroutine.SavedRegisteredForTest!;
+        Assert.IsTrue(after.Length > beforeLength, $"the slots grew at the unmount ({beforeLength} -> {after.Length})");
+
+        // Third step, on another carrier: the late-registered field and the earlier one are both the goroutine's.
+        int probe = 0;
+        bool flag = false;
+
+        OnThread(() =>
+        {
+            goroutine.Mount();
+            probe = t_probe;
+            flag = (bool)s_panicOnFault.GetValue(null)!;
+            goroutine.Unmount();
+        });
+
+        Assert.AreEqual(41, probe, "the field registered between a mount and its unmount moved with the goroutine");
+        Assert.IsTrue(flag, "the earlier slot survived the growth");
     }
 }

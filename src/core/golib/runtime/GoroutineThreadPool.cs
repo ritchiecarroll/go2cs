@@ -263,6 +263,9 @@ internal static class GoroutineThreadPool
     private static readonly List<MountedSwap> s_mounted = [];
     private static MountedSwap[] s_mountedSnapshot = [];
 
+    // TEST-ONLY: how many swaps are registered now (MountedThreadStateTests' growth row).
+    internal static int MountedSwapCountForTest => Volatile.Read(ref s_mountedSnapshot).Length;
+
     /// <summary>
     /// Registers a swap for a package's goroutine-scoped thread-statics, which then move with a MULTIPLEXED goroutine
     /// from carrier to carrier (M:N); returns true so it can initialize a static field.
