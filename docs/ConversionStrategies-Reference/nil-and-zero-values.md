@@ -531,7 +531,7 @@ func main() {
 	var up *T
 	var z any = up
 ```
-<!-- source: src/tests/Behavioral/NamedPointerNilInterface/NamedPointerNilInterface.cs.target:65-74 -->
+<!-- source: src/tests/Behavioral/NamedPointerNilInterface/NamedPointerNilInterface.cs.target:109-118 -->
 ```csharp
     P p = default;
     any x = (p ?? (P)nil);
@@ -558,7 +558,7 @@ that cannot be null passes through bare: a conversion of nil or of an address, s
 **A value of type-parameter type** boxed inside a generic body takes golib's `OrTypedNilOf`, which
 decides per type argument; for a named pointer type argument it answers the same `NilInstance`.
 
-<!-- source: src/tests/Behavioral/NamedPointerNilInterface/NamedPointerNilInterface.cs.target:35-35 -->
+<!-- source: src/tests/Behavioral/NamedPointerNilInterface/NamedPointerNilInterface.cs.target:37 -->
 ```csharp
 internal static any boxE<E>(E e) { return (e).OrTypedNilOf(); }
 ```

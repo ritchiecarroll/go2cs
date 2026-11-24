@@ -3,5 +3,5 @@
 # derived from the Go source; the comment above it names the GOOS flavours that hold it.
 
 [/NamedPointerNilInterface.cs]
-# CS0649: windows
+# CS0649: darwin linux windows
 dotnet_diagnostic.CS0649.severity = none
