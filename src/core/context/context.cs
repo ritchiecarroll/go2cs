@@ -249,7 +249,7 @@ public static Context TODO() {
 // A CancelFunc does not wait for the work to stop.
 // A CancelFunc may be called by multiple goroutines simultaneously.
 // After the first call, subsequent calls to a CancelFunc do nothing.
-// type CancelFunc is a methodless func type — rendered inline as its base delegate
+public delegate void CancelFunc();
 
 // WithCancel returns a derived context that points to the parent context
 // but has a new Done channel. The returned context's Done channel is closed
@@ -258,7 +258,7 @@ public static Context TODO() {
 //
 // Canceling this context releases resources associated with it, so code should
 // call cancel as soon as the operations running in this [Context] complete.
-public static (Context ctx, Action cancel) WithCancel(Context parent) {
+public static (Context ctx, CancelFunc cancel) WithCancel(Context parent) {
     var c = withCancel(parent);
     var cʗ1 = c;
     return (new cancelCtxжContext(c), [GoFunc("WithCancel.func1")] () => {
@@ -276,7 +276,7 @@ public static (Context ctx, Action cancel) WithCancel(Context parent) {
 //     then Cause(parentContext) == Cause(childContext) == cause1
 //   - if childContext is canceled with cause2 before parentContext is canceled with cause1,
 //     then Cause(parentContext) == cause1 and Cause(childContext) == cause2
-// type CancelCauseFunc is a methodless func type — rendered inline as its base delegate
+public delegate void CancelCauseFunc(error cause);
 
 // WithCancelCause behaves like [WithCancel] but returns a [CancelCauseFunc] instead of a [CancelFunc].
 // Calling cancel with a non-nil error (the "cause") records that error in ctx;
@@ -289,7 +289,7 @@ public static (Context ctx, Action cancel) WithCancel(Context parent) {
 //	cancel(myError)
 //	ctx.Err() // returns context.Canceled
 //	context.Cause(ctx) // returns myError
-public static (Context ctx, Action<error> cancel) WithCancelCause(Context parent) {
+public static (Context ctx, CancelCauseFunc cancel) WithCancelCause(Context parent) {
     var c = withCancel(parent);
     var cʗ1 = c;
     return (new cancelCtxжContext(c), [GoFunc("WithCancelCause.func1")] (error cause) => {
@@ -686,14 +686,14 @@ internal static @string String⁔(/*this*/ withoutCancelCtx c) {
 //
 // Canceling this context releases resources associated with it, so code should
 // call cancel as soon as the operations running in this [Context] complete.
-public static (Context, Action) WithDeadline(Context parent, time.Time d) {
+public static (Context, CancelFunc) WithDeadline(Context parent, time.Time d) {
     return WithDeadlineCause(parent, d, default);
 }
 
 // WithDeadlineCause behaves like [WithDeadline] but also sets the cause of the
 // returned Context when the deadline is exceeded. The returned [CancelFunc] does
 // not set the cause.
-public static (Context, Action) WithDeadlineCause(Context parent, time.Time d, error cause) {
+public static (Context, CancelFunc) WithDeadlineCause(Context parent, time.Time d, error cause) {
     GoFrame ᒐ = default;
     try {
         if (parent == nil) {
@@ -776,14 +776,14 @@ internal static void cancel⁔(/*this*/ ж<timerCtx> Ꮡc, bool removeFromParent
 //		defer cancel()  // releases resources if slowOperation completes before timeout elapses
 //		return slowOperation(ctx)
 //	}
-public static (Context, Action) WithTimeout(Context parent, time.Duration timeout) {
+public static (Context, CancelFunc) WithTimeout(Context parent, time.Duration timeout) {
     return WithDeadline(parent, time.Now().Add(timeout));
 }
 
 // WithTimeoutCause behaves like [WithTimeout] but also sets the cause of the
 // returned Context when the timeout expires. The returned [CancelFunc] does
 // not set the cause.
-public static (Context, Action) WithTimeoutCause(Context parent, time.Duration timeout, error cause) {
+public static (Context, CancelFunc) WithTimeoutCause(Context parent, time.Duration timeout, error cause) {
     return WithDeadlineCause(parent, time.Now().Add(timeout), cause);
 }
 

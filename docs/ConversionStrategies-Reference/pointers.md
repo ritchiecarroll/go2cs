@@ -1210,13 +1210,13 @@ Guarded by: the behavioral program `UnsafePointerCallResultLifetime`; `TestDisca
 
 Go's `(*T)(p)` turns an `unsafe.Pointer` into a typed pointer to the same memory, and the typed pointer keeps that memory alive. The converter emits golib's typed conversion, `@unsafe.Pointer.To<T>(p)`, which receives the pointer itself: its number and [the box it carries](#converting-a-go-pointer-to-unsafepointer).
 
-<!-- source: src/tests/Behavioral/UnsafePointerTypeAlias/main.go:20-22 -->
+<!-- source: src/tests/Behavioral/UnsafePointerTypeAlias/main.go:24-26 -->
 ```go
 func readU32(p ptr, o uintptr) uint32 {
 	return *(*uint32)(unsafe.Add(p, o))
 }
 ```
-<!-- source: src/tests/Behavioral/UnsafePointerTypeAlias/main.cs.target:19-21 -->
+<!-- source: src/tests/Behavioral/UnsafePointerTypeAlias/main.cs.target:23-25 -->
 ```csharp
 internal static uint32 readU32(ptr p, uintptr o) {
     return ~@unsafe.Pointer.To<uint32>(@unsafe.Add(p, o));
@@ -2163,7 +2163,7 @@ mergeCancel := func(ctx, cancelCtx Context) (Context, CancelFunc) {
 lambda conversion, which is what the gate tests.) Without the cast the tuple has no natural type, so
 neither does the enclosing conversion — CS8917 on the declaration and CS8130 at every deconstruction
 of its result. Naming the type is also the more faithful rendering: Go's declared result there *is*
-`CancelFunc`, a methodless func type, which renders inline as its base delegate `Action`. An UNNAMED `func() bool` result would need the synthesized
+`CancelFunc`, a defined func type, which is its own delegate. An UNNAMED `func() bool` result would need the synthesized
 `Func<…>`/`Action` spelling and has no corpus site today, so it is deliberately left.
 
 ## Publicization decides WHAT a type's modifier is; the test-bridge arm only decides WHERE

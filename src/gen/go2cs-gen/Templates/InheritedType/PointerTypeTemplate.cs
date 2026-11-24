@@ -11,6 +11,11 @@ namespace go2cs.Templates.InheritedType;
 
 internal static class PointerTypeTemplate
 {
+    // The members this wrapper declares for its own use under an ASCII name (R7; see ISliceTypeTemplate.ClaimableMembers).
+    // Go declares no method on a named pointer type (an invalid receiver), so only the type's own NAME claims one (CS0542).
+    // GenTests' NamedChanMapNumericClaimedMemberTests.
+    internal static readonly string[] ClaimableMembers = ["IsNilPointer", "IsNull", "NilInstance", "ValueSlot", "at", "of"];
+
     // The box's deref alias (PointerExtensions.DerefOrNull) for a NAMED pointer, as an extension method of the package
     // class beside the wrapper: a ref to the pointee, or a null ref for a nil pointer, which faults where Go's
     // dereference panics. A *T parameter the converter lowers to `ref T` takes `ref p.DerefOrNull()` at the call
@@ -27,48 +32,53 @@ internal static class PointerTypeTemplate
                 ref ʗp is null ? ref global::System.Runtime.CompilerServices.Unsafe.NullRef<{{targetTypeName}}>() : ref (({{PointerPrefix}}<{{targetTypeName}}>)ʗp).DerefOrNull();
         """;
 
+    // A member the wrapper's own type NAME claims (CS0542) is spelled through Common.PointerWrapperMember, and the
+    // interface members among them (IPointer<T>.Value / IsNull, INilPointer.IsNilPointer) are then implemented explicitly.
     public static string Generate(string className, string targetTypeName) =>
+        Body(className, targetTypeName, member => PointerWrapperMember(className, member));
+
+    private static string Body(string className, string targetTypeName, System.Func<string, string> name) =>
         $$"""
 
                 public override bool Equals(object? obj) => obj switch
                 {
                     {{className}} other => m_value == other.m_value,
                     // A null reference is the same Go nil pointer as the canonical typed nil instance.
-                    null => IsNilPointer,
+                    null => {{(name("IsNilPointer") == "IsNilPointer" ? "IsNilPointer" : "((INilPointer)this).IsNilPointer")}},
                     _ => false
                 };
 
                 public override int GetHashCode() => m_value?.GetHashCode() ?? 0;
 
-                public ref {{targetTypeName}} Value => ref m_value.Value;
+                public ref {{targetTypeName}} {{name("Value")}} => ref m_value.Value;{{(name("Value") == "Value" ? "" : $"\r\n\r\n        ref {targetTypeName} IPointer<{targetTypeName}>.Value => ref m_value.Value;")}}
 
                 // The box's nil-check-free slot. The converter reads a dereference whose RESULT is
                 // itself reference-like (a map, slice, pointer...) through `ValueSlot` rather than
                 // `Value`, since Go's `*pp` may legally yield nil (convStarExpr). A NAMED pointer type
                 // is this wrapper rather than the box, so it forwards the same slot: without it
                 // `len(*p)` with `type P *M` was CS1061 at every such dereference.
-                public ref {{targetTypeName}} ValueSlot => ref m_value.ValueSlot;
+                public ref {{targetTypeName}} {{name("ValueSlot")}} => ref m_value.ValueSlot;
 
-                public bool IsNull => m_value is null || m_value.IsNull;
+                public bool {{name("IsNull")}} => m_value is null || m_value.IsNull;{{(name("IsNull") == "IsNull" ? "" : "\r\n\r\n        bool IPointer<" + targetTypeName + ">.IsNull => m_value is null || m_value.IsNull;")}}
 
                 // STRUCTURAL nil — pointer identity and the reflection bridge's nil probes; the
                 // value-peeking IsNull above remains the dereference guard. See ж<T>.IsNilPointer.
-                public bool IsNilPointer => m_value is null || m_value.IsNilPointer;
+                public bool {{name("IsNilPointer")}} => m_value is null || m_value.IsNilPointer;{{(name("IsNilPointer") == "IsNilPointer" ? "" : "\r\n\r\n        bool INilPointer.IsNilPointer => m_value is null || m_value.IsNilPointer;")}}
 
                 // The CANONICAL typed nil instance for this named pointer type (see ж<T>.NilBox):
                 // every nil→'{{className}}' conversion yields this shared instance, so a typed nil
                 // boxed into an interface keeps its Go type and reference-compares equal across sites.
-                internal static {{className}} NilInstance { get; } = new(nil);
+                internal static {{className}} {{name("NilInstance")}} { get; } = new(nil);
                 
-                public {{PointerPrefix}}<TElem> of<TElem>(FieldRefFunc<TElem> fieldRefFunc) => m_value.of(fieldRefFunc);
+                public {{PointerPrefix}}<TElem> {{name("of")}}<TElem>(FieldRefFunc<TElem> fieldRefFunc) => m_value.of(fieldRefFunc);
                 
-                public {{PointerPrefix}}<TElem> of<TElem>(FieldRefFunc<{{targetTypeName}}, TElem> fieldRefFunc) => m_value.of(fieldRefFunc);
+                public {{PointerPrefix}}<TElem> {{name("of")}}<TElem>(FieldRefFunc<{{targetTypeName}}, TElem> fieldRefFunc) => m_value.of(fieldRefFunc);
                 
-                public {{PointerPrefix}}<TElem> at<TElem>(nint index) => m_value.at<TElem>(index);
+                public {{PointerPrefix}}<TElem> {{name("at")}}<TElem>(nint index) => m_value.at<TElem>(index);
 
-                public {{PointerPrefix}}<TElem> at<TElem>(int index) => m_value.at<TElem>(index);
+                public {{PointerPrefix}}<TElem> {{name("at")}}<TElem>(int index) => m_value.at<TElem>(index);
 
-                public {{PointerPrefix}}<TElem> at<TElem>(ulong index) => m_value.at<TElem>(index);
+                public {{PointerPrefix}}<TElem> {{name("at")}}<TElem>(ulong index) => m_value.at<TElem>(index);
 
                 static {{targetTypeName}} IPointer<{{targetTypeName}}>.operator ~(IPointer<{{targetTypeName}}> value) => value.Value;
 

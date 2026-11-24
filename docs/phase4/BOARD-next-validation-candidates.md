@@ -41799,6 +41799,46 @@ re-run here: go-spew is not on this box, and its row stays C2's to re-measure.
 
 — H (2026-11-22)
 
+## 2026-11-23 -- D (every defined func type is a delegate of its own): the .5 release moves the break floor, F = R
+
+**For the .5 release seat.** C2's D seat makes 30 exported standard-library types (the defined func types without
+methods, `context.CancelFunc`, `bufio.SplitFunc`, `io/fs.WalkDirFunc` and 27 more) delegates of their own, where they
+were the underlying `Action`/`Func<…>`. That is a binary break for compiled code, carried as binary-compatibility
+suppression entries in the seat. COORD ruled (2026-11-23 05:38Z) that `GoBreakFloor` in `go.lib.targets` moves AT the
+release that ships it, F = R (DESIGN-go-break-floor.md §4), not in the seat; push-nuget refuses the release until it
+does. The Upgrading line is in docs/DRAFT-news-next.md.
+
+— C2 (2026-11-23)
+
+## 2026-11-23 -- the comment census cannot match a Go local to its shadow-renamed C# local (`xΔ1`)
+
+**Finding.** The census matches a Go line to its C# translation by identifiers (`csIdents`, `internal/commentcensus/census.go`).
+It strips the converter's capture and temporary suffixes (`ʗ1`, `ᴛ1`), but not a trailing shadow rename, `Δ1`. So Go's
+`var cancelCtx func()` cannot match its own translation, `Action cancelCtxΔ1 = default;`. It matches the next line that
+names `cancelCtx` through another suffix, and every later line of that body reads one off.
+
+**How D met it.** D's tuple deconstruction declares a temporary named after its Go target,
+`(req.ctx, var cancelCtxᴛ1) = context.WithDeadline(...)`. In `net/http/client.cs` (setRequestCancel) the census
+anchored `var cancelCtx func()` on that line, which raised `body:extra:unexplained` and `body:go-blank-cs-none` by one
+each. The C# blank lines are where Go's are. COORD ruled (2026-11-23 07:37Z) to fix the matcher if it costs under half
+a lane-day, and otherwise to raise the baseline with a BOARD row owning the fix. The D seat raises the baseline by those
+two.
+
+**Why it was not fixed in D.** Two matcher changes were measured over the whole corpus at `59e5e5701e`:
+- Excluding a deconstruction's `var xᴛN` from the Go name cleared one client.cs finding but not the other: Go line 370
+  then matched the follow-up `cancelCtxΔ1 = NilSafeDelegateConversion<…>(cancelCtxᴛ1)`. It also added one in
+  `net/http/h2_bundle.cs:4665`, where the deconstruction IS the translation of `ctx, cancel = context.WithCancel(...)`.
+- Stripping `Δ\d+` in `decorRe` is the root fix and moves the whole census. 1,493 finding lines change:
+  `body:go-blank-unmapped` 2055 -> 992, `body:extra:unexplained` 2430 -> 1691, `misplaced:free-stmt` 356 -> 72,
+  `misplaced:trailing-stmt` 60 -> 13, `misplaced:decl-doc` 55 -> 41, and `body:go-blank-cs-none` 1834 -> 2181 (+347).
+  Each of those 347 needs checking before the baseline is believed. They are blanks the census can now place, and some
+  may be real gaps. Examples: `compress/flate/huffman_bit_writer.go:375`, `crypto/internal/cryptotest/aead.go:188`.
+
+**Owner.** C2, as a follow-up seat after D lands: strip `Δ\d+`, classify the +347 (real gap or matcher), add a guard that
+is red on today's matcher at client.cs, and re-baseline. Then D's two-line raise comes back out.
+
+— C2 (2026-11-23)
+
 ### 2026-11-22 — C2: optimized code can report the function's first statement as a caller line (OPEN, low; test functions cured on claude/c2-m1-test-noopt)
 
 **The finding.** When a function keeps `runtime.Caller`'s result in a local across a method chain written over
@@ -41957,5 +41997,109 @@ holds for a promoted method that is NOT weak and parks: its forwarder is plain t
 **Owner.** Unassigned; COORD routes. Not in the N1 seat.
 
 — P4 (2026-11-23)
+
+## 2026-11-24 — P5 (C45; COORD ruling 20261124T022736Z, D5 split out): a write through a string's data pointer reaches the string's shared backing (OPEN, candidate .5, owner P5)
+
+**OPEN.** A Go string's bytes are immutable, and Go programs that read them through `unsafe.StringData`, a string
+header's Data or `*(*unsafe.Pointer)(unsafe.Pointer(&s))` never write through that pointer. go2cs hands out a WRITABLE
+alias: `unsafe.StringData(s)` is `Ꮡ(window, 0)`, an element reference into the string's own backing array
+(`src/core/unsafe/unsafe.cs`), and the string header box's Data is the same element box. A store through it, or through
+a view built from it, changes the backing, and every string sharing that backing changes with it. Three paths reach it:
+the scalar store `*(*byte)(p) = 'x'`, the array view `(*[N]byte)(p)` (`Pointer.ToArray`, a window on the string's own
+backing) and `unsafe.Slice(unsafe.StringData(s), n)`. All three are on master today; C45 adds no new path to it.
+
+**Scenario (P3's read of the C45 delta, 2026-11-24).** `(*[1]byte)(h.p)[0] = 'x'` with `s` a one-byte string: a
+one-byte string's backing is golib's process-wide table (`src/core/golib/string.cs`), so every equal one-byte string in
+the process changes.
+
+**What a cure owes (COORD's ruling).** It covers EVERY path (scalar, `Pointer.ToArray` views and `unsafe.Slice`); the
+owner's rule is never to narrow a correctness rule by reachability. A write through a `ref` is not seen at the store
+(`ж<T>.Value` is a `ref T`), so the design names the mechanism that sees it instead (P3's MUST): a check on the next
+access, as the header boxes' limit L1 does, or another. A cost read on the `ElementRef` hot path comes first, and the
+gate includes a one-byte string.
+
+**Owner.** P5, its own seat after C45.
+
+— P5 (2026-11-24)
+
+## 2026-11-24 — P5 (C45; COORD ruling 20261124T050140Z, P3 finding 2): a store through a slice read as a string or string header matches Go (OPEN, post-.5)
+
+**OPEN.** `*(*string)(unsafe.Pointer(&b)) = s`, and the same whole store through a two-word string header
+(`*(*str)(unsafe.Pointer(&b)) = h`, zeebo/xxh3's `str`), replace the slice's data pointer and length in Go and keep its
+capacity: after `c := []byte("xyz"); *(*string)(unsafe.Pointer(&c)) = "q"`, Go prints 1 for `len(c)`. golib reads both
+through read-only views (`SliceAsStringBox`, `SliceStringHeaderBox`), which can refuse a store only on their next access,
+and the temporary box such a statement writes through has none, so the store was lost with no word (the conversion
+printed 3). C45 makes the statement panic by name (`go2cs: store through a read-only view`; the converter's
+`readOnlySliceViewStore`, Behavioral UnsafeHeaderViewRefusals, docs/Limitations.md) when the conversion is written in
+the assignment target, and stops the file by name (`GO2CS2008`) when that assignment is a `for` statement's init or post
+clause, where no throw statement can stand. A field store through the header is refused by its generated setter already.
+
+**Where it is still silent.** A store through a pointer VARIABLE that holds the view, `p := (*string)(unsafe.Pointer(&c));
+*p = "q"`, or through a function that stores through such a pointer, is not refused at the statement: it lands in the
+view, which panics by name on the next access through `p`, and is lost with no word when there is none (`len(c)` reads
+3 where Go reads 1). UnsafeHeaderViewRefusals pins both: "store through a variable, then read" (the panic) and "store
+through a variable, last access" (the wrong 3, until this row's cure). Found by P3's delta read of C45 r2 e87b097396
+(COORD 20261124T063422Z).
+
+**What a cure owes.** The store itself: set the slice's data and length from the stored string or header and keep its
+capacity, through the slice's own box, for `=`, the compound assignments and a tuple assignment alike, with the
+behavioral arms turned from refusals into Go's values.
+
+**Owner.** Unassigned (post-.5).
+
+— P5 (2026-11-24)
+
+## 2026-11-24 — P5 (C45; COORD 20261124T062025Z): a conversion to a defined type over unsafe.Pointer does not compile (OPEN, post-.5)
+
+**OPEN.** `type P unsafe.Pointer; x := 1; p := P(&x)` is spelled `new P(Ꮡx)`, which fails CS1503: the defined type's
+constructor takes no box. It is loud, so no program runs on a wrong value, but a module that writes it does not build.
+An ALIAS (`type P = unsafe.Pointer`) is the same type as unsafe.Pointer and takes its retaining door (C45); a defined
+type is a distinct type and keeps its own route. Read by a probe at C45 r2 (e87b097396), outside the C45 fix.
+
+**What a cure owes.** The defined type's conversion takes the same box-carrying door as unsafe.Pointer (FromPinnedBox
+for a pointer operand, FromHeaderData for rule 6, the uintptr hop), spelled through the defined type, with a behavioral
+arm per operand shape under forced collections, and the conversion back from the defined type to unsafe.Pointer.
+
+**Owner.** Unassigned (post-.5).
+
+— P5 (2026-11-24)
+
+## 2026-11-23 — R (found by R7 seat 2's NamedChanMapNumericShadow rows; older than R7): a zero-valued named-pointer variable in an interface reads as a nil interface
+
+**OPEN.** Go: `type P *string; var p P; var x any = p` gives a NON-nil interface holding a typed nil (`x != nil` is
+true and `x.(P)` succeeds). Converted, `P p = default;` is a null reference (a named pointer is go2cs-gen's wrapper
+CLASS, and its zero value is null by design: PointerTypeTemplate's DerefAlias note), so `any x = p;` stores null and
+`x != nil` reads false, `x.(P)` fails. A typed nil CONVERSION is right: `any x = P(nil)` emits `((P)nil)`, which the
+wrapper's implicit operator maps to its canonical NilInstance, and both checks read as Go's.
+
+**Measured.** Default mode, at claude/r-r7-chan-map-num 62f1816922 before the rows were dropped: the R7 type
+`NilInstance` and the near-miss `strPtr` (same shape, a name no wrapper declares) both printed `true false false` where
+Go prints `true true true`. So the name is not the cause, and every named pointer type has it. NamedChanMapNumericShadow
+keeps only the conversion rows, with a comment naming this defect.
+
+**Likely seat.** Wherever a named-pointer VALUE converts to an interface (an assignment, an argument, a return, a
+composite element), the null wrapper becomes the type's NilInstance, the same canonical instance the conversion already
+yields. Not cut: no corpus reach measured.
+
+**Owner.** Unassigned; COORD routes.
+
+— R (2026-11-23)
+
+## 2026-11-24 — R (P3's NIT 5 on R7 seat 2, not traced): the Value‿ / Δ collision carve-out reads only the converting package's renames
+
+**OPEN, not measured.** `wrapperValueMember` (R7 seat 1) and `pointerWrapperMember` (seat 2) in
+src/go2cs/typeNameResolution.go keep the plain member name when the wrapper type is a collision-renamed local type
+(`nameCollisions`, which go2cs-gen sees as `ΔValue` and so declares a plain `Value`), but `nameCollisions` describes
+only the package being converted. So if package a's `type Value *T` (or `type Value []byte`) is collision-renamed
+there, package b dereferencing or unwrapping it would spell `.Value‿` against a wrapper that declares `Value`: CS1061.
+P3 read the shape from the code (inbox/COORD/20261124T062820Z-P3.md, NIT 5); no program has been built to show it,
+and no corpus type is both named Value and collision-renamed (the R7 censuses found no non-struct Value type in std).
+
+**Likely seat.** The rename decision for a FOREIGN type read from that package's own collision set (the converter
+already records cross-package renames for type references: foreignAliasedTypeName), in both helpers at once.
+
+**Owner.** Unassigned; COORD routes.
+
+— R (2026-11-24)
 
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

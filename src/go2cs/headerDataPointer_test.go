@@ -69,6 +69,28 @@ func sliceData(b []byte) byte {
 	return *(*byte)(unsafe.Pointer(h.Data))
 }
 
+// An ALIAS of unsafe.Pointer (zeebo/xxh3's spelling) takes the same door, through the alias name (C45, P3's read).
+type ptr = unsafe.Pointer
+
+func aliasData(b []byte) byte {
+	h := (*reflect.SliceHeader)(ptr(&b))
+	return *(*byte)(ptr(h.Data))
+}
+
+// The alias through a pointer RECEIVER: the plain spelling's FromRef arm, never a mint over the dereferenced value.
+type cell struct{ v uint64 }
+
+func (c *cell) addr() ptr {
+	return ptr(c)
+}
+
+// The alias over a NAMED uintptr: the plain spelling's hop through the underlying.
+type word uintptr
+
+func aliasWord(w word) ptr {
+	return ptr(w)
+}
+
 // A header built field by field is a plain struct box; the call still goes through FromHeaderData, which answers
 // today's number pointer for it at run time.
 func plain(n uintptr) uintptr {
@@ -101,6 +123,7 @@ func other(x *notHeader) unsafe.Pointer {
 func main() {
 	dst := make([]byte, 8)
 	fmt.Println(hostname("host", dst), string(dst[:4]), inline("x"), deref("y"), sliceData([]byte{7}), plain(0) == 0, number(0) == nil, other(&notHeader{}) == nil, param(&reflect.StringHeader{}) == nil, value("v") == nil)
+	fmt.Println(aliasData([]byte{9}), (&cell{v: 1}).addr() != nil, aliasWord(0) == nil)
 }
 `)
 
@@ -149,6 +172,7 @@ func TestHeaderDataPointerEmitsFromHeaderData(t *testing.T) {
 		{"sliceData", "@unsafe.Pointer.FromHeaderData(h)"},
 		{"plain", "@unsafe.Pointer.FromHeaderData(p)"},
 		{"param", "@unsafe.Pointer.FromHeaderData(sh)"},
+		{"aliasData", "ptr.FromHeaderData(h)"},
 	} {
 		body := emittedFunctionBody(t, mainCs, arm.function)
 
@@ -161,6 +185,19 @@ func TestHeaderDataPointerEmitsFromHeaderData(t *testing.T) {
 	// hand over and the function compiles. A ref-lowered parameter (`ref reflect.StringHeader sh`) would have none.
 	if body := emittedFunctionBody(t, mainCs, "param"); !strings.Contains(body, "param(ж<reflect.StringHeader> sh)") {
 		t.Errorf("param: the header pointer parameter must keep its box, got:\n%s", body)
+	}
+
+	// The alias takes the plain spelling's other arms too, spelled through the alias: a pointer receiver mints from the
+	// receiver's own reference, and a named uintptr hops through its underlying (C45, P3's read).
+	for _, arm := range []struct {
+		function, want string
+	}{
+		{"addr", "ptr.FromRef(ref c)"},
+		{"aliasWord", "(ptr)(uintptr)w"},
+	} {
+		if body := emittedFunctionBody(t, mainCs, arm.function); !strings.Contains(body, arm.want) {
+			t.Errorf("%s: an alias of unsafe.Pointer must take the plain spelling's arm (%q), got:\n%s", arm.function, arm.want, body)
+		}
 	}
 
 	// The controls: each stays a pointer made from a number, and takes no FromHeaderData.
@@ -176,5 +213,95 @@ func TestHeaderDataPointerEmitsFromHeaderData(t *testing.T) {
 		if !strings.Contains(body, arm.want) || strings.Contains(body, "FromHeaderData") {
 			t.Errorf("%s: a form that is not a reflect header's Data must stay a number pointer (%q, no FromHeaderData), got:\n%s", arm.function, arm.want, body)
 		}
+	}
+}
+
+// A store through a slice read as a string panics by name in place of the statement (readOnlySliceViewStore), in a
+// block and in a function literal's body alike. A for statement's init or post clause sits inside the C# `for (…)`
+// header, where a throw statement cannot stand, so there the file's conversion stops by name (GO2CS2008). P3 2026-11-24
+// (COORD 20261124T063422Z): the clause store was converted, and lost with no word. Red before the clause arm: both
+// clause files converted and no file was dropped.
+func TestSliceViewStoreInAForClauseStopsTheFile(t *testing.T) {
+	isolateConverterPathGlobals(t)
+	if testing.Short() {
+		t.Skip("integration test: runs the real converter over a module fixture")
+	}
+
+	takeDroppedFiles()
+	t.Cleanup(func() { takeDroppedFiles() })
+
+	root := t.TempDir()
+	appDir := filepath.Join(root, "app")
+	header := "package main\n\nimport \"unsafe\"\n\n"
+
+	writeModuleFile(t, filepath.Join(appDir, "go.mod"), "module example.com/viewstore\n\ngo 1.23\n")
+	writeModuleFile(t, filepath.Join(appDir, "main.go"), header+`func main() {
+	c := []byte("xyz")
+	*(*string)(unsafe.Pointer(&c)) = "q"
+	f := func() { *(*string)(unsafe.Pointer(&c)) = "r" }
+	f()
+	println(len(c))
+}
+`)
+	writeModuleFile(t, filepath.Join(appDir, "forpost.go"), header+`func forPost() {
+	c := []byte("xyz")
+	for i := 0; i < 1; *(*string)(unsafe.Pointer(&c)) = "q" {
+		i++
+	}
+}
+`)
+	writeModuleFile(t, filepath.Join(appDir, "forinit.go"), header+`func forInit() {
+	c := []byte("xyz")
+	for *(*string)(unsafe.Pointer(&c)) = "q"; len(c) > 5; {
+	}
+}
+`)
+
+	goRoot := build.Default.GOROOT
+
+	if goRoot == "" {
+		goRoot = runtime.GOROOT()
+	}
+
+	options := Options{
+		goRoot:              goRoot,
+		goPath:              build.Default.GOPATH,
+		go2csPath:           filepath.Join(root, "out"),
+		recurse:             true,
+		targetPlatform:      runtime.GOOS + "/" + runtime.GOARCH,
+		indentSpaces:        4,
+		preferVarDecl:       true,
+		useChannelOperators: true,
+	}
+
+	build.Default.GOROOT = options.goRoot
+	build.Default.GOPATH = options.goPath
+
+	if err := NewModuleConverter(options).ConvertModule(appDir); err != nil {
+		t.Fatalf("ConvertModule: %v", err)
+	}
+
+	mainCs := readGenerated(t, filepath.Join(options.go2csPath, "src", "example.com", "viewstore", "main.cs"))
+
+	if got := strings.Count(mainCs, `throw panic("go2cs: store through a read-only view: a string read over a []byte`); got != 2 {
+		t.Errorf("the statement store and the literal's store each panic by name: %d of 2 in\n%s", got, mainCs)
+	}
+
+	err := droppedFileError()
+
+	if err == nil {
+		t.Fatal("a store through a view in a for clause stops the file's conversion; no file was dropped")
+	}
+
+	message := err.Error()
+
+	for _, want := range []string{"2 files", "forpost.go (.cs): @visitAssignStmt - go2cs: store through a read-only view", "forinit.go (.cs): @visitAssignStmt", "in a for clause at "} {
+		if !strings.Contains(message, want) {
+			t.Errorf("the error names %q:\n%s", want, message)
+		}
+	}
+
+	if strings.Contains(message, "main.go") {
+		t.Errorf("only the two clause files are dropped:\n%s", message)
 	}
 }

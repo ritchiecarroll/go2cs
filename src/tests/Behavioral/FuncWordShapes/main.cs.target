@@ -5,7 +5,7 @@ using @unsafe = unsafe_package;
 
 partial class main_package {
 
-// type binop is a methodless func type — rendered inline as its base delegate
+internal delegate nint binop(nint _Δp0, nint _Δp1);
 
 partial struct holder {
     internal Func<nint, nint, nint> f;
@@ -46,7 +46,7 @@ internal static nint callR1(uintptr x, nint a, nint b) {
 }
 
 internal static nint callR1Named(uintptr x, nint a, nint b) {
-    return GoFuncCookie.Func<Func<nint, nint, nint>>(x)(a, b);
+    return GoFuncCookie.Func<binop>(x)(a, b);
 }
 
 internal static nint callR2(uintptr x, nint a, nint b) {
@@ -65,7 +65,7 @@ internal static void main() {
     fmt.Println("m1 add != mul:", wAdd != wMul);
     fmt.Println("m1 add == m2 add:", wAdd == wordOf(add));
     fmt.Println("m1 add == m2 holder add:", wAdd == wordOfHolder(new holder(add)));
-    fmt.Println("m1 add as binop == m1 add:", ccgoFP(new Func<nint, nint, nint>(add)) == wAdd);
+    fmt.Println("m1 add as binop == m1 add:", ccgoFP(new binop(add)) == wAdd);
     fmt.Println("m1 ccgo spelling == m1 add:", ccgoFPLocal(add) == wAdd);
 
     fmt.Println("r1 add(2,3):", callR1(wAdd, 2, 3));
@@ -124,7 +124,7 @@ internal static void main() {
     storeFunc(@unsafe.Add(@unsafe.Pointer.FromPinnedBox(lt), /* unsafe.Offsetof(lt.f) */ (uintptr)16), mul);
     fmt.Println("w3 local func field f(3,3):", lt.f(3, 3), lt.name);
 
-    ref var nb = ref heap<Func<nint, nint, nint>>(out var Ꮡnb);
+    ref var nb = ref heap<binop>(out var Ꮡnb);
     storeFunc(@unsafe.Pointer.FromPinnedBox(Ꮡnb), add);
     fmt.Println("w3 named func variable nb(2,2):", nb(2, 2));
 

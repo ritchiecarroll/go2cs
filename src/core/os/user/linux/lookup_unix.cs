@@ -15,7 +15,7 @@ using strings = strings_package;
 partial class user_package {
 
 // lineFunc returns a value, an error, or (nil, nil) to skip the row.
-// type lineFunc is a methodless func type — rendered inline as its base delegate
+internal delegate (any v, error err) lineFunc(slice<byte> line);
 
 // readColonFile parses r as an /etc/group or /etc/passwd style file, running
 // fn for each row. readColonFile returns a value, an error, or (nil, nil) if
@@ -23,7 +23,7 @@ partial class user_package {
 //
 // readCols is the minimum number of colon-separated fields that will be passed
 // to fn; in a long line additional fields may be silently discarded.
-internal static (any v, error err) readColonFile(io.Reader r, Func<slice<byte>, (any, error)> fn, nint readCols) {
+internal static (any v, error err) readColonFile(io.Reader r, lineFunc fn, nint readCols) {
     any v = default;
     error err = default;
 
@@ -91,7 +91,7 @@ internal static (any v, error err) readColonFile(io.Reader r, Func<slice<byte>, 
     }
 }
 
-internal static Func<slice<byte>, (any, error)> matchGroupIndexValue(@string value, nint idx) {
+internal static lineFunc matchGroupIndexValue(@string value, nint idx) {
     @string leadColon = default;
     if (idx > 0) {
         leadColon = ":";
@@ -141,7 +141,7 @@ internal static (ж<Group>, error) findGroupName(@string name, io.Reader r) {
 
 // returns a *User for a row if that row's has the given value at the
 // given index.
-internal static Func<slice<byte>, (any, error)> matchUserIndexValue(@string value, nint idx) {
+internal static lineFunc matchUserIndexValue(@string value, nint idx) {
     @string leadColon = default;
     if (idx > 0) {
         leadColon = ":";

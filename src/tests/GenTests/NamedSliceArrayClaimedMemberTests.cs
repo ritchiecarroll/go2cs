@@ -32,7 +32,7 @@ public class NamedSliceArrayClaimedMemberTests
 
     // Names a Go method can never claim on the wrapper: the converter renames a Go method of these names
     // (identifierNaming.go `reserved`), so it reaches C# as ΔEquals, ΔToString, ...
-    private static readonly HashSet<string> s_reserved = ["Equals", "GetHashCode", "GetType", "ToString", "slice", "MemberwiseClone"];
+    internal static readonly HashSet<string> s_reserved = ["Equals", "GetHashCode", "GetType", "ToString", "slice", "MemberwiseClone"];
 
     // Public wrapper members outside the three templates' own lists, each with its reason. Value is the underlying-value
     // property every reader spells through Common.WrapperValueMember; a Go method named Value is call-correct beside it
@@ -60,11 +60,21 @@ public class NamedSliceArrayClaimedMemberTests
         global using System;
         global using System.Numerics;
         global using any = System.Object;
+        global using uint8 = System.Byte;
+        global using uint16 = System.UInt16;
+        global using uint32 = System.UInt32;
+        global using uint64 = System.UInt64;
+        global using int8 = System.SByte;
+        global using int16 = System.Int16;
+        global using int32 = System.Int32;
+        global using int64 = System.Int64;
+        global using float32 = System.Single;
+        global using float64 = System.Double;
         """;
 
     // Runs TypeGenerator over the declarations and returns the generated type's symbol and the errors reported inside its
     // own generated part(s).
-    private static (INamedTypeSymbol Type, string[] Errors) Generated(string declarations, string typeName)
+    internal static (INamedTypeSymbol Type, string[] Errors) Generated(string declarations, string typeName)
     {
         string source =
             $$"""
@@ -102,7 +112,7 @@ public class NamedSliceArrayClaimedMemberTests
 
     // The generated wrapper's non-private members a Go method could be named like (an internal member binds a same-package
     // Go call just as a public one does): ASCII identifiers, no constructors, operators, conversions, accessors or indexers.
-    private static SortedSet<string> VisibleAsciiMembers(INamedTypeSymbol type)
+    internal static SortedSet<string> VisibleAsciiMembers(INamedTypeSymbol type)
     {
         SortedSet<string> names = new(StringComparer.Ordinal);
 

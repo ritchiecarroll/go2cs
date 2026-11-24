@@ -1,0 +1,9 @@
+string store: panic: go2cs: store through a read-only view: a string read over a []byte cannot be assigned; Go would replace the slice's data pointer and length
+string op-store: panic: go2cs: store through a read-only view: a string read over a []byte cannot be assigned; Go would replace the slice's data pointer and length
+header store: panic: go2cs: store through a read-only view: a main.str read over a []byte cannot be assigned; Go would replace the slice's data pointer and length
+tuple store: panic: go2cs: store through a read-only view: a string read over a []byte cannot be assigned; Go would replace the slice's data pointer and length
+uint32 slice as string: panic: runtime error: dereference of a managed pointer with no address
+named slice as string: panic: runtime error: dereference of a managed pointer with no address
+named slice header: panic: runtime error: cannot read native memory as main.str: its CLR layout is not its Go layout
+store through a variable, then read: panic: string written through a reinterpretation: a string read over a []byte was assigned, and the view is read-only
+store through a variable, last access: 3

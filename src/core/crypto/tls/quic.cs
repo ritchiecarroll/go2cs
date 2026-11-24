@@ -165,7 +165,7 @@ partial struct quicState {
     internal channel<EmptyStruct> signalc;  // handshake data is available to be read
     internal channel<EmptyStruct> blockedc; // handshake is waiting for data, closed when done
     internal context.Context ctx;           // handshake context
-    internal Action cancel;
+    internal context.CancelFunc cancel;
     internal bool waitingForDrain;
     internal bool errorReturned;
     // readbuf is shared between HandleData and the handshake goroutine.

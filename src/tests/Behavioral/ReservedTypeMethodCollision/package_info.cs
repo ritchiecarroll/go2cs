@@ -103,7 +103,7 @@ public static partial class main_package
 // the body's frame as the Go method.
 // <MethodForwarders>
 partial class mainᴛSieve {
-    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Filter(this Sieve sv, Func<nint, bool> f) => main_package.Filter⁔(sv, f);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Filter(this Sieve sv, Filter f) => main_package.Filter⁔(sv, f);
 }
 partial class mainᴛbuilder {
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static Δslice Δslice(this ref builder b, nint n) => main_package.Δslice⁔(ref b, n);

@@ -51,7 +51,7 @@ namespace go2cs;
 /// </para>
 /// <para>
 /// A HEADER-SHAPED struct is one exception to <c>ref</c>: an <c>unsafe.Pointer</c> field and then one or two
-/// <c>int</c> fields, Go's slice and string headers (<see cref="IsHeaderShaped"/>). Its fields get GET/SET properties,
+/// <c>int</c> or <c>uint</c> fields, Go's slice and string headers (<see cref="IsHeaderShaped"/>). Its fields get GET/SET properties,
 /// and the setter calls <c>ж&lt;T&gt;.OnHeaderStore()</c> after the store. golib's header boxes view a slice or string
 /// variable as such a header and must commit each store to the variable, which a <c>ref</c> cannot be intercepted to
 /// do: the header's last store is followed by no access of the box at all. A read, a store and a compound assignment
@@ -665,7 +665,7 @@ public class FieldAccessGenerator : ISourceGenerator
 
     /// <summary>
     /// Whether <paramref name="type"/> is shaped as a Go slice or string header: exactly an <c>unsafe.Pointer</c> field
-    /// (the one class implementing golib's <c>IUnsafePointer</c>) and then one or two <c>int</c> fields, in declaration
+    /// (the one class implementing golib's <c>IUnsafePointer</c>) and then one or two <c>int</c> or <c>uint</c> fields, in declaration
     /// order, as golib's SliceHeaderBox and StringHeaderBox require.
     /// </summary>
     internal static bool IsHeaderShaped(INamedTypeSymbol type)
@@ -683,7 +683,8 @@ public class FieldAccessGenerator : ISourceGenerator
             return false;
         }
 
-        return fields.Skip(1).All(field => field.Type.SpecialType == SpecialType.System_IntPtr);
+        // Go's int (nint), or a uint (nuint): github.com/zeebo/xxh3's `str{p unsafe.Pointer; l uint}` (C45).
+        return fields.Skip(1).All(field => field.Type.SpecialType is SpecialType.System_IntPtr or SpecialType.System_UIntPtr);
     }
 
     /// <summary>

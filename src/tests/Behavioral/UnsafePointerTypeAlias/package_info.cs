@@ -10,6 +10,7 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+global using ualiasꓸPtr = go.unsafe_package.Pointer;
 // </ImportedTypeAliases>
 
 using go;
@@ -44,6 +45,7 @@ using static go.main_package;
 // The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
 // go2cs-gen emits a field property on the pointer for each of their fields.
 [assembly: GoFieldAccess(typeof(cursor))]
+[assembly: GoFieldAccess(typeof(reflect_package.SliceHeader))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -53,7 +55,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "AA4ggqaCpoKCgqaCgoKUgoKUgoI=")]
+[assembly: GoPositionMap("main.go", "main.cs", "ABIogqaCAAUUoKqClIKCgoKCgqamgoKCpoKCgpSCgpSCgpSClIKCgoKC")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -70,6 +72,7 @@ public static partial class main_package
 
     // <TypeAccessibility>
     internal partial struct cursor {}
+    internal partial struct word {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import
@@ -80,6 +83,8 @@ public static partial class main_package
 
     // <ImportInitializers>
     [GoInit] internal static void initᴛᴛimportꓸfmt() => builtin.initPackage(typeof(fmt_package));
+    [GoInit] internal static void initᴛᴛimportꓸreflect() => builtin.initPackage(typeof(reflect_package));
+    [GoInit] internal static void initᴛᴛimportꓸruntime() => builtin.initPackage(typeof(runtime_package));
     // </ImportInitializers>
 }
 

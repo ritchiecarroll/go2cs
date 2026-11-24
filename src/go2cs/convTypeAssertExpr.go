@@ -78,23 +78,14 @@ func (v *Visitor) convTypeAssertExpr(typeAssertExpr *ast.TypeAssertExpr) string 
 	// (`_<(Map)>()`, CS1525). The parentheses are syntax only, so the type is rendered unwrapped.
 	typeExpr := v.convExpr(ast.Unparen(typeAssertExpr.Type), []ExprContext{context})
 
-	// A methodless named func type collapses to its base C# delegate everywhere it is REFERENCED
-	// (getAliasQualifiedTypeName), so its NAME is never emitted. A type-assertion target `ci.(Compressor)` where
-	// `type Compressor func(io.Writer) (io.WriteCloser, error)` must therefore assert against the
-	// collapsed delegate `Func<…>`, not the bare (undefined) name `Compressor` — convExpr on the type
-	// ident renders the name (CS0246, archive/zip's compressor/decompressor registries). Render the
-	// collapsed form for such a target.
-	// An ANONYMOUS func type target takes the same route: the AST render above goes through the
+	// An ANONYMOUS func type target renders through getCSharpTypeName: the AST render above goes through the
 	// string-based type-name path, which skips the VARIADIC params-Span delegate lowering —
 	// `cw.(func(string, ...any))` emitted `._<Action<@string, .any>>` with a literal `.any`
 	// (CS1001, net/http transport.go logf). getCSharpTypeName builds the delegate structurally via
 	// iifeDelegateType (`Actionꓸꓸꓸ<@string, any>`); non-variadic signatures render identically
 	// on both paths.
 	if targetType := v.getExprType(typeAssertExpr.Type); targetType != nil {
-		_, isMethodlessNamed := methodlessNamedFuncSignature(targetType)
-		_, isAnonSig := targetType.(*types.Signature)
-
-		if isMethodlessNamed || isAnonSig {
+		if _, isAnonSig := targetType.(*types.Signature); isAnonSig {
 			typeExpr = v.getCSharpTypeName(targetType)
 		}
 	}

@@ -952,7 +952,7 @@ public static partial ж<DB> OpenDB(driver.Connector c) {
         connector: c,
         openerCh: new channel<EmptyStruct>(connectionRequestQueueSize),
         lastPut: new map<ж<driverConn>, @string>(),
-        stop: cancel
+        stop: NilSafeDelegateConversion<Action, context.CancelFunc>(cancel)
     ));
 
     var dbʗ1 = db;
@@ -2185,7 +2185,7 @@ internal static partial (ж<Tx> tx, error err) beginDC⁔(/*this*/ ж<DB> Ꮡdb,
         dc: dc,
         releaseConn: release,
         txi: txi,
-        cancel: cancel,
+        cancel: NilSafeDelegateConversion<Action, context.CancelFunc>(cancel),
         keepConnOnRollback: keepConnOnRollback,
         ctx: ctx
     ));
@@ -2231,7 +2231,7 @@ internal static (ж<Conn>, error) Conn⁔(/*this*/ ж<DB> Ꮡdb, context.Context
     return (conn, default);
 }
 
-// type releaseConn is a methodless func type — rendered inline as its base delegate
+internal delegate void releaseConn(error _);
 
 // Conn represents a single database connection rather than a pool of database
 // connections. Prefer running queries from [DB] unless there is a specific
@@ -2257,12 +2257,12 @@ partial struct Conn {
     internal sync.Once releaseConnOnce;
     // releaseConnCache is a cache of c.closemuRUnlockCondReleaseConn
     // to save allocations in a call to grabConn.
-    internal Action<error> releaseConnCache;
+    internal releaseConn releaseConnCache;
 }
 
 // grabConn takes a context to implement stmtConnGrabber
 // but the context is not used.
-internal static (ж<driverConn>, Action<error>, error) grabConn⁔(/*this*/ ж<Conn> Ꮡc, context.Context _) {
+internal static (ж<driverConn>, releaseConn, error) grabConn⁔(/*this*/ ж<Conn> Ꮡc, context.Context _) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (Ꮡc.Ꮡdone.Load()) {
@@ -2283,7 +2283,7 @@ internal static error PingContext⁔(/*this*/ ж<Conn> Ꮡc, context.Context ctx
     if (err != nil) {
         return err;
     }
-    return c.db.pingDC(ctx, dc, release);
+    return c.db.pingDC(ctx, dc, NilSafeDelegateConversion<Action<error>, releaseConn>(release));
 }
 
 // ExecContext executes a query without returning any rows.
@@ -2296,7 +2296,7 @@ internal static (Result, error) ExecContext⁔(/*this*/ ж<Conn> Ꮡc, context.C
     if (err != nil) {
         return (default, err);
     }
-    return c.db.execDC(ctx, dc, release, query, args);
+    return c.db.execDC(ctx, dc, NilSafeDelegateConversion<Action<error>, releaseConn>(release), query, args);
 }
 
 // QueryContext executes a query that returns rows, typically a SELECT.
@@ -2309,7 +2309,7 @@ internal static (ж<Rows>, error) QueryContext⁔(/*this*/ ж<Conn> Ꮡc, contex
     if (err != nil) {
         return (default, err);
     }
-    return c.db.queryDC(ctx, default, dc, release, query, args);
+    return c.db.queryDC(ctx, default, dc, NilSafeDelegateConversion<Action<error>, releaseConn>(release), query, args);
 }
 
 // QueryRowContext executes a query that is expected to return at most one row.
@@ -2340,7 +2340,7 @@ internal static (ж<Stmt>, error) PrepareContext⁔(/*this*/ ж<Conn> Ꮡc, cont
     if (err != nil) {
         return (default, err);
     }
-    return c.db.prepareDC(ctx, dc, release, new ConnжstmtConnGrabber(Ꮡc), query);
+    return c.db.prepareDC(ctx, dc, NilSafeDelegateConversion<Action<error>, releaseConn>(release), new ConnжstmtConnGrabber(Ꮡc), query);
 }
 
 // Raw executes f exposing the underlying driver connection for the
@@ -2353,7 +2353,7 @@ internal static error /*err*/ Raw⁔(/*this*/ ж<Conn> Ꮡc, Func<any, error> f)
     GoFrame ᒐ = default;
     try {
         ж<driverConn> dc = default;
-        Action<error> release = default;
+        releaseConn release = default;
 
         // grabConn takes a context to implement stmtConnGrabber, but the context is not used.
         (dc, release, err) = Ꮡc.grabConn(default);
@@ -2400,7 +2400,7 @@ internal static (ж<Tx>, error) BeginTx⁔(/*this*/ ж<Conn> Ꮡc, context.Conte
     if (err != nil) {
         return (default, err);
     }
-    return c.db.beginDC(ctx, dc, release, opts);
+    return c.db.beginDC(ctx, dc, NilSafeDelegateConversion<Action<error>, releaseConn>(release), opts);
 }
 
 // closemuRUnlockCondReleaseConn read unlocks closemu
@@ -2534,7 +2534,7 @@ internal static void close⁔(/*this*/ ref Tx tx, error err) {
 // a successful call to (*Tx).grabConn. For tests.
 internal static Action hookTxGrabConn;
 
-internal static (ж<driverConn>, Action<error>, error) grabConn⁔(/*this*/ ж<Tx> Ꮡtx, context.Context ctx) {
+internal static (ж<driverConn>, releaseConn, error) grabConn⁔(/*this*/ ж<Tx> Ꮡtx, context.Context ctx) {
     ref var tx = ref Ꮡtx.DerefOrNull();
 
     var selᴛ18 = ctx.Done();
@@ -2689,7 +2689,7 @@ internal static (ж<Stmt>, error) PrepareContext⁔(/*this*/ ж<Tx> Ꮡtx, conte
         return (default, err);
     }
 
-    (var stmt, err) = tx.db.prepareDC(ctx, dc, release, new TxжstmtConnGrabber(Ꮡtx), query);
+    (var stmt, err) = tx.db.prepareDC(ctx, dc, NilSafeDelegateConversion<Action<error>, releaseConn>(release), new TxжstmtConnGrabber(Ꮡtx), query);
     if (err != nil) {
         return (default, err);
     }
@@ -2744,7 +2744,7 @@ internal static ж<Stmt> StmtContext⁔(/*this*/ ж<Tx> Ꮡtx, context.Context c
             return Ꮡ(new Stmt(stickyErr: err));
         }
         var releaseʗ1 = release;
-        defer(releaseʗ1, (error)(default), ref ᒐ);
+        defer(NilSafeDelegateConversion<Action<error>, releaseConn>(releaseʗ1), (error)(default), ref ᒐ);
 
         if (tx.db != stmt.db) {
             return Ꮡ(new Stmt(stickyErr: errors.New(sqlTxStmtStatementFromˢ)));
@@ -2846,7 +2846,7 @@ internal static (Result, error) ExecContext⁔(/*this*/ ж<Tx> Ꮡtx, context.Co
     if (err != nil) {
         return (default, err);
     }
-    return tx.db.execDC(ctx, dc, release, query, args);
+    return tx.db.execDC(ctx, dc, NilSafeDelegateConversion<Action<error>, releaseConn>(release), query, args);
 }
 
 // Exec executes a query that doesn't return rows.
@@ -2870,7 +2870,7 @@ internal static (ж<Rows>, error) QueryContext⁔(/*this*/ ж<Tx> Ꮡtx, context
         return (default, err);
     }
 
-    return tx.db.queryDC(ctx, tx.ctx, dc, release, query, args);
+    return tx.db.queryDC(ctx, tx.ctx, dc, NilSafeDelegateConversion<Action<error>, releaseConn>(release), query, args);
 }
 
 // Query executes a query that returns rows, typically a SELECT.
@@ -2922,7 +2922,7 @@ partial struct connStmt {
 partial interface stmtConnGrabber {
     // grabConn returns the driverConn and the associated release function
     // that must be called when the operation completes.
-    (ж<driverConn>, Action<error>, error) grabConn(context.Context _);
+    (ж<driverConn>, releaseConn, error) grabConn(context.Context _);
     // txCtx returns the transaction context if available.
     // The returned context should be selected on along with
     // any query context when awaiting a cancel.
@@ -3095,7 +3095,8 @@ internal static (ж<driverConn> dc, Action<error> releaseConn, ж<driverStmt> ds
     // stmt was created on.
     if (s.cg != nil) {
         s.mu.Unlock();
-        (dc, releaseConn, err) = s.cg.grabConn(ctx); // blocks, waiting for the connection.
+        (dc, var releaseConnᴛ1, err) = s.cg.grabConn(ctx); // blocks, waiting for the connection.
+        releaseConn = NilSafeDelegateConversion<Action<error>, releaseConn>(releaseConnᴛ1);
         if (err != nil) {
             return (dc, releaseConn, ds, err);
         }
@@ -3396,7 +3397,7 @@ internal static partial void initContextClose⁔(/*this*/ ж<Rows> Ꮡrs, contex
         return;
     }
     var (closectx, cancel) = context.WithCancel(ctx);
-    rs.cancel = cancel;
+    rs.cancel = NilSafeDelegateConversion<Action, context.CancelFunc>(cancel);
     goǃ(Ꮡrs.awaitDone, ctx, txctx, closectx);
 }
 

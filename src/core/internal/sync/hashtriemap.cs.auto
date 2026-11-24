@@ -29,8 +29,8 @@ partial struct HashTrieMap<K, V> {
     internal atomic.Uint32 inited;
     internal Mutex initMu;
     internal atomic.Pointer<indirect<K, V>> root;
-    internal Func<@unsafe.Pointer, uintptr, uintptr> keyHash;
-    internal Func<@unsafe.Pointer, @unsafe.Pointer, bool> valEqual;
+    internal hashFunc keyHash;
+    internal equalFunc valEqual;
     internal uintptr seed;
 }
 
@@ -60,8 +60,8 @@ internal static partial void initSlow⁔<K, V>(/*this*/ ж<HashTrieMap<K, V>> �
         map<K, V> m = default;
         var mapType = abi.TypeOf(m).MapType();
         Ꮡht.of(HashTrieMap<K, V>.Ꮡroot).Store(newIndirectNode<K, V>(nil));
-        ht.keyHash = mapType.Hasher;
-        ht.valEqual = mapType.Value.Elem.Equal;
+        ht.keyHash = NilSafeDelegateConversion<hashFunc, Func<@unsafe.Pointer, uintptr, uintptr>>(mapType.Hasher);
+        ht.valEqual = NilSafeDelegateConversion<equalFunc, Func<@unsafe.Pointer, @unsafe.Pointer, bool>>(mapType.Value.Elem.Equal);
         ht.seed = (uintptr)runtime_rand();
 
         Ꮡht.of(HashTrieMap<K, V>.Ꮡinited).Store(1);
@@ -70,8 +70,8 @@ internal static partial void initSlow⁔<K, V>(/*this*/ ж<HashTrieMap<K, V>> �
     finally { if (ᒐd1) Ꮡht.of(HashTrieMap<K, V>.ᏑinitMu).Unlock(); ᒐ.Run(); }
 }
 
-// type hashFunc is a methodless func type — rendered inline as its base delegate
-// type equalFunc is a methodless func type — rendered inline as its base delegate
+internal delegate uintptr hashFunc(@unsafe.Pointer _Δp0, uintptr _Δp1);
+internal delegate bool equalFunc(@unsafe.Pointer _Δp0, @unsafe.Pointer _Δp1);
 
 // Load returns the value stored in the map for a key, or nil if no
 // value is present.
@@ -490,7 +490,7 @@ internal static bool /*deleted*/ CompareAndDelete⁔<K, V>(/*this*/ ж<HashTrieM
 // Returns a non-nil node, which will always be an entry, if found.
 //
 // If i != nil then i.mu is locked, and it is the caller's responsibility to unlock it.
-internal static (ж<indirect<K, V>> i, nuint hashShift, ж<atomic.Pointer<node<K, V>>> slot, ж<node<K, V>> n) find⁔<K, V>(/*this*/ ж<HashTrieMap<K, V>> Ꮡht, K key, uintptr hash, Func<@unsafe.Pointer, @unsafe.Pointer, bool> valEqual, V value) {
+internal static (ж<indirect<K, V>> i, nuint hashShift, ж<atomic.Pointer<node<K, V>>> slot, ж<node<K, V>> n) find⁔<K, V>(/*this*/ ж<HashTrieMap<K, V>> Ꮡht, K key, uintptr hash, equalFunc valEqual, V value) {
     ж<indirect<K, V>> i = default;
     nuint hashShift = default;
     ж<atomic.Pointer<node<K, V>>> slot = default;
@@ -662,7 +662,7 @@ internal static (V, bool) lookup⁔<K, V>(/*this*/ ж<entry<K, V>> Ꮡe, K key) 
     return (@new<V>().ValueSlot, false);
 }
 
-internal static (V, bool) lookupWithValue⁔<K, V>(/*this*/ ж<entry<K, V>> Ꮡe, K key, V valueʗp, Func<@unsafe.Pointer, @unsafe.Pointer, bool> valEqual) {
+internal static (V, bool) lookupWithValue⁔<K, V>(/*this*/ ж<entry<K, V>> Ꮡe, K key, V valueʗp, equalFunc valEqual) {
     ref var e = ref Ꮡe.DerefOrNull();
     ref var value = ref heap(valueʗp, out var Ꮡvalue);
 
@@ -711,7 +711,7 @@ internal static (ж<entry<K, V>>, V, bool) swap⁔<K, V>(/*this*/ ж<entry<K, V>
 // equal. Returns the new entry chain and whether or not anything was swapped.
 //
 // compareAndSwap must be called under the mutex of the indirect node which e is a child of.
-internal static (ж<entry<K, V>>, bool) compareAndSwap⁔<K, V>(/*this*/ ж<entry<K, V>> Ꮡhead, K key, V oldʗp, V @new, Func<@unsafe.Pointer, @unsafe.Pointer, bool> valEqual) {
+internal static (ж<entry<K, V>>, bool) compareAndSwap⁔<K, V>(/*this*/ ж<entry<K, V>> Ꮡhead, K key, V oldʗp, V @new, equalFunc valEqual) {
     ref var head = ref Ꮡhead.DerefOrNull();
     ref var old = ref heap(oldʗp, out var Ꮡold);
 
@@ -768,7 +768,7 @@ internal static (V, ж<entry<K, V>>, bool) loadAndDelete⁔<K, V>(/*this*/ ж<en
 // equal. Returns the new entry chain and whether or not anything was deleted.
 //
 // compareAndDelete must be called under the mutex of the indirect node which e is a child of.
-internal static (ж<entry<K, V>>, bool) compareAndDelete⁔<K, V>(/*this*/ ж<entry<K, V>> Ꮡhead, K key, V valueʗp, Func<@unsafe.Pointer, @unsafe.Pointer, bool> valEqual) {
+internal static (ж<entry<K, V>>, bool) compareAndDelete⁔<K, V>(/*this*/ ж<entry<K, V>> Ꮡhead, K key, V valueʗp, equalFunc valEqual) {
     ref var head = ref Ꮡhead.DerefOrNull();
     ref var value = ref heap(valueʗp, out var Ꮡvalue);
 

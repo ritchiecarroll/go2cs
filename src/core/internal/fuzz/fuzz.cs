@@ -111,7 +111,8 @@ public static partial error /*err*/ CoordinateFuzzing(context.Context ctx, Coord
 
         if (opts.Timeout > 0) {
             Action cancel = default;
-            (ctx, cancel) = context.WithTimeout(ctx, opts.Timeout);
+            (ctx, var cancelᴛ1) = context.WithTimeout(ctx, opts.Timeout);
+            cancel = NilSafeDelegateConversion<Action, context.CancelFunc>(cancelᴛ1);
             var cancelʗ1 = cancel;
             defer(cancelʗ1, ref ᒐ);
         }
