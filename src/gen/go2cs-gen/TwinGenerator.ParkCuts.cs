@@ -54,7 +54,7 @@ public sealed partial class TwinGenerator
 
     internal sealed partial class Run
     {
-        // GoTwinsWeak and GoTwinsCut (MSBuild properties, ';' or ',' between entries), read in Execute.
+        // GoTwinsWeak and GoTwinsCut (MSBuild properties, ';' between entries: a generic key holds ','), read in Execute.
         internal string? WeakProperty { get; init; }
         internal string? CutProperty { get; init; }
 
@@ -93,7 +93,7 @@ public sealed partial class TwinGenerator
         }
 
         private static IEnumerable<string> Entries(string? property) =>
-            property is null ? [] : property.Split([';', ','], StringSplitOptions.RemoveEmptyEntries).Select(entry => entry.Trim()).Where(entry => entry.Length > 0);
+            property is null ? [] : property.Split([';'], StringSplitOptions.RemoveEmptyEntries).Select(entry => entry.Trim()).Where(entry => entry.Length > 0);
 
         private bool DeclaresPackage(string packageClass) =>
             m_augmented.Assembly.GetTypeByMetadataName(packageClass) is not null;
@@ -137,7 +137,7 @@ public sealed partial class TwinGenerator
         // W: the call's target is weak, by its twin's [GoParkWeak] in metadata (any assembly) or by this build's list. A
         // box-overload call is weak by the overload's twin (sync's `Lockꞏtwin(this ж<Mutex>)` is that twin).
         internal bool WeakTarget(Site site) =>
-            !site.Interface && (IsWeak(site.Target) || site is { ViaBoxOverload: true, BoxOverload: { } overload } && IsWeak(overload));
+            !site.Interface && !site.OwnBody && (IsWeak(site.Target) || site is { ViaBoxOverload: true, BoxOverload: { } overload } && IsWeak(overload));
 
         private readonly Dictionary<ISymbol, bool> m_weak = new(SymbolEqualityComparer.Default);
 
@@ -153,9 +153,47 @@ public sealed partial class TwinGenerator
 
             weak = m_candidates.TryGetValue(definition, out Candidate? candidate) ? candidate.Weak :
                 definition.ContainingType is { } type && type.GetMembers(definition.Name + Suffix).OfType<IMethodSymbol>().Any(twin =>
-                    TwinBinds(twin) && twin.Parameters.Length == definition.Parameters.Length && twin.IsStatic == definition.IsStatic && CarriesWeak(twin));
+                    TwinBinds(twin) && twin.IsStatic == definition.IsStatic && SameParameters(twin, definition) && CarriesWeak(twin));
 
             return m_weak[definition] = weak;
+        }
+
+        // The twin's parameters are the member's, as HasTwinMember compares them, except that a receiver may come in its
+        // box (sync's `Lockꞏtwin(this ж<Mutex>)` for `Lock(this ref Mutex)`): so one receiver's weak mark never reads for
+        // another type's method of the same name in one class.
+        private static bool SameParameters(IMethodSymbol twin, IMethodSymbol member)
+        {
+            if (twin.Parameters.Length != member.Parameters.Length || twin.TypeParameters.Length != member.TypeParameters.Length)
+                return false;
+
+            for (int i = 0; i < twin.Parameters.Length; i++)
+            {
+                ITypeSymbol own = twin.Parameters[i].Type, theirs = member.Parameters[i].Type;
+
+                if (own.ToDisplayString() == theirs.ToDisplayString())
+                    continue;
+
+                if (i == 0 && own is INamedTypeSymbol { Name: "ж", TypeArguments.Length: 1 } box && box.TypeArguments[0].ToDisplayString() == theirs.ToDisplayString())
+                    continue;
+
+                return false;
+            }
+
+            return true;
+        }
+
+        // A forwarder's call to its own body: the target is the caller's name plus the suffix, on the same key.
+        private void MarkOwnBodies()
+        {
+            foreach (Candidate candidate in m_ordered)
+            {
+                foreach (Site site in candidate.Sites)
+                {
+                    if (!site.Interface && site.Target is { } target && Normalize(target).Name == candidate.Symbol.Name + MethodBodySuffix &&
+                        MemberKey(target) == MemberKey(candidate.Symbol))
+                        site.OwnBody = true;
+                }
+            }
         }
 
         internal static bool CarriesWeak(IMethodSymbol twin) =>
@@ -176,7 +214,7 @@ public sealed partial class TwinGenerator
                 {
                     IMethodSymbol? callee = site.Interface ? site.IfaceTarget : site.Target;
 
-                    if (callee is null || !m_cutEntries.ContainsKey((caller, MemberKey(callee))))
+                    if (callee is null || site.OwnBody || !m_cutEntries.ContainsKey((caller, MemberKey(callee))))
                         continue;
 
                     site.Cut = true;
@@ -198,7 +236,8 @@ public sealed partial class TwinGenerator
 
                 foreach (Site site in candidate.Sites)
                 {
-                    if (!site.Direct || !WouldAwait(site))
+                    // Active, not only Direct: a site in a go literal is awaited by the rewriter, so a cut there is live.
+                    if (!site.Active || !WouldAwait(site))
                         continue;
 
                     if (site.Cut)
@@ -215,11 +254,12 @@ public sealed partial class TwinGenerator
 
             foreach (KeyValuePair<string, string> entry in m_weakEntries)
             {
-                Candidate? candidate = m_ordered.FirstOrDefault(c => MemberKey(c.Symbol) == entry.Key);
+                // A suffix-form method is two candidates on one key, forwarder and body: the entry is live if either parks.
+                Candidate[] named = [.. m_ordered.Where(c => MemberKey(c.Symbol) == entry.Key)];
 
-                if (candidate is null)
+                if (named.Length == 0)
                     Report(entry.Key, entry.Value, "names no member of this assembly");
-                else if (!candidate.Parks)
+                else if (!named.Any(c => c.Parks))
                     Report(entry.Key, entry.Value, "dead: the member's own twin cannot park, so it carries [GoParkForwarder] and no weak mark");
             }
 

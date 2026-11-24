@@ -43,6 +43,10 @@ which members are state machines and which forwarders are marked. So they are no
 | W | building the CALLEE's assembly, and every caller's | the callee's twin carries **`[GoParkWeak]`** (new golib attribute, `[mn-frozen]` beside `[GoParkForwarder]`); a caller's generator reads it from metadata, as it reads `[GoParkForwarder]` | `sync.Mutex.Lock`, `sync.RWMutex.Lock`, `sync.RWMutex.RLock`, internal/poll `fdMutex`'s `rwlock` (the file-descriptor lock) |
 | C | building the CALLER's assembly only | nothing crosses assemblies: the caller's own twins come out plain at that site, so its members' marks say the rest | six sites, section 3.1 |
 
+> **Amended 2026-11-24 (P3's NIT 4a).** The tree carries ONE stdlib W entry, `sync.Mutex.Lock` (its hand twin in
+> `sync/mutex.cs`). The other three in the table have no twin to mark: `RWMutex.Lock` and `RWMutex.RLock` are not
+> twinned, and `fdMutex`'s `rwlock` is not either. Each gains its mark when it gains a twin.
+
 ### 3.1 The stdlib's cut sites, as they are at the corpus (amended 2026-11-21, P3's MUST 1)
 
 Read in the converted source (`src/core/fmt`, go1.26.11 corpus), not in Go's: the first draft named two rune-reader

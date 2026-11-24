@@ -181,6 +181,107 @@ public class ParkCutTests
         StringAssert.Contains(twins, "// weak-sites=0 cut-sites=2", "the report counts both cut sites");
     }
 
+    // N1-1/2/4 over the method-holder form (P3's MUST, row 7 read 2026-11-24): a weak entry on a library method names the
+    // forwarder and the body by one key. The forwarder's one call is its own body, and that call is neither weak nor
+    // cuttable: the forwarder parks through it, so its twin exists, carries [GoParkWeak] and never [GoParkForwarder], and
+    // a caller twinned anyway awaits it. Without that, the forwarder stops parking and every caller holds its carrier.
+    private const string SuffixWeak = """
+            public partial struct P { public nint v; }
+
+            public static void sfxBoth⁔(/*this*/ ж<P> Ꮡp) { ᐸꟷ(ch); Ꮡp.Value.v++; }
+
+            public static void sfxBoth(this ж<P> Ꮡp) => sfxBoth⁔(Ꮡp);
+
+            internal static void onlySfx(ж<P> Ꮡp) { Ꮡp.sfxBoth(); }
+
+            internal static void sfxAndPark(ж<P> Ꮡp) { Ꮡp.sfxBoth(); ᐸꟷ(ch); }
+
+        """;
+
+    [TestMethod]
+    public void N1_1b_AWeakSuffixMethodKeepsItsForwarderParkingAndMarkedWeak()
+    {
+        (string twins, Diagnostic[] errors) = RunWith(null, Props(weak: "go.box_package.P.sfxBoth"), SuffixWeak);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        Assert.AreEqual(0, Stale().Length, "a live weak entry: " + StaleText());
+        string marks = MarksOf(twins, "sfxBoth");
+        StringAssert.Contains(marks, Weak, "the forwarder's twin carries the weak mark");
+        Assert.IsFalse(marks.Contains("GoParkForwarder", StringComparison.Ordinal), "the forwarder still parks, so it is not a marked forwarder");
+        StringAssert.Contains(TwinOf(twins, "sfxBoth"), "sfxBoth⁔ꞏtwin(", "the forwarder's twin awaits its body");
+        Assert.IsFalse(twins.Contains("onlySfxꞏtwin(", StringComparison.Ordinal), "N1-1: a caller whose only park is the weak member is plain");
+        StringAssert.Contains(TwinOf(twins, "sfxAndPark"), "sfxBothꞏtwin(", "N1-2: a caller twinned anyway awaits the weak forwarder");
+    }
+
+    private const string SuffixWeakLibrary = """
+        using System;
+        using static go.builtin;
+
+        namespace go;
+
+        public static partial class lib_package
+        {
+            internal static channel<nint> ch;
+
+            public partial struct P { public nint v; }
+
+            public static void sfxBoth⁔(/*this*/ ж<P> Ꮡp) { ᐸꟷ(ch); Ꮡp.Value.v++; }
+
+            public static void sfxBoth(this ж<P> Ꮡp) => sfxBoth⁔(Ꮡp);
+        }
+        """;
+
+    private const string UsesSuffixLibrary = """
+            internal static void useSfx(ж<lib_package.P> Ꮡp) { lib_package.sfxBoth(Ꮡp); }
+
+            internal static void useSfxAndPark(ж<lib_package.P> Ꮡp) { lib_package.sfxBoth(Ꮡp); ᐸꟷ(ch); }
+
+        """;
+
+    [TestMethod]
+    public void N1_4c_AWeakSuffixMethodCrossesAssembliesOnItsForwardersTwin()
+    {
+        LibraryTwins = true;
+        LibraryProperties = Props(weak: "go.lib_package.P.sfxBoth");
+
+        try
+        {
+            (string twins, Diagnostic[] errors) = RunWith(SuffixWeakLibrary, null, UsesSuffixLibrary);
+
+            Assert.AreEqual(0, errors.Length, Errors(errors));
+            Assert.IsFalse(twins.Contains("useSfxꞏtwin(", StringComparison.Ordinal), "the forwarder's [GoParkWeak] keeps useSfx plain");
+            StringAssert.Contains(TwinOf(twins, "useSfxAndPark"), "sfxBothꞏtwin(", "a caller twinned anyway awaits the forwarder's twin");
+        }
+        finally
+        {
+            LibraryTwins = false;
+            LibraryProperties = null;
+        }
+    }
+
+    // P3's SHOULD (row 7 read): a cut site inside a go literal is awaited by the rewriter when not cut, so a cut there is
+    // live, never "dead".
+    private const string CutInLiteral = """
+            public static void parker() { ᐸꟷ(ch); }
+
+            internal static void launches() { goǃ(() => { parker(); }); ᐸꟷ(ch); }
+
+        """;
+
+    [TestMethod]
+    public void N1_3c_ACutInsideAGoLiteralIsLive()
+    {
+        (string plain, Diagnostic[] plainErrors) = RunWith(null, null, CutInLiteral);
+        Assert.AreEqual(0, plainErrors.Length, Errors(plainErrors));
+        StringAssert.Contains(TwinOf(plain, "launches"), "parkerꞏtwin", "CONTROL: uncut, the literal awaits parker");
+
+        (string twins, Diagnostic[] errors) = RunWith(null, Props(cut: "go.box_package.launches->go.box_package.parker"), CutInLiteral);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        Assert.IsFalse(TwinOf(twins, "launches").Contains("parkerꞏtwin", StringComparison.Ordinal), "cut, the literal's call is plain");
+        Assert.AreEqual(0, Stale().Length, "the cut does something, so it is not dead: " + StaleText());
+    }
+
     // A library's member that parks, with its twin, marked weak or not; compiled first and referenced by image.
     private static string Library(bool weak) => $$"""
         using System;

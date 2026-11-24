@@ -79,6 +79,10 @@ public sealed partial class TwinGenerator : ISourceGenerator
 
         // N1 (DESIGN-mn-nopark.md 4): a named cut of its caller (GoTwinsCut or the stdlib table), never a park.
         public bool Cut;
+
+        // N1: a method forwarder's one call, to its own suffix-form body (one key names both). Never weak, never cut:
+        // the forwarder parks through it, as its callers expect (P3's row 7 read, 2026-11-24).
+        public bool OwnBody;
     }
 
     // golib's goǃ and goǃtwin ladders take the goroutine's function and at most 16 arguments.
@@ -299,6 +303,7 @@ public sealed partial class TwinGenerator : ISourceGenerator
 
             // N1 (TwinGenerator.ParkCuts.cs): this build's weak members and cut sites, set before the fixpoint reads them.
             ReadParkCuts();
+            MarkOwnBodies();
             MarkCuts();
 
             foreach (Candidate candidate in m_ordered)

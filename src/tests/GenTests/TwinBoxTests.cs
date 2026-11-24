@@ -720,8 +720,13 @@ public class TwinBoxTests
             // A library built WITH twins (LibraryTwins, set by the row): its generated twins, as a twin-built package ships them.
             if (LibraryTwins)
             {
+                Dictionary<string, string> libraryProperties = new() { ["build_property.GoTwins"] = "true" };
+
+                foreach (KeyValuePair<string, string> pair in LibraryProperties ?? [])
+                    libraryProperties[pair.Key] = pair.Value;
+
                 CSharpGeneratorDriver.Create([new RecvGenerator(), new FieldAccessGenerator(), new TypeGenerator(), new TwinGenerator()], parseOptions: options,
-                        optionsProvider: new BuildProperties(new() { ["build_property.GoTwins"] = "true" }))
+                        optionsProvider: new BuildProperties(libraryProperties))
                     .RunGeneratorsAndUpdateCompilation(lib, out lib, out _);
             }
 
@@ -769,6 +774,9 @@ public class TwinBoxTests
 
     // When set, RunWith builds its library with the twin generator on (TwinSurfaceTests, the refused-parker row).
     [ThreadStatic] internal static bool LibraryTwins;
+
+    // Extra build properties for a LibraryTwins build (N1-4b: the library's own GoTwinsWeak).
+    [ThreadStatic] internal static Dictionary<string, string>? LibraryProperties;
 
     // The diagnostics the generators of RunWith's last run reported (the guard's rows, TwinSurfaceTests F9 and F10).
     [ThreadStatic] internal static Diagnostic[]? LastGeneratorDiagnostics;
