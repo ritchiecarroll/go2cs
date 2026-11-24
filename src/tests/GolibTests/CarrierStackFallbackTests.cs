@@ -135,4 +135,22 @@ public class CarrierStackFallbackTests
         Assert.AreEqual(256 * MB, size, "the shared size is NOT walked down: the next carrier still asks for 256 MB");
         Assert.AreEqual(0, Lines(stderr).Length, $"nothing worked, so nothing is said:\n{stderr}");
     }
+
+    [TestMethod]
+    public void AfterANonSizeRefusalTheNextCarrierStartsAt256MB()
+    {
+        // A thread or process limit refuses every size; then threads free up (no refusal) and the next carrier, starting
+        // from the shared size the refusal left, gets the full 256 MB with nothing said.
+        (bool[] refused, _, long failures, int left) = StartCarriers(256 * MB, refuseAbove: 0, count: 1);
+
+        Assert.IsFalse(refused[0]);
+        Assert.AreEqual(1, failures);
+
+        (bool[] recovered, string stderr, long failuresAfter, int size) = StartCarriers(left, refuseAbove: int.MaxValue, count: 1);
+
+        Assert.IsTrue(recovered[0], "the next carrier starts once threads free up");
+        Assert.AreEqual(0, failuresAfter);
+        Assert.AreEqual(256 * MB, size, "and at 256 MB: the refusal did not cost the deep-recursion stack");
+        Assert.AreEqual(0, Lines(stderr).Length, $"a full-size start says nothing:\n{stderr}");
+    }
 }
