@@ -162,6 +162,8 @@ func TestSuggest(t *testing.T) {
 		"-recures":    "-recurse",
 		"nuget":       "-nuget-map",
 		"zzzzzzzz":    "",
+		"v":           "",
+		"tset":        "",
 	}
 
 	for name, want := range cases {
@@ -174,10 +176,19 @@ func TestSuggest(t *testing.T) {
 }
 
 func TestPlainText(t *testing.T) {
-	got := PlainText("See **[Build tags](X.md#a)**, `-tags`, `src\\`<!-- note -->  and more.")
+	cases := map[string]string{
+		"See **[Build tags](X.md#a)**, `-tags`<!-- note -->  and more.": "See Build tags (" + SiteURL + "X.html#a), -tags and more.",
+		"Ctrl-C or Ctrl-\\ stops the run":                               "Ctrl-C or Ctrl-\\ stops the run",
+		"writes `<dir>\\platform-manifest.json` and `src\\`":            "writes <dir>\\platform-manifest.json and src\\",
+		"an escaped \\* star and \\| pipe":                              "an escaped * star and | pipe",
+		"[nugetgo.net](https://nugetgo.net) and [x](../LICENSING.md)":   "https://nugetgo.net and x (" + repositoryURL + "LICENSING.md)",
+		"[the reference](#option-tests)":                                "the reference",
+	}
 
-	if want := "See Build tags, -tags, src and more."; got != want {
-		t.Errorf("PlainText = %q, want %q", got, want)
+	for markdown, want := range cases {
+		if got := PlainText(markdown); got != want {
+			t.Errorf("PlainText(%q) = %q, want %q", markdown, got, want)
+		}
 	}
 }
 

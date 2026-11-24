@@ -24,8 +24,9 @@ import (
 )
 
 // helpRequest reports whether args ask for help, and the topic asked about: "" for the common help, "all" for every
-// option, or an option name. Help is -h, -help or --help anywhere before a "--", with the topic either after an equals
-// sign or as the next argument.
+// option, or an option name. Help is -h, -help or --help anywhere before a "--". The topic follows an equals sign, or
+// is the next argument when that is "all" or names an option, with or without its dash; any other next argument, such
+// as the input of `go2cs -h pkg_dir out`, leaves the common help.
 func helpRequest(args []string) (topic string, ok bool) {
 	for i, arg := range args {
 		if arg == "--" {
@@ -46,8 +47,12 @@ func helpRequest(args []string) (topic string, ok bool) {
 			return value, true
 		}
 
-		if i+1 < len(args) && !strings.HasPrefix(args[i+1], "-") {
-			return args[i+1], true
+		if i+1 < len(args) {
+			if next := args[i+1]; strings.EqualFold(next, "all") {
+				return next, true
+			} else if _, known := clihelp.Lookup(next); known {
+				return next, true
+			}
 		}
 
 		return "", true

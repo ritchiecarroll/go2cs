@@ -14,6 +14,7 @@ package clihelp
 import (
 	"fmt"
 	"io"
+	"path"
 	"regexp"
 	"sort"
 	"strings"
@@ -89,7 +90,7 @@ func Options() []Option {
 }
 
 // Suggest returns the option names closest to name, nearest first: a name name is a prefix of, or one at most two
-// edits away. It returns nothing when no name is that close.
+// edits away and no more than a third of name's length. It returns nothing when no name is that close.
 func Suggest(name string) []string {
 	name = strings.TrimLeft(name, "-")
 
@@ -102,7 +103,7 @@ func Suggest(name string) []string {
 
 	for _, option := range options {
 		switch distance := editDistance(name, option.Name); {
-		case distance <= 2:
+		case distance <= min(2, len(name)/3):
 			candidates = append(candidates, scored{option.Name, distance})
 		case len(name) >= 3 && strings.HasPrefix(option.Name, name):
 			candidates = append(candidates, scored{option.Name, 3})
@@ -154,17 +155,27 @@ func editDistance(a, b string) int {
 // Usage is the first line every help form prints.
 const Usage = "Usage: go2cs [options] <input> [output_dir]"
 
+// SiteURL is where the go2cs documentation is published. A link in an option's details prints its target there, since
+// a user of the dotnet tool has no clone to look in.
+const SiteURL = "https://go2cs.net/"
+
+// repositoryURL is where a linked file outside docs/ is read.
+const repositoryURL = "https://github.com/ritchiecarroll/go2cs/blob/master/"
+
 // Footer closes the common help.
 const Footer = `go2cs -help all lists every option. go2cs -help <option> explains one, for example go2cs -help tests.
 go2cs toolchain -help manages the Go toolchain go2cs converts with.
-The full reference is docs/CommandLine.md in the go2cs repository.`
+Every option, in full: ` + SiteURL + `CommandLine.html`
 
-// examples are the common help's examples: what a first conversion looks like.
+// examples are the common help's examples: converting a program and building it, which is what a first-time user
+// needs, then the single-package and test forms, which build against a go2cs clone.
 var examples = [][2]string{
-	{"go2cs package_dir out", "convert one package"},
-	{"go2cs -recurse=nuget module_dir out", "convert a module, with the standard library from NuGet"},
-	{"go2cs -tests -test-action all pkg_dir out", "convert a package and its tests, run them, compare with go test"},
-	{"go2cs -stdlib fmt strings", "convert standard library packages"},
+	{"go2cs -recurse=nuget module_dir out", "convert a program (its module and dependencies); the standard library " +
+		"comes from NuGet"},
+	{"cd out/src/<import-path> && dotnet run", "then build and run it (needs the .NET 10 SDK)"},
+	{"go2cs package_dir out", "convert one package; it builds against a go2cs clone (-go2cspath)"},
+	{"go2cs -tests -test-action all pkg_dir out", "convert a package's tests, run them and compare with go test (in a " +
+		"go2cs clone)"},
 }
 
 const width = 100
@@ -175,8 +186,15 @@ func WriteCommon(w io.Writer) {
 	writeList(w, filter(func(o Option) bool { return o.Class == Common }))
 	fmt.Fprintf(w, "\nExamples:\n")
 
+	indent := strings.Repeat(" ", 2+41+2)
+
 	for _, example := range examples {
-		fmt.Fprintf(w, "  %-44s %s\n", example[0], example[1])
+		if len(example[0]) > 41 {
+			fmt.Fprintf(w, "  %s\n%s\n", example[0], wrap(example[1], width, indent))
+			continue
+		}
+
+		fmt.Fprintf(w, "  %-41s  %s\n", example[0], strings.TrimLeft(wrap(example[1], width, indent), " "))
 	}
 
 	fmt.Fprintf(w, "\n%s\n", Footer)
@@ -286,21 +304,67 @@ func writeList(w io.Writer, list []Option) {
 
 var (
 	commentPattern = regexp.MustCompile(`(?s)<!--.*?-->`)
-	linkPattern    = regexp.MustCompile(`\[([^\]]*)\]\([^)]*\)`)
+	linkPattern    = regexp.MustCompile(`\[([^\]]*)\]\(([^)]*)\)`)
 	strongPattern  = regexp.MustCompile(`\*\*([^*]+)\*\*`)
+	escapePattern  = regexp.MustCompile("\\\\([!-/:-@\\[-`{-~])")
 	spacePattern   = regexp.MustCompile(`\s+`)
 )
 
-// PlainText turns one paragraph of Markdown into terminal text: HTML comments go, a link keeps its text, strong
-// emphasis and code spans lose their marks, and a backslash escape keeps the character it escapes.
+// PlainText turns one paragraph of Markdown into terminal text: HTML comments go, a link keeps its text and adds its
+// target (LinkTarget), strong emphasis and code spans lose their marks, and outside a code span a backslash before
+// ASCII punctuation, a Markdown escape, keeps only the character it escapes. Any other backslash is printed.
 func PlainText(markdown string) string {
 	text := commentPattern.ReplaceAllString(markdown, "")
-	text = linkPattern.ReplaceAllString(text, "$1")
+	text = linkPattern.ReplaceAllStringFunc(text, func(link string) string {
+		parts := linkPattern.FindStringSubmatch(link)
+		label, target := parts[1], LinkTarget(parts[2])
+
+		switch {
+		case target == "":
+			return label
+		case strings.Contains(target, strings.Trim(label, "`")):
+			return target
+		default:
+			return label + " (" + target + ")"
+		}
+	})
 	text = strongPattern.ReplaceAllString(text, "$1")
-	text = strings.ReplaceAll(text, "`", "")
-	text = strings.ReplaceAll(text, `\`, "")
+
+	// Even pieces are outside a code span, odd ones inside it, where a backslash is literal.
+	pieces := strings.Split(text, "`")
+
+	for i := 0; i < len(pieces); i += 2 {
+		pieces[i] = escapePattern.ReplaceAllString(pieces[i], "$1")
+	}
+
+	text = strings.Join(pieces, "")
 
 	return strings.TrimSpace(spacePattern.ReplaceAllString(text, " "))
+}
+
+// LinkTarget is where a link in an option's details points, for the terminal: an absolute URL as it is, a page of the
+// documentation at SiteURL, and any other file of the repository on GitHub. Links resolve from docs/, where the page
+// they are published on lives. A link to an anchor of the same page has no target outside it, and returns "".
+func LinkTarget(target string) string {
+	switch {
+	case strings.HasPrefix(target, "https://") || strings.HasPrefix(target, "http://"):
+		return target
+	case strings.HasPrefix(target, "#"):
+		return ""
+	}
+
+	file, anchor, _ := strings.Cut(target, "#")
+	resolved := path.Join("docs", file)
+
+	if anchor != "" {
+		anchor = "#" + anchor
+	}
+
+	if page, ok := strings.CutPrefix(resolved, "docs/"); ok && strings.HasSuffix(page, ".md") {
+		return SiteURL + strings.TrimSuffix(page, ".md") + ".html" + anchor
+	}
+
+	return repositoryURL + resolved + anchor
 }
 
 // wrap fills text to width columns, every line starting with indent.

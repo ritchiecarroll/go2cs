@@ -86,7 +86,7 @@ func TestHelpAllListsEveryOption(t *testing.T) {
 
 // -help <option> prints that option's entry, with the flag's default, in either spelling of the topic.
 func TestHelpExplainsOneOption(t *testing.T) {
-	for _, args := range [][]string{{"-help", "indent"}, {"-help=indent"}, {"-help=-indent"}} {
+	for _, args := range [][]string{{"-help", "indent"}, {"-help=indent"}, {"-help=-indent"}, {"-help", "-indent"}} {
 		stdout, _, code := runCLIStatus(t, args...)
 
 		if code != 0 || !strings.HasPrefix(stdout, "-indent <n>\n") || !strings.Contains(stdout, "Default: 4") {
@@ -97,7 +97,7 @@ func TestHelpExplainsOneOption(t *testing.T) {
 
 // A help topic that names no option, or an option the flag set does not define, fails with the nearest names.
 func TestHelpSuggestsTheNearestOption(t *testing.T) {
-	for _, args := range [][]string{{"-help", "test-actoin"}, {"-test-actoin", "all", "pkg"}} {
+	for _, args := range [][]string{{"-help=test-actoin"}, {"-test-actoin", "all", "pkg"}} {
 		_, stderr, code := runCLIStatus(t, args...)
 
 		if code != 1 || !strings.Contains(stderr, "there is no option -test-actoin. Did you mean -test-action?") {
@@ -147,13 +147,31 @@ func TestHelpRequest(t *testing.T) {
 		{[]string{"--help"}, "", true},
 		{[]string{"-help", "all"}, "all", true},
 		{[]string{"-help=tests"}, "tests", true},
-		{[]string{"-recurse", "-help", "-tests"}, "", true},
+		{[]string{"-recurse", "-help", "-tests"}, "-tests", true},
+		{[]string{"-h", "pkg_dir", "out"}, "", true},
+		{[]string{"-help", "tests"}, "tests", true},
+		{[]string{"-help", "ALL"}, "ALL", true},
 		{[]string{"--", "-help"}, "", false},
 	}
 
 	for _, c := range cases {
 		if topic, ok := helpRequest(c.args); topic != c.topic || ok != c.ok {
 			t.Errorf("helpRequest(%q) = %q, %v; want %q, %v", c.args, topic, ok, c.topic, c.ok)
+		}
+	}
+}
+
+// The -warn help names every code -warn may downgrade, so the table cannot fall behind warnAllowedCodes.
+func TestHelpNamesEveryWarnAllowedCode(t *testing.T) {
+	stdout, _, code := runCLIStatus(t, "-help", "warn")
+
+	if code != 0 {
+		t.Fatalf("go2cs -help warn: exit %d", code)
+	}
+
+	for _, allowed := range warnAllowedCodeList() {
+		if !strings.Contains(stdout, allowed) {
+			t.Errorf("go2cs -help warn does not name %s, which -warn may downgrade:\n%s", allowed, stdout)
 		}
 	}
 }

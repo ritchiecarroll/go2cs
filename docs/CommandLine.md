@@ -41,11 +41,11 @@ The common options, with a short description each. Each name links to its full e
 | Option | Description |
 |:--|:--|
 | [`-recurse[=module,nuget]`](#option-recurse) | Convert a module and its third-party dependencies (=module: the module only; =nuget: standard library from NuGet). |
-| [`-go2cspath <dir>`](#option-go2cspath) | Where the go2cs standard library and runtime are, when they are not from NuGet (env GO2CSPATH). |
+| [`-go2cspath <dir>`](#option-go2cspath) | Where the go2cs standard library and runtime are when not from NuGet, and where -stdlib writes. |
 | [`-platforms <os/arch>`](#option-platforms) | The target platform, os/arch (default: this machine's). |
 | [`-tags <list>`](#option-tags) | Build tags applied when loading packages, comma-separated. |
 | [`-comments`](#option-comments) | Carry the Go source comments into the C#. |
-| [`-stdlib`](#option-stdlib) | Convert the Go standard library itself, or the packages named after it. |
+| [`-stdlib`](#option-stdlib) | For go2cs development: convert the Go standard library into the -go2cspath root. |
 | [`-cgo`](#option-cgo) | Convert a cgo package whose C use go2cs can bind (needs a C compiler). |
 | [`-tests`](#option-tests) | Also convert the package's Go tests and emit a runnable C# test host. |
 | [`-test-action <action>`](#option-test-action) | With -tests: convert, build, run, compare (with go test) or all. |
@@ -101,7 +101,7 @@ What a first conversion needs: convert and build a program or module, or check a
 
 Common option, converting.
 
-Convert a downloaded module **and its third-party dependencies** in dependency order, referencing (not reconverting) the pre-converted standard library. **Plain `-recurse` references a standard library staged on this machine** by `deploy-core.ps1`, at `<gopath>/src/go2cs`, so pass `-go2cspath <gopath>/src/go2cs` with it; most conversions want `-recurse=nuget`, which needs nothing staged. An optional second positional sets the output root for the generated `src\` (app) and `pkg\` (dependency) trees. A package that fails to convert (it does not load, or the converter panics) is reported and skipped, and so is a package the converter **refuses** (a `GO2CS2001`, `GO2CS2002`, `GO2CS2003`, `GO2CS2005`, `GO2CS2006`, `GO2CS2010` or `GO2CS2011` error): its diagnostics print as errors, it gets no project, every other package still converts, and the run ends with exit 1, naming each failed and refused package and each converted package that imports a refused one (which will not build until the refused package converts). A code downgraded by `-warn` is not a refusal. A single-package conversion still stops at a refusal and writes nothing. `-tests -recurse` skips a refused package too and tests each package as `go test ./...` does: a tested package that is refused, or whose test closure imports a refused package, is named with that reason and gets no test project, the others are converted and tested, and the run ends with exit 1. Its conversion step also goes on past a failed package as before. The module is converted, and validated, as Go builds it with the build tags `safe,purego,noasm`, which the run prints at its start (see [Build tags](ConvertingAModule.md#build-tags-for-a-module)). See [Converting a real-world Go module](ConvertingAModule.md).
+Convert a downloaded module **and its third-party dependencies** in dependency order, referencing (not reconverting) the pre-converted standard library. **Plain `-recurse` references a standard library staged on this machine** by `deploy-core.ps1`, at `<gopath>/src/go2cs`, so pass `-go2cspath <gopath>/src/go2cs` with it; most conversions want `-recurse=nuget`, which needs nothing staged. An optional second positional sets the output root for the generated `src\` (app) and `pkg\` (dependency) trees. A package that fails to convert (it does not load, or the converter panics) is reported and skipped, and so is a package the converter **refuses** (any refusal error, listed in [Diagnostic codes](DiagnosticCodes.md)): its diagnostics print as errors, it gets no project, every other package still converts, and the run ends with exit 1, naming each failed and refused package and each converted package that imports a refused one (which will not build until the refused package converts). A code downgraded by `-warn` is not a refusal. A single-package conversion still stops at a refusal and writes nothing. `-tests -recurse` skips a refused package too and tests each package as `go test ./...` does: a tested package that is refused, or whose test closure imports a refused package, is named with that reason and gets no test project, the others are converted and tested, and the run ends with exit 1. Its conversion step also goes on past a failed package as before. The module is converted, and validated, as Go builds it with the build tags `safe,purego,noasm`, which the run prints at its start (see [Build tags](ConvertingAModule.md#build-tags-for-a-module)). See [Converting a real-world Go module](ConvertingAModule.md).
 
 `-recurse=module`: Same, but convert only the module's own packages: third-party packages are referenced into `pkg\` but not converted, and are listed at the end of the run. It changes the scope only: alone it keeps plain `-recurse`'s local references, and `-recurse=module,nuget` gives NuGet ones. See [converting the module only](ConvertingAModule.md#optional-convert-the-module-only-and-deal-with-its-dependencies-later).
 
@@ -135,7 +135,7 @@ Carry source comments into the output (best effort, see [go/ast comment status](
 
 Common option, converting.
 
-Convert the Go standard library, or only the packages named after it (`go2cs -stdlib fmt strings`). With no `-tags` it applies the build tags `purego,math_big_pure_go`, which select the portable Go implementations over the assembly ones; an explicit `-tags` replaces them, and `-tags=` applies none.
+For go2cs development: convert the Go standard library, or only the packages named after it (`go2cs -stdlib fmt strings`), into the `-go2cspath` root, as `core/<package>`. Converting a program does not need it: `-recurse=nuget` takes the standard library from NuGet. Convert into a root copied from a go2cs clone's `src/core`: in any other root the hand-written files are replaced by automatic conversions that compile and do not work. With no `-tags` it applies the build tags `purego,math_big_pure_go`, which select the portable Go implementations over the assembly ones; an explicit `-tags` replaces them, and `-tags=` applies none.
 
 #### <a id="option-cgo"></a>`-cgo`
 
@@ -307,7 +307,7 @@ With `-tests`: convert a package that `-stdlib` deliberately skips (`testing`, `
 
 Advanced option, testing.
 
-With `-tests` on a third-party module: the committed tree of module rows' disclosure manifests, laid out like the module cache (`<dir>/<module path>@<version>/<package dir>/go2cs_test_disclosures.json`; the repository keeps it at `src/tests/ModuleDisclosures`). A manifest there is read only when the package's output directory holds none, and only for the module version this run resolved; a manifest kept for another version is not applied, and the run prints one line naming both. The version comes from the module-cache directory the module was converted from, or from `-module-version`; when it can be found from neither, the run is refused before any conversion. Takes effect only with `-tests -recurse`, and is refused otherwise.
+With `-tests` on a third-party module: the committed tree of disclosure manifests (the tests a module's own validation excludes, each with its reason), laid out like the module cache (`<dir>/<module path>@<version>/<package dir>/go2cs_test_disclosures.json`; the repository keeps it at `src/tests/ModuleDisclosures`). A manifest there is read only when the package's output directory holds none, and only for the module version this run resolved; a manifest kept for another version is not applied, and the run prints one line naming both. The version comes from the module-cache directory the module was converted from, or from `-module-version`; when it can be found from neither, the run is refused before any conversion. Takes effect only with `-tests -recurse`, and is refused otherwise.
 
 #### <a id="option-module-version"></a>`-module-version <version>`
 
@@ -349,7 +349,7 @@ With `-recurse=nuget`: apply only **canonical** mappings (the module owner's own
 
 Advanced option, nuget mapping.
 
-With `-recurse=nuget`: read mapped packages' versions from this feed **instead of** nuget.org: an `https://` NuGet v3 service index (a rehearsal gallery such as int.nugettest.org) or a local folder of `.nupkg` files. A rehearsal version (`nugetgo-pack.ps1 -RehearsalSuffix`) is admitted only from it. The restore reads your own package sources, so add the feed there too.
+With `-recurse=nuget`: read mapped packages' versions from this feed **instead of** nuget.org: an `https://` NuGet v3 service index (a test gallery such as int.nugettest.org, for trying packages before they are published) or a local folder of `.nupkg` files. A rehearsal version (`nugetgo-pack.ps1 -RehearsalSuffix`) is admitted only from it. The restore reads your own package sources, so add the feed there too.
 
 #### <a id="option-indent"></a>`-indent <n>`
 
@@ -409,7 +409,7 @@ Override which struct types hold their Go arrays INLINE (the `go.arrays` family,
 
 Advanced option, output.
 
-Downgrade the listed converter refusals to warnings, so a package that holds a refused site still converts and the rest of it runs. Opt-in per code, never a default. A code is allowed only when every site it covers fails LOUD when reached: the converted program panics there with the refusal text, and never runs on with a silently wrong result. Today that is `GO2CS2002` alone (a self-referential constraint proxy method that cannot forward its storage-sharing value). Each downgraded site is printed as `warning GO2CS2002: ...` (exit 0) and recorded in package_info.cs, and every C# build of the project then reports it as `GO2CS0011`, so a project nobody converts again still shows it carries a known-broken path. An unknown code, or a known code that cannot fail loud (`GO2CS2001`, `GO2CS2003`, `GO2CS2004`, `GO2CS2005`, `GO2CS2006`, `GO2CS2008`, `GO2CS2010`, `GO2CS2011`), is an error that names it and the reason. See [diagnostic codes](DiagnosticCodes.md).
+Downgrade the listed converter refusals to warnings, so a package that holds a refused site still converts and the rest of it runs. Opt-in per code, never a default. A code is allowed only when every site it covers fails LOUD when reached: the converted program panics there with the refusal text, and never runs on with a silently wrong result. Today that is `GO2CS2002` alone (a self-referential constraint proxy method that cannot forward its storage-sharing value). Each downgraded site is printed as `warning GO2CS2002: ...` (exit 0) and recorded in package_info.cs, and every C# build of the project then reports it as `GO2CS0011`, so a project nobody converts again still shows it carries a known-broken path. Any other code, an unknown one or a refusal that cannot fail loud, is an error that names it and the reason. See [diagnostic codes](DiagnosticCodes.md).
 
 #### <a id="option-platform-census"></a>`-platform-census <dir>`
 

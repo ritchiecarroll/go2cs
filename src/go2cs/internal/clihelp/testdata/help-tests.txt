@@ -11,4 +11,5 @@
   out_root, with the output root outside the module's source tree. The module form does not look for
   the go2cs tree, so name it with -go2cspath, as an absolute path (or GO2CSPATH). It takes plain
   -recurse only: -tests with =module or =nuget is refused; a module that needs a newer Go than the
-  converted standard library is refused. See Validate a converted test suite.
+  converted standard library is refused. See Validate a converted test suite
+  (https://go2cs.net/BuildingGo2cs.html#validate-a-converted-test-suite).
