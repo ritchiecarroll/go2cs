@@ -203,6 +203,10 @@ type cgoStructParam struct {
 	goSide  string
 	pointer bool
 	void    bool
+
+	// out is a pointer to one C pointer, the out-parameter (`&db`, `char **`; Phase 3 shape (i), 3.2 seat 1b), and
+	// goSide is then the C pointer's pointee: the slot is a ж<ж<goSide>>.
+	out bool
 }
 
 // cgoIsVoidPointer reports whether a parameter or result type is Go's unsafe.Pointer, which is what cmd/cgo gives a C
@@ -234,6 +238,22 @@ func (set *cgoWrapperSet) param(function string, index int, t types.Type) (cgoSt
 	}
 
 	if pointer, ok := t.(*types.Pointer); ok {
+		// A pointer to one C pointer is the out-parameter (shape (i), design 18.12 item 4): one stack word, copied in and
+		// back by the pointer-member rules. Its pointee is a C struct or one C scalar, as a pointer parameter's is.
+		if inner, ok := types.Unalias(pointer.Elem()).(*types.Pointer); ok {
+			if named := cgoStructOf(inner.Elem()); named != nil {
+				return cgoStructParam{goSide: cgoGoSideName(named), out: true}, nil
+			}
+
+			scalar, err := cgoScalarOf(function, role, inner.Elem())
+
+			if err != nil || scalar.isVoid {
+				return cgoStructParam{}, fmt.Errorf("cgo wrapper: C.%s's %s is a pointer to a pointer to something other than a C struct or one C scalar, which go2cs does not pass to C yet", function, role)
+			}
+
+			return cgoStructParam{goSide: scalar.goSide, out: true}, nil
+		}
+
 		named := cgoStructOf(pointer.Elem())
 
 		// A pointer to ONE C scalar crosses as a struct pointer does: a stack copy in, its address handed over, and the
@@ -330,7 +350,7 @@ func (set *cgoWrapperSet) wrapper(declaration cgoDeclaration) (string, error) {
 		}
 
 		params[i] = param
-		scalarsOnly = scalarsOnly && param.mirror == nil && !param.pointer && !param.void
+		scalarsOnly = scalarsOnly && param.mirror == nil && !param.pointer && !param.void && !param.out
 	}
 
 	resultType := signature.Results().At(0).Type()
@@ -419,6 +439,11 @@ func (set *cgoWrapperSet) wrapper(declaration cgoDeclaration) (string, error) {
 			wrapperParams = append(wrapperParams, fmt.Sprintf("%s p%d", cgoVoidPointerType, i))
 			arguments = append(arguments, fmt.Sprintf("a%d", i))
 
+		case param.out:
+			externParams = append(externParams, fmt.Sprintf("nint p%d", i))
+			wrapperParams = append(wrapperParams, fmt.Sprintf("ж<ж<%s>> p%d", param.goSide, i))
+			arguments = append(arguments, fmt.Sprintf("a%d", i))
+
 		case param.pointer:
 			externParams = append(externParams, fmt.Sprintf("nint p%d", i))
 			wrapperParams = append(wrapperParams, fmt.Sprintf("ж<%s> p%d", param.goSide, i))
@@ -453,6 +478,16 @@ func (set *cgoWrapperSet) wrapper(declaration cgoDeclaration) (string, error) {
 			// everything else is refused here, before anything is pinned or handed over (13.5: classify, pin, call).
 			fmt.Fprintf(&before, "\n        global::go.golib.GoCgoPin g%d = %sPinVoidPointer(p%d, %q);\n", i, args, i, function)
 			pinned = append(pinned, i)
+
+		case param.out:
+			// The out-parameter (shape (i)): a slot in Go memory crosses as one stack word, copied in by the pointer-member
+			// rule (a Go pointer in it is cgo's panic) and copied back after the call, where an address C left alone keeps
+			// its box. A slot in C memory is handed over by its own address.
+			fmt.Fprintf(&before, "\n        nint m%d = default;\n", i)
+			fmt.Fprintf(&before, "        global::go.golib.GoCgoStructPointer k%d = %sOutParameter(p%d, %q, out nuint n%d, out ж<%s>? q%d);\n", i, args, i, function, i, param.goSide, i)
+			fmt.Fprintf(&before, "        nint a%d = (nint)n%d;\n", i, i)
+			fmt.Fprintf(&before, "\n        if (k%d == %s)\n        {\n            m%d = (nint)n%d;\n            a%d = (nint)(&m%d);\n        }\n", i, mirrorKind, i, i, i, i)
+			fmt.Fprintf(&after, "\n        if (k%d == %s)\n            p%d.ValueSlot = %sPointerMemberBack<%s>((nuint)m%d, q%d, n%d);\n", i, mirrorKind, i, args, param.goSide, i, i, i)
 
 		case param.pointer:
 			copyType := param.scalar.primitive

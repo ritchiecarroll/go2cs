@@ -124,6 +124,38 @@ namespace go.golib;
     }
 
     /// <summary>
+    /// The out-parameter, ruled shape (i) (cgo Phase 3, increment 3.2, seat 1b: design 4 and 18.12 item 4): a pointer
+    /// to one C pointer (<c>&amp;db</c>, <c>char **</c>). A slot in Go memory crosses as one stack word, as a pointer
+    /// MEMBER of a mirror does (<see cref="GoCgoStructPointer.Mirror"/>): <paramref name="word"/> is copied in by
+    /// <see cref="PointerMember{U}"/> (nil 0, a C pointer its address, a Go pointer cgo's panic), and the wrapper copies
+    /// the word back after the call by <see cref="PointerMemberBack{U}"/> against <paramref name="original"/>. A slot in C
+    /// memory (<c>&amp;l.next</c> over a C struct) is handed over by its own address, uncopied
+    /// (<see cref="GoCgoStructPointer.Native"/>). A nil slot is C's NULL.
+    /// </summary>
+    public static GoCgoStructPointer OutParameter<U>(ж<ж<U>>? slot, string function, out nuint word, out ж<U>? original)
+    {
+        word = 0;
+        original = null;
+
+        if (slot is null || slot.IsNilPointer)
+            return GoCgoStructPointer.Nil;
+
+        if (slot is NativeBox<ж<U>> native)
+        {
+            if (!IsGenuinelyNative(native))
+                throw Refused(function, typeof(ж<U>), "a native pointer minted from managed storage (a reinterpret view, an order token or a pinned managed address), which C must not write through");
+
+            word = native.NativeAddress;
+            return GoCgoStructPointer.Native;
+        }
+
+        RequireManagedSlot(slot);
+        original = slot.ValueSlot;
+        word = PointerMember(original);
+        return GoCgoStructPointer.Mirror;
+    }
+
+    /// <summary>
     /// A pointer member's value as it is copied into a mirror: nil is 0 and a genuinely native pointer is its address.
     /// A pointer into Go memory panics with cgo's own message: Go's cgocheck makes the same refusal at run time, and
     /// here it is always on. (Go prefixes the message with the caller's file and line, which a wrapper cannot know.)

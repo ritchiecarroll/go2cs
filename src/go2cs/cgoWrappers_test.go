@@ -118,6 +118,9 @@ type _Ctype_time_t = _Ctype_long
 
 func _Cfunc_gmtime_r(p0 *_Ctype_time_t, p1 *_Ctype_struct_tm) (r1 *_Ctype_struct_tm) { return }
 func _Cfunc_frexp(p0 _Ctype_double, p1 *_Ctype_int) (r1 _Ctype_double) { return }
+
+// strtol: its char ** parameter is the out-parameter (Phase 3 shape (i), 3.2 seat 1b), one stack word copied in and back.
+func _Cfunc_strtol(p0 *_Ctype_char, p1 **_Ctype_char, p2 _Ctype_int) (r1 _Ctype_long) { return }
 `
 
 const cgoDarwinStructs = `
@@ -165,6 +168,9 @@ type _Ctype_time_t = _Ctype_long
 
 func _Cfunc_gmtime_r(p0 *_Ctype_time_t, p1 *_Ctype_struct_tm) (r1 *_Ctype_struct_tm) { return }
 func _Cfunc_frexp(p0 _Ctype_double, p1 *_Ctype_int) (r1 _Ctype_double) { return }
+
+// strtol: its char ** parameter is the out-parameter (Phase 3 shape (i), 3.2 seat 1b), one stack word copied in and back.
+func _Cfunc_strtol(p0 *_Ctype_char, p1 **_Ctype_char, p2 _Ctype_int) (r1 _Ctype_long) { return }
 `
 
 const cgoWindowsStructs = `
@@ -225,6 +231,9 @@ type _Ctype___time64_t = _Ctype_longlong
 
 func _Cfunc__gmtime64_s(p0 *_Ctype_struct_tm, p1 *_Ctype___time64_t) (r1 _Ctype_int) { return }
 func _Cfunc_frexp(p0 _Ctype_double, p1 *_Ctype_int) (r1 _Ctype_double) { return }
+
+// strtol: its char ** parameter is the out-parameter (Phase 3 shape (i), 3.2 seat 1b), one stack word copied in and back.
+func _Cfunc_strtol(p0 *_Ctype_char, p1 **_Ctype_char, p2 _Ctype_int) (r1 _Ctype_long) { return }
 `
 
 // The probe library's declarations (increment 4d), as cmd/cgo gives them on every OS: src/tests/GolibTests/cgo-probe's

@@ -665,6 +665,61 @@ static unsafe partial class cgotestꓸC_package
         return default;
     }
 
+    // C.strtol, bound to ucrtbase.dll.
+    [global::System.Runtime.InteropServices.LibraryImport("ucrtbase.dll", EntryPoint = "strtol")]
+    [global::System.Runtime.InteropServices.UnmanagedCallConv(CallConvs = new[] { typeof(global::System.Runtime.CompilerServices.CallConvCdecl) })]
+    private static partial int strtolᴍnative(nint p0, nint p1, int p2);
+
+    internal static @long strtol(ж<@char> p0, ж<ж<@char>> p1, @int p2)
+    {
+        sbyte m0 = default;
+        global::go.golib.GoCgoStructPointer k0 = global::go.golib.GoCgoArgs.ScalarPointer(p0, "strtol", out nuint n0, out global::go.golib.GoCgoPin g0);
+        nint a0 = (nint)n0;
+
+        if (k0 == global::go.golib.GoCgoStructPointer.Mirror)
+        {
+            m0 = (int8)p0.Value;
+            a0 = (nint)(&m0);
+        }
+
+        nint m1 = default;
+        global::go.golib.GoCgoStructPointer k1 = global::go.golib.GoCgoArgs.OutParameter(p1, "strtol", out nuint n1, out ж<@char>? q1);
+        nint a1 = (nint)n1;
+
+        if (k1 == global::go.golib.GoCgoStructPointer.Mirror)
+        {
+            m1 = (nint)n1;
+            a1 = (nint)(&m1);
+        }
+
+        int r;
+
+        fixed (byte* f0 = g0)
+        {
+            if (k0 == global::go.golib.GoCgoStructPointer.Pinned)
+                a0 = g0.Address(f0);
+
+            global::go.runtime_package.syscallEntersyscall();
+
+            try
+            {
+                r = strtolᴍnative(a0, a1, (int32)p2);
+            }
+            finally
+            {
+                global::go.runtime_package.syscallExitsyscall();
+            }
+        }
+
+        if (k0 == global::go.golib.GoCgoStructPointer.Mirror)
+            p0.Value = (@char)(int8)m0;
+
+        if (k1 == global::go.golib.GoCgoStructPointer.Mirror)
+            p1.ValueSlot = global::go.golib.GoCgoArgs.PointerMemberBack<@char>((nuint)m1, q1, n1);
+
+        return (@long)(int32)r;
+    }
+
     // The package's C libraries, as the converter captured them, registered with golib's resolver for this
     // assembly's own [LibraryImport] bindings when the module loads.
     [global::System.Runtime.CompilerServices.ModuleInitializer]
