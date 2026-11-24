@@ -236,8 +236,8 @@ means a [golib](#the-golib-runtime-library) type or function implements it at ru
   src/tests/Behavioral/MapCommaOk/main.cs.target:8#440e42 · src/tests/Behavioral/GenericFuncDecl/GenericFuncDecl.cs.target:7#6d8518 +
   src/tests/Behavioral/GenericInterfaceConstraint/GenericInterfaceConstraint.go:53#b41110 + GenericInterfaceConstraint.cs.target:47#b015bf ·
   src/tests/Behavioral/TypeConversionReturnType/TypeConversionReturnType.cs.target:1#b7a909 ·
-  src/tests/Behavioral/PackageVarInitOrder/registry.cs.target:14#8dd9ca · src/tests/Behavioral/LambdaFunctions/LambdaFunctions.cs.target:49#5d6ee4 +
-  src/tests/Behavioral/LocalFunctionEmission/main.cs.target:15#9ecd18 (local function only from a `name := func…` short declaration
+  src/tests/Behavioral/PackageVarInitOrder/registry.cs.target:14#8dd9ca · src/tests/Behavioral/LambdaFunctions/LambdaFunctions.cs.target:49#afed8b +
+  src/tests/Behavioral/LocalFunctionEmission/main.cs.target:15#a71e1d (local function only from a `name := func…` short declaration
   whose variable is only called; a `var f T = func…` stays a lambda, LambdaFunctions.go:49,52#68e74a) ·
   src/tests/Behavioral/ForVariants/ForVariants.cs.target:55,61#094976 ·
   src/tests/Behavioral/ExprSwitch/ExprSwitch.cs.target:57#5657c6 · src/tests/Behavioral/TypeAssert/TypeAssert.cs.target:24,62#71330e +
