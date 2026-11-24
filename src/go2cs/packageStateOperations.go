@@ -52,6 +52,7 @@ func resetPackageState(pkg *packages.Package) {
 	cgoRouteActive = false
 	cgoBindingsWritten = false
 	cgoRouteFunctions = nil
+	cgoRouteVariables = nil
 	cgoCheckClosures = nil
 	currentPackagePath = pkg.PkgPath
 	packageInfoSystemClashes = systemUsingClashes(pkg.Types)
