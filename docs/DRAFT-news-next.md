@@ -137,12 +137,12 @@ and match Go's test results. C# written by hand against converted code may need 
        remarks ("A project that sets it keeps the generator's rule and loses only this net"), the GO2CS0016 row of
        DiagnosticCodes.md, PLAN-public-surface-stability.md (item 8, 2026-11-20). Disclosed in PublicSurface.md, tier 2,
        in the same pass. -->
-- **[LANDED e25362aedc]** **A Go name spelled with a letter go2cs uses in generated names refuses its package.** A
-  package that declares an identifier spelled with one of those letters (`Ꮡ`, `ᴛ`, `ж` and the others), or a `Δ`
-  name equal to one go2cs generates in that package, now stops with error `GO2CS2015`, which names each identifier;
-  such a name could bind silently to a generated one. Other `Δ` names convert, and a `Δ`-led struct field, method or
-  type keeps its Go name through reflection, encoding and `fmt`. Rename a refused identifier
-  ([Diagnostic codes](DiagnosticCodes.md)).
+- **[LANDED e25362aedc; the `Δ`-name cure <train-11 merge>]** **A Go name spelled with a letter go2cs uses in generated
+  names refuses its package.** A package that declares an identifier spelled with one of those letters (`Ꮡ`, `ᴛ`, `ж`
+  and the others), or a `Δ` name equal to one go2cs generates in that package, stops with error `GO2CS2015`, which
+  names each identifier: such a name could bind silently to a generated one. Every other `Δ` name converts, and a
+  struct field, method or type whose name starts with `Δ` keeps its Go name in reflection, encoding and `fmt` output.
+  Rename a refused identifier ([Diagnostic codes](DiagnosticCodes.md)).
   <!-- 2026-11-24 (P2, .5 Δ cure seat claude/p2-delta-go-name): the cure retires the Δ-led field, method and type arm
        and its KnownIssues entry (#delta-led-field-method-type-refused); this entry's link pointed there. Text
        adjusted to the cured state; P4 owns this file and may reword. -->
