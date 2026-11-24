@@ -81,7 +81,7 @@ public sealed partial class TwinGenerator : ISourceGenerator
         public bool Cut;
 
         // N1: a method forwarder's one call, to its own suffix-form body (one key names both). Never weak, never cut:
-        // the forwarder parks through it, as its callers expect (P3's row 7 read, 2026-11-24).
+        // the forwarder parks through it, as its callers expect.
         public bool OwnBody;
     }
 
