@@ -117,7 +117,7 @@ internal static void main() {
     fmt.Println(n, @out, serr == nil);
 
     var p = new provider(produce: [GoFunc("main.func2")] (nint x) => x * 2);
-    var r = new registry(h: NilSafeDelegateConversion<handler, Func<nint, nint>>(p.produce));
+    var r = new registry(h: builtin.NilSafeDelegateConversion<handler, Func<nint, nint>>(p.produce));
     fmt.Println(r.h(21));
 
     tagged tg = new handlerᴠtagged(r.h);

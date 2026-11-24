@@ -109,7 +109,7 @@ public static slice<@string> Walk<N>(N n)
         n = next();
     }
 
-    @out = move2heap(outᴷ, @out);
+    @out = builtin.move2heap(outᴷ, @out);
     return @out;
 }
 

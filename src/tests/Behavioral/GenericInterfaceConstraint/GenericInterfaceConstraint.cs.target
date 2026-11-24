@@ -94,31 +94,31 @@ internal static void main() {
     var shapes = slice<Shape>([new CircleжShape(Ꮡ(new Circle(R: 1D))), new SquareжShape(Ꮡ(new Square(S: 2D)))]);
     var rounds = slice<Round>([new CircleжRound(Ꮡ(new Circle(R: 4D)))]);
 
-    fmt.Printf("circles: %.2f\n"u8, totalArea(widen<ж<Circle>, Shape>(circles, elemᴛ0 => new CircleжShape(elemᴛ0))));
-    fmt.Printf("squares: %.2f\n"u8, totalArea(widen<ж<Square>, Shape>(squares, elemᴛ0 => new SquareжShape(elemᴛ0))));
+    fmt.Printf("circles: %.2f\n"u8, totalArea(builtin.widen<ж<Circle>, Shape>(circles, elemᴛ0 => new CircleжShape(elemᴛ0))));
+    fmt.Printf("squares: %.2f\n"u8, totalArea(builtin.widen<ж<Square>, Shape>(squares, elemᴛ0 => new SquareжShape(elemᴛ0))));
     fmt.Printf("shapes: %.2f\n"u8, totalArea(shapes));
     fmt.Printf("rounds: %.2f\n"u8, totalArea(rounds));
 
-    walkAll(widen<ж<Circle>, Shape>(circles, elemᴛ0 => new CircleжShape(elemᴛ0)));
+    walkAll(builtin.widen<ж<Circle>, Shape>(circles, elemᴛ0 => new CircleжShape(elemᴛ0)));
     walkAll(shapes);
     walkAll(rounds);
 
     var shared = Ꮡ(new Circle(R: 1D));
     Func<ж<Circle>> none = default;
 
-    fmt.Println(makeShape<Shape>(widen<ж<Circle>, Shape>(newUnitCircle, elemᴛ0 => new CircleжShape(elemᴛ0))));
+    fmt.Println(makeShape<Shape>(builtin.widen<ж<Circle>, Shape>(newUnitCircle, elemᴛ0 => new CircleжShape(elemᴛ0))));
     var sharedʗ1 = shared;
-    fmt.Println(makeShape(widen<ж<Circle>, Shape>([GoFunc("main.func1")] ж<Circle> () => {
+    fmt.Println(makeShape(builtin.widen<ж<Circle>, Shape>([GoFunc("main.func1")] ж<Circle> () => {
         sharedʗ1.R++;
         return sharedʗ1;
     }, elemᴛ0 => new CircleжShape(elemᴛ0))));
-    fmt.Println(makeShape(widen<ж<Circle>, Shape>(none, elemᴛ0 => new CircleжShape(elemᴛ0))));
+    fmt.Println(makeShape(builtin.widen<ж<Circle>, Shape>(none, elemᴛ0 => new CircleжShape(elemᴛ0))));
 
     var fig = ((Figure)new CircleжFigure(Ꮡ(new Circle(R: 2D))));
 
-    fmt.Println(makeShape<Shape>(widen<Figure, Shape>(newFigure, elemᴛ0 => new FigureᴠShape(elemᴛ0))));
+    fmt.Println(makeShape<Shape>(builtin.widen<Figure, Shape>(newFigure, elemᴛ0 => new FigureᴠShape(elemᴛ0))));
     var figʗ1 = fig;
-    fmt.Println(makeShape(widen<Figure, Shape>([GoFunc("main.func2")] Figure () => figʗ1, elemᴛ0 => new FigureᴠShape(elemᴛ0))));
+    fmt.Println(makeShape(builtin.widen<Figure, Shape>([GoFunc("main.func2")] Figure () => figʗ1, elemᴛ0 => new FigureᴠShape(elemᴛ0))));
     fmt.Println(makeShape([GoFunc("main.func3")] Round () => new CircleжRound(Ꮡ(new Circle(R: 1D)))));
 }
 

@@ -9,7 +9,7 @@ internal static partial void main() {
     fmt.Println("cap:", cap(ch), "len:", len(ch));
 
     var chᴛ1 = ch.ᐸꟷ(1, ꓸꓸꓸ);
-    switch (trySelect(chᴛ1)) {
+    switch (builtin.trySelect(chᴛ1)) {
     case 0: {
         fmt.Println("send: ready (wrong for unbuffered)");
         break;
@@ -20,7 +20,7 @@ internal static partial void main() {
     }}
 
     var chᴛ2 = ch;
-    switch (trySelect(ᐸꟷ(chᴛ2, ꓸꓸꓸ))) {
+    switch (builtin.trySelect(ᐸꟷ(chᴛ2, ꓸꓸꓸ))) {
     case 0 when chᴛ2.ꟷᐳ(out var v): {
         fmt.Println("recv: ready (wrong):", v);
         break;

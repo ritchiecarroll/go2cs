@@ -118,7 +118,7 @@ internal static void withLit(this ж<box> Ꮡx) {
         [GoFunc("(*box).withLit.func1")] void f() {
             GoFrame ᒐ = default;
             try {
-                var r = recoverChecked(); if (r != nil) {
+                var r = builtin.recoverChecked(); if (r != nil) {
                     fmt.Println("inner recovered", r);
                 }
             }

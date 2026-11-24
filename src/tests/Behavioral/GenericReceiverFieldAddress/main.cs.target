@@ -14,13 +14,13 @@ internal static T getT<T>(ref T p) { return p; }
 public static void Set<T>(this ж<Box<T>> Ꮡb, T val) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    setT(ref nonnil(ref b).v, val);
+    setT(ref builtin.nonnil(ref b).v, val);
 }
 
 public static T Get<T>(this ж<Box<T>> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    return getT(ref nonnil(ref b).v);
+    return getT(ref builtin.nonnil(ref b).v);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

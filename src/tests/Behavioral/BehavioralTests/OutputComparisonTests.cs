@@ -1049,6 +1049,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckGoexitFromMain() => CheckTarget("GoexitFromMain");
 
     [TestMethod]
+    public void CheckGolibIntrinsicShadow() => CheckTarget("GolibIntrinsicShadow");
+
+    [TestMethod]
     public void CheckGoroutinePanicAfterDeferredDone() => CheckTarget("GoroutinePanicAfterDeferredDone");
 
     [TestMethod]

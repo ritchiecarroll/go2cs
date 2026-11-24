@@ -59,7 +59,7 @@ internal static void main() {
     }}
 
     var selᴛ4 = fresh();
-    switch (trySelect(ᐸꟷ(selᴛ4, ꓸꓸꓸ))) {
+    switch (builtin.trySelect(ᐸꟷ(selᴛ4, ꓸꓸꓸ))) {
     case 0 when selᴛ4.ꟷᐳ(out var v): {
         fmt.Println("S4 got:", v, "made =", made);
         break;

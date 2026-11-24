@@ -1087,6 +1087,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckGoexitFromMain() => CheckTarget("GoexitFromMain");
 
     [TestMethod]
+    public void CheckGolibIntrinsicShadow() => CheckTarget("GolibIntrinsicShadow");
+
+    [TestMethod]
     public void CheckGoroutinePanicAfterDeferredDone() => CheckTarget("GoroutinePanicAfterDeferredDone");
 
     [TestMethod]

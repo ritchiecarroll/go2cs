@@ -55,7 +55,7 @@ internal static void main() {
     var selᴛ3 = chanByte(fullBytes, "1:byte-chan").ᐸꟷ(200, ꓸꓸꓸ);
     var selᴛ4 = chanInt(noPeer, "2:recv-chan");
     var selᴛ5 = chanAny(fullAny, "3:any-chan").ᐸꟷ(valInt(3, "4:any-val"), ꓸꓸꓸ);
-    switch (trySelect(selᴛ3, ᐸꟷ(selᴛ4, ꓸꓸꓸ), selᴛ5)) {
+    switch (builtin.trySelect(selᴛ3, ᐸꟷ(selᴛ4, ꓸꓸꓸ), selᴛ5)) {
     case 0: {
         hit = 1;
         break;

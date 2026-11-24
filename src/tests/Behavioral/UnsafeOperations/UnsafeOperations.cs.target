@@ -48,11 +48,11 @@ partial struct Arrays {
 }
 
 public static uint64 Float64bits(float64 f) {
-    return bitcast<float64, uint64>(f);
+    return builtin.bitcast<float64, uint64>(f);
 }
 
 public static float64 Float64frombits(uint64 b) {
-    return bitcast<uint64, float64>(b);
+    return builtin.bitcast<uint64, float64>(b);
 }
 
 internal partial struct main_x /*dyn*/ {
@@ -89,7 +89,7 @@ internal static void main() {
     int8 i = -1;
     int16 j = (int16)i;
     fmt.Println(i, j);
-    uint8 k = bitcast<int8, uint8>(i);
+    uint8 k = builtin.bitcast<int8, uint8>(i);
     fmt.Println(k);
 
     main_x x = default;

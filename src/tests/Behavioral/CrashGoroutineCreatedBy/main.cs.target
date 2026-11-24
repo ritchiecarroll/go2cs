@@ -55,7 +55,7 @@ internal static void parent() {
         lines = append(linesᴷ, lines, scanner.Text());
     }
 
-    lines = move2heap(linesᴷ, lines);
+    lines = builtin.move2heap(linesᴷ, lines);
     foreach (var (i, line) in range(lines)) {
         switch (ᐧ) {
         case {} when strings.HasPrefix(line, "panic: "): {

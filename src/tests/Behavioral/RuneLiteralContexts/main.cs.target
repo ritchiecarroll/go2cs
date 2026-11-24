@@ -110,7 +110,7 @@ internal static partial void main() {
     (tw[0], tw[1]) = ('x', 'y');
     var sel = new channel<rune>(1);
     var selᴛ1 = sel.ᐸꟷ('s', ꓸꓸꓸ);
-    switch (trySelect(selᴛ1)) {
+    switch (builtin.trySelect(selᴛ1)) {
     case 0: {
         break;
     }

@@ -89,7 +89,7 @@ break_outer:;
         var (ᴛ15, ᴛ16) = next();
         iᴛ1 = must(ᴛ15, ᴛ16);
     }
-    funcs = move2heap(funcsᴷ, funcs);
+    funcs = builtin.move2heap(funcsᴷ, funcs);
     foreach (var (_, f) in range(funcs)) {
         fmt.Print(f(), " ");
     }

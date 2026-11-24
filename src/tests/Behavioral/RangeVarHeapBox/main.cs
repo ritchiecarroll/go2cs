@@ -26,7 +26,7 @@ internal static slice<ж<nint>> collectPointers(slice<nint> s) {
 
         ptrs = append(ptrsᴷ, ptrs, Ꮡi);
     }
-    ptrs = move2heap(ptrsᴷ, ptrs);
+    ptrs = builtin.move2heap(ptrsᴷ, ptrs);
     return ptrs;
 }
 
@@ -42,7 +42,7 @@ internal static slice<Func<nint>> intClosures() {
         var pʗ1 = p;
         fs = append(fsᴷ, fs, [GoFunc("intClosures.func1")] () => pʗ1.Value);
     }
-    fs = move2heap(fsᴷ, fs);
+    fs = builtin.move2heap(fsᴷ, fs);
     return fs;
 }
 
@@ -61,7 +61,7 @@ internal static slice<Func<@string>> stringClosures(@string s) {
         var prʗ1 = pr;
         fs = append(fsᴷ, fs, [GoFunc("stringClosures.func1")] () => fmt.Sprint(piʗ1.Value, ":", (@string)(prʗ1.Value)));
     }
-    fs = move2heap(fsᴷ, fs);
+    fs = builtin.move2heap(fsᴷ, fs);
     return fs;
 }
 
@@ -77,7 +77,7 @@ internal static slice<Func<nint>> chanClosures(channel<nint> ch) {
         var pʗ1 = p;
         fs = append(fsᴷ, fs, [GoFunc("chanClosures.func1")] () => pʗ1.Value);
     }
-    fs = move2heap(fsᴷ, fs);
+    fs = builtin.move2heap(fsᴷ, fs);
     return fs;
 }
 

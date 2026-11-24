@@ -12,28 +12,28 @@ internal static void main() {
 
     var b = slice<byte>("Content-Length"u8);
 
-    fmt.Println(interned[tmpstring(b)]);
+    fmt.Println(interned[builtin.tmpstring(b)]);
 
     b[0] = (byte)'X';
-    fmt.Println(interned[tmpstring(b)] == "");
+    fmt.Println(interned[builtin.tmpstring(b)] == "");
 
     b[0] = (byte)'C';
-    var (v, ok) = interned[tmpstring(b), ꟷ];
+    var (v, ok) = interned[builtin.tmpstring(b), ꟷ];
     fmt.Println(v, ok);
     b[0] = (byte)'X';
-    (v, ok) = interned[tmpstring(b), ꟷ];
+    (v, ok) = interned[builtin.tmpstring(b), ꟷ];
     fmt.Println(v == ""u8, ok);
     b[0] = (byte)'C';
 
-    fmt.Println(interned[tmpstring(b[..4])] == "");
-    fmt.Println(interned[tmpstring(b[0..])]);
+    fmt.Println(interned[builtin.tmpstring(b[..4])] == "");
+    fmt.Println(interned[builtin.tmpstring(b[0..])]);
 
     var w = new map<@string, nint>{};
     var k = slice<byte>("alpha"u8);
     w[((@string)k)] = 42;
     k[0] = (byte)'Z';
     fmt.Println(w["alpha"], len(w));
-    var (_, hit) = w[tmpstring(k), ꟷ];
+    var (_, hit) = w[builtin.tmpstring(k), ꟷ];
     fmt.Println(hit);
 
     delete(w, (@string)slice<byte>("alpha"u8));

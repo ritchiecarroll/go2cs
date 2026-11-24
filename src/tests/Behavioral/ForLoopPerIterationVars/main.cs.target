@@ -42,7 +42,7 @@ internal static void g2() {
         iᴛ1 = i;
     }
     fmt.Println("g2:", len(fs));
-    fs = move2heap(fsᴷ, fs);
+    fs = builtin.move2heap(fsᴷ, fs);
     foreach (var (_, f) in range(fs)) {
         fmt.Println("g2v:", f());
     }
@@ -76,7 +76,7 @@ internal static void g4() {
         });
         iᴛ1 = i;
     }
-    fs = move2heap(fsᴷ, fs);
+    fs = builtin.move2heap(fsᴷ, fs);
     foreach (var (_, f) in range(fs)) {
         f();
     }
@@ -101,7 +101,7 @@ continue_outer:;
         iᴛ1 = i;
     }
 break_outer:;
-    fs = move2heap(fsᴷ, fs);
+    fs = builtin.move2heap(fsᴷ, fs);
     foreach (var (_, f) in range(fs)) {
         fmt.Println("g5:", f());
     }

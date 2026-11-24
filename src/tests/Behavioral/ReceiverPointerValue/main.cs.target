@@ -36,7 +36,7 @@ internal static slice<ж<ring>> chain(this ж<ring> Ꮡr, nint n) {
         p = p.next;
         nodes = append(nodesᴷ, nodes, p);
     }
-    nodes = move2heap(nodesᴷ, nodes);
+    nodes = builtin.move2heap(nodesᴷ, nodes);
     return nodes;
 }
 

@@ -31,7 +31,7 @@ public static K Key<K, V>(this Pair<K, V> p) { return p.k; }
 public static @string String<K, V>(this Pair<K, V> p) { return fmt.Sprintf("%v=%v"u8, (p.k).OrTypedNilOf(), (p.v).OrTypedNilOf()); }
 
 public static V /*old*/ Swap<K, V>(this ref Pair<K, V> p, V v) {
-    V old = GoZero<V>();
+    V old = builtin.GoZero<V>();
 
     (old, p.v) = (p.v, v);
     return old;
@@ -110,7 +110,7 @@ internal static slice<reflect.Value> args(params ꓸꓸꓸany valuesʗp) {
     foreach (var (_, a) in range(values)) {
         @in = append(inᴷ, @in, reflect.ValueOf(a));
     }
-    @in = move2heap(inᴷ, @in);
+    @in = builtin.move2heap(inᴷ, @in);
     return @in;
 }
 

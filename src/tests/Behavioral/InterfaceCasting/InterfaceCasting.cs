@@ -59,7 +59,7 @@ internal static void addTo(ref nint p, nint delta) {
 public static @string Inc(this ж<Counter> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
-    addTo(ref nonnil(ref c).n, 1);
+    addTo(ref builtin.nonnil(ref c).n, 1);
     return "inc";
 }
 

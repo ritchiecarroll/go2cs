@@ -1087,6 +1087,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckGoexitFromMain() => CheckTarget("GoexitFromMain");
 
     [TestMethod]
+    public void CheckGolibIntrinsicShadow() => CheckTarget("GolibIntrinsicShadow");
+
+    [TestMethod]
     public void CheckGoroutinePanicAfterDeferredDone() => CheckTarget("GoroutinePanicAfterDeferredDone");
 
     [TestMethod]
