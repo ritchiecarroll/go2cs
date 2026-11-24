@@ -50,6 +50,15 @@ func TestZzCgoNetTestsProbe(t *testing.T) {
 		}
 	}
 
+	// go2cs-gen embeds the converter's field-collision list (go2cs-gen.csproj's one input outside gen).
+	if err := os.MkdirAll(filepath.Join(scratch, "go2cs"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+
+	if out, err := exec.Command("cp", filepath.Join(treeSrc, "go2cs", "fieldAccessCollisions.txt"), filepath.Join(scratch, "go2cs")).CombinedOutput(); err != nil {
+		t.Fatalf("seed fieldAccessCollisions.txt: %v\n%s", err, out)
+	}
+
 	input := filepath.Join(strings.TrimSpace(string(goRoot)), "src", "net")
 	output := filepath.Join(scratch, "core", "net")
 	args := []string{"-go2cspath", scratch, "-cgo", "-tests", "-test-action", "all", "-test-timeout", "20m",
@@ -60,6 +69,17 @@ func TestZzCgoNetTestsProbe(t *testing.T) {
 	combined, err := cmd.CombinedOutput()
 
 	t.Logf("PROBE exit: %v", err)
+
+	seen := map[string]bool{}
+
+	for _, line := range strings.Split(string(combined), "\n") {
+		if at := strings.Index(line, ": error "); at >= 0 && !seen[line[at:]] {
+			seen[line[at:]] = true
+			t.Logf("PROBE error: %s", strings.TrimSpace(line))
+		}
+	}
+
+	t.Logf("PROBE distinct errors: %d", len(seen))
 
 	for _, line := range strings.Split(lastLines(string(combined), 120), "\n") {
 		t.Logf("PROBE out: %s", line)
