@@ -30,10 +30,10 @@ An executable's **`<AssemblyName>` is the last element of its import path**, mir
 Go's `func main` is emitted as `main`, under its own name, like every other Go function. The C# entry point is
 not in the converted source: go2cs-gen's `MainEntryGenerator` adds it to the program's `main_package` class.
 
-<!-- source: src/tests/Behavioral/MainDeepRecursion/main.cs.target:16-18 -->
+<!-- source: src/tests/Behavioral/NamedArrayAnonElement/main.cs.target:22-24 -->
 ```csharp
 internal static void main() {
-    fmt.Println("depth:", depth(levels));
+    fmt.Println("named-array anon element compiles");
 }
 ```
 
@@ -81,7 +81,8 @@ variable, a median of up to about 3 ms. A 1 GiB reservation costs the same as a 
 RID.
 
 **Guards:** Behavioral `MainDeepRecursion` (recursion 2,000,000 deep in `main`; before this rule it aborted
-after 174,430 frames on linux), GolibTests `MainThreadTests`, GenTests `MainEntryGeneratorTests`.
+after 174,430 frames on linux; `main` parks first, so under `GO2CS_MN=1` it recurses on a carrier, which reserves the
+same 1 GiB), GolibTests `MainThreadTests` and `CarrierStackFallbackTests`, GenTests `MainEntryGeneratorTests`.
 <!-- C46, COORD ruling 2026-11-11 (option A). Converter: src/go2cs/visitFuncDecl.go (the `main` -> `Main` rename removed).
      Generator: src/gen/go2cs-gen/MainEntryGenerator.cs. golib: src/core/golib/runtime/MainThread.cs, Goroutine.cs
      NoteLockOSThread/NoteUnlockOSThread; runtime: src/core/runtime/managed_impl.cs LockOSThread/UnlockOSThread.
