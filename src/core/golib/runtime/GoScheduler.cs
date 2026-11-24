@@ -103,9 +103,15 @@ public static class GoScheduler
     // The P count: how many goroutine steps run at once. It follows GOMAXPROCS (SetProcs, below).
     private static int s_procs = ReadProcs();
 
-    // A carrier runs inline continuations of any depth the twin chain reaches, so it gets a goroutine-sized
-    // stack rather than the prototype's 256 KB.
-    private const int CarrierStackSize = 1024 * 1024;
+    // A carrier runs a goroutine's step on its own stack, and a step may recurse as deeply as Go allows a goroutine to,
+    // so a carrier reserves what a plain goroutine's thread does: Goroutine.StackReserve (256 MB by default, the one
+    // knob GO2CS_GOROUTINE_STACK governs both). A fixed 1 MB overflowed a 200,000-level recursion that Go and the
+    // thread path both run (M:N row 4, behavioral GoroutineStackReserve). On the shipped 64-bit platforms the reserve
+    // is address space, committed only as deep as a step recurses. A platform that refuses the size gets the largest it
+    // grants, halving down to MinCarrierStackSize, said once on stderr by name (CarrierThread); never a silent 1 MB.
+    private static int s_carrierStackSize = Math.Max(Goroutine.StackReserve, MinCarrierStackSize);
+    private const int MinCarrierStackSize = 1024 * 1024;
+    private static int s_carrierStackFallbackSaid;
 
     // GO2CS_MN_PREEMPT_MS: how long a step may run before the monitor injects a P beside it (default 10 ms,
     // Go's forcePreemptNS). 0 turns injection off: a measurement arm, not a mode.
@@ -527,6 +533,7 @@ public static class GoScheduler
                $" steps-over-10ms={Interlocked.Read(ref s_longSteps)}" +
                $" max-step-ms={Interlocked.Read(ref s_maxStepTicks) * 1000 / Stopwatch.Frequency}" +
                $" carrier-start-failures={Interlocked.Read(ref s_carrierStartFailures)}" +
+               $" carrier-stack-mb={Volatile.Read(ref s_carrierStackSize) / (1024 * 1024)}" +
                $" retakes={Interlocked.Read(ref s_retakes)}" +
                $" off-carrier-resumes={Interlocked.Read(ref s_offCarrierResumes)}" +
                $" nested-resumes={Interlocked.Read(ref s_nestedResumes)}" +
@@ -697,15 +704,7 @@ public static class GoScheduler
 
         try
         {
-            Thread thread = new(carrier.Loop, CarrierStackSize) { IsBackground = true, Name = "go-carrier" };
-
-            // A carrier is often started from inside a goroutine's step. It must not start under that
-            // goroutine's ExecutionContext, or every goroutine it mounts afterwards could read it.
-            if (s_contextSwap)
-                thread.UnsafeStart();
-            else
-                thread.Start();
-
+            CarrierThread(carrier.Loop);
             Interlocked.Increment(ref s_carriersStarted);
         }
         catch (OutOfMemoryException)
@@ -714,6 +713,38 @@ public static class GoScheduler
                 s_carriers.Remove(carrier);
 
             Interlocked.Increment(ref s_carrierStartFailures);
+        }
+    }
+
+    // Starts a carrier thread at the carrier stack size (s_carrierStackSize). A refused start above MinCarrierStackSize
+    // halves the size for this carrier and every later one, and the first fallback is said once on stderr, by name; a
+    // refusal at MinCarrierStackSize throws on to StartCarrier, which counts it as a start failure as before.
+    private static void CarrierThread(ThreadStart loop)
+    {
+        while (true)
+        {
+            int size = Volatile.Read(ref s_carrierStackSize);
+
+            try
+            {
+                Thread thread = new(loop, size) { IsBackground = true, Name = "go-carrier" };
+
+                // A carrier is often started from inside a goroutine's step. It must not start under that
+                // goroutine's ExecutionContext, or every goroutine it mounts afterwards could read it.
+                if (s_contextSwap)
+                    thread.UnsafeStart();
+                else
+                    thread.Start();
+
+                return;
+            }
+            catch (OutOfMemoryException) when (size > MinCarrierStackSize)
+            {
+                int smaller = Math.Max(size / 2, MinCarrierStackSize);
+
+                if (Interlocked.CompareExchange(ref s_carrierStackSize, smaller, size) == size && Interlocked.Exchange(ref s_carrierStackFallbackSaid, 1) == 0)
+                    Console.Error.WriteLine($"go2cs: this platform refused a {size / (1024 * 1024)} MB carrier stack; carriers reserve {smaller / (1024 * 1024)} MB or less ({Goroutine.StackReserveVariable})");
+            }
         }
     }
 
