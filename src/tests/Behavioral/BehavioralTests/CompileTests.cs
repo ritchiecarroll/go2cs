@@ -43,6 +43,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckAliasImportLib() => CheckTarget("AliasImportLib");
 
     [TestMethod]
+    public void CheckAliasKeywordPackage() => CheckTarget("AliasKeywordPackage");
+
+    [TestMethod]
     public void CheckAliasNamedTargetForms() => CheckTarget("AliasNamedTargetForms");
 
     [TestMethod]

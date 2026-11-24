@@ -42102,4 +42102,25 @@ already records cross-package renames for type references: foreignAliasedTypeNam
 
 — R (2026-11-24)
 
+## 2026-11-24 — i9 (M:N row 9, COORD 183002Z): a package named by a C# keyword gets a bare `using internal = …;` in package_info.cs, and the file fails to parse (CURED in claude/i9-alias-keyword-escape)
+
+**How found.** TS row 9 at master cb6def82a2: the PLAIN typescript-go build failed in
+go-json-experiment's jsonflags with CS1041 ("Identifier expected; 'internal' is a keyword") and a cascade, 28 errors
+in one project. Three package_info.cs files carried `using internal = go.github.com.go_json_experiment.json.internal_package;`
+twice each: in the `<ImportedTypeAliases>` block and in the repeat after the namespace.
+
+**Cause.** 187c6f88d0 ("a method with a holder takes the suffix form", 2026-11-21) walks every named type in a
+forwarder's signature through `recordConversionPackageUsing`, which keyed `conversionPackageUsings` by the raw Go package
+name. Its older callers (recorded conversions) never met a keyword-named package, so the spelling had never been wrong
+in practice. The TS gates at f36b6b0d48 (2026-11-17) emitted an empty block for these files.
+
+**Cure.** The qualifier is spelled through `getSanitizedImport`, as every other import alias is, at the one place the
+map is keyed; the block and the post-namespace repeat both inherit it. Guarded by the behavioral project
+AliasKeywordPackage (packages named `internal` and `checked`, each named in a method signature on a defined integer type,
+plus a type alias): with master's converter it fails to compile (CS1001/CS1002/CS1514/CS1525 on `using checked = …`),
+with the cure it compiles and prints Go's output. Stdlib reach: none (no committed package_info.cs declares a bare
+keyword alias; footprint read with the seat).
+
+— i9 (2026-11-24)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

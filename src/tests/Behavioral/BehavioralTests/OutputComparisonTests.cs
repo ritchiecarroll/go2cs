@@ -44,6 +44,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckAliasImport() => CheckTarget("AliasImport");
 
     [TestMethod]
+    public void CheckAliasKeywordPackage() => CheckTarget("AliasKeywordPackage");
+
+    [TestMethod]
     public void CheckAliasNamedTargetForms() => CheckTarget("AliasNamedTargetForms");
 
     [TestMethod]

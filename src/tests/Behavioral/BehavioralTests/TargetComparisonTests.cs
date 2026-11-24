@@ -46,6 +46,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckAliasImportLib() => CheckTarget("AliasImportLib");
 
     [TestMethod]
+    public void CheckAliasKeywordPackage() => CheckTarget("AliasKeywordPackage");
+
+    [TestMethod]
     public void CheckAliasNamedTargetForms() => CheckTarget("AliasNamedTargetForms");
 
     [TestMethod]
