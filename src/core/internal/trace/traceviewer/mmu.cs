@@ -41,13 +41,13 @@ using net;
 
 partial class traceviewer_package {
 
-// type MutatorUtilFunc is a methodless func type — rendered inline as its base delegate
+public delegate (slice<slice<trace.MutatorUtil>>, error) MutatorUtilFunc(trace.UtilFlags _);
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static ref readonly @string modeˢ => ref modeˢᵇ;
 private static readonly @string modeˢᵇ = "mode"u8;
 
-public static http.HandlerFunc MMUHandlerFunc(slice<Range> ranges, Func<trace.UtilFlags, (slice<slice<trace.MutatorUtil>>, error)> f) {
+public static http.HandlerFunc MMUHandlerFunc(slice<Range> ranges, MutatorUtilFunc f) {
     var mmu = Ꮡ(new mmu(
         cache: new map<trace.UtilFlags, ж<mmuCacheEntry>>(),
         f: f,
@@ -99,7 +99,7 @@ partial struct mmuCacheEntry {
 partial struct mmu {
     internal sync.Mutex mu;
     internal map<trace.UtilFlags, ж<mmuCacheEntry>> cache;
-    internal Func<trace.UtilFlags, (slice<slice<trace.MutatorUtil>>, error)> f;
+    internal MutatorUtilFunc f;
     internal slice<Range> ranges;
 }
 

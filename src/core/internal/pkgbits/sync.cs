@@ -28,12 +28,12 @@ internal static slice<@string> fmtFrames(params ꓸꓸꓸuintptr pcsʗp) {
     return res;
 }
 
-// type frameVisitor is a methodless func type — rendered inline as its base delegate
+internal delegate void frameVisitor(@string @file, nint line, @string name, uintptr offset);
 
 // walkFrames calls visit for each call frame represented by pcs.
 //
 // pcs should be a slice of PCs, as returned by runtime.Callers.
-internal static void walkFrames(slice<uintptr> pcs, Action<@string, nint, @string, uintptr> visit) {
+internal static void walkFrames(slice<uintptr> pcs, frameVisitor visit) {
     if (len(pcs) == 0) {
         return;
     }

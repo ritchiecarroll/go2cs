@@ -78,17 +78,17 @@ public static slice<T> Wrap<T>(T v) { return [v]; }
 
 public static V Pair<K, V>(K k, V v) { return v; }
 
-// type Sift is a methodless func type — rendered inline as its base delegate
+public delegate bool Sift(nint _);
 
-internal static bool Sift⁔(/*this*/ Sensor s, Func<nint, bool> f) { return f((nint)s.Temp); }
+internal static bool Sift⁔(/*this*/ Sensor s, Sift f) { return f((nint)s.Temp); }
 
 partial struct Node {
     public nint ID;
 }
 
-// type Resolver is a methodless func type — rendered inline as its base delegate
+public delegate (ж<Node>, error) Resolver(map<@string, ж<Node>> imports, @string path);
 
-public static (ж<Node>, error) Resolve(Func<map<@string, ж<Node>>, @string, (ж<Node>, error)> r, @string path) { return r(default, path); }
+public static (ж<Node>, error) Resolve(Resolver r, @string path) { return r(default, path); }
 
 partial struct Probe {
     public nint Hits;

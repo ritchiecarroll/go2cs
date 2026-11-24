@@ -248,19 +248,6 @@ func (v *Visitor) visitTypeSwitchStmtCore(typeSwitchStmt *ast.TypeSwitchStmt) {
 
 				caseExpr := v.convExpr(expr, []ExprContext{identContext})
 
-				// A METHODLESS named func type is rendered as its base delegate everywhere and declares
-				// no type of its own (methodlessNamedFuncSignature), so a case naming it must spell the
-				// delegate, exactly as a type ASSERTION on it already does (convTypeAssertExpr). The Go
-				// name was emitted as-is: mapstructure's DecodeHookExec, `case DecodeHookFuncType:`,
-				// CS0246 (CS0103 without a binding). Two collapsed labels with the same signature now
-				// share one C# type — merged by the rule above when their bodies match, a CS8120
-				// compile error when they differ, never routed silently into the wrong body.
-				if caseType := v.getExprType(expr); caseType != nil {
-					if _, isCollapsed := methodlessNamedFuncSignature(caseType); isCollapsed {
-						caseExpr = v.getCSharpTypeName(caseType)
-					}
-				}
-
 				// An INTERFACE-typed case label (named or anonymous) dispatches by Go METHOD-SET
 				// semantics, not C# nominal implementation: the operand (`x.type()`) surfaces the
 				// Go dynamic value — for a pointer-sourced implementation that is the raw receiver

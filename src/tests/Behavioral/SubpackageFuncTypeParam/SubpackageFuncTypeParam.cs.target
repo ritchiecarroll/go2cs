@@ -6,9 +6,9 @@ using sync;
 
 partial class main_package {
 
-// type applyFunc is a methodless func type — rendered inline as its base delegate
+internal delegate int32 applyFunc(ж<atomic.Int32> c);
 
-internal static int32 run(Func<ж<atomic.Int32>, int32> f, ж<atomic.Int32> c) {
+internal static int32 run(applyFunc f, ж<atomic.Int32> c) {
     return f(c);
 }
 

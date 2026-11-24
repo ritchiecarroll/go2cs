@@ -8,7 +8,7 @@ using reflect = reflect_package;
 
 partial class gob_package {
 
-[GoLazy] partial class lazyᴛencArrayHelper { internal static map<reflect.Kind, Func<ж<encoderState>, reflect.Value, bool>> encArrayHelper = new map<reflect.Kind, Func<ж<encoderState>, reflect.Value, bool>>{
+[GoLazy] partial class lazyᴛencArrayHelper { internal static map<reflect.Kind, encHelper> encArrayHelper = new map<reflect.Kind, encHelper>{
     [reflect.Bool] = encBoolArray,
     [reflect.Complex64] = encComplex64Array,
     [reflect.Complex128] = encComplex128Array,
@@ -27,7 +27,7 @@ partial class gob_package {
     [reflect.Uintptr] = encUintptrArray
 }; }
 
-[GoLazy] partial class lazyᴛencSliceHelper { internal static map<reflect.Kind, Func<ж<encoderState>, reflect.Value, bool>> encSliceHelper = new map<reflect.Kind, Func<ж<encoderState>, reflect.Value, bool>>{
+[GoLazy] partial class lazyᴛencSliceHelper { internal static map<reflect.Kind, encHelper> encSliceHelper = new map<reflect.Kind, encHelper>{
     [reflect.Bool] = encBoolSlice,
     [reflect.Complex64] = encComplex64Slice,
     [reflect.Complex128] = encComplex128Slice,

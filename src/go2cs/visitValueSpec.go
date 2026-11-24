@@ -393,15 +393,12 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc, declDoc *ast.Com
 					// `var f parseSpecFunction` (`func(*go/ast.CommentGroup, go/token.Token, int)
 					// ast.Spec`) — mangles those elements to the nonexistent `go.go.ast.CommentGroup`/
 					// `go.go.token.Token` (CS0234), while its matching parameter and assigned-lambda
-					// sites render structurally through getCSharpTypeName. getCSharpTypeName routes both forms
-					// through iifeDelegateType, whose aliasedElementTypeName keeps each element's
-					// `pkg.Type` alias. This precedence matches getCSharpTypeName's own (a func render wins
-					// over the foreign-alias route below, whose alias would point at the SKIPPED
-					// methodless-func declaration). A NAMED func type WITH methods keeps its delegate name.
+					// sites render structurally through getCSharpTypeName. getCSharpTypeName routes the
+					// anonymous form through iifeDelegateType, whose aliasedElementTypeName keeps each
+					// element's `pkg.Type` alias. A NAMED func type keeps its delegate name.
 					_, isSig := types.Unalias(def.Type()).(*types.Signature)
-					_, isMethodlessFunc := methodlessNamedFuncSignature(def.Type())
 
-					if isSig || isMethodlessFunc {
+					if isSig {
 						csTypeName = v.getCSharpTypeName(def.Type())
 					} else if aliased, ok := v.foreignAliasedTypeName(def.Type()); ok {
 						// A local declared as a foreign RENAMED type routes through the recorded
@@ -724,6 +721,10 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc, declDoc *ast.Com
 						if narrowedChan := v.chanDirNarrowedValue(def.Type(), v.info.TypeOf(valueSpec.Values[i]), valExpr); narrowedChan != "" {
 							valExpr = narrowedChan
 						}
+
+						// A func value reaching a slot of a different func type: a defined func type and its unnamed
+						// signature convert implicitly in Go (see funcValueForSlot).
+						valExpr = v.funcValueForSlot(def.Type(), valueSpec.Values[i], valExpr)
 
 						// A slice- or map-cored type parameter as a typed var's value (see coreTypeParamValue).
 						if materialized := v.coreTypeParamValue(def.Type(), v.info.TypeOf(valueSpec.Values[i]), valExpr); materialized != "" {

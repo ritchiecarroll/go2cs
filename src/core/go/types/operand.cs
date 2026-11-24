@@ -120,7 +120,7 @@ private static readonly @string withInvalidTypeˢᵇ = " with invalid type"u8;
 //
 // cgofunc    <expr> (<untyped kind> <mode>                    )
 // cgofunc    <expr> (               <mode>       of type <typ>)
-internal static @string operandString(ref operand x, Func<ж<Package>, @string> qf) {
+internal static @string operandString(ref operand x, Qualifier qf) {
     // special-case nil
     if (isTypes2) {
         if (x.mode == nilvalue) {

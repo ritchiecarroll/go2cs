@@ -19,7 +19,7 @@ partial class types_package {
 internal static ref readonly @string nilˢ => ref nilˢᵇ;
 private static readonly @string nilˢᵇ = "<nil>"u8;
 
-internal static @string sprintf(ж<token.FileSet> fset, Func<ж<Package>, @string> qf, bool tpSubscripts, @string format, params ꓸꓸꓸany argsʗp) {
+internal static @string sprintf(ж<token.FileSet> fset, Qualifier qf, bool tpSubscripts, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     foreach (var (i, vᴛ1) in range(args)) {
@@ -122,7 +122,7 @@ internal static @string sprintf⁔(/*this*/ ж<Checker> Ꮡcheck, @string format
     ref var check = ref Ꮡcheck.DerefOrNull();
 
     ж<token.FileSet> fset = default;
-    Func<ж<Package>, @string> qf = default;
+    Qualifier qf = default;
     if (Ꮡcheck != nil) {
         fset = check.fset;
         qf = (ж<Package> p1) => Ꮡcheck.qualifier(p1);
@@ -144,7 +144,7 @@ internal static void trace⁔(/*this*/ ж<Checker> Ꮡcheck, token.Pos pos, @str
         pos1,
         pad,
         strings.Repeat(".  ", check.indent),
-        sprintf(check.fset, new Func<ж<Package>, @string>(Ꮡcheck.qualifier), true, format, args.ꓸꓸꓸ));
+        sprintf(check.fset, new Qualifier(Ꮡcheck.qualifier), true, format, args.ꓸꓸꓸ));
 }
 
 // ndigits returns the number of decimal digits in x.
@@ -168,7 +168,7 @@ internal static void dump⁔(/*this*/ ж<Checker> Ꮡcheck, @string format, para
     var args = argsʗp.sslice();
     ref var check = ref Ꮡcheck.DerefOrNull();
 
-    fmt.Println(sprintf(check.fset, new Func<ж<Package>, @string>(Ꮡcheck.qualifier), true, format, args.ꓸꓸꓸ));
+    fmt.Println(sprintf(check.fset, new Qualifier(Ꮡcheck.qualifier), true, format, args.ꓸꓸꓸ));
 }
 
 internal static @string qualifier⁔(/*this*/ ref Checker check, ж<Package> Ꮡpkg) {

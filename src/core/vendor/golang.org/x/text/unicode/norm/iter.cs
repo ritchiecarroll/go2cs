@@ -18,14 +18,14 @@ public static UntypedInt MaxSegmentSize => /* maxByteBufferSize */ 128;
 partial struct Iter {
     internal reorderBuffer rb;
     internal array<byte> buf = new(maxByteBufferSize);
-    internal Properties info;                 // first character saved from previous iteration
-    internal Func<ж<Iter>, slice<byte>> next; // implementation of next depends on form
-    internal Func<ж<Iter>, slice<byte>> asciiF;
+    internal Properties info; // first character saved from previous iteration
+    internal iterFunc next;   // implementation of next depends on form
+    internal iterFunc asciiF;
     internal nint p;               // current position in input source
     internal slice<byte> multiSeg; // remainder of multi-segment decomposition
 }
 
-// type iterFunc is a methodless func type — rendered inline as its base delegate
+internal delegate slice<byte> iterFunc(ж<Iter> _);
 
 // Init initializes i to iterate over src after normalizing it to Form f.
 internal static void Init⁔(/*this*/ ref Iter i, Form f, slice<byte> src) {

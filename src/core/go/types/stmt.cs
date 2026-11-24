@@ -379,7 +379,7 @@ L:
                 // talk about "case" rather than "type" because of nil case
                 @string Ts = nilˢ2;
                 if (T != nil) {
-                    Ts = TypeString(T, new Func<ж<Package>, @string>(Ꮡcheck.qualifier));
+                    Ts = TypeString(T, new Qualifier(Ꮡcheck.qualifier));
                 }
                 var err = Ꮡcheck.newError(DuplicateCase);
                 err.addf(new ast_Exprᴠpositioner(e), "duplicate case %s in type switch", Ts);
@@ -439,7 +439,7 @@ L:
                 // talk about "case" rather than "type" because of nil case
                 @string Ts = nilˢ2;
                 if (T != nil) {
-                    Ts = TypeString(T, new Func<ж<Package>, @string>(Ꮡcheck.qualifier));
+                    Ts = TypeString(T, new Qualifier(Ꮡcheck.qualifier));
                 }
                 var err = Ꮡcheck.newError(DuplicateCase);
                 err.addf(new ast_Exprᴠpositioner(e), "duplicate case %s in type switch", Ts);

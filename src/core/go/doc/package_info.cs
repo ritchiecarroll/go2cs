@@ -191,7 +191,7 @@ partial class docᴛPackage {
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> HTML(this ж<Package> Ꮡp, @string text) => doc_package.HTML⁔(Ꮡp, text);
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> Markdown(this ж<Package> Ꮡp, @string text) => doc_package.Markdown⁔(Ꮡp, text);
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> Text(this ж<Package> Ꮡp, @string text) => doc_package.Text⁔(Ꮡp, text);
-    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Filter(this ref Package p, Func<@string, bool> f) => doc_package.Filter⁔(ref p, f);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Filter(this ref Package p, Filter f) => doc_package.Filter⁔(ref p, f);
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Synopsis(this ж<Package> Ꮡp, @string text) => doc_package.Synopsis⁔(Ꮡp, text);
 }
 partial class docᴛmethodSet {

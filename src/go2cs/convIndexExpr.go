@@ -180,7 +180,8 @@ func (v *Visitor) convIndexExpr(indexExpr *ast.IndexExpr, context IndexExprConte
 			// mistook the selector's parameter ROOT for the indexed pointer and skipped it
 			// (CS0021 on every named-array-wrapper box index).
 			if ident, isBare := indexExpr.X.(*ast.Ident); !isBare || !v.isDerefdPointerParamIdent(ident) {
-				ptrDeref = ".Value"
+				// A named pointer type itself named Value declares the member as NamedWrapperValue (pointerWrapperMember).
+				ptrDeref = "." + v.pointerWrapperMember(typeAndVal.Type, "Value")
 
 				// A deref-aliased pointer RECEIVER (`this ref T v`) is the named array's WRAPPER, not a box,
 				// so this `.Value` is the wrapper's underlying-value property, which a type named Value

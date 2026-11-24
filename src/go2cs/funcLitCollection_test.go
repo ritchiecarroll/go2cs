@@ -107,8 +107,9 @@ func TestAttributedLiteralKeepsItsCollectionAnArray(t *testing.T) {
 	mainCs := readGenerated(t, filepath.Join(options.go2csPath, "src", "example.com", "collattr", "main.cs"))
 
 	for _, want := range []string{
-		// a targeted collection whose first element, `default`, does not stop the attribute guess
-		"internal static slice<Func<nint, nint>> table = new Func<nint, nint>[]{",
+		// a targeted collection whose first element, `default`, does not stop the attribute guess; its element is
+		// the defined func type decoder, which is a delegate of its own
+		"internal static slice<decoder> table = new decoder[]{",
 		// a targeted collection that opens with a literal
 		"internal static slice<Action<ж<cfg>>> appliers = new Action<ж<cfg>>[]{",
 		`internal static slice<Func<nint>> values = new Func<nint>[]{[GoFunc("init.func3")] () => 7}.slice();`,

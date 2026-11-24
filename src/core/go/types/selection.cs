@@ -160,7 +160,7 @@ private static readonly @string methodExprˢᵇ = "method expr "u8;
 //	"field (T) f int"
 //	"method (T) f(X) Y"
 //	"method expr (T) f(X) Y"
-public static @string SelectionString(ж<Selection> Ꮡs, Func<ж<Package>, @string> qf) {
+public static @string SelectionString(ж<Selection> Ꮡs, Qualifier qf) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     @string k = default;

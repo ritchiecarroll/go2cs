@@ -685,19 +685,16 @@ func (v *Visitor) convCompositeLitAs(compositeLit *ast.CompositeLit, elidedType 
 				if _, isSig := named.Underlying().(*types.Signature); isSig {
 					wrapDelegate = !types.Identical(types.Unalias(valueType), types.Unalias(fieldVar.Type()))
 				}
-			} else if _, isSig := types.Unalias(fieldVar.Type()).(*types.Signature); isSig && !typeContainsTypeParams(fieldVar.Type()) {
+			} else if _, isSig := types.Unalias(fieldVar.Type()).(*types.Signature); isSig && !typeContainsTypeParams(fieldVar.Type()) && !signatureMentionsTypeParams(fieldVar.Type()) {
 				// The MIRROR: STRUCTURAL func-type field ← value rendering as a named delegate.
 				// Same two named-rendering shapes as the call-site rule (convCallExpr): a value
-				// whose GO type is a named func type with methods (a METHODLESS one already
-				// renders as the structural delegate itself and stays bare), and a `:=` local
+				// whose GO type is a named func type, and a `:=` local
 				// declared from a method group (typed with the matching package named delegate
 				// by visitAssignStmt's methodGroupDelegateType). Method groups and func literals
 				// themselves convert natively and are excluded by both gates.
 				if argNamed, ok := types.Unalias(valueType).(*types.Named); ok {
 					if _, argIsSig := argNamed.Underlying().(*types.Signature); argIsSig {
-						if _, collapses := methodlessNamedFuncSignature(argNamed); !collapses {
-							wrapDelegate = true
-						}
+						wrapDelegate = true
 					}
 				} else if argSig, ok := types.Unalias(valueType).(*types.Signature); ok {
 					if argIdent, ok := valueExpr.(*ast.Ident); ok &&
@@ -1358,6 +1355,7 @@ func (v *Visitor) convCompositeLitAs(compositeLit *ast.CompositeLit, elidedType 
 		}
 		result.WriteString(elements.String())
 	} else {
+		v.recordFuncElementConversions(compositeLit.Elts, elementType, callContext)
 		v.collectionExpressionElements = takesBuiltin
 		result.WriteString(v.convExprList(compositeLit.Elts, compositeLit.Lbrace, callContext))
 
@@ -1387,6 +1385,44 @@ func (v *Visitor) convCompositeLitAs(compositeLit *ast.CompositeLit, elidedType 
 	result.WriteString(fmt.Sprintf("%s%s%s", rbracePrefix, rbrace, compositeSuffix))
 
 	return result.String()
+}
+
+// recordFuncElementConversions marks each positional element of a slice or array literal whose element type is a
+// func type the element is not: Go converts a defined func type and its unnamed signature implicitly (`[]F{plain}`),
+// and the element converts through golib's NilSafeDelegateConversion as an assignment does (funcValueForSlot). A
+// func literal or method group converts natively and is not marked; a keyed element is not either.
+func (v *Visitor) recordFuncElementConversions(elts []ast.Expr, elementType types.Type, context *CallExprContext) {
+	if context == nil || elementType == nil {
+		return
+	}
+
+	if _, isSig := elementType.Underlying().(*types.Signature); !isSig || typeContainsTypeParams(elementType) || signatureMentionsTypeParams(elementType) {
+		return
+	}
+
+	for i, elt := range elts {
+		if _, keyed := elt.(*ast.KeyValueExpr); keyed {
+			continue
+		}
+
+		eltType := v.info.TypeOf(elt)
+
+		if eltType == nil || types.Identical(eltType, elementType) || typeContainsTypeParams(eltType) || signatureMentionsTypeParams(eltType) {
+			continue
+		}
+
+		if _, isSig := eltType.Underlying().(*types.Signature); !isSig {
+			continue
+		}
+
+		if kind, source := v.delegateWrap(elementType, elt, eltType); kind == delegateWrapNilSafe {
+			if context.nilSafeDelegateArgs == nil {
+				context.nilSafeDelegateArgs = make(map[int]string)
+			}
+
+			context.nilSafeDelegateArgs[i] = v.getCSharpTypeName(elementType) + ", " + source
+		}
+	}
 }
 
 // sliceLiteralTakesBuiltin reports whether an unkeyed composite literal of type t renders as golib's builtin

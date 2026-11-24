@@ -177,8 +177,9 @@ func (v *Visitor) markCarriedPointerConversion(expr ast.Expr) {
 // the node, and reports false everywhere else (the caller keeps FromRef). As a pointer handed to golib it is
 // `@unsafe.Pointer.FromPinnedBox(Ꮡrecv)`, with no cast: a cast would turn it back into a number before
 // unsafe.Add saw it (10.3). Under Go's own `uintptr(...)` it is the bare box, and the enclosing conversion's
-// `(uintptr)` cast reads its number, as it does for any other pointer operand (markDeadUnsafePointerBox).
-func (v *Visitor) receiverPointerAtProvenUse(callExpr *ast.CallExpr) (string, bool) {
+// `(uintptr)` cast reads its number, as it does for any other pointer operand (markDeadUnsafePointerBox). pointerName is
+// the name the conversion spells: `@unsafe.Pointer`, or an alias of it.
+func (v *Visitor) receiverPointerAtProvenUse(callExpr *ast.CallExpr, pointerName string) (string, bool) {
 	carried := v.carriedPointerCasts[callExpr]
 
 	if !carried && !v.deadUnsafePointerBoxes[callExpr] {
@@ -196,7 +197,7 @@ func (v *Visitor) receiverPointerAtProvenUse(callExpr *ast.CallExpr) (string, bo
 	box := v.convExpr(arg, []ExprContext{identContext})
 
 	if carried {
-		return fmt.Sprintf("@unsafe.Pointer.FromPinnedBox(%s)", box), true
+		return fmt.Sprintf("%s.FromPinnedBox(%s)", pointerName, box), true
 	}
 
 	return box, true

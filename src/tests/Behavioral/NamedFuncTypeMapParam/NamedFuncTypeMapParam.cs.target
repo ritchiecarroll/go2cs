@@ -8,9 +8,9 @@ partial struct Node {
     internal @string name;
 }
 
-// type Importer is a methodless func type — rendered inline as its base delegate
+public delegate (ж<Node> pkg, error err) Importer(map<@string, ж<Node>> imports, @string path);
 
-internal static ж<Node> newPackage(Func<map<@string, ж<Node>>, @string, (ж<Node>, error)> importer, map<@string, ж<Node>> files) {
+internal static ж<Node> newPackage(Importer importer, map<@string, ж<Node>> files) {
     var (n, _) = importer(files, "root");
     return n;
 }
@@ -21,7 +21,7 @@ internal static (ж<Node> pkg, error err) lookup(map<@string, ж<Node>> imports,
 
 internal static void main() {
     var files = new map<@string, ж<Node>>{["a"] = Ꮡ(new Node(name: "alpha"))};
-    var pkg = newPackage(new Func<map<@string, ж<Node>>, @string, (ж<Node>, error)>(lookup), files);
+    var pkg = newPackage(new Importer(lookup), files);
     fmt.Println(pkg.name);
 }
 
