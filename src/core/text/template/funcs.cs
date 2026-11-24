@@ -67,7 +67,7 @@ internal static FuncMap builtins() {
 
 // builtinFuncs lazily computes & caches the builtinFuncs map.
 internal static Func<map<@string, reflect.Value>> builtinFuncs;
-internal static void initᴛbuiltinFuncs() { builtinFuncs = sync.OnceValue(map<@string, reflect.Value> () => {
+internal static void initᴛbuiltinFuncs() { builtinFuncs = sync.OnceValue([GoFunc("init.func1")] map<@string, reflect.Value> () => {
     var funcMap = builtins();
     var m = new map<@string, reflect.Value>(len(funcMap));
     addValueFuncs(m, funcMap);
@@ -413,7 +413,7 @@ internal static (reflect.Value val, error err) safeCall(reflect.Value fun, slice
     error err = default;
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("safeCall.func1")] () => {
             var r = recover(); if (r != nil) {
                 var (e, ok) = r._<error>(ᐧ); if (ok) {
                     err = e;

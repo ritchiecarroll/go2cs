@@ -344,7 +344,7 @@ internal static (@string path, @string rawpath) joinURLPath(ж<url.URL> Ꮡa, ж
 //		},
 //	}
 public static ж<ReverseProxy> NewSingleHostReverseProxy(ж<url.URL> target) {
-    var director = (ж<http.Request> req) => {
+    var director = [GoFunc("NewSingleHostReverseProxy.func1")] (ж<http.Request> req) => {
         rewriteRequestURL(ref (req).DerefOrNull(), target);
     };
     return Ꮡ(new ReverseProxy(Director: director));
@@ -471,7 +471,7 @@ internal static partial void ServeHTTP⁔(/*this*/ ж<ReverseProxy> Ꮡp, http.R
             var cancelʗ2 = cancel;
             var ctxʗ1 = ctx;
             var notifyChanʗ1 = notifyChan;
-            goǃ(() => {
+            goǃ([GoFunc("(*ReverseProxy).ServeHTTP.func1")] () => {
                 var notifyChanᴛ1 = notifyChanʗ1;
                 var selᴛ4 = ctxʗ1.Done();
                 switch (select(ᐸꟷ(notifyChanᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ4, ꓸꓸꓸ))) {
@@ -609,7 +609,7 @@ internal static partial void ServeHTTP⁔(/*this*/ ж<ReverseProxy> Ꮡp, http.R
         ref var roundTripMutex = ref heap(new sync.Mutex(), out var ᏑroundTripMutex);
         bool roundTripDone = default;
         var trace = Ꮡ(new httptrace.ClientTrace(
-            Got1xxResponse: (nint code, textproto.MIMEHeader header) => {
+            Got1xxResponse: [GoFunc("(*ReverseProxy).ServeHTTP.func2")] (nint code, textproto.MIMEHeader header) => {
                 GoFrame ᒐ = default;
                 try {
                     ᏑroundTripMutex.Lock();
@@ -971,7 +971,7 @@ internal static partial void handleUpgradeResponse⁔(/*this*/ ж<ReverseProxy> 
         var backConnCloseCh = new channel<bool>(0);
         var backConnʗ1 = backConn;
         var backConnCloseChʗ1 = backConnCloseCh;
-        goǃ(() => {
+        goǃ([GoFunc("(*ReverseProxy).handleUpgradeResponse.func1")] () => {
             // Ensure that the cancellation of a request closes the backend.
             // See issue https://golang.org/issue/35559.
             var selᴛ5 = Ꮡreq.Value.Context().Done();
@@ -1072,7 +1072,7 @@ internal static ж<godebug.Setting> urlmaxqueryparams = godebug.New("urlmaxquery
 internal static UntypedInt defaultMaxParams => 10000;
 
 internal static @string cleanQueryParams(@string s) {
-    @string reencode(@string sΔ1) {
+    [GoFunc("cleanQueryParams.func1")] @string reencode(@string sΔ1) {
         var (v, _) = url.ParseQuery(sΔ1);
         return v.Encode();
     }

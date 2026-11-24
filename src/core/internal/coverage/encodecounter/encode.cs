@@ -141,7 +141,7 @@ internal static error writeSegmentPreamble⁔(/*this*/ ж<CoverageDataWriter> �
 
     var akeys = slices.Sorted(maps.Keys<map<@string, @string>, @string, @string>(args));
 
-    error wrULEB128(nuint v) {
+    [GoFunc("(*CoverageDataWriter).writeSegmentPreamble.func1")] error wrULEB128(nuint v) {
         Ꮡcfw.Value.tmp = Ꮡcfw.Value.tmp[..0];
         Ꮡcfw.Value.tmp = uleb128.AppendUleb128(Ꮡcfw.Value.tmp, v);
         var (_, err) = Ꮡws.Value.Write(Ꮡcfw.Value.tmp); if (err != nil) {
@@ -260,7 +260,7 @@ internal static error writeCounters⁔(/*this*/ ж<CoverageDataWriter> Ꮡcfw, C
     //   implicitly.
     var ctrb = new slice<byte>(4);
     var ctrbʗ1 = ctrb;
-    error wrval(uint32 val) {
+    [GoFunc("(*CoverageDataWriter).writeCounters.func1")] error wrval(uint32 val) {
         slice<byte> buf = default;
         nint towr = default;
         if (Ꮡcfw.Value.cflavor == coverage.CtrRaw) {
@@ -285,7 +285,7 @@ internal static error writeCounters⁔(/*this*/ ж<CoverageDataWriter> Ꮡcfw, C
 
     // Write out entries for each live function.
     var wrvalʗ1 = wrval;
-    var emitter = error (uint32 pkid, uint32 funcid, slice<uint32> counters) => {
+    var emitter = [GoFunc("(*CoverageDataWriter).writeCounters.func2")] error (uint32 pkid, uint32 funcid, slice<uint32> counters) => {
         Ꮡcfw.Value.csh.FcnEntries++;
         {
             var err = wrvalʗ1((uint32)len(counters)); if (err != nil) {

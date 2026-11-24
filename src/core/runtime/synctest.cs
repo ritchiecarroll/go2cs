@@ -231,7 +231,7 @@ internal static void synctestRun(Action fʗp) {
 
         gp.Value.bubble = bubble;
         var gpʗ1 = gp;
-        defer(() => {
+        defer([GoFunc("synctestRun.func1")] () => {
             gpʗ1.Value.bubble = default;
         }, ref ᒐ);
 
@@ -239,7 +239,7 @@ internal static void synctestRun(Action fʗp) {
         var pc = sys.GetCallerPC();
         var bubbleʗ1 = bubble;
         var gpʗ2 = gp;
-        systemstack(() => {
+        systemstack([GoFunc("synctestRun.func2")] () => {
             var fv = ~Ꮡf.Reinterpret<Action, ж<funcval>>();
             bubbleʗ1.main = newproc1(fv, gpʗ2, pc, false, waitReasonZero);
             var pp = (~(~getg()).m).p.ptr();
@@ -253,7 +253,7 @@ internal static void synctestRun(Action fʗp) {
             unlock(bubble.Ꮡmu);
             var bubbleʗ2 = bubble;
             var gpʗ3 = gp;
-            systemstack(() => {
+            systemstack([GoFunc("synctestRun.func3")] () => {
                 // Clear gp.m.curg while running timers,
                 // so timer goroutines inherit their child race context from g0.
                 var curg = gpʗ3.Value.m.Value.curg;
@@ -410,7 +410,7 @@ internal static void synctest_inBubble(any bubble, Action f) {
         }
         gp.Value.bubble = bubble._<ж<synctestBubble>>();
         var gpʗ1 = gp;
-        defer(() => {
+        defer([GoFunc("synctest_inBubble.func1")] () => {
             gpʗ1.Value.bubble = default;
         }, ref ᒐ);
         f();

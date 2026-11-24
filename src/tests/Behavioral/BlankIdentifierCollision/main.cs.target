@@ -77,7 +77,7 @@ internal static void blankFuncValues() {
     
     var cʗ1 = c;
     _ = (Func<nint, nint>)((nint p1) => cʗ1.bump(p1));
-    _ = (Func<@string, nint>)((@string sΔ1) => len(sΔ1));
+    _ = (Func<@string, nint>)([GoFunc("blankFuncValues.func1")] (@string sΔ1) => len(sΔ1));
 
     var f = pair;
     _ = f;

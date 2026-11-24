@@ -12,7 +12,7 @@ partial class main_package {
 internal static void expectPanic(@string label, @string want, Action f) {
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("expectPanic.func1")] () => {
             var r = recover();
             @string msg = fmt.Sprint(r);
             fmt.Printf("%-16s panicked: %v  mentions %q: %v  text: %s\n"u8, label, r != nil, want, strings.Contains(msg, want), msg);
@@ -39,7 +39,7 @@ partial struct MyBuffer /*global::go.bytes_package.Buffer*/;
 internal static void convRow(@string label, any x, any want) {
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("convRow.func1")] () => {
             var r = recover(); if (r != nil) {
                 fmt.Printf("%-34s PANIC: %v\n"u8, label, r);
             }
@@ -86,23 +86,23 @@ internal static void main() {
     ref var xa = ref heap<array<nint>>(array<nint>([10, 20, 30, 40, 50, 60, 70, 80]), out var Ꮡxa);
     ref var vs = ref heap<reflect.Value>(reflect.ValueOf(Ꮡxs).Elem(), out var Ꮡvs);
     var vsʗ1 = vs;
-    expectPanic("SetLen(10)", "SetLen", () => {
+    expectPanic("SetLen(10)", "SetLen", [GoFunc("main.func1")] () => {
         vsʗ1.SetLen(10);
     });
     var vsʗ2 = vs;
-    expectPanic("SetCap(10)", "SetCap", () => {
+    expectPanic("SetCap(10)", "SetCap", [GoFunc("main.func2")] () => {
         vsʗ2.SetCap(10);
     });
     var vsʗ3 = vs;
-    expectPanic("SetLen(-1)", "SetLen", () => {
+    expectPanic("SetLen(-1)", "SetLen", [GoFunc("main.func3")] () => {
         vsʗ3.SetLen(-1);
     });
     var vsʗ4 = vs;
-    expectPanic("SetCap(-1)", "SetCap", () => {
+    expectPanic("SetCap(-1)", "SetCap", [GoFunc("main.func4")] () => {
         vsʗ4.SetCap(-1);
     });
     var vsʗ5 = vs;
-    expectPanic("SetCap(6)<len", "SetCap", () => {
+    expectPanic("SetCap(6)<len", "SetCap", [GoFunc("main.func5")] () => {
         vsʗ5.SetCap(6);
     });
     vs.SetLen(5);
@@ -112,29 +112,29 @@ internal static void main() {
     vs.SetCap(5);
     fmt.Println("after SetCap(5): len, cap =", len(xs), cap(xs), "contents", xs);
     var vsʗ6 = vs;
-    expectPanic("SetCap(4)<len", "SetCap", () => {
+    expectPanic("SetCap(4)<len", "SetCap", [GoFunc("main.func6")] () => {
         vsʗ6.SetCap(4);
     });
     var vsʗ7 = vs;
-    expectPanic("SetLen(6)>cap", "SetLen", () => {
+    expectPanic("SetLen(6)>cap", "SetLen", [GoFunc("main.func7")] () => {
         vsʗ7.SetLen(6);
     });
     ref var va = ref heap<reflect.Value>(reflect.ValueOf(Ꮡxa).Elem(), out var Ꮡva);
     var vaʗ1 = va;
-    expectPanic("array SetLen", "SetLen", () => {
+    expectPanic("array SetLen", "SetLen", [GoFunc("main.func8")] () => {
         vaʗ1.SetLen(8);
     });
     var vaʗ2 = va;
-    expectPanic("array SetCap", "SetCap", () => {
+    expectPanic("array SetCap", "SetCap", [GoFunc("main.func9")] () => {
         vaʗ2.SetCap(8);
     });
     var backing = xs.slice(0, cap(xs));
     backing[0] = 99;
     fmt.Println("write through the re-capped window seen by the original:", xs[0] == 99);
-    expectPanic("Bytes on int", "on int Value", () => {
+    expectPanic("Bytes on int", "on int Value", [GoFunc("main.func10")] () => {
         reflect.ValueOf((nint)0).Bytes();
     });
-    expectPanic("Bytes []string", "of non-byte slice", () => {
+    expectPanic("Bytes []string", "of non-byte slice", [GoFunc("main.func11")] () => {
         reflect.ValueOf(slice<@string>([])).Bytes();
     });
     var x = new main_S(new byte[]{1, 2, 3, 4}.slice());
@@ -142,10 +142,10 @@ internal static void main() {
     y[0] = 42;
     fmt.Println("S bytes:", y, "aliases x:", x[0] == 42);
     ref var a = ref heap<main_A>(new main_A(new byte[]{1, 2, 3, 4}.array()), out var Ꮡa);
-    expectPanic("Bytes [4]byte value", "unaddressable", () => {
+    expectPanic("Bytes [4]byte value", "unaddressable", [GoFunc("main.func12")] () => {
         reflect.ValueOf(Ꮡa.Value).Bytes();
     });
-    expectPanic("Bytes *[4]byte", "on ptr Value", () => {
+    expectPanic("Bytes *[4]byte", "on ptr Value", [GoFunc("main.func13")] () => {
         reflect.ValueOf(Ꮡa).Bytes();
     });
     var b = reflect.ValueOf(Ꮡa).Elem().Bytes();
@@ -156,13 +156,13 @@ internal static void main() {
     fmt.Println("SB    bytes:", reflect.ValueOf(new main_SB(new main_B[]{1, 2, 3, 4}.slice())).Bytes());
     fmt.Println("*AB   bytes:", reflect.ValueOf(@new<main_AB>()).Elem().Bytes());
     ref var ab = ref heap<main_AB>(new main_AB(new main_B[]{5, 6, 7, 8}.array()), out var Ꮡab);
-    expectPanic("Bytes AB value", "unaddressable", () => {
+    expectPanic("Bytes AB value", "unaddressable", [GoFunc("main.func14")] () => {
         reflect.ValueOf(Ꮡab.Value).Bytes();
     });
     var c = reflect.ValueOf(Ꮡab).Elem().Bytes();
     c[2] = 44;
     fmt.Println("AB bytes:", c, "aliases ab:", ab[2] == 44);
-    expectPanic("Bytes [4]int", "of non-byte array", () => {
+    expectPanic("Bytes [4]int", "of non-byte array", [GoFunc("main.func15")] () => {
         reflect.ValueOf(Ꮡ(new nint[]{}.array(4))).Elem().Bytes();
     });
 
@@ -226,7 +226,7 @@ internal static void main() {
     fmt.Println("array pointer aliases the slice:", src[2] == 99);
     ref var sh = ref heap<reflect.Value>(reflect.ValueOf(slice<byte>([1, 2, 3, 4])), out var Ꮡsh);
     var shʗ1 = sh;
-    expectPanic("Convert short slice", "cannot convert slice with length 4 to pointer to array with length 8", () => {
+    expectPanic("Convert short slice", "cannot convert slice with length 4 to pointer to array with length 8", [GoFunc("main.func16")] () => {
         shʗ1.Convert(reflect.TypeOf(ж<array<byte>>.NilBoxOfDims(8L)));
     });
 
@@ -244,10 +244,10 @@ internal static void main() {
     sendOnly.Interface()._<channel/*<-*/<nint>>().ᐸꟷ(7);
     fmt.Println("converted send-only view type:", sendOnly.Type(), " interface type:", reflect.TypeOf(sendOnly.Interface()), " received on the original:", ᐸꟷ<nint>(live));
 
-    void setRow(@string label, reflect.Type slotΔ1, reflect.Value xΔ1) {
+    [GoFunc("main.func17")] void setRow(@string label, reflect.Type slotΔ1, reflect.Value xΔ1) {
         GoFrame ᒐ = default;
         try {
-            defer(() => {
+            defer([GoFunc("main.func17.1")] () => {
                 var r = recover(); if (r != nil) {
                     fmt.Printf("%-38s PANIC: %v\n"u8, label, r);
                 }
@@ -272,7 +272,7 @@ internal static void main() {
     fmt.Println("send-only slot value type:", reflect.TypeOf(slot.Interface()), " received on the original:", ᐸꟷ<nint>(live));
 
     fmt.Println("IntChanRecv dir:", reflect.TypeOf((IntChanRecv)default).ChanDir(), " IntChanSend dir:", reflect.TypeOf((IntChanSend)default).ChanDir(), " IntChan dir:", reflect.TypeOf((IntChan)default).ChanDir());
-    void canRow(any xΔ2, any yΔ1) {
+    [GoFunc("main.func18")] void canRow(any xΔ2, any yΔ1) {
         fmt.Printf("%-14v -> %-14v convertible=%v assignable=%v\n"u8, reflect.TypeOf(xΔ2), reflect.TypeOf(yΔ1), reflect.TypeOf(xΔ2).ConvertibleTo(reflect.TypeOf(yΔ1)), reflect.TypeOf(xΔ2).AssignableTo(reflect.TypeOf(yΔ1)));
     }
     canRow(/*<-*/channel<nint>.RecvOnly, (IntChanRecv)default);

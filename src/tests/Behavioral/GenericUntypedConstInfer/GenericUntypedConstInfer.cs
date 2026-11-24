@@ -5,7 +5,7 @@ using fmt = fmt_package;
 partial class main_package {
 
 internal static Action<T, bool> wantValue<T>(T want) {
-    return (T got, bool ok) => {
+    return [GoFunc("wantValue[...].func1")] (T got, bool ok) => {
         if (ok && AreEqual(got, want)) {
             fmt.Println("match", (got).OrTypedNilOf());
         } else {
@@ -15,7 +15,7 @@ internal static Action<T, bool> wantValue<T>(T want) {
 }
 
 internal static Action<bool> wantPresent<T>(T want) {
-    return (bool ok) => {
+    return [GoFunc("wantPresent[...].func1")] (bool ok) => {
         fmt.Println("present", (want).OrTypedNilOf(), ok);
     };
 }
@@ -43,13 +43,13 @@ internal static channel<T> chanOf<T>(T v) {
 }
 
 internal static Action<V, bool> pairValue<K, V>(K k, V v) {
-    return (V got, bool ok) => {
+    return [GoFunc("pairValue[...].func1")] (V got, bool ok) => {
         fmt.Println("pair", (k).OrTypedNilOf(), (got).OrTypedNilOf(), ok);
     };
 }
 
 internal static Action<T, bool> wantLike<T>(T proto, T want) {
-    return (T got, bool ok) => {
+    return [GoFunc("wantLike[...].func1")] (T got, bool ok) => {
         fmt.Println("like", (got).OrTypedNilOf(), (want).OrTypedNilOf(), ok);
     };
 }
@@ -57,7 +57,7 @@ internal static Action<T, bool> wantLike<T>(T proto, T want) {
 internal static Action<T, bool> wantInt64<T>(T want)
     where T : /* int64 */ IAdditionOperators<T, T, T>, ISubtractionOperators<T, T, T>, IMultiplyOperators<T, T, T>, IDivisionOperators<T, T, T>, IIncrementOperators<T>, IDecrementOperators<T>, IUnaryNegationOperators<T, T>, IModulusOperators<T, T, T>, IBitwiseOperators<T, T, T>, IShiftOperators<T, int, T>, IEqualityOperators<T, T, bool>, IComparisonOperators<T, T, bool>, new()
 {
-    return (T got, bool ok) => {
+    return [GoFunc("wantInt64[...].func1")] (T got, bool ok) => {
         fmt.Println("i64", (got).OrTypedNilOf(), (want).OrTypedNilOf(), ok);
     };
 }

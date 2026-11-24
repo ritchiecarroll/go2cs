@@ -103,7 +103,7 @@ internal static error Close⁔(/*this*/ ref Archive a) {
 
 // NewArchive creates a new Archive for accessing an AIX big archive in an underlying reader.
 public static (ж<Archive>, error) NewArchive(io.ReaderAt r) {
-    (int64, error) parseDecimalBytes(slice<byte> b) => strconv.ParseInt(strings.TrimSpace((@string)b), 10, 64);
+    [GoFunc("NewArchive.func1")] (int64, error) parseDecimalBytes(slice<byte> b) => strconv.ParseInt(strings.TrimSpace((@string)b), 10, 64);
     var sr = io.NewSectionReader(r, 0, 9223372036854775807L);
 
     // Read File Header

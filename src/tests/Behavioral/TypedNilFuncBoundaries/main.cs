@@ -46,7 +46,7 @@ internal static void main() {
     fmt.Println("qualified", take(fmt.Sprint) != nil);
     var hʗ1 = h;
     fmt.Println("methodval", take(() => hʗ1.method()) != nil);
-    fmt.Println("literal ", take(() => {
+    fmt.Println("literal ", take([GoFunc("main.func1")] () => {
     }) != nil);
 
     fmt.Println("fieldfn ", take((h.fn).OrTypedNilFunc()) == nil);

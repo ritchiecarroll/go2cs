@@ -9,11 +9,16 @@
 package main
 
 import (
+	"archive/zip"
+	"bytes"
+	"crypto/sha256"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"sort"
 	"strings"
 	"testing"
@@ -127,89 +132,9 @@ func TestModuleCacheGoModReadsThroughASymlinkedSpelling(t *testing.T) {
 	}
 }
 
-// The driver hands the go commands the same answer through GOFLAGS -overlay, says so, and writes
-// nothing into the cache.
-func TestInstallGoModOverlayForAModuleWithoutGoMod(t *testing.T) {
-	_, moduleDir := moduleCacheFixture(t)
-	outRoot := t.TempDir()
-	t.Setenv("GOFLAGS", "-mod=mod")
-
-	overlay, err := installGoModOverlay(moduleDir, outRoot)
-
-	if err != nil || overlay == "" {
-		t.Fatalf("want an overlay, got %q (%v)", overlay, err)
-	}
-
-	if got, want := os.Getenv("GOFLAGS"), "-mod=mod -overlay="+overlay; got != want {
-		t.Fatalf("GOFLAGS: want %q, got %q", want, got)
-	}
-
-	data, err := os.ReadFile(overlay)
-
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	synthesized, _ := goModFile(moduleDir)
-
-	if want := `{"Replace":{` + quoteJSON(filepath.Join(moduleDir, "go.mod")) + `:` + quoteJSON(synthesized) + `}}`; string(data) != want {
-		t.Fatalf("overlay: want %s, got %s", want, data)
-	}
-
-	if _, err := os.Stat(filepath.Join(moduleDir, "go.mod")); !os.IsNotExist(err) {
-		t.Fatal("a go.mod was written into the module cache")
-	}
-
-	// A module that ships its own go.mod gets no overlay and GOFLAGS is left as it is.
-	t.Setenv("GOFLAGS", "")
-	own := t.TempDir()
-	writeModuleFile(t, filepath.Join(own, "go.mod"), "module example.com/own\n")
-
-	if overlay, err := installGoModOverlay(own, outRoot); err != nil || overlay != "" || os.Getenv("GOFLAGS") != "" {
-		t.Fatalf("a module with its own go.mod: want no overlay, got %q (%v), GOFLAGS %q", overlay, err, os.Getenv("GOFLAGS"))
-	}
-
-	// An existing -overlay is never replaced.
-	t.Setenv("GOFLAGS", "-overlay=elsewhere.json")
-
-	if _, err := installGoModOverlay(moduleDir, outRoot); err == nil {
-		t.Fatal("an existing GOFLAGS -overlay was replaced")
-	}
-}
-
-// The dependency preflight keeps the run's GOFLAGS (and so the go.mod overlay): it used to replace
-// GOFLAGS with -mod=readonly, `go mod download` then saw no module, and pkg/errors v0.9.1 was refused
-// before converting anything ("go: no modules specified"). Runs the real go command.
-func TestGoModDownloadPreflightKeepsTheGoModOverlay(t *testing.T) {
-	_, moduleDir := moduleCacheFixture(t)
-	t.Setenv("GOFLAGS", "")
-
-	if _, err := installGoModOverlay(moduleDir, t.TempDir()); err != nil {
-		t.Fatal(err)
-	}
-
-	if err := goModDownloadPreflight(moduleDir); err != nil {
-		t.Fatalf("the preflight must see the module through the overlay: %v", err)
-	}
-}
-
-func quoteJSON(s string) string {
-	out := []byte{'"'}
-
-	for _, r := range s {
-		if r == '\\' || r == '"' {
-			out = append(out, '\\')
-		}
-
-		out = append(out, string(r)...)
-	}
-
-	return string(append(out, '"'))
-}
-
 // PLAIN -recurse over a module-cache release with no go.mod (cgo against go.* INC 4: github.com/mattn/go-pointer
 // v0.0.1 is one, and nugetgo-pack converts each flavor with -recurse=nuget from its cache directory). Only the -tests
-// -recurse driver handled one, through a go.mod overlay that go list and go build both refuse beneath GOMODCACHE, so
+// -recurse driver tried one, through a go.mod overlay that go list and go build both refuse beneath GOMODCACHE, so
 // plain -recurse failed its dependency preflight: "go: no modules specified". It now converts a COPY carrying the
 // cache's synthesized go.mod. Driven through the real binary against offline fabricated caches, each run under a
 // private TMPDIR, with COORD's conditions and P3's reads as arms.
@@ -698,5 +623,255 @@ func TestACopyRunMapsEverySourceOrRefusesByName(t *testing.T) {
 
 	if remapCopiedError(nil) != nil || remapCopiedError(sentinel) != sentinel {
 		t.Error("nil stays nil, and an error naming no copy is returned as it is")
+	}
+}
+
+// go2cs never writes into the module cache (COORD's ruling on the 2026-11-22 STOP-LINE). A release converted from the
+// cache used to be its own main module, and the dependency preflight's `go mod download` rewrites a go.mod with no
+// `go` directive (it adds the toolchain's) and writes a go.sum, even under -mod=readonly; the cache's read-only
+// modes do not stop a root process. Measured on gopkg.in/yaml.v3 v3.0.1 and github.com/google/uuid v1.6.0. Every cache
+// release now converts and tests from a copy, so the cache is byte-unchanged, go.sum absence included: a release whose
+// go.mod has no go line under plain -recurse and under -tests -recurse, and (the control) one that has a go line.
+func TestARunLeavesTheModuleCacheByteUnchanged(t *testing.T) {
+	if testing.Short() {
+		t.Skip("integration test: builds the converter and converts from a fabricated module cache")
+	}
+
+	treeSrc, err := filepath.Abs("..")
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Every file under the cache by its path, as a hash of its bytes (directories by their presence).
+	snapshot := func(t *testing.T, cache string) map[string]string {
+		t.Helper()
+		files := map[string]string{}
+
+		err := filepath.WalkDir(cache, func(path string, entry os.DirEntry, err error) error {
+			if err != nil {
+				return err
+			}
+
+			rel, _ := filepath.Rel(cache, path)
+
+			// The go command's own lock file, which any go command that reads the cache takes: housekeeping, not content.
+			if filepath.ToSlash(rel) == "cache/lock" {
+				return nil
+			}
+
+			if entry.IsDir() {
+				files[filepath.ToSlash(rel)+"/"] = "dir"
+				return nil
+			}
+
+			data, err := os.ReadFile(path)
+
+			if err != nil {
+				return err
+			}
+
+			files[filepath.ToSlash(rel)] = fmt.Sprintf("%x", sha256.Sum256(data))
+
+			return nil
+		})
+
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		return files
+	}
+
+	run := func(t *testing.T, cache, dir string, args ...string) string {
+		t.Helper()
+		tmp := t.TempDir()
+		output := filepath.Join(t.TempDir(), "out")
+		cmd := exec.Command(driverBinary(t), append(append(args, "-go2cspath", treeSrc), dir, output)...)
+		cmd.Env = append(os.Environ(), "GOMODCACHE="+cache, "GOFLAGS=", "GOPROXY=off", "GOWORK=off", "GOTOOLCHAIN=local", "GONOSUMDB=*",
+			"TMPDIR="+tmp, "TMP="+tmp, "TEMP="+tmp)
+		combined, err := cmd.CombinedOutput()
+
+		if err != nil {
+			t.Fatalf("go2cs %s failed: %v\n%s", strings.Join(args, " "), err, lastLines(string(combined), 12))
+		}
+
+		return string(combined)
+	}
+
+	proxy := dependencyProxy(t)
+	primed := func(t *testing.T, cache string) string { return primeDependency(t, proxy, cache) }
+
+	for _, arm := range []struct {
+		name  string
+		goMod string
+	}{
+		{"a release whose go.mod has no go line", "module example.com/plain\n\nrequire example.com/dep v1.0.0\n"},
+		{"the control: a release whose go.mod has a go line", "module example.com/plain\n\ngo 1.21\n\nrequire example.com/dep v1.0.0\n"},
+	} {
+		for _, args := range [][]string{{"-recurse"}, {"-tests", "-test-action", "convert", "-recurse"}} {
+			t.Run(arm.name+" under "+strings.Join(args, " "), func(t *testing.T) {
+				cache := t.TempDir()
+				sums := primed(t, cache)
+				dir := filepath.Join(cache, "example.com", "plain@v1.0.0")
+				writeModuleFile(t, filepath.Join(dir, "go.mod"), arm.goMod)
+				writeModuleFile(t, filepath.Join(dir, "go.sum"), sums)
+				writeModuleFile(t, filepath.Join(dir, "plain.go"), "package plain\n\n// One is one.\nfunc One() int { return 1 }\n")
+				writeModuleFile(t, filepath.Join(dir, "plain_test.go"),
+					"package plain\n\nimport \"testing\"\n\nfunc TestOne(t *testing.T) {\n\tif One() != 1 {\n\t\tt.Fatal(\"One\")\n\t}\n}\n")
+				writeModuleFile(t, filepath.Join(cache, "cache", "download", "example.com", "plain", "@v", "v1.0.0.mod"), arm.goMod)
+
+				before := snapshot(t, cache)
+				run(t, cache, dir, args...)
+				after := snapshot(t, cache)
+
+				for path, hash := range after {
+					if before[path] != hash {
+						t.Errorf("the run wrote %s into the module cache", path)
+					}
+				}
+
+				for path := range before {
+					if _, kept := after[path]; !kept {
+						t.Errorf("the run removed %s from the module cache", path)
+					}
+				}
+			})
+		}
+	}
+}
+
+// dependencyProxy serves example.com/dep v1.0.0 from a file proxy. `go mod download` rewrites a go.mod only when it
+// has a dependency to fetch, so a fixture release requires this one; primeDependency puts it in a cache BEFORE a
+// snapshot, as go itself populates a cache, and the run then reads it with GOPROXY=off.
+func dependencyProxy(t *testing.T) string {
+	t.Helper()
+	proxy := t.TempDir()
+	depRoot := "example.com/dep@v1.0.0/"
+	writeModuleFile(t, filepath.Join(proxy, "example.com", "dep", "@v", "list"), "v1.0.0\n")
+	writeModuleFile(t, filepath.Join(proxy, "example.com", "dep", "@v", "v1.0.0.info"), `{"Version":"v1.0.0","Time":"2026-01-01T00:00:00Z"}`)
+	// No go line, as gopkg.in/check.v1's synthesized go.mod has none: a dependency that declared a newer Go than the
+	// release's implied 1.16 would make go itself refuse to load the release as a main module ("updates to go.mod
+	// needed"), which go2cs reports as go does.
+	writeModuleFile(t, filepath.Join(proxy, "example.com", "dep", "@v", "v1.0.0.mod"), "module example.com/dep\n")
+
+	var zipped bytes.Buffer
+	archive := zip.NewWriter(&zipped)
+
+	for name, body := range map[string]string{"go.mod": "module example.com/dep\n", "dep.go": "package dep\n\n// Two is two.\nfunc Two() int { return 2 }\n"} {
+		w, err := archive.Create(depRoot + name)
+
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		_, _ = w.Write([]byte(body))
+	}
+
+	if err := archive.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	writeModuleFile(t, filepath.Join(proxy, "example.com", "dep", "@v", "v1.0.0.zip"), zipped.String())
+
+	return proxy
+}
+
+// primeDependency downloads example.com/dep v1.0.0 from proxy into cache and returns its two go.sum lines.
+//
+// Two host rules, both from train 6's hosted go-test. A file proxy on Windows is file:///C:/..., since Go refuses
+// file://C:/... as "a file:// proxy URL with non-path elements". And -modcacherw: the go command writes the module it
+// extracts read-only, so as any user but root t.TempDir's cleanup cannot remove the cache ("unlinkat ...: permission
+// denied" on linux and darwin). The snapshot these tests compare reads bytes, not modes, so a writable cache only makes
+// a stray write succeed where it is seen.
+func primeDependency(t *testing.T, proxy, cache string) string {
+	t.Helper()
+	proxyURL := "file://" + filepath.ToSlash(proxy)
+
+	if runtime.GOOS == "windows" {
+		proxyURL = "file:///" + filepath.ToSlash(proxy)
+	}
+
+	cmd := exec.Command("go", "mod", "download", "-json", "example.com/dep@v1.0.0")
+	cmd.Dir = t.TempDir()
+	cmd.Env = append(os.Environ(), "GOMODCACHE="+cache, "GOFLAGS=-modcacherw", "GOPROXY="+proxyURL, "GOSUMDB=off", "GOWORK=off", "GOTOOLCHAIN=local")
+	out, err := cmd.Output()
+
+	if err != nil {
+		t.Fatalf("priming the cache with example.com/dep: %v\n%s", err, out)
+	}
+
+	var info struct{ Sum, GoModSum string }
+
+	if err := json.Unmarshal(out, &info); err != nil || info.Sum == "" {
+		t.Fatalf("reading the primed sums: %v\n%s", err, out)
+	}
+
+	return "example.com/dep v1.0.0 " + info.Sum + "\nexample.com/dep v1.0.0/go.mod " + info.GoModSum + "\n"
+}
+
+// The dependency preflight is a CHECK, never an edit: `go mod download` rewrites a go.mod that has no go directive and
+// requires a module (it adds the toolchain's `go` line), and the module would then be read at the toolchain's language
+// version instead of the Go 1.16 its go.mod means. The preflight puts the go.mod's own bytes back. Measured on
+// gopkg.in/yaml.v3 v3.0.1, whose copy was otherwise converted and tested as go 1.26.11.
+func TestTheDependencyPreflightLeavesTheGoModAsItWas(t *testing.T) {
+	cache := t.TempDir()
+	primeDependency(t, dependencyProxy(t), cache)
+	dir := t.TempDir()
+	goMod := "module example.com/plain\n\nrequire example.com/dep v1.0.0\n"
+	writeModuleFile(t, filepath.Join(dir, "go.mod"), goMod)
+	writeModuleFile(t, filepath.Join(dir, "plain.go"), "package plain\n")
+	t.Setenv("GOMODCACHE", cache)
+	t.Setenv("GOFLAGS", "")
+	t.Setenv("GOPROXY", "off")
+	t.Setenv("GOWORK", "off")
+	t.Setenv("GONOSUMDB", "*")
+	t.Setenv("GOSUMDB", "off")
+
+	if err := goModDownloadPreflight(dir); err != nil {
+		t.Fatal(err)
+	}
+
+	if data, _ := os.ReadFile(filepath.Join(dir, "go.mod")); string(data) != goMod {
+		t.Fatalf("the preflight rewrote the go.mod:\n%s", data)
+	}
+}
+
+// A cache release that ships no go.sum, or one without its test dependencies' sums (gopkg.in/yaml.v3 v3.0.1: its tests
+// import gopkg.in/check.v1, whose module hash it never recorded), loads its tests in the copy: -tests -recurse fills
+// the copy's go.sum, as `go mod download all` would, and keeps the release's go.mod bytes.
+func TestTestsRecurseLoadsATestDependencyTheReleaseRecordsNoSumFor(t *testing.T) {
+	if testing.Short() {
+		t.Skip("integration test: builds the converter and converts from a fabricated module cache")
+	}
+
+	treeSrc, err := filepath.Abs("..")
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	cache := t.TempDir()
+	primeDependency(t, dependencyProxy(t), cache)
+	dir := filepath.Join(cache, "example.com", "plain@v1.0.0")
+	writeModuleFile(t, filepath.Join(dir, "go.mod"), "module example.com/plain\n\nrequire example.com/dep v1.0.0\n")
+	writeModuleFile(t, filepath.Join(dir, "plain.go"), "package plain\n\n// One is one.\nfunc One() int { return 1 }\n")
+	writeModuleFile(t, filepath.Join(dir, "plain_test.go"),
+		"package plain\n\nimport (\n\t\"testing\"\n\n\t\"example.com/dep\"\n)\n\nfunc TestOne(t *testing.T) {\n\tif One()+dep.Two() != 3 {\n\t\tt.Fatal(\"One\")\n\t}\n}\n")
+	writeModuleFile(t, filepath.Join(cache, "cache", "download", "example.com", "plain", "@v", "v1.0.0.mod"), "module example.com/plain\n\nrequire example.com/dep v1.0.0\n")
+
+	tmp := t.TempDir()
+	outRoot := filepath.Join(t.TempDir(), "out")
+	cmd := exec.Command(driverBinary(t), "-tests", "-test-action", "convert", "-recurse", "-go2cspath", treeSrc, dir, outRoot)
+	cmd.Env = append(os.Environ(), "GOMODCACHE="+cache, "GOFLAGS=", "GOPROXY=off", "GOWORK=off", "GOTOOLCHAIN=local", "GONOSUMDB=*", "GOSUMDB=off",
+		"TMPDIR="+tmp, "TMP="+tmp, "TEMP="+tmp)
+	combined, err := cmd.CombinedOutput()
+
+	if err != nil {
+		t.Fatalf("go2cs -tests -recurse failed on a release with no go.sum: %v\n%s", err, lastLines(string(combined), 12))
+	}
+
+	if projects, _ := filepath.Glob(filepath.Join(outRoot, "src", "example.com", "plain", "*.tests.csproj")); len(projects) != 1 {
+		t.Errorf("want one test project for example.com/plain, got %v\n%s", projects, lastLines(string(combined), 12))
 	}
 }

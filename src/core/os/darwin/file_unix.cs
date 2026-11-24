@@ -45,7 +45,7 @@ internal static error rename(@string oldname, @string newname) {
             return new LinkErrorжerror(Ꮡ(new LinkError("rename", oldname, newname, syscall.EEXIST)));
         }
     }
-    err = ignoringEINTR(() => syscall.Rename(oldname, newname));
+    err = ignoringEINTR([GoFunc("rename.func1")] () => syscall.Rename(oldname, newname));
     if (err != nil) {
         return new LinkErrorжerror(Ꮡ(new LinkError("rename", oldname, newname, err)));
     }
@@ -172,7 +172,7 @@ internal static ж<File> newFile(nint fd, @string name, newFileKind kind, bool n
         switch (ᐧ) {
         case {} when exprᴛ1 == "darwin"u8 || exprᴛ1 == "ios"u8 || exprᴛ1 == "dragonfly"u8 || exprᴛ1 == "freebsd"u8 || exprᴛ1 == "netbsd"u8 || exprᴛ1 == "openbsd"u8: {
             ref var st = ref heap(new syscall.Stat_t(), out var Ꮡst);
-            var err = ignoringEINTR(() => syscall.Fstat(fd, Ꮡst));
+            var err = ignoringEINTR([GoFunc("newFile.func1")] () => syscall.Fstat(fd, Ꮡst));
             var typ = (uint16)(st.Mode & (uint16)syscall.S_IFMT);
             // Don't try to use kqueue with regular files on *BSDs.
             // On FreeBSD a regular file is always
@@ -265,7 +265,7 @@ internal static (ж<File>, error) openFileNolog(@string name, nint flag, FileMod
     ref var s = ref heap(new poll.SysFile(), out var Ꮡs);
     ref var e = ref heap<error>(out var Ꮡe);
     // We have to check EINTR here, per issues 11180 and 39237.
-    ignoringEINTR(() => {
+    ignoringEINTR([GoFunc("openFileNolog.func1")] () => {
         (r, Ꮡs.Value, Ꮡe.ValueSlot) = open(name, flag | (nint)syscall.O_CLOEXEC, syscallMode(perm));
         return Ꮡe.ValueSlot;
     });
@@ -293,7 +293,7 @@ internal static (ж<File>, error) openDirNolog(@string name) {
     nint r = default;
     ref var s = ref heap(new poll.SysFile(), out var Ꮡs);
     ref var e = ref heap<error>(out var Ꮡe);
-    ignoringEINTR(() => {
+    ignoringEINTR([GoFunc("openDirNolog.func1")] () => {
         (r, Ꮡs.Value, Ꮡe.ValueSlot) = open(name, (nint)((nint)(nint)(O_RDONLY | (nint)syscall.O_CLOEXEC) | (nint)syscall.O_DIRECTORY), 0);
         return Ꮡe.ValueSlot;
     });
@@ -354,7 +354,7 @@ internal static (int64 ret, error err) seek⁔(/*this*/ ж<File> Ꮡf, int64 off
 // If the file is a symbolic link, it changes the size of the link's target.
 // If there is an error, it will be of type [*PathError].
 public static error Truncate(@string name, int64 size) {
-    var e = ignoringEINTR(() => syscall.Truncate(name, size));
+    var e = ignoringEINTR([GoFunc("Truncate.func1")] () => syscall.Truncate(name, size));
     if (e != nil) {
         return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "truncate", Path: name, Err: e)));
     }
@@ -368,11 +368,11 @@ public static error Remove(@string name) {
     // whether name is a file or directory.
     // Try both: it is cheaper on average than
     // doing a Stat plus the right one.
-    var e = ignoringEINTR(() => syscall.Unlink(name));
+    var e = ignoringEINTR([GoFunc("Remove.func1")] () => syscall.Unlink(name));
     if (e == nil) {
         return default;
     }
-    var e1 = ignoringEINTR(() => syscall.Rmdir(name));
+    var e1 = ignoringEINTR([GoFunc("Remove.func2")] () => syscall.Rmdir(name));
     if (e1 == nil) {
         return default;
     }
@@ -415,7 +415,7 @@ internal static @string tempDir() {
 // Link creates newname as a hard link to the oldname file.
 // If there is an error, it will be of type *LinkError.
 public static error Link(@string oldname, @string newname) {
-    var e = ignoringEINTR(() => syscall.Link(oldname, newname));
+    var e = ignoringEINTR([GoFunc("Link.func1")] () => syscall.Link(oldname, newname));
     if (e != nil) {
         return new LinkErrorжerror(Ꮡ(new LinkError("link", oldname, newname, e)));
     }
@@ -427,7 +427,7 @@ public static error Link(@string oldname, @string newname) {
 // if oldname is later created as a directory the symlink will not work.
 // If there is an error, it will be of type *LinkError.
 public static error Symlink(@string oldname, @string newname) {
-    var e = ignoringEINTR(() => syscall.Symlink(oldname, newname));
+    var e = ignoringEINTR([GoFunc("Symlink.func1")] () => syscall.Symlink(oldname, newname));
     if (e != nil) {
         return new LinkErrorжerror(Ꮡ(new LinkError("symlink", oldname, newname, e)));
     }
@@ -438,7 +438,7 @@ internal static (@string, error) readlink(@string name) {
     for (nint len = 128; ; len *= 2) {
         var b = new slice<byte>(len);
         var bʗ1 = b;
-        var (n, err) = ignoringEINTR2((nint, error) () => {
+        var (n, err) = ignoringEINTR2([GoFunc("readlink.func1")] (nint, error) () => {
             var (ᴛ1, ᴛ2) = syscall.Readlink(name, bʗ1);
             return fixCount(ᴛ1, ᴛ2);
         });

@@ -98,7 +98,7 @@ internal static (io.ReadSeeker reader, io.Closer closer, error err) openExportFi
         }
         closer = new os_FileжCloser(f);
         var fʗ1 = f;
-        defer(() => {
+        defer([GoFunc("openExportFile.func1")] () => {
             if (Ꮡerr.ValueSlot != nil && closer != nil) {
                 fʗ1.Close();
             }
@@ -172,7 +172,7 @@ internal partial interface GetImporter_type /*dyn*/ {
 public static Importer GetImporter(slice<@string> searchpaths, map<ж<types.Package>, InitData> initmap) {
     var initmapʗ1 = initmap;
     var searchpathsʗ1 = searchpaths;
-    return (map<@string, ж<types.Package>> imports, @string pkgpath, @string srcDir, Func<@string, (io.ReadCloser, error)> lookup) => {
+    return [GoFunc("GetImporter.func1")] (map<@string, ж<types.Package>> imports, @string pkgpath, @string srcDir, Func<@string, (io.ReadCloser, error)> lookup) => {
         ж<types.Package> pkg = default;
         error err = default;
         GoFrame ᒐ = default;

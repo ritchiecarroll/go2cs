@@ -75,7 +75,7 @@ internal static void dumpSigStack(@string s, uintptr sp, uintptr stackhi, uintpt
     println((@string)"SP:\t", (hex)(uint64)sp);
     println((@string)"ctx:\t", (hex)(uint64)ctx);
     var entriesStart = (uintptr)@unsafe.Pointer.To<ucontext>((@unsafe.Pointer)ctx).Ꮡuc_mcontext.Ꮡ__reserved;
-    hexdumpWords(sp, stackhi, (uintptr p, hexdumpMarker hm) => {
+    hexdumpWords(sp, stackhi, [GoFunc("dumpSigStack.func1")] (uintptr p, hexdumpMarker hm) => {
         switch (p) {
         case var ᴛ when ᴛ == ctx: {
             hm.start();

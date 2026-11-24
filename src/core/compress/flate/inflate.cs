@@ -804,7 +804,7 @@ internal static void makeReader⁔(/*this*/ ref decompressor f, io.Reader r) {
 }
 
 internal static void fixedHuffmanDecoderInit() {
-    ᏑfixedOnce.Do(() => {
+    ᏑfixedOnce.Do([GoFunc("fixedHuffmanDecoderInit.func1")] () => {
         // These come from the RFC section 3.2.6.
         array<nint> bits = new(288);
         for (nint i = 0; i < 144; i++) {

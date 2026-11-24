@@ -26,7 +26,7 @@ internal static partial void main() {
     var b = glyphlib.New();
     var bʗ1 = b;
     var doneʗ1 = done;
-    goǃ(() => {
+    goǃ([GoFunc("main.func1")] () => {
         doneʗ1.ᐸꟷ(bʗ1.Take());
     });
     b.Put(7);
@@ -39,7 +39,7 @@ internal static partial void main() {
     var l = Ꮡ(new local(ch: new channel<nint>(0)));
     var doneʗ2 = done;
     var lʗ1 = l;
-    goǃ(() => {
+    goǃ([GoFunc("main.func2")] () => {
         doneʗ2.ᐸꟷ(lʗ1.Take());
     });
     l.ch.ᐸꟷ(8);

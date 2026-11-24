@@ -870,7 +870,7 @@ internal static ref sync.Pool bufioWriter4kPool => ref ((StaticBox<sync.Pool>)�
 
 internal static UntypedInt copyBufPoolSize => /* 32 * 1024 */ 32768;
 
-internal static readonly ж<sync.Pool> ᏑcopyBufPool = new StaticBox<sync.Pool>(new sync.Pool(New: () => Ꮡ(new array<byte>(32768))));
+internal static readonly ж<sync.Pool> ᏑcopyBufPool = new StaticBox<sync.Pool>(new sync.Pool(New: [GoFunc("init.func16")] () => Ꮡ(new array<byte>(32768))));
 internal static ref sync.Pool copyBufPool => ref ((StaticBox<sync.Pool>)ᏑcopyBufPool).ValueSlot;
 
 internal static slice<byte> getCopyBuf() {
@@ -1050,7 +1050,7 @@ internal static (ж<response> w, error err) readRequest⁔(/*this*/ ж<conn> Ꮡ
         }
         {
             var d = c.server.WriteTimeout; if (d > 0) {
-                defer(() => {
+                defer([GoFunc("(*conn).readRequest.func1")] () => {
                     Ꮡc.Value.rwc.SetWriteDeadline(time.Now().Add(d));
                 }, ref ᒐ);
             }
@@ -1363,7 +1363,7 @@ internal static void writeHeader⁔(/*this*/ ref chunkWriter cw, slice<byte> p) 
     }
     ref var excludeHeader = ref heap<map<@string, bool>>(out var ᏑexcludeHeader);
     var headerʗ1 = header;
-    void delHeader(@string key) {
+    [GoFunc("(*chunkWriter).writeHeader.func1")] void delHeader(@string key) {
         if (owned) {
             headerʗ1.Del(key);
             return;
@@ -2036,7 +2036,7 @@ internal static void serve⁔(/*this*/ ж<conn> Ꮡc, context.Context ctx) {
         }
         ctx = context.WithValue(ctx, LocalAddrContextKey.OrTypedNil(), c.rwc.LocalAddr());
         ref var inFlightResponse = ref heap<ж<response>>(out var ᏑinFlightResponse);
-        defer([MethodImpl(MethodImplOptions.NoInlining)] () => {
+        defer([MethodImpl(MethodImplOptions.NoInlining), GoFunc("(*conn).serve.func1")] () => {
             var err = recover(); if (err != nil && !AreEqual(err, ErrAbortHandler)) {
                 const nint size = /* 64 << 10 */ 65536;
                 var buf = new slice<byte>(size);
@@ -2323,7 +2323,7 @@ internal static bool maybeServeUnencryptedHTTP2⁔(/*this*/ ж<conn> Ꮡc, conte
     if (!ok) {
         return false;
     }
-    bool hasPreface(ж<conn> cΔ1, slice<byte> preface) {
+    [GoFunc("(*conn).maybeServeUnencryptedHTTP2.func1")] bool hasPreface(ж<conn> cΔ1, slice<byte> preface) {
         cΔ1.r.setReadLimit((int64)len(preface) - (int64)cΔ1.bufr.Buffered());
         var (got, err) = cΔ1.bufr.Peek(len(preface));
         cΔ1.r.setInfiniteReadLimit();
@@ -2510,7 +2510,7 @@ public static Handler StripPrefix(@string prefix, Handler h) {
     if (prefix == ""u8) {
         return h;
     }
-    return new HandlerFuncᴠHandler(new HandlerFunc((ResponseWriter w, ж<Request> r) => {
+    return new HandlerFuncᴠHandler(new HandlerFunc([GoFunc("StripPrefix.func1")] (ResponseWriter w, ж<Request> r) => {
         @string p = strings.TrimPrefix(r.URL.Path, prefix);
         @string rp = strings.TrimPrefix(r.URL.RawPath, prefix);
         if (len(p) < len(r.URL.Path) && (r.URL.RawPath == ""u8 || len(rp) < len(r.URL.RawPath))) {
@@ -2890,7 +2890,7 @@ internal static (Handler h, @string patStr, ж<pattern>, slice<@string> matches)
         var allowedMethods = Ꮡmux.matchingMethods(host, path);
         if (len(allowedMethods) > 0) {
             var allowedMethodsʗ1 = allowedMethods;
-            return (new HandlerFuncᴠHandler(new HandlerFunc((ResponseWriter w, ж<Request> rΔ1) => {
+            return (new HandlerFuncᴠHandler(new HandlerFunc([GoFunc("(*ServeMux).findHandler.func1")] (ResponseWriter w, ж<Request> rΔ1) => {
                 w.Header().Set(allowˢ, strings.Join(allowedMethodsʗ1, ", "));
                 Error(w, StatusText(StatusMethodNotAllowed), StatusMethodNotAllowed);
             })), "", default, default);
@@ -3135,7 +3135,7 @@ internal static partial error registerErr⁔(/*this*/ ж<ServeMux> Ꮡmux, @stri
         // Check for conflict.
         {
             var patʗ1 = pat;
-            var errΔ1 = mux.index.possiblyConflictingPatterns(pat, error (ж<pattern> pat2) => {
+            var errΔ1 = mux.index.possiblyConflictingPatterns(pat, [GoFunc("(*ServeMux).registerErr.func1")] error (ж<pattern> pat2) => {
                 if (patʗ1.conflictsWith(pat2)) {
                     @string d = describeConflict(patʗ1, pat2);
                     return fmt.Errorf("pattern %q (registered at %s) conflicts with pattern %q (registered at %s):\n%s"u8,
@@ -3381,7 +3381,7 @@ internal static partial error Shutdown⁔(/*this*/ ж<Server> Ꮡs, context.Cont
         Ꮡs.ᏑlistenerGroup.Wait();
 
         var pollIntervalBase = time.Millisecond;
-        time.Duration nextPollInterval() {
+        [GoFunc("(*Server).Shutdown.func1")] time.Duration nextPollInterval() {
             // Add 10% jitter.
             var interval = pollIntervalBase + ((time.Duration)(int64)rand.Intn((nint)(pollIntervalBase / 10)));
             // Double and clamp for next time.
@@ -3563,7 +3563,7 @@ internal static partial void badServeHTTP(serverHandler _Δp0, ResponseWriter _�
 //
 // AllowQuerySemicolons should be invoked before [Request.ParseForm] is called.
 public static Handler AllowQuerySemicolons(Handler h) {
-    return new HandlerFuncᴠHandler(new HandlerFunc((ResponseWriter w, ж<Request> r) => {
+    return new HandlerFuncᴠHandler(new HandlerFunc([GoFunc("AllowQuerySemicolons.func1")] (ResponseWriter w, ж<Request> r) => {
         if (strings.Contains(r.URL.RawQuery, ";")) {
             var r2 = @new<Request>();
             r2.Value = r.Value;
@@ -3800,7 +3800,7 @@ internal static slice<@string> adjustNextProtos(slice<@string> nextProtos, Proto
     nextProtos = slices.Clone<slice<@string>, @string>(nextProtos);
     Protocols have = default;
     var protosʗ1 = protos;
-    nextProtos = slices.DeleteFunc(nextProtos, (@string s) => {
+    nextProtos = slices.DeleteFunc(nextProtos, [GoFunc("adjustNextProtos.func1")] (@string s) => {
         switch (ᐧ) {
         case {} when s == "http/1.1"u8: {
             if (!protosʗ1.HTTP1()) {
@@ -4146,11 +4146,11 @@ internal static partial void ServeHTTP⁔(/*this*/ ж<timeoutHandler> Ꮡh, Resp
         var doneʗ1 = done;
         var panicChanʗ1 = panicChan;
         var twʗ1 = tw;
-        goǃ(() => {
+        goǃ([GoFunc("(*timeoutHandler).ServeHTTP.func1")] () => {
             GoFrame ᒐ = default;
             try {
                 var panicChanʗ2 = panicChanʗ1;
-                defer(() => {
+                defer([GoFunc("(*timeoutHandler).ServeHTTP.func1.1")] () => {
                     var p = recover(); if (p != nil) {
                         panicChanʗ2.ᐸꟷ(p);
                     }
@@ -4480,7 +4480,7 @@ internal static bool tlsRecordHeaderLooksLikeHTTP(/*[5]*/ array<byte> hdr) {
 
 // MaxBytesHandler returns a [Handler] that runs h with its [ResponseWriter] and [Request.Body] wrapped by a MaxBytesReader.
 public static Handler MaxBytesHandler(Handler h, int64 n) {
-    return new HandlerFuncᴠHandler(new HandlerFunc((ResponseWriter w, ж<Request> r) => {
+    return new HandlerFuncᴠHandler(new HandlerFunc([GoFunc("MaxBytesHandler.func1")] (ResponseWriter w, ж<Request> r) => {
         ref var r2 = ref heap<Request>(r.Value, out var Ꮡr2);
         r2.Body = MaxBytesReader(w, r.Body, n);
         h.ServeHTTP(w, Ꮡr2);

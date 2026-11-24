@@ -109,7 +109,7 @@ public static (ж<ast.File> f, error err) ParseFile(ж<token.FileSet> fset, @str
 
         ref var p = ref heap(new parser(), out var Ꮡp);
         var fileʗ1 = @file;
-        defer(() => {
+        defer([GoFunc("ParseFile.func1")] () => {
             var e = recover(); if (e != nil) {
                 // resume same panic if it's not a bailout
                 ref var bail = ref heap<bailout>(out var Ꮡbail);
@@ -238,7 +238,7 @@ public static (ast.Expr expr, error err) ParseExprFrom(ж<token.FileSet> fset, @
         }
 
         ref var p = ref heap(new parser(), out var Ꮡp);
-        defer(() => {
+        defer([GoFunc("ParseExprFrom.func1")] () => {
             var e = recover(); if (e != nil) {
                 // resume same panic if it's not a bailout
                 ref var bail = ref heap<bailout>(out var Ꮡbail);

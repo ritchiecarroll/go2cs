@@ -4,12 +4,12 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-internal delegate void releaser(error _);
+// type releaser is a methodless func type — rendered inline as its base delegate
 
-internal delegate (@string path, bool ok) lookup(@string _);
+// type lookup is a methodless func type — rendered inline as its base delegate
 
-internal static releaser makeReleaser(@string tag, ж<slice<@string>> log) {
-    return (error err) => {
+internal static Action<error> makeReleaser(@string tag, ж<slice<@string>> log) {
+    return [GoFunc("makeReleaser.func1")] (error err) => {
         if (err != nil) {
             log.ValueSlot = append(log.ValueSlot, tag + ":"u8 + err.Error());
         } else {
@@ -23,11 +23,11 @@ internal static void consume(Action<error> r, error err) {
 }
 
 partial struct holder {
-    internal releaser release;
+    internal Action<error> release;
     internal @string name;
 }
 
-internal static (nint, releaser, error) grab(@string tag, ж<slice<@string>> log) {
+internal static (nint, Action<error>, error) grab(@string tag, ж<slice<@string>> log) {
     return (len(tag), makeReleaser(tag, log), default);
 }
 
@@ -35,19 +35,19 @@ internal static void main() {
     ref var log = ref heap<slice<@string>>(out var Ꮡlog);
 
     var (n, rel, err) = grab("a", Ꮡlog);
-    consume(NilSafeDelegateConversion<Action<error>, releaser>(rel), default);
+    consume(rel, default);
     fmt.Println("n:", n, "err:", err == nil);
 
     var h = new holder(release: makeReleaser("field", Ꮡlog), name: "h");
     h.release(fmt.Errorf("boom"u8));
-    consume(NilSafeDelegateConversion<Action<error>, releaser>(h.release), default);
+    consume(h.release, default);
 
-    releaser r = makeReleaser("direct", Ꮡlog);
+    Action<error> r = makeReleaser("direct", Ꮡlog);
     r(default);
-    consume(NilSafeDelegateConversion<Action<error>, releaser>(r), fmt.Errorf("late"u8));
+    consume(r, fmt.Errorf("late"u8));
 
-    lookup find = default;
-    find = (@string s) => (s + "!", len(s) > 0);
+    Func<@string, (@string, bool)> find = default;
+    find = [GoFunc("main.func1")] (@string s) => (s + "!", len(s) > 0);
     var (p, okp) = find("q");
     fmt.Println("lookup:", p, okp);
 

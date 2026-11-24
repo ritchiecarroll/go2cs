@@ -58,7 +58,7 @@ using System.Runtime.CompilerServices;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/runtime/exithook/hooks.go", "hooks.cs", "AC1WkoKUggAIEPKCgpSUgoKUgoK4goKCgpS0yA==", "67-71:1", "", "", "", "79:21,80:13")]
+[assembly: GoPositionMap("internal/runtime/exithook/hooks.go", "hooks.cs", "AC1WkoKUggAIEPKCgpSUgoKUgoK4goKCgpS0yA==", "67-71:1", "", "", "", "79:43,80:13")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.runtime;

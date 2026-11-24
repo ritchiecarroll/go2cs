@@ -22,7 +22,7 @@ internal static nint bufCap = 10000;
 //
 // Multiple calls to MakeStream must return equivalent instances,
 // so for example the key and/or IV must be fixed.
-public delegate cipher.Stream MakeStream();
+// type MakeStream is a methodless func type — rendered inline as its base delegate
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static ref readonly @string xorSemanticsˢ => ref xorSemanticsˢᵇ;
@@ -35,8 +35,8 @@ private static readonly @string directXORˢᵇ = "DirectXOR"u8;
 
 // TestStream performs a set of tests on cipher.Stream implementations,
 // checking the documented requirements of XORKeyStream.
-public static void TestStream(ж<testing.T> t, MakeStream ms) {
-    t.Run(xorSemanticsˢ, (ж<testing.T> tΔ1) => {
+public static void TestStream(ж<testing.T> t, Func<cipher.Stream> ms) {
+    t.Run(xorSemanticsˢ, [GoFunc("TestStream.func1")] (ж<testing.T> tΔ1) => {
         if (strings.Contains(tΔ1.Name(), testCFBStreamˢ)) {
             // This is ugly, but so is CFB's abuse of cipher.Stream.
             // Don't want to make it easier for anyone else to do that.
@@ -44,9 +44,9 @@ public static void TestStream(ж<testing.T> t, MakeStream ms) {
         }
 
         // Test that XORKeyStream inverts itself for encryption/decryption.
-        tΔ1.Run(roundtripˢ, (ж<testing.T> tΔ2) => {
+        tΔ1.Run(roundtripˢ, [GoFunc("TestStream.func1.1")] (ж<testing.T> tΔ2) => {
             foreach (var (_, length) in range(bufLens)) {
-                tΔ2.Run(fmt.Sprintf("BuffLength=%d"u8, length), (ж<testing.T> tΔ3) => {
+                tΔ2.Run(fmt.Sprintf("BuffLength=%d"u8, length), [GoFunc("TestStream.func1.1.1")] (ж<testing.T> tΔ3) => {
                     var rng = newRandReader(tΔ3);
 
                     var plaintext = new slice<byte>(length);
@@ -66,9 +66,9 @@ public static void TestStream(ж<testing.T> t, MakeStream ms) {
 
         // Test that XORKeyStream behaves the same as directly XORing
         // plaintext with the stream.
-        tΔ1.Run(directXORˢ, (ж<testing.T> tΔ4) => {
+        tΔ1.Run(directXORˢ, [GoFunc("TestStream.func1.2")] (ж<testing.T> tΔ4) => {
             foreach (var (_, length) in range(bufLens)) {
-                tΔ4.Run(fmt.Sprintf("BuffLength=%d"u8, length), (ж<testing.T> tΔ5) => {
+                tΔ4.Run(fmt.Sprintf("BuffLength=%d"u8, length), [GoFunc("TestStream.func1.2.1")] (ж<testing.T> tΔ5) => {
                     var rng = newRandReader(tΔ5);
 
                     var plaintext = new slice<byte>(length);
@@ -91,7 +91,7 @@ public static void TestStream(ж<testing.T> t, MakeStream ms) {
         });
     });
 
-    t.Run(emptyInputˢ, (ж<testing.T> tΔ6) => {
+    t.Run(emptyInputˢ, [GoFunc("TestStream.func2")] (ж<testing.T> tΔ6) => {
         var rng = newRandReader(tΔ6);
 
         var (src, dst) = (new slice<byte>(100), new slice<byte>(100));
@@ -104,7 +104,7 @@ public static void TestStream(ж<testing.T> t, MakeStream ms) {
         }
     });
 
-    t.Run(alterInputˢ, (ж<testing.T> tΔ7) => {
+    t.Run(alterInputˢ, [GoFunc("TestStream.func3")] (ж<testing.T> tΔ7) => {
         var rng = newRandReader(tΔ7);
         var (src, dst, before) = (new slice<byte>(bufCap), new slice<byte>(bufCap), new slice<byte>(bufCap));
         rng.Read(src);
@@ -113,7 +113,7 @@ public static void TestStream(ж<testing.T> t, MakeStream ms) {
             var beforeʗ1 = before;
             var dstʗ1 = dst;
             var srcʗ1 = src;
-            tΔ7.Run(fmt.Sprintf("BuffLength=%d"u8, length), (ж<testing.T> tΔ8) => {
+            tΔ7.Run(fmt.Sprintf("BuffLength=%d"u8, length), [GoFunc("TestStream.func3.1")] (ж<testing.T> tΔ8) => {
                 copy(beforeʗ1, srcʗ1);
 
                 ms().XORKeyStream(dstʗ1.slice(0, length), srcʗ1.slice(0, length));
@@ -124,7 +124,7 @@ public static void TestStream(ж<testing.T> t, MakeStream ms) {
         }
     });
 
-    t.Run(aliasingˢ, (ж<testing.T> tΔ9) => {
+    t.Run(aliasingˢ, [GoFunc("TestStream.func4")] (ж<testing.T> tΔ9) => {
         var rng = newRandReader(tΔ9);
 
         var (buff, expectedOutput) = (new slice<byte>(bufCap), new slice<byte>(bufCap));
@@ -143,7 +143,7 @@ public static void TestStream(ж<testing.T> t, MakeStream ms) {
         }
     });
 
-    t.Run(outOfBoundsWriteˢ, (ж<testing.T> tΔ10) => { // Issue 21104
+    t.Run(outOfBoundsWriteˢ, [GoFunc("TestStream.func5")] (ж<testing.T> tΔ10) => { // Issue 21104
         var rng = newRandReader(tΔ10);
 
         var plaintext = new slice<byte>(bufCap);
@@ -155,10 +155,10 @@ public static void TestStream(ж<testing.T> t, MakeStream ms) {
 
             var ciphertextʗ1 = ciphertext;
             var plaintextʗ1 = plaintext;
-            tΔ10.Run(fmt.Sprintf("BuffLength=%d"u8, length), (ж<testing.T> tΔ11) => {
+            tΔ10.Run(fmt.Sprintf("BuffLength=%d"u8, length), [GoFunc("TestStream.func5.1")] (ж<testing.T> tΔ11) => {
                 var ciphertextʗ2 = ciphertextʗ1;
                 var plaintextʗ2 = plaintextʗ1;
-                mustPanic(tΔ11, outputSmallerThanInputˢ, () => {
+                mustPanic(tΔ11, outputSmallerThanInputˢ, [GoFunc("TestStream.func5.1.1")] () => {
                     ms().XORKeyStream(ciphertextʗ2.slice(0, length), plaintextʗ2);
                 });
 
@@ -169,7 +169,7 @@ public static void TestStream(ж<testing.T> t, MakeStream ms) {
         }
     });
 
-    t.Run(bufferOverlapˢ, (ж<testing.T> tΔ12) => {
+    t.Run(bufferOverlapˢ, [GoFunc("TestStream.func6")] (ж<testing.T> tΔ12) => {
         var rng = newRandReader(tΔ12);
 
         var buff = new slice<byte>(bufCap);
@@ -181,32 +181,32 @@ public static void TestStream(ж<testing.T> t, MakeStream ms) {
             }
 
             var buffʗ1 = buff;
-            tΔ12.Run(fmt.Sprintf("BuffLength=%d"u8, length), (ж<testing.T> tΔ13) => {
+            tΔ12.Run(fmt.Sprintf("BuffLength=%d"u8, length), [GoFunc("TestStream.func6.1")] (ж<testing.T> tΔ13) => {
                 // Make src and dst slices point to same array with inexact overlap
                 ref var src = ref heap<slice<byte>>(buffʗ1.slice(0, length), out var Ꮡsrc);
                 ref var dst = ref heap<slice<byte>>(buffʗ1.slice(1, length + 1), out var Ꮡdst);
-                mustPanic(tΔ13, invalidBufferOverlapˢ, () => {
+                mustPanic(tΔ13, invalidBufferOverlapˢ, [GoFunc("TestStream.func6.1.1")] () => {
                     ms().XORKeyStream(Ꮡdst.ValueSlot, Ꮡsrc.ValueSlot);
                 });
 
                 // Only overlap on one byte
                 Ꮡsrc.ValueSlot = buffʗ1.slice(0, length);
                 Ꮡdst.ValueSlot = buffʗ1.slice(length - 1, 2 * length - 1);
-                mustPanic(tΔ13, invalidBufferOverlapˢ, () => {
+                mustPanic(tΔ13, invalidBufferOverlapˢ, [GoFunc("TestStream.func6.1.2")] () => {
                     ms().XORKeyStream(Ꮡdst.ValueSlot, Ꮡsrc.ValueSlot);
                 });
 
                 // src comes after dst with one byte overlap
                 Ꮡsrc.ValueSlot = buffʗ1.slice(length - 1, 2 * length - 1);
                 Ꮡdst.ValueSlot = buffʗ1.slice(0, length);
-                mustPanic(tΔ13, invalidBufferOverlapˢ, () => {
+                mustPanic(tΔ13, invalidBufferOverlapˢ, [GoFunc("TestStream.func6.1.3")] () => {
                     ms().XORKeyStream(Ꮡdst.ValueSlot, Ꮡsrc.ValueSlot);
                 });
             });
         }
     });
 
-    t.Run(keepStateˢ, (ж<testing.T> tΔ14) => {
+    t.Run(keepStateˢ, [GoFunc("TestStream.func7")] (ж<testing.T> tΔ14) => {
         var rng = newRandReader(tΔ14);
 
         var plaintext = new slice<byte>(bufCap);
@@ -250,25 +250,25 @@ private static readonly @string blockModeStreamˢᵇ = "BlockModeStream"u8;
 // BlockMode uses an IV with incorrect length.
 // For a valid IV, it also runs all TestStream tests on the resulting stream.
 public static void TestStreamFromBlock(ж<testing.T> t, cipher.Block block, Func<cipher.Block, slice<byte>, cipher.Stream> blockMode) {
-    t.Run(wrongIVLenˢ, (ж<testing.T> tΔ1) => {
+    t.Run(wrongIVLenˢ, [GoFunc("TestStreamFromBlock.func1")] (ж<testing.T> tΔ1) => {
         tΔ1.Skip(seeIssue68377ˢ);
 
         var rng = newRandReader(tΔ1);
         var iv = new slice<byte>(block.BlockSize() + 1);
         rng.Read(iv);
         var ivʗ1 = iv;
-        mustPanic(tΔ1, ivLengthMustEqualBlockˢ, () => {
+        mustPanic(tΔ1, ivLengthMustEqualBlockˢ, [GoFunc("TestStreamFromBlock.func1.1")] () => {
             blockMode(block, ivʗ1);
         });
     });
 
-    t.Run(blockModeStreamˢ, (ж<testing.T> tΔ2) => {
+    t.Run(blockModeStreamˢ, [GoFunc("TestStreamFromBlock.func2")] (ж<testing.T> tΔ2) => {
         var rng = newRandReader(tΔ2);
         var iv = new slice<byte>(block.BlockSize());
         rng.Read(iv);
 
         var ivʗ2 = iv;
-        TestStream(tΔ2, () => blockMode(block, ivʗ2));
+        TestStream(tΔ2, [GoFunc("TestStreamFromBlock.func2.1")] () => blockMode(block, ivʗ2));
     });
 }
 

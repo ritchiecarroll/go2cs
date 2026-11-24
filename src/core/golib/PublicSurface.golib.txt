@@ -113,6 +113,9 @@ go.GoExternalStubAttribute
 go.GoFieldAccessAttribute
 go.GoForeignMemory
 go.GoFrame
+# go.GoFuncAttribute: the literal-name seat, COORD ruling 2026-11-22 (docs/phase4/inbox/C1/20261122T171256Z-COORD.md, option a).
+# A converter-emitted attribute on every function literal; it stays in namespace go, so emission does not move.
+go.GoFuncAttribute
 go.GoFuncCookie
 go.GoFuncRoot
 go.GoHandOwnedPackageAttribute

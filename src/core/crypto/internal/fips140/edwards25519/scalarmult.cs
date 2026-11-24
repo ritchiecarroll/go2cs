@@ -10,7 +10,7 @@ partial class edwards25519_package {
 // basepointTable is a set of 32 affineLookupTables, where table i is generated
 // from 256i * basepoint. It is precomputed the first time it's used.
 internal static ж<array<affineLookupTable>> basepointTable() {
-    ᏑbasepointTablePrecomp.of(basepointTablePrecompᴛ1.ᏑinitOnce).Do(() => {
+    ᏑbasepointTablePrecomp.of(basepointTablePrecompᴛ1.ᏑinitOnce).Do([GoFunc("basepointTable.func1")] () => {
         var p = NewGeneratorPoint();
         for (nint i = 0; i < 32; i++) {
             basepointTablePrecomp.table[i].FromP3(p);
@@ -128,7 +128,7 @@ internal static ж<Point> ScalarMult⁔(/*this*/ ж<Point> Ꮡv, ж<Scalar> x, �
 // basepointNafTable is the nafLookupTable8 for the basepoint.
 // It is precomputed the first time it's used.
 internal static ж<nafLookupTable8> basepointNafTable() {
-    ᏑbasepointNafTablePrecomp.of(basepointNafTablePrecompᴛ1.ᏑinitOnce).Do(() => {
+    ᏑbasepointNafTablePrecomp.of(basepointNafTablePrecompᴛ1.ᏑinitOnce).Do([GoFunc("basepointNafTable.func1")] () => {
         ᏑbasepointNafTablePrecomp.of(basepointNafTablePrecompᴛ1.Ꮡtable).FromP3(NewGeneratorPoint());
     });
     return ᏑbasepointNafTablePrecomp.of(basepointNafTablePrecompᴛ1.Ꮡtable);

@@ -439,7 +439,7 @@ internal static uintptr sweepone() {
         // allocations to trigger a GC) which would be nice to fill in
         // with scavenging work.
         if (debug.scavtrace > 0) {
-            systemstack(() => {
+            systemstack([GoFunc("sweepone.func1")] () => {
                 @lock(Ꮡmheap_.Ꮡlock);
 
                 // Get released stats.
@@ -786,7 +786,7 @@ internal static bool sweep⁔(/*this*/ ref sweepLocked sl, bool preserve) {
         // The arena is ready to be recycled. Remove it from the quarantine list
         // and place it on the ready list. Don't add it back to any sweep lists.
         var sʗ1 = s;
-        systemstack(() => {
+        systemstack([GoFunc("(*sweepLocked).sweep.func1")] () => {
             // It's the arena code's responsibility to get the chunk on the quarantine
             // list by the time all references to the chunk are gone.
             if (sʗ1.list != Ꮡmheap_.ᏑuserArena.of(mheap_userArena.ᏑquarantineList)) {

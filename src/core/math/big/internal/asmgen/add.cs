@@ -37,11 +37,11 @@ internal static void addOrSubVV(ж<Asm> Ꮡa, @string name) {
         c = Ꮡa.Reg();
         Ꮡa.Mov(a.Imm(0), c);
         Ꮡa.EOL(clearSavedCarryˢ);
-        p.AtUnrollStart(() => {
+        p.AtUnrollStart([GoFunc("addOrSubVV.func1")] () => {
             Ꮡa.RestoreCarry(Ꮡc.Value);
             Ꮡa.Free(Ꮡc.Value);
         });
-        p.AtUnrollEnd(() => {
+        p.AtUnrollEnd([GoFunc("addOrSubVV.func2")] () => {
             Ꮡa.Unfree(Ꮡc.Value);
             Ꮡa.SaveCarry(Ꮡc.Value);
         });
@@ -52,7 +52,7 @@ internal static void addOrSubVV(ж<Asm> Ꮡa, @string name) {
     }
     var addʗ1 = add;
     var pʗ1 = p;
-    p.Loop((slice<slice<Reg>> @in, slice<slice<Reg>> @out) => {
+    p.Loop([GoFunc("addOrSubVV.func3")] (slice<slice<Reg>> @in, slice<slice<Reg>> @out) => {
         foreach (var (i, x) in range(@in[0])) {
             var y = @in[1][i];
             addʗ1(y, x, x, (Carry)(SetCarry | UseCarry));

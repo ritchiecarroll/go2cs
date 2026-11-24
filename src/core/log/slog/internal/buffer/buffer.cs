@@ -17,7 +17,7 @@ partial struct Buffer /*[]byte*/;
 
 // Having an initial size gives a dramatic speedup.
 [GoLazy] partial class lazyᴛbufPool { internal static readonly ж<sync.Pool> ᏑbufPool = new StaticBox<sync.Pool>(new sync.Pool(
-    New: () => {
+    New: [GoFunc("init.func1")] () => {
         var b = new slice<byte>(0, 1024);
         return Ꮡ(b).Reinterpret<slice<byte>, Buffer>();
     }

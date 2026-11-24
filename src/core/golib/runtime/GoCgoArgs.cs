@@ -160,6 +160,58 @@ namespace go.golib;
         throw HelperRefused(helper, "a pointer into Go memory");
     }
 
+    /// <summary>
+    /// Go's <c>*p</c> for <c>p</c> a <c>**C.T</c>, the load go2cs emits on the cgo route (cgo Phase 3, increment 3.2,
+    /// seat 1c: docs/phase4/DESIGN-cgo-phase3-marshaling.md 18.11).
+    /// </summary>
+    /// <remarks>
+    /// A native box (<c>&amp;l.next</c> over a C struct in C memory, at the field's Go offset) names a WORD, which the
+    /// reference floor refuses to read as a managed reference: the word is read as 1a's field read reads it
+    /// (CgoPointerWords). A field view whose source is native had no known Go offset and is refused by name. Any other
+    /// box is a managed slot, read as the converter reads one today: a nil box is Go's nil dereference, and the slot
+    /// itself is <c>ValueSlot</c>, so a slot that holds a nil pointer loads nil (<c>.Value</c> would read that as a nil
+    /// box and panic).
+    /// </remarks>
+    public static ж<U> LoadPointer<U>(ж<ж<U>> p)
+    {
+        if (p is NativeBox<ж<U>> native)
+            return CgoPointerWords.ReadWord(native);
+
+        RequireManagedSlot(p);
+        return p.ValueSlot;
+    }
+
+    /// <summary>
+    /// Go's <c>*p = v</c> for <c>p</c> a <c>**C.T</c>, the store beside <see cref="LoadPointer{U}"/>: a word of C memory
+    /// takes 0 for nil and the address of C memory alone, and a Go pointer is refused by name.
+    /// </summary>
+    public static void StorePointer<U>(ж<ж<U>> p, ж<U> value)
+    {
+        if (p is NativeBox<ж<U>> native)
+        {
+            CgoPointerWords.WriteWord(native, value);
+            return;
+        }
+
+        RequireManagedSlot(p);
+        p.ValueSlot = value;
+    }
+
+    // A nil p (IsNilPointer: the box itself, never a box that holds nil) is Go's nil dereference. A field view over a native source (no known Go offset; ж.cs's nativeFieldView kept
+    // the view) is refused before any read or write: its CLR slot is not where the field's bytes are (18.11 [P3 M1]).
+    private static void RequireManagedSlot<U>(ж<ж<U>>? p)
+    {
+        if (p is null || p.IsNilPointer)
+            throw RuntimeErrorPanic.NilPointerDereference();
+
+        if (p is INativeRooted { IsNativeRooted: true })
+        {
+            throw p is FieldRefBox<ж<U>> view
+                ? view.NoKnownGoOffset()
+                : RuntimeErrorPanic.NativeStructLayoutMismatch(typeof(ж<U>), "a view of native memory with no known Go offset");
+        }
+    }
+
     /// <summary>The number of bytes <c>C.CString</c> allocates: the string's bytes and a NUL.</summary>
     public static nuint StringSize(@string s) => (nuint)s.Length + 1;
 

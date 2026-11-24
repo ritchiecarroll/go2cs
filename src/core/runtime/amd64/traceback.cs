@@ -697,7 +697,7 @@ internal static void printArgs(funcInfo f, @unsafe.Pointer argp, uintptr pc) {
         startOffset = ~@unsafe.Pointer.To<uint8>(liveInfo);
     }
 
-    bool isLive(uint8 off, uint8 slotIdxΔ1) {
+    [GoFunc("printArgs.func1")] bool isLive(uint8 off, uint8 slotIdxΔ1) {
         if (liveInfo == nil || liveIdx <= 0) {
             return true; // no liveness info, always live
         }
@@ -709,7 +709,7 @@ internal static void printArgs(funcInfo f, @unsafe.Pointer argp, uintptr pc) {
     }
 
     var isLiveʗ1 = isLive;
-    void print1(uint8 off, uint8 sz, uint8 slotIdxΔ2) {
+    [GoFunc("printArgs.func2")] void print1(uint8 off, uint8 sz, uint8 slotIdxΔ2) {
         var x = readUnaligned64(add(argp, (uintptr)off));
         // mask out irrelevant bits
         if (sz < 8) {
@@ -727,7 +727,7 @@ internal static void printArgs(funcInfo f, @unsafe.Pointer argp, uintptr pc) {
     }
 
     var start = true;
-    void printcomma() {
+    [GoFunc("printArgs.func3")] void printcomma() {
         if (!start) {
             print((@string)", ");
         }
@@ -948,7 +948,7 @@ internal static void traceback1(uintptr pc, uintptr sp, uintptr lr, ж<g> Ꮡgp,
     // cgo expansion boundaries. It's not clear that's much simpler.
     flags |= (unwindFlags)(unwindPrintErrors);
     ref var u = ref heap(new unwinder(), out var Ꮡu);
-    nint tracebackWithRuntime(bool showRuntime) {
+    [GoFunc("traceback1.func1")] nint tracebackWithRuntime(bool showRuntime) {
         const nint maxInt = 0x7fffffff;
         Ꮡu.initAt(pc, sp, lr, Ꮡgp, flags);
         var (n, lastN) = traceback2(Ꮡu, showRuntime, 0, tracebackInnerFrames);
@@ -999,7 +999,7 @@ internal static (nint n, nint lastN) traceback2(ж<unwinder> Ꮡu, bool showRunt
 
     // commitFrame commits to a logical frame and returns whether this frame
     // should be printed and whether iteration should stop.
-    var commitFrame = () => {
+    var commitFrame = [GoFunc("traceback2.func1")] () => {
         if (skip == 0 && max == 0) {
             // Stop
             return (false, true);
@@ -1328,7 +1328,7 @@ internal static void goroutineheader(ж<g> Ꮡgp) {
 }
 
 internal static void tracebackothers(ж<g> me) {
-    tracebacksomeothers(me, (ж<g> _) => true);
+    tracebacksomeothers(me, [GoFunc("tracebackothers.func1")] (ж<g> _) => true);
 }
 
 internal static void tracebacksomeothers(ж<g> me, Func<ж<g>, bool> showf) {
@@ -1350,7 +1350,7 @@ internal static void tracebacksomeothers(ж<g> me, Func<ж<g>, bool> showf) {
     // against concurrent creation of new Gs, but even with allglock we may
     // miss Gs created after this loop.
     var curgpʗ1 = curgp;
-    forEachGRace((ж<g> gp) => {
+    forEachGRace([GoFunc("tracebacksomeothers.func1")] (ж<g> gp) => {
         if (gp == me || gp == curgpʗ1) {
             return;
         }
@@ -1423,7 +1423,7 @@ internal static void tracebackHexdump(stack stk, ж<stkframe> Ꮡframe, uintptr 
 
     // Print the hex dump.
     print((@string)"stack: frame={sp:", (hex)(uint64)frame.sp, (@string)", fp:", (hex)(uint64)frame.fp, (@string)"} stack=[", (hex)(uint64)stk.lo, (@string)",", (hex)(uint64)stk.hi, (@string)")\n");
-    hexdumpWords(lo, hi - lo, (uintptr p, hexdumpMarker m) => {
+    hexdumpWords(lo, hi - lo, [GoFunc("tracebackHexdump.func1")] (uintptr p, hexdumpMarker m) => {
         if (p == Ꮡframe.Value.fp) {
             m.start();
             println((@string)"FP");
@@ -1725,7 +1725,7 @@ internal static void printCgoTraceback(ref cgoCallers callers) {
         return;
     }
 
-    var commitFrame = () => {
+    var commitFrame = [GoFunc("printCgoTraceback.func1")] () => {
         return (true, false);
     };
     ref var arg = ref heap(new cgoSymbolizerArg(), out var Ꮡarg);

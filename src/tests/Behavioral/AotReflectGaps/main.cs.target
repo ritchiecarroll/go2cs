@@ -34,7 +34,7 @@ public static uint32 Haunt(this Ghost g, bool b, rune r) { return (uint32)g.X + 
 internal static void run(@string name, Action f) {
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("run.func1")] () => {
             var r = recover(); if (r != nil) {
                 fmt.Printf("%s: recovered: %v\n"u8, name, r);
             }
@@ -57,7 +57,7 @@ internal static void main() {
         methodTypes();
     }
     if (only == ""u8 || only == "3"u8) {
-        run("3a interface Method(0).Type", () => {
+        run("3a interface Method(0).Type", [GoFunc("main.func1")] () => {
             var m = reflect.TypeOf((ж<Shaper>)nil).Elem().Method(0);
             fmt.Println("3a", m.Name, m.Type);
         });
@@ -65,12 +65,12 @@ internal static void main() {
     if (only == ""u8 || only == "4"u8) {
         var gt = reflect.TypeOf((ж<Ghost>)nil);
         var gtʗ1 = gt;
-        run("4a never-built Method(0).Type value", () => {
+        run("4a never-built Method(0).Type value", [GoFunc("main.func2")] () => {
             var m = gtʗ1.Elem().Method(0);
             fmt.Println("4a", m.Name, m.Type);
         });
         var gtʗ2 = gt;
-        run("4b never-built Method(0).Type pointer", () => {
+        run("4b never-built Method(0).Type pointer", [GoFunc("main.func3")] () => {
             var m = gtʗ2.Method(0);
             fmt.Println("4b", m.Name, m.Type);
         });
@@ -82,32 +82,32 @@ internal static void typeOps() {
     h.N = 3;
     var ft = reflect.TypeOf(h).Field(0).Type;
 
-    run("1a fmt %v nil field", () => {
+    run("1a fmt %v nil field", [GoFunc("typeOps.func1")] () => {
         fmt.Printf("1a %v\n"u8, Ꮡh.Value);
     });
-    run("1b fmt %+v nil field", () => {
+    run("1b fmt %+v nil field", [GoFunc("typeOps.func2")] () => {
         fmt.Printf("1b %+v\n"u8, Ꮡh.Value);
     });
     var ftʗ1 = ft;
-    run("1c field type", () => {
+    run("1c field type", [GoFunc("typeOps.func3")] () => {
         fmt.Println("1c", ftʗ1, ftʗ1.Elem(), ftʗ1.Elem().Kind());
     });
     var ftʗ2 = ft;
-    run("1d reflect.New elem", () => {
+    run("1d reflect.New elem", [GoFunc("typeOps.func4")] () => {
         var p = reflect.New(ftʗ2.Elem());
         p.Elem().Field(0).SetInt(7);
         fmt.Printf("1d %v %T\n"u8, p.Elem().Interface(), p.Interface());
     });
     var ftʗ3 = ft;
-    run("1e reflect.Zero elem", () => {
+    run("1e reflect.Zero elem", [GoFunc("typeOps.func5")] () => {
         fmt.Printf("1e %+v\n"u8, reflect.Zero(ftʗ3.Elem()).Interface());
     });
     var ftʗ4 = ft;
-    run("1f reflect.Zero ptr", () => {
+    run("1f reflect.Zero ptr", [GoFunc("typeOps.func6")] () => {
         fmt.Printf("1f %v\n"u8, reflect.Zero(ftʗ4).IsNil());
     });
     var ftʗ5 = ft;
-    run("1g set field through New", () => {
+    run("1g set field through New", [GoFunc("typeOps.func7")] () => {
         var v = reflect.ValueOf(Ꮡh).Elem();
         v.Field(0).Set(reflect.New(ftʗ5.Elem()));
         fmt.Printf("1g %+v\n"u8, Ꮡh.Value.P.Value);
@@ -117,21 +117,21 @@ internal static void typeOps() {
 internal static void methodTypes() {
     var nt = reflect.TypeOf(new Num());
     var ntʗ1 = nt;
-    run("2a Method(0).Type value", () => {
+    run("2a Method(0).Type value", [GoFunc("methodTypes.func1")] () => {
         var m = ntʗ1.Method(0);
         fmt.Println("2a", m.Name, m.Type);
     });
     var ntʗ2 = nt;
-    run("2b Method(1).Type value", () => {
+    run("2b Method(1).Type value", [GoFunc("methodTypes.func2")] () => {
         var m = ntʗ2.Method(1);
         fmt.Println("2b", m.Name, m.Type);
     });
     var ntʗ3 = nt;
-    run("2c Method(0).Type pointer", () => {
+    run("2c Method(0).Type pointer", [GoFunc("methodTypes.func3")] () => {
         var m = reflect.PtrTo(ntʗ3).Method(0);
         fmt.Println("2c", m.Name, m.Type);
     });
-    run("2d Method call", () => {
+    run("2d Method call", [GoFunc("methodTypes.func4")] () => {
         var @out = reflect.ValueOf(new Num(N: 2)).Method(0).Call(slice<reflect.Value>([reflect.ValueOf((nint)5), reflect.ValueOf("x")]));
         fmt.Println("2d", @out[0].Int(), @out[1].String());
     });

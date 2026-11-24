@@ -725,8 +725,8 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 		}
 	}
 
-	// `*p = v` with p a *unsafe.Pointer is the word door's store (unsafePointerWordDoor.go, W2).
-	if store, isStore := v.unsafePointerWordStore(assignStmt); isStore {
+	// `*p = v` with p a *unsafe.Pointer is the word door's store (W2); with p a **C.T, cgoPointerDoor.go's.
+	if store, isStore := v.pointerWordDoorStore(assignStmt); isStore {
 		result.WriteString(store)
 
 		if hoistBuf != nil && hoistBuf.Len() > 0 {

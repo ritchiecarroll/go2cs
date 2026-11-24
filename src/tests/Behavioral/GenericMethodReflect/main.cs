@@ -72,7 +72,7 @@ partial interface swapper {
 internal static void @try(@string label, Func<@string> f) {
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("try.func1")] () => {
             var r = recover(); if (r != nil) {
                 fmt.Printf("%-36s PANIC %v\n"u8, label, r);
             }
@@ -119,39 +119,39 @@ internal static void probe(@string name, any value, any pointer, map<@string, sl
     ref var pv = ref heap<reflect.Value>(reflect.ValueOf(pointer), out var Ꮡpv);
 
     var vʗ1 = v;
-    @try(name + " value methods"u8, () => names(vʗ1.Type()));
+    @try(name + " value methods"u8, [GoFunc("probe.func1")] () => names(vʗ1.Type()));
     var pvʗ1 = pv;
-    @try(name + " pointer methods"u8, () => names(pvʗ1.Type()));
+    @try(name + " pointer methods"u8, [GoFunc("probe.func2")] () => names(pvʗ1.Type()));
 
     foreach (var (i, n) in range(goSets[name, () => new array<slice<@string>>(2)][0])) {
         var inʗ1 = @in;
         var vʗ2 = v;
-        @try(fmt.Sprintf("%s v.Method(%d)"u8, name, i), () => n + " "u8 + show(vʗ2.Method(i).Call(args(inʗ1[n].ꓸꓸꓸ))));
+        @try(fmt.Sprintf("%s v.Method(%d)"u8, name, i), [GoFunc("probe.func3")] () => n + " "u8 + show(vʗ2.Method(i).Call(args(inʗ1[n].ꓸꓸꓸ))));
         var inʗ2 = @in;
         var vʗ3 = v;
-        @try(fmt.Sprintf("%s T.Method(%d).Func"u8, name, i), () => {
+        @try(fmt.Sprintf("%s T.Method(%d).Func"u8, name, i), [GoFunc("probe.func4")] () => {
             var m = vʗ3.Type().Method(i);
             return m.Name + " "u8 + show(m.Func.Call(appendꓸꓸꓸ(slice<reflect.Value>([vʗ3]), args(inʗ2[n].ꓸꓸꓸ))));
         });
         var inʗ3 = @in;
         var vʗ4 = v;
-        @try(fmt.Sprintf("%s v.MethodByName(%s)"u8, name, n), () => show(vʗ4.MethodByName(n).Call(args(inʗ3[n].ꓸꓸꓸ))));
+        @try(fmt.Sprintf("%s v.MethodByName(%s)"u8, name, n), [GoFunc("probe.func5")] () => show(vʗ4.MethodByName(n).Call(args(inʗ3[n].ꓸꓸꓸ))));
     }
 
     foreach (var (i, n) in range(goSets[name, () => new array<slice<@string>>(2)][1])) {
         var inʗ4 = @in;
         var pvʗ2 = pv;
-        @try(fmt.Sprintf("%s pv.Method(%d)"u8, name, i), () => n + " "u8 + show(pvʗ2.Method(i).Call(args(inʗ4[n].ꓸꓸꓸ))));
+        @try(fmt.Sprintf("%s pv.Method(%d)"u8, name, i), [GoFunc("probe.func6")] () => n + " "u8 + show(pvʗ2.Method(i).Call(args(inʗ4[n].ꓸꓸꓸ))));
         var inʗ5 = @in;
         var pvʗ3 = pv;
-        @try(fmt.Sprintf("%s *T.Method(%d).Func"u8, name, i), () => {
+        @try(fmt.Sprintf("%s *T.Method(%d).Func"u8, name, i), [GoFunc("probe.func7")] () => {
             var m = pvʗ3.Type().Method(i);
             return m.Name + " "u8 + show(m.Func.Call(appendꓸꓸꓸ(slice<reflect.Value>([pvʗ3]), args(inʗ5[n].ꓸꓸꓸ))));
         });
     }
 
     var pvʗ4 = pv;
-    @try(name + " after pointer calls"u8, () => fmt.Sprint(pvʗ4.Elem().Interface()));
+    @try(name + " after pointer calls"u8, [GoFunc("probe.func8")] () => fmt.Sprint(pvʗ4.Elem().Interface()));
 }
 
 [GoLazy] partial class lazyᴛgoSets { internal static map<@string, array<slice<@string>>> goSets = new map<@string, array<slice<@string>>>{
@@ -171,29 +171,29 @@ internal static void main() {
     probe("Pair[string,int]", new Pair<@string, nint>(k: "a", v: 1), Ꮡ(new Pair<@string, nint>(k: "b", v: 2)), new map<@string, slice<any>>{["Swap"] = [(nint)5]});
     probe("Ord2[age]", new Ord2<age>(a: 1, b: 2), Ꮡ(new Ord2<age>(a: 3, b: 2)), default);
 
-    @try("fmt generic Stringer", () => fmt.Sprint(new Pair<@string, nint>(k: "z", v: 26)));
-    @try("fmt *generic Stringer", () => fmt.Sprint(Ꮡ(new Pair<@string, nint>(k: "y", v: 25))));
-    @try("fmt non-generic Stringer", () => fmt.Sprint(new Pair<@string, nint>(k: "x", v: 24).String()));
+    @try("fmt generic Stringer", [GoFunc("main.func1")] () => fmt.Sprint(new Pair<@string, nint>(k: "z", v: 26)));
+    @try("fmt *generic Stringer", [GoFunc("main.func2")] () => fmt.Sprint(Ꮡ(new Pair<@string, nint>(k: "y", v: 25))));
+    @try("fmt non-generic Stringer", [GoFunc("main.func3")] () => fmt.Sprint(new Pair<@string, nint>(k: "x", v: 24).String()));
 
-    @try("assert generic to Stringer", () => {
+    @try("assert generic to Stringer", [GoFunc("main.func4")] () => {
         var (s, ok) = ((any)new Pair<@string, nint>(k: "z", v: 26))._<fmt.Stringer>(ᐧ);
         if (!ok) {
             return "false";
         }
         return "true "u8 + s.String();
     });
-    @try("assert *generic to Stringer", () => {
+    @try("assert *generic to Stringer", [GoFunc("main.func5")] () => {
         var (s, ok) = ((any)(Ꮡ(new Pair<@string, nint>(k: "z", v: 26))))._<fmt.Stringer>(ᐧ);
         if (!ok) {
             return "false";
         }
         return "true "u8 + s.String();
     });
-    @try("assert generic to swapper", () => {
+    @try("assert generic to swapper", [GoFunc("main.func6")] () => {
         var (_, ok) = ((any)new Pair<@string, nint>(k: "z", v: 26))._<swapper>(ᐧ);
         return fmt.Sprint(ok);
     });
-    @try("assert *generic to swapper", () => {
+    @try("assert *generic to swapper", [GoFunc("main.func7")] () => {
         var p = Ꮡ(new Pair<@string, nint>(k: "w", v: 1));
         var (s, ok) = ((any)p.OrTypedNil())._<swapper>(ᐧ);
         if (!ok) {
@@ -202,7 +202,7 @@ internal static void main() {
         nint old = s.Swap(2);
         return fmt.Sprint(ok, " ", old, " ", p.v);
     });
-    @try("assert generic Cell to valuer", () => {
+    @try("assert generic Cell to valuer", [GoFunc("main.func8")] () => {
         var (c, ok) = ((any)new Cell<nuint>(V: 1, Valid: true))._<valuer>(ᐧ);
         if (!ok) {
             return "false";

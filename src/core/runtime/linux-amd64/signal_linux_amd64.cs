@@ -65,7 +65,7 @@ internal static void dumpSigStack(@string s, uintptr sp, uintptr stackhi, uintpt
     println((@string)"fpfield:\t", (hex)(uint64)fpfield);
     var fpbegin = (uintptr)(Ꮡ(new sigctxt(nil, (@unsafe.Pointer)ctx))).regs().fpstate;
     println((@string)"fpstate:\t", (hex)(uint64)fpbegin);
-    hexdumpWords(sp, stackhi, (uintptr p, hexdumpMarker hm) => {
+    hexdumpWords(sp, stackhi, [GoFunc("dumpSigStack.func1")] (uintptr p, hexdumpMarker hm) => {
         switch (p) {
         case var ᴛ when ᴛ == ctx: {
             hm.start();

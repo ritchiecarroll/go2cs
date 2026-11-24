@@ -235,7 +235,7 @@ internal static ж<Named> unpack⁔(/*this*/ ж<Named> Ꮡn) {
         }
 
         // underlying comes after unpacking, do not set it
-        defer([MethodImpl(MethodImplOptions.NoInlining)] () => {
+        defer([MethodImpl(MethodImplOptions.NoInlining), GoFunc("(*Named).unpack.func1")] () => {
             assert(!Ꮡn.stateHas(hasUnder));
         }, ref ᒐ);
 
@@ -723,7 +723,7 @@ internal static void resolveUnderlying⁔(/*this*/ ж<Named> Ꮡn) {
     foreach (var (_, t) in range(path)) {
         var tʗ1 = t;
         var uʗ1 = u;
-        func(() => {
+        func([GoFunc("(*Named).resolveUnderlying.func1")] () => {
             GoFrame ᒐ = default;
             try {
                 tʗ1.Ꮡmu.Lock();
@@ -816,7 +816,7 @@ internal static Type /*rhs*/ expandRHS⁔(/*this*/ ж<Named> Ꮡn) {
             check.trace(n.obj.pos, namedExpandRHSSˢ, Ꮡn.OrTypedNil());
             check.indent++;
             var checkʗ1 = check;
-            defer(() => {
+            defer([GoFunc("(*Named).expandRHS.func1")] () => {
                 checkʗ1.indent--;
                 checkʗ1.trace(Ꮡn.Value.obj.pos, sRhsSˢ, Ꮡn.OrTypedNil(), rhs);
             }, ref ᒐ);

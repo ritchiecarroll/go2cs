@@ -102,11 +102,11 @@ internal static UntypedInt put => 3;
 internal static void put⁔(/*this*/ ref holder h, /*[3]*/ array<nint> v) { v = v.Clone(); }
 
 internal static void main() {
-    var lambda = ([GoArrayDims(32)] array<byte> x) => {
+    var lambda = [GoFunc("main.func1")] ([GoArrayDims(32)] array<byte> x) => {
         x = x.Clone();
         return len(x);
     };
-    nint local([GoArrayDims(3)] array<nint> x) {
+    [GoFunc("main.func2")] nint local([GoArrayDims(3)] array<nint> x) {
         x = x.Clone();
         return len(x);
     }

@@ -262,8 +262,8 @@ internal static slice<nint> /*seq*/ wrap(slice<@string> words, nint max) {
     // We care about ending in punctuation characters because
     // it makes the text easier to skim if not too many sentences
     // or phrases begin with a single word on the previous line.
-    wrap_score add(wrap_score s, wrap_score t) => new wrap_score(s.hi + t.hi, s.lo + t.lo);
-    nint cmp(wrap_score s, wrap_score t) {
+    [GoFunc("wrap.func1")] wrap_score add(wrap_score s, wrap_score t) => new wrap_score(s.hi + t.hi, s.lo + t.lo);
+    [GoFunc("wrap.func2")] nint cmp(wrap_score s, wrap_score t) {
         switch (ᐧ) {
         case {} when s.hi < t.hi: {
             return -1;
@@ -291,7 +291,7 @@ internal static slice<nint> /*seq*/ wrap(slice<@string> words, nint max) {
     // weight returns weight(i, j).
     var totalʗ1 = total;
     var wordsʗ1 = words;
-    wrap_score weight(nint i, nint j) {
+    [GoFunc("wrap.func3")] wrap_score weight(nint i, nint j) {
         // On the last line, there is zero weight for being too short.
         nint nΔ1 = totalʗ1[j] - 1 - totalʗ1[i];
         if (j == len(wordsʗ1) && nΔ1 <= max) {
@@ -316,15 +316,15 @@ internal static slice<nint> /*seq*/ wrap(slice<@string> words, nint max) {
     ref var f = ref heap<slice<wrap_score>>(slice<wrap_score>([new(0, 0)]), out var Ꮡf);
     var addʗ1 = add;
     var weightʗ1 = weight;
-    wrap_score g(nint i, nint j) => addʗ1(Ꮡf.ValueSlot[i], weightʗ1(i, j));
+    [GoFunc("wrap.func4")] wrap_score g(nint i, nint j) => addʗ1(Ꮡf.ValueSlot[i], weightʗ1(i, j));
 
     var cmpʗ1 = cmp;
     var gʗ1 = g;
     var wordsʗ2 = words;
-    bool bridge(nint a, nint b, nint c) {
+    [GoFunc("wrap.func5")] bool bridge(nint a, nint b, nint c) {
         var cmpʗ2 = cmpʗ1;
         var gʗ2 = gʗ1;
-        nint k = c + sort.Search(len(wordsʗ2) + 1 - c, (nint kΔ1) => {
+        nint k = c + sort.Search(len(wordsʗ2) + 1 - c, [GoFunc("wrap.func5.1")] (nint kΔ1) => {
             kΔ1 += c;
             return cmpʗ2(gʗ2(a, kΔ1), gʗ2(b, kΔ1)) > 0;
         });

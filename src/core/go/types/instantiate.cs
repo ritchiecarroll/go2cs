@@ -122,7 +122,7 @@ internal static Type /*res*/ instance⁔(/*this*/ ж<Checker> Ꮡcheck, token.Po
     var ctxtsʗ1 = ctxts;
     var hashesʗ1 = hashes;
     var targsʗ1 = targs;
-    Type updateContexts(Type resΔ1) {
+    [GoFunc("(*Checker).instance.func1")] Type updateContexts(Type resΔ1) {
         for (nint i = len(ctxtsʗ1) - 1; i >= 0; i--) {
             resΔ1 = ctxtsʗ1[i].update(hashesʗ1[i], orig, targsʗ1, resΔ1);
         }
@@ -317,7 +317,7 @@ internal static bool implements⁔(/*this*/ ж<Checker> Ꮡcheck, Type V, Type T
 
     // Only check comparability if we don't have a more specific error.
     var Tiʗ1 = Ti;
-    bool checkComparability() {
+    [GoFunc("(*Checker).implements.func1")] bool checkComparability() {
         if (!Tiʗ1.IsComparable()) {
             return true;
         }
@@ -366,7 +366,7 @@ internal static bool implements⁔(/*this*/ ж<Checker> Ꮡcheck, Type V, Type T
 
     // Otherwise, V's type must be included in the iface type set.
     ref var alt = ref heap<Type>(out var Ꮡalt);
-    if (Ti.typeSet().@is((ж<term> t) => {
+    if (Ti.typeSet().@is([GoFunc("(*Checker).implements.func2")] (ж<term> t) => {
         if (!t.includes(V)) {
             // If V ∉ t.typ but V ∈ ~t.typ then remember this type
             // so we can suggest it as an alternative in the error

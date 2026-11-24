@@ -364,12 +364,12 @@ internal static partial (slice<IPAddr>, error) lookupIPAddr⁔(/*this*/ ж<Resol
     ᏑdnsWaitGroup.Add(1);
     var lookupGroupCtxʗ1 = lookupGroupCtx;
     var resolverFuncʗ1 = resolverFunc;
-    var ch = Ꮡr.getLookupGroup().DoChan(lookupKey, () => {
+    var ch = Ꮡr.getLookupGroup().DoChan(lookupKey, [GoFunc("(*Resolver).lookupIPAddr.func1")] () => {
         var (ᴛ1, ᴛ2) = testHookLookupIP(lookupGroupCtxʗ1, resolverFuncʗ1, network, host);
         return (ᴛ1, ᴛ2);
     });
 
-    void dnsWaitGroupDone(/*<-*/channel<singleflight.Result> chΔ1, context.CancelFunc cancelFn) {
+    [GoFunc("(*Resolver).lookupIPAddr.func2")] void dnsWaitGroupDone(/*<-*/channel<singleflight.Result> chΔ1, Action cancelFn) {
         ᐸꟷ(chΔ1);
         ᏑdnsWaitGroup.Done();
         cancelFn();
@@ -388,7 +388,7 @@ internal static partial (slice<IPAddr>, error) lookupIPAddr⁔(/*this*/ ж<Resol
         if (Ꮡr.getLookupGroup().ForgetUnshared(lookupKey)) {
             lookupGroupCancel();
             var dnsWaitGroupDoneʗ1 = dnsWaitGroupDone;
-            goǃ(dnsWaitGroupDoneʗ1, ch, () => {
+            goǃ(dnsWaitGroupDoneʗ1, ch, [GoFunc("(*Resolver).lookupIPAddr.func3")] () => {
             });
         } else {
             var dnsWaitGroupDoneʗ2 = dnsWaitGroupDone;

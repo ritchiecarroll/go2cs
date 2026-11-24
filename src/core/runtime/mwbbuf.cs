@@ -177,7 +177,7 @@ internal static void wbBufFlush() {
 
     // Switch to the system stack so we don't have to worry about
     // safe points.
-    systemstack(() => {
+    systemstack([GoFunc("wbBufFlush.func1")] () => {
         wbBufFlush1((~(~getg()).m).p.ptr());
     });
 }

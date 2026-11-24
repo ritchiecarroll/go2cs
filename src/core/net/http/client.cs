@@ -255,7 +255,7 @@ internal static (ж<Response> resp, Func<bool> didTimeout, error err) send(ж<Re
 
     // forkReq forks req into a shallow clone of ireq the first
     // time it's called.
-    void forkReq() {
+    [GoFunc("send.func1")] void forkReq() {
         if (Ꮡireq == Ꮡreq.ValueSlot) {
             Ꮡreq.ValueSlot = @new<Request>();
             Ꮡreq.ValueSlot.Value = Ꮡireq.Value; // shallow clone
@@ -405,7 +405,7 @@ internal static partial (Action stopTimer, Func<bool> didTimeout) setRequestCanc
         (req.ctx, var cancelCtxᴛ1) = context.WithDeadline(oldCtx, deadline);
         cancelCtxΔ1 = NilSafeDelegateConversion<Action, context.CancelFunc>(cancelCtxᴛ1);
         var deadlineʗ1 = deadline;
-        return (cancelCtxΔ1, () => time.Now().After(deadlineʗ1));
+        return (cancelCtxΔ1, [GoFunc("setRequestCancel.func1")] () => time.Now().After(deadlineʗ1));
     }
     var initialReqCancel = req.Cancel; // the user's original Request.Cancel, if any
 
@@ -419,7 +419,7 @@ internal static partial (Action stopTimer, Func<bool> didTimeout) setRequestCanc
     req.Cancel = cancel.AsRecvOnly();
 
     var cancelʗ1 = cancel;
-    void doCancel() {
+    [GoFunc("setRequestCancel.func2")] void doCancel() {
         // The second way in the func comment above:
         close(cancelʗ1);
         var (v, ok) = rt._<setRequestCancel_canceler>(ᐧ); if (ok) {
@@ -430,7 +430,7 @@ internal static partial (Action stopTimer, Func<bool> didTimeout) setRequestCanc
     var stopTimerCh = new channel<EmptyStruct>(0);
     var cancelCtxʗ1 = cancelCtx;
     var stopTimerChʗ1 = stopTimerCh;
-    stopTimer = sync.OnceFunc(() => {
+    stopTimer = sync.OnceFunc([GoFunc("setRequestCancel.func3")] () => {
         close(stopTimerChʗ1);
         if (cancelCtxʗ1 != nil) {
             cancelCtxʗ1();
@@ -444,7 +444,7 @@ internal static partial (Action stopTimer, Func<bool> didTimeout) setRequestCanc
     var initialReqCancelʗ1 = initialReqCancel;
     var stopTimerChʗ2 = stopTimerCh;
     var timerʗ1 = timer;
-    goǃ(() => {
+    goǃ([GoFunc("setRequestCancel.func4")] () => {
         var initialReqCancelᴛ1 = initialReqCancelʗ1;
         var selᴛ2 = timerʗ1.C;
         var stopTimerChᴛ1 = stopTimerChʗ2;
@@ -676,7 +676,7 @@ internal static (ж<Response> retres, error reterr) do⁔(/*this*/ ж<Client> �
         ref var req = ref Ꮡreq.DerefOrNull();
 
         if (testHookClientDoResult != nil) {
-            defer(() => {
+            defer([GoFunc("(*Client).do.func1")] () => {
                 testHookClientDoResult(retres, reterr);
             }, ref ᒐ);
         }
@@ -699,7 +699,7 @@ internal static (ж<Response> retres, error reterr) do⁔(/*this*/ ж<Client> �
         ref var redirectMethod = ref heap(new @string(), out var ᏑredirectMethod);
         bool includeBody = true;
         bool stripSensitiveHeaders = false;
-        error uerr(error err) {
+        [GoFunc("(*Client).do.func2")] error uerr(error err) {
             // the body may have been closed already by c.send()
             if (!reqBodyClosed) {
                 Ꮡreq.Value.closeBody();
@@ -863,7 +863,7 @@ internal static Action<ж<Request>, bool, bool> makeHeadersCopier⁔(/*this*/ ж
 
     var icookiesʗ1 = icookies;
     var ireqhdrʗ1 = ireqhdr;
-    return (ж<Request> req, bool stripSensitiveHeaders, bool stripBodyHeaders) => {
+    return [GoFunc("(*Client).makeHeadersCopier.func1")] (ж<Request> req, bool stripSensitiveHeaders, bool stripBodyHeaders) => {
         var ssᴷ = new stackAppend<@string>();
         // If Jar is present and there was some initial cookies provided
         // via the request header, then we may need to alter the initial

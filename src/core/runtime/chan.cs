@@ -258,7 +258,7 @@ internal static bool chansend(ж<hchan> Ꮡc, @unsafe.Pointer ep, bool block, ui
         var sg = c.recvq.dequeue(); if (sg != nil) {
             // Found a waiting receiver. We pass the value we want to send
             // directly to the receiver, bypassing the channel buffer (if any).
-            send(Ꮡc, sg, ep, [MethodImpl(MethodImplOptions.NoInlining)] () => {
+            send(Ꮡc, sg, ep, [MethodImpl(MethodImplOptions.NoInlining), GoFunc("chansend.func1")] () => {
                 unlock(Ꮡc.Ꮡlock);
             }, 3);
             return true;
@@ -669,7 +669,7 @@ internal static (bool selected, bool received) chanrecv(ж<hchan> Ꮡc, @unsafe.
                 // directly from sender. Otherwise, receive from head of queue
                 // and add sender's value to the tail of the queue (both map to
                 // the same buffer slot because the queue is full).
-                recv(Ꮡc, sg, ep, [MethodImpl(MethodImplOptions.NoInlining)] () => {
+                recv(Ꮡc, sg, ep, [MethodImpl(MethodImplOptions.NoInlining), GoFunc("chanrecv.func1")] () => {
                     unlock(Ꮡc.Ꮡlock);
                 }, 3);
                 return (true, true);

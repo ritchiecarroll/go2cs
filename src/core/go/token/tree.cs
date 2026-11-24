@@ -138,7 +138,7 @@ internal static (ж<ж<node>> pos, ж<node> parent) locate⁔(/*this*/ ж<tree> 
 // some files may not be visited.
 // No file will be visited multiple times.
 internal static iter.Seq<ж<File>> all⁔(/*this*/ ж<tree> Ꮡt) {
-    return (Func<ж<File>, bool> yield) => {
+    return [GoFunc("(*tree).all.func1")] (Func<ж<File>, bool> yield) => {
         if (Ꮡt == nil) {
             return;
         }

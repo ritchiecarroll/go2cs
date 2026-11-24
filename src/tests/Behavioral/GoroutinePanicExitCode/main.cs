@@ -9,7 +9,7 @@ internal static partial void main() {
 
     var done = new channel<EmptyStruct>(0);
 
-    goǃ(() => {
+    goǃ([GoFunc("main.func1")] () => {
         throw panic("goroutine boom");
     });
 

@@ -94,7 +94,7 @@ internal static nint directCallStaysUnboxed() {
 
 internal static nint viaClosure() {
     ref var c = ref heap<counter>(new counter(n: 60), out var Ꮡc);
-    void run() {
+    [GoFunc("viaClosure.func1")] void run() {
         applyInt(Ꮡc.dec, 8, 9);
     }
     run();

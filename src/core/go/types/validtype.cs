@@ -48,7 +48,7 @@ internal static bool validType0⁔(/*this*/ ж<Checker> Ꮡcheck, token.Pos pos,
             }
             check.indent++;
             Ꮡcheck.trace(pos, validTypeSNestVPathVˢ, typ, pathString(makeObjList(nest)), pathString(makeObjList(path)));
-            defer(() => {
+            defer([GoFunc("(*Checker).validType0.func1")] () => {
                 Ꮡcheck.Value.indent--;
             }, ref ᒐ);
         }

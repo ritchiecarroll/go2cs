@@ -5,7 +5,7 @@ using fmt = fmt_package;
 partial class main_package {
 
 internal static Action makeGreeter(@string name) {
-    return () => {
+    return [GoFunc("makeGreeter.func1")] () => {
         GoFrame ᒐ = default;
         try {
             defer(ᴛ1 => fmt.Println("bye", ᴛ1), name, ref ᒐ);
@@ -17,7 +17,7 @@ internal static Action makeGreeter(@string name) {
 }
 
 internal static void main() {
-    void f() {
+    [GoFunc("main.func1")] void f() {
         GoFrame ᒐ = default;
         try {
             defer(() => fmt.Println("deferred"), ref ᒐ);
@@ -28,10 +28,10 @@ internal static void main() {
     }
     f();
 
-    void divPrint(nint a, nint b) {
+    [GoFunc("main.func2")] void divPrint(nint a, nint b) {
         GoFrame ᒐ = default;
         try {
-            defer(() => {
+            defer([GoFunc("main.func2.1")] () => {
                 var r = recover(); if (r != nil) {
                     fmt.Println("closure recovered:", r);
                 }
@@ -44,11 +44,11 @@ internal static void main() {
     divPrint(20, 4);
     divPrint(1, 0);
 
-    nint /*result*/ safeDiv(nint a, nint b) {
+    [GoFunc("main.func3")] nint /*result*/ safeDiv(nint a, nint b) {
         nint result = default;
         GoFrame ᒐ = default;
         try {
-            defer(() => {
+            defer([GoFunc("main.func3.1")] () => {
                 var r = recover(); if (r != nil) {
                     result = -1;
                 }
@@ -62,11 +62,11 @@ internal static void main() {
     fmt.Println(safeDiv(20, 4));
     fmt.Println(safeDiv(1, 0));
 
-    nint /*n*/ counted() {
+    [GoFunc("main.func4")] nint /*n*/ counted() {
         nint n = default;
         GoFrame ᒐ = default;
         try {
-            defer(() => {
+            defer([GoFunc("main.func4.1")] () => {
                 n++;
             }, ref ᒐ);
             n = 10;
@@ -81,10 +81,10 @@ internal static void main() {
     var greet = makeGreeter("go2cs");
     greet();
 
-    void run(Action fn) {
+    [GoFunc("main.func5")] void run(Action fn) {
         fn();
     }
-    run(() => {
+    run([GoFunc("main.func6")] () => {
         GoFrame ᒐ = default;
         try {
             defer(() => fmt.Println("arg-closure deferred"), ref ᒐ);
@@ -94,10 +94,10 @@ internal static void main() {
         finally { ᒐ.Run(); }
     });
 
-    func(() => {
+    func([GoFunc("main.func7")] () => {
         GoFrame ᒐ = default;
         try {
-            defer(() => {
+            defer([GoFunc("main.func7.1")] () => {
                 var r = recover(); if (r != nil) {
                     fmt.Println("outer recovered:", r);
                 }
@@ -107,7 +107,7 @@ internal static void main() {
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
     })();
-    (nint, error) fetch() {
+    [GoFunc("main.func8")] (nint, error) fetch() {
         GoFrame ᒐ = default;
         try {
             defer(() => fmt.Println("fetch deferred"), ref ᒐ);
@@ -131,7 +131,7 @@ partial struct task {
 
 internal static ж<task> makeTask(nint @base) {
     nint bonus = @base * 2;
-    return Ꮡ(new task(fn: () => bonus + 1, name: "t"));
+    return Ꮡ(new task(fn: [GoFunc("makeTask.func1")] () => bonus + 1, name: "t"));
 }
 
 } // end main_package

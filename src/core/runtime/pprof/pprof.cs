@@ -342,7 +342,7 @@ public static slice<ж<Profile>> Profiles() {
             all = append(all, p);
         }
 
-        slices.SortFunc(all, (ж<Profile> a, ж<Profile> b) => strings.Compare(a.name, b.name));
+        slices.SortFunc(all, [GoFunc("Profiles.func1")] (ж<Profile> a, ж<Profile> b) => strings.Compare(a.name, b.name));
         return all;
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
@@ -555,7 +555,7 @@ private static readonly @string labelsˢᵇ = "\n# labels: "u8;
 internal static error printCountProfile(io.Writer w, nint debug, @string name, countProfile p) {
     // Build count of each stack.
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
-    @string key(slice<uintptr> stk, ж<labelMap> lbls) {
+    [GoFunc("printCountProfile.func1")] @string key(slice<uintptr> stk, ж<labelMap> lbls) {
         Ꮡbuf.Value.Reset();
         fmt.Fprintf(new strings_BuilderжWriter(Ꮡbuf), "@"u8);
         foreach (var (_, pc) in range(stk)) {
@@ -610,7 +610,7 @@ internal static error printCountProfile(io.Writer w, nint debug, @string name, c
         Action labels = default;
         if (p.Label(idx) != nil) {
             var bʗ1 = b;
-            labels = () => {
+            labels = [GoFunc("printCountProfile.func2")] () => {
                 foreach (var (_, lbl) in range(p.Label(idx).Set.List)) {
                     bʗ1.pbLabel(tagSample_Label, lbl.Key, lbl.Value, 0);
                 }
@@ -740,7 +740,7 @@ internal static error writeHeapInternal(io.Writer w, nint debug, @string default
         return writeHeapProto(w, p, (int64)runtime.MemProfileRate, defaultSampleType);
     }
 
-    slices.SortFunc(p, (profilerecord.MemProfileRecord a, profilerecord.MemProfileRecord bΔ1) => cmp.Compare(a.InUseBytes(), bΔ1.InUseBytes()));
+    slices.SortFunc(p, [GoFunc("writeHeapInternal.func1")] (profilerecord.MemProfileRecord a, profilerecord.MemProfileRecord bΔ1) => cmp.Compare(a.InUseBytes(), bΔ1.InUseBytes()));
 
     var b = bufio.NewWriter(w);
     var tw = tabwriter.NewWriter(new bufio_WriterжWriter(b), 1, 8, 1, (byte)'\t', 0);
@@ -845,7 +845,7 @@ internal static error writeThreadCreate(io.Writer w, nint debug) {
     // Until https://golang.org/issues/6104 is addressed, wrap
     // ThreadCreateProfile because there's no point in tracking labels when we
     // don't get any stack-traces.
-    return writeRuntimeProfile(w, debug, threadcreateˢ, (slice<profilerecord.StackRecord> p, slice<@unsafe.Pointer> _) => {
+    return writeRuntimeProfile(w, debug, threadcreateˢ, [GoFunc("writeThreadCreate.func1")] (slice<profilerecord.StackRecord> p, slice<@unsafe.Pointer> _) => {
         return pprof_threadCreateInternal(p);
     });
 }
@@ -1111,7 +1111,7 @@ internal static error writeProfileInternal(io.Writer w, nint debug, @string name
         }
     }
 
-    slices.SortFunc(p, (profilerecord.BlockProfileRecord a, profilerecord.BlockProfileRecord bΔ1) => cmp.Compare(bΔ1.Cycles, a.Cycles));
+    slices.SortFunc(p, [GoFunc("writeProfileInternal.func1")] (profilerecord.BlockProfileRecord a, profilerecord.BlockProfileRecord bΔ1) => cmp.Compare(bΔ1.Cycles, a.Cycles));
 
     if (debug <= 0) {
         return printCountCycleProfile(w, contentionsˢ, delayˢ, p);

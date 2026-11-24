@@ -44,7 +44,7 @@ internal static error Fchown⁔(/*this*/ ж<FD> Ꮡfd, nint uid, nint gid) {
             return err;
         }
         ᒐd1 = true;
-        return ignoringEINTR(() => Δsyscall.Fchown(Ꮡfd.Value.Sysfd, uid, gid));
+        return ignoringEINTR([GoFunc("(*FD).Fchown.func1")] () => Δsyscall.Fchown(Ꮡfd.Value.Sysfd, uid, gid));
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡfd.decref(); ᒐ.Run(); }
@@ -59,7 +59,7 @@ internal static error Ftruncate⁔(/*this*/ ж<FD> Ꮡfd, int64 size) {
             return err;
         }
         ᒐd1 = true;
-        return ignoringEINTR(() => Δsyscall.Ftruncate(Ꮡfd.Value.Sysfd, size));
+        return ignoringEINTR([GoFunc("(*FD).Ftruncate.func1")] () => Δsyscall.Ftruncate(Ꮡfd.Value.Sysfd, size));
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡfd.decref(); ᒐ.Run(); }

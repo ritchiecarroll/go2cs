@@ -218,7 +218,7 @@ internal static partial void probeRequestBody⁔(/*this*/ ж<transferWriter> Ꮡ
     ref var t = ref Ꮡt.DerefOrNull();
 
     t.ByteReadCh = new channel<readResult>(1);
-    goǃ((io.Reader body) => {
+    goǃ([GoFunc("(*transferWriter).probeRequestBody.func1")] (io.Reader body) => {
         ref var buf = ref heap(new array<byte>(1), out var Ꮡbuf);
         ref var rres = ref heap(new readResult(), out var Ꮡrres);
         (rres.n, rres.err) = body.Read(buf[..]);
@@ -377,7 +377,7 @@ internal static error /*err*/ writeBody⁔(/*this*/ ж<transferWriter> Ꮡt, io.
 
         int64 ncopy = default;
         var closed = false;
-        defer(() => {
+        defer([GoFunc("(*transferWriter).writeBody.func1")] () => {
             if (closed || Ꮡt.Value.BodyCloser == nil) {
                 return;
             }
@@ -867,7 +867,7 @@ internal static (Header, error) fixTrailer(Header header, bool chunked) {
     ref var err = ref heap<error>(out var Ꮡerr);
     foreach (var (_, v) in range(vv)) {
         var trailerʗ1 = trailer;
-        foreachHeaderElement(v, (@string key) => {
+        foreachHeaderElement(v, [GoFunc("fixTrailer.func1")] (@string key) => {
             key = CanonicalHeaderKey(key);
             switch (ᐧ) {
             case {} when key == "Transfer-Encoding"u8 || key == "Trailer"u8 || key == "Content-Length"u8: {

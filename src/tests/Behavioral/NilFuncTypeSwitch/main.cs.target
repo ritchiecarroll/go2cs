@@ -21,11 +21,11 @@ internal static @string Name(this localStepE s) { return "locale"; }
 
 internal static @string Error(this localStepE s) { return "locale error"; }
 
-internal delegate nint hook(@string _);
+// type hook is a methodless func type — rendered inline as its base delegate
 
-internal delegate bool left(bool _);
+// type left is a methodless func type — rendered inline as its base delegate
 
-internal delegate bool right(bool _);
+// type right is a methodless func type — rendered inline as its base delegate
 
 partial struct probe {
     internal @string name;
@@ -75,25 +75,25 @@ internal static any concrete(@string kind) {
         return ((Func<nint, nint>)(default)).OrTypedNilFunc();
     }
     case {} when kind == "hook"u8: {
-        return (default(hook)!).OrTypedNilFunc();
+        return (default(Func<@string, nint>)!).OrTypedNilFunc();
     }
     case {} when kind == "left"u8: {
-        return (default(left)!).OrTypedNilFunc();
+        return (default(Func<bool, bool>)!).OrTypedNilFunc();
     }
     case {} when kind == "right"u8: {
-        return (default(right)!).OrTypedNilFunc();
+        return (default(Func<bool, bool>)!).OrTypedNilFunc();
     }
     case {} when kind == "livestep"u8: {
         return (typelib.NewStep()).OrTypedNilFunc();
     }
     case {} when kind == "livelocale"u8: {
-        return new localStepE((nint x) => x + 2);
+        return new localStepE([GoFunc("concrete.func1")] (nint x) => x + 2);
     }
     case {} when kind == "livebare"u8: {
-        return nint (nint x) => x + 3;
+        return [GoFunc("concrete.func2")] nint (nint x) => x + 3;
     }
     case {} when kind == "livehook"u8: {
-        return new hook((@string s) => len(s));
+        return new Func<@string, nint>([GoFunc("concrete.func3")] (@string s) => len(s));
     }
     case {} when kind == "nilptr"u8: {
         return (ж<typelib.Box>)nil;
@@ -126,7 +126,7 @@ internal static namer @static(@string kind) {
         break;
     }
     case {} when kind == "livelocale"u8: {
-        n = new localStepEᴠnamer(new localStepE((nint x) => x + 2));
+        n = new localStepEᴠnamer(new localStepE([GoFunc("static.func1")] (nint x) => x + 2));
         break;
     }
     case {} when kind == "nilptr"u8: {
@@ -149,7 +149,7 @@ internal static error asError(@string kind) {
         break;
     }
     case {} when kind == "livelocale"u8: {
-        e = new localStepEᴠerror(new localStepE((nint x) => x + 2));
+        e = new localStepEᴠerror(new localStepE([GoFunc("asError.func1")] (nint x) => x + 2));
         break;
     }}
 
@@ -212,7 +212,7 @@ internal static @string which(any a) {
         }
         return "func nil";
     }
-    case {} Δv when Δv._<hook>(out var v): {
+    case {} Δv when Δv._<Func<@string, nint>>(out var v): {
         if (v != nil) {
             return "hook live "u8 + fmt.Sprint(v("abc"));
         }
@@ -244,7 +244,7 @@ internal static @string unbound(any a) {
     case {} ᴛ0 when ᴛ0._<Func<nint, nint>>(out var _): {
         return "func";
     }
-    case {} ᴛ0 when ᴛ0._<hook>(out var _): {
+    case {} ᴛ0 when ᴛ0._<Func<@string, nint>>(out var _): {
         return "hook";
     }
     case ж<typelib.Box>: {
@@ -270,7 +270,7 @@ internal static @string multi(any a) {
         return "local "u8 + fmt.Sprint(v == nil);
     }
     case {} ᴛ0 when ᴛ0._<Func<nint, nint>>(out var _):
-    case {} ᴛ1 when ᴛ1._<hook>(out var _): {
+    case {} ᴛ1 when ᴛ1._<Func<@string, nint>>(out var _): {
         var v = a;
         return "plain "u8 + fmt.Sprint(v == nil);
     }
@@ -294,7 +294,7 @@ internal static @string mixed(any a) {
     case {} Δv when Δv._<namer>(out var v): {
         return "namer "u8 + v.Name();
     }
-    case {} Δv when Δv._<hook>(out var v): {
+    case {} Δv when Δv._<Func<@string, nint>>(out var v): {
         return "hook "u8 + fmt.Sprint(v == nil);
     }}
     return "other";
@@ -308,7 +308,7 @@ internal static bool bareIsNil(ref Func<nint, nint> p) {
     return p == nil;
 }
 
-internal static bool hookIsNil(ref hook p) {
+internal static bool hookIsNil(ref Func<@string, nint> p) {
     return p == nil;
 }
 
@@ -320,7 +320,7 @@ internal static @string escape(any a) {
     case {} Δv when Δv._<Func<nint, nint>>(out var v): {
         return "func "u8 + fmt.Sprint(bareIsNil(ref v));
     }
-    case {} Δv when Δv._<hook>(out var v): {
+    case {} Δv when Δv._<Func<@string, nint>>(out var v): {
         return "hook "u8 + fmt.Sprint(hookIsNil(ref v));
     }}
     return "other";
@@ -328,35 +328,33 @@ internal static @string escape(any a) {
 
 internal static @string merged(any a) {
     switch (a.type()) {
-    case {} ᴛ0 when ᴛ0._<left>(out var _): {
+    case {} ᴛ0 when ᴛ0._<Func<bool, bool>>(out var _): {
         return "pred";
     }
-    case {} ᴛ0 when ᴛ0._<right>(out var _): {
-        return "pred";
-    }}
+    /* case Func<bool, bool>: merged with an earlier case mapping to the same C# type (identical body) */}
 
     return "other";
 }
 
-[GoLazy] partial class lazyᴛprobes { internal static slice<probe> probes = [
+[GoLazy] partial class lazyᴛprobes { internal static slice<probe> probes = new probe[]{
     new("bound", which),
     new("unbound", unbound),
     new("multi", multi),
     new("mixed", mixed),
     new("escape", escape),
     new("merged", merged),
-    new("reswitch", (any a) => {
+    new("reswitch", [GoFunc("init.func1")] (any a) => {
         any b = a._<namer>();
         return which(b);
     }),
-    new("ifacesw", (any a) => which(reflect.ValueOf(a).Interface()))
-]; }
+    new("ifacesw", [GoFunc("init.func2")] (any a) => which(reflect.ValueOf(a).Interface()))
+}.slice(); }
 
 internal static void runOne(@string arm, @string kind, probe p) {
     GoFrame ᒐ = default;
     try {
         var pʗ1 = p;
-        defer(() => {
+        defer([GoFunc("runOne.func1")] () => {
             var r = recover(); if (r != nil) {
                 fmt.Println(arm, kind, pʗ1.name, "= PANIC", r);
             }

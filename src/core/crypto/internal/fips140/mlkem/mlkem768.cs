@@ -173,7 +173,7 @@ internal static (ж<DecapsulationKey768>, error) generateKey(ж<DecapsulationKey
     ref var z = ref heap(new array<byte>(32), out var Ꮡz);
     drbg.Read(z[..]);
     kemKeyGen(dk, Ꮡd, ref z);
-    fips140.PCT(mlKemPctˢ, () => kemPCT(dk));
+    fips140.PCT(mlKemPctˢ, [GoFunc("generateKey.func1")] () => kemPCT(dk));
     fips140.RecordApproved();
     return (dk, default);
 }

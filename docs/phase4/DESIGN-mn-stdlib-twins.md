@@ -115,3 +115,16 @@ keep the plain path; a twin-built sync (piece 5) must not emit the generator's b
   15 us at p99. (Go's own figure on windows is below its clock's resolution there.)
 - StdlibTwinSurfaceTests also holds that no other public twin ships in go.sync or go.time. The slow path is
   `lockSlowAsync`, with the park scope inside the try and `leave` in its own finally.
+
+## 7. Pieces 1, 4, 5 and 6, and the ref-blocked calls (dated block, 2026-11-23, G)
+
+The pieces after 2 and 3 are recorded in their own DATA files:
+- piece 1, the hosts made `partial` and GO2CS0021: [DATA-mn-row7-hosts.md](DATA-mn-row7-hosts.md);
+- pieces 4, 5 and 6 (R5 by its declaration's file, `GoStdlibTwins`, the whole standard library twinned on three
+  targets, and the rewriter cures it needed): [DATA-mn-row7-r5.md](DATA-mn-row7-r5.md);
+- the ref-blocked calls (the Go-order move and inline re-derivation): [DATA-mn-row7-refblock.md](DATA-mn-row7-refblock.md).
+
+**The flip is row 10's.** `GoStdlibTwins` (src/core/Directory.Build.props) is OFF by default, and the repoguard
+TestStdlibTwinsDefaultOff holds it off. It turns on by default, and the `go.*` packages are packed with twins, only on
+row 10's ruling against section 4's T1-T5 (the owner's 2026-11-21 ruling). Until then a twinned standard library is
+built only by a gate or row 10 itself, with `-p:GoStdlibTwins=true`.

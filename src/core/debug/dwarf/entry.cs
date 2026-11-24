@@ -481,7 +481,7 @@ internal static ж<Entry> entry⁔(/*this*/ ж<buf> Ꮡb, ж<Entry> cu, ж<unit>
         Field: new slice<Field>(len(a.field))
     ));
 
-    @string resolveStrx(uint64 strBase, uint64 offΔ1) {
+    [GoFunc("(*buf).entry.func1")] @string resolveStrx(uint64 strBase, uint64 offΔ1) {
         offΔ1 += strBase;
         if ((uint64)(nint)offΔ1 != offΔ1) {
             Ꮡb.Value.error(dwFormStrxOffsetOutOfˢ);
@@ -511,7 +511,7 @@ internal static ж<Entry> entry⁔(/*this*/ ж<buf> Ꮡb, ж<Entry> cu, ж<unit>
         return val;
     }
 
-    uint64 resolveRnglistx(uint64 rnglistsBase, uint64 offΔ2) {
+    [GoFunc("(*buf).entry.func2")] uint64 resolveRnglistx(uint64 rnglistsBase, uint64 offΔ2) {
         var (is64, _) = Ꮡb.Value.format.dwarf64();
         if (is64) {
             offΔ2 *= 8;

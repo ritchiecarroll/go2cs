@@ -350,7 +350,7 @@ internal static void init⁔(/*this*/ ж<scavengerState> Ꮡs) {
     s.g = getg();
 
     s.timer = @new<timer>();
-    var f = (any sΔ1, uintptr _Δp1, int64 _Δp2) => {
+    var f = [GoFunc("(*scavengerState).init.func1")] (any sΔ1, uintptr _Δp1, int64 _Δp2) => {
         sΔ1._<ж<scavengerState>>().wake();
     };
     s.timer.init(f, Ꮡs.OrTypedNil());
@@ -379,7 +379,7 @@ internal static void init⁔(/*this*/ ж<scavengerState> Ꮡs) {
 
     // Install real functions if stubs aren't present.
     if (s.scavenge == nil) {
-        s.scavenge = (uintptr n) => {
+        s.scavenge = [GoFunc("(*scavengerState).init.func2")] (uintptr n) => {
             var start = nanotime();
             var r = Ꮡmheap_.Ꮡpages.scavenge(n, default, false);
             var end = nanotime();
@@ -391,13 +391,13 @@ internal static void init⁔(/*this*/ ж<scavengerState> Ꮡs) {
         };
     }
     if (s.shouldStop == nil) {
-        s.shouldStop = () => {
+        s.shouldStop = [GoFunc("(*scavengerState).init.func3")] () => {
             // If background scavenging is disabled or if there's no work to do just stop.
             return heapRetained() <= Ꮡscavenge.of(scavengeᴛ1.ᏑgcPercentGoal).Load() && ᏑgcController.ᏑmappedReady.Load() <= Ꮡscavenge.of(scavengeᴛ1.ᏑmemoryLimitGoal).Load();
         };
     }
     if (s.gomaxprocs == nil) {
-        s.gomaxprocs = () => gomaxprocs;
+        s.gomaxprocs = [GoFunc("(*scavengerState).init.func4")] () => gomaxprocs;
     }
 }
 
@@ -691,7 +691,7 @@ internal static uintptr scavenge⁔(/*this*/ ж<pageAlloc> Ꮡp, uintptr nbytes,
         if (ci == 0) {
             break;
         }
-        systemstack(() => {
+        systemstack([GoFunc("(*pageAlloc).scavenge.func1")] () => {
             released += Ꮡp.Value.scavengeOne(ci, pageIdx, nbytes - released);
         });
         if (shouldStop != nil && shouldStop()) {
@@ -836,7 +836,7 @@ private static readonly @string badMValueˢᵇ = "bad m value"u8;
 //
 // m must be a power of 2 <= maxPagesPerPhysPage.
 internal static uint64 fillAligned(uint64 x, nuint m) {
-    uint64 apply(uint64 xΔ1, uint64 c) {
+    [GoFunc("fillAligned.func1")] uint64 apply(uint64 xΔ1, uint64 c) {
         // The technique used it here is derived from
         // https://graphics.stanford.edu/~seander/bithacks.html#ZeroInWord
         // and extended for more than just bytes (like nibbles

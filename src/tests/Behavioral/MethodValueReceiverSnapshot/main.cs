@@ -41,10 +41,10 @@ internal static void main() {
     ref var a = ref heap<frame>(new frame(Name: "a"), out var Ꮡa);
 
         var aʗ1 = a;
-    var typed = slice<Func<@string>>([
+    var typed = new Func<@string>[]{
         () => aʗ1.label(),
-        () => Ꮡa.Value.Name
-    ]);
+        [GoFunc("main.func1")] () => Ꮡa.Value.Name
+    }.slice();
 
     a.Name = "A";
 
@@ -53,10 +53,10 @@ internal static void main() {
     ref var b = ref heap<frame>(new frame(Name: "b", Inlined: true), out var Ꮡb);
 
         var bʗ1 = b;
-    var boxed = slice<any>([
+    var boxed = new any[]{
         () => bʗ1.label(),
-        bool () => Ꮡb.Value.Inlined
-    ]);
+        [GoFunc("main.func2")] bool () => Ꮡb.Value.Inlined
+    }.slice();
 
     b.Name = "B";
 
@@ -75,7 +75,7 @@ internal static void main() {
     fmt.Println("distinct", first(), second(), c.label());
 
     var d = new frame(Name: "d");
-    @string call(Func<@string> f) => f();
+    [GoFunc("main.func3")] @string call(Func<@string> f) => f();
     var dʗ1 = d;
     @string got = call(() => dʗ1.label());
     d.Name = "D";
@@ -84,7 +84,7 @@ internal static void main() {
     fmt.Println("argument", got, call(() => dʗ2.label()));
 
     ref var e = ref heap<frame>(new frame(Name: "e"), out var Ꮡe);
-    @string watch() => Ꮡe.Value.Name;
+    [GoFunc("main.func4")] @string watch() => Ꮡe.Value.Name;
     var eʗ1 = e;
     
     var bound = () => eʗ1.label();
@@ -144,7 +144,7 @@ internal static void main() {
     fmt.Println("idxP    ", s11[0].Name);
 
     ref var p12 = ref heap<frame>(new frame(Name: "p12"), out var Ꮡp12);
-    Action hold(Action f) => f;
+    [GoFunc("main.func5")] Action hold(Action f) => f;
     var argP = hold(Ꮡp12.bump);
     p12 = new frame(Name: "P12");
     argP();

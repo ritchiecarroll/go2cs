@@ -268,7 +268,7 @@ internal static ж<@file> lookup⁔(/*this*/ FS f, @string name) {
     var (dir, elem, _) = split(name);
     var files = f.files.ValueSlot;
     var filesʗ1 = files;
-    nint i = sortSearch(len(files), (nint iΔ1) => {
+    nint i = sortSearch(len(files), [GoFunc("FS.lookup.func1")] (nint iΔ1) => {
         var (idir, ielem, _) = split(filesʗ1[iΔ1].name);
         return idir > dir || idir == dir && ielem >= elem;
     });
@@ -287,12 +287,12 @@ internal static slice<@file> readDir⁔(/*this*/ FS f, @string dir) {
     // and then return that slice of the list.
     var files = f.files.ValueSlot;
     var filesʗ1 = files;
-    nint i = sortSearch(len(files), (nint iΔ1) => {
+    nint i = sortSearch(len(files), [GoFunc("FS.readDir.func1")] (nint iΔ1) => {
         var (idir, _, _) = split(filesʗ1[iΔ1].name);
         return idir >= dir;
     });
     var filesʗ2 = files;
-    nint j = sortSearch(len(files), (nint jΔ1) => {
+    nint j = sortSearch(len(files), [GoFunc("FS.readDir.func2")] (nint jΔ1) => {
         var (jdir, _, _) = split(filesʗ2[jΔ1].name);
         return jdir > dir;
     });

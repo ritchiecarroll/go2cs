@@ -448,7 +448,7 @@ internal static slice<byte> appendInt(slice<byte> b, nint x, nint width) {
     }
 
     // 2-digit and 4-digit fields are the most common in time formats.
-    byte utod(nuint uΔ1) => (byte)('0' + (byte)uΔ1);
+    [GoFunc("appendInt.func1")] byte utod(nuint uΔ1) => (byte)('0' + (byte)uΔ1);
     switch (ᐧ) {
     case {} when width == 2 && u < 100: {
         return append(b, utod(u / 10), utod(u % 10));

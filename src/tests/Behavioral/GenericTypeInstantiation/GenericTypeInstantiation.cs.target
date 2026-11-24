@@ -72,7 +72,7 @@ internal static void main() {
     var (text, _) = stringStack.Pop();
     fmt.Printf("Popped from string stack: %s\n"u8, text);
 
-    var pair = new Seq2Like<@string, nint>((@string k, nint v) => len(k) == v);
+    var pair = new Seq2Like<@string, nint>([GoFunc("main.func1")] (@string k, nint v) => len(k) == v);
     fmt.Println(consume(pair, fourˢ, 4), pair("nope", 3));
 
     fmt.Println(describe<fmt.Stringer>("stringer"));

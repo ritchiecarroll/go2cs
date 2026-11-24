@@ -13,7 +13,7 @@ using path;
 
 partial class testenv_package {
 
-internal static Func<(bool, @string)> hasSymlink = sync.OnceValues((bool, @string) () => {
+internal static Func<(bool, @string)> hasSymlink = sync.OnceValues([GoFunc("init.func7")] (bool, @string) () => {
     GoFrame ᒐ = default;
     try {
         var (tmpdir, err) = os.MkdirTemp("", "symtest");

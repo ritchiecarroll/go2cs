@@ -493,7 +493,7 @@ internal static error writeMetaData(io.Writer w, slice<rtcov.CovMetaBlob> metali
 internal static error VisitFuncs⁔(/*this*/ ref emitState s, encodecounter.CounterVisitorFn f) {
     slice<uint32> tcounters = default;
 
-    slice<uint32> rdCounters(slice<atomic.Uint32> actrs, slice<uint32> ctrs) {
+    [GoFunc("(*emitState).VisitFuncs.func1")] slice<uint32> rdCounters(slice<atomic.Uint32> actrs, slice<uint32> ctrs) {
         ctrs = ctrs[..0];
         foreach (var i in range(len(actrs))) {
             ctrs = append(ctrs, Ꮡ(actrs, i).Load());

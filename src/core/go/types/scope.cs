@@ -203,7 +203,7 @@ internal static Object resolve(@string name, Object obj) {
     {
         var (lazy, ok) = obj._<ж<lazyObject>>(ᐧ); if (ok) {
             var lazyʗ1 = lazy;
-            lazy.Ꮡonce.Do(() => {
+            lazy.Ꮡonce.Do([GoFunc("resolve.func1")] () => {
                 var objΔ1 = lazyʗ1.resolve();
 
                 var (_, okΔ1) = objΔ1._<ж<lazyObject>>(ᐧ); if (okΔ1) {

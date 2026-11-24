@@ -51,7 +51,7 @@ internal static slice<Type> /*inferred*/ infer⁔(/*this*/ ж<Checker> Ꮡcheck,
         // be able to use it either.
         if (check.conf.Error != nil) {
             var tparamsʗ1 = tparams;
-            defer([MethodImpl(MethodImplOptions.NoInlining)] () => {
+            defer([MethodImpl(MethodImplOptions.NoInlining), GoFunc("(*Checker).infer.func1")] () => {
                 assert(inferred == nil || len(inferred) == len(tparamsʗ1) && !slices.Contains(inferred, (Type)(default)));
             }, ref ᒐ);
         }
@@ -59,7 +59,7 @@ internal static slice<Type> /*inferred*/ infer⁔(/*this*/ ж<Checker> Ꮡcheck,
         if (traceInference) {
             Ꮡcheck.dump(inferSSSˢ, tparams, Ꮡparams.OrTypedNil(), targs); // aligned with rename print below
             var tparamsʗ2 = tparams;
-            defer(() => {
+            defer([GoFunc("(*Checker).infer.func2")] () => {
                 Ꮡcheck.dump("=> %s ➞ %s\n", tparamsʗ2, inferred);
             }, ref ᒐ);
         }
@@ -132,7 +132,7 @@ internal static slice<Type> /*inferred*/ infer⁔(/*this*/ ж<Checker> Ꮡcheck,
 
         var tparamsʗ3 = tparams;
         var uʗ1 = u;
-        void errorf(Type tpar, Type targ, ж<operand> arg) {
+        [GoFunc("(*Checker).infer.func3")] void errorf(Type tpar, Type targ, ж<operand> arg) {
             // provide a better error message if we can
             var targsΔ1 = uʗ1.inferred(tparamsʗ3);
             if (targsΔ1[0] == nil) {
@@ -322,7 +322,7 @@ internal static slice<Type> /*inferred*/ infer⁔(/*this*/ ж<Checker> Ꮡcheck,
                     ref var cause = ref heap(new @string(), out var Ꮡcause);
                     var constraint = tpar.iface();
                     var uʗ2 = u;
-                    if (!Ꮡcheck.hasAllMethods(tx, new InterfaceжType(constraint), true, (Type x, Type y) => uʗ2.unify(x, y, exact), Ꮡcause)) {
+                    if (!Ꮡcheck.hasAllMethods(tx, new InterfaceжType(constraint), true, [GoFunc("(*Checker).infer.func4")] (Type x, Type y) => uʗ2.unify(x, y, exact), Ꮡcause)) {
                         // TODO(gri) better error message (see TODO above)
                         err.addf(posn, "%s (type %s) does not satisfy %s %s", tpar.OrTypedNil(), tx, tpar.Constraint(), cause);
                         inferred = default; goto ᒐdone;
@@ -600,7 +600,7 @@ internal static bool /*res*/ isParameterized⁔(/*this*/ ж<tpWalker> Ꮡw, Type
             res = x; goto ᒐdone;
         }
         w.seen[typ] = false;
-        defer(() => {
+        defer([GoFunc("(*tpWalker).isParameterized.func1")] () => {
             Ꮡw.Value.seen[typ] = res;
         }, ref ᒐ);
 
@@ -649,7 +649,7 @@ internal static bool /*res*/ isParameterized⁔(/*this*/ ж<tpWalker> Ꮡw, Type
                     res = true; goto ᒐdone;
                 }
             }
-            res = tset.@is((ж<term> tΔ1) => tΔ1 != nil && Ꮡw.isParameterized(tΔ1.typ)); goto ᒐdone;
+            res = tset.@is([GoFunc("(*tpWalker).isParameterized.func2")] (ж<term> tΔ1) => tΔ1 != nil && Ꮡw.isParameterized(tΔ1.typ)); goto ᒐdone;
         }
         case ж<Map> t: {
             res = Ꮡw.isParameterized(t.key) || Ꮡw.isParameterized(t.elem); goto ᒐdone;
@@ -700,7 +700,7 @@ internal static (ж<term>, bool) coreTerm(ж<TypeParam> Ꮡtpar) {
     nint n = 0;
     ref var single = ref heap<ж<term>>(out var Ꮡsingle); // valid if n == 1
     ref var tilde = ref heap(new bool(), out var Ꮡtilde);
-    tpar.@is((ж<term> t) => {
+    tpar.@is([GoFunc("coreTerm.func1")] (ж<term> t) => {
         if (t == nil) {
             assert(n == 0);
             return false; // no terms

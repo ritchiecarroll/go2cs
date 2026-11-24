@@ -1039,7 +1039,7 @@ internal static partial void ensureSigM() {
     maskUpdatedChan = new channel<EmptyStruct>(0);
     disableSigChan = new channel<uint32>(0);
     enableSigChan = new channel<uint32>(0);
-    goǃ(() => {
+    goǃ([GoFunc("ensureSigM.func1")] () => {
         GoFrame ᒐ = default;
         try {
             // Signal masks are per-thread, so make sure this goroutine stays on one
@@ -1252,7 +1252,7 @@ internal static void msigrestore(sigset sigmaskʗp) {
 // exiting.
 internal static readonly ж<sigset> ᏑsigsetAllExiting = new StaticBox<sigset>(default(sigset));
 internal static ref sigset sigsetAllExiting => ref ((StaticBox<sigset>)ᏑsigsetAllExiting).ValueSlot;
-internal static void initᴛsigsetAllExiting() { sigsetAllExiting = func(sigset () => {
+internal static void initᴛsigsetAllExiting() { sigsetAllExiting = func([GoFunc("init.func2")] sigset () => {
     ref var res = ref heap<sigset>(sigset_all, out var Ꮡres);
 
     // Apply GOOS-specific overrides here, rather than in osinit,

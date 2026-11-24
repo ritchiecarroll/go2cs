@@ -552,7 +552,7 @@ internal static (ж<indirect<K, V>> i, nuint hashShift, ж<atomic.Pointer<node<K
 // method on the HashTrieMap.
 internal static Action<Func<K, V, bool>> All⁔<K, V>(/*this*/ ж<HashTrieMap<K, V>> Ꮡht) {
     Ꮡht.init();
-    return (Func<K, V, bool> yield) => {
+    return [GoFunc("(*HashTrieMap[...]).All.func1")] (Func<K, V, bool> yield) => {
         Ꮡht.Value.iter(Ꮡht.of(HashTrieMap<K, V>.Ꮡroot).Load(), yield);
     };
 }

@@ -147,7 +147,7 @@ internal static ж<T> LoadOrStore⁔<T>(/*this*/ ж<canonMap<T>> Ꮡm, T keyʗp)
             slot.Store(m.expand(oldEntry, newEntry, hash, hashShift, i));
         }
         var wpʗ1 = wp;
-        runtime.AddCleanup(canon, (EmptyStruct _Δp0) => {
+        runtime.AddCleanup(canon, [GoFunc("(*canonMap[...]).LoadOrStore.func1")] (EmptyStruct _Δp0) => {
             Ꮡm.cleanup(hash, wpʗ1);
         }, new EmptyStruct(), new object?[] { Ꮡm }, new object?[] { wp });
         return canon;

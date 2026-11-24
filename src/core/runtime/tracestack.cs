@@ -318,7 +318,7 @@ internal static nint fpunwindExpand(slice<uintptr> dst, slice<uintptr> pcBuf) {
     // pcs can be added.
 
     var dstʗ1 = dst;
-    Func<uintptr, bool> skipOrAdd = (uintptr retPC) => {
+    Func<uintptr, bool> skipOrAdd = [GoFunc("fpunwindExpand.func1")] (uintptr retPC) => {
         if (skip > 0) {
             skip--;
         } else if (n < len(dstʗ1)) {

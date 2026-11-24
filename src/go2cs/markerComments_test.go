@@ -135,8 +135,8 @@ func TestGoCommentsAreNeverMarkers(t *testing.T) {
 		"internal static void put⁔(/*this*/ ref holder h, /*[3]*/ array<nint> v) {",
 		"internal static nint noted(/*[4]*/ array<byte> a, nint b) {",
 		"internal static T first<T>(/*[2]*/ array<T> a) {",
-		"var lambda = ([GoArrayDims(32)] array<byte> x) => {",
-		"nint local([GoArrayDims(3)] array<nint> x) {",
+		`var lambda = [GoFunc("main.func1")] ([GoArrayDims(32)] array<byte> x) => {`,
+		`[GoFunc("main.func2")] nint local([GoArrayDims(3)] array<nint> x) {`,
 	} {
 		if !strings.Contains(mainCs, want) {
 			t.Errorf("want %q in:\n%s", want, mainCs)

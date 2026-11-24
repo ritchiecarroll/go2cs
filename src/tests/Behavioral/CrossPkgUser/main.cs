@@ -8,7 +8,7 @@ using CrossPkgLib = CrossPkgLib_package;
 
 partial class main_package {
 
-public static Func<CrossPkgLib.Status, nint> CheckFunc = (CrossPkgLib.Status st) => st.Code * 2;
+public static Func<CrossPkgLib.Status, nint> CheckFunc = [GoFunc("init.func1")] (CrossPkgLib.Status st) => st.Code * 2;
 
 internal static (CrossPkgLib.Status, nint) gauge(CrossPkgLib.Status st) {
     return (new CrossPkgLib.Status(Code: st.Code + 1), st.Code);
@@ -126,7 +126,7 @@ internal static CrossPkgLib.Emitter leafEmitter = new CrossPkgLib.LeafжEmitter(
 internal static CrossPkgLib.Emitter branchEmitter = new CrossPkgLib.BranchжEmitter(CrossPkgLib.NewBranch("branch", 3));
 
 internal static Func<@string, (@string, slice<byte>, error)> makeScanner(@string @base) {
-    return (@string @file) => {
+    return [GoFunc("makeScanner.func1")] (@string @file) => {
         @string name = default;
         slice<byte> data = default;
         error err = default;
@@ -291,10 +291,10 @@ internal static void main() {
         fmt.Println(len(wrapped), wrapped[0]);
         fmt.Println(CrossPkgLib.Pair<@string, nint>((@string)"k", 8));
 
-        CrossPkgLib.Sift isHot = (nint tΔ1) => tΔ1 > 50;
+        Func<nint, bool> isHot = [GoFunc("main.func1")] (nint tΔ1) => tΔ1 > 50;
         fmt.Println(isHot(60), isHot(40));
 
-        var (nd, nerr) = CrossPkgLib.Resolve(new CrossPkgLib.Resolver(simpleResolve), "abcde");
+        var (nd, nerr) = CrossPkgLib.Resolve(new Func<map<@string, ж<CrossPkgLib.Node>>, @string, (ж<CrossPkgLib.Node>, error)>(simpleResolve), "abcde");
         fmt.Println(nd.ID, nerr == nil);
 
         sensorHolder.item = Ꮡ(new CrossPkgLib.Sensor(Name: "garage", Temp: 30D));

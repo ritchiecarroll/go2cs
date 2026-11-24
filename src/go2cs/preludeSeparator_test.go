@@ -85,8 +85,8 @@ func TestPreludeSetApartByOneBlankLine(t *testing.T) {
 		{"/*n*/ sum(", "/*n*/ sum(", 3, "// first body comment"},
 		{" esc(/*[2]*/", " esc(/*[2]*/", 4, "n = a[1];"},
 		{" val(this ", " val(this ", 1, "return Ꮡx;"},
-		{" get(this ", "try {", 2, "defer(() => {"},
-		{" rec(/*[2]*/", "try {", 2, "defer(() => {"},
+		{" get(this ", "try {", 2, `defer([GoFunc("(*T).get.func1")] () => {`},
+		{" rec(/*[2]*/", "try {", 2, `defer([GoFunc("rec.func1")] () => {`},
 	} {
 		at := lineContaining(t, lines, c.header)
 

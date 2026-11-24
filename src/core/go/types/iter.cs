@@ -19,7 +19,7 @@ partial class types_package {
 //
 // Example: for m := range t.Methods() { ... }
 internal static iter.Seq<ж<Func>> Methods⁔(/*this*/ ж<Interface> Ꮡt) {
-    return (Func<ж<Func>, bool> yield) => {
+    return [GoFunc("(*Interface).Methods.func1")] (Func<ж<Func>, bool> yield) => {
         foreach (var i in range(Ꮡt.NumMethods())) {
             if (!yield(Ꮡt.Method(i))) {
                 break;
@@ -33,7 +33,7 @@ internal static iter.Seq<ж<Func>> Methods⁔(/*this*/ ж<Interface> Ꮡt) {
 //
 // Example: for m := range t.ExplicitMethods() { ... }
 internal static iter.Seq<ж<Func>> ExplicitMethods⁔(/*this*/ ж<Interface> Ꮡt) {
-    return (Func<ж<Func>, bool> yield) => {
+    return [GoFunc("(*Interface).ExplicitMethods.func1")] (Func<ж<Func>, bool> yield) => {
         foreach (var i in range(Ꮡt.Value.NumExplicitMethods())) {
             if (!yield(Ꮡt.Value.ExplicitMethod(i))) {
                 break;
@@ -46,7 +46,7 @@ internal static iter.Seq<ж<Func>> ExplicitMethods⁔(/*this*/ ж<Interface> Ꮡ
 //
 // Example: for e := range t.EmbeddedTypes() { ... }
 internal static iter.Seq<Type> EmbeddedTypes⁔(/*this*/ ж<Interface> Ꮡt) {
-    return (Func<Type, bool> yield) => {
+    return [GoFunc("(*Interface).EmbeddedTypes.func1")] (Func<Type, bool> yield) => {
         foreach (var i in range(Ꮡt.Value.NumEmbeddeds())) {
             if (!yield(Ꮡt.Value.EmbeddedType(i))) {
                 break;
@@ -59,7 +59,7 @@ internal static iter.Seq<Type> EmbeddedTypes⁔(/*this*/ ж<Interface> Ꮡt) {
 //
 // Example: for m := range t.Methods() { ... }
 internal static iter.Seq<ж<Func>> Methods⁔(/*this*/ ж<Named> Ꮡt) {
-    return (Func<ж<Func>, bool> yield) => {
+    return [GoFunc("(*Named).Methods.func1")] (Func<ж<Func>, bool> yield) => {
         foreach (var i in range(Ꮡt.NumMethods())) {
             if (!yield(Ꮡt.Method(i))) {
                 break;
@@ -72,7 +72,7 @@ internal static iter.Seq<ж<Func>> Methods⁔(/*this*/ ж<Named> Ꮡt) {
 //
 // Example: for child := range scope.Children() { ... }
 internal static iter.Seq<ж<Scope>> Children⁔(/*this*/ ж<Scope> Ꮡs) {
-    return (Func<ж<Scope>, bool> yield) => {
+    return [GoFunc("(*Scope).Children.func1")] (Func<ж<Scope>, bool> yield) => {
         foreach (var i in range(Ꮡs.Value.NumChildren())) {
             if (!yield(Ꮡs.Value.Child(i))) {
                 break;
@@ -85,7 +85,7 @@ internal static iter.Seq<ж<Scope>> Children⁔(/*this*/ ж<Scope> Ꮡs) {
 //
 // Example: for field := range s.Fields() { ... }
 internal static iter.Seq<ж<Var>> Fields⁔(/*this*/ ж<Struct> Ꮡs) {
-    return (Func<ж<Var>, bool> yield) => {
+    return [GoFunc("(*Struct).Fields.func1")] (Func<ж<Var>, bool> yield) => {
         foreach (var i in range(Ꮡs.Value.NumFields())) {
             if (!yield(Ꮡs.Value.Field(i))) {
                 break;
@@ -98,7 +98,7 @@ internal static iter.Seq<ж<Var>> Fields⁔(/*this*/ ж<Struct> Ꮡs) {
 //
 // Example: for v := range tuple.Variables() { ... }
 internal static iter.Seq<ж<Var>> Variables⁔(/*this*/ ж<Tuple> Ꮡt) {
-    return (Func<ж<Var>, bool> yield) => {
+    return [GoFunc("(*Tuple).Variables.func1")] (Func<ж<Var>, bool> yield) => {
         foreach (var i in range(Ꮡt.Len())) {
             if (!yield(Ꮡt.Value.At(i))) {
                 break;
@@ -111,7 +111,7 @@ internal static iter.Seq<ж<Var>> Variables⁔(/*this*/ ж<Tuple> Ꮡt) {
 //
 // Example: for method := range s.Methods() { ... }
 internal static iter.Seq<ж<Selection>> Methods⁔(/*this*/ ж<MethodSet> Ꮡs) {
-    return (Func<ж<Selection>, bool> yield) => {
+    return [GoFunc("(*MethodSet).Methods.func1")] (Func<ж<Selection>, bool> yield) => {
         foreach (var i in range(Ꮡs.Value.Len())) {
             if (!yield(Ꮡs.Value.At(i))) {
                 break;
@@ -124,7 +124,7 @@ internal static iter.Seq<ж<Selection>> Methods⁔(/*this*/ ж<MethodSet> Ꮡs) 
 //
 // Example: for term := range union.Terms() { ... }
 internal static iter.Seq<ж<Term>> Terms⁔(/*this*/ ж<Union> Ꮡu) {
-    return (Func<ж<Term>, bool> yield) => {
+    return [GoFunc("(*Union).Terms.func1")] (Func<ж<Term>, bool> yield) => {
         foreach (var i in range(Ꮡu.Value.Len())) {
             if (!yield(Ꮡu.Value.Term(i))) {
                 break;
@@ -137,7 +137,7 @@ internal static iter.Seq<ж<Term>> Terms⁔(/*this*/ ж<Union> Ꮡu) {
 //
 // Example: for tparam := range l.TypeParams() { ... }
 internal static iter.Seq<ж<TypeParam>> TypeParams⁔(/*this*/ ж<TypeParamList> Ꮡl) {
-    return (Func<ж<TypeParam>, bool> yield) => {
+    return [GoFunc("(*TypeParamList).TypeParams.func1")] (Func<ж<TypeParam>, bool> yield) => {
         foreach (var i in range(Ꮡl.Len())) {
             if (!yield(Ꮡl.Value.At(i))) {
                 break;
@@ -150,7 +150,7 @@ internal static iter.Seq<ж<TypeParam>> TypeParams⁔(/*this*/ ж<TypeParamList>
 //
 // Example: for t := range l.Types() { ... }
 internal static iter.Seq<Type> Types⁔(/*this*/ ж<TypeList> Ꮡl) {
-    return (Func<Type, bool> yield) => {
+    return [GoFunc("(*TypeList).Types.func1")] (Func<Type, bool> yield) => {
         foreach (var i in range(Ꮡl.Len())) {
             if (!yield(Ꮡl.Value.At(i))) {
                 break;

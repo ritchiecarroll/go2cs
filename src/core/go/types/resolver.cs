@@ -308,7 +308,7 @@ internal static void collectObjects⁔(/*this*/ ж<Checker> Ꮡcheck) {
         var fileScopeʗ1 = fileScope;
         var pkgʗ1 = pkg;
         var pkgImportsʗ1 = pkgImports;
-        Ꮡcheck.walkDecls(@file.Decls, (decl d) => {
+        Ꮡcheck.walkDecls(@file.Decls, [GoFunc("(*Checker).collectObjects.func1")] (decl d) => {
             switch (d.type()) {
             case importDecl dΔ1: {
                 // import package
@@ -567,7 +567,7 @@ internal static void sortObjects⁔(/*this*/ ref Checker check) {
         check.objList[i] = obj;
         i++;
     }
-    slices.SortFunc(check.objList, (Object a, Object b) => cmp.Compare(a.order(), b.order()));
+    slices.SortFunc(check.objList, [GoFunc("(*Checker).sortObjects.func1")] (Object a, Object b) => cmp.Compare(a.order(), b.order()));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

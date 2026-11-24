@@ -446,7 +446,7 @@ internal static ж<workbuf> getempty() {
             unlock(Ꮡwork.ᏑwbufSpans.of(workType_wbufSpans.Ꮡlock));
         }
         if (s == nil) {
-            systemstack(() => {
+            systemstack([GoFunc("getempty.func1")] () => {
                 Ꮡs.ValueSlot = Ꮡmheap_.allocManual(workbufAlloc / pageSize, spanAllocWorkBuf);
             });
             if (s == nil) {
@@ -554,7 +554,7 @@ internal static bool freeSomeWbufs(bool preemptible) {
         unlock(Ꮡwork.ᏑwbufSpans.of(workType_wbufSpans.Ꮡlock));
         return false;
     }
-    systemstack(() => {
+    systemstack([GoFunc("freeSomeWbufs.func1")] () => {
         var gp = getg().Value.m.Value.curg;
         for (nint i = 0; i < batchSize && !(preemptible && (~gp).preempt); i++) {
             var span = work.wbufSpans.free.first;

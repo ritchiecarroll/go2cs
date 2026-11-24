@@ -597,14 +597,14 @@ internal static error /*err*/ write⁔(/*this*/ ж<Request> Ꮡr, io.Writer w, b
         var trace = httptrace.ContextClientTrace(r.Context());
         if (trace != nil && trace.WroteRequest != nil) {
             var traceʗ1 = trace;
-            defer(() => {
+            defer([GoFunc("(*Request).write.func1")] () => {
                 traceʗ1.WroteRequest(new httptrace.WroteRequestInfo(
                     Err: Ꮡerr.ValueSlot
                 ));
             }, ref ᒐ);
         }
         var closed = false;
-        defer(() => {
+        defer([GoFunc("(*Request).write.func2")] () => {
             if (closed) {
                 return;
             }
@@ -958,7 +958,7 @@ public static (ж<Request>, error) NewRequestWithContext(context.Context ctx, @s
             req.ContentLength = (int64)v.Len();
             var buf = v.Bytes();
             var bufʗ1 = buf;
-            req.GetBody = (io.ReadCloser, error) () => {
+            req.GetBody = [GoFunc("NewRequestWithContext.func1")] (io.ReadCloser, error) () => {
                 var r = bytes.NewReader(bufʗ1);
                 return (io.NopCloser(new bytes_ReaderжReader(r)), default);
             };
@@ -968,7 +968,7 @@ public static (ж<Request>, error) NewRequestWithContext(context.Context ctx, @s
             req.ContentLength = (int64)v.Len();
             ref var snapshot = ref heap<bytes.Reader>(v.Value, out var Ꮡsnapshot);
             var snapshotʗ1 = snapshot;
-            req.GetBody = (io.ReadCloser, error) () => {
+            req.GetBody = [GoFunc("NewRequestWithContext.func2")] (io.ReadCloser, error) () => {
                 ref var r = ref heap<bytes.Reader>(snapshotʗ1, out var Ꮡr);
                 return (io.NopCloser(new bytes_ReaderжReader(Ꮡr)), default);
             };
@@ -978,7 +978,7 @@ public static (ж<Request>, error) NewRequestWithContext(context.Context ctx, @s
             req.ContentLength = (int64)v.Len();
             ref var snapshot = ref heap<strings.Reader>(v.Value, out var Ꮡsnapshot);
             var snapshotʗ2 = snapshot;
-            req.GetBody = (io.ReadCloser, error) () => {
+            req.GetBody = [GoFunc("NewRequestWithContext.func3")] (io.ReadCloser, error) () => {
                 ref var r = ref heap<strings.Reader>(snapshotʗ2, out var Ꮡr);
                 return (io.NopCloser(new strings_ReaderжReader(Ꮡr)), default);
             };
@@ -1003,7 +1003,7 @@ public static (ж<Request>, error) NewRequestWithContext(context.Context ctx, @s
         // variable to mean explicitly zero.
         if (req.GetBody != nil && req.ContentLength == 0) {
             req.Body = NoBody;
-            req.GetBody = (io.ReadCloser, error) () => (NoBody, default);
+            req.GetBody = [GoFunc("NewRequestWithContext.func4")] (io.ReadCloser, error) () => (NoBody, default);
         }
     }
 
@@ -1159,7 +1159,7 @@ internal static (ж<Request> req, error err) readRequest(ж<bufio.Reader> b) {
         (s, err) = tp.ReadLine(); if (err != nil) {
             (req, err) = (default, err); goto ᒐdone;
         }
-        defer(() => {
+        defer([GoFunc("readRequest.func1")] () => {
             if (AreEqual(Ꮡerr.ValueSlot, io.EOF)) {
                 Ꮡerr.ValueSlot = io.ErrUnexpectedEOF;
             }

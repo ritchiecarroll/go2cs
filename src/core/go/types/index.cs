@@ -123,7 +123,7 @@ internal static bool /*isFuncInst*/ indexExpr⁔(/*this*/ ж<Checker> Ꮡcheck, 
         ref var elem = ref heap<Type>(out var Ꮡelem);
         var mode = variable;                        // non-maps result mode
         // TODO(gri) factor out closure and use it for non-typeparam cases as well
-        if (underIs(x.typ, (Type u) => {
+        if (underIs(x.typ, [GoFunc("(*Checker).indexExpr.func1")] (Type u) => {
             var l = (int64)(-1); // valid if >= 0
             Type k = default;    // k is only set for maps
             Type eΔ1 = default;
@@ -252,7 +252,7 @@ internal static void sliceExpr⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operand> Ꮡ
     ref var cu = ref heap<Type>(out var Ꮡcu);
     bool hasString = default;
     // TODO(adonovan): use go1.23 "range typeset()".
-    typeset(x.typ)((Type t, Type u) => {
+    typeset(x.typ)([GoFunc("(*Checker).sliceExpr.func1")] (Type t, Type u) => {
         if (u == nil) {
             Ꮡcheck.errorf(new operandжpositioner(Ꮡx), NonSliceableOperand, "cannot slice %s: no specific type in %s", Ꮡx.OrTypedNil(), Ꮡx.Value.typ);
             Ꮡcu.ValueSlot = default;

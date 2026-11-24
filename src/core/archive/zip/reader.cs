@@ -860,7 +860,7 @@ internal static @string toValidName(@string name) {
 }
 
 internal static void initFileList⁔(/*this*/ ж<Reader> Ꮡr) {
-    Ꮡr.ᏑfileListOnce.Do(() => {
+    Ꮡr.ᏑfileListOnce.Do([GoFunc("(*Reader).initFileList.func1")] () => {
         // Preallocate the minimum size of the index.
         // We may also synthesize additional directory entries.
         Ꮡr.Value.fileList = new slice<fileListEntry>(0, len(Ꮡr.Value.File));
@@ -931,7 +931,7 @@ internal static void initFileList⁔(/*this*/ ж<Reader> Ꮡr) {
             }
         }
 
-        slices.SortFunc(Ꮡr.Value.fileList, (fileListEntry a, fileListEntry b) => fileEntryCompare(a.name, b.name));
+        slices.SortFunc(Ꮡr.Value.fileList, [GoFunc("(*Reader).initFileList.func1.1")] (fileListEntry a, fileListEntry b) => fileEntryCompare(a.name, b.name));
     });
 }
 
@@ -990,7 +990,7 @@ internal static ж<fileListEntry> openLookup⁔(/*this*/ ref Reader r, @string n
 
     var (dir, elem, _) = split(name);
     var files = r.fileList;
-    var (i, _) = slices.BinarySearchFunc(files, dir, (fileListEntry a, @string dirΔ1) => {
+    var (i, _) = slices.BinarySearchFunc(files, dir, [GoFunc("(*Reader).openLookup.func1")] (fileListEntry a, @string dirΔ1) => {
         var (idir, ielem, _) = split(a.name);
         if (dirΔ1 != idir) {
             return strings.Compare(idir, dirΔ1);
@@ -1008,7 +1008,7 @@ internal static ж<fileListEntry> openLookup⁔(/*this*/ ref Reader r, @string n
 
 internal static slice<fileListEntry> openReadDir⁔(/*this*/ ref Reader r, @string dir) {
     var files = r.fileList;
-    var (i, _) = slices.BinarySearchFunc(files, dir, (fileListEntry a, @string dirΔ1) => {
+    var (i, _) = slices.BinarySearchFunc(files, dir, [GoFunc("(*Reader).openReadDir.func1")] (fileListEntry a, @string dirΔ1) => {
         var (idir, _, _) = split(a.name);
         if (dirΔ1 != idir) {
             return strings.Compare(idir, dirΔ1);
@@ -1016,7 +1016,7 @@ internal static slice<fileListEntry> openReadDir⁔(/*this*/ ref Reader r, @stri
         // find the first entry with dir
         return +1;
     });
-    var (j, _) = slices.BinarySearchFunc(files, dir, (fileListEntry a, @string dirΔ2) => {
+    var (j, _) = slices.BinarySearchFunc(files, dir, [GoFunc("(*Reader).openReadDir.func2")] (fileListEntry a, @string dirΔ2) => {
         var (jdir, _, _) = split(a.name);
         if (dirΔ2 != jdir) {
             return strings.Compare(jdir, dirΔ2);

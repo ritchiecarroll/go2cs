@@ -10,11 +10,11 @@ partial struct config {
 }
 
 internal static Func<nint, nint> scaler(ж<config> c) {
-    return (nint x) => x * c.Value.size + c.Value.tag;
+    return [GoFunc("scaler.func1")] (nint x) => x * c.Value.size + c.Value.tag;
 }
 
 internal static Action mutate(ж<config> c) {
-    return () => {
+    return [GoFunc("mutate.func1")] () => {
         c.Value.size++;
     };
 }

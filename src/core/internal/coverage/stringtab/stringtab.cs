@@ -70,7 +70,7 @@ internal static uint32 Size⁔(/*this*/ ref Writer stw) {
 internal static error Write⁔(/*this*/ ж<Writer> Ꮡstw, io.Writer w) {
     ref var stw = ref Ꮡstw.DerefOrNull();
 
-    error wr128(nuint v) {
+    [GoFunc("(*Writer).Write.func1")] error wr128(nuint v) {
         Ꮡstw.Value.tmp = Ꮡstw.Value.tmp[..0];
         Ꮡstw.Value.tmp = uleb128.AppendUleb128(Ꮡstw.Value.tmp, v);
         var (nw, err) = w.Write(Ꮡstw.Value.tmp); if (err != nil) {

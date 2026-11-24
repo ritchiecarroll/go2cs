@@ -549,7 +549,7 @@ private static readonly @string zipCannotAddNonRegularˢᵇ = "zip: cannot add n
 // It walks the directory tree starting at the root of the filesystem
 // adding each file to the zip using deflate while maintaining the directory structure.
 internal static error AddFS⁔(/*this*/ ж<Writer> Ꮡw, fs.FS fsys) {
-    return fs.WalkDir(fsys, ".", error (@string name, fs.DirEntry d, error err) => {
+    return fs.WalkDir(fsys, ".", [GoFunc("(*Writer).AddFS.func1")] error (@string name, fs.DirEntry d, error err) => {
         GoFrame ᒐ = default;
         try {
             if (err != nil) {

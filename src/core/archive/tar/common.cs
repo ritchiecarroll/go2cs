@@ -415,7 +415,7 @@ internal static (Format format, map<@string, @string> paxHdrs, error err) allowe
     bool preferPAX = default; // Prefer PAX over USTAR
     var hʗ1 = h;
     var paxHdrsʗ1 = paxHdrs;
-    void verifyString(@string s, nint size, @string name, @string paxKey) {
+    [GoFunc("Header.allowedFormats.func1")] void verifyString(@string s, nint size, @string name, @string paxKey) {
         // NUL-terminator is optional for path and linkpath.
         // Technically, it is required for uname and gname,
         // but neither GNU nor BSD tar checks for it.
@@ -446,7 +446,7 @@ internal static (Format format, map<@string, @string> paxHdrs, error err) allowe
     }
     var hʗ2 = h;
     var paxHdrsʗ2 = paxHdrs;
-    void verifyNumeric(int64 n, nint size, @string name, @string paxKey) {
+    [GoFunc("Header.allowedFormats.func2")] void verifyNumeric(int64 n, nint size, @string name, @string paxKey) {
         if (!fitsInBase256(size, n)) {
             whyNoGNU = fmt.Sprintf("GNU cannot encode %s=%d"u8, name, n);
             format.mustNotBe(FormatGNU);
@@ -467,7 +467,7 @@ internal static (Format format, map<@string, @string> paxHdrs, error err) allowe
     }
     var hʗ3 = h;
     var paxHdrsʗ3 = paxHdrs;
-    void verifyTime(time.Time ts, nint size, @string name, @string paxKey) {
+    [GoFunc("Header.allowedFormats.func3")] void verifyTime(time.Time ts, nint size, @string name, @string paxKey) {
         if (ts.IsZero()) {
             return; // Always okay
         }

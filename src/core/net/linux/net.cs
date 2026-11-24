@@ -423,7 +423,7 @@ internal static ref listenerBacklogCacheᴛ1 listenerBacklogCache => ref ((Stati
 //
 //go:linkname listenerBacklog
 internal static nint listenerBacklog() {
-    ᏑlistenerBacklogCache.of(listenerBacklogCacheᴛ1.ᏑOnce).Do(() => {
+    ᏑlistenerBacklogCache.of(listenerBacklogCacheᴛ1.ᏑOnce).Do([GoFunc("listenerBacklog.func1")] () => {
         listenerBacklogCache.val = maxListenerBacklog();
     });
     return listenerBacklogCache.val;
@@ -841,7 +841,7 @@ internal static readonly ж<Δsync.Once> ᏑthreadOnce = new StaticBox<Δsync.On
 internal static ref Δsync.Once threadOnce => ref ((StaticBox<Δsync.Once>)ᏑthreadOnce).ValueSlot;
 
 internal static error acquireThread(context.Context ctx) {
-    ᏑthreadOnce.Do(() => {
+    ᏑthreadOnce.Do([GoFunc("acquireThread.func1")] () => {
         threadLimit = new channel<EmptyStruct>(concurrentThreadsLimit());
     });
     var threadLimitᴛ1 = threadLimit.ᐸꟷ(new EmptyStruct(), ꓸꓸꓸ);

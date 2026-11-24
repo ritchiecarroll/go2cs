@@ -9,7 +9,7 @@ internal delegate void stopFn();
 
 internal static stopFn makeStop(@string tag, channel/*<-*/<@string> @out) {
     var outʗ1 = @out;
-    return () => {
+    return [GoFunc("makeStop.func1")] () => {
         outʗ1.ᐸꟷ(tag);
     };
 }
@@ -35,7 +35,7 @@ internal static partial void main() {
 
         var drained = new channel<nint>(1);
         var drainedʗ1 = drained;
-        defer(() => {
+        defer([GoFunc("main.func1")] () => {
             var (v, open) = ᐸꟷ(drainedʗ1, ꟷ);
             fmt.Println("after close:", v, open);
         }, ref ᒐ);
@@ -135,7 +135,7 @@ internal static (nint sum, error err) add(this ж<acc> Ꮡa, nint n) {
     try {
         ref var a = ref Ꮡa.DerefOrNull();
 
-        defer(() => {
+        defer([GoFunc("(*acc).add.func1")] () => {
             var e = recover(); if (e != nil) {
                 err = fmt.Errorf("boom"u8);
             }
@@ -152,7 +152,7 @@ internal static (nint sum, error err) add(this ж<acc> Ꮡa, nint n) {
 }
 
 public static Action<@string> GetPrintLn() {
-    return (@string src) => {
+    return [GoFunc("GetPrintLn.func1")] (@string src) => {
         fmt.Println(src);
     };
 }

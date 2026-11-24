@@ -26,17 +26,17 @@ internal static void main() {
     fmt.Println(s);
 
     var sv = new Sieve(vals: [1, 2, 3, 4, 5, 6]);
-    Filter even = (nint n) => n % 2 == 0;
+    Func<nint, bool> even = [GoFunc("main.func1")] (nint n) => n % 2 == 0;
     fmt.Println(sv.Filter(even));
 }
 
-public delegate bool Filter(nint _);
+// type Filter is a methodless func type — rendered inline as its base delegate
 
 partial struct Sieve {
     internal slice<nint> vals;
 }
 
-internal static nint Filter⁔(/*this*/ Sieve sv, Filter f) {
+internal static nint Filter⁔(/*this*/ Sieve sv, Func<nint, bool> f) {
     nint count = 0;
     foreach (var (_, v) in range(sv.vals)) {
         if (f(v)) {

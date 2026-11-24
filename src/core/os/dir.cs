@@ -125,7 +125,7 @@ public static (slice<DirEntry>, error) ReadDir(@string name) {
         defer(() => fʗ1.Close(), ref ᒐ);
 
         (var dirs, err) = f.ReadDir(-1);
-        slices.SortFunc(dirs, (DirEntry a, DirEntry b) => bytealg.CompareString(a.Name(), b.Name()));
+        slices.SortFunc(dirs, [GoFunc("ReadDir.func1")] (DirEntry a, DirEntry b) => bytealg.CompareString(a.Name(), b.Name()));
         return (dirs, err);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
@@ -150,7 +150,7 @@ public static (slice<DirEntry>, error) ReadDir(@string name) {
 //
 // Copying stops at and returns the first error encountered.
 public static error CopyFS(@string dir, fs.FS fsys) {
-    return fs.WalkDir(fsys, ".", error (@string path, fs.DirEntry d, error err) => {
+    return fs.WalkDir(fsys, ".", [GoFunc("CopyFS.func1")] error (@string path, fs.DirEntry d, error err) => {
         GoFrame ᒐ = default;
         try {
             if (err != nil) {

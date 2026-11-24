@@ -54,7 +54,7 @@ internal static error /*err*/ fprint(io.Writer w, ж<token.FileSet> fset, any x,
         ), out var Ꮡp);
 
         // install error handler
-        defer(() => {
+        defer([GoFunc("fprint.func1")] () => {
             var e = recover(); if (e != nil) {
                 err = e._<localError>().err; // re-panics if it's not a localError
             }

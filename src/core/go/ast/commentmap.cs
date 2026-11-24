@@ -16,7 +16,7 @@ partial class ast_package {
 
 // sortComments sorts the list of comment groups in source order.
 internal static void sortComments(slice<ж<CommentGroup>> list) {
-    slices.SortFunc(list, (ж<CommentGroup> a, ж<CommentGroup> b) => cmp.Compare(a.Pos(), b.Pos()));
+    slices.SortFunc(list, [GoFunc("sortComments.func1")] (ж<CommentGroup> a, ж<CommentGroup> b) => cmp.Compare(a.Pos(), b.Pos()));
 }
 
 // A CommentMap maps an AST node to a list of comment groups
@@ -37,7 +37,7 @@ internal static void addComment⁔(/*this*/ CommentMap cmap, Node n, ж<CommentG
 // nodeList returns the list of nodes of the AST n in source order.
 internal static slice<Node> nodeList(Node n) {
     ref var list = ref heap<slice<Node>>(out var Ꮡlist);
-    Inspect(n, (Node nΔ1) => {
+    Inspect(n, [GoFunc("nodeList.func1")] (Node nΔ1) => {
         // don't collect comments
         switch (nΔ1.type()) {
         case null:
@@ -249,7 +249,7 @@ internal static CommentMap Filter⁔(/*this*/ CommentMap cmap, Node node) {
     var umap = new CommentMap(0);
     var cmapʗ1 = cmap;
     var umapʗ1 = umap;
-    Inspect(node, (Node n) => {
+    Inspect(node, [GoFunc("CommentMap.Filter.func1")] (Node n) => {
         var g = cmapʗ1[n]; if (len(g) > 0) {
             umapʗ1[n] = g;
         }
@@ -319,7 +319,7 @@ internal static @string String⁔(/*this*/ CommentMap cmap) {
     foreach (var (node, _) in cmap) {
         nodes = append(nodesᴷ, nodes, node);
     }
-    slices.SortFunc(nodes, (Node a, Node b) => {
+    slices.SortFunc(nodes, [GoFunc("CommentMap.String.func1")] (Node a, Node b) => {
         nint r = cmp.Compare(a.Pos(), b.Pos());
         if (r != 0) {
             return r;

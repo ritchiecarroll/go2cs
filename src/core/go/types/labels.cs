@@ -119,15 +119,15 @@ internal static slice<ж<ast.BranchStmt>> blockBranches⁔(/*this*/ ж<Checker> 
     // All forward jumps jumping over a variable declaration are possibly
     // invalid (they may still jump out of the block and be ok).
     // recordVarDecl records them for the given position.
-    void recordVarDecl(token.Pos pos) {
+    [GoFunc("(*Checker).blockBranches.func1")] void recordVarDecl(token.Pos pos) {
         varDeclPos = pos;
         ᏑbadJumps.ValueSlot = appendꓸꓸꓸ(ᏑbadJumps.ValueSlot[..0], ᏑfwdJumps.ValueSlot); // copy fwdJumps to badJumps
     }
 
-    bool jumpsOverVarDecl(ж<ast.BranchStmt> jmp) => varDeclPos.IsValid() && slices.Contains(ᏑbadJumps.ValueSlot, jmp);
+    [GoFunc("(*Checker).blockBranches.func2")] bool jumpsOverVarDecl(ж<ast.BranchStmt> jmp) => varDeclPos.IsValid() && slices.Contains(ᏑbadJumps.ValueSlot, jmp);
 
     var bʗ1 = b;
-    void blockBranches(ж<ast.LabeledStmt> lstmtΔ1, slice<ast.Stmt> listΔ1) {
+    [GoFunc("(*Checker).blockBranches.func3")] void blockBranches(ж<ast.LabeledStmt> lstmtΔ1, slice<ast.Stmt> listΔ1) {
         // Unresolved forward jumps inside the nested block
         // become forward jumps in the current block.
         ᏑfwdJumps.ValueSlot = appendꓸꓸꓸ(ᏑfwdJumps.ValueSlot, Ꮡcheck.blockBranches(all, bʗ1, lstmtΔ1, listΔ1));
@@ -138,7 +138,7 @@ internal static slice<ж<ast.BranchStmt>> blockBranches⁔(/*this*/ ж<Checker> 
     var blockBranchesʗ1 = blockBranches;
     var jumpsOverVarDeclʗ1 = jumpsOverVarDecl;
     var recordVarDeclʗ1 = recordVarDecl;
-    stmtBranches = (ж<ast.LabeledStmt> lstmtΔ2, ast.Stmt s) => {
+    stmtBranches = [GoFunc("(*Checker).blockBranches.func4")] (ж<ast.LabeledStmt> lstmtΔ2, ast.Stmt s) => {
         switch (s.type()) {
         case ж<ast.DeclStmt> sΔ1: {
             var (d, _) = sΔ1.Decl._<ж<ast.GenDecl>>(ᐧ); if (d != nil && d.Tok == token.VAR) {

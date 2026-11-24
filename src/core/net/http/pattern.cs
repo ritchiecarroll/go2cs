@@ -109,7 +109,7 @@ internal static (ж<pattern>, error err) parsePattern(@string s) {
             (_ᴛ1, err) = (default, errors.New(emptyPatternˢ)); goto ᒐdone;
         }
         nint off = 0; // offset into string
-        defer(() => {
+        defer([GoFunc("parsePattern.func1")] () => {
             if (err != nil) {
                 err = fmt.Errorf("at offset %d: %w"u8, off, err);
             }

@@ -257,10 +257,10 @@ internal static ints lookupAll⁔(/*this*/ ж<Index> Ꮡx, slice<byte> s) {
     // find matching suffix index range [i:j]
     // find the first index where s would be the prefix
     var sʗ1 = s;
-    nint i = sort.Search(x.sa.len(), (nint iΔ1) => bytes.Compare(Ꮡx.Value.at(iΔ1), sʗ1) >= 0);
+    nint i = sort.Search(x.sa.len(), [GoFunc("(*Index).lookupAll.func1")] (nint iΔ1) => bytes.Compare(Ꮡx.Value.at(iΔ1), sʗ1) >= 0);
     // starting at i, find the first index at which s is not a prefix
     var sʗ2 = s;
-    nint j = i + sort.Search(x.sa.len() - i, (nint jΔ1) => !bytes.HasPrefix(Ꮡx.Value.at(jΔ1 + i), sʗ2));
+    nint j = i + sort.Search(x.sa.len() - i, [GoFunc("(*Index).lookupAll.func2")] (nint jΔ1) => !bytes.HasPrefix(Ꮡx.Value.at(jΔ1 + i), sʗ2));
     return x.sa.Δslice(i, j);
 }
 

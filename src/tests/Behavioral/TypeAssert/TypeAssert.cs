@@ -51,7 +51,7 @@ internal static void safeAssertions() {
 internal static void assertionsWithPanic() {
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("assertionsWithPanic.func1")] () => {
             var r = recover(); if (r != nil) {
                 fmt.Println("Recovered from panic:", r);
             }

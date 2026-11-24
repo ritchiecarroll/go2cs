@@ -32,7 +32,7 @@ internal static void main() {
         _ = back;
     }
 
-    @unsafe.Pointer pick(bool u) {
+    [GoFunc("main.func1")] @unsafe.Pointer pick(bool u) {
         if (u) {
             return (@unsafe.Pointer)(uintptr)0;
         }

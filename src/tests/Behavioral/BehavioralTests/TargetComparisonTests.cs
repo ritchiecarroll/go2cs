@@ -613,6 +613,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckDivideByZeroPanic() => CheckTarget("DivideByZeroPanic");
 
     [TestMethod]
+    public void CheckDotImportAdapterNameInHolder() => CheckTarget("DotImportAdapterNameInHolder");
+
+    [TestMethod]
     public void CheckDotImportNameCollision() => CheckTarget("DotImportNameCollision");
 
     [TestMethod]
@@ -1316,6 +1319,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckLiteralFloatConstFold() => CheckTarget("LiteralFloatConstFold");
+
+    [TestMethod]
+    public void CheckLiteralFrameNames() => CheckTarget("LiteralFrameNames");
 
     [TestMethod]
     public void CheckLocalFunctionEmission() => CheckTarget("LocalFunctionEmission");
@@ -2147,6 +2153,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckPointerParamWalk() => CheckTarget("PointerParamWalk");
+
+    [TestMethod]
+    public void CheckPointerPrintIdentity() => CheckTarget("PointerPrintIdentity");
 
     [TestMethod]
     public void CheckPointerReceiverNilCompare() => CheckTarget("PointerReceiverNilCompare");

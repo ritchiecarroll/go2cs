@@ -458,7 +458,7 @@ The assignment statement's position is that of `check` on its left, which preced
 ```csharp
 ref var check = ref heap<Func<uint32, slice<bool>, bool>>(out var Ꮡcheck);
 …
-check = (uint32 pc, slice<bool> mΔ1) => {
+check = [GoFunc("makeOnePass.func1")] (uint32 pc, slice<bool> mΔ1) => {
     …
 ok = Ꮡcheck.ValueSlot(inst.Out, mΔ1) && Ꮡcheck.ValueSlot(inst.Arg, mΔ1);
 …
@@ -476,10 +476,10 @@ ref var p = ref heap<payload>(new payload(vals: [1, 2, 3, 4]), out var Ꮡp);
 var @out = new channel<nint>(1);
 var outʗ1 = @out;
 var pʗ1 = p;
-[MethodImpl(MethodImplOptions.NoInlining)] void outer() {
+[MethodImpl(MethodImplOptions.NoInlining), GoFunc("nestedStructCapture.func1")] void outer() {
     var outʗ2 = outʗ1;
     var pʗ2 = pʗ1;
-    goǃ(() => {
+    goǃ([GoFunc("nestedStructCapture.func1.1")] () => {
         outʗ2.ᐸꟷ(pʗ2.sum());
     });
 }
@@ -541,7 +541,7 @@ internal static nint deepest(ж<node> n) {
         if (len(n.DerefOrNull().kids) == 0) {
             return n.DerefOrNull().val;
         }
-        n.DerefOrNull().each((ж<node> k) => {
+        n.DerefOrNull().each([GoFunc("deepest.func1")] (ж<node> k) => {
             n = k;
             return true;
         });
@@ -624,11 +624,11 @@ A literal that **defers or recovers** is no bar: its frame is an ordinary local 
 
 <!-- source: src/tests/Behavioral/LocalFunctionEmission/main.cs.target:77-94 -->
 ```csharp
-nint /*r*/ guard(nint n) {
+[GoFunc("p6.func1")] nint /*r*/ guard(nint n) {
     nint r = default;
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("p6.func1.1")] () => {
             var e = recover(); if (e != nil) {
                 r = -1;
             }
@@ -1566,7 +1566,7 @@ runtime/debugcall.go:266), which are the 4 emitted sites. Their regen: docs/phas
 
 ## A pointer `reflect` handed out as an `unsafe.Pointer` must convert BACK — the order token is remembered, not redefined
 
-A Go pointer to managed storage has no machine address to report, so every projection of one to a scalar answers with a stable **order token** instead: `INilPointer.PointerOrderToken`, whose own remarks say plainly that tokens "are order keys, never an identity substitute". `reflect.Value.Pointer` and `reflect.Value.UnsafePointer` both project through it (`reflect/value_impl.cs`'s `reflectPointerToken`), and that contract is exactly right for the consumers it was written for — `fmt`'s `%p`, and `internal/fmtsort`'s ordering of pointer-keyed map entries, which compares two tokens arithmetically.
+A Go pointer to managed storage has no machine address to report, so every projection of one to a scalar answers with a stable **order token** instead: `INilPointer.PointerOrderToken`, whose own remarks say plainly that tokens "are order keys, never an identity substitute". `reflect.Value.UnsafeAddr` projects through it (`reflect/value_impl.cs`'s `reflectPointerToken`), because `reflect.NewAt` resolves a number exactly, through the token table. `reflect.Value.Pointer` and `reflect.Value.UnsafePointer`, and through them `fmt`'s `%p` and `internal/fmtsort`'s ordering of pointer-keyed map entries, answer the pointer's own number instead: `ManagedPointerTokens.PointerNumber`, the number `unsafe.Pointer(p)` carries, so Go's `fmt.Sprintf("%p", p) == fmt.Sprintf("%v", unsafe.Pointer(p))` holds. For a reference-bearing pointee that number is the order token. For reference-free storage it is the pinned address, and the first such projection pins the box for the rest of the box's life; the pin dies with the box. <!-- COORD's %p ruling, 2026-11-22, option A, on C2's BOARD entry of the same day. docs/phase4/DATA-pfmt-identity-2026-11-22.md: the red read false on every machine-address row; arm L, 100,000 pins come and go with their boxes; the pointer-keyed-map arm reads 0.91x to 0.98x of the token build. -->
 
 It is not sufficient for the other direction Go permits: converting the scalar back to a pointer and dereferencing it. `go/types`' own test suite does precisely that to reach the unexported `Config._Trace` field:
 
@@ -1593,13 +1593,13 @@ The conversion back, `@unsafe.Pointer.To<T>`, is the number conversion: it and `
 
 The information needed to do better is never actually lost. `reflect.Value.Addr` surfaces the **real aliasing box** — an addressable Value already carries `addrBox`, minted by `GoReflect.FieldAliasBox` — and only the projection to a scalar discards it. So golib's `ManagedPointerTokens` (`golib/ж.PointerTokens.cs`) remembers the association the projection drops: the token that was handed out, and the box it named. `reflectPointerToken` registers on the way out, and the `uintptr → ж<T>` operator consults the table **first**, so a token that came from there recovers its own box and aliases the original storage exactly as Go's pointer would. Everything else keeps the native-address route.
 
-Two properties are deliberate. **The token VALUE does not change.** The obvious alternative — minting self-identifying handles from a reserved numeric range — would also change what `%p` prints and what order pointer-keyed maps print in, because those read the very same token; carrying the association out of band instead leaves every existing observable byte-identical, and costs one dictionary probe on a conversion that was already allocating an object. **Entries are weak, and verified on resolve**: the table must never be the reason a box stays alive, and a resolve re-derives the box's current token and requires equality, so a stale entry cannot answer. The type-descriptor path (`typeDescriptorOrderToken`, which packs type NAMES so fmtsort orders them lexically) returns before registration and is untouched — those tokens are shared by every descriptor with the same name and are not identities to recover.
+Two properties are deliberate. **The token VALUE does not change.** The obvious alternative — minting self-identifying handles from a reserved numeric range — would also change what `%p` prints and what order pointer-keyed maps print in, because for a reference-bearing pointee those read the very same token; carrying the association out of band instead leaves every existing observable byte-identical, and costs one dictionary probe on a conversion that was already allocating an object. **Entries are weak, and verified on resolve**: the table must never be the reason a box stays alive, and a resolve re-derives the box's current token and requires equality, so a stale entry cannot answer. The type-descriptor path (`typeDescriptorOrderToken`, which packs type NAMES so fmtsort orders them lexically) returns before registration and is untouched — those tokens are shared by every descriptor with the same name and are not identities to recover.
 
 Corpus footprint of the idiom: in all of GOROOT it is `go/types`' `check_test.go` (bool and string), its `cmd/compile/internal/types2` twin, and four descriptor-walking sites in `reflect/type.go`; `sync/atomic`'s two uses only test alignment (`p&7 != 0`) and never dereference. (Guarded by the `ReflectFieldAddrWrite` behavioral **output** test — writes to a bool, a string and an int field through `Addr().UnsafePointer()`, each read back through the ORIGINAL struct to prove aliasing rather than a detached copy, two derivations of one field compared for pointer equality, and the untouched neighbours asserted unchanged, all vs `go run`. It faults with an access violation on pre-fix golib.)
 
 ### Converting back as ANOTHER layout-identical type answers the direct reinterpret's view
 
-The convert-back is not limited to the field's own type. gojq's code tests read a defined-type field through its underlying type, `*(*int)(unsafe.Pointer(v.FieldByName("op").UnsafeAddr()))` over `op opcode`. Go's direct form of the same pointer, `(*int)(unsafe.Pointer(&r.op))`, emits `Reinterpret<opcode, nint>()` over the field pointer, which aliases the field (`ReinterpretAliasing.HoldsForRoot`). So the uintptr route answers the same view: where the number is the resolved box's OWN order token and that rule holds over the same root, `explicit operator ж<T>(uintptr)` returns the root, or a `FieldRefBox<T>` over it, instead of a native box over the token. One rule decides both routes. A pair the direct form refuses keeps today's carrier. A real address keeps the native route: the step is keyed on the number (`ManagedPointerTokens.IsTaggedToken`, which every managed order token passes and no real address does), so a native box, whose token IS its address, and a view whose token is a native address (a field of an element over native storage) are both excluded, whatever the box kind. A pinned real address is not the box's token. Before this, the number reached a native box over the token: reflect hands out the order token for a reference-free field box too, which the interior step's flag (`IsOrderTokenAt`, reference-bearing only) does not cover. Its first dereference panicked, and a non-first field met the token-arithmetic refusal. Not covered: the identity `uintptr(unsafe.Pointer(p)) == v.UnsafeAddr()` reads false on the C# side, as it already does for the exact type, because a reference-free box's uintptr is its pinned address, not reflect's token; and `reflect.NewAt` over the same number still resolves exactly only. (Guarded by the `ReflectUnsafeAddrDeref` behavioral **output** test, 6 re-typed arms and 5 exact-type controls, and GolibTests `UintptrReinterpretViewTests`.)<!-- BOARD 2026-11-07, gojq class E. -->
+The convert-back is not limited to the field's own type. gojq's code tests read a defined-type field through its underlying type, `*(*int)(unsafe.Pointer(v.FieldByName("op").UnsafeAddr()))` over `op opcode`. Go's direct form of the same pointer, `(*int)(unsafe.Pointer(&r.op))`, emits `Reinterpret<opcode, nint>()` over the field pointer, which aliases the field (`ReinterpretAliasing.HoldsForRoot`). So the uintptr route answers the same view: where the number is the resolved box's OWN order token and that rule holds over the same root, `explicit operator ж<T>(uintptr)` returns the root, or a `FieldRefBox<T>` over it, instead of a native box over the token. One rule decides both routes. A pair the direct form refuses keeps today's carrier. A real address keeps the native route: the step is keyed on the number (`ManagedPointerTokens.IsTaggedToken`, which every managed order token passes and no real address does), so a native box, whose token IS its address, and a view whose token is a native address (a field of an element over native storage) are both excluded, whatever the box kind. A pinned real address is not the box's token. Before this, the number reached a native box over the token: reflect hands out the order token for a reference-free field box too, which the interior step's flag (`IsOrderTokenAt`, reference-bearing only) does not cover. Its first dereference panicked, and a non-first field met the token-arithmetic refusal. Two residuals are disclosed. First, for reference-free storage `v.UnsafeAddr()` is the order token while `uintptr(unsafe.Pointer(p))` is the pinned address, so Go's identity between them reads false on the C# side, and `reflect.NewAt` over the pinned number plus an offset still resolves exactly only, so it falls to a zero box. Second, a reference-free field inside a struct that holds a reference has no storage that can be held still: its `uintptr` is an address nothing pins, so every reflect projection of it keeps the order token, and `%p` of it differs from `unsafe.Pointer` of it. `v.Addr().UnsafePointer()` over a reference-free root is the pinned address, and it converts back through the pinned record: through the field's own type exactly, and through another layout-identical type by the native route over the same pinned memory. (Guarded by the `ReflectUnsafeAddrDeref` behavioral **output** test, 6 re-typed arms and 5 exact-type controls; GolibTests `UintptrReinterpretViewTests`; and the `PointerPrintIdentity` output test, 14 identity lines and the convert-back over a reference-free root.)<!-- BOARD 2026-11-07, gojq class E. -->
 
 ## An OPAQUE `*struct{}` conversion mints a recoverable token — `syscall.Pointer(unsafe.Pointer(p))` keeps its referent
 
@@ -1991,7 +1991,7 @@ Guarded by `PointerCastSliceRange` (compile-shape).
 A literal with a single `unsafe.Pointer` result can mix return arms of DIFFERENT C# types (reflect `deepEqual`'s `ptrval`: `(uintptr)v.pointer()` on one arm, the raw `v.ptr` on the other), which defeats C# lambda return-type inference (CS8917). The emitted lambda states its return type explicitly; each arm then converts implicitly through the golib operators:
 <!-- source: src/tests/Behavioral/PointerCastSliceRange/PointerCastSliceRange.cs:35 -->
 ```csharp
-@unsafe.Pointer pick(bool u) {
+[GoFunc("main.func1")] @unsafe.Pointer pick(bool u) {
 ```
 (`pick` is only ever called, so it emits as a C# local function, which states its return type by
 construction; a literal in value position takes the lambda form `@unsafe.Pointer (bool u) => { … }`.)
@@ -2026,7 +2026,7 @@ NAMED results are included: the trigger — a multi-result literal with a return
 A literal with a single Go `string` result can mix return arms of DIFFERENT C# types even though every arm is a Go string: a bare string literal is a `"…"u8` `ReadOnlySpan<byte>`, a literal+variable concat binds golib's `operator +(@string, @string)` (so it is `@string` regardless of u8 suppression), and a call into a hand-written stub can return C# `string` (the baseline `fmt.Sprintf` does). `@string` and `string` convert implicitly in BOTH directions, so a lambda mixing those arms has no unique best common type and its delegate type is not inferable — CS8917 on `pick := func(v any) string {…}` whose `case string:` arm returns `"string:" + t` alongside `fmt.Sprintf` arms. In assignment position (`var pick = …`, where C# must infer the delegate type), the lambda states its return type explicitly and each arm then converts to `@string` in place:
 <!-- source: src/tests/Behavioral/FuncLitStringConcatReturn/main.cs:11 -->
 ```csharp
-@string pick(any v) {
+[GoFunc("main.func1")] @string pick(any v) {
 ```
 (The guard's `pick` is only ever called, so it emits as a local function with the declared result; a
 value-used literal takes `var pick = @string (any v) => { … };`.)
@@ -2054,7 +2054,7 @@ That Go-`int` exemption is **narrowed, not absolute**: it holds only while every
 The SINGLE-result numeric sibling of the string arm above <!-- history: added 2026-07-17, the Phase-4 blocker-map row B7b (strings ×3, bytes ×2) -->: a literal with a declared numeric result whose return arm references a **named untyped constant** — strings/bytes TestMap's `maxRune := func(rune) rune { return unicode.MaxRune }`. The const reference emits as a golib `Untyped*` wrapper reference (`Δunicode.MaxRune`, an `UntypedInt` static), and the wrapper's implicit conversions run in **both** directions with every numeric type. So in natural-inference position an all-const arm set infers the wrapper delegate — `var maxRune = (rune r) => Δunicode.MaxRune;` is `Func<rune, UntypedInt>`, rejected at the invariant-delegate `Map(maxRune, …)` call (CS1503) — and a mixed const/typed arm set (TestMap's `encode`, mixing `unicode.MaxRune`/`utf8.RuneSelf` with the `rune` parameter) has no unique best common type at all (CS8917). When any top-level return arm is a bare named untyped-const reference, the lambda states the declared return type explicitly and each arm converts in place:
 <!-- source: src/tests/Behavioral/FuncLitUntypedConstReturn/main.cs:24 -->
 ```csharp
-var maxFn = rune (rune _) => maxRune;
+var maxFn = [GoFunc("main.func1")] rune (rune _) => maxRune;
 ```
 Same gates as the string arm: assignment position only (argument/return/composite-element literals are target-typed — no inference to fail), and a BASIC numeric result (a named numeric type would need a second user conversion the wrapper cannot chain — the `lambdaConstReturnCastType` named-type rationale).
 

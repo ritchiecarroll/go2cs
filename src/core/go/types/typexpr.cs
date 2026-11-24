@@ -195,7 +195,7 @@ internal static void validVarType⁔(/*this*/ ж<Checker> Ꮡcheck, ast.Expr e, 
     // We don't want to call typ.Underlying() or complete interfaces while we are in
     // the middle of type-checking parameter declarations that might belong
     // to interface methods. Delay this check to the end of type-checking.
-    check.later(() => {
+    check.later([GoFunc("(*Checker).validVarType.func1")] () => {
         var (t, _) = typ.Underlying()._<ж<Interface>>(ᐧ); if (t != nil) {
             var tset = computeInterfaceTypeSet(Ꮡcheck, e.Pos(), t); // TODO(gri) is this the correct position?
             if (!tset.IsMethodSet()) {
@@ -281,7 +281,7 @@ internal static Type /*T*/ typInternal⁔(/*this*/ ж<Checker> Ꮡcheck, ast.Exp
         if (check.conf._Trace) {
             Ꮡcheck.trace(e0.Pos(), typeSˢ, e0);
             check.indent++;
-            defer(() => {
+            defer([GoFunc("(*Checker).typInternal.func1")] () => {
                 Ꮡcheck.Value.indent--;
                 Type under = default;
                 if (T != nil) {
@@ -426,7 +426,7 @@ internal static Type /*T*/ typInternal⁔(/*this*/ ж<Checker> Ꮡcheck, ast.Exp
             // Delay this check because it requires fully setup types;
             // it is safe to continue in any case (was go.dev/issue/6667).
             var typʗ1 = typΔ7;
-            check.later(() => {
+            check.later([GoFunc("(*Checker).typInternal.func2")] () => {
                 if (!Comparable(typʗ1.key)) {
                     @string why = default;
                     if (isTypeParam(typʗ1.key)) {
@@ -498,7 +498,7 @@ internal static Type /*res*/ instantiatedType⁔(/*this*/ ж<Checker> Ꮡcheck, 
         if (check.conf._Trace) {
             Ꮡcheck.trace(ix.Pos(), instantiatingTypeSWithSˢ, ix.x, ix.indices);
             check.indent++;
-            defer(() => {
+            defer([GoFunc("(*Checker).instantiatedType.func1")] () => {
                 Ꮡcheck.Value.indent--;
                 // Don't format the underlying here. It will always be nil.
                 Ꮡcheck.trace(Ꮡix.Value.Pos(), "=> %s", res);
@@ -538,7 +538,7 @@ internal static Type /*res*/ instantiatedType⁔(/*this*/ ж<Checker> Ꮡcheck, 
         // For Named types, orig.tparams may not be set up, so we need to do expansion later.
         var instʗ1 = inst;
         var targsʗ1 = targs;
-        check.later(() => {
+        check.later([GoFunc("(*Checker).instantiatedType.func2")] () => {
             // This is an instance from the source, not from recursive substitution,
             // and so it must be resolved during type-checking so that we can report
             // errors.

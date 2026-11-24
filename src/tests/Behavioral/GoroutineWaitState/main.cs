@@ -69,7 +69,7 @@ internal static partial void main() {
     var done = new channel<@string>(len(parked));
 
     var doneʗ1 = done;
-    goǃ(() => {
+    goǃ([GoFunc("main.func1")] () => {
         Ꮡmu.Lock();
         Ꮡmu.Unlock();
         doneʗ1.ᐸꟷ("mutex");
@@ -77,7 +77,7 @@ internal static partial void main() {
 
     var doneʗ2 = done;
     var recvʗ1 = recv;
-    goǃ(() => {
+    goǃ([GoFunc("main.func2")] () => {
         ᐸꟷ(recvʗ1);
         doneʗ2.ᐸꟷ("recv");
     });
@@ -85,7 +85,7 @@ internal static partial void main() {
     var doneʗ3 = done;
     var selAʗ1 = selA;
     var selBʗ1 = selB;
-    goǃ(() => {
+    goǃ([GoFunc("main.func3")] () => {
         var selAᴛ1 = selAʗ1;
         var selBᴛ1 = selBʗ1;
         switch (select(ᐸꟷ(selAᴛ1, ꓸꓸꓸ), ᐸꟷ(selBᴛ1, ꓸꓸꓸ))) {
@@ -99,7 +99,7 @@ internal static partial void main() {
     });
 
     var doneʗ4 = done;
-    goǃ(() => {
+    goǃ([GoFunc("main.func4")] () => {
         Ꮡwg.Wait();
         doneʗ4.ᐸꟷ("waitgroup");
     });

@@ -164,7 +164,7 @@ partial struct headerSorter {
 }
 
 internal static readonly ж<sync.Pool> ᏑheaderSorterPool = new StaticBox<sync.Pool>(new sync.Pool(
-    New: () => @new<headerSorter>()
+    New: [GoFunc("init.func15")] () => @new<headerSorter>()
 ));
 internal static ref sync.Pool headerSorterPool => ref ((StaticBox<sync.Pool>)ᏑheaderSorterPool).ValueSlot;
 
@@ -186,7 +186,7 @@ internal static (slice<keyValues> kvs, ж<headerSorter> hs) sortedKeyValues⁔(/
         }
     }
     hs.kvs = kvs;
-    slices.SortFunc(hs.kvs, (keyValues a, keyValues b) => strings.Compare(a.key, b.key));
+    slices.SortFunc(hs.kvs, [GoFunc("Header.sortedKeyValues.func1")] (keyValues a, keyValues b) => strings.Compare(a.key, b.key));
     return (kvs, hs);
 }
 

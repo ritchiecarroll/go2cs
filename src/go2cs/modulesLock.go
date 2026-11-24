@@ -10,6 +10,8 @@ package main
 
 import (
 	"bufio"
+	"bytes"
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -170,18 +172,60 @@ func goSumHashes(moduleDir string) map[string]string {
 // against the module's own go.mod and go.sum (-mod=readonly), so a dependency missing from the cache
 // or failing verification is ONE refusal naming it, instead of a load warning per package that
 // imports it. -mod=readonly is ADDED to the run's GOFLAGS, never substituted for it: the run's own
-// flags include the go.mod overlay of a module that ships none (installGoModOverlay), and replacing
-// GOFLAGS dropped it, so `go mod download` saw no module ("no modules specified").
+// flags are the user's, and a module that ships no go.mod is read from a copy carrying the cache's
+// synthesized one (enterModuleCacheReleaseCopy).
+//
+// It is a CHECK, never an edit of the go.mod: `go mod download` rewrites a go.mod that has no `go` directive and
+// requires a module (it adds the toolchain's `go` line, and -mod=readonly does not stop it), which would read the module
+// at the toolchain's language version instead of the Go 1.16 its go.mod means (gopkg.in/yaml.v3 v3.0.1, measured). The
+// go.mod's own bytes are put back (keepingGoMod).
 func goModDownloadPreflight(moduleDir string) error {
-	cmd := exec.Command("go", "mod", "download")
-	cmd.Dir = moduleDir
-	cmd.Env = append(os.Environ(), "GOFLAGS="+strings.TrimSpace(os.Getenv("GOFLAGS")+" -mod=readonly"))
+	return keepingGoMod(moduleDir, func() error {
+		cmd := exec.Command("go", "mod", "download")
+		cmd.Dir = moduleDir
+		cmd.Env = append(os.Environ(), "GOFLAGS="+strings.TrimSpace(os.Getenv("GOFLAGS")+" -mod=readonly"))
 
-	if output, err := cmd.CombinedOutput(); err != nil {
-		return goModDownloadFailure(moduleDir, strings.TrimSpace(string(output)))
+		if output, err := cmd.CombinedOutput(); err != nil {
+			return goModDownloadFailure(moduleDir, strings.TrimSpace(string(output)))
+		}
+
+		return nil
+	})
+}
+
+// fillModuleCopySums records, in a module-cache release's COPY, the go.sum lines of every module its build list holds,
+// test dependencies included, as `go mod download all` does: a release that ships no go.sum, or one without its test
+// dependencies' sums, cannot otherwise load its tests (gopkg.in/yaml.v3 v3.0.1 records none for gopkg.in/check.v1). It
+// writes only the copy's go.sum, and keeps the copy's go.mod bytes (keepingGoMod).
+func fillModuleCopySums(copyDir string) error {
+	return keepingGoMod(copyDir, func() error {
+		cmd := exec.Command("go", "mod", "download", "all")
+		cmd.Dir = copyDir
+		cmd.Env = append(os.Environ(), "GOFLAGS="+strings.TrimSpace(os.Getenv("GOFLAGS")+" -mod=readonly"))
+
+		if output, err := cmd.CombinedOutput(); err != nil {
+			return fmt.Errorf("recording the module's go.sum lines in its copy (go mod download all): %w\n%s", err, strings.TrimSpace(string(output)))
+		}
+
+		return nil
+	})
+}
+
+// keepingGoMod runs action and then puts dir's go.mod back to the bytes it had before, when action changed them.
+func keepingGoMod(dir string, action func() error) error {
+	goModPath := filepath.Join(dir, "go.mod")
+	before, readErr := os.ReadFile(goModPath)
+	err := action()
+
+	if readErr == nil {
+		if after, _ := os.ReadFile(goModPath); !bytes.Equal(after, before) {
+			if restoreErr := os.WriteFile(goModPath, before, 0o644); restoreErr != nil {
+				return errors.Join(err, fmt.Errorf("restoring %s after go mod download: %w", goModPath, restoreErr))
+			}
+		}
 	}
 
-	return nil
+	return err
 }
 
 // goModDownloadFailure words the preflight's refusal. A module (or a dependency) whose go line asks for

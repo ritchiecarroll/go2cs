@@ -8,7 +8,7 @@ internal static nint /*x*/ incr() {
     nint x = default;
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("incr.func1")] () => {
             x++;
         }, ref ᒐ);
         x = 5;
@@ -22,7 +22,7 @@ internal static nint /*x*/ incrBare() {
     nint x = default;
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("incrBare.func1")] () => {
             x += 10;
         }, ref ᒐ);
         x = 1;
@@ -37,7 +37,7 @@ internal static (nint a, nint b) swapAndBump() {
     nint b = default;
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("swapAndBump.func1")] () => {
             (a, b) = (b, a);
             a += 100;
         }, ref ᒐ);
@@ -55,11 +55,11 @@ internal static nint /*total*/ closures(nint n) {
     nint total = default;
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("closures.func1")] () => {
             total += 1;
         }, ref ᒐ);
-        nint dbl(nint x) => x * 2;
-        nint noisy() => 99;
+        [GoFunc("closures.func2")] nint dbl(nint x) => x * 2;
+        [GoFunc("closures.func3")] nint noisy() => 99;
         _ = noisy();
         total = dbl(n);
     }
@@ -73,7 +73,7 @@ internal static (nint @out, @string label) compute(nint x) {
     @string label = default;
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("compute.func1")] () => {
             @out += 1000;
         }, ref ᒐ);
         if (x < 0) {
@@ -92,7 +92,7 @@ internal static (nint code, @string msg) guarded(bool boom) {
     @string msg = default;
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("guarded.func1")] () => {
             var r = recover(); if (r != nil) {
                 code = -1;
                 msg = "recovered";
@@ -114,7 +114,7 @@ internal static (ж<box>, error err) parseLimited(nint n) {
     error err = default;
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("parseLimited.func1")] () => {
             var r = recover(); if (r != nil) {
                 err = fmt.Errorf("too big: %v"u8, r);
             }

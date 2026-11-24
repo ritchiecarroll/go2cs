@@ -34,7 +34,7 @@ internal static void AddASN1Enum⁔(/*this*/ ж<Builder> Ꮡb, int64 v) {
 }
 
 internal static void addASN1Signed⁔(/*this*/ ж<Builder> Ꮡb, asn1.Tag tag, int64 v) {
-    Ꮡb.AddASN1(tag, (ж<Builder> c) => {
+    Ꮡb.AddASN1(tag, [GoFunc("(*Builder).addASN1Signed.func1")] (ж<Builder> c) => {
         nint length = 1;
         for (var i = v; i >= 0x80 || i < -0x80; i >>= 8) {
             length++;
@@ -49,7 +49,7 @@ internal static void addASN1Signed⁔(/*this*/ ж<Builder> Ꮡb, asn1.Tag tag, i
 
 // AddASN1Uint64 appends a DER-encoded ASN.1 INTEGER.
 internal static void AddASN1Uint64⁔(/*this*/ ж<Builder> Ꮡb, uint64 v) {
-    Ꮡb.AddASN1(asn1.INTEGER, (ж<Builder> c) => {
+    Ꮡb.AddASN1(asn1.INTEGER, [GoFunc("(*Builder).AddASN1Uint64.func1")] (ж<Builder> c) => {
         nint length = 1;
         for (var i = v; i >= 0x80; i >>= 8) {
             length++;
@@ -70,7 +70,7 @@ internal static void AddASN1BigInt⁔(/*this*/ ж<Builder> Ꮡb, ж<big.Int> n) 
         return;
     }
 
-    Ꮡb.AddASN1(asn1.INTEGER, (ж<Builder> c) => {
+    Ꮡb.AddASN1(asn1.INTEGER, [GoFunc("(*Builder).AddASN1BigInt.func1")] (ж<Builder> c) => {
         if (n.Value.Sign() < 0) {
             // A negative number has to be converted to two's-complement form. So we
             // invert and subtract 1. If the most-significant-bit isn't set then
@@ -101,7 +101,7 @@ internal static void AddASN1BigInt⁔(/*this*/ ж<Builder> Ꮡb, ж<big.Int> n) 
 // AddASN1OctetString appends a DER-encoded ASN.1 OCTET STRING.
 internal static void AddASN1OctetString⁔(/*this*/ ж<Builder> Ꮡb, slice<byte> bytes) {
     var bytesʗ1 = bytes;
-    Ꮡb.AddASN1(asn1.OCTET_STRING, (ж<Builder> c) => {
+    Ꮡb.AddASN1(asn1.OCTET_STRING, [GoFunc("(*Builder).AddASN1OctetString.func1")] (ж<Builder> c) => {
         c.AddBytes(bytesʗ1);
     });
 }
@@ -118,7 +118,7 @@ internal static void AddASN1GeneralizedTime⁔(/*this*/ ж<Builder> Ꮡb, time.T
         return;
     }
     var tʗ1 = t;
-    Ꮡb.AddASN1(asn1.GeneralizedTime, (ж<Builder> c) => {
+    Ꮡb.AddASN1(asn1.GeneralizedTime, [GoFunc("(*Builder).AddASN1GeneralizedTime.func1")] (ж<Builder> c) => {
         c.AddBytes(slice<byte>(tʗ1.Format(generalizedTimeFormatStr)));
     });
 }
@@ -126,7 +126,7 @@ internal static void AddASN1GeneralizedTime⁔(/*this*/ ж<Builder> Ꮡb, time.T
 // AddASN1UTCTime appends a DER-encoded ASN.1 UTCTime.
 internal static void AddASN1UTCTime⁔(/*this*/ ж<Builder> Ꮡb, time.Time t) {
     var tʗ1 = t;
-    Ꮡb.AddASN1(asn1.UTCTime, (ж<Builder> c) => {
+    Ꮡb.AddASN1(asn1.UTCTime, [GoFunc("(*Builder).AddASN1UTCTime.func1")] (ж<Builder> c) => {
         // As utilized by the X.509 profile, UTCTime can only
         // represent the years 1950 through 2049.
         if (tʗ1.Year() < 1950 || tʗ1.Year() >= 2050) {
@@ -141,7 +141,7 @@ internal static void AddASN1UTCTime⁔(/*this*/ ж<Builder> Ꮡb, time.Time t) {
 // support BIT STRINGs that are not a whole number of bytes.
 internal static void AddASN1BitString⁔(/*this*/ ж<Builder> Ꮡb, slice<byte> data) {
     var dataʗ1 = data;
-    Ꮡb.AddASN1(asn1.BIT_STRING, (ж<Builder> bΔ1) => {
+    Ꮡb.AddASN1(asn1.BIT_STRING, [GoFunc("(*Builder).AddASN1BitString.func1")] (ж<Builder> bΔ1) => {
         bΔ1.AddUint8(0);
         bΔ1.AddBytes(dataʗ1);
     });
@@ -188,7 +188,7 @@ internal static bool isValidOID(encoding_asn1.ObjectIdentifier oid) {
 
 internal static void AddASN1ObjectIdentifier⁔(/*this*/ ж<Builder> Ꮡb, encoding_asn1.ObjectIdentifier oid) {
     var oidʗ1 = oid;
-    Ꮡb.AddASN1(asn1.OBJECT_IDENTIFIER, (ж<Builder> bΔ1) => {
+    Ꮡb.AddASN1(asn1.OBJECT_IDENTIFIER, [GoFunc("(*Builder).AddASN1ObjectIdentifier.func1")] (ж<Builder> bΔ1) => {
         if (!isValidOID(oidʗ1)) {
             bΔ1.err = fmt.Errorf("cryptobyte: invalid OID: %v"u8, oidʗ1);
             return;
@@ -202,7 +202,7 @@ internal static void AddASN1ObjectIdentifier⁔(/*this*/ ж<Builder> Ꮡb, encod
 }
 
 internal static void AddASN1Boolean⁔(/*this*/ ж<Builder> Ꮡb, bool v) {
-    Ꮡb.AddASN1(asn1.BOOLEAN, (ж<Builder> bΔ1) => {
+    Ꮡb.AddASN1(asn1.BOOLEAN, [GoFunc("(*Builder).AddASN1Boolean.func1")] (ж<Builder> bΔ1) => {
         if (v) {
             bΔ1.AddUint8(0xff);
         } else {

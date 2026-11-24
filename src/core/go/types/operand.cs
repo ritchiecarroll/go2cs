@@ -404,7 +404,7 @@ internal static (bool, errors.Code) assignableTo⁔(/*this*/ ж<operand> Ꮡx, �
         if (Tp != nil) {
             // T is a type parameter: x is assignable to T if it is
             // representable by each specific type in the type set of T.
-            return (Tp.@is((ж<term> t) => {
+            return (Tp.@is([GoFunc("(*operand).assignableTo.func1")] (ж<term> t) => {
                 if (t == nil) {
                     return false;
                 }
@@ -473,7 +473,7 @@ internal static (bool, errors.Code) assignableTo⁔(/*this*/ ж<operand> Ꮡx, �
         return (false, IncompatibleAssign);
     }
 
-    void errorf(@string format, params ꓸꓸꓸany argsʗp) {
+    [GoFunc("(*operand).assignableTo.func2")] void errorf(@string format, params ꓸꓸꓸany argsʗp) {
         var args = argsʗp.sslice();
         if (check != nil && Ꮡcause != nil) {
             @string msg = check.sprintf(format, args.ꓸꓸꓸ);
@@ -491,7 +491,7 @@ internal static (bool, errors.Code) assignableTo⁔(/*this*/ ж<operand> Ꮡx, �
         errors.Code code = IncompatibleAssign;
         var Tpʗ1 = Tp;
         var errorfʗ1 = errorf;
-        Tp.@is((ж<term> TΔ1) => {
+        Tp.@is([GoFunc("(*operand).assignableTo.func3")] (ж<term> TΔ1) => {
             if (TΔ1 == nil) {
                 return false; // no specific types
             }
@@ -515,7 +515,7 @@ internal static (bool, errors.Code) assignableTo⁔(/*this*/ ж<operand> Ꮡx, �
         var Vpʗ1 = Vp;
         var errorfʗ2 = errorf;
         var origTʗ1 = origT;
-        Vp.@is((ж<term> VΔ1) => {
+        Vp.@is([GoFunc("(*operand).assignableTo.func4")] (ж<term> VΔ1) => {
             if (VΔ1 == nil) {
                 return false; // no specific types
             }

@@ -448,7 +448,7 @@ internal static void walkRange⁔(/*this*/ ж<state> Ꮡs, reflect.Value dot, ж
         ref var r = ref Ꮡr.DerefOrNull();
 
         s.at(new parse.RangeNodeжNode(Ꮡr));
-        defer(() => {
+        defer([GoFunc("(*state).walkRange.func1")] () => {
             var rΔ1 = recover(); if (rΔ1 != nil && !AreEqual(rΔ1, walkBreak)) {
                 throw panic(rΔ1);
             }
@@ -457,7 +457,7 @@ internal static void walkRange⁔(/*this*/ ж<state> Ꮡs, reflect.Value dot, ж
         var (val, _) = indirect(s.evalPipeline(dot, r.Pipe));
         // mark top of stack before any variables in the body are pushed.
         nint mark = s.mark();
-        void oneIteration(reflect.Value index, reflect.Value elem) {
+        [GoFunc("(*state).walkRange.func2")] void oneIteration(reflect.Value index, reflect.Value elem) {
             GoFrame ᒐ = default;
             try {
                 if (len(Ꮡr.Value.Pipe.Decl) > 0) {
@@ -485,7 +485,7 @@ internal static void walkRange⁔(/*this*/ ж<state> Ꮡs, reflect.Value dot, ж
                     }
                 }
                 defer(Ꮡs.pop, mark, ref ᒐ);
-                defer(() => {
+                defer([GoFunc("(*state).walkRange.func2.1")] () => {
                     // Consume panic(walkContinue)
                     var rΔ2 = recover(); if (rΔ2 != nil && !AreEqual(rΔ2, walkContinue)) {
                         throw panic(rΔ2);
@@ -951,7 +951,7 @@ internal static reflect.Value evalCall⁔(/*this*/ ref state s, reflect.Value do
         s.errorf("%v", errΔ1);
     }
 
-    reflect.Value unwrap(reflect.Value vΔ1) {
+    [GoFunc("(*state).evalCall.func1")] reflect.Value unwrap(reflect.Value vΔ1) {
         if (AreEqual(vΔ1.Type(), reflectValueType)) {
             vΔ1 = vΔ1.Interface()._<reflect.Value>();
         }

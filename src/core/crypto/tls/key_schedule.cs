@@ -75,7 +75,7 @@ internal static Func<@string, slice<byte>, nint, (slice<byte>, error)> exportKey
 
     var expMasterSecret = s.ExporterMasterSecret(transcript);
     var expMasterSecretʗ1 = expMasterSecret;
-    return (@string label, slice<byte> context, nint length) => (expMasterSecretʗ1.Exporter(label, context, length), default);
+    return [GoFunc("(*cipherSuiteTLS13).exportKeyingMaterial.func1")] (@string label, slice<byte> context, nint length) => (expMasterSecretʗ1.Exporter(label, context, length), default);
 }
 
 partial struct keySharePrivateKeys {
@@ -103,19 +103,19 @@ internal static ref readonly @string tlsUnsupportedKeyˢ => ref tlsUnsupportedKe
 private static readonly @string tlsUnsupportedKeyˢᵇ = "tls: unsupported key exchange"u8;
 
 internal static (keyExchange, error) keyExchangeForCurveID(CurveID id) {
-    var newMLKEMPrivateKey768 = (crypto.Decapsulator, error) (slice<byte> b) => {
+    var newMLKEMPrivateKey768 = [GoFunc("keyExchangeForCurveID.func1")] (crypto.Decapsulator, error) (slice<byte> b) => {
         var (ᴛ1, ᴛ2) = mlkem.NewDecapsulationKey768(b);
         return (new mlkem.DecapsulationKey768жDecapsulator(ᴛ1), ᴛ2);
     };
-    var newMLKEMPrivateKey1024 = (crypto.Decapsulator, error) (slice<byte> b) => {
+    var newMLKEMPrivateKey1024 = [GoFunc("keyExchangeForCurveID.func2")] (crypto.Decapsulator, error) (slice<byte> b) => {
         var (ᴛ1, ᴛ2) = mlkem.NewDecapsulationKey1024(b);
         return (new mlkem.DecapsulationKey1024жDecapsulator(ᴛ1), ᴛ2);
     };
-    var newMLKEMPublicKey768 = (crypto.Encapsulator, error) (slice<byte> b) => {
+    var newMLKEMPublicKey768 = [GoFunc("keyExchangeForCurveID.func3")] (crypto.Encapsulator, error) (slice<byte> b) => {
         var (ᴛ1, ᴛ2) = mlkem.NewEncapsulationKey768(b);
         return (new mlkem.EncapsulationKey768жEncapsulator(ᴛ1), ᴛ2);
     };
-    var newMLKEMPublicKey1024 = (crypto.Encapsulator, error) (slice<byte> b) => {
+    var newMLKEMPublicKey1024 = [GoFunc("keyExchangeForCurveID.func4")] (crypto.Encapsulator, error) (slice<byte> b) => {
         var (ᴛ1, ᴛ2) = mlkem.NewEncapsulationKey1024(b);
         return (new mlkem.EncapsulationKey1024жEncapsulator(ᴛ1), ᴛ2);
     };
@@ -211,7 +211,7 @@ internal static (ж<keySharePrivateKeys>, slice<keyShare>, error) keyShares⁔(/
     ref var priv = ref heap<ж<keySharePrivateKeys>>(out var Ꮡpriv);
     ref var ecdhShares = ref heap<slice<keyShare>>(out var ᏑecdhShares);
     ref var err = ref heap<error>(out var Ꮡerr);
-    fips140.WithoutEnforcement(() => { // Hybrid of ML-KEM, which is Approved.
+    fips140.WithoutEnforcement([GoFunc("(*hybridKeyExchange).keyShares.func1")] () => { // Hybrid of ML-KEM, which is Approved.
         (Ꮡpriv.ValueSlot, ᏑecdhShares.ValueSlot, Ꮡerr.ValueSlot) = Ꮡke.Value.ecdh.keyShares(rand);
     });
     if (err != nil) {
@@ -260,7 +260,7 @@ internal static (slice<byte>, keyShare, error) serverSharedSecret⁔(/*this*/ ж
     ref var ks = ref heap(new keyShare(), out var Ꮡks);
     ref var err = ref heap<error>(out var Ꮡerr);
     var ecdhShareDataʗ1 = ecdhShareData;
-    fips140.WithoutEnforcement(() => { // Hybrid of ML-KEM, which is Approved.
+    fips140.WithoutEnforcement([GoFunc("(*hybridKeyExchange).serverSharedSecret.func1")] () => { // Hybrid of ML-KEM, which is Approved.
         (ᏑecdhSharedSecret.ValueSlot, Ꮡks.Value, Ꮡerr.ValueSlot) = Ꮡke.Value.ecdh.serverSharedSecret(rand, ecdhShareDataʗ1);
     });
     if (err != nil) {
@@ -306,7 +306,7 @@ internal static (slice<byte>, error) clientSharedSecret⁔(/*this*/ ж<hybridKey
     ref var ecdhSharedSecret = ref heap<slice<byte>>(out var ᏑecdhSharedSecret);
     ref var err = ref heap<error>(out var Ꮡerr);
     var ecdhShareDataʗ1 = ecdhShareData;
-    fips140.WithoutEnforcement(() => { // Hybrid of ML-KEM, which is Approved.
+    fips140.WithoutEnforcement([GoFunc("(*hybridKeyExchange).clientSharedSecret.func1")] () => { // Hybrid of ML-KEM, which is Approved.
         (ᏑecdhSharedSecret.ValueSlot, Ꮡerr.ValueSlot) = Ꮡke.Value.ecdh.clientSharedSecret(Ꮡpriv, ecdhShareDataʗ1);
     });
     if (err != nil) {

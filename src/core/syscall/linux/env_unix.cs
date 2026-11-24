@@ -27,7 +27,7 @@ internal static slice<@string> envs = runtime_envs();
 }
 
 // in package runtime
-internal static Action copyenv = Δsync.OnceFunc(() => {
+internal static Action copyenv = Δsync.OnceFunc([GoFunc("init.func1")] () => {
     env = new map<@string, nint>();
     foreach (var (i, s) in range(envs)) {
         for (nint j = 0; j < len(s); j++) {

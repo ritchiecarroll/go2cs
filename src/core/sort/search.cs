@@ -126,7 +126,7 @@ public static (nint i, bool found) Find(nint n, Func<nint, nint> cmp) {
 // The slice must be sorted in ascending order.
 public static nint SearchInts(slice<nint> a, nint x) {
     var aʗ1 = a;
-    return Search(len(a), (nint i) => aʗ1[i] >= x);
+    return Search(len(a), [GoFunc("SearchInts.func1")] (nint i) => aʗ1[i] >= x);
 }
 
 // SearchFloat64s searches for x in a sorted slice of float64s and returns the index
@@ -135,7 +135,7 @@ public static nint SearchInts(slice<nint> a, nint x) {
 // The slice must be sorted in ascending order.
 public static nint SearchFloat64s(slice<float64> a, float64 x) {
     var aʗ1 = a;
-    return Search(len(a), (nint i) => aʗ1[i] >= x);
+    return Search(len(a), [GoFunc("SearchFloat64s.func1")] (nint i) => aʗ1[i] >= x);
 }
 
 // SearchStrings searches for x in a sorted slice of strings and returns the index
@@ -144,7 +144,7 @@ public static nint SearchFloat64s(slice<float64> a, float64 x) {
 // The slice must be sorted in ascending order.
 public static nint SearchStrings(slice<@string> a, @string x) {
     var aʗ1 = a;
-    return Search(len(a), (nint i) => aʗ1[i] >= x);
+    return Search(len(a), [GoFunc("SearchStrings.func1")] (nint i) => aʗ1[i] >= x);
 }
 
 // Search returns the result of applying [SearchInts] to the receiver and x.

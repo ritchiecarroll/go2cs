@@ -142,7 +142,7 @@ internal static slice<entry> enumerate(@string dir) {
         }
 
         var outʗ1 = @out;
-        sort.Slice(@out, (nint i, nint j) => outʗ1[i].name < outʗ1[j].name);
+        sort.Slice(@out, [GoFunc("enumerate.func1")] (nint i, nint j) => outʗ1[i].name < outʗ1[j].name);
         return @out;
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }

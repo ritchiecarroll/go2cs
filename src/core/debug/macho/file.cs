@@ -644,7 +644,7 @@ private static readonly @string strˢᵇ = "str"u8;
 
 // DWARF returns the DWARF debug information for the Mach-O file.
 internal static (ж<dwarf.Data>, error) DWARF⁔(/*this*/ ref File f) {
-    @string dwarfSuffix(ж<Section> s) {
+    [GoFunc("(*File).DWARF.func1")] @string dwarfSuffix(ж<Section> s) {
         @string sectname = s.Name;
         nint pfx = default;
         switch (ᐧ) {
@@ -677,7 +677,7 @@ internal static (ж<dwarf.Data>, error) DWARF⁔(/*this*/ ref File f) {
         }
         return sectname.slice(pfx);
     }
-    (slice<byte>, error) sectionData(ж<Section> s) {
+    [GoFunc("(*File).DWARF.func2")] (slice<byte>, error) sectionData(ж<Section> s) {
         var (b, errΔ1) = s.Data();
         if (errΔ1 != nil && (uint64)len(b) < s.Size) {
             return (default, errΔ1);

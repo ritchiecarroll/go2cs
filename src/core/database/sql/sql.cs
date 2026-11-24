@@ -740,7 +740,7 @@ internal static Func<error> closeDBLocked⁔(/*this*/ ж<driverConn> Ꮡdc) {
         Ꮡdc.of(driverConn.ᏑMutex).Lock();
         ᒐd1 = true;
         if (dc.closed) {
-            return () => errors.New(sqlDuplicateDriverConnˢ);
+            return [GoFunc("(*driverConn).closeDBLocked.func1")] () => errors.New(sqlDuplicateDriverConnˢ);
         }
         dc.closed = true;
         return dc.db.removeDepLocked(new driverConnжfinalCloser(Ꮡdc), Ꮡdc.OrTypedNil());
@@ -776,7 +776,7 @@ internal static error finalClose⁔(/*this*/ ж<driverConn> Ꮡdc) {
     // Each *driverStmt has a lock to the dc. Copy the list out of the dc
     // before calling close on each stmt.
     ref var openStmt = ref heap<slice<ж<driverStmt>>>(out var ᏑopenStmt);
-    withLock(new driverConnжLocker(Ꮡdc), () => {
+    withLock(new driverConnжLocker(Ꮡdc), [GoFunc("(*driverConn).finalClose.func1")] () => {
         ᏑopenStmt.ValueSlot = new slice<ж<driverStmt>>(0, len(Ꮡdc.Value.openStmt));
         foreach (var (ds, _) in Ꮡdc.Value.openStmt) {
             ᏑopenStmt.ValueSlot = append(ᏑopenStmt.ValueSlot, ds);
@@ -786,7 +786,7 @@ internal static error finalClose⁔(/*this*/ ж<driverConn> Ꮡdc) {
     foreach (var (_, ds) in range(openStmt)) {
         ds.Close();
     }
-    withLock(new driverConnжLocker(Ꮡdc), () => {
+    withLock(new driverConnжLocker(Ꮡdc), [GoFunc("(*driverConn).finalClose.func2")] () => {
         Ꮡdc.Value.finalClosed = true;
         Ꮡerr.ValueSlot = Ꮡdc.Value.ci.Close();
         Ꮡdc.Value.ci = default;
@@ -906,7 +906,7 @@ internal static Func<error> removeDepLocked⁔(/*this*/ ref DB db, finalCloser x
     }
     default: {
         // Dependencies remain.
-        return () => default;
+        return [GoFunc("(*DB).removeDepLocked.func1")] () => default;
     }}
 }
 
@@ -1004,7 +1004,7 @@ internal static error pingDC⁔(/*this*/ ref DB db, context.Context ctx, ж<driv
     {
         var (pinger, ok) = dc.ci._<driver.Pinger>(ᐧ); if (ok) {
             var pingerʗ1 = pinger;
-            withLock(new driverConnжLocker(Ꮡdc), () => {
+            withLock(new driverConnжLocker(Ꮡdc), [GoFunc("(*DB).pingDC.func1")] () => {
                 Ꮡerr.ValueSlot = pingerʗ1.Ping(ctx);
             });
         }
@@ -1021,7 +1021,7 @@ internal static error PingContext⁔(/*this*/ ж<DB> Ꮡdb, context.Context ctx)
     ref var dc = ref heap<ж<driverConn>>(out var Ꮡdc);
     ref var err = ref heap<error>(out var Ꮡerr);
 
-    err = db.retry((connReuseStrategy strategy) => {
+    err = db.retry([GoFunc("(*DB).PingContext.func1")] (connReuseStrategy strategy) => {
         (Ꮡdc.ValueSlot, Ꮡerr.ValueSlot) = Ꮡdb.conn(ctx, strategy);
         return Ꮡerr.ValueSlot;
     });
@@ -1663,7 +1663,7 @@ internal static void noteUnusedDriverStatement⁔(/*this*/ ж<DB> Ꮡdb, ж<driv
         db.mu.Lock();
         ᒐd1 = true;
         if (c.inUse) {
-            c.onPut = append(c.onPut, () => {
+            c.onPut = append(c.onPut, [GoFunc("(*DB).noteUnusedDriverStatement.func1")] () => {
                 ds.Close();
             });
         } else {
@@ -1810,7 +1810,7 @@ internal static (ж<Stmt>, error) PrepareContext⁔(/*this*/ ж<DB> Ꮡdb, conte
     ref var stmt = ref heap<ж<Stmt>>(out var Ꮡstmt);
     ref var err = ref heap<error>(out var Ꮡerr);
 
-    err = db.retry((connReuseStrategy strategy) => {
+    err = db.retry([GoFunc("(*DB).PrepareContext.func1")] (connReuseStrategy strategy) => {
         (Ꮡstmt.ValueSlot, Ꮡerr.ValueSlot) = Ꮡdb.prepare(ctx, query, strategy);
         return Ꮡerr.ValueSlot;
     });
@@ -1852,10 +1852,10 @@ internal static (ж<Stmt>, error) prepareDC⁔(/*this*/ ж<DB> Ꮡdb, context.Co
     try {
         ref var ds = ref heap<ж<driverStmt>>(out var Ꮡds);
         ref var err = ref heap<error>(out var Ꮡerr);
-        defer(() => {
+        defer([GoFunc("(*DB).prepareDC.func1")] () => {
             release(Ꮡerr.ValueSlot);
         }, ref ᒐ);
-        withLock(new driverConnжLocker(dc), () => {
+        withLock(new driverConnжLocker(dc), [GoFunc("(*DB).prepareDC.func2")] () => {
             (Ꮡds.ValueSlot, Ꮡerr.ValueSlot) = dc.prepareLocked(ctx, cg, query);
         });
         if (err != nil) {
@@ -1892,7 +1892,7 @@ internal static (Result, error) ExecContext⁔(/*this*/ ж<DB> Ꮡdb, context.Co
     ref var err = ref heap<error>(out var Ꮡerr);
 
     var argsʗ1 = args;
-    err = db.retry((connReuseStrategy strategy) => {
+    err = db.retry([GoFunc("(*DB).ExecContext.func1")] (connReuseStrategy strategy) => {
         (Ꮡres.ValueSlot, Ꮡerr.ValueSlot) = Ꮡdb.exec(ctx, query, argsʗ1, strategy);
         return Ꮡerr.ValueSlot;
     });
@@ -1928,7 +1928,7 @@ internal static (Result res, error err) execDC⁔(/*this*/ ref DB db, context.Co
     try {
         ref var dc = ref Ꮡdc.DerefOrNull();
 
-        defer(() => {
+        defer([GoFunc("(*DB).execDC.func1")] () => {
             release(err);
         }, ref ᒐ);
         var (execerCtx, ok) = dc.ci._<driver.ExecerContext>(ᐧ);
@@ -1942,7 +1942,7 @@ internal static (Result res, error err) execDC⁔(/*this*/ ref DB db, context.Co
             var argsʗ1 = args;
             var execerʗ1 = execer;
             var execerCtxʗ1 = execerCtx;
-            withLock(new driverConnжLocker(Ꮡdc), () => {
+            withLock(new driverConnжLocker(Ꮡdc), [GoFunc("(*DB).execDC.func2")] () => {
                 (Ꮡnvdargs.ValueSlot, err) = driverArgsConnLocked(Ꮡdc.Value.ci, nil, argsʗ1);
                 if (err != nil) {
                     return;
@@ -1958,7 +1958,7 @@ internal static (Result res, error err) execDC⁔(/*this*/ ref DB db, context.Co
         }
 
         ref var si = ref heap<driver.Stmt>(out var Ꮡsi);
-        withLock(new driverConnжLocker(Ꮡdc), () => {
+        withLock(new driverConnжLocker(Ꮡdc), [GoFunc("(*DB).execDC.func3")] () => {
             (Ꮡsi.ValueSlot, err) = ctxDriverPrepare(ctx, Ꮡdc.Value.ci, query);
         });
         if (err != nil) {
@@ -1984,7 +1984,7 @@ internal static (ж<Rows>, error) QueryContext⁔(/*this*/ ж<DB> Ꮡdb, context
     ref var err = ref heap<error>(out var Ꮡerr);
 
     var argsʗ1 = args;
-    err = db.retry((connReuseStrategy strategy) => {
+    err = db.retry([GoFunc("(*DB).QueryContext.func1")] (connReuseStrategy strategy) => {
         (Ꮡrows.ValueSlot, Ꮡerr.ValueSlot) = Ꮡdb.query(ctx, query, argsʗ1, strategy);
         return Ꮡerr.ValueSlot;
     });
@@ -2033,7 +2033,7 @@ internal static (ж<Rows>, error) queryDC⁔(/*this*/ ref DB db, context.Context
         var argsʗ1 = args;
         var queryerʗ1 = queryer;
         var queryerCtxʗ1 = queryerCtx;
-        withLock(new driverConnжLocker(Ꮡdc), () => {
+        withLock(new driverConnжLocker(Ꮡdc), [GoFunc("(*DB).queryDC.func1")] () => {
             (Ꮡnvdargs.ValueSlot, ᏑerrΔ1.ValueSlot) = driverArgsConnLocked(Ꮡdc.Value.ci, nil, argsʗ1);
             if (ᏑerrΔ1.ValueSlot != nil) {
                 return;
@@ -2059,7 +2059,7 @@ internal static (ж<Rows>, error) queryDC⁔(/*this*/ ref DB db, context.Context
 
     ref var si = ref heap<driver.Stmt>(out var Ꮡsi);
     ref var err = ref heap<error>(out var Ꮡerr);
-    withLock(new driverConnжLocker(Ꮡdc), () => {
+    withLock(new driverConnжLocker(Ꮡdc), [GoFunc("(*DB).queryDC.func2")] () => {
         (Ꮡsi.ValueSlot, Ꮡerr.ValueSlot) = ctxDriverPrepare(ctx, Ꮡdc.Value.ci, query);
     });
     if (err != nil) {
@@ -2131,7 +2131,7 @@ internal static (ж<Tx>, error) BeginTx⁔(/*this*/ ж<DB> Ꮡdb, context.Contex
     ref var tx = ref heap<ж<Tx>>(out var Ꮡtx);
     ref var err = ref heap<error>(out var Ꮡerr);
 
-    err = db.retry((connReuseStrategy strategy) => {
+    err = db.retry([GoFunc("(*DB).BeginTx.func1")] (connReuseStrategy strategy) => {
         (Ꮡtx.ValueSlot, Ꮡerr.ValueSlot) = Ꮡdb.begin(ctx, opts, strategy);
         return Ꮡerr.ValueSlot;
     });
@@ -2166,7 +2166,7 @@ internal static partial (ж<Tx> tx, error err) beginDC⁔(/*this*/ ж<DB> Ꮡdb,
 
     ref var txi = ref heap<driver.Tx>(out var Ꮡtxi);
     ref var keepConnOnRollback = ref heap<bool>(false, out var ᏑkeepConnOnRollback);
-    withLock(new driverConnжLocker(dc), () => {
+    withLock(new driverConnжLocker(dc), [GoFunc("(*DB).beginDC.func1")] () => {
         var (_, hasSessionResetter) = dc.Value.ci._<driver.SessionResetter>(ᐧ);
         var (_, hasConnectionValidator) = dc.Value.ci._<driver.Validator>(ᐧ);
         ᏑkeepConnOnRollback.Value = hasSessionResetter && hasConnectionValidator;
@@ -2215,7 +2215,7 @@ internal static (ж<Conn>, error) Conn⁔(/*this*/ ж<DB> Ꮡdb, context.Context
     ref var dc = ref heap<ж<driverConn>>(out var Ꮡdc);
     ref var err = ref heap<error>(out var Ꮡerr);
 
-    err = db.retry((connReuseStrategy strategy) => {
+    err = db.retry([GoFunc("(*DB).Conn.func1")] (connReuseStrategy strategy) => {
         (Ꮡdc.ValueSlot, Ꮡerr.ValueSlot) = Ꮡdb.conn(ctx, strategy);
         return Ꮡerr.ValueSlot;
     });
@@ -2268,7 +2268,7 @@ internal static (ж<driverConn>, releaseConn, error) grabConn⁔(/*this*/ ж<Con
     if (Ꮡc.Ꮡdone.Load()) {
         return (default, default, ErrConnDone);
     }
-    Ꮡc.ᏑreleaseConnOnce.Do(() => {
+    Ꮡc.ᏑreleaseConnOnce.Do([GoFunc("(*Conn).grabConn.func1")] () => {
         Ꮡc.Value.releaseConnCache = (error p1) => Ꮡc.closemuRUnlockCondReleaseConn(p1);
     });
     Ꮡc.Ꮡclosemu.RLock();
@@ -2364,7 +2364,7 @@ internal static error /*err*/ Raw⁔(/*this*/ ж<Conn> Ꮡc, Func<any, error> f)
         dc.ᏑMutex.Lock();
         var dcʗ1 = dc;
         var releaseʗ1 = release;
-        defer(() => {
+        defer([GoFunc("(*Conn).Raw.func1")] () => {
             dcʗ1.ᏑMutex.Unlock();
 
             // If f panics fPanic will remain true.
@@ -2619,7 +2619,7 @@ internal static error Commit⁔(/*this*/ ж<Tx> Ꮡtx) {
     Ꮡtx.Ꮡclosemu.Unlock();
 
     ref var err = ref heap<error>(out var Ꮡerr);
-    withLock(new driverConnжLocker(tx.dc), () => {
+    withLock(new driverConnжLocker(tx.dc), [GoFunc("(*Tx).Commit.func1")] () => {
         Ꮡerr.ValueSlot = Ꮡtx.Value.txi.Commit();
     });
     if (!errors.Is(err, driver.ErrBadConn)) {
@@ -2653,7 +2653,7 @@ internal static error rollback⁔(/*this*/ ж<Tx> Ꮡtx, bool discardConn) {
     Ꮡtx.Ꮡclosemu.Unlock();
 
     ref var err = ref heap<error>(out var Ꮡerr);
-    withLock(new driverConnжLocker(tx.dc), () => {
+    withLock(new driverConnжLocker(tx.dc), [GoFunc("(*Tx).rollback.func1")] () => {
         Ꮡerr.ValueSlot = Ꮡtx.Value.txi.Rollback();
     });
     if (!errors.Is(err, driver.ErrBadConn)) {
@@ -2761,7 +2761,7 @@ internal static ж<Stmt> StmtContext⁔(/*this*/ ж<Tx> Ꮡtx, context.Context c
             // code-complexity for this.
             stmt.mu.Unlock();
             var dcʗ1 = dc;
-            withLock(new driverConnжLocker(dc), () => {
+            withLock(new driverConnжLocker(dc), [GoFunc("(*Tx).StmtContext.func1")] () => {
                 (Ꮡsi.ValueSlot, Ꮡerr.ValueSlot) = ctxDriverPrepare(ctx, dcʗ1.ci, Ꮡstmt.Value.query);
             });
             if (err != nil) {
@@ -2783,7 +2783,7 @@ internal static ж<Stmt> StmtContext⁔(/*this*/ ж<Tx> Ꮡtx, context.Context c
             if (si == nil) {
                 ref var ds = ref heap<ж<driverStmt>>(out var Ꮡds);
                 var dcʗ2 = dc;
-                withLock(new driverConnжLocker(dc), () => {
+                withLock(new driverConnжLocker(dc), [GoFunc("(*Tx).StmtContext.func2")] () => {
                     (Ꮡds.ValueSlot, Ꮡerr.ValueSlot) = Ꮡstmt.prepareOnConnLocked(ctx, dcʗ2);
                 });
                 if (err != nil) {
@@ -2987,7 +2987,7 @@ internal static (Result, error) ExecContext⁔(/*this*/ ж<Stmt> Ꮡs, context.C
 
         ref var res = ref heap<Result>(out var Ꮡres);
         var argsʗ1 = args;
-        var err = s.db.retry((connReuseStrategy strategy) => {
+        var err = s.db.retry([GoFunc("(*Stmt).ExecContext.func1")] (connReuseStrategy strategy) => {
             var (dc, releaseConn, ds, errΔ1) = Ꮡs.connStmt(ctx, strategy);
             if (errΔ1 != nil) {
                 return errΔ1;
@@ -3121,7 +3121,7 @@ internal static (ж<driverConn> dc, Action<error> releaseConn, ж<driverStmt> ds
     s.mu.Unlock();
 
     // No luck; we need to prepare the statement on this connection
-    withLock(new driverConnжLocker(dc), () => {
+    withLock(new driverConnжLocker(dc), [GoFunc("(*Stmt).connStmt.func1")] () => {
         (ds, err) = Ꮡs.prepareOnConnLocked(ctx, dc);
     });
     if (err != nil) {
@@ -3164,7 +3164,7 @@ internal static (ж<Rows>, error) QueryContext⁔(/*this*/ ж<Stmt> Ꮡs, contex
         ref var rows = ref heap<ж<Rows>>(out var Ꮡrows);
 
         var argsʗ1 = args;
-        var err = s.db.retry(error (connReuseStrategy strategy) => {
+        var err = s.db.retry([GoFunc("(*Stmt).QueryContext.func1")] error (connReuseStrategy strategy) => {
             var (dc, releaseConn, ds, errΔ1) = Ꮡs.connStmt(ctx, strategy);
             if (errΔ1 != nil) {
                 return errΔ1;
@@ -3186,7 +3186,7 @@ internal static (ж<Rows>, error) QueryContext⁔(/*this*/ ж<Stmt> Ꮡs, contex
                 // releaseConn must be set before initContextClose or it could
                 // release the connection before it is set.
                 var releaseConnʗ1 = releaseConn;
-                Ꮡrows.ValueSlot.releaseConn = (error errΔ2) => {
+                Ꮡrows.ValueSlot.releaseConn = [GoFunc("(*Stmt).QueryContext.func1.1")] (error errΔ2) => {
                     releaseConnʗ1(errΔ2);
                     Ꮡs.Value.db.removeDep(new StmtжfinalCloser(Ꮡs), Ꮡrows.ValueSlot.OrTypedNil());
                 };
@@ -3453,7 +3453,7 @@ internal static bool Next⁔(/*this*/ ж<Rows> Ꮡrs) {
 
     bool doClose = default;
     bool ok = default;
-    withLock(Ꮡrs.Ꮡclosemu.RLocker(), () => {
+    withLock(Ꮡrs.Ꮡclosemu.RLocker(), [GoFunc("(*Rows).Next.func1")] () => {
         (doClose, ok) = Ꮡrs.nextLocked();
     });
     if (doClose) {
@@ -3529,7 +3529,7 @@ internal static bool NextResultSet⁔(/*this*/ ж<Rows> Ꮡrs) {
         Ꮡrs.closemuRUnlockIfHeldByScan();
 
         bool doClose = default;
-        defer(() => {
+        defer([GoFunc("(*Rows).NextResultSet.func1")] () => {
             if (doClose) {
                 Ꮡrs.Close();
             }
@@ -3907,7 +3907,7 @@ internal static bool scanArgsContainRawBytes(slice<any> args) {
 
 // rowsCloseHook returns a function so tests may install the
 // hook through a test only mutex.
-internal static Func<Action<ж<Rows>, ж<error>>> rowsCloseHook = () => default;
+internal static Func<Action<ж<Rows>, ж<error>>> rowsCloseHook = [GoFunc("init.func1")] () => default;
 
 // Close closes the [Rows], preventing further enumeration. If [Rows.Next] is called
 // and returns false and there are no further result sets,
@@ -3941,7 +3941,7 @@ internal static error close⁔(/*this*/ ж<Rows> Ꮡrs, error errʗp) {
             rs.lasterr = err;
         }
 
-        withLock(new driverConnжLocker(rs.dc), () => {
+        withLock(new driverConnжLocker(rs.dc), [GoFunc("(*Rows).close.func1")] () => {
             Ꮡerr.ValueSlot = Ꮡrs.Value.rowsi.Close();
         });
         var fn = rowsCloseHook(); if (fn != nil) {

@@ -8,7 +8,7 @@ partial struct myMap /*map[@string, nint]*/;
 
 partial struct mySlice /*[]nint*/;
 
-internal delegate @string myFunc(nint _);
+// type myFunc is a methodless func type — rendered inline as its base delegate
 
 partial struct withSlice {
     public nint A;
@@ -52,7 +52,7 @@ internal static @string Error(this sliceErr _) { return "sliceErr"; }
 internal static void check(@string name, Action f) {
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("check.func1")] () => {
             var r = recover(); if (r != nil) {
                 fmt.Printf("%-24s PANIC: %v\n"u8, name, r);
                 return;
@@ -68,7 +68,7 @@ internal static void check(@string name, Action f) {
 internal static void checkPanicOnly(@string name, Action f) {
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("checkPanicOnly.func1")] () => {
             var r = recover(); if (r != nil) {
                 fmt.Printf("%-24s PANIC\n"u8, name);
                 return;
@@ -91,63 +91,63 @@ internal static void main() {
 
     any m = new map<@string, nint>{["a"] = 1};
     var mʗ1 = m;
-    check("map", () => {
+    check("map", [GoFunc("main.func1")] () => {
         _ = AreEqual(mʗ1, mʗ1);
     });
 
     any s = slice<nint>([1, 2]);
     var sʗ1 = s;
-    check("slice", () => {
+    check("slice", [GoFunc("main.func2")] () => {
         _ = AreEqual(sʗ1, sʗ1);
     });
 
-    any fn = () => {
+    any fn = [GoFunc("main.func3")] () => {
     };
     var fnʗ1 = fn;
-    check("func", () => {
+    check("func", [GoFunc("main.func4")] () => {
         _ = AreEqual(fnʗ1, fnʗ1);
     });
 
     any nm = new myMap(new map<@string, nint>{["a"] = 1});
     var nmʗ1 = nm;
-    check("named map", () => {
+    check("named map", [GoFunc("main.func5")] () => {
         _ = AreEqual(nmʗ1, nmʗ1);
     });
 
     any nsl = new mySlice(new nint[]{1}.slice());
     var nslʗ1 = nsl;
-    check("named slice", () => {
+    check("named slice", [GoFunc("main.func6")] () => {
         _ = AreEqual(nslʗ1, nslʗ1);
     });
 
-    any nf = new myFunc((nint _Δp0) => "");
+    any nf = new Func<nint, @string>([GoFunc("main.func7")] (nint _Δp0) => "");
     var nfʗ1 = nf;
-    checkPanicOnly("named func", () => {
+    checkPanicOnly("named func", [GoFunc("main.func8")] () => {
         _ = AreEqual(nfʗ1, nfʗ1);
     });
 
     any ws = new withSlice(1, [2]);
     var wsʗ1 = ws;
-    check("struct w/ slice", () => {
+    check("struct w/ slice", [GoFunc("main.func9")] () => {
         _ = AreEqual(wsʗ1, wsʗ1);
     });
 
     any wm = new withMap(1, new map<@string, nint>{});
     var wmʗ1 = wm;
-    check("struct w/ map", () => {
+    check("struct w/ map", [GoFunc("main.func10")] () => {
         _ = AreEqual(wmʗ1, wmʗ1);
     });
 
-    any wf = new withFunc(() => {
+    any wf = new withFunc([GoFunc("main.func11")] () => {
     });
     var wfʗ1 = wf;
-    check("struct w/ func", () => {
+    check("struct w/ func", [GoFunc("main.func12")] () => {
         _ = AreEqual(wfʗ1, wfʗ1);
     });
 
     any nested = new outer(new inner(slice<byte>("x"u8)), 1);
     var nestedʗ1 = nested;
-    check("struct w/ struct", () => {
+    check("struct w/ struct", [GoFunc("main.func13")] () => {
         _ = AreEqual(nestedʗ1, nestedʗ1);
     });
 
@@ -156,25 +156,25 @@ internal static void main() {
 
     any aos = array<slice<nint>>([[1]]);
     var aosʗ1 = aos;
-    check("array of slice", () => {
+    check("array of slice", [GoFunc("main.func14")] () => {
         _ = AreEqual(aosʗ1, aosʗ1);
     });
 
     any aom = new map<@string, nint>[]{}.array(2);
     var aomʗ1 = aom;
-    check("array of map", () => {
+    check("array of map", [GoFunc("main.func15")] () => {
         _ = AreEqual(aomʗ1, aomʗ1);
     });
 
     any a2d = new array<slice<nint>>[]{}.array(2, () => new(3));
     var a2dʗ1 = a2d;
-    check("2-D array of slice", () => {
+    check("2-D array of slice", [GoFunc("main.func16")] () => {
         _ = AreEqual(a2dʗ1, a2dʗ1);
     });
 
     any aostruct = new withSlice[]{}.array(3);
     var aostructʗ1 = aostruct;
-    check("array of struct", () => {
+    check("array of struct", [GoFunc("main.func17")] () => {
         _ = AreEqual(aostructʗ1, aostructʗ1);
     });
 
@@ -183,13 +183,13 @@ internal static void main() {
 
     any wa = new withAny(1, new map<@string, nint>{});
     var waʗ1 = wa;
-    check("struct w/ any=map", () => {
+    check("struct w/ any=map", [GoFunc("main.func18")] () => {
         _ = AreEqual(waʗ1, waʗ1);
     });
 
     any wa2 = new withAny(1, slice<nint>([1]));
     var wa2ʗ1 = wa2;
-    check("struct w/ any=slice", () => {
+    check("struct w/ any=slice", [GoFunc("main.func19")] () => {
         _ = AreEqual(wa2ʗ1, wa2ʗ1);
     });
 
@@ -203,7 +203,7 @@ internal static void main() {
 
     error e = new sliceErr([1]);
     var eʗ1 = e;
-    check("error w/ slice", () => {
+    check("error w/ slice", [GoFunc("main.func20")] () => {
         _ = AreEqual(eʗ1, eʗ1);
     });
 
@@ -211,34 +211,34 @@ internal static void main() {
     fmt.Println("== nil compares never panic ==");
 
     var mʗ2 = m;
-    check("map == nil", () => {
+    check("map == nil", [GoFunc("main.func21")] () => {
         _ = mʗ2 == nil;
     });
     var sʗ2 = s;
-    check("slice == nil", () => {
+    check("slice == nil", [GoFunc("main.func22")] () => {
         _ = sʗ2 == nil;
     });
     var fnʗ2 = fn;
-    check("func == nil", () => {
+    check("func == nil", [GoFunc("main.func23")] () => {
         _ = fnʗ2 == nil;
     });
     var wsʗ2 = ws;
-    check("struct w/ slice == nil", () => {
+    check("struct w/ slice == nil", [GoFunc("main.func24")] () => {
         _ = wsʗ2 == nil;
     });
     var aosʗ2 = aos;
-    check("array of slice == nil", () => {
+    check("array of slice == nil", [GoFunc("main.func25")] () => {
         _ = aosʗ2 == nil;
     });
 
     any nilIface = default;
     var mʗ3 = m;
     var nilIfaceʗ1 = nilIface;
-    check("nil iface == map", () => {
+    check("nil iface == map", [GoFunc("main.func26")] () => {
         _ = AreEqual(nilIfaceʗ1, mʗ3);
     });
     var nilIfaceʗ2 = nilIface;
-    check("nil iface == nil iface", () => {
+    check("nil iface == nil iface", [GoFunc("main.func27")] () => {
         _ = AreEqual(nilIfaceʗ2, nilIfaceʗ2);
     });
 
@@ -248,17 +248,17 @@ internal static void main() {
     any i = (nint)5;
     var iʗ1 = i;
     var mʗ4 = m;
-    check("map == int", () => {
+    check("map == int", [GoFunc("main.func28")] () => {
         _ = AreEqual(mʗ4, iʗ1);
     });
     var mʗ5 = m;
     var sʗ3 = s;
-    check("slice == map", () => {
+    check("slice == map", [GoFunc("main.func29")] () => {
         _ = AreEqual(sʗ3, mʗ5);
     });
     var iʗ2 = i;
     var sʗ4 = s;
-    check("int == slice", () => {
+    check("int == slice", [GoFunc("main.func30")] () => {
         _ = AreEqual(iʗ2, sʗ4);
     });
 
@@ -325,12 +325,12 @@ internal static void main() {
 
     for (nint iΔ1 = 0; iΔ1 < 2; iΔ1++) {
         var mʗ6 = m;
-        check("repeat map", () => {
+        check("repeat map", [GoFunc("main.func31")] () => {
             _ = AreEqual(mʗ6, mʗ6);
         });
         var i1ʗ1 = i1;
         var i2ʗ1 = i2;
-        check("repeat comparable", () => {
+        check("repeat comparable", [GoFunc("main.func32")] () => {
             _ = AreEqual(i1ʗ1, i2ʗ1);
         });
     }

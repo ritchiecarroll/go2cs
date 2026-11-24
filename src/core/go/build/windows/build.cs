@@ -668,7 +668,7 @@ internal static (ж<Package>, error) Import⁔(/*this*/ ж<Context> Ꮡctxt, @st
         break;
     }}
     var pʗ1 = p;
-    void setPkga() {
+    [GoFunc("(*Context).Import.func1")] void setPkga() {
         var exprᴛ2 = Ꮡctxt.Value.Compiler;
         switch (ᐧ) {
         case {} when exprᴛ2 == "gccgo"u8: {
@@ -695,7 +695,7 @@ internal static (ж<Package>, error) Import⁔(/*this*/ ж<Context> Ꮡctxt, @st
         // p.Dir directory may or may not exist. Gather partial information first, check if it exists later.
         // Determine canonical import path, if any.
         // Exclude results where the import path would include /testdata/.
-        bool inTestdata(@string sub) => strings.Contains(sub, testdataˢ) || strings.HasSuffix(sub, testdataˢ2) || strings.HasPrefix(sub, testdataˢ3) || sub == "testdata"u8;
+        [GoFunc("(*Context).Import.func2")] bool inTestdata(@string sub) => strings.Contains(sub, testdataˢ) || strings.HasSuffix(sub, testdataˢ2) || strings.HasPrefix(sub, testdataˢ3) || sub == "testdata"u8;
         if (ctxt.GOROOT != ""u8) {
             @string root = ctxt.joinPath(ctxt.GOROOT, srcˢ);
             var (sub, ok) = ctxt.hasSubdir(root, p.Dir); if (ok && !inTestdata(sub)) {
@@ -756,7 +756,7 @@ internal static (ж<Package>, error) Import⁔(/*this*/ ж<Context> Ꮡctxt, @st
         if ((ImportMode)(mode & IgnoreVendor) == 0 && srcDir != ""u8) {
             var pʗ2 = p;
             var setPkgaʗ1 = setPkga;
-            bool searchVendor(@string root, bool isGoroot) {
+            [GoFunc("(*Context).Import.func3")] bool searchVendor(@string root, bool isGoroot) {
                 var (sub, ok) = Ꮡctxt.Value.hasSubdir(root, srcDir);
                 if (!ok || !strings.HasPrefix(sub, srcˢ2) || strings.Contains(sub, testdataˢ)) {
                     return false;
@@ -936,7 +936,7 @@ Found:
     var badGoFiles = new map<@string, bool>();
     var badGoFilesʗ1 = badGoFiles;
     var pʗ3 = p;
-    void badGoFile(@string name, error errΔ2) {
+    [GoFunc("(*Context).Import.func4")] void badGoFile(@string name, error errΔ2) {
         if (ᏑbadGoError.ValueSlot == nil) {
             ᏑbadGoError.ValueSlot = errΔ2;
         }
@@ -2107,7 +2107,7 @@ internal static bool matchAuto⁔(/*this*/ ж<Context> Ꮡctxt, @string text, ma
 
 internal static bool eval⁔(/*this*/ ж<Context> Ꮡctxt, constraint.Expr x, map<@string, bool> allTags) {
     var allTagsʗ1 = allTags;
-    return x.Eval((@string tag) => Ꮡctxt.Value.matchTag(tag, allTagsʗ1));
+    return x.Eval([GoFunc("(*Context).eval.func1")] (@string tag) => Ꮡctxt.Value.matchTag(tag, allTagsʗ1));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

@@ -15,7 +15,7 @@ partial class net_package {
 // readProtocolsOnce loads contents of /etc/protocols into protocols map
 // for quick access.
 internal static Action readProtocolsOnce;
-internal static void initᴛreadProtocolsOnce() { readProtocolsOnce = Δsync.OnceFunc(() => {
+internal static void initᴛreadProtocolsOnce() { readProtocolsOnce = Δsync.OnceFunc([GoFunc("init.func6")] () => {
     GoFrame ᒐ = default;
     try {
         var (@file, err) = open("/etc/protocols");

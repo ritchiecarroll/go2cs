@@ -320,7 +320,7 @@ internal static (slice<@string>, error) readRecord⁔(/*this*/ ref Reader r, sli
 parseField:
     for (;;) {
         if (r.TrimLeadingSpace) {
-            nint i = bytes.IndexFunc(line, (rune rΔ1) => !unicode.IsSpace(rΔ1));
+            nint i = bytes.IndexFunc(line, [GoFunc("(*Reader).readRecord.func1")] (rune rΔ1) => !unicode.IsSpace(rΔ1));
             if (i < 0) {
                 i = len(line);
                 pos.col -= lengthNL(line);

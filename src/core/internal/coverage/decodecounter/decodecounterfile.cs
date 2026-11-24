@@ -193,7 +193,7 @@ internal static error readArgs⁔(/*this*/ ж<CounterDataReader> Ꮡcdr) {
     }
     var slr = slicereader.NewReader(b, false /* not readonly */);
     var slrʗ1 = slr;
-    (@string, error) sget() {
+    [GoFunc("(*CounterDataReader).readArgs.func1")] (@string, error) sget() {
         var kidx = slrʗ1.ReadULEB128();
         if ((nint)kidx >= Ꮡcdr.Value.stab.Entries()) {
             return ("", fmt.Errorf("malformed string table ref"u8));
@@ -326,7 +326,7 @@ internal static (bool, error) NextFunc⁔(/*this*/ ж<CounterDataReader> Ꮡcdr,
     cdr.fcnCount++;
     Func<(uint32, error)> rdu32 = default;
     if (cdr.hdr.CFlavor == coverage.CtrULeb128) {
-        rdu32 = (uint32, error) () => {
+        rdu32 = [GoFunc("(*CounterDataReader).NextFunc.func1")] (uint32, error) () => {
             nuint shift = default;
             uint64 value = default;
             for (;;) {
@@ -345,7 +345,7 @@ internal static (bool, error) NextFunc⁔(/*this*/ ж<CounterDataReader> Ꮡcdr,
         };
     } else if (cdr.hdr.CFlavor == coverage.CtrRaw) {
         if (cdr.hdr.BigEndian) {
-            rdu32 = (uint32, error) () => {
+            rdu32 = [GoFunc("(*CounterDataReader).NextFunc.func2")] (uint32, error) () => {
                 var (n, errΔ2) = Ꮡcdr.Value.mr.Read(Ꮡcdr.Value.u32b);
                 if (errΔ2 != nil) {
                     return ((uint32)(0), errΔ2);
@@ -356,7 +356,7 @@ internal static (bool, error) NextFunc⁔(/*this*/ ж<CounterDataReader> Ꮡcdr,
                 return (binary.BigEndian.Uint32(Ꮡcdr.Value.u32b), default);
             };
         } else {
-            rdu32 = (uint32, error) () => {
+            rdu32 = [GoFunc("(*CounterDataReader).NextFunc.func3")] (uint32, error) () => {
                 var (n, errΔ3) = Ꮡcdr.Value.mr.Read(Ꮡcdr.Value.u32b);
                 if (errΔ3 != nil) {
                     return ((uint32)(0), errΔ3);

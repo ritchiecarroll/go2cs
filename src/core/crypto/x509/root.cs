@@ -112,7 +112,7 @@ public static void SetFallbackRoots(ж<CertPool> roots) {
             return;
         }
 
-        Ꮡonce.Do(() => {
+        Ꮡonce.Do([GoFunc("SetFallbackRoots.func1")] () => {
             throw panic("unreachable");
         }); // asserts that system roots were indeed loaded before.
 

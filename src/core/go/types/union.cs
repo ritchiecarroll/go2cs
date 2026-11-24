@@ -98,7 +98,7 @@ internal static Type parseUnion(ж<Checker> Ꮡcheck, ast.Expr uexpr) {
     // Note: This is a quadratic algorithm, but unions tend to be short.
     var termsʗ1 = terms;
     var tlistʗ1 = tlist;
-    check.later(() => {
+    check.later([GoFunc("parseUnion.func1")] () => {
         foreach (var (i, t) in range(termsʗ1)) {
             if (!isValid((~t).typ)) {
                 continue;

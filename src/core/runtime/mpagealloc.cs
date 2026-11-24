@@ -728,7 +728,7 @@ internal static (uintptr, offAddr) find⁔(/*this*/ ref pageAlloc p, uintptr npa
     // pages on the root level and narrow that down if we descend into
     // that summary. But as soon as we need to iterate beyond that summary
     // in a level to find a large enough range, we'll stop narrowing.
-    void foundFree(offAddr addrΔ1, uintptr size) {
+    [GoFunc("(*pageAlloc).find.func1")] void foundFree(offAddr addrΔ1, uintptr size) {
         if (ᏑfirstFree.Value.@base.lessEqual(addrΔ1) && addrΔ1.add(size - 1).lessEqual(ᏑfirstFree.Value.bound)) {
             // This range fits within the current firstFree window, so narrow
             // down the firstFree window to the base and bound of this range.

@@ -80,7 +80,7 @@ internal static partial void main() {
             goǃ(sʗ1.worker, i);
         } else {
             var sʗ2 = s;
-            goǃ(() => {
+            goǃ([GoFunc("main.func1")] () => {
                 sʗ2.worker(i);
             });
         }

@@ -29,9 +29,9 @@ internal static void main() {
     fmt.Println(invoke(NilSafeDelegateConversion<Func<nint, @string, @string>, Plain>(p), 2, "b"));
 
     fmt.Println(invoke(describe, 3, "c"));
-    fmt.Println(invoke((nint n, @string s) => s + "!"u8, 4, "d"));
+    fmt.Println(invoke([GoFunc("main.func1")] (nint n, @string s) => s + "!"u8, 4, "d"));
 
-    Handler h2 = (nint n, @string s) => fmt.Sprintf("%s/%d"u8, s, n);
+    Handler h2 = [GoFunc("main.func2")] (nint n, @string s) => fmt.Sprintf("%s/%d"u8, s, n);
     fmt.Println(invoke(NilSafeDelegateConversion<Func<nint, @string, @string>, Handler>(h2), 5, "e"));
 
     var sc = Ꮡ(new screen(prefix: "#"));
@@ -52,7 +52,7 @@ internal static @string render(this ref screen s, nint n, @string msg) {
 }
 
 internal static Handler makeHandler(@string tag) {
-    return (nint n, @string s) => fmt.Sprintf("%s%d%s"u8, tag, n, s);
+    return [GoFunc("makeHandler.func1")] (nint n, @string s) => fmt.Sprintf("%s%d%s"u8, tag, n, s);
 }
 
 } // end main_package

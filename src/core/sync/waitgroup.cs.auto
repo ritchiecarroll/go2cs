@@ -256,10 +256,10 @@ internal static void Wait⁔(/*this*/ ж<WaitGroup> Ꮡwg) {
 // [the Go memory model]: https://go.dev/ref/mem
 internal static partial void Go⁔(/*this*/ ж<WaitGroup> Ꮡwg, Action f) {
     Ꮡwg.Add(1);
-    goǃ(() => {
+    goǃ([GoFunc("(*WaitGroup).Go.func1")] () => {
         GoFrame ᒐ = default;
         try {
-            defer(() => {
+            defer([GoFunc("(*WaitGroup).Go.func1.1")] () => {
                 var x = recover(); if (x != nil) {
                     // f panicked, which will be fatal because
                     // this is a new goroutine.

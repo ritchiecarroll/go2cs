@@ -76,7 +76,7 @@ using System.Runtime.CompilerServices;
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("net/http/cgi/cgi_main.go", "cgi_main.cs", "ABomgqSClAAKCqKCgqaCgqaCgoKmgoKClIKmlIKClKaUgqaCgqaCyoKClAAUCJKUlKS0grSCpIKCgpSCgoKUgoKUgoKCpoKCgqaCpg==", "105-134:1")]
 [assembly: GoPositionMap("net/http/cgi/child.go", "child.cs", "ABc4woKClIKUpoKCgoKmABwKooKCgqaCgqaCgIK2goKUlIKCgpSmgriCgpSCuIKUgoKC3ICCtpSCgpSUgoKUuIKCgpTKgpSuwoKClIKUgpTKgoKClAALGIKmgqaCgpSClKaClIKUgq7CgpSCgoKUgoI=", "", "", "189=NewWriter/1/1/3")]
-[assembly: GoPositionMap("net/http/cgi/host.go", "host.cs", "ACdIlIKkpKSkpKSUABs+goKUAAIUAAoCgoKCgoKCgriCpgALBtKCgoKmgpSCgpSCpgANHIKmpoKUpoKmooKUlIKClKaClIKmgoKUlIKCuIKCuIKmlJKCgpSUgqaCgqbugpSCgoKmgoKClIKUkqSCgoKCgoKCgoKClIKUgoKClIKClIKCgoKUgoKUgpSCgpSCgoKClLS2goKCpoKCgpSCuIKCgqaC3IKCuJSCgu60pKKClLiigoKCggAKFgAKFqaClKTapg==", "221-224:1", "", "159=RequestURI/1/1/7;253=stderr/1/1/5", "278:21,280:21")]
+[assembly: GoPositionMap("net/http/cgi/host.go", "host.cs", "ACdIlIKkpKSkpKSUABs+goKUAAIUAAoCgoKCgoKCgriCpgALBtKCgoKmgpSCgpSCpgANHIKmpoKUpoKmooKUlIKClKaClIKmgoKUlIKCuIKCuIKmlJKCgpSUgqaCgqbugpSCgoKmgoKClIKUkqSCgoKCgoKCgoKClIKUgoKClIKClIKCgoKUgoKUgpSCgpSCgoKClLS2goKCpoKCgpSCuIKCgqaC3IKCuJSCgu60pKKClLiigoKCggAKFgAKFqaClKTapg==", "221-224:1", "", "42=Invoke/1/1/16;159=RequestURI/1/1/7;253=stderr/1/1/5", "278:21,280:21")]
 // </GoSourcePositionMaps>
 
 namespace go.net.http;

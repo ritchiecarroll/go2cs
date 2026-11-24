@@ -783,7 +783,7 @@ internal static (context, bool) escapeTemplateBody⁔(/*this*/ ref escaper e, co
     ref var t = ref Ꮡt.DerefOrNull();
 
     var cʗ1 = c;
-    var filter = (ж<escaper> e1, context c1) => {
+    var filter = [GoFunc("(*escaper).escapeTemplateBody.func1")] (ж<escaper> e1, context c1) => {
         if (c1.state == stateError) {
             // Do not update the input escaper, e.
             return false;

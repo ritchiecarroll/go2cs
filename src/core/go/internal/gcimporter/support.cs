@@ -64,7 +64,7 @@ internal static token.Pos pos⁔(/*this*/ ref fakeFileSet s, @string @file, nint
 }
 
 internal static void setLines⁔(/*this*/ ref fakeFileSet s) {
-    ᏑfakeLinesOnce.Do(() => {
+    ᏑfakeLinesOnce.Do([GoFunc("(*fakeFileSet).setLines.func1")] () => {
         fakeLines = new slice<nint>(maxlines);
         foreach (var i in range(len(fakeLines))) {
             fakeLines[i] = i;

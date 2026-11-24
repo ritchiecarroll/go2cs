@@ -35,7 +35,7 @@ internal static (score, bool) stay(score s) {
 internal delegate action strategy(score _);
 
 internal static strategy stayAtK(nint k) {
-    return (score s) => {
+    return [GoFunc("stayAtK.func1")] (score s) => {
         if (s.thisTurn >= k) {
             return stay;
         }
@@ -112,11 +112,11 @@ internal static void main() {
     var (result, turnIsOver) = converted(new score(player: 3, opponent: 5, thisTurn: 7));
     fmt.Println("converted func type call:", result.player, result.opponent, result.thisTurn, turnIsOver);
 
-    var m = new machine(split: (@string s) => (len(s), s + "!", default));
+    var m = new machine(split: [GoFunc("main.func1")] (@string s) => (len(s), s + "!", default));
     var (n, @out, serr) = m.split("hi");
     fmt.Println(n, @out, serr == nil);
 
-    var p = new provider(produce: (nint x) => x * 2);
+    var p = new provider(produce: [GoFunc("main.func2")] (nint x) => x * 2);
     var r = new registry(h: NilSafeDelegateConversion<handler, Func<nint, nint>>(p.produce));
     fmt.Println(r.h(21));
 
@@ -129,20 +129,20 @@ internal static void main() {
     }
 
     var res = new resolver(
-        lookupPackage: (@string name) => {
+        lookupPackage: [GoFunc("main.func3")] (@string name) => {
             if (name == "fmt"u8) {
                 return ("pkg/fmt", true);
             }
             return ("", false);
         },
-        lookupSym: (@string recv, @string name) => {
+        lookupSym: [GoFunc("main.func4")] (@string recv, @string name) => {
             return recv == ""u8 && name == "Printf"u8;
         }
     );
     var (ip, found) = res.lookupPackage("fmt");
     fmt.Println(ip, found, res.lookupSym("", "Printf"), res.lookupSym("T", "M"));
 
-    (any, error) fetch() {
+    [GoFunc("main.func5")] (any, error) fetch() {
         var (ᴛ1, ᴛ2) = fetchPair();
         return (ᴛ1, ᴛ2);
     }

@@ -109,7 +109,7 @@ internal static (slice<byte> signature, error err) Sign⁔(/*this*/ PrivateKey p
     var privʗ1 = priv;
 
     var privʗ2 = priv;
-    (var k, err) = ᏑprivateKeyCache.Get(Ꮡ(priv, 0), () => ed25519.NewPrivateKey(privʗ1), (ж<ed25519.PrivateKey> kΔ1) => subtle.ConstantTimeCompare(privʗ2, kΔ1.Bytes()) == 1);
+    (var k, err) = ᏑprivateKeyCache.Get(Ꮡ(priv, 0), [GoFunc("PrivateKey.Sign.func1")] () => ed25519.NewPrivateKey(privʗ1), [GoFunc("PrivateKey.Sign.func2")] (ж<ed25519.PrivateKey> kΔ1) => subtle.ConstantTimeCompare(privʗ2, kΔ1.Bytes()) == 1);
     if (err != nil) {
         return (default, err);
     }
@@ -216,7 +216,7 @@ internal static void sign(slice<byte> signature, PrivateKey privateKey, slice<by
     var privateKeyʗ1 = privateKey;
 
     var privateKeyʗ2 = privateKey;
-    var (k, err) = ᏑprivateKeyCache.Get(Ꮡ(privateKey, 0), () => ed25519.NewPrivateKey(privateKeyʗ1), (ж<ed25519.PrivateKey> kΔ1) => subtle.ConstantTimeCompare(privateKeyʗ2, kΔ1.Bytes()) == 1);
+    var (k, err) = ᏑprivateKeyCache.Get(Ꮡ(privateKey, 0), [GoFunc("sign.func1")] () => ed25519.NewPrivateKey(privateKeyʗ1), [GoFunc("sign.func2")] (ж<ed25519.PrivateKey> kΔ1) => subtle.ConstantTimeCompare(privateKeyʗ2, kΔ1.Bytes()) == 1);
     if (err != nil) {
         throw panic("ed25519: bad private key: " + err.Error());
     }

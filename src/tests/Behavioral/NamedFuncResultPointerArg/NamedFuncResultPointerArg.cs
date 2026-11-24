@@ -8,10 +8,10 @@ partial struct State {
     internal nint sum;
 }
 
-internal delegate void addFunc(ж<State> s, nint x);
+// type addFunc is a methodless func type — rendered inline as its base delegate
 
-internal static addFunc adder() {
-    return (ж<State> s, nint x) => {
+internal static Action<ж<State>, nint> adder() {
+    return [GoFunc("adder.func1")] (ж<State> s, nint x) => {
         s.sum += x;
     };
 }

@@ -36,7 +36,7 @@ internal static (int64 written, bool handled, error err) writeTo⁔(/*this*/ ж<
     }
 
     var pfdʗ1 = pfd;
-    var rerr = sc.Read((uintptr fd) => {
+    var rerr = sc.Read([GoFunc("(*File).writeTo.func1")] (uintptr fd) => {
         (written, Ꮡerr.ValueSlot, handled) = poll.SendFile(pfdʗ1, fd, 0);
         return true;
     });

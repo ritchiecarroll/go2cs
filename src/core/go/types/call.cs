@@ -156,7 +156,7 @@ internal static ж<Signature> /*res*/ instantiateSignature⁔(/*this*/ ж<Checke
         if (check.conf._Trace) {
             Ꮡcheck.trace(pos, instantiatingSignatureSˢ, Ꮡtyp.OrTypedNil(), targs);
             check.indent++;
-            defer(() => {
+            defer([GoFunc("(*Checker).instantiateSignature.func1")] () => {
                 Ꮡcheck.Value.indent--;
                 Ꮡcheck.trace(pos, sUnderSˢ, res.OrTypedNil(), res.Underlying());
             }, ref ᒐ);
@@ -173,7 +173,7 @@ internal static ж<Signature> /*res*/ instantiateSignature⁔(/*this*/ ж<Checke
         // verify instantiation lazily (was go.dev/issue/50450)
         var targsʗ1 = targs;
         var xlistʗ1 = xlist;
-        check.later(() => {
+        check.later([GoFunc("(*Checker).instantiateSignature.func2")] () => {
             var tparams = Ꮡtyp.Value.TypeParams().list();
             // check type constraints
             var (i, err) = Ꮡcheck.verify(pos, tparams, targsʗ1, Ꮡcheck.Value.context()); if (err != nil) {
@@ -282,7 +282,7 @@ internal static exprKind callExpr⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operand> 
 
     // If the operand type is a type parameter, all types in its type set
     // must have a common underlying type, which must be a signature.
-    var (u, err) = commonUnder(x.typ, (Type t, Type uΔ1) => {
+    var (u, err) = commonUnder(x.typ, [GoFunc("(*Checker).callExpr.func1")] (Type t, Type uΔ1) => {
         var (_, ok) = uΔ1._<ж<Signature>>(ᐧ); if (uΔ1 != nil && !ok) {
             return typeErrorf("%s is not a function", t);
         }
@@ -414,7 +414,7 @@ internal static (slice<ж<operand>> resList, slice<slice<Type>> targsList) gener
         ref var check = ref Ꮡcheck.DerefOrNull();
 
         if (debug) {
-            defer(() => {
+            defer([GoFunc("(*Checker).genericExprList.func1")] () => {
                 // type arguments must only exist for partially instantiated functions
                 foreach (var (i, x) in range(resList)) {
                     if (i < len(targsList)) {

@@ -193,7 +193,7 @@ internal static (ж<UnixConn>, error) dialUnix⁔(/*this*/ ж<sysDialer> Ꮡsd, 
 
     var ctrlCtxFn = sd.Dialer.ControlContext;
     if (ctrlCtxFn == nil && sd.Dialer.Control != nil) {
-        ctrlCtxFn = (context.Context ctxΔ1, @string network, @string address, syscall.RawConn c) => Ꮡsd.Value.Dialer.Control(network, address, c);
+        ctrlCtxFn = [GoFunc("(*sysDialer).dialUnix.func1")] (context.Context ctxΔ1, @string network, @string address, syscall.RawConn c) => Ꮡsd.Value.Dialer.Control(network, address, c);
     }
     var (fd, err) = unixSocket(ctx, sd.network, new UnixAddrжsockaddr(laddr), new UnixAddrжsockaddr(raddr), dialˢ, ctrlCtxFn);
     if (err != nil) {
@@ -224,7 +224,7 @@ internal static error close⁔(/*this*/ ж<UnixListener> Ꮡln) {
     // sequence in ListenUnix. It's only non-Go
     // programs that can mess us up.
     // Even if there are racy calls to Close, we want to unlink only for the first one.
-    Ꮡln.ᏑunlinkOnce.Do(() => {
+    Ꮡln.ᏑunlinkOnce.Do([GoFunc("(*UnixListener).close.func1")] () => {
         if (Ꮡln.Value.path[0] != '@' && Ꮡln.Value.unlink) {
             syscall.Unlink(Ꮡln.Value.path);
         }
@@ -258,7 +258,7 @@ internal static (ж<UnixListener>, error) listenUnix⁔(/*this*/ ж<sysListener>
 
     Func<context.Context, @string, @string, syscall.RawConn, error> ctrlCtxFn = default;
     if (sl.ListenConfig.Control != nil) {
-        ctrlCtxFn = (context.Context ctxΔ1, @string network, @string address, syscall.RawConn c) => Ꮡsl.Value.ListenConfig.Control(network, address, c);
+        ctrlCtxFn = [GoFunc("(*sysListener).listenUnix.func1")] (context.Context ctxΔ1, @string network, @string address, syscall.RawConn c) => Ꮡsl.Value.ListenConfig.Control(network, address, c);
     }
     var (fd, err) = unixSocket(ctx, sl.network, new UnixAddrжsockaddr(Ꮡladdr), default, listenˢ, ctrlCtxFn);
     if (err != nil) {
@@ -272,7 +272,7 @@ internal static (ж<UnixConn>, error) listenUnixgram⁔(/*this*/ ж<sysListener>
 
     Func<context.Context, @string, @string, syscall.RawConn, error> ctrlCtxFn = default;
     if (sl.ListenConfig.Control != nil) {
-        ctrlCtxFn = (context.Context ctxΔ1, @string network, @string address, syscall.RawConn c) => Ꮡsl.Value.ListenConfig.Control(network, address, c);
+        ctrlCtxFn = [GoFunc("(*sysListener).listenUnixgram.func1")] (context.Context ctxΔ1, @string network, @string address, syscall.RawConn c) => Ꮡsl.Value.ListenConfig.Control(network, address, c);
     }
     var (fd, err) = unixSocket(ctx, sl.network, new UnixAddrжsockaddr(laddr), default, listenˢ, ctrlCtxFn);
     if (err != nil) {

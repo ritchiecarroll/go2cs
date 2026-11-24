@@ -269,7 +269,7 @@ internal static error walksymtab(slice<byte> data, nint ptrsz, Func<sym, error> 
 // returning an in-memory representation.
 internal static (slice<Sym>, error) newTable(slice<byte> symtab, nint ptrsz) {
     nint n = default;
-    var err = walksymtab(symtab, ptrsz, (sym s) => {
+    var err = walksymtab(symtab, ptrsz, [GoFunc("newTable.func1")] (sym s) => {
         n++;
         return default;
     });
@@ -280,7 +280,7 @@ internal static (slice<Sym>, error) newTable(slice<byte> symtab, nint ptrsz) {
     var fname = new map<uint16, @string>();
     ref var syms = ref heap<slice<Sym>>(new slice<Sym>(0, n), out var Ꮡsyms);
     var fnameʗ1 = fname;
-    err = walksymtab(symtab, ptrsz, error (sym s) => {
+    err = walksymtab(symtab, ptrsz, [GoFunc("newTable.func2")] error (sym s) => {
         nint nΔ1 = len(Ꮡsyms.ValueSlot);
         Ꮡsyms.ValueSlot = Ꮡsyms.ValueSlot.slice(0, nΔ1 + 1);
         var ts = Ꮡ(Ꮡsyms.ValueSlot, nΔ1);

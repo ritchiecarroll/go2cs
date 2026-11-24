@@ -444,9 +444,9 @@ public static void Inspect(Node node, Func<Node, bool> f) {
 // For greater control over the traversal of each subtree, use
 // [Inspect] or [PreorderStack].
 public static iter.Seq<Node> Preorder(Node root) {
-    return (Func<Node, bool> yield) => {
+    return [GoFunc("Preorder.func1")] (Func<Node, bool> yield) => {
         var ok = true;
-        Inspect(root, (Node n) => {
+        Inspect(root, [GoFunc("Preorder.func1.1")] (Node n) => {
             if (n != nil) {
                 // yield must not be called once ok is false.
                 ok = ok && yield(n);
@@ -470,7 +470,7 @@ public static iter.Seq<Node> Preorder(Node root) {
 // stack, and it is surprisingly tricky to do this correctly.)
 public static void PreorderStack(Node root, slice<Node> stack, Func<Node, slice<Node>, bool> f) {
     nint before = len(stack);
-    Inspect(root, (Node n) => {
+    Inspect(root, [GoFunc("PreorderStack.func1")] (Node n) => {
         if (n != nil) {
             if (!f(n, stack)) {
                 // Do not push, as there will be no corresponding pop.

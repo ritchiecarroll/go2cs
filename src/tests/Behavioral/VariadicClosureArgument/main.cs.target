@@ -22,7 +22,7 @@ internal static nint sum(Funcꓸꓸꓸ<nint, nint> add) { return add(1, 2, 3); }
 
 internal static void main() {
     @string @out = "";
-    Actionꓸꓸꓸ<@string, any> writeFormat = (@string format, params ꓸꓸꓸany argsʗp) => {
+    Actionꓸꓸꓸ<@string, any> writeFormat = [GoFunc("main.func1")] (@string format, params ꓸꓸꓸany argsʗp) => {
         var args = argsʗp.sslice();
         @out += fmt.Sprintf(format, args.ꓸꓸꓸ) + ";"u8;
     };
@@ -34,12 +34,12 @@ internal static void main() {
     fmt.Println(@out);
 
     ref var b = ref heap(new strings.Builder(), out var Ꮡb);
-    Actionꓸꓸꓸ<@string, any> emit = (@string format, params ꓸꓸꓸany argsʗp) => {
+    Actionꓸꓸꓸ<@string, any> emit = [GoFunc("main.func2")] (@string format, params ꓸꓸꓸany argsʗp) => {
         var args = argsʗp.sslice();
         fmt.Fprintf(new strings_BuilderжWriter(Ꮡb), "["u8 + format + "]"u8, args.ꓸꓸꓸ);
     };
     header(emit, 6);
-    emit = (@string format, params ꓸꓸꓸany argsʗp) => {
+    emit = [GoFunc("main.func3")] (@string format, params ꓸꓸꓸany argsʗp) => {
         var args = argsʗp.sslice();
         fmt.Fprintf(new strings_BuilderжWriter(Ꮡb), "<"u8 + format + ">"u8, args.ꓸꓸꓸ);
     };
@@ -47,7 +47,7 @@ internal static void main() {
     fmt.Println(b.String());
 
     nint total = 0;
-    Funcꓸꓸꓸ<nint, nint> add = (params ꓸꓸꓸnint xsʗp) => {
+    Funcꓸꓸꓸ<nint, nint> add = [GoFunc("main.func4")] (params ꓸꓸꓸnint xsʗp) => {
         var xs = xsʗp.sslice();
         foreach (var (_, x) in range(xs)) {
             total += x;

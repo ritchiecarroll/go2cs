@@ -125,7 +125,7 @@ internal static partial void armB() {
         defer(ᴛ1 => close(ᴛ1), ready, ref ᒐ);
         goǃ(finish, ready);
 
-        defer(() => {
+        defer([GoFunc("armB.func1")] () => {
             fmt.Println("main's deferred call ran; recover() =", recover());
         }, ref ᒐ);
         runtime.Goexit();
@@ -213,7 +213,7 @@ internal static partial void outer() {
 internal static partial void inner() {
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("inner.func1")] () => {
             fmt.Println("inner's deferred call ran; recover() =", recover());
         }, ref ᒐ);
         var c = new channel<nint>(0);
@@ -276,7 +276,7 @@ internal static void parent(@string name, bool header) {
 
     if (err == nil) {
         var cmdʗ1 = cmd;
-        var timer = time.AfterFunc((time.Duration)(10000000000L), () => {
+        var timer = time.AfterFunc((time.Duration)(10000000000L), [GoFunc("parent.func1")] () => {
             ᏑtimedOut.Store(true);
             cmdʗ1.Process.Kill();
         });

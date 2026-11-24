@@ -273,7 +273,7 @@ partial struct Stack {
 // Frames is an iterator over the frames in a Stack.
 internal static iter.Seq<StackFrame> Frames⁔(/*this*/ Stack s) {
     var sʗ1 = s;
-    return (Func<StackFrame, bool> yield) => {
+    return [GoFunc("Stack.Frames.func1")] (Func<StackFrame, bool> yield) => {
         if (sʗ1.id == 0) {
             return;
         }
@@ -406,7 +406,7 @@ public static (Event e, error err) MakeEvent<T>(EventConfig<T> c)
             ctx: new schedCtx(G: c.Goroutine, P: c.Proc, M: c.Thread)
         ));
         var cʗ1 = c;
-        defer(() => {
+        defer([GoFunc("MakeEvent[...].func1")] () => {
             // N.b. evSync is not in tracev2.Specs()
             if (err != nil || e.@base.typ == evSync) {
                 return;

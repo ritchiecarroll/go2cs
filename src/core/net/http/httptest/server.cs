@@ -144,7 +144,7 @@ internal static void Start⁔(/*this*/ ж<Server> Ꮡs) {
         // We set DialContext here to preserve any context values that are passed in,
         // but fall back to Dial if the user has set it.
         var trʗ1 = tr;
-        tr.DialContext = (context.Context ctx, @string network, @string addr) => {
+        tr.DialContext = [GoFunc("(*Server).Start.func1")] (context.Context ctx, @string network, @string addr) => {
             if (trʗ1.Dial != nil) {
                 return trʗ1.Dial(network, addr);
             }
@@ -213,7 +213,7 @@ internal static void StartTLS⁔(/*this*/ ж<Server> Ꮡs) {
     ));
     ref var dialer = ref heap<net.Dialer>(new net.Dialer(), out var Ꮡdialer);
     var trʗ1 = tr;
-    tr.DialContext = (context.Context ctx, @string network, @string addr) => {
+    tr.DialContext = [GoFunc("(*Server).StartTLS.func1")] (context.Context ctx, @string network, @string addr) => {
         if (trʗ1.Dial != nil) {
             return trʗ1.Dial(network, addr);
         }
@@ -386,7 +386,7 @@ internal static ж<http.Client> Client⁔(/*this*/ ref Server s) {
 
 internal static partial void goServe⁔(/*this*/ ж<Server> Ꮡs) {
     Ꮡs.Ꮡwg.Add(1);
-    goǃ(() => {
+    goǃ([GoFunc("(*Server).goServe.func1")] () => {
         GoFrame ᒐ = default;
         try {
             defer(Ꮡs.Ꮡwg.Done, ref ᒐ);
@@ -404,7 +404,7 @@ internal static void wrap⁔(/*this*/ ж<Server> Ꮡs) {
 
     var oldHook = s.Config.ConnState;
     var oldHookʗ1 = oldHook;
-    s.Config.ConnState = (net.Conn c, http.ConnState cs) => {
+    s.Config.ConnState = [GoFunc("(*Server).wrap.func1")] (net.Conn c, http.ConnState cs) => {
         GoFrame ᒐ = default;
         try {
             Ꮡs.Value.mu.Lock();

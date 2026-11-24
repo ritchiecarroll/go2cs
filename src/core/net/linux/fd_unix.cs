@@ -117,7 +117,7 @@ internal static (syscall.Sockaddr rsa, error ret) connect⁔(/*this*/ ж<netFD> 
             // with test code that restores the old value.
             var testHookCanceledDialΔ1 = testHookCanceledDial;
             var testHookCanceledDialʗ1 = testHookCanceledDialΔ1;
-            var stop = context.AfterFunc(ctx, () => {
+            var stop = context.AfterFunc(ctx, [GoFunc("(*netFD).connect.func1")] () => {
                 // Force the runtime's poller to immediately give up
                 // waiting for writability, unblocking waitWrite
                 // below.
@@ -125,7 +125,7 @@ internal static (syscall.Sockaddr rsa, error ret) connect⁔(/*this*/ ж<netFD> 
                 testHookCanceledDialʗ1();
             });
             var stopʗ1 = stop;
-            defer(() => {
+            defer([GoFunc("(*netFD).connect.func2")] () => {
                 if (!stopʗ1() && ret == nil) {
                     // The context.AfterFunc has called or is about to call
                     // SetWriteDeadline, but the connect code below had

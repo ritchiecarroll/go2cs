@@ -50,7 +50,7 @@ public static (slice<DirEntry>, error) ReadDir(FS fsys, @string name) {
         }
 
         (var list, err) = dir.ReadDir(-1);
-        slices.SortFunc(list, (DirEntry a, DirEntry b) => bytealg.CompareString(a.Name(), b.Name()));
+        slices.SortFunc(list, [GoFunc("ReadDir.func1")] (DirEntry a, DirEntry b) => bytealg.CompareString(a.Name(), b.Name()));
         return (list, err);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }

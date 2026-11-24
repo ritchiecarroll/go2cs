@@ -16,7 +16,6 @@ namespace go.vendor.golang.org.x.text.unicode;
 // - Transformer for reordering?
 // - Transformer (validator, really) for Bidi Rule.
 using bytes = bytes_package;
-using ꓸꓸꓸOption = Span<bidi_package.Option>;
 
 partial class bidi_package {
 
@@ -51,7 +50,7 @@ public partial struct options {
 }
 
 // An Option is an option for Bidi processing.
-public delegate void Option(ж<options> _);
+// type Option is a methodless func type — rendered inline as its base delegate
 
 // ICU allows the user to define embedding levels. This may be used, for example,
 // to use hierarchical structure of markup languages to define embeddings.
@@ -64,8 +63,8 @@ public delegate void Option(ж<options> _);
 
 // DefaultDirection sets the default direction for a Paragraph. The direction is
 // overridden if the text contains directional characters.
-public static Option DefaultDirection(Direction d) {
-    return (ж<options> opts) => {
+public static Action<ж<options>> DefaultDirection(Direction d) {
+    return [GoFunc("DefaultDirection.func1")] (ж<options> opts) => {
         opts.defaultDirection = d;
     };
 }
@@ -74,7 +73,7 @@ public static Option DefaultDirection(Direction d) {
 partial struct Paragraph {
     internal slice<byte> p;
     internal Ordering o;
-    internal slice<Option> opts;
+    internal slice<Action<ж<options>>> opts;
     internal slice<Class> types;
     internal slice<bracketType> pairTypes;
     internal slice<rune> pairValues;
@@ -128,7 +127,7 @@ internal static (nint n, error err) prepareInput⁔(/*this*/ ref Paragraph p) {
 // it will only process the first paragraph and report the number of bytes
 // consumed from b including this separator. Error may be non-nil if options are
 // given.
-internal static (nint n, error err) SetBytes⁔(/*this*/ ref Paragraph p, slice<byte> b, params ꓸꓸꓸOption optsʗp) {
+internal static (nint n, error err) SetBytes⁔(/*this*/ ref Paragraph p, slice<byte> b, params Span<Action<ж<options>>> optsʗp) {
     var opts = optsʗp.slice();
 
     p.p = b;
@@ -141,7 +140,7 @@ internal static (nint n, error err) SetBytes⁔(/*this*/ ref Paragraph p, slice<
 // it will only process the first paragraph and report the number of bytes
 // consumed from s including this separator. Error may be non-nil if options are
 // given.
-internal static (nint n, error err) SetString⁔(/*this*/ ref Paragraph p, @string s, params ꓸꓸꓸOption optsʗp) {
+internal static (nint n, error err) SetString⁔(/*this*/ ref Paragraph p, @string s, params Span<Action<ж<options>>> optsʗp) {
     var opts = optsʗp.slice();
 
     p.p = slice<byte>(s);

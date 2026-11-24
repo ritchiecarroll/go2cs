@@ -78,7 +78,7 @@ internal static void init⁔(/*this*/ ж<parser> Ꮡp, ж<token.File> Ꮡfile, s
     ref var @file = ref Ꮡfile.DerefOrNull();
 
     p.@file = Ꮡfile;
-    var eh = (token.Position pos, @string msg) => {
+    var eh = [GoFunc("(*parser).init.func1")] (token.Position pos, @string msg) => {
         Ꮡp.Value.errors.Add(pos, msg);
     };
     p.scanner.Init(p.@file, src, NilSafeDelegateConversion<scanner.ErrorHandler, Action<token.Position, @string>>(eh), scanner.ScanComments);
@@ -1303,7 +1303,7 @@ internal static slice<ж<ast.Field>> /*params*/ parseParameterList⁔(/*this*/ �
         // collect all names with the same types into a single ast.Field.
         ref var names = ref heap<slice<ж<ast.Ident>>>(out var Ꮡnames);
         ref var typ = ref heap<ast.Expr>(out var Ꮡtyp);
-        void addParams() {
+        [GoFunc("(*parser).parseParameterList.func1")] void addParams() {
             assert(Ꮡtyp.ValueSlot != nil, nilTypeInNamedParameterˢ);
             var field = Ꮡ(new ast.Field(Names: Ꮡnames.ValueSlot, Type: Ꮡtyp.ValueSlot));
             @params = append(@params, field);
@@ -2302,7 +2302,7 @@ internal static ast.Expr parsePrimaryExpr⁔(/*this*/ ж<parser> Ꮡp, ast.Expr 
         // since it can iteratively produce a nested output, and we want to
         // limit how deep a structure we generate.
         nint n = default;
-        defer(() => {
+        defer([GoFunc("(*parser).parsePrimaryExpr.func1")] () => {
             Ꮡp.Value.nestLev -= n;
         }, ref ᒐ);
         for (n = 1; ; n++) {
@@ -2513,7 +2513,7 @@ internal static ast.Expr parseBinaryExpr⁔(/*this*/ ж<parser> Ꮡp, ast.Expr x
         // since it can iteratively produce a nested output, and we want to
         // limit how deep a structure we generate.
         nint n = default;
-        defer(() => {
+        defer([GoFunc("(*parser).parseBinaryExpr.func1")] () => {
             Ꮡp.Value.nestLev -= n;
         }, ref ᒐ);
         for (n = 1; ; n++) {

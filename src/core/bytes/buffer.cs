@@ -252,7 +252,7 @@ internal static (int64 n, error err) ReadFrom⁔(/*this*/ ref Buffer b, io.Reade
 internal static slice<byte> growSlice(slice<byte> b, nint n) {
     GoFrame ᒐ = default;
     try {
-        defer(() => {
+        defer([GoFunc("growSlice.func1")] () => {
             if (recover() != nil) {
                 throw panic(ErrTooLarge);
             }

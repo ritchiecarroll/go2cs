@@ -52,7 +52,7 @@ namespace go.testing_runtime;
 /// defect be recorded as a genuine behavioral difference. Both make the exit code non-zero.
 /// </para>
 /// </remarks>
-public sealed class TestRunner
+public sealed partial class TestRunner
 {
     private readonly TestRegistry m_registry;
     private readonly TestOptions m_options;
@@ -107,7 +107,7 @@ public sealed class TestRunner
     /// <c>=== NAME</c> when the last line printed was another's. <see cref="Write"/> is a plain write to the same
     /// output, as Go's <c>fmt.Fprintf(p.w, ...)</c> of a non-chatty report is. One lock orders all three.
     /// </summary>
-    internal sealed class ChattyPrinter(Action<string> write)
+    internal sealed partial class ChattyPrinter(Action<string> write)
     {
         private readonly object m_syncRoot = new();
         private string? m_lastName;

@@ -346,7 +346,7 @@ public static (ж<Table>, error) NewTable(slice<byte> symtab, ж<LineTable> Ꮡp
     ref var pcln = ref Ꮡpcln.DerefOrNull();
 
     nint n = default;
-    var err = walksymtab(symtab, (sym s) => {
+    var err = walksymtab(symtab, [GoFunc("NewTable.func1")] (sym s) => {
         n++;
         return default;
     });
@@ -364,7 +364,7 @@ public static (ж<Table>, error) NewTable(slice<byte> symtab, ж<LineTable> Ꮡp
     nint nz = 0;
     var lasttyp = (uint8)0;
     var fnameʗ1 = fname;
-    err = walksymtab(symtab, error (sym s) => {
+    err = walksymtab(symtab, [GoFunc("NewTable.func2")] error (sym s) => {
         nint nΔ1 = len(Ꮡt.Value.Syms);
         Ꮡt.Value.Syms = Ꮡt.Value.Syms.slice(0, nΔ1 + 1);
         var ts = Ꮡ(Ꮡt.Value.Syms, nΔ1);

@@ -29,7 +29,7 @@ internal static partial ж<cachelike> alloc() {
 
 internal static (nint, nint) allocShape() {
     ref var c = ref heap<ж<cachelike>>(out var Ꮡc);
-    run(() => {
+    run([GoFunc("allocShape.func1")] () => {
         Ꮡc.ValueSlot = alloc();
         Ꮡc.ValueSlot.Ꮡflush.bump(41);
         Ꮡc.ValueSlot.pad = 7;
@@ -48,7 +48,7 @@ internal static partial ж<gauge> newGauge() {
 
 internal static nint namedAfterType() {
     ref var gauge = ref heap<ж<gauge>>(newGauge(), out var Ꮡgauge);
-    run(() => {
+    run([GoFunc("namedAfterType.func1")] () => {
         Ꮡgauge.ValueSlot = newGauge();
         Ꮡgauge.ValueSlot.Ꮡv.bump(5);
     });

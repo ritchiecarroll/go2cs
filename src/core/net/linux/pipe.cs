@@ -56,7 +56,7 @@ internal static void set⁔(/*this*/ ж<pipeDeadline> Ꮡd, time.Time t) {
                 if (closed) {
                     d.cancel = new channel<EmptyStruct>(0);
                 }
-                d.timer = time.AfterFunc(dur, () => {
+                d.timer = time.AfterFunc(dur, [GoFunc("(*pipeDeadline).set.func1")] () => {
                     close(Ꮡd.Value.cancel);
                 });
                 return;
@@ -291,7 +291,7 @@ internal static error SetWriteDeadline⁔(/*this*/ ж<pipe> Ꮡp, time.Time t) {
 }
 
 internal static error Close⁔(/*this*/ ж<pipe> Ꮡp) {
-    Ꮡp.Ꮡonce.Do(() => {
+    Ꮡp.Ꮡonce.Do([GoFunc("(*pipe).Close.func1")] () => {
         close(Ꮡp.Value.localDone);
     });
     return default;

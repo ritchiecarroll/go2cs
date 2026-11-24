@@ -171,10 +171,10 @@ internal static void main() {
     nint n = 2 * procs;
 
     var began = time.Now();
-    fmt.Println("pipelines int:", pipelines(n, nint (nint i) => i * 3));
-    fmt.Println("pipelines string:", pipelines(n, @string (nint i) => fmt.Sprint("s", i)));
-    fmt.Println("pipelines struct:", pipelines(n, point (nint i) => new point(i, -i)));
-    fmt.Println("pipelines array:", pipelines(n, array<int64> (nint i) => array<int64>([(int64)i, 1, 2, 3])));
+    fmt.Println("pipelines int:", pipelines(n, [GoFunc("main.func1")] nint (nint i) => i * 3));
+    fmt.Println("pipelines string:", pipelines(n, [GoFunc("main.func2")] @string (nint i) => fmt.Sprint("s", i)));
+    fmt.Println("pipelines struct:", pipelines(n, [GoFunc("main.func3")] point (nint i) => new point(i, -i)));
+    fmt.Println("pipelines array:", pipelines(n, [GoFunc("main.func4")] array<int64> (nint i) => array<int64>([(int64)i, 1, 2, 3])));
     report("pipelines", began);
 
     began = time.Now();

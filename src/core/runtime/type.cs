@@ -146,7 +146,7 @@ internal static ж<byte> getGCMaskOnDemand(ж<_type> Ꮡt) {
             // Build gcmask for this type.
             var bytes = (uintptr)goarch.PtrSize * divRoundUp(t.PtrBytes / (uintptr)goarch.PtrSize, 8 * goarch.PtrSize);
             p = @unsafe.Pointer.To<byte>(persistentalloc(bytes, goarch.PtrSize, Ꮡmemstats.Ꮡother_sys));
-            systemstack(() => {
+            systemstack([GoFunc("getGCMaskOnDemand.func1")] () => {
                 buildGCMask(Ꮡt, new bitCursor(ptr: Ꮡp.ValueSlot, n: 0));
             });
 

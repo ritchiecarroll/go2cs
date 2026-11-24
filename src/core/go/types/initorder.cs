@@ -157,7 +157,7 @@ internal static slice<Object> findPath(map<Object, ж<declInfo>> objMap, Object 
         deps = append(deps, d);
     }
     var depsʗ1 = deps;
-    sort.Slice(deps, (nint i, nint j) => depsʗ1[i].order() < depsʗ1[j].order());
+    sort.Slice(deps, [GoFunc("findPath.func1")] (nint i, nint j) => depsʗ1[i].order() < depsʗ1[j].order());
 
     foreach (var (_, d) in range(deps)) {
         if (AreEqual(d, to)) {
@@ -281,7 +281,7 @@ internal static slice<ж<graphNode>> dependencyGraph(map<Object, ж<declInfo>> o
     // throughout the function graph, the cost of removing a function at
     // position X is proportional to cost * (len(funcG)-X). Therefore, we should
     // remove high-cost functions last.
-    slices.SortFunc(funcG, (ж<graphNode> a, ж<graphNode> b) => cmp.Compare(a.cost(), b.cost()));
+    slices.SortFunc(funcG, [GoFunc("dependencyGraph.func1")] (ж<graphNode> a, ж<graphNode> b) => cmp.Compare(a.cost(), b.cost()));
     foreach (var (_, n) in range(funcG)) {
         // connect each predecessor p of n with each successor s
         // and drop the function node (don't collect it in G)

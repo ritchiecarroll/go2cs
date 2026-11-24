@@ -119,7 +119,7 @@ internal static bool IsNormalString⁔(/*this*/ Form f, @string s) {
         return true;
     }
     ref var rb = ref heap<reorderBuffer>(new reorderBuffer(f: ft.Value, src: src, nsrc: len(s)), out var Ꮡrb);
-    rb.setFlusher(default, (ж<reorderBuffer> rbΔ1) => {
+    rb.setFlusher(default, [GoFunc("Form.IsNormalString.func1")] (ж<reorderBuffer> rbΔ1) => {
         for (nint i = 0; i < rbΔ1.nrune; i++) {
             var info = rbΔ1.rune[i];
             if (bp + (nint)info.size > len(s)) {

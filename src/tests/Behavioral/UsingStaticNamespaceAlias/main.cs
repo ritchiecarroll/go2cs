@@ -18,7 +18,7 @@ partial struct noCopy {
 
 internal static partial void launch(channel<@string> done) {
     var doneʗ1 = done;
-    goǃ(() => {
+    goǃ([GoFunc("launch.func1")] () => {
         doneʗ1.ᐸꟷ(Marshal(Unsafe));
     });
 }

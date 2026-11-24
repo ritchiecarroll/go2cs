@@ -54,12 +54,12 @@ public static TraceConsumer ViewerDataTraceConsumer(io.Writer w, int64 startIdx,
         var encʗ3 = enc;
         var requiredFramesʗ4 = requiredFrames;
     return new TraceConsumer(
-        ConsumeTimeUnit: (@string unit) => {
+        ConsumeTimeUnit: [GoFunc("ViewerDataTraceConsumer.func1")] (@string unit) => {
             io.WriteString(w, displayTimeUnitˢ);
             encʗ1.Encode(unit);
             io.WriteString(w, ",");
         },
-        ConsumeViewerEvent: (ж<format.Event> v, bool @required) => {
+        ConsumeViewerEvent: [GoFunc("ViewerDataTraceConsumer.func2")] (ж<format.Event> v, bool @required) => {
             index++;
             if (!@required && (index < startIdx || index > endIdx)) {
                 // not in the range. Skip!
@@ -67,13 +67,13 @@ public static TraceConsumer ViewerDataTraceConsumer(io.Writer w, int64 startIdx,
             }
             var allFramesʗ2 = allFramesʗ1;
             var requiredFramesʗ2 = requiredFramesʗ1;
-            WalkStackFrames(allFramesʗ1, v.Stack, (nint id) => {
+            WalkStackFrames(allFramesʗ1, v.Stack, [GoFunc("ViewerDataTraceConsumer.func2.1")] (nint id) => {
                 @string s = strconv.Itoa(id);
                 requiredFramesʗ2[s] = allFramesʗ2[s];
             });
             var allFramesʗ3 = allFramesʗ1;
             var requiredFramesʗ3 = requiredFramesʗ1;
-            WalkStackFrames(allFramesʗ1, v.EndStack, (nint id) => {
+            WalkStackFrames(allFramesʗ1, v.EndStack, [GoFunc("ViewerDataTraceConsumer.func2.2")] (nint id) => {
                 @string s = strconv.Itoa(id);
                 requiredFramesʗ3[s] = allFramesʗ3[s];
             });
@@ -88,10 +88,10 @@ public static TraceConsumer ViewerDataTraceConsumer(io.Writer w, int64 startIdx,
             // Same should be applied to splittingTraceConsumer.
             written++;
         },
-        ConsumeViewerFrame: (@string k, format.Frame v) => {
+        ConsumeViewerFrame: [GoFunc("ViewerDataTraceConsumer.func3")] (@string k, format.Frame v) => {
             allFramesʗ4[k] = v;
         },
-        Flush: () => {
+        Flush: [GoFunc("ViewerDataTraceConsumer.func4")] () => {
             io.WriteString(w, stackFramesˢ);
             encʗ3.Encode(requiredFramesʗ4);
             io.WriteString(w, @"}");
@@ -125,22 +125,22 @@ public static (ж<splitter>, TraceConsumer) SplittingTraceConsumer(nint max) {
         var allFramesʗ5 = allFrames;
         var sʗ1 = s;
     return (s, new TraceConsumer(
-        ConsumeTimeUnit: (@string unit) => {
+        ConsumeTimeUnit: [GoFunc("SplittingTraceConsumer.func1")] (@string unit) => {
             Ꮡdata.Value.TimeUnit = unit;
         },
-        ConsumeViewerEvent: (ж<format.Event> v, bool @required) => {
+        ConsumeViewerEvent: [GoFunc("SplittingTraceConsumer.func2")] (ж<format.Event> v, bool @required) => {
             if (@required) {
                 // Store required events inside data so flush
                 // can include them in the required part of the
                 // trace.
                 Ꮡdata.Value.Events = append(Ꮡdata.Value.Events, v);
                 var allFramesʗ2 = allFramesʗ1;
-                WalkStackFrames(allFramesʗ1, v.Stack, (nint id) => {
+                WalkStackFrames(allFramesʗ1, v.Stack, [GoFunc("SplittingTraceConsumer.func2.1")] (nint id) => {
                     @string sΔ1 = strconv.Itoa(id);
                     Ꮡdata.Value.Frames[sΔ1] = allFramesʗ2[sΔ1];
                 });
                 var allFramesʗ3 = allFramesʗ1;
-                WalkStackFrames(allFramesʗ1, v.EndStack, (nint id) => {
+                WalkStackFrames(allFramesʗ1, v.EndStack, [GoFunc("SplittingTraceConsumer.func2.2")] (nint id) => {
                     @string sΔ2 = strconv.Itoa(id);
                     Ꮡdata.Value.Frames[sΔ2] = allFramesʗ3[sΔ2];
                 });
@@ -151,19 +151,19 @@ public static (ж<splitter>, TraceConsumer) SplittingTraceConsumer(nint max) {
             ref var size = ref heap<SplittingTraceConsumer_eventSz>(new SplittingTraceConsumer_eventSz(Time: v.Time, Sz: Ꮡcw.Value.size + 1), out var Ꮡsize); // +1 for ",".
             // Add referenced stack frames. Their size is computed
             // in flush, where we can dedup across events.
-            WalkStackFrames(allFramesʗ1, v.Stack, (nint id) => {
+            WalkStackFrames(allFramesʗ1, v.Stack, [GoFunc("SplittingTraceConsumer.func2.3")] (nint id) => {
                 Ꮡsize.Value.Frames = append(Ꮡsize.Value.Frames, id);
             });
-            WalkStackFrames(allFramesʗ1, v.EndStack, (nint id) => {
+            WalkStackFrames(allFramesʗ1, v.EndStack, [GoFunc("SplittingTraceConsumer.func2.4")] (nint id) => {
                 Ꮡsize.Value.Frames = append(Ꮡsize.Value.Frames, id); // This may add duplicates. We'll dedup later.
             });
             Ꮡsizes.ValueSlot = append(Ꮡsizes.ValueSlot, Ꮡsize.Value);
             Ꮡcw.Value.size = 0;
         },
-        ConsumeViewerFrame: (@string k, format.Frame v) => {
+        ConsumeViewerFrame: [GoFunc("SplittingTraceConsumer.func3")] (@string k, format.Frame v) => {
             allFramesʗ4[k] = v;
         },
-        Flush: () => {
+        Flush: [GoFunc("SplittingTraceConsumer.func4")] () => {
             // Calculate size of the mandatory part of the trace.
             // This includes thread names and stack frames for
             // required events.

@@ -20,7 +20,7 @@ internal static slice<byte> colon = [(byte)':'];
 // Subsequent calls will return the cached value and will not reflect
 // changes to the current user.
 public static (ж<User>, error) Current() {
-    Ꮡcache.of(cacheᴛ1.ᏑOnce).Do(() => {
+    Ꮡcache.of(cacheᴛ1.ᏑOnce).Do([GoFunc("Current.func1")] () => {
         (cache.u, cache.err) = current();
     });
     if (cache.err != nil) {

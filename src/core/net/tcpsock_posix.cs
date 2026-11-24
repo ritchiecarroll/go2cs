@@ -99,7 +99,7 @@ internal static (ж<TCPConn>, error) doDialTCPProto⁔(/*this*/ ж<sysDialer> �
 
     var ctrlCtxFn = sd.Dialer.ControlContext;
     if (ctrlCtxFn == nil && sd.Dialer.Control != nil) {
-        ctrlCtxFn = (context.Context ctxΔ1, @string network, @string address, syscall.RawConn c) => Ꮡsd.Value.Dialer.Control(network, address, c);
+        ctrlCtxFn = [GoFunc("(*sysDialer).doDialTCPProto.func1")] (context.Context ctxΔ1, @string network, @string address, syscall.RawConn c) => Ꮡsd.Value.Dialer.Control(network, address, c);
     }
     var (fd, err) = internetSocket(ctx, sd.network, new TCPAddrжsockaddr(Ꮡladdr), new TCPAddrжsockaddr(raddr), syscall.SOCK_STREAM, proto, dialˢ, ctrlCtxFn);
 
@@ -207,7 +207,7 @@ internal static (ж<TCPListener>, error) listenTCPProto⁔(/*this*/ ж<sysListen
 
     Func<context.Context, @string, @string, syscall.RawConn, error> ctrlCtxFn = default;
     if (sl.ListenConfig.Control != nil) {
-        ctrlCtxFn = (context.Context ctxΔ1, @string network, @string address, syscall.RawConn c) => Ꮡsl.Value.ListenConfig.Control(network, address, c);
+        ctrlCtxFn = [GoFunc("(*sysListener).listenTCPProto.func1")] (context.Context ctxΔ1, @string network, @string address, syscall.RawConn c) => Ꮡsl.Value.ListenConfig.Control(network, address, c);
     }
     var (fd, err) = internetSocket(ctx, sl.network, new TCPAddrжsockaddr(laddr), default, syscall.SOCK_STREAM, proto, listenˢ, ctrlCtxFn);
     if (err != nil) {

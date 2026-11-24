@@ -8,7 +8,7 @@ partial class main_package {
 private static readonly object heyˢ = (@string)"hey"u8;
 
 internal static void main() {
-    void whatAmI(any i) {
+    [GoFunc("main.func1")] void whatAmI(any i) {
         switch (i.type()) {
         case null: {
             fmt.Println("I'm nil");
@@ -38,7 +38,7 @@ internal static void main() {
     whatAmI(heyˢ);
     whatAmI(default);
 
-    void classify(any i) {
+    [GoFunc("main.func2")] void classify(any i) {
         switch (i.type()) {
         case nint: {
             fmt.Println("int");
@@ -71,7 +71,7 @@ internal static void main() {
     classify(c);
     classify(d);
 
-    void kind(any i) {
+    [GoFunc("main.func3")] void kind(any i) {
         switch (i.type()) {
         case nuint: {
             fmt.Println("uint word");

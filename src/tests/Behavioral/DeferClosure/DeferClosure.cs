@@ -8,7 +8,7 @@ internal static void main() {
     GoFrame ᒐ = default;
     try {
         nint count = 0;
-        defer(() => {
+        defer([GoFunc("main.func1")] () => {
             fmt.Println("Deferred count (closure):", count);
         }, ref ᒐ);
         count = 10;

@@ -1073,7 +1073,7 @@ internal static void drawPaletted(Image dst, image.Rectangle r, image.Image src,
         quantErrorCurr = GoReflect.WithElemDims(new slice<array<int32>>(r.Dx() + 2, () => new(4)), 4);
         quantErrorNext = GoReflect.WithElemDims(new slice<array<int32>>(r.Dx() + 2, () => new(4)), 4);
     }
-    var pxRGBA = (nint x, nint y) => {
+    var pxRGBA = [GoFunc("drawPaletted.func1")] (nint x, nint y) => {
         return src.At(x, y).RGBA();
     };
     // Fast paths for special cases to avoid excessive use of the color.Color
@@ -1081,19 +1081,19 @@ internal static void drawPaletted(Image dst, image.Rectangle r, image.Image src,
     // each pixel on r. See also https://golang.org/issues/15759.
     switch (src.type()) {
     case ж<image.RGBA> src0: {
-        pxRGBA = (nint x, nint y) => {
+        pxRGBA = [GoFunc("drawPaletted.func2")] (nint x, nint y) => {
             return src0.RGBAAt(x, y).RGBA();
         };
         break;
     }
     case ж<image.NRGBA> src0: {
-        pxRGBA = (nint x, nint y) => {
+        pxRGBA = [GoFunc("drawPaletted.func3")] (nint x, nint y) => {
             return src0.NRGBAAt(x, y).RGBA();
         };
         break;
     }
     case ж<image.YCbCr> src0: {
-        pxRGBA = (nint x, nint y) => {
+        pxRGBA = [GoFunc("drawPaletted.func4")] (nint x, nint y) => {
             return src0.YCbCrAt(x, y).RGBA();
         };
         break;

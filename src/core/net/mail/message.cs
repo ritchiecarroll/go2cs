@@ -126,7 +126,7 @@ internal static (map<@string, slice<@string>>, error) readHeader(ж<textproto.Re
 
 // Layouts suitable for passing to time.Parse.
 // These are tried in order.
-internal static Func<slice<@string>> dateLayouts = sync.OnceValue(slice<@string> () => {
+internal static Func<slice<@string>> dateLayouts = sync.OnceValue([GoFunc("init.func1")] slice<@string> () => {
     // Generate layouts based on RFC 5322, section 3.3.
 
     var dows = array<@string>(["", "Mon, "]);   // day-of-week
@@ -586,7 +586,7 @@ internal static (@string spec, error err) consumeAddrSpec⁔(/*this*/ ж<addrPar
 
         ref var orig = ref heap<addrParser>(p, out var Ꮡorig);
         var origʗ1 = orig;
-        defer(() => {
+        defer([GoFunc("(*addrParser).consumeAddrSpec.func1")] () => {
             if (err != nil) {
                 Ꮡp.Value = origʗ1;
             }
@@ -900,7 +900,7 @@ internal static (@string, error) consumeDisplayNameComment⁔(/*this*/ ref addrP
     }
 
     // TODO(stapelberg): parse quoted-string within comment
-    var words = strings.FieldsFunc(comment, (rune r) => r == ' ' || r == '\t');
+    var words = strings.FieldsFunc(comment, [GoFunc("(*addrParser).consumeDisplayNameComment.func1")] (rune r) => r == ' ' || r == '\t');
     foreach (var (idx, word) in range(words)) {
         var (decoded, isEncoded, err) = p.decodeRFC2047Word(word);
         if (err != nil) {
@@ -1002,7 +1002,7 @@ internal static (@string word, bool isEncoded, error err) decodeRFC2047Word⁔(/
     var adec = dec.Value;
     var charsetReaderError = false;
     var decʗ1 = dec;
-    adec.CharsetReader = (@string charset, io.Reader input) => {
+    adec.CharsetReader = [GoFunc("(*addrParser).decodeRFC2047Word.func1")] (@string charset, io.Reader input) => {
         if (decʗ1.CharsetReader == nil) {
             charsetReaderError = true;
             return (default, ((charsetError)charset));
@@ -1032,7 +1032,7 @@ internal static (@string word, bool isEncoded, error err) decodeRFC2047Word⁔(/
 }
 
 [GoLazy] partial class lazyᴛrfc2047Decoder { internal static readonly ж<mime.WordDecoder> Ꮡrfc2047Decoder = new StaticBox<mime.WordDecoder>(new mime.WordDecoder(
-    CharsetReader: (@string charset, io.Reader input) => (default, ((charsetError)charset))
+    CharsetReader: [GoFunc("init.func2")] (@string charset, io.Reader input) => (default, ((charsetError)charset))
 )); }
 internal static ref mime.WordDecoder rfc2047Decoder => ref ((StaticBox<mime.WordDecoder>)Ꮡrfc2047Decoder).ValueSlot;
 

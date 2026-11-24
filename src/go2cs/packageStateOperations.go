@@ -150,6 +150,7 @@ func resetPackageState(pkg *packages.Package) {
 	packageDirectBoxReceiverMethods = make(map[*types.Func]bool)
 	packageRefReturnPrimaryMethods = make(map[*types.Func]bool)
 	initFuncCounter = 0
+	packageFuncLitGoNames = map[*ast.FuncLit]string{}
 	usesUnsafeCode = false
 	packageImportForces = hashset.HashSet[string]{}
 	packageImportInits = map[string]string{}

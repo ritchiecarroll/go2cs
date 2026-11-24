@@ -54,7 +54,7 @@ internal static partial void traceStartReadCPU() {
     trace.cpuSleep = newWakeableSleep();
     var done = new channel<EmptyStruct>(1);
     var doneʗ1 = done;
-    goǃ(() => {
+    goǃ([GoFunc("traceStartReadCPU.func1")] () => {
         while (traceEnabled()) {
             // Sleep here because traceReadCPU is non-blocking. This mirrors
             // how the runtime/pprof package obtains CPU profile data.
@@ -217,7 +217,7 @@ internal static void traceCPUFlush(uintptr gen) {
     {
         var buf = trace.cpuBuf[gen % 2]; if (buf != nil) {
             var bufʗ1 = buf;
-            systemstack(() => {
+            systemstack([GoFunc("traceCPUFlush.func1")] () => {
                 @lock(Ꮡtrace.of(traceᴛ1.Ꮡlock));
                 traceBufFlush(bufʗ1, gen);
                 unlock(Ꮡtrace.of(traceᴛ1.Ꮡlock));

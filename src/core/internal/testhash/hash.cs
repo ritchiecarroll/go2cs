@@ -25,7 +25,7 @@ public static void TestHash(ж<testing.T> t, MakeHash mh) {
     TestHashWithoutClone(t, mh);
 
     // Test whether the results after cloning are consistent.
-    t.Run(cloneˢ, (ж<testing.T> tΔ1) => {
+    t.Run(cloneˢ, [GoFunc("TestHash.func1")] (ж<testing.T> tΔ1) => {
         var (h, ok) = mh()._<hash.Cloner>(ᐧ);
         if (!ok) {
             tΔ1.Fatalf("%T does not implement hash.Cloner", (mh).OrTypedNilFunc());
@@ -78,7 +78,7 @@ private static readonly @string statefulWriteˢᵇ = "StatefulWrite"u8;
 
 public static void TestHashWithoutClone(ж<testing.T> t, MakeHash mh) {
     // Test that Sum returns an appended digest matching output of Size
-    t.Run(sumAppendˢ, (ж<testing.T> tΔ1) => {
+    t.Run(sumAppendˢ, [GoFunc("TestHashWithoutClone.func1")] (ж<testing.T> tΔ1) => {
         var h = mh();
         var rng = newRandReader(tΔ1);
 
@@ -115,7 +115,7 @@ public static void TestHashWithoutClone(ж<testing.T> t, MakeHash mh) {
     });
 
     // Test that Hash.Write never returns error.
-    t.Run(writeWithoutErrorˢ, (ж<testing.T> tΔ2) => {
+    t.Run(writeWithoutErrorˢ, [GoFunc("TestHashWithoutClone.func2")] (ж<testing.T> tΔ2) => {
         var h = mh();
         var rng = newRandReader(tΔ2);
 
@@ -132,7 +132,7 @@ public static void TestHashWithoutClone(ж<testing.T> t, MakeHash mh) {
         }
     });
 
-    t.Run(resetStateˢ, (ж<testing.T> tΔ3) => {
+    t.Run(resetStateˢ, [GoFunc("TestHashWithoutClone.func3")] (ж<testing.T> tΔ3) => {
         var h = mh();
         var rng = newRandReader(tΔ3);
 
@@ -151,7 +151,7 @@ public static void TestHashWithoutClone(ж<testing.T> t, MakeHash mh) {
     });
 
     // Check that Write isn't reading from beyond input slice's bounds
-    t.Run(outOfBoundsReadˢ, (ж<testing.T> tΔ4) => {
+    t.Run(outOfBoundsReadˢ, [GoFunc("TestHashWithoutClone.func4")] (ж<testing.T> tΔ4) => {
         var h = mh();
         nint blockSize = h.BlockSize();
         var rng = newRandReader(tΔ4);
@@ -181,7 +181,7 @@ public static void TestHashWithoutClone(ж<testing.T> t, MakeHash mh) {
     });
 
     // Test that multiple calls to Write is stateful
-    t.Run(statefulWriteˢ, (ж<testing.T> tΔ5) => {
+    t.Run(statefulWriteˢ, [GoFunc("TestHashWithoutClone.func5")] (ж<testing.T> tΔ5) => {
         var h = mh();
         var rng = newRandReader(tΔ5);
 

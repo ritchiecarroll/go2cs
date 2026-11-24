@@ -258,8 +258,9 @@ func (v *Visitor) writePositionSentinelCalls(goPos token.Pos, roots ...ast.Node)
 //
 // Calls inside a function literal are not the statement's (the literal's statements carry their own
 // sentinels). A conversion and a builtin are not calls a frame can be suspended in, so they are not
-// counted. A statement that invokes a function literal is not described at all: what such a call emits
-// is not a named call this can count.
+// counted. An immediately invoked literal (`func() { … }()`) is counted as `Invoke`: the converted call
+// invokes the delegate its lambda becomes, and Go answers the literal's caller with the line of its
+// `}(`, which is the call's own `(`.
 func (v *Visitor) laterLineCallPayload(stmtLine int, roots ...ast.Node) string {
 	if len(roots) == 0 || v.info == nil {
 		return ""
@@ -398,8 +399,6 @@ func (v *Visitor) laterLineCallName(call *ast.CallExpr) (name string, counted bo
 	var obj types.Object
 
 	switch fun := fun.(type) {
-	case *ast.FuncLit:
-		return "", false, false
 	case *ast.Ident:
 		obj = v.info.Uses[fun]
 	case *ast.SelectorExpr:
@@ -417,8 +416,9 @@ func (v *Visitor) laterLineCallName(call *ast.CallExpr) (name string, counted bo
 		return obj.Name(), true, true
 	}
 
-	// A func-typed variable, field or parameter, or any other expression yielding a func value: a
-	// delegate, invoked through Invoke.
+	// A func-typed variable, field or parameter, an immediately invoked literal (`func() { … }()`), or any
+	// other expression yielding a func value: a delegate, invoked through Invoke, whose call the per-call
+	// table counts like any other.
 	return "Invoke", true, true
 }
 
@@ -1000,10 +1000,10 @@ func encodePositionTable(entries []positionEntry) string {
 // because the frame's Go line already comes from this same record's line table, so both halves of
 // the answer are conversion-time facts and nothing is derived from Roslyn's numbering.
 //
-// Package-level literals (a `var x = func() { … }` initializer) are deliberately NOT recorded:
-// cmd/compile numbers those with a package-global `glob..funcN` counter whose order is a compile-
-// schedule fact rather than a per-file source fact, so a frame in one keeps the fallback answer,
-// exactly as any unrecorded frame does.
+// Package-level literals (a `var x = func() { … }` initializer) are NOT recorded here: cmd/compile
+// numbers those `init.funcN` with one package counter in initialization order (types.Info.InitOrder),
+// which is not a per-file source fact. Their names, like every literal's, ride the literal's own
+// [GoFunc] attribute (funcLitGoNames.go), which the runtime reads before this record.
 // ----------------------------------------------------------------------------------------------
 
 // funcLitEntry is one function literal's recorded name: the Go source lines it spans, and the

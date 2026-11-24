@@ -33,7 +33,7 @@ at run time and panics with the `runtime.Error` "negative shift amount" (`runtim
 below zero. Widened to `uint64` as the guard above widens a count, a negative count would read as a huge one
 and the shift would quietly give 0, or -1 for a signed right shift of a negative value. So the converter widens
 a SIGNED count to `int64` (`one.Lsh((int64)(neg))`, `x.LshAssign((int64)(neg))`, and `(int64)(c)`
-for a named count, through the wrapper's explicit operator to `int64`).<!-- src/tests/Behavioral/NegativeShiftCount/main.cs.target:49 (`arm("named count", () => fmt.Sprint(big.Lsh((int64)(c))));`) --> That binds `GoShift`'s signed-count overloads, which raise the panic through golib's
+for a named count, through the wrapper's explicit operator to `int64`).<!-- src/tests/Behavioral/NegativeShiftCount/main.cs.target:49 (`arm("named count", [GoFunc("main.func5")] () => fmt.Sprint(big.Lsh((int64)(c))));`) --> That binds `GoShift`'s signed-count overloads, which raise the panic through golib's
 `RuntimeErrorPanic.NegativeShiftAmount`. The runtime registers its own `shiftError` as the value, so
 `recover()` sees a `runtime.Error` whose text is Go's. A count of zero or more defers to the unsigned
 guard.
@@ -239,7 +239,7 @@ arm("int64", func() string { return fmt.Sprint(i64/int64(m1), " ", i64%int64(m1)
 ```
 <!-- source: src/tests/Behavioral/MinIntDivide/main.cs.target:118 -->
 ```csharp
-arm("int64", () => fmt.Sprint(quo(i64, (int64)m1), " ", rem(i64, (int64)m1)));
+arm("int64", [GoFunc("main.func3")] () => fmt.Sprint(quo(i64, (int64)m1), " ", rem(i64, (int64)m1)));
 ```
 
 Here `i64` holds `math.MinInt64`, `m1` is an `int` holding -1, `arm` runs the function under `recover` and

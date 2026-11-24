@@ -91,7 +91,7 @@ internal static void consume(ref slice<slice<byte>> v, int64 n) {
 }
 
 // TestHookDidWritev is a hook for testing writev.
-public static readonly ж<Action<nint>> ᏑTestHookDidWritev = new StaticBox<Action<nint>>((nint wrote) => {
+public static readonly ж<Action<nint>> ᏑTestHookDidWritev = new StaticBox<Action<nint>>([GoFunc("init.func1")] (nint wrote) => {
 });
 public static ref Action<nint> TestHookDidWritev => ref ((StaticBox<Action<nint>>)ᏑTestHookDidWritev).ValueSlot;
 

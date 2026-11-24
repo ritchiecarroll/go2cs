@@ -19,10 +19,10 @@ internal static partial @string who() {
 }
 
 internal static partial void siblings() {
-    void f1() {
+    [GoFunc("siblings.func1")] void f1() {
         fmt.Println("sibling-1:", who());
     }
-    void f2() {
+    [GoFunc("siblings.func2")] void f2() {
         fmt.Println("sibling-2:", who());
     }
     f1();
@@ -30,31 +30,31 @@ internal static partial void siblings() {
 }
 
 internal static partial void nested() {
-    var outer = () => {
-        void inner() {
+    var outer = [GoFunc("nested.func1")] () => {
+        [GoFunc("nested.func1.1")] void inner() {
             fmt.Println("nested-inner:", who());
         }
         fmt.Println("nested-outer:", who());
         inner();
     };
     run(outer);
-    void after() {
+    [GoFunc("nested.func2")] void after() {
         fmt.Println("after-nest:", who());
     }
     after();
 }
 
 internal static partial void second() {
-    void g() {
+    [GoFunc("second.func1")] void g() {
         fmt.Println("second-fn:", who());
     }
     g();
 }
 
 internal static partial void deep() {
-    var l1 = () => {
-        var l2 = () => {
-            void l3() {
+    var l1 = [GoFunc("deep.func1")] () => {
+        var l2 = [GoFunc("deep.func1.1")] () => {
+            [GoFunc("deep.func1.1.1")] void l3() {
                 fmt.Println("deep-3:", who());
             }
             l3();
@@ -67,11 +67,11 @@ internal static partial void deep() {
 }
 
 internal static partial void nestedSiblings() {
-    var o = () => {
-        void a() {
+    var o = [GoFunc("nestedSiblings.func1")] () => {
+        [GoFunc("nestedSiblings.func1.1")] void a() {
             fmt.Println("nest-sib-a:", who());
         }
-        void b() {
+        [GoFunc("nestedSiblings.func1.2")] void b() {
             fmt.Println("nest-sib-b:", who());
         }
         a();
@@ -83,7 +83,7 @@ internal static partial void nestedSiblings() {
 internal static partial void run(Action f) { f(); }
 
 internal static partial void viaArg() {
-    run(() => {
+    run([GoFunc("viaArg.func1")] () => {
         fmt.Println("via-arg:", who());
     });
 }
@@ -93,7 +93,7 @@ internal static partial void deferred() {
     try {
         fmt.Println("named-control:", who());
 
-        defer(() => {
+        defer([GoFunc("deferred.func1")] () => {
             fmt.Println("deferred:", who());
         }, ref ᒐ);
     }

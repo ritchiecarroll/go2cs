@@ -98,7 +98,7 @@ internal static lineFunc matchGroupIndexValue(@string value, nint idx) {
     }
     var substr = slice<byte>(leadColon + value + ":");
     var substrʗ1 = substr;
-    return (slice<byte> line) => {
+    return [GoFunc("matchGroupIndexValue.func1")] (slice<byte> line) => {
         any v = default;
         error err = default;
         if (!bytes.Contains(line, substrʗ1) || bytes.Count(line, colon) < 3) {
@@ -148,7 +148,7 @@ internal static lineFunc matchUserIndexValue(@string value, nint idx) {
     }
     var substr = slice<byte>(leadColon + value + ":");
     var substrʗ1 = substr;
-    return (slice<byte> line) => {
+    return [GoFunc("matchUserIndexValue.func1")] (slice<byte> line) => {
         any v = default;
         error err = default;
         if (!bytes.Contains(line, substrʗ1) || bytes.Count(line, colon) < 6) {

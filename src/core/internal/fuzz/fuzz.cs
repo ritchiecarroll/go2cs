@@ -129,7 +129,7 @@ public static partial error /*err*/ CoordinateFuzzing(context.Context ctx, Coord
         var cʗ1 = c;
         var cancelWorkersʗ2 = cancelWorkers;
         var fuzzCtxʗ1 = fuzzCtx;
-        [MethodImpl(MethodImplOptions.NoInlining)] void stop(error errΔ2) {
+        [MethodImpl(MethodImplOptions.NoInlining), GoFunc("CoordinateFuzzing.func1")] void stop(error errΔ2) {
             if (shouldPrintDebugInfo()) {
                 var (_, @file, line, ok) = Δruntime.Caller(1);
                 if (ok) {
@@ -161,7 +161,7 @@ public static partial error /*err*/ CoordinateFuzzing(context.Context ctx, Coord
         var crashWritten = false;
         var cʗ2 = c;
         var optsʗ1 = opts;
-        defer(() => {
+        defer([GoFunc("CoordinateFuzzing.func2")] () => {
             if (cʗ2.crashMinimizing == nil || crashWritten) {
                 return;
             }
@@ -199,7 +199,7 @@ public static partial error /*err*/ CoordinateFuzzing(context.Context ctx, Coord
             var errCʗ1 = errC;
             var fuzzCtxʗ2 = fuzzCtx;
             var wʗ1 = w;
-            goǃ(() => {
+            goǃ([GoFunc("CoordinateFuzzing.func3")] () => {
                 var errΔ4 = wʗ1.coordinate(fuzzCtxʗ2);
                 if (fuzzCtxʗ2.Err() != nil || isInterruptError(errΔ4)) {
                     errΔ4 = default;

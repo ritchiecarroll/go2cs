@@ -25,7 +25,7 @@ internal static (ж<sharedMem> mem, error err) sharedMemMapFile(ж<os.File> f, n
     try {
         ref var err = ref Ꮡerr.ValueSlot;
 
-        defer(() => {
+        defer([GoFunc("sharedMemMapFile.func1")] () => {
             if (Ꮡerr.ValueSlot != nil) {
                 Ꮡerr.ValueSlot = fmt.Errorf("mapping temporary file %s: %w"u8, f.Value.Name(), Ꮡerr.ValueSlot);
             }

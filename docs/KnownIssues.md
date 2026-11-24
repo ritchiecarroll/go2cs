@@ -217,6 +217,14 @@ waits inside code built without twins keeps its thread while it waits. The other
 reads are measurement switches, not settings: none is supported, and they may change or go away. The diagnostics
 `GO2CS0014` through `GO2CS0018` ([Diagnostic codes](DiagnosticCodes.md)) come only from a build with twins.
 
+**A plain read and a call in the same expression can see different values with and without twins.** In an expression
+such as `fmt.Println(a, f())`, Go orders only the calls: the read of `a` may come before or after `f()`, and the gc
+compiler reads it after. The converted code reads operands left to right, as C# does, so when `f` changes `a` it prints
+the value `a` had before the call. Built with twins and run with `GO2CS_MN=1`, a call that can wait is sometimes
+evaluated ahead of the plain reads in its expression, as gc evaluates it, and then the program prints the value after
+the call. Both orders are allowed by the Go specification; a program whose output depends on the difference relies on
+unspecified behavior.
+
 ## With go2cs 1.26.10.2 or earlier, a program converted with local standard-library references runs its standard library built Debug
 
 **Symptom.** A program converted by go2cs 1.26.10.2 or earlier with plain `-recurse` or `-recurse=module`
@@ -681,3 +689,45 @@ reads back under its own name, and this refusal is retired.
      (2a), durable cure as its own .5 seat (2b). The three projection sites: src/core/golib/GoReflect.FieldAccess.cs:404
      `if (projected.StartsWith(ShadowVarMarker, StringComparison.Ordinal))` (fields), GoReflect.TypeNaming.cs:718 `if (name.StartsWith(ShadowVarMarker, StringComparison.Ordinal))` (type names), runtime/TypeExtensions.GoMethodSets.cs:709 `emittedName.StartsWith(ShadowVarMarker, StringComparison.Ordinal)` (methods). The
      refusal: src/go2cs/markerGlyphRefusal.go, deltaProjectionReason. -->
+
+## In optimized code, `runtime.Caller` can report an earlier line of the calling function {#in-optimized-code-runtimecaller-can-report-an-earlier-line-of-the-calling-function}
+
+<!-- Measured 2026-11-22 on linux-x64 (.NET 10), go1.26.11, converter/generator at claude/c2-m1-test-noopt, with a
+     converted program whose function keeps runtime.Caller(0)'s line in a local across a three-line method chain and
+     then reads its own line from a slice literal; Go answers line+5. Release, default tiering: +5 on the first call
+     and after 500 calls, 0 after 200,500 calls and a pause (tiered up). Release with DOTNET_TieredCompilation=0: 0 from
+     the first call. Debug build: +5. Release with DOTNET_JITMinOpts=1: +5. Cost, crypto/sha256 over 64 MiB in the same
+     program, two runs each: Release default 0.71 s, Release TieredCompilation=0 1.4-1.6 s, Release JITMinOpts=1
+     23.4-23.9 s, Debug 26.7-27.1 s (Go: 63 ms). COORD 211538Z and the owner (212210Z) ruled: test functions only are
+     compiled unoptimized; production keeps its optimizations, with these routes documented.
+     Same-name calls, measured 2026-11-22 with a C# probe (three chained calls of one method, each callee reading its
+     caller's StackFrame.GetILOffset): Release gives 5, 5, 5 under the tiered JIT, TieredCompilation=0 and JITMinOpts
+     alike; Debug 7, 13, 18; Release IL in an assembly marked DisableOptimizations 5, 11, 16. A converted test chain
+     read [23 23] under JITMinOpts and [23 24], Go's answer, with its test assembly compiled Optimize=false (COORD
+     23:57Z, option 2: the test assembly switch, go.lib.symbols.targets). -->
+A function compiled with optimizations can lose the exact position of a call it makes. A `runtime.Caller` that reads
+that function's frame, from a function it calls, then reports the line of the function's first statement instead of
+the line of the call. Go always reports the call's line. This is measured on `linux-x64` and follows from how .NET's
+optimizing JIT records positions, so it is expected on every platform.
+
+The loss needs a particular shape, measured here as a function that keeps `runtime.Caller`'s result in a variable
+across a method chain written over several lines. Most functions report Go's lines. Under the default runtime
+settings a converted program reports the right line until the JIT recompiles the function with full optimization,
+which happens after it has run many times. With `DOTNET_TieredCompilation=0` it is compiled optimized from the start.
+
+A `Release` build also gives every call in one statement the position of the statement. Two calls to the same function
+in one statement, such as a method chain written over several lines (`b.On(1).` then `On(2)` on the next line), then
+both report the line of the first call. This holds under every JIT setting, because the positions a frame can report
+are fixed when the assembly is compiled.
+
+Converted Go tests are not affected. The test assembly go2cs writes for a package's tests is compiled without
+optimization, so `t.Logf`, testify's failure locations and every other line read from test code match Go, while the
+package under test stays optimized. To build a test assembly optimized, for a benchmark run, set the MSBuild property
+`GoTestOptimize` to `true` (`-p:GoTestOptimize=true`).
+
+To get Go's lines in a program, use one of these, at a large cost in speed:
+- a `Debug` build, which reports both cases as Go does: in the measurement above, about 38 times slower than the
+  default `Release` build on a `crypto/sha256` workload;
+- `DOTNET_JITMinOpts=1` in the program's environment, which keeps a `Release` build but turns off JIT optimization: it
+  reports the call's line instead of the function's first statement, but not two calls of one function in one
+  statement apart; about 33 times slower on the same workload.

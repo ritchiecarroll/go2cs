@@ -65,7 +65,7 @@ internal static void swapEmitter(ж<logger> l, bool swap) {
 internal static void main() {
     apply(gather);
 
-    apply((@string prefix, params ꓸꓸꓸnint valsʗp) => {
+    apply([GoFunc("main.func1")] (@string prefix, params ꓸꓸꓸnint valsʗp) => {
         var vals = valsʗp.sslice();
         return fmt.Sprintf("%s|%d"u8, prefix, len(vals));
     });
@@ -79,7 +79,7 @@ internal static void main() {
     f = gather;
     fmt.Println(f("var", 10));
 
-    report((@string format, params ꓸꓸꓸany argsʗp) => {
+    report([GoFunc("main.func2")] (@string format, params ꓸꓸꓸany argsʗp) => {
         var args = argsʗp.sslice();
         fmt.Printf(format + "\n"u8, args.ꓸꓸꓸ);
     });

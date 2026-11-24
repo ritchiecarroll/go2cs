@@ -233,7 +233,7 @@ internal static void addMul(ж<Func> Ꮡf, @string addsrc, @string mulsrc, nint 
     var cʗ1 = c;
     var mʗ1 = m;
     var pʗ1 = p;
-    p.Loop((slice<slice<Reg>> @in, slice<slice<Reg>> @out) => {
+    p.Loop([GoFunc("addMul.func1")] (slice<slice<Reg>> @in, slice<slice<Reg>> @out) => {
         aʗ1.Comment(multiplyˢ);
         var prev = cʗ1;
         Carry flag = SetCarry;
@@ -300,7 +300,7 @@ internal static void addMulAlt(ж<Func> Ꮡf) {
     ref var prev = ref heap<Reg>(c, out var Ꮡprev);
     p.Start(n, 1, 8);
     var aʗ1 = a;
-    p.AtUnrollStart(() => {
+    p.AtUnrollStart([GoFunc("addMulAlt.func1")] () => {
         aʗ1.Comment(multiplyAndAddˢ);
         aʗ1.ClearCarry((Carry)(AddCarry | AltCarry));
         aʗ1.ClearCarry(AddCarry);
@@ -309,7 +309,7 @@ internal static void addMulAlt(ж<Func> Ꮡf) {
     var aʗ2 = a;
     var cʗ1 = c;
     var r0ʗ1 = r0;
-    p.AtUnrollEnd(() => {
+    p.AtUnrollEnd([GoFunc("addMulAlt.func2")] () => {
         aʗ2.Add(r0ʗ1, Ꮡprev.Value, cʗ1, (Carry)(UseCarry | SmashCarry));
         aʗ2.Add(r0ʗ1, cʗ1, cʗ1, (Carry)((Carry)(UseCarry | SmashCarry) | AltCarry));
         Ꮡprev.Value = cʗ1;
@@ -317,7 +317,7 @@ internal static void addMulAlt(ж<Func> Ꮡf) {
     var aʗ3 = a;
     var mʗ1 = m;
     var pʗ1 = p;
-    p.Loop((slice<slice<Reg>> @in, slice<slice<Reg>> @out) => {
+    p.Loop([GoFunc("addMulAlt.func3")] (slice<slice<Reg>> @in, slice<slice<Reg>> @out) => {
         foreach (var (i, y) in range(@in[1])) {
             var x = @in[0][i];
             var lo = y;
@@ -357,7 +357,7 @@ internal static void addMulVirtualCarry(ж<Func> Ꮡf, nint mulIndex) {
     var cʗ1 = c;
     var mʗ1 = m;
     var pʗ1 = p;
-    p.Loop((slice<slice<Reg>> @in, slice<slice<Reg>> @out) => {
+    p.Loop([GoFunc("addMulVirtualCarry.func1")] (slice<slice<Reg>> @in, slice<slice<Reg>> @out) => {
         aʗ1.Comment(syntheticCarryOneColumnˢ);
         var (lo, hi) = (aʗ1.Reg(), aʗ1.Reg());
         foreach (var (i, x) in range(@in[mulIndex])) {

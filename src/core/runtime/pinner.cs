@@ -132,7 +132,7 @@ internal static bool setPinned(@unsafe.Pointer ptr, bool pin) {
             // and increase the pin counter
             // TODO(mknyszek): investigate if systemstack is necessary here
             var spanʗ1 = span;
-            systemstack(() => {
+            systemstack([GoFunc("setPinned.func1")] () => {
                 var offset = objIndex * spanʗ1.elemsize;
                 spanʗ1.incPinCounter(offset);
             });
@@ -147,7 +147,7 @@ internal static bool setPinned(@unsafe.Pointer ptr, bool pin) {
                 bool exists = default;
                 // TODO(mknyszek): investigate if systemstack is necessary here
                 var spanʗ2 = span;
-                systemstack(() => {
+                systemstack([GoFunc("setPinned.func2")] () => {
                     var offset = objIndex * spanʗ2.elemsize;
                     exists = spanʗ2.decPinCounter(offset);
                 });
@@ -330,7 +330,7 @@ internal static bool decPinCounter⁔(/*this*/ ж<mspan> Ꮡspan, uintptr offset
 
 // to be able to test that the GC panics when a pinned pointer is leaking, this
 // panic function is a variable, that can be overwritten by a test.
-internal static Action pinnerLeakPanic = () => {
+internal static Action pinnerLeakPanic = [GoFunc("init.func1")] () => {
     throw panic(((errorString)(@string)"runtime.Pinner: found leaking pinned pointer; forgot to call Unpin()?"));
 };
 

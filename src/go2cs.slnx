@@ -528,6 +528,9 @@
     <Project Path="tests/Behavioral/DerivedInterfaceStructuralProbe/DerivedInterfaceStructuralProbe.csproj" />
     <Project Path="tests/Behavioral/DirectBoxReceiverPassedWhole/DirectBoxReceiverPassedWhole.csproj" />
     <Project Path="tests/Behavioral/DivideByZeroPanic/DivideByZeroPanic.csproj" />
+    <Project Path="tests/Behavioral/DotImportAdapterNameInHolder/DotImportAdapterNameInHolder.csproj" />
+    <Project Path="tests/Behavioral/DotImportAdapterNameInHolder/a/sinks/DotImportAdapterNameInHolder.a.sinks.csproj" />
+    <Project Path="tests/Behavioral/DotImportAdapterNameInHolder/b/sinks/DotImportAdapterNameInHolder.b.sinks.csproj" />
     <Project Path="tests/Behavioral/DotImportNameCollision/DotImportNameCollision.csproj" />
     <Project Path="tests/Behavioral/DotImportNameCollision/a/keys/DotImportNameCollision.a.keys.csproj" />
     <Project Path="tests/Behavioral/DotImportNameCollision/b/keys/DotImportNameCollision.b.keys.csproj" />
@@ -791,6 +794,8 @@
     <Project Path="tests/Behavioral/LinknameVarPullLib/LinknameVarPullLib.csproj" />
     <Project Path="tests/Behavioral/LinuxSpawnBasics/LinuxSpawnBasics.csproj" />
     <Project Path="tests/Behavioral/LiteralFloatConstFold/LiteralFloatConstFold.csproj" />
+    <Project Path="tests/Behavioral/LiteralFrameNames/LiteralFrameNames.csproj" />
+    <Project Path="tests/Behavioral/LiteralFrameNames/framelib/LiteralFrameNames.framelib.csproj" />
     <Project Path="tests/Behavioral/LocalNamedPointerConversion/LocalNamedPointerConversion.csproj" />
     <Project Path="tests/Behavioral/LocalNamedTypeDecls/LocalNamedTypeDecls.csproj" />
     <Project Path="tests/Behavioral/LocalFunctionEmission/LocalFunctionEmission.csproj" />
@@ -1065,6 +1070,7 @@
     <Project Path="tests/Behavioral/PointerEmbedValueChainPromotion/PointerEmbedValueChainPromotion.csproj" />
     <Project Path="tests/Behavioral/PointerElementAtUnsignedIndex/PointerElementAtUnsignedIndex.csproj" />
     <Project Path="tests/Behavioral/PointerParamWalk/PointerParamWalk.csproj" />
+    <Project Path="tests/Behavioral/PointerPrintIdentity/PointerPrintIdentity.csproj" />
     <Project Path="tests/Behavioral/PointerParamNames/PointerParamNames.csproj" />
     <Project Path="tests/Behavioral/PointerArrayRange/PointerArrayRange.csproj" />
     <Project Path="tests/Behavioral/PointerCastSliceRange/PointerCastSliceRange.csproj" />
