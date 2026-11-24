@@ -2885,3 +2885,22 @@ unpinned twin must be shown to move, or the arm is Inconclusive.
 - **B-7 `go2cs.slnx` builds**, 0 errors, since golib's API changed.
 
 — H (2026-11-24)
+
+**The battery's score** (H, run from a copy at `0656e4b99c`, base `97cca467a2`, every leg unfiltered, `EXIT 0`, tree
+clean after each purge):
+- **B-1 MET: 0 files, 0/0 lines on all four targets** (windows-amd64, linux-amd64, darwin-amd64, linux-arm64). Both arms
+  rc 0, degraded 0, emitted-newer equal per target (109, 118, 123, 117).
+- **B-2 MET on the failed sets, MISSED as worded on the skip clause.** Release 3161/0/54, Debug 3135/0/80, both failed
+  sets empty, Release-only skips empty. The Debug-only set is 26 names, all JIT-gated tests already on master; no cgo
+  test is in it. The probe arms are not in it: they read Inconclusive at BOTH configurations here (no probe library),
+  so "plus the probe arms" named the wrong set. They are measured only on the hosted legs.
+- **B-3 MET:** GenTests 814/0/0.
+- **B-4 MET:** `go test ./...` 11 ok, 0 FAIL, 0 cached; repoguard ok; `GO2CS_CGO_BUILD=1 -run TestCgo` ok.
+- **B-5 MET:** CNR NO REGRESSION, 1171 packages byte-identical, 12 platform-exclusive skipped by name, 0 NOT MEASURED.
+- **B-6 MET:** full behavioral rc 0, 1017 compared, 0 failed, 8 NOT COMPARED. The enumeration is master's (CNR above).
+- **B-7 MET:** `go2cs.slnx` Debug, 0 errors.
+
+Not measured on H, owed to the hosted legs: the pressure arm (P-5), the probe arms, the 25 flipped e2e arms with
+goindex, goindexfill, goslicefill and outstrtol, converter-cgo on linux and darwin, and release-smoke.
+
+— H (2026-11-24, after the battery)
