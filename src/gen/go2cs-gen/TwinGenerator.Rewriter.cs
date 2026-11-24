@@ -1365,7 +1365,7 @@ public sealed partial class TwinGenerator
                 {
                     SyntaxTriviaList leading = visited.GetLeadingTrivia();
 
-                    // P3's MUST on the closure cure: a LABELED statement's labels move onto its first moved call, so a
+                    // A LABELED statement's labels move onto its first moved call, so a
                     // `goto L` runs the moved calls again, as it ran them in the statement (`retry: for u.init(); …` with
                     // a parking init: `retry: await …initꞏtwin(…); … for (; …)`, never `await …; retry: for (; …)`).
                     List<LabeledStatementSyntax> labels = [];
@@ -1523,7 +1523,7 @@ public sealed partial class TwinGenerator
             // initializer (go/internal/gcimporter's `for ((nint i, nint n) = (0, r.Len()); …)`) stays in the header: its
             // await is nested, so it parses, and moved before the loop its variables would leave the loop's scope (CS0136).
             // The converter writes at most ONE initializer (Go's for has one init statement); the list form is C#'s. Under a
-            // label, the statement list moves the labels onto the first moved initializer (P3's MUST), so a goto re-runs it.
+            // label, the statement list moves the labels onto the first moved initializer, so a goto re-runs it.
             int initialAwaits = m_awaits;
             List<ExpressionSyntax> started = [.. node.Initializers.Select(item => Head(item)!)];
             SeparatedSyntaxList<ExpressionSyntax> initializers = SeparatedList(started, node.Initializers.GetSeparators());

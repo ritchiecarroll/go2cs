@@ -45,7 +45,7 @@ public sealed partial class TwinGenerator
         // The receiver's name when this method gets a box twin (9.3): an extension whose FIRST parameter, and only it, is a
         // plain `ref` (never `in`, `out` or `ref readonly`, which copy in Go), not [GoCopyBound] (a value-method-set
         // forwarder, bound through a copy), with a body, and whose body names no `Ꮡ<receiver>` already. The body may be an
-        // EXPRESSION: since the glyph seat (C1, train 4) a method is a `M(this ref T t, …) => M⁔(ref t, …)` forwarder whose
+        // EXPRESSION: since method bodies moved to the package class (the ⁔ suffix form), a method is a `M(this ref T t, …) => M⁔(ref t, …)` forwarder whose
         // body is `M⁔`. Refused for want of a block, those forwarders had no box twin, so a twinned caller holding the box
         // called the plain forwarder and everything under it ran plain (DATA-mn-closure-cure.md: parks 36 -> 0).
         private string? BoxReceiverOf(MethodDeclarationSyntax method, IMethodSymbol symbol)
