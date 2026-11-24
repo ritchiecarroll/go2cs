@@ -21,6 +21,9 @@ import (
 	"testing"
 )
 
+// The fixture calls strtod, not abs: gcc compiles abs as a builtin, so cmd/cgo's binary imports no symbol for it and the
+// verified-names rule refuses it by name (read on the hosted leg 45488939174). strtod is the p3 fixture's, proven on
+// linux, darwin and windows.
 const cgoTestsFixture = `package cgot4
 
 /*
@@ -28,23 +31,30 @@ const cgoTestsFixture = `package cgot4
 */
 import "C"
 
-// Abs is C's abs, through the cgo route.
-func Abs(x int) int { return int(C.abs(C.int(x))) }
+import "unsafe"
+
+// Parse is C's strtod over a C copy of s, through the cgo route.
+func Parse(s string) float64 {
+	cs := C.CString(s)
+	defer C.free(unsafe.Pointer(cs))
+
+	return float64(C.strtod(cs, nil))
+}
 `
 
 const cgoTestsFixtureTest = `package cgot4
 
 import "testing"
 
-func TestAbsCrossesToC(t *testing.T) {
-	if got := Abs(-3); got != 3 {
-		t.Errorf("Abs(-3) = %d, want 3", got)
+func TestParseCrossesToC(t *testing.T) {
+	if got := Parse("1.5abc"); got != 1.5 {
+		t.Errorf("Parse(\"1.5abc\") = %v, want 1.5", got)
 	}
 }
 
-func TestAbsOfZero(t *testing.T) {
-	if got := Abs(0); got != 0 {
-		t.Errorf("Abs(0) = %d, want 0", got)
+func TestParseOfNothing(t *testing.T) {
+	if got := Parse("abc"); got != 0 {
+		t.Errorf("Parse(\"abc\") = %v, want 0", got)
 	}
 }
 `
@@ -97,7 +107,7 @@ func TestACgoPackageConvertsWithItsTestsAndMatchesGo(t *testing.T) {
 
 	t.Logf("READING: status %q matched %v go %v csharp %v errors %v", record.Status, record.Matched, record.Go, record.CSharp, record.Errors)
 
-	for _, name := range []string{"TestAbsCrossesToC", "TestAbsOfZero"} {
+	for _, name := range []string{"TestParseCrossesToC", "TestParseOfNothing"} {
 		if record.Go[name] != "pass" || record.CSharp[name] != "pass" {
 			t.Errorf("%s: go %q, go2cs %q, want pass on both sides", name, record.Go[name], record.CSharp[name])
 		}
