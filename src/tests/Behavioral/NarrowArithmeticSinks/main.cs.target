@@ -12,7 +12,7 @@ partial struct holder {
     internal any v;
 }
 
-// type byteFunc is a methodless func type — rendered inline as its base delegate
+internal delegate @string byteFunc(byte _);
 
 internal static int8 a = 100;
 internal static uint8 u = 200;
@@ -186,7 +186,7 @@ internal static void main() {
     arm("negated minimum", [GoFunc("main.func31")] () => fmt.Sprint((nint)((int8)(-m8)), " ", (int64)((int8)(-m8))));
     arm("named func param", [GoFunc("main.func32")] () => {
 
-        Func<byte, @string> f = [GoFunc("main.func32.1")] (byte b) => fmt.Sprint(b);
+        byteFunc f = [GoFunc("main.func32.1")] (byte b) => fmt.Sprint(b);
         return f((byte)(u + w8)) + " "u8 + f((byte)((u >> 1)));
     });
 

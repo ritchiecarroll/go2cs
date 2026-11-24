@@ -43,7 +43,7 @@ partial struct stringer {
     internal @string s;
 }
 
-internal static (nint, F) pairF() { return (1, (@string _) => default); }
+internal static (nint, F) pairF() { return (1, [GoFunc("pairF.func1")] (@string _) => default); }
 
 internal static @string /*out*/ deferF(F f) {
     @string @out = default;
@@ -69,14 +69,14 @@ internal delegate nint handler(ж<node> _Δp0, nint _Δp1);
 internal static error check(this stringer s, @string _) { return default; }
 
 internal static void main() {
-    F f = (@string _Δp0) => default;
-    var plain = error (@string _Δp0) => default;
+    F f = [GoFunc("main.func1")] (@string _Δp0) => default;
+    var plain = [GoFunc("main.func2")] error (@string _Δp0) => default;
 
     show("F", (f).OrTypedNilFunc());
     F nilF = default;
     show("nil F", (nilF).OrTypedNilFunc());
-    show("hooks.Handler", new hooks.Handler((nint x) => x));
-    show("G", new G((nint x) => x));
+    show("hooks.Handler", new hooks.Handler([GoFunc("main.func3")] (nint x) => x));
+    show("G", new G([GoFunc("main.func4")] (nint x) => x));
     show("Alias", (((Alias)plain)).OrTypedNilFunc());
     show("unnamed", (plain).OrTypedNilFunc());
 
@@ -114,7 +114,7 @@ internal static void main() {
     F mv = (@string p1) => sʗ1.check(p1);
     var sʗ2 = s;
     fmt.Println("method value", mv("") == nil, NilSafeDelegateConversion<F, Func<@string, error>>((@string p1) => sʗ2.check(p1))("") == nil);
-    F lit = (@string _Δp0) => fmt.Errorf("lit"u8);
+    F lit = [GoFunc("main.func5")] (@string _Δp0) => fmt.Errorf("lit"u8);
     fmt.Println("func literal", lit("").Error());
     F none = default;
     fmt.Println("nil", none == nil, f != nil);
@@ -130,11 +130,11 @@ internal static void main() {
     var byName = new map<@string, F>{["plain"] = NilSafeDelegateConversion<F, Func<@string, error>>(plain), ["f"] = f};
     fmt.Println("keyed", table[1](Ꮡ(new node(2)), 3), table[2](Ꮡ(new node(2)), 3), table[0] == nil, byName["plain"]("") == nil, len(byName));
 
-    fmt.Println("hooks", hooks.Apply((nint x) => x * 3, 2), hooks.Raw(NilSafeDelegateConversion<Func<nint, nint>, hooks.Handler>(hooks.Make(5)), 1), hooks.Apply(hooks.Make(1), 1));
+    fmt.Println("hooks", hooks.Apply([GoFunc("main.func6")] (nint x) => x * 3, 2), hooks.Raw(NilSafeDelegateConversion<Func<nint, nint>, hooks.Handler>(hooks.Make(5)), 1), hooks.Apply(hooks.Make(1), 1));
 
     Alias al = NilSafeDelegateConversion<Alias, F>(f);
     fmt.Println("alias", al("") == nil);
-    G g = (nint x) => x + 1;
+    G g = [GoFunc("main.func7")] (nint x) => x + 1;
     fmt.Println("method type", g.Twice(1));
 }
 
