@@ -1699,6 +1699,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckNamedPointerLocalSurface() => CheckTarget("NamedPointerLocalSurface");
 
     [TestMethod]
+    public void CheckNamedPointerNilInterface() => CheckTarget("NamedPointerNilInterface");
+
+    [TestMethod]
     public void CheckNamedPointerParamArgument() => CheckTarget("NamedPointerParamArgument");
 
     [TestMethod]

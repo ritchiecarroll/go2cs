@@ -2895,6 +2895,7 @@ body also reads through it ([glyph table](#reading-converted-code-names-and-glyp
 | `p == nil`, or `nil` passed to a pointer parameter | `p == nil` (`Ꮡp == nil` where the body also reads through `p`), `f(nil)` | golib's `nil` matches both forms of a nil pointer. |
 | `var x any = (*int)(nil)` | `any x = ((ж<nint>)nil);` | The interface keeps the type `*int`. |
 | `var dpi any = dp`, for a pointer `dp` | `any dpi = dp.OrTypedNil();` | The same, for a pointer variable. |
+| `var x any = p`, for `p` of a named pointer type `P` | `any x = (p ?? (P)nil);` | The same, for a named pointer type's wrapper class. |
 | `var a [5]int` | `array<nint> a = new(5);` | The array needs its length. |
 | `var z holder`, a struct holding an array | `holder z = new();` | C#'s `default` skips field initializers. |
 | `var e Embedded`, a struct that embeds a type | `Embedded e = new(nil);` | The constructor builds each embedded field. |

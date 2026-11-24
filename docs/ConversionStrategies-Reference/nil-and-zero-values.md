@@ -489,9 +489,9 @@ there at all. (Guarded by the `MultiValueReturnOrder` behavioral test's identity
 `(*thing, error)` call forwarded into `(any, error)`, then read back through a type switch and both
 assertions; before the fix the switch takes the `case thing` arm and the `*thing` assertion panics.)
 
-The scope is a genuine `*T` (a `types.Pointer`). `unsafe.Pointer` is a Basic and renders as a
-struct, and a NAMED pointer type renders as its generated wrapper struct — neither can be a null
-reference, so neither has anything to carry. An address-of (`&x`), a `new(T)`, a `(*T)(nil)` and a
+The scope of this arm is a genuine `*T` (a `types.Pointer`). `unsafe.Pointer` and a NAMED pointer
+type are classes whose zero value is a null reference too, so each crosses through its own canonical
+typed nil; the named pointer's arm is the next section. An address-of (`&x`), a `new(T)`, a `(*T)(nil)` and a
 pointer CONVERSION of any of those (`(*Buffer)(&b)`, log/slog's buffer pool) render non-null by
 construction and are left bare.
 
@@ -503,6 +503,75 @@ pointer method set. Guarded by the extended `TypedNilInterface` (declared/field/
 nils through every one of those slots, `%T`, `==`, and a type assert, output-compared vs `go run`;
 before the fix it reports `dpi==nil true` where Go says `false` and panics dereferencing a nil box
 on the return path).
+
+## A named pointer type crosses into `any` as its own typed nil
+
+A Go defined pointer type (`type P *T`) becomes a generated wrapper class, and the zero value of a
+class is a null reference. So wherever a value of a named pointer type enters an empty interface,
+the converter turns a null wrapper into the type's canonical typed nil, the same instance a `P(nil)`
+conversion yields. The interface then holds dynamic type `P` as Go's does: `x != nil` is true,
+`x.(P)` succeeds with a nil result, `%T` prints `main.P` and a type switch takes `case P`.
+
+```go
+type T struct{ n int }
+
+type P *T
+
+type IP *int
+…
+func main() {
+	var p P
+	var x any = p
+	report("assign P", x)
+
+	var ip IP
+	var y any = ip
+	report("assign IP", y)
+
+	var up *T
+	var z any = up
+```
+<!-- source: src/tests/Behavioral/NamedPointerNilInterface/NamedPointerNilInterface.cs.target:65-74 -->
+```csharp
+    P p = default;
+    any x = (p ?? (P)nil);
+    report("assign P", x);
+
+    IP ip = default;
+    any y = (ip ?? (IP)nil);
+    report("assign IP", y);
+
+    ж<T> up = default;
+    any z = up.OrTypedNil();
+```
+
+`(P)nil` is the wrapper's public conversion from `nil`, which answers the type's canonical typed nil
+(`NilInstance`), so the form holds for a named pointer type of another package too. The unnamed
+`*T` beside it takes the [pointer arm](#a-pointer-crossing-into-an-interface-carries-its-static-type-however-the-pointer-was-produced)
+(`.OrTypedNil()`, `ж<T>.NilBox`); the wrapper is not a `ж<T>`, so that accessor cannot serve it.
+
+**Every boxing slot takes it**: an assignment, a return, an argument, a map value, an `[]any`
+element, a struct-literal `any` field, a map miss, a struct field and a slice element. A rendering
+that cannot be null passes through bare: a conversion of nil or of an address, such as `P(nil)` or
+`P(&t)`.
+
+**A value of type-parameter type** boxed inside a generic body takes golib's `OrTypedNilOf`, which
+decides per type argument; for a named pointer type argument it answers the same `NilInstance`.
+
+<!-- source: src/tests/Behavioral/NamedPointerNilInterface/NamedPointerNilInterface.cs.target:35-35 -->
+```csharp
+internal static any boxE<E>(E e) { return (e).OrTypedNilOf(); }
+```
+
+**Limits.** A named `unsafe.Pointer` (`type UP unsafe.Pointer`) is a generated struct, cannot be
+null, and takes nothing. A named pointer type has no methods, so it never reaches a non-empty
+interface.
+
+Guarded by: the `NamedPointerNilInterface` behavioral test (every slot above, named and unnamed,
+through `== nil`, `%T`, `%v`, three assertions and a type switch, output-compared with `go run`).
+<!-- i9, 2026-11-24, R's board row of 2026-11-23: before the converter arm, 17 of the guard's 22 lines differed from Go
+(every named-pointer row read nil=true, %T=<nil>, case nil; the comma-ok assertion failed; x==x2 read false). With the
+converter arm and without the golib arm, exactly the two generic named-pointer rows still differed. -->
 
 ## Pointer-to-interface assignment through selector fields
 A selector assignment whose LHS field is an interface (`h.d = s`) uses the type of the **whole selector expression**, not just the selected identifier name, when deciding whether to wrap the RHS in an interface adapter. If the RHS is a pointer-typed identifier, the adapter receives the pointer box so a dereferenced value alias is not copied into a pointer-only implementation. The generated form matches other pointer-to-interface conversion sites:

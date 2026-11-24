@@ -2876,6 +2876,11 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 								callExprContext.markAnyBoxedUnsafePointerArg(j)
 							}
 
+							// The named-pointer sibling: its wrapper class's zero value is a null reference.
+							if isNamedPointerType(argType) && isEmptyInterfaceTarget(paramType) {
+								callExprContext.markAnyBoxedNamedPointerArg(j)
+							}
+
 							// The type-parameter sibling: a value of type E that may be a nil pointer or func at run time.
 							if typeParam, isTypeParam := argType.(*types.TypeParam); isTypeParam && typeParamCanHoldNilReference(typeParam) && isEmptyInterfaceTarget(paramType) {
 								callExprContext.markAnyBoxedTypeParamArg(j)
@@ -3371,6 +3376,10 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 
 								if isExactUnsafePointer(argType) {
 									callExprContext.markAnyBoxedUnsafePointerArg(i)
+								}
+
+								if isNamedPointerType(argType) {
+									callExprContext.markAnyBoxedNamedPointerArg(i)
 								}
 
 								// The type-parameter sibling: a value of type E that may be a nil pointer or func at run time.
