@@ -8516,7 +8516,8 @@ letter U+01C3, which most fonts draw the same way. That letter keeps the method'
 namespace every converted file lives in ([glyphs](#reading-converted-code-names-and-glyphs)).
 
 By default, each goroutine runs on an operating-system thread of its own, from start to finish. That is the main difference
-from Go, and the last part of this section explains what it means for a program.
+from Go, and the last part of this section explains what it means for a program. [Async twins](AsyncTwins.md),
+experimental and opt-in, let a goroutine that waits give its thread back.
 
 **`goǃ` takes the function and its arguments separately.** Most `goǃ` overloads take an `Action`, a C#
 delegate that returns nothing, followed by the argument values. A matching set of twins takes a
@@ -8800,7 +8801,8 @@ no platform is named there, so the figure is kept here rather than in the text. 
 **`runtime` keeps Go's goroutine contracts on top of threads.** `runtime.Goexit` runs the goroutine's
 deferred calls and ends only that goroutine. Called from `main`, it runs main's deferred calls and ends `main`
 without returning: the other goroutines keep running, and once none can run the program dies with Go's
-`fatal error: no goroutines (main called runtime.Goexit) - deadlock!`, exit status 2. `runtime.LockOSThread` holds because each goroutine already owns its thread, and a goroutine
+`fatal error: no goroutines (main called runtime.Goexit) - deadlock!`, exit status 2. By default, `runtime.LockOSThread` holds because each goroutine already owns its thread; under
+async twins it takes the thread out of the shared pool until `UnlockOSThread`. A goroutine
 that ends while locked retires its thread instead of handing it to the next goroutine.
 These functions are hand-written C#
 ([Manually-Converted Declarations](#manually-converted-declarations)).
@@ -8809,11 +8811,14 @@ These functions are hand-written C#
 src/core/sync/mutex.cs:137 `internal sealed class WaitQueue : SemaphoreSlim {`;
 src/core/sync/atomic/doc_impl.cs:142 `return Interlocked.Add(ref addr.Value, delta);`
 (2026-11-15, sqlite-cs W9a: this sentence cited internal/sync's runtime semaphore, which the hand-owned sync.Mutex never waited on; at 091935257c it waited on a SemaphoreSlim it held by reference, and since W9a on one it names by a handle.) -->
-**`sync` and `sync/atomic` run on .NET primitives.** A `sync.Mutex` is Go's eight bytes, and one that must
+**`sync` and `sync/atomic` run on .NET primitives.** A `sync.Mutex` is Go's eight bytes, and by default one that must
 wait blocks its thread on a .NET semaphore it names by a number in those bytes
 ([Reference](ConversionStrategies-Reference/manual-conversions.md#syncmutex-is-gos-eight-bytes-and-its-wait-queue-is-a-handle-in-the-sema-word)). Most `sync/atomic` functions are one line: `AddInt32` returns
 `Interlocked.Add(ref addr.Value, delta)`. Here `addr` is a `ж<int32>`, golib's box for a Go pointer,
 and `.Value` is the `int32` it points to ([Pointers](#pointers)).
+
+**With async twins a program can run its goroutines on a small pool of threads instead**, experimental and opt-in:
+[Async twins](AsyncTwins.md).
 
 **Full detail:** [Reference → Goroutine callees](ConversionStrategies-Reference/defer-panic-recover.md#a-value-returning-goroutine-callee-is-wrapped-in-a-discarding-lambda) —
 the other `go`-statement forms (named function types, builtins, value receivers, multi-value arguments),
@@ -12410,9 +12415,9 @@ public static void Gosched()
 }
 ```
 
-The omitted lines are a comment on why a plain thread yield is not enough on Linux. Each go2cs goroutine
+The omitted lines are a comment on why a plain thread yield is not enough on Linux. By default each go2cs goroutine
 keeps one .NET thread while it runs (see [Goroutines](#goroutines)), so yielding the processor means
-yielding the thread.
+yielding the thread. Under [async twins](AsyncTwins.md), `Gosched` parks the goroutine and its thread runs another.
 [golib](#the-golib-runtime-library), go2cs's hand-written runtime library, provides
 `GoschedBackoff.Yield` for this. It yields the current thread, and sleeps briefly when a plain yield
 lets nothing else run.
@@ -12477,7 +12482,7 @@ converter's list can likewise name the operating systems it covers.
 **The main hand-owned surfaces implement Go's contract on .NET primitives:**
 - `sync.Pool`, and `sync.Cond`'s copy check, which in Go stores the `Cond`'s own address as an integer.
 - `runtime.SetFinalizer`, `runtime.AddCleanup` and `weak.Pointer`, on .NET object lifetime.
-- `runtime.GOMAXPROCS`, `Gosched`, `LockOSThread` and `Goexit`, on .NET threads; see [Goroutines](#goroutines).
+- `runtime.GOMAXPROCS`, `Gosched`, `LockOSThread` and `Goexit`, on .NET threads by default; see [Goroutines](#goroutines).
 - `runtime.GC` and `runtime.ReadMemStats`, on the .NET garbage collector.
 - `time`'s timers, on golib's `GoTimer` timer service.
 - `internal/sync.HashTrieMap`, the map under `sync.Map` and `unique`, on .NET's `ConcurrentDictionary`.

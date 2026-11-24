@@ -38,7 +38,8 @@ is disclosed by name, with its reason, on the package's row in
 says what that proves.
 
 Some things do differ, and you should know them before you start. By default a goroutine is an
-operating-system thread, so thousands are fine and hundreds of thousands are not. A deadlock usually hangs where Go would
+operating-system thread, so thousands are fine and hundreds of thousands are not ([async twins](AsyncTwins.md) change that for a
+program that opts in). A deadlock usually hangs where Go would
 report it. A goroutine's stack does not grow.
 [What converts, but doesn't behave exactly like Go](Limitations.md#what-converts-but-doesnt-behave-exactly-like-go)
 lists them all.

@@ -3234,13 +3234,13 @@ everything below them stays auto-converted and simply becomes unreachable.
 
 | Go API | Managed realization | Divergence |
 |---|---|---|
-| `Gosched()` | `Thread.Yield()` | none — same "offer the rest of the slice, then continue" contract |
-| `GOMAXPROCS(n)` | remembered value; `n < 1` queries. It starts as Go's `schedinit` starts it: the `GOMAXPROCS` environment variable when it parses as a positive number (which marks the setting custom), and otherwise Go's default for `NumCPU`. `NumCPU` is `getCPUCount()`, the CPUs the operating system lets the process run on, read once at start-up as `osinit` reads it. Neither reads `DOTNET_PROCESSOR_COUNT` or .NET's `Environment.ProcessorCount`: a converted program answers as the Go program does on the same machine, and `GOMAXPROCS` is the cap it honours (.NET still sizes its own thread pool by `DOTNET_PROCESSOR_COUNT`) | with the default threads, does **not** cap parallelism — the CLR schedules goroutine threads. The universal save/restore idiom `defer runtime.GOMAXPROCS(runtime.GOMAXPROCS(n))` is exactly right |
+| `Gosched()` | `Thread.Yield()` by default; under async twins, a park: the goroutine gives its pool thread to another | none — same "offer the rest of the slice, then continue" contract |
+| `GOMAXPROCS(n)` | remembered value; `n < 1` queries. It starts as Go's `schedinit` starts it: the `GOMAXPROCS` environment variable when it parses as a positive number (which marks the setting custom), and otherwise Go's default for `NumCPU`. `NumCPU` is `getCPUCount()`, the CPUs the operating system lets the process run on, read once at start-up as `osinit` reads it. Neither reads `DOTNET_PROCESSOR_COUNT` or .NET's `Environment.ProcessorCount`: a converted program answers as the Go program does on the same machine, and `GOMAXPROCS` is the cap it honours (.NET still sizes its own thread pool by `DOTNET_PROCESSOR_COUNT`) | with the default threads, does **not** cap parallelism — the CLR schedules goroutine threads; with async twins and `GO2CS_MN=1` it sets how many goroutines run at once, as in Go ([Async twins](../AsyncTwins.md)). The universal save/restore idiom `defer runtime.GOMAXPROCS(runtime.GOMAXPROCS(n))` is exactly right |
 | `SetDefaultGOMAXPROCS()` | Go's body over the remembered value: it sets `defaultGOMAXPROCS(0)`, the CPUs the process may run on, which on linux is lowered to the cgroup's CPU limit (rounded up, at least 2; the cgroup is opened at start-up, after `parsedebugvars`, as `schedinit`'s `defaultGOMAXPROCSInit` does). `GOMAXPROCS(n)` marks the setting custom, as Go's does, and this clears the mark | none in the value. Go's automatic update runs as Go's does: the managed sysmon tick re-reads `defaultGOMAXPROCS(0)` at most once a second while the setting is not custom, and a changed value is set with the world stopped, so the process follows a change of its CPU affinity or its cgroup's CPU limit (`GODEBUG=updatemaxprocs=0` turns it off; `GOMAXPROCS(n)` waits for a read in flight, and always wins). One difference in cost: Go's sysmon parks while every P is idle, so an idle Go program runs no check, while the managed tick keeps checking, about 0.1 ms of CPU a second once warm on a linux box (2026-11-18). The converted body set `newprocs` for a `startTheWorldWithSema` that never runs, so before 2026-11-17 the call changed nothing, and before 2026-11-18 the value followed a change only when the program called this |
 | `GC()` | blocking compacting collect → `WaitForPendingFinalizers` → collect → **`GcPauseRecorder.Drain()`** | none observable; the second pass reclaims what finalizers released, which is the state a completed Go cycle leaves. The drain is what makes `NumGC` current on return |
 | `Stack(buf, all)` | a Go-shaped traceback rendered from the managed stack into `buf`; `all` enumerates every live goroutine | see *`runtime.Stack` renders a GO-shaped traceback* and *`runtime.Stack(all: true)`* below |
 | `ReadMemStats(m)` | `GC.GetTotalMemory`/`GetTotalAllocatedBytes` + one `GcPauseRecorder` snapshot | allocator-internal fields (`Mallocs`/`Frees`/`HeapObjects`/`BySize`) and `GCCPUFraction` stay **zero** rather than invented; the pause history, `LastGC`, `PauseTotalNs`, `NumGC`, `NumForcedGC` and `HeapReleased` are **real** (see below) |
-| `LockOSThread`/`UnlockOSThread` | no-ops | no-ops **by construction**: a goroutine already *is* a managed thread, so the guarantee they exist to provide holds unconditionally |
+| `LockOSThread`/`UnlockOSThread` | Go's bodies: a lock count, the nesting overflow panic, and a goroutine that exits locked retires its thread | with the default threads a goroutine already *is* a managed thread, so the pin itself holds unconditionally; under async twins a locked goroutine also takes its thread out of the shared pool until it unlocks |
 
 `Stack` had one divergence that looked like a bug: Go keeps the panicking frames alive until the
 panic completes, so `debug.Stack()` called from a deferred function *during* a panic shows the
@@ -3609,8 +3609,8 @@ In Go the two wait on different addresses. That copy also reads two words other 
 writing, a known gap.<!-- 2026-11-23 .5 docs pass (P1), UX-7: process term moved out of visible text: "it is recorded on the BOARD" (docs/phase4/BOARD-next-validation-candidates.md). -->
 
 **Where this differs from Go.** Wakeups follow the semaphore's order and a woken waiter competes with
-newcomers, as in Go's normal mode; Go's starvation mode is not reproduced. A waiter blocks its OS
-thread in the semaphore, where Go parks a goroutine and frees its M, and an `Unlock` that read 2
+newcomers, as in Go's normal mode; Go's starvation mode is not reproduced. By default a waiter blocks its OS
+thread in the semaphore, where Go parks a goroutine and frees its M; under async twins a contended `Lock` parks when its caller is a twin for another reason (a channel, a `select`, a `Sleep`, a call that parks); a caller whose only wait is `Lock` keeps its thread, as does any `Lock` with the block or mutex profile on. An `Unlock` that read 2
 takes its stripe's monitor for the lookup. `Unlock` reads the `sema` word after the swap that unlocks,
 as Go's own slow path does. Memory that is zeroed and reused as a mutex while a queue it named still
 has waiters, or bytes that happen to hold a handle a stripe hands out again after its 26-bit sequence
@@ -3952,8 +3952,8 @@ Stage B of the scheduler design, held behind the synthetic-PC registry that woul
 Three further limits are stated rather than approximated: `running` covers Go's `_Grunnable` as well
 as `_Grunning` (there is no P and no run queue, so a thread waiting for a core is indistinguishable
 from one on it); Go's ` (scan)`, `, N minutes` and `, locked to thread` header decorations are omitted
-(no GC of ours, no park timestamp, and `LockOSThread` is a no-op here because every goroutine already
-owns its thread); and `NumGoroutine()` and the enumeration are two reads of one registry, so they agree
+(no GC of ours, no park timestamp, and the lock count `LockOSThread` keeps is not read into the
+header); and `NumGoroutine()` and the enumeration are two reads of one registry, so they agree
 at rest and can differ while a goroutine is registering or retiring — the same direction as the count's
 already-documented early-climb/late-decay. (Guarded by the `GoroutineWaitState` behavioral test — four
 goroutines parked on a mutex, a channel receive, a select and a WaitGroup, read back through a

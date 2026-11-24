@@ -44,7 +44,8 @@ standard library, and runs on Windows, Linux or macOS. **A longer evening:** lot
   libraries ship a pure-Go fallback behind a build tag. A plain `-recurse` applies the common ones (`safe`, `purego`,
   `noasm`) for you; an explicit `-tags` replaces them, so restate them beside your own.
 * **By default, each live goroutine holds an operating-system thread.** Thousands alive at once are fine; Go's
-  million are out of reach.
+  million are out of reach. A program built and run with [async twins](AsyncTwins.md) parks goroutines that wait in twinned code
+  instead (experimental). <!-- (b)-dependent -->
 * **It's usually slower than Go**, starts slower and uses more memory.
 * **One conversion targets one operating system.**
 * **Most failures are loud. A few differences are silent**: see the last bullet under
@@ -113,6 +114,8 @@ standard library, and runs on Windows, Linux or macOS. **A longer evening:** lot
   the threads one process may run (`kern.num_taskthreads`, a few thousand on the hosted macOS 15 machines measured),
   and the `go` statement past it ends the program
   ([Known issues](KnownIssues.md#on-macos-a-go-statement-past-the-systems-thread-limit-ends-the-program)).
+  [Async twins](AsyncTwins.md), experimental and opt-in, run goroutines that wait in twinned code on a small pool of
+  threads. <!-- (b)-dependent -->
   <!-- Measured by C1 on 2026-11-08 (run 42497561630, claude/c1-darwin-threadcap a85e0cf11, the GolibTests probe
        DarwinGoroutineThreadCapProbe), on GitHub-hosted macOS runners, both shipped mac RIDs:
        - osx-arm64, macOS 15.8.2: kern.num_taskthreads 2048; the first go statement to fail found 2,027 live parked
@@ -135,12 +138,19 @@ standard library, and runs on Windows, Linux or macOS. **A longer evening:** lot
   where, by default, each goroutine is a thread named `goroutine-N`.
   <!-- src/core/golib/runtime/Goroutine.cs:1096 `internal static bool IsForeverWait(WaitReason reason) =>`
        and :1169 `internal static bool IsProvableDeadlock(IEnumerable<(WaitReason Reason, bool Readied, bool IsMain)> users)`. -->
-* **Stacks don't grow.** `main` runs on a thread that reserves 1 GiB, which covers Go's 1 GB limit for it, and
+* **Stacks don't grow.** By default, `main` runs on a thread that reserves 1 GiB, which covers Go's 1 GB limit for it, and
   a goroutine's thread reserves 256 MB (`GO2CS_GOROUTINE_STACK` changes it), or 16 MB when the converter proves it
   cannot recurse ([how](ConversionStrategies.md#goroutines)). Recursion past a thread's reserve ends the process
   with .NET's `Stack overflow.`, with no panic and no deferred calls, where Go prints `fatal error: stack overflow`
   and exits 2. Your main package's `init` functions run on the startup thread's smaller stack, and so does `main`
-  when an `init` called `runtime.LockOSThread`, as in Go.
+  when an `init` called `runtime.LockOSThread`, as in Go. With the scheduler of [async twins](AsyncTwins.md) on, every pool thread
+  reserves 1 GiB, or the goroutine reserve when that is larger, so `main`'s twin and every goroutine the scheduler runs
+  keep at least `main`'s 1 GiB. A set `GO2CS_GOROUTINE_STACK` sizes the pool threads instead, lower or higher, never
+  below 1 MiB, and then bounds `main`'s recursion too; goroutines on threads of their own keep 256 MB (16 MB bounded).
+  <!-- 2026-11-24 (P4, row 18 sweep): the post-row-4 truth, R's M:N row 4 (claude/r-mn-row4-stack), train 11.
+       Final rule at R's fold 2 37fede0ea6 (COORD 224341Z): GoScheduler.CarrierStackSizeFor = goroutineStackSet ?
+       Math.Max(goroutineReserve, MinCarrierStackSize 1 MiB) : Math.Max(MainThread.StackReserve 1 GiB, goroutineReserve).
+       Earlier reading: the carrier stack was Goroutine.StackReserve, never under 1 MiB. -->
   <!-- C46 (COORD ruling 2026-11-11, option A): src/core/golib/runtime/MainThread.cs `public const int StackReserve =
        1024 * 1024 * 1024;` and its LockOSThread rule; go2cs-gen MainEntryGenerator writes the entry point. The init
        residual: the main package's init is a module initializer of the entry assembly, which the CLR runs before

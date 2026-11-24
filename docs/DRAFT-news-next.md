@@ -343,13 +343,16 @@ and match Go's test results. C# written by hand against converted code may need 
   <!-- 2026-11-23 (P1): train 1, merge dcfc9c99a1 (claude/p4-probe-cache 7f14c1bb4d; board hh, COORD 2026-11-20
        09:41Z). The text: CommandLine.md's `-probe-cache` row and the KnownIssues.md entry. -->
 - **[LANDED 1c9c6a224e … e280cae69d]** **An experimental M:N scheduler, off by default.** go2cs can run goroutines
-  on a small pool of threads, as Go does, instead of one operating-system thread each. It is inert unless a project
-  is built with twins (an async copy of each function that can wait without holding a thread), which works only in a
-  project built inside a go2cs repository clone, and the program runs with `GO2CS_MN=1`. The published `go.*`
-  packages are not built with twins, and a program that does not opt in runs each goroutine on its own thread, as
-  before. The diagnostics
-  `GO2CS0014`, `GO2CS0015`, `GO2CS0017`, `GO2CS0018`, `GO2CS0020` and `GO2CS0021` come only from a build with twins
-  ([Known issues](KnownIssues.md#goroutines-on-a-shared-pool-of-threads-mn-are-experimental-and-off-unless-you-build-and-run-for-them)).
+  on a small pool of threads, as Go does, instead of one operating-system thread each. The technique is **async
+  twins**: a second copy of each function that waits by giving its thread back to the scheduler. It is opt-in: a
+  program gets it only when its projects are built with twins, which works only inside a go2cs repository clone, and
+  it runs with `GO2CS_MN=1`. <!-- (b)-dependent --> The published `go.*` packages are not built with twins, and a program that does not opt
+  in runs each goroutine on its own thread, as before. The diagnostics `GO2CS0014`, `GO2CS0015`, `GO2CS0017`,
+  `GO2CS0018`, `GO2CS0019`, `GO2CS0020` and `GO2CS0021` come only from a build with twins
+  ([Async twins](AsyncTwins.md), [Known issues](KnownIssues.md#goroutines-on-a-shared-pool-of-threads-mn-are-experimental-and-off-unless-you-build-and-run-for-them)).
+  <!-- 2026-11-24 (P4, row 18): "async twins" named and docs/AsyncTwins.md linked (COORD 2026-11-21 15:49Z, step 0).
+       GO2CS0019 added: it landed with row 7's N1 (train 9, b2c9435159) and is reported only in a build with twins
+       (DiagnosticCodes.md row 0019 at cb6def82a2). -->
   <!-- 2026-11-23 (P1): the M:N rows, by first-parent merge: train 3 1c9c6a224e (claude/g-mn-proto-b1 1cfee4a63e, the
        scheduler, the twin generator, GO2CS0014/0015/0017/0018) and da3273f975 (claude/h-mn-origin-table 1fc98cd07c);
        train 4 467912f059 (g-mn-row6-parkstep), 817c346d85 (g-mn-gosched-park); train 5 13c748a241

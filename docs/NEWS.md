@@ -1107,7 +1107,7 @@ goroutine waits on a nil channel or an empty `select {}`; any other deadlock han
 goroutine, nor for the deadlock report: those went to stderr alone. They now reach the crash file too.
 <!-- Deadlock: merge 01986cdd81 (4078bdc81b): red first at master 3da19d0e2e (the line alone; the three-goroutine case
      twice); behavioral DeadlockGoroutineBlocks; golib + hand-owned runtime only, 0 corpus lines; no platform named.
-     Limitations.md:132-135#ab9ea8 and GoFeatureSupport.md:117#21160f already state it. Crash output: merge 456b550a46 (b60eef7b07):
+     Limitations.md:135-138#ab9ea8 and GoFeatureSupport.md:117#21160f already state it. Crash output: merge 456b550a46 (b60eef7b07):
      builtin.WriteFatalReport; GolibTests BackstopCrashOutputTests red with the crash file empty, green, linux. -->
 
 **A profiled program no longer hangs.** With the block or mutex profiler on, the first event on a stack the profiler
