@@ -370,16 +370,11 @@ type Visitor struct {
 	// See liftExplicitAnonStructTypeArgs for the measured shape and the three-step resolution that
 	// makes the registry the only route from that position.
 	liftAtCallBoundary bool
-	// heapIntrinsicShadowed reports that a Go DECLARATION named `heap` is visible where the
-	// current function's heap-box emissions land, so each of them must spell golib's boxing
-	// intrinsic as `builtin.heap` rather than the bare `heap` (see heapIntrinsicName). Set per
-	// function declaration, and OR-ed with a function literal's own declarations (save/restore in
-	// convFuncLit) so a literal nested inside a clean function is still covered by its own params.
-	heapIntrinsicShadowed bool
-	// heapIdentInPackage caches whether the package under conversion declares `heap` at ALL (see
-	// packageMentionsHeapIntrinsicIdent) — the gate that keeps the per-declaration scan from
-	// costing every package a second AST traversal to learn a package-wide fact.
-	heapIdentInPackage   *bool
+	// golibCallScope is the function declaration, or package-level function literal, whose
+	// declarations golibCall consults (setGolibCallScope); golibCallScopeNames caches the names it
+	// declares, collected on first use.
+	golibCallScope       ast.Node
+	golibCallScopeNames  hashset.HashSet[string]
 	currentFuncSignature *types.Signature
 	// funcSignatureIsLiteralSeed records that currentFuncSignature is a func LITERAL's own signature,
 	// seeded by convFuncLit because there was no enclosing declaration to take it from — the state a

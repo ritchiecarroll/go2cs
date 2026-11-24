@@ -1036,7 +1036,7 @@ func TestMethodsOfPackageMainStayInItsPackageClassUnlessTheyHideAName(t *testing
 		"internal static nint Size(this plain p)",
 		"internal static void Grow(this ref plain p, nint by)",
 		"((Func<plain, nint>)(main_package.Size))",
-		"=> main_package.Size(panicwrapRecv(p0, ",
+		"=> main_package.Size(builtin.panicwrapRecv(p0, ",
 		"internal static nint Limit⁔(/*this*/ withFunc _) { return Limit(); }",
 		"internal static nint len⁔(/*this*/ withBuiltin w) {",
 		"internal static void sort⁔(/*this*/ withImport w) { sort.Ints(w); }",

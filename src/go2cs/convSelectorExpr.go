@@ -1372,7 +1372,7 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 
 					// wrapperRecv: a nil receiver faults IN the wrapper, as Go's does, raised as the
 					// wrapper's own panic (the emitter's marker runtime.Callers keeps the frame on).
-					return fmt.Sprintf("((%s)(%s(%s) => wrapperRecv(p0).%s(%s)))", delegateType, v.methodExpressionWrapperMark(sel, false), strings.Join(params, ", "), methodName, strings.Join(args, ", "))
+					return fmt.Sprintf("((%s)(%s(%s) => builtin.wrapperRecv(p0).%s(%s)))", delegateType, v.methodExpressionWrapperMark(sel, false), strings.Join(params, ", "), methodName, strings.Join(args, ", "))
 				}
 			}
 		}
@@ -3077,12 +3077,12 @@ func (v *Visitor) methodExpressionWrapperReceiver(sel *types.Selection) string {
 
 				message := fmt.Sprintf("value method %s.%s.%s called using nil *%s pointer", pkgPath, typeName, sel.Obj().Name(), typeName)
 
-				return fmt.Sprintf("panicwrapRecv(p0, %q)", message)
+				return fmt.Sprintf("builtin.panicwrapRecv(p0, %q)", message)
 			}
 		}
 	}
 
-	return "wrapperRecv(p0)"
+	return "builtin.wrapperRecv(p0)"
 }
 
 // methodExpressionWrapperMark spells the [GoWrapper] attribute for a method expression the converter

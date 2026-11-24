@@ -495,9 +495,9 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 		if callContext != nil && callContext.nilSafeDelegateArgs != nil {
 			if typeArgs, ok := callContext.nilSafeDelegateArgs[i]; ok && len(typeArgs) > 0 {
 				if label, value, found := strings.Cut(resultExpr, ": "); found && isSimpleIdentifierName(label) {
-					resultExpr = fmt.Sprintf("%s: NilSafeDelegateConversion<%s>(%s)", label, typeArgs, value)
+					resultExpr = fmt.Sprintf("%s: builtin.NilSafeDelegateConversion<%s>(%s)", label, typeArgs, value)
 				} else {
-					resultExpr = fmt.Sprintf("NilSafeDelegateConversion<%s>(%s)", typeArgs, resultExpr)
+					resultExpr = fmt.Sprintf("builtin.NilSafeDelegateConversion<%s>(%s)", typeArgs, resultExpr)
 				}
 			}
 		}

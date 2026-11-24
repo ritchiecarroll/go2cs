@@ -955,7 +955,7 @@ func (v *Visitor) shiftCountUint64Operand(expr ast.Expr, converted string) strin
 	}
 
 	if tp, ok := types.Unalias(v.getType(expr, false)).(*types.TypeParam); ok && typeParamIsInteger(tp) {
-		return fmt.Sprintf("ConvertToUInt64<%s>(%s)", v.getCSharpTypeName(tp), converted)
+		return fmt.Sprintf("builtin.ConvertToUInt64<%s>(%s)", v.getCSharpTypeName(tp), converted)
 	}
 
 	return castOf(width, converted)
@@ -2064,7 +2064,7 @@ func (v *Visitor) convBinaryExprCore(binaryExpr *ast.BinaryExpr, context Pattern
 		if tv, ok := v.info.Types[other]; ok && tv.Value != nil {
 			if otherType := v.info.TypeOf(other); otherType != nil {
 				if basic, isBasic := otherType.(*types.Basic); types.Identical(otherType, tp) || (isBasic && basic.Info()&types.IsUntyped != 0) {
-					return fmt.Sprintf("ConvertToType<%s>(%s)", v.getCSharpTypeName(tp), otherOperand)
+					return fmt.Sprintf("builtin.ConvertToType<%s>(%s)", v.getCSharpTypeName(tp), otherOperand)
 				}
 			}
 		}

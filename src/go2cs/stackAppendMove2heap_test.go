@@ -225,40 +225,40 @@ func TestStackAppendMove2heapEmission(t *testing.T) {
 		// return: the buffer at the append, the move ahead of the return
 		"    var rᴷ = new stackAppend<byte>(moves: true);\n",
 		"r = append(rᴷ, r, (byte)i);",
-		"    r = move2heap(rᴷ, r);\n    return r;\n",
+		"    r = builtin.move2heap(rᴷ, r);\n    return r;\n",
 		// an assignment through a pointer
 		"    var qᴷ = new stackAppend<ж<byte>>(moves: true);\n",
-		"    q = move2heap(qᴷ, q);\n",
+		"    q = builtin.move2heap(qᴷ, q);\n",
 		// the capacity observed: every append passes the buffer, declared capacityUsed
 		"    var cᴷ = new stackAppend<byte>(moves: true, capacityUsed: true);\n",
 		"c = append(cᴷ, c, (byte)i);",
 		"c = append(cᴷ, c, (byte)1);",
-		"    c = move2heap(cᴷ, c);\n    return (c, cap(c));\n",
+		"    c = builtin.move2heap(cᴷ, c);\n    return (c, cap(c));\n",
 		// an assignment to a field
-		"    f = move2heap(fᴷ, f);\n",
+		"    f = builtin.move2heap(fᴷ, f);\n",
 		// a bare return of a named result
-		"    nr = move2heap(nrᴷ, nr);\n    return nr;\n",
+		"    nr = builtin.move2heap(nrᴷ, nr);\n    return nr;\n",
 		// a range over a slice that never escapes
 		"    var gᴷ = new stackAppend<byte>(moves: true);\n",
-		"    g = move2heap(gᴷ, g);\n    foreach (var (_, b) in range(g)) {\n",
+		"    g = builtin.move2heap(gᴷ, g);\n    foreach (var (_, b) in range(g)) {\n",
 		// x = x[i:j] observes the capacity
 		"    var sᴷ = new stackAppend<byte>(moves: true, capacityUsed: true);\n",
-		"    s = move2heap(sᴷ, s);\n    return s;\n",
+		"    s = builtin.move2heap(sᴷ, s);\n    return s;\n",
 		// an if's init: the move goes ahead of the if, as Go prepends it to the init
 		"    var pᴷ = new stackAppend<ж<nint>>(moves: true);\n",
-		"    p = move2heap(pᴷ, p);\n",
+		"    p = builtin.move2heap(pᴷ, p);\n",
 		// a labeled range: the move goes ahead of the labeled statement
 		"    var lᴷ = new stackAppend<byte>(moves: true);\n",
-		"    l = move2heap(lᴷ, l);\n",
+		"    l = builtin.move2heap(lᴷ, l);\n",
 		// two variables escape in one return: each is moved
-		"    a = move2heap(aᴷ, a);\n    w = move2heap(wᴷ, w);\n    return (a, w);\n",
+		"    a = builtin.move2heap(aᴷ, a);\n    w = builtin.move2heap(wᴷ, w);\n    return (a, w);\n",
 	} {
 		if strings.Count(emitted, want) != 1 {
 			t.Errorf("want exactly one %q in:\n%s", want, emitted)
 		}
 	}
 
-	if got := strings.Count(emitted, "move2heap("); got != 11 {
+	if got := strings.Count(emitted, "builtin.move2heap("); got != 11 {
 		t.Errorf("move2heap written %d times, want 11 (ret, store, capUsed, field, named, ranged, reslice, ifInit, labeled, pair's a and w):\n%s", got, emitted)
 	}
 
@@ -268,7 +268,7 @@ func TestStackAppendMove2heapEmission(t *testing.T) {
 	}
 
 	// The moves come ahead of the statement Go's transition belongs to.
-	for _, order := range [][2]string{{"p = move2heap(pᴷ, p);", "len(t) > 0"}, {"l = move2heap(lᴷ, l);", "foreach (var (_, b) in range(l))"}} {
+	for _, order := range [][2]string{{"p = builtin.move2heap(pᴷ, p);", "len(t) > 0"}, {"l = builtin.move2heap(lᴷ, l);", "foreach (var (_, b) in range(l))"}} {
 		if move, use := strings.Index(emitted, order[0]), strings.Index(emitted, order[1]); move < 0 || use < 0 || move > use {
 			t.Errorf("%q is not ahead of %q:\n%s", order[0], order[1], emitted)
 		}

@@ -533,17 +533,15 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 	savedInFunction := v.inFunction
 	v.inFunction = true
 
-	// The literal's OWN parameters and locals can shadow golib's `heap` intrinsic even when the
-	// enclosing declaration's do not — and a literal in a PACKAGE-LEVEL initializer has no enclosing
-	// declaration at all, so the flag would otherwise carry whatever function was visited last. Rebase
-	// on the package answer in that case, then OR in this literal's own declarations; restored below.
-	savedHeapIntrinsicShadowed := v.heapIntrinsicShadowed
+	// A literal inside a function declaration is covered by that declaration's golibCall scope, which
+	// includes the literal's own parameters and locals. A literal in a PACKAGE-LEVEL initializer has no
+	// enclosing declaration, so the scope would otherwise be whatever function was visited last: it
+	// becomes the literal itself. Restored below.
+	savedGolibCallScope, savedGolibCallScopeNames := v.golibCallScope, v.golibCallScopeNames
 
 	if !savedInFunction {
-		v.heapIntrinsicShadowed = v.packageDeclaresHeapIntrinsicIdent()
+		v.setGolibCallScope(funcLit)
 	}
-
-	v.heapIntrinsicShadowed = v.heapIntrinsicShadowed || v.declaresHeapIntrinsicIdent(funcLit)
 
 	// `inFunction` says the BODY is function scope; it does NOT say there is an enclosing function
 	// DECLARATION. currentFuncName and currentFuncPrefix are owned by visitFuncDecl (allocated
@@ -596,7 +594,7 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 		v.namedReturnNames = savedNamedReturnNames
 		v.currentReturnSignature = savedReturnSignature
 		v.inFunction = savedInFunction
-		v.heapIntrinsicShadowed = savedHeapIntrinsicShadowed
+		v.golibCallScope, v.golibCallScopeNames = savedGolibCallScope, savedGolibCallScopeNames
 		v.inGoFrame = savedInGoFrame
 		v.goFrameNamedExit = savedGoFrameNamedExit
 		v.openGoFrames = savedOpenGoFrames
