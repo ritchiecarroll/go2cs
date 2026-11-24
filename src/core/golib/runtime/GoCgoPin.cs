@@ -50,3 +50,10 @@ namespace go.golib;
     /// <summary>What C receives, given the address the wrapper's <c>fixed</c> pinned this argument at.</summary>
     public unsafe nint Address(byte* pinned) => m_root is null ? (nint)m_number : (nint)(pinned + m_offset);
 }
+
+// The pin a box owns, read without the pointee type (the cgo door sees the box as an object). Implemented by ж<T>
+// (ж.CgoPin.cs): the address-take's pin-only hold, or the pin a native box took over managed storage.
+internal interface IManagedPinHolder
+{
+    PinnedBuffer? ManagedPin { get; }
+}

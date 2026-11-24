@@ -13,12 +13,6 @@ using go.golib;
 
 namespace go;
 
-// The pin a box owns, read without the pointee type (the door sees the box as an object).
-internal interface IManagedPinHolder
-{
-    PinnedBuffer? ManagedPin { get; }
-}
-
 public abstract partial class ж<T> : IManagedPinHolder
 {
     PinnedBuffer? IManagedPinHolder.ManagedPin => m_pin;
