@@ -9,11 +9,12 @@ using go.golib;
 namespace GolibTests;
 
 /// <summary>
-/// M:N row 4: a carrier reserves Goroutine.StackReserve, and a platform that refuses that size gets the largest it
-/// grants, halving a local size down to 1 MB; only a start that succeeds publishes the smaller size and says it on stderr
-/// by name, and a refusal at every size is a counted start failure that leaves the shared size alone. No platform here
-/// refuses 256 MB, so these rows force the refusal through the test-only GoScheduler.RefuseCarrierStackAboveForTest and
-/// make the fallback fail and recover (safety floor 13; COORD and P3, 2026-11-24).
+/// M:N row 4: a carrier reserves main's 1 GiB (MainThread.StackReserve, or the goroutine reserve when that is larger),
+/// because any carrier may run a step of main's twin; a platform that refuses that size gets the largest it grants,
+/// halving a local size down to 1 MB; only a start that succeeds publishes the smaller size and says it on stderr by name,
+/// and a refusal at every size is a counted start failure that leaves the shared size alone. No platform here refuses
+/// 1 GiB, so these rows force the refusal through the test-only GoScheduler.RefuseCarrierStackAboveForTest and make the
+/// fallback fail and recover (safety floor 13; COORD and P3, 2026-11-24).
 /// </summary>
 [TestClass]
 [DoNotParallelize]
@@ -24,7 +25,7 @@ public class CarrierStackFallbackTests
     // A carrier loop that ends at once: the rows read how the thread STARTED, not what it runs.
     private static void Idle() { }
 
-    private static readonly int s_defaultSize = Math.Max(Goroutine.StackReserve, GoScheduler.MinCarrierStackSize);
+    private static readonly int s_defaultSize = GoScheduler.DefaultCarrierStackSize;
 
     // Starts count carriers (all at once when concurrent) from a shared size of startSize under the refusal threshold,
     // and returns whether each started, what stderr said, and how many start failures were counted. The threshold, the
@@ -87,7 +88,7 @@ public class CarrierStackFallbackTests
         Assert.AreEqual(1, lines.Length, $"one line, from the start that published; the later carrier says nothing:\n{stderr}");
         StringAssert.Contains(lines[0], "refused a 256 MB carrier stack");
         StringAssert.Contains(lines[0], "carriers reserve 128 MB");
-        StringAssert.Contains(lines[0], Goroutine.StackReserveVariable, "the line names the knob");
+        StringAssert.Contains(lines[0], "main included", "the line says what the size bounds");
     }
 
     [TestMethod]
@@ -134,6 +135,16 @@ public class CarrierStackFallbackTests
         Assert.AreEqual(1, failures, "counted as one start failure");
         Assert.AreEqual(256 * MB, size, "the shared size is NOT walked down: the next carrier still asks for 256 MB");
         Assert.AreEqual(0, Lines(stderr).Length, $"nothing worked, so nothing is said:\n{stderr}");
+    }
+
+    [TestMethod]
+    public void ACarrierReservesTheMainGoroutinesStack()
+    {
+        // Main's twin parks and resumes on whichever carrier is free, so every carrier reserves what main's own thread
+        // does without the scheduler: Go's main may recurse that deep (behavioral MainDeepRecursion, under --mn).
+        Assert.IsTrue(GoScheduler.DefaultCarrierStackSize >= MainThread.StackReserve,
+            $"a carrier reserves {GoScheduler.DefaultCarrierStackSize / MB} MB, short of main's {MainThread.StackReserve / MB} MB");
+        Assert.IsTrue(GoScheduler.DefaultCarrierStackSize >= Goroutine.StackReserve, "and never less than a goroutine's thread");
     }
 
     [TestMethod]

@@ -103,15 +103,18 @@ public static class GoScheduler
     // The P count: how many goroutine steps run at once. It follows GOMAXPROCS (SetProcs, below).
     private static int s_procs = ReadProcs();
 
-    // A carrier runs a goroutine's step on its own stack, and a step may recurse as deeply as Go allows a goroutine to,
-    // so a carrier reserves what a plain goroutine's thread does: Goroutine.StackReserve (256 MB by default, the one
-    // knob GO2CS_GOROUTINE_STACK governs both). A fixed 1 MB overflowed a 200,000-level recursion that Go and the
-    // thread path both run (M:N row 4, behavioral GoroutineStackReserve). On the shipped 64-bit platforms the reserve
-    // is address space, committed only as deep as a step recurses. A platform that refuses the size gets the largest it
-    // grants, halving down to MinCarrierStackSize, published and said on stderr by name only once a start at it
-    // succeeds (CarrierThread); never a silent 1 MB. A carrier never reserves less than MinCarrierStackSize, whatever
-    // GO2CS_GOROUTINE_STACK says (0 included, which a plain goroutine's thread passes to Thread as "the default").
-    private static int s_carrierStackSize = Math.Max(Goroutine.StackReserve, MinCarrierStackSize);
+    // A carrier runs a goroutine's step on its own stack, and a step may recurse as deeply as Go allows a goroutine to.
+    // Any carrier may run a step of main's twin (it moves between carriers at every park), so a carrier reserves what
+    // main's own thread does, MainThread.StackReserve (1 GiB), or Goroutine.StackReserve when GO2CS_GOROUTINE_STACK
+    // raises that above it. A fixed 1 MB overflowed a 200,000-level recursion that Go and the thread path both run (M:N
+    // row 4, behavioral GoroutineStackReserve), and the goroutine reserve alone left main's twin short of the 1 GiB
+    // main has without the scheduler (behavioral MainDeepRecursion; C46's typescript-go parse units). The reserve is
+    // address space on the shipped 64-bit platforms, committed only as deep as a step recurses, and there are about as
+    // many carriers as Ps, where the goroutine reserve is multiplied by every goroutine on a thread of its own. A
+    // platform that refuses the size gets the largest it grants, halving down to MinCarrierStackSize, published and
+    // said on stderr by name only once a start at it succeeds (CarrierThread); never a silent 1 MB.
+    internal static readonly int DefaultCarrierStackSize = Math.Max(MainThread.StackReserve, Goroutine.StackReserve);
+    private static int s_carrierStackSize = DefaultCarrierStackSize;
     internal const int MinCarrierStackSize = 1024 * 1024;
 
     // TEST-ONLY, not a user knob: GolibTests' CarrierStackFallbackTests sets it to make a carrier stack above this many
@@ -780,7 +783,7 @@ public static class GoScheduler
                 // Publish a size that worked, once: of two carriers that halved at the same time, one wins the exchange
                 // and says it, and a later carrier starts at the published size with nothing to say.
                 if (size < shared && Interlocked.CompareExchange(ref s_carrierStackSize, size, shared) == shared)
-                    Console.Error.WriteLine($"go2cs: this platform refused a {shared / (1024 * 1024)} MB carrier stack; carriers reserve {size / (1024 * 1024)} MB ({Goroutine.StackReserveVariable})");
+                    Console.Error.WriteLine($"go2cs: this platform refused a {shared / (1024 * 1024)} MB carrier stack; carriers reserve {size / (1024 * 1024)} MB, so a goroutine on one, main included, recurses at most that deep");
 
                 return;
             }
