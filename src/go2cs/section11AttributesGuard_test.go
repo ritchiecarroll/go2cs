@@ -89,6 +89,12 @@ func TestSection11AttributesLeftConvertedCode(t *testing.T) {
 			for index, line := range strings.Split(string(data), "\n") {
 				code, _, _ := strings.Cut(line, "//")
 
+				// A delegate cannot be partial, so no accessibility record can carry its attributes: a lifted
+				// function-local func type keeps [GoLocalName] on its declaration (visitFuncType.go).
+				if strings.Contains(code, " delegate ") {
+					continue
+				}
+
 				for _, moved := range section11Attributes {
 					if strings.Contains(code, moved.attribute) {
 						sites = append(sites, rel+":"+strconv.Itoa(index+1)+": "+moved.attribute+" ("+moved.row+")")
