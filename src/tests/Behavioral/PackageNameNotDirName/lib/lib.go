@@ -3,6 +3,8 @@ package sqlite3
 
 type Sqlite3_int64 = int64
 
+func Twice(n int64) int64 { return n * 2 }
+
 type Tdb = struct {
 	FbusyTimeout int32
 	FaDb         [2]int64

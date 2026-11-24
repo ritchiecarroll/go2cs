@@ -1274,6 +1274,9 @@ go.golib.GoFuncPair :: property abstract System.Delegate Twin { get; }
 go.golib.GoFuncPair :: shape abstract class; abstract-members get_Plain(), get_Twin()
 go.golib.GoParkForwarderAttribute :: ctor public ()
 go.golib.GoParkForwarderAttribute :: shape sealed class; base System.Attribute; usage Method, multiple False, inherited False
+# GoParkWeakAttribute: N1, DESIGN-mn-nopark.md 3.2.
+go.golib.GoParkWeakAttribute :: ctor public ()
+go.golib.GoParkWeakAttribute :: shape sealed class; base System.Attribute; usage Method, multiple False, inherited False
 go.golib.GoTask :: method go.golib.GoTaskAwaiter GetAwaiter()
 go.golib.GoTask :: shape readonly struct; builder go.golib.GoTaskBuilder
 go.golib.GoTask<T> :: ctor public (T)

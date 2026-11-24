@@ -30,6 +30,11 @@ public static void Sort(sort.Interface data) { sort.Sort(data); }
 
 public static nint Run() { return 4; }
 
+internal static nint measure(nint size) {
+    var f = ((Func<gauge, words, nint>)(main_package.size));
+    return f(new gauge(n: size), new words(new uint64[]{1, 2}.slice()));
+}
+
 internal static void others() {
     var w = new words(new uint64[]{3, 1, 2}.slice());
     w.Sort();
@@ -39,6 +44,7 @@ internal static void others() {
     var (_, isFunc) = boxed._<Func<nint>>(ᐧ);
 
     fmt.Println("others", w, w.cap(), cap(w), w.bits(), bits.Len64(w[0]), new gauge(n: 5).size(w), run(), isFunc, w.Run());
+    fmt.Println("method expression", measure(5));
 }
 
 } // end main_package

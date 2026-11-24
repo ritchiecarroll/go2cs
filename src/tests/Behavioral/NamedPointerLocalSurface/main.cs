@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using time = time_package;
 
 partial class main_package {
 
@@ -20,6 +21,10 @@ partial struct holder {
 
 internal static uint8 first(ref flagSet o) { return o[0]; }
 
+partial class timeLocation /*ж<time.Location>*/;
+
+internal static @string zoneName(ж<time.Location> l) { return l.String(); }
+
 internal static void main() {
     var p = new PP(Ꮡ(new point(x: 4)));
     p.y = p.x + 1;
@@ -37,6 +42,9 @@ internal static void main() {
 
     var h = new holder(f: g);
     fmt.Println(first(ref (g).DerefOrNull()), first(ref (h.f).DerefOrNull()), h.f.Value[1]);
+
+    var tl = new timeLocation(time.UTC);
+    fmt.Println(zoneName(tl));
 }
 
 } // end main_package
