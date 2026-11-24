@@ -110,8 +110,25 @@ public static class GoScheduler
     // is address space, committed only as deep as a step recurses. A platform that refuses the size gets the largest it
     // grants, halving down to MinCarrierStackSize, said once on stderr by name (CarrierThread); never a silent 1 MB.
     private static int s_carrierStackSize = Math.Max(Goroutine.StackReserve, MinCarrierStackSize);
-    private const int MinCarrierStackSize = 1024 * 1024;
+    internal const int MinCarrierStackSize = 1024 * 1024;
     private static int s_carrierStackFallbackSaid;
+
+    // TEST-ONLY, not a user knob: GolibTests' CarrierStackFallbackTests sets it to make a carrier stack above this many
+    // bytes refused, as a platform would refuse it, so the fallback below is made to fail (safety floor 13).
+    internal static int RefuseCarrierStackAboveForTest = int.MaxValue;
+
+    // TEST-ONLY: the carrier stack size a carrier starts at now.
+    internal static int CarrierStackSize => Volatile.Read(ref s_carrierStackSize);
+
+    // TEST-ONLY: the carrier start failures counted so far.
+    internal static long CarrierStartFailures => Interlocked.Read(ref s_carrierStartFailures);
+
+    // TEST-ONLY: puts the carrier stack size and the said-once flag back to a row's starting state.
+    internal static void ResetCarrierStackForTest(int size)
+    {
+        Volatile.Write(ref s_carrierStackSize, size);
+        Volatile.Write(ref s_carrierStackFallbackSaid, 0);
+    }
 
     // GO2CS_MN_PREEMPT_MS: how long a step may run before the monitor injects a P beside it (default 10 ms,
     // Go's forcePreemptNS). 0 turns injection off: a measurement arm, not a mode.
@@ -702,23 +719,33 @@ public static class GoScheduler
                 s_peakCarriers = s_carriers.Count;
         }
 
-        try
-        {
-            CarrierThread(carrier.Loop);
-            Interlocked.Increment(ref s_carriersStarted);
-        }
-        catch (OutOfMemoryException)
+        if (!StartCarrierThread(carrier.Loop))
         {
             lock (s_carriersLock)
                 s_carriers.Remove(carrier);
+        }
+    }
 
+    // Starts a carrier thread and counts it. A refusal at MinCarrierStackSize is counted as a start failure instead, and
+    // the caller drops the carrier (false).
+    internal static bool StartCarrierThread(ThreadStart loop)
+    {
+        try
+        {
+            CarrierThread(loop);
+            Interlocked.Increment(ref s_carriersStarted);
+            return true;
+        }
+        catch (OutOfMemoryException)
+        {
             Interlocked.Increment(ref s_carrierStartFailures);
+            return false;
         }
     }
 
     // Starts a carrier thread at the carrier stack size (s_carrierStackSize). A refused start above MinCarrierStackSize
     // halves the size for this carrier and every later one, and the first fallback is said once on stderr, by name; a
-    // refusal at MinCarrierStackSize throws on to StartCarrier, which counts it as a start failure as before.
+    // refusal at MinCarrierStackSize throws on to StartCarrierThread, which counts it as a start failure as before.
     private static void CarrierThread(ThreadStart loop)
     {
         while (true)
@@ -727,6 +754,9 @@ public static class GoScheduler
 
             try
             {
+                if (size > RefuseCarrierStackAboveForTest)
+                    throw new OutOfMemoryException("a carrier stack refused by GoScheduler.RefuseCarrierStackAboveForTest");
+
                 Thread thread = new(loop, size) { IsBackground = true, Name = "go-carrier" };
 
                 // A carrier is often started from inside a goroutine's step. It must not start under that
