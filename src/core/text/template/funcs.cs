@@ -14,8 +14,8 @@ using unicode = unicode_package;
 using utf8 = go.unicode.utf8_package;
 using go.unicode;
 using net;
-using ꓸꓸꓸany = Span<any>;
-using ꓸꓸꓸreflectꓸValue = Span<reflect_package.Value>;
+using ꓸꓸꓸany = variadic<any>;
+using ꓸꓸꓸreflectꓸValue = variadic<reflect_package.Value>;
 
 partial class template_package {
 

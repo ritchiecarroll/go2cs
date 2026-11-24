@@ -116,15 +116,16 @@ public record MethodInfo
 
     // True when this method can be forwarded through a REFLECTIVE invoker — every parameter and the
     // return type round-trip through `object`. False for a ref-struct (a Go variadic tail lowers to
-    // `params Span<T>`, which cannot be boxed), a by-ref parameter or return, a pointer type, or a
+    // `params variadic<T>`, a ref struct that cannot be boxed), a by-ref parameter or return, a pointer type, or a
     // generic method. The non-generic object shell is emitted only when every interface method
     // qualifies; the delegate-bound shell, which forwards through a typed delegate, is unaffected.
     // Defaults true so a MethodInfo built without semantic type info keeps the prior behavior.
     public bool IsInvokerForwardable { get; init; } = true;
 
     // For an interface member that is not invoker-forwardable ONLY because its last parameter is a Go variadic tail
-    // (`params Span<T>`): the delegate type golib's reflect builds for its signature, which is the type a generated
-    // method-set arm's bound delegate has (MethodSet.DelegateType). The object shell forwards such a member through that
+    // (`params variadic<T>`, or a hand-written `params Span<T>`): the delegate type golib's reflect builds for its
+    // signature, which is the type a generated method-set arm's bound delegate has (MethodSet.DelegateType). The
+    // object shell forwards such a member through that
     // delegate, bound per dynamic value by golib's AdapterBinder, so an interface with a variadic method still gets the
     // shell that needs no MakeGenericType, the one Native AOT can always build. Null otherwise, and when no delegate
     // family declares the signature.
@@ -360,7 +361,7 @@ public static class MethodSyntaxExtensions
     }
 
     // True when a type survives the object round-trip a reflective invoker performs. A ref-struct
-    // cannot be boxed at all (the Go variadic tail `params ꓸꓸꓸT` resolves to `System.Span<T>`), and
+    // cannot be boxed at all (the Go variadic tail `params ꓸꓸꓸT` resolves to `go.variadic<T>`), and
     // a pointer type has no boxed form the invoker can carry back.
     internal static bool IsInvokerForwardableType(ITypeSymbol? type)
     {
@@ -373,8 +374,9 @@ public static class MethodSyntaxExtensions
         };
     }
 
-    // MethodInfo.VariadicDelegate's rule: every parameter but a last `Span<T>` and the return survive the invoker's object
-    // round-trip, nothing is by-ref or generic, and golib declares a delegate family for the signature.
+    // MethodInfo.VariadicDelegate's rule: every parameter but a last variadic tail (`variadic<T>` or `Span<T>`) and the
+    // return survive the invoker's object round-trip, nothing is by-ref or generic, and golib declares a delegate family
+    // for the signature.
     internal static string? VariadicDelegateType(IMethodSymbol method, Compilation compilation)
     {
         if (method.IsGenericMethod || method.ReturnsByRef || method.ReturnsByRefReadonly || method.Parameters.Length == 0 ||

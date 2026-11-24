@@ -9,7 +9,7 @@ using strings = strings_package;
 using unicode = unicode_package;
 using utf8 = go.unicode.utf8_package;
 using go.unicode;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸany = variadic<any>;
 
 partial class template_package {
 
@@ -159,7 +159,7 @@ internal static bool isCSSSpace(byte b) {
 
 // cssEscaper escapes HTML and CSS special characters using \<hex>+ escapes.
 internal static @string cssEscaper(params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     var (s, _) = stringify(args.ꓸꓸꓸ);
     ref var b = ref heap(new strings.Builder(), out var Ꮡb);
@@ -229,7 +229,7 @@ internal static slice<byte> mozBindingBytes = slice<byte>("mozbinding"u8);
 // It filters out unsafe values, such as those that affect token boundaries,
 // and anything that might execute scripts.
 internal static @string cssValueFilter(params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
     var idᴷ = new stackAppend<byte>();
 
     var (s, t) = stringify(args.ꓸꓸꓸ);

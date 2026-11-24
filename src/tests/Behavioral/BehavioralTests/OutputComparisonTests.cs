@@ -3098,6 +3098,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckVariadicSlotInterfaces() => CheckTarget("VariadicSlotInterfaces");
 
     [TestMethod]
+    public void CheckVariadicSpreadHeapAlias() => CheckTarget("VariadicSpreadHeapAlias");
+
+    [TestMethod]
     public void CheckVendoredPathModuleImport() => CheckTarget("VendoredPathModuleImport");
 
     [TestMethod]

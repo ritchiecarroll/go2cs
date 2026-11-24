@@ -89,8 +89,8 @@ using static global::go.go.@internal.gccgoimporter_package;
 using constant = global::go.go.constant_package;
 using io = global::go.io_package;
 using types = global::go.go.types_package;
-using ꓸꓸꓸany = Span<any>;
-using ꓸꓸꓸstring = Span<@string>;
+using ꓸꓸꓸany = variadic<any>;
+using ꓸꓸꓸstring = variadic<@string>;
 
 [GoPackage("gccgoimporter")]
 public static partial class gccgoimporter_package

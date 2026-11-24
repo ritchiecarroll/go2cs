@@ -46,6 +46,12 @@ type FileEntry struct {
 	// types.Object and computed per file in performEscapeAnalysis.
 	ssliceEligible map[types.Object]bool
 
+	// packForwardOnly flags an ssliceEligible variadic parameter whose ONLY use is one spread into a
+	// non-builtin call outside any loop (`f(x, xs...)`). Its prologue binds the pack itself
+	// (`var xs = xsʗp;`), so the callee receives the caller's own pack: a spread `g(s...)` stays the
+	// caller's slice through the forward, as Go hands it on. Keyed like ssliceEligible.
+	packForwardOnly map[types.Object]bool
+
 	// sstringConvExprs flags the specific `string(x)` conversion CallExprs that must emit `(sstring)x`
 	// (the zero-copy view) rather than `(@string)x` (the heap copy): the RHS of an eligible local
 	// (above) and unnamed `string(x)` temporaries consumed within a comparison against a literal
@@ -653,6 +659,7 @@ type Visitor struct {
 	tightenedConsts         map[*types.Const]*types.Basic // Function-local untyped consts declared at their single concrete use type (see performUntypedConstAnalysis)
 	sstringEligible         map[types.Object]bool         // String locals emittable as stack-only sstring (see FileEntry.sstringEligible)
 	ssliceEligible          map[types.Object]bool         // Variadic params emittable as stack-only sslice (see FileEntry.ssliceEligible)
+	packForwardOnly         map[types.Object]bool         // Variadic params whose only use is a forward (see FileEntry.packForwardOnly)
 	sstringConvExprs        map[*ast.CallExpr]bool        // `string(x)` conversions that emit `(sstring)x` (see FileEntry.sstringConvExprs)
 	emitStringConvAsSString bool                          // Transient: while emitting an eligible decl's RHS, a string([]byte) conversion emits `(sstring)` not `(@string)`
 	sstringHoistedConvExprs map[*ast.CallExpr]string      // Per-func: eligible `string(x)` uses lifted to a shared sstring temp — each emits the temp NAME (see planSStringHoists)

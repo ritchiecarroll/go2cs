@@ -15,7 +15,7 @@ using global::go.io;
 using global::go.os;
 using io = io_package;
 using path;
-using ꓸꓸꓸstring = Span<@string>;
+using ꓸꓸꓸstring = variadic<@string>;
 
 partial class gccgoimporter_package {
 

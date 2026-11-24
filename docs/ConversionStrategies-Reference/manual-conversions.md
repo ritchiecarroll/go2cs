@@ -216,7 +216,7 @@ is a golib slice-model capability rather than a per-GOOS hand-own (`src/core/gol
      landed
      in the copy. The native-backed arm that retires it: src/core/unsafe/unsafe.cs:2018
      (`A pointer that ALIASES a GENUINELY NATIVE address yields a NATIVE-BACKED slice over that`); the door:
-     src/core/golib/slice.cs:306 (`The single creation door for a native-backed slice`). -->
+     src/core/golib/slice.cs:311 (`The single creation door for a native-backed slice`). -->
 
 ## The CryptoAPI chain seam — when a native record must be READ as a struct and HANDED BACK as a pointer
 
@@ -642,7 +642,7 @@ variadic `Call`/`CallSlice`, and `reflectlite`'s `rtype.Name` — are hand-owned
 
 <a id="variadic-call-and-makefunc-under-native-aot"></a>
 **A variadic `Call` and `MakeFunc` work under Native AOT through compiled trampolines that go2cs-gen
-registers.** A converted Go variadic takes its tail as a C# `Span<T>`, so it is a golib `Funcꓸꓸꓸ<…>` or
+registers.** A converted Go variadic takes its tail as golib's `variadic<T>` pack, so it is a golib `Funcꓸꓸꓸ<…>` or
 `Actionꓸꓸꓸ<…>` delegate, and `reflect` calls or makes one through a generic trampoline closed over that
 delegate's own type arguments (`GoReflect.VariadicRegistry.cs`). The JIT closes such a trampoline for any types.
 Native AOT has code for it only when compiled code named the instantiation, and a value type such as `@string`, a
@@ -673,10 +673,10 @@ Guards: the behavioral test `ReflectVariadicCall`; GolibTests' `GoReflectBridgeC
 <!-- golib: src/core/golib/GoReflect.VariadicRegistry.cs:26-28 (`go2cs-gen calls one of these for every variadic signature that can`),
      :49-53 (`GoDeferredRegistrations.EscapeRegistry.Run()`), :82-83
      (`if (!golib.TypeExtensions.IsDynamicCodeSupported && System.Array.Exists(typeArguments, static argument => argument.IsValueType))`),
-     :100 (`go2cs: reflect cannot call or make the variadic func`). go2cs-gen: src/gen/go2cs-gen/EscapeRegistryGenerator.cs:427
+     :100 (`go2cs: reflect cannot call or make the variadic func`). go2cs-gen: src/gen/go2cs-gen/EscapeRegistryGenerator.cs:429
      (`internal static string? VariadicRegistration(Compilation? compilation, INamedTypeSymbol? package, ITypeSymbol type)`),
-     src/gen/go2cs-gen/MethodSet.cs:437 (`private static string? Registration(Compilation compilation, IReadOnlyList<string> parameters, string variadic, string returns)`),
-     :398 (`Registration(compilation, [receiverType, .. shape.Parameters], shape.Variadic, shape.Returns)`), :129-130
+     src/gen/go2cs-gen/MethodSet.cs:445 (`private static string? Registration(Compilation compilation, IReadOnlyList<string> parameters, string variadic, string returns)`),
+     :406 (`Registration(compilation, [receiverType, .. shape.Parameters], shape.Variadic, shape.Returns)`), :132-133
      (`body.Append(register);`). Guards: src/tests/GolibTests/GoReflectBridgeClosureTests.cs:173
      (`public void ARegisteredVariadicSignatureIsServedByItsCompiledTrampolines()`), :209
      (`public void AnUnregisteredValueTypeVariadicIsRefusedByNameWithoutDynamicCode()`);
@@ -2953,10 +2953,11 @@ what keeps `Name()` and the descriptor's `TFlagNamed` agreeing with the string.
 **The variadic tail is recognized by SHAPE, not by the delegate family's name.** The golib families
 carry a name marker and the detection used to rely on it, but a declared `func(string, ...int)` used
 as a method group in an `any` position acquires C#'s NATURAL delegate type instead, whose name carries
-no marker — so it reported non-variadic and `In(1)` handed back a raw `Span<int>`, rendering
-``func(string, Span`1)``. A `Span<T>` parameter cannot arise any other way in converted code (Go has
-no such type, and the converter emits one only for a variadic tail), so testing for it subsumes the
-name test rather than widening it.
+no marker — so it reported non-variadic and `In(1)` handed back the raw tail type, rendering
+``func(string, Span`1)`` in the releases whose tail was a `Span<T>`. A `variadic<T>` parameter cannot
+arise any other way in converted code (Go has no such type, and the converter emits one only for a
+variadic tail), so testing for it subsumes the name test rather than widening it.
+<!-- the shape test: src/core/golib/GoReflect.TypeLayout.cs:1567 `tail.GetGenericTypeDefinition() == typeof(variadic<>);` (wall E moved it from Span<>). -->
 
 Every defined func type, with or without methods, is its own delegate and keeps its name: `%T`,
 `Name()` and `String()` answer `main.F`, `"F"` and `"main.F"` for `type F func(string) error`. Until
@@ -4615,7 +4616,7 @@ exactly what the descriptor's **dims cargo** already carries for every declared 
 construction is the `(managed type, dims)` pair `abi.TypeOf` reaches from a live `[n]T` value. The hand-own
 `reflect/value_impl.cs` builds it, beside its sibling constructor `PointerTo`:
 
-<!-- source: src/core/reflect/value_impl.cs:3701-3722 -->
+<!-- source: src/core/reflect/value_impl.cs:3694-3715 -->
 ```csharp
 public static Type ArrayOf(nint length, Type elem) {
     if (length < 0) {

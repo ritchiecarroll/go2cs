@@ -1,14 +1,14 @@
 namespace go;
 
 using fmt = fmt_package;
-using ꓸꓸꓸany = Span<any>;
-using ꓸꓸꓸnint = Span<nint>;
+using ꓸꓸꓸany = variadic<any>;
+using ꓸꓸꓸnint = variadic<nint>;
 
 partial class main_package {
 
 internal static void main() {
     [GoFunc("main.func1")] @string format(@string f, params ꓸꓸꓸany aʗp) {
-        var a = aʗp.sslice();
+        var a = aʗp;
         return fmt.Sprintf(f, a.ꓸꓸꓸ);
     }
     fmt.Println(format("%s=%d", (@string)"x", (nint)1));
@@ -26,7 +26,7 @@ internal static void main() {
 
     var sumʗ1 = sum;
     [GoFunc("main.func3")] nint forward(params ꓸꓸꓸnint aʗp) {
-        var a = aʗp.sslice();
+        var a = aʗp;
         return sumʗ1(a.ꓸꓸꓸ);
     }
     fmt.Println(forward(10, 20, 30));
@@ -35,7 +35,7 @@ internal static void main() {
     [GoFunc("main.func4")] void mutate(params ꓸꓸꓸnint numsʗp) {
         GoFrame ᒐ = default;
         try {
-            var nums = numsʗp.sslice();
+            var nums = numsʗp.slice();
             defer([GoFunc("main.func4.1")] () => {
             }, ref ᒐ);
             nums[0] = 40;

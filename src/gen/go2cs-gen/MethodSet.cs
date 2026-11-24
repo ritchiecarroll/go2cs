@@ -68,8 +68,10 @@ internal static class MethodSet
     // One Go method as the arms call it: the call target, the fixed parameter types, the variadic tail's element type
     // (or null), the return type ("" for void), and whether the type promotes it from an embedded field. Every type is
     // spelled so it binds inside the type's own part.
+    // SpanTail marks a hand-written `params Span<T>` tail: the family delegates take golib's variadic<T>, so such a method
+    // has no method-group conversion to one and its arms call it through a lambda.
     private readonly record struct Shape(string Name, Receiver Receiver, string Target, IReadOnlyList<string> Parameters, string? Variadic, string Returns,
-        bool Promoted = false);
+        bool Promoted = false, bool SpanTail = false);
 
     /// <summary>
     /// The source of a generated part of <paramref name="type"/> implementing <c>IGoMethodSet</c>, or <c>null</c> when it
@@ -209,12 +211,14 @@ internal static class MethodSet
 
         List<string> parameters = [];
         string? variadic = null;
+        bool spanTail = false;
 
         for (int i = 1; i < closed.Parameters.Length; i++)
         {
             IParameterSymbol parameter = closed.Parameters[i];
 
-            // A by-ref parameter has no Func/Action form. A Span<T> is Go's variadic tail, only as the last parameter.
+            // A by-ref parameter has no Func/Action form. A variadic<T> (or hand-written Span<T>) is Go's variadic tail, only
+            // as the last parameter.
             if (parameter.RefKind != RefKind.None || parameter.HasExplicitDefaultValue)
                 return null;
 
@@ -224,6 +228,7 @@ internal static class MethodSet
                     return null;
 
                 variadic = tail.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                spanTail = parameter.Type.Name == "Span";
                 continue;
             }
 
@@ -242,7 +247,7 @@ internal static class MethodSet
 
         // The call names the class that declares the method: the type's method holder, or its package class.
         return new Shape(method.Name, kind, $"{method.ContainingType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}.{name}{typeArguments}",
-            parameters, variadic, closed.ReturnsVoid ? "" : closed.ReturnType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat));
+            parameters, variadic, closed.ReturnsVoid ? "" : closed.ReturnType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat), SpanTail: spanTail);
     }
 
     // The type's promoted methods: the forwarders in its generated part whose receiver is the type (`this T`,
@@ -294,6 +299,7 @@ internal static class MethodSet
 
             List<string> parameters = [];
             string? variadic = null;
+            bool spanTail = false;
             bool renderable = true;
             SeparatedSyntaxList<ParameterSyntax> declared = method.ParameterList.Parameters;
 
@@ -311,13 +317,14 @@ internal static class MethodSet
 
                 if (parameter.Modifiers.Any(SyntaxKind.ParamsKeyword))
                 {
-                    if (i != declared.Count - 1 || LastName(parameter.Type) is not GenericNameSyntax { Identifier.ValueText: "Span", TypeArgumentList.Arguments: [var element] })
+                    if (i != declared.Count - 1 || LastName(parameter.Type) is not GenericNameSyntax { Identifier.ValueText: "Span" or "variadic", TypeArgumentList.Arguments: [var element] } tailName)
                     {
                         renderable = false;
                         break;
                     }
 
                     variadic = element.ToString();
+                    spanTail = tailName.Identifier.ValueText == "Span";
                     continue;
                 }
 
@@ -333,7 +340,7 @@ internal static class MethodSet
             string returns = method.ReturnType.ToString() is var text && text == "void" ? "" : method.ReturnType.ToString();
 
             yield return new Shape(method.Identifier.ValueText, kind, $"{OwnerName(owner)}.{method.Identifier.Text}{method.TypeParameterList?.ToString() ?? ""}",
-                parameters, variadic, returns, Promoted: true);
+                parameters, variadic, returns, Promoted: true, SpanTail: spanTail);
         }
 
         // The forwarder's class, fully qualified: the package class, or the sibling class at namespace level.
@@ -370,7 +377,7 @@ internal static class MethodSet
         if (shape.Variadic is not null)
         {
             names.Add($"{TempVarMarker}arg{names.Count + 1}");
-            declarations.Add($"global::System.Span<{shape.Variadic}> {names[^1]}");
+            declarations.Add($"global::go.variadic<{shape.Variadic}> {names[^1]}");
         }
 
         string arguments = string.Concat(names.Select(argument => ", " + argument));
@@ -388,6 +395,7 @@ internal static class MethodSet
         // An arm that only passes its receiver and arguments through is the method itself, a method group cast as the
         // converter emits a method expression, so reflect's func identity (keyed on the delegate's method) agrees.
         string? Method(string receiverType) =>
+            shape.SpanTail ? Unbound(receiverType, $"{shape.Target}({TempVarMarker}recv{arguments})") :
             Delegate(compilation, [receiverType, .. shape.Parameters], shape.Variadic, shape.Returns) is { } unboundDelegate
                 ? $"{unboundDelegate}({shape.Target})"
                 : null;
@@ -551,12 +559,15 @@ internal static class MethodSet
         _ => null
     };
 
-    // The element of a System.Span<T>, or null for any other type. Returned rather than an out parameter: netstandard2.0
-    // has no NotNullWhen to tell the caller a true answer carries one (CS8602).
-    internal static ITypeSymbol? SpanElement(ITypeSymbol type) =>
-        type is INamedTypeSymbol { Name: "Span", TypeArguments: [var argument], ContainingNamespace: { Name: "System", ContainingNamespace.IsGlobalNamespace: true } }
-            ? argument
-            : null;
+    // The element of a Go variadic tail, or null for any other type: golib's go.variadic<T> (what the converter emits), or a
+    // System.Span<T> (a hand-written `params Span<T>`). Returned rather than an out parameter: netstandard2.0 has no
+    // NotNullWhen to tell the caller a true answer carries one (CS8602).
+    internal static ITypeSymbol? SpanElement(ITypeSymbol type) => type switch
+    {
+        INamedTypeSymbol { Name: "variadic", TypeArguments: [var argument], ContainingNamespace: { Name: "go", ContainingNamespace.IsGlobalNamespace: true } } => argument,
+        INamedTypeSymbol { Name: "Span", TypeArguments: [var argument], ContainingNamespace: { Name: "System", ContainingNamespace.IsGlobalNamespace: true } } => argument,
+        _ => null
+    };
 
     private static bool IsBox(ITypeSymbol type, out ITypeSymbol element)
     {

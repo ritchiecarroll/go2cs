@@ -1,6 +1,6 @@
 namespace go;
 
-using ꓸꓸꓸgreatestEnd_nodes = Span<main_package.greatestEnd_nodes>;
+using ꓸꓸꓸgreatestEnd_nodes = variadic<main_package.greatestEnd_nodes>;
 
 partial class main_package {
 

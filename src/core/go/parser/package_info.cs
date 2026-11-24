@@ -120,8 +120,8 @@ namespace go.go;
 using static global::go.go.parser_package;
 using ast = global::go.go.ast_package;
 using token = global::go.go.token_package;
-using ꓸꓸꓸany = Span<any>;
-using ꓸꓸꓸжastꓸIdent = Span<ж<global::go.go.ast_package.Ident>>;
+using ꓸꓸꓸany = variadic<any>;
+using ꓸꓸꓸжastꓸIdent = variadic<ж<global::go.go.ast_package.Ident>>;
 
 [GoPackage("parser")]
 public static partial class parser_package

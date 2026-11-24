@@ -70,7 +70,7 @@ namespace go.text;
 
 using static go.text.scanner_package;
 using io = go.io_package;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸany = variadic<any>;
 
 [GoPackage("scanner")]
 public static partial class scanner_package

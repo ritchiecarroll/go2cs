@@ -1457,6 +1457,7 @@
     <Project Path="tests/Behavioral/VariadicPromotedForwarder/VariadicPromotedForwarder.csproj" />
     <Project Path="tests/Behavioral/VariadicPromotedForwarder/varhostlib/go.varhost.csproj" />
     <Project Path="tests/Behavioral/VariadicSlotInterfaces/VariadicSlotInterfaces.csproj" />
+    <Project Path="tests/Behavioral/VariadicSpreadHeapAlias/VariadicSpreadHeapAlias.csproj" />
     <Project Path="tests/Behavioral/VariableCapture/VariableCapture.csproj" />
     <Project Path="tests/Behavioral/VariadicClosureShadowParam/VariadicClosureShadowParam.csproj" />
     <Project Path="tests/Behavioral/VendoredPathModuleImport/VendoredPathModuleImport.csproj" />

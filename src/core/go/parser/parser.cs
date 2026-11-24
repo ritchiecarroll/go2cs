@@ -34,7 +34,7 @@ using strings = strings_package;
 using global::go.go;
 using global::go.go.@internal;
 using global::go.go.build;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸany = variadic<any>;
 
 partial class parser_package {
 
@@ -96,7 +96,7 @@ private static readonly @string dotsᶜᵇ = ". . . . . . . . . . . . . . . . . 
 // ----------------------------------------------------------------------------
 // Parsing support
 internal static void printTrace⁔(/*this*/ ref parser p, params ꓸꓸꓸany aʗp) {
-    var a = aʗp.sslice();
+    var a = aʗp;
 
     @string dots = dotsᶜ;
     const nint n = /* len(dots) */ 64;

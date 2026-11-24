@@ -1,7 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
-using ꓸꓸꓸOption = Span<main_package.Option>;
+using ꓸꓸꓸOption = variadic<main_package.Option>;
 
 partial class main_package {
 

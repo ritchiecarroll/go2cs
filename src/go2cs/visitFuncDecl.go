@@ -248,12 +248,17 @@ func (v *Visitor) variadicAliasIdent(elem types.Type, typeName string) string {
 }
 
 // variadicParamType renders a variadic parameter's C# type, registering the file-local
-// `using ꓸꓸꓸT = Span<…>;` alias whenever one applies. The alias is what keeps a variadic signature
+// `using ꓸꓸꓸT = variadic<…>;` alias whenever one applies. The alias is what keeps a variadic signature
 // reading like its Go original (`shapes ...Shape` → `params ꓸꓸꓸShape shapesʗp`); it already backs
 // os/signal's `Notify(…, params ꓸꓸꓸosꓸSignal sigʗp)` and internal/fuzz's `ꓸꓸꓸCorpusEntry`.
+//
+// The pack type is golib's `variadic<T>` (variadicPack.cs), not `Span<T>`: it carries the caller's
+// slice when the call spreads one (`f(s...)`), so the callee's `xs` IS that slice, as Go specifies,
+// and element writes through it reach the caller. A `Span<T>` tail lost the header and the heap
+// prologue's copy dropped those writes (sqlite's TestPreUpdateHook, convertAssign(&dest[i])).
 func (v *Visitor) variadicParamType(elem types.Type) string {
 	typeName, aliasName, inline := v.variadicElementType(elem)
-	spanType := fmt.Sprintf("Span<%s>", typeName)
+	spanType := fmt.Sprintf("variadic<%s>", typeName)
 
 	if inline {
 		return spanType
@@ -1279,7 +1284,14 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 					sliceType = "sslice"
 				}
 
-				if v.options.preferVarDecl {
+				// A pack whose only use is a forward binds the pack itself (see packForwardOnly).
+				if v.packForwardOnly[param] {
+					if v.options.preferVarDecl {
+						v.writeString(resultParameters, "%s%svar %s = %s;", v.newline, v.indent(v.indentLevel+1), getSanitizedIdentifier(param.Name()), getVariadicParamName(param))
+					} else {
+						v.writeString(resultParameters, "%s%svariadic<%s> %s = %s;", v.newline, v.indent(v.indentLevel+1), v.getCSharpTypeName(param.Type().(*types.Slice).Elem()), getSanitizedIdentifier(param.Name()), getVariadicParamName(param))
+					}
+				} else if v.options.preferVarDecl {
 					v.writeString(resultParameters, "%s%svar %s = %s.%s();", v.newline, v.indent(v.indentLevel+1), getSanitizedIdentifier(param.Name()), getVariadicParamName(param), sliceMethod)
 				} else {
 					v.writeString(resultParameters, "%s%s%s<%s> %s = %s.%s();", v.newline, v.indent(v.indentLevel+1), sliceType, v.getCSharpTypeName(param.Type().(*types.Slice).Elem()), getSanitizedIdentifier(param.Name()), getVariadicParamName(param), sliceMethod)

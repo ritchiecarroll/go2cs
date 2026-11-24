@@ -24,7 +24,7 @@ using strings = strings_package;
 /* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
 using @internal;
 using go.net;
-using ꓸꓸꓸstring = Span<@string>;
+using ꓸꓸꓸstring = variadic<@string>;
 
 partial class url_package {
 
@@ -1318,7 +1318,7 @@ internal static error UnmarshalBinary⁔(/*this*/ ref URL u, slice<byte> text) {
 // Any sequences of multiple / characters will be reduced to a single /.
 // Path elements must already be in escaped form, as produced by [PathEscape].
 internal static ж<URL> JoinPath⁔(/*this*/ ref URL u, params ꓸꓸꓸstring elemʗp) {
-    var elem = elemʗp.sslice();
+    var elem = elemʗp;
 
     var (url, _) = u.joinPath(elem.ꓸꓸꓸ);
     return url;
@@ -1409,7 +1409,7 @@ internal static bool stringContainsCTLByte(@string s) {
 public static (@string result, error err) JoinPath(@string @base, params ꓸꓸꓸstring elemʗp) {
     @string result = default;
     error err = default;
-    var elem = elemʗp.sslice();
+    var elem = elemʗp;
 
     (var url, err) = Parse(@base);
     if (err != nil) {

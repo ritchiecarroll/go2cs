@@ -41932,6 +41932,46 @@ program prints frame information for promoted methods, and a twin adds or rename
 
 — G (2026-11-23)
 
+## 2026-11-20 — P2 (wall E, .5): Go's spread hands the callee the slice itself; go2cs copied it
+
+Found by sqlite-cs (P5's TestPreUpdateHook divergence): a row scan wrote through `dest...` into a slice its caller
+held, and the writes were lost. Go's `f(s...)` passes `s` itself (same array, length and capacity), so a write to
+`args[i]` inside `f` is visible to the caller. go2cs passed a `params Span<T>` tail and its heap prologue copied the
+span into a fresh slice, so every such write landed in the copy.
+
+**Cut** (`claude/p2-wall-e-spread-alias`, COORD rulings 2026-11-20T12:12:30Z, 13:50:29Z, 14:03:02Z): the tail is
+golib's `variadic<T>`, a `readonly ref struct` that carries either the caller's slice (a spread) or the literal
+elements, with `using ꓸꓸꓸT = variadic<T>;` as the converted spelling. The heap prologue `.slice()` returns the
+spread slice itself; a literal pack still copies (a fresh array, as Go builds). A view prologue (`.sslice()`) stays
+for read-only uses; an element write of a basic or type-parameter pack takes the heap prologue, because C# hands a
+collection builder read-only static data for an all-constant primitive argument list. A forward `g(xs...)` binds the
+pack itself (`var xs = xsʗp;`) when it is the pack's sole use outside any loop, so a spread caller's slice reaches `g`.
+It is a binary break of every public variadic signature: 393 suppression entries in 57 packages, and the break floor
+moves to the .5 release.
+
+**Two rules recorded for later, neither a wrong answer today:**
+- *The sslice copy point.* `sslice<T>.ToSlice()` (and its implicit conversion to `slice<T>`) copies the window into
+  a new array (`src/core/golib/sslice.cs`). The converter admits the view prologue only for uses that never reach a
+  `slice<T>`, so no emitted pack crosses it. Any rule that widens the view's admission must route a spread pack's
+  slice around this conversion, or a callee's writes are lost again.
+- *Forwards in exclusive branches.* The forward rule counts forwards over the whole body (`escapeAnalysisOperations.go`,
+  forwards != 1 keeps the heap prologue), so `if c { g(xs...) } else { h(xs...) }` takes the heap prologue though each
+  path forwards once. Behavior is right either way (the heap prologue returns a spread's slice itself); the cost is a
+  literal pack's copy. A branch-exclusive count would keep the bind there.
+
+**Measurement lessons.** The footprint A/B ran three targets (amd64) and missed the linux/arm64 flavor; the hosted
+release-smoke's linux-arm64 cgo leg named it (CS0121 on `cgocaller`). A fourth-target run moved exactly one line.
+The suppression generator wrote 392 of the guard's 393 entries; the miss was an interface property ADDED over a base
+interface's unchanged one (golib's `ISlice<T>` over `IArray<T>`), which no removed-member route sees.
+
+**Perf row** (fmt, linux/amd64 JIT Release, one cloud box, 3 processes per arm interleaved, rounds 2-6, at
+`c423f1593e` and `4c16756345`): `fmt.Sprintf("%d %s", i, s)` floor 511.4 ns/op base, 545.2 ns/op cut (median 565.8
+and 582.6); `fmt.Sprint(args...)` floor 1095.1 base, 946.0 cut (median 1186.2 and 1079.1). The per-process spread is
+larger than either delta, so only the floors are read: the literal call costs about 34 ns more, the spread call about
+149 ns less. Go on the same box: 109.2 and 125.6 ns/op.
+
+— P2 (2026-11-20)
+
 **GoStmtValueReturn [Compile]: CUT (P4, 2026-11-23).** Root: the generator classifies a typed go literal as a twin
 launch whatever its return type, and goǃtwin (frozen) takes only `Action<…>` plus `Func<…, GoTask>`, so a literal
 returning a value (`go func(...) error {...}(...)`) is CS8030 in its plain half and CS8031 in its twin, and an explicit
