@@ -98,9 +98,7 @@
   <ItemGroup Condition="'$(GoTwinsRefuse)' != ''">
     <AdditionalFiles Include="$(GoTwinsRefuse)" />
   </ItemGroup>
-  <!-- A converted test host (*.tests) enters at its own host Main and has no main_package.main, so the twin generator writes no
-       GoTwinEntry for it; built with twins (D2/T6's GoStdlibTwinsTests), it keeps its own entry. -->
-  <PropertyGroup Condition="'$(GoTwins)' == 'true' and '$(OutputType)' == 'Exe' and !$(MSBuildProjectName.EndsWith('.tests'))">
+  <PropertyGroup Condition="'$(GoTwins)' == 'true' and '$(OutputType)' == 'Exe'">
     <StartupObject>go.GoTwinEntry</StartupObject>
   </PropertyGroup>
 </Project>

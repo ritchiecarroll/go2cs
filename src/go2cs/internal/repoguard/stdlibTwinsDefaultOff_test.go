@@ -36,9 +36,10 @@ var (
 
 // The one tracked path allowed to turn GoStdlibTwins on: D2/T6 (FLEET 20261121T230700Z; COORD's GO 20261125T080536Z), the
 // default-mode roster swept against a twinned standard library. It is os-matrix's sweep-shard, which never packs, and only
-// when the plan read ;twins=1. Any other expression that can yield 'true' is refused like a literal.
+// this exact expression, which yields 'true' when the plan read ;twins=1. Any other expression for the name, anywhere, is
+// refused: the value of an expression cannot be read from its text (P3, 2026-11-25).
 const stdlibTwinsAllowedWorkflow = ".github/workflows/os-matrix.yml"
-const stdlibTwinsAllowedCondition = "needs.plan.outputs.sweep-twins == '1'"
+const stdlibTwinsAllowedExpr = "needs.plan.outputs.sweep-twins == '1' && 'true' || ''"
 
 // turnsStdlibTwinsOn reports whether a tracked file's text turns GoStdlibTwins on: an MSBuild element that sets it
 // true (comments stripped), or a script, workflow or command line that passes it true.
@@ -55,11 +56,7 @@ func turnsStdlibTwinsOn(rel, text string) bool {
 	}
 
 	for _, m := range stdlibTwinsOnExpr.FindAllStringSubmatch(text, -1) {
-		if !strings.Contains(m[1], "'true'") {
-			continue
-		}
-
-		if lower == stdlibTwinsAllowedWorkflow && strings.Contains(m[1], stdlibTwinsAllowedCondition) {
+		if lower == stdlibTwinsAllowedWorkflow && strings.TrimSpace(m[1]) == stdlibTwinsAllowedExpr {
 			continue
 		}
 
@@ -155,7 +152,10 @@ func TestStdlibTwinsScannerFires(t *testing.T) {
 		{".github/workflows/os-matrix.yml", "GoStdlibTwins: ${{ needs.plan.outputs.mn == '1' && 'true' || '' }}", true},
 		{".github/workflows/ci-master.yml", "GoStdlibTwins: ${{ needs.plan.outputs.sweep-twins == '1' && 'true' || '' }}", true},
 		{".github/workflows/os-matrix.yml", "GoStdlibTwins: ${{ 'true' }}", true},
-		{".github/workflows/os-matrix.yml", "GoStdlibTwinsTests: ${{ needs.plan.outputs.sweep-twins == '1' && 'true' || '' }}", false},
+		// P3's holes: the allowed condition beside an always-true arm, and an expression with no 'true' literal at all.
+		{".github/workflows/os-matrix.yml", "GoStdlibTwins: ${{ needs.plan.outputs.sweep-twins == '1' || 'true' }}", true},
+		{".github/workflows/ci-master.yml", "GoStdlibTwins: ${{ true }}", true},
+		{".github/workflows/ci-master.yml", "GoStdlibTwins: ${{ inputs.twins }}", true},
 	}
 
 	for _, c := range cases {
