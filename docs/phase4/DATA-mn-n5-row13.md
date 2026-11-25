@@ -95,6 +95,22 @@ At claude/r-mn-n5-sleep aff3727dc4, hosted linux (4 cores), behavioral-smoke in 
   n=100,000, 50 of 50 ok (0 hangs, 0 non-zero exits, 0 outputs differing from Go's), wall 6.0-6.4 s, peak carriers
   10-17, sampled peak OS threads 24-35 (row 7's linux band 37-44; the design's stop line, +25%, is 55).
 
+### 4.2 Hosted windows and darwin, 2026-11-25 (COORD GO 20261125T080536Z: row 13's named NOT RUN)
+
+At claude/r-mn-n5-sleep 010bb1ba92, behavioral-smoke 'MnInvisible;mn=1' (windows run 45576158669; darwin run 45576163996, both
+macs). MnInvisible under --mn PASSES all four phases on win-x64, osx-x64 and osx-arm64 (V1, V2, V4, V5, V6 equal to Go).
+
+| host | V4 floor p99 (default mode) | V4 twinned p99, 200 ms steps | 2 s steps | C-exec, warmed |
+|---|---|---|---|---|
+| win-x64, 4 cores | 24.0-31.2 ms | 45.7-81.2 | 42.3-45.9 | handoffs 576, retakes 16, injections 0 |
+| osx-x64, 4 cores | 80.7-96.9 (max 280) | 133.1-190.6 | 177.3-187.3 | handoffs 0, retakes 0, injections 13/21/14 |
+| osx-arm64, 3 cores | 11.9-17.0 | 43.1-133.7 | 28.0-29.4 | handoffs 0, retakes 0, injections 12/10/11 |
+
+Two readings change the record. os/exec Wait is INVISIBLE on darwin (injections only, warmed), where it is retaken on
+linux and handed off or retaken on windows: a darwin bracket candidate (BOARD, 2026-11-25). And the wake tail BOARDed for
+R-LAPTOP is not that host's alone: hosted windows and both macs read twinned p99 well over their default-mode floor + 25 ms
+at 200 ms steps; linux, the gate of record, does not (section 2, I4).
+
 ## Appendix: the predictions as written, with their scores
 
 ### row13/PREDICTIONS-base.md
@@ -305,4 +321,16 @@ SCORED (a), hosted linux run 45565158258 at aff3727dc4, 4 cores: I4 step PASS (t
 SCORED (b), hosted linux run 45565162745 at aff3727dc4, the storm gate: 50 of 50 ok (0 HANG, 0 EXIT, 0 OUTPUT;
 failures=0) MET; wall 6.0-6.4 s (median 6.4) MET; READING peak-carriers 10-17 MET; sampled peak OS threads 24-35 --
 as worded (30-55) MISSED LOW by up to 6, below row 7's linux band (37-44) and well inside the stop line (55).
+
+ROW 13 HOSTED WINDOWS AND DARWIN LEGS (COORD GO 20261125T080536Z), written before the dispatches, behavioral-smoke
+'MnInvisible;mn=1' at the commit below (darwin fans out to osx-arm64 and osx-x64):
+- the runner's --mn run of MnInvisible PASSES all four phases on windows and on both macs (V1, V2, V4, V5, V6 equal to Go);
+- the N5 step: every V4 run finishes (latency a reading off linux); C-exec released true 3/3 on each, injections 0-2.
+- Latency readings, a guess: darwin twinned p99 <= 25 ms; windows twinned p99 over 25 ms (a 15.6 ms timer, as on R-LAPTOP).
+SCORED row 13 hosted legs at 010bb1ba92 (windows run 45576158669; darwin run 45576163996, osx-x64 + osx-arm64):
+- --mn MnInvisible PASS on windows, osx-x64, osx-arm64 -- MET. Every V4 run finished -- MET.
+- C-exec released 3/3 everywhere -- MET. Injections 0-2: windows MET (handoffs 576, retakes 16, inj 0); darwin MISSED:
+  osx-x64 inj 13/21/14, osx-arm64 12/10/11, handoffs 0, retakes 0 -- os/exec Wait is INVISIBLE on darwin (warmed).
+- Latency guess: windows twinned p99 over 25 (46-81 at 200 ms, 42-46 at 2 s; floor 24-31) MET; darwin p99 <= 25 MISSED:
+  osx-arm64 43.1-133.7 at 200 ms, 28.0-29.4 at 2 s (floor 11.9-17.0); osx-x64 133-191 and 177-187 (floor 81-97, max 280).
 ```

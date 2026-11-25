@@ -42130,4 +42130,30 @@ MnSpinCap's spinners complete). Not cut.
 
 — R (2026-11-25)
 
+## 2026-11-25 — R (M:N row 13 follow-up, hosted darwin): os/exec Wait blocks invisibly on darwin under the M:N scheduler
+
+**OPEN, darwin only.** MnInvisible's C-exec census row (K goroutines blocked in exec.Cmd.Wait, warmed, GO2CS_MN=1) on
+hosted osx-x64 and osx-arm64 (run 45576163996, claude/r-mn-n5-sleep 010bb1ba92) reads handoffs 0, retakes 0 and
+injections 10-21 in each of three runs: the wait is invisible, and the scheduler answers it with injected threads. The
+same row on hosted linux reads retakes 15-16 and 0 injections (the native retake), and on hosted windows handoffs 576,
+retakes 16 and 0 injections. Released 3/3 everywhere, so nothing hangs; on darwin each waiter costs a carrier until the
+monitor injects one.
+
+**Likely seat.** darwin's process wait (wait4 through syscall's darwin path, or os's darwin-specific pidfd-less wait)
+reaching the native call without the runtime's entersyscall family, so GoNativeCall's depth stays even. Not traced.
+
+**Owner.** Unassigned; COORD routes (Q3's default: the lane on row 13).
+
+— R (2026-11-25)
+
+## 2026-11-25 — R (addendum to this BOARD's 2026-11-25 row on R-LAPTOP's wake tail): the tail is not that host's alone
+
+Hosted runs of MnInvisible V4 (run 45576158669, windows; run 45576163996, darwin) read twinned p99 well above each host's
+default-mode floor + 25 ms at 200 ms steps: win-x64 45.7-81.2 ms against a floor of 24.0-31.2; osx-arm64 43.1-133.7
+against 11.9-17.0; osx-x64 133.1-190.6 against 80.7-96.9. Hosted linux, the gate of record, reads 7-14 ms against 3-4.
+So the earlier row's "host-only" applies to linux as the exception rather than to R-LAPTOP: the tail shows on every
+non-linux host read so far. Its likely seat is unchanged.
+
+— R (2026-11-25)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
