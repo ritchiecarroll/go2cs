@@ -518,6 +518,11 @@ func (set *cgoWrapperSet) wrapper(declaration cgoDeclaration) (string, error) {
 	}
 	var bearingCopies []bearingCopy
 
+	// The void and out-parameter arguments, each of which can cross as a word mirror of a Go array of C pointers (.5 cgo
+	// item 2, DESIGN 18.12.3, H's verdict (A)): every word C wrote is checked against every pinned argument inside the
+	// `fixed`, the mirror's own pin included, and the words are copied back after it.
+	var wordMirrors []int
+
 	checked := map[string]bool{}
 
 	for i, param := range params {
@@ -564,18 +569,25 @@ func (set *cgoWrapperSet) wrapper(declaration cgoDeclaration) (string, error) {
 			// What a void pointer carries is GoCgoArgs' to decide (Phase 3 §13.4, §16.1 B, 18.12): nil and C memory cross as
 			// their number, Go memory whose box names its storage crosses held still by the `fixed` around the call, and
 			// everything else is refused here, before anything is pinned or handed over (13.5: classify, pin, call).
-			fmt.Fprintf(&before, "\n        global::go.golib.GoCgoPin g%d = %sPinVoidPointer(p%d, %q);\n", i, args, i, function)
+			fmt.Fprintf(&before, "\n        global::go.golib.GoCgoPin g%d = %sPinVoidPointer(p%d, %q, out global::go.golib.GoCgoWordMirror? w%d);\n", i, args, i, function, i)
 			pinned = append(pinned, i)
+			wordMirrors = append(wordMirrors, i)
+			fmt.Fprintf(&after, "\n        w%d?.CopyBack(copies, %q);\n", i, function)
+			needCopies = true
 
 		case param.out:
 			// The out-parameter (shape (i)): a slot in Go memory crosses as one stack word, copied in by the pointer-member
 			// rule (a Go pointer in it is cgo's panic) and copied back after the call, where an address C left alone keeps
-			// its box. A slot in C memory is handed over by its own address.
+			// its box. A slot in C memory is handed over by its own address. An element of a Go array of C pointers is the
+			// argv shape: the whole array crosses as a pinned word mirror (Pinned), copied back by the mirror.
 			fmt.Fprintf(&before, "\n        nint m%d = default;\n", i)
-			fmt.Fprintf(&before, "        global::go.golib.GoCgoStructPointer k%d = %sOutParameter(p%d, %q, out nuint n%d, out ж<%s>? q%d);\n", i, args, i, function, i, param.goSide, i)
+			fmt.Fprintf(&before, "        global::go.golib.GoCgoStructPointer k%d = %sOutParameter(p%d, %q, out nuint n%d, out ж<%s>? q%d, out global::go.golib.GoCgoPin g%d, out global::go.golib.GoCgoWordMirror? w%d);\n", i, args, i, function, i, param.goSide, i, i, i)
+			pinnedScalars = append(pinnedScalars, i)
+			wordMirrors = append(wordMirrors, i)
 			fmt.Fprintf(&before, "        nint a%d = (nint)n%d;\n", i, i)
 			fmt.Fprintf(&before, "\n        if (k%d == %s)\n        {\n            m%d = (nint)n%d;\n            a%d = (nint)(&m%d);\n        }\n", i, mirrorKind, i, i, i, i)
 			fmt.Fprintf(&after, "\n        if (k%d == %s)\n            p%d.ValueSlot = %sPointerMemberBack<%s>((nuint)m%d, q%d, n%d, copies, %q);\n", i, mirrorKind, i, args, param.goSide, i, i, i, function)
+			fmt.Fprintf(&after, "\n        w%d?.CopyBack(copies, %q);\n", i, function)
 			returnedWords = append(returnedWords, returnedWord{word: fmt.Sprintf("(nuint)m%d", i)})
 			stackCopies = append(stackCopies, fmt.Sprintf("k%d == %s ? new(&m%d, (nuint)sizeof(nint), p%d) : default", i, mirrorKind, i, i))
 			needCopies = true
@@ -816,6 +828,18 @@ func (set *cgoWrapperSet) wrapper(declaration cgoDeclaration) (string, error) {
 			if resultMirror != nil && set.pointerBearing[resultMirror.name] {
 				for _, i := range all {
 					fmt.Fprintf(&text, "            ᴍpin_%s(in r, g%d, f%d, %q);\n", resultMirror.name, i, i, function)
+				}
+			}
+		}
+
+		// Every word C wrote into a word mirror, against every pin: an address inside pinned Go storage (the mirror's
+		// own words included, `argv[0] = &argv[2]`) is refused by name, as any returned word inside a pin is.
+		if len(wordMirrors) > 0 {
+			text.WriteString("\n")
+
+			for _, m := range wordMirrors {
+				for _, i := range all {
+					fmt.Fprintf(&text, "            w%d?.RequireWordsOutsidePin(g%d, f%d, %q);\n", m, i, i, function)
 				}
 			}
 		}

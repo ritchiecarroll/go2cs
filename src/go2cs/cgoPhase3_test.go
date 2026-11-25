@@ -112,7 +112,7 @@ func TestCgoPhase3FixtureConvertsItsHelpersVoidPointersAndDeferredCalls(t *testi
 	// item 2), and a void pointer result is its number.
 	for _, function := range []string{"free", "go2cs_probe_release", "go2cs_probe_same", "go2cs_probe_sum"} {
 		member := cgoBindingsMember(t, bindings, " "+function+"(@unsafe.Pointer p0")
-		classified := strings.Index(member, `GoCgoArgs.PinVoidPointer(p0, "`+function+`")`)
+		classified := strings.Index(member, `GoCgoArgs.PinVoidPointer(p0, "`+function+`", out global::go.golib.GoCgoWordMirror? w0)`)
 		pinned := strings.Index(member, "fixed (byte* f0 = g0)")
 		addressed := strings.Index(member, "nint a0 = g0.Address(f0);")
 		entered := strings.Index(member, "syscallEntersyscall()")
@@ -362,10 +362,6 @@ const cgoP3LayoutEntryPointer = "cannot read native memory as *main._Ctype_struc
 // ж.CgoFields.cs, CgoFieldStoreIntoCText). Go stores it; C memory must not hold one, so go2cs refuses it by name.
 const cgoP3StoreGoIntoC = "storing a Go pointer into C memory is refused"
 
-// cgoP3OutParameterElement is in the refusal of an out-parameter that is an element of a Go array of C pointers
-// (GoCgoArgs.OutParameter; P3's review of 1b, item 1).
-const cgoP3OutParameterElement = "an element of a Go array of C pointers"
-
 // cgoP3ReturnedIntoGoMemory is in the refusal of a word C returned inside a pinned argument's Go storage
 // (GoCgoArgs.RequireWordOutsidePin; P3's review of 1b, item 4).
 const cgoP3ReturnedIntoGoMemory = "returned an address inside the Go memory it was handed"
@@ -440,10 +436,11 @@ func cgoP3Arms() []cgoG1Arm {
 		// Seat 1b's out-parameter (18.12 item 4, shape (i)): strtod's char ** endptr, &end over a Go variable.
 		{name: "outstrtod"},
 		// P3's review of 1b (COORD inbox 20261124T173809Z): an element of a native window over a view, typed (item 2), and
-		// the two out-parameter shapes refused by name (items 1 and 4).
+		// the two out-parameter shapes (items 1 and 4). The element of a Go array of C pointers was refused by name until
+		// the .5 cgo item 2 word mirror, and now runs as Go does; the pointer into Go memory stays refused.
 		{name: "goviewcelemstring"},
 		{name: "goviewcelemfill"},
-		{name: "outstrtodelem", csFails: cgoP3OutParameterElement},
+		{name: "outstrtodelem"},
 		{name: "outstrtodgo", csFails: cgoP3ReturnedIntoGoMemory},
 		// P3's read of the fold (COORD inbox 20261124T204626Z): the pointer result inside a pin and its identity
 		// near-miss, and the wide reinterpret view and its same-size near-miss.
@@ -500,7 +497,8 @@ func cgoP3Arms() []cgoG1Arm {
 		// near-miss over C memory.
 		{name: "argvgo"},
 		{name: "argvfill"},
-		{name: "argvgoptr", goFails: cgoG1PointerPanic, csFails: cgoG1PointerPanic},
+		// Both sides panic, so the arm carries no expectation: the shared branch compares the exit and the first line.
+		{name: "argvgoptr"},
 		{name: "argvself", csFails: cgoP3ReturnedIntoGoMemory},
 		{name: "argvc"},
 		{name: "argvfield"},
