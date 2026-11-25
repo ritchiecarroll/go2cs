@@ -1,0 +1,86 @@
+Usage: go2cs [options] <input> [output_dir]
+
+Common options:
+  -recurse[=module,nuget]  Convert a module and its third-party dependencies (=module: the module
+                           only; =nuget: standard library from NuGet)
+  -go2cspath <dir>         Where the go2cs standard library and runtime are when not from NuGet, and
+                           where -stdlib writes
+  -platforms <os/arch>     The target platform, os/arch (default: this machine's)
+  -tags <list>             Build tags applied when loading packages, comma-separated
+  -comments                Carry the Go source comments into the C#
+  -stdlib                  For go2cs development: convert the Go standard library into the
+                           -go2cspath root
+  -cgo                     Convert a cgo package whose C use go2cs can bind (needs a C compiler)
+  -tests                   Also convert the package's Go tests and emit a runnable C# test host
+  -test-action <action>    With -tests: convert, build, run, compare (with go test) or all
+  -version                 Print the converter's release tuple and exit
+
+Advanced options: converting:
+  -goroot <dir>                Override the detected Go root
+  -gopath <dir>                Override the detected Go path
+  -module-safe-tag             With -recurse: apply the safe, purego and noasm build tags (default
+                               on)
+  -convert-timeout <duration>  With -stdlib: the cap on one package's conversion
+  -allow-stale-converter       With -stdlib or -tests: run even when this binary is older than its
+                               sources
+  -stack-append <mode>         Emit Go's stack-append buffer: on, off or auto
+  -probe-cache <dir>           The Go build cache the escape probe uses (env GO2CS_PROBE_CACHE)
+
+Advanced options: testing:
+  -test-timeout <duration>    With -tests: the package deadline for build, run and compare
+  -test-deadline <duration>   With -tests: the per-test deadline for the converted host (0 disables
+                              it)
+  -test-filter <regex>        With -tests: a regular expression both sides run, as go test -run
+  -test-config <config>       With -tests: build and run the test host as Release (default) or Debug
+  -test-tiered                With -test-config Release: turn the CLR's tiered JIT back on
+  -test-build-maxcpu <n>      With -tests: cap the test host's dotnet publish at n MSBuild nodes
+  -test-publish-binlog        With -tests: keep an MSBuild binary log of a failed test-host publish
+  -test-oracle-vet-off        With -tests: run go test with -vet=off
+  -test-oracle-goarch <arch>  With -tests: the GOARCH go test runs at, when it must differ from the
+                              target
+  -test-allow-handown         With -tests: convert a package -stdlib skips, into a bare scratch root
+  -module-disclosures <dir>   With -tests on a module: the tree of committed disclosure manifests
+  -module-version <version>   With -module-disclosures: the version a copied module source is
+
+Advanced options: nuget mapping:
+  -nuget-map <source>             With -recurse=nuget: add a module-to-package mapping source
+                                  (repeatable; off disables mapping)
+  -nuget-map-only                 With -nuget-map: use only the listed sources, not nugetgo.net
+  -nuget-map-exclude <module-path>
+                                  With -recurse=nuget: never map this module (repeatable)
+  -nuget-map-refresh              With -recurse=nuget: fetch every source again and re-resolve every
+                                  module
+  -nuget-map-canonical-only       With -recurse=nuget: apply only the module owners' own mappings
+  -nuget-map-feed <feed>          With -recurse=nuget: read mapped package versions from this feed,
+                                  not nuget.org
+
+Advanced options: output:
+  -indent <n>                     Spaces per indent level (default 4)
+  -var                            Prefer var declarations where the type is obvious (default on)
+  -uco                            Emit channel operators instead of method calls (default on)
+  -hoist-literals                 Hoist string literals to named static fields, as the standard
+                                  library does
+  -csproj <file>                  Generate project files from this .csproj template
+  -license <expression>           Set the generated projects' NuGet license to an SPDX expression
+  -provenance                     Add a notice to each converted file naming its Go source and
+                                  module
+  -trimpath                       Record main-module sources as go build -trimpath does (default on)
+  -inline-arrays <pattern>[,<pattern>...]
+                                  Override which packages' structs hold their arrays inline
+  -warn <code>[,<code>...]        Downgrade the listed converter refusal codes to warnings
+
+Advanced options: multi-platform and census:
+  -platform-census <dir>  With -stdlib and several -platforms: write a per-target emission census
+                          here
+  -platform-stage <dir>   With -stdlib and several -platforms: stage the per-target conversions here
+  -ref-census <file>      With -stdlib: write the box-to-reference lowering census to this file
+
+Advanced options: diagnostics:
+  -tree   Print each file's Go parse tree during conversion
+  -debug  Let a conversion failure crash with a full stack trace
+
+Experimental options: development:
+  -dual-recv         Also emit by-reference forms of eligible pointer-receiver methods
+  -dual-recv-params  With -dual-recv: those forms also lower their pointer parameters
+
+go2cs -help <option> explains one option.

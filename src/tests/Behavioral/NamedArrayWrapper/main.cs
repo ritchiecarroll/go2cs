@@ -25,8 +25,6 @@ internal static void fill(this ж<pallocBits> Ꮡb) {
 }
 
 internal static void main() {
-    var wᴷ = new stackAppend<uint32>();
-
     ref var e = ref heap(new pallocBits(), out var Ꮡe);
     Ꮡe.fill();
     fmt.Println((Ꮡe.Reinterpret<pallocBits, pageBits>()).get(0), (Ꮡe.Reinterpret<pallocBits, pageBits>()).get(3));
@@ -64,7 +62,7 @@ internal static void main() {
     fmt.Println(t[2]);
     var w = new pm(new uint32[]{}.slice());
     fmt.Println(len(w), cap(w));
-    w = append(wᴷ, w, (uint32)42);
+    w = append(w, (uint32)42);
     fmt.Println(len(w), w[0]);
 
     zeroTB(ref t);

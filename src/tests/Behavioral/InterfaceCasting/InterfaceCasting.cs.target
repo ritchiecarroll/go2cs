@@ -113,8 +113,6 @@ internal static (Animal, @string) pick(nint kind) {
 public static Animal Self(this ж<Cat> Ꮡc) { return new CatжAnimal(Ꮡc); }
 
 internal static void main() {
-    var packᴷ = new stackAppend<Animal>();
-
     error err = default;
 
     err = new MyError("bar");
@@ -156,7 +154,7 @@ internal static void main() {
     fmt.Println(readers[0].read());
 
     slice<Animal> pack = default;
-    pack = append(packᴷ, pack, (Animal)(new CatжAnimal(Ꮡ(new Cat()))));
+    pack = append(pack, (Animal)(new CatжAnimal(Ꮡ(new Cat()))));
     pack = append(pack, (Animal)(new Dog()));
     fmt.Println(len(pack), pack[0].Speak(), pack[1].Speak());
     var cp = Ꮡ(new Cat());

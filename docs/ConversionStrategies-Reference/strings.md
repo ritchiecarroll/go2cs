@@ -428,10 +428,10 @@ A `string` parameter is an `@string`, so every literal argument is copied into o
   <!-- illustration: not converter output -->
   ```csharp
   [GeneratedCode("go2cs-gen", …), OverloadResolutionPriority(-1)]
-  public static global::go.@string Sprintf(global::go.@string format, params global::System.Span<object> aʗp) => Sprintf((global::go.sstring)format, aʗp);
+  public static global::go.@string Sprintf(global::go.@string format, params global::go.variadic<object> aʗp) => Sprintf((global::go.sstring)format, aʗp);
 
   public static readonly global::go.Funcꓸꓸꓸ<global::go.@string, object, global::go.@string> Sprintfᶠ =
-      [global::go.GoTwinForwarder("Sprintf")] static (global::go.@string format, global::System.Span<object> aʗp) => Sprintf(format, aʗp);
+      [global::go.GoTwinForwarder("Sprintf")] static (global::go.@string format, global::go.variadic<object> aʗp) => Sprintf(format, aʗp);
   ```
 
 **Calls do not change.** Wherever both members apply, the priority picks the `sstring` one. That covers a `u8` literal (through `sstring`'s implicit conversion), an `@string` (as a view) and a C# string. `fmt.Sprintf("xxx"u8)` copies nothing for its argument.

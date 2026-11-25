@@ -11,7 +11,7 @@ using strings = strings_package;
 using constant = global::go.go.constant_package;
 using errors = global::go.@internal.types.errors_package;
 using global::go.go;
-using ꓸꓸꓸastꓸExpr = Span<global::go.go.ast_package.Expr>;
+using ꓸꓸꓸastꓸExpr = variadic<global::go.go.ast_package.Expr>;
 
 partial class types_package {
 

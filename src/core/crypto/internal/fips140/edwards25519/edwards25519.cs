@@ -7,7 +7,7 @@ namespace go.crypto.@internal.fips140;
 using field = go.crypto.@internal.fips140.edwards25519.field_package;
 using errors = errors_package;
 using go.crypto.@internal.fips140.edwards25519;
-using ꓸꓸꓸжPoint = Span<ж<edwards25519_package.Point>>;
+using ꓸꓸꓸжPoint = variadic<ж<edwards25519_package.Point>>;
 
 partial class edwards25519_package {
 

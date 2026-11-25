@@ -165,6 +165,11 @@ internal static class StringLiteralCache
     {
         @string value = new(bytes);
 
+        // The literal's bytes are static data from here on, as Go's RODATA is: unsafe.StringData hands out a pointer
+        // into a private copy of them, never into the backing every evaluation of the literal shares. Registered before
+        // the value is published; a racing thread's losing copy is registered too and simply never used.
+        ReadOnlyStringBacking.Register(bytes);
+
         lock (s_lock)
         {
             Slot[] slots = s_slots;

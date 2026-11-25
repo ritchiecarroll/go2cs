@@ -77,7 +77,7 @@ namespace go.net;
 using static go.net.smtp_package;
 using io = go.io_package;
 using tls = go.crypto.tls_package;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸany = variadic<any>;
 
 [GoPackage("smtp")]
 public static partial class smtp_package

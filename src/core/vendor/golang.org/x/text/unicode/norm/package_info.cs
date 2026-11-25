@@ -84,7 +84,7 @@ namespace go.vendor.golang.org.x.text.unicode;
 
 using static go.vendor.golang.org.x.text.unicode.norm_package;
 using io = go.io_package;
-using ꓸꓸꓸbyte = Span<byte>;
+using ꓸꓸꓸbyte = variadic<byte>;
 
 [GoPackage("norm", ImportPath = "vendor/golang.org/x/text/unicode/norm")]
 public static partial class norm_package

@@ -22,19 +22,19 @@ partial class pubPtr /*ж<pub>*/;
 internal static void main() {
     var ps = Ꮡ(new s(1));
     var dps = new sPtr(ps);
-    fmt.Println(fmt.Sprintf("%#v"u8, dps));
-    fmt.Println(fmt.Sprintf("%v"u8, dps), fmt.Sprintf("%[1]T"u8, dps));
-    fmt.Println("Addr of Elem:", reflect.ValueOf(dps).Elem().Addr().Type());
+    fmt.Println(fmt.Sprintf("%#v"u8, (dps ?? (sPtr)nil)));
+    fmt.Println(fmt.Sprintf("%v"u8, (dps ?? (sPtr)nil)), fmt.Sprintf("%[1]T"u8, (dps ?? (sPtr)nil)));
+    fmt.Println("Addr of Elem:", reflect.ValueOf((dps ?? (sPtr)nil)).Elem().Addr().Type());
 
     var pp = new pubPtr(Ꮡ(new pub(2)));
-    var f = reflect.ValueOf(pp).Elem().Field(0);
+    var f = reflect.ValueOf((pp ?? (pubPtr)nil)).Elem().Field(0);
     f.SetInt(5);
     var evalᴛ1 = f.Addr();
     var evalᴛ2 = evalᴛ1.Type();
     fmt.Println("field write through:", (pp.Value).I, evalᴛ2);
 
     var ap = new arrPtr(Ꮡ(array<nint>([1, 2, 3])));
-    reflect.ValueOf(ap).Elem().Index(1).SetInt(9);
+    reflect.ValueOf((ap ?? (arrPtr)nil)).Elem().Index(1).SetInt(9);
     fmt.Println("index write through:", (ap.Value)[1], ap.Value);
 
     fmt.Println(fmt.Sprintf("%#v"u8, ps.OrTypedNil()), reflect.ValueOf(ps.OrTypedNil()).Elem().Addr().Type());

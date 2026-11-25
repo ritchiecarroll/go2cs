@@ -17,7 +17,7 @@ using global::go.@internal;
 using global::go.go;
 using global::go.unicode;
 using iter = iter_package;
-using ꓸꓸꓸжastꓸFile = Span<ж<global::go.go.ast_package.File>>;
+using ꓸꓸꓸжastꓸFile = variadic<ж<global::go.go.ast_package.File>>;
 
 partial class doc_package {
 

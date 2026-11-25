@@ -76,8 +76,8 @@ using raw = go.@internal.trace.raw_package;
 using time = go.time_package;
 using trace = go.@internal.trace_package;
 using tracev2 = go.@internal.trace.tracev2_package;
-using ꓸꓸꓸany = Span<any>;
-using ꓸꓸꓸuint64 = Span<uint64>;
+using ꓸꓸꓸany = variadic<any>;
+using ꓸꓸꓸuint64 = variadic<uint64>;
 
 [GoPackage("testgen")]
 public static partial class testgen_package

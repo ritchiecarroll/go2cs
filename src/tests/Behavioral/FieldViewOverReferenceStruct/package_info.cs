@@ -44,8 +44,8 @@ using static go.main_package;
 // The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
 // go2cs-gen emits a field property on the pointer for each of their fields.
 [assembly: GoFieldAccess(typeof(rawInet4))]
-[assembly: GoFieldAccess(typeof(record))]
 [assembly: GoFieldAccess(typeof(sockInet4))]
+[assembly: GoFieldAccess(typeof(Δrecord))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -73,8 +73,8 @@ public static partial class main_package
     // <TypeAccessibility>
     internal partial struct pair {}
     [GoValueClone("addr", "zero")] internal partial struct rawInet4 {}
-    internal partial struct record {}
     [GoValueClone("addr", "raw")] internal partial struct sockInet4 {}
+    internal partial struct Δrecord {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import

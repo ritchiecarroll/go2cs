@@ -21,8 +21,6 @@ internal static void describe(@string label, reflect.Type t) {
 }
 
 internal static @string walkRangeShape(reflect.Value v) {
-    var outᴷ = new stackAppend<@string>();
-
     if (v.Kind() != reflect.Chan) {
         return "not a channel";
     }
@@ -38,7 +36,7 @@ internal static @string walkRangeShape(reflect.Value v) {
         if (!ok) {
             break;
         }
-        @out = append(outᴷ, @out, fmt.Sprint(elem));
+        @out = append(@out, fmt.Sprint(elem));
     }
 
     return "["u8 + strings.Join(@out, " ") + "]"u8;

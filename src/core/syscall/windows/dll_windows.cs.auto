@@ -15,7 +15,7 @@ using atomic = go.sync.atomic_package;
 using @unsafe = unsafe_package;
 using @internal.syscall.windows;
 using go.sync;
-using ꓸꓸꓸuintptr = Span<uintptr>;
+using ꓸꓸꓸuintptr = variadic<uintptr>;
 
 partial class syscall_package {
 
@@ -101,7 +101,7 @@ public static (uintptr r1, uintptr r2, Errno err) Syscall18(uintptr trap, uintpt
 //go:nosplit
 //go:uintptrkeepalive
 public static (uintptr r1, uintptr r2, Errno err) SyscallN(uintptr p, params ꓸꓸꓸuintptr argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp.slice();
 
     return syscalln(p, (uintptr)len(args), args.ꓸꓸꓸ);
 }
@@ -278,7 +278,7 @@ internal static uintptr Addr⁔(/*this*/ ref Proc p) {
 //
 //go:uintptrescapes
 internal static (uintptr, uintptr, error) Call⁔(/*this*/ ref Proc p, params ꓸꓸꓸuintptr aʗp) {
-    var a = aʗp.sslice();
+    var a = aʗp;
 
     var (ᴛ1, ᴛ2, ᴛ3) = SyscallN(p.Addr(), a);
     return (ᴛ1, ᴛ2, ᴛ3);
@@ -420,7 +420,7 @@ internal static uintptr Addr⁔(/*this*/ ж<LazyProc> Ꮡp) {
 //
 //go:uintptrescapes
 internal static (uintptr r1, uintptr r2, error lastErr) Call⁔(/*this*/ ж<LazyProc> Ꮡp, params ꓸꓸꓸuintptr aʗp) {
-    var a = aʗp.sslice();
+    var a = aʗp;
     ref var p = ref Ꮡp.DerefOrNull();
 
     Ꮡp.mustFind();

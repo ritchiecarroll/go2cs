@@ -131,7 +131,7 @@ using static global::go.go.printer_package;
 using ast = global::go.go.ast_package;
 using io = global::go.io_package;
 using token = global::go.go.token_package;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸany = variadic<any>;
 
 [GoPackage("printer")]
 public static partial class printer_package

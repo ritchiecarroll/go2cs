@@ -123,15 +123,19 @@ public sealed partial class TwinGenerator
         // arguments are evaluated before it): what the runtime counted in the plain method's IL, now counted here.
         private int CallOrdinal(SyntaxNode original)
         {
+            // A call's Go name as the runtime reads it (managed_impl.cs goCalleeName): a [GoName] stamp, else every leading Δ off.
+            static string GoCalleeName(IMethodSymbol method) =>
+                method.Name.StartsWith("Δ", System.StringComparison.Ordinal) && Common.GetGoNameStamp(method) is { } stamp ? stamp : method.Name.TrimStart('Δ');
+
             if (original is not InvocationExpressionSyntax call || m_model.GetSymbolInfo(call).Symbol is not IMethodSymbol target)
                 return 0;
 
-            string name = target.Name.TrimStart('Δ');
+            string name = GoCalleeName(target);
             int ordinal = 0, total = 0;
 
             foreach (InvocationExpressionSyntax other in PostOrder(SequenceNode(original)))
             {
-                if (m_model.GetSymbolInfo(other).Symbol is not IMethodSymbol callee || callee.Name.TrimStart('Δ') != name)
+                if (m_model.GetSymbolInfo(other).Symbol is not IMethodSymbol callee || GoCalleeName(callee) != name)
                     continue;
 
                 total++;

@@ -84,7 +84,7 @@ namespace go.net;
 
 using static go.net.textproto_package;
 using io = go.io_package;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸany = variadic<any>;
 
 [GoPackage("textproto")]
 public static partial class textproto_package

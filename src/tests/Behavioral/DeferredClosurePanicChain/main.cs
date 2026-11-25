@@ -7,8 +7,6 @@ using strings = strings_package;
 partial class main_package {
 
 internal static partial @string frames(@string owner) {
-    var namesᴷ = new stackAppend<@string>();
-
     var pcs = new slice<uintptr>(64);
     nint n = runtime.Callers(2, pcs);
     var iter = runtime.CallersFrames(pcs.slice(0, n));
@@ -16,7 +14,7 @@ internal static partial @string frames(@string owner) {
 
     for (;;) {
         var (frame, more) = iter.Next();
-        names = append(namesᴷ, names, frame.Function);
+        names = append(names, frame.Function);
 
         if (frame.Function == "main."u8 + owner || !more) {
             break;

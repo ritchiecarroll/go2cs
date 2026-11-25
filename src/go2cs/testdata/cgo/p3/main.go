@@ -17,6 +17,7 @@ package main
 
 /*
 #include <stdlib.h>
+#include <string.h>
 
 const char *go2cs_probe_text(void);
 char *go2cs_probe_text_copy(const char *text);
@@ -38,6 +39,17 @@ struct go2cs_probe_entry *go2cs_probe_list(void);
 void go2cs_probe_list_release(struct go2cs_probe_entry *node);
 int go2cs_probe_next_family(struct go2cs_probe_entry *node);
 void *go2cs_probe_address(void);
+
+struct go2cs_probe_gauge
+{
+	int count;
+	long long total;
+};
+
+extern int go2cs_probe_counter;
+extern struct go2cs_probe_gauge go2cs_probe_gauge_now;
+extern int go2cs_probe_last_error;
+int go2cs_probe_bump(int step);
 */
 import "C"
 
@@ -60,6 +72,22 @@ type goHeader struct {
 	pad  int32
 	n    int32
 	name [8]byte
+}
+
+// goCHeader is goHeader with a C-typed array field, so &h.name[0] is a *C.char with no conversion: an element of a native
+// window over a view of Go memory (P3's review of 1b, item 2).
+type goCHeader struct {
+	pad  int32
+	n    int32
+	name [8]C.char
+}
+
+// goRefHost holds a Go reference, so no door can pin a view of one of its fields: its storage is a managed object
+// (P3's review of 1b, item 3).
+type goRefHost struct {
+	p *int
+	n int32
+	c int8
 }
 
 // same returns the pointer it was handed: a user function whose result is an unsafe.Pointer.
@@ -342,6 +370,89 @@ func main() {
 		s := h.name[:]
 		n := C.go2cs_probe_text_fill((*C.char)(unsafe.Pointer(unsafe.SliceData(s))), 8)
 		fmt.Printf("goviewnamedata %d %q\n", int(n), string(s[:n]))
+	// Increment 3.2 seat 1b (DESIGN-cgo-phase3-marshaling 18.12 item 5): cmd/cgo's element and slice check closures,
+	// written as Go code writes them, so cmd/cgo itself makes the closures (checkIndex, checkSlice).
+	case "goindex":
+		// &b[2] straight into a void pointer: cmd/cgo's index form.
+		b := make([]byte, 16)
+		fmt.Println("goindex", C.go2cs_probe_same(unsafe.Pointer(&b[2])) != nil, len(b))
+	case "goindexfill":
+		// &b[4] as a typed pointer C writes through: the index form under conversions.
+		b := make([]byte, 16)
+		n := C.go2cs_probe_text_fill((*C.char)(unsafe.Pointer(&b[4])), 8)
+		fmt.Printf("goindexfill %d %q\n", int(n), string(b[4:4+int(n)]))
+	case "goviewcelemstring":
+		// P3's review of 1b, item 2: C.GoString(&h.name[0]) with name [8]C.char, h a view over a Go slice, read by the
+		// helper with no conversion. Refused before the fold (the helper asked the element with number 0).
+		b := make([]byte, 16)
+		copy(b[8:], "hi")
+		h := (*goCHeader)(unsafe.Pointer(&b[0]))
+		fmt.Printf("goviewcelemstring %q %d\n", C.GoString(&h.name[0]), len(b))
+	case "goviewcelemfill":
+		// The same element as a char * C fills, through a variable (written in the call, cmd/cgo checks the element).
+		b := make([]byte, 16)
+		h := (*goCHeader)(unsafe.Pointer(&b[0]))
+		p := &h.name[0]
+		n := C.go2cs_probe_text_fill(p, 8)
+		fmt.Printf("goviewcelemfill %d %q\n", int(n), string(b[8:8+int(n)]))
+	case "outstrtodelem":
+		// P3's review of 1b, item 1: endptr is an element of a Go slice of C pointers, through a variable. Go writes it;
+		// go2cs refuses by name, since the out-parameter's one-word mirror is not the array C may read or fill.
+		cs := C.CString("1.5abc")
+		defer C.free(unsafe.Pointer(cs))
+		ends := make([]*C.char, 2)
+		p := &ends[0]
+		n := C.strtod(cs, p)
+		fmt.Println("outstrtodelem", float64(n), C.GoString(ends[0]))
+	case "outstrtodgo":
+		// P3's review of 1b, item 4: strtod over a Go buffer leaves endptr INSIDE that buffer, which is Go memory. Go reads
+		// it; go2cs refuses by name inside the call's pin, never minting a native box over Go memory that can move.
+		b := []byte("2.5xyz\x00")
+		var end *C.char
+		n := C.strtod((*C.char)(unsafe.Pointer(&b[0])), &end)
+		fmt.Println("outstrtodgo", float64(n), C.GoString(end))
+	case "resultstrtokgo":
+		// P3's read of the fold, 2a: a pointer RESULT inside the Go buffer C was handed. strtok skips the leading spaces
+		// and returns &b[2]. Go prints the word; go2cs refuses by name inside the call's pin. strtok, not strchr: glibc's
+		// C23 headers make strchr a const-preserving macro.
+		b := []byte("  xy\x00")
+		delim := C.CString(" ")
+		defer C.free(unsafe.Pointer(delim))
+		p := C.strtok((*C.char)(unsafe.Pointer(&b[0])), delim)
+		fmt.Println("resultstrtokgo", C.GoString(p))
+	case "resultstrcpyself":
+		// Its near-miss: strcpy returns the destination it was handed, a pinned Go buffer. That is the identity return,
+		// which maps back to the caller's own pointer and prints as Go does.
+		b := make([]byte, 8)
+		src := C.CString("abc")
+		defer C.free(unsafe.Pointer(src))
+		p := C.strcpy((*C.char)(unsafe.Pointer(&b[0])), src)
+		fmt.Println("resultstrcpyself", C.GoString(p), string(b[:3]))
+	case "goviewwide":
+		// P3's read of the fold, 2b (item 3's shape): a char * over a 4-byte field of a struct that holds a Go reference.
+		// Go lets C fill the field; go2cs refuses by name, since no door can pin it and a one-char copy would put C's
+		// other bytes on the stack.
+		s := goRefHost{p: new(int)}
+		n := C.go2cs_probe_text_fill((*C.char)(unsafe.Pointer(&s.n)), 4)
+		fmt.Println("goviewwide", int(n), s.n, s.p != nil)
+	case "goviewsame":
+		// Its near-miss: a char * over a one-byte field of the same struct keeps the one-char copy.
+		s := goRefHost{p: new(int)}
+		n := C.go2cs_probe_text_fill((*C.char)(unsafe.Pointer(&s.c)), 1)
+		fmt.Println("goviewsame", int(n), s.c, s.p != nil)
+	case "outstrtod":
+		// The out-parameter, shape (i) (18.12 item 4): strtod's char ** endptr is &end, a Go variable C writes. strtod,
+		// not strtol: glibc's C23 headers rename strtol to __isoc23_strtol, which go2cs refuses by name (GO2CS2001).
+		cs := C.CString("1.5abc")
+		defer C.free(unsafe.Pointer(cs))
+		var end *C.char
+		n := C.strtod(cs, &end)
+		fmt.Println("outstrtod", float64(n), C.GoString(end))
+	case "goslicefill":
+		// unsafe.SliceData(b[4:]) as a typed pointer C writes through: cmd/cgo's slice form.
+		b := make([]byte, 16)
+		n := C.go2cs_probe_text_fill((*C.char)(unsafe.Pointer(unsafe.SliceData(b[4:]))), 8)
+		fmt.Printf("goslicefill %d %q\n", int(n), string(b[4:4+int(n)]))
 	// Increment 3.2's first reds (DESIGN-cgo-phase3-marshaling section 6): C memory that Go reads. Go runs each to its
 	// end; what go2cs does with each is READ before 3.2 changes anything.
 	case "s6field":
@@ -496,6 +607,32 @@ func main() {
 		s := h.name[:]
 		n := C.go2cs_probe_text_fill((*C.char)(unsafe.Pointer(unsafe.SliceData(s))), 8)
 		fmt.Printf("cviewnamedata %d %q\n", int(n), string(s[:n]))
+	case "cvar":
+		// A C int global: read, written from Go, then changed by C and read again.
+		before := int(C.go2cs_probe_counter)
+		C.go2cs_probe_counter = 10
+		after := int(C.go2cs_probe_bump(5))
+		fmt.Println("cvar", before, after, int(C.go2cs_probe_counter))
+	case "cvarstruct":
+		// A C struct global: whole-value read, field write from Go, a write by C, and a whole-value write from Go.
+		g := C.go2cs_probe_gauge_now
+		C.go2cs_probe_gauge_now.total = 1000
+		C.go2cs_probe_bump(2)
+		h := C.go2cs_probe_gauge_now
+		C.go2cs_probe_gauge_now = C.struct_go2cs_probe_gauge{count: 40, total: 41}
+		fmt.Println("cvarstruct", int(g.count), int64(g.total), int(h.count), int64(h.total),
+			int(C.go2cs_probe_gauge_now.count), int64(C.go2cs_probe_gauge_now.total))
+	case "cvarerrno":
+		// An errno-style global: C sets it on a refused call and clears it on the next good one.
+		r := int(C.go2cs_probe_bump(-1))
+		bad := int(C.go2cs_probe_last_error)
+		C.go2cs_probe_bump(1)
+		fmt.Println("cvarerrno", r, bad, int(C.go2cs_probe_last_error))
+	case "cvaraddr":
+		// The global's address: a Go pointer to C memory, the same address on each use, written through.
+		p := &C.go2cs_probe_counter
+		*p = 77
+		fmt.Println("cvaraddr", p == &C.go2cs_probe_counter, int(C.go2cs_probe_counter))
 	default:
 		fmt.Println("unknown arm", arm)
 		os.Exit(64)

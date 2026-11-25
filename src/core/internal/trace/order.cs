@@ -10,7 +10,7 @@ using tracev2 = go.@internal.trace.tracev2_package;
 using version = go.@internal.trace.version_package;
 using go.@internal.trace;
 using io = io_package;
-using ꓸꓸꓸuint64 = Span<uint64>;
+using ꓸꓸꓸuint64 = variadic<uint64>;
 
 partial class trace_package {
 

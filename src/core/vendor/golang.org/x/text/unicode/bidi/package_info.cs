@@ -75,8 +75,8 @@ using System.Runtime.CompilerServices;
 namespace go.vendor.golang.org.x.text.unicode;
 
 using static go.vendor.golang.org.x.text.unicode.bidi_package;
-using ꓸꓸꓸClass = Span<bidi_package.Class>;
-using ꓸꓸꓸOption = Span<bidi_package.Option>;
+using ꓸꓸꓸClass = variadic<bidi_package.Class>;
+using ꓸꓸꓸOption = variadic<bidi_package.Option>;
 
 [GoPackage("bidi", ImportPath = "vendor/golang.org/x/text/unicode/bidi")]
 public static partial class bidi_package

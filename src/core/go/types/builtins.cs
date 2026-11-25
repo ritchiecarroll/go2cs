@@ -13,7 +13,7 @@ using static global::go.@internal.types.errors_package;
 using errors = global::go.@internal.types.errors_package;
 using global::go.go;
 using iter = iter_package;
-using ꓸꓸꓸType = Span<types_package.Type>;
+using ꓸꓸꓸType = variadic<types_package.Type>;
 
 partial class types_package {
 

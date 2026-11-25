@@ -118,7 +118,7 @@ using context = go.context_package;
 using driver = go.database.sql.driver_package;
 using reflect = go.reflect_package;
 using time = go.time_package;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸany = variadic<any>;
 
 [GoPackage("sql")]
 public static partial class sql_package

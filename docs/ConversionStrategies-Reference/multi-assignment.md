@@ -344,7 +344,7 @@ capturing closure (the pre-existing box-ref-var case) or anywhere in the current
 var swapped Animal = Dog{}
 replaceAnimal(&swapped)      // callee: *a = &Cat{}
 ```
-<!-- source: src/tests/Behavioral/InterfaceCasting/InterfaceCasting.cs.target:165-168 -->
+<!-- source: src/tests/Behavioral/InterfaceCasting/InterfaceCasting.cs.target:163-166 -->
 ```csharp
 ref var swapped = ref heap<Animal>(out var Ꮡswapped);
 

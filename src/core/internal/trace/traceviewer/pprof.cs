@@ -20,7 +20,7 @@ using go.os;
 using io = io_package;
 using net;
 using path;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸany = variadic<any>;
 
 partial class traceviewer_package {
 
@@ -59,7 +59,7 @@ public static http.HandlerFunc SVGProfileHandlerFunc(ProfileFunc f) {
                 w.Header().Set(contentTypeˢ, applicationOctetStreamˢ);
 
                 [GoFunc("SVGProfileHandlerFunc.func1.1")] void failf(@string s, params ꓸꓸꓸany argsʗp) {
-                    var args = argsʗp.sslice();
+                    var args = argsʗp;
                     w.Header().Set(contentTypeˢ, textPlainCharsetUtf8ˢ);
                     w.Header().Set(xGoPprofˢ, "1");
                     var evalᴛ1 = fmt.Sprintf(s, args.ꓸꓸꓸ);

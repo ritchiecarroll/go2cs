@@ -602,7 +602,8 @@ func adapterStructQualifierIsLocal(qualifier string) bool {
 // (CS1503 ×20, the io wall's reappearance). Exact-key matches run as a full pass FIRST so a
 // fallback match on an early pair can never shadow an exact match on a later one.
 func emittedAdapterPair(pairs [][2]string, structBase, interfaceTypeName string) ([2]string, bool) {
-	structKey := strings.TrimPrefix(adapterStructKey(structBase), ShadowVarMarker)
+	rawStructKey := adapterStructKey(structBase)
+	structKey := strings.TrimPrefix(rawStructKey, ShadowVarMarker)
 
 	// ⚠⚠ BOTH SIDES OF THIS COMPARISON STRIP, and they must, because the two sides arrive in
 	// DIFFERENT SPELLINGS: `interfaceTypeName` comes from the deferred marker — already stripped by
@@ -623,6 +624,16 @@ func emittedAdapterPair(pairs [][2]string, structBase, interfaceTypeName string)
 		pairRef := stripAdapterInterfaceTypeArgs(pair[1])
 
 		return strings.TrimPrefix(adapterInterfacePackagePrefix(pairRef), ShadowVarMarker)+adapterInterfaceSimpleName(pairRef) == interfaceKey
+	}
+
+	// The struct spelled exactly as the cast spells it wins first: Go names one Δ apart (`Matrix` beside
+	// `ΔMatrix`, both Go's own) strip to one key, and record order would hand ΔMatrix's cast to Matrix's pair.
+	// A collision-renamed struct whose cast and record spell it alike matches here too; one spelled apart
+	// still meets its record in the stripped pass below.
+	for _, pair := range pairs {
+		if matchesInterface(pair) && adapterStructKey(pair[0]) == rawStructKey {
+			return pair, true
+		}
 	}
 
 	for _, pair := range pairs {

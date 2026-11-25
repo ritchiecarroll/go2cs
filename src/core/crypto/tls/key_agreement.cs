@@ -150,7 +150,7 @@ internal static slice<byte> md5SHA1Hash(slice<slice<byte>> slices) {
 
 // hashForServerKeyExchange hashes the given slices and returns their digest
 // using a hash based on the sigType. It can only be used for TLS 1.0 and 1.1.
-internal static slice<byte> hashForServerKeyExchange(uint8 sigType, params Span<slice<byte>> slicesʗp) {
+internal static slice<byte> hashForServerKeyExchange(uint8 sigType, params variadic<slice<byte>> slicesʗp) {
     var slices = slicesʗp.slice();
 
     if (sigType == signatureECDSA) {

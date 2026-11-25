@@ -12,7 +12,7 @@ using token = global::go.go.token_package;
 using strings = strings_package;
 using global::go.go;
 using global::go.go.doc;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸany = variadic<any>;
 
 partial class doc_package {
 

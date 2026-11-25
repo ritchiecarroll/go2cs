@@ -37,7 +37,7 @@ using global::go.os;
 using global::go.path;
 using global::go.unicode;
 using iter = iter_package;
-using ꓸꓸꓸstring = Span<@string>;
+using ꓸꓸꓸstring = variadic<@string>;
 
 partial class build_package {
 
@@ -114,7 +114,7 @@ partial struct Context {
 
 // joinPath calls ctxt.JoinPath (if not nil) or else filepath.Join.
 internal static @string joinPath⁔(/*this*/ ref Context ctxt, params ꓸꓸꓸstring elemʗp) {
-    var elem = elemʗp.sslice();
+    var elem = elemʗp.slice();
 
     var f = ctxt.JoinPath; if (f != nil) {
         return f(elem.ꓸꓸꓸ);

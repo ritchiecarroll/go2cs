@@ -11,7 +11,7 @@ public static T IfElse<T>(bool b, T whenTrue, T whenFalse) {
     return whenFalse;
 }
 
-internal static T first<T>(params Span<T> xsʗp) {
+internal static T first<T>(params variadic<T> xsʗp) {
     var xs = xsʗp.sslice();
 
     return xs[0];

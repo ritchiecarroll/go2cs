@@ -20,14 +20,11 @@ internal static gotime.Duration timeout(nint n) {
 }
 
 internal static void main() {
-    var locsᴷ = new stackAppend<ж<gotime.Location>>();
-
     var z = new tzLocation(tz: "UTC", loc: gotime.UTC);
     fmt.Println(z.tz, z.loc.String());
 
     slice<ж<gotime.Location>> locs = default;
-    var evalᴛ1 = @fixed("EST", -5 * 3600);
-    locs = append(locsᴷ, locs, gotime.UTC, evalᴛ1);
+    locs = append(locs, gotime.UTC, @fixed("EST", -5 * 3600));
     foreach (var (_, l) in range(locs)) {
         fmt.Println(l.OrTypedNil());
     }

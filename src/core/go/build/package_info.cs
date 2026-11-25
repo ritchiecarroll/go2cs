@@ -94,7 +94,7 @@ using constraint = global::go.go.build.constraint_package;
 using fs = global::go.io.fs_package;
 using io = global::go.io_package;
 using token = global::go.go.token_package;
-using ꓸꓸꓸstring = Span<@string>;
+using ꓸꓸꓸstring = variadic<@string>;
 
 [GoPackage("build")]
 public static partial class build_package

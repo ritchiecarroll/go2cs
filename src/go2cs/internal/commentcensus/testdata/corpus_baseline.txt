@@ -4,10 +4,10 @@
 blank2:member-boundary	15
 body:extra:after-lowered-switch	95
 body:extra:after-named-result-locals	234
-body:extra:after-param-prelude	190
-body:extra:unexplained	2435
+body:extra:after-param-prelude	195
+body:extra:unexplained	2426
 body:go-blank-cs-none	1835
-body:go-blank-unmapped	2059
+body:go-blank-unmapped	2055
 eol:cs-ragged-run	78
 eol:missing	3
 eol:moved-to-own-line	4

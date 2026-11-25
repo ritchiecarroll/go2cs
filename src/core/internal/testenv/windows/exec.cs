@@ -16,7 +16,7 @@ using testing = testing_package;
 using time = time_package;
 using go;
 using go.os;
-using ꓸꓸꓸstring = Span<@string>;
+using ꓸꓸꓸstring = variadic<@string>;
 
 partial class testenv_package {
 
@@ -177,7 +177,7 @@ internal partial interface CommandContext_type /*dyn*/ :
 //   - fails the test if the command does not complete before the test's deadline, and
 //   - sets a Cleanup function that verifies that the test did not leak a subprocess.
 public static ж<exec.Cmd> CommandContext(testing.TB t, context.Context ctx, @string name, params ꓸꓸꓸstring argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     t.Helper();
     MustHaveExec(t);
@@ -265,7 +265,7 @@ public static ж<exec.Cmd> CommandContext(testing.TB t, context.Context ctx, @st
 // Command is like exec.Command, but applies the same changes as
 // testenv.CommandContext (with a default Context).
 public static partial ж<exec.Cmd> Command(testing.TB t, @string name, params ꓸꓸꓸstring argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     t.Helper();
     return CommandContext(t, context.Background(), name, args.ꓸꓸꓸ);

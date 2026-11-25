@@ -360,7 +360,7 @@ cannot even be invoked where it stands (**CS0149**). C# 13 does give it a natura
 compiler-synthesized `<>f__AnonymousDelegate<N>`, unrelated to anything golib declares.
 
 golib already has the right type — the `Actionꓸꓸꓸ`/`Funcꓸꓸꓸ` family whose tail is a
-`params Span<TArg>` — and `iifeDelegateType` already renders it from a signature, because the
+`params variadic<TArg>` — and `iifeDelegateType` already renders it from a signature, because the
 immediately-invoked-literal path needs the same thing. So a variadic literal callee is CAST to its
 family delegate and then invoked, exactly the `((<delegate>)(<lambda>))(<args>)` shape a non-variadic
 IIFE already uses, and the registration takes the temp-parameter form so there is something to invoke. For
@@ -402,16 +402,18 @@ temp-parameter force alone gives CS0411 ×4, the delegate cast alone gives CS014
 **An adjacent wall this deliberately does NOT close, measured here and not caused by it:**
 
 **A SPREAD argument to any deferred variadic call.** `defer f(nums...)` emits `nums.ꓸꓸꓸ`, a
-`Span<T>`, as the type argument of `defer<T>` — and C# forbids a ref struct there (**CS9244**).
+`variadic<T>` pack (a ref struct, as the `Span<T>` before it was), as the type argument of `defer<T>` —
+and C# forbids a ref struct there (**CS9244**).
 Proven independent: a NAMED variadic callee with no func literal anywhere emits the identical
 `defer(ᴛ1 => f(ᴛ1), nums.ꓸꓸꓸ, ref ᒐ)` and fails the same way. Closing it means passing the SLICE
 and spreading inside the thunk, at every variadic deferred call in the corpus.
 
 An empty variadic call is NOT such a wall: `f()` on `func f(parts ...int)` answers `parts == nil` as `true`, as in
-Go, because the variadic pack's `Span<T>.slice()` keeps a null span nil.
-<!-- src/core/golib/slice.cs:2021 `if (IsNilSpan(source))`. history: this was listed here as a second wall (an
+Go, because the empty pack's `.slice()` copies no elements and keeps Go's nil for a zero-argument call.
+<!-- src/core/golib/variadicPack.cs:118-119#b93221: a literal pack's .slice() is `pack.Elements.slice()`, the Span copy below. -->
+<!-- src/core/golib/slice.cs:2032 `if (IsNilSpan(source))`. history: this was listed here as a second wall (an
      empty slice where Go passes nil); golib's Span-to-slice copy has since kept nil-ness,
-     slice.cs:1991 `NIL-NESS CROSSES THIS BOUNDARY`. -->
+     slice.cs:2002 `NIL-NESS CROSSES THIS BOUNDARY`. -->
 
 ## A ZERO-ARG deferred/spawned call of a NAMED variadic callee keeps the lambda — the group carries `params`
 

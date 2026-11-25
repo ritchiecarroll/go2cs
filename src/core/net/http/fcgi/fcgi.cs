@@ -127,7 +127,7 @@ internal static error Close⁔(/*this*/ ж<conn> Ꮡc) {
     finally { if (ᒐd1) Ꮡc.DerefOrNull().mutex.Unlock(); ᒐ.Run(); }
 }
 
-partial struct record {
+partial struct Δrecord {
     internal header h;
     internal array<byte> buf = new(maxWrite + maxPad);
 }
@@ -136,7 +136,7 @@ partial struct record {
 internal static ref readonly @string fcgiInvalidHeaderVersionˢ => ref fcgiInvalidHeaderVersionˢᵇ;
 private static readonly @string fcgiInvalidHeaderVersionˢᵇ = "fcgi: invalid header version"u8;
 
-internal static error /*err*/ read⁔(/*this*/ ж<record> Ꮡrec, io.Reader r) {
+internal static error /*err*/ read⁔(/*this*/ ж<Δrecord> Ꮡrec, io.Reader r) {
     error err = default;
     ref var rec = ref Ꮡrec.DerefOrNull();
 
@@ -153,7 +153,7 @@ internal static error /*err*/ read⁔(/*this*/ ж<record> Ꮡrec, io.Reader r) {
     return default;
 }
 
-internal static slice<byte> content⁔(/*this*/ ref record r) {
+internal static slice<byte> content⁔(/*this*/ ref Δrecord r) {
     return r.buf.slice(0, r.h.ContentLength);
 }
 

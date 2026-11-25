@@ -16,7 +16,7 @@ using utf8 = unicode.utf8_package;
 using global::go.go;
 using text;
 using unicode;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸany = variadic<any>;
 
 partial class gccgoimporter_package {
 
@@ -96,7 +96,7 @@ internal static void error⁔(/*this*/ ref parser p, any err) {
 }
 
 internal static void errorf⁔(/*this*/ ref parser p, @string format, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     p.error(fmt.Errorf(format, args.ꓸꓸꓸ));
 }
@@ -1080,7 +1080,7 @@ internal static types.Type lookupBuiltinType(nint typ) {
 //
 // parseType updates the type map to t for all type numbers n.
 internal static types.Type parseType⁔(/*this*/ ж<parser> Ꮡp, ж<types.Package> pkg, params ꓸꓸꓸany nʗp) {
-    var n = nʗp.sslice();
+    var n = nʗp;
     ref var p = ref Ꮡp.DerefOrNull();
 
     p.expect('<');
@@ -1146,7 +1146,7 @@ internal static (types.Type t, nint n1) parseTypeAfterAngle⁔(/*this*/ ж<parse
 internal static (types.Type t, nint n1) parseTypeExtended⁔(/*this*/ ж<parser> Ꮡp, ж<types.Package> pkg, params ꓸꓸꓸany nʗp) {
     types.Type t = default;
     nint n1 = default;
-    var n = nʗp.sslice();
+    var n = nʗp;
     ref var p = ref Ꮡp.DerefOrNull();
 
     p.expect('<');

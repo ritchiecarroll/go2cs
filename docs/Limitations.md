@@ -44,7 +44,8 @@ standard library, and runs on Windows, Linux or macOS. **A longer evening:** lot
   libraries ship a pure-Go fallback behind a build tag. A plain `-recurse` applies the common ones (`safe`, `purego`,
   `noasm`) for you; an explicit `-tags` replaces them, so restate them beside your own.
 * **By default, each live goroutine holds an operating-system thread.** Thousands alive at once are fine; Go's
-  million are out of reach.
+  million are out of reach. A program built and run with [async twins](AsyncTwins.md) parks goroutines that wait in twinned code
+  instead (experimental). <!-- (b)-dependent -->
 * **It's usually slower than Go**, starts slower and uses more memory.
 * **One conversion targets one operating system.**
 * **Most failures are loud. A few differences are silent**: see the last bullet under
@@ -113,6 +114,8 @@ standard library, and runs on Windows, Linux or macOS. **A longer evening:** lot
   the threads one process may run (`kern.num_taskthreads`, a few thousand on the hosted macOS 15 machines measured),
   and the `go` statement past it ends the program
   ([Known issues](KnownIssues.md#on-macos-a-go-statement-past-the-systems-thread-limit-ends-the-program)).
+  [Async twins](AsyncTwins.md), experimental and opt-in, run goroutines that wait in twinned code on a small pool of
+  threads. <!-- (b)-dependent -->
   <!-- Measured by C1 on 2026-11-08 (run 42497561630, claude/c1-darwin-threadcap a85e0cf11, the GolibTests probe
        DarwinGoroutineThreadCapProbe), on GitHub-hosted macOS runners, both shipped mac RIDs:
        - osx-arm64, macOS 15.8.2: kern.num_taskthreads 2048; the first go statement to fail found 2,027 live parked
@@ -135,12 +138,19 @@ standard library, and runs on Windows, Linux or macOS. **A longer evening:** lot
   where, by default, each goroutine is a thread named `goroutine-N`.
   <!-- src/core/golib/runtime/Goroutine.cs:1096 `internal static bool IsForeverWait(WaitReason reason) =>`
        and :1169 `internal static bool IsProvableDeadlock(IEnumerable<(WaitReason Reason, bool Readied, bool IsMain)> users)`. -->
-* **Stacks don't grow.** `main` runs on a thread that reserves 1 GiB, which covers Go's 1 GB limit for it, and
+* **Stacks don't grow.** By default, `main` runs on a thread that reserves 1 GiB, which covers Go's 1 GB limit for it, and
   a goroutine's thread reserves 256 MB (`GO2CS_GOROUTINE_STACK` changes it), or 16 MB when the converter proves it
   cannot recurse ([how](ConversionStrategies.md#goroutines)). Recursion past a thread's reserve ends the process
   with .NET's `Stack overflow.`, with no panic and no deferred calls, where Go prints `fatal error: stack overflow`
   and exits 2. Your main package's `init` functions run on the startup thread's smaller stack, and so does `main`
-  when an `init` called `runtime.LockOSThread`, as in Go.
+  when an `init` called `runtime.LockOSThread`, as in Go. With the scheduler of [async twins](AsyncTwins.md) on, every pool thread
+  reserves 1 GiB, or the goroutine reserve when that is larger, so `main`'s twin and every goroutine the scheduler runs
+  keep at least `main`'s 1 GiB. A set `GO2CS_GOROUTINE_STACK` sizes the pool threads instead, lower or higher, never
+  below 1 MiB, and then bounds `main`'s recursion too; goroutines on threads of their own keep 256 MB (16 MB bounded).
+  <!-- 2026-11-24 (P4, row 18 sweep): the post-row-4 truth, R's M:N row 4 (claude/r-mn-row4-stack), train 11.
+       Final rule at R's fold 2 37fede0ea6 (COORD 224341Z): GoScheduler.CarrierStackSizeFor = goroutineStackSet ?
+       Math.Max(goroutineReserve, MinCarrierStackSize 1 MiB) : Math.Max(MainThread.StackReserve 1 GiB, goroutineReserve).
+       Earlier reading: the carrier stack was Goroutine.StackReserve, never under 1 MiB. -->
   <!-- C46 (COORD ruling 2026-11-11, option A): src/core/golib/runtime/MainThread.cs `public const int StackReserve =
        1024 * 1024 * 1024;` and its LockOSThread rule; go2cs-gen MainEntryGenerator writes the entry point. The init
        residual: the main package's init is a module initializer of the entry assembly, which the CLR runs before
@@ -257,6 +267,44 @@ standard library, and runs on Windows, Linux or macOS. **A longer evening:** lot
   * Copying a struct by value shares any fixed-size array inside an embedded struct.
   * A slice of one number type laid over another's storage
     (`unsafe.Slice((*uint64)(unsafe.Pointer(&b[0])), n)`) is a copy: writes through it never reach `b`.
+  * A write through `unsafe.StringData`'s pointer into a string literal or a one-byte string faults in Go, because
+    those bytes are read-only. In go2cs those bytes are shared by every equal string, so the write changes every
+    later evaluation of that literal, in every package, or every one-byte string of that byte. Set
+    `GO2CS_CHECK_STRING_WRITES=1` ([Tuning](Tuning.md#checking-writes-through-string-data)) to have it caught by
+    name: `unsafe.StringData` then gives the pointer a private copy of the bytes, so the write reaches no other
+    string, and the program panics at the next read through that pointer (`*p`, or a pointer `unsafe.Add` made from
+    it) or at the next `unsafe.StringData` over the same string. A write through a view that reads the bytes
+    directly, a slice from `unsafe.Slice(p, n)` or a `(*[N]byte)(unsafe.Pointer(p))` array pointer, also lands in
+    the copy, and is reported only if a later access goes through one of those two checks. The `Data` of a
+    `reflect.StringHeader` laid over such a string names the same copy. With the check on, three cases are still
+    not covered, and none of them panics:
+    - A literal hoisted into a `static readonly` field (`"..."u8`), which the standard library does throughout and
+      a package converted with `-hoist-literals` does too. A write through `unsafe.StringData` changes that literal
+      wherever it is used: after a write through the pointer to `err.(*strconv.NumError).Func` from
+      `strconv.ParseBool("x")`, every later such error names the changed function.
+    - A literal written in place as `"..."u8` (format strings and other string arguments in converted code). It
+      becomes a new array at each evaluation, so a write through `unsafe.StringData` is private to that one value.
+    - A string `unsafe.String` builds from `unsafe.StringData`'s pointer. It shares the private copy, so it reads
+      any byte later written there, and `unsafe.StringData` over it hands out a pointer with no check.
+
+    A heap string (one built at run time) behaves as in Go: the write changes it and every string sharing its bytes.
+  <!-- 2026-11-24 (P5, D5). COORD ruled option A 20261124T103731Z (a private copy and a next-access panic, always on,
+       cut f4318664d4 + cf7e3b212b); the owner then ruled it an OPT-IN DIAGNOSTIC, off by default (COORD
+       20261124T133212Z: "no need for normal runtime work where Go already protects converted code"), after the 50,000-
+       literal bench read the always-on registry at about twice master's gen-2 pause and three times its gen-0 pause.
+       golib ReadOnlyStringBacking.Enabled reads GO2CS_CHECK_STRING_WRITES once at start-up; off, no literal is
+       registered and StringData makes no lookup. Guarded by GolibTests ReadOnlyStringDataTests: the switch-off row pins
+       this default (the write reaches the equal literal), and the switch-on rows run in a child host (red at master
+       b2c9435159 on the literal, one-byte and unsafe.Slice arms; the next-access check neutered fails the three panic
+       arms by name). Behavioral StringDataIdentity compares identity, heap and near-miss arms against go run with the
+       switch off. The header's Data goes through the same door (ж.StringHeaderBox.cs (H) and the pointer shape),
+       guarded by GolibTests StringHeaderNumberTests W4. The uncovered cases, counted by P3 at cf7e3b212b
+       (COORD/20261124T130505Z-P3.md): (a) 10,799 hoisted `xˢᵇ = "..."u8` declarations in 1,284 files under src/core,
+       test files included, plus any user package converted with -hoist-literals (hoistedLiteralOperations.go); P3's
+       scenario is strconv/number.cs `parseBoolˢᵇ`. (b) A non-hoisted "..."u8 operand converts through implicit
+       operator @string(ReadOnlySpan<byte>) into a fresh array per evaluation. (c) unsafe.String over the shadow (P3
+       NIT 4). Registering hoisted field backings is dropped from .5; if ever wanted it is diagnostic-only, an OPEN
+       BOARD row (2026-11-24). -->
   * A pointer's number kept in a `uintptr` and turned back into a pointer in a later statement
     (`n := uintptr(unsafe.Pointer(p))`, then `(*T)(unsafe.Pointer(n))`) can name memory that has since moved, and
     the number does not keep the value alive. Go calls this invalid too, but it often works there. Do the
@@ -345,7 +393,7 @@ check runs at the package's first C call rather than when it loads.
        the host only (this section's text at the tag: "One package, one machine").
      - The net resolver: no merge in trains 1 to 7 converts it. -->
 
-<!-- src/go2cs/main.go:307 (`Not combinable with -stdlib or -tests. With -recurse, every non-standard-library package of the module loads cgo-on and each cgo package converts this way`); src/go2cs/csproj-template.xml:135 (`<ProjectReference Include="$(go2csPath)gen/go2cs-gen/go2cs-gen.csproj"`) and src/go2cs/csproj-template.xml:187 (`<ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />`). COORD's ruling O2, 2026-11-14 (cgo 3.1's release-path seat). -->
+<!-- src/go2cs/internal/clihelp/options.go, the -cgo entry's history comment ("Not combinable with -stdlib or -tests. With -recurse, every non-standard-library package of the module loads cgo-on and each cgo package converts this way"); src/go2cs/csproj-template.xml:135 (`<ProjectReference Include="$(go2csPath)gen/go2cs-gen/go2cs-gen.csproj"`) and src/go2cs/csproj-template.xml:187 (`<ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />`). COORD's ruling O2, 2026-11-14 (cgo 3.1's release-path seat). -->
 
 **What is refused, by name.** Each of these is not supported yet; [the Roadmap](Roadmap.md#cgo) says what is planned.
 - a pointer into Go memory handed to C as a `void *`, or to `C.GoBytes`, `C.GoString` or `C.GoStringN`.
@@ -356,7 +404,10 @@ check runs at the package's first C call rather than when it loads.
 - a function the preamble itself defines, and a `#define` that is not a constant, both of which need
   compiled C;
 - `//export`;
-- a C variable, a C function used as a value, and `go C.f(…)` with a pointer cmd/cgo checks;
+- a C variable whose type is not a C scalar or struct (an array, a pointer, a function pointer or a union);
+  `C.x` of a scalar or struct type reads and writes the variable in place, as Go does, once a library the
+  package links exports it;
+- a C function used as a value, and `go C.f(…)` with a pointer cmd/cgo checks;
 - a C function Go's own cgo build does not import by its C name: one a header renames (macOS on x64 makes
   `fstat` the symbol `fstat$INODE64`), or one the C compiler inlines. go2cs cannot tell the two apart, so it
   refuses both rather than bind a function C would not call:
@@ -566,7 +617,7 @@ A package's own Go `Test` functions were converted, run, and compared with `go t
 verdict, by full test name. That's a real bar, and narrower than the word sounds:
 
 * **Tests only.** Examples, benchmarks and fuzz targets never run. No race detector either.
-  <!-- src/go2cs/testConversion.go:4262 `entry.Kind, entry.Status, entry.Reason = "fuzz", "unsupported", "fuzz execution is deferred to Phase 4D"`;
+  <!-- src/go2cs/testConversion.go:4283 `entry.Kind, entry.Status, entry.Reason = "fuzz", "unsupported", "fuzz execution is deferred to Phase 4D"`;
        Example- and Benchmark-only test files are left out of the compile set, :859
        `// Phase-4D file exclusion (option-a ruling): drop Example/Benchmark-only test files from the`. -->
 * **Matched is not passed.** A test that skips on both sides counts as a match and measures nothing.

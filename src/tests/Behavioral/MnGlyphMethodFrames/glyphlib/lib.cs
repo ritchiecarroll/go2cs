@@ -36,8 +36,6 @@ internal static partial @string Pass⁔(/*this*/ Box b, nint n) {
 }
 
 public static partial @string Frames(@string tag) {
-    var namesᴷ = new stackAppend<@string>();
-
     var pcs = new slice<uintptr>(32);
     nint n = runtime.Callers(2, pcs);
     var frames = runtime.CallersFrames(pcs.slice(0, n));
@@ -51,7 +49,7 @@ public static partial @string Frames(@string tag) {
             break;
         }
 
-        names = append(namesᴷ, names, frame.Function + ":"u8 + strconv.Itoa(frame.Line));
+        names = append(names, frame.Function + ":"u8 + strconv.Itoa(frame.Line));
 
         if (!more || frame.Function == "main.main"u8) {
             break;

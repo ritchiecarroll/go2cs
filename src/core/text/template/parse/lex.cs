@@ -8,7 +8,7 @@ using strings = strings_package;
 using unicode = unicode_package;
 using utf8 = go.unicode.utf8_package;
 using go.unicode;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸany = variadic<any>;
 
 partial class parse_package {
 
@@ -221,7 +221,7 @@ internal static void acceptRun⁔(/*this*/ ref lexer l, @string valid) {
 // errorf returns an error token and terminates the scan by passing
 // back a nil pointer that will be the next state, terminating l.nextItem.
 internal static stateFn errorf⁔(/*this*/ ref lexer l, @string format, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     var evalᴛ1 = fmt.Sprintf(format, args.ꓸꓸꓸ);
     l.item = new item(itemError, l.start, evalᴛ1, l.startLine);

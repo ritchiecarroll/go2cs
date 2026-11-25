@@ -7,7 +7,7 @@ using fmt = fmt_package;
 using reflect = reflect_package;
 using slices = slices_package;
 using testing = testing_package;
-using ꓸꓸꓸstring = Span<@string>;
+using ꓸꓸꓸstring = variadic<@string>;
 
 partial class cryptotest_package {
 

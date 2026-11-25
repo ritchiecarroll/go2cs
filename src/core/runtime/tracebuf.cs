@@ -9,7 +9,7 @@ using tracev2 = @internal.trace.tracev2_package;
 using @unsafe = unsafe_package;
 using @internal.runtime;
 using @internal.trace;
-using ꓸꓸꓸtraceArg = Span<runtime_package.traceArg>;
+using ꓸꓸꓸtraceArg = variadic<runtime_package.traceArg>;
 
 partial class runtime_package {
 

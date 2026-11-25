@@ -188,7 +188,7 @@ internal static void serve⁔(/*this*/ ж<child> Ꮡc) {
 
         defer(ᴛ0 => ᴛ0.Close(), Ꮡc.Value.conn, ref ᒐ);
         defer(Ꮡc.cleanUp, ref ᒐ);
-        ref var rec = ref heap(new record(), out var Ꮡrec);
+        ref var rec = ref heap(new Δrecord(), out var Ꮡrec);
         for (;;) {
             {
                 var err = Ꮡrec.read(c.conn.rwc); if (err != nil) {
@@ -222,7 +222,7 @@ public static error ErrConnClosed = errors.New("fcgi: connection to web server c
 internal static ref readonly @string fcgiReceivedIdThatIsˢ => ref fcgiReceivedIdThatIsˢᵇ;
 private static readonly @string fcgiReceivedIdThatIsˢᵇ = "fcgi: received ID that is already in-flight"u8;
 
-internal static partial error handleRecord⁔(/*this*/ ж<child> Ꮡc, ж<record> Ꮡrec) {
+internal static partial error handleRecord⁔(/*this*/ ж<child> Ꮡc, ж<Δrecord> Ꮡrec) {
     ref var c = ref Ꮡc.DerefOrNull();
     ref var rec = ref Ꮡrec.DerefOrNull();
 

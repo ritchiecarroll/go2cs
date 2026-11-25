@@ -13,7 +13,7 @@ using fmt = fmt_package;
 using runtime = runtime_package;
 using strconv = strconv_package;
 using strings = strings_package;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸany = variadic<any>;
 
 partial class parse_package {
 
@@ -73,8 +73,8 @@ internal static ж<Tree> Copy⁔(/*this*/ ж<Tree> Ꮡt) {
 // templates described in the argument string. The top-level template will be
 // given the specified name. If an error is encountered, parsing stops and an
 // empty map is returned with the error.
-public static (map<@string, ж<Tree>>, error) Parse(@string name, @string text, @string leftDelim, @string rightDelim, params Span<map<@string, any>> funcsʗp) {
-    var funcs = funcsʗp.sslice();
+public static (map<@string, ж<Tree>>, error) Parse(@string name, @string text, @string leftDelim, @string rightDelim, params variadic<map<@string, any>> funcsʗp) {
+    var funcs = funcsʗp;
 
     var treeSet = new map<@string, ж<Tree>>();
     var t = New(name);
@@ -147,7 +147,7 @@ internal static item peekNonSpace⁔(/*this*/ ref Tree t) {
 // Parsing.
 
 // New allocates a new parse tree with the given name.
-public static ж<Tree> New(@string name, params Span<map<@string, any>> funcsʗp) {
+public static ж<Tree> New(@string name, params variadic<map<@string, any>> funcsʗp) {
     var funcs = funcsʗp.slice();
 
     return Ꮡ(new Tree(
@@ -182,7 +182,7 @@ internal static (@string location, @string context) ErrorContext⁔(/*this*/ ж<
 
 // errorf formats the error and terminates processing.
 internal static void errorf⁔(/*this*/ ref Tree t, @string format, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     t.Root = default;
     format = fmt.Sprintf("template: %s:%d: %s"u8, t.ParseName, t.token[0].line, format);
@@ -291,7 +291,7 @@ internal static void stopParse⁔(/*this*/ ref Tree t) {
 // the template for execution. If either action delimiter string is empty, the
 // default ("{{" or "}}") is used. Embedded template definitions are added to
 // the treeSet map.
-internal static (ж<Tree> tree, error err) Parse⁔(/*this*/ ж<Tree> Ꮡt, @string text, @string leftDelim, @string rightDelim, map<@string, ж<Tree>> treeSet, params Span<map<@string, any>> funcsʗp) {
+internal static (ж<Tree> tree, error err) Parse⁔(/*this*/ ж<Tree> Ꮡt, @string text, @string leftDelim, @string rightDelim, map<@string, ж<Tree>> treeSet, params variadic<map<@string, any>> funcsʗp) {
     ж<Tree> tree = default;
     heap<error>(out var Ꮡerr);
     GoFrame ᒐ = default;

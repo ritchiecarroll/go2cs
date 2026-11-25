@@ -18,7 +18,7 @@ using go.@internal;
 using io;
 using io = io_package;
 using path;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸany = variadic<any>;
 
 partial class pods_package {
 
@@ -206,7 +206,7 @@ internal static slice<Pod> collectPodsImpl(slice<@string> files, slice<nint> dir
 }
 
 internal static void warning(@string s, params ꓸꓸꓸany aʗp) {
-    var a = aʗp.sslice();
+    var a = aʗp;
 
     fmt.Fprintf(new os.FileжWriter(os.Stderr), "warning: "u8);
     fmt.Fprintf(new os.FileжWriter(os.Stderr), s, a.ꓸꓸꓸ);

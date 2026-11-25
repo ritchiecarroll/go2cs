@@ -11,7 +11,7 @@ using path = path_package;
 using filepath = go.path.filepath_package;
 using go.io;
 using go.path;
-using ꓸꓸꓸstring = Span<@string>;
+using ꓸꓸꓸstring = variadic<@string>;
 
 partial class template_package {
 
@@ -39,7 +39,7 @@ public static ж<Template> Must(ж<Template> t, error err) {
 // For instance, ParseFiles("a/foo", "b/foo") stores "b/foo" as the template
 // named "foo", while "a/foo" is unavailable.
 public static (ж<Template>, error) ParseFiles(params ꓸꓸꓸstring filenamesʗp) {
-    var filenames = filenamesʗp.sslice();
+    var filenames = filenamesʗp;
 
     return parseFiles(nil, readFileOS, filenames.ꓸꓸꓸ);
 }
@@ -56,7 +56,7 @@ public static (ж<Template>, error) ParseFiles(params ꓸꓸꓸstring filenames�
 // When parsing multiple files with the same name in different directories,
 // the last one mentioned will be the one that results.
 internal static (ж<Template>, error) ParseFiles⁔(/*this*/ ж<Template> Ꮡt, params ꓸꓸꓸstring filenamesʗp) {
-    var filenames = filenamesʗp.sslice();
+    var filenames = filenamesʗp;
     ref var t = ref Ꮡt.DerefOrNull();
 
     t.init();

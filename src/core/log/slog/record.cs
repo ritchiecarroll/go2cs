@@ -6,8 +6,8 @@ namespace go.log;
 using runtime = runtime_package;
 using slices = slices_package;
 using time = time_package;
-using ꓸꓸꓸAttr = Span<slog_package.Attr>;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸAttr = variadic<slog_package.Attr>;
+using ꓸꓸꓸany = variadic<any>;
 
 partial class slog_package {
 

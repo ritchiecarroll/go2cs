@@ -97,8 +97,8 @@ using static go.log.slog_package;
 using buffer = go.log.slog.@internal.buffer_package;
 using context = go.context_package;
 using time = go.time_package;
-using ꓸꓸꓸAttr = Span<slog_package.Attr>;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸAttr = variadic<slog_package.Attr>;
+using ꓸꓸꓸany = variadic<any>;
 
 [GoPackage("slog")]
 public static partial class slog_package

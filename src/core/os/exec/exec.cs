@@ -109,7 +109,7 @@ using @internal.syscall;
 using fs = go.io.fs_package;
 using path;
 using sync;
-using ꓸꓸꓸstring = Span<@string>;
+using ꓸꓸꓸstring = variadic<@string>;
 
 partial class exec_package {
 
@@ -479,7 +479,7 @@ public static partial ж<Cmd> Command(@string name, params ꓸꓸꓸstring argʗ
 // on its Process, and leaves its WaitDelay unset. The caller may change the
 // cancellation behavior by modifying those fields before starting the command.
 public static ж<Cmd> CommandContext(context.Context ctx, @string name, params ꓸꓸꓸstring argʗp) {
-    var arg = argʗp.sslice();
+    var arg = argʗp;
 
     if (ctx == nil) {
         throw panic("nil Context");

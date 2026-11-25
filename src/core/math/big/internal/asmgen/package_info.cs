@@ -91,8 +91,8 @@ using System.Runtime.CompilerServices;
 namespace go.math.big.@internal;
 
 using static go.math.big.@internal.asmgen_package;
-using ꓸꓸꓸany = Span<any>;
-using ꓸꓸꓸnint = Span<nint>;
+using ꓸꓸꓸany = variadic<any>;
+using ꓸꓸꓸnint = variadic<nint>;
 
 [GoPackage("asmgen")]
 public static partial class asmgen_package

@@ -181,7 +181,7 @@ using sync = go.sync_package;
 using atomic = go.sync.atomic_package;
 using go;
 using go.sync;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸany = variadic<any>;
 
 partial class bisect_package {
 

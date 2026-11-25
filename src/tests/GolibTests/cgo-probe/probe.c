@@ -288,3 +288,64 @@ GO2CS_PROBE_EXPORT void *go2cs_probe_address(void)
 
     return address;
 }
+
+// Increment 3.2 seat 1b's pressure arm (docs/phase4/DESIGN-cgo-phase3-marshaling.md 18 item 4, 18.1 COORD (b)): fills
+// size bytes one at a time, pausing between them, so that a compacting collection on another thread runs while C writes
+// Go memory the wrapper holds pinned. Byte i is 'a' + i % 26. Returns size.
+#if defined(_WIN32)
+__declspec(dllimport) void __stdcall Sleep(unsigned long milliseconds);
+
+static void go2cs_probe_pause(int micros)
+{
+    Sleep((unsigned long)(micros >= 1000 ? micros / 1000 : 1));
+}
+#else
+#include <time.h>
+
+static void go2cs_probe_pause(int micros)
+{
+    struct timespec pause = { micros / 1000000, (long)(micros % 1000000) * 1000L };
+    nanosleep(&pause, NULL);
+}
+#endif
+
+GO2CS_PROBE_EXPORT int go2cs_probe_slow_fill(char *buffer, int size, int micros)
+{
+    for (int i = 0; i < size; i++)
+    {
+        buffer[i] = (char)('a' + i % 26);
+        go2cs_probe_pause(micros);
+    }
+
+    return size;
+}
+
+// C global variables (cgo item 3, C.x): an int, a struct with padding between its fields, and an errno-style int a
+// call sets. Go reads and writes each in place; so does go2cs, through a box over the symbol's exported address.
+struct go2cs_probe_gauge
+{
+    int count;
+    long long total;
+};
+
+GO2CS_PROBE_EXPORT int go2cs_probe_counter = 3;
+GO2CS_PROBE_EXPORT struct go2cs_probe_gauge go2cs_probe_gauge_now = { 1, 100 };
+GO2CS_PROBE_EXPORT int go2cs_probe_last_error;
+
+// Adds step to the counter and folds it into the gauge, as C code that owns these globals would. A negative step is
+// refused: the counter is left as it was and go2cs_probe_last_error reads 22 (EINVAL's value on linux), as errno would.
+GO2CS_PROBE_EXPORT int go2cs_probe_bump(int step)
+{
+    if (step < 0)
+    {
+        go2cs_probe_last_error = 22;
+        return -1;
+    }
+
+    go2cs_probe_last_error = 0;
+    go2cs_probe_counter += step;
+    go2cs_probe_gauge_now.count++;
+    go2cs_probe_gauge_now.total += go2cs_probe_counter;
+
+    return go2cs_probe_counter;
+}

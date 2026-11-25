@@ -10,7 +10,7 @@ using io = io_package;
 using os = os_package;
 using reflect = reflect_package;
 using global::go.go;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸany = variadic<any>;
 
 partial class ast_package {
 
@@ -134,7 +134,7 @@ partial struct localError {
 
 // printf is a convenience wrapper that takes care of print errors.
 internal static void printf⁔(/*this*/ ж<printer> Ꮡp, @string format, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     var (_, err) = fmt.Fprintf(new printerжWriter(Ꮡp), format, args.ꓸꓸꓸ); if (err != nil) {
         throw panic(new localError(err));

@@ -74,8 +74,8 @@ public static partial class main_package
     internal partial struct intSET {}
     internal partial struct layout {}
     internal partial struct outer {}
-    internal partial struct record {}
     internal partial struct stringMap {}
+    internal partial struct Δrecord {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import

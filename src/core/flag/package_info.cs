@@ -82,7 +82,7 @@ using static go.flag_package;
 using encoding = go.encoding_package;
 using time = go.time_package;
 using Δio = go.io_package;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸany = variadic<any>;
 
 [GoPackage("flag")]
 public static partial class flag_package

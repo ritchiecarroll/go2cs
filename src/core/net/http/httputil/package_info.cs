@@ -111,7 +111,7 @@ using io = go.io_package;
 using net = go.net_package;
 using time = go.time_package;
 using url = go.net.url_package;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸany = variadic<any>;
 
 [GoPackage("httputil")]
 public static partial class httputil_package

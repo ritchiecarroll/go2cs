@@ -16,7 +16,7 @@ using System.Runtime.InteropServices;
 using XpkgPromotedInnerLib = XpkgPromotedInnerLib_package;
 using XpkgPromotedMidLib = XpkgPromotedMidLib_package;
 using encoding;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸany = variadic<any>;
 
 partial class main_package {
 
@@ -131,12 +131,10 @@ partial struct HideC {
 }
 
 internal static @string methods(reflect.Type t) {
-    var namesᴷ = new stackAppend<@string>();
-
     slice<@string> names = default;
 
     for (nint i = 0; i < t.NumMethod(); i++) {
-        names = append(namesᴷ, names, t.Method(i).Name);
+        names = append(names, t.Method(i).Name);
     }
 
     sort.Strings(names);

@@ -44,6 +44,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckAliasImport() => CheckTarget("AliasImport");
 
     [TestMethod]
+    public void CheckAliasKeywordPackage() => CheckTarget("AliasKeywordPackage");
+
+    [TestMethod]
     public void CheckAliasNamedTargetForms() => CheckTarget("AliasNamedTargetForms");
 
     [TestMethod]
@@ -570,6 +573,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckDeltaNameEdgeCases() => CheckTarget("DeltaNameEdgeCases");
+
+    [TestMethod]
+    public void CheckDeltaNameProjection() => CheckTarget("DeltaNameProjection");
 
     [TestMethod]
     public void CheckDerefPointerToField() => CheckTarget("DerefPointerToField");
@@ -1664,6 +1670,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckNamedPointerLocalSurface() => CheckTarget("NamedPointerLocalSurface");
 
     [TestMethod]
+    public void CheckNamedPointerNilInterface() => CheckTarget("NamedPointerNilInterface");
+
+    [TestMethod]
     public void CheckNamedPointerParamArgument() => CheckTarget("NamedPointerParamArgument");
 
     [TestMethod]
@@ -2001,6 +2010,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckPackageShadowPointerParam() => CheckTarget("PackageShadowPointerParam");
+
+    [TestMethod]
+    public void CheckPackageSuffixCollision() => CheckTarget("PackageSuffixCollision");
 
     [TestMethod]
     public void CheckPackageVarFuncLitPointerParam() => CheckTarget("PackageVarFuncLitPointerParam");
@@ -3129,6 +3141,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckVariadicSlotInterfaces() => CheckTarget("VariadicSlotInterfaces");
+
+    [TestMethod]
+    public void CheckVariadicSpreadHeapAlias() => CheckTarget("VariadicSpreadHeapAlias");
 
     [TestMethod]
     public void CheckVendoredPathModuleImport() => CheckTarget("VendoredPathModuleImport");

@@ -1,8 +1,9 @@
 <#
 .SYNOPSIS
     Writes the CompatibilitySuppressions.xml of every packed go.* package whose public methods moved into a class
-    marked [GoPromotedHost] or [GoMethodHost] since its baseline, whose names dropped the Delta prefix (U+0394), or
-    whose structs no longer need a value clone, and reports every other member the package lost.
+    marked [GoPromotedHost] or [GoMethodHost] since its baseline, whose names dropped the Delta prefix (U+0394),
+    whose structs no longer need a value clone, or whose variadic parameters became go.variadic<T>, and reports every
+    other member the package lost.
 
 .DESCRIPTION
     Run it over the merged packages of a pack-only run (push-nuget.ps1 -VersionSuffix local.1 -OutDir <dir>), in the
@@ -17,11 +18,15 @@
                 type implementing a renamed interface, CP0021 a renamed constraint. GoApiCompatMoves.psm1 says how.
       a clone   a struct whose value copy needs no clone (a zero-length array holds nothing to copy, 1.26.11.1): CP0008
                 the struct no longer implementing go.IGoValueClone, CP0002 its Delta-named Clone().
+      a variadic tail  a params System.Span<X> that became go.variadic<X> (wall E, the .5 release): CP0002 the method
+                (a delegate's Invoke and BeginInvoke among them), CP0006 too for an interface method, and CP0002 by its
+                getter for a spread property whose System.Span<X> became go.variadic<X>, and CP0006 for a spread property
+                an interface adds over its base's (golib's ISlice<T> over IArray<T>).
 
     Nothing is written for a member that left any other way. Each is listed with its reason, and the script exits 1:
     the guard will read it red, as it should, until someone announces it or puts it back.
 
-    It writes only the files of these three kinds of break. A package that already carries a suppression file is refused
+    It writes only the files of these four kinds of break. A package that already carries a suppression file is refused
     unless -Force is given, because that file's other entries would be lost.
 
     The guard is the judge of the result, not this script: pack again and read "Binary compatibility: CLEAN". An entry

@@ -8,7 +8,7 @@ using os = os_package;
 using slices = slices_package;
 using sync = sync_package;
 using System.Runtime.CompilerServices;
-using ꓸꓸꓸosꓸSignal = Span<os_package.Signal>;
+using ꓸꓸꓸosꓸSignal = variadic<os_package.Signal>;
 
 partial class signal_package {
 

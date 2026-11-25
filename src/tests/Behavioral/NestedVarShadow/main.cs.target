@@ -65,7 +65,7 @@ internal static (nint, @string) pkgParamShadow(ж<strings.Reader> Ꮡstrings) {
 }
 
 partial struct @file {
-    internal ж<strings.Reader> ΔΔfile;
+    [GoName("file")] internal ж<strings.Reader> ΔΔfile;
     internal nint n;
 }
 

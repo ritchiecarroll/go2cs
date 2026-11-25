@@ -3,7 +3,7 @@ global using strs = go.slice<go.@string>;
 namespace go;
 
 using fmt = fmt_package;
-using ꓸꓸꓸnint = Span<nint>;
+using ꓸꓸꓸnint = variadic<nint>;
 
 partial class main_package {
 

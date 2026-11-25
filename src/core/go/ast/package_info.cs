@@ -235,7 +235,7 @@ namespace go.go;
 using static global::go.go.ast_package;
 using reflect = global::go.reflect_package;
 using token = global::go.go.token_package;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸany = variadic<any>;
 
 [GoPackage("ast")]
 public static partial class ast_package

@@ -4,8 +4,8 @@ using fmt = fmt_package;
 using lib = ForeignAndUnnamedStructConversion.lib_package;
 using other = ForeignAndUnnamedStructConversion.other_package;
 using ForeignAndUnnamedStructConversion;
-using ꓸꓸꓸanonBox_V = Span<main_package.anonBox_V>;
-using ꓸꓸꓸlibꓸPitch = Span<ForeignAndUnnamedStructConversion.lib_package.Pitch>;
+using ꓸꓸꓸanonBox_V = variadic<main_package.anonBox_V>;
+using ꓸꓸꓸlibꓸPitch = variadic<ForeignAndUnnamedStructConversion.lib_package.Pitch>;
 
 partial class main_package {
 
@@ -38,8 +38,7 @@ internal static void foreignToLocal() {
 
     ref var h = ref heap<hertz>((hertz)p, out var Ꮡh);
     h.Hz++;
-    var evalᴛ1 = h.half();
-    fmt.Println("foreign to local:", h.Hz, p.Hz, evalᴛ1);
+    fmt.Println("foreign to local:", h.Hz, p.Hz, h.half());
     var H = (Hertz)p;
     H.Hz += 2;
     fmt.Println("foreign to exported local:", H.Hz, p.Hz);
@@ -66,12 +65,10 @@ internal static void foreignToLocal() {
 
     var ph = Ꮡp.Reinterpret<lib.Pitch, hertz>();
     ph.Hz = 100;
-    var evalᴛ2 = ph.half();
-    fmt.Println("pointer, foreign to local:", p.Hz, evalᴛ2);
+    fmt.Println("pointer, foreign to local:", p.Hz, ph.half());
     var pp = Ꮡh.Reinterpret<hertz, lib.Pitch>();
     pp.Hz = 200;
-    var evalᴛ3 = pp.Double();
-    fmt.Println("pointer, local to foreign:", h.Hz, evalᴛ3);
+    fmt.Println("pointer, local to foreign:", h.Hz, pp.Double());
 }
 
 internal partial struct convLocal_x /*dyn*/ {
@@ -350,10 +347,8 @@ internal static nint deleteForeign(lib.Pitch p) {
     return len(m);
 }
 internal static nint appendLocal(hertz h) {
-    var sᴷ = new stackAppend<anonBox_V>();
-
     slice<anonBox_V> s = default;
-    s = append(sᴷ, s, h, h);
+    s = append(s, h, h);
     return len(s) + s[1].Hz;
 }
 internal static nint selectForeign(lib.Pitch p) {
@@ -483,8 +478,7 @@ internal static partial nint backGoForeign(anonBox_V a) {
     var c = new channel<nint>(0);
     var cʗ1 = c;
     goǃ([GoFunc("backGoForeign.func1")] (lib.Pitch p) => {
-        var evalᴛ1 = p.Double();
-        cʗ1.ᐸꟷ(evalᴛ1);
+        cʗ1.ᐸꟷ(p.Double());
     }, a);
     return ᐸꟷ(c);
 }
@@ -519,10 +513,8 @@ internal static nint backDeleteLocal(anonBox_V a) {
     return len(m);
 }
 internal static nint backAppendForeign(anonBox_V a) {
-    var sᴷ = new stackAppend<lib.Pitch>();
-
     slice<lib.Pitch> s = default;
-    s = append(sᴷ, s, (lib.Pitch)(a), (lib.Pitch)(a));
+    s = append(s, (lib.Pitch)(a), (lib.Pitch)(a));
     return len(s) + s[1].Double();
 }
 internal static nint backSelectLocal(anonBox_V a) {
@@ -612,8 +604,7 @@ internal static void everyOtherPlace() {
     var p = new lib.Pitch(Hz: 440);
     var a = new anonBox_V(Hz: 8);
 
-    var evalᴛ1 = pkgPitch.Double();
-    fmt.Println("package variable:", pkgAnon.Hz, evalᴛ1);
+    fmt.Println("package variable:", pkgAnon.Hz, pkgPitch.Double());
     fmt.Println("assign to field, element, map entry, through pointer:", setFieldLocal(h), setElemForeign(p), setMapLocal(h), setDerefForeign(p));
     fmt.Println("variadic, method, function value:", variadicLocal(h), methodForeign(p), funcValueLocal(h));
     fmt.Println("deferred and go-statement argument:", deferForeign(p), goLocal(h));
@@ -680,9 +671,7 @@ internal static void namedAndUnnamed() {
     var ph = Ꮡa.Reinterpret<anonBox_V, hertz>();
     ph.Hz = 10;
     var pp = Ꮡa.Reinterpret<anonBox_V, lib.Pitch>();
-    var evalᴛ1 = ph.half();
-    var evalᴛ2 = pp.Double();
-    fmt.Println("pointer to named:", a.Hz, evalᴛ1, evalᴛ2);
+    fmt.Println("pointer to named:", a.Hz, ph.half(), pp.Double());
 }
 
 internal partial struct liftVar_x /*dyn*/ {
@@ -734,13 +723,10 @@ internal partial struct liftElements_s /*dyn*/ {
 }
 
 internal static nint liftElements() {
-    var sᴷ = new stackAppend<liftElements_s>();
-
     var s = slice<liftElements_s>([laterTempo()]);
     var m = new map<liftElements_s, nint>{[laterTempo()] = 1};
-    s = append(sᴷ, s, new liftElements_s(laterTempo().Bpm));
-    var evalᴛ1 = laterTempo();
-    return s[0].Bpm + m[evalᴛ1] + len(s);
+    s = append(s, new liftElements_s(laterTempo().Bpm));
+    return s[0].Bpm + m[laterTempo()] + len(s);
 }
 
 internal partial struct liftRange_x /*dyn*/ {

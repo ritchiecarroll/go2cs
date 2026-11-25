@@ -59,7 +59,7 @@ using System.Runtime.CompilerServices;
 namespace go.go;
 
 using static global::go.go.varhost_package;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸany = variadic<any>;
 
 [GoPackage("varhost")]
 public static partial class varhost_package
