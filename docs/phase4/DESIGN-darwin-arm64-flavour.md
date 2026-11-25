@@ -467,3 +467,6 @@ next; the classifier applies LA §2.1 over `U'`. Paths are in the D2 seat's DATA
   space before each root and stops under 10 GB.
 - If M1c shows E differing from D in more than the predicted families (arch-folded constants, the `_arm64` file set),
   D2 stops and the difference is classified before any apply.
+- D6 (P3's revision 2 nit 5): D6 does not pack a package whose osx-arm64 asset breaks against its last published
+  one until P2, the GoBreakFloor's owner, has answered on the suppression entries and the floor rule for it (section
+  3). Packing first and asking after is a published break with no ruling behind it.
