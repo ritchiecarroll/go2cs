@@ -483,6 +483,8 @@ public sealed partial class TwinGenerator
                 // gc runs it, and Rule S derives the refs again before the read.
                 // M:N row 19, rule 1: a cast of a call that already moved reads the spilled temporary, so it is
                 // a pure read too (debug/elf's `Off: (uint64)bo.Uint32(…)` arguments, math/big's `(Word)(nuint)r.Uint32()`).
+                // A COPYING conversion was probed too: gc runs `string(f())` after a later call in the same statement
+                // (`use(string(f()), h())` with h writing f's bytes prints "Nld", go1.26.11), the order this move gives.
                 ExpressionSyntax core = bare;
 
                 while (core is ParenthesizedExpressionSyntax or CastExpressionSyntax)

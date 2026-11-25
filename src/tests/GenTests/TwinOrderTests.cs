@@ -113,6 +113,24 @@ public class TwinOrderTests
                 return h.A;
             }
 
+            // Row 19 rule 1 over a COPYING cast (P3's read): `use(string(f()), h())`, f returning a shared []byte "old" and h
+            // writing b[0] = 'N'. gc converts after h runs and prints "Nld" (go1.26.11); the twin moves h too, so its
+            // conversion reads the spilled slice after h's write, as gc does. The plain method converts first ("old").
+            internal static slice<byte> shared = new(new byte[] { (byte)'o', (byte)'l', (byte)'d' });
+
+            public static slice<byte> bytesOf(bool block) { if (block) { ᐸꟷ(ch); } return shared; }
+
+            public static nint poke(bool block) { if (block) { ᐸꟷ(ch); } shared[0] = (byte)'N'; return 0; }
+
+            internal static @string use(@string s, nint k) => s;
+
+            public static @string castCopy()
+            {
+                ref var s = ref heap<@string>(default, out var Ꮡs);
+                s = use((@string)bytesOf(false), poke(false));
+                return s;
+            }
+
             // Row 19 rule 2, encoding/gob's getBaseType(""u8, t.Elem()): a u8 literal handed to an @string parameter, then
             // a parking call that cannot move ahead of its statement (gob's sits inside a call that moves; here, an if
             // header), so it awaits in place. The argument C# holds is the @string the literal converts to, not the
@@ -191,7 +209,8 @@ public class TwinOrderTests
         StringAssert.Contains(twins, "await Setꞏtwin(Ꮡa, 5, false)", "the second argument's call awaits: the cast before it reads a spilled value");
         Assert.AreEqual((nint)33, Twin(assembly, "castArgs"), "3*10+3");
         Assert.AreEqual((nint)51, Twin(assembly, "castOperand"), "3 | 3<<4");
-        Assert.IsFalse(twins.Contains("|castArgs|Set|") || twins.Contains("|castOperand|Set|"), "no ref-blocked row names either function\n" + twins);
+        Assert.AreEqual("Nld", Twin(assembly, "castCopy").ToString(), "gc converts after the later call writes the shared bytes");
+        Assert.IsFalse(twins.Contains("|castArgs|Set|") || twins.Contains("|castOperand|Set|") || twins.Contains("|castCopy|poke|"), "no ref-blocked row names these functions\n" + twins);
     }
 
     [TestMethod]
@@ -201,7 +220,7 @@ public class TwinOrderTests
 
         StringAssert.Contains(twins, "(await namedꞏtwin(\"ab\"u8, (await Setꞏtwin(Ꮡa, 2, false)), false))", "the parking call awaits in place");
         Assert.IsFalse(twins.Contains("|u8Named|Set|"), "no ref-blocked row names u8Named\n" + twins);
-        Assert.AreEqual((nint)1, Twin(assembly, "u8Named"), "len(\"ab\")*10+3 == 23");
+        Assert.AreEqual((nint)1, Twin(assembly, "u8Named"), "the if header compared len(\"ab\")*10+3 with 23");
 
         StringAssert.Contains(twins, "|u8Spanned|Set|ref-like-before|", "the ref struct parameter's literal still blocks the call, by name");
         Assert.AreEqual((nint)1, Twin(assembly, "u8Spanned"));
