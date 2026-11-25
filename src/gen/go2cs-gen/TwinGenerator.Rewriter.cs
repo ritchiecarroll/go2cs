@@ -485,7 +485,7 @@ public sealed partial class TwinGenerator
                 inert = false;
             }
 
-            void Earlier(ExpressionSyntax expression, bool receiver = false)
+            void Earlier(ExpressionSyntax expression)
             {
                 TypeInfo info = m_model.GetTypeInfo(expression);
                 // M:N row 19, rule 2: the value C# holds is the CONVERTED one. A u8 literal handed to an @string
@@ -518,7 +518,7 @@ public sealed partial class TwinGenerator
                     return;
 
                 // M:N row 19, M1: while the plan pass runs, an earlier call that can spill by value is planned, not a blocker.
-                if (m_plan is not null && core is InvocationExpressionSyntax call && SpillableEarlier(call, receiver))
+                if (m_plan is not null && core is InvocationExpressionSyntax call && SpillableEarlier(call))
                 {
                     m_plan.Add(call);
                     return;
@@ -622,7 +622,7 @@ public sealed partial class TwinGenerator
                         {
                             ExpressionSyntax receiver = invocation.Expression is MemberAccessExpressionSyntax access ? access.Expression : invocation.Expression;
                             refLike |= ByRefReceiver(receiver);
-                            Earlier(receiver, receiver: true);
+                            Earlier(receiver);
                         }
 
                         // The spill's second rule (12.4): the enclosing call moves ahead of its statement, so this call
@@ -912,14 +912,15 @@ public sealed partial class TwinGenerator
         }
 
         // M1's by-value test (P3, MUST 1 and SHOULD 4a): a spill copies the call's result into a temporary, so the call
-        // must not return by ref (`ref` or `ref readonly`) nor be used by ref (a `ref`, `in` or `out` argument, or the
-        // receiver of a struct member, which takes `this` by reference); its result must not be ref-like (a ref struct
-        // cannot live across the await, CS4007); and it must declare no variable (an `out var` or a pattern designation
-        // would move to the spill's scope).
-        private bool SpillableEarlier(InvocationExpressionSyntax call, bool receiver)
+        // must not return by ref (`ref` or `ref readonly`) nor be passed by ref (a `ref`, `in` or `out` argument); its
+        // result must not be ref-like (a ref struct cannot live across the await, CS4007); and it must declare no variable
+        // (an `out var` or a pattern designation would move to the spill's scope). A by-value struct result that is the
+        // receiver of a member is a fresh value either way: C# copies such a receiver into a hidden temporary, and a
+        // `this ref` extension cannot take it at all (net's `netip.AddrFrom16(sa.Addr).WithZone(zoneCache.name(…))`).
+        private bool SpillableEarlier(InvocationExpressionSyntax call)
         {
             if (m_model.GetSymbolInfo(call).Symbol is not IMethodSymbol { ReturnsVoid: false, ReturnsByRef: false, ReturnsByRefReadonly: false } method ||
-                method.ReturnType.IsRefLikeType || receiver && method.ReturnType.IsValueType)
+                method.ReturnType.IsRefLikeType)
                 return false;
 
             SyntaxNode? parent = call.Parent;
@@ -1462,6 +1463,7 @@ public sealed partial class TwinGenerator
             int awaits = m_awaits, pairAwaits = m_pairAwaits, weakAwaits = m_weakAwaits, totalAwaits = Awaits, temps = m_temps, tests = m_run.PairTests;
             List<string> hoisted = [.. HoistedPairs];
             List<int> sites = m_sites, calls = m_calls;
+            int refBlocked = RefBlocked, refBlockedRows = RefBlockedRows.Count;
             m_scopes = [];
             m_awaits = 0;
             m_pairAwaits = 0;
@@ -1482,8 +1484,12 @@ public sealed partial class TwinGenerator
 
             if (!parks)
             {
-                // Not can-park: undo what the twin visit counted, and leave the literal plain.
+                // Not can-park: undo what the twin visit counted, and leave the literal plain. The ref-blocked rows go
+                // back too: a call the discarded visit found ref-blocked is a plain call in a plain literal, not a block
+                // (row 19: crypto/tls's five `() => recv.New()` literals read as ref-blocked after ruling 2 left them plain).
                 Awaits = totalAwaits;
+                RefBlocked = refBlocked;
+                RefBlockedRows.RemoveRange(refBlockedRows, RefBlockedRows.Count - refBlockedRows);
                 m_temps = temps;
                 m_run.PairTests = tests;
                 HoistedPairs.Clear();

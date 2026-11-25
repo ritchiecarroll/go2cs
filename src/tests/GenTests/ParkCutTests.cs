@@ -530,6 +530,17 @@ public class ParkCutTests
 
             internal static nint useHash(crypto_package.Hash h) => expand(() => h.New(), 1);
 
+            // crypto/tls's shape: a ref local read after the literal, in a later argument. The weak call inside the
+            // literal is not awaited in the end (the literal stays plain), so it is no ref-blocked row either.
+            public partial struct suite { public crypto_package.Hash hash; public nint size; }
+
+            internal static nint useSuite(ж<suite> Ꮡc)
+            {
+                ref var c = ref Ꮡc.DerefOrNull();
+                var recv = c.hash;
+                return expand(() => recv.New(), c.size);
+            }
+
         """;
 
     // A package class named crypto_package without Hash.New: the row binds there and reads stale.
@@ -555,6 +566,10 @@ public class ParkCutTests
             string useHash = TwinOf(twins, "useHash");
             StringAssert.Contains(useHash, "expandꞏtwin(", "expand still parks through its own func value, so useHash awaits it");
             Assert.IsFalse(useHash.Contains("Newꞏtwin", StringComparison.Ordinal), "the lambda calls a weak member: it is not paired\n" + useHash);
+            string useSuite = TwinOf(twins, "useSuite");
+            StringAssert.Contains(useSuite, "expandꞏtwin(", useSuite);
+            Assert.IsFalse(useSuite.Contains("Newꞏtwin", StringComparison.Ordinal), "not paired\n" + useSuite);
+            Assert.IsFalse(twins.Contains("|useSuite|New|", StringComparison.Ordinal), "a literal left plain leaves no ref-blocked row\n" + twins);
         }
         finally
         {

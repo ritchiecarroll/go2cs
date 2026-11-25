@@ -240,6 +240,31 @@ public class TwinMovabilityTests
                 return show3("o"u8, mul(Ꮡa, 2), mul(Ꮡa, 3), Set(Ꮡa, 4, false));
             }
 
+            // An earlier call whose struct result is the receiver of a value method (net's
+            // `netip.AddrFrom16(sa.Addr).WithZone(…)`): the result is a fresh value, so its temporary is the same value.
+            public partial struct Pt { public nint x; }
+
+            internal static Pt mkPt(nint v) => new Pt { x = v };
+
+            internal static nint twice(this Pt p) => p.x * 2;
+
+            internal static nint plus(this Pt p, nint v) => p.x * 10 + v;
+
+            // net's exact shape: the earlier call is the receiver of the call the parking call is an argument of. Go: mkPt
+            // reads a (1), Set runs, plus gives 13, and a is read after: 5*10+13. C# order reads a first: 1*10+13.
+            public static nint earlierRecvOuter()
+            {
+                ref var a = ref heap<nint>(1, out var Ꮡa);
+                return show("w"u8, a, mkPt(a).plus(Set(Ꮡa, 5, false)));
+            }
+
+            // Go: mkPt and twice run, then Set, and a is read after: 2, 5, 3. C# order: 2, 1, 3.
+            public static nint earlierRecv()
+            {
+                ref var a = ref heap<nint>(1, out var Ꮡa);
+                return show3("r"u8, mkPt(a).twice(), a, Set(Ꮡa, 5, false));
+            }
+
             // The M1 near-misses: an earlier call whose result is used by ref (a spill would copy it) and one whose result
             // is ref-like (it cannot live across the await) stay blockers, by name.
             internal static ref nint slot(ж<nint> Ꮡp) => ref Ꮡp.DerefOrNull();
@@ -464,6 +489,12 @@ public class TwinMovabilityTests
         Assert.AreEqual((nint)753, Twin(assembly, "earlierCall"), "gc: bump, Set, then the read of a: 7, 5, 3");
         Assert.AreEqual((nint)723, Plain(assembly, "earlierCall"), "the plain method reads a between the calls, C# order");
         Assert.AreEqual((nint)263, Twin(assembly, "twoEarlier"), "the spills keep text order: 2, 6, 3");
+        Assert.IsFalse(twins.Contains("|earlierRecv|Set|"), "a struct result used as a receiver spills\n" + twins);
+        Assert.AreEqual((nint)253, Twin(assembly, "earlierRecv"), "gc: 2, 5, 3");
+        Assert.AreEqual((nint)213, Plain(assembly, "earlierRecv"), "C# order: 2, 1, 3");
+        Assert.IsFalse(twins.Contains("|earlierRecvOuter|Set|"), "the receiver of the enclosing call spills\n" + twins);
+        Assert.AreEqual((nint)63, Twin(assembly, "earlierRecvOuter"), "gc: 5*10 + 13");
+        Assert.AreEqual((nint)23, Plain(assembly, "earlierRecvOuter"), "C# order: 1*10 + 13");
     }
 
     [TestMethod]
