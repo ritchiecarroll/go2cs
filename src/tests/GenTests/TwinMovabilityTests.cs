@@ -28,7 +28,12 @@ public class TwinMovabilityTests
 {
     private const string Source = """
         using System;
+        using go;
         using static go.builtin;
+
+        [assembly: GoImplement<global::go.move_package.Buf, global::go.move_package.Writer>(Pointer = true)]
+        [assembly: GoImplement<global::go.move_package.Val, global::go.move_package.Namer>]
+        [assembly: GoImplement<global::go.move_package.Namer, global::go.move_package.Writer>]
 
         namespace go;
 
@@ -148,6 +153,52 @@ public class TwinMovabilityTests
                 total += show("f"u8, 1, Set(Ꮡa, 2, false));
                 return total;
             }
+
+            // M2: the converter's form of a Go interface conversion of a variable is a generated adapter over it.
+            public partial struct Buf { public nint id; }
+
+            public partial interface Writer { nint Write(nint p); }
+
+            internal static nint Write(this ж<Buf> Ꮡb, nint p) => Ꮡb.DerefOrNull().id * 10 + p;
+
+            public partial struct Val { public nint id; }
+
+            public partial interface Namer { nint Write(nint p); }
+
+            internal static nint Write(this Val v, nint p) => v.id * 10 + p;
+
+            internal static nint useW(ReadOnlySpan<byte> format, Writer w, nint b) => w.Write(b);
+
+            public static nint SetP(ж<ж<Buf>> Ꮡp, ж<Buf> v, bool block) { Ꮡp.DerefOrNull() = v; if (block) { ᐸꟷ(ch); } return 3; }
+
+            public static nint SetN(ж<Namer> Ꮡp, Namer v, bool block) { Ꮡp.DerefOrNull() = v; if (block) { ᐸꟷ(ch); } return 3; }
+
+            // A pointer adapter: gc converts `w` after the call reassigns it.
+            public static nint ptrAdapter()
+            {
+                heap(new Buf(id: 1), out var Ꮡb1);
+                heap(new Buf(id: 2), out var Ꮡb2);
+                ref var pb = ref heap<ж<Buf>>(Ꮡb1, out var Ꮡpb);
+                return useW("p"u8, new BufжWriter(pb), SetP(Ꮡpb, Ꮡb2, false));
+            }
+
+            // A value adapter (an interface converted to another interface, fmt's `new fmt_StateᴠWriter(s)`) copies its
+            // operand: gc reads `n` after the call reassigns it.
+            public static nint valAdapter()
+            {
+                ref var n = ref heap<Namer>(new Val(id: 1), out var Ꮡn);
+                return useW("v"u8, new NamerᴠWriter(n), SetN(Ꮡn, new Val(id: 2), false));
+            }
+
+            // The M2 near-miss: an adapter over a CALL is not a pure read; the call is ordered before the parking call.
+            internal static ж<Buf> pick(ж<Buf> b) { counter++; return b; }
+
+            public static nint adapterOverCall()
+            {
+                heap(new Buf(id: 1), out var Ꮡb1);
+                ref var a = ref heap<nint>(1, out var Ꮡa);
+                return useW("c"u8, new BufжWriter(pick(Ꮡb1)), Set(Ꮡa, 2, false));
+            }
         }
         """;
 
@@ -224,6 +275,21 @@ public class TwinMovabilityTests
         Assert.AreEqual((nint)13, Twin(assembly, "compoundField"));
     }
 
+    [TestMethod]
+    public void AnAdapterOverAPureReadIsAPureRead_M2()
+    {
+        (string twins, Assembly assembly) = Build();
+
+        Assert.IsFalse(twins.Contains("|ptrAdapter|SetP|") || twins.Contains("|valAdapter|SetN|"), "no ref-blocked row names the adapter rows\n" + twins);
+        Assert.AreEqual((nint)23, Twin(assembly, "ptrAdapter"), "gc converts the pointer after the call: 2*10+3");
+        Assert.AreEqual((nint)13, Plain(assembly, "ptrAdapter"), "the plain method converts first, C# order");
+        Assert.AreEqual((nint)23, Twin(assembly, "valAdapter"), "gc converts the interface after the call: 2*10+3");
+        Assert.AreEqual((nint)13, Plain(assembly, "valAdapter"), "the plain method converts first, C# order");
+
+        StringAssert.Contains(twins, "|adapterOverCall|Set|ref-like-before|earlier:ObjectCreationExpression", "an adapter over a call is ordered\n" + twins);
+        Assert.AreEqual((nint)13, Twin(assembly, "adapterOverCall"));
+    }
+
     private static readonly CSharpParseOptions Options = new(LanguageVersion.CSharp13);
 
     private static (string twins, Assembly assembly) Build()
@@ -234,7 +300,7 @@ public class TwinMovabilityTests
 
         Dictionary<string, string> properties = new() { ["build_property.GoTwins"] = "true" };
 
-        CSharpGeneratorDriver.Create([new RecvGenerator(), new FieldAccessGenerator(), new TypeGenerator(), new TwinGenerator()], parseOptions: Options,
+        CSharpGeneratorDriver.Create([new RecvGenerator(), new FieldAccessGenerator(), new TypeGenerator(), new ImplementGenerator(), new TwinGenerator()], parseOptions: Options,
                 optionsProvider: new BuildProperties(properties))
             .RunGeneratorsAndUpdateCompilation(compilation, out Compilation output, out _);
 

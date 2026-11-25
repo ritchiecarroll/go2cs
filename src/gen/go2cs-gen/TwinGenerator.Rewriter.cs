@@ -686,6 +686,8 @@ public sealed partial class TwinGenerator
                 case PrefixUnaryExpressionSyntax unary when unary.IsKind(SyntaxKind.UnaryMinusExpression) || unary.IsKind(SyntaxKind.UnaryPlusExpression) ||
                                                             unary.IsKind(SyntaxKind.LogicalNotExpression) || unary.IsKind(SyntaxKind.BitwiseNotExpression):
                     return IsPureRead(unary.Operand);
+                case ObjectCreationExpressionSyntax creation:
+                    return IsAdapterOverPureRead(creation);
                 default:
                     return false;
             }
@@ -693,6 +695,49 @@ public sealed partial class TwinGenerator
             static bool IsNumeric(ITypeSymbol? type) =>
                 type is { SpecialType: >= SpecialType.System_Char and <= SpecialType.System_Double or SpecialType.System_IntPtr or SpecialType.System_UIntPtr } ||
                 type is { TypeKind: TypeKind.Enum };
+        }
+
+        // M:N row 19, M2 (DESIGN-mn-row19-movability.md): the converter's form of a Go interface conversion of a variable,
+        // `io.Writer(&buf)`, is a generated adapter over it (`new bytes_BufferжWriter(Ꮡbuf)`, `new fmt_StateᴠWriter(s)`),
+        // whose constructor only stores its operand. gc converts after a later call in the same statement (go1.26.11: a
+        // pointer, an interface variable and a value read the call's write when the call is not inlined, and a parking
+        // call never is), so an adapter over a pure read is a pure read. An adapter is recognized against go2cs-gen's own
+        // output: one emitted in another assembly implements golib's IGoAdapter; one emitted beside this code is not yet
+        // in the compilation the rewriter reads, so it is named by a GoImplement record of this assembly whose source type
+        // is the operand's (through ж<T> for a pointer record) and whose interface ends the adapter's name.
+        private bool IsAdapterOverPureRead(ObjectCreationExpressionSyntax creation)
+        {
+            if (creation.ArgumentList is not { Arguments: [{ RefKindKeyword.RawKind: (int)SyntaxKind.None } argument] } || creation.Initializer is not null ||
+                !IsPureRead(argument.Expression))
+                return false;
+
+            ITypeSymbol? created = m_model.GetTypeInfo(creation).Type;
+
+            if (created is null)
+                return false;
+
+            if (created.TypeKind != TypeKind.Error)
+                return created.AllInterfaces.Any(contract => contract is { Name: "IGoAdapter", ContainingNamespace: { Name: "go", ContainingNamespace.IsGlobalNamespace: true } });
+
+            if (m_model.GetTypeInfo(argument.Expression).Type is not { } operand)
+                return false;
+
+            foreach (AttributeData record in m_model.Compilation.Assembly.GetAttributes())
+            {
+                if (record.AttributeClass is not { Name: "GoImplementAttribute", TypeArguments: [{ } source, { } contract] })
+                    continue;
+
+                bool pointer = record.NamedArguments.Any(named => named is { Key: "Pointer", Value.Value: true });
+
+                ITypeSymbol? wrapped = pointer
+                    ? operand is INamedTypeSymbol { Name: "ж", TypeArguments: [{ } element] } ? element : null
+                    : operand;
+
+                if (wrapped is not null && SymbolEqualityComparer.Default.Equals(wrapped, source) && created.Name.EndsWith(contract.Name, System.StringComparison.Ordinal))
+                    return true;
+            }
+
+            return false;
         }
 
         // M:N row 19, M7 (DESIGN-mn-row19-movability.md): a converted Go constant is a constant. The converter emits a typed
