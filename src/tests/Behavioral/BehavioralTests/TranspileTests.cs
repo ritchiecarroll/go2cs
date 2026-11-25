@@ -715,6 +715,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckExportedAliasUnexportedTarget() => CheckTarget("ExportedAliasUnexportedTarget");
 
     [TestMethod]
+    public void CheckExportedFuncOfUnexportedFuncType() => CheckTarget("ExportedFuncOfUnexportedFuncType");
+
+    [TestMethod]
     public void CheckExprSwitch() => CheckTarget("ExprSwitch");
 
     [TestMethod]

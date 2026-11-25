@@ -718,6 +718,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckExportedAliasUnexportedTarget() => CheckTarget("ExportedAliasUnexportedTarget");
 
     [TestMethod]
+    public void CheckExportedFuncOfUnexportedFuncType() => CheckTarget("ExportedFuncOfUnexportedFuncType");
+
+    [TestMethod]
     public void CheckExprSwitch() => CheckTarget("ExprSwitch");
 
     [TestMethod]

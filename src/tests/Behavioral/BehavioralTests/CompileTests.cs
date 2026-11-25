@@ -715,6 +715,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckExportedAliasUnexportedTarget() => CheckTarget("ExportedAliasUnexportedTarget");
 
     [TestMethod]
+    public void CheckExportedFuncOfUnexportedFuncType() => CheckTarget("ExportedFuncOfUnexportedFuncType");
+
+    [TestMethod]
     public void CheckExprSwitch() => CheckTarget("ExprSwitch");
 
     [TestMethod]
