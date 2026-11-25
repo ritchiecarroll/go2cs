@@ -12,6 +12,10 @@
 // <ImportedTypeAliases>
 using @checked = go.AliasKeywordPackage.checked_package;
 using @internal = go.AliasKeywordPackage.internal_package;
+using @lock = go.AliasKeywordPackage.tokens_package;
+using @record = go.AliasKeywordPackage.record_package;
+using @union = go.AliasKeywordPackage.union_package;
+using partial = go.AliasKeywordPackage.partial_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -46,6 +50,10 @@ using System.Runtime.CompilerServices;
 
 // <ImplicitConversions>
 [assembly: GoImplicitConv<Bools, @checked.Token>(Inverted = true, ValueType = "uint64")]
+[assembly: GoImplicitConv<Bools, @lock.Kind>(Inverted = true, ValueType = "uint64")]
+[assembly: GoImplicitConv<Bools, @record.Entry>(Inverted = true, ValueType = "uint64")]
+[assembly: GoImplicitConv<Bools, @union.Set>(Inverted = true, ValueType = "uint64")]
+[assembly: GoImplicitConv<Bools, partial.Part>(Inverted = true, ValueType = "uint64")]
 // </ImplicitConversions>
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
@@ -56,7 +64,7 @@ using System.Runtime.CompilerServices;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("flags.go", "flags.cs", "AAwklpY=")]
+[assembly: GoPositionMap("flags.go", "flags.cs", "ABEulpaWlpaW")]
 // </GoSourcePositionMaps>
 
 namespace go.AliasKeywordPackage;
@@ -64,6 +72,10 @@ namespace go.AliasKeywordPackage;
 using static go.AliasKeywordPackage.flags_package;
 using @checked = go.AliasKeywordPackage.checked_package;
 using @internal = go.AliasKeywordPackage.internal_package;
+using @lock = go.AliasKeywordPackage.tokens_package;
+using @record = go.AliasKeywordPackage.record_package;
+using @union = go.AliasKeywordPackage.union_package;
+using partial = go.AliasKeywordPackage.partial_package;
 
 [GoPackage("flags")]
 public static partial class flags_package
@@ -107,5 +119,9 @@ partial class flagsᴛBools {
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static uint64 Options(this Bools b, @internal.NotForPublicUse _) => flags_package.Options⁔(b, _);
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @checked.Token Check(this Bools b, @checked.Token t) => flags_package.Check⁔(b, t);
     [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Has(this Bools b, Flag f) => flags_package.Has⁔(b, f);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @lock.Kind Lock(this Bools b, @lock.Kind k) => flags_package.Lock⁔(b, k);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @union.Set Union(this Bools b, @union.Set s) => flags_package.Union⁔(b, s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @record.Entry Record(this Bools b, @record.Entry e) => flags_package.Record⁔(b, e);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static partial.Part Partial(this Bools b, partial.Part p) => flags_package.Partial⁔(b, p);
 }
 // </MethodForwarders>

@@ -1967,6 +1967,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckPackageShadowPointerParam() => CheckTarget("PackageShadowPointerParam");
 
     [TestMethod]
+    public void CheckPackageSuffixCollision() => CheckTarget("PackageSuffixCollision");
+
+    [TestMethod]
     public void CheckPackageVarFuncLitPointerParam() => CheckTarget("PackageVarFuncLitPointerParam");
 
     [TestMethod]

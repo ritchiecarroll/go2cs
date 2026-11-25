@@ -190,6 +190,11 @@
     <ProjectReference Include="checked/AliasKeywordPackage.checked.csproj" />
     <ProjectReference Include="flags/AliasKeywordPackage.flags.csproj" />
     <ProjectReference Include="internal/AliasKeywordPackage.internal.csproj" />
+    <ProjectReference Include="opts/AliasKeywordPackage.opts.csproj" />
+    <ProjectReference Include="partial/AliasKeywordPackage.partial.csproj" />
+    <ProjectReference Include="record/AliasKeywordPackage.record.csproj" />
+    <ProjectReference Include="tokens/AliasKeywordPackage.tokens.csproj" />
+    <ProjectReference Include="union/AliasKeywordPackage.union.csproj" />
   </ItemGroup>
 
   <ItemGroup>
