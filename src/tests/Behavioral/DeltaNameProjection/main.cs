@@ -260,13 +260,10 @@ internal static void main() {
 }
 
 internal static slice<@string> methodNames(reflect.Type t) {
-    var namesᴷ = new stackAppend<@string>(moves: true);
-
     slice<@string> names = default;
     foreach (var i in range(t.NumMethod())) {
-        names = append(namesᴷ, names, t.Method(i).Name);
+        names = append(names, t.Method(i).Name);
     }
-    names = move2heap(namesᴷ, names);
     return names;
 }
 
