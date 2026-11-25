@@ -371,3 +371,40 @@ GO2CS_PROBE_EXPORT int go2cs_probe_pick_as_char(int *a, char **out)
     *out = (char *)a;
     return *a;
 }
+
+// Item 2, the argv shape (.5 cgo, DESIGN-cgo-phase3-marshaling 18.12.3; H's verdict (A), the word mirror): a NULL-ended
+// array of C strings. Returns count * 100 + the strings' total length, so a dropped or swapped word reads differently.
+GO2CS_PROBE_EXPORT int go2cs_probe_argv_count(char **argv)
+{
+    int count = 0;
+    int length = 0;
+
+    for (; argv[count] != NULL; count++)
+        for (const char *c = argv[count]; *c != 0; c++)
+            length++;
+
+    return count * 100 + length;
+}
+
+// The same through a void pointer: the void door's argv.
+GO2CS_PROBE_EXPORT int go2cs_probe_argv_count_void(void *argv)
+{
+    return go2cs_probe_argv_count((char **)argv);
+}
+
+// C fills the first n words with C strings it owns, and leaves the rest alone.
+GO2CS_PROBE_EXPORT int go2cs_probe_argv_fill(char **argv, int n)
+{
+    static char *const words[] = { "c0", "c11", "c222", "c3333" };
+
+    for (int i = 0; i < n && i < 4; i++)
+        argv[i] = words[i];
+
+    return n;
+}
+
+// H's point 2: C stores the address of argv[2] into argv[0], a pointer into the array it was handed.
+GO2CS_PROBE_EXPORT void go2cs_probe_argv_self(char **argv)
+{
+    argv[0] = (char *)&argv[2];
+}

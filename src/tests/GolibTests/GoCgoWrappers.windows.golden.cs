@@ -443,6 +443,125 @@ static unsafe partial class cgotestꓸC_package
         return (@int)(int32)r;
     }
 
+    // C.go2cs_probe_argv_count, bound to go2csprobe.dll.
+    [global::System.Runtime.InteropServices.LibraryImport("go2csprobe.dll", EntryPoint = "go2cs_probe_argv_count")]
+    [global::System.Runtime.InteropServices.UnmanagedCallConv(CallConvs = new[] { typeof(global::System.Runtime.CompilerServices.CallConvCdecl) })]
+    private static partial int go2cs_probe_argv_countᴍnative(nint p0);
+
+    internal static @int go2cs_probe_argv_count(ж<ж<@char>> p0)
+    {
+        nint m0 = default;
+        global::go.golib.GoCgoStructPointer k0 = global::go.golib.GoCgoArgs.OutParameter(p0, "go2cs_probe_argv_count", out nuint n0, out ж<@char>? q0);
+        nint a0 = (nint)n0;
+
+        if (k0 == global::go.golib.GoCgoStructPointer.Mirror)
+        {
+            m0 = (nint)n0;
+            a0 = (nint)(&m0);
+        }
+
+        int r;
+        global::go.runtime_package.syscallEntersyscall();
+
+        try
+        {
+            r = go2cs_probe_argv_countᴍnative(a0);
+        }
+        finally
+        {
+            global::go.runtime_package.syscallExitsyscall();
+        }
+
+        global::System.ReadOnlySpan<global::go.golib.GoCgoStackCopy> copies =
+        [
+            k0 == global::go.golib.GoCgoStructPointer.Mirror ? new(&m0, (nuint)sizeof(nint), p0) : default
+        ];
+
+        if (k0 == global::go.golib.GoCgoStructPointer.Mirror)
+            p0.ValueSlot = global::go.golib.GoCgoArgs.PointerMemberBack<@char>((nuint)m0, q0, n0, copies, "go2cs_probe_argv_count");
+
+        return (@int)(int32)r;
+    }
+
+    // C.go2cs_probe_argv_fill, bound to go2csprobe.dll.
+    [global::System.Runtime.InteropServices.LibraryImport("go2csprobe.dll", EntryPoint = "go2cs_probe_argv_fill")]
+    [global::System.Runtime.InteropServices.UnmanagedCallConv(CallConvs = new[] { typeof(global::System.Runtime.CompilerServices.CallConvCdecl) })]
+    private static partial int go2cs_probe_argv_fillᴍnative(nint p0, int p1);
+
+    internal static @int go2cs_probe_argv_fill(ж<ж<@char>> p0, @int p1)
+    {
+        nint m0 = default;
+        global::go.golib.GoCgoStructPointer k0 = global::go.golib.GoCgoArgs.OutParameter(p0, "go2cs_probe_argv_fill", out nuint n0, out ж<@char>? q0);
+        nint a0 = (nint)n0;
+
+        if (k0 == global::go.golib.GoCgoStructPointer.Mirror)
+        {
+            m0 = (nint)n0;
+            a0 = (nint)(&m0);
+        }
+
+        int r;
+        global::go.runtime_package.syscallEntersyscall();
+
+        try
+        {
+            r = go2cs_probe_argv_fillᴍnative(a0, (int32)p1);
+        }
+        finally
+        {
+            global::go.runtime_package.syscallExitsyscall();
+        }
+
+        global::System.ReadOnlySpan<global::go.golib.GoCgoStackCopy> copies =
+        [
+            k0 == global::go.golib.GoCgoStructPointer.Mirror ? new(&m0, (nuint)sizeof(nint), p0) : default
+        ];
+
+        if (k0 == global::go.golib.GoCgoStructPointer.Mirror)
+            p0.ValueSlot = global::go.golib.GoCgoArgs.PointerMemberBack<@char>((nuint)m0, q0, n0, copies, "go2cs_probe_argv_fill");
+
+        return (@int)(int32)r;
+    }
+
+    // C.go2cs_probe_argv_self, bound to go2csprobe.dll.
+    [global::System.Runtime.InteropServices.LibraryImport("go2csprobe.dll", EntryPoint = "go2cs_probe_argv_self")]
+    [global::System.Runtime.InteropServices.UnmanagedCallConv(CallConvs = new[] { typeof(global::System.Runtime.CompilerServices.CallConvCdecl) })]
+    private static partial void go2cs_probe_argv_selfᴍnative(nint p0);
+
+    internal static @void go2cs_probe_argv_self(ж<ж<@char>> p0)
+    {
+        nint m0 = default;
+        global::go.golib.GoCgoStructPointer k0 = global::go.golib.GoCgoArgs.OutParameter(p0, "go2cs_probe_argv_self", out nuint n0, out ж<@char>? q0);
+        nint a0 = (nint)n0;
+
+        if (k0 == global::go.golib.GoCgoStructPointer.Mirror)
+        {
+            m0 = (nint)n0;
+            a0 = (nint)(&m0);
+        }
+
+        global::go.runtime_package.syscallEntersyscall();
+
+        try
+        {
+            go2cs_probe_argv_selfᴍnative(a0);
+        }
+        finally
+        {
+            global::go.runtime_package.syscallExitsyscall();
+        }
+
+        global::System.ReadOnlySpan<global::go.golib.GoCgoStackCopy> copies =
+        [
+            k0 == global::go.golib.GoCgoStructPointer.Mirror ? new(&m0, (nuint)sizeof(nint), p0) : default
+        ];
+
+        if (k0 == global::go.golib.GoCgoStructPointer.Mirror)
+            p0.ValueSlot = global::go.golib.GoCgoArgs.PointerMemberBack<@char>((nuint)m0, q0, n0, copies, "go2cs_probe_argv_self");
+
+        return default;
+    }
+
     // C.go2cs_probe_cursor_at, bound to go2csprobe.dll.
     [global::System.Runtime.InteropServices.LibraryImport("go2csprobe.dll", EntryPoint = "go2cs_probe_cursor_at")]
     [global::System.Runtime.InteropServices.UnmanagedCallConv(CallConvs = new[] { typeof(global::System.Runtime.CompilerServices.CallConvCdecl) })]

@@ -64,6 +64,10 @@ int go2cs_probe_pick(int *a, int **out);
 int go2cs_probe_pick_b(struct go2cs_probe_pair *pair, int **out);
 void go2cs_probe_node_ring(struct go2cs_probe_node *node);
 int go2cs_probe_pick_as_char(int *a, char **out);
+int go2cs_probe_argv_count(char **argv);
+int go2cs_probe_argv_count_void(void *argv);
+int go2cs_probe_argv_fill(char **argv, int n);
+void go2cs_probe_argv_self(char **argv);
 */
 import "C"
 
@@ -94,6 +98,13 @@ type goCHeader struct {
 	pad  int32
 	n    int32
 	name [8]C.char
+}
+
+// goArgvHost holds an array of C pointers as a FIELD, so &h.ptrs[0] is item 2's argv shape inside a Go struct (P3's
+// unconfirmed row, carried by item 2).
+type goArgvHost struct {
+	n    int32
+	ptrs [4]*C.char
 }
 
 // goRefHost holds a Go reference, so no door can pin a view of one of its fields: its storage is a managed object
@@ -682,6 +693,57 @@ func main() {
 		n.value = 9
 		C.go2cs_probe_node_ring(&n)
 		fmt.Println("ringself", int(n.value), n.next == &n)
+	// The .5 cgo item 2, the argv shape (18.12.3; H's verdict (A), the word mirror): C reads or fills a whole Go array of
+	// C pointers it was handed the first of. Go runs each; go2cs mirrors the backing array as words, pins it for the
+	// call and copies it back, and refuses a Go pointer among the words (cgo's own panic) and a word C stores INTO the
+	// array (inside the pin), by name.
+	case "argvgo":
+		a, bb := C.CString("a"), C.CString("bb")
+		defer C.free(unsafe.Pointer(a))
+		defer C.free(unsafe.Pointer(bb))
+		argv := []*C.char{a, bb, nil}
+		fmt.Println("argvgo", int(C.go2cs_probe_argv_count(&argv[0])))
+	case "argvfill":
+		z := C.CString("z")
+		defer C.free(unsafe.Pointer(z))
+		argv := []*C.char{nil, nil, z}
+		n := C.go2cs_probe_argv_fill(&argv[0], 2)
+		fmt.Println("argvfill", int(n), C.GoString(argv[0]), C.GoString(argv[1]), argv[2] == z)
+	case "argvgoptr":
+		// A Go pointer among the words: cgo's panic on both sides.
+		b := []byte("g\x00")
+		argv := []*C.char{(*C.char)(unsafe.Pointer(&b[0])), nil}
+		fmt.Println("argvgoptr", int(C.go2cs_probe_argv_count(&argv[0])))
+	case "argvself":
+		// C stores &argv[2] into argv[0]. Go keeps it; go2cs refuses by name, since the mirror is one of the call's pins.
+		argv := make([]*C.char, 3)
+		C.go2cs_probe_argv_self(&argv[0])
+		fmt.Println("argvself", unsafe.Pointer(argv[0]) == unsafe.Pointer(&argv[2]))
+	case "argvc":
+		// The near-miss: an argv in C memory, viewed as a Go slice, crosses by its own address.
+		p := (**C.char)(C.malloc(C.size_t(3 * unsafe.Sizeof(uintptr(0)))))
+		defer C.free(unsafe.Pointer(p))
+		s := unsafe.Slice(p, 3)
+		abc := C.CString("abc")
+		defer C.free(unsafe.Pointer(abc))
+		s[0], s[1], s[2] = abc, nil, nil
+		fmt.Println("argvc", int(C.go2cs_probe_argv_count(&s[0])))
+	case "argvfield":
+		// The array as a field of a Go struct (P3's row).
+		x, yy := C.CString("x"), C.CString("yy")
+		defer C.free(unsafe.Pointer(x))
+		defer C.free(unsafe.Pointer(yy))
+		var h goArgvHost
+		h.ptrs[0], h.ptrs[1] = x, yy
+		fmt.Println("argvfield", int(C.go2cs_probe_argv_count(&h.ptrs[0])))
+	case "argvvoid":
+		// The void door.
+		x, yy, zzz := C.CString("x"), C.CString("yy"), C.CString("zzz")
+		defer C.free(unsafe.Pointer(x))
+		defer C.free(unsafe.Pointer(yy))
+		defer C.free(unsafe.Pointer(zzz))
+		argv := []*C.char{x, yy, zzz, nil}
+		fmt.Println("argvvoid", int(C.go2cs_probe_argv_count_void(unsafe.Pointer(&argv[0]))))
 	default:
 		fmt.Println("unknown arm", arm)
 		os.Exit(64)

@@ -494,6 +494,17 @@ func cgoP3Arms() []cgoG1Arm {
 		{name: "outothertype", csFails: cgoP3InsideStackCopy},
 		{name: "outinterior", csFails: cgoP3InsideStackCopy},
 		{name: "ringself"},
+		// The .5 cgo item 2, the argv shape (18.12.3, H's verdict (A)): a whole Go array of C pointers through the typed
+		// door, filled by C, as a struct field and through the void door; a Go pointer among the words (cgo's panic on
+		// both sides); a word C stores into the array itself, refused by name (the mirror is one of the pins); and the
+		// near-miss over C memory.
+		{name: "argvgo"},
+		{name: "argvfill"},
+		{name: "argvgoptr", goFails: cgoG1PointerPanic, csFails: cgoG1PointerPanic},
+		{name: "argvself", csFails: cgoP3ReturnedIntoGoMemory},
+		{name: "argvc"},
+		{name: "argvfield"},
+		{name: "argvvoid"},
 	}
 }
 

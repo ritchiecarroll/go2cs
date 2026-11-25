@@ -288,6 +288,9 @@ func _Cfunc_go2cs_probe_pick(p0 *_Ctype_int, p1 **_Ctype_int) (r1 _Ctype_int) { 
 func _Cfunc_go2cs_probe_pick_b(p0 *_Ctype_struct_go2cs_probe_pair, p1 **_Ctype_int) (r1 _Ctype_int) { return }
 func _Cfunc_go2cs_probe_node_ring(p0 *_Ctype_struct_go2cs_probe_node) (r1 _Ctype_void) { return }
 func _Cfunc_go2cs_probe_pick_as_char(p0 *_Ctype_int, p1 **_Ctype_char) (r1 _Ctype_int) { return }
+func _Cfunc_go2cs_probe_argv_count(p0 **_Ctype_char) (r1 _Ctype_int) { return }
+func _Cfunc_go2cs_probe_argv_fill(p0 **_Ctype_char, p1 _Ctype_int) (r1 _Ctype_int) { return }
+func _Cfunc_go2cs_probe_argv_self(p0 **_Ctype_char) (r1 _Ctype_void) { return }
 `
 
 // cgoProbeLibrary is the probe library's load-time name on goos, as the hosted leg builds it (its SONAME on linux, its
@@ -352,7 +355,8 @@ func cgoWrapperGolden(t *testing.T, target cgoWrapperTarget) string {
 
 	for _, symbol := range []string{"go2cs_probe_pair", "go2cs_probe_pair_sum", "go2cs_probe_add_into", "go2cs_probe_tagged_double", "go2cs_probe_hfa_scale", "go2cs_probe_strtol", "go2cs_probe_slow_fill",
 		"go2cs_probe_cursor_set", "go2cs_probe_cursor_at", "go2cs_probe_pick", "go2cs_probe_pick_b", "go2cs_probe_node_ring",
-		"go2cs_probe_pick_as_char"} {
+		"go2cs_probe_pick_as_char", "go2cs_probe_argv_count", "go2cs_probe_argv_fill",
+		"go2cs_probe_argv_self"} {
 		set.libraries[symbol] = cgoProbeLibrary(target.goos)
 	}
 
