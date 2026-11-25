@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"go/ast"
 	"go/token"
+	"maps"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -252,19 +253,38 @@ var funcLitAttrRe = regexp.MustCompile(`^\s*\[(MethodImpl\(MethodImplOptions\.No
 
 // scaffoldRe matches the lines the converter writes ahead of a statement's own translation: a func literal's
 // capture copy (`var xʗ1 = x;`), a heap box for an escaping local (`ref var x = ref heap<T>(out var Ꮡx);`), and Go
-// 1.26's move of a buffered slice to the heap (`x = move2heap(xᴷ, x);`), which Go inserts ahead of the statement.
-var scaffoldRe = regexp.MustCompile(`^(var [\pL\pN_@]+ʗ\d+ = [\pL\pN_@Ꮡ.]+;|ref var [\pL\pN_@]+ = ref heap(<.*>)?\(.*out var Ꮡ[\pL\pN_@]+\);|` + move2heapLine + `)$`)
+// 1.26's move of a buffered slice to the heap (`x = move2heap(xᴷ, x);`), which Go inserts ahead of the statement,
+// and an operand-order hoist (`var evalᴛ1 = f();`), a call of the statement below run ahead of its plain operands.
+var scaffoldRe = regexp.MustCompile(`^(var [\pL\pN_@]+ʗ\d+ = [\pL\pN_@Ꮡ.]+;|ref var [\pL\pN_@]+ = ref heap(<.*>)?\(.*out var Ꮡ[\pL\pN_@]+\);|` + move2heapLine + `|` + operandHoistLine + `)$`)
 
 // walkScaffoldRe is the part of scaffoldRe that is never a statement of its own: a capture copy, the BARE heap box
 // `ref var x = ref heap<T>(out var Ꮡx);`, which the next line's assignment completes, and a move to the heap. A box
 // WITH an initializer (`ref var buf = ref heap(new T(), out var Ꮡbuf);`, an escaping `var buf T`) is a whole Go
 // statement, so the walk that places a Go blank must stop at it: crossing it credits the previous statement's
-// blank to the line below.
-var walkScaffoldRe = regexp.MustCompile(`^(var [\pL\pN_@]+ʗ\d+ = [\pL\pN_@Ꮡ.]+;|ref var [\pL\pN_@]+ = ref heap<.*>\(out var Ꮡ[\pL\pN_@]+\);|` + move2heapLine + `)$`)
+// blank to the line below. An operand-order hoist is only a prefix of the statement below, so the walk crosses it.
+var walkScaffoldRe = regexp.MustCompile(`^(var [\pL\pN_@]+ʗ\d+ = [\pL\pN_@Ꮡ.]+;|ref var [\pL\pN_@]+ = ref heap<.*>\(out var Ꮡ[\pL\pN_@]+\);|` + move2heapLine + `|` + operandHoistLine + `)$`)
 
 // move2heapLine is one line of the moves the converter writes ahead of a statement where buffered slices escape:
 // `x = move2heap(xᴷ, x);`, one per variable.
 const move2heapLine = `[\pL\pN_@]+ = move2heap\([\pL\pN_@]+ᴷ, [\pL\pN_@]+\);`
+
+// operandHoistLine is one line of the temps the converter writes ahead of a statement whose calls gc runs before its
+// plain operands (src/go2cs/operandOrder.go): `var evalᴛ1 = bump();`, one per moved call, in the calls' order.
+const operandHoistLine = `var evalᴛ\d+ = .+;`
+
+var operandHoistRe = regexp.MustCompile(`^` + operandHoistLine + `$`)
+
+// hoistedIdents is csIdents for C# line c plus every operand-order hoist directly above it (no earlier than line
+// floor): a moved call's identifiers sit on its hoist line, and the statement names only the temp.
+func hoistedIdents(cs *csFile, c, floor int) map[string]bool {
+	m := csIdents(cs.codeText[c-1])
+
+	for h := c - 1; h >= floor && operandHoistRe.MatchString(strings.TrimSpace(cs.codeText[h-1])); h-- {
+		maps.Copy(m, csIdents(cs.codeText[h-1]))
+	}
+
+	return m
+}
 
 // gotoLabelRe matches the goto a labeled continue or break becomes; its label is Go's.
 var gotoLabelRe = regexp.MustCompile(`\bgoto (?:continue|break)_([\pL_][\pL\pN_]*);`)
@@ -759,7 +779,7 @@ func analyze(p pair, r *results, verbose bool) {
 						if !cs.codeOnLine[c-1] {
 							continue
 						}
-						if holdsAll(csIdents(cs.codeText[c-1]), ids) {
+						if holdsAll(hoistedIdents(cs, c, cur), ids) {
 							if skip > 0 {
 								skip--
 								continue
@@ -879,7 +899,7 @@ func preludeSeparator(cs *csFile, g *goFile, cOpen, cEnd, lb, rb int) int {
 		if !cs.codeOnLine[l-1] {
 			continue
 		}
-		ci := csIdents(cs.codeText[l-1])
+		ci := hoistedIdents(cs, l, c+1)
 		all := true
 		for k := range ids {
 			if !ci[k] {

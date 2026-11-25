@@ -152,11 +152,11 @@ A root plus a single "indirect" flag is not enough, and the corpus says so. `net
 
 Every call-bearing operand at or **below** the hazardous index spills, not merely the hazardous one: the spec *does* fix the calls' order among themselves, so spilling `b.bump()` out of `return b.n, side(), b.bump()` while leaving `side()` in the tuple would run bump first. A channel **receive** spills with them, since the spec's sentence orders receives alongside calls. A type conversion and a pure builtin (`len(o.der)`) do not: both are calls syntactically and reads semantically, gc spills neither, and leaving them in the tuple is what puts their reads after the spilled calls — which is exactly where gc puts them. The temporaries are named `evalᴛ` and a number unique in the function, the names the statement-wide rule below gives its own spills, so two spills in one scope cannot collide.<!-- Before the statement-wide rule: numbered from the file-monotonic `tupleTempIndex` the converter's other multi-value expansions share. -->
 
-The scope is as much of the rule as the spill is: a rule that spilled every call-bearing operand would also be correct, and would rewrite most of the corpus for no correctness gain. Three controls therefore keep the call *in* the tuple — an operand that **is** the pointer (`return c, c.bump()`; both orders yield the same pointer, and the emitted pointer is the box rather than a copy), a call on unrelated storage (`return a.n, b.bump()`), and a **value**-receiver method (`return c.n, c.peek()`; the receiver is a copy, so the caller can observe nothing). The net/http pointer-field shape above was the fourth control until the statement-wide rule spilled it. Deliberately *not* covered, each because deciding it needs more than the statement itself: an operand that contains a call of its own (`return o.f + g(), o.mutate()` — gc spills `g()` too and reads `o.f` last, so spilling the whole operand would re-create the problem rather than fix it; no corpus site), a pointer whose **pointee no path can name** (`f(getPtr())` — the interprocedural question one step removed), aliasing through a slice or map's **backing store** (`return s[0], fill(s)`, where no address is taken at the call site at all), and a call that reaches the operand through a package-level or captured variable, which is interprocedural outright.
+The scope is as much of the rule as the spill is: a rule that spilled every call-bearing operand would also be correct, and would rewrite most of the corpus for no correctness gain. Three controls therefore keep the call *in* the tuple — an operand that **is** the pointer (`return c, c.bump()`; both orders yield the same pointer, and the emitted pointer is the box rather than a copy), a call on unrelated storage (`return a.n, b.bump()`), and a **value**-receiver method (`return c.n, c.peek()`; the receiver is a copy, so the caller can observe nothing). The net/http pointer-field shape above is not a control: the statement-wide rule spills it.<!-- It was the fourth control of this rule before the statement-wide operand-order rule (2026-11-24). --> Deliberately *not* covered, each because deciding it needs more than the statement itself: an operand that contains a call of its own (`return o.f + g(), o.mutate()` — gc spills `g()` too and reads `o.f` last, so spilling the whole operand would re-create the problem rather than fix it; no corpus site), a pointer whose **pointee no path can name** (`f(getPtr())` — the interprocedural question one step removed), aliasing through a slice or map's **backing store** (`return s[0], fill(s)`, where no address is taken at the call site at all), and a call that reaches the operand through a package-level or captured variable, which is interprocedural outright.
 
-**Corpus footprint** (measured when the spill was added, by an A/B of two seeded whole-stdlib reconverts)<!-- 2 production files; 10,260 files emitted per side --> — `crypto/x509/oid.cs`, where the spill is the bug fix, and `runtime/symtabinl.cs`'s `return u, u.resolveInternal(pc)`, where it is emission-only (the method reads its receiver and writes nothing, so gc's order and C#'s agree on the value; the spill simply stops relying on that). Their two `package_info.cs` position maps move with them, and nothing else in the corpus did. The statement-wide rule in the next section now spills far more widely, and its footprint is stated there.
+**Corpus footprint** (measured when the spill was added, by an A/B of two seeded whole-stdlib reconverts)<!-- 2 production files; 10,260 files emitted per side --> — `crypto/x509/oid.cs`, where the spill is the bug fix, and `runtime/symtabinl.cs`'s `return u, u.resolveInternal(pc)`, where it is emission-only (the method reads its receiver and writes nothing, so gc's order and C#'s agree on the value; the spill simply stops relying on that). Their two `package_info.cs` position maps move with them, and nothing else in the corpus did. The statement-wide rule in the next section spills far more widely.
 
-(Guarded by the `MultiValueReturnOrder` behavioral test — all five hazard shapes, a three-operand call-order case, and the controls, output-compared vs `go run`; before the fix every hazard reports the pre-mutation value. `returnOperandOrder.go` owns the analysis and `returnOperandOrder_test.go` pins the emission against three neuters: the rule forced off, the rule forced on everywhere, and `pathsConflict` reduced to the root-plus-indirect model — the last reporting exactly the two controls the access path exists to separate. Those neuters were read when the controls were four; the statement-wide rule now spills `pointerFieldUnrelated`, so the test carries it as a hazard and three controls remain.)
+(Guarded by the `MultiValueReturnOrder` behavioral test — all five hazard shapes, a three-operand call-order case, and the controls, output-compared vs `go run`; before the fix every hazard reports the pre-mutation value. `returnOperandOrder.go` owns the analysis and `returnOperandOrder_test.go` pins the emission against three neuters: the rule forced off, the rule forced on everywhere, and `pathsConflict` reduced to the root-plus-indirect model — the last reporting exactly the two controls the access path exists to separate. The test carries `pointerFieldUnrelated` as a hazard, because the statement-wide rule spills it.)<!-- The three neuters were read when the controls were four (2026-11-24). -->
 
 ## A call runs before the plain operands of its statement
 
@@ -166,7 +166,7 @@ Go's specification orders a statement's calls and receives, left to right, and l
 ```go
 g = 1
 setG := func() int { g = 10; return 2 }
-fmt.Println("global:", pair(g, setG()))   // gc: setG runs, THEN g is read: "global: 10 2"
+fmt.Println("global:", pair(g, setG()))
 ```
 <!-- source: src/tests/Behavioral/OperandOrderCallArgs/main.cs.target:30-31 -->
 ```csharp
@@ -174,7 +174,7 @@ var evalᴛ2 = setG();
 fmt.Println("global:", pair(g, evalᴛ2));
 ```
 
-(The temps are numbered per function; an earlier statement in the same function took `evalᴛ1`.)
+Go prints `global: 10 2`: `setG` runs, then `g` is read. (The temps are numbered per function; an earlier statement in the same function took `evalᴛ1`.)
 
 **Only a read a call can write counts.** That is a package variable; a local that a func literal captures or whose address is taken (`&x`, a pointer-method call or method value on it, or slicing it when it is an array); a dereference; a field through a pointer; an element of a slice or map; and a field, element or slice of an operand that is itself one of these. A plain local is never such a read: only the statement's own assignments can change it, and they run after its operands, so the two orders agree. `x := f(a, g(b))` over plain locals emits as it always has. A read inside an earlier call is evaluated when that call runs, so it does not count either: `two(f(g), mut())` is left alone.
 
@@ -182,7 +182,7 @@ fmt.Println("global:", pair(g, evalᴛ2));
 
 <!-- source: src/tests/Behavioral/OperandOrderEarly/main.go:54 -->
 ```go
-fmt.Println("len:", ints(g, len(s), mut()))   // gc: "len: 2 1 0", len(s) before mut, g after
+fmt.Println("len:", ints(g, len(s), mut()))
 ```
 <!-- source: src/tests/Behavioral/OperandOrderEarly/main.cs.target:53-55 -->
 ```csharp
@@ -190,6 +190,8 @@ var evalᴛ1 = len(s);
 var evalᴛ2 = mut();
 fmt.Println("len:", ints(g, evalᴛ1, evalᴛ2));
 ```
+
+Go prints `len: 2 1 0`: `len(s)` runs before `mut`, and `g` is read after both.
 
 A comparison passed to a `...any` parameter is boxed early, so the common formatting shape keeps C#'s order and moves nothing:
 
@@ -236,7 +238,7 @@ again:
 
 The temps are numbered per function, never from the file's tuple counter, so a hoist renumbers no other temp; a func literal shares its enclosing function's counter. The multi-value return spill above is the narrower case of this rule and composes with it: a call this rule moved renders as its temp, so the return spill sees an operand with no call in it.
 
-**Corpus footprint** (an A/B of two seeded whole-stdlib reconverts per target): about 1,500 hoisted lines in about 130 packages and 330 `.cs` files on each target, plus the position maps that move with them.<!-- Measured 2026-11-24, master converter against the cut: windows/amd64 1,515 hoist lines, 131 packages, 330 .cs; linux/amd64 1,500, 130, 328; darwin/amd64 1,495, 129, 326; linux/arm64 1,496, 129, 327. Predicted 700-1,800 hoists in 90-150 packages. Outside the predicted kinds: a lambda or expression-bodied method that gains a prelude becomes a block body. -->
+<!-- Corpus footprint, an A/B of two seeded whole-stdlib reconverts per target, measured 2026-11-24, master converter against the cut: windows/amd64 1,515 hoist lines, 131 packages, 330 .cs; linux/amd64 1,500, 130, 328; darwin/amd64 1,495, 129, 326; linux/arm64 1,496, 129, 327. Predicted 700-1,800 hoists in 90-150 packages. Outside the predicted kinds: a lambda or expression-bodied method that gains a prelude becomes a block body. -->
 
 **Limits**, which keep C#'s left-to-right order: a `case` expression (Go evaluates cases lazily, so none can move ahead of the switch; the tag is covered); a package-level initializer, which has no statement to put a prelude before; a statement with a multi-value call or a comma-ok form among its moves (`x := g + sum(two())`); and an operation that can panic, such as `x/y`, which C# runs at its place where gc runs the statement's calls first. [Known issues](../KnownIssues.md#operand-order-limits) lists them for users; `docs/DESIGN-operand-order.md` has the design.
 
