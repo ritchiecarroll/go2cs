@@ -45,6 +45,10 @@ public sealed partial class TwinGenerator
         private readonly HashSet<SyntaxNode> m_spillEarlier = [];
         private List<InvocationExpressionSyntax>? m_plan;
 
+        // M:N row 19, M9: the right operand of a logical operator being lowered to an if. A call's walk stops there, as at
+        // the store statement `ᴛ = <right operand>;` the lowering writes for it.
+        private SyntaxNode? m_lowerRoot;
+
         public int Awaits, GoTwinned, Unrederivable, Literals, IfaceAwaits, Spills, RefBlocked;
 
         // The ref-blocked census (row 7, DATA-mn-row7-refblock.md): one row per call left plain because it could not
@@ -519,6 +523,9 @@ public sealed partial class TwinGenerator
 
             for (SyntaxNode? parent = node.Parent; parent is not null && moved is null; child = parent, parent = parent.Parent)
             {
+                if (ReferenceEquals(child, m_lowerRoot))
+                    break;
+
                 if (parent is StatementSyntax statement)
                 {
                     // M:N row 19 (DESIGN-mn-row19-movability.md): a call moves only out of a statement that is a direct
@@ -723,9 +730,9 @@ public sealed partial class TwinGenerator
         // evaluation order and Go's call order, and the parking call then moves after them. A pure read between them
         // stays in place and reads after both, as in gc. The walk only reaches positions evaluated unconditionally, and
         // what is evaluated before each planned call is judged by the same walk, so the rule is recursive.
-        private void PlanEarlierSpills(StatementSyntax statement)
+        private void PlanEarlierSpills(SyntaxNode scope)
         {
-            foreach (InvocationExpressionSyntax call in statement.DescendantNodes(node => node == statement || node is not (StatementSyntax or AnonymousFunctionExpressionSyntax))
+            foreach (InvocationExpressionSyntax call in scope.DescendantNodesAndSelf(node => node == scope || node is not (StatementSyntax or AnonymousFunctionExpressionSyntax))
                          .OfType<InvocationExpressionSyntax>())
             {
                 if (!m_run.Sites.TryGetValue(call, out Site? site) || site.Go != GoKind.None || !m_run.ShouldAwait(site))
@@ -747,6 +754,146 @@ public sealed partial class TwinGenerator
 
                 if (spill && movable && plan.Count > 0)
                     m_spillEarlier.UnionWith(plan);
+            }
+        }
+
+        // M:N row 19, M9 (DESIGN-mn-row19-movability.md, owner ruling 3): a logical operator whose right operand holds a
+        // parking call that cannot move only because the operator may skip it is lowered to the branch Go means, through a
+        // fresh temporary of the operator's own type: `&&` as `T ᴛ = a; if (ᴛ) { ᴛ = f(); }`, `||` with `if (!ᴛ)`, then
+        // the statement with ᴛ in place of the operator. The left operand runs once, first; the right operand runs only
+        // when Go runs it; a store target is written once, after the right operand, so a right operand reading the target
+        // sees its old value (P3, MUST 2). The shapes: `return op;`, a single-variable local declaration, and a store into
+        // a plain local or parameter, each a direct member of a statement list (the caller is Statements). A chain lowers
+        // from the outside in. A user-defined operator, or a left operand declaring a variable, is not lowered.
+        private List<StatementSyntax>? LowerLogical(StatementSyntax statement)
+        {
+            ExpressionSyntax? expression = statement switch
+            {
+                ReturnStatementSyntax { Expression: { } value } => value,
+                LocalDeclarationStatementSyntax { IsConst: false, Declaration: { Type: not RefTypeSyntax, Variables: [{ Initializer.Value: { } value }] } } => value,
+                ExpressionStatementSyntax { Expression: AssignmentExpressionSyntax store } when store.IsKind(SyntaxKind.SimpleAssignmentExpression) &&
+                    m_model.GetSymbolInfo(store.Left).Symbol is ILocalSymbol { RefKind: RefKind.None } or IParameterSymbol { RefKind: RefKind.None } => store.Right,
+                _ => null
+            };
+
+            if (expression is null || Unparenthesized(expression) is not BinaryExpressionSyntax op || !Lowerable(op) ||
+                m_model.GetTypeInfo(op).Type is not { TypeKind: not TypeKind.Error } type)
+                return null;
+
+            string temp = "ᴛtwin" + ++m_temps;
+            List<StatementSyntax> lowered = [];
+
+            Lower(op, temp, type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat), lowered);
+
+            for (int i = 0; i < lowered.Count; i++)
+                lowered[i] = lowered[i].WithLeadingTrivia(i == 0 ? statement.GetLeadingTrivia() : TriviaList(Space));
+
+            lowered.Add(statement.ReplaceNode(expression, IdentifierName(temp).WithTriviaFrom(expression)).WithLeadingTrivia(Space));
+            return lowered;
+        }
+
+        private static ExpressionSyntax Unparenthesized(ExpressionSyntax expression)
+        {
+            while (expression is ParenthesizedExpressionSyntax parenthesized)
+                expression = parenthesized.Expression;
+
+            return expression;
+        }
+
+        // Whether the operator is lowered: the built-in logical operator, a left operand that declares no variable, and a
+        // parking call in the right operand that is blocked here and would move (or await in place) in the store the
+        // lowering writes for it, its earlier calls spilled by M1, or under an inner operator that is itself lowered.
+        private bool Lowerable(BinaryExpressionSyntax op)
+        {
+            if (!(op.IsKind(SyntaxKind.LogicalAndExpression) || op.IsKind(SyntaxKind.LogicalOrExpression)) ||
+                m_model.GetSymbolInfo(op).Symbol is IMethodSymbol { MethodKind: MethodKind.UserDefinedOperator } ||
+                op.Left.DescendantNodesAndSelf().Any(node => node is DeclarationExpressionSyntax or DeclarationPatternSyntax or RecursivePatternSyntax or VarPatternSyntax))
+                return false;
+
+            foreach (InvocationExpressionSyntax call in op.Right.DescendantNodesAndSelf(node => node is not AnonymousFunctionExpressionSyntax).OfType<InvocationExpressionSyntax>())
+            {
+                if (!m_run.Sites.TryGetValue(call, out Site? site) || site.Go != GoKind.None || !m_run.ShouldAwait(site) ||
+                    !RefLikeBefore(call, out bool movableHere) || movableHere)
+                    continue;
+
+                SyntaxNode? outerRoot = m_lowerRoot;
+                List<InvocationExpressionSyntax>? outerPlan = m_plan;
+
+                m_lowerRoot = op.Right;
+                m_plan = [];
+
+                try
+                {
+                    if (!RefLikeBefore(call, out bool movableLowered) || movableLowered)
+                        return true;
+
+                    m_plan = outerPlan;
+
+                    if (Unparenthesized(op.Right) is BinaryExpressionSyntax inner && Lowerable(inner))
+                        return true;
+                }
+                finally
+                {
+                    m_lowerRoot = outerRoot;
+                    m_plan = outerPlan;
+                }
+            }
+
+            return false;
+        }
+
+        // Writes the lowered operator into the temporary: its declaration (or, for an inner operator of a chain, a store)
+        // from the left operand, then the if that stores the right operand, as Statements writes a statement: each moved
+        // call on its own line followed by the live refs derived again, and the live refs again after an await in place.
+        private void Lower(BinaryExpressionSyntax op, string temp, string? type, List<StatementSyntax> output)
+        {
+            List<StatementSyntax> outerSpills = m_spills;
+
+            m_spills = [];
+            ExpressionSyntax left = (ExpressionSyntax)Visit(op.Left)!;
+            Flush(output);
+            m_spills = outerSpills;
+
+            output.Add(ParseStatement((type is null ? "" : type + " ") + temp + " = " + left.WithoutTrivia().ToFullString() + ";"));
+
+            SyntaxNode? outerRoot = m_lowerRoot;
+            List<StatementSyntax> body = [];
+
+            m_lowerRoot = op.Right;
+
+            if (Unparenthesized(op.Right) is BinaryExpressionSyntax inner && Lowerable(inner))
+            {
+                Lower(inner, temp, null, body);
+            }
+            else
+            {
+                PlanEarlierSpills(op.Right);
+
+                int before = m_awaits;
+
+                m_spills = [];
+                ExpressionSyntax right = (ExpressionSyntax)Visit(op.Right)!;
+                Flush(body);
+                m_spills = outerSpills;
+
+                body.Add(ParseStatement(temp + " = " + right.WithoutTrivia().ToFullString() + ";"));
+
+                if (m_awaits != before)
+                    body.AddRange(Live(TriviaList(Space)));
+            }
+
+            m_lowerRoot = outerRoot;
+
+            output.Add(ParseStatement("if (" + (op.IsKind(SyntaxKind.LogicalOrExpression) ? "!" : "") + temp + ") { " +
+                                      string.Join(" ", body.Select(statement => statement.WithoutTrivia().ToFullString())) + " }"));
+
+            void Flush(List<StatementSyntax> into)
+            {
+                foreach (StatementSyntax spill in m_spills)
+                {
+                    into.Add(spill);
+                    into.AddRange(Live(TriviaList(Space)));
+                }
             }
         }
 
@@ -1562,7 +1709,8 @@ public sealed partial class TwinGenerator
 
                 PlanEarlierSpills(statement);
 
-                StatementSyntax visited = (StatementSyntax)Visit(statement)!;
+                List<StatementSyntax>? lowered = LowerLogical(statement);
+                StatementSyntax visited = lowered is null ? (StatementSyntax)Visit(statement)! : lowered[^1];
                 List<StatementSyntax> spills = m_spills;
 
                 m_current = outer;
@@ -1604,6 +1752,10 @@ public sealed partial class TwinGenerator
 
                     visited = visited.WithLeadingTrivia(Space);
                 }
+
+                // M9: the lowered operator's temporary and its if stand before the statement that reads the temporary.
+                if (lowered is not null)
+                    result.AddRange(lowered.Take(lowered.Count - 1));
 
                 Register(statement);
 

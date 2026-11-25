@@ -243,6 +243,96 @@ public class TwinMovabilityTests
                 ref var a = ref heap<nint>(1, out var Ꮡa);
                 return showSpan("y"u8, spanOf(), Set(Ꮡa, 2, false));
             }
+
+            // M9: a logical operator whose right operand must await is lowered to an if, through a fresh temporary.
+            public static bool andReturn()
+            {
+                ref var a = ref heap<nint>(1, out var Ꮡa);
+                return a == 1 && show("r"u8, a, Set(Ꮡa, 2, false)) == 23;
+            }
+
+            public static bool orReturn()
+            {
+                ref var a = ref heap<nint>(1, out var Ꮡa);
+                return a != 1 || show("o"u8, a, Set(Ꮡa, 2, false)) == 23;
+            }
+
+            public static bool andLocal()
+            {
+                ref var a = ref heap<nint>(1, out var Ꮡa);
+                bool r = a == 1 && show("l"u8, a, Set(Ꮡa, 2, false)) == 23;
+                return r;
+            }
+
+            public static bool orStore()
+            {
+                ref var a = ref heap<nint>(1, out var Ꮡa);
+                bool r = false;
+                r = a != 1 || show("s"u8, a, Set(Ꮡa, 2, false)) == 23;
+                return r;
+            }
+
+            public static bool chainAnd()
+            {
+                ref var a = ref heap<nint>(1, out var Ꮡa);
+                return a == 1 && counter >= 0 && show("c"u8, a, Set(Ꮡa, 2, false)) == 23;
+            }
+
+            public static bool chainOrAnd()
+            {
+                ref var a = ref heap<nint>(1, out var Ꮡa);
+                return a != 1 || (counter >= 0 && show("d"u8, a, Set(Ꮡa, 2, false)) == 23);
+            }
+
+            // M9's near-misses: a right operand that awaits nothing, and one whose await stays in place, stay plain.
+            public static bool andNoAwait()
+            {
+                ref var a = ref heap<nint>(1, out var Ꮡa);
+                return a == 1 && show("n"u8, 1, 2) == 12;
+            }
+
+            public static bool andInPlace()
+            {
+                ref var a = ref heap<nint>(1, out var Ꮡa);
+                return a == 1 && Set(Ꮡa, 2, false) == 3;
+            }
+
+            // A right operand with a side effect, and one that panics, behind a left operand that short-circuits.
+            internal static nint boom() => throw new InvalidOperationException("boom");
+
+            public static nint andSideEffect()
+            {
+                ref var a = ref heap<nint>(1, out var Ꮡa);
+                bool r = a != 1 && show("e"u8, other(), Set(Ꮡa, 2, false)) == 3;
+                return counter * 10 + (r ? 1 : 0) + a * 100;
+            }
+
+            public static nint orPanic()
+            {
+                ref var a = ref heap<nint>(1, out var Ꮡa);
+                bool r = a == 1 || show("p"u8, boom(), Set(Ꮡa, 2, false)) == 3;
+                return (r ? 1 : 0) + a * 100;
+            }
+
+            // A store whose right operand reads the target: Go passes the OLD value.
+            internal static bool check(ReadOnlySpan<byte> format, bool old, nint b) => !old;
+
+            public static bool targetRead()
+            {
+                ref var a = ref heap<nint>(1, out var Ꮡa);
+                bool ok = false;
+                ok = a == 1 && check("k"u8, ok, Set(Ꮡa, 5, false));
+                return ok;
+            }
+
+            // The statement-list rule's near-miss for M9: a brace-less body is not lowered and stays blocked by name.
+            public static bool bracelessAnd()
+            {
+                ref var a = ref heap<nint>(1, out var Ꮡa);
+                if (counter != 99)
+                    return counter >= 0 && show("q"u8, 1, Set(Ꮡa, 2, false)) == 13;
+                return false;
+            }
         }
         """;
 
@@ -354,6 +444,46 @@ public class TwinMovabilityTests
         StringAssert.Contains(twins, "|spanArg|Set|ref-like-before|earlier:InvocationExpression", "a ref-like result cannot cross the await\n" + twins);
         Assert.AreEqual((nint)1023, Twin(assembly, "refArg"), "Set wrote 2, the ref parameter added 100 to a: 102*10+3");
         Assert.AreEqual((nint)23, Twin(assembly, "spanArg"));
+    }
+
+    [TestMethod]
+    public void ALogicalOperatorWhoseRightOperandMustAwaitIsLowered_M9()
+    {
+        (string twins, Assembly assembly) = Build();
+
+        foreach (string name in new[] { "andReturn", "orReturn", "andLocal", "orStore", "chainAnd", "chainOrAnd", "andSideEffect", "orPanic", "targetRead" })
+            Assert.IsFalse(twins.Contains("|" + name + "|Set|"), "no ref-blocked row names " + name + "\n" + twins);
+
+        StringAssert.Contains(twins, "bool ᴛtwin", "the operator's temporary takes the operator's own type");
+
+        foreach (string name in new[] { "andReturn", "orReturn", "andLocal", "orStore", "chainAnd", "chainOrAnd" })
+        {
+            Assert.AreEqual(true, Twin(assembly, name), name + ": gc reads a after the call, 2*10+3 == 23");
+            Assert.AreEqual(false, Plain(assembly, name), name + ": the plain method reads a first, C# order");
+        }
+    }
+
+    [TestMethod]
+    public void ALoweredRightOperandRunsOnlyWhenGoRunsIt_M9()
+    {
+        (string twins, Assembly assembly) = Build();
+
+        Assert.AreEqual((nint)100, Twin(assembly, "andSideEffect"), "the left operand is false: other() never runs, Set never writes");
+        Assert.AreEqual((nint)101, Twin(assembly, "orPanic"), "the left operand is true: boom() never runs");
+        Assert.AreEqual(true, Twin(assembly, "targetRead"), "the right operand reads the target's old value, false");
+    }
+
+    [TestMethod]
+    public void ARightOperandThatNeedNotMoveIsNotLowered_M9NearMiss()
+    {
+        (string twins, Assembly assembly) = Build();
+
+        StringAssert.Contains(twins, "andNoAwaitꞏtwin() => new global::go.golib.GoTask<bool>(andNoAwait());", "nothing awaits: the twin is the plain method\n" + twins);
+        StringAssert.Contains(twins, "return a == 1 && (await Setꞏtwin(Ꮡa, 2, false)) == 3;", "the await stays in place\n" + twins);
+        StringAssert.Contains(twins, "|bracelessAnd|Set|ref-like-before|", "a brace-less body stays blocked by name\n" + twins);
+        Assert.AreEqual(true, Twin(assembly, "andNoAwait"));
+        Assert.AreEqual(true, Twin(assembly, "andInPlace"));
+        Assert.AreEqual(true, Twin(assembly, "bracelessAnd"));
     }
 
     private static readonly CSharpParseOptions Options = new(LanguageVersion.CSharp13);

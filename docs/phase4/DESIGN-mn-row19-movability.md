@@ -204,6 +204,12 @@ Rows (COORD 2026-11-25 11:46Z), each red first and checked by value:
 
 Size: about 40 to 60 generator lines plus the rows. It clears gob's three class-6 rows.
 
+As coded, "cannot stay in place" is decided by running the existing walk twice for each parking call in the right
+operand: the call is ref-blocked where it stands, and it moves or awaits in place when the walk stops at the right
+operand (the store the lowering writes), with M1 planning its earlier calls, or it sits under an inner operator that is
+itself lowered. The near-miss whose right operand awaits nothing has no awaiting twin body at all; the one whose await
+stays in place keeps `a == 1 && (await …) == 3`.
+
 ### 3.3 The two gc probes, run 2026-11-25 (go1.26.11, linux/amd64)
 
 Run in scratch before this note was read. They go into `src/tools/mnspike2/MnGoOrder` with the seat's code.
