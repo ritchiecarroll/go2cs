@@ -144,6 +144,7 @@
     <None Include="$(MSBuildThisFileDirectory)chanDirectionCargo.go" />
     <None Include="$(MSBuildThisFileDirectory)childEnvGo2CSPath_test.go" />
     <None Include="$(MSBuildThisFileDirectory)classicPartialFlavours_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)cpuStartupFlavours_test.go" />
     <None Include="$(MSBuildThisFileDirectory)cliPaths_test.go" />
     <None Include="$(MSBuildThisFileDirectory)closedCarrier.go" />
     <None Include="$(MSBuildThisFileDirectory)closedCarrier_test.go" />
