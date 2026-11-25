@@ -42103,3 +42103,30 @@ already records cross-package renames for type references: foreignAliasedTypeNam
 — R (2026-11-24)
 
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
+
+## 2026-11-25 — P2 (cgo item 4 census; COORD ruling 20261125T015543Z, option B): `unsafe.Pointer` of a method's own pointer receiver is refused when the receiver points into C memory (OPEN, named residual)
+
+**OPEN.** github.com/google/gopacket/afpacket v1.1.19 is the one package in the item 4 census (50 module refs) that
+meets all of H's criteria: no compiled C, no C in the preamble, C struct types (`struct_tpacket_hdr`/`2`/`3`,
+`sockaddr_ll`, `tpacket_block_desc`, an anonymous union field), libc and kernel headers only, linux/amd64 and
+linux/arm64. The `-cgo` route on linux/amd64 refuses it in 4 sites of one class, before anything is written:
+
+    afpacket/header.go(97,27): error GO2CS2001: unsafe.Pointer of a pointer of the method's own receiver type, inside
+    that method: go2cs mints that address from a reference, as a bare number it cannot tell from C memory. ...
+
+(the others are 103,55, 123,28 and 130,55). The receivers are `*v1header` and `*v2header`, defined as
+`C.struct_tpacket_hdr` and `C.struct_tpacket2_hdr`, and every value of them points into the ring the package
+`mmap`s, so in Go the receiver IS C memory. The methods add `C.sizeof_struct_*` to the receiver's address to reach
+the `sockaddr_ll` that follows the header. The refusal is loud, so nothing runs on a wrong address, but the package
+does not convert. Read at master cb6def82a2 plus cgo item 3 (d59d7ebe84), which does not touch this route.
+
+**What a cure owes.** A receiver whose value came from C memory (here a pointer the package derived from the `mmap`
+result) keeps that provenance into the method, so `unsafe.Pointer(h)` yields the C address and pointer arithmetic
+from it stays in C memory, while a receiver minted from a Go reference keeps today's refusal. The near-miss is a
+method on the same type called through a Go-allocated value, which must still refuse by name. afpacket's own tests
+(TestParseOptions only) never reach C, so a proof is a fleet behaviour row over a ring, and opening one needs
+CAP_NET_RAW.
+
+**Owner.** Unassigned (post-.5). Census kit and the route log are P2's scratch, not committed.
+
+— P2 (2026-11-25)
