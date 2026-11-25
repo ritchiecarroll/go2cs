@@ -340,7 +340,7 @@ try {
     $text = ''
     if (Test-Path -LiteralPath $golib) { $text = [System.IO.File]::ReadAllText($golib) }
     $b3 = $text.Contains('B3') -and $text.Contains('batch 231')
-    $wallE = $text.Contains('Wall E') -and $text.Contains('2026-11-20T13:50:29Z')
+    $wallE = $text.Contains('variadic retype') -and $text.Contains('2026-11-20T13:50:29Z')
     Check 'golib''s suppression file carries at most the 12 B3 entries or the 38 wall E entries, by the break it cites' (
         $entries.Count -eq 0 -or ($b3 -and $entries.Count -le 12) -or ($wallE -and $entries.Count -le 38)) "$($entries.Count) entries; cites B3 $b3, wall E $wallE"
     Check 'every entry names golib''s lib/ asset' (@($entries | Where-Object { $_.Asset -cne 'lib/net10.0/golib.dll' }).Count -eq 0) 'an entry names another asset'
