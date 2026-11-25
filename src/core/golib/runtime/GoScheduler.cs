@@ -616,20 +616,25 @@ public static class GoScheduler
     /// <summary>The scheduler's counters, one line.</summary>
     public static string Reading()
     {
+        // The block counters are read BEFORE the thread sample: the sample is slow on some hosts (linux reads /proc for
+        // every thread), and a reading taken inside a step must not count what its own sampling caused (N5's fixture).
+        long handoffs = Interlocked.Read(ref s_handoffs), injections = Interlocked.Read(ref s_injections);
+        long retakes = Interlocked.Read(ref s_retakes), sensed = Interlocked.Read(ref s_sensed);
+
         SampleThreads();
 
         return $"READING go-scheduler procs={s_procs} peak-carriers={Volatile.Read(ref s_peakCarriers)}" +
                $" carriers-started={Interlocked.Read(ref s_carriersStarted)} peak-os-threads={Volatile.Read(ref s_peakThreads)}" +
                $" steps={Interlocked.Read(ref s_steps)} parks={Interlocked.Read(ref s_parks)}" +
                $" migrations={Interlocked.Read(ref s_migrations)} migrated-goroutines={Interlocked.Read(ref s_migrated)}" +
-               $" handoffs={Interlocked.Read(ref s_handoffs)} thread-blocks={Interlocked.Read(ref s_threadBlocks)}" +
-               $" injections={Interlocked.Read(ref s_injections)}" +
+               $" handoffs={handoffs} thread-blocks={Interlocked.Read(ref s_threadBlocks)}" +
+               $" injections={injections}" +
                $" run-next-steps={Interlocked.Read(ref s_runNextSteps)} run-next-steals={Interlocked.Read(ref s_runNextSteals)}" +
                $" steps-over-10ms={Interlocked.Read(ref s_longSteps)}" +
                $" max-step-ms={Interlocked.Read(ref s_maxStepTicks) * 1000 / Stopwatch.Frequency}" +
                $" carrier-start-failures={Interlocked.Read(ref s_carrierStartFailures)}" +
                $" carrier-stack-mb={Volatile.Read(ref s_carrierStackSize) / (1024 * 1024)}" +
-               $" retakes={Interlocked.Read(ref s_retakes)} sensed={Interlocked.Read(ref s_sensed)}" +
+               $" retakes={retakes} sensed={sensed}" +
                $" off-carrier-resumes={Interlocked.Read(ref s_offCarrierResumes)}" +
                $" nested-resumes={Interlocked.Read(ref s_nestedResumes)}" +
                $" pins={Interlocked.Read(ref s_pins)} pinned-wakes={Interlocked.Read(ref s_pinnedWakes)}" +
