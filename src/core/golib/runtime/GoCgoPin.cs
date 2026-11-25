@@ -65,6 +65,45 @@ namespace go.golib;
     }
 }
 
+/// <summary>
+/// One stack copy a cgo wrapper handed C the address of (a mirror of a whole Go struct or one Go scalar, or an
+/// out-parameter's word), with the Go box it stands for (cgo Phase 3, .5 cgo items 1(a) and 1(b): the C-return routes,
+/// DESIGN-cgo-phase3-marshaling 18.12.3). A word C returns (a pointer result, an out-parameter's word, a pointer member
+/// of a mirror) that equals the copy's own address IS that box, as it is under Go (<c>pick(&amp;a, &amp;out)</c> leaves
+/// <c>out == &amp;a</c>); a word anywhere else inside the copy names a stack slot that dies with the call, and is
+/// refused by name. A default value (no address) stands for an argument that was not copied: it matches nothing.
+/// </summary>
+[EditorBrowsable(EditorBrowsableState.Never)] public readonly struct GoCgoStackCopy
+{
+    private readonly nuint m_start;
+    private readonly nuint m_size;
+    private readonly object? m_box;
+
+    /// <summary>
+    /// A stack copy of <paramref name="size"/> bytes at <paramref name="start"/>, standing for <paramref name="box"/>.
+    /// </summary>
+    public unsafe GoCgoStackCopy(void* start, nuint size, object? box)
+    {
+        m_start = (nuint)start;
+        m_size = size;
+        m_box = box;
+    }
+
+    // Whether the copy was made (an argument mirrored for this call).
+    internal bool IsCopy => m_start != 0;
+
+    // The box this copy stands for, when the address is the copy's own and the box is a pointer of C's pointee type.
+    internal bool TryIdentity<U>(nuint address, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out ж<U>? box)
+    {
+        box = address == m_start ? m_box as ж<U> : null;
+        return box is not null;
+    }
+
+    // Whether an address lies in the copy: [its first byte, one past its end]. One past the end is included for the
+    // pin's reason (GoCgoPin.Holds): C's cursor past a copy is a stack address, not C memory.
+    internal bool Holds(nuint address) => m_start != 0 && address >= m_start && address <= m_start + m_size;
+}
+
 // The pin a box owns, read without the pointee type (the cgo door sees the box as an object). Implemented by ж<T>
 // (ж.CgoPin.cs): the address-take's pin-only hold, or the pin a native box took over managed storage.
 internal interface IManagedPinHolder

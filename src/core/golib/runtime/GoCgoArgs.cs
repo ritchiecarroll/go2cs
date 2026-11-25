@@ -223,6 +223,35 @@ namespace go.golib;
         return new NativeBox<U>(address);
     }
 
+    /// <summary>
+    /// <see cref="PointerMemberBack{U}(nuint, ж{U}, nuint)"/>, asked also against the stack copies the wrapper handed C
+    /// (cgo Phase 3, .5 cgo item 1(b): DESIGN-cgo-phase3-marshaling 18.12.3): an address that is a copy's own, of C's
+    /// pointee type, is the box that copy stands for (Go's <c>out == &amp;a</c>); any other address inside a copy names a
+    /// stack slot that dies with the call, and is refused by name, never minted as C memory.
+    /// </summary>
+    public static ж<U>? PointerMemberBack<U>(nuint address, ж<U>? original, nuint copiedIn, ReadOnlySpan<GoCgoStackCopy> copies, string function)
+    {
+        if (address == 0)
+            return null;
+
+        if (address == copiedIn)
+            return original;
+
+        foreach (ref readonly GoCgoStackCopy copy in copies)
+        {
+            if (copy.TryIdentity(address, out ж<U>? box))
+                return box;
+        }
+
+        foreach (ref readonly GoCgoStackCopy copy in copies)
+        {
+            if (copy.Holds(address))
+                throw RuntimeErrorPanic.ErrorString($"cgo: C.{function} returned an address inside the stack copy of a Go argument that is not that argument as a pointer to {typeof(U).Name}, and go2cs cannot represent a pointer into that copy, so it refuses the result");
+        }
+
+        return new NativeBox<U>(address);
+    }
+
     // ---- cgo Phase 3, increment 3.1 (docs/phase4/DESIGN-cgo-phase3-marshaling.md §16): a void pointer, and cmd/cgo's
     // own helpers. Increment 3.1 hands C no Go memory. Every pointer into Go memory that reaches one of these doors is
     // refused by name, before the call, and each refusal names the increment that admits it.
