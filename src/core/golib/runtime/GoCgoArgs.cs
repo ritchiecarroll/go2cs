@@ -425,6 +425,12 @@ namespace go.golib;
         if (ManagedPointerTokens.IsTaggedToken(number))
             throw GoPointerToUnpinnedGoPointer();
 
+        // A NUMBER of Go memory (design 20.4 S4): `unsafe.Pointer(uintptr(unsafe.Pointer(&x)))`, in one expression or
+        // through a variable, with or without an offset. It crosses as the pin of the storage it names, found through
+        // the record its mint left, never trusted as an address.
+        if (PinNumber(number, function) is { } numberPin)
+            return numberPin;
+
         string? what = GoMemory(pointer, out nuint address);
 
         if (what is not null)
@@ -450,6 +456,56 @@ namespace go.golib;
         }
 
         return PinVoidPointer(pointer, function);
+    }
+
+    // A number of Go memory handed to a void pointer (design 20.4 S4, with P3's conditions and COORD's ruling on Q3: both
+    // forms). Null when the number names no Go memory golib knows, so the door goes on to its other tests (C memory crosses
+    // as its number). The number is never trusted as an address: the record its mint left names the storage, the storage
+    // is pinned for the call as any void pointer's is, and the offset is bounded by that storage.
+    // - An exact address the registry resolves (`uintptr(unsafe.Pointer(&x))`): its box's storage, at the box's slot.
+    // - An interior address inside a pin golib holds (`... + off`): that pin's storage, at the offset, inside its extent.
+    // - An entry whose box has been collected: refused by name.
+    // A number past a pin's end crosses as its number and pins nothing, as the pin-extent index rules (end-exclusive,
+    // docs/phase4/DESIGN-cgo-pin-extents.md): one past the end is the end cursor of a begin/end pair, whose begin pins the
+    // storage. Residue (stated in the design, 20.4 S4): a number further past, or one whose collected entry the sweep has
+    // already removed, names nothing golib can see and crosses as C memory, as a wild pointer does under Go; and a token id
+    // reused after its box died can name another live box (ids wrap at 2^29), remote and no worse than Go's use-after-free.
+    private static unsafe GoCgoPin? PinNumber(nuint number, string function)
+    {
+        if (ManagedPointerTokens.HoldsCollectedEntry(number))
+            throw VoidRefused(function, "a number naming a Go value that has been collected");
+
+        if (ManagedPointerTokens.Resolve(number) is { } registered && registered is not INativeRooted { IsGenuinelyNativeRoot: true })
+        {
+            if (!TryPinTarget(registered, number, out Array? root, out nint offset))
+                throw VoidRefused(function, "a number naming Go memory whose storage go2cs cannot hold still for the call");
+
+            RequireCrossable(root);
+            return new GoCgoPin(root, offset);
+        }
+
+        if (PinExtents.Find(number) is { } held && held.PinnedTarget is Array heldRoot && held.TryExtent(out nuint start, out nuint end) && number >= start && number < end)
+        {
+            RequireCrossable(heldRoot);
+            return new GoCgoPin(heldRoot, (nint)(number - start));
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// What C receives for a <c>uintptr_t</c> or <c>intptr_t</c> parameter (design 20.4 S4, P3's read): the integer as it
+    /// is, unless it is a TOKEN, the number go2cs gives <c>uintptr(unsafe.Pointer(p))</c> for a Go value that has no address
+    /// (it holds Go references). Go would hand C that value's address; a token names no memory, so C would receive silent
+    /// garbage, and the call is refused by name instead. Any other integer, a real address of Go memory included, crosses:
+    /// an integer is what Go lets C see.
+    /// </summary>
+    public static ulong Word(ulong value, string function)
+    {
+        if (ManagedPointerTokens.IsTaggedToken((nuint)value))
+            throw RuntimeErrorPanic.ErrorString($"cgo: the pointer-sized integer handed to C.{function} is go2cs's token for a Go value that has no address (it holds Go references), not that value's address; C would receive a number that names no memory, so go2cs refuses the call");
+
+        return value;
     }
 
     // The pin for a pointer that carries its box. The box decides (M2): its storage, found through the derivations it
