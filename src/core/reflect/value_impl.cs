@@ -2696,6 +2696,15 @@ internal static @string valueMethodName(string method) {
     // `reflect.Value.` prefix from the FIRST PARAMETER'S TYPE, so `Append(ΔValue s, ...)` -- a package
     // function the emission gives a ΔValue first parameter -- matched, and it manufactured
     // "reflect.Value.Append" where Go says "unknown method".
+    //
+    // A Go method's body is the C# method `<name>⁔` (the converter's glyph suffix; U+2054 is connector
+    // punctuation, which no Go identifier can spell), and its extension forwarder `<name>` is a
+    // [StackTraceHidden] one-liner, so [CallerMemberName] captures the BODY's name. The Go method is the name
+    // without the suffix, as golib's frame naming reads it (GoSyntheticPC): reflect's TestValuePanic printed
+    // "call of reflect.Value.Recv⁔ on string Value".
+    if (method.Length > 1 && method[^1] == '\u2054')
+        method = method[..^1];
+
     return method.Length != 0 && char.IsUpper(method[0])
         ? (@string)("reflect.Value." + method)
         : "unknown method"u8;

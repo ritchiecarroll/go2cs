@@ -369,6 +369,18 @@ public static partial class GoReflect
             if (dstType == nilFunc.Type)
                 return true;
 
+            // Two func types of identical signature are distinct delegates, since every defined func type is
+            // its own: a named type and its unnamed form are assignable both ways (one side unnamed), and any
+            // two convert. The nil crosses as the live-delegate arm in TryConvertTo carries a value, under the
+            // same refusal: two different NAMED func types stay unassignable, as in Go. reflect's TestConvert:
+            // `func()(nil)` converted to `MyFunc`.
+            if (typeof(Delegate).IsAssignableFrom(dstType) &&
+                !RefusedByGoAssignability(relation, nilFunc.Type, dstType) &&
+                haveIdenticalDelegateSignature(nilFunc.Type, dstType))
+            {
+                return true;
+            }
+
             if (!dstType.IsInterface)
                 return false;
 
