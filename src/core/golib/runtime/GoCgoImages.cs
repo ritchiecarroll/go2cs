@@ -122,6 +122,9 @@ namespace go.golib;
         return [.. keys];
     }
 
+    // The value is a converted Go struct (or an array<T> of one) whose fields the registry keeps, as NativeStructMarshal's
+    // encode of the same value already relies on.
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2075", Justification = GoTypeRegistry.RegisteredTypeJustification)]
     private static void AddBackings(List<object> keys, object? value)
     {
         if (value is null)
