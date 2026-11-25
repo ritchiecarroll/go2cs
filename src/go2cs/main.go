@@ -312,6 +312,7 @@ func main() {
 	allowStaleConverterCmd := commandLine.Bool("allow-stale-converter", false, clihelp.Summary("allow-stale-converter"))
 	dualRecvCmd := commandLine.Bool("dual-recv", false, clihelp.Summary("dual-recv"))
 	dualRecvParamsCmd := commandLine.Bool("dual-recv-params", false, clihelp.Summary("dual-recv-params"))
+	stackAppendCmd := commandLine.String("stack-append", "auto", clihelp.Summary("stack-append"))
 	probeCacheCmd := commandLine.String("probe-cache", "", clihelp.Summary("probe-cache"))
 
 	// The other direction of clihelp.Summary's check: an option the table describes that the flag set does not define
@@ -566,8 +567,15 @@ func main() {
 
 	probeCacheFlag = strings.TrimSpace(*probeCacheCmd)
 
+	stackAppend, stackAppendErr := parseStackAppendMode(*stackAppendCmd)
+
+	if stackAppendErr != nil {
+		log.Fatalln(stackAppendErr)
+	}
+
 	options := Options{
 		warnCodes:           warnCodes,
+		stackAppend:         stackAppend,
 		inlineArrays:        inlineArrays,
 		goRoot:              *goRootCmd,
 		goPath:              *goPathCmd,

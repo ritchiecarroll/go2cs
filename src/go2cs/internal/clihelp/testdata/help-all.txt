@@ -23,6 +23,7 @@ Advanced options: converting:
   -convert-timeout <duration>  With -stdlib: the cap on one package's conversion
   -allow-stale-converter       With -stdlib or -tests: run even when this binary is older than its
                                sources
+  -stack-append <mode>         Emit Go's stack-append buffer: on, off or auto
   -probe-cache <dir>           The Go build cache the escape probe uses (env GO2CS_PROBE_CACHE)
 
 Advanced options: testing:

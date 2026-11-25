@@ -6,8 +6,6 @@ using time = time_package;
 partial class main_package {
 
 internal static nint run(nint n) {
-    var bufᴷ = new stackAppend<byte>();
-
     nint total = 0;
     var buf = new slice<byte>(0, 32);
 
@@ -15,7 +13,7 @@ internal static nint run(nint n) {
         buf = buf[..0];
         nint v = i;
         if (v == 0) {
-            buf = append(bufᴷ, buf, (byte)'0');
+            buf = append(buf, (byte)'0');
         }
         while (v > 0) {
             buf = append(buf, (byte)('0' + v % 10));

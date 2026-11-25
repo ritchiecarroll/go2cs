@@ -18,8 +18,6 @@ internal static rune retRune() { return 'Z'; }
 internal static byte retByte() { return (byte)'z'; }
 
 internal static partial void main() {
-    var bsᴷ = new stackAppend<byte>();
-
     fmt.Println((rune)'a');
     fmt.Printf("%T %v\n"u8, (rune)'a', (rune)'a');
     any anyv = (rune)'w';
@@ -44,7 +42,7 @@ internal static partial void main() {
     fmt.Println(isByte((byte)'x'), retByte());
     var bs = slice<byte>([(byte)'h', (byte)'i']);
     bs[0] = (byte)'H';
-    bs = append(bsᴷ, bs, (byte)'!');
+    bs = append(bs, (byte)'!');
     fmt.Println((@string)bs);
     int8 i8 = (int8)'A';
     int16 i16 = (int16)'B';

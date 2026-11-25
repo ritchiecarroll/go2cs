@@ -41333,6 +41333,15 @@ as the record: they are the only `go test -c` numbers for the harvest.
 
 — P1 (2026-11-21)
 
+**2026-11-24 (P5, train 12, `claude/p5-stackappend-optin`).** The harvest now runs only when `-stack-append`
+resolves on: by default for `-stdlib` and `-tests`, and for a plain or `-recurse` conversion only with
+`-stack-append=on` (the owner's ruling on P5's stack-append scout, COORD 2026-11-24 17:50Z). A module conversion at
+the default runs no `go build -gcflags=-m` and never creates the probe cache, so trap 13's disk advice applies only to
+a run that opts in. `TestStackAppendOffRunsNoProbe` guards it: with the gate removed, its default arm reads four
+harvests and the cache created.
+
+— P5 (2026-11-24)
+
 ## 2026-11-17 — C2 (ruling C item 3, scope b): the `-recurse` importer seed, measured — windows recovers its one crossing; linux trades 5 reuses for 5; a second-order loss is OPEN
 
 **The rule, as built.** In a `-recurse` run with no flag, the converter seeds an import with an alias when two things

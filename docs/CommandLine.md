@@ -172,6 +172,7 @@ Options that change a default, tune a run, or drive a maintainer's instrument. `
 | [`-module-safe-tag`](#option-module-safe-tag) | Converting | With -recurse: apply the safe, purego and noasm build tags (default on). |
 | [`-convert-timeout <duration>`](#option-convert-timeout) | Converting | With -stdlib: the cap on one package's conversion. |
 | [`-allow-stale-converter`](#option-allow-stale-converter) | Converting | With -stdlib or -tests: run even when this binary is older than its sources. |
+| [`-stack-append <mode>`](#option-stack-append) | Converting | Emit Go's stack-append buffer: on, off or auto. |
 | [`-probe-cache <dir>`](#option-probe-cache) | Converting | The Go build cache the escape probe uses (env GO2CS_PROBE_CACHE). |
 | [`-test-timeout <duration>`](#option-test-timeout) | Testing | With -tests: the package deadline for build, run and compare. |
 | [`-test-deadline <duration>`](#option-test-deadline) | Testing | With -tests: the per-test deadline for the converted host (0 disables it). |
@@ -237,11 +238,17 @@ Advanced option, converting.
 
 With `-stdlib` or `-tests`: proceed even when this binary is older than the converter sources beside it. Both refuse otherwise, because a stale binary emits the previous converter's C# and still exits 0. It is meant for one deliberate case, a comparison against a preserved binary.
 
+#### <a id="option-stack-append"></a>`-stack-append <mode>`
+
+Advanced option, converting.
+
+`on`, `off` or `auto`: whether the conversion reproduces Go's stack-append backing store. Since Go 1.25 an `append` to a slice that does not escape first fills a 32-byte buffer, which `cap()` after the first appends and `testing.AllocsPerRun` can observe. `on` emits that buffer (`var xᴷ = new stackAppend<T>();` and `x = append(xᴷ, x, v);`), reading which append sites qualify from `go build -gcflags=-m` once per package and target (see `-probe-cache`). `off` emits plain `x = append(x, v)` and runs no probe build. `auto`, the default, is `on` for `-stdlib` and `-tests`, whose converted tests compare against Go's own, and `off` for a plain or `-recurse` conversion, a single standard-library package converted without `-stdlib` included (use `-stdlib <package>` for the standard library's emission). The buffer is a heap array in golib, so `on` changes what a program can observe, not its speed or its allocations. See [the stack-append buffer](ConversionStrategies-Reference/slices-and-arrays.md#a-non-escaping-append-can-take-gos-32-byte-stack-buffer).
+
 #### <a id="option-probe-cache"></a>`-probe-cache <dir>`
 
 Advanced option, converting.
 
-The Go build cache (`GOCACHE`) of the `go build` and `go test -c` runs that read the Go compiler's escape decisions for each converted package. Default: `go2cs/probe-cache` under the user cache directory (`~/.cache` on Linux, `%LocalAppData%` on Windows, `~/Library/Caches` on macOS), or the `GO2CS_PROBE_CACHE` environment variable. It is kept apart from your own `GOCACHE` because those runs build the standard library for four targets with flags no ordinary build uses. Go removes entries unused for five days, and deleting the directory is always safe: the next conversion rebuilds what it needs. See [Known issues](KnownIssues.md#a-conversion-keeps-a-go-build-cache-of-its-own).
+The Go build cache (`GOCACHE`) of the `go build` and `go test -c` runs that read the Go compiler's escape decisions for each converted package. They run only when `-stack-append` resolves `on`: for `-stdlib` and `-tests` by default, and for any other conversion only with `-stack-append=on`; with it off the cache is never created. Default: `go2cs/probe-cache` under the user cache directory (`~/.cache` on Linux, `%LocalAppData%` on Windows, `~/Library/Caches` on macOS), or the `GO2CS_PROBE_CACHE` environment variable. It is kept apart from your own `GOCACHE` because those runs build the standard library for four targets with flags no ordinary build uses. Go removes entries unused for five days, and deleting the directory is always safe: the next conversion rebuilds what it needs. See [Known issues](KnownIssues.md#a-conversion-keeps-a-go-build-cache-of-its-own).
 
 #### <a id="option-test-timeout"></a>`-test-timeout <duration>`
 

@@ -95,6 +95,8 @@ func TestPackageInputDigestMovesWithEachInput(t *testing.T) {
 	otherPlatform, otherOption := base, base
 	otherPlatform.targetPlatform = "windows/amd64"
 	otherOption.preferVarDecl = false
+	otherStackAppend := base
+	otherStackAppend.stackAppend = stackAppendOn
 
 	for _, c := range []struct {
 		name string
@@ -105,6 +107,7 @@ func TestPackageInputDigestMovesWithEachInput(t *testing.T) {
 		{"a hand-owned companion", digest(t, sources, "// hand-owned\n", base, "rev-1")},
 		{"the target platform", digest(t, sources, "", otherPlatform, "rev-1")},
 		{"a conversion option", digest(t, sources, "", otherOption, "rev-1")},
+		{"the stack-append mode", digest(t, sources, "", otherStackAppend, "rev-1")},
 		{"the converter revision", digest(t, sources, "", base, "rev-2")},
 	} {
 		if c.got == reference {
@@ -119,6 +122,14 @@ func TestPackageInputDigestMovesWithEachInput(t *testing.T) {
 
 	if got := digest(t, sources, "", withComments, "rev-1"); got != reference {
 		t.Errorf("-comments moved the digest (%s, want %s): a -tests proof could never match a -recurse=nuget root", got, reference)
+	}
+
+	// The mode enters as it RESOLVES: auto under -tests is on, so it digests as -stack-append=on does.
+	autoTests := base
+	autoTests.convertTests = true
+
+	if got, want := digest(t, sources, "", autoTests, "rev-1"), digest(t, sources, "", otherStackAppend, "rev-1"); got != want {
+		t.Errorf("auto under -tests digests %s, -stack-append=on %s: the digest must read the resolved mode", got, want)
 	}
 }
 

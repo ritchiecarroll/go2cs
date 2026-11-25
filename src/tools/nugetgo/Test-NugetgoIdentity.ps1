@@ -273,15 +273,15 @@ try {
     Check 'a converted file without the notice is named' ($missing.Count -eq 1 -and $missing[0] -eq (Join-Path $lib 'b.cs')) "missing $($missing -join ', ')"
 }
 finally { Remove-Item -Recurse -Force -LiteralPath $provenanceRoot -ErrorAction SilentlyContinue }
-Check 'nugetgo-pack.ps1 converts each flavor with -provenance and refuses an unmarked -RecurseRoot when the license asks for the notice' (
+Check 'nugetgo-pack.ps1 converts each flavor with -stack-append=on (the validated emission) and -provenance, and refuses an unmarked -RecurseRoot when the license asks for the notice' (
     $pack.Contains('$provenance = Test-NugetgoProvenanceLicense $LicenseSpdx') -and
     $pack.Contains('$unmarked = @(Find-NugetgoFilesWithoutProvenance -ProjectFiles $libraries.ToArray())') -and
     $pack.Contains('convert it again with go2cs -recurse=nuget -provenance') -and
-    $pack.Contains('& $converter -recurse=nuget @provenanceArgs -platforms')) 'the pack script does not wire the notice'
+    $pack.Contains('& $converter -recurse=nuget -stack-append=on @provenanceArgs -platforms')) 'the pack script does not wire the notice'
 $repack = [System.IO.File]::ReadAllText((Join-Path $PSScriptRoot 'Invoke-NugetgoRepack.ps1'))
-Check 'Invoke-NugetgoRepack.ps1 converts PR with -provenance when the row''s license asks for the notice' (
+Check 'Invoke-NugetgoRepack.ps1 converts PR with -stack-append=on, and with -provenance when the row''s license asks for the notice' (
     $repack.Contains('$provenanceArgs = @(if (Test-NugetgoProvenanceLicense $row.LicenseSpdx) { ''-provenance'' })') -and
-    $repack.Contains('(@(''-recurse=nuget'') + $provenanceArgs + @(''-platforms''')) 'the repack driver does not pass -provenance to step 1.4'
+    $repack.Contains('(@(''-recurse=nuget'', ''-stack-append=on'') + $provenanceArgs + @(''-platforms''')) 'the repack driver does not pass -provenance to step 1.4'
 
 # The driver passes -provenance only for a module it has a row for. A published module with no row is rebuilt by
 # hand, and an Apache-2.0 one then reaches the pack without the notice: mousetrap, Apache-2.0 and without Go tests,
