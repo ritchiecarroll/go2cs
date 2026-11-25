@@ -1197,6 +1197,104 @@ Guarded by `StringByteUnionConstraint` — `trimHead`/`headSum` (assigned back, 
 ## Spreading a union-constrained value
 A union-constrained value may also be **spread** into a variadic — encoding/json's `appendString[Bytes []byte | string]` does `append(dst, src[lo:hi]...)` (and the open-ended `append(dst, src[lo:]...)`). The sub-slice is typed as the type parameter again (above), so the spread renders as `src[lo..hi].ꓸꓸꓸ`. A bare type-parameter value has no members of its own, so the spread `ꓸꓸꓸ` (which yields the `Span<byte>` the `append<T>(slice<T>, params Span<T>)` overload binds) must be declared on the **constraint interface** — a member access on a constrained type-parameter value resolves through its constraint. `IByteSeq<T>` therefore exposes `Span<T> ꓸꓸꓸ { get; }`; both implementers already satisfy it (`slice<T>` as `Span<T>`, `@string` as `Span<byte>`), so the interface member is implicit and adds no cast (CS1061 otherwise — the type parameter `Bytes` had no `ꓸꓸꓸ`). (Guarded by the `StringByteUnionConstraint` extension `appendRun` — a bounded and an open-ended sub-slice of the union value spread into `append`, both instantiations value-compared vs Go.)
 
+## An unnamed array type argument carries its length through an array-dims companion
+
+C# spells every Go `[N]E` as the one `array<E>`, so a type argument alone cannot say how long an
+UNNAMED array is: the length is instance state. Most code never needs it, because a value carries it.
+A generic that builds a type DESCRIPTOR from its type argument alone does need it — `unique.Make`
+calls `abi.TypeFor[T]()` and reads the descriptor's size first, and a `[2]string` descriptor with no
+length has size zero, which sends every pair of values to Make's zero-size arm and gives them one
+handle. The converter therefore adds a **companion type parameter** `Tᴀ : IGoArrayDims` that carries
+the dims from the call site to the type-only descriptor.
+
+Go:
+```go
+func wrapMake[T comparable](v T) unique.Handle[T] {
+	return unique.Make(v)
+}
+
+ab := unique.Make([2]string{"a", "b"})
+abc := unique.Make([3]string{"a", "b", "c"})
+```
+C# emitted today. A call site whose type argument is an unnamed array supplies a **phantom** class
+named for its dims (`ᴀ2` for `[2]`, `ᴀ2_3` for `[2][3]`), declared once per package side beside the
+first function that uses it; an unexported generic whose type parameter reaches the descriptor carries
+the companion and forwards it:
+<!-- source: src/tests/Behavioral/UnnamedArrayTypeArgDescriptor/main.cs.target:12-18 -->
+```csharp
+internal static unique.Handle<T> wrapMake<T, Tᴀ>(T v)
+    where Tᴀ : IGoArrayDims
+{
+    return unique.Make<T, Tᴀ>(v);
+}
+
+private sealed class ᴀ2 : IGoArrayDims { public static nint[] Dims { get; } = [2]; }
+```
+<!-- source: src/tests/Behavioral/UnnamedArrayTypeArgDescriptor/main.cs.target:28-31 -->
+```csharp
+    var ab = unique.Make<array<@string>, ᴀ2>(array<@string>(["a", "b"]));
+    var ac = unique.Make<array<@string>, ᴀ2>(array<@string>(["a", "c"]));
+    var ab2 = unique.Make<array<@string>, ᴀ2>(array<@string>(["a", "b"]));
+    var abc = unique.Make<array<@string>, ᴀ3>(array<@string>(["a", "b", "c"]));
+```
+
+**An EXPORTED generic keeps its Go signature and gains an overload.** A caller in another assembly
+may not know about the companion, so an exported function that needs it emits two methods: the
+arity-1 method Go declares, now a one-line forwarder passing golib's `ᴀnone` (no dims), and the
+arity-2 method carrying the body, hidden from IntelliSense:
+<!-- source: src/core/unique/handle.cs:35-40 -->
+```csharp
+public static Handle<T> Make<T>(T value) => Make<T, ᴀnone>(value);
+[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static Handle<T> Make<T, Tᴀ>(T value)
+    where Tᴀ : IGoArrayDims
+{
+    // Find the map for type T.
+    var typ = abi.TypeFor<T, Tᴀ>();
+```
+The package publishes which functions have the overload, and at which type-parameter index, as an
+assembly record in its `package_info.cs`; a consumer reads the record and calls the arity-2 method only
+when it has an unnamed array type argument (or a companion of its own to forward), and the arity-1
+method otherwise:
+<!-- source: src/core/unique/package_info.cs:34 -->
+```csharp
+[assembly: GoArrayDimsCompanion("Make", 0)]
+```
+<!-- source: src/tests/Behavioral/UnnamedArrayTypeArgDescriptor/main.cs.target:66-67 -->
+```csharp
+    fmt.Println("foreign Same:", wrap.Same<array<@string>, ᴀ2>(array<@string>(["k", "l"]), array<@string>(["k", "l"])), wrap.Same<array<@string>, ᴀ2>(array<@string>(["k", "l"]), array<@string>(["k", "m"])));
+    fmt.Println("foreign non-array:", wrap.Same(strˢ, strˢ), wrap.Same<nint>(1, 2));
+```
+(`strˢ` is a hoisted string literal: `private static readonly @string strˢ = "str"u8;`.)
+
+**Why.** The need starts at a **sink** — a function that builds a descriptor from a type argument
+alone. The hand-owned sink is `abi.TypeFor<T, Tᴀ>()` (`internal/abi/type_impl.cs`), which answers the
+descriptor a live `[N]E` value answers: the same box for equal dims, whichever assembly declared the
+phantom, so `unique.Make` keys one map per array type. The need propagates backwards through every
+generic whose type parameter reaches a sink, inside the package and across packages through the
+records. Identity is the property: two equal `[2]string` values from two assemblies must reach one
+handle. A pointer to an array, a struct holding an array and a DEFINED array type need no companion —
+their own C# types carry the length (`pair` above is `partial struct pair /*[2]@string*/`).
+
+**Limits.** Scope is `abi.TypeFor` and its consumers (`unique.Make`); `reflect.TypeFor` is not a sink
+yet. An exported function whose body the converter does not emit (a hand-owned or manually converted
+function) never gets an overload, and a function value of an exported generic with no unnamed array
+argument binds the arity-1 method. A `-tests` conversion takes production's records for production's
+exported functions, so a test file cannot change which production functions are overloaded. Dims for a
+non-array type argument panic by name (`abi.TypeFor: array dims [2] for …, which is not an array`).
+
+<!-- Design: docs/phase4/DESIGN-array-type-argument-length.md rev 2 (approved by P3, rulings by COORD:
+overload over a zero-value shape; scope abi.TypeFor + unique.Make; arity-2 method tier 2,
+EditorBrowsable(Never), in the ApiCompat baseline; the abi overload tier 3). Cures unique's
+TestMakeAllocs half 2 (the zero-size handle). -->
+
+Guarded by: `UnnamedArrayTypeArgDescriptor` (direct, method value, local forwarder, foreign
+`Wrap`/`Same`, pointer, struct and defined-array controls, output-compared against `go run`);
+`GolibTests.AbiArrayDimsCompanionTests` (descriptor identity against a live value, a different length
+is a different box, equal dims from two phantoms reach one box, `ᴀnone` moves nothing, the non-array
+refusal, `unique.Make` keyed on the value); the converter unit tests
+`TestArrayDimsOverloadForAnExportedSinkReachingGeneric`, `TestArrayDimsOverloadNeedsTheRecord` and
+`TestArrayDimsOverloadForwarderLine`.
+
 ---
 
 [← Maps and Channels](maps-and-channels.md) · [Index](README.md) · [Type Aliasing →](type-aliasing.md)

@@ -27,6 +27,8 @@ using static go.UnnamedArrayTypeArgDescriptor.wrap_package;
 // when referenced.
 
 // <ExportedTypeAliases>
+[assembly: GoArrayDimsCompanion("Same", 0)]
+[assembly: GoArrayDimsCompanion("Wrap", 0)]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -49,7 +51,7 @@ using static go.UnnamedArrayTypeArgDescriptor.wrap_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("lib.go", "lib.cs", "AAYSgqiC")]
+[assembly: GoPositionMap("lib.go", "lib.cs", "AAYSsqiy")]
 // </GoSourcePositionMaps>
 
 namespace go.UnnamedArrayTypeArgDescriptor;
