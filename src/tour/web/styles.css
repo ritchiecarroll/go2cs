@@ -449,10 +449,25 @@ button {
   overflow: auto;
   color: var(--code-text);
   background: var(--editor);
+  /* The Go editor's typography, read from its computed style in the pinned Tour (x/website 52d470bcf26e):
+     app.css sets 'Inconsolata', monospace at line-height 1.2em over a 16px body that is
+     -webkit-font-smoothing: antialiased, and codemirror.css's pre sets font-variant-ligatures: contextual.
+     Its tab is CodeMirror's tabSize: 4, drawn as a span four characters wide (CodeMirror leaves no raw tab
+     in a line, so the CSS tab-size there is never used), which tab-size: 4 gives here. */
   font: 16px/1.2 "Inconsolata", monospace;
+  -webkit-font-smoothing: antialiased;
+  font-variant-ligatures: contextual;
   tab-size: 4;
   white-space: pre;
   scrollbar-color: var(--scrollbar) transparent;
+}
+
+/* Every source view's text sits in a <code>, and the browser's own stylesheet gives <code> font-family:
+   monospace, which beats the family the pre would pass down. The C# then drew in the platform's default
+   monospace font (Menlo on a Mac, DejaVu Sans Mono on Linux), wider and heavier than the Go side's
+   Inconsolata. */
+.source-view code {
+  font: inherit;
 }
 
 .source-view[hidden] {

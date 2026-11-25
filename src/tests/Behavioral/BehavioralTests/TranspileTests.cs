@@ -715,6 +715,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckExportedAliasUnexportedTarget() => CheckTarget("ExportedAliasUnexportedTarget");
 
     [TestMethod]
+    public void CheckExportedFuncOfUnexportedFuncType() => CheckTarget("ExportedFuncOfUnexportedFuncType");
+
+    [TestMethod]
     public void CheckExprSwitch() => CheckTarget("ExprSwitch");
 
     [TestMethod]
@@ -1052,6 +1055,9 @@ public class A1_TranspileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckGlyphLibraryFrameNames() => CheckTarget("GlyphLibraryFrameNames");
+
+    [TestMethod]
+    public void CheckGoCallNamedFuncType() => CheckTarget("GoCallNamedFuncType");
 
     [TestMethod]
     public void CheckGoCallVariations() => CheckTarget("GoCallVariations");

@@ -91,19 +91,65 @@ func Anchor(option Option) string {
 	return "option-" + option.Name
 }
 
-// markdownSyntax is the option's syntax as a code span. A pipe in it (a value such as on|off|auto) is escaped, since
-// the page's tables would otherwise read it as a cell boundary.
+// markdownSyntax is the option's syntax as a code span, for a heading. A pipe in it (a value such as on|off|auto) is
+// escaped, since a table would otherwise read it as a cell boundary.
 func markdownSyntax(option Option) string {
 	return "`" + strings.ReplaceAll(syntax(option), "|", `\|`) + "`"
 }
 
-// writeCommonTable writes the Common options as a table: each name links to its sub-section, with its summary.
+// cellSyntax is the option's syntax for a table cell: an HTML code element with <wbr> break points, so that a browser
+// wrapping a narrow column breaks the token at a boundary a reader expects (before an optional part in brackets,
+// after a comma, before a pipe, as well as at a space) and not right after the leading dash, the only break point a code span
+// gives it in -recurse[=module,nuget]. A <wbr> adds no character, so the text a reader copies is the syntax as -help
+// prints it. Every character Markdown, the table or HTML could read is written as an entity (< > & | [ ] * _ ` \):
+// GitHub reads the element's content as Markdown and the site's kramdown keeps it raw, and an entity reads the same
+// in both, where a backslash escape would show on the site.
+func cellSyntax(option Option) string {
+	text := syntax(option)
+	var b strings.Builder
+	b.WriteString("<code>")
+
+	for i, r := range text {
+		if i > 0 && (r == '[' || r == '|' || r == '<' && text[i-1] != ' ' && text[i-1] != ',') {
+			b.WriteString("<wbr>")
+		}
+
+		switch r {
+		case '<':
+			b.WriteString("&lt;")
+		case '>':
+			b.WriteString("&gt;")
+		case '&':
+			b.WriteString("&amp;")
+		case '|':
+			b.WriteString("&#124;")
+		case '[', ']', '*', '_', '`', '\\':
+			fmt.Fprintf(&b, "&#%d;", r)
+		default:
+			b.WriteRune(r)
+		}
+
+		if r == ',' {
+			b.WriteString("<wbr>")
+		}
+	}
+
+	b.WriteString("</code>")
+
+	return b.String()
+}
+
+// writeCommonTable writes the Common options as a table: each name links to its sub-section, with its summary. A blank
+// line separates the table from each region marker: without one the site's kramdown reads the marker comment and the
+// table as one paragraph and shows the rows as text (GitHub renders the table either way).
 func writeCommonTable(b *strings.Builder) {
-	b.WriteString("| Option | Description |\n|:--|:--|\n")
+	b.WriteString("\n| Option | Description |\n|:--|:--|\n")
 
 	for _, option := range filter(func(o Option) bool { return o.Class == Common }) {
-		fmt.Fprintf(b, "| [%s](#%s) | %s. |\n", markdownSyntax(option), Anchor(option), option.Summary)
+		fmt.Fprintf(b, "| [%s](#%s) | %s. |\n", cellSyntax(option), Anchor(option), option.Summary)
 	}
+
+	b.WriteString("\n")
 }
 
 var classIntros = map[Class]string{
@@ -126,7 +172,7 @@ func writeReference(b *strings.Builder) {
 			b.WriteString("| Option | Group | Description |\n|:--|:--|:--|\n")
 
 			for _, option := range members {
-				fmt.Fprintf(b, "| [%s](#%s) | %s | %s. |\n", markdownSyntax(option), Anchor(option), option.Group,
+				fmt.Fprintf(b, "| [%s](#%s) | %s | %s. |\n", cellSyntax(option), Anchor(option), option.Group,
 					option.Summary)
 			}
 
